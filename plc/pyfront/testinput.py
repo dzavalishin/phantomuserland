@@ -1,4 +1,4 @@
-
+class myclass:
 def load(fname):
     if fname == 'ok':
         r = 2 + fname
@@ -7,8 +7,8 @@ def load(fname):
     return r
 
 def system(cmd):
-    os = 2;
-    #import os
-    return os.system(cmd)
+    #os = 2;
+    import os
+    return os.system(cmd, 'hi', 'there')
     #load(cmd)
 

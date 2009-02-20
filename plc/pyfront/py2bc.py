@@ -46,7 +46,7 @@ def tinypy():
 def main(src,dest):
     s = load(src)
     r = _compile(s,src)
-    save(dest,r)
+    save(dest,'<PythonFrontend>\n'+r+'</PythonFrontend>\n')
 
 if __name__ == '__main__':
     main(ARGV[1],ARGV[2])
