@@ -3,7 +3,7 @@ from tokenize import Token
 if '.' in str(1.0):
     from boot import *
 
-EOF,ADD,SUB,MUL,DIV,POW,AND,OR,CMP,GET,SET,NUMBER,STRING,GGET,GSET,MOVE,DEF,PASS,JUMP,CALL,RETURN,IF,DEBUG,EQ,LE,LT,DICT,LIST,NONE,LEN,POS,PARAMS,IGET,FILE,NAME,NE,HAS,RAISE,SETJMP,MOD,LSH,RSH,ITER,DEL,REGS = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+#EOF,ADD,SUB,MUL,DIV,POW,AND,OR,CMP,GET,SET,NUMBER,STRING,GGET,GSET,MOVE,DEF,PASS,JUMP,CALL,RETURN,IF,DEBUG,EQ,LE,LT,DICT,LIST,NONE,LEN,POS,PARAMS,IGET,FILE,NAME,NE,HAS,RAISE,SETJMP,MOD,LSH,RSH,ITER,DEL,REGS = 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
 
 class DState:
     def __init__(self,code,fname):
@@ -53,7 +53,8 @@ def setpos(v):
     D.lineno = line
     val = text + "\0"*(4-len(text)%4)
     #code('POS','strlen='+str(len(val)),'line='+str(line), "'"+val+"'")
-    code('<POS','line='+str(line), 'text="'+text+'"',' />')
+    #code('<POS','line='+str(line), 'text="'+text+'"',' />')
+    xml('pos','line',line, 'text',text)
     #comment('Src line='+str(line)+"'"+text+"'")
     #write(val)
 def code(i,a='',b='',c=''):
@@ -77,10 +78,10 @@ def emitmove(to,frm):
     xml('MOVE','to',to,'from', frm)
 
 def emitgget(to,varname):
-    xml('GGET', 'to', to, 'gVarName=', varname)
+    xml('GGET', 'to', to, 'gVarName', varname)
 
 def emitgset(varname,frr):
-    xml('GSET', 'gVarName=', varname, 'fromreg', frr)
+    xml('GSET', 'gVarName', varname, 'fromreg', frr)
 
 
 def emitset(kls,fld,reg):
@@ -159,6 +160,7 @@ def map_tags():
     for item in D.out:
         if item[0] == 'tag':
             tags[item[1]] = n
+            out.append(item)
             continue
         if item[0] == 'regs':
             out.append(get_code16('<REGS num="'+str(item[1])+'" />','',''))
@@ -168,13 +170,17 @@ def map_tags():
         n += 1
     for n in range(0,len(out)):
         item = out[n]
-        if item[0] == 'jump':
-            out[n] = get_code16('<JUMP a="'+str(item[1])+'" b="'+str(tags[item[1]]-n)+'" />','','')
+        if item[0] == 'tag':
+            out[n] = ('code', '<Label name="'+str(item[1])+'" />', '', '', '')
+        elif item[0] == 'jump':
+            #out[n] = get_code16('<JUMP a="'+str(item[1])+'" b="'+str(tags[item[1]]-n)+'" />','','')
+            out[n] = get_code16('<JUMP label="'+str(item[1])+'" />','','')
         elif item[0] == 'setjmp':
             out[n] = get_code16('SETJMP',item[1],tags[item[1]]-n)
         elif item[0] == 'fnc':
             #out[n] = get_code16('DefFunc',item[1],tags[item[2]]-n)
             out[n] = ('code', '<DefFunc outreg="'+str(item[1])+'" len="'+str(tags[item[2]]-n)+'" />', '', '', '')
+
     for n in range(0,len(out)):
         item = out[n]
         if item[0] == 'data':
@@ -268,7 +274,7 @@ def ss_infix(ss,i,tb,tc,r=None):
 
 def _do_none(r=None):
     r = get_tmp(r)
-    code('<NONE reg="'+r'" /><!-- set reg '+str(r)+' to null -->', '', '', '')
+    code('<NONE reg="'+str(r)+'" /><!-- set reg '+str(r)+' to null -->')
     return r
 
 def do_symbol(t,r=None):
@@ -383,11 +389,14 @@ def manage_seq(i,a,items,sav=0):
             #code('MOVE','to='+str(r),'from='+str(b))
             emitmove(r,b)
             free_tmp(b)
+        #print 'seq out to reg '+str(r)
         n +=1
     if not len(tmps):
-        code(i,a,0,0)
+        xml(i,"out",a,"inStart",0,"inNum",0)
+        #code(i,a,0,0)
         return 0
-    code(i,a,tmps[0],len(items))
+    #code(i,a,tmps[0],len(items))
+    xml(i,"out",a,"inStart",tmps[0],"inNum",len(items))
     free_tmps(tmps[sav:])
     return tmps[0]
 
@@ -454,7 +463,7 @@ def do_call(t,r=None):
             emitset(e,t1,t2)
             free_tmp(t1); free_tmp(t2) #REG
         if d: free_tmp(do(Token(t.pos,'call',None,[Token(t.pos,'name','merge'),Token(t.pos,'reg',e),d.items[0]]))) #REG
-    manage_seq('PARAMS','reg='+str(r),a)
+    manage_seq('PARAMS',r,a)
     if c != None:
         t1,t2 = _do_string('*'),do(c.items[0])
         #code('SET',r,t1,t2)
@@ -465,7 +474,7 @@ def do_call(t,r=None):
         #code('SET',r,t1,e)
         emitset(r,t1,e)
         free_tmp(t1) #REG
-    xml('CALL','unknown',r,'func',fnc,'params',r)
+    xml('CALL','ret',r,'func',fnc,'params',r)
     free_tmp(fnc) #REG
     return r
 
@@ -516,7 +525,8 @@ def do_def(tok,kls=None):
         free_tmp(tmp) #REG
     if d != None:
         e = do_local(d.items[0])
-        code('DICT',e,0,0)
+        #code('DICT',e,0,0)
+        xml('DICT',"reg",e)
         tmp = _do_none()
         code('IGET',e,r,tmp)
         free_tmp(tmp) #REG
@@ -593,8 +603,9 @@ def do_class(t):
     params = do_local(Token(tok.pos,'name','__params'))
 
     slf = do_local(Token(tok.pos,'name','self'))
-    code('<!-- self -->');
-    code('DICT',slf,0,0)
+    comment('self');
+    #code('DICT',slf,0,0)
+    xml('DICT',"reg",slf)
 
     free_tmp(do(Token(tok.pos,'call',None,[
         Token(tok.pos,'get',None,[
@@ -611,12 +622,12 @@ def do_class(t):
         emitget(tmp,slf,'__init__')
         t4 = get_tmp()
         #code('CALL',t4,'func='+str(tmp),'params='+str(params))
-        xml('CALL','unknown',t4,'func',tmp,'params',params)
+        xml('CALL','ret',t4,'func',tmp,'params',params)
         free_tmp(tmp) #REG
         #free_tmp(t3) #REG
         free_tmp(t4) #REG
-    code('#', 'return self');
-    code('<RETURN reg="'+str(slf)+'" />', '', '', '')
+    comment('return self');
+    code('<RETURN reg="'+str(slf)+'" />',)
 
     D.end()
     tag(t,'end')
@@ -746,7 +757,8 @@ def do_info(name='?'):
     if '-nopos' in ARGV: return
     #code('FILE',free_tmp(_do_string(D.fname)))
     #code('NAME',free_tmp(_do_string(name)))
-    code('<FILE name="'+D.fname+'" />', '', '', '')
+    #code('<FILE name="'+D.fname+'" />', '', '', '')
+    xml('file', 'name', D.fname)
     #code('<Function name="'+name+'" />')
     xml('Function', 'name', name)
 def do_module(t):
