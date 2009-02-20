@@ -1,9 +1,11 @@
+<PythonCode>   
 <REGS num="2" />   
 <POS line=1 text=""  />
 <FILE name="testinput.py" />   
 <Function name="?" />   
 <POS line=2 text="def load(fname):"  />
-<DefFunc ordinal="0" len="25" />   
+<DefFunc ordinal="0" len="27" />   
+<PythonCode>   
 <REGS num="4" />   
 <POS line=2 text="def load(fname):"  />
 <FILE name="testinput.py" />   
@@ -16,21 +18,23 @@
 <IF reg="2" />   
 <JUMP a="1:1:1" b="6" />   
 <POS line=4 text="        r = 2 + fname"  />
-<NUMBER reg="3" val="2.0"  /> -
+<NUMBER reg="3" val="2.0"  /> 
 <ADD out="3" left="3" right="1" />   
 <MOVE to="2" from="3" />   
 <JUMP a="1:1:end" b="6" />   
 <POS line=6 text="        r = 3 + fname"  />
-<NUMBER reg="3" val="3.0"  /> -
+<NUMBER reg="3" val="3.0"  /> 
 <ADD out="3" left="3" right="1" />   
 <MOVE to="2" from="3" />   
 <JUMP a="1:1:end" b="1" />   
 <POS line=7 text="    return r"  />
 <RETURN reg="2" />   
 <EOF />   
+</PythonCode>   
 <GSET gVarName=="load" fromreg="0" />   
 <POS line=9 text="def system(cmd):"  />
-<DefFunc ordinal="1" len="18" />   
+<DefFunc ordinal="1" len="20" />   
+<PythonCode>   
 <REGS num="6" />   
 <POS line=9 text="def system(cmd):"  />
 <FILE name="testinput.py" />   
@@ -38,7 +42,7 @@
 <NONE reg="" /><!-- set reg 2 to null -->   
 <GET toreg="1" class="0" fieldName="2" />   
 <POS line=10 text="    os = 2;"  />
-<NUMBER reg="3" val="2.0"  /> -
+<NUMBER reg="3" val="2.0"  /> 
 <MOVE to="2" from="3" />   
 <POS line=12 text="    return os.system(cmd)"  />
 <STRING reg="5" content="system" len="6"  />
@@ -48,5 +52,7 @@ PARAMS reg=3 5 1
 <CALL unknown="3" func="4" params="3" />   
 <RETURN reg="3" />   
 <EOF />   
+</PythonCode>   
 <GSET gVarName=="system" fromreg="1" />   
 <EOF />   
+</PythonCode>   
