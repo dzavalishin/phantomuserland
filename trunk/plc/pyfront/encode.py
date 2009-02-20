@@ -20,7 +20,7 @@ class DState:
         insert(self.cregs)
     def end(self):
         self.cregs.append(self.mreg)
-        code('EOF')
+        xml('EOF')
         
         # This next line forces the encoder to
         # throw an exception if any tmp regs 
@@ -51,7 +51,8 @@ def setpos(v):
     D.lineno = line
     val = text + "\0"*(4-len(text)%4)
     #code('POS','strlen='+str(len(val)),'line='+str(line), "'"+val+"'")
-    code('POS','line='+str(line), "'"+val+"'")
+    code('<POS','line='+str(line), 'text="'+text+'"',' />')
+    #comment('Src line='+str(line)+"'"+text+"'")
     #write(val)
 def code(i,a='-',b='-',c='-'):
     #if not istype(i,'number'): raise
@@ -59,6 +60,42 @@ def code(i,a='-',b='-',c='-'):
     #if not istype(b,'number'): raise
     #if not istype(c,'number'): raise
     write(('code',str(i),str(a),str(b),str(c)))
+def xml(tag, p1='', v1='', p2='', v2='', p3='', v3=''):
+    parms = ''
+    if( p1 != '' ):
+        parms += ' '+p1+'="'+str(v1)+'"'
+    if( p2 != '' ):
+        parms += ' '+p2+'="'+str(v2)+'"'
+    if( p3 != '' ):
+        parms += ' '+p3+'="'+str(v3)+'"'
+
+    write(('code','<'+tag+parms+' />', '', '', ''))
+
+def emitmove(to,frm):
+    xml('MOVE','to',to,'from', frm)
+
+def emitgget(to,varname):
+    xml('GGET', 'to', to, 'gVarName=', varname)
+
+def emitgset(varname,frr):
+    xml('GSET', 'gVarName=', varname, 'fromreg', frr)
+
+
+def emitset(kls,fld,reg):
+    xml('SET',"class",kls,"fieldName", fld,"fromreg",reg)
+
+def emitget(toreg,cls,fld):
+    xml('GET','toreg',toreg,'class',cls,"fieldName",fld)
+
+def emiteq(to,a,b):
+    xml('EQ','result',to,'left',a,'right',b)
+
+def emitif(reg):
+    xml('IF','reg',reg)
+
+
+def comment(text):
+    write(('code','<!--',text,'','-->'))
 def code_16(i,a,b):
     if b < 0: b += 0x8000
     #code(i,a,(b&0xff00)>>8,(b&0xff)>>0)
@@ -72,7 +109,7 @@ def _do_string(v,r=None):
     #val = v + "\0"*(4-len(v)%4)
     #code_16('STRING',r,len(v))
     #write(val)
-    code('STRING','reg='+str(r),"'"+str(v)+"'", 'len='+str(len(v)))
+    code('<STRING','reg="'+str(r)+'" content="'+str(v)+'"', 'len="'+str(len(v))+'"', ' />' )
     return r
 def do_string(t,r=None):
     return _do_string(t.val,r)
@@ -82,7 +119,7 @@ def _do_number(v,r=None):
     #code('NUMBER',r,0,0)
     #write(fpack(number(v)))
     #code('NUMBER','reg='+str(r),'val='+str(fpack(number(v))))
-    code('NUMBER','reg='+str(r),'val='+str(number(v)))
+    code('<NUMBER','reg="'+str(r)+'" val="'+str(number(v))+'"', ' />' )
     return r
 def do_number(t,r=None):
     return _do_number(t.val,r)
@@ -122,7 +159,7 @@ def map_tags():
             tags[item[1]] = n
             continue
         if item[0] == 'regs':
-            out.append(get_code16('REGS',item[1],0))
+            out.append(get_code16('<REGS num="'+str(item[1])+'" />','',''))
             n += 1
             continue
         out.append(item)
@@ -130,12 +167,12 @@ def map_tags():
     for n in range(0,len(out)):
         item = out[n]
         if item[0] == 'jump':
-            out[n] = get_code16('JUMP',item[1],tags[item[1]]-n)
+            out[n] = get_code16('<JUMP a="'+str(item[1])+'" b="'+str(tags[item[1]]-n)+'" />','','')
         elif item[0] == 'setjmp':
             out[n] = get_code16('SETJMP',item[1],tags[item[1]]-n)
         elif item[0] == 'fnc':
             #out[n] = get_code16('DefFunc',item[1],tags[item[2]]-n)
-            out[n] = ('code', 'DefFunc','ordinal='+str(item[1]),'len='+str(tags[item[2]]-n), '')
+            out[n] = ('code', '<DefFunc ordinal="'+str(item[1])+'" len="'+str(tags[item[2]]-n)+'" />', '', '', '')
     for n in range(0,len(out)):
         item = out[n]
         if item[0] == 'data':
@@ -144,7 +181,7 @@ def map_tags():
         elif item[0] == 'code':
             i,a,b,c = item[1:]
             #out[n] = chr(i)+chr(a)+chr(b)+chr(c)
-            out[n] = 'code '+str(i)+' '+str(a)+' '+str(b)+' '+str(c)+'\n'
+            out[n] = str(i)+' '+str(a)+' '+str(b)+' '+str(c)+'\n'
         else:
             raise str(('huh?',item))
         #if len(out[n]) != 4:
@@ -201,7 +238,8 @@ def imanage(orig,fnc):
 def infix(i,tb,tc,r=None):
     r = get_tmp(r)
     b,c = do(tb,r),do(tc)
-    code(i,'out='+str(r),b,c)
+    #code(i,'out='+str(r),b,c)
+    xml(i,'out',r,'left',b,'right',c)
     if r != b: free_tmp(b)
     free_tmp(c)
     return r
@@ -211,8 +249,12 @@ def ss_infix(ss,i,tb,tc,r=None):
     ss = _do_number(ss)
     t = get_tag()
     r = do(tb,r)
-    code('EQ',r2,r,ss)
-    code('IF',r2)
+    #code('EQ',r2,r,ss)
+    #xml('EQ','result',r2,'left',r,'right',ss)
+    emiteq(r2,r,ss)
+    #code('IF',r2)
+    #xml('IF','reg',r2)
+    emitif(r2)
     jump(t,'else')
     jump(t,'end')
     tag(t,'else')
@@ -224,7 +266,7 @@ def ss_infix(ss,i,tb,tc,r=None):
 
 def _do_none(r=None):
     r = get_tmp(r)
-    code('NONE',r,'# set reg '+str(r)+' to null')
+    code('<NONE reg="'+r'" /><!-- set reg '+str(r)+' to null -->', '', '', '')
     return r
 
 def do_symbol(t,r=None):
@@ -260,7 +302,8 @@ def do_symbol(t,r=None):
     if t.val == 'notin':
         r = infix('HAS',items[1],items[0],r)
         zero = _do_number('0')
-        code('EQ',r,r,free_tmp(zero))
+        #code('EQ',r,r,free_tmp(zero))
+        emiteq(r,r,free_tmp(zero))
         return r
     if t.val in sets:
         return do_set_ctx(items[0],items[1]);
@@ -282,13 +325,15 @@ def do_set_ctx(k,v):
         if (D._globals and k.val not in D.vars) or (k.val in D.globals):
             #c = do_string(k)
             b = do(v)
-            code('GSET','gVarName='+k.val,'reg='+str(b))
+            #code('<GSET gVarName="'+k.val+'" reg="'+str(b)+'" />','','','')
+            emitgset(k.val,b)
             #free_tmp(c)
             free_tmp(b)
             return
         a = do_local(k)
         b = do(v)
-        code('MOVE','to='+str(a),'from='+str(b))
+        #code('<MOVE to="'+str(a)+'" from="'+str(b)+'" />', '', '', '')
+        emitmove(a,b)
         free_tmp(b)
         return a
     elif k.type in ('tuple','list'):
@@ -298,7 +343,8 @@ def do_set_ctx(k,v):
                 vv = v.items[n]
                 tmp = get_tmp(); tmps.append(tmp)
                 r = do(vv)
-                code('MOVE','to='+str(tmp),'from='+str(r))
+                #code('< MOVE to="'+str(tmp)+'" from="'+str(r)+'" />', '', '', '')
+                emitmove(tmp,r)
                 free_tmp(r) #REG
                 n+=1
             n = 0
@@ -319,7 +365,8 @@ def do_set_ctx(k,v):
     r = do(k.items[0])
     rr = do(v)
     tmp = do(k.items[1])
-    code('SET',r,tmp,rr)
+    #code('SET',r,tmp,rr)
+    emitset(r,tmp,rr)
     free_tmp(r) #REG
     free_tmp(tmp) #REG
     return rr
@@ -331,7 +378,8 @@ def manage_seq(i,a,items,sav=0):
         r = tmps[n]
         b = do(tt,r)
         if r != b:
-            code('MOVE','to='+str(r),'from='+str(b))
+            #code('MOVE','to='+str(r),'from='+str(b))
+            emitmove(r,b)
             free_tmp(b)
         n +=1
     if not len(tmps):
@@ -400,19 +448,22 @@ def do_call(t,r=None):
         for p in b:
             p.items[0].type = 'string'
             t1,t2 = do(p.items[0]),do(p.items[1])
-            code('SET',e,t1,t2)
+            #code('SET',e,t1,t2)
+            emitset(e,t1,t2)
             free_tmp(t1); free_tmp(t2) #REG
         if d: free_tmp(do(Token(t.pos,'call',None,[Token(t.pos,'name','merge'),Token(t.pos,'reg',e),d.items[0]]))) #REG
     manage_seq('PARAMS','reg='+str(r),a)
     if c != None:
         t1,t2 = _do_string('*'),do(c.items[0])
-        code('SET',r,t1,t2)
+        #code('SET',r,t1,t2)
+        emitset(r,t1,t2)
         free_tmp(t1); free_tmp(t2) #REG
     if e != None:
         t1 = _do_none()
-        code('SET',r,t1,e)
+        #code('SET',r,t1,e)
+        emitset(r,t1,e)
         free_tmp(t1) #REG
-    code('CALL',r,'func='+str(fnc),r)
+    xml('CALL','unknown',r,'func',fnc,'params',r)
     free_tmp(fnc) #REG
     return r
 
@@ -423,7 +474,8 @@ def do_name(t,r=None):
     #c = do_string(t)
     #code('GGET','reg='+str(r),c)
     #free_tmp(c)
-    code('GGET','reg='+str(r),'gVarName='+t.val)
+    #code('<GGET reg="'+str(r)+'" gVarName="'+t.val+'" />', '', '', '')
+    emitgget( r, t.val );
     return r
 
 def do_local(t,r=None):
@@ -445,7 +497,8 @@ def do_def(tok,kls=None):
     for p in a:
         v = do_local(p)
         tmp = _do_none()
-        code('GET','toreg='+str(v),r,tmp)
+        #code('GET','toreg='+str(v),r,tmp)
+        emitget(v,r,tmp)
         free_tmp(tmp) #REG
     for p in b:
         v = do_local(p.items[0])
@@ -456,7 +509,8 @@ def do_def(tok,kls=None):
     if c != None:
         v = do_local(c.items[0])
         tmp = _do_string('*')
-        code('GET','toreg='+str(v),r,tmp)
+        #code('GET','toreg='+str(v),r,tmp)
+        emitget(v,r,tmp)
         free_tmp(tmp) #REG
     if d != None:
         e = do_local(d.items[0])
@@ -474,7 +528,8 @@ def do_def(tok,kls=None):
         r = do_set_ctx(items[0],Token(tok.pos,'reg',rf))
     else:
         rn = do_string(items[0])
-        code('SET',kls,rn,rf)
+        #code('SET',kls,rn,rf)
+        emitset(kls,rn,rf)
         free_tmp(rn)
 
     free_tmp(rf)
@@ -494,7 +549,9 @@ def do_class(t):
     #code('GSET',ts,kls)
     #free_tmp(ts) #REG
 
-    code('GSET','gVarName='+name,'reg='+str(kls))
+    #code('GSET','gVarName='+name,'reg='+str(kls))
+    #code('GSET','gVarName',name,'reg',kls)
+    emitgset(name,kls)
 
     init,_new = False,[]
     if parent:
@@ -534,7 +591,7 @@ def do_class(t):
     params = do_local(Token(tok.pos,'name','__params'))
 
     slf = do_local(Token(tok.pos,'name','self'))
-    code('#','self');
+    code('<!-- self -->');
     code('DICT',slf,0,0)
 
     free_tmp(do(Token(tok.pos,'call',None,[
@@ -547,20 +604,25 @@ def do_class(t):
         tmp = get_tmp()
         #t3 = _do_string('__init__')
         #code('GET',tmp,slf,t3)
-        code('GET','toreg='+str(tmp),'fromClass='+str(slf),"varName='__init__'")
+        #code('GET','toreg='+str(tmp),'fromClass='+str(slf),"varName='__init__'")
+        #xml('GET','toreg',tmp,'fromClass',slf,"varName",'__init__')
+        emitget(tmp,slf,'__init__')
         t4 = get_tmp()
-        code('CALL',t4,'func='+str(tmp),'params='+str(params))
+        #code('CALL',t4,'func='+str(tmp),'params='+str(params))
+        xml('CALL','unknown',t4,'func',tmp,'params',params)
         free_tmp(tmp) #REG
         #free_tmp(t3) #REG
         free_tmp(t4) #REG
     code('#', 'return self');
-    code('RETURN','reg='+str(slf))
+    code('<RETURN reg="'+str(slf)+'" />', '', '', '')
 
     D.end()
     tag(t,'end')
     #ts = _do_string('__call__')
     #code('SET',kls,ts,rf)
-    code('SET',"class="+str(kls),"fieldName='__call__'",rf)
+    #code('SET',"class="+str(kls),"fieldName='__call__'",rf)
+    #xml('SET',"class",kls,"fieldName", '__call__',"rf",rf)
+    emitset(kls,'__call__',rf)
     free_tmp(kls) #REG
     #free_tmp(ts) #REG
 
@@ -573,7 +635,8 @@ def do_while(t):
     tag(t,'begin')
     tag(t,'continue')
     r = do(items[0])
-    code('IF',r)
+    #code('IF',r)
+    emitif(r)
     free_tmp(r) #REG
     jump(t,'end')
     free_tmp(do(items[1])) #REG
@@ -616,7 +679,10 @@ def do_if(t):
     for tt in items:
         tag(t,n)
         if tt.type == 'elif':
-            a = do(tt.items[0]); code('IF',a); free_tmp(a);
+            a = do(tt.items[0]);
+            #code('IF',a);
+            emitif(a);
+            free_tmp(a);
             jump(t,n+1)
             free_tmp(do(tt.items[1])) #REG
         elif tt.type == 'else':
@@ -641,13 +707,15 @@ def do_try(t):
 def do_return(t):
     if t.items: r = do(t.items[0])
     else: r = _do_none()
-    code('RETURN','reg='+str(r))
+    #code('<RETURN ','reg="'+str(r)+'"','/>')
+    xml('RETURN','reg',r)
     free_tmp(r)
     return
 def do_raise(t):
     if t.items: r = do(t.items[0])
     else: r = _do_none()
-    code('RAISE',r)
+    #code('RAISE',r)
+    xml('RAISE','reg',r)
     free_tmp(r)
     return
 
@@ -670,14 +738,15 @@ def do_get(t,r=None):
 
 def do_break(t): jump(D.tstack[-1],'break')
 def do_continue(t): jump(D.tstack[-1],'continue')
-def do_pass(t): code('PASS')
+def do_pass(t): xml('PASS')
 
 def do_info(name='?'):
     if '-nopos' in ARGV: return
     #code('FILE',free_tmp(_do_string(D.fname)))
     #code('NAME',free_tmp(_do_string(name)))
-    code('FILE',D.fname)
-    code('FuncNAME',name)
+    code('<FILE name="'+D.fname+'" />', '', '', '')
+    #code('<Function name="'+name+'" />')
+    xml('Function', 'name', name)
 def do_module(t):
     do_info()
     free_tmp(do(t.items[0])) #REG
