@@ -17,10 +17,12 @@ class DState:
         else: self.stack.append(None)
         self.vars,self.r2n,self.n2r,self._tmpi,self.mreg,self.snum,self._globals,self.lineno,self.globals,self.cregs,self.tmpc = [],{},{},0,0,str(self._scopei),gbl,-1,[],['regs'],0
         self._scopei += 1
+        code('<PythonCode>')
         insert(self.cregs)
     def end(self):
         self.cregs.append(self.mreg)
         xml('EOF')
+        code('</PythonCode>')
         
         # This next line forces the encoder to
         # throw an exception if any tmp regs 
@@ -54,7 +56,7 @@ def setpos(v):
     code('<POS','line='+str(line), 'text="'+text+'"',' />')
     #comment('Src line='+str(line)+"'"+text+"'")
     #write(val)
-def code(i,a='-',b='-',c='-'):
+def code(i,a='',b='',c=''):
     #if not istype(i,'number'): raise
     #if not istype(a,'number'): raise
     #if not istype(b,'number'): raise
@@ -172,7 +174,7 @@ def map_tags():
             out[n] = get_code16('SETJMP',item[1],tags[item[1]]-n)
         elif item[0] == 'fnc':
             #out[n] = get_code16('DefFunc',item[1],tags[item[2]]-n)
-            out[n] = ('code', '<DefFunc ordinal="'+str(item[1])+'" len="'+str(tags[item[2]]-n)+'" />', '', '', '')
+            out[n] = ('code', '<DefFunc outreg="'+str(item[1])+'" len="'+str(tags[item[2]]-n)+'" />', '', '', '')
     for n in range(0,len(out)):
         item = out[n]
         if item[0] == 'data':
