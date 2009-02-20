@@ -1,6 +1,3 @@
-def system(cmd):
-    import os
-    return os.system(cmd)
 
 def load(fname):
     if fname == 'ok':
@@ -8,3 +5,10 @@ def load(fname):
     else:
         r = 3 + fname
     return r
+
+def system(cmd):
+    os = 2;
+    #import os
+    return os.system(cmd)
+    #load(cmd)
+
