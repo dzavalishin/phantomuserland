@@ -17,14 +17,22 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.compiler.IdentNode;
 import ru.dz.plc.compiler.JumpNode;
 import ru.dz.plc.compiler.JumpTargetNode;
+import ru.dz.plc.compiler.JzNode;
+import ru.dz.plc.compiler.NewNode;
 import ru.dz.plc.compiler.NullNode;
 import ru.dz.plc.compiler.OpAssignNode;
+import ru.dz.plc.compiler.OpPlusNode;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.ReturnNode;
+import ru.dz.plc.compiler.ValEqNode;
+import sun.io.Converters;
 
 public class PythonFrontendXML {
+	private static final boolean really = false;
 	DocumentBuilderFactory docBuilderFactory;
 	DocumentBuilder docBuilder;
 	private Document doc;
@@ -123,19 +131,23 @@ public class PythonFrontendXML {
 	}
 
 
-	private Map<Integer,RegNode> registers = new HashMap<Integer, RegNode>();
+	private Map<Integer,RegisterNodeWrapper> registers = new HashMap<Integer, RegisterNodeWrapper>();
 	
 	private void setRegister(int reg, ru.dz.plc.compiler.Node n )
 	{
-		registers.put(reg, new RegNode(n) );
+		registers.put(reg, new RegisterNodeWrapper(n) );
 	}
 
-	private void setRegister(int reg, RegNode rn )
+	private void setRegister(int reg, RegisterNodeWrapper rn )
 	{
 		registers.put(reg, rn );
 	}
 
-	private RegNode getRegister( int reg )
+	private void setRegister(Node cn, String name, ru.dz.plc.compiler.Node n ) {
+		registers.put(getInt(cn, name), new RegisterNodeWrapper(n) );
+	}
+	
+	private RegisterNodeWrapper getRegister( int reg )
 	{
 		return registers.get(reg);
 	}
@@ -145,8 +157,13 @@ public class PythonFrontendXML {
 		return registers.get(reg).use();
 	}
 
+	private ru.dz.plc.compiler.Node useRegister( Node cn, String name )
+	{
+		return registers.get(getInt(cn, name)).use();
+	}
+
 	
-	private void loadCode(Node n) {
+	private void loadCode(Node n) throws ConnvertException {
 		// We're in the top level code
 
 		List<ru.dz.plc.compiler.Node> out = new LinkedList<ru.dz.plc.compiler.Node>();
@@ -219,22 +236,43 @@ public class PythonFrontendXML {
 				int outReg = getInt(cn,"out");
 				int inStartReg = getInt(cn,"inStart");
 				int inRegsNum = getInt(cn,"inNum");
-				
-				// TODO here we must create a new dictionary
-				// temp create something
-				setRegister(outReg, new NullNode() );
+
+				setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false)), null, null) );
+				// TODO use some map style container for dictionary
+				// TODO here we must fill a new dictionary - compose?
+				if(inRegsNum != 0)
+					throw new ConnvertException("No dictionary compose code yet");
 			}
 			else if(nname.equals("gget"))
 			{
 				// TODO this is wrong!
 				String varName = getString(cn, "gVarName");
 				setRegister(getInt(cn,"to"), new IdentNode(varName) );
+				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
 			else if(nname.equals("gset"))
 			{
 				// TODO this is wrong!
 				String varName = getString(cn, "gVarName");
 				out.add( new OpAssignNode(new IdentNode(varName), useRegister(getInt(cn,"fromreg"))) );
+				if( really ) throw new ConnvertException(nname+" is not implemented");
+			}
+			else if(nname.equals("get"))
+			{
+				int toReg = getInt(cn,"toreg");
+				int objectReg = getInt(cn,"class");
+				int nameregReg = getInt(cn,"fieldName");
+				// TODO implement
+				setRegister(toReg, new NullNode() );
+				if( really ) throw new ConnvertException(nname+" is not implemented");
+			}
+			else if(nname.equals("set"))
+			{
+				int fromReg = getInt(cn,"fromreg");
+				int objectReg = getInt(cn,"class");
+				int nameregReg = getInt(cn,"fieldName");
+				// TODO implement
+				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
 			else if(nname.equals("move"))
 			{
@@ -244,6 +282,20 @@ public class PythonFrontendXML {
 			{
 				out.add( new ReturnNode( useRegister(getInt(cn, "reg")) ) );
 			}
+			else if(nname.equals("add"))
+			{				
+				setRegister(cn, "out", new OpPlusNode(useRegister(cn,"left"),useRegister(cn,"right")) );
+			}
+			else if(nname.equals("eq"))
+			{				
+				setRegister(cn, "out", new ValEqNode(useRegister(cn,"left"),useRegister(cn,"right")) );
+			}
+			/*else if(nname.equals("if"))
+			{
+				useRegister(cn, "reg")
+				
+				new JzNode()
+			}*/
 			else if(nname.equals("label"))
 			{				
 				out.add(  new JumpTargetNode(getString(cn,"name")) );
@@ -275,7 +327,9 @@ public class PythonFrontendXML {
 	}
 
 
-	private void processFunction(Node cn, int funcOutReg, int funcCodeLen) {		
+
+
+	private void processFunction(Node cn, int funcOutReg, int funcCodeLen) throws ConnvertException {		
 		loadCode(cn);
 	}
 
@@ -293,27 +347,6 @@ public class PythonFrontendXML {
 		return Double.parseDouble(cn.getAttributes().getNamedItem(name).getNodeValue());		
 	}
 	
-}
-
-
-class RegNode
-{
-	private final ru.dz.plc.compiler.Node plcNode;
-	private int useCount = 0;
-
-	public RegNode(ru.dz.plc.compiler.Node plcNode ) {
-		this.plcNode = plcNode;		
-	}
-	
-	public ru.dz.plc.compiler.Node use()
-	{
-		useCount++;
-		return plcNode;		
-	}
-
-	public int getUseCount() {
-		return useCount;
-	}
 }
 
 

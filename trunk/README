@@ -1,0 +1,25 @@
+Hello there.
+
+It is a repository for Phantom OS userland code and cross-development tools.
+
+Code, contained here, is not all we have for Phantom - we upload only
+those parts of code which are more or less ready to be co-developed.
+
+Basically, most of code we (the original team) upload is very straighforward
+and, sometimes, dumb. That, to some extent, is on purpose. We want to have
+a working system first and polish it next. Besides, not all the concepts and
+design desicions are final, so it is of no use to finalize all the 
+implementation desisions now as well.
+
+Please visit http://groups.google.com/group/phantom-os and join us to discuss
+what can you do for the project.
+
+The original code was created under cygwin environment, so it needs some
+tailoring to continue development in Linux. If someone wants to do that - 
+you're welcome.
+
+
+Best regards, Dmitry Zavalishin,
+Phantom project... how to say... inventor? :)
+http://dz.ru/en
+

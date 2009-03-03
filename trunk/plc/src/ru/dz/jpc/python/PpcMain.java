@@ -7,6 +7,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import ru.dz.plc.compiler.ClassMap;
+
 public class PpcMain {
 
 	/**
@@ -17,7 +19,7 @@ public class PpcMain {
 	 * @throws ConnvertException 
 	 */
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException, ConnvertException {
-		// TODO Auto-generated method stub
+		ClassMap cm = new ClassMap();
 
 		PythonFrontendXML pfx = new PythonFrontendXML();
 		
