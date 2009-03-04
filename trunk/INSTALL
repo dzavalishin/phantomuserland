@@ -1,0 +1,31 @@
+NB! Kernel is not available now, so QEMU part can be skipped.
+
+0. You will need cygwin on Windows. Everything here was not tested
+   on Unix, but generally is very Unix-friendly.
+
+1. set PHANTOM_HOME env var to point to this directory.
+
+2. set PHANTOM_TFTP env var to point to tftp directory your 
+   QEMU will serve tftp contents from.
+
+3. Edit config.mk
+
+4. make install
+
+5. type "pvm_test.exe" and press Enter. Phantom Windows test environment 
+   must start and show some fancy background and some shit over it.
+
+For Windows-based Phantom code test and debug the path is:
+
+1. Make sure you have all classes you import compiled in plib/bin. Just
+   come to that dir and make. No dependencies are set up between .pc 
+   files so, it is possible, you will need to make 3 or 4 times of compile
+   some .ph files yourself. Use "plc file.ph" to compile .ph source file.
+   Result comes to plib/bin automatically.
+
+2. Make sure you have "classes" file made in plib/bin. Just "make" after
+   all the required .pc files are there.
+
+3. Run pvm_test.exe. See ru.dz.phantom.system.boot.ph to understand
+   startup sequence.
+

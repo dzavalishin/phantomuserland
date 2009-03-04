@@ -14,18 +14,17 @@ package .internal;
 
 /**
  *
- * This class has internal implementation (as everything in
- * .internal package). It means that VM will bever load its
- * bytecode, and internal version will be used instead. This
- * class definition must be synchronized with VM implementation.
+ * This is needed to compile all classes from scratch. Real
+ * .internal.object refers to .internal.string, so we compile this first,
+ * than compile .internal.string, then REAL .internal.object, and then
+ * .internal.string again so that it will have all the methods of
+ * .internal.object too.
  *
 **/
 
 /**
  *
  * Root of all evil. :)
- *
- * TODO: fix return types.
  *
 **/
 
@@ -34,11 +33,13 @@ class .internal.object
 
 	void construct_me () [0] { }
 	void destruct_me () [1] {  }
-	.internal."class" getClass () [2] {  }
+
+	.internal.object getClass () [2] {  } // wrong
+
 	void clone() [3] {  }
 	int equals(var object) [4] { }
 
-	.internal.string toString() [5] {  }
+	.internal.object toString() [5] {  } // wrong
 
 	int hashCode() [15] { return 0; }
 

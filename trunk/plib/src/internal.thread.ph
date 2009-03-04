@@ -12,8 +12,6 @@
 
 package .internal;
 
-//import .internal."class";
-
 /**
  *
  * This class has internal implementation (as everything in
@@ -25,16 +23,14 @@ package .internal;
 
 /**
  *
- * Integer.
+ * Thread. 
  *
- * TODO: fix toString
+ * TODO: some methods? :)
  *
 **/
 
-class .internal.int
+class .internal."thread"
 {
-
-//	.internal."class" getClass () [2] {  }
 
 	.internal.string toString() [5] {  }
 
