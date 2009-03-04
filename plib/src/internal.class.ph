@@ -12,8 +12,6 @@
 
 package .internal;
 
-//import .internal."class";
-
 /**
  *
  * This class has internal implementation (as everything in
@@ -25,18 +23,17 @@ package .internal;
 
 /**
  *
- * Integer.
+ * Classes are objects of this class.
  *
- * TODO: fix toString
+ * TODO: getName, getShortName, getFullName, isSubclassOf
  *
 **/
 
-class .internal.int
+class .internal."class"
 {
 
-//	.internal."class" getClass () [2] {  }
-
-	.internal.string toString() [5] {  }
+	// Not implemented?
+	.internal."class" newClass() [8] {  }
 
 };
 
