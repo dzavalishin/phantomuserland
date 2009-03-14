@@ -277,7 +277,11 @@ extends GrammarHelper {
 				break;
 			}
 
-			sb.append(getIdent());
+			if( peek() == id_string_const )
+				sb.append(getString());
+			else
+				sb.append(getIdent());
+			
 			if( !testAndEat( id_point ) )
 				break;
 		}
