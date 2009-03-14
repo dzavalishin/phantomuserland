@@ -24,7 +24,7 @@ public class Version
 	/**
 	 * Program version.
 	 */
-	public static final String VERSION = "0.33";  //$NON-NLS-1$
+	public static final String VERSION = "0.34";  //$NON-NLS-1$
 	
 	/**
 	 * Program SVN revision.

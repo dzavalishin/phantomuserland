@@ -18,18 +18,19 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import ru.dz.plc.compiler.ClassMap;
-import ru.dz.plc.compiler.EmptyNode;
-import ru.dz.plc.compiler.IdentNode;
-import ru.dz.plc.compiler.JumpNode;
-import ru.dz.plc.compiler.JumpTargetNode;
-import ru.dz.plc.compiler.JzNode;
-import ru.dz.plc.compiler.NewNode;
-import ru.dz.plc.compiler.NullNode;
-import ru.dz.plc.compiler.OpAssignNode;
-import ru.dz.plc.compiler.OpPlusNode;
 import ru.dz.plc.compiler.PhantomType;
-import ru.dz.plc.compiler.ReturnNode;
-import ru.dz.plc.compiler.ValEqNode;
+import ru.dz.plc.compiler.binode.NewNode;
+import ru.dz.plc.compiler.binode.OpAssignNode;
+import ru.dz.plc.compiler.binode.OpPlusNode;
+import ru.dz.plc.compiler.binode.ValEqNode;
+import ru.dz.plc.compiler.node.EmptyNode;
+import ru.dz.plc.compiler.node.IdentNode;
+import ru.dz.plc.compiler.node.JumpNode;
+import ru.dz.plc.compiler.node.JumpTargetNode;
+import ru.dz.plc.compiler.node.JzNode;
+import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.ReturnNode;
+import ru.dz.plc.util.PlcException;
 import sun.io.Converters;
 
 public class PythonFrontendXML {
@@ -98,7 +99,7 @@ public class PythonFrontendXML {
 	}
 
 
-	public void convert() throws ConnvertException {
+	public void convert() throws ConnvertException, PlcException {
 		Node de = doc.getDocumentElement();
 		
 		if(!de.getNodeName().equalsIgnoreCase("pythonfrontend"))
@@ -134,7 +135,7 @@ public class PythonFrontendXML {
 
 	private Map<Integer,RegisterNodeWrapper> registers = new HashMap<Integer, RegisterNodeWrapper>();
 	
-	private void setRegister(int reg, ru.dz.plc.compiler.Node n )
+	private void setRegister(int reg, ru.dz.plc.compiler.node.Node n )
 	{
 		registers.put(reg, new RegisterNodeWrapper(n) );
 	}
@@ -144,7 +145,7 @@ public class PythonFrontendXML {
 		registers.put(reg, rn );
 	}
 
-	private void setRegister(Node cn, String name, ru.dz.plc.compiler.Node n ) {
+	private void setRegister(Node cn, String name, ru.dz.plc.compiler.node.Node n ) {
 		registers.put(getInt(cn, name), new RegisterNodeWrapper(n) );
 	}
 	
@@ -153,21 +154,21 @@ public class PythonFrontendXML {
 		return registers.get(reg);
 	}
 
-	private ru.dz.plc.compiler.Node useRegister( int reg )
+	private ru.dz.plc.compiler.node.Node useRegister( int reg )
 	{
 		return registers.get(reg).use();
 	}
 
-	private ru.dz.plc.compiler.Node useRegister( Node cn, String name )
+	private ru.dz.plc.compiler.node.Node useRegister( Node cn, String name )
 	{
 		return registers.get(getInt(cn, name)).use();
 	}
 
 	
-	private void loadCode(Node n) throws ConnvertException {
+	private void loadCode(Node n) throws ConnvertException, PlcException {
 		// We're in the top level code
 
-		List<ru.dz.plc.compiler.Node> out = new LinkedList<ru.dz.plc.compiler.Node>();
+		List<ru.dz.plc.compiler.node.Node> out = new LinkedList<ru.dz.plc.compiler.node.Node>();
 		
 		// These two are saved in DefFunc and used in PythonCode
 		int funcOutReg = -1;
@@ -221,12 +222,12 @@ public class PythonFrontendXML {
 			}			
 			else if(nname.equals("string"))
 			{
-				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.StringConstNode(getString(cn,"content")));
+				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.StringConstNode(getString(cn,"content")));
 			}			
 			else if(nname.equals("number"))
 			{
 				// TODO Its FLOAT!
-				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.IntConstNode((int)getDouble(cn,"val")));
+				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.IntConstNode((int)getDouble(cn,"val")));
 			}			
 			else if(nname.equals("eof"))
 			{
@@ -330,7 +331,7 @@ public class PythonFrontendXML {
 
 
 
-	private void processFunction(Node cn, int funcOutReg, int funcCodeLen) throws ConnvertException {		
+	private void processFunction(Node cn, int funcOutReg, int funcCodeLen) throws ConnvertException, PlcException {		
 		loadCode(cn);
 	}
 
