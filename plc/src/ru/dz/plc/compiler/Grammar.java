@@ -2,7 +2,52 @@ package ru.dz.plc.compiler;
 
 import java.io.*;
 
-import ru.dz.plc.compiler.Node;
+import ru.dz.plc.compiler.binode.BoolAndNode;
+import ru.dz.plc.compiler.binode.BoolOrNode;
+import ru.dz.plc.compiler.binode.CallArgNode;
+import ru.dz.plc.compiler.binode.CatchNode;
+import ru.dz.plc.compiler.binode.ForeachNode;
+import ru.dz.plc.compiler.binode.NewNode;
+import ru.dz.plc.compiler.binode.OpAndNode;
+import ru.dz.plc.compiler.binode.OpAssignNode;
+import ru.dz.plc.compiler.binode.OpDivideNode;
+import ru.dz.plc.compiler.binode.OpMinusNode;
+import ru.dz.plc.compiler.binode.OpMultiplyNode;
+import ru.dz.plc.compiler.binode.OpOrNode;
+import ru.dz.plc.compiler.binode.OpPlusNode;
+import ru.dz.plc.compiler.binode.OpSubscriptNode;
+import ru.dz.plc.compiler.binode.OpVassignNode;
+import ru.dz.plc.compiler.binode.RefEqNode;
+import ru.dz.plc.compiler.binode.RefNeqNode;
+import ru.dz.plc.compiler.binode.SequenceNode;
+import ru.dz.plc.compiler.binode.ValEqNode;
+import ru.dz.plc.compiler.binode.ValGeNode;
+import ru.dz.plc.compiler.binode.ValGtNode;
+import ru.dz.plc.compiler.binode.ValLeNode;
+import ru.dz.plc.compiler.binode.ValLtNode;
+import ru.dz.plc.compiler.binode.ValNeqNode;
+import ru.dz.plc.compiler.node.BinaryConstNode;
+import ru.dz.plc.compiler.node.BoolNotNode;
+import ru.dz.plc.compiler.node.BreakNode;
+import ru.dz.plc.compiler.node.ClassDefinitionNode;
+import ru.dz.plc.compiler.node.ContinueNode;
+import ru.dz.plc.compiler.node.EmptyNode;
+import ru.dz.plc.compiler.node.IdentNode;
+import ru.dz.plc.compiler.node.IntConstNode;
+import ru.dz.plc.compiler.node.MethodNode;
+import ru.dz.plc.compiler.node.Node;
+import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.OpNotNode;
+import ru.dz.plc.compiler.node.ReturnNode;
+import ru.dz.plc.compiler.node.StringConstNode;
+import ru.dz.plc.compiler.node.SwitchCaseNode;
+import ru.dz.plc.compiler.node.SwitchDefaultNode;
+import ru.dz.plc.compiler.node.SwitchNode;
+import ru.dz.plc.compiler.node.ThisNode;
+import ru.dz.plc.compiler.node.ThrowNode;
+import ru.dz.plc.compiler.trinode.DoWhileNode;
+import ru.dz.plc.compiler.trinode.IfNode;
+import ru.dz.plc.compiler.trinode.OpMethodCallNode;
 import ru.dz.plc.parser.*;
 import ru.dz.plc.util.*;
 
@@ -317,7 +362,7 @@ extends GrammarHelper {
 			if( t.get_id() == id_var ) {
 				if(interface_mode)
 					syntax_error("interface can not have fields");
-				PhantomType type = new ph_type_unknown();
+				PhantomType type = new PhTypeUnknown();
 				String vname = getIdent();
 				if(testAndEat( id_colon ))
 					type = parseType();
@@ -351,8 +396,8 @@ extends GrammarHelper {
 				parseDefinitionArglist(m);
 				if( testAndEat(id_lbracket) )
 				{
-					int required_method_index = getInt();
-					me.mt.set_ordinal(m,required_method_index);
+					int required_method_index = getInt();					
+					me.setMethodOrdinal(m,required_method_index);
 					expect(id_rbracket);
 				}
 				parse_attributes( false );
@@ -389,7 +434,7 @@ extends GrammarHelper {
 		{
 			if( l.is_eof() ) { syntax_error("arg list syntax"); return null; }
 			if (testAndEat( id_var ) ) {
-				PhantomType type = new ph_type_unknown();
+				PhantomType type = new PhTypeUnknown();
 				String vname = getIdent();
 				if(testAndEat( id_colon ))
 					type = parseType();
@@ -416,9 +461,9 @@ extends GrammarHelper {
 		Token t = l.get();
 		if (parser_debug) System.out.println("type Token: " + t.toString());
 
-		PhantomType main_type = new ph_type_unknown();
+		PhantomType main_type = new PhTypeUnknown();
 
-		if(t.get_id() == id_void ) main_type = new ph_type_void();
+		if(t.get_id() == id_void ) main_type = new PhTypeVoid();
 		else if(t.get_id() == id_aster )
 		{
 			// *type-var case
@@ -428,8 +473,8 @@ extends GrammarHelper {
 			l.unget();
 			String cln = parseClassName(false);
 
-			if( cln.equals("int") ) main_type = new ph_type_int();
-			else if( cln.equals("string") ) main_type = new ph_type_string();
+			if( cln.equals("int") ) main_type = new PhTypeInt();
+			else if( cln.equals("string") ) main_type = new PhTypeString();
 			else
 			{
 				PhantomClass c = classes.get(cln, false);
@@ -723,8 +768,8 @@ extends GrammarHelper {
 		Node expr = parseExpression(false);
 		expect(id_rparen);
 		if( testAndEat( id_semicolon ) )
-			return new do_while_node(pre, expr, null ).setContext( l );
-		return new do_while_node(pre, expr, parseOperator() ).setContext( l );
+			return new DoWhileNode(pre, expr, null ).setContext( l );
+		return new DoWhileNode(pre, expr, parseOperator() ).setContext( l );
 	}
 
 	private Node parseWhile() throws PlcException, IOException {
@@ -732,7 +777,7 @@ extends GrammarHelper {
 		expect(id_lparen);
 		Node expr = parseExpression(false);
 		expect(id_rparen);
-		return new do_while_node(null, expr, parseOperator() ).setContext( l );
+		return new DoWhileNode(null, expr, parseOperator() ).setContext( l );
 	}
 
 	private Node parseReturn() throws PlcException, IOException {
@@ -765,12 +810,12 @@ extends GrammarHelper {
 		Node code = parseOperator();
 
 		// TODO Must have type of expression!
-		ps.get_method().svars.add_stack_var(new PhantomVariable(ident.value(),new ph_type_unknown()));
+		ps.get_method().svars.add_stack_var(new PhantomVariable(ident.value(),new PhTypeUnknown()));
 
 		// secondary (internal) var to keep iterator
-		ps.get_method().svars.add_stack_var(new PhantomVariable(ident.value()+"$iterator",new ph_type_unknown()));
+		ps.get_method().svars.add_stack_var(new PhantomVariable(ident.value()+"$iterator",new PhTypeUnknown()));
 
-		return new NodeForeach( ident.value(), expr, code ).setContext( l );
+		return new ForeachNode( ident.value(), expr, code ).setContext( l );
 	}
 
 	// --------------------------------------------------------------------------
@@ -1023,7 +1068,7 @@ extends GrammarHelper {
 				Node method = parse_method_id();
 				Node args = parse_call_args();
 				//out = new op_method_call_node(atom, method, args).setContext( l );
-				out = new op_method_call_node(out, method, args).setContext( l );
+				out = new OpMethodCallNode(out, method, args).setContext( l );
 			}
 			else if (peek( id_lparen )) {
 				// TODO this is wrong and can't be in loop? What if we already have out?
@@ -1036,7 +1081,7 @@ extends GrammarHelper {
 
 				IdentNode ident = (IdentNode)atom;
 				Node method = new MethodNode( ident.get_name() ).setContext( l );
-				out = new op_method_call_node(object, method, args).setContext( l );
+				out = new OpMethodCallNode(object, method, args).setContext( l );
 				//out = new op_method_call_node(object, atom, args);
 			}
 			else if (testAndEat( id_lbracket )) {
@@ -1073,8 +1118,8 @@ extends GrammarHelper {
 				PhantomType type = null;
 
 				String typeName = t.value();
-				if(typeName.equals("int")) { typeName = ".internal.int"; type = new ph_type_int(); }
-				else if(typeName.equals("string")) { typeName = ".internal.string"; type = new ph_type_string(); }
+				if(typeName.equals("int")) { typeName = ".internal.int"; type = new PhTypeInt(); }
+				else if(typeName.equals("string")) { typeName = ".internal.string"; type = new PhTypeString(); }
 				else
 				{
 					ClassMap.get_map().do_import(typeName);
