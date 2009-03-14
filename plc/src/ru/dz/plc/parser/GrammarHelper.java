@@ -181,6 +181,11 @@ public class GrammarHelper {
 		return nt.get_id() == id;
 	}
 
+	/**
+	 * Take a look at the next token, but not consume it.
+	 * @return token id 
+	 * @throws PlcException
+	 */
 	protected int peek() throws PlcException {
 		Token nt = l.get();
 		l.unget();
