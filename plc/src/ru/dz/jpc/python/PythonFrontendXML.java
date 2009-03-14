@@ -18,6 +18,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.EmptyNode;
 import ru.dz.plc.compiler.IdentNode;
 import ru.dz.plc.compiler.JumpNode;
 import ru.dz.plc.compiler.JumpTargetNode;
@@ -263,7 +264,7 @@ public class PythonFrontendXML {
 				int objectReg = getInt(cn,"class");
 				int nameregReg = getInt(cn,"fieldName");
 				// TODO implement
-				setRegister(toReg, new NullNode() );
+				setRegister(toReg, new EmptyNode() );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
 			else if(nname.equals("set"))
