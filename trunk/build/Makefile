@@ -3,11 +3,12 @@ include ../config.mk
 install: tools boot
 
 boot: classes menu.lst #phantom
-	cp $^ $(PHANTOM_TFTP)
+	cp $^ $(realpath $(PHANTOM_TFTP))
 
 tools: $(INST_BIN)/pfsextract.exe $(INST_BIN)/pfsformat.exe \
        $(INST_BIN)/plc.cmd $(INST_BIN)/mkbulk.exe $(INST_BIN)/pvm_test.exe \
-       $(INST_BIN)/bin2hex.cmd $(INST_BIN)/pbitmap.cmd 
+       $(INST_BIN)/pbitmap.cmd 
+# $(INST_BIN)/bin2hex.cmd 
 
 $(INST_BIN)/pbitmap.cmd: bin/pbitmap.cmd
 	cp $^ $@
