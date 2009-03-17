@@ -6,7 +6,8 @@ NB! Kernel is not available now, so QEMU part can be skipped.
 1. set PHANTOM_HOME env var to point to this directory.
 
 2. set PHANTOM_TFTP env var to point to tftp directory your 
-   QEMU will serve tftp contents from.
+   QEMU will serve tftp contents from. (As far as I understand QEMU has
+   some bug forcing this dir to be in the root of current disk in Windows)
 
 3. Edit config.mk
 
