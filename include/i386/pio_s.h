@@ -1,3 +1,7 @@
+
+#warning use pio.h
+
+
 #if 1
 
 #ifdef SLOW_IO_BY_JUMPING

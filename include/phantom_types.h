@@ -31,6 +31,22 @@ typedef	unsigned long long	u_int64_t;
 
 #endif
 
+// FreeBSD code wants these
+typedef u_int64_t uintmax_t;
+typedef int64_t intmax_t;
+typedef unsigned char u_char;
+typedef unsigned short u_short;
+typedef unsigned int u_int;
+typedef unsigned long u_long;
+
+typedef	u_int64_t	u_quad_t;	/* quads (deprecated) */
+typedef	int64_t		quad_t;
+
+typedef	int32_t		ptrdiff_t;
+
+
+typedef u_int8_t        bool;
+
 
 
 typedef u_int32_t 		disk_page_no_t;
@@ -40,6 +56,16 @@ typedef u_int32_t       	phys_page_t;
 
 typedef void *  		vmem_ptr_t;
 
+#ifndef _SIZE_T
+#define _SIZE_T
+typedef int			size_t;
+#endif //_SIZE_T
+
+typedef	u_int32_t		uintptr_t;
+
+// time
+
+typedef int64_t bigtime_t;
 
 
 

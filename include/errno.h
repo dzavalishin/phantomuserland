@@ -162,9 +162,9 @@ extern int errno;			/* global error number */
 
 /*
 #ifdef KERNEL
-/* pseudo-errors returned inside kernel to modify return to process */
-#define	ERESTART	-1		/* restart syscall */
-#define	EJUSTRETURN	-2		/* don't modify regs, just return */
+// pseudo-errors returned inside kernel to modify return to process 
+#define	ERESTART	-1		// restart syscall 
+#define	EJUSTRETURN	-2		// don't modify regs, just return 
 #endif
 */
 
