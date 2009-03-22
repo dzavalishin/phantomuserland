@@ -35,12 +35,22 @@
 
 #define SLOW_DOWN_IO __SLOW_DOWN_IO
 
+// see pio.c
+#ifdef __PIO_IMPLEMENTATION
+#define __PIOEXTERN
+#else
+#define __PIOEXTERN static __inline__
+#endif
+
+
+//#define __PIOEXTERN extern inline
+
 /*
  * Talk about misusing macros..
  */
 
 #define __OUT1(s,x) \
-extern inline void __out##s(unsigned x value, unsigned short port) {
+__PIOEXTERN  void __out##s(unsigned x value, unsigned short port) {
 
 #define __OUT2(s,s1,s2) \
 __asm__ __volatile__ ("out" #s " %" s1 "0,%" s2 "1"
@@ -52,7 +62,7 @@ __OUT1(s##_p,x) __OUT2(s,s1,"w") : : "a" (value), "d" (port)); SLOW_DOWN_IO; } \
 __OUT1(s##c_p,x) __OUT2(s,s1,"") : : "a" (value), "id" (port)); SLOW_DOWN_IO; }
 
 #define __IN1(s) \
-extern inline RETURN_TYPE __in##s(unsigned short port) { RETURN_TYPE _v;
+__PIOEXTERN  RETURN_TYPE __in##s(unsigned short port) { RETURN_TYPE _v;
 
 #define __IN2(s,s1,s2) \
 __asm__ __volatile__ ("in" #s " %" s2 "1,%" s1 "0"
@@ -64,12 +74,12 @@ __IN1(s##_p) __IN2(s,s1,"w") : "=a" (_v) : "d" (port) ,##i ); SLOW_DOWN_IO; retu
 __IN1(s##c_p) __IN2(s,s1,"") : "=a" (_v) : "id" (port) ,##i ); SLOW_DOWN_IO; return _v; }
 
 #define __INS(s) \
-extern inline void ins##s(unsigned short port, void * addr, unsigned long count) \
+__PIOEXTERN  void ins##s(unsigned short port, void * addr, unsigned long count) \
 { __asm__ __volatile__ ("cld ; rep ; ins" #s \
 : "=D" (addr), "=c" (count) : "d" (port),"0" (addr),"1" (count)); }
 
 #define __OUTS(s) \
-extern inline void outs##s(unsigned short port, const void * addr, unsigned long count) \
+__PIOEXTERN  void outs##s(unsigned short port, const void * addr, unsigned long count) \
 { __asm__ __volatile__ ("cld ; rep ; outs" #s \
 : "=S" (addr), "=c" (count) : "d" (port),"0" (addr),"1" (count)); }
 
@@ -77,10 +87,12 @@ extern inline void outs##s(unsigned short port, const void * addr, unsigned long
 /* __IN(b,"b","0" (0)) */
 __IN(b,"")
 #undef RETURN_TYPE
+
 #define RETURN_TYPE unsigned short
 /* __IN(w,"w","0" (0)) */
 __IN(w,"")
 #undef RETURN_TYPE
+
 #define RETURN_TYPE unsigned int
 __IN(l,"")
 #undef RETURN_TYPE
@@ -97,12 +109,14 @@ __OUTS(b)
 __OUTS(w)
 __OUTS(l)
 
+
+#if 1
 /*
  * Note that due to the way __builtin_constant_p() works, you
  *  - can't use it inside a inline function (it will never be true)
  *  - you don't have to worry about side effects within the __builtin..
  */
-#define outb(val,port) \
+#define outb(port,val) \
 ((__builtin_constant_p((port)) && (port) < 256) ? \
 	__outbc((val),(port)) : \
 	__outb((val),(port)))
@@ -112,7 +126,7 @@ __OUTS(l)
 	__inbc(port) : \
 	__inb(port))
 
-#define outb_p(val,port) \
+#define outb_p(port,val) \
 ((__builtin_constant_p((port)) && (port) < 256) ? \
 	__outbc_p((val),(port)) : \
 	__outb_p((val),(port)))
@@ -122,7 +136,7 @@ __OUTS(l)
 	__inbc_p(port) : \
 	__inb_p(port))
 
-#define outw(val,port) \
+#define outw(port,val) \
 ((__builtin_constant_p((port)) && (port) < 256) ? \
 	__outwc((val),(port)) : \
 	__outw((val),(port)))
@@ -132,7 +146,7 @@ __OUTS(l)
 	__inwc(port) : \
 	__inw(port))
 
-#define outw_p(val,port) \
+#define outw_p(port,val) \
 ((__builtin_constant_p((port)) && (port) < 256) ? \
 	__outwc_p((val),(port)) : \
 	__outw_p((val),(port)))
@@ -142,7 +156,7 @@ __OUTS(l)
 	__inwc_p(port) : \
 	__inw_p(port))
 
-#define outl(val,port) \
+#define outl(port,val) \
 ((__builtin_constant_p((port)) && (port) < 256) ? \
 	__outlc((val),(port)) : \
 	__outl((val),(port)))
@@ -152,7 +166,7 @@ __OUTS(l)
 	__inlc(port) : \
 	__inl(port))
 
-#define outl_p(val,port) \
+#define outl_p(port,val) \
 ((__builtin_constant_p((port)) && (port) < 256) ? \
 	__outlc_p((val),(port)) : \
 	__outl_p((val),(port)))
@@ -161,5 +175,8 @@ __OUTS(l)
 ((__builtin_constant_p((port)) && (port) < 256) ? \
 	__inlc_p(port) : \
 	__inl_p(port))
+
+#endif
+
 
 #endif
