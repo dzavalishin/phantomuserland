@@ -669,7 +669,10 @@ extends GrammarHelper {
 		String ident = getIdent();
 		expect(id_colon);
 		PhantomType t = parseType();
-		ps.get_method().svars.add_stack_var(new PhantomVariable(ident, t));
+		if( t.is_int() )
+			ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, t));
+		else
+			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, t));
 		expect( id_semicolon);
 		return null;
 	}

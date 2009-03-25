@@ -23,7 +23,7 @@ public class ValEqNode extends BiBistackNode {
 
 
     //if(getType().is_int())
-    if(!go_to_object_stack)
+    if(!go_to_object_stack())
     {
       if(!(getType().is_int())) throw new PlcException("val_eq_node","not an int in int stack");
       c.emitISubLU();

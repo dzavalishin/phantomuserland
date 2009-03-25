@@ -11,21 +11,21 @@ package ru.dz.plc.compiler;
 
 public class PhantomStackVar extends PhantomVariable
 {
-  int      abs_stack_pos;
+	int      abs_stack_pos;
 
-  public PhantomStackVar( String name, PhantomType type , int n)
-  {
-    super( name, type );
-    abs_stack_pos = n;
-  }
+	public PhantomStackVar( String name, PhantomType type , int n)
+	{
+		super( name, type );
+		abs_stack_pos = n;
+	}
 
-  public PhantomStackVar( PhantomVariable v, int n)
-  {
-    super( v );
-    abs_stack_pos = n;
-  }
+	public PhantomStackVar( PhantomVariable v, int n)
+	{
+		super( v );
+		abs_stack_pos = n;
+	}
 
 
-  public int      get_abs_stack_pos() { return abs_stack_pos; }
+	public int      get_abs_stack_pos() { return abs_stack_pos; }
 
 }

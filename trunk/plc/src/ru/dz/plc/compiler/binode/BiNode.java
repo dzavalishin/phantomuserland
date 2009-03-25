@@ -97,21 +97,26 @@ abstract public class BiNode extends Node {
  * stack.
  */
 abstract class BiBistackNode extends BiNode {
-  boolean go_to_object_stack = false;
-  public boolean args_on_int_stack() { return !go_to_object_stack; }
+  //boolean go_to_object_stack = false;
+  public boolean args_on_int_stack() { return !go_to_object_stack(); }
 
   public BiBistackNode( Node l, Node r)
   {
     super(l,r);
-    go_to_object_stack = (!_l.is_on_int_stack()) || (!_r.is_on_int_stack());
+    
   }
 
+  public boolean go_to_object_stack() 
+  {
+	  return (!_l.is_on_int_stack()) || (!_r.is_on_int_stack()); 
+  }
+  
   public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
   {
     _l.generate_code(c, s);
-    if (go_to_object_stack && _l.is_on_int_stack()) c.emit_i2o();
+    if (go_to_object_stack() && _l.is_on_int_stack()) c.emit_i2o();
     _r.generate_code(c, s);
-    if (go_to_object_stack && _r.is_on_int_stack()) c.emit_i2o();
+    if (go_to_object_stack() && _r.is_on_int_stack()) c.emit_i2o();
 
     log.fine("Node "+this+" codegen");
     generate_my_code(c,s);
