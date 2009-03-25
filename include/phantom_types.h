@@ -65,7 +65,13 @@ typedef	u_int32_t		uintptr_t;
 
 // time
 
-typedef int64_t bigtime_t;
+typedef u_int64_t bigtime_t;
+
+#ifndef _TIME_T_DECLARED
+typedef	u_int64_t	time_t;
+#define	_TIME_T_DECLARED
+#endif
+
 
 
 

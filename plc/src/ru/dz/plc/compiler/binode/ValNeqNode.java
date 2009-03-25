@@ -23,7 +23,7 @@ public class ValNeqNode extends BiBistackNode {
 	// objects without conversion to int
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		//if(getType().is_int())
-		if(!go_to_object_stack)
+		if(!go_to_object_stack())
 		{
 			if(!(getType().is_int())) throw new PlcException("val_eq_node","not an int on int stack");
 			c.emitISubLU();

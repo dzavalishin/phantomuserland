@@ -28,6 +28,8 @@ public class SwitchNode extends Node {
 		this.expr = expr;
 	}
 
+	
+	
 	public String toString()  {    return "switch "; /*+ident;*/  }
 	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); }
 	public boolean is_const() { return true; }
@@ -46,6 +48,7 @@ public class SwitchNode extends Node {
 
 	public void preprocess_me( ParseState s ) throws PlcException
 	{
+		expr.preprocess(s);
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException

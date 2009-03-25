@@ -23,7 +23,10 @@ public class Method
   public PhantomType  type;
   //public Node         args;
 
+  // Main ones - on object stack
   public PhantomStack     svars = new PhantomStack();
+  // Binary ones - on integer stack
+  public PhantomStack     isvars = new PhantomStack();
 
   public LinkedList<ArgDefinition>   args_def = new LinkedList<ArgDefinition>();
 
@@ -106,7 +109,8 @@ public class Method
     // ------------------------------------------
     // traverse tree to allocate automatic vars?
     // ------------------------------------------
-    int n_auto_vars = svars.used_slots;
+    int n_auto_vars = svars.getUsedSlots();
+    int n_int_auto_vars = isvars.getUsedSlots();
     // ------------------------------------------
 
     // ------------------------------------------
@@ -134,9 +138,15 @@ public class Method
     // BUG! We can execute vars initialization code here, can we?
     // We can if code does not depend on auto vars itself, or depends only on
     // previous ones.
+    // TODO: BUG! autovars in arguments are already on stack, we don't have to reserve space
     for( int i = n_auto_vars; i > 0; i-- )
       c.emitPushNull();
 
+    // TODO introduce instruction to reserve o+i space in one step
+    // Reserve integer stack place for int vars
+    for( int i = n_int_auto_vars; i > 0; i-- )
+    	c.emitIConst_0();
+    	
     // ------------------------------------------
 
 

@@ -615,7 +615,7 @@ public class Codegen extends opcode_ids {
 	{
 		put_byte( opcode_os_get32 );
 		put_int32(pos);
-		list("get stk pos="+pos);
+		list("get o stk pos="+pos);
 	}
 
 	/**
@@ -628,9 +628,37 @@ public class Codegen extends opcode_ids {
 	{
 		put_byte( opcode_os_set32 );
 		put_int32(pos);
-		list("set stk pos="+pos);
+		list("set o stk pos="+pos);
 	}
 
+	/**
+	 * Load object from given position of object stack, push to top of stack.
+	 * Local variables access.
+	 * @param pos Stack position to get from.
+	 * @throws IOException
+	 */
+	public void emitIGet( int pos ) throws IOException
+	{
+		put_byte( opcode_is_get32 );
+		put_int32(pos);
+		list("get i stk pos="+pos);
+	}
+
+	/**
+	 * Pop object, store to selected position of object stack. 
+	 * Local variables access.
+	 * @param pos
+	 * @throws IOException
+	 */
+	public void emitISet( int pos ) throws IOException
+	{
+		put_byte( opcode_is_set32 );
+		put_int32(pos);
+		list("set i stk pos="+pos);
+	}
+
+	
+	
 	public void emit_ptr_eq() throws IOException
 	{
 		put_byte(opcode_os_eq);

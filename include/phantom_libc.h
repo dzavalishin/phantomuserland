@@ -78,6 +78,11 @@ int printf(const char *fmt, ...);
 
 
 
+// console.c
+int getchar(void);
+int putchar(int c);
+
+
 
 
 

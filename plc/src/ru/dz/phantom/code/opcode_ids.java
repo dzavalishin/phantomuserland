@@ -45,6 +45,9 @@ public class opcode_ids {
   protected static final byte opcode_iconst_32bit  = 0x23;
   protected static final byte opcode_sconst_bin    = 0x24;
 
+  protected static final byte opcode_is_get32 = (byte)0x26;	// get value from stack absolute-addressed slot, push on top
+  protected static final byte opcode_is_set32 = (byte)0x27;	// pop stack top, set value in stack absolute-addressed slot
+  
   protected static final byte opcode_push_catcher  = 0x2D;
   protected static final byte opcode_pop_catcher   = 0x2E;
   protected static final byte opcode_throw         = 0x2F;

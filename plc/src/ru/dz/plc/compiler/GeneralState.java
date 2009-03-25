@@ -18,6 +18,7 @@ public class GeneralState {
   public Method  get_method ( ) { return my_method; }
 
   public PhantomStack stack_vars() { return my_method.svars; }
+  public PhantomStack istack_vars() { return my_method.isvars; }
 
   public PhantomClass get_class() throws PlcException
   {
