@@ -75,4 +75,5 @@
 #define	T_PF_WRITE		0x2		/* write access */
 #define	T_PF_USER		0x4		/* from user state */
 
-#endif	_I386_TRAP_H_
+#endif	// _I386_TRAP_H_
+
