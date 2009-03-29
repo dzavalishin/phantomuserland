@@ -21,7 +21,7 @@ struct VBEInfoBlock {
     u_int32_t oem_product_rev_ptr;
     u_int8_t  reserved[222];
     u_int8_t  oem_data[256];
-} _PACKED;
+} __attribute__ ((packed));
 
 struct VBEModeInfoBlock {
     u_int16_t attributes;
@@ -60,7 +60,7 @@ struct VBEModeInfoBlock {
     u_int32_t offscreen_mem_offset;
     u_int16_t offscreen_mem_size;
     u_int8_t  _reserved2[206];
-} _PACKED;
+} __attribute__ ((packed));
 
 #endif
 

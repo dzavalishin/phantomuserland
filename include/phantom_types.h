@@ -39,6 +39,8 @@ typedef unsigned short u_short;
 typedef unsigned int u_int;
 typedef unsigned long u_long;
 
+typedef u_int32_t register_t;
+
 typedef	u_int64_t	u_quad_t;	/* quads (deprecated) */
 typedef	int64_t		quad_t;
 
