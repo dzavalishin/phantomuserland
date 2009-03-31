@@ -535,6 +535,16 @@ intr_restore(register_t eflags)
 }
 
 
+static __inline unsigned int
+get_esp(void)
+{
+	unsigned int sel;
+	__asm __volatile("movl %%esp,%0" : "=rm" (sel));
+	return (sel);
+}
+
+
+
 #endif	/* __GNUC__ */
 #endif	/* ASSEMBLER */
 
