@@ -53,8 +53,11 @@ typedef u_int8_t        bool;
 
 typedef u_int32_t 		disk_page_no_t;
 
-// physical mem page no
+// physical mem page no - used as physaddr! fix?
 typedef u_int32_t       	phys_page_t;
+
+// physical mem address
+typedef u_int32_t       	physaddr_t;
 
 typedef void *  		vmem_ptr_t;
 

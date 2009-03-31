@@ -62,5 +62,8 @@ struct VBEModeInfoBlock {
     u_int8_t  _reserved2[206];
 } __attribute__ ((packed));
 
+
+#define VBE_MODE_LINEAR 0x4000
+
 #endif
 

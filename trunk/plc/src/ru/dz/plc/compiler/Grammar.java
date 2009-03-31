@@ -736,6 +736,8 @@ extends GrammarHelper {
 			else                               code = sequence( code, parseOperator() );
 		}
 
+		code = sequence( code, new BreakNode().setContext( l ) );
+		
 		sw_node.add_code(code);
 		return sw_node;
 	}
