@@ -17,7 +17,7 @@
 
 #define BGR 1
 
-struct rgb_t
+typedef struct rgb_t
 {
 #if BGR
     unsigned char       b;
@@ -28,10 +28,10 @@ struct rgb_t
     unsigned char       g;
     unsigned char       b;
 #endif
-};
+} rgb_t;
 
 
-struct rgba_t
+typedef struct rgba_t
 {
 #if BGR
     unsigned char       b;
@@ -43,47 +43,64 @@ struct rgba_t
     unsigned char       b;
 #endif
     unsigned char       a;      // Alpha
-};
+} rgba_t;
 
-extern struct rgba_t COLOR_BLACK;
-extern struct rgba_t COLOR_WHITE;
+extern rgba_t COLOR_BLACK;
+extern rgba_t COLOR_WHITE;
 
-extern struct rgba_t COLOR_LIGHTGRAY;
-extern struct rgba_t COLOR_DARKGRAY;
-extern struct rgba_t COLOR_YELLOW;
-extern struct rgba_t COLOR_LIGHTRED;
-extern struct rgba_t COLOR_RED;
-extern struct rgba_t COLOR_BROWN;
-extern struct rgba_t COLOR_BLUE;
-extern struct rgba_t COLOR_CYAN;
-extern struct rgba_t COLOR_LIGHTBLUE;
-extern struct rgba_t COLOR_GREEN;
-extern struct rgba_t COLOR_LIGHTGREEN;
-extern struct rgba_t COLOR_MAGENTA;
-extern struct rgba_t COLOR_LIGHTMAGENTA;
+extern rgba_t COLOR_LIGHTGRAY;
+extern rgba_t COLOR_DARKGRAY;
+extern rgba_t COLOR_YELLOW;
+extern rgba_t COLOR_LIGHTRED;
+extern rgba_t COLOR_RED;
+extern rgba_t COLOR_BROWN;
+extern rgba_t COLOR_BLUE;
+extern rgba_t COLOR_CYAN;
+extern rgba_t COLOR_LIGHTBLUE;
+extern rgba_t COLOR_GREEN;
+extern rgba_t COLOR_LIGHTGREEN;
+extern rgba_t COLOR_MAGENTA;
+extern rgba_t COLOR_LIGHTMAGENTA;
 
-struct drv_video_bitmap_t
+typedef struct drv_video_bitmap
 {
     int         	xsize;
     int 		ysize;
-    struct rgba_t       pixel[];
-};
+    rgba_t       pixel[];
+} drv_video_bitmap_t;
 
 
-struct drv_video_window_t
+typedef struct rect
 {
-    int         	xsize;
+    int x, y;
+    int xsize, ysize;
+} rect_t;
+
+
+
+typedef struct drv_video_window
+{
+    int         	xsize; // physical
     int 		ysize;
+
     int                 x, y; // On screen
-    struct rgba_t       pixel[];
-};
 
-struct drv_video_font_t
+    int                 li, ti, ri, bi; // insets
+
+    // bitmap itself
+    rgba_t       	pixel[];
+} drv_video_window_t;
+
+// returns nonzero if rect is out of window
+int rect_win_bounds( rect_t *r, drv_video_window_t *w );
+
+
+typedef struct drv_video_font_t
 {
     int         	xsize;
     int 		ysize;
     char *              font;
-};
+} drv_video_font_t;
 
 extern struct drv_video_font_t         drv_video_16x16_font;
 extern struct drv_video_font_t         drv_video_8x16ant_font;
@@ -97,35 +114,40 @@ extern struct drv_video_font_t         drv_video_8x16scr_font;
 
 
 // malloc value to create drv_video_window_t
-static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(struct rgba_t) * xsize * ysize) + sizeof(struct drv_video_window_t); }
-static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(struct rgba_t) * xsize * ysize) + sizeof(struct drv_video_bitmap_t); }
+static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_window_t); }
+static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
 
-void    drv_video_window_clear( struct drv_video_window_t *win );
-void    drv_video_window_fill( struct drv_video_window_t *win, struct rgba_t color );
+
+drv_video_window_t *drv_video_window_create(int xsize, int ysize);
+
+void    drv_video_window_clear( drv_video_window_t *win );
+void    drv_video_window_fill( drv_video_window_t *win, rgba_t color );
+
+void 	drv_video_window_fill_rect( drv_video_window_t *win, rgba_t color, rect_t r );
 
 void 	drv_video_font_draw_string(
-                                           struct drv_video_window_t *win,
+                                           drv_video_window_t *win,
                                            const struct drv_video_font_t *font,
-                                           char *s, const struct rgba_t color,
+                                           char *s, const rgba_t color,
                                            int x, int y );
 void 	drv_video_font_scroll_line(
-                                           struct drv_video_window_t *win,
-                                           const struct drv_video_font_t *font, struct rgba_t color );
+                                           drv_video_window_t *win,
+                                           const struct drv_video_font_t *font, rgba_t color );
 
-void 	drv_video_font_scroll_pixels( struct drv_video_window_t *win, int npix, struct rgba_t color);
+void 	drv_video_font_scroll_pixels( drv_video_window_t *win, int npix, rgba_t color);
 
 // returns new x position
 void 	drv_video_font_tty_string(
-                                          struct drv_video_window_t *win,
+                                          drv_video_window_t *win,
                                           const struct drv_video_font_t *font,
                                           const char *s,
-                                          const struct rgba_t color,
-                                          const struct rgba_t back,
+                                          const rgba_t color,
+                                          const rgba_t back,
                                           int *x, int *y );
 
 struct data_area_4_bitmap;
 
-int drv_video_ppm_load( struct drv_video_bitmap_t **to, void *from );
+int drv_video_ppm_load( drv_video_bitmap_t **to, void *from );
 int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from );
 
 
@@ -151,9 +173,9 @@ struct drv_video_screen_t
     // Main interface
 
     void 	(*update) (void);
-    void 	(*bitblt) (const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-    void 	(*winblt) (const struct drv_video_window_t *from, int xpos, int ypos);
-    void 	(*readblt) (const struct rgba_t *to, int xpos, int ypos, int xsize, int ysize);
+    void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
+    void 	(*winblt) (const drv_video_window_t *from, int xpos, int ypos);
+    void 	(*readblt) (const rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
     // Callbacks - to be filled by OS before driver init - BUG - kill!
 
@@ -162,7 +184,7 @@ struct drv_video_screen_t
     // Mouse cursor
 
     void        (*redraw_mouse_cursor)();
-    void        (*set_mouse_cursor)(struct drv_video_bitmap_t *cursor);
+    void        (*set_mouse_cursor)(drv_video_bitmap_t *cursor);
     void        (*mouse_disable)();
     void        (*mouse_enable)();
 
@@ -175,55 +197,60 @@ extern struct drv_video_screen_t        *video_drv;
 extern void drv_video_null();
 
 
-struct drv_video_bitmap_t *      drv_video_get_default_mouse_bmp();
+drv_video_bitmap_t *      drv_video_get_default_mouse_bmp();
 
 
-extern void drv_video_bitblt_forw(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-extern void drv_video_bitblt_rev(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-extern void drv_video_win_winblt(const struct drv_video_window_t *from, int xpos, int ypos);
-extern void drv_video_win_winblt_rev(const struct drv_video_window_t *from, int xpos, int ypos);
-void drv_video_readblt_forw( struct rgba_t *to, int xpos, int ypos, int xsize, int ysize);
-void drv_video_readblt_rev( struct rgba_t *to, int xpos, int ypos, int xsize, int ysize);
+extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
+extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
+extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos);
+extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos);
+void drv_video_readblt_forw( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
+void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
 
 // RGB videospace access workers
-void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
-void drv_video_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
+void drv_video_bitblt_worker(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
+void drv_video_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
 
 
 
 
 
-void rgba2rgb_move( struct rgb_t *dest, const struct rgba_t *src, int nelem );
-void rgba2rgba_move( struct rgba_t *dest, const struct rgba_t *src, int nelem );
-void rgb2rgba_move( struct rgba_t *dest, const struct rgb_t *src, int nelem );
-void int565_to_rgba_move( struct rgba_t *dest, const short int *src, int nelem );
+void rgba2rgb_move( struct rgb_t *dest, const rgba_t *src, int nelem );
+void rgba2rgba_move( rgba_t *dest, const rgba_t *src, int nelem );
+void rgb2rgba_move( rgba_t *dest, const struct rgb_t *src, int nelem );
+void int565_to_rgba_move( rgba_t *dest, const short int *src, int nelem );
+
+void rgba2rgba_replicate( rgba_t *dest, const rgba_t *src, int nelem );
 
 
 void bitmap2bitmap(
-		struct rgba_t *dest, int destWidth, int destHeight, int destX, int destY,
-		const struct rgba_t *src, int srcWidth, int srcHeight, int srcX, int srcY,
+		rgba_t *dest, int destWidth, int destHeight, int destX, int destY,
+		const rgba_t *src, int srcWidth, int srcHeight, int srcX, int srcY,
 		int moveWidth, int moveHeight
 );
 
+
+
+
 // Default mouse implementation to be used by video drivers if no
 // hardware impl exists
-void drv_video_set_mouse_cursor_deflt(struct drv_video_bitmap_t *nc);
+void drv_video_set_mouse_cursor_deflt(drv_video_bitmap_t *nc);
 void drv_video_draw_mouse_deflt(void);
 void drv_video_mouse_off_deflt(void);
 void drv_video_mouse_on_deflt(void);
 
 
 
-
+void drv_video_window_preblit( drv_video_window_t *w );
 
 
 
 //void drv_video_bitblt(const char *from, int xpos, int ypos, int xsize, int ysize);
 #define drv_video_update() video_drv->update()
 #define drv_video_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
-#define drv_video_bitblt(from, xpos, ypos, xsize,ysize)  ( video_drv->mouse_disable(),video_drv->bitblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
-#define drv_video_winblt(from, xpos, ypos)               ( video_drv->mouse_disable(),video_drv->winblt(from, xpos, ypos), video_drv->mouse_enable() )
+#define drv_video_bitblt(from, xpos, ypos, xsize,ysize)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
+#define drv_video_winblt(from, xpos, ypos)               ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, xpos, ypos), video_drv->mouse_enable() )
 
 // These are special for mouse pointer code - they're not try to disable mouse
 #define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize)
@@ -234,6 +261,35 @@ void drv_video_mouse_on_deflt(void);
 #define drv_video_draw_mouse()            	video_drv->redraw_mouse_cursor()
 #define drv_video_mouse_off()             	video_drv->mouse_disable()
 #define drv_video_mouse_on()              	video_drv->mouse_enable()
+
+
+
+
+
+
+/**
+ *
+ * Replicates src to dest. src has one horiz. line of srcSize pixels.
+ * nSteps is number of replication steps vertically.
+ *
+**/
+
+void replicate2window_ver( drv_video_window_t *dest, int destX, int destY,
+                       int nSteps, const rgba_t *src, int srcSize );
+
+
+/**
+ *
+ * Replicates src to dest. src has one vert. line of srcSize pixels.
+ * nSteps is number of times to draw src horizontally.
+ *
+**/
+
+void replicate2window_hor( drv_video_window_t *dest, int destX, int destY,
+                       int nSteps, const rgba_t *src, int srcSize );
+
+
+void window_basic_border( drv_video_window_t *dest, const rgba_t *src, int srcSize );
 
 
 
