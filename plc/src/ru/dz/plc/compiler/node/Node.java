@@ -215,10 +215,16 @@ abstract class SwitchLabelNode extends Node {
 
 	public void preprocess_me( ParseState s ) throws PlcException	{	}
 
+	/* Wrong: parent automatically calcs our _l, which is not needed here, see SwitchNode
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		c.markLabel(my_label);
-	}
+	}*/
 
+	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
+		c.markLabel(my_label);
+		c.emitIsDrop(); // We have a copy of switch expression os stack - drop it
+	}
+	
 };
 
 
