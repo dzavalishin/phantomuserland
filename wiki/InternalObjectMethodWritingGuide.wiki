@@ -6,7 +6,9 @@ Syscall is a method of internal class. It is called as usual method (at least al
 
 Syscall is supposed to return one object or return nothing. Syscall can throw an exception.
 
-Syscall is NOT supposed to keep or pass further its object arguments without copying them by value or incrementing their reference count.
+Syscall is supposed to decrement refcount for its object arguments or save/pass them along.
+
+Q: what about 'this'?
 
 Call parameters: 'this' object, current thread object da pointer.
 
