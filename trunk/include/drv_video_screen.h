@@ -77,6 +77,7 @@ typedef struct rect
 } rect_t;
 
 
+#define WIN_DECORATED           0x00000001
 
 typedef struct drv_video_window
 {
@@ -85,7 +86,12 @@ typedef struct drv_video_window
 
     int                 x, y; // On screen
 
+    int                 generation; // used to redraw self and borders on global events
+    int                 flags;
+
     int                 li, ti, ri, bi; // insets
+
+    rgba_t       	bg; // background color
 
     // bitmap itself
     rgba_t       	pixel[];
@@ -117,8 +123,14 @@ extern struct drv_video_font_t         drv_video_8x16scr_font;
 static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_window_t); }
 static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
 
+void drv_video_window_update_generation(void);
 
-drv_video_window_t *drv_video_window_create(int xsize, int ysize);
+
+drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg );
+// for statically allocated ones
+void drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg );
+void drv_video_window_free(drv_video_window_t *w);
+
 
 void    drv_video_window_clear( drv_video_window_t *win );
 void    drv_video_window_fill( drv_video_window_t *win, rgba_t color );
@@ -250,7 +262,7 @@ void drv_video_window_preblit( drv_video_window_t *w );
 #define drv_video_update() video_drv->update()
 #define drv_video_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
 #define drv_video_bitblt(from, xpos, ypos, xsize,ysize)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
-#define drv_video_winblt(from, xpos, ypos)               ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, xpos, ypos), video_drv->mouse_enable() )
+#define drv_video_winblt(from)                           ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y), video_drv->mouse_enable() )
 
 // These are special for mouse pointer code - they're not try to disable mouse
 #define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize)
