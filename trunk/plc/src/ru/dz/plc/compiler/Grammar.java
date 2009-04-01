@@ -45,6 +45,7 @@ import ru.dz.plc.compiler.node.SwitchDefaultNode;
 import ru.dz.plc.compiler.node.SwitchNode;
 import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.compiler.node.ThrowNode;
+import ru.dz.plc.compiler.node.VoidNode;
 import ru.dz.plc.compiler.trinode.DoWhileNode;
 import ru.dz.plc.compiler.trinode.IfNode;
 import ru.dz.plc.compiler.trinode.OpMethodCallNode;
@@ -659,7 +660,8 @@ extends GrammarHelper {
 				syntax_error("syntax error in Method body");
 				l.get(); // eat some bad stuff...
 			}
-			return expr;
+			
+			return new VoidNode( expr );
 		}
 	}
 

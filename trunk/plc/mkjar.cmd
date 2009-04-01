@@ -1,2 +1,2 @@
 cd bin
-jar cvfe ../plc.jar ru.dz.plc.PlcMain .
+jar cvfe ../../build/jar/plc.jar ru.dz.plc.PlcMain .

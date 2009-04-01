@@ -84,7 +84,7 @@ public class SwitchNode extends Node {
 			c.emitISubLU();
 			c.emitJz(case_node.get_label());
 		}
-		c.emitIsDrop();
+		//c.emitIsDrop(); - will be dropped by SwitchDefaultNode code
 		if(my_default != null) c.emitJmp(my_default.get_label());
 		else c.emitJmp(s.break_label);
 	}
