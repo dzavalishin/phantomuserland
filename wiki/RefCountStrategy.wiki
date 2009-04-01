@@ -1,0 +1,12 @@
+#summary Reference count implementation details.
+
+= Rule =
+
+Reference count is incremented on allocation, object field read and dup. Reference count is decremented on drop, object field overwrite and other object loss.
+
+
+= Details =
+
+See:
+  * ref_inc_o, ref_dec_o
+  * ref_inc_p, ref_dec_p
