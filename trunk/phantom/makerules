@@ -1,0 +1,19 @@
+default: all
+
+INCDIRS += $(realpath $(PHANTOM_HOME))/include
+
+CFLAGS 	+= -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc
+
+
+%.o: %.c
+	$(CC) -c -o $@ $(CFLAGS) $<
+
+.SUFFIXES:
+
+
+
+clean:
+	rm -rf *.[doa] *.bak depend 
+
+-include *.d
+
