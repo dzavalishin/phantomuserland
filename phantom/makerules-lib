@@ -1,0 +1,19 @@
+
+all: $(TARGET)
+
+prepare::
+
+CLEAN_FILES += $(TARGET)
+
+
+include $(BUILD_ROOT)/makerules
+
+
+$(TARGET): $(OBJFILES)
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+
+
+
+
