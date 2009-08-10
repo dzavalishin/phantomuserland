@@ -2,11 +2,19 @@ default: all
 
 INCDIRS += $(realpath $(PHANTOM_HOME))/include
 
-CFLAGS 	+= -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc
+PHANTOM_CFLAGS += -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc
 
+vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)
+
+
+FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
+CFILES := $(filter %.c,$(FILES))
+OBJFILES += $(patsubst %.c,%.o,$(notdir $(CFILES)))
+	
 
 %.o: %.c
-	$(CC) -c -o $@ $(CFLAGS) $<
+	$(CC) -c -o $@ $(PHANTOM_CFLAGS) $<
 
 .SUFFIXES:
 
