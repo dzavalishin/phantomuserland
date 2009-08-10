@@ -16,7 +16,7 @@ package .ru.dz.phantom.system;
 // 8-th method of it will be called and some special
 // boot object will be passed in.
 
-// It is worth top mention that this code runs just ONCE in the
+// It is worth to mention that this code runs just ONCE in the
 // any Phantom instance's LIFE. At the very first OS instance start.
 // At the next start OS continues work from the point it was stopped at.
 

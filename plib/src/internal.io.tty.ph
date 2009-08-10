@@ -15,7 +15,7 @@ package .internal.io;
 /**
  *
  * This class has internal implementation (as everything in
- * .internal package). It means that VM will bever load its
+ * .internal package). It means that VM will never load its
  * bytecode, and internal version will be used instead. This
  * class definition must be synchronized with VM implementation.
  *
@@ -23,8 +23,8 @@ package .internal.io;
 
 /**
  *
- * TTY - temporary screen/keyb io. to be redone.
- * It is not just a tty, as you can blit a bitmap to it.
+ * TTY - temporary screen/keyb io. To be redone.
+ * It is not just a tty, as you can blit a bitmap to it. See bitmap class.
  *
  * TODO: getwc blocks in kernel, preventing it from snaps!
  *

@@ -37,7 +37,21 @@ class bootstarap
     **/
     .internal."class" loadClass( var name : .internal.string ) {8] {}
 
+    /**
+     *
+     * Prints to OS console. Boot process debug/info/error output only.
+     *
+    **/
+
     void consolePrint( var s : .internal.string ) [16] {}
+
+    /**
+     *
+     * Set global OS class loader. Now this loader is called on EVERY class
+     * access by name (it means any new() operator with class name, for example),
+     * so it must be fast. Later kernel will have fast classname-impl cache.
+     *
+    **/
 
     void setClassLoader( var cl : .internal.object ) [17] {}
 
@@ -51,6 +65,12 @@ class bootstarap
      *
     **/
     void startThread( var o : .internal.object ) [18] {}
+
+    /**
+     *
+     * Creates object of .internal.binary type. Hack.
+     *
+    **/
 
     .internal.binary createBinary( var sizeBytes : int ) [19] {}
 
