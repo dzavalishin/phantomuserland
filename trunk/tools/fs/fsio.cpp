@@ -8,9 +8,9 @@
  *
 **/
 
+
 #include "fsio.h"
 
-#include <string.h>
 
 void fsio::open( const char *fname )
 {

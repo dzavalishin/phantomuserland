@@ -8,6 +8,9 @@
  *
 **/
 
+#define _TIME_T_DECLARED
+
+
 #include <string.h>
 #include <stdio.h>
 

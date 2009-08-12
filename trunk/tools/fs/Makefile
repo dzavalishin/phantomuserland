@@ -5,8 +5,11 @@ DEST=../../build/bin
 
 PHINC=$(realpath $(PHANTOM_HOME))/include
 
-CFLAGS += -I$(PHINC)
-CPPFLAGS += -I$(PHINC)
+#CFLAGS += -I. -I- -I$(PHINC)
+#CPPFLAGS += -I. -I- -I$(PHINC)
+
+CFLAGS += -idirafter $(PHINC)
+CPPFLAGS += -idirafter $(PHINC)
 
 
 clean:

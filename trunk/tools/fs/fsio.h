@@ -8,9 +8,16 @@
  *
 **/
 
+#include <stdint.h>
+
+// or else it conflicts with compiler's types.h
+#define _TIME_T_DECLARED
+
 #include <stdio.h>
 #include <string.h>
+
 #include <phantom_disk.h>
+
 
 
 class fsio
