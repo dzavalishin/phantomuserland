@@ -60,10 +60,13 @@ static hal_mutex_t  alloc_mutex;
 // allocator waits for GC to give him a chance
 static volatile int     alloc_request_gc_pause = 0;
 
-
+// Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena
 static void * pvm_object_space_start;
 static void * pvm_object_space_end;
+
+// Last position where allocator finished looking for objects.
 static void * pvm_object_space_alloc_current_position;
+
 
 struct pvm_object_storage *get_root_object_storage() { return pvm_object_space_start; }
 
