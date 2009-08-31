@@ -1022,7 +1022,8 @@ static int si_array_11_set(struct pvm_object me, struct data_area_4_thread *tc )
 
     pvm_set_array_ofield( me.data, index, value );
 
-    // pvm_set_array_ofield increments refcount and we return object back.
+    ref_inc_o(value);
+    // we increment refcount and return object back.
     // it will possibly be dropped and refcount will decrement again then.
     SYSCALL_RETURN(value);
 }
