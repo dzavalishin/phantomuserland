@@ -1241,11 +1241,13 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
 
 static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
 {
+    if ( o == 0 )
+       return;
+
     //struct pvm_object_storage *curr = arg;
 
     // sanity check
-    //Crash here!!!
-    assert( o != 0 );
+    //assert( o != 0 );
 
     if( ((void*)o) < pvm_object_space_start || ((void*)o) >= pvm_object_space_end )
         panic("add from internal - out from object space");
