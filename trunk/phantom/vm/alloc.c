@@ -323,7 +323,7 @@ panic("mem finished !!!");
 #else
     struct pvm_object_storage *
         data = (struct pvm_object_storage *)  malloc(size);
-    pvm_init_object_header(&(data->_ah), size);
+        pvm_init_object_header(data, size);
 #endif
 
     //if( data == 0 ) throw except( name, "out of memory" );
@@ -1262,7 +1262,7 @@ static void refzero_mark_or_add( pvm_object_storage_t * o )
 {
     ref_dec_p(o);
 
-    if(o->_ah.refCount == 0)
+    if(o->_ah.refCount == 0 && (o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO))
     {
         // FIXME must not be so in final OS, stack overflow possiblity!
         // TODO use some local pool too, instead of recursion
