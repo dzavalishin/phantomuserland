@@ -1264,7 +1264,7 @@ static void refzero_process_children( pvm_object_storage_t *o )
 {
     assert((o->_ah.alloc_flags) == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO);
     do_refzero_process_children( o );
-    o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
+    o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 }
 
 static void do_refzero_process_children( pvm_object_storage_t *o )
