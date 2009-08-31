@@ -1298,12 +1298,14 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
 static inline void ref_dec_p(pvm_object_storage_t *p)
 {
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    // (NB!) Two asserts below are currently hitted!!!
+    // (BUG!) Two asserts below are currently hitted!!!
     //assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     //assert( p->_ah.refCount > 0 );
+    if(p->_ah.refCount <= 0)
+       DEBUG_PRINT("Y");
     assert( p->_ah.exact_size > 0 );
 
-    if(p->_ah.refCount < UINT_MAX)
+    if(p->_ah.refCount < INT_MAX)
     {
         if( 0 == ( --(p->_ah.refCount) ) )
             ref_dec_proccess_zero(p);
@@ -1315,7 +1317,7 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
     assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount != 0 );
 
-    if( p->_ah.refCount < UINT_MAX )
+    if( p->_ah.refCount < INT_MAX )
         (p->_ah.refCount)++;
 }
 
@@ -1330,7 +1332,7 @@ void ref_saturate_p(pvm_object_storage_t *p)
     assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount != 0 );
 
-    p->_ah.refCount = UINT_MAX;
+    p->_ah.refCount = INT_MAX;
 }
 
 void ref_saturate_o(pvm_object_t o)
