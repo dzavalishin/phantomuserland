@@ -25,6 +25,9 @@
 extern const int sys_nerr;
 extern const char *const sys_errlist[];
 
+#if 1
+#include <string.h>
+#else
 int strerror_r(int errnum, char *strerrbuf, size_t buflen);
 
 size_t strlcat(char *dst, const char *src, size_t  siz);
@@ -59,11 +62,15 @@ long strtol(const char *nptr, char **endptr, int base);
 quad_t strtoq(const char *nptr, char **endptr, int base);
 u_quad_t strtouq(const char *nptr, char **endptr, int base);
 
+#endif
 
 
+#if 1
+#include <stdlib.h>
+#else
 void _exit(int code);
 void exit(int code);
-
+#endif
 
 int kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
 int vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap);
