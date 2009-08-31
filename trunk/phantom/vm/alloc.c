@@ -36,34 +36,11 @@ static hal_spinlock_t dynroots_lock;
 static hal_spinlock_t refzero_spinlock;
 static void refzero_process_children( pvm_object_storage_t *o );
 
-
-
-// Stick to the tradition
-#define PVM_END_MEM_MARKER 0xDEADBEEF
-
-// TODO: mark end of memory with some cookie and check for it
-// to be there in memcheck and allocator
-
-// BUG: Need global allocator and gc semaphore
-
-static void pvm_init_object_header(struct object_PVM_ALLOC_Header *h, unsigned int size)
-{
-    h->object_start_marker = PVM_OBJECT_START_MARKER;
-    // dont' touch alloc_flags
-    h->gc_flags = 0;
-    // dont' touch exact_size
-    h->refCount = 1;
-
-    h->exact_size = size;
-}
-
-
-
-
 // taken if allocation is not possible now - by allocator and critical part of GC
 static hal_mutex_t  alloc_mutex;
 // allocator waits for GC to give him a chance
 static volatile int     alloc_request_gc_pause = 0;
+
 
 // Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena
 static void * pvm_object_space_start;
@@ -73,13 +50,14 @@ static void * pvm_object_space_end;
 static void * pvm_object_space_alloc_current_position;
 
 
-struct pvm_object_storage *get_root_object_storage() { return pvm_object_space_start; }
+pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
 
-
-
-
+// Initialize the heap
 void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 {
+    assert(_pvm_object_space_start != 0);
+    assert(size > 0);
+
     hal_spin_init( &refzero_spinlock );
     hal_spin_init( &dynroots_lock );
 
@@ -90,7 +68,6 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 
     if( hal_mutex_init( &alloc_mutex ) )
         panic("Can't init allocator mutex");
-
 }
 
 
@@ -108,74 +85,105 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
 
 
-pvm_object_storage_t *pvm_alloc_wrap_to_next_object(pvm_object_storage_t *op)
+static void pvm_init_object_header(pvm_object_storage_t *op, unsigned int size)
+{
+    op->_ah.object_start_marker = PVM_OBJECT_START_MARKER;
+    op->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
+    op->_ah.gc_flags = 0;
+    op->_ah.refCount = 1;
+    op->_ah.exact_size = size;
+}
+
+static void pvm_init_free_object_header(pvm_object_storage_t *op, unsigned int size)
+{
+    op->_ah.object_start_marker = PVM_OBJECT_START_MARKER;
+    op->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
+    op->_ah.gc_flags = 0;
+    op->_ah.refCount = 0;
+    op->_ah.exact_size = size;
+}
+
+
+void pvm_alloc_clear_mem(void)
+{
+    assert(pvm_object_space_start != 0);
+    pvm_object_storage_t *op = (pvm_object_storage_t *)pvm_object_space_start;
+
+    pvm_init_free_object_header(op, pvm_object_space_end - pvm_object_space_start);
+}
+
+
+#define PVM_MIN_FRAGMENT_SIZE 32
+
+// returns allocated object
+static pvm_object_storage_t *pvm_alloc_eat_some(pvm_object_storage_t *op, unsigned int size)
+{
+    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
+    assert(op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE);
+
+    unsigned int surplus = op->_ah.exact_size - size;
+    assert(surplus >= 0);
+    if (surplus < PVM_MIN_FRAGMENT_SIZE) {
+        // don't break in too small pieces
+        pvm_init_object_header(op, op->_ah.exact_size);  //update alloc_flags
+        return op;
+    }
+
+    pvm_init_object_header(op, size);
+
+    void *o = (void*)op + size;
+    pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
+    pvm_init_free_object_header(opppa, surplus);
+    return op;
+}
+
+// try to collapse current with next objects until they are free
+static void pvm_alloc_collapse_with_next_free(pvm_object_storage_t *op)
+{
+    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
+    assert(op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE);
+
+    unsigned int size = op->_ah.exact_size;
+    do {
+        void *o = (void *)op + size;
+        pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
+        if (o < pvm_object_space_end  &&  opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE) {
+            size += opppa->_ah.exact_size;
+            pvm_init_free_object_header(op, size);  //update exact_size
+            DEBUG_PRINT("^");
+        } else {
+            break;
+        }
+    } while(0);
+}
+
+
+// walk through
+static pvm_object_storage_t *pvm_alloc_wrap_to_next_object(pvm_object_storage_t *op)
 {
     assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
     void *o = (void *)op;
     o += op->_ah.exact_size;
     if( o >= pvm_object_space_end )
     {
+        assert(o <= pvm_object_space_end);
         o = pvm_object_space_start;
-        printf("alloc wrap??");
+        DEBUG_PRINT("\n(alloc wrap)\n");
     }
-    return (struct pvm_object_storage *)o;
+    return (pvm_object_storage_t *)o;
 }
 
 
-pvm_object_storage_t *pvm_alloc_following_object(pvm_object_storage_t *op)
-{
-    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
-    void *o = (void *)op;
-    o += op->_ah.exact_size;
-    if( o >= pvm_object_space_end )
-        return 0;
 
-    if( *((int *)o) != PVM_OBJECT_START_MARKER)
-        return 0;
-
-    return (struct pvm_object_storage *)o;
-}
-
-
-#if 1
-static inline int pvm_alloc_is_object(struct pvm_object_storage *o)
+static inline int pvm_alloc_is_object(pvm_object_storage_t *o)
 {
     return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER;
 }
-#else
-#define pvm_alloc_is_object(o) ((o)->_ah.object_start_marker == PVM_OBJECT_START_MARKER)
-#endif
 
-
-#if 1
-static inline int pvm_alloc_is_free_object(struct pvm_object_storage *o)
+static inline int pvm_alloc_is_free_object(pvm_object_storage_t *o)
 {
-    return
-        (o->_ah.object_start_marker == PVM_OBJECT_START_MARKER)
-        &&
-        (!(o->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED))
-        ;
-}
-#else
-#define pvm_alloc_is_free_object(o) (\
-    ((o)->_ah.object_start_marker == PVM_OBJECT_START_MARKER) \
-    && \
-    (!((o)->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED)))
-#endif
-
-#define check_out_of_mem() do {                                         \
-	if(curr == pvm_object_space_alloc_current_position)          \
-        { \
-            return 0;\
-            pvm_exec_throw( "out of memory" );                          \
-    	    }                                                           \
-    	} while(0);
-
-
-void pvm_alloc_clear_mem(void)
-{
-    assert(pvm_object_space_start != 0);
-    *((int *)pvm_object_space_start) = PVM_END_MEM_MARKER;
+    return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER
+                 &&  o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE ;
 }
 
 bool pvm_object_is_allocated(pvm_object_storage_t *o)
@@ -197,12 +205,9 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 }
 
 
-
 // Find a piece of mem of given or bigger size.
 static struct pvm_object_storage *pvm_find(unsigned int size)
 {
-    //size += 1000; // alloc debug, TEMP, BUG
-
     struct pvm_object_storage *result = 0;
 
     struct pvm_object_storage *curr = pvm_object_space_alloc_current_position;
@@ -211,127 +216,53 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
 
     while(result == 0)
     {
-        // BUG must be >= ?
-        if( wrapped && ((void *)curr > pvm_object_space_alloc_current_position) )
+        //if ((void *)curr + 500 > pvm_object_space_end)
+        //    DEBUG_PRINT("<500");
+
+
+        if( wrapped && ((void *)curr >= pvm_object_space_alloc_current_position) ) {
+            DEBUG_PRINT("\n no memory! \n");
             return 0;
+        }
 
         if( (void *)curr < pvm_object_space_alloc_current_position )
             wrapped = 1;
 
-        if(!pvm_alloc_is_object(curr))
+        if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED == curr->_ah.alloc_flags )
         {
-            //assert( *((int *)curr) == PVM_END_MEM_MARKER );
-            if( *((int *)curr) != PVM_END_MEM_MARKER )
-            {
-                panic("No obj marker, no end of mem marker at 0x%X (arena %x-%x)", curr, pvm_object_space_start, pvm_object_space_end );
-            }
-
-            // Not an object, we are at the end of space and we need to create a new header here.
-            if( size < (pvm_object_space_end - ((void *)curr) ) )
-            {
-                // Have free zero filled place - eat some
-
-                // need it here to make sure pvm_alloc_next will work below.
-                pvm_init_object_header(&(curr->_ah), size);
-
-                // If allocation arena is not zero filled, make sure
-                // it contains no object marker accidentally
-                pvm_object_storage_t *nx = ((void *)curr)+size;
-                if(
-                   ( ((void *)nx)+sizeof(int) ) <= pvm_object_space_end
-                  ) // Depends on the fact that object_start_marker is the first field!
-                {
-                    //nx->_ah.object_start_marker = 0;
-                    *((int *)nx) = PVM_END_MEM_MARKER;
-                }
-
-                result = curr;
-                break; // Ok
-            }
-
-            // Final non-inited piece is too small - search again from the start of mem pool
-            curr = pvm_object_space_start;
+            DEBUG_PRINT("a");
+            // Is allocated? Go to the next one.
+            curr = pvm_alloc_wrap_to_next_object(curr);
             continue;
-
         }
 
-        // Is an object.
-
-
-        if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO & (curr->_ah.alloc_flags) )
+        if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO == curr->_ah.alloc_flags )
         {
+            DEBUG_PRINT("(c)");
             hal_spin_lock( &refzero_spinlock );
             refzero_process_children( curr );
             hal_spin_unlock( &refzero_spinlock );
             // Supposed to be free here
         }
 
-        if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED & (curr->_ah.alloc_flags) )
-        {
-            // Is allocated? Go to the next one.
+        // now free
+        assert(  PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE == curr->_ah.alloc_flags );
+        pvm_alloc_collapse_with_next_free(curr);  // just in case
+        if (curr->_ah.exact_size < size) {
+            DEBUG_PRINT("|");
             curr = pvm_alloc_wrap_to_next_object(curr);
             continue;
         }
 
-// FIXME - why off? Suspected to be wrong?
-#if 0
-        // Current object is free
-        do {
-            // See if the next is free too, combine spaces if so
-
-            struct pvm_object_storage *next_obj = pvm_alloc_following_object(curr);
-            if(next_obj != 0 && pvm_alloc_is_free_object(next_obj))
-            {
-                curr->_ah.exact_size += next_obj->_ah.exact_size;
-                next_obj->_ah.object_start_marker = 0; // so it will not be found by memscan in gc
-                continue; // Retry - maybe there are some more free objects follow
-            }
-        } while(0);
-#endif
-        // BUG: if last object (emptiness follows), must combine it with that emptiness
-
-        // We are at the free object - check if size is ok
-
-        if( curr->_ah.exact_size < size )
-        {
-            // Too small? Go to the next
-            curr = pvm_alloc_wrap_to_next_object(curr);
-            continue;
-        }
-//printf("allc free ");
-printf("\r(^) ");
-
-        // Ok, now cut off some piece
-        unsigned int toomuch = curr->_ah.exact_size - size;
-#if 1
-// object division code is bad
-        if( toomuch < 32 ) // don't break in too small pieces // BUG: constant - define
-#endif
-        {
-            result = curr;
-            break; // Take it as is
-        }
-
-        // Break down in two
-        curr->_ah.exact_size = size;
-        {
-            struct pvm_object_storage *next_obj = pvm_alloc_following_object(curr);
-            if(next_obj == 0)
-            {
-                result = curr;
-                break;
-            }
-            pvm_init_object_header(&(next_obj->_ah), toomuch);
-        }
-
-        result = curr;
-        break;
-
+        result = pvm_alloc_eat_some(curr, size);
+        //break;
     }
 
     assert(result != 0);
-    //pvm_object_space_alloc_current_position = pvm_alloc_wrap_to_next_object(result);
-    pvm_object_space_alloc_current_position = result;
+    DEBUG_PRINT("+");
+
+    pvm_object_space_alloc_current_position = pvm_alloc_wrap_to_next_object(result);
+    //pvm_object_space_alloc_current_position = result;
     return result;
 }
 
@@ -384,9 +315,11 @@ printf("done gc\n");
         hal_mutex_lock( &alloc_mutex );
 
 //panic("mem dump after gc");
-
-#endif
+#else
+panic("mem finished !!!");
+#endif //GC_ENABLED
     } while(1);
+
 #else
     struct pvm_object_storage *
         data = (struct pvm_object_storage *)  malloc(size);
@@ -394,9 +327,6 @@ printf("done gc\n");
 #endif
 
     //if( data == 0 ) throw except( name, "out of memory" );
-    data->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
-    data->_ah.gc_flags = 0;
-    data->_ah.refCount = 1;
     data->_da_size = data_area_size;
 
     // TODO remove it here - memory must be cleaned some other, more effective way
@@ -471,16 +401,13 @@ int pvm_memcheck()
     {
         if(!pvm_alloc_is_object(curr))
         {
-            int marker = (*((int *)curr)) == PVM_END_MEM_MARKER;
-            // Not an object, we are at the end of space
-            printf("Memcheck: end of objects at 0x%X (%d bytes used), marker is %s\n", curr, ((void *)curr)-((void *)pvm_object_space_start), marker ? "GOOD" : "BAD" );
             printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
             return 0;
         }
 
         // Is an object.
 
-        if( curr->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED )
+        if( curr->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED )
             used += curr->_ah.exact_size;
         else
             free += curr->_ah.exact_size;
@@ -700,12 +627,7 @@ static void gc_find_free(void)
 
         if(!pvm_alloc_is_object(curr))
         {
-            assert( (*((int *)curr)) == PVM_END_MEM_MARKER );
-            //int marker = (*((int *)curr)) == PVM_END_MEM_MARKER;
-            //printf("GC: end of objects at 0x%X (%d bytes used), marker is %s\n", curr, ((void *)curr)-((void *)pvm_object_space_start), marker ? "GOOD" : "BAD" );
-
-            /*if(!marker)
-             panic("GC found memory inconsistency");*/
+            /* panic("GC found memory inconsistency");*/
             // Not a panic since allocator may coalesce current object with other
             // till we slept - FIXME
 
@@ -721,7 +643,7 @@ static void gc_find_free(void)
            (GC_GENERATION_MODULUS(gen+2) == current_gc_generation)
           )
         {
-            if(curr->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED)
+            if(curr->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED)
             {
                 if(gc_is_marked(curr) )
                     panic("freeing marked!");
@@ -736,13 +658,11 @@ static void gc_find_free(void)
             }
 
             // Free it
-            curr->_ah.alloc_flags &= (~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED);
-            // And make sure it has no refcount follower flag and won't be processed by refcount postprocessor
-            curr->_ah.alloc_flags &= (~PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO);
+            curr->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
         }
 
 
-        if(! (curr->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) )
+        if(! (curr->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) )
         {
             free_mem_size += curr->_ah.exact_size;
             if( curr->_ah.exact_size > free_max_piece)
@@ -754,7 +674,7 @@ static void gc_find_free(void)
         curr = pvm_gc_next_object(curr);
     }
 
-    if(curr == pvm_object_space_end || ((*((int *)curr)) == PVM_END_MEM_MARKER) )
+    if(curr == pvm_object_space_end)
     {
         printf("\rGC OK, collected %6d objects, %9d bytes, %9dK free, %8dK max piece\n", gc_objects_collected,  gc_bytes_collected, free_mem_size/1024, free_max_piece/1024 );
         //printf("GC: reached exact arena end at 0x%X, %d bytes total, %d bytes freed\n", curr, ((void *)curr)-((void *)pvm_object_space_start), gc_bytes_collected );
@@ -971,9 +891,6 @@ void gc_bump_generations(void)
 
     while(((void *)curr) < pvm_object_space_end)
     {
-        if( (*((int *)curr)) == PVM_END_MEM_MARKER )
-            break;
-
         // TODO just move main loop CURR lower, then remove
         // from area and and mark everything in area that is
         // above the new CURR. Don't panic.
@@ -1084,7 +1001,7 @@ static void gc_bump_scanmem(
         if( os->_ah.object_start_marker != PVM_OBJECT_START_MARKER )
             continue;
 
-        if( ! (os->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED ) )
+        if( ! (os->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED ) )
             continue;
 
         if( os->_ah.exact_size < sizeof(pvm_object_storage_t) )
@@ -1327,6 +1244,7 @@ static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
     //struct pvm_object_storage *curr = arg;
 
     // sanity check
+    //Crash here!!!
     assert( o != 0 );
 
     if( ((void*)o) < pvm_object_space_start || ((void*)o) >= pvm_object_space_end )
