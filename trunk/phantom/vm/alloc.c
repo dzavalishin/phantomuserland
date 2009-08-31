@@ -1301,8 +1301,11 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
     // (BUG!) Two asserts below are currently hitted!!!
     //assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     //assert( p->_ah.refCount > 0 );
-    if(p->_ah.refCount <= 0)
-       DEBUG_PRINT("Y");
+    if(p->_ah.refCount <= 0) {
+       //DEBUG_PRINT("Y");
+       printf("%d", -  p->_ah.refCount);
+   }
+
     assert( p->_ah.exact_size > 0 );
 
     if(p->_ah.refCount < INT_MAX)
