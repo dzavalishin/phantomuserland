@@ -16,24 +16,12 @@
 #include <phantom_libc.h>
 #include <limits.h>
 
-// this structure must be first in any object
+
+// This structure must be first in any object
 // for garbage collector to work ok
 
 #define PVM_OBJECT_START_MARKER 0x7FAA7F55
 
-// This is an allocated object
-#define PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED 0x01
-// This object has zero reference count, but objects it references are not yet
-// processed. All the children refcounts must be decremented and then this object
-// can be freed.
-#define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
-// Refcount came to the situation where it references some object with refcount > 1, so that
-// this branch won't be collected with refcount algorithm. It's a subject to check for loop.
-#define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFNONZERO 0x04
-
-
-
-//#undef REFC_DEALLOC
 
 struct object_PVM_ALLOC_Header
 {
@@ -65,126 +53,6 @@ struct pvm_object_storage
 };
 
 typedef struct pvm_object_storage pvm_object_storage_t;
-
-
-
-
-
-
-
-
-
-#define REFCOUNT 1
-//#define REFC_IN_SYS 1
-
-
-#if 1
-//#  define REFC_DEALLOC PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED
-#define DO_REFC_DEALLOC(op) (op->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO)
-#  define PRFKL
-//#  define PRFKL printf("(X) ")
-#else
-//#  define REFC_DEALLOC 0
-#define DO_REFC_DEALLOC(op)
-#  define PRFKL
-#endif
-
-// TODO BUG when delete object - run and dec refs for all fields?
-
-// Make sure this object won't be deleted with refcount dec
-// used on sys global objects
-static inline void ref_saturate_o(pvm_object_t o)
-{
-#if REFCOUNT
-    if(!o.data) return;
-    o.data->_ah.refCount = UINT_MAX;
-#endif
-}
-
-static inline void ref_saturate_p(pvm_object_storage_t *p)
-{
-    if(!p) return;
-    p->_ah.refCount = UINT_MAX;
-}
-
-
-#if 1
-
-static inline void ref_inc_o(pvm_object_t o)
-{
-#if REFCOUNT
-    if( o.data->_ah.refCount < UINT_MAX )
-        (o.data->_ah.refCount)++;
-#endif
-}
-
-static inline void ref_dec_o(pvm_object_t o)
-{
-#if REFCOUNT
-    if((o).data->_ah.refCount < UINT_MAX)
-    {
-        if( 0 == ( --((o).data->_ah.refCount) ) )
-        {
-            //((o).data->_ah.alloc_flags) &= ~REFC_DEALLOC;
-            DO_REFC_DEALLOC((o).data)
-            PRFKL;
-        }
-    }
-#endif
-}
-
-
-#else
-#define ref_inc_o(_o) \
-    do { \
-      pvm_object_t o = _o; \
-      if( (o).data->_ah.refCount < UINT_MAX) \
-        ++((o).data->_ah.refCount); \
-    } while(0);
-
-#define ref_dec_o(_o) \
-    do { \
-      pvm_object_t o = _o; \
-      if((o).data->_ah.refCount < UINT_MAX) \
-      { \
-        if( 0 == ( --((o).data->_ah.refCount) ) ) \
-        { \
-          /*((o).data->_ah.alloc_flags) &= ~REFC_DEALLOC;*/ DO_REFC_DEALLOC((o).data) PRFKL;\
-        } \
-      } \
-    } while(0)
-#endif
-
-#if REFCOUNT
-
-#define ref_inc_p(_o) \
-    do { \
-      pvm_object_storage_t *o = _o; \
-      if((o)->_ah.refCount < UINT_MAX) \
-        ++((o)->_ah.refCount); \
-    } while(0)
-
-#define ref_dec_p(_o) \
-    do { \
-      pvm_object_storage_t *o = _o; \
-      if((o)->_ah.refCount < UINT_MAX) \
-      { \
-        if( 0 == ( --((o)->_ah.refCount) ) ) \
-        { \
-          /*((o)->_ah.alloc_flags) &= ~REFC_DEALLOC;*/ DO_REFC_DEALLOC((o)); PRFKL;\
-        } \
-      } \
-    } while(0)
-
-#else
-#define ref_inc_p(_o)
-#define ref_dec_p(_o)
-#endif
-
-
-
-
-
 
 
 

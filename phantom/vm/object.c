@@ -27,9 +27,11 @@
 #if 1
 static inline void verify_p( pvm_object_storage_t *p )
 {
-	if( p && ! (p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED))
+
+	if( p && ! pvm_object_is_allocated(p))
 	{
 		dumpo(p);
+		//pvm_object_is_allocated_assert(p);
 		panic("freed object accessed");
 	}
 }
