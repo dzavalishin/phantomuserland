@@ -30,12 +30,13 @@
 
 #include <kernel/snap_sync.h>
 
-#define hal_printf printf
+//#define hal_printf printf
+
 
 
 #define DEB_CALLRET 0
 
-static int debug_print_instr = 0;
+static int debug_print_instr = 1;
 
 
 /**

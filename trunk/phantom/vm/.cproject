@@ -21,6 +21,9 @@
 <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.Cygwin_PE" id="cdt.managedbuild.target.gnu.platform.cygwin.base.1184001521" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.cygwin.base"/>
 <builder enableAutoBuild="true" id="cdt.managedbuild.target.gnu.builder.cygwin.base.748736208" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="-2" superClass="cdt.managedbuild.target.gnu.builder.cygwin.base"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.cygwin.base.669015958" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.cygwin.base">
+<option id="gnu.both.asm.option.include.paths.1303237257" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;../..\include&quot;"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.766031813" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.archiver.cygwin.base.1745667743" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.cygwin.base"/>
