@@ -20,7 +20,7 @@
 #include "vm/syscall.h"
 #include "vm/root.h"
 #include "vm/p2c.h"
-
+#include "vm/alloc.h"
 
 
 static int debug_print = 0;

@@ -56,7 +56,7 @@ void pvm_root_init(void)
 
     if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
     {
-        // Not an object in the beginning of the address pace?
+        // Not an object in the beginning of the address space?
         // We have a fresh OS instance then. Set it up from scratch.
 
         //root->_ah.object_start_marker = PVM_OBJECT_START_MARKER;
@@ -69,7 +69,7 @@ void pvm_root_init(void)
         return;
     }
 
-    assert(root->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED);
+    assert(pvm_object_is_allocated( root ));
 
     // internal classes
     int i;

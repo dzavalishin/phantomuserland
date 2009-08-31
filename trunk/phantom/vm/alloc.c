@@ -20,9 +20,14 @@
 
 #include "vm/alloc.h"
 #include "vm/internal.h"
-#include "vm/root.h"
-#include "vm/exec.h"
+//#include "vm/root.h"
+//#include "vm/exec.h"
 #include "vm/object_flags.h"
+
+
+
+//#define DEBUG_PRINT(a)
+#define DEBUG_PRINT(a) printf((a))
 
 
 static void gc_roots_to_area();
@@ -87,6 +92,20 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
         panic("Can't init allocator mutex");
 
 }
+
+
+// alloc_flags below are mutually exclusive!
+
+// Free'd object
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE 0x00
+
+// This is an allocated object
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED 0x01
+
+// This object has zero reference count, but objects it references are not yet
+// processed. All the children refcounts must be decremented and then this object
+// can be freed.
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
 
 
 pvm_object_storage_t *pvm_alloc_wrap_to_next_object(pvm_object_storage_t *op)
@@ -158,6 +177,25 @@ void pvm_alloc_clear_mem(void)
     assert(pvm_object_space_start != 0);
     *((int *)pvm_object_space_start) = PVM_END_MEM_MARKER;
 }
+
+bool pvm_object_is_allocated(pvm_object_storage_t *o)
+{
+    return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER
+            && o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED
+            //o->_ah.gc_flags == 0;
+            && o->_ah.refCount > 0
+            && o->_ah.exact_size > 0 ;
+}
+
+void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
+{
+    assert( o->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+    assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+        //o->_ah.gc_flags == 0;
+    assert( o->_ah.refCount > 0 );
+    assert( o->_ah.exact_size > 0 );
+}
+
 
 
 // Find a piece of mem of given or bigger size.
@@ -1212,9 +1250,9 @@ static void gc_roots_to_area()
 
 // -----------------------------------------------------------------------
 // Refcount processor.
-// Takes object which is found to be nonreferenced (has PVM_OBJECT_AH_ALLOCATOR_FLAG_REFNONZERO flag)
-// and processes all its children. Those with only one ref wil become marked with
-// PVM_OBJECT_AH_ALLOCATOR_FLAG_REFNONZERO flag too.
+// Takes object which is found to be nonreferenced (has PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO flag)
+// and processes all its children. Those with only one ref will become marked with
+// PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO flag too.
 // -----------------------------------------------------------------------
 
 static void refzero_mark_or_add( pvm_object_storage_t * o );
@@ -1224,11 +1262,9 @@ static void do_refzero_process_children( pvm_object_storage_t *o );
 
 static void refzero_process_children( pvm_object_storage_t *o )
 {
-    assert((o->_ah.alloc_flags) & PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO);
-    assert((o->_ah.alloc_flags) & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED);
+    assert((o->_ah.alloc_flags) == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO);
     do_refzero_process_children( o );
-    o->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
-    o->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
+    o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
 }
 
 static void do_refzero_process_children( pvm_object_storage_t *o )
@@ -1291,24 +1327,105 @@ static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
     //struct pvm_object_storage *curr = arg;
 
     // sanity check
+    assert( o != 0 );
 
     if( ((void*)o) < pvm_object_space_start || ((void*)o) >= pvm_object_space_end )
         panic("add from internal - out from object space");
 
 
+    DEBUG_PRINT("Ku");
     if( o != 0 )
         refzero_mark_or_add( o );
 }
 
+static void ref_dec_p(pvm_object_storage_t *p);
+
 static void refzero_mark_or_add( pvm_object_storage_t * o )
 {
     ref_dec_p(o);
+
     if(o->_ah.refCount == 0)
     {
         // FIXME must not be so in final OS, stack overflow possiblity!
         // TODO use some local pool too, instead of recursion
+        // or, alternatively, just free one generation and postpone others for the future
         refzero_process_children( o );
     }
+}
+
+
+/*-----------------------------------------------------------------------------------------*/
+
+// used by   ref_dec_p()
+static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
+{
+    assert(p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED);
+    assert(p->_ah.refCount == 0);
+
+    // free immediately if no children
+    if (p->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING
+                     | PHANTOM_OBJECT_STORAGE_FLAG_IS_INT
+                     | PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE
+                    )) {
+        p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
+        DEBUG_PRINT("-");
+    } else {
+        // postpone for delayed inspection (bug or feature?)
+        p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
+        DEBUG_PRINT("(X)");
+    }
+}
+
+
+static inline void ref_dec_p(pvm_object_storage_t *p)
+{
+    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+    // (NB!) Two asserts below are currently hitted!!!
+    //assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    //assert( p->_ah.refCount > 0 );
+    assert( p->_ah.exact_size > 0 );
+
+    if(p->_ah.refCount < UINT_MAX)
+    {
+        if( 0 == ( --(p->_ah.refCount) ) )
+            ref_dec_proccess_zero(p);
+    }
+}
+
+static inline void ref_inc_p(pvm_object_storage_t *p)
+{
+    assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.refCount != 0 );
+
+    if( p->_ah.refCount < UINT_MAX )
+        (p->_ah.refCount)++;
+}
+
+
+//external calls:
+
+// Make sure this object won't be deleted with refcount dec
+// used on sys global objects
+void ref_saturate_p(pvm_object_storage_t *p)
+{
+    if(!p) return;
+    assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.refCount != 0 );
+
+    p->_ah.refCount = UINT_MAX;
+}
+
+void ref_saturate_o(pvm_object_t o)
+{
+    ref_saturate_p(o.data);
+}
+void ref_dec_o(pvm_object_t o)
+{
+    ref_dec_p(o.data);
+}
+void ref_inc_o(pvm_object_t o)
+{
+    ref_inc_p(o.data);
 }
 
 

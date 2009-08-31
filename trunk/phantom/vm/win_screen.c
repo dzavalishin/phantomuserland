@@ -358,7 +358,7 @@ int pvm_win_init()
 {
     drv_video_win32.screen = 0; // Not ready yet
 
-    printf("Starting windows grahpics 'driver'\n" );
+    printf("Starting windows graphics 'driver'\n" );
 
 
     static unsigned long tid;

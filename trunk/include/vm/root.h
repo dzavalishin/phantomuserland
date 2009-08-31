@@ -17,12 +17,6 @@
 // TODO - to be able to grow root object store at address 0 just a pointer to it
 // (one-slot array?)
 
-struct pvm_object_storage *get_root_object_storage();
-
-void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size );
-int pvm_memcheck();
-
-
 void pvm_root_init(void);
 
 void phantom_setenv( const char *name, const char *value );

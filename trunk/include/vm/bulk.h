@@ -13,6 +13,7 @@
 #define BULK_H
 
 #include <phantom_types.h>
+#include "vm/object.h"
 
 
 typedef int (*pvm_bulk_read_t)(int count, void *data);

@@ -18,6 +18,7 @@
 #include "vm/root.h"
 #include "vm/exec.h"
 #include "vm/bulk.h"
+#include "vm/alloc.h"
 
 
 #include "vm/p2c.h"
@@ -846,9 +847,9 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
     cfda->this_object = object;
 
     struct pvm_object thread = pvm_create_thread_object( new_cf );
-    gc_root_add(thread);
+    gc_root_add(thread.data);
 // TODO
-gc_root_add(object); // ? why?
+gc_root_add(object.data); // ? why?
 
     phantom_activate_thread(thread);
     }
