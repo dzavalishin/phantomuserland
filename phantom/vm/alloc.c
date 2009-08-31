@@ -1276,7 +1276,7 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
     //struct pvm_object_storage *co = o->_class.data;
     gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( o->_class, class )->sys_table_id].iter;
 
-
+    // Iterate over reference-type fields of internal-class objects, calling refzero_add_from_internal for each such field.
     func( refzero_add_from_internal, o, 0 );
 
 
