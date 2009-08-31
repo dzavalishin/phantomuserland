@@ -24,8 +24,14 @@ typedef	__signed char		   int8_t;
 typedef	unsigned char		 u_int8_t;
 typedef	short			  int16_t;
 typedef	unsigned short		u_int16_t;
+
+#ifndef __INT32_DEFINED__
+#define __INT32_DEFINED__
 typedef	int			  int32_t;
+#endif
+
 typedef	unsigned int		u_int32_t;
+
 typedef	long long		  int64_t;
 typedef	unsigned long long	u_int64_t;
 
@@ -39,16 +45,14 @@ typedef unsigned short u_short;
 typedef unsigned int u_int;
 typedef unsigned long u_long;
 
-typedef u_int32_t register_t;
 
 typedef	u_int64_t	u_quad_t;	/* quads (deprecated) */
 typedef	int64_t		quad_t;
 
-typedef	int32_t		ptrdiff_t;
 
-
+#ifndef __cplusplus
 typedef u_int8_t        bool;
-
+#endif
 
 
 typedef u_int32_t 		disk_page_no_t;
@@ -66,7 +70,11 @@ typedef void *  		vmem_ptr_t;
 typedef int			size_t;
 #endif //_SIZE_T
 
+#ifndef _STDINT_H
 typedef	u_int32_t		uintptr_t;
+typedef	int32_t			ptrdiff_t;
+typedef u_int32_t 		register_t;
+#endif
 
 // time
 
