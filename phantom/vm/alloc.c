@@ -1297,8 +1297,18 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
 }
 
 
+void debug_catch_object(char *msg, pvm_object_storage_t *p )
+{
+    // Can be used to trace some specific object's access
+    //if( p != 0x7AA0B880 )
+        return;
+    printf("touch %s 0x%X, refcnt = %d ", msg, p, p->_ah.refCount );
+}
+
 static inline void ref_dec_p(pvm_object_storage_t *p)
 {
+    debug_catch_object("--", p);
+
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     // (BUG!) Two asserts below are currently hitted!!!
     //assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
@@ -1319,8 +1329,15 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
 
 static inline void ref_inc_p(pvm_object_storage_t *p)
 {
+    debug_catch_object("++", p);
+
     assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    assert( p->_ah.refCount != 0 );
+    //assert( p->_ah.refCount != 0 );
+
+    if( p->_ah.refCount <= 0 )
+    {
+        panic("p->_ah.refCount <= 0: 0x%X", p);
+    }
 
     if( p->_ah.refCount < INT_MAX )
         (p->_ah.refCount)++;
@@ -1333,6 +1350,8 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
 // used on sys global objects
 void ref_saturate_p(pvm_object_storage_t *p)
 {
+    debug_catch_object("!!", p);
+
     if(!p) return;
     assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount != 0 );

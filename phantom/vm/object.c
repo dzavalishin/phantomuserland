@@ -27,22 +27,23 @@
 #if 1
 static inline void verify_p( pvm_object_storage_t *p )
 {
+    debug_catch_object( "V", p );
 
-	if( p && ! pvm_object_is_allocated(p))
-	{
-		dumpo(p);
-		//pvm_object_is_allocated_assert(p);
-		panic("freed object accessed");
-	}
+    if( p && ! pvm_object_is_allocated(p))
+    {
+        dumpo(p);
+        //pvm_object_is_allocated_assert(p);
+        panic("freed object accessed");
+    }
 }
 
 static inline void verify_o( pvm_object_t o )
 {
-	if( o.data )
-	{
-		verify_p( o.data );
-		verify_p( o.interface );
-	}
+    if( o.data )
+    {
+        verify_p( o.data );
+        verify_p( o.interface );
+    }
 }
 #else
 #define verify_p()
@@ -213,8 +214,8 @@ pvm_set_field( struct pvm_object_storage *o, unsigned int slot, struct pvm_objec
 void
 pvm_set_ofield( struct pvm_object op, unsigned int slot, struct pvm_object value )
 {
-	verify_o(op);
-	verify_o(value);
+    verify_o(op);
+    verify_o(value);
     if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & ((op.data)->_flags) )
     {
         if( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & ((op.data)->_flags) )
