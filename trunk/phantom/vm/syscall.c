@@ -118,7 +118,11 @@ int si_void_4_equals(struct pvm_object me, struct data_area_4_thread *tc )
 
     struct pvm_object him = POP_ARG;
 
-    SYSCALL_RETURN(pvm_create_int_object( me.data == him.data ));
+    int ret = (me.data == him.data);
+
+    SYS_FREE_O(him);
+
+    SYSCALL_RETURN(pvm_create_int_object( ret ) );
 }
 
 int si_void_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
@@ -202,6 +206,8 @@ static int si_int_4_equals(struct pvm_object me, struct data_area_4_thread *tc )
     int same_class = me.data->_class.data == him.data->_class.data;
     int same_value = pvm_get_int(me) == pvm_get_int(him);
 
+    SYS_FREE_O(him);
+
     SYSCALL_RETURN(pvm_create_int_object( same_class && same_value));
 }
 
@@ -268,13 +274,16 @@ static int si_string_4_equals(struct pvm_object me, struct data_area_4_thread *t
     struct data_area_4_string *meda = pvm_object_da( me, string );
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
-
-    // BUG - can compare just same classes
-    SYSCALL_RETURN(pvm_create_int_object(
+    int ret = 
         me.data->_class.data == him.data->_class.data &&
         meda->length == himda->length &&
         0 == strncmp( (const char*)meda->data, (const char*)himda->data, meda->length )
-        ));
+        ;
+
+    SYS_FREE_O(him);
+
+    // BUG - can compare just same classes
+    SYSCALL_RETURN(pvm_create_int_object( ret ) );
 }
 
 static int si_string_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
@@ -292,13 +301,8 @@ static int si_string_8_substring(struct pvm_object me, struct data_area_4_thread
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 2);
 
-    //struct pvm_object _len = POP_ARG;
-    //ASSERT_INT(_len);
-    int parmlen = POP_INT();//pvm_get_int(_len);
-
-    //struct pvm_object _index = POP_ARG;
-    //ASSERT_INT(_index);
-    int index = POP_INT();//pvm_get_int(_index);
+    int parmlen = POP_INT();
+    int index = POP_INT();
 
 
     if( index < 0 || index >= meda->length )
@@ -325,9 +329,7 @@ static int si_string_9_charat(struct pvm_object me, struct data_area_4_thread *t
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    //struct pvm_object _index = POP_ARG;
-    //ASSERT_INT(_index);
-    int index = POP_INT(); //pvm_get_int(_index);
+    int index = POP_INT();
 
 
     int len = meda->length;
@@ -618,7 +620,12 @@ static int si_class_class_8_new_class(struct pvm_object me, struct data_area_4_t
     //struct pvm_object      new_class = pvm_object_storage::create( pvm_get_class_class(), &da );
     //SYSCALL_RETURN(new_class);
 
-    SYSCALL_RETURN( pvm_create_class_object(name, iface, sizeof(struct pvm_object) * pvm_get_int(da_size)) );
+    pvm_object_t ret = pvm_create_class_object(name, iface, sizeof(struct pvm_object) * pvm_get_int(da_size));
+
+    SYS_FREE_O(name);
+    SYS_FREE_O(iface);
+
+    SYSCALL_RETURN( ret );
 }
 
 syscall_func_t	syscall_table_4_class[16] =
@@ -730,11 +737,12 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    struct pvm_object name = POP_ARG;
-    ASSERT_STRING(name);
-
     const int bufs = 1024;
     char buf[bufs+1];
+
+    {
+    struct pvm_object name = POP_ARG;
+    ASSERT_STRING(name);
 
     struct data_area_4_string *nameda = pvm_object_da( name, string );
 
@@ -742,6 +750,9 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     int len = nameda->length > bufs ? bufs : nameda->length;
     memcpy( buf, nameda->data, len );
     buf[len] = '\0';
+
+    SYS_FREE_O(name);
+    }
 
     // BUG! Need some diagnostics from loader here
 
@@ -781,6 +792,7 @@ static int si_bootstrap_9_load_code(struct pvm_object me, struct data_area_4_thr
     int len = nameda->length > bufs ? bufs : nameda->length;
     memcpy( buf, nameda->data, len );
     buf[len] = '\0';
+    SYS_FREE_O(name);
 
     code_seg cs = load_code(buf);
 
@@ -801,6 +813,7 @@ static int si_bootstrap_16_print(struct pvm_object me, struct data_area_4_thread
         {
     	struct pvm_object o = POP_ARG;
         pvm_object_print( o );
+        SYS_FREE_O( o );
         }
 
     SYSCALL_RETURN_NOTHING;
@@ -819,6 +832,8 @@ static int si_bootstrap_17_register_class_loader(struct pvm_object me, struct da
     pvm_object_storage_t *root = get_root_object_storage();
     pvm_set_field( root, PVM_ROOT_OBJECT_CLASS_LOADER, pvm_root.class_loader );
 
+    // Don't need do SYS_FREE_O(loader) since we store it
+
     SYSCALL_RETURN_NOTHING;
 }
 
@@ -831,6 +846,8 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
     CHECK_PARAM_COUNT(n_param, 1);
 
     struct pvm_object object = POP_ARG;
+
+    // Don't need do SYS_FREE_O(object) since we store it as 'this'
 
 #if 1
     // TODO check object class to be runnable or subclass
@@ -882,11 +899,14 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
     struct pvm_object _bmp = POP_ARG;
 
+    // BUG! Must store it and repaint on OS restart
     if( drv_video_bmpblt(_bmp,0,0) )
     	SYSCALL_THROW_STRING( "not a bitmap" );
 
     drv_video_window_update_generation();
 
+    // Remove it if will store bmp!
+    SYS_FREE_O(_bmp);
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -919,6 +939,7 @@ static int si_bootstrap_22_set_os_interface(struct pvm_object me, struct data_ar
     ref_saturate_o(pvm_root.os_entry); // make sure refcount is disabled for this object
     struct pvm_object_storage *root = get_root_object_storage();
     pvm_set_field( root, PVM_ROOT_OBJECT_OS_ENTRY, pvm_root.os_entry );
+    // No ref dec - we store it.
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -993,9 +1014,7 @@ static int si_array_10_get(struct pvm_object me, struct data_area_4_thread *tc )
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    //struct pvm_object _index = POP_ARG;
-    //ASSERT_INT(_index);
-    unsigned int index = POP_INT(); //pvm_get_int(_index);
+    unsigned int index = POP_INT();
 
     struct data_area_4_array *da = (struct data_area_4_array *)me.data->da;
 
@@ -1015,8 +1034,6 @@ static int si_array_11_set(struct pvm_object me, struct data_area_4_thread *tc )
     CHECK_PARAM_COUNT(n_param, 2);
 
     int index = POP_INT();
-    //struct pvm_object _index = POP_ARG;
-    //ASSERT_INT(_index);
 
     struct pvm_object value = POP_ARG;
 
@@ -1210,9 +1227,7 @@ static int si_binary_8_getbyte(struct pvm_object me, struct data_area_4_thread *
     DEBUG_INFO;
     struct data_area_4_binary *da = pvm_object_da( me, binary );
 
-    //struct pvm_object _index = POP_ARG;
-    //ASSERT_INT(_index);
-    unsigned int index = POP_INT(); //pvm_get_int(_index);
+    unsigned int index = POP_INT();
 
     int size = me.data->_da_size - sizeof( struct data_area_4_binary );
 
@@ -1227,14 +1242,8 @@ static int si_binary_9_setbyte(struct pvm_object me, struct data_area_4_thread *
     DEBUG_INFO;
     struct data_area_4_binary *da = pvm_object_da( me, binary );
 
-    //struct pvm_object _byte = POP_ARG;
-    //ASSERT_INT(_byte);
-    unsigned int byte = POP_INT(); //pvm_get_int(_byte);
-
-
-    //struct pvm_object _index = POP_ARG;
-    //ASSERT_INT(_index);
-    unsigned int index = POP_INT(); //pvm_get_int(_index);
+    unsigned int byte = POP_INT();
+    unsigned int index = POP_INT();
 
     int size = me.data->_da_size - sizeof( struct data_area_4_binary );
 
@@ -1252,17 +1261,9 @@ static int si_binary_10_setrange(struct pvm_object me, struct data_area_4_thread
     DEBUG_INFO;
     struct data_area_4_binary *da = pvm_object_da( me, binary );
 
-    //struct pvm_object _len = POP_ARG;
-    //ASSERT_INT(_len);
-    unsigned int len = POP_INT(); //pvm_get_int(_len);
-
-    //struct pvm_object _frompos = POP_ARG;
-    //ASSERT_INT(_frompos);
-    unsigned int frompos = POP_INT();//pvm_get_int(_frompos);
-
-    //struct pvm_object _topos = POP_ARG;
-    //ASSERT_INT(_topos);
-    unsigned int topos = POP_INT();//pvm_get_int(_topos);
+    unsigned int len = POP_INT();
+    unsigned int frompos = POP_INT();
+    unsigned int topos = POP_INT();
 
     // TODO assert his class!!
     struct pvm_object _src = POP_ARG;
@@ -1339,8 +1340,7 @@ static int si_closure_11_setobject(struct pvm_object me, struct data_area_4_thre
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    // We do not decrement its refcount, 'cause we store
-    // it. TODO - on our object disposal we have to dec refcount!
+    // We do not decrement its refcount, 'cause we store it.
     da->object = POP_ARG;
 
     SYSCALL_RETURN_NOTHING;
@@ -1385,7 +1385,6 @@ static int si_bitmap_8_fromstring(struct pvm_object me, struct data_area_4_threa
 //printf("Load from string\n");
 
     pvm_object_t _s = POP_ARG;
-    //struct data_area_4_string *in = POP_STRING();
 
     if( drv_video_string2bmp( da, pvm_object_da( _s, string)->data ) )
     	SYSCALL_THROW_STRING("can not parse graphics data");
@@ -1407,7 +1406,7 @@ static int si_bitmap_9_paintto(struct pvm_object me, struct data_area_4_thread *
     int x = POP_INT();
     struct pvm_object _tty = POP_ARG;
 
-    // TOD check class!
+    // TODO check class!
     struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
     struct data_area_4_binary *pixels = pvm_object_da( da->image, binary );
 
