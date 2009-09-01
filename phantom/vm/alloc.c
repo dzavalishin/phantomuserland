@@ -85,7 +85,7 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
 
 
-static void pvm_init_object_header(pvm_object_storage_t *op, unsigned int size)
+static void init_object_header(pvm_object_storage_t *op, unsigned int size)
 {
     op->_ah.object_start_marker = PVM_OBJECT_START_MARKER;
     op->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
@@ -94,7 +94,7 @@ static void pvm_init_object_header(pvm_object_storage_t *op, unsigned int size)
     op->_ah.exact_size = size;
 }
 
-static void pvm_init_free_object_header(pvm_object_storage_t *op, unsigned int size)
+static void init_free_object_header(pvm_object_storage_t *op, unsigned int size)
 {
     op->_ah.object_start_marker = PVM_OBJECT_START_MARKER;
     op->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
@@ -106,50 +106,50 @@ static void pvm_init_free_object_header(pvm_object_storage_t *op, unsigned int s
 
 void pvm_alloc_clear_mem(void)
 {
-    assert(pvm_object_space_start != 0);
+    assert( pvm_object_space_start != 0 );
     pvm_object_storage_t *op = (pvm_object_storage_t *)pvm_object_space_start;
 
-    pvm_init_free_object_header(op, pvm_object_space_end - pvm_object_space_start);
+    init_free_object_header(op, pvm_object_space_end - pvm_object_space_start);
 }
 
 
 #define PVM_MIN_FRAGMENT_SIZE 32
 
 // returns allocated object
-static pvm_object_storage_t *pvm_alloc_eat_some(pvm_object_storage_t *op, unsigned int size)
+static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned int size)
 {
-    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
-    assert(op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE);
+    assert( op->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+    assert( op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
 
     unsigned int surplus = op->_ah.exact_size - size;
     assert(surplus >= 0);
     if (surplus < PVM_MIN_FRAGMENT_SIZE) {
         // don't break in too small pieces
-        pvm_init_object_header(op, op->_ah.exact_size);  //update alloc_flags
+        init_object_header(op, op->_ah.exact_size);  //update alloc_flags
         return op;
     }
 
-    pvm_init_object_header(op, size);
+    init_object_header(op, size);
 
     void *o = (void*)op + size;
     pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
-    pvm_init_free_object_header(opppa, surplus);
+    init_free_object_header(opppa, surplus);
     return op;
 }
 
 // try to collapse current with next objects until they are free
-static void pvm_alloc_collapse_with_next_free(pvm_object_storage_t *op)
+static void alloc_collapse_with_next_free(pvm_object_storage_t *op)
 {
-    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
-    assert(op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE);
+    assert( op->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+    assert( op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
 
     unsigned int size = op->_ah.exact_size;
     do {
         void *o = (void *)op + size;
         pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
-        if (o < pvm_object_space_end  &&  opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE) {
+        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < pvm_object_space_end ) {
             size += opppa->_ah.exact_size;
-            pvm_init_free_object_header(op, size);  //update exact_size
+            init_free_object_header(op, size);  //update exact_size
             DEBUG_PRINT("^");
         } else {
             break;
@@ -159,7 +159,7 @@ static void pvm_alloc_collapse_with_next_free(pvm_object_storage_t *op)
 
 
 // walk through
-static pvm_object_storage_t *pvm_alloc_wrap_to_next_object(pvm_object_storage_t *op)
+static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op)
 {
     assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
     void *o = (void *)op;
@@ -199,7 +199,7 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 {
     assert( o->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-        //o->_ah.gc_flags == 0;
+    //o->_ah.gc_flags == 0;
     assert( o->_ah.refCount > 0 );
     assert( o->_ah.exact_size > 0 );
 }
@@ -232,7 +232,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         {
             DEBUG_PRINT("a");
             // Is allocated? Go to the next one.
-            curr = pvm_alloc_wrap_to_next_object(curr);
+            curr = alloc_wrap_to_next_object(curr);
             continue;
         }
 
@@ -247,21 +247,25 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
 
         // now free
         assert(  PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE == curr->_ah.alloc_flags );
-        pvm_alloc_collapse_with_next_free(curr);  // just in case
+
         if (curr->_ah.exact_size < size) {
-            DEBUG_PRINT("|");
-            curr = pvm_alloc_wrap_to_next_object(curr);
-            continue;
+            alloc_collapse_with_next_free(curr);
+            // try again -
+            if (curr->_ah.exact_size < size) {
+                DEBUG_PRINT("|");
+                curr = alloc_wrap_to_next_object(curr);
+                continue;
+            }
         }
 
-        result = pvm_alloc_eat_some(curr, size);
+        result = alloc_eat_some(curr, size);
         //break;
     }
 
     assert(result != 0);
     DEBUG_PRINT("+");
 
-    pvm_object_space_alloc_current_position = pvm_alloc_wrap_to_next_object(result);
+    pvm_object_space_alloc_current_position = alloc_wrap_to_next_object(result);
     //pvm_object_space_alloc_current_position = result;
     return result;
 }
@@ -323,7 +327,7 @@ panic("mem finished !!!");
 #else
     struct pvm_object_storage *
         data = (struct pvm_object_storage *)  malloc(size);
-        pvm_init_object_header(data, size);
+        init_object_header(data, size);
 #endif
 
     //if( data == 0 ) throw except( name, "out of memory" );
@@ -1179,7 +1183,7 @@ static void do_refzero_process_children( pvm_object_storage_t *o );
 
 static void refzero_process_children( pvm_object_storage_t *o )
 {
-    assert((o->_ah.alloc_flags) == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO);
+    assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO );
     do_refzero_process_children( o );
     o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 }
@@ -1279,8 +1283,8 @@ static void refzero_mark_or_add( pvm_object_storage_t * o )
 // used by   ref_dec_p()
 static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
 {
-    assert(p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED);
-    assert(p->_ah.refCount == 0);
+    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.refCount == 0 );
 
     // free immediately if no children
     if (p->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING
@@ -1310,9 +1314,9 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
     debug_catch_object("--", p);
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    // (BUG!) Two asserts below are currently hitted!!!
-    //assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    //assert( p->_ah.refCount > 0 );
+    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.refCount > 0 );
+
     if(p->_ah.refCount <= 0) {
        //DEBUG_PRINT("Y");
         printf("%d", -  p->_ah.refCount);
@@ -1332,8 +1336,8 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
 {
     debug_catch_object("++", p);
 
-    assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    //assert( p->_ah.refCount != 0 );
+    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.refCount > 0 );
 
     if( p->_ah.refCount <= 0 )
     {
@@ -1354,8 +1358,8 @@ void ref_saturate_p(pvm_object_storage_t *p)
     debug_catch_object("!!", p);
 
     if(!p) return;
-    assert( p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    assert( p->_ah.refCount != 0 );
+    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.refCount > 0 );
 
     p->_ah.refCount = INT_MAX;
 }
