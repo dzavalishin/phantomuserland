@@ -339,7 +339,11 @@ struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_obj
     int i = 0;
     // copy methods from parent
     for( ; i < base_icount; i++ )
-        data_area[i] = (da_po_ptr(base_i->da))[i];
+    {
+        pvm_object_t baseMethod = (da_po_ptr(base_i->da))[i];
+        ref_inc_o(baseMethod);
+        data_area[i] = baseMethod;
+    }
 
     // fill others with nulls
     for( ; i < n_methods; i++ )
