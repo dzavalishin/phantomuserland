@@ -77,8 +77,8 @@ struct pvm_object  pvm_get_array_ofield(struct pvm_object_storage *o, unsigned i
 // TODO need semaphores here
 void pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struct pvm_object value )
 {
-	verify_p(o);
-	verify_o(value);
+    verify_p(o);
+    verify_o(value);
     if(
        !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) ) ||
        !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )

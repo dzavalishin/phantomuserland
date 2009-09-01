@@ -279,7 +279,7 @@ int main(int argc, char* argv[])
     pvm_root_init();
 
 //ui_loop( argc, argv, "test");
-
+    printf("\nPhantom code finished\n" );
     getchar();
 #if 0
     //pvm_create_int_object(0);
