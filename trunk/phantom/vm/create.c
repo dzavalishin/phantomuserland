@@ -313,7 +313,7 @@ static struct pvm_object create_interface_worker( int n_methods )
     int das = n_methods*sizeof(struct pvm_object);
 
     pvm_object_t ret = pvm_object_create_dynamic( pvm_get_interface_class(), das );
-    ref_saturate_o(ret); // Interface is never refcounted!
+    ref_saturate_o(ret); // Interface is never refcounted! (But why?)
     return ret;
 }
 
@@ -361,7 +361,7 @@ void pvm_internal_init_interface(struct pvm_object_storage * os)
 void pvm_gc_iter_interface(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
     // Empty
-    // Must not be called - this is not a really internal object
+    // Must not be called - this is not really an internal object
     panic("Interface GC iterator called");
 }
 
