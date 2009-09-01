@@ -1300,7 +1300,7 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
 void debug_catch_object(char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
-    //if( p != 0x7AA0B880 )
+    //if( p != 0x7A9F1165 )
         return;
     printf("touch %s 0x%X, refcnt = %d ", msg, p, p->_ah.refCount );
 }
@@ -1315,7 +1315,8 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
     //assert( p->_ah.refCount > 0 );
     if(p->_ah.refCount <= 0) {
        //DEBUG_PRINT("Y");
-       printf("%d", -  p->_ah.refCount);
+        printf("%d", -  p->_ah.refCount);
+        //printf("@ 0x%X", p); getchar();
    }
 
     assert( p->_ah.exact_size > 0 );

@@ -14,4 +14,4 @@ set confirm off
 
 #break pvm_exec_throw
 
-break alloc.c:1301
+break alloc.c:1305
