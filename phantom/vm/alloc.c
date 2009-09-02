@@ -154,7 +154,7 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op)
         } else {
             break;
         }
-    } while(0);
+    } while(1);
 }
 
 
@@ -1262,7 +1262,7 @@ static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
         refzero_mark_or_add( o );
 }
 
-static void ref_dec_p(pvm_object_storage_t *p);
+static inline void ref_dec_p(pvm_object_storage_t *p);
 
 static void refzero_mark_or_add( pvm_object_storage_t * o )
 {
