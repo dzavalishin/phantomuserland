@@ -46,8 +46,19 @@ static volatile int     alloc_request_gc_pause = 0;
 static void * pvm_object_space_start;
 static void * pvm_object_space_end;
 
+// Doesn't work - possibly due to the situation where one space current
+// pointer looks into the center of pair of free objects which are
+// combined in other one
+#define SEPARATE_SPACES 0
+
+#if SEPARATE_SPACES
+static void * pvm_object_space_alloc_current_position_small;
+static void * pvm_object_space_alloc_current_position_large;
+#else
 // Last position where allocator finished looking for objects.
 static void * pvm_object_space_alloc_current_position;
+#endif
+
 
 
 pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
@@ -64,7 +75,12 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
     pvm_object_space_start = _pvm_object_space_start;
     pvm_object_space_end = pvm_object_space_start + size;
 
+#if SEPARATE_SPACES
+    pvm_object_space_alloc_current_position_small = pvm_object_space_start;
+    pvm_object_space_alloc_current_position_large = pvm_object_space_start;
+#else
     pvm_object_space_alloc_current_position = pvm_object_space_start;
+#endif
 
     if( hal_mutex_init( &alloc_mutex ) )
         panic("Can't init allocator mutex");
@@ -101,6 +117,8 @@ void pvm_alloc_clear_mem(void)
 
 
 #define PVM_MIN_FRAGMENT_SIZE 32
+// On 8 it dies!
+//#define PVM_MIN_FRAGMENT_SIZE 8
 
 // returns allocated object
 static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned int size)
@@ -195,9 +213,36 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 // Find a piece of mem of given or bigger size.
 static struct pvm_object_storage *pvm_find(unsigned int size)
 {
+
+#if SEPARATE_SPACES
+    void **lastpos_ptr = &pvm_object_space_alloc_current_position_large;
+
+    // FIXME TEMP we have no small object arenas, so here is a dumb temp
+    // solution - to look for small objects at start
+    // [dz] doesn't help much
+    if(size < 64)
+        lastpos_ptr = &pvm_object_space_alloc_current_position_small;
+        //pvm_object_space_alloc_current_position = pvm_object_space_start;
+
+#define CURR_POS (*lastpos_ptr)
+
+#else
+#define CURR_POS pvm_object_space_alloc_current_position
+
+
+    static int rest_cnt = 0;
+
+    if(size < 64 && rest_cnt++ > 2000)
+    {
+        CURR_POS = pvm_object_space_start;
+        rest_cnt = 0;
+    }
+
+#endif
+
     struct pvm_object_storage *result = 0;
 
-    struct pvm_object_storage *curr = pvm_object_space_alloc_current_position;
+    struct pvm_object_storage *curr = CURR_POS; //pvm_object_space_alloc_current_position;
 
     int wrapped = 0;
 
@@ -207,12 +252,12 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         //    DEBUG_PRINT("<500");
 
 
-        if( wrapped && ((void *)curr >= pvm_object_space_alloc_current_position) ) {
+        if( wrapped && ((void *)curr >= CURR_POS /* pvm_object_space_alloc_current_position */ ) ) {
             DEBUG_PRINT("\n no memory! \n");
             return 0;
         }
 
-        if( (void *)curr < pvm_object_space_alloc_current_position )
+        if( (void *)curr < CURR_POS /* pvm_object_space_alloc_current_position */ )
             wrapped = 1;
 
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED == curr->_ah.alloc_flags )
@@ -235,6 +280,8 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         // now free
         assert(  PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE == curr->_ah.alloc_flags );
 
+        //alloc_collapse_with_next_free(curr);
+
         if (curr->_ah.exact_size < size) {
             alloc_collapse_with_next_free(curr);
             // try again -
@@ -252,7 +299,8 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
     assert(result != 0);
     DEBUG_PRINT("+");
 
-    pvm_object_space_alloc_current_position = alloc_wrap_to_next_object(result);
+    //pvm_object_space_alloc_current_position =
+    CURR_POS = alloc_wrap_to_next_object(result);
     //pvm_object_space_alloc_current_position = result;
     return result;
 }
@@ -382,7 +430,7 @@ panic("mem finished !!!");
 
 int pvm_memcheck()
 {
-    long used = 0, free = 0, objects = 0;
+    long used = 0, free = 0, objects = 0, largest = 0;
 
     struct pvm_object_storage *curr = pvm_object_space_start;
 
@@ -392,8 +440,10 @@ int pvm_memcheck()
     {
         if(!pvm_alloc_is_object(curr))
         {
-            printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
-            return 0;
+            //printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
+            //return 0;
+            printf("Memcheck: not an object at 0x%X\n", (void *)curr);
+            break;
         }
 
         // Is an object.
@@ -401,14 +451,19 @@ int pvm_memcheck()
         if( curr->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED )
             used += curr->_ah.exact_size;
         else
+        {
             free += curr->_ah.exact_size;
+            if( curr->_ah.exact_size > largest )
+                largest = curr->_ah.exact_size;
+        }
 
         objects++;
 
         curr = pvm_gc_next_object(curr);
     }
 
-    printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
+    //printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
+    printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
 
     if(curr == pvm_object_space_end)
     {
