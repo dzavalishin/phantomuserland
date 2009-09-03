@@ -333,6 +333,8 @@ void ref_free_stack( pvm_object_storage_t *o )
 
     o->_ah.refCount = 0;
     o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
+
+    debug_catch_object("stack", o);
 }
 
 

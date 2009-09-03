@@ -126,8 +126,8 @@ static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned i
     assert( op->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
 
+    assert(op->_ah.exact_size >= size);
     unsigned int surplus = op->_ah.exact_size - size;
-    assert(surplus >= 0);
     if (surplus < PVM_MIN_FRAGMENT_SIZE) {
         // don't break in too small pieces
         init_object_header(op, op->_ah.exact_size);  //update alloc_flags
@@ -210,7 +210,9 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 }
 
 
-// Find a piece of mem of given or bigger size.
+
+
+// Find a piece of mem of given or bigger size. Linear allocation.
 static struct pvm_object_storage *pvm_find(unsigned int size)
 {
 
@@ -248,10 +250,6 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
 
     while(result == 0)
     {
-        //if ((void *)curr + 500 > pvm_object_space_end)
-        //    DEBUG_PRINT("<500");
-
-
         if( wrapped && ((void *)curr >= CURR_POS /* pvm_object_space_alloc_current_position */ ) ) {
             DEBUG_PRINT("\n no memory! \n");
             return 0;
@@ -306,6 +304,8 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
 }
 
 
+void debug_catch_object(const char *msg, pvm_object_storage_t *p );
+
 
 // TODO include
 extern int phantom_virtual_machine_threads_stopped;
@@ -315,10 +315,7 @@ extern int phantom_virtual_machine_threads_stopped;
 struct pvm_object_storage *
 pvm_object_alloc( unsigned int data_area_size )
 {
-    unsigned int size = sizeof(struct pvm_object_storage)+data_area_size;
-
-    // BUG: dies after alloc of 5 mb in one piece
-    //printf("alloc %d ", size);
+    unsigned int size = sizeof(struct pvm_object_storage) + data_area_size;
 
     alloc_request_gc_pause++;
     hal_mutex_lock( &alloc_mutex );
@@ -367,6 +364,7 @@ panic("mem finished !!!");
 
     //if( data == 0 ) throw except( name, "out of memory" );
     data->_da_size = data_area_size;
+    debug_catch_object("new", data);
 
     // TODO remove it here - memory must be cleaned some other, more effective way
     memset( data->da, 0, data_area_size );
@@ -493,7 +491,7 @@ static void gc_bump_process_children(
                                      struct pvm_object_storage *curr
                                     );
 static void gc_bump_scanmem(
-                            char *mem, unsigned size,
+                            char *mem, unsigned int size,
                             struct pvm_object_storage *curr
                            );
 
@@ -1028,7 +1026,7 @@ static inline int addr_in_range(unsigned int addr)
 }
 
 static void gc_bump_scanmem(
-	char *mem, unsigned size,
+	char *mem, unsigned int size,
         struct pvm_object_storage *curr
                            )
 {
@@ -1346,13 +1344,14 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
     assert( p->_ah.refCount == 0 );
 
     // free immediately if no children
-    if (p->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING
-                     | PHANTOM_OBJECT_STORAGE_FLAG_IS_INT
-                     | PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE
-                    )) {
+    if ((p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) &&
+        (p->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING |
+                       PHANTOM_OBJECT_STORAGE_FLAG_IS_INT |
+                       PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE
+                    ))) {
         p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
         DEBUG_PRINT("-");
-    } 
+    }
     else {
         // postpone for delayed inspection (bug or feature?)
         p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
@@ -1362,17 +1361,18 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
         // TODO use some local pool too, instead of recursion
         // or, alternatively, just free one generation and postpone others for the future
         refzero_process_children( p );
-
     }
 }
 
 
-void debug_catch_object(char *msg, pvm_object_storage_t *p )
+void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
     //if( p != 0x7A9F3527 )
         return;
-    printf("touch %s 0x%X, refcnt = %d ", msg, p, p->_ah.refCount );
+    printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
+
+    print_object_flags(p);
     //getchar();
     printf("\n"); // for GDB to break here
 }
@@ -1390,12 +1390,9 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
         printf(" %d", p->_ah.refCount );
         printf(" @ 0x%X", p); getchar();
     }*/
-
     assert( p->_ah.refCount > 0 );
 
-    assert( p->_ah.exact_size > 0 );
-
-    if(p->_ah.refCount < INT_MAX) // Do we really need this check?
+    if(p->_ah.refCount < INT_MAX) // Do we really need this check? Sure, we see many decrements for saturated objects!
     {
         if( 0 == ( --(p->_ah.refCount) ) )
             ref_dec_proccess_zero(p);
@@ -1425,9 +1422,9 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
 // used on sys global objects
 void ref_saturate_p(pvm_object_storage_t *p)
 {
+    if(!p) return;
     debug_catch_object("!!", p);
 
-    if(!p) return;
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount > 0 );
 
