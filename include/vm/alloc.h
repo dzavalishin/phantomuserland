@@ -17,6 +17,32 @@
 
 #define GC_ENABLED 0
 
+
+
+
+
+// alloc_flags below are mutually exclusive!
+
+// Free'd object
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE 0x00
+
+// This is an allocated object
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED 0x01
+
+// This object has zero reference count, but objects it references are not yet
+// processed. All the children refcounts must be decremented and then this object
+// can be freed.
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
+
+
+
+
+
+
+
+
+
+
 // gc
 
 void run_gc();

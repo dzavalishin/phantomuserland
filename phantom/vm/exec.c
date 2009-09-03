@@ -36,13 +36,14 @@
 
 #define DEB_CALLRET 0
 
-static int debug_print_instr = 0;
+//static int debug_print_instr = 1;
+int debug_print_instr = 0;
 
 // This must be true but I don't sure it works ok.
 // The main potential problem is that refcount code will
 // try to process (dec refounts) on stacks - shall it
 // process just everything under stack pointer, or what?
-#define RELEASE_FRAME_ON_RETURN 0
+#define RELEASE_FRAME_ON_RETURN 1
 
 
 /**
@@ -298,6 +299,13 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
 
 
     cfda->prev = da->call_frame;
+
+    /*
+     * NB! We don't increment reference (though we should),
+     * we simply clear this reference manually on return.
+     */
+
+    //ref_inc_o(cfda->prev);
 
     pvm_exec_save_fast_acc(da);
     da->call_frame = new_cf;
@@ -870,6 +878,9 @@ void pvm_exec(struct pvm_object current_thread)
                 if( DEB_CALLRET || debug_print_instr ) hal_printf("ret; ");
                 //if( cf->estack.empty() ) throw except( "exec", "nowhere to return" );
                 struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;//da->call_frame.get_prev();
+
+                pvm_object_da( da->call_frame, call_frame )->prev.data = 0; // Or else refcounter will follow this link many times
+
                 if( pvm_is_null( ret ) )
                 {
                     return;

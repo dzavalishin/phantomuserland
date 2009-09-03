@@ -13,6 +13,7 @@
 #define PO_OBJECT_FLAGS_H
 
 #if 0
+
 #ifdef POSF_CONST_INIT
 #define	POSF(name,val)	\
     unsigned char	PHANTOM_OBJECT_STORAGE_FLAG_##name = val;
@@ -25,7 +26,10 @@
 	 void POSF_RESET_##name(unsigned char &v) { v &= ~val; } \
 	 unsigned char POSF_GET_##name(unsigned char v) { return v & val; }
 */
-// implementation is in C++
+// Object is call frame. This is needed by refcount code to free stacks manually
+POSF(IS_CALL_FRAME,0x100)
+
+// implementation is in VM/kernel
 POSF(IS_INTERNAL,0x80)
 
 // NOT IMPLEMENTED
@@ -59,6 +63,7 @@ POSF(IS_CODE,0x01)
 
 // TODO Add flag marking object as having no pointers out - for GC
 
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME 0x100
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL 0x80
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE 0x40
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING 0x20

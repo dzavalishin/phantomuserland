@@ -82,13 +82,14 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
     v; \
     })
 
+/* can't be used since string has to be SYS_FREE_'ed
 #define POP_STRING() \
     ({ \
     struct pvm_object __sval = POP_ARG; \
     ASSERT_STRING(__sval); \
     pvm_object_da( __sval, string ); \
     })
-
+*/
 
 
 // --------------------------------------------------------------------------

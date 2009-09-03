@@ -415,7 +415,7 @@ static inline void gc_fcall( void (*f)(struct pvm_object_storage * o, void *arg)
 void pvm_gc_iter_ostack(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
     struct data_area_4_object_stack *da = (struct data_area_4_object_stack *)&(os->da);
-    gc_fcall( func, arg, da->common.root );
+    //gc_fcall( func, arg, da->common.root ); // NO! Root is referenced many times and has other path, so can't be followed by refcount from here
     gc_fcall( func, arg, da->common.curr ); // Need?
     gc_fcall( func, arg, da->common.prev );
     gc_fcall( func, arg, da->common.next );
