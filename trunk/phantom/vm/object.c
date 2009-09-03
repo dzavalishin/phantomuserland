@@ -323,13 +323,8 @@ void pvm_object_print(struct pvm_object o )
         }
 }
 
-// For debugging - to call from GDB - arg is object storage!
-
-void dumpo( int addr )
+void print_object_flags(struct pvm_object_storage *o)
 {
-    struct pvm_object_storage *o = (struct pvm_object_storage *)addr;
-
-    printf("Flags: '");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )        printf("INTERNAL ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE )      printf("RESIZEABLE ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING )          printf("STRING ");
@@ -338,6 +333,16 @@ void dumpo( int addr )
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS )           printf("CLASS ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE )       printf("INTERFACE ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE )            printf("CODE ");
+}
+
+// For debugging - to call from GDB - arg is object storage!
+
+void dumpo( int addr )
+{
+    struct pvm_object_storage *o = (struct pvm_object_storage *)addr;
+
+    printf("Flags: '");
+    print_object_flags(o);
     printf("'\n");
     printf("Da size: %ld\n", (long)(o->_da_size) );
 
