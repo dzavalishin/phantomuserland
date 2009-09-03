@@ -42,7 +42,7 @@
 static struct rgba_t win[wysize*wxsize];
 
 
-static int size = 120*1024*1024;
+static int size = 40*1024*1024;
 static void *mem;
 
 
@@ -472,7 +472,7 @@ void panic(const char *fmt, ...)
         //save_mem(mem, size);
 	printf("\nPress Enter...");
 
-	//pvm_memcheck();
+	pvm_memcheck();
 	getchar();
 	exit(1);
 }
