@@ -275,6 +275,12 @@ void pvm_internal_init_call_frame(struct pvm_object_storage * os)
     //struct data_area_4_call_frame *da = pvm_data_area( os, call_frame );
     struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(os->da);
 
+    if( ! (os->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME) ) )
+    {
+        //printf("\ni c f - no flag!!\n\n");
+        os->_flags |= PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME;
+    }
+
     da->IP_max = 0;
     da->IP = 0;
     da->code = 0;
@@ -291,12 +297,42 @@ void pvm_internal_init_call_frame(struct pvm_object_storage * os)
 
 void pvm_gc_iter_call_frame(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
+    panic("iter_call_frame called");
     struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(os->da);
     gc_fcall( func, arg, da->this_object );
-    gc_fcall( func, arg, da->prev );
+    gc_fcall( func, arg, da->prev ); // FYI - shall never be followed in normal situation, must contain zero data ptr if being considered by refcount
     gc_fcall( func, arg, da->istack );
     gc_fcall( func, arg, da->ostack );
     gc_fcall( func, arg, da->estack );
+}
+
+void ref_free_stack( pvm_object_storage_t *o );
+
+// Special refcount support for stackframe - see comments in refcount on this
+void ref_free_stackframe( pvm_object_storage_t *o )
+{
+    struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(o->da);
+    ref_dec_o( da->this_object ); // Process ref to 'this' in a regular way
+
+    ref_free_stack( da->istack.data );
+    ref_free_stack( da->ostack.data );
+    ref_free_stack( da->estack.data );
+}
+
+
+void ref_free_stack( pvm_object_storage_t *o )
+{
+    if( o == 0 ) return;
+    // Hack.
+    // Other stacks (is,es) have the same structure of 'common' field
+    struct data_area_4_object_stack *da = (struct data_area_4_object_stack *)&(o->da);
+
+    ref_free_stack( da->common.prev.data );
+    // TODO in fact, we have to dec refcount for all unpopped
+    // objects on o and e stacks.
+
+    o->_ah.refCount = 0;
+    o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 }
 
 

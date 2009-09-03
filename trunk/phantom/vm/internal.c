@@ -108,7 +108,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_internal_init_call_frame,
         pvm_gc_iter_call_frame,
         sizeof(struct data_area_4_call_frame),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME
     },
     {
         ".internal.istack",

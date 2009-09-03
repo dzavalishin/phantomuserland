@@ -42,7 +42,7 @@
 static struct rgba_t win[wysize*wxsize];
 
 
-static int size = 30*1024*1024;
+static int size = 120*1024*1024;
 static void *mem;
 
 
@@ -225,6 +225,7 @@ static void mouse_callback()
 
 extern int print_gc_free;
 
+static void args(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
@@ -232,6 +233,8 @@ int main(int argc, char* argv[])
 
     drv_video_win32.mouse = mouse_callback;
     video_drv = &drv_video_win32;
+
+    args(argc,argv);
 
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 
@@ -312,6 +315,61 @@ int main(int argc, char* argv[])
     save_mem(mem, size);
     return 0;
 }
+
+
+
+
+static void usage()
+{
+    printf(
+           "Usage: pvm_test [-flags]\n\n"
+           "Flags:\n"
+           "-di\t- debug (print) instructions\n"
+           "-h\t- print this\n"
+           );
+}
+
+extern int debug_print_instr;
+
+
+static void args(int argc, char* argv[])
+{
+    while(argc-- > 1)
+    {
+        char *arg = *++argv;
+
+        if( *arg != '-' )
+        {
+            usage(); exit(22);
+        }
+        arg++;
+
+        switch( *arg )
+        {
+        case 'd':
+            {
+                char c;
+                arg++;
+                while( (c = *arg++ ) != 0 )
+                {
+                    switch(c) {
+                    case 'i': debug_print_instr = 1; break;
+
+                    }
+                }
+            }
+            break;
+
+        case 'h':
+        default:
+            usage(); exit(22);
+        }
+    }
+
+}
+
+
+
 
 
 

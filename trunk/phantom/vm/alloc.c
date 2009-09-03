@@ -71,19 +71,6 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 }
 
 
-// alloc_flags below are mutually exclusive!
-
-// Free'd object
-#define PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE 0x00
-
-// This is an allocated object
-#define PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED 0x01
-
-// This object has zero reference count, but objects it references are not yet
-// processed. All the children refcounts must be decremented and then this object
-// can be freed.
-#define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
-
 
 static void init_object_header(pvm_object_storage_t *op, unsigned int size)
 {
@@ -1179,7 +1166,7 @@ static void gc_roots_to_area()
 static void refzero_mark_or_add( pvm_object_storage_t * o );
 static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg);
 static void do_refzero_process_children( pvm_object_storage_t *o );
-
+void ref_free_stackframe( pvm_object_storage_t *o ); // TODO to header!
 
 static void refzero_process_children( pvm_object_storage_t *o )
 {
@@ -1227,6 +1214,21 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
       )
         return;
 
+    if(o->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME) )
+    {
+        /*
+         * NB! It is FORBIDDEN to follow references in stack frame manually.
+         *
+         * Stack frame points to stacks, and stacks are double linked and do not
+         * support regular refcount. And can't be freed by regular refcount.
+         * So due to said above and the total ownership of stacks by stack
+         * frame we are freeing them manually when stack frame is freed by
+         * refcount code.
+         *
+         */
+        ref_free_stackframe(o);
+        return;
+    }
 
     // Now find and call class-specific function
 
@@ -1258,8 +1260,8 @@ static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
 
 
     DEBUG_PRINT("Ku");
-    if( o != 0 )
-        refzero_mark_or_add( o );
+    //if( o != 0 ) // checked above
+    refzero_mark_or_add( o );
 }
 
 static inline void ref_dec_p(pvm_object_storage_t *p);
@@ -1268,13 +1270,15 @@ static void refzero_mark_or_add( pvm_object_storage_t * o )
 {
     ref_dec_p(o);
 
+    /* moved to ref_dec_proccess_zero
     if(o->_ah.refCount == 0 && (o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO))
     {
         // FIXME must not be so in final OS, stack overflow possiblity!
         // TODO use some local pool too, instead of recursion
         // or, alternatively, just free one generation and postpone others for the future
         refzero_process_children( o );
-    }
+        }
+    */
 }
 
 
@@ -1293,10 +1297,17 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
                     )) {
         p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
         DEBUG_PRINT("-");
-    } else {
+    } 
+    else {
         // postpone for delayed inspection (bug or feature?)
         p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
         DEBUG_PRINT("(X)");
+
+        // FIXME must not be so in final OS, stack overflow possiblity!
+        // TODO use some local pool too, instead of recursion
+        // or, alternatively, just free one generation and postpone others for the future
+        refzero_process_children( p );
+
     }
 }
 
@@ -1304,9 +1315,11 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
 void debug_catch_object(char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
-    //if( p != 0x7A9F1165 )
+    //if( p != 0x7A9F3527 )
         return;
     printf("touch %s 0x%X, refcnt = %d ", msg, p, p->_ah.refCount );
+    //getchar();
+    printf("\n"); // for GDB to break here
 }
 
 static inline void ref_dec_p(pvm_object_storage_t *p)
@@ -1315,17 +1328,19 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    assert( p->_ah.refCount > 0 );
 
-    if(p->_ah.refCount <= 0) {
+    //if(p->_ah.refCount <= 0) {
+    /*if( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED ) {
        //DEBUG_PRINT("Y");
-        printf("%d", -  p->_ah.refCount);
-        //printf("@ 0x%X", p); getchar();
-   }
+        printf(" %d", p->_ah.refCount );
+        printf(" @ 0x%X", p); getchar();
+    }*/
+
+    assert( p->_ah.refCount > 0 );
 
     assert( p->_ah.exact_size > 0 );
 
-    if(p->_ah.refCount < INT_MAX)
+    if(p->_ah.refCount < INT_MAX) // Do we really need this check?
     {
         if( 0 == ( --(p->_ah.refCount) ) )
             ref_dec_proccess_zero(p);
