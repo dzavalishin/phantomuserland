@@ -1206,7 +1206,7 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
     //pvm_object_t co;
     //co.data = code;
     //co.interface = 0;
-    gc_root_add(code);
+    ////gc_root_add(code);
 }
 
 
