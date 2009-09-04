@@ -274,7 +274,7 @@ static int si_string_4_equals(struct pvm_object me, struct data_area_4_thread *t
     struct data_area_4_string *meda = pvm_object_da( me, string );
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
-    int ret = 
+    int ret =
         me.data->_class.data == him.data->_class.data &&
         meda->length == himda->length &&
         0 == strncmp( (const char*)meda->data, (const char*)himda->data, meda->length )
@@ -623,6 +623,7 @@ static int si_class_class_8_new_class(struct pvm_object me, struct data_area_4_t
     pvm_object_t ret = pvm_create_class_object(name, iface, sizeof(struct pvm_object) * pvm_get_int(da_size));
 
     SYS_FREE_O(name);
+    SYS_FREE_O(da_size);
     SYS_FREE_O(iface);
 
     SYSCALL_RETURN( ret );

@@ -362,7 +362,7 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size )
 
     pvm_object_storage_t * data;
 
-    if (size >= PAGE_SIZE) // (NB!) free() under the same condition!!!
+    if (size >= MAX_BLOCK_SIZE) // (NB!) free() under the same condition!!! (including GC)
     {
         data = (pvm_object_storage_t *)  malloc(size);
         init_object_header(data, size);
@@ -746,11 +746,9 @@ static void gc_find_free(void)
 // GC helper area - keeps addresses of objects to visit - all of them
 // are, of course, accessible (not garbage) - TEMP TODO static
 
-//static int gc_area_size = 1024*1024;
 #define gc_area_size (1024*1024)
 static struct pvm_object_storage *gc_area[gc_area_size];
 
-#if 1
 
 int areapos = 0;
 
@@ -766,109 +764,6 @@ static struct pvm_object_storage * gc_area_get_and_remove()
     if( areapos <= 0 ) return 0;
     return gc_area[--areapos];
 }
-
-
-
-#else
-
-
-
-/*static void gc_init_area()
-{
-    // empty yet
-}
-
-static void gc_kill_area()
-{
-    // empty yet
-}*/
-
-// This many slots to look checking for duplicates
-#define HASH_LOOK_SLOTS 0xFFF
-
-static int gc_area_hash(struct pvm_object_storage *o)
-{
-    unsigned int a = (unsigned  int)o;
-    // 8 top bits. Mask for 1024*1024 is 0xFFFFF, so move left 12 bits
-    return (((a >> 3) ^ (a >> 9 )) & 0xFF) << 12;
-}
-
-static void gc_area_add(struct pvm_object_storage *o)
-{
-    struct pvm_object_storage **put_pos = gc_area + gc_area_hash( o );
-
-    //struct pvm_object_storage *start = gc_area_get_pos;
-    struct pvm_object_storage **start = put_pos;
-
-    int count = 0;
-
-    while( 0 != *put_pos )
-    {
-        count++;
-        put_pos++;
-        if( put_pos >= gc_area+gc_area_size )
-            put_pos = gc_area;
-        if( put_pos == start )
-            panic("out of area in GC");
-    }
-
-    *put_pos = o;
-
-    while( count < HASH_LOOK_SLOTS )
-    {
-        count++;
-        put_pos++;
-        if( put_pos >= gc_area+gc_area_size )
-            put_pos = gc_area;
-        if( put_pos == start )
-            break;
-
-        // Duplicate found
-        if( *put_pos == o )
-            *put_pos = 0;
-
-    }
-}
-
-/*
-static void gc_area_remove(pvm_object_storage *o)
-{
-#error impl
-}
-*/
-
-static struct pvm_object_storage **gc_area_get_pos  = 0;
-static struct pvm_object_storage * gc_area_get_and_remove()
-{
-    if(
-       (gc_area_get_pos < gc_area) ||
-       (gc_area_get_pos > gc_area+gc_area_size)
-      )
-        gc_area_get_pos = gc_area;
-
-
-    struct pvm_object_storage **start = gc_area_get_pos;
-
-
-    while( 0 == *gc_area_get_pos )
-    {
-        gc_area_get_pos++;
-        if( gc_area_get_pos >= gc_area+gc_area_size )
-            gc_area_get_pos = gc_area;
-        if( gc_area_get_pos == start )
-            return 0;
-    }
-
-    struct pvm_object_storage *out = *gc_area_get_pos;
-    *gc_area_get_pos = 0;
-
-    return out;
-}
-
-#endif
-
-
-
 
 
 
@@ -1202,7 +1097,7 @@ static void gc_roots_to_area()
 {
     int i;
     hal_spin_lock( &dynroots_lock );
-    for( i = 0; i < gc_roots_size; i++ )
+    for( i = 0; i < rootspos; i++ )
         gc_area_add( gc_roots[i] );
     hal_spin_unlock( &dynroots_lock );
 }
@@ -1223,6 +1118,7 @@ static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg);
 static void do_refzero_process_children( pvm_object_storage_t *o );
 void ref_free_stackframe( pvm_object_storage_t *o ); // TODO to header!
 
+
 static void refzero_process_children( pvm_object_storage_t *o )
 {
     assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO );
@@ -1233,18 +1129,13 @@ static void refzero_process_children( pvm_object_storage_t *o )
 static void do_refzero_process_children( pvm_object_storage_t *o )
 {
 
-    //don't touch classes yet
-    //refzero_mark_or_add( o->_class.data );
-    //refzero_mark_or_add( o->_class.interface );
-
     if( !(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
     {
         int i;
 
         for( i = 0; i < da_po_limit(o); i++ )
         {
-            refzero_mark_or_add( da_po_ptr(o->da)[i].data );
-            //refzero_mark_or_add( da_po_ptr(o->da)[i].interface );
+            ref_dec_o( da_po_ptr(o->da)[i] );
         }
         return;
     }
@@ -1294,47 +1185,28 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
     func( refzero_add_from_internal, o, 0 );
 
 
+    //don't touch classes yet
+    //ref_dec_o( o->_class );  // Why?
+
+
     // well. this was added in desperation.
     // scan through all the da trying to treat everything as obj addr
 
     //gc_bump_scanmem( o->da, o->_da_size, curr );
 }
 
+static inline void ref_dec_p(pvm_object_storage_t *p);
+
 static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
 {
     if ( o == 0 )
        return;
 
-    //struct pvm_object_storage *curr = arg;
-
-    // sanity check
-    //assert( o != 0 );
-
-    if( ((void*)o) < pvm_object_space_start || ((void*)o) >= pvm_object_space_end )
-        panic("add from internal - out from object space");
-
-
     DEBUG_PRINT("Ku");
-    //if( o != 0 ) // checked above
-    refzero_mark_or_add( o );
+    ref_dec_p( o );
 }
 
-static inline void ref_dec_p(pvm_object_storage_t *p);
 
-static void refzero_mark_or_add( pvm_object_storage_t * o )
-{
-    ref_dec_p(o);
-
-    /* moved to ref_dec_proccess_zero
-    if(o->_ah.refCount == 0 && (o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO))
-    {
-        // FIXME must not be so in final OS, stack overflow possiblity!
-        // TODO use some local pool too, instead of recursion
-        // or, alternatively, just free one generation and postpone others for the future
-        refzero_process_children( o );
-        }
-    */
-}
 
 
 /*-----------------------------------------------------------------------------------------*/
@@ -1364,7 +1236,7 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
         // or, alternatively, just free one generation and postpone others for the future
         refzero_process_children( p );
 
-        if (p->_ah.exact_size >= PAGE_SIZE)
+        if (p->_ah.exact_size >= MAX_BLOCK_SIZE)
         {
             free(p);
             p = 0;

@@ -312,6 +312,7 @@ void ref_free_stack( pvm_object_storage_t *o );
 void ref_free_stackframe( pvm_object_storage_t *o )
 {
     struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(o->da);
+    gc_root_rm(da->code);
     ref_dec_o( da->this_object ); // Process ref to 'this' in a regular way
 
     ref_free_stack( da->istack.data );
@@ -335,7 +336,7 @@ void ref_free_stack( pvm_object_storage_t *o )
     o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 
     debug_catch_object("stack", o);
-    if (o->_ah.exact_size >= PAGE_SIZE)
+    if (o->_ah.exact_size >= MAX_BLOCK_SIZE)
     {
         free(o);
         o = 0;
