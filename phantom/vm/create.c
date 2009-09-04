@@ -312,7 +312,7 @@ void ref_free_stack( pvm_object_storage_t *o );
 void ref_free_stackframe( pvm_object_storage_t *o )
 {
     struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(o->da);
-    gc_root_rm(da->code);
+    ////gc_root_rm(da->code);
     ref_dec_o( da->this_object ); // Process ref to 'this' in a regular way
 
     ref_free_stack( da->istack.data );
