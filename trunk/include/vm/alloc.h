@@ -35,7 +35,7 @@
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
 
 
-
+#define PAGE_SIZE 4096
 
 
 
