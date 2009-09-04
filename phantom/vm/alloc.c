@@ -304,7 +304,6 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
 }
 
 
-void debug_catch_object(const char *msg, pvm_object_storage_t *p );
 
 
 // TODO include
@@ -312,20 +311,14 @@ extern int phantom_virtual_machine_threads_stopped;
 
 
 
-struct pvm_object_storage *
-pvm_object_alloc( unsigned int data_area_size )
+static pvm_object_storage_t * pool_alloc(unsigned int size)
 {
-    unsigned int size = sizeof(struct pvm_object_storage) + data_area_size;
+    pvm_object_storage_t * data = 0;
 
     alloc_request_gc_pause++;
     hal_mutex_lock( &alloc_mutex );
 
-
-#if 1
-
-    struct pvm_object_storage * data;
-
-    int ngc = 0;
+    int ngc = 1;
     do {
         data = pvm_find(size);
 
@@ -333,7 +326,7 @@ pvm_object_alloc( unsigned int data_area_size )
             break;
 
         if(ngc-- <= 0)
-            panic("out of mem looking for %d bytes", size);
+            break;
 
         // We can't run GC from here cause it will reach semi-ready object
         // behind us and die. :(
@@ -345,32 +338,48 @@ pvm_object_alloc( unsigned int data_area_size )
         phantom_virtual_machine_threads_stopped++; // pretend we are stopped
 printf("will gc... ");
         run_gc();
-        phantom_virtual_machine_threads_stopped--;
 printf("done gc\n");
+        phantom_virtual_machine_threads_stopped--;
         alloc_request_gc_pause++;
         hal_mutex_lock( &alloc_mutex );
 
-//panic("mem dump after gc");
-#else
-panic("mem finished !!!");
 #endif //GC_ENABLED
     } while(1);
 
-#else
-    struct pvm_object_storage *
-        data = (struct pvm_object_storage *)  malloc(size);
-        init_object_header(data, size);
-#endif
+    alloc_request_gc_pause--; // In the mutex to prevent one more giveup by GC
+    hal_mutex_unlock( &alloc_mutex );
 
-    //if( data == 0 ) throw except( name, "out of memory" );
+    return data;
+}
+
+
+void debug_catch_object(const char *msg, pvm_object_storage_t *p );
+
+
+pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size )
+{
+    unsigned int size = sizeof(pvm_object_storage_t) + data_area_size;
+
+    pvm_object_storage_t * data;
+
+    if (size >= PAGE_SIZE) // (NB!) free() under the same condition!!!
+    {
+        data = (pvm_object_storage_t *)  malloc(size);
+        init_object_header(data, size);
+    }
+    else
+    {
+        data = pool_alloc(size);
+    }
+
+    if( data == 0 )
+        panic("out of mem looking for %d bytes", size);
+
     data->_da_size = data_area_size;
     debug_catch_object("new", data);
 
     // TODO remove it here - memory must be cleaned some other, more effective way
     memset( data->da, 0, data_area_size );
-
-    alloc_request_gc_pause--; // In the mutex to prevent one more giveup by GC
-    hal_mutex_unlock( &alloc_mutex );
 
     return data;
 }
@@ -1154,7 +1163,6 @@ static void gc_bump_process_area(struct pvm_object_storage *curr)
 static struct pvm_object_storage *gc_roots[gc_roots_size];
 
 
-
 int rootspos = 0;
 
 void gc_root_add(struct pvm_object_storage *o)
@@ -1169,29 +1177,23 @@ void gc_root_add(struct pvm_object_storage *o)
     hal_spin_unlock( &dynroots_lock );
 }
 
-void gc_root_rm(struct pvm_object_storage *o)
+void gc_root_rm(pvm_object_storage_t *o)
 {
     hal_spin_lock( &dynroots_lock );
+
     int i;
-#if 1
-    for( i = 0; i < gc_roots_size; i++ )
-        if(gc_roots[i] == o)
-        {
-            gc_roots[i] = 0;
-            break;
-        }
-#else
-    // not tested
-    for( i = 0; i < gc_roots_size; i++ )
+    for( i = 0; i < rootspos; i++ )
+    {
         if(gc_roots[i] == o)
         {
             // swap with last and kill last then
+            // (border cases verified: rootspos == 0 not possible here, rootspos == 1 - correct)
             gc_roots[i] = gc_roots[rootspos-1];
             gc_roots[rootspos-1] = 0;
             rootspos--;
             break;
         }
-#endif
+    }
     hal_spin_unlock( &dynroots_lock );
 }
 
@@ -1361,6 +1363,12 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
         // TODO use some local pool too, instead of recursion
         // or, alternatively, just free one generation and postpone others for the future
         refzero_process_children( p );
+
+        if (p->_ah.exact_size >= PAGE_SIZE)
+        {
+            free(p);
+            p = 0;
+        }
     }
 }
 

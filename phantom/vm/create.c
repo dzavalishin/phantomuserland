@@ -335,6 +335,11 @@ void ref_free_stack( pvm_object_storage_t *o )
     o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 
     debug_catch_object("stack", o);
+    if (o->_ah.exact_size >= PAGE_SIZE)
+    {
+        free(o);
+        o = 0;
+    }
 }
 
 
