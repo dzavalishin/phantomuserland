@@ -26,8 +26,9 @@
 
 
 
-//#define DEBUG_PRINT(a)
-#define DEBUG_PRINT(a) printf((a))
+#define DEBUG_PRINT(a)
+//#define DEBUG_PRINT(a) printf((a))
+
 
 
 static void gc_roots_to_area();
