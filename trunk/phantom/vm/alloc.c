@@ -45,20 +45,10 @@ static volatile int     alloc_request_gc_pause = 0;
 
 // Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena
 static void * pvm_object_space_start;
+
 static void * pvm_object_space_end;
-
-// Doesn't work - possibly due to the situation where one space current
-// pointer looks into the center of pair of free objects which are
-// combined in other one
-#define SEPARATE_SPACES 0
-
-#if SEPARATE_SPACES
-static void * pvm_object_space_alloc_current_position_small;
-static void * pvm_object_space_alloc_current_position_large;
-#else
 // Last position where allocator finished looking for objects.
 static void * pvm_object_space_alloc_current_position;
-#endif
 
 
 
@@ -118,8 +108,8 @@ void pvm_alloc_clear_mem()
 
 
 #define PVM_MIN_FRAGMENT_SIZE 32
-// On 8 it dies!
-//#define PVM_MIN_FRAGMENT_SIZE 8
+// On 15 it dies! Corruption?
+//#define PVM_MIN_FRAGMENT_SIZE 15
 
 // returns allocated object
 static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned int size)
@@ -135,7 +125,7 @@ static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned i
         return op;
     }
 
-    init_object_header(op, size);
+    init_object_header(op, size);  //update size and alloc_flags
 
     void *o = (void*)op + size;
     pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
@@ -168,8 +158,9 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
 static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op)
 {
     assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
-    void *o = (void *)op;
-    o += op->_ah.exact_size;
+
+    void *o = (void *)op + op->_ah.exact_size;
+
     if( o >= pvm_object_space_end )
     {
         assert(o <= pvm_object_space_end);
@@ -217,21 +208,7 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 static struct pvm_object_storage *pvm_find(unsigned int size)
 {
 
-#if SEPARATE_SPACES
-    void **lastpos_ptr = &pvm_object_space_alloc_current_position_large;
-
-    // FIXME TEMP we have no small object arenas, so here is a dumb temp
-    // solution - to look for small objects at start
-    // [dz] doesn't help much
-    if(size < 64)
-        lastpos_ptr = &pvm_object_space_alloc_current_position_small;
-        //pvm_object_space_alloc_current_position = pvm_object_space_start;
-
-#define CURR_POS (*lastpos_ptr)
-
-#else
 #define CURR_POS pvm_object_space_alloc_current_position
-
 
     static int rest_cnt = 0;
 
@@ -240,8 +217,9 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         CURR_POS = pvm_object_space_start;
         rest_cnt = 0;
     }
+    // optimization above
 
-#endif
+
 
     struct pvm_object_storage *result = 0;
 
@@ -262,6 +240,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED == curr->_ah.alloc_flags )
         {
             DEBUG_PRINT("a");
+            assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
             // Is allocated? Go to the next one.
             curr = alloc_wrap_to_next_object(curr);
             continue;
@@ -270,6 +249,8 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO == curr->_ah.alloc_flags )
         {
             DEBUG_PRINT("(c)");
+            assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+
             hal_spin_lock( &refzero_spinlock );
             refzero_process_children( curr );
             hal_spin_unlock( &refzero_spinlock );
@@ -277,9 +258,8 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         }
 
         // now free
-        assert(  PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE == curr->_ah.alloc_flags );
-
-        //alloc_collapse_with_next_free(curr);
+        assert( PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE == curr->_ah.alloc_flags );
+        assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
         if (curr->_ah.exact_size < size) {
             alloc_collapse_with_next_free(curr, size);
@@ -1282,6 +1262,7 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
 {
     debug_catch_object("++", p);
 
+    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount > 0 );
 
@@ -1303,6 +1284,7 @@ static inline void ref_saturate_p(pvm_object_storage_t *p)
 {
     debug_catch_object("!!", p);
 
+    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount > 0 );
 
