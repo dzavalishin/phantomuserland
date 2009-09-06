@@ -31,6 +31,8 @@
 
 
 
+static void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
+
 static void gc_roots_to_area();
 static hal_spinlock_t dynroots_lock;
 
@@ -45,16 +47,89 @@ static volatile int     alloc_request_gc_pause = 0;
 
 // Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena
 static void * pvm_object_space_start;
-
 static void * pvm_object_space_end;
-// Last position where allocator finished looking for objects.
-static void * pvm_object_space_alloc_current_position;
 
 
+//
+#define ARENAS 5
+static void * start_a[ARENAS];
+static void * end_a[ARENAS];
+// Last position where allocator finished looking for objects
+static void * curr_a[ARENAS];
+
+//memory corruption evidence:
+#define check_strange_corruption 0
+
+#if check_strange_corruption
+//#define PVM_MIN_FRAGMENT_SIZE 32
+// On 15 it dies! Corruption?
+#define PVM_MIN_FRAGMENT_SIZE 15
+
+static int percent_a[ARENAS] = { 100, 0, 0, 0, 0 };
+static inline int find_arena(unsigned int size, unsigned int flags, bool saturated) { return 0; }
+#else
+
+#define PVM_MIN_FRAGMENT_SIZE 32
+
+// Partition: #0 (root, should be first),  #1 (stack), #2 (int), #3 else (small), #4 else (large)
+static int percent_a[ARENAS] = { 25, 15, 3, 7, 50 };
+
+
+static inline int find_arena(unsigned int size, unsigned int flags, bool saturated)
+{
+    int arena = 0; // root|saturated|code|class|interface|Large - nearly constant
+
+    if (flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME))
+        arena = 1; //fast
+    else if (flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT)
+        arena = 2; //small and fast
+    else if (saturated)
+        arena = 0; //never dies
+    else if (flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS|PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
+        arena = 0; //code|class|interface - never dies?
+    else if (size < 1000)
+        arena = 3; //small
+    else // >1000
+        arena = 4; //large
+
+    return arena;
+}
+#endif
 
 pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
 
+static void init_arenas( void * _pvm_object_space_start, unsigned int size )
+{
+    pvm_object_space_start = _pvm_object_space_start;
+    pvm_object_space_end = pvm_object_space_start + size;
+
+    void * cur = _pvm_object_space_start;
+    int percent_100 = 0;
+    int i;
+    for( i = 0; i < ARENAS; i++) {
+		start_a[i] = cur;
+		curr_a[i] = cur;
+		cur += (size / 200) * percent_a[i] * 2;  //aligned?
+		percent_100 += percent_a[i];
+		end_a[i] = cur;
+	}
+	assert(percent_100 == 100); //check twice!
+	end_a[ARENAS-1] = pvm_object_space_start + size; //to be exact
+}
+
+
 // Initialize the heap
+void pvm_alloc_clear_mem()
+{
+    assert( pvm_object_space_start != 0 );
+    int i;
+    for( i = 0; i < ARENAS; i++) {
+	    init_free_object_header((pvm_object_storage_t *)start_a[i], end_a[i] - start_a[i]);
+	}
+}
+
+
+// Initialize the heap, prepare
 void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 {
     assert(_pvm_object_space_start != 0);
@@ -63,15 +138,7 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
     hal_spin_init( &refzero_spinlock );
     hal_spin_init( &dynroots_lock );
 
-    pvm_object_space_start = _pvm_object_space_start;
-    pvm_object_space_end = pvm_object_space_start + size;
-
-#if SEPARATE_SPACES
-    pvm_object_space_alloc_current_position_small = pvm_object_space_start;
-    pvm_object_space_alloc_current_position_large = pvm_object_space_start;
-#else
-    pvm_object_space_alloc_current_position = pvm_object_space_start;
-#endif
+    init_arenas(_pvm_object_space_start, size);
 
     if( hal_mutex_init( &alloc_mutex ) )
         panic("Can't init allocator mutex");
@@ -98,19 +165,6 @@ static void init_free_object_header(pvm_object_storage_t *op, unsigned int size)
 }
 
 
-void pvm_alloc_clear_mem()
-{
-    assert( pvm_object_space_start != 0 );
-    pvm_object_storage_t *op = (pvm_object_storage_t *)pvm_object_space_start;
-
-    init_free_object_header(op, pvm_object_space_end - pvm_object_space_start);
-}
-
-
-#define PVM_MIN_FRAGMENT_SIZE 32
-// On 15 it dies! Corruption?
-//#define PVM_MIN_FRAGMENT_SIZE 15
-
 // returns allocated object
 static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned int size)
 {
@@ -134,7 +188,7 @@ static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned i
 }
 
 // try to collapse current with next objects until they are free
-static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int need_size)
+static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int need_size, void * end)
 {
     assert( op->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
@@ -143,7 +197,7 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
     do {
         void *o = (void *)op + size;
         pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
-        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < pvm_object_space_end && need_size > size) {
+        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < end && need_size > size) {
             size += opppa->_ah.exact_size;
             init_free_object_header(op, size);  //update exact_size
             DEBUG_PRINT("^");
@@ -155,16 +209,16 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
 
 
 // walk through
-static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op)
+static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op, void * start, void * end)
 {
     assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
 
     void *o = (void *)op + op->_ah.exact_size;
 
-    if( o >= pvm_object_space_end )
+    if( o >= end )
     {
-        assert(o <= pvm_object_space_end);
-        o = pvm_object_space_start;
+        assert(o <= end);
+        o = start;
         DEBUG_PRINT("\n(alloc wrap)\n");
     }
     return (pvm_object_storage_t *)o;
@@ -205,36 +259,38 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 
 
 // Find a piece of mem of given or bigger size. Linear allocation.
-static struct pvm_object_storage *pvm_find(unsigned int size)
+static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
 {
 
-#define CURR_POS pvm_object_space_alloc_current_position
+#define CURR_POS  curr_a[arena]
 
-    static int rest_cnt = 0;
-
-    if(size < 64 && rest_cnt++ > 2000)
-    {
-        CURR_POS = pvm_object_space_start;
-        rest_cnt = 0;
-    }
-    // optimization above
+//    static int rest_cnt = 0;
+//
+//    if(size < 64 && rest_cnt++ > 2000)
+//    {
+//        CURR_POS = start_a[arena];
+//        rest_cnt = 0;
+//    }
+    // a kind of optimization above
 
 
 
     struct pvm_object_storage *result = 0;
 
-    struct pvm_object_storage *curr = CURR_POS; //pvm_object_space_alloc_current_position;
+    struct pvm_object_storage *start = start_a[arena];
+    struct pvm_object_storage *end = end_a[arena];
 
     int wrapped = 0;
+    struct pvm_object_storage *curr = CURR_POS;
 
     while(result == 0)
     {
-        if( wrapped && ((void *)curr >= CURR_POS /* pvm_object_space_alloc_current_position */ ) ) {
+        if( wrapped && ((void *)curr >= CURR_POS ) ) {
             DEBUG_PRINT("\n no memory! \n");
             return 0;
         }
 
-        if( (void *)curr < CURR_POS /* pvm_object_space_alloc_current_position */ )
+        if( (void *)curr < CURR_POS )
             wrapped = 1;
 
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED == curr->_ah.alloc_flags )
@@ -242,7 +298,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
             DEBUG_PRINT("a");
             assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
             // Is allocated? Go to the next one.
-            curr = alloc_wrap_to_next_object(curr);
+            curr = alloc_wrap_to_next_object(curr, start, end);
             continue;
         }
 
@@ -262,11 +318,11 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
         if (curr->_ah.exact_size < size) {
-            alloc_collapse_with_next_free(curr, size);
+            alloc_collapse_with_next_free(curr, size, end);
             // try again -
             if (curr->_ah.exact_size < size) {
                 DEBUG_PRINT("|");
-                curr = alloc_wrap_to_next_object(curr);
+                curr = alloc_wrap_to_next_object(curr, start, end);
                 continue;
             }
         }
@@ -278,9 +334,8 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
     assert(result != 0);
     DEBUG_PRINT("+");
 
-    //pvm_object_space_alloc_current_position =
-    CURR_POS = alloc_wrap_to_next_object(result);
-    //pvm_object_space_alloc_current_position = result;
+    CURR_POS = alloc_wrap_to_next_object(result, start, end);
+    //CURR_POS = result;
     return result;
 }
 
@@ -292,7 +347,7 @@ extern int phantom_virtual_machine_threads_stopped;
 
 
 
-static pvm_object_storage_t * pool_alloc(unsigned int size)
+static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
 {
     pvm_object_storage_t * data = 0;
 
@@ -301,7 +356,7 @@ static pvm_object_storage_t * pool_alloc(unsigned int size)
 
     int ngc = 1;
     do {
-        data = pvm_find(size);
+        data = pvm_find(size, arena);
 
         if(data)
             break;
@@ -344,8 +399,10 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 
     pvm_object_storage_t * data;
 
+    int arena = find_arena(size, flags, saturated);
 
-    data = pool_alloc(size);
+
+    data = pool_alloc(size, arena);
 
     if( data == 0 )
         panic("out of mem looking for %d bytes", size);
