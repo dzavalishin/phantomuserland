@@ -35,10 +35,6 @@
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
 
 
-#define MAX_BLOCK_SIZE 4096
-
-
-
 
 
 
@@ -56,19 +52,18 @@ void gc_root_rm(struct pvm_object_storage *o);
 
 // Make sure this object won't be deleted with refcount dec
 // used on sys global objects
-void ref_saturate_p(pvm_object_storage_t *p);
 void ref_saturate_o(pvm_object_t o);
 
 void ref_dec_o(pvm_object_t o);
 void ref_inc_o(pvm_object_t o);
 
 
-pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size );
+pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned int flags, bool saturated );
 //void pvm_object_delete( pvm_object_storage_t * );
 
 
 void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size );
-void pvm_alloc_clear_mem(void);
+void pvm_alloc_clear_mem();
 
 pvm_object_storage_t *get_root_object_storage();
 

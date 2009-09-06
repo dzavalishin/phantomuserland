@@ -325,6 +325,7 @@ void pvm_object_print(struct pvm_object o )
 
 void print_object_flags(struct pvm_object_storage *o)
 {
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME )     printf("STACK_FRAME ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME )      printf("CALL_FRAME ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )        printf("INTERNAL ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE )      printf("RESIZEABLE ");
@@ -373,13 +374,6 @@ void dumpo( int addr )
         printf("Class: { "); dumpo( (int)(o->_class.data) ); printf("}\n");
         //pvm_object_print( o->_class );
     }
-
-}
-
-
-void checkheap(void)
-{
-    pvm_object_alloc( 4 );
 }
 
 

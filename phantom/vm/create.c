@@ -46,10 +46,12 @@ pvm_object_create_dynamic( struct pvm_object object_class, int das )
 	if( das < 0 )
 		das = cda->object_data_area_size;
 
-	struct pvm_object_storage * out = pvm_object_alloc( das );
+	unsigned int flags = cda->object_flags;
+
+	struct pvm_object_storage * out = pvm_object_alloc( das, flags, 0 );
 	out->_class = object_class;
 	//out->_da_size = das; // alloc does it
-	out->_flags = cda->object_flags;
+    //out->_flags = flags; // alloc does it
 
 	struct pvm_object ret;
 	ret.data = out;
@@ -112,7 +114,7 @@ struct pvm_object     pvm_create_object(struct pvm_object type)
 //__inline__
 struct pvm_object     pvm_create_null_object()
 {
-	return pvm_root.null_object;//pvm_object_create_fixed( pvm_get_null_class() );
+	return pvm_root.null_object; //pvm_object_create_fixed( pvm_get_null_class() );
 }
 
 void pvm_internal_init_void(struct pvm_object_storage * os) {}
@@ -275,11 +277,7 @@ void pvm_internal_init_call_frame(struct pvm_object_storage * os)
 	//struct data_area_4_call_frame *da = pvm_data_area( os, call_frame );
 	struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(os->da);
 
-	if( ! (os->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME) ) )
-	{
-		//printf("\ni c f - no flag!!\n\n");
-		os->_flags |= PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME;
-	}
+	assert(os->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME );
 
 	da->IP_max = 0;
 	da->IP = 0;
@@ -343,12 +341,7 @@ void ref_free_stack( pvm_object_storage_t *o, int isObject )
 	o->_ah.refCount = 0;
 	o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 
-	debug_catch_object("stack", o);
-	if (o->_ah.exact_size >= MAX_BLOCK_SIZE)
-	{
-		free(o);
-		o = 0;
-	}
+	debug_catch_object("del", o);
 }
 
 
@@ -371,12 +364,7 @@ void ref_free_estack( pvm_object_storage_t *o )
 	o->_ah.refCount = 0;
 	o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 
-	debug_catch_object("stack", o);
-	if (o->_ah.exact_size >= MAX_BLOCK_SIZE)
-	{
-		free(o);
-		o = 0;
-	}
+	debug_catch_object("del", o);
 }
 
 

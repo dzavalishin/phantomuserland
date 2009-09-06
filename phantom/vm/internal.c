@@ -117,7 +117,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_internal_init_istack,
         pvm_gc_iter_istack,
         sizeof(struct data_area_4_integer_stack),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME
     },
     {
         ".internal.ostack",
@@ -126,7 +126,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_internal_init_ostack,
         pvm_gc_iter_ostack,
         sizeof(struct data_area_4_object_stack),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME
     },
     {
         ".internal.estack",
@@ -135,7 +135,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_internal_init_estack,
         pvm_gc_iter_estack,
         sizeof(struct data_area_4_exception_stack),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME
     },
     {
         ".internal.boot",
