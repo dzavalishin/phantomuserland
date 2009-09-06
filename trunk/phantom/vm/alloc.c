@@ -108,7 +108,7 @@ static void init_free_object_header(pvm_object_storage_t *op, unsigned int size)
 }
 
 
-void pvm_alloc_clear_mem(void)
+void pvm_alloc_clear_mem()
 {
     assert( pvm_object_space_start != 0 );
     pvm_object_storage_t *op = (pvm_object_storage_t *)pvm_object_space_start;
@@ -144,7 +144,7 @@ static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned i
 }
 
 // try to collapse current with next objects until they are free
-static void alloc_collapse_with_next_free(pvm_object_storage_t *op)
+static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int need_size)
 {
     assert( op->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
@@ -153,7 +153,7 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op)
     do {
         void *o = (void *)op + size;
         pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
-        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < pvm_object_space_end ) {
+        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < pvm_object_space_end && need_size > size) {
             size += opppa->_ah.exact_size;
             init_free_object_header(op, size);  //update exact_size
             DEBUG_PRINT("^");
@@ -282,7 +282,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size)
         //alloc_collapse_with_next_free(curr);
 
         if (curr->_ah.exact_size < size) {
-            alloc_collapse_with_next_free(curr);
+            alloc_collapse_with_next_free(curr, size);
             // try again -
             if (curr->_ah.exact_size < size) {
                 DEBUG_PRINT("|");
@@ -354,29 +354,26 @@ printf("done gc\n");
 }
 
 
+static inline void ref_saturate_p(pvm_object_storage_t *p);
 void debug_catch_object(const char *msg, pvm_object_storage_t *p );
 
 
-pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size )
+pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned int flags, bool saturated )
 {
     unsigned int size = sizeof(pvm_object_storage_t) + data_area_size;
 
     pvm_object_storage_t * data;
 
-    if (size >= MAX_BLOCK_SIZE) // (NB!) free() under the same condition!!! (including GC)
-    {
-        data = (pvm_object_storage_t *)  malloc(size);
-        init_object_header(data, size);
-    }
-    else
-    {
-        data = pool_alloc(size);
-    }
+
+    data = pool_alloc(size);
 
     if( data == 0 )
         panic("out of mem looking for %d bytes", size);
 
     data->_da_size = data_area_size;
+    data->_flags = flags;
+    if (saturated)
+        ref_saturate_p(data);
     debug_catch_object("new", data);
 
     // TODO remove it here - memory must be cleaned some other, more effective way
@@ -1124,7 +1121,10 @@ static void refzero_process_children( pvm_object_storage_t *o )
 {
     assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO );
     do_refzero_process_children( o );
+
     o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
+    debug_catch_object("del", o);
+    DEBUG_PRINT("x");
 }
 
 static void do_refzero_process_children( pvm_object_storage_t *o )
@@ -1225,6 +1225,7 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
                        PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE
                     ))) {
         p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
+        debug_catch_object("del", p);
         DEBUG_PRINT("-");
     }
     else {
@@ -1234,14 +1235,11 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
 
         // FIXME must not be so in final OS, stack overflow possiblity!
         // TODO use some local pool too, instead of recursion
-        // or, alternatively, just free one generation and postpone others for the future
-        refzero_process_children( p );
 
-        if (p->_ah.exact_size >= MAX_BLOCK_SIZE)
-        {
-            free(p);
-            p = 0;
-        }
+        // or, alternatively, just comment out the following lines to postpone deallocation to future
+        hal_mutex_lock( &alloc_mutex );
+        refzero_process_children( p );
+        hal_mutex_unlock( &alloc_mutex );
     }
 }
 
@@ -1301,9 +1299,8 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
 
 // Make sure this object won't be deleted with refcount dec
 // used on sys global objects
-void ref_saturate_p(pvm_object_storage_t *p)
+static inline void ref_saturate_p(pvm_object_storage_t *p)
 {
-    if(!p) return;
     debug_catch_object("!!", p);
 
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
@@ -1314,6 +1311,7 @@ void ref_saturate_p(pvm_object_storage_t *p)
 
 void ref_saturate_o(pvm_object_t o)
 {
+    if(!(o.data)) return;
     ref_saturate_p(o.data);
 }
 void ref_dec_o(pvm_object_t o)

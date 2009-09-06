@@ -152,35 +152,39 @@ static void pvm_save_root_objects()
 static void pvm_create_root_objects()
 {
     int root_da_size = PVM_ROOT_OBJECTS_COUNT * sizeof(struct pvm_object);
+    unsigned int flags = 0; // usual plain vanilla array
+	// make sure refcount is disabled for all objects created here -- 3-rd argument of pvm_object_alloc is true
+
     // Allocate the very first object
     struct pvm_object_storage *root = get_root_object_storage();
-    struct pvm_object_storage *roota = pvm_object_alloc( root_da_size );
+    struct pvm_object_storage *roota = pvm_object_alloc( root_da_size, flags, 1 );
 
     // and make sure it is really the first
     assert(root == roota);
 
     // TODO set class later
 
-    root->_da_size = root_da_size;
-    root->_flags = 0; // usual plain vanilla array
-
-    ref_saturate_p(root); // no refcount!
+    //root->_da_size = root_da_size;  // alloc does it
+    //root->_flags = flags;  // alloc does it
+    //ref_saturate_p(root); // no refcount!  // alloc does it
 
     // Partially build interface object for internal classes
 
-    pvm_root.sys_interface_object.data = pvm_object_alloc( N_SYS_METHODS * sizeof(struct pvm_object) );
+    flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE ;
+    pvm_root.sys_interface_object.data = pvm_object_alloc( N_SYS_METHODS * sizeof(struct pvm_object), flags, 1 );
     pvm_root.sys_interface_object.interface = pvm_root.sys_interface_object.data;
-    ref_saturate_p(pvm_root.sys_interface_object.data);
+    //ref_saturate_p(pvm_root.sys_interface_object.data);
 
-    pvm_root.null_object.data = pvm_object_alloc( 0 ); // da does not exist
+    pvm_root.null_object.data = pvm_object_alloc( 0, 0, 1 ); // da does not exist
     pvm_root.null_object.interface = pvm_root.sys_interface_object.data;
 
 
     int i;
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
-        struct pvm_object_storage *curr = pvm_object_alloc( sizeof( struct data_area_4_class ) );
-        ref_saturate_p(curr);
+        flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS ;
+        struct pvm_object_storage *curr = pvm_object_alloc( sizeof( struct data_area_4_class ), flags, 1 );
+        //ref_saturate_p(curr);
         struct data_area_4_class *da = (struct data_area_4_class *)curr->da;
 
         da->sys_table_id 		= i; // so simple
@@ -194,10 +198,10 @@ static void pvm_create_root_objects()
     set_root_from_table();
 
     pvm_root.null_object.data->_class = pvm_root.null_class;
-    pvm_root.null_object.data->_flags = 0;
+    //pvm_root.null_object.data->_flags = 0;
 
     pvm_root.sys_interface_object.data->_class = pvm_root.interface_class;
-    pvm_root.sys_interface_object.data->_flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE;
+    //pvm_root.sys_interface_object.data->_flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE;
 
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
@@ -208,7 +212,7 @@ static void pvm_create_root_objects()
         da->object_default_interface    = pvm_root.sys_interface_object;
 
         curr->_class = pvm_root.class_class;
-        curr->_flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS;
+        //curr->_flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS;
     }
 
 
@@ -324,7 +328,7 @@ static void pvm_boot()
     gc_root_add( thread.data );
 
     // debug only
-    //ref_saturate_p( thread.data );
+    //ref_saturate_o( thread ); // debug only
     //printf("root thread 0x%X\n", thread.data );
 
     // GOGOGO!

@@ -101,8 +101,8 @@ struct data_area_4_string
 
 struct data_area_4_class
 {
-    unsigned char		object_flags;			// object of thic class will have such flags
-    unsigned int		object_data_area_size;	// object of thic class will have data area of this size
+    unsigned int		object_flags;			// object of this class will have such flags
+    unsigned int		object_data_area_size;	// object of this class will have data area of this size
     struct pvm_object		object_default_interface; // default one
     //syscall_func_t  *class_sys_table;
     //unsigned int	class_sys_table_size;

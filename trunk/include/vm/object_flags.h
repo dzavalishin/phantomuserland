@@ -26,6 +26,10 @@
 	 void POSF_RESET_##name(unsigned char &v) { v &= ~val; } \
 	 unsigned char POSF_GET_##name(unsigned char v) { return v & val; }
 */
+
+// Object is i/o/e stack. This is needed by refcount code to allocate stacks efficiently
+POSF(IS_STACK_FRAME,0x200)
+
 // Object is call frame. This is needed by refcount code to free stacks manually
 POSF(IS_CALL_FRAME,0x100)
 
@@ -63,6 +67,7 @@ POSF(IS_CODE,0x01)
 
 // TODO Add flag marking object as having no pointers out - for GC
 
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME 0x200
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME 0x100
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL 0x80
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE 0x40
