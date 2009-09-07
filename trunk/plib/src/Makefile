@@ -21,10 +21,11 @@ roots::
 classes: \
      ../bin/internal.object.pc ../bin/internal.int.pc ../bin/internal.string.pc \
      ../bin/internal.binary.pc ../bin/internal.class.pc \
-     ../bin/internal.io.tty.pc ../bin/phantom.environment.pc \
+     ../bin/internal.io.tty.pc \
      ../bin/internal.bitmap.pc ../bin/phantom.user.pc ../bin/phantom.util.map.pc \
      ../bin/ru.dz.phantom.backgrounds.pc ../bin/phantom.os.time.pc \
      ../bin/internal.world.pc ../bin/phantom.osimpl.pc ../bin/phantom.os.pc \
+     ../bin/phantom.environment.pc \
      ../bin/internal.thread.pc \
 #     ../bin/
 

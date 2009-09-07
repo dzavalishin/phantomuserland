@@ -64,7 +64,6 @@ class class_loader
 
     .internal.object load_class( var name : string )
     {
-        //print("in load_class\n");
         return boot_object.8(name);
     }
 
@@ -83,20 +82,20 @@ class class_loader
 
     .internal.object get_class( var name : string ) [8]
     {
-        print("Loader: class '"); print(name); print("' requested... ");
+        //print("Loader: class '"); print(name); print("' requested... ");
         i = 0;
 
         while( i < index )
         {
             if( name == classes[i] )
             {
-                print("and found\n");
+                //print("and found\n");
                 return classes[i+1];
             }
             i = i + 2;
         }
 
-        print("loading\n");
+        //print("loading\n");
         return load(name);
     }
 
