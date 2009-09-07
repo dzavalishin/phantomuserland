@@ -3,6 +3,7 @@ W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
 libphantom_vm.a: 
 	ar crs $@ $(filter-out main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o,$^)
+	cp $@ ../lib
 
 #winhal.o: winhal.c
 #	gcc $(W32GCC) $^
@@ -13,7 +14,7 @@ libphantom_vm.a:
 nonstandalone.o: nonstandalone.c
 	gcc -c nonstandalone.c
 
-#GLLIB=../gl/libTinyGL.a 
+GLLIB=../lib/libTinyGL.a 
 
 pvm_test: main.o nonstandalone.o $(GLLIB)
 	gcc -p -pg -ffreestanding -o $@ $^  -lgdi32 
