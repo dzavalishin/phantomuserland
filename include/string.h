@@ -34,6 +34,9 @@ void *memcpy(void *dst0, const void *src0, size_t length);
 void *memmove(void *dst0, const void *src0, size_t length);
 void bcopy(const void *src0, void *dst0, size_t length);
 
+int memcmp(const void *s1v, const void *s2v, size_t size);
+int bcmp(const void *s1, const void *s2, size_t n);
+
 
 void bzero(void *dst0, size_t length);
 void *memset(void *dst0, int c0, size_t length);
