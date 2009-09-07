@@ -8,11 +8,13 @@ CLEAN_FILES += $(TARGET)
 
 include $(BUILD_ROOT)/makerules
 
+#	$(RANLIB) $@
+
+ARFLAGS = crs
 
 $(TARGET): $(OBJFILES)
-	$(AR) $(ARFLAGS) $@ $?
-	$(RANLIB) $@
-
+	$(AR) $(ARFLAGS)  $@ $?
+	cp $@ $(BUILD_ROOT)/lib
 
 
 
