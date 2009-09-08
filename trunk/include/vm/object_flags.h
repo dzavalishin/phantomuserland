@@ -16,15 +16,15 @@
 
 #ifdef POSF_CONST_INIT
 #define	POSF(name,val)	\
-    unsigned char	PHANTOM_OBJECT_STORAGE_FLAG_##name = val;
+    unsigned int	PHANTOM_OBJECT_STORAGE_FLAG_##name = val;
 #else
 #define	POSF(name,val)	\
-    extern unsigned char	PHANTOM_OBJECT_STORAGE_FLAG_##name;
+    extern unsigned int	PHANTOM_OBJECT_STORAGE_FLAG_##name;
 #endif
 /*
-	 void POSF_SET_##name(unsigned char &v) { v |= val; } \
-	 void POSF_RESET_##name(unsigned char &v) { v &= ~val; } \
-	 unsigned char POSF_GET_##name(unsigned char v) { return v & val; }
+	 void POSF_SET_##name(unsigned int &v) { v |= val; } \
+	 void POSF_RESET_##name(unsigned int &v) { v &= ~val; } \
+	 unsigned int POSF_GET_##name(unsigned int v) { return v & val; }
 */
 
 // Object is i/o/e stack. This is needed by refcount code to allocate stacks efficiently
