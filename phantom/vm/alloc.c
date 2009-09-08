@@ -57,22 +57,11 @@ static void * end_a[ARENAS];
 // Last position where allocator finished looking for objects
 static void * curr_a[ARENAS];
 
-//memory corruption evidence:
-#define check_strange_corruption 0
 
-#if check_strange_corruption
-//#define PVM_MIN_FRAGMENT_SIZE 32
-// On 15 it dies! Corruption?
-#define PVM_MIN_FRAGMENT_SIZE 15
-
-static int percent_a[ARENAS] = { 100, 0, 0, 0, 0 };
-static inline int find_arena(unsigned int size, unsigned int flags, bool saturated) { return 0; }
-#else
-
-#define PVM_MIN_FRAGMENT_SIZE 32
-
-// Partition: #0 (root, should be first),  #1 (stack), #2 (int), #3 else (small), #4 else (large)
-static int percent_a[ARENAS] = { 25, 15, 3, 7, 50 };
+// Names helper
+static const char* name_a[ARENAS] = { "root, static", "stack", "int", "small", "large" };
+// Partition
+static int percent_a[ARENAS] = { 15, 15, 2, 28, 40 };
 
 
 static inline int find_arena(unsigned int size, unsigned int flags, bool saturated)
@@ -94,7 +83,6 @@ static inline int find_arena(unsigned int size, unsigned int flags, bool saturat
 
     return arena;
 }
-#endif
 
 pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
 
@@ -109,7 +97,7 @@ static void init_arenas( void * _pvm_object_space_start, unsigned int size )
     for( i = 0; i < ARENAS; i++) {
 		start_a[i] = cur;
 		curr_a[i] = cur;
-		cur += (size / 200) * percent_a[i] * 2;  //aligned?
+		cur += (size / 400) * percent_a[i] * 4;  //align 4 bytes
 		percent_100 += percent_a[i];
 		end_a[i] = cur;
 	}
@@ -124,7 +112,7 @@ void pvm_alloc_clear_mem()
     assert( pvm_object_space_start != 0 );
     int i;
     for( i = 0; i < ARENAS; i++) {
-	    init_free_object_header((pvm_object_storage_t *)start_a[i], end_a[i] - start_a[i]);
+        init_free_object_header((pvm_object_storage_t *)start_a[i], end_a[i] - start_a[i]);
 	}
 }
 
@@ -148,6 +136,8 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 
 static void init_object_header(pvm_object_storage_t *op, unsigned int size)
 {
+    assert( size >= sizeof(pvm_object_storage_t) );
+
     op->_ah.object_start_marker = PVM_OBJECT_START_MARKER;
     op->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
     op->_ah.gc_flags = 0;
@@ -157,12 +147,17 @@ static void init_object_header(pvm_object_storage_t *op, unsigned int size)
 
 static void init_free_object_header(pvm_object_storage_t *op, unsigned int size)
 {
+    assert( size >= sizeof(pvm_object_storage_t) );
+
     op->_ah.object_start_marker = PVM_OBJECT_START_MARKER;
     op->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
     op->_ah.gc_flags = 0;
     op->_ah.refCount = 0;
     op->_ah.exact_size = size;
 }
+
+
+#define PVM_MIN_FRAGMENT_SIZE  (sizeof(pvm_object_storage_t) + sizeof(int))      /* should be a minimal object size at least */
 
 
 // returns allocated object
@@ -187,6 +182,7 @@ static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned i
     return op;
 }
 
+
 // try to collapse current with next objects until they are free
 static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int need_size, void * end)
 {
@@ -197,7 +193,7 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
     do {
         void *o = (void *)op + size;
         pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
-        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < end && need_size > size) {
+        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < end ) {
             size += opppa->_ah.exact_size;
             init_free_object_header(op, size);  //update exact_size
             DEBUG_PRINT("^");
@@ -237,13 +233,16 @@ static inline int pvm_alloc_is_free_object(pvm_object_storage_t *o)
                  &&  o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE ;
 }
 
+// maximal test:
 bool pvm_object_is_allocated(pvm_object_storage_t *o)
 {
     return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER
             && o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED
             //o->_ah.gc_flags == 0;
             && o->_ah.refCount > 0
-            && o->_ah.exact_size > 0 ;
+            && o->_ah.exact_size >= ( o->_da_size + sizeof(pvm_object_storage_t) )
+            && o->_ah.exact_size <  ( o->_da_size + sizeof(pvm_object_storage_t) + PVM_MIN_FRAGMENT_SIZE )
+            && o->_ah.exact_size <= ( pvm_object_space_end - (void*)o ) ;
 }
 
 void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
@@ -252,7 +251,9 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
     assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     //o->_ah.gc_flags == 0;
     assert( o->_ah.refCount > 0 );
-    assert( o->_ah.exact_size > 0 );
+    assert( o->_ah.exact_size >= ( o->_da_size + sizeof(pvm_object_storage_t) ) );
+    assert( o->_ah.exact_size <  ( o->_da_size + sizeof(pvm_object_storage_t) + PVM_MIN_FRAGMENT_SIZE ) );
+    assert( o->_ah.exact_size <= (pvm_object_space_end - (void*)o) );
 }
 
 
@@ -296,7 +297,6 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED == curr->_ah.alloc_flags )
         {
             DEBUG_PRINT("a");
-            assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
             // Is allocated? Go to the next one.
             curr = alloc_wrap_to_next_object(curr, start, end);
             continue;
@@ -305,7 +305,6 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO == curr->_ah.alloc_flags )
         {
             DEBUG_PRINT("(c)");
-            assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
             hal_spin_lock( &refzero_spinlock );
             refzero_process_children( curr );
@@ -315,7 +314,6 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
 
         // now free
         assert( PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE == curr->_ah.alloc_flags );
-        assert( curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
         if (curr->_ah.exact_size < size) {
             alloc_collapse_with_next_free(curr, size, end);
@@ -391,11 +389,18 @@ printf("done gc\n");
 
 static inline void ref_saturate_p(pvm_object_storage_t *p);
 void debug_catch_object(const char *msg, pvm_object_storage_t *p );
+//allocation statistics:
+#define max_stat_size 4096
+static long created_o[ARENAS][max_stat_size+1];
+static long created_large_o[ARENAS];
+static long used_o[ARENAS][max_stat_size+1];
+static long used_large_o[ARENAS];
 
 
 pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned int flags, bool saturated )
 {
     unsigned int size = sizeof(pvm_object_storage_t) + data_area_size;
+    size = (((size - 1)/ 4) + 1) * 4 ;  //align 4 bytes
 
     pvm_object_storage_t * data;
 
@@ -411,10 +416,17 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
     data->_flags = flags;
     if (saturated)
         ref_saturate_p(data);
+
     debug_catch_object("new", data);
 
     // TODO remove it here - memory must be cleaned some other, more effective way
     memset( data->da, 0, data_area_size );
+
+    //stat
+    if (size <= max_stat_size)
+        created_o[arena][size]++;
+    else
+        created_large_o[arena]++;
 
     return data;
 }
@@ -460,6 +472,8 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 // -----------------------------------------------------------------------
 
 
+static int memcheck_one(int i, void * start, void * end);
+static void memcheck_print_histogram(int i);
 
 
 /*
@@ -472,26 +486,57 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 
 int pvm_memcheck()
 {
+    int i;
+    for( i = 0; i < ARENAS; i++)
+    {
+        printf("\n Arena #%d [%s] \n", i, name_a[i]);
+        memcheck_one(i, start_a[i], end_a[i]);
+    }
+
+    return 0;
+}
+
+
+static int memcheck_one(int i, void * start, void * end)
+{
+    used_large_o[i] = 0; //reset
+    int size;
+    for( size = 0; size <= max_stat_size; size++)
+        used_o[i][size] = 0; //reset
+
     long used = 0, free = 0, objects = 0, largest = 0;
 
-    struct pvm_object_storage *curr = pvm_object_space_start;
+    struct pvm_object_storage *curr = start;
 
-    printf("Memcheck: checking object memory allocation consistency (at %x, %d bytes)\n", pvm_object_space_start, ((void *)pvm_object_space_start)-((void *)pvm_object_space_start) );
+    printf("Memcheck: checking object memory allocation consistency (at %x, %d bytes)\n", start, (end - start) );
 
-    while(((void *)curr) < pvm_object_space_end)
+    while(((void *)curr) < end)
     {
         if(!pvm_alloc_is_object(curr))
         {
             //printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
             //return 0;
-            printf("Memcheck: not an object at 0x%X\n", (void *)curr);
+            printf("Memcheck: not an object at 0x%X\n", curr);
             break;
         }
 
         // Is an object.
 
         if( curr->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED )
+        {
+            if(!pvm_object_is_allocated(curr))  //more tests
+            {
+                printf("Memcheck: corrupted allocated object at 0x%X\n", curr);
+                break;
+            }
+            if (curr->_ah.exact_size <= max_stat_size)
+                used_o[i][curr->_ah.exact_size]++;
+            else
+                used_large_o[i]++;
+
             used += curr->_ah.exact_size;
+            objects++;
+        }
         else
         {
             free += curr->_ah.exact_size;
@@ -499,7 +544,6 @@ int pvm_memcheck()
                 largest = curr->_ah.exact_size;
         }
 
-        objects++;
 
         curr = pvm_gc_next_object(curr);
     }
@@ -507,16 +551,33 @@ int pvm_memcheck()
     //printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
     printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
 
-    if(curr == pvm_object_space_end)
+    if((void *)curr == end)
     {
-        printf("Memcheck: reached exact arena end at 0x%X (%d bytes used)\n", curr, ((void *)curr)-((void *)pvm_object_space_start) );
+        printf("Memcheck: reached exact arena end at 0x%X (%d bytes used)\n", curr, ((void *)curr) - start );
+        memcheck_print_histogram(i);
         return 0;
     }
 
-    printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%X (%d bytes size)\n-----------------\n\n", curr, ((void *)curr)-((void *)pvm_object_space_start) );
+    printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%X (%d bytes size)\n-----------------\n\n", curr, ((void *)curr) - start );
     return 1;
 }
 
+
+static void memcheck_print_histogram(int arena)
+{
+    if (arena == 0) return; //nothing interesting
+
+    if (created_large_o[arena] > 0)
+        printf(" large objects: now used %d, was allocated %d\n", used_large_o[arena], created_large_o[arena]);
+
+    printf(" small objects: size, now used, was allocated\n");
+    int size;
+    for( size = 0; size <= max_stat_size; size++)
+    {
+        if(created_o[arena][size] > 0)
+            printf("   %6d %6d %12d \n", size, used_o[arena][size], created_o[arena][size]);
+    }
+}
 
 
 
