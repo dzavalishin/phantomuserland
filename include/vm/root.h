@@ -54,7 +54,7 @@ struct pvm_root_t
     struct pvm_object           closure_class;
 
     struct pvm_object           null_object;
-    struct pvm_object           sys_interface_object;   // Each method is a consecutive syscall (sys 0 firts, sys 1 second etc) + return
+    struct pvm_object           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
     struct pvm_object           class_loader;           // Root class loader (user code)
     struct pvm_object           threads_list;           // Array? of threads
     struct pvm_object           windows_list;           // Array? of windows - NB! - how to deal with multiuser?
