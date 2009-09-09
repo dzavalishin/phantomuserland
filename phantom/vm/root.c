@@ -325,7 +325,6 @@ static void pvm_boot()
     cfda->this_object = user_boot;
 
     struct pvm_object thread = pvm_create_thread_object( new_cf );
-    gc_root_add( thread.data );
 
     // debug only
     //ref_saturate_o( thread ); // debug only
@@ -334,8 +333,7 @@ static void pvm_boot()
     // GOGOGO!
     pvm_exec(thread);
 
-    gc_root_rm( thread.data );
-    ref_dec_o( thread );
+    pvm_release_thread_object( thread );
 
 }
 

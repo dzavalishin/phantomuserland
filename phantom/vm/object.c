@@ -129,6 +129,24 @@ int get_array_size(struct pvm_object_storage *array)
     return da->used_slots;
 }
 
+void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop )
+{
+    struct data_area_4_array *da = (struct data_area_4_array *)&(array->da);
+
+    //swap with last and decrement used_slots
+    unsigned int slot;
+    for( slot = 0; slot < da->used_slots; slot++ )
+        if ( pvm_get_ofield( da->page, slot ).data == value_to_pop.data )
+        {
+            if (slot != da->used_slots-1)
+                pvm_set_ofield( da->page, slot, pvm_get_ofield( da->page, da->used_slots-1 ) );
+            da->used_slots--;
+            return;
+        }
+
+    pvm_exec_throw( "attempt to remove non existing element from array" );
+}
+
 
 
 /**
@@ -325,6 +343,7 @@ void pvm_object_print(struct pvm_object o )
 
 void print_object_flags(struct pvm_object_storage *o)
 {
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD )          printf("THREAD ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME )     printf("STACK_FRAME ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME )      printf("CALL_FRAME ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )        printf("INTERNAL ");

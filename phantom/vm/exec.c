@@ -1206,7 +1206,6 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
     //pvm_object_t co;
     //co.data = code;
     //co.interface = 0;
-    ////gc_root_add(code);
 }
 
 
@@ -1266,13 +1265,11 @@ pvm_exec_run_method(
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 
-    gc_root_add( thread.data );
     pvm_exec( thread );
 
     pvm_object_t ret = pvm_ostack_pop( pvm_object_da(cfda->ostack, object_stack) );
 
-    gc_root_rm( thread.data );
-    ref_dec_o( thread );
+    pvm_release_thread_object( thread );
 
     return ret;
 }

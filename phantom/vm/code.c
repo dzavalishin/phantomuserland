@@ -104,6 +104,7 @@ void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, struct pvm_obje
     cf->code = da->code;
     cf->IP_max = da->code_size;
     cf->IP = 0;
+    cf->cs = code; // for gc only
 }
 
 

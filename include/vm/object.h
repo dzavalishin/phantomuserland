@@ -110,8 +110,9 @@ void       		pvm_set_ofield( struct pvm_object, unsigned int no, struct pvm_obje
 struct pvm_object  	pvm_get_array_ofield(struct pvm_object_storage *o, unsigned int slot  );
 void 			pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struct pvm_object value );
 
-void 			pvm_append_array(struct pvm_object_storage *array, struct pvm_object value_to_append );
 int                     get_array_size(struct pvm_object_storage *array);
+void 			pvm_append_array(struct pvm_object_storage *array, struct pvm_object value_to_append );
+void            pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop );
 
 // Debug
 
@@ -163,6 +164,7 @@ struct pvm_object     pvm_create_ostack_object();
 struct pvm_object     pvm_create_estack_object();
 struct pvm_object     pvm_create_binary_object(int size, void *init);
 
+void     pvm_release_thread_object( struct pvm_object thread );
 
 
 //static __inline__ struct pvm_object     pvm_get_null_object() { return pvm_create_null_object(); }

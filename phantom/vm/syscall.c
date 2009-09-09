@@ -766,8 +766,6 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     }
     else
     {
-// temp!
-//gc_root_add(new_class);
     	SYSCALL_RETURN(new_class);
     }
 }
@@ -865,9 +863,6 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
     cfda->this_object = object;
 
     struct pvm_object thread = pvm_create_thread_object( new_cf );
-    gc_root_add(thread.data);
-// TODO
-gc_root_add(object.data); // ? why?
 
     phantom_activate_thread(thread);
     }

@@ -44,8 +44,6 @@
 void run_gc();
 void init_gc();
 
-void gc_root_add(struct pvm_object_storage *o);
-void gc_root_rm(struct pvm_object_storage *o);
 
 
 // allocator

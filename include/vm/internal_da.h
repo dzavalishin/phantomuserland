@@ -53,14 +53,12 @@ struct data_area_4_call_frame
     struct pvm_object		ostack; // main object stack
     struct pvm_object		estack; // exception catchers
 
-    //struct pvm_object		cs; 	// code segment
+    struct pvm_object		cs; 	// code segment, ref just for gc
 
     unsigned int		IP_max;	// size of code in bytes
     unsigned char *		code; 	// (byte)code itself
 
     unsigned int    		IP;
-
-    // TODO add code object ref - just for gc
 
     struct pvm_object  		this_object;
 
