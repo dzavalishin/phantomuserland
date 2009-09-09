@@ -26,8 +26,8 @@
 
 
 
-#define DEBUG_PRINT(a)
-//#define DEBUG_PRINT(a) printf((a))
+//#define DEBUG_PRINT(a)
+#define DEBUG_PRINT(a) printf((a))
 
 
 
@@ -61,7 +61,7 @@ static void * curr_a[ARENAS];
 // Names helper
 static const char* name_a[ARENAS] = { "root, static", "stack", "int", "small", "large" };
 // Partition
-static int percent_a[ARENAS] = { 15, 15, 2, 28, 40 };
+static int percent_a[ARENAS] = { 15, 15, 2, 48, 20 };
 
 
 static inline int find_arena(unsigned int size, unsigned int flags, bool saturated)
@@ -287,7 +287,6 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
     while(result == 0)
     {
         if( wrapped && ((void *)curr >= CURR_POS ) ) {
-            DEBUG_PRINT("\n no memory! \n");
             return 0;
         }
 
@@ -362,12 +361,14 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
         if(ngc-- <= 0)
             break;
 
+printf("out of mem looking for %d bytes, arena %d \n", size, arena);
+
         // We can't run GC from here cause it will reach semi-ready object
         // behind us and die. :(
 
-#if GC_ENABLED
+#if 1 //GC_ENABLED
         alloc_request_gc_pause--; // In the mutex to prevent one more giveup by GC
-        hal_mutex_unlock( &alloc_mutex );
+        //hal_mutex_unlock( &alloc_mutex );
 
         phantom_virtual_machine_threads_stopped++; // pretend we are stopped
 printf("will gc... ");
@@ -375,7 +376,7 @@ printf("will gc... ");
 printf("done gc\n");
         phantom_virtual_machine_threads_stopped--;
         alloc_request_gc_pause++;
-        hal_mutex_lock( &alloc_mutex );
+        //hal_mutex_lock( &alloc_mutex );
 
 #endif //GC_ENABLED
     } while(1);
@@ -586,9 +587,128 @@ static void memcheck_print_histogram(int arena)
 // -----------------------------------------------------------------------
 // Ok, poor man's GC: mark/sweep only for now,
 // TODO implement some more serious GC
-// Not tested well!
 // -----------------------------------------------------------------------
 
+#define old_gc 0
+#if !old_gc
+
+void init_gc() {};
+
+static void free_unmarked();
+static void mark_tree(pvm_object_storage_t * root);
+static void gc_bump_process_children(pvm_object_storage_t *o);
+
+
+void run_gc()
+{
+    pvm_memcheck();  // visualization
+    DEBUG_PRINT("gc started...\n");
+
+
+    // First pass - tree walk, recursively (for now).
+    //
+    // Root always used. All other objects, including pvm_root and pvm_root.threads_list, should be reacher from root...
+    pvm_object_storage_t *root = get_root_object_storage();
+
+    mark_tree( root ); // Root is allways used
+
+
+    // Second pass - linear walk to free unused objects
+    //
+    free_unmarked();
+
+    DEBUG_PRINT("gc finished!\n");
+    pvm_memcheck();  // visualization
+}
+
+
+static void free_unmarked()
+{
+    void * curr;
+    for( curr = pvm_object_space_start; curr < pvm_object_space_end ; curr += ((pvm_object_storage_t *)curr)->_ah.exact_size )
+    {
+        pvm_object_storage_t * p = (pvm_object_storage_t *)curr;
+
+        if (p->_ah.gc_flags != 0)
+            p->_ah.gc_flags = 0;  // clear marked
+        else
+            if ( p->_ah.refCount > 0 )
+            {
+                debug_catch_object("gc", p);
+                p->_ah.refCount = 0;  // free now
+                p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE; // free now
+            }
+    }
+}
+
+static inline void mark(pvm_object_storage_t * p)
+{
+    if (p != 0)
+       p->_ah.gc_flags = 1;
+}
+
+static void mark_tree(pvm_object_storage_t * root)
+{
+    if (root == 0)
+        return;
+
+    if (root->_ah.gc_flags == 1)
+        return; // already done
+
+    mark(root);
+    gc_bump_process_children(root);
+}
+
+static void mark_tree_o(struct pvm_object o)
+{
+    mark_tree(o.data);
+    mark_tree(o.interface);
+}
+
+static void add_from_internal(pvm_object_storage_t * o, void *arg)
+{
+    mark_tree( o );
+}
+
+static void gc_bump_process_children(pvm_object_storage_t *o)
+{
+    mark_tree_o( o->_class );
+
+    // Fast skip for int and string and code - all of them
+    // have no pointers out
+    if(
+       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING) ||
+       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT) ||
+       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE)
+      )
+        return;
+
+    if( !(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
+    {
+        int i;
+
+        for( i = 0; i < da_po_limit(o); i++ )
+        {
+            mark_tree_o( da_po_ptr(o->da)[i] );
+        }
+        return;
+    }
+    // We're here if object is internal.
+
+
+    // Now find and call class-specific function
+
+    gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( o->_class, class )->sys_table_id].iter;
+
+    func( add_from_internal, o, 0 );
+}
+
+
+
+
+
+//<-----------------------------------------------------------------------------------------//
+#else //old_gc
 
 static void gc_bump_process_area(struct pvm_object_storage *curr);
 static void gc_bump_process_children(
@@ -995,14 +1115,6 @@ static void gc_mark_or_add(
 }
 
 
-static void add_from_internal(struct pvm_object_storage * o, void *arg)
-{
-    struct pvm_object_storage *curr = arg;
-    if( o != 0 )
-        gc_mark_or_add( o, curr, 0 );
-}
-
-
 static int check_prev_object(unsigned int addr)
 {
     void *op = (void *)addr;
@@ -1081,6 +1193,14 @@ static void gc_bump_scanmem(
 }
 
 
+static void add_from_internal(struct pvm_object_storage * o, void *arg)
+{
+    struct pvm_object_storage *curr = arg;
+    if( o != 0 )
+        gc_mark_or_add( o, curr, 0 );
+}
+
+
 // TODO Might run out of area
 // curr is where the main loop now: all objects above
 // will be marked, all below will go to area
@@ -1116,6 +1236,7 @@ static void gc_bump_process_children(
       )
         return;
 
+
     // Now find and call class-specific function
 
     //struct pvm_object_storage *co = o->_class.data;
@@ -1128,7 +1249,7 @@ static void gc_bump_process_children(
     // well. this was added in desperation.
     // scan through all the da trying to treat everything as obj addr
 
-    gc_bump_scanmem( o->da, o->_da_size, curr );
+    //gc_bump_scanmem( o->da, o->_da_size, curr );
 }
 
 // Either mark or add to area all the children of the area's objects
@@ -1197,6 +1318,8 @@ static void gc_roots_to_area()
         gc_area_add( gc_roots[i] );
     hal_spin_unlock( &dynroots_lock );
 }
+//<-----------------------------------------------------------------------------------------//
+#endif //old_gc
 
 
 
@@ -1275,6 +1398,19 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
         return;
     }
 
+    if(o->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD) )
+    {
+        /*
+         * NB! It is FORBIDDEN to follow references in stack frame manually.
+         *
+         * Special version of thread iter function for refcount - avoid following stack frames.
+         *
+         */
+        pvm_gc_iter_thread_1( add_from_internal, o, 0 );
+        return;
+    }
+
+
     // Now find and call class-specific function
 
     //struct pvm_object_storage *co = o->_class.data;
@@ -1346,6 +1482,7 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
     //if( p != 0x7A9F3527 )
+    //if( !strcmp(msg, "gc") )
         return;
     printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
 

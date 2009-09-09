@@ -27,6 +27,9 @@
 	 unsigned int POSF_GET_##name(unsigned int v) { return v & val; }
 */
 
+// Object is thread. This is needed by refcount code to free stacks manually
+POSF(IS_THREAD,0x400)
+
 // Object is i/o/e stack. This is needed by refcount code to allocate stacks efficiently
 POSF(IS_STACK_FRAME,0x200)
 
@@ -67,6 +70,7 @@ POSF(IS_CODE,0x01)
 
 // TODO Add flag marking object as having no pointers out - for GC
 
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD 0x400
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME 0x200
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME 0x100
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL 0x80

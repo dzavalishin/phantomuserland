@@ -99,7 +99,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_internal_init_thread,
         pvm_gc_iter_thread,
         sizeof(struct data_area_4_thread),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD
     },
     {
         ".internal.call_frame",
