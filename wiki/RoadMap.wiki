@@ -1,0 +1,43 @@
+#summary Phantom development plan.
+
+= Nearest Goal =
+
+To produce distributable alpha-level OS which can be programmed for by 3rd party programmers.
+
+= Userland/Tools Tasks =
+
+Quite crirtical tasks.
+
+  * *Java bytecode compiler*. Have skeleton, need complete one.
+  * *Hosted test env. multithreading*. Must be easy.
+  * *Hosted test env. TCP access*. Ditto.
+  * *Windowing env Z-buffer*. 
+  * *Windowing evants, input, event thread pools*. 
+  * *VM and compiler support for floats/doubles/64 bit ints*. 
+  * *More of Phantom language implementation in compiler*. Closures, direct containers support.
+
+Not critical, but can be done relatively easily.
+
+  * *Border objects and restart exceptions*. Especially for TCP interfaces.
+
+Not so easy, but we need it, sooner or later.
+
+  * *Python compiler*. Seems to be a good possible object env shell and common scripting language. Or shall it be Ruby instead?
+
+= Kernel Tasks =
+
+  * *VirtIO drivers*. Have partial VirtIO environment, need complete disk and net drivers.
+  * *IDE driver cleanup*. Driver supports interrupts and BM but does not use them!
+  * *Partition lookup code*. None at all.
+  * *IP stack tests and userland interface*. 
+
+Not critical, but can be done relatively easily.
+
+  * *Disk selection*. Right now Phantom looks for its disk in hardcoded places.
+
+
+= General Project Support Tasks =
+
+
+  * *Doxygen*. And code documentation too.
+
