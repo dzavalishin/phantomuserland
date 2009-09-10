@@ -53,7 +53,7 @@ struct data_area_4_call_frame
     struct pvm_object		ostack; // main object stack
     struct pvm_object		estack; // exception catchers
 
-    struct pvm_object		cs; 	// code segment, ref just for gc
+    //struct pvm_object		cs; 	// code segment, ref just for gc - OK without
 
     unsigned int		IP_max;	// size of code in bytes
     unsigned char *		code; 	// (byte)code itself
@@ -143,11 +143,11 @@ struct data_area_4_thread
 
 // fast access copies
 
-    struct pvm_object  				_this_object; 	// Loaded by load_fast_acc from frame
+    struct pvm_object  				_this_object; 	// Loaded by load_fast_acc from call_frame
 
-    struct data_area_4_integer_stack *		_istack;        // Loaded by load_fast_acc from frame
-    struct data_area_4_object_stack *		_ostack;        // Loaded by load_fast_acc from frame
-    struct data_area_4_exception_stack *      	_estack;        // Loaded by load_fast_acc from frame
+    struct data_area_4_integer_stack *		_istack;        // Loaded by load_fast_acc from call_frame
+    struct data_area_4_object_stack *		_ostack;        // Loaded by load_fast_acc from call_frame
+    struct data_area_4_exception_stack *      	_estack;        // Loaded by load_fast_acc from call_frame
 
 };
 
