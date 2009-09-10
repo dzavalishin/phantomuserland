@@ -17,6 +17,7 @@
 #include <phantom_libc.h>
 
 
+// NB!  GC optimization: if PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE flag is present, the pvm_gc_iter_##something  function will not be used!
 
 struct internal_class pvm_internal_classes[] =
 {
@@ -25,9 +26,9 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_NULL_CLASS,
         syscall_table_4_void,
         pvm_internal_init_void,
-        pvm_gc_iter_void,
+        0 /*pvm_gc_iter_void*/,
         0,
-        0
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
     {
         ".internal.class",
@@ -52,27 +53,27 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_CODE_CLASS,
         syscall_table_4_code,
         pvm_internal_init_code,
-        pvm_gc_iter_code,
+        0 /*pvm_gc_iter_code*/,
         0, // Dynamic
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
     {
         ".internal.int",
         PVM_ROOT_OBJECT_INT_CLASS,
         syscall_table_4_int,
         pvm_internal_init_int,
-        pvm_gc_iter_int,
+        0 /*pvm_gc_iter_int*/,
         sizeof(struct data_area_4_int),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_INT
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
     {
         ".internal.string",
         PVM_ROOT_OBJECT_STRING_CLASS,
         syscall_table_4_string,
         pvm_internal_init_string,
-        pvm_gc_iter_string,
+        0 /*pvm_gc_iter_string*/,
         sizeof(struct data_area_4_string), // Dynamic!
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
     {
         ".internal.container.array",
@@ -142,18 +143,18 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_BOOT_CLASS,
         syscall_table_4_boot,
         pvm_internal_init_boot,
-        pvm_gc_iter_boot,
+        0 /*pvm_gc_iter_boot*/,
         sizeof(struct data_area_4_boot),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
     {
         ".internal.io.tty",
         PVM_ROOT_OBJECT_TTY_CLASS,
         syscall_table_4_tty,
         pvm_internal_init_tty,
-        pvm_gc_iter_tty,
+        0 /*pvm_gc_iter_tty*/,
         sizeof(struct data_area_4_tty),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
 /*    {
         ".internal.io.driver",
@@ -170,9 +171,9 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_MUTEX_CLASS,
         syscall_table_4_mutex,
         pvm_internal_init_mutex,
-        pvm_gc_iter_mutex,
+        0 /*pvm_gc_iter_mutex*/,
         sizeof(struct data_area_4_mutex),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
 
     {
@@ -180,9 +181,9 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_BINARY_CLASS,
         syscall_table_4_binary,
         pvm_internal_init_binary,
-        pvm_gc_iter_binary,
+        0 /*pvm_gc_iter_binary*/,
         sizeof(struct data_area_4_binary), // TODO problem - dynamically sized!
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
 
     {
@@ -210,9 +211,9 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_WORLD_CLASS,
         syscall_table_4_world,
         pvm_internal_init_world,
-        pvm_gc_iter_world,
+        0 /*pvm_gc_iter_world*/,
         sizeof(struct data_area_4_world),
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
 
 

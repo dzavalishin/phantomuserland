@@ -29,7 +29,7 @@ static inline void verify_p( pvm_object_storage_t *p )
 {
     debug_catch_object( "V", p );
 
-    if( p && ! pvm_object_is_allocated(p))
+    if( p && ! pvm_object_is_allocated_light(p))
     {
         dumpo(p);
         //pvm_object_is_allocated_assert(p);
@@ -343,6 +343,7 @@ void pvm_object_print(struct pvm_object o )
 
 void print_object_flags(struct pvm_object_storage *o)
 {
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )       printf("CHILDFREE ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD )          printf("THREAD ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME )     printf("STACK_FRAME ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME )      printf("CALL_FRAME ");
