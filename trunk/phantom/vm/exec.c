@@ -39,11 +39,6 @@
 //static int debug_print_instr = 1;
 int debug_print_instr = 0;
 
-// This must be true but I don't sure it works ok.
-// The main potential problem is that refcount code will
-// try to process (dec refounts) on stacks - shall it
-// process just everything under stack pointer, or what?
-#define RELEASE_FRAME_ON_RETURN 1
 
 
 /**
@@ -211,8 +206,8 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
 
             pvm_exec_throw( "unwind: nowhere to return" );
         }
-        // TODO dec refcounts for stack frame we leave!
         pvm_exec_save_fast_acc(da); // need?
+        ref_dec_o(da->call_frame); // we are erasing reference to old call frame - release it!
         da->call_frame = ret;
         pvm_exec_load_fast_acc(da);
     }
@@ -908,9 +903,7 @@ void pvm_exec(struct pvm_object current_thread)
                 // TODO dec refcnt for all old stack?
                 // TODO dec refcount for old this!
                 pvm_exec_save_fast_acc(da); // need?
-#if RELEASE_FRAME_ON_RETURN
                 ref_dec_o(da->call_frame); // we are erasing reference to old call frame - release it!
-#endif
                 da->call_frame = ret;
                 pvm_exec_load_fast_acc(da);
 
