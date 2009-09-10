@@ -38,6 +38,10 @@ Not critical, but can be done relatively easily.
 
 = General Project Support Tasks =
 
+We need volunteers for these:
 
   * *Doxygen*. And code documentation too.
-
+  * *Test suite, regular regression test setup*. 
+  * *Code review*. Need code review process to be set up and carried.
+  * *Good internal document(s) on development process*. For new members to jump in easily.
+  * *Define branching/merging rules*. We will have to have release branches.
