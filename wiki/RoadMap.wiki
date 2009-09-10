@@ -1,4 +1,5 @@
 #summary Phantom development plan.
+#labels Featured,Phase-Requirements
 
 = Nearest Goal =
 
