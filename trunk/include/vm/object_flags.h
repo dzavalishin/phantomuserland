@@ -27,10 +27,13 @@
 	 unsigned int POSF_GET_##name(unsigned int v) { return v & val; }
 */
 
+// flag marking object as having no pointers out - optimization for GC and refcount decr
+POSF(IS_CHILDFREE,0x800)
+
 // Object is thread. This is needed by refcount code to free stacks manually
 POSF(IS_THREAD,0x400)
 
-// Object is i/o/e stack. This is needed by refcount code to allocate stacks efficiently
+// Object is i/o/e stack. This is needed to allocate stacks efficiently
 POSF(IS_STACK_FRAME,0x200)
 
 // Object is call frame. This is needed by refcount code to free stacks manually
@@ -68,8 +71,9 @@ POSF(IS_CODE,0x01)
 
 #endif
 
-// TODO Add flag marking object as having no pointers out - for GC
+// flags:
 
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE 0x800
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD 0x400
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME 0x200
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME 0x100

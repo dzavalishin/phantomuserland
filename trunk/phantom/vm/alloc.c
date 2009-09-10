@@ -25,6 +25,7 @@
 #include "vm/object_flags.h"
 
 
+#define test_gc_load 1
 
 //#define DEBUG_PRINT(a)
 #define DEBUG_PRINT(a) printf((a))
@@ -61,7 +62,11 @@ static void * curr_a[ARENAS];
 // Names helper
 static const char* name_a[ARENAS] = { "root, static", "stack", "int", "small", "large" };
 // Partition
-static int percent_a[ARENAS] = { 15, 15, 2, 48, 20 };
+#if test_gc_load
+static int percent_a[ARENAS] = { 15, 15, 2, 54, 14 };  // play with numbers
+#else
+static int percent_a[ARENAS] = { 15, 15, 2, 18, 50 };
+#endif
 
 
 static inline int find_arena(unsigned int size, unsigned int flags, bool saturated)
@@ -231,6 +236,12 @@ static inline int pvm_alloc_is_free_object(pvm_object_storage_t *o)
 {
     return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER
                  &&  o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE ;
+}
+
+bool pvm_object_is_allocated_light(pvm_object_storage_t *o)
+{
+    return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER
+            && o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
 }
 
 // maximal test:
@@ -441,32 +452,15 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 // -----------------------------------------------------------------------
 
 
-/*inline struct pvm_object_storage *pvm_gc_next_object(struct pvm_object_storage *op)
+static inline struct pvm_object_storage *pvm_next_object(struct pvm_object_storage *op)
 {
-    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
+    //assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
+
     void *o = (void *)op;
     o += op->_ah.exact_size;
     return (struct pvm_object_storage *)o;
-}*/
+}
 
-#if 0
-#define pvm_gc_next_object(op) \
-({ \
-    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER); \
-    void *o = (void *)op; \
-    o += op->_ah.exact_size; \
-    o; \
-})
-
-#else
-
-#define pvm_gc_next_object(op) \
-({ \
-    assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER); \
-    ((void *)op) + op->_ah.exact_size; \
-})
-
-#endif
 
 // -----------------------------------------------------------------------
 // Memory walk/check code
@@ -546,7 +540,8 @@ static int memcheck_one(int i, void * start, void * end)
         }
 
 
-        curr = pvm_gc_next_object(curr);
+        //curr = pvm_next_object(curr);
+        curr = (struct pvm_object_storage *)( ((void *)curr) + curr->_ah.exact_size );
     }
 
     //printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
@@ -645,16 +640,21 @@ static inline void mark(pvm_object_storage_t * p)
        p->_ah.gc_flags = 1;
 }
 
-static void mark_tree(pvm_object_storage_t * root)
+static void mark_tree(pvm_object_storage_t * p)
 {
-    if (root == 0)
+    if (p == 0)
         return;
 
-    if (root->_ah.gc_flags == 1)
+    if (p->_ah.gc_flags == 1)
         return; // already done
 
-    mark(root);
-    gc_bump_process_children(root);
+    mark(p);
+
+    // Fast skip if no children -
+    if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) )
+    {
+        gc_bump_process_children(p);
+    }
 }
 
 static void mark_tree_o(struct pvm_object o)
@@ -672,15 +672,11 @@ static void gc_bump_process_children(pvm_object_storage_t *o)
 {
     mark_tree_o( o->_class );
 
-    // Fast skip for int and string and code - all of them
-    // have no pointers out
-    if(
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING) ||
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT) ||
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE)
-      )
-        return;
+    // Fast skip if no children - done!
+    //if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
+    //    return;
 
+    // plain non internal objects -
     if( !(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
     {
         int i;
@@ -691,8 +687,8 @@ static void gc_bump_process_children(pvm_object_storage_t *o)
         }
         return;
     }
-    // We're here if object is internal.
 
+    // We're here if object is internal.
 
     // Now find and call class-specific function
 
@@ -732,7 +728,11 @@ static void refzero_process_children( pvm_object_storage_t *o )
 
 static void do_refzero_process_children( pvm_object_storage_t *o )
 {
+    // Fast skip if no children - done!
+    //if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
+    //    return;
 
+    // plain non internal objects -
     if( !(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
     {
         int i;
@@ -746,15 +746,6 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
 
     // We're here if object is internal.
 
-    // Fast skip for int and string and code - all of them
-    // have no pointers out
-
-    if(
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING) ||
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT) ||
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE)
-      )
-        return;
 
     // TEMP - skip classes and interfaces too. we must not reach them, in fact... how do we?
     if(
@@ -804,12 +795,6 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
 
     //don't touch classes yet
     //ref_dec_o( o->_class );  // Why?
-
-
-    // well. this was added in desperation.
-    // scan through all the da trying to treat everything as obj addr
-
-    //gc_bump_scanmem( o->da, o->_da_size, curr );
 }
 
 static inline void ref_dec_p(pvm_object_storage_t *p);
@@ -834,17 +819,15 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount == 0 );
 
-    // free immediately if no children
-    if ((p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) &&
-        (p->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING |
-                       PHANTOM_OBJECT_STORAGE_FLAG_IS_INT |
-                       PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE
-                    ))) {
+    // Fast skip if no children
+    if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
+    {
         p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
         debug_catch_object("del", p);
         DEBUG_PRINT("-");
     }
-    else {
+    else
+    {
         // postpone for delayed inspection (bug or feature?)
         p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
         DEBUG_PRINT("(X)");
@@ -864,7 +847,9 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
     //if( p != 0x7A9F3527 )
-    //if( !strcmp(msg, "gc") )
+    if( !test_gc_load )
+        return;
+    if( 0 != strcmp(msg, "gc") )
         return;
     printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
 
