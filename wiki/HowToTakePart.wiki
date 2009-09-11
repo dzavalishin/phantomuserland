@@ -1,0 +1,12 @@
+#summary How to take a part in project.
+#labels Featured
+
+  * Contact Dmitry Zavalishin (dz), dz@dz.ru - please don't forget to add 'phantom' word to the subject line.
+  * Read [http://code.google.com/p/phantomuserland/source/browse/#svn/trunk/doc dox]
+  * Checkout project and setup required environment.
+  * Select subsystem to care of (see RoadMap) or some subsystem-independent role, such as to work on documentation or testing.
+  * Decide with dz and/or with subsystem lead what to do first.
+  * Do it!
+  * Take a look at CodingStyle to do it right.
+
+Very good start is to do some code review for the part you want to work on, and, possibly, to write some regression tests for it. 
