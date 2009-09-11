@@ -505,7 +505,8 @@ void pvm_gc_iter_thread(gc_iterator_call_t func, struct pvm_object_storage * os,
 void pvm_gc_iter_thread_1(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
 	struct data_area_4_thread *da = (struct data_area_4_thread *)&(os->da);
-	//gc_fcall( func, arg, da->call_frame );  //call_frame could not be proccessed by refcount, see above
+	//gc_fcall( func, arg, da->call_frame );  //call_frame could not be proccessed by refcount currently
+	ref_free_stackframe( da->call_frame.data );
 	gc_fcall( func, arg, da->owner );
 	gc_fcall( func, arg, da->environment );
 }
