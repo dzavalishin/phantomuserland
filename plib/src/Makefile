@@ -30,7 +30,8 @@ classes: \
 #     ../bin/
 
 
-PLC=plc.cmd
+
+PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
 
 ../bin/%.pc: %.ph
 	$(PLC) $<

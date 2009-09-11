@@ -9,6 +9,8 @@ NB! Kernel is not available now, so QEMU part can be skipped.
    QEMU will serve tftp contents from. (As far as I understand QEMU has
    some bug forcing this dir to be in the root of current disk in Windows)
 
+   UPD: QEMU 10 doesn't have this bug with tftp.
+
 3. Edit config.mk
 
 4. make install
