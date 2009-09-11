@@ -1,0 +1,21 @@
+<gcjbuilder>
+  <projectType>0</projectType>
+  <buildType>0</buildType>
+  <mainClass>ru.dz.plc.PlcMain</mainClass>
+  <classpathCompile>0</classpathCompile>
+  <classpathDll></classpathDll>
+  <classpathJars/>
+  <resources/>
+  <optLevel>0</optLevel>
+  <optFlags></optFlags>
+  <debugLevel>2</debugLevel>
+  <debugFlags></debugFlags>
+  <gcjMisc></gcjMisc>
+  <linkLib/>
+  <linkObj/>
+  <linkPath/>
+  <linkMisc></linkMisc>
+  <buildFolder>debug</buildFolder>
+  <buildFile>plc</buildFile>
+  <buildCommand>make</buildCommand>
+</gcjbuilder>
