@@ -1,3 +1,6 @@
+default::
+	@echo make all or make install
+
 install::
 	cd build ; make install
 
@@ -5,4 +8,4 @@ install::
 
 all::
 	cd phantom; make all; cd ..
-	cd plib; make all; cd..
+	cd plib; make all; cd ..
