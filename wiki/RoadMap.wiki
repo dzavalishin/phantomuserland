@@ -5,7 +5,7 @@
 
 To produce distributable alpha-level OS which can be programmed for by 3rd party programmers.
 
-= Userland/Tools Tasks =
+== Userland/Tools Tasks ==
 
 Quite crirtical tasks.
 
@@ -25,7 +25,7 @@ Not so easy, but we need it, sooner or later.
 
   * *Python compiler*. Seems to be a good possible object env shell and common scripting language. Or shall it be Ruby instead?
 
-= Kernel Tasks =
+== Kernel Tasks ==
 
   * *VirtIO drivers*. Have partial VirtIO environment, need complete disk and net drivers.
   * *IDE driver cleanup*. Driver supports interrupts and BM but does not use them!
@@ -46,3 +46,10 @@ We need volunteers for these:
   * *Code review*. Need code review process to be set up and carried.
   * *Good internal document(s) on development process*. For new members to jump in easily.
   * *Define branching/merging rules*. We will have to have release branches.
+
+
+= Far Goals =
+
+  * *Graphical shell*. Something to start with.
+  * *Posix support*. Map two binary objects to DS/CS, run native thread, support syscall mapping.
+  * *OpenGL*. In fact, it is quite easy to get TinyGL working (it is already done for kernel), but we need a clean userland interface and understanding of interoperation for multiiple simult. threads doing GL rendering in a same env.
