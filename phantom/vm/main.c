@@ -223,7 +223,6 @@ static void mouse_callback()
     video_drv->redraw_mouse_cursor();
 }
 
-extern int print_gc_free;
 
 static void args(int argc, char* argv[]);
 
@@ -247,15 +246,8 @@ int main(int argc, char* argv[])
     setDiffMem( mem, malloc(size+1024*10), size );
 
     hal_init( mem, size );
-    init_gc(); // TODO hal must do it? or root?
-
-    //pvm_alloc_init( mem, size );
-
-    //getchar();
-
 
     videotest();
-
 
     //getchar();
 
@@ -284,30 +276,15 @@ int main(int argc, char* argv[])
 //ui_loop( argc, argv, "test");
     printf("\nPhantom code finished\n" );
     getchar();
+
 #if 0
-    //pvm_create_int_object(0);
-
     pvm_memcheck();
-
-
-    printf("will run GC\n" );
-    run_gc();
-
-    pvm_memcheck();
-    //print_gc_free = 1;
-
-    pvm_create_int_object(0);
-    pvm_create_int_object(0);
-
-    printf("press enter\n" );
-//    getchar();
 
     printf("will run GC\n" );
     run_gc();
 
     printf("press enter\n" );
 //    getchar();
-
 
     pvm_memcheck();
 #endif

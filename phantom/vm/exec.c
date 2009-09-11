@@ -262,7 +262,7 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
     struct pvm_object new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
-    // allocae places on stack
+    // allocate places on stack
     {
         int i;
         for( i = n_param; i; i-- )
@@ -393,7 +393,7 @@ void pvm_exec(struct pvm_object current_thread)
             //pvm_exec_load_fast_acc(da); // We don't need this, if we die, we will enter again from above :)
         }
 
-#if GC_ENABLED
+#if 1 //GC_ENABLED  //Just for fun?
         static int gcc = 0;
         gcc++;
         if( gcc > 20000 )

@@ -20,30 +20,27 @@
 
 #include "vm/alloc.h"
 #include "vm/internal.h"
-//#include "vm/root.h"
-//#include "vm/exec.h"
 #include "vm/object_flags.h"
 
 
 #define test_gc_load 1
 
-//#define DEBUG_PRINT(a)
-#define DEBUG_PRINT(a) printf((a))
+
+#if test_gc_load
+#define DEBUG_PRINT(a)    printf(a)
+#define DEBUG_PRINT1(a,b)  printf(a,b)
+#else
+#define DEBUG_PRINT(a)
+#define DEBUG_PRINT1(a,b)
+#endif
 
 
 
 static void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
-
-static void gc_roots_to_area();
-static hal_spinlock_t dynroots_lock;
-
-static hal_spinlock_t refzero_spinlock;
 static void refzero_process_children( pvm_object_storage_t *o );
 
-// taken if allocation is not possible now - by allocator and critical part of GC
+// Gigant lock for now. TODO
 static hal_mutex_t  alloc_mutex;
-// allocator waits for GC to give him a chance
-static volatile int     alloc_request_gc_pause = 0;
 
 
 // Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena
@@ -89,6 +86,18 @@ static inline int find_arena(unsigned int size, unsigned int flags, bool saturat
     return arena;
 }
 
+static inline unsigned int round_size(unsigned int size, int arena)
+{
+    size = (((size - 1)/ 4) + 1) * 4 ;  //align 4 bytes
+
+    // for reference: minimal object (int) = 36 bytes
+
+//    if (arena == 3) //small strings
+//        size = (((size - 1)/ 72) + 1) * 72 ;  //align 72 bytes (typical sizes: 40 and 68 bytes) - avoid fragmentation
+
+    return size;
+}
+
 pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
 
 static void init_arenas( void * _pvm_object_space_start, unsigned int size )
@@ -128,13 +137,12 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
     assert(_pvm_object_space_start != 0);
     assert(size > 0);
 
-    hal_spin_init( &refzero_spinlock );
-    hal_spin_init( &dynroots_lock );
-
     init_arenas(_pvm_object_space_start, size);
 
     if( hal_mutex_init( &alloc_mutex ) )
         panic("Can't init allocator mutex");
+
+    //init_gc();  // here, if needed
 }
 
 
@@ -162,7 +170,7 @@ static void init_free_object_header(pvm_object_storage_t *op, unsigned int size)
 }
 
 
-#define PVM_MIN_FRAGMENT_SIZE  (sizeof(pvm_object_storage_t) + sizeof(int))      /* should be a minimal object size at least */
+#define PVM_MIN_FRAGMENT_SIZE  (sizeof(pvm_object_storage_t) + sizeof(int) )      /* should be a minimal object size at least */
 
 
 // returns allocated object
@@ -189,7 +197,7 @@ static pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned i
 
 
 // try to collapse current with next objects until they are free
-static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int need_size, void * end)
+static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int need_size, void * end, int arena)
 {
     assert( op->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     assert( op->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
@@ -198,19 +206,28 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
     do {
         void *o = (void *)op + size;
         pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
-        if ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE  &&  o < end ) {
+        if ( ( o < end )  &&
+             ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE )  &&
+             ( size < need_size * 32 ) //limit page in amount
+           )
+        {
             size += opppa->_ah.exact_size;
-            init_free_object_header(op, size);  //update exact_size
             DEBUG_PRINT("^");
         } else {
             break;
         }
     } while(1);
+
+    if (size > op->_ah.exact_size)
+    {
+        init_free_object_header(op, size);  //update exact_size
+        DEBUG_PRINT1("%d", arena);
+    }
 }
 
 
 // walk through
-static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op, void * start, void * end)
+static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op, void * start, void * end, int *wrap, int arena)
 {
     assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
 
@@ -220,7 +237,9 @@ static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op,
     {
         assert(o <= end);
         o = start;
-        DEBUG_PRINT("\n(alloc wrap)\n");
+        *wrap++;
+        DEBUG_PRINT("\n(alloc wrap)");
+        DEBUG_PRINT1("%d", arena);
     }
     return (pvm_object_storage_t *)o;
 }
@@ -292,33 +311,27 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
     struct pvm_object_storage *start = start_a[arena];
     struct pvm_object_storage *end = end_a[arena];
 
-    int wrapped = 0;
+    int wrap = 0;
     struct pvm_object_storage *curr = CURR_POS;
 
     while(result == 0)
     {
-        if( wrapped && ((void *)curr >= CURR_POS ) ) {
+        if( wrap > 1 ) {
             return 0;
         }
-
-        if( (void *)curr < CURR_POS )
-            wrapped = 1;
 
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED == curr->_ah.alloc_flags )
         {
             DEBUG_PRINT("a");
             // Is allocated? Go to the next one.
-            curr = alloc_wrap_to_next_object(curr, start, end);
+            curr = alloc_wrap_to_next_object(curr, start, end, &wrap, arena);
             continue;
         }
 
         if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO == curr->_ah.alloc_flags )
         {
             DEBUG_PRINT("(c)");
-
-            hal_spin_lock( &refzero_spinlock );
             refzero_process_children( curr );
-            hal_spin_unlock( &refzero_spinlock );
             // Supposed to be free here
         }
 
@@ -326,11 +339,11 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
         assert( PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE == curr->_ah.alloc_flags );
 
         if (curr->_ah.exact_size < size) {
-            alloc_collapse_with_next_free(curr, size, end);
+            alloc_collapse_with_next_free(curr, size, end, arena);
             // try again -
             if (curr->_ah.exact_size < size) {
                 DEBUG_PRINT("|");
-                curr = alloc_wrap_to_next_object(curr, start, end);
+                curr = alloc_wrap_to_next_object(curr, start, end, &wrap, arena);
                 continue;
             }
         }
@@ -342,7 +355,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
     assert(result != 0);
     DEBUG_PRINT("+");
 
-    CURR_POS = alloc_wrap_to_next_object(result, start, end);
+    CURR_POS = alloc_wrap_to_next_object(result, start, end, &wrap, arena);
     //CURR_POS = result;
     return result;
 }
@@ -350,17 +363,13 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
 
 
 
-// TODO include
-extern int phantom_virtual_machine_threads_stopped;
-
 
 
 static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
 {
     pvm_object_storage_t * data = 0;
 
-    alloc_request_gc_pause++;
-    hal_mutex_lock( &alloc_mutex );
+    hal_mutex_lock( &alloc_mutex );  //TODO avoid Gigant lock
 
     int ngc = 1;
     do {
@@ -372,27 +381,17 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
         if(ngc-- <= 0)
             break;
 
-        printf("out of mem looking for %d bytes, arena %d \n", size, arena);
-
-        // We can't run GC from here cause it will reach semi-ready object
-        // behind us and die. :(
+        DEBUG_PRINT1("\n out of mem looking for %d bytes \n", size);
+        DEBUG_PRINT1(", arena %d \n", arena);
 
 #if 1 //GC_ENABLED
-        alloc_request_gc_pause--; // In the mutex to prevent one more giveup by GC
-        //hal_mutex_unlock( &alloc_mutex );
-
-        phantom_virtual_machine_threads_stopped++; // pretend we are stopped
-printf("will gc... ");
+        hal_mutex_unlock( &alloc_mutex );
         run_gc();
-printf("done gc\n");
-        phantom_virtual_machine_threads_stopped--;
-        alloc_request_gc_pause++;
-        //hal_mutex_lock( &alloc_mutex );
-
+        hal_mutex_lock( &alloc_mutex );
 #endif //GC_ENABLED
+
     } while(1);
 
-    alloc_request_gc_pause--; // In the mutex to prevent one more giveup by GC
     hal_mutex_unlock( &alloc_mutex );
 
     return data;
@@ -412,12 +411,11 @@ static long used_large_o[ARENAS];
 pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned int flags, bool saturated )
 {
     unsigned int size = sizeof(pvm_object_storage_t) + data_area_size;
-    size = (((size - 1)/ 4) + 1) * 4 ;  //align 4 bytes
 
     pvm_object_storage_t * data;
 
     int arena = find_arena(size, flags, saturated);
-
+    size = round_size(size, arena);
 
     data = pool_alloc(size, arena);
 
@@ -585,33 +583,48 @@ static void memcheck_print_histogram(int arena)
 // -----------------------------------------------------------------------
 
 
-void init_gc() {};
+//static void init_gc() {};
 
 static void free_unmarked();
 static void mark_tree(pvm_object_storage_t * root);
-static void gc_bump_process_children(pvm_object_storage_t *o);
+static void gc_process_children(pvm_object_storage_t *o);
 
+
+//// TODO include
+//extern int phantom_virtual_machine_threads_stopped;
+static volatile int  gc_n_run = 0;
 
 void run_gc()
 {
+    int n_run = gc_n_run;
+
+    hal_mutex_lock( &alloc_mutex );
+    if (n_run != gc_n_run) { hal_mutex_unlock( &alloc_mutex ); return; }
+    //phantom_virtual_machine_threads_stopped++; // pretend we are stopped
+    //TODO: refine sinchronization
+
     pvm_memcheck();  // visualization
     DEBUG_PRINT("gc started...\n");
 
 
-    // First pass - tree walk, recursively (for now).
+    // First pass - tree walk, mark visited.
     //
-    // Root always used. All other objects, including pvm_root and pvm_root.threads_list, should be reached from root...
+    // Root is always used. All other objects, including pvm_root and pvm_root.threads_list, should be reached from root...
     pvm_object_storage_t *root = get_root_object_storage();
+    mark_tree( root );
 
-    mark_tree( root ); // Root is allways used
 
-
-    // Second pass - linear walk to free unused objects
+    // Second pass - linear walk to free unused objects.
     //
     free_unmarked();
 
     DEBUG_PRINT("gc finished!\n");
     pvm_memcheck();  // visualization
+
+    //TODO refine sinchronization
+    //phantom_virtual_machine_threads_stopped--;
+    gc_n_run++;
+    hal_mutex_unlock( &alloc_mutex );
 }
 
 
@@ -653,7 +666,7 @@ static void mark_tree(pvm_object_storage_t * p)
     // Fast skip if no children -
     if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) )
     {
-        gc_bump_process_children(p);
+        gc_process_children(p);
     }
 }
 
@@ -668,7 +681,7 @@ static void add_from_internal(pvm_object_storage_t * o, void *arg)
     mark_tree( o );
 }
 
-static void gc_bump_process_children(pvm_object_storage_t *o)
+static void gc_process_children(pvm_object_storage_t *o)
 {
     mark_tree_o( o->_class );
 
@@ -774,9 +787,8 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
     if(o->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD) )
     {
         /*
-         * NB! It is FORBIDDEN to follow references in stack frame manually.
          *
-         * Special version of thread iter function for refcount - avoid following stack frames.
+         * Special version of thread iter function for refcount, uses ref_free_stackframe().
          *
          */
         pvm_gc_iter_thread_1( add_from_internal, o, 0 );
@@ -818,28 +830,20 @@ static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
 {
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount == 0 );
+    assert( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) );
 
-    // Fast skip if no children
-    if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
-    {
-        p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
-        debug_catch_object("del", p);
-        DEBUG_PRINT("-");
-    }
-    else
-    {
-        // postpone for delayed inspection (bug or feature?)
-        p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
-        DEBUG_PRINT("(X)");
+    // postpone for delayed inspection (bug or feature?)
 
-        // FIXME must not be so in final OS, stack overflow possiblity!
-        // TODO use some local pool too, instead of recursion
+    DEBUG_PRINT("(X)");
+    hal_mutex_lock( &alloc_mutex );
+    p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
 
-        // or, alternatively, just comment out the following lines to postpone deallocation to future
-        hal_mutex_lock( &alloc_mutex );
-        refzero_process_children( p );
-        hal_mutex_unlock( &alloc_mutex );
-    }
+    // FIXME must not be so in final OS, stack overflow possiblity!
+    // TODO use some local pool too, instead of recursion
+    // or, alternatively, just comment out lock and processing of children to postpone deallocation for the future
+
+    refzero_process_children( p );
+    hal_mutex_unlock( &alloc_mutex );
 }
 
 
@@ -876,7 +880,16 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
     if(p->_ah.refCount < INT_MAX) // Do we really need this check? Sure, we see many decrements for saturated objects!
     {
         if( 0 == ( --(p->_ah.refCount) ) )
-            ref_dec_proccess_zero(p);
+        {
+            // Fast way if no children
+            if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
+            {
+                p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
+                debug_catch_object("del", p);
+                DEBUG_PRINT("-");
+            } else
+                ref_dec_proccess_zero(p);
+        }
     }
 }
 
@@ -898,8 +911,6 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
 }
 
 
-//external calls:
-
 // Make sure this object won't be deleted with refcount dec
 // used on sys global objects
 static inline void ref_saturate_p(pvm_object_storage_t *p)
@@ -913,6 +924,8 @@ static inline void ref_saturate_p(pvm_object_storage_t *p)
     p->_ah.refCount = INT_MAX;
 }
 
+
+//external calls:
 void ref_saturate_o(pvm_object_t o)
 {
     if(!(o.data)) return;

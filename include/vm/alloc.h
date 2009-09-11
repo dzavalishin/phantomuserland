@@ -15,9 +15,6 @@
 #include "vm/object.h"
 
 
-#define GC_ENABLED 0
-
-
 
 
 
@@ -35,14 +32,6 @@
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
 
 
-
-
-
-
-// gc
-
-void run_gc();
-void init_gc();
 
 
 
@@ -69,6 +58,12 @@ int pvm_memcheck();
 bool pvm_object_is_allocated_light(pvm_object_storage_t *p);
 bool pvm_object_is_allocated(pvm_object_storage_t *p);
 void pvm_object_is_allocated_assert(pvm_object_storage_t *p);
+
+
+
+// gc
+
+void run_gc();
 
 
 #endif // PVM_ALLOC_H
