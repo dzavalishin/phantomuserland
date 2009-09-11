@@ -59,4 +59,12 @@ struct virtio_blk_outhdr
 #define VIRTIO_BLK_S_OK		0
 #define VIRTIO_BLK_S_IOERR	1
 #define VIRTIO_BLK_S_UNSUPP	2
+
+
+struct virtio_blk_inhdr
+{
+      unsigned char status;
+};
+
+
 #endif /* _VIRTIO_BLK_H */

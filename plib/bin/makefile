@@ -1,3 +1,5 @@
+all:: classes
+
 MKBULK=mkbulk
 PLC=plc.cmd
 
