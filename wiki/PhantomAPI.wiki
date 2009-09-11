@@ -7,9 +7,9 @@
 
 == Existing APIs ==
 
-  * *TimeAPI* - time related calls (_getTimeServer()_)
+  * TimeAPI - time related calls (_getTimeServer()_)
 
-== ToDo ==
+== Todo ==
 
   * Threads (have wild impl, needs to be wrapped)
   * Net IO (TCP,UDP)
