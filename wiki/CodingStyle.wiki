@@ -1,0 +1,11 @@
+#summary Phantom coding conventions.
+#labels Phase-Implementation,Featured
+
+This page is incomplete.
+
+== C (Kernel/VM) ==
+
+  * Tabs: 4 spaces.
+  * Doxygen brief: Java style. (Up to first dot.)
+
+*Document your code!*
