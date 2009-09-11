@@ -1,0 +1,23 @@
+#summary List of all available APIs.
+#labels Phase-Design
+
+== Accessor ==
+
+*.phantom.os* - main accessor class
+
+== Existing APIs ==
+
+  * *TimeAPI* - time related calls (_getTimeServer()_)
+
+== ToDo ==
+
+  * Threads (have wild impl, needs to be wrapped)
+  * Net IO (TCP,UDP)
+  * Windows (started, not done)
+  * Random (Have pseudo-random in tetris code, extract, seed, need kernel API)
+  * Environment (name=value, have some impl. in .phantom.environment, need to define keys, access, etc)
+  * TTY style windows (have wild impl., need wrapper or redesign)
+  * Shell support - object directories
+  * Shell support - post boxes (to pass objects to another user)
+  * Application - base class for app
+  * Startup shell class control - some way to put kernel command line to kernel env, choose root shell class by kernel env. field value
