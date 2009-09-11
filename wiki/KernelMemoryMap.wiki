@@ -1,0 +1,42 @@
+#summary Phantom kernel memory structure.
+
+== IA32 Memory Map ==
+
+
+0x0 - 0x500 - BIOS data area, preserved
+
+0x500 - 0x100000 - low memory. Allocable except for I/O and ROM area (1mb-640k)
+
+0x100000 - 0x??????? = 1mb - ?mb = kernel
+
+kernel end - 0x40000000 = kernel heap, mapped as is
+
+0x40000000 - 0x80000000 = unmapped, used to allocate unbacked address space (mem mapped devices, etc)
+
+0x80000000 - 0xC0000000 = foreground, objects space
+
+== IA64 Memory Map ==
+
+TODO. Supposedly:
+
+0x40000000 - 0x80000000 = unmapped, used to allocate unbacked address space (mem mapped devices, etc)
+
+0x80000000 - max positive ptr = foreground, objects space
+
+min neg - 0 = kernel
+
+== Problems ==
+
+ * Videomem does not work if mapped not identically.
+
+== Memory TODO ==
+
+ * Current phys mem allocator works with mapped memory directly. Divide in physical allocator and heap (which can sbrk using phys allocator).
+ * VM86 is implemented and does some low mem access. Document it!
+ * Page 0 - unmap to catch null ptr accesses.
+ * POSIX code - CS/DS segments mapped to binary objects
+
+== To think about ==
+
+Interpreter code in a special segment?
+
