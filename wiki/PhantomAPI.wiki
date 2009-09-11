@@ -7,7 +7,7 @@
 
 == Existing APIs ==
 
-  * TimeAPI - time related calls (_getTimeServer()_)
+  * *[TimeAPI]* - time related calls (_getTimeServer()_)
 
 == Todo ==
 
