@@ -52,4 +52,7 @@ We need volunteers for these:
 
   * *Graphical shell*. Something to start with.
   * *Posix support*. Map two binary objects to DS/CS, run native thread, support syscall mapping.
+  * *LLVM fast code*. In addition to posix subsystem it would be nice to have a specific LLVM subsystem which can offer programmers hispeed, but portable (to Phantom on other arch) programming framework. The same CS/DS binary objects, but executable code is LLVM-level and passed through LLVM backend before being run for the first time.
   * *OpenGL*. In fact, it is quite easy to get TinyGL working (it is already done for kernel), but we need a clean userland interface and understanding of interoperation for multiiple simult. threads doing GL rendering in a same env.
+  * *Sound drivers*. At least some very simple AC97 wave output one?
+  * *Video codecs environment*. Seems to be requiring Posix/LLVM support first. The first goal is to be able to give it an MPEG binary for playing.
