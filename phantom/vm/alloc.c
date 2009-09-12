@@ -23,10 +23,10 @@
 #include "vm/object_flags.h"
 
 
-#define test_gc_load 1
+#define debug_allocation 0
 
 
-#if test_gc_load
+#if debug_allocation
 #define DEBUG_PRINT(a)    printf(a)
 #define DEBUG_PRINT1(a,b)  printf(a,b)
 #else
@@ -59,7 +59,7 @@ static void * curr_a[ARENAS];
 // Names helper
 static const char* name_a[ARENAS] = { "root, static", "stack", "int", "small", "large" };
 // Partition
-#if test_gc_load
+#if debug_allocation
 static int percent_a[ARENAS] = { 15, 15, 2, 54, 14 };  // play with numbers
 #else
 static int percent_a[ARENAS] = { 15, 15, 2, 18, 50 };
@@ -381,14 +381,11 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
         if(ngc-- <= 0)
             break;
 
-        DEBUG_PRINT1("\n out of mem looking for %d bytes \n", size);
-        DEBUG_PRINT1(", arena %d \n", arena);
+        printf("\n out of mem looking for %d bytes, arena %d. Run GC... \n", size, arena);
 
-#if 1 //GC_ENABLED
         hal_mutex_unlock( &alloc_mutex );
         run_gc();
         hal_mutex_lock( &alloc_mutex );
-#endif //GC_ENABLED
 
     } while(1);
 
@@ -593,13 +590,21 @@ static void gc_process_children(pvm_object_storage_t *o);
 //// TODO include
 //extern int phantom_virtual_machine_threads_stopped;
 static volatile int  gc_n_run = 0;
+static unsigned char  gc_flags_last_generation = 0;
 
 void run_gc()
 {
-    int n_run = gc_n_run;
+    int my_run = gc_n_run;
 
     hal_mutex_lock( &alloc_mutex );
-    if (n_run != gc_n_run) { hal_mutex_unlock( &alloc_mutex ); return; }
+
+    if (my_run != gc_n_run) // lock acquired when concurrent gc run finished
+        { hal_mutex_unlock( &alloc_mutex ); return; }
+    gc_n_run++;
+
+    gc_flags_last_generation++; // bump generation
+    if (gc_flags_last_generation == 0)  gc_flags_last_generation++;  // != 0 'cause allocation reset gc_flags to zero
+
     //phantom_virtual_machine_threads_stopped++; // pretend we are stopped
     //TODO: refine sinchronization
 
@@ -610,20 +615,19 @@ void run_gc()
     // First pass - tree walk, mark visited.
     //
     // Root is always used. All other objects, including pvm_root and pvm_root.threads_list, should be reached from root...
-    pvm_object_storage_t *root = get_root_object_storage();
-    mark_tree( root );
+    mark_tree( get_root_object_storage() );
 
 
     // Second pass - linear walk to free unused objects.
     //
     free_unmarked();
 
+
     DEBUG_PRINT("gc finished!\n");
     pvm_memcheck();  // visualization
 
     //TODO refine sinchronization
     //phantom_virtual_machine_threads_stopped--;
-    gc_n_run++;
     hal_mutex_unlock( &alloc_mutex );
 }
 
@@ -634,23 +638,26 @@ static void free_unmarked()
     for( curr = pvm_object_space_start; curr < pvm_object_space_end ; curr += ((pvm_object_storage_t *)curr)->_ah.exact_size )
     {
         pvm_object_storage_t * p = (pvm_object_storage_t *)curr;
+        assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
-        if (p->_ah.gc_flags != 0)
-            p->_ah.gc_flags = 0;  // clear marked
-        else
-            if ( p->_ah.refCount > 0 )
-            {
-                debug_catch_object("gc", p);
-                p->_ah.refCount = 0;  // free now
-                p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE; // free now
-            }
+        if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.refCount > 0 ) )  //touch only not accessed but allocated objects
+        {
+            debug_catch_object("gc", p);
+            p->_ah.refCount = 0;  // free now
+            p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE; // free now
+        }
     }
 }
 
 static inline void mark(pvm_object_storage_t * p)
 {
-    if (p != 0)
-       p->_ah.gc_flags = 1;
+    if (p == 0)
+        return;
+
+    p->_ah.gc_flags = gc_flags_last_generation;
+
+    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
 }
 
 static void mark_tree(pvm_object_storage_t * p)
@@ -658,7 +665,7 @@ static void mark_tree(pvm_object_storage_t * p)
     if (p == 0)
         return;
 
-    if (p->_ah.gc_flags == 1)
+    if (p->_ah.gc_flags == gc_flags_last_generation)
         return; // already done
 
     mark(p);
@@ -676,7 +683,7 @@ static void mark_tree_o(struct pvm_object o)
     mark_tree(o.interface);
 }
 
-static void add_from_internal(pvm_object_storage_t * o, void *arg)
+static void gc_add_from_internal(pvm_object_storage_t * o, void *arg)
 {
     mark_tree( o );
 }
@@ -707,7 +714,7 @@ static void gc_process_children(pvm_object_storage_t *o)
 
     gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( o->_class, class )->sys_table_id].iter;
 
-    func( add_from_internal, o, 0 );
+    func( gc_add_from_internal, o, 0 );
 }
 
 
@@ -723,7 +730,7 @@ static void gc_process_children(pvm_object_storage_t *o)
 // PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO flag too.
 // -----------------------------------------------------------------------
 
-static void refzero_mark_or_add( pvm_object_storage_t * o );
+static inline void ref_dec_p(pvm_object_storage_t *p);
 static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg);
 static void do_refzero_process_children( pvm_object_storage_t *o );
 void ref_free_stackframe( pvm_object_storage_t *o ); // TODO to header!
@@ -791,7 +798,7 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
          * Special version of thread iter function for refcount, uses ref_free_stackframe().
          *
          */
-        pvm_gc_iter_thread_1( add_from_internal, o, 0 );
+        pvm_gc_iter_thread_1( refzero_add_from_internal, o, 0 );
         return;
     }
 
@@ -809,7 +816,6 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
     //ref_dec_o( o->_class );  // Why?
 }
 
-static inline void ref_dec_p(pvm_object_storage_t *p);
 
 static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
 {
@@ -851,9 +857,9 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
     //if( p != 0x7A9F3527 )
-    if( !test_gc_load )
-        return;
-    if( 0 != strcmp(msg, "gc") )
+    //if( !debug_allocation )
+        //return;
+    if( 0 != strncmp(msg, "gc", 2) )
         return;
     printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
 
@@ -901,10 +907,10 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount > 0 );
 
-    if( p->_ah.refCount <= 0 )
-    {
-        panic("p->_ah.refCount <= 0: 0x%X", p);
-    }
+    //if( p->_ah.refCount <= 0 )
+    //{
+    //    panic("p->_ah.refCount <= 0: 0x%X", p);
+    //}
 
     if( p->_ah.refCount < INT_MAX )
         (p->_ah.refCount)++;
