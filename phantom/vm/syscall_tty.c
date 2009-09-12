@@ -167,6 +167,8 @@ static int gotoxy_19(struct pvm_object me , struct data_area_4_thread *tc )
     //printf("gotoxy pix %d,%d\n", da->x, da->y );
     //printf("gotoxy font %d,%d\n", da->font_width, da->font_height );
     //validate_xy(da);
+    SYS_FREE_O(_x);
+    SYS_FREE_O(_y);
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -200,6 +202,7 @@ static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
 
     // TODO colors from attrs
     //printf("setcolor  font %d,%d\n", da->font_width, da->font_height );
+    SYS_FREE_O(_col);
 
     SYSCALL_RETURN_NOTHING;
 }

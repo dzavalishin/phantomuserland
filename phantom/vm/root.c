@@ -352,7 +352,7 @@ static int get_env_name_pos( const char *name )
 	int i;
 	for( i = 0; i < items; i++ )
 	{
-
+        //not implemented
 	}
 
 	return -1;
@@ -372,16 +372,16 @@ void phantom_setenv( const char *name, const char *value )
 	int pos = get_env_name_pos( name );
 
 	if(pos < 0)
-		pvm_append_array(pvm_root.kernel_environment.data,s);
+		pvm_append_array(pvm_root.kernel_environment.data, s);
 	else
-		pvm_set_array_ofield(pvm_root.kernel_environment.data,pos,s);
+		pvm_set_array_ofield(pvm_root.kernel_environment.data, pos, s);
 }
 
 int phantom_getenv( const char *name, char *value, int vsize )
 {
 	int pos = get_env_name_pos( name );
 	if( pos < 0 ) return 0;
-	pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data,pos);
+	pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, pos);
 	if( o.data == 0 ) return 0;
 	char *ed = pvm_get_str_data(o);
 	int el = pvm_get_str_len(o);
@@ -389,6 +389,7 @@ int phantom_getenv( const char *name, char *value, int vsize )
 	if( vsize > el ) vsize = el;
 
 	strncpy( value, ed, vsize );
+	ref_dec_o(o);
 
 	return 1;
 }

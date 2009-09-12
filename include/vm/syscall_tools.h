@@ -63,13 +63,7 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
 // Int/string parameters shortcuts
 // --------------------------------------------------------------------------
 
-#if 1
 #define SYS_FREE_O(o) ref_dec_o(o)
-#define SYS_FREE_P(o) ref_dec_p(o)
-#else
-#define SYS_FREE_O(o)
-#define SYS_FREE_P(o)
-#endif
 
 // Depends on GCC {} value extension
 

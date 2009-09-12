@@ -683,7 +683,7 @@ void   pvm_release_thread_object( struct pvm_object thread )
 	// remove from system threads list
 	pvm_pop_array(pvm_root.threads_list.data, thread);
 
-	ref_dec_o( thread );
+	//ref_dec_o( thread );  //the thread was released by pvm_pop_array(), do not understand how
 }
 
 

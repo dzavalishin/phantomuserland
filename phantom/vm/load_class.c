@@ -36,11 +36,11 @@ int debug_print = 0;
 //---------------------------------------------------------------------------
 
 
-struct method_loader_handler 
+struct method_loader_handler
 {
     struct pvm_code_handler 		ch;
 
-    struct pvm_object 			my_name;
+    //struct pvm_object 			my_name;
     struct pvm_object 			my_code;
     int            			my_ordinal;
 };
@@ -53,10 +53,12 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
     mh->ch.IP_max = in_size;
     mh->ch.IP = 0;
 
-    mh->my_name = pvm_code_get_string(&(mh->ch));
+    pvm_object_t name = pvm_code_get_string(&(mh->ch));
 
     if(debug_print) printf("Method is: " );
-    if(debug_print) pvm_object_print( mh->my_name );
+    if(debug_print) pvm_object_print( name );
+    //mh->my_name = name; //- not used
+    ref_dec_o(name);
 
     mh->my_ordinal = pvm_code_get_int32(&(mh->ch));
     if(debug_print) printf(", ordinal %d\n", mh->my_ordinal );
@@ -85,7 +87,6 @@ int pvm_load_class_from_memory( unsigned char * contents, int fsize, struct pvm_
     int record_size = 0;
 
     struct pvm_object class_name;
-    struct pvm_object base_name;
     struct pvm_object base_class = pvm_get_null_class();
 
     int n_object_slots = 0; // for a new class
@@ -134,16 +135,20 @@ int pvm_load_class_from_memory( unsigned char * contents, int fsize, struct pvm_
                 if(debug_print) printf("Class is: " );
 
                 class_name = pvm_code_get_string(&h);//.get_string();
-
                 if(debug_print) pvm_object_print( class_name );
+
                 n_object_slots = pvm_code_get_int32(&h); //.get_int32();
                 if(debug_print) printf(", %d fileds", n_object_slots );
+
                 n_method_slots = pvm_code_get_int32(&h);
                 if(debug_print) printf(", %d methods\n", n_method_slots );
-                base_name = pvm_code_get_string(&h);
+
+                struct pvm_object base_name = pvm_code_get_string(&h);
                 if(debug_print) printf("Based on: ");
                 if(debug_print) pvm_object_print( base_name );
                 if(debug_print) printf("\n");
+                ref_dec_o(base_name);
+
                 got_class_header = 1;
 
                 // BUG! Fix me!
