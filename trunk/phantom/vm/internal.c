@@ -247,10 +247,11 @@ int     pvm_iclass_by_class( struct pvm_object_storage *cs )
 
 int     pvm_iclass_by_name( const char *name )
 {
+    int len = strlen(name);
     int i;
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
-        if( 0 == strcmp( pvm_internal_classes[i].name, name ) )
+        if( 0 == strncmp( pvm_internal_classes[i].name, name, len ) )
             return i;
     }
     panic("no iclass named %s", name);

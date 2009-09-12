@@ -36,7 +36,7 @@ static int debug_print = 0;
 //
 //	Default syscalls.
 //
-//	Any class with internal implementation will ptresent at least:
+//	Any class with internal implementation will present at least:
 //
 //	sys 0:	Construct. No args.
 //
@@ -464,9 +464,11 @@ static int si_thread_12_getEnvironment(struct pvm_object me, struct data_area_4_
 
     if( pvm_is_null(meda->environment) )
     {
-    	struct pvm_object cl;
-    	cl = pvm_exec_lookup_class( tc, pvm_create_string_object(".phantom.environment"));
-    	meda->environment = pvm_create_object(cl);
+        struct pvm_object env = pvm_create_string_object(".phantom.environment");
+        struct pvm_object cl;
+        cl = pvm_exec_lookup_class( tc, env );
+        meda->environment = pvm_create_object(cl);
+        ref_dec_o(env);
     }
 
     SYSCALL_RETURN(meda->environment);
@@ -797,6 +799,7 @@ static int si_bootstrap_9_load_code(struct pvm_object me, struct data_area_4_thr
 
     SYSCALL_RETURN(pvm_object_storage::create_code( cs.get_code_size(), cs.get_code() ));
 #else
+    SYS_FREE_O(name);
     SYSCALL_THROW_STRING( "load code not implemented" );
 #endif
 }
@@ -946,7 +949,7 @@ static int si_bootstrap_23_getenv(struct pvm_object me, struct data_area_4_threa
     SYSCALL_RETURN(pvm_root.kernel_environment);
 }
 
-syscall_func_t	syscall_table_4_boot[23] =
+syscall_func_t	syscall_table_4_boot[24] =
 {
     &si_void_0_construct,           	&si_void_1_destruct,
     &si_void_2_class,               	&si_void_3_clone,

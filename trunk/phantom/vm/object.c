@@ -70,7 +70,6 @@ struct pvm_object  pvm_get_array_ofield(struct pvm_object_storage *o, unsigned i
     if( slot >= da->used_slots )
         pvm_exec_throw( "load: array index out of bounds" );
 
-    verify_o(pvm_get_ofield( da->page, slot));
     return pvm_get_ofield( da->page, slot);
 }
 
@@ -134,15 +133,19 @@ void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_
     struct data_area_4_array *da = (struct data_area_4_array *)&(array->da);
 
     //swap with last and decrement used_slots
+    struct pvm_object *p = da_po_ptr((da->page.data)->da);
     unsigned int slot;
     for( slot = 0; slot < da->used_slots; slot++ )
-        if ( pvm_get_ofield( da->page, slot ).data == value_to_pop.data )
+    {
+        if ( ( p[slot] ).data == value_to_pop.data )  //please don't leak refcnt
         {
-            if (slot != da->used_slots-1)
-                pvm_set_ofield( da->page, slot, pvm_get_ofield( da->page, da->used_slots-1 ) );
+            if (slot != da->used_slots-1) {
+                p[slot] = p[da->used_slots-1];
+            }
             da->used_slots--;
             return;
         }
+    }
 
     pvm_exec_throw( "attempt to remove non existing element from array" );
 }
@@ -174,8 +177,8 @@ pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
         pvm_exec_throw( "save: slot index out of bounds" );
     }
 
-    ref_inc_o(da_po_ptr(o->da)[slot]);
     verify_o(da_po_ptr(o->da)[slot]);
+    ref_inc_o(da_po_ptr(o->da)[slot]);
     return da_po_ptr(o->da)[slot];
 }
 
@@ -198,8 +201,8 @@ pvm_get_ofield( struct pvm_object op, unsigned int slot )
         pvm_exec_throw( "load: slot index out of bounds" );
     }
 
-    ref_inc_o(da_po_ptr((op.data)->da)[slot]);
     verify_o(da_po_ptr((op.data)->da)[slot]);
+    ref_inc_o(da_po_ptr((op.data)->da)[slot]);
     return da_po_ptr((op.data)->da)[slot];
 }
 
@@ -225,7 +228,7 @@ pvm_set_field( struct pvm_object_storage *o, unsigned int slot, struct pvm_objec
         pvm_exec_throw( "load: slot index out of bounds" );
     }
 
-    if(da_po_ptr(o->da)[slot].data)     ref_dec_o(da_po_ptr(o->da)[slot]);
+    if(da_po_ptr(o->da)[slot].data)     ref_dec_o(da_po_ptr(o->da)[slot]);  //decr old value
     da_po_ptr(o->da)[slot] = value;
 }
 
@@ -250,7 +253,7 @@ pvm_set_ofield( struct pvm_object op, unsigned int slot, struct pvm_object value
         pvm_exec_throw( "slot index out of bounds" );
     }
 
-    if(da_po_ptr((op.data)->da)[slot].data) ref_dec_o(da_po_ptr((op.data)->da)[slot]);
+    if(da_po_ptr((op.data)->da)[slot].data) ref_dec_o(da_po_ptr((op.data)->da)[slot]);  //decr old value
     da_po_ptr((op.data)->da)[slot] = value;
 }
 

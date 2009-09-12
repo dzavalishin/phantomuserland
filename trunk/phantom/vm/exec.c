@@ -33,12 +33,18 @@
 //#define hal_printf printf
 
 
+/*
+ * NB! Refcount contract:
+ *        operations with stack (push, pop, top) and stack "alloca" pvm_ostack_abs_get/pvm_ostack_abs_set do not change refcount - just copy pointers;
+ *        pvm_set_[o]field do not change refcount;
+ *        pvm_get_[o]field - do increment;
+ */
+
 
 #define DEB_CALLRET 0
 
 //static int debug_print_instr = 1;
 int debug_print_instr = 0;
-
 
 
 /**
@@ -157,7 +163,6 @@ static void pvm_exec_get( struct data_area_4_thread *da, unsigned abs_stack_pos 
 static void pvm_exec_set( struct data_area_4_thread *da, unsigned abs_stack_pos )
 {
     if( debug_print_instr ) hal_printf("os stack set %d; ", abs_stack_pos);
-    // TODO killing var in stack - dec refcount
     pvm_ostack_abs_set( da->_ostack, abs_stack_pos, os_pop() );
 }
 
@@ -422,7 +427,9 @@ void pvm_exec(struct pvm_object current_thread)
                     hal_printf(" (" );
                     //cf->cs.get_string( cf->IP ).my_data()->print();
                     //get_string().my_data()->print();
-                    pvm_object_print( pvm_code_get_string(&(da->code)) );
+                    pvm_object_t o = pvm_code_get_string(&(da->code));
+                    pvm_object_print(o);
+                    ref_dec_o(o);
                     hal_printf(")" );
                 }
 
@@ -733,7 +740,8 @@ void pvm_exec(struct pvm_object current_thread)
                 struct pvm_object name = pvm_code_get_string(&(da->code));
                 //os_push(pvm_object_storage::get_string_class() );
                 //hal_printf("ERROR: summon by name; "); name.my_data()->print();
-                struct pvm_object cl = pvm_exec_lookup_class(da,name);
+                struct pvm_object cl = pvm_exec_lookup_class(da, name);
+                ref_dec_o(name);
                 // TODO: Need throw here? Just return null
                 if( pvm_is_null( cl ) )
                     pvm_exec_throw("summon by name: null class");
@@ -756,7 +764,6 @@ void pvm_exec(struct pvm_object current_thread)
         case opcode_new:
             if( debug_print_instr ) hal_printf("new; ");
             {
-                //os_push( pvm_object_storage::create( os_pop(), 0 ) );
                 pvm_object_t cl = os_pop();
                 os_push( pvm_create_object( cl ) );
                 ref_dec_o( cl );
@@ -765,8 +772,9 @@ void pvm_exec(struct pvm_object current_thread)
 
         case opcode_copy:
             if( debug_print_instr ) hal_printf("copy; ");
-            // incs refcounts there
-            os_push( pvm_copy_object( os_pop() ) );
+            pvm_object_t o = os_pop();
+            os_push( pvm_copy_object( o ) );
+            ref_dec_o(o);
             break;
 
             // TODO if you want to enable these, work out refcount
@@ -1170,7 +1178,7 @@ static struct pvm_object pvm_exec_compose_object(
     for( i = 0; i < to_pop; i++ )
     {
         data_area[i] = pvm_ostack_pop( in_stack );
-        ref_inc_o(data_area[i]);
+        //ref_inc_o(data_area[i]); -- not needed - popped from stack
     }
 
     for( ; i < max; i++ )
