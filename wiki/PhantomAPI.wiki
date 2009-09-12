@@ -21,3 +21,4 @@
   * Shell support - post boxes (to pass objects to another user)
   * Application - base class for app
   * Startup shell class control - some way to put kernel command line to kernel env, choose root shell class by kernel env. field value
+  * *[MemoryAPI]* - special memory allocation related calls (_getMemoryServer()_)
