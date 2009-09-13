@@ -35,9 +35,8 @@
 
 /*
  * NB! Refcount contract:
- *        operations with stack (push, pop, top) and stack "alloca" pvm_ostack_abs_get/pvm_ostack_abs_set do not change refcount - just copy pointers;
- *        pvm_set_[o]field do not change refcount;
- *        pvm_get_[o]field - do increment;
+ *        all push/pop/get/set operations with objects just copy pointers and do not change refcount
+ *        - someone who consumes the arg must!
  */
 
 
@@ -125,7 +124,9 @@ void pvm_exec_save_fast_acc(struct data_area_4_thread *da)
 static void pvm_exec_load( struct data_area_4_thread *da, unsigned slot )
 {
     if( debug_print_instr ) hal_printf("os load %d; ", slot);
-    os_push( pvm_get_ofield( this_object(), slot) );
+    struct pvm_object o = pvm_get_ofield( this_object(), slot);
+    ref_inc_o( o );
+    os_push( o );
 }
 
 static void pvm_exec_save( struct data_area_4_thread *da, unsigned slot )
@@ -139,9 +140,7 @@ static void pvm_exec_iload( struct data_area_4_thread *da, unsigned slot )
 {
     if( debug_print_instr ) hal_printf("is load %d; ", slot);
     // TODO pvm_get_asint must return int and do not change refcount
-    pvm_object_t o = pvm_get_ofield( this_object(), slot);
-    int v = pvm_get_int( o );
-    ref_dec_o(o);
+    int v = pvm_get_int( pvm_get_ofield( this_object(), slot) );
     is_push( v );
 }
 
@@ -799,7 +798,9 @@ void pvm_exec(struct pvm_object current_thread)
                 while( num )
                 {
                     num--;
-                    os_push( pvm_get_ofield( to_decomp, num) );
+                    struct pvm_object o = pvm_get_ofield( to_decomp, num);
+                    ref_inc_o( o );
+                    os_push( o );
                 }
                 os_push(to_decomp.data->_class);
             }
@@ -949,8 +950,7 @@ void pvm_exec(struct pvm_object current_thread)
             if( debug_print_instr ) hal_printf("pop catcher; ");
             //cf->pop_catcher();
             //call_frame.estack().pop();
-            // TODO dec refcnt
-            es_pop();
+            ref_dec_o( es_pop().object );
             break;
 
             // ok, now method calls ------------------------------------------------------

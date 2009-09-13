@@ -23,6 +23,7 @@
 #include "vm/object_flags.h"
 
 
+#define debug_memory_leaks 0
 #define debug_allocation 0
 
 
@@ -545,7 +546,7 @@ static int memcheck_one(int i, void * start, void * end)
     if((void *)curr == end)
     {
         printf("Memcheck: reached exact arena end at 0x%X (%d bytes used)\n", curr, ((void *)curr) - start );
-        memcheck_print_histogram(i);
+        if (debug_memory_leaks) memcheck_print_histogram(i);
         return 0;
     }
 
@@ -582,7 +583,7 @@ static void memcheck_print_histogram(int arena)
 
 //static void init_gc() {};
 
-static void free_unmarked();
+static int free_unmarked();
 static void mark_tree(pvm_object_storage_t * root);
 static void gc_process_children(pvm_object_storage_t *o);
 
@@ -608,8 +609,8 @@ void run_gc()
     //phantom_virtual_machine_threads_stopped++; // pretend we are stopped
     //TODO: refine sinchronization
 
-    pvm_memcheck();  // visualization
-    DEBUG_PRINT("gc started...\n");
+    if (debug_memory_leaks) pvm_memcheck();  // visualization
+    if (debug_memory_leaks) printf("gc started...  ");
 
 
     // First pass - tree walk, mark visited.
@@ -620,11 +621,13 @@ void run_gc()
 
     // Second pass - linear walk to free unused objects.
     //
-    free_unmarked();
+    int freed = free_unmarked();
 
+    if ( freed > 0 )
+       printf("\ngc: %d objects freed\n", freed);
 
-    DEBUG_PRINT("gc finished!\n");
-    pvm_memcheck();  // visualization
+    if (debug_memory_leaks) pfintf("gc finished!\n");
+    if (debug_memory_leaks) pvm_memcheck();  // visualization
 
     //TODO refine sinchronization
     //phantom_virtual_machine_threads_stopped--;
@@ -632,8 +635,9 @@ void run_gc()
 }
 
 
-static void free_unmarked()
+static int free_unmarked()
 {
+    int freed = 0;
     void * curr;
     for( curr = pvm_object_space_start; curr < pvm_object_space_end ; curr += ((pvm_object_storage_t *)curr)->_ah.exact_size )
     {
@@ -642,33 +646,26 @@ static void free_unmarked()
 
         if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.refCount > 0 ) )  //touch only not accessed but allocated objects
         {
+            freed++;
             debug_catch_object("gc", p);
             p->_ah.refCount = 0;  // free now
             p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE; // free now
         }
     }
-}
-
-static inline void mark(pvm_object_storage_t * p)
-{
-    if (p == 0)
-        return;
-
-    p->_ah.gc_flags = gc_flags_last_generation;
-
-    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    return freed;
 }
 
 static void mark_tree(pvm_object_storage_t * p)
 {
-    if (p == 0)
-        return;
-
     if (p->_ah.gc_flags == gc_flags_last_generation)
         return; // already done
 
-    mark(p);
+    p->_ah.gc_flags = gc_flags_last_generation;
+
+
+    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+
 
     // Fast skip if no children -
     if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) )
@@ -677,15 +674,18 @@ static void mark_tree(pvm_object_storage_t * p)
     }
 }
 
-static void mark_tree_o(struct pvm_object o)
+static void mark_tree_o(pvm_object_t o)
 {
-    mark_tree(o.data);
-    mark_tree(o.interface);
+    if(o.data == 0) // Don't try to process null objects
+        return;
+
+    mark_tree( o.data );
+    mark_tree( o.interface );
 }
 
-static void gc_add_from_internal(pvm_object_storage_t * o, void *arg)
+static void gc_add_from_internal(pvm_object_t o, void *arg)
 {
-    mark_tree( o );
+    mark_tree_o( o );
 }
 
 static void gc_process_children(pvm_object_storage_t *o)
@@ -730,8 +730,7 @@ static void gc_process_children(pvm_object_storage_t *o)
 // PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO flag too.
 // -----------------------------------------------------------------------
 
-static inline void ref_dec_p(pvm_object_storage_t *p);
-static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg);
+static void refzero_add_from_internal(pvm_object_t o, void *arg);
 static void do_refzero_process_children( pvm_object_storage_t *o );
 void ref_free_stackframe( pvm_object_storage_t *o ); // TODO to header!
 
@@ -813,17 +812,16 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
 
 
     //don't touch classes yet
-    //ref_dec_o( o->_class );  // Why?
+    //ref_dec_o( o->_class );  // Why? Class objects are saturated for now.
 }
 
 
-static void refzero_add_from_internal(pvm_object_storage_t * o, void *arg)
+static void refzero_add_from_internal(pvm_object_t o, void *arg)
 {
-    if ( o == 0 )
-       return;
+    //if(o.data == 0) // Don't try to process null objects - never happen in fact!
+    //   return;
 
-    DEBUG_PRINT("Ku");
-    ref_dec_p( o );
+    ref_dec_o( o );
 }
 
 
@@ -857,13 +855,13 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
     //if( p != 0x7A9F3527 )
-    //if( !debug_allocation )
-        //return;
-    if( 0 != strncmp(msg, "gc", 2) )
+    if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
+    //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING) )
         return;
     printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
 
     print_object_flags(p);
+    //dumpo(p);
     //getchar();
     printf("\n"); // for GDB to break here
 }

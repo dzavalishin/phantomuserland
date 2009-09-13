@@ -345,7 +345,7 @@ int pvm_estack_foreach(
  * Stack objects creation.
  * NB. We are deliberately do not use classic init by constructor
  * to speedup creation.
- * TODO: some kind of object pools to recycle stack objects?
+ * TODO: some kind of object pools to recycle stack objects?  Just in the thread object.
  *
  * ssize is number of slots in page
 **/
@@ -404,13 +404,8 @@ void pvm_internal_init_ostack(struct pvm_object_storage *os )
     sda->curr_da = (void *)sda;
 }
 
-static inline void gc_fcall( void (*f)(struct pvm_object_storage * o, void *arg), void *arg, pvm_object_t o )
-{
-	if(o.data == 0) // Don't try to process null objects
-		return;
-	f( o.data, arg);
-	f( o.interface, arg );
-}
+
+#define gc_fcall( f, arg, o )   f( o, arg )
 
 void pvm_gc_iter_ostack(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {

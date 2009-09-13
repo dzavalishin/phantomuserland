@@ -254,8 +254,7 @@ void pvm_gc_iter_page(gc_iterator_call_t func, struct pvm_object_storage * os, v
 	int i;
 	for( i = 0; i < n_slots; i++ )
 	{
-		func( data_area[i].data, arg );
-		func( data_area[i].interface, arg );
+		func( data_area[i], arg );
 	}
 }
 
@@ -293,7 +292,7 @@ void pvm_internal_init_call_frame(struct pvm_object_storage * os)
 
 
 
-#define gc_fcall( f, a, o ) { if(o.data != 0) {f( o.data, arg); f( o.interface, arg );}}
+#define gc_fcall( f, arg, o )   f( o, arg )
 
 
 // GC only, not for refcount!
@@ -507,8 +506,8 @@ void pvm_gc_iter_thread_1(gc_iterator_call_t func, struct pvm_object_storage * o
 	struct data_area_4_thread *da = (struct data_area_4_thread *)&(os->da);
 	//gc_fcall( func, arg, da->call_frame );  //call_frame could not be proccessed by refcount currently
 	ref_free_stackframe( da->call_frame.data );
-	gc_fcall( func, arg, da->owner );
-	gc_fcall( func, arg, da->environment );
+	//gc_fcall( func, arg, da->owner );
+	//gc_fcall( func, arg, da->environment );  //both not implemented, initialized to 0
 }
 
 
