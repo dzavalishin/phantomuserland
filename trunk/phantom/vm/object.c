@@ -178,7 +178,6 @@ pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
     }
 
     verify_o(da_po_ptr(o->da)[slot]);
-    ref_inc_o(da_po_ptr(o->da)[slot]);
     return da_po_ptr(o->da)[slot];
 }
 
@@ -202,7 +201,6 @@ pvm_get_ofield( struct pvm_object op, unsigned int slot )
     }
 
     verify_o(da_po_ptr((op.data)->da)[slot]);
-    ref_inc_o(da_po_ptr((op.data)->da)[slot]);
     return da_po_ptr((op.data)->da)[slot];
 }
 

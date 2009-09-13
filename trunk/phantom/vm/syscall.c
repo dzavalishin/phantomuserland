@@ -445,7 +445,9 @@ static int si_thread_14_getOsInterface(struct pvm_object me, struct data_area_4_
 {
     DEBUG_INFO;
     struct pvm_object_storage *root = get_root_object_storage();
-    SYSCALL_RETURN( pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY ) );
+    struct pvm_object o = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
+    ref_inc_o(o);
+    SYSCALL_RETURN( o );
 }
 
 static int si_thread_13_getUser(struct pvm_object me, struct data_area_4_thread *tc )
@@ -1020,8 +1022,9 @@ static int si_array_10_get(struct pvm_object me, struct data_area_4_thread *tc )
     if( index >= da->used_slots )
         SYSCALL_THROW_STRING( "array get - index is out of bounds" );
 
-    //SYSCALL_RETURN( da->page.load(index) );
-    SYSCALL_RETURN( pvm_get_ofield( da->page, index) );
+    struct pvm_object o = pvm_get_ofield( da->page, index);
+    ref_inc_o( o );
+    SYSCALL_RETURN( o );
 }
 
 
@@ -1463,7 +1466,7 @@ static int si_world_8_getMyThread(struct pvm_object o, struct data_area_4_thread
 
     struct pvm_object out;
 
-    out.data = tc;
+    out.data = tc; //TODO: BUG: type mismatch!
     out.interface = thread_iface;
 
     ref_inc_o( out );

@@ -78,7 +78,6 @@ void pvm_root_init(void)
         pvm_internal_classes[i].class_object = pvm_get_field( root,
                        pvm_internal_classes[i].root_index
                        );
-        ref_saturate_o( pvm_internal_classes[i].class_object );
     }
 
     set_root_from_table();
@@ -92,16 +91,6 @@ void pvm_root_init(void)
     pvm_root.class_loader = pvm_get_field( root, PVM_ROOT_OBJECT_CLASS_LOADER );
     pvm_root.kernel_environment = pvm_get_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT );
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
-
-    ref_saturate_o( pvm_root.null_object );
-    ref_saturate_o( pvm_root.sys_interface_object );
-    ref_saturate_o( pvm_root.class_loader );
-    ref_saturate_o( pvm_root.threads_list );
-    ref_saturate_o( pvm_root.windows_list );
-    ref_saturate_o( pvm_root.users_list );
-    ref_saturate_o( pvm_root.kernel_environment );
-    ref_saturate_o( pvm_root.os_entry );
-
 }
 
 
@@ -119,20 +108,7 @@ static void pvm_save_root_objects()
                        pvm_internal_classes[i].root_index,
                        pvm_internal_classes[i].class_object
                      );
-        // Make sure refcount can't kill it
-        ref_saturate_o( pvm_internal_classes[i].class_object );
     }
-
-    // Make sure refcount can't kill it
-
-    ref_saturate_o( pvm_root.null_object );
-    ref_saturate_o( pvm_root.sys_interface_object );
-    ref_saturate_o( pvm_root.class_loader );
-    ref_saturate_o( pvm_root.threads_list );
-    ref_saturate_o( pvm_root.windows_list );
-    ref_saturate_o( pvm_root.users_list );
-    ref_saturate_o( pvm_root.kernel_environment );
-    ref_saturate_o( pvm_root.os_entry );
 
     pvm_set_field( root, PVM_ROOT_OBJECT_NULL, pvm_root.null_object );
     pvm_set_field( root, PVM_ROOT_OBJECT_SYSINTERFACE, pvm_root.sys_interface_object );
@@ -153,7 +129,7 @@ static void pvm_create_root_objects()
 {
     int root_da_size = PVM_ROOT_OBJECTS_COUNT * sizeof(struct pvm_object);
     unsigned int flags = 0; // usual plain vanilla array
-	// make sure refcount is disabled for all objects created here -- 3-rd argument of pvm_object_alloc is true
+	// make sure refcount is disabled for all objects created here: 3-rd argument of pvm_object_alloc is true (obsolete: ref_saturate_p)
 
     // Allocate the very first object
     struct pvm_object_storage *root = get_root_object_storage();
@@ -164,16 +140,11 @@ static void pvm_create_root_objects()
 
     // TODO set class later
 
-    //root->_da_size = root_da_size;  // alloc does it
-    //root->_flags = flags;  // alloc does it
-    //ref_saturate_p(root); // no refcount!  // alloc does it
-
     // Partially build interface object for internal classes
 
     flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE ;
     pvm_root.sys_interface_object.data = pvm_object_alloc( N_SYS_METHODS * sizeof(struct pvm_object), flags, 1 );
     pvm_root.sys_interface_object.interface = pvm_root.sys_interface_object.data;
-    //ref_saturate_p(pvm_root.sys_interface_object.data);
 
     pvm_root.null_object.data = pvm_object_alloc( 0, 0, 1 ); // da does not exist
     pvm_root.null_object.interface = pvm_root.sys_interface_object.data;
@@ -184,7 +155,6 @@ static void pvm_create_root_objects()
     {
         flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS ;
         struct pvm_object_storage *curr = pvm_object_alloc( sizeof( struct data_area_4_class ), flags, 1 );
-        //ref_saturate_p(curr);
         struct data_area_4_class *da = (struct data_area_4_class *)curr->da;
 
         da->sys_table_id 		= i; // so simple
@@ -198,10 +168,8 @@ static void pvm_create_root_objects()
     set_root_from_table();
 
     pvm_root.null_object.data->_class = pvm_root.null_class;
-    //pvm_root.null_object.data->_flags = 0;
 
     pvm_root.sys_interface_object.data->_class = pvm_root.interface_class;
-    //pvm_root.sys_interface_object.data->_flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE;
 
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
@@ -212,7 +180,6 @@ static void pvm_create_root_objects()
         da->object_default_interface    = pvm_root.sys_interface_object;
 
         curr->_class = pvm_root.class_class;
-        //curr->_flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS;
     }
 
 
@@ -381,15 +348,16 @@ int phantom_getenv( const char *name, char *value, int vsize )
 {
 	int pos = get_env_name_pos( name );
 	if( pos < 0 ) return 0;
+
 	pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, pos);
 	if( o.data == 0 ) return 0;
 	char *ed = pvm_get_str_data(o);
 	int el = pvm_get_str_len(o);
+    ref_dec_o(o);
 
 	if( vsize > el ) vsize = el;
 
 	strncpy( value, ed, vsize );
-	ref_dec_o(o);
 
 	return 1;
 }

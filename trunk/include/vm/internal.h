@@ -15,7 +15,7 @@
 
 
 typedef void (*init_func_t)( struct pvm_object_storage * os );
-typedef void (*gc_iterator_call_t)( struct pvm_object_storage * os, void *arg );
+typedef void (*gc_iterator_call_t)( struct pvm_object o, void *arg );
 typedef void (*gc_iterator_func_t)( gc_iterator_call_t func, struct pvm_object_storage * os, void *arg );
 
 

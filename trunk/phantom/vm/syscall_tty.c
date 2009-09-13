@@ -150,14 +150,8 @@ static int gotoxy_19(struct pvm_object me , struct data_area_4_thread *tc )
 
     CHECK_PARAM_COUNT(n_param, 2);
 
-    struct pvm_object _y = POP_ARG;
-    struct pvm_object _x = POP_ARG;
-
-    ASSERT_INT(_x);
-    ASSERT_INT(_y);
-
-    int gox = (int)pvm_get_int(_x);
-    int goy = (int)pvm_get_int(_y);
+    int gox = POP_INT();
+    int goy = POP_INT();
 
     //printf("gotoxy char %d,%d\n", gox, goy );
 
@@ -167,8 +161,6 @@ static int gotoxy_19(struct pvm_object me , struct data_area_4_thread *tc )
     //printf("gotoxy pix %d,%d\n", da->x, da->y );
     //printf("gotoxy font %d,%d\n", da->font_width, da->font_height );
     //validate_xy(da);
-    SYS_FREE_O(_x);
-    SYS_FREE_O(_y);
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -196,13 +188,11 @@ static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
 
     CHECK_PARAM_COUNT(n_param, 1);
 
-    struct pvm_object _col = POP_ARG;
-    ASSERT_INT(_col);
-    //int attr = (short)pvm_get_int(_col);
+    int color = POP_INT();
+    //int attr = (short)color;
 
     // TODO colors from attrs
     //printf("setcolor  font %d,%d\n", da->font_width, da->font_height );
-    SYS_FREE_O(_col);
 
     SYSCALL_RETURN_NOTHING;
 }
