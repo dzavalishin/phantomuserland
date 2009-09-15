@@ -627,7 +627,7 @@ void run_gc()
     if ( freed > 0 )
        printf("\ngc: %i objects freed\n", freed);
 
-    if (debug_memory_leaks) pfintf("gc finished!\n");
+    if (debug_memory_leaks) printf("gc finished!\n");
     if (debug_memory_leaks) pvm_memcheck();  // visualization
 
     //TODO refine sinchronization
