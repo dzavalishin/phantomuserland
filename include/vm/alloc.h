@@ -41,8 +41,8 @@
 // used on sys global objects
 void ref_saturate_o(pvm_object_t o);
 
-void ref_dec_o(pvm_object_t o);
-void ref_inc_o(pvm_object_t o);
+pvm_object_t  ref_dec_o(pvm_object_t o);
+pvm_object_t  ref_inc_o(pvm_object_t o);
 
 
 pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned int flags, bool saturated );

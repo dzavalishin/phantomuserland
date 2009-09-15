@@ -27,13 +27,8 @@
 #define debug_allocation 0
 
 
-#if debug_allocation
-#define DEBUG_PRINT(a)    printf(a)
-#define DEBUG_PRINT1(a,b)  printf(a,b)
-#else
-#define DEBUG_PRINT(a)
-#define DEBUG_PRINT1(a,b)
-#endif
+#define DEBUG_PRINT(a)   if (debug_allocation) printf(a)
+#define DEBUG_PRINT1(a,b)  if (debug_allocation) printf(a,b)
 
 
 
@@ -63,7 +58,7 @@ static const char* name_a[ARENAS] = { "root, static", "stack", "int", "small", "
 #if debug_allocation
 static int percent_a[ARENAS] = { 15, 15, 2, 54, 14 };  // play with numbers
 #else
-static int percent_a[ARENAS] = { 15, 15, 2, 18, 50 };
+static int percent_a[ARENAS] = { 15, 15, 2, 28, 40 };
 #endif
 
 
@@ -384,6 +379,12 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
 
         printf("\n out of mem looking for %d bytes, arena %d. Run GC... \n", size, arena);
 
+        /*
+         * NB!  In fact, it is a huge risk to call GC here:  being called whithin constructor
+         * GC will free objects just allocated but not yet linked to parents. Highly destructive!
+         *
+         */
+
         hal_mutex_unlock( &alloc_mutex );
         run_gc();
         hal_mutex_lock( &alloc_mutex );
@@ -624,7 +625,7 @@ void run_gc()
     int freed = free_unmarked();
 
     if ( freed > 0 )
-       printf("\ngc: %d objects freed\n", freed);
+       printf("\ngc: %i objects freed\n", freed);
 
     if (debug_memory_leaks) pfintf("gc finished!\n");
     if (debug_memory_leaks) pvm_memcheck();  // visualization
@@ -657,10 +658,7 @@ static int free_unmarked()
 
 static void mark_tree(pvm_object_storage_t * p)
 {
-    if (p->_ah.gc_flags == gc_flags_last_generation)
-        return; // already done
-
-    p->_ah.gc_flags = gc_flags_last_generation;
+    p->_ah.gc_flags = gc_flags_last_generation;  // set
 
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
@@ -679,8 +677,8 @@ static void mark_tree_o(pvm_object_t o)
     if(o.data == 0) // Don't try to process null objects
         return;
 
-    mark_tree( o.data );
-    mark_tree( o.interface );
+    if (o.data->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.data );
+    if (o.interface->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.interface );
 }
 
 static void gc_add_from_internal(pvm_object_t o, void *arg)
@@ -935,13 +933,15 @@ void ref_saturate_o(pvm_object_t o)
     if(!(o.data)) return;
     ref_saturate_p(o.data);
 }
-void ref_dec_o(pvm_object_t o)
+pvm_object_t  ref_dec_o(pvm_object_t o)
 {
     ref_dec_p(o.data);
+    return o;
 }
-void ref_inc_o(pvm_object_t o)
+pvm_object_t  ref_inc_o(pvm_object_t o)
 {
     ref_inc_p(o.data);
+    return o;
 }
 
 

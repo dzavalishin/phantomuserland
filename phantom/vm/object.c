@@ -304,7 +304,7 @@ pvm_copy_object( struct pvm_object in_object )
     for(; i >= 0; i-- )
     {
         if(da_po_ptr((in_object.data)->da)[i].data)
-            ref_inc_o(da_po_ptr((in_object.data)->da)[i]);
+            ref_inc_o( da_po_ptr((in_object.data)->da)[i] );
     }
 
     memcpy( out.data->da, in_object.data->da, da_size );
