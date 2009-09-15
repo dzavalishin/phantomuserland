@@ -125,8 +125,7 @@ static void pvm_exec_load( struct data_area_4_thread *da, unsigned slot )
 {
     if( debug_print_instr ) hal_printf("os load %d; ", slot);
     struct pvm_object o = pvm_get_ofield( this_object(), slot);
-    ref_inc_o( o );
-    os_push( o );
+    os_push( ref_inc_o (o) );
 }
 
 static void pvm_exec_save( struct data_area_4_thread *da, unsigned slot )
@@ -155,8 +154,7 @@ static void pvm_exec_get( struct data_area_4_thread *da, unsigned abs_stack_pos 
 {
     if( debug_print_instr ) hal_printf("os stack get %d; ", abs_stack_pos);
     pvm_object_t o = pvm_ostack_abs_get(da->_ostack, abs_stack_pos);
-    ref_inc_o( o );
-    os_push( o );
+    os_push( ref_inc_o(o) );
 }
 
 static void pvm_exec_set( struct data_area_4_thread *da, unsigned abs_stack_pos )
@@ -632,8 +630,8 @@ void pvm_exec(struct pvm_object current_thread)
             {
                 struct pvm_object o = os_pop();
                 if( o.data == 0 ) pvm_exec_throw("o2i(null)");
-                ref_dec_o(o);
                 is_push( pvm_get_int( o ) );
+                ref_dec_o(o);
             }
             break;
 
@@ -686,15 +684,13 @@ void pvm_exec(struct pvm_object current_thread)
 
         case opcode_summon_thread:
             if( debug_print_instr ) hal_printf("summon thread; ");
-            ref_inc_o( current_thread );
-            os_push( current_thread );
+            os_push( ref_inc_o( current_thread ) );
             //hal_printf("ERROR: summon thread; ");
             break;
 
         case opcode_summon_this:
             if( debug_print_instr ) hal_printf("summon this; ");
-            ref_inc_o( this_object() );
-            os_push( this_object() );
+            os_push( ref_inc_o( this_object() ) );
             break;
 
         case opcode_summon_class_class:
@@ -744,8 +740,7 @@ void pvm_exec(struct pvm_object current_thread)
                 // TODO: Need throw here? Just return null
                 if( pvm_is_null( cl ) )
                     pvm_exec_throw("summon by name: null class");
-                ref_inc_o( cl );
-                os_push( cl );
+                os_push( ref_inc_o( cl ) );
             }
             break;
 
@@ -799,8 +794,7 @@ void pvm_exec(struct pvm_object current_thread)
                 {
                     num--;
                     struct pvm_object o = pvm_get_ofield( to_decomp, num);
-                    ref_inc_o( o );
-                    os_push( o );
+                    os_push( ref_inc_o( o ) );
                 }
                 os_push(to_decomp.data->_class);
             }
@@ -983,8 +977,7 @@ void pvm_exec(struct pvm_object current_thread)
             if( debug_print_instr ) hal_printf("os dup; ");
             {
                 pvm_object_t o = os_top();
-                ref_inc_o( o );
-                os_push( o );//_ostack->top());
+                os_push( ref_inc_o( o ) );
             }
             break;
 
@@ -997,8 +990,7 @@ void pvm_exec(struct pvm_object current_thread)
             if( debug_print_instr ) hal_printf("os pull; ");
             {
                 pvm_object_t o = os_pull(pvm_code_get_int32(&(da->code)));
-                ref_inc_o( o );
-                os_push( o );
+                os_push( ref_inc_o( o ) );
             }
             break;
 
@@ -1178,7 +1170,6 @@ static struct pvm_object pvm_exec_compose_object(
     for( i = 0; i < to_pop; i++ )
     {
         data_area[i] = pvm_ostack_pop( in_stack );
-        //ref_inc_o(data_area[i]); -- not needed - popped from stack
     }
 
     for( ; i < max; i++ )
@@ -1254,8 +1245,7 @@ pvm_exec_run_method(
     int i;
     for( i = n_args-1; i > -1; i-- )
     {
-        ref_inc_o( args[i] );
-        pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), args[i] );
+        pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), ref_inc_o( args[i] ) );
     }
 
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), n_args); // pass him real number of parameters

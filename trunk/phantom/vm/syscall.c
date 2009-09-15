@@ -446,8 +446,7 @@ static int si_thread_14_getOsInterface(struct pvm_object me, struct data_area_4_
     DEBUG_INFO;
     struct pvm_object_storage *root = get_root_object_storage();
     struct pvm_object o = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
-    ref_inc_o(o);
-    SYSCALL_RETURN( o );
+    SYSCALL_RETURN( ref_inc_o( o ) );
 }
 
 static int si_thread_13_getUser(struct pvm_object me, struct data_area_4_thread *tc )
@@ -1023,8 +1022,7 @@ static int si_array_10_get(struct pvm_object me, struct data_area_4_thread *tc )
         SYSCALL_THROW_STRING( "array get - index is out of bounds" );
 
     struct pvm_object o = pvm_get_ofield( da->page, index);
-    ref_inc_o( o );
-    SYSCALL_RETURN( o );
+    SYSCALL_RETURN( ref_inc_o( o ) );
 }
 
 
@@ -1041,10 +1039,9 @@ static int si_array_11_set(struct pvm_object me, struct data_area_4_thread *tc )
 
     pvm_set_array_ofield( me.data, index, value );
 
-    ref_inc_o(value);
     // we increment refcount and return object back.
     // it will possibly be dropped and refcount will decrement again then.
-    SYSCALL_RETURN(value);
+    SYSCALL_RETURN( ref_inc_o( value) );
 }
 
 
@@ -1469,9 +1466,7 @@ static int si_world_8_getMyThread(struct pvm_object o, struct data_area_4_thread
     out.data = tc; //TODO: BUG: type mismatch!
     out.interface = thread_iface;
 
-    ref_inc_o( out );
-
-    SYSCALL_RETURN(out);
+    SYSCALL_RETURN( ref_inc_o( out ) );
 }
 
 

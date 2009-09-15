@@ -353,7 +353,6 @@ int phantom_getenv( const char *name, char *value, int vsize )
 	if( o.data == 0 ) return 0;
 	char *ed = pvm_get_str_data(o);
 	int el = pvm_get_str_len(o);
-    ref_dec_o(o);
 
 	if( vsize > el ) vsize = el;
 
