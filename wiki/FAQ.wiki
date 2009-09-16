@@ -1,0 +1,11 @@
+#summary General list if frequently asked questions.
+#labels Phase-Support
+
+(in progress. feel free to add questions)
+
+== Tech ==
+
+
+Q: *How do you change program code, if program data is just object state?*
+A: It will be possible to uprgade class code as long as class structure is the same. See PhantomClassVersion.
+A: If nem implementstion is very different, user will have to do document conversion, as he does today with conventional software. Or it can be done automatically, by using new class's copy constructor.
