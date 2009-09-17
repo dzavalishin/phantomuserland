@@ -3,50 +3,56 @@
 
 (in progress. feel free to add questions)
 
-This is a technological (programmers') FAQ. See [GeneralFAQ] for more common questions.
+This is a technological (programmers') FAQ. 
 
-== Tech ==
+See:
+  * [TechFAQ] for tech details related questions.
+  * [GeneralFAQ] for more common questions.
 
+== Classification ==
 
-Q: *How do you change program code, if program data is just object state?*
+<br><br>
+Q: *Is Phantom a POSIX-compliant system?*
 <br>
-A: It will be possible to uprgade class code as long as class structure is the same. See PhantomClassVersion.
+A: Not necessarily. It is possible to layer POSIX subsystem above the Phantom native environment, but it is not an idea per se. Though we'd like to implement POSIX subsystem later.
+<br><br>
+Q: *Is Phantom an object-oriented OS?*
 <br>
-A: If nem implementstion is very different, user will have to do document conversion, as he does today with conventional software. Or it can be done automatically, by using new class's copy constructor.
-
-
-Q: *I have been told that the Phantom will be working very slowly, because it is based on interpreted code.*<br>
-A: 90% of today's professional software is based on «interpreted» code. That includes programs in Java, C#, PHP, Python, Ryby programming languages – in short, all modern ones. This does not mean that such programs work slowly. Compilation of such programs in traditional systems is being implemented directly during the execution. This approach slightly slows launch of the program; but otherwise performance is not slower, and sometimes (in the case of Java and C#) superseeds performance of programs written in obsolete languages (C++, Pascal, etc). In the Phantom OS delay in launching the program is eliminated as a result of JIT-compilation system remaining for reuse. In addition, because of the lack of context switching between kernel and application Phantom will provide greater overall performance of real code, than for example classic Unix.
-
-See also: http://ru.wikipedia.org/wiki/JIT
-
-
-Q: *Is JIT already implemented in OS Phantom?*
+A: Yes. Basically you can speak about Phantom as a huge pool of fine-graied objects.
+<br><br>
+Q: *Is Phantom a microkernel OS?*
 <br>
-A: No. We are not confident that the current format and semantics of the kernel’s bytecode are final. We will go to work on JIT after semantics will be fixed. Strictly speaking, for the past 4 years of the Phantom it has not been changed, so most likely this issue is almost settled now. Only to check some subtle aspects of the system in the restart phase. To build JIT system, LLVM is considered as one of the options, so that we do not foresee big problems in this part of our job.
-
-See also: http://dotgnu.org/
-
-Q: *How will you deal with the problem of drivers?*
+A: Yes. It is not enforced (kernel can be extended, if it is needed, and is fully multithreaded), but basic Phantom implementation requires a very small kernel. Generally, kernel contains threading and paging code only. All drivers except for the disk IO can be implemented in userland.
+<br><br>
+Q: *Does Phantom have processes?*
 <br>
-A: It should be noted that in the last 5 years, this issue has lost its severity. Many drivers exist in the source code; a variety of devices has decreased significantly. For example, today only three video card drivers could cover, perhaps, 95% of computers on the market. And these three drivers may be transferred from Linux. Many peripheral devices nowaday connect via USB or FireWire, which actually means that they require only two actual low level drivers – for USB and FireWire ports as such. But these ports are implemented in a fairly standard way. So the problem – although still quite serious – ceased to be immense. 
-
-Q: *Is there some virtualization support mechanism (for example: qemu + win23/linux), and what is your vision of the future of this technology in Phantom?*
+A: Phantom has threads. Process (group of threads, sharing some global state such as current directory and some other historical junk) is not needed in Phantom. But any group of threads can set up their own common object and keep common state in it.
+<br><br>
+Q: *What about separate address spaces?*
 <br>
-A: It is possible, and there is no reason not to implement it now. However, we rather see the version of the Phantom itself and any other operating system under the general type of hypervisor such as Xen. At the same time, support for Xen in Phantom facilitates its launch on Amazon Cloud.
-
-Q: *They say in the Phantom there are no files – is it true? How do you live without files?*
+A: No. No! At this point you thought to yourself something like “than Phantom can not protect one application from other”, and were wrong. Phantom is one big address space. But, nevertheless, everything inside is protected. Protection is based on a simple idea. Phantom is a big virtual machine. And this VM has no means to convert integer to pointer – due to this it is impossible to scan through address space and gan access to anything you have no pointer to. That simple. And – yes, due to the absence of separate address spaces IPCs are really cheap in Phantom. And there are no context switches, which adds to the system effectiveness. One can argue that VM makes system to run slowly, but nowadays this problem is solved with effective JIT compilers, so we don’t expect real degradation due to the VM. Moreover, result of JIT compilation can be stored so usual Java-like startup penalty won’t exist in Phantom either.
+<br><br>
+Q: *File system?*
 <br>
-A: Yes, it's true. The files themselves are only needed for one reason. They keep «souls of dead programs» – states of programs in the interval between the stop and restart of the program. Since program in Phantom does not need to rest (more accurately – to lose internal state, because it could be stopped), there is no reason to write its condition elsewhere.
-
-Q: *What about end-user? Where will he put his Word paper?*
+A: Nope. Sorry. Nobody needs files in Phantom. All the operating system state is saved across shutdowns. Phantom is the only global persistent OS in the world, AFAIK. All the state of all the objects is saved. Even power failure is not a problem, because of unique Phantom’s ability to store its’ complete state on disk frequently. The most unusual Phantom property is its hybrid paging/persistence system. All the userland memory is mapped to disk and is frequently snapped. Snapshot logic is tied with the common paging logis so that snapshots are done cheap way. From the application’s point of view it means that all the user documents or any othet program state doesn’t have to be squished into the linear filespace with the help of the serialization code, as it is in classic operating systems. Anything is kept in its internal, “graph of objects” form. This means that Phantom programs are much simpler and more efficient too. Opening text document in classic OS means reading file (transferring its data to specific place in process’s memory) and then converting its contents to program’s internal form (decoding and once more moving data), and just then – showing it to user. Opening text document in Phantom means just executing some object’s printMe() method – all the data is ready and available directly without conversion.
+<br><br>
+Q: *So what happens when Phantom reboots?*
 <br>
-A: You will not notice disappearance of files. For user, there will be folders and icons-documents in them. Icon will activate (conditionally speaking – it will run the editDocument method in new threads) an object, relevant to the user’s document. Just a document will not be stored in serialized «file» form, but exactly as it is present in the program and is convenient for the program to work. This means that 1. programmer no longer be writing code recording the status of the file and reading it back (in different situations, it is from 30 to 70% of program’s code), 2. actual «opening of the document» will be much faster (no de-serialization process, as there is no data moved from place to place) and 3. any document can easily integrate itself into any other document – by simply adding into itself a reference to a foreign object. 
-
-Q: *What do I do if I lose part of the disk? In the normal system, I lose some files, and you will loose all at once. Right?*
+A: You will get your desktop in the same state as it was before shutdown. Everything intact.
+<br><br>
+Q: *And if I had some, say, ssh or telnet connection?*
 <br>
-A: Not really. Objects in the Phantom are marked in such a way that even basing on a «snatch» of memory, they can be restored. The problem lays in identifying situation «snatches» in the address space. We plan to put in memory special facilities beacons with a certain period, which just record their own address. In this way data can be restored from «broken» address space of Phantom in case of fatal disk failure.
-
-Q: *If the program is poorly written and “eats up” memory, we are used to kill her and start anew. And now?*
+A: It will die. Sorry. Of course, telnet app can restart connection for you – if some application needs to be informed about system restart, Phantom will provide special signalling. But most applications won’t even notice that shutdown happened.
+<br><br>
+Q: *OS is based on VM – does it mean that not all the possible programming languages will be supported?*
 <br>
-A: And now. Indeed, it is necessary to distinguish between job of the program and state of the program. Phantom saves the state, thus making unnecessary «manual» saving of it’s state; but it does not require all programs to work continuously. That is, to keep process/thread running.
+A: Yes. Say goodbye to C and Assembler. On the other side, everything is in Java or C# now, or even in some even more dynamic language, such as Javascript or, even, PHP. All these languages will be supported.
+<br><br>
+Q: *So Phantom has no address arithmetics?*
+<br>
+A: It has, but only inside the single object. And objects can be huge. No limit.
+<br><br>
+Q: *Is it a 32 or 64 bit OS?*
+<br>
+A: It is meaningless to have 32 bit Phantom, because of single address space. We are going to have 64-bit version as mainstreem one and the existing 32-bit implementation will be, possibly, left for small handheld devices.
+<br>
