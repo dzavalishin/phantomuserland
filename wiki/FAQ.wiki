@@ -8,6 +8,7 @@ This is a top-level :) FAQ and list of other FAQ pages.
 See:
   * [TechFAQ] for tech details related questions.
   * [GeneralFAQ] for more common questions.
+  * [DoYouKnowFAQ] for "_Do you know XXX_" style questions. :)
 
 == Classification ==
 
