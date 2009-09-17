@@ -3,7 +3,7 @@
 
 (in progress. feel free to add questions)
 
-This is a technological (programmers') FAQ. 
+This is a top-level :) FAQ and list of other FAQ pages. 
 
 See:
   * [TechFAQ] for tech details related questions.
