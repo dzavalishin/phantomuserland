@@ -76,7 +76,7 @@ struct data_area_4_thread;
  * Lookup class. TODO reimplement! Can block!
  */
 
-struct pvm_object pvm_exec_lookup_class( struct data_area_4_thread *thread, struct pvm_object name);
+struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name);
 
 /**
  *

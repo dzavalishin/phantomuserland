@@ -201,7 +201,7 @@ static void pvm_create_root_objects()
 
     pvm_root.threads_list = pvm_create_object( pvm_get_array_class() );
     pvm_root.kernel_environment = pvm_create_object(pvm_get_array_class());
-    //pvm_root.os_entry = pvm_create_null_object();
+    //pvm_root.os_entry = pvm_get_null_object();
 }
 
 
@@ -279,29 +279,8 @@ static void pvm_boot()
     struct pvm_object user_boot = pvm_create_object( user_boot_class );
 
 
-
-
-    struct pvm_object new_cf = pvm_create_call_frame_object();
-    struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
-
-    pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), system_boot );
-    pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), 1); // pass him real number of parameters
-
-    struct pvm_object_storage *code = pvm_exec_find_method( user_boot, 8 );
-    pvm_exec_set_cs( cfda, code );
-    cfda->this_object = user_boot;
-
-    struct pvm_object thread = pvm_create_thread_object( new_cf );
-
-    // debug only
-    //ref_saturate_o( thread ); // debug only
-    //printf("root thread 0x%X\n", thread.data );
-
-    // GOGOGO!
-    pvm_exec(thread);
-
-    pvm_release_thread_object( thread );
-
+    struct pvm_object args[1] = { system_boot };
+    pvm_exec_run_method(user_boot, 8, 1, args);
 }
 
 

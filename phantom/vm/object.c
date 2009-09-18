@@ -291,14 +291,14 @@ int pvm_object_class_is( struct pvm_object object, struct pvm_object tclass )
 struct pvm_object
 pvm_copy_object( struct pvm_object in_object )
 {
+    // TODO ERR throw!
+    if(in_object.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL)
+        panic("internal object copy?!");
+
     struct pvm_object in_class = in_object.data->_class;
     int da_size = in_object.data->_da_size;
 
     struct pvm_object out = pvm_object_create_dynamic( in_class, da_size );
-
-    // TODO ERR throw!
-    if(in_object.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL)
-        panic("internal object copy?!");
 
     int i = da_size/sizeof(struct pvm_object);
     for(; i >= 0; i-- )

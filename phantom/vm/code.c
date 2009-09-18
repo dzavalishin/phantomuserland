@@ -11,8 +11,8 @@
 
 #include "phantom_libc.h"
 
-#include "vm/internal_da.h"
-#include "vm/exec.h"
+//#include "vm/internal_da.h"
+//#include "vm/exec.h"
 #include "vm/code.h"
 #include "vm/object_flags.h"
 #include "vm/exception.h"

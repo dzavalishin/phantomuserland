@@ -466,10 +466,10 @@ static int si_thread_12_getEnvironment(struct pvm_object me, struct data_area_4_
     if( pvm_is_null(meda->environment) )
     {
         struct pvm_object env = pvm_create_string_object(".phantom.environment");
-        struct pvm_object cl;
-        cl = pvm_exec_lookup_class( tc, env );
+        struct pvm_object cl = pvm_exec_lookup_class_by_name( env );
         meda->environment = pvm_create_object(cl);
         ref_dec_o(env);
+        ref_dec_o(cl);
     }
 
     SYSCALL_RETURN(meda->environment);
@@ -608,28 +608,18 @@ static int si_class_class_8_new_class(struct pvm_object me, struct data_area_4_t
 
     CHECK_PARAM_COUNT(n_param, 3);
 
-    struct pvm_object name = POP_ARG;
-    struct pvm_object da_size = POP_ARG;
+    struct pvm_object class_name = POP_ARG;
+    int n_object_slots = POP_INT();
     struct pvm_object iface = POP_ARG;
 
-    ASSERT_STRING(name);
-    ASSERT_INT(da_size);
+    ASSERT_STRING(class_name);
 
-    //struct data_area_4_class       da; //(iface,name,pvm_get_null_class());
+    struct pvm_object new_class = pvm_create_class_object(class_name, iface, sizeof(struct pvm_object) * n_object_slots);
 
-    //da.object_data_area_size   = sizeof(struct pvm_object) * ((int)pvm_get_int(da_size));
-    //da.object_flags     = 0;
-
-    //struct pvm_object      new_class = pvm_object_storage::create( pvm_get_class_class(), &da );
-    //SYSCALL_RETURN(new_class);
-
-    pvm_object_t ret = pvm_create_class_object(name, iface, sizeof(struct pvm_object) * pvm_get_int(da_size));
-
-    SYS_FREE_O(name);
-    SYS_FREE_O(da_size);
+    SYS_FREE_O(class_name);
     SYS_FREE_O(iface);
 
-    SYSCALL_RETURN( ret );
+    SYSCALL_RETURN( new_class );
 }
 
 syscall_func_t	syscall_table_4_class[16] =
@@ -867,6 +857,8 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
     cfda->this_object = object;
 
     struct pvm_object thread = pvm_create_thread_object( new_cf );
+
+    printf("here?\n");
 
     phantom_activate_thread(thread);
     }

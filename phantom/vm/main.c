@@ -26,7 +26,7 @@
 #include <phantom_libc.h>
 
 #include "vm/root.h"
-#include "vm/bulk.h"
+//#include "vm/bulk.h"
 
 #include "vm/internal_da.h"
 
