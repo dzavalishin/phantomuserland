@@ -5,27 +5,6 @@ Q: *What is this Phantom OS? Is it another re-packed Linux clone?*
 
 A: Absolutely not. We do not consider interesting or valuable creation of yet another duplicate of an existing operating system.
 
-Q: *What is so interesting about, or benefitial from a system that is incompatible with anything yet?*
-
-A: You can not compete with something, repeating it. 
-
-
-Q: *OK, but how can it compete with Windows?*
-
-A: As in any other sector of the economy, competition requires ability to produce the same or better products at a lower cost. In the "software" sector of economy application software is the product. And operating systems and programming languages – are kind of “machines” and “plants” for software production. "End-user" part of the  operating system (beauty and comfort of the user interface) is secondary and is easily produced. Primary and important is to make the OS, on which it would be cheap and convenient to produce software. We know how to do it.
-
-Q: *How much cheaper will software production be on OS Phantom?*
-
-A: We expect a minimum of 30% increase in productivity and this is a conservative estimate. The cumulative effect may well result in 200-400% increase.
-
-Q: *400%? This cannot be real!*
-
-A: It is real. Growth in productivity from a simple shift in the development of C++ software programming language to Java and C# languages is estimated by experts to be as much as 500% – as, indeed, it explains the displacement of the first language by the last two over quite short period of time.
-
-Q: *What is this increase? These programming languages are very similar! Impossible!*
-
-A: We would be happy to discuss this matter over coffee break – it is not five minute chat. Briefly it is so that Java and C# possess two important features: a) they take away from a programmer mere possibility to make some very painful mistakes, which often require a correction which may take inadequate and unpredictable time, and b) they provide much comfortable way to build programs from large working parts. OS Phantom significantly developes that success.
-
 Q: *But the new system will require new programs – what kind of programming giant will be required to create them?*
 
 A: A significant number of programs do not need to be re-created – just get moved from the old systems. Let me also draw your attention to the phenomenon of the iPhone. It is based on very specific system (modified MacOS), with all programs created from scratch – even a simple transfer of programs from other operating system is impossible because of a very unusual approach to build a user interface. Barely a year and a half ago, there was no iPhone, nor its operating system or software, and no programmers experienced in writing programs for it. Nevertheless, today there are about ten thousand (10,000) programs for the iPhone.
