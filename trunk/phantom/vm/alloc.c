@@ -15,7 +15,7 @@
 #include <phantom_libc.h>
 
 #include <hal.h>
-#include <kernel/snap_sync.h>
+//#include <kernel/snap_sync.h>
 
 
 #include "vm/alloc.h"
@@ -730,7 +730,9 @@ static void gc_process_children(pvm_object_storage_t *o)
 
 static void refzero_add_from_internal(pvm_object_t o, void *arg);
 static void do_refzero_process_children( pvm_object_storage_t *o );
+
 void ref_free_stackframe( pvm_object_storage_t *o ); // TODO to header!
+void pvm_gc_iter_thread_1(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg); // TODO to header!
 
 
 static void refzero_process_children( pvm_object_storage_t *o )

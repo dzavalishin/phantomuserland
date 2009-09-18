@@ -269,7 +269,7 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
         int i;
         for( i = n_param; i; i-- )
         {
-            pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), pvm_create_null_object() );
+            pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), pvm_get_null_object() );
         }
     }
 
@@ -313,16 +313,6 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
 
 
 
-
-
-//static struct pvm_object pvm_exec_lookup_class( struct data_area_4_thread *thread, struct pvm_object name);
-
-
-static struct pvm_object pvm_exec_compose_object(
-                                                 struct pvm_object class,
-                                                 struct data_area_4_object_stack *stack,
-                                                 int number
-                                                );
 
 
 /*
@@ -670,7 +660,7 @@ void pvm_exec(struct pvm_object current_thread)
         case opcode_os_push_null:
             if( debug_print_instr ) hal_printf("push null; ");
             {
-                os_push( pvm_create_null_object() );
+                os_push( pvm_get_null_object() );
                 break;
             }
 
@@ -679,7 +669,7 @@ void pvm_exec(struct pvm_object current_thread)
 
         case opcode_summon_null:
             if( debug_print_instr ) hal_printf("push null; ");
-            os_push( pvm_create_null_object() ); // TODO BUG: so what opcode_os_push_null is for then?
+            os_push( pvm_get_null_object() ); // TODO BUG: so what opcode_os_push_null is for then?
             break;
 
         case opcode_summon_thread:
@@ -733,9 +723,7 @@ void pvm_exec(struct pvm_object current_thread)
             {
                 if( debug_print_instr ) hal_printf("summon by name; ");
                 struct pvm_object name = pvm_code_get_string(&(da->code));
-                //os_push(pvm_object_storage::get_string_class() );
-                //hal_printf("ERROR: summon by name; "); name.my_data()->print();
-                struct pvm_object cl = pvm_exec_lookup_class(da, name);
+                struct pvm_object cl = pvm_exec_lookup_class_by_name( name );
                 ref_dec_o(name);
                 // TODO: Need throw here? Just return null
                 if( pvm_is_null( cl ) )
@@ -766,9 +754,11 @@ void pvm_exec(struct pvm_object current_thread)
 
         case opcode_copy:
             if( debug_print_instr ) hal_printf("copy; ");
-            pvm_object_t o = os_pop();
-            os_push( pvm_copy_object( o ) );
-            ref_dec_o(o);
+            {
+                pvm_object_t o = os_pop();
+                os_push( pvm_copy_object( o ) );
+                ref_dec_o(o);
+            }
             break;
 
             // TODO if you want to enable these, work out refcount
@@ -899,7 +889,7 @@ void pvm_exec(struct pvm_object current_thread)
 
                 //int do_return_val = !os_empty();
                 pvm_object_t ret_val = os_empty() ?
-                    pvm_create_null_object() : os_pop();
+                    pvm_get_null_object() : os_pop();
 
                 //if(do_return_val) ret_val = ;
 
@@ -1058,7 +1048,7 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, int sysca
     struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
 
     // TODO fix this back
-    //if( syscall_index >= da->class_sys_table_size )                        throw except("find_syscall", "sys no out of table size" );
+    //if( syscall_index >= da->class_sys_table_size )                        pvm_exec_throw("find_syscall: syscall_index no out of table size" );
 
     syscall_func_t *tab = pvm_internal_classes[da->sys_table_id].syscalls_table;
     return tab[syscall_index];
@@ -1078,7 +1068,7 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, int metho
 	}
 
 	struct pvm_object_storage *iface = o.interface;
-    if( iface == 0 ) //pvm_is_null( iface ) )
+    if( iface == 0 )
     {
     	if( o.data->_class.data == 0 )
     	{
@@ -1088,13 +1078,13 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, int metho
         iface = pvm_object_da( o.data->_class, class )->object_default_interface.data;
     }
 
-    if( iface == 0 ) //pvm_is_null( iface ) )
+    if( iface == 0 )
         pvm_exec_throw( "pvm_exec_find_method: no interface found" );
 
     if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
         pvm_exec_throw( "pvm_exec_find_method: not an interface object" );
 
-    if(method_index > da_po_limit(iface))
+    if(method_index < 0 || method_index > da_po_limit(iface))
         pvm_exec_throw( "pvm_exec_find_method: method index is out of bounds" );
 
     return da_po_ptr(iface->da)[method_index].data;
@@ -1202,9 +1192,9 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
 
 
 // TODO: implement!
-struct pvm_object pvm_exec_lookup_class( struct data_area_4_thread *thread, struct pvm_object name)
+struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
 {
-    //pvm_exec_throw("pvm_exec_lookup_class: not implemented");
+    //pvm_exec_throw("pvm_exec_lookup_class_by_name: not implemented");
 
     // Try internal
     struct pvm_object ret = pvm_lookup_internal_class(name);
@@ -1216,7 +1206,10 @@ struct pvm_object pvm_exec_lookup_class( struct data_area_4_thread *thread, stru
      * BUG! This executes code in a tight loop. It will prevent
      * snaps from being done. Redo with a separate thread start.
      *
+     * Run class loader in the main pvm_exec() loop? Hmmm.
+     *
      */
+printf("lookup_class_by_name\n");
 
     // Try userland loader
     struct pvm_object args[1] = { name };
@@ -1243,9 +1236,9 @@ pvm_exec_run_method(
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
     int i;
-    for( i = n_args-1; i > -1; i-- )
+    for( i = n_args; i > 0; i-- )
     {
-        pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), ref_inc_o( args[i] ) );
+        pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), ref_inc_o( args[i-1] ) );
     }
 
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), n_args); // pass him real number of parameters
@@ -1255,6 +1248,8 @@ pvm_exec_run_method(
     ref_inc_o( cfda->this_object = this_object );
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
+
+printf("here!\n");
 
     pvm_exec( thread );
 

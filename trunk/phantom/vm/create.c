@@ -69,29 +69,14 @@ pvm_object_create_dynamic( struct pvm_object object_class, int das )
 
 struct pvm_object     pvm_create_object(struct pvm_object type)
 {
-	//return pvm_object_create_fixed(type);
-
 	struct data_area_4_class *cda = pvm_data_area(type,class);
-
-	/*
-    // Fast check
-    if( cda->object_flags == 0 )
-        return pvm_object_create_fixed(type);
-
-    int fl = cda->object_flags;
-
-    fl &= ~PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE;
-    fl &= ~PHANTOM_OBJECT_STORAGE_FLAG_IS_DECOMPOSEABLE;
-    fl &= ~PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE;
-
-    if( fl )
-        return pvm_object_create_fixed(type);
-	 */
 
 	struct pvm_object ret = pvm_object_create_fixed(type);
 
 	if( cda->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
 	{
+        // init internal object
+
 		int rec = pvm_iclass_by_class( type.data );
 
 		pvm_internal_classes[rec].init( ret.data );
@@ -114,7 +99,7 @@ struct pvm_object     pvm_create_object(struct pvm_object type)
 //__inline__
 struct pvm_object     pvm_create_null_object()
 {
-	return pvm_root.null_object; //pvm_object_create_fixed( pvm_get_null_class() );
+	return pvm_root.null_object;  // already created once forever
 }
 
 void pvm_internal_init_void(struct pvm_object_storage * os) {}
@@ -229,7 +214,7 @@ pvm_create_page_object( int n_slots, struct pvm_object *init, int init_slots )
 		data_area[i] = *init++;
 
 	for( ; i < n_slots; i++ )
-		data_area[i] = pvm_create_null_object();
+		data_area[i] = pvm_get_null_object();
 
 	return _data;
 }
@@ -243,7 +228,7 @@ void pvm_internal_init_page(struct pvm_object_storage * os)
 
 	int i;
 	for( i = 0; i < n_slots; i++ )
-		data_area[i] = pvm_create_null_object();
+		data_area[i] = pvm_get_null_object();
 }
 
 void pvm_gc_iter_page(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
@@ -669,6 +654,7 @@ struct pvm_object     pvm_create_thread_object(struct pvm_object start_cf )
 
 	// add to system threads list
 	pvm_append_array(pvm_root.threads_list.data, ret);
+    ref_inc_o(ret);
 
 	// not for each and every one
 	//phantom_activate_thread(ret);
@@ -679,10 +665,12 @@ struct pvm_object     pvm_create_thread_object(struct pvm_object start_cf )
 
 void   pvm_release_thread_object( struct pvm_object thread )
 {
-	// remove from system threads list
+    // the thread was decr once... while executing class loader code... TODO: should be rewritten!
+
+	// remove from system threads list.
 	pvm_pop_array(pvm_root.threads_list.data, thread);
 
-	//ref_dec_o( thread );  //the thread was released by pvm_pop_array(), do not understand how
+	ref_dec_o( thread );  //free now
 }
 
 
