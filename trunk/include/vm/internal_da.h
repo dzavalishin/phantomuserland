@@ -21,12 +21,14 @@
 #include "hal.h"
 
 
+/** Extract (typed) object data area pointer from object pointer. */
 #define pvm_object_da( o, type ) ((struct data_area_4_##type *)&(o.data->da))
+/** Extract (typed) object data area pointer from object pointer. */
 #define pvm_data_area( o, type ) ((struct data_area_4_##type *)&(o.data->da))
 
-// Num of slots in normal (noninternal) object
+/** Num of slots in normal (noninternal) object. */
 #define da_po_limit(o)	 (o->_da_size/sizeof(struct pvm_object))
-// Slots access for noninternal object
+/** Slots access for noninternal object. */
 #define da_po_ptr(da)  ((struct pvm_object *)&da)
 
 
@@ -161,14 +163,37 @@ struct data_area_4_thread_factory
 
 struct pvm_stack_da_common
 {
+    /**
+     *
+     * Root (first created) page of the stack.
+     * rootda is shortcut pointer to root's data area (struct data_area_4_XXX_stack).
+     *
+     */
     struct pvm_object           	root;
+
+    /**
+     *
+     * Current (last created) page of the stack.
+     * This field is used in root stack page only.
+     *
+     * See curr_da below - it is a shortcut to curr object's data area.
+     *
+     * See also '#define set_me(to)' in stacks.c.
+     *
+     */
     struct pvm_object           	curr;
 
+    /** Pointer to previous (older) stack page. */
     struct pvm_object  			prev;
+
+    /** Pointer to next (newer) stack page. */
     struct pvm_object  			next;
 
-    unsigned int    			free_cell_ptr; // number of cells used
-    unsigned int                        __sSize; // Page array has this many elements
+    /** number of cells used. */
+    unsigned int    			free_cell_ptr;
+
+    /** Page array has this many elements. */
+    unsigned int                        __sSize; 
 };
 
 
@@ -228,7 +253,8 @@ struct data_area_4_boot
 struct data_area_4_tty
 {
     drv_video_window_t           	w;
-    rgba_t       			pixel[PVM_MAX_TTY_PIXELS]; // this extends w and works as it's last field
+    /** this field extends w and works as it's last field. */
+    rgba_t       			pixel[PVM_MAX_TTY_PIXELS]; 
 
     int                                 font_height; // Font is hardcoded yet - BUG - but we cant have ptr to kernel from object
     int                                 font_width;
@@ -241,9 +267,9 @@ struct data_area_4_tty
 
 struct data_area_4_mutex
 {
-    //void *mutex; // hack - depends on mutex definition in OS KIT
     // TODO need queue!
-    struct data_adrea_4_thread  *sleeping; // Which thread is sleeping
+    /** Which thread is sleeping. */
+    struct data_adrea_4_thread  *sleeping; 
 };
 
 
@@ -257,8 +283,10 @@ struct data_area_4_binary
 
 struct data_area_4_closure
 {
-    struct pvm_object   object; // Which object to call
-    int                 ordinal; // Which methos to call
+    /** Which object to call. */
+    struct pvm_object   object;
+    /** Which method to call. */
+    int                 ordinal; 
 };
 
 
