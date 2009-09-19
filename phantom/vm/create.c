@@ -292,7 +292,7 @@ void pvm_gc_iter_call_frame(gc_iterator_call_t func, struct pvm_object_storage *
 }
 
 
-void ref_free_stack( pvm_object_storage_t *o, int type );
+static void ref_free_stack( pvm_object_storage_t *o, int type );
 
 // Special refcount support for stackframe - see comments in refcount on this
 void ref_free_stackframe( pvm_object_storage_t *o )
@@ -306,9 +306,8 @@ void ref_free_stackframe( pvm_object_storage_t *o )
 }
 
 
-void ref_free_stack( pvm_object_storage_t *o, int type )
+static void ref_free_stack( pvm_object_storage_t *o, int type )
 {
-	if( o == 0 ) return;
 	// Hack.
 	// Other stacks (is,es) have the same structure of 'common' field
 	struct data_area_4_object_stack *da = (struct data_area_4_object_stack *)&(o->da);
@@ -337,6 +336,9 @@ void ref_free_stack( pvm_object_storage_t *o, int type )
 	o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
 
 	debug_catch_object("del", o);
+
+    if ( da->common.next.data != 0 )
+        ref_free_stack( da->common.next.data, type );  //tail recursion
 }
 
 

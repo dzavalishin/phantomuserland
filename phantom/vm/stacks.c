@@ -10,9 +10,7 @@
  *
 **/
 
-// I believe this is right, but left old code for any case.
-// Need test with huge amount of auto vars to check.
-#define ABSFROMROOT 1
+
 
 #include "vm/internal.h"
 #include "vm/internal_da.h"
@@ -52,7 +50,7 @@
             if( no_next() )                          \
                 {                                    \
                 s->common.next = make();             \
-                set_next_prev( s->common.curr );     \
+                set_next_prev();     \
                 }                                    \
             set_me( s->common.next );                \
         }                                            \
@@ -67,28 +65,13 @@
  *
 **/
 
-#define make() pvm_create_ostack_object(s->common.root)
-#define set_next_prev(me) pvm_object_da(s->common.next,object_stack)->common.prev = me
+#define make()  pvm_create_ostack_object()
+#define set_next_prev()  { pvm_object_da(s->common.next, object_stack)->common.prev = rootda->common.curr; pvm_object_da(s->common.next, object_stack)->common.root = rootda->common.root; }
 
 void pvm_ostack_push( struct data_area_4_object_stack* rootda, struct pvm_object o )
 {
     struct data_area_4_object_stack* s = rootda->curr_da;
-
     check_overflow();
-
-    /*if( page_is_full() )
-    {
-        if( no_next() )
-        {
-            s->common.next = make();
-            set_next_prev( s->common.curr );
-        }
-        set_me( s->common.next );
-
-        { s->common.curr = s->common.next; s->curr_da = (void *)&(to.data->da); }
-    }*/
-
-
     if( page_is_full() ) panic("opush page full aft mkpage");
     page_push(o);
 }
@@ -105,6 +88,7 @@ struct pvm_object pvm_ostack_top( struct data_area_4_object_stack* rootda )
 {
     struct data_area_4_object_stack* s = rootda->curr_da;
     check_underflow();
+    if( page_is_empty() ) panic("otop page empty");
     return page_top();
 }
 
@@ -117,20 +101,14 @@ int pvm_ostack_empty( struct data_area_4_object_stack* rootda )
 
 void pvm_ostack_abs_set( struct data_area_4_object_stack* rootda, int abs_pos, struct pvm_object val )
 {
-    struct data_area_4_object_stack* s = rootda->curr_da;
-    struct pvm_object c = s->common.root;
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
 
-    while( abs_pos >= s->common.__sSize )
+    while( abs_pos >= pagesize )
     {
-        //c = data_area(c)->next;
-// TODO ERR prev?? not next??
-#if ABSFROMROOT
         c = pvm_object_da(c,object_stack)->common.next;
-#else
-        c = pvm_object_da(c,object_stack)->common.prev;
-#endif
         if( pvm_is_null(c) ) pvm_exec_throw( "o abs_set: out of stack" );
-        abs_pos -= s->common.__sSize;
+        abs_pos -= pagesize;
     }
 
     //TODO: assert should be here instead of decrement - it is an error in bytecode compilator/implementation
@@ -141,20 +119,14 @@ void pvm_ostack_abs_set( struct data_area_4_object_stack* rootda, int abs_pos, s
 
 struct pvm_object pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, int abs_pos )
 {
-    struct data_area_4_object_stack* s = rootda->curr_da;
-    struct pvm_object c = s->common.root;
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
 
-    while( abs_pos >= s->common.__sSize )
+    while( abs_pos >= pagesize )
     {
-        //c = data_area(c)->next;
-// TODO ERR prev?? not next??
-#if ABSFROMROOT
         c = pvm_object_da(c,object_stack)->common.next;
-#else
-        c = pvm_object_da(c,object_stack)->common.prev;
-#endif
         if( pvm_is_null(c) ) pvm_exec_throw( "o abs_get: out of stack" );
-        abs_pos -= s->common.__sSize;
+        abs_pos -= pagesize;
     }
 
     return pvm_object_da(c,object_stack)->stack[abs_pos];
@@ -170,14 +142,12 @@ struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int
 
     while( displ < 0 )
     {
-        //c = data_area(c)->prev;
         c = pvm_object_da(c,object_stack)->common.prev;
         if( pvm_is_null(c) ) pvm_exec_throw( "stack pull: underflow" );
         displ += s->common.__sSize;
     }
 
     return pvm_object_da(c,object_stack)->stack[displ];
-
 }
 
 
@@ -189,8 +159,9 @@ struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int
 
 #undef make
 #undef set_next_prev
-#define make() pvm_create_istack_object(s->common.root)
-#define set_next_prev(me) pvm_object_da(s->common.next,integer_stack)->common.prev = me
+#define make()  pvm_create_istack_object()
+#define set_next_prev()  { pvm_object_da(s->common.next, integer_stack)->common.prev = rootda->common.curr; pvm_object_da(s->common.next, integer_stack)->common.root = rootda->common.root; }
+
 
 
 void pvm_istack_push( struct data_area_4_integer_stack* rootda, int o )
@@ -227,20 +198,14 @@ int pvm_istack_empty( struct data_area_4_integer_stack* rootda )
 
 void pvm_istack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, int val )
 {
-    struct data_area_4_integer_stack* s = rootda->curr_da;
-    struct pvm_object c = s->common.root;
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
 
-    while( abs_pos >= s->common.__sSize )
+    while( abs_pos >= pagesize )
     {
-        //c = data_area(c)->next;
-// TODO ERR prev?? not next??
-#if ABSFROMROOT
         c = pvm_object_da(c,integer_stack)->common.next;
-#else
-        c = pvm_object_da(c,integer_stack)->common.prev;
-#endif
-        if( pvm_is_null(c) ) pvm_exec_throw( "i abs_set: out of stack" );
-        abs_pos -= s->common.__sSize;
+        if( pvm_is_null(c) ) pvm_exec_throw( "o abs_set: out of stack" );
+        abs_pos -= pagesize;
     }
 
     pvm_object_da(c,integer_stack)->stack[abs_pos] = val;
@@ -248,21 +213,14 @@ void pvm_istack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, 
 
 int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 {
-// TODO ERR curr?? not root?
-    struct data_area_4_integer_stack* s = rootda->curr_da;
-    struct pvm_object c = s->common.root;
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
 
-    while( abs_pos >= s->common.__sSize )
+    while( abs_pos >= pagesize )
     {
-        //c = data_area(c)->next;
-// TODO ERR prev?? not next??
-#if ABSFROMROOT
         c = pvm_object_da(c,integer_stack)->common.next;
-#else
-        c = pvm_object_da(c,integer_stack)->common.prev;
-#endif
-        if( pvm_is_null(c) ) pvm_exec_throw( "i abs_get: out of stack" );
-        abs_pos -= s->common.__sSize;
+        if( pvm_is_null(c) ) pvm_exec_throw( "o abs_get: out of stack" );
+        abs_pos -= pagesize;
     }
 
     return pvm_object_da(c,integer_stack)->stack[abs_pos];
@@ -278,8 +236,9 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 
 #undef make
 #undef set_next_prev
-#define make() pvm_create_estack_object(s->common.root)
-#define set_next_prev(me) pvm_object_da(s->common.next,exception_stack)->common.prev = me
+#define make()  pvm_create_estack_object()
+#define set_next_prev()  { pvm_object_da(s->common.next, exception_stack)->common.prev = rootda->common.curr; pvm_object_da(s->common.next, exception_stack)->common.root = rootda->common.root; }
+
 
 
 void pvm_estack_push( struct data_area_4_exception_stack* rootda, struct pvm_exception_handler e )
@@ -398,7 +357,7 @@ void pvm_internal_init_ostack(struct pvm_object_storage *os )
     ret.data = os;
     ret.interface = 0; // Nobody needs it there anyway
 
-    sda->common.root = ret;
+    sda->common.root = ret;  // will update later for nonroot pages
     sda->common.curr = ret;
     sda->common.prev.data = 0;
     sda->common.next.data = 0;
@@ -413,16 +372,15 @@ void pvm_internal_init_ostack(struct pvm_object_storage *os )
 void pvm_gc_iter_ostack(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
     struct data_area_4_object_stack *da = (struct data_area_4_object_stack *)&(os->da);
-    //gc_fcall( func, arg, da->common.root ); // NO! Root is referenced many times and has other path, so can't be followed by refcount from here
-    gc_fcall( func, arg, da->common.curr ); // Need?
-    gc_fcall( func, arg, da->common.prev );
-    gc_fcall( func, arg, da->common.next );
 
     int i, max = da->common.free_cell_ptr;
     for( i = 0; i < max; i++ )
     {
         gc_fcall( func, arg, da->stack[i] );
     }
+
+    if ( da->common.next.data != 0 )
+        gc_fcall( func, arg, da->common.next );  //we are starting from root, so following next is enough. Tail recursion
 }
 
 
@@ -446,7 +404,12 @@ void pvm_internal_init_istack(struct pvm_object_storage *os )
 
 void pvm_gc_iter_istack(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-    // Empty
+    struct data_area_4_object_stack *da = (struct data_area_4_object_stack *)&(os->da);
+
+    // No objects in the integer stack, but please visit linked list ifself
+
+    if ( da->common.next.data != 0 )
+        gc_fcall( func, arg, da->common.next );  //we are starting from root, so following next is enough. Tail recursion
 }
 
 
@@ -472,15 +435,14 @@ void pvm_internal_init_estack(struct pvm_object_storage *os )
 void pvm_gc_iter_estack(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
     struct data_area_4_exception_stack *da = (struct data_area_4_exception_stack *)&(os->da);
-    gc_fcall( func, arg, da->common.root );
-    gc_fcall( func, arg, da->common.curr ); // Need?
-    gc_fcall( func, arg, da->common.prev );
-    gc_fcall( func, arg, da->common.next );
 
     int i, max = da->common.free_cell_ptr;
     for( i = 0; i < max; i++ )
     {
         gc_fcall( func, arg, da->stack[i].object );
     }
+
+    if ( da->common.next.data != 0 )
+        gc_fcall( func, arg, da->common.next );  //we are starting from root, so following next is enough. Tail recursion
 }
 
