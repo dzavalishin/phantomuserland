@@ -1,4 +1,4 @@
-#summary General list if frequently asked questions.
+#summary General list of frequently asked questions.
 #labels Phase-Support
 
 (in progress. feel free to add questions)
@@ -8,6 +8,7 @@ This is a top-level :) FAQ and list of other FAQ pages.
 See:
   * [TechFAQ] for tech details related questions.
   * [GeneralFAQ] for more common questions.
+  * [SerializationFAQ] for questions on serialization.
   * [DoYouKnowFAQ] for "_Do you know XXX_" style questions. :)
 
 == Classification ==
