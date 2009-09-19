@@ -731,8 +731,6 @@ static void gc_process_children(pvm_object_storage_t *o)
 static void refzero_add_from_internal(pvm_object_t o, void *arg);
 static void do_refzero_process_children( pvm_object_storage_t *o );
 
-void ref_free_stackframe( pvm_object_storage_t *o ); // TODO to header!
-void pvm_gc_iter_thread_1(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg); // TODO to header!
 
 
 static void refzero_process_children( pvm_object_storage_t *o )
@@ -774,33 +772,6 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
       )
         return;
 
-    if(o->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME) )
-    {
-        /*
-         * NB! It is FORBIDDEN to follow references in stack frame manually.
-         *
-         * Stack frame points to stacks, and stacks are double linked and do not
-         * support regular refcount. And can't be freed by regular refcount.
-         * So due to said above and the total ownership of stacks by stack
-         * frame we are freeing them manually when stack frame is freed by
-         * refcount code.
-         *
-         */
-        ref_free_stackframe(o);
-        return;
-    }
-
-    if(o->_flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD) )
-    {
-        /*
-         *
-         * Special version of thread iter function for refcount, uses ref_free_stackframe().
-         *
-         */
-        pvm_gc_iter_thread_1( refzero_add_from_internal, o, 0 );
-        return;
-    }
-
 
     // Now find and call class-specific function
 
@@ -818,8 +789,8 @@ static void do_refzero_process_children( pvm_object_storage_t *o )
 
 static void refzero_add_from_internal(pvm_object_t o, void *arg)
 {
-    //if(o.data == 0) // Don't try to process null objects - never happen in fact!
-    //   return;
+    if(o.data == 0) // Don't try to process null objects
+       return;
 
     ref_dec_o( o );
 }
