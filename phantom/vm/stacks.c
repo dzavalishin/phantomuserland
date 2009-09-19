@@ -204,7 +204,7 @@ void pvm_istack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, 
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,integer_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_throw( "o abs_set: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_throw( "i abs_set: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -219,7 +219,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,integer_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_throw( "o abs_get: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_throw( "i abs_get: out of stack" );
         abs_pos -= pagesize;
     }
 
