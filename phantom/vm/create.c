@@ -280,7 +280,6 @@ void pvm_internal_init_call_frame(struct pvm_object_storage * os)
 #define gc_fcall( f, arg, o )   f( o, arg )
 
 
-// GC only, not for refcount!
 void pvm_gc_iter_call_frame(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
 	struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(os->da);
@@ -290,57 +289,6 @@ void pvm_gc_iter_call_frame(gc_iterator_call_t func, struct pvm_object_storage *
 	gc_fcall( func, arg, da->ostack );
 	gc_fcall( func, arg, da->estack );
 }
-
-
-static void ref_free_stack( pvm_object_storage_t *o, int type );
-
-// Special refcount support for stackframe - see comments in refcount on this
-void ref_free_stackframe( pvm_object_storage_t *o )
-{
-	struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(o->da);
-	ref_dec_o( da->this_object ); // Process ref to 'this' in a regular way
-
-	ref_free_stack( da->istack.data, 0 );
-	ref_free_stack( da->ostack.data, 1 );
-	ref_free_stack( da->estack.data, 2 );
-}
-
-
-static void ref_free_stack( pvm_object_storage_t *o, int type )
-{
-	// Hack.
-	// Other stacks (is,es) have the same structure of 'common' field
-	struct data_area_4_object_stack *da = (struct data_area_4_object_stack *)&(o->da);
-
-	switch (type) {
-	case 1:
-		// Now process all the unpopped objects on stack, if stack is object one
-		while(da->common.free_cell_ptr > 0)
-		{
-			pvm_object_t popped = da->stack[--(da->common.free_cell_ptr)];
-			ref_dec_o( popped );
-		}
-		break;
-	case 2:
-		// Now process all the unpopped exception catchers on stack.
-		while( da->common.free_cell_ptr > 0)
-		{
-			struct pvm_exception_handler popped = ((struct data_area_4_exception_stack *)da)->stack[--(da->common.free_cell_ptr)];
-			ref_dec_o( popped.object );
-		}
-	case 0:
-		break;
-	}
-
-	o->_ah.refCount = 0;
-	o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
-
-	debug_catch_object("del", o);
-
-    if ( da->common.next.data != 0 )
-        ref_free_stack( da->common.next.data, type );  //tail recursion
-}
-
 
 
 // interface is a quite usual phantom object.
@@ -477,7 +425,6 @@ void pvm_internal_init_thread(struct pvm_object_storage * os)
 }
 
 
-// GC only, not for refcount!
 void pvm_gc_iter_thread(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
 	struct data_area_4_thread *da = (struct data_area_4_thread *)&(os->da);
@@ -485,18 +432,6 @@ void pvm_gc_iter_thread(gc_iterator_call_t func, struct pvm_object_storage * os,
 	gc_fcall( func, arg, da->owner );
 	gc_fcall( func, arg, da->environment );
 }
-
-
-// a version for refcount
-void pvm_gc_iter_thread_1(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
-{
-	struct data_area_4_thread *da = (struct data_area_4_thread *)&(os->da);
-	//gc_fcall( func, arg, da->call_frame );  //call_frame could not be proccessed by refcount currently
-	ref_free_stackframe( da->call_frame.data );
-	//gc_fcall( func, arg, da->owner );
-	//gc_fcall( func, arg, da->environment );  //both not implemented, initialized to 0
-}
-
 
 
 void pvm_internal_init_code(struct pvm_object_storage * os)

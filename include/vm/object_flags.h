@@ -30,13 +30,13 @@
 // flag marking object as having no pointers out - optimization for GC and refcount decr
 POSF(IS_CHILDFREE,0x800)
 
-// Object is thread. This is needed by refcount code to free stacks manually
+// Object is thread. For information purposes only
 POSF(IS_THREAD,0x400)
 
 // Object is i/o/e stack. This is needed to allocate stacks efficiently
 POSF(IS_STACK_FRAME,0x200)
 
-// Object is call frame. This is needed by refcount code to free stacks manually
+// Object is call frame. This is needed to allocate stacks efficiently
 POSF(IS_CALL_FRAME,0x100)
 
 // implementation is in VM/kernel
