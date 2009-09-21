@@ -199,6 +199,7 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
         // like ret here
         if( debug_print_instr ) hal_printf("except does unwind, ");
         struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
+
         if( pvm_is_null( ret ) )
         {
             printf("Unhandled exception: ");
@@ -208,8 +209,9 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
 
             pvm_exec_throw( "unwind: nowhere to return" );
         }
-        pvm_exec_save_fast_acc(da); // need?
+        pvm_object_da( da->call_frame, call_frame )->prev.data = 0; // Or else refcounter will follow this link
         ref_dec_o(da->call_frame); // we are erasing reference to old call frame - release it!
+
         da->call_frame = ret;
         pvm_exec_load_fast_acc(da);
     }
@@ -260,6 +262,8 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
     {
         hal_printf("call %d; ", method_index );
     }
+    pvm_exec_save_fast_acc(da);
+
     // which object's method we'll call - pop after args!
     struct pvm_object new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
@@ -286,25 +290,13 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), n_param);
 
     struct pvm_object o = os_pop();
+
     struct pvm_object_storage *code = pvm_exec_find_method( o, method_index );
-
     assert(code != 0);
-
     pvm_exec_set_cs( cfda, code );
-
     cfda->this_object = o;
 
-
-    cfda->prev = da->call_frame;
-
-    /*
-     * NB! We don't increment reference (though we should),
-     * we simply clear this reference manually on return.
-     */
-
-    //ref_inc_o(cfda->prev);
-
-    pvm_exec_save_fast_acc(da);
+    cfda->prev = da->call_frame;  // link
     da->call_frame = new_cf;
     pvm_exec_load_fast_acc(da);
 
@@ -865,43 +857,21 @@ void pvm_exec(struct pvm_object current_thread)
             {
                 if( DEB_CALLRET || debug_print_instr ) hal_printf("ret; ");
                 //if( cf->estack.empty() ) throw except( "exec", "nowhere to return" );
-                struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;//da->call_frame.get_prev();
-
-                pvm_object_da( da->call_frame, call_frame )->prev.data = 0; // Or else refcounter will follow this link many times
+                struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
 
                 if( pvm_is_null( ret ) )
                 {
-                    return;
-                    //throw except( "exec", "nowhere to return" );
+                    return;  // exit thread
                 }
+                pvm_object_t return_val = os_empty() ?  pvm_get_null_object() : os_pop();
 
-
-                /*
-                if(!os_empty())
-                {
-                    //ret.ostack().push(os_pop());
-
-                    pvm_object os = pvm_object_da( ret, call_frame )->ostack;
-
-                    pvm_ostack_push( pvm_object_da( os, object_stack ), os_pop() );
-                }
-                */
-
-                //int do_return_val = !os_empty();
-                pvm_object_t ret_val = os_empty() ?
-                    pvm_get_null_object() : os_pop();
-
-                //if(do_return_val) ret_val = ;
-
-                // TODO dec refcnt for all old stack?
-                // TODO dec refcount for old this!
-                pvm_exec_save_fast_acc(da); // need?
+                pvm_object_da( da->call_frame, call_frame )->prev.data = 0; // Or else refcounter will follow this link
                 ref_dec_o(da->call_frame); // we are erasing reference to old call frame - release it!
+
                 da->call_frame = ret;
                 pvm_exec_load_fast_acc(da);
 
-                //if(do_return_val)
-                os_push( ret_val );
+                os_push( return_val );
             }
             break;
 
@@ -1209,7 +1179,7 @@ struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
      * Run class loader in the main pvm_exec() loop? Hmmm.
      *
      */
-printf("lookup_class_by_name\n");
+//printf("lookup_class_by_name\n");
 
     // Try userland loader
     struct pvm_object args[1] = { name };
@@ -1245,11 +1215,11 @@ pvm_exec_run_method(
 
     struct pvm_object_storage *code = pvm_exec_find_method( this_object, method );
     pvm_exec_set_cs( cfda, code );
-    ref_inc_o( cfda->this_object = this_object );
+    cfda->this_object = ref_inc_o( this_object );  // need increment ??
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 
-printf("here!\n");
+//printf("here!\n");
 
     pvm_exec( thread );
 
