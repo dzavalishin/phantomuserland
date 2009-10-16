@@ -2,7 +2,7 @@ default: all
 
 INCDIRS += $(realpath $(PHANTOM_HOME))/include
 
-PHANTOM_CFLAGS += -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS))
+PHANTOM_CFLAGS += -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc
 
 vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
 vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)
