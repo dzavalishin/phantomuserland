@@ -119,7 +119,7 @@ struct data_area_4_class
 struct pvm_code_handler
 {
     const unsigned char *   	code;
-    unsigned int            	IP;
+    unsigned int            	IP;   /* Instruction Pointer */
     unsigned int            	IP_max;
 };
 
@@ -193,7 +193,7 @@ struct pvm_stack_da_common
     unsigned int    			free_cell_ptr;
 
     /** Page array has this many elements. */
-    unsigned int                        __sSize; 
+    unsigned int                        __sSize;
 };
 
 
@@ -254,7 +254,7 @@ struct data_area_4_tty
 {
     drv_video_window_t           	w;
     /** this field extends w and works as it's last field. */
-    rgba_t       			pixel[PVM_MAX_TTY_PIXELS]; 
+    rgba_t       			pixel[PVM_MAX_TTY_PIXELS];
 
     int                                 font_height; // Font is hardcoded yet - BUG - but we cant have ptr to kernel from object
     int                                 font_width;
@@ -269,7 +269,7 @@ struct data_area_4_mutex
 {
     // TODO need queue!
     /** Which thread is sleeping. */
-    struct data_adrea_4_thread  *sleeping; 
+    struct data_adrea_4_thread  *sleeping;
 };
 
 
@@ -286,7 +286,7 @@ struct data_area_4_closure
     /** Which object to call. */
     struct pvm_object   object;
     /** Which method to call. */
-    int                 ordinal; 
+    int                 ordinal;
 };
 
 
