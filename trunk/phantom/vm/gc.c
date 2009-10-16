@@ -31,6 +31,30 @@
 
 
 
+// -----------------------------------------------------------------------
+// Collect cycles --  refcounter-based full GC
+// see Bacon algorithm (US Patent number 6879991, issued April 12, 2005) or (US Patent number 7216136 issued 8 May 2007)
+// TODO: not implemented,
+// Need persistent cycles_root_buffer not collected by usual gc/refcount - new internal object type?
+
+static void cycle_root_buffer_add_candidate(pvm_object_storage_t *p)
+{
+}
+static void cycle_root_buffer_rm_candidate(pvm_object_storage_t *p)
+{
+}
+static void cycle_root_buffer_clear()
+{
+    //just set size to zero, so regular GC will ignore it gracefully
+}
+void gc_collect_cycles()
+{
+}
+
+
+
+
+
 
 // -----------------------------------------------------------------------
 // Ok, poor man's GC: mark/sweep only for now,
@@ -69,6 +93,9 @@ void run_gc()
 
     if (debug_memory_leaks) pvm_memcheck();  // visualization
     if (debug_memory_leaks) printf("gc started...  ");
+
+
+    cycle_root_buffer_clear(); // so two types of gc could coexists
 
 
     // First pass - tree walk, mark visited.
@@ -121,7 +148,7 @@ static void mark_tree(pvm_object_storage_t * p)
 
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
 
 
     // Fast skip if no children -
@@ -167,7 +194,7 @@ static void gc_process_children(pvm_object_storage_t *p)
 
     // We're here if object is internal.
 
-    // Now find and call class-specific function
+    // Now find and call class-specific function: pvm_gc_iter_*
 
     gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( p->_class, class )->sys_table_id].iter;
 
@@ -194,10 +221,16 @@ static void do_refzero_process_children( pvm_object_storage_t *p );
 
 void refzero_process_children( pvm_object_storage_t *p )
 {
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO );
+    assert( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
+    assert( !(p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) );
+
     do_refzero_process_children( p );
 
+    if ( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER )
+        cycle_root_buffer_rm_candidate( p );
+
     p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
+
     debug_catch_object("del", p);
     DEBUG_PRINT("x");
 }
@@ -232,12 +265,10 @@ static void do_refzero_process_children( pvm_object_storage_t *p )
         return;
 
 
-    // Now find and call class-specific function
+    // Now find and call class-specific function: pvm_gc_iter_*
 
-    //struct pvm_object_storage *co = o->_class.data;
     gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( p->_class, class )->sys_table_id].iter;
 
-    // Iterate over reference-type fields of internal-class objects, calling refzero_add_from_internal for each such field.
     func( refzero_add_from_internal, p, 0 );
 
 
@@ -260,9 +291,9 @@ static void refzero_add_from_internal(pvm_object_t o, void *arg)
 /*-----------------------------------------------------------------------------------------*/
 
 // used by   ref_dec_p()
-void ref_dec_proccess_zero(pvm_object_storage_t *p)
+static void ref_dec_proccess_zero(pvm_object_storage_t *p)
 {
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount == 0 );
     assert( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) );
 
@@ -270,7 +301,9 @@ void ref_dec_proccess_zero(pvm_object_storage_t *p)
 
     DEBUG_PRINT("(X)");
     hal_mutex_lock( &alloc_mutex );
-    p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
+    //p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
+    p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
+    p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
 
     // FIXME must not be so in final OS, stack overflow possiblity!
     // TODO use some local pool too, instead of recursion
@@ -279,6 +312,7 @@ void ref_dec_proccess_zero(pvm_object_storage_t *p)
     refzero_process_children( p );
     hal_mutex_unlock( &alloc_mutex );
 }
+
 
 
 void debug_catch_object(const char *msg, pvm_object_storage_t *p )
@@ -301,15 +335,15 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
     debug_catch_object("--", p);
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.refCount > 0 );
 
     //if(p->_ah.refCount <= 0) {
-    /*if( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED ) {
+    /*if( !(p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) ) {
        //DEBUG_PRINT("Y");
         printf(" %d", p->_ah.refCount );
         printf(" @ 0x%X", p); getchar();
     }*/
-    assert( p->_ah.refCount > 0 );
 
     if(p->_ah.refCount < INT_MAX) // Do we really need this check? Sure, we see many decrements for saturated objects!
     {
@@ -324,6 +358,18 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
             } else
                 ref_dec_proccess_zero(p);
         }
+
+        // if we decrement refcount and stil above zero - mark an object as potential cycle root;
+        // and internal objects can't be a cycle root (sic!)
+        else if ( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
+        {
+            if ( !(p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER) )
+            {
+                cycle_root_buffer_add_candidate(p);
+                p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER ;
+            }
+            p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN ;  // set down flag
+        }
     }
 }
 
@@ -332,7 +378,7 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
     debug_catch_object("++", p);
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount > 0 );
 
     //if( p->_ah.refCount <= 0 )
@@ -341,7 +387,12 @@ static inline void ref_inc_p(pvm_object_storage_t *p)
     //}
 
     if( p->_ah.refCount < INT_MAX )
+    {
         (p->_ah.refCount)++;
+
+        if ( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER )
+            p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN ;  //clear down flag
+    }
 }
 
 

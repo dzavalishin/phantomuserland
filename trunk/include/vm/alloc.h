@@ -66,8 +66,6 @@ void ref_saturate_p(pvm_object_storage_t *p);
 
 
 
-// alloc_flags below are mutually exclusive!
-
 // Free'd object
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE 0x00
 
@@ -78,6 +76,16 @@ void ref_saturate_p(pvm_object_storage_t *p);
 // processed. All the children refcounts must be decremented and then this object
 // can be freed.
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO 0x02
+
+
+
+// Flags for cycle detection candidates (noninternal objects only),
+// - can be joined with 0x00, 0x01 or 0x02
+//
+// this one set when refcounter goes down to nonzero value, and clears otherwise
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN 0x04
+// and this is for objects already in cycle candidates buffer -
+#define PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER 0x08
 
 
 
