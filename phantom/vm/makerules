@@ -17,4 +17,4 @@ nonstandalone.o: nonstandalone.c
 GLLIB=../lib/libTinyGL.a 
 
 pvm_test: main.o nonstandalone.o $(GLLIB)
-	gcc -p -pg -ffreestanding -o $@ $^  -lgdi32 
+	gcc -g -ffreestanding -o $@ $^  -lgdi32 
