@@ -14,7 +14,7 @@ OBJFILES += $(patsubst %.c,%.o,$(notdir $(CFILES)))
 	
 
 %.o: %.c
-	$(CC) -c -o $@ $(PHANTOM_CFLAGS) $<
+	gcc -c -o $@ $(PHANTOM_CFLAGS) $<
 
 .SUFFIXES:
 
