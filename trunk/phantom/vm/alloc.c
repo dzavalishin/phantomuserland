@@ -5,21 +5,14 @@
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel ready: yes
- * Preliminary: no (but GC is not finished)
+ * Preliminary: no
  *
  *
 **/
 
 
-#include <phantom_assert.h>
-#include <phantom_libc.h>
-
-#include <hal.h>
-//#include <kernel/snap_sync.h>
-
 
 #include "vm/alloc.h"
-#include "vm/internal.h"
 #include "vm/object_flags.h"
 
 
@@ -33,15 +26,17 @@
 
 
 static void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
-static void refzero_process_children( pvm_object_storage_t *o );
 
 // Gigant lock for now. TODO
-static hal_mutex_t  alloc_mutex;
+hal_mutex_t  alloc_mutex;
 
 
 // Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena
 static void * pvm_object_space_start;
 static void * pvm_object_space_end;
+
+void * get_pvm_object_space_start() { return pvm_object_space_start; }
+void * get_pvm_object_space_end() { return pvm_object_space_end; }
 
 
 //
@@ -397,8 +392,6 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
 }
 
 
-static inline void ref_saturate_p(pvm_object_storage_t *p);
-void debug_catch_object(const char *msg, pvm_object_storage_t *p );
 //allocation statistics:
 #define max_stat_size 4096
 static long created_o[ARENAS][max_stat_size+1];
@@ -573,348 +566,5 @@ static void memcheck_print_histogram(int arena)
 }
 
 
-
-
-
-// -----------------------------------------------------------------------
-// Ok, poor man's GC: mark/sweep only for now,
-// TODO implement some more serious GC
-// -----------------------------------------------------------------------
-
-
-//static void init_gc() {};
-
-static int free_unmarked();
-static void mark_tree(pvm_object_storage_t * root);
-static void gc_process_children(pvm_object_storage_t *o);
-
-
-//// TODO include
-//extern int phantom_virtual_machine_threads_stopped;
-static volatile int  gc_n_run = 0;
-static unsigned char  gc_flags_last_generation = 0;
-
-void run_gc()
-{
-    int my_run = gc_n_run;
-
-    hal_mutex_lock( &alloc_mutex );
-
-    if (my_run != gc_n_run) // lock acquired when concurrent gc run finished
-        { hal_mutex_unlock( &alloc_mutex ); return; }
-    gc_n_run++;
-
-    gc_flags_last_generation++; // bump generation
-    if (gc_flags_last_generation == 0)  gc_flags_last_generation++;  // != 0 'cause allocation reset gc_flags to zero
-
-    //phantom_virtual_machine_threads_stopped++; // pretend we are stopped
-    //TODO: refine sinchronization
-
-    if (debug_memory_leaks) pvm_memcheck();  // visualization
-    if (debug_memory_leaks) printf("gc started...  ");
-
-
-    // First pass - tree walk, mark visited.
-    //
-    // Root is always used. All other objects, including pvm_root and pvm_root.threads_list, should be reached from root...
-    mark_tree( get_root_object_storage() );
-
-
-    // Second pass - linear walk to free unused objects.
-    //
-    int freed = free_unmarked();
-
-    if ( freed > 0 )
-       printf("\ngc: %i objects freed\n", freed);
-
-    if (debug_memory_leaks) printf("gc finished!\n");
-    if (debug_memory_leaks) pvm_memcheck();  // visualization
-
-    //TODO refine sinchronization
-    //phantom_virtual_machine_threads_stopped--;
-    hal_mutex_unlock( &alloc_mutex );
-}
-
-
-static int free_unmarked()
-{
-    int freed = 0;
-    void * curr;
-    for( curr = pvm_object_space_start; curr < pvm_object_space_end ; curr += ((pvm_object_storage_t *)curr)->_ah.exact_size )
-    {
-        pvm_object_storage_t * p = (pvm_object_storage_t *)curr;
-        assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-
-        if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.refCount > 0 ) )  //touch only not accessed but allocated objects
-        {
-            freed++;
-            debug_catch_object("gc", p);
-            p->_ah.refCount = 0;  // free now
-            p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE; // free now
-        }
-    }
-    return freed;
-}
-
-static void mark_tree(pvm_object_storage_t * p)
-{
-    p->_ah.gc_flags = gc_flags_last_generation;  // set
-
-
-    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-
-
-    // Fast skip if no children -
-    if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) )
-    {
-        gc_process_children(p);
-    }
-}
-
-static void mark_tree_o(pvm_object_t o)
-{
-    if(o.data == 0) // Don't try to process null objects
-        return;
-
-    if (o.data->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.data );
-    if (o.interface->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.interface );
-}
-
-static void gc_add_from_internal(pvm_object_t o, void *arg)
-{
-    mark_tree_o( o );
-}
-
-static void gc_process_children(pvm_object_storage_t *o)
-{
-    mark_tree_o( o->_class );
-
-    // Fast skip if no children - done!
-    //if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
-    //    return;
-
-    // plain non internal objects -
-    if( !(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
-    {
-        int i;
-
-        for( i = 0; i < da_po_limit(o); i++ )
-        {
-            mark_tree_o( da_po_ptr(o->da)[i] );
-        }
-        return;
-    }
-
-    // We're here if object is internal.
-
-    // Now find and call class-specific function
-
-    gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( o->_class, class )->sys_table_id].iter;
-
-    func( gc_add_from_internal, o, 0 );
-}
-
-
-
-
-
-
-
-// -----------------------------------------------------------------------
-// Refcount processor.
-// Takes object which is found to be nonreferenced (has PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO flag)
-// and processes all its children. Those with only one ref will become marked with
-// PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO flag too.
-// -----------------------------------------------------------------------
-
-static void refzero_add_from_internal(pvm_object_t o, void *arg);
-static void do_refzero_process_children( pvm_object_storage_t *o );
-
-
-
-static void refzero_process_children( pvm_object_storage_t *o )
-{
-    assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO );
-    do_refzero_process_children( o );
-
-    o->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
-    debug_catch_object("del", o);
-    DEBUG_PRINT("x");
-}
-
-static void do_refzero_process_children( pvm_object_storage_t *o )
-{
-    // Fast skip if no children - done!
-    //if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
-    //    return;
-
-    // plain non internal objects -
-    if( !(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
-    {
-        int i;
-
-        for( i = 0; i < da_po_limit(o); i++ )
-        {
-            ref_dec_o( da_po_ptr(o->da)[i] );
-        }
-        return;
-    }
-
-    // We're here if object is internal.
-
-
-    // TEMP - skip classes and interfaces too. we must not reach them, in fact... how do we?
-    if(
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS) ||
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) ||
-       (o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE)
-      )
-        return;
-
-
-    // Now find and call class-specific function
-
-    //struct pvm_object_storage *co = o->_class.data;
-    gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( o->_class, class )->sys_table_id].iter;
-
-    // Iterate over reference-type fields of internal-class objects, calling refzero_add_from_internal for each such field.
-    func( refzero_add_from_internal, o, 0 );
-
-
-    //don't touch classes yet
-    //ref_dec_o( o->_class );  // Why? Class objects are saturated for now.
-}
-
-
-static void refzero_add_from_internal(pvm_object_t o, void *arg)
-{
-    if(o.data == 0) // Don't try to process null objects
-       return;
-
-    ref_dec_o( o );
-}
-
-
-
-
-/*-----------------------------------------------------------------------------------------*/
-
-// used by   ref_dec_p()
-static inline void ref_dec_proccess_zero(pvm_object_storage_t *p)
-{
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    assert( p->_ah.refCount == 0 );
-    assert( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) );
-
-    // postpone for delayed inspection (bug or feature?)
-
-    DEBUG_PRINT("(X)");
-    hal_mutex_lock( &alloc_mutex );
-    p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
-
-    // FIXME must not be so in final OS, stack overflow possiblity!
-    // TODO use some local pool too, instead of recursion
-    // or, alternatively, just comment out lock and processing of children to postpone deallocation for the future
-
-    refzero_process_children( p );
-    hal_mutex_unlock( &alloc_mutex );
-}
-
-
-void debug_catch_object(const char *msg, pvm_object_storage_t *p )
-{
-    // Can be used to trace some specific object's access
-    //if( p != 0x7A9F3527 )
-    if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
-    //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING) )
-        return;
-    printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
-
-    print_object_flags(p);
-    //dumpo(p);
-    //getchar();
-    printf("\n"); // for GDB to break here
-}
-
-static inline void ref_dec_p(pvm_object_storage_t *p)
-{
-    debug_catch_object("--", p);
-
-    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-
-    //if(p->_ah.refCount <= 0) {
-    /*if( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED ) {
-       //DEBUG_PRINT("Y");
-        printf(" %d", p->_ah.refCount );
-        printf(" @ 0x%X", p); getchar();
-    }*/
-    assert( p->_ah.refCount > 0 );
-
-    if(p->_ah.refCount < INT_MAX) // Do we really need this check? Sure, we see many decrements for saturated objects!
-    {
-        if( 0 == ( --(p->_ah.refCount) ) )
-        {
-            // Fast way if no children
-            if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
-            {
-                p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
-                debug_catch_object("del", p);
-                DEBUG_PRINT("-");
-            } else
-                ref_dec_proccess_zero(p);
-        }
-    }
-}
-
-static inline void ref_inc_p(pvm_object_storage_t *p)
-{
-    debug_catch_object("++", p);
-
-    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    assert( p->_ah.refCount > 0 );
-
-    //if( p->_ah.refCount <= 0 )
-    //{
-    //    panic("p->_ah.refCount <= 0: 0x%X", p);
-    //}
-
-    if( p->_ah.refCount < INT_MAX )
-        (p->_ah.refCount)++;
-}
-
-
-// Make sure this object won't be deleted with refcount dec
-// used on sys global objects
-static inline void ref_saturate_p(pvm_object_storage_t *p)
-{
-    debug_catch_object("!!", p);
-
-    assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    assert( p->_ah.refCount > 0 );
-
-    p->_ah.refCount = INT_MAX;
-}
-
-
-//external calls:
-void ref_saturate_o(pvm_object_t o)
-{
-    if(!(o.data)) return;
-    ref_saturate_p(o.data);
-}
-pvm_object_t  ref_dec_o(pvm_object_t o)
-{
-    ref_dec_p(o.data);
-    return o;
-}
-pvm_object_t  ref_inc_o(pvm_object_t o)
-{
-    ref_inc_p(o.data);
-    return o;
-}
 
 
