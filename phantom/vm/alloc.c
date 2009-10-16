@@ -251,14 +251,14 @@ static inline int pvm_alloc_is_free_object(pvm_object_storage_t *o)
 bool pvm_object_is_allocated_light(pvm_object_storage_t *o)
 {
     return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER
-            && o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
+            && o->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED;
 }
 
 // maximal test:
 bool pvm_object_is_allocated(pvm_object_storage_t *o)
 {
     return o->_ah.object_start_marker == PVM_OBJECT_START_MARKER
-            && o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED
+            && o->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED
             //o->_ah.gc_flags == 0;
             && o->_ah.refCount > 0
             && o->_ah.exact_size >= ( o->_da_size + sizeof(pvm_object_storage_t) )
@@ -269,7 +269,7 @@ bool pvm_object_is_allocated(pvm_object_storage_t *o)
 void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 {
     assert( o->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
-    assert( o->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( o->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     //o->_ah.gc_flags == 0;
     assert( o->_ah.refCount > 0 );
     assert( o->_ah.exact_size >= ( o->_da_size + sizeof(pvm_object_storage_t) ) );
@@ -311,7 +311,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
             return 0;
         }
 
-        if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED == curr->_ah.alloc_flags )
+        if( PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED & curr->_ah.alloc_flags )
         {
             DEBUG_PRINT("a");
             // Is allocated? Go to the next one.
@@ -319,7 +319,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
             continue;
         }
 
-        if(  PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO == curr->_ah.alloc_flags )
+        if( PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE != curr->_ah.alloc_flags ) // refcount == 0, but refzero or in buffer or both
         {
             DEBUG_PRINT("(c)");
             refzero_process_children( curr );
@@ -507,7 +507,7 @@ static int memcheck_one(int i, void * start, void * end)
 
         // Is an object.
 
-        if( curr->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED )
+        if( curr->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED )
         {
             if(!pvm_object_is_allocated(curr))  //more tests
             {
