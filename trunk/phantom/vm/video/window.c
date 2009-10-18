@@ -15,7 +15,7 @@
 
 // here we have a problem - some windows are persistent and
 // keep their generation. So on start we need to advance
-// generation twice to make sure all windows are cathed up
+// generation twice to make sure all windows are catched up
 static int win_generation = 0;
 
 void drv_video_window_update_generation(void)

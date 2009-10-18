@@ -377,7 +377,8 @@ void pvm_exec(struct pvm_object current_thread)
             //pvm_exec_load_fast_acc(da); // We don't need this, if we die, we will enter again from above :)
         }
 
-#if 1 //GC_ENABLED  //Just for fun?
+        // GC can be enabled here for test purposes only.
+#if 0 //GC_ENABLED  //Just for fun?
         static int gcc = 0;
         gcc++;
         if( gcc > 20000 )
