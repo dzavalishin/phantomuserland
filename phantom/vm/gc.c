@@ -290,6 +290,8 @@ static void refzero_add_from_internal(pvm_object_t o, void *arg)
 
 /*-----------------------------------------------------------------------------------------*/
 
+#define RECURSE_REF_DEC 0
+
 // used by   ref_dec_p()
 static void ref_dec_proccess_zero(pvm_object_storage_t *p)
 {
@@ -300,7 +302,9 @@ static void ref_dec_proccess_zero(pvm_object_storage_t *p)
     // postpone for delayed inspection (bug or feature?)
 
     DEBUG_PRINT("(X)");
+#if RECURSE_REF_DEC
     hal_mutex_lock( &alloc_mutex );
+#endif
     //p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
     p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
     p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
@@ -309,8 +313,10 @@ static void ref_dec_proccess_zero(pvm_object_storage_t *p)
     // TODO use some local pool too, instead of recursion
     // or, alternatively, just comment out lock and processing of children to postpone deallocation for the future
 
+#if RECURSE_REF_DEC
     refzero_process_children( p );
     hal_mutex_unlock( &alloc_mutex );
+#endif
 }
 
 
