@@ -131,7 +131,7 @@ static int free_unmarked()
         pvm_object_storage_t * p = (pvm_object_storage_t *)curr;
         assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
-        if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.refCount > 0 ) )  //touch only not accessed but allocated objects
+        if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE ) )  //touch only not accessed but allocated objects
         {
             freed++;
             debug_catch_object("gc", p);
@@ -222,7 +222,7 @@ static void do_refzero_process_children( pvm_object_storage_t *p );
 void refzero_process_children( pvm_object_storage_t *p )
 {
     assert( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
-    assert( !(p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED) );
+    assert( p->_ah.refCount == 0 );
 
     do_refzero_process_children( p );
 
@@ -290,32 +290,26 @@ static void refzero_add_from_internal(pvm_object_t o, void *arg)
 
 /*-----------------------------------------------------------------------------------------*/
 
-#define RECURSE_REF_DEC 0
+#define RECURSE_REF_DEC 1
 
 // used by   ref_dec_p()
 static void ref_dec_proccess_zero(pvm_object_storage_t *p)
 {
-    assert( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    assert( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE );
     assert( p->_ah.refCount == 0 );
     assert( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) );
 
-    // postpone for delayed inspection (bug or feature?)
-
-    DEBUG_PRINT("(X)");
-#if RECURSE_REF_DEC
-    hal_mutex_lock( &alloc_mutex );
-#endif
-    //p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
-    p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
-    p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
-
-    // FIXME must not be so in final OS, stack overflow possiblity!
-    // TODO use some local pool too, instead of recursion
-    // or, alternatively, just comment out lock and processing of children to postpone deallocation for the future
-
 #if RECURSE_REF_DEC
     refzero_process_children( p );
-    hal_mutex_unlock( &alloc_mutex );
+#else
+    // postpone for delayed inspection (bug or feature?)
+    // FIXME must not be so in final OS, stack overflow possiblity!
+    // TODO use some local pool too, instead of recursion
+
+    DEBUG_PRINT("(X)");
+    //p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
+    p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
+    p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
 #endif
 }
 
