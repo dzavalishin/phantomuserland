@@ -57,7 +57,7 @@ void gc_collect_cycles()
 
 
 // -----------------------------------------------------------------------
-// Ok, poor man's GC: mark/sweep only for now,
+// Ok, poor man's GC:  stop-the-world mark/sweep
 // TODO implement some more serious GC
 // -----------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ void gc_collect_cycles()
 
 static int free_unmarked();
 static void mark_tree(pvm_object_storage_t * root);
-static void gc_process_children(pvm_object_storage_t *o);
+static void gc_process_children(pvm_object_storage_t *p);
 void debug_catch_object(const char *msg, pvm_object_storage_t *p );
 
 
@@ -131,7 +131,7 @@ static int free_unmarked()
         pvm_object_storage_t * p = (pvm_object_storage_t *)curr;
         assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
-        if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE ) )  //touch only not accessed but allocated objects
+        if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE ) )  //touch not accessed but allocated objects
         {
             freed++;
             debug_catch_object("gc", p);
@@ -300,14 +300,12 @@ static void ref_dec_proccess_zero(pvm_object_storage_t *p)
     assert( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) );
 
 #if RECURSE_REF_DEC
+    // FIXME must not be so in final OS, stack overflow possiblity!
+    // TODO use some local pool too, instead of recursion
     refzero_process_children( p );
 #else
     // postpone for delayed inspection (bug or feature?)
-    // FIXME must not be so in final OS, stack overflow possiblity!
-    // TODO use some local pool too, instead of recursion
-
     DEBUG_PRINT("(X)");
-    //p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO;
     p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
     p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
 #endif
