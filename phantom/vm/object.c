@@ -402,11 +402,8 @@ void pvm_check_is_thread( struct pvm_object new_thread )
 {
     struct pvm_object_storage	* d = new_thread.data;
 
-    if( ! (d->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
+    if( d->_flags != (PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD) )
         panic("Thread object has no INTERNAL flag");
-
-//    if( (d->_flags & ~PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
-//        panic("Thread object has other than INTERNAL flag");
 
     if( !pvm_object_class_is( new_thread, pvm_get_thread_class() ) )
         panic("Thread object class is not .internal.thread");

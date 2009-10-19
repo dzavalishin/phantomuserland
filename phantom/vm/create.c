@@ -261,8 +261,6 @@ void pvm_internal_init_call_frame(struct pvm_object_storage * os)
 	//struct data_area_4_call_frame *da = pvm_data_area( os, call_frame );
 	struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(os->da);
 
-	assert(os->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME );
-
 	da->IP_max = 0;
 	da->IP = 0;
 	da->code = 0;
@@ -403,8 +401,6 @@ void pvm_gc_iter_class(gc_iterator_call_t func, struct pvm_object_storage * os, 
 void pvm_internal_init_thread(struct pvm_object_storage * os)
 {
 	struct data_area_4_thread *      da = (struct data_area_4_thread *)os->da;
-
-	assert(os->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD );
 
 	hal_spin_init(&da->spin);
 	da->sleep_flag                      = 0;
