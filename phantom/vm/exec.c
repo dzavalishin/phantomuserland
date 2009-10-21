@@ -70,6 +70,7 @@ int debug_print_instr = 0;
 
 #define es_push( i ) 	pvm_estack_push( da->_estack, i )
 #define es_pop() 	pvm_estack_pop( da->_estack )
+#define es_empty()  pvm_estack_empty( da->_estack )
 
 
 #define this_object()   (da->_this_object)
@@ -98,10 +99,9 @@ void pvm_exec_load_fast_acc(struct data_area_4_thread *da)
     da->code.IP_max  = cf->IP_max;
     da->code.code    = cf->code;
 
-    da->code.IP      = cf->IP; //da->call_frame.get_IP();
+    da->code.IP      = cf->IP;  /* Instruction Pointer */
 
-    da->_this_object = cf->this_object; //da->call_frame.get_this();
-
+    da->_this_object = cf->this_object;
     da->_istack = (struct data_area_4_integer_stack*)(& cf->istack.data->da);
     da->_ostack = (struct data_area_4_object_stack*)(& cf->ostack.data->da);
     da->_estack = (struct data_area_4_exception_stack*)(& cf->estack.data->da);
@@ -177,15 +177,32 @@ static void pvm_exec_iset( struct data_area_4_thread *da, unsigned abs_stack_pos
 }
 
 
+static void free_call_frame(struct pvm_object cf)
+{
+    pvm_object_da( cf, call_frame )->prev.data = 0; // Or else refcounter will follow this link
+    ref_dec_o( cf ); // we are erasing reference to old call frame - release it!
+}
 
 
+static void pvm_exec_do_return(struct data_area_4_thread *da)
+{
+    struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev; // prev exists - we guarantee it
+
+    pvm_object_t return_val = os_empty() ?  pvm_get_null_object() : os_pop(); // return value not in stack? Why?
+
+    free_call_frame( da->call_frame );
+
+    da->call_frame = ret;
+    pvm_exec_load_fast_acc(da);
+
+    os_push( return_val );
+}
 
 
 static int pvm_exec_find_catch(
                                struct data_area_4_exception_stack* stack,
                                unsigned int *jump_to,
                                struct pvm_object thrown_obj );
-
 
 
 // object to throw is on stack
@@ -209,8 +226,7 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
 
             pvm_exec_throw( "unwind: nowhere to return" );
         }
-        pvm_object_da( da->call_frame, call_frame )->prev.data = 0; // Or else refcounter will follow this link
-        ref_dec_o(da->call_frame); // we are erasing reference to old call frame - release it!
+        free_call_frame( da->call_frame );
 
         da->call_frame = ret;
         pvm_exec_load_fast_acc(da);
@@ -254,19 +270,9 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned syscall_index 
 
 
 
-
-
-static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param )
+static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned method_index, unsigned n_param )
 {
-    if( DEB_CALLRET || debug_print_instr )
-    {
-        hal_printf("call %d; ", method_index );
-    }
-    pvm_exec_save_fast_acc(da);
-
     // which object's method we'll call - pop after args!
-    struct pvm_object new_cf = pvm_create_call_frame_object();
-    struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
     // allocate places on stack
     {
@@ -295,15 +301,42 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
     assert(code != 0);
     pvm_exec_set_cs( cfda, code );
     cfda->this_object = o;
+}
 
-    cfda->prev = da->call_frame;  // link
+
+static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param, unsigned char next_instr )
+{
+    if( DEB_CALLRET || debug_print_instr ) hal_printf("call %d; ", method_index );
+
+    /*
+     * Stack growth optimization for bytecode [opcode_call; opcode_ret]
+     *
+     * While executing "return f(x)"  we do not need callee callframe any more
+     * so we can free it before executing f(x), to avoid unneeded stack growth and memory footprint.
+     * Especially effective for recursion. Implemented in gcc -O2 long ago.
+     */
+    int optimize_stack = (opcode_ret == next_instr) && es_empty();
+
+    pvm_exec_save_fast_acc(da);  // not needed for optimized stack in fact
+
+    struct pvm_object new_cf = pvm_create_call_frame_object();
+    struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
+
+    init_cfda(da, cfda, method_index, n_param);
+
+    if (!optimize_stack)
+        cfda->prev = da->call_frame;  // link
+    else
+    {
+        cfda->prev = pvm_object_da( da->call_frame, call_frame )->prev; // set
+
+        free_call_frame( da->call_frame );
+    }
     da->call_frame = new_cf;
     pvm_exec_load_fast_acc(da);
 
     //if( debug_print_instr ) hal_printf("call %d end; ", method_index );
 }
-
-
 
 
 
@@ -377,8 +410,8 @@ void pvm_exec(struct pvm_object current_thread)
             //pvm_exec_load_fast_acc(da); // We don't need this, if we die, we will enter again from above :)
         }
 
-        // GC can be enabled here for test purposes only.
-#if 0 //GC_ENABLED  //Just for fun?
+
+#if 0 // GC_ENABLED  // GC can be enabled here for test purposes only.
         static int gcc = 0;
         gcc++;
         if( gcc > 20000 )
@@ -857,22 +890,13 @@ void pvm_exec(struct pvm_object current_thread)
         case opcode_ret:
             {
                 if( DEB_CALLRET || debug_print_instr ) hal_printf("ret; ");
-                //if( cf->estack.empty() ) throw except( "exec", "nowhere to return" );
                 struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
 
                 if( pvm_is_null( ret ) )
                 {
                     return;  // exit thread
                 }
-                pvm_object_t return_val = os_empty() ?  pvm_get_null_object() : os_pop();
-
-                pvm_object_da( da->call_frame, call_frame )->prev.data = 0; // Or else refcounter will follow this link
-                ref_dec_o(da->call_frame); // we are erasing reference to old call frame - release it!
-
-                da->call_frame = ret;
-                pvm_exec_load_fast_acc(da);
-
-                os_push( return_val );
+                pvm_exec_do_return(da);
             }
             break;
 
@@ -911,23 +935,23 @@ void pvm_exec(struct pvm_object current_thread)
             // ok, now method calls ------------------------------------------------------
 
             // these 4 are parameter-less calls!
-        case opcode_short_call_0:			pvm_exec_call(da,0,0);	break;
-        case opcode_short_call_1:			pvm_exec_call(da,1,0);	break;
-        case opcode_short_call_2:			pvm_exec_call(da,2,0);	break;
-        case opcode_short_call_3:			pvm_exec_call(da,3,0);	break;
+        case opcode_short_call_0:           pvm_exec_call(da,0,0,pvm_code_get_byte_speculative(&(da->code)));   break;
+        case opcode_short_call_1:           pvm_exec_call(da,1,0,pvm_code_get_byte_speculative(&(da->code)));   break;
+        case opcode_short_call_2:           pvm_exec_call(da,2,0,pvm_code_get_byte_speculative(&(da->code)));   break;
+        case opcode_short_call_3:           pvm_exec_call(da,3,0,pvm_code_get_byte_speculative(&(da->code)));   break;
 
         case opcode_call_8bit:
             {
                 int method_index = pvm_code_get_byte(&(da->code));
                 int n_param = pvm_code_get_int32(&(da->code));
-                pvm_exec_call(da,method_index,n_param);
+                pvm_exec_call(da,method_index,n_param,pvm_code_get_byte_speculative(&(da->code)));
             }
             break;
         case opcode_call_32bit:
             {
                 int method_index = pvm_code_get_int32(&(da->code));
                 int n_param = pvm_code_get_int32(&(da->code));
-                pvm_exec_call(da,method_index,n_param);
+                pvm_exec_call(da,method_index,n_param,pvm_code_get_byte_speculative(&(da->code)));
             }
             break;
 
@@ -997,7 +1021,7 @@ void pvm_exec(struct pvm_object current_thread)
             if( (instruction & 0xE0 ) == opcode_call_00 )
             {
                 int n_param = pvm_code_get_byte(&(da->code));
-                pvm_exec_call(da,instruction & 0x1F,n_param);
+                pvm_exec_call(da,instruction & 0x1F,n_param,0);
                 continue;
             }
 
@@ -1216,7 +1240,7 @@ pvm_exec_run_method(
 
     struct pvm_object_storage *code = pvm_exec_find_method( this_object, method );
     pvm_exec_set_cs( cfda, code );
-    cfda->this_object = ref_inc_o( this_object );  // need increment ??
+    cfda->this_object = ref_inc_o( this_object );
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 

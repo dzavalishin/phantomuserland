@@ -11,7 +11,9 @@ set confirm off
 
 #set debug_print_instr=1
 
-
+#break pvm_exec_call
 #break pvm_exec_throw
 
-break alloc.c:1311
+#break alloc.c:1311
+
+break panic
