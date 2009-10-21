@@ -50,11 +50,18 @@ void pvm_code_check_bounds( struct pvm_code_handler *code, unsigned int ip, char
         throw_bounds( ip, code->IP_max, where );
 }
 
+unsigned char pvm_code_get_byte_speculative(struct pvm_code_handler *code)
+{
+    pvm_code_check_bounds( code, code->IP, "get_byte" );
+    return (unsigned char)code->code[code->IP];  // do not increment IP !
+}
+
 
 unsigned char pvm_code_get_byte(struct pvm_code_handler *code)
 {
     pvm_code_check_bounds( code, code->IP, "get_byte" );
-    return (unsigned char)code->code[code->IP++];}
+    return (unsigned char)code->code[code->IP++];
+}
 
 int pvm_code_get_int32(struct pvm_code_handler *code)
 {
@@ -89,13 +96,9 @@ struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
  *
  **/
 
-
 void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, struct pvm_object code)
 {
-
-    //if( !POSF_GET_IS_CODE(_flags) )        throw except("get_code", "i am not a code object" );
-
-    // TODO: these asserts must just raise an exception in Phantom code, nothing more.
+    // TODO: these asserts must just raise an exception in Phantom code, nothing more. ??
     if( !(code.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
         pvm_exec_throw("exec: not a code object");
 
