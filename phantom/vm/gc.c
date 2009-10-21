@@ -66,7 +66,13 @@ void gc_collect_cycles()
 
 static int free_unmarked();
 static void mark_tree(pvm_object_storage_t * root);
-static void gc_process_children(pvm_object_storage_t *p);
+
+//typedef void (*gc_iterator_call_t)( struct pvm_object o, void *arg );
+//typedef void (*gc_iterator_func_t)( gc_iterator_call_t func, struct pvm_object_storage * os, void *arg );
+
+static void mark_tree_o(pvm_object_t o, void *arg);
+static void gc_process_children(gc_iterator_call_t f, pvm_object_storage_t *p, void *arg);
+
 void debug_catch_object(const char *msg, pvm_object_storage_t *p );
 
 
@@ -154,11 +160,11 @@ static void mark_tree(pvm_object_storage_t * p)
     // Fast skip if no children -
     if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE) )
     {
-        gc_process_children(p);
+        gc_process_children( mark_tree_o, p, 0 /*unused cookie*/ );
     }
 }
 
-static void mark_tree_o(pvm_object_t o)
+static void mark_tree_o(pvm_object_t o, void *arg)
 {
     if(o.data == 0) // Don't try to process null objects
         return;
@@ -167,14 +173,10 @@ static void mark_tree_o(pvm_object_t o)
     if (o.interface->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.interface );
 }
 
-static void gc_add_from_internal(pvm_object_t o, void *arg)
-{
-    mark_tree_o( o );
-}
 
-static void gc_process_children(pvm_object_storage_t *p)
+static void gc_process_children(gc_iterator_call_t f, pvm_object_storage_t *p, void *arg)
 {
-    mark_tree_o( p->_class );
+    f( p->_class, arg );
 
     // Fast skip if no children - done!
     //if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
@@ -187,7 +189,7 @@ static void gc_process_children(pvm_object_storage_t *p)
 
         for( i = 0; i < da_po_limit(p); i++ )
         {
-            mark_tree_o( da_po_ptr(p->da)[i] );
+            f( da_po_ptr(p->da)[i], arg );
         }
         return;
     }
@@ -198,7 +200,7 @@ static void gc_process_children(pvm_object_storage_t *p)
 
     gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( p->_class, class )->sys_table_id].iter;
 
-    func( gc_add_from_internal, p, 0 );
+    func( f, p, arg );
 }
 
 
