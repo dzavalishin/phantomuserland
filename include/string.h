@@ -9,6 +9,10 @@
 
 int strerror_r(int errnum, char *strerrbuf, size_t buflen);
 
+char * strtok_r(register char *s, register const char *delim, char **last);
+
+
+
 size_t strlcat(char *dst, const char *src, size_t  siz);
 size_t strlcpy(char *dst, const char *src, size_t siz);
 
