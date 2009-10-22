@@ -77,6 +77,10 @@ void    				hal_sti();
 int                                     hal_is_sti(); // returns true if ints enabled
 int                                     hal_save_cli(); // cli and ret 1 if was enabled
 
+void 					phantom_mem_lock();
+void 					phantom_mem_unlock();
+
+
 // void    				sleep_usec( int microseconds ) = 0;
 void    				hal_sleep_msec( int miliseconds );
 

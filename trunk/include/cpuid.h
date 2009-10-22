@@ -1,3 +1,17 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * CPU identification headers.
+ *
+ * Kernel ready: yes
+ * Preliminary: no
+ *
+ *
+**/
+
 #ifndef CPUID_H
 #define CPUID_H
 
