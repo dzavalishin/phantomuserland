@@ -80,9 +80,15 @@ typedef u_int32_t 		register_t;
 
 typedef u_int64_t bigtime_t;
 
+#ifndef _TIME_T
 #ifndef _TIME_T_DECLARED
+
 typedef	u_int64_t	time_t;
+
 #define	_TIME_T_DECLARED
+#define	_TIME_T
+
+#endif
 #endif
 
 
