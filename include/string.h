@@ -18,13 +18,13 @@ size_t strlcpy(char *dst, const char *src, size_t siz);
 
 
 
-int strcmp(unsigned char *s1, unsigned char *s2);
+int strcmp(const char *s1, const char *s2);
 int strncmp(const char *s1, const char *s2, size_t n);
 
-char *strcat(char *s, char *add);
-char *strcpy(char *to, char *from);
+char *strcat(char *s, const char *add);
+char *strcpy(char *to, const char *from);
 int strlen(const char *string);
-char *strncpy(char *to, char *from, int count);
+char *strncpy(char *to, const char *from, int count);
 
 char *strchr(const char *p, int ch);
 char *index(const char *p, int ch);

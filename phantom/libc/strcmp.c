@@ -48,9 +48,9 @@
 #include <phantom_libc.h>
 
 int
-strcmp(unsigned char *s1, unsigned char *s2)
+strcmp(const char *s1, const char *s2)
 {
-register unsigned int a, b;
+register int a, b;
 
 
 
