@@ -42,7 +42,7 @@
 #include <phantom_libc.h>
 
 char *
-strcat(char *s, char *add)
+strcat(char *s, const char *add)
 {
 register char *ret = s;
 
