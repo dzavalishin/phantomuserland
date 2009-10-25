@@ -62,6 +62,9 @@ typedef u_int32_t       	phys_page_t;
 
 // physical mem address
 typedef u_int32_t       	physaddr_t;
+// linear mem address
+typedef u_int32_t       	linaddr_t;
+
 
 typedef void *  		vmem_ptr_t;
 
