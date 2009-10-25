@@ -14,6 +14,8 @@
 #define HAL_H
 
 
+#define USE_PHANTOM_PAGING_CODE 1
+
 /**
  *
  * This header defines (very unclear and chaotic at this moment) hardware abstraction layer.
