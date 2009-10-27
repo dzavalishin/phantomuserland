@@ -94,6 +94,9 @@ typedef unsigned int	pd_entry_t;
 #define	pa_to_pde(a)		((a) & INTEL_PDE_PFN)
 
 
+// Combine address and mode bits into a PTE.
+#define create_pte(a, m)	((pt_entry_t) (((oskit_addr_t) (a)) | (m)))
+
 
 
 
