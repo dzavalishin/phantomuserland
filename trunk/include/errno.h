@@ -43,8 +43,11 @@
 
 // TODO this shouldnt'be used in kernel! redo!
 //#ifndef KERNEL
-extern int errno;			/* global error number */
+//extern int errno;			/* global error number */
 //#endif
+
+typedef int errno_t;
+
 
 #define	EPERM		1		/* Operation not permitted */
 #define	ENOENT		2		/* No such file or directory */
