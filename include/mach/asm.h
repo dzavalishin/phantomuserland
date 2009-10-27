@@ -65,7 +65,7 @@
 #define gLB(n)  n ## :
 #define LBb(x,n) n ## b
 #define LBf(x,n) n ## f
-#else __STDC__
+#else // __STDC__
 #error XXX elf
 #define EXT(x) _/**/x
 #define LEXT(x) _/**/x/**/:
@@ -73,7 +73,7 @@
 #define gLB(n) n/**/:
 #define LBb(x,n) n/**/b
 #define LBf(x,n) n/**/f
-#endif __STDC__
+#endif // __STDC__
 #define SVC .byte 0x9a; .long 0; .word 0x7
 
 #define String	.ascii
@@ -101,14 +101,14 @@
 #define	ASENTRY(x) 	.globl x; .p2align TEXT_ALIGN; gLB(x) ; \
   			pushl %ebp; movl %esp, %ebp; MCOUNT; popl %ebp;
 
-#else	GPROF
+#else	// GPROF
 
 #define MCOUNT
 #define	ENTRY(x)	.globl EXT(x); .p2align TEXT_ALIGN; LEXT(x)
 #define	ENTRY2(x,y)	.globl EXT(x); .globl EXT(y); \
 			.p2align TEXT_ALIGN; LEXT(x) LEXT(y)
 #define	ASENTRY(x)	.globl x; .p2align TEXT_ALIGN; gLB(x)
-#endif	GPROF
+#endif	// GPROF
 
 #define	Entry(x)	.globl EXT(x); .p2align TEXT_ALIGN; LEXT(x)
 #define	DATA(x)		.globl EXT(x); .p2align DATA_ALIGN; LEXT(x)
