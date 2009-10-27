@@ -108,10 +108,11 @@ strtoul(const char * __restrict nptr, char ** __restrict endptr, int base)
 	}
 	if (any < 0) {
 		acc = ULONG_MAX;
-		errno = ERANGE;
+		//errno = ERANGE;
 	} else if (!any) {
 noconv:
-		errno = EINVAL;
+            ;
+		//errno = EINVAL;
 	} else if (neg)
 		acc = -acc;
 	if (endptr != NULL)

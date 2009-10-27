@@ -42,6 +42,7 @@
 
 #include <phantom_libc.h>
 
+#if 0
 // TODO check for atexit not to be used and kill later
 
 /*
@@ -82,14 +83,16 @@ void _run_atexits()
      for (i = _atexit_index - 1; i >= 0; i--)
          (*_atexit_functions[i])();
 }
+#endif
 
 void _exit(int code)
 {
-   panic("_exit(%d) called", code);
+    //panic("_exit(%d) called", code);
+    pc_reset();
 }
 
 void exit(int code)
 {
-    _run_atexits();
+    //_run_atexits();
     _exit(code);
 }

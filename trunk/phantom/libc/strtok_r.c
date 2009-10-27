@@ -39,10 +39,7 @@
 //#endif
 
 char *
-strtok_r(s, delim, last)
-	register char *s;
-	register const char *delim;
-	char **last;
+strtok_r(register char *s, register const char *delim, char **last)
 {
 	register char *spanp;
 	register int c, sc;

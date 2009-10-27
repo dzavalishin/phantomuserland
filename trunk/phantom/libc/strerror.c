@@ -41,7 +41,8 @@
 //#include <string.h>
 //#include <stdio.h>
 
-
+// Won't work in Phantom anyway. Need to replace with more trivial imlp.
+#if 0
 
 #define	UPREFIX		"Unknown error"
 
@@ -127,3 +128,6 @@ strerror(int num)
             errno = EINVAL;
 	return (ebuf);
 }
+
+
+#endif
