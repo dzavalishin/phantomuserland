@@ -161,16 +161,16 @@ typedef	struct queue_entry	*queue_entry_t;
  */
 #define queue_enter(head, elt, type, field)			\
 { 								\
-	register queue_entry_t prev;				\
+	register queue_entry_t __prev;				\
 								\
-	prev = (head)->prev;					\
-	if ((head) == prev) {					\
+	__prev = (head)->prev;					\
+	if ((head) == __prev) {					\
 		(head)->next = (queue_entry_t) (elt);		\
 	}							\
 	else {							\
-		((type)prev)->field.next = (queue_entry_t)(elt);\
+		((type)__prev)->field.next = (queue_entry_t)(elt);\
 	}							\
-	(elt)->field.prev = prev;				\
+	(elt)->field.prev = __prev;				\
 	(elt)->field.next = head;				\
 	(head)->prev = (queue_entry_t) elt;			\
 }
@@ -188,16 +188,16 @@ typedef	struct queue_entry	*queue_entry_t;
  */
 #define queue_enter_first(head, elt, type, field)		\
 { 								\
-	register queue_entry_t next;				\
+	register queue_entry_t __next;				\
 								\
-	next = (head)->next;					\
-	if ((head) == next) {					\
+	__next = (head)->next;					\
+	if ((head) == __next) {					\
 		(head)->prev = (queue_entry_t) (elt);		\
 	}							\
 	else {							\
-		((type)next)->field.prev = (queue_entry_t)(elt);\
+		((type)__next)->field.prev = (queue_entry_t)(elt);\
 	}							\
-	(elt)->field.next = next;				\
+	(elt)->field.next = __next;				\
 	(elt)->field.prev = head;				\
 	(head)->next = (queue_entry_t) elt;			\
 }
@@ -215,22 +215,22 @@ typedef	struct queue_entry	*queue_entry_t;
  */
 #define queue_enter_before(head, nelt, elt, type, field)	\
 {								\
-	register queue_entry_t prev;				\
+	register queue_entry_t __prev;				\
 								\
 	(elt)->field.next = (queue_entry_t)(nelt);		\
 	if ((head) == (queue_entry_t)(nelt)) {			\
 		(elt)->field.prev = (head)->prev;		\
-		prev = (head)->prev;				\
+		__prev = (head)->prev;				\
 		(head)->prev = (queue_entry_t)(elt);		\
 	} else {						\
 		(elt)->field.prev = (nelt)->field.prev;		\
-		prev = (nelt)->field.prev;			\
+		__prev = (nelt)->field.prev;			\
 		(nelt)->field.prev = (queue_entry_t)(elt);	\
 	}							\
-	if ((head) == prev)					\
+	if ((head) == __prev)					\
 		(head)->next = (queue_entry_t)(elt);		\
 	else							\
-		((type)prev)->field.next = (queue_entry_t)(elt);\
+		((type)__prev)->field.next = (queue_entry_t)(elt);\
 }
 
 /*
@@ -246,22 +246,22 @@ typedef	struct queue_entry	*queue_entry_t;
  */
 #define queue_enter_after(head, pelt, elt, type, field)		\
 {								\
-	register queue_entry_t next;				\
+	register queue_entry_t __next;				\
 								\
 	(elt)->field.prev = (queue_entry_t)(pelt);		\
 	if ((head) == (queue_entry_t)(pelt)) {			\
 		(elt)->field.next = (head)->next;		\
-		next = (head)->next;				\
+		__next = (head)->next;				\
 		(head)->next = (queue_entry_t)(elt);		\
 	} else {						\
 		(elt)->field.next = (pelt)->field.next;		\
-		next = (pelt)->field.next;			\
+		__next = (pelt)->field.next;			\
 		(pelt)->field.next = (queue_entry_t)(elt);	\
 	}							\
-	if ((head) == next)					\
+	if ((head) == __next)					\
 		(head)->prev = (queue_entry_t)(elt);		\
 	else							\
-		((type)next)->field.prev = (queue_entry_t)(elt);\
+		((type)__next)->field.prev = (queue_entry_t)(elt);\
 }
 
 /*
@@ -283,20 +283,20 @@ typedef	struct queue_entry	*queue_entry_t;
  */
 #define	queue_remove(head, elt, type, field)			\
 {								\
-	register queue_entry_t	next, prev;			\
+	register queue_entry_t	__next, __prev;			\
 								\
-	next = (elt)->field.next;				\
-	prev = (elt)->field.prev;				\
+	__next = (elt)->field.next;				\
+	__prev = (elt)->field.prev;				\
 								\
-	if ((head) == next)					\
-		(head)->prev = prev;				\
+	if ((head) == __next)					\
+		(head)->prev = __prev;				\
 	else							\
-		((type)next)->field.prev = prev;		\
+		((type)__next)->field.prev = __prev;		\
 								\
-	if ((head) == prev)					\
-		(head)->next = next;				\
+	if ((head) == __prev)					\
+		(head)->next = __next;				\
 	else							\
-		((type)prev)->field.next = next;		\
+		((type)__prev)->field.next = __next;		\
 }
 
 /*
@@ -310,16 +310,16 @@ typedef	struct queue_entry	*queue_entry_t;
  */
 #define	queue_remove_first(head, entry, type, field)		\
 {								\
-	register queue_entry_t	next;				\
+	register queue_entry_t	__next;				\
 								\
 	(entry) = (type) ((head)->next);			\
-	next = (entry)->field.next;				\
+	__next = (entry)->field.next;				\
 								\
-	if ((head) == next)					\
+	if ((head) == __next)					\
 		(head)->prev = (head);				\
 	else							\
-		((type)(next))->field.prev = (head);		\
-	(head)->next = next;					\
+		((type)(__next))->field.prev = (head);		\
+	(head)->next = __next;					\
 }
 
 /*
@@ -333,15 +333,15 @@ typedef	struct queue_entry	*queue_entry_t;
  */
 #define	queue_remove_last(head, entry, type, field)		\
 {								\
-	register queue_entry_t	prev;				\
+	register queue_entry_t	__prev;				\
 								\
 	(entry) = (type) ((head)->prev);			\
-	prev = (entry)->field.prev;				\
+	__prev = (entry)->field.prev;				\
 								\
-	if ((head) == prev)					\
+	if ((head) == __prev)					\
 		(head)->next = (head);				\
 	else							\
-		((type)(prev))->field.next = (head);		\
+		((type)(__prev))->field.next = (head);		\
 	(head)->prev = prev;					\
 }
 
