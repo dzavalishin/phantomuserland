@@ -29,6 +29,13 @@ public class Fileops
     return (int)v;
   }
 
+    public static byte[] get_bytes(RandomAccessFile is, int length) throws IOException {
+        byte bb[] = new byte[length];
+
+        is.read(bb);
+        return bb;
+    }
+
   public static String get_string( RandomAccessFile is ) throws IOException {
     int len = get_int32(is);
 
