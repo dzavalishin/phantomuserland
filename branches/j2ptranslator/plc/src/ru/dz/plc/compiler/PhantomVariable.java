@@ -35,5 +35,7 @@ public class PhantomVariable
   public String getName() { return name; }
   public PhantomType  getType() { return type; }
 
-
+    public void setType(PhantomType type) {
+        this.type = type;
+    }
 };

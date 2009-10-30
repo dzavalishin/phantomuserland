@@ -34,8 +34,9 @@ static private int nothers;		// number of "other" classes referenced
 static void write(PrintWriter d, ClassData c, ClassMap classes) throws PlcException
 {
 	//PhantomClass me = new PhantomClass(".java."+c.fname);
-	PhantomClass me = new PhantomClass("."+c.fname); 
-	classes.add(me);
+    PhantomClass me = new PhantomClass("."+c.name);
+//	PhantomClass me = new PhantomClass("."+c.fname);
+    classes.add(me);
 	
 	ParseState				ps = new ParseState();	
 	ps.set_class(me);
@@ -102,6 +103,7 @@ static void write(PrintWriter d, ClassData c, ClassMap classes) throws PlcExcept
 
     // generate method code
     for (int i = 0; i < c.methods.length; i++) {
+        if ("<init>".equals(c.methods[i].name)) continue;     // constructor not suported yet
 	Method m = new Method(c, c.methods[i]);
 	MethGen.minfo(d, m, me);			// always gen exception list
 	if ((m.fl.access & ClassData.ACC_ABSTRACT) == 0) {

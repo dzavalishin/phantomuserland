@@ -134,7 +134,9 @@ class MethGen extends Opcode {
 
 		// generate initialization of local variables (from parameter list)
 		d.println();
-		lvinits(d, m, pclass, pMethod);				
+
+        setMethodArgsType(m, pMethod);
+//		lvinits(d, m, pclass, pMethod);
 
 		// initialize class, if static function, and if class has initializer
 		if ((f.access & ClassData.ACC_STATIC) != 0
@@ -388,6 +390,107 @@ class MethGen extends Opcode {
 
 	}
 
+    
+    static private void setMethodArgsType(Method m, ru.dz.plc.compiler.Method pm ) throws PlcException
+	{
+		String s = m.astack;				// entry "stack"
+		int pnum = 0;					// parameter number
+		int vnum = 0;					// variable number
+
+		if ((m.fl.access & ClassData.ACC_STATIC) != 0)	// if static function
+			pnum++;						//    no "this" param
+
+		//int phantomOrdinal = 0;
+
+//		boolean isInt = false;
+        List<PhantomType> argTypes = getArguments(m.fl.signature);
+
+        for (int i = 0; i < s.length(); i++) {		// for each entry val
+			String varName;
+
+			char c = s.charAt(i);
+			if (c == 'x') {					// if double-wide
+				c = s.charAt(++i);
+//				d.println("\t" + c + "v" + vnum + " = p" + pnum++ + ";");
+
+				varName = c + "v" + vnum;
+
+				vnum += 2;
+			} else {
+				varName = c + "v" + vnum++;
+//				d.println("\t" + c + "v" + vnum++ + " = p" + pnum++ + ";");
+			}
+			/*
+			pc.setField( phantomOrdinal, varName, null);
+			System.out.println("set parm field "+varName);
+			 */
+
+			if(i == 0 )
+			{
+				// First one is 'this', skip it
+				continue;
+			}
+
+//			isInt = c == 'i';
+//
+//			PhantomClass vc = isInt ?
+//					ClassMap.get_map().get(".internal.int",false) :
+//						ClassMap.get_map().get(".internal.object",false);
+            PhantomType argType = argTypes.get(i);
+            pm.addArg(varName, argType);
+		}
+
+	}
+
+    private static List<PhantomType> getArguments(String signature) throws PlcException {
+                int beginIndex = signature.indexOf('(');
+        int endIndex = signature.indexOf(')');
+        StringBuffer args = new StringBuffer(signature.substring(beginIndex+1, endIndex));
+
+        List<PhantomType> result = new ArrayList<PhantomType>();
+        result.add(null);
+
+        if (args.length()==0) return result;
+        for (;args.length()>0;) {
+            switch (args.charAt(0)) {
+                case 'I':
+                    result.add(new PhantomType(ClassMap.get_map().get(".internal.int",false)));
+                    args.delete(0,1);
+                    break;
+                case 'Z':
+                case 'B':
+                case 'S':
+                case 'C':
+                case 'J':
+                case 'F':
+                case 'D':
+                    result.add(new PhantomType(ClassMap.get_map().get(".internal.object",false)));
+                    args.delete(0,1);
+                    System.out.println("unimplemented type " + args.charAt(0));
+                    break;
+                case 'L':
+                    int end = args.indexOf(";");
+                    String type = args.substring(0, end + 1);
+
+                    if (type.equals("Ljava/lang/String;")){
+                        result.add(new PhantomType(ClassMap.get_map().get(".internal.string",false)));
+                    } else {
+                        type = "." + type.substring(1, type.length()-1).replace("/", ".");
+                        result.add(new PhantomType(ClassMap.get_map().get(type, false)));
+                    }
+                    args.delete(0,end+1);
+                    break;
+                case '[':
+                    args.delete(0,1);
+                    System.out.println("unimplemented type " + args.charAt(0));
+                    break;
+//                case 'V':
+//                default:
+//                    break;
+            }
+        }
+        return result;
+    }
 
 	//  syncwrap(d, m) -- generate wrapper function for synchronized method
 

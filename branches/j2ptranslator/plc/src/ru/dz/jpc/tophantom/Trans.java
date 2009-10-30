@@ -67,6 +67,9 @@ class Trans {
 
 	private static boolean okToInstallPkgClasses = true; // install class files when building packages?
 
+
+    private static String classPath;		// dir where to search external .pc files
+
 	//  main(args) -- main program.
 
 	public static void main(String args[]) throws PlcException, IOException 
@@ -151,6 +154,13 @@ class Trans {
 			case 'R':           // retobaapi
 				retobaapi = true;
 				break;
+            case 'c':           // classpath
+                i++;
+                if (i >= args.length)
+                    abort(usagestring);
+                classPath = args[i];
+                args[i] = null;
+                break;
 			default:
 				abort("Unrecognized option " + s + "\n" + usagestring);
 			}
@@ -209,13 +219,30 @@ class Trans {
 	        log.info("Processing "+name);
 
 			
-			ClassMap				classes = new ClassMap();
+			ClassMap classes = new ClassMap();
 
 			classes.do_import(".internal.object");			
 			classes.do_import(".internal.int");
-			
+
 			try { classes.do_import(".internal.string"); } finally {}
-			
+
+            { // load external .pc files from classpath
+                if (classPath != null && classPath.length()>0) {
+                    File dir = new File(classPath);
+                    if (dir.isDirectory()) {
+                        File[] files = dir.listFiles();
+                        for (File file : files) {
+                            String fileName = file.getName();
+                            if (file.exists() && file.isFile() && fileName.endsWith(".pc")) {
+                                String className = "." + fileName.substring(0, fileName.length()-3);
+                                classes.do_import(className);			
+                            }
+                        }
+                    }
+                }
+            }
+
+
 			// stop if we've already done this one
 			// XXX can we do this here?  can differences between name and
 			// k.name give us headaches?

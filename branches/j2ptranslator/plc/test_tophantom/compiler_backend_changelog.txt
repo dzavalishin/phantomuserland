@@ -1,0 +1,21 @@
+ru.dz.phantom.code.Fileops
+    add method:
+        public static byte[] get_bytes(RandomAccessFile is, int length) throws IOException;
+
+ru.dz.plc.compiler.PhantomVariable
+    add method:
+        public void setType(PhantomType type);
+
+
+-------------
+
+Node subclasses:
+
+ru.dz.jpc.tophantom.node.binode.OpAssignTransNode extends OpAssignNode
+    rewrite metod:
+        protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException;
+
+ru.dz.jpc.tophantom.node.IdentTransNode extends IdentNode
+    add method:
+        public void setType(PhantomType ptype);
+
