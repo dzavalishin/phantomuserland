@@ -21,6 +21,7 @@ package .ru.dz.phantom.system;
 import .translation.phantom.test.obj_test;
 import .translation.java.test.obj_test;
 import .translation.java.test.b;
+import .translation.java.test.compare;
 
 attribute const * ->!;
 
@@ -34,6 +35,7 @@ class translation_regression_tests
     var p_result_int : .internal.int;
     var p_result_str : .internal.string;
     var p_result_obj : .translation.java.test.b;
+    var c_obj : .translation.java.test.compare;
 
     void run (var _boot_object @const ) {
         boot_object = _boot_object;
@@ -47,6 +49,59 @@ class translation_regression_tests
         print("\n\nRun Java translated bytecode test\n");
         run_test(new .translation.java.test.obj_test());
 
+
+        c_obj = new .translation.java.test.compare();
+
+        log_str(c_obj.if_icmple(6), "if_icmple: ");
+        log_str(c_obj.if_icmplt(6), "if_icmplt: ");
+        log_str(c_obj.if_icmplt(5), "if_icmplt: ");
+
+        log_str(c_obj.if_icmpge(10), "if_icmpge: ");
+        log_str(c_obj.if_icmpgt(10), "if_icmpgt: ");
+        log_str(c_obj.if_icmpgt(10), "if_icmpgt: ");
+
+        log_str(c_obj.if_icmpne(10), "if_icmpne: ");
+        log_str(c_obj.if_icmpeq(10), "if_icmpeq: ");
+
+
+        log_str(c_obj.ifle(10), "ifle: ");
+
+        log_str(c_obj.iflt(10), "iflt: ");
+        log_str(c_obj.iflt(0), "iflt: ");
+
+        log_str(c_obj.ifge(2-3), "ifle: ");
+
+        log_str(c_obj.ifgt(2-3), "iflt: ");
+        log_str(c_obj.ifgt(0), "iflt: ");
+
+        log_str(c_obj.ifeq(1), "ifeq: ");
+        log_str(c_obj.ifne(0), "ifne: ");
+
+        log_str(c_obj.if_icmple_else(6), "if_icmple_else: ");
+        log_str(c_obj.if_icmple_else(4), "if_icmple_else: ");
+
+        log_str(c_obj.if_icmplt_else(5), "if_icmplt_else: ");
+        log_str(c_obj.if_icmplt_else(4), "if_icmplt_else: ");
+
+        log_str(c_obj.if_icmpge_else(4), "if_icmpge_else: ");
+        log_str(c_obj.if_icmpge_else(6), "if_icmpge_else: ");
+
+        log_str(c_obj.if_icmpgt_else(5), "if_icmpgt_else: ");
+        log_str(c_obj.if_icmpgt_else(6), "if_icmpgt_else: ");
+
+
+        log_str(c_obj.if_icmple_elseif_else(6), "if_icmple_elseif_else: ");
+        log_str(c_obj.if_icmple_elseif_else(4), "if_icmple_elseif_else: ");
+        log_str(c_obj.if_icmple_elseif_else(2), "if_icmple_elseif_else: ");
+
+
+        log_str(c_obj.if_icmple_all(25), "if_icmple_all: ");
+        log_str(c_obj.if_icmple_all(15), "if_icmple_all: ");
+        log_str(c_obj.if_icmple_all(5), "if_icmple_all: ");
+
+
+
+        print("\n\n");
     }
 
 	// ---------------------------------------------------------------------

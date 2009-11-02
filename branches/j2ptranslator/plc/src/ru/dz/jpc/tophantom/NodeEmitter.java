@@ -8,6 +8,7 @@ import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.jpc.tophantom.node.binode.SequenceTransNode;
 
 public class NodeEmitter {
 	Logger log = Logger.getLogger(NodeEmitter.class.getName());
@@ -41,7 +42,9 @@ public class NodeEmitter {
 		while(!out.isEmpty())
 		{
 			//code = new SequenceNode( code, out.remove(out.size()-1) );
-			code = new SequenceNode( out.remove(out.size()-1), code );
+
+            code = new SequenceTransNode( out.remove(out.size()-1), code );
+//			code = new SequenceNode( out.remove(out.size()-1), code );
 		}
 		return code;
 	}

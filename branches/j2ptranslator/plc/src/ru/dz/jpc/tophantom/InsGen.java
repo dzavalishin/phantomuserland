@@ -440,33 +440,70 @@ class InsGen extends Opcode {
 		case IFZRO:			// ifeq, ifnull, ifgt, ...
 			d.print("\tif (" + stacktop(ins) + o.opr + "0)\n\t\t");
 			gengoto(d, m, ins, ins.val);
+
+            {
+                Node p1 = ns.pop();
+                Node p2 = new IntConstNode(0);
+
+				String cmpop = o.opr.trim();
+
+				// Reverse op! We use JZ, not JNZ!
+				if(cmpop.equals("<="))      ns.emitLinear(new ValGtNode(p1,p2));
+				else if(cmpop.equals("<"))  ns.emitLinear(new ValGeNode(p1,p2));
+				else if(cmpop.equals(">=")) ns.emitLinear(new ValLtNode(p1,p2));
+				else if(cmpop.equals(">"))  ns.emitLinear(new ValLeNode(p1,p2));
+                else if(cmpop.equals("==")) ns.emitLinear(new ValNeqNode(p1,p2));
+                else if(cmpop.equals("!=")) ns.emitLinear(new ValEqNode(p1,p2));
+				else
+				{
+					System.out.print("Unknown if '"+cmpop+"' ");
+					break;
+				}
+				ns.emitLinear(new JzNode(target(m, ins.val)));
+
+//                if (o.name.equals("ifle")) {
+//                    String labelNo = c.getLabel();
+//                    ValGtNode gtNode = new ValGtNode(ns.pop(), new IntConstNode(0));
+//                    IfTransNode ifNode = new IfTransNode(gtNode, labelNo);
+//                    int target = ins.val;
+//                }
+//                else if (o.name.equals("ifge")) {
+//                    break;  // not supported yet
+//                }
+//                //todo others if
+            }
 			break;
 
 		case IFCMP:			// if_icmplt, if_acmpne, ...
 			d.print("\tif (" + stack2nd(ins) +o.opr +stacktop(ins) + ")\n\t\t");
 			gengoto(d, m, ins, ins.val);
-			
+
 			{
 				//Node go = new JumpNode(target(m, ins.val));
-				
-				Node p1 = ns.pop();
-				Node p2 = ns.pop();
-				
+
+                Node p2 = ns.pop();
+                Node p1 = ns.pop();
+
+//				Node p1 = ns.pop();
+//				Node p2 = ns.pop();
+
 				String cmpop = o.opr.trim();
-				
+
 				// Reverse op! We use JZ, not JNZ!
 				if(cmpop.equals("<="))		ns.emitLinear(new ValGtNode(p1,p2));
 				else if(cmpop.equals("<"))		ns.emitLinear(new ValGeNode(p1,p2));
 				else if(cmpop.equals(">="))		ns.emitLinear(new ValLtNode(p1,p2));
 				else if(cmpop.equals(">"))		ns.emitLinear(new ValLeNode(p1,p2));
+                else if(cmpop.equals("=="))		ns.emitLinear(new ValNeqNode(p1,p2));
+                else if(cmpop.equals("!="))		ns.emitLinear(new ValEqNode(p1,p2));
 				else
 				{
-					System.out.print("Unknown if '"+cmpop+"' ");					
+					System.out.print("Unknown if '"+cmpop+"' ");
 					break;
 				}
 				ns.emitLinear(new JzNode(target(m, ins.val)));
-								
-			}			
+
+			}
 			return;
 
 		case TBLSW:			// tableswitch
