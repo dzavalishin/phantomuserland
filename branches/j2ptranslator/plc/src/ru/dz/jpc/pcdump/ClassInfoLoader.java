@@ -105,7 +105,7 @@ public class ClassInfoLoader {
         int n_method_slots = Fileops.get_int32(is);
         if(debug_print) System.out.println("    Method slots: " + n_method_slots );
         class_parent_name = Fileops.get_string(is);
-        if(debug_print) System.out.println("    Class parent name: " + class_parent_name );
+        if(debug_print) System.out.println("    Class parent name: " + class_parent_name + "\n");
 
         if(class_parent_name != null && class_parent_name.length() > 0 && !class_parent_name.equals(".internal.object"))
           my_class.addParent(class_parent_name);
@@ -268,14 +268,14 @@ class code_handler
       me.ordinal = my_ordinal;
 
 //      if(debug_print) System.out.print("Method is: " + my_name + ", ret type is '"+my_return_type.toString()+"', arg count = " );
-        if(debug_print) System.out.print("    Return type: "+my_return_type.toString());
+        if(debug_print) System.out.println("    Return type: "+my_return_type.toString());
 
       for( int arg_no = 0; arg_no < my_args_count; arg_no++ )
       {
         String arg_name = Fileops.get_string(is);
         PhantomType arg_type = new PhantomType(is);
 
-          if(debug_print) System.out.print("    Argument definition: "+arg_name+" type: "+ arg_type.toString());
+          if(debug_print) System.out.println("    Argument definition: "+arg_name+" type: "+ arg_type.toString());
 //        if(debug_print) System.out.print(": '"+arg_type.get_main_class_name()+"' ");
 //        if(debug_print && arg_type.is_container())
 //        {

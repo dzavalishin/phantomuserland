@@ -165,7 +165,7 @@ public class CodeLoader extends opcode_ids {
                 opcodeAddress = codePointer;
                 int method_index = 0x0F & opcode;
                 int n_param = code[++codePointer] & 0xff;
-                System.out.print("        " + opcodeAddress + "\t");
+                System.out.print("        " + opcodeAddress + ":\t");
                 System.out.println(opcodeNames[opcode & 0xff] + " " +method_index + " " + n_param);
                 continue;
             }
@@ -222,13 +222,21 @@ public class CodeLoader extends opcode_ids {
                 case opcode_short_call_2 :
                 case opcode_short_call_3 :
                     opcodeAddress = codePointer;
-                    System.out.print("        " + opcodeAddress + "\t");
+                    System.out.print("        " + opcodeAddress + ":\t");
                     System.out.println(opcodeNames[opcode]);
                     break;
 
                 case opcode_jmp :                       // int32 argument
                 case opcode_djnz :
                 case opcode_jz :
+                    opcodeAddress = codePointer;
+                    argInt32 = getInt32(code, codePointer+1);
+                    codePointer +=4;
+                    System.out.print("        " + opcodeAddress + ":\t");
+                    System.out.print(opcodeNames[opcode] + " " + argInt32);
+                    System.out.println("  // " + (opcodeAddress+1+argInt32) + ":");
+                    break;
+
                 case opcode_iconst_32bit :
                 case opcode_os_load32 :
                 case opcode_os_save32 :
@@ -242,7 +250,7 @@ public class CodeLoader extends opcode_ids {
                     opcodeAddress = codePointer;
                     argInt32 = getInt32(code, codePointer+1);
                     codePointer +=4;
-                    System.out.print("        " + opcodeAddress + "\t");
+                    System.out.print("        " + opcodeAddress + ":\t");
                     System.out.println(opcodeNames[opcode] + " " + argInt32);
                     break;
 
@@ -251,7 +259,7 @@ public class CodeLoader extends opcode_ids {
                 case opcode_os_save8 :
                     opcodeAddress = codePointer;
                     argByte = code[++codePointer] & 0xff;
-                    System.out.print("        " + opcodeAddress + "\t");
+                    System.out.print("        " + opcodeAddress + ":\t");
                     System.out.println(opcodeNames[opcode] + " " + argByte);
                     break;
 
@@ -260,7 +268,7 @@ public class CodeLoader extends opcode_ids {
                     argByte = code[++codePointer] & 0xff;
                     argInt32 = getInt32(code, codePointer+1);
                     codePointer +=4;
-                    System.out.print("        " + opcodeAddress + "\t");
+                    System.out.print("        " + opcodeAddress + ":\t");
                     System.out.println(opcodeNames[opcode] + " " + argByte + " " + argInt32);
                     break;
 
@@ -270,7 +278,7 @@ public class CodeLoader extends opcode_ids {
                     codePointer +=4;
                     arg2Int32 = getInt32(code, codePointer+1);
                     codePointer +=4;
-                    System.out.print("        " + opcodeAddress + "\t");
+                    System.out.print("        " + opcodeAddress + ":\t");
                     System.out.println(opcodeNames[opcode] + " " + argInt32 + " " + arg2Int32);
                     break;
 
@@ -282,7 +290,7 @@ public class CodeLoader extends opcode_ids {
                     codePointer +=4;
                     int divisor = getInt32(code, codePointer+1);
                     codePointer +=4;
-                    System.out.print("        " + opcodeAddress + "\t");
+                    System.out.print("        " + opcodeAddress + ":\t");
                     System.out.println(opcodeNames[opcode] + " table-size:" + tableSize +
                             " " + shift + "/" +divisor);
                     for (int i=0; i<tableSize; i++) {
@@ -297,9 +305,9 @@ public class CodeLoader extends opcode_ids {
                     opcodeAddress = codePointer;
                     argBin = getBinData(code, codePointer+1);
                     codePointer += 4 + argBin.length;
-                    System.out.print("        " + opcodeAddress + "\t");
-                    System.out.println(opcodeNames[opcode] + " \"" + new String(argBin) + "\" "
-                            + argBin);
+                    System.out.print("        " + opcodeAddress + ":\t");
+                    System.out.println(opcodeNames[opcode] + " ["+ argBin.length + "]\"" + new String(argBin) + "\"" /*+ "  // ["
+                            + argBin.length + "] " + getHexStr(argBin)*/);
                     break;
 
                 default:
@@ -328,4 +336,12 @@ public class CodeLoader extends opcode_ids {
       return data;
     }
 
+    public String getHexStr(byte[] data) {
+        StringBuffer result = new StringBuffer();
+        for(byte b : data) {
+            result.append(Integer.toHexString(b& 0xff));
+            result.append(' ');
+        }
+        return result.toString().toUpperCase();
+    }
 }
