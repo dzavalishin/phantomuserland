@@ -110,7 +110,8 @@ void					hal_pages_control( physaddr_t  p, void *page_start_addr, int n_pages, p
 void * 					hal_alloc_page(); // allocate (identically) mapped mem page in kern addr space
 void   					hal_free_page(void *page); // deallocate identically mapped page
 
-int         				hal_alloc_phys_page(physaddr_t  *result); // alloc and not map
+// TODO return errno_t, success must == 0
+int         				hal_alloc_phys_page(physaddr_t  *result); // alloc and not map -- returns 1 on success
 void        				hal_free_phys_page(physaddr_t  page); // alloc and not map - WILL PANIC if page is mapped!
 
 void         				hal_alloc_phys_pages(physaddr_t  *result, int npages); // alloc and not map
@@ -120,6 +121,7 @@ int         				hal_alloc_vaddress(void **result, int num); // alloc address of 
 void        				hal_free_vaddress(void *addr, int num);
 
 
+void    				hal_copy_page_v2p( physaddr_t to, void *from );
 
 
 
