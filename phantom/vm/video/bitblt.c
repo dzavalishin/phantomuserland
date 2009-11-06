@@ -322,8 +322,8 @@ void bitmap2bitmap(
 	//int srcLineStep = srcWidth * sizeof(struct rgba_t);
 	//int dstLineStep = destWidth * sizeof(struct rgba_t);
 
-	struct rgba_t *srcPtr = src + srcY*srcWidth + srcX;
-	struct rgba_t *dstPtr = dest + destY*destWidth + destX;
+	const struct rgba_t *srcPtr = src + srcY*srcWidth + srcX;
+	struct rgba_t *dstPtr      = dest + destY*destWidth + destX;
 
 	int hcnt;
 	for(hcnt = moveHeight; hcnt; hcnt--)

@@ -147,7 +147,7 @@ int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from )
     bmp->ysize = height;
 
     //struct rgba_t *pixel = bmp->pixel;
-    moveImage( bda->data, from, height, width, maxcolorval > 255 );
+    moveImage( (rgba_t *)(bda->data), from, height, width, maxcolorval > 255 );
     return 0;
 }
 

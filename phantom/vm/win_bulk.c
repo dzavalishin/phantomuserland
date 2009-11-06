@@ -27,7 +27,7 @@
 
 int load_code(void **out_code, unsigned int *out_size, const char *fn)
 {
-    FILE * f = fopen( fn, "rb" );
+    FILE * f = (FILE *)fopen( fn, "rb" );
 
     if( f == NULL )
     {
@@ -96,7 +96,7 @@ int bulk_read_f( int count, void *data )
 void save_mem( void *mem, int size )
 {
     printf("Creating mem dump file\n" );
-    FILE * f = fopen( "wsnap.dump", "wb" );
+    FILE * f = (FILE *)fopen( "wsnap.dump", "wb" );
 
     if( f == NULL )
     {

@@ -31,7 +31,7 @@ static inline void verify_p( pvm_object_storage_t *p )
 
     if( p && ! pvm_object_is_allocated_light(p))
     {
-        dumpo(p);
+        dumpo((int)p);
         //pvm_object_is_allocated_assert(p);
         panic("freed object accessed");
     }

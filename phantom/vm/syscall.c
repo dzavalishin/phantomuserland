@@ -77,7 +77,7 @@ static int debug_print = 0;
 int invalid_syscall(struct pvm_object o, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
-printf("invalid syscal for object: "); dumpo( o.data );//pvm_object_print( o ); printf("\n");
+printf("invalid syscal for object: "); dumpo( (int)(o.data) );//pvm_object_print( o ); printf("\n");
 //printf("invalid value's class: "); pvm_object_print( o.data->_class); printf("\n");
     SYSCALL_THROW_STRING( "invalid syscall called" );
 }
@@ -1402,8 +1402,8 @@ static int si_bitmap_9_paintto(struct pvm_object me, struct data_area_4_thread *
     struct data_area_4_binary *pixels = pvm_object_da( da->image, binary );
 
     bitmap2bitmap(
-    		&(tty->pixel), tty->w.xsize, tty->w.ysize, x, y,
-    		pixels, da->xsize, da->ysize, 0, 0,
+    		tty->pixel, tty->w.xsize, tty->w.ysize, x, y,
+    		(rgba_t *)pixels, da->xsize, da->ysize, 0, 0,
     		da->xsize, da->ysize
     );
     //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
@@ -1455,7 +1455,10 @@ static int si_world_8_getMyThread(struct pvm_object o, struct data_area_4_thread
 
     struct pvm_object out;
 
-    out.data = tc; //TODO: BUG: type mismatch!
+    //out.data = tc; //TODO: BUG: type mismatch!
+    out.data =
+        (pvm_object_storage_t *)
+        (tc - DA_OFFSET()); // XXX HACK!
     out.interface = thread_iface;
 
     SYSCALL_RETURN( ref_inc_o( out ) );

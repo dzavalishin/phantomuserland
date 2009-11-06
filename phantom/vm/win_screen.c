@@ -373,14 +373,14 @@ int pvm_win_init()
         if( init_err ) break;
         if( init_ok )
         {
+#if VIDEO_ZBUF
+            video_zbuf_init();
+#endif
             return 0;
         }
 
     }
 
-#if VIDEO_ZBUF
-    video_zbuf_init();
-#endif
 
     return -1;
 }
