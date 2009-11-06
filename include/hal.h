@@ -32,7 +32,7 @@
 #include <phantom_assert.h>
 
 
-#define __MEM_GB 0x40000000
+#define __MEM_GB 0x40000000u
 #define __MEM_PAGE 4096
 // Start of pool of virtual addresses that normally not backed with memory,
 // but used to map in some physical mem page for kernel access or CPU-based IO

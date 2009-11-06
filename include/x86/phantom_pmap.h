@@ -95,7 +95,7 @@ typedef unsigned int	pd_entry_t;
 
 
 // Combine address and mode bits into a PTE.
-#define create_pte(a, m)	((pt_entry_t) (((oskit_addr_t) (a)) | (m)))
+#define create_pte(a, m)	((pt_entry_t) (((physaddr_t) (a)) | (m)))
 
 
 
