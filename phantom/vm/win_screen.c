@@ -44,8 +44,8 @@ start: (void *)drv_video_null,
 stop:  (void *)drv_video_null,
 
     drv_video_null,
-    drv_video_null,
-    drv_video_null,
+    (void*)drv_video_null,
+    (void*)drv_video_null,
 
     drv_video_null,
 
@@ -377,6 +377,10 @@ int pvm_win_init()
         }
 
     }
+
+#if VIDEO_ZBUF
+    video_zbuf_init();
+#endif
 
     return -1;
 }

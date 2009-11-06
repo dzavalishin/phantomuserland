@@ -13,9 +13,31 @@
 #ifndef DRV_VIDEO_SCREEN_H
 #define DRV_VIDEO_SCREEN_H
 
-// Windows 'screen' driver works in BGR format :(
+#include <phantom_types.h>
 
+// Windows 'screen' driver works in BGR format :(
 #define BGR 1
+
+#define VIDEO_ZBUF 0
+
+
+
+typedef u_int8_t zbuf_t;
+extern zbuf_t *zbuf;
+
+void video_zbuf_init();
+void video_zbuf_reset();
+void video_zbuf_reset_square(int x, int y, int xsize, int ysize );
+void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos );
+int video_zbuf_check( int linpos, u_int8_t zpos );
+
+
+
+
+
+
+
+
 
 typedef struct rgb_t
 {
@@ -44,6 +66,9 @@ typedef struct rgba_t
 #endif
     unsigned char       a;      // Alpha
 } rgba_t;
+
+
+
 
 extern rgba_t COLOR_BLACK;
 extern rgba_t COLOR_WHITE;
@@ -84,7 +109,7 @@ typedef struct drv_video_window
     int         	xsize; // physical
     int 		ysize;
 
-    int                 x, y; // On screen
+    int                 x, y, z; // On screen
 
     int                 generation; // used to redraw self and borders on global events
     int                 flags;
@@ -185,8 +210,14 @@ struct drv_video_screen_t
     // Main interface
 
     void 	(*update) (void);
+
+#if VIDEO_ZBUF
+    void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos);
+    void 	(*winblt) (const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
+#else
     void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
     void 	(*winblt) (const drv_video_window_t *from, int xpos, int ypos);
+#endif
     void 	(*readblt) (const rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
     // Callbacks - to be filled by OS before driver init - BUG - kill!
@@ -212,17 +243,35 @@ extern void drv_video_null();
 drv_video_bitmap_t *      drv_video_get_default_mouse_bmp();
 
 
+#if VIDEO_ZBUF
+
+extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
+extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
+extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
+extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
+
+#else
+
 extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
 extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
 extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos);
 extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos);
+
+#endif
+
 void drv_video_readblt_forw( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
 
 // RGB videospace access workers
-void drv_video_bitblt_worker(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
+//void drv_video_bitblt_worker(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
 void drv_video_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
+
+#if VIDEO_ZBUF
+void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos);
+#else
+void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
+#endif
 
 
 
@@ -234,6 +283,14 @@ void rgb2rgba_move( rgba_t *dest, const struct rgb_t *src, int nelem );
 void int565_to_rgba_move( rgba_t *dest, const short int *src, int nelem );
 
 void rgba2rgba_replicate( rgba_t *dest, const rgba_t *src, int nelem );
+
+
+void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos  );
+void rgb2rgba_zbmove( struct rgba_t *dest, const struct rgb_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
+void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
+void rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
+void int565_to_rgba_zbmove( struct rgba_t *dest, const short int *src, zbuf_t *zb, int nelem, zbuf_t zpos );
+
 
 
 void bitmap2bitmap(
@@ -261,13 +318,22 @@ void drv_video_window_preblit( drv_video_window_t *w );
 //void drv_video_bitblt(const char *from, int xpos, int ypos, int xsize, int ysize);
 #define drv_video_update() video_drv->update()
 #define drv_video_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
+
+#if VIDEO_ZBUF
+#define drv_video_bitblt(from, xpos, ypos, xsize, ysize, zpos)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize, ysize, zpos), video_drv->mouse_enable() )
+#define drv_video_winblt(from)                                  ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y, (from)->z), video_drv->mouse_enable() )
+#else
 #define drv_video_bitblt(from, xpos, ypos, xsize,ysize)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
 #define drv_video_winblt(from)                           ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y), video_drv->mouse_enable() )
+#endif
 
 // These are special for mouse pointer code - they're not try to disable mouse
-#define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize)
-#define drv_video_bitblt_ms(from, xpos, ypos, xsize,ysize) video_drv->bitblt(from, xpos, ypos, xsize,ysize)
-
+#define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
+#if VIDEO_ZBUF
+#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, 0xFF)
+#else
+#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize )
+#endif
 
 #define drv_video_set_mouse_cursor(nc) 		video_drv->set_mouse_cursor(nc)
 #define drv_video_draw_mouse()            	video_drv->redraw_mouse_cursor()
