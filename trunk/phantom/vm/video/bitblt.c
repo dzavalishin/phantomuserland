@@ -38,7 +38,11 @@
  *
  **/
 
+#if VIDEO_ZBUF
+void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
+#else
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse)
+#endif
 {
 	//printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
 	assert(video_drv->screen != 0);
@@ -111,7 +115,14 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
 			// Window start pos in line
 			const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
-			rgba2rgb_move( (void *)s_start, w_start, xlen );
+#if VIDEO_ZBUF
+                        zbuf_t *zb = zbuf + ((wline*xsize) + xshift);
+                        // 0xFF is a special value for mouse painting. XXX hack!
+                        if(zpos == 0xFF) rgba2rgb_move( (void *)s_start, w_start, xlen );
+                        else rgba2rgb_zbmove( (void *)s_start, w_start, zb, xlen, zpos );
+#else
+                        rgba2rgb_move( (void *)s_start, w_start, xlen );
+#endif
 		}
 	}
 	else
@@ -123,7 +134,14 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
 			// Window start pos in line
 			const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
+#if VIDEO_ZBUF
+			zbuf_t *zb = zbuf + ((wline*xsize) + xshift);
+                        // 0xFF is a special value for mouse painting. XXX hack!
+			if(zpos == 0xFF) rgba2rgb_move( (void *)s_start, w_start, xlen );
+			else rgba2rgb_zbmove( (void *)s_start, w_start, zb, xlen, zpos );
+#else
 			rgba2rgb_move( (void *)s_start, w_start, xlen );
+#endif
 		}
 	}
 
@@ -317,6 +335,99 @@ void bitmap2bitmap(
 }
 
 
+//#if VIDEO_ZBUF
+
+void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos  )
+{
+    while(nelem-- > 0)
+    {
+        if( *zb > zpos ) { zb++; continue; }
+        *zb++ = zpos;
+
+        if(src->a)
+        {
+            dest->r = src->r;
+            dest->g = src->g;
+            dest->b = src->b;
+        }
+        dest++;
+        src++;
+    }
+}
+
+void rgb2rgba_zbmove( struct rgba_t *dest, const struct rgb_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
+{
+    while(nelem-- > 0)
+    {
+        if( *zb > zpos ) { zb++; continue; }
+        *zb++ = zpos;
+
+        dest->a = 0xFF;
+
+        dest->r = src->r;
+        dest->g = src->g;
+        dest->b = src->b;
+
+        dest++;
+        src++;
+    }
+}
+
+
+void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
+{
+    while(nelem-- > 0)
+        if(src->a)
+        {
+            if( *zb > zpos ) { zb++; continue; }
+            *zb++ = zpos;
+
+            *dest++ = *src++;
+        }
+        else
+        {
+            dest++;
+            src++;
+            zb++;
+        }
+}
+
+
+void rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
+{
+    if(!src->a) return;
+    while(nelem-- > 0)
+    {
+        if( *zb > zpos ) { zb++; continue; }
+        *zb++ = zpos;
+
+        *dest++ = *src;
+    }
+}
+
+
+
+void int565_to_rgba_zbmove( struct rgba_t *dest, const short int *src, zbuf_t *zb, int nelem, zbuf_t zpos )
+{
+    while(nelem-- > 0)
+    {
+        if( *zb > zpos ) { zb++; continue; }
+        *zb++ = zpos;
+
+        dest->a = 0xFF;
+
+        dest->r = ((*src >>11) & 0x1F) << 3;
+        dest->g = ((*src >>5)  & 0x3F) << 2;
+        dest->b = (*src & 0x1F) << 3;
+
+        dest++;
+        src++;
+    }
+}
+
+
+//#else
+
 void rgba2rgb_move( struct rgb_t *dest, const struct rgba_t *src, int nelem )
 {
 	while(nelem-- > 0)
@@ -390,6 +501,7 @@ void int565_to_rgba_move( struct rgba_t *dest, const short int *src, int nelem )
 
 }
 
+//#endif
 
 
 

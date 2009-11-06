@@ -66,6 +66,7 @@ static drv_video_window_t *do_drv_video_window_create(int xsize, int ysize)
     w->ysize = ysize;
 
     w->li = w->ti = w->ri = w->bi = 0;
+    w->z = 0xFE; // quite atop
 
     return w;
 }

@@ -115,7 +115,11 @@ void videotest()
             win[c].a = 1;
         }
 
-        drv_video_bitblt(win, 0, i*10, wxsize, wysize);
+#if VIDEO_ZBUF
+        drv_video_bitblt(win, 0, i*10, wxsize, wysize, 0xFF);
+#else
+        drv_video_bitblt(win, 0, i*10, wxsize, wysize );
+#endif
         //drv_win_screen_update();
         //drv_video_update();
     }
