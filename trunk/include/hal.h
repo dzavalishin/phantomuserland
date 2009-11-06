@@ -181,7 +181,7 @@ void 					hal_irq_free( int irq, void (*func)(void *arg), void *arg );
 struct hal_mutex
 {
     // TODO hack! see impl.
-    void *impl;
+    struct phantom_mutex_impl *impl;
 };
 
 typedef struct hal_mutex hal_mutex_t;
@@ -195,7 +195,7 @@ int 					hal_mutex_destroy(hal_mutex_t *m);
 struct hal_cond
 {
     // TODO hack! see impl.
-    void *impl;
+    struct phantom_cond_impl *impl;
 };
 
 typedef struct hal_cond hal_cond_t;
