@@ -59,14 +59,16 @@
 #define	T_NO_FPU		7		/* no floating point */
 #define	T_DOUBLE_FAULT		8		/* double fault */
 #define	T_FPU_FAULT		9
-/*				10 */
+#define T_INVALID_TSS		10
 #define	T_SEGMENT_NOT_PRESENT	11
 #define	T_STACK_FAULT		12
 #define	T_GENERAL_PROTECTION	13
 #define	T_PAGE_FAULT		14
-/*				15 */
+/* Pentium Pro generates this due to a bug.  See the eratta sheet.	15 */
 #define	T_FLOATING_POINT_ERROR	16
 #define	T_WATCHPOINT		17
+#define	T_ALIGNMENT_CHECK	17
+#define	T_MACHINE_CHECK		18
 
 /*
  * Page-fault trap codes.
