@@ -239,24 +239,29 @@ static void set_root_from_table()
  *
 **/
 
-__inline__ struct pvm_object     pvm_get_null_class() { return pvm_root.null_class; }
-__inline__ struct pvm_object     pvm_get_class_class() { return pvm_root.class_class; }
-__inline__ struct pvm_object     pvm_get_interface_class() { return pvm_root.interface_class; }
-__inline__ struct pvm_object     pvm_get_code_class() { return pvm_root.code_class; }
-__inline__ struct pvm_object     pvm_get_int_class() { return pvm_root.int_class; }
-__inline__ struct pvm_object     pvm_get_string_class() { return pvm_root.string_class; }
-__inline__ struct pvm_object     pvm_get_array_class() { return pvm_root.array_class; }
-__inline__ struct pvm_object     pvm_get_page_class() { return pvm_root.page_class; }
-__inline__ struct pvm_object     pvm_get_thread_class() { return pvm_root.thread_class; }
-__inline__ struct pvm_object     pvm_get_call_frame_class() { return pvm_root.call_frame_class; }
-__inline__ struct pvm_object     pvm_get_istack_class() { return pvm_root.istack_class; }
-__inline__ struct pvm_object     pvm_get_ostack_class() { return pvm_root.ostack_class; }
-__inline__ struct pvm_object     pvm_get_estack_class() { return pvm_root.estack_class; }
-__inline__ struct pvm_object     pvm_get_boot_class() { return pvm_root.boot_class; }
-__inline__ struct pvm_object     pvm_get_binary_class() { return pvm_root.binary_class; }
-__inline__ struct pvm_object     pvm_get_bitmap_class() { return pvm_root.bitmap_class; }
-__inline__ struct pvm_object     pvm_get_closure_class() { return pvm_root.closure_class; }
-__inline__ struct pvm_object     pvm_get_world_class() { return pvm_root.world_class; }
+//#define GCINLINE __inline__
+#define GCINLINE 
+
+GCINLINE struct pvm_object     pvm_get_null_class() { return pvm_root.null_class; }
+GCINLINE struct pvm_object     pvm_get_class_class() { return pvm_root.class_class; }
+GCINLINE struct pvm_object     pvm_get_interface_class() { return pvm_root.interface_class; }
+GCINLINE struct pvm_object     pvm_get_code_class() { return pvm_root.code_class; }
+GCINLINE struct pvm_object     pvm_get_int_class() { return pvm_root.int_class; }
+GCINLINE struct pvm_object     pvm_get_string_class() { return pvm_root.string_class; }
+GCINLINE struct pvm_object     pvm_get_array_class() { return pvm_root.array_class; }
+GCINLINE struct pvm_object     pvm_get_page_class() { return pvm_root.page_class; }
+GCINLINE struct pvm_object     pvm_get_thread_class() { return pvm_root.thread_class; }
+GCINLINE struct pvm_object     pvm_get_call_frame_class() { return pvm_root.call_frame_class; }
+GCINLINE struct pvm_object     pvm_get_istack_class() { return pvm_root.istack_class; }
+GCINLINE struct pvm_object     pvm_get_ostack_class() { return pvm_root.ostack_class; }
+GCINLINE struct pvm_object     pvm_get_estack_class() { return pvm_root.estack_class; }
+GCINLINE struct pvm_object     pvm_get_boot_class() { return pvm_root.boot_class; }
+GCINLINE struct pvm_object     pvm_get_binary_class() { return pvm_root.binary_class; }
+GCINLINE struct pvm_object     pvm_get_bitmap_class() { return pvm_root.bitmap_class; }
+GCINLINE struct pvm_object     pvm_get_closure_class() { return pvm_root.closure_class; }
+GCINLINE struct pvm_object     pvm_get_world_class() { return pvm_root.world_class; }
+
+#undef GCINLINE
 
 
 /**

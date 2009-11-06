@@ -218,7 +218,7 @@ struct drv_video_screen_t
     void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
     void 	(*winblt) (const drv_video_window_t *from, int xpos, int ypos);
 #endif
-    void 	(*readblt) (const rgba_t *to, int xpos, int ypos, int xsize, int ysize);
+    void 	(*readblt) ( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
     // Callbacks - to be filled by OS before driver init - BUG - kill!
 
@@ -258,6 +258,8 @@ extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int y
 extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos);
 
 #endif
+
+//    void 	(*readblt) (const rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
 void drv_video_readblt_forw( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize);

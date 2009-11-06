@@ -55,6 +55,11 @@ struct pvm_object_storage
 typedef struct pvm_object_storage pvm_object_storage_t;
 
 
+#define _obj_offsetof(type, field) ((char *)&((type *) 0)->field - (char *) 0)
+
+#define DA_OFFSET() _obj_offsetof(pvm_object_storage_t, da)
+
+//#undef _obj_offsetof
 
 /**
  *
