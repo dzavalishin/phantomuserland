@@ -241,8 +241,6 @@ int 					hal_time_init(); // asks RTC
 
 void 					hal_time_tick(int tick_rate);
 
-bigtime_t 				hal_system_time(void); // uptime
-bigtime_t 				hal_local_time(void); // real time/date
 
 
 
