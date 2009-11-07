@@ -304,7 +304,12 @@ static __inline void
 invltlb(void)
 {
 
-	load_cr3(rcr3());
+	//load_cr3(rcr3());
+    //set_cr3(get_cr3));
+
+    register unsigned int _temp__;
+    asm("mov %%cr3, %0" : "=r" (_temp__));
+    asm volatile("mov %0, %%cr3" : : "r" (_temp__));
 }
 
 /*
