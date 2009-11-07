@@ -1,0 +1,30 @@
+#summary Kernel low level timing services
+
+= Overview =
+
+{{{#include <time.h>}}}
+
+== Time in seconds ==
+
+unix {{{time()}}} - just the same old true unix time(). not recommended, of course
+
+== Time in microseconds ==
+
+{{{bigtime_t hal_system_time(void);}}} - useconds from kernel boot
+
+{{{bigtime_t hal_local_time(void);}}} - absolute time in useconds - *NB! Base?*  
+
+
+{{{void phantom_spinwait(int millis);}}} - wait some mseconds by spinning (not giving CPU away) - note that you have to disable interrupts (or, at least, preemption) to wait EXACTLY for given time.
+
+== Callouts ==
+
+*TODO*
+
+{{{void phantom_request_callout( int msec, void (*func)(void *), void *arg);}}}
+
+*NB!* It is possible for callout to happen BEFORE the return from this function.
+
+*TODO*
+
+{{{void phantom_request_cond_signal( int msec, hal_cond_t *cond);}}}
