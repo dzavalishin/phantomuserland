@@ -143,12 +143,12 @@ typedef struct efi_gpe_Attrs {
 
 /* EFI Guid Partition Entry */
 typedef struct efi_gpe {
-    struct uuid    efi_gpe_PartitionTypeGUID;
-    struct uuid    efi_gpe_UniquePartitionGUID;
-    diskaddr_t    efi_gpe_StartingLBA;
-    diskaddr_t    efi_gpe_EndingLBA;
-    efi_gpe_Attrs_t    efi_gpe_Attributes;
-    ushort_t    efi_gpe_PartitionName[EFI_PART_NAME_LEN];
+    struct uuid    	efi_gpe_PartitionTypeGUID;
+    struct uuid    	efi_gpe_UniquePartitionGUID;
+    u_int64_t    	efi_gpe_StartingLBA;
+    u_int64_t    	efi_gpe_EndingLBA;
+    efi_gpe_Attrs_t    	efi_gpe_Attributes;
+    u_int16_t    	efi_gpe_PartitionName[EFI_PART_NAME_LEN];
 } efi_gpe_t;
 
 

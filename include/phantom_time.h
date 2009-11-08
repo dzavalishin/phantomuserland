@@ -66,6 +66,7 @@ struct tm {
 };
 
 //extern char *tzname[];
+extern const char *monNames[]; // 0 is Jan
 
 
 
