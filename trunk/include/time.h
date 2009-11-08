@@ -2,6 +2,7 @@
 #define TIME_H
 
 #include <phantom_types.h>
+#include <phantom_time.h>
 
 // microseconds!
 bigtime_t 		hal_system_time(void); // uptime
