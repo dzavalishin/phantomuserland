@@ -1,5 +1,7 @@
 TRFS - trivial remote file system, quick and dirty product of dz@dz.ru :)
 
+Port is 2052, near NFS, but unused.
+
 Simplest thing to page across network. Runs on UDP or TCP. Any packet
 is retransmitted if no reply received. Newer request replaces older
 even if no reply is received.
@@ -19,8 +21,20 @@ NSectors - 32 bit net order, number of 512 bype sectors to transfer
 StartSector - 64 bit net order, number of 512 bype sector to start io from
 
 
+
+NOP
+------
+
+Error
+------
+SessionId
+ErrorId - int32
+ErrorTextLen - int32, bytes in ErrorText
+ErrorText - 
+
 FindRQ
 ------
+SessionId - ignored!
 file name
 
 
