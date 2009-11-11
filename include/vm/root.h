@@ -146,6 +146,11 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_CLOSURE_CLASS 25
 
+
+#define PVM_ROOT_OBJECT_UDP_CLASS 26
+
+#define PVM_ROOT_OBJECT_TCP_CLASS 27
+
 // Runtime restoration facilities
 
 

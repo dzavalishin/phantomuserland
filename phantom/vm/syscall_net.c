@@ -198,3 +198,42 @@ syscall_func_t	syscall_table_4_tcp[24] =
 DECLARE_SIZE(tcp);
 
 
+
+
+
+
+
+
+
+
+
+#if 0
+
+syscall_func_t	syscall_table_4_udp[26] =
+{
+    &si_void_0_construct,           	&si_void_1_destruct,
+    &si_void_2_class,               	&si_void_3_clone,
+    &si_void_4_equals,              	&si_udp_tostring_5,
+    &si_void_6_toXML,               	&si_void_7_fromXML,
+    // 8
+    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,               	&si_void_15_hashcode,
+    // 16
+    &si_udp_bind_16,    		&si_udp_unbind_17,
+    &si_udp_waitsend_18,               	&si_udp_send_19,
+    &si_udp_waitrecv_20,    		&si_udp_recv_21,
+
+    &si_udp_waitrecvfrom_22,     	&si_udp_recvfrom_23,
+    &si_udp_waitsendto_24,     		&si_udp_sendto_25,
+
+};
+DECLARE_SIZE(udp);
+
+
+
+#endif
+
+
+
