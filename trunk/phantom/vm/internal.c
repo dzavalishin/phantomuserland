@@ -27,6 +27,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_void,
         pvm_internal_init_void,
         0 /*pvm_gc_iter_void*/,
+        0, // no finalizer
         0,
         PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -36,6 +37,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_class,
         pvm_internal_init_class,
         pvm_gc_iter_class,
+        0, // no finalizer
         sizeof(struct data_area_4_class),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS
     },
@@ -45,6 +47,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_interface,
         pvm_internal_init_interface,
         pvm_gc_iter_interface,
+        0, // no finalizer
         0, // Dynamic
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE // no internal flag?
     },
@@ -54,6 +57,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_code,
         pvm_internal_init_code,
         0 /*pvm_gc_iter_code*/,
+        0, // no finalizer
         0, // Dynamic
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -63,6 +67,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_int,
         pvm_internal_init_int,
         0 /*pvm_gc_iter_int*/,
+        0, // no finalizer
         sizeof(struct data_area_4_int),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -72,6 +77,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_string,
         pvm_internal_init_string,
         0 /*pvm_gc_iter_string*/,
+        0, // no finalizer
         sizeof(struct data_area_4_string), // Dynamic!
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -81,6 +87,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_array,
         pvm_internal_init_array,
         pvm_gc_iter_array,
+        0, // no finalizer
         sizeof(struct data_area_4_array),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_DECOMPOSEABLE|PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE
     },
@@ -90,6 +97,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_page,
         pvm_internal_init_page,
         pvm_gc_iter_page,
+        0, // no finalizer
         0, // Dynamic
         0 // PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
     },
@@ -99,6 +107,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_thread,
         pvm_internal_init_thread,
         pvm_gc_iter_thread,
+        0, // no finalizer
         sizeof(struct data_area_4_thread),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD
     },
@@ -108,6 +117,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_call_frame,
         pvm_internal_init_call_frame,
         pvm_gc_iter_call_frame,
+        0, // no finalizer
         sizeof(struct data_area_4_call_frame),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME
     },
@@ -117,6 +127,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_istack,
         pvm_internal_init_istack,
         pvm_gc_iter_istack,
+        0, // no finalizer
         sizeof(struct data_area_4_integer_stack),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME
     },
@@ -126,6 +137,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_ostack,
         pvm_internal_init_ostack,
         pvm_gc_iter_ostack,
+        0, // no finalizer
         sizeof(struct data_area_4_object_stack),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME
     },
@@ -135,6 +147,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_estack,
         pvm_internal_init_estack,
         pvm_gc_iter_estack,
+        0, // no finalizer
         sizeof(struct data_area_4_exception_stack),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME
     },
@@ -144,6 +157,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_boot,
         pvm_internal_init_boot,
         0 /*pvm_gc_iter_boot*/,
+        0, // no finalizer
         sizeof(struct data_area_4_boot),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -153,6 +167,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_tty,
         pvm_internal_init_tty,
         0 /*pvm_gc_iter_tty*/,
+        0, // no finalizer
         sizeof(struct data_area_4_tty),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -162,6 +177,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_driver,
         pvm_internal_init_driver,
         pvm_gc_iter_driver,
+        0, // no finalizer
         sizeof(struct data_area_4_driver),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
     },
@@ -172,6 +188,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_mutex,
         pvm_internal_init_mutex,
         0 /*pvm_gc_iter_mutex*/,
+        0, // no finalizer
         sizeof(struct data_area_4_mutex),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -182,6 +199,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_binary,
         pvm_internal_init_binary,
         0 /*pvm_gc_iter_binary*/,
+        0, // no finalizer
         sizeof(struct data_area_4_binary), // TODO problem - dynamically sized!
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
@@ -192,6 +210,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_bitmap,
         pvm_internal_init_bitmap,
         pvm_gc_iter_bitmap,
+        0, // no finalizer
         sizeof(struct data_area_4_bitmap),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
     },
@@ -202,6 +221,7 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_closure,
         pvm_internal_init_closure,
         pvm_gc_iter_closure,
+        0, // no finalizer
         sizeof(struct data_area_4_closure),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
     },
@@ -212,11 +232,25 @@ struct internal_class pvm_internal_classes[] =
         syscall_table_4_world,
         pvm_internal_init_world,
         0 /*pvm_gc_iter_world*/,
+        0, // no finalizer
         sizeof(struct data_area_4_world),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },
 
-
+#if 0
+    {
+        ".internal.udp",
+        PVM_ROOT_OBJECT_UDP_CLASS,
+        syscall_table_4_udp,
+        pvm_internal_init_udp,
+        0 /*pvm_gc_iter_udp*/,
+        pvm_..._udp,
+        sizeof(struct data_area_4_udp),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER
+    },
+#endif
 };
 
 int pvm_n_internal_classes = sizeof(pvm_internal_classes) / sizeof(struct internal_class);

@@ -27,6 +27,9 @@
 	 unsigned int POSF_GET_##name(unsigned int v) { return v & val; }
 */
 
+// flag object as having finalizer
+POSF(IS_FINALIZER, 0x1000)
+
 // flag marking object as having no pointers out - optimization for GC and refcount decr
 POSF(IS_CHILDFREE,0x800)
 
@@ -73,6 +76,7 @@ POSF(IS_CODE,0x01)
 
 // flags:
 
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER 0x1000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE 0x800
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD 0x400
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME 0x200
