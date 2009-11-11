@@ -43,7 +43,7 @@
 
 int strlen(const char *string)
 {
-    register char *ret = string;
+    register const char *ret = string;
 
     while (*string++)
         ;
