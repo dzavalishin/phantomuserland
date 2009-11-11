@@ -72,18 +72,31 @@
 #include <stdarg.h>
 
 #include <phantom_libc.h>
-// spinlocks
+// spinlocks, preemtion
 #include <hal.h>
 
 #define TOCONS	0x01
 #define TOTTY	0x02
 #define TOLOG	0x04
 
+#if 1
+
+#define LOCK() hal_disable_preemption()
+#define UNLOCK() hal_enable_preemption()
+
+#else
+
+// No. It is wrong. it will hang if second printf will happen in
+// interrupt. We need to distinguish between interrupt and normal
+// state, and interlock with mutex in normal state and just run
+// in interrupt. or - !! - just switch preemtion off during printf!
 
 static hal_spinlock_t   spinlock;
 
 #define LOCK() hal_spin_lock(&spinlock)
 #define UNLOCK() hal_spin_unlock(&spinlock)
+
+#endif
 
 /* Max number conversion buffer length: a u_quad_t in base 2, plus NUL byte. */
 //#define MAXNBUF	(sizeof(intmax_t) * NBBY + 1)
