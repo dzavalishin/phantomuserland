@@ -11,6 +11,8 @@ bigtime_t 		hal_local_time(void);  // real time/date
 // seconds
 time_t 			time(time_t *timer);
 
+#define phantom_spinwait_msec phantom_spinwait
+
 /* wait by spinning: number of milliseconds to delay */
 void 			phantom_spinwait(int millis);
 
