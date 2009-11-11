@@ -72,11 +72,18 @@
 #include <stdarg.h>
 
 #include <phantom_libc.h>
-
+// spinlocks
+#include <hal.h>
 
 #define TOCONS	0x01
 #define TOTTY	0x02
 #define TOLOG	0x04
+
+
+static hal_spinlock_t   spinlock;
+
+#define LOCK() hal_spin_lock(&spinlock)
+#define UNLOCK() hal_spin_unlock(&spinlock)
 
 /* Max number conversion buffer length: a u_quad_t in base 2, plus NUL byte. */
 //#define MAXNBUF	(sizeof(intmax_t) * NBBY + 1)
@@ -327,7 +334,9 @@ int printf(const char *fmt, ...)
     pca.p_bufr = NULL;
 #endif
 
+    LOCK();
     retval = kvprintf(fmt, aputchar, &pca, 10, ap);
+    UNLOCK();
     va_end(ap);
 
 #ifdef PRINTF_BUFR_SIZE
@@ -364,7 +373,9 @@ vprintf(const char *fmt, va_list ap)
     pca.p_bufr = NULL;
 #endif
 
+    LOCK();
     retval = kvprintf(fmt, aputchar, &pca, 10, ap);
+    UNLOCK();
 
 #ifdef PRINTF_BUFR_SIZE
     /* Write any buffered console output: */

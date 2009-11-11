@@ -41,6 +41,7 @@
  */
 
 #include <phantom_libc.h>
+#include <kernel/init.h>
 
 #if 0
 // TODO check for atexit not to be used and kill later
@@ -88,7 +89,11 @@ void _run_atexits()
 void _exit(int code)
 {
     //panic("_exit(%d) called", code);
-    pc_reset();
+    //pc_reset();
+    hal_cpu_reset_real();
+    
+    /*UNREACHED*/
+#pragma unreached
 }
 
 void exit(int code)
