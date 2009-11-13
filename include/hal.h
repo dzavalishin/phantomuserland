@@ -30,7 +30,7 @@
 
 #include <phantom_types.h>
 #include <phantom_assert.h>
-
+#include <spinlock.h>
 
 #define __MEM_GB 0x40000000u
 #define __MEM_PAGE 4096
@@ -159,18 +159,6 @@ void                                    hal_disable_preemption(void);
 void                                    hal_enable_preemption(void);
 
 
-// ------------------------------------------------------------------------------------------
-// SPINLOCKS
-
-struct hal_spinlock {
-	volatile int lock;
-};
-
-typedef struct hal_spinlock hal_spinlock_t;
-
-void 					hal_spin_init(hal_spinlock_t *sl);
-void 					hal_spin_lock(hal_spinlock_t *sl);
-void 					hal_spin_unlock(hal_spinlock_t *sl);
 
 // ------------------------------------------------------------------------------------------
 // IRQ
