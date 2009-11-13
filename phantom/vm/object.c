@@ -344,6 +344,7 @@ void pvm_object_print(struct pvm_object o )
 
 void print_object_flags(struct pvm_object_storage *o)
 {
+    if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER )       printf("FINALIZER ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )       printf("CHILDFREE ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD )          printf("THREAD ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME )     printf("STACK_FRAME ");
