@@ -139,6 +139,13 @@ static int free_unmarked()
 
         if ( (p->_ah.gc_flags != gc_flags_last_generation) && ( p->_ah.alloc_flags != PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE ) )  //touch not accessed but allocated objects
         {
+            if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER )
+            {
+                // based on the assumption that finalizer is only valid for some internal childfree objects - is it correct?
+                gc_finalizer_func_t  func = pvm_internal_classes[pvm_object_da( p->_class, class )->sys_table_id].finalizer;
+                if (func != 0) func(p);
+            }
+
             freed++;
             debug_catch_object("gc", p);
             p->_ah.refCount = 0;  // free now
@@ -352,6 +359,13 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
             // Fast way if no children
             if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
             {
+                if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER )
+                {
+                    // based on the assumption that finalizer is only valid for some internal childfree objects - is it correct?
+                    gc_finalizer_func_t  func = pvm_internal_classes[pvm_object_da( p->_class, class )->sys_table_id].finalizer;
+                    if (func != 0) func(p);
+                }
+
                 p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
                 debug_catch_object("del", p);
                 DEBUG_PRINT("-");
