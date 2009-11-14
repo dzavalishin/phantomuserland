@@ -266,4 +266,8 @@ struct AddrRangeDesc
 #define MB_ARD_MEMORY       1
 
 
+
+extern struct multiboot_info bootParameters;
+
+
 #endif //_MACH_I386_MULTIBOOT_H_
