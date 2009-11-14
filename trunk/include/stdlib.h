@@ -1,15 +1,9 @@
-#if 0
-#include "phantom_libc.h"
-#else
-
 #ifndef __STDLIB_H__
 #define __STDLIB_H__
 
-void _exit(int code);
-void exit(int code);
+void _exit(int code) __attribute__ ((noreturn));
+void exit(int code) __attribute__ ((noreturn));
 
 
 #endif // __STDLIB_H__
-
-#endif
 
