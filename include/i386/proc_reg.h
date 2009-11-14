@@ -548,7 +548,15 @@ get_esp(void)
 	return (sel);
 }
 
+/*
+static __inline void
+set_esp(unsigned int espv)
+{
+	__asm __volatile("movl %0, %%esp" : "=rm" (espv));
+}
+*/
 
+#define set_esp(espv) __asm __volatile("movl %0, %%esp" : "=rm" (espv))
 
 #endif	/* __GNUC__ */
 #endif	/* ASSEMBLER */
