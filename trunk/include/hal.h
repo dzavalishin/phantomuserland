@@ -128,7 +128,10 @@ int         				hal_alloc_vaddress(void **result, int num); // alloc address of 
 void        				hal_free_vaddress(void *addr, int num);
 
 
-void    				hal_copy_page_v2p( physaddr_t to, void *from );
+void		hal_copy_page_v2p( physaddr_t to, void *from );
+void		memcpy_p2v( void *to, physaddr_t from, size_t size );
+void		memcpy_v2p( physaddr_t to, void *from, size_t size );
+
 
 
 
