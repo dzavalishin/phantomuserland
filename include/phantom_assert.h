@@ -47,6 +47,10 @@ void panic(const char *__format, ...) __dead2;
 #endif // __PANIC_DEFINED
 
 
+void stack_dump();
+void stack_dump_ebp(void *ebp);
+
+
 
 /*
  * Unlike other ANSI header files, <assert.h> may usefully be included
