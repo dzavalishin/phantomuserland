@@ -27,7 +27,7 @@ int phantom_is_a_real_kernel() { return 0; }
 
 void        hal_init( vmem_ptr_t va, long vs )
 {
-	printf("Win32 HAL init\n");
+	hal_printf("Win32 HAL init\n");
 
 	hal.object_vspace = va;
 	hal.object_vsize = vs;
@@ -52,7 +52,7 @@ vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 void    hal_halt()
 {
 	//fflush(stderr);
-	printf("\n\nhal halt called, exiting.\n");
+	hal_printf("\n\nhal halt called, exiting.\n");
 	getchar();
 	exit(1);
 }
