@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <phantom_libc.h>  //printf
+
 
 #define MAX_DEPTH 16
 
