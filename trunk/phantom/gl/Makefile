@@ -20,7 +20,9 @@ clean:
 	rm -f *~ *.o *.a *.d
 
 .c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -ffreestanding -MD -DHAVE_CONFIG_H -DOSKIT_X86 -DOSKIT_X86_PC -DINDIRECT_OSENV -nostdinc -O0 -g -c $*.c
+
+	@echo ---- cc $@
+	@$(CC) $(CFLAGS) $(INCLUDES) -ffreestanding -MD -DHAVE_CONFIG_H -DOSKIT_X86 -DOSKIT_X86_PC -DINDIRECT_OSENV -nostdinc -O0 -g -c $*.c
 
 clip.o: zgl.h zfeatures.h
 vertex.o: zgl.h zfeatures.h
