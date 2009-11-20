@@ -754,7 +754,7 @@ void pvm_exec(struct pvm_object current_thread)
                 // TODO: Need throw here? Just return null
                 if( pvm_is_null( cl ) )
                     pvm_exec_throw("summon by name: null class");
-                os_push( ref_inc_o( cl ) );
+                os_push( cl );  // cl popped from stack - don't increment
             }
             break;
 
@@ -774,7 +774,7 @@ void pvm_exec(struct pvm_object current_thread)
             {
                 pvm_object_t cl = os_pop();
                 os_push( pvm_create_object( cl ) );
-                ref_dec_o( cl );
+                //ref_dec_o( cl );  // object keep class ref
             }
             break;
 

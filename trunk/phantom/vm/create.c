@@ -51,7 +51,7 @@ pvm_object_create_dynamic( struct pvm_object object_class, int das )
 	struct pvm_object_storage * out = pvm_object_alloc( das, flags, 0 );
 	out->_class = object_class;
 	//out->_da_size = das; // alloc does it
-    //out->_flags = flags; // alloc does it
+	//out->_flags = flags; // alloc does it
 
 	struct pvm_object ret;
 	ret.data = out;
@@ -301,7 +301,6 @@ static struct pvm_object create_interface_worker( int n_methods )
 	int das = n_methods*sizeof(struct pvm_object);
 
 	pvm_object_t ret = pvm_object_create_dynamic( pvm_get_interface_class(), das );
-	ref_saturate_o(ret); // Interface is never refcounted! (But why?)
 	return ret;
 }
 
@@ -369,7 +368,7 @@ struct pvm_object pvm_create_class_object(struct pvm_object name, struct pvm_obj
 	da->sys_table_id             	= -1;
 
 	da->class_name 			= name;
-	da->class_parent 			= pvm_get_null_class();
+	da->class_parent 		= pvm_get_null_class();
 
 	return _data;
 }
@@ -384,7 +383,7 @@ void pvm_internal_init_class(struct pvm_object_storage * os)
 	da->sys_table_id             	= -1;
 
 	da->class_name 			= pvm_get_null_object();
-	da->class_parent 			= pvm_get_null_class();
+	da->class_parent		= pvm_get_null_class();
 }
 
 

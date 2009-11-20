@@ -259,6 +259,9 @@ static void do_refzero_process_children( pvm_object_storage_t *p )
         {
             ref_dec_o( da_po_ptr(p->da)[i] );
         }
+        //don't touch classes yet
+        //ref_dec_o( p->_class );  // Why? a kind of mismatch in the compiler, in opcode_os_save8
+
         return;
     }
 
@@ -271,6 +274,7 @@ static void do_refzero_process_children( pvm_object_storage_t *p )
        (p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) ||
        (p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE)
       )
+        //panic("");
         return;
 
 
@@ -282,7 +286,7 @@ static void do_refzero_process_children( pvm_object_storage_t *p )
 
 
     //don't touch classes yet
-    //ref_dec_o( p->_class );  // Why? Class objects are saturated for now.
+    //ref_dec_o( p->_class );  // Why? Internal class objects are saturated for now.
 }
 
 
@@ -327,7 +331,7 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
     // Can be used to trace some specific object's access
     //if( p != 0x7A9F3527 )
     if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
-    //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING) )
+    //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) )
         return;
     printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
 
@@ -432,6 +436,7 @@ void ref_saturate_o(pvm_object_t o)
 }
 pvm_object_t  ref_dec_o(pvm_object_t o)
 {
+    // Interface is never refcounted! (But why?)
     ref_dec_p(o.data);
     return o;
 }

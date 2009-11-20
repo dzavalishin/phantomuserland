@@ -295,6 +295,7 @@ pvm_copy_object( struct pvm_object in_object )
     if(in_object.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL)
         panic("internal object copy?!");
 
+    //ref_inc_o( in_object.data->_class );  //increment if class is refcounted
     struct pvm_object in_class = in_object.data->_class;
     int da_size = in_object.data->_da_size;
 
