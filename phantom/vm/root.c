@@ -143,7 +143,7 @@ static void pvm_create_root_objects()
     // Partially build interface object for internal classes
 
     flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE ;
-    pvm_root.sys_interface_object.data = pvm_object_alloc( N_SYS_METHODS * sizeof(struct pvm_object), flags, 1 );
+    pvm_root.sys_interface_object.data = pvm_object_alloc( N_SYS_METHODS * sizeof(struct pvm_object), flags, 0 );
     pvm_root.sys_interface_object.interface = pvm_root.sys_interface_object.data;
 
     pvm_root.null_object.data = pvm_object_alloc( 0, 0, 1 ); // da does not exist

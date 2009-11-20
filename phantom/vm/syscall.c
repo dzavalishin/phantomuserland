@@ -100,6 +100,7 @@ int si_void_1_destruct(struct pvm_object o, struct data_area_4_thread *tc )
 int si_void_2_class(struct pvm_object this_obj, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
+    //ref_inc_o( this_obj.data->_class );  //increment if class is refcounted
     SYSCALL_RETURN(this_obj.data->_class);
 }
 
@@ -469,7 +470,7 @@ static int si_thread_12_getEnvironment(struct pvm_object me, struct data_area_4_
         struct pvm_object cl = pvm_exec_lookup_class_by_name( env );
         meda->environment = pvm_create_object(cl);
         ref_dec_o(env);
-        ref_dec_o(cl);
+        //ref_dec_o(cl);  // object keep class ref
     }
 
     SYSCALL_RETURN(meda->environment);
@@ -616,8 +617,8 @@ static int si_class_class_8_new_class(struct pvm_object me, struct data_area_4_t
 
     struct pvm_object new_class = pvm_create_class_object(class_name, iface, sizeof(struct pvm_object) * n_object_slots);
 
-    SYS_FREE_O(class_name);
-    SYS_FREE_O(iface);
+    //SYS_FREE_O(class_name);  //linked in class object
+    //SYS_FREE_O(iface);  //linked in class object
 
     SYSCALL_RETURN( new_class );
 }

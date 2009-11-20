@@ -49,7 +49,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_gc_iter_interface,
         0, // no finalizer
         0, // Dynamic
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE // no internal flag?
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE // no internal flag!
     },
     {
         ".internal.code",
