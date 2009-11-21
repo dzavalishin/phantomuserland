@@ -12,6 +12,7 @@
 
 #include "drv_video_screen.h"
 #include <assert.h>
+#include <phantom_libc.h>
 
 // here we have a problem - some windows are persistent and
 // keep their generation. So on start we need to advance
