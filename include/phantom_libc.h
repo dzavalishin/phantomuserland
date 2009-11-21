@@ -84,6 +84,7 @@ int snprintf(char *str, size_t size, const char *format, ...);
 int vprintf(const char *fmt, va_list ap);
 int printf(const char *fmt, ...);
 
+int sscanf(const char *ibuf, const char *fmt, ...);
 
 
 // console.c
