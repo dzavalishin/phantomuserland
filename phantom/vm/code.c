@@ -56,6 +56,12 @@ unsigned char pvm_code_get_byte_speculative(struct pvm_code_handler *code)
     return (unsigned char)code->code[code->IP];  // do not increment IP !
 }
 
+unsigned char pvm_code_get_byte_speculative2(struct pvm_code_handler *code)
+{
+    pvm_code_check_bounds( code, code->IP, "get_byte" );
+    return (unsigned char)code->code[code->IP + 1];  // do not increment IP !
+}
+
 
 unsigned char pvm_code_get_byte(struct pvm_code_handler *code)
 {
