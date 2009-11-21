@@ -406,6 +406,7 @@ void pvm_internal_init_thread(struct pvm_object_storage * os)
 	hal_cond_init(&(da->wakeup_cond));
 
 	da->call_frame   			= pvm_create_call_frame_object();
+	da->stack_depth				= 1;
 
 	da->owner.data = 0;
 	da->environment.data = 0;
@@ -581,12 +582,13 @@ struct pvm_object     pvm_create_thread_object(struct pvm_object start_cf )
 	struct data_area_4_thread *da = (struct data_area_4_thread *)ret.data->da;
 
 	da->call_frame = start_cf;
+	da->stack_depth = 1;
 
 	pvm_exec_load_fast_acc(da);
 
 	// add to system threads list
 	pvm_append_array(pvm_root.threads_list.data, ret);
-    ref_inc_o(ret);
+	ref_inc_o(ret);
 
 	// not for each and every one
 	//phantom_activate_thread(ret);
