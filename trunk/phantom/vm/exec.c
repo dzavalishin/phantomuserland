@@ -306,7 +306,7 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
 }
 
 
-static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param, unsigned char next_instr )
+static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param, int optimize_next_instr )
 {
     if( DEB_CALLRET || debug_print_instr ) hal_printf( "\ncall %d (stack_depth %d -> ", method_index, da->stack_depth );
 
@@ -314,10 +314,13 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
      * Stack growth optimization for bytecode [opcode_call; opcode_ret]
      *
      * While executing "return f(x)"  we do not need callee callframe any more
-     * so we can free it before executing f(x), to avoid unneeded stack growth and memory footprint.
-     * Especially effective for recursion. Implemented in gcc -O2 long ago.
+     * so we can free it before executing f(x), to avoid unneeded stack growth
+     * and memory footprint. Effective for tail recursion and mutual recursion.
+     * Implemented in gcc -O2 long ago.
      */
-    int optimize_stack = (opcode_ret == next_instr) && es_empty();
+    unsigned char next_instr = pvm_code_get_byte_speculative(&(da->code));
+
+    int optimize_stack = optimize_next_instr && (opcode_ret == next_instr) && es_empty();
 
     pvm_exec_save_fast_acc(da);  // not needed for optimized stack in fact
 
@@ -942,23 +945,23 @@ void pvm_exec(struct pvm_object current_thread)
             // ok, now method calls ------------------------------------------------------
 
             // these 4 are parameter-less calls!
-        case opcode_short_call_0:           pvm_exec_call(da,0,0,pvm_code_get_byte_speculative(&(da->code)));   break;
-        case opcode_short_call_1:           pvm_exec_call(da,1,0,pvm_code_get_byte_speculative(&(da->code)));   break;
-        case opcode_short_call_2:           pvm_exec_call(da,2,0,pvm_code_get_byte_speculative(&(da->code)));   break;
-        case opcode_short_call_3:           pvm_exec_call(da,3,0,pvm_code_get_byte_speculative(&(da->code)));   break;
+        case opcode_short_call_0:           pvm_exec_call(da,0,0,1);   break;
+        case opcode_short_call_1:           pvm_exec_call(da,1,0,1);   break;
+        case opcode_short_call_2:           pvm_exec_call(da,2,0,1);   break;
+        case opcode_short_call_3:           pvm_exec_call(da,3,0,1);   break;
 
         case opcode_call_8bit:
             {
                 int method_index = pvm_code_get_byte(&(da->code));
                 int n_param = pvm_code_get_int32(&(da->code));
-                pvm_exec_call(da,method_index,n_param,pvm_code_get_byte_speculative(&(da->code)));
+                pvm_exec_call(da,method_index,n_param,1);
             }
             break;
         case opcode_call_32bit:
             {
                 int method_index = pvm_code_get_int32(&(da->code));
                 int n_param = pvm_code_get_int32(&(da->code));
-                pvm_exec_call(da,method_index,n_param,pvm_code_get_byte_speculative(&(da->code)));
+                pvm_exec_call(da,method_index,n_param,1);
             }
             break;
 
