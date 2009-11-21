@@ -177,10 +177,12 @@ static void pvm_exec_iset( struct data_area_4_thread *da, unsigned abs_stack_pos
 }
 
 
-static void free_call_frame(struct pvm_object cf)
+static void free_call_frame(struct pvm_object cf, struct data_area_4_thread *da)
 {
     pvm_object_da( cf, call_frame )->prev.data = 0; // Or else refcounter will follow this link
     ref_dec_o( cf ); // we are erasing reference to old call frame - release it!
+
+    da->stack_depth--;
 }
 
 
@@ -190,7 +192,7 @@ static void pvm_exec_do_return(struct data_area_4_thread *da)
 
     pvm_object_t return_val = os_empty() ?  pvm_get_null_object() : os_pop(); // return value not in stack? Why?
 
-    free_call_frame( da->call_frame );
+    free_call_frame( da->call_frame, da );
 
     da->call_frame = ret;
     pvm_exec_load_fast_acc(da);
@@ -226,7 +228,7 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
 
             pvm_exec_throw( "unwind: nowhere to return" );
         }
-        free_call_frame( da->call_frame );
+        free_call_frame( da->call_frame, da );
 
         da->call_frame = ret;
         pvm_exec_load_fast_acc(da);
@@ -306,7 +308,7 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
 
 static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param, unsigned char next_instr )
 {
-    if( DEB_CALLRET || debug_print_instr ) hal_printf("call %d; ", method_index );
+    if( DEB_CALLRET || debug_print_instr ) hal_printf( "\ncall %d (stack_depth %d -> ", method_index, da->stack_depth );
 
     /*
      * Stack growth optimization for bytecode [opcode_call; opcode_ret]
@@ -330,12 +332,14 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
     {
         cfda->prev = pvm_object_da( da->call_frame, call_frame )->prev; // set
 
-        free_call_frame( da->call_frame );
+        free_call_frame( da->call_frame, da );
     }
+
+    da->stack_depth++;
     da->call_frame = new_cf;
     pvm_exec_load_fast_acc(da);
 
-    //if( debug_print_instr ) hal_printf("call %d end; ", method_index );
+    if( debug_print_instr ) hal_printf( "%d); ", da->stack_depth );
 }
 
 
@@ -889,22 +893,25 @@ void pvm_exec(struct pvm_object current_thread)
 
         case opcode_ret:
             {
-                if( DEB_CALLRET || debug_print_instr ) hal_printf("ret; ");
+                if( DEB_CALLRET || debug_print_instr ) hal_printf( "\nret     (stack_depth %d -> ", da->stack_depth );
                 struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
 
                 if( pvm_is_null( ret ) )
                 {
+                    if( DEB_CALLRET || debug_print_instr ) hal_printf( "exit thread)\n");
                     return;  // exit thread
                 }
                 pvm_exec_do_return(da);
+                if( DEB_CALLRET || debug_print_instr ) hal_printf( "%d); ", da->stack_depth );
             }
             break;
 
             // exceptions are like ret ---------------------------------------------------
 
         case opcode_throw:
-            if( DEB_CALLRET || debug_print_instr ) hal_printf("throw; ");
+            if( DEB_CALLRET || debug_print_instr ) hal_printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
             pvm_exec_do_throw(da);
+            if( DEB_CALLRET || debug_print_instr ) hal_printf( "%d); ", da->stack_depth );
             break;
 
         case opcode_push_catcher:
@@ -1021,7 +1028,7 @@ void pvm_exec(struct pvm_object current_thread)
             if( (instruction & 0xE0 ) == opcode_call_00 )
             {
                 int n_param = pvm_code_get_byte(&(da->code));
-                pvm_exec_call(da,instruction & 0x1F,n_param,0);
+                pvm_exec_call(da,instruction & 0x1F,n_param,0); //no optimization for soon return
                 continue;
             }
 

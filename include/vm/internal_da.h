@@ -151,7 +151,13 @@ struct data_area_4_thread
     struct data_area_4_object_stack *		_ostack;        // Loaded by load_fast_acc from call_frame
     struct data_area_4_exception_stack *      	_estack;        // Loaded by load_fast_acc from call_frame
 
+
+    // misc data
+    int stack_depth;	// number of frames
+    //long memory_size;	// memory allocated - deallocated by this thread
 };
+
+typedef struct data_area_4_thread thread_context_t;
 
 /*
 // Thread factory is used to keep thread number
