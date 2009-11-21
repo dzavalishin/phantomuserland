@@ -306,21 +306,31 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
 }
 
 
-static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param, int optimize_next_instr )
+static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param, int do_optimize_ret )
 {
     if( DEB_CALLRET || debug_print_instr ) hal_printf( "\ncall %d (stack_depth %d -> ", method_index, da->stack_depth );
 
     /*
      * Stack growth optimization for bytecode [opcode_call; opcode_ret]
+     * and [opcode_call; opcode_os_drop; opcode_ret]
      *
      * While executing "return f(x)"  we do not need callee callframe any more
      * so we can free it before executing f(x), to avoid unneeded stack growth
      * and memory footprint. Effective for tail recursion and mutual recursion.
      * Implemented in gcc -O2 long ago.
      */
-    unsigned char next_instr = pvm_code_get_byte_speculative(&(da->code));
+    int optimize_stack = 0;
 
-    int optimize_stack = optimize_next_instr && (opcode_ret == next_instr) && es_empty();
+    if ((opcode_os_drop == pvm_code_get_byte_speculative(&(da->code)) &&
+         opcode_ret == pvm_code_get_byte_speculative2(&(da->code))
+        ) ||
+        (opcode_ret == pvm_code_get_byte_speculative(&(da->code)) &&
+         do_optimize_ret
+        )
+       )
+    {
+        optimize_stack = es_empty();
+    }
 
     pvm_exec_save_fast_acc(da);  // not needed for optimized stack in fact
 
@@ -336,13 +346,15 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index,
         cfda->prev = pvm_object_da( da->call_frame, call_frame )->prev; // set
 
         free_call_frame( da->call_frame, da );
+
+        if( DEB_CALLRET || debug_print_instr ) hal_printf( "*" );
     }
 
     da->stack_depth++;
     da->call_frame = new_cf;
     pvm_exec_load_fast_acc(da);
 
-    if( debug_print_instr ) hal_printf( "%d); ", da->stack_depth );
+    if( DEB_CALLRET || debug_print_instr ) hal_printf( "%d); ", da->stack_depth );
 }
 
 
@@ -758,9 +770,13 @@ void pvm_exec(struct pvm_object current_thread)
                 struct pvm_object name = pvm_code_get_string(&(da->code));
                 struct pvm_object cl = pvm_exec_lookup_class_by_name( name );
                 ref_dec_o(name);
-                // TODO: Need throw here? Just return null
-                if( pvm_is_null( cl ) )
+                // TODO: Need throw here?
+                if( pvm_is_null( cl ) ) {
                     pvm_exec_throw("summon by name: null class");
+                    //hal_printf("summon by name: null class");
+                    //pvm_exec_do_throw(da);
+                    break;
+                }
                 os_push( cl );  // cl popped from stack - don't increment
             }
             break;
@@ -1018,21 +1034,21 @@ void pvm_exec(struct pvm_object current_thread)
                     pvm_exec_save_fast_acc(da); // Before snap
                     phantom_thread_sleep_worker( da );
                 }
-                continue;
+                break;
             }
 
             if( instruction  == opcode_sys_8bit )
             {
                 pvm_exec_sys(da,pvm_code_get_byte(&(da->code))); //cf->cs.get_byte( cf->IP ));
                 goto sys_sleep;
-                //continue;
+                //break;
             }
 
             if( (instruction & 0xE0 ) == opcode_call_00 )
             {
                 int n_param = pvm_code_get_byte(&(da->code));
                 pvm_exec_call(da,instruction & 0x1F,n_param,0); //no optimization for soon return
-                continue;
+                break;
             }
 
             hal_printf("Unknown op code 0x%X\n", instruction );
