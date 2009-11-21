@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include "drv_video_screen.h"
+#include <phantom_libc.h>
 
 
 static drv_video_bitmap_t *mpointer = 0;
