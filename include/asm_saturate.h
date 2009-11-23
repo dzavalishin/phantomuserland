@@ -26,4 +26,50 @@ adcl $0, %0
 subl $2, %0
 */
 
+/*
+
+Alternative 1:
+
+
+mov refcounter, %eax
+again:
+mov %eax, %ebx
+set carry
+rcl %ebx
+// if (refcounter == %eax) refcounter = %ebx else %eax = refcounter
+cmpxchg %ebx, refcounter
+jnz again
+
+
+mov refcounter, %eax
+again:
+mov %eax, %ebx
+sar %ebx
+// if (refcounter == %eax) refcounter = %ebx else %eax = refcounter
+cmpxchg %ebx, refcounter
+jnz again
+
+
+*/
+
+
+
+
+
+/*
+
+Alternative 2:
+
+lock inc refcounter
+lock and 0x0000FFFF refcounter -> refcounter
+
+
+reg <- refcounter
+and reg, 0xFFFFFF00
+lock dec refcounter
+lock or reg refcounter -> refcounter
+
+
+*/
+
 #endif // _ASM_SATURATE
