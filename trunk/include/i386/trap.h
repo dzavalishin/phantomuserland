@@ -77,5 +77,79 @@
 #define	T_PF_WRITE		0x2		/* write access */
 #define	T_PF_USER		0x4		/* from user state */
 
+
+
+
+
+
+#ifndef ASSEMBLER
+
+
+/* This structure corresponds to the state of user registers
+   as saved upon kernel trap/interrupt entry.
+   As always, it is only a default implementation;
+   a well-optimized microkernel will probably want to override it
+   with something that allows better optimization.  */
+
+struct trap_state {
+
+	/* Saved segment registers */
+	unsigned int	gs;
+	unsigned int	fs;
+	unsigned int	es;
+	unsigned int	ds;
+
+	/* PUSHA register state frame */
+	unsigned int	edi;
+	unsigned int	esi;
+	unsigned int	ebp;
+	unsigned int	cr2;	/* we save cr2 over esp for page faults */
+	unsigned int	ebx;
+	unsigned int	edx;
+	unsigned int	ecx;
+	unsigned int	eax;
+
+	unsigned int	trapno;
+	unsigned int	err;
+
+	/* Processor state frame */
+	unsigned int	eip;
+	unsigned int	cs;
+	unsigned int	eflags;
+	unsigned int	esp;
+	unsigned int	ss;
+
+	/* Virtual 8086 segment registers */
+	unsigned int	v86_es;
+	unsigned int	v86_ds;
+	unsigned int	v86_fs;
+	unsigned int	v86_gs;
+};
+
+/* The actual trap_state frame pushed by the processor
+   varies in size depending on where the trap came from.  */
+#define TR_KSIZE	((int)&((struct trap_state*)0)->esp)
+#define TR_USIZE	((int)&((struct trap_state*)0)->v86_es)
+#define TR_V86SIZE	sizeof(struct trap_state)
+
+
+
+#else // ASSEMBLER
+
+#include <mach/asm.h>
+
+#define UNEXPECTED_TRAP				\
+	movw	%ss,%ax				;\
+	movw	%ax,%ds				;\
+	movw	%ax,%es				;\
+	movl	%esp,%eax			;\
+	pushl	%eax				;\
+	call	EXT(trap_dump_die)		;\
+
+
+#endif // ASSEMBLER
+
+
+
 #endif	// _I386_TRAP_H_
 
