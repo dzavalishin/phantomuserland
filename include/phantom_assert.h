@@ -51,6 +51,9 @@ void stack_dump();
 void stack_dump_ebp(void *ebp);
 
 
+extern char * (*phantom_symtab_getname)( void *addr );
+
+
 
 /*
  * Unlike other ANSI header files, <assert.h> may usefully be included

@@ -24,6 +24,8 @@ StartSector - 64 bit net order, number of 512 bype sector to start io from
 
 NOP
 ------
+SessionId
+
 
 Error
 ------
@@ -35,6 +37,8 @@ ErrorText -
 FindRQ
 ------
 SessionId - ignored!
+
+fileNameLen - int32
 file name
 
 
@@ -71,7 +75,7 @@ data (512*n_pages bytes)
 
 
 
-WrireRQ
+WriteRQ
 ------
 SessionId
 
