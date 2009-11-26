@@ -64,6 +64,20 @@ void pvm_root_init(void)
         pvm_create_root_objects();
         pvm_save_root_objects();
 
+        phantom_setenv("root.shell",".ru.dz.phantom.system.shell");
+        phantom_setenv("root.init",".ru.dz.phantom.system.init");
+
+        /* test code
+        {
+            char buf[512];
+            phantom_getenv("root.shell", buf, 511 );
+            printf("Root shell env var is '%s'\n", buf );
+            phantom_getenv("root.init", buf, 511 );
+            printf("Root init env var is '%s'\n", buf );
+            getchar();
+        }
+        */
+
         pvm_boot();
 
         return;
@@ -303,7 +317,22 @@ static int get_env_name_pos( const char *name )
 	int i;
 	for( i = 0; i < items; i++ )
 	{
-        //not implemented
+            pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, i);
+            char *ed = pvm_get_str_data(o);
+            int el = pvm_get_str_len(o);
+
+            char *eqpos = strchr( ed, '=' );
+            if( eqpos == 0 )
+            {
+                // Strange...
+                continue;
+            }
+            int keylen = eqpos - ed;
+
+            if( 0 == strncmp( ed, name, keylen ) )
+            {
+                return i;
+            }
 	}
 
 	return -1;
@@ -333,14 +362,32 @@ int phantom_getenv( const char *name, char *value, int vsize )
 	int pos = get_env_name_pos( name );
 	if( pos < 0 ) return 0;
 
+        assert( vsize > 1 ); // trailing zero and at least one char
+
 	pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, pos);
 	if( o.data == 0 ) return 0;
 	char *ed = pvm_get_str_data(o);
 	int el = pvm_get_str_len(o);
 
+        //printf("full '%.*s'\n", el, ed );
+
+        char *eqpos = strchr( ed, '=' );
+        if( eqpos == 0 )
+        {
+            *value == '\0';
+            return;
+        }
+
+        eqpos++; // skip '='
+
+        el -= (eqpos - ed);
+
+        el++; // add place for trailing zero
+
 	if( vsize > el ) vsize = el;
 
-	strncpy( value, ed, vsize );
+        strncpy( value, eqpos, vsize );
+        value[vsize-1] = '\0';
 
 	return 1;
 }
