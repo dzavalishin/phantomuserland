@@ -2,8 +2,10 @@
 
 = Overview =
 
-{{{#include <threads.h>}}}
-{{{#include <hal.h>}}}
+{{{
+#include <threads.h>
+#include <hal.h>
+}}}
 
 Phantom kernel is preemptively multithreaded. Threads sync API (see KernelSync) is more or less the same as in pthreads, but not exactly.
 
