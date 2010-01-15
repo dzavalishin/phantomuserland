@@ -67,3 +67,49 @@ Mutex can't be used:
 == Cond ==
 
 Cond is similar to mutex in terms of usage, but does a different thing. Cond is used to signal other thread that it can continue running. Cond is used with mutex - nearly allways!
+
+Here's why. Typical use of cond is, for example, signalling about new data available in buffer. Assume following code:
+
+{{{
+char getchar()
+{
+    while( buffer_is_empty(buf) )             // A
+        hal_cond_wait( buffer_related_cond ); // B
+    return buffer_get( buf );                 
+}
+
+void interrupt_handler()
+{
+    char c = read_char_from_device();
+    buffer_put( buf, char );                  // C
+    hal_cond_signal( buffer_related_cond );   // D
+}
+}}}
+
+Now imagine that due to bad luck code was executed ln the following sequence: A, <interrupt>, C, D, <return from interrupt>, B. Getchar checked that buffer is empty, then interrupt code put data and signalled about it with cond - but nobody yet listened to signal, because line B was not executed. Interrupt is lost then - too bad.
+
+Because of this cond is usually used with mutex, which makes sure that data modification and signalling are done atomically. Look:
+
+{{{
+char getchar()
+{
+    hal_mutex_lock( buffer_related_mutex );
+    while( buffer_is_empty(buf) )             // A
+        hal_cond_wait( buffer_related_cond, buffer_related_mutex ); // B
+    hal_mutex_unlock( buffer_related_mutex );
+
+    return buffer_get( buf );                 
+}
+
+void interrupt_handler()
+{
+    char c = read_char_from_device();
+
+    hal_mutex_lock( buffer_related_mutex );
+    buffer_put( buf, char );                  // C
+    hal_cond_signal( buffer_related_cond );   // D
+    hal_mutex_unlock( buffer_related_mutex );
+}
+}}}
+
+Note that hal_cond_wait() unlocks given mutex *AFTER* blocking the thread and starting to wait for signal. It makes sure that data modification and cond signalling can't occure between lines A and B.
