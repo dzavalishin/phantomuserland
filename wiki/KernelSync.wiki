@@ -86,7 +86,7 @@ void interrupt_handler()
 }
 }}}
 
-Now imagine that due to bad luck code was executed ln the following sequence: A, <interrupt>, C, D, <return from interrupt>, B. Getchar checked that buffer is empty, then interrupt code put data and signalled about it with cond - but nobody yet listened to signal, because line B was not executed. Interrupt is lost then - too bad.
+Now imagine that due to bad luck code was executed ln the following sequence: A, *interrupt*, C, D, *return from interrupt*, B. Getchar checked that buffer is empty, then interrupt code put data and signalled about it with cond - but nobody yet listened to signal, because line B was not executed. Interrupt is lost then - too bad.
 
 Because of this cond is usually used with mutex, which makes sure that data modification and signalling are done atomically. Look:
 
