@@ -114,6 +114,56 @@ struct region_descriptor {
 	asm volatile("mov %0, %%cr0" : : "r" (_temp__)); \
      })
 
+
+
+
+
+
+
+static __inline unsigned int
+read_eflags(void)
+{
+	unsigned int	ef;
+
+	__asm __volatile("pushfl; popl %0" : "=r" (ef));
+	return (ef);
+}
+
+
+static __inline void
+write_eflags(unsigned int ef)
+{
+	__asm __volatile("pushl %0; popfl" : : "r" (ef));
+}
+
+
+
+static __inline void
+disable_intr(void)
+{
+	__asm __volatile("cli" : : : "memory");
+}
+
+
+
+static __inline unsigned int
+get_esp(void)
+{
+	unsigned int sel;
+	__asm __volatile("movl %%esp,%0" : "=rm" (sel));
+	return (sel);
+}
+
+
+
+
+
+
+
+
+#if 0
+
+
 #define	get_cr2() \
     ({ \
 	register unsigned int _temp__; \
@@ -200,11 +250,6 @@ bsrl(unsigned int mask)
 	return (result);
 }
 
-static __inline void
-disable_intr(void)
-{
-	__asm __volatile("cli" : : : "memory");
-}
 
 static __inline void
 do_cpuid(unsigned int ax, unsigned int *p)
@@ -242,15 +287,6 @@ ia32_pause(void)
 	__asm __volatile("pause");
 }
 
-static __inline unsigned int
-read_eflags(void)
-{
-	unsigned int	ef;
-
-	__asm __volatile("pushfl; popl %0" : "=r" (ef));
-	return (ef);
-}
-
 static __inline u_int64_t
 rdmsr(unsigned int msr)
 {
@@ -282,12 +318,6 @@ static __inline void
 wbinvd(void)
 {
 	__asm __volatile("wbinvd");
-}
-
-static __inline void
-write_eflags(unsigned int ef)
-{
-	__asm __volatile("pushl %0; popfl" : : "r" (ef));
 }
 
 static __inline void
@@ -381,6 +411,8 @@ rtr(void)
 	return (tr);
 }
 
+
+#if 0
 static __inline void
 load_fs(unsigned int sel)
 {
@@ -392,6 +424,8 @@ load_gs(unsigned int sel)
 {
 	__asm __volatile("movl %0,%%gs" : : "rm" (sel));
 }
+#endif
+
 
 static __inline void
 lidt(struct region_descriptor *addr)
@@ -424,6 +458,8 @@ load_dr0(unsigned int dr0)
 {
 	__asm __volatile("movl %0,%%dr0" : : "r" (dr0));
 }
+
+//#endif
 
 static __inline unsigned int
 rdr1(void)
@@ -540,13 +576,6 @@ intr_restore(register_t eflags)
 }
 
 
-static __inline unsigned int
-get_esp(void)
-{
-	unsigned int sel;
-	__asm __volatile("movl %%esp,%0" : "=rm" (sel));
-	return (sel);
-}
 
 /*
 static __inline void
@@ -556,7 +585,11 @@ set_esp(unsigned int espv)
 }
 */
 
+
+
 #define set_esp(espv) __asm __volatile("movl %0, %%esp" : "=rm" (espv))
+
+#endif
 
 #endif	/* __GNUC__ */
 #endif	/* ASSEMBLER */
