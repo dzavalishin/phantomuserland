@@ -5,6 +5,10 @@
 #include <hal.h>
 
 
+
+
+
+
 #define THREAD_PRIO_NORM        0x7
 #define THREAD_PRIO_LOWEST      0x1
 #define THREAD_PRIO_LOW         0x2
@@ -15,6 +19,25 @@
 
 // Or (|) with prio to get realtime thread
 #define THREAD_PRIO_MOD_REALTIME     0x10
+
+
+
+
+#define THREAD_FLAG_USER        0x0001 // runs in user mode - not imlp
+#define THREAD_FLAG_VM          0x0002 // runs virtual machine thread, owner points to phantom thread object??? GC??!
+#define THREAD_FLAG_JIT         0x0004 // JITted VM tread - not imlp
+#define THREAD_FLAG_NATIVE      0x0008 // runs native code objetct - not imlp
+#define THREAD_FLAG_KERNEL      0x0010 // runs some kernel private stuff
+
+#define THREAD_FLAG_PREFORK     0x0020 // is to be forked
+#define THREAD_FLAG_PARENT      0x0040 // after fork - parent
+#define THREAD_FLAG_CHILD       0x0080 // after fork - child
+
+
+#define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)
+
+
+
 
 
 
@@ -37,6 +60,8 @@ void phantom_scheduler_yield( void );
 void hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ));
 
 */
+
+int phantom_vm_threads_get_count();
 
 
 #endif // THREADS_H

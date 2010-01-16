@@ -154,6 +154,8 @@ void        				hal_exit_kernel_thread(void);
 
 // returns thread id, does not check for thread death
 int                                     hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
+int					hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
+
 
 void                                    hal_set_thread_priority( int tid, int prio );
 
