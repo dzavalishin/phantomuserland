@@ -181,10 +181,12 @@ CODE facilitynames[] = {
  */
 #include <sys/cdefs.h>
 //#include <sys/_types.h>
+#include <stdarg.h>
 
 __BEGIN_DECLS
 void	syslog(int, const char *, ...) __printflike(2, 3);
 //void	vsyslog(int, const char *, __va_list) __printflike(2, 0);
+void    vsyslog(int pri, const char *fmt, va_list ap) __printflike(2, 0);
 __END_DECLS
 
 
