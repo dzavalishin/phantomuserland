@@ -156,6 +156,13 @@ get_esp(void)
 
 
 
+static __inline unsigned int
+get_ss(void)
+{
+	unsigned int sel;
+	__asm __volatile("movw %%ss,%w0" : "=rm" (sel));
+	return (sel);
+}
 
 
 
@@ -395,13 +402,6 @@ rldt(void)
 	return (ldtr);
 }
 
-static __inline unsigned int
-rss(void)
-{
-	unsigned int sel;
-	__asm __volatile("movl %%ss,%0" : "=rm" (sel));
-	return (sel);
-}
 
 static __inline u_int16_t
 rtr(void)
