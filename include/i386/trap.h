@@ -132,6 +132,10 @@ struct trap_state {
 #define TR_USIZE	((int)&((struct trap_state*)0)->v86_es)
 #define TR_V86SIZE	sizeof(struct trap_state)
 
+#define I386_N_TRAPS 32
+
+int (*phantom_trap_handlers[I386_N_TRAPS])(struct trap_state *ts);
+
 
 
 #else // ASSEMBLER
