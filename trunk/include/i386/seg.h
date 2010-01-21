@@ -61,7 +61,16 @@
 #ifndef	_I386_SEG_H_
 #define	_I386_SEG_H_
 
-//#include <platforms.h>
+
+
+/* Format of a "pseudo-descriptor", used for loading the IDT and GDT.  */
+struct pseudo_descriptor
+{
+	short pad;
+	unsigned short limit;
+	unsigned long linear_base;
+};
+
 
 /*
  * i386 segmentation.

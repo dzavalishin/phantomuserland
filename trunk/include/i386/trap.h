@@ -136,6 +136,12 @@ struct trap_state {
 
 int (*phantom_trap_handlers[I386_N_TRAPS])(struct trap_state *ts);
 
+void dump_ss(struct trap_state *st);
+const char *trap_name(unsigned int trapnum);
+int trap_panic(struct trap_state *ts);
+
+
+
 
 
 #else // ASSEMBLER
