@@ -1,53 +1,12 @@
 #ifndef	_PHANTOM_PMAP_MACHINE_
 #define _PHANTOM_PMAP_MACHINE_
 
+#ifndef ASSEMBLER
 #include <phantom_types.h>
+#endif
 
 #define NPDE 1024
 #define NPTE 1024
-
-/*
- *	i386/i486 Page Table Entry
- */
-
-typedef unsigned int	pt_entry_t;
-typedef unsigned int	pd_entry_t;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*
@@ -108,6 +67,22 @@ typedef unsigned int	pd_entry_t;
 
 
 
+
+
+#ifndef ASSEMBLER
+
+
+/*
+ *	i386/i486 Page Table Entry
+ */
+
+typedef unsigned int	pt_entry_t;
+typedef unsigned int	pd_entry_t;
+
+
+
+
+
 /*
  *	Convert linear offset to page descriptor index
  */
@@ -128,6 +103,7 @@ void phantom_paging_init(void);
 void phantom_map_page(linaddr_t la, pt_entry_t mapping );
 void phantom_unmap_page(linaddr_t la );
 
+#endif // ASSEMBLER
 
 
 

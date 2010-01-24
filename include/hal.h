@@ -30,6 +30,7 @@
 
 #include <phantom_types.h>
 #include <phantom_assert.h>
+#include <errno.h>
 #include <spinlock.h>
 
 #define __MEM_GB 0x40000000u
@@ -117,15 +118,24 @@ void	hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t
 void * 					hal_alloc_page(); // allocate (identically) mapped mem page in kern addr space
 void   					hal_free_page(void *page); // deallocate identically mapped page
 
-// TODO return errno_t, success must == 0
-int         				hal_alloc_phys_page(physaddr_t  *result); // alloc and not map -- returns 1 on success
+errno_t        				hal_alloc_phys_page(physaddr_t  *result); // alloc and not map -- returns 1 on success
 void        				hal_free_phys_page(physaddr_t  page); // alloc and not map - WILL PANIC if page is mapped!
 
-void         				hal_alloc_phys_pages(physaddr_t  *result, int npages); // alloc and not map
+errno_t        				hal_alloc_phys_pages(physaddr_t  *result, int npages); // alloc and not map
 void        				hal_free_phys_pages(physaddr_t  page, int npages); // alloc and not map - WILL PANIC if page is mapped!
 
 int         				hal_alloc_vaddress(void **result, int num); // alloc address of a page, but not memory
 void        				hal_free_vaddress(void *addr, int num);
+
+// Allocate physmem, address space for it, and map. Panics if out of anything.
+void 					hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes );
+// Unmap, free addr space and physmem
+void 					hal_pv_free( physaddr_t pa, void *va, int size_bytes );
+
+// Low ( < 1M ) mem. Identically mapped all the time!
+errno_t					hal_alloc_phys_pages_low(physaddr_t *result, int npages);
+void                                    hal_free_phys_pages_low(physaddr_t  paddr, int npages);
+
 
 
 void		hal_copy_page_v2p( physaddr_t to, void *from );
