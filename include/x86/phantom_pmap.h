@@ -27,6 +27,8 @@
 //#define INTEL_PTE_WIRED		0x00000200
 //#define INTEL_PDPTE_NESTED	0x00000400
 
+#define INTEL_PTE_AVAIL		0x00000e00
+
 #define INTEL_PTE_PFN		0xfffff000
 
 
@@ -45,6 +47,10 @@
 #define INTEL_PDE_PFN		0xfffff000
 
 
+/*
+ *	Macros to translate between page table entry values
+ *	and physical addresses.
+ */
 
 #define	pa_to_pte(a)		((a) & INTEL_PTE_PFN)
 #define	pte_to_pa(p)		((p) & INTEL_PTE_PFN)
@@ -84,14 +90,16 @@ typedef unsigned int	pd_entry_t;
 
 
 /*
- *	Convert linear offset to page descriptor index
+ *	Convert linear offset to page descriptor/page table index
  */
 #define lin2pdenum(a)	(((a) >> PDESHIFT) & PDEMASK)
+#define lin2ptenum(a)	(((a) >> PTESHIFT) & PTEMASK)
 
 /*
- *	Convert page descriptor index to linear address
+ *	Convert page descriptor/page table index to linear address
  */
 #define pdenum2lin(a)	((vm_offset_t)(a) << PDESHIFT)
+#define ptenum2lin(a)	((vm_offset_t)(a) << PTESHIFT)
 
 
 
