@@ -95,6 +95,35 @@ typedef	u_int64_t	time_t;
 #endif
 
 
+// ------------ From Mach
+
+/*
+ * A natural_t is the type for the native
+ * integer type, e.g. 32 or 64 or.. whatever
+ * register size the machine has.  Unsigned, it is
+ * used for entities that might be either
+ * unsigned integers or pointers, and for
+ * type-casting between the two.
+ * For instance, the IPC system represents
+ * a port in user space as an integer and
+ * in kernel space as a pointer.
+ */
+typedef unsigned int        natural_t;
+
+
+/*
+ * A vm_offset_t is a type-neutral pointer,
+ * e.g. an offset into a virtual memory space.
+ */
+typedef        natural_t        vm_offset_t;
+
+/*
+ * A vm_size_t is the proper type for e.g.
+ * expressing the difference between two
+ * vm_offset_t entities.
+ */
+typedef        natural_t        vm_size_t;
+
 
 
 #endif // PAGER_TYPES_H
