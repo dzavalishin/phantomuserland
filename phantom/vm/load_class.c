@@ -150,7 +150,7 @@ int pvm_load_class_from_memory( unsigned char * contents, int fsize, struct pvm_
                 ref_dec_o(base_name);
 
                 got_class_header = 1;
-
+#warning base class ignored
                 // BUG! Fix me!
                 /*if( !EQ_STRING_P2C(base_name,".internal.object") )
                     base_class = pvm_lookup_class(base_name);
