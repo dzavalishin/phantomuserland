@@ -88,8 +88,6 @@ void _run_atexits()
 
 void _exit(int code)
 {
-    //panic("_exit(%d) called", code);
-    //pc_reset();
     hal_cpu_reset_real();
     
     /*UNREACHED*/
