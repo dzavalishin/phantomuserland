@@ -166,6 +166,22 @@ get_ss(void)
 
 
 
+static __inline u_int64_t
+rdmsr(unsigned int msr)
+{
+	u_int64_t rv;
+
+	__asm __volatile("rdmsr" : "=A" (rv) : "c" (msr));
+	return (rv);
+}
+
+static __inline void
+wrmsr(unsigned int msr, u_int64_t newval)
+{
+	__asm __volatile("wrmsr" : : "A" (newval), "c" (msr));
+}
+
+
 
 
 #if 0
@@ -294,14 +310,6 @@ ia32_pause(void)
 	__asm __volatile("pause");
 }
 
-static __inline u_int64_t
-rdmsr(unsigned int msr)
-{
-	u_int64_t rv;
-
-	__asm __volatile("rdmsr" : "=A" (rv) : "c" (msr));
-	return (rv);
-}
 
 static __inline u_int64_t
 rdpmc(unsigned int pmc)
@@ -327,11 +335,6 @@ wbinvd(void)
 	__asm __volatile("wbinvd");
 }
 
-static __inline void
-wrmsr(unsigned int msr, u_int64_t newval)
-{
-	__asm __volatile("wrmsr" : : "A" (newval), "c" (msr));
-}
 
 
 /*
