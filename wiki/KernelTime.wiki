@@ -49,3 +49,7 @@ flags are:
 {{{void phantom_request_timed_thread_wake( int tid, long timeMsec );}}}
 
 Implement copy of these, but working on separate thread.
+
+== Sleep ==
+
+{{{void phantom_spinwait(int millis);}}} - spend some milliseconds consuming CPU
