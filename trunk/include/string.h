@@ -33,6 +33,8 @@ char *strrchr(const char *p, int ch);
 char *rindex(const char *p, int ch);
 
 char *strdup( const char *);
+char *strndup(const char *s, size_t n);
+
 
 void *memcpy(void *dst0, const void *src0, size_t length);
 void *memmove(void *dst0, const void *src0, size_t length);
