@@ -377,6 +377,32 @@ static int si_string_11_length(struct pvm_object me, struct data_area_4_thread *
     SYSCALL_RETURN(pvm_create_int_object( meda->length ));
 }
 
+static int si_string_12_find(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    struct pvm_object him = POP_ARG;
+    ASSERT_STRING(him);
+
+    struct data_area_4_string *meda = pvm_object_da( me, string );
+    struct data_area_4_string *himda = pvm_object_da( him, string );
+
+    const char * ret = strnstrn(
+    		meda->data, meda->length,
+                himda->data, himda->length );
+
+    SYS_FREE_O(him);
+
+    int pos = -1;
+
+    if( ret != 0 )
+        pos = ret-meda->data;
+
+    SYSCALL_RETURN(pvm_create_int_object( pos ));
+}
 
 
 syscall_func_t	syscall_table_4_string[16] =
@@ -386,9 +412,9 @@ syscall_func_t	syscall_table_4_string[16] =
     &si_string_4_equals,  &si_string_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_string_8_substring, &si_string_9_charat,
-    &si_string_10_concat, &si_string_11_length,
-    &invalid_syscall,               &invalid_syscall,
+    &si_string_8_substring, 		&si_string_9_charat,
+    &si_string_10_concat, 		&si_string_11_length,
+    &si_string_12_find,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
 };
 DECLARE_SIZE(string);
@@ -943,6 +969,7 @@ static int si_bootstrap_23_getenv(struct pvm_object me, struct data_area_4_threa
     SYSCALL_RETURN(pvm_root.kernel_environment);
 }
 
+
 syscall_func_t	syscall_table_4_boot[24] =
 {
     &si_void_0_construct,           	&si_void_1_destruct,
@@ -958,7 +985,9 @@ syscall_func_t	syscall_table_4_boot[24] =
     &si_bootstrap_16_print,             &si_bootstrap_17_register_class_loader,
     &si_bootstrap_18_thread,            &si_bootstrap_19_create_binary,
     &si_bootstrap_20_set_screen_background, &si_bootstrap_21_sleep,
-    &si_bootstrap_22_set_os_interface,  &si_bootstrap_23_getenv
+    &si_bootstrap_22_set_os_interface,  &si_bootstrap_23_getenv,
+    // 24
+    //&si_bootstrap_24_getenv_val
 };
 DECLARE_SIZE(boot);
 
@@ -1037,6 +1066,16 @@ static int si_array_11_set(struct pvm_object me, struct data_area_4_thread *tc )
     SYSCALL_RETURN( ref_inc_o( value) );
 }
 
+static int si_array_12_size(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 0);
+
+    struct data_area_4_array *da = (struct data_area_4_array *)me.data->da;
+
+    SYSCALL_RETURN(pvm_create_int_object( da->used_slots ) );
+}
 
 
 
@@ -1048,9 +1087,9 @@ syscall_func_t	syscall_table_4_array[16] =
     &si_void_4_equals,              &si_array_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_array_8_get_iterator, &si_array_9_get_subarray,
-    &si_array_10_get,     &si_array_11_set,
-    &invalid_syscall,               &invalid_syscall,
+    &si_array_8_get_iterator,       &si_array_9_get_subarray,
+    &si_array_10_get,               &si_array_11_set,
+    &si_array_12_size,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
 

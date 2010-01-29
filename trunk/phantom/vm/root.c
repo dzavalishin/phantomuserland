@@ -67,9 +67,6 @@ void pvm_root_init(void)
         pvm_create_root_objects();
         pvm_save_root_objects();
 
-        phantom_setenv("root.shell",".ru.dz.phantom.system.shell");
-        phantom_setenv("root.init",".ru.dz.phantom.system.init");
-
         load_kernel_boot_env();
 
         /* test code
@@ -401,6 +398,11 @@ int phantom_getenv( const char *name, char *value, int vsize )
 
 static void load_kernel_boot_env(void)
 {
+    // Default env first
+    phantom_setenv("root.shell",".ru.dz.phantom.system.shell");
+    phantom_setenv("root.init",".ru.dz.phantom.system.init");
+
+
     int i = main_envc;
     char **ep = main_env;
     while( i-- )
