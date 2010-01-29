@@ -52,6 +52,27 @@ long strtol(const char *nptr, char **endptr, int base);
 quad_t strtoq(const char *nptr, char **endptr, int base);
 u_quad_t strtouq(const char *nptr, char **endptr, int base);
 
+
+void *memchr(void const *buf, int c, size_t len);
+void *memscan(void *addr, int c, size_t size);
+int strcoll(const char *s1, const char *s2);
+char *strncat(char *dest, char const *src, size_t count);
+int strnicmp(char const *s1, char const *s2, size_t len);
+int strncasecmp(char const *s1, char const *s2, size_t len);
+size_t strnlen(char const *s, size_t count);
+char *strpbrk(char const *cs, char const *ct);
+size_t strspn(char const *s, char const *accept);
+char *strstr(char const *s1, char const *s2);
+size_t strxfrm(char *dest, const char *src, size_t n);
+
+
+
+
+
+
+
+
+
 #endif // __STRING_H__
 
 
