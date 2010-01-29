@@ -390,7 +390,7 @@ static int si_string_12_find(struct pvm_object me, struct data_area_4_thread *tc
     struct data_area_4_string *meda = pvm_object_da( me, string );
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
-    const char * ret = strnstrn(
+    unsigned char * ret = strnstrn(
     		meda->data, meda->length,
                 himda->data, himda->length );
 
@@ -399,7 +399,7 @@ static int si_string_12_find(struct pvm_object me, struct data_area_4_thread *tc
     int pos = -1;
 
     if( ret != 0 )
-        pos = ret-meda->data;
+        pos = ret - (meda->data);
 
     SYSCALL_RETURN(pvm_create_int_object( pos ));
 }

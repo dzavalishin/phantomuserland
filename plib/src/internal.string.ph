@@ -40,6 +40,8 @@ class .internal.string
 
 	int length() [11] {}
 
+	int strstr( var s : string ) [12] {}
+
 };
 
 

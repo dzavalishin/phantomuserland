@@ -170,6 +170,8 @@ class boot
 	var os : .phantom.osimpl;
         os = new .phantom.osimpl();
 
+        os.init(boot_object);
+
 	return os;
     }
 

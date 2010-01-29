@@ -42,7 +42,6 @@ class os
 	}
     }
 
-
     .phantom.os.time getTimeServer() { init(); return impl.getTimeServer(); }
 
 };
