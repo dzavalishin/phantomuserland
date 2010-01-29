@@ -21,7 +21,7 @@ strdup(const char *str)
 }
 
 
-char *strndup(const char *s, size_t n)
+char *strndup(const char *str, size_t n)
 {
 	size_t len;
 	char *copy;

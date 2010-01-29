@@ -27,6 +27,8 @@
 #include "vm/exception.h"
 #include "vm/bulk.h"
 
+#include <kernel/boot.h>
+
 //#include "vm/systable_id.h"
 
 static void pvm_create_root_objects();
@@ -39,6 +41,7 @@ static void pvm_boot();
 
 struct pvm_root_t pvm_root;
 
+static void load_kernel_boot_env(void);
 
 /**
  *
@@ -66,6 +69,8 @@ void pvm_root_init(void)
 
         phantom_setenv("root.shell",".ru.dz.phantom.system.shell");
         phantom_setenv("root.init",".ru.dz.phantom.system.init");
+
+        load_kernel_boot_env();
 
         /* test code
         {
@@ -392,4 +397,34 @@ int phantom_getenv( const char *name, char *value, int vsize )
 	return 1;
 }
 
+
+
+static void load_kernel_boot_env(void)
+{
+    int i = main_envc;
+    char **ep = main_env;
+    while( i-- )
+    {
+        const char *e = *ep++;
+
+        const char *eq = index( e, '=' );
+
+        if( eq == 0 )
+        {
+            printf("Warning: env without =, '%s'\n", e);
+            continue;
+        }
+
+        int nlen = eq-e;
+        eq++; // skip =
+
+        char buf[128+1];
+        if( nlen > 128 ) nlen=128;
+
+        strncpy( buf, e, nlen );
+
+        printf("Loading env '%s'='%s'\n", buf, eq );
+        phantom_setenv( buf, eq );
+    }
+}
 

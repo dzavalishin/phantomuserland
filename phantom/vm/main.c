@@ -24,6 +24,7 @@
 #include <stdarg.h>
 
 #include <phantom_libc.h>
+#include <kernel/boot.h>
 
 #include "vm/root.h"
 //#include "vm/bulk.h"
@@ -33,8 +34,21 @@
 #include "main.h"
 #include "win_bulk.h"
 
-
 #include "drv_video_screen.h"
+
+#define MAXENVBUF 128
+static char *envbuf[MAXENVBUF] = { 0 };
+
+
+
+
+
+
+
+
+
+
+
 
 #define wysize 60
 #define wxsize 80
@@ -312,18 +326,36 @@ static void usage()
 
 extern int debug_print_instr;
 
+int main_envc;
+const char **main_env;
+
 
 static void args(int argc, char* argv[])
 {
+    main_envc = 0;
+    main_env = &envbuf;
+
     while(argc-- > 1)
     {
         char *arg = *++argv;
+
+        if( *arg != '-' && index( arg, '=' ) )
+        {
+            if( main_envc >= MAXENVBUF )
+            {
+                printf("Env too big\n");
+                exit(22);
+            }
+            envbuf[main_envc++] = arg;
+            envbuf[main_envc] = 0;
+            continue;
+        }
 
         if( *arg != '-' )
         {
             usage(); exit(22);
         }
-        arg++;
+        arg++; // skip '-'
 
         switch( *arg )
         {
