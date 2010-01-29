@@ -61,7 +61,7 @@
 #ifndef	_I386_SEG_H_
 #define	_I386_SEG_H_
 
-
+#ifndef ASSEMBLER
 
 /* Format of a "pseudo-descriptor", used for loading the IDT and GDT.  */
 struct pseudo_descriptor
@@ -111,6 +111,9 @@ struct fake_descriptor {
 	unsigned int	access:8;		// access 
 };
 */
+
+#endif
+
 
 #define	SZ_32		0x4			/* 32-bit segment */
 #define SZ_16		0x0			/* 16-bit segment */
