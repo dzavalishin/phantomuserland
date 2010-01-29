@@ -65,6 +65,7 @@ size_t strspn(char const *s, char const *accept);
 char *strstr(char const *s1, char const *s2);
 size_t strxfrm(char *dest, const char *src, size_t n);
 
+char *strnstrn(char const *s1, int l1, char const *s2, int l2);
 
 
 

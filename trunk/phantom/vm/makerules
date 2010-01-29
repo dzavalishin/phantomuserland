@@ -14,7 +14,7 @@ libphantom_vm.a:
 nonstandalone.o: nonstandalone.c
 	gcc -c nonstandalone.c
 
-GLLIB=../lib/libTinyGL.a 
+GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o 
 
 pvm_test: main.o nonstandalone.o $(GLLIB)
 	gcc -g -ffreestanding -o $@ $^  -lgdi32 

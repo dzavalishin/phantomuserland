@@ -1,29 +1,31 @@
 /**
  *
- * Test code used to check snapshots.
+ * Phantom OS - Phantom language library
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Internal: No
+ * Preliminary: Yes
+ *
  *
 **/
 
-
 package .ru.dz.phantom.system;
 
+import .phantom.os;
 import .internal.io.tty;
+import .ru.dz.phantom.system.runnable;
 
 attribute const * ->!;
 
 
-class thread_test // extends runnable
+class shell extends runnable
 {
     var console : .internal.io.tty;
     var incr :  int;
-    var o : .pahntom.os;
-	
-	
-    // They call us here
-    void run(var parent_object @const ) [8] // don't have to give number here? Must be inherited?
+
+    void run(var parent_object @const ) [8]
     {
-        o.init();
-        
         console = new .internal.io.tty();
         incr = 1;
 
@@ -36,7 +38,5 @@ class thread_test // extends runnable
             console.putws("  ");
         }
     }
-
 };
-
 
