@@ -93,6 +93,8 @@ int putchar(int c);
 
 
 
+u_int32_t random(void);
+void srandom(u_int32_t seed);
 
 
 

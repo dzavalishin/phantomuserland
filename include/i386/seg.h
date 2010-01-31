@@ -112,8 +112,7 @@ struct fake_descriptor {
 };
 */
 
-#endif
-
+#endif // ASSEMBLER
 
 #define	SZ_32		0x4			/* 32-bit segment */
 #define SZ_16		0x0			/* 16-bit segment */

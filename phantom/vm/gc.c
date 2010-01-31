@@ -330,7 +330,7 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
     //if( p != (void *)0x7acbe56c )
-    if( p != (void *)0x7acbd0e8 )
+    //if( p != (void *)0x7acbd0e8 )
     //if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
     //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) )
         return;
