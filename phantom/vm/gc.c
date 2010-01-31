@@ -329,8 +329,9 @@ static void ref_dec_proccess_zero(pvm_object_storage_t *p)
 void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
     // Can be used to trace some specific object's access
-    //if( p != 0x7A9F3527 )
-    if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
+    //if( p != (void *)0x7acbe56c )
+    if( p != (void *)0x7acbd0e8 )
+    //if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
     //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) )
         return;
     printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
@@ -420,7 +421,17 @@ void ref_saturate_p(pvm_object_storage_t *p)
 {
     debug_catch_object("!!", p);
 
+    // Saturated object can't be a loop collection candidate. Can it?
+    if ( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER )
+        cycle_root_buffer_rm_candidate( p );
+
+    p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER;
+
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+    // [dz] was assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    // But fails if object had PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
+    // TODO Check if PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER has to be handled
+    // here
     assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount > 0 );
 

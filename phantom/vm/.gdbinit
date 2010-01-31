@@ -1,13 +1,12 @@
 set confirm off
 
-#file pvm_test.exe 
-#target exec pvm_test.exe 
+target exec pvm_test.exe 
+file pvm_test.exe 
 #symbol-file pvm_test.exe 
 
-#break main
+break main
 #break pvm_exec
 
-#run
 
 #set debug_print_instr=1
 
@@ -17,3 +16,7 @@ set confirm off
 #break alloc.c:1311
 
 break panic
+
+break si_bootstrap_22_set_os_interface
+
+run
