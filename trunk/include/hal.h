@@ -151,12 +151,6 @@ void        				hal_register_page_fault_handler(void (*page_fault_handler)( void
 
 
 
-// BSD-like sleep/wakeup - not impl.
-#if 0
-void        				hal_sleep( void *object ); // sleep until wakeup with the same arg
-void        				hal_wakeup( void *object ); // caller must check for sleep reason to go!
-#endif
-
 
 
 void        				hal_start_kernel_thread(void (*thread)(void));
