@@ -26,7 +26,7 @@ classes: \
      ../bin/ru.dz.phantom.backgrounds.pc ../bin/phantom.os.time.pc \
      ../bin/internal.world.pc ../bin/phantom.osimpl.pc ../bin/phantom.os.pc \
      ../bin/phantom.environment.pc \
-     ../bin/internal.thread.pc \
+     ../bin/internal.thread.pc ../bin/ru.dz.phantom.system.thread_test.pc \
 #     ../bin/
 
 
@@ -35,3 +35,9 @@ PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
 
 ../bin/%.pc: %.ph
 	$(PLC) $<
+
+
+
+clean::
+	rm *.ph~
+        

@@ -44,6 +44,12 @@ class os
 
     .phantom.os.time getTimeServer() { init(); return impl.getTimeServer(); }
 
+    string getKernelEnvironmentValue( var inkey : .internal.string )
+    {
+        init();
+        return impl.getKernelEnvironmentValue( inkey );
+    }
+
 };
 
 
