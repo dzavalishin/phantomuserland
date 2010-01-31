@@ -217,6 +217,10 @@ static void pvm_create_root_objects()
 
     pvm_root.threads_list = pvm_create_object( pvm_get_array_class() );
     pvm_root.kernel_environment = pvm_create_object(pvm_get_array_class());
+
+    ref_saturate_o(pvm_root.threads_list);
+    ref_saturate_o(pvm_root.kernel_environment);
+
     //pvm_root.os_entry = pvm_get_null_object();
 }
 
@@ -404,7 +408,7 @@ static void load_kernel_boot_env(void)
 
 
     int i = main_envc;
-    char **ep = main_env;
+    const char **ep = main_env;
     while( i-- )
     {
         const char *e = *ep++;
@@ -424,6 +428,7 @@ static void load_kernel_boot_env(void)
         if( nlen > 128 ) nlen=128;
 
         strncpy( buf, e, nlen );
+        buf[nlen] = '\0';
 
         printf("Loading env '%s'='%s'\n", buf, eq );
         phantom_setenv( buf, eq );
