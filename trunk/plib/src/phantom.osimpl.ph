@@ -28,21 +28,36 @@ class osimpl
 
         void init(var _bootObject : .internal.object ) { bootObject = _bootObject; }
 
-        string getEnvironmentValue( var key : .internal.string )
+        string getKernelEnvironmentValue( var inkey : .internal.string )
         {
             var env : string [];
-            env = bootObject.23();
+            env = bootObject.23(); // Kernel env ("key=val") array
 
             var size : int;
+            var i : int;
 
             size = env.12(); // hack, of course
+            i = size;
 
-            while( size > 0 )
+            while( i > 0 )
             {
-                size = size - 1;
+                i = i - 1;
                 var el : string;
-                el = env[size];
+                el = env[i];
 
+                var pos : int;
+                pos = el.strstr("=");
+
+                if( pos < 0 )
+                    continue;
+
+                var key : string;
+                var val : string;
+
+                key = el.substring( 0, pos );
+                val = el.substring( pos+1, el.length() - pos - 1 );
+
+                if( key == inkey ) return val;
 
             }
             return null;

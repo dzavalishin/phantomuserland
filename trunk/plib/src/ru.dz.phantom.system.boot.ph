@@ -123,7 +123,17 @@ class boot
         console = new .internal.io.tty();
 
 	// setup global OS interface object NOW
-	boot_object.22( get_os_interface_object() );
+        var oi : .phantom.osimpl;
+        oi = get_os_interface_object();
+        // Pass it to OS to be made accessible from all threads
+	boot_object.22( oi ); 
+
+        print("Env root.shell=");
+        print(oi.getKernelEnvironmentValue("root.shell"));
+        print("\n");
+        print("Env root.init=");
+        print(oi.getKernelEnvironmentValue("root.init"));
+        print("\n");
 
 
         console.putws("Creating root window...\n");

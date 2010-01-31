@@ -8,6 +8,7 @@
 package .ru.dz.phantom.system;
 
 import .internal.io.tty;
+import .phantom.os;
 
 attribute const * ->!;
 
@@ -16,7 +17,7 @@ class thread_test // extends runnable
 {
     var console : .internal.io.tty;
     var incr :  int;
-    var o : .pahntom.os;
+    var o : .phantom.os;
 	
 	
     // They call us here
