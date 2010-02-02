@@ -966,8 +966,7 @@ static int si_bootstrap_22_set_os_interface(struct pvm_object me, struct data_ar
 static int si_bootstrap_23_getenv(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
-	ref_inc_o(pvm_root.kernel_environment);
-    SYSCALL_RETURN(pvm_root.kernel_environment);
+    SYSCALL_RETURN( ref_inc_o( pvm_root.kernel_environment ) );
 }
 
 
@@ -1064,7 +1063,7 @@ static int si_array_11_set(struct pvm_object me, struct data_area_4_thread *tc )
 
     // we increment refcount and return object back.
     // it will possibly be dropped and refcount will decrement again then.
-    SYSCALL_RETURN( ref_inc_o( value) );
+    SYSCALL_RETURN( ref_inc_o( value ) );
 }
 
 static int si_array_12_size(struct pvm_object me, struct data_area_4_thread *tc )
