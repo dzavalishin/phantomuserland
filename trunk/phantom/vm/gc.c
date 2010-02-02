@@ -429,10 +429,9 @@ void ref_saturate_p(pvm_object_storage_t *p)
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
     // [dz] was assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
-    // But fails if object had PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
-    // TODO Check if PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER has to be handled
-    // here
-    assert( p->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
+    // But fails if object had PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN
+    // TODO Check if PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN has to be handled
+    assert( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED );
     assert( p->_ah.refCount > 0 );
 
     p->_ah.refCount = INT_MAX;

@@ -966,6 +966,7 @@ static int si_bootstrap_22_set_os_interface(struct pvm_object me, struct data_ar
 static int si_bootstrap_23_getenv(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
+	ref_inc_o(pvm_root.kernel_environment);
     SYSCALL_RETURN(pvm_root.kernel_environment);
 }
 

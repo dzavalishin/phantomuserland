@@ -9,4 +9,4 @@ call plc ru.dz.phantom.tetris.figure.ph
 call plc ru.dz.phantom.tetris.mainmodule.ph
 cd ..
 
-call plc compiler_regression_test.ph ru.dz.phantom.system.boot.ph
+rem call plc compiler_regression_test.ph ru.dz.phantom.system.boot.ph
