@@ -218,8 +218,8 @@ static void pvm_create_root_objects()
     pvm_root.threads_list = pvm_create_object( pvm_get_array_class() );
     pvm_root.kernel_environment = pvm_create_object(pvm_get_array_class());
 
-    ref_saturate_o(pvm_root.threads_list);
-    ref_saturate_o(pvm_root.kernel_environment);
+    ref_saturate_o(pvm_root.threads_list); //Need it?
+    ref_saturate_o(pvm_root.kernel_environment); //Need it?
 
     //pvm_root.os_entry = pvm_get_null_object();
 }
