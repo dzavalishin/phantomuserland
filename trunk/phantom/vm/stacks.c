@@ -72,7 +72,7 @@ void pvm_ostack_push( struct data_area_4_object_stack* rootda, struct pvm_object
 {
     struct data_area_4_object_stack* s = rootda->curr_da;
     check_overflow();
-    if( page_is_full() ) panic("opush page full aft mkpage");
+    if( page_is_full() ) panic("opush page full after mkpage");
     page_push(o);
 }
 
@@ -134,6 +134,8 @@ struct pvm_object pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, i
 
 struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int depth )
 {
+    if( depth < 0 ) pvm_exec_throw( "stack pull: overflow" );
+
     struct data_area_4_object_stack* s = rootda->curr_da;
     // steps up to needed slot from the bottom of the current page
     int displ = s->common.free_cell_ptr - depth - 1;
