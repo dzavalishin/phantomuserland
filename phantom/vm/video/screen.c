@@ -35,7 +35,6 @@ struct rgba_t COLOR_LIGHTGRAY = { 0x80, 0x80, 0x80, 0xFF };
 struct rgba_t COLOR_YELLOW = { 0x00, 0xFF, 0xFF, 0xFF };
 
 
-//extern void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
 
 
 

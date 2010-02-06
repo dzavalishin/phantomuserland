@@ -83,5 +83,24 @@ int video_zbuf_check( int linpos, u_int8_t zpos )
 }
 
 
+void video_zbuf_dump()
+{
+    int y;
+    int ysize = video_drv->ysize;
+
+    printf("zbuf dump %d*%d\n", video_drv->xsize, video_drv->ysize );
+    for(y = 0; y < ysize; y++)
+    {
+        int x;
+        int xsize = video_drv->xsize;
+
+        for( x = 0; x < xsize; x++ )
+        {
+            int linpos = x + y*xsize;
+            printf("%02X", zbuf[linpos] );
+        }
+        printf("\n");
+    }
+}
 
 

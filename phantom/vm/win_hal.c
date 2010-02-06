@@ -17,8 +17,10 @@
 
 
 #include "gcc_replacements.h"
-
+#include "vm/internal_da.h"
 #include "hal.h"
+#include "main.h"
+
 
 struct hardware_abstraction_level    	hal;
 
@@ -140,4 +142,154 @@ int hal_cond_init( hal_cond_t *c, const char *name )
 
 
 
+//int debug_print = 0;
+
+
+
+
+// no snaps here
+
+volatile int phantom_virtual_machine_snap_request = 0;
+
+void phantom_thread_wait_4_snap()
+{
+    // Just return
+}
+
+
+void phantom_activate_thread()
+{
+    // Threads do not work in this mode
+}
+
+
+
+void phantom_snapper_wait_4_threads()
+{
+    // Do nothing in non-kernel version
+    // Must be implemented if no-kernel multithread will be done
+}
+
+
+void phantom_snapper_reenable_threads()
+{
+    //
+}
+
+int phantom_dev_keyboard_getc(void)
+{
+    return getchar();
+}
+
+
+
+
+
+
+void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
+{
+    /*if(phantom_virtual_machine_stop_request)
+    {
+        if(DEBUG) printf("Thread will die now\n");
+        pthread_exit(0);
+    }*/
+
+
+    //phantom_virtual_machine_threads_stopped++;
+
+    while(thda->sleep_flag)
+        sleep(1);
+
+    //phantom_virtual_machine_threads_stopped--;
+
+}
+
+
+void phantom_thread_put_asleep( struct data_area_4_thread *thda )
+{
+    thda->sleep_flag++;
+    // NB! This will work if called from SYS only! That's
+    // ok since no other bytecode instr can call this.
+    // Real sleep happens in phantom_thread_sleep_worker
+}
+
+
+void phantom_thread_wake_up( struct data_area_4_thread *thda )
+{
+    thda->sleep_flag--;
+}
+
+
+
+void phantom_wakeup_after_msec(long msec)
+{
+    hal_sleep_msec(msec);
+}
+
+
+
+void panic(const char *fmt, ...)
+{
+	va_list vl;
+
+	printf("\nPanic: ");
+	va_start(vl, fmt);
+	vprintf(fmt, vl);
+	va_end(vl);
+
+        //save_mem(mem, size);
+	printf("\nPress Enter...");
+
+	pvm_memcheck();
+	getchar();
+	exit(1);
+}
+
+
+
+static void *dm_mem, *dm_copy;
+static int dm_size = 0;
+void setDiffMem( void *mem, void *copy, int size )
+{
+    dm_mem = mem;
+    dm_copy = copy;
+    dm_size = size;
+}
+
+void checkDiffMem()
+{
+    char *mem = dm_mem;
+    char *copy = dm_copy;
+    char *start = dm_mem;
+    int prevdiff = 0;
+
+return;
+
+    int i = dm_size;
+    while( i-- )
+    {
+        if( *mem != *copy )
+        {
+            if( !prevdiff )
+            {
+                printf(", d@ 0x%04x", mem - start );
+            }
+            prevdiff = prevdiff ? 2 : 1;
+            *copy = *mem;
+        }
+        else
+        {
+            if( prevdiff == 2 )
+            {
+                printf( "-%04x", mem - start -1 );
+                prevdiff = 0;
+            }
+        }
+        mem++;
+        copy++;
+    }
+
+    printf(" Press Enter...");
+    getchar();
+}
 
