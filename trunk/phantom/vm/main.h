@@ -15,3 +15,7 @@
 int load_code(void **out_code, unsigned int *out_size, const char *fn);
 void save_mem( void *addr, int size );
 
+
+void setDiffMem( void *mem, void *copy, int size );
+void checkDiffMem();
+

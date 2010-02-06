@@ -29,7 +29,7 @@
 #include "vm/root.h"
 //#include "vm/bulk.h"
 
-#include "vm/internal_da.h"
+//#include "vm/internal_da.h"
 
 #include "main.h"
 #include "win_bulk.h"
@@ -60,6 +60,18 @@ static int size = 40*1024*1024;
 static void *mem;
 
 
+static void fillw(char r, char g, char b )
+{
+    // fill
+    int c;
+    for( c = 0; c < wxsize*wysize; c++ )
+    {
+        win[c].r = r;
+        win[c].g = g;
+        win[c].b = b;
+        win[c].a = 1;
+    }
+}
 
 
 
@@ -74,7 +86,7 @@ void videotest()
     //char win[ysize*xsize*3];
 
 #if 0
-    const char *bpm = "G:/Projects/phantom/trunk/resources/backgrounds/phantom_dz_large copy.pbm";
+    const char *bpm = "../../plib/resources/backgrounds/phantom_dz_large.pbm";
 
     {
         FILE *f = fopen(bpm, "r" );
@@ -104,7 +116,7 @@ void videotest()
             printf("can't parse %s: %d\n", bpm, result );
         else
         {
-            drv_video_bitblt(bmp->pixel, 0, 0, bmp->xsize, bmp->ysize);
+            drv_video_bitblt(bmp->pixel, 0, 0, bmp->xsize, bmp->ysize, 0xFF );
         }
 
         bmp_pixels = bmp->pixel;
@@ -119,18 +131,10 @@ void videotest()
 
     for( i = 0; i < 10; i++ )
     {
-        // fill
-        int c;
-        for( c = 0; c < wxsize*wysize; c++ )
-        {
-            win[c].r = (i+2)*10;
-            win[c].g = (i+2)*20;
-            win[c].b = (i+4)*10;
-            win[c].a = 1;
-        }
+        fillw( (i+2)*10, (i+2)*20, (i+4)*10 );
 
 #if VIDEO_ZBUF
-        drv_video_bitblt(win, 0, i*10, wxsize, wysize, 0xFF);
+        drv_video_bitblt(win, 0, i*10, wxsize, wysize, i & 1 ? 0xFF : 0x55 );
 #else
         drv_video_bitblt(win, 0, i*10, wxsize, wysize );
 #endif
@@ -149,10 +153,22 @@ void videotest()
     //drv_video_window_fill( w, COLOR_LIGHTGRAY );
     drv_video_winblt( w );
 
+#if VIDEO_ZBUF
+    video_zbuf_reset();
+
+    fillw( 0xFF, 0, 0 );
+    drv_video_bitblt(win, 150, 100, wxsize, wysize, 0xEF );
+
+    //video_zbuf_dump();
+
+    fillw( 0, 0xFF, 0 );
+    drv_video_bitblt(win, 175, 120, wxsize, wysize, 0xEE );
+    drv_video_bitblt(win, 400, 400, wxsize, wysize, 0xEE );
+#endif
 
 //getchar();
 
-#if 0
+#if 1
     drv_video_font_scroll_line( w, &drv_video_8x16san_font, COLOR_DARKGRAY );
     drv_video_font_draw_string( w, &drv_video_8x16san_font, "Test font", COLOR_BLACK, 0, 0 );
     drv_video_font_scroll_line( w, &drv_video_8x16san_font, COLOR_LIGHTGRAY );
@@ -175,52 +191,6 @@ void videotest()
 
 
 
-
-void *dm_mem, *dm_copy;
-int dm_size = 0;
-void setDiffMem( void *mem, void *copy, int size )
-{
-    dm_mem = mem;
-    dm_copy = copy;
-    dm_size = size;
-}
-
-void checkDiffMem()
-{
-    char *mem = dm_mem;
-    char *copy = dm_copy;
-    char *start = dm_mem;
-    int prevdiff = 0;
-
-return;
-
-    int i = dm_size;
-    while( i-- )
-    {
-        if( *mem != *copy )
-        {
-            if( !prevdiff )
-            {
-                printf(", d@ 0x%04x", mem - start );
-            }
-            prevdiff = prevdiff ? 2 : 1;
-            *copy = *mem;
-        }
-        else
-        {
-            if( prevdiff == 2 )
-            {
-                printf( "-%04x", mem - start -1 );
-                prevdiff = 0;
-            }
-        }
-        mem++;
-        copy++;
-    }
-
-    printf(" Press Enter...");
-    getchar();
-}
 
 
 
@@ -267,7 +237,7 @@ int main(int argc, char* argv[])
 
     videotest();
 
-    //getchar();
+    getchar();
 
     char *dir = getenv("PHANTOM_HOME");
     char *rest = "plib/bin/classes";
@@ -385,107 +355,3 @@ static void args(int argc, char* argv[])
 
 
 
-
-
-//int debug_print = 0;
-
-
-
-
-// no snaps here
-
-volatile int phantom_virtual_machine_snap_request = 0;
-
-void phantom_thread_wait_4_snap()
-{
-    // Just return
-}
-
-
-void phantom_activate_thread()
-{
-    // Threads do not work in this mode
-}
-
-
-
-void phantom_snapper_wait_4_threads()
-{
-    // Do nothing in non-kernel version
-    // Must be implemented if no-kernel multithread will be done
-}
-
-
-void phantom_snapper_reenable_threads()
-{
-    //
-}
-
-int phantom_dev_keyboard_getc(void)
-{
-    return getchar();
-}
-
-
-
-
-
-
-void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
-{
-    /*if(phantom_virtual_machine_stop_request)
-    {
-        if(DEBUG) printf("Thread will die now\n");
-        pthread_exit(0);
-    }*/
-
-
-    //phantom_virtual_machine_threads_stopped++;
-
-    while(thda->sleep_flag)
-        sleep(1);
-
-    //phantom_virtual_machine_threads_stopped--;
-
-}
-
-
-void phantom_thread_put_asleep( struct data_area_4_thread *thda )
-{
-    thda->sleep_flag++;
-    // NB! This will work if called from SYS only! That's
-    // ok since no other bytecode instr can call this.
-    // Real sleep happens in phantom_thread_sleep_worker
-}
-
-
-void phantom_thread_wake_up( struct data_area_4_thread *thda )
-{
-    thda->sleep_flag--;
-}
-
-
-
-void phantom_wakeup_after_msec(long msec)
-{
-    hal_sleep_msec(msec);
-}
-
-
-
-void panic(const char *fmt, ...)
-{
-	va_list vl;
-
-	printf("\nPanic: ");
-	va_start(vl, fmt);
-	vprintf(fmt, vl);
-	va_end(vl);
-
-        //save_mem(mem, size);
-	printf("\nPress Enter...");
-
-	pvm_memcheck();
-	getchar();
-	exit(1);
-}
