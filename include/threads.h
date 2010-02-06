@@ -63,6 +63,8 @@ void hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ));
 
 int phantom_vm_threads_get_count();
 
+void hal_set_thread_name(const char *name);
+
 
 #endif // THREADS_H
 
