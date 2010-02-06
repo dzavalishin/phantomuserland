@@ -885,7 +885,7 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
 
     struct pvm_object thread = pvm_create_thread_object( new_cf );
 
-    printf("here?\n");
+    //printf("here?\n");
 
     phantom_activate_thread(thread);
     }

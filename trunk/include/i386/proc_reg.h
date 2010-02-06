@@ -154,6 +154,14 @@ get_esp(void)
 	return (sel);
 }
 
+static __inline unsigned int
+get_ebp(void)
+{
+	unsigned int sel;
+	__asm __volatile("movl %%ebp,%0" : "=rm" (sel));
+	return (sel);
+}
+
 
 
 static __inline unsigned int

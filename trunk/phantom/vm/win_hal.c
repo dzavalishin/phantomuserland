@@ -113,7 +113,7 @@ int phantom_virtual_machine_threads_stopped = 0;
 // TODO - implement those ones
 
 
-int hal_mutex_init(hal_mutex_t *m)
+int hal_mutex_init(hal_mutex_t *m, const char *name)
 {
     return 0;
 }
@@ -130,7 +130,7 @@ int hal_mutex_unlock(hal_mutex_t *m)
 
 
 
-int hal_cond_init( hal_cond_t *c )
+int hal_cond_init( hal_cond_t *c, const char *name )
 {
     return 0;
 }

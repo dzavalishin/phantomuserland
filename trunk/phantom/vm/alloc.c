@@ -130,7 +130,7 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 
     init_arenas(_pvm_object_space_start, size);
 
-    if( hal_mutex_init( &alloc_mutex ) )
+    if( hal_mutex_init( &alloc_mutex, "ObjAlloc" ) )
         panic("Can't init allocator mutex");
 
     //init_gc();  // here, if needed

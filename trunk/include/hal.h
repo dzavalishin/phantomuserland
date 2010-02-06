@@ -173,10 +173,13 @@ void                                    hal_enable_preemption(void);
 // IRQ
 
 #define HAL_IRQ_SHAREABLE 1
-#define HAL_IRQ_PRIVATE 1
+//#define HAL_IRQ_PRIVATE 1
 
 int 					hal_irq_alloc( int irq, void (*func)(void *arg), void *arg, int is_shareable );
 void 					hal_irq_free( int irq, void (*func)(void *arg), void *arg );
+
+void 					hal_enable_softirq();
+void 					hal_disable_softirq();
 
 
 // ------------------------------------------------------------------------------------------
@@ -184,32 +187,30 @@ void 					hal_irq_free( int irq, void (*func)(void *arg), void *arg );
 
 struct hal_mutex
 {
-    // TODO hack! see impl.
     struct phantom_mutex_impl *impl;
 };
 
 typedef struct hal_mutex hal_mutex_t;
 
-int 					hal_mutex_init(hal_mutex_t *m);
-int 					hal_mutex_lock(hal_mutex_t *m);
-int 					hal_mutex_unlock(hal_mutex_t *m);
-int 					hal_mutex_destroy(hal_mutex_t *m);
+errno_t					hal_mutex_init(hal_mutex_t *m, const char *name);
+errno_t					hal_mutex_lock(hal_mutex_t *m);
+errno_t					hal_mutex_unlock(hal_mutex_t *m);
+errno_t					hal_mutex_destroy(hal_mutex_t *m);
 
 
 struct hal_cond
 {
-    // TODO hack! see impl.
     struct phantom_cond_impl *impl;
 };
 
 typedef struct hal_cond hal_cond_t;
 
 
-int 					hal_cond_init( hal_cond_t *c );
-int 					hal_cond_wait( hal_cond_t *c, hal_mutex_t *m );
-int 					hal_cond_signal( hal_cond_t *c );
-int 					hal_cond_broadcast( hal_cond_t *c );
-int 					hal_cond_destroy( hal_cond_t *c );
+errno_t 				hal_cond_init( hal_cond_t *c, const char *name );
+errno_t					hal_cond_wait( hal_cond_t *c, hal_mutex_t *m );
+errno_t					hal_cond_signal( hal_cond_t *c );
+errno_t					hal_cond_broadcast( hal_cond_t *c );
+errno_t					hal_cond_destroy( hal_cond_t *c );
 
 
 
@@ -221,7 +222,7 @@ struct hal_sem;
 typedef struct hal_sem hal_sem_t;
 
 
-int 					hal_sem_init( hal_sem_t *s );
+int 					hal_sem_init( hal_sem_t *s, const char *name );
 void 					hal_sem_release( hal_sem_t *s );
 int 					hal_sem_acquire( hal_sem_t *s );
 void 					hal_sem_destroy( hal_sem_t *s );

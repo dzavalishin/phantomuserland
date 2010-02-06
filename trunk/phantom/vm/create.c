@@ -403,7 +403,7 @@ void pvm_internal_init_thread(struct pvm_object_storage * os)
 
 	hal_spin_init(&da->spin);
 	da->sleep_flag                      = 0;
-	hal_cond_init(&(da->wakeup_cond));
+	hal_cond_init(&(da->wakeup_cond), "VmThrdWake");
 
 	da->call_frame   			= pvm_create_call_frame_object();
 	da->stack_depth				= 1;
