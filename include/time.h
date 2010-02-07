@@ -16,6 +16,13 @@ time_t 			time(time_t *timer);
 /* wait by spinning: number of milliseconds to delay */
 void 			phantom_spinwait(int millis);
 
+// Updated by kernel time code, readonly. Read by copying pointer
+// and reading then. Updated by pointer change once a second.
+//
+// Example: struct tm *tmp, myTime; tmp = current_time; myTime = *tmp;
+//
+struct tm *		current_time;
+
 
 #endif // TIME_H
 
