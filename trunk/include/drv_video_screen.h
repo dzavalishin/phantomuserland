@@ -14,11 +14,12 @@
 #define DRV_VIDEO_SCREEN_H
 
 #include <phantom_types.h>
+#include <queue.h>
 
 // Windows 'screen' driver works in BGR format :(
 #define BGR 1
 
-#define VIDEO_ZBUF 0
+#define VIDEO_ZBUF 1
 
 
 
@@ -114,6 +115,8 @@ typedef struct drv_video_window
     int                 generation; // used to redraw self and borders on global events
     int                 flags;
 
+    queue_chain_t       chain; // All windows are on this chain
+
     int                 li, ti, ri, bi; // insets
 
     rgba_t       	bg; // background color
@@ -150,11 +153,15 @@ static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (s
 
 void drv_video_window_update_generation(void);
 
-
+// dynamic allocation
 drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg );
-// for statically allocated ones
-void drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg );
+// free dynamically allocated window
 void drv_video_window_free(drv_video_window_t *w);
+
+// init for statically allocated ones
+void drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg );
+// destroy for statically allocated ones
+void drv_video_window_destroy(drv_video_window_t *w);
 
 
 void    drv_video_window_clear( drv_video_window_t *win );
