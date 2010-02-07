@@ -157,14 +157,15 @@ void videotest()
     video_zbuf_reset();
 
     fillw( 0xFF, 0, 0 );
-    drv_video_bitblt(win, 150, 100, wxsize, wysize, 0xEF );
+    drv_video_bitblt(win, 550, 100, wxsize, wysize, 0xEF );
 
     //video_zbuf_dump();
 
     fillw( 0, 0xFF, 0 );
-    drv_video_bitblt(win, 175, 120, wxsize, wysize, 0xEE );
-    drv_video_bitblt(win, 400, 400, wxsize, wysize, 0xEE );
+    drv_video_bitblt(win, 575, 120, wxsize, wysize, 0xEE );
+    drv_video_bitblt(win, 700, 400, wxsize, wysize, 0xEE );
 #endif
+    video_zbuf_reset();
 
 //getchar();
 
@@ -237,7 +238,7 @@ int main(int argc, char* argv[])
 
     videotest();
 
-    getchar();
+    //getchar();
 
     char *dir = getenv("PHANTOM_HOME");
     char *rest = "plib/bin/classes";
@@ -275,9 +276,9 @@ int main(int argc, char* argv[])
 //    getchar();
 
     pvm_memcheck();
-#endif
 
     save_mem(mem, size);
+#endif
     return 0;
 }
 

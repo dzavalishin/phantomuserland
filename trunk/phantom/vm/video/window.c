@@ -65,9 +65,9 @@ static drv_video_window_t *do_drv_video_window_create(int xsize, int ysize)
 
     w->xsize = xsize;
     w->ysize = ysize;
+    w->z = 0xFE; // quite atop
 
     w->li = w->ti = w->ri = w->bi = 0;
-    w->z = 0xFE; // quite atop
 
     return w;
 }
@@ -103,19 +103,7 @@ drv_video_window_create(
                         rgba_t bg )
 {
     drv_video_window_t *w = do_drv_video_window_create(xsize, ysize);
-
     drv_video_window_init( w, xsize, ysize, x, y, bg );
-
-    //drv_video_window_t *w2 = do_drv_video_window_create(xsize+sz*2, ysize+sz*2);
-
-    /*
-    w->x = x; w->y = y;
-    w->bg = bg;
-    w->flags = WIN_DECORATED;
-
-    win_make_decorations(w);
-    */
-
     return w;
 }
 
@@ -138,17 +126,13 @@ drv_video_window_init( drv_video_window_t *w,
     //int sz = sizeof(brdr)/sizeof(rgba_t);
     //drv_video_window_t *w2 = do_drv_video_window_create(xsize+sz*2, ysize+sz*2);
 
-    w->x = x; w->y = y;
+    w->x = x;
+    w->y = y;
+    w->z = 0xFE; // quite atop
     //w2->x = x-sz; w2->y = y-sz;
     w->bg = bg;
 
     win_make_decorations(w);
-    //drv_video_window_fill( w2, bg );
-    //window_basic_border( w2, brdr, sz );
-    //drv_video_winblt(w2);
-    //drv_video_window_free(w2);
-
-    //return w;
 }
 
 
