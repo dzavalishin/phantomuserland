@@ -919,7 +919,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
     struct pvm_object _bmp = POP_ARG;
 
     // BUG! Must store it and repaint on OS restart
-    if( drv_video_bmpblt(_bmp,0,0) )
+    if( drv_video_bmpblt(_bmp,0,0,0) )
     	SYSCALL_THROW_STRING( "not a bitmap" );
 
     drv_video_window_update_generation();

@@ -14,16 +14,14 @@
 #include <assert.h>
 #include <phantom_libc.h>
 
+static queue_head_t     allwindows = { &allwindows, &allwindows };
+
+
 // here we have a problem - some windows are persistent and
 // keep their generation. So on start we need to advance
 // generation twice to make sure all windows are catched up
 static int win_generation = 0;
 
-void drv_video_window_update_generation(void)
-{
-    win_generation++;
-    // TODO ERR redraw all here, or ask some thread to do that
-}
 
 
 int rect_win_bounds( rect_t *r, drv_video_window_t *w )
@@ -50,8 +48,10 @@ int rect_win_bounds( rect_t *r, drv_video_window_t *w )
 }
 
 
+
 void drv_video_window_free(drv_video_window_t *w)
 {
+    drv_video_window_destroy(w);
     free(w);
 }
 
@@ -83,6 +83,8 @@ static void win_make_decorations(drv_video_window_t *w)
     int sz = sizeof(brdr)/sizeof(rgba_t);
     drv_video_window_t *w2 = do_drv_video_window_create(w->xsize+sz*2, w->ysize+sz*2);
 
+    queue_enter(&allwindows, w2, drv_video_window_t *, chain);
+
     w2->x = w->x-sz; w2->y = w->y-sz;
     w2->bg = w->bg;
 
@@ -106,6 +108,7 @@ drv_video_window_create(
     drv_video_window_init( w, xsize, ysize, x, y, bg );
     return w;
 }
+
 
 
 // for statically allocated ones
@@ -133,8 +136,27 @@ drv_video_window_init( drv_video_window_t *w,
     w->bg = bg;
 
     win_make_decorations(w);
+
+    queue_enter(&allwindows, w, drv_video_window_t *, chain);
 }
 
+
+void drv_video_window_destroy(drv_video_window_t *w)
+{
+    queue_remove(&allwindows, w, drv_video_window_t *, chain);
+}
+
+
+void drv_video_window_update_generation(void)
+{
+    win_generation++;
+    // redraw all here, or ask some thread to do that
+    drv_video_window_t *w;
+    queue_iterate(&allwindows, w, drv_video_window_t *, chain)
+    {
+        drv_video_winblt( w );
+    }
+}
 
 
 

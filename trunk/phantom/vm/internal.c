@@ -166,8 +166,8 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_TTY_CLASS,
         syscall_table_4_tty,
         pvm_internal_init_tty,
-        0 /*pvm_gc_iter_tty*/,
-        0, // no finalizer
+        pvm_gc_iter_tty,
+        pvm_gc_finalizer_tty, // no finalizer
         sizeof(struct data_area_4_tty),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE
     },

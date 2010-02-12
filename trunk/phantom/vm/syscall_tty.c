@@ -89,13 +89,9 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
 
     //printf("tty print: '%s' at %d,%d\n", buf, da->x, da->y );
 
-#if 0
-	struct rgba_t fg = COLOR_RED;
-	struct rgba_t bg = COLOR_GREEN;
-#else
-        struct rgba_t fg = da->fg;
-        struct rgba_t bg = da->bg;
-#endif
+    struct rgba_t fg = da->fg;
+    struct rgba_t bg = da->bg;
+
     drv_video_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
     //drv_video_winblt( &(da->w), da->w.x, da->w.y);
     drv_video_winblt( &(da->w) );
@@ -258,10 +254,12 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
 {
     struct data_area_4_tty      *tty = (struct data_area_4_tty *)ttyos->da;
 
+    /*
     tty->w.xsize = PVM_DEF_TTY_XSIZE;
     tty->w.ysize = PVM_DEF_TTY_YSIZE;
     tty->w.x = 100;
     tty->w.y = 100;
+    */
 
     tty->font_height = 16;
     tty->font_width = 8;
@@ -272,19 +270,17 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
     tty->fg = COLOR_BLACK;
     tty->bg = COLOR_WHITE;
 
-    //printf("init font %d,%d\n", tty->font_width, tty->font_height );
-
-    //drv_video_window_fill( &(tty->w), tty->bg );
-    //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
-
-    //printf("init tty\n");
-    //printf("init font %d,%d\n", tty->font_width, tty->font_height );
-
     drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE );
 }
 
 void pvm_gc_iter_tty(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
     // Empty
+}
+
+void pvm_gc_finalizer_tty( struct pvm_object_storage * os )
+{
+    struct data_area_4_tty      *tty = (struct data_area_4_tty *)os->da;
+    drv_video_window_destroy(&(tty->w));
 }
 

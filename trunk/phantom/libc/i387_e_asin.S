@@ -33,9 +33,10 @@
  *	J.T. Conklin (jtc@wimsey.com), Winning Strategies, Inc.
  */
 
-#include <machine/asmacros.h>
+#include <mach/asm.h>
+//#include <machine/asmacros.h>
 
-RCSID("$\Id: e_asin.S,v 1.2 1994/08/19 11:14:12 jkh Exp $")
+//RCSID("$\Id: e_asin.S,v 1.2 1994/08/19 11:14:12 jkh Exp $")
 
 /* asin = atan (x / sqrt(1 - x^2)) */
 ENTRY(__ieee754_asin)
