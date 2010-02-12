@@ -1,3 +1,5 @@
+default:: all
+
 include config.mk
 
 OBJS= api.o list.o vertex.o init.o matrix.o texture.o \

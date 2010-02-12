@@ -1,4 +1,4 @@
-default: all
+default:: all
 
 INCDIRS += $(realpath $(PHANTOM_HOME))/include
 
