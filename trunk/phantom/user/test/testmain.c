@@ -4,4 +4,5 @@ int
 main()
 {
 	exit(0);
+    asm("int $3");
 }

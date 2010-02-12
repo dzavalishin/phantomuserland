@@ -1,7 +1,14 @@
+PHANTOM_CFLAGS += -ffreestanding
 
 #W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
-test: test/testmain.o $(GLLIB)
-	gcc -g -ffreestanding -o $@ $^  -lgdi32 
+#LD_ADDR=--script=ld.script
+LD_ADDR=-Ttext 0
+
+
+pmod_test: test/testmain.o $(GLLIB)
+	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^
+	objcopy -O elf32-i386 $@.pe $@
+	objdump -x -d $@ >$@.dump
 
 
