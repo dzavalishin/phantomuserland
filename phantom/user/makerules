@@ -6,7 +6,7 @@ PHANTOM_CFLAGS += -ffreestanding
 LD_ADDR=-Ttext 0
 
 
-pmod_test: test/testmain.o $(GLLIB)
+pmod_test: crt/crt0.o test/testmain.o
 	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^
 	objcopy -O elf32-i386 $@.pe $@
 	objdump -x -d $@ >$@.dump
