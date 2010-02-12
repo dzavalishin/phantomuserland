@@ -33,9 +33,10 @@
  *	J.T. Conklin (jtc@wimsey.com), Winning Strategies, Inc.
  */
 
-#include <machine/asmacros.h>
+#include <mach/asm.h>
+//#include <machine/asmacros.h>
 
-RCSID("$\Id: s_floor.S,v 1.2.6.1 1996/12/15 15:23:17 bde Exp $")
+//RCSID("$\Id: s_floor.S,v 1.2.6.1 1996/12/15 15:23:17 bde Exp $")
 
 ENTRY(floor)
 	pushl	%ebp

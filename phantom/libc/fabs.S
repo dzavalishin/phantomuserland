@@ -36,7 +36,7 @@
  * $FreeBSD: src/lib/libc/i386/gen/fabs.S,v 1.5 1999/08/27 23:59:20 peter Exp $
  */
 
-#include <machine/asmacros.h>
+#include <mach/asm.h>
 
 
 #if defined(LIBC_RCS) && !defined(lint)

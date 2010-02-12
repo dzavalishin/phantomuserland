@@ -10,12 +10,19 @@ vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)
 
 FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
 CFILES := $(filter %.c,$(FILES))
+SFILES := $(filter %.S,$(FILES))
 OBJFILES += $(patsubst %.c,%.o,$(notdir $(CFILES)))
+OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
 	
 
 %.o: %.c
 	@echo ---- cc $@
 	@gcc -c -o $@ $(PHANTOM_CFLAGS) $<
+
+%.o: %.S
+	@echo ---- cc $@
+	@gcc -c -o $@ $(PHANTOM_CFLAGS) $<
+
 
 .SUFFIXES:
 

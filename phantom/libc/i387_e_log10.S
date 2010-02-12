@@ -33,9 +33,10 @@
  *	J.T. Conklin (jtc@wimsey.com), Winning Strategies, Inc.
  */
 
-#include <machine/asmacros.h>
+#include <mach/asm.h>
+//#include <machine/asmacros.h>
 
-RCSID("$\Id: e_log10.S,v 1.2 1994/08/19 11:14:16 jkh Exp $")
+//RCSID("$\Id: e_log10.S,v 1.2 1994/08/19 11:14:16 jkh Exp $")
 
 ENTRY(__ieee754_log10)
 	fldlg2

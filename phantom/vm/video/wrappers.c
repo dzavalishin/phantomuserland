@@ -19,7 +19,7 @@
 // interfaces
 
 // Returns nonzero if class is not bitmap
-int drv_video_bmpblt( struct pvm_object _bmp, int xpos, int ypos )
+int drv_video_bmpblt( struct pvm_object _bmp, int xpos, int ypos, int zpos )
 {
 
     if( !pvm_object_class_is( _bmp, pvm_get_bitmap_class() ) )
@@ -29,7 +29,7 @@ int drv_video_bmpblt( struct pvm_object _bmp, int xpos, int ypos )
     struct data_area_4_binary *bin = pvm_object_da( bmp->image, binary );
 
 #if VIDEO_ZBUF
-    drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize, 0xFE );
+    drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize, (zbuf_t)zpos );
 #else
     drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize );
 #endif

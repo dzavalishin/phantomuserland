@@ -33,9 +33,10 @@
  *	J.T. Conklin (jtc@wimsey.com), Winning Strategies, Inc.
  */
 
-#include <machine/asmacros.h>
+#include <mach/asm.h>
+//#include <machine/asmacros.h>
 
-RCSID("$\Id: s_log1p.S,v 1.3 1994/08/19 23:52:29 jkh Exp $")
+//RCSID("$\Id: s_log1p.S,v 1.3 1994/08/19 23:52:29 jkh Exp $")
 
 /*
  * The fyl2xp1 instruction has such a limited range:

@@ -33,9 +33,10 @@
  *	J.T. Conklin (jtc@wimsey.com), Winning Strategies, Inc.
  */
 
-#include <machine/asmacros.h>
+#include <mach/asm.h>
+//#include <machine/asmacros.h>
 
-RCSID("$\Id: s_rint.S,v 1.2 1994/08/19 11:14:29 jkh Exp $")
+//RCSID("$\Id: s_rint.S,v 1.2 1994/08/19 11:14:29 jkh Exp $")
 
 ENTRY(rint)
 	fldl	4(%esp)

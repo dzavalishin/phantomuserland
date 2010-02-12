@@ -1,0 +1,7 @@
+
+#W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
+
+test: test/testmain.o $(GLLIB)
+	gcc -g -ffreestanding -o $@ $^  -lgdi32 
+
+
