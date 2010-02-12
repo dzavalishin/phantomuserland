@@ -2,5 +2,5 @@
 #include "SYS.h"
 
 
-SYSCALL(exit)
+SYSCALL(vsyslog)
 	ret		// Supposed to be impossible
