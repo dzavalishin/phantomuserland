@@ -21,7 +21,7 @@
  */
 
 #include <mach/asm.h>
-#include "syscalls.h"
+#include <kernel/syscalls.h>
 
 
 #ifdef __STDC__
