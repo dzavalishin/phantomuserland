@@ -213,10 +213,13 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
  * fields into a gdt descriptor entry.
  */
 
+//#define SEL_MASK (~0x3)
+#define SEL_MASK (~0x7)
+
 #define make_descriptor(array, sel, base, limit, acc1, acc2) \
     { \
 	struct real_descriptor *g; \
-	g = (struct real_descriptor *) (((char *)array) + (sel & ~0x3) ); \
+	g = (struct real_descriptor *) (((char *)array) + (sel & SEL_MASK) ); \
 	/*g->limit_low = limit & 0xffff;*/ \
 	g->base_low  = base & 0xffff; \
 	g->base_med  = (base >> 16) & 0xff; \
