@@ -191,8 +191,33 @@ wrmsr(unsigned int msr, u_int64_t newval)
 
 
 
+static __inline u_int16_t
+rdldt(void)
+{
+	u_int16_t ldtr;
+	__asm __volatile("sldt %0" : "=g" (ldtr));
+	return (ldtr);
+}
+
+static __inline void
+wrldt(u_int16_t sel)
+{
+	__asm __volatile("lldt %0" : : "r" (sel));
+}
+
+
 
 #if 0
+
+#define	get_ldt() \
+    ({ \
+	unsigned short _seg__; \
+	asm volatile("sldt %0" : "=rm" (_seg__) ); \
+	_seg__; \
+    })
+
+#define	set_ldt(seg) \
+	asm volatile("lldt %0" : : "rm" ((unsigned short)(seg)) )
 
 
 #define	get_cr2() \
@@ -244,15 +269,6 @@ wrmsr(unsigned int msr, u_int64_t newval)
 #define	set_tr(seg) \
 	asm volatile("ltr %0" : : "rm" ((unsigned short)(seg)) )
 
-#define	get_ldt() \
-    ({ \
-	unsigned short _seg__; \
-	asm volatile("sldt %0" : "=rm" (_seg__) ); \
-	_seg__; \
-    })
-
-#define	set_ldt(seg) \
-	asm volatile("lldt %0" : : "rm" ((unsigned short)(seg)) )
 
 
 
@@ -405,13 +421,6 @@ ridt(void)
 	return (idtr);
 }
 
-static __inline u_int16_t
-rldt(void)
-{
-	u_int16_t ldtr;
-	__asm __volatile("sldt %0" : "=g" (ldtr));
-	return (ldtr);
-}
 
 
 static __inline u_int16_t
@@ -444,11 +453,6 @@ lidt(struct region_descriptor *addr)
 	__asm __volatile("lidt (%0)" : : "r" (addr));
 }
 
-static __inline void
-lldt(u_int16_t sel)
-{
-	__asm __volatile("lldt %0" : : "r" (sel));
-}
 
 static __inline void
 ltr(u_int16_t sel)

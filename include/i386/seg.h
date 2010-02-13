@@ -112,6 +112,10 @@ struct fake_descriptor {
 };
 */
 
+void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
+	  unsigned char access, unsigned char word_count);
+
+
 #endif // ASSEMBLER
 
 #define	SZ_32		0x4			/* 32-bit segment */
@@ -171,7 +175,7 @@ struct fake_descriptor {
 //#define	USER_CS		0x17		/* user code segment */
 //#define	USER_DS		0x1f		/* user data segment */
 
-#define	LDTSZ		4
+//#define	LDTSZ		4
 
 /*
  * Kernel descriptors for MACH - 32-bit flat address space.
@@ -222,6 +226,22 @@ struct fake_descriptor {
 	g->base_high = base >> 24; \
         set_descriptor_limit( g, limit ); \
     }
+
+
+/* Fill a gate with particular values.  */
+/*
+#define fill_gate( gate, _offset, selector, access, word_count) \
+    { \
+    unsigned __offset_ = (_offset); \
+    (gate)->offset_low = __offset_ & 0xffff;  \
+    (gate)->selector = (selector);        \
+    (gate)->word_count = (word_count);    \
+    (gate)->access = (access) | ACC_P;    \
+    (gate)->offset_high = ((__offset_ >> 16) & 0xffff;  \
+    }
+*/
+
+
 
 // TODO ERR 64-bit not ready
 #define lintokv(la)	((void *)(la))
