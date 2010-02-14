@@ -73,6 +73,12 @@ typedef void *  		vmem_ptr_t;
 typedef int			size_t;
 #endif //_SIZE_T
 
+#ifndef _OFF_T
+#define _OFF_T
+typedef int			off_t;
+#endif //_OFF_T
+
+
 #ifndef _STDINT_H
 typedef	u_int32_t		uintptr_t;
 typedef	int32_t			ptrdiff_t;

@@ -1,3 +1,6 @@
+#ifndef UUPROCESS_H
+#define UUPROCESS_H
+
 struct uufile;
 struct uutty;
 
@@ -32,4 +35,7 @@ struct uuprocess
 typedef struct uuprocess uuprocess_t;
 
 uuprocess_t *uu_create_process(int ppid);
+
+
+#endif // UUPROCESS_H
 
