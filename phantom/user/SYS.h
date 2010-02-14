@@ -27,18 +27,18 @@
 #ifdef __STDC__
 
 //#define	SYSCALL(x)	ENTRY(x); movl	$(SYS_ ## x), %eax; SVC; jb LCL(cerror)
-#define	SYSCALL(x)	ENTRY(x); movl	$(SYS_ ## x), %eax; SVC
-#define	PSEUDO(x,y)	ENTRY(x); movl	$(SYS_ ## y), %eax; SVC
+#define	SYSCALL(x)	ENTRY(x); movl	$(SYS_ ## x), %eax; SVC; ret
+#define	PSEUDO(x,y)	ENTRY(x); movl	$(SYS_ ## y), %eax; SVC; ret
 
 #else // __STDC__
 
 //#define	SYSCALL(x)	ENTRY(x); movl	$SYS_/**/x, %eax; SVC; jb LCL(cerror)
-#define	SYSCALL(x)	ENTRY(x); movl	$SYS_/**/x, %eax; SVC
-#define	PSEUDO(x,y)	ENTRY(x); movl	$SYS_/**/y, %eax; SVC
+#define	SYSCALL(x)	ENTRY(x); movl	$SYS_/**/x, %eax; SVC; ret
+#define	PSEUDO(x,y)	ENTRY(x); movl	$SYS_/**/y, %eax; SVC; ret
 
 #endif // __STDC__
 
-#define	CALL(x,y)	calls $x, EXT(y)
+//#define	CALL(x,y)	calls $x, EXT(y)
 
 //.data
 //	.globl	LCL(cerror)

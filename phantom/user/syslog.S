@@ -1,6 +1,7 @@
 #include <mach/asm.h>
 #include "SYS.h"
 
+// see general.S
+//SYSCALL(ssyslog)
 
-SYSCALL(vsyslog)
-	ret		// Supposed to be impossible
+
