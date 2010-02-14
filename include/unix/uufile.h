@@ -5,6 +5,10 @@
 #include <hal.h>
 #include <errno.h>
 
+#define FS_MAX_MOUNT 64
+#define FS_MAX_MOUNT_PATH 128
+#define FS_MAX_PATH_LEN 1024
+
 struct uufile;
 struct uufs;
 
@@ -19,6 +23,9 @@ struct uufileops
 
     // returns -1 for non-files?
     size_t      (*getsize)( struct uufile *f);
+
+	// used when clone file
+	void *		(*copyimpl)( void *impl); 
 };
 
 
@@ -43,7 +50,10 @@ uufile_t *create_uufile();
 
 struct uufs
 {
-    struct uufile *     (*open)(const char *name, int create, int write);
+	//char			name[FS_MAX_MOUNT_PATH];
+	// called after we got uufile and need really do an open op
+    errno_t             (*open)(struct uufile *, int create, int write);
+	// Close disposes file - it can't be used after that
     errno_t             (*close)(struct uufile *);
 
     // Create a file struct for given path
