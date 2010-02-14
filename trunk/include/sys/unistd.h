@@ -43,11 +43,19 @@ extern "C" {
 #define _ATTRIBUTE(attrs)
 #endif
 
+    typedef int pid_t;
 
-int 	read(int __fd, void *__buf, size_t __nbyte );
-int		write(int __fd, const void *__buf, size_t __nbyte );
+    void 		sleepmsec(int);
+    void 		ssyslog(int level, const char *string );
 
-void	_exit(int __status ) _ATTRIBUTE ((noreturn)) ;
+
+    int 		read(int __fd, void *__buf, size_t __nbyte );
+    int			write(int __fd, const void *__buf, size_t __nbyte );
+
+    void		_exit(int __status ) _ATTRIBUTE ((noreturn)) ;
+
+    pid_t   		getpid(void);
+    pid_t   		getppid(void);
 
 
 
@@ -139,8 +147,6 @@ int    _EXFUN(getpeereid, (int, uid_t *, gid_t *));
 #endif
 pid_t   _EXFUN(getpgid, (pid_t));
 pid_t   _EXFUN(getpgrp, (void ));
-pid_t   _EXFUN(getpid, (void ));
-pid_t   _EXFUN(getppid, (void ));
 #ifdef __CYGWIN__
 pid_t   _EXFUN(getsid, (pid_t));
 #endif

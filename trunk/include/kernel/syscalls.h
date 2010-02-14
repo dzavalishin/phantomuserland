@@ -19,7 +19,7 @@
 
 
 #define SYS_sleepmsec		16	// ++
-#define SYS_na+-sleep		17	// +-
+#define SYS_nanosleep		17	// +-
 #define SYS_time                18	// +-
 #define SYS_getitimer           19	// +-
 #define SYS_setitimer           20	// +-
@@ -81,7 +81,7 @@
 #define SYS_getcwd              79	// +-
 #define SYS_lstat               80	// +-
 #define SYS_lstat64             81	// +-
-#define SYS_mk+-d               82	// +-
+#define SYS_mknod               82	// +-
 #define SYS_pipe                83	// +-
 #define SYS_symlink             84	// +-
 

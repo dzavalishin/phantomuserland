@@ -1,3 +1,10 @@
+#ifndef UUFILE_H
+#define UUFILE_H
+
+#include <phantom_types.h>
+#include <hal.h>
+#include <errno.h>
+
 struct uufile;
 struct uufs;
 
@@ -9,12 +16,15 @@ struct uufileops
     //errno_t     (*ioctl)(   struct uufile *f, struct ??);
 
     size_t      (*getpath)( struct uufile *f, void *dest, size_t bytes);
+
+    // returns -1 for non-files?
+    size_t      (*getsize)( struct uufile *f);
 };
 
 
 struct uufile
 {
-    struct uufileops    ops;
+    struct uufileops *  ops;
     size_t              pos;
     struct uufs *       fs;
     void *              impl; // implementation specific
@@ -50,4 +60,6 @@ struct uutty
     struct uufile *     io;
 };
 
+
+#endif // UUFILE_H
 
