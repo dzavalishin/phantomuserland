@@ -86,15 +86,6 @@
 
 #else
 
-// No. It is wrong. it will hang if second printf will happen in
-// interrupt. We need to distinguish between interrupt and normal
-// state, and interlock with mutex in normal state and just run
-// in interrupt. or - !! - just switch preemtion off during printf!
-
-static hal_spinlock_t   spinlock;
-
-#define LOCK() hal_spin_lock(&spinlock)
-#define UNLOCK() hal_spin_unlock(&spinlock)
 
 #endif
 

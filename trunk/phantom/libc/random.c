@@ -41,7 +41,7 @@
 
 static u_int32_t randseed = 937186357; /* after srandom(1), NSHUFF counted */
 
-#warning TODO set seed from timer in timer init
+//#warning TODO set seed from timer in timer init
 void
 srandom(u_int32_t seed)
 {

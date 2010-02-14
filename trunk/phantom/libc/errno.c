@@ -29,4 +29,4 @@
 
 // TODO this is wrong to have global errno in kernel!
 
-int errno;
+//int errno;
