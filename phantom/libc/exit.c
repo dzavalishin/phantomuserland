@@ -86,13 +86,6 @@ void _run_atexits()
 }
 #endif
 
-void _exit(int code)
-{
-    hal_cpu_reset_real();
-    
-    /*UNREACHED*/
-#pragma unreached
-}
 
 void exit(int code)
 {
