@@ -5,9 +5,11 @@ PHANTOM_CFLAGS += -ffreestanding
 #LD_ADDR=--script=ld.script
 LD_ADDR=-Ttext 0
 
+//LIBGCC := `$(CC) --print-libgcc-file-name`
+LIBGCC := `gcc --print-libgcc-file-name`
 
-pmod_test: crt/crt0.o test/testmain.o
-	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^
+pmod_test: crt/crt0.o test/testmain.o ../lib/libphantom_c.a
+	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
 	objcopy -O elf32-i386 $@.pe $@
 	objdump -x -d $@ >$@.dump
 

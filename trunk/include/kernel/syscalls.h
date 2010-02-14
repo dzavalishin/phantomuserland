@@ -6,9 +6,9 @@
 // in general.S
 #define SYS_exit		0	// ++
 #define SYS_ssyslog		1	// ++
-#define SYS_getpagesize		2	// +-
-#define SYS_personality		3	// +-
-#define SYS_uname               4	// +-
+#define SYS_getpagesize		2	// ++
+#define SYS_personality		3	// +!
+#define SYS_uname               4	// ++ - test!
 #define SYS_sync                5	// +-
 #define SYS_sysinfo             6	// +-
 #define SYS_sysfs               7	// +-
@@ -63,13 +63,13 @@
 
 
 // in file.S
-#define SYS_open                64	// +-
-#define SYS_close               65	// +-
-#define SYS_read                66	// +-
-#define SYS_write               67	// +-
-#define SYS_lseek               68	// +-
-#define SYS_creat               69	// +-
-#define SYS_chdir               70	// +-
+#define SYS_open                64	// ++
+#define SYS_close               65	// ++
+#define SYS_read                66	// ++
+#define SYS_write               67	// ++
+#define SYS_lseek               68	// ++
+#define SYS_creat               69	// +!
+#define SYS_chdir               70	// +!
 #define SYS_link                71	// +-
 #define SYS_unlink              72	// +-
 #define SYS__llseek             73	// +-
@@ -85,8 +85,8 @@
 #define SYS_pipe                83	// +-
 #define SYS_symlink             84	// +-
 
-#define SYS_mount               85	// +-
-#define SYS_umount              86	// +-
+#define SYS_mount               85	// +!
+#define SYS_umount              86	// ++ - doesnt check usage
 
 #define SYS_truncate            87	// +-
 #define SYS_truncate64          88	// +-
