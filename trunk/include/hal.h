@@ -197,6 +197,8 @@ errno_t					hal_mutex_lock(hal_mutex_t *m);
 errno_t					hal_mutex_unlock(hal_mutex_t *m);
 errno_t					hal_mutex_destroy(hal_mutex_t *m);
 
+// FIXME
+#define ASSERT_LOCKED_MUTEX(m) 
 
 struct hal_cond
 {

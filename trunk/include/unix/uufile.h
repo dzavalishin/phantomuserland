@@ -24,9 +24,13 @@ struct uufileops
 
     // returns -1 for non-files?
     size_t      (*getsize)( struct uufile *f);
+    errno_t     (*setsize)( struct uufile *f, size_t size);
+
+    errno_t     (*chmod)( struct uufile *f, int mode);
+    errno_t     (*chown)( struct uufile *f, int user, int grp);
 
 	// used when clone file
-	void *		(*copyimpl)( void *impl); 
+    void *      (*copyimpl)( void *impl);
 };
 
 
