@@ -36,7 +36,7 @@ Basic IO (open/r/w/close/ioctl) is done, more to come.
 
 
 
-= ToDo =
+= Todo =
 
 The most needed things to be done ASAP are:
 
