@@ -69,7 +69,7 @@
 #define SYS_write               67	// ++
 #define SYS_lseek               68	// ++
 #define SYS_creat               69	// +!
-#define SYS_chdir               70	// +!
+#define SYS_chdir               70	// ++
 #define SYS_link                71	// +-
 #define SYS_unlink              72	// +-
 #define SYS__llseek             73	// +-
@@ -88,9 +88,9 @@
 #define SYS_mount               85	// +!
 #define SYS_umount              86	// ++ - doesnt check usage
 
-#define SYS_truncate            87	// +-
+#define SYS_truncate            87	// ++
 #define SYS_truncate64          88	// +-
-#define SYS_fchdir              89	// +-
+#define SYS_fchdir              89	// ++
 #define SYS_fchmod              90	// +-
 #define SYS_fchown              91	// +-
 #define SYS_fchown32            92	// +-
@@ -104,7 +104,7 @@
 #define SYS_fstatfs             100	// +-
 #define SYS_fsync               101	// +-
 //#define SYS_ftime              102	// +-
-#define SYS_ftruncate           103	// +-
+#define SYS_ftruncate           103	// ++
 #define SYS_ftruncate64         104	// +-
 #define SYS_utime               105	// +-
 #define SYS_chmod               106	// +-
@@ -115,8 +115,8 @@
 #define SYS_lchown32            111	// +-
 #define SYS_pread               112	// +-
 #define SYS_pwrite              113	// +-
-#define SYS_readv               114	// +-
-#define SYS_writev              115	// +-
+#define SYS_readv               114	// ++
+#define SYS_writev              115	// ++
 #define SYS_readlink            116	// +-
 
 #define SYS_readdir             117	// +-
@@ -127,8 +127,8 @@
 
 
 // in net.S
-#define SYS_gethostname         128	// +-
-#define SYS_sethostname         129	// +-
+#define SYS_gethostname         128	// +! No access from obj code, not persisted
+#define SYS_sethostname         129	// +!
 
 #define SYS_socket              130	// +-
 #define SYS_bind                131	// +-
@@ -154,10 +154,10 @@
 #define SYS_fork                257	// +-
 #define SYS_vfork               258	// +-
 #define SYS_nice                259	// +-
-#define SYS_ioctl               260	// +-
+#define SYS_ioctl               260	// +!
 #define SYS_kill                261	// +-
 //#define SYS_pipe                262	// +-
-#define SYS_umask               263	// +-
+#define SYS_umask               263	// ++
 #define SYS_clone               264	// +-
 
 // in mmap.S
