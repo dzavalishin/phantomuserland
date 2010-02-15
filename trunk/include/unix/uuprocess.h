@@ -33,6 +33,8 @@ struct uuprocess
 
     struct uufile *     cwd;
 
+	int					capas; // Capabilities == rights
+
 	// Process address space is mapped to our main linear adrr space
 	// as follows. These adresses are used in syscall processing.
 	// Any pointer from user process is first has mem_start added and

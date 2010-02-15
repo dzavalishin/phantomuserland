@@ -43,7 +43,7 @@ extern "C" {
 #define _ATTRIBUTE(attrs)
 #endif
 
-    typedef int pid_t;
+    //typedef int pid_t;
 
     void 		sleepmsec(int);
     void 		ssyslog(int level, const char *string );

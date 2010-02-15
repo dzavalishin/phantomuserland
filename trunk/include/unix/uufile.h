@@ -4,6 +4,7 @@
 #include <phantom_types.h>
 #include <hal.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #define FS_MAX_MOUNT 64
 #define FS_MAX_MOUNT_PATH 128
@@ -16,8 +17,8 @@ struct uufileops
 {
     size_t      (*read)(    struct uufile *f, void *dest, size_t bytes);
     size_t      (*write)(   struct uufile *f, void *dest, size_t bytes);
-    //errno_t     (*stat)(    struct uufile *f, struct ??);
-    //errno_t     (*ioctl)(   struct uufile *f, struct ??);
+    errno_t     (*stat)(    struct uufile *f, struct stat *dest);
+    int         (*ioctl)(   struct uufile *f, errno_t *err, int request, void *data );
 
     size_t      (*getpath)( struct uufile *f, void *dest, size_t bytes);
 
