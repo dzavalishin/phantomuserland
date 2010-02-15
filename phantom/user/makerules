@@ -14,3 +14,5 @@ pmod_test: crt/crt0.o test/testmain.o ../lib/libphantom_c.a
 	objdump -x -d $@ >$@.dump
 
 
+install:: pmod_test
+	cp pmod_test G:/Projects/phantom/trunk/run/tftp/pmod_test
