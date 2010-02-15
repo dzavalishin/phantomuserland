@@ -55,4 +55,4 @@ SYSCALL(writev)
 SYSCALL(readlink)
 
 SYSCALL(readdir)
-
+SYSCALL(stat)
