@@ -1,5 +1,5 @@
 #summary Unix/posix/Linux emulation in Phantom
-#labels Unix,Phase-Implementation
+#labels Component-Unix,Phase-Implementation,Featured
 
 = Unix in Phantom =
 
