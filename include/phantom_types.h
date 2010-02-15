@@ -76,7 +76,22 @@ typedef int			size_t;
 #ifndef _OFF_T
 #define _OFF_T
 typedef int			off_t;
+typedef int			_off_t;
 #endif //_OFF_T
+
+
+// next are for Unix emulation env
+typedef unsigned int _dev_t;
+typedef unsigned int dev_t;
+typedef unsigned int _ino_t;
+typedef unsigned int ino_t;
+typedef int	_pid_t;
+typedef _pid_t	pid_t;
+typedef unsigned short _mode_t;
+typedef _mode_t	mode_t;
+typedef int	_sigset_t;
+typedef _sigset_t	sigset_t;
+
 
 
 #ifndef _STDINT_H

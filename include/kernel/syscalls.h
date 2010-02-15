@@ -79,7 +79,7 @@
 #define SYS_dup                 77	// +-
 #define SYS_dup2                78	// +-
 #define SYS_getcwd              79	// +-
-#define SYS_lstat               80	// +-
+#define SYS_lstat               80	// +!
 #define SYS_lstat64             81	// +-
 #define SYS_mknod               82	// +-
 #define SYS_pipe                83	// +-
@@ -99,7 +99,7 @@
 #define SYS_fdatasync           95	// +-
 #define SYS_flock               96	// +-
 //#define SYS_                97	// +-
-#define SYS_fstat               98	// +-
+#define SYS_fstat               98	// ++
 #define SYS_fstat64             99	// +-
 #define SYS_fstatfs             100	// +-
 #define SYS_fsync               101	// +-
@@ -120,6 +120,7 @@
 #define SYS_readlink            116	// +-
 
 #define SYS_readdir             117	// +-
+#define SYS_stat                118	// ++
 
 
 
