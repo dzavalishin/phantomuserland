@@ -38,6 +38,8 @@ Basic IO (open/r/w/close/ioctl) is done, more to come.
 
 = Todo =
 
+== Unix itself ==
+
 The most needed things to be done ASAP are:
 
   * sbrk
@@ -47,3 +49,12 @@ The most needed things to be done ASAP are:
   * fork/exec/argv
   * exit!! :)
   * signals
+
+== Phantom integration ==
+
+The main thing to implement is ability to call object's methods. One of solutions is to have object FS which will let Phantom to "open" objects as files. For binary objects or objects representing data streams usual red/write/mmap syscalls will be usable. For all objects some special _method call_ syscall has to be implemented, which has file (object!) descriptors, strings and ints as parameters and returns new file (object!) descriptor for returned object. Any other idea?
+
+Second is direct access to binary/string (byte stream) object contents. Possible solutions:
+
+  # mapping to a segment, use of FS/GS - easy, but intel-specific
+  # mapping with mmap to process AS. much better and is in sync with object access via file descriptors
