@@ -1,9 +1,12 @@
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
+#include <sys/socket.h>
 
 // Unix emulation related things
 
 uufile_t *uu_namei(const char *filename);
+// Allocate a new fd in u for f
+int uu_find_fd( uuprocess_t *u, uufile_t *f  );
 
 
 // Unix syscalls impl
@@ -36,4 +39,11 @@ int usys_fchown( int *err, uuprocess_t *u, int fd, int user, int grp );
 
 int usys_gethostname( int *err, uuprocess_t *u, char *data, size_t len );
 int usys_sethostname( int *err, uuprocess_t *u, const char *data, size_t len );
+
+
+int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol);
+int usys_bind(  int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, socklen_t addrlen);
+int usys_listen(int *err, uuprocess_t *u, int fd, int backlog);
+
+
 
