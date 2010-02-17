@@ -91,9 +91,9 @@
 #define SYS_truncate            87	// ++
 #define SYS_truncate64          88	// +-
 #define SYS_fchdir              89	// ++
-#define SYS_fchmod              90	// +-
-#define SYS_fchown              91	// +-
-#define SYS_fchown32            92	// +-
+#define SYS_fchmod              90	// +!
+#define SYS_fchown              91	// +!
+#define SYS_fchown32            92	// +!
 #define SYS_fcntl               93	// +-
 #define SYS_fcntl64             94	// +-
 #define SYS_fdatasync           95	// +-
@@ -119,7 +119,7 @@
 #define SYS_writev              115	// ++
 #define SYS_readlink            116	// +-
 
-#define SYS_readdir             117	// +-
+#define SYS_readdir             117	// +! no impl in fsystems
 #define SYS_stat                118	// ++
 
 

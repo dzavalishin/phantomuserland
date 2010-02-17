@@ -39,11 +39,18 @@ struct uufile
     struct uufileops *  ops;
     size_t              pos;
     struct uufs *       fs;
+    unsigned            flags;
+    const char *	name;   // This entry's name, or zero if none
     void *              impl; // implementation specific
 
     hal_mutex_t         mutex; // serialize access
 };
 
+
+#define UU_FILE_FLAG_DIR        (1<<0) // Dir
+#define UU_FILE_FLAG_NET        (1<<1) // Socket
+#define UU_FILE_FLAG_TCP        (1<<2) // Stream
+#define UU_FILE_FLAG_UDP        (1<<3) // Dgram
 
 typedef struct uufile uufile_t;
 
@@ -55,7 +62,7 @@ uufile_t *create_uufile();
 
 struct uufs
 {
-	//char			name[FS_MAX_MOUNT_PATH];
+    char *              name; // Just FS type name
 	// called after we got uufile and need really do an open op
     errno_t             (*open)(struct uufile *, int create, int write);
 	// Close disposes file - it can't be used after that
@@ -74,6 +81,24 @@ struct uutty
 {
     struct uufile *     io;
 };
+
+
+
+
+#define CHECK_FD_RANGE(_fd) do { if( _fd < 0 || _fd > MAX_UU_FD ) { *err = EBADF; return -1; } } while(0)
+#define GETF(_fd) (u->fd[_fd])
+#define CHECK_FD_OPEN(__fd)  do { if( GETF(__fd) == 0 ) { *err = EBADF; return -1; } } while(0)
+
+#define CHECK_FD(_cfd) do { CHECK_FD_RANGE(_cfd); CHECK_FD_OPEN(_cfd); } while(0)
+
+
+extern struct uufileops tcpfs_fops; // Used in sock syscalls
+extern struct uufileops udpfs_fops; // Used in sock syscalls
+
+extern struct uufs tcp_fs; // Used in sock syscalls
+extern struct uufs udp_fs; // Used in sock syscalls
+extern struct uufs dev_fs;
+extern struct uufs proc_fs;
 
 
 #endif // UUFILE_H

@@ -5,6 +5,9 @@
 
 struct uusocket
 {
+    int         domain;         // Can be ignored as it's allways tcpip now
+    int         type;           // need?
+    int         protocol;
     sockaddr 	addr;
     void *	prot_data;  	// kern udp_open(&prot_data)/udp_close(prot_data)
     //char *	dest; 		// host:port or addr:port
