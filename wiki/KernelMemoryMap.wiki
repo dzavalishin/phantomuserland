@@ -32,7 +32,7 @@ min neg - 0 = kernel
 == Memory TODO ==
 
  * Current phys mem allocator works with mapped memory directly. Divide in physical allocator and heap (which can sbrk using phys allocator).
- * KernelVM86 is implemented and does some low mem access. Document it!
+ * [KernelVM86] is implemented and does some low mem access. Document it!
  * Page 0 - unmap to catch null ptr accesses.
  * POSIX code - CS/DS segments mapped to binary objects
 
@@ -44,7 +44,7 @@ Interpreter code in a special segment?
 
 This is how it should be, not how it is. We're implementing now what is described here.
 
-1. Low level phys RAM allocator. Has two parts on ia32 - one is used to allocate blow 1mb memory and used in a very special situations like in KernelVM86 support code. Main one allocates RAM which is not statically assigned to kernel image (everything above it). Allocation is in page size increments.
+1. Low level phys RAM allocator. Has two parts on ia32 - one is used to allocate blow 1mb memory and used in a very special situations like in [KernelVM86] support code. Main one allocates RAM which is not statically assigned to kernel image (everything above it). Allocation is in page size increments.
 
 This allocator is used by kernel heap allocator to replentish heap, and directly by users which need page-aligned RAM (for phys-level access, usually).
 
