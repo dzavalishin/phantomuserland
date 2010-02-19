@@ -58,3 +58,10 @@ Q: *Is it a 32 or 64 bit OS?*
 <br>
 A: It is meaningless to have 32 bit Phantom, because of single address space. We are going to have 64-bit version as mainstreem one and the existing 32-bit implementation will be, possibly, left for small handheld devices.
 <br>
+
+<p>
+Q: How can app live without files?
+<br>
+A:
+
+http://misc.dz.ru/~dz/phantom/Application_Data_Flow.png
