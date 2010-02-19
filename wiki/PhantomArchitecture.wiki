@@ -1,6 +1,8 @@
 #summary Phantom architecture.
 #labels Phase-Design
 
+http://misc.dz.ru/~dz/phantom/Phantom_Structure.png
+
 == General ==
 
 Phantom is, basically, a virtual machine (VM) working in a huge persistent
@@ -72,4 +74,3 @@ not exactly native, but LLVM-level code for this environment.
 
 Based on the native code subsystem it is possible to build POSIX-like 
 environment to support existing Unix applications.
-
