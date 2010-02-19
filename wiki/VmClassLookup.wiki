@@ -1,4 +1,5 @@
 #summary Class lookup by name
+#labels Phase-Design,Component-VM,Component-Ph
 
 = Introduction =
 
