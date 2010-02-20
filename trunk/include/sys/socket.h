@@ -1,16 +1,71 @@
-#ifndef SOCKET_H
-#define SOCKET_H
+#ifndef SYS_SOCKET_H
+#define SYS_SOCKET_H
 
 #include <phantom_types.h>
 
 typedef int socklen_t;
 
 
-struct linger
-{
-    int         l_onoff; //          indicates whether linger option is enabled
-    int         l_linger; //         linger time, in seconds
+
+
+/*
+ * Option flags per-socket.
+ */
+#define	SO_DEBUG	0x0001		/* turn on debugging info recording */
+#define	SO_ACCEPTCONN	0x0002		/* socket has had listen() */
+#define	SO_REUSEADDR	0x0004		/* allow local address reuse */
+#define	SO_KEEPALIVE	0x0008		/* keep connections alive */
+#define	SO_DONTROUTE	0x0010		/* just use interface addresses */
+#define	SO_BROADCAST	0x0020		/* permit sending of broadcast msgs */
+#define	SO_USELOOPBACK	0x0040		/* bypass hardware when possible */
+#define	SO_LINGER	0x0080		/* linger on close if data present */
+#define	SO_OOBINLINE	0x0100		/* leave received OOB data in line */
+#define	SO_REUSEPORT	0x0200		/* allow local address & port reuse */
+/* 	SO_OTIMESTAMP	0x0400		*/
+#define	SO_ACCEPTFILTER	0x1000		/* there is an accept filter */
+#define	SO_TIMESTAMP	0x2000		/* timestamp received dgram traffic */
+
+
+/*
+ * Additional options, not kept in so_options.
+ */
+#define SO_SNDBUF	0x1001		/* send buffer size */
+#define SO_RCVBUF	0x1002		/* receive buffer size */
+#define SO_SNDLOWAT	0x1003		/* send low-water mark */
+#define SO_RCVLOWAT	0x1004		/* receive low-water mark */
+     /* SO_OSNDTIMEO		0x1005 */
+     /* SO_ORCVTIMEO		0x1006 */
+#define	SO_ERROR	0x1007		/* get error status and clear */
+#define	SO_TYPE		0x1008		/* get socket type */
+#define	SO_OVERFLOWED	0x1009		/* datagrams: return packets dropped */
+
+#define	SO_NOHEADER	0x100a		/* user supplies no header to kernel;
+					 * kernel removes header and supplies
+					 * payload
+					 */
+#define SO_SNDTIMEO	0x100b		/* send timeout */
+#define SO_RCVTIMEO	0x100c		/* receive timeout */
+/*
+ * Structure used for manipulating linger option.
+ */
+struct	linger {
+	int	l_onoff;		/* option on/off */
+	int	l_linger;		/* linger time in seconds */
 };
+
+struct	accept_filter_arg {
+	char	af_name[16];
+	char	af_arg[256-16];
+};
+
+/*
+ * Level number for (get/set)sockopt() to apply to socket itself.
+ */
+#define	SOL_SOCKET	0xffff		/* options for socket level */
+
+
+
+
 
 
 /*
@@ -36,6 +91,72 @@ struct linger
 #define PF_LOCAL        AF_LOCAL
 #define PF_INET         AF_INET
 #define PF_INET6        AF_INET6
+
+
+
+
+
+
+struct sockaddr;
+
+
+
+
+
+
+
+
+/*
+ * Message header for recvmsg and sendmsg calls.
+ * Used value-result for recvmsg, value only for sendmsg.
+ */
+struct msghdr {
+	void		*msg_name;	/* optional address */
+	socklen_t	msg_namelen;	/* size of address */
+	struct iovec	*msg_iov;	/* scatter/gather array */
+	int		msg_iovlen;	/* # elements in msg_iov */
+	void		*msg_control;	/* ancillary data, see below */
+	socklen_t	msg_controllen;	/* ancillary data buffer len */
+	int		msg_flags;	/* flags on received message */
+};
+
+#define	MSG_OOB		0x0001		/* process out-of-band data */
+#define	MSG_PEEK	0x0002		/* peek at incoming message */
+#define	MSG_DONTROUTE	0x0004		/* send without using routing tables */
+#define	MSG_EOR		0x0008		/* data completes record */
+#define	MSG_TRUNC	0x0010		/* data discarded before delivery */
+#define	MSG_CTRUNC	0x0020		/* control data lost before delivery */
+#define	MSG_WAITALL	0x0040		/* wait for full request or error */
+#define	MSG_DONTWAIT	0x0080		/* this message should be nonblocking */
+#define	MSG_BCAST	0x0100		/* this message was rcvd using link-level brdcst */
+#define	MSG_MCAST	0x0200		/* this message was rcvd using link-level mcast */
+#define	MSG_NOSIGNAL	0x0400		/* do not generate SIGPIPE on EOF */
+
+/* Extra flags used internally only */
+#define	MSG_USERFLAGS	0x0ffffff
+#define MSG_NAMEMBUF	0x1000000	/* msg_name is an mbuf */
+#define MSG_CONTROLMBUF	0x2000000	/* msg_control is an mbuf */
+#define MSG_IOVUSRSPACE	0x4000000	/* msg_iov is in user space */
+#define MSG_LENUSRSPACE	0x8000000	/* address length is in user space */
+
+/*
+ * Header for ancillary data objects in msg_control buffer.
+ * Used for additional information with/about a datagram
+ * not expressible by flags.  The format is a sequence
+ * of message elements headed by cmsghdr structures.
+ */
+struct cmsghdr {
+	socklen_t	cmsg_len;	/* data byte count, including hdr */
+	int		cmsg_level;	/* originating protocol */
+	int		cmsg_type;	/* protocol-specific type */
+/* followed by	u_char  cmsg_data[]; */
+};
+
+
+
+
+
+
 
 
 
@@ -178,60 +299,6 @@ typedef	_BSD_SSIZE_T_	ssize_t;
 #include <sys/uio.h>
 
 
-/*
- * Option flags per-socket.
- */
-#define	SO_DEBUG	0x0001		/* turn on debugging info recording */
-#define	SO_ACCEPTCONN	0x0002		/* socket has had listen() */
-#define	SO_REUSEADDR	0x0004		/* allow local address reuse */
-#define	SO_KEEPALIVE	0x0008		/* keep connections alive */
-#define	SO_DONTROUTE	0x0010		/* just use interface addresses */
-#define	SO_BROADCAST	0x0020		/* permit sending of broadcast msgs */
-#define	SO_USELOOPBACK	0x0040		/* bypass hardware when possible */
-#define	SO_LINGER	0x0080		/* linger on close if data present */
-#define	SO_OOBINLINE	0x0100		/* leave received OOB data in line */
-#define	SO_REUSEPORT	0x0200		/* allow local address & port reuse */
-/* 	SO_OTIMESTAMP	0x0400		*/
-#define	SO_ACCEPTFILTER	0x1000		/* there is an accept filter */
-#define	SO_TIMESTAMP	0x2000		/* timestamp received dgram traffic */
-
-
-/*
- * Additional options, not kept in so_options.
- */
-#define SO_SNDBUF	0x1001		/* send buffer size */
-#define SO_RCVBUF	0x1002		/* receive buffer size */
-#define SO_SNDLOWAT	0x1003		/* send low-water mark */
-#define SO_RCVLOWAT	0x1004		/* receive low-water mark */
-/* SO_OSNDTIMEO		0x1005 */
-/* SO_ORCVTIMEO		0x1006 */
-#define	SO_ERROR	0x1007		/* get error status and clear */
-#define	SO_TYPE		0x1008		/* get socket type */
-#define	SO_OVERFLOWED	0x1009		/* datagrams: return packets dropped */
-
-#define	SO_NOHEADER	0x100a		/* user supplies no header to kernel;
-					 * kernel removes header and supplies
-					 * payload
-					 */
-#define SO_SNDTIMEO	0x100b		/* send timeout */
-#define SO_RCVTIMEO	0x100c		/* receive timeout */
-/*
- * Structure used for manipulating linger option.
- */
-struct	linger {
-	int	l_onoff;		/* option on/off */
-	int	l_linger;		/* linger time in seconds */
-};
-
-struct	accept_filter_arg {
-	char	af_name[16];
-	char	af_arg[256-16];
-};
-
-/*
- * Level number for (get/set)sockopt() to apply to socket itself.
- */
-#define	SOL_SOCKET	0xffff		/* options for socket level */
 
 /*
  * Address families.
@@ -525,51 +592,6 @@ struct kinfo_pcb {
 #define	SOMAXCONN	128
 #endif
 
-/*
- * Message header for recvmsg and sendmsg calls.
- * Used value-result for recvmsg, value only for sendmsg.
- */
-struct msghdr {
-	void		*msg_name;	/* optional address */
-	socklen_t	msg_namelen;	/* size of address */
-	struct iovec	*msg_iov;	/* scatter/gather array */
-	int		msg_iovlen;	/* # elements in msg_iov */
-	void		*msg_control;	/* ancillary data, see below */
-	socklen_t	msg_controllen;	/* ancillary data buffer len */
-	int		msg_flags;	/* flags on received message */
-};
-
-#define	MSG_OOB		0x0001		/* process out-of-band data */
-#define	MSG_PEEK	0x0002		/* peek at incoming message */
-#define	MSG_DONTROUTE	0x0004		/* send without using routing tables */
-#define	MSG_EOR		0x0008		/* data completes record */
-#define	MSG_TRUNC	0x0010		/* data discarded before delivery */
-#define	MSG_CTRUNC	0x0020		/* control data lost before delivery */
-#define	MSG_WAITALL	0x0040		/* wait for full request or error */
-#define	MSG_DONTWAIT	0x0080		/* this message should be nonblocking */
-#define	MSG_BCAST	0x0100		/* this message was rcvd using link-level brdcst */
-#define	MSG_MCAST	0x0200		/* this message was rcvd using link-level mcast */
-#define	MSG_NOSIGNAL	0x0400		/* do not generate SIGPIPE on EOF */
-
-/* Extra flags used internally only */
-#define	MSG_USERFLAGS	0x0ffffff
-#define MSG_NAMEMBUF	0x1000000	/* msg_name is an mbuf */
-#define MSG_CONTROLMBUF	0x2000000	/* msg_control is an mbuf */
-#define MSG_IOVUSRSPACE	0x4000000	/* msg_iov is in user space */
-#define MSG_LENUSRSPACE	0x8000000	/* address length is in user space */
-
-/*
- * Header for ancillary data objects in msg_control buffer.
- * Used for additional information with/about a datagram
- * not expressible by flags.  The format is a sequence
- * of message elements headed by cmsghdr structures.
- */
-struct cmsghdr {
-	socklen_t	cmsg_len;	/* data byte count, including hdr */
-	int		cmsg_level;	/* originating protocol */
-	int		cmsg_type;	/* protocol-specific type */
-/* followed by	u_char  cmsg_data[]; */
-};
 
 /* given pointer to struct cmsghdr, return pointer to data */
 #define	CMSG_DATA(cmsg) \

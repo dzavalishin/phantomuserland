@@ -1,6 +1,10 @@
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
 #include <sys/socket.h>
+#include <dirent.h>
+
+struct sockaddr;
+
 
 // Unix emulation related things
 
@@ -35,15 +39,37 @@ int usys_ftruncate(int *err, uuprocess_t *u, int fd, off_t length);
 int usys_fchmod( int *err, uuprocess_t *u, int fd, int mode );
 int usys_fchown( int *err, uuprocess_t *u, int fd, int user, int grp );
 
+int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp );
+
+
+
 
 
 int usys_gethostname( int *err, uuprocess_t *u, char *data, size_t len );
 int usys_sethostname( int *err, uuprocess_t *u, const char *data, size_t len );
+
+int usys_getsockname(int *err, uuprocess_t *u, int fd, struct sockaddr *name, socklen_t *namelen);
+int usys_getpeername(int *err, uuprocess_t *u, int fd, struct sockaddr *name, socklen_t *namelen);
+
+
+int usys_getsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, void *optval, socklen_t *optlen);
+int usys_setsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, const void *optval, socklen_t optlen);
 
 
 int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol);
 int usys_bind(  int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, socklen_t addrlen);
 int usys_listen(int *err, uuprocess_t *u, int fd, int backlog);
 
+
+
+
+ssize_t usys_recv(int *err, uuprocess_t *u, int fd, void *buf, size_t len, int flags);
+ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t len, int flags,
+                      struct sockaddr *from, socklen_t *fromlen);
+ssize_t usys_recvmsg(int *err, uuprocess_t *u, int fd, struct msghdr *msg, int flags);
+
+ssize_t usys_send(int *err, uuprocess_t *u, int fd, const void *buf, size_t len, int flags);
+ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t len, int flags, const struct sockaddr *to, socklen_t tolen);
+ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg, int flags);
 
 
