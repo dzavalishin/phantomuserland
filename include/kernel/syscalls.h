@@ -130,11 +130,11 @@
 #define SYS_gethostname         128	// +! No access from obj code, not persisted
 #define SYS_sethostname         129	// +!
 
-#define SYS_socket              130	// +-
-#define SYS_bind                131	// +-
+#define SYS_socket              130	// ++
+#define SYS_bind                131	// ++
 #define SYS_accept              132	// +-
 #define SYS_connect             133	// +-
-#define SYS_listen              134	// +-
+#define SYS_listen              134	// ++
 #define SYS_recv                135	// +-
 #define SYS_recvfrom            136	// +-
 #define SYS_recvmsg             137	// +-
@@ -142,12 +142,12 @@
 #define SYS_sendto              139	// +-
 #define SYS_sendmsg             140	// +-
 #define SYS_sendfile            141	// +-
-#define SYS_setsockopt          142	// +-
+#define SYS_setsockopt          142	// +!
 #define SYS_socketcall          143	// +-
 #define SYS_socketpair          144	// +-
-#define SYS_getpeername         145	// +-
-#define SYS_getsockname         146	// +-
-#define SYS_getsockopt          147	// +-
+#define SYS_getpeername         145	// +!
+#define SYS_getsockname         146	// +!
+#define SYS_getsockopt          147	// +!
 
 // in general.S
 #define SYS_brk                 256	// +-
