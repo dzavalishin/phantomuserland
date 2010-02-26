@@ -147,7 +147,7 @@ void videotest()
     //w->xsize = 140;
     //w->ysize = 80;
 
-    drv_video_window_t *w = drv_video_window_create(140,80, 200, 200, COLOR_LIGHTGRAY );
+    drv_video_window_t *w = drv_video_window_create( 140,80, 200, 200, COLOR_LIGHTGRAY, "Test Window" );
 
     //drv_video_window_clear( w );
     //drv_video_window_fill( w, COLOR_LIGHTGRAY );

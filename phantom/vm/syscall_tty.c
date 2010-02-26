@@ -271,6 +271,7 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
     tty->bg = COLOR_WHITE;
 
     drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE );
+	tty->w.title = "VM TTY Window";
 }
 
 void pvm_gc_iter_tty(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)

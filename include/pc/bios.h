@@ -27,6 +27,9 @@
  * $FreeBSD: src/sys/i386/include/pc/bios.h,v 1.14 2002/09/23 18:54:31 alfred Exp $
  */
 
+#include <phantom_types.h>
+#include <sys/cdefs.h>
+
 /* 
  * Signature structure for the BIOS32 Service Directory header 
  */
@@ -61,8 +64,8 @@ extern int              bios32_SDlookup(struct bios32_SDentry *ent);
 extern u_int32_t        bios_sigsearch(u_int32_t start, u_char *sig, int siglen, 
                                          int paralen, int sigofs);
 
-#define BIOS_PADDRTOVADDR(x)    (((x) - ISA_HOLE_START) + atdevbase)
-#define BIOS_VADDRTOPADDR(x)    (((x) - atdevbase) + ISA_HOLE_START)
+//#define BIOS_PADDRTOVADDR(x)    (((x) - ISA_HOLE_START) + atdevbase)
+//#define BIOS_VADDRTOPADDR(x)    (((x) - atdevbase) + ISA_HOLE_START)
 
 
 /* 
