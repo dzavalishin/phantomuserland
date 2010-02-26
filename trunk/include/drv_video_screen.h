@@ -121,6 +121,8 @@ typedef struct drv_video_window
 
     rgba_t       	bg; // background color
 
+    const char* 	title;
+
     // bitmap itself
     rgba_t       	pixel[];
 } drv_video_window_t;
@@ -154,7 +156,7 @@ static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (s
 void drv_video_window_update_generation(void);
 
 // dynamic allocation
-drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg );
+drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg, const char* title );
 // free dynamically allocated window
 void drv_video_window_free(drv_video_window_t *w);
 

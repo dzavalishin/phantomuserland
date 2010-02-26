@@ -16,6 +16,7 @@
 #define CPUID_H
 
 #include <phantom_types.h>
+#include <sys/cdefs.h>
 
 
 

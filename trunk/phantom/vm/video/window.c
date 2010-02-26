@@ -78,23 +78,59 @@ static rgba_t brdr[] = {
     { 0x40, 0x40, 0x40, 0xFF },
 };
 
+rgba_t title_back_color = { 122, 230, 251, 0xFF };
+
 static void win_make_decorations(drv_video_window_t *w)
 {
-    int sz = sizeof(brdr)/sizeof(rgba_t);
-    drv_video_window_t *w2 = do_drv_video_window_create(w->xsize+sz*2, w->ysize+sz*2);
+    int bordr_size = sizeof(brdr)/sizeof(rgba_t);
+#if 1
+    int title_size = 18;
+
+
+    drv_video_window_t *w3 = do_drv_video_window_create
+        (
+         w->xsize+bordr_size*2,
+         title_size+bordr_size*2
+        );
+
+    queue_enter(&allwindows, w3, drv_video_window_t *, chain);
+
+    w3->x = w->x-bordr_size; w3->y = w->y+w->ysize; //+bordr_size;
+    w3->z = w->z;
+
+    w3->bg = title_back_color;
+
+    w3->flags = 0;
+
+    drv_video_window_fill( w3, w3->bg );
+    window_basic_border( w3, brdr, bordr_size );
+
+    // BUG! It must be +3, not -1 on Y coord!
+    drv_video_font_draw_string( w3, &drv_video_8x16cou_font,
+                                w->title, COLOR_BLACK,
+                                bordr_size+3, bordr_size-1 );
+
+    drv_video_winblt(w3);
+    drv_video_window_free(w3);
+#endif
+
+    //int bordr_size = sizeof(brdr)/sizeof(rgba_t);
+    drv_video_window_t *w2 = do_drv_video_window_create(w->xsize+bordr_size*2, w->ysize+bordr_size*2);
 
     queue_enter(&allwindows, w2, drv_video_window_t *, chain);
 
-    w2->x = w->x-sz; w2->y = w->y-sz;
+    w2->x = w->x-bordr_size; w2->y = w->y-bordr_size;
+    w2->z = w->z;
+
     w2->bg = w->bg;
 
     w2->flags = 0;
 
     drv_video_window_fill( w2, w2->bg );
-    window_basic_border( w2, brdr, sz );
+    window_basic_border( w2, brdr, bordr_size );
+
     drv_video_winblt(w2);
     drv_video_window_free(w2);
-
 }
 
 
@@ -102,10 +138,11 @@ drv_video_window_t *
 drv_video_window_create(
                         int xsize, int ysize,
                         int x, int y,
-                        rgba_t bg )
+                        rgba_t bg, const char *title )
 {
     drv_video_window_t *w = do_drv_video_window_create(xsize, ysize);
     drv_video_window_init( w, xsize, ysize, x, y, bg );
+    w->title = title;
     return w;
 }
 
@@ -134,6 +171,8 @@ drv_video_window_init( drv_video_window_t *w,
     w->z = 0xFE; // quite atop
     //w2->x = x-sz; w2->y = y-sz;
     w->bg = bg;
+
+    w->title = "?";
 
     win_make_decorations(w);
 
