@@ -342,8 +342,10 @@ void bitmap2bitmap(
 
 void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos  )
 {
+    int *isrc = (int *)src;
     while(nelem-- > 0)
     {
+#if 0
         // BUG don't update zbuf if alpha is zero?
         if( *zb > zpos ) { zb++; dest++; src++; continue; }
         *zb++ = zpos;
@@ -356,6 +358,21 @@ void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, 
         }
         dest++;
         src++;
+#else
+        // BUG don't update zbuf if alpha is zero?
+
+        if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
+        *zb++ = zpos;
+        //if( !(src->a) ) { dest++; src++; continue; }
+
+        int w = *isrc++;
+
+        dest->r = w >> 16;
+        dest->g = w >> 8;
+        dest->b = w >> 0;
+
+        dest++;
+#endif
     }
 }
 

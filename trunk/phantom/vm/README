@@ -1,4 +1,8 @@
 Original Code Source: Dmitry Zavalishion, dz@dz.ru
+
+Contributors:
+	Leonid Pauzner, lpauzner@yandex.ru - Refcount GC, object allocator
+
 Description:  
 	Phantom Virtual Machine
 	Bytecode interpreter and virtual machine services
