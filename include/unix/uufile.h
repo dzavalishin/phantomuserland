@@ -51,6 +51,7 @@ struct uufile
 #define UU_FILE_FLAG_NET        (1<<1) // Socket
 #define UU_FILE_FLAG_TCP        (1<<2) // Stream
 #define UU_FILE_FLAG_UDP        (1<<3) // Dgram
+#define UU_FILE_FLAG_MNT        (1<<4) // Mount point - FS root
 
 typedef struct uufile uufile_t;
 
