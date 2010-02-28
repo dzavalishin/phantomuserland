@@ -4,6 +4,7 @@
 #include <phantom_types.h>
 #include <hal.h>
 #include <errno.h>
+#include <queue.h>
 #include <sys/stat.h>
 
 #define FS_MAX_MOUNT 64
@@ -43,6 +44,7 @@ struct uufile
     const char *	name;   // This entry's name, or zero if none
     void *              impl; // implementation specific
 
+    int                 refcount; // n of refs to this node - TODO!
     hal_mutex_t         mutex; // serialize access
 };
 
@@ -58,6 +60,39 @@ typedef struct uufile uufile_t;
 
 uufile_t *copy_uufile( uufile_t *in );
 uufile_t *create_uufile();
+
+void set_uufile_name( uufile_t *in, const char *name );
+
+
+void link_uufile( uufile_t *in );
+void unlink_uufile( uufile_t *in );
+
+
+
+
+
+typedef struct dir_ent
+{
+    queue_chain_t       chain;
+
+    const char *        name; // malloc'ed
+    int                 flags;
+    uufile_t *          uufile;
+    void *              unused;
+} dir_ent_t;
+
+
+uufile_t *create_dir();
+
+//! Unlink by name
+errno_t unlink_dir_name( uufile_t *dir, const char *name );
+
+//! Unlink by contaned uufile
+errno_t unlink_dir_ent( uufile_t *dir, uufile_t *deu );
+
+// Find or create dir ent
+uufile_t *lookup_dir( uufile_t *dir, const char *name, int create, uufile_t *(*createf)() );
+
 
 
 
