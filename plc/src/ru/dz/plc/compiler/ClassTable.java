@@ -55,6 +55,8 @@ public class ClassTable {
 			{
 				String fns = c.getName()+".pc";
 				String lstfns = c.getName()+".lstc";
+				String verfns = c.getName()+".ver";
+				
 				// skip leading point
 				File fn = new File( PlcMain.getOutputPath(), fns.substring(1));
 				File lstfn = new File( PlcMain.getOutputPath(), lstfns.substring(1));
@@ -64,15 +66,45 @@ public class ClassTable {
 
 				lstfn.delete();
 				FileWriter lst = new FileWriter(lstfn);
+
+				{
+					/*
+					File verfn = new File( PlcMain.getOutputPath(), verfns.substring(1));
+					RandomAccessFile vf = new RandomAccessFile( verfn, "rw" );
+					String verstr = vf.readLine();
+					int ver = 0;
+					if(verstr.matches("Version=[0-9]+"))
+					{
+						
+					}
+					else
+					{
+						verstr = String.format("%4d", year, month, day, hour, min, sec );
+					}*/
+
+					
+				}
+
+				Calendar cc = Calendar.getInstance(TimeZone.getTimeZone("GMT"));						
+				String verstr = String.format("%4d%02d%02d%02d%02d%02d%03d", 
+						cc.get(Calendar.YEAR), 
+						cc.get(Calendar.MONTH), 
+						cc.get(Calendar.DAY_OF_MONTH), 
+						cc.get(Calendar.HOUR), 
+						cc.get(Calendar.MINUTE), 
+						cc.get(Calendar.SECOND),
+						cc.get(Calendar.MILLISECOND)
+						);
 				
 				ClassFileInfo cf =
 					new ClassFileInfo(
 							of, c.getName(), c.getParent() == null ? "" : c.getParent(),
-									c.getFieldSlotsNeeded(), c.getMethodSlotsNeeded()
+									c.getFieldSlotsNeeded(), c.getMethodSlotsNeeded(),
+									verstr
 					);
 
 				cf.write();
-				c.codegen(of, lst);
+				c.codegen(of, lst, verstr);
 				//cf.reWrite();
 
 				of.close();

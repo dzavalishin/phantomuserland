@@ -16,6 +16,8 @@ public class PhantomClass {
 
 	private String name;
 
+//	private String version; // Current class version, must increment each compile
+	
 	private MethodTable mt; // TODO accessed directly, must be public
 	private FieldTable ft; // TODO accessed directly, must be public
 
@@ -261,10 +263,10 @@ public class PhantomClass {
 		mt.print(ps);
 	}
 
-	public void codegen(RandomAccessFile os, FileWriter lst) throws IOException, PlcException
+	public void codegen(RandomAccessFile os, FileWriter lst, String version) throws IOException, PlcException
 	{
 		CodeGeneratorState s = new CodeGeneratorState(this);
-		mt.codegen(os, lst, s);
+		mt.codegen(os, lst, s, version);
 	}
 
 	public void preprocess(ParseState ps) throws PlcException

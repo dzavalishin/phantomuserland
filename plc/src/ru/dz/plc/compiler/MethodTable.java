@@ -137,8 +137,9 @@ public class MethodTable {
     }
   }
 
-  public void codegen(RandomAccessFile os, FileWriter lst, CodeGeneratorState s) throws IOException, PlcException {
+  public void codegen(RandomAccessFile os, FileWriter lst, CodeGeneratorState s, String version) throws IOException, PlcException {
     set_ordinals();
+    lst.write("Class version "+version+"\n\n");
 
     for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
     {
