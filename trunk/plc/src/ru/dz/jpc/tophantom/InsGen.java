@@ -174,7 +174,7 @@ class InsGen extends Opcode {
 			d.println(assign(ins) + "new(&cl_" +
 					Names.hashclass((String)c.name) + ".C);");
 			{
-				PhantomClass pc = ClassMap.get_map().get(c.name,false);
+				PhantomClass pc = ClassMap.get_map().get(c.name,false,null);
 				if (pc == null)
 					throw new PlcException("Class " + c.name + " is not defined - forgot to import?");
 
@@ -587,7 +587,7 @@ class InsGen extends Opcode {
 
 	private static void ensureAutoVariable(ParseState ps, String ident) throws PlcException {
 		if(ps.get_method().svars.get_var(ident) == null)
-			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false))));
+			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false,null))));
 	}
 
 

@@ -9,7 +9,7 @@ public class PhTypeObject extends PhantomType {
 		//super( null );
 		//super( new PhantomClass(".internal.int") );
 
-		super( ClassMap.get_map().get(".internal.object",false) );	
+		super( ClassMap.get_map().get(".internal.object",false,null) );	
 		//_is_int = true;
 	}
 	
