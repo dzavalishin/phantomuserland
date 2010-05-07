@@ -8,7 +8,7 @@ public class PhTypeInt extends PhantomType {
 		//super( null );
 		//super( new PhantomClass(".internal.int") );
 
-		super( ClassMap.get_map().get(".internal.int",false) );	
+		super( ClassMap.get_map().get(".internal.int",false,null) );	
 		_is_int = true;
 	}
 

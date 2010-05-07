@@ -196,11 +196,15 @@ public class PhantomType {
 		_is_string = main_class_name.equals(".internal.string");
 	}
 
+	/**
+	 * 
+	 * @return Class of this type
+	 */
 	public PhantomClass get_class()
 	{
 		if( _class != null ) return _class;
-		if( _is_int ) _class = ClassMap.get_map().get(".internal.int",false);
-		if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false);
+		if( _is_int ) _class = ClassMap.get_map().get(".internal.int",false, null);
+		if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
 
 		return _class;
 	}

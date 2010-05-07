@@ -27,13 +27,15 @@ public class PhantomClass {
 	private PhantomClass parent_class = null;
 	private boolean have_nonvoid_parent = false;
 
+	private Set<PhantomClass> referencedClasses;
+
 	public PhantomClass(String name) throws PlcException {
 		this.name = name;
 		mt = new MethodTable();
 		ft = new FieldTable();
 
 		if (!name.equals(".internal.object")) {
-			parent_class = ClassMap.get_map().get(parent,false);
+			parent_class = ClassMap.get_map().get(parent,false,null);
 			if (parent_class == null)
 				throw new PlcException("PhantomClass constructor",
 						"no .internal.object class found", name);
@@ -58,17 +60,25 @@ public class PhantomClass {
 	// Parents
 	// ------------------------------------------------------------------------
 
-	public void addInterface(String name) {
-		PhantomClass iface = ClassMap.get_map().get(name,false);
+	/**
+	 * @param name Interface name
+	 * @param ps Parse state to notify about dependency on this interface, or <code>null</code>.
+	 */
+	public void addInterface(String name, ParseState ps) {
+		PhantomClass iface = ClassMap.get_map().get(name,false,ps);
 		interfaces.add(iface);
 	}
 
-	public boolean addParent(String name) throws PlcException {
+	/**
+	 * @param name Parent name
+	 * @param ps Parse state to notify about dependency on this parent, or <code>null</code>.
+	 */
+	public boolean addParent(String name, ParseState ps) throws PlcException {
 		if (have_nonvoid_parent)return false;
 		parent = name;
 		have_nonvoid_parent = true;
 
-		parent_class = ClassMap.get_map().get(name,false);
+		parent_class = ClassMap.get_map().get(name,false,ps);
 
 		if (parent_class != null) {
 			/*
@@ -308,6 +318,14 @@ public class PhantomClass {
 
 	public void setMethodOrdinal(Method m, int required_method_index) throws PlcException {
 		mt.set_ordinal(m,required_method_index);		
+	}
+
+	public void setReferencedClasses(Set<PhantomClass> referencedClasses) {
+		this.referencedClasses = referencedClasses;
+	}
+
+	public Set<PhantomClass> getReferencedClasses() {
+		return referencedClasses;
 	}
 
 

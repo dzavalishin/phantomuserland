@@ -73,7 +73,7 @@ class MethGen extends Opcode {
 		NodeEmitter emitter = new NodeEmitter();
 		
 		ru.dz.plc.compiler.Method pMethod = pclass.addMethod( f.name, 
-				new PhantomType( ClassMap.get_map().get(".internal.object",false) ) 
+				new PhantomType( ClassMap.get_map().get(".internal.object",false,null) ) 
 		);
 
 		ps.set_method(pMethod);
@@ -380,8 +380,8 @@ class MethGen extends Opcode {
 			isInt = c == 'i';				
 
 			PhantomClass vc = isInt ?
-					ClassMap.get_map().get(".internal.int",false) :
-						ClassMap.get_map().get(".internal.object",false);
+					ClassMap.get_map().get(".internal.int",false,null) :
+						ClassMap.get_map().get(".internal.object",false,null);
 
 					pm.addArg(varName, new PhantomType(vc) );
 		}

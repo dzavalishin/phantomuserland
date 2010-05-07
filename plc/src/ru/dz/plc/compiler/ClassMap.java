@@ -1,5 +1,6 @@
 package ru.dz.plc.compiler;
 
+import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.PlcException;
 
 import java.io.IOException;
@@ -45,11 +46,18 @@ public class ClassMap {
 
 	public void imported_add_hack( PhantomClass c ) throws PlcException { imported_classes.add(c); }
 
-	public PhantomClass get( String cln, boolean justTry )
+	/**
+	 * 
+	 * @param cln Class name
+	 * @param justTry Don't cry about class absence. 
+	 * @param ps ParseState to inform about dependency on the requested class. Used by .d file generation. Can be <code>null</code>.
+	 * @return Class found or null.
+	 */
+	public PhantomClass get( String cln, boolean justTry, ParseState ps )
 	{
-		PhantomClass c = classes.get(cln,justTry);
+		PhantomClass c = classes.get(cln,justTry, ps);
 		if (c == null)
-			c = imported_classes.get(cln,justTry);
+			c = imported_classes.get(cln,justTry, ps);
 		return c;
 	}
 

@@ -239,7 +239,7 @@ public class PythonFrontendXML {
 				int inStartReg = getInt(cn,"inStart");
 				int inRegsNum = getInt(cn,"inNum");
 
-				setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false)), null, null) );
+				setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false,null)), null, null) );
 				// TODO use some map style container for dictionary
 				// TODO here we must fill a new dictionary - compose?
 				if(inRegsNum != 0)
