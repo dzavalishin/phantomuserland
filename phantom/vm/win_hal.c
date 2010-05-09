@@ -293,3 +293,19 @@ return;
     getchar();
 }
 
+
+
+
+void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus )
+{
+}
+
+int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait )
+{
+    printf("\nGetEvent!?\n");
+    w->events_count--;
+    assert(!wait);
+    return 0;
+}
+
+

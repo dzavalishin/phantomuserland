@@ -23,7 +23,8 @@ classes: \
      ../bin/internal.binary.pc ../bin/internal.class.pc \
      ../bin/internal.io.tty.pc \
      ../bin/internal.bitmap.pc ../bin/phantom.user.pc ../bin/phantom.util.map.pc \
-     ../bin/ru.dz.phantom.backgrounds.pc ../bin/phantom.os.time.pc \
+     ../bin/ru.dz.phantom.backgrounds.pc ../bin/ru.dz.phantom.resources.pc \
+     ../bin/phantom.os.time.pc \
      ../bin/internal.world.pc ../bin/phantom.osimpl.pc ../bin/phantom.os.pc \
      ../bin/phantom.environment.pc \
      ../bin/internal.thread.pc ../bin/ru.dz.phantom.system.thread_test.pc \
