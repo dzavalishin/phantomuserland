@@ -13,9 +13,18 @@
 #include "drv_video_screen.h"
 #include <assert.h>
 #include <phantom_libc.h>
+#include <event.h>
+#include <spinlock.h>
 
-static queue_head_t     allwindows = { &allwindows, &allwindows };
 
+//static
+queue_head_t     	allwindows = { &allwindows, &allwindows };
+
+//static
+drv_video_window_t *	focused_window = 0;
+
+//static
+hal_spinlock_t  		allw_lock;
 
 // here we have a problem - some windows are persistent and
 // keep their generation. So on start we need to advance
@@ -48,6 +57,22 @@ int rect_win_bounds( rect_t *r, drv_video_window_t *w )
 }
 
 
+int point_in_win( int x, int y, drv_video_window_t *w )
+{
+    if( x < w->x || y < w->y )
+        return 0;
+
+    if( x > w->x + w->xsize )
+        return 0;
+
+    if( y > w->y + w->ysize )
+        return 0;
+
+    return 1;
+}
+
+
+
 
 void drv_video_window_free(drv_video_window_t *w)
 {
@@ -57,17 +82,45 @@ void drv_video_window_free(drv_video_window_t *w)
 
 
 
+static void
+common_window_init( drv_video_window_t *w,
+                        int xsize, int ysize )
+{
+    w->xsize = xsize;
+    w->ysize = ysize;
+
+    w->li = w->ti = w->ri = w->bi = 0;
+
+    w->generation = 0;
+
+    w->x = 0;
+    w->y = 0;
+    w->z = 0xFE; // quite atop
+
+    w->bg = COLOR_BLACK;
+
+    queue_init(&(w->events));
+    w->events_count = 0;
+    w->stall = 0;
+}
+
 static drv_video_window_t *do_drv_video_window_create(int xsize, int ysize)
 {
-    drv_video_window_t *w = malloc(drv_video_window_bytes(xsize,ysize));
+    drv_video_window_t *w = calloc(1,drv_video_window_bytes(xsize,ysize));
     if(w == 0)
         return 0;
 
-    w->xsize = xsize;
-    w->ysize = ysize;
-    w->z = 0xFE; // quite atop
+    //w->xsize = xsize;
+    //w->ysize = ysize;
+    //w->z = 0xFE; // quite atop
 
-    w->li = w->ti = w->ri = w->bi = 0;
+    //w->li = w->ti = w->ri = w->bi = 0;
+
+    //queue_init(&(w->events));
+    //w->events_count = 0;
+    //w->stall = 0;
+
+    common_window_init( w, xsize, ysize );
 
     return w;
 }
@@ -93,7 +146,10 @@ static void win_make_decorations(drv_video_window_t *w)
          title_size+bordr_size*2
         );
 
-    queue_enter(&allwindows, w3, drv_video_window_t *, chain);
+    w3->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+    //hal_spin_lock( &allw_lock );
+    //queue_enter(&allwindows, w3, drv_video_window_t *, chain);
+    //hal_spin_unlock( &allw_lock );
 
     w3->x = w->x-bordr_size; w3->y = w->y+w->ysize; //+bordr_size;
     w3->z = w->z;
@@ -110,6 +166,10 @@ static void win_make_decorations(drv_video_window_t *w)
                                 w->title, COLOR_BLACK,
                                 bordr_size+3, bordr_size-1 );
 
+    drv_video_window_draw_bitmap( w3, w3->xsize - close_bmp.xsize - 5, 5, &close_bmp );
+    drv_video_window_draw_bitmap( w3, w3->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
+
+
     drv_video_winblt(w3);
     drv_video_window_free(w3);
 #endif
@@ -117,7 +177,10 @@ static void win_make_decorations(drv_video_window_t *w)
     //int bordr_size = sizeof(brdr)/sizeof(rgba_t);
     drv_video_window_t *w2 = do_drv_video_window_create(w->xsize+bordr_size*2, w->ysize+bordr_size*2);
 
-    queue_enter(&allwindows, w2, drv_video_window_t *, chain);
+    w2->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+    //hal_spin_lock( &allw_lock );
+    //queue_enter(&allwindows, w2, drv_video_window_t *, chain);
+    //hal_spin_unlock( &allw_lock );
 
     w2->x = w->x-bordr_size; w2->y = w->y-bordr_size;
     w2->z = w->z;
@@ -155,34 +218,67 @@ drv_video_window_init( drv_video_window_t *w,
                         int x, int y,
                         rgba_t bg )
 {
-    w->xsize = xsize;
-    w->ysize = ysize;
+    common_window_init( w, xsize, ysize );
 
-    w->li = w->ti = w->ri = w->bi = 0;
+    //w->xsize = xsize;
+    //w->ysize = ysize;
 
-    w->flags = WIN_DECORATED;
-    w->generation = 0;
+    //w->li = w->ti = w->ri = w->bi = 0;
 
-    //int sz = sizeof(brdr)/sizeof(rgba_t);
-    //drv_video_window_t *w2 = do_drv_video_window_create(xsize+sz*2, ysize+sz*2);
+    w->flags = WFLAG_WIN_DECORATED;
+    //w->generation = 0;
 
     w->x = x;
     w->y = y;
-    w->z = 0xFE; // quite atop
-    //w2->x = x-sz; w2->y = y-sz;
+    //w->z = 0xFE; // quite atop
     w->bg = bg;
 
     w->title = "?";
 
+    //queue_init(&(w->events));
+    //w->events_count = 0;
+    //w->stall = 0;
+
     win_make_decorations(w);
 
+    hal_spin_lock( &allw_lock );
     queue_enter(&allwindows, w, drv_video_window_t *, chain);
+    hal_spin_unlock( &allw_lock );
 }
 
 
 void drv_video_window_destroy(drv_video_window_t *w)
 {
-    queue_remove(&allwindows, w, drv_video_window_t *, chain);
+    if( focused_window == w )
+    {
+        event_q_put_win( w->x, w->y, UI_EVENT_WIN_LOST_FOCUS, focused_window );
+        focused_window = 0;
+    }
+
+    if(!w->flags & WFLAG_WIN_NOTINALL )
+    {
+        hal_spin_lock( &allw_lock );
+        queue_remove(&allwindows, w, drv_video_window_t *, chain);
+        hal_spin_unlock( &allw_lock );
+    }
+    // This will inform win on its death and unlock event read loop to make
+    // sure it doesnt loop in dead window
+    event_q_put_win( w->x, w->y, UI_EVENT_WIN_DESTROYED, focused_window );
+
+
+
+    // drain event queue
+    if( w->events_count > 0 )
+    {
+        struct ui_event e;
+
+        // Wait to make sure regular event pump drv_video_window_get_event is done
+        hal_sleep_msec( 200 ); 
+
+        while( w->events_count > 0 )
+            drv_video_window_get_event( w, &e, 0 );
+    }
+
 }
 
 
@@ -191,10 +287,12 @@ void drv_video_window_update_generation(void)
     win_generation++;
     // redraw all here, or ask some thread to do that
     drv_video_window_t *w;
+    hal_spin_lock( &allw_lock );
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
         drv_video_winblt( w );
     }
+    hal_spin_unlock( &allw_lock );
 }
 
 
@@ -230,6 +328,20 @@ drv_video_window_fill_rect( drv_video_window_t *w, rgba_t color, rect_t r )
 }
 
 
+void
+drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
+{
+    bitmap2bitmap(
+                  w->pixel, w->xsize, w->ysize, x, y,
+                  bmp->pixel, bmp->xsize, bmp->ysize, 0, 0,
+                  bmp->xsize, bmp->ysize
+                 );
+
+}
+
+
+
+
 
 
 
@@ -240,9 +352,10 @@ void drv_video_window_preblit( drv_video_window_t *w )
     if( (w->generation != win_generation) )
     {
         w->generation = win_generation;
-        if(w->flags & WIN_DECORATED)
+        if(w->flags & WFLAG_WIN_DECORATED)
             win_make_decorations(w);
     }
 }
+
 
 

@@ -1,6 +1,9 @@
 
 #include <queue.h>
 
+//! Max number of unprocessed events in window queue. Extra events will be thrown away.
+#define MAX_WINDOW_EVENTS 512
+
 struct ui_event
 {
     queue_chain_t               chain; // on q
@@ -17,7 +20,7 @@ struct ui_event
     int                         rel_y;
     int                         rel_z;
 
-    struct drv_video_window *   focus; // Who is in focus now
+    struct drv_video_window *   focus; // Target window
 
     union {
 
@@ -48,6 +51,7 @@ struct ui_event
 
 #define UI_EVENT_WIN_GOT_FOCUS          1
 #define UI_EVENT_WIN_LOST_FOCUS         2
+#define UI_EVENT_WIN_DESTROYED          3
 
 
 

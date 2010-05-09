@@ -103,7 +103,9 @@ typedef struct rect
 } rect_t;
 
 
-#define WIN_DECORATED           0x00000001
+#define WFLAG_WIN_DECORATED           0x00000001
+// This is temp win, not included in allwindows list
+#define WFLAG_WIN_NOTINALL            0x00000002
 
 typedef struct drv_video_window
 {
@@ -123,12 +125,20 @@ typedef struct drv_video_window
 
     const char* 	title;
 
+    queue_chain_t       events; // Incoming events
+    volatile int	events_count; // To prevent overfill of dead window q
+
+    int                 stall; // True if event queue is overloaded and events are being lost
+
     // bitmap itself
     rgba_t       	pixel[];
 } drv_video_window_t;
 
 // returns nonzero if rect is out of window
 int rect_win_bounds( rect_t *r, drv_video_window_t *w );
+
+// returns nonzero if point is in window
+int point_in_win( int x, int y, drv_video_window_t *w );
 
 
 typedef struct drv_video_font_t
@@ -146,6 +156,9 @@ extern struct drv_video_font_t         drv_video_8x16med_font;
 extern struct drv_video_font_t         drv_video_8x16rom_font;
 extern struct drv_video_font_t         drv_video_8x16san_font;
 extern struct drv_video_font_t         drv_video_8x16scr_font;
+
+extern drv_video_bitmap_t 		close_bmp; // Window close button
+extern drv_video_bitmap_t 		pin_bmp; // Window pin button
 
 
 
@@ -170,6 +183,10 @@ void    drv_video_window_clear( drv_video_window_t *win );
 void    drv_video_window_fill( drv_video_window_t *win, rgba_t color );
 
 void 	drv_video_window_fill_rect( drv_video_window_t *win, rgba_t color, rect_t r );
+
+void    drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp );
+
+
 
 void 	drv_video_font_draw_string(
                                            drv_video_window_t *win,
