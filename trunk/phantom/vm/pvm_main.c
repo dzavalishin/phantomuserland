@@ -41,6 +41,109 @@ static char *envbuf[MAXENVBUF] = { 0 };
 
 
 
+#include <math.h>
+
+
+
+
+
+static const MaxColor     = 110;
+
+
+static struct rgba_t palette[256];
+
+static void mkFlamePalette()
+{
+    u_int8_t i;
+
+    memset( palette, sizeof(palette), 0 );
+
+    for( i = 0; i < MaxColor; i++ )
+        palette[i] = Hsi2Rgb(4.6-1.5*i/MaxColor,i/MaxColor,i/MaxColor);
+
+    for( i = MaxColor; i < 255; i++ )
+    {
+        palette[i]=palette[i-1];
+
+        if(palette[i].r < 63) palette[i].r++;
+        if(palette[i].r < 63) palette[i].r++;
+
+        if( ((i % 2) == 0) && (palette[i].g < 53) ) palette[i].g++;
+        if( ((i % 2) == 0) && (palette[i].b < 63) ) palette[i].b++;
+    }
+
+}
+
+
+void genflame( char *video, int vsize, int xsize )
+{
+    char *src = video+vsize-xsize;
+    char *dst = video+vsize;
+    int count = vsize-xsize;
+
+    while(count--)
+    {
+        char acc = *src--;
+
+        acc += src[0];
+        acc += src[-319];
+        acc += src[2];
+        acc <<= 2;
+
+        //acc &= 0xF;
+        acc += 0x10;
+
+        *dst-- = acc;
+    }
+
+    count = xsize;
+    //dst = video + vsize-xsize;
+    dst = video;
+    while(count--)
+    {
+        *dst++ = random();
+    }
+}
+
+
+
+// Just for fun :)
+void flame(drv_video_window_t *w)
+{
+    int vsize = w->xsize * w->ysize;
+    char *video = calloc( 1, vsize );
+
+    mkFlamePalette();
+
+    while(1)
+    {
+        genflame( video, vsize, w->xsize );
+
+        char *src = video;
+        struct rgba_t *dest = w->pixel;
+
+        int i;
+        for( i = 0; i < vsize; i++ )
+        {
+#if 1
+            *dest++ = palette[*src++ * 3];
+#else
+            dest->a = 0xFF;
+            dest->r = *src;
+            dest->g = 0;
+            dest->b = 0;
+
+            src++;
+            dest++;
+#endif
+        }
+
+        drv_video_winblt( w );
+    }
+
+
+}
+
 
 
 
@@ -152,6 +255,8 @@ void videotest()
     //drv_video_window_clear( w );
     //drv_video_window_fill( w, COLOR_LIGHTGRAY );
     drv_video_winblt( w );
+
+    //flame(w);
 
 #if VIDEO_ZBUF
     video_zbuf_reset();

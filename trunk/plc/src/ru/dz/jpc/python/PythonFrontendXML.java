@@ -31,7 +31,6 @@ import ru.dz.plc.compiler.node.JzNode;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.util.PlcException;
-import sun.io.Converters;
 
 public class PythonFrontendXML {
 	private static final boolean really = false;

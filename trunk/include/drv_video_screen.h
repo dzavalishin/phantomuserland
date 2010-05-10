@@ -16,6 +16,8 @@
 #include <phantom_types.h>
 #include <queue.h>
 
+
+
 // Windows 'screen' driver works in BGR format :(
 #define BGR 1
 
@@ -107,6 +109,8 @@ typedef struct rect
 // This is temp win, not included in allwindows list
 #define WFLAG_WIN_NOTINALL            0x00000002
 
+#define WSTATE_WIN_FOCUSED              (1<<0)
+
 typedef struct drv_video_window
 {
     int         	xsize; // physical
@@ -115,7 +119,8 @@ typedef struct drv_video_window
     int                 x, y, z; // On screen
 
     int                 generation; // used to redraw self and borders on global events
-    int                 flags;
+    int                 flags; // Not supposed to change during window's life
+    int                 state; // Can change anytime
 
     queue_chain_t       chain; // All windows are on this chain
 
@@ -129,6 +134,13 @@ typedef struct drv_video_window
     volatile int	events_count; // To prevent overfill of dead window q
 
     int                 stall; // True if event queue is overloaded and events are being lost
+
+    /*!
+     * Called from main event dispatch thread after event is placed to
+     * window event queue. Supposed to process event or trigger waiting
+     * thread to do that.
+     */
+    void                (*inKernelEventProcess)( struct drv_video_window *w );
 
     // bitmap itself
     rgba_t       	pixel[];
@@ -399,6 +411,10 @@ void window_basic_border( drv_video_window_t *dest, const rgba_t *src, int srcSi
 
 
 
+
+#ifndef VIDEO_H
+#include <video.h>
+#endif // VIDEO_H
 
 
 #endif // DRV_VIDEO_SCREEN_H

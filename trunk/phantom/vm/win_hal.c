@@ -309,3 +309,7 @@ int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int w
 }
 
 
+int hal_save_cli() { return 1; }
+void hal_sti() {}
+void hal_cli() {}
+
