@@ -52,7 +52,20 @@ struct ui_event
 #define UI_EVENT_WIN_GOT_FOCUS          1
 #define UI_EVENT_WIN_LOST_FOCUS         2
 #define UI_EVENT_WIN_DESTROYED          3
+#define UI_EVENT_WIN_REDECORATE         4 //! Repaint titlebar
+#define UI_EVENT_WIN_REPAINT            5 //! Repaint all
 
 
+
+
+
+//! Put mouse event onto the main e q
+void event_q_put_mouse( int x, int y, int buttons );
+
+//! Put key event onto the main e q
+void event_q_put_key( int vkey, int ch );
+
+//! Put window event onto the main e q
+void event_q_put_win( int x, int y, int info, struct drv_video_window *focus );
 
 
