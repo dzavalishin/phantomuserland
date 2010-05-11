@@ -258,6 +258,20 @@ void videotest()
 
     //flame(w);
 
+    drv_video_window_draw_line( w, 1, 1, 110, 20, COLOR_RED );
+    drv_video_window_draw_line( w, 110, 1, 110, 20, COLOR_RED );
+    drv_video_window_draw_line( w, 1, 20, 110, 20, COLOR_GREEN );
+
+    drv_video_window_fill_ellipse( w, 30, 30, 15, 27, COLOR_BLUE );
+
+    drv_video_window_fill_box( w,  40, 32, 33, 10, COLOR_RED );
+
+    drv_video_window_draw_box( w, 45, 37, 33, 12, COLOR_BLACK );
+
+    drv_video_winblt( w );
+
+    getchar();
+
 #if VIDEO_ZBUF
     video_zbuf_reset();
 
