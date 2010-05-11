@@ -25,9 +25,20 @@
 rgba_t Hsi2Rgb(double H, double S, double I );
 
 
+void drv_video_window_draw_line( drv_video_window_t *w,
+                                 int x1, int y1, int x2, int y2, rgba_t c);
 
+void drv_video_window_fill_ellipse( drv_video_window_t *w,
+                                 int x,int y,int lx,int ly,
+                                 rgba_t c);
 
+void drv_video_window_fill_box( drv_video_window_t *w,
+                                 int x,int y,int lx,int ly,
+                                 rgba_t c);
 
+void drv_video_window_draw_box( drv_video_window_t *w,
+                                 int x,int y,int lx,int ly,
+                                 rgba_t c);
 
 #endif // VIDEO_H
 
