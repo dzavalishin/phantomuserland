@@ -12,8 +12,8 @@ Quite crirtical tasks.
   * *Java bytecode compiler*. Have skeleton, need complete one.
   * *Hosted test env. multithreading*. Must be easy.
   * *Hosted test env. TCP access*. Ditto.
-  * *Windowing env Z-buffer*. 
-  * *Windowing evants, input, event thread pools*. 
+  * Windowing env Z-buffer - *Done*. 
+  * Windowing events, input, event thread pools - *In progress*. 
   * *VM and compiler support for floats/doubles/64 bit ints*. 
   * *More of Phantom language implementation in compiler*. Closures, direct containers support.
 
@@ -29,7 +29,7 @@ Not so easy, but we need it, sooner or later.
 
   * *VirtIO drivers*. Have partial VirtIO environment, need complete disk and net drivers.
   * *IDE driver cleanup*. Driver supports interrupts and BM but does not use them!
-  * *Partition lookup code*. None at all.
+  * *Partition lookup code*. Partially implemented.
   * *IP stack tests and userland interface*. 
 
 Not critical, but can be done relatively easily.
@@ -51,7 +51,7 @@ We need volunteers for these:
 = Far Goals =
 
   * *Graphical shell*. Something to start with.
-  * *Posix support*. Map two binary objects to DS/CS, run native thread, support syscall mapping.
+  * *Posix support*. Map two binary objects to DS/CS, run native thread, support syscall mapping. *In progress*
   * *LLVM fast code*. In addition to posix subsystem it would be nice to have a specific LLVM subsystem which can offer programmers hispeed, but portable (to Phantom on other arch) programming framework. The same CS/DS binary objects, but executable code is LLVM-level and passed through LLVM backend before being run for the first time.
   * *OpenGL*. In fact, it is quite easy to get TinyGL working (it is already done for kernel), but we need a clean userland interface and understanding of interoperation for multiiple simult. threads doing GL rendering in a same env.
   * *Sound drivers*. At least some very simple AC97 wave output one?
