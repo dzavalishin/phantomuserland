@@ -19,6 +19,7 @@
 #include "driver_map.h"
 
 #include <i386/pio.h>
+#include <sys/libkern.h>
 #include <phantom_libc.h>
 #include <time.h>
 
@@ -30,6 +31,8 @@
 #define BLOCK_LENGTH    512   /* Length of digitized sound output block     */
 #define BUFFER_LENGTH 	BLOCK_LENGTH*2
 
+#define BUFFER_PAGES 	(((BUFFER_LENGTH-1)/PAGE_SIZE)+1)
+
 #define lo(value) (unsigned char)((value) & 0x00FF)
 #define hi(value) (unsigned char)((value) >> 8)
 
@@ -40,7 +43,7 @@ typedef struct
 
     float dspversion;
 
-    int dma;
+    int dma8;
     int dma16;
 
     int dma_maskport;
@@ -97,11 +100,6 @@ typedef struct
 
 
 
-static int
-sb_detect(int unit, int addr)
-{
-    return 0;
-}
 
 
 
@@ -123,20 +121,20 @@ static void startblock_sc(phantom_device_t *dev);
 
 static void sb_interrupt( void *_dev );
 
+static errno_t sb_detect( phantom_device_t *dev );
+
 // TODO this is to be moved to driver_map.c and be kept in driver tables
 static int seq_number = 0;
 
-phantom_device_t * driver_isa_sb_probe( int port, int irq, int stage )
+phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage )
 {
-    if( !sb_detect( seq_number, port) )
-        return 0;
-
     physaddr_t physbuf;
-    if( hal_alloc_phys_pages_low( &physbuf, ((BUFFER_LENGTH-1)/PAGE_SIZE)+1 ) )
+    if( hal_alloc_phys_pages_low( &physbuf, BUFFER_PAGES ) )
         return 0;
-
 
     phantom_device_t * dev = calloc(sizeof(phantom_device_t), 1);
+    if(dev == 0)
+        goto free1;
 
     dev->iobase = port;
     dev->irq = irq;
@@ -154,11 +152,12 @@ phantom_device_t * driver_isa_sb_probe( int port, int irq, int stage )
     if( hal_irq_alloc( irq, &sb_interrupt, dev, HAL_IRQ_SHAREABLE ) )
     {
         SHOW_ERROR( 0, "IRQ %d is busy", irq );
-        free(dev);
-        return 0;
+        goto free2;
     }
 
     sb_t *sb = calloc( sizeof(sb_t), 1 );
+    if( sb == 0 ) goto free3;
+
     dev->drv_private = sb;
 
     sb->active = 0;
@@ -169,17 +168,39 @@ phantom_device_t * driver_isa_sb_probe( int port, int irq, int stage )
     sb->avail4write = 0;
     sb->start4write = 0;
 
+    // No chance to set 'em? Kernel environment?
+    sb->dma8 = 1;
+    sb->dma16 = 5;
+
+
+    if( sb_detect(dev) )
+    {
+        SHOW_ERROR( 0, "SB16 not found at 0x%d", port );
+        goto free4;
+    }
+
+
     if( SB_Init(dev) )
     {
-        free(sb);
-        free(dev);
-        hal_irq_free( irq, &sb_interrupt, dev );
         SHOW_ERROR0( 0, "Unable to init SB16");
+        goto free4;
     }
 
     sb->physbuf = physbuf;
 
     return dev;
+
+    // TODO sema? mutex?
+free4:
+    free(sb);
+free3:
+    hal_irq_free( irq, &sb_interrupt, dev );
+free2:
+    free(dev);
+free1:
+    hal_free_phys_pages_low( physbuf, BUFFER_PAGES );
+    return 0;
+
 }
 
 
@@ -251,37 +272,25 @@ static void sb_interrupt( void *_dev )
     sb->intcount++;
 
     hal_sti();
-    /*
-    if(!sb->autoinit)   // Start next block quickly if not using auto-init DMA
-    {
-        startblock_sc(dev);
-        copy_sound();
-        sb->curblock = !sb->curblock;  // Toggle block
-    }*/
 
-    //update_voices();
-    //mix_voices();
 
-    //if(sb->autoinit)
-    {
-        //copy_sound();
 
-        // Clean buffer so that if no incoming data available,
-        // No sound will be produced
-        u_int16_t *destptr =  (u_int16_t *)sb->blockptr[sb->curblock];
-        memset( destptr, BLOCK_LENGTH*2, 0 );
+    // Clean buffer so that if no incoming data available,
+    // No sound will be produced
+    u_int16_t *destptr =  (u_int16_t *)sb->blockptr[sb->curblock];
+    memset( destptr, BLOCK_LENGTH*2, 0 );
 
-        int ie = hal_save_cli();
-        hal_spin_lock( &sb->lock );
-        sb->avail4write = BLOCK_LENGTH; // 16-bit words!
-        sb->start4write = destptr;
-        hal_spin_unlock( &sb->lock );
-        if(ie) hal_sti();
+    int ie = hal_save_cli();
+    hal_spin_lock( &sb->lock );
+    sb->avail4write = BLOCK_LENGTH; // 16-bit words!
+    sb->start4write = destptr;
+    hal_spin_unlock( &sb->lock );
+    if(ie) hal_sti();
 
-        hal_cond_signal( &sb->canWrite );
+    hal_cond_signal( &sb->canWrite );
 
-        sb->curblock = !sb->curblock;  // Toggle block
-    }
+    sb->curblock = !sb->curblock;  // Toggle block
+
 
 }
 
@@ -440,25 +449,25 @@ static int sb_write(struct phantom_device *dev, const void *buf, int len)
 
 
 static void SB_WriteDSP(phantom_device_t *dev, u_int8_t value)
-  {
+{
     sb_t *sb = (sb_t *)dev->drv_private;
 
-    while ((inp(sb->writeport) & 0x80))
+    while ((inb(sb->writeport) & 0x80))
         ;
     outb(sb->writeport, value);
-  }
+}
 
 static u_int8_t  SB_ReadDSP(phantom_device_t *dev)
 {
     sb_t *sb = (sb_t *)dev->drv_private;
 
-    while (!(inp(sb->pollport) & 0x80))
+    while (!(inb(sb->pollport) & 0x80))
         ;
-    return(inp(sb->readport));
+    return(inb(sb->readport));
 }
 
 static errno_t SB_ResetDSP(phantom_device_t *dev)
-  {
+{
     int i;
 
     sb_t *sb = (sb_t *)dev->drv_private;
@@ -473,743 +482,229 @@ static errno_t SB_ResetDSP(phantom_device_t *dev)
         ;
 
     return (i > 0) ? 0 : ENXIO;
-  }
+}
 
 
-/*
-//! Starts a single-cycle DMA transfer
-static void startblock_sc(phantom_device_t *dev)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include "sb16_regs.h"
+
+
+
+static void
+hw_codec_reg_write(phantom_device_t* dev, u_int8_t index, u_int8_t value)
+{
+    /* write a Mixer indirect register */
+    outb(dev->iobase + SB16_MIXER_ADDRESS, index);
+    outb(dev->iobase + SB16_MIXER_DATA, value);
+}
+
+static int
+hw_codec_reg_read(phantom_device_t* dev, u_int8_t index)
+{
+    /* read a Mixer indirect register */
+    outb(dev->iobase + SB16_MIXER_ADDRESS, index);
+    return inb(dev->iobase + SB16_MIXER_DATA);
+}
+
+
+
+static void
+hw_codec_read_irq_setup(phantom_device_t* dev)
+{
+    /* query the current IRQ line resource */
+    int mask = hw_codec_reg_read(dev, SB16_IRQ_SETUP);
+
+    dev->irq = 5;
+
+    if (mask & 0x01)		dev->irq = 2;
+    if (mask & 0x02)		dev->irq = 5;
+    if (mask & 0x04)		dev->irq = 7;
+    if (mask & 0x08)		dev->irq = 10;
+}
+
+static void
+hw_codec_read_dma_setup(phantom_device_t* dev)
 {
     sb_t *sb = (sb_t *)dev->drv_private;
 
-    outb(sb->dma_maskport,   sb->dma_stopmask);
-    outb(sb->dma_clrptrport, 0x00);
-    outb(sb->dma_modeport,   sb->dma_mode);
-    outb(sb->dma_addrport,   lo(sb->block_ofs[sb->curblock]));
-    outb(sb->dma_addrport,   hi(sb->block_ofs[sb->curblock]));
-    outb(sb->dma_countport,  lo(BLOCK_LENGTH-1));
-    outb(sb->dma_countport,  hi(BLOCK_LENGTH-1));
-    outb(sb->dma_pageport,   sb->block_page[sb->curblock]);
-    outb(sb->dma_maskport,   sb->dma_startmask);
+    /* query the current DMA channel resources */
+    int mask = hw_codec_reg_read(dev, SB16_DMA_SETUP);
 
-    SB_WriteDSP(dev, 0x14);                // 8-bit single-cycle DMA sound output
-    SB_WriteDSP(dev, lo(BLOCK_LENGTH-1));
-    SB_WriteDSP(dev, hi(BLOCK_LENGTH-1));
+    sb->dma8 = 1;
+    if (mask & 0x01)        sb->dma8 = 0;
+    if (mask & 0x02)        sb->dma8 = 1;
+    if (mask & 0x08)        sb->dma8 = 3;
+
+    sb->dma16 = sb->dma8;
+    if (mask & 0x20)        sb->dma16 = 5;
+    if (mask & 0x40)        sb->dma16 = 6;
+    if (mask & 0x80)        sb->dma16 = 7;
+}   
+        
+static void 
+hw_codec_write_irq_setup(phantom_device_t* dev)
+{       
+    /* change programmable IRQ line resource */
+    int mask = 0x02;
+
+    if (dev->irq == 2)		mask = 0x01;
+    if (dev->irq == 5)		mask = 0x02;
+    if (dev->irq == 7)		mask = 0x04;
+    if (dev->irq == 10)		mask = 0x08;
+
+    hw_codec_reg_write(dev, SB16_IRQ_SETUP, mask);
 }
-*/
 
-
-
-
-#if 0
-
-
-
-
-// SOUNDBLASTER 8-CHANNEL MIXING LIBRARY
-// Remember to compile SBLIB.CPP with the -ZU option!
-
-#ifndef _SBLIB_H_
-#define _SBLIB_H_
-
-#include <stdio.h>
-
-// Sample type
-
-typedef struct
+static void
+hw_codec_write_dma_setup(phantom_device_t* dev)
 {
- signed char *data;
- unsigned long size;
-} SB_Sample;
-
-// Tries to init soundblaster
-
-int SB_Init(int baseio, int irq, int dma, int dma16);
-
-// Removes handler and resets DSP
-
-void SB_Done();
-
-// Allocate buffers and start sound output
-
-void SB_MixOn();
-
-// De-allocate buffers and stop sound ouput
-
-void SB_MixOff();
-
-// Load RAW sample
-
-void SB_LoadRAW(FILE * handle,SB_Sample **sound);
-
-// Free sound from memory
-
-void SB_FreeSound(SB_Sample **sound);
-
-// Start a sound
-
-void SB_PlaySound(SB_Sample *sound, int index, unsigned char volume, int loop);
-
-// Stop a sound
-
-void SB_StopSound(int index);
-
-// Check if a sound is currently playing
-
-int SB_PlayCheck(int index);
-
-// Sets overall sound volume
-
-void SB_SetVol(unsigned char new_volume);
-
-extern volatile long intcount;
-extern volatile int voicecount;
-
-extern float dspversion;
-
-#endif
-
-
-// 8-chan mixing lib
-
-#define TRUE  1
-#define FALSE 0
-#define ON  1
-#define OFF 0
-
-#define BLOCK_LENGTH    512   /* Length of digitized sound output block     */
-#define VOICES          8     /* Number of available simultaneous voices    */
-#define VOLUMES         64    /* Number of volume levels for sound output   */
-
-volatile long intcount;               /* Current count of sound interrupts  */
-volatile int  voicecount;             /* Number of voices currently in use  */
-
-float dspversion;
-int   autoinit;
-int   sixteenbit;
-
-#include <dos.h>
-#include <i86.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
-#include <malloc.h>
-#include <mem.h>
-#include "sblib.h"
-#include "sbstuff.h"
-
-#define BUFFER_LENGTH BLOCK_LENGTH*2
-
-#define BYTE unsigned char
-
-#define lo(value) (unsigned char)((value) & 0x00FF)
-#define hi(value) (unsigned char)((value) >> 8)
-
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#define min(a, b) (((a) > (b)) ? (b) : (a))
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-#define MIN(a, b) (((a) > (b)) ? (b) : (a))
-
-static int resetport;
-static int readport;
-static int writeport;
-static int pollport;
-static int ackport;
-
-static int pic_rotateport;
-static int pic_maskport;
-
-static int dma_maskport;
-static int dma_clrptrport;
-static int dma_modeport;
-static int dma_addrport;
-static int dma_countport;
-static int dma_pageport;
-
-static char irq_startmask;
-static char irq_stopmask;
-static char irq_intvector;
-
-static char dma_startmask;
-static char dma_stopmask;
-static char dma_mode;
-
-static void (interrupt far *oldintvector)(void);
-
-static int handler_installed;
-
-void SB_LoadWav(FILE * handle, SB_Sample **sound)
-{
-
+    sb_t *sb = (sb_t *)dev->drv_private;
+    /* change programmable DMA channel resources */
+    hw_codec_reg_write(dev, SB16_DMA_SETUP, (1 << sb->dma8) | (1 << sb->dma16));
 }
 
 
 
-void install_handler(void);
-void uninstall_handler(void);
-void smix_exitproc(void);
-
-int SB_Init(int baseio, int irq, int dma, int dma16)
-  {
-   /* Sound card IO ports */
-    resetport  = baseio + 0x006;
-    readport   = baseio + 0x00A;
-    writeport  = baseio + 0x00C;
-    pollport   = baseio + 0x00E;
-
-   /* Reset DSP, get version, choose output mode */
-    if (!SB_ResetDSP())
-      return(FALSE);
-    SB_WriteDSP(0xE1);  /* Get DSP version number */
-    dspversion = SB_ReadDSP();  dspversion += SB_ReadDSP() / 100.0;
-    autoinit   = (dspversion > 2.0);
-    sixteenbit = (dspversion > 4.0) && (dma16 != 0) && (dma16 > 3);
-
-   /* Compute interrupt controller ports and parameters */
-    if (irq < 8)
-      { /* PIC1 */
-        irq_intvector  = 0x08 + irq;
-        pic_rotateport = 0x20;
-        pic_maskport   = 0x21;
-      }
-    else
-      { /* PIC2 */
-        irq_intvector  = 0x70 + irq-8;
-        pic_rotateport = 0xA0;
-        pic_maskport   = 0xA1;
-      }
-    irq_stopmask  = 1 << (irq % 8);
-    irq_startmask = ~irq_stopmask;
-
-   /* Compute DMA controller ports and parameters */
-    if (sixteenbit)
-      { /* Sixteen bit */
-        dma_maskport   = 0xD4;
-        dma_clrptrport = 0xD8;
-        dma_modeport   = 0xD6;
-        dma_addrport   = 0xC0 + 4*(dma16-4);
-        dma_countport  = 0xC2 + 4*(dma16-4);
-        switch (dma16)
-          {
-            case 5:
-              dma_pageport = 0x8B;
-              break;
-            case 6:
-              dma_pageport = 0x89;
-              break;
-            case 7:
-              dma_pageport = 0x8A;
-              break;
-          }
-        dma_stopmask  = dma16-4 + 0x04;  /* 000001xx */
-        dma_startmask = dma16-4 + 0x00;  /* 000000xx */
-        if (autoinit)
-          dma_mode = dma16-4 + 0x58;     /* 010110xx */
-        else
-          dma_mode = dma16-4 + 0x48;     /* 010010xx */
-        ackport = baseio + 0x00F;
-      }
-    else
-      { /* Eight bit */
-        dma_maskport   = 0x0A;
-        dma_clrptrport = 0x0C;
-        dma_modeport   = 0x0B;
-        dma_addrport   = 0x00 + 2*dma;
-        dma_countport  = 0x01 + 2*dma;
-        switch (dma)
-          {
-            case 0:
-              dma_pageport = 0x87;
-              break;
-            case 1:
-              dma_pageport = 0x83;
-              break;
-            case 2:
-              dma_pageport = 0x81;
-              break;
-            case 3:
-              dma_pageport = 0x82;
-              break;
-          }
-        dma_stopmask  = dma + 0x04;      /* 000001xx */
-        dma_startmask = dma + 0x00;      /* 000000xx */
-        if (autoinit)
-          dma_mode    = dma + 0x58;      /* 010110xx */
-        else
-          dma_mode    = dma + 0x48;      /* 010010xx */
-        ackport = baseio + 0x00E;
-      }
-    install_handler();
-    atexit(smix_exitproc);
-    return(TRUE);
-  }
-
-void SB_Done(void)
-  {
-    if (handler_installed) uninstall_handler();
-    SB_ResetDSP();
-  }
-
-/* Voice control */
-
-typedef struct
-  {
-    SB_Sample *sound;
-    int   index;
-    int   volume;
-    int   loop;
-    long  curpos;
-    int   done;
-  } VOICE;
-
-static int   inuse[VOICES];
-static VOICE voice[VOICES];
 
 
 
-/* Volume lookup table */
-static signed int (*volume_table)[VOLUMES][256];
 
-/* Mixing buffer */
-static signed int  mixingblock[BLOCK_LENGTH];  /* Signed 16 bit */
 
-/* Output buffers */
-static void          (*outmemarea)                = NULL;
-static unsigned char (*out8buf)[2][BLOCK_LENGTH]  = NULL;
-static signed  short (*out16buf)[2][BLOCK_LENGTH] = NULL;
 
-static void *blockptr[2];
 
-static short int outmemarea_sel;              /* Selector for output buffer */
+static void
+hw_codec_write_byte(phantom_device_t *dev, u_int8_t value)
+{
+    int i;
 
-/* Addressing for auto-initialized transfers (Whole buffer)   */
-static unsigned long buffer_addr;
-static unsigned char buffer_page;
-static unsigned int  buffer_ofs;
+    /* wait until the DSP is ready to receive data */
+    for (i = 0; i < SB16_CODEC_IO_DELAY; i++) {
+        if (!( inb(dev->iobase + SB16_CODEC_WRITE_STATUS) & 0x80))
+            break;
+    }
 
-/* Addressing for single-cycle transfers (One block at a time */
-static unsigned long block_addr[2];
-static unsigned char block_page[2];
-static unsigned int  block_ofs[2];
+    /* write a byte to the DSP data port */
+    outb(dev->iobase + SB16_CODEC_WRITE_DATA, value);
+}
 
-//static int handler_installed;
+static int
+hw_codec_read_byte(phantom_device_t *dev)
+{
+    int i;
+    /* wait until the DSP has data available */
+    for (i = 0; i < SB16_CODEC_IO_DELAY; i++) {
+        if (inb(dev->iobase + SB16_CODEC_READ_STATUS) & 0x80)
+            break;
+    }
 
-static unsigned char sound_volume;
+    /* read a byte from the DSP data port */
+    return inb(dev->iobase + SB16_CODEC_READ_DATA);
+}
 
-/* 8-bit clipping */
 
-static unsigned char (*clip_8_buf)[256*VOICES];
-static unsigned char (*clip_8)[256*VOICES];
 
-static void start_dac(void)
-  {
-    if (autoinit)
-      { /* Auto init DMA */
-        outb(dma_maskport,   dma_stopmask);
-        outb(dma_clrptrport, 0x00);
-        outb(dma_modeport,   dma_mode);
-        outb(dma_addrport,   lo(buffer_ofs));
-        outb(dma_addrport,   hi(buffer_ofs));
-        outb(dma_countport,  lo(BUFFER_LENGTH-1));
-        outb(dma_countport,  hi(BUFFER_LENGTH-1));
-        outb(dma_pageport,   buffer_page);
-        outb(dma_maskport,   dma_startmask);
-      }
-    else
-      { /* Single cycle DMA */
-        outb(dma_maskport,   dma_stopmask);
-        outb(dma_clrptrport, 0x00);
-        outb(dma_modeport,   dma_mode);
-        outb(dma_addrport,   lo(buffer_ofs));
-        outb(dma_addrport,   hi(buffer_ofs));
-        outb(dma_countport,  lo(BLOCK_LENGTH-1));
-        outb(dma_countport,  hi(BLOCK_LENGTH-1));
-        outb(dma_pageport,   buffer_page);
-        outb(dma_maskport,   dma_startmask);
-      }
+static int
+hw_codec_read_version(phantom_device_t *dev)
+{
+    int minor, major;
 
-    if (sixteenbit)
-      { /* Sixteen bit auto-initialized: SB16 and up (DSP 4.xx)             */
-        SB_WriteDSP(0x41);                /* Set sound output sampling rate   */
-        SB_WriteDSP(hi(22050));
-        SB_WriteDSP(lo(22050));
-        SB_WriteDSP(0xB6);                /* 16-bit cmd  - D/A - A/I - FIFO   */
-        SB_WriteDSP(0x10);                /* 16-bit mode - signed mono        */
-        SB_WriteDSP(lo(BLOCK_LENGTH-1));
-        SB_WriteDSP(hi(BLOCK_LENGTH-1));
-      }
-    else
-      { /* Eight bit */
-        if (autoinit)
-          { /* Eight bit auto-initialized:  SBPro and up (DSP 2.00+)        */
-            SB_WriteDSP(0xD1);            /* Turn on speaker                  */
-            SB_WriteDSP(0x40);            /* Set sound output time constant   */
-            SB_WriteDSP(211);             /*  = 256 - (1000000 / rate)        */
-            SB_WriteDSP(0x48);            /* Set DSP block transfer size      */
-            SB_WriteDSP(lo(BLOCK_LENGTH-1));
-            SB_WriteDSP(hi(BLOCK_LENGTH-1));
-            SB_WriteDSP(0x1C);            /* 8-bit auto-init DMA mono output  */
-          }
-        else
-          { /* Eight bit single-cycle:  Sound Blaster (DSP 1.xx+)           */
-            SB_WriteDSP(0xD1);            /* Turn on speaker                  */
-            SB_WriteDSP(0x40);            /* Set sound output time constant   */
-            SB_WriteDSP(211);             /*  = 256 - (1000000 / rate)        */
-            SB_WriteDSP(0x14);            /* 8-bit single-cycle DMA output    */
-            SB_WriteDSP(lo(BLOCK_LENGTH-1));
-            SB_WriteDSP(hi(BLOCK_LENGTH-1));
-          }
-      }
-  }
+    /* query the DSP hardware version number */
+    hw_codec_write_byte(dev, SB16_CODEC_VERSION);
+    major = hw_codec_read_byte(dev);
+    minor = hw_codec_read_byte(dev);
 
-static void stop_dac(void)
-  {
-    if (sixteenbit)
-      SB_WriteDSP(0xD5);                  /* Pause 16-bit DMA sound I/O       */
-    else
-      {
-        SB_WriteDSP(0xD0);                /* Pause 8-bit DMA sound I/O        */
-        SB_WriteDSP(0xD3);                /* Turn off speaker                 */
-      }
+    SHOW_INFO( 0, "SB16 version %d.%d\n", major, minor);
 
-    outb(dma_maskport, dma_stopmask);   /* Stop DMA                         */
-  }
+    return (major << 8) + minor;
+}
 
-/* Volume control */
 
-static void init_volume_table(void)
-  {
-    unsigned int  volume;
-    signed   int  insample;
-    signed   char invalue;
+static errno_t
+hw_codec_reset(phantom_device_t *dev)
+{
+    int times, delay;
 
-    volume_table = (int (* )[64][256])malloc(VOLUMES * 256 * sizeof(signed int));
+    /* try to reset the DSP hardware */
+    for (times = 0; times < 10; times++)
+    {
+        outb(dev->iobase + SB16_CODEC_RESET, 1);
 
-    for (volume=0; volume < VOLUMES; volume++)
-      for (insample = -128; insample <= 127; insample++)
-        {
-          invalue = insample;
-          (*volume_table)[volume][(unsigned char)invalue] =
-            (((float)volume/(float)(VOLUMES-1)) * 32 * invalue);
+        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+            inb(dev->iobase + SB16_CODEC_RESET);
+
+        outb( dev->iobase + SB16_CODEC_RESET, 0);
+
+        if (hw_codec_read_byte(dev) == 0xaa)
+            return 0;
+    }
+
+    return ENXIO;
+}
+
+
+
+static errno_t sb_detect( phantom_device_t *dev )
+{
+    errno_t rc;
+
+    if ((rc=hw_codec_reset(dev)) == 0) {
+        if (hw_codec_read_version(dev) >= 0x400) {
+            hw_codec_write_irq_setup(dev);
+            hw_codec_write_dma_setup(dev);
+            rc = 0;
+        } else {
+            rc = ENXIO;
         }
+    }
 
-    sound_volume = 255;
-  }
-
-void SB_SetVol(unsigned char new_volume)
-  {
-    sound_volume = new_volume;
-  }
-
-/* Mixing initialization */
-
-static void init_clip8(void)
-  {
-    int i;
-    int value;
-
-    clip_8_buf = (unsigned char (* )[2048])malloc(256*VOICES);
-    clip_8     = (unsigned char (* )[2048])clip_8_buf + 128*VOICES;
-
-    for (i = -128*VOICES; i < 128*VOICES; i++)
-      {
-        value = i;
-        value = max(value, -128);
-        value = min(value, 127);
-
-        (*clip_8)[i] = value + 128;
-      }
-  }
-
-static unsigned long linear_addr(void *ptr)
-  {
-    return((unsigned long)(ptr));
-  }
-
-void deallocate_voice(int voicenum);
-
-void SB_MixOn(void)
-  {
-    int i;
-
-    for (i=0; i < VOICES; i++)
-      deallocate_voice(i);
-    voicecount = 0;
-
-    if (sixteenbit)
-      {
-       /* Find a block of memory that does not cross a page boundary */
-        outmemarea=low_malloc(4*BUFFER_LENGTH, &outmemarea_sel);
-        out16buf=(short (* )[2][512])outmemarea;
-        if ((((linear_addr(out16buf) >> 1) % 65536) + BUFFER_LENGTH) > 65536)
-          out16buf += BUFFER_LENGTH;
-
-        for (i=0; i<2; i++)
-          blockptr[i] = &((*out16buf)[i]);
-
-       /* DMA parameters */
-        buffer_addr = linear_addr(out16buf);
-        buffer_page = buffer_addr        / 65536;
-        buffer_ofs  = (buffer_addr >> 1) % 65536;
-
-        memset(out16buf, 0x00, BUFFER_LENGTH * sizeof(signed short));
-      }
-    else
-      {
-       /* Find a block of memory that does not cross a page boundary */
-        outmemarea =(unsigned char (* )[2][512]) low_malloc(2*BUFFER_LENGTH, &outmemarea_sel);
-        out8buf=(unsigned char (* )[2][512])outmemarea;
-        if (((linear_addr(out8buf) % 65536) + BUFFER_LENGTH) > 65536)
-          out8buf += BUFFER_LENGTH;
-
-        for (i=0; i<2; i++)
-          blockptr[i] = &((*out8buf)[i]);
-
-       /* DMA parameters */
-        buffer_addr = linear_addr(out8buf);
-        buffer_page = buffer_addr / 65536;
-        buffer_ofs  = buffer_addr % 65536;
-        for (i=0; i<2; i++)
-          {
-            block_addr[i] = linear_addr(blockptr[i]);
-            block_page[i] = block_addr[i] / 65536;
-            block_ofs[i]  = block_addr[i] % 65536;
-          }
-        memset(out8buf, 0x80, BUFFER_LENGTH * sizeof(unsigned char));
-
-        init_clip8();
-
-      }
-
-    curblock = 0;
-    intcount = 0;
-
-    init_volume_table();
-    start_dac();
-  }
-
-void SB_MixOff(void)
-  {
-    stop_dac();
-
-    free(volume_table);
-
-    if (!sixteenbit) free(clip_8_buf);
-
-    low_free(outmemarea_sel);
-  }
-
-/* Loading and freeing sounds */
-
-static FILE *sound_file;
-static long sound_size;
-
-void SB_LoadRAW(FILE * handle,SB_Sample **sound)
-{
- static long ssize;
- // Read size
- fread(&ssize,sizeof(long),1,handle);
- /* Allocate sound control structure and sound data block */
-  (*sound) = (SB_Sample *) malloc(sizeof(SB_Sample));
-  (*sound)->data  = (signed char *)(malloc(ssize));
-  (*sound)->size = ssize;
- /* Read sound data and close file (Isn't flat mode nice?) */
- fread((*sound)->data, sizeof(signed char), ssize, handle);
+    return rc;
 }
 
-void SB_FreeSound(SB_Sample **sound)
-  {
-    free((*sound)->data);
-    free(*sound);
-    *sound = NULL;
-  }
-
-/* Voice maintainance */
-
-static void deallocate_voice(int voicenum)
-  {
-    inuse[voicenum] = FALSE;
-    voice[voicenum].sound  = NULL;
-    voice[voicenum].index  = -1;
-    voice[voicenum].volume = 0;
-    voice[voicenum].curpos = -1;
-    voice[voicenum].loop   = FALSE;
-    voice[voicenum].done   = FALSE;
-  }
-
-void SB_PlaySound(SB_Sample *sound, int index, unsigned char volume, int loop)
-  {
-    int i, voicenum;
-
-    voicenum = -1;
-    i = 0;
-
-    do
-      {
-        if (!inuse[i])
-          voicenum = i;
-        i++;
-      }
-    while ((voicenum == -1) && (i < VOICES));
-
-    if (voicenum != -1)
-      {
-        voice[voicenum].sound  = sound;
-        voice[voicenum].index  = index;
-        voice[voicenum].volume = volume;
-        voice[voicenum].curpos = 0;
-        voice[voicenum].loop   = loop;
-        voice[voicenum].done   = FALSE;
-
-        inuse[voicenum] = TRUE;
-        voicecount++;
-      }
-  }
-
-void SB_StopSound(int index)
-  {
-    int i;
-
-    for (i=0; i < VOICES; i++)
-      if (voice[i].index == index)
-        {
-          voicecount--;
-          deallocate_voice(i);
-        }
-  }
-
-int  sound_playing(int index)
-  {
-    int i;
-
-   /* Search for a sound with the specified index */
-    for (i=0; i < VOICES; i++)
-      if (voice[i].index == index)
-        return(TRUE);
-
-   /* Sound not found */
-    return(FALSE);
-  }
-
-static void update_voices(void)
-  {
-    int voicenum;
-
-    for (voicenum=0; voicenum < VOICES; voicenum++)
-      {
-        if (inuse[voicenum])
-          {
-            if (voice[voicenum].done)
-              {
-                voicecount--;
-                deallocate_voice(voicenum);
-              }
-          }
-      }
-  }
-
-/* Mixing */
-
-static void mix_voice(int voicenum)
-  {
-    SB_Sample *sound;
-    int   mixlength;
-    signed char *sourceptr;
-    signed int *volume_lookup;
-    int chunklength;
-    int destindex;
-
-   /* Initialization */
-    sound = voice[voicenum].sound;
-
-    sourceptr = sound->data + voice[voicenum].curpos;
-    destindex = 0;
-
-   /* Compute mix length */
-    if (voice[voicenum].loop)
-      mixlength = BLOCK_LENGTH;
-    else
-      mixlength =
-       MIN(BLOCK_LENGTH, sound->size - voice[voicenum].curpos);
-
-    volume_lookup =
-     (signed int *)(&((*volume_table)[(unsigned char)((((sound_volume/256.0) * voice[voicenum].volume) * (VOLUMES/256.0)))]));
-
-    do
-      {
-       /* Compute the max consecutive samples that can be mixed */
-        chunklength =
-         MIN(mixlength, sound->size - voice[voicenum].curpos);
-
-       /* Update the current position */
-        voice[voicenum].curpos += chunklength;
-
-       /* Update the remaining samples count */
-        mixlength -= chunklength;
-
-       /* Mix samples until end of mixing or end of sound data is reached */
-        while (chunklength--)
-          mixingblock[destindex++] += volume_lookup[(unsigned char)(*(sourceptr++))];
-
-       /* If we've reached the end of the block, wrap to start of sound */
-        if (sourceptr == (sound->data + sound->size))
-          {
-            if (voice[voicenum].loop)
-              {
-                voice[voicenum].curpos = 0;
-                sourceptr = sound->data;
-              }
-            else
-              {
-                voice[voicenum].done = TRUE;
-              }
-          }
-      }
-    while (mixlength); /* Wrap around to finish mixing if necessary */
-  }
-
-static void silenceblock(void)
-  {
-    memset(&mixingblock, 0x00, BLOCK_LENGTH*sizeof(signed int));
-  }
-
-static void mix_voices(void)
-  {
-    int i;
-
-    silenceblock();
-
-    for (i=0; i < VOICES; i++)
-      if (inuse[i])
-        mix_voice(i);
-  }
 
 
 
 
 
 
-static void uninstall_handler(void)
-  {
-    _disable();  /* CLI */
-    outb(pic_maskport, (inp(pic_maskport) | irq_stopmask));
 
-    _dos_setvect(irq_intvector, oldintvector);
 
-    _enable();   /* STI */
 
-    handler_installed = FALSE;
-  }
 
-static void smix_exitproc(void)
-  {
-    stop_dac();
-    SB_Done();
-  }
 
-/* лллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллллл */
 
-#endif
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1219,334 +714,451 @@ static void smix_exitproc(void)
 
 #if 0
 
-/* SBDETECT.C                                                         */
-/* Copyright 1997 by Ethan Brodsky.  All Rights Reserved.             */
-/* 97/6/30 - ebrodsky@pobox.com - http://www.pobox.com/~ebrodsky/     */
-
-#include <conio.h>
-#include <dos.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-unsigned char read_dsp(int baseio)
-  {
-    while (!(inp(baseio+0x00E) & 0x80))
-      { }
-
-    return(inp(baseio+0x00A));
-  }
-
-void write_dsp(int baseio, unsigned char value)
-  {
-    while ((inp(baseio+0x00C) & 0x80))
-      { }
-
-    outb(baseio+0x00C, value);
-  }
-
-int reset_dsp(int baseio)
-  {
-    unsigned i;
-
-    outb(baseio+0x006, 1);
-    delay(1);
-    outb(baseio+0x006, 0);
-
-    for (i = 65535U; i > 0; i--)
-      {
-        if ((inp(baseio+0x00E) & 0x80) && (inp(baseio+0x00A) == 0xAA))
-          break;
-      }
-
-    return(i > 0);
-  }
-
-//////////////////////////////////////////////////////////////////////////////
-
-int detect_baseio(void)
-  {
-   // list of possible addresses, plus "sentinel" -1
-    static int val[] = {0x210, 0x220, 0x230, 0x240, 0x250, 0x260, 0x280, -1};
-    static int count = sizeof(val)/sizeof(*val) - 1; // don't test -1
-    int i;
-
-   // for each possible port
-    for (i = 0; i < count; i++)
-     // test it by attempting to reset the DSP
-      if (reset_dsp(val[i]))
-       // if found, break now
-        break;
-
-   // base io address, or, if not found, -1, since i=count+1
-    return val[i];
-  }
-
-//////////////////////////////////////////////////////////////////////////////
-
-void dsp_stopall(int baseio)
-  {
-   // pause 8/16-bit DMA mode digitized sound I/O
-    reset_dsp(baseio);
-    write_dsp(baseio, 0xD0);
-    write_dsp(baseio, 0xD5);
-  }
-
-unsigned char dma_req(void)
- // returns dma_request for all channels (bit7->dma7..bit0->dma0)
-  {
-    return (inp(0xD0) & 0xF0) | (inp(0x08) >> 4);
-  }
-
-int bitcount(unsigned char x)
- // returns number of set bits in byte x
-  {
-    int i;
-    int count = 0;
-
-    for (i = 0; i < 8; i++)
-      if (x & (1 << i))
-        count++;
-
-    return count;
-  }
-
-int bitpos(unsigned char x)
- // returns position lowest set bit in byte x (if none, returns -1)
-  {
-    int i;
-
-    for (i = 0; i < 8; i++)
-      if (x & (1 << i))
-        return i;
-
-    return -1;
-  }
-
-int find_dma(int baseio, int dmac)
-  {
-   // dma channels active when sound is not: can't be audio DMA channel
-    int dma_maskout = ~0x10;  // initially mask only DMA4 (cascade)
-
-   // dma channels active during audio, minus those masked out
-    int dma_mask    = 0;
-
-    int i;
-
-   // stop all dsp activity
-    dsp_stopall(baseio);
-
-   // poll to find out which DMA channels are in use without sound
-    for (i = 0; i < 100; i++)
-      dma_maskout &= ~dma_req();
-
-   // now program card and see what channel becomes active
-    if (dmac == 1)
-      {
-       // 8-bit single-cycle DMA mode digitized sound output
-        write_dsp(baseio, 0x14);
-        write_dsp(baseio, 0x00);  // lo  one sample
-        write_dsp(baseio, 0x00);  // hi
-      }
-    else
-      {
-       // 16-bit single-cycle DMA mode digitized sound output
-        write_dsp(baseio, 0xB0); // 16-bit, D/A, S/C, FIFO off
-        write_dsp(baseio, 0x10); // 16-bit mono signed PCM
-        write_dsp(baseio, 0x00); // lo   one sample
-        write_dsp(baseio, 0x00); // hi
-      }
-
-   // poll to find out which (unmasked) DMA channels are in use with sound
-    for (i = 0; i < 100; i++)
-      dma_mask |= dma_req() & dma_maskout;
-
-   // stop all dsp activity
-    dsp_stopall(baseio);
-
-    if (bitcount(dma_mask) == 1)
-      return bitpos(dma_mask);
-    else
-      return -1;
-
-  }
-
-int detect_dma(int baseio)
-  {
-    return find_dma(baseio, 1);
-  }
-
-int detect_dma16(int baseio)
-  {
-    return find_dma(baseio, 2);
-  }
-
-//////////////////////////////////////////////////////////////////////////////
-
-void dsp_transfer(int baseio, int dma8)
-  {
-    static int dma_pageports[] = {0x87, 0x83, 0x81, 0x82, -1, 0x8B, 0x89, 0x8A};
-
-    int dma_maskport   = 0x0A;
-    int dma_modeport   = 0x0B;
-    int dma_clrptrport = 0x0C;
-    int dma_addrport   = 0x00+2*dma8;
-    int dma_countport  = 0x01+2*dma8;
-    int dma_pageport   = dma_pageports[dma8];
-
-   // mask DMA channel
-    outb(dma_maskport,   0x04 | dma8);
-
-   // write DMA mode: single-cycle read transfer
-    outb(dma_modeport,   0x48 | dma8);
-
-   // clear byte-pointer flip-flop
-    outb(dma_clrptrport, 0x00);
-
-   // one transfer
-    outb(dma_countport,  0x00); // lo
-    outb(dma_countport,  0x00); // hi
-
-   // address ????????
-    outb(dma_addrport,   0); // lo
-    outb(dma_addrport,   0); // hi
-    outb(dma_pageport,   0);
-
-   // unmask DMA channel
-    outb(dma_maskport,   0x00 | dma8);
-
-   // 8-bit single-cycle DMA mode digitized sound outbut
-    write_dsp(baseio, 0x14);
-    write_dsp(baseio, 0x00);    // lo  one sample
-    write_dsp(baseio, 0x00);    // hi
-  }
-
-static void ((interrupt far *old_handler[16])(void));
-
-static int irq_hit[16];
-static int irq_mask[16];
-
-void clear_irq_hit(void)
-  {
-    int i;
-
-    for (i = 0; i < 16; i++)
-      irq_hit[i] = 0;
-  }
-
-void interrupt irq2_handler(void)  { irq_hit[2]  = 1;  _chain_intr(old_handler[2]);  }
-void interrupt irq3_handler(void)  { irq_hit[3]  = 1;  _chain_intr(old_handler[3]);  }
-void interrupt irq5_handler(void)  { irq_hit[5]  = 1;  _chain_intr(old_handler[5]);  }
-void interrupt irq7_handler(void)  { irq_hit[7]  = 1;  _chain_intr(old_handler[7]);  }
-void interrupt irq10_handler(void) { irq_hit[10] = 1;  _chain_intr(old_handler[10]); }
 
-int detect_irq(int baseio, int dma8)
-  {
-    int pic1_oldmask, pic2_oldmask;
 
-    int irq = -1;
-    int i;
+static int32
+hw_codec_inth(void* cookie)
+{
+	phantom_device_t* dev = (phantom_device_t*)cookie;
+	int32 rc = B_UNHANDLED_INTERRUPT;
 
-   // install handlers
-    old_handler[2]  = _dos_getvect(0x0A);  _dos_setvect(0x0A, irq2_handler);
-    old_handler[3]  = _dos_getvect(0x0B);  _dos_setvect(0x0B, irq3_handler);
-    old_handler[5]  = _dos_getvect(0x0D);  _dos_setvect(0x0D, irq5_handler);
-    old_handler[7]  = _dos_getvect(0x0F);  _dos_setvect(0x0F, irq7_handler);
-    old_handler[10] = _dos_getvect(0x72);  _dos_setvect(0x72, irq10_handler);
+	/* read the IRQ interrupt status register */
+	int status = hw_codec_reg_read(dev, SB16_IRQ_STATUS);
 
-   // save old IRQ mask and unmask IRQs
-    pic1_oldmask = inp(0x21);   outb(0x21, pic1_oldmask & 0x53);
-    pic2_oldmask = inp(0xA1);   outb(0xA1, pic2_oldmask & 0xFB);
+	/* check if this hardware raised this interrupt */
+	if (status & 0x03) {
+		rc = B_HANDLED_INTERRUPT;
 
-    clear_irq_hit();
+		/* acknowledge DMA memory transfers */
+		if (status & 0x01)
+			gISA->read_io_8(dev->iobase + SB16_CODEC_ACK_8_BIT);
+		if (status & 0x02)
+			gISA->read_io_8(dev->iobase + SB16_CODEC_ACK_16_BIT);
 
-   // wait to see what interrupts are triggered without sound
-    delay(100);
+		/* acknowledge PIC interrupt signal */
+		if (dev->irq >= 8)
+			gISA->write_io_8(0xa0, 0x20);
 
-   // mask out any interrupts triggered without sound
-    for (i = 0; i < 16; i++)
-      irq_mask[i] = irq_hit[i];
+		gISA->write_io_8(0x20, 0x20);
 
-    clear_irq_hit();
+		/* handle buffer finished interrupt */
+		if (((dev->playback_stream.bits >> 3) & status) != 0) {
+			sb16_stream_buffer_done(&dev->playback_stream);
+			rc = B_INVOKE_SCHEDULER;
+		}
+		if (((dev->record_stream.bits >> 3) & status) != 0) {
+			sb16_stream_buffer_done(&dev->record_stream);
+			rc = B_INVOKE_SCHEDULER;
+		}
 
-   // try to trigger an interrupt using DSP command F2
-    write_dsp(baseio, 0xF2);
+		if ((status & 0x04) != 0) {
+			/* MIDI stream done */
+			rc = B_INVOKE_SCHEDULER;
+		}
+	}
 
-    delay(10);
+	return rc;
+}
 
-   // detect any interrupts triggered
-    for (i = 0; i < 16; i++)
-      if (irq_hit[i] && !irq_mask[i])
-        irq = i;
 
-   // if F2 fails to trigger an interrupt, run a short transfer
-    if (irq == -1)
-      {
-        reset_dsp(baseio);
-        dsp_transfer(baseio, dma8);
 
-        delay(10);
 
-       // detect any interrupts triggered
-        for (i = 0; i < 16; i++)
-          if (irq_hit[i] && !irq_mask[i])
-            irq = i;
-      }
 
-   // reset DSP in case we've confused it
-    reset_dsp(baseio);
+//#pragma mark -
 
-   // remask IRQs
-    outb(0x21, pic1_oldmask);
-    outb(0xA1, pic2_oldmask);
+status_t
+sb16_stream_setup_buffers(phantom_device_t* dev, sb16_stream_t* s, const char* desc)
+{
+	return B_OK;
+}
 
-   // uninstall handlers
-    _dos_setvect(0x0A, old_handler[2]);
-    _dos_setvect(0x0B, old_handler[3]);
-    _dos_setvect(0x0D, old_handler[5]);
-    _dos_setvect(0x0F, old_handler[7]);
-    _dos_setvect(0x72, old_handler[10]);
+status_t
+sb16_stream_start(phantom_device_t* dev, sb16_stream_t* s)
+{
+	return B_OK;
+}
 
-    return irq;
-  }
+status_t 
+sb16_stream_stop(phantom_device_t* dev, sb16_stream_t* s)
+{
+	return B_OK;
+}
 
-//////////////////////////////////////////////////////////////////////////////
+void
+sb16_stream_buffer_done(sb16_stream_t* stream)
+{
+}
 
-int sb_detect(int *baseio, int *irq, int *dma, int *dma16)
-  {
-    *irq   = -1;
-    *dma16 = -1;
+//#pragma mark -
 
-    if ((*baseio = detect_baseio()) == -1)
-      return 0;
+status_t
+sb16_hw_init(phantom_device_t* dev)
+{
+	status_t rc;
 
-    if ((*dma = detect_dma(*baseio)) == -1)
-      return 0;
+	/* First of all, grab the ISA module */
+	if ((rc=get_module(B_ISA_MODULE_NAME, (module_info**)&gISA)) != B_OK)
+		return rc;
 
-    if ((*dma16 = detect_dma16(*baseio)) == -1)
-      return 0;
+	/* Check if the hardware is sensible... */
+	if ((rc=hw_codec_detect(dev)) == B_OK) {
+		if ((rc=gISA->lock_isa_dma_channel(dev->dma8)) == B_OK &&
+			(rc=gISA->lock_isa_dma_channel(dev->dma16)) == B_OK) {
+			rc = install_io_interrupt_handler(dev->irq, hw_codec_inth, dev, 0);
+		}
+	}
 
-    if ((*irq = detect_irq(*baseio, *dma)) == -1)
-      return 0;
+	return rc;
+}
 
-    return 1;
-  }
+void
+sb16_hw_stop(phantom_device_t* dev)
+{
+}
 
-int main()
-  {
-    int baseio, irq, dma, dma16;
-    int detected;
+void
+sb16_hw_uninit(phantom_device_t* dev)
+{
+    remove_io_interrupt_handler(dev->irq, hw_codec_inth, dev);
 
-    detected = sb_detect(&baseio, &irq, &dma, &dma16);
+    if (gISA != NULL) {
+        gISA->unlock_isa_dma_channel(dev->dma8);
 
-    printf("%s \n", detected ? "Success" : "Failure");
+        if (dev->dma8 != dev->dma16)
+            gISA->unlock_isa_dma_channel(dev->dma16);
 
-    printf("baseio: %Xh \n", baseio);
-    printf("irq:    %i  \n", irq);
-    printf("dma:    %i  \n", dma);
-    printf("dma16:  %i  \n", dma16);
+        put_module(B_ISA_MODULE_NAME);
+    }
 
-    return !detected;
-  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include "driver.h"
+
+multi_channel_info chans[] = {
+	{  0, B_MULTI_OUTPUT_CHANNEL, 	B_CHANNEL_LEFT | B_CHANNEL_STEREO_BUS, 0 },
+	{  1, B_MULTI_OUTPUT_CHANNEL, 	B_CHANNEL_RIGHT | B_CHANNEL_STEREO_BUS, 0 },
+	{  2, B_MULTI_INPUT_CHANNEL, 	B_CHANNEL_LEFT | B_CHANNEL_STEREO_BUS, 0 },
+	{  3, B_MULTI_INPUT_CHANNEL, 	B_CHANNEL_RIGHT | B_CHANNEL_STEREO_BUS, 0 },
+	{  4, B_MULTI_OUTPUT_BUS, 		B_CHANNEL_LEFT | B_CHANNEL_STEREO_BUS, 	B_CHANNEL_MINI_JACK_STEREO },
+	{  5, B_MULTI_OUTPUT_BUS, 		B_CHANNEL_RIGHT | B_CHANNEL_STEREO_BUS, B_CHANNEL_MINI_JACK_STEREO },
+	{  6, B_MULTI_INPUT_BUS, 		B_CHANNEL_LEFT | B_CHANNEL_STEREO_BUS, 	B_CHANNEL_MINI_JACK_STEREO },
+	{  7, B_MULTI_INPUT_BUS, 		B_CHANNEL_RIGHT | B_CHANNEL_STEREO_BUS, B_CHANNEL_MINI_JACK_STEREO },
+};
+
+static int32
+format2size(uint32 format)
+{
+	switch(format) {
+		case B_FMT_8BIT_S:
+		case B_FMT_16BIT:
+			return 2;
+
+		default:
+			return -1;
+	}
+}
+
+static status_t
+get_description(sb16_dev_t* dev, multi_description* data)
+{
+	data->interface_version = B_CURRENT_INTERFACE_VERSION;
+	data->interface_minimum = B_CURRENT_INTERFACE_VERSION;
+
+	strcpy(data->friendly_name,"SoundBlaster 16");
+	strcpy(data->vendor_info,"Haiku");
+
+	data->output_channel_count = 2;
+	data->input_channel_count = 2;
+	data->output_bus_channel_count = 2;
+	data->input_bus_channel_count = 2;
+	data->aux_bus_channel_count = 0;
+
+	if (data->request_channel_count >= (int)(sizeof(chans) / sizeof(chans[0]))) {
+		memcpy(data->channels,&chans,sizeof(chans));
+	}
+
+	/* determine output/input rates */	
+	data->output_rates =
+	data->input_rates = B_SR_44100 | B_SR_22050 | B_SR_11025;
+
+	data->max_cvsr_rate = 0;
+	data->min_cvsr_rate = 0;
+
+	data->output_formats = 
+	data->input_formats = B_FMT_8BIT_S | B_FMT_16BIT;
+	data->lock_sources = B_MULTI_LOCK_INTERNAL;
+	data->timecode_sources = 0;
+	data->interface_flags = B_MULTI_INTERFACE_PLAYBACK | B_MULTI_INTERFACE_RECORD;
+	data->start_latency = 30000;
+
+	strcpy(data->control_panel,"");
+
+	return B_OK;
+}
+
+static status_t
+get_enabled_channels(sb16_dev_t* dev, multi_channel_enable* data)
+{
+	B_SET_CHANNEL(data->enable_bits, 0, true);
+	B_SET_CHANNEL(data->enable_bits, 1, true);
+	B_SET_CHANNEL(data->enable_bits, 2, true);
+	B_SET_CHANNEL(data->enable_bits, 3, true);
+	data->lock_source = B_MULTI_LOCK_INTERNAL;
+
+	return B_OK;
+}
+
+static status_t
+get_global_format(sb16_dev_t* dev, multi_format_info* data)
+{
+	data->output_latency = 0;
+	data->input_latency = 0;
+	data->timecode_kind = 0;
+
+	data->output.format = dev->playback_stream.sampleformat;
+	data->output.rate = dev->playback_stream.samplerate;
+
+	data->input.format = dev->record_stream.sampleformat;
+	data->input.rate = dev->record_stream.samplerate;
+
+	return B_OK;
+}
+
+static status_t
+set_global_format(sb16_dev_t* dev, multi_format_info* data)
+{
+	dev->playback_stream.sampleformat = data->output.format;
+	dev->playback_stream.samplerate = data->output.rate;
+	dev->playback_stream.sample_size = format2size(dev->playback_stream.sampleformat);
+
+	dev->record_stream.sampleformat = data->input.format;
+	dev->record_stream.samplerate = data->input.rate;
+	dev->record_stream.sample_size = format2size(dev->record_stream.sampleformat);
+
+	return B_OK;
+}
+
+static int32
+create_group_control(multi_mix_control* multi, int32 idx, int32 parent, int32 string, const char* name) 
+{
+        multi->id = SB16_MULTI_CONTROL_FIRSTID + idx;
+        multi->parent = parent;
+        multi->flags = B_MULTI_MIX_GROUP;
+        multi->master = SB16_MULTI_CONTROL_MASTERID;
+        multi->string = string;
+        if(name)
+                strcpy(multi->name, name);
+ 
+       return multi->id;
+}
+
+static status_t
+list_mix_controls(sb16_dev_t* dev, multi_mix_control_info * data)
+{
+	int32 parent;
+
+	parent = create_group_control(data->controls +0, 0, 0, 0, "Record");
+        parent = create_group_control(data->controls +1, 1, 0, 0, "AC97 Mixer");
+        parent = create_group_control(data->controls +2, 2, 0, S_SETUP, NULL);
+        data->control_count = 3;
+
+	return B_OK;
+}
+
+static status_t
+list_mix_connections(sb16_dev_t* dev, multi_mix_connection_info * data)
+{
+	return B_ERROR;
+}
+
+static status_t
+list_mix_channels(sb16_dev_t* dev, multi_mix_channel_info *data)
+{
+	return B_ERROR;
+}
+
+static status_t
+get_buffers(sb16_dev_t* dev, multi_buffer_list* data)
+{
+	uint32 playback_sample_size = dev->playback_stream.sample_size;
+	uint32 record_sample_size = dev->record_stream.sample_size;
+	uint32 cidx, bidx;
+	status_t rc;
+
+	dprintf("%s: playback: %ld buffers, %ld channels, %ld samples\n", __func__, 
+		data->request_playback_buffers, data->request_playback_channels, data->request_playback_buffer_size);
+	dprintf("%s: record: %ld buffers, %ld channels, %ld samples\n", __func__, 
+		data->request_record_buffers, data->request_record_channels, data->request_record_buffer_size);
+
+	/* Workaround for Haiku multi_audio API, since it prefers to let the driver pick
+		values, while the BeOS multi_audio actually gives the user's defaults. */
+	if (data->request_playback_buffers > STRMAXBUF ||
+		data->request_playback_buffers < STRMINBUF) {
+		data->request_playback_buffers = STRMINBUF;
+	}
+	
+	if (data->request_record_buffers > STRMAXBUF ||
+		data->request_record_buffers < STRMINBUF) {
+		data->request_record_buffers = STRMINBUF;
+	}
+
+	if (data->request_playback_buffer_size == 0)
+		data->request_playback_buffer_size  = DEFAULT_FRAMESPERBUF;
+
+	if (data->request_record_buffer_size == 0)
+		data->request_record_buffer_size  = DEFAULT_FRAMESPERBUF;
+
+	/* ... from here on, we can assume again that a reasonable request is being made */
+
+	data->flags = 0;
+
+	/* Copy the requested settings into the streams */
+	dev->playback_stream.num_buffers = data->request_playback_buffers;
+	dev->playback_stream.num_channels = data->request_playback_channels;
+	dev->playback_stream.buffer_length = data->request_playback_buffer_size;
+	if ((rc=sb16_stream_setup_buffers(dev, &dev->playback_stream, "Playback")) != B_OK) {
+		dprintf("%s: Error setting up playback buffers (%s)\n", __func__, strerror(rc));
+		return rc;
+	}
+
+	dev->record_stream.num_buffers = data->request_record_buffers;
+	dev->record_stream.num_channels = data->request_record_channels;
+	dev->record_stream.buffer_length = data->request_record_buffer_size;
+	if ((rc=sb16_stream_setup_buffers(dev, &dev->record_stream, "Recording")) != B_OK) {
+		dprintf("%s: Error setting up recording buffers (%s)\n", __func__, strerror(rc));
+		return rc;
+	}
+
+	/* Setup data structure for multi_audio API... */
+	data->return_playback_buffers = data->request_playback_buffers;
+	data->return_playback_channels = data->request_playback_channels;
+	data->return_playback_buffer_size = data->request_playback_buffer_size;		/* frames */
+
+	for (bidx=0; bidx < data->return_playback_buffers; bidx++) {
+		for (cidx=0; cidx < data->return_playback_channels; cidx++) {
+			data->playback_buffers[bidx][cidx].base = dev->playback_stream.buffers[bidx] + (playback_sample_size * cidx);
+			data->playback_buffers[bidx][cidx].stride = playback_sample_size * data->return_playback_channels;
+		}
+	}
+
+	data->return_record_buffers = data->request_record_buffers;
+	data->return_record_channels = data->request_record_channels;
+	data->return_record_buffer_size = data->request_record_buffer_size;			/* frames */
+
+	for (bidx=0; bidx < data->return_record_buffers; bidx++) {
+		for (cidx=0; cidx < data->return_record_channels; cidx++) {
+			data->record_buffers[bidx][cidx].base = dev->record_stream.buffers[bidx] + (record_sample_size * cidx);
+			data->record_buffers[bidx][cidx].stride = record_sample_size * data->return_record_channels;
+		}
+	}
+
+	return B_OK;
+}
+
+static status_t
+buffer_exchange(sb16_dev_t* dev, multi_buffer_info* data)
+{
+	static int debug_buffers_exchanged = 0;
+	cpu_status status;
+	status_t rc;
+
+	if (!dev->playback_stream.running)
+		sb16_stream_start(dev, &dev->playback_stream);
+
+	/* do playback */
+	rc=acquire_sem(dev->playback_stream.buffer_ready_sem);
+	if (rc != B_OK) {
+		dprintf("%s: Error waiting for playback buffer to finish (%s)!\n", __func__,
+			strerror(rc));
+		return rc;
+	}
+
+	status = disable_interrupts();
+	acquire_spinlock(&dev->playback_stream.lock);
+
+	data->playback_buffer_cycle = dev->playback_stream.buffer_cycle;
+	data->played_real_time = dev->playback_stream.real_time;
+	data->played_frames_count = dev->playback_stream.frames_count;
+
+	release_spinlock(&dev->playback_stream.lock);
+	restore_interrupts(status);
+
+	debug_buffers_exchanged++;
+	if (((debug_buffers_exchanged % 100) == 1) && (debug_buffers_exchanged < 1111)) {
+		dprintf("%s: %d buffers processed\n", __func__, debug_buffers_exchanged);
+	}
+
+	return B_OK;
+}
+
+static status_t
+buffer_force_stop(sb16_dev_t* dev)
+{
+	sb16_stream_stop(dev, &dev->playback_stream);
+	sb16_stream_stop(dev, &dev->record_stream);
+
+	delete_sem(dev->playback_stream.buffer_ready_sem);
+	delete_sem(dev->record_stream.buffer_ready_sem);
+
+	return B_OK;
+}
+
+status_t
+multi_audio_control(void* cookie, uint32 op, void* arg, size_t len)
+{
+	switch(op) {
+		case B_MULTI_GET_DESCRIPTION:			return get_description(cookie, arg);
+		case B_MULTI_GET_EVENT_INFO:			return B_ERROR;
+		case B_MULTI_SET_EVENT_INFO:			return B_ERROR;
+		case B_MULTI_GET_EVENT:					return B_ERROR;
+		case B_MULTI_GET_ENABLED_CHANNELS:		return get_enabled_channels(cookie, arg);
+		case B_MULTI_SET_ENABLED_CHANNELS:		return B_OK;
+		case B_MULTI_GET_GLOBAL_FORMAT:			return get_global_format(cookie, arg);
+		case B_MULTI_SET_GLOBAL_FORMAT:			return set_global_format(cookie, arg);
+		case B_MULTI_GET_CHANNEL_FORMATS:		return B_ERROR;
+		case B_MULTI_SET_CHANNEL_FORMATS:		return B_ERROR;
+		case B_MULTI_GET_MIX:					return B_ERROR;
+		case B_MULTI_SET_MIX:					return B_ERROR;
+		case B_MULTI_LIST_MIX_CHANNELS:			return list_mix_channels(cookie, arg);
+		case B_MULTI_LIST_MIX_CONTROLS:			return list_mix_controls(cookie, arg);
+		case B_MULTI_LIST_MIX_CONNECTIONS:		return list_mix_connections(cookie, arg);
+		case B_MULTI_GET_BUFFERS:				return get_buffers(cookie, arg);
+		case B_MULTI_SET_BUFFERS:				return B_ERROR;
+		case B_MULTI_SET_START_TIME:			return B_ERROR;
+		case B_MULTI_BUFFER_EXCHANGE:			return buffer_exchange(cookie, arg);
+		case B_MULTI_BUFFER_FORCE_STOP:			return buffer_force_stop(cookie);
+	}
+
+	return B_BAD_VALUE;
+}
+
 
 #endif
 
