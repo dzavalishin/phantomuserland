@@ -250,6 +250,8 @@ u_int16_t	letoh16 __P((u_int16_t));*/
 #define	HTONL(x) (x) = htonl((u_int32_t)(x))
 #define	HTONS(x) (x) = htons((u_int16_t)(x))
 
+#define B_BENDIAN_TO_HOST_INT16(x) betoh16(x)
+
 #endif /* _POSIX_SOURCE */
 #endif /* _SYS_ENDIAN_H_ */
 
