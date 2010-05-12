@@ -1,11 +1,11 @@
 BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
-TARGET	= libphantom.a 
+TARGET	= libdev.a 
 
-SRCDIRS += $(BUILD_ROOT)/libphantom
+SRCDIRS += $(BUILD_ROOT)/dev
 
-#INCDIRS += /usr/include/w32api/
+INCDIRS += ../kernel
 
 include $(BUILD_ROOT)/makerules-lib
 
-include $(BUILD_ROOT)/libphantom/makerules
+include $(BUILD_ROOT)/dev/makerules
