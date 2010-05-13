@@ -14,6 +14,7 @@
 **/
 
 #include <phantom_assert.h>
+#include <errno.h>
 
 #include "vm/root.h"
 #include "vm/internal_da.h"
@@ -56,7 +57,7 @@ void jit_unary_op(
 }
 
 
-void pvm_jit(struct pvm_object current_thread)
+errno_t pvm_jit(struct pvm_object current_thread)
 {
 
     struct jit_out      jo;
@@ -173,14 +174,14 @@ void pvm_jit(struct pvm_object current_thread)
         case opcode_iconst_0:
             if( debug_print_instr ) hal_printf("iconst 0; ");
             //is_push(0);
-            jit_iconst(0); // mov 0, %ax
+            jit_iconst( j, 0 ); // mov 0, %ax
             jit_is_push( j );// push AX
             break;
 
         case opcode_iconst_1:
             if( debug_print_instr ) hal_printf("iconst 1; ");
             //is_push(1);
-            jit_iconst(1); // mov 1, %ax
+            jit_iconst( j, 1 ); // mov 1, %ax
             jit_is_push( j );// push AX
             break;
 
@@ -188,7 +189,7 @@ void pvm_jit(struct pvm_object current_thread)
             {
                 int v = pvm_code_get_byte(&(da->code));
                 //is_push(v);
-                jit_iconst(v); // mov v, %ax
+                jit_iconst( j, v ); // mov v, %ax
                 jit_is_push( j );// push AX
                 if( debug_print_instr ) hal_printf("iconst8 = %d; ", v);
                 break;
@@ -198,7 +199,7 @@ void pvm_jit(struct pvm_object current_thread)
             {
                 int v = pvm_code_get_int32(&(da->code));
                 //is_push(v);
-                jit_iconst(v); // mov v, %ax
+                jit_iconst( j, v ); // mov v, %ax
                 jit_is_push( j );// push AX
                 if( debug_print_instr ) hal_printf("iconst32 = %d; ", v);
                 break;
@@ -889,14 +890,27 @@ void pvm_jit(struct pvm_object current_thread)
             }
             break;
 
-        case opcode_is_get32:        pvm_exec_iget(da, pvm_code_get_int32(&(da->code)));	break;
-        case opcode_is_set32:        pvm_exec_iset(da, pvm_code_get_int32(&(da->code)));	break;
+        case opcode_is_get32:
+            //pvm_exec_iget(da, pvm_code_get_int32(&(da->code)));
+            {
+                int pos = pvm_code_get_int32(&(da->code));
+                jit_is_absget( j, pos ); // AX, DX = obj
+                jit_is_push( j );
+            }
+            break;
+        case opcode_is_set32:
+            //pvm_exec_iset(da, pvm_code_get_int32(&(da->code)));
+            {
+                int pos = pvm_code_get_int32(&(da->code));
+                jit_is_pop( j );
+                jit_is_absset( j, pos );
+            }
+            break;
 
         default:
             if( (instruction & 0xF0 ) == opcode_sys_0 )
             {
-#error impl
-                pvm_exec_sys(da,instruction & 0x0F);
+                jit_sys( j, instruction & 0x0F);
     sys_sleep:
                 // Only sys can put thread asleep
                 // If we are snapped here we, possibly, will continue from
@@ -912,20 +926,23 @@ void pvm_jit(struct pvm_object current_thread)
 
             if( instruction  == opcode_sys_8bit )
             {
-                pvm_exec_sys(da,pvm_code_get_byte(&(da->code))); //cf->cs.get_byte( cf->IP ));
+                jit_sys( j, pvm_code_get_byte(&(da->code))); 
                 goto sys_sleep;
                 //break;
             }
 
             if( (instruction & 0xE0 ) == opcode_call_00 )
             {
+#error impl
                 int n_param = pvm_code_get_byte(&(da->code));
                 pvm_exec_call(da,instruction & 0x1F,n_param,0); //no optimization for soon return
                 break;
             }
 
             hal_printf("Unknown op code 0x%X\n", instruction );
-            pvm_exec_throw( "thread exec: unknown opcode" ); //, instruction );
+
+            return ENOENT;
+            //pvm_exec_throw( "thread exec: unknown opcode" ); //, instruction );
             //exit(33);
         }
     }
