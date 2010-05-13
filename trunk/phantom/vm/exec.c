@@ -4,6 +4,8 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
+ * Bytecode interpreter.
+ *
  * Kernel ready: yes
  * Preliminary: no
  *
