@@ -1,0 +1,104 @@
+ifndef _phantom_x86_makerules_
+_phantom_x86_makerules__ = yes
+
+
+TARGETS = phantom
+
+deafult: $(TARGETS)
+
+others::
+	cd $(realpath $(PHANTOM_HOME))/phantom/vm; make clean; make; 
+	cd $(realpath $(PHANTOM_HOME))/phantom/libc; make clean; make; 
+	cd i386; make clean; make; cd ..
+	cd threads; make clean; make; cd ..
+
+all:: others 
+	make clean; make
+
+prepare::
+
+SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
+INCDIRS +=	$(realpath $(PHANTOM_HOME))/include threads 
+CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d
+PHANTOM_CFLAGS += -DHAVE_NET=0 -DHAVE_UNIX=0
+
+
+CLIB   =
+
+include $(PHANTOM_SRCDIR)/GNUmakerules
+
+DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))
+
+LIBGCC := `$(CC) --print-libgcc-file-name`
+
+#OKLIBDIR=../../old/kernel/lib
+
+TH_LIB=threads/libthreads.a
+PHANTOM_LIBS = 	$(TH_LIB) 
+
+
+
+LD_ADDR=--script=ld.script
+
+PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
+
+entry.o: crtn.o
+
+#START_O_FILE=$(OBJDIR)/lib/multiboot.o 
+START_O_FILE=entry.o
+# driver_isa_beep.o
+phantom: $(START_O_FILE) \
+	events.o \
+       	heap/heap.o heap/heap_pool.o heap/secondaries.o boot_cmd_line.o \
+       	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
+       	ohci.o uhci.o uhci_rh.o uhci_util.o \
+        traps.o amap.o i386/pic.o hal_physmem.o physalloc.o \
+       	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
+       	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
+       	time.o console.o timedcall.o driver_pci_rtl8139.o dev/keyboard.o \
+        paging_device.o dpc.o spinlock.o hal.o fsck.o \
+        console_win.o vm_threads.o snap_sync.o ps2.o \
+       	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o video_drv_cirrus.o \
+        video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_bios_vesa.o \
+        video_drv_basic_vga.o video_drv_basic_vga_tables.o video.o \
+       	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
+       	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
+        driver_isa_com.o driver_isa_lpt.o \
+        device.o driver_isa_vga_txt.o driver_isa_ne2000.o \
+       	driver_pci_pcnet32.o syslog.o driver_pci_intel82559.o \
+       	symtab.o driver_isa_beep.o unix/dir.o \
+       	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
+        unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
+        unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fat32.o \
+        unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
+	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
+        unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
+        svn_version.o $(PLIBDIR)/libdev.a \
+       	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
+       	i386/libi386.a $(DEPENDLIBS)
+
+	@echo "Linking $@ ---------------------------------------------"
+	@$(LD) $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
+		-o $@.pe $(filter-out %.a,$^) $(PLIBDIR)/libdev.a  	\
+                $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a \
+		i386/libi386.a $(PLIBDIR)/libdev.a \
+		$(PHANTOM_LIBS) $(PLIBDIR)/libphantom_c.a \
+		i386/libi386.a \
+		$(CLIB) $(LIBGCC) crtn.o 
+
+	../objcopy-ph -O elf32-i386 $@.pe $@
+	cat < $@ > ../../run/tftp/$@
+	objdump -x $@.pe >$@.pe.sym
+	gzip < $@ > ../../run/tftp/$@
+#	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
+#	cd ../../run
+#	genisoimage -o cd.iso tftp
+
+
+
+
+svn_version.c::
+	@echo "---- (creating svn_version.c)"
+	@echo -n 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
+
+endif

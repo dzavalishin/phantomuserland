@@ -1,0 +1,4 @@
+timeout=3
+title=phantom
+kernel=(nd)/tftp/phantom
+module=(nd)/tftp/classes

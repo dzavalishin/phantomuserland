@@ -1,0 +1,278 @@
+
+Init heap of 64 Mb
+heap_alloc_table = 0x593000, heap_base = 0x59b000, heap_size = 0x3fff000
+boot/dumpf: [0x000000000 - 0x000000500[ (1280 b) - BIOS DA
+boot/dumpf: [0x000000500 - 0x000002000[ (   6 K) - low RAM
+boot/dumpf: [0x000002000 - 0x000002060[ (  96 b) - args
+boot/dumpf: [0x000002060 - 0x00000206C[ (  12 b) - mod name
+boot/dumpf: [0x00000206C - 0x00000206D[ (   1 b) - low RAM
+boot/dumpf: [0x00000206D - 0x00000207B[ (  14 b) - mod name
+boot/dumpf: [0x00000207B - 0x000026D00[ ( 147 K) - low RAM
+boot/dumpf: [0x000026D00 - 0x000026D20[ (  32 b) - mod tab
+boot/dumpf: [0x000026D20 - 0x00009F000[ ( 480 K) - low RAM
+boot/dumpf: [0x00009F000 - 0x000100000[ ( 388 K) - unknown
+boot/dumpf: [0x000100000 - 0x000142AE0[ ( 266 K) - ELF section
+boot/dumpf: [0x000142AE0 - 0x000143000[ (1312 b) - kernel
+boot/dumpf: [0x000143000 - 0x00055D1F0[ (   4 M) - ELF section
+boot/dumpf: [0x00055D1F0 - 0x00055E000[ (3600 b) - kernel
+boot/dumpf: [0x00055E000 - 0x00055E940[ (2368 b) - ELF section
+boot/dumpf: [0x00055E940 - 0x00055F000[ (1728 b) - kernel
+boot/dumpf: [0x00055F000 - 0x00055F0D0[ ( 208 b) - ELF section
+boot/dumpf: [0x00055F0D0 - 0x000560000[ (3888 b) - kernel
+boot/dumpf: [0x000560000 - 0x000591118[ ( 196 K) - ELF section
+boot/dumpf: [0x000591118 - 0x000592000[ (3816 b) - kernel
+boot/dumpf: [0x000592000 - 0x004645FA8[ (  64 M) - ELF section
+boot/dumpf: [0x004645FA8 - 0x004646000[ (  88 b) - kernel
+boot/dumpf: [0x004646000 - 0x0046462F8[ ( 760 b) - ELF header
+boot/dumpf: [0x0046462F8 - 0x0046462F9[ (   1 b) - hi RAM
+boot/dumpf: [0x0046462F9 - 0x004646459[ ( 352 b) - ELF section
+boot/dumpf: [0x004646459 - 0x00464645A[ (   1 b) - hi RAM
+boot/dumpf: [0x00464645A - 0x00465417C[ (  55 K) - ELF section
+boot/dumpf: [0x00465417C - 0x004654180[ (   4 b) - hi RAM
+boot/dumpf: [0x004654180 - 0x004665118[ (  67 K) - ELF section
+boot/dumpf: [0x004665118 - 0x004665119[ (   1 b) - hi RAM
+boot/dumpf: [0x004665119 - 0x0046827D0[ ( 117 K) - ELF section
+boot/dumpf: [0x0046827D0 - 0x0046827D1[ (   1 b) - hi RAM
+boot/dumpf: [0x0046827D1 - 0x004688E2B[ (  25 K) - ELF section
+boot/dumpf: [0x004688E2B - 0x004688E30[ (   5 b) - hi RAM
+boot/dumpf: [0x004688E30 - 0x00468A0D0[ (   4 K) - ELF section
+boot/dumpf: [0x00468A0D0 - 0x00468A0D1[ (   1 b) - hi RAM
+boot/dumpf: [0x00468A0D1 - 0x00468B24D[ (   4 K) - ELF section
+boot/dumpf: [0x00468B24D - 0x00468B24E[ (   1 b) - hi RAM
+boot/dumpf: [0x00468B24E - 0x004697B8E[ (  50 K) - ELF section
+boot/dumpf: [0x004697B8E - 0x004697B8F[ (   1 b) - hi RAM
+boot/dumpf: [0x004697B8F - 0x00470209C[ ( 425 K) - ELF section
+boot/dumpf: [0x00470209C - 0x00470209D[ (   1 b) - hi RAM
+boot/dumpf: [0x00470209D - 0x004702159[ ( 188 b) - ELF section
+boot/dumpf: [0x004702159 - 0x00470215C[ (   3 b) - hi RAM
+boot/dumpf: [0x00470215C - 0x00471858C[ (  89 K) - ELF section
+boot/dumpf: [0x00471858C - 0x00471858D[ (   1 b) - hi RAM
+boot/dumpf: [0x00471858D - 0x004721BFA[ (  37 K) - ELF section
+boot/dumpf: [0x004721BFA - 0x004722000[ (1030 b) - hi RAM
+boot/dumpf: [0x004722000 - 0x00496D019[ (2348 K) - module
+boot/dumpf: [0x00496D019 - 0x00496E000[ (4071 b) - hi RAM
+boot/dumpf: [0x00496E000 - 0x00497A1F5[ (  48 K) - module
+boot/dumpf: [0x00497A1F5 - 0x0080F0000[ (  55 M) - hi RAM
+boot/dumpf: [0x0080F0000 - 0x100000000[ (3967 M) - unknown
+boot/phantom_parse_cmd_line: Boot argv:
+boot/phantom_parse_cmd_line: 	-d
+boot/phantom_parse_cmd_line: Main argv:
+boot/phantom_parse_cmd_line: 	(nd)/phantom
+boot/phantom_parse_cmd_line: 	-t
+boot/phantom_parse_cmd_line: Main env:
+boot/phantom_parse_cmd_line: 	bootclass=ru.dz.phantom.system.boot
+boot/phantom_parse_cmd_line: 	shellclass=ru.dz.phantom.system.shell
+exec is 10
+Got string table 18 : 'libgcc2.c'
+Warning: extra space in symtab leftx86 HAL init
+HAL init VM at 0x80000000
+arch_get_rtc_delta: GMT 22:37:2 8.3.2010
+driver/loadpci: Loading PCI config:
+PCI 0.0: PCI & Memory (Intel) 8086:1237 class 6:0 (bridge: host bridge) if 0
+PCI 1.0: PIIX3 PCI-to-ISA Bridge (Triton II) (Intel) 8086:7000 class 6:1 (bridge: isa) if 0
+PCI 1.1: PIIX3 IDE Interface (Triton II) (Intel) 8086:7010 class 1:1 (mass storage: ide) if 80
+PCI 1.3: PIIX4/4E/4M Power Management Controller (Intel) 8086:7113 class 6:80 (bridge: other) if 0
+PCI 2.0: 64-bit VisualMedia Accelerator (Cirrus Logic) 1013:B8 class 3:0 (display: vga) if 0
+PCI 3.0: ? (?) 1AF4:1000 class 2:0 (network: ethernet) if 0
+PCI 4.0: PCnet LANCE PCI Ethernet Controller (Advanced Micro Devices) 1022:2000 class 2:0 (network: ethernet) if 0
+PCI 5.0: VirtIO device (?) 1AF4:1001 class 1:80 (mass storage: other) if 0
+PCI 6.0: VirtIO device (?) 1AF4:1002 class 5:0 (memory: ram) if 0
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 0
+driver/probe_isa: Driver 'CGA' attached to ISA at 0x3D4 (IRQ -1)
+driver/probe_isa: Driver 'Beep' attached to ISA at 0x42 (IRQ -1)
+bios/driver_etc_smbios_probe: SMBios Version: 2.4
+bios/driver_etc_smbios_probe: SMBios BCD Revision: 2.4
+driver/probe_etc: Driver 'SMBios' attached
+findspeed: delaycount=34990 (tics=341)
+main timer usec_per_tick = 10000
+boot/phantom_map_mem_equally: Data seg 0x143000-4642868, 72364032 bytes, 17667 pages
+
+!spinlock STI!
+
+!spinunlock STI!
+
+Phantom 0.09 (SVN ver  312M ) starting
+
+boot/phantom_process_boot_options: Warning: Unknownm boot option '-d'
+CPU 0: family 6 model 3 stepping 3, string 'GenuineIntel'
+CPU 0: features: fpu de pse tsc msr pae mce cx8 apic sep pge cmov pat mmx fxsr sse sse2 sse3 
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 1
+driver/probe_isa: Driver 'PS2 Keyboard' attached to ISA at 0xFFFFFFFF (IRQ 1)
+driver/probe_isa: Driver 'PS2 Mouse' attached to ISA at 0xFFFFFFFF (IRQ 12)
+
+Looking for VESA VBE... VESA ver 200 ptr 50000040, OEM 'VGABIOS Cirrus extension'
+Total 4K mem, cap: 0
+Lookup VESA modes:
+101,  640* 480/ 8, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+110,  640* 480/15, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+111,  640* 480/16, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+112,  640* 480/24, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: better
+103,  800* 600/ 8, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+113,  800* 600/15, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+114,  800* 600/16, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+115,  800* 600/24, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: better
+105, 1024* 768/ 8, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+116, 1024* 768/15, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+117, 1024* 768/16, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+118, 1024* 768/24, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: better
+107, 1280*1024/ 8, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+119, 1280*1024/15, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+11A, 1280*1024/16, mem F0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+VESA mode 280 1024*768 24bpp selected, mem at F0000000
+video/set_video_driver_bios_vesa_pa: VESA vaddr = 40000000, 1024 pages, 4 mbytes
+
+Setting VESA video mode 280
+video/phantom_start_video_driver: Skipping video drv select due to enforce
+Activating APIC...APIC ver. 0x1, unit id 0x0
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 2
+driver/probe_isa: Driver 'LPT1' attached to ISA at 0x378 (IRQ 7)
+com/com_detect: com0: 82550 or 16550 chip
+driver/probe_isa: Driver 'COM1' attached to ISA at 0x3F8 (IRQ 4)
+dpc/dpc_init: Starting DPC
+disk/setup_simple_ide: Init
+disk/setup_simple_ide: Found PCI IDE, BM base reg=0xC000
+disk/int_enable_irq: IDE Set IRQ 14
+
+disk/setup_simple_ide: Found 2 devices, dev 0 is ATA, dev 1 is ATA.
+
+disk/simple_ide_idenify_device: --- Identifying IDE 0: 
+disk/simple_ide_idenify_device:  is not ATA, nSect=4 Mb Model: 'QEMU HARDDISK                           ' fixed, 48 bit LBA
+disk/simple_ide_idenify_device: --- Identifying IDE 1: 
+disk/simple_ide_idenify_device:  is not ATA, nSect=80 Mb Model: 'QEMU HARDDISK                           ' fixed, 48 bit LBA
+Checking superblock...root sb sys name = 'Unnamed Phantom system', checksum ok
+Looking for superblock at 256... Found superblock at 256
+Looking for superblock at 544... Found superblock at 544
+sb1 status 1, sb2 - 1, sb3 - 1
+root sb sb2 addr 256, sb3 addr 544, free start 545, free list 17, fs clean -1
+ Warning: Disk FS minor version number is low: 0x2, mine is 0x3... all 3 superblocks are found and good, ok.
+FSCK: *** check superblock ***
+FSCK: *** check lists ***
+-- Last snap... Ok
+-- Prev snap... Ok
+-- Boot list... Ok
+-- Kernel... None
+-- Log list... None
+FSCK: *** Finish! ***
+ updating superblock... saved all 3
+
+!spinlock STI!
+
+!spinunlock STI!
+
+
+No pagelist to load
+
+boot/load_classes_module: Classes boot module is found
+
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 3
+driver/probe_isa: Driver 'LPT1' attached to ISA at 0x378 (IRQ 7)
+com/com_detect: com1: 82550 or 16550 chip
+driver/probe_isa: Driver 'COM1' attached to ISA at 0x3F8 (IRQ 4)
+Loading env 'bootclass'='ru.dz.phantom.system.boot'
+Loading env 'shellclass'='ru.dz.phantom.system.shell'
+Phantom System Envirinment Setup is running
+pager/vm_map_deferred_disk_alloc_thread: Ready
+pager/vm_map_lazy_pageout_thread: Ready
+loading loader class
+creating loader object
+initializing loader
+registering loader
+Loader: class '.ru.dz.phantom.system.regression_tests' requested... loading
+Starting compiler regression tests
+Phantom language regression tests are running
+Checking flow control operators... passed
+Checking int math... passed
+Checking arrays... Beeping: beep two! beep one! beep zero! 
+passed
+Finished compiler regression tests
+Loader: class '.ru.dz.phantom.backgrounds' requested... loading
+
+will load bitmap...
+have bitmap!...
+Loader: class '.phantom.osimpl' requested... loading
+Loader: class '.ru.dz.windows.root' requested... loading
+Finished windows tests
+Loader: class '.ru.dz.phantom.system.thread_test' requested... loading
+boot/main: Will run phantom threads... 
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 4
+driver/probe_isa: Driver 'LPT1' attached to ISA at 0x378 (IRQ 7)
+com/com_detect: com2: 82550 or 16550 chip
+driver/probe_isa: Driver 'COM1' attached to ISA at 0x3F8 (IRQ 4)
+PRESS Q TO STOP PHANTOM
+Snapshot start!
+0x80000000 (1)
+0x80100000 (256)
+0x80200000 (256)
+0x80300000 (67)
+0x80400000 (0)
+0x80500000 (53)
+0x80600000 (256)
+0x80700000 (10)
+0x80800000 (0)
+0x80900000 (0)
+0x80A00000 (3)
+0x80B00000 (8)
+0x80C00000 (0)
+0x80D00000 (0)
+0x80E00000 (0)
+0x80F00000 (0)
+0x81000000 (0)
+0x81100000 (0)
+0x81200000 (0)
+0x81300000 (0)
+0x81400000 (206)
+0x81500000 (256)
+0x81600000 (256)
+0x81700000 (256)
+0x81800000 (256)
+0x81900000 (256)
+0x81A00000 (93)
+0x81B00000 (0)
+0x81C00000 (0)
+0x81D00000 (0)
+0x81E00000 (0)
+0x81F00000 (0)
+0x82000000 (0)
+wait 4 pgout to settle
+stop world
+snap: threads stopped
+Snapshot THE SNAP...done THE SNAP
+snapaid COW 0x80A3F000
+req pageout fastsnapaid COW 0x8060A000
+req pageout fastsnapaid COW 0x80A44000
+req pageout fastpgout
+0x80000000 (0)
+0x80100000 (0)
+0x80200000 (0)
+0x80300000 (0)
+0x80400000 (0)
+0x80500000 (0)
+0x80600000 (1)
+0x80700000 (2)
+0x80800000 (0)
+0x80900000 (0)
+0x80A00000 (0)
+0x80B00000 (2)
+0x80C00000 (0)
+0x80D00000 (0)
+0x80E00000 (0)
+0x80F00000 (0)
+0x81000000 (0)
+0x81100000 (0)
+0x81200000 (0)
+0x81300000 (0)
+0x81400000 (57)
+0x81500000 (256)
+0x81600000 (256)
+0x81700000 (256)
+0x81800000 (256)
+0x81900000 (256)
+0x81A00000 (93)
+0x81B00000 (0)
+0x81C00000 (0)
+0x81D00000 (0)
+0x81E00000 (0)
+0x81F00000 (0)
+0x82000000 (0)
+snapshot will finalize_snap
+finalize_snap 0x80000000: finalize_snap 0x80001000: finalize_snap 0x80002000: finalize_snap 0x80003000: finalize_snap 0x80004000: finalize_snap 0x80005000: finalize_snap 0x80006000: finalize_snap 0x80007000: finalize_snap 0x80008000: finalize_snap 0x80009000: finalize_snap 0x8000A000: finalize_snap 0x8000B000: finalize_snap 0x8000C000: finalize_snap 0x8000D000: finalize_snap 0x8000E000: finalize_snap 0x8000F000: finalize_snap 0x80010000: finalize_snap 0x80011000: finalize_snap 0x80012000: finalize_snap 0x80013000: finalize_snap 0x80014000: finalize_snap 0x80015000: finalize_snap 0x80016000: finalize_snap 0x80017000: finalize_snap 0x80018000: finalize_snap 0x80019000: finalize_snap 0x8001A000: finalize_snap 0x8001B000: finalize_snap 0x8001C000: finalize_snap 0x8001D000: finalize_snap 0x8001E000: finalize_snap 0x8001F000: finalize_snap 0x80020000: finalize_snap 0x80021000: finalize_snap 0x80022000: finalize_snap 0x80023000: finalize_snap 0x80024000: finalize_snap 0x80025000: finalize_snap 0x80026000: finalize_snap 0x80027000: finalize_snap 0x80028000: finalize_snap 0x80029000: finalize_snap 0x8002A000: finalize_snap 0x8002B000: finalize_snap 0x8002C000: finalize_snap 0x8002D000: finalize_snap 0x8002E000: finalize_snap 0x8002F000: finalize_snap 0x80030000: finalize_snap 0x80031000: finalize_snap 0x80032000: finalize_snap 0x80033000: finalize_snap 0x80034000: finalize_snap 0x80035000: finalize_snap 0x80036000: finalize_snap 0x80037000: finalize_snap 0x80038000: finalize_snap 0x80039000: finalize_snap 0x8003A000: finalize_snap 0x8003B000: finalize_snap 0x8003C000: finalize_snap 0x8003D000: finalize_snap 0x8003E000: finalize_snap 0x8003F000: finalize_snap 0x80040000: finalize_snap 0x80041000: finalize_snap 0x80042000: finalize_snap 0x80043000: finalize_snap 0x80044000: finalize_snap 0x80045000: finalize_snap 0x80046000: finalize_snap 0x80047000: finalize_snap 0x80048000: finalize_snap 0x80049000: finalize_snap 0x8004A000: finalize_snap 0x8004B000: finalize_snap 0x8004C000: finalize_snap 0x8004D000: finalize_snap 0x8004E000: finalize_snap 0x8004F000: finalize_snap 0x80050000: finalize_snap 0x80051000: finalize_snap 0x80052000: finalize_snap 0x80053000: finalize_snap 0x80054000: finalize_snap 0x80055000: finalize_snap 0x80056000: finalize_snap 0x80057000: finalize_snap 0x80058000: finalize_snap 0x80059000: finalize_snap 0x8005A000: finalize_snap 0x8005B000: finalize_snap 0x8005C000: finalize_snap 0x8005D000: finalize_snap 0x8005E000: finalize_snap 0x8005F000: finalize_snap 0x80060000: finalize_snap 0x80061000: finalize_snap 0x80062000: finalize_snap 0x80063000: finalize_snap 0x80064000: finalize_snap 0x80065000: finalize_snap 0x80066000: finalize_snap 0x80067000: finalize_snap 0x80068000: finalize_snap 0x80069000: finalize_snap 0x8006A000: finalize_snap 0x8006B000: finalize_snap 0x8006C000: finalize_snap 0x8006D000: finalize_snap 0x8006E000: finalize_snap 0x8006F000: finalize_snap 0x80070000: finalize_snap 0x80071000: finalize_snap 0x80072000: finalize_snap 0x80073000: finalize_snap 0x80074000: finalize_snap 0x80075000: finalize_snap 0x80076000: finalize_snap 0x80077000: finalize_snap 0x80078000: finalize_snap 0x80079000: finalize_snap 0x8007A000: finalize_snap 0x8007B000: finalize_snap 0x8007C000: finalize_snap 0x8007D000: finalize_snap 0x8007E000: finalize_snap 0x8007F000: finalize_snap 0x80080000: finalize_snap 0x80081000: finalize_snap 0x80082000: finalize_snap 0x80083000: finalize_snap 0x80084000: finalize_snap 0x80085000: finalize_snap 0x80086000: finalize_snap 0x80087000: finalize_snap 0x80088000: finalize_snap 0x80089000: finalize_snap 0x8008A000: finalize_snap 0x8008B000: finalize_snap 0x8008C000: finalize_snap 0x8008D000: finalize_snap 0x8008E000: finalize_snap 0x8008F000: finalize_snap 0x80090000: finalize_snap 0x80091000: finalize_snap 0x80092000: finalize_snap 0x80093000: finalize_snap 0x80094000: finalize_snap 0x80095000: finalize_snap 0x80096000: finalize_snap 0x80097000: finalize_snap 0x80098000: finalize_snap 0x80099000: finalize_snap 0x8009A000: finalize_snap 0x8009B000: finalize_snap 0x8009C000: finalize_snap 0x8009D000: finalize_snap 0x8009E000: finalize_snap 0x8009F000: finalize_snap 0x800A0000: finalize_snap 0x800A1000: finalize_snap 0x800A2000: finalize_snap 0x800A3000: finalize_snap 0x800A4000: finalize_snap 0x800A5000: finalize_snap 0x800A6000: finalize_snap 0x800A7000: finalize_snap 0x800A8000: finalize_snap 0x800A9000: finalize_snap 0x800AA000: finalize_snap 0x800AB000: finalize_snap 0x800AC000: finalize_snap 0x800AD000: finalize_snap 0x800AE000: finalize_snap 0x800AF000: finalize_snap 0x800B0000: finalize_snap 0x800B1000: finalize_snap 0x800B2000: finalize_snap 0x800B3000: finalize_snap 0x800B4000: finalize_snap 0x800B5000: finalize_snap 0x800B6000: finalize_snap 0x800B7000: finalize_snap 0x800B8000: finalize_snap 0x800B9000: finalize_snap 0x800BA000: finalize_snap 0x800BB000: finalize_snap 0x800BC000: finalize_snap 0x800BD000: finalize_snap 0x800BE000: finalize_snap 0x800BF000: finalize_snap 0x800C0000: finalize_snap 0x800C1000: finalize_snap 0x800C2000: finalize_snap 0x800C3000: finalize_snap 0x800C4000: finalize_snap 0x800C5000: finalize_snap 0x800C6000: finalize_snap 0x800C7000: finalize_snap 0x800C8000: finalize_snap 0x800C9000: finalize_snap 0x800CA000: finalize_snap 0x800CB000: finalize_snap 0x800CC000: finalize_snap 0x800CD000: finalize_snap 0x800CE000: finalize_snap 0x800CF000: finalize_snap 0x800D0000: finalize_snap 0x800D1000: finalize_snap 0x800D2000: finalize_snap 0x800D3000: finalize_snap 0x800D4000: finalize_snap 0x800D5000: finalize_snap 0x800D6000: finalize_snap 0x800D7000: finalize_snap 0x800D8000: finalize_snap 0x800D9000: finalize_snap 0x800DA000: finalize_snap 0x800DB000: finalize_snap 0x800DC000: finalize_snap 0x800DD000: finalize_snap 0x800DE000: finalize_snap 0x800DF000: finalize_snap 0x800E0000: finalize_snap 0x800E1000: finalize_snap 0x800E2000: finalize_snap 0x800E3000: finalize_snap 0x800E4000: finalize_snap 0x800E5000: finalize_snap 0x800E6000: finalize_snap 0x800E7000: finalize_snap 0x800E8000: finalize_snap 0x800E9000: finalize_snap 0x800EA000: finalize_snap 0x800EB000: finalize_snap 0x800EC000: finalize_snap 0x800ED000: finalize_snap 0x800EE000: finalize_snap 0x800EF000: finalize_snap 0x800F0000: finalize_snap 0x800F1000: finalize_snap 0x800F2000: finalize_snap 0x800F3000: finalize_snap 0x800F4000: finalize_snap 0x800F5000: finalize_snap 0x800F6000: finalize_snap 0x800F7000: finalize_snap 0x800F8000: finalize_snap 0x800F9000: finalize_snap 0x800FA000: finalize_snap 0x800FB000: finalize_snap 0x800FC000: finalize_snap 0x800FD000: finalize_snap 0x800FE000: finalize_snap 0x800FF000: finalize_snap 0x80100000: finalize_snap 0x80101000: finalize_snap 0x80102000: finalize_snap 0x80103000: finalize_snap 0x80104000: finalize_snap 0x80105000: finalize_snap 0x80106000: finalize_snap 0x80107000: finalize_snap 0x80108000: finalize_snap 0x80109000: finalize_snap 0x8010A000: finalize_snap 0x8010B000: finalize_snap 0x8010C000: finalize_snap 0x8010D000: finalize_snap 0x8010E000: finalize_snap 0x8010F000: finalize_snap 0x80110000: finalize_snap 0x80111000: finalize_snap 0x80112000: finalize_snap 0x80113000: finalize_snap 0x80114000: finalize_snap 0x80115000: finalize_snap 0x80116000: finalize_snap 0x80117000: finalize_snap 0x80118000: finalize_snap 0x80119000: finalize_snap 0x8011A000: finalize_snap 0x8011B000: finalize_snap 0x8011C000: finalize_snap 0x8011D000: finalize_snap 0x8011E000: finalize_snap 0x8011F000: finalize_snap 0x80120000: finalize_snap 0x80121000: finalize_snap 0x80122000: finalize_snap 0x80123000: finalize_snap 0x80124000: finalize_snap 0x80125000: finalize_snap 0x80126000: finalize_snap 0x80127000: finalize_snap 0x80128000: finalize_snap 0x80129000: finalize_snap 0x8012A000: finalize_snap 0x8012B000: finalize_snap 0x8012C000: finalize_snap 0x8012D000: finalize_snap 0x8012E000: finalize_snap 0x8012F000: finalize_snap 0x80130000: finalize_snap 0x80131000: finalize_snap 0x80132000: finalize_snap 0x80133000: finalize_snap 0x80134000: finalize_snap 0x80135000: finalize_snap 0x80136000: finalize_snap 0x80137000: finalize_snap 0x80138000: finalize_snap 0x80139000: finalize_snap 0x8013A000: finalize_snap 0x8013B000: finalize_snap 0x8013C000: finalize_snap 0x8013D000: finalize_snap 0x8013E000: finalize_snap 0x8013F000: finalize_snap 0x80140000: finalize_snap 0x80141000: finalize_snap 0x80142000: finalize_snap 0x80143000: finalize_snap 0x80144000: finalize_snap 0x80145000: finalize_snap 0x80146000: finalize_snap 0x80147000: finalize_snap 0x80148000: finalize_snap 0x80149000: finalize_snap 0x8014A000: finalize_snap 0x8014B000: finalize_snap 0x8014C000: finalize_snap 0x8014D000: finalize_snap 0x8014E000: finalize_snap 0x8014F000: finalize_snap 0x80150000: finalize_snap 0x80151000: finalize_snap 0x80152000: finalize_snap 0x80153000: finalize_snap 0x80154000: finalize_snap 0x80155000: finalize_snap 0x80156000: finalize_snap 0x80157000: finalize_snap 0x80158000: finalize_snap 0x80159000: finalize_snap 0x8015A000: finalize_snap 0x8015B000: finalize_snap 0x8015C000: finalize_snap 0x8015D000: finalize_snap 0x8015E000: finalize_snap 0x8015F000: finalize_snap 0x80160000: finalize_snap 0x80161000: finalize_snap 0x80162000: finalize_snap 0x80163000: finalize_snap 0x80164000: finalize_snap 0x80165000: finalize_snap 0x80166000: finalize_snap 0x80167000: finalize_snap 0x80168000: finalize_snap 0x80169000: finalize_snap 0x8016A000: finalize_snap 0x8016B000: finalize_snap 0x8016C000: finalize_snap 0x8016D000: finalize_snap 0x8016E000: finalize_snap 0x8016F000: finalize_snap 0x80170000: finalize_snap 0x80171000: finalize_snap 0x80172000: finalize_snap 0x80173000: finalize_snap 0x80174000: finalize_snap 0x80175000: finalize_snap 0x80176000: finalize_snap 0x80177000: finalize_snap 0x80178000: finalize_snap 0x80179000: finalize_snap 0x8017A000: finalize_snap 0x8017B000: finalize_snap 0x8017C000: finalize_snap 0x8017D000: finalize_snap 0x8017E000: finalize_snap 0x8017F000: finalize_snap 0x80180000: finalize_snap 0x80181000: finalize_snap 0x80182000: finalize_snap 0x80183000: finalize_snap 0x80184000: finalize_snap 0x80185000: finalize_snap 0x80186000: finalize_snap 0x80187000: finalize_snap 0x80188000: finalize_snap 0x80189000: finalize_snap 0x8018A000: finalize_snap 0x8018B000: finalize_snap 0x8018C000: finalize_snap 0x8018D000: finalize_snap 0x8018E000: finalize_snap 0x8018F000: finalize_snap 0x80190000: finalize_snap 0x80191000: finalize_snap 0x80192000: finalize_snap 0x80193000: finalize_snap 0x80194000: finalize_snap 0x80195000: finalize_snap 0x80196000: finalize_snap 0x80197000: finalize_snap 0x80198000: finalize_snap 0x80199000: finalize_snap 0x8019A000: finalize_snap 0x8019B000: finalize_snap 0x8019C000: finalize_snap 0x8019D000: finalize_snap 0x8019E000: finalize_snap 0x8019F000: finalize_snap 0x801A0000: finalize_snap 0x801A1000: finalize_snap 0x801A2000: finalize_snap 0x801A3000: finalize_snap 0x801A4000: finalize_snap 0x801A5000: finalize_snap 0x801A6000: finalize_snap 0x801A7000: finalize_snap 0x801A8000: finalize_snap 0x801A9000: finalize_snap 0x801AA000: finalize_snap 0x801AB000: finalize_snap 0x801AC000: finalize_snap 0x801AD000: finalize_snap 0x801AE000: finalize_snap 0x801AF000: finalize_snap 0x801B0000: finalize_snap 0x801B1000: finalize_snap 0x801B2000: finalize_snap 0x801B3000: finalize_snap 0x801B4000: finalize_snap 0x801B5000: finalize_snap 0x801B6000: finalize_snap 0x801B7000: finalize_snap 0x801B8000: finalize_snap 0x801B9000: finalize_snap 0x801BA000: finalize_snap 0x801BB000: finalize_snap 0x801BC000: finalize_snap 0x801BD000: finalize_snap 0x801BE000: finalize_snap 0x801BF000: finalize_snap 0x801C0000: finalize_snap 0x801C1000: finalize_snap 0x801C2000: finalize_snap 0x801C3000: finalize_snap 0x801C4000: finalize_snap 0x801C5000: finalize_snap 0x801C6000: finalize_snap 0x801C7000: finalize_snap 0x801C8000: finalize_snap 0x801C9000: finalize_snap 0x801CA000: finalize_snap 0x801CB000: finalize_snap 0x801CC000: finalize_snap 0x801CD000: finalize_snap 0x801CE000: finalize_snap 0x801CF000: finalize_snap 0x801D0000: finalize_snap 0x801D1000: finalize_snap 0x801D2000: finalize_snap 0x801D3000: finalize_snap 0x801D4000: finalize_snap 0x801D5000: finalize_snap 0x801D6000: finalize_snap 0x801D7000: finalize_snap 0x801D8000: finalize_snap 0x801D9000: finalize_snap 0x801DA000: finalize_snap 0x801DB000: finalize_snap 0x801DC000: finalize_snap 0x801DD000: finalize_snap 0x801DE000: finalize_snap 0x801DF000: finalize_snap 0x801E0000: finalize_snap 0x801E1000: finalize_snap 0x801E2000: finalize_snap 0x801E3000: finalize_snap 0x801E4000: finalize_snap 0x801E5000: finalize_snap 0x801E6000: finalize_snap 0x801E7000: finalize_snap 0x801E8000: finalize_snap 0x801E9000: finalize_snap 0x801EA000: finalize_snap 0x801EB000: finalize_snap 0x801EC000: finalize_snap 0x801ED000: finalize_snap 0x801EE000: finalize_snap 0x801EF000: finalize_snap 0x801F0000: finalize_snap 0x801F1000: finalize_snap 0x801F2000: finalize_snap 0x801F3000: finalize_snap 0x801F4000: finalize_snap 0x801F5000: finalize_snap 0x801F6000: finalize_snap 0x801F7000: finalize_snap 0x801F8000: finalize_snap 0x801F9000: finalize_snap 0x801FA000: finalize_snap 0x801FB000: finalize_snap 0x801FC000: finalize_snap 0x801FD000: finalize_snap 0x801FE000: finalize_snap 0x801FF000: finalize_snap 0x80200000: finalize_snap 0x80201000: finalize_snap 0x80202000: finalize_snap 0x80203000: finalize_snap 0x80204000: finalize_snap 0x80205000: finalize_snap 0x80206000: finalize_snap 0x80207000: finalize_snap 0x80208000: finalize_snap 0x80209000: finalize_snap 0x8020A000: finalize_snap 0x8020B000: finalize_snap 0x8020C000: finalize_snap 0x8020D000: finalize_snap 0x8020E000: finalize_snap 0x8020F000: finalize_snap 0x80210000: finalize_snap 0x80211000: finalize_snap 0x80212000: finalize_snap 0x80213000: finalize_snap 0x80214000: finalize_snap 0x80215000: finalize_snap 0x80216000: finalize_snap 0x80217000: finalize_snap 0x80218000: finalize_snap 0x80219000: finalize_snap 0x8021A000: finalize_snap 0x8021B000: finalize_snap 0x8021C000: finalize_snap 0x8021D000: finalize_snap 0x8021E000: finalize_snap 0x8021F000: finalize_snap 0x80220000: finalize_snap 0x80221000: finalize_snap 0x80222000: finalize_snap 0x80223000: finalize_snap 0x80224000: finalize_snap 0x80225000: finalize_snap 0x80226000: finalize_snap 0x80227000: finalize_snap 0x80228000: finalize_snap 0x80229000: finalize_snap 0x8022A000: finalize_snap 0x8022B000: finalize_snap 0x8022C000: finalize_snap 0x8022D000: finalize_snap 0x8022E000: finalize_snap 0x8022F000: finalize_snap 0x80230000: finalize_snap 0x80231000: finalize_snap 0x80232000: finalize_snap 0x80233000: finalize_snap 0x80234000: finalize_snap 0x80235000: finalize_snap 0x80236000: finalize_snap 0x80237000: finalize_snap 0x80238000: finalize_snap 0x80239000: finalize_snap 0x8023A000: finalize_snap 0x8023B000: finalize_snap 0x8023C000: finalize_snap 0x8023D000: finalize_snap 0x8023E000: finalize_snap 0x8023F000: finalize_snap 0x80240000: finalize_snap 0x80241000: finalize_snap 0x80242000: finalize_snap 0x80243000: finalize_snap 0x80244000:  done, finalize_snap 0x80245000:  done, finalize_snap 0x80246000:  done, finalize_snap 0x80247000:  done, finalize_snap 0x80248000:  done, finalize_snap 0x80249000:  done, finalize_snap 0x8024A000:  done, finalize_snap 0x8024B000:  done, finalize_snap 0x8024C000:  done, finalize_snap 0x8024D000:  done, finalize_snap 0x8024E000:  done, finalize_snap 0x8024F000:  done, finalize_snap 0x80250000:  done, finalize_snap 0x80251000:  done, finalize_snap 0x80252000:  done, finalize_snap 0x80253000:  done, finalize_snap 0x80254000:  done, finalize_snap 0x80255000:  done, finalize_snap 0x80256000:  done, finalize_snap 0x80257000:  done, finalize_snap 0x80258000:  done, finalize_snap 0x80259000:  done, finalize_snap 0x8025A000:  done, finalize_snap 0x8025B000:  done, finalize_snap 0x8025C000:  done, finalize_snap 0x8025D000:  done, finalize_snap 0x8025E000:  done, finalize_snap 0x8025F000:  done, finalize_snap 0x80260000:  done, finalize_snap 0x80261000:  done, finalize_snap 0x80262000:  done, finalize_snap 0x80263000:  done, finalize_snap 0x80264000:  done, finalize_snap 0x80265000:  done, finalize_snap 0x80266000:  done, finalize_snap 0x80267000:  done, finalize_snap 0x80268000:  done, finalize_snap 0x80269000:  done, finalize_snap 0x8026A000:  done, finalize_snap 0x8026B000:  done, finalize_snap 0x8026C000:  done, finalize_snap 0x8026D000:  done, finalize_snap 0x8026E000:  done, finalize_snap 0x8026F000:  done, finalize_snap 0x80270000:  done, finalize_snap 0x80271000:  done, finalize_snap 0x80272000:  done, finalize_snap 0x80273000:  done, finalize_snap 0x80274000:  done, finalize_snap 0x80275000:  done, finalize_snap 0x80276000:  done, finalize_snap 0x80277000:  done, finalize_snap 0x80278000:  done, finalize_snap 0x80279000:  done, finalize_snap 0x8027A000:  done, finalize_snap 0x8027B000:  done, finalize_snap 0x8027C000:  done, finalize_snap 0x8027D000:  done, finalize_snap 0x8027E000:  done, finalize_snap 0x8027F000:  done, finalize_snap 0x80280000:  done, finalize_snap 0x80281000:  done, finalize_snap 0x80282000:  done, finalize_snap 0x80283000:  done, finalize_snap 0x80284000:  done, finalize_snap 0x80285000:  done, finalize_snap 0x80286000:  done, finalize_snap 0x80287000:  done, finalize_snap 0x80288000:  done, finalize_snap 0x80289000:  done, finalize_snap 0x8028A000:  done, finalize_snap 0x8028B000:  done, finalize_snap 0x8028C000:  done, finalize_snap 0x8028D000:  done, finalize_snap 0x8028E000:  done, finalize_snap 0x8028F000:  done, finalize_snap 0x80290000:  done, finalize_snap 0x80291000:  done, finalize_snap 0x80292000:  done, finalize_snap 0x80293000:  done, finalize_snap 0x80294000:  done, finalize_snap 0x80295000:  done, finalize_snap 0x80296000:  done, finalize_snap 0x80297000:  done, finalize_snap 0x80298000:  done, finalize_snap 0x80299000:  done, finalize_snap 0x8029A000:  done, finalize_snap 0x8029B000:  done, finalize_snap 0x8029C000:  done, finalize_snap 0x8029D000:  done, finalize_snap 0x8029E000:  done, finalize_snap 0x8029F000:  done, finalize_snap 0x802A0000:  done, finalize_snap 0x802A1000:  done, finalize_snap 0x802A2000:  done, finalize_snap 0x802A3000:  done, finalize_snap 0x802A4000:  done, finalize_snap 0x802A5000:  done, finalize_snap 0x802A6000:  done, finalize_snap 0x802A7000:  done, finalize_snap 0x802A8000:  done, finalize_snap 0x802A9000:  done, finalize_snap 0x802AA000:  done, finalize_snap 0x802AB000:  done, finalize_snap 0x802AC000:  done, finalize_snap 0x802AD000:  done, finalize_snap 0x802AE000:  done, finalize_snap 0x802AF000:  done, finalize_snap 0x802B0000:  done, finalize_snap 0x802B1000:  done, finalize_snap 0x802B2000:  done, finalize_snap 0x802B3000:  done, finalize_snap 0x802B4000:  done, finalize_snap 0x802B5000:  done, finalize_snap 0x802B6000:  done, finalize_snap 0x802B7000:  done, finalize_snap 0x802B8000:  done, finalize_snap 0x802B9000:  done, finalize_snap 0x802BA000:  done, finalize_snap 0x802BB000:  done, finalize_snap 0x802BC000:  done, finalize_snap 0x802BD000:  done, finalize_snap 0x802BE000:  done, finalize_snap 0x802BF000:  done, finalize_snap 0x802C0000:  done, finalize_snap 0x802C1000:  done, finalize_snap 0x802C2000:  done, finalize_snap 0x802C3000:  done, finalize_snap 0x802C4000:  done, finalize_snap 0x802C5000:  done, finalize_snap 0x802C6000:  done, finalize_snap 0x802C7000:  done, finalize_snap 0x802C8000:  done, finalize_snap 0x802C9000:  done, finalize_snap 0x802CA000:  done, finalize_snap 0x802CB000:  done, finalize_snap 0x802CC000:  done, finalize_snap 0x802CD000:  done, finalize_snap 0x802CE000:  done, finalize_snap 0x802CF000:  done, finalize_snap 0x802D0000:  done, finalize_snap 0x802D1000:  done, finalize_snap 0x802D2000:  done, finalize_snap 0x802D3000:  done, finalize_snap 0x802D4000:  done, finalize_snap 0x802D5000:  done, finalize_snap 0x802D6000:  done, finalize_snap 0x802D7000:  done, finalize_snap 0x802D8000:  done, finalize_snap 0x802D9000:  done, finalize_snap 0x802DA000:  done, finalize_snap 0x802DB000:  done, finalize_snap 0x802DC000:  done, finalize_snap 0x802DD000:  done, finalize_snap 0x802DE000:  done, finalize_snap 0x802DF000:  done, finalize_snap 0x802E0000:  done, finalize_snap 0x802E1000:  done, finalize_snap 0x802E2000:  done, finalize_snap 0x802E3000:  done, finalize_snap 0x802E4000:  done, finalize_snap 0x802E5000:  done, finalize_snap 0x802E6000:  done, finalize_snap 0x802E7000:  done, finalize_snap 0x802E8000:  done, finalize_snap 0x802E9000:  done, finalize_snap 0x802EA000:  done, finalize_snap 0x802EB000:  done, finalize_snap 0x802EC000:  done, finalize_snap 0x802ED000:  done, finalize_snap 0x802EE000:  done, finalize_snap 0x802EF000:  done, finalize_snap 0x802F0000:  done, finalize_snap 0x802F1000:  done, finalize_snap 0x802F2000:  done, finalize_snap 0x802F3000:  done, finalize_snap 0x802F4000:  done, finalize_snap 0x802F5000:  done, finalize_snap 0x802F6000:  done, finalize_snap 0x802F7000:  done, finalize_snap 0x802F8000:  done, finalize_snap 0x802F9000:  done, finalize_snap 0x802FA000:  done, finalize_snap 0x802FB000:  done, finalize_snap 0x802FC000:  done, finalize_snap 0x802FD000:  done, finalize_snap 0x802FE000:  done, finalize_snap 0x802FF000:  done, finalize_snap 0x80300000:  done, finalize_snap 0x80301000:  done, finalize_snap 0x80302000:  done, finalize_snap 0x80303000:  done, finalize_snap 0x80304000:  done, finalize_snap 0x80305000:  done, finalize_snap 0x80306000:  done, finalize_snap 0x80307000:  done, finalize_snap 0x80308000:  done, finalize_snap 0x80309000:  done, finalize_snap 0x8030A000:  done, finalize_snap 0x8030B000:  done, finalize_snap 0x8030C000:  done, finalize_snap 0x8030D000:  done, finalize_snap 0x8030E000:  done, finalize_snap 0x8030F000:  done, finalize_snap 0x80310000:  done, finalize_snap 0x80311000:  done, finalize_snap 0x80312000:  done, finalize_snap 0x80313000:  done, finalize_snap 0x80314000:  done, finalize_snap 0x80315000:  done, finalize_snap 0x80316000:  done, finalize_snap 0x80317000:  done, finalize_snap 0x80318000:  done, finalize_snap 0x80319000:  done, finalize_snap 0x8031A000:  done, finalize_snap 0x8031B000:  done, finalize_snap 0x8031C000:  done, finalize_snap 0x8031D000:  done, finalize_snap 0x8031E000:  done, finalize_snap 0x8031F000:  done, finalize_snap 0x80320000:  done, finalize_snap 0x80321000:  done, finalize_snap 0x80322000:  done, finalize_snap 0x80323000:  done, finalize_snap 0x80324000:  done, finalize_snap 0x80325000:  done, finalize_snap 0x80326000:  done, finalize_snap 0x80327000:  done, finalize_snap 0x80328000:  done, finalize_snap 0x80329000:  done, finalize_snap 0x8032A000:  done, finalize_snap 0x8032B000:  done, finalize_snap 0x8032C000:  done, finalize_snap 0x8032D000:  done, finalize_snap 0x8032E000:  done, finalize_snap 0x8032F000:  done, finalize_snap 0x80330000:  done, finalize_snap 0x80331000:  done, finalize_snap 0x80332000:  done, finalize_snap 0x80333000:  done, finalize_snap 0x80334000:  done, finalize_snap 0x80335000:  done, finalize_snap 0x80336000:  done, finalize_snap 0x80337000:  done, finalize_snap 0x80338000:  done, finalize_snap 0x80339000:  done, finalize_snap 0x8033A000:  done, finalize_snap 0x8033B000:  done, finalize_snap 0x8033C000:  done, finalize_snap 0x8033D000:  done, finalize_snap 0x8033E000:  done, finalize_snap 0x8033F000:  done, finalize_snap 0x80340000:  done, finalize_snap 0x80341000:  done, finalize_snap 0x80342000:  done, finalize_snap 0x80343000:  done, finalize_snap 0x80344000:  done, finalize_snap 0x80345000:  done, finalize_snap 0x80346000:  done, finalize_snap 0x80347000:  done, finalize_snap 0x80348000:  done, finalize_snap 0x80349000:  done, finalize_snap 0x8034A000:  done, finalize_snap 0x8034B000:  done, finalize_snap 0x8034C000:  done, finalize_snap 0x8034D000:  done, finalize_snap 0x8034E000:  done, finalize_snap 0x8034F000:  done, finalize_snap 0x80350000:  done, finalize_snap 0x80351000:  done, finalize_snap 0x80352000:  done, finalize_snap 0x80353000:  done, finalize_snap 0x80354000:  done, finalize_snap 0x80355000:  done, finalize_snap 0x80356000:  done, finalize_snap 0x80357000:  done, finalize_snap 0x80358000:  done, finalize_snap 0x80359000:  done, finalize_snap 0x8035A000:  done, finalize_snap 0x8035B000:  done, finalize_snap 0x8035C000:  done, finalize_snap 0x8035D000:  done, finalize_snap 0x8035E000:  done, finalize_snap 0x8035F000:  done, finalize_snap 0x80360000:  done, finalize_snap 0x80361000:  done, finalize_snap 0x80362000:  done, finalize_snap 0x80363000:  done, finalize_snap 0x80364000:  done, finalize_snap 0x80365000:  done, finalize_snap 0x80366000:  done, finalize_snap 0x80367000:  done, finalize_snap 0x80368000:  done, finalize_snap 0x80369000:  done, finalize_snap 0x8036A000:  done, finalize_snap 0x8036B000:  done, finalize_snap 0x8036C000:  done, finalize_snap 0x8036D000:  done, finalize_snap 0x8036E000:  done, finalize_snap 0x8036F000:  done, finalize_snap 0x80370000:  done, finalize_snap 0x80371000:  done, finalize_snap 0x80372000:  done, finalize_snap 0x80373000:  done, finalize_snap 0x80374000:  done, finalize_snap 0x80375000:  done, finalize_snap 0x80376000:  done, finalize_snap 0x80377000:  done, finalize_snap 0x80378000:  done, finalize_snap 0x80379000:  done, finalize_snap 0x8037A000:  done, finalize_snap 0x8037B000:  done, finalize_snap 0x8037C000:  done, finalize_snap 0x8037D000:  done, finalize_snap 0x8037E000:  done, finalize_snap 0x8037F000:  done, finalize_snap 0x80380000:  done, finalize_snap 0x80381000:  done, finalize_snap 0x80382000:  done, finalize_snap 0x80383000:  done, finalize_snap 0x80384000:  done, finalize_snap 0x80385000:  done, finalize_snap 0x80386000:  done, finalize_snap 0x80387000:  done, finalize_snap 0x80388000:  done, finalize_snap 0x80389000:  done, finalize_snap 0x8038A000:  done, finalize_snap 0x8038B000:  done, finalize_snap 0x8038C000:  done, finalize_snap 0x8038D000:  done, finalize_snap 0x8038E000:  done, finalize_snap 0x8038F000:  done, finalize_snap 0x80390000:  done, finalize_snap 0x80391000:  done, finalize_snap 0x80392000:  done, finalize_snap 0x80393000:  done, finalize_snap 0x80394000:  done, finalize_snap 0x80395000:  done, finalize_snap 0x80396000:  done, finalize_snap 0x80397000:  done, finalize_snap 0x80398000:  done, finalize_snap 0x80399000:  done, finalize_snap 0x8039A000:  done, finalize_snap 0x8039B000:  done, finalize_snap 0x8039C000:  done, finalize_snap 0x8039D000:  done, finalize_snap 0x8039E000:  done, finalize_snap 0x8039F000:  done, finalize_snap 0x803A0000:  done, finalize_snap 0x803A1000:  done, finalize_snap 0x803A2000:  done, finalize_snap 0x803A3000:  done, finalize_snap 0x803A4000:  done, finalize_snap 0x803A5000:  done, finalize_snap 0x803A6000:  done, finalize_snap 0x803A7000:  done, finalize_snap 0x803A8000:  done, finalize_snap 0x803A9000:  done, finalize_snap 0x803AA000:  done, finalize_snap 0x803AB000:  done, finalize_snap 0x803AC000:  done, finalize_snap 0x803AD000:  done, finalize_snap 0x803AE000:  done, finalize_snap 0x803AF000:  done, finalize_snap 0x803B0000:  done, finalize_snap 0x803B1000:  done, finalize_snap 0x803B2000:  done, finalize_snap 0x803B3000:  done, finalize_snap 0x803B4000:  done, finalize_snap 0x803B5000:  done, finalize_snap 0x803B6000:  done, finalize_snap 0x803B7000:  done, finalize_snap 0x803B8000:  done, finalize_snap 0x803B9000:  done, finalize_snap 0x803BA000:  done, finalize_snap 0x803BB000:  done, finalize_snap 0x803BC000:  done, finalize_snap 0x803BD000:  done, finalize_snap 0x803BE000:  done, finalize_snap 0x803BF000:  done, finalize_snap 0x803C0000:  done, finalize_snap 0x803C1000:  done, finalize_snap 0x803C2000:  done, finalize_snap 0x803C3000:  done, finalize_snap 0x803C4000:  done, finalize_snap 0x803C5000:  done, finalize_snap 0x803C6000:  done, finalize_snap 0x803C7000:  done, finalize_snap 0x803C8000:  done, finalize_snap 0x803C9000:  done, finalize_snap 0x803CA000:  done, finalize_snap 0x803CB000:  done, finalize_snap 0x803CC000:  done, finalize_snap 0x803CD000:  done, finalize_snap 0x803CE000:  done, finalize_snap 0x803CF000:  done, finalize_snap 0x803D0000:  done, finalize_snap 0x803D1000:  done, finalize_snap 0x803D2000:  done, finalize_snap 0x803D3000:  done, finalize_snap 0x803D4000:  done, finalize_snap 0x803D5000:  done, finalize_snap 0x803D6000:  done, finalize_snap 0x803D7000:  done, finalize_snap 0x803D8000:  done, finalize_snap 0x803D9000:  done, finalize_snap 0x803DA000:  done, finalize_snap 0x803DB000:  done, finalize_snap 0x803DC000:  done, finalize_snap 0x803DD000:  done, finalize_snap 0x803DE000:  done, finalize_snap 0x803DF000:  done, finalize_snap 0x803E0000:  done, finalize_snap 0x803E1000:  done, finalize_snap 0x803E2000:  done, finalize_snap 0x803E3000:  done, finalize_snap 0x803E4000:  done, finalize_snap 0x803E5000:  done, finalize_snap 0x803E6000:  done, finalize_snap 0x803E7000:  done, finalize_snap 0x803E8000:  done, finalize_snap 0x803E9000:  done, finalize_snap 0x803EA000:  done, finalize_snap 0x803EB000:  done, finalize_snap 0x803EC000:  done, finalize_snap 0x803ED000:  done, finalize_snap 0x803EE000:  done, finalize_snap 0x803EF000:  done, finalize_snap 0x803F0000:  done, finalize_snap 0x803F1000:  done, finalize_snap 0x803F2000:  done, finalize_snap 0x803F3000:  done, finalize_snap 0x803F4000:  done, finalize_snap 0x803F5000:  done, finalize_snap 0x803F6000:  done, finalize_snap 0x803F7000:  done, finalize_snap 0x803F8000:  done, finalize_snap 0x803F9000:  done, finalize_snap 0x803FA000:  done, finalize_snap 0x803FB000:  done, finalize_snap 0x803FC000:  done, finalize_snap 0x803FD000:  done, finalize_snap 0x803FE000:  done, finalize_snap 0x803FF000:  done, finalize_snap 0x80400000:  done, finalize_snap 0x80401000:  done, finalize_snap 0x80402000:  done, finalize_snap 0x80403000:  done, finalize_snap 0x80404000:  done, finalize_snap 0x80405000:  done, finalize_snap 0x80406000:  done, finalize_snap 0x80407000:  done, finalize_snap 0x80408000:  done, finalize_snap 0x80409000:  done, finalize_snap 0x8040A000:  done, finalize_snap 0x8040B000:  done, finalize_snap 0x8040C000:  done, finalize_snap 0x8040D000:  done, finalize_snap 0x8040E000:  done, finalize_snap 0x8040F000:  done, finalize_snap 0x80410000:  done, finalize_snap 0x80411000:  done, finalize_snap 0x80412000:  done, finalize_snap 0x80413000:  done, finalize_snap 0x80414000:  done, finalize_snap 0x80415000:  done, finalize_snap 0x80416000:  done, finalize_snap 0x80417000:  done, finalize_snap 0x80418000:  done, finalize_snap 0x80419000:  done, finalize_snap 0x8041A000:  done, finalize_snap 0x8041B000:  done, finalize_snap 0x8041C000:  done, finalize_snap 0x8041D000:  done, finalize_snap 0x8041E000:  done, finalize_snap 0x8041F000:  done, finalize_snap 0x80420000:  done, finalize_snap 0x80421000:  done, finalize_snap 0x80422000:  done, finalize_snap 0x80423000:  done, finalize_snap 0x80424000:  done, finalize_snap 0x80425000:  done, finalize_snap 0x80426000:  done, finalize_snap 0x80427000:  done, finalize_snap 0x80428000:  done, finalize_snap 0x80429000:  done, finalize_snap 0x8042A000:  done, finalize_snap 0x8042B000:  done, finalize_snap 0x8042C000:  done, finalize_snap 0x8042D000:  done, finalize_snap 0x8042E000:  done, finalize_snap 0x8042F000:  done, finalize_snap 0x80430000:  done, finalize_snap 0x80431000:  done, finalize_snap 0x80432000:  done, finalize_snap 0x80433000:  done, finalize_snap 0x80434000:  done, finalize_snap 0x80435000:  done, finalize_snap 0x80436000:  done, finalize_snap 0x80437000:  done, finalize_snap 0x80438000:  done, finalize_snap 0x80439000:  done, finalize_snap 0x8043A000:  done, finalize_snap 0x8043B000:  done, finalize_snap 0x8043C000:  done, finalize_snap 0x8043D000:  done, finalize_snap 0x8043E000:  done, finalize_snap 0x8043F000:  done, finalize_snap 0x80440000:  done, finalize_snap 0x80441000:  done, finalize_snap 0x80442000:  done, finalize_snap 0x80443000:  done, finalize_snap 0x80444000:  done, finalize_snap 0x80445000:  done, finalize_snap 0x80446000:  done, finalize_snap 0x80447000:  done, finalize_snap 0x80448000:  done, finalize_snap 0x80449000:  done, finalize_snap 0x8044A000:  done, finalize_snap 0x8044B000:  done, finalize_snap 0x8044C000:  done, finalize_snap 0x8044D000:  done, finalize_snap 0x8044E000:  done, finalize_snap 0x8044F000:  done, finalize_snap 0x80450000:  done, finalize_snap 0x80451000:  done, finalize_snap 0x80452000:  done, finalize_snap 0x80453000:  done, finalize_snap 0x80454000:  done, finalize_snap 0x80455000:  done, finalize_snap 0x80456000:  done, finalize_snap 0x80457000:  done, finalize_snap 0x80458000:  done, finalize_snap 0x80459000:  done, finalize_snap 0x8045A000:  done, finalize_snap 0x8045B000:  done, finalize_snap 0x8045C000:  done, finalize_snap 0x8045D000:  done, finalize_snap 0x8045E000:  done, finalize_snap 0x8045F000:  done, finalize_snap 0x80460000:  done, finalize_snap 0x80461000:  done, finalize_snap 0x80462000:  done, finalize_snap 0x80463000:  done, finalize_snap 0x80464000:  done, finalize_snap 0x80465000:  done, finalize_snap 0x80466000:  done, finalize_snap 0x80467000:  done, finalize_snap 0x80468000:  done, finalize_snap 0x80469000:  done, finalize_snap 0x8046A000:  done, finalize_snap 0x8046B000:  done, finalize_snap 0x8046C000:  done, finalize_snap 0x8046D000:  done, finalize_snap 0x8046E000:  done, finalize_snap 0x8046F000:  done, finalize_snap 0x80470000:  done, finalize_snap 0x80471000:  done, finalize_snap 0x80472000:  done, finalize_snap 0x80473000:  done, finalize_snap 0x80474000:  done, finalize_snap 0x80475000:  done, finalize_snap 0x80476000:  done, finalize_snap 0x80477000:  done, finalize_snap 0x80478000:  done, finalize_snap 0x80479000:  done, finalize_snap 0x8047A000:  done, finalize_snap 0x8047B000:  done, finalize_snap 0x8047C000:  done, finalize_snap 0x8047D000:  done, finalize_snap 0x8047E000:  done, finalize_snap 0x8047F000:  done, finalize_snap 0x80480000:  done, finalize_snap 0x80481000:  done, finalize_snap 0x80482000:  done, finalize_snap 0x80483000:  done, finalize_snap 0x80484000:  done, finalize_snap 0x80485000:  done, finalize_snap 0x80486000:  done, finalize_snap 0x80487000:  done, finalize_snap 0x80488000:  done, finalize_snap 0x80489000:  done, finalize_snap 0x8048A000:  done, finalize_snap 0x8048B000:  done, finalize_snap 0x8048C000:  done, finalize_snap 0x8048D000:  done, finalize_snap 0x8048E000:  done, finalize_snap 0x8048F000:  done, finalize_snap 0x80490000:  done, finalize_snap 0x80491000:  done, finalize_snap 0x80492000:  done, finalize_snap 0x80493000:  done, finalize_snap 0x80494000:  done, finalize_snap 0x80495000:  done, finalize_snap 0x80496000:  done, finalize_snap 0x80497000:  done, finalize_snap 0x80498000:  done, finalize_snap 0x80499000:  done, finalize_snap 0x8049A000:  done, finalize_snap 0x8049B000:  done, finalize_snap 0x8049C000:  done, finalize_snap 0x8049D000:  done, finalize_snap 0x8049E000:  done, finalize_snap 0x8049F000:  done, finalize_snap 0x804A0000:  done, finalize_snap 0x804A1000:  done, finalize_snap 0x804A2000:  done, finalize_snap 0x804A3000:  done, finalize_snap 0x804A4000:  done, finalize_snap 0x804A5000:  done, finalize_snap 0x804A6000:  done, finalize_snap 0x804A7000:  done, finalize_snap 0x804A8000:  done, finalize_snap 0x804A9000:  done, finalize_snap 0x804AA000:  done, finalize_snap 0x804AB000:  done, finalize_snap 0x804AC000:  done, finalize_snap 0x804AD000:  done, finalize_snap 0x804AE000:  done, finalize_snap 0x804AF000:  done, finalize_snap 0x804B0000:  done, finalize_snap 0x804B1000:  done, finalize_snap 0x804B2000:  done, finalize_snap 0x804B3000:  done, finalize_snap 0x804B4000:  done, finalize_snap 0x804B5000:  done, finalize_snap 0x804B6000:  done, finalize_snap 0x804B7000:  done, finalize_snap 0x804B8000:  done, finalize_snap 0x804B9000:  done, finalize_snap 0x804BA000:  done, finalize_snap 0x804BB000:  done, finalize_snap 0x804BC000:  done, finalize_snap 0x804BD000:  done, finalize_snap 0x804BE000:  done, finalize_snap 0x804BF000:  done, finalize_snap 0x804C0000:  done, finalize_snap 0x804C1000:  done, finalize_snap 0x804C2000:  done, finalize_snap 0x804C3000:  done, finalize_snap 0x804C4000:  done, finalize_snap 0x804C5000:  done, finalize_snap 0x804C6000:  done, finalize_snap 0x804C7000:  done, finalize_snap 0x804C8000:  done, finalize_snap 0x804C9000:  done, finalize_snap 0x804CA000:  done, finalize_snap 0x804CB000:  done, finalize_snap 0x804CC000: finalize_snap 0x804CD000: finalize_snap 0x804CE000: finalize_snap 0x804CF000: finalize_snap 0x804D0000: finalize_snap 0x804D1000: finalize_snap 0x804D2000: finalize_snap 0x804D3000: finalize_snap 0x804D4000: finalize_snap 0x804D5000: finalize_snap 0x804D6000: finalize_snap 0x804D7000: finalize_snap 0x804D8000: finalize_snap 0x804D9000: finalize_snap 0x804DA000: finalize_snap 0x804DB000: finalize_snap 0x804DC000: finalize_snap 0x804DD000: finalize_snap 0x804DE000: finalize_snap 0x804DF000: finalize_snap 0x804E0000: finalize_snap 0x804E1000: finalize_snap 0x804E2000: finalize_snap 0x804E3000: finalize_snap 0x804E4000: finalize_snap 0x804E5000: finalize_snap 0x804E6000: finalize_snap 0x804E7000: finalize_snap 0x804E8000: finalize_snap 0x804E9000: finalize_snap 0x804EA000: finalize_snap 0x804EB000: finalize_snap 0x804EC000: finalize_snap 0x804ED000: finalize_snap 0x804EE000: finalize_snap 0x804EF000: finalize_snap 0x804F0000: finalize_snap 0x804F1000: finalize_snap 0x804F2000: finalize_snap 0x804F3000: finalize_snap 0x804F4000: finalize_snap 0x804F5000: finalize_snap 0x804F6000: finalize_snap 0x804F7000: finalize_snap 0x804F8000: finalize_snap 0x804F9000: finalize_snap 0x804FA000: finalize_snap 0x804FB000: finalize_snap 0x804FC000: finalize_snap 0x804FD000: finalize_snap 0x804FE000: finalize_snap 0x804FF000: finalize_snap 0x80500000: finalize_snap 0x80501000: finalize_snap 0x80502000: finalize_snap 0x80503000: finalize_snap 0x80504000: finalize_snap 0x80505000: finalize_snap 0x80506000: finalize_snap 0x80507000: finalize_snap 0x80508000: finalize_snap 0x80509000: finalize_snap 0x8050A000: finalize_snap 0x8050B000: finalize_snap 0x8050C000: finalize_snap 0x8050D000: finalize_snap 0x8050E000: finalize_snap 0x8050F000: finalize_snap 0x80510000: finalize_snap 0x80511000: finalize_snap 0x80512000: finalize_snap 0x80513000: finalize_snap 0x80514000: finalize_snap 0x80515000: finalize_snap 0x80516000: finalize_snap 0x80517000: finalize_snap 0x80518000: finalize_snap 0x80519000: finalize_snap 0x8051A000: finalize_snap 0x8051B000: finalize_snap 0x8051C000: finalize_snap 0x8051D000: finalize_snap 0x8051E000: finalize_snap 0x8051F000: finalize_snap 0x80520000: finalize_snap 0x80521000: finalize_snap 0x80522000: finalize_snap 0x80523000: finalize_snap 0x80524000: touch

@@ -1,0 +1,395 @@
+http://www.codepedia.com/1/CMOS_C
+
+Codepedia - The software and hardware developers Encyclopedia
+[Home]  [Edit this page]  [Recent Changes]  [Special Pages]  [Help]  CMOS_C CMOS
+(A little Mystery)
+
+This article features CMOS, which is an interesting topic for the beginners and for virtually every programmer as CMOS stores the system settings even when you switch off the computer. Ever wondered how Operating system is able to tell you correct time and date even if you keep your computer off for months? All the required settings about FDD, HDD, timers, etc. are stored in a small capacity low powered memory called the CMOS.
+
+In this article I present you with a basic knowledge of this memory area of your system, how to actually access this memory, a code segment in C and then a memory map of CMOS.
+
+The CMOS (Complementary Metal Oxide Semiconductor) memory is 65 or 128 byte RAM which is powered by a battery on the motherboard.
+
+The CMOS is actually out of range of normal address range and cannot be directly reached. It is accessed through IN and OUT commands which are used at ports 70h and 71h.
+
+Because of the construction of the port 70, the CMOS RAM has an upper limit of 128 bytes. This is because only 7 bits i.e. bits 0-6 are used for addressing and the last bit i.e. bit 7 is used for Enabling or Disabling Non Maskable Interrupts (NMI), bit 7=0 Enable NMI, bit 7=1 Disable NMI
+
+To access CMOS RAM, the index address (0 to 7F H) is output to port 70H, and the data is then read or written at port 71 H. Interrupts should be inhibited while the entire port 70 H /71 H sequence is completed. Alternatively, the port sequence can occur during an interrupt service routine before re-enabling interrupts. If these precautions are not observed, an interrupt service routine could potentially intervene between the output to port 70 H and the subsequent I/O to port 71 H, overwriting the port 70 H value.
+
+/*Code segment in C for accessing CMOS*/
+
+In the following function ReadFromCMOS we execute a loop for 128 times to read all the CMOS locations, each time we clear accumulator, disable interrupts, copy index of the byte to be read to lower byte of accumulator, provide index to port number 70h and then wait for the response to be provided on port 71h, we then copy value provided at port 71h and enable interrupts, this value is then stored in array.
+
+ReadFromCMOS (unsigned char array [])
+{
+   int index;
+   unsigned char tvalue, bindex;
+   for(index = 0; index < 128; index++)
+   {
+      char AL_ = (unsigned char) index;
+      _asm 
+      {
+         xor ax,ax       /* Clear accumulator*/
+         cli             /* Disable interrupts*/
+         mov al,AL_      /* Move index address*/
+         out 0x70,al     /* Copy address to CMOS register*/
+         nop
+         nop
+         nop             /* Wait a bit for response*/
+         in al,0x71      /* Fetch 1 byte to al*/
+         sti             /* Enable interrupts*/
+         mov tvalue,al
+       }
+       array[index] = tvalue;
+   }
+}
+
+
+
+In the following function WriteToCMOS we execute a loop for 128 times to write to all the CMOS locations, each time we take a byte from array. we clear accumulator, disable interrupts, copy index of the byte to be written to lower byte of accumulator, byte to be written to higher byte of accumulator, provide index to port number 70h and byte to be written on port 71h, we then enable interrupts.
+
+WriteTOCMOS(unsigned char array[])
+{
+   unsigned char index;
+   for(index = 0; index < 128; index++)
+   {
+      unsigned char tvalue = array[index];
+      _asm 
+      {
+         xor ax,ax       /* zero register*/
+         cli             /* Clear interrupts*/
+         mov al,index    /* move index address*/
+         mov ah,tvalue   /* copy value to ah*/
+         out 0x70,al     /* copy address to CMOS register*/
+         nop
+         nop
+         nop             /* Wait a bit */
+         mov al,ah       /* move value to al*/
+         out 0x71,al     /* write 1 byte to CMOS*/
+         sti             /* Enable interrupts*/
+      }
+   }
+}
+
+
+
+On Linux, you must set the IO permission level (iopl) to read or write from those ports. Sample code for Linux:
+
+/* (c) 2003 Ark Linux (http://www.arklinux.org/),
+   released to the public domain */
+
+   1. include <sys/io.h>
+
+inline void cli() {
+	asm("cli");
+}
+inline void sti() {
+	asm("sti");
+}
+void setCmos(int reg, int value)
+{
+	outb_p(reg, 0x70);
+	outb_p(value, 0x71);
+}
+int readCmos(int reg)
+{
+	outb_p(reg, 0x70);
+	return inb_p(0x71);
+}
+int main(int argc, char **argv)
+{
+	iopl(3);
+	cli();
+	/* Use readCmos() and writeCmos() here */
+	sti();
+	iopl(0);
+}
+
+
+
+Below is a typical CMOS RAM memory map for an AT PC. Under a 128 byte ISA compatible CMOS, 16 bytes (00h-0fh) is the real time clock, 32 bytes (10h-2Fh) is the ISA configuration data, 16 bytes (30h-3Fh) is the BIOS specific configuration data and 64 bytes (40h-7Fh) is the ESCD (Extended System Configuration Data).
+
+
+Offset Offset  Field   Function
+Hex     Dec    size
+00h      0     1 byte  RTC seconds. Contains the seconds value of current time. (BCD Format)
+01h      1     1 byte  RTC seconds alarm. Contains the seconds value for the RTC alarm (BCD Format)
+02h      2     1 byte  RTC minutes. Contains the minutes value of the current time (BCD Format)
+03h      3     1 byte  RTC minutes alarm. Contains the minutes value for the RTC alarm ((BCD Format)
+04h      4     1 byte  RTC hours. Contains the hours value of the current time (BCD Format)
+05h      5     1 byte  RTC hours alarm. Contains the hours value for the RTC alarm (BCD Format)
+06h      6     1 byte  RTC day of week. Contains the current day of the week (1 .. 7, sunday=1)
+07h      7     1 byte  RTC date day. Contains day value of current date (BCD Format)
+08h      8     1 byte  RTC date month. Contains the month value of current date (BCD Format)
+09h      9     1 byte  RTC date year. Contains the year value of current date (BCD Format)
+0Ah     10     1 byte  Status Register A
+                       Bit  7   = Update in progress 
+                                  (0 = Date and time can be read,
+                                   1 = Time update in progress)
+                       Bits 6-4 = Time frequency divider (010 = 32.768KHz)
+                       Bits 3-0 = Rate selection frequency 
+                       (0110 = 1.024KHz square wave frequency)
+0Bh     11     1 byte  Status Register B
+                       Bit 7 = Clock update cycle 
+                               (0 = Update normally, 1 = Abort update in progress)
+                       Bit 6 = Periodic interrupt 
+                               (0 = Disable interrupt (default), 1 = Enable interrupt)
+                       Bit 5 = Alarm interrupt 
+                               (0 = Disable interrupt (default), 1 = Enable interrupt)
+                       Bit 4 = Update ended interrupt 
+                               (0 = Disable interrupt (default), 1 = Enable interrupt)
+                       Bit 3 = Status register A square wave frequency 
+                               (0 = Disable square wave (default), 1 = Enable square wave)
+                       Bit 2 = 24 hour clock 
+                               (0 = 24 hour mode (default), 1 = 12 hour mode)
+                       Bit 1 = Daylight savings time 
+                               (0 = Disable daylight savings (default),
+                                1 = Enable daylight savings)
+0Ch     12     1 byte  Status Register C - Read only flags indicating system 
+                       status conditions
+                       Bit  7   = IRQF flag
+                       Bit  6   = PF flag
+                       Bit  5   = AF flag
+                       Bit  4   = UF flag
+                       Bits 3-0 = Reserved
+0Dh     13     1 byte  Status Register D - Valid CMOS RAM flag on bit 7 
+                       (battery condition flag)
+                       Bit 7 = Valid CMOS RAM flag 
+                       (0 = CMOS battery dead, 1 = CMOS battery power good)
+                       Bit 6-0 = Reserved
+0Eh     14     1 byte  Diagnostic Status
+                       Bit 7 = Real time clock power status 
+                       (0 = CMOS has not lost power, 1 = CMOS has lost power)
+                       Bit 6 = CMOS checksum status 
+                       (0 = Checksum is good, 1 = Checksum is bad)
+                       Bit 5 = POST configuration information status 
+                       (0 = Configuration information is valid, 
+                       1 = Configuration information in invalid)
+                       Bit 4 = Memory size compare during POST 
+                       (0 = POST memory equals configuration, 
+                       1 = POST memory not equal to configuration)
+                       Bit 3 = Fixed disk/adapter initialization 
+                       (0 = Initialization good, 1 = Initialization bad)
+                       Bit 2 = CMOS time status indicator 
+                       (0 = Time is valid, 1 = Time is invalid)
+                       Bit 1-0 = Reserved
+0Fh     15     1 byte  CMOS Shutdown Status
+                       00h = Power on or soft reset
+                       01h = Memory size pass
+                       02h = Memory test pass
+                       03h = Memory test fail
+                       04h = POST complete; boot system
+                       05h = JMP double word pointer with EOI
+                       06h = Protected mode tests pass
+                       07h = protected mode tests fail
+                       08h = Memory size fail
+                       09h = Int 15h block move
+                       0Ah = JMP double word pointer without EOI
+                       0Bh = Used by 80386
+10h     16     1 byte  Floppy Disk Drive Types
+                       Bits 7-4 = Drive 0 type
+                       Bits 3-0 = Drive 1 type
+                       0000 = None
+                       0001 = 360KB
+                       0010 = 1.2MB
+                       0011 = 720KB
+                       0100 = 1.44MB
+11h     17     1 byte  System Configuration Settings
+                       Bit 7 = Mouse support disable/enable
+                       Bit 6 = Memory test above 1MB disable/enable
+                       Bit 5 = Memory test tick sound disable/enable
+                       Bit 4 = Memory parity error check disable/enable
+                       Bit 3 = Setup utility trigger display disable/enable
+                       Bit 2 = Hard disk type 47 RAM area 
+                               (0:300h or upper 1KB of DOS area)
+                       Bit 1 = Wait for <F1> if any error message disable/enable
+                       Bit 0 = System boot up with Numlock (off/on)
+12h     18     1 byte  Hard Disk Types
+                       Bits 7-4 = Hard disk 0 type
+                       Bits 3-0 = Hard disk 1 type
+                       0000 = No drive installed
+                       0001 = Type 1 installed
+                       1110 = Type 14 installed
+                       1111 = Type 16-47 (defined later in 19h)
+13h     19     1 byte  Typematic Parameters
+                       Bit 7 = typematic rate programming disable/enabled
+                       Bit 6-5 = typematic rate delay
+                       Bit 4-2 = Typematic rate
+14h     20     1 byte  Installed Equipment
+                       Bits 7-6 = Number of floppy disks 
+                       (00 = 1 floppy disk, 01 = 2 floppy disks)
+                       Bits 5-4 = Primary display 
+                       (00 = Use display adapter BIOS, 01 = CGA 40 column, 
+                       10 = CGA 80 column, 11 = Monochrome Display Adapter)
+                       Bit 3 = Display adapter installed/not installed
+                       Bit 2 = Keyboard installed/not installed
+                       Bit 1 = math coprocessor installed/not installed
+                       Bit 0 = Always set to 1
+15h     21     1 byte  Base Memory Low Order Byte - Least significant byte
+16h     22     1 byte  Base Memory High Order Byte - Most significant byte
+17h     23     1 byte  Extended Memory Low Order Byte - Least significant byte
+18h     24     1 byte  Extended Memory High Order Byte - Most significant byte
+19h     25     1 byte  Hard Disk 0 Extended Type - 
+                       (10h to 2Eh = Type 16 to 46 respectively)
+1Ah     26     1 byte  Hard Disk 1 Extended Type - 
+                       (10h to 2Eh = Type 16 to 46 respectively)
+1Bh     27     1 byte  User Defined Drive C: 
+                       Number of cylinders least significant byte
+1Ch     28     1 byte  User Defined Drive C: 
+                       Number of cylinders most significant byte
+1Dh     29     1 byte  User Defined Drive C: 
+                       Number of heads
+1Eh     30     1 byte  User Defined Drive C: 
+                       Write precomp cylinder least significant byte
+1Fh     31     1 byte  User Defined Drive C: 
+                       Write precomp cylinder most significant byte
+20h     32     1 byte  User Defined Drive C: 
+                       Control byte
+21h     33     1 byte  User Defined Drive C: 
+                       Landing zone least significant byte
+22h     34     1 byte  User Defined Drive C: 
+                       Landing zone most significant byte
+23h     35     1 byte  User Defined Drive C: 
+                       Number of sectors
+24h     36     1 byte  User Defined Drive D: 
+                       Number of cylinders least significant byte
+25h     37     1 byte  User defined Drive D: 
+                       Number of cylinders most significant byte
+26h     38     1 byte  User Defined Drive D: 
+                       Number of heads
+27h     39     1 byte  User Defined Drive D: 
+                       Write precomp cylinder least significant byte
+28h     40     1 byte  User Defined Drive D: 
+                       Write precomp cylinder most significant byte
+29h     41     1 byte  User Defined Drive D: 
+                       Control byte
+2Ah     42     1 byte  User Defined Drive D: 
+                       Landing zone least significant byte
+2Bh     43     1 byte  User Defined Drive D: 
+                       Landing zone most significant byte
+2Ch     44     1 byte  User Defined Drive D: 
+                       Number of sectors
+2Dh     45     1 byte  System Operational Flags
+                       Bit 7 = Weitek processor present/absent
+                       Bit 6 = Floppy drive seek at boot enable/disable
+                       Bit 5 = System boot sequence
+                       Bit 4 = System boot CPU speed high/low
+                       Bit 3 = External cache enable/disable
+                       Bit 2 = Internal cache enable/disable
+                       Bit 1 = Fast gate A20 operation enable/disable
+                       Bit 0 = Turbo switch function enable/disable
+2Eh     46     1 byte  CMOS Checksum High Order Byte - Most significant byte
+2Fh     47     1 byte  CMOS Checksum Low Order Byte - Least significant byte
+30h     48     1 byte  Actual Extended Memory Low Order Byte 
+                       Least significant byte
+31h     49     1 byte  Actual Extended Memory High Order Byte 
+                       Most significant byte
+32h     50     1 byte  Century Date BCD - Value for century of current date
+33h     51     1 byte  POST Information Flags
+                       Bit 7 = BIOS length (64KB/128KB)
+                       Bit 6-1 = reserved
+                       Bit 0 = POST cache test passed/failed
+34h     52     1 byte  BIOS and Shadow Option Flags
+                       Bit 7 = Boot sector virus protection disabled/enabled
+                       Bit 6 = Password checking option disabled/enabled
+                       Bit 5 = Adapter ROM shadow C800h (16KB) disabled/enabled
+                       Bit 4 = Adapter ROM shadow CC00h (16KB) disabled/enabled
+                       Bit 3 = Adapter ROM shadow D000h (16KB) disabled/enabled
+                       Bit 2 = Adapter ROM shadow D400h (16KB) disabled/enabled
+                       Bit 1 = Adapter ROM shadow D800h (16KB) disabled/enabled
+                       Bit 0 = Adapter ROM shadow DC00h (16KB) disabled/enabled
+35h     53     1 byte  BIOS and Shadow Option Flags
+                       Bit 7 = Adapter ROM shadow E000h (16KB) disabled/enabled
+                       Bit 6 = Adapter ROM shadow E400h (16KB) disabled/enabled
+                       Bit 5 = Adapter ROM shadow E800h (16KB) disabled/enabled
+                       Bit 4 = Adapter ROM shadow EC00h (16KB) disabled/enabled
+                       Bit 3 = System ROM shadow F000h (16KB) disabled/enabled
+                       Bit 2 = Video ROM shadow C000h (16KB) disabled/enabled
+                       Bit 1 = Video ROM shadow C400h (16KB) disabled/enabled
+                       Bit 0 = Numeric processor test disabled/enabled
+36h     54     1 byte  Chipset Specific Information
+37h     55     1 byte  Password Seed and Color Option
+                       Bit 7-4 = Password seed (do not change)
+                       Bit 3-0 = Setup screen color palette
+                           07h = White on black
+                           70h = Black on white
+                           17h = White on blue
+                           20h = Black on green
+                           30h = Black on turquoise
+                           47h = White on red
+                           57h = White on magenta
+                           60h = Black on brown
+38h-3d  56-61  6 byte  Encrypted Password - (do not change)
+3Eh     62     1 byte  Extended CMOS Checksum - Most significant byte
+3Fh     63     1 byte  Extended CMOS Checksum - Least significant byte
+40h     64     1 byte  Model Number Byte
+41h     65     1 byte  1st Serial Number Byte
+42h     66     1 byte  2nd Serial Number Byte
+43h     67     1 byte  3rd Serial Number Byte
+44h     68     1 byte  4th Serial Number Byte
+45h     69     1 byte  5th Serial Number Byte
+46h     70     1 byte  6th Serial Number Byte
+47h     71     1 byte  CRC Byte
+48h     72     1 byte  Century Byte
+49h     73     1 byte  Date Alarm
+4Ah     74     1 byte  Extended Control Register 4A
+4Bh     75     1 byte  Extended Control register 4B
+4Ch     76     1 byte  Reserved
+4Dh     77     1 byte  Reserved
+4Eh     78     1 byte  Real Time Clock - Address 2
+4Fh     79     1 byte  Real Time Clock - Address 3
+50h     80     1 byte  Extended RAM Address - Least significant byte
+51h     81     1 byte  Extended RAM Address - Most significant byte
+52h     82     1 byte  Reserved
+53h     83     1 byte  Extended RAM Data Port
+54h     84     1 byte  Reserved
+55h     85     1 byte  Reserved
+56h     86     1 byte  Reserved
+57h     87     1 byte  Reserved
+58h     88     1 byte  Reserved
+59h     89     1 byte  Reserved
+5Ah     90     1 byte  Reserved
+5Bh     91     1 byte  Reserved
+5Ch     92     1 byte  Reserved
+5Dh     93     1 byte  Reserved
+
+
+
+About the author:
+Pradeep P. Chandiramani
+/*PCD*/
+pradeepchandiramani@yahoo.co.in
+
+Copyright (C) 2004 by Pradeep P Chandiramani. No part of this article should be reproduced in any form without prior permission form the author.
+last edited (August 23, 2004) by Doctor Slush, Number of views: 25570, Current Rev: 9 (Diff)
+
+[Edit this page]  [Page history]  [What links here]  [Discuss this topic]  [Printer Friendly]  
+
+Members
+Username:
+
+Password:
+
+
+Register
+Forgot Password?
+
+HELP
+FAQ
+
+Undefined Pages
+Orphan Pages
+Latest Pages
+Notifications
+Top Users
+
+Contact Us
+Link To Us
+
+
+Advanced Search
+
+
+
+Programmers Heaven - for .NET, Java, C/C++ and WEB Developers!
+© 1996-2008 Community Networks Ltd. All rights reserved. Reproduction in whole or in part, in any form or medium without express written permission is prohibited. Violators of this policy may be subject to legal action. Please read Terms Of Use and Privacy Statement for more information. Site Management by Lars Hagelin at Kontantkort.se.

@@ -1,0 +1,92 @@
+#include "../config.h"
+
+#include <i386/seg.h>
+#include <phantom_types.h>
+#include <phantom_libc.h>
+#include "idt.h"
+
+//extern struct real_gate idt[];
+
+struct idt_init_entry
+{
+    unsigned entrypoint;
+    unsigned short vector;
+    unsigned short type;
+};
+extern struct idt_init_entry idt_inittab[];
+
+
+/* Fill a gate in the IDT.  */
+#define fill_idt_gate(int_num, entry, selector, access, dword_count) \
+	fill_gate(&idt[int_num], entry, selector, access, dword_count)
+
+
+/* Fill a gate with particular values.  */
+void
+fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
+	  unsigned char access, unsigned char word_count)
+{
+	gate->offset_low = offset & 0xffff;
+	gate->selector = selector;
+	gate->word_count = word_count;
+	gate->access = access | ACC_P;
+	gate->offset_high = (offset >> 16) & 0xffff;
+}
+
+
+
+
+
+
+/** Load the IDT pointer into the processor.  */
+void phantom_load_idt(void)
+{
+    struct pseudo_descriptor pdesc;
+
+    pdesc.limit = sizeof(idt)-1;
+    pdesc.linear_base = kvtolin(&idt);
+    set_idt(&pdesc);
+}
+
+
+/* defined in intr.S */
+extern u_int32_t int_entry_table[];
+
+
+void phantom_fill_idt(void)
+{
+    struct idt_init_entry *iie = idt_inittab;
+
+    /* Initialize the exception vectors from the idt_inittab.  */
+    while (iie->entrypoint)
+    {
+        fill_idt_gate(iie->vector, iie->entrypoint, KERNEL_CS, iie->type, 0);
+        iie++;
+    }
+
+    // Init PIC vectors
+    int i;
+    for (i = 0; i < 16; i++)
+    {
+        //printf("IRQ%d @0x%X, ", i, int_entry_table[i] );
+        fill_idt_gate(PIC_INT_BASE + i,
+                      int_entry_table[i], KERNEL_CS,
+//                      ACC_PL_U|ACC_INTR_GATE, 0);
+                      ACC_PL_K|ACC_INTR_GATE, 0);
+    }
+    printf("\n");
+}
+
+/*
+void phantom_init_idt()
+{
+    phantom_fill_idt();
+    phantom_load_idt();
+    struct region_descriptor rd;
+
+    rd.rd_limit = sizeof(idt) - 1;
+    rd.rd_base = kvtolin(&idt);
+
+    asm volatile("lidt (%0)" : : "r" (&rd));
+}
+*/
