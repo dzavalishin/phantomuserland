@@ -1,0 +1,3708 @@
+Breakpoint 1 at 0x158c49: file t_panic.c, line 24.
+Breakpoint 2 at 0x14063a: file exec.c, line 89.
+Breakpoint 3 at 0x10c6cd: file main.c, line 191.
+Breakpoint 4 at 0x119484: file spinlock.c, line 43.
+Breakpoint 5 at 0x159396: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 1, panic (fmt=0x5ae417 "mutex - not owner") at t_panic.c:24
+24	    if(panic_reenter)
+#0  panic (fmt=0x5ae417 "mutex - not owner") at t_panic.c:24
+#1  0x0015827e in hal_mutex_unlock (m=0xb6f054) at mutex.c:117
+#2  0x0011ca6d in vm_map_page_fault_handler (address=0x80000000, write=0, ip=1300674) at vm_map.c:184
+#3  0x0011cb4f in vm_map_page_fault_trap_handler (ts=0x45d1f2c) at vm_map.c:223
+#4  0x00157f2c in phantom_kernel_trap (ts=0x45d1f2c) at trap_entry.c:18
+#5  0x00577199 in trap_push_segs ()
+#6  0x045d1f2c in _phantom_start_stack_start ()
+#7  0x00000000 in ?? ()
+quit
+Breakpoint 1 at 0x158c43: file t_panic.c, line 23.
+Breakpoint 2 at 0x140634: file exec.c, line 88.
+Breakpoint 3 at 0x10c6bc: file main.c, line 191.
+Breakpoint 4 at 0x119484: file spinlock.c, line 43.
+Breakpoint 5 at 0x159396: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Remote communication error: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x158c43: file t_panic.c, line 23.
+Breakpoint 2 at 0x140634: file exec.c, line 88.
+Breakpoint 3 at 0x10c6bc: file main.c, line 191.
+Breakpoint 4 at 0x119484: file spinlock.c, line 43.
+Breakpoint 5 at 0x159396: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Remote communication error: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x1404ff: file t_panic.c, line 23.
+Breakpoint 2 at 0x1296f0: file exec.c, line 88.
+Breakpoint 3 at 0x1085fc: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140baa: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+192	    init_irq_allocator();
+195	    phantom_init_descriptors();
+197	    init_multiboot_symbols();
+199	    hal_init(
+209	    phantom_pci_find_drivers( 0 );
+211	    phantom_timer_pit_init(100,0);
+213	    phantom_paging_init();
+215	    phantom_timed_call_init(); // Too late? Move up?
+222	    phantom_trap_handlers[15] = ignore_handler;
+223	    phantom_threads_init();
+224	    phantom_request_timed_call( &sched_timer, TIMEDCALL_FLAG_PERIODIC );
+225	    hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
+228	    set_cr0( get_cr0() | CR0_WP );
+233	        strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
+237	    printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
+238	    phantom_process_boot_options();
+240	    detect_cpu(0);
+243	    hal_init_physmem_alloc_thread();
+245	    net_stack_init();
+247	    phantom_pci_find_drivers( 1 );
+250	    phantom_init_vm86();
+251	    phantom_init_vesa();
+252	    phantom_start_video_driver();
+255	    phantom_init_apic();
+259	    phantom_pci_find_drivers( 2 );
+281	    start_phantom();
+283	    phantom_check_disk_check_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
+285	    load_classes_module();
+287	    phantom_pci_find_drivers( 3 );
+295	    pvm_root_init();
+putpkt: write failed: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x140505: file t_panic.c, line 24.
+Breakpoint 2 at 0x1296f6: file exec.c, line 89.
+Breakpoint 3 at 0x10860d: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140baa: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+192	    init_irq_allocator();
+195	    phantom_init_descriptors();
+197	    init_multiboot_symbols();
+199	    hal_init(
+209	    phantom_pci_find_drivers( 0 );
+211	    phantom_timer_pit_init(100,0);
+213	    phantom_paging_init();
+215	    phantom_timed_call_init(); // Too late? Move up?
+222	    phantom_trap_handlers[15] = ignore_handler;
+223	    phantom_threads_init();
+224	    phantom_request_timed_call( &sched_timer, TIMEDCALL_FLAG_PERIODIC );
+225	    hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
+228	    set_cr0( get_cr0() | CR0_WP );
+233	        strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
+237	    printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
+238	    phantom_process_boot_options();
+240	    detect_cpu(0);
+243	    hal_init_physmem_alloc_thread();
+245	    net_stack_init();
+247	    phantom_pci_find_drivers( 1 );
+250	    phantom_init_vm86();
+251	    phantom_init_vesa();
+252	    phantom_start_video_driver();
+255	    phantom_init_apic();
+259	    phantom_pci_find_drivers( 2 );
+281	    start_phantom();
+283	    phantom_check_disk_check_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
+285	    load_classes_module();
+287	    phantom_pci_find_drivers( 3 );
+295	    pvm_root_init();
+pvm_root_init () at root.c:58
+58	    struct pvm_object_storage *root = get_root_object_storage();
+60	    if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
+0x0013f362 in _t_page_fault ()
+putpkt: write failed: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x1404ff: file t_panic.c, line 23.
+Breakpoint 2 at 0x1296f6: file exec.c, line 89.
+Breakpoint 3 at 0x10860d: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140baa: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+Breakpoint 7 at 0x1104c2: file vm_map.c, line 1065.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 7, page_fault (p=0x905000, is_writing=0) at vm_map.c:1065
+1065	    if( is_writing )    page_fault_write( p );
+1066	    else                page_fault_read( p );
+page_fault_read (p=0x905000) at vm_map.c:777
+777	    if( /*(!page_is_read_enabled ) && */ p->flag_phys_mem )
+793	    if(FAULT_DEBUG) hal_printf("unmapped read 0x%X\n", p->virt_addr );
+795	    p->access_count++; // well, we shouldnt, but what the hell...
+798	    while(p->pager_io.flag_pagein)
+820	        while(hal_alloc_phys_page(&newp))
+829	        p->phys_page_no = newp;
+830	        p->flag_phys_mem = 1;
+831	        p->flag_phys_dirty = 0;
+832	        p->flag_phys_protect = 1; // read access.
+833	        hal_page_control( p->phys_page_no, p->virt_addr, page_map, page_ro );
+837	    if(p->flag_pager_io_busy) hal_panic("pager_io busy?");
+841	    if     ( p->flag_have_curr )    p->pager_io.disk_page   = p->curr_page;
+842	    else if( p->flag_have_make )    p->pager_io.disk_page   = p->make_page;
+843	    else if( p->flag_have_prev )    p->pager_io.disk_page   = p->prev_page;
+851	        page_clear_engine_clear_page(p->phys_page_no);
+852	        p->flag_phys_dirty = 0;
+853	        p->flag_phys_protect = 1; // read access - see below.
+855	        hal_page_control( p->phys_page_no, p->virt_addr, page_map, page_ro );
+895	}
+page_fault (p=0x905000, is_writing=0) at vm_map.c:1067
+1067	}
+vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206654) at vm_map.c:183
+183	    hal_mutex_unlock(&vm_map_mutex);
+184	    hal_mutex_lock(&vmp->lock);
+185	    vmp->flag_busy = 0;
+187	    hal_cond_broadcast(&vmp->done); // Will do no harm.
+188	    hal_mutex_unlock(&vmp->lock);
+190	}
+vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:228
+228	        return 0;
+237	}
+phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:23
+23	}
+0x0055d199 in trap_push_segs ()
+Single stepping until exit from function trap_push_segs, 
+which has no line number information.
+0x00000000 in ?? ()
+Cannot find bounds of current function
+Cannot find bounds of current function
+Cannot find bounds of current function
+No function contains program counter for selected frame.
+eax            0x80000000	-2147483648
+ecx            0x13ebd4	1305556
+edx            0x0	0
+ebx            0x3eaa0	256672
+esp            0x45b3f70	0x45b3f70
+ebp            0x45b3f98	0x45b3f98
+esi            0x3eb00	256768
+edi            0x46428e0	73672928
+eip            0x0	0
+eflags         0x2	[ ]
+cs             0x0	0
+ss             0x18	24
+ds             0x18	24
+es             0x18	24
+fs             0x0	0
+gs             0x0	0
+quit
+Breakpoint 1 at 0x140423: file t_panic.c, line 23.
+Breakpoint 2 at 0x129614: file exec.c, line 88.
+Breakpoint 3 at 0x1085fc: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x110418: file vm_map.c, line 1056.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, page_fault (p=0x905000, is_writing=0) at vm_map.c:1056
+1056	{
+#0  page_fault (p=0x905000, is_writing=0) at vm_map.c:1056
+#1  0x0010f36d in vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206434) at vm_map.c:180
+#2  0x0010f44d in vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:219
+#3  0x0013f70c in phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:18
+#4  0x0055d199 in trap_push_segs ()
+#5  0x045b3f2c in _phantom_start_stack_start ()
+#6  0x00000000 in ?? ()
+1057	    if( is_writing )    page_fault_write( p );
+1058	    else                page_fault_read( p );
+1059	}
+vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206434) at vm_map.c:181
+181	    vmp->flag_busy = 0;
+183	    hal_cond_broadcast(&vmp->sleepStone); // Will do no harm.
+184	    hal_mutex_unlock(&vm_map_mutex);
+186	}
+vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:224
+224	        return 0;
+$1 = (struct trap_state *) 0x45b3f2c
+$2 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+$3 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+233	}
+phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:23
+23	}
+$4 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+0x0055d199 in trap_push_segs ()
+Dump of assembler code for function trap_push_segs:
+0x0055d185 <trap_push_segs+0>:	push   %ds
+0x0055d186 <trap_push_segs+1>:	push   %es
+0x0055d187 <trap_push_segs+2>:	push   %fs
+0x0055d189 <trap_push_segs+4>:	push   %gs
+0x0055d18b <trap_push_segs+6>:	mov    %ss,%ax
+0x0055d18e <trap_push_segs+9>:	mov    %eax,%ds
+0x0055d190 <trap_push_segs+11>:	mov    %eax,%es
+0x0055d192 <trap_push_segs+13>:	cld    
+0x0055d193 <trap_push_segs+14>:	push   %esp
+0x0055d194 <trap_push_segs+15>:	call   0x13f6d4 <phantom_kernel_trap>
+0x0055d199 <trap_push_segs+20>:	add    $0x4,%esp
+0x0055d19c <trap_push_segs+23>:	pop    %gs
+0x0055d19e <trap_push_segs+25>:	pop    %fs
+0x0055d1a0 <trap_push_segs+27>:	pop    %es
+0x0055d1a1 <trap_push_segs+28>:	pop    %ds
+0x0055d1a2 <trap_push_segs+29>:	popa   
+0x0055d1a3 <trap_push_segs+30>:	add    $0x8,%esp
+0x0055d1a6 <trap_push_segs+33>:	iret   
+0x0055d1a7 <trap_push_segs+34>:	add    %bl,-0xd(%eax)
+End of assembler dump.
+0x0055d19c in trap_push_segs ()
+0x0055d19e in trap_push_segs ()
+0x0055d1a0 in trap_push_segs ()
+0x0055d1a1 in trap_push_segs ()
+0x0055d1a2 in trap_push_segs ()
+0x0055d1a3 in trap_push_segs ()
+$5 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+0x0055d1a6 in trap_push_segs ()
+Undefined info command: "regs".  Try "help info".
+eax            0x80000000	-2147483648
+ecx            0x13eaf8	1305336
+edx            0x0	0
+ebx            0x3eaa0	256672
+esp            0x45b3f64	0x45b3f64
+ebp            0x45b3f98	0x45b3f98
+esi            0x3eb00	256768
+edi            0x46428e0	73672928
+eip            0x55d1a6	0x55d1a6 <trap_push_segs+33>
+eflags         0x3012	[ AF #12 #13 ]
+cs             0x10	16
+ss             0x18	24
+ds             0x18	24
+es             0x18	24
+fs             0x0	0
+gs             0x0	0
+0x00000000 in ?? ()
+$6 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+$7 = (struct trap_state *) 0x45b3f2c
+List of classes of commands:
+
+aliases -- Aliases of other commands
+breakpoints -- Making program stop at certain points
+data -- Examining data
+files -- Specifying and examining files
+internals -- Maintenance commands
+obscure -- Obscure features
+running -- Running the program
+stack -- Examining the stack
+status -- Status inquiries
+support -- Support facilities
+tracepoints -- Tracing of program execution without stopping the program
+user-defined -- User-defined commands
+
+Type "help" followed by a class name for a list of commands in that class.
+Type "help all" for the list of all commands.
+Type "help" followed by command name for full documentation.
+Type "apropos word" to search for commands related to "word".
+Command name abbreviations are allowed if unambiguous.
+Examining data.
+
+List of commands:
+
+append -- Append target code/data to a local file
+append binary -- Append target code/data to a raw binary file
+append binary memory -- Append contents of memory to a raw binary file
+append binary value -- Append the value of an expression to a raw binary file
+append memory -- Append contents of memory to a raw binary file
+append value -- Append the value of an expression to a raw binary file
+call -- Call a function in the program
+disassemble -- Disassemble a specified section of memory
+display -- Print value of expression EXP each time the program stops
+dump -- Dump target code/data to a local file
+dump binary -- Write target code/data to a raw binary file
+dump binary memory -- Write contents of memory to a raw binary file
+dump binary value -- Write the value of an expression to a raw binary file
+dump ihex -- Write target code/data to an intel hex file
+dump ihex memory -- Write contents of memory to an ihex file
+dump ihex value -- Write the value of an expression to an ihex file
+dump memory -- Write contents of memory to a raw binary file
+dump srec -- Write target code/data to an srec file
+dump srec memory -- Write contents of memory to an srec file
+dump srec value -- Write the value of an expression to an srec file
+dump tekhex -- Write target code/data to a tekhex file
+dump tekhex memory -- Write contents of memory to a tekhex file
+dump tekhex value -- Write the value of an expression to a tekhex file
+dump value -- Write the value of an expression to a raw binary file
+init-if-undefined -- Initialize a convenience variable if necessary
+inspect -- Same as "print" command
+mem -- Define attributes for memory region or reset memory region handling to
+output -- Like "print" but don't put in value history and don't print newline
+print -- Print value of expression EXP
+print-object -- Ask an Objective-C object to print itself
+printf -- Printf "printf format string"
+ptype -- Print definition of type TYPE
+restore -- Restore the contents of FILE to target memory
+set -- Evaluate expression EXP and assign result to variable VAR
+set annotate -- Set annotation_level
+set architecture -- Set architecture of target
+set args -- Set argument list to give program being debugged when it is started
+set auto-solib-add -- Set autoloading of shared library symbols
+set backtrace -- Set backtrace specific variables
+set backtrace limit -- Set an upper bound on the number of backtrace levels
+set backtrace past-entry -- Set whether backtraces should continue past the entry point of a program
+set backtrace past-main -- Set whether backtraces should continue past "main"
+set breakpoint -- Breakpoint specific settings
+set breakpoint auto-hw -- Set automatic usage of hardware breakpoints
+set breakpoint pending -- Set debugger's behavior regarding pending breakpoints
+set can-use-hw-watchpoints -- Set debugger's willingness to use watchpoint hardware
+set case-sensitive -- Set case sensitivity in name search
+set charset -- Set the host and target character sets
+set check -- Set the status of the type/range checker
+set check range -- Set range checking
+set check type -- Set type checking
+set coerce-float-to-double -- Set coercion of floats to doubles when calling functions
+set complaints -- Set max number of complaints about incorrect symbols
+set confirm -- Set whether to confirm potentially dangerous operations
+set cp-abi -- Set the ABI used for inspecting C++ objects
+set cygwin-exceptions -- Break when an exception is detected in the Cygwin DLL itself
+set debug -- Generic command for setting gdb debugging flags
+set debug arch -- Set architecture debugging
+set debug event -- Set event debugging
+set debug expression -- Set expression debugging
+set debug frame -- Set frame debugging
+set debug infrun -- Set inferior debugging
+set debug observer -- Set observer debugging
+set debug overload -- Set debugging of C++ overloading
+set debug remote -- Set debugging of remote protocol
+set debug serial -- Set serial debugging
+set debug target -- Set target debugging
+set debug xml -- Set XML parser debugging
+set debug-file-directory -- Set the directory where separate debug symbols are searched for
+set debugevents -- Set whether to display kernel events in child process
+set debugexceptions -- Set whether to display kernel exceptions in child process
+set debugexec -- Set whether to display execution in child process
+set debugmemory -- Set whether to display memory accesses in child process
+set debugvarobj -- Set varobj debugging
+set demangle-style -- Set the current C++ demangling style
+set disassembly-flavor -- Set the disassembly flavor
+set editing -- Set editing of command lines as they are typed
+set endian -- Set endianness of target
+set environment -- Set environment variable value to give the program
+set exec-done-display -- Set notification of completion for asynchronous execution commands
+set extension-language -- Set mapping between filename extension and source language
+set follow-fork-mode -- Set debugger response to a program call of fork or vfork
+set gnutarget -- (Set the current BFD target
+set height -- Set number of lines gdb thinks are in a page
+set history -- Generic command for setting command history parameters
+set history expansion -- Set history expansion on command input
+set history filename -- Set the filename in which to record the command history
+set history save -- Set saving of the history record on exit
+set history size -- Set the size of the command history
+set host-charset -- Set the host character set
+set inferior-tty -- Set terminal for future runs of program being debugged
+set input-radix -- Set default input radix for entering numbers
+set language -- Set the current source language
+set listsize -- Set number of source lines gdb will list by default
+set logging -- Set logging options
+set logging file -- Set the current logfile
+set logging off -- Disable logging
+set logging on -- Enable logging
+set logging overwrite -- Set whether logging overwrites or appends to the log file
+set logging redirect -- Set the logging output mode
+set max-user-call-depth -- Set the max call depth for user-defined commands
+set mem -- Memory regions settings
+set mem inaccessible-by-default -- Set handling of unknown memory regions
+set new-console -- Set creation of new console when creating child process
+set new-group -- Set creation of new group when creating child process
+set opaque-type-resolution -- Set resolution of opaque struct/class/union types (if set before loading symbols)
+set osabi -- Set OS ABI of target
+set output-radix -- Set default output radix for printing of values
+set overload-resolution -- Set overload resolution in evaluating C++ functions
+set pagination -- Set state of pagination
+set print -- Generic command for setting how things print
+set print address -- Set printing of addresses
+set print array -- Set prettyprinting of arrays
+set print array-indexes -- Set printing of array indexes
+set print asm-demangle -- Set demangling of C++/ObjC names in disassembly listings
+set print demangle -- Set demangling of encoded C++/ObjC names when displaying symbols
+set print elements -- Set limit on string chars or array elements to print
+set print frame-arguments -- Set printing of non-scalar frame arguments
+set print max-symbolic-offset -- Set the largest offset that will be printed in <symbol+1234> form
+set print null-stop -- Set printing of char arrays to stop at first null char
+set print object -- Set printing of object's derived type based on vtable info
+set print pascal_static-members -- Set printing of pascal static members
+set print pretty -- Set prettyprinting of structures
+set print repeats -- Set threshold for repeated print elements
+set print sevenbit-strings -- Set printing of 8-bit characters in strings as \nnn
+set print static-members -- Set printing of C++ static members
+set print symbol-filename -- Set printing of source filename and line number with <symbol>
+set print thread-events -- Set printing of thread events (e
+set print union -- Set printing of unions interior to structures
+set print vtbl -- Set printing of C++ virtual function tables
+set prompt -- Set gdb's prompt
+set radix -- Set default input and output number radices
+set remote -- Remote protocol specific variables
+set remote P-packet -- Set use of remote protocol `P' (set-register) packet
+set remote X-packet -- Set use of remote protocol `X' (binary-download) packet
+set remote Z-packet -- Set use of remote protocol `Z' packets
+set remote access-watchpoint-packet -- Set use of remote protocol `Z4' (access-watchpoint) packet
+set remote attach-packet -- Set use of remote protocol `vAttach' (attach) packet
+set remote binary-download-packet -- Set use of remote protocol `X' (binary-download) packet
+set remote exec-file -- Set the remote pathname for "run"
+set remote fetch-register-packet -- Set use of remote protocol `p' (fetch-register) packet
+set remote get-thread-local-storage-address-packet -- Set use of remote protocol `qGetTLSAddr' (get-thread-local-storage-address) packet
+set remote hardware-breakpoint-limit -- Set the maximum number of target hardware breakpoints
+set remote hardware-breakpoint-packet -- Set use of remote protocol `Z1' (hardware-breakpoint) packet
+set remote hardware-watchpoint-limit -- Set the maximum number of target hardware watchpoints
+set remote hostio-close-packet -- Set use of remote protocol `vFile:close' (hostio-close) packet
+set remote hostio-open-packet -- Set use of remote protocol `vFile:open' (hostio-open) packet
+set remote hostio-pread-packet -- Set use of remote protocol `vFile:pread' (hostio-pread) packet
+set remote hostio-pwrite-packet -- Set use of remote protocol `vFile:pwrite' (hostio-pwrite) packet
+set remote hostio-unlink-packet -- Set use of remote protocol `vFile:unlink' (hostio-unlink) packet
+set remote library-info-packet -- Set use of remote protocol `qXfer:libraries:read' (library-info) packet
+set remote memory-map-packet -- Set use of remote protocol `qXfer:memory-map:read' (memory-map) packet
+set remote memory-read-packet-size -- Set the maximum number of bytes per memory-read packet
+set remote memory-write-packet-size -- Set the maximum number of bytes per memory-write packet
+set remote p-packet -- Set use of remote protocol `p' (fetch-register) packet
+set remote pass-signals-packet -- Set use of remote protocol `QPassSignals' (pass-signals) packet
+set remote read-aux-vector-packet -- Set use of remote protocol `qXfer:auxv:read' (read-aux-vector) packet
+set remote read-spu-object-packet -- Set use of remote protocol `qXfer:spu:read' (read-spu-object) packet
+set remote read-watchpoint-packet -- Set use of remote protocol `Z3' (read-watchpoint) packet
+set remote run-packet -- Set use of remote protocol `vRun' (run) packet
+set remote set-register-packet -- Set use of remote protocol `P' (set-register) packet
+set remote software-breakpoint-packet -- Set use of remote protocol `Z0' (software-breakpoint) packet
+set remote supported-packets-packet -- Set use of remote protocol `qSupported' (supported-packets) packet
+set remote symbol-lookup-packet -- Set use of remote protocol `qSymbol' (symbol-lookup) packet
+set remote system-call-allowed -- Set if the host system(3) call is allowed for the target
+set remote target-features-packet -- Set use of remote protocol `qXfer:features:read' (target-features) packet
+set remote verbose-resume-packet -- Set use of remote protocol `vCont' (verbose-resume) packet
+set remote write-spu-object-packet -- Set use of remote protocol `qXfer:spu:write' (write-spu-object) packet
+set remote write-watchpoint-packet -- Set use of remote protocol `Z2' (write-watchpoint) packet
+set remoteaddresssize -- Set the maximum size of the address (in bits) in a memory packet
+set remotebaud -- Set baud rate for remote serial I/O
+set remotebreak -- Set whether to send break if interrupted
+set remotecache -- Set cache use for remote targets
+set remoteflow -- Set use of hardware flow control for remote serial I/O
+set remotelogbase -- Set numerical base for remote session logging
+set remotelogfile -- Set filename for remote session recording
+set remotetimeout -- Set timeout limit to wait for target to respond
+set remotewritesize -- Set the maximum number of bytes per memory write packet (deprecated)
+set scheduler-locking -- Set mode for locking scheduler during execution
+set serial -- Set default serial/parallel port configuration
+set shell -- Set use of shell to start subprocess
+set solib-absolute-prefix -- Set an alternate system root
+set solib-search-path -- Set the search path for loading non-absolute shared library symbol files
+set step-mode -- Set mode of the step operation
+set stop-on-solib-events -- Set stopping for shared library events
+set struct-convention -- Set the convention for returning small structs
+set substitute-path -- Usage: set substitute-path FROM TO
+set symbol-reloading -- Set dynamic symbol table reloading multiple times in one run
+set sysroot -- Set an alternate system root
+set target-charset -- Set the target character set
+set tdesc -- Set target description specific variables
+set tdesc filename -- Set the file to read for an XML target description
+set trace-commands -- Set tracing of GDB CLI commands
+set trust-readonly-sections -- Set mode for reading from readonly sections
+set tui -- TUI configuration variables
+set tui active-border-mode -- Set the attribute mode to use for the active TUI window border
+set tui border-kind -- Set the kind of border for TUI windows
+set tui border-mode -- Set the attribute mode to use for the TUI window borders
+set unwindonsignal -- Set unwinding of stack if a signal is received while in a call dummy
+set variable -- Evaluate expression EXP and assign result to variable VAR
+set verbose -- Set verbosity
+set watchdog -- Set watchdog timer
+set width -- Set number of characters gdb thinks are in a line
+set write -- Set writing into executable and core files
+undisplay -- Cancel some expressions to be displayed when program stops
+whatis -- Print data type of expression EXP
+x -- Examine memory: x/FMT ADDRESS
+
+Type "help" followed by command name for full documentation.
+Type "apropos word" to search for commands related to "word".
+Command name abbreviations are allowed if unambiguous.
+Examining data.
+
+List of commands:
+
+append -- Append target code/data to a local file
+append binary -- Append target code/data to a raw binary file
+append binary memory -- Append contents of memory to a raw binary file
+append binary value -- Append the value of an expression to a raw binary file
+append memory -- Append contents of memory to a raw binary file
+append value -- Append the value of an expression to a raw binary file
+call -- Call a function in the program
+disassemble -- Disassemble a specified section of memory
+display -- Print value of expression EXP each time the program stops
+dump -- Dump target code/data to a local file
+dump binary -- Write target code/data to a raw binary file
+dump binary memory -- Write contents of memory to a raw binary file
+dump binary value -- Write the value of an expression to a raw binary file
+dump ihex -- Write target code/data to an intel hex file
+dump ihex memory -- Write contents of memory to an ihex file
+dump ihex value -- Write the value of an expression to an ihex file
+dump memory -- Write contents of memory to a raw binary file
+dump srec -- Write target code/data to an srec file
+dump srec memory -- Write contents of memory to an srec file
+dump srec value -- Write the value of an expression to an srec file
+dump tekhex -- Write target code/data to a tekhex file
+dump tekhex memory -- Write contents of memory to a tekhex file
+dump tekhex value -- Write the value of an expression to a tekhex file
+dump value -- Write the value of an expression to a raw binary file
+init-if-undefined -- Initialize a convenience variable if necessary
+inspect -- Same as "print" command
+mem -- Define attributes for memory region or reset memory region handling to
+output -- Like "print" but don't put in value history and don't print newline
+print -- Print value of expression EXP
+print-object -- Ask an Objective-C object to print itself
+printf -- Printf "printf format string"
+ptype -- Print definition of type TYPE
+restore -- Restore the contents of FILE to target memory
+set -- Evaluate expression EXP and assign result to variable VAR
+set annotate -- Set annotation_level
+set architecture -- Set architecture of target
+set args -- Set argument list to give program being debugged when it is started
+set auto-solib-add -- Set autoloading of shared library symbols
+set backtrace -- Set backtrace specific variables
+set backtrace limit -- Set an upper bound on the number of backtrace levels
+set backtrace past-entry -- Set whether backtraces should continue past the entry point of a program
+set backtrace past-main -- Set whether backtraces should continue past "main"
+set breakpoint -- Breakpoint specific settings
+set breakpoint auto-hw -- Set automatic usage of hardware breakpoints
+set breakpoint pending -- Set debugger's behavior regarding pending breakpoints
+set can-use-hw-watchpoints -- Set debugger's willingness to use watchpoint hardware
+set case-sensitive -- Set case sensitivity in name search
+set charset -- Set the host and target character sets
+set check -- Set the status of the type/range checker
+set check range -- Set range checking
+set check type -- Set type checking
+set coerce-float-to-double -- Set coercion of floats to doubles when calling functions
+set complaints -- Set max number of complaints about incorrect symbols
+set confirm -- Set whether to confirm potentially dangerous operations
+set cp-abi -- Set the ABI used for inspecting C++ objects
+set cygwin-exceptions -- Break when an exception is detected in the Cygwin DLL itself
+set debug -- Generic command for setting gdb debugging flags
+set debug arch -- Set architecture debugging
+set debug event -- Set event debugging
+set debug expression -- Set expression debugging
+set debug frame -- Set frame debugging
+set debug infrun -- Set inferior debugging
+set debug observer -- Set observer debugging
+set debug overload -- Set debugging of C++ overloading
+set debug remote -- Set debugging of remote protocol
+set debug serial -- Set serial debugging
+set debug target -- Set target debugging
+set debug xml -- Set XML parser debugging
+set debug-file-directory -- Set the directory where separate debug symbols are searched for
+set debugevents -- Set whether to display kernel events in child process
+set debugexceptions -- Set whether to display kernel exceptions in child process
+set debugexec -- Set whether to display execution in child process
+set debugmemory -- Set whether to display memory accesses in child process
+set debugvarobj -- Set varobj debugging
+set demangle-style -- Set the current C++ demangling style
+set disassembly-flavor -- Set the disassembly flavor
+set editing -- Set editing of command lines as they are typed
+set endian -- Set endianness of target
+set environment -- Set environment variable value to give the program
+set exec-done-display -- Set notification of completion for asynchronous execution commands
+set extension-language -- Set mapping between filename extension and source language
+set follow-fork-mode -- Set debugger response to a program call of fork or vfork
+set gnutarget -- (Set the current BFD target
+set height -- Set number of lines gdb thinks are in a page
+set history -- Generic command for setting command history parameters
+set history expansion -- Set history expansion on command input
+set history filename -- Set the filename in which to record the command history
+set history save -- Set saving of the history record on exit
+set history size -- Set the size of the command history
+set host-charset -- Set the host character set
+set inferior-tty -- Set terminal for future runs of program being debugged
+set input-radix -- Set default input radix for entering numbers
+set language -- Set the current source language
+set listsize -- Set number of source lines gdb will list by default
+set logging -- Set logging options
+set logging file -- Set the current logfile
+set logging off -- Disable logging
+set logging on -- Enable logging
+set logging overwrite -- Set whether logging overwrites or appends to the log file
+set logging redirect -- Set the logging output mode
+set max-user-call-depth -- Set the max call depth for user-defined commands
+set mem -- Memory regions settings
+set mem inaccessible-by-default -- Set handling of unknown memory regions
+set new-console -- Set creation of new console when creating child process
+set new-group -- Set creation of new group when creating child process
+set opaque-type-resolution -- Set resolution of opaque struct/class/union types (if set before loading symbols)
+set osabi -- Set OS ABI of target
+set output-radix -- Set default output radix for printing of values
+set overload-resolution -- Set overload resolution in evaluating C++ functions
+set pagination -- Set state of pagination
+set print -- Generic command for setting how things print
+set print address -- Set printing of addresses
+set print array -- Set prettyprinting of arrays
+set print array-indexes -- Set printing of array indexes
+set print asm-demangle -- Set demangling of C++/ObjC names in disassembly listings
+set print demangle -- Set demangling of encoded C++/ObjC names when displaying symbols
+set print elements -- Set limit on string chars or array elements to print
+set print frame-arguments -- Set printing of non-scalar frame arguments
+set print max-symbolic-offset -- Set the largest offset that will be printed in <symbol+1234> form
+set print null-stop -- Set printing of char arrays to stop at first null char
+set print object -- Set printing of object's derived type based on vtable info
+set print pascal_static-members -- Set printing of pascal static members
+set print pretty -- Set prettyprinting of structures
+set print repeats -- Set threshold for repeated print elements
+set print sevenbit-strings -- Set printing of 8-bit characters in strings as \nnn
+set print static-members -- Set printing of C++ static members
+set print symbol-filename -- Set printing of source filename and line number with <symbol>
+set print thread-events -- Set printing of thread events (e
+set print union -- Set printing of unions interior to structures
+set print vtbl -- Set printing of C++ virtual function tables
+set prompt -- Set gdb's prompt
+set radix -- Set default input and output number radices
+set remote -- Remote protocol specific variables
+set remote P-packet -- Set use of remote protocol `P' (set-register) packet
+set remote X-packet -- Set use of remote protocol `X' (binary-download) packet
+set remote Z-packet -- Set use of remote protocol `Z' packets
+set remote access-watchpoint-packet -- Set use of remote protocol `Z4' (access-watchpoint) packet
+set remote attach-packet -- Set use of remote protocol `vAttach' (attach) packet
+set remote binary-download-packet -- Set use of remote protocol `X' (binary-download) packet
+set remote exec-file -- Set the remote pathname for "run"
+set remote fetch-register-packet -- Set use of remote protocol `p' (fetch-register) packet
+set remote get-thread-local-storage-address-packet -- Set use of remote protocol `qGetTLSAddr' (get-thread-local-storage-address) packet
+set remote hardware-breakpoint-limit -- Set the maximum number of target hardware breakpoints
+set remote hardware-breakpoint-packet -- Set use of remote protocol `Z1' (hardware-breakpoint) packet
+set remote hardware-watchpoint-limit -- Set the maximum number of target hardware watchpoints
+set remote hostio-close-packet -- Set use of remote protocol `vFile:close' (hostio-close) packet
+set remote hostio-open-packet -- Set use of remote protocol `vFile:open' (hostio-open) packet
+set remote hostio-pread-packet -- Set use of remote protocol `vFile:pread' (hostio-pread) packet
+set remote hostio-pwrite-packet -- Set use of remote protocol `vFile:pwrite' (hostio-pwrite) packet
+set remote hostio-unlink-packet -- Set use of remote protocol `vFile:unlink' (hostio-unlink) packet
+set remote library-info-packet -- Set use of remote protocol `qXfer:libraries:read' (library-info) packet
+set remote memory-map-packet -- Set use of remote protocol `qXfer:memory-map:read' (memory-map) packet
+set remote memory-read-packet-size -- Set the maximum number of bytes per memory-read packet
+set remote memory-write-packet-size -- Set the maximum number of bytes per memory-write packet
+set remote p-packet -- Set use of remote protocol `p' (fetch-register) packet
+set remote pass-signals-packet -- Set use of remote protocol `QPassSignals' (pass-signals) packet
+set remote read-aux-vector-packet -- Set use of remote protocol `qXfer:auxv:read' (read-aux-vector) packet
+set remote read-spu-object-packet -- Set use of remote protocol `qXfer:spu:read' (read-spu-object) packet
+set remote read-watchpoint-packet -- Set use of remote protocol `Z3' (read-watchpoint) packet
+set remote run-packet -- Set use of remote protocol `vRun' (run) packet
+set remote set-register-packet -- Set use of remote protocol `P' (set-register) packet
+set remote software-breakpoint-packet -- Set use of remote protocol `Z0' (software-breakpoint) packet
+set remote supported-packets-packet -- Set use of remote protocol `qSupported' (supported-packets) packet
+set remote symbol-lookup-packet -- Set use of remote protocol `qSymbol' (symbol-lookup) packet
+set remote system-call-allowed -- Set if the host system(3) call is allowed for the target
+set remote target-features-packet -- Set use of remote protocol `qXfer:features:read' (target-features) packet
+set remote verbose-resume-packet -- Set use of remote protocol `vCont' (verbose-resume) packet
+set remote write-spu-object-packet -- Set use of remote protocol `qXfer:spu:write' (write-spu-object) packet
+set remote write-watchpoint-packet -- Set use of remote protocol `Z2' (write-watchpoint) packet
+set remoteaddresssize -- Set the maximum size of the address (in bits) in a memory packet
+set remotebaud -- Set baud rate for remote serial I/O
+set remotebreak -- Set whether to send break if interrupted
+set remotecache -- Set cache use for remote targets
+set remoteflow -- Set use of hardware flow control for remote serial I/O
+set remotelogbase -- Set numerical base for remote session logging
+set remotelogfile -- Set filename for remote session recording
+set remotetimeout -- Set timeout limit to wait for target to respond
+set remotewritesize -- Set the maximum number of bytes per memory write packet (deprecated)
+set scheduler-locking -- Set mode for locking scheduler during execution
+set serial -- Set default serial/parallel port configuration
+set shell -- Set use of shell to start subprocess
+set solib-absolute-prefix -- Set an alternate system root
+set solib-search-path -- Set the search path for loading non-absolute shared library symbol files
+set step-mode -- Set mode of the step operation
+Quit
+Dump target code/data to a local file.
+
+List of dump subcommands:
+
+dump binary -- Write target code/data to a raw binary file
+dump ihex -- Write target code/data to an intel hex file
+dump memory -- Write contents of memory to a raw binary file
+dump srec -- Write target code/data to an srec file
+dump tekhex -- Write target code/data to a tekhex file
+dump value -- Write the value of an expression to a raw binary file
+
+Type "help dump" followed by dump subcommand name for full documentation.
+Type "apropos word" to search for commands related to "word".
+Command name abbreviations are allowed if unambiguous.
+$8 = 0x1268a2
+$9 = 0x10
+$10 = 0x14
+$11 = 0x18
+$12 = 0x1c
+Invalid cast.
+$13 = {0x45b3f64}
+Item count other than 1 is meaningless in "print" command.
+eax            0x80000000	-2147483648
+ecx            0x13eaf8	1305336
+edx            0x0	0
+ebx            0x3eaa0	256672
+esp            0x45b3f70	0x45b3f70
+ebp            0x45b3f98	0x45b3f98
+esi            0x3eb00	256768
+edi            0x46428e0	73672928
+eip            0x0	0
+eflags         0x2	[ ]
+cs             0x0	0
+ss             0x18	24
+ds             0x18	24
+es             0x18	24
+fs             0x0	0
+gs             0x0	0
+quit
+Breakpoint 1 at 0x140429: file t_panic.c, line 24.
+Breakpoint 2 at 0x12961a: file exec.c, line 89.
+Breakpoint 3 at 0x10860d: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11041e: file vm_map.c, line 1057.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, page_fault (p=0x905000, is_writing=0) at vm_map.c:1057
+1057	    if( is_writing )    page_fault_write( p );
+vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206434) at vm_map.c:181
+181	    vmp->flag_busy = 0;
+183	    hal_cond_broadcast(&vmp->sleepStone); // Will do no harm.
+184	    hal_mutex_unlock(&vm_map_mutex);
+186	}
+vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:224
+224	        return 0;
+$1 = (struct trap_state *) 0x45b3f2c
+$2 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+233	}
+phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:23
+23	}
+0x0055d199 in trap_push_segs ()
+Dump of assembler code for function trap_push_segs:
+0x0055d185 <trap_push_segs+0>:	push   %ds
+0x0055d186 <trap_push_segs+1>:	push   %es
+0x0055d187 <trap_push_segs+2>:	push   %fs
+0x0055d189 <trap_push_segs+4>:	push   %gs
+0x0055d18b <trap_push_segs+6>:	mov    %ss,%ax
+0x0055d18e <trap_push_segs+9>:	mov    %eax,%ds
+0x0055d190 <trap_push_segs+11>:	mov    %eax,%es
+0x0055d192 <trap_push_segs+13>:	cld    
+0x0055d193 <trap_push_segs+14>:	push   %esp
+0x0055d194 <trap_push_segs+15>:	call   0x13f6d4 <phantom_kernel_trap>
+0x0055d199 <trap_push_segs+20>:	add    $0x4,%esp
+0x0055d19c <trap_push_segs+23>:	pop    %gs
+0x0055d19e <trap_push_segs+25>:	pop    %fs
+0x0055d1a0 <trap_push_segs+27>:	pop    %es
+0x0055d1a1 <trap_push_segs+28>:	pop    %ds
+0x0055d1a2 <trap_push_segs+29>:	popa   
+0x0055d1a3 <trap_push_segs+30>:	add    $0x8,%esp
+0x0055d1a6 <trap_push_segs+33>:	iret   
+0x0055d1a7 <trap_push_segs+34>:	add    %bl,-0xd(%eax)
+End of assembler dump.
+0x0055d19c in trap_push_segs ()
+0x0055d19e in trap_push_segs ()
+0x0055d1a0 in trap_push_segs ()
+0x0055d1a1 in trap_push_segs ()
+$3 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+0x0055d1a2 in trap_push_segs ()
+0x0055d1a3 in trap_push_segs ()
+0x0055d1a6 in trap_push_segs ()
+$4 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+eax            0x80000000	-2147483648
+ecx            0x13eaf8	1305336
+edx            0x0	0
+ebx            0x3eaa0	256672
+esp            0x45b3f64	0x45b3f64
+ebp            0x45b3f98	0x45b3f98
+esi            0x3eb00	256768
+edi            0x46428e0	73672928
+eip            0x55d1a6	0x55d1a6 <trap_push_segs+33>
+eflags         0x3012	[ AF #12 #13 ]
+cs             0x10	16
+ss             0x18	24
+ds             0x18	24
+es             0x18	24
+fs             0x0	0
+gs             0x0	0
+$5 = (void *) 0x45b3f64
+$6 = 1206434
+$7 = 1206438
+eax            0x80000000	-2147483648
+ecx            0x13eaf8	1305336
+edx            0x0	0
+ebx            0x3eaa0	256672
+esp            0x45b3f64	0x45b3f64
+ebp            0x45b3f98	0x45b3f98
+esi            0x3eb00	256768
+edi            0x46428e0	73672928
+eip            0x55d1a6	0x55d1a6 <trap_push_segs+33>
+eflags         0x3012	[ AF #12 #13 ]
+cs             0x10	16
+ss             0x18	24
+ds             0x18	24
+es             0x18	24
+fs             0x0	0
+gs             0x0	0
+$8 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 0, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+$9 = 1206438
+$10 = 1206438
+$11 = 16
+$12 = 12802
+$13 = 3
+$14 = 73445296
+Dump of assembler code for function trap_push_segs:
+0x0055d185 <trap_push_segs+0>:	push   %ds
+0x0055d186 <trap_push_segs+1>:	push   %es
+0x0055d187 <trap_push_segs+2>:	push   %fs
+0x0055d189 <trap_push_segs+4>:	push   %gs
+0x0055d18b <trap_push_segs+6>:	mov    %ss,%ax
+0x0055d18e <trap_push_segs+9>:	mov    %eax,%ds
+0x0055d190 <trap_push_segs+11>:	mov    %eax,%es
+0x0055d192 <trap_push_segs+13>:	cld    
+0x0055d193 <trap_push_segs+14>:	push   %esp
+0x0055d194 <trap_push_segs+15>:	call   0x13f6d4 <phantom_kernel_trap>
+0x0055d199 <trap_push_segs+20>:	add    $0x4,%esp
+0x0055d19c <trap_push_segs+23>:	pop    %gs
+0x0055d19e <trap_push_segs+25>:	pop    %fs
+0x0055d1a0 <trap_push_segs+27>:	pop    %es
+0x0055d1a1 <trap_push_segs+28>:	pop    %ds
+0x0055d1a2 <trap_push_segs+29>:	popa   
+0x0055d1a3 <trap_push_segs+30>:	add    $0x8,%esp
+0x0055d1a6 <trap_push_segs+33>:	iret   
+0x0055d1a7 <trap_push_segs+34>:	add    %bl,-0xd(%eax)
+End of assembler dump.
+eax            0x80000000	-2147483648
+ecx            0x13eaf8	1305336
+edx            0x0	0
+ebx            0x3eaa0	256672
+esp            0x45b3f64	0x45b3f64
+ebp            0x45b3f98	0x45b3f98
+esi            0x3eb00	256768
+edi            0x46428e0	73672928
+eip            0x55d1a6	0x55d1a6 <trap_push_segs+33>
+eflags         0x3012	[ AF #12 #13 ]
+cs             0x10	16
+ss             0x18	24
+ds             0x18	24
+es             0x18	24
+fs             0x0	0
+gs             0x0	0
+$15 = 1206434
+Step one instruction exactly.
+Argument N means do this N times (or till program stops for another reason).
+0x00000000 in ?? ()
+eax            0x80000000	-2147483648
+ecx            0x13eaf8	1305336
+edx            0x0	0
+ebx            0x3eaa0	256672
+esp            0x45b3f70	0x45b3f70
+ebp            0x45b3f98	0x45b3f98
+esi            0x3eb00	256768
+edi            0x46428e0	73672928
+eip            0x0	0
+eflags         0x2	[ ]
+cs             0x0	0
+ss             0x18	24
+ds             0x18	24
+es             0x18	24
+fs             0x0	0
+gs             0x0	0
+quit
+Breakpoint 1 at 0x140429: file t_panic.c, line 24.
+Breakpoint 2 at 0x12961a: file exec.c, line 89.
+Breakpoint 3 at 0x10860d: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11041e: file vm_map.c, line 1057.
+Hardware watchpoint 7: pm_map->lock.lock
+Cannot find bounds of current function
+eax            0x20	32
+ecx            0xe905	59653
+edx            0xe905	59653
+ebx            0x20	32
+esp            0xf000fead	0xf000fead
+ebp            0xf000fec5	0xf000fec5
+esi            0xf000ff53	-268370093
+edi            0xf391bab3	-208553293
+eip            0xf9a4	0xf9a4
+eflags         0x12	[ AF ]
+cs             0x10	16
+ss             0x20	32
+ds             0x20	32
+es             0x20	32
+fs             0x20	32
+gs             0x20	32
+0x0000f9a7 in ?? ()
+A syntax error in expression, near `'.
+Value can't be converted to integer.
+Invalid cast.
+Dump of assembler code from 0xf9a4 to 0xf9ae:
+0x0000f9a4:	inc    %esi
+0x0000f9a5:	inc    %ebx
+0x0000f9a6:	dec    %edx
+0x0000f9a7:	jne    0xf988
+0x0000f9a9:	xor    %eax,%eax
+0x0000f9ab:	pop    %ebx
+0x0000f9ac:	pop    %esi
+0x0000f9ad:	leave  
+End of assembler dump.
+0x0000f9b6 in ?? ()
+0x0000f9b9 in ?? ()
+0x0000f9cc in ?? ()
+0x0000f9cf in ?? ()
+0x0000f9d2 in ?? ()
+0x0000f9d4 in ?? ()
+0x0000f9db in ?? ()
+0x0000f9f3 in ?? ()
+0x0000f9f9 in ?? ()
+0x0000fa00 in ?? ()
+0x0000fa0e in ?? ()
+0x0000fa15 in ?? ()
+0x0000fa23 in ?? ()
+0x0000fa2a in ?? ()
+0x0000fa2c in ?? ()
+0x0000fa2f in ?? ()
+0x0000fa30 in ?? ()
+0x000161ce in ?? ()
+0x000161cf in ?? ()
+0x000161d1 in ?? ()
+0x000161d2 in ?? ()
+0x000161d7 in ?? ()
+0x000161dd in ?? ()
+0x000161e4 in ?? ()
+0x000161e7 in ?? ()
+0x000161e8 in ?? ()
+0x000161ea in ?? ()
+0x000161ec in ?? ()
+0x000161ef in ?? ()
+0x000161f1 in ?? ()
+0x000161f2 in ?? ()
+0x000161f3 in ?? ()
+0x000161f4 in ?? ()
+0x0000fa35 in ?? ()
+0x0000fa38 in ?? ()
+0x0000fa39 in ?? ()
+0x0000ef14 in ?? ()
+0x0000ef15 in ?? ()
+0x0000ef18 in ?? ()
+0x0000ef19 in ?? ()
+0x0000ef0a in ?? ()
+0x0000ef0d in ?? ()
+0x0000ef0f in ?? ()
+0x0000f988 in ?? ()
+0x0000f989 in ?? ()
+0x0000f98b in ?? ()
+0x0000f98e in ?? ()
+0x0000f98f in ?? ()
+0x0000f992 in ?? ()
+0x0000f995 in ?? ()
+0x0000f9a4 in ?? ()
+0x0000f9a7 in ?? ()
+0x0000f9b6 in ?? ()
+0x0000f9b9 in ?? ()
+0x0000f9cc in ?? ()
+0x0000f9cf in ?? ()
+0x0000f9d2 in ?? ()
+0x0000f9d4 in ?? ()
+0x0000f9db in ?? ()
+0x0000f9f3 in ?? ()
+0x0000f9f9 in ?? ()
+0x0000fa00 in ?? ()
+0x0000fa0e in ?? ()
+0x0000fa15 in ?? ()
+0x0000fa23 in ?? ()
+0x0000fa2a in ?? ()
+0x0000fa2c in ?? ()
+0x0000fa2f in ?? ()
+0x0000fa30 in ?? ()
+0x000161ce in ?? ()
+0x000161cf in ?? ()
+0x000161d1 in ?? ()
+0x000161d2 in ?? ()
+0x000161d7 in ?? ()
+0x000161dd in ?? ()
+0x000161e4 in ?? ()
+0x000161e7 in ?? ()
+0x000161e8 in ?? ()
+0x000161ea in ?? ()
+0x000161ec in ?? ()
+0x000161ef in ?? ()
+0x000161f1 in ?? ()
+0x000161f2 in ?? ()
+0x000161f3 in ?? ()
+0x000161f4 in ?? ()
+0x0000fa35 in ?? ()
+0x0000fa38 in ?? ()
+0x0000fa39 in ?? ()
+0x0000ef14 in ?? ()
+0x0000ef15 in ?? ()
+0x0000ef18 in ?? ()
+0x0000ef19 in ?? ()
+0x0000ef0a in ?? ()
+0x0000ef0d in ?? ()
+0x0000ef0f in ?? ()
+0x0000f988 in ?? ()
+0x0000f989 in ?? ()
+0x0000f98b in ?? ()
+0x0000f98e in ?? ()
+0x0000f98f in ?? ()
+0x0000f992 in ?? ()
+0x0000f995 in ?? ()
+0x0000f9a4 in ?? ()
+0x0000f9a7 in ?? ()
+0x0000f9b6 in ?? ()
+0x0000f9b9 in ?? ()
+0x0000f9cc in ?? ()
+0x0000f9cf in ?? ()
+0x0000f9d2 in ?? ()
+0x0000f9d4 in ?? ()
+0x0000f9db in ?? ()
+0x0000f9f3 in ?? ()
+0x0000f9f9 in ?? ()
+0x0000fa00 in ?? ()
+0x0000fa0e in ?? ()
+0x0000fa15 in ?? ()
+0x0000fa23 in ?? ()
+0x0000fa2a in ?? ()
+0x0000fa2c in ?? ()
+0x0000fa2f in ?? ()
+0x0000fa30 in ?? ()
+0x000161ce in ?? ()
+0x000161cf in ?? ()
+0x000161d1 in ?? ()
+0x000161d2 in ?? ()
+0x000161d7 in ?? ()
+0x000161dd in ?? ()
+0x000161e4 in ?? ()
+0x000161e7 in ?? ()
+0x000161e8 in ?? ()
+0x000161ea in ?? ()
+0x000161ec in ?? ()
+0x000161ef in ?? ()
+0x000161f1 in ?? ()
+0x000161f2 in ?? ()
+0x000161f3 in ?? ()
+0x000161f4 in ?? ()
+0x0000fa35 in ?? ()
+0x0000fa38 in ?? ()
+0x0000fa39 in ?? ()
+0x0000ef14 in ?? ()
+0x0000ef15 in ?? ()
+0x0000ef18 in ?? ()
+0x0000ef19 in ?? ()
+0x0000ef0a in ?? ()
+0x0000ef0d in ?? ()
+0x0000ef0f in ?? ()
+0x0000f988 in ?? ()
+0x0000f989 in ?? ()
+0x0000f98b in ?? ()
+0x0000f98e in ?? ()
+0x0000f98f in ?? ()
+0x0000f992 in ?? ()
+0x0000f995 in ?? ()
+0x0000f9a4 in ?? ()
+0x0000f9a7 in ?? ()
+0x0000f9b6 in ?? ()
+0x0000f9b9 in ?? ()
+0x0000f9cc in ?? ()
+0x0000f9cf in ?? ()
+0x0000f9d2 in ?? ()
+0x0000f9d4 in ?? ()
+0x0000f9db in ?? ()
+0x0000f9f3 in ?? ()
+0x0000f9f9 in ?? ()
+0x0000fa00 in ?? ()
+0x0000fa0e in ?? ()
+0x0000fa15 in ?? ()
+0x0000fa23 in ?? ()
+0x0000fa2a in ?? ()
+0x0000fa2c in ?? ()
+0x0000fa2f in ?? ()
+0x0000fa30 in ?? ()
+0x000161ce in ?? ()
+0x000161cf in ?? ()
+0x000161d1 in ?? ()
+0x000161d2 in ?? ()
+0x000161d7 in ?? ()
+0x000161dd in ?? ()
+0x000161e4 in ?? ()
+0x000161e7 in ?? ()
+0x000161e8 in ?? ()
+0x000161ea in ?? ()
+0x000161ec in ?? ()
+0x000161ef in ?? ()
+0x000161f1 in ?? ()
+0x000161f2 in ?? ()
+0x000161f3 in ?? ()
+0x000161f4 in ?? ()
+0x0000fa35 in ?? ()
+0x0000fa38 in ?? ()
+0x0000fa39 in ?? ()
+0x0000ef14 in ?? ()
+0x0000ef15 in ?? ()
+0x0000ef18 in ?? ()
+0x0000ef19 in ?? ()
+0x0000ef0a in ?? ()
+0x0000ef0d in ?? ()
+0x0000ef0f in ?? ()
+0x0000f988 in ?? ()
+0x0000f989 in ?? ()
+0x0000f98b in ?? ()
+0x0000f98e in ?? ()
+0x0000f98f in ?? ()
+0x0000f992 in ?? ()
+0x0000f995 in ?? ()
+0x0000f9a4 in ?? ()
+0x0000f9a7 in ?? ()
+0x0000f9b6 in ?? ()
+0x0000f9b9 in ?? ()
+0x0000f9cc in ?? ()
+0x0000f9cf in ?? ()
+quit
+Breakpoint 1 at 0x140423: file t_panic.c, line 23.
+Breakpoint 2 at 0x129614: file exec.c, line 88.
+Breakpoint 3 at 0x1085fc: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x110418: file vm_map.c, line 1056.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, page_fault (p=0x905000, is_writing=0) at vm_map.c:1056
+1056	{
+1057	    if( is_writing )    page_fault_write( p );
+1058	    else                page_fault_read( p );
+1059	}
+vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206434) at vm_map.c:181
+181	    vmp->flag_busy = 0;
+183	    hal_cond_broadcast(&vmp->sleepStone); // Will do no harm.
+184	    hal_mutex_unlock(&vm_map_mutex);
+186	}
+vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:224
+224	        return 0;
+$1 = (struct trap_state *) 0x45b3f2c
+$2 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 5680059, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+233	}
+phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:23
+23	}
+0x0055d199 in trap_push_segs ()
+0x0055d19c in trap_push_segs ()
+Dump of assembler code for function trap_push_segs:
+0x0055d185 <trap_push_segs+0>:	push   %ds
+0x0055d186 <trap_push_segs+1>:	push   %es
+0x0055d187 <trap_push_segs+2>:	push   %fs
+0x0055d189 <trap_push_segs+4>:	push   %gs
+0x0055d18b <trap_push_segs+6>:	mov    %ss,%ax
+0x0055d18e <trap_push_segs+9>:	mov    %eax,%ds
+0x0055d190 <trap_push_segs+11>:	mov    %eax,%es
+0x0055d192 <trap_push_segs+13>:	cld    
+0x0055d193 <trap_push_segs+14>:	push   %esp
+0x0055d194 <trap_push_segs+15>:	call   0x13f6d4 <phantom_kernel_trap>
+0x0055d199 <trap_push_segs+20>:	add    $0x4,%esp
+0x0055d19c <trap_push_segs+23>:	pop    %gs
+0x0055d19e <trap_push_segs+25>:	pop    %fs
+0x0055d1a0 <trap_push_segs+27>:	pop    %es
+0x0055d1a1 <trap_push_segs+28>:	pop    %ds
+0x0055d1a2 <trap_push_segs+29>:	popa   
+0x0055d1a3 <trap_push_segs+30>:	add    $0x8,%esp
+0x0055d1a6 <trap_push_segs+33>:	iret   
+0x0055d1a7 <trap_push_segs+34>:	add    %bl,-0xd(%eax)
+End of assembler dump.
+Single stepping until exit from function trap_push_segs, 
+which has no line number information.
+0x00000000 in ?? ()
+#0  0x00000000 in ?? ()
+#1  0x00000003 in ?? ()
+#2  0x0460afb0 in _allpci ()
+#3  0x00566460 in ___FUNCTION__.2072 ()
+#4  0x00566305 in ___FUNCTION__.1917 ()
+#5  0x00000003 in ?? ()
+#6  0xffffffff in ?? ()
+#7  0x00005000 in ?? ()
+#8  0x80000000 in ?? ()
+#9  0x00000000 in ?? ()
+quit
+Breakpoint 1 at 0x140423: file t_panic.c, line 23.
+Breakpoint 2 at 0x129614: file exec.c, line 88.
+Breakpoint 3 at 0x1085fc: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x110418: file vm_map.c, line 1056.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, page_fault (p=0x905000, is_writing=0) at vm_map.c:1056
+1056	{
+#0  page_fault (p=0x905000, is_writing=0) at vm_map.c:1056
+#1  0x0010f36d in vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206434) at vm_map.c:180
+#2  0x0010f44d in vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:219
+#3  0x0013f70c in phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:18
+#4  0x0055d199 in trap_push_segs ()
+#5  0x045b3f2c in _phantom_start_stack_start ()
+#6  0x00000000 in ?? ()
+quit
+Breakpoint 1 at 0x140423: file t_panic.c, line 23.
+Breakpoint 2 at 0x129614: file exec.c, line 88.
+Breakpoint 3 at 0x1085fc: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x10f390: file vm_map.c, line 195.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:195
+195	{
+$1 = (struct trap_state *) 0x45b3f2c
+$2 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 73088860, ebx = 256672, edx = 5680059, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+$3 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 73088860, ebx = 256672, edx = 5680059, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+196	    if (ts->trapno == T_DEBUG)
+202	    if (ts->trapno == T_PAGE_FAULT) {
+205	        ts->cr2 = get_cr2();
+208	            long addr = (unsigned int) ts->cr2;
+210	            addr -= (unsigned int)vm_map_start_of_virtual_address_space;
+212	            if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
+219	        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip );
+224	        return 0;
+$4 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 73088860, ebx = 256672, edx = 5680059, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+$5 = {gs = 0, fs = 0, es = 24, ds = 24, edi = 73672928, esi = 256768, ebp = 73088920, cr2 = 2147483648, ebx = 256672, edx = 5680059, ecx = 1305336, eax = 2147483648, trapno = 14, err = 0, eip = 1206434, cs = 16, eflags = 12802, esp = 3, ss = 73445296, v86_es = 5661792, v86_ds = 5661445, v86_fs = 3, v86_gs = 4294967295}
+0x0010f454	224	        return 0;
+0x0010f462	232	    panic("Not a page fault in vm_map_page_fault_trap_handler\n");
+233	}
+0x0010f466 in vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:233
+233	}
+0x0013f70c in phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:18
+18	    if(handler(ts))
+0x0055d199 in trap_push_segs ()
+0x0055d19c in trap_push_segs ()
+Dump of assembler code for function trap_push_segs:
+0x0055d185 <trap_push_segs+0>:	push   %ds
+0x0055d186 <trap_push_segs+1>:	push   %es
+0x0055d187 <trap_push_segs+2>:	push   %fs
+0x0055d189 <trap_push_segs+4>:	push   %gs
+0x0055d18b <trap_push_segs+6>:	mov    %ss,%ax
+0x0055d18e <trap_push_segs+9>:	mov    %eax,%ds
+0x0055d190 <trap_push_segs+11>:	mov    %eax,%es
+0x0055d192 <trap_push_segs+13>:	cld    
+0x0055d193 <trap_push_segs+14>:	push   %esp
+0x0055d194 <trap_push_segs+15>:	call   0x13f6d4 <phantom_kernel_trap>
+0x0055d199 <trap_push_segs+20>:	add    $0x4,%esp
+0x0055d19c <trap_push_segs+23>:	pop    %gs
+0x0055d19e <trap_push_segs+25>:	pop    %fs
+0x0055d1a0 <trap_push_segs+27>:	pop    %es
+0x0055d1a1 <trap_push_segs+28>:	pop    %ds
+0x0055d1a2 <trap_push_segs+29>:	popa   
+0x0055d1a3 <trap_push_segs+30>:	add    $0x8,%esp
+0x0055d1a6 <trap_push_segs+33>:	iret   
+0x0055d1a7 <trap_push_segs+34>:	add    %bl,-0xd(%eax)
+End of assembler dump.
+0x0055d19e in trap_push_segs ()
+0x0055d1a0 in trap_push_segs ()
+0x0055d1a1 in trap_push_segs ()
+0x0055d1a2 in trap_push_segs ()
+0x0055d1a3 in trap_push_segs ()
+0x0055d1a6 in trap_push_segs ()
+$6 = (void *) 0x45b3f64
+$7 = 1206434
+$8 = 0x1268a2
+0x00000000 in ?? ()
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x140423: file t_panic.c, line 23.
+Breakpoint 2 at 0x129614: file exec.c, line 88.
+Breakpoint 3 at 0x1085fc: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x10f390: file vm_map.c, line 195.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Program received signal SIGINT, Interrupt.
+rgba2rgb_zbmove (dest=0x401bcb1c, src=0x8184fc, zb=0x6803b4 'þ' <repeats 55 times>, nelem=51, zpos=254 'þ') at /cygdrive/g/Projects/userland/trunk/phantom/vm/video/bitblt.c:364
+364	        if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
+365	        *zb++ = zpos;
+368	        int w = *isrc++;
+370	        dest->r = w >> 16;
+371	        dest->g = w >> 8;
+372	        dest->b = w >> 0;
+374	        dest++;
+346	    while(nelem-- > 0)
+364	        if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
+365	        *zb++ = zpos;
+368	        int w = *isrc++;
+370	        dest->r = w >> 16;
+371	        dest->g = w >> 8;
+372	        dest->b = w >> 0;
+374	        dest++;
+346	    while(nelem-- > 0)
+364	        if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
+365	        *zb++ = zpos;
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:195
+195	{
+196	    if (ts->trapno == T_DEBUG)
+202	    if (ts->trapno == T_PAGE_FAULT) {
+205	        ts->cr2 = get_cr2();
+208	            long addr = (unsigned int) ts->cr2;
+210	            addr -= (unsigned int)vm_map_start_of_virtual_address_space;
+212	            if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
+219	        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip );
+224	        return 0;
+quit
+Breakpoint 1 at 0x140429: file t_panic.c, line 24.
+Breakpoint 2 at 0x12961a: file exec.c, line 89.
+Breakpoint 3 at 0x10860d: file main.c, line 191.
+Breakpoint 4 at 0x10bdbc: file spinlock.c, line 43.
+Breakpoint 5 at 0x140ace: file t_sleep.c, line 31.
+Breakpoint 6 at 0x10f396: file vm_map.c, line 196.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:196
+196	    if (ts->trapno == T_DEBUG)
+Make selected stack frame return to its caller.
+Control remains in the debugger, but when you continue
+execution will resume in the frame above the one now selected.
+If an argument is given, it is an expression for the value to return.
+#0  vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:196
+#1  0x0013f70c in phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:18
+#2  0x0055d199 in trap_push_segs ()
+#3  0x045b3f2c in _phantom_start_stack_start ()
+#4  0x00000000 in ?? ()
+23	}
+0x0055d199 in trap_push_segs ()
+0x0055d19c in trap_push_segs ()
+Dump of assembler code for function trap_push_segs:
+0x0055d185 <trap_push_segs+0>:	push   %ds
+0x0055d186 <trap_push_segs+1>:	push   %es
+0x0055d187 <trap_push_segs+2>:	push   %fs
+0x0055d189 <trap_push_segs+4>:	push   %gs
+0x0055d18b <trap_push_segs+6>:	mov    %ss,%ax
+0x0055d18e <trap_push_segs+9>:	mov    %eax,%ds
+0x0055d190 <trap_push_segs+11>:	mov    %eax,%es
+0x0055d192 <trap_push_segs+13>:	cld    
+0x0055d193 <trap_push_segs+14>:	push   %esp
+0x0055d194 <trap_push_segs+15>:	call   0x13f6d4 <phantom_kernel_trap>
+0x0055d199 <trap_push_segs+20>:	add    $0x4,%esp
+0x0055d19c <trap_push_segs+23>:	pop    %gs
+0x0055d19e <trap_push_segs+25>:	pop    %fs
+0x0055d1a0 <trap_push_segs+27>:	pop    %es
+0x0055d1a1 <trap_push_segs+28>:	pop    %ds
+0x0055d1a2 <trap_push_segs+29>:	popa   
+0x0055d1a3 <trap_push_segs+30>:	add    $0x8,%esp
+0x0055d1a6 <trap_push_segs+33>:	iret   
+0x0055d1a7 <trap_push_segs+34>:	add    %bl,-0xd(%eax)
+End of assembler dump.
+0x0055d19e in trap_push_segs ()
+0x0055d1a0 in trap_push_segs ()
+0x0055d1a1 in trap_push_segs ()
+0x0055d1a2 in trap_push_segs ()
+0x0055d1a3 in trap_push_segs ()
+0x0055d1a6 in trap_push_segs ()
+0x001268a2 in pvm_root_init () at root.c:60
+60	    if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
+0x0013f286 in _t_page_fault ()
+Single stepping until exit from function _t_page_fault, 
+which has no line number information.
+0x0055d184 in _phantom_alltraps ()
+Single stepping until exit from function _phantom_alltraps, 
+which has no line number information.
+0x0055d185 in trap_push_segs ()
+Single stepping until exit from function trap_push_segs, 
+which has no line number information.
+phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:8
+8	{
+9	    int trapno = ts->trapno;
+13	        = phantom_trap_handlers[trapno];
+15	    if(handler == 0)
+18	    if(handler(ts))
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:196
+196	    if (ts->trapno == T_DEBUG)
+202	    if (ts->trapno == T_PAGE_FAULT) {
+205	        ts->cr2 = get_cr2();
+208	            long addr = (unsigned int) ts->cr2;
+210	            addr -= (unsigned int)vm_map_start_of_virtual_address_space;
+212	            if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
+219	        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip );
+23	}
+0x0055d199 in trap_push_segs ()
+0x0055d19c in trap_push_segs ()
+0x0055d19e in trap_push_segs ()
+0x0055d1a0 in trap_push_segs ()
+0x0055d1a1 in trap_push_segs ()
+0x0055d1a2 in trap_push_segs ()
+0x0055d1a3 in trap_push_segs ()
+0x0055d1a6 in trap_push_segs ()
+0x001268a2 in pvm_root_init () at root.c:60
+60	    if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
+0x0013f286 in _t_page_fault ()
+Single stepping until exit from function _t_page_fault, 
+which has no line number information.
+0x0055d184 in _phantom_alltraps ()
+Single stepping until exit from function _phantom_alltraps, 
+which has no line number information.
+0x0055d185 in trap_push_segs ()
+Single stepping until exit from function trap_push_segs, 
+which has no line number information.
+phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:8
+8	{
+9	    int trapno = ts->trapno;
+13	        = phantom_trap_handlers[trapno];
+15	    if(handler == 0)
+18	    if(handler(ts))
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:196
+196	    if (ts->trapno == T_DEBUG)
+202	    if (ts->trapno == T_PAGE_FAULT) {
+205	        ts->cr2 = get_cr2();
+208	            long addr = (unsigned int) ts->cr2;
+210	            addr -= (unsigned int)vm_map_start_of_virtual_address_space;
+212	            if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
+219	        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip );
+vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206434) at vm_map.c:145
+145	    long addr = (unsigned int) address;
+147	    addr -= (unsigned int)vm_map_start_of_virtual_address_space;
+156	    int pageno = addr / __MEM_PAGE;
+158	    vm_page *vmp = vm_map_map + pageno;
+160	    if(FAULT_DEBUG) hal_printf("fault 0x%X pgno %d\n", addr, pageno );
+162	    hal_mutex_lock(&vm_map_mutex);
+168	    if( vmp->flag_dont_touch || vmp->flag_busy )
+179	    vmp->flag_busy = 1;
+180	    page_fault( vmp, write );
+page_fault (p=0x905000, is_writing=0) at vm_map.c:1057
+1057	    if( is_writing )    page_fault_write( p );
+1058	    else                page_fault_read( p );
+page_fault_read (p=0x905000) at vm_map.c:769
+769	    if( /*(!page_is_read_enabled ) && */ p->flag_phys_mem )
+785	    if(FAULT_DEBUG) hal_printf("unmapped read 0x%X\n", p->virt_addr );
+787	    p->access_count++; // well, we shouldnt, but what the hell...
+790	    while(p->pager_io.flag_pagein)
+812	        while(hal_alloc_phys_page(&newp))
+821	        p->phys_page_no = newp;
+822	        p->flag_phys_mem = 1;
+823	        p->flag_phys_dirty = 0;
+824	        p->flag_phys_protect = 1; // read access.
+825	        hal_page_control( p->phys_page_no, p->virt_addr, page_map, page_ro );
+829	    if(p->flag_pager_io_busy) hal_panic("pager_io busy?");
+833	    if     ( p->flag_have_curr )    p->pager_io.disk_page   = p->curr_page;
+834	    else if( p->flag_have_make )    p->pager_io.disk_page   = p->make_page;
+835	    else if( p->flag_have_prev )    p->pager_io.disk_page   = p->prev_page;
+843	        page_clear_engine_clear_page(p->phys_page_no);
+838	        // They're trying to read from unallocated page.
+839	        // BUG! In fact, we are better send them an exception
+840	        // because it looks like an error. But for now we'll just give
+841	        // 'em an empty page.
+842	
+843	        page_clear_engine_clear_page(p->phys_page_no);
+844	        p->flag_phys_dirty = 0;
+845	        p->flag_phys_protect = 1; // read access - see below.
+846	
+847	        hal_page_control( p->phys_page_no, p->virt_addr, page_map, page_ro );
+page_clear_engine_clear_page (p=77856768) at vm_map.c:1722
+1722	    int enabled = hal_save_cli();
+1717	
+1718	// Clear phys page from some special vaddress
+1719	// TODO perCPU vaddress and no spinlock?
+1720	static void page_clear_engine_clear_page(phys_page_t p)
+1721	{
+1722	    int enabled = hal_save_cli();
+1723	    hal_spin_lock(&page_clear_lock);
+1724	
+1725	    if(FAULT_DEBUG)
+1726	        hal_printf("page_clear_engine_clear_page( 0x%X )\n", p );
+1727	
+1728	    hal_page_control( p, page_clear_vaddr, page_map, page_rw );
+1729	
+1730	    // TODO use MMX clear code
+1731	    //memset( page_clear_vaddr, '#', __MEM_PAGE );
+1732	    //memset( page_clear_vaddr, 0, __MEM_PAGE );
+1733	    fast_clear_page( page_clear_vaddr );
+1734	
+1735	    hal_page_control( p, page_clear_vaddr, page_unmap, page_ro );
+1736	
+1737	    hal_spin_unlock(&page_clear_lock);
+1738	    if (enabled) hal_sti();
+1739	}
+1740	
+1741	
+1742	
+1743	
+845	        p->flag_phys_protect = 1; // read access - see below.
+847	        hal_page_control( p->phys_page_no, p->virt_addr, page_map, page_ro );
+887	}
+page_fault (p=0x905000, is_writing=0) at vm_map.c:1059
+1059	}
+#0  page_fault (p=0x905000, is_writing=0) at vm_map.c:1059
+#1  0x0010f36d in vm_map_page_fault_handler (address=0x80000000, write=0, ip=1206434) at vm_map.c:180
+#2  0x0010f44d in vm_map_page_fault_trap_handler (ts=0x45b3f2c) at vm_map.c:219
+#3  0x0013f70c in phantom_kernel_trap (ts=0x45b3f2c) at trap_entry.c:18
+#4  0x0055d199 in trap_push_segs ()
+#5  0x045b3f2c in _phantom_start_stack_start ()
+#6  0x00000000 in ?? ()
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45b3edc) at vm_map.c:196
+196	    if (ts->trapno == T_DEBUG)
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45b3edc) at vm_map.c:196
+196	    if (ts->trapno == T_DEBUG)
+
+Program received signal SIGINT, Interrupt.
+0x0000f988 in ?? ()
+quit
+Breakpoint 1 at 0x15806f: file t_panic.c, line 23.
+Breakpoint 2 at 0x141208: file exec.c, line 88.
+Breakpoint 3 at 0x10cb1c: file main.c, line 191.
+Breakpoint 4 at 0x119938: file spinlock.c, line 43.
+Breakpoint 5 at 0x1581d6: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11cf46: file vm_map.c, line 199.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 1, panic (fmt=0x57ad7c "Unexpected trap %s\n") at t_panic.c:23
+23	{
+#0  panic (fmt=0x57ad7c "Unexpected trap %s\n") at t_panic.c:23
+#1  0x00109b14 in trap_panic (ts=0x45cf72c) at traps.c:82
+#2  0x00157358 in phantom_kernel_trap (ts=0x45cf72c) at trap_entry.c:18
+#3  0x00576199 in trap_push_segs ()
+#4  0x045cf72c in _phantom_start_stack_start ()
+#5  0x00000000 in ?? ()
+quit
+Breakpoint 1 at 0x158055: file t_panic.c, line 24.
+Breakpoint 2 at 0x1411ee: file exec.c, line 89.
+Breakpoint 3 at 0x10cb2d: file main.c, line 191.
+Breakpoint 4 at 0x119918: file spinlock.c, line 43.
+Breakpoint 5 at 0x1581b6: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11cf2c: file vm_map.c, line 200.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 1, panic (fmt=0x57ad7c "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+#0  panic (fmt=0x57ad7c "Unexpected trap %s\n") at t_panic.c:24
+#1  0x00109b14 in trap_panic (ts=0x45cf72c) at traps.c:82
+#2  0x00157338 in phantom_kernel_trap (ts=0x45cf72c) at trap_entry.c:18
+#3  0x00576199 in trap_push_segs ()
+#4  0x045cf72c in _phantom_start_stack_start ()
+#5  0x00000000 in ?? ()
+19	int panic_reenter = 0;
+20	
+21	
+22	void panic(const char *fmt, ...)
+23	{
+24	    if(panic_reenter)
+25	        _exit(33);
+26	
+27	    hal_cli();
+28	    panic_reenter++;
+27	    hal_cli();
+28	    panic_reenter++;
+30	    printf("Panic: ");
+32	    va_start(ap, fmt);
+33	    vprintf(fmt, ap);
+34	    printf("\n");
+36	    stack_dump();
+38	    dump_thread_stacks();
+40	    exit(33);
+
+Program received signal SIGINT, Interrupt.
+0x0000e86b in ?? ()
+quit
+Breakpoint 1 at 0x15804f: file t_panic.c, line 23.
+Breakpoint 2 at 0x1411e8: file exec.c, line 88.
+Breakpoint 3 at 0x10cb1c: file main.c, line 191.
+Breakpoint 4 at 0x119918: file spinlock.c, line 43.
+Breakpoint 5 at 0x1581b6: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11cf26: file vm_map.c, line 199.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Dump of assembler code for function get_unused:
+0x0010017e <get_unused+0>:	push   %ebp
+0x0010017f <get_unused+1>:	mov    %esp,%ebp
+0x00100181 <get_unused+3>:	sub    $0x18,%esp
+0x00100184 <get_unused+6>:	mov    0x5ae030,%eax
+0x00100189 <get_unused+11>:	cmp    $0x5ae030,%eax
+0x0010018e <get_unused+16>:	jne    0x100195 <get_unused+23>
+0x00100190 <get_unused+18>:	call   0x10010a <allocate_event>
+0x00100195 <get_unused+23>:	mov    0x5ae030,%eax
+0x0010019a <get_unused+28>:	cmp    $0x5ae030,%eax
+0x0010019f <get_unused+33>:	jne    0x1001ad <get_unused+47>
+0x001001a1 <get_unused+35>:	movl   $0x579018,(%esp)
+0x001001a8 <get_unused+42>:	call   0x15804f <panic>
+0x001001ad <get_unused+47>:	movl   $0x5ae010,(%esp)
+0x001001b4 <get_unused+54>:	call   0x1574fe <hal_mutex_lock>
+0x001001b9 <get_unused+59>:	mov    0x5ae030,%eax
+0x001001be <get_unused+64>:	mov    %eax,-0x4(%ebp)
+0x001001c1 <get_unused+67>:	mov    -0x4(%ebp),%eax
+0x001001c4 <get_unused+70>:	mov    (%eax),%eax
+0x001001c6 <get_unused+72>:	mov    %eax,-0x14(%ebp)
+0x001001c9 <get_unused+75>:	cmpl   $0x5ae030,-0x14(%ebp)
+0x001001d0 <get_unused+82>:	jne    0x1001de <get_unused+96>
+0x001001d2 <get_unused+84>:	movl   $0x5ae030,0x5ae034
+0x001001dc <get_unused+94>:	jmp    0x1001e8 <get_unused+106>
+0x001001de <get_unused+96>:	mov    -0x14(%ebp),%eax
+0x001001e1 <get_unused+99>:	movl   $0x5ae030,0x4(%eax)
+0x001001e8 <get_unused+106>:	mov    -0x14(%ebp),%eax
+0x001001eb <get_unused+109>:	mov    %eax,0x5ae030
+0x001001f0 <get_unused+114>:	movl   $0x5ae010,(%esp)
+0x001001f7 <get_unused+121>:	call   0x157631 <hal_mutex_unlock>
+0x001001fc <get_unused+126>:	mov    -0x4(%ebp),%eax
+0x001001ff <get_unused+129>:	leave  
+0x00100200 <get_unused+130>:	ret    
+End of assembler dump.
+quit
+Breakpoint 1 at 0x158221: file t_panic.c, line 24.
+Breakpoint 2 at 0x1413ba: file exec.c, line 89.
+Breakpoint 3 at 0x10cb45: file main.c, line 191.
+Breakpoint 4 at 0x119954: file spinlock.c, line 43.
+Breakpoint 5 at 0x158382: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11cf8c: file vm_map.c, line 200.
+Hardware watchpoint 7: pm_map->lock.lock
+Breakpoint 8 at 0x1004e4: file events.c, line 212.
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45cfb9c) at vm_map.c:200
+200	    if (ts->trapno == T_DEBUG)
+
+Breakpoint 8, event_q_put_mouse (x=490, y=501, buttons=0) at events.c:212
+212	    struct ui_event *e = get_unused();
+213	    e->type = UI_EVENT_TYPE_MOUSE;
+214	    e->time = 0; // TODO put time
+215	    e->focus= 0;
+217	    e->m.buttons = buttons;
+218	    e->abs_x = x;
+219	    e->abs_y = y;
+221	    put_event(e);
+put_event (e=0x131f0c0) at events.c:106
+106	    hal_mutex_lock( &main_q_mutex );
+107	    queue_enter(&main_event_q, e, struct ui_event *, chain);
+108	    hal_cond_broadcast( &have_event );
+$1 = {next = 0x131f0c0, prev = 0x131f0c0}
+$2 = (queue_head_t *) 0x5ae040
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x15826d: file t_panic.c, line 24.
+Breakpoint 2 at 0x141406: file exec.c, line 89.
+Breakpoint 3 at 0x10cb91: file main.c, line 191.
+Breakpoint 4 at 0x1199a0: file spinlock.c, line 43.
+Breakpoint 5 at 0x1583ce: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11cfd8: file vm_map.c, line 200.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Dump of assembler code for function push_event:
+0x00100487 <push_event+0>:	push   %ebp
+0x00100488 <push_event+1>:	mov    %esp,%ebp
+0x0010048a <push_event+3>:	sub    $0x8,%esp
+0x0010048d <push_event+6>:	mov    0x8(%ebp),%eax
+0x00100490 <push_event+9>:	mov    %eax,(%esp)
+0x00100493 <push_event+12>:	call   0x100686 <drv_video_window_receive_event>
+0x00100498 <push_event+17>:	leave  
+0x00100499 <push_event+18>:	ret    
+End of assembler dump.
+quit
+Breakpoint 1 at 0x1582c1: file t_panic.c, line 24.
+Breakpoint 2 at 0x14145a: file exec.c, line 89.
+Breakpoint 3 at 0x10cbe5: file main.c, line 191.
+Breakpoint 4 at 0x1199f4: file spinlock.c, line 43.
+Breakpoint 5 at 0x158422: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11d02c: file vm_map.c, line 200.
+Hardware watchpoint 7: pm_map->lock.lock
+Breakpoint 8 at 0x1004c5: file events.c, line 196.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 8, push_event (e=0x5d9240) at events.c:196
+196	    drv_video_window_receive_event(e);
+#0  push_event (e=0x5d9240) at events.c:196
+#1  0x001004ba in event_push_thread () at events.c:181
+#2  0x00119f38 in kernel_thread_starter (func=0x10040f) at hal.c:264
+#3  0x0015a2e1 in phantom_thread_c_starter (func=0x119f27 <kernel_thread_starter>, arg=0x10040f, t=0x856000) at t_machdep.c:152
+#4  0x0015a338 in _phantom_thread_trampoline ()
+$1 = (struct ui_event *) 0x5d9240
+$2 = {chain = {next = 0x5d9280, prev = 0x5ae050}, type = 4, time = 0, abs_x = 47, abs_y = 750, abs_z = 0, rel_x = 0, rel_y = 0, rel_z = 0, focus = 0x0, {k = {vk = 3, ch = 0}, m = {buttons = 3}, w = {info = 3}}}
+191	void drv_video_window_receive_event(struct ui_event *e);
+192	
+193	
+194	static void push_event( struct ui_event *e )
+195	{
+196	    drv_video_window_receive_event(e);
+197	}
+198	
+199	
+200	
+drv_video_window_receive_event (e=0x5d9240) at events.c:312
+312	    int ie = hal_save_cli();
+307	
+308	
+309	//! Select target and put event to window queue.
+310	void drv_video_window_receive_event(struct ui_event *e)
+311	{
+312	    int ie = hal_save_cli();
+313	    hal_spin_lock( &allw_lock );
+314	
+315	    select_event_target(e);
+316	
+hal_save_cli () at clisti.c:25
+25	    e = hal_is_sti();
+hal_is_sti () at clisti.c:17
+17	    __asm __volatile("pushfl; popl %0" : "=r" (ef));
+18	    return ef & EFL_IF;
+19	}
+hal_save_cli () at clisti.c:26
+26	    __asm __volatile("cli" : : : "memory");
+27	    return e;
+28	}
+drv_video_window_receive_event (e=0x5d9240) at events.c:313
+313	    hal_spin_lock( &allw_lock );
+hal_spin_lock (sl=0x4a00148) at spinlock.c:37
+37	    if(hal_is_sti())
+41	    if(sl->lock)
+49	    while( !  _spin_try_lock( &(sl->lock)  ) )
+54	    sl->ebp = get_ebp();
+56	}
+drv_video_window_receive_event (e=0x5d9240) at events.c:315
+315	    select_event_target(e);
+select_event_target (e=0x5d9240) at events.c:273
+273	    if( e->type == UI_EVENT_TYPE_WIN )
+306	}
+$3 = {chain = {next = 0x5d9280, prev = 0x5ae050}, type = 4, time = 0, abs_x = 47, abs_y = 750, abs_z = 0, rel_x = 0, rel_y = 0, rel_z = 0, focus = 0x0, {k = {vk = 3, ch = 0}, m = {buttons = 3}, w = {info = 3}}}
+301	            //break; // need to check all to make sure we selected topmost
+302	        }
+303	        
+304	    }
+305	
+306	}
+307	
+308	
+309	//! Select target and put event to window queue.
+310	void drv_video_window_receive_event(struct ui_event *e)
+drv_video_window_receive_event (e=0x5d9240) at events.c:317
+317	    if( e->focus == 0 )
+312	    int ie = hal_save_cli();
+313	    hal_spin_lock( &allw_lock );
+314	
+315	    select_event_target(e);
+316	
+317	    if( e->focus == 0 )
+318	    {
+319	        printf("unfocused event");
+320	        goto ret;
+321	    }
+319	        printf("unfocused event");
+352	    hal_spin_unlock( &allw_lock );
+353	    if(ie) hal_sti();
+356	    if(w->inKernelEventProcess)
+357	        w->inKernelEventProcess(w);
+$4 = (drv_video_window_t *) 0x10
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x1582c7: file t_panic.c, line 23.
+Breakpoint 2 at 0x141460: file exec.c, line 88.
+Breakpoint 3 at 0x10cbe0: file main.c, line 191.
+Breakpoint 4 at 0x119a00: file spinlock.c, line 43.
+Breakpoint 5 at 0x15842e: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11d032: file vm_map.c, line 199.
+Hardware watchpoint 7: pm_map->lock.lock
+31	    sl->lock = 0;
+32	    sl->ebp = 0;
+33	}
+34	
+35	void hal_spin_lock(hal_spinlock_t *sl)
+36	{
+37	    if(hal_is_sti())
+38	        printf("\n!spinlock STI!\n");
+39	
+40	#if SPIN_DEBUG
+Breakpoint 8 at 0x1199eb: file spinlock.c, line 38.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 8, hal_spin_lock (sl=0x4662c78) at spinlock.c:38
+38	        printf("\n!spinlock STI!\n");
+#0  hal_spin_lock (sl=0x4662c78) at spinlock.c:38
+#1  0x00158a11 in phantom_import_main_thread () at t_create.c:188
+#2  0x00159757 in phantom_threads_init () at t_init.c:51
+#3  0x0010cc52 in main () at main.c:223
+#4  0x00101bae in phantom_multiboot_main (multibootboot_info_pa=256672) at multiboot.c:94
+#5  0x00100032 in boot_code ()
+
+Breakpoint 8, hal_spin_lock (sl=0x4a00148) at spinlock.c:38
+38	        printf("\n!spinlock STI!\n");
+#0  hal_spin_lock (sl=0x4a00148) at spinlock.c:38
+#1  0x0013e9c2 in drv_video_window_init (w=0x977000, xsize=620, ysize=200, x=50, y=550, bg={b = 0 '\0', g = 0 '\0', r = 0 '\0', a = 255 'ÿ'}) at /cygdrive/g/Projects/userland/trunk/phantom/vm/video/window.c:249
+#2  0x0013e94f in drv_video_window_create (xsize=620, ysize=200, x=50, y=550, bg={b = 0 '\0', g = 0 '\0', r = 0 '\0', a = 255 'ÿ'}, title=0x57e0c1 "Console") at /cygdrive/g/Projects/userland/trunk/phantom/vm/video/window.c:212
+#3  0x0011b7be in phantom_init_console_window () at console_win.c:126
+#4  0x001256fe in video_post_start () at video.c:89
+#5  0x0012581a in phantom_enforce_video_driver (vd=0x15c960) at video.c:136
+#6  0x00154d24 in phantom_init_vesa () at vesa.c:216
+#7  0x0010ccf6 in main () at main.c:252
+#8  0x00101bae in phantom_multiboot_main (multibootboot_info_pa=0) at multiboot.c:94
+#9  0x00000000 in ?? ()
+
+Breakpoint 8, hal_spin_lock (sl=0x4a00148) at spinlock.c:38
+38	        printf("\n!spinlock STI!\n");
+#0  hal_spin_lock (sl=0x4a00148) at spinlock.c:38
+#1  0x0013e9c2 in drv_video_window_init (w=0xa86000, xsize=400, ysize=400, x=600, y=100, bg={b = 0 '\0', g = 0 '\0', r = 0 '\0', a = 255 'ÿ'}) at /cygdrive/g/Projects/userland/trunk/phantom/vm/video/window.c:249
+#2  0x0013e94f in drv_video_window_create (xsize=400, ysize=400, x=600, y=100, bg={b = 0 '\0', g = 0 '\0', r = 0 '\0', a = 255 'ÿ'}, title=0x57e0e1 "Threads") at /cygdrive/g/Projects/userland/trunk/phantom/vm/video/window.c:212
+#3  0x0011b816 in phantom_init_console_window () at console_win.c:137
+#4  0x001256fe in video_post_start () at video.c:89
+#5  0x0012581a in phantom_enforce_video_driver (vd=0x15c960) at video.c:136
+#6  0x00154d24 in phantom_init_vesa () at vesa.c:216
+#7  0x0010ccf6 in main () at main.c:252
+#8  0x00101bae in phantom_multiboot_main (multibootboot_info_pa=0) at multiboot.c:94
+#9  0x00000000 in ?? ()
+
+Breakpoint 8, hal_spin_lock (sl=0x4624a00) at spinlock.c:38
+38	        printf("\n!spinlock STI!\n");
+#0  hal_spin_lock (sl=0x4624a00) at spinlock.c:38
+#1  0x0011e9e2 in page_clear_engine_init () at vm_map.c:1696
+#2  0x0011d16c in vm_map_init (page_count=8193) at vm_map.c:269
+#3  0x0010cb09 in start_phantom () at main.c:115
+#4  0x0010cd1b in main () at main.c:282
+#5  0x00101bae in phantom_multiboot_main (multibootboot_info_pa=0) at multiboot.c:94
+#6  0x00000000 in ?? ()
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45cff2c) at vm_map.c:199
+warning: Source file is more recent than executable.
+199	{
+
+Breakpoint 8, hal_spin_lock (sl=0x4a00148) at spinlock.c:38
+38	        printf("\n!spinlock STI!\n");
+#0  hal_spin_lock (sl=0x4a00148) at spinlock.c:38
+#1  0x0013eadb in drv_video_window_update_generation () at /cygdrive/g/Projects/userland/trunk/phantom/vm/video/window.c:295
+#2  0x0014abec in si_bootstrap_20_set_screen_background (me={data = 0x80a3dd58, interface = 0x80000350}, tc=0x80a3e014) at syscall.c:925
+#3  0x00141aa0 in pvm_exec_sys (da=0x80a3e014, syscall_index=20) at exec.c:266
+#4  0x0014384e in pvm_exec (current_thread={data = 0x80a3dff4, interface = 0x80000350}) at exec.c:1042
+#5  0x00143ce2 in pvm_exec_run_method (this_object={data = 0x80a3df9c, interface = 0x800014e0}, method=8, n_args=1, args=0x45cff48) at exec.c:1275
+#6  0x0013f9bb in pvm_boot () at root.c:308
+#7  0x0013ee64 in pvm_root_init () at root.c:83
+#8  0x0010cd55 in main () at main.c:296
+#9  0x00101bae in phantom_multiboot_main (multibootboot_info_pa=0) at multiboot.c:94
+#10 0x00000000 in ?? ()
+
+Breakpoint 4, hal_spin_lock (sl=0x4a00148) at spinlock.c:43
+43	        printf("spinlock reenter detected, prev enter was here:\n");
+#0  hal_spin_lock (sl=0x4a00148) at spinlock.c:43
+#1  0x001006fa in drv_video_window_receive_event (e=0x5d9340) at events.c:315
+#2  0x001004d0 in push_event (e=0x5d9340) at events.c:196
+#3  0x001004ba in event_push_thread () at events.c:181
+#4  0x00119f44 in kernel_thread_starter (func=0x10040f) at hal.c:264
+#5  0x0015a2ed in phantom_thread_c_starter (func=0x119f33 <kernel_thread_starter>, arg=0x10040f, t=0x856000) at t_machdep.c:152
+#6  0x0015a344 in _phantom_thread_trampoline ()
+quit
+Breakpoint 1 at 0x158359: file t_panic.c, line 24.
+Breakpoint 2 at 0x1414f2: file exec.c, line 89.
+Breakpoint 3 at 0x10cbf1: file main.c, line 191.
+Breakpoint 4 at 0x119a00: file spinlock.c, line 43.
+Breakpoint 5 at 0x1584ba: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11d038: file vm_map.c, line 200.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Dump of assembler code for function push_event:
+0x001004bf <push_event+0>:	push   %ebp
+0x001004c0 <push_event+1>:	mov    %esp,%ebp
+0x001004c2 <push_event+3>:	sub    $0x8,%esp
+0x001004c5 <push_event+6>:	mov    0x8(%ebp),%eax
+0x001004c8 <push_event+9>:	mov    %eax,(%esp)
+0x001004cb <push_event+12>:	call   0x1006d9 <drv_video_window_receive_event>
+0x001004d0 <push_event+17>:	leave  
+0x001004d1 <push_event+18>:	ret    
+End of assembler dump.
+quit
+Breakpoint 1 at 0x15a78d: file t_panic.c, line 24.
+Breakpoint 2 at 0x143496: file exec.c, line 89.
+Breakpoint 3 at 0x10d6c5: file main.c, line 191.
+Breakpoint 4 at 0x11a774: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a8ee: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11ddac: file vm_map.c, line 200.
+Hardware watchpoint 7: pm_map->lock.lock
+Breakpoint 8 at 0x14007d: file isa_sb16.c, line 665.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 8, sb_detect (dev=0x5eb500) at isa_sb16.c:665
+665	    if ((rc=hw_codec_reset(dev)) == 0) {
+hw_codec_reset (dev=0x5eb500) at isa_sb16.c:643
+643	    for (times = 0; times < 10; times++)
+645	        outb(dev->iobase + SB16_CODEC_RESET, 1);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+647	        for (delay = 0; delay < SB16_CODEC_RESET_DELAY; delay++)
+648	            inb(dev->iobase + SB16_CODEC_RESET);
+0x00140088 in sb_detect (dev=0x5eb500) at isa_sb16.c:665
+665	    if ((rc=hw_codec_reset(dev)) == 0) {
+Value returned is $1 = 0
+666	        if (hw_codec_read_version(dev) >= 0x400) {
+hw_codec_read_version (dev=0x5eb500) at isa_sb16.c:627
+627	    hw_codec_write_byte(dev, SB16_CODEC_VERSION);
+628	    major = hw_codec_read_byte(dev);
+629	    minor = hw_codec_read_byte(dev);
+631	    SHOW_INFO( 0, "SB16 version %d.%d\n", major, minor);
+633	    return (major << 8) + minor;
+634	}
+629	    minor = hw_codec_read_byte(dev);
+630	
+631	    SHOW_INFO( 0, "SB16 version %d.%d\n", major, minor);
+632	
+633	    return (major << 8) + minor;
+634	}
+635	
+636	
+637	static errno_t
+638	hw_codec_reset(phantom_device_t *dev)
+sb_detect (dev=0x5eb500) at isa_sb16.c:667
+667	            hw_codec_write_irq_setup(dev);
+hw_codec_write_irq_setup (dev=0x5eb500) at isa_sb16.c:563
+563	    int mask = 0x02;
+565	    if (dev->irq == 2)		mask = 0x01;
+$2 = (phantom_device_t *) 0x5eb500
+$3 = 5
+566	    if (dev->irq == 5)		mask = 0x02;
+567	    if (dev->irq == 7)		mask = 0x04;
+568	    if (dev->irq == 10)		mask = 0x08;
+570	    hw_codec_reg_write(dev, SB16_IRQ_SETUP, mask);
+571	}
+sb_detect (dev=0x5eb500) at isa_sb16.c:668
+668	            hw_codec_write_dma_setup(dev);
+hw_codec_write_dma_setup (dev=0x5eb500) at isa_sb16.c:576
+576	    sb_t *sb = (sb_t *)dev->drv_private;
+578	    hw_codec_reg_write(dev, SB16_DMA_SETUP, (1 << sb->dma8) | (1 << sb->dma16));
+Cannot access memory at address 0x0
+quit
+Breakpoint 1 at 0x15a797: file t_panic.c, line 23.
+Breakpoint 2 at 0x1434a0: file exec.c, line 90.
+Breakpoint 3 at 0x10d6b4: file main.c, line 191.
+Breakpoint 4 at 0x11a774: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a8fe: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11dda6: file vm_map.c, line 199.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45d2f2c) at vm_map.c:199
+199	{
+#0  vm_map_page_fault_trap_handler (ts=0x45d2f2c) at vm_map.c:199
+#1  0x00159a80 in phantom_kernel_trap (ts=0x45d2f2c) at trap_entry.c:18
+#2  0x00578199 in trap_push_segs ()
+#3  0x045d2f2c in _phantom_start_stack_start ()
+#4  0x00000000 in ?? ()
+200	    if (ts->trapno == T_DEBUG)
+206	    if (ts->trapno == T_PAGE_FAULT) {
+209	        ts->cr2 = get_cr2();
+212	            long addr = (unsigned int) ts->cr2;
+214	            addr -= (unsigned int)vm_map_start_of_virtual_address_space;
+216	            if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
+223	        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip );
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45d2edc) at vm_map.c:199
+199	{
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45d2edc) at vm_map.c:199
+199	{
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45d2edc) at vm_map.c:199
+199	{
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45d2edc) at vm_map.c:199
+199	{
+
+Breakpoint 6, vm_map_page_fault_trap_handler (ts=0x45d2edc) at vm_map.c:199
+199	{
+Remote communication error: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x15a797: file t_panic.c, line 23.
+Breakpoint 2 at 0x1434a0: file exec.c, line 90.
+Breakpoint 3 at 0x10d6b4: file main.c, line 191.
+Breakpoint 4 at 0x11a774: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a8fe: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Program received signal SIGINT, Interrupt.
+0x0000e86c in ?? ()
+quit
+Breakpoint 1 at 0x15a70f: file t_panic.c, line 23.
+Breakpoint 2 at 0x143418: file exec.c, line 90.
+Breakpoint 3 at 0x10d62c: file main.c, line 191.
+Breakpoint 4 at 0x11a6ec: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a876: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+192	    init_irq_allocator();
+195	    phantom_init_descriptors();
+197	    init_multiboot_symbols();
+199	    hal_init(
+209	    phantom_pci_find_drivers( 0 );
+211	    phantom_timer_pit_init(100,0);
+213	    phantom_paging_init();
+215	    phantom_timed_call_init(); // Too late? Move up?
+222	    phantom_trap_handlers[15] = ignore_handler;
+223	    phantom_threads_init();
+224	    phantom_request_timed_call( &sched_timer, TIMEDCALL_FLAG_PERIODIC );
+225	    hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
+228	    set_cr0( get_cr0() | CR0_WP );
+233	        strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
+237	    printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
+238	    phantom_process_boot_options();
+240	    detect_cpu(0);
+243	    hal_init_physmem_alloc_thread();
+245	    net_stack_init();
+247	    phantom_pci_find_drivers( 1 );
+249	    init_main_event_q();
+251	    phantom_init_vm86();
+252	    phantom_init_vesa();
+253	    phantom_start_video_driver();
+256	    phantom_init_apic();
+260	    phantom_pci_find_drivers( 2 );
+265	    phantom_unix_fs_init();
+269	    phantom_start_boot_modules();
+282	    start_phantom();
+putpkt: write failed: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x15a715: file t_panic.c, line 24.
+Breakpoint 2 at 0x14341e: file exec.c, line 91.
+Breakpoint 3 at 0x10d63d: file main.c, line 191.
+Breakpoint 4 at 0x11a6ec: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a876: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+Breakpoint 7 at 0x10d517: file main.c, line 98.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 7, start_phantom () at main.c:98
+98	    phantom_snap_threads_interlock_init();
+100	    dpc_init();
+putpkt: write failed: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x15a70f: file t_panic.c, line 23.
+Breakpoint 2 at 0x143418: file exec.c, line 90.
+Breakpoint 3 at 0x10d62c: file main.c, line 191.
+Breakpoint 4 at 0x11a6ec: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a876: file t_sleep.c, line 31.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Breakpoint 7 at 0x11a529: file dpc.c, line 156.
+
+Breakpoint 7, dpc_init () at dpc.c:156
+156	    SHOW_FLOW0( 0, "Starting DPC");
+157	    hal_cond_init( &dpc_thread_sleep_stone, "DPC" );
+158	    spinlock_init( &dpc_request_lock );
+161	    hal_start_kernel_thread(dpc_thread);
+164	    hal_start_kernel_thread(dpc_timed_waker_thread);
+166	    while(!dpc_init_ok)
+167	        hal_sleep_msec(1); // wait for thread to start
+166	    while(!dpc_init_ok)
+167	        hal_sleep_msec(1); // wait for thread to start
+putpkt: write failed: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x15a70f: file t_panic.c, line 23.
+Breakpoint 2 at 0x143418: file exec.c, line 90.
+Breakpoint 3 at 0x10d62c: file main.c, line 191.
+Breakpoint 4 at 0x11a6ec: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a876: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11a523: file dpc.c, line 155.
+Hardware watchpoint 7: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, dpc_init () at dpc.c:155
+155	{
+150	}
+151	
+152	
+153	
+154	void dpc_init()
+155	{
+156	    SHOW_FLOW0( 0, "Starting DPC");
+157	    hal_cond_init( &dpc_thread_sleep_stone, "DPC" );
+158	    spinlock_init( &dpc_request_lock );
+159	
+160	    SHOW_FLOW0( 1, "Starting DPC thread...");
+161	    hal_start_kernel_thread(dpc_thread);
+162	
+163	    SHOW_FLOW0( 1, " starting DPC waker thread...");
+164	    hal_start_kernel_thread(dpc_timed_waker_thread);
+165	
+166	    while(!dpc_init_ok)
+167	        hal_sleep_msec(1); // wait for thread to start
+168	
+169	    SHOW_FLOW0( 1, "DPC start done\n");
+170	}
+171	
+172	
+173	void dpc_finish()
+174	{
+175	    dpc_stop_request = 1;
+176	    // Now wake up DPC worker
+177	    hal_cond_broadcast( &dpc_thread_sleep_stone );
+178	
+179	}
+180	
+Line number 181 out of range; dpc.c has 180 lines.
+Undefined command: "1".  Try "help".
+1	/**
+2	 *
+3	 * Deferred procedure calls.
+4	 * Callouts are done from special thread, not from
+5	 * interrupt context.
+6	 *
+7	**/
+8	
+9	#define DEBUG_MSG_PREFIX "dpc"
+10	#include "debug_ext.h"
+1	/**
+2	 *
+3	 * Deferred procedure calls.
+4	 * Callouts are done from special thread, not from
+5	 * interrupt context.
+6	 *
+7	**/
+8	
+9	#define DEBUG_MSG_PREFIX "dpc"
+10	#include "debug_ext.h"
+11	#define debug_level_flow 0
+12	#define debug_level_error 10
+13	#define debug_level_info 10
+14	
+15	//---------------------------------------------------------------------------
+16	
+17	#include <phantom_libc.h>
+18	#include <threads.h>
+19	#include "dpc.h"
+20	
+21	//---------------------------------------------------------------------------
+22	
+23	#define MULTIPLE_DPC_THREADS 1
+24	
+25	
+26	hal_spinlock_t         	dpc_request_lock;
+27	dpc_request *		dpc_request_first = 0;
+28	hal_cond_t		dpc_thread_sleep_stone;
+29	static hal_mutex_t 	unused_dpc_mutex; // cond needs it!
+30	volatile char		dpc_stop_request = 0;
+31	static volatile char	dpc_init_ok = 0;
+32	
+33	
+34	static dpc_request *    dpc_request_find()
+35	{
+36	    int ie = hal_save_cli();
+37	    spinlock_lock( &dpc_request_lock, "dpc find" );
+38	    SHOW_FLOW0( 1, "DPC find... ");
+39	
+40	    dpc_request *i;
+41	    for( i = dpc_request_first; i; i = i->next )
+42	    {
+43	        //if( !i->go ) return; // q must be sorted...
+44	        if( !i->go ) continue;
+45	        i->go = 0;
+46	
+47	        SHOW_FLOW0( 1, "DPC found\n");
+48	        spinlock_unlock( &dpc_request_lock, "dpc find" );
+49	        if(ie) hal_sti();
+50	        return i;
+51	    }
+52	
+53	    SHOW_FLOW0( 1, "DPC not found\n");
+54	    spinlock_unlock( &dpc_request_lock, "dpc find" );
+55	    if(ie) hal_sti();
+56	    return 0;
+57	}
+58	
+59	
+60	//static
+61	void
+62	dpc_request_run()
+63	{
+64	    dpc_request *i;
+65	    do
+66	    {
+67	        i = dpc_request_find();
+68	        if(i == 0) return;
+69	        SHOW_FLOW( 3, "\n\nDPC fires 0x%X...", i->func);
+70	        SHOW_FLOW0( 2, "<DPC ");
+71	        i->func(i->arg);
+72	        SHOW_FLOW0( 2, " DPC> ");
+73	        SHOW_FLOW0( 3, " ...DPC fire DONE\n\n");
+74	
+75	    } while(1);
+76	}
+77	
+78	
+79	static int idle_dpc_threads = 0;
+80	static int dpc_threads = 0;
+81	
+82	#define MAX_DPC_IDLE_THREADS 6
+83	#define MIN_DPC_IDLE_THREADS 2
+84	
+85	static void dpc_thread(void)
+86	{
+87	    hal_mutex_init(&unused_dpc_mutex, "DPC");
+88	    hal_mutex_lock(&unused_dpc_mutex);
+89	
+90	    hal_set_thread_name("DPC Work");
+Breakpoint 8 at 0x11a435: file dpc.c, line 87.
+
+Program received signal SIGINT, Interrupt.
+0x0000e86d in ?? ()
+#0  0x0000e86d in ?? ()
+#1  0xeeaceeac in ?? ()
+#2  0x1fea1ff0 in ?? ()
+#3  0x00010001 in ?? ()
+#4  0x00000006 in ?? ()
+#5  0x00000246 in ?? ()
+#6  0x00008e8f in ?? ()
+#7  0x00060246 in ?? ()
+#8  0x0000812f in ?? ()
+#9  0x80e70206 in ?? ()
+#10 0x6e280000 in ?? ()
+#11 0x702f2964 in ?? ()
+#12 0x746e6168 in ?? ()
+#13 0x2d206d6f in ?? ()
+#14 0x6f622064 in ?? ()
+#15 0x6c63746f in ?? ()
+#16 0x3d737361 in ?? ()
+#17 0x642e7572 in ?? ()
+#18 0x68702e7a in ?? ()
+#19 0x6f746e61 in ?? ()
+#20 0x79732e6d in ?? ()
+#21 0x6d657473 in ?? ()
+#22 0x6f6f622e in ?? ()
+#23 0x68732074 in ?? ()
+#24 0x636c6c65 in ?? ()
+#25 0x7373616c in ?? ()
+#26 0x2e75723d in ?? ()
+#27 0x702e7a64 in ?? ()
+#28 0x746e6168 in ?? ()
+#29 0x732e6d6f in ?? ()
+#30 0x65747379 in ?? ()
+#31 0x68732e6d in ?? ()
+#32 0x206c6c65 in ?? ()
+#33 0x2d202d2d in ?? ()
+#34 0x6e280074 in ?? ()
+#35 0x632f2964 in ?? ()
+#36 0x7373616c in ?? ()
+#37 0x28007365 in ?? ()
+#38 0x2f29646e in ?? ()
+#39 0x646f6d70 in ?? ()
+#40 0x7365745f in ?? ()
+#41 0x00000074 in ?? ()
+#42 0x00000000 in ?? ()
+#0  0x0000e86d in ?? ()
+#1  0xeeaceeac in ?? ()
+#2  0x1fea1ff0 in ?? ()
+#3  0x00010001 in ?? ()
+#4  0x00000006 in ?? ()
+#5  0x00000246 in ?? ()
+#6  0x00008e8f in ?? ()
+#7  0x00060246 in ?? ()
+#8  0x0000812f in ?? ()
+#9  0x80e70206 in ?? ()
+#10 0x6e280000 in ?? ()
+#11 0x702f2964 in ?? ()
+#12 0x746e6168 in ?? ()
+#13 0x2d206d6f in ?? ()
+#14 0x6f622064 in ?? ()
+#15 0x6c63746f in ?? ()
+#16 0x3d737361 in ?? ()
+#17 0x642e7572 in ?? ()
+#18 0x68702e7a in ?? ()
+#19 0x6f746e61 in ?? ()
+#20 0x79732e6d in ?? ()
+#21 0x6d657473 in ?? ()
+#22 0x6f6f622e in ?? ()
+#23 0x68732074 in ?? ()
+#24 0x636c6c65 in ?? ()
+#25 0x7373616c in ?? ()
+#26 0x2e75723d in ?? ()
+#27 0x702e7a64 in ?? ()
+#28 0x746e6168 in ?? ()
+#29 0x732e6d6f in ?? ()
+#30 0x65747379 in ?? ()
+#31 0x68732e6d in ?? ()
+#32 0x206c6c65 in ?? ()
+#33 0x2d202d2d in ?? ()
+#34 0x6e280074 in ?? ()
+#35 0x632f2964 in ?? ()
+#36 0x7373616c in ?? ()
+#37 0x28007365 in ?? ()
+#38 0x2f29646e in ?? ()
+#39 0x646f6d70 in ?? ()
+#40 0x7365745f in ?? ()
+#41 0x00000074 in ?? ()
+#42 0x00000000 in ?? ()
+quit
+Breakpoint 1 at 0x15a6ef: file t_panic.c, line 23.
+Breakpoint 2 at 0x1433f8: file exec.c, line 90.
+Breakpoint 3 at 0x10d62c: file main.c, line 191.
+Breakpoint 4 at 0x11a6cc: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a856: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11a503: file dpc.c, line 155.
+Breakpoint 7 at 0x15c10b: file t_switch.c, line 41.
+Hardware watchpoint 8: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 6, dpc_init () at dpc.c:155
+155	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+Remote communication error: Connection reset by peer.
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x15a6f5: file t_panic.c, line 24.
+Breakpoint 2 at 0x1433fe: file exec.c, line 91.
+Breakpoint 3 at 0x10d63d: file main.c, line 191.
+Breakpoint 4 at 0x11a6cc: file spinlock.c, line 43.
+Breakpoint 5 at 0x15a856: file t_sleep.c, line 31.
+Breakpoint 6 at 0x11a509: file dpc.c, line 156.
+Breakpoint 7 at 0x15c111: file t_switch.c, line 42.
+Hardware watchpoint 8: pm_map->lock.lock
+quit
+Breakpoint 1 at 0x1436e3: file t_panic.c, line 23.
+Breakpoint 2 at 0x12c4b8: file exec.c, line 90.
+Breakpoint 3 at 0x10956c: file main.c, line 191.
+Breakpoint 4 at 0x10d008: file spinlock.c, line 43.
+Breakpoint 5 at 0x14384a: file t_sleep.c, line 31.
+Breakpoint 6 at 0x10ce3f: file dpc.c, line 155.
+Breakpoint 7 at 0x1450ff: file t_switch.c, line 41.
+Hardware watchpoint 8: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Invalid number "137c51".
+Dump of assembler code for function putws_17:
+0x00137aa4 <putws_17+0>:	push   %ebp
+0x00137aa5 <putws_17+1>:	mov    %esp,%ebp
+0x00137aa7 <putws_17+3>:	push   %esi
+0x00137aa8 <putws_17+4>:	push   %ebx
+0x00137aa9 <putws_17+5>:	sub    $0x450,%esp
+0x00137aaf <putws_17+11>:	mov    0x46421f0,%eax
+0x00137ab4 <putws_17+16>:	test   %eax,%eax
+0x00137ab6 <putws_17+18>:	je     0x137adc <putws_17+56>
+0x00137ab8 <putws_17+20>:	movl   $0x40,0xc(%esp)
+0x00137ac0 <putws_17+28>:	movl   $0x56dccb,0x8(%esp)
+0x00137ac8 <putws_17+36>:	movl   $0x56dd14,0x4(%esp)
+0x00137ad0 <putws_17+44>:	movl   $0x56dcdc,(%esp)
+0x00137ad7 <putws_17+51>:	call   0x138a64 <printf>
+0x00137adc <putws_17+56>:	mov    0x8(%ebp),%eax
+0x00137adf <putws_17+59>:	add    $0x20,%eax
+0x00137ae2 <putws_17+62>:	mov    %eax,-0x18(%ebp)
+0x00137ae5 <putws_17+65>:	mov    0x10(%ebp),%eax
+0x00137ae8 <putws_17+68>:	mov    0x3c(%eax),%eax
+0x00137aeb <putws_17+71>:	mov    %eax,(%esp)
+0x00137aee <putws_17+74>:	call   0x1331fc <pvm_istack_pop>
+0x00137af3 <putws_17+79>:	mov    %eax,-0x14(%ebp)
+0x00137af6 <putws_17+82>:	cmpl   $0x0,-0x14(%ebp)
+0x00137afa <putws_17+86>:	jg     0x137b31 <putws_17+141>
+0x00137afc <putws_17+88>:	movl   $0x56dd1d,(%esp)
+0x00137b03 <putws_17+95>:	call   0x130950 <pvm_create_string_object>
+0x00137b08 <putws_17+100>:	mov    %edx,%ecx
+0x00137b0a <putws_17+102>:	mov    %eax,%edx
+0x00137b0c <putws_17+104>:	mov    0x10(%ebp),%eax
+0x00137b0f <putws_17+107>:	mov    0x40(%eax),%eax
+0x00137b12 <putws_17+110>:	mov    %edx,0x4(%esp)
+0x00137b16 <putws_17+114>:	mov    %ecx,0x8(%esp)
+0x00137b1a <putws_17+118>:	mov    %eax,(%esp)
+0x00137b1d <putws_17+121>:	call   0x132cd8 <pvm_ostack_push>
+0x00137b22 <putws_17+126>:	movl   $0x0,-0x43c(%ebp)
+0x00137b2c <putws_17+136>:	jmp    0x137cca <putws_17+550>
+0x00137b31 <putws_17+141>:	mov    0x10(%ebp),%eax
+0x00137b34 <putws_17+144>:	mov    0x40(%eax),%eax
+0x00137b37 <putws_17+147>:	mov    %eax,(%esp)
+0x00137b3a <putws_17+150>:	call   0x132dc3 <pvm_ostack_pop>
+0x00137b3f <putws_17+155>:	mov    %eax,-0x20(%ebp)
+0x00137b42 <putws_17+158>:	mov    %edx,-0x1c(%ebp)
+0x00137b45 <putws_17+161>:	mov    -0x20(%ebp),%eax
+0x00137b48 <putws_17+164>:	mov    0x10(%eax),%ebx
+0x00137b4b <putws_17+167>:	call   0x12a26c <pvm_get_string_class>
+0x00137b50 <putws_17+172>:	cmp    %eax,%ebx
+0x00137b52 <putws_17+174>:	je     0x137b89 <putws_17+229>
+0x00137b54 <putws_17+176>:	movl   $0x56dd14,(%esp)
+0x00137b5b <putws_17+183>:	call   0x130950 <pvm_create_string_object>
+0x00137b60 <putws_17+188>:	mov    %edx,%ecx
+0x00137b62 <putws_17+190>:	mov    %eax,%edx
+0x00137b64 <putws_17+192>:	mov    0x10(%ebp),%eax
+0x00137b67 <putws_17+195>:	mov    0x40(%eax),%eax
+0x00137b6a <putws_17+198>:	mov    %edx,0x4(%esp)
+0x00137b6e <putws_17+202>:	mov    %ecx,0x8(%esp)
+0x00137b72 <putws_17+206>:	mov    %eax,(%esp)
+0x00137b75 <putws_17+209>:	call   0x132cd8 <pvm_ostack_push>
+0x00137b7a <putws_17+214>:	movl   $0x0,-0x43c(%ebp)
+0x00137b84 <putws_17+224>:	jmp    0x137cca <putws_17+550>
+0x00137b89 <putws_17+229>:	mov    -0x20(%ebp),%eax
+0x00137b8c <putws_17+232>:	add    $0x20,%eax
+0x00137b8f <putws_17+235>:	mov    (%eax),%eax
+0x00137b91 <putws_17+237>:	mov    %eax,-0x10(%ebp)
+0x00137b94 <putws_17+240>:	mov    -0x20(%ebp),%eax
+0x00137b97 <putws_17+243>:	add    $0x20,%eax
+0x00137b9a <putws_17+246>:	add    $0x4,%eax
+0x00137b9d <putws_17+249>:	mov    %eax,-0xc(%ebp)
+0x00137ba0 <putws_17+252>:	cmpl   $0x400,-0x10(%ebp)
+0x00137ba7 <putws_17+259>:	jle    0x137bb0 <putws_17+268>
+0x00137ba9 <putws_17+261>:	movl   $0x400,-0x10(%ebp)
+0x00137bb0 <putws_17+268>:	mov    -0x10(%ebp),%eax
+0x00137bb3 <putws_17+271>:	mov    %eax,0x8(%esp)
+0x00137bb7 <putws_17+275>:	mov    -0xc(%ebp),%eax
+0x00137bba <putws_17+278>:	mov    %eax,0x4(%esp)
+0x00137bbe <putws_17+282>:	lea    -0x422(%ebp),%eax
+0x00137bc4 <putws_17+288>:	mov    %eax,(%esp)
+0x00137bc7 <putws_17+291>:	call   0x13a360 <strncpy>
+0x00137bcc <putws_17+296>:	mov    -0x10(%ebp),%eax
+0x00137bcf <putws_17+299>:	movb   $0x0,-0x422(%ebp,%eax,1)
+0x00137bd7 <putws_17+307>:	mov    -0x20(%ebp),%eax
+0x00137bda <putws_17+310>:	mov    -0x1c(%ebp),%edx
+0x00137bdd <putws_17+313>:	mov    %eax,(%esp)
+0x00137be0 <putws_17+316>:	mov    %edx,0x4(%esp)
+0x00137be4 <putws_17+320>:	call   0x131a47 <ref_dec_o>
+0x00137be9 <putws_17+325>:	mov    -0x18(%ebp),%eax
+0x00137bec <putws_17+328>:	mov    0x7536c(%eax),%eax
+0x00137bf2 <putws_17+334>:	mov    %eax,-0x426(%ebp)
+0x00137bf8 <putws_17+340>:	mov    -0x18(%ebp),%eax
+0x00137bfb <putws_17+343>:	mov    0x75370(%eax),%eax
+0x00137c01 <putws_17+349>:	mov    %eax,-0x42a(%ebp)
+0x00137c07 <putws_17+355>:	mov    -0x18(%ebp),%eax
+0x00137c0a <putws_17+358>:	lea    0x75368(%eax),%edx
+0x00137c10 <putws_17+364>:	mov    -0x18(%ebp),%eax
+0x00137c13 <putws_17+367>:	add    $0x75364,%eax
+0x00137c18 <putws_17+372>:	mov    -0x18(%ebp),%ecx
+0x00137c1b <putws_17+375>:	mov    %edx,0x18(%esp)
+0x00137c1f <putws_17+379>:	mov    %eax,0x14(%esp)
+0x00137c23 <putws_17+383>:	mov    -0x42a(%ebp),%eax
+0x00137c29 <putws_17+389>:	mov    %eax,0x10(%esp)
+0x00137c2d <putws_17+393>:	mov    -0x426(%ebp),%eax
+0x00137c33 <putws_17+399>:	mov    %eax,0xc(%esp)
+0x00137c37 <putws_17+403>:	lea    -0x422(%ebp),%eax
+0x00137c3d <putws_17+409>:	mov    %eax,0x8(%esp)
+0x00137c41 <putws_17+413>:	movl   $0x14af40,0x4(%esp)
+0x00137c49 <putws_17+421>:	mov    %ecx,(%esp)
+0x00137c4c <putws_17+424>:	call   0x12bd05 <drv_video_font_tty_string>
+0x00137c51 <putws_17+429>:	mov    0x460cc88,%eax
+0x00137c56 <putws_17+434>:	mov    0x44(%eax),%eax
+0x00137c59 <putws_17+437>:	call   *%eax
+0x00137c5b <putws_17+439>:	mov    -0x18(%ebp),%eax
+0x00137c5e <putws_17+442>:	mov    %eax,(%esp)
+0x00137c61 <putws_17+445>:	call   0x1294af <drv_video_window_preblit>
+0x00137c66 <putws_17+450>:	mov    0x460cc88,%eax
+0x00137c6b <putws_17+455>:	mov    0x30(%eax),%esi
+0x00137c6e <putws_17+458>:	mov    -0x18(%ebp),%eax
+0x00137c71 <putws_17+461>:	mov    0x10(%eax),%eax
+0x00137c74 <putws_17+464>:	movzbl %al,%ebx
+0x00137c77 <putws_17+467>:	mov    -0x18(%ebp),%eax
+0x00137c7a <putws_17+470>:	mov    0xc(%eax),%edx
+0x00137c7d <putws_17+473>:	mov    -0x18(%ebp),%eax
+0x00137c80 <putws_17+476>:	mov    0x8(%eax),%eax
+0x00137c83 <putws_17+479>:	mov    -0x18(%ebp),%ecx
+0x00137c86 <putws_17+482>:	mov    %ebx,0xc(%esp)
+0x00137c8a <putws_17+486>:	mov    %edx,0x8(%esp)
+0x00137c8e <putws_17+490>:	mov    %eax,0x4(%esp)
+0x00137c92 <putws_17+494>:	mov    %ecx,(%esp)
+0x00137c95 <putws_17+497>:	call   *%esi
+0x00137c97 <putws_17+499>:	mov    0x460cc88,%eax
+0x00137c9c <putws_17+504>:	mov    0x48(%eax),%eax
+0x00137c9f <putws_17+507>:	call   *%eax
+0x00137ca1 <putws_17+509>:	call   0x130879 <pvm_create_null_object>
+0x00137ca6 <putws_17+514>:	mov    %edx,%ecx
+0x00137ca8 <putws_17+516>:	mov    %eax,%edx
+0x00137caa <putws_17+518>:	mov    0x10(%ebp),%eax
+0x00137cad <putws_17+521>:	mov    0x40(%eax),%eax
+0x00137cb0 <putws_17+524>:	mov    %edx,0x4(%esp)
+0x00137cb4 <putws_17+528>:	mov    %ecx,0x8(%esp)
+0x00137cb8 <putws_17+532>:	mov    %eax,(%esp)
+0x00137cbb <putws_17+535>:	call   0x132cd8 <pvm_ostack_push>
+0x00137cc0 <putws_17+540>:	movl   $0x1,-0x43c(%ebp)
+0x00137cca <putws_17+550>:	mov    -0x43c(%ebp),%eax
+0x00137cd0 <putws_17+556>:	add    $0x450,%esp
+0x00137cd6 <putws_17+562>:	pop    %ebx
+0x00137cd7 <putws_17+563>:	pop    %esi
+0x00137cd8 <putws_17+564>:	pop    %ebp
+0x00137cd9 <putws_17+565>:	ret    
+End of assembler dump.
+Dump of assembler code for function putws_17:
+0x00137aa4 <putws_17+0>:	push   %ebp
+0x00137aa5 <putws_17+1>:	mov    %esp,%ebp
+0x00137aa7 <putws_17+3>:	push   %esi
+0x00137aa8 <putws_17+4>:	push   %ebx
+0x00137aa9 <putws_17+5>:	sub    $0x450,%esp
+0x00137aaf <putws_17+11>:	mov    0x46421f0,%eax
+0x00137ab4 <putws_17+16>:	test   %eax,%eax
+0x00137ab6 <putws_17+18>:	je     0x137adc <putws_17+56>
+0x00137ab8 <putws_17+20>:	movl   $0x40,0xc(%esp)
+0x00137ac0 <putws_17+28>:	movl   $0x56dccb,0x8(%esp)
+0x00137ac8 <putws_17+36>:	movl   $0x56dd14,0x4(%esp)
+0x00137ad0 <putws_17+44>:	movl   $0x56dcdc,(%esp)
+0x00137ad7 <putws_17+51>:	call   0x138a64 <printf>
+0x00137adc <putws_17+56>:	mov    0x8(%ebp),%eax
+0x00137adf <putws_17+59>:	add    $0x20,%eax
+0x00137ae2 <putws_17+62>:	mov    %eax,-0x18(%ebp)
+0x00137ae5 <putws_17+65>:	mov    0x10(%ebp),%eax
+0x00137ae8 <putws_17+68>:	mov    0x3c(%eax),%eax
+0x00137aeb <putws_17+71>:	mov    %eax,(%esp)
+0x00137aee <putws_17+74>:	call   0x1331fc <pvm_istack_pop>
+0x00137af3 <putws_17+79>:	mov    %eax,-0x14(%ebp)
+0x00137af6 <putws_17+82>:	cmpl   $0x0,-0x14(%ebp)
+0x00137afa <putws_17+86>:	jg     0x137b31 <putws_17+141>
+0x00137afc <putws_17+88>:	movl   $0x56dd1d,(%esp)
+0x00137b03 <putws_17+95>:	call   0x130950 <pvm_create_string_object>
+0x00137b08 <putws_17+100>:	mov    %edx,%ecx
+0x00137b0a <putws_17+102>:	mov    %eax,%edx
+0x00137b0c <putws_17+104>:	mov    0x10(%ebp),%eax
+0x00137b0f <putws_17+107>:	mov    0x40(%eax),%eax
+0x00137b12 <putws_17+110>:	mov    %edx,0x4(%esp)
+0x00137b16 <putws_17+114>:	mov    %ecx,0x8(%esp)
+0x00137b1a <putws_17+118>:	mov    %eax,(%esp)
+0x00137b1d <putws_17+121>:	call   0x132cd8 <pvm_ostack_push>
+0x00137b22 <putws_17+126>:	movl   $0x0,-0x43c(%ebp)
+0x00137b2c <putws_17+136>:	jmp    0x137cca <putws_17+550>
+0x00137b31 <putws_17+141>:	mov    0x10(%ebp),%eax
+0x00137b34 <putws_17+144>:	mov    0x40(%eax),%eax
+0x00137b37 <putws_17+147>:	mov    %eax,(%esp)
+0x00137b3a <putws_17+150>:	call   0x132dc3 <pvm_ostack_pop>
+0x00137b3f <putws_17+155>:	mov    %eax,-0x20(%ebp)
+0x00137b42 <putws_17+158>:	mov    %edx,-0x1c(%ebp)
+0x00137b45 <putws_17+161>:	mov    -0x20(%ebp),%eax
+0x00137b48 <putws_17+164>:	mov    0x10(%eax),%ebx
+0x00137b4b <putws_17+167>:	call   0x12a26c <pvm_get_string_class>
+0x00137b50 <putws_17+172>:	cmp    %eax,%ebx
+0x00137b52 <putws_17+174>:	je     0x137b89 <putws_17+229>
+0x00137b54 <putws_17+176>:	movl   $0x56dd14,(%esp)
+0x00137b5b <putws_17+183>:	call   0x130950 <pvm_create_string_object>
+0x00137b60 <putws_17+188>:	mov    %edx,%ecx
+0x00137b62 <putws_17+190>:	mov    %eax,%edx
+0x00137b64 <putws_17+192>:	mov    0x10(%ebp),%eax
+0x00137b67 <putws_17+195>:	mov    0x40(%eax),%eax
+0x00137b6a <putws_17+198>:	mov    %edx,0x4(%esp)
+0x00137b6e <putws_17+202>:	mov    %ecx,0x8(%esp)
+0x00137b72 <putws_17+206>:	mov    %eax,(%esp)
+0x00137b75 <putws_17+209>:	call   0x132cd8 <pvm_ostack_push>
+0x00137b7a <putws_17+214>:	movl   $0x0,-0x43c(%ebp)
+0x00137b84 <putws_17+224>:	jmp    0x137cca <putws_17+550>
+0x00137b89 <putws_17+229>:	mov    -0x20(%ebp),%eax
+0x00137b8c <putws_17+232>:	add    $0x20,%eax
+0x00137b8f <putws_17+235>:	mov    (%eax),%eax
+0x00137b91 <putws_17+237>:	mov    %eax,-0x10(%ebp)
+0x00137b94 <putws_17+240>:	mov    -0x20(%ebp),%eax
+0x00137b97 <putws_17+243>:	add    $0x20,%eax
+0x00137b9a <putws_17+246>:	add    $0x4,%eax
+0x00137b9d <putws_17+249>:	mov    %eax,-0xc(%ebp)
+0x00137ba0 <putws_17+252>:	cmpl   $0x400,-0x10(%ebp)
+0x00137ba7 <putws_17+259>:	jle    0x137bb0 <putws_17+268>
+0x00137ba9 <putws_17+261>:	movl   $0x400,-0x10(%ebp)
+0x00137bb0 <putws_17+268>:	mov    -0x10(%ebp),%eax
+0x00137bb3 <putws_17+271>:	mov    %eax,0x8(%esp)
+0x00137bb7 <putws_17+275>:	mov    -0xc(%ebp),%eax
+0x00137bba <putws_17+278>:	mov    %eax,0x4(%esp)
+0x00137bbe <putws_17+282>:	lea    -0x422(%ebp),%eax
+0x00137bc4 <putws_17+288>:	mov    %eax,(%esp)
+0x00137bc7 <putws_17+291>:	call   0x13a360 <strncpy>
+0x00137bcc <putws_17+296>:	mov    -0x10(%ebp),%eax
+0x00137bcf <putws_17+299>:	movb   $0x0,-0x422(%ebp,%eax,1)
+0x00137bd7 <putws_17+307>:	mov    -0x20(%ebp),%eax
+0x00137bda <putws_17+310>:	mov    -0x1c(%ebp),%edx
+0x00137bdd <putws_17+313>:	mov    %eax,(%esp)
+0x00137be0 <putws_17+316>:	mov    %edx,0x4(%esp)
+0x00137be4 <putws_17+320>:	call   0x131a47 <ref_dec_o>
+0x00137be9 <putws_17+325>:	mov    -0x18(%ebp),%eax
+0x00137bec <putws_17+328>:	mov    0x7536c(%eax),%eax
+0x00137bf2 <putws_17+334>:	mov    %eax,-0x426(%ebp)
+0x00137bf8 <putws_17+340>:	mov    -0x18(%ebp),%eax
+0x00137bfb <putws_17+343>:	mov    0x75370(%eax),%eax
+0x00137c01 <putws_17+349>:	mov    %eax,-0x42a(%ebp)
+0x00137c07 <putws_17+355>:	mov    -0x18(%ebp),%eax
+0x00137c0a <putws_17+358>:	lea    0x75368(%eax),%edx
+0x00137c10 <putws_17+364>:	mov    -0x18(%ebp),%eax
+0x00137c13 <putws_17+367>:	add    $0x75364,%eax
+0x00137c18 <putws_17+372>:	mov    -0x18(%ebp),%ecx
+0x00137c1b <putws_17+375>:	mov    %edx,0x18(%esp)
+0x00137c1f <putws_17+379>:	mov    %eax,0x14(%esp)
+0x00137c23 <putws_17+383>:	mov    -0x42a(%ebp),%eax
+0x00137c29 <putws_17+389>:	mov    %eax,0x10(%esp)
+0x00137c2d <putws_17+393>:	mov    -0x426(%ebp),%eax
+0x00137c33 <putws_17+399>:	mov    %eax,0xc(%esp)
+0x00137c37 <putws_17+403>:	lea    -0x422(%ebp),%eax
+0x00137c3d <putws_17+409>:	mov    %eax,0x8(%esp)
+0x00137c41 <putws_17+413>:	movl   $0x14af40,0x4(%esp)
+0x00137c49 <putws_17+421>:	mov    %ecx,(%esp)
+0x00137c4c <putws_17+424>:	call   0x12bd05 <drv_video_font_tty_string>
+0x00137c51 <putws_17+429>:	mov    0x460cc88,%eax
+0x00137c56 <putws_17+434>:	mov    0x44(%eax),%eax
+0x00137c59 <putws_17+437>:	call   *%eax
+0x00137c5b <putws_17+439>:	mov    -0x18(%ebp),%eax
+0x00137c5e <putws_17+442>:	mov    %eax,(%esp)
+0x00137c61 <putws_17+445>:	call   0x1294af <drv_video_window_preblit>
+0x00137c66 <putws_17+450>:	mov    0x460cc88,%eax
+0x00137c6b <putws_17+455>:	mov    0x30(%eax),%esi
+0x00137c6e <putws_17+458>:	mov    -0x18(%ebp),%eax
+0x00137c71 <putws_17+461>:	mov    0x10(%eax),%eax
+0x00137c74 <putws_17+464>:	movzbl %al,%ebx
+0x00137c77 <putws_17+467>:	mov    -0x18(%ebp),%eax
+0x00137c7a <putws_17+470>:	mov    0xc(%eax),%edx
+0x00137c7d <putws_17+473>:	mov    -0x18(%ebp),%eax
+Quit
+Dump of assembler code for function drv_video_font_scroll_pixels:
+0x0012bc19 <drv_video_font_scroll_pixels+0>:	push   %ebp
+0x0012bc1a <drv_video_font_scroll_pixels+1>:	mov    %esp,%ebp
+0x0012bc1c <drv_video_font_scroll_pixels+3>:	sub    $0x28,%esp
+0x0012bc1f <drv_video_font_scroll_pixels+6>:	cmpl   $0x0,0xc(%ebp)
+0x0012bc23 <drv_video_font_scroll_pixels+10>:	jns    0x12bc41 <drv_video_font_scroll_pixels+40>
+0x0012bc25 <drv_video_font_scroll_pixels+12>:	movl   $0x56bdb0,0x8(%esp)
+0x0012bc2d <drv_video_font_scroll_pixels+20>:	movl   $0x67,0x4(%esp)
+0x0012bc35 <drv_video_font_scroll_pixels+28>:	movl   $0x56bdd0,(%esp)
+0x0012bc3c <drv_video_font_scroll_pixels+35>:	call   0x1436e3 <panic>
+0x0012bc41 <drv_video_font_scroll_pixels+40>:	mov    0x8(%ebp),%eax
+0x0012bc44 <drv_video_font_scroll_pixels+43>:	mov    0x4(%eax),%eax
+0x0012bc47 <drv_video_font_scroll_pixels+46>:	cmp    0xc(%ebp),%eax
+0x0012bc4a <drv_video_font_scroll_pixels+49>:	jg     0x12bc60 <drv_video_font_scroll_pixels+71>
+0x0012bc4c <drv_video_font_scroll_pixels+51>:	mov    0x10(%ebp),%eax
+0x0012bc4f <drv_video_font_scroll_pixels+54>:	mov    %eax,0x4(%esp)
+0x0012bc53 <drv_video_font_scroll_pixels+58>:	mov    0x8(%ebp),%eax
+0x0012bc56 <drv_video_font_scroll_pixels+61>:	mov    %eax,(%esp)
+0x0012bc59 <drv_video_font_scroll_pixels+64>:	call   0x12be7c <drv_video_window_fill>
+0x0012bc5e <drv_video_font_scroll_pixels+69>:	jmp    0x12bcdf <drv_video_font_scroll_pixels+198>
+0x0012bc60 <drv_video_font_scroll_pixels+71>:	mov    0x8(%ebp),%eax
+0x0012bc63 <drv_video_font_scroll_pixels+74>:	lea    0x54(%eax),%edx
+0x0012bc66 <drv_video_font_scroll_pixels+77>:	mov    0x8(%ebp),%eax
+0x0012bc69 <drv_video_font_scroll_pixels+80>:	mov    (%eax),%eax
+0x0012bc6b <drv_video_font_scroll_pixels+82>:	imul   0xc(%ebp),%eax
+0x0012bc6f <drv_video_font_scroll_pixels+86>:	shl    $0x2,%eax
+0x0012bc72 <drv_video_font_scroll_pixels+89>:	lea    (%edx,%eax,1),%eax
+0x0012bc75 <drv_video_font_scroll_pixels+92>:	mov    %eax,-0xc(%ebp)
+0x0012bc78 <drv_video_font_scroll_pixels+95>:	mov    0x8(%ebp),%eax
+0x0012bc7b <drv_video_font_scroll_pixels+98>:	mov    (%eax),%edx
+0x0012bc7d <drv_video_font_scroll_pixels+100>:	mov    0x8(%ebp),%eax
+0x0012bc80 <drv_video_font_scroll_pixels+103>:	mov    0x4(%eax),%eax
+0x0012bc83 <drv_video_font_scroll_pixels+106>:	sub    0xc(%ebp),%eax
+0x0012bc86 <drv_video_font_scroll_pixels+109>:	imul   %edx,%eax
+0x0012bc89 <drv_video_font_scroll_pixels+112>:	mov    %eax,-0x8(%ebp)
+0x0012bc8c <drv_video_font_scroll_pixels+115>:	mov    -0x8(%ebp),%eax
+0x0012bc8f <drv_video_font_scroll_pixels+118>:	shl    $0x2,%eax
+0x0012bc92 <drv_video_font_scroll_pixels+121>:	mov    %eax,%edx
+0x0012bc94 <drv_video_font_scroll_pixels+123>:	mov    0x8(%ebp),%eax
+0x0012bc97 <drv_video_font_scroll_pixels+126>:	add    $0x54,%eax
+0x0012bc9a <drv_video_font_scroll_pixels+129>:	mov    %edx,0x8(%esp)
+0x0012bc9e <drv_video_font_scroll_pixels+133>:	mov    %eax,0x4(%esp)
+0x0012bca2 <drv_video_font_scroll_pixels+137>:	mov    -0xc(%ebp),%eax
+0x0012bca5 <drv_video_font_scroll_pixels+140>:	mov    %eax,(%esp)
+0x0012bca8 <drv_video_font_scroll_pixels+143>:	call   0x13a68c <memmove>
+0x0012bcad <drv_video_font_scroll_pixels+148>:	mov    0x8(%ebp),%eax
+0x0012bcb0 <drv_video_font_scroll_pixels+151>:	mov    (%eax),%eax
+0x0012bcb2 <drv_video_font_scroll_pixels+153>:	imul   0xc(%ebp),%eax
+0x0012bcb6 <drv_video_font_scroll_pixels+157>:	mov    %eax,-0x4(%ebp)
+0x0012bcb9 <drv_video_font_scroll_pixels+160>:	mov    0x8(%ebp),%eax
+0x0012bcbc <drv_video_font_scroll_pixels+163>:	add    $0x54,%eax
+0x0012bcbf <drv_video_font_scroll_pixels+166>:	mov    %eax,-0xc(%ebp)
+0x0012bcc2 <drv_video_font_scroll_pixels+169>:	jmp    0x12bcd0 <drv_video_font_scroll_pixels+183>
+0x0012bcc4 <drv_video_font_scroll_pixels+171>:	mov    -0xc(%ebp),%edx
+0x0012bcc7 <drv_video_font_scroll_pixels+174>:	mov    0x10(%ebp),%eax
+0x0012bcca <drv_video_font_scroll_pixels+177>:	mov    %eax,(%edx)
+0x0012bccc <drv_video_font_scroll_pixels+179>:	addl   $0x4,-0xc(%ebp)
+0x0012bcd0 <drv_video_font_scroll_pixels+183>:	cmpl   $0x0,-0x4(%ebp)
+0x0012bcd4 <drv_video_font_scroll_pixels+187>:	setne  %al
+0x0012bcd7 <drv_video_font_scroll_pixels+190>:	subl   $0x1,-0x4(%ebp)
+0x0012bcdb <drv_video_font_scroll_pixels+194>:	test   %al,%al
+0x0012bcdd <drv_video_font_scroll_pixels+196>:	jne    0x12bcc4 <drv_video_font_scroll_pixels+171>
+0x0012bcdf <drv_video_font_scroll_pixels+198>:	leave  
+0x0012bce0 <drv_video_font_scroll_pixels+199>:	ret    
+End of assembler dump.
+quit
+Breakpoint 1 at 0x1436b5: file t_panic.c, line 24.
+Breakpoint 2 at 0x12c4be: file exec.c, line 91.
+Breakpoint 3 at 0x109599: file main.c, line 191.
+Breakpoint 4 at 0x10d03c: file spinlock.c, line 43.
+Breakpoint 5 at 0x143816: file t_sleep.c, line 31.
+Breakpoint 6 at 0x10ce79: file dpc.c, line 156.
+Breakpoint 7 at 0x1450d1: file t_switch.c, line 42.
+Hardware watchpoint 8: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:42
+42	    int ie = hal_save_cli();
+
+Breakpoint 6, dpc_init () at dpc.c:156
+156	    SHOW_FLOW0( 0, "Starting DPC");
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+#0  panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+#1  0x00106580 in trap_panic (ts=0x601ef4) at traps.c:82
+#2  0x00142998 in phantom_kernel_trap (ts=0x601ef4) at trap_entry.c:18
+#3  0x00561199 in trap_push_segs ()
+#4  0x00601ef4 in _phantom_start_heap_start ()
+#5  0x00000000 in ?? ()
+Dump of assembler code for function drv_video_window_receive_event:
+0x001006e2 <drv_video_window_receive_event+0>:	push   %ebp
+0x001006e3 <drv_video_window_receive_event+1>:	mov    %esp,%ebp
+0x001006e5 <drv_video_window_receive_event+3>:	sub    $0x38,%esp
+0x001006e8 <drv_video_window_receive_event+6>:	cmpl   $0x0,0x8(%ebp)
+0x001006ec <drv_video_window_receive_event+10>:	jne    0x10070a <drv_video_window_receive_event+40>
+0x001006ee <drv_video_window_receive_event+12>:	movl   $0x5640d8,0x8(%esp)
+0x001006f6 <drv_video_window_receive_event+20>:	movl   $0x14b,0x4(%esp)
+0x001006fe <drv_video_window_receive_event+28>:	movl   $0x5640f8,(%esp)
+0x00100705 <drv_video_window_receive_event+35>:	call   0x1436af <panic>
+0x0010070a <drv_video_window_receive_event+40>:	movl   $0x0,-0x18(%ebp)
+0x00100711 <drv_video_window_receive_event+47>:	call   0x13bb41 <hal_save_cli>
+0x00100716 <drv_video_window_receive_event+52>:	mov    %eax,-0x14(%ebp)
+0x00100719 <drv_video_window_receive_event+55>:	movl   $0x4647d28,(%esp)
+0x00100720 <drv_video_window_receive_event+62>:	call   0x10d018 <hal_spin_lock>
+0x00100725 <drv_video_window_receive_event+67>:	mov    0x8(%ebp),%eax
+0x00100728 <drv_video_window_receive_event+70>:	mov    %eax,(%esp)
+0x0010072b <drv_video_window_receive_event+73>:	call   0x100625 <select_event_target>
+0x00100730 <drv_video_window_receive_event+78>:	mov    0x8(%ebp),%eax
+0x00100733 <drv_video_window_receive_event+81>:	mov    0x30(%eax),%eax
+0x00100736 <drv_video_window_receive_event+84>:	test   %eax,%eax
+0x00100738 <drv_video_window_receive_event+86>:	je     0x10085a <drv_video_window_receive_event+376>
+0x0010073e <drv_video_window_receive_event+92>:	movl   $0x0,-0x10(%ebp)
+0x00100745 <drv_video_window_receive_event+99>:	movl   $0x0,-0xc(%ebp)
+0x0010074c <drv_video_window_receive_event+106>:	mov    0x8(%ebp),%eax
+0x0010074f <drv_video_window_receive_event+109>:	mov    0x8(%eax),%eax
+0x00100752 <drv_video_window_receive_event+112>:	cmp    $0x1,%eax
+0x00100755 <drv_video_window_receive_event+115>:	jne    0x10079d <drv_video_window_receive_event+187>
+0x00100757 <drv_video_window_receive_event+117>:	mov    0x8(%ebp),%eax
+0x0010075a <drv_video_window_receive_event+120>:	mov    0x30(%eax),%edx
+0x0010075d <drv_video_window_receive_event+123>:	mov    0x4619f00,%eax
+0x00100762 <drv_video_window_receive_event+128>:	cmp    %eax,%edx
+0x00100764 <drv_video_window_receive_event+130>:	je     0x10079d <drv_video_window_receive_event+187>
+0x00100766 <drv_video_window_receive_event+132>:	mov    0x8(%ebp),%eax
+0x00100769 <drv_video_window_receive_event+135>:	mov    0x18(%eax),%eax
+0x0010076c <drv_video_window_receive_event+138>:	mov    %eax,-0x8(%ebp)
+0x0010076f <drv_video_window_receive_event+141>:	mov    0x8(%ebp),%eax
+0x00100772 <drv_video_window_receive_event+144>:	mov    0x1c(%eax),%eax
+0x00100775 <drv_video_window_receive_event+147>:	mov    %eax,-0x4(%ebp)
+0x00100778 <drv_video_window_receive_event+150>:	mov    0x4619f00,%eax
+0x0010077d <drv_video_window_receive_event+155>:	test   %eax,%eax
+0x0010077f <drv_video_window_receive_event+157>:	je     0x100789 <drv_video_window_receive_event+167>
+0x00100781 <drv_video_window_receive_event+159>:	mov    0x4619f00,%eax
+0x00100786 <drv_video_window_receive_event+164>:	mov    %eax,-0x10(%ebp)
+0x00100789 <drv_video_window_receive_event+167>:	mov    0x8(%ebp),%eax
+0x0010078c <drv_video_window_receive_event+170>:	mov    0x30(%eax),%eax
+0x0010078f <drv_video_window_receive_event+173>:	mov    %eax,-0xc(%ebp)
+0x00100792 <drv_video_window_receive_event+176>:	mov    0x8(%ebp),%eax
+0x00100795 <drv_video_window_receive_event+179>:	mov    0x30(%eax),%eax
+0x00100798 <drv_video_window_receive_event+182>:	mov    %eax,0x4619f00
+0x0010079d <drv_video_window_receive_event+187>:	mov    0x8(%ebp),%eax
+0x001007a0 <drv_video_window_receive_event+190>:	mov    0x30(%eax),%eax
+0x001007a3 <drv_video_window_receive_event+193>:	mov    %eax,-0x18(%ebp)
+0x001007a6 <drv_video_window_receive_event+196>:	mov    0x8(%ebp),%eax
+0x001007a9 <drv_video_window_receive_event+199>:	mov    0x18(%eax),%edx
+0x001007ac <drv_video_window_receive_event+202>:	mov    -0x18(%ebp),%eax
+0x001007af <drv_video_window_receive_event+205>:	mov    0x8(%eax),%eax
+0x001007b2 <drv_video_window_receive_event+208>:	sub    %eax,%edx
+0x001007b4 <drv_video_window_receive_event+210>:	mov    0x8(%ebp),%eax
+0x001007b7 <drv_video_window_receive_event+213>:	mov    %edx,0x24(%eax)
+0x001007ba <drv_video_window_receive_event+216>:	mov    0x8(%ebp),%eax
+0x001007bd <drv_video_window_receive_event+219>:	mov    0x1c(%eax),%edx
+0x001007c0 <drv_video_window_receive_event+222>:	mov    -0x18(%ebp),%eax
+0x001007c3 <drv_video_window_receive_event+225>:	mov    0xc(%eax),%eax
+0x001007c6 <drv_video_window_receive_event+228>:	sub    %eax,%edx
+0x001007c8 <drv_video_window_receive_event+230>:	mov    0x8(%ebp),%eax
+0x001007cb <drv_video_window_receive_event+233>:	mov    %edx,0x28(%eax)
+0x001007ce <drv_video_window_receive_event+236>:	mov    -0x18(%ebp),%eax
+0x001007d1 <drv_video_window_receive_event+239>:	mov    0x10(%eax),%edx
+0x001007d4 <drv_video_window_receive_event+242>:	mov    0x8(%ebp),%eax
+0x001007d7 <drv_video_window_receive_event+245>:	mov    %edx,0x20(%eax)
+0x001007da <drv_video_window_receive_event+248>:	mov    0x8(%ebp),%eax
+0x001007dd <drv_video_window_receive_event+251>:	movl   $0x0,0x2c(%eax)
+0x001007e4 <drv_video_window_receive_event+258>:	mov    -0x18(%ebp),%eax
+0x001007e7 <drv_video_window_receive_event+261>:	mov    0x48(%eax),%eax
+0x001007ea <drv_video_window_receive_event+264>:	cmp    $0x1ff,%eax
+0x001007ef <drv_video_window_receive_event+269>:	jg     0x100850 <drv_video_window_receive_event+366>
+0x001007f1 <drv_video_window_receive_event+271>:	mov    -0x18(%ebp),%eax
+0x001007f4 <drv_video_window_receive_event+274>:	mov    0x44(%eax),%eax
+0x001007f7 <drv_video_window_receive_event+277>:	mov    %eax,-0x24(%ebp)
+0x001007fa <drv_video_window_receive_event+280>:	mov    -0x18(%ebp),%eax
+0x001007fd <drv_video_window_receive_event+283>:	add    $0x40,%eax
+0x00100800 <drv_video_window_receive_event+286>:	cmp    -0x24(%ebp),%eax
+0x00100803 <drv_video_window_receive_event+289>:	jne    0x100810 <drv_video_window_receive_event+302>
+0x00100805 <drv_video_window_receive_event+291>:	mov    0x8(%ebp),%edx
+0x00100808 <drv_video_window_receive_event+294>:	mov    -0x18(%ebp),%eax
+0x0010080b <drv_video_window_receive_event+297>:	mov    %edx,0x40(%eax)
+0x0010080e <drv_video_window_receive_event+300>:	jmp    0x100818 <drv_video_window_receive_event+310>
+0x00100810 <drv_video_window_receive_event+302>:	mov    -0x24(%ebp),%edx
+0x00100813 <drv_video_window_receive_event+305>:	mov    0x8(%ebp),%eax
+0x00100816 <drv_video_window_receive_event+308>:	mov    %eax,(%edx)
+0x00100818 <drv_video_window_receive_event+310>:	mov    0x8(%ebp),%eax
+0x0010081b <drv_video_window_receive_event+313>:	mov    -0x24(%ebp),%edx
+0x0010081e <drv_video_window_receive_event+316>:	mov    %edx,0x4(%eax)
+0x00100821 <drv_video_window_receive_event+319>:	mov    -0x18(%ebp),%eax
+0x00100824 <drv_video_window_receive_event+322>:	lea    0x40(%eax),%edx
+0x00100827 <drv_video_window_receive_event+325>:	mov    0x8(%ebp),%eax
+0x0010082a <drv_video_window_receive_event+328>:	mov    %edx,(%eax)
+0x0010082c <drv_video_window_receive_event+330>:	mov    0x8(%ebp),%edx
+0x0010082f <drv_video_window_receive_event+333>:	mov    -0x18(%ebp),%eax
+0x00100832 <drv_video_window_receive_event+336>:	mov    %edx,0x44(%eax)
+0x00100835 <drv_video_window_receive_event+339>:	mov    -0x18(%ebp),%eax
+0x00100838 <drv_video_window_receive_event+342>:	mov    0x48(%eax),%eax
+0x0010083b <drv_video_window_receive_event+345>:	lea    0x1(%eax),%edx
+0x0010083e <drv_video_window_receive_event+348>:	mov    -0x18(%ebp),%eax
+0x00100841 <drv_video_window_receive_event+351>:	mov    %edx,0x48(%eax)
+0x00100844 <drv_video_window_receive_event+354>:	mov    -0x18(%ebp),%eax
+0x00100847 <drv_video_window_receive_event+357>:	movl   $0x0,0x4c(%eax)
+0x0010084e <drv_video_window_receive_event+364>:	jmp    0x10085a <drv_video_window_receive_event+376>
+0x00100850 <drv_video_window_receive_event+366>:	mov    -0x18(%ebp),%eax
+0x00100853 <drv_video_window_receive_event+369>:	movl   $0x1,0x4c(%eax)
+0x0010085a <drv_video_window_receive_event+376>:	movl   $0x4647d28,(%esp)
+0x00100861 <drv_video_window_receive_event+383>:	call   0x10d08a <hal_spin_unlock>
+0x00100866 <drv_video_window_receive_event+388>:	cmpl   $0x0,-0x14(%ebp)
+0x0010086a <drv_video_window_receive_event+392>:	je     0x100871 <drv_video_window_receive_event+399>
+0x0010086c <drv_video_window_receive_event+394>:	call   0x13bb26 <hal_sti>
+0x00100871 <drv_video_window_receive_event+399>:	cmpl   $0x0,-0x10(%ebp)
+0x00100875 <drv_video_window_receive_event+403>:	je     0x100898 <drv_video_window_receive_event+438>
+0x00100877 <drv_video_window_receive_event+405>:	mov    -0x10(%ebp),%eax
+0x0010087a <drv_video_window_receive_event+408>:	mov    %eax,0xc(%esp)
+0x0010087e <drv_video_window_receive_event+412>:	movl   $0x2,0x8(%esp)
+0x00100886 <drv_video_window_receive_event+420>:	mov    -0x4(%ebp),%eax
+0x00100889 <drv_video_window_receive_event+423>:	mov    %eax,0x4(%esp)
+0x0010088d <drv_video_window_receive_event+427>:	mov    -0x8(%ebp),%eax
+0x00100890 <drv_video_window_receive_event+430>:	mov    %eax,(%esp)
+0x00100893 <drv_video_window_receive_event+433>:	call   0x10059a <event_q_put_win>
+0x00100898 <drv_video_window_receive_event+438>:	cmpl   $0x0,-0xc(%ebp)
+0x0010089c <drv_video_window_receive_event+442>:	je     0x1008bf <drv_video_window_receive_event+477>
+0x0010089e <drv_video_window_receive_event+444>:	mov    -0xc(%ebp),%eax
+0x001008a1 <drv_video_window_receive_event+447>:	mov    %eax,0xc(%esp)
+0x001008a5 <drv_video_window_receive_event+451>:	movl   $0x1,0x8(%esp)
+0x001008ad <drv_video_window_receive_event+459>:	mov    -0x4(%ebp),%eax
+0x001008b0 <drv_video_window_receive_event+462>:	mov    %eax,0x4(%esp)
+0x001008b4 <drv_video_window_receive_event+466>:	mov    -0x8(%ebp),%eax
+0x001008b7 <drv_video_window_receive_event+469>:	mov    %eax,(%esp)
+0x001008ba <drv_video_window_receive_event+472>:	call   0x10059a <event_q_put_win>
+0x001008bf <drv_video_window_receive_event+477>:	cmpl   $0x0,-0x18(%ebp)
+0x001008c3 <drv_video_window_receive_event+481>:	je     0x1008dd <drv_video_window_receive_event+507>
+0x001008c5 <drv_video_window_receive_event+483>:	mov    -0x18(%ebp),%eax
+0x001008c8 <drv_video_window_receive_event+486>:	mov    0x50(%eax),%eax
+0x001008cb <drv_video_window_receive_event+489>:	test   %eax,%eax
+0x001008cd <drv_video_window_receive_event+491>:	je     0x1008dd <drv_video_window_receive_event+507>
+0x001008cf <drv_video_window_receive_event+493>:	mov    -0x18(%ebp),%eax
+0x001008d2 <drv_video_window_receive_event+496>:	mov    0x50(%eax),%edx
+0x001008d5 <drv_video_window_receive_event+499>:	mov    -0x18(%ebp),%eax
+0x001008d8 <drv_video_window_receive_event+502>:	mov    %eax,(%esp)
+0x001008db <drv_video_window_receive_event+505>:	call   *%edx
+0x001008dd <drv_video_window_receive_event+507>:	leave  
+0x001008de <drv_video_window_receive_event+508>:	ret    
+End of assembler dump.
+Dump of assembler code for function drv_video_window_receive_event:
+0x001006e2 <drv_video_window_receive_event+0>:	push   %ebp
+0x001006e3 <drv_video_window_receive_event+1>:	mov    %esp,%ebp
+0x001006e5 <drv_video_window_receive_event+3>:	sub    $0x38,%esp
+0x001006e8 <drv_video_window_receive_event+6>:	cmpl   $0x0,0x8(%ebp)
+0x001006ec <drv_video_window_receive_event+10>:	jne    0x10070a <drv_video_window_receive_event+40>
+0x001006ee <drv_video_window_receive_event+12>:	movl   $0x5640d8,0x8(%esp)
+0x001006f6 <drv_video_window_receive_event+20>:	movl   $0x14b,0x4(%esp)
+0x001006fe <drv_video_window_receive_event+28>:	movl   $0x5640f8,(%esp)
+0x00100705 <drv_video_window_receive_event+35>:	call   0x1436af <panic>
+0x0010070a <drv_video_window_receive_event+40>:	movl   $0x0,-0x18(%ebp)
+0x00100711 <drv_video_window_receive_event+47>:	call   0x13bb41 <hal_save_cli>
+0x00100716 <drv_video_window_receive_event+52>:	mov    %eax,-0x14(%ebp)
+0x00100719 <drv_video_window_receive_event+55>:	movl   $0x4647d28,(%esp)
+0x00100720 <drv_video_window_receive_event+62>:	call   0x10d018 <hal_spin_lock>
+0x00100725 <drv_video_window_receive_event+67>:	mov    0x8(%ebp),%eax
+0x00100728 <drv_video_window_receive_event+70>:	mov    %eax,(%esp)
+0x0010072b <drv_video_window_receive_event+73>:	call   0x100625 <select_event_target>
+0x00100730 <drv_video_window_receive_event+78>:	mov    0x8(%ebp),%eax
+0x00100733 <drv_video_window_receive_event+81>:	mov    0x30(%eax),%eax
+0x00100736 <drv_video_window_receive_event+84>:	test   %eax,%eax
+0x00100738 <drv_video_window_receive_event+86>:	je     0x10085a <drv_video_window_receive_event+376>
+0x0010073e <drv_video_window_receive_event+92>:	movl   $0x0,-0x10(%ebp)
+0x00100745 <drv_video_window_receive_event+99>:	movl   $0x0,-0xc(%ebp)
+0x0010074c <drv_video_window_receive_event+106>:	mov    0x8(%ebp),%eax
+0x0010074f <drv_video_window_receive_event+109>:	mov    0x8(%eax),%eax
+0x00100752 <drv_video_window_receive_event+112>:	cmp    $0x1,%eax
+0x00100755 <drv_video_window_receive_event+115>:	jne    0x10079d <drv_video_window_receive_event+187>
+0x00100757 <drv_video_window_receive_event+117>:	mov    0x8(%ebp),%eax
+0x0010075a <drv_video_window_receive_event+120>:	mov    0x30(%eax),%edx
+0x0010075d <drv_video_window_receive_event+123>:	mov    0x4619f00,%eax
+0x00100762 <drv_video_window_receive_event+128>:	cmp    %eax,%edx
+0x00100764 <drv_video_window_receive_event+130>:	je     0x10079d <drv_video_window_receive_event+187>
+0x00100766 <drv_video_window_receive_event+132>:	mov    0x8(%ebp),%eax
+0x00100769 <drv_video_window_receive_event+135>:	mov    0x18(%eax),%eax
+0x0010076c <drv_video_window_receive_event+138>:	mov    %eax,-0x8(%ebp)
+0x0010076f <drv_video_window_receive_event+141>:	mov    0x8(%ebp),%eax
+0x00100772 <drv_video_window_receive_event+144>:	mov    0x1c(%eax),%eax
+0x00100775 <drv_video_window_receive_event+147>:	mov    %eax,-0x4(%ebp)
+0x00100778 <drv_video_window_receive_event+150>:	mov    0x4619f00,%eax
+0x0010077d <drv_video_window_receive_event+155>:	test   %eax,%eax
+0x0010077f <drv_video_window_receive_event+157>:	je     0x100789 <drv_video_window_receive_event+167>
+0x00100781 <drv_video_window_receive_event+159>:	mov    0x4619f00,%eax
+0x00100786 <drv_video_window_receive_event+164>:	mov    %eax,-0x10(%ebp)
+0x00100789 <drv_video_window_receive_event+167>:	mov    0x8(%ebp),%eax
+0x0010078c <drv_video_window_receive_event+170>:	mov    0x30(%eax),%eax
+0x0010078f <drv_video_window_receive_event+173>:	mov    %eax,-0xc(%ebp)
+0x00100792 <drv_video_window_receive_event+176>:	mov    0x8(%ebp),%eax
+0x00100795 <drv_video_window_receive_event+179>:	mov    0x30(%eax),%eax
+0x00100798 <drv_video_window_receive_event+182>:	mov    %eax,0x4619f00
+0x0010079d <drv_video_window_receive_event+187>:	mov    0x8(%ebp),%eax
+0x001007a0 <drv_video_window_receive_event+190>:	mov    0x30(%eax),%eax
+0x001007a3 <drv_video_window_receive_event+193>:	mov    %eax,-0x18(%ebp)
+0x001007a6 <drv_video_window_receive_event+196>:	mov    0x8(%ebp),%eax
+0x001007a9 <drv_video_window_receive_event+199>:	mov    0x18(%eax),%edx
+0x001007ac <drv_video_window_receive_event+202>:	mov    -0x18(%ebp),%eax
+0x001007af <drv_video_window_receive_event+205>:	mov    0x8(%eax),%eax
+0x001007b2 <drv_video_window_receive_event+208>:	sub    %eax,%edx
+0x001007b4 <drv_video_window_receive_event+210>:	mov    0x8(%ebp),%eax
+0x001007b7 <drv_video_window_receive_event+213>:	mov    %edx,0x24(%eax)
+0x001007ba <drv_video_window_receive_event+216>:	mov    0x8(%ebp),%eax
+0x001007bd <drv_video_window_receive_event+219>:	mov    0x1c(%eax),%edx
+0x001007c0 <drv_video_window_receive_event+222>:	mov    -0x18(%ebp),%eax
+0x001007c3 <drv_video_window_receive_event+225>:	mov    0xc(%eax),%eax
+0x001007c6 <drv_video_window_receive_event+228>:	sub    %eax,%edx
+0x001007c8 <drv_video_window_receive_event+230>:	mov    0x8(%ebp),%eax
+0x001007cb <drv_video_window_receive_event+233>:	mov    %edx,0x28(%eax)
+0x001007ce <drv_video_window_receive_event+236>:	mov    -0x18(%ebp),%eax
+0x001007d1 <drv_video_window_receive_event+239>:	mov    0x10(%eax),%edx
+0x001007d4 <drv_video_window_receive_event+242>:	mov    0x8(%ebp),%eax
+0x001007d7 <drv_video_window_receive_event+245>:	mov    %edx,0x20(%eax)
+0x001007da <drv_video_window_receive_event+248>:	mov    0x8(%ebp),%eax
+0x001007dd <drv_video_window_receive_event+251>:	movl   $0x0,0x2c(%eax)
+0x001007e4 <drv_video_window_receive_event+258>:	mov    -0x18(%ebp),%eax
+0x001007e7 <drv_video_window_receive_event+261>:	mov    0x48(%eax),%eax
+0x001007ea <drv_video_window_receive_event+264>:	cmp    $0x1ff,%eax
+0x001007ef <drv_video_window_receive_event+269>:	jg     0x100850 <drv_video_window_receive_event+366>
+0x001007f1 <drv_video_window_receive_event+271>:	mov    -0x18(%ebp),%eax
+0x001007f4 <drv_video_window_receive_event+274>:	mov    0x44(%eax),%eax
+0x001007f7 <drv_video_window_receive_event+277>:	mov    %eax,-0x24(%ebp)
+0x001007fa <drv_video_window_receive_event+280>:	mov    -0x18(%ebp),%eax
+0x001007fd <drv_video_window_receive_event+283>:	add    $0x40,%eax
+0x00100800 <drv_video_window_receive_event+286>:	cmp    -0x24(%ebp),%eax
+0x00100803 <drv_video_window_receive_event+289>:	jne    0x100810 <drv_video_window_receive_event+302>
+0x00100805 <drv_video_window_receive_event+291>:	mov    0x8(%ebp),%edx
+0x00100808 <drv_video_window_receive_event+294>:	mov    -0x18(%ebp),%eax
+0x0010080b <drv_video_window_receive_event+297>:	mov    %edx,0x40(%eax)
+0x0010080e <drv_video_window_receive_event+300>:	jmp    0x100818 <drv_video_window_receive_event+310>
+0x00100810 <drv_video_window_receive_event+302>:	mov    -0x24(%ebp),%edx
+0x00100813 <drv_video_window_receive_event+305>:	mov    0x8(%ebp),%eax
+0x00100816 <drv_video_window_receive_event+308>:	mov    %eax,(%edx)
+0x00100818 <drv_video_window_receive_event+310>:	mov    0x8(%ebp),%eax
+0x0010081b <drv_video_window_receive_event+313>:	mov    -0x24(%ebp),%edx
+0x0010081e <drv_video_window_receive_event+316>:	mov    %edx,0x4(%eax)
+0x00100821 <drv_video_window_receive_event+319>:	mov    -0x18(%ebp),%eax
+0x00100824 <drv_video_window_receive_event+322>:	lea    0x40(%eax),%edx
+Quit
+Breakpoint 9 at 0x1006e8: file events.c, line 331.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, dpc_init () at dpc.c:156
+156	    SHOW_FLOW0( 0, "Starting DPC");
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c10c0) at events.c:331
+331	    assert(e);
+332	    drv_video_window_t *w = 0;
+334	    int ie = hal_save_cli();
+335	    hal_spin_lock( &allw_lock );
+337	    select_event_target(e);
+339	    if( e->focus == 0 )
+381	    hal_spin_unlock( &allw_lock );
+382	    if(ie) hal_sti();
+385	    if(later_lost) event_q_put_win( later_x, later_y, UI_EVENT_WIN_LOST_FOCUS, later_lost );
+386	    if(later_gain) event_q_put_win( later_x, later_y, UI_EVENT_WIN_GOT_FOCUS, later_gain );
+389	    if(w != 0 && w->inKernelEventProcess)
+392	}
+push_event (e=0x5c10c0) at events.c:214
+214	}
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1100) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1140) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1180) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c11c0) at events.c:331
+331	    assert(e);
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, dpc_init () at dpc.c:156
+156	    SHOW_FLOW0( 0, "Starting DPC");
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c10c0) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1100) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1140) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1180) at events.c:331
+331	    assert(e);
+332	    drv_video_window_t *w = 0;
+334	    int ie = hal_save_cli();
+335	    hal_spin_lock( &allw_lock );
+337	    select_event_target(e);
+339	    if( e->focus == 0 )
+381	    hal_spin_unlock( &allw_lock );
+382	    if(ie) hal_sti();
+385	    if(later_lost) event_q_put_win( later_x, later_y, UI_EVENT_WIN_LOST_FOCUS, later_lost );
+386	    if(later_gain) event_q_put_win( later_x, later_y, UI_EVENT_WIN_GOT_FOCUS, later_gain );
+389	    if(w != 0 && w->inKernelEventProcess)
+392	}
+push_event (e=0x5c1180) at events.c:214
+214	}
+event_push_thread () at events.c:183
+183	        remove_extra_unused();
+187	        hal_mutex_lock( &main_q_mutex );
+188	        while(queue_empty(&main_event_q))
+191	        if(queue_empty(&main_event_q))
+194	        queue_remove_first(&main_event_q, e, struct ui_event *, chain);
+195	        hal_mutex_unlock( &main_q_mutex );
+198	        push_event(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c11c0) at events.c:331
+331	    assert(e);
+332	    drv_video_window_t *w = 0;
+334	    int ie = hal_save_cli();
+335	    hal_spin_lock( &allw_lock );
+337	    select_event_target(e);
+339	    if( e->focus == 0 )
+346		drv_video_window_t *later_lost = 0;
+347		drv_video_window_t *later_gain = 0;
+351	    if(e->type == UI_EVENT_TYPE_MOUSE && focused_window != e->focus)
+362	    w = e->focus;
+365	    e->rel_x = e->abs_x - w->x;
+366	    e->rel_y = e->abs_y - w->y;
+368	    e->abs_z = w->z;
+369	    e->rel_z = 0;
+371	    if( w->events_count < MAX_WINDOW_EVENTS )
+373	        queue_enter(&(w->events), e, struct ui_event *, chain);
+0x00142512 in _t_page_fault ()
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c10c0) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1100) at events.c:331
+331	    assert(e);
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c10c0) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1100) at events.c:331
+331	    assert(e);
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, dpc_init () at dpc.c:156
+156	    SHOW_FLOW0( 0, "Starting DPC");
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c10c0) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1100) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1140) at events.c:331
+331	    assert(e);
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1180) at events.c:331
+331	    assert(e);
+332	    drv_video_window_t *w = 0;
+334	    int ie = hal_save_cli();
+335	    hal_spin_lock( &allw_lock );
+337	    select_event_target(e);
+$1 = (drv_video_window_t *) 0x0
+$2 = (drv_video_window_t *) 0x0
+339	    if( e->focus == 0 )
+#0  drv_video_window_receive_event (e=0x5c1180) at events.c:339
+#1  0x001004d0 in push_event (e=0x5c1180) at events.c:213
+#2  0x001004ba in event_push_thread () at events.c:198
+#3  0x0010d54c in kernel_thread_starter (func=0x10040f) at hal.c:264
+#4  0x001456e5 in phantom_thread_c_starter (
+    func=0x10d53b <kernel_thread_starter>, arg=0x10040f, t=0x5cf800)
+    at t_machdep.c:152
+#5  0x0014573c in _phantom_thread_trampoline ()
+381	    hal_spin_unlock( &allw_lock );
+382	    if(ie) hal_sti();
+385	    if(later_lost) event_q_put_win( later_x, later_y, UI_EVENT_WIN_LOST_FOCUS, later_lost );
+386	    if(later_gain) event_q_put_win( later_x, later_y, UI_EVENT_WIN_GOT_FOCUS, later_gain );
+389	    if(w != 0 && w->inKernelEventProcess)
+$3 = (drv_video_window_t *) 0x0
+392	}
+push_event (e=0x5c1180) at events.c:214
+214	}
+event_push_thread () at events.c:183
+183	        remove_extra_unused();
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c11c0) at events.c:331
+331	    assert(e);
+332	    drv_video_window_t *w = 0;
+334	    int ie = hal_save_cli();
+335	    hal_spin_lock( &allw_lock );
+337	    select_event_target(e);
+339	    if( e->focus == 0 )
+346		drv_video_window_t *later_lost = 0;
+347		drv_video_window_t *later_gain = 0;
+351	    if(e->type == UI_EVENT_TYPE_MOUSE && focused_window != e->focus)
+362	    w = e->focus;
+$4 = (drv_video_window_t *) 0x0
+365	    e->rel_x = e->abs_x - w->x;
+$5 = (drv_video_window_t *) 0x601f80
+366	    e->rel_y = e->abs_y - w->y;
+368	    e->abs_z = w->z;
+369	    e->rel_z = 0;
+371	    if( w->events_count < MAX_WINDOW_EVENTS )
+373	        queue_enter(&(w->events), e, struct ui_event *, chain);
+There is no member named event.
+$6 = {next = 0x601fd0, prev = 0x10d0a6}
+$7 = (struct queue_entry *) 0x601fd0
+$8 = {next = 0x601fe0, prev = 0x1456e5}
+$9 = (struct ui_event *) 0x5c11c0
+$10 = {chain = {next = 0x5c1200, prev = 0x596050}, type = 4, time = 0, 
+  abs_x = 5896096, abs_y = 0, abs_z = 0, rel_x = -137760, rel_y = 0, 
+  rel_z = 0, focus = 0x601f80, modifiers = 0, {k = {vk = 2, ch = 0}, m = {
+      buttons = 2}, w = {info = 2}}}
+0x00142512 in _t_page_fault ()
+#0  0x00142512 in _t_page_fault ()
+#1  0x0000000e in ?? ()
+#2  0x00000003 in ?? ()
+#3  0x00100816 in drv_video_window_receive_event (e=0x5c11c0) at events.c:373
+#4  0x001004d0 in push_event (e=0x5c11c0) at events.c:213
+#5  0x001004ba in event_push_thread () at events.c:198
+#6  0x0010d54c in kernel_thread_starter (func=0x10040f) at hal.c:264
+#7  0x001456e5 in phantom_thread_c_starter (
+    func=0x10d53b <kernel_thread_starter>, arg=0x10040f, t=0x5cf800)
+    at t_machdep.c:152
+#8  0x0014573c in _phantom_thread_trampoline ()
+quit
+putpkt: write failed: Connection reset by peer.
+Breakpoint 1 at 0x1436fb: file t_panic.c, line 23.
+Breakpoint 2 at 0x12c4f0: file exec.c, line 90.
+Breakpoint 3 at 0x1095a0: file main.c, line 191.
+Breakpoint 4 at 0x10d03f: file spinlock.c, line 43.
+Breakpoint 5 at 0x143862: file t_sleep.c, line 31.
+Breakpoint 6 at 0x10ce8b: file dpc.c, line 155.
+Breakpoint 7 at 0x145117: file t_switch.c, line 41.
+Hardware watchpoint 8: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+Can't find member of namespace, class, struct, or union named "spinlock.c"
+Hint: try 'spinlock.c<TAB> or 'spinlock.c<ESC-?>
+(Note leading single quote.)
+38	}
+39	
+40	void hal_spin_lock(hal_spinlock_t *sl)
+41	{
+42	    if(hal_is_sti())
+43	        printf("\n!spinlock STI!\n");
+44	
+45	#if SPIN_DEBUG
+46	    if(sl->lock)
+47	    {
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 7, phantom_thread_switch () at t_switch.c:41
+41	{
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:23
+23	{
+#0  panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:23
+#1  0x00106598 in trap_panic (ts=0x601ef4) at traps.c:82
+#2  0x001429e1 in phantom_kernel_trap (ts=0x601ef4) at trap_entry.c:19
+#3  0x00561199 in trap_push_segs ()
+#4  0x00601ef4 in _phantom_start_heap_start ()
+#5  0x00000000 in ?? ()
+Breakpoint 9 at 0x1007fc: file events.c, line 373.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c1100) at events.c:373
+373	    if( w->events_count < MAX_WINDOW_EVENTS )
+$1 = (drv_video_window_t *) 0x601f80
+$2 = {xsize = 6299568, ysize = 1049786, x = 6033664, y = 5857296, z = 0, generation = 0, flags = 0, state = 6033728, chain = {next = 0x0, prev = 0x0}, li = 0, ti = 6033664, ri = 6299600, bi = 1103236, bg = {b = 0 '\0', g = 0 '\0', r = 0 '\0', a = 0 '\0'}, title = 0x2 "", events = {next = 0x601fd0, prev = 0x10d0d8}, events_count = 0, stall = 1049615, inKernelEventProcess = 0x601fe0 <_phantom_start_heap_start+438240>, pixel = 0x601fd4}
+375	        queue_enter(&(w->events), e, struct ui_event *, chain);
+0x00142556 in _t_page_fault ()
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:23
+23	{
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 6, dpc_init () at dpc.c:155
+155	{
+
+Breakpoint 9, drv_video_window_receive_event (e=0x5c11c0) at events.c:373
+373	    if( w->events_count < MAX_WINDOW_EVENTS )
+375	        queue_enter(&(w->events), e, struct ui_event *, chain);
+$3 = (struct ui_event *) 0x5c11c0
+$4 = (drv_video_window_t *) 0x601f80
+$5 = {xsize = 6299568, ysize = 1049786, x = 6033856, y = 0, z = 0, generation = 0, flags = 0, state = 6033920, chain = {next = 0x0, prev = 0x0}, li = 0, ti = 6033856, ri = 6299600, bi = 1103236, bg = {b = 0 '\0', g = 0 '\0', r = 0 '\0', a = 0 '\0'}, title = 0x3002 "", events = {next = 0x601fd0, prev = 0x10d0d8}, events_count = 0, stall = 1049615, inKernelEventProcess = 0x601fe0 <_phantom_start_heap_start+438240>, pixel = 0x601fd4}
+quit
+Breakpoint 1 at 0x1436fb: file t_panic.c, line 23.
+Breakpoint 2 at 0x12c4f0: file exec.c, line 90.
+Breakpoint 3 at 0x1095a0: file main.c, line 191.
+Breakpoint 4 at 0x10d03f: file spinlock.c, line 43.
+Breakpoint 5 at 0x143862: file t_sleep.c, line 31.
+No source file named event.c.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:23
+23	{
+Num     Type           Disp Enb Address    What
+1       breakpoint     keep y   0x001436fb in panic at t_panic.c:23
+	breakpoint already hit 1 time
+2       breakpoint     keep y   0x0012c4f0 in pvm_exec_throw at exec.c:90
+3       breakpoint     keep y   0x001095a0 in main at main.c:191
+	breakpoint already hit 1 time
+4       breakpoint     keep y   0x0010d03f in hal_spin_lock at spinlock.c:43
+5       breakpoint     keep y   0x00143862 in wakethread at t_sleep.c:31
+6       hw watchpoint  keep y              pm_map->lock.lock
+quit
+Breakpoint 1 at 0x143701: file t_panic.c, line 24.
+Breakpoint 2 at 0x12c4f6: file exec.c, line 91.
+Breakpoint 3 at 0x1095b1: file main.c, line 191.
+Breakpoint 4 at 0x10d03f: file spinlock.c, line 43.
+Breakpoint 5 at 0x143862: file t_sleep.c, line 31.
+No source file named event.c.
+Hardware watchpoint 6: pm_map->lock.lock
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+#0  panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+#1  0x00106598 in trap_panic (ts=0x601ef4) at traps.c:82
+#2  0x001429e1 in phantom_kernel_trap (ts=0x601ef4) at trap_entry.c:19
+#3  0x00561199 in trap_push_segs ()
+#4  0x00601ef4 in _phantom_start_heap_start ()
+#5  0x00000000 in ?? ()
+#0  panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+#1  0x00106598 in trap_panic (ts=0x601ef4) at traps.c:82
+#2  0x001429e1 in phantom_kernel_trap (ts=0x601ef4) at trap_entry.c:19
+#3  0x00561199 in trap_push_segs ()
+#4  0x00601ef4 in _phantom_start_heap_start ()
+#5  0x00000000 in ?? ()
+
+Breakpoint 3, main () at main.c:191
+191	{
+192	    init_irq_allocator();
+195	    phantom_init_descriptors();
+197	    init_multiboot_symbols();
+199	    hal_init(
+209	    phantom_pci_find_drivers( 0 );
+211	    phantom_timer_pit_init(100,0);
+213	    phantom_paging_init();
+215	    phantom_timed_call_init(); // Too late? Move up?
+222	    phantom_trap_handlers[15] = ignore_handler;
+223	    phantom_threads_init();
+224	    phantom_request_timed_call( &sched_timer, TIMEDCALL_FLAG_PERIODIC );
+225	    hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
+228	    set_cr0( get_cr0() | CR0_WP );
+233	        strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
+237	    printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
+238	    phantom_process_boot_options();
+240	    detect_cpu(0);
+243	    hal_init_physmem_alloc_thread();
+245	    net_stack_init();
+247	    phantom_pci_find_drivers( 1 );
+249	    init_main_event_q();
+251	    phantom_init_vm86();
+252	    phantom_init_vesa();
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+
+Breakpoint 3, main () at main.c:191
+191	{
+Breakpoint 7 at 0x13fd24: file vesa.c, line 84.
+
+Breakpoint 7, phantom_init_vesa () at vesa.c:84
+84	    printf("\nLooking for VESA VBE... " );
+85	    rc = getVesaControllerInfo( &vi_buf );
+86	    if( rc )
+91	    vi = &vi_buf;
+96	    char *oem_name = farTo32(vi->oem_ptr);
+97	    printf("VESA ver %X ptr %X, OEM '%s'\n", vi->version, vi->video_ptr, oem_name );
+99	    printf("Total %dK mem, cap: %b\n", 64*vi->total_memory/1024, vi->capabilities, "\020\01DAC 8bit\02not VGA compatible\03RAMDAC blank\04STEREO\05STEREO EVC" );
+103	    u_int16_t best_mode = -1;
+104	    int best_width = -1;
+109	    memmove( modes_buf, farTo32(vi->video_ptr), sizeof(modes_buf) );
+110	    u_int16_t *modes = modes_buf;
+113	    printf("Lookup VESA modes:\n");
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+159	        if( info.memory_model != 6 )
+165	        if( info.num_planes > 1 )
+171	        if( info.x_resolution > best_width && info.x_resolution <= MAX_W )
+173	            best_width = info.x_resolution;
+174	            best_mode = mode;
+175	            best_info = info;
+176	            printf("better\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+159	        if( info.memory_model != 6 )
+165	        if( info.num_planes > 1 )
+171	        if( info.x_resolution > best_width && info.x_resolution <= MAX_W )
+173	            best_width = info.x_resolution;
+174	            best_mode = mode;
+175	            best_info = info;
+176	            printf("better\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+159	        if( info.memory_model != 6 )
+165	        if( info.num_planes > 1 )
+171	        if( info.x_resolution > best_width && info.x_resolution <= MAX_W )
+173	            best_width = info.x_resolution;
+174	            best_mode = mode;
+175	            best_info = info;
+176	            printf("better\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+116	        u_int16_t mode = *modes;
+120	        getVesaModeInfo( mode, &info );
+123	        if(! (info.attributes & 0x01 ))
+127	            const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
+128	            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+135	        if(! (info.attributes & 0x08 ))
+141	        if(! (info.attributes & 0x80 ))
+147	        if(! (info.attributes & 0x10 ))
+153	        if( info.bits_per_pixel != 24 )
+155	            printf("not 24bpp\n");
+114	    for(; *modes != 0xFFFF; modes++ )
+183	    if( best_width < 0 )
+191	    printf("VESA mode %d %d*%d %dbpp selected, mem at %X\n",
+198	    video_driver_bios_vesa.xsize = best_info.x_resolution;
+199	    video_driver_bios_vesa.ysize = best_info.y_resolution;
+201	    int v_memsize = 64*1024*vi->total_memory;
+203	    set_video_driver_bios_vesa_pa( best_info.phys_base_ptr, v_memsize );
+204	    set_video_driver_bios_vesa_mode( best_mode | VBE_MODE_LINEAR );
+208	    printf("Setting VESA video mode %d\n", best_mode );
+209	    if( setVesaMode( best_mode | VBE_MODE_LINEAR ) )
+216	    phantom_enforce_video_driver(&video_driver_bios_vesa);
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+Breakpoint 8 at 0x118e1c: file video.c, line 123.
+
+Breakpoint 3, main () at main.c:191
+191	{
+
+Breakpoint 8, phantom_enforce_video_driver (vd=0x1478e0) at video.c:123
+123	    if(video_drv)
+126	    video_drv =  vd;
+129	    if(video_drv) res = video_drv->start();
+132	    if( res )
+135	    was_enforced = 1;
+136	    video_post_start();
+137	}
+phantom_init_vesa () at vesa.c:218
+218	}
+main () at main.c:253
+253	    phantom_start_video_driver();
+256	    phantom_init_apic();
+260	    phantom_pci_find_drivers( 2 );
+282	    start_phantom();
+
+Breakpoint 1, panic (fmt=0x565554 "Unexpected trap %s\n") at t_panic.c:24
+24	    if(panic_reenter)
+quit

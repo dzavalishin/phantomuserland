@@ -1,0 +1,29 @@
+
+HOST_CPU	= i686
+HOST_ARCH	= x86
+unix_host	= NONE
+
+export CC	= gcc
+export LD	= ld
+export STRIP	= strip
+export AR	= ar
+export RANLIB	= ranlib
+export OBJCOPY	= objcopy
+export NM	= nm
+
+AWK		= gawk
+YACC		= bison -y
+M4		= m4
+INSTALL		= /usr/bin/install -c
+INSTALL_PROGRAM	= ${INSTALL}
+INSTALL_DATA	= ${INSTALL} -m 644
+
+DEFINES		= -DHAVE_CONFIG_H  -DINDIRECT_OSENV=1
+CFLAGS		= 
+M4FLAGS		= -s
+
+INSTALL_INCDIR	= $(prefix)/include
+INSTALL_BINDIR	= $(exec_prefix)/bin
+INSTALL_LIBDIR	= $(exec_prefix)/lib
+
+PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inline-functions
