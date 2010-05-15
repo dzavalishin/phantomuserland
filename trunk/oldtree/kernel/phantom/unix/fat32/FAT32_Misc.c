@@ -1,3 +1,4 @@
+#if HAVE_UNIX
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //					        FAT32 File IO Library
@@ -39,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // FATMisc_ClearLFN: Clear long file name cache
 //-----------------------------------------------------------------------------
-void FATMisc_ClearLFN(f32_t *impl, BOOL wipeTable)
+void FATMisc_ClearLFN(f32_t *impl, u_int8_t  wipeTable)
 {
     int i;
     FAT32_LFN.no_of_strings = 0;
@@ -330,4 +331,6 @@ BOOL FATMisc_GenerateTail( f32_t *impl, char *sfn_output, char *sfn_input, UINT3
 
     return TRUE;
 }
+
+#endif // #if HAVE_UNIX
 

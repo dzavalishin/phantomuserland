@@ -140,7 +140,7 @@ static void do_phantom_heap_init(addr_t new_heap_base, unsigned int new_heap_siz
     // then assign, turning on protection
 
     static hal_mutex_t mutex;
-    if(hal_mutex_init(&mutex) < 0) {
+    if(hal_mutex_init(&mutex,"Heap") < 0) {
         panic("error creating heap mutex\n");
     }
 

@@ -9,6 +9,7 @@
  *
 **/
 
+#define EVENTS_ENABLED 0
 
 #include <threads.h>
 #include <event.h>
@@ -62,6 +63,7 @@ void init_main_event_q()
         allocate_event();
     hal_mutex_unlock( &unused_q_mutex );
 
+#if EVENTS_ENABLED
     hal_start_kernel_thread( event_push_thread );
 
     event_engine_active = 1;
@@ -69,6 +71,7 @@ void init_main_event_q()
 #if 0
     phantom_set_console_getchar( phantom_window_getc );
     phantom_dev_keyboard_start_events();
+#endif
 #endif
 }
 
@@ -180,6 +183,7 @@ static void event_push_thread()
 
     while(1)
     {
+#if EVENTS_ENABLED
         remove_extra_unused();
 
         struct ui_event *e;
@@ -199,7 +203,7 @@ static void event_push_thread()
 
         // window code will return when done
         //return_unused_event(e);
-
+#endif
     }
 
 
