@@ -1,3 +1,5 @@
+#if HAVE_UNIX
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //					        FAT32 File IO Library
@@ -315,3 +317,5 @@ BOOL FAT32_AddClusterToEndofChain(f32_t *impl, UINT32 StartCluster, UINT32 newEn
     return TRUE;
 }
 #endif
+
+#endif // #if HAVE_UNIX

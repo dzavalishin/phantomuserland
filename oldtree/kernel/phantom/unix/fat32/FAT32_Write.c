@@ -1,3 +1,5 @@
+#if HAVE_UNIX
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //					        FAT32 File IO Library
@@ -302,3 +304,5 @@ BOOL FAT32_AddFileEntry(f32_t *impl, UINT32 dirCluster, char *filename, char *sh
 }
 #endif
 
+
+#endif // #if HAVE_UNIX

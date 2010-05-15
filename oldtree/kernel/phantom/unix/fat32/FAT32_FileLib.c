@@ -876,5 +876,4 @@ int fl_remove( const char * filename )
 #endif
 
 
-#endif // HAVE_UNIX
 
