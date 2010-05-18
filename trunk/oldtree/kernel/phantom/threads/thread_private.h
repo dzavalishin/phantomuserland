@@ -188,7 +188,15 @@ void phantom_switch_context(
 
 extern phantom_thread_t *   percpu_current_thread[];
 
-#define GET_CURRENT_THREAD() percpu_current_thread[0]
+//#define GET_CURRENT_THREAD() percpu_current_thread[0]
+#define GET_CURRENT_THREAD() get_current_thread()
+#define SET_CURRENT_THREAD(t) ({ percpu_current_thread[0] = (t); (void)0;})
+ 
+static inline phantom_thread_t * get_current_thread(void)
+{
+	static phantom_thread_t dummy;
+	return percpu_current_thread[0] ? percpu_current_thread[0] : &dummy;
+}
 
 
 extern phantom_thread_t *   percpu_idlest_thread[];

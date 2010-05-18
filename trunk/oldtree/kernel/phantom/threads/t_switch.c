@@ -86,7 +86,8 @@ void phantom_thread_switch()
 
     // do it before - after we will have stack switched and can't access
     // correct 'next'
-    GET_CURRENT_THREAD() = next;
+    //GET_CURRENT_THREAD() = next;
+    SET_CURRENT_THREAD(next);
 
     hal_enable_softirq();
     phantom_switch_context(old, next, toUnlock );

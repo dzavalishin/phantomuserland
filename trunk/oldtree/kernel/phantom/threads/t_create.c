@@ -10,6 +10,13 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "threads"
+#include "../debug_ext.h"
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <malloc.h>
 #include <string.h>
 #include <i386/proc_reg.h>
@@ -209,7 +216,8 @@ phantom_import_main_thread()
     // Let it be elegible to run
     t->sleep_flags &= ~THREAD_SLEEP_LOCKED;
 
-    GET_CURRENT_THREAD() = t;
+    //GET_CURRENT_THREAD() = t;
+    SET_CURRENT_THREAD(t);
 
     hal_set_thread_name("Main");
 
@@ -272,7 +280,7 @@ static phantom_thread_t *child;
 
 void phantom_thread_in_interrupt_fork()
 {
-printf("ifork in...\n");
+    SHOW_INFO0( 10, "ifork in...");
     assert( forkLock.lock != 0 );
     hal_spin_lock(&schedlock);
 
@@ -282,17 +290,18 @@ printf("ifork in...\n");
 
 //#warning cli
     // Save to me, switch to me
-printf("ifork save...\n");
+    SHOW_INFO0( 10, "ifork save...");
     phantom_switch_context(parent, parent, &schedlock );
-printf("ifork saved...\n");
+    SHOW_INFO0( 10, "ifork saved...");
     // (OLD) phantom_switch_context() below returns here in old thread!!
 
     if(!(parent->thread_flags & THREAD_FLAG_PREFORK))
     {
         set_esp(old_sp);
-printf("ifork in old...\n");
+        SHOW_INFO0( 10, "ifork in old...");
         // Second return. We're in old tread and done with fork;
-        GET_CURRENT_THREAD() = parent;
+        //GET_CURRENT_THREAD() = parent;
+        SET_CURRENT_THREAD(parent);
 
         // Let child be elegible to run
         child->sleep_flags &= ~THREAD_SLEEP_LOCKED;
@@ -300,10 +309,11 @@ printf("ifork in old...\n");
 
         return;
     }
-printf("ifork cont...\n");
+    SHOW_INFO0( 10, "ifork cont...");
 
     parent->thread_flags &= ~THREAD_FLAG_PREFORK;
-    GET_CURRENT_THREAD() = child;
+    //GET_CURRENT_THREAD() = child;
+    SET_CURRENT_THREAD(child);
 
     // Now switch stack and copy some 512 bytes there to make sure
     // new one will have some place to return to
@@ -312,9 +322,11 @@ printf("ifork cont...\n");
     void *from = (void*) (old_sp = get_esp());
     void *to = (child->stack) - cp_size - 1;
 
-printf("ifork memmove...\n");
+    SHOW_INFO0( 10, "ifork memmove...");
     memmove(to, from, cp_size);
-printf("set ESP...\n");
+
+    //printf("set ESP...\n");
+    SHOW_INFO0( 10, "set ESP...");
     set_esp((int)to);
 
 //#warning sti
