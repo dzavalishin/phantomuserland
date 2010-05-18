@@ -12,6 +12,7 @@
 
 #include <phantom_assert.h>
 #include <x86/phantom_page.h>
+#include <phantom_types.h>
 
 #include <malloc.h>
 

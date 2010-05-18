@@ -1,3 +1,4 @@
+include ../../config.mk 
 
 W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
@@ -15,6 +16,17 @@ nonstandalone.o: nonstandalone.c
 	gcc -c nonstandalone.c
 
 GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o 
+#GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o ../lib/libphantom_c.a 
+
+ifeq ($(OSTYPE),cygwin)
+OSLIB = -lgdi32 
+else
+OSLIB= ../lib/libphantom_c.a 
+endif
+
 
 pvm_test: pvm_main.o nonstandalone.o $(GLLIB)
-	gcc -g -ffreestanding -o $@ $^  -lgdi32 
+	gcc -g -ffreestanding -o $@ $^ $(OSLIB)
+
+#pvm_test: pvm_main.o nonstandalone.o
+#	gcc -g -ffreestanding -o $@ $^ $(GLLIB)
