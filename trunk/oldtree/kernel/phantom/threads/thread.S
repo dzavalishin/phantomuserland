@@ -75,8 +75,11 @@ ENTRY(phantom_switch_context)
     // Done, unlock the spinlock given
 
     movl	12(%ecx),%ecx			// Lock ptr
-    xorl        %eax,%eax
-    xchgl   	%eax,(%ecx)                     // Unlock it
+//    xorl        %eax,%eax
+//    xchgl   	%eax,(%ecx)                     // Unlock it
+    pushl	%ecx
+    call	EXT(hal_spin_unlock)
+    popl	%ecx
 
     // now we have in eax (which is int ret val) old lock value
 

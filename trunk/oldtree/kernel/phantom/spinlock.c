@@ -27,7 +27,7 @@
 
 
 #if SPIN_DEBUG
-static int global_lock_entry_count = 0;
+int global_lock_entry_count = 0;
 #endif
 
 
@@ -64,12 +64,15 @@ void hal_spin_lock(hal_spinlock_t *sl)
 
 void hal_spin_unlock(hal_spinlock_t *sl)
 {
+    if (sl) // Scheduler sometimes calls us will sl == 0
+    {
+    assert(sl->lock);
 #if SPIN_DEBUG
     sl->ebp = 0;
     global_lock_entry_count--;
 #endif
     _spin_unlock(&(sl->lock));
-
+	}
     if(hal_is_sti())
         printf("\n!spinunlock STI!\n");
 }

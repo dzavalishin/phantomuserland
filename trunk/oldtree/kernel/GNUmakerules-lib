@@ -9,9 +9,11 @@ else
 _LIBS = $(TARGET)
 endif
 
-LIBOUT=../old/kernel/lib
+#LIBOUT=../old/kernel/lib
+LIBOUT=$(PHANTOM_SRCDIR)/../kernel/lib
 
-all: $(_LIBS) $(addprefix $(LIBOUT)/lib/, $(_LIBS))
+#all: $(_LIBS) $(addprefix $(LIBOUT)/lib/, $(_LIBS))
+all: $(_LIBS) $(addprefix $(LIBOUT)/, $(_LIBS))
 
 prepare::
 
@@ -34,9 +36,13 @@ $(PTARGET): $(POBJFILES)
 endif
 
 
-$(LIBOUT)/lib/%: %
+#$(LIBOUT)/lib/%: %
 #	test -d $(LIBOUT)/lib || mkdir $(LIBOUT)/lib
 #	cp $< $@
+$(LIBOUT)/%: %
+	test -d $(LIBOUT) || mkdir $(LIBOUT)
+	cp $< $@
+
 
 install: $(addprefix $(INSTALL_LIBDIR)/,$(_LIBS))
 

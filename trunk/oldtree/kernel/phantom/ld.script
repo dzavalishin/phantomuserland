@@ -1,4 +1,4 @@
-OUTPUT_FORMAT(pei-i386)
+/*OUTPUT_FORMAT(pei-i386)*/
 
      SECTIONS
      {
@@ -10,31 +10,35 @@ OUTPUT_FORMAT(pei-i386)
 		PROVIDE (etext = .);
 		}
 
-       .data BLOCK(__section_alignment__) : 
+       .data /*BLOCK(__section_alignment__)*/ : 
 		{ 
+		PROVIDE (_data_start__ = .);
 		PROVIDE (__data_start__ = .);
                 *(.data) 
                 }
 
-       .rdata BLOCK(__section_alignment__) : 
+       .rdata /*BLOCK(__section_alignment__)*/ : 
 		{ *(.rdata) }
 
-       .idata BLOCK(__section_alignment__) : 
+       .idata /*BLOCK(__section_alignment__)*/ : 
 		{ *(.idata) }
 
-       .bss BLOCK(__section_alignment__) :
+       .bss /*BLOCK(__section_alignment__)*/ :
  		{ 
+    		_bss_start__ = . ;
     		__bss_start__ = . ;
 		*(.bss) 
+		_bss_end__ = . ;
 		__bss_end__ = . ;
 		}
 
-  .endjunk BLOCK(__section_alignment__) :
+  .endjunk /*BLOCK(__section_alignment__)*/ :
   {
     /* end is deprecated, don't use it */
     PROVIDE (end = .);
     PROVIDE ( _end = .);
-     __end__ = .;
+    _end__ = .;
+    __end__ = .;
   }
 
      }

@@ -86,9 +86,10 @@ phantom: $(START_O_FILE) \
 		i386/libi386.a \
 		$(CLIB) $(LIBGCC) crtn.o 
 
-	../objcopy-ph -O elf32-i386 $@.pe $@
+#	../objcopy-ph -O elf32-i386 $@.pe $@
+	objcopy -O elf32-i386 $@.pe $@
 	cat < $@ > ../../run/tftp/$@
-	objdump -x $@.pe >$@.pe.sym
+#	objdump -x $@.pe >$@.pe.sym
 	gzip < $@ > ../../run/tftp/$@
 #	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
 #	cd ../../run
