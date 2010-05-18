@@ -343,6 +343,25 @@ int main(int argc, char* argv[])
 
     args(argc,argv);
 
+#if 0
+    {
+        extern char jit_proto_ret[];
+        extern char jit_proto_ret_end[];
+
+        int size = jit_proto_ret_end - jit_proto_ret;
+
+        char copy[20];
+
+        memmove( copy, jit_proto_ret, size );
+
+        //void (*f)() = (void *)jit_proto_ret;
+        void (*f)() = (void *)copy;
+
+        f();
+    }
+#endif
+
+
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 
     pvm_win_init();
@@ -355,7 +374,7 @@ int main(int argc, char* argv[])
 
     hal_init( mem, size );
 
-    videotest();
+    //videotest();
 
     //getchar();
 

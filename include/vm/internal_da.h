@@ -99,6 +99,7 @@ struct data_area_4_string
 
 
 
+// NB! See JIT assembly hardcode for object structure offsets
 struct data_area_4_class
 {
     unsigned int		object_flags;			// object of this class will have such flags

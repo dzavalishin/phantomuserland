@@ -13,6 +13,28 @@
 #ifndef JIT_H
 #define JIT_H
 
+#include <sys/types.h>
+
+void jit_init(void);
+
+// =========================================================================
+//                                        XX
+//                  X                      X
+// XX XXX   XXXX   XXXXX    XXXXX          X XXX    XXXX   XX XXX   XXXX
+//  XX  X  X    X   X           X          XX   X  XXXXXX   XX  X  XXXXXX
+//  X   X  X    X   X   X  XXXXXX          X    X  X        X   X  X
+// XXX XXX  XXXX    XXXX   XXXX XX        XXXXXX    XXXXX  XXX XXX  XXXXX
+//
+// Don't you EVER remove or change there funcs. Each instance of OS keeps
+// these ordinals in JITted code.
+//
+// Or we have to find way to force OS instance to reJIT on some serious
+// change. Any kernel change, for example?
+//
+// =========================================================================
+
+
+
 enum jit_callable
 {
     JIT_F_LOAD_F_ACC, 			// pvm_exec_load_fast_acc
@@ -22,13 +44,29 @@ enum jit_callable
     JIT_F_CREATE_OBJ, 			// pvm_create_object
     JIT_F_COPY_OBJ,                     // pvm_copy_object
     JIT_F_CREATE_INT_OBJ,               // pvm_create_int_object
+
+    // LAST!
+    JIT_FUNC_TABLE_SIZE
+};
+
+//void jit_kernel_func_table_init();
+
+
+enum jit_register
+{
+    JIT_R_AX, JIT_R_BX, JIT_R_CX, JIT_R_DX, JIT_R_SI, JIT_R_DI
 };
 
 
 struct jit_out
 {
     //! Next label id
-    int nextLabel;
+    int 	nextLabel;
+
+    // Code buffer
+    char *	buf;
+    char *	bufp; // Current put pos
+    int   	bufsize;
 
     // map of interpreted IP to asm instr offset
 

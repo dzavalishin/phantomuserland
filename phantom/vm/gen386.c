@@ -13,6 +13,11 @@
 #include "jit.h"
 
 
+#define COPYCODE(name)                          \
+    extern char jit_proto_##name[]; 		\
+    extern char jit_proto_##name##_end[];      	\
+    copy_jit_code( j, jit_proto_##name, jit_proto_##name##_end - jit_proto_##name );
+
 
 // --------------------------------------------------------------------------
 // Direct instructions
@@ -30,7 +35,7 @@ void jit_gen_neg( jit_out_t *j, int dst ) // dst = !dst
 {
 }
 
-void jit_jz( jit_out_t *, int jlabel )
+void jit_jz( jit_out_t *j, int jlabel )
 {
     // get dest ip from jlabel
 }
@@ -70,6 +75,12 @@ void jit_o2int( jit_out_t *j )
 void jit_gen_isnull( jit_out_t *j, int dst ) // dst = (dst == 0)
 {
     // Must set flags? Suppose so.
+    switch(dst)
+    {
+    case JIT_R_AX:    { COPYCODE(isnull_ax);      break; }
+    default:
+        panic("isnull !ax?");
+    }
 }
 
 
@@ -99,7 +110,7 @@ void jit_is_top( jit_out_t *j )
 {
 }
 
-void jit_iconst( jit_out_t *j, int const) // mov 0, %ax
+void jit_iconst( jit_out_t *j, int constVal ) // mov 0, %ax
 {
 }
 
@@ -129,11 +140,11 @@ void jit_os_top( jit_out_t *j )
 // --------------------------------------------------------------------------
 
 
-jit_refinc( jit_out_t *j, int reg )
+void jit_refinc( jit_out_t *j, int reg )
 {
 }
 
-jit_refdec( jit_out_t *j, int reg )
+void jit_refdec( jit_out_t *j, int reg )
 {
 }
 
@@ -144,8 +155,7 @@ jit_refdec( jit_out_t *j, int reg )
 
 void jit_get_null( jit_out_t *j ) // AX = 0 DX = 0
 {
-    // mov $0, %ax
-    // mov $0, %dx
+    COPYCODE(get_null);
 }
 
 void jit_get_thread( jit_out_t *j )// AX, DX = thread ptr
@@ -155,30 +165,37 @@ void jit_get_thread( jit_out_t *j )// AX, DX = thread ptr
 
 void jit_get_this( jit_out_t *j ) // AX, DX = this ptr
 {
-    // mov %bx, %ax
+    COPYCODE(get_this);
 }
 
 void jit_get_class_class( jit_out_t *j ) // AX, DX = ptr
 {
+    COPYCODE(get_class_class);
 }
 
 void jit_get_iface_class( jit_out_t *j ) // AX, DX = ptr
 {
+    COPYCODE(get_iface_class);
 }
 
 void jit_get_code_class( jit_out_t *j ) // AX, DX = ptr
 {
+    COPYCODE(get_code_class);
 }
 
 void jit_get_int_class( jit_out_t *j ) // AX, DX = ptr
 {
+    COPYCODE(get_int_class);
+
 }
 
-void jit_get_strting_class( jit_out_t *j ) // AX, DX = ptr
+void jit_get_string_class( jit_out_t *j ) // AX, DX = ptr
 {
+    COPYCODE(get_string_class);
 }
 
 void jit_get_array_class( jit_out_t *j ) // AX, DX = ptr
 {
+    COPYCODE(get_array_class);
 }
 
