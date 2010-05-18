@@ -40,13 +40,13 @@ static hal_spinlock_t unused_lock;
 void phantom_thread_switch()
 {
     int ie = hal_save_cli();
-    hal_spinlock_t *toUnlock;
+    hal_spinlock_t *toUnlock = 0;
 
     if(GET_CURRENT_THREAD()->sw_unlock == &schedlock)
     {
         SHOW_ERROR0(0, "schedlock passed as sw_unlock!");
         GET_CURRENT_THREAD()->sw_unlock = 0;
-        toUnlock = &unused_lock;
+        //toUnlock = &unused_lock;
     }
     else
     {
@@ -55,7 +55,7 @@ void phantom_thread_switch()
         toUnlock = GET_CURRENT_THREAD()->sw_unlock;
         GET_CURRENT_THREAD()->sw_unlock = 0;
 
-        if(toUnlock == 0) toUnlock = &unused_lock;
+        //if(toUnlock == 0) toUnlock = &unused_lock;
 
         assert(toUnlock != &schedlock);
         // FIXME This is SMP-wrong! It has to beunlocked AFTER thread is swithed off
@@ -189,6 +189,7 @@ exit:
 void hal_disable_preemption(void)
 {
     //int ret = !GET_CURRENT_THREAD()->preemption_disabled;
+    assert(GET_CURRENT_THREAD()->preemption_disabled == 0);
     GET_CURRENT_THREAD()->preemption_disabled = 1;
     //return ret;
 }
@@ -202,6 +203,7 @@ int hal_disable_preemption_r(void)
 
 void hal_enable_preemption(void)
 {
+    assert(GET_CURRENT_THREAD()->preemption_disabled == 1);
     GET_CURRENT_THREAD()->preemption_disabled = 0;
 }
 

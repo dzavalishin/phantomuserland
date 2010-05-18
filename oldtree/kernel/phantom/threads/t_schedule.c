@@ -430,6 +430,10 @@ void thread_block( int sleep_flag, hal_spinlock_t *lock_to_be_unlocked )
     int ie = hal_save_cli();
     hal_spin_lock(&schedlock);
 
+#if SPIN_DEBUG
+    assert(global_lock_entry_count == 2);
+#endif
+
     phantom_thread_t *t = GET_CURRENT_THREAD();
     //t_dequeue_runq(t);
     t->sleep_flags |= sleep_flag;
