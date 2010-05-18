@@ -41,6 +41,7 @@ struct pvm_object
 
 typedef struct pvm_object pvm_object_t;
 
+// NB! See JIT assembly hardcode for object structure offsets
 struct pvm_object_storage
 {
     struct object_PVM_ALLOC_Header	_ah;

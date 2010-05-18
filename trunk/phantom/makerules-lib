@@ -12,7 +12,7 @@ include $(BUILD_ROOT)/makerules
 
 ARFLAGS = crs
 
-$(TARGET): $(OBJFILES)
+$(TARGET): $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) )
 	$(AR) $(ARFLAGS)  $@ $?
 	cp $@ $(BUILD_ROOT)/lib
 

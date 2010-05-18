@@ -458,10 +458,10 @@ static int si_thread_11_continue(struct pvm_object me, struct data_area_4_thread
     DEBUG_INFO;
     struct data_area_4_thread *meda = pvm_object_da( me, thread );
 
-    hal_spin_lock(&meda->spin);
+    //hal_spin_lock(&meda->spin);
     if( !meda->sleep_flag )
     	SYSCALL_THROW_STRING("Thread is not sleeping in continue");
-    hal_spin_unlock(&meda->spin);
+    //hal_spin_unlock(&meda->spin);
 
     SYSCALL_WAKE_THREAD_UP(meda);
 

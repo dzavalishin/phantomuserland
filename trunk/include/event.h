@@ -8,7 +8,7 @@
 
 struct ui_event
 {
-    queue_chain_t               chain; // on q
+    queue_chain_t               echain; // on q
 
     int				type; // UI_EVENT_TYPE_
 
@@ -47,6 +47,7 @@ struct ui_event
 
 };
 
+typedef struct ui_even ui_event_t;
 
 #define UI_EVENT_TYPE_MOUSE     	(1<<0)
 #define UI_EVENT_TYPE_KEY     		(1<<1)
