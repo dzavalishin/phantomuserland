@@ -21,10 +21,10 @@ LIBDIRS += $(OBJDIR)/lib
 # The -I- flag divides the -I line:
 #	-I flags before -I- are searched for #include "file" only, not <file>
 #	-I flags after -I- are searched for all include files.
-PHANTOM_CPPFLAGS	+= -MD $(DEFINES) -I. $(addprefix -iquote,$(SRCDIRS)) \
+PHANTOM_CPPFLAGS	+= -W -Wall -MD $(DEFINES) -I. $(addprefix -iquote,$(SRCDIRS)) \
 		    $(addprefix -iquote,$(MOSTLY_SRCDIRS)) \
 		    $(addprefix -I,$(INCDIRS)) -nostdinc
-PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -Wall $(PHANTOM_FFLAGS)
+PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -W -Wall $(PHANTOM_FFLAGS)
 PHANTOM_LDFLAGS	+= $(addprefix -L,$(LIBDIRS))
 
 # Add a `-g' if the debug option is set.
