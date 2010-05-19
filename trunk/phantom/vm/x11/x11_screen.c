@@ -5,189 +5,190 @@
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel ready: no
- * Preliminary: no
  *
- * This source file implements (attempts to) X11 based wrapper for VM to
+ * This source file implements X11 based wrapper for VM to
  * run in Unix-hosted environment.
  *
  * TODO: GBR -> RGB!!
  *
- **/
+**/
 
-#include <X11/Xlib.h> // preceede most other headers!
-#include <X11/Xutil.h>		/* BitmapOpenFailed, etc. */
+//#include <phantom_libc.h>
+
+#include <string.h>
+#include <assert.h>
+
+#include <drv_video_screen.h>
+
+#include "../gcc_replacements.h"
+
+#include "screen_x11.h"
+
+#define VSCREEN_WIDTH 1024
+#define VSCREEN_HEIGHT 768
 
 
-
-void drawbmp(Display *display, Window win, GC gc)
+struct drv_video_screen_t        drv_video_x11 =
 {
+    "X11",
+    // size
+    0, 0,
+    // mouse x y flags
+    0, 0, 0,
 
-        /* this variable will contain the ID of the newly created pixmap.    */
-        Pixmap bitmap;
-        /* these variables will contain the dimensions of the loaded bitmap. */
-        unsigned int bitmap_width, bitmap_height;
-        /* these variables will contain the location of the hotspot of the   */
-        /* loaded bitmap.                                                    */
-        int hotspot_x, hotspot_y;
+    // screen
+    0,
 
-#if 0
+probe: (void *)drv_video_null,
+start: (void *)drv_video_null,
+stop:  (void *)drv_video_null,
+
+    drv_video_null,
+    (void*)drv_video_null,
+    (void*)drv_video_null,
+
+    drv_video_null,
+
+mouse:    		drv_video_null,
+
+redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
+set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
+mouse_disable:          drv_video_mouse_off_deflt,
+mouse_enable:          	drv_video_mouse_on_deflt,
+
+};
+
+
+
+
+
+static int eline = 0;
+
+
+static int init_ok = 0;
+static int init_err = 0;
+
+
+static char screen_image [VSCREEN_WIDTH*VSCREEN_HEIGHT*3];
+
+
+
+//static
+void drv_x11_screen_update(void)
+{
+    win_x11_update(screen_image);
+    eline = 1;
+}
+
+/*
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+    case WM_PAINT:
+
+        break;
+
+
+    case WM_MOUSEMOVE:
         {
-        /* load the bitmap found in the file "icon.bmp", create a pixmap     */
-        /* containing its data in the server, and put its ID in the 'bitmap' */
-        /* variable.                                                         */
-        int rc = XReadBitmapFile(display, win,
-                                 "close.bmp",
-                                 &bitmap_width, &bitmap_height,
-                                 &bitmap,
-                                 &hotspot_x, &hotspot_y);
-        /* check for failure or success. */
-        switch (rc) {
-        case BitmapOpenFailed:
-            printf( "XReadBitmapFile - could not open file 'icon.bmp'.\n");
-            exit(1);
-            break;
-        case BitmapFileInvalid:
-            printf(
-                    "XReadBitmapFile - file '%s' doesn't contain a valid bitmap.\n",
-                    "icon.bmp");
-            exit(1);
-            break;
-        case BitmapNoMemory:
-            printf( "XReadBitmapFile - not enough memory.\n");
-            exit(1);
-            break;
+            int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
+            int yPos = VSCREEN_HEIGHT - (short)(0x0FFFF & (lParam>>16));//GET_Y_LPARAM(lParam);
+
+            //	printf("%d,%d\n", xPos, yPos );
+
+            drv_video_x11.mouse_x = xPos;
+            drv_video_x11.mouse_y = yPos;
+            drv_video_x11.mouse_flags = wParam;
+            drv_video_x11.mouse();
+
         }
+        break;
 
-        /* start drawing the given pixmap on to our window. */
-        {
-            int i, j;
-
-            for(i=0; i<6; i++) {
-                for(j=0; j<6; j++) {
-                    XCopyPlane(display, bitmap, win, gc,
-                               0, 0,
-                               bitmap_width, bitmap_height,
-                               j*bitmap_width, i*bitmap_height,
-                               1);
-                    XSync(display, False);
-                    usleep(100000);
-                }
-            }
-        }
+    default:
+        return DefWindowProc(hWnd, iMessage, wParam, lParam);
     }
-#else
-
-        bitmap = XCreatePixmap(display, XDefaultRootWindow(display), 30, 40, XDefaultDepth(display, XDefaultScreen(display)));
-
-        int screenNumber = DefaultScreen(display);
-        unsigned long white = WhitePixel(display,screenNumber);
-        unsigned long black = BlackPixel(display,screenNumber);
-
-        XSetForeground( display, gc, black );
-        XFillRectangle(display, bitmap, gc, 0, 0, 15, 20);
-        XSetForeground( display, gc, white );
-        XDrawPoint(display, bitmap, gc, 10, 10);
-
-        XCopyPlane(display, bitmap, win, gc,
-             0, 0,
-             15, 20,
-             15, 20,
-             1);
-
-
-
-
-#endif
-
-
-}
-
-static XImage *image;
-static void * prepare(Display *display, Window win, GC gc, int xsize, int ysize)
-{
-    char *newBuf = calloc( 4, xsize * ysize );
-    if( newBuf == 0 ) return 0;
-
-    image = XCreateImage (display,
-                                  CopyFromParent, 24,
-                                  ZPixmap, 0,
-                                  (char *) newBuf,
-                                  xsize, ysize,
-                                  32, 0 );
-
-    //memset( newBuf, 4 * xsize * ysize, 0xFF );
-    int size = xsize * ysize;
-    int *p = (int *)newBuf;
-    while(size--)
-    {
-        *p++ = 0x00FF0000;
-    }
-
-    XPutImage(display, win, gc, image, 0, 0, 0, 0, xsize, ysize);
-    return newBuf;
-}
-
-
-static void * update(Display *display, Window win, GC gc, int xsize, int ysize)
-{
-    XPutImage(display, win, gc, image, 0, 0, 0, 0, xsize, ysize);
-}
-
-
-int main()
-{
-
-    Display *dsp = XOpenDisplay( NULL );
-    if( !dsp ){ return 1; }
-
-
-    int screenNumber = DefaultScreen(dsp);
-    unsigned long white = WhitePixel(dsp,screenNumber);
-    unsigned long black = BlackPixel(dsp,screenNumber);
-
-
-    Window win = XCreateSimpleWindow(dsp,
-                                     DefaultRootWindow(dsp),
-                                     50, 50,   // origin
-                                     200, 200, // size
-                                     0, black, // border
-                                     white );  // backgd
-
-    XMapWindow( dsp, win );
-
-
-    long eventMask = StructureNotifyMask;
-    XSelectInput( dsp, win, eventMask );
-
-    XEvent evt;
-    do{
-        XNextEvent( dsp, &evt );   // calls XFlush
-    }while( evt.type != MapNotify );
-
-
-    GC gc = XCreateGC( dsp, win,
-                       0,        // mask of values
-                       NULL );   // array of values
-    XSetForeground( dsp, gc, black );
-
-
-    XDrawLine(dsp, win, gc, 10, 10,190,190); //from-to
-    XDrawLine(dsp, win, gc, 10,190,190, 10); //from-to
-
-    drawbmp( dsp, win, gc );
-    prepare( dsp, win, gc, 15, 10);
-
-
-    eventMask = ButtonPressMask|ButtonReleaseMask;
-    XSelectInput(dsp,win,eventMask); // override prev
-
-    do{
-        XNextEvent( dsp, &evt );   // calls XFlush()
-    } while( evt.type != ButtonRelease );
-
-
-    XDestroyWindow( dsp, win );
-    XCloseDisplay( dsp );
-
     return 0;
 }
+*/
+
+
+//int WINAPI
+void    pvm_x11_window_thread()
+{
+
+    if(win_x11_init(VSCREEN_WIDTH,VSCREEN_HEIGHT))
+    {
+        init_err = 1;
+        return; // BUG: report error
+    }
+
+
+    int i;
+    for( i = 0; i < VSCREEN_WIDTH * VSCREEN_HEIGHT * 3; i++)
+    {
+        screen_image[i] = 34;
+    }
+
+    drv_video_x11.screen = screen_image;
+    drv_video_x11.xsize = VSCREEN_WIDTH;
+    drv_video_x11.ysize = VSCREEN_HEIGHT;
+    drv_video_x11.update = &drv_x11_screen_update;
+#if 1
+    drv_video_x11.bitblt = &drv_video_bitblt_forw;
+    drv_video_x11.winblt = &drv_video_x11_winblt;
+    drv_video_x11.readblt = &drv_video_readblt_forw;
+#else
+    drv_video_x11.bitblt = &drv_video_bitblt_rev;
+    drv_video_x11.winblt = &drv_video_x11_winblt_rev;
+    drv_video_x11.readblt = &drv_video_readblt_rev;
+#endif
+
+    drv_video_x11.redraw_mouse_cursor = &drv_video_draw_mouse_deflt;
+    drv_video_x11.set_mouse_cursor = &drv_video_set_mouse_cursor_deflt;
+    drv_video_x11.mouse_disable = &drv_video_mouse_off_deflt;
+    drv_video_x11.mouse_enable = &drv_video_mouse_on_deflt;
+
+    init_ok = 1;
+
+
+    win_x11_message_loop();
+    //printf("Message loop end\n");
+
+}
+
+
+int pvm_x11_init()
+{
+    drv_video_x11.screen = 0; // Not ready yet
+
+    printf("Starting X11 graphics 'driver'\n" );
+
+
+    static unsigned long tid;
+    if( 0 == CreateThread( 0, 0, (void *)&pvm_x11_window_thread, (void*)0, 0, &tid ) )
+        panic("can't start window thread");
+
+
+    int repeat = 10000;
+    while(repeat-- > 0)
+    {
+        sleep(1);
+        if( init_err ) break;
+        if( init_ok )
+        {
+#if VIDEO_ZBUF
+            video_zbuf_init();
+#endif
+            return 0;
+        }
+
+    }
+
+
+    return -1;
+}
+
+
+
+
+
+
