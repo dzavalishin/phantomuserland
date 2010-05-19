@@ -20,6 +20,7 @@
 #include "vm/object.h"
 #include "vm/code.h"
 #include "vm/bulk.h"
+#include "vm/alloc.h"
 
 #include "vm/p2c.h"
 

@@ -34,7 +34,8 @@ int pvm_memcheck();
 bool pvm_object_is_allocated_light(pvm_object_storage_t *p);
 bool pvm_object_is_allocated(pvm_object_storage_t *p);
 void pvm_object_is_allocated_assert(pvm_object_storage_t *p);
-
+void print_object_flags(pvm_object_storage_t *p);
+void debug_catch_object(const char *msg, pvm_object_storage_t *p);
 
 
 // gc
