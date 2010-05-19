@@ -31,6 +31,7 @@
 
 //#include "vm/internal_da.h"
 
+#include "hal.h"
 #include "main.h"
 #include "win_bulk.h"
 
