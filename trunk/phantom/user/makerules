@@ -1,4 +1,4 @@
-PHANTOM_CFLAGS += -ffreestanding
+PHANTOM_CFLAGS += -ffreestanding -W -Wall
 
 #W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
