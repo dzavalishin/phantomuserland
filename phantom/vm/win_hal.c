@@ -13,13 +13,14 @@
 **/
 
 #include <stdarg.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 
 
 #include "gcc_replacements.h"
 #include "vm/internal_da.h"
 #include "hal.h"
 #include "main.h"
+#include "vm/alloc.h"
 
 
 struct hardware_abstraction_level    	hal;

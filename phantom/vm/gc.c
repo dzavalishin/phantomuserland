@@ -73,8 +73,6 @@ static void mark_tree(pvm_object_storage_t * root);
 static void mark_tree_o(pvm_object_t o, void *arg);
 static void gc_process_children(gc_iterator_call_t f, pvm_object_storage_t *p, void *arg);
 
-void debug_catch_object(const char *msg, pvm_object_storage_t *p );
-
 
 //// TODO include
 //extern int phantom_virtual_machine_threads_stopped;

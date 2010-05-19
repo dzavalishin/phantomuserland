@@ -15,6 +15,7 @@
 #include "vm/internal.h"
 #include "vm/internal_da.h"
 #include "vm/exception.h"
+#include "vm/alloc.h"
 
 // Ok. All these methods receive ptr to root stack object da,
 // which curr_da field points to the active page data area.
