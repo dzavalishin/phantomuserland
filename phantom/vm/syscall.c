@@ -13,13 +13,14 @@
 
 #include <phantom_libc.h>
 
+#include <kernel/snap_sync.h>
+
 #include "vm/syscall.h"
 #include "vm/object.h"
 #include "vm/root.h"
 #include "vm/exec.h"
 #include "vm/bulk.h"
 #include "vm/alloc.h"
-
 
 #include "vm/p2c.h"
 
