@@ -23,6 +23,7 @@
 #include "vm/alloc.h"
 
 #include "vm/p2c.h"
+#include "vm/alloc.h"
 
 
 int debug_print = 0;

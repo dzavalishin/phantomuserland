@@ -332,7 +332,7 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
     //if( 0 != strncmp(msg, "gc", 2) || !debug_memory_leaks )
     //if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) )
         return;
-    printf("touch %s 0x%X, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
+    printf("touch %s %p, refcnt = %d, size = %d da_size = %d ", msg, p, p->_ah.refCount, p->_ah.exact_size, p->_da_size);
 
     print_object_flags(p);
     //dumpo(p);

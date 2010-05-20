@@ -15,6 +15,7 @@
 #include <event.h>
 #include <spinlock.h>
 
+#include "hal.h"
 #include "win_local.h"
 
 static void defaultEventProcessor();
@@ -159,7 +160,7 @@ void drv_video_window_destroy(drv_video_window_t *w)
         focused_window = 0;
     }
 
-    if(!w->flags & WFLAG_WIN_NOTINALL )
+    if(!(w->flags & WFLAG_WIN_NOTINALL))
     {
         int ie = hal_save_cli();
         hal_spin_lock( &allw_lock );

@@ -28,6 +28,7 @@
 
 #include "vm/root.h"
 //#include "vm/bulk.h"
+#include "hal.h"
 
 //#include "vm/internal_da.h"
 

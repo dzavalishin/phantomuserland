@@ -24,6 +24,17 @@ void tkSwapBuffers(void)
     PhantomSwapBuffers(w1);
 }
 
+/* change view angle, exit upon ESC */
+GLenum key(int k, GLenum mask)
+{
+    switch (k) {
+    case 'q':
+    case KEY_ESCAPE:
+        exit(0);
+    }
+    return GL_FALSE;
+}
+
 int
 ui_loop(int argc,char **argv, const char *name)
 {

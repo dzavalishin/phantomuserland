@@ -90,18 +90,6 @@ typedef u_quad_t (*ccfntype)(const char *, char **, int);
 static const u_char *__sccl(char *, const u_char *);
 
 int
-sscanf(const char *ibuf, const char *fmt, ...)
-{
-	va_list ap;
-	int ret;
-	
-	va_start(ap, fmt);
-	ret = vsscanf(ibuf, fmt, ap);
-	va_end(ap);
-	return(ret);
-}
-
-int
 vsscanf(const char *inp, char const *fmt0, va_list ap)
 {
 	int inr;
@@ -626,5 +614,17 @@ doswitch:
 		}
 	}
 	/* NOTREACHED */
+}
+
+int
+sscanf(const char *ibuf, const char *fmt, ...)
+{
+	va_list ap;
+	int ret;
+	
+	va_start(ap, fmt);
+	ret = vsscanf(ibuf, fmt, ap);
+	va_end(ap);
+	return(ret);
 }
 
