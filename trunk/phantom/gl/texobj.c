@@ -182,17 +182,6 @@ idle(void)
     draw();
 }
 
-/* change view angle, exit upon ESC */
-GLenum key(int k, GLenum mask)
-{
-    switch (k) {
-    case 'q':
-    case KEY_ESCAPE:
-        exit(0);
-    }
-    return GL_FALSE;
-}
-
 /*
  int main(int argc, char **argv)
  {

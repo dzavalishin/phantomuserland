@@ -493,7 +493,7 @@ static int memcheck_one(int i, void * start, void * end)
 
     struct pvm_object_storage *curr = start;
 
-    printf("Memcheck: checking object memory allocation consistency (at %x, %d bytes)\n", start, (end - start) );
+    printf("Memcheck: checking object memory allocation consistency (at %p, %d bytes)\n", start, (end - start) );
 
     while(((void *)curr) < end)
     {
@@ -501,7 +501,7 @@ static int memcheck_one(int i, void * start, void * end)
         {
             //printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
             //return 0;
-            printf("Memcheck: not an object at 0x%X\n", curr);
+            printf("Memcheck: not an object at %p\n", curr);
             break;
         }
 
@@ -511,7 +511,7 @@ static int memcheck_one(int i, void * start, void * end)
         {
             if(!pvm_object_is_allocated(curr))  //more tests
             {
-                printf("Memcheck: corrupted allocated object at 0x%X\n", curr);
+                printf("Memcheck: corrupted allocated object at %p\n", curr);
                 break;
             }
             if (curr->_ah.exact_size <= max_stat_size)
@@ -539,12 +539,12 @@ static int memcheck_one(int i, void * start, void * end)
 
     if((void *)curr == end)
     {
-        printf("Memcheck: reached exact arena end at 0x%X (%d bytes used)\n", curr, ((void *)curr) - start );
+        printf("Memcheck: reached exact arena end at %p (%d bytes used)\n", curr, ((void *)curr) - start );
         if (debug_memory_leaks) memcheck_print_histogram(i);
         return 0;
     }
 
-    printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%X (%d bytes size)\n-----------------\n\n", curr, ((void *)curr) - start );
+    printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%p (%d bytes size)\n-----------------\n\n", curr, ((void *)curr) - start );
     return 1;
 }
 
@@ -554,14 +554,14 @@ static void memcheck_print_histogram(int arena)
     if (arena == 0) return; //nothing interesting
 
     if (created_large_o[arena] > 0)
-        printf(" large objects: now used %d, was allocated %d\n", used_large_o[arena], created_large_o[arena]);
+        printf(" large objects: now used %ld, was allocated %ld\n", used_large_o[arena], created_large_o[arena]);
 
     printf(" small objects: size, now used, was allocated\n");
     int size;
     for( size = 0; size <= max_stat_size; size++)
     {
         if(created_o[arena][size] > 0)
-            printf("   %6d %6d %12d \n", size, used_o[arena][size], created_o[arena][size]);
+            printf("   %6d %6ld %12ld \n", size, used_o[arena][size], created_o[arena][size]);
     }
 }
 

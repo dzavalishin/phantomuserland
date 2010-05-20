@@ -16,8 +16,10 @@
 //#include <stdlib.h>
 
 
+#include "event.h"
 #include "gcc_replacements.h"
 #include "vm/internal_da.h"
+#include "vm/alloc.h"
 #include "hal.h"
 #include "main.h"
 #include "vm/alloc.h"

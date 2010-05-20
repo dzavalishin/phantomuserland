@@ -331,7 +331,7 @@ void pio_drq_block_in( unsigned int addrDataReg,
     else
 #endif
     {
-        int pxw;
+        int pxw = 16;
         long wc;
 
         // adjust pio_xfer_width - don't use DWORD if wordCnt is odd.
@@ -484,7 +484,7 @@ void pio_drq_block_out( unsigned int addrDataReg,
     else
 #endif
     {
-        int pxw;
+        int pxw = 16;
         long wc;
 
         // adjust pio_xfer_width - don't use DWORD if wordCnt is odd.

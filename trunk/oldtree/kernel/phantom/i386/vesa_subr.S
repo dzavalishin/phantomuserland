@@ -1,10 +1,14 @@
 
 .globl _bios_int_10
 _bios_int_10:
+.globl bios_int_10
+bios_int_10:
 	int		$0x10
 	int		$0x21
 .globl _bios_int_10_end
 _bios_int_10_end:
+.globl bios_int_10_end
+bios_int_10_end:
 
 
 

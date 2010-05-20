@@ -380,8 +380,8 @@ int phantom_getenv( const char *name, char *value, int vsize )
         char *eqpos = strchr( ed, '=' );
         if( eqpos == 0 )
         {
-            *value == '\0';
-            return;
+            *value = '\0';
+            return 0;
         }
 
         eqpos++; // skip '='

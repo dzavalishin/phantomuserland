@@ -48,7 +48,7 @@ register char *ret = s;
 
 	while(*s) s++;
 
-	while(*s++ = *add++) ;
+	while((*s++ = *add++)) ;
 
 	return ret;
 }
