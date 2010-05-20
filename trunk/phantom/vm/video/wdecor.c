@@ -162,8 +162,6 @@ void win_make_decorations(drv_video_window_t *w)
 
     w3->bg = (w->state & WSTATE_WIN_FOCUSED) ? title_back_color_focus : title_back_color_nofocus;
 
-    w3->flags = 0;
-
     drv_video_window_fill( w3, w3->bg );
     window_basic_border( w3, brdr, bordr_size );
 
@@ -192,8 +190,6 @@ void win_make_decorations(drv_video_window_t *w)
     w2->z = w->z;
 
     w2->bg = w->bg;
-
-    w2->flags = 0;
 
     drv_video_window_fill( w2, w2->bg );
     window_basic_border( w2, brdr, bordr_size );

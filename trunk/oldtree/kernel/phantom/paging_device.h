@@ -28,6 +28,7 @@
 //---------------------------------------------------------------------------
 struct vm_page;
 
+//#define REMAPPED_PAGING_IO (1)
 /* TODO: think over DPC usage here */
 
 typedef struct paging_device
@@ -46,9 +47,10 @@ typedef struct paging_device
 
     int 		tid;  // IO thread for our disk
 
-#if REMAPPED_PAGING_IO
+// Don't change struct format
+//#if REMAPPED_PAGING_IO
     void * 		io_vaddr; // Place in address space to map page for IO to
-#endif
+//#endif
 
     hal_cond_t		start_io_sema;
 

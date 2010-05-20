@@ -49,7 +49,7 @@ static char *envbuf[MAXENVBUF] = { 0 };
 
 
 
-static const MaxColor     = 110;
+static const int MaxColor     = 110;
 
 
 static struct rgba_t palette[256];
