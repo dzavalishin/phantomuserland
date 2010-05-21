@@ -79,6 +79,7 @@ static inline int find_arena(unsigned int size, unsigned int flags, bool saturat
 
 static inline unsigned int round_size(unsigned int size, int arena)
 {
+    (void) arena;
     size = (((size - 1)/ 4) + 1) * 4 ;  //align 4 bytes
 
     // for reference: minimal object (int) = 36 bytes
@@ -228,7 +229,8 @@ static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op,
     {
         assert(o <= end);
         o = start;
-        *wrap++;
+        //*wrap++;
+        wrap++;
         DEBUG_PRINT("\n(alloc wrap)");
         DEBUG_PRINT1("%d", arena);
     }

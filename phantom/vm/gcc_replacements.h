@@ -16,7 +16,16 @@ typedef struct _FILE FILE;
 #endif
 
 
-void *malloc( int size );
+#ifndef _SIZE_T
+#define _SIZE_T
+typedef unsigned int		size_t;
+typedef int			ssize_t;
+#endif //_SIZE_T
+
+
+//void *malloc( int size );
+void *malloc(size_t size);
+
 void free( void *mem );
 
 
