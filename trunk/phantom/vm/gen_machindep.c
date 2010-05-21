@@ -114,7 +114,7 @@ int jit_get_label( jit_out_t *j )
 }
 
 
-void jit_mark_label( j, jl )
+void jit_mark_label( jit_out_t *j, int jl )
 {
     // Set label targer to current binary instr ptr
 

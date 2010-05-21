@@ -102,7 +102,7 @@ struct pvm_object     pvm_create_null_object()
 	return pvm_root.null_object;  // already created once forever
 }
 
-void pvm_internal_init_void(struct pvm_object_storage * os) {}
+void pvm_internal_init_void(struct pvm_object_storage * os) { (void)os; }
 
 void pvm_gc_iter_void(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
@@ -118,11 +118,14 @@ struct pvm_object     pvm_create_int_object(int _value)
 
 void pvm_internal_init_int(struct pvm_object_storage * os)
 {
+    (void)os;
 }
 
 void pvm_gc_iter_int(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 
@@ -188,7 +191,10 @@ void pvm_internal_init_string(struct pvm_object_storage * os)
 
 void pvm_gc_iter_string(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 
@@ -347,9 +353,12 @@ void pvm_internal_init_interface(struct pvm_object_storage * os)
 
 void pvm_gc_iter_interface(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
-	// Must not be called - this is not really an internal object
-	panic("Interface GC iterator called");
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
+    // Must not be called - this is not really an internal object
+    panic("Interface GC iterator called");
 }
 
 
@@ -439,7 +448,10 @@ void pvm_internal_init_code(struct pvm_object_storage * os)
 
 void pvm_gc_iter_code(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 
@@ -465,12 +477,16 @@ void pvm_gc_iter_array(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 void pvm_internal_init_boot(struct pvm_object_storage * os)
 {
-	// Nohing!
+     (void)os; 
+     // Nohing!
 }
 
 void pvm_gc_iter_boot(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 
@@ -478,14 +494,19 @@ void pvm_gc_iter_boot(gc_iterator_call_t func, struct pvm_object_storage * os, v
 
 void pvm_internal_init_mutex(struct pvm_object_storage * os)
 {
-	//struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
+    (void)os;
 
-	//pthread_mutex_init(&(da->mutex), 0);
+    //struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
+
+    //pthread_mutex_init(&(da->mutex), 0);
 }
 
 void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 
@@ -493,14 +514,17 @@ void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 void pvm_internal_init_binary(struct pvm_object_storage * os)
 {
-	//struct data_area_4_binary *      da = (struct data_area_4_binary *)os->da;
-	// empty
-
+    (void)os;
+    //struct data_area_4_binary *      da = (struct data_area_4_binary *)os->da;
+    // empty
 }
 
 void pvm_gc_iter_binary(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 
@@ -518,7 +542,8 @@ struct pvm_object     pvm_create_binary_object(int size, void *init)
 
 void pvm_internal_init_bitmap(struct pvm_object_storage * os)
 {
-	// Nothing
+    (void)os;
+    // Nothing
 }
 
 void pvm_gc_iter_bitmap(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
@@ -532,14 +557,17 @@ void pvm_gc_iter_bitmap(gc_iterator_call_t func, struct pvm_object_storage * os,
 
 void pvm_internal_init_world(struct pvm_object_storage * os)
 {
-	//struct data_area_4_binary *      da = (struct data_area_4_binary *)os->da;
-	// empty
-
+    (void)os;
+    //struct data_area_4_binary *      da = (struct data_area_4_binary *)os->da;
+    // empty
 }
 
 void pvm_gc_iter_world(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 
@@ -552,9 +580,9 @@ void pvm_internal_init_closure(struct pvm_object_storage * os)
 
 void pvm_gc_iter_closure(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	struct data_area_4_closure *      da = (struct data_area_4_closure *)os->da;
-	//if(da->image.object != 0)
-	gc_fcall( func, arg, da->object );
+    struct data_area_4_closure *      da = (struct data_area_4_closure *)os->da;
+    //if(da->image.object != 0)
+    gc_fcall( func, arg, da->object );
 }
 
 

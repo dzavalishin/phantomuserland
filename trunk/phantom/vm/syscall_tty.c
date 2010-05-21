@@ -55,6 +55,7 @@ static int debug_print = 0;
 
 static int tostring_5(struct pvm_object me , struct data_area_4_thread *tc )
 {
+    (void) me;
     DEBUG_INFO;
     SYSCALL_RETURN( pvm_create_string_object( "tty window" ));
 }
@@ -103,6 +104,7 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
 
 static int getwc_16(struct pvm_object me , struct data_area_4_thread *tc )
 {
+    (void) me;
     DEBUG_INFO;
     char c[1];
 
@@ -116,6 +118,7 @@ static int getwc_16(struct pvm_object me , struct data_area_4_thread *tc )
 
 static int debug_18(struct pvm_object me , struct data_area_4_thread *tc )
 {
+    (void) me;
     DEBUG_INFO;
 
     //struct data_area_4_tty      *da = pvm_data_area( me, tty );
@@ -177,6 +180,7 @@ static int clear_20(struct pvm_object me , struct data_area_4_thread *tc )
 
 static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
 {
+    (void) me;
     //struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
     DEBUG_INFO;
@@ -185,6 +189,7 @@ static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
     CHECK_PARAM_COUNT(n_param, 1);
 
     int color = POP_INT();
+
     //int attr = (short)color;
 
     // TODO colors from attrs
@@ -195,12 +200,14 @@ static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
 
 static int fill_22(struct pvm_object me , struct data_area_4_thread *tc )
 {
+    (void) me;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "not implemented" );
 }
 
 static int putblock_23(struct pvm_object me , struct data_area_4_thread *tc )
 {
+    (void) me;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "not implemented" );
 }
@@ -276,6 +283,9 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
 
 void pvm_gc_iter_tty(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
+    (void) func;
+    (void) os;
+    (void) arg;
     // Empty
 }
 

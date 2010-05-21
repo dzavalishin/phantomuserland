@@ -19,7 +19,7 @@
 **/
 
 
-#include "gcc_replacements.h"
+//#include "gcc_replacements.h"
 
 #include <stdarg.h>
 

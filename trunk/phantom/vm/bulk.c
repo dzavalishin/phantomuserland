@@ -16,7 +16,7 @@
 #include <phantom_libc.h>
 #include <assert.h>
 
-#include "gcc_replacements.h"
+//#include "gcc_replacements.h"
 
 
 #include "vm/internal_da.h"
