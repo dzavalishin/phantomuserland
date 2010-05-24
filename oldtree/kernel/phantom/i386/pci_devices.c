@@ -5,7 +5,7 @@
 char *get_pci_vendor(int vid)
 {
 // TODO bin search
-    int i;
+    unsigned int i;
     for(i = 0; i <PCI_VENTABLE_LEN; i++)
         if(PciVenTable[i].VenId == vid)
             return PciVenTable[i].VenFull;
@@ -19,7 +19,7 @@ char *get_pci_device(int vid, int did)
         return "VirtIO device";
 
 // TODO bin search
-    int i;
+    unsigned int i;
     for(i = 0; i <PCI_DEVTABLE_LEN; i++)
         if(PciDevTable[i].VenId == vid && PciDevTable[i].DevId == did)
             return PciDevTable[i].ChipDesc;

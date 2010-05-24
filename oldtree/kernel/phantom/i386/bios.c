@@ -208,6 +208,7 @@ smbios_identify()
 static int seq_number = 0;
 phantom_device_t * driver_etc_smbios_probe( const char *name, int stage )
 {
+    (void) stage;
     struct smbios_eps * ep = smbios_identify();
 
     if( seq_number || ep == 0 ) return 0;
@@ -247,7 +248,9 @@ phantom_device_t * driver_etc_smbios_probe( const char *name, int stage )
 static int smbios_read( struct phantom_device *dev, void *buf, int len)
 {
     //struct smbios_eps * ep = (struct smbios_eps *)dev->drv_private;
-
+    (void) dev;
+    (void) buf;
+    (void) len;
     return -ENODEV;
 }
 

@@ -231,6 +231,8 @@ void hal_disable_softirq() { DISABLE_SOFT_IRQ(); }
 
 void hal_softirq_dispatcher(struct trap_state *ts)
 {
+    (void) ts;
+
     hal_cli();
 
     while(softirq_requests)

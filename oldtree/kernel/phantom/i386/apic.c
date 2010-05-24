@@ -362,7 +362,7 @@ int arch_smp_clear_apic_timer(void)
 #define MP_FLT_SIGNATURE '_PM_'
 #define MP_CTH_SIGNATURE 'PCMP'
 
-
+#if 0
 
 static unsigned int *smp_probe(unsigned int base, unsigned int limit)
 {
@@ -382,6 +382,7 @@ static unsigned int *smp_probe(unsigned int base, unsigned int limit)
 
 
 
+#endif
 
 
 

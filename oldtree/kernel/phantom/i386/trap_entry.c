@@ -3,6 +3,8 @@
 #include <phantom_assert.h>
 //#include <phantom_libc.h>
 
+#include "misc.h"
+
 void
 phantom_kernel_trap( struct trap_state *ts )
 {
