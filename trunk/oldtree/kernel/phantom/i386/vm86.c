@@ -33,7 +33,7 @@ static void check_ua( u_int32_t addr )
     // ROM area is ok too
     if( addr > 0xA0000u && addr < 0x100000u )        return;
 
-    if( addr < (int)vm86_setup.code || addr > (int)vm86_setup.stackHi )
+    if( addr < (unsigned int)vm86_setup.code || addr > (unsigned int)vm86_setup.stackHi )
         panic("Invalid VM86 address 0x%X (%X-%X)",
               addr, vm86_setup.code, vm86_setup.stackHi
              );
@@ -601,7 +601,7 @@ void phantom_init_vm86(void)
 
 
 static jmp_buf jb;
-void phantom_v86_run(void *code, int size)
+void phantom_v86_run(void *code, size_t size)
 {
     if(!vm86_ready) 		panic("VM86 is not ready, but used");
     if( size > 0xFFFFu )        panic("VM86 code size > 64k");

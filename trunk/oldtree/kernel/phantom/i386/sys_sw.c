@@ -92,6 +92,7 @@ errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int
 
 void syscall_sw(struct trap_state *st)
 {
+#if HAVE_UNIX
     int callno = st->eax;
 
     /*
@@ -129,7 +130,6 @@ void syscall_sw(struct trap_state *st)
     int ret = 0;
     int err = 0;
 
-#if HAVE_UNIX
 
     switch(callno)
     {
@@ -571,8 +571,9 @@ void syscall_sw(struct trap_state *st)
     }
 
 #else // HAVE_UNIX
-    err = ENOSYS;
-    ret = -1;
+    int err = ENOSYS;
+    int ret = -1;
+    goto err_ret; // to clear warning
 #endif // HAVE_UNIX
 
 err_ret:
@@ -596,7 +597,7 @@ errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int
 {
     void *dest = (void *)(useraddr+mina);
 
-    if( (int)dest < mina || (int)dest > maxa )
+    if( (unsigned int)dest < mina || (unsigned int)dest > maxa )
         return EFAULT;
 
     memcpy( dest, src, len );

@@ -38,7 +38,8 @@ unsigned int clknumb = CLKNUM;		/* interrupt interval for timer 0 */
 /* number of milliseconds to delay */
 void phantom_spinwait(int millis)
 {
-    int i, j;
+    int i;
+    unsigned int j;
 
     for (i=0;i<millis;i++)
         for (j=0;j<delaycount;j++)

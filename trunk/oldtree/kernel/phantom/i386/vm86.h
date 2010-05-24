@@ -88,7 +88,7 @@ typedef union
 
 
 
-void phantom_v86_run(void *code, int size);
+//void phantom_v86_run(void *code, size_t size);
 
 void phantom_bios_int_10();
 void phantom_bios_int_10_args(RM_REGS *regs);

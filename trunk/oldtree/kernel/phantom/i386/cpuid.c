@@ -100,7 +100,7 @@ const cache_static_t cd_array[] = {
     {0xF0, {CACHE_PREFETCH, 64, 0, 0, 0}},
     {0xF1, {CACHE_PREFETCH, 128, 0, 0, 0}},
 
-    {0},
+    {0, {0, 0, 0, 0, 0}},
 };
 
 
@@ -421,7 +421,7 @@ char *
 viz32(u_int32_t x)
 {
     static char buf[sizeof(x) + 1];
-    int i;
+    unsigned int i;
 
     for(i = 0; i < sizeof(x); i++){
         int c = x & 0xFF;
@@ -852,7 +852,7 @@ identify_cpu(void)
     /* Old leaf, decode anyways so we get TLB/etc info not in new leaf */
     if (num_base >= 2 && (cpuid(2, 0).eax & 0xFF) >= 1) {
         u_int8_t cache_buf[sizeof(struct cpuid_regs) * 256];
-        int call_num, i;
+        unsigned int call_num, i;
 
         nregs = cpuid(2, 0);
         call_num = nregs.eax & 0xFF;

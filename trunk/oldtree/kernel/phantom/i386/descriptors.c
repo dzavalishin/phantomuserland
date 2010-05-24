@@ -206,7 +206,7 @@ errno_t get_uldt_cs_ds(
     fill_ldt_descriptor(cs, cs_base, 1 + (cs_limit-1)/PAGE_SIZE,
                         ACC_PL_U|ACC_CODE_R, SZ_32|SZ_G);
 
-    fill_ldt_descriptor(ds, cs_base, 1 + (ds_limit-1)/PAGE_SIZE,
+    fill_ldt_descriptor(ds, ds_base, 1 + (ds_limit-1)/PAGE_SIZE,
                         ACC_PL_U|ACC_DATA_W, SZ_32|SZ_G);
 
     *ocs = cs;
