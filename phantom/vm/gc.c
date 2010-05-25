@@ -190,7 +190,7 @@ static void gc_process_children(gc_iterator_call_t f, pvm_object_storage_t *p, v
     // plain non internal objects -
     if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
     {
-        int i;
+        unsigned i;
 
         for( i = 0; i < da_po_limit(p); i++ )
         {
@@ -251,7 +251,7 @@ static void do_refzero_process_children( pvm_object_storage_t *p )
     // plain non internal objects -
     if( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
     {
-        int i;
+        unsigned i;
 
         for( i = 0; i < da_po_limit(p); i++ )
         {
@@ -441,11 +441,10 @@ void ref_saturate_o(pvm_object_t o)
     if(!(o.data)) return;
     ref_saturate_p(o.data);
 }
-pvm_object_t  ref_dec_o(pvm_object_t o)
+void ref_dec_o(pvm_object_t o)
 {
     // Interface is never refcounted! (But why?)
     ref_dec_p(o.data);
-    return o;
 }
 pvm_object_t  ref_inc_o(pvm_object_t o)
 {

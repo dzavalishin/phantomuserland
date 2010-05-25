@@ -46,7 +46,7 @@ void run_gc();
 // used on sys global objects
 void ref_saturate_o(pvm_object_t o);
 
-pvm_object_t  ref_dec_o(pvm_object_t o);
+void          ref_dec_o(pvm_object_t o);
 pvm_object_t  ref_inc_o(pvm_object_t o);
 
 
