@@ -23,12 +23,12 @@ struct physalloc
 {
     hal_spinlock_t      lock;
 
-    u_int32_t           total_size; // max num of alloc units - NOT USED YET
+    u_int32_t           total_size; // max num of alloc units
 
     /** Bit == 1 if page is used. */
     map_elem_t 		*map; //[MAP_SIZE_ELEM];
 
-    int 		alloc_last_pos;
+    int 		alloc_last_pos; // index inside map array
     int 		n_used_pages; // number of used mem pages now
 
     int 		inited;

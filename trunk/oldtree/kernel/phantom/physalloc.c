@@ -63,6 +63,8 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
     hal_spin_lock(&(arena->lock));
     int prev_alloc_last_pos = arena->alloc_last_pos;
 
+    assert(arena->alloc_last_pos < arena->total_size / BITS_PER_ELEM);
+
     do {
         if( ~(arena->map[arena->alloc_last_pos]) )
         {
@@ -90,7 +92,7 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
             return 0;
         }
         arena->alloc_last_pos++;
-        if(arena->alloc_last_pos == arena->total_size)
+        if(arena->alloc_last_pos >= arena->total_size / BITS_PER_ELEM)
             arena->alloc_last_pos = 0;  //wrap
 
     } while( arena->alloc_last_pos != prev_alloc_last_pos );
@@ -156,6 +158,7 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
 
     //ATTN: share alloc_last_pos with phantom_phys_alloc_page()...
     int prev_alloc_last_pos = arena->alloc_last_pos;
+    assert(arena->alloc_last_pos < arena->total_size / BITS_PER_ELEM);
 
     assert(npages != 0);
     int elem_no = npages/BITS_PER_ELEM;
@@ -170,7 +173,8 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
         if( arena->map[arena->alloc_last_pos] == 0 )  i++;  else i = 0;
 
         arena->alloc_last_pos++;
-        if (arena->alloc_last_pos == arena->total_size) { arena->alloc_last_pos = 0; i = 0;}  //wrap
+        if (arena->alloc_last_pos >= arena->total_size / BITS_PER_ELEM)
+        { arena->alloc_last_pos = 0; i = 0;}  //wrap
 
     } while( arena->alloc_last_pos != prev_alloc_last_pos && i < N );
 
