@@ -29,7 +29,7 @@ include $(PHANTOM_SRCDIR)/GNUmakerules
 
 DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))
 
-LIBGCC := `$(CC) --print-libgcc-file-name`
+LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
 #OKLIBDIR=../../old/kernel/lib
 
