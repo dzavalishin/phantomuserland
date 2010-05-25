@@ -74,6 +74,7 @@ void beep()
 // Stop device
 static int beep_stop(phantom_device_t *dev)
 {
+    (void) dev;
     nosound();
     return 0;
 }
@@ -82,11 +83,17 @@ static int beep_stop(phantom_device_t *dev)
 
 static int beep_read(struct phantom_device *dev, void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
     return -EIO;
 }
 
 static int beep_write(struct phantom_device *dev, const void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
     // TODO process MIDI stream?
     return -EIO;
 }
@@ -98,6 +105,10 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage )
 {
+    (void) port;
+    (void) irq;
+    (void) stage;
+
     if(seq_number)        return 0; // just one instance!
 
     // TODO check if we really have this hardware. How?
