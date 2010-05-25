@@ -89,10 +89,7 @@ hal_spinlock_t                pagelist_lock;
 
 void pagelist_init( pagelist *me, disk_page_no_t root_page, int  _init, int magic )
 {
-    spinlock_init(&me->lock);
     if(_DEBUG) hal_printf("pagelist init... ");
-    spinlock_lock(&me->lock, "c'tor");
-    if(_DEBUG) hal_printf("in lock... ");
     me->root_page = root_page;
     me->magic = magic;
 
@@ -131,8 +128,6 @@ void pagelist_init( pagelist *me, disk_page_no_t root_page, int  _init, int magi
 
     me->curr = (struct phantom_disk_blocklist *)disk_page_cache_data(&me->curr_p);
     if(_DEBUG) hal_printf("pagelist init DONE\n");
-
-    spinlock_unlock(&me->lock, "c'tor");
 }
 
 
@@ -140,7 +135,6 @@ void
 pagelist_clear(pagelist *me)
 {
     pagelist_flush(me);
-    spinlock_lock(&me->lock, "clear");
 
     disk_page_no_t curr_page = me->root_page;
 
@@ -159,15 +153,12 @@ pagelist_clear(pagelist *me)
     me->curr_displ = me->pos = 0;
 
     disk_page_cache_modified(&me->curr_p);
-    spinlock_unlock(&me->lock, "clear");
 }
 
 
 int 
 pagelist_read_seq( pagelist *me, disk_page_no_t *out )
 {
-    spinlock_lock(&me->lock, "read");
-
     int pagepos = me->pos - me->curr_displ;
 
     if( pagepos < 0 || pagepos > N_REF_PER_BLOCK )
@@ -186,15 +177,12 @@ pagelist_read_seq( pagelist *me, disk_page_no_t *out )
     *out = me->curr->list[pagepos];
     me->pos++;
 
-    spinlock_unlock(&me->lock, "read");
     return 1;
 }
 
 void
 pagelist_write_seq( pagelist *me, disk_page_no_t wr_data )
 {
-    spinlock_lock(&me->lock, "write");
-
     int pagepos = me->pos - me->curr_displ;
 
     if( pagepos < 0 || pagepos > N_REF_PER_BLOCK )
@@ -225,7 +213,5 @@ pagelist_write_seq( pagelist *me, disk_page_no_t wr_data )
     me->curr->head.used = pagepos+1;
     me->pos++;
     disk_page_cache_modified(&me->curr_p);
-
-    spinlock_unlock(&me->lock, "write");
 }
 

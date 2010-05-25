@@ -88,9 +88,6 @@ static __inline__ void *disk_page_cache_data(disk_page_cache *me) { disk_page_ca
 
 typedef struct pagelist
 {
-    //static
-    hal_spinlock_t          lock;
-
     int                     magic;
 
     disk_page_no_t          root_page;
