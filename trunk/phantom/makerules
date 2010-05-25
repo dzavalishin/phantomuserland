@@ -2,7 +2,10 @@ default:: all
 
 INCDIRS += $(realpath $(PHANTOM_HOME))/include
 
-PHANTOM_CFLAGS += -W -Wall -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc
+# hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare
+
+PHANTOM_CFLAGS += $(WARN)  -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc
 
 vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
 vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)
