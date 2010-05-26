@@ -9,7 +9,8 @@ include $(OBJDIR)/Makeconf
 
 ##### End of configuration section #####
 
-TARGET	= libthreads.a test
+#TARGET	= libthreads.a test
+TARGET	= libthreads.a 
 
 SRCDIRS += $(PHANTOM_SRCDIR)/phantom/threads
 

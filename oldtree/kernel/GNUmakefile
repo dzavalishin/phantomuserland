@@ -8,7 +8,7 @@ exec_prefix	= ${prefix}
 include $(OBJDIR)/Makeconf
 
 
-SUBDIRS		= $(filter-out $(PHANTOM_EXCLUDED_SUBDIRS), phantom )
+SUBDIRS		= $(filter-out $(PHANTOM_EXCLUDED_SUBDIRS), phantom/i386 phantom/threads phantom )
 
 
 

@@ -28,8 +28,8 @@ struct physalloc
     /** Bit == 1 if page is used. */
     map_elem_t 		*map; //[MAP_SIZE_ELEM];
 
-    int 		alloc_last_pos; // index inside map array
-    int 		n_used_pages; // number of used mem pages now
+    u_int32_t 		alloc_last_pos; // index inside map array
+    u_int32_t 		n_used_pages; // number of used mem pages now
 
     int 		inited;
 };

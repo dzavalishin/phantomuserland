@@ -20,7 +20,7 @@ break main
 #break hal_set_thread_priority
 
 break spinlock.c:43
-break t_sleep.c:31
+#break t_sleep.c:31
 
 #break page_fault
 #break vm_map_page_fault_trap_handler
@@ -28,8 +28,13 @@ break t_sleep.c:31
 #break dpc_init
 #break phantom_thread_switch
 
-break event.c:373
+#break event.c:373
 
 #set pagination off
 
-watch pm_map->lock.lock
+#watch pm_map->lock.lock
+
+break phantom_phys_alloc_init_static
+break hal_alloc_vaddress
+
+break physalloc.c:193
