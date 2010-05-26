@@ -20,6 +20,9 @@ static int seq_number = 0;
 
 static void driver_virtio_disk_interrupt(virtio_device_t *me, int isr )
 {
+    (void) me;
+    (void) isr;
+
     printf("got virtio interrupt\n");
 
 }
@@ -29,6 +32,7 @@ int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len);
 
 phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
 {
+    (void) stage;
 
     if(vdev.pci)
     {

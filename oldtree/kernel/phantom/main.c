@@ -164,6 +164,8 @@ phantom_scheduler_schedule_soft_irq()
 
 static int ignore_handler(struct trap_state *ts)
 {
+    (void) ts;
+
     hal_sti(); // It works in open interrupts
     phantom_scheduler_soft_interrupt();
     // it returns with soft irqs disabled
@@ -415,6 +417,8 @@ static void net_stack_init()
 
 void _exit(int code)
 {
+    (void) code;
+
     hal_cpu_reset_real();
     
     /*UNREACHED*/

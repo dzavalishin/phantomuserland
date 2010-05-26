@@ -59,7 +59,7 @@ typedef struct paging_device
 
 
 static __inline__ int
-paging_device_can_grow(paging_device *me) { return 0; } // can I grow pagespace
+paging_device_can_grow(paging_device *me) {     (void) me; return 0; } // can I grow pagespace
 
 //static __inline__ void
 //paging_device_io_completion_interrupt(paging_device *me) { dpc_request_trigger( &me->io_done_dpc, me); }

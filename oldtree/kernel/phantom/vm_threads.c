@@ -27,6 +27,8 @@ static volatile int all_threads_started = 0;
 
 static void thread_death_handler( void *arg )
 {
+    (void) arg;
+
     //struct pvm_object current_thread = *((struct pvm_object *)arg);
     n_vm_threads--;
 

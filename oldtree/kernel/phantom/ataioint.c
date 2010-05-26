@@ -263,8 +263,9 @@ void int_restore_int_vect( void )
 
 static void int_handler( void *arg )
 {
+    (void) arg;
 
-   // increment the interrupt counter
+    // increment the interrupt counter
 
    int_intr_cntr ++ ;
 

@@ -295,6 +295,8 @@ static int uhci_start(phantom_device_t *dev)
 // Stop device
 static int uhci_stop(phantom_device_t *dev)
 {
+    (void) dev;
+
     return 0;
 }
 
@@ -303,11 +305,19 @@ static int uhci_stop(phantom_device_t *dev)
 
 static int uhci_read(struct phantom_device *dev, void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
+
     return -EIO;
 }
 
 static int uhci_write(struct phantom_device *dev, const void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
+
     return -EIO;
 }
 

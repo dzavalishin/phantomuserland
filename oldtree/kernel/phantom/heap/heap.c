@@ -107,6 +107,8 @@ static void dump_bin(int bin_index)
 #pragma GCC diagnostic ignored "-Wunused-function"
 static void dump_bin_list(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
     int i;
 
     printf("%d heap bins at %p:\n", bin_count, bins);

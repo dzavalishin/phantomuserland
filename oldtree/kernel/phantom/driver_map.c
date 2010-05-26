@@ -128,7 +128,7 @@ typedef struct
 // NB! No network drivers on stage 0!
 static etc_probe_t etc_drivers[] =
 {
-    { "SMBios", 		driver_etc_smbios_probe },
+    { "SMBios", 		driver_etc_smbios_probe, 	0 },
 
 };
 
@@ -243,7 +243,7 @@ static int loadpci()
 static int probe_all( int stage, pci_cfg_t *pci )
 {
 //printf("%d PCI check vend %X dev %X cl %X\n", stage, pci->vendor_id, pci->device_id, pci->base_class );
-    int i;
+    unsigned int i;
     for( i = 0; i < sizeof(pci_drivers)/sizeof(pci_probe_t); i++ )
     {
         pci_probe_t *dp = &pci_drivers[i];
@@ -329,7 +329,7 @@ static int probe_virtio( int stage, pci_cfg_t *pci )
 
 static int probe_isa( int stage )
 {
-    int i;
+    unsigned int i;
     for( i = 0; i < sizeof(isa_drivers)/sizeof(isa_probe_t); i++ )
     {
         isa_probe_t *dp = &isa_drivers[i];
@@ -355,7 +355,7 @@ static int probe_isa( int stage )
 
 static int probe_etc( int stage )
 {
-    int i;
+    unsigned int i;
     for( i = 0; i < sizeof(etc_drivers)/sizeof(etc_probe_t); i++ )
     {
         etc_probe_t *dp = &etc_drivers[i];

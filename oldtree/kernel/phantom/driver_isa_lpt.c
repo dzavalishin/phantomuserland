@@ -92,6 +92,8 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_lpt_probe( int port, int irq, int stage )
 {
+    (void) irq;
+    (void) stage;
     //if(lpt_addr)        return 0; // just one instance yet!
 
     if( !lpt_detect(port) )

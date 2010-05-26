@@ -53,7 +53,7 @@
 
 
 static int DEBUG_MARK = 0;
-static int SNAP_DEBUG = 1;
+static int SNAP_DEBUG = 0;
 static int SNAP_STEPS_DEBUG = 1;
 static int SNAP_LISTS_DEBUG = 0;
 static int FAULT_DEBUG = 0;

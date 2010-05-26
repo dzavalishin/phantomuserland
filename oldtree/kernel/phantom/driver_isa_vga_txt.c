@@ -103,6 +103,9 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_vga_probe( int port, int irq, int stage )
 {
+    (void) irq;
+    (void) stage;
+
     if(seq_number)
     {
         return 0; // just one instance!
