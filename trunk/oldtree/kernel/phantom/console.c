@@ -22,7 +22,7 @@ static int (*getchar_impl)(void) = phantom_scan_console_getc;
 static int (*putchar_impl)(int) = driver_isa_vga_putc; // It (hopefully) works from point zero
 static int (*puts_impl)(const char *) = 0;
 */
-int 	null_set_color(struct rgba_t c) { return 0; }
+int 	null_set_color(struct rgba_t c) {     (void) c; return 0; 	}
 
 static struct console_ops default_ops =
 {

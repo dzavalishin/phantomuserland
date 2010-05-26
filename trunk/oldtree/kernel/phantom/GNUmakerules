@@ -43,6 +43,12 @@ LD_ADDR=--script=ld.script
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
+i386/libi386.a:
+	cd i386; make; cd ..
+
+threads/libthreads.a:
+	cd threads; make; cd ..
+
 entry.o: crtn.o
 
 #START_O_FILE=$(OBJDIR)/lib/multiboot.o 

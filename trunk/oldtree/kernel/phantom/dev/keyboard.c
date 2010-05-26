@@ -30,7 +30,7 @@ static int  leds;
 static hal_cond_t keyboard_sem;
 static hal_mutex_t  keyboard_read_mutex;
 #define BUF_LEN 256
-const int keyboard_buf_len = BUF_LEN;
+const unsigned int keyboard_buf_len = BUF_LEN;
 static _key_event keyboard_buf[BUF_LEN];
 static unsigned int head, tail;
 //static isa_bus_manager *isa;
@@ -339,8 +339,10 @@ static void handle_set1_keycode(unsigned char key)
             break;
         case KEY_SCRLOCK:
             if(event.modifiers & KEY_MODIFIER_DOWN)
+            {
                 ;
                 //dbg_set_serial_debug(dbg_get_serial_debug()?0:1);
+            }
             break;
         }
 
@@ -440,6 +442,9 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_ps2k_probe( int port, int irq, int stage )
 {
+    (void) port;
+    (void) stage;
+
     if( seq_number || phantom_dev_keyboard_init(irq) )
         return 0;
 

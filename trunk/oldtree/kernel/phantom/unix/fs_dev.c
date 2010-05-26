@@ -273,6 +273,7 @@ void devfs_register_dev( phantom_device_t* dev )
 
 void devfs_register_dev( phantom_device_t* dev )
 {
+    (void) dev;
 }
 
 #endif // HAVE_UNIX

@@ -147,6 +147,8 @@ static void e( errno_t err )
 
 void dumpf( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg )
 {
+    (void) arg;
+
     if(flags == MEM_MAP_HI_RAM && (n_elem >= PAGE_SIZE*10) )
         hal_physmem_add( from, n_elem/PAGE_SIZE );
 
@@ -219,7 +221,7 @@ static void make_mem_map(void)
                      bootParameters.mods_count * sizeof(*m),
                      MEM_MAP_MODTAB);
 
-        int i;
+        unsigned int i;
         for (i = 0; i < bootParameters.mods_count; i++)
         {
             if (m[i].string != 0)
@@ -272,6 +274,8 @@ static void make_mem_map(void)
 
 static void map_eq( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg )
 {
+    (void) arg;
+
     int off = from & INTEL_OFFMASK;
     unsigned pageaddr = (unsigned)(from & ~INTEL_OFFMASK); // Just page start addr
     n_elem += off; // We moved start addr back, now fix len

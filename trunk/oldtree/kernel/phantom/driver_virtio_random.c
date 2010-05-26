@@ -22,6 +22,9 @@ static hal_cond_t wait_4_data;
 
 static void driver_virtio_random_interrupt(virtio_device_t *me, int isr )
 {
+    (void) me;
+    (void) isr;
+
     printf("got virtio random interrupt\n");
 
     hal_mutex_lock( &access_mutex );
@@ -30,6 +33,7 @@ static void driver_virtio_random_interrupt(virtio_device_t *me, int isr )
 
 phantom_device_t *driver_virtio_random_probe( pci_cfg_t *pci, int stage )
 {
+    (void) stage;
 
     if(vdev.pci)
     {

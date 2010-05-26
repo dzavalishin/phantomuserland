@@ -106,6 +106,7 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_com_probe( int port, int irq, int stage )
 {
+    (void) stage;
     if( !com_detect( seq_number, port) )
         return 0;
 
@@ -258,11 +259,17 @@ static int com_stop(phantom_device_t *dev)
 
 static int com_read(struct phantom_device *dev, void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
     return -EIO;
 }
 
 static int com_write(struct phantom_device *dev, const void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
     return -EIO;
 }
 
