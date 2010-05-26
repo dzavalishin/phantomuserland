@@ -115,8 +115,7 @@ void phantom_scheduler_soft_interrupt(void)
 
     phantom_scheduler_soft_interrupt_reenter++;
 
-    hal_spinlock_t dummy;
-    phantom_thread_switch(&dummy);
+    phantom_thread_switch();
 
     phantom_scheduler_soft_interrupt_reenter--;
 

@@ -131,28 +131,28 @@ void dumpo( int addr );
  *
 **/
 
-struct pvm_object     pvm_get_null_class();
-struct pvm_object     pvm_get_class_class();
-struct pvm_object     pvm_get_interface_class();
-struct pvm_object     pvm_get_code_class();
-struct pvm_object     pvm_get_int_class();
-struct pvm_object     pvm_get_string_class();
-struct pvm_object     pvm_get_array_class();
-struct pvm_object     pvm_get_page_class();
-struct pvm_object     pvm_get_thread_class();
-struct pvm_object     pvm_get_call_frame_class();
-struct pvm_object     pvm_get_istack_class();
-struct pvm_object     pvm_get_ostack_class();
-struct pvm_object     pvm_get_estack_class();
-struct pvm_object     pvm_get_boot_class();
-struct pvm_object     pvm_get_binary_class();
-struct pvm_object     pvm_get_bitmap_class();
+struct pvm_object     pvm_get_null_class(void);
+struct pvm_object     pvm_get_class_class(void);
+struct pvm_object     pvm_get_interface_class(void);
+struct pvm_object     pvm_get_code_class(void);
+struct pvm_object     pvm_get_int_class(void);
+struct pvm_object     pvm_get_string_class(void);
+struct pvm_object     pvm_get_array_class(void);
+struct pvm_object     pvm_get_page_class(void);
+struct pvm_object     pvm_get_thread_class(void);
+struct pvm_object     pvm_get_call_frame_class(void);
+struct pvm_object     pvm_get_istack_class(void);
+struct pvm_object     pvm_get_ostack_class(void);
+struct pvm_object     pvm_get_estack_class(void);
+struct pvm_object     pvm_get_boot_class(void);
+struct pvm_object     pvm_get_binary_class(void);
+struct pvm_object     pvm_get_bitmap_class(void);
 
 
-struct pvm_object     pvm_create_null_object();
+struct pvm_object     pvm_create_null_object(void);
 struct pvm_object     pvm_create_class_object(struct pvm_object name, struct pvm_object iface, int da_size);
 struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_object parent_class );
-//struct pvm_object     pvm_create_interface_object();
+//struct pvm_object     pvm_create_interface_object(void);
 struct pvm_object     pvm_create_code_object(int size, void *code);
 struct pvm_object     pvm_create_int_object(int value);
 struct pvm_object     pvm_create_string_object(const char *value);
@@ -161,13 +161,13 @@ struct pvm_object     pvm_create_string_object_binary_cat(
 	const char *value1, int n_bytes1,
         const char *value2, int n_bytes2 );
 
-//struct pvm_object     pvm_create_array_object();
+//struct pvm_object     pvm_create_array_object(void);
 struct pvm_object     pvm_create_page_object( int n_slots, struct pvm_object *init, int init_slots );
 struct pvm_object     pvm_create_thread_object( struct pvm_object start_call_frame );
-struct pvm_object     pvm_create_call_frame_object();
-struct pvm_object     pvm_create_istack_object();
-struct pvm_object     pvm_create_ostack_object();
-struct pvm_object     pvm_create_estack_object();
+struct pvm_object     pvm_create_call_frame_object(void);
+struct pvm_object     pvm_create_istack_object(void);
+struct pvm_object     pvm_create_ostack_object(void);
+struct pvm_object     pvm_create_estack_object(void);
 struct pvm_object     pvm_create_binary_object(int size, void *init);
 
 void     pvm_release_thread_object( struct pvm_object thread );

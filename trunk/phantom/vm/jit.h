@@ -49,7 +49,7 @@ enum jit_callable
     JIT_FUNC_TABLE_SIZE
 };
 
-//void jit_kernel_func_table_init();
+//void jit_kernel_func_table_init(void);
 
 
 enum jit_register

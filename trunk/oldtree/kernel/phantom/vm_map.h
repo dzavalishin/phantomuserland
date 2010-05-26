@@ -175,12 +175,12 @@ void       	vm_page_req_pageout();
     //void                vm_map_for_not_snapped( vmem_page_func_t func );
     //void                vm_map_for_snapped( vmem_page_func_t func );
 
-    void                vm_map_clear_snapped();
+    void                vm_map_clear_snapped(void);
 
     void *              vm_map_get_object_address_space_start(); // { return start_of_virtual_address_space; }
 
 
-    void                vm_map_wait_for_finish();
+    void                vm_map_wait_for_finish(void);
 
 //extern vm_map_impl   vm_map;
 

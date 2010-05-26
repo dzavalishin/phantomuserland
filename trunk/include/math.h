@@ -261,7 +261,7 @@ extern float scalbnf(float, int);
 /*
  * float versions of BSD math library entry points
  */
-extern float cabsf ();
+extern float cabsf (void);
 extern float dremf(float, float);
 extern float expm1f(float);
 extern float log1pf(float);

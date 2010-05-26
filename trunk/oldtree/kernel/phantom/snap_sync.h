@@ -12,7 +12,7 @@ extern volatile int     phantom_virtual_machine_stop_request; // Is one (with th
 
 
 void phantom_finish_all_threads(void);
-void activate_all_threads();
+void activate_all_threads(void);
 
 
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda );

@@ -27,8 +27,8 @@
 
 // TODO not SMP safe, redo
 
-void dpc_init();
-void dpc_finish();
+void dpc_init(void);
+void dpc_finish(void);
 
 
 extern hal_cond_t   	dpc_thread_sleep_stone;

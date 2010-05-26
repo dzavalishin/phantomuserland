@@ -26,11 +26,11 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 
 
 void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size );
-void pvm_alloc_clear_mem();
+void pvm_alloc_clear_mem(void);
 
 pvm_object_storage_t *get_root_object_storage();
 
-int pvm_memcheck();
+int pvm_memcheck(void);
 bool pvm_object_is_allocated_light(pvm_object_storage_t *p);
 bool pvm_object_is_allocated(pvm_object_storage_t *p);
 void pvm_object_is_allocated_assert(pvm_object_storage_t *p);
@@ -40,7 +40,7 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p);
 
 // gc
 
-void run_gc();
+void run_gc(void);
 
 // Make sure this object won't be deleted with refcount dec
 // used on sys global objects

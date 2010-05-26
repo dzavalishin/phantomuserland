@@ -26,10 +26,10 @@ int phantom_scan_console_getc(void);
 
 void    console_set_fg_color( struct rgba_t );
 
-void    console_set_message_color();
-void    console_set_error_color();
-void    console_set_warning_color();
-void    console_set_normal_color();
+void    console_set_message_color(void);
+void    console_set_error_color(void);
+void    console_set_warning_color(void);
+void    console_set_normal_color(void);
 
 
 #endif // _PHANTOM_CONSOLE_H

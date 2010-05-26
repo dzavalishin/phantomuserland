@@ -28,8 +28,8 @@
 typedef u_int8_t zbuf_t;
 extern zbuf_t *zbuf;
 
-void video_zbuf_init();
-void video_zbuf_reset();
+void video_zbuf_init(void);
+void video_zbuf_reset(void);
 void video_zbuf_reset_square(int x, int y, int xsize, int ysize );
 void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos );
 int video_zbuf_check( int linpos, u_int8_t zpos );
@@ -275,7 +275,7 @@ extern struct drv_video_screen_t        drv_video_win32;
 
 extern struct drv_video_screen_t        *video_drv;
 
-extern void drv_video_null();
+extern void drv_video_null(void);
 
 
 drv_video_bitmap_t *      drv_video_get_default_mouse_bmp();

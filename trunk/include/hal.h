@@ -77,8 +77,8 @@ void    				hal_init_object_vmem(void *start_of_virtual_address_space);
 void    				hal_halt();
 void    				hal_cli();
 void    				hal_sti();
-int                                     hal_is_sti(); // returns true if ints enabled
-int                                     hal_save_cli(); // cli and ret 1 if was enabled
+int                                     hal_is_sti(void); // returns true if ints enabled
+int                                     hal_save_cli(void); // cli and ret 1 if was enabled
 
 void 					phantom_mem_lock();
 void 					phantom_mem_unlock();

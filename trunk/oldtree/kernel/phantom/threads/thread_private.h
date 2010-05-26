@@ -166,7 +166,7 @@ void phantom_threads_init(void);
  * this function and the one which initializes kernel.
  *
 **/
-void phantom_import_main_thread();
+void phantom_import_main_thread(void);
 
 
 
@@ -260,10 +260,10 @@ void t_enqueue_runq(phantom_thread_t *);
 #endif
 
 /** Returns nonzero if preemption was enabled. */
-int hal_disable_preemption_r();
-void hal_disable_preemption();
-void hal_enable_preemption();
-int hal_is_preemption_disabled();
+int hal_disable_preemption_r(void);
+void hal_disable_preemption(void);
+void hal_enable_preemption(void);
+int hal_is_preemption_disabled(void);
 
 
 void phantom_thread_init_conds(void);
@@ -348,7 +348,7 @@ void phantom_scheduler_time_interrupt(void);
 void phantom_scheduler_soft_interrupt(void);
 
 
-void phantom_scheduler_schedule_soft_irq(); // do not enforce, just make it come in some near future
+void phantom_scheduler_schedule_soft_irq(void); // do not enforce, just make it come in some near future
 
 
 /**
@@ -359,7 +359,7 @@ void phantom_scheduler_schedule_soft_irq(); // do not enforce, just make it come
  *
 **/
 
-void phantom_thread_switch();
+void phantom_thread_switch(void);
 
 
 

@@ -28,19 +28,19 @@ public:
           ulong options);
   virtual ~BGLView();
 
-  void LockGL();
-  void UnlockGL();
-  void SwapBuffers();
+  void LockGL(void);
+  void UnlockGL(void);
+  void SwapBuffers(void);
 //  BView *EmbeddedView();
 //  status_t CopyPixelsOut(BPoint source, BBitmap *dest);
 //  status_t CopyPixelsIn(BBitmap *source, BPoint dest);
 
   virtual void ErrorCallback(GLenum errorCode);
   virtual void Draw(BRect updateRect);
-  virtual void AttachedToWindow();
-  virtual void AllAttached();
-  virtual void DetachedFromWindow();
-  virtual void AllDetached();
+  virtual void AttachedToWindow(void);
+  virtual void AllAttached(void);
+  virtual void DetachedFromWindow(void);
+  virtual void AllDetached(void);
   virtual void FrameResized(float width, float height);
 //  virtual status_t Perform(perform_code d, void *arg);
 
@@ -52,8 +52,8 @@ public:
   virtual void MessageReceived(BMessage *msg);
   virtual void SetResizingMode(uint32 mode);
 
-  virtual void Show();
-  virtual void Hide();
+  virtual void Show(void);
+  virtual void Hide(void);
 
   virtual BHandler *ResolveSpecifier(BMessage *msg, int32 index,
 							         BMessage *specifier, int32 form,
