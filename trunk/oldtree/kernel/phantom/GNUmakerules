@@ -12,14 +12,15 @@ others::
 	cd i386; make clean; make; cd ..
 	cd threads; make clean; make; cd ..
 
-all:: others 
-	make clean; make
+#all:: others 
+all:: $(TARGETS)
+#	make clean; make
 
 prepare::
 
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include threads 
-CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d
+CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d heap/*.o heap/*.d
 PHANTOM_CFLAGS += -DHAVE_NET=0 -DHAVE_UNIX=0
 
 

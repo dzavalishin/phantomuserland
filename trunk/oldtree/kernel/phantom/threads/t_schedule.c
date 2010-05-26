@@ -21,13 +21,13 @@
 static volatile int reschedule_request = 0;
 
 /** Idle prio threads */
-static queue_head_t	runq_idle = {0};
+static queue_head_t	runq_idle = {0,0};
 
 /** Normal prio threads */
-static queue_head_t	runq_norm = {0};
+static queue_head_t	runq_norm = {0,0};
 
 /** Realtime prio threads */
-static queue_head_t	runq_rt = {0};
+static queue_head_t	runq_rt = {0,0};
 
 
 void phantom_scheduler_init(void)

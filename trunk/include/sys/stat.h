@@ -162,7 +162,9 @@ extern "C" {
 
 #define _CRTIMP
 #define __MINGW_NOTHROW
+#ifndef __cdecl
 #define __cdecl
+#endif
 
 _CRTIMP int __cdecl __MINGW_NOTHROW	_fstat (int, struct _stat*);
 _CRTIMP int __cdecl __MINGW_NOTHROW	_chmod (const char*, int);

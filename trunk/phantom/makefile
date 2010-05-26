@@ -1,6 +1,6 @@
 default:: all
 
-SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), libc gl vm user )
+SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), libc gl vm user dev libphantom )
 
 
 %.MAKE:
