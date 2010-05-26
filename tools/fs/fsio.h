@@ -37,7 +37,7 @@ public:
 
     void open( const char *fname );
 
-    void close();
+    void close(void);
 
 
     void read( void *buf, long block_no );

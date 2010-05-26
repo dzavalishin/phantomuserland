@@ -287,9 +287,9 @@ Index structure
 
 // --- Prototypes ----------------------------------------------------- //
 
-//bool init_ext2();
+//bool init_ext2(void);
 //char *pwd_ext2();
-//void ls_ext2();
+//void ls_ext2(void);
 //void cd_ext2(char *param);
 //void cat_ext2(char *stringa);
 

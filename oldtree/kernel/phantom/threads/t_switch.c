@@ -30,8 +30,6 @@
 
 hal_spinlock_t schedlock;
 
-static hal_spinlock_t unused_lock;
-
 //static int preemption_disabled = 0;
 
 #if 1
@@ -46,7 +44,6 @@ void phantom_thread_switch()
     {
         SHOW_ERROR0(0, "schedlock passed as sw_unlock!");
         GET_CURRENT_THREAD()->sw_unlock = 0;
-        //toUnlock = &unused_lock;
     }
     else
     {
@@ -54,8 +51,6 @@ void phantom_thread_switch()
 
         toUnlock = GET_CURRENT_THREAD()->sw_unlock;
         GET_CURRENT_THREAD()->sw_unlock = 0;
-
-        //if(toUnlock == 0) toUnlock = &unused_lock;
 
         assert(toUnlock != &schedlock);
         // FIXME This is SMP-wrong! It has to beunlocked AFTER thread is swithed off

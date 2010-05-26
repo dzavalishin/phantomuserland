@@ -87,7 +87,7 @@ void net_test(void);
 
 void phantom_parse_cmd_line(void);
 void phantom_process_boot_options(void);
-void phantom_start_boot_modules();
+void phantom_start_boot_modules(void);
 
 
 
@@ -122,10 +122,10 @@ void beep(void);
 // Unix emulation
 // -----------------------------------------------------------------------
 
-extern int syscall();
+extern int syscall(void);
 
 
-void phantom_unix_fs_init();
+void phantom_unix_fs_init(void);
 
 
 
@@ -133,6 +133,6 @@ void phantom_unix_fs_init();
 // Misc debug
 // -----------------------------------------------------------------------
 
-void check_global_lock_entry_count();
+void check_global_lock_entry_count(void);
 
 

@@ -93,7 +93,7 @@ void event_q_put_win( int x, int y, int info, struct drv_video_window *focus );
 
 
 //! Start sending keybd events from keybd driver - see keyboard.c
-void phantom_dev_keyboard_start_events();
+void phantom_dev_keyboard_start_events(void);
 
 
 #endif // EVENT_H

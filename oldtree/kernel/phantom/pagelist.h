@@ -116,14 +116,14 @@ static __inline__ void pagelist_finish(pagelist *me) { pagelist_flush(me); disk_
 //virtual disk_page_no_t   pop() = 0;
 //virtual void            push( disk_page_no_t ) = 0;
 
-//disk_page_no_t   root();
+//disk_page_no_t   root(void);
 
 
 void            pagelist_clear(pagelist *me);
 void            pagelist_write_seq( pagelist *me, disk_page_no_t );
 
 static __inline__ void            pagelist_seek(pagelist *me) { me->curr_displ = me->pos = 0; disk_page_cache_seek_async( &me->curr_p, me->root_page ); }
-//virtual disk_page_no_t   read_seq();
+//virtual disk_page_no_t   read_seq(void);
 int             pagelist_read_seq( pagelist *me, disk_page_no_t *out );
 
 

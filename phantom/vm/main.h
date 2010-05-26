@@ -17,5 +17,5 @@ void save_mem( void *addr, int size );
 
 
 void setDiffMem( void *mem, void *copy, int size );
-void checkDiffMem();
+void checkDiffMem(void);
 

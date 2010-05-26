@@ -11,7 +11,7 @@
 #include "hal.h"
 //---------------------------------------------------------------------------
 
-void page_device_io_final_callback();
+void page_device_io_final_callback(void);
 
 
 
@@ -31,26 +31,26 @@ optimize head movement better */
     void 			pager_stop_io(); // called after io is complete
     void 			pager_free_io_resources(pager_io_request *req);
 
-    void                        pager_get_superblock();
-    void                        pager_update_superblock();
+    void                        pager_get_superblock(void);
+    void                        pager_update_superblock(void);
 
-    void                        pager_fix_incomplete_format();
-    int                         pager_fast_fsck();
-    int                         pager_long_fsck();
+    void                        pager_fix_incomplete_format(void);
+    int                         pager_fast_fsck(void);
+    int                         pager_long_fsck(void);
 
 
     // DO NOT use superblock free_start!
     void                        pager_put_to_free_list( disk_page_no_t );
-    void                        pager_refill_free_reserve();
+    void                        pager_refill_free_reserve(void);
     void                        pager_format_empty_free_list_block( disk_page_no_t );
-    void                        pager_init_free_list();
+    void                        pager_init_free_list(void);
 
 
     // NB! On init pagefile must be good and healthy,
     // so if one needs some check and fix, it must be done
     // before.
     void                pager_init(paging_device * device); // {  }
-    void                pager_finish();
+    void                pager_finish(void);
 
 
     int                 pager_interrupt_alloc_page(disk_page_no_t *out);
@@ -65,16 +65,16 @@ optimize head movement better */
     void                pager_enqueue_for_pageout( pager_io_request *p );
     void                pager_enqueue_for_pageout_fast( pager_io_request *p );
 
-    void                pager_io_done();
+    void                pager_io_done(void);
 
-    long                pager_object_space_address();
+    long                pager_object_space_address(void);
 
     phantom_disk_superblock *        pager_superblock_ptr();
 
 
 
 
-    void                pager_refill_free();
+    void                pager_refill_free(void);
 
     // called under sema!
     void 		pager_start_io(); // called to start new io
