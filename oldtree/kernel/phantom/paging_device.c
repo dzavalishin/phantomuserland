@@ -307,6 +307,7 @@ paging_device_io_thread( void *arg )
 
 void init_paging_device(paging_device *me, const char *devname, int n_pages )
 {
+    (void) devname;
 
     if(hal_cond_init( &me->start_io_sema, "PagerIO" ))
         panic("Paging sema creation failed");
@@ -476,8 +477,10 @@ getchar();
       printf( "* %s\n", cp );
       lc ++ ;
       if ( ! ( lc & 0x000f ) )
+      {
           //pause()
           ;
+      }
    }
 
    // display the low level trace
@@ -490,13 +493,17 @@ getchar();
       printf( "* %s\n", cp );
       lc ++ ;
       if ( ! ( lc & 0x000f ) )
+      {
           //pause()
           ;
+      }
    }
 
    if ( lc & 0x000f )
+   {
        //pause()
        ;
+   }
 }
 
 
@@ -642,6 +649,8 @@ void phantom_check_disk_save_virtmem( void *start, int npages )
 
 void phantom_check_disk_check_virtmem( void *_start, int npages )
 {
+    (void) _start;
+    (void) npages;
 #if 0
     char pagecopy[4096];
     char p0_pagecopy[4096];

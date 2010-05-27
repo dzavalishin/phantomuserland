@@ -142,6 +142,8 @@ static void    page_fault( vm_page *p, int  is_writing );
 static void
 vm_map_page_fault_handler( void *address, int  write, int ip )
 {
+    (void) ip;
+
     // BUG! TODO! Stack growth? Object space growth?
     long addr = (unsigned int) address;
 
@@ -542,6 +544,7 @@ void snapper_COW_callback( pager_io_request *req, int  write );
 static int
 page_fault_snap_aid( vm_page *p, int  page_is_read_enabled, int  is_writing  )
 {
+    (void) page_is_read_enabled;
     // 1. We are called only for user's write access attempt!
     assert(is_writing);
 

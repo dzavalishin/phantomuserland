@@ -473,7 +473,7 @@ int vm86_gpf_handler(struct trap_state *ts)
 
 static void *		exe;
 
-void phantom_v86_run(void *code, int size);
+void phantom_v86_run(void *code, size_t size);
 
 // asm code
 //extern char vesa_setup_end[], vesa_setup_start[];
