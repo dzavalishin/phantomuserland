@@ -87,5 +87,11 @@ optimize head movement better */
     void 		phantom_fsck(int do_rebuild );
 
 
+    void 		phantom_free_snap(
+                                          disk_page_no_t old_snap_start,
+                                          disk_page_no_t curr_snap_start,
+                                          disk_page_no_t new_snap_start
+                                         );
+
 
 #endif

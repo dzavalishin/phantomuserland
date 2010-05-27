@@ -1,8 +1,14 @@
-#define USE_AMAP 1
+#define DEBUG_MSG_PREFIX "fsck"
+#include "debug_ext.h"
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
+
 
 #include "amap.h"
 
 #include <phantom_disk.h>
+#include <errno.h>
 
 #include "pager.h"
 
@@ -194,7 +200,7 @@ static int fsck_forlist( disk_page_no_t list_start, int check_magic, int (*proce
     while( next ) {
         if(out_of_disk(next))
         {
-            printf("FSCK: list structure block is out of disk, blk %d", next );
+            SHOW_ERROR( 0, "FSCK: list structure block is out of disk, blk %d", next );
             insane = 1;
             break;
         }
@@ -209,7 +215,7 @@ static int fsck_forlist( disk_page_no_t list_start, int check_magic, int (*proce
 
         if( (check_magic != 0) && (curr->head.magic != check_magic) )
         {
-            printf("FSCK: list magic is wrong, 0x%x instead of 0x%x, blk %d", curr->head.magic, check_magic, currp_no );
+            SHOW_ERROR( 0, "FSCK: list magic is wrong, 0x%x instead of 0x%x, blk %d", curr->head.magic, check_magic, currp_no );
             insane = 1;
             break;
         }
@@ -218,13 +224,13 @@ static int fsck_forlist( disk_page_no_t list_start, int check_magic, int (*proce
 
         if( used > N_REF_PER_BLOCK )
         {
-            printf("FSCK: overused list page, magic 0x%x, blk %d", curr->head.magic, currp_no );
+            SHOW_ERROR( 0, "FSCK: overused list page, magic 0x%x, blk %d", curr->head.magic, currp_no );
             insane = 1;
             break;
         }
 
         if( used != N_REF_PER_BLOCK && next != 0 )
-            printf("FSCK warning: incomplete list page, magic 0x%x, blk %d", curr->head.magic, currp_no );
+            SHOW_ERROR( 0, "FSCK warning: incomplete list page, magic 0x%x, blk %d", curr->head.magic, currp_no );
 
         if(process_f != NULL )
         {
@@ -234,7 +240,7 @@ static int fsck_forlist( disk_page_no_t list_start, int check_magic, int (*proce
                 disk_page_no_t lbn = curr->list[i];
                 if(out_of_disk(lbn))
                 {
-                    printf("FSCK: list data block is out of disk, blk %d", lbn );
+                    SHOW_ERROR( 0, "FSCK: list data block is out of disk, blk %d", lbn );
                     insane = 1;
                     break;
                 }
@@ -487,18 +493,18 @@ void phantom_fsck(int do_rebuild )
 
     // 1. Check some superblock integrity
 
-    printf("FSCK: *** check superblock ***\n");
+    SHOW_FLOW0( 0, "*** check superblock ***");
     if( phantom_fsck_super() ) do_rebuild = 1;
 
     // 2. check lists integrity, kill insane lists
 
-    printf("FSCK: *** check lists ***\n"); //getchar();
+    SHOW_FLOW0( 0, "*** check lists ***");
     if( phantom_fsck_lists() ) do_rebuild = 1;
 
 
     if(do_rebuild)
     {
-        printf("FSCK: *** errors found, rebuilding free list ***\n");
+        SHOW_ERROR0( 0, "*** errors found, rebuilding free list ***");
         // 3. Rebuild freelist
 
         //phantom_fsck_rebuild_free();
@@ -515,7 +521,7 @@ void phantom_fsck(int do_rebuild )
 
     // Q - what shell we do if cross-use detected?
 
-    printf("FSCK: *** Finish! ***\n");
+    SHOW_FLOW0( 0, "*** Finish! ***");
 
 }
 
@@ -538,6 +544,8 @@ static void free_snap_worker(disk_page_no_t toFree, int flags)
         printf("phantom_free_snap warning: nonfree block passed by iterator: %d\n", (int)toFree );
         return;
     }
+
+    pager_free_page( toFree );
 }
 
 void phantom_free_snap(
@@ -546,9 +554,16 @@ void phantom_free_snap(
                        disk_page_no_t new_snap_start
                       )
 {
+    SHOW_FLOW0( 0, "*** freeing old snap ***");
     fsck_create_map();
 
     //fsck_set_map_used();
+
+    if( old_snap_start == 0 )
+    {
+        SHOW_FLOW0( 0, "*** No old snap, skip list deletion ***");
+        return;
+    }
 
     fsck_list_justadd_as_free( old_snap_start );
 
@@ -558,6 +573,8 @@ void phantom_free_snap(
 
     // go through list, free pages that are finally free in map
     iterate_map(free_snap_worker, MAP_FREE);
+
+    // ERROR - list structure for old_snap_start has to be freed too
 
     fsck_delete_map();
 

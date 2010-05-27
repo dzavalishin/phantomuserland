@@ -40,6 +40,7 @@
 #include "vm_map.h"
 #include "dpc.h"
 #include "snap_sync.h"
+#include "pager.h"
 
 #include "i386/cpu.h"
 #include "i386/mmx.h"
@@ -122,7 +123,7 @@ void *              vm_map_get_object_address_space_start() { return vm_map_star
 unsigned char      phantom_vm_generation; // system's current generation number
 
 // generation is cycling, do special comparison
-static int __inline__ page_generation_is_less( unsigned char page_gen )
+__inline__ static int page_generation_is_less( unsigned char page_gen )
 {
     // take wraparound in account
     if( phantom_vm_generation & 0x80 ) // upper bit? Move both down a half
@@ -1295,8 +1296,7 @@ static void save_snap( volatile vm_page *p )
 
 
 
-void
-do_snapshot()
+void do_snapshot()
 {
     int			  enabled; // interrupts
 
@@ -1452,16 +1452,18 @@ phantom_save_vmem();
 
     // ok, now we have current snap and previous one. come fix the
     // superblock
-
-    //long toFree = pager_superblock_ptr()->prev_snap;
+    disk_page_no_t toFree = pager_superblock_ptr()->prev_snap; // Save list head to be deleted
 
     pager_superblock_ptr()->prev_snap = pager_superblock_ptr()->last_snap;
     pager_superblock_ptr()->last_snap = new_snap_head;
     pager_update_superblock();
 
 
-    // TODO free list @toFree excep 4 pages used in actual two lists
+    // TODO free list @toFree excep for pages used in actual two lists
+    disk_page_no_t actual1 = pager_superblock_ptr()->prev_snap;
+    disk_page_no_t actual2 = pager_superblock_ptr()->last_snap;
 
+    phantom_free_snap ( toFree, actual1, actual2 );
 
     //#error not impl
     // and free pages of previous-previous snapshot that changed in this
