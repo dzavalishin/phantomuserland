@@ -88,12 +88,18 @@ printf("invalid syscal for object: "); dumpo( (int)(o.data) );//pvm_object_print
 
 int si_void_0_construct(struct pvm_object oo, struct data_area_4_thread *tc )
 {
+    (void)oo;
+    //(void)tc;
+
     DEBUG_INFO;
     SYSCALL_RETURN_NOTHING;
 }
 
 int si_void_1_destruct(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
+    //(void)tc;
+
     DEBUG_INFO;
     SYSCALL_RETURN_NOTHING;
 }
@@ -107,6 +113,7 @@ int si_void_2_class(struct pvm_object this_obj, struct data_area_4_thread *tc )
 
 int si_void_3_clone(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "void clone called" );
 }
@@ -129,30 +136,35 @@ int si_void_4_equals(struct pvm_object me, struct data_area_4_thread *tc )
 
 int si_void_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "(void)" ));
 }
 
 int si_void_6_toXML(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "<void>" ));
 }
 
 int si_void_7_fromXML(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "(void)" ));
 }
 
 int si_void_8_def_op_1(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "void default op 1 called" );
 }
 
 int si_void_9_def_op_2(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "void default op 2 called" );
 }
@@ -428,12 +440,14 @@ DECLARE_SIZE(string);
 
 static int si_thread_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "thread" ));
 }
 
 static int si_thread_8_start(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     //phantom_activate_thread(me);
     //SYSCALL_RETURN(pvm_create_string_object( "thread" ));
@@ -471,6 +485,7 @@ static int si_thread_11_continue(struct pvm_object me, struct data_area_4_thread
 
 static int si_thread_14_getOsInterface(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     struct pvm_object_storage *root = get_root_object_storage();
     struct pvm_object o = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
@@ -479,6 +494,7 @@ static int si_thread_14_getOsInterface(struct pvm_object me, struct data_area_4_
 
 static int si_thread_13_getUser(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     struct data_area_4_thread *meda = pvm_object_da( me, thread );
 
@@ -488,6 +504,7 @@ static int si_thread_13_getUser(struct pvm_object me, struct data_area_4_thread 
 
 static int si_thread_12_getEnvironment(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     struct data_area_4_thread *meda = pvm_object_da( me, thread );
 
@@ -550,6 +567,7 @@ DECLARE_SIZE(call_frame);
 
 static int si_istack_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "istack" ));
 }
@@ -575,6 +593,7 @@ DECLARE_SIZE(istack);
 
 static int si_ostack_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "ostack" ));
 }
@@ -600,6 +619,7 @@ DECLARE_SIZE(ostack);
 
 static int si_estack_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "estack" ));
 }
@@ -624,12 +644,14 @@ DECLARE_SIZE(estack);
 
 static int si_class_class_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "class" ));
 }
 
 static int si_class_class_8_new_class(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -670,6 +692,7 @@ DECLARE_SIZE(class);
 
 static int si_interface_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "interface" ));
 }
@@ -695,6 +718,7 @@ DECLARE_SIZE(interface);
 
 static int si_code_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "code" ));
 }
@@ -720,6 +744,7 @@ DECLARE_SIZE(code);
 
 static int si_page_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "page" ));
 }
@@ -747,6 +772,7 @@ DECLARE_SIZE(page);
 
 static int si_bootstrap_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "bootstrap" ));
 }
@@ -754,6 +780,7 @@ static int si_bootstrap_5_tostring(struct pvm_object me, struct data_area_4_thre
 
 static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -826,6 +853,7 @@ static int si_bootstrap_9_load_code(struct pvm_object me, struct data_area_4_thr
 
 static int si_bootstrap_16_print(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -842,6 +870,7 @@ static int si_bootstrap_16_print(struct pvm_object me, struct data_area_4_thread
 
 static int si_bootstrap_17_register_class_loader(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -900,6 +929,7 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
 // THIS IS JUST A TEMP SHORTCUT!
 static int si_bootstrap_19_create_binary(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -912,6 +942,7 @@ static int si_bootstrap_19_create_binary(struct pvm_object me, struct data_area_
 
 static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -933,6 +964,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
 static int si_bootstrap_21_sleep(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -950,6 +982,7 @@ static int si_bootstrap_21_sleep(struct pvm_object me, struct data_area_4_thread
 
 static int si_bootstrap_22_set_os_interface(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -966,6 +999,7 @@ static int si_bootstrap_22_set_os_interface(struct pvm_object me, struct data_ar
 
 static int si_bootstrap_23_getenv(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     SYSCALL_RETURN( ref_inc_o( pvm_root.kernel_environment ) );
 }
@@ -997,6 +1031,7 @@ DECLARE_SIZE(boot);
 
 static int si_array_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     // BUG? Recursively call tostring for all of them?
     SYSCALL_RETURN(pvm_create_string_object( "array" ));
@@ -1005,6 +1040,7 @@ static int si_array_5_tostring(struct pvm_object me, struct data_area_4_thread *
 
 static int si_array_8_get_iterator(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -1015,6 +1051,7 @@ static int si_array_8_get_iterator(struct pvm_object me, struct data_area_4_thre
 
 static int si_array_9_get_subarray(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
@@ -1102,6 +1139,7 @@ DECLARE_SIZE(array);
 
 static int si_mutex_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "mutex" ));
 }
@@ -1111,6 +1149,7 @@ static int si_mutex_8_lock(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
+    (void)da;
 
     // No locking in syscalls!!
     //pthread_mutex_lock(&(da->mutex));
@@ -1125,6 +1164,7 @@ static int si_mutex_9_unlock(struct pvm_object me, struct data_area_4_thread *tc
 {
     DEBUG_INFO;
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
+    (void)da;
 
     // No locking in syscalls!!
     //pthread_mutex_unlock(&(da->mutex));
@@ -1166,6 +1206,7 @@ DECLARE_SIZE(mutex);
 
 static int si_cond_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( ".internal.cond" ));
 }
@@ -1173,8 +1214,10 @@ static int si_cond_5_tostring(struct pvm_object o, struct data_area_4_thread *tc
 
 static int si_cond_8_wait(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     struct data_area_4_cond *da = pvm_object_da( me, cond );
+    (void)da;
 
     // No locking in syscalls!!
     //pthread_cond_wait(&(da->cond));
@@ -1186,8 +1229,10 @@ static int si_cond_8_wait(struct pvm_object me, struct data_area_4_thread *tc )
 
 static int si_cond_9_twait(struct pvm_object me, struct data_area_4_thread *tc )
 {
+    (void)me;
     DEBUG_INFO;
     struct data_area_4_cond *da = pvm_object_da( me, cond );
+    (void)da;
 
     SYSCALL_THROW_STRING( "timed wait not impl" );
 
@@ -1204,6 +1249,7 @@ static int si_cond_10_broadcast(struct pvm_object me, struct data_area_4_thread 
 {
     DEBUG_INFO;
     struct data_area_4_cond *da = pvm_object_da( me, cond );
+    (void)da;
 
     // No locking in syscalls!!
     //pthread_cond_broadcast(&(da->cond));
@@ -1217,6 +1263,7 @@ static int si_cond_11_signal(struct pvm_object me, struct data_area_4_thread *tc
 {
     DEBUG_INFO;
     struct data_area_4_cond *da = pvm_object_da( me, cond );
+    (void)da;
 
     // No locking in syscalls!!
     //pthread_cond_signal(&(da->cond));
@@ -1248,6 +1295,7 @@ DECLARE_SIZE(cond);
 
 static int si_binary_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     // TODO hexdump
     SYSCALL_RETURN(pvm_create_string_object( "(binary)" ));
@@ -1399,6 +1447,7 @@ DECLARE_SIZE(closure);
 
 static int si_bitmap_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     // TODO hexdump
     SYSCALL_RETURN(pvm_create_string_object( "(bitmap)" ));
@@ -1477,6 +1526,7 @@ DECLARE_SIZE(bitmap);
 
 static int si_world_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "(world)" ));
 }
@@ -1485,6 +1535,7 @@ static struct pvm_object_storage	* thread_iface = 0;
 
 static int si_world_8_getMyThread(struct pvm_object o, struct data_area_4_thread *tc )
 {
+    (void)o;
     DEBUG_INFO;
 
     // TODO spinlock!

@@ -164,7 +164,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         {
             DWORD err = GetLastError();
             //FormatMessage();
-            printf("Win error %d", err);
+            printf("Win error %d", (int)err);
 
             LPVOID lpMsgBuf;
             FormatMessage(

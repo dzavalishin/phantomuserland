@@ -39,9 +39,11 @@
 
 static void cycle_root_buffer_add_candidate(pvm_object_storage_t *p)
 {
+    (void)p;
 }
 static void cycle_root_buffer_rm_candidate(pvm_object_storage_t *p)
 {
+    (void)p;
 }
 static void cycle_root_buffer_clear()
 {
@@ -171,6 +173,8 @@ static void mark_tree(pvm_object_storage_t * p)
 
 static void mark_tree_o(pvm_object_t o, void *arg)
 {
+    (void)arg;
+
     if(o.data == 0) // Don't try to process null objects
         return;
 
@@ -290,6 +294,7 @@ static void do_refzero_process_children( pvm_object_storage_t *p )
 
 static void refzero_add_from_internal(pvm_object_t o, void *arg)
 {
+    (void) arg;
     if(o.data == 0) // Don't try to process null objects
        return;
 
