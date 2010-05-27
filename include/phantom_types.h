@@ -70,7 +70,7 @@ typedef void *  		vmem_ptr_t;
 
 #ifndef _SIZE_T
 #define _SIZE_T
-typedef int			size_t;
+typedef unsigned int		size_t;
 typedef int			ssize_t;
 #endif //_SIZE_T
 
