@@ -41,6 +41,8 @@ int jit_init_unit( jit_out_t *j )
     j->buf = 0;
     j->bufp = 0;
     j->bufsize = 0;
+
+    return 0;
 }
 
 

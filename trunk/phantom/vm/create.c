@@ -99,14 +99,17 @@ struct pvm_object     pvm_create_object(struct pvm_object type)
 //__inline__
 struct pvm_object     pvm_create_null_object()
 {
-	return pvm_root.null_object;  // already created once forever
+    return pvm_root.null_object;  // already created once forever
 }
 
 void pvm_internal_init_void(struct pvm_object_storage * os) { (void)os; }
 
 void pvm_gc_iter_void(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	// Empty
+    (void)func;
+    (void)os;
+    (void)arg;
+    // Empty
 }
 
 struct pvm_object     pvm_create_int_object(int _value)
@@ -125,6 +128,7 @@ void pvm_gc_iter_int(gc_iterator_call_t func, struct pvm_object_storage * os, vo
 {
     (void)os;
     (void)arg;
+    (void)func;
     // Empty
 }
 
