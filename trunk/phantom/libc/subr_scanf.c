@@ -275,7 +275,7 @@ literal:
 			if (flags & SUPPRESS) {
 				size_t sum = 0;
 				for (;;) {
-					if ((n = inr) < width) {
+					if ((n = inr) < (int)width) {
 						sum += n;
 						width -= n;
 						inp += n;

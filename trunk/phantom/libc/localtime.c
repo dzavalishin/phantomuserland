@@ -8,9 +8,9 @@ static char* dayNames[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday
 
 
 static char* numbers[] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-static int monthDay[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+//static int monthDay[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
-
+#if 0
 static int _getMonthFromYDay(int yDay, int isLeapYear)
 {
 	int i = 12;
@@ -23,7 +23,7 @@ static int _getMonthFromYDay(int yDay, int isLeapYear)
 	while(yDay < month_first);
 	return i;
 }
-
+//#endif
 
 static long _getLastDayOfYear(long year)
 {
@@ -32,7 +32,7 @@ static long _getLastDayOfYear(long year)
 	- ((long)year)/400L;
 }
 
-
+//#if 0
 static long _getYear(long day)
 {
 	long y1 = day / 366;
@@ -41,7 +41,9 @@ static long _getYear(long day)
 	
 	return y1;	
 }
+#endif
 
+#if 0
 static int _isLeapYear(int year)
 {
 	if(year % 4 == 0 && year % 400 != 0)
@@ -64,6 +66,7 @@ static long _getDay(int year, int month, int dayOfMonth)
 	return _getDayOfYear(year, month, dayOfMonth)
 		+ _getLastDayOfYear(year - 1);
 }
+#endif
 
 /*
 struct tm *localtime_rb(bigtime_t timer, struct tm *tmb)

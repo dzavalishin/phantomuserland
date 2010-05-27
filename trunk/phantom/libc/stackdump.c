@@ -12,7 +12,7 @@ static void stack_dump_one(void *ebp)
     if( addr == 0 )
         return;
 
-    printf("- %08p", addr);
+    printf("- %8p", addr);
 
     if(phantom_symtab_getname)
     {
