@@ -7,9 +7,10 @@ install::
 # 	echo $(realpath $(PHANTOM_HOME))
 
 all::
+	cd plib; make all; cd ..
+	cd apps/tetris/tetris; make all; cd ../..
 	cd phantom; make all; cd ..
 	cd oldtree/kernel; make all; cd ../..
-	cd plib; make all; cd ..
 
 clean::
 	cd phantom; make clean; cd ..
