@@ -428,10 +428,12 @@ vprintf(const char *fmt, va_list ap)
  * the console then the last bunch of characters are saved in msgbuf for
  * inspection later.
  */
+
 static void
 aputchar(int c, void *arg)
 {
 #if 1
+    (void) arg;
     putchar(c);
 #else
     struct putchar_arg *ap = (struct putchar_arg*) arg;
@@ -964,7 +966,7 @@ kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_lis
  SYSCTL_INT(_security_bsd, OID_AUTO, unprivileged_read_msgbuf,
  CTLFLAG_RW, &unprivileged_read_msgbuf, 0,
  "Unprivileged processes may read the kernel message buffer");
-
+*/
  /* Sysctls for accessing/clearing the msgbuf * /
   static int
   sysctl_kern_msgbuf(SYSCTL_HANDLER_ARGS)
@@ -1031,7 +1033,8 @@ kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_lis
   db_printf("\n");
   }
 
-  #endif /* DDB */
+  #endif // DDB
+  */
 
 void
 hexdump(const void *ptr, int length, const char *hdr, int flags)
