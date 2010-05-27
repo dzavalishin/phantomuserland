@@ -884,6 +884,8 @@ static int ohci_init(int (*hc_init_callback)(void *callback_cookie, void *cookie
 
 phantom_device_t * driver_ohci_probe( pci_cfg_t *pci, int stage )
 {
+    (void) stage;
+
     printf( DEV_NAME " probe\n" );
 
     if(pci->sub_class != OHCI_SUB_CLASS || pci->interface != OHCI_INTERFACE)

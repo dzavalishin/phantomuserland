@@ -277,6 +277,7 @@ static void fsck_list_justadd_as_free( disk_page_no_t list_start )
 static void fsck_list_crossuse( disk_page_no_t list_start )
 //__attribute__ ((unused))
 {
+    (void) list_start;
     //fsck_forlist( list_start, fsck_just_mark_as_used );
     // no - do myself, have a copy of forlist here
     panic("unimplemented fsck_list_crossuse");

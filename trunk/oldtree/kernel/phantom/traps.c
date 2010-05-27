@@ -70,6 +70,7 @@ void dump_ss(struct trap_state *st)
 
 static int trap_ignore(struct trap_state *ts)
 {
+    (void)ts;
     return 0;
 }
 

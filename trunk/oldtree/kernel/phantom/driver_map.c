@@ -112,7 +112,7 @@ static isa_probe_t isa_drivers[] =
 
 //    { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 0x10 }
 
-    { "SB16",         driver_isa_sb16_probe,  3, 0x220, 5 },
+//    { "SB16",         driver_isa_sb16_probe,  3, 0x220, 5 },
 };
 
 

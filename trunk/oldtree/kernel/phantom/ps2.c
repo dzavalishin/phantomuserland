@@ -67,6 +67,8 @@ static int xsign, ysign, xval, yval;
 
 void phantom_dev_ps2_int_handler( void *arg )
 {
+    (void) arg;
+
     static int inbytepos = 0;
 
     signed char mousedata = inb( PS2_DATA_ADDR );
@@ -197,6 +199,9 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
 {
+    (void) port;
+    (void) stage;
+
     if( seq_number || phantom_dev_ps2_do_init())
         return 0;
 
