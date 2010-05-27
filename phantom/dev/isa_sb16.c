@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -1162,3 +1163,4 @@ multi_audio_control(void* cookie, uint32 op, void* arg, size_t len)
 
 #endif
 
+#endif

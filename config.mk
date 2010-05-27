@@ -21,3 +21,18 @@ endif
 #endif
 #endif
 
+
+# How to cpmile phantom source
+
+PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
+
+%.pc: %.ph
+	$(PLC) $<
+
+
+# Where phancom class files are
+
+PCDIR=$(realpath $(PHANTOM_HOME))/plib/bin
+
+vpath %.pc $(PCDIR)
+
