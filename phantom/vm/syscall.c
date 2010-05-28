@@ -1311,7 +1311,8 @@ static int si_binary_8_getbyte(struct pvm_object me, struct data_area_4_thread *
 
     int size = me.data->_da_size - sizeof( struct data_area_4_binary );
 
-    if( index < 0 || index >= size )
+    //if( index < 0 || index >= size )
+    if( index >= size )
         SYSCALL_THROW_STRING( "binary index out of bounds" );
 
     SYSCALL_RETURN(pvm_create_int_object( da->data[index] ));
@@ -1327,7 +1328,8 @@ static int si_binary_9_setbyte(struct pvm_object me, struct data_area_4_thread *
 
     int size = me.data->_da_size - sizeof( struct data_area_4_binary );
 
-    if( index < 0 || index >= size )
+    //if( index < 0 || index >= size )
+    if( index >= size )
         SYSCALL_THROW_STRING( "binary index out of bounds" );
 
     da->data[index] = byte;
@@ -1352,12 +1354,14 @@ static int si_binary_10_setrange(struct pvm_object me, struct data_area_4_thread
 
     int size = me.data->_da_size - sizeof( struct data_area_4_binary );
 
-    if( topos < 0 || topos+len > size )
+    //if( topos < 0 || topos+len > size )
+    if( topos+len > size )
         SYSCALL_THROW_STRING( "binary copy dest index/len out of bounds" );
 
     int src_size = _src.data->_da_size - sizeof( struct data_area_4_binary );
 
-    if( frompos < 0 || frompos+len > src_size )
+    //if( frompos < 0 || frompos+len > src_size )
+    if( frompos+len > src_size )
         SYSCALL_THROW_STRING( "binary copy src index/len out of bounds" );
 
     //da->data[index] = byte;
