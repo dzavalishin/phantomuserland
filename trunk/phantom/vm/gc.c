@@ -347,6 +347,7 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 
 static inline void ref_dec_p(pvm_object_storage_t *p)
 {
+    if( p == 0 ) return;
     debug_catch_object("--", p);
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
@@ -397,6 +398,7 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
 
 static inline void ref_inc_p(pvm_object_storage_t *p)
 {
+    if( p == 0 ) return;
     debug_catch_object("++", p);
 
     assert( p->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
