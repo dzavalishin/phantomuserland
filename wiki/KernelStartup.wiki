@@ -1,0 +1,86 @@
+#summary Phantom boot sequence
+
+= Overview =
+
+One must distinguish first boot of the given OS instance, and later ones. First boot differs because kernel has no snapshot to start from and has to build minimal working environment. Later boots are simple - find actual snapshot and map memory. Well, see details below.
+
+
+= Kernel boot =
+
+
+== Multiboot ==
+
+Phantom is a multiboot kernel. Multiboot commands are like this:
+
+{{{
+title=phantom
+kernel=(nd)/phantom -d root.boot=ru.dz.phantom.tetris.boot --
+module=(nd)/classes
+module=(nd)/pmod_test
+boot 
+}}}
+
+Kernel command line is:
+ * args (TODO: -d - debug)
+ * kernel environment (root.boot = boot class name, root.init = init class name, root.shell = shell class name)
+ * -- separates kernel main argv/argc
+ * kernel main args (unused yet)
+
+Module named 'classses' (just this name) is needed during th first boot only and passes basic class set for empty OS to initialize itself.
+
+Any module named 'pmod_*' is kernel extension - part of Unix subsystem. In the development.
+
+Current kernel looks for Phantom HDD at IDE drive 1 (counting from 0), IE first slave. No partition table is taken in account, but first 16 4K blocks are skipped and not touched.
+
+TODO: It has to be possible to change it at least with kernel parameter, or, better, with partition table lookup. Corresponding code is partially written. (disk.c)
+
+
+== Drivers ==
+
+See tables in driver_map.c - ISA drivers are probed, PCI are started by looking up PCI config and looking up drivers by PCI codes. Drivers are started in 4 stages, se main.c
+
+{{{
+    // Stage is:
+    //   0 - very early in the boot - interrupts can be used only
+    //   1 - boot, most of kernel infrastructure is there
+    //   2 - disks which Phantom will live in must be found here
+    //   3 - late and optional and slow junk
+}}}
+
+
+== Video ==
+
+See video.c
+
+Two paths:
+ * VESA - if VESA is found, VESA driver is enforced. That's wrong, surely.
+ * Else, all the videodrivers are called to probe hw and tell which resolution they can give. Biggest one is selected.
+
+TODO: boot flag to force VESA, boot parameter to limit resolution.
+
+
+== Unix subsystem ==
+
+If compiled in, starts just before Phantom subsystem, and starts all pmod_ modules in turn.
+
+See unix/
+
+
+= Phantom subsystem start =
+
+See pvm_root_init()
+
+In signle thread:
+ * On first start boot code is run.
+ * On subsequent starts it supposed that init code will be run instead of boot. Possibly.
+
+In multithread:
+ * all the rest is run.
+
+== First run ==
+
+See vm/root.c, pvm_boot()
+
+On the first run kernel 'manually' builds minimal object environment (class/int/string/...) classes, loads '.ru.dz.phantom.system.boot' class (if not overriden from kernel command line), and starts VM thread to run it. All the threads run from boot code will be registered, but not started until boot code is over. Finish of the boot code lets OS to start all the VM threads.
+
+NB: On this run root array of special references is built. These references are used by kernel on subsequent starts to reach specific objects in object space, such as list of all VM threads, etc. 
