@@ -298,8 +298,15 @@ static void pvm_boot()
 
     struct pvm_object user_boot_class;
 
-    if( pvm_load_class_from_module(".ru.dz.phantom.system.boot", &user_boot_class))
+    const char boot_class[128];
+    if( !phantom_getenv("root.boot", boot_class, 128 ) )
+        strcpy( boot_class, ".ru.dz.phantom.system.boot" );
+
+    if( pvm_load_class_from_module(boot_class, &user_boot_class))
+    {
+        printf("Unable to load boot class '%s'", boot_class );
         pvm_exec_throw("Unable to load user boot class");
+    }
 
     struct pvm_object user_boot = pvm_create_object( user_boot_class );
 
@@ -405,6 +412,7 @@ static void load_kernel_boot_env(void)
     // Default env first
     phantom_setenv("root.shell",".ru.dz.phantom.system.shell");
     phantom_setenv("root.init",".ru.dz.phantom.system.init");
+    phantom_setenv("root.boot",".ru.dz.phantom.system.boot");
 
 
     int i = main_envc;
