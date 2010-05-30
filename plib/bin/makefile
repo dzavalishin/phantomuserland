@@ -25,4 +25,4 @@ phantom.osimpl.pc phantom.os.pc phantom.os.time.pc ru.dz.phantom.tetris.*.pc
 
 
 clean: 
-	rm *.pc *.lst *.lstc classes *.d
+	-rm *.pc *.lst *.lstc classes *.d

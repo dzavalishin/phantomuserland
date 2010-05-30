@@ -19,6 +19,7 @@
 // will prevent other idle threads from running
 static void haltme( void *a )
 {
+    (void) a;
     //hal_set_thread_priority( GET_CURRENT_THREAD()->tid, THREAD_PRIO_IDLE );
 
     hal_set_thread_name("<Halt_Me>");

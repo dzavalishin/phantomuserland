@@ -12,7 +12,7 @@
 //#include <fcntl.h>
 //#include <i386/io.h>
 
-#include "pci.h"
+#include <i386/pci.h>
 
 typedef struct
 {

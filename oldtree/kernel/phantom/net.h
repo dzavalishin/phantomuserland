@@ -8,6 +8,7 @@
 #define NET_CHATTY 1
 
 
+#include <errno.h>
 #include "hal_private.h"
 
 #include "nqueue.h"
@@ -61,6 +62,9 @@ typedef uint32 ipv4_addr;
 #define NETADDR_TO_IPV4(naddr) (*(ipv4_addr *)(&((&(naddr))->addr[0])))
 #define IPV4_DOTADDR_TO_ADDR(a, b, c, d) \
 	(((ipv4_addr)(a) << 24) | (((ipv4_addr)(b) & 0xff) << 16) | (((ipv4_addr)(c) & 0xff) << 8) | ((ipv4_addr)(d) & 0xff))
+
+
+errno_t parse_ipv4_addr( ipv4_addr *out, char *str );
 
 
 #if 0

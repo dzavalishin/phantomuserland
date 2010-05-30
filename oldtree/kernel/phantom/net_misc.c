@@ -247,6 +247,9 @@ static int syslog_failed = 0;
 static char syslog_src_addr[64] = "(unknown)";
 static sockaddr syslog_addr;
 
+// Set in boot_cmd_line
+extern char *syslog_dest_address_string;
+
 static int connect_syslog(void)
 {
     if( udp_open(&syslog_socket) )
@@ -260,6 +263,10 @@ static int connect_syslog(void)
     syslog_addr.addr.len = 4;
     syslog_addr.addr.type = ADDR_TYPE_IP;
     NETADDR_TO_IPV4(syslog_addr.addr) = IPV4_DOTADDR_TO_ADDR(192, 168, 1, 100);
+
+    // It won't assign if address string is null or wrong
+    parse_ipv4_addr( &(NETADDR_TO_IPV4(syslog_addr.addr)), syslog_dest_address_string );
+
 
     int rc;
     if( 0 != (rc = udp_bind(syslog_socket, &syslog_addr)) )

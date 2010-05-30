@@ -42,8 +42,7 @@
 #include "timedcall.h"
 
 #include <sys/utsname.h>
-
-//#include <elf.h>
+#include <stdlib.h>
 
 // pvm_bulk_init
 #include <vm/bulk.h>
@@ -420,7 +419,4 @@ void _exit(int code)
     (void) code;
 
     hal_cpu_reset_real();
-    
-    /*UNREACHED*/
-//#pragma unreached
 }

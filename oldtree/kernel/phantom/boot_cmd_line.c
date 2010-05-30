@@ -225,15 +225,66 @@ phantom_parse_cmd_line()
 
 }
 
+// See debug_ext.h
+int debug_max_level_flow  = 255;
+int debug_max_level_info  = 255;
+int debug_max_level_error = 255;
+
+
+char *syslog_dest_address_string = 0;
+
+
+/**
+ *
+ * -d max_error_level (0-255)
+ * -e max_error_level (0-255)
+ * -i max_info_level (0-255)
+ * -f max_flow_level (0-255)
+ * -s syslog_dest_ip_addr
+ *
+**/
+
 void
 phantom_process_boot_options(void)
 {
     int c = boot_argc;
     const char **args = boot_argv;
 
+
     while(c--)
     {
         const char *arg = *args++;
+        if( *arg != '-' )
+            goto error;
+
+        if( strlen( arg ) != 2 )
+            SHOW_ERROR( 0, "Warning: boot option '%s' length is not 2 chars", arg);
+
+        switch( arg[1] )
+        {
+        case 'd':
+        case 'e':
+            debug_max_level_error = (int)atol( *args++ );
+            break;
+
+        case 'f':
+            debug_max_level_flow = (int)atol( *args++ );
+            break;
+
+        case 'i':
+            debug_max_level_info = (int)atol( *args++ );
+            break;
+
+        case 's':
+            syslog_dest_address_string = strdup( *args++ );
+            break;
+
+        default:
+            goto error;
+        }
+        continue;
+
+    error:
         SHOW_ERROR( 0, "Warning: Unknownm boot option '%s'", arg);
     }
 

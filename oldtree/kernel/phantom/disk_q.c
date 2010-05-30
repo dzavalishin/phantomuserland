@@ -129,7 +129,7 @@ void phantom_init_disk_q(struct disk_q *q, void (*startIo)( struct disk_q *q ))
 
 
 
-phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void (*startIoFunc)( struct disk_q *q ) )
+phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *private, int unit, void (*startIoFunc)( struct disk_q *q ) )
 {
     phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size);
 
@@ -141,6 +141,9 @@ phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void (
     phantom_init_disk_q( q, startIoFunc );
 
     ret->specific = q;
+
+    q->device = private;
+    q->unit = unit; // if this is multi-unit device, let 'em distinguish
 
     // errno_t phantom_register_disk_drive(ret);
 

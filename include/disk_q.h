@@ -2,8 +2,8 @@
 #define DISK_Q_H
 
 #include <hal.h>
-#include "disk.h"
-#include "queue.h"
+#include <disk.h>
+#include <queue.h>
 
 // TODO bring 'em to one place, make unique
 #define DISK_Q_STRUCT_ID 0x12120001
@@ -16,6 +16,7 @@ struct disk_q
 
     // Used by driver to link with it's private device struct
     void                                *device;
+    int                                 unit;
 
     hal_spinlock_t                      lock;
 
@@ -33,7 +34,7 @@ struct disk_q
 /** initialize disk_q structure. */
 void phantom_init_disk_q(struct disk_q *q, void (*startIo)( struct disk_q *q ) );
 
-phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void (*startIoFunc)( struct disk_q *q ) );
+phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *private, int unit, void (*startIoFunc)( struct disk_q *q ) );
 
 
 #endif // DISK_Q_H
