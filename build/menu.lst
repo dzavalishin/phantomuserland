@@ -1,4 +1,21 @@
+color yellow/blue yellow/magenta
 timeout=3
 title=phantom
-kernel=(nd)/tftp/phantom
-module=(nd)/tftp/classes
+kernel=(nd)/phantom -d 10 bootclass=ru.dz.phantom.system.boot shellclass=ru.dz.phantom.system.shell -- 
+module=(nd)/classes
+module=(nd)/pmod_test
+boot 
+
+
+title=phantom (alt boot class)
+kernel=(nd)/phantom -d 10 bootclass=ru.dz.phantom.system.boot_1 shellclass=ru.dz.phantom.system.shell --
+module=(nd)/classes
+module=(nd)/pmod_test
+boot 
+
+
+title=phantom (debug mode)
+kernel=(nd)/phantom -d 20 -- 
+module=(nd)/classes
+module=(nd)/pmod_test
+boot 
