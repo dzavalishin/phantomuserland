@@ -14,17 +14,26 @@ Phantom is a multiboot kernel. Multiboot commands are like this:
 
 {{{
 title=phantom
-kernel=(nd)/phantom -d root.boot=ru.dz.phantom.tetris.boot --
+kernel=(nd)/phantom -d 10 root.boot=ru.dz.phantom.tetris.boot --
 module=(nd)/classes
 module=(nd)/pmod_test
 boot 
 }}}
 
 Kernel command line is:
- * args (TODO: -d - debug)
+ * kernel startup args
  * kernel environment (root.boot = boot class name, root.init = init class name, root.shell = shell class name)
  * -- separates kernel main argv/argc
  * kernel main args (unused yet)
+
+Kernel startup args are:
+{{{
+-d max_error_level (0-255)
+-e max_error_level (0-255)
+-i max_info_level (0-255)
+-f max_flow_level (0-255)
+-s syslog_dest_ip_addr
+}}}
 
 Module named 'classses' (just this name) is needed during th first boot only and passes basic class set for empty OS to initialize itself.
 
