@@ -837,5 +837,30 @@ int ipv4_init(void)
 	return 0;
 }
 
+/**
+ *
+ * Parse IP address string. If string is parsable, assign IP address to out.
+ * Returns 0 if OK and EINVAL else.
+ *
+**/
+
+errno_t parse_ipv4_addr( ipv4_addr *out, char *str )
+{
+    unsigned int a,b,c,d;
+
+    if( str == 0 )
+        return EINVAL;
+
+    int n = sscanf( str, "%d.%d.%d.%d", &a, &b, &c, &d );
+
+    if( n != 4 || a > 255 || b > 255 || c > 255 || d > 255 )
+        return EINVAL;
+
+    *out = IPV4_DOTADDR_TO_ADDR(a, b, c, d);
+    return 0;
+}
+
+
+
 #endif // HAVE_NET
 

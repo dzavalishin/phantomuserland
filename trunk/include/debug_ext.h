@@ -54,16 +54,21 @@
 #define DEBUG_WAIT_ERROR
 #endif
 
+extern int debug_max_level_flow;
+extern int debug_max_level_info;
+extern int debug_max_level_error;
+
+
 #ifndef DEBUG_MAX_LEVEL_FLOW
-#define DEBUG_MAX_LEVEL_FLOW 255
+#define DEBUG_MAX_LEVEL_FLOW debug_max_level_flow
 #endif
 
 #ifndef DEBUG_MAX_LEVEL_INFO
-#define DEBUG_MAX_LEVEL_INFO 255
+#define DEBUG_MAX_LEVEL_INFO debug_max_level_info
 #endif
 
 #ifndef DEBUG_MAX_LEVEL_ERROR
-#define DEBUG_MAX_LEVEL_ERROR 255
+#define DEBUG_MAX_LEVEL_ERROR debug_max_level_error
 #endif
 
 #ifndef DEBUG_MSG_PREFIX

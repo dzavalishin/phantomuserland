@@ -3,46 +3,8 @@
 
 #include "vm/object.h"
 
-/*
-struct phantom_dev_ops
-{
-    int (*start)(struct phantom_device *dev); // Start device (begin using)
-    int (*stop)(struct phantom_device *dev);  // Stop device
-
-    // OS sends data to driver - either on its own initiative
-    // or as result of phantom_os_ops.kick
-    int (*send)(struct phantom_device *dev, void *data, int len); 
-
-    // If last call of phantom_os_ops.send was incomplete transfer
-    // (OS consumed not all of data), OS has to kick driver when
-    // it is finally ready to eat more.
-    int (*kick)(struct phantom_device *dev);
-};
-
-typedef struct phantom_dev_ops phantom_dev_ops_t;
-
-struct phantom_os_ops
-{
-    // Driver sends data to OS - either on its own initiative
-    // or as result of phantom_dev_ops.kick
-    int (*send)(struct phantom_device *dev, void *data, int len); 
-
-    // If last call of phantom_drv_ops.send was incomplete transfer
-    // (Driver consumed not all of data), Driver has to kick OS when
-    // it is finally ready to eat more.
-    int (*kick)(struct phantom_device *dev); 
-};
-
-typedef struct phantom_os_ops phantom_os_ops_t;
-*/
-
 
 struct phantom_device;
-
-
-
-
-
 
 
 struct phantom_dev_ops

@@ -61,6 +61,7 @@ typedef struct phantom_disk_partition phantom_disk_partition_t;
 
 phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition_t *base, long shift, long size);
 
+errno_t phantom_register_disk_drive(phantom_disk_partition_t *p);
 
 
 

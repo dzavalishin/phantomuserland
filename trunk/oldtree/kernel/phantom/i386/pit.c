@@ -3,6 +3,7 @@
 #include <phantom_libc.h>
 
 #include <hal.h>
+#include <time.h>
 #include "../misc.h"
 
 #include "pit.h"
@@ -23,7 +24,8 @@ int pit0_mode = PIT_C0|PIT_SQUAREMODE|PIT_READMODE ;
 unsigned int delaycount;		/* loop count in trying to delay for
 * 1 millisecond
 */
-unsigned long microdata=50;		/* loop count for 10 microsecond wait.
+
+unsigned long ten_microsec_sleep_loop_count = 50;		/* loop count for 10 microsecond wait.
 MUST be initialized for those who
 insist on calling "tenmicrosec"
 it before the clock has been
@@ -89,26 +91,13 @@ static void findspeed()
     if(s) hal_sti();
 }
 
-#if uWAIT
 
-/*
- asm:
-
- // Waste 10 microseconds.
-
- ENTRY(tenmicrosec)
- movl	_microdata,%ecx		// cycle count for 10 microsecond loop
- tenmicroloop:
- loop	tenmicroloop
- ret
-
- */
 
 
 #define MICROCOUNT      1000    /* keep small to prevent overflow */
 static void microfind()
 {
-    unsigned int flags;
+    //unsigned int flags;
     unsigned char byte;
     unsigned short leftover;
     int s;
@@ -121,7 +110,7 @@ static void microfind()
     /* output a count of -1 to counter 0 */
     outb(pitctr0_port, 0xff);
     outb(pitctr0_port, 0xff);
-    microdata=MICROCOUNT;
+    ten_microsec_sleep_loop_count=MICROCOUNT;
     tenmicrosec();
     /* Read the value left in the counter */
     byte = inb(pitctr0_port);	/* least siginifcant */
@@ -131,9 +120,9 @@ static void microfind()
      *  (loopcount * timer clock speed)/ (counter ticks * 1000)
      *  Note also that 1000 is for figuring out milliseconds
      */
-    microdata = (MICROCOUNT * CLKNUM) / ((0xffff-leftover)*100000);
-    if (!microdata)
-        microdata++;
+    ten_microsec_sleep_loop_count = (MICROCOUNT * CLKNUM) / ((0xffff-leftover)*100000);
+    if (!ten_microsec_sleep_loop_count)
+        ten_microsec_sleep_loop_count++;
 
     //splon(s);         /* restore interrupt state */
     if(s) hal_sti();
@@ -143,7 +132,6 @@ static void microfind()
 
 
 
-#endif
 
 
 
@@ -174,9 +162,9 @@ void phantom_timer0_start(void)
     //form_pic_mask();
 
     findspeed();
-#if uWAIT
+//#if uWAIT
     microfind();
-#endif
+//#endif
     s = hal_save_cli(); //sploff();         /* disable interrupts */
 
     /* Since we use only timer 0, we program that.
@@ -235,7 +223,6 @@ phantom_timer_pit_init(int freq, void (*timer_intr)())
         panic( /*__FUNCTION__*/ "phantom_timer_pit_init: can't install intr handler %x", rc);
 
     srandom(pit_read(0)); // try to init random gen
-
 
     return freq;
 }

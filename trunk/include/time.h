@@ -16,6 +16,9 @@ time_t 			time(time_t *timer);
 /* wait by spinning: number of milliseconds to delay */
 void 			phantom_spinwait(int millis);
 
+// Wait by spinning, ~10 microsec
+void			tenmicrosec(void); 
+
 // Updated by kernel time code, readonly. Read by copying pointer
 // and reading then. Updated by pointer change once a second.
 //

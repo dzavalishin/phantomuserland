@@ -163,6 +163,8 @@ int					hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
 
 void                                    hal_set_thread_priority( int tid, int prio );
 
+void hal_set_thread_name(const char *name);
+
 
 void                                    hal_disable_preemption(void);
 void                                    hal_enable_preemption(void);

@@ -1,1 +1,0 @@
-const char* SVN_Version = " 344:345 "; const char* svn_version(void) { return SVN_Version; }

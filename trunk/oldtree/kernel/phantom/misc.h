@@ -101,7 +101,6 @@ struct multiboot_module *phantom_multiboot_find(const char *string);
 #define SOFT_IRQ_THREADS        31
 
 
-void hal_set_thread_name(const char *name);
 
 
 
