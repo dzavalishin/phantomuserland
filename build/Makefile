@@ -2,8 +2,11 @@ include ../config.mk
 
 install: tools boot
 
+#TFTP_PATH=$(realpath $(PHANTOM_TFTP))
+TFTP_PATH=../oldtree/run/tftp/tftp
+
 boot: classes menu.lst #phantom
-	cp $^ $(realpath $(PHANTOM_TFTP))
+	cp $^ $(TFTP_PATH)
 
 tools: $(INST_BIN)/pfsextract.exe $(INST_BIN)/pfsformat.exe \
        $(INST_BIN)/plc.cmd $(INST_BIN)/mkbulk.exe $(INST_BIN)/pvm_test.exe \
