@@ -188,8 +188,10 @@ static timedcall_t sched_timer =
 **/
 
 
-int main()
+int main(int argc, char **argv, char **envp)
 {
+    (void) envp;
+
     init_irq_allocator();
 
     // BUG - called second time?
@@ -273,6 +275,17 @@ int main()
     //arch_get_rtc_delta(); // Read PC clock
     //getchar();
 
+    // -----------------------------------------------------------------------
+    // If this is test run, switch to test code
+    // -----------------------------------------------------------------------
+
+    if( argc >= 3 && (0 == strcmp( argv[1], "-test" )) )
+    {
+        SHOW_FLOW( 0, "Will run '%s' test", argv[2] );
+        run_test( argv[2], argv[3] );
+        SHOW_FLOW0( 0, "Test done, reboot");
+        exit(0);
+    }
 
     // -----------------------------------------------------------------------
     // Now starting object world infrastructure
