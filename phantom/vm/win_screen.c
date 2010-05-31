@@ -43,13 +43,13 @@ probe: (void *)drv_video_null,
 start: (void *)drv_video_null,
 stop:  (void *)drv_video_null,
 
-    drv_video_null,
+    (void*)drv_video_null,
     (void*)drv_video_null,
     (void*)drv_video_null,
 
-    drv_video_null,
+    (void*)drv_video_null,
 
-mouse:    		drv_video_null,
+mouse:    		(void*)drv_video_null,
 
 redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
 set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,

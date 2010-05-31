@@ -16,6 +16,7 @@
 #include <event.h>
 #include <spinlock.h>
 
+#include "win_local.h"
 
 
 

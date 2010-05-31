@@ -23,6 +23,7 @@
 #include "hal.h"
 #include "main.h"
 #include "vm/alloc.h"
+#include "video/win_local.h"
 
 
 struct hardware_abstraction_level    	hal;
