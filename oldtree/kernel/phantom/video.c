@@ -42,7 +42,7 @@ static void phantom_select_video_driver()
 
     SHOW_FLOW0( 2, "Look for video driver" );
 
-    int i;
+    unsigned int i;
     for( i = 0; i < (sizeof(video_drivers)/sizeof(struct drv_video_screen_t *)); i++ )
     {
         struct drv_video_screen_t *drv = video_drivers[i];

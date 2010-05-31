@@ -6,6 +6,12 @@ module=(nd)/classes
 module=(nd)/pmod_test
 boot 
 
+title=phantom ALL TESTS
+kernel=(nd)/phantom -d 20 -- -test all
+module=(nd)/classes
+module=(nd)/pmod_test
+boot 
+
 
 title=phantom (alt boot class)
 kernel=(nd)/phantom -d 10 root.boot=ru.dz.phantom.tetris.boot --

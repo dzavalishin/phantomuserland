@@ -134,4 +134,10 @@ void phantom_unix_fs_init(void);
 
 void check_global_lock_entry_count(void);
 
+// -----------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------
+
+
+void run_test( const char *test_name, const char *test_parm );
 

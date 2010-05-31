@@ -55,6 +55,7 @@ entry.o: crtn.o
 START_O_FILE=entry.o
 # driver_isa_beep.o
 phantom: $(START_O_FILE) \
+	test_switch.o \
 	events.o \
        	heap/heap.o heap/heap_pool.o heap/secondaries.o boot_cmd_line.o \
        	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
