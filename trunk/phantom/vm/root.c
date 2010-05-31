@@ -298,7 +298,7 @@ static void pvm_boot()
 
     struct pvm_object user_boot_class;
 
-    const char boot_class[128];
+    char boot_class[128];
     if( !phantom_getenv("root.boot", boot_class, 128 ) )
         strcpy( boot_class, ".ru.dz.phantom.system.boot" );
 

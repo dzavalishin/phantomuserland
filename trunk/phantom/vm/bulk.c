@@ -41,7 +41,7 @@ static int load( int len, struct pvm_object   *out );
 static int cncmp( const char *a, const char *b );
 
 // Return 0 on success
-int pvm_load_class_from_module( char *class_name, struct pvm_object   *out )
+int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out )
 {
     seekf(0);
 
@@ -90,7 +90,7 @@ static int load( int len, struct pvm_object   *out )
 {
     if(DEBUG) printf("Bulk: loading\n" );
 
-    char *buf = malloc(len);
+    void *buf = malloc(len);
     if( buf == 0 )
         return -1;
 

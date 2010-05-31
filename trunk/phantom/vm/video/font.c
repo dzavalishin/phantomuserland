@@ -20,7 +20,7 @@ static __inline__ int _bpc(const drv_video_font_t *font)
     return font->ysize * (1 + ((font->xsize-1) / 8));
 }
 
-__inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, char c )
+__inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, const char c )
 {
     //int bpc = font->ysize * (1 + ((font->xsize-1) / 8));
     return font->font + c * _bpc(font);
@@ -86,7 +86,7 @@ __inline__ int drv_video_font_draw_char(
 __inline__ void drv_video_font_draw_string(
                                            drv_video_window_t *win,
                                            const drv_video_font_t *font,
-                                           char *s, const rgba_t color,
+                                           const char *s, const rgba_t color,
                                            int x, int y )
 {
     int nc = strlen(s);

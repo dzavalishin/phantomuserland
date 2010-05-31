@@ -28,8 +28,8 @@ struct pvm_bulk_class_head
     u_int32_t   data_length;
 };
 
-int pvm_load_class_from_module( char *class_name, struct pvm_object   *out );
-int pvm_load_class_from_memory( unsigned char * contents, int fsize, struct pvm_object* out );
+int pvm_load_class_from_module( const char *class_name, struct pvm_object *out );
+int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *out );
 void pvm_bulk_init( pvm_bulk_seek_t sf, pvm_bulk_read_t rd );
 
 

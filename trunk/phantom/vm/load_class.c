@@ -75,7 +75,7 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
 
 
 
-int pvm_load_class_from_memory( unsigned char * contents, int fsize, struct pvm_object* out )
+int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *out )
 {
     /*
      struct pvm_code_handler ch;
@@ -85,7 +85,7 @@ int pvm_load_class_from_memory( unsigned char * contents, int fsize, struct pvm_
      ch.IP = 0;
      */
 
-    unsigned char *rec_start = contents;
+    const unsigned char *rec_start = (const unsigned char *)data;
     int record_size = 0;
 
     struct pvm_object class_name;
@@ -98,11 +98,11 @@ int pvm_load_class_from_memory( unsigned char * contents, int fsize, struct pvm_
     struct pvm_object iface;
     int got_class_header = 0;
 
-    for( ; rec_start < contents + fsize; rec_start = rec_start+record_size )
+    for( ; rec_start < (const unsigned char *)data + fsize; rec_start = rec_start+record_size )
     {
-        unsigned char *ptr = rec_start;
+        const unsigned char *ptr = rec_start;
 
-        //printf("%d bytes left\n", contents + fsize - ptr );
+        //printf("%d bytes left\n", data + fsize - ptr );
 
         if( strncmp( (const char *)ptr, "phfr:", 5 ) )
         {

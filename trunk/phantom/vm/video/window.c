@@ -18,7 +18,7 @@
 #include "hal.h"
 #include "win_local.h"
 
-static void defaultEventProcessor();
+//static void defaultEventProcessor();
 
 
 //static
@@ -96,8 +96,6 @@ drv_video_window_t *private_drv_video_window_create(int xsize, int ysize)
     return w;
 }
 
-
-void win_make_decorations(drv_video_window_t *w);
 
 
 drv_video_window_t *
