@@ -56,19 +56,8 @@ typedef struct vm_page
     // NB!! pager_io_request MUST BE FIRST so that its address is our address too!
     struct pager_io_request pager_io;
 
-    unsigned char       generation;        // this page's generation number
-
     void *              virt_addr;         // where phys_addr is mapped
     phys_page_t         phys_addr;      // our phys mem page, if any
-
-    // don't touch this object and its page!
-    // This and next flag can be checked/modified only under a special
-    // mutex - vm_map_mutex.
-    unsigned char       flag_busy               ONEBIT;
-
-    // don't touch the page itself, it is in the middle
-    // of something - such as swapin, COW, etc.
-    unsigned char       flag_dont_touch         ONEBIT;
 
     // Can't touch pager_io data
     unsigned char       flag_pager_io_busy      ONEBIT;
@@ -119,17 +108,6 @@ typedef struct vm_page
 
     int                 access_count;
 
-
-    //struct vm_page *    dfda_next; // deferred disk alloc
-
-
-    //void                kick_pageout() volatile; // set on pageout q
-    //void                sync_pageout() volatile; // do NOW!
-    //void                req_pagein () volatile; // set on pagein q
-    //void                sync_pagein () volatile; // do NOW!
-
-    // Kick this when setting flag_busy or flag_dont_touch
-    //hal_cond_t      	sleepStone;
     hal_cond_t      	done;
     hal_mutex_t         lock;
 

@@ -359,10 +359,10 @@ paging_device_io_done(void *arg)
 static void
 paging_device_start_io(paging_device *me)
 {
-    if( me->io_is_in_progress ) panic("have io_is_in_progress in paging_device_stop_io");
-    me->io_is_in_progress = 1;
-    SHOW_FLOW0(8, "paging device START IO ");
     hal_mutex_lock( &me->mutex );
+    if( me->io_is_in_progress ) panic("have io_is_in_progress in paging_device_stop_io");
+    SHOW_FLOW0(8, "paging device START IO ");
+    me->io_is_in_progress = 1;
     hal_cond_broadcast(&me->start_io_sema);
     hal_mutex_unlock( &me->mutex );
 }

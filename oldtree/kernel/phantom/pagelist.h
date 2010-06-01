@@ -65,21 +65,68 @@ typedef struct disk_page_cache
 } disk_page_cache;
 
 
-static __inline__ void disk_page_cache_wait(disk_page_cache *me) { disk_page_io_wait(&me->io); }
+static __inline__ void disk_page_cache_wait(disk_page_cache *me)
+{
+    disk_page_io_wait(&me->io);
+}
 
-static __inline__ void disk_page_cache_flush(disk_page_cache *me) { if( me->dirty ) { disk_page_cache_wait(me); disk_page_io_save_me_async(&me->io); me->dirty = 0; } }
+static __inline__ void disk_page_cache_flush(disk_page_cache *me)
+{
+    if( me->dirty )
+    {
+        disk_page_cache_wait(me);
+        disk_page_io_save_me_async(&me->io);
+        me->dirty = 0;
+    }
+}
 
-static __inline__ void disk_page_cache_init(disk_page_cache *me) { me->dirty = 0; disk_page_io_init(&me->io); }
-static __inline__ void disk_page_cache_finish(disk_page_cache *me) { disk_page_cache_flush(me); disk_page_cache_wait(me); disk_page_io_finish(&me->io); } // we have to wait or it will panic
+static __inline__ void disk_page_cache_init(disk_page_cache *me)
+{
+    me->dirty = 0;
+    disk_page_io_init(&me->io);
+}
+static __inline__ void disk_page_cache_finish(disk_page_cache *me)
+{
+    disk_page_cache_flush(me);
+    disk_page_cache_wait(me);
+    disk_page_io_finish(&me->io);
+} // we have to wait or it will panic
 
-static __inline__ void disk_page_cache_seek_async( disk_page_cache *me, disk_page_no_t dpage ) { disk_page_cache_flush(me); disk_page_cache_wait(me);  disk_page_io_seek( &me->io, dpage ); disk_page_io_load_me_async(&me->io); }
-static __inline__ void disk_page_cache_seek_sync( disk_page_cache *me, disk_page_no_t dpage ) { disk_page_cache_flush(me); disk_page_cache_wait(me);   disk_page_io_seek( &me->io, dpage ); disk_page_io_load_me_sync(&me->io); }
-static __inline__ void disk_page_cache_seek_noread( disk_page_cache *me, disk_page_no_t dpage ) { disk_page_cache_flush(me); disk_page_cache_wait(me); disk_page_io_seek( &me->io, dpage ); }
-static __inline__ disk_page_no_t disk_page_cache_tell(disk_page_cache *me) { return disk_page_io_tell( &me->io ); }
+static __inline__ void disk_page_cache_seek_async( disk_page_cache *me, disk_page_no_t dpage )
+{
+    disk_page_cache_flush(me);
+    disk_page_cache_wait(me);
+    disk_page_io_seek( &me->io, dpage );
+    disk_page_io_load_me_async(&me->io);
+}
+static __inline__ void disk_page_cache_seek_sync( disk_page_cache *me, disk_page_no_t dpage )
+{
+    disk_page_cache_flush(me);
+    disk_page_cache_wait(me);
+    disk_page_io_seek( &me->io, dpage );
+    disk_page_io_load_me_sync(&me->io);
+}
+static __inline__ void disk_page_cache_seek_noread( disk_page_cache *me, disk_page_no_t dpage )
+{
+    disk_page_cache_flush(me);
+    disk_page_cache_wait(me);
+    disk_page_io_seek( &me->io, dpage );
+}
+static __inline__ disk_page_no_t disk_page_cache_tell(disk_page_cache *me)
+{
+    return disk_page_io_tell( &me->io );
+}
 
-static __inline__ void disk_page_cache_modified(disk_page_cache *me) { me->dirty = 1; }
+static __inline__ void disk_page_cache_modified(disk_page_cache *me)
+{
+    me->dirty = 1;
+}
 
-static __inline__ void *disk_page_cache_data(disk_page_cache *me) { disk_page_cache_wait(me); return disk_page_io_data(&me->io); }
+static __inline__ void *disk_page_cache_data(disk_page_cache *me)
+{
+    disk_page_cache_wait(me);
+    return disk_page_io_data(&me->io);
+}
 
 
 // Just a huge on-disk extensible array of pointers to disk pages

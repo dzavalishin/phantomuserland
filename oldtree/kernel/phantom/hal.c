@@ -267,11 +267,11 @@ kernel_thread_starter(void *func)
 }
 
 
-void
+void*
 hal_start_kernel_thread(void (*thread)(void))
 {
     //phantom_thread_t *t =
-    phantom_create_thread( kernel_thread_starter, thread, THREAD_FLAG_KERNEL );
+    return phantom_create_thread( kernel_thread_starter, thread, THREAD_FLAG_KERNEL );
 }
 
 

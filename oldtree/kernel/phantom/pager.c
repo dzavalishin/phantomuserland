@@ -279,7 +279,12 @@ void pager_stop_io() // called after io is complete
         //hal_printf("pager_stop_io pagein AFT rem Q START = 0x%X Q END = 0x%X... ", pagein_q_start, pagein_q_end);
 
         last->flag_pagein = 0;
-        if(last->pager_callback) last->pager_callback( last, 0 );
+        if(last->pager_callback)
+        {
+            hal_mutex_unlock(&pager_mutex);
+            last->pager_callback( last, 0 );
+            hal_mutex_lock(&pager_mutex);
+        }
         //hal_wakeup( last );
         pagein_is_in_process = 0;
         }
@@ -295,7 +300,12 @@ void pager_stop_io() // called after io is complete
         //free_io_resources(last);
 
         last->flag_pageout = 0;
-        if(last->pager_callback) last->pager_callback( last, 1 );
+        if(last->pager_callback)
+        {
+            hal_mutex_unlock(&pager_mutex);
+            last->pager_callback( last, 1 );
+            hal_mutex_lock(&pager_mutex);
+        }
         //hal_printf("pager_stop_io pageout aft callbk... " );
         //hal_wakeup( last );
         pageout_is_in_process = 0;

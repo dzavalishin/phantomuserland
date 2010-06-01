@@ -150,7 +150,8 @@ static void dpc_timed_waker_thread(void)
     }
 }
 
-
+static void * dpc_thread_object;
+static void * dpc_timed_waker_thread_object;
 
 void dpc_init()
 {
@@ -161,10 +162,10 @@ void dpc_init()
     hal_mutex_init(&unused_dpc_mutex, "DPC");
 
     SHOW_FLOW0( 1, "Starting DPC thread...");
-    hal_start_kernel_thread(dpc_thread);
+    dpc_thread_object = hal_start_kernel_thread(dpc_thread);
 
     SHOW_FLOW0( 1, " starting DPC waker thread...");
-    hal_start_kernel_thread(dpc_timed_waker_thread);
+    dpc_timed_waker_thread_object = hal_start_kernel_thread(dpc_timed_waker_thread);
 
     while(!dpc_init_ok)
         hal_sleep_msec(1); // wait for thread to start

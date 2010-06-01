@@ -153,7 +153,7 @@ void        				hal_register_page_fault_handler(void (*page_fault_handler)( void
 
 
 
-void        				hal_start_kernel_thread(void (*thread)(void));
+void*        				hal_start_kernel_thread(void (*thread)(void));
 void        				hal_exit_kernel_thread(void);
 
 // returns thread id, does not check for thread death

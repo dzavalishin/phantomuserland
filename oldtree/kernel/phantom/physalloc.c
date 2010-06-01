@@ -106,6 +106,7 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 void phantom_phys_free_page( physalloc_t *arena, physalloc_item_t free )
 {
     assert(arena->inited);
+    assert(free >= 0 && free < arena->total_size);
 
     int elem_no = free/BITS_PER_ELEM;
     int elem_pos = free%BITS_PER_ELEM;
@@ -122,6 +123,10 @@ void phantom_phys_free_page( physalloc_t *arena, physalloc_item_t free )
 void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_t n_pages )
 {
     assert(arena->inited);
+    assert(start >= 0 &&
+            start < arena->total_size &&
+            n_pages < arena->total_size &&
+            start + n_pages < arena->total_size);
 
     while(n_pages)
     {
