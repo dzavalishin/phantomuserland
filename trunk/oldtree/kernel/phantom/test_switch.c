@@ -17,12 +17,23 @@
 
 
 #include "config.h"
+
 #include <phantom_libc.h>
 #include <errno.h>
+#include <setjmp.h>
+
 #include "misc.h"
 #include "test.h"
 
 #include "svn_version.h"
+
+
+static jmp_buf jb;
+
+void test_fail(errno_t rc)
+{
+    longjmp( jb, rc );
+}
 
 
 /**
@@ -38,7 +49,20 @@
 
 
 
-#define TEST(name) ({ if( all || (0 == strcmp( test_name, #name )) ) report( do_test_##name(test_parm), #name ); })
+#define TEST(name) \
+    ({                                  		\
+    int rc;                                             \
+    if( ( rc = setjmp( jb )) )				\
+    {                                                   \
+        report( rc, #name );     			\
+    }                                                   \
+    else                                                \
+    {                                                   \
+        if( all || (0 == strcmp( test_name, #name )) )  \
+        report( do_test_##name(test_parm), #name );     \
+    }                                                   \
+    })
+
 
 void report( int rc, const char *test_name )
 {
@@ -73,6 +97,8 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(udp_send);
     TEST(udp_syslog);
+
+    TEST(threads);
 
     printf("-----\nPhantom test suite FINISHED\n" );
 
