@@ -12,6 +12,11 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <errno.h>
+
+void test_fail(errno_t rc); // Call from any test to return to test runner and signal failure
+
+
 
 int do_test_malloc(const char *test_parm);
 
@@ -45,6 +50,7 @@ int do_test_udp_syslog(const char *test_parm);
 
 // TODO test threads, mutexes, conds, semas incl timeouts
 
+int do_test_threads(const char *test_parm);
 
 
 #endif // TEST_H
