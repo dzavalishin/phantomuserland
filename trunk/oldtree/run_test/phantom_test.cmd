@@ -30,7 +30,7 @@ del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
 
-copy ../run/tftp/* tftp
+cp ../run/tftp/* tftp
 
 bin\qemu -no-reboot %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% -soundhw sb16
 
