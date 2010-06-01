@@ -17,47 +17,8 @@
 
 int phantom_tcpip_active = 0;
 
-#define NET_TEST 0
 
 
-#if NET_TEST
-static void do_net_test(void)
-{
-    int rc;
-
-    void *prot_data;
-    if( udp_open(&prot_data) )
-    {
-        SHOW_ERROR0(0, "UDP - can't prepare endpoint");
-        return;
-    }
-
-    char buf[] = "UDP request";
-
-    sockaddr addr;
-    addr.port = 69; // TFTP
-
-    addr.addr.len = 4;
-    addr.addr.type = ADDR_TYPE_IP;
-    //NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(192, 168, 1, 0xFF);
-    //NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(192, 168, 1, 123);
-    //NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(127, 0, 0, 1);
-    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2);
-
-    if( 0 != (rc = udp_sendto(prot_data, buf, sizeof(buf), &addr)) )
-    {
-        if(rc == ERR_NET_NO_ROUTE)
-        {
-            printf("UDP - No route\n", rc);
-        }
-        else
-            printf("UDP - can't send, rc = %d\n", rc);
-        return;
-    }
-
-    printf("UDP - done sending");
-}
-#endif // NET_TEST
 
 
 /*
@@ -383,9 +344,6 @@ void udp_syslog_send(const char *prefix, const char *message)
 void net_test(void)
 {
     syslog(LOG_DEBUG|LOG_KERN,"Test of UDP syslog");
-#if NET_TEST
-    //do_net_test();
-#endif
     //tftp_test();
     //getchar();
 
