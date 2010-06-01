@@ -98,6 +98,10 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(udp_send);
     TEST(udp_syslog);
 
+    // These are long
+    TEST(dpc);
+
+    // These are very long, do 'em last
     TEST(threads);
 
     printf("-----\nPhantom test suite FINISHED\n" );

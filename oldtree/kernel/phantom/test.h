@@ -52,6 +52,8 @@ int do_test_udp_syslog(const char *test_parm);
 
 int do_test_threads(const char *test_parm);
 
+int do_test_dpc(const char *test_parm);
+
 
 #endif // TEST_H
 

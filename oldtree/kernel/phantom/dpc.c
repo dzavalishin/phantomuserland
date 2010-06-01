@@ -20,7 +20,7 @@
 
 //---------------------------------------------------------------------------
 
-#define MULTIPLE_DPC_THREADS 0
+#define MULTIPLE_DPC_THREADS 1
 
 
 hal_spinlock_t         	dpc_request_lock;
@@ -84,9 +84,6 @@ static int dpc_threads = 0;
 
 static void dpc_thread(void)
 {
-    hal_mutex_init(&unused_dpc_mutex, "DPC");
-    hal_mutex_lock(&unused_dpc_mutex);
-
     hal_set_thread_name("DPC Work");
 
     dpc_init_ok = 1;
@@ -104,20 +101,24 @@ static void dpc_thread(void)
 
         idle_dpc_threads++;
 
+        // TODO Thread exit is not implemented
         if(dpc_stop_request
-#if MULTIPLE_DPC_THREADS
+#if 0 && MULTIPLE_DPC_THREADS
            || (idle_dpc_threads > MAX_DPC_IDLE_THREADS)
 #endif
           )
         {
             SHOW_FLOW0( 1, "DPC stop" );
             dpc_threads--;
+            idle_dpc_threads--;
             hal_exit_kernel_thread();
         }
 
+        hal_mutex_lock(&unused_dpc_mutex);
         SHOW_FLOW( 3, "DPC sleep at 0x%X\n", &dpc_thread_sleep_stone);
         hal_cond_wait( &dpc_thread_sleep_stone, &unused_dpc_mutex );
         SHOW_FLOW0( 3, "DPC wakeup\n");
+        hal_mutex_unlock(&unused_dpc_mutex);
 
         idle_dpc_threads--;
     }
@@ -156,6 +157,8 @@ void dpc_init()
     SHOW_FLOW0( 0, "Starting DPC");
     hal_cond_init( &dpc_thread_sleep_stone, "DPC" );
     spinlock_init( &dpc_request_lock );
+
+    hal_mutex_init(&unused_dpc_mutex, "DPC");
 
     SHOW_FLOW0( 1, "Starting DPC thread...");
     hal_start_kernel_thread(dpc_thread);
