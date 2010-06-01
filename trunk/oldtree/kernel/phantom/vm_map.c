@@ -162,32 +162,8 @@ vm_map_page_fault_handler( void *address, int  write, int ip )
 
     if(FAULT_DEBUG) hal_printf("fault 0x%X pgno %d\n", addr, pageno );
 
-    hal_mutex_lock(&vm_map_mutex);
-
-    // Someone is taking care of ths page, hands off.
-    // It is supposed that later faults are of the same nature
-    // and will be covered by first one's processing.
-    // If not - we will get fault back.
-    if( vmp->flag_dont_touch || vmp->flag_busy )
-    {
-        hal_mutex_unlock(&vm_map_mutex);
-        hal_mutex_lock(&vmp->lock);
-        while( vmp->flag_dont_touch || vmp->flag_busy )
-        {
-            if(FAULT_DEBUG) hal_printf("donttouch/busy 0x%X\n", vmp->virt_addr );
-            hal_cond_wait(&vmp->done,&vmp->lock);
-        }
-        hal_mutex_unlock(&vmp->lock);
-        return;
-    }
-
-    vmp->flag_busy = 1;
-    page_fault( vmp, write );
-    hal_mutex_unlock(&vm_map_mutex);
     hal_mutex_lock(&vmp->lock);
-    vmp->flag_busy = 0;
-    // We have to do this only if we opened mutex in page_fault(). Track that later.
-    hal_cond_broadcast(&vmp->done); // Will do no harm.
+    page_fault( vmp, write );
     hal_mutex_unlock(&vmp->lock);
 
 }
@@ -429,14 +405,14 @@ vm_page_req_pageout(vm_page *me)
 
     if(PAGING_DEBUG) hal_printf("req pageout 0x%X: ", me->virt_addr );
 
-#if ERRS
-#error check me->flag_dont_touch and me->flag_busy?
-#endif
-
-    if(me->flag_pager_io_busy)
-    {
-        if(PAGING_DEBUG) hal_printf("already on pager\n" );
-        return;
+    while (me->flag_pager_io_busy)
+    {  
+        if (me->pager_io.pager_callback == pageout_callback)
+        {
+            if(PAGING_DEBUG) hal_printf("already on pager\n" );
+            return;
+        }
+        hal_cond_wait(&me->done, &me->lock);
     }
 
     if(!me->flag_phys_mem)
@@ -444,22 +420,16 @@ vm_page_req_pageout(vm_page *me)
         if(PAGING_DEBUG) hal_printf("no phys mem\n" );
         return;
     }
+
     if(!me->flag_phys_dirty)
     {
         if(PAGING_DEBUG) hal_printf("not dirty\n" );
         return;
     }
 
-    if(me->flag_dont_touch)
-    {
-        if(1||PAGING_DEBUG) hal_printf("flag_dont_touch - skip pgout\n" );
-        return;
-    }
-
     if(!me->flag_have_curr)
     {
         if(PAGING_DEBUG) hal_printf("no curr disk page\n" );
-        //return;
 
         // Ask them to allocate us some disk space.
         if(PAGING_DEBUG) hal_printf("ask disk block 0x%X\n", me->virt_addr );
@@ -475,58 +445,34 @@ vm_page_req_pageout(vm_page *me)
     hal_page_control(me->phys_addr, me->virt_addr, page_map, page_ro );
 
     me->flag_phys_protect = 1;
-    me->flag_dont_touch = 1;
-
     me->flag_pager_io_busy = 1;
-    //me->pager_io.virt_addr = me->virt_addr;
     me->pager_io.phys_page = me->phys_addr;
     me->pager_io.pager_callback = pageout_callback;
-#if ERRS
-#error Not sure we allways can write to curr page!
-#endif
     me->pager_io.disk_page = me->curr_page;
 
     if(PAGEOUT_DEBUG||PAGING_DEBUG) hal_printf("really req pageout\n" );
-    pager_enqueue_for_pageout( /*(pager_io_request*)*/&me->pager_io );
-
-    // Following lines added to prevent hang due to some races.
-    // BUG: Races must be fixed, surely...
-#if 0
-    while(me->flag_pager_io_busy)
-    {
-        // races! pager does not take vm_map_mutex before modifying flag_pager_io_busy
-        //hal_cond_wait(&me->sleepStone,&vm_map_mutex);
-        hal_mutex_unlock(&vm_map_mutex);
-        hal_sleep_msec( 1 ); // TODO: yield?
-        hal_mutex_lock(&vm_map_mutex);
-    }
-    if(PAGING_DEBUG) hal_printf("pageout done\n" );
-#endif
+    pager_enqueue_for_pageout(&me->pager_io);
 }
 
 
 void pageout_callback( pager_io_request *req, int write )
 {
     assert(write);
-    // BUG!?
-    //hal_mutex_lock(&vm_map_mutex); // BUG - can we wait in callback?
-
-    // Called after we asked for pageout
 
     vm_page *vmp = (vm_page *)req;
-    if(PAGEOUT_DEBUG||PAGING_DEBUG) hal_printf("pageout callback 0x%X\n", vmp->virt_addr );
-
-    if(!vmp->flag_pager_io_busy) hal_panic("pager_io not busy?");
-
-    //if(!write) hal_panic("pageout_callback after read!?");
-    req->pager_callback = 0;
 
     hal_mutex_lock(&vmp->lock);
+
+    if(PAGEOUT_DEBUG||PAGING_DEBUG) hal_printf("pageout callback 0x%X\n", vmp->virt_addr );
+
+    assert(vmp->flag_pager_io_busy);
+
+    req->pager_callback = 0;
+
     vmp->flag_phys_dirty = 0; // just saved out, we're clean
     vmp->flag_pager_io_busy = 0;
-    vmp->flag_dont_touch = 0; // let them run!
-
     hal_cond_broadcast(&vmp->done);
+
     hal_mutex_unlock(&vmp->lock);
 }
 
@@ -542,21 +488,16 @@ void snapper_COW_callback( pager_io_request *req, int  write );
 // this code will do fault-time snapshot work
 // returns 1 if caller must return now
 static int
-page_fault_snap_aid( vm_page *p, int  page_is_read_enabled, int  is_writing  )
+page_fault_snap_aid( vm_page *p, int  is_writing  )
 {
-    (void) page_is_read_enabled;
     // 1. We are called only for user's write access attempt!
     assert(is_writing);
-
-    // Sanity check
-    //if( p->flag_have_make ) hal_panic("page_fault_snap_aid - have make page??");
-    //assert(!p->flag_have_make);
 
     // Is it OK?
     if(p->flag_have_make)
         return 0; // No special snap treatment needed, or, maybe, already done
 
-    if( !p->flag_phys_mem )
+    if(!p->flag_phys_mem || !p->flag_phys_dirty)
     {
         // Since we're not backed, have only actual copy on disk.
         // this copy will go to snapshot, but we'll read it in
@@ -573,7 +514,6 @@ page_fault_snap_aid( vm_page *p, int  page_is_read_enabled, int  is_writing  )
             p->make_page = p->curr_page;
             p->flag_have_curr = 0;
             p->flag_have_make = 1;
-            p->generation = phantom_vm_generation;
             return 0; // Do standard write fault processing
         }
 
@@ -585,22 +525,19 @@ page_fault_snap_aid( vm_page *p, int  page_is_read_enabled, int  is_writing  )
             // Code there must move page to const block, possibly.
             // (A block that keeps pages that do not change for
             // generations.)
-            p->generation = phantom_vm_generation;
+            p->make_page = p->prev_page;
+            p->flag_have_prev = 0;
+            p->flag_have_make = 1;
             return 0; // Do standard write fault processing
         }
 
         // BUG? Can we just let him go? We definitely shall not write him?
         p->make_page = 0;
         p->flag_have_make = 1;
-        p->generation = phantom_vm_generation;
         return 0; // Do standard write fault processing
-
-        //hal_panic("page_fault_snap_aid - unmapped unbacked page");
-        // NO - done ater return! activate swapin and put thread sleeping
     }
 
     // we're in RAM, but still need one more RAM page
-
 
     /* TODO: We can start pageout even if no new RAM page is available */
 
@@ -612,31 +549,24 @@ page_fault_snap_aid( vm_page *p, int  page_is_read_enabled, int  is_writing  )
 
     hal_copy_page_v2p( new_phys, p->virt_addr );
 
-
     assert(!p->flag_pager_io_busy);
 
     p->flag_pager_io_busy = 1;
 
     // pass new page to pager
-    p->pager_io.phys_page = new_phys; // kvtophys( new_addr );
+    p->pager_io.phys_page = new_phys;
     p->pager_io.pager_callback = snapper_COW_callback;
 
     // current disk page will come to snap - activate swapout now
 
-
     if( p->flag_have_curr )
     {
-        assert(!p->flag_have_make);
-
         p->make_page = p->curr_page;
         p->flag_have_curr = 0;
         p->flag_have_make = 1;
-        // BUG - or should we update generation on pageout completion?
-        p->generation = phantom_vm_generation;
     }
     else
     {
-        //hal_panic("no curr disk page on in-snap mem write pagefault");
         if( !pager_alloc_page(&(p->make_page)) )
             hal_panic("can't alloc disk page in req pageout");
         p->flag_have_make = 1;
@@ -651,15 +581,8 @@ page_fault_snap_aid( vm_page *p, int  page_is_read_enabled, int  is_writing  )
 
     p->access_count++;
     p->flag_phys_dirty = 1; // we'll be dirty after return from trap
-    // Done!
 
-    assert(p->flag_phys_mem);
-
-    p->flag_dont_touch = 1; // Long op on page, will be reset in COW cllback
-
-    // NB! Must be last - it does not check mutex - we
-    // must finish all the modifications before starting
-    pager_enqueue_for_pageout_fast( &(p->pager_io) );
+    pager_enqueue_for_pageout_fast(&p->pager_io);
 
     return 1; // Don't do standard write fault processing
 }
@@ -670,33 +593,23 @@ page_fault_snap_aid( vm_page *p, int  page_is_read_enabled, int  is_writing  )
 
 void snapper_COW_callback( pager_io_request *req, int  write )
 {
-    // We are not taking mutex here because p->flag_dont_touch is true
-    // and we are in the DPC thread, so can't (and souldn't) wait
-    //hal_mutex_lock(&vm_map_mutex); // BUG! Can we lock here? We will put somebody like DPC thread in sleep
-
     // Called after we copied write-attempted page to side-allocated
     // storage and kicked it to be paged out to a snapshot.
 
+    assert(write);
+
     vm_page *vmp = (vm_page *)req;
+    hal_mutex_lock(&vmp->lock);
     if(COW_DEBUG||SNAP_DEBUG) hal_printf("COW callback 0x%X\n", vmp->virt_addr );
 
-    assert(vmp->flag_dont_touch);
     assert(vmp->flag_pager_io_busy);
-    assert(write);
-    //if(!vmp->flag_pager_io_busy) hal_panic("COW: pager_io not busy?");
-    //if(!write) hal_panic("snapper_COW_callback after read!?");
     req->pager_callback = 0;
 
     // release memory used to hold page.
 
-    //hal_mutex_unlock(&vm_map_mutex); // BUG - see above, can we wait in callback?
     hal_free_phys_page(req->phys_page);
 
-    // TODO can we sleep here? who calls us? DPC? We'll stop DPC thread then?
-    // TODO have thread pool in DPC?
-    hal_mutex_lock(&vmp->lock);
     vmp->flag_pager_io_busy = 0;
-    vmp->flag_dont_touch = 0; // let them run!
     hal_cond_broadcast(&vmp->done);
     hal_mutex_unlock(&vmp->lock);
 }
@@ -710,34 +623,23 @@ void snapper_COW_callback( pager_io_request *req, int  write )
 static void
 pagein_callback( pager_io_request *p, int  pageout )
 {
-    //hal_cli(); // BUG: can we sleep in callback?
-    //hal_mutex_lock(&vm_map_mutex);
-
     vm_page *vmp = (vm_page *)p;
+
+    hal_mutex_lock(&vmp->lock);
     if(PAGING_DEBUG) hal_printf("pagein callback 0x%X\n", vmp->virt_addr );
 
     assert(vmp->flag_pager_io_busy);
     assert(!pageout);
-    //if(!vmp->flag_pager_io_busy) hal_panic("pager_io not busy in pagein callback?");
-    //if(pageout) hal_panic("pageout came to pahein callback");
-
 
     p->pager_callback = 0;
 
+    hal_page_control( vmp->phys_addr, vmp->virt_addr, page_map,
+           vmp->flag_phys_protect ? page_ro : page_rw);
 
-    hal_page_control( vmp->phys_addr, vmp->virt_addr, page_map, page_ro );
-    vmp->flag_phys_protect = 1;
     vmp->flag_phys_dirty = 0;
-
-    hal_mutex_lock(&vmp->lock);
     vmp->flag_pager_io_busy = 0;
-    //vmp->flag_dont_touch = 0; // let them run!
     hal_cond_broadcast(&vmp->done); // wakeup threads waiting for page
     hal_mutex_unlock(&vmp->lock);
-
-    //hal_sti();
-    //hal_mutex_unlock(&vm_map_mutex);
-
 }
 
 
@@ -747,48 +649,22 @@ pagein_callback( pager_io_request *p, int  pageout )
 static void
 page_fault_read( vm_page *p )
 {
-    //int  page_is_read_enabled = (p->flag_phys_mem) && (!p->flag_phys_protect);
-
-    // just read from mapped, but locked for statistics page
-    // it is the same for snapshot and normal operation mode
-
-    // NB! Can it happen at all? Do we need to check CPU ppage access flag instead?
-    if( /*(!page_is_read_enabled ) && */ p->flag_phys_mem )
+    while (p->flag_pager_io_busy)
     {
-        // counter strike :)
-        p->access_count++;
-        p->flag_phys_protect = 1;
-        hal_page_control( p->phys_addr, p->virt_addr, page_map, page_ro );
+        hal_cond_wait(&p->done, &p->lock);
+    }
+
+    if (p->flag_phys_mem)
+    {
         return;
     }
 
     // read from unmapped page occured
     // it is the same for snapshot and normal operation mode
 
-    /*if( p->flag_phys_mem )
-        hal_panic("page has phys mem on read access fault - ??");*/
-
-
     if(FAULT_DEBUG) hal_printf("unmapped read 0x%X\n", p->virt_addr );
     // counter strike :)
     p->access_count++; // well, we shouldnt, but what the hell...
-
-    // pagein is already in progress, so...
-    while(p->pager_io.flag_pagein)
-    {
-        // Frankly, it must not be possible - if pagein is active, then
-        // page is mapped...
-#if 0
-        hal_cond_wait(&p->sleepStone,&vm_map_mutex);
-#else
-        hal_mutex_unlock(&vm_map_mutex);
-        hal_sleep_msec( 1 ); // TODO: yield?
-        hal_mutex_lock(&vm_map_mutex);
-#endif
-        // we'll just return, and if page is there -
-        // nothing will happen. If not - another fault will come.
-        return;
-    }
 
     // Allocate phys mem
     {
@@ -809,18 +685,17 @@ page_fault_read( vm_page *p )
         p->flag_phys_mem = 1;
         p->flag_phys_dirty = 0;
         p->flag_phys_protect = 1; // read access.
-        hal_page_control( p->phys_addr, p->virt_addr, page_map, page_ro );
     }
 
     // Allright, decide where to read from
-    if(p->flag_pager_io_busy) hal_panic("pager_io busy?");
-
     // if we have current and want just read, we are paging it in
     // in any state
     if     ( p->flag_have_curr )    p->pager_io.disk_page   = p->curr_page;
     else if( p->flag_have_make )    p->pager_io.disk_page   = p->make_page;
     else if( p->flag_have_prev )    p->pager_io.disk_page   = p->prev_page;
-    else
+    else                            p->pager_io.disk_page   = 0;
+
+    if (p->pager_io.disk_page == 0)
     {
         // They're trying to read from unallocated page.
         // BUG! In fact, we are better send them an exception
@@ -835,42 +710,19 @@ page_fault_read( vm_page *p )
         return;
     }
 
-    // HACK! We set have make and make_page = 0 on unused page
-    if(p->flag_have_make && p->make_page == 0 && !p->flag_have_curr && !p->flag_have_prev )
-    {
-        page_clear_engine_clear_page(p->phys_addr);
-        p->flag_phys_dirty = 0;
-        p->flag_phys_protect = 1; // read access - see below.
-
-        hal_page_control( p->phys_addr, p->virt_addr, page_map, page_ro );
-        return;
-    }
-
+    assert(!p->flag_pager_io_busy);
     if(FAULT_DEBUG) hal_printf("start pagein 0x%X\n", p->virt_addr );
 
     p->flag_pager_io_busy = 1;
-    // start pagein, passing wakeup for this thread callback
-    //p->pager_io.virt_addr = p->virt_addr;
     p->pager_io.phys_page = p->phys_addr;
     p->pager_io.pager_callback = pagein_callback;
 
-    pager_enqueue_for_pagein( &(p->pager_io) );
+    pager_enqueue_for_pagein(&p->pager_io);
 
-#if 0
-    while(p->flag_pager_io_busy)
+    while (p->flag_pager_io_busy)
     {
-        hal_cond_wait(&p->sleepStone,&vm_map_mutex);
+        hal_cond_wait(&p->done, &p->lock);
     }
-#else
-    while(p->flag_pager_io_busy)
-    {
-        // races! pager does not take vm_map_mutex before modifying flag_pager_io_busy
-        //hal_cond_wait(&me->sleepStone,&vm_map_mutex);
-        hal_mutex_unlock(&vm_map_mutex);
-        hal_sleep_msec( 1 ); // TODO: yield?
-        hal_mutex_lock(&vm_map_mutex);
-    }
-#endif
 }
 
 
@@ -886,33 +738,22 @@ page_fault_write( vm_page *p )
     if(FAULT_DEBUG) hal_printf("write 0x%X\n", p->virt_addr );
     // we're here if it was write (and, possibly, page is not mapped)
 
-    // Can it happen here with flag_busy taken?
-    if(p->pager_io.flag_pagein || p->pager_io.flag_pageout)
+    while (p->flag_pager_io_busy)
     {
-        if(FAULT_DEBUG) hal_printf("write nosnap go asleep on pager io 0x%X\n", p->virt_addr );
-#if 0
-        hal_cond_wait(&p->sleepStone,&vm_map_mutex);
-#else
-#if ERRS
-#error Why do we check here internal pagers flags?
-#endif
-        while( p->flag_pager_io_busy || p->pager_io.flag_pagein || p->pager_io.flag_pageout )
-        {
-            hal_mutex_unlock(&vm_map_mutex);
-            hal_sleep_msec( 1 ); // TODO: yield?
-            hal_mutex_lock(&vm_map_mutex);
-        }
-#endif
+        hal_cond_wait(&p->done, &p->lock);
+    }
 
+    if (p->flag_phys_mem && !p->flag_phys_protect)
+    {
         return;
     }
 
-    int  page_is_read_enabled = (p->flag_phys_mem) && (!p->flag_phys_protect);
-
     // we have to aid snapping of this page
-    if( is_in_snapshot_process && page_generation_is_less( p->generation ) )
-        if( page_fault_snap_aid( p, page_is_read_enabled, 1  ) )
+    if( is_in_snapshot_process && !p->flag_have_make)
+        if( page_fault_snap_aid(p, 1) )
+        {
             return;
+        }
 
     if(FAULT_DEBUG) hal_printf("get page to write 0x%X\n", p->virt_addr );
 
@@ -933,12 +774,9 @@ page_fault_write( vm_page *p )
         return;
     }
 
-    //if(p->flag_io_phys_mem) panic("still have flag_io_phys_mem");
-
     // Get us some phys mem
 
-    if(0||FAULT_DEBUG) hal_printf("get physmem 0x%X\n", p->virt_addr );
-
+    if(FAULT_DEBUG) hal_printf("get physmem 0x%X\n", p->virt_addr );
 
     // try to alloc phys page. if cant - kick allocator to find free space
     // (this will result in swapout, usually), then schedule dpc and put
@@ -959,68 +797,38 @@ page_fault_write( vm_page *p )
     // got some - now pagein.
 
     p->phys_addr = newp;
-    hal_page_control( p->phys_addr, p->virt_addr, page_map, page_rw );
     p->flag_phys_mem = 1;
-    p->flag_phys_dirty = 1; // or set it after pagein?
+    p->flag_phys_dirty = 0; // or set it after pagein?
     p->flag_phys_protect = 0; // pager has to write there - or can it anyway?
-
-    if(p->flag_pager_io_busy) hal_panic("pager_io busy?");
-    p->flag_pager_io_busy = 1;
 
     if     ( p->flag_have_curr ) p->pager_io.disk_page = p->curr_page;
     else if( p->flag_have_make ) p->pager_io.disk_page = p->make_page;
     else if( p->flag_have_prev ) p->pager_io.disk_page = p->prev_page;
-    else
+    else                         p->pager_io.disk_page = 0;
+
+    if (p->pager_io.disk_page == 0)
     {
         // Just clear page here as it is new
-
-        p->flag_pager_io_busy = 0; // need not
-        //memset( p->virt_addr, 0, __MEM_PAGE /*BUG!*/ );
-        //#warning use page clear engine
         page_clear_engine_clear_page(p->phys_addr);
-
-
-#if 0 // Why?
-        // Ask them to allocate us some disk space.
-        hal_printf("ask disk block 0x%X\n", p->virt_addr );
-        if( pager_interrupt_alloc_page(&p->curr_page) )
-        {
-            p->flag_have_curr = 1;
-            hal_printf("got disk block 0x%X\n", p->virt_addr );
-            return; // got it
-        }
-
-        vm_page_req_deferred_disk_alloc(p);
-#endif
+        hal_page_control( p->phys_addr, p->virt_addr, page_map, page_rw );
+        p->flag_phys_dirty = 1;
         return;
     }
 
+    assert(!p->flag_pager_io_busy);
     if(FAULT_DEBUG) hal_printf("req pagein 0x%X\n", p->virt_addr );
 
-    //p->pager_io.virt_addr = p->virt_addr;
+    p->flag_pager_io_busy = 1;
     p->pager_io.phys_page = p->phys_addr;
     p->pager_io.pager_callback = pagein_callback;
 
-    pager_enqueue_for_pagein( /*(pager_io_request*)*/&(p->pager_io) );
+    pager_enqueue_for_pagein(&p->pager_io);
 
-#if 0
-    while(p->flag_pager_io_busy)
+    while (p->flag_pager_io_busy)
     {
-        hal_cond_wait(&p->sleepStone,&vm_map_mutex);
+        hal_cond_wait(&p->done, &p->lock);
     }
-#else
-
-    while(p->flag_pager_io_busy)
-    {
-        // races! pager does not take vm_map_mutex before modifying flag_pager_io_busy
-        //hal_cond_wait(&me->sleepStone,&vm_map_mutex);
-        hal_mutex_unlock(&vm_map_mutex);
-        hal_sleep_msec( 1 ); // TODO: yield?
-        hal_mutex_lock(&vm_map_mutex);
-    }
-
-#endif
-
+    p->flag_phys_dirty = 1;
 }
 
 
@@ -1054,41 +862,16 @@ page_fault( vm_page *p, int  is_writing )
 void
 vm_map_do_for( vmem_page_func_t func, bool_vmem_page_func_t predicate )
 {
-    //if(do_lock)
-    hal_mutex_lock(&vm_map_mutex);
-
-    foreach_pause_counter   pcount;
-    foreach_pause_counter_init( &pcount );
-
     vm_page *i;
     for( i = vm_map_map; i < vm_map_map_end; i++ )
     {
-        if(foreach_pause(&pcount))
-        {
-            hal_mutex_unlock(&vm_map_mutex);
-            // give them a chance
-            hal_mutex_lock(&vm_map_mutex);
-        }
-
-        while( i->flag_busy )
-        {
-            hal_mutex_unlock(&vm_map_mutex);
-            // give them a chance to unlock
-            hal_sleep_msec(1);
-            hal_mutex_lock(&vm_map_mutex);
-        }
+        hal_mutex_lock(&i->lock);
         if( predicate == 0 || predicate( i ) )
         {
-            i->flag_busy = 1;
             func( i );
-            hal_mutex_lock(&i->lock);
-            i->flag_busy = 0;
-            hal_cond_broadcast(&(i->done)); // Will do no harm.
-            hal_mutex_unlock(&i->lock);
         }
+        hal_mutex_unlock(&i->lock);
     }
-
-    hal_mutex_unlock(&vm_map_mutex);
 }
 
 void
@@ -1112,7 +895,7 @@ vm_map_for_all( vmem_page_func_t func )
 // saving to disk is to be done in page fault code or later in regular snapshot
 // code
 //
-static void mark_for_snap( volatile vm_page *p )
+static void mark_for_snap(vm_page *p)
 {
     if(p->flag_have_make)       hal_panic("mark_for_snap got flag_have_make set");
 
@@ -1133,16 +916,10 @@ static void mark_for_snap( volatile vm_page *p )
         return;
     }
 
-
-
     if(DEBUG_MARK) hal_printf("set to ro\n");
     // ok, page is mapped, writeable: the real case.
     hal_page_control( p->phys_addr, p->virt_addr, page_map, page_ro );
     p->flag_phys_protect = 1;
-
-    // do we need it here? Better do it before and/or after!
-    //if(p->flag_phys_dirty)        vm_page_req_pageout(p);
-
 }
 
 static void kick_pageout(vm_page *p)
@@ -1163,7 +940,7 @@ static void kick_pageout(vm_page *p)
 
 
 // NB! Call with vm_map_mutex taken
-static void finalize_snap( volatile vm_page *p )
+static void finalize_snap(vm_page *p)
 {
     if(SNAP_DEBUG) hal_printf("finalize_snap 0x%X: ", p->virt_addr );
 
@@ -1173,86 +950,24 @@ static void finalize_snap( volatile vm_page *p )
         return;
     }
 
-    if(p->flag_phys_dirty)
+    while (p->flag_pager_io_busy)
     {
-        if(SNAP_DEBUG) hal_printf("touch\n" );
-
-        hal_mutex_unlock(&vm_map_mutex);
-        hal_mutex_lock(&p->lock);
-        p->flag_busy = 0;
-        hal_cond_broadcast(&(p->done)); // Will do no harm.
-        hal_mutex_unlock(&p->lock);
-
-        {
-            // BUG! touch is in the races with other thread or CPU. Init COW without touching page data.
-            // TODO SMP spinlock?
-            int enabled = hal_save_cli();
-
-            // touch it to make sure fault COW does the work
-            char a = *((char *)(p->virt_addr));
-            *((char *)(p->virt_addr)) = a;
-
-            // TODO SMP spinlock unlock?
-            if (enabled) hal_sti();
-        }
-
-        // BUG! Races! Wait for some real event from page fault code on THIS page
-
-        hal_sleep_msec(1); // TODO yield?
-        //while( p->flag_pager_io_busy )
-        while( ! p->flag_have_make )
-        {
-            if(SNAP_DEBUG) hal_printf("w4make " );
-            hal_sleep_msec(1); // TODO give up the rest of slice? Skip to the next page?
-        }
-        //hal_cli();
-        hal_mutex_lock(&vm_map_mutex);
-        p->flag_busy = 1;
-
-        if(! p->flag_have_make )
-            hal_panic("doesnt have make again!");
-
+        hal_cond_wait(&p->done, &p->lock);
     }
 
-    /*    if(p->flag_phys_dirty)
-     {
-     hal_sti();
-     if( !p->flag_pager_io_busy )
-     p->req_pageout();
+    if(p->flag_have_make)
+    {
+        if(SNAP_DEBUG) hal_printf("has make\n" );
+        return;
+    }
 
-     while( p->flag_pager_io_busy )
-     hal_sleep_msec(0);
-     hal_cli();
-     }*/
-
-    if(p->flag_phys_dirty && !(p->flag_have_make))
-#if 1
-        hal_panic("dirty not snapped after snap?!");
-#else
-        // Ask them to allocate us some disk space.
-        hal_printf("ask disk block 0x%X\n", p->virt_addr );
-        if( pager_interrupt_alloc_page(&p->curr_page) )
-        {
-            p->flag_have_curr = 1;
-            if(SNAP_DEBUG) hal_printf("got disk block for 0x%X\n", p->virt_addr );
-        }
-        else
-        {
-            vm_page_req_deferred_disk_alloc(p);
-            if(SNAP_DEBUG) hal_printf("sleep wait 4 deferred disk alloc %X\n", p->virt_addr );
-            while(!p->flag_have_make)
-                hal_cond_wait(&p->sleepStone,&vm_map_mutex);
-            if(SNAP_DEBUG) hal_printf("got deferred disk alloc %X\n", p->virt_addr );
-        }
-#endif
+    assert(!p->flag_phys_dirty);
 
     if(p->flag_have_curr)
     {
         p->make_page = p->curr_page;
         p->flag_have_curr = 0;
         p->flag_have_make = 1;
-        p->generation = phantom_vm_generation;
-        //hal_mutex_unlock(&vm_map_mutex);
         return;
     }
 
@@ -1260,41 +975,38 @@ static void finalize_snap( volatile vm_page *p )
     {
         // NB! snap list writer will check out that make == prev
         p->make_page = p->prev_page;
+        p->flag_have_prev = 0;
         p->flag_have_make = 1;
-        p->generation = phantom_vm_generation;
-        //hal_mutex_unlock(&vm_map_mutex);
         return;
     }
 
     // either empty or nonexistent. How can we distinguish?
     p->make_page = 0; // NB! means page is not to be written or can be written as zeros
     p->flag_have_make = 1;
-    p->generation = phantom_vm_generation;
 
     if(SNAP_DEBUG) hal_printf(" done, " );
-    // fall out
-    //hal_mutex_unlock(&vm_map_mutex);
 }
 
 
 pagelist *snap_saver = 0;
 
-static void save_snap( volatile vm_page *p )
+static void save_snap(vm_page *p)
 {
     // TODO added for safety - remove or do in a more smart way?
     // HACK! We set have make and make_page = 0 on unused page
     if(! (p->flag_have_make && p->make_page == 0 && !p->flag_have_curr && !p->flag_have_prev) )
         vm_page_req_pageout(p);
 
-    if(!p->flag_have_make)
-        hal_panic("no flag_have_make after snap?!");
+    assert(p->flag_have_make);
 
-    //if(p->make_page == 0)        printf("mp0 ");
-
+    hal_mutex_unlock(&p->lock);
     pagelist_write_seq( snap_saver, p->make_page);
     if(SNAP_LISTS_DEBUG) hal_printf("pg %d, ", p->make_page);
+    hal_mutex_lock(&p->lock);
 
+    p->prev_page = p->make_page;
     p->flag_have_make = 0;
+    p->flag_have_prev = 1;
 }
 
 
@@ -1313,7 +1025,10 @@ void do_snapshot()
     // If we skip this pageout, a lot of pages will go to 'after snap' state.
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
     if(SNAP_STEPS_DEBUG) hal_printf("wait 4 pgout to settle\n");
-    hal_sleep_msec(30000); // sleep for 10 sec - why 10?
+
+    // commented out to stress the pager
+    //hal_sleep_msec(30000); // sleep for 10 sec - why 10?
+
     if(SNAP_STEPS_DEBUG) hal_printf("stop world\n");
 
 
@@ -1322,49 +1037,10 @@ void do_snapshot()
 
     if(SNAP_STEPS_DEBUG) printf("snap: threads stopped");
 
-    //hal_cli();
-    //hal_mutex_lock(&vm_map_mutex);
     enabled = hal_save_cli(); 
 
     // START!
     is_in_snapshot_process = 1;
-
-    /* WRONG
-
-    // --- Mark all vmem pages as not snapped
-    vm_map_clear_snapped();
-
-    // all the clean pages will go to snapshot directly
-    // we're doing this step before swapping all the memory out to
-    // make snapshot process a bit more smooth.
-    vm_map_for_clean_not_snapped( snap_clean_page );
-
-    // here we'll kick pageout for all unsnapped pages
-    vm_map_for_not_snapped( pageout );
-
-    // here we have to wait somehow for pageout to complete
-    //while(snapshot_swapout_queue_size)
-    //hal_sleep_msec(100); // sleep for 0.1 sec
-
-    // again - all the clean pages will go to snapshot directly
-    vm_map_for_clean_not_snapped( snap_clean_page );
-    */
-
-    // NB! Some pages are possibly have RAM page but have no actual
-    // backing disk page. Give them one now! Just to make sure we have
-    // disk space to complete. (What if we have no? Just die?)
-
-    // first we'll kick pageout for all pages.
-    //vm_map_for_all( pageout );
-
-    // here we have to wait somehow for pageout to complete
-    //while(snapshot_swapout_queue_size)
-    //hal_sleep_msec(100); // sleep for 0.1 sec
-    //hal_sleep_msec(1000); // sleep for 1 sec
-
-    // hope that pageout made some free physical memory
-    // in fact - there will be no really free memory, just
-    // a lot (I hope!) of clean pages that we can treat as free later
 
     // Terrible and mighty step - ALL the pages will be marked
     // as not snapped and access to them will be locked here, so
@@ -1379,24 +1055,14 @@ void do_snapshot()
     // special snap-friendly state, etc
 
     vm_map_for_all( mark_for_snap );
-    phantom_vm_generation++;        // Now any page fault will work for us
-
-    // dies with intr disabled
-#if 0
-hal_printf("save vmem copy...");
-phantom_save_vmem();
-#endif
 
     hal_printf("done THE SNAP\n");
 
-    //hal_mutex_unlock(&vm_map_mutex);
     if(enabled) hal_sti();
 
     phantom_snapper_reenable_threads();
 
     // YES, YES, YES, Snap is nearly done.
-
-    hal_sleep_msec(10000); // sleep for 100 msec - why 100?
 
     // Here we have to wait a little and start processing pages manually
     // because no one can be sure that all the pages will be accessed for
@@ -1406,22 +1072,18 @@ phantom_save_vmem();
     if(SNAP_STEPS_DEBUG) hal_printf("pgout\n");
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
 
-    hal_sleep_msec(1000); // sleep for 100 msec - why 100?
-
     //if(SNAP_STEPS_DEBUG) hal_printf("snapshot go kick ass those lazy pages\n");
     //if(SNAP_DEBUG) getchar();
-
-    // BUG! BUG! BUG! BUG! BUG! BUG! BUG! It must be earlier!
-    //phantom_snapper_reenable_threads();
-    //hal_sleep_msec(2000); // sleep for 100 msec - why 100?
 
     hal_printf("snapshot will finalize_snap\n");
     // scan nonsnapped pages, snap them manually (or just access to cause
     // page fault??)
     vm_map_for_all( finalize_snap );
 
-    // BUG! BUG! BUG! BUG! BUG! BUG! BUG! It must be earlier!
-    //phantom_snapper_reenable_threads();
+    // now all pages must have make_page.
+    // will save them now and move make_page -> prev_page,
+    // don't want page_fault_write to create them another make_page as we do this.
+    is_in_snapshot_process = 0;
 
     // now all the pages for snapshot are done. Now create
     // the disk data structure for them
@@ -1436,12 +1098,10 @@ phantom_save_vmem();
     if( !pager_alloc_page(&new_snap_head) ) panic("out of disk!");
 
 
-
     if(SNAP_STEPS_DEBUG) hal_printf("Creating pagelist...\n");
     //if(SNAP_DEBUG) getchar();
 
     {
-
         pagelist saver;
         pagelist_init( &saver, new_snap_head, 1, DISK_STRUCT_MAGIC_SNAP_LIST );
 
@@ -1466,7 +1126,8 @@ phantom_save_vmem();
     disk_page_no_t actual1 = pager_superblock_ptr()->prev_snap;
     disk_page_no_t actual2 = pager_superblock_ptr()->last_snap;
 
-    phantom_free_snap ( toFree, actual1, actual2 );
+    // TODO broken
+    //phantom_free_snap ( toFree, actual1, actual2 );
 
     //#error not impl
     // and free pages of previous-previous snapshot that changed in this
@@ -1479,7 +1140,6 @@ phantom_save_vmem();
 
 
     // DONE!
-    is_in_snapshot_process = 0;
     hal_printf("\nSnapshot done!\n");
     //if(SNAP_DEBUG) getchar();
 
@@ -1538,12 +1198,8 @@ static void vm_map_lazy_pageout_thread(void)
 
     int loop_count = 0;
 
-    hal_mutex_lock(&vm_map_mutex);
-
     while(1)
     {
-        hal_mutex_unlock(&vm_map_mutex);
-
         if( stop_lazy_pageout_thread )
         {
             do_snapshot();
@@ -1564,36 +1220,13 @@ static void vm_map_lazy_pageout_thread(void)
             loop_count = 0;
             if( vm_regular_snaps_enabled )
             {
-#if 1
-
-#if 1
                 do_snapshot();
-#else
-                printf("Total pageout\n");
-                vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
-                printf("Total pageout done\n");
-#endif
-
-#else
-                phantom_snapper_wait_4_threads();
-                hal_sleep_msec( 1000 );
-                phantom_snapper_reenable_threads();
-#endif
             }
         }
 
 
-        //hal_cli();
-        hal_mutex_lock(&vm_map_mutex);
 continue;
 
-        // too busy page?
-        if( p->flag_busy )
-            continue;
-        //printf("nb ");
-        if( p->flag_dont_touch )
-            continue;
-        //printf("ndt ");
         // has nothing to swap out?
         if( !(p->flag_phys_mem) )
             continue;

@@ -62,6 +62,21 @@ static void checkinit(hal_mutex_t *m)
     if(ie) hal_sti();
 }
 
+static void verify_mutex_deadlock(phantom_thread_t *t)
+{
+    hal_mutex_t *m = t->waitmutex;
+
+    while (m)
+    {
+        struct phantom_mutex_impl* mi = m->impl;
+        phantom_thread_t *o = mi->owner;
+        assert(o != t);
+        if (o->waitmutex == m)
+            break;
+        m = o->waitmutex;
+    }
+}
+
 errno_t hal_mutex_lock(hal_mutex_t *m)
 {
     if(m->impl == 0) checkinit(m);
@@ -89,6 +104,9 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
     queue_enter(&(mi->waiting_threads), GET_CURRENT_THREAD(), phantom_thread_t *, chain);
 
     GET_CURRENT_THREAD()->waitmutex = m; // just for debug
+
+    //verify_mutex_deadlock(GET_CURRENT_THREAD());
+
     thread_block( THREAD_SLEEP_MUTEX, &(mi->lock) );
     // returns on unblock
     goto nounlock;
@@ -96,6 +114,7 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
 ret:
     hal_spin_unlock(&(mi->lock));
 nounlock:
+    GET_CURRENT_THREAD()->waitmutex = 0; // just for debug
     if(pr) hal_enable_preemption();
     if(ie) hal_sti();
 
