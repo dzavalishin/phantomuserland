@@ -96,8 +96,6 @@ void start_phantom()
     //pressEnter("will start Phantom");
     phantom_snap_threads_interlock_init();
 
-    dpc_init();
-
     //pressEnter("will init paging dev");
 
     // TODO size?
@@ -274,6 +272,7 @@ int main(int argc, char **argv, char **envp)
 
     //arch_get_rtc_delta(); // Read PC clock
     //getchar();
+    dpc_init();
 
     // -----------------------------------------------------------------------
     // If this is test run, switch to test code
