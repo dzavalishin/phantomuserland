@@ -34,6 +34,7 @@
 
 #include <i386/trap.h>
 #include <i386/proc_reg.h>
+#include <x86/phantom_pmap.h>
 
 
 
@@ -94,6 +95,7 @@ static hal_cond_t      deferred_alloc_thread_sleep;
 // Q of candidates to reclaim phys mem, starting from less used ones
 static queue_head_t		reclaim_q;
 static hal_mutex_t 		reclaim_q_mutex;
+static hal_cond_t      		reclaim_q_nonempty;
 
 
 // for each copy of system this address can't change - we
@@ -264,6 +266,7 @@ vm_map_init(unsigned long page_count)
 
     queue_init(&reclaim_q);
     hal_mutex_init(&reclaim_q_mutex, "MemReclaim");
+    hal_cond_init( &reclaim_q_nonempty, "HaveReclaim" );
 
     hal_mutex_init(&vm_map_mutex, "VM Map");
 
@@ -414,7 +417,7 @@ vm_page_req_pageout(vm_page *me)
     if(PAGING_DEBUG) hal_printf("req pageout 0x%X: ", me->virt_addr );
 
     while (me->flag_pager_io_busy)
-    {  
+    {
         if (me->pager_io.pager_callback == pageout_callback)
         {
             if(PAGING_DEBUG) hal_printf("already on pager\n" );
@@ -1045,7 +1048,7 @@ void do_snapshot()
 
     if(SNAP_STEPS_DEBUG) printf("snap: threads stopped");
 
-    enabled = hal_save_cli(); 
+    enabled = hal_save_cli();
 
     // START!
     is_in_snapshot_process = 1;
@@ -1163,30 +1166,93 @@ void do_snapshot()
 // (runs in pager thread on a quite low prio)
 //---------------------------------------------------------------------------
 
-/*
- void
- do_pageout_housekeeping()
- {
- do_pageout_kickoff_dirty();
- do_pageout_alloc_disk_pages();
- }
+static size_t reclaim_q_size = 0;
+
+static int is_on_reclaim_q( vm_page *p )
+{
+    return p->reclaim_q_chain.next != 0;
+}
+
+static void put_on_reclaim_q_last( vm_page *p )
+{
+    assert(!is_on_reclaim_q( p ) );
+    queue_enter( &reclaim_q, p, vm_page *, reclaim_q_chain);
+    int was0 = !reclaim_q_size;
+    reclaim_q_size++;
+    if(was0) hal_cond_broadcast( &reclaim_q_nonempty );
+}
+
+static void put_on_reclaim_q_first( vm_page *p )
+{
+    assert(!is_on_reclaim_q( p ) );
+    queue_enter_first( &reclaim_q, p, vm_page *, reclaim_q_chain);
+    int was0 = !reclaim_q_size;
+    reclaim_q_size++;
+    if(was0) hal_cond_broadcast( &reclaim_q_nonempty );
+}
+
+static void remove_from_reclaim_q( vm_page *p )
+{
+    assert(reclaim_q_size > 0);
+    reclaim_q_size--;
+    assert(is_on_reclaim_q( p ) );
+    queue_remove( &reclaim_q, p, vm_page *, reclaim_q_chain);
+    p->reclaim_q_chain.next = 0;
+}
+
+static vm_page *get_mem_to_reclaim(void)
+{
+    hal_mutex_lock(&reclaim_q_mutex);
+
+    while(reclaim_q_size == 0)
+        hal_cond_wait( &reclaim_q_nonempty, &reclaim_q_mutex );
+
+    assert( !queue_empty(&reclaim_q) );
+
+    vm_page *p;
+    queue_remove_first( &reclaim_q, p, vm_page *, reclaim_q_chain );
+
+    hal_mutex_unlock(&reclaim_q_mutex);
+
+    return p;
+}
+
+void physmem_try_to_reclaim_page()
+{
+    //while(1)
+    {
+        vm_page *p = get_mem_to_reclaim();
+        int got = 0;
+
+        hal_mutex_lock(&p->lock);
+
+        // This one seems dirty and we have plenty of pretendents - forget it
+        if( p->flag_phys_dirty && reclaim_q_size > 100)
+            goto unlock;
+
+        // Some activity or no mem - no, thanx
+        if( p->flag_pager_io_busy || !p->flag_phys_mem )
+            goto unlock;
+
+        p->flag_phys_mem = 0; // Take it
+        phys_page_t paddr = p->phys_addr;
+        hal_page_control( paddr, p->virt_addr, page_unmap, page_ro );
+        got = 1;
+
+    unlock:
+        hal_mutex_unlock(&p->lock);
+
+        if( got )
+        {
+            hal_free_phys_page(paddr);
+            return;
+        }
+    }
+}
 
 
- // scan through pages getting backing disk pages as needed
- void
- do_pageout_alloc_disk_pages()
- {
- #error not impl
- }
 
 
- // scan through pages and pageout some dirty ones - IDLE only!
- void
- do_pageout_kickoff_dirty()
- {
- #error not impl
- }
- */
 
 //int  vm_map_last_snap_is_done = 0;
 
@@ -1232,9 +1298,9 @@ static void vm_map_lazy_pageout_thread(void)
             }
         }
 
-        /* TODO
 
-        linaddr_t la = find linaddr of p
+#if 0
+        linaddr_t la = (linaddr_t)(p->virt_addr);
 
         int acc = phantom_is_page_accessed(la);
 
@@ -1246,23 +1312,28 @@ static void vm_map_lazy_pageout_thread(void)
         // now react somehow by putting page with higher idle_count to reclaim queue?
         // >1 reclaim queues? Or just sort such Q a bit, moving idler pages to start?
 
-        hal_mutex_lock(&reclaim_q_mutex);
-
-        if( p->idle_count > 2 )
+        if(p->flag_phys_mem)
         {
-            check we're not on Q already
-            queue_enter( &reclaim_q, p, vm_page *, reclaim_q_chain);
+            hal_mutex_lock(&reclaim_q_mutex);
+
+            hal_mutex_lock(&p->lock);
+            if( p->idle_count > 1 && !is_on_reclaim_q(p)  )
+            {
+                put_on_reclaim_q_last(p);
+            }
+
+            if( p->idle_count > 4 )
+            {
+                if(is_on_reclaim_q(p))
+                    remove_from_reclaim_q( p );
+                put_on_reclaim_q_first(p);
+            }
+            //reclaim_unlock:
+            hal_mutex_unlock(&p->lock);
+
+            hal_mutex_unlock(&reclaim_q_mutex);
         }
-
-        if( p->idle_count > 4 )
-        {
-            queue_remove( &reclaim_q, p, vm_page *, reclaim_q_chain);
-            queue_enter_first( &reclaim_q, p, vm_page *, reclaim_q_chain);
-        }
-
-        hal_mutex_unlock(&reclaim_q_mutex);
-
-        */
+#endif
 
 
         /*

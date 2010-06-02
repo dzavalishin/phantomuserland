@@ -15,7 +15,7 @@
 
 #define MAP_SIZE_ELEM(items) ( ( ((items)-1) /(sizeof(map_elem_t)*8) ) + 1 )
 
-typedef int  			physalloc_item_t; // alloc unit no
+typedef unsigned int  		physalloc_item_t; // alloc unit no
 
 typedef u_int32_t 		map_elem_t;
 
@@ -56,6 +56,8 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
 void 	phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_t n_pages );
 
 
+// N of free elems
+int phantom_phys_free_count( physalloc_t *arena );
 
 #endif // PHYSALLOC_H
 
