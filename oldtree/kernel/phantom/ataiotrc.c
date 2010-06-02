@@ -202,7 +202,7 @@ static void init_cmd_ndx_tbl( void );
 static void init_cmd_ndx_tbl( void )
 
 {
-   int ndx;
+   unsigned int ndx;
 
    for ( ndx = 0; ndx < sizeof( cmdCodeLst ); ndx ++ )
       trc_CmdCodeNdx[cmdCodeLst[ndx]] = ndx;

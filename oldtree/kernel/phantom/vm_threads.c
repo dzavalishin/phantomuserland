@@ -76,7 +76,7 @@ int phantom_vm_threads_get_count() { return n_vm_threads; }
 
 
 // -----------------------------------------------------------------------
-
+/*
 static void phantom_add_thread_to_thread_list(struct pvm_object new_thread)
 {
     // ERROR! Races? Synchronize? Inside of method!
@@ -84,7 +84,7 @@ static void phantom_add_thread_to_thread_list(struct pvm_object new_thread)
     pvm_append_array( pvm_root.threads_list.data, new_thread );
 
 }
-
+*/
 
 
 void phantom_activate_thread(struct pvm_object new_thread)

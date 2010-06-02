@@ -144,6 +144,7 @@ void        hal_log( char *format, ... )
 void
 hal_init_object_vmem(void *start_of_virtual_address_space)
 {
+    (void) start_of_virtual_address_space;
 }
 
 

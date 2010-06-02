@@ -122,6 +122,19 @@ void phantom_unmap_page(linaddr_t la )
 }
 
 
+int phantom_is_page_accessed(linaddr_t la )
+{
+    assert(PAGE_ALIGNED(la));
+    return (*get_pte(la)) & INTEL_PTE_REF;
+}
+
+int phantom_is_page_modified(linaddr_t la )
+{
+    assert(PAGE_ALIGNED(la));
+    return (*get_pte(la)) & INTEL_PTE_MOD;
+}
+
+
 
 void
 phantom_dump_pdir()

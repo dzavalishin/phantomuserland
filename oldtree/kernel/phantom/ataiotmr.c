@@ -268,7 +268,7 @@ void tmr_delay_atapi( int dev )
 void tmr_delay_xfer( void )
 
 {
-   long lw;
+   unsigned long lw;
    assert(hal_is_sti());
    trc_llt( 0, 0, TRC_LLT_DELAY2 );
    lw = time(0); //tmr_read_bios_timer();

@@ -915,7 +915,7 @@ int dma_pci_packet( int dev,
     unsigned char lowCyl;
     unsigned char highCyl;
     unsigned int cntr;
-    int ndx;
+    unsigned int ndx;
     unsigned char  * cfp;
 
     // mark start of isa dma PI cmd in low level trace

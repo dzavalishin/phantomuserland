@@ -102,8 +102,6 @@ hal_free_vaddress(void *addr, int num)
 // Main physical memory allocator. Allocates whole pages only.
 // -----------------------------------------------------------------------
 
-static char fill[128]; // ??! someone destroys mem here?
-
 static physalloc_t   	pm_map;  // Main arena
 static physalloc_t   	low_map; // Memory below 1 Mb - special use only
 
