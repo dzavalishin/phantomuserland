@@ -159,9 +159,10 @@ pagelist_clear(pagelist *me)
 int 
 pagelist_read_seq( pagelist *me, disk_page_no_t *out )
 {
-    int pagepos = me->pos - me->curr_displ;
+    unsigned int pagepos = me->pos - me->curr_displ;
 
-    if( pagepos < 0 || pagepos > N_REF_PER_BLOCK )
+    //if( pagepos < 0 || pagepos > N_REF_PER_BLOCK )
+    if( pagepos > N_REF_PER_BLOCK )
         panic("pagelist_read_seq bad pos");
 
     if( pagepos == N_REF_PER_BLOCK )
@@ -183,9 +184,10 @@ pagelist_read_seq( pagelist *me, disk_page_no_t *out )
 void
 pagelist_write_seq( pagelist *me, disk_page_no_t wr_data )
 {
-    int pagepos = me->pos - me->curr_displ;
+    unsigned int pagepos = me->pos - me->curr_displ;
 
-    if( pagepos < 0 || pagepos > N_REF_PER_BLOCK )
+    //if( pagepos < 0 || pagepos > N_REF_PER_BLOCK )
+    if( pagepos > N_REF_PER_BLOCK )
         panic("pagelist_write_seq bad pos");
 
     if( pagepos == N_REF_PER_BLOCK )

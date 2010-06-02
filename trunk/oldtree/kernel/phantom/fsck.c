@@ -187,7 +187,7 @@ static void fsck_set_map_used()
 **/
 
 
-static int fsck_forlist( disk_page_no_t list_start, int check_magic, int (*process_f) (disk_page_no_t ) )
+static int fsck_forlist( disk_page_no_t list_start, unsigned int check_magic, int (*process_f) (disk_page_no_t ) )
 {
     int insane = 0;
 
@@ -220,7 +220,7 @@ static int fsck_forlist( disk_page_no_t list_start, int check_magic, int (*proce
             break;
         }
 
-        int used = curr->head.used; // how many slots are used in this page
+        unsigned int used = curr->head.used; // how many slots are used in this page
 
         if( used > N_REF_PER_BLOCK )
         {
@@ -234,7 +234,7 @@ static int fsck_forlist( disk_page_no_t list_start, int check_magic, int (*proce
 
         if(process_f != NULL )
         {
-            int i;
+            unsigned int i;
             for( i = 0; i < used; i++ )
             {
                 disk_page_no_t lbn = curr->list[i];

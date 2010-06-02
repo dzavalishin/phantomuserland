@@ -160,7 +160,7 @@ void virtio_set_features( virtio_device_t *vd, u_int32_t features )
 void virtio_get_config_struct( virtio_device_t *vd, void *buf, unsigned len )
 {
     u_int8_t *p = buf;
-    int i;
+    unsigned int i;
 
     for (i = 0; i < len; i++)
         p[i] = inb( vd->basereg + VIRTIO_PCI_CONFIG + i );
@@ -169,7 +169,7 @@ void virtio_get_config_struct( virtio_device_t *vd, void *buf, unsigned len )
 void virtio_set_config_struct( virtio_device_t *vd, const void *buf, unsigned len )
 {
     const u_int8_t *p = buf;
-    int i;
+    unsigned int i;
 
     for (i = 0; i < len; i++)
         outb( vd->basereg + VIRTIO_PCI_CONFIG + i, p[i] );
@@ -385,7 +385,7 @@ int virtio_detach_buffer( virtio_device_t *vd, int qindex,
     }
 
     int pos = r->lastUsedIdx % r->vr.num;
-    int bufIndex = r->vr.used->ring[pos].id;
+    unsigned int bufIndex = r->vr.used->ring[pos].id;
 
     if(bufIndex >= r->vr.num)
     {

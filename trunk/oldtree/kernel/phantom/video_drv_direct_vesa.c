@@ -27,7 +27,7 @@ stop:  	(void *)drv_video_null,
 update:	drv_video_null,
 bitblt: (void *)drv_video_null,
 winblt: (void *)drv_video_null,
-readblt: drv_video_null,
+readblt: (void *)drv_video_null,
 
 mouse:  drv_video_null,
 redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,

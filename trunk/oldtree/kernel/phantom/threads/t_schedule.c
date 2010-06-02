@@ -226,7 +226,7 @@ void t_enqueue_runq(phantom_thread_t *t)
 
 
 // Each thread runs for 0.1 sec normally
-#define NORM_TICKS 50
+#define NORM_TICKS 10
 //#define NORM_TICKS 1
 
 static int t_assign_time(void);

@@ -37,7 +37,7 @@
 void sub_zero_return_data( void )
 
 {
-   int ndx;
+   unsigned int ndx;
 
    for ( ndx = 0; ndx < sizeof( reg_cmd_info ); ndx ++ )
       ( (unsigned char *) & reg_cmd_info )[ndx] = 0;

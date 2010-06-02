@@ -61,7 +61,7 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 
     int ie = hal_save_cli();
     hal_spin_lock(&(arena->lock));
-    int prev_alloc_last_pos = arena->alloc_last_pos;
+    unsigned int prev_alloc_last_pos = arena->alloc_last_pos;
 
     assert(arena->alloc_last_pos < arena->total_size / BITS_PER_ELEM);
 
@@ -162,7 +162,7 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
     hal_spin_lock(&(arena->lock));
 
     //ATTN: share alloc_last_pos with phantom_phys_alloc_page()...
-    int prev_alloc_last_pos = arena->alloc_last_pos;
+    unsigned int prev_alloc_last_pos = arena->alloc_last_pos;
     assert(arena->alloc_last_pos < arena->total_size / BITS_PER_ELEM);
 
     assert(npages != 0);

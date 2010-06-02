@@ -530,8 +530,8 @@ start: 			basic_vga_start,
 stop:   		basic_vga_stop,
 
 update:    		drv_video_null,
-bitblt:    		basic_vga_bitblt,
-winblt: 		basic_vga_winblt,
+bitblt:    		(void *)basic_vga_bitblt,
+winblt: 		(void *)basic_vga_winblt,
 readblt: 		basic_vga_readblt,
 
 mouse:    		drv_video_null,
@@ -544,7 +544,7 @@ mouse_disable:          drv_video_mouse_off_deflt,
 mouse_enable:           drv_video_mouse_on_deflt,
 #else
 redraw_mouse_cursor:    drv_video_null,
-set_mouse_cursor:       drv_video_null,
+set_mouse_cursor:       (void *)drv_video_null,
 mouse_disable:          drv_video_null,
 mouse_enable:           drv_video_null,
 #endif
