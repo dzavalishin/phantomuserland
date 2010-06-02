@@ -183,23 +183,14 @@ exit:
 
 void hal_disable_preemption(void)
 {
-    //int ret = !GET_CURRENT_THREAD()->preemption_disabled;
-    assert(GET_CURRENT_THREAD()->preemption_disabled == 0);
-    GET_CURRENT_THREAD()->preemption_disabled = 1;
-    //return ret;
-}
-
-int hal_disable_preemption_r(void)
-{
-    int ret = !GET_CURRENT_THREAD()->preemption_disabled;
-    GET_CURRENT_THREAD()->preemption_disabled = 1;
-    return ret;
+    GET_CURRENT_THREAD()->preemption_disabled++;
+    assert(GET_CURRENT_THREAD()->preemption_disabled > 0);
 }
 
 void hal_enable_preemption(void)
 {
-    assert(GET_CURRENT_THREAD()->preemption_disabled == 1);
-    GET_CURRENT_THREAD()->preemption_disabled = 0;
+    assert(GET_CURRENT_THREAD()->preemption_disabled > 0);
+    GET_CURRENT_THREAD()->preemption_disabled--;
 }
 
 int hal_is_preemption_disabled()

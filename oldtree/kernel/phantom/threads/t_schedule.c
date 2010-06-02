@@ -435,6 +435,15 @@ void thread_block( int sleep_flag, hal_spinlock_t *lock_to_be_unlocked )
 
     phantom_thread_t *t = GET_CURRENT_THREAD();
     //t_dequeue_runq(t);
+
+#if LATENCY_DEBUG
+    if (!t->sleep_flags &&
+            (sleep_flag & THREAD_SLEEP_MUTEX))
+    {
+        t->sleep_start = hal_system_time();
+    }
+#endif
+
     t->sleep_flags |= sleep_flag;
 
     hal_spin_unlock(&schedlock);
@@ -458,6 +467,23 @@ void thread_unblock( phantom_thread_t *t, int sleep_flag )
     hal_spin_lock(&schedlock);
 
     assert( t->sleep_flags & sleep_flag );
+
+#if LATENCY_DEBUG
+    if ((t->sleep_flags & sleep_flag) & THREAD_SLEEP_MUTEX)
+    {
+        bigtime_t delay = hal_system_time() - t->sleep_start;
+        if (delay > t->max_sleep)
+        {
+            t->max_sleep = delay;
+            printf("max latency: %d for ", delay);
+            dump_thread_info(t);
+            dump_thread_stack(t);
+            printf("released by ");
+            dump_thread_info(GET_CURRENT_THREAD());
+            stack_dump();
+        }
+    }
+#endif
 
     t->sleep_flags &= ~sleep_flag;
 

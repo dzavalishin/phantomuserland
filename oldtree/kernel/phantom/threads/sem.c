@@ -73,7 +73,7 @@ errno_t hal_sem_wait(hal_sem_t *c, hal_mutex_t *m)
 
     // save & dis preemtion
     int ie = hal_save_cli();
-    int pr = hal_disable_preemption_r();
+    hal_disable_preemption();
     hal_spin_lock(&(ci->lock));
 
 
@@ -96,7 +96,7 @@ errno_t hal_sem_wait(hal_sem_t *c, hal_mutex_t *m)
 
 //ret:
     //hal_spin_unlock(&(ci->lock));
-    if(pr) hal_enable_preemption();
+    hal_enable_preemption();
     if(ie) hal_sti();
 
     hal_mutex_lock(m);
@@ -126,7 +126,7 @@ errno_t hal_sem_timedwait( hal_sem_t *c, hal_mutex_t *m, long msecTimeout )
 
     // save & dis preemtion
     int ie = hal_save_cli();
-    int pr = hal_disable_preemption_r();
+    hal_disable_preemption();
     hal_spin_lock(&(ci->lock));
 
 
@@ -162,7 +162,7 @@ errno_t hal_sem_timedwait( hal_sem_t *c, hal_mutex_t *m, long msecTimeout )
     t->thread_flags &= ~THREAD_FLAG_TIMEDOUT;
 
 
-    if(pr) hal_enable_preemption();
+    hal_enable_preemption();
     if(ie) hal_sti();
 
     hal_mutex_lock(m);
@@ -186,7 +186,7 @@ errno_t hal_sem_signal(hal_sem_t *c)
 
     // save & dis preemtion
     int ie = hal_save_cli();
-    int pr = hal_disable_preemption_r();
+    hal_disable_preemption();
     hal_spin_lock(&(ci->lock));
 
     if (queue_empty(&(ci->waiting_threads)))
@@ -209,7 +209,7 @@ errno_t hal_sem_signal(hal_sem_t *c)
 ret:
     hal_spin_unlock(&(ci->lock));
 ena:
-    if(pr) hal_enable_preemption();
+    hal_enable_preemption();
     if(ie) hal_sti();
 
     return 0;
@@ -223,7 +223,7 @@ errno_t hal_sem_broadcast(hal_sem_t *c)
 
     // save & dis preemtion
     int ie = hal_save_cli();
-    int pr = hal_disable_preemption_r();
+    hal_disable_preemption();
     hal_spin_lock(&(ci->lock));
 
     if (queue_empty(&(ci->waiting_threads)))
@@ -245,7 +245,7 @@ errno_t hal_sem_broadcast(hal_sem_t *c)
 ret:
     hal_spin_unlock(&(ci->lock));
 //ena:
-    if(pr) hal_enable_preemption();
+    hal_enable_preemption();
     if(ie) hal_sti();
 
     return 0;
