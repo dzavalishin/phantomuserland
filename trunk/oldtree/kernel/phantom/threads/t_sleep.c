@@ -49,7 +49,7 @@ hal_sleep_msec( int timeMsec )
 
     // save & dis preemtion
     int ie = hal_save_cli();
-    int pr = hal_disable_preemption_r();
+    hal_disable_preemption();
 
 #warning if thread is killed this must be undone!
     hal_spin_lock(&t->waitlock);
@@ -66,7 +66,7 @@ hal_sleep_msec( int timeMsec )
 
     thread_block( THREAD_SLEEP_SLEEP, t->sleep_event.lockp );
 
-    if(pr) hal_enable_preemption();
+    hal_enable_preemption();
     if(ie) hal_sti();
 }
 

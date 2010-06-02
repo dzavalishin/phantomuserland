@@ -36,7 +36,10 @@ static char *find_sym(void * addr)
 }
 
 
-
+static int compare_symbols(const void *a, const void *b)
+{
+    return ((const sym_t*)a)->address - ((const sym_t*)b)->address;
+}
 
 static void load_elf_symtab(
                             Elf32_Sym *symtab, int symsize,
@@ -93,6 +96,8 @@ static void load_elf_symtab(
 
     if(space_left > 0)
         printf("Warning: extra space in symtab left");
+
+    qsort(symbols, n_symbols, sizeof(*symbols), compare_symbols);
 
     phantom_symtab_getname = find_sym;
 }

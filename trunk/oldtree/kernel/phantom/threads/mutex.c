@@ -85,7 +85,7 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
 
     // save & dis preemtion
     int ie = hal_save_cli();
-    int pr = hal_disable_preemption_r();
+    hal_disable_preemption();
     hal_spin_lock(&(mi->lock));
 
     if(mi->owner == 0)
@@ -115,7 +115,7 @@ ret:
     hal_spin_unlock(&(mi->lock));
 nounlock:
     GET_CURRENT_THREAD()->waitmutex = 0; // just for debug
-    if(pr) hal_enable_preemption();
+    hal_enable_preemption();
     if(ie) hal_sti();
 
     return 0;
@@ -129,7 +129,7 @@ errno_t hal_mutex_unlock(hal_mutex_t *m)
 
     // save & dis preemtion
     int ie = hal_save_cli();
-    int pr = hal_disable_preemption_r();
+    hal_disable_preemption();
     hal_spin_lock(&(mi->lock));
 
     if(mi->owner != GET_CURRENT_THREAD())
@@ -148,7 +148,7 @@ errno_t hal_mutex_unlock(hal_mutex_t *m)
 
 ret:
     hal_spin_unlock(&(mi->lock));
-    if(pr) hal_enable_preemption();
+    hal_enable_preemption();
     if(ie) hal_sti();
 
     return 0;

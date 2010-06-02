@@ -23,6 +23,7 @@
 
 #define USE_FORK_LUKE 0
 
+#define LATENCY_DEBUG 0
 
 #define MAX_THREADS 1024
 
@@ -108,6 +109,11 @@ struct phantom_thread
 
     /** Will be unlocked just after this thread is switched off CPU */
     hal_spinlock_t              *sw_unlock;
+
+#if LATENCY_DEBUG
+    bigtime_t                   sleep_start;
+    bigtime_t                   max_sleep;
+#endif
 };
 
 
@@ -259,8 +265,6 @@ void t_enqueue_runq(phantom_thread_t *);
 #define hal_is_preemption_disabled t_is_preemption_disabled
 #endif
 
-/** Returns nonzero if preemption was enabled. */
-int hal_disable_preemption_r(void);
 void hal_disable_preemption(void);
 void hal_enable_preemption(void);
 int hal_is_preemption_disabled(void);
