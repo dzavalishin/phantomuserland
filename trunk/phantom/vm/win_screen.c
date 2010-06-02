@@ -14,6 +14,8 @@
  *
 **/
 
+#ifndef __linux__
+
 #include <phantom_libc.h>
 
 #include <windows.h>
@@ -387,6 +389,6 @@ int pvm_win_init()
 
 
 
-
+#endif // __linux__
 
 

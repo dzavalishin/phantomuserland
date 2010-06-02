@@ -272,4 +272,8 @@ float	__kernel_cosdf(double);
 float	__kernel_tandf(double,int);
 int	__kernel_rem_pio2f(float*,float*,int,int,int,const int*);
 
+double sqrt(double x);
+double scalbn(double x, int exp);
+double fabs(double x);
+
 #endif /* !_MATH_PRIVATE_H_ */
