@@ -31,6 +31,8 @@
 
 #define USE_RESERVE 0
 
+// Automatically reclaim mem when out of phys mem pages
+#define AUTOFREE 0
 
 // todo if we change memory allocation seriously, change kvtophys()
 // and phystokv() as well
@@ -161,7 +163,20 @@ hal_alloc_phys_pages(physaddr_t *result, int npages) // alloc and not map
     int ie = hal_save_cli();
     hal_spin_lock(&pm_lock);
 #endif
-    int rc = phantom_phys_alloc_region( &pm_map, &ret, npages );
+    int rc;
+
+#if AUTOFREE
+    while(1)
+    {
+        rc = phantom_phys_alloc_region( &pm_map, &ret, npages );
+        if( rc == 0 )
+            break;
+        physmem_try_to_reclaim_page();
+    }
+#else
+    rc = phantom_phys_alloc_region( &pm_map, &ret, npages );
+#endif
+
 
 #if USE_RESERVE
     hal_spin_unlock(&pm_lock);
@@ -211,7 +226,19 @@ hal_alloc_phys_page(physaddr_t  *result)
 
     hal_spin_lock(&pm_lock);
 #endif
-    int rc = phantom_phys_alloc_page( &pm_map, &ret );
+    int rc;
+
+#if AUTOFREE
+    while(1)
+    {
+        rc = phantom_phys_alloc_page( &pm_map, &ret );
+        if( rc == 0 )
+            break;
+        physmem_try_to_reclaim_page();
+    }
+#else
+        rc = phantom_phys_alloc_page( &pm_map, &ret );
+#endif
 
 #if USE_RESERVE
     hal_spin_unlock(&pm_lock);

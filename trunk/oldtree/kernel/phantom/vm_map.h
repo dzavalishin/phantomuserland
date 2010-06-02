@@ -58,7 +58,7 @@ typedef struct vm_page
     // NB!! pager_io_request MUST BE FIRST so that its address is our address too!
     struct pager_io_request pager_io;
 
-    void *              virt_addr;         // where phys_addr is mapped
+    void *              virt_addr;     	// where phys_addr is mapped
     phys_page_t         phys_addr;      // our phys mem page, if any
 
     // Can't touch pager_io data
@@ -221,6 +221,12 @@ typedef struct foreach_pause_counter
 
 void foreach_pause_counter_init(foreach_pause_counter *me);
 int  foreach_pause(foreach_pause_counter *me);
+
+
+
+
+// Called from physmem allocator to get some more physram
+void physmem_try_to_reclaim_page(void);
 
 
 
