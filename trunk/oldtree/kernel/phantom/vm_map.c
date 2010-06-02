@@ -1200,7 +1200,7 @@ static void remove_from_reclaim_q( vm_page *p )
     p->reclaim_q_chain.next = 0;
 }
 
-static vm_page *get_mem_to_reclaim(void)
+static vm_page *get_vmpage_to_reclaim(void)
 {
     hal_mutex_lock(&reclaim_q_mutex);
 
@@ -1221,7 +1221,7 @@ void physmem_try_to_reclaim_page()
 {
     //while(1)
     {
-        vm_page *p = get_mem_to_reclaim();
+        vm_page *p = get_vmpage_to_reclaim();
         int got = 0;
 
         hal_mutex_lock(&p->lock);
@@ -1230,8 +1230,18 @@ void physmem_try_to_reclaim_page()
         if( p->flag_phys_dirty && reclaim_q_size > 100)
             goto unlock;
 
-        // Some activity or no mem - no, thanx
-        if( p->flag_pager_io_busy || !p->flag_phys_mem )
+        if( p->flag_phys_dirty )
+        {
+            vm_page_req_pageout(p);
+
+            while (p->flag_pager_io_busy)
+            {
+                hal_cond_wait(&p->done, &p->lock);
+            }
+        }
+
+        // Some activity or no mem or still dirty - no, thanx
+        if( p->flag_pager_io_busy || !p->flag_phys_mem || p->flag_phys_dirty )
             goto unlock;
 
         p->flag_phys_mem = 0; // Take it
