@@ -9,6 +9,8 @@
 #ifndef vm_mapH
 #define vm_mapH
 
+#include <queue.h>
+
 #include "spinlock.h"
 #include "pager.h"
 #include "hal.h"
@@ -106,11 +108,15 @@ typedef struct vm_page
     // is what we had on previous (but still last actual) snapshot
     // we'll read from it if no changes were done to the page since then.
 
-    int                 access_count;
+    int                 access_count; // Need?
+
+    // How many times in line lazy pageout thread found this page to be unreferenced
+    int                 idle_count;
 
     hal_cond_t      	done;
     hal_mutex_t         lock;
 
+    queue_chain_t       reclaim_q_chain; // Used to put page on memory reclaim list
 
 } vm_page;
 

@@ -91,6 +91,9 @@ static void page_clear_engine_clear_page(phys_page_t p);
 
 static hal_cond_t      deferred_alloc_thread_sleep;
 
+// Q of candidates to reclaim phys mem, starting from less used ones
+static queue_head_t		reclaim_q;
+static hal_mutex_t 		reclaim_q_mutex;
 
 
 // for each copy of system this address can't change - we
@@ -188,11 +191,12 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
         ts->cr2 = get_cr2();
 
         {
-            long addr = (unsigned int) ts->cr2;
+            unsigned long addr = (unsigned int) ts->cr2;
 
             addr -= (unsigned int)vm_map_start_of_virtual_address_space;
 
-            if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
+            //if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
+            if( addr >= (vm_map_vm_page_count*__MEM_PAGE) )
             {
                 dump_ss(ts);
                 hal_panic("fault address 0x%X is outside of object space, IP 0x%X", (unsigned int) ts->cr2, ts->eip);
@@ -258,11 +262,15 @@ vm_map_init(unsigned long page_count)
 
     vm_map_start_of_virtual_address_space = (void *)hal_object_space_address();
 
+    queue_init(&reclaim_q);
+    hal_mutex_init(&reclaim_q_mutex, "MemReclaim");
+
     hal_mutex_init(&vm_map_mutex, "VM Map");
 
     hal_mutex_lock(&vm_map_mutex);
 
-    int np;
+
+    unsigned int np;
     for( np = 0; np < page_count; np++ )
         vm_page_init( &vm_map_map[np], ((char *)vm_map_start_of_virtual_address_space) + (__MEM_PAGE * np) );
 
@@ -1223,6 +1231,56 @@ static void vm_map_lazy_pageout_thread(void)
                 do_snapshot();
             }
         }
+
+        /* TODO
+
+        linaddr_t la = find linaddr of p
+
+        int acc = phantom_is_page_accessed(la);
+
+        if( acc )
+            p->idle_count = 0;
+        else
+            p->idle_count++;
+
+        // now react somehow by putting page with higher idle_count to reclaim queue?
+        // >1 reclaim queues? Or just sort such Q a bit, moving idler pages to start?
+
+        hal_mutex_lock(&reclaim_q_mutex);
+
+        if( p->idle_count > 2 )
+        {
+            check we're not on Q already
+            queue_enter( &reclaim_q, p, vm_page *, reclaim_q_chain);
+        }
+
+        if( p->idle_count > 4 )
+        {
+            queue_remove( &reclaim_q, p, vm_page *, reclaim_q_chain);
+            queue_enter_first( &reclaim_q, p, vm_page *, reclaim_q_chain);
+        }
+
+        hal_mutex_unlock(&reclaim_q_mutex);
+
+        */
+
+
+        /*
+        // Now really reclaim mem keeping free phys mem count reasonably high
+
+        hal_mutex_lock(&reclaim_q_mutex);
+
+        check some physmem free page counter. if low, and !queue_empty(&reclaim_q)
+        {
+            queue_remove_first( &reclaim_q, p, vm_page *, reclaim_q_chain);
+        }
+        hal_mutex_unlock(&reclaim_q_mutex);
+
+        check some physmem free page counter. if !too! low, take CURRENT visiting page
+        and reclaim its memory. Possibly set some global mem thrash state.
+        Show user a window saying 'go buy some more RAM!' :)
+
+         */
 
 
 continue;
