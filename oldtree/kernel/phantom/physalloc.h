@@ -59,6 +59,10 @@ void 	phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size
 // N of free elems
 int phantom_phys_free_count( physalloc_t *arena );
 
+int have_lot_of_free_physmem(); // No reclaim really needed
+int low_low_free_physmem(); // Really out of physmem
+int low_free_physmem(); // Just need some more
+
 #endif // PHYSALLOC_H
 
 

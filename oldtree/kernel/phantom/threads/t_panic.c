@@ -13,6 +13,8 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <hal.h>
+#include <phantom_libc.h>
+
 #include "thread_private.h"
 
 

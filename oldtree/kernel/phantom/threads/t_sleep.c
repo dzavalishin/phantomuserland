@@ -17,10 +17,11 @@
 #define debug_level_info 10
 
 
+#include <hal.h>
+#include <phantom_libc.h>
 
 #include "thread_private.h"
 #include "../timedcall.h"
-#include <hal.h>
 
 static void wakethread( void *arg )
 {
