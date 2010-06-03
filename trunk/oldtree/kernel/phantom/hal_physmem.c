@@ -262,6 +262,27 @@ hal_free_phys_page(physaddr_t  paddr) // alloc and not map - WILL PANIC if page 
 }
 
 
+
+int have_lot_of_free_physmem()
+{
+    // 200 free pages are ok
+    return phantom_phys_free_count( &pm_map ) > 200;
+}
+
+// Really out of physmem
+int low_low_free_physmem()
+{
+    return phantom_phys_free_count( &pm_map ) < 10;
+}
+
+// Just need some more
+int low_free_physmem()
+{
+    return phantom_phys_free_count( &pm_map ) < 100;
+}
+
+
+
 // -----------------------------------------------------------------------
 // Combined allocator interface. Allocates memory, address space for it,
 // maps and returns both physical and virtual addresses.

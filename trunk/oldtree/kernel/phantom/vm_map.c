@@ -1327,17 +1327,34 @@ static void vm_map_lazy_pageout_thread(void)
             hal_mutex_lock(&reclaim_q_mutex);
 
             hal_mutex_lock(&p->lock);
-            if( p->idle_count > 1 && !is_on_reclaim_q(p)  )
-            {
-                put_on_reclaim_q_last(p);
-            }
+
+            int onq = is_on_reclaim_q(p);
 
             if( p->idle_count > 4 )
             {
-                if(is_on_reclaim_q(p))
+                if(onq)
                     remove_from_reclaim_q( p );
                 put_on_reclaim_q_first(p);
+                onq = 1;
             }
+            else if( p->idle_count > 1 && low_free_physmem() && !onq  )
+            {
+                if(is_on_reclaim_q(p))
+                    put_on_reclaim_q_last(p);
+            }
+
+            // Busy page
+            if( p->idle_count < 1 )
+            {
+                // We have free mem - let him go
+                if(onq && have_lot_of_free_physmem())
+                    remove_from_reclaim_q( p );
+
+                // Too bad - you're in the army now
+                if(!onq && low_low_free_physmem())
+                    put_on_reclaim_q_last(p);
+            }
+
             //reclaim_unlock:
             hal_mutex_unlock(&p->lock);
 

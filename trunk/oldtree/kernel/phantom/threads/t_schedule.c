@@ -61,6 +61,8 @@ void phantom_scheduler_yield( void )
     //hal_spinlock_t dummy;
     //phantom_thread_switch(&dummy);
     //phantom_thread_switch();
+
+    // TODO in fact, possibly, it is ok just to call phantom_scheduler_soft_interrupt() from here?
     phantom_scheduler_request_soft_irq();
 
     // assert that cur thread is runnable
@@ -266,7 +268,7 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
             // hack?
             if( it->sleep_flags ) continue;
 #endif
-            if( it->priority > maxprio )
+            if( ((int)it->priority) > maxprio )
             {
                 maxprio = it->priority;
                 best = it;
@@ -286,7 +288,7 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
         // If no normal thread has ticks left, reassign
         // ticks and retry
         do {
-            int maxprio = 0; // NB! not a negative number!
+            unsigned int maxprio = 0; // NB! not a negative number!
             phantom_thread_t *best = 0;
             phantom_thread_t *it = 0;
             queue_iterate(&runq_norm, it, phantom_thread_t *, runq_chain)
@@ -476,7 +478,7 @@ void thread_unblock( phantom_thread_t *t, int sleep_flag )
         {
             t->max_sleep = delay;
             printf("max latency: %d for ", delay);
-            dump_thread_info(t);
+            phantom_scheduler_request_soft_irq();dump_thread_info(t);
             dump_thread_stack(t);
             printf("released by ");
             dump_thread_info(GET_CURRENT_THREAD());

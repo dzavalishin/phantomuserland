@@ -355,6 +355,9 @@ void phantom_scheduler_soft_interrupt(void);
 void phantom_scheduler_schedule_soft_irq(void); // do not enforce, just make it come in some near future
 
 
+// TODO in fact, possibly, it is ok just to call phantom_scheduler_soft_interrupt() from it?
+void phantom_scheduler_request_soft_irq(void); // enforce soft irq
+
 /**
  *
  * Switch to other thread. Calls scheduler to
@@ -384,7 +387,7 @@ phantom_thread_t *phantom_create_thread( void (*func)(void *), void *arg, int fl
 void phantom_thread_in_interrupt_fork(void);
 
 void dump_thread_stack(phantom_thread_t *t);
-
+void dump_thread_stacks(void);
 
 
 // ToDO move to more adequate header

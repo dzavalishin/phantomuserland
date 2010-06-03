@@ -34,4 +34,7 @@ cp ../run/tftp/* tftp
 
 bin\qemu -no-reboot %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% -soundhw sb16
 
+grep "KERNEL TEST" serial0.log 
+pause
+
 exit
