@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: it is a question.
- * Preliminary: no
+ * Main paging/persistent memory unit.
  *
  *
 **/
@@ -16,14 +15,9 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include "config.h"
 
-/**
- *
- * TODO REVIEW for kernel
- **/
 //---------------------------------------------------------------------------
-
-#define ERRS 0
 
 
 #include <phantom_libc.h>
@@ -39,6 +33,7 @@
 
 
 #include "vm_map.h"
+#include "physalloc.h"
 #include "dpc.h"
 #include "snap_sync.h"
 #include "pager.h"
@@ -46,7 +41,6 @@
 #include "i386/cpu.h"
 #include "i386/mmx.h"
 
-#define hal_panic panic
 #define volatile /* */
 
 
@@ -82,6 +76,7 @@ static hal_mutex_t vm_map_mutex;
 
 static void vm_map_deferred_disk_alloc_thread(void);
 static void vm_map_lazy_pageout_thread(void);
+static void vm_map_snapshot_thread(void);
 
 
 static void page_clear_engine_init(void);
@@ -157,7 +152,7 @@ vm_map_page_fault_handler( void *address, int  write, int ip )
     if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
     {
         dump_ds
-        hal_panic("fault address 0x%X is outside of object space, IP 0x%X", address, ip);
+        panic("fault address 0x%X is outside of object space, IP 0x%X", address, ip);
     }
     */
 
@@ -201,7 +196,7 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
             if( addr >= (vm_map_vm_page_count*__MEM_PAGE) )
             {
                 dump_ss(ts);
-                hal_panic("fault address 0x%X is outside of object space, IP 0x%X", (unsigned int) ts->cr2, ts->eip);
+                panic("fault address 0x%X is outside of object space, IP 0x%X", (unsigned int) ts->cr2, ts->eip);
             }
         }
 
@@ -280,7 +275,7 @@ vm_map_init(unsigned long page_count)
     if(pager_superblock_ptr()->last_snap == 0 )
     {
         hal_printf("\n\nNo pagelist to load\n\n");
-        //hal_panic("vmem load: no pagelist!");
+        //panic("vmem load: no pagelist!");
     }
     else
     {
@@ -319,6 +314,7 @@ vm_map_init(unsigned long page_count)
 #if 1
     hal_start_kernel_thread(vm_map_deferred_disk_alloc_thread);
     hal_start_kernel_thread(vm_map_lazy_pageout_thread);
+    hal_start_kernel_thread(vm_map_snapshot_thread);
 #endif
     // Ok, everything is ready now. Turn on pagefaults handling
     phantom_trap_handlers[T_PAGE_FAULT] = vm_map_page_fault_trap_handler;
@@ -365,9 +361,9 @@ int     is_in_snapshot_process = 0;
  // called under the lock!
  static void snap_clean_page( vm_page *p )
  {
- if(p->flag_snapped )        hal_panic("snap_clean got snapped page");
- if(p->flag_phys_dirty)      hal_panic("snap_clean got dirty page");
- if(p->flag_have_make)       hal_panic("snap_clean got flag_have_make set");
+ if(p->flag_snapped )        panic("snap_clean got snapped page");
+ if(p->flag_phys_dirty)      panic("snap_clean got dirty page");
+ if(p->flag_have_make)       panic("snap_clean got flag_have_make set");
 
  // well, now page can have no current if it did not changed since last snap
  if(!p->flag_have_curr)
@@ -447,7 +443,7 @@ vm_page_req_pageout(vm_page *me)
 
         if( !pager_alloc_page(&me->curr_page) )
         {
-            hal_panic("can't alloc disk page in req pageout");
+            panic("can't alloc disk page in req pageout");
         }
         me->flag_have_curr = 1;
         if(PAGING_DEBUG) hal_printf("got disk block for 0x%X\n", me->virt_addr );
@@ -579,7 +575,7 @@ page_fault_snap_aid( vm_page *p, int  is_writing  )
     else
     {
         if( !pager_alloc_page(&(p->make_page)) )
-            hal_panic("can't alloc disk page in req pageout");
+            panic("can't alloc disk page in req pageout");
         p->flag_have_make = 1;
     }
 
@@ -686,7 +682,7 @@ page_fault_read( vm_page *p )
         while(hal_alloc_phys_page(&newp))
         {
 
-            hal_panic("deferred alloc not implemented!");
+            panic("deferred alloc not implemented!");
             // TODO request some pageout works, etc
             //request_more_ram = 1;
             //hal_cond_wait(&ramSleepStone,&vm_map_mutex);
@@ -797,7 +793,7 @@ page_fault_write( vm_page *p )
     while(hal_alloc_phys_page(&newp))
     {
 
-        hal_panic("deferred alloc not implemented!");
+        panic("deferred alloc not implemented!");
         // TODO request some pageout works, etc
         //request_more_ram = 1;
 
@@ -908,7 +904,7 @@ vm_map_for_all( vmem_page_func_t func )
 //
 static void mark_for_snap(vm_page *p)
 {
-    if(p->flag_have_make)       hal_panic("mark_for_snap got flag_have_make set");
+    if(p->flag_have_make)       panic("mark_for_snap got flag_have_make set");
 
     if(DEBUG_MARK) hal_printf("mark4snap 0x%x: ", p->virt_addr );
 
@@ -1166,7 +1162,7 @@ void do_snapshot()
 // (runs in pager thread on a quite low prio)
 //---------------------------------------------------------------------------
 
-static size_t reclaim_q_size = 0;
+static volatile size_t reclaim_q_size = 0;
 
 static int is_on_reclaim_q( vm_page *p )
 {
@@ -1210,6 +1206,7 @@ static vm_page *get_vmpage_to_reclaim(void)
     assert( !queue_empty(&reclaim_q) );
 
     vm_page *p;
+    reclaim_q_size--;
     queue_remove_first( &reclaim_q, p, vm_page *, reclaim_q_chain );
 
     hal_mutex_unlock(&reclaim_q_mutex);
@@ -1255,6 +1252,7 @@ void physmem_try_to_reclaim_page()
         if( got )
         {
             hal_free_phys_page(paddr);
+            SHOW_FLOW0(0, "MEM RECLAIM");
             return;
         }
     }
@@ -1274,42 +1272,20 @@ void vm_enable_regular_snaps() { vm_regular_snaps_enabled = 1; }
 static void vm_map_lazy_pageout_thread(void)
 {
     SHOW_FLOW0( 1, "Ready");
-
-    hal_set_thread_name("LazySnap");
-
+    hal_set_thread_name("LazyReclaim");
 
     vm_page *p = vm_map_map;
-
-    int loop_count = 0;
 
     while(1)
     {
         if( stop_lazy_pageout_thread )
-        {
-            do_snapshot();
-            stop_deferred_disk_alloc_thread = 1;
-
-            hal_cond_broadcast( &deferred_alloc_thread_sleep );
-            // so that it will see the stop flag
-
             hal_exit_kernel_thread();
-        }
 
         hal_sleep_msec( 100 ); // TODO: yield?
         p++;
         if( p >= vm_map_map_end ) p = vm_map_map;
 
-        if( loop_count++ > 100 )
-        {
-            loop_count = 0;
-            if( vm_regular_snaps_enabled )
-            {
-                do_snapshot();
-            }
-        }
-
-
-#if 0
+#if MEM_RECLAIM
         linaddr_t la = (linaddr_t)(p->virt_addr);
 
         int acc = phantom_is_page_accessed(la);
@@ -1339,14 +1315,17 @@ static void vm_map_lazy_pageout_thread(void)
             }
             else if( p->idle_count > 1 && low_free_physmem() && !onq  )
             {
-                if(is_on_reclaim_q(p))
+                if(!onq)
+                {
                     put_on_reclaim_q_last(p);
+                    onq = 1;
+                }
             }
 
-            // Busy page
+            // Active page
             if( p->idle_count < 1 )
             {
-                // We have free mem - let him go
+                // We have lot of free mem - let him go
                 if(onq && have_lot_of_free_physmem())
                     remove_from_reclaim_q( p );
 
@@ -1401,6 +1380,32 @@ continue;
         // allright, kick it!
 
         vm_page_req_pageout(p);
+    }
+}
+
+
+static void vm_map_snapshot_thread(void)
+{
+    hal_set_thread_name("SnapShot");
+
+    while(1)
+    {
+        if( stop_lazy_pageout_thread )
+        {
+            do_snapshot();
+            stop_deferred_disk_alloc_thread = 1;
+
+            hal_cond_broadcast( &deferred_alloc_thread_sleep );
+            // so that it will see the stop flag
+
+            hal_exit_kernel_thread();
+        }
+
+        hal_sleep_msec( 100000 ); 
+        if( vm_regular_snaps_enabled )
+            do_snapshot();
+
+
     }
 }
 

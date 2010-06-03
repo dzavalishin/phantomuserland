@@ -387,7 +387,8 @@ paging_device_start_read(
 
     SHOW_FLOW(8, "paging_device_start_read PA 0x%x dsk %d \n", me->mem, me->disk );
 
-    if(disk < 0 || disk >= me->n_pages)
+    //if(disk < 0 || disk >= me->n_pages)
+    if(disk >= (unsigned)me->n_pages)
         panic("disk page address is out of range: %d (%d max)", disk, me->n_pages );
 
     paging_device_start_io(me);

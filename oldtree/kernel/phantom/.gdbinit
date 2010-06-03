@@ -13,28 +13,9 @@ break panic
 break pvm_exec_throw
 
 break main
-#break vm_map_lazy_pageout_thread
 
-#break phantom_bios_int_10_args
+break vm_map.c:1174
+break vm_map.c:1183
+break vm_map.c:1191
+break vm_map.c:1201
 
-#break hal_set_thread_priority
-
-break spinlock.c:43
-#break t_sleep.c:31
-
-#break page_fault
-#break vm_map_page_fault_trap_handler
-
-#break dpc_init
-#break phantom_thread_switch
-
-#break event.c:373
-
-#set pagination off
-
-#watch pm_map->lock.lock
-
-break phantom_phys_alloc_init_static
-break hal_alloc_vaddress
-
-break physalloc.c:193

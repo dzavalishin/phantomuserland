@@ -114,7 +114,7 @@ static void bochs_map_video(int on_off)
     hal_pages_control_etc(
                           VBE_DISPI_LFB_PHYSICAL_ADDRESS,
                           video_driver_bochs_vesa_emulator.screen,
-                          n_pages, page_map, page_rw,
+                          n_pages, on_off ? page_map : page_unmap, page_rw,
                           INTEL_PTE_WTHRU|INTEL_PTE_NCACHE );
 
 #else

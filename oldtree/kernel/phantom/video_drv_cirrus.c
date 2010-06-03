@@ -180,6 +180,7 @@ void set_video_driver_cirrus_pa( physaddr_t pa, size_t size )
 #if 1
 static void map_video(int on_off)
 {
+    (void) on_off;
     panic("no cirrus driver yet!");
 }
 #else
