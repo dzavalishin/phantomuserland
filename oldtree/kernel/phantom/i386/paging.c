@@ -18,18 +18,11 @@ static pt_entry_t *ptabs;
 void phantom_paging_init(void)
 {
     // On ia32 - allocate all the possible page tables, for simplicity
-#if OWN_PHYSMEMALLOC
     extern char phantom_pdir_mem[];
     extern char phantom_ptab_mem[];
 
     pdir = (pd_entry_t *)&phantom_pdir_mem;
     ptabs = (pt_entry_t *)&phantom_ptab_mem;
-#else
-    pdir = (pd_entry_t *)smemalign( PAGE_SIZE, PAGE_SIZE );
-
-    // 1024 page tables
-    ptabs = (pt_entry_t *)smemalign( PAGE_SIZE, PAGE_SIZE*NPDE );
-#endif
 
     assert((((unsigned) pdir) & (PAGE_SIZE-1)) == 0);
     assert((((unsigned)ptabs) & (PAGE_SIZE-1)) == 0);
@@ -53,13 +46,10 @@ void phantom_paging_init(void)
     // Now map all mem equally
     //hal_pages_control( 0, 0, NPDE*NPTE, page_map, page_rw );
 
-#if OWN_PHYSMEMALLOC
     phantom_map_mem_equally();
-#else
     // Now map all mem equally - JUST 1/4
     //- upper 2GBs are handled by virt mem, and 0x40000000 - 0x80000000 is for addr space allocator
-    hal_pages_control( 0, 0, NPDE*NPTE/4, page_map, page_rw );
-#endif
+    //hal_pages_control( 0, 0, NPDE*NPTE/4, page_map, page_rw );
 
 #if 0
     // If we have superpages support, enable 'em in CPU
