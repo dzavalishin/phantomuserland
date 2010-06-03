@@ -3,22 +3,23 @@
 
 = Nearest Goal =
 
-To produce distributable alpha-level OS which can be programmed for by 3rd party programmers.
+To produce distributable alpha-level OS which can be programmed for by 3rd party programmers. *We're quite close to this.*
 
 == Userland/Tools Tasks ==
 
 Quite crirtical tasks.
 
-  * *Java bytecode compiler*. Have skeleton, need complete one.
+  * *Java bytecode compiler*. Have skeleton, need complete one. *Really urgent.*
   * *Hosted test env. multithreading*. Must be easy.
   * *Hosted test env. TCP access*. Ditto.
   * Windowing env Z-buffer - *Done*. 
-  * Windowing events, input, event thread pools - *In progress*. 
+  * Windowing events, input, event thread pools - *In progress, need userland iface*. 
   * *VM and compiler support for floats/doubles/64 bit ints*. 
   * *More of Phantom language implementation in compiler*. Closures, direct containers support.
 
 Not critical, but can be done relatively easily.
 
+  * *WeakRefs*
   * *Border objects and restart exceptions*. Especially for TCP interfaces.
 
 Not so easy, but we need it, sooner or later.
@@ -28,8 +29,8 @@ Not so easy, but we need it, sooner or later.
 == Kernel Tasks ==
 
   * *VirtIO drivers*. Have partial VirtIO environment, need complete disk and net drivers.
-  * *IDE driver cleanup*. Driver supports interrupts and BM but does not use them!
-  * *Partition lookup code*. Partially implemented.
+  * *IDE driver cleanup*. Existing driver is very strange. *started*
+  * *Partition lookup code*. Partially implemented. *need tests*
   * *IP stack tests and userland interface*. 
 
 Not critical, but can be done relatively easily.
@@ -42,7 +43,7 @@ Not critical, but can be done relatively easily.
 We need volunteers for these:
 
   * *Doxygen*. And code documentation too.
-  * *Test suite, regular regression test setup*. 
+  * *Test suite*, regular regression test setup. *in progress*
   * *Code review*. Need code review process to be set up and carried.
   * *Good internal document(s) on development process*. For new members to jump in easily.
   * *Define branching/merging rules*. We will have to have release branches.
@@ -54,5 +55,5 @@ We need volunteers for these:
   * *Posix support*. Map two binary objects to DS/CS, run native thread, support syscall mapping. *In progress*
   * *LLVM fast code*. In addition to posix subsystem it would be nice to have a specific LLVM subsystem which can offer programmers hispeed, but portable (to Phantom on other arch) programming framework. The same CS/DS binary objects, but executable code is LLVM-level and passed through LLVM backend before being run for the first time.
   * *OpenGL*. In fact, it is quite easy to get TinyGL working (it is already done for kernel), but we need a clean userland interface and understanding of interoperation for multiiple simult. threads doing GL rendering in a same env.
-  * *Sound drivers*. At least some very simple AC97 wave output one?
+  * *Sound drivers*. At least some very simple AC97 wave output one? *in progress*
   * *Video codecs environment*. Seems to be requiring Posix/LLVM support first. The first goal is to be able to give it an MPEG binary for playing.
