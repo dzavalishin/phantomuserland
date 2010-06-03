@@ -276,7 +276,7 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
             temp = bigCnt;       // use big count (1 of 4 PRDs)
         else                    // else
             temp = smallCnt;     // use small count (3 of 4 PRDs)
-        if ( temp > bc )        // count to large?
+        if ( temp > (unsigned long)bc )        // count too large?
             temp = bc;           //    yes - use actual count
         // check if count will fit
         phyAddr += temp;

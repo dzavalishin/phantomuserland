@@ -11,7 +11,8 @@ static int debug_level_flow = 1;
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 
-static u_int16_t vesaMode = -1;
+//static u_int16_t vesaMode = -1;
+static int16_t vesaMode = -1;
 
 static void map_video(int on_off);
 
@@ -103,7 +104,7 @@ static void map_video(int on_off)
     hal_pages_control_etc(
                           video_driver_bios_vesa_pa,
                           video_driver_bios_vesa.screen,
-                          n_pages, page_map, page_rw,
+                          n_pages, on_off ? page_map : page_unmap, page_rw,
                           INTEL_PTE_WTHRU|INTEL_PTE_NCACHE );
 }
 

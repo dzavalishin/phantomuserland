@@ -1746,7 +1746,7 @@ int reg_packet( int dev,
    unsigned char highCyl;
    unsigned int byteCnt;
    long wordCnt;
-   int ndx;
+   unsigned int ndx;
    //unsigned long dpaddr;
    void *savedpaddr;
    unsigned char * cfp;

@@ -32,7 +32,7 @@
 #define USE_RESERVE 0
 
 // Automatically reclaim mem when out of phys mem pages
-#define AUTOFREE 0
+#define AUTOFREE MEM_RECLAIM
 
 // todo if we change memory allocation seriously, change kvtophys()
 // and phystokv() as well
@@ -107,6 +107,7 @@ hal_free_vaddress(void *addr, int num)
 static physalloc_t   	pm_map;  // Main arena
 static physalloc_t   	low_map; // Memory below 1 Mb - special use only
 
+static int total_phys_pages = 0;
 
 #if USE_RESERVE
 static hal_spinlock_t	pm_lock; // reenter lock
@@ -145,6 +146,7 @@ hal_init_physmem_alloc_thread(void)
 void
 hal_physmem_add( physaddr_t start, size_t npages )
 {
+    total_phys_pages = npages;
     phantom_phys_free_region( &pm_map, start/PAGE_SIZE, npages );
 
     // Unmap it for any case
@@ -261,6 +263,11 @@ hal_free_phys_page(physaddr_t  paddr) // alloc and not map - WILL PANIC if page 
     hal_free_phys_pages(paddr, 1);
 }
 
+
+int phantom_phys_free_count( physalloc_t *arena )
+{
+    return total_phys_pages - arena->n_used_pages;
+}
 
 
 int have_lot_of_free_physmem()

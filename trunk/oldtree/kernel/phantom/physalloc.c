@@ -213,8 +213,4 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
 }
 
 
-int phantom_phys_free_count( physalloc_t *arena )
-{
-    return arena->total_size - arena->n_used_pages;
-}
 
