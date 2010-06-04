@@ -92,7 +92,7 @@ struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
     pvm_code_check_bounds( code, code->IP-1, "get_string" );
     // after we checked there is a real data accessible we can
     // create string object
-    return pvm_create_string_object_binary( sp, len );
+    return pvm_create_string_object_binary( (const char *)sp, len );
 }
 
 

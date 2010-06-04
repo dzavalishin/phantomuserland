@@ -16,10 +16,10 @@
 #include <phantom_types.h>
 #include <queue.h>
 
+#include <video/rect.h>
+#include <video/font.h>
+#include <video/color.h>
 
-
-// Windows 'screen' driver works in BGR format :(
-#define BGR 1
 
 #define VIDEO_ZBUF 1
 
@@ -42,53 +42,6 @@ int video_zbuf_check( int linpos, u_int8_t zpos );
 
 
 
-typedef struct rgb_t
-{
-#if BGR
-    unsigned char       b;
-    unsigned char       g;
-    unsigned char       r;
-#else
-    unsigned char       r;
-    unsigned char       g;
-    unsigned char       b;
-#endif
-} rgb_t;
-
-
-typedef struct rgba_t
-{
-#if BGR
-    unsigned char       b;
-    unsigned char       g;
-    unsigned char       r;
-#else
-    unsigned char       r;
-    unsigned char       g;
-    unsigned char       b;
-#endif
-    unsigned char       a;      // Alpha
-} rgba_t;
-
-
-
-
-extern rgba_t COLOR_BLACK;
-extern rgba_t COLOR_WHITE;
-
-extern rgba_t COLOR_LIGHTGRAY;
-extern rgba_t COLOR_DARKGRAY;
-extern rgba_t COLOR_YELLOW;
-extern rgba_t COLOR_LIGHTRED;
-extern rgba_t COLOR_RED;
-extern rgba_t COLOR_BROWN;
-extern rgba_t COLOR_BLUE;
-extern rgba_t COLOR_CYAN;
-extern rgba_t COLOR_LIGHTBLUE;
-extern rgba_t COLOR_GREEN;
-extern rgba_t COLOR_LIGHTGREEN;
-extern rgba_t COLOR_MAGENTA;
-extern rgba_t COLOR_LIGHTMAGENTA;
 
 typedef struct drv_video_bitmap
 {
@@ -98,11 +51,6 @@ typedef struct drv_video_bitmap
 } drv_video_bitmap_t;
 
 
-typedef struct rect
-{
-    int x, y;
-    int xsize, ysize;
-} rect_t;
 
 
 #define WFLAG_WIN_DECORATED           0x00000001
@@ -153,21 +101,6 @@ int rect_win_bounds( rect_t *r, drv_video_window_t *w );
 int point_in_win( int x, int y, drv_video_window_t *w );
 
 
-typedef struct drv_video_font_t
-{
-    int         	xsize;
-    int 		ysize;
-    char *              font;
-} drv_video_font_t;
-
-extern struct drv_video_font_t         drv_video_16x16_font;
-extern struct drv_video_font_t         drv_video_8x16ant_font;
-extern struct drv_video_font_t         drv_video_8x16bro_font;
-extern struct drv_video_font_t         drv_video_8x16cou_font;
-extern struct drv_video_font_t         drv_video_8x16med_font;
-extern struct drv_video_font_t         drv_video_8x16rom_font;
-extern struct drv_video_font_t         drv_video_8x16san_font;
-extern struct drv_video_font_t         drv_video_8x16scr_font;
 
 extern drv_video_bitmap_t 		close_bmp; // Window close button
 extern drv_video_bitmap_t 		pin_bmp; // Window pin button

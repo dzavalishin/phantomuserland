@@ -2,6 +2,7 @@
 #define EVENT_H
 
 #include <queue.h>
+#include <video/rect.h>
 
 //! Max number of unprocessed events in window queue. Extra events will be thrown away.
 #define MAX_WINDOW_EVENTS 512
@@ -39,19 +40,23 @@ struct ui_event
 
         } m;
 
+        // WIN and GLOBAL events
         struct {
-            int         info;           // UI_EVENT_WIN_
+            int         	info;           // UI_EVENT_WIN_
+            rect_t              rect;           // If relevant...
         } w;
 
     };
 
 };
 
-typedef struct ui_even ui_event_t;
+typedef struct ui_event ui_event_t;
 
 #define UI_EVENT_TYPE_MOUSE     	(1<<0)
 #define UI_EVENT_TYPE_KEY     		(1<<1)
 #define UI_EVENT_TYPE_WIN     		(1<<2)
+// Global events are usually converted to multiple WIN events
+#define UI_EVENT_TYPE_GLOBAL   		(1<<3)
 
 
 #define UI_MODIFIER_KEYUP               (1<<0) // Else down
@@ -79,6 +84,9 @@ typedef struct ui_even ui_event_t;
 #define UI_EVENT_WIN_REPAINT            5 //! Repaint all
 
 
+#define UI_EVENT_GLOBAL_REPAINT_RECT    1 //! Repaint all windows that intersect w. rect
+
+
 
 
 
@@ -91,6 +99,10 @@ void event_q_put_key( int vkey, int ch, int modifiers );
 //! Put window event onto the main e q
 void event_q_put_win( int x, int y, int info, struct drv_video_window *focus );
 
+//! Put global event onto the main e q, supposed that event system
+//! will decide which windows have to receive this event.
+//void event_q_put_global( int x, int y, int info );
+void event_q_put_global( ui_event_t *e );
 
 //! Start sending keybd events from keybd driver - see keyboard.c
 void phantom_dev_keyboard_start_events(void);

@@ -7,6 +7,8 @@
 #include <vm/internal_da.h>
 #include <vm/root.h>
 
+#include <vm/syscall.h>
+
 #include <threads.h>
 // TEMP! Remove!
 #include "threads/thread_private.h"

@@ -11,6 +11,7 @@
 **/
 
 #include "jit.h"
+#include <phantom_assert.h>
 
 
 #define COPYCODE(name)                          \

@@ -26,6 +26,9 @@ void			tenmicrosec(void);
 //
 struct tm *		current_time;
 
+#include <vm/internal_da.h>
+void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc);
+
 
 #endif // TIME_H
 

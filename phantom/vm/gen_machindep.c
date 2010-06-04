@@ -101,7 +101,8 @@ void jit_code_32( jit_out_t *j, u_int32_t code )
 
 
 // Put binary code part to output code buffer
-void copy_jit_code( jit_out_t *j, char * code, int size )
+void copy_jit_code( jit_out_t *j, void *code, size_t size )
+//void copy_jit_code( jit_out_t *j, char * code, int size )
 {
     jit_checkbuf( j, size );
     memmove( j->bufp, code, size );

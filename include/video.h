@@ -40,5 +40,11 @@ void drv_video_window_draw_box( drv_video_window_t *w,
                                  int x,int y,int lx,int ly,
                                  rgba_t c);
 
+
+void drv_video_window_move( drv_video_window_t *w, int x, int y );
+
+void drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out );
+
+
 #endif // VIDEO_H
 

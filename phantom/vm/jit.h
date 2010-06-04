@@ -80,7 +80,7 @@ typedef struct jit_out jit_out_t;
 
 
 
-
+void copy_jit_code( jit_out_t *j, void *start, size_t size );
 
 
 

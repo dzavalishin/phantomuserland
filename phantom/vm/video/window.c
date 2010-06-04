@@ -214,4 +214,77 @@ void drv_video_window_preblit( drv_video_window_t *w )
     }
 }
 
+static void
+do_window_resize( drv_video_window_t *w, int xsize, int ysize )
+{
+    panic("not impl");
+}
+
+
+
+
+
+
+void
+drv_video_window_move( drv_video_window_t *w, int x, int y )
+{
+    int ox = w->x;
+    int oy = w->x;
+    video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+    w->x = x;
+    w->y = y;
+
+    ui_event_t e;
+    //struct ui_event e;
+
+    e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
+    e.w.rect.x = ox;
+    e.w.rect.y = oy;
+    e.w.rect.xsize = w->xsize;
+    e.w.rect.ysize = w->ysize;
+
+    event_q_put_global( &e );
+
+    event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+
+}
+
+
+void
+drv_video_window_resize( drv_video_window_t *w, int xsize, int ysize )
+{
+    rect_t oldsize;
+    rect_t newsize;
+    rect_t maxsize;
+    drv_video_window_get_bounds( w, &oldsize );
+    do_window_resize(w, xsize, ysize);
+    drv_video_window_get_bounds( w, &newsize );
+
+    rect_add( &maxsize, &oldsize, &newsize );
+
+    video_zbuf_reset_square( maxsize.x, maxsize.y, maxsize.xsize, maxsize.ysize );
+
+    {
+    ui_event_t e;
+    //struct ui_event e;
+    e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
+    e.w.rect = maxsize;
+
+    event_q_put_global( &e );
+    }
+}
+
+
+void
+drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out )
+{
+    assert(out);
+
+    out->x = w->x;
+    out->y = w->y;
+    out->xsize = w->xsize;
+    out->ysize = w->ysize;
+}
+
+
 

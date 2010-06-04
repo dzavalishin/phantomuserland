@@ -22,6 +22,8 @@
 #include "vm/p2c.h"
 #include "vm/alloc.h"
 
+#include <console.h>
+
 
 static int debug_print = 0;
 
@@ -189,7 +191,7 @@ static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
     CHECK_PARAM_COUNT(n_param, 1);
 
     int color = POP_INT();
-
+    (void) color;
     //int attr = (short)color;
 
     // TODO colors from attrs

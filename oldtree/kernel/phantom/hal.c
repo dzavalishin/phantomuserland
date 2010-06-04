@@ -360,7 +360,6 @@ void hal_sem_destroy( hal_sem_t *s )
     hal_mutex_destroy( &(s->m) );
 }
 
-//#if !OWN_THREADS
 int hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout );
 
 
@@ -383,21 +382,7 @@ int hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
     hal_mutex_unlock( &(s->m) );
     return 0;
 }
-//#endif
 
-
-/*
-int hal_cond_init( hal_cond_t *c );
-int hal_cond_wait( hal_cond_t *c, hal_mutex_t *m );
-int hal_cond_signal( hal_cond_t *c );
-int hal_cond_broadcast( hal_cond_t *c );
-int hal_cond_destroy( hal_cond_t *c );
-
-int hal_mutex_init(hal_mutex_t *m);
-int hal_mutex_lock(hal_mutex_t *m);
-int hal_mutex_unlock(hal_mutex_t *m);
-int hal_mutex_destroy(hal_mutex_t *m);
-*/
 
 
 

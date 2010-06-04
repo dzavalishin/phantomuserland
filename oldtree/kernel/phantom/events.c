@@ -17,7 +17,10 @@
 #include <malloc.h>
 #include <hal.h>
 #include <string.h>
-//#include <video.h>
+#include <video.h>
+
+void drv_video_window_explode_event(struct ui_event *e);
+
 
 static void event_push_thread();
 
@@ -214,7 +217,10 @@ void drv_video_window_receive_event(struct ui_event *e);
 
 static void push_event( struct ui_event *e )
 {
-    drv_video_window_receive_event(e);
+    if( e->type == UI_EVENT_TYPE_GLOBAL )
+        drv_video_window_explode_event(e);
+    else
+        drv_video_window_receive_event(e);
 }
 
 
@@ -276,6 +282,23 @@ void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus 
 
 
 
+//! Put global event onto the main e q
+void event_q_put_global( ui_event_t *ie )
+{
+    if(!event_engine_active) return; // Just ignore
+
+    struct ui_event *e = get_unused();
+
+    *e = *ie;
+
+    e->type = UI_EVENT_TYPE_GLOBAL;
+    e->time = 0; // TODO put time
+    e->focus= 0;
+
+    put_event(e);
+}
+
+
 
 
 // -----------------------------------------------------------------
@@ -311,7 +334,7 @@ static void select_event_target(struct ui_event *e)
     assert( e->type == UI_EVENT_TYPE_MOUSE );
 
     int wz = 0;
-    hal_spin_lock( &allw_lock );
+    //hal_spin_lock( &allw_lock );
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
         if( w->z < wz )
@@ -326,9 +349,11 @@ static void select_event_target(struct ui_event *e)
         }
         
     }
-    hal_spin_unlock( &allw_lock );
+    //hal_spin_unlock( &allw_lock );
 
 }
+
+
 
 
 //! Select target and put event to window queue.
@@ -387,7 +412,7 @@ ret:
     hal_spin_unlock( &allw_lock );
     if(ie) hal_sti();
 
-	// It has mutex anc can't be called in spinlock
+    // It has mutex and can't be called in spinlock
     if(later_lost) event_q_put_win( later_x, later_y, UI_EVENT_WIN_LOST_FOCUS, later_lost );
     if(later_gain) event_q_put_win( later_x, later_y, UI_EVENT_WIN_GOT_FOCUS, later_gain );
 
@@ -396,6 +421,34 @@ ret:
         w->inKernelEventProcess(w);
 
 }
+
+
+void drv_video_window_explode_event(struct ui_event *e)
+{
+    drv_video_window_t *w;
+
+    int ie = hal_save_cli();
+    hal_spin_lock( &allw_lock );
+    queue_iterate(&allwindows, w, drv_video_window_t *, chain)
+    {
+        rect_t  wr, isect;
+        drv_video_window_get_bounds( w, &wr );
+
+
+        if( e->w.info == UI_EVENT_GLOBAL_REPAINT_RECT )
+        {
+            int intersects = rect_mul( &isect, &wr, &(e->w.rect) );
+            if(intersects)
+                event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+        }
+
+    }
+    hal_spin_unlock( &allw_lock );
+    if(ie) hal_sti();
+
+
+}
+
 
 
 //! Get next event for this window

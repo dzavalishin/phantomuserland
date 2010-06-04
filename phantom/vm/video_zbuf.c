@@ -2,6 +2,8 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
 
+#include <video/rect.h>
+
 /**
  *
  * Z buffer implementation.
@@ -18,6 +20,7 @@ u_int8_t *zbuf = 0;
 static u_int32_t zbsize = 0;
 static u_int32_t zbwidth = 0;
 
+static rect_t zbuf_rect;
 
 void video_zbuf_init()
 {
@@ -27,6 +30,11 @@ void video_zbuf_init()
     zbwidth = video_drv->xsize;
 
     zbuf = malloc( zbsize );
+
+    zbuf_rect.x = 0;
+    zbuf_rect.y = 0;
+    zbuf_rect.xsize = video_drv->xsize;
+    zbuf_rect.ysize = video_drv->ysize;
 
     video_zbuf_reset();
 }
@@ -52,12 +60,23 @@ void video_zbuf_reset_square(int x, int y, int xsize, int ysize )
 
 void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos )
 {
+    rect_t out;
+    rect_t a;
+
+    a.x = x;
+    a.y = y;
+    a.xsize = xsize;
+    a.ysize = ysize;
+
+    if(!rect_mul( &out, &a, &zbuf_rect ))
+        return;
+
     int ys;
     for(ys = 0; ys < ysize; ys++)
     {
-        int linpos = x + y*zbwidth;
-        y++;
-        memset( zbuf+linpos, zpos, xsize );
+        int linpos = out.x + out.y*zbwidth;
+        out.y++;
+        memset( zbuf+linpos, zpos, out.xsize );
     }
 }
 

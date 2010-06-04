@@ -14,8 +14,9 @@ break pvm_exec_throw
 
 break main
 
-break vm_map.c:1174
-break vm_map.c:1183
-break vm_map.c:1191
-break vm_map.c:1201
+#break vm_map.c:1174
+#break vm_map.c:1183
+#break vm_map.c:1191
+#break vm_map.c:1201
 
+break drv_video_window_receive_event

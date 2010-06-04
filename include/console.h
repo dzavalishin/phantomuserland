@@ -31,5 +31,8 @@ void    console_set_error_color(void);
 void    console_set_warning_color(void);
 void    console_set_normal_color(void);
 
+// TODO remove it from here, it is used temp. in syscalls!
+int phantom_dev_keyboard_getc(void);
+
 
 #endif // _PHANTOM_CONSOLE_H

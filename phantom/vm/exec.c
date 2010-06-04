@@ -1157,7 +1157,7 @@ static int pvm_exec_find_catch(
 
 //pvm_object
 //pvm_exec_compose_object( pvm_object in_class, pow_ostack in_stack, int to_pop )
-
+#if 0
 static struct pvm_object pvm_exec_compose_object(
                                                  struct pvm_object in_class,
                                                  struct data_area_4_object_stack *in_stack,
@@ -1197,7 +1197,7 @@ static struct pvm_object pvm_exec_compose_object(
     */
     return out;
 }
-
+#endif
 
 // Todo it's a call_frame method!
 void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_storage * code )

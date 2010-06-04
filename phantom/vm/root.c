@@ -332,7 +332,7 @@ static int get_env_name_pos( const char *name )
 	{
             pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, i);
             char *ed = pvm_get_str_data(o);
-            int el = pvm_get_str_len(o);
+            //int el = pvm_get_str_len(o);
 
             char *eqpos = strchr( ed, '=' );
             if( eqpos == 0 )
