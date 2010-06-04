@@ -16,24 +16,28 @@
 //#include <stdlib.h>
 #include <phantom_libc.h>
 
-static inline int isws(unsigned char c)
+//static inline int isws(unsigned char c)
+static inline int isws(char c)
 {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
-static void skip_ws( unsigned char** cpp )
+//static void skip_ws( unsigned char** cpp )
+static void skip_ws( char** cpp )
 {
     while( isws( **cpp ) )
         (*cpp)++;
 }
 
-static void skip_num( unsigned char** cpp )
+//static void skip_num( unsigned char** cpp )
+static void skip_num( char** cpp )
 {
     while( **cpp >= '0' && **cpp <= '9' )
         (*cpp)++;
 }
 
-static void skip_comment( unsigned char** cpp )
+//static void skip_comment( unsigned char** cpp )
+static void skip_comment( char** cpp )
 {
     if(**cpp != '#') return;
     (*cpp)++;
@@ -49,7 +53,7 @@ static void moveImage( rgba_t *to, unsigned char *from, int height, int width, i
 {
     int row;
     for(row = height - 1;row >= 0;row--){
-        char *rowScan = from + (row * width * (twobytes ? 6 : 3));
+        unsigned char *rowScan = from + (row * width * (twobytes ? 6 : 3));
         int pixelsLeft;
         for(pixelsLeft = width;pixelsLeft > 0;pixelsLeft--){
             to->a = 255;
@@ -74,7 +78,8 @@ static void moveImage( rgba_t *to, unsigned char *from, int height, int width, i
 
 static int parseHeader( unsigned char **pfrom, int *width, int *height, int *maxcolorval)
 {
-	unsigned char *from = *pfrom;
+    //unsigned char *from = *pfrom;
+    char *from = (char *)*pfrom;
 
     if( *from++ != 'P' ) return 1;
     if( *from++ != '6' ) return 2;
@@ -99,7 +104,7 @@ static int parseHeader( unsigned char **pfrom, int *width, int *height, int *max
     if(!isws( *from ) ) return 6;
     from++;
 
-    *pfrom = from;
+    *pfrom = (unsigned char *)from;
 
     return 0;
 }

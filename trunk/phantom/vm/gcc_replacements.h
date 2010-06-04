@@ -28,5 +28,13 @@ void *malloc(size_t size);
 
 void free( void *mem );
 
+FILE * fopen( const char *fn, const char *mode );
+int fread( void *ptr, int, int, FILE *f );
+int fwrite( const void *ptr, int, int, FILE *f );
+int fclose( FILE *f );
+
+int fseek( FILE *f, long offset, int whence );
+long ftell( FILE *f );
+
 
 void exit(int retcode );

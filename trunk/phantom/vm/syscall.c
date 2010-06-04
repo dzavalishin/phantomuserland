@@ -12,6 +12,7 @@
 
 
 #include <phantom_libc.h>
+#include <time.h>
 
 #include <kernel/snap_sync.h>
 
@@ -272,7 +273,7 @@ static int si_string_3_clone(struct pvm_object me, struct data_area_4_thread *tc
     DEBUG_INFO;
     ASSERT_STRING(me);
     struct data_area_4_string *meda = pvm_object_da( me, string );
-    SYSCALL_RETURN(pvm_create_string_object_binary( meda->data, meda->length ));
+    SYSCALL_RETURN(pvm_create_string_object_binary( (char *)meda->data, meda->length ));
 }
 
 static int si_string_4_equals(struct pvm_object me, struct data_area_4_thread *tc )
@@ -331,7 +332,7 @@ static int si_string_8_substring(struct pvm_object me, struct data_area_4_thread
 
     //printf("substr inx %x len %d parmlen %d\n", index, len, parmlen);
 
-    SYSCALL_RETURN(pvm_create_string_object_binary( meda->data + index, len ));
+    SYSCALL_RETURN(pvm_create_string_object_binary( (char *)meda->data + index, len ));
 }
 
 static int si_string_9_charat(struct pvm_object me, struct data_area_4_thread *tc )
@@ -369,8 +370,8 @@ static int si_string_10_concat(struct pvm_object me, struct data_area_4_thread *
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
     pvm_object_t ret = pvm_create_string_object_binary_cat(
-    		meda->data, meda->length,
-                himda->data, himda->length );
+    		(char *)meda->data, meda->length,
+                (char *)himda->data, himda->length );
 
     SYS_FREE_O(him);
 
@@ -403,9 +404,9 @@ static int si_string_12_find(struct pvm_object me, struct data_area_4_thread *tc
     struct data_area_4_string *meda = pvm_object_da( me, string );
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
-    unsigned char * ret = strnstrn(
-    		meda->data, meda->length,
-                himda->data, himda->length );
+    unsigned char * ret = (unsigned char *)strnstrn(
+    		(char *)meda->data, meda->length,
+                (char *)himda->data, himda->length );
 
     SYS_FREE_O(him);
 
@@ -445,6 +446,7 @@ static int si_thread_5_tostring(struct pvm_object me, struct data_area_4_thread 
     SYSCALL_RETURN(pvm_create_string_object( "thread" ));
 }
 
+/*
 static int si_thread_8_start(struct pvm_object me, struct data_area_4_thread *tc )
 {
     (void)me;
@@ -453,7 +455,7 @@ static int si_thread_8_start(struct pvm_object me, struct data_area_4_thread *tc
     //SYSCALL_RETURN(pvm_create_string_object( "thread" ));
     SYSCALL_RETURN_NOTHING;
 }
-
+*/
 
 static int si_thread_10_pause(struct pvm_object me, struct data_area_4_thread *tc )
 {
@@ -1175,7 +1177,7 @@ static int si_mutex_9_unlock(struct pvm_object me, struct data_area_4_thread *tc
 static int si_mutex_10_trylock(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
-    struct data_area_4_mutex *da = pvm_object_da( me, mutex );
+    //struct data_area_4_mutex *da = pvm_object_da( me, mutex );
 
     // No locking in syscalls!!
     //SYSCALL_RETURN(pvm_create_int_object( pthread_mutex_trylock(&(da->mutex)) ));
@@ -1278,7 +1280,7 @@ syscall_func_t	syscall_table_4_cond[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
-    &si_void_4_equals,              &si_mutex_5_tostring,
+    &si_void_4_equals,              &si_cond_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
     &si_cond_8_wait,      &si_cond_9_twait,

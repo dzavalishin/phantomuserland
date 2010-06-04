@@ -9,7 +9,7 @@ rem    -net nic,model=ne2k_isa -net nic,model=rtl8139 -net nic,model=i82559er -n
 SET Q_NET= -net nic,model=pcnet  -net user -tftp ../run/tftp
 
 rem SET Q_MACHINE=-M isapc
-SET Q_MACHINE=
+rem SET Q_MACHINE=-m 85
 
 SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda snapcopy.img -hdb phantom.img 
 rem -hdc cd.iso

@@ -172,7 +172,7 @@ void dumpf( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, voi
 
     const char *name = nameTab[flags];
 
-    SHOW_FLOW( 1,
+    SHOW_FLOW( 11,
            "[0x%09qX - 0x%09qX[ (%4d %s) - %s",
            from, from+n_elem,
            kmb, kms, name

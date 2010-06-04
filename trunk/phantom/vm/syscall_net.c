@@ -156,6 +156,7 @@ static int si_tcp_waitaccept_22(struct pvm_object me , struct data_area_4_thread
 
     CHECK_PARAM_COUNT(n_param, 1);
     int backlog = POP_INT();
+    (void) backlog;
 
     //SYSCALL_PUT_THIS_THREAD_ASLEEP()
 

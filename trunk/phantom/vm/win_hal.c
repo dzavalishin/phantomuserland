@@ -63,7 +63,7 @@ void    hal_halt()
 	exit(1);
 }
 
-
+extern int sleep(int);
 void        hal_sleep_msec( int miliseconds )
 {
 	//usleep(1000*miliseconds);
@@ -298,6 +298,7 @@ return;
 }
 
 
+void event_q_put_global( ui_event_t *e ) {}
 
 
 void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus )
