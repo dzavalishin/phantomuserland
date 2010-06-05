@@ -101,14 +101,14 @@ static void init_arenas( void * _pvm_object_space_start, unsigned int size )
     int percent_100 = 0;
     int i;
     for( i = 0; i < ARENAS; i++) {
-		start_a[i] = cur;
-		curr_a[i] = cur;
-		cur += (size / 400) * percent_a[i] * 4;  //align 4 bytes
-		percent_100 += percent_a[i];
-		end_a[i] = cur;
-	}
-	assert(percent_100 == 100); //check twice!
-	end_a[ARENAS-1] = pvm_object_space_start + size; //to be exact
+        start_a[i] = cur;
+        curr_a[i] = cur;
+        cur += (size / 400) * percent_a[i] * 4;  //align 4 bytes
+        percent_100 += percent_a[i];
+        end_a[i] = cur;
+    }
+    assert(percent_100 == 100); //check twice!
+    end_a[ARENAS-1] = pvm_object_space_start + size; //to be exact
 }
 
 
@@ -119,7 +119,7 @@ void pvm_alloc_clear_mem()
     int i;
     for( i = 0; i < ARENAS; i++) {
         init_free_object_header((pvm_object_storage_t *)start_a[i], end_a[i] - start_a[i]);
-	}
+    }
 }
 
 
@@ -370,6 +370,8 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
         if(data)
             break;
 
+        break; //skip GC, until we bring context to the allocator
+
         if(ngc-- <= 0)
             break;
 
@@ -458,8 +460,8 @@ static inline struct pvm_object_storage *pvm_next_object(struct pvm_object_stora
 // -----------------------------------------------------------------------
 
 
-static int memcheck_one(int i, void * start, void * end);
-static void memcheck_print_histogram(int i);
+static int memcheck_one(unsigned int i, void * start, void * end);
+static void memcheck_print_histogram(unsigned int i);
 
 
 /*
@@ -472,7 +474,7 @@ static void memcheck_print_histogram(int i);
 
 int pvm_memcheck()
 {
-    int i;
+    unsigned int i;
     for( i = 0; i < ARENAS; i++)
     {
         printf("\n Arena #%d [%s] \n", i, name_a[i]);
@@ -483,14 +485,14 @@ int pvm_memcheck()
 }
 
 
-static int memcheck_one(int i, void * start, void * end)
+static int memcheck_one(unsigned int i, void * start, void * end)
 {
     used_large_o[i] = 0; //reset
-    int size;
+    unsigned int size;
     for( size = 0; size <= max_stat_size; size++)
         used_o[i][size] = 0; //reset
 
-    long used = 0, free = 0, objects = 0, largest = 0;
+    unsigned long used = 0, free = 0, objects = 0, largest = 0;
 
     struct pvm_object_storage *curr = start;
 
@@ -550,7 +552,7 @@ static int memcheck_one(int i, void * start, void * end)
 }
 
 
-static void memcheck_print_histogram(int arena)
+static void memcheck_print_histogram(unsigned int arena)
 {
     if (arena == 0) return; //nothing interesting
 
@@ -558,7 +560,7 @@ static void memcheck_print_histogram(int arena)
         printf(" large objects: now used %ld, was allocated %ld\n", used_large_o[arena], created_large_o[arena]);
 
     printf(" small objects: size, now used, was allocated\n");
-    int size;
+    unsigned int size;
     for( size = 0; size <= max_stat_size; size++)
     {
         if(created_o[arena][size] > 0)
