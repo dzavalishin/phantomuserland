@@ -33,8 +33,8 @@ static int _DEBUG = 0;
 
 
 
-static hal_mutex_t  			pager_mutex;
-static hal_mutex_t  			pager_freelist_mutex;
+static hal_mutex_t              pager_mutex;
+static hal_mutex_t              pager_freelist_mutex;
 
 
 
@@ -45,28 +45,30 @@ static hal_mutex_t  			pager_freelist_mutex;
 #define free_reserve_size  32
 
 
-static paging_device       		*pdev;
+static paging_device            *pdev;
 
-static pager_io_request    		*pagein_q_start = 0;    // points to first (will go now or going now) page
-static pager_io_request    		*pagein_q_end = 0;      // points to last page
-//static int                 		pagein_q_len;
+static pager_io_request         *pager_current_request = 0;
 
-static pager_io_request    		*pageout_q_start = 0;
-static pager_io_request    		*pageout_q_end = 0;
-//static int                 		pageout_q_len;
+static pager_io_request         *pagein_q_start = 0;    // points to first (will go now) page
+static pager_io_request         *pagein_q_end = 0;      // points to last page
+//static int                        pagein_q_len;
 
-static int                 		pagein_is_in_process = 0;
-static int                 		pageout_is_in_process = 0;
+static pager_io_request         *pageout_q_start = 0;
+static pager_io_request         *pageout_q_end = 0;
+//static int                      pageout_q_len;
 
-
-static phantom_disk_superblock     	superblock;
-static int                         	need_fsck;
+static int                      pagein_is_in_process = 0;
+static int                      pageout_is_in_process = 0;
 
 
-static disk_page_io                	freelist_head;
-static int                        	freelist_inited = 0;
-static disk_page_no_t               	free_reserve[free_reserve_size]; // for interrupt time allocs
-static int                         	free_reserve_n;
+static phantom_disk_superblock      superblock;
+static int                          need_fsck;
+
+
+static disk_page_io                 freelist_head;
+static int                          freelist_inited = 0;
+static disk_page_no_t                   free_reserve[free_reserve_size]; // for interrupt time allocs
+static int                          free_reserve_n;
 
 
 
@@ -241,13 +243,21 @@ void pager_start_io() // called to start new io
     // system responce time depends on it - right?
     if(pagein_q_start)
     {
+        pager_current_request = pagein_q_start;
+        pagein_q_start = pager_current_request->next_page;
+        if(pagein_q_start == 0) pagein_q_end = 0;
+
         pagein_is_in_process = 1;
-        paging_device_start_read_rq( pdev, pagein_q_start, page_device_io_final_callback );
+        paging_device_start_read_rq( pdev, pager_current_request, page_device_io_final_callback );
     }
     else if(pageout_q_start)
     {
+        pager_current_request = pageout_q_start;
+        pageout_q_start = pager_current_request->next_page;
+        if(pageout_q_start == 0) pageout_q_end = 0;
+
         pageout_is_in_process = 1;
-        paging_device_start_write_rq( pdev, pageout_q_start, page_device_io_final_callback );
+        paging_device_start_write_rq( pdev, pager_current_request, page_device_io_final_callback );
     }
 }
 
@@ -262,21 +272,11 @@ void pager_stop_io() // called after io is complete
     if( (!pagein_is_in_process) && (!pageout_is_in_process) ) panic("stop when no io in pager");
     if( pagein_is_in_process    &&   pageout_is_in_process  ) panic("double io in stop_io");
 
+    pager_io_request *last = pager_current_request;
 //set_dr7(0); // turn off all debug registers
     if(pagein_is_in_process)
-        {
-        pager_io_request *last = pagein_q_start;
-
-        //hal_printf("pager_stop_io pagein BEF rem Q START = 0x%X Q END = 0x%X... ", pagein_q_start, pagein_q_end);
-
+    {
         pager_debug_print_q();
-
-        pagein_q_start = last->next_page;
-        if(pagein_q_start == 0) pagein_q_end = 0;
-
-        // free page resources allotted for pager activity?
-        //free_io_resources(last);
-        //hal_printf("pager_stop_io pagein AFT rem Q START = 0x%X Q END = 0x%X... ", pagein_q_start, pagein_q_end);
 
         last->flag_pagein = 0;
         if(last->pager_callback)
@@ -285,20 +285,11 @@ void pager_stop_io() // called after io is complete
             last->pager_callback( last, 0 );
             hal_mutex_lock(&pager_mutex);
         }
-        //hal_wakeup( last );
         pagein_is_in_process = 0;
-        }
+    }
 
     if(pageout_is_in_process)
-        {
-        pager_io_request *last = pageout_q_start;
-        pageout_q_start = last->next_page;
-        if(pageout_q_start == 0) pageout_q_end = 0;
-
-        //hal_printf("pager_stop_io pageout bef callbk... " );
-        // free page resources allotted for pager activity?
-        //free_io_resources(last);
-
+    {
         last->flag_pageout = 0;
         if(last->pager_callback)
         {
@@ -306,21 +297,18 @@ void pager_stop_io() // called after io is complete
             last->pager_callback( last, 1 );
             hal_mutex_lock(&pager_mutex);
         }
-        //hal_printf("pager_stop_io pageout aft callbk... " );
-        //hal_wakeup( last );
         pageout_is_in_process = 0;
-        }
+    }
 
     pager_start_io();
     hal_mutex_unlock(&pager_mutex);
-    }
+}
 
 
 
 
 
-void
-pager_enqueue_for_pagein ( pager_io_request *p )
+void pager_enqueue_for_pagein ( pager_io_request *p )
 {
     if(p->phys_page == 0)
         panic("pagein to zero address");
@@ -336,7 +324,6 @@ pager_enqueue_for_pagein ( pager_io_request *p )
 
     if( p->flag_pagein || p->flag_pageout ) panic("enqueue_for_pagein: page is already on pager queue");
 
-    //spinlock_lock( &pager_lock, "enqueue_for_pagein");
     hal_mutex_lock(&pager_mutex);
 
     p->flag_pagein = 1;
@@ -348,100 +335,130 @@ pager_enqueue_for_pagein ( pager_io_request *p )
 
     pager_start_io();
 
-    //spinlock_unlock( &pager_lock, "enqueue_for_pagein");
     hal_mutex_unlock(&pager_mutex);
 }
 
-// BUG!! CAN'T INSERT INTO THE BEGINNING OF Q! Q head is used in request finalization
-// as a pointer to CURRENTLY FINISHED REQUEST!
-void
-pager_enqueue_for_pagein_fast ( pager_io_request *p )
+void pager_enqueue_for_pagein_fast ( pager_io_request *p )
 {
 #if 1
     pager_enqueue_for_pagein( p );
 #else
-    hal_printf("ENQ 4 pagein fast VA 0x%X PA 0x%X disk %d\n",
-               p->virt_addr,
-               p->phys_page,
-               p->disk_page
-              );
-
     if( p->flag_pagein || p->flag_pageout ) panic("enqueue_for_pagein_fast: page is already on pager queue");
 
-    spinlock_lock( &pager_lock, "enqueue_for_pagein");
+    hal_mutex_lock(&pager_mutex);
 
     p->flag_pagein = 1;
-    if( pagein_q_start == 0 ) { pagein_q_start = p; pagein_q_end = p; p->next_page = 0; /*start_io();*/ }
+    if( pagein_q_start == 0 ) { pagein_q_start = p; pagein_q_end = p; p->next_page = 0; }
     else { p->next_page = pagein_q_start; pagein_q_start = p; }
     pager_start_io();
 
-    spinlock_unlock( &pager_lock, "enqueue_for_pagein");
+    hal_mutex_unlock(&pager_mutex);
 #endif
 }
 
-void
-pager_enqueue_for_pageout( pager_io_request *p )
-    {
+void pager_enqueue_for_pageout( pager_io_request *p )
+{
     if(p->phys_page == 0)
         panic("pageout from zero address");
     /*hal_printf("ENQ 4 pageout req  0x%X  VA 0x%X PA 0x%X disk %d, Q START = 0x%X\n",
-               p,
-               p->virt_addr,
-               p->phys_page,
-               p->disk_page,
-               pagein_q_start
-              ); */
+      p,
+      p->virt_addr,
+      p->phys_page,
+      p->disk_page,
+      pagein_q_start
+      ); */
     if( p->flag_pagein || p->flag_pageout ) panic("enqueue_for_pageout: page is already on pager queue");
 
-    //spinlock_lock( &pager_lock, "enqueue_for_pageout");
-    //hal_printf("ENQ 4 pgout bef lock... ");
     hal_mutex_lock(&pager_mutex);
-    //hal_printf("ENQ 4 pgout aft lock... ");
 
     p->flag_pageout = 1;
     p->next_page = 0;
-    if( pageout_q_start == 0 ) { pageout_q_start = p; pageout_q_end = p; /*start_io();*/ }
+    if( pageout_q_start == 0 ) { pageout_q_start = p; pageout_q_end = p; }
     else { pageout_q_end->next_page = p;  pageout_q_end = p; }
     pager_start_io();
 
-    //spinlock_unlock( &pager_lock, "enqueue_for_pageout");
     hal_mutex_unlock(&pager_mutex);
-    //hal_printf("ENQ 4 pgout done\n");
-    }
+}
 
 
-// BUG!! CAN'T INSERT INTO THE BEGINNING OF Q! Q head is used in request finalization
-// as a pointer to CURRENTLY FINISHED REQUEST!
-
-void
-pager_enqueue_for_pageout_fast( pager_io_request *p )
+void pager_enqueue_for_pageout_fast( pager_io_request *p )
 {
 #if 1
     pager_enqueue_for_pageout( p );
 #else
-    hal_printf("ENQ 4 pageout req  0x%X  VA 0x%X PA 0x%X disk %d, Q START = 0x%X\n",
-               p,
-               p->virt_addr,
-               p->phys_page,
-               p->disk_page,
-               pagein_q_start
-              );
-
     if( p->flag_pagein || p->flag_pageout ) panic("enqueue_for_pageout_fast: page is already on pager queue");
 
-    //spinlock_lock( &pager_lock, "enqueue_for_pageout");
     hal_mutex_lock(&pager_mutex);
 
     p->flag_pageout = 1;
-    if( pageout_q_start == 0 ) { pageout_q_start = p; pageout_q_end = p; p->next_page = 0; /*start_io();*/ }
+    if( pageout_q_start == 0 ) { pageout_q_start = p; pageout_q_end = p; p->next_page = 0; }
     else { p->next_page = pageout_q_start;  pageout_q_start = p; }
     pager_start_io();
 
-    //spinlock_unlock( &pager_lock, "enqueue_for_pageout");
     hal_mutex_unlock(&pager_mutex);
 #endif
 }
 
+
+void pager_raise_request_priority(pager_io_request *p)
+{
+    hal_mutex_lock(&pager_mutex);
+
+    if (pager_current_request != p && pageout_q_start != p)
+    {
+        pager_io_request *i;
+        for (i = pageout_q_start; i; i = i->next_page)
+        {
+            if (i->next_page == p)
+            {
+                i->next_page = p->next_page;
+                if (pageout_q_end == p)
+                    pageout_q_end = i;
+                p->next_page = pageout_q_start;
+                pageout_q_start = p;
+                break;
+            }
+        }
+    }
+
+    hal_mutex_unlock(&pager_mutex);
+}
+
+int pager_dequeue_from_pageout(pager_io_request *p)
+{
+    int dequeued = 0;
+    hal_mutex_lock(&pager_mutex);
+
+    if (pageout_q_start == p)
+    {
+        pageout_q_start = p->next_page;
+        if (!pageout_q_start)
+            pageout_q_end = 0;
+        p->flag_pageout = 0;
+        dequeued = 1;
+    }
+    else if (pager_current_request != p)
+    {
+        pager_io_request *i;
+        for (i = pageout_q_start; i; i = i->next_page)
+        {
+            if (i->next_page == p)
+            {
+                i->next_page = p->next_page;
+                if (pageout_q_end == p)
+                    pageout_q_end = i;
+
+                p->flag_pageout = 0;
+                dequeued = 1;
+                break;
+            }
+        }
+    }
+
+    hal_mutex_unlock(&pager_mutex);
+
+    return dequeued;
+}
 
 // ---------------------------------------------------------------------------
 //
