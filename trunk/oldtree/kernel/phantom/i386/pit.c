@@ -18,7 +18,7 @@ int pitctr1_port = PITCTR1;	/* For 386/20 Board */
 int pitctr2_port = PITCTR2;	/* For 386/20 Board */
 /* We want PIT 0 in square wave mode */
 
-int pit0_mode = PIT_C0|PIT_SQUAREMODE|PIT_READMODE ;
+int pit0_mode = PIT_C0|PIT_NDIVMODE|PIT_READMODE ;
 
 
 unsigned int delaycount;		/* loop count in trying to delay for
@@ -199,6 +199,27 @@ static void timer_int_handler()
     //if(handler != 0) handler();
 }
 
+static int pit_arch_get_tick_rate(void)
+{
+    return usec_per_tick;
+}
+
+static bigtime_t pit_arch_get_time_delta(void)
+{
+    int ei = hal_save_cli();
+    int d = pit_read(0);
+    if (ei) hal_sti();
+    
+    assert(d > 0);
+    if (!--d)
+        return 0;
+
+    bigtime_t r = (bigtime_t)(CLKNUM / hz - d) * 1000000 / CLKNUM;
+
+    assert(r < 1000000 / hz);
+
+    return r;
+}
 
 int
 phantom_timer_pit_init(int freq, void (*timer_intr)())
@@ -223,6 +244,22 @@ phantom_timer_pit_init(int freq, void (*timer_intr)())
         panic( /*__FUNCTION__*/ "phantom_timer_pit_init: can't install intr handler %x", rc);
 
     srandom(pit_read(0)); // try to init random gen
+
+    arch_get_tick_rate = pit_arch_get_tick_rate;
+    arch_get_time_delta = pit_arch_get_time_delta;
+
+    bigtime_t a = hal_system_time();
+    bigtime_t start = a;
+
+#if 0
+    // check that system time is monotonous
+    while (a - start < 1000000)
+    {
+        bigtime_t b = hal_system_time();
+        assert(a <= b);
+        a = b;
+    }
+#endif
 
     return freq;
 }
