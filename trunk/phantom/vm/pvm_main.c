@@ -28,8 +28,6 @@
 
 #include "vm/root.h"
 //#include "vm/bulk.h"
-#include "hal.h"
-
 //#include "vm/internal_da.h"
 
 #include "hal.h"
@@ -40,10 +38,6 @@
 
 #define MAXENVBUF 128
 static char *envbuf[MAXENVBUF] = { 0 };
-
-
-
-#include <math.h>
 
 
 
@@ -444,7 +438,7 @@ const char **main_env;
 static void args(int argc, char* argv[])
 {
     main_envc = 0;
-    main_env = &envbuf;
+    main_env = (const char **) &envbuf;
 
     while(argc-- > 1)
     {

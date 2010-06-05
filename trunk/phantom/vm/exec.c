@@ -241,11 +241,11 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
 }
 
 
-static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, int syscall_index );
+static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index );
 
 
 // syscalss numbers are specific to object class
-static void pvm_exec_sys( struct data_area_4_thread *da, unsigned syscall_index )
+static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
 {
     if( debug_print_instr ) hal_printf("sys %d start; ", syscall_index );
 
@@ -274,13 +274,13 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned syscall_index 
 
 
 
-static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned method_index, unsigned n_param )
+static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned int method_index, unsigned int n_param )
 {
     // which object's method we'll call - pop after args!
 
     // allocate places on stack
     {
-        int i;
+        unsigned int i;
         for( i = n_param; i; i-- )
         {
             pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), pvm_get_null_object() );
@@ -289,7 +289,7 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
 
     // fill 'em in correct order
     {
-        int i;
+        unsigned int i;
         for( i = n_param; i; i-- )
         {
             pvm_ostack_abs_set( pvm_object_da(cfda->ostack, object_stack), i-1, os_pop() );
@@ -308,7 +308,7 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
 }
 
 
-static void pvm_exec_call( struct data_area_4_thread *da, unsigned method_index, unsigned n_param, int do_optimize_ret )
+static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_index, unsigned int n_param, int do_optimize_ret )
 {
     if( DEB_CALLRET || debug_print_instr ) hal_printf( "\ncall %d (stack_depth %d -> ", method_index, da->stack_depth );
 
@@ -970,15 +970,15 @@ void pvm_exec(struct pvm_object current_thread)
 
         case opcode_call_8bit:
             {
-                int method_index = pvm_code_get_byte(&(da->code));
-                int n_param = pvm_code_get_int32(&(da->code));
+                unsigned int method_index = pvm_code_get_byte(&(da->code));
+                unsigned int n_param = pvm_code_get_int32(&(da->code));
                 pvm_exec_call(da,method_index,n_param,1);
             }
             break;
         case opcode_call_32bit:
             {
-                int method_index = pvm_code_get_int32(&(da->code));
-                int n_param = pvm_code_get_int32(&(da->code));
+                unsigned int method_index = pvm_code_get_int32(&(da->code));
+                unsigned int n_param = pvm_code_get_int32(&(da->code));
                 pvm_exec_call(da,method_index,n_param,1);
             }
             break;
@@ -1048,7 +1048,7 @@ void pvm_exec(struct pvm_object current_thread)
 
             if( (instruction & 0xE0 ) == opcode_call_00 )
             {
-                int n_param = pvm_code_get_byte(&(da->code));
+                unsigned n_param = pvm_code_get_byte(&(da->code));
                 pvm_exec_call(da,instruction & 0x1F,n_param,0); //no optimization for soon return
                 break;
             }
@@ -1063,7 +1063,7 @@ void pvm_exec(struct pvm_object current_thread)
 
 
 
-static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, int syscall_index )
+static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index )
 {
     if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
         pvm_exec_throw( "pvm_exec_find_syscall: not a class object" );
@@ -1083,7 +1083,7 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, int sysca
  *
  */
 
-struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, int method_index )
+struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned int method_index )
 {
 	if( o.data == 0 )
 	{
@@ -1107,7 +1107,7 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, int metho
     if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
         pvm_exec_throw( "pvm_exec_find_method: not an interface object" );
 
-    if(method_index < 0 || method_index > da_po_limit(iface))
+    if(method_index > da_po_limit(iface))
         pvm_exec_throw( "pvm_exec_find_method: method index is out of bounds" );
 
     return da_po_ptr(iface->da)[method_index].data;

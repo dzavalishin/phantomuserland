@@ -4,6 +4,7 @@ int putchar( int c )
 {
     char cc = c;
     write(1, &cc, 1);
+    return cc;
 }
 
 int getchar()

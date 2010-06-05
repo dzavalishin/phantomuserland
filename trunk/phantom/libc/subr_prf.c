@@ -600,7 +600,7 @@ ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
  *		("%*D", len, ptr, " " -> XX XX XX XX ...
  */
 int
-kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap)
+kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap)
 {
 #define PCHAR(c) {int cc=(c); if (func) (*func)(cc,arg); else *d++ = cc; retval++; }
     char nbuf[MAXNBUF];

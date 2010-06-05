@@ -766,16 +766,16 @@ errno_t pvm_jit(struct pvm_object current_thread)
         case opcode_call_8bit:
             {
 #error impl
-                int method_index = pvm_code_get_byte(&(da->code));
-                int n_param = pvm_code_get_int32(&(da->code));
+                unsigned int method_index = pvm_code_get_byte(&(da->code));
+                unsigned int n_param = pvm_code_get_int32(&(da->code));
                 pvm_exec_call(da,method_index,n_param,1);
             }
             break;
         case opcode_call_32bit:
             {
 #error impl
-                int method_index = pvm_code_get_int32(&(da->code));
-                int n_param = pvm_code_get_int32(&(da->code));
+                unsigned int method_index = pvm_code_get_int32(&(da->code));
+                unsigned int n_param = pvm_code_get_int32(&(da->code));
                 pvm_exec_call(da,method_index,n_param,1);
             }
             break;
@@ -934,7 +934,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             if( (instruction & 0xE0 ) == opcode_call_00 )
             {
 #error impl
-                int n_param = pvm_code_get_byte(&(da->code));
+                unsigned int n_param = pvm_code_get_byte(&(da->code));
                 pvm_exec_call(da,instruction & 0x1F,n_param,0); //no optimization for soon return
                 break;
             }
