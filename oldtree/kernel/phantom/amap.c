@@ -89,6 +89,17 @@ amap_init( amap_t *map, amap_elem_addr_t start, amap_elem_size_t n_elem, u_int32
     queue_enter(&(map->queue), ne, amap_entry_t *, chain);
 }
 
+void
+amap_destroy( amap_t *map )
+{
+    amap_entry_t *ie;
+    while( !queue_empty(&(map->queue)) )
+    {
+        queue_remove_first(&(map->queue), ie, amap_entry_t *, chain);
+        free(ie);
+    }
+}
+
 
 
 void
@@ -268,7 +279,7 @@ amap_check_modify( amap_t *map, amap_elem_addr_t from, amap_elem_size_t n_elem, 
         }
         else
         {
-            if(modified) *modified = 0;
+            if(modified) *modified = 1;
         }
 
         amap_elem_addr_t e_finish = e->start+e->n_elem; // One AFTER el end

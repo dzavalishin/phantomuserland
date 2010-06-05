@@ -20,3 +20,7 @@ break main
 #break vm_map.c:1201
 
 break drv_video_window_receive_event
+
+
+break fsck_create_map
+break do_test_amap

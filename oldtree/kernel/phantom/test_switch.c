@@ -35,6 +35,13 @@ void test_fail(errno_t rc)
     longjmp( jb, rc );
 }
 
+void test_fail_msg(errno_t rc, const char *msg)
+{
+    printf( "Test fail: %s\n", msg );
+    longjmp( jb, rc );
+}
+
+
 
 /**
  *
@@ -94,6 +101,7 @@ void run_test( const char *test_name, const char *test_parm )
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
     TEST(malloc);
+    TEST(amap);
 
     TEST(udp_send);
     TEST(udp_syslog);

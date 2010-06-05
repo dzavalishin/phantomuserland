@@ -31,6 +31,9 @@ typedef struct amap {
 // Create
 void amap_init( amap_t *map, amap_elem_addr_t start, amap_elem_size_t n_elem, u_int32_t start_state_flags );
 
+// Kill
+void amap_destroy( amap_t *map );
+
 
 // Set range to have these attributes
 errno_t amap_modify( amap_t *map, amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags );
