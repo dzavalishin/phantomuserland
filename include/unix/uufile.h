@@ -59,7 +59,7 @@ typedef struct uufile uufile_t;
 
 
 uufile_t *copy_uufile( uufile_t *in );
-uufile_t *create_uufile();
+uufile_t *create_uufile(void);
 
 void set_uufile_name( uufile_t *in, const char *name );
 
@@ -82,7 +82,7 @@ typedef struct dir_ent
 } dir_ent_t;
 
 
-uufile_t *create_dir();
+uufile_t *create_dir(void);
 
 //! Unlink by name
 errno_t unlink_dir_name( uufile_t *dir, const char *name );
@@ -108,7 +108,7 @@ struct uufs
     uufile_t *		(*namei)(const char *filename);
 
     // Return a file struct for fs root
-    uufile_t *		(*root)();
+    uufile_t *		(*root)(void);
 };
 
 typedef struct uufs uufs_t;

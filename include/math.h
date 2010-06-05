@@ -177,7 +177,7 @@ extern double scalbn(double, int);
  * BSD math library entry points
  */
 struct complex { double x, y; };
-extern double cabs(struct complex);
+//extern double cabs(); //(double complex);
 extern double drem(double, double);
 extern double expm1(double);
 extern double log1p(double);
@@ -261,7 +261,7 @@ extern float scalbnf(float, int);
 /*
  * float versions of BSD math library entry points
  */
-extern float cabsf (void);
+//extern float cabsf(); //(float complex);
 extern float dremf(float, float);
 extern float expm1f(float);
 extern float log1pf(float);

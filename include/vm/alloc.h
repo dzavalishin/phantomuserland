@@ -28,7 +28,7 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size );
 void pvm_alloc_clear_mem(void);
 
-pvm_object_storage_t *get_root_object_storage();
+pvm_object_storage_t *get_root_object_storage(void);
 
 int pvm_memcheck(void);
 bool pvm_object_is_allocated_light(pvm_object_storage_t *p);
@@ -58,8 +58,8 @@ pvm_object_t  ref_inc_o(pvm_object_t o);
 // Gigant lock for now. TODO
 extern hal_mutex_t  alloc_mutex;
 
-void * get_pvm_object_space_start();
-void * get_pvm_object_space_end();
+void * get_pvm_object_space_start(void);
+void * get_pvm_object_space_end(void);
 
 void refzero_process_children( pvm_object_storage_t *o );
 void ref_saturate_p(pvm_object_storage_t *p);

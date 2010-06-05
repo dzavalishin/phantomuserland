@@ -53,19 +53,19 @@ quad_t strtoq(const char *nptr, char **endptr, int base);
 u_quad_t strtouq(const char *nptr, char **endptr, int base);
 
 
-void *memchr(void const *buf, int c, size_t len);
+void *memchr(const void *buf, int c, size_t len);
 void *memscan(void *addr, int c, size_t size);
 int strcoll(const char *s1, const char *s2);
-char *strncat(char *dest, char const *src, size_t count);
-int strnicmp(char const *s1, char const *s2, size_t len);
-int strncasecmp(char const *s1, char const *s2, size_t len);
-size_t strnlen(char const *s, size_t count);
-char *strpbrk(char const *cs, char const *ct);
-size_t strspn(char const *s, char const *accept);
-char *strstr(char const *s1, char const *s2);
+char *strncat(char *dest, const char *src, size_t count);
+int strnicmp(const char *s1, const char *s2, size_t len);
+int strncasecmp(const char *s1, const char *s2, size_t len);
+size_t strnlen(const char *s, size_t count);
+char *strpbrk(const char *cs, const char *ct);
+size_t strspn(const char *s, const char *accept);
+char *strstr(const char *s1, const char *s2);
 size_t strxfrm(char *dest, const char *src, size_t n);
 
-char *strnstrn(char const *s1, int l1, char const *s2, int l2);
+char *strnstrn(const char *s1, int l1, const char *s2, int l2);
 
 
 
