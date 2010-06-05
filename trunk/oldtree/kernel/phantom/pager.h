@@ -64,6 +64,8 @@ optimize head movement better */
     void                pager_enqueue_for_pagein_fast ( pager_io_request *p );
     void                pager_enqueue_for_pageout( pager_io_request *p );
     void                pager_enqueue_for_pageout_fast( pager_io_request *p );
+    void                pager_raise_request_priority(pager_io_request *p);
+    int                 pager_dequeue_from_pageout(pager_io_request *p);
 
     void                pager_io_done(void);
 
