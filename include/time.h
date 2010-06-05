@@ -8,6 +8,9 @@
 bigtime_t 		hal_system_time(void); // uptime
 bigtime_t 		hal_local_time(void);  // real time/date
 
+extern int (*arch_get_tick_rate)(void);
+extern bigtime_t (*arch_get_time_delta)(void);
+
 // seconds
 time_t 			time(time_t *timer);
 

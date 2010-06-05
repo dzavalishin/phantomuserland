@@ -27,6 +27,11 @@ const char *monNames[12] =
 // which the timer interrupts run (see TICK_RATE in timer.c).
 static bigtime_t sys_time;
 
+static hal_spinlock_t sys_time_accurate_spinlock;
+// The latest accurate system time, accurate to the resolution
+// of the underlying hardware timer
+static bigtime_t sys_time_accurate;
+
 // The delta of usecs that needs to be added to sys_time to get real time
 static bigtime_t real_time_delta;
 
@@ -49,6 +54,7 @@ int hal_time_init()
     tz_delta = 0;
     strcpy(tz_name, "UTC");
     real_time_delta = arch_get_rtc_delta();
+    hal_spin_init(&sys_time_accurate_spinlock);
 
     return 0;
 }
@@ -82,6 +88,8 @@ void hal_time_tick(int tick_rate)
     }
 }
 
+int (*arch_get_tick_rate)(void);
+bigtime_t (*arch_get_time_delta)(void);
 
 bigtime_t hal_system_time(void)
 {
@@ -94,10 +102,27 @@ retry:
     if(val > *st)
         goto retry;
 
-#if ERR
     // ask the architectural specific layer to give us a little better precision if it can
-    val += arch_get_time_delta();
-#endif
+    if (arch_get_tick_rate && arch_get_time_delta)
+    {
+        val += arch_get_time_delta();
+
+        int ei = hal_save_cli();
+        hal_spin_lock(&sys_time_accurate_spinlock);
+        
+        // if we're in cli and the tick is pending, compensate for it
+        // if, not while: must not cli longer than for 2 ticks,
+        // otherwise system time will lag
+        if (val < sys_time_accurate)
+            val += arch_get_tick_rate();
+
+        // make sure system time is monotonous
+        assert(val >= sys_time_accurate);
+
+        sys_time_accurate = val;
+        hal_spin_unlock(&sys_time_accurate_spinlock);
+        if (ei) hal_sti();
+    }
 
     return val;
 }
