@@ -1134,7 +1134,7 @@ void do_snapshot()
     disk_page_no_t actual2 = pager_superblock_ptr()->last_snap;
 
     // TODO broken
-    //phantom_free_snap ( toFree, actual1, actual2 );
+    phantom_free_snap ( toFree, actual1, actual2 );
 
     //#error not impl
     // and free pages of previous-previous snapshot that changed in this
@@ -1163,6 +1163,7 @@ void do_snapshot()
 //---------------------------------------------------------------------------
 
 static volatile size_t reclaim_q_size = 0;
+#if MEM_RECLAIM
 
 static int is_on_reclaim_q( vm_page *p )
 {
@@ -1195,6 +1196,7 @@ static void remove_from_reclaim_q( vm_page *p )
     queue_remove( &reclaim_q, p, vm_page *, reclaim_q_chain);
     p->reclaim_q_chain.next = 0;
 }
+#endif // MEM_RECLAIM
 
 static vm_page *get_vmpage_to_reclaim(void)
 {

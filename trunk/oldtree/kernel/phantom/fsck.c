@@ -60,7 +60,7 @@ static void fsck_create_map()
 
 static void fsck_delete_map()
 {
-#warning amap destroy?
+    amap_destroy( &map );
     map_created = 0;
 }
 
@@ -546,6 +546,7 @@ static void free_snap_worker(disk_page_no_t toFree, int flags)
         return;
     }
 
+    SHOW_FLOW( 0, "Free old snap blk: %ld", (long)toFree );
     pager_free_page( toFree );
 }
 
