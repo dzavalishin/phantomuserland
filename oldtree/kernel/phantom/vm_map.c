@@ -29,6 +29,7 @@
 #include <i386/trap.h>
 #include <i386/proc_reg.h>
 #include <x86/phantom_pmap.h>
+#include <time.h>
 
 
 
@@ -403,6 +404,9 @@ vm_page_req_deferred_disk_alloc(vm_page *me)
     hal_cond_broadcast( &deferred_alloc_thread_sleep );
 }*/
 
+static void
+pagein_callback( pager_io_request *p, int  pageout );
+
 // Called under the lock
 
 void
@@ -412,14 +416,11 @@ vm_page_req_pageout(vm_page *me)
 
     if(PAGING_DEBUG) hal_printf("req pageout 0x%X: ", me->virt_addr );
 
-    while (me->flag_pager_io_busy)
+    if (me->flag_pager_io_busy)
     {
-        if (me->pager_io.pager_callback == pageout_callback)
-        {
-            if(PAGING_DEBUG) hal_printf("already on pager\n" );
-            return;
-        }
-        hal_cond_wait(&me->done, &me->lock);
+        // if it is in the pager, it will return clean. no reason to wait
+        if(PAGING_DEBUG) hal_printf("already in pager\n" );
+        return;
     }
 
     if(!me->flag_phys_mem)
@@ -457,8 +458,10 @@ vm_page_req_pageout(vm_page *me)
     me->pager_io.pager_callback = pageout_callback;
     me->pager_io.disk_page = me->curr_page;
 
+    hal_mutex_unlock(&me->lock);
     if(PAGEOUT_DEBUG||PAGING_DEBUG) hal_printf("really req pageout\n" );
     pager_enqueue_for_pageout(&me->pager_io);
+    hal_mutex_lock(&me->lock);
 }
 
 
@@ -589,7 +592,12 @@ page_fault_snap_aid( vm_page *p, int  is_writing  )
     p->access_count++;
     p->flag_phys_dirty = 1; // we'll be dirty after return from trap
 
-    pager_enqueue_for_pageout_fast(&p->pager_io);
+    // release page_fault_write as we've made separate page copy for IO
+    hal_cond_broadcast(&p->done);
+
+    hal_mutex_unlock(&p->lock);
+    pager_enqueue_for_pageout(&p->pager_io);
+    hal_mutex_lock(&p->lock);
 
     return 1; // Don't do standard write fault processing
 }
@@ -724,7 +732,9 @@ page_fault_read( vm_page *p )
     p->pager_io.phys_page = p->phys_addr;
     p->pager_io.pager_callback = pagein_callback;
 
+    hal_mutex_unlock(&p->lock);
     pager_enqueue_for_pagein(&p->pager_io);
+    hal_mutex_lock(&p->lock);
 
     while (p->flag_pager_io_busy)
     {
@@ -745,22 +755,41 @@ page_fault_write( vm_page *p )
     if(FAULT_DEBUG) hal_printf("write 0x%X\n", p->virt_addr );
     // we're here if it was write (and, possibly, page is not mapped)
 
-    while (p->flag_pager_io_busy)
+    // don't change page data if it's under IO
+    while (p->flag_pager_io_busy && p->pager_io.phys_page == p->phys_addr)
     {
+        // if it's snapshot time and this IO is pageout
+        // try to dequeue it and reprocess through snap_aid
+        if (is_in_snapshot_process && !p->flag_have_make &&
+                pager_dequeue_from_pageout(&p->pager_io))
+        {
+            if(FAULT_DEBUG) hal_printf("dequeued 0x%X\n", p->virt_addr );
+            p->flag_pager_io_busy = 0;
+            break;
+        }
+        // failed to dequeue, at least try to raise its priority
+        pager_raise_request_priority(&p->pager_io);
+
+        if(FAULT_DEBUG) hal_printf("waiting for pager io 0x%X\n", p->virt_addr );
         hal_cond_wait(&p->done, &p->lock);
     }
 
     if (p->flag_phys_mem && !p->flag_phys_protect)
     {
+        if(FAULT_DEBUG) hal_printf("solved meanwhile 0x%X\n", p->virt_addr );
         return;
     }
 
     // we have to aid snapping of this page
     if( is_in_snapshot_process && !p->flag_have_make)
+    {
+        if(FAULT_DEBUG) hal_printf("aiding snap 0x%X\n", p->virt_addr );
         if( page_fault_snap_aid(p, 1) )
         {
+            if(FAULT_DEBUG) hal_printf("done 0x%X\n", p->virt_addr );
             return;
         }
+    }
 
     if(FAULT_DEBUG) hal_printf("get page to write 0x%X\n", p->virt_addr );
 
@@ -815,6 +844,7 @@ page_fault_write( vm_page *p )
 
     if (p->pager_io.disk_page == 0)
     {
+        if(FAULT_DEBUG) hal_printf("zero page 0x%X\n", p->virt_addr );
         // Just clear page here as it is new
         page_clear_engine_clear_page(p->phys_addr);
         hal_page_control( p->phys_addr, p->virt_addr, page_map, page_rw );
@@ -829,7 +859,9 @@ page_fault_write( vm_page *p )
     p->pager_io.phys_page = p->phys_addr;
     p->pager_io.pager_callback = pagein_callback;
 
+    hal_mutex_unlock(&p->lock);
     pager_enqueue_for_pagein(&p->pager_io);
+    hal_mutex_lock(&p->lock);
 
     while (p->flag_pager_io_busy)
     {
@@ -847,7 +879,7 @@ page_fault_write( vm_page *p )
 
 
 
-
+#define LATENCY_DEBUG 0
 
 // Mutex is taken!
 //
@@ -856,8 +888,22 @@ page_fault_write( vm_page *p )
 void
 page_fault( vm_page *p, int  is_writing )
 {
+#if LATENCY_DEBUG
+    bigtime_t start = hal_system_time();
+#endif
     if( is_writing )    page_fault_write( p );
     else                page_fault_read( p );
+#if LATENCY_DEBUG
+    bigtime_t end = hal_system_time();
+
+    if (end - start > p->max_latency)
+    {
+        p->max_latency = (int)(end - start);
+        if (p->max_latency > 100000)
+            printf("page va %p, max latency: %d, %s\n",
+                    p->virt_addr, p->max_latency, is_writing ? "w" : "r");
+    }
+#endif
 }
 
 
@@ -953,18 +999,19 @@ static void finalize_snap(vm_page *p)
 
     if(p->flag_have_make)
     {
-        if(SNAP_DEBUG) hal_printf("has make\n" );
+        if(SNAP_DEBUG) hal_printf("has make 1\n" );
         return;
     }
 
     while (p->flag_pager_io_busy)
     {
+        if(SNAP_DEBUG) hal_printf("waiting for pager io\n" );
         hal_cond_wait(&p->done, &p->lock);
     }
 
     if(p->flag_have_make)
     {
-        if(SNAP_DEBUG) hal_printf("has make\n" );
+        if(SNAP_DEBUG) hal_printf("has make 2\n" );
         return;
     }
 
@@ -980,7 +1027,6 @@ static void finalize_snap(vm_page *p)
 
     if(p->flag_have_prev)
     {
-        // NB! snap list writer will check out that make == prev
         p->make_page = p->prev_page;
         p->flag_have_prev = 0;
         p->flag_have_make = 1;
@@ -1017,6 +1063,16 @@ static void save_snap(vm_page *p)
 }
 
 
+static void wait_commit_snap(vm_page *p)
+{
+    if (p->flag_pager_io_busy && p->flag_have_curr && p->pager_io.disk_page == p->curr_page)
+        return;
+
+    while (p->flag_pager_io_busy)
+    {
+        hal_cond_wait(&p->done, &p->lock);
+    }
+}
 
 void do_snapshot()
 {
@@ -1119,6 +1175,10 @@ void do_snapshot()
         pagelist_flush(&saver);
         pagelist_finish(&saver);
     }
+
+    if(SNAP_STEPS_DEBUG) hal_printf("Waiting for all pages to be flushed...\n");
+    // make sure page data has been written
+    vm_map_for_all( wait_commit_snap );
 
     // ok, now we have current snap and previous one. come fix the
     // superblock
