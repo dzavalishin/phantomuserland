@@ -197,10 +197,10 @@ struct drv_video_screen_t
 
     // Mouse cursor
 
-    void        (*redraw_mouse_cursor)();
+    void        (*redraw_mouse_cursor)(void);
     void        (*set_mouse_cursor)(drv_video_bitmap_t *cursor);
-    void        (*mouse_disable)();
-    void        (*mouse_enable)();
+    void        (*mouse_disable)(void);
+    void        (*mouse_enable)(void);
 
 };
 
@@ -211,7 +211,7 @@ extern struct drv_video_screen_t        *video_drv;
 extern void drv_video_null(void);
 
 
-drv_video_bitmap_t *      drv_video_get_default_mouse_bmp();
+drv_video_bitmap_t *      drv_video_get_default_mouse_bmp(void);
 
 
 #if VIDEO_ZBUF

@@ -73,7 +73,7 @@ void _exit(int code);
 void exit(int code);
 #endif
 
-int kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
+int kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
 int vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap);
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 int snprintf(char *str, size_t size, const char *format, ...);
@@ -122,9 +122,9 @@ char *getenv(const char *name);
 
 
 /* BCD conversions. */
-extern u_char const	bcd2bin_data[];
-extern u_char const	bin2bcd_data[];
-extern char const	hex2ascii_data[];
+extern const u_char	bcd2bin_data[];
+extern const u_char	bin2bcd_data[];
+extern const char	hex2ascii_data[];
 
 #define	bcd2bin(bcd)	(bcd2bin_data[bcd])
 #define	bin2bcd(bin)	(bin2bcd_data[bin])

@@ -65,7 +65,7 @@ extern struct hardware_abstraction_level    	hal;
 int 					phantom_is_a_real_kernel(void);
 
 
-vmem_ptr_t 				hal_object_space_address();
+vmem_ptr_t 				hal_object_space_address(void);
 
 
 
@@ -74,14 +74,14 @@ void        				hal_init( vmem_ptr_t va, long vs );
 void    				hal_init_object_vmem(void *start_of_virtual_address_space);
 
 
-void    				hal_halt();
-void    				hal_cli();
-void    				hal_sti();
+void    				hal_halt(void);
+void    				hal_cli(void);
+void    				hal_sti(void);
 int                                     hal_is_sti(void); // returns true if ints enabled
 int                                     hal_save_cli(void); // cli and ret 1 if was enabled
 
-void 					phantom_mem_lock();
-void 					phantom_mem_unlock();
+void 					phantom_mem_lock(void);
+void 					phantom_mem_unlock(void);
 
 
 // void    				sleep_usec( int microseconds ) = 0;
@@ -92,16 +92,16 @@ void        				hal_log( char *format, ... );
 
 
 // paging support
-static __inline__ unsigned int        	hal_min_pagesize() { return __MEM_PAGE; }
-static __inline__ unsigned int        	hal_mem_pagesize() { return __MEM_PAGE; }
-void *      		  		hal_paged_space(); // where paged memory starts
+static __inline__ unsigned int        	hal_min_pagesize(void) { return __MEM_PAGE; }
+static __inline__ unsigned int        	hal_mem_pagesize(void) { return __MEM_PAGE; }
+void *      		  		hal_paged_space(void); // where paged memory starts
 void        				hal_grow_paged_space( unsigned add_bytes );
 static __inline__ int                 	hal_address_is_aligned( void *addr ) { return ( ((int)addr)%hal_min_pagesize() ) == 0; }
 
 
 
-long        				hal_phys_mem_4_paging(); // how much of phys mem is available for paging at all
-long        				hal_free_phys_mem_4_paging(); // how much of phys mem is available for paging is left unmapped now
+long        				hal_phys_mem_4_paging(void); // how much of phys mem is available for paging at all
+long        				hal_free_phys_mem_4_paging(void); // how much of phys mem is available for paging is left unmapped now
 
 void					hal_page_control( physaddr_t  p, void *page_start_addr, page_mapped_t mapped, page_access_t access );
 void					hal_pages_control( physaddr_t  p, void *page_start_addr, int n_pages, page_mapped_t mapped, page_access_t access );
@@ -115,7 +115,7 @@ void	hal_page_control_etc(
 void	hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapped, page_access_t access, u_int32_t flags );
 
 
-void * 					hal_alloc_page(); // allocate (identically) mapped mem page in kern addr space
+void * 					hal_alloc_page(void); // allocate (identically) mapped mem page in kern addr space
 void   					hal_free_page(void *page); // deallocate identically mapped page
 
 errno_t        				hal_alloc_phys_page(physaddr_t  *result); // alloc and not map -- returns 1 on success
@@ -180,8 +180,8 @@ void                                    hal_enable_preemption(void);
 int 					hal_irq_alloc( int irq, void (*func)(void *arg), void *arg, int is_shareable );
 void 					hal_irq_free( int irq, void (*func)(void *arg), void *arg );
 
-void 					hal_enable_softirq();
-void 					hal_disable_softirq();
+void 					hal_enable_softirq(void);
+void 					hal_disable_softirq(void);
 
 
 // ------------------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ int 					hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec );
 
 //typedef int64_t bigtime_t;
 
-int 					hal_time_init(); // asks RTC
+int 					hal_time_init(void); // asks RTC
 
 void 					hal_time_tick(int tick_rate);
 

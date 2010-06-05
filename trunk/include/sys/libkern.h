@@ -66,9 +66,9 @@ static __inline quad_t qabs(quad_t a) { return (a < 0 ? -a : a); }
 #endif
 
 /* BCD conversions. */
-extern u_char const	bcd2bin_data[];
-extern u_char const	bin2bcd_data[];
-extern char const	hex2ascii_data[];
+extern const u_char	bcd2bin_data[];
+extern const u_char	bin2bcd_data[];
+extern const char	hex2ascii_data[];
 
 #define	bcd2bin(bcd)	(bcd2bin_data[bcd])
 #define	bin2bcd(bin)	(bin2bcd_data[bin])
