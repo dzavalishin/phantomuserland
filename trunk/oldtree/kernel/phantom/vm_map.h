@@ -118,6 +118,7 @@ typedef struct vm_page
 
     queue_chain_t       reclaim_q_chain; // Used to put page on memory reclaim list
 
+    int                 max_latency;
 } vm_page;
 
 void		vm_page_init( vm_page *me, void *my_vaddr);
