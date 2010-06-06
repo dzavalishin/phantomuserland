@@ -26,7 +26,8 @@ static int out_of_disk(disk_page_no_t disk_block_num)
     // TODO must be error
 
     if(((unsigned long)disk_block_num) < ((unsigned long)pager_superblock_ptr()->disk_start_page))
-        printf("FSCK: Warning: block number below disk start: %ld < %ld", (unsigned long)disk_block_num, (unsigned long)pager_superblock_ptr()->disk_start_page );
+        printf("FSCK: Warning: block number below disk start: %ld < %ld\n",
+                (unsigned long)disk_block_num, (unsigned long)pager_superblock_ptr()->disk_start_page );
 
     // unsigned comparison will treat negatives as very big positives -> out of range
     return ((unsigned long)disk_block_num) > ((unsigned long)pager_superblock_ptr()->disk_page_count);
@@ -238,13 +239,16 @@ static int fsck_forlist( disk_page_no_t list_start, unsigned int check_magic, in
             for( i = 0; i < used; i++ )
             {
                 disk_page_no_t lbn = curr->list[i];
-                if(out_of_disk(lbn))
+                if (lbn)
                 {
-                    SHOW_ERROR( 0, "FSCK: list data block is out of disk, blk %d", lbn );
-                    insane = 1;
-                    break;
+                    if(out_of_disk(lbn))
+                    {
+                        SHOW_ERROR( 0, "FSCK: list data block is out of disk, blk %d", lbn );
+                        insane = 1;
+                        break;
+                    }
+                    process_f(lbn);
                 }
-                if(process_f) process_f(lbn);
             }
         }
 
@@ -546,7 +550,7 @@ static void free_snap_worker(disk_page_no_t toFree, int flags)
         return;
     }
 
-    SHOW_FLOW( 0, "Free old snap blk: %ld", (long)toFree );
+    //SHOW_FLOW( 0, "Free old snap blk: %ld", (long)toFree );
     pager_free_page( toFree );
 }
 
@@ -556,19 +560,16 @@ void phantom_free_snap(
                        disk_page_no_t new_snap_start
                       )
 {
-    SHOW_FLOW0( 0, "*** freeing old snap ***");
-    fsck_create_map();
-
-    //fsck_set_map_used();
-
     if( old_snap_start == 0 )
     {
         SHOW_FLOW0( 0, "*** No old snap, skip list deletion ***");
         return;
     }
 
-    fsck_list_justadd_as_free( old_snap_start );
+    SHOW_FLOW0( 0, "*** freeing old snap ***");
+    fsck_create_map();
 
+    fsck_list_justadd_as_free( old_snap_start );
     fsck_list_justadd_as_used( curr_snap_start );
     fsck_list_justadd_as_used( new_snap_start );
 
