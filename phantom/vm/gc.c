@@ -345,6 +345,9 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
     printf("\n"); // for GDB to break here
 }
 
+static void gc_clear_weakrefs(pvm_object_storage_t *p);
+
+
 static inline void ref_dec_p(pvm_object_storage_t *p)
 {
     if( p == 0 ) return;
@@ -365,6 +368,20 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
     {
         if( 0 == ( --(p->_ah.refCount) ) )
         {
+            if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_HAS_WEAKREF )
+            {
+                // This one has weak reference(s) pointing to it
+
+                // If clearing weakrefs had problems, just bail out,
+                // leave it all to long big smart GC
+                //if( gc_clear_weakrefs(p) )                    goto nokill;
+                gc_clear_weakrefs(p);
+
+                if( 0 != p->_ah.refCount )
+                    goto nonzero;
+            }
+
+
             // Fast way if no children
             if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )
             {
@@ -384,15 +401,20 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
 
         // if we decrement refcount and stil above zero - mark an object as potential cycle root;
         // and internal objects can't be a cycle root (sic!)
-        else if ( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
+        else
         {
-            if ( !(p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER) )
+        nonzero:;
+            if ( !(p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
             {
-                cycle_root_buffer_add_candidate(p);
-                p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER ;
+                if ( !(p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER) )
+                {
+                    cycle_root_buffer_add_candidate(p);
+                    p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER ;
+                }
+                p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN ;  // set down flag
             }
-            p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN ;  // set down flag
         }
+    //nokill:;
     }
 }
 
@@ -457,6 +479,20 @@ pvm_object_t  ref_inc_o(pvm_object_t o)
 {
     ref_inc_p(o.data);
     return o;
+}
+
+
+
+
+static void gc_clear_weakrefs(pvm_object_storage_t *p)
+{
+    // This impl assumes object _satellites field is used for
+    // holding weakref backpointer only
+
+
+    struct pvm_object w = p->_satellites;
+
+    si_weakref_9_resetMyObject( w );
 }
 
 

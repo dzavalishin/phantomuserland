@@ -15,6 +15,7 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <limits.h>
+#include <errno.h>
 
 
 // This structure must be first in any object
@@ -47,6 +48,7 @@ struct pvm_object_storage
     struct object_PVM_ALLOC_Header	_ah;
 
     struct pvm_object  		        _class;
+    struct pvm_object  		        _satellites; // Points to chain of objects related to this one
     u_int32_t				_flags; // TODO int! Need more flags
     unsigned int			_da_size; // in bytes!
 
@@ -61,6 +63,9 @@ typedef struct pvm_object_storage pvm_object_storage_t;
 #define DA_OFFSET() _obj_offsetof(pvm_object_storage_t, da)
 
 //#undef _obj_offsetof
+
+errno_t si_weakref_9_resetMyObject(struct pvm_object o );
+
 
 /**
  *
@@ -147,6 +152,7 @@ struct pvm_object     pvm_get_estack_class(void);
 struct pvm_object     pvm_get_boot_class(void);
 struct pvm_object     pvm_get_binary_class(void);
 struct pvm_object     pvm_get_bitmap_class(void);
+struct pvm_object     pvm_get_weakref_class(void);
 
 
 struct pvm_object     pvm_create_null_object(void);

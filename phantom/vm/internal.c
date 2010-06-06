@@ -247,6 +247,18 @@ struct internal_class pvm_internal_classes[] =
     },
 
     {
+        ".internal.weakref",
+        PVM_ROOT_OBJECT_WEAKREF_CLASS,
+        syscall_table_4_weakref,
+        pvm_internal_init_weakref,
+        pvm_gc_iter_weakref,
+        0, // no finalizer
+        sizeof(struct data_area_4_weakref),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
+        {0,0}
+    },
+
+    {
         ".internal.world",
         PVM_ROOT_OBJECT_WORLD_CLASS,
         syscall_table_4_world,

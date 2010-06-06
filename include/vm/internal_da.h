@@ -323,6 +323,12 @@ struct data_area_4_world
 
 
 
+struct data_area_4_weakref
+{
+    /** Object we point to */
+    struct pvm_object   object;
+    hal_spinlock_t      lock;   // interlocks access tp object from GC finalizer and from getting ref
+};
 
 
 

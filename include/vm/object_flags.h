@@ -76,6 +76,8 @@ POSF(IS_CODE,0x01)
 
 // flags:
 
+// These are set on creation by class
+
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER 0x1000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE 0x800
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD 0x400
@@ -89,6 +91,14 @@ POSF(IS_CODE,0x01)
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS 0x04
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE 0x02
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE 0x01
+
+// NB! Runtime flags!
+
+// These can be set/reset in runtime
+
+// This object has week ref on it (must be on _satellites chain)
+#define PHANTOM_OBJECT_STORAGE_FLAG_HAS_WEAKREF 0x100000
+
 
 #endif // PO_OBJECT_FLAGS_H
 

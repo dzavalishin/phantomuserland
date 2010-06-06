@@ -9,7 +9,7 @@
  *
 **/
 
-#define EVENTS_ENABLED 0
+#define EVENTS_ENABLED 1
 
 #include <threads.h>
 #include <event.h>
@@ -367,6 +367,9 @@ void drv_video_window_receive_event(struct ui_event *e)
 
     select_event_target(e);
 
+    drv_video_window_t *later_lost = 0;
+    drv_video_window_t *later_gain = 0;
+
     if( e->focus == 0 )
     {
         //printf("unfocused event");
@@ -374,8 +377,6 @@ void drv_video_window_receive_event(struct ui_event *e)
     }
 
 	
-    drv_video_window_t *later_lost = 0;
-    drv_video_window_t *later_gain = 0;
     int later_x, later_y;
 
     // For now use any mouse event to change focus

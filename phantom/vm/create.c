@@ -594,6 +594,57 @@ void pvm_gc_iter_closure(gc_iterator_call_t func, struct pvm_object_storage * os
 
 
 
+void pvm_internal_init_weakref(struct pvm_object_storage * os)
+{
+    struct data_area_4_weakref *      da = (struct data_area_4_weakref *)os->da;
+    da->object.data = 0;
+    hal_spin_init( &da->lock );
+}
+
+void pvm_gc_iter_weakref(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+    struct data_area_4_weakref *      da = (struct data_area_4_weakref *)os->da;
+
+    (void) da;
+    // No! We are weak ref and do not count our reference or make GC
+    // know of it so that our reference does not prevent ref'd object
+    // from being GC'ed
+    //gc_fcall( func, arg, da->object );
+}
+
+
+struct pvm_object     pvm_create_weakref_object(struct pvm_object owned )
+{
+    if(owned.data->_satellites.data != 0)
+        return owned.data->_satellites;
+
+    struct pvm_object ret = pvm_object_create_fixed( pvm_get_weakref_class() );
+    struct data_area_4_weakref *da = (struct data_area_4_weakref *)ret.data->da;
+
+    // Interlocked to make sure no races can happen
+    // (ref ass'ment seems to be non-atomic)
+    int ie = hal_save_cli();
+    hal_spin_lock( &da->lock );
+
+    // No ref inc!
+    da->object = owned;
+    owned.data->_satellites = ret;
+
+    hal_spin_unlock( &da->lock );
+    if( ie ) hal_sti();
+
+    return ret;
+}
+
+
+
+
+
+
+// -----------------------------------------------------------------------
+// Specials
+// -----------------------------------------------------------------------
+
 
 
 struct pvm_object     pvm_create_code_object(int size, void *code)

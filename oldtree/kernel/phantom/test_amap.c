@@ -61,6 +61,25 @@ int do_test_amap(const char *test_parm)
     amap_iterate_flags( &map, count, 0, MAP_FREE );
     test_check_eq( counter, 1 );
 
+    unsigned int i;
+
+    for( i = 20; i < 50; i += 3 )
+    {
+        test_check_false( amap_check_modify( &map, i, 2, MAP_FREE, &modified ) );
+    }
+
+    for( i = 20; i < 50; i += 4 )
+    {
+        test_check_false( amap_check_modify( &map, i, 4, MAP_USED, &modified ) );
+        test_check_true( modified );
+    }
+
+    for( i = 20; i < 100; i += 7 )
+    {
+        test_check_false( amap_check_modify( &map, i, 3, MAP_FREE, &modified ) );
+    }
+
+
     amap_destroy( &map );
     return 0;
 }
