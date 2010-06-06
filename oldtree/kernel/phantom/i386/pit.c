@@ -248,10 +248,10 @@ phantom_timer_pit_init(int freq, void (*timer_intr)())
     arch_get_tick_rate = pit_arch_get_tick_rate;
     arch_get_time_delta = pit_arch_get_time_delta;
 
+#if 0
     bigtime_t a = hal_system_time();
     bigtime_t start = a;
 
-#if 0
     // check that system time is monotonous
     while (a - start < 1000000)
     {
@@ -259,6 +259,16 @@ phantom_timer_pit_init(int freq, void (*timer_intr)())
         assert(a <= b);
         a = b;
     }
+    // ...even with interrupts disabled
+    int ei = hal_save_cli();
+    while (a - start < 2000000)
+    {
+        bigtime_t b = hal_system_time();
+        assert(a <= b);
+        assert(a + usec_per_tick >= b);
+        a = b;
+    }
+    if (ei) hal_sti();
 #endif
 
     return freq;
