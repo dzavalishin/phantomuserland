@@ -23,11 +23,12 @@ const char *monNames[12] =
 
 // microseconds!
 
+static hal_spinlock_t sys_time_spinlock;
+
 // The 'rough' counter of system up time, accurate to the rate at
 // which the timer interrupts run (see TICK_RATE in timer.c).
 static bigtime_t sys_time;
 
-static hal_spinlock_t sys_time_accurate_spinlock;
 // The latest accurate system time, accurate to the resolution
 // of the underlying hardware timer
 static bigtime_t sys_time_accurate;
@@ -49,12 +50,13 @@ static char tz_name[64];
 
 int hal_time_init()
 {
+    hal_spin_init(&sys_time_spinlock);
     sys_time = 0;
+    sys_time_accurate = 0;
     real_time_delta = 0;
     tz_delta = 0;
     strcpy(tz_name, "UTC");
     real_time_delta = arch_get_rtc_delta();
-    hal_spin_init(&sys_time_accurate_spinlock);
 
     return 0;
 }
@@ -69,8 +71,11 @@ static long secDivider = 0;
 
 void hal_time_tick(int tick_rate)
 {
+    int ei = hal_save_cli();
+    hal_spin_lock(&sys_time_spinlock);
     sys_time += tick_rate;
-    //arch_time_tick();
+    hal_spin_unlock(&sys_time_spinlock);
+    if (ei) hal_sti();
 
     msecDivider += tick_rate;
     while(msecDivider > 1000)
@@ -93,50 +98,59 @@ bigtime_t (*arch_get_time_delta)(void);
 
 bigtime_t hal_system_time(void)
 {
-    volatile bigtime_t *st = &sys_time;
     bigtime_t val;
+    bigtime_t d;
+    int tick_rate;
 
-retry:
-    // read the system time, make sure we didn't get a partial read
+    if (arch_get_tick_rate && arch_get_time_delta)
+    {
+        d = arch_get_time_delta();
+        tick_rate = arch_get_tick_rate();
+    }
+
+    int ei = hal_save_cli();
+    hal_spin_lock(&sys_time_spinlock);
     val = sys_time;
-    if(val > *st)
-        goto retry;
 
     // ask the architectural specific layer to give us a little better precision if it can
     if (arch_get_tick_rate && arch_get_time_delta)
     {
-        val += arch_get_time_delta();
+        val += d;
 
-        int ei = hal_save_cli();
-        hal_spin_lock(&sys_time_accurate_spinlock);
-        
         // if we're in cli and the tick is pending, compensate for it
         // if, not while: must not cli longer than for 2 ticks,
         // otherwise system time will lag
         if (val < sys_time_accurate)
-            val += arch_get_tick_rate();
+            val += tick_rate;
+
+        // lag detected, compensate for it
+        if (val < sys_time_accurate)
+        {
+            sys_time += tick_rate;
+            val += tick_rate;
+        }
 
         // make sure system time is monotonous
         assert(val >= sys_time_accurate);
 
         sys_time_accurate = val;
-        hal_spin_unlock(&sys_time_accurate_spinlock);
-        if (ei) hal_sti();
     }
+
+    hal_spin_unlock(&sys_time_spinlock);
+    if (ei) hal_sti();
 
     return val;
 }
 
 bigtime_t hal_system_time_lores(void)
 {
-    volatile bigtime_t *st = &sys_time;
     bigtime_t val;
 
-retry:
-    // read the system time, make sure we didn't get a partial read
+    int ei = hal_save_cli();
+    hal_spin_lock(&sys_time_spinlock);
     val = sys_time;
-    if(val > *st)
-        goto retry;
+    hal_spin_unlock(&sys_time_spinlock);
+    if (ei) hal_sti();
 
     return val;
 }
