@@ -108,4 +108,23 @@ class compare {
         arg = arg + 2;        
         return arg;
     }
+
+
+    String ifnull(String arg) {
+        if (arg != null) return "not null";
+        else return "null";
+    }
+
+    String ifnonnull(String arg) {
+        if (arg == null) return "null";
+        else return "not null";
+    }
+
+
+/*
+    String if_icmple(int arg) {
+        if (arg > 5) return "ok";
+        return "error";
+    }
+*/
 }

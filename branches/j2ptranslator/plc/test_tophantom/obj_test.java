@@ -96,4 +96,36 @@ class obj_test {
         return obj.expression(9, 10, 21, 3, 6);
     }
 
+
+
+
+
+    int getFieldInt() {
+        field obj = new field();
+	  return obj.getFieldInt();
+    }
+
+    void setFieldInt() {
+        field obj = new field();
+	  obj.setFieldInt(777);
+    }
+
+    int getSetFieldInt() {
+        field obj = new field();
+	  obj.setFieldInt(999);
+	  return obj.getFieldInt();
+    }
+
+/*
+    void accessSetInt() {
+        field obj = new field();
+	  obj.fieldInt = 777;
+    }
+
+    int accessGetSetInt() {
+        field obj = new field();
+	  obj.fieldInt = 999;
+	  return obj.fieldInt;
+    }
+*/
 }

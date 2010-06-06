@@ -153,15 +153,17 @@ class InsGen extends Opcode {
 						" = " + stacktop(ins) + ";");
 			break;
 
-		case GETF:			// getfield
+		case GETF:			// [getfield]
 			checkref(d, ins, -1);
 			r = (FieldRef)ins.con.value;
 			d.println(assign(ins) +
 					"((struct in_" + Names.hashclass(r.cl.name) + "*)" +
 					stacktop(ins) + ")->" + Names.hashvar(r.name) + ";");
 
-			ns.push(new IdentTransNode(r.name));
-
+            ns.push(new IdentTransNode(r.name));
+//            {
+//                myClass.addField(r.name, getFieldType(r.signature));
+//            }
 			return;
 
 		case PUTF:			// putfield
@@ -171,7 +173,8 @@ class InsGen extends Opcode {
 					stack2nd(ins) + ")->" + Names.hashvar(r.name) + " = " +
 					stacktop(ins) + ";");
 
-			ns.push( new OpAssignNode( new IdentTransNode(r.name), ns.pop()) );
+//			ns.push( new OpAssignNode( new IdentTransNode(r.name), ns.pop()) );
+            ns.push( new OpAssignTransNode( new IdentTransNode(r.name), ns.pop()) );
 
 			return;
 
@@ -437,13 +440,13 @@ class InsGen extends Opcode {
 						stack2nd(ins) + " == " + stacktop(ins) + ") ? 0 : 1);");
 			break;
 
-		case IFZRO:			// ifeq, ifnull, ifgt, ...
+		case IFZRO:			// [ifeq, ifne, ifle, iflt, ifge, ifgt, ifnonnull, ifnull]
 			d.print("\tif (" + stacktop(ins) + o.opr + "0)\n\t\t");
 			gengoto(d, m, ins, ins.val);
 
             {
                 Node p1 = ns.pop();
-                Node p2 = new IntConstNode(0);
+                Node p2 = (o.name.equals("ifnonnull") || o.name.equals("ifnull")) ? new NullNode() : new IntConstNode(0);
 
 				String cmpop = o.opr.trim();
 
@@ -472,7 +475,7 @@ class InsGen extends Opcode {
 //                }
 //                //todo others if
             }
-			break;
+			return;
 
 		case IFCMP:			// if_icmplt, if_acmpne, ...
 			d.print("\tif (" + stack2nd(ins) +o.opr +stacktop(ins) + ")\n\t\t");
@@ -788,10 +791,49 @@ class InsGen extends Opcode {
     private static PhantomType getReturnType(String signature) throws PlcException{
         int index = signature.indexOf(")");
         String retType = signature.substring(index+1);
-        switch (retType.charAt(0)) {
+        return getFieldType(retType);
+
+//        switch (retType.charAt(0)) {
+//            case 'I':
+//                return new PhantomType(ClassMap.get_map().get(".internal.int",false));
+////                break;
+//            case 'Z':
+//            case 'B':
+//            case 'S':
+//            case 'C':
+//            case 'J':
+//            case 'F':
+//            case 'D':
+//                System.out.println("unimplemented return type " + retType.charAt(0));
+//                return new PhantomType(ClassMap.get_map().get(".internal.object",false));
+////                break;
+//            case 'L':
+////                int end = retType.indexOf(";");
+//                String type = retType;
+//
+//                if (type.equals("Ljava/lang/String;")){
+//                    return new PhantomType(ClassMap.get_map().get(".internal.string",false));
+//                } else {
+//                    type = "." + type.substring(1, type.length()-1).replace("/", ".");
+//                    return new PhantomType(ClassMap.get_map().get(type, false));
+//                }
+////                break;
+//            case '[':
+//                retType = retType.substring(1);
+//                System.out.println("unimplemented return type [");
+//            case 'V':
+//                break;
+//
+////                default:
+////                    break;
+//        }
+//        return null;
+    }
+
+    public static PhantomType getFieldType(String signature) throws PlcException {
+        switch (signature.charAt(0)) {
             case 'I':
                 return new PhantomType(ClassMap.get_map().get(".internal.int",false));
-//                break;
             case 'Z':
             case 'B':
             case 'S':
@@ -799,32 +841,32 @@ class InsGen extends Opcode {
             case 'J':
             case 'F':
             case 'D':
-                System.out.println("unimplemented return type " + retType.charAt(0));
+                System.out.println("unimplemented type " + signature.charAt(0));
                 return new PhantomType(ClassMap.get_map().get(".internal.object",false));
-//                break;
             case 'L':
-//                int end = retType.indexOf(";");
-                String type = retType;
+                String type = signature;
 
+                PhantomType ptype = null;
                 if (type.equals("Ljava/lang/String;")){
-                    return new PhantomType(ClassMap.get_map().get(".internal.string",false));
+                    ptype = new PhantomType(ClassMap.get_map().get(".internal.string",false));
                 } else {
                     type = "." + type.substring(1, type.length()-1).replace("/", ".");
-                    return new PhantomType(ClassMap.get_map().get(type, false));
+                    ptype = new PhantomType(ClassMap.get_map().get(type, false));
                 }
-//                break;
+                return ptype;
             case '[':
-                retType = retType.substring(1);
-                System.out.println("unimplemented return type L");
+                String arrayType = signature.substring(1);
+                System.out.println("unimplemented type [");
             case 'V':
                 break;
-
-//                default:
-//                    break;
+            default:
+                System.out.println("unknown type "+signature);
+                break;
         }
         return null;
-
     }
+
+
 
 	//  ancestor(cl, h) -- is the hashed classname h our class or a superclass? 
 

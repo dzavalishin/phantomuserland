@@ -19,3 +19,6 @@ ru.dz.jpc.tophantom.node.IdentTransNode extends IdentNode
     add method:
         public void setType(PhantomType ptype);
 
+ru.dz.jpc.tophantom.node.binode.SequenceTransNode extends SequenceNode
+    rewrite method (rewrite generation right child node):
+        public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException

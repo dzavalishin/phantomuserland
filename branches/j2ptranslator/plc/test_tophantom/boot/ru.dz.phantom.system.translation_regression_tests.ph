@@ -35,7 +35,6 @@ class translation_regression_tests
     var p_result_int : .internal.int;
     var p_result_str : .internal.string;
     var p_result_obj : .translation.java.test.b;
-    var c_obj : .translation.java.test.compare;
 
     void run (var _boot_object @const ) {
         boot_object = _boot_object;
@@ -44,61 +43,17 @@ class translation_regression_tests
         print("Phantom language translation tests are running\n");
 
 //        print("Run Phantom bytecode test\n");        
-//        run_test(new .translation.phantom.test.obj_test());
+//        run_method_call(new .translation.phantom.test.obj_test());
 
-        print("\n\nRun Java translated bytecode test\n");
-        run_test(new .translation.java.test.obj_test());
-
-
-        c_obj = new .translation.java.test.compare();
-
-        log_str(c_obj.if_icmple(6), "if_icmple: ");
-        log_str(c_obj.if_icmplt(6), "if_icmplt: ");
-        log_str(c_obj.if_icmplt(5), "if_icmplt: ");
-
-        log_str(c_obj.if_icmpge(10), "if_icmpge: ");
-        log_str(c_obj.if_icmpgt(10), "if_icmpgt: ");
-        log_str(c_obj.if_icmpgt(10), "if_icmpgt: ");
-
-        log_str(c_obj.if_icmpne(10), "if_icmpne: ");
-        log_str(c_obj.if_icmpeq(10), "if_icmpeq: ");
+//        print("\n\nRun Java translated bytecode test\n");
 
 
-        log_str(c_obj.ifle(10), "ifle: ");
-
-        log_str(c_obj.iflt(10), "iflt: ");
-        log_str(c_obj.iflt(0), "iflt: ");
-
-        log_str(c_obj.ifge(2-3), "ifle: ");
-
-        log_str(c_obj.ifgt(2-3), "iflt: ");
-        log_str(c_obj.ifgt(0), "iflt: ");
-
-        log_str(c_obj.ifeq(1), "ifeq: ");
-        log_str(c_obj.ifne(0), "ifne: ");
-
-        log_str(c_obj.if_icmple_else(6), "if_icmple_else: ");
-        log_str(c_obj.if_icmple_else(4), "if_icmple_else: ");
-
-        log_str(c_obj.if_icmplt_else(5), "if_icmplt_else: ");
-        log_str(c_obj.if_icmplt_else(4), "if_icmplt_else: ");
-
-        log_str(c_obj.if_icmpge_else(4), "if_icmpge_else: ");
-        log_str(c_obj.if_icmpge_else(6), "if_icmpge_else: ");
-
-        log_str(c_obj.if_icmpgt_else(5), "if_icmpgt_else: ");
-        log_str(c_obj.if_icmpgt_else(6), "if_icmpgt_else: ");
+        print("\n\nRun method call test\n");
+        run_method_call(new .translation.java.test.obj_test());
 
 
-        log_str(c_obj.if_icmple_elseif_else(6), "if_icmple_elseif_else: ");
-        log_str(c_obj.if_icmple_elseif_else(4), "if_icmple_elseif_else: ");
-        log_str(c_obj.if_icmple_elseif_else(2), "if_icmple_elseif_else: ");
-
-
-        log_str(c_obj.if_icmple_all(25), "if_icmple_all: ");
-        log_str(c_obj.if_icmple_all(15), "if_icmple_all: ");
-        log_str(c_obj.if_icmple_all(5), "if_icmple_all: ");
-
+        print("\n\nRun compare test\n");
+        run_compare(new .translation.java.test.compare());
 
 
         print("\n\n");
@@ -130,7 +85,7 @@ class translation_regression_tests
 	// test bytecode
 	// ---------------------------------------------------------------------
 
-    void run_test(var obj : .internal.object) {
+    void run_method_call(var obj : .internal.object) {
 
         p_obj = obj;
 //        p_obj = new .translation.phantom.test.obj_test();
@@ -194,6 +149,78 @@ class translation_regression_tests
         log_int(777, p_result_int, "expression: ");
 
 
-        print("\nDone\n");
+
+        print("\n\nField\n");
+
+
+        p_result_int = p_obj.getSetFieldInt();
+        log_int(999, p_result_int, "getSetFieldInt: ");
+
+
+//        p_obj.accessSetInt();
+        print("\n    accessSetInt : failure");
+//        p_result_int = p_obj.accessGetInt();
+        print("\n    accessGetInt : failure");
+    }
+
+
+
+    void run_compare(var c_obj : .translation.java.test.compare) {
+
+        log_str(c_obj.if_icmple(6), "if_icmple: ");
+        log_str(c_obj.if_icmplt(6), "if_icmplt: ");
+        log_str(c_obj.if_icmplt(5), "if_icmplt: ");
+
+        log_str(c_obj.if_icmpge(10), "if_icmpge: ");
+        log_str(c_obj.if_icmpgt(10), "if_icmpgt: ");
+        log_str(c_obj.if_icmpgt(10), "if_icmpgt: ");
+
+        log_str(c_obj.if_icmpne(10), "if_icmpne: ");
+        log_str(c_obj.if_icmpeq(10), "if_icmpeq: ");
+
+
+        log_str(c_obj.ifle(10), "ifle: ");
+
+        log_str(c_obj.iflt(10), "iflt: ");
+        log_str(c_obj.iflt(0), "iflt: ");
+
+        log_str(c_obj.ifge(2-3), "ifle: ");
+
+        log_str(c_obj.ifgt(2-3), "iflt: ");
+        log_str(c_obj.ifgt(0), "iflt: ");
+
+        log_str(c_obj.ifeq(1), "ifeq: ");
+        log_str(c_obj.ifne(0), "ifne: ");
+
+        log_str(c_obj.if_icmple_else(6), "if_icmple_else: ");
+        log_str(c_obj.if_icmple_else(4), "if_icmple_else: ");
+
+        log_str(c_obj.if_icmplt_else(5), "if_icmplt_else: ");
+        log_str(c_obj.if_icmplt_else(4), "if_icmplt_else: ");
+
+        log_str(c_obj.if_icmpge_else(4), "if_icmpge_else: ");
+        log_str(c_obj.if_icmpge_else(6), "if_icmpge_else: ");
+
+        log_str(c_obj.if_icmpgt_else(5), "if_icmpgt_else: ");
+        log_str(c_obj.if_icmpgt_else(6), "if_icmpgt_else: ");
+
+
+        log_str(c_obj.if_icmple_elseif_else(6), "if_icmple_elseif_else: ");
+        log_str(c_obj.if_icmple_elseif_else(4), "if_icmple_elseif_else: ");
+        log_str(c_obj.if_icmple_elseif_else(2), "if_icmple_elseif_else: ");
+
+
+        log_str(c_obj.if_icmple_all(25), "if_icmple_all: ");
+        log_str(c_obj.if_icmple_all(15), "if_icmple_all: ");
+        log_str(c_obj.if_icmple_all(5), "if_icmple_all: ");
+
+
+        log_str(c_obj.ifnonnull(null), "ifnonnull (null): ");
+        log_str(c_obj.ifnull(null), "ifnull (null): ");
+
+//        log_str(c_obj.ifnonnull("test"), "ifnonnull (not null): ");
+        print("\n    ifnonnull (not null): failure");
+//        log_str(c_obj.ifnull("test"), "ifnull (not null):");
+        print("\n    ifnull (not null): failure");
     }
 };

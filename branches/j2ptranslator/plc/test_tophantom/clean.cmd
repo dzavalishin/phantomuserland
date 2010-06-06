@@ -7,6 +7,7 @@ rem cp ./*.pc ./tmp
 del a.*
 del b.*
 del compare.*
+del field.*
 del obj_test.*
 del translation.*.*
 del translation_*.*

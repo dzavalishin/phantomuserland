@@ -40,7 +40,12 @@ static void write(PrintWriter d, ClassData c, ClassMap classes) throws PlcExcept
 	
 	ParseState				ps = new ParseState();	
 	ps.set_class(me);
-	
+
+    // set fields
+    for (Field field : c.fields) {
+        me.addField(field.name, InsGen.getFieldType(field.signature));
+    }
+
     declared = new Hashtable();		// clear list of classes
 
     // include general definitions, present class, ancestors, their interfaces

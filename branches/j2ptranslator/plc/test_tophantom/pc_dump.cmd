@@ -3,3 +3,4 @@ java -cp ../out/production/plc/;. ru.dz.jpc.pcdump.PcDump translation.java.test.
 java -cp ../out/production/plc/;. ru.dz.jpc.pcdump.PcDump translation.java.test.obj_test.pc >obj_test.pcdump
 
 java -cp ../out/production/plc/;. ru.dz.jpc.pcdump.PcDump translation.java.test.compare.pc >compare.pcdump
+java -cp ../out/production/plc/;. ru.dz.jpc.pcdump.PcDump translation.java.test.field.pc >field.pcdump

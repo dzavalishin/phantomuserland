@@ -4,10 +4,12 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.binode.BiNode;
+import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
 import java.io.PrintStream;
+import java.io.IOException;
 
 /**
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
@@ -16,30 +18,9 @@ import java.io.PrintStream;
  *
  * @author Irek
  */
-public class SequenceTransNode extends BiNode {
+public class SequenceTransNode extends SequenceNode {
     public SequenceTransNode(Node l, Node r) {
         super(l, r);
-    }
-
-    public String toString() {
-        return ", ";
-    }
-
-    protected void generate_my_code(Codegen c, CodeGeneratorState s) {
-    } // really nothing :)
-
-    protected void print_children(PrintStream ps, int level, int start_level) throws PlcException {
-        if (_l != null) _l.print(ps, level + 1, start_level + 1);
-        if (_r != null) _r.print(ps, level + 1, start_level + 1);
-    }
-
-    protected void print_me() {
-        /*System.out.print(toString());
-          if( is_const()   ) System.out.print(" : const");
-          System.out.println();*/
-    }
-
-    public void preprocess_me(ParseState ps) throws PlcException {
     }
 
 
@@ -65,6 +46,19 @@ public class SequenceTransNode extends BiNode {
         }
         return result;
     }
+
+
+  public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
+  {
+    if( _l != null ) { _l.generate_code(c,s); move_between_stacks(c, _l.is_on_int_stack()); }
+    // after generate right node do not move stacs for right child in SequenceTransNode
+    if( _r != null ) { _r.generate_code(c,s); /*move_between_stacks(c, _r.is_on_int_stack());*/ }
+
+    log.fine("Node "+this+" codegen");
+
+    if(context != null) c.emitComment("Line "+context.getLineNumber());
+    generate_my_code(c,s);
+  }
 
 //    public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 //        _l.generate_code(c, s);

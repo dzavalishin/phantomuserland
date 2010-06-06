@@ -27,8 +27,7 @@ public class OpAssignTransNode extends OpAssignNode {
 
     protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException,
                 PlcException {
-//		if( _l.getClass() == IdentNode.class )
-//		{
+		if( _l instanceof IdentNode) {
 			//if( _l != null ) { _l.generate_code(c,s); move_between_stacks(c, _l.is_on_int_stack()); }
 			if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
 
@@ -69,7 +68,7 @@ public class OpAssignTransNode extends OpAssignNode {
 				c.emitSet(svar.get_abs_stack_pos()); // set stack variable
 				if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
 			}
-//		}
+		}
 //		else if( _l.getClass() == OpSubscriptNode.class )
 //		{
 //			// this is assignment to array element
@@ -100,8 +99,8 @@ public class OpAssignTransNode extends OpAssignNode {
 //			//check_assignment_types("container element", type, _r.getType());
 //			check_assignment_types("container element", destType, _r.getType());
 //		}
-//		else
-//			throw new PlcException("= Node", "unknown left Node", _l.toString() );
+		else
+			throw new PlcException("= Node", "unknown left Node", _l.toString() );
 
 	}
 }
