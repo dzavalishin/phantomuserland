@@ -53,6 +53,8 @@ struct pvm_root_t
     struct pvm_object           world_class;
     struct pvm_object           closure_class;
 
+    struct pvm_object           weakref_class;
+
     struct pvm_object           null_object;
     struct pvm_object           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
     struct pvm_object           class_loader;           // Root class loader (user code)
@@ -150,6 +152,8 @@ extern struct pvm_root_t pvm_root;
 #define PVM_ROOT_OBJECT_UDP_CLASS 26
 
 #define PVM_ROOT_OBJECT_TCP_CLASS 27
+
+#define PVM_ROOT_OBJECT_WEAKREF_CLASS 28
 
 // Runtime restoration facilities
 

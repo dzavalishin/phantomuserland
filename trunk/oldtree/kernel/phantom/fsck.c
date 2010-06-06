@@ -24,6 +24,8 @@ static int map_created = 0;
 static int out_of_disk(disk_page_no_t disk_block_num)
 {
     // TODO must be error
+    if(disk_block_num == 0)
+        return 0; // blk num 0 is used as 'nothing'
 
     if(((unsigned long)disk_block_num) < ((unsigned long)pager_superblock_ptr()->disk_start_page))
         printf("FSCK: Warning: block number below disk start: %ld < %ld\n",
@@ -544,6 +546,10 @@ void phantom_fsck(int do_rebuild )
 
 static void free_snap_worker(disk_page_no_t toFree, int flags)
 {
+    // don't try to free blk 0 - zero is used as 'no block' marker
+    if( toFree == 0 )
+        return;
+
     if(flags != MAP_FREE )
     {
         printf("phantom_free_snap warning: nonfree block passed by iterator: %d\n", (int)toFree );
@@ -551,6 +557,7 @@ static void free_snap_worker(disk_page_no_t toFree, int flags)
     }
 
     //SHOW_FLOW( 0, "Free old snap blk: %ld", (long)toFree );
+    //printf( " %ld", (long)toFree );
     pager_free_page( toFree );
 }
 

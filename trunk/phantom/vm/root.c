@@ -249,6 +249,7 @@ static void set_root_from_table()
     SET_ROOT_CLASS(bitmap,BITMAP);
     SET_ROOT_CLASS(closure,CLOSURE);
     SET_ROOT_CLASS(world,WORLD);
+    SET_ROOT_CLASS(weakref, WEAKREF);
 }
 
 
@@ -280,6 +281,7 @@ GCINLINE struct pvm_object     pvm_get_binary_class() { return pvm_root.binary_c
 GCINLINE struct pvm_object     pvm_get_bitmap_class() { return pvm_root.bitmap_class; }
 GCINLINE struct pvm_object     pvm_get_closure_class() { return pvm_root.closure_class; }
 GCINLINE struct pvm_object     pvm_get_world_class() { return pvm_root.world_class; }
+GCINLINE struct pvm_object     pvm_get_weakref_class() { return pvm_root.weakref_class; }
 
 #undef GCINLINE
 

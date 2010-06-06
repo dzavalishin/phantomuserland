@@ -1579,3 +1579,79 @@ syscall_func_t	syscall_table_4_world[16] =
 };
 DECLARE_SIZE(world);
 
+
+// --------- weakref -------------------------------------------------------
+
+static int si_weakref_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    (void)o;
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_string_object( "(weakref)" ));
+}
+
+
+static int si_weakref_8_getMyObject(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+
+    struct data_area_4_weakref *da = pvm_object_da( o, weakref );
+
+    // All we do is return new reference to our object,
+    // incrementing refcount before
+    int ie = hal_save_cli();
+    hal_spin_lock( &da->lock );
+
+    struct pvm_object out = ref_inc_o( da->object );
+
+    hal_spin_unlock( &da->lock );
+    if( ie ) hal_sti();
+
+    SYSCALL_RETURN( out );
+
+}
+
+errno_t si_weakref_9_resetMyObject(struct pvm_object o )
+{
+    struct data_area_4_weakref *da = pvm_object_da( o, weakref );
+
+    errno_t rc = EWOULDBLOCK;
+
+    int ie = hal_save_cli();
+    hal_spin_lock( &da->lock );
+
+    // As we are interlocked with above, no refcount inc can be from us
+    // ERROR if more than one weakref is pointing to obj, possibility
+    // exist than GC will reset some of them, and than will still let
+    // object to exist. We need to make sure only one weakref exists.
+    if(da->object.data->_ah.refCount == 0)
+    {
+        da->object.data = 0;
+        da->object.interface = 0;
+        rc = 0;
+    }
+
+    hal_spin_unlock( &da->lock );
+    if( ie ) hal_sti();
+
+    return rc;
+}
+
+
+
+syscall_func_t	syscall_table_4_weakref[16] =
+{
+    &si_void_0_construct,           &si_void_1_destruct,
+    &si_void_2_class,               &si_void_3_clone,
+    &si_void_4_equals,              &si_weakref_5_tostring,
+    &si_void_6_toXML,               &si_void_7_fromXML,
+    // 8
+    &si_weakref_8_getMyObject,	    &invalid_syscall,
+    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
+    &invalid_syscall,               &si_void_15_hashcode
+    // 16
+
+};
+DECLARE_SIZE(weakref);
+
+

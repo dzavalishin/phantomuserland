@@ -73,6 +73,7 @@ DEF_I(binary)
 DEF_I(bitmap)
 DEF_I(world)
 DEF_I(closure)
+DEF_I(weakref)
 
 #undef DEF_I
 
