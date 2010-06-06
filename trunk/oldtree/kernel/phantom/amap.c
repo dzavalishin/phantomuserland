@@ -320,9 +320,9 @@ amap_check_modify( amap_t *map, amap_elem_addr_t from, amap_elem_size_t n_elem, 
 
     } while(e->start < finish);
 
-    amap_elem_addr_t e_finish = e->start+e->n_elem;
-    if(e_finish != finish)
-        panic("AMAP - finished not on exact end");
+    //amap_elem_addr_t e_finish = e->start+e->n_elem;
+    //if(e_finish != finish)
+    //    panic("AMAP - finished not on exact end");
 
     rejoin_range( map, from, n_elem );
 
