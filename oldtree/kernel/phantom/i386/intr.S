@@ -1,8 +1,10 @@
 #include <mach/asm.h>
+#include <i386/isa/pic_regs.h>
+
 #include "interrupts.h"
 
-#warning some other define must be used here!
-#define PIC_VECTBASE 0x20
+//#warning some other define must be used here!
+//#define PIC_VECTBASE 0x20
 
 // TODO EBX is not really used
 

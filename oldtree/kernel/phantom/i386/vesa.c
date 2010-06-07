@@ -1,7 +1,7 @@
 #include <phantom_libc.h>
 #include <i386/vesa.h>
 #include <hal.h>
-#include "../video.h"
+#include <video.h>
 #include "vm86.h"
 
 #include "../misc.h"

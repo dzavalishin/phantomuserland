@@ -216,7 +216,7 @@ static bigtime_t pit_arch_get_time_delta(void)
 
     bigtime_t r = (bigtime_t)(CLKNUM / hz - d) * 1000000 / CLKNUM;
 
-    assert(r < 1000000 / hz);
+    assert(r < 1000000u / hz);
 
     return r;
 }
