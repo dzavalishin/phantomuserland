@@ -57,6 +57,9 @@ WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define NINTR	0x10
 #define	NPICS	0x02
 
+
+#define PIC_VECTBASE 0x20
+
 /*
 ** The following are definitions used to locate the PICs in the system
 */
