@@ -19,7 +19,7 @@ Quite crirtical tasks.
 
 Not critical, but can be done relatively easily.
 
-  * *WeakRefs*
+  * *VmWeakRef* *In progress*
   * *Border objects and restart exceptions*. Especially for TCP interfaces.
 
 Not so easy, but we need it, sooner or later.
