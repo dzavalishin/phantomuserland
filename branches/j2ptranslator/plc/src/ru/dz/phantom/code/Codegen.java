@@ -20,7 +20,7 @@ public class Codegen extends opcode_ids {
 	private ForwardAddressMap fmap = new ForwardAddressMap();
 	private BackAddressMap    bmap = new BackAddressMap();
 
-	private long                start_position_in_file = 0;
+	//private long                start_position_in_file = 0;
 
 	// ------------------------------------------------------------------------
 	// labels
@@ -49,7 +49,7 @@ public class Codegen extends opcode_ids {
 	public Codegen(RandomAccessFile f, FileWriter lst ) throws IOException {
 		this.os = f;
 		this.lst  = lst;
-		start_position_in_file = os.getFilePointer();
+		//start_position_in_file = os.getFilePointer();
 	}
 
 
@@ -60,7 +60,7 @@ public class Codegen extends opcode_ids {
 	public void set_os(RandomAccessFile f, FileWriter lst ) throws IOException {
 		this.os = f;
 		this.lst  = lst;
-		start_position_in_file = os.getFilePointer();
+		//start_position_in_file = os.getFilePointer();
 	}
 
 	private void list(String s) throws IOException 
@@ -77,55 +77,10 @@ public class Codegen extends opcode_ids {
 		lst.write('\n');
 	}
 	
-	/*public void finalizer() throws IOException {
-    os.close();
-  }*/
-
-	/*
-  public void put_byte( byte v ) throws IOException {
-    byte[] bb = new byte[1];
-    bb[0] = v;
-    os.write(bb);
-  } */
 	public void put_byte( byte v ) throws IOException { Fileops.put_byte( os, v ); }
-
-	/* public void put_int32( int v ) throws IOException {
-    byte[] bb = new byte[4];
-    bb[3] = (byte)( v        & 0xFF);
-    bb[2] = (byte)((v >>  8) & 0xFF);
-    bb[1] = (byte)((v >> 16) & 0xFF);
-    bb[0] = (byte)((v >> 24) & 0xFF);
-    os.write(bb);
-  }*/
 	public void put_int32( int v ) throws IOException { Fileops.put_int32(os, v ); }
-
-	/*
-  public void put_string_zero( String v ) throws IOException {
-    Charset cs = Charset.forName("UTF-8");
-    ByteBuffer bb = cs.encode(v);
-    os.write(bb.array());
-    os.write(0);
-    os.write(0); // BUG? UTF-8 strings should end with one or two zeros?
-  }
-	 */
-
-	/*public void put_string_bin( byte[] v ) throws IOException {
-    put_int32( v.length );
-    os.write(v);
-  }*/
-
-	/*public void put_string_bin( String v ) throws IOException {
-    //Charset cs = Charset.forName("UTF-8");
-    //ByteBuffer bb = cs.encode(v);
-    //put_string_bin( bb.array() );
-    // BUG! must be above version for UTF-8!
-    // but does not compile with gcj
-    put_string_bin( v.getBytes() );
-  }*/
-
 	public void put_string_bin( String v ) throws IOException { Fileops.put_string_bin(os, v); }
-
-	public void put_string_bin( byte [] v ) throws IOException { Fileops.put_string_bin(os, v); }	
+	public void put_string_bin( byte [] v ) throws IOException { Fileops.put_string_bin(os, v); }
 
 	// ------ map works --------
 

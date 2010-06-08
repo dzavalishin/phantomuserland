@@ -320,14 +320,14 @@ extends GrammarHelper {
 				String class_to_extend = parseClassName(false);
 				if(interface_mode)
 					syntax_error("interface can not extend class");
-				if( !me.addParent(class_to_extend) )
+				if( !me.addParent(class_to_extend, ps) )
 					syntax_error("just one base class (yet?)");
 			}
 			else if( id == id_implements )
 			{
 				l.get();
 				String interface_to_implement = parseClassName(false);
-				me.addInterface(interface_to_implement);
+				me.addInterface(interface_to_implement, ps);
 			}
 			else
 				break;
@@ -336,6 +336,8 @@ extends GrammarHelper {
 		expect(id_block_open);
 		out = new ClassDefinitionNode( me, parseClassBody(me, interface_mode) ).setContext( l );
 		expect(id_block_close);
+
+		me.setReferencedClasses(ps.getReferencedClasses());
 
 		ps.set_class(null); // came out of class
 
@@ -482,7 +484,7 @@ extends GrammarHelper {
 			else if( cln.equals("string") ) main_type = new PhTypeString();
 			else
 			{
-				PhantomClass c = classes.get(cln, false);
+				PhantomClass c = classes.get(cln, false, ps);
 				if (c == null)
 					syntax_error("Class " + cln + " is not defined - forgot to import?");
 
@@ -1134,7 +1136,7 @@ extends GrammarHelper {
 				else
 				{
 					ClassMap.get_map().do_import(typeName);
-					PhantomClass phantomClass = ClassMap.get_map().get(typeName, true);
+					PhantomClass phantomClass = ClassMap.get_map().get(typeName, true, ps);
 					if( phantomClass != null )
 						type = new PhantomType( phantomClass );
 				}

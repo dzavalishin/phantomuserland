@@ -31,7 +31,6 @@ import ru.dz.plc.compiler.node.JzNode;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.util.PlcException;
-import sun.io.Converters;
 
 public class PythonFrontendXML {
 	private static final boolean really = false;
@@ -239,7 +238,7 @@ public class PythonFrontendXML {
 				int inStartReg = getInt(cn,"inStart");
 				int inRegsNum = getInt(cn,"inNum");
 
-				setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false)), null, null) );
+				setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false,null)), null, null) );
 				// TODO use some map style container for dictionary
 				// TODO here we must fill a new dictionary - compose?
 				if(inRegsNum != 0)

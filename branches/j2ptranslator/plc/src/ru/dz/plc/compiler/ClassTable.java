@@ -5,6 +5,7 @@ import java.io.*;
 
 import ru.dz.phantom.code.*;
 import ru.dz.plc.PlcMain;
+import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.*;
 
 /**
@@ -18,7 +19,9 @@ public class ClassTable {
 
 	private Map<String, PhantomClass> table;
 
-	ClassTable() {    table = new HashMap<String, PhantomClass>();  }
+	ClassTable() {
+		table = new HashMap<String, PhantomClass>();
+		}
 
 	void add( PhantomClass pc ) throws PlcException {
 		String name = pc.getName();
@@ -27,13 +30,21 @@ public class ClassTable {
 	}
 
 	boolean have( String name ) { return table.containsKey(name); }
-	public PhantomClass get( String name, boolean justTry ) { 
+
+	public PhantomClass get( String name, boolean justTry, ParseState pc ) {
 		if(name.charAt(0) != '.' && (!justTry))
 		{
 			System.out.println("Warning: Request for non-absolute class "+name);
 			name = "."+name;
 		}
-		return ((PhantomClass)table.get(name)); 
+
+		PhantomClass ret = ((PhantomClass)table.get(name));
+
+		// Note which classes caller references
+		if( pc != null && ret != null )
+			pc.addReferencedClass(ret);
+
+		return ret;
 	}
 
 	public void print() throws PlcException
@@ -53,26 +64,58 @@ public class ClassTable {
 
 			PhantomClass c = i.next();
 			{
-				String fns = c.getName()+".pc";
+				String classfns = c.getName()+".pc";
 				String lstfns = c.getName()+".lstc";
+				String verfns = c.getName()+".ver";
+
 				// skip leading point
-				File fn = new File( PlcMain.getOutputPath(), fns.substring(1));
+				File classfn = new File( PlcMain.getOutputPath(), classfns.substring(1));
 				File lstfn = new File( PlcMain.getOutputPath(), lstfns.substring(1));
 
-				fn.delete();
-				RandomAccessFile of = new RandomAccessFile( fn, "rw" );
+				classfn.delete();
+				RandomAccessFile of = new RandomAccessFile( classfn, "rw" );
 
 				lstfn.delete();
 				FileWriter lst = new FileWriter(lstfn);
-				
+
+				{
+					/*
+					File verfn = new File( PlcMain.getOutputPath(), verfns.substring(1));
+					RandomAccessFile vf = new RandomAccessFile( verfn, "rw" );
+					String verstr = vf.readLine();
+					int ver = 0;
+					if(verstr.matches("Version=[0-9]+"))
+					{
+
+					}
+					else
+					{
+						verstr = String.format("%4d", year, month, day, hour, min, sec );
+					}*/
+
+
+				}
+
+				Calendar cc = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+				String verstr = String.format("%4d%02d%02d%02d%02d%02d%03d",
+						cc.get(Calendar.YEAR),
+						cc.get(Calendar.MONTH),
+						cc.get(Calendar.DAY_OF_MONTH),
+						cc.get(Calendar.HOUR),
+						cc.get(Calendar.MINUTE),
+						cc.get(Calendar.SECOND),
+						cc.get(Calendar.MILLISECOND)
+						);
+
 				ClassFileInfo cf =
 					new ClassFileInfo(
 							of, c.getName(), c.getParent() == null ? "" : c.getParent(),
-									c.getFieldSlotsNeeded(), c.getMethodSlotsNeeded()
+									c.getFieldSlotsNeeded(), c.getMethodSlotsNeeded(),
+									verstr
 					);
 
 				cf.write();
-				c.codegen(of, lst);
+				c.codegen(of, lst, verstr);
 				//cf.reWrite();
 
 				of.close();
@@ -94,6 +137,34 @@ public class ClassTable {
 				os.close();
 				ps.close();
 			}
+
+			{
+				String fns = c.getName()+".d";
+				// skip leading point
+				File fn = new File( PlcMain.getOutputPath(), fns.substring(1));
+				fn.delete();
+
+				FileOutputStream os = new FileOutputStream( fn );
+				//BufferedOutputStream bos = new BufferedOutputStream(os);
+
+				PrintStream ps = new PrintStream(os);
+
+				//c.print(ps);
+
+				ps.format("%s: ", c.getName().substring(1)+".pc" );
+				ps.format("%s\n", c.getName().substring(1)+".ph" );
+
+                if (c.getReferencedClasses() != null) {
+                    for( PhantomClass ref : c.getReferencedClasses() )
+                    {
+                        ps.format("\t%s\n", ref.getName().substring(1)+".ph" );
+                    }
+                }
+                
+				os.close();
+				ps.close();
+			}
+
 		}
 	}
 

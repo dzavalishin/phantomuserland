@@ -73,7 +73,7 @@ class MethGen extends Opcode {
 		NodeEmitter emitter = new NodeEmitter();
 		
 		ru.dz.plc.compiler.Method pMethod = pclass.addMethod( f.name, 
-				new PhantomType( ClassMap.get_map().get(".internal.object",false) ) 
+				new PhantomType( ClassMap.get_map().get(".internal.object",false,null) ) 
 		);
 
 		ps.set_method(pMethod);
@@ -382,8 +382,8 @@ class MethGen extends Opcode {
 			isInt = c == 'i';				
 
 			PhantomClass vc = isInt ?
-					ClassMap.get_map().get(".internal.int",false) :
-						ClassMap.get_map().get(".internal.object",false);
+					ClassMap.get_map().get(".internal.int",false,null) :
+						ClassMap.get_map().get(".internal.object",false,null);
 
 					pm.addArg(varName, new PhantomType(vc) );
 		}
@@ -454,7 +454,7 @@ class MethGen extends Opcode {
         for (;args.length()>0;) {
             switch (args.charAt(0)) {
                 case 'I':
-                    result.add(new PhantomType(ClassMap.get_map().get(".internal.int",false)));
+                    result.add(new PhantomType(ClassMap.get_map().get(".internal.int",false,null)));
                     args.delete(0,1);
                     break;
                 case 'Z':
@@ -464,7 +464,7 @@ class MethGen extends Opcode {
                 case 'J':
                 case 'F':
                 case 'D':
-                    result.add(new PhantomType(ClassMap.get_map().get(".internal.object",false)));
+                    result.add(new PhantomType(ClassMap.get_map().get(".internal.object",false,null)));
                     args.delete(0,1);
                     System.out.println("unimplemented type " + args.charAt(0));
                     break;
@@ -473,10 +473,10 @@ class MethGen extends Opcode {
                     String type = args.substring(0, end + 1);
 
                     if (type.equals("Ljava/lang/String;")){
-                        result.add(new PhantomType(ClassMap.get_map().get(".internal.string",false)));
+                        result.add(new PhantomType(ClassMap.get_map().get(".internal.string",false,null)));
                     } else {
                         type = "." + type.substring(1, type.length()-1).replace("/", ".");
-                        result.add(new PhantomType(ClassMap.get_map().get(type, false)));
+                        result.add(new PhantomType(ClassMap.get_map().get(type, false,null)));
                     }
                     args.delete(0,end+1);
                     break;

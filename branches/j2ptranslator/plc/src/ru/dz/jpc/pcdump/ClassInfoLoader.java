@@ -105,10 +105,12 @@ public class ClassInfoLoader {
         int n_method_slots = Fileops.get_int32(is);
         if(debug_print) System.out.println("    Method slots: " + n_method_slots );
         class_parent_name = Fileops.get_string(is);
-        if(debug_print) System.out.println("    Class parent name: " + class_parent_name + "\n");
+        if(debug_print) System.out.println("    Class parent name: " + class_parent_name);
+        String classVersion = Fileops.get_string(is);
+        if(debug_print) System.out.println("    Class version: " + classVersion + "  // "+ parseClassVersion(classVersion) + "\n");
 
         if(class_parent_name != null && class_parent_name.length() > 0 && !class_parent_name.equals(".internal.object"))
-          my_class.addParent(class_parent_name);
+          my_class.addParent(class_parent_name,null);
 
         if(class_name != null && class_name.equals(".internal.object"))
         {
@@ -156,6 +158,15 @@ public class ClassInfoLoader {
 
     return true;
   }
+
+    private String parseClassVersion(String classVersion) {
+        if (classVersion == null || classVersion.length()<17) return "";
+        StringBuffer sb = new StringBuffer();
+        sb.append(classVersion.substring(0, 4) + "." + classVersion.substring(4, 6) + "." + classVersion.substring(6, 8));
+        sb.append(" ");
+        sb.append(classVersion.substring(8, 10) + ":" + classVersion.substring(10, 12) + ":" + classVersion.substring(12, 14) + "." + classVersion.substring(14, 17));
+        return sb.toString();
+    }
 
     public void setDebug_print(boolean debug_print) {
         this.debug_print = debug_print;

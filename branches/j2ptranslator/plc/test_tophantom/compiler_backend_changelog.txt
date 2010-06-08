@@ -6,6 +6,10 @@ ru.dz.plc.compiler.PhantomVariable
     add method:
         public void setType(PhantomType type);
 
+ru.dz.plc.compiler.ClassTable
+    add lines (to fix NullPointerException)
+        157 if (c.getReferencedClasses() != null) {
+        162 }
 
 -------------
 

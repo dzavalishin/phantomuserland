@@ -49,7 +49,7 @@ public class Main {
 		
 		fw.write("#include \"drv_video_screen.h\"\n\n");
 		
-		fw.write("struct drv_video_bitmap_t "+varBase+"_bmp = {" + w +", "+ h +", { \n");
+		fw.write("drv_video_bitmap_t "+varBase+"_bmp = {" + w +", "+ h +", { \n");
 		//fw.write("char "+varBase+"_data[] = {\n");
 		
 	    System.out.println("width, height: " + w + ", " + h);

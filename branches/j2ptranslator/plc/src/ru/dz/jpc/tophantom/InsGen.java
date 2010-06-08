@@ -183,7 +183,7 @@ class InsGen extends Opcode {
 			d.println(assign(ins) + "new(&cl_" +
 					Names.hashclass((String)c.name) + ".C);");
 			{
-				PhantomClass pc = ClassMap.get_map().get(c.name,false);
+				PhantomClass pc = ClassMap.get_map().get(c.name,false,null);
 				if (pc == null)
 					throw new PlcException("Class " + c.name + " is not defined - forgot to import?");
 
@@ -595,7 +595,7 @@ class InsGen extends Opcode {
 //                if (ins.con.value instanceof MethodRef) {
                     String type = ((MethodRef)ins.con.value).cl.name;
                     type = "."+type;
-                    PhantomType phantomType = new PhantomType(ClassMap.get_map().get(type, false));
+                    PhantomType phantomType = new PhantomType(ClassMap.get_map().get(type, false, null));
                     obj.setType(phantomType);
 
                     PhantomStackVar pStackVar = ps.get_method().svars.get_var(obj.get_name());
@@ -679,14 +679,14 @@ class InsGen extends Opcode {
             {   // update method return type
                 switch (ident.charAt(0)) {
                     case 'i':
-                        ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.int",false));
+                        ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.int",false, null));
                         break;
                     case 'l':
                     case 'f':
                     case 'd':
                     case 'a':
                         if (m.fl.signature.endsWith(")Ljava/lang/String;")){
-                            ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.string",false));
+                            ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.string",false, null));
                         } else {
                             PhantomType returnType = getReturnType(m.fl.signature);
                             if (returnType != null) ps.getMethod().type = returnType;
@@ -742,7 +742,7 @@ class InsGen extends Opcode {
 
 	private static void ensureAutoVariable(ParseState ps, String ident) throws PlcException {
 		if(ps.get_method().svars.get_var(ident) == null)
-			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false))));
+			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false,null))));
     }
 
 //    private static void setTypeAutoVariable(ParseState ps, String type) throws PlcException {
@@ -833,7 +833,7 @@ class InsGen extends Opcode {
     public static PhantomType getFieldType(String signature) throws PlcException {
         switch (signature.charAt(0)) {
             case 'I':
-                return new PhantomType(ClassMap.get_map().get(".internal.int",false));
+                return new PhantomType(ClassMap.get_map().get(".internal.int",false, null));
             case 'Z':
             case 'B':
             case 'S':
@@ -842,16 +842,16 @@ class InsGen extends Opcode {
             case 'F':
             case 'D':
                 System.out.println("unimplemented type " + signature.charAt(0));
-                return new PhantomType(ClassMap.get_map().get(".internal.object",false));
+                return new PhantomType(ClassMap.get_map().get(".internal.object",false, null));
             case 'L':
                 String type = signature;
 
                 PhantomType ptype = null;
                 if (type.equals("Ljava/lang/String;")){
-                    ptype = new PhantomType(ClassMap.get_map().get(".internal.string",false));
+                    ptype = new PhantomType(ClassMap.get_map().get(".internal.string",false, null));
                 } else {
                     type = "." + type.substring(1, type.length()-1).replace("/", ".");
-                    ptype = new PhantomType(ClassMap.get_map().get(type, false));
+                    ptype = new PhantomType(ClassMap.get_map().get(type, false, null));
                 }
                 return ptype;
             case '[':

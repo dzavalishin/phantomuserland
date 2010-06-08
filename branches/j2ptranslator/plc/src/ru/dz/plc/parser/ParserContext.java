@@ -1,5 +1,10 @@
 package ru.dz.plc.parser;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import ru.dz.plc.compiler.PhantomClass;
+
 /**
  * <p>Title: Phantom Language Compiler</p>
  * <p>Description: </p>
@@ -9,18 +14,21 @@ package ru.dz.plc.parser;
  * @version 1.0
  */
 
-public class ParserContext {
-	String   excerpt;
-	int line_no;
+public class ParserContext
+{
+	private String   excerpt;
+	private int line_no;
 	private final String fname;
 
-	public ParserContext(Lex l) {
+	public ParserContext(Lex l)
+	{
 		this.fname = l.getFilename();
 		excerpt = new String( l.get_track() );
 		line_no = l.get_line_number();
 	}
 
-	public ParserContext(String fname, int line) {
+	public ParserContext(String fname, int line)
+	{
 		this.fname = fname;
 		line_no = line;	
 	}
@@ -29,5 +37,8 @@ public class ParserContext {
 	public String get_context() { return excerpt; }
 
 	public int getLineNumber() { return line_no;	}
+
+
+
 
 }
