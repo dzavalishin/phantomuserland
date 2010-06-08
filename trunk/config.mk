@@ -22,7 +22,7 @@ endif
 #endif
 
 
-# How to cpmile phantom source
+# How to compile phantom source
 
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
 
@@ -30,7 +30,7 @@ PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
 	$(PLC) $<
 
 
-# Where phancom class files are
+# Where phantom class files are
 
 PCDIR=$(realpath $(PHANTOM_HOME))/plib/bin
 
