@@ -18,6 +18,8 @@
 #include "vm/stacks.h"
 #include "vm/p2c.h"
 
+#include <sys/cdefs.h>
+
 // --------------------------------------------------------------------------
 // Macros for syscall bodies
 // --------------------------------------------------------------------------
@@ -42,11 +44,11 @@
     	SYSCALL_THROW(pvm_create_string_object( "sys: need more parameters" )); \
     } while(0)
 
-
+//             SYSCALL_THROW_STRING( /*"not a string arg: "*/  __func__ );
 #define ASSERT_STRING(obj) \
     do { \
 	if( !IS_PHANTOM_STRING(obj) ) \
-            SYSCALL_THROW_STRING( /*"not a string arg: "*/  __func__ ); \
+        SYSCALL_THROW_STRING( "not a string arg: " __FILE__ ":" __XSTRING(__LINE__) ); \
     } while(0)
 
 
