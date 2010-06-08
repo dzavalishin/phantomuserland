@@ -284,17 +284,21 @@ static int si_string_4_equals(struct pvm_object me, struct data_area_4_thread *t
     CHECK_PARAM_COUNT(n_param, 1);
 
     struct pvm_object him = POP_ARG;
-    ASSERT_STRING(him);
 
-    struct data_area_4_string *meda = pvm_object_da( me, string );
-    struct data_area_4_string *himda = pvm_object_da( him, string );
+    int ret = 0;
+    if( !pvm_is_null(him) )
+    {
+        ASSERT_STRING(him);
 
-    int ret =
-        me.data->_class.data == him.data->_class.data &&
-        meda->length == himda->length &&
-        0 == strncmp( (const char*)meda->data, (const char*)himda->data, meda->length )
-        ;
+        struct data_area_4_string *meda = pvm_object_da( me, string );
+        struct data_area_4_string *himda = pvm_object_da( him, string );
 
+        ret =
+            me.data->_class.data == him.data->_class.data &&
+            meda->length == himda->length &&
+            0 == strncmp( (const char*)meda->data, (const char*)himda->data, meda->length )
+            ;
+    }
     SYS_FREE_O(him);
 
     // BUG - can compare just same classes

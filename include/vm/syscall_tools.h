@@ -55,7 +55,7 @@
 #define ASSERT_INT(obj) \
     do { \
 	if( !IS_PHANTOM_INT(obj) ) \
-            SYSCALL_THROW_STRING("not an integer arg"  ); \
+        SYSCALL_THROW_STRING("not an integer arg: " __FILE__ ":" __XSTRING(__LINE__)  ); \
     } while(0)
 
 #define DEBUG_INFO \
