@@ -1,3 +1,4 @@
+#include <config.h>
 #if HAVE_NET
 
 #include <phantom_libc.h>

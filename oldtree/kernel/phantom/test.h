@@ -54,6 +54,7 @@ int do_test_udp_syslog(const char *test_parm);
 
 // TODO test time of day, timed_call, sleep, spin sleeps, etc
 
+// TODO test timed call incl phantom_undo_timed_call()
 
 // TODO test threads, mutexes, conds, semas incl timeouts
 

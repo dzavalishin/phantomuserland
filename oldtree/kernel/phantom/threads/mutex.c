@@ -99,7 +99,7 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
 
     t_queue_check(&(mi->waiting_threads), GET_CURRENT_THREAD());
 
-    // todo pri inherit here
+    // TODO pri inherit here
 
     queue_enter(&(mi->waiting_threads), GET_CURRENT_THREAD(), phantom_thread_t *, chain);
 

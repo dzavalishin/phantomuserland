@@ -1,3 +1,5 @@
+#include <config.h>
+
 #if HAVE_NET
 
 #define DEBUG_MSG_PREFIX "net"

@@ -250,8 +250,8 @@ again:
 		// It is not supposed that callee will sleep, but for any case
 		// unlock the spinlock
     	hal_spin_unlock( &timedcall_lock );
-	    // call
-        ep->f(ep->arg);
+        // call
+        if(ep->f) ep->f(ep->arg);
     	hal_spin_lock( &timedcall_lock );
 
         // reattach? free?
@@ -271,6 +271,57 @@ again:
 unlock:
     hal_spin_unlock( &timedcall_lock );
 }
+
+
+
+static int is_on_q(timedcall_t *entry)
+{
+    timedcall_t *next;
+
+    queue_iterate( &head, next, timedcall_t *, chain)
+        if(next == entry)
+            return 1;
+
+    return 0;
+}
+
+
+
+void phantom_undo_timed_call(timedcall_t *entry)
+{
+    if(!inited) return;
+
+    if( (entry->chain.next == 0) || (entry->chain.prev == 0) )
+        return;
+
+    hal_spin_lock( &timedcall_lock );
+    entry->f = 0; // make sure it won't fire in any case
+
+    assert( ! (entry->flags & TIMEDCALL_FLAG_AUTOFREE) );
+
+    if( !is_on_q(entry) )
+        goto unlock;
+
+    long more = entry->msecMore;
+
+    timedcall_t *tnext = (timedcall_t *)queue_next(&(entry->chain));
+
+    queue_remove(&head, entry, timedcall_t *, chain);
+
+    if( !queue_end( &head, tnext) )
+        tnext->msecMore += more;
+
+unlock:
+    hal_spin_unlock( &timedcall_lock );
+}
+
+
+
+
+
+
+
+
 
 
 #if TEST

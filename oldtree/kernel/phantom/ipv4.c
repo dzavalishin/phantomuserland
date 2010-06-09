@@ -1,3 +1,5 @@
+#include <config.h>
+
 #if HAVE_NET
 
 /*
@@ -844,7 +846,7 @@ int ipv4_init(void)
  *
 **/
 
-errno_t parse_ipv4_addr( ipv4_addr *out, char *str )
+errno_t parse_ipv4_addr( ipv4_addr *out, const char *str )
 {
     unsigned int a,b,c,d;
 

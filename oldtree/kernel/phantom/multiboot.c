@@ -24,7 +24,10 @@
 #include <multiboot.h>
 #include <kernel/boot.h>
 #include <elf.h>
+
 #include <i386/isa/pic.h>
+#include <i386/isa/pic_regs.h>
+
 
 #include "misc.h"
 #include "config.h"
@@ -52,7 +55,8 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
 
 
     // Program the PIC
-    phantom_pic_init(0x20, 0x28);
+    //phantom_pic_init(0x20, 0x28);
+	phantom_pic_init(PIC_VECTBASE, PIC_VECTBASE+8);
 
     // Disable all the IRQs
     phantom_pic_disable_all();

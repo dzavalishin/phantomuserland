@@ -1,3 +1,5 @@
+#include <config.h>
+
 #if HAVE_NET
 
 /* Copyright 1999, Brian J. Swetland.  All Rights Reserved.

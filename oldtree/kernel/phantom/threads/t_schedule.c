@@ -468,6 +468,7 @@ void thread_unblock( phantom_thread_t *t, int sleep_flag )
     int ie = hal_save_cli();
     hal_spin_lock(&schedlock);
 
+    assert( !(t->sleep_flags & THREAD_SLEEP_ZOMBIE) );
     assert( t->sleep_flags & sleep_flag );
 
 #if LATENCY_DEBUG

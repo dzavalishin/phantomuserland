@@ -25,7 +25,7 @@ phantom_thread_t * t_dequeue_highest_prio(queue_head_t *queue)
     queue_remove_first(queue, nextt, phantom_thread_t *, chain);
 #else
     phantom_thread_t	*it;
-    unsigned int	max = 0;
+    unsigned int  	max = 0;
 
     queue_iterate(queue, it, phantom_thread_t *, chain)
     {
