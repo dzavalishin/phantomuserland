@@ -277,13 +277,14 @@ hal_start_kernel_thread(void (*thread)(void))
 
 
 
-
+/*
 void
 hal_exit_kernel_thread(void)
 {
-    panic("can't kill some kernel thread");
+    //panic("can't kill some kernel thread");
+    t_kill_thread( GET_CURRENT_THREAD()->tid );
 }
-
+*/
 
 
 

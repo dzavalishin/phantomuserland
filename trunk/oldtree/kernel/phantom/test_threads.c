@@ -31,10 +31,12 @@ static hal_cond_t c;
 static hal_mutex_t m;
 
 //static void YIELD();
-#define YIELD() hal_sleep_msec(400)
+//#define YIELD() hal_sleep_msec(400)
+#define YIELD() hal_sleep_msec(40)
 
 // TODO call kill thread when implemented
-#define FINISH() do { hal_sleep_msec(1000); } while(1)
+//#define FINISH() do { hal_sleep_msec(1000); } while(1)
+#define FINISH()
 
 
 static void pressEnter(char *text)
@@ -96,7 +98,6 @@ void t1(void *a)
         hal_mutex_lock(&m);
         printf("locked mutex\n");
         checkEnterMutex();
-        YIELD();
         YIELD();
         printf("Will unlock mutex\n");
         checkLeaveMutex();

@@ -23,6 +23,9 @@
 #include "thread_private.h"
 #include "../timedcall.h"
 
+#include <phantom_libc.h>
+
+
 static void wakethread( void *arg )
 {
     phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
@@ -52,7 +55,6 @@ hal_sleep_msec( int timeMsec )
     int ie = hal_save_cli();
     hal_disable_preemption();
 
-#warning if thread is killed this must be undone!
     hal_spin_lock(&t->waitlock);
     t->sleep_event.lockp = &t->waitlock;
     //hal_spin_lock(&t->sleep_event.lock);

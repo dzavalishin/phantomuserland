@@ -19,8 +19,12 @@ break main
 #break vm_map.c:1191
 #break vm_map.c:1201
 
-break drv_video_window_receive_event
+#break drv_video_window_receive_event
 
 
-break fsck_create_map
-break do_test_amap
+#break page_fault
+#break vm_map_page_fault_trap_handler
+
+break t_kill_thread
+break t_do_kill_thread
+break t_do_some_kills

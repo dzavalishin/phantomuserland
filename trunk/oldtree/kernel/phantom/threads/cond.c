@@ -110,6 +110,9 @@ errno_t hal_cond_wait(hal_cond_t *c, hal_mutex_t *m)
 static void wake_cond_thread( void *arg )
 {
     phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
+
+    if(t->waitcond == 0) return;
+
     struct phantom_cond_impl *ci = t->waitcond->impl;
 
     queue_remove(&(ci->waiting_threads), t, phantom_thread_t *, chain);
@@ -145,7 +148,6 @@ errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
     t->waitcond   = c;
 
     // Now prepare timer
-#warning if thread is killed this must be undone!
     t->sleep_event.lockp = &t->waitlock;
     t->sleep_event.msecLater = msecTimeout;
     t->sleep_event.f = wake_cond_thread;
@@ -155,7 +157,6 @@ errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
 
 
     phantom_request_timed_call( &t->sleep_event, TIMEDCALL_FLAG_CHECKLOCK );
-
 
     thread_block( THREAD_SLEEP_COND, &t->waitlock );
 
@@ -202,6 +203,8 @@ errno_t hal_cond_signal(hal_cond_t *c)
     next_waiter->waitcond = 0;
     //hal_spin_unlock(&(t->waitlock));
 
+    phantom_undo_timed_call( &next_waiter->sleep_event );
+
     thread_unblock( next_waiter, THREAD_SLEEP_COND );
 
     goto ena;
@@ -236,6 +239,8 @@ errno_t hal_cond_broadcast(hal_cond_t *c)
     {
         if(nextt == GET_CURRENT_THREAD())
             panic("cond: wake up self?");
+
+        phantom_undo_timed_call( &nextt->sleep_event );
 
         nextt->waitcond = 0;
         thread_unblock( nextt, THREAD_SLEEP_COND );

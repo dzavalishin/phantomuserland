@@ -26,6 +26,11 @@ static void haltme( void *a )
 
     while(1)
     {
+        hal_disable_preemption();
+        if( t_thread_kill_request )
+            t_do_some_kills();
+        hal_enable_preemption();
+
         //osenv_softintr_enable();
         hal_sti();
         asm volatile("hlt" : : );
@@ -47,6 +52,8 @@ phantom_threads_init()
 
     phantom_thread_init_conds();
     phantom_thread_init_mutexes();
+
+    phantom_thread_init_killer();
 
     // Create thread entry for this control flow
     phantom_import_main_thread();

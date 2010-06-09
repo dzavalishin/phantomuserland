@@ -46,6 +46,9 @@ void phantom_request_timed_func( timedcall_func_t f, void *arg, int msecLater, u
 void phantom_request_cond_signal( int msec, hal_cond_t *cond);
 void phantom_request_cond_broadcast( int msec, hal_cond_t *cond);
 
+// Un-request previously requested timed call
+void phantom_undo_timed_call(timedcall_t *entry);
+
 
 #endif // TIMEDCALL_H
 

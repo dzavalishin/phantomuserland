@@ -1,3 +1,5 @@
+#include <config.h>
+
 #if HAVE_NET
 
 /*
@@ -34,6 +36,8 @@ int icmp_input(cbuf *buf, ifnet *i, ipv4_addr source_ipaddr)
     icmp_header *header;
     int err;
 
+    (void) i;
+
     header = (icmp_header *)cbuf_get_ptr(buf, 0);
 
 #if NET_CHATTY
@@ -46,7 +50,7 @@ int icmp_input(cbuf *buf, ifnet *i, ipv4_addr source_ipaddr)
         dprintf("icmp message fails cksum\n");
 #if NET_CHATTY
         {
-            int i;
+            unsigned int i;
             for(i=0; i<cbuf_get_len(buf); i++) {
                 if((i % 8) == 0) {
                     dprintf("\n0x%x: ", i);

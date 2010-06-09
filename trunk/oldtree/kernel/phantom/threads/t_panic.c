@@ -17,6 +17,8 @@
 
 #include "thread_private.h"
 
+#include <phantom_libc.h>
+
 
 int panic_reenter = 0;
 

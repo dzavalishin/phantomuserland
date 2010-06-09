@@ -1,3 +1,5 @@
+#include <config.h>
+
 #if HAVE_NET
 /*
  ** Copyright 2001-2004, Travis Geiselbrecht. All rights reserved.
@@ -470,6 +472,9 @@ static int bind_local_address(tcp_socket *s, netaddr *remote_addr)
 
 int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_address)
 {
+    (void) i;
+
+
     tcp_header *header;
     int err = 0;
     int length = cbuf_get_len(buf);
@@ -1084,6 +1089,8 @@ out:
 
 ssize_t tcp_recvfrom(void *prot_data, void *buf, ssize_t len, sockaddr *saddr, int flags, bigtime_t timeout)
 {
+    (void) saddr;
+
     tcp_socket *s = prot_data;
     int err;
     ssize_t bytes_read = 0;
@@ -1153,6 +1160,8 @@ out:
 
 ssize_t tcp_sendto(void *prot_data, const void *_inbuf, ssize_t len, sockaddr *toaddr)
 {
+    (void) toaddr;
+
     tcp_socket *s = prot_data;
     const uint8 *inbuf = _inbuf;
     ssize_t sent = 0;

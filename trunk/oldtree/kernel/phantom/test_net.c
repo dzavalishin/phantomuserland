@@ -17,13 +17,16 @@
 
 
 #include "config.h"
-#include <phantom_libc.h>
-#include <errno.h>
-#include "test.h"
 
+#include <phantom_libc.h>
+#include <sys/syslog.h>
+#include <errno.h>
 
 #include "net.h"
 #include "udp.h"
+
+#include "test.h"
+
 
 
 int do_test_udp_send(const char *test_parm)
@@ -36,7 +39,7 @@ int do_test_udp_send(const char *test_parm)
     if( udp_open(&prot_data) )
     {
         SHOW_ERROR0(0, "UDP - can't prepare endpoint");
-        return EXNIO;
+        return ENXIO;
     }
 
     char buf[] = "UDP request";
@@ -93,7 +96,7 @@ int do_test_udp_syslog(const char *test_parm)
 #else
     (void) test_parm;
     SHOW_INFO0( 0, "Warning - no network in kernel, test SKIPPED");
-    return 0;
 #endif
+    return 0;
 }
 

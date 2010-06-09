@@ -59,12 +59,11 @@ hal_get_thread_priority( int tid )
 /**
  *
  * Set (for current thread) a handler, which will be
- * called if thread is killed in some innatural way.
+ * called if thread is killed in some way.
  *
 **/
 
 
-#warning death handler is not called
 void
 hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ))
 {

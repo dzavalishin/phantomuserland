@@ -64,7 +64,7 @@ typedef uint32 ipv4_addr;
 	(((ipv4_addr)(a) << 24) | (((ipv4_addr)(b) & 0xff) << 16) | (((ipv4_addr)(c) & 0xff) << 8) | ((ipv4_addr)(d) & 0xff))
 
 
-errno_t parse_ipv4_addr( ipv4_addr *out, char *str );
+errno_t parse_ipv4_addr( ipv4_addr *out, const char *str );
 
 
 #if 0

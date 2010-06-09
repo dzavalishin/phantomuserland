@@ -150,7 +150,9 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 #endif
 
     func(arg);
-    panic("thread %d retuned", t->tid );
+    t_kill_thread( t->tid );
+    panic("thread %d returned from t_kill_thread", t->tid );
+
 }
 
 

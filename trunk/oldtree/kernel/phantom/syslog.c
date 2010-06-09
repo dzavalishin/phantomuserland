@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include <sys/syslog.h>
 #include <stdarg.h>
 #include <phantom_libc.h>

@@ -109,6 +109,9 @@ errno_t hal_sem_wait(hal_sem_t *c, hal_mutex_t *m)
 static void wake_sem_thread( void *arg )
 {
     phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
+
+    if(t->waitsem == 0) return;
+
     struct phantom_sem_impl *ci = t->waitsem->impl;
 
     queue_remove(&(ci->waiting_threads), t, phantom_thread_t *, chain);
@@ -254,6 +257,8 @@ ret:
 
 errno_t hal_sem_destroy(hal_sem_t *c)
 {
+    hal_sem_broadcast(c);
+
     //if(m->impl.owner != 0)        panic("locked mutex killed");
     free(c->impl);
     c->impl=0;

@@ -77,6 +77,7 @@ struct phantom_thread
     hal_spinlock_t              waitlock;
 
     queue_chain_t		chain; // used by mutex/cond code to chain waiting threads
+    queue_chain_t		kill_chain; // used kill code to chain threads to kill
 
     //* Used to wake with timer, see hal_sleep_msec
     timedcall_t                 sleep_event; 
@@ -141,6 +142,10 @@ struct phantom_thread
 //#define THREAD_SLEEP_SEM        0x0010 // waits for sema
 #define THREAD_SLEEP_LOCKED     0x0020 // thread state is incomplete (on creation)
 #define THREAD_SLEEP_IO     	0x0040 // Waits for synchronous IO to complete
+
+#define THREAD_SLEEP_ZOMBIE    	0x0100 // Waits for synchronous IO to complete
+
+
 
 #define THREAD_PRIO_NORM        0x7
 #define THREAD_PRIO_LOWEST      0x1
@@ -272,6 +277,19 @@ int hal_is_preemption_disabled(void);
 
 void phantom_thread_init_conds(void);
 void phantom_thread_init_mutexes(void);
+
+void phantom_thread_init_killer(void);
+
+
+// ----------------------------------------------------------------
+// Killer
+// ----------------------------------------------------------------
+
+
+extern int     t_thread_kill_request;
+void t_do_some_kills(void);
+
+errno_t t_kill_thread( int tid );
 
 
 // ----------------------------------------------------------------
