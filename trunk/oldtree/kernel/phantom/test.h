@@ -18,10 +18,12 @@
 void test_fail(errno_t rc); // Call from any test to return to test runner and signal failure
 void test_fail_msg(errno_t rc, const char *msg); // Call from any test to return to test runner and signal failure
 
-#define test_check_true(expr) if( !expr ) test_fail_msg( -1, #expr " is not true at " __STRING( __LINE__ ) );
-#define test_check_false(expr) if( expr ) test_fail_msg( -1, #expr " is not false at " __STRING(  __LINE__ ) );
+#define test_check_true(expr) if( !expr ) test_fail_msg( -1, #expr " is not true at " __XSTRING( __LINE__ ) );
+#define test_check_false(expr) if( expr ) test_fail_msg( -1, #expr " is not false at " __XSTRING(  __LINE__ ) );
 
-#define test_check_eq(expr, val) if( expr != val ) test_fail_msg( -1, #expr " != " #val " at " __STRING(  __LINE__ ) );
+#define test_check_eq(expr, val) if( expr != val ) test_fail_msg( -1, #expr " != " #val " at " __XSTRING(  __LINE__ ) );
+#define test_check_gt(expr, val) if( expr <= val ) test_fail_msg( -1, #expr " <= " #val " at " __XSTRING(  __LINE__ ) );
+#define test_check_ge(expr, val) if( expr < val ) test_fail_msg( -1, #expr " < " #val " at " __XSTRING(  __LINE__ ) );
 
 
 
@@ -61,6 +63,10 @@ int do_test_udp_syslog(const char *test_parm);
 int do_test_threads(const char *test_parm);
 
 int do_test_dpc(const char *test_parm);
+
+
+int do_test_timed_call(const char *test_parm);
+
 
 int do_test_amap(const char *test_parm);
 

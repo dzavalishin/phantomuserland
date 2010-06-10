@@ -88,6 +88,8 @@ static int seq_number = 0;
 
 phantom_device_t * driver_intel_82559_probe( pci_cfg_t *pci, int stage )
 {
+    (void) stage;
+
     intel82559 *nic = NULL;
 
     printf( DEV_NAME " probe\n");
@@ -343,11 +345,19 @@ int intel82559_init(intel82559 *nic, int card_idx)
 
 static int intel82559_read(struct phantom_device *dev, void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
+
     return -1;
 }
 
 static int intel82559_write(struct phantom_device *dev, const void *buf, int len)
 {
+    (void) dev;
+    (void) buf;
+    (void) len;
+
     return -1;
 }
 
@@ -358,7 +368,7 @@ static int intel82559_get_address(struct phantom_device *dev, void *buf, int len
 
     if(!nic)        return ERR_IO_ERROR;
 
-    if(len >= sizeof(nic->mac_addr)) {
+    if(len >= (int)sizeof(nic->mac_addr)) {
         memcpy(buf, nic->mac_addr, sizeof(nic->mac_addr));
     } else {
         err = ERR_VFS_INSUFFICIENT_BUF;
@@ -370,11 +380,13 @@ static int intel82559_get_address(struct phantom_device *dev, void *buf, int len
 
 static int intel82559_start(intel82559 *nic)
 {
+    (void) nic;
     return -1;
 }
 
 static int intel82559_stop(intel82559 *nic)
 {
+    (void) nic;
     return -1;
 }
 

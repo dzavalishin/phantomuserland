@@ -18,87 +18,80 @@
 #include <assert.h>
 #include <phantom_libc.h>
 
-#define TEST 0
-//#define DEBUG 0
 
 
 static hal_spinlock_t 	timedcall_lock;
-static queue_head_t    	head;
+static queue_head_t    	tcEventQ;
 static int              inited = 0;
 
-
-#if TEST
-static void phantom_timed_call_test();
-#endif
 
 
 void phantom_timed_call_init(void)
 {
     hal_spin_init( &timedcall_lock );
-    queue_init( &head );
+    queue_init( &tcEventQ );
 
     inited = 1;
 
-#if TEST
-    phantom_timed_call_test();
-#endif
 }
 
-static void do_request_timed_call( timedcall_t *entry, u_int32_t flags )
+static void do_request_timed_call( timedcall_t *newEntry, u_int32_t flags )
 {
 
     // Still call it later - for any case :)
-    if( entry->msecLater < 0 ) entry->msecLater = 0;
-    entry->msecMore = 0;
-    entry->flags = flags;
+    if( newEntry->msecLater < 0 ) newEntry->msecLater = 0;
+    newEntry->msecMore = 0;
+    newEntry->flags = flags;
 
     if(
-       (entry->flags & TIMEDCALL_FLAG_PERIODIC) &&
-       (entry->flags & TIMEDCALL_FLAG_AUTOFREE)
+       (newEntry->flags & TIMEDCALL_FLAG_PERIODIC) &&
+       (newEntry->flags & TIMEDCALL_FLAG_AUTOFREE)
       )
         panic("periodic autofree timed call requested");
 
-    //if( entry.next != 0)        panic("next != null in phantom_request_timed_call");
+    //if( newEntry.next != 0)        panic("next != null in phantom_request_timed_call");
 
-    if(queue_empty(&head))
+    if(queue_empty(&tcEventQ))
     {
         SHOW_FLOW0( 2, "put: empty");
-        entry->msecMore = entry->msecLater;
-        queue_enter_first( &head, entry, timedcall_t *, chain);
+        newEntry->msecMore = newEntry->msecLater;
+        queue_enter_first( &tcEventQ, newEntry, timedcall_t *, chain);
         goto unlock;
     }
 
     {
-        timedcall_t *first = (timedcall_t *)queue_first(&head);
-        if(entry->msecLater < first->msecMore)
+        timedcall_t *first = (timedcall_t *)queue_first(&tcEventQ);
+        if(newEntry->msecLater < first->msecMore)
         {
             SHOW_FLOW0( 2, "put: first");
-            entry->msecMore = entry->msecLater;
-            first->msecMore -= entry->msecMore;
-            queue_enter_first( &head, entry, timedcall_t *, chain);
+            newEntry->msecMore = newEntry->msecLater;
+            first->msecMore -= newEntry->msecMore;
+            queue_enter_first( &tcEventQ, newEntry, timedcall_t *, chain);
             goto unlock;
         }
     }
 
     timedcall_t *ep;
-    long msecSumm = 0;
-    queue_iterate( &head, ep, timedcall_t *, chain)
+    long msecSum = 0;
+    queue_iterate( &tcEventQ, ep, timedcall_t *, chain)
     {
-        if( entry->msecLater >= msecSumm && entry->msecLater < msecSumm + ep->msecMore )
+        if( newEntry->msecLater >= msecSum && newEntry->msecLater < msecSum + ep->msecMore )
         {
-            entry->msecMore = entry->msecLater - msecSumm;
-            ep->msecMore -= entry->msecMore;
+            //newEntry->msecMore = newEntry->msecLater - (msecSum + ep->msecMore); // wrong, gives negative times
+            newEntry->msecMore = newEntry->msecLater - msecSum;
+            ep->msecMore -= newEntry->msecMore;
 
-            SHOW_FLOW( 2, "put: before %ld", ep->msecLater );
-            queue_enter_before( &head, ep, entry, timedcall_t *, chain);
+            SHOW_FLOW( 2, "put: before %ld (%ld total)", ep->msecLater, msecSum );
+            queue_enter_before( &tcEventQ, ep, newEntry, timedcall_t *, chain);
+            //queue_enter_after( &tcEventQ, ep, newEntry, timedcall_t *, chain);
             goto unlock;
         }
 
-        msecSumm += ep->msecMore;
+        msecSum += ep->msecMore;
     }
 
-    entry->msecMore = entry->msecLater - msecSumm;
-    queue_enter( &head, entry, timedcall_t *, chain);
+    newEntry->msecMore = newEntry->msecLater - msecSum;
+    queue_enter( &tcEventQ, newEntry, timedcall_t *, chain);
     SHOW_FLOW0( 2, "put: last");
 
 unlock:
@@ -188,7 +181,14 @@ void phantom_request_timed_func( timedcall_func_t f, void *arg, int msecLater, u
 
 
 
-
+static void dputc(char c)
+{
+#if debug_level_flow > 2
+    putchar(c);
+#else
+    (void) c;
+#endif
+}
 
 
 
@@ -201,23 +201,17 @@ void phantom_process_timed_calls()
     if(!inited) return;
 
     hal_spin_lock( &timedcall_lock );
-#if debug_level_flow > 2
-    putchar('.');
-#endif
+    dputc('.');
 
 
-    if(queue_empty(&head))
+    if(queue_empty(&tcEventQ))
     {
-#if debug_level_flow > 2
-        putchar('-');
-#endif
+        dputc('-');
         goto unlock;
     }
-#if debug_level_flow > 2
-    putchar('%');
-#endif
+    dputc('%');
 
-    timedcall_t *ep = (timedcall_t *)queue_first(&head);
+    timedcall_t *ep = (timedcall_t *)queue_first(&tcEventQ);
 
     ep->msecMore--;
 
@@ -232,16 +226,15 @@ again:
 
     if( ep->msecMore <= 0 )
     {
-#if debug_level_flow > 2
-    putchar('!');
-#endif
-        // detach
-        queue_remove(&head, ep, timedcall_t *, chain);
+        dputc('!');
 
-        if( (ep->msecMore < 0) && !queue_empty(&head) )
+        // detach
+        queue_remove(&tcEventQ, ep, timedcall_t *, chain);
+
+        if( (ep->msecMore < 0) && !queue_empty(&tcEventQ) )
         {
             // It can happen if execution was deferred due to the lock
-            timedcall_t *next_ep = (timedcall_t *)queue_first(&head);
+            timedcall_t *next_ep = (timedcall_t *)queue_first(&tcEventQ);
             // ep->msecMore is negative. Propagate extra time to next
             // event
             next_ep->msecMore += ep->msecMore;
@@ -256,14 +249,17 @@ again:
 
         // reattach? free?
         if( ep->flags & TIMEDCALL_FLAG_PERIODIC )
+        {
+            assert(ep->msecLater > 0);
             local_request_timed_call( ep, ep->flags );
+        }
         else if( ep->flags & TIMEDCALL_FLAG_AUTOFREE )
             free( ep );
 
 
-        if(!queue_empty(&head))
+        if(!queue_empty(&tcEventQ))
         {
-            ep = (timedcall_t *)queue_first(&head);
+            ep = (timedcall_t *)queue_first(&tcEventQ);
             goto again;
         }
     }
@@ -278,7 +274,7 @@ static int is_on_q(timedcall_t *entry)
 {
     timedcall_t *next;
 
-    queue_iterate( &head, next, timedcall_t *, chain)
+    queue_iterate( &tcEventQ, next, timedcall_t *, chain)
         if(next == entry)
             return 1;
 
@@ -294,6 +290,7 @@ void phantom_undo_timed_call(timedcall_t *entry)
     if( (entry->chain.next == 0) || (entry->chain.prev == 0) )
         return;
 
+    int ie = hal_save_cli();
     hal_spin_lock( &timedcall_lock );
     entry->f = 0; // make sure it won't fire in any case
 
@@ -306,13 +303,14 @@ void phantom_undo_timed_call(timedcall_t *entry)
 
     timedcall_t *tnext = (timedcall_t *)queue_next(&(entry->chain));
 
-    queue_remove(&head, entry, timedcall_t *, chain);
+    queue_remove(&tcEventQ, entry, timedcall_t *, chain);
 
-    if( !queue_end( &head, tnext) )
+    if( !queue_end( &tcEventQ, tnext) )
         tnext->msecMore += more;
 
 unlock:
     hal_spin_unlock( &timedcall_lock );
+    if(ie) hal_sti();
 }
 
 
@@ -320,56 +318,19 @@ unlock:
 
 
 
-
-
-
-
-#if TEST
-
-
-static void echo(  void *_a )
-{
-    printf("Echo: '%s'\n", _a);
-}
-
-timedcall_t     t1 = { echo, "hello 1", 1 };
-timedcall_t     t2 = { echo, "hello 100", 100 };
-timedcall_t     t3 = { echo, "hello 2000", 2000 };
-timedcall_t     t4 = { echo, "hello 10 000", 10000 };
-
-static char *msg = "timed func";
-
-static void phantom_timed_call_test()
-{
-    //printf("Testing timed calls, reset time:\n");
-    //getchar();
-    phantom_request_timed_call( &t1, 0 );
-    phantom_request_timed_call( &t2, 0 );
-    phantom_request_timed_call( &t3, 0 );
-    phantom_request_timed_call( &t4, 0 );
-
-    phantom_request_timed_func( echo, msg, 5000, 0 );
-
-
-    printf("Testing timed calls, wait for echoes:\n");
-    getchar();
-}
-
-
-#endif // TEST
 
 
 void dump_timed_call_queue()
 {
     timedcall_t *entry;
     int index = 0;
-    queue_iterate( &head, entry, timedcall_t *, chain)
+    queue_iterate( &tcEventQ, entry, timedcall_t *, chain)
     {
         printf("%2d @%8X time %5ld left %5ld, flags %b%s\n",
                index++, entry, entry->msecLater, entry->msecMore,
                entry->flags,
-               "\20\0Periodic\1AutoFree\2CheckLock",
-               entry->lockp->lock ? ", locked" : ", unl"
+               "\20\1Periodic\2AutoFree\3CheckLock",
+               entry->lockp ? (entry->lockp->lock ? ", Locked" : ", Unlocked") : ""
               );
     }
 }

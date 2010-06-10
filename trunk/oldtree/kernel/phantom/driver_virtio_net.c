@@ -51,12 +51,16 @@ static int seq_number = 0;
 
 static void driver_virtio_net_interrupt(virtio_device_t *me, int isr )
 {
+    (void) me;
+    (void) isr;
+
     SHOW_FLOW0( 4, "got virtio net interrupt");
 
 }
 
 phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
 {
+    (void) stage;
 
     if(vdev.pci)
     {

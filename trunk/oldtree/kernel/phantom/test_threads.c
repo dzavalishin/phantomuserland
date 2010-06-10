@@ -23,6 +23,10 @@
 
 #include "threads/thread_private.h"
 #include <hal.h>
+#include "timedcall.h"
+
+#define TEST_CHATTY 0
+
 
 static volatile int thread_activity_counter = 0;
 static volatile int thread_stop_request = 0;
@@ -41,7 +45,7 @@ static hal_mutex_t m;
 
 static void pressEnter(char *text)
 {
-    printf("%s\n", text);
+    if(TEST_CHATTY) printf("%s\n", text);
 }
 
 static int inmutex = 0;
@@ -65,7 +69,7 @@ static void t_wait(void *a)
     {
         thread_activity_counter++;
 
-        printf("--- thread %s will wait 4 cond ---\n", name);
+        if(TEST_CHATTY) printf("--- thread %s will wait 4 cond ---\n", name);
 
         hal_mutex_lock(&m);
         checkEnterMutex();
@@ -75,7 +79,7 @@ static void t_wait(void *a)
         checkLeaveMutex();
         hal_mutex_unlock(&m);
 
-        printf("--- thread %s runs ---\n", name);
+        if(TEST_CHATTY) printf("--- thread %s runs ---\n", name);
         //pressEnter("--- thread a runs ---\n");
         YIELD();
     }
@@ -84,34 +88,34 @@ static void t_wait(void *a)
 
 
 static int counter = 0;
-void t1(void *a)
+void thread1(void *a)
 {
     char *name = a;
     while(!thread_stop_request)
     {
         thread_activity_counter++;
 
-        printf("--- thread %s runs ---\n", name);
+        if(TEST_CHATTY) printf("--- thread %s runs ---\n", name);
         pressEnter("");
 
-        printf("Will lock mutex\n");
+        if(TEST_CHATTY) printf("Will lock mutex\n");
         hal_mutex_lock(&m);
-        printf("locked mutex\n");
+        if(TEST_CHATTY) printf("locked mutex\n");
         checkEnterMutex();
         YIELD();
-        printf("Will unlock mutex\n");
+        if(TEST_CHATTY) printf("Will unlock mutex\n");
         checkLeaveMutex();
         hal_mutex_unlock(&m);
-        printf("unlocked mutex\n");
+        if(TEST_CHATTY) printf("unlocked mutex\n");
 
 
         counter++;
         if(counter >7)
         {
             counter = 0;
-            printf("Will signal cond\n");
+            if(TEST_CHATTY) printf("Will signal cond\n");
             hal_cond_signal(&c);
-            printf("Signalled cond\n");
+            if(TEST_CHATTY) printf("Signalled cond\n");
         }
         YIELD();
         
@@ -128,9 +132,9 @@ static errno_t threads_test()
     hal_mutex_init(&m, "threadTest");
 
     pressEnter("will create thread");
-    phantom_create_thread( t1, "__T1__", 0 );
-    phantom_create_thread( t1, "__T2__", 0 );
-    //phantom_create_thread( t1, "__T3__" );
+    phantom_create_thread( thread1, "__T1__", 0 );
+    phantom_create_thread( thread1, "__T2__", 0 );
+    //phantom_create_thread( thread1, "__T3__" );
 
     //phantom_create_thread( t_wait, "__TW__" );
     int tid = hal_start_kernel_thread_arg( t_wait, "__TW__" );
@@ -139,10 +143,10 @@ static errno_t threads_test()
     int i = 40;
     while(i-- > 0)
     {
-        pressEnter("will yield");
+        if(TEST_CHATTY) pressEnter("will yield");
         YIELD();
 
-        printf("!! back in main\n");
+        if(TEST_CHATTY) printf("!! back in main\n");
     }
 
 
@@ -285,5 +289,112 @@ int do_test_dpc(const char *test_parm)
 
     return rc;
 }
+
+
+
+
+
+
+
+
+
+
+// -----------------------------------------------------------------------
+// Timed calls
+// -----------------------------------------------------------------------
+
+
+
+
+
+
+static int called = 0;
+
+static void echo(  void *_a )
+{
+    called++;
+    printf("Echo: '%s'\n", _a);
+}
+
+static timedcall_t     t1 = { echo, "hello 5", 5 };
+static timedcall_t     t2 = { echo, "hello 100", 100 };
+static timedcall_t     t3 = { echo, "hello 2000", 2000 };
+static timedcall_t     t4 = { echo, "hello 10 000", 10000 };
+
+static char *msg = "timed func";
+
+int do_test_timed_call(const char *test_parm)
+{
+    (void) test_parm;
+
+
+    called = 0;
+
+    phantom_request_timed_call( &t2, 0 );
+    phantom_undo_timed_call(&t2);
+
+    hal_sleep_msec(200); // Twice the time
+    test_check_eq(called, 0);
+
+
+
+
+    called = 0;
+
+    printf("Testing timed calls, wait for echoes:\n");
+
+    phantom_request_timed_call( &t1, 0 );
+    //test_check_false(called); // it is still possible for this test to fail with correct code!
+    phantom_request_timed_call( &t2, 0 );
+    phantom_request_timed_call( &t3, 0 );
+    phantom_request_timed_call( &t4, 0 );
+
+    phantom_request_timed_func( echo, msg, 5000, 0 );
+
+
+
+    // We check for >= (ge) because hal_sleep... can cleep for more than asked, and timed
+    // calls are usually quite on time
+
+    hal_sleep_msec(6);
+    test_check_ge(called, 1);
+
+    hal_sleep_msec(200); // Have lag of 106 msec, OK?
+    test_check_ge(called, 2);
+
+    hal_sleep_msec(2000-100); // Still have lag of 106 msec
+    test_check_ge(called, 3);
+
+    hal_sleep_msec(5000-2000); // Have lag of 206 msec
+    test_check_ge(called, 4);
+
+    hal_sleep_msec(100+10000-5000-2000); // Have lag of 206 msec
+    test_check_ge(called, 5);
+
+    printf("Testing timed call recall, must be no echoes:\n");
+
+
+    printf("Done testing timed calls\n");
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

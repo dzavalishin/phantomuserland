@@ -86,7 +86,7 @@ static int rtl8139_get_address( struct phantom_device *dev, void *buf, int len)
 
     if(!nic)        return ERR_IO_ERROR;
 
-    if(len >= sizeof(nic->mac_addr)) {
+    if(len >= (int)sizeof(nic->mac_addr)) {
         memcpy(buf, nic->mac_addr, sizeof(nic->mac_addr));
     } else {
         err = ERR_VFS_INSUFFICIENT_BUF;
@@ -129,6 +129,7 @@ static rtl8139 *rtl8139_new()
 
 phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
 {
+    (void) stage;
     rtl8139 * nic = NULL;
 
     printf( DEV_NAME " probe\n" );
@@ -841,6 +842,8 @@ out:
 
 static int rtl8139_rxint(rtl8139 *rtl, u_int16_t int_status)
 {
+    (void) int_status;
+
     int rc = 0;//INT_NO_RESCHEDULE;
 
     if(DEBUG > 1)	printf("rx\n");
