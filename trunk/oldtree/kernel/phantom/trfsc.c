@@ -215,7 +215,7 @@ void trfs_mark_recombine_map(trfs_queue_t *qe, u_int64_t start, u_int32_t num)
 
 int trfs_request_complete(trfs_queue_t *qe)
 {
-    int num = qe->fio.nSectors;
+    unsigned int num = qe->fio.nSectors;
     int start = 0;
 
     assert( num <= sizeof(u_int32_t)*8 );
@@ -360,6 +360,7 @@ void recvReadReply(trfs_pkt_t *rq)
 
 void recvFindReply(trfs_pkt_t *rq)
 {
+    (void) rq;
     SHOW_ERROR0( 0, "TRFS: unexpected findReply");
 }
 
@@ -386,6 +387,8 @@ void sendRequest(trfs_queue_t *qe)
 
 static void trfs_recv_thread(void *arg)
 {
+    (void) arg;
+
     u_int8_t    buf[TRFS_MAX_PKT];
 
     hal_set_thread_name("TRFS Recv");
@@ -430,6 +433,8 @@ static void trfs_recv_thread(void *arg)
 
 static void trfs_resend_thread(void *arg)
 {
+    (void) arg;
+
     hal_set_thread_name("TRFS Resend");
 
     while(1)
@@ -487,6 +492,7 @@ void phantom_trfs_init()
 
 errno_t trfsAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
 {
+    (void) p;
 /*
     assert(p->specific != 0);
     // Temp! Rewrite!

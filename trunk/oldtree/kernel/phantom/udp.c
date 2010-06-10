@@ -141,6 +141,8 @@ static void udp_endpoint_release_ref(udp_endpoint *e)
 
 int udp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_address)
 {
+    (void) i;
+
     udp_header *header;
     udp_endpoint *e;
     udp_queue_elem *qe;
@@ -286,16 +288,22 @@ int udp_bind(void *prot_data, sockaddr *addr)
 
 int udp_connect(void *prot_data, sockaddr *addr)
 {
+    (void) prot_data;
+    (void) addr;
     return ERR_NOT_ALLOWED;
 }
 
 int udp_listen(void *prot_data)
 {
+    (void) prot_data;
     return ERR_NOT_ALLOWED;
 }
 
 int udp_accept(void *prot_data, sockaddr *addr, void **new_socket)
 {
+    (void) prot_data;
+    (void) addr;
+    (void) new_socket;
     return ERR_NOT_ALLOWED;
 }
 
@@ -324,6 +332,7 @@ ssize_t udp_recvfrom(
     ssize_t ret;
 
 retry:
+//#warning timeout ignored
 #if ERR
     if(flags & SOCK_FLAG_TIMEOUT)
         err = sem_acquire_etc(e->blocking_sem, 1, SEM_FLAG_TIMEOUT, timeout, NULL);

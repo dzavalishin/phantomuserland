@@ -87,6 +87,8 @@ static int validate_cbuf(cbuf *head)
     /* make sure the added up size == the total size */
     if(counted_size != head->total_len)
         panic("validate_cbuf: cbuf %p has bad total_len %ld, counted %ld\n", head, head->total_len, counted_size);
+#else
+    (void) head;
 #endif
     return 0;
 }

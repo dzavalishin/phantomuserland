@@ -280,6 +280,8 @@ int main(int argc, char **argv, char **envp)
 
     if( argc >= 3 && (0 == strcmp( argv[1], "-test" )) )
     {
+        SHOW_FLOW0( 0, "Sleep before tests to settle down boot activities" );
+        hal_sleep_msec( 2000 );
         SHOW_FLOW( 0, "Will run '%s' test", argv[2] );
         run_test( argv[2], argv[3] );
         SHOW_FLOW0( 0, "Test done, reboot");
