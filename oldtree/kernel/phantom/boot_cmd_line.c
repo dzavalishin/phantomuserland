@@ -1,6 +1,6 @@
 #define DEBUG_MSG_PREFIX "boot"
 #include "debug_ext.h"
-static int debug_level_flow = 1;
+static int debug_level_flow = 0;
 static int debug_level_error = 1;
 
 #include <phantom_types.h>

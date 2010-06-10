@@ -108,6 +108,7 @@ void run_test( const char *test_name, const char *test_parm )
 
     // These are long
     TEST(dpc);
+    TEST(timed_call);
 
     // These are very long, do 'em last
     TEST(threads);
