@@ -117,6 +117,8 @@ out:
 
 static void net_timer_runner(void *arg)
 {
+    (void) arg;
+
     net_timer_event *e;
     bigtime_t now;
 

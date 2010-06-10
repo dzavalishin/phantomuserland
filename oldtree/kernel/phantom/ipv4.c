@@ -147,6 +147,8 @@ static void dump_ipv4_header(ipv4_header *head)
 
 static void ipv4_frag_killer(void *unused)
 {
+    (void) unused;
+
 	struct hash_iterator i;
 	ipv4_fragment *frag, *last;
 	ipv4_fragment *free_list = NULL;

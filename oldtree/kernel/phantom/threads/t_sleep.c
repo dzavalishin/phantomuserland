@@ -26,7 +26,7 @@
 #include <phantom_libc.h>
 
 
-static void wakethread( void *arg )
+void wake_sleeping_thread( void *arg )
 {
     phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
 
@@ -60,12 +60,12 @@ hal_sleep_msec( int timeMsec )
     //hal_spin_lock(&t->sleep_event.lock);
 
     t->sleep_event.msecLater = timeMsec;
-    t->sleep_event.f = wakethread;
+    t->sleep_event.f = wake_sleeping_thread;
     t->sleep_event.arg = (void *)t->tid;
 
     phantom_request_timed_call( &t->sleep_event, TIMEDCALL_FLAG_CHECKLOCK );
 
-    //phantom_request_timed_func( wakethread, (void *)t->tid, timeMsec, 0 );
+    //phantom_request_timed_func( wake_sleeping_thread, (void *)t->tid, timeMsec, 0 );
 
     thread_block( THREAD_SLEEP_SLEEP, t->sleep_event.lockp );
 

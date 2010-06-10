@@ -39,6 +39,7 @@ static int _loopback_input(cbuf *buf, ifnet *i, int protocol_type)
 
 int loopback_input(cbuf *buf, ifnet *i)
 {
+    (void) i;
     // What? you can't call this directly
     cbuf_free_chain(buf);
     return NO_ERROR;
@@ -46,6 +47,8 @@ int loopback_input(cbuf *buf, ifnet *i)
 
 int loopback_output(cbuf *buf, ifnet *i, netaddr *target, int protocol_type)
 {
+    (void) target;
+
     _loopback_input(buf, i, protocol_type);
 
     return NO_ERROR;

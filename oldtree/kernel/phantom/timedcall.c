@@ -292,8 +292,8 @@ void phantom_undo_timed_call(timedcall_t *entry)
 
     int ie = hal_save_cli();
     hal_spin_lock( &timedcall_lock );
-    entry->f = 0; // make sure it won't fire in any case
-
+    //void *save_f = entry->f; // save
+    //entry->f = 0; // make sure it won't fire in any case
     assert( ! (entry->flags & TIMEDCALL_FLAG_AUTOFREE) );
 
     if( !is_on_q(entry) )
@@ -309,6 +309,7 @@ void phantom_undo_timed_call(timedcall_t *entry)
         tnext->msecMore += more;
 
 unlock:
+    //entry->f = save_f; // put func back!
     hal_spin_unlock( &timedcall_lock );
     if(ie) hal_sti();
 }
@@ -318,6 +319,7 @@ unlock:
 
 
 
+extern void wake_sleeping_thread( void *arg );
 
 
 void dump_timed_call_queue()
@@ -326,8 +328,16 @@ void dump_timed_call_queue()
     int index = 0;
     queue_iterate( &tcEventQ, entry, timedcall_t *, chain)
     {
-        printf("%2d @%8X time %5ld left %5ld, flags %b%s\n",
-               index++, entry, entry->msecLater, entry->msecMore,
+        printf("%2d ", index++ );
+
+        if( entry->f == wake_sleeping_thread )
+            printf("WakeTh %3d ", (int)entry->arg );
+        else
+            printf(" @%8X ", entry );
+
+
+        printf("time %5ld left %5ld, flags %b%s\n",
+               entry->msecLater, entry->msecMore,
                entry->flags,
                "\20\1Periodic\2AutoFree\3CheckLock",
                entry->lockp ? (entry->lockp->lock ? ", Locked" : ", Unlocked") : ""

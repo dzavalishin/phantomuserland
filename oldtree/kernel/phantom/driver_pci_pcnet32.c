@@ -20,7 +20,7 @@
 
 #define DEV_NAME "PCNET32: "
 
-static int DEBUG = 1;
+static int DEBUG = 0;
 
 #if 0
 

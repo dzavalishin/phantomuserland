@@ -304,11 +304,11 @@ int do_test_dpc(const char *test_parm)
 // -----------------------------------------------------------------------
 
 
+#define DUMPQ 0
 
 
 
-
-static int called = 0;
+static volatile int called = 0;
 
 static void echo(  void *_a )
 {
@@ -321,13 +321,14 @@ static timedcall_t     t2 = { echo, "hello 100", 100 };
 static timedcall_t     t3 = { echo, "hello 2000", 2000 };
 static timedcall_t     t4 = { echo, "hello 10 000", 10000 };
 
-static char *msg = "timed func";
+static char *msg = "timed func 5000";
 
 int do_test_timed_call(const char *test_parm)
 {
     (void) test_parm;
 
 
+    printf("Testing timed call undo, must be no echoes:\n");
     called = 0;
 
     phantom_request_timed_call( &t2, 0 );
@@ -337,6 +338,9 @@ int do_test_timed_call(const char *test_parm)
     test_check_eq(called, 0);
 
 
+#if DUMPQ
+    //dump_timed_call_queue();
+#endif
 
 
     called = 0;
@@ -346,12 +350,17 @@ int do_test_timed_call(const char *test_parm)
     phantom_request_timed_call( &t1, 0 );
     //test_check_false(called); // it is still possible for this test to fail with correct code!
     phantom_request_timed_call( &t2, 0 );
+#if DUMPQ
+    //dump_timed_call_queue();
+#endif
     phantom_request_timed_call( &t3, 0 );
     phantom_request_timed_call( &t4, 0 );
 
     phantom_request_timed_func( echo, msg, 5000, 0 );
 
-
+#if DUMPQ
+    dump_timed_call_queue();
+#endif
 
     // We check for >= (ge) because hal_sleep... can cleep for more than asked, and timed
     // calls are usually quite on time
@@ -368,10 +377,9 @@ int do_test_timed_call(const char *test_parm)
     hal_sleep_msec(5000-2000); // Have lag of 206 msec
     test_check_ge(called, 4);
 
-    hal_sleep_msec(100+10000-5000-2000); // Have lag of 206 msec
+    hal_sleep_msec(2500+10000-5000-2000); // Strange - need quite big lag here...
     test_check_ge(called, 5);
 
-    printf("Testing timed call recall, must be no echoes:\n");
 
 
     printf("Done testing timed calls\n");
