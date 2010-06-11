@@ -285,6 +285,21 @@ struct internal_class pvm_internal_classes[] =
         {0,0}
     },
 #endif
+
+
+    {
+        ".internal.window",
+        PVM_ROOT_OBJECT_WINDOW_CLASS,
+        syscall_table_4_window,
+        pvm_internal_init_window,
+        pvm_gc_iter_window,
+        pvm_gc_finalizer_window,
+        sizeof(struct data_area_4_window),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
+        {0,0}
+    },
+
+
 };
 
 int pvm_n_internal_classes = sizeof(pvm_internal_classes) / sizeof(struct internal_class);

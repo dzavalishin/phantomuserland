@@ -638,6 +638,58 @@ struct pvm_object     pvm_create_weakref_object(struct pvm_object owned )
 
 
 
+struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
+{
+    struct data_area_4_weakref *da = pvm_object_da( wr, weakref );
+
+    // All we do is return new reference to our object,
+    // incrementing refcount before
+    int ie = hal_save_cli();
+    hal_spin_lock( &da->lock );
+
+    struct pvm_object out = ref_inc_o( da->object );
+
+    hal_spin_unlock( &da->lock );
+    if( ie ) hal_sti();
+
+    return out;
+}
+
+
+
+
+
+
+
+
+
+void pvm_internal_init_window(struct pvm_object_storage * os)
+{
+}
+
+
+void pvm_gc_iter_window(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+}
+
+
+struct pvm_object     pvm_create_window_object(struct pvm_object owned )
+{
+    pvm_object_t ret = pvm_object_create_fixed( pvm_get_window_class() );
+    struct data_area_4_window *da = (struct data_area_4_window *)ret.data->da;
+
+    // This object needs OS attention at restart
+    // TODO do it by class flag in create fixed or earlier?
+    pvm_add_object_to_restart_list( ret );
+
+    return ret;
+}
+
+void pvm_gc_finalizer_window( struct pvm_object_storage * os )
+{
+    // is it called?
+}
+
 
 
 

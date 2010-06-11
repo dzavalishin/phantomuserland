@@ -64,6 +64,8 @@ typedef struct pvm_object_storage pvm_object_storage_t;
 
 //#undef _obj_offsetof
 
+//void pvm_weakref_set_object( struct pvm_object wr, struct pvm_object o );
+struct pvm_object pvm_weakref_get_object(struct pvm_object wr );
 errno_t si_weakref_9_resetMyObject(struct pvm_object o );
 
 
@@ -153,6 +155,7 @@ struct pvm_object     pvm_get_boot_class(void);
 struct pvm_object     pvm_get_binary_class(void);
 struct pvm_object     pvm_get_bitmap_class(void);
 struct pvm_object     pvm_get_weakref_class(void);
+struct pvm_object     pvm_get_window_class(void);
 
 
 struct pvm_object     pvm_create_null_object(void);
@@ -175,6 +178,9 @@ struct pvm_object     pvm_create_istack_object(void);
 struct pvm_object     pvm_create_ostack_object(void);
 struct pvm_object     pvm_create_estack_object(void);
 struct pvm_object     pvm_create_binary_object(int size, void *init);
+
+//struct pvm_object     pvm_create_weakref_object(void);
+struct pvm_object     pvm_create_weakref_object(struct pvm_object owned );
 
 void     pvm_release_thread_object( struct pvm_object thread );
 
