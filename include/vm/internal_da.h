@@ -331,7 +331,18 @@ struct data_area_4_weakref
 };
 
 
+// BUG! Size hardcode! Redo with separate object!
+#define PVM_MAX_WIN_PIXELS 1024*1024
 
+struct data_area_4_window
+{
+    drv_video_window_t           	w;
+    /** this field extends w and works as it's last field. */
+    rgba_t       			pixel[PVM_MAX_WIN_PIXELS];
+
+    int                                 x, y; // in pixels
+    rgba_t                       	fg, bg; // colors
+};
 
 
 

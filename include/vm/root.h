@@ -54,12 +54,13 @@ struct pvm_root_t
     struct pvm_object           closure_class;
 
     struct pvm_object           weakref_class;
+    struct pvm_object           window_class;
 
     struct pvm_object           null_object;
     struct pvm_object           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
     struct pvm_object           class_loader;           // Root class loader (user code)
     struct pvm_object           threads_list;           // Array? of threads
-    struct pvm_object           windows_list;           // Array? of windows - NB! - how to deal with multiuser?
+    struct pvm_object           restart_list;           // Array of weak refs to objects that need attention at restart - XXX func called?
     struct pvm_object           users_list;           	// Array? of users - NOT IMPLEMENTED
     struct pvm_object           kernel_environment;     // Array? of users - NOT IMPLEMENTED
     struct pvm_object           os_entry;               // Main OS services entry point
@@ -155,6 +156,8 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_WEAKREF_CLASS 28
 
+#define PVM_ROOT_OBJECT_WINDOW_CLASS 29
+
 // Runtime restoration facilities
 
 
@@ -168,7 +171,7 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_USERS_LIST 67
 
-#define PVM_ROOT_OBJECT_WINDOWS_LIST 68
+#define PVM_ROOT_OBJECT_RESTART_LIST 68
 
 #define PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT 69
 

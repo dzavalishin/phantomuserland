@@ -1597,7 +1597,7 @@ static int si_weakref_5_tostring(struct pvm_object o, struct data_area_4_thread 
 static int si_weakref_8_getMyObject(struct pvm_object o, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
-
+#if 0
     struct data_area_4_weakref *da = pvm_object_da( o, weakref );
 
     // All we do is return new reference to our object,
@@ -1609,7 +1609,9 @@ static int si_weakref_8_getMyObject(struct pvm_object o, struct data_area_4_thre
 
     hal_spin_unlock( &da->lock );
     if( ie ) hal_sti();
-
+#else
+    pvm_object_t out = pvm_weakref_get_object( o );
+#endif
     SYSCALL_RETURN( out );
 
 }
@@ -1642,6 +1644,8 @@ errno_t si_weakref_9_resetMyObject(struct pvm_object o )
 
 
 
+
+
 syscall_func_t	syscall_table_4_weakref[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
@@ -1657,5 +1661,37 @@ syscall_func_t	syscall_table_4_weakref[16] =
 
 };
 DECLARE_SIZE(weakref);
+
+
+
+
+// --------- window -------------------------------------------------------
+
+
+static int si_window_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    (void)o;
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_string_object( "(window)" ));
+}
+
+
+
+syscall_func_t	syscall_table_4_window[16] =
+{
+    &si_void_0_construct,           &si_void_1_destruct,
+    &si_void_2_class,               &si_void_3_clone,
+    &si_void_4_equals,              &si_window_5_tostring,
+    &si_void_6_toXML,               &si_void_7_fromXML,
+    // 8
+    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
+    &invalid_syscall,               &si_void_15_hashcode
+    // 16
+
+};
+DECLARE_SIZE(window);
+
 
 

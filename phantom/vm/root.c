@@ -43,6 +43,9 @@ struct pvm_root_t pvm_root;
 
 static void load_kernel_boot_env(void);
 
+static void handle_object_at_restart( pvm_object_t o );
+
+
 /**
  *
  * Either load OS state from disk or (if persistent memory is empty) create
@@ -102,11 +105,42 @@ void pvm_root_init(void)
     pvm_root.null_object = pvm_get_field( root, PVM_ROOT_OBJECT_NULL );
     pvm_root.threads_list = pvm_get_field( root, PVM_ROOT_OBJECT_THREAD_LIST );
     pvm_root.sys_interface_object = pvm_get_field( root, PVM_ROOT_OBJECT_SYSINTERFACE );
-    pvm_root.windows_list = pvm_get_field( root, PVM_ROOT_OBJECT_WINDOWS_LIST );
+    pvm_root.restart_list = pvm_get_field( root, PVM_ROOT_OBJECT_RESTART_LIST );
     pvm_root.users_list = pvm_get_field( root, PVM_ROOT_OBJECT_USERS_LIST );
     pvm_root.class_loader = pvm_get_field( root, PVM_ROOT_OBJECT_CLASS_LOADER );
     pvm_root.kernel_environment = pvm_get_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT );
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
+
+
+//#warning cycle through restart objects here and call XXX
+
+    int items = get_array_size(pvm_root.restart_list.data);
+
+    pvm_object_t wrc = pvm_get_weakref_class();
+
+    printf("Processing restart list.\n");
+    for( i = 0; i < items; i++ )
+    {
+        pvm_object_t wr = pvm_get_array_ofield(pvm_root.restart_list.data, i);
+        pvm_object_t o;
+        if(!pvm_object_class_is( wr, wrc ))
+        {
+            //SHOW_ERROR("Not weakref in restart list!");
+            printf("Not weakref in restart list!\n");
+            o = wr;
+        }
+        else
+            o = pvm_weakref_get_object( wr );
+
+        if(!pvm_is_null(o) )
+        {
+            handle_object_at_restart(o);
+            ref_dec_o(o);
+        }
+    }
+
+    printf("Done processing restart list.\n");
+
 }
 
 
@@ -132,7 +166,7 @@ static void pvm_save_root_objects()
     pvm_set_field( root, PVM_ROOT_OBJECT_CLASS_LOADER, pvm_root.class_loader );
 
     pvm_set_field( root, PVM_ROOT_OBJECT_THREAD_LIST, pvm_root.threads_list );
-    pvm_set_field( root, PVM_ROOT_OBJECT_WINDOWS_LIST, pvm_root.windows_list );
+    pvm_set_field( root, PVM_ROOT_OBJECT_RESTART_LIST, pvm_root.restart_list );
     pvm_set_field( root, PVM_ROOT_OBJECT_USERS_LIST, pvm_root.users_list );
     pvm_set_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT, pvm_root.kernel_environment );
     pvm_set_field( root, PVM_ROOT_OBJECT_OS_ENTRY, pvm_root.os_entry );
@@ -217,9 +251,14 @@ static void pvm_create_root_objects()
 
     pvm_root.threads_list = pvm_create_object( pvm_get_array_class() );
     pvm_root.kernel_environment = pvm_create_object(pvm_get_array_class());
+    pvm_root.restart_list = pvm_create_object( pvm_get_array_class() );
+    pvm_root.users_list = pvm_create_object( pvm_get_array_class() );
 
     ref_saturate_o(pvm_root.threads_list); //Need it?
     ref_saturate_o(pvm_root.kernel_environment); //Need it?
+    ref_saturate_o(pvm_root.restart_list); //Need it?
+    ref_saturate_o(pvm_root.users_list); //Need it?
+
 
     //pvm_root.os_entry = pvm_get_null_object();
 }
@@ -261,7 +300,7 @@ static void set_root_from_table()
 **/
 
 //#define GCINLINE __inline__
-#define GCINLINE 
+#define GCINLINE
 
 GCINLINE struct pvm_object     pvm_get_null_class() { return pvm_root.null_class; }
 GCINLINE struct pvm_object     pvm_get_class_class() { return pvm_root.class_class; }
@@ -282,6 +321,7 @@ GCINLINE struct pvm_object     pvm_get_bitmap_class() { return pvm_root.bitmap_c
 GCINLINE struct pvm_object     pvm_get_closure_class() { return pvm_root.closure_class; }
 GCINLINE struct pvm_object     pvm_get_world_class() { return pvm_root.world_class; }
 GCINLINE struct pvm_object     pvm_get_weakref_class() { return pvm_root.weakref_class; }
+GCINLINE struct pvm_object     pvm_get_window_class() { return pvm_root.window_class; }
 
 #undef GCINLINE
 
@@ -327,84 +367,84 @@ static void pvm_boot()
 
 static int get_env_name_pos( const char *name )
 {
-	int items = get_array_size(pvm_root.kernel_environment.data);
+    int items = get_array_size(pvm_root.kernel_environment.data);
 
-	int i;
-	for( i = 0; i < items; i++ )
-	{
-            pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, i);
-            char *ed = pvm_get_str_data(o);
-            //int el = pvm_get_str_len(o);
+    int i;
+    for( i = 0; i < items; i++ )
+    {
+        pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, i);
+        char *ed = pvm_get_str_data(o);
+        //int el = pvm_get_str_len(o);
 
-            char *eqpos = strchr( ed, '=' );
-            if( eqpos == 0 )
-            {
-                // Strange...
-                continue;
-            }
-            int keylen = eqpos - ed;
+        char *eqpos = strchr( ed, '=' );
+        if( eqpos == 0 )
+        {
+            // Strange...
+            continue;
+        }
+        int keylen = eqpos - ed;
 
-            if( 0 == strncmp( ed, name, keylen ) )
-            {
-                return i;
-            }
-	}
+        if( 0 == strncmp( ed, name, keylen ) )
+        {
+            return i;
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 #define MAX_ENV_KEY 256
 void phantom_setenv( const char *name, const char *value )
 {
-	char ename[MAX_ENV_KEY];
+    char ename[MAX_ENV_KEY];
 
-	strncpy( ename, name, MAX_ENV_KEY-2 );
-	ename[MAX_ENV_KEY-2] = '\0';
-	strcat( ename, "=" );
+    strncpy( ename, name, MAX_ENV_KEY-2 );
+    ename[MAX_ENV_KEY-2] = '\0';
+    strcat( ename, "=" );
 
-	pvm_object_t s = pvm_create_string_object_binary_cat( ename, strlen(ename), value, strlen(value) );
+    pvm_object_t s = pvm_create_string_object_binary_cat( ename, strlen(ename), value, strlen(value) );
 
-	int pos = get_env_name_pos( name );
+    int pos = get_env_name_pos( name );
 
-	if(pos < 0)
-		pvm_append_array(pvm_root.kernel_environment.data, s);
-	else
-		pvm_set_array_ofield(pvm_root.kernel_environment.data, pos, s);
+    if(pos < 0)
+        pvm_append_array(pvm_root.kernel_environment.data, s);
+    else
+        pvm_set_array_ofield(pvm_root.kernel_environment.data, pos, s);
 }
 
 int phantom_getenv( const char *name, char *value, int vsize )
 {
-	int pos = get_env_name_pos( name );
-	if( pos < 0 ) return 0;
+    int pos = get_env_name_pos( name );
+    if( pos < 0 ) return 0;
 
-        assert( vsize > 1 ); // trailing zero and at least one char
+    assert( vsize > 1 ); // trailing zero and at least one char
 
-	pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, pos);
-	if( o.data == 0 ) return 0;
-	char *ed = pvm_get_str_data(o);
-	int el = pvm_get_str_len(o);
+    pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, pos);
+    if( o.data == 0 ) return 0;
+    char *ed = pvm_get_str_data(o);
+    int el = pvm_get_str_len(o);
 
-        //printf("full '%.*s'\n", el, ed );
+    //printf("full '%.*s'\n", el, ed );
 
-        char *eqpos = strchr( ed, '=' );
-        if( eqpos == 0 )
-        {
-            *value = '\0';
-            return 0;
-        }
+    char *eqpos = strchr( ed, '=' );
+    if( eqpos == 0 )
+    {
+        *value = '\0';
+        return 0;
+    }
 
-        eqpos++; // skip '='
+    eqpos++; // skip '='
 
-        el -= (eqpos - ed);
+    el -= (eqpos - ed);
 
-        el++; // add place for trailing zero
+    el++; // add place for trailing zero
 
-	if( vsize > el ) vsize = el;
+    if( vsize > el ) vsize = el;
 
-        strncpy( value, eqpos, vsize );
-        value[vsize-1] = '\0';
+    strncpy( value, eqpos, vsize );
+    value[vsize-1] = '\0';
 
-	return 1;
+    return 1;
 }
 
 
@@ -443,5 +483,19 @@ static void load_kernel_boot_env(void)
         printf("Loading env '%s'='%s'\n", buf, eq );
         phantom_setenv( buf, eq );
     }
+}
+
+
+
+static void handle_object_at_restart( pvm_object_t o )
+{
+}
+
+
+void pvm_add_object_to_restart_list( pvm_object_t o )
+{
+    pvm_object_t wr = pvm_create_weakref_object(o);
+    // TODO sync?
+    pvm_append_array( pvm_root.restart_list.data, wr );
 }
 
