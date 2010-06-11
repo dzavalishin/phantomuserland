@@ -88,12 +88,14 @@ typedef struct phantom_disk_superblock
 	char				general_flags_3;	// undefined yet
 
 	disk_page_no_t			last_snap;	// the latest snapshot or 0 if no.
-	long				last_snap_time; // unix time_t - NOT IMPL
-	long				last_snap_crc32;	// to make sure it is correct - NOT IMPL
+	//long				last_snap_time; // unix time_t - NOT IMPL
+	//long				last_snap_crc32;	// to make sure it is correct - NOT IMPL
+	u_int32_t			last_snap_time; // unix time_t - NOT IMPL
+	u_int32_t			last_snap_crc32;	// to make sure it is correct - NOT IMPL
 
 	disk_page_no_t			prev_snap;	// previous snapshot or 0 if no.
-	long				prev_snap_time; // unix time_t - NOT IMPL
-	long				prev_snap_crc32;	// to make sure it is correct - NOT IMPL
+	u_int32_t			prev_snap_time; // unix time_t - NOT IMPL
+	u_int32_t			prev_snap_crc32;	// to make sure it is correct - NOT IMPL
 
 	u_int32_t	 		magic2;		// 32 bits  - DISK_STRUCT_MAGIC_SUPER_2
 
@@ -102,14 +104,14 @@ typedef struct phantom_disk_superblock
 	disk_page_no_t			boot_progress_page;	// Boot process is updating this page to track boot progress and recover from hangs - NOT IMPL
 	disk_page_no_t			boot_module[DISK_STRUCT_N_MODULES];	// List of blocks for boot time modules, up to 32.
 
-	long				last_boot_time; // time_t - for boot to prefer the latest - NOT IMPL
+	u_int32_t      			last_boot_time; // time_t - for boot to prefer the latest - NOT IMPL
 
 	disk_page_no_t			bad_list;	// List of bad blocks or 0. - NOT IMPL
 	disk_page_no_t			log_list;	// List of blocks for kernel debug logging. - NOT IMPL
 
 	char				sys_name[DISK_STRUCT_SB_SYSNAME_SIZE];	// 0-terminated description for bootloader menu
 
-	long				object_space_address;	// Object space expects to be loaded here
+	u_int32_t      			object_space_address;	// Object space expects to be loaded here
 
 	// unused for now
 	disk_page_no_t			last_short_journal_blocks[64]; //  - NOT IMPL
