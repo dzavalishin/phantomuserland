@@ -1234,6 +1234,10 @@ struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
      */
 //printf("lookup_class_by_name\n");
 
+
+    if( pvm_is_null(pvm_root.class_loader) )
+        return pvm_create_null_object();
+
     // Try userland loader
     struct pvm_object args[1] = { name };
     return pvm_exec_run_method( pvm_root.class_loader, 8, 1, args );

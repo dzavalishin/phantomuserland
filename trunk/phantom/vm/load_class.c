@@ -152,11 +152,14 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 ref_dec_o(base_name);
 
                 got_class_header = 1;
+#if 0
 #warning base class ignored
-                // BUG! Fix me!
-                /*if( !EQ_STRING_P2C(base_name,".internal.object") )
-                    base_class = pvm_lookup_class(base_name);
-                */
+#else
+                if( EQ_STRING_P2C(base_name,".internal.object") )
+                    base_class = pvm_get_null_class();
+                else
+                    base_class = pvm_exec_lookup_class_by_name(base_name);
+#endif
 
                 iface = pvm_create_interface_object( n_method_slots, base_class );
 
