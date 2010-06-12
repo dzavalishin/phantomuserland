@@ -40,6 +40,8 @@ hal_spin_lock(&lock);
 hal_spin_unlock(&lock);
 }}}
 
+*NB!* Spinlocks can't be used around code which accesses object land. Such code can cause page fault and context switch as a result, which leads to panic in spinlock counter assert in context switch.
+
 == Interrupt disable ==
 
 Interrupt disable protects current CPU from being interrupted. It guarantees you that this CPU won't switch from your code to interrupt handler or other thread.
