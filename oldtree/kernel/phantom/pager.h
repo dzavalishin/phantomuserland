@@ -44,6 +44,7 @@ optimize head movement better */
     void                        pager_refill_free_reserve(void);
     void                        pager_format_empty_free_list_block( disk_page_no_t );
     void                        pager_init_free_list(void);
+    void                        pager_flush_free_list(void);
 
 
     // NB! On init pagefile must be good and healthy,

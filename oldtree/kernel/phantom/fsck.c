@@ -583,6 +583,7 @@ void phantom_free_snap(
 
     // go through list, free pages that are finally free in map
     iterate_map(free_snap_worker, MAP_FREE);
+    pager_flush_free_list();
 
     // ERROR - list structure for old_snap_start has to be freed too
 
