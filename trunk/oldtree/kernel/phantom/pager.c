@@ -178,7 +178,7 @@ void
 pager_finish()
 {
     // BUG! Kick all stuff out - especially disk_page_cachers
-    disk_page_io_save_sync(&freelist_head,superblock.free_list);
+    pager_flush_free_list();
 
     superblock.fs_is_clean = 1; // mark as clean
     pager_update_superblock();
@@ -779,12 +779,18 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
 
     freelist.head.magic = DISK_STRUCT_MAGIC_FREEHEAD;
     freelist.head.used = 0;
-    freelist.head.next = 0;
+    freelist.head.next = superblock.free_list;
 
     *( (struct phantom_disk_blocklist *)disk_page_io_data(&freelist_head) ) = freelist;
     disk_page_io_save_sync(&freelist_head,fp);
 }
 
+void pager_flush_free_list(void)
+{
+    hal_mutex_lock(&pager_freelist_mutex);
+    disk_page_io_save_sync(&freelist_head,superblock.free_list);
+    hal_mutex_unlock(&pager_freelist_mutex);
+}
 
 void
 pager_put_to_free_list( disk_page_no_t free_page )
@@ -812,6 +818,7 @@ pager_put_to_free_list( disk_page_no_t free_page )
             freelist_inited = 1;
 
             hal_mutex_unlock(&pager_freelist_mutex);
+            pager_update_superblock();
             return; // we used free page as freelist root, done now
             }
         else
@@ -825,11 +832,9 @@ pager_put_to_free_list( disk_page_no_t free_page )
 
     if( list->head.used >= N_REF_PER_BLOCK )
         {
-            pager_format_empty_free_list_block( free_page );
-            list->head.next = free_page;
             disk_page_io_save_sync(&freelist_head,superblock.free_list);
+            pager_format_empty_free_list_block( free_page );
             superblock.free_list = free_page;
-            disk_page_io_load_sync(&freelist_head,superblock.free_list);
 
             hal_mutex_unlock(&pager_freelist_mutex);
             return;
@@ -903,7 +908,7 @@ pager_refill_free_reserve()
             free_reserve[free_reserve_n++] = list->list[--list->head.used];
         else
             {
-            if( list->head.next == 0 )
+            if(list->head.next == 0 || list->head.next == superblock.free_list)
                 break; // that was last one, we will not kill freelist head
 
             free_reserve[free_reserve_n++] = superblock.free_list;
@@ -928,6 +933,7 @@ pager_refill_free_reserve()
                 break;
                 }
 
+            pager_update_superblock();
             }
         }
 
