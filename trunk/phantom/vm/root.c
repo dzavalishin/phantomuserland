@@ -113,34 +113,40 @@ void pvm_root_init(void)
 
 
 //#warning cycle through restart objects here and call XXX
-
+#if 0
     int items = get_array_size(pvm_root.restart_list.data);
 
     pvm_object_t wrc = pvm_get_weakref_class();
 
-    printf("Processing restart list.\n");
-    for( i = 0; i < items; i++ )
+    if( !pvm_is_null( pvm_root.restart_list ) )
     {
-        pvm_object_t wr = pvm_get_array_ofield(pvm_root.restart_list.data, i);
-        pvm_object_t o;
-        if(!pvm_object_class_is( wr, wrc ))
+        printf("Processing restart list.\n");
+        for( i = 0; i < items; i++ )
         {
-            //SHOW_ERROR("Not weakref in restart list!");
-            printf("Not weakref in restart list!\n");
-            o = wr;
-        }
-        else
-            o = pvm_weakref_get_object( wr );
+            pvm_object_t wr = pvm_get_array_ofield(pvm_root.restart_list.data, i);
+            pvm_object_t o;
+            if(!pvm_object_class_is( wr, wrc ))
+            {
+                //SHOW_ERROR("Not weakref in restart list!");
+                printf("Not weakref in restart list!\n");
+                //o = wr;
+                handle_object_at_restart(wr);
+            }
+            else
+            {
+                o = pvm_weakref_get_object( wr );
 
-        if(!pvm_is_null(o) )
-        {
-            handle_object_at_restart(o);
-            ref_dec_o(o);
+                if(!pvm_is_null(o) )
+                {
+                    handle_object_at_restart(o);
+                    ref_dec_o(o);
+                }
+            }
         }
+
+        printf("Done processing restart list.\n");
     }
-
-    printf("Done processing restart list.\n");
-
+#endif
 }
 
 
@@ -486,9 +492,33 @@ static void load_kernel_boot_env(void)
 }
 
 
+static o_restart_func_t find_restart_f( struct pvm_object _class )
+{
+    if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
+        pvm_exec_throw( "find_restart_f: not a class object" );
+
+    struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
+
+    // TODO fix this back
+    //if( syscall_index >= da->class_sys_table_size )                        pvm_exec_throw("find_syscall: syscall_index no out of table size" );
+
+    return pvm_internal_classes[da->sys_table_id].restart;
+}
+
 
 static void handle_object_at_restart( pvm_object_t o )
 {
+#warning crashes due to use of mutex in persisytent object
+#if 0
+    if(!(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
+    {
+        printf( "not internal object in restart list!" );
+        return;
+    }
+    o_restart_func_t rf = find_restart_f( o.data->_class );
+
+    if(rf) rf(o);
+#endif
 }
 
 

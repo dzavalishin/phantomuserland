@@ -40,6 +40,8 @@
 #ifndef _I386_ISA_ISA_H_
 #define	_I386_ISA_ISA_H_
 
+#warning try x86/isa.h instead
+
 /* BEWARE:  Included in both assembler and C code */
 
 /*

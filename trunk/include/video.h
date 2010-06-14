@@ -44,9 +44,15 @@ void drv_video_window_draw_box( drv_video_window_t *w,
 void drv_video_window_move( drv_video_window_t *w, int x, int y );
 
 void drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out );
-
-
+// ------------------------------------------------------------------------
 // Kernel video stuff
+// ------------------------------------------------------------------------
+
+// Used in window object restart func to re-enter window to OS all win q
+void drv_video_window_enter_allwq( drv_video_window_t *w);
+
+
+
 
 extern struct drv_video_screen_t        video_driver_bochs_vesa_emulator;
 extern struct drv_video_screen_t        video_driver_basic_vga;
@@ -74,6 +80,11 @@ void set_video_driver_bios_vesa_mode( u_int16_t mode );
 
 void setTextVideoMode(void); // Using int10
 int setVesaMode( u_int16_t mode ); // Using int10
+
+
+// ------------------------------------------------------------------------
+// pixel processing
+// ------------------------------------------------------------------------
 
 
 #endif // VIDEO_H

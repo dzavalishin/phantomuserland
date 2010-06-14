@@ -1,14 +1,30 @@
-#if HAVE_UNIX
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Quick and dirty NE2000 driver. Both ISA and PCI.
+ *
+ * TODO: interrupts! (nearly done)
+ *
+**/
 
-#define DEBUG_MSG_PREFIX "boot"
+
+#if HAVE_NET
+
+#define DEBUG_MSG_PREFIX "ne2000"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 2
 #define debug_level_error 10
 #define debug_level_info 10
 
 #include <i386/pio.h>
+#include <i386/pci.h>
 #include <hal.h>
 #include <phantom_assert.h>
+
+#include "driver_map.h"
 
 #include "net/ns8390.h"
 #include "device.h"
@@ -56,6 +72,11 @@ struct ne
     unsigned char 	eth_drain_receiver;
 
     unsigned char	node_addr[ETH_ALEN];
+
+    int                 thread;
+
+    int                 active;
+    int                 interrupt_count;
 };
 
 
@@ -82,13 +103,54 @@ static int ne_read(phantom_device_t * dev, void *buf, int buflen );
 static int ne_get_address( struct phantom_device *dev, void *buf, int len);
 
 
+static void ne_interrupt( void *_dev );
+static void ne2000_thread(void *_dev );
+
+
+phantom_device_t * driver_pci_ne2000_probe( pci_cfg_t *pci, int stage )
+{
+
+    SHOW_FLOW0( 0, "Looking for PCI NE2000" );
+
+    int port = 0;
+    int irq = pci->interrupt;
+
+    int i;
+    for (i = 0; i < 6; i++)
+    {
+        if (pci->base[i] > 0xffff)
+        {
+            //nic->phys_base = pci->base[i];
+            //nic->phys_size = pci->size[i];
+            SHOW_INFO( 0, "base 0x%lx, size 0x%lx", pci->base[i], pci->size[i]);
+        } else if( pci->base[i] > 0) {
+            port = pci->base[i];
+            SHOW_INFO( 0, "io_port 0x%x", pci->base[i]);
+        }
+    }
+
+    SHOW_INFO( 0, "irq %d", irq );
+
+    if( port == 0 ) return 0;
+
+    return driver_isa_ne2000_probe( port, irq, stage );
+
+}
+
+
 
 
 static int seq_number = 0;
 
 phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
 {
-    if( seq_number || ne_probe1(port) )        return 0;
+    (void) stage;
+
+    SHOW_FLOW( 0, "Looking for NE2000 at 0x%x", port );
+
+    // BUG it does not work on PCI cards
+    //if( seq_number || ne_probe1(port) )        return 0;
+    if( ne_probe1(port) )        return 0;
 
 
     phantom_device_t * dev = calloc(1, sizeof(phantom_device_t));
@@ -111,10 +173,29 @@ phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
 
     if( !ne_probe( dev ) )
     {
+    free2:
         free(dev->drv_private);
         free(dev);
         return 0;
     }
+
+    struct ne *pvt = dev->drv_private;
+
+    if( hal_irq_alloc( irq, &ne_interrupt, dev, HAL_IRQ_SHAREABLE ) )
+    {
+        SHOW_ERROR( 0, "IRQ %d is busy", irq );
+        goto free2;
+    }
+
+    pvt->thread = hal_start_kernel_thread_arg( ne2000_thread, dev );
+
+    // Enable interrupts?
+    outb( eth_nic_base+D8390_P0_IMR, 0xFF );
+    //outb( eth_nic_base+D8390_P0_IMR, D8390_ISR_PRX|D8390_ISR_PTX|D8390_ISR_RXE|D8390_ISR_TXE );
+
+
+    pvt->active = 1;
+
 
     ifnet *interface;
     if( if_register_interface( IF_TYPE_ETHERNET, &interface, dev) )
@@ -177,6 +258,65 @@ phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
 
     return dev;
 }
+
+
+static void ne_interrupt( void *_dev )
+{
+    phantom_device_t * dev = _dev;
+    struct ne *pvt = dev->drv_private;
+
+    int status = inb( eth_nic_base+D8390_P0_ISR );
+
+    // ack all
+    outb(eth_nic_base + D8390_P0_ISR, status);
+
+    SHOW_FLOW( 6, "Interrupt status %b", status, "\020\1RXDONE\2TXDONE\3RXERR\4TXERR\5OVERFLOW\6CTR_OVF\7RDMA_COMPL\10RESET" );
+
+    // TODO ask thread to reset card
+
+    if( status & D8390_ISR_PRX )
+    {
+        // some reception
+
+    }
+
+}
+
+
+
+static void ne2000_thread(void *_dev)
+{
+    hal_set_thread_name("Ne2000Drv");
+
+    phantom_device_t * dev = _dev;
+    struct ne *pvt = dev->drv_private;
+
+    SHOW_FLOW0( 1, "Thread ready, wait 4 nic active" );
+
+    while(1)
+    {
+        while( !pvt->active )
+            hal_sleep_msec(1000);
+
+        SHOW_FLOW0( 1, "Thread ready, wait 4 sema" );
+
+        //hal_sem_acquire( &(nic->interrupt_sem) );
+
+        // XXX BUG DUMB CODE
+        while(pvt->interrupt_count <= 0)
+            hal_sleep_msec(200);
+
+        pvt->interrupt_count--;
+
+
+        // TODO reset card on some errors
+
+        //SHOW_FLOW( 1, "Finished iteration, status = 0x%x", read_csr(nic, PCNET_CSR_STATUS));
+    }
+
+}
+
+
 
 /**************************************************************************
  NE_DISABLE - Turn off adapter
@@ -261,6 +401,8 @@ static int ne_probe(phantom_device_t * dev)
         if (!memcmp(testbuf, test, sizeof(test)))
             goto out;
 
+#warning we get here regardless of if above
+
     out:
         if (eth_nic_base == 0)
             return (0);
@@ -272,7 +414,8 @@ static int ne_probe(phantom_device_t * dev)
 
         eth_pio_read( dev, 0, romdata, sizeof(romdata));
 
-        for (i = 0; i < ETH_ALEN; i++) {
+        for (i = 0; i < ETH_ALEN; i++)
+        {
             pvt->node_addr[i] = romdata[i + ((pvt->eth_flags & FLAG_16BIT) ? i : 0)];
         }
 
@@ -352,11 +495,11 @@ static errno_t ne_probe1(int ioaddr) {
 
     if (inb(ioaddr + D8390_P0_TCR)) {
         outb(ioaddr, state);
-        outb(ioaddr + 0x0d, regd);
-        return 0;
+        outb(ioaddr + D8390_P0_TCR, regd);
+        return ENXIO;
     }
 
-    return ENXIO;
+    return 0;
 }
 
 
@@ -401,6 +544,10 @@ static void ne_transmit(//struct nic *nic,
 static int ne_write(phantom_device_t * dev, const void *buf, int in_buflen )
 {
     struct ne *pvt = dev->drv_private;
+
+    SHOW_FLOW( 3, "write %d bytes", in_buflen );
+
+    //hexdump( buf, in_buflen, "pkt", 0 );
 
     int buflen = in_buflen;
     assert( buflen < 2048 ); // TODO correct limit
@@ -522,9 +669,8 @@ static void ne_reset(phantom_device_t * dev)
  **************************************************************************/
 static int ne_poll(phantom_device_t * dev, void *buf, int buflen)
 {
-    int ret = 0;
     unsigned char rstat, curr, next;
-    unsigned short len, frag;
+    unsigned short len;
     unsigned short pktoff;
     //unsigned char *p;
     struct ringbuffer pkthdr;
@@ -532,34 +678,47 @@ static int ne_poll(phantom_device_t * dev, void *buf, int buflen)
     struct ne *pvt = dev->drv_private;
 
     rstat = inb(eth_nic_base+D8390_P0_RSR);
-    if (!(rstat & D8390_RSTAT_PRX)) return 0;
+    if (!(rstat & D8390_RSTAT_PRX))
+    {
+        SHOW_FLOW0( 10, "!D8390_RSTAT_PRX" );
+        return 0;
+    }
+
     next = inb(eth_nic_base+D8390_P0_BOUND)+1;
-    if (next >= pvt->eth_memsize) next = pvt->eth_rx_start;
+
     outb( eth_nic_base+D8390_P0_COMMAND, D8390_COMMAND_PS1 );
+
     curr = inb(eth_nic_base+D8390_P1_CURR);
     outb( eth_nic_base+D8390_P0_COMMAND, D8390_COMMAND_PS0 );
 
-    if (curr >= pvt->eth_memsize) curr = pvt->eth_rx_start;
-    if (curr == next) return 0;
 
+    SHOW_FLOW( 10, "next = %d, curr = %d, memsize = %d", next, curr, pvt->eth_memsize );
+
+    if(next >= pvt->eth_memsize) next = pvt->eth_rx_start;
+    if(curr >= pvt->eth_memsize) curr = pvt->eth_rx_start;
+
+    SHOW_FLOW( 10, "next = %d, curr = %d, memsize = %d", next, curr, pvt->eth_memsize );
+
+    if (curr == next)
+    {
+        SHOW_FLOW0( 10, "curr == next" );
+        return 0;
+    }
     //if ( ! retrieve ) return 1;
 
     pktoff = next << 8;
-    if( pvt->eth_flags & FLAG_PIO )
-        eth_pio_read( dev, pktoff, (unsigned char *)&pkthdr, 4);
-    else
-    {
-        //memcpy(&pkthdr, bus_to_virt(eth_rmem + pktoff), 4);
-        memcpy_p2v( &pkthdr, pvt->eth_rmem + pktoff, 4 );
-    }
+    if( pvt->eth_flags & FLAG_PIO )        eth_pio_read( dev, pktoff, (unsigned char *)&pkthdr, 4);
+    else                                   memcpy_p2v( &pkthdr, pvt->eth_rmem + pktoff, 4 );
 
     pktoff += sizeof(pkthdr);
 
     /* incoming length includes FCS so must sub 4 */
     len = pkthdr.len - 4;
 
-    if ((pkthdr.status & D8390_RSTAT_PRX) == 0 || len < ETH_ZLEN
-        || len > ETH_FRAME_LEN) {
+    SHOW_FLOW( 10, "pkt status = %d, next = %d, len = %d", pkthdr.status, pkthdr.next, pkthdr.len );
+
+    if ((pkthdr.status & D8390_RSTAT_PRX) == 0 || len < ETH_ZLEN || len > ETH_FRAME_LEN)
+    {
         SHOW_ERROR0( 0, "Bogus packet, ignoring" );
         return 0;
     }
@@ -568,14 +727,16 @@ static int ne_poll(phantom_device_t * dev, void *buf, int buflen)
     //p = nic->packet;
     //nic->packetlen = len; /* available to caller */
 
-    frag = (pvt->eth_memsize << 8) - pktoff;
+    unsigned short frag = (pvt->eth_memsize << 8) - pktoff;
+    SHOW_FLOW( 10, "frag = %d", frag );
 
     if( len > buflen )
     {
-        SHOW_ERROR0(0, "Packet too long");
+        SHOW_ERROR(0, "Packet too long (%d > buf %d)", len, buflen);
         len = buflen;
     }
-    ret = 0;
+
+    int ret = 0;
 
     if(len > frag)
     { /* We have a wrap-around */
@@ -593,15 +754,18 @@ static int ne_poll(phantom_device_t * dev, void *buf, int buflen)
         len -= frag;
     }
 
+    SHOW_FLOW( 10, "len = %d, ret = %d", len, ret );
+
+
     /* read second part */
     if( pvt->eth_flags & FLAG_PIO)
         eth_pio_read( dev, pktoff, p, len);
     else
-    {
-        //memcpy(p, bus_to_virt(eth_rmem + pktoff), len);
         memcpy_p2v( p, pvt->eth_rmem + pktoff, len );
-        ret += len;
-    }
+
+    ret += len;
+
+    SHOW_FLOW( 10, "len = %d, ret = %d", len, ret );
 
     next = pkthdr.next; /* frame number of next packet */
 
@@ -609,6 +773,8 @@ static int ne_poll(phantom_device_t * dev, void *buf, int buflen)
         next = pvt->eth_memsize;
 
     outb( eth_nic_base+D8390_P0_BOUND, next-1 );
+
+    SHOW_FLOW( 10, "ret = %d", ret );
 
     return ret;
 }
@@ -625,18 +791,40 @@ static int ne_poll(phantom_device_t * dev, void *buf, int buflen)
 
 static int ne_read( struct phantom_device *dev, void *buf, int len)
 {
+    SHOW_FLOW( 4, "read %d bytes", len );
+
     if(len < ETHERNET_MAX_SIZE)
         return ERR_VFS_INSUFFICIENT_BUF;
 
     int ret = 0;
     do {
+        SHOW_FLOW( 7, "poll %d bytes", len );
         ret = ne_poll(dev, buf, len);
         if( ret <= 0 )
-        {
             hal_sleep_msec(200); // BUG! POLLING!
-        }
+
+        /*
+        if( ret > 0 )
+            break;
+
+        int have = 0;
+
+        // disable rx ints
+        int imr = inb( eth_nic_base+D8390_P0_IMR );
+        outb( eth_nic_base+D8390_P0_IMR, imr & ~D8390_ISR_PRX );
+
+        rstat = inb(eth_nic_base+D8390_P0_RSR);
+        if ((rstat & D8390_RSTAT_PRX))
+            have = 1;
+
+        outb( eth_nic_base+D8390_P0_IMR, imr & ~D8390_ISR_PRX );
+        */
+
     } while( ret <= 0 );
 
+    //hexdump( buf, ret, "recv pkt", 0 );
+
+    SHOW_FLOW( 7, "read %d bytes", ret );
     return ret;
 }
 
@@ -649,7 +837,7 @@ static int ne_get_address( struct phantom_device *dev, void *buf, int len)
 
     if(!pvt)        return ERR_IO_ERROR;
 
-    if(len >= sizeof(pvt->node_addr)) {
+    if( (unsigned)len >= sizeof(pvt->node_addr)) {
         memcpy(buf, pvt->node_addr, sizeof(pvt->node_addr));
     } else {
         err = ERR_VFS_INSUFFICIENT_BUF;

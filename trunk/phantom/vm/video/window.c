@@ -142,6 +142,21 @@ drv_video_window_init( drv_video_window_t *w,
 
     win_make_decorations(w);
 
+    /*
+    int ie = hal_save_cli();
+    hal_spin_lock( &allw_lock );
+    queue_enter(&allwindows, w, drv_video_window_t *, chain);
+    hal_spin_unlock( &allw_lock );
+    if(ie) hal_sti();
+    */
+
+    drv_video_window_enter_allwq(w);
+
+}
+
+
+void drv_video_window_enter_allwq( drv_video_window_t *w)
+{
     int ie = hal_save_cli();
     hal_spin_lock( &allw_lock );
     queue_enter(&allwindows, w, drv_video_window_t *, chain);

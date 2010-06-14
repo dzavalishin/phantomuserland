@@ -422,6 +422,9 @@ static void net_stack_init()
     //socket_init();
     //net_control_init();
 
+    phantom_trfs_init();
+
+
     //beep(); // TODO test!
 #endif // HAVE_NET
 }

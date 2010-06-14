@@ -1622,8 +1622,9 @@ errno_t si_weakref_9_resetMyObject(struct pvm_object o )
 
     errno_t rc = EWOULDBLOCK;
 
-    int ie = hal_save_cli();
-    hal_spin_lock( &da->lock );
+    //int ie = hal_save_cli();
+    //hal_spin_lock( &da->lock );
+    hal_mutex_lock( &da->mutex );
 
     // As we are interlocked with above, no refcount inc can be from us
     // ERROR if more than one weakref is pointing to obj, possibility
@@ -1636,8 +1637,9 @@ errno_t si_weakref_9_resetMyObject(struct pvm_object o )
         rc = 0;
     }
 
-    hal_spin_unlock( &da->lock );
-    if( ie ) hal_sti();
+    hal_mutex_unlock( &da->mutex );
+    //hal_spin_unlock( &da->lock );
+    //if( ie ) hal_sti();
 
     return rc;
 }

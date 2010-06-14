@@ -3,6 +3,7 @@
 
 #include <phantom_types.h>
 #include <queue.h>
+#include <sys/cdefs.h>
 
 #include "pager_io_req.h"
 
@@ -17,7 +18,7 @@ typedef struct {
     u_int32_t           ioId;
     u_int32_t           nSectors;
     u_int64_t           startSector;
-} trfs_fio_t;
+} __packed trfs_fio_t;
 
 
 typedef struct {
@@ -28,6 +29,7 @@ typedef struct {
 
     queue_chain_t       chain;
 
+    int                 resend_count;
     //bigtime_t         sent_time; // When did we sent it?
 } trfs_queue_t;
 
@@ -39,7 +41,7 @@ typedef struct {
 // TODO add timing
 #define TRFS_NEED_RESEND(elt)  1
 
-typedef struct {
+struct trfs_pkt {
     u_int32_t           type;
     u_int64_t           sessionId;
 
@@ -81,7 +83,9 @@ typedef struct {
 
     };
 
-} trfs_pkt_t;
+} __packed;
+
+typedef struct trfs_pkt trfs_pkt_t;
 
 
 #define PKT_T_NOP  		0

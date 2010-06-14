@@ -101,9 +101,8 @@ static void dpc_thread(void)
 
         idle_dpc_threads++;
 
-        // TODO Thread exit is not implemented
         if(dpc_stop_request
-#if 0 && MULTIPLE_DPC_THREADS
+#if MULTIPLE_DPC_THREADS
            || (idle_dpc_threads > MAX_DPC_IDLE_THREADS)
 #endif
           )

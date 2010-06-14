@@ -534,8 +534,6 @@ static void pcnet32_int(void* data)
     pcnet32 *nic = (pcnet32 *)data;
     u_int32_t status;
 
-    //acquire_spinlock(&nic->control_lock);
-    //int_disable_interrupts();
     int s = hal_save_cli();
     hal_spin_lock(&nic->control_lock);
 
@@ -547,8 +545,6 @@ static void pcnet32_int(void* data)
     // for the time being
     write_csr(nic, PCNET_CSR_STATUS, status & ~PCNET_STATUS_IENA);
 
-    //int_restore_interrupts();
-    //release_spinlock(&nic->control_lock);
     hal_spin_unlock(&nic->control_lock);
     if(s) hal_sti();
 
@@ -559,7 +555,6 @@ static void pcnet32_int(void* data)
 
     nic->interrupt_count++;
 
-    //if(DEBUG) printf( DEV_NAME "interrupt handled. pcnet status 0x%.8x", read_csr(nic, PCNET_CSR_STATUS));
     if(DEBUG) printf( DEV_NAME "interrupt handled. pcnet status 0x%.8x", status );
 
     //return INT_RESCHEDULE;

@@ -280,7 +280,17 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
     tty->bg = COLOR_WHITE;
 
     drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE );
-	tty->w.title = "VM TTY Window";
+    tty->w.title = "VM TTY Window";
+
+    {
+    pvm_object_t o;
+    o.data = ttyos;
+    o.interface = pvm_get_default_interface(ttyos).data;
+
+    // This object needs OS attention at restart
+    // TODO do it by class flag in create fixed or earlier?
+    pvm_add_object_to_restart_list( o );
+    }
 }
 
 void pvm_gc_iter_tty(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
@@ -295,5 +305,13 @@ void pvm_gc_finalizer_tty( struct pvm_object_storage * os )
 {
     struct data_area_4_tty      *tty = (struct data_area_4_tty *)os->da;
     drv_video_window_destroy(&(tty->w));
+}
+
+
+void pvm_restart_tty( pvm_object_t o )
+{
+    struct data_area_4_tty *da = pvm_object_da( o, tty );
+
+    drv_video_window_enter_allwq( &da->w );
 }
 
