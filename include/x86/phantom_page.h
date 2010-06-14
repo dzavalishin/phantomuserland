@@ -4,3 +4,6 @@
 
 #define PAGE_ALIGN(x) (((x) + (PAGE_SIZE-1)) & ~(PAGE_SIZE-1))
 #define PAGE_ALIGNED(x) ( 0 == ( (x)  & (PAGE_SIZE-1) ))
+
+// Align to address of page which contains addr x
+#define PREV_PAGE_ALIGN(x) ((x) & ~(PAGE_SIZE-1))

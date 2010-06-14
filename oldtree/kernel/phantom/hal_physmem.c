@@ -422,6 +422,29 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
     if(hal_alloc_vaddress( &addr, 1))
         panic("out of vaddresses");
 
+#if 0 // panics, need test
+    if(!PAGE_ALIGNED(to))
+    {
+        // Process partial page
+
+        physaddr_t page = PREV_PAGE_ALIGN(to);
+        int shift = to-page;
+        int part = PAGE_SIZE-shift;
+        assert( shift < PAGE_SIZE );
+        assert( shift > 0 );
+
+        hal_page_control( page, addr, page_map, page_rw );
+
+        memcpy( addr+shift, from, part );
+
+        hal_page_control( page, addr, page_unmap, page_noaccess );
+
+        to += part;
+        from += part;
+        size -= part;
+    }
+#endif
+
     assert(PAGE_ALIGNED(to));
 
     do

@@ -6,6 +6,8 @@ Author: Martin Renters
 
 **************************************************************************/
 
+#include <sys/cdefs.h>
+
 //FILE_LICENCE ( BSD2 );
 
 #define VENDOR_NONE     0
@@ -231,7 +233,7 @@ struct ringbuffer {
         unsigned char status;
         unsigned char next;
         unsigned short len;
-};
+} __packed;
 /*
  * Local variables:
  *  c-basic-offset: 8

@@ -15,7 +15,7 @@
 
 #define DEBUG_MSG_PREFIX "TRFS"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -54,7 +54,7 @@ static hal_mutex_t      lock;
 // Local funcs
 // --------------------------------------------------------
 
-
+// NB! Deletes qe!
 static void trfs_signal_done(trfs_queue_t *qe);
 
 
@@ -95,6 +95,8 @@ static errno_t trfs_send(void *pkt, int pktsize)
     if(trfs_failed || !phantom_tcpip_active)
         return ENOTCONN;
 
+    if(debug_level_flow >= 11) hexdump( pkt, pktsize, "TRFS send pkt", 0 );
+
     SHOW_FLOW0( 1, "sending" );
     int rc;
     if( 0 == (rc = udp_sendto(trfs_socket, pkt, pktsize, &trfs_addr)) )
@@ -125,7 +127,7 @@ static int trfs_recv(void *pkt, int pktsize)
 static void trfs_reset_session(u_int64_t new_sessionId)
 {
     sessionId = new_sessionId;
-    SHOW_FLOW0( 1, "NOT IMPL" );
+    SHOW_FLOW( 1, "NOT IMPL, new SessionId = %ld", sessionId );
     // TODO reestablish all fileIds
     // TODO rerequest all data
 }
@@ -144,8 +146,10 @@ static int getIoId()
 
 
 
-trfs_queue_t *findRequest( trfs_fio_t *fio, u_int32_t type )
+trfs_queue_t *findRequest( trfs_fio_t *recvFio, u_int32_t type )
 {
+    SHOW_FLOW( 2, "look for req such as fid %d ioid %d nSect %d start %ld", recvFio->fileId, recvFio->ioId, recvFio->nSectors, recvFio->startSector);
+
     trfs_queue_t *elt;
     hal_mutex_lock(&lock);
     queue_iterate( &requests, elt, trfs_queue_t *, chain)
@@ -154,28 +158,29 @@ trfs_queue_t *findRequest( trfs_fio_t *fio, u_int32_t type )
             continue;
 
         if(
-           (elt->fio.fileId != fio->fileId) ||
-           (elt->fio.ioId != fio->ioId)
+           (elt->fio.fileId != recvFio->fileId) ||
+           (elt->fio.ioId != recvFio->ioId)
           )
             continue;
 
         u_int64_t our_start = elt->fio.startSector;
         u_int64_t our_end = our_start + elt->fio.nSectors; // one after
 
-        if( fio->startSector < our_start || fio->startSector >= our_end )
+        if( (recvFio->startSector < our_start) || (recvFio->startSector >= our_end) )
         {
-            SHOW_ERROR0( 0, "reply is out of req bounds");
+            SHOW_ERROR( 0, "reply is out of req bounds, our %ld to %ld, got %ld", our_start, our_end, recvFio->startSector );
             continue;
         }
 
-        u_int64_t his_end = fio->startSector + fio->nSectors;
+        u_int64_t his_end = recvFio->startSector + recvFio->nSectors;
 
         if( his_end > our_end )
-            SHOW_ERROR( 0, "warning: reply brought too many sectors (%d against %d)", his_end, our_end );
+            SHOW_ERROR( 0, "warning: reply brought too many sectors (%ld against %ld)", his_end, our_end );
 
         hal_mutex_unlock(&lock);
         return elt;
     }
+
     hal_mutex_unlock(&lock);
     return 0;
 }
@@ -268,11 +273,8 @@ void trfs_process_received_data(trfs_queue_t *qe, trfs_fio_t *fio, void *data)
     int len = (int)_len*TRFS_SECTOR_SIZE;
     int shift = (int)(firstIn-firstReq)*TRFS_SECTOR_SIZE;
 
-    memcpy_v2p( (qe->orig_request->phys_page) + shift, data, len );
+    //memcpy_v2p( (qe->orig_request->phys_page) + shift, data, len );
 
-    //#warning move_data( data, firstIn, len );
-    // WRONG!
-    //memcpy_v2p( qe->orig_request->phys_page, data, nDataBytes );
 }
 
 
@@ -296,6 +298,24 @@ static errno_t sendReadRq( trfs_queue_t *qe )
 
     rq.readRq.nRequests = 1;
     rq.readRq.request[0] = qe->fio;
+
+    // If we have some sectors receiver, shift request forward.
+    // This covers the situation when server sends us back just some
+    // first sectors per request.
+    {
+        int start = 0;
+
+        for( start = 0; start < sizeof(u_int32_t)*8; start++ )
+        {
+            if( qe->recombine_map & (1 << start) )
+            {
+                rq.readRq.request[0].startSector++;
+                rq.readRq.request[0].nSectors--;
+            }
+            else
+                break;
+        }
+    }
 
     SHOW_FLOW0( 1, "send read rq" );
     return trfs_send(&rq, sizeof(rq)) ? EIO : 0;
@@ -341,6 +361,8 @@ void recvReadReply(trfs_pkt_t *rq)
 {
     trfs_fio_t *fio = &(rq->readReply.info);
     void *data = rq->readReply.data;
+
+    SHOW_FLOW( 2, "read reply for fid %d ioid %d nSect %d start %ld", fio->fileId, fio->ioId, fio->nSectors, fio->startSector);
 
     trfs_queue_t *qe = findRequest( fio, TRFS_QEL_TYPE_READ );
     if( qe == 0 )
@@ -401,10 +423,19 @@ static void trfs_recv_thread(void *arg)
     }
     while(1)
     {
-        if( trfs_recv( &buf, TRFS_MAX_PKT) )
+        int rc;
+        if( ( rc = trfs_recv( &buf, TRFS_MAX_PKT)) <= 0 )
         {
+            SHOW_ERROR( 1, "recv err %d", rc );
+        again:
             hal_sleep_msec( 100 ); // Against tight loop
             continue;
+        }
+
+        if( rc < (int)sizeof(trfs_pkt_t) )
+        {
+            SHOW_ERROR( 1, "recv pkt size %d < required %d", rc, sizeof(trfs_pkt_t) );
+            goto again;
         }
 
         trfs_pkt_t *rq = (trfs_pkt_t *)buf;
@@ -413,7 +444,7 @@ static void trfs_recv_thread(void *arg)
 
         if(rq->sessionId != sessionId)
         {
-            trfs_reset_session(sessionId);
+            trfs_reset_session(rq->sessionId);
             if(rq->type != PKT_T_Error)
                 continue;
         }
@@ -431,6 +462,9 @@ static void trfs_recv_thread(void *arg)
     }
 }
 
+//#define MAX_RETRY 30
+#define MAX_RETRY 3000
+
 static void trfs_resend_thread(void *arg)
 {
     (void) arg;
@@ -441,6 +475,9 @@ static void trfs_resend_thread(void *arg)
     {
         hal_sleep_msec( 1000 ); // between bursts
         hal_mutex_lock(&lock);
+
+        trfs_queue_t *first = 0;
+
     again:
         if(queue_empty(&requests))
         {
@@ -454,11 +491,28 @@ static void trfs_resend_thread(void *arg)
         queue_remove_first( &requests, elt, trfs_queue_t *, chain );
         queue_enter(&requests, elt, trfs_queue_t *, chain);
 
+        if( elt == first )
+        {
+            hal_mutex_unlock(&lock);
+            continue;
+        }
+        first = elt;
+
         if( TRFS_NEED_RESEND(elt) )
         {
-            SHOW_FLOW0( 1, "rerequest" );
-            sendRequest(elt);
-            hal_sleep_msec( 100 ); // between packets
+            if( elt->resend_count++ > MAX_RETRY )
+            {
+                queue_remove( &requests, elt, trfs_queue_t *, chain );
+                elt->orig_request->flag_ioerror = 1;
+                elt->orig_request->rc = ETIMEDOUT;
+                trfs_signal_done(elt);
+            }
+            else
+            {
+                SHOW_FLOW0( 1, "rerequest" );
+                sendRequest(elt);
+                hal_sleep_msec( 100 ); // between packets
+            }
             goto again;
         }
 
@@ -470,6 +524,7 @@ static void trfs_resend_thread(void *arg)
 // Init and interface
 // --------------------------------------------------------
 
+static void testrq();
 
 void phantom_trfs_init()
 {
@@ -484,6 +539,11 @@ void phantom_trfs_init()
     hal_start_kernel_thread_arg( trfs_resend_thread, 0 );
 
     trfs_inited = 1;
+
+    SHOW_FLOW0( 0, "inited" );
+
+
+    testrq();
 }
 
 
@@ -513,6 +573,8 @@ errno_t trfsAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
 
     qe->recombine_map = 0; // nothing is ready
 
+    qe->resend_count = 0;
+
     SHOW_FLOW0( 1, "new request" );
     addRequest(qe);
     sendRequest(qe);
@@ -525,7 +587,75 @@ void trfs_signal_done(trfs_queue_t *qe)
 {
     SHOW_FLOW0( 1, "done" );
     pager_io_request_done( qe->orig_request );
+
+    // panics
+    free(qe);
 }
+
+
+phantom_disk_partition_t *phantom_create_trfs_partition_struct( long size )
+{
+    phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size);
+
+    ret->asyncIo = trfsAsyncIo;
+    ret->flags |= PART_FLAG_IS_WHOLE_DISK;
+
+
+    //struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
+    //phantom_init_disk_q( q, startIoFunc );
+
+    ret->specific = 0;
+
+    //q->device = private;
+    //q->unit = unit; // if this is multi-unit device, let 'em distinguish
+
+    // errno_t phantom_register_disk_drive(ret);
+
+
+    return ret;
+}
+
+
+
+static void test_report( struct pager_io_request *req, int write )
+{
+    SHOW_INFO( 0, "callback for 0x%p called, %s", req, write ? "wr" : "rd" );
+
+    if(req->flag_ioerror)
+        SHOW_ERROR( 0, "rc = %d", req->rc );
+    else
+        SHOW_FLOW0( 0, "success" );
+}
+
+
+static void testrq()
+{
+    phantom_disk_partition_t *p = phantom_create_trfs_partition_struct( 1024 );
+
+    static pager_io_request rq;
+    pager_io_request_init( &rq );
+
+
+    void *va;
+
+    hal_pv_alloc( &rq.phys_page, &va, 4096 );
+
+    rq.disk_page = 0;
+
+    rq.blockNo = 0;
+    rq.nSect = 4096/512;
+
+    rq.flag_pagein = 1;
+    rq.flag_pageout = 0;
+
+    rq.pager_callback = test_report;
+
+    disk_enqueue( p, &rq );
+
+}
+
+
+
 
 #endif // HAVE_NET
 

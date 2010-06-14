@@ -22,6 +22,7 @@ void pvm_root_init(void);
 void phantom_setenv( const char *name, const char *value );
 int phantom_getenv( const char *name, char *value, int vsize );
 
+void pvm_add_object_to_restart_list( pvm_object_t o );
 
 
 

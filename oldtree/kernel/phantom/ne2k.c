@@ -1,5 +1,5 @@
-#include <config.h>
-
+#warning unused
+#if 0
 #if HAVE_NET
 
 /* Copyright 1999, Brian J. Swetland.  All Rights Reserved.
@@ -615,3 +615,4 @@ int main(int argc, char **argv)
 
 #endif // HAVE_NET
 
+#endif

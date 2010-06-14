@@ -20,7 +20,7 @@ static __inline__ int _bpc(const drv_video_font_t *font)
     return font->ysize * (1 + ((font->xsize-1) / 8));
 }
 
-__inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, const char c )
+__inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, char c )
 {
     //int bpc = font->ysize * (1 + ((font->xsize-1) / 8));
     return font->font + c * _bpc(font);
@@ -83,7 +83,7 @@ __inline__ int drv_video_font_draw_char(
 
 
 
-__inline__ void drv_video_font_draw_string(
+void drv_video_font_draw_string(
                                            drv_video_window_t *win,
                                            const drv_video_font_t *font,
                                            const char *s, const rgba_t color,
@@ -98,27 +98,9 @@ __inline__ void drv_video_font_draw_string(
     }
 }
 
-void 	drv_video_font_scroll_pixels( drv_video_window_t *win, int npix, rgba_t color)
-{
-    assert(npix >= 0);
-    //assert(npix <= win->ysize);
 
-    if(npix >= win->ysize)
-    {
-        drv_video_window_fill( win, color );
-        return;
-    }
 
-    struct rgba_t *dst = win->pixel + (win->xsize * npix);
-    int len = win->xsize * (win->ysize - npix);
-    memmove( dst, win->pixel, len*sizeof(struct rgba_t) );
-    int clrlen = win->xsize * npix;
-    dst = win->pixel;
-    while( clrlen-- )
-    {
-        *dst++ = color;
-    }
-}
+
 
 void 	drv_video_font_scroll_line(
                                            drv_video_window_t *win,

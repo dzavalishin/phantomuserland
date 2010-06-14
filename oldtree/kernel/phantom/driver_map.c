@@ -42,13 +42,14 @@ static pci_probe_t pci_drivers[] =
     //    { "VirtIO Baloon", driver_virtio_baloon_probe, 2, VIRTIO_VENDOR, 0, 5 },
     //{ "VirtIO Random",  driver_virtio_random_probe, 2, 0x1AF4, 0, 1 }, // TODO dev/dclass?
 
-#if HAVE_NET
+#if 1 && HAVE_NET
     { "VirtIO Net",  driver_virtio_net_probe, 1, 0x1AF4, 0x1000, 0 }, // TODO dev/dclass?
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
     { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
     { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
     { "Intel i82559er", driver_intel_82559_probe, 	3, 0x8086, 0x1209, 0 },
 #endif // HAVE_NET
+    { "Ne2000 PCI", 	driver_pci_ne2000_probe, 	1, 0x10ec, 0x8029, 0 },
 
 #if COMPILE_OHCI
     { "USB OHCI",       driver_ohci_probe, 		3, 0, 0, OHCI_BASE_CLASS },
@@ -110,7 +111,13 @@ static isa_probe_t isa_drivers[] =
 
     { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
 
-//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 0x10 }
+#if HAVE_NET
+//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
+//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 11 },
+//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x320, 11 },
+//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x340, 11 },
+//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x360, 11 },
+#endif
 
 //    { "SB16",         driver_isa_sb16_probe,  3, 0x220, 5 },
 };
@@ -240,14 +247,16 @@ static int loadpci()
 }
 
 
-static int probe_all( int stage, pci_cfg_t *pci )
+static int probe_pci( int stage, pci_cfg_t *pci )
 {
-//printf("%d PCI check vend %X dev %X cl %X\n", stage, pci->vendor_id, pci->device_id, pci->base_class );
-    unsigned int i;
+
+    SHOW_FLOW( 2, "%d PCI check vend %X dev %X cl %X", stage, pci->vendor_id, pci->device_id, pci->base_class );
+
+               unsigned int i;
     for( i = 0; i < sizeof(pci_drivers)/sizeof(pci_probe_t); i++ )
     {
         pci_probe_t *dp = &pci_drivers[i];
-//printf("-- against %X : %X cl %X stg %d\n", dp->vendor, dp->device, dp->dclass, dp->minstage );
+        SHOW_FLOW( 3, "-- against %X : %X cl %X stg %d", dp->vendor, dp->device, dp->dclass, dp->minstage );
         if( stage < dp->minstage )
             continue;
         if( dp->device && pci->device_id != dp->device )
@@ -334,8 +343,11 @@ static int probe_isa( int stage )
     {
         isa_probe_t *dp = &isa_drivers[i];
 
+        SHOW_FLOW( 2, "check %s stage %d minstage %d", dp->name, stage, dp->minstage );
         if( stage < dp->minstage )
             continue;
+
+        SHOW_FLOW( 2, "probe %s @ 0x%x", dp->name, dp->port );
 
         phantom_device_t *dev = dp->probe_f( dp->port, dp->irq, stage );
 
@@ -344,8 +356,8 @@ static int probe_isa( int stage )
             SHOW_INFO( 0, "Driver '%s' attached to ISA at 0x%X (IRQ %d)",
                        dp->name, dp->port, dp->irq );
             phantom_bus_add_dev( &isa_bus, dev );
-            dp->minstage = ~0; // prevent it from being processed next time
         }
+        dp->minstage = 1000; // prevent it from being processed next time
     }
 
     return 0;
@@ -399,7 +411,7 @@ int phantom_pci_find_drivers( int stage )
         if( (!allpci[i].filled) || allpci[i].used )
             continue;
 
-        if( probe_all(stage, &allpci[i].pci ) )
+        if( probe_pci(stage, &allpci[i].pci ) )
             allpci[i].used = 1;
     }
     SHOW_FLOW( 2, "Finished looking for PCI devices, stage %d", stage );

@@ -7,6 +7,7 @@ SET Q_PORTS= -parallel file:lpt_01.log  -serial file:serial0.log
 rem SET Q_NET=-net nic,model=ne2k_isa -net nic,model=ne2k_pci
 rem    -net nic,model=ne2k_isa -net nic,model=rtl8139 -net nic,model=i82559er -net nic,model=pcnet -net nic,model=ne2k_isa
 SET Q_NET= -net nic,model=pcnet  -net user -tftp ../run/tftp
+rem SET Q_NET= -net nic,model=virtio -net nic,model=pcnet -net nic,model=ne2k_pci  -net user -tftp tftp
 
 rem SET Q_MACHINE=-M isapc
 rem SET Q_MACHINE=-m 85

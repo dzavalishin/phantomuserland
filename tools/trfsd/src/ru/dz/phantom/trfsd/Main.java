@@ -1,14 +1,12 @@
 package ru.dz.phantom.trfsd;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
@@ -42,13 +40,22 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		serverSessionId = System.currentTimeMillis();
 		
+		String fn = "Phantom.ClassFile";
+		
+		String home = System.getenv("PHANTOM_HOME");
+		if( home != null )
+		{
+			fn = home + "/build/classes";
+		}
+		
+		System.out.println("TRFS Daemon, serving from "+fn);
 		//new BufferedInputStream( new FileInputStream("Phantom.PageFile"), BUF_SIZE);
 		//stream = new FileInputStream("Phantom.ClassFile");
-		file = new RandomAccessFile("Phantom.ClassFile", "rw");
+		file = new RandomAccessFile(fn, "r");
 		
 		if(file == null)
 		{
-			System.out.println("Unable to open file");
+			System.out.println("Unable to open file "+fn);
 			return;
 		}
 		
@@ -62,28 +69,34 @@ public class Main {
 			DatagramPacket p = new DatagramPacket(buf , length);
 			ss.receive(p);
 			
-			try { process( buf, p.getAddress() ); }
+			try { process( buf, p.getAddress(), p.getPort() ); }
 			catch (IOException e) {
 				// 5 is EIO errno
-				replyWithError(p.getAddress(), 5, e.getMessage());
+				replyWithError(p.getAddress(), p.getPort(), 5, e.getMessage());
+				System.out.println("Replied with error "+e.getMessage());
 			}
 		}
 	}
 
 
-	private static void process(byte[] buf, InetAddress peer) throws IOException {
-		ByteBuffer bb = ByteBuffer.wrap(buf);  
+	private static void process(byte[] buf, InetAddress peer, int port) throws IOException {
+		ByteBuffer bb = ByteBuffer.wrap(buf);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
 		
 		int pktType = bb.getInt();
 		long sessionId = bb.getLong();
 		
+		System.out.println("Got request type "+pktType +" from "+ peer + " port "+port);
+		
 		if((sessionId != serverSessionId) && (pktType != PKT_T_FindRQ))
 		{
 			// 4 is EINTR errno
-			replyWithError(peer, 4, "Wrong session number");
+			replyWithError(peer, port, 4, "Wrong session number");
+			System.out.println("Session wrong: "+sessionId+", need "+serverSessionId);			
 			return;
 		}
 		
+
 		switch(pktType) {
 		case PKT_T_ReadRQ:
 			
@@ -96,8 +109,10 @@ public class Main {
 				int ioId = bb.getInt();
 				int nSectors = bb.getInt();
 				int startSector = bb.getInt();
-				
-				process_read(peer, fileId, ioId, nSectors, startSector );
+
+				System.out.println("Got ReadRequest for file "+fileId+" sect "+startSector+ " nsect "+nSectors);
+
+				process_read(peer, port, fileId, ioId, nSectors, startSector );
 			}
 			
 			
@@ -113,28 +128,31 @@ public class Main {
 	
 	
 
-	private static void process_read(InetAddress peer, int fileId, int ioId, int nSectors,
-			int startSector) throws IOException {
+	private static void process_read(InetAddress peer, int port, int fileId, int ioId, int nSectors,
+			int startSector ) throws IOException {
 
 		if(fileId != 0)
 		{
 			// 2 is ENOENT
-			replyWithError(peer, 2, "Wrong FileId");
+			replyWithError(peer, port, 2, "Wrong FileId");
 			return;
 		}
 
 		if(nSectors > 2)
 		{
 			// 27 is EFBIG
-			replyWithError(peer, 27, "Too many sectors requested");
-			return;
+			//replyWithError(peer, port, 27, "Too many sectors requested");
+			//return;
+			nSectors = 2;
+			// TODO send multiple packets automatically
 		}
+
 		
 		byte[] data = getData(fileId, nSectors, startSector);
 		if(data == null)
 		{
 			// 14 is EFAULT
-			replyWithError(peer, 14, "No data");
+			replyWithError(peer, port, 14, "No data");
 			return;
 		}
 		
@@ -142,6 +160,7 @@ public class Main {
 		byte[] buf = new byte[1600];
 		
 		ByteBuffer bb = ByteBuffer.wrap(buf);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
 		
 		bb.putInt(PKT_T_ReadReply);
 		bb.putLong(serverSessionId);
@@ -149,15 +168,17 @@ public class Main {
 		bb.putInt(fileId);
 		bb.putInt(ioId);
 		bb.putInt(nSectors);
-		bb.putInt(startSector);
+		bb.putLong(startSector);
 		
 		//bb.putInt(buf.length);
 		
 		assert(data.length == nSectors*SSIZE);
 		
 		bb.put(data);
-		System.out.print("Sending "+nSectors+" sect. from "+startSector);
+		System.out.println("Sending "+nSectors+" sect. from "+startSector);
 		DatagramPacket p = new DatagramPacket(buf, bb.position());
+		p.setAddress(peer);
+		p.setPort(port);
 		ss.send(p);		
 		
 	}
@@ -165,11 +186,12 @@ public class Main {
 
 
 
-	private static void replyWithError(InetAddress peer, int errno, String string) throws IOException {
+	private static void replyWithError(InetAddress peer, int port, int errno, String string) throws IOException {
 		
 		byte[] buf = new byte[1600];
 		
 		ByteBuffer bb = ByteBuffer.wrap(buf);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
 		
 		bb.putInt(PKT_T_Error);
 		bb.putLong(serverSessionId);
@@ -182,6 +204,8 @@ public class Main {
 		bb.put(strBytes);
 		
 		DatagramPacket p = new DatagramPacket(buf, bb.position());
+		p.setAddress(peer);
+		p.setPort(port);
 		ss.send(p);		
 	}
 

@@ -1,4 +1,5 @@
-#include <config.h>
+#warning unused
+#if 0
 
 #if HAVE_NET
 
@@ -969,3 +970,4 @@ void nic_block_output(snic *nic, packet_buffer *pkt) {
 
 #endif // HAVE_NET
 
+#endif

@@ -20,6 +20,8 @@ typedef void (*gc_iterator_func_t)( gc_iterator_call_t func, struct pvm_object_s
 
 typedef void (*gc_finalizer_func_t)( struct pvm_object_storage * os );
 
+typedef void (*o_restart_func_t)( pvm_object_t o );
+
 
 struct internal_class
 {
@@ -29,6 +31,7 @@ struct internal_class
     init_func_t                 init;                   // constructor
     gc_iterator_func_t          iter;                   // Call func for all the object pointer contained in this internal object
     gc_finalizer_func_t         finalizer;
+    o_restart_func_t            restart;                // Called on OS restart if object put itself to restart list, see root.c
     int                         da_size;
     int                         flags;
     struct pvm_object           class_object;           // inited on start, used for lookup
@@ -51,7 +54,8 @@ struct pvm_object pvm_lookup_internal_class(struct pvm_object name);
     extern syscall_func_t	syscall_table_4_##cn[]; \
     extern void pvm_internal_init_##cn( struct pvm_object_storage * os ); \
     extern void pvm_gc_iter_##cn( gc_iterator_call_t func, struct pvm_object_storage * os, void *arg ); \
-    extern void pvm_gc_finalizer_##cn( struct pvm_object_storage * os );
+    extern void pvm_gc_finalizer_##cn( struct pvm_object_storage * os ); \
+    extern void pvm_restart_##cn( pvm_object_t o );
 
 DEF_I(void);
 DEF_I(class)

@@ -214,5 +214,12 @@ void pvm_check_is_thread( struct pvm_object new_thread );
 
 
 
+#define pvm_get_default_interface(os) \
+    ({  \
+    struct data_area_4_class *da = pvm_object_da( os->_class, class );  \
+    da->object_default_interface; \
+    })
+
+
 #endif // PVM_OBJECT_H
 

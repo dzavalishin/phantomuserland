@@ -135,7 +135,7 @@ void    drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_v
 
 void 	drv_video_font_draw_string(
                                            drv_video_window_t *win,
-                                           const struct drv_video_font_t *font,
+                                           const drv_video_font_t *font,
                                            const char *s, const rgba_t color,
                                            int x, int y );
 void 	drv_video_font_scroll_line(

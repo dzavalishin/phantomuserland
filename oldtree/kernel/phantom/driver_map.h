@@ -39,6 +39,8 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage );
 
 phantom_device_t * driver_intel_82559_probe( pci_cfg_t *pci, int stage );
 
+phantom_device_t * driver_pci_ne2000_probe( pci_cfg_t *pci, int stage );
+
 // ---------------------------------------------------------------
 //                               ISA
 // ---------------------------------------------------------------
