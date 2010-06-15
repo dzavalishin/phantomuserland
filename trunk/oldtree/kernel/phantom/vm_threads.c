@@ -63,14 +63,21 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 {
     args_used++;
 
-    //int rc = pthread_create(&tid, 0, thread_run_func, &new_thread);
-    //if( rc )        panic("can't create thread");
+    int tid = hal_start_thread(thread_run_func, &new_thread, THREAD_FLAG_VM|THREAD_FLAG_USER);
 
-    //pthread_t tid =
-    hal_start_thread(thread_run_func, &new_thread, THREAD_FLAG_VM|THREAD_FLAG_USER);
+    struct data_area_4_thread *tda = pvm_object_da( new_thread, thread );
+    tda->tid = tid;
 
     while(args_used > 0)
         hal_sleep_msec(1);
+}
+
+
+//static
+phantom_thread_t* vm_thread_2_kernel_thread(struct pvm_object vm_thread)
+{
+    struct data_area_4_thread *tda = pvm_object_da( vm_thread, thread );
+    return get_thread(tda->tid);
 }
 
 

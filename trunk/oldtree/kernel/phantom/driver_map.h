@@ -24,6 +24,9 @@ phantom_device_t * driver_virtio_baloon_probe( pci_cfg_t *pci, int stage );
 phantom_device_t * driver_ohci_probe( pci_cfg_t *pci, int stage );
 phantom_device_t * driver_uhci_probe( pci_cfg_t *pci, int stage );
 
+/* Intel Vendor Id */
+#define INTEL_VENDORID                        0x8086
+
 /* AMD Vendor ID */
 #define AMD_VENDORID                          0x1022
 
@@ -40,6 +43,12 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage );
 phantom_device_t * driver_intel_82559_probe( pci_cfg_t *pci, int stage );
 
 phantom_device_t * driver_pci_ne2000_probe( pci_cfg_t *pci, int stage );
+
+// buses & pwer mgmt
+
+phantom_device_t * driver_intel_1237_bridge_probe( pci_cfg_t *pci, int stage );
+phantom_device_t * driver_intel_PIIX4_pm_probe( pci_cfg_t *pci, int stage );
+
 
 // ---------------------------------------------------------------
 //                               ISA

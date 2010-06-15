@@ -143,6 +143,7 @@ struct data_area_4_thread
     volatile int                                sleep_flag;     // Is true if thread is put asleep in userland
     hal_cond_t   				wakeup_cond;    // Will sleep here
 
+    int                                         tid;            // Actual kernel thread id - reloaded on each kernel restart
 
 // fast access copies
 
