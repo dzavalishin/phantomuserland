@@ -38,16 +38,16 @@ typedef struct
 // NB! No network drivers on stage 0!
 static pci_probe_t pci_drivers[] =
 {
-//    { "VirtIO Disk", 	driver_virtio_disk_probe, 	2, VIRTIO_VENDOR, 0, 1 },
+    //    { "VirtIO Disk", 	driver_virtio_disk_probe, 	2, VIRTIO_VENDOR, 0, 1 },
     //    { "VirtIO Baloon", driver_virtio_baloon_probe, 2, VIRTIO_VENDOR, 0, 5 },
-    //{ "VirtIO Random",  driver_virtio_random_probe, 2, 0x1AF4, 0, 1 }, // TODO dev/dclass?
+    //    { "VirtIO Random",  driver_virtio_random_probe, 2, 0x1AF4, 0, 1 }, // TODO dev/dclass?
 
 #if 1 && HAVE_NET
-    { "VirtIO Net",  driver_virtio_net_probe, 1, 0x1AF4, 0x1000, 0 }, // TODO dev/dclass?
+    { "VirtIO Net",  	driver_virtio_net_probe, 	1, 0x1AF4, 0x1000, 0 }, // TODO dev/dclass?
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
     { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
     { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
-    { "Intel i82559er", driver_intel_82559_probe, 	3, 0x8086, 0x1209, 0 },
+    { "Intel i82559er", driver_intel_82559_probe, 	3, INTEL_VENDORID, 0x1209, 0 },
 #endif // HAVE_NET
     { "Ne2000 PCI", 	driver_pci_ne2000_probe, 	1, 0x10ec, 0x8029, 0 },
 
@@ -56,6 +56,12 @@ static pci_probe_t pci_drivers[] =
 #endif
 
     { "USB UHCI",       driver_uhci_probe, 		3, 0, 0, UHCI_BASE_CLASS },
+
+    // Chipset drivers, etc
+
+    // Do not work, seem to be uninited by BIOS - no IO port defined
+    //{ "PIC/Mem 1237", 	driver_intel_1237_bridge_probe,	3, INTEL_VENDORID, 0x1237, 0 },
+    //{ "PIIX4 PM", 	driver_intel_PIIX4_pm_probe,	3, INTEL_VENDORID, 0x7113, 0 },
 
 };
 

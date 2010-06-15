@@ -273,6 +273,7 @@ void trfs_process_received_data(trfs_queue_t *qe, trfs_fio_t *fio, void *data)
     int len = (int)_len*TRFS_SECTOR_SIZE;
     int shift = (int)(firstIn-firstReq)*TRFS_SECTOR_SIZE;
 
+    // TODO crashes, fix
     //memcpy_v2p( (qe->orig_request->phys_page) + shift, data, len );
 
 }

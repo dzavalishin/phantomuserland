@@ -75,6 +75,7 @@ phantom: $(START_O_FILE) \
         driver_isa_com.o driver_isa_lpt.o \
         device.o driver_isa_vga_txt.o driver_isa_ne2000.o \
        	driver_pci_pcnet32.o syslog.o driver_pci_intel82559.o \
+        driver_pci_intel_etc.o \
        	symtab.o driver_isa_beep.o unix/dir.o \
        	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
         unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
