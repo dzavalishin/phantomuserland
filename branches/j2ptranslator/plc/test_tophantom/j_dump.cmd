@@ -4,5 +4,6 @@ javap -verbose -s -l obj_test >obj_test.jdump
 
 javap -verbose -s -l compare >compare.jdump
 javap -verbose -s -l field >field.jdump
+javap -verbose -s -l loop >loop.jdump
 
 

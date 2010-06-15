@@ -11,6 +11,13 @@ ru.dz.plc.compiler.ClassTable
         157 if (c.getReferencedClasses() != null) {
         162 }
 
+
+ru.dz.jpc.tophantom.NodeEmitter
+    add methods
+        public int getCurrentStackSize()'
+        public Node getLastOutNodeByIndex(int index);
+
+
 -------------
 
 Node subclasses:
@@ -25,4 +32,34 @@ ru.dz.jpc.tophantom.node.IdentTransNode extends IdentNode
 
 ru.dz.jpc.tophantom.node.binode.SequenceTransNode extends SequenceNode
     rewrite method (rewrite generation right child node):
-        public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
+        public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException;
+
+
+
+ru.dz.jpc.tophantom.node.binode.OpPlusTransNode
+    rewrite method (calculate node type if child is .internal.object):
+        public void find_out_my_type() throws PlcException;
+
+ru.dz.jpc.tophantom.node.binode.ValEqTransNode
+    rewrite method (calculate node type if child is .internal.object):
+        public void find_out_my_type() throws PlcException;
+
+ru.dz.jpc.tophantom.node.binode.ValNeqTransNode
+    rewrite method (calculate node type if child is .internal.object):
+        public void find_out_my_type() throws PlcException;
+
+ru.dz.jpc.tophantom.node.binode.ValGeTransNode
+    rewrite method (calculate node type if child is .internal.object):
+        public void find_out_my_type() throws PlcException;
+
+ru.dz.jpc.tophantom.node.binode.ValGtTransNode
+    rewrite method (calculate node type if child is .internal.object):
+        public void find_out_my_type() throws PlcException;
+
+ru.dz.jpc.tophantom.node.binode.ValLeTransNode
+    rewrite method (calculate node type if child is .internal.object):
+        public void find_out_my_type() throws PlcException;
+
+ru.dz.jpc.tophantom.node.binode.ValLtTransNode
+    rewrite method (calculate node type if child is .internal.object):
+        public void find_out_my_type() throws PlcException;

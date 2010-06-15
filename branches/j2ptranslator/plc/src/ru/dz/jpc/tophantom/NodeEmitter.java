@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import ru.dz.plc.compiler.binode.SequenceNode;
-import ru.dz.plc.compiler.node.EmptyNode;
-import ru.dz.plc.compiler.node.Node;
-import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.*;
 import ru.dz.jpc.tophantom.node.binode.SequenceTransNode;
 
 public class NodeEmitter {
@@ -79,4 +77,23 @@ public class NodeEmitter {
 		out.add(sn);		
 	}
 
+    public int getCurrentStackSize() {
+        return stack.size();
+    }
+    public Node getLastOutNodeByIndex(int index) {
+        Node result = null;
+
+        if (out != null) {
+            for (int i=out.size()-1, count=0; i>=0; i--) {
+                Node node = out.get(i);
+                if (node instanceof JumpTargetNode || node instanceof JumpNode) continue;
+
+                if (index == count++) {
+                    result = node;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }

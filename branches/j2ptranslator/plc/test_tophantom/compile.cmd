@@ -8,4 +8,5 @@ cp ./field.class ./translation/java/test
 javac -cp . obj_test.java
 
 javac compare.java
+javac loop.java
 

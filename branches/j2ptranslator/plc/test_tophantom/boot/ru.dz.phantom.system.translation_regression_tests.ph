@@ -18,10 +18,10 @@ package .ru.dz.phantom.system;
  *
 **/
 
-import .translation.phantom.test.obj_test;
 import .translation.java.test.obj_test;
 import .translation.java.test.b;
 import .translation.java.test.compare;
+import .translation.java.test.loop;
 
 attribute const * ->!;
 
@@ -31,7 +31,7 @@ class translation_regression_tests
     var boot_object;
     var boot_success : int;
 
-    var p_obj : .translation.phantom.test.obj_test;
+    var p_obj : .translation.java.test.obj_test;
     var p_result_int : .internal.int;
     var p_result_str : .internal.string;
     var p_result_obj : .translation.java.test.b;
@@ -54,6 +54,10 @@ class translation_regression_tests
 
         print("\n\nRun compare test\n");
         run_compare(new .translation.java.test.compare());
+
+
+        print("\n\nRun loop\n");
+        run_loop(new .translation.java.test.loop());
 
 
         print("\n\n");
@@ -215,12 +219,52 @@ class translation_regression_tests
         log_str(c_obj.if_icmple_all(5), "if_icmple_all: ");
 
 
-        log_str(c_obj.ifnonnull(null), "ifnonnull (null): ");
-        log_str(c_obj.ifnull(null), "ifnull (null): ");
+        log_str(c_obj.ifnonnull(null), "ifnonnull(null): ");
+        log_str(c_obj.ifnull(null), "ifnull(null): ");
 
-//        log_str(c_obj.ifnonnull("test"), "ifnonnull (not null): ");
-        print("\n    ifnonnull (not null): failure");
-//        log_str(c_obj.ifnull("test"), "ifnull (not null):");
-        print("\n    ifnull (not null): failure");
+
+//        log_str(c_obj.ifnonnull("test"), "ifnonnull(test): ");
+        print("\n    ifnonnull(test): failure");
+//        log_str(c_obj.ifnull("test"), "ifnull(test):");
+        print("\n    ifnull(test): failure");
+
+
+
+        print("\n  logic");
+        log_str(c_obj.logic_and_and(10), "logic_and_and(10): ");
+        log_str(c_obj.logic_and_and2(10), "logic_and_and2(10): ");
+        log_str(c_obj.logic_and_and_n(1), "logic_and_and_n(1): ");
+        log_str(c_obj.logic_and_and_n(2), "logic_and_and_n(2): ");
+        log_str(c_obj.logic_and_and2_n(1), "logic_and_and2_n(1): ");
+        log_str(c_obj.logic_and_and2_n(2), "logic_and_and2_n(2): ");
+        log_str(c_obj.logic_and_and2_n(3), "logic_and_and2_n(3): ");
+        log_str(c_obj.logic_and_and_zero_n(1), "logic_and_and_zero_n(1): ");
+//        log_str(c_obj.logic_and_and_zero_n(2), "logic_and_and_zero_n(2): ");
+
+        log_str(c_obj.logic_or_or(2), "logic_or_or(2): ");
+        log_str(c_obj.logic_or_or2(2), "logic_or_or2(2): ");
+        log_str(c_obj.logic_or_or_n(1), "logic_or_or_n(1): ");
+        log_str(c_obj.logic_or_or2_n(1), "logic_or_or2_n(1): ");
+        log_str(c_obj.logic_or_or_zero_n(3), "logic_or_or_zero_n(3): ");
+//        log_str(c_obj.logic_or_or_zero_n(2), "logic_or_or_zero_n(2): ");
+
+
+        log_str(c_obj.logic_and(5), "logic_and(5): ");
+        log_str(c_obj.logic_and_n(1), "logic_and_n(1): ");
+        log_str(c_obj.logic_or(2), "logic_or(2): ");
+        log_str(c_obj.logic_or_n(1), "logic_or_n(1): ");
+
+
+
+        log_str(c_obj.logic_not(1), "logic_not(1): ");
+        log_str(c_obj.logic_not_n(5), "logic_not_n(5): ");
+    }
+
+
+
+
+    void run_loop(var l_obj : .translation.java.test.loop) {
+
+        log_str(l_obj.loop_for(), "loop_for(): ");
     }
 };
