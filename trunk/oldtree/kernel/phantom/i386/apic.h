@@ -23,6 +23,9 @@
 #ifndef _PHANTOM_APIC_
 #define _PHANTOM_APIC_
 
+
+
+
 typedef struct ApicReg
 {
 	unsigned r;	/* the actual register */

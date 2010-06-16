@@ -5,6 +5,8 @@
 #include <phantom_libc.h>
 #include "idt.h"
 
+#include "apic.h"
+
 //extern struct real_gate idt[];
 
 struct idt_init_entry
@@ -52,6 +54,10 @@ void phantom_load_idt(void)
 /* defined in intr.S */
 extern u_int32_t int_entry_table[];
 
+/* defined in apic_idt.S */
+extern u_int32_t apic_entry_table[];
+
+
 
 void phantom_fill_idt(void)
 {
@@ -71,10 +77,18 @@ void phantom_fill_idt(void)
         //printf("IRQ%d @0x%X, ", i, int_entry_table[i] );
         fill_idt_gate(PIC_INT_BASE + i,
                       int_entry_table[i], KERNEL_CS,
-//                      ACC_PL_U|ACC_INTR_GATE, 0);
                       ACC_PL_K|ACC_INTR_GATE, 0);
     }
-    printf("\n");
+
+    // Init APIC vectors
+    for (i = 0; i < 32; i++)
+    {
+        //printf("APIC IRQ%d @0x%X, ", i, int_entry_table[i] );
+        fill_idt_gate(APIC_INT_BASE + i,
+                      apic_entry_table[i], KERNEL_CS,
+                      ACC_PL_K|ACC_INTR_GATE, 0);
+    }
+
 }
 
 /*

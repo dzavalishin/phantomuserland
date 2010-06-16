@@ -1,10 +1,30 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * APIC support
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "apic"
+#include "debug_ext.h"
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include "cpu.h"
 #include "../misc.h"
 #include "apic.h"
+#include "idt.h"
 
 #include <x86/phantom_pmap.h>
 #include <hal.h>
 #include <phantom_libc.h>
+#include <i386/trap.h>
+
+#define APIC_TIMER_VECTOR (APIC_INT_BASE+31)
 
 static int      have_apic = 0;
 
@@ -48,8 +68,11 @@ void phantom_init_apic(void)
     apic_local_unit->divider_config.r = 0xA; // div 128
     apic_local_unit->init_count.r = 1024*1024; // some khz range?
 
-    char timer_vect = 0x40;
-    apic_local_unit->timer_vector.r = timer_vect | 0x02000000; // enable timer
+    //char timer_vect = 0x40;
+    apic_local_unit->timer_vector.r =
+        APIC_TIMER_VECTOR |
+        0x02000000 | 	// enable timer
+        (1<<17); 	// periodic
 #endif
 
 }
@@ -58,6 +81,28 @@ void apic_eoi()
 {
     apic_local_unit->eoi.r = 0; // 0 is critical for X2APIC
 }
+
+void apic_timer()
+{
+}
+
+void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
+{
+    (void) ts;
+
+    vector += APIC_INT_BASE;
+
+    if(vector == APIC_TIMER_VECTOR)
+    {
+        // apic_eoi();
+        apic_timer();
+        // return;
+    }
+
+    printf("APIC int %d ", vector);
+    apic_eoi();
+}
+
 
 
 /*

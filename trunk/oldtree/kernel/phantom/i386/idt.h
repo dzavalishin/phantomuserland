@@ -40,6 +40,8 @@
 #define IDTSZ 256
 
 #define PIC_INT_BASE 0x20
+#define APIC_INT_BASE 0x40
+
 
 //#include_next "idt.h"
 

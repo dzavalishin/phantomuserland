@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * 8259 IDT table and asm interrupt entry/exit code.
+ *
+**/
+
+
 #include <mach/asm.h>
 #include <i386/isa/pic_regs.h>
 
