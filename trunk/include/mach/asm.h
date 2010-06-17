@@ -101,6 +101,8 @@
 #define	ASENTRY(x) 	.globl x; .p2align TEXT_ALIGN; gLB(x) ; \
   			pushl %ebp; movl %esp, %ebp; MCOUNT; popl %ebp;
 
+#define NON_GPROF_ENTRY(x) .globl EXT(x); .p2align TEXT_ALIGN; LEXT(x)
+
 #else	// GPROF
 
 #define MCOUNT
@@ -108,6 +110,10 @@
 #define	ENTRY2(x,y)	.globl EXT(x); .globl EXT(y); \
 			.p2align TEXT_ALIGN; LEXT(x) LEXT(y)
 #define	ASENTRY(x)	.globl x; .p2align TEXT_ALIGN; gLB(x)
+
+#define NON_GPROF_ENTRY(x) .globl EXT(x); .p2align TEXT_ALIGN; LEXT(x)
+
+
 #endif	// GPROF
 
 #define	Entry(x)	.globl EXT(x); .p2align TEXT_ALIGN; LEXT(x)

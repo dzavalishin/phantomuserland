@@ -272,12 +272,24 @@ struct data_area_4_tty
 };
 
 
+#define MAX_MUTEX_THREADS 3
 
 struct data_area_4_mutex
 {
+    //hal_spinlock_t      lock;
+    int                 poor_mans_pagefault_compatible_spinlock;
+    int         	can_sleep_on_snapshot; // how do we list waiting threads then?
+
+    // Up to MAX_MUTEX_THREADS are stored here
+    pvm_object_t	waiting_threads[MAX_MUTEX_THREADS];
+    // And the rest is here
+    pvm_object_t	waiting_threads_array;
+
+    int                 nwaiting;
+
     // TODO need queue!
     /** Which thread is sleeping. */
-    struct data_adrea_4_thread  *sleeping;
+    //struct data_adrea_4_thread  *sleeping;
 };
 
 

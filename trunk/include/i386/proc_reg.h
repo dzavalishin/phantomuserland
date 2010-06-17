@@ -46,6 +46,8 @@
 #ifndef	_I386_PROC_REG_H_
 #define	_I386_PROC_REG_H_
 
+#ifndef ASSEMBLER
+
 #include <phantom_types.h>
 
 
@@ -57,6 +59,8 @@ struct region_descriptor {
 	u_int16_t 	rd_limit;		/* segment extent */
 	unsigned 	rd_base:32 __attribute__ ((packed));	/* base address  */
 };
+
+#endif // ASSEMBLER
 
 
 
