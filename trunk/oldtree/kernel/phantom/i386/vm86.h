@@ -7,7 +7,8 @@
 
 #define VM86_R0_STACK_SIZE (1024*64)
 
-#define VM86_EXE_SIZE (1024*64*3)
+//#define VM86_EXE_SIZE (1024*64*3)
+#define VM86_EXE_SIZE (1024*64*2)
 
 
 struct vm86tss
