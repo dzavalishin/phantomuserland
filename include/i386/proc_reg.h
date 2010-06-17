@@ -209,6 +209,19 @@ wrldt(u_int16_t sel)
 	__asm __volatile("lldt %0" : : "r" (sel));
 }
 
+static __inline void
+halt(void)
+{
+	__asm __volatile("hlt");
+}
+
+
+static __inline void
+ia32_pause(void)
+{
+	__asm __volatile("pause");
+}
+
 
 
 #if 0
@@ -325,18 +338,6 @@ enable_intr(void)
 }
 
 
-static __inline void
-halt(void)
-{
-	__asm __volatile("hlt");
-}
-
-
-static __inline void
-ia32_pause(void)
-{
-	__asm __volatile("pause");
-}
 
 
 static __inline u_int64_t

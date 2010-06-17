@@ -45,13 +45,17 @@
  *  ones defined.
  */
 
+
+extern volatile int     smp_ap_booted;
+
 #if 1
 #define CMOS_WRITE_BYTE(x,y)	rtcout(x,y) /* write unsigned char "y" at CMOS loc "x" */
 #define CMOS_READ_BYTE(x)	rtcin(x) /* read unsigned char at CMOS loc "x" */
 #define PHYS_TO_VIRTUAL(x)	phystokv(x)	/* convert physical address "x" to virtual */
 #define VIRTUAL_TO_PHYS(x)	kvtophys(x)     /* convert virtual address "x" to physical */
 //#define UDELAY(x)		/* delay roughly at least "x" microsecs */
-#define TEST_BOOTED(x)		0	/* test bootaddr x to see if CPU started */
+#define TEST_BOOTED(x)		smp_ap_booted
+	/* test bootaddr x to see if CPU started */
 #define READ_MSR_LO(x)		( (u_int32_t)rdmsr(x) )	/* Read MSR low function */
 #endif
 
@@ -194,22 +198,35 @@ boot_cpu(imps_processor *proc)
      * "patch_code_start" should be placed at a 4K-aligned address
      * under the 1MB boundary.
      */
-#if 1
+
     return 0;
+
     //panic("boot SMP cpu code is not ready");
-#else
-    extern char patch_code_start[];
-    extern char patch_code_end[];
-    bootaddr = (512-64)*1024;
-    memcpy((char *)bootaddr, patch_code_start, patch_code_end - patch_code_start);
-#endif
+
+    //extern char patch_code_start[];
+    //extern char patch_code_end[];
+    //bootaddr = (512-64)*1024;
+    //memcpy((char *)bootaddr, patch_code_start, patch_code_end - patch_code_start);
+
+    assert( 0 == hal_alloc_phys_pages_low( &bootaddr, 4 ) );
+
+    install_ap_tramp(bootaddr);
+
+    smp_ap_booted = 0;
+
+
     /*
      *  Generic CPU startup sequence starts here.
      */
 
     /* set BIOS reset vector */
     CMOS_WRITE_BYTE(CMOS_RESET_CODE, CMOS_RESET_JUMP);
-    *((volatile unsigned *) bios_reset_vector) = ((bootaddr & 0xFF000) << 12);
+    //*((volatile unsigned *) bios_reset_vector) = ((bootaddr & 0xFF000) << 12);
+    //*((volatile unsigned *) bios_reset_vector) = ((bootaddr & 0xFF000) << 12);
+
+    *((volatile unsigned short *) 0x469) = bootaddr >> 4;
+    *((volatile unsigned short *) 0x467) = bootaddr & 0xf;
+
 
     /* clear the APIC error register */
     IMPS_LAPIC_WRITE(LAPIC_ESR, 0);
@@ -228,6 +245,7 @@ boot_cpu(imps_processor *proc)
     phantom_spinwait(10);
     //UDELAY(10000);
 
+#if 1
     /*
      *  Send Startup IPIs if not an old pre-integrated APIC.
      */
@@ -240,6 +258,7 @@ boot_cpu(imps_processor *proc)
             phantom_spinwait(1);
         }
     }
+#endif
 
     /*
      *  Check to see if other processor has started.
@@ -268,6 +287,8 @@ boot_cpu(imps_processor *proc)
     /* clean up BIOS reset vector */
     CMOS_WRITE_BYTE(CMOS_RESET_CODE, 0);
     *((volatile unsigned *) bios_reset_vector) = 0;
+
+    smp_ap_booted = 0;
 
     return success;
 }

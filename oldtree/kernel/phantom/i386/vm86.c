@@ -572,8 +572,11 @@ void phantom_init_vm86(void)
 
     vm86_setup.code  	= exe;
     vm86_setup.data  	= exe+1*64*1024;
-    vm86_setup.stackLow = exe+2*64*1024;
-    vm86_setup.stackHi 	= exe+3*64*1024-4;
+    //vm86_setup.stackLow = exe+2*64*1024;
+    //vm86_setup.stackHi 	= exe+3*64*1024-4;
+
+    vm86_setup.stackLow = exe+1*64*1024;
+    vm86_setup.stackHi 	= exe+2*64*1024-4;
 
     if( ((int)vm86_setup.stackHi) >= 0x100000 )
     {
