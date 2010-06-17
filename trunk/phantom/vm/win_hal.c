@@ -242,10 +242,10 @@ void panic(const char *fmt, ...)
 	va_end(vl);
 
         //save_mem(mem, size);
-	printf("\nPress Enter...");
-
-	pvm_memcheck();
 	getchar();
+	printf("\nPress Enter from memcheck...");
+	pvm_memcheck();
+	//printf("\nPress Enter...");	getchar();
 	exit(1);
 }
 

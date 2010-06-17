@@ -500,17 +500,27 @@ void pvm_internal_init_mutex(struct pvm_object_storage * os)
 {
     (void)os;
 
-    //struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
+    struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
 
-    //pthread_mutex_init(&(da->mutex), 0);
+    //hal_spin_init( &da->lock );
+
 }
 
 void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-    (void)func;
-    (void)os;
-    (void)arg;
+    //(void)func;
+    //(void)os;
+    //(void)arg;
     // Empty
+
+    struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
+    int i;
+
+    gc_fcall( func, arg, da->waiting_threads_array );
+
+    for( i = 0; i < MAX_MUTEX_THREADS; i++ )
+        gc_fcall( func, arg, da->waiting_threads[i] );
+
 }
 
 

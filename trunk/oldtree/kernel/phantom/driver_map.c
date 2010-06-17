@@ -118,11 +118,11 @@ static isa_probe_t isa_drivers[] =
     { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
 
 #if HAVE_NET
-//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
-//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 11 },
-//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x320, 11 },
-//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x340, 11 },
-//    { "NE2000", 	driver_isa_ne2000_probe,1, 0x360, 11 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 11 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, 0x320, 11 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, 0x340, 11 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, 0x360, 11 },
 #endif
 
 //    { "SB16",         driver_isa_sb16_probe,  3, 0x220, 5 },

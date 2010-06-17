@@ -29,6 +29,6 @@ rem mv serial0.log serial0.log.old
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-bin\qemu %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% -soundhw sb16
+bin\qemu -smp 4 %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% -soundhw sb16
 
 exit
