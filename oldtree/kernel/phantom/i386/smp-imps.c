@@ -21,11 +21,19 @@
 
 #define _SMP_IMPS_C
 
+#define DEBUG_MSG_PREFIX "smp"
+#include "debug_ext.h"
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <i386/proc_reg.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 #include <time.h>
+#include <errno.h>
 
 #include "rtc.h"
 
@@ -52,7 +60,7 @@
  *  Includes here
  */
 
-#define IMPS_DEBUG
+#define IMPS_DEBUG 1
 
 #include "apic.h"
 #include "smp-imps.h"
@@ -127,8 +135,7 @@ unsigned char imps_apic_cpu_map[IMPS_MAX_CPUS];
  *  Function finished.
  */
 
-static int
-    get_checksum(unsigned start, int length)
+static int get_checksum(unsigned start, int length)
 {
     unsigned sum = 0;
 
@@ -144,7 +151,7 @@ static int
  *  APIC ICR write and status check function.
  */
 
-static int
+static errno_t
 send_ipi(unsigned int dst, unsigned int v)
 {
     int to, send_status;
@@ -162,7 +169,7 @@ send_ipi(unsigned int dst, unsigned int v)
         send_status = IMPS_LAPIC_READ(LAPIC_ICR) & LAPIC_ICR_STATUS_PEND;
     } while (send_status && (to++ < 1000));
 
-    return (to < 1000);
+    return (to < 1000) ? ETIMEDOUT : 0;
 }
 
 
@@ -187,12 +194,15 @@ boot_cpu(imps_processor *proc)
      * "patch_code_start" should be placed at a 4K-aligned address
      * under the 1MB boundary.
      */
-
+#if 1
+    return 0;
+    //panic("boot SMP cpu code is not ready");
+#else
     extern char patch_code_start[];
     extern char patch_code_end[];
     bootaddr = (512-64)*1024;
     memcpy((char *)bootaddr, patch_code_start, patch_code_end - patch_code_start);
-
+#endif
     /*
      *  Generic CPU startup sequence starts here.
      */
@@ -241,10 +251,10 @@ boot_cpu(imps_processor *proc)
         phantom_spinwait(10);
     }
     if (to >= 100) {
-        printf("CPU Not Responding, DISABLED");
+        SHOW_INFO0( 0, "CPU Not Responding, DISABLED" );
         success = 0;
     } else {
-        printf("#%d  Application Processor (AP)", imps_num_cpus);
+        SHOW_INFO( 0, "#%d  Application Processor (AP)", imps_num_cpus);
     }
 
     /*
@@ -259,8 +269,6 @@ boot_cpu(imps_processor *proc)
     CMOS_WRITE_BYTE(CMOS_RESET_CODE, 0);
     *((volatile unsigned *) bios_reset_vector) = 0;
 
-    printf("\n");
-
     return success;
 }
 
@@ -274,14 +282,14 @@ add_processor(imps_processor *proc)
 {
     int apicid = proc->apic_id;
 
-    printf("  Processor [APIC id %d ver %d]:  ",
+    SHOW_INFO( 0, "  Processor [APIC id %d ver %d]:  ",
                   apicid, proc->apic_ver);
     if (!(proc->flags & IMPS_FLAG_ENABLED)) {
-        printf("DISABLED\n");
+        SHOW_INFO0( 0, "  - DISABLED");
         return;
     }
     if (proc->flags & (IMPS_CPUFLAG_BOOT)) {
-        printf("#0  BootStrap Processor (BSP)\n");
+        SHOW_INFO0( 0, "  - #0  BootStrap Processor (BSP)");
         return;
     }
     if (boot_cpu(proc)) {
@@ -293,11 +301,13 @@ add_processor(imps_processor *proc)
         imps_apic_cpu_map[apicid] = imps_num_cpus;
         imps_num_cpus++;
 #else
-        printf("SKIP\n");
+        SHOW_INFO0( 0, "  - SKIP");
 #endif
     }
 }
 
+#define MAXBUSIDS 10
+static char *bus_ids[MAXBUSIDS];
 
 static void
 add_bus(imps_bus *bus)
@@ -306,7 +316,11 @@ add_bus(imps_bus *bus)
 
     memcpy(str, bus->bus_type, 6);
     str[6] = 0;
-    printf("  Bus id %d is %s\n", bus->id, str);
+    SHOW_INFO( 0, "  Bus id %d is %s\n", bus->id, str);
+
+
+    if(bus->id < MAXBUSIDS)
+        bus_ids[bus->id] = strdup(str);
 
     /*  XXXXX  add OS-specific code here */
 }
@@ -314,15 +328,42 @@ add_bus(imps_bus *bus)
 static void
 add_ioapic(imps_ioapic *ioapic)
 {
-    printf("  I/O APIC id %d ver %d, address: 0x%x  ",
+    SHOW_INFO( 0, "  I/O APIC id %d ver %d, address: 0x%x  ",
                   ioapic->id, ioapic->ver, ioapic->addr);
     if (!(ioapic->flags & IMPS_FLAG_ENABLED)) {
-        printf("DISABLED\n");
+        SHOW_INFO0( 0, "  - DISABLED");
         return;
     }
-    printf("\n");
 
     /*  XXXXX  add OS-specific code here */
+}
+
+static void
+add_int(imps_interrupt *ii)
+{
+    char * itname = "?";
+
+    switch(ii->type)
+    {
+    case IMPS_BCT_IO_INTERRUPT: 	itname = "io"; break;
+    case IMPS_BCT_LOCAL_INTERRUPT:      itname = "local"; break;
+    }
+
+    char *busname = "? bus ";
+    if(ii->source_bus_id < MAXBUSIDS)
+        busname = bus_ids[ii->source_bus_id];
+
+    if( 0 == busname ) busname = "?? bus";
+
+    SHOW_INFO( 0,  "Interrupt type %d (%s), int_type %d, flags %d",
+           ii->type, itname, ii->int_type, ii->flags
+          );
+
+    SHOW_INFO( 0,  " - %s (%d) irq %2X -> apic %d in %2X",
+               busname,
+               ii->source_bus_id, ii->source_bus_irq,
+               ii->dest_apic_id, ii->dest_apic_intin
+             );
 }
 
 
@@ -341,16 +382,18 @@ imps_read_config_table(unsigned start, int count)
         case IMPS_BCT_IOAPIC:
             add_ioapic((imps_ioapic *)start);
             break;
-#if 0	/*  XXXXX  uncomment this if "add_io_interrupt" is implemented */
+	/*  XXXXX  uncomment this if "add_io_interrupt" is implemented */
         case IMPS_BCT_IO_INTERRUPT:
-            add_io_interrupt((imps_interrupt *)start);
+            add_int((imps_interrupt *)start);
+            //add_io_interrupt((imps_interrupt *)start);
             break;
-#endif
-#if 0	/*  XXXXX  uncomment this if "add_local_interrupt" is implemented */
+
+	/*  XXXXX  uncomment this if "add_local_interrupt" is implemented */
         case IMPS_BCT_LOCAL_INTERRUPT:
-            add_local_interupt((imps_interrupt *)start);
+            add_int((imps_interrupt *)start);
+            //add_local_interupt((imps_interrupt *)start);
             break;
-#endif
+
         default:
             break;
         }
@@ -367,7 +410,7 @@ imps_bad_bios(imps_fps *fps_ptr)
         = (imps_cth *) PHYS_TO_VIRTUAL(fps_ptr->cth_ptr);
 
     if (fps_ptr->feature_info[0] > IMPS_FPS_DEFAULT_MAX) {
-        printf("    Invalid MP System Configuration type %d\n",
+        SHOW_ERROR( 0, "    Invalid MP System Configuration type %d",
                       fps_ptr->feature_info[0]);
         return 1;
     }
@@ -376,11 +419,11 @@ imps_bad_bios(imps_fps *fps_ptr)
         sum = get_checksum((unsigned)local_cth_ptr,
                            local_cth_ptr->base_length);
         if (local_cth_ptr->sig != IMPS_CTH_SIGNATURE || sum) {
-            printf("    Bad MP Config Table sig 0x%x and/or checksum 0x%x\n", (unsigned)(fps_ptr->cth_ptr), sum);
+            SHOW_ERROR( 0, "    Bad MP Config Table sig 0x%x and/or checksum 0x%x", (unsigned)(fps_ptr->cth_ptr), sum);
             return 1;
         }
         if (local_cth_ptr->spec_rev != fps_ptr->spec_rev) {
-            printf("    Bad MP Config Table sub-revision # %d\n", local_cth_ptr->spec_rev);
+            SHOW_ERROR( 0, "    Bad MP Config Table sub-revision # %d", local_cth_ptr->spec_rev);
             return 1;
         }
         if (local_cth_ptr->extended_length) {
@@ -389,12 +432,12 @@ imps_bad_bios(imps_fps *fps_ptr)
                                 local_cth_ptr->extended_length)
                    + local_cth_ptr->extended_checksum) & 0xFF;
             if (sum) {
-                printf("    Bad Extended MP Config Table checksum 0x%x\n", sum);
+                SHOW_ERROR( 0, "    Bad Extended MP Config Table checksum 0x%x", sum);
                 return 1;
             }
         }
     } else if (!fps_ptr->feature_info[0]) {
-        printf("    Missing configuration information\n");
+        SHOW_ERROR0( 0, "    Missing configuration information");
         return 1;
     }
 
@@ -411,7 +454,7 @@ imps_read_bios(imps_fps *fps_ptr)
         = (imps_cth *)PHYS_TO_VIRTUAL(fps_ptr->cth_ptr);
     char *str_ptr;
 
-    printf("Intel MultiProcessor Spec 1.%d BIOS support detected\n",
+    SHOW_INFO( 0, "Intel MultiProcessor Spec 1.%d BIOS support detected",
                   fps_ptr->spec_rev);
 
     /*
@@ -420,7 +463,7 @@ imps_read_bios(imps_fps *fps_ptr)
      */
 
     if (imps_bad_bios(fps_ptr)) {
-        printf("    Disabling MPS support\n");
+        SHOW_ERROR0( 0, "    Disabling MPS support");
         return;
     }
 
@@ -434,10 +477,10 @@ imps_read_bios(imps_fps *fps_ptr)
     } else {
         imps_lapic_addr = LAPIC_ADDR_DEFAULT;
     }
-    printf("    APIC config: \"%s mode\"    Local APIC address: 0x%x\n",
+    SHOW_INFO( 0, "    APIC config: \"%s mode\"    Local APIC address: 0x%x",
                   str_ptr, imps_lapic_addr);
     if (imps_lapic_addr != (READ_MSR_LO(0x1b) & 0xFFFFF000)) {
-        printf("Inconsistent Local APIC address, Disabling SMP support\n");
+        SHOW_ERROR0( 0, "Inconsistent Local APIC address, Disabling SMP support");
         return;
     }
     imps_lapic_addr = (int)PHYS_TO_VIRTUAL(imps_lapic_addr);
@@ -457,7 +500,7 @@ imps_read_bios(imps_fps *fps_ptr)
         str1[8] = 0;
         memcpy(str2, local_cth_ptr->prod_id, 12);
         str2[12] = 0;
-        printf("  OEM id: %s  Product id: %s\n", str1, str2);
+        SHOW_INFO( 0, "  OEM id: %s  Product id: %s", str1, str2);
         cth_start = ((unsigned) local_cth_ptr) + sizeof(imps_cth);
         cth_count = local_cth_ptr->entry_count;
     } else {
@@ -522,9 +565,7 @@ imps_read_bios(imps_fps *fps_ptr)
 static int
 imps_scan(unsigned start, unsigned length)
 {
-#ifdef IMPS_DEBUG
-        printf("Scanning from 0x%x for %d bytes\n", start, length);
-#endif
+    SHOW_FLOW( 2, "Scanning from 0x%x for %d bytes", start, length );
 
     while (length > 0) {
         imps_fps *fps_ptr = (imps_fps *) PHYS_TO_VIRTUAL(start);
@@ -533,9 +574,9 @@ imps_scan(unsigned start, unsigned length)
             && fps_ptr->length == 1
             && (fps_ptr->spec_rev == 1 || fps_ptr->spec_rev == 4)
             && !get_checksum(start, 16)) {
-#ifdef IMPS_DEBUG
-            printf("Found MP Floating Structure Pointer at %x\n", start);
-#endif
+
+            SHOW_FLOW( 2, "Found MP Floating Structure Pointer at %x", start);
+
             imps_read_bios(fps_ptr);
             return 1;
         }

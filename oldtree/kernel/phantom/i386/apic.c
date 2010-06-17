@@ -75,6 +75,8 @@ void phantom_init_apic(void)
         (1<<17); 	// periodic
 #endif
 
+    imps_probe();
+
 }
 
 void apic_eoi()
