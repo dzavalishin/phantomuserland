@@ -126,6 +126,8 @@ class boot
 
     void tetris()
     {
+		testInheritance();
+
         try {
         console = new .internal.io.tty();
 

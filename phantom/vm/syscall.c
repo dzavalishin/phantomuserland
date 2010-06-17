@@ -816,7 +816,16 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     // TODO - is it available just in non-kernel builds?
     if( pvm_load_class_from_module(buf, &new_class))
     {
-        SYSCALL_THROW_STRING( "class load error" );
+        const char *msg = " - class load error";
+        if( strlen(buf) >= bufs - 2 - strlen(msg) )
+        {
+            SYSCALL_THROW_STRING( msg+3 );
+        }
+        else
+        {
+            strcat( buf, msg );
+            SYSCALL_THROW_STRING( buf );
+        }
     }
     else
     {
@@ -1143,6 +1152,27 @@ DECLARE_SIZE(array);
 
 // --------- mutex -------------------------------------------------------
 
+// NB - persistent mutexes!
+// TODO have a mark - can this mutex be locked at snapshot
+
+
+void vm_mutex_lock( pvm_object_t me )
+{
+    struct data_area_4_mutex *da = pvm_object_da( me, mutex );
+    (void)da;
+
+
+}
+
+void vm_mutex_unlock( pvm_object_t me )
+{
+    struct data_area_4_mutex *da = pvm_object_da( me, mutex );
+    (void)da;
+
+
+}
+
+
 static int si_mutex_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
     (void)o;
@@ -1162,6 +1192,7 @@ static int si_mutex_8_lock(struct pvm_object me, struct data_area_4_thread *tc )
 
     //SYSCALL_PUT_THIS_THREAD_ASLEEP()
 
+    vm_mutex_lock( me );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -1174,6 +1205,8 @@ static int si_mutex_9_unlock(struct pvm_object me, struct data_area_4_thread *tc
 
     // No locking in syscalls!!
     //pthread_mutex_unlock(&(da->mutex));
+
+    vm_mutex_unlock( me );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -1197,8 +1230,8 @@ syscall_func_t	syscall_table_4_mutex[16] =
     &si_void_4_equals,              &si_mutex_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_mutex_8_lock,     &si_mutex_9_unlock,
-    &si_mutex_10_trylock, &invalid_syscall,
+    &si_mutex_8_lock,     	    &si_mutex_9_unlock,
+    &si_mutex_10_trylock, 	    &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16

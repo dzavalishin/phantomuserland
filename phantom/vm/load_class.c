@@ -146,10 +146,15 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 if(debug_print) printf(", %d methods\n", n_method_slots );
 
                 struct pvm_object base_name = pvm_code_get_string(&h);
-                if(debug_print) printf("Based on: ");
-                if(debug_print) pvm_object_print( base_name );
-                if(debug_print) printf("\n");
-                ref_dec_o(base_name);
+                //if(debug_print)
+                {
+                    printf("Based on: ");
+                    pvm_object_print( base_name );
+                    printf("\n");
+                }
+
+                // TODO turn on later, when we're sure all class collections have it
+                //struct pvm_object version_string = pvm_code_get_string(&h);
 
                 got_class_header = 1;
 #if 0
@@ -160,6 +165,8 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 else
                     base_class = pvm_exec_lookup_class_by_name(base_name);
 #endif
+                ref_dec_o(base_name);
+
 
                 iface = pvm_create_interface_object( n_method_slots, base_class );
 
