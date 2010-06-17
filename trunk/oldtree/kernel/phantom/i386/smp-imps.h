@@ -166,6 +166,7 @@ struct imps_interrupt
 };
 
 
+
 /*
  *  Exported globals here.
  */
@@ -179,7 +180,7 @@ extern int imps_enabled;
 /*
  *  This contains the local APIC hardware address.
  */
-extern unsigned imps_lapic_addr;
+//extern unsigned imps_lapic_addr;
 
 /*
  *  This represents the number of CPUs found.
@@ -219,10 +220,10 @@ int imps_force(int ncpus);
 /*
  *  Defines that use variables
  */
-
-#define IMPS_LAPIC_READ(x)  (*((volatile unsigned *) (imps_lapic_addr+(x))))
+// was imps_lapic_addr
+#define IMPS_LAPIC_READ(x)  (*((volatile unsigned *) (((void *)apic_local_unit)+(x))))
 #define IMPS_LAPIC_WRITE(x, y)   \
-   (*((volatile unsigned *) (imps_lapic_addr+(x))) = (y))
+   (*((volatile unsigned *) (((void *)apic_local_unit)+(x))) = (y))
 
 #endif  /* !_SMP_IMPS_H */
 
