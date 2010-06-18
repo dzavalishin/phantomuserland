@@ -201,6 +201,9 @@ int main(int argc, char **argv, char **envp)
              (void *)PHANTOM_AMAP_START_VM_POOL,
              N_OBJMEM_PAGES*4096L);
 
+    detect_cpu(0);
+    phantom_init_apic();
+
     // Stage is:
     //   0 - very early in the boot - interrupts can be used only
     //   1 - boot, most of kernel infrastructure is there
@@ -238,7 +241,7 @@ int main(int argc, char **argv, char **envp)
     printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
     phantom_process_boot_options();
 
-    detect_cpu(0);
+    //detect_cpu(0);
 
     // Used to refill list used to allocate physmem in interrupts
     hal_init_physmem_alloc_thread();
@@ -254,7 +257,7 @@ int main(int argc, char **argv, char **envp)
     phantom_start_video_driver();
 
 
-    phantom_init_apic();
+    //phantom_init_apic();
     //pressEnter("after APIC");
 
 

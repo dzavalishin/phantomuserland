@@ -13,6 +13,25 @@
 
 #include <x86/comreg.h>
 
+/*
+
+Format of BIOS Data Segment at segment 40h:
+		{items in curly braces not documented by IBM}
+Offset	Size	Description
+ 00h	WORD	Base I/O address of 1st serial I/O port, zero if none
+ 02h	WORD	Base I/O address of 2nd serial I/O port, zero if none
+ 04h	WORD	Base I/O address of 3rd serial I/O port, zero if none
+ 06h	WORD	Base I/O address of 4th serial I/O port, zero if none
+		    Note: Above fields filled in turn by POST as it finds serial
+		    ports. POST never leaves gaps. DOS and BIOS serial device
+		    numbers may be redefined by re-assigning these fields.
+ 08h	WORD	Base I/O address of 1st parallel I/O port, zero if none
+ 0Ah	WORD	Base I/O address of 2nd parallel I/O port, zero if none
+ 0Ch	WORD	Base I/O address of 3rd parallel I/O port, zero if none
+ 0Eh	WORD	[non-PS] Base I/O address of 4th parallel I/O port, zero if none
+
+
+ */
 
 typedef struct
 {
