@@ -19,7 +19,11 @@ static hal_cond_t   phantom_snap_wait_4_vm_enter;
 static hal_cond_t   phantom_snap_wait_4_vm_leave;
 static hal_cond_t   phantom_vm_wait_4_snap;
 
+// BUG - really inefficient, as it wakes single cond
+// and wakes all threads for most of them to go sleep again
 static hal_mutex_t  interlock_mutex;
+static hal_cond_t   vm_thread_wakeup_cond;
+
 
 void phantom_snap_threads_interlock_init( void )
 {
@@ -28,7 +32,8 @@ void phantom_snap_threads_interlock_init( void )
        hal_cond_init( &phantom_snap_wait_4_vm_leave, "Snap W4L" ) ||
        hal_cond_init( &phantom_vm_wait_4_snap, "Snap W4S" ) ||
 
-       hal_mutex_init( &interlock_mutex, "Snap ILck" )
+       hal_mutex_init( &interlock_mutex, "Snap ILck" ) ||
+       hal_cond_init( &vm_thread_wakeup_cond, "VmSleep")
       )
         panic("Can't init thread/snap interlocks");
 }
@@ -167,6 +172,7 @@ void phantom_snapper_reenable_threads( void )
 // userland sleep/wakeup code
 // ----------------------------------------------------------------
 
+
 /*
  *
  * Called by any virt. machine thread when it sees
@@ -189,8 +195,10 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     phantom_virtual_machine_threads_stopped++;
     hal_cond_broadcast( &phantom_snap_wait_4_vm_enter );
     //if(DEBUG) printf("Thread reported sleep, will wait now\n");
+
+    //while(thda->sleep_flag)        hal_cond_wait( &(thda->wakeup_cond), &interlock_mutex );
     while(thda->sleep_flag)
-        hal_cond_wait( &(thda->wakeup_cond), &interlock_mutex );
+        hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
 
     //if(DEBUG) printf("Thread awaken, will report wakeup\n");
     phantom_virtual_machine_threads_stopped--;
@@ -213,8 +221,9 @@ printf("put thread asleep\n");
 void phantom_thread_wake_up( struct data_area_4_thread *thda )
 {
     thda->sleep_flag--;
+    //if(thda->sleep_flag <= 0)        hal_cond_broadcast( &thda->wakeup_cond );
     if(thda->sleep_flag <= 0)
-        hal_cond_broadcast( &thda->wakeup_cond );
+        hal_cond_broadcast( &vm_thread_wakeup_cond );
 }
 
 

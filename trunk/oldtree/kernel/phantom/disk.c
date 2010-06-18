@@ -160,6 +160,7 @@ void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq )
 // ------------------------------------------------------------
 
 static void find_subpartitions(phantom_disk_partition_t *p);
+static void dump_partition(phantom_disk_partition_t *p);
 
 static phantom_disk_partition_t partitions[MAX_DISK_PARTITIONS];
 static int nPartitions = 0;
@@ -173,6 +174,7 @@ static void register_partition(phantom_disk_partition_t *p)
     }
 
     partitions[nPartitions] = *p;
+    dump_partition(p);
     find_subpartitions(p);
 }
 
@@ -273,6 +275,13 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
         phantom_disk_partition_t * newp = phantom_create_partition_struct( p, pp->start, pp->size);
         newp->type = pp->type;
 
+        if(newp->type == PHANTOM_PARTITION_TYPE_ID)
+        {
+            printf("!! Phantom Partition found !!\n");
+            p->flags |= PART_FLAG_IS_PHANTOM_TYPE;
+
+        }
+
         char pn[4] = "PC0";
         pn[2] += pno++;
         strncpy(newp->name, pn, PARTITION_NAME_LEN-1);
@@ -302,5 +311,18 @@ static void lookup_phantom_fs(phantom_disk_partition_t *p)
             p->flags |= PART_FLAG_IS_PHANTOM_FSSB;
         }
     }
+}
+
+
+
+static void dump_partition(phantom_disk_partition_t *p)
+{
+    printf("Disk Partition %s (%s)\n", p->name, p->label );
+
+    printf(" - type %d%s\n", p->type, p->type == PHANTOM_PARTITION_TYPE_ID ? " (phantom)" : "" );
+    printf(" - flags %b\n", p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
+    printf(" - blksz %d, start %ld, size %ld\n", p->block_size, p->shift, p->size );
+    printf(" - %s base, %s specific\n", p->base ? "has" : "no", p->specific ? "has" : "no" );
+
 }
 

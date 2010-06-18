@@ -176,6 +176,7 @@ send_ipi(unsigned int dst, unsigned int v)
     return (to < 1000) ? ETIMEDOUT : 0;
 }
 
+static unsigned bootaddr;
 
 /*
  *  Primary function for booting individual CPUs.
@@ -188,7 +189,7 @@ static int
 boot_cpu(imps_processor *proc)
 {
     int apicid = proc->apic_id, success = 1, to;
-    unsigned bootaddr, accept_status;
+    unsigned accept_status;
     unsigned bios_reset_vector = (int)PHYS_TO_VIRTUAL(BIOS_RESET_VECTOR);
 
     /*
@@ -199,7 +200,7 @@ boot_cpu(imps_processor *proc)
      * under the 1MB boundary.
      */
 
-    return 0;
+    //return 0;
 
     //panic("boot SMP cpu code is not ready");
 
@@ -207,8 +208,6 @@ boot_cpu(imps_processor *proc)
     //extern char patch_code_end[];
     //bootaddr = (512-64)*1024;
     //memcpy((char *)bootaddr, patch_code_start, patch_code_end - patch_code_start);
-
-    assert( 0 == hal_alloc_phys_pages_low( &bootaddr, 4 ) );
 
     install_ap_tramp(bootaddr);
 
@@ -683,6 +682,9 @@ imps_force(int ncpus)
 int
 imps_probe(void)
 {
+    assert( 0 == hal_alloc_phys_pages_low( &bootaddr, 4 ) );
+
+
     /*
      *  Determine possible address of the EBDA
      */
@@ -710,7 +712,8 @@ imps_probe(void)
      *    unlikely to be an MPS compatible machine, so return failure.
      */
     if (mem_lower < 512*1024 || mem_lower > 640*1024) {
-        return 0;
+        //return 0;
+        goto free;
     }
 
     if (ebda_addr > mem_lower - 1024
@@ -728,6 +731,8 @@ imps_probe(void)
     /*
      *  If no BIOS info on MPS hardware is found, then return failure.
      */
+free:
+    hal_free_phys_pages_low( bootaddr, 4 );
 
     return 0;
 }
