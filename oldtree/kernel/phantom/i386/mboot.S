@@ -183,7 +183,7 @@ bootMP:
 	mov	$(boot_stk-bootMP), %esp
 
 	/* Now load the global descriptor table */
-	lgdt	MP_GDTptr-bootMP
+	lgdt	(MP_GDTptr-bootMP)
 
 	/* Enable protected mode */
 	movl	%cr0, %eax
@@ -194,8 +194,9 @@ bootMP:
 	 * make intrasegment jump to flush the processor pipeline and
 	 * reload CS register
 	 */
-	//pushl	$0x18
-	pushl	$KERNEL_DS
+	pushl	$0x18
+	//pushl	$KERNEL_DS
+	//pushl	$KERNEL_CS
 	pushl	$(protmode-bootMP)
 	lretl
 
@@ -212,8 +213,8 @@ protmode:
  	 * SO NOW... for the BIG Jump into kernel's segment
 	 * and physical text above 1 Meg.
 	 */
-	//mov	$0x10, %ebx
-	mov	$KERNEL_CS, %ebx
+	mov	$0x10, %ebx
+	//mov	$KERNEL_DS, %ebx
 	movw	%bx, %ds
 	movw	%bx, %es
 	movw	%bx, %fs

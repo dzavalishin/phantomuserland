@@ -28,11 +28,6 @@
 #define IMPS_READ(x)	(*((volatile unsigned *) (x)))
 #define IMPS_WRITE(x,y)	(*((volatile unsigned *) (x)) = (y))
 
-#ifdef IMPS_DEBUG
-#define IMPS_DEBUG_PRINT(x)  KERNEL_PRINT(x)
-#else  /* !IMPS_DEBUG */
-#define IMPS_DEBUG_PRINT(x)
-#endif /* !IMPS_DEBUG */
 
 #define IMPS_MAX_CPUS			APIC_BCAST_ID
 
@@ -221,9 +216,9 @@ int imps_force(int ncpus);
  *  Defines that use variables
  */
 // was imps_lapic_addr
-#define IMPS_LAPIC_READ(x)  (*((volatile unsigned *) (((void *)apic_local_unit)+(x))))
+#define IMPS_LAPIC_READ(x)  (*((volatile unsigned *) (((unsigned)apic_local_unit)+(x))))
 #define IMPS_LAPIC_WRITE(x, y)   \
-   (*((volatile unsigned *) (((void *)apic_local_unit)+(x))) = (y))
+   (*((volatile unsigned *) (((unsigned)apic_local_unit)+(x))) = (y))
 
 #endif  /* !_SMP_IMPS_H */
 
