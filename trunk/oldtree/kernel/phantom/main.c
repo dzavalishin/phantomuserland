@@ -193,7 +193,7 @@ int main(int argc, char **argv, char **envp)
     init_irq_allocator();
 
     // BUG - called second time?
-    phantom_init_descriptors();
+    //phantom_init_descriptors();
 
     init_multiboot_symbols();
 
@@ -202,6 +202,7 @@ int main(int argc, char **argv, char **envp)
              N_OBJMEM_PAGES*4096L);
 
     detect_cpu(0);
+    phantom_paging_init();
     phantom_init_apic();
 
     // Stage is:
@@ -214,7 +215,6 @@ int main(int argc, char **argv, char **envp)
 
     phantom_timer_pit_init(100,0);
 
-    phantom_paging_init();
 
     phantom_timed_call_init(); // Too late? Move up?
 

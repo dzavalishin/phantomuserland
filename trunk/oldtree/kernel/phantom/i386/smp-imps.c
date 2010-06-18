@@ -192,6 +192,10 @@ boot_cpu(imps_processor *proc)
     unsigned accept_status;
     unsigned bios_reset_vector = (int)PHYS_TO_VIRTUAL(BIOS_RESET_VECTOR);
 
+    int ver = IMPS_LAPIC_READ(LAPIC_VER);
+    SHOW_FLOW( 0, "APIC ver = 0x%x (%d)", ver, APIC_VERSION(ver) );
+
+
     /*
      * Copy boot code for secondary CPUs here.  Find it in between
      * "patch_code_start" and "patch_code_end" symbols.  The other CPUs
@@ -200,7 +204,7 @@ boot_cpu(imps_processor *proc)
      * under the 1MB boundary.
      */
 
-    //return 0;
+    return 0;
 
     //panic("boot SMP cpu code is not ready");
 
@@ -259,6 +263,8 @@ boot_cpu(imps_processor *proc)
     }
 #endif
 
+    hal_sleep_msec(10000);
+
     /*
      *  Check to see if other processor has started.
      */
@@ -267,6 +273,7 @@ boot_cpu(imps_processor *proc)
     {
         //UDELAY(10000);
         phantom_spinwait(10);
+        phantom_spinwait(1000);
     }
     if (to >= 100) {
         SHOW_INFO0( 0, "CPU Not Responding, DISABLED" );

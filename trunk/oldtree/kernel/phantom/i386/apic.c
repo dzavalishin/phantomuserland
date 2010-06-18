@@ -141,6 +141,8 @@ void arch_smp_send_broadcast_ici(void)
     if(ie) hal_sti();
 }
 
+
+
 /* cpu_apic_id?
 
 void arch_smp_send_ici(int target_cpu)
