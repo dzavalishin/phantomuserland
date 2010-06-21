@@ -24,7 +24,10 @@
 #include <phantom_libc.h>
 #include <i386/trap.h>
 
-#define APIC_TIMER_VECTOR (APIC_INT_BASE+31)
+// NB! Spurious must have lower bits = 1111
+#define APIC_SPURIOUS_VECTOR    (APIC_INT_BASE+31)
+#define APIC_TIMER_VECTOR 	(APIC_INT_BASE+30)
+#define APIC_ERROR_VECTOR       (APIC_INT_BASE+29)
 
 static int      have_apic = 0;
 
@@ -75,6 +78,19 @@ void phantom_init_apic(void)
         (1<<17); 	// periodic
 #endif
 
+    apic_local_unit->error_vector.r = APIC_ERROR_VECTOR;
+
+    // must be after imps_probe and must get address from it
+    phantom_io_apic_init( 0xFEC00000 );
+
+#if 1
+    // Actually enable APIC, disable focus check (why?)
+    apic_local_unit->spurious_vector.r =
+        APIC_SPURIOUS_VECTOR |
+        APIC_SVR_SWEN | APIC_SVR_FOCUS
+        ;
+#endif
+
     imps_probe();
 
 }
@@ -84,8 +100,24 @@ void apic_eoi()
     apic_local_unit->eoi.r = 0; // 0 is critical for X2APIC
 }
 
-void apic_timer()
+static void apic_timer()
 {
+}
+
+static void apic_spur()
+{
+    SHOW_ERROR0( 0, "Spurious APIC interrupt" );
+}
+
+
+static void apic_err()
+{
+    apic_local_unit->error_status.r = 0; // request to update
+    int err = apic_local_unit->error_status.r;
+    SHOW_ERROR( 0, "APIC error interrupt, err = %b",
+                err,
+                "\020\1SendCs\2RecvCs\3SendAccept\4RecvAccept\5Rsvd5\6SendIllVect\7RecvIllVect\10IllRegAddr"
+              );
 }
 
 void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
@@ -94,11 +126,23 @@ void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
 
     vector += APIC_INT_BASE;
 
-    if(vector == APIC_TIMER_VECTOR)
+    switch(vector)
     {
-        // apic_eoi();
-        apic_timer();
-        // return;
+    case APIC_SPURIOUS_VECTOR:
+        apic_spur();
+        return; // NB! No EOI!
+
+    case APIC_ERROR_VECTOR:
+        apic_err();
+        break;
+
+    case APIC_TIMER_VECTOR:
+        {
+            // apic_eoi();
+            apic_timer();
+            // return;
+        }
+        break;
     }
 
     printf("APIC int %d ", vector);

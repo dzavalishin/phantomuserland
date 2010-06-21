@@ -182,6 +182,8 @@ bootMP:
 	mov	%ax, %ss
 	mov	$(boot_stk-bootMP), %esp
 
+//hlt // ok
+
 	/* Now load the global descriptor table */
 	lgdt	(MP_GDTptr-bootMP)
 
@@ -189,21 +191,28 @@ bootMP:
 	movl	%cr0, %eax
 	orl	$CR0_PE, %eax
 	movl	%eax, %cr0 
-
+//hlt // ok
 	/*
 	 * make intrasegment jump to flush the processor pipeline and
 	 * reload CS register
 	 */
-	pushl	$0x18
+/*
+        pushl	$0x18
 	//pushl	$KERNEL_DS
 	//pushl	$KERNEL_CS
 	pushl	$(protmode-bootMP)
 	lretl
+        */
+        pushf
+        push	$0x18
+	pushl	$(protmode-bootMP)
+        iretl;
+
 
        .code32		
 protmode:
 	CHECKPOINT(0x35, 2)
-
+hlt
 	/*
 	 * we are NOW running for the first time with %eip
 	 * having the full physical address, BUT we still
@@ -298,6 +307,24 @@ ENTRY(mp_gdtbase)      	/* this will be modified by mpInstallTramp() */
 
 	.space	0x100	/* space for boot_stk - 1st temporary stack */
 boot_stk:
+
+/*
+    .code16
+Puts16:
+		pusha				; save registers
+putsLoop1:
+		lodsb				; load next byte from string from SI to AL
+		or	al, al			; Does AL=0?
+		jz	Puts16Done		; Yep, null terminator found-bail out
+		mov	ah, 0xe			; Nope-Print the character
+		int	0x10			; invoke BIOS
+		jmp	putsLoop1			; Repeat until null terminator found
+Puts16Done:
+		popa				; restore registers
+		ret				; we are done, so return
+*/
+
+
 
 BOOTMP2:
 	.globl	bootMP_size

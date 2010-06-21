@@ -13,6 +13,7 @@
 #ifndef HAL_H
 #define HAL_H
 
+#define USE_NEW_SEMAS 1
 
 #define USE_PHANTOM_PAGING_CODE 1
 

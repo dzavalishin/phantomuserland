@@ -2,6 +2,7 @@
 #define DISK_H
 
 #include <errno.h>
+#include <hal.h>
 #include "pager_io_req.h"
 
 #define MAX_DISK_PARTITIONS 64
@@ -18,7 +19,7 @@ struct phantom_disk_partition
     char        label[PARTITION_NAME_LEN];      // Partition label or additional info
 
     int         flags;
-    int 	type;           // 0-0xFF is PC part types
+    int         type;           // 0-0xFF is PC part types
 
     struct phantom_disk_partition *base; //
 

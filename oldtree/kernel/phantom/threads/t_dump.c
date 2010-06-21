@@ -35,7 +35,10 @@ void dump_thread_info(phantom_thread_t *t)
         printf("mutx %08X", t->waitmutex );
 
     if(t->sleep_flags & THREAD_SLEEP_COND)
-        printf("mutx %08X", t->waitcond );
+        printf("cond %08X", t->waitcond );
+
+    if(t->sleep_flags & THREAD_SLEEP_SEM)
+        printf("sema %08X", t->waitsem );
 
 
 
@@ -91,7 +94,7 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
     case THREAD_SLEEP_SLEEP:    slp = "SLEEP"; break;
     case THREAD_SLEEP_COND:     slp = "COND"; break;
     case THREAD_SLEEP_MUTEX:    slp = "MUTEX"; break;
-    //case THREAD_SLEEP_SEM:      slp = "SEMA"; break;
+    case THREAD_SLEEP_SEM:      slp = "SEMA"; break;
     case THREAD_SLEEP_LOCKED:   slp = "LOCK"; break;
     case THREAD_SLEEP_IO:       slp = "IO"; break;
     };
@@ -109,7 +112,6 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 
     if(t->sleep_flags & THREAD_SLEEP_MUTEX)
     {
-        //rc = snprintf(buf, len, "mutx %08X ", t->waitmutex );
         rc = snprintf(buf, len, "%08X %s",
                       t->waitmutex, t->waitmutex->impl->name );
         len -= rc;
@@ -119,13 +121,23 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 
     if(t->sleep_flags & THREAD_SLEEP_COND)
     {
-        //rc = snprintf(buf, len, "cond %08X ", t->waitcond );
         rc = snprintf(buf, len, "%08X %s",
                       t->waitcond, t->waitcond->impl->name );
         len -= rc;
         ret += rc;
         buf += rc;
     }
+
+#if USE_NEW_SEMAS
+    if(t->sleep_flags & THREAD_SLEEP_SEM)
+    {
+        rc = snprintf(buf, len, "%08X %s",
+                      t->waitsem, t->waitsem->impl->name );
+        len -= rc;
+        ret += rc;
+        buf += rc;
+    }
+#endif
 
     if( len > 0 )
     {

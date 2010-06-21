@@ -274,7 +274,7 @@ void trfs_process_received_data(trfs_queue_t *qe, trfs_fio_t *fio, void *data)
     int shift = (int)(firstIn-firstReq)*TRFS_SECTOR_SIZE;
 
     // TODO crashes, fix
-    //memcpy_v2p( (qe->orig_request->phys_page) + shift, data, len );
+    memcpy_v2p( (qe->orig_request->phys_page) + shift, data, len );
 
 }
 
@@ -304,7 +304,7 @@ static errno_t sendReadRq( trfs_queue_t *qe )
     // This covers the situation when server sends us back just some
     // first sectors per request.
     {
-        int start = 0;
+        unsigned int start = 0;
 
         for( start = 0; start < sizeof(u_int32_t)*8; start++ )
         {
@@ -575,6 +575,10 @@ errno_t trfsAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
     qe->recombine_map = 0; // nothing is ready
 
     qe->resend_count = 0;
+
+    //memcpy_v2p( rq->phys_page, "ABC", 4 );
+    //memcpy_v2p( rq->phys_page+1024, "ABC", 4 );
+
 
     SHOW_FLOW0( 1, "new request" );
     addRequest(qe);

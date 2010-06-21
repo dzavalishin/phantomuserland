@@ -215,6 +215,7 @@ int main(int argc, char **argv, char **envp)
 
     phantom_timer_pit_init(100,0);
 
+    //phantom_paging_init();
 
     phantom_timed_call_init(); // Too late? Move up?
 

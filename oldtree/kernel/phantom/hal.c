@@ -315,7 +315,7 @@ hal_dump(char *data, int len)
 
 
 
-
+#if !USE_NEW_SEMAS
 
 // -----------------------------------------------------------------------
 //
@@ -384,7 +384,7 @@ int hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
     return 0;
 }
 
-
+#endif
 
 
 

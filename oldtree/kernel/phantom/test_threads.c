@@ -33,6 +33,7 @@ static volatile int thread_stop_request = 0;
 
 static hal_cond_t c;
 static hal_mutex_t m;
+static hal_sem_t s;
 
 //static void YIELD();
 //#define YIELD() hal_sleep_msec(400)
@@ -62,6 +63,14 @@ static void checkEnterMutex()
 static void checkLeaveMutex() { inmutex--; }
 
 
+static void t_empty(void *a)
+{
+    (void) a;
+    hal_sleep_msec( random() % 6000 );
+    // TODO do some random things, such as sleep, set timer, etc
+}
+
+
 static void t_wait(void *a)
 {
     char *name = a;
@@ -88,7 +97,7 @@ static void t_wait(void *a)
 
 
 static int counter = 0;
-void thread1(void *a)
+static void thread1(void *a)
 {
     char *name = a;
     while(!thread_stop_request)
@@ -108,6 +117,8 @@ void thread1(void *a)
         hal_mutex_unlock(&m);
         if(TEST_CHATTY) printf("unlocked mutex\n");
 
+        if( random() & 1 )
+            hal_sem_acquire( &s );
 
         counter++;
         if(counter >7)
@@ -124,12 +135,27 @@ void thread1(void *a)
 }
 
 
+static void t_sem_signal(void *a)
+{
+    (void) a;
+    while( !thread_stop_request )
+    {
+        hal_sleep_msec( 350 );
+        hal_sem_release( &s );
+    }
+}
+
 
 static errno_t threads_test()
 {
 
     hal_cond_init(&c, "threadTest");
     hal_mutex_init(&m, "threadTest");
+    hal_sem_init(&s, "threadTest");
+
+    int i = 40;
+    while(i-- > 0)
+        phantom_create_thread( t_empty, "Empty", 0 );
 
     pressEnter("will create thread");
     phantom_create_thread( thread1, "__T1__", 0 );
@@ -140,7 +166,7 @@ static errno_t threads_test()
     int tid = hal_start_kernel_thread_arg( t_wait, "__TW__" );
     hal_set_thread_priority( tid, THREAD_PRIO_HIGH );
 
-    int i = 40;
+    i = 40;
     while(i-- > 0)
     {
         if(TEST_CHATTY) pressEnter("will yield");
@@ -149,8 +175,9 @@ static errno_t threads_test()
         if(TEST_CHATTY) printf("!! back in main\n");
     }
 
+    t_kill_thread( tid );
+    hal_sleep_msec( 30 );
 
-    // TODO use thread kill func
     thread_stop_request = 1;
     hal_sleep_msec( 10 );
 

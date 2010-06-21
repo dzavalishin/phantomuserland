@@ -73,6 +73,7 @@ struct phantom_thread
      */
     hal_cond_t *                waitcond;
     hal_mutex_t *               waitmutex;
+    hal_sem_t *                 waitsem;
 
     hal_spinlock_t              waitlock;
 
@@ -139,7 +140,7 @@ struct phantom_thread
 #define THREAD_SLEEP_SLEEP      0x0002 // waits for time to pass
 #define THREAD_SLEEP_COND       0x0004 // waits for cond to be signalled
 #define THREAD_SLEEP_MUTEX      0x0008 // waits for mutex to be freed
-//#define THREAD_SLEEP_SEM        0x0010 // waits for sema
+#define THREAD_SLEEP_SEM        0x0010 // waits for sema
 #define THREAD_SLEEP_LOCKED     0x0020 // thread state is incomplete (on creation)
 #define THREAD_SLEEP_IO     	0x0040 // Waits for synchronous IO to complete
 
@@ -436,7 +437,7 @@ struct phantom_mutex_impl
 
 };
 
-/*
+
 struct phantom_sem_impl
 {
     hal_spinlock_t      lock;
@@ -444,8 +445,14 @@ struct phantom_sem_impl
     const char*         name;
     queue_head_t	waiting_threads;
 };
-*/
 
+
+#if USE_NEW_SEMAS
+struct hal_sem
+{
+    struct phantom_sem_impl     *impl;
+};
+#endif // USE_NEW_SEMAS
 
 #endif // THREAD_PRIVATE_H
 

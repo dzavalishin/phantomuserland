@@ -13,7 +13,7 @@
 static pd_entry_t *pdir;
 static pt_entry_t *ptabs;
 
-
+static int paging_inited = 0;
 
 void phantom_paging_init(void)
 {
@@ -42,6 +42,8 @@ void phantom_paging_init(void)
         ptep += PAGE_SIZE;
     }
 
+    // needed by phantom_map_mem_equally();
+    paging_inited = 1;
 
     // Now map all mem equally
     //hal_pages_control( 0, 0, NPDE*NPTE, page_map, page_rw );
@@ -70,7 +72,6 @@ void phantom_paging_init(void)
                  jmp	1f             ;\
                  1:                     \
                  " : : "r" (get_cr0() | CR0_PG));
-
 
 }
 
@@ -101,6 +102,7 @@ void phantom_paging_init(void)
 void phantom_map_page(linaddr_t la, pt_entry_t mapping )
 {
     assert(PAGE_ALIGNED(la));
+    assert(paging_inited);
     *get_pte(la) = mapping;
 }
 
@@ -108,6 +110,7 @@ void phantom_map_page(linaddr_t la, pt_entry_t mapping )
 void phantom_unmap_page(linaddr_t la )
 {
     assert(PAGE_ALIGNED(la));
+    assert(paging_inited);
     *get_pte(la) = 0;
 }
 
@@ -115,12 +118,14 @@ void phantom_unmap_page(linaddr_t la )
 int phantom_is_page_accessed(linaddr_t la )
 {
     assert(PAGE_ALIGNED(la));
+    assert(paging_inited);
     return (*get_pte(la)) & INTEL_PTE_REF;
 }
 
 int phantom_is_page_modified(linaddr_t la )
 {
     assert(PAGE_ALIGNED(la));
+    assert(paging_inited);
     return (*get_pte(la)) & INTEL_PTE_MOD;
 }
 
@@ -133,6 +138,7 @@ phantom_dump_pdir()
     int was_invalid = 0;
     //phyasddr_t range_start = ptenum2lin(0);
 
+    assert(paging_inited);
     printf("------------ PageTable\n");
 
     int i;

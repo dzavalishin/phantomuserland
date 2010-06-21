@@ -53,8 +53,8 @@ typedef struct ApicLocalUnit
 	ApicReg reserved6;
 	ApicReg reserved7;
 	ApicReg 		task_pri;               // TPRI
-	ApicReg reservedb;
-	ApicReg reservedc;
+	ApicReg reservedb; // arb pri
+	ApicReg reservedc; // cpu pri
         ApicReg 		eoi;                    // EOI
 	ApicReg 		remote;
 	ApicReg 		logical_dest;
@@ -62,17 +62,18 @@ typedef struct ApicLocalUnit
 	ApicReg 		spurious_vector;        // SIVR
 	ApicReg 		isr[8];
 	ApicReg 		tmr[8];
-	ApicReg 		irr[8];
-	ApicReg reserved28[8];
+        ApicReg 		irr[8];
+        ApicReg                 error_status;
+	ApicReg reserved28[7];
 	ApicReg			int_command[2]; 	// ICR1. ICR2
 	ApicReg 		timer_vector; 		// LVTT
 	ApicReg reserved33;
-	ApicReg reserved34;
+	ApicReg reserved34; // perf count lvt
 	ApicReg 		lint0_vector;
 	ApicReg 		lint1_vector;
-	ApicReg reserved37;
-	ApicReg 		init_count;
-	ApicReg 		cur_count;
+	ApicReg 		error_vector; // err vector
+	ApicReg 		init_count; // timer
+	ApicReg 		cur_count;  // timer
 	ApicReg reserved3a;
 	ApicReg reserved3b;
 	ApicReg reserved3c;
@@ -163,9 +164,9 @@ extern volatile ApicLocalUnit * apic_local_unit;
 #define LOPRIO_LEVEL       0x00000010
 
 //#define IOAPIC_ID          0x0
-#define IOAPIC_VERSION     0x1
-#define IOAPIC_ARB         0x2
-#define IOAPIC_REDIR_TABLE 0x10
+//#define IOAPIC_VERSION     0x1
+//#define IOAPIC_ARB         0x2
+//#define IOAPIC_REDIR_TABLE 0x10
 
 #define IPI_CACHE_FLUSH    0x40
 #define IPI_INV_TLB        0x41
@@ -250,8 +251,19 @@ struct mp_ext_ioapic
 	unsigned int *addr;
 };
 
+void phantom_io_apic_init( physaddr_t pa );
 
+u_int32_t readIoApic(u_int32_t reg);
+void writeIoApic( u_int32_t reg, u_int32_t value);
 
+#define IOAPIC_LEVEL_TRIGGERED 1
+#define IOAPIC_EDGE_TRIGGERED  0
+
+#define IOAPIC_LO_ACTIVE 1
+#define IOAPIC_HI_ACTIVE 0
+
+void setIoApicInput( int input, int vector, int level, int low_active );
+void dumpIoApicInputs(void);
 
 
 
