@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "boot"
 #include "debug_ext.h"
-#define debug_level_flow 11
+#define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -340,7 +340,7 @@ void phantom_map_mem_equally()
 
     hal_pages_control( ds_start, (void *)ds_start, ds_pages, page_map, page_rw );
 
-    SHOW_FLOW( 1, "Data seg 0x%X-%X, %d bytes, %d pages", ds_start, ((int)&_bss_end__), ds_bytes, ds_pages );
+    SHOW_FLOW( 7, "Data seg 0x%X-%X, %d bytes, %d pages", ds_start, ((int)&_bss_end__), ds_bytes, ds_pages );
 }
 
 

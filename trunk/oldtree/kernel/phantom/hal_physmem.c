@@ -423,7 +423,7 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
     if(hal_alloc_vaddress( &addr, 1))
         panic("out of vaddresses");
 
-#if 0 // panics, need test
+#if 1 // panics, need test
     if(!PAGE_ALIGNED(to))
     {
         // Process partial page
@@ -431,6 +431,9 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
         physaddr_t page = PREV_PAGE_ALIGN(to);
         int shift = to-page;
         int part = PAGE_SIZE-shift;
+
+        if( part > size ) part = size;
+
         assert( shift < PAGE_SIZE );
         assert( shift > 0 );
 
@@ -446,9 +449,9 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
     }
 #endif
 
-    assert(PAGE_ALIGNED(to));
+    if( size > 0 ) assert(PAGE_ALIGNED(to));
 
-    do
+    while( size > 0 )
     {
         int stepSize = size > PAGE_SIZE ? PAGE_SIZE : size;
         size -= stepSize;
@@ -462,7 +465,7 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
         to += PAGE_SIZE;
         from += PAGE_SIZE;
 
-    } while( size > 0 );
+    }
 
     assert( size == 0 );
 

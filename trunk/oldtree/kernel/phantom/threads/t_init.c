@@ -52,7 +52,7 @@ phantom_threads_init()
 
     phantom_thread_init_conds();
     phantom_thread_init_mutexes();
-
+	phantom_thread_init_sems();
     phantom_thread_init_killer();
 
     // Create thread entry for this control flow

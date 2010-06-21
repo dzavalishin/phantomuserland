@@ -141,7 +141,7 @@ struct data_area_4_thread
     hal_spinlock_t 				spin; // used on manipulations with sleep_flag
 
     volatile int                                sleep_flag;     // Is true if thread is put asleep in userland
-    hal_cond_t   				wakeup_cond;    // Will sleep here
+    //hal_cond_t   				wakeup_cond;    // Will sleep here
 
     int                                         tid;            // Actual kernel thread id - reloaded on each kernel restart
 

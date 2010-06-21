@@ -29,6 +29,7 @@
 
 
 #include <i386/proc_reg.h>
+#include <i386/isa/pic.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
@@ -96,29 +97,40 @@ static struct {
     imps_interrupt intin[16];
     imps_interrupt lintin[2];
 } defconfig = {
-    { { IMPS_BCT_PROCESSOR, 0, 0, 0, 0, 0},
-    { IMPS_BCT_PROCESSOR, 1, 0, 0, 0, 0} },
-    { { IMPS_BCT_BUS, 0, {'E', 'I', 'S', 'A', ' ', ' '}},
-    { 255, 1, {'P', 'C', 'I', ' ', ' ', ' '}} },
+    {
+        { IMPS_BCT_PROCESSOR, 0, 0, 0, 0, 0, "" },
+        { IMPS_BCT_PROCESSOR, 1, 0, 0, 0, 0, "" }
+    },
+
+    {
+        { IMPS_BCT_BUS, 0, {'E', 'I', 'S', 'A', ' ', ' '}},
+        { 255, 1, {'P', 'C', 'I', ' ', ' ', ' '}}
+    },
+
     { IMPS_BCT_IOAPIC, 0, 0, IMPS_FLAG_ENABLED, IOAPIC_ADDR_DEFAULT },
-    { { IMPS_BCT_IO_INTERRUPT, IMPS_INT_EXTINT, 0, 0, 0, 0xFF, 0},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 1, 0xFF, 1},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 0, 0xFF, 2},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 3, 0xFF, 3},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 4, 0xFF, 4},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 5, 0xFF, 5},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 6, 0xFF, 6},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 7, 0xFF, 7},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 8, 0xFF, 8},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 9, 0xFF, 9},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 10, 0xFF, 10},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 11, 0xFF, 11},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 12, 0xFF, 12},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 13, 0xFF, 13},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 14, 0xFF, 14},
-    { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 15, 0xFF, 15} },
-    { { IMPS_BCT_LOCAL_INTERRUPT, IMPS_INT_EXTINT, 0, 0, 15, 0xFF, 0},
-    { IMPS_BCT_LOCAL_INTERRUPT, IMPS_INT_NMI, 0, 0, 15, 0xFF, 1} }
+
+    {
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_EXTINT, 0, 0, 0, 0xFF, 0},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 1, 0xFF, 1},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 0, 0xFF, 2},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 3, 0xFF, 3},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 4, 0xFF, 4},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 5, 0xFF, 5},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 6, 0xFF, 6},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 7, 0xFF, 7},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 8, 0xFF, 8},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 9, 0xFF, 9},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 10, 0xFF, 10},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 11, 0xFF, 11},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 12, 0xFF, 12},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 13, 0xFF, 13},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 14, 0xFF, 14},
+        { IMPS_BCT_IO_INTERRUPT, IMPS_INT_INT, 0, 0, 15, 0xFF, 15}
+    },
+    {
+        { IMPS_BCT_LOCAL_INTERRUPT, IMPS_INT_EXTINT, 0, 0, 15, 0xFF, 0},
+        { IMPS_BCT_LOCAL_INTERRUPT, IMPS_INT_NMI, 0, 0, 15, 0xFF, 1}
+    }
 };
 
 /*
@@ -263,13 +275,14 @@ boot_cpu(imps_processor *proc)
     }
 #endif
 
-    hal_sleep_msec(10000);
+    SHOW_FLOW0( 0, "Wait for CPU to start" );
+
 
     /*
      *  Check to see if other processor has started.
      */
     to = 0;
-    while (!TEST_BOOTED(bootaddr) && to++ < 100)
+    while (!TEST_BOOTED(bootaddr) && to++ < 10000)
     {
         //UDELAY(10000);
         phantom_spinwait(10);
@@ -281,6 +294,8 @@ boot_cpu(imps_processor *proc)
     } else {
         SHOW_INFO( 0, "#%d  Application Processor (AP)", imps_num_cpus);
     }
+
+    
 
     /*
      *  Generic CPU startup sequence ends here, the rest is cleanup.
@@ -691,6 +706,9 @@ imps_probe(void)
 {
     assert( 0 == hal_alloc_phys_pages_low( &bootaddr, 4 ) );
 
+    int picmask = phantom_pic_get_irqmask();
+    phantom_pic_disable_all();
+
 
     /*
      *  Determine possible address of the EBDA
@@ -729,10 +747,13 @@ imps_probe(void)
         ebda_addr = 0;
     }
 
+    int ret = 0;
+
     if (((ebda_addr && imps_scan(ebda_addr, 1024))
          || (!ebda_addr && imps_scan(mem_lower - 1024, 1024))
          || imps_scan(0xF0000, 0x10000)) && imps_enabled) {
-        return imps_num_cpus;
+        ret = imps_num_cpus;
+        goto free;
     }
 
     /*
@@ -740,7 +761,8 @@ imps_probe(void)
      */
 free:
     hal_free_phys_pages_low( bootaddr, 4 );
+    phantom_pic_set_irqmask(picmask);
 
-    return 0;
+    return ret;
 }
 

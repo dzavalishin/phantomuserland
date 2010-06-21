@@ -44,6 +44,7 @@
 #define IOAPIC_RW				0x10
 #define		IOAPIC_ID			0
 #define		IOAPIC_VER			1
+#define         IOAPIC_ARB                      2
 #define		IOAPIC_REDIR			0x10
 
 #define LAPIC_ID				0x20
@@ -81,6 +82,17 @@
 #define LAPIC_TICR				0x380
 #define LAPIC_TCCR				0x390
 #define LAPIC_TDCR				0x3E0
+
+
+
+/*
+ *  IO APIC Defines.
+ */
+
+
+#define IOAPIC_REDIR_LEVEL  (1<<15)
+#define IOAPIC_REDIR_LOWACT (1<<13)
+
 
 #endif  /* _APIC_REGS_H */
 

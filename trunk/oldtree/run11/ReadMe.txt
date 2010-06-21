@@ -10,7 +10,6 @@ To run kernel first time:
 What is included here is kernel and simple userland code which starts
 and runs Tetris-like thing forever (forever == some two days, I think).
 
-This demo has SNAPSHOTS TURNED OFF, so no persistence, sorry.
 
 You can go to http://code.google.com/p/phantomuserland/, download
 userland environment and try to write some app for this kernel,
