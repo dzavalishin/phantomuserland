@@ -81,7 +81,7 @@ void phantom_init_apic(void)
     apic_local_unit->error_vector.r = APIC_ERROR_VECTOR;
 
     // must be after imps_probe and must get address from it
-    phantom_io_apic_init( 0xFEC00000 );
+    //phantom_io_apic_init( 0xFEC00000 );
 
 #if 1
     // Actually enable APIC, disable focus check (why?)

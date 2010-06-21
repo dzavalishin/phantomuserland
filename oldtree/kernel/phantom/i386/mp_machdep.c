@@ -84,6 +84,9 @@ install_ap_tramp(void *boot_address)
 	dst8 = (u_int8_t *) (dst16 + 1);
 	*dst16 = (u_int) boot_address & 0xffff;
 	*dst8 = ((u_int) boot_address >> 16) & 0xff;
+
+
+        dump_mp_gdt( va + ((u_int) & MP_GDT - boot_base) );
 }
 
 volatile int     smp_ap_booted = 0;
@@ -91,7 +94,7 @@ volatile int     smp_ap_booted = 0;
 void smp_ap_start(void)
 {
     smp_ap_booted = 1;
-    printf("!! SMP AP START !!");
+    //printf("!! SMP AP START !!");
 
     halt();
 }

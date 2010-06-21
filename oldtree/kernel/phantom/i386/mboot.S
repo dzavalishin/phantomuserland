@@ -89,6 +89,7 @@ NON_GPROF_ENTRY(MPentry)
 	movl	$1,%eax
 	cpuid					/* Retrieve features */
 	movl	%cr4,%eax
+//hlt
 /*
 #ifndef DISABLE_PSE
 	testl	$CPUID_PSE,%edx
@@ -123,13 +124,13 @@ NON_GPROF_ENTRY(MPentry)
 	movl	R(IdlePTD), %eax
 	movl	%eax,%cr3	
 #endif
-#endif
 
 	movl	%cr0,%eax
 	orl	$CR0_PE|CR0_PG,%eax		/* enable paging */
 	movl	%eax,%cr0			/* let the games begin! */
 	movl	bootSTK,%esp			/* boot stack end loc. */
-
+#endif
+//hlt
 	pushl	$mp_begin			/* jump to high mem */
 	ret
 
@@ -137,8 +138,9 @@ NON_GPROF_ENTRY(MPentry)
 	 * Wait for the booting CPU to signal startup
 	 */
 mp_begin:	/* now running relocated at KERNBASE */
-	CHECKPOINT(0x37, 4)
-	call	EXT(smp_ap_start)			/* load i386 tables */
+    CHECKPOINT(0x37, 4)
+//hlt
+    call	EXT(smp_ap_start)			/* load i386 tables */
 
 	.data
 	P2ALIGN(PAGE_SHIFT)
@@ -196,23 +198,23 @@ bootMP:
 	 * make intrasegment jump to flush the processor pipeline and
 	 * reload CS register
 	 */
-/*
+#if 1
         pushl	$0x18
 	//pushl	$KERNEL_DS
 	//pushl	$KERNEL_CS
 	pushl	$(protmode-bootMP)
 	lretl
-        */
+#else
         pushf
         push	$0x18
 	pushl	$(protmode-bootMP)
         iretl;
-
+#endif
 
        .code32		
 protmode:
 	CHECKPOINT(0x35, 2)
-hlt
+//hlt
 	/*
 	 * we are NOW running for the first time with %eip
 	 * having the full physical address, BUT we still
@@ -229,7 +231,7 @@ hlt
 	movw	%bx, %fs
 	movw	%bx, %gs
 	movw	%bx, %ss
-
+//hlt
 	.globl	bigJump
 ENTRY(bigJump)
 	/* this will be modified by mpInstallTramp() */
@@ -276,8 +278,10 @@ kerneldata:		/* offset = 0x10 */
 
 bootcode:		/* offset = 0x18 */
 
-	.word	0xffff	/* segment limit 0..15 */
-ENTRY(bootCodeSeg)     	/* this will be modified by mpInstallTramp() */
+        .word	0xffff	/* segment limit 0..15 */
+// NB! Not ENTRY()!
+            //ENTRY(bootCodeSeg)     	/* this will be modified by mpInstallTramp() */
+.globl EXT(bootCodeSeg); LEXT(bootCodeSeg)
 	.word	0x0000	/* segment base 0..15 */
 	.byte	0x00	/* segment base 16...23; set for 0x000xx000 */
 	.byte	0x9e	/* flags; Type  */
@@ -287,7 +291,9 @@ ENTRY(bootCodeSeg)     	/* this will be modified by mpInstallTramp() */
 bootdata:		/* offset = 0x20 */
 
 	.word	0xffff	
-ENTRY(bootDataSeg)     	/* this will be modified by mpInstallTramp() */
+// NB! Not ENTRY()!
+    //ENTRY(bootDataSeg)     	/* this will be modified by mpInstallTramp() */
+.globl EXT(bootDataSeg); LEXT(bootDataSeg)
 	.word	0x0000	/* segment base 0..15 */
 	.byte	0x00	/* segment base 16...23; set for 0x000xx000 */
 	.byte	0x92	
@@ -302,7 +308,9 @@ ENTRY(bootDataSeg)     	/* this will be modified by mpInstallTramp() */
 MP_GDTptr:	
 mp_gdtlimit:
 	.word	0x0028		
-ENTRY(mp_gdtbase)      	/* this will be modified by mpInstallTramp() */
+// NB! Not ENTRY()!
+//ENTRY(mp_gdtbase)      	/* this will be modified by mpInstallTramp() */
+.globl EXT(mp_gdtbase); LEXT(mp_gdtbase)
 	.long	0
 
 	.space	0x100	/* space for boot_stk - 1st temporary stack */

@@ -29,6 +29,7 @@
 
 
 #include <i386/proc_reg.h>
+#include <i386/seg.h>
 #include <i386/isa/pic.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
@@ -52,8 +53,13 @@ extern volatile int     smp_ap_booted;
 #if 1
 #define CMOS_WRITE_BYTE(x,y)	rtcout(x,y) /* write unsigned char "y" at CMOS loc "x" */
 #define CMOS_READ_BYTE(x)	rtcin(x) /* read unsigned char at CMOS loc "x" */
-#define PHYS_TO_VIRTUAL(x)	phystokv(x)	/* convert physical address "x" to virtual */
+
+//#define PHYS_TO_VIRTUAL(x)	phystokv(x)	/* convert physical address "x" to virtual */
+//#define VIRTUAL_TO_PHYS(x)	kvtophys(x)     /* convert virtual address "x" to physical */
+
+#define PHYS_TO_VIRTUAL(x)	((void*)(x))	/* convert physical address "x" to virtual */
 #define VIRTUAL_TO_PHYS(x)	kvtophys(x)     /* convert virtual address "x" to physical */
+
 //#define UDELAY(x)		/* delay roughly at least "x" microsecs */
 #define TEST_BOOTED(x)		smp_ap_booted
 	/* test bootaddr x to see if CPU started */
@@ -188,6 +194,27 @@ send_ipi(unsigned int dst, unsigned int v)
     return (to < 1000) ? ETIMEDOUT : 0;
 }
 
+
+dump_mp_gdt(void *addr)
+{
+    extern u_int 	MP_GDT;
+    struct real_descriptor *rd = addr;
+
+    int i;
+
+    for( i = 0; i < 5; i++, rd++ )
+    {
+        printf("%d: base %x lim %x, acc %x gran %x\n",
+               i,
+               rd->base_low + (rd->base_med<<16) + (rd->base_high<<24),
+               rd->limit_low + (rd->limit_high<<16),
+               rd->access, rd->granularity
+              );
+    }
+}
+
+
+
 static unsigned bootaddr;
 
 /*
@@ -216,7 +243,7 @@ boot_cpu(imps_processor *proc)
      * under the 1MB boundary.
      */
 
-    return 0;
+    //return 0;
 
     //panic("boot SMP cpu code is not ready");
 
@@ -229,6 +256,7 @@ boot_cpu(imps_processor *proc)
 
     smp_ap_booted = 0;
 
+    //dump_mp_gdt((void *)&MP_GDT);
 
     /*
      *  Generic CPU startup sequence starts here.
@@ -295,7 +323,7 @@ boot_cpu(imps_processor *proc)
         SHOW_INFO( 0, "#%d  Application Processor (AP)", imps_num_cpus);
     }
 
-    
+
 
     /*
      *  Generic CPU startup sequence ends here, the rest is cleanup.
@@ -310,6 +338,8 @@ boot_cpu(imps_processor *proc)
     *((volatile unsigned *) bios_reset_vector) = 0;
 
     smp_ap_booted = 0;
+
+    //dump_mp_gdt();
 
     return success;
 }
@@ -424,16 +454,11 @@ imps_read_config_table(unsigned start, int count)
         case IMPS_BCT_IOAPIC:
             add_ioapic((imps_ioapic *)start);
             break;
-	/*  XXXXX  uncomment this if "add_io_interrupt" is implemented */
         case IMPS_BCT_IO_INTERRUPT:
             add_int((imps_interrupt *)start);
-            //add_io_interrupt((imps_interrupt *)start);
             break;
-
-	/*  XXXXX  uncomment this if "add_local_interrupt" is implemented */
         case IMPS_BCT_LOCAL_INTERRUPT:
             add_int((imps_interrupt *)start);
-            //add_local_interupt((imps_interrupt *)start);
             break;
 
         default:
