@@ -83,7 +83,15 @@ static void vm_map_snapshot_thread(void);
 static void page_clear_engine_init(void);
 static void page_clear_engine_clear_page(phys_page_t p);
 
-
+#define VERIFY_SNAP
+#ifdef VERIFY_SNAP
+static void vm_verify_snap(disk_page_no_t head);
+#else
+static inline void vm_verify_snap(disk_page_no_t head)
+{
+    (void)head;
+}
+#endif
 
 
 static hal_cond_t      deferred_alloc_thread_sleep;
@@ -1255,6 +1263,8 @@ void do_snapshot()
     // make sure page data has been written
     vm_map_for_all( wait_commit_snap );
 
+    vm_verify_snap(new_snap_head);
+
     // ok, now we have current snap and previous one. come fix the
     // superblock
     disk_page_no_t toFree = pager_superblock_ptr()->prev_snap; // Save list head to be deleted
@@ -1665,6 +1675,105 @@ static void page_clear_engine_clear_page(phys_page_t p)
     if (enabled) hal_sti();
 }
 
+#ifdef VERIFY_SNAP
 
+#include <vm/object.h>
+#include <vm/alloc.h>
 
+static size_t vm_verify_object(void *p)
+{
+    struct pvm_object_storage *curr = p;
+    assert(curr->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
+    if (pvm_object_is_allocated_light(p))
+        pvm_object_is_allocated_assert(p);
+    return curr->_ah.exact_size;
+}
+
+/**
+ * Verify objects in the page.
+ *
+ * When object's pvm_object_storage crosses page boundary, part of it is stored in
+ * the hdr for reassembly with the next page.
+ *
+ * @param data: page data
+ * @param page_offset: relative to the vm_map_start_of_virtual_address_space
+ * @param current: current object offset relative to the vm_map_start_of_virtual_address_space
+ * @param sz: size of VM, limit for the current
+ *
+ * @return offset of the object out of the current page, unless current object's
+ * pvm_object_storage crosses page boundary
+ */
+static size_t vm_verify_page(void *data, size_t page_offset, size_t current, size_t sz)
+{
+    static struct pvm_object_storage hdr;
+
+    if (current < page_offset && page_offset - current < sizeof(hdr))
+    {
+        memcpy(((void*)&hdr) + (page_offset - current), data,
+                sizeof(hdr) - (page_offset - current));
+        current += vm_verify_object(&hdr);
+    }
+    while (current < sz && current - page_offset < PAGE_SIZE)
+    {
+        if (current + sizeof(hdr) - page_offset <= PAGE_SIZE)
+            current += vm_verify_object(data + (current - page_offset));
+        else
+        {
+            memcpy(&hdr, data + (current - page_offset), PAGE_SIZE - (current - page_offset));
+            break;
+        }
+    }
+    return current;
+}
+
+static void vm_verify_snap(disk_page_no_t head)
+{
+    int progress = 0;
+    int np;
+    pagelist loader;
+    size_t current = 0;
+
+    disk_page_io page_io = {};
+
+    if (!head)
+        return;
+
+    if(SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot...\n");
+
+    disk_page_io_allocate(&page_io);
+    pagelist_init(&loader, head, 0, DISK_STRUCT_MAGIC_SNAP_LIST);
+
+    pagelist_seek(&loader);
+
+    for(np = 0; np < vm_map_map_end - vm_map_map; np++)
+    {
+        size_t page_offset = np * PAGE_SIZE;
+        disk_page_no_t block;
+
+        if (progress != np * 100 / (vm_map_map_end - vm_map_map))
+        {
+            progress = np * 100 / (vm_map_map_end - vm_map_map);
+            if(SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot: %d%%\n", progress);
+        }
+        if (!pagelist_read_seq(&loader, &block))
+        {
+            printf("Incomplete pagelist\n");
+            //panic("Incomplete pagelist\n");
+            break;
+        }
+
+        if (current < page_offset || current - page_offset < PAGE_SIZE)
+        {
+            page_io.req.disk_page = block;
+            disk_page_io_load_me_async(&page_io);
+            disk_page_io_wait(&page_io);
+            current = vm_verify_page(page_io.mem, page_offset, current, hal.object_vsize);
+        }
+    }
+
+    pagelist_finish( &loader );
+    disk_page_io_release(&page_io);
+}
+
+#endif
 
