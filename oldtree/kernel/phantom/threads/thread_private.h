@@ -135,6 +135,7 @@ struct phantom_thread
 #define THREAD_FLAG_CHILD       0x0080 // after fork - child
 
 #define THREAD_FLAG_TIMEDOUT    0x0100 // Cond (or something else) was timed out
+#define THREAD_FLAG_UNDEAD      0x0200 // This thread can't be killed for some reason. Usually it's some special one like CPU idle thread.
 
 
 #define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)
