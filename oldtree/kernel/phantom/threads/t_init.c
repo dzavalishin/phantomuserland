@@ -61,6 +61,7 @@ phantom_threads_init()
     // Create idle (idlest!;) thread
 
     GET_IDLEST_THREAD() = phantom_create_thread( haltme, 0, THREAD_FLAG_KERNEL );
+    GET_IDLEST_THREAD()->thread_flags |= THREAD_FLAG_NOSCHEDULE;
 
     // BUG! Bad hack! Fix and use hal_set_thread_priority() here!
     // BUG! On SMP will be really wrong!

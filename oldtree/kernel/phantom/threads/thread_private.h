@@ -136,6 +136,7 @@ struct phantom_thread
 
 #define THREAD_FLAG_TIMEDOUT    0x0100 // Cond (or something else) was timed out
 #define THREAD_FLAG_UNDEAD      0x0200 // This thread can't be killed for some reason. Usually it's some special one like CPU idle thread.
+#define THREAD_FLAG_NOSCHEDULE  0x0400 // Must not be selected by scheduler in usual way - per CPU 'parking' (idlest) thread
 
 
 #define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)

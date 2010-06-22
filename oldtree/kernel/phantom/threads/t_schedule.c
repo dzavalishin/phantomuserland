@@ -276,6 +276,7 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
             // hack?
             if( it->sleep_flags ) continue;
 #endif
+            if( it->thread_flags & THREAD_FLAG_NOSCHEDULE ) continue;
             if( ((int)it->priority) > maxprio )
             {
                 maxprio = it->priority;
@@ -312,6 +313,8 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
                 // hack?
                 if( it->sleep_flags ) continue;
 #endif
+                if( it->thread_flags & THREAD_FLAG_NOSCHEDULE ) continue;
+
                 if( (it->priority > maxprio) && (it->ticks_left > 0) )
                 {
                     maxprio = it->priority;
@@ -330,33 +333,42 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
     }
 
 
+    if(queue_empty(&runq_idle))
+        goto idle_no;
 
+    phantom_thread_t *last_idle = (phantom_thread_t *)queue_last(&runq_idle);
 
 idle_again:
-    if(!queue_empty(&runq_idle))
-    {
-        // Have idle one?
-        ret = (phantom_thread_t *)queue_first(&runq_idle);
+    // Have idle one?
+    ret = (phantom_thread_t *)queue_first(&runq_idle);
 #if CHECK_SLEEP_FLAGS
-        // hack?
-        if( ret->sleep_flags )
-        {
-            queue_remove(&runq_idle, ret, phantom_thread_t *, runq_chain);
-            queue_enter(&runq_idle, ret, phantom_thread_t *, runq_chain);
-            goto idle_again;
-        }
+    // hack? BUG - sleeping thread on run q!
+    if( ret->sleep_flags )
+        goto idle_retry;
 #endif
-        if( ret )
-        {
-            // Just take first. Switched off thread will become
-            // last on runq, so all idle threads will run in cycle
-            ret->ticks_left = NORM_TICKS;
-            assert(t_is_runnable(ret));
-            return ret;
-        }
+
+    if( ret->thread_flags & THREAD_FLAG_NOSCHEDULE )
+        goto idle_retry;
+
+    if( ret )
+    {
+        // Just take first. Switched off thread will become
+        // last on runq, so all idle threads will run in cycle
+        ret->ticks_left = NORM_TICKS;
+        assert(t_is_runnable(ret));
+        return ret;
     }
 
+idle_retry:
+    if( ret != last_idle )
+    {
+        queue_remove(&runq_idle, ret, phantom_thread_t *, runq_chain);
+        queue_enter(&runq_idle, ret, phantom_thread_t *, runq_chain);
+        goto idle_again;
+    }
 
+idle_no:
+    ;
     // NOTHING!
 #if 0
     {
@@ -382,7 +394,7 @@ idle_again:
 
 
 
-// NB! Must be called under schedlock 
+// NB! Must be called under schedlock
 // Check if all normal threads eaten their time slots, assign new ones
 static int t_assign_time(void)
 {
