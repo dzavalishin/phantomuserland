@@ -157,6 +157,7 @@ phantom_import_cpu_thread(int ncpu)
     phantom_thread_state_init(t);
 
     t->thread_flags |= THREAD_FLAG_UNDEAD;
+    t->thread_flags |= THREAD_FLAG_NOSCHEDULE;
 
     // Let it be elegible to run
     t->sleep_flags &= ~THREAD_SLEEP_LOCKED;
