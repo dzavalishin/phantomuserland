@@ -99,10 +99,11 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
     case THREAD_SLEEP_IO:       slp = "IO"; break;
     };
 
-    rc = snprintf(buf, len, " %2d %02d %-5.5s %-10.10s ",
+    rc = snprintf(buf, len, " %2d %02d %-5.5s %d %-10.10s ",
                   t->tid,
                   t->priority,
                   slp,
+                  t->cpu_id,
                   t->name
           );
 
@@ -152,7 +153,7 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 void phantom_dump_threads_buf(char *buf, int len)
 {
     int rc;
-    rc = snprintf(buf, len, " Id Pr State Name         Locked\n");
+    rc = snprintf(buf, len, " Id Pr State CPU Name      Locked\n");
     buf += rc;
     len -= rc;
 

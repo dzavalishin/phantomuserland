@@ -135,8 +135,8 @@ void phantom_init_console_window()
 
 
     phantom_debug_window = drv_video_window_create(
-                        400, 400,
-                        600, 100, console_bg, "Threads" );
+                        400, 450,
+                        600, 50, console_bg, "Threads" );
 
     phantom_debug_window_puts("Phantom debug window\n");
 

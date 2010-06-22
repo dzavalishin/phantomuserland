@@ -168,6 +168,8 @@ phantom_import_cpu_thread(int ncpu)
     snprintf( name, 20, "CPU %d idle", ncpu );
 
     hal_set_thread_name(name);
+    t->priority = THREAD_PRIO_IDLE;
+
 }
 
 
@@ -187,6 +189,8 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
 {
     //t->thread_flags = 0;
     t->priority = THREAD_PRIO_NORM;
+
+    t->cpu_id = GET_CPU_ID();
 
 
     // malloc uses mutex, so we have to use physalloc which is protected with spinlocks

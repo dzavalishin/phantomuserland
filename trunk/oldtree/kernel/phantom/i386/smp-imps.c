@@ -796,6 +796,27 @@ free:
 
     return ret;
 }
+
+
+// -----------------------------------------------------------------------
+//
+// SMP - secondary (non-boot) CPU startup.
+// See mboot.S for low level code.
+//
+// Be VERY careful here as things are quite fragile before smp_ap_booted = 1;
+//
+// We come to C code with special GDT, no IDT, no LDT, no TSS. We CAN NOT
+// use things like malloc() and everything else with mutex/cond/sem code
+// inside.
+//
+// -----------------------------------------------------------------------
+
+
+
+
+
+
+
 static void do_smp_ap_start(void);
 
 
@@ -818,6 +839,7 @@ void smp_ap_start(void)
     panic(msg);
 }
 
+#define REAL_SMP 0
 
 
 static void do_smp_ap_start(void)
@@ -832,16 +854,26 @@ static void do_smp_ap_start(void)
     phantom_load_cpu_tss(ncpu);
 
     phantom_import_cpu_thread(ncpu);
-    // hal_sti();
 //halt();
     // We can report boot only after phantom_import_cpu_thread,
     // cause it gives us new stack
     smp_ap_booted = 1;
 
-    //printf("!! SMP AP START !!");
+    phantom_load_idt(); // We can do this here as nothing relies on IDT before
+    hal_sti();
+
+    printf( "!! SMP AP %d START !!\n", ncpu );
+
+
     while(1)
+    {
+#if REAL_SMP
+        hal_sleep_msec(10);
+#else
         halt();
+#endif
+    }
 
-
+    halt();
 }
 
