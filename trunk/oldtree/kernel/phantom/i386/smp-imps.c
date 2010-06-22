@@ -830,10 +830,10 @@ static void do_smp_ap_start(void)
     int ncpu = GET_CPU_ID();
 
     phantom_load_cpu_tss(ncpu);
-halt();
+
     phantom_import_cpu_thread(ncpu);
     // hal_sti();
-
+//halt();
     // We can report boot only after phantom_import_cpu_thread,
     // cause it gives us new stack
     smp_ap_booted = 1;

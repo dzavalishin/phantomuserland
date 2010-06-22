@@ -46,8 +46,6 @@ void phantom_thread_state_init(phantom_thread_t *t)
 
     t->sw_unlock = 0;
 
-    t->priority = THREAD_PRIO_NORM;
-
     t->preemption_disabled = 0;
 
     int *esp = (int *)(t->cpu.esp);
