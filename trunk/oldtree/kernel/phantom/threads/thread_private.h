@@ -211,9 +211,9 @@ extern phantom_thread_t *   percpu_current_thread[];
  
 static inline phantom_thread_t * get_current_thread(void)
 {
-    static phantom_thread_t dummy;
+    static phantom_thread_t dummy[MAX_CPUS];
     int ncpu = GET_CPU_ID();
-    return percpu_current_thread[ncpu] ? percpu_current_thread[ncpu] : &dummy;
+    return percpu_current_thread[ncpu] ? percpu_current_thread[ncpu] : dummy + ncpu;
 }
 
 

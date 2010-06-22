@@ -1,6 +1,7 @@
 #include <spinlock.h>
 #include <hal.h>
 #include <phantom_libc.h>
+#include <kernel/smp.h>
 
 #if SPIN_DEBUG
 #include <i386/proc_reg.h>
@@ -27,7 +28,7 @@
 
 
 #if SPIN_DEBUG
-int global_lock_entry_count = 0;
+int global_lock_entry_count[MAX_CPUS] = {};
 #endif
 
 
@@ -57,7 +58,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
 
 
 #if SPIN_DEBUG
-    global_lock_entry_count++;
+    global_lock_entry_count[GET_CPU_ID()]++;
     sl->ebp = get_ebp();
 #endif
 }
@@ -69,7 +70,7 @@ void hal_spin_unlock(hal_spinlock_t *sl)
     assert(sl->lock);
 #if SPIN_DEBUG
     sl->ebp = 0;
-    global_lock_entry_count--;
+    global_lock_entry_count[GET_CPU_ID()]--;
 #endif
     _spin_unlock(&(sl->lock));
 	}
