@@ -207,7 +207,7 @@ int main(int argc, char **argv, char **envp)
     phantom_timer_pit_init(100,0);
     phantom_timed_call_init(); // Too late? Move up?
 
-    phantom_init_apic();
+    //phantom_init_apic();
 
     // Stage is:
     //   0 - very early in the boot - interrupts can be used only
@@ -231,11 +231,12 @@ int main(int argc, char **argv, char **envp)
 
     set_cr0( get_cr0() | CR0_WP );
 
+    phantom_init_apic(); // Starts other CPUs
+
     {
         extern const char* SVN_Version;
         extern struct utsname phantom_uname;
         strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
-
     }
 
     printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );

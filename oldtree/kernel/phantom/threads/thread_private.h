@@ -219,7 +219,7 @@ static inline phantom_thread_t * get_current_thread(void)
 
 extern phantom_thread_t *   percpu_idlest_thread[];
 
-#define GET_IDLEST_THREAD() percpu_idlest_thread[0]
+#define GET_IDLEST_THREAD() percpu_idlest_thread[GET_CPU_ID()]
 
 
 

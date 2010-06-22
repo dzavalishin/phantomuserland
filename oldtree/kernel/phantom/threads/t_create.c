@@ -170,6 +170,7 @@ phantom_import_cpu_thread(int ncpu)
     hal_set_thread_name(name);
     t->priority = THREAD_PRIO_IDLE;
 
+    GET_IDLEST_THREAD() = t;
 }
 
 

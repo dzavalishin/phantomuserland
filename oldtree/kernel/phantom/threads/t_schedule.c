@@ -17,6 +17,7 @@
 
 #define CHECK_SLEEP_FLAGS 1
 
+#define DIRECT_YIELD 1
 
 static volatile int reschedule_request = 0;
 
@@ -63,8 +64,11 @@ void phantom_scheduler_yield( void )
     //phantom_thread_switch();
 
     // TODO in fact, possibly, it is ok just to call phantom_scheduler_soft_interrupt() from here?
+#if DIRECT_YIELD
+    phantom_scheduler_soft_interrupt();
+#else
     phantom_scheduler_request_soft_irq();
-
+#endif
     // assert that cur thread is runnable
 }
 
@@ -80,7 +84,11 @@ void phantom_scheduler_yield_locked( hal_spinlock_t *lock )
 
 
     //phantom_thread_switch();
+#if DIRECT_YIELD
+    phantom_scheduler_soft_interrupt();
+#else
     phantom_scheduler_request_soft_irq();
+#endif
 
     // assert that cur thread is runnable
 }
@@ -98,7 +106,7 @@ void phantom_scheduler_soft_interrupt(void)
     // if curr thread disables preemption or scheduler lock is here,
     // don't interfere! BUT - if thread has sleep_flags, then we are
     // called to switch it off, so do it!
-#if 0
+#if 1
     if(
        (GET_CURRENT_THREAD()->sleep_flags == 0 )
         &&
