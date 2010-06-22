@@ -139,6 +139,7 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
 {
     SHOW_FLOW( 2, "Kill thread tid %d", t->tid );
 
+    assert( !(t->thread_flags & THREAD_FLAG_UNDEAD) );
     assert( t->sleep_flags & THREAD_SLEEP_ZOMBIE );
     assert( t != GET_CURRENT_THREAD() );
 
