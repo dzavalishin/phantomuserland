@@ -31,9 +31,13 @@
 #include <i386/proc_reg.h>
 #include <i386/seg.h>
 #include <i386/isa/pic.h>
+#include <x86/phantom_pmap.h>
+
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
+#include <kernel/smp.h>
+
 #include <time.h>
 #include <errno.h>
 
@@ -48,7 +52,8 @@
  */
 
 
-extern volatile int     smp_ap_booted;
+static volatile int     smp_ap_booted = 0;
+//extern volatile int     smp_ap_booted;
 
 #if 1
 #define CMOS_WRITE_BYTE(x,y)	rtcout(x,y) /* write unsigned char "y" at CMOS loc "x" */
@@ -195,9 +200,9 @@ send_ipi(unsigned int dst, unsigned int v)
 }
 
 
-dump_mp_gdt(void *addr)
+void dump_mp_gdt(void *addr)
 {
-    extern u_int 	MP_GDT;
+    //extern u_int 	MP_GDT;
     struct real_descriptor *rd = addr;
 
     int i;
@@ -216,6 +221,8 @@ dump_mp_gdt(void *addr)
 
 
 static unsigned bootaddr;
+static void *   ap_stack;
+
 
 /*
  *  Primary function for booting individual CPUs.
@@ -234,6 +241,8 @@ boot_cpu(imps_processor *proc)
     int ver = IMPS_LAPIC_READ(LAPIC_VER);
     SHOW_FLOW( 0, "APIC ver = 0x%x (%d)", ver, APIC_VERSION(ver) );
 
+    // TODO define size? guard page?
+    ap_stack = calloc(1, 64*1024);
 
     /*
      * Copy boot code for secondary CPUs here.  Find it in between
@@ -309,14 +318,15 @@ boot_cpu(imps_processor *proc)
     /*
      *  Check to see if other processor has started.
      */
+#define WAIT_4_START 1000
     to = 0;
-    while (!TEST_BOOTED(bootaddr) && to++ < 10000)
+    while (!TEST_BOOTED(bootaddr) && to++ < WAIT_4_START)
     {
         //UDELAY(10000);
         phantom_spinwait(10);
         phantom_spinwait(1000);
     }
-    if (to >= 100) {
+    if (to >= WAIT_4_START) {
         SHOW_INFO0( 0, "CPU Not Responding, DISABLED" );
         success = 0;
     } else {
@@ -354,7 +364,7 @@ add_processor(imps_processor *proc)
 {
     int apicid = proc->apic_id;
 
-    SHOW_INFO( 0, "  Processor [APIC id %d ver %d]:  ",
+    SHOW_INFO( 0, "  Starting processor [APIC id %d ver %d]:  ",
                   apicid, proc->apic_ver);
     if (!(proc->flags & IMPS_FLAG_ENABLED)) {
         SHOW_INFO0( 0, "  - DISABLED");
@@ -366,15 +376,11 @@ add_processor(imps_processor *proc)
     }
     if (boot_cpu(proc)) {
 
-#if SMP_DO_BOOT
-        /*  XXXXX  add OS-specific setup for secondary CPUs here */
-
         imps_cpu_apic_map[imps_num_cpus] = apicid;
         imps_apic_cpu_map[apicid] = imps_num_cpus;
         imps_num_cpus++;
-#else
-        SHOW_INFO0( 0, "  - SKIP");
-#endif
+
+        SHOW_INFO( 0, "  Processor [APIC id %d] reports OK", apicid);
     }
 }
 
@@ -789,5 +795,53 @@ free:
     phantom_pic_set_irqmask(picmask);
 
     return ret;
+}
+static void do_smp_ap_start(void);
+
+
+// We get here from trampoline running on the next Application Processor
+// Note that we're on the TEMP stack, having WRONG GDT, NO LDT/IDT, ints
+// disabled and minimal possible CPU (CR0, etc) state
+void smp_ap_start(void)
+{
+    static const char *msg = "AP idle thread unwind";
+    __asm __volatile("movl %0, %%esp" : "=rm" (ap_stack));
+    __asm __volatile("pushl %0" : : "r" (msg));
+    __asm __volatile("pushl %0" : : "r" (panic));
+    __asm __volatile("pushl %0" : : "r" (panic));
+
+    // For stack trace to finish here
+    __asm __volatile("movl $0, %%ebp" : );
+
+    // So that do_smp_ap_start will have good stack right from start
+    do_smp_ap_start();
+    panic(msg);
+}
+
+
+
+static void do_smp_ap_start(void)
+{
+
+    phantom_load_gdt();
+    phantom_paging_start(); // NB! Can't call GET_CPU_ID() before this line for APIC page mapping is not available
+
+    relocate_apic();
+    int ncpu = GET_CPU_ID();
+
+    phantom_load_cpu_tss(ncpu);
+halt();
+    phantom_import_cpu_thread(ncpu);
+    // hal_sti();
+
+    // We can report boot only after phantom_import_cpu_thread,
+    // cause it gives us new stack
+    smp_ap_booted = 1;
+
+    //printf("!! SMP AP START !!");
+    while(1)
+        halt();
+
+
 }
 

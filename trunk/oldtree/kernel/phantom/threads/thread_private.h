@@ -21,6 +21,8 @@
 #include <hal.h>
 #include <wtty.h>
 
+#include <kernel/smp.h>
+
 #define USE_FORK_LUKE 0
 
 #define LATENCY_DEBUG 0
@@ -34,6 +36,8 @@ struct phantom_thread
     /** NB! Exactly first! Accessed from asm. */
     cpu_state_save_t       	cpu;
 
+    int                         cpu_id; // on which CPU this thread is dispatched now
+
     int                         tid;
 
     // phantom thread ref, etc
@@ -42,7 +46,7 @@ struct phantom_thread
     //wtty_t *			ctty;
 
     // if this thread runs Unix simulation process - here is it
-    struct uuprocess *			u;
+    struct uuprocess *		u;
 
     const char *		name;
 
@@ -202,12 +206,13 @@ extern phantom_thread_t *   percpu_current_thread[];
 
 //#define GET_CURRENT_THREAD() percpu_current_thread[0]
 #define GET_CURRENT_THREAD() get_current_thread()
-#define SET_CURRENT_THREAD(t) ({ percpu_current_thread[0] = (t); (void)0;})
+#define SET_CURRENT_THREAD(t) ({ percpu_current_thread[GET_CPU_ID()] = (t); (void)0;})
  
 static inline phantom_thread_t * get_current_thread(void)
 {
-	static phantom_thread_t dummy;
-	return percpu_current_thread[0] ? percpu_current_thread[0] : &dummy;
+    static phantom_thread_t dummy;
+    int ncpu = GET_CPU_ID();
+    return percpu_current_thread[ncpu] ? percpu_current_thread[ncpu] : &dummy;
 }
 
 
@@ -265,11 +270,6 @@ void t_queue_check(queue_head_t *queue, phantom_thread_t *test);
 void t_dequeue_runq(phantom_thread_t *);
 void t_enqueue_runq(phantom_thread_t *);
 
-#if 0
-#define hal_disable_preemption t_disable_preemption
-#define hal_enable_preemption t_enable_preemption
-#define hal_is_preemption_disabled t_is_preemption_disabled
-#endif
 
 void hal_disable_preemption(void);
 void hal_enable_preemption(void);

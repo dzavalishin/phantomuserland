@@ -26,6 +26,7 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
+#include <kernel/smp.h>
 #include <kernel/init.h>
 #include <x86/phantom_page.h>
 
@@ -48,6 +49,7 @@ struct real_descriptor 	ldt[LDTSZ];
 struct real_gate 	idt[IDTSZ];
 
 struct i386_tss	       	tss;
+struct i386_tss	       	cpu_tss[MAX_CPUS];
 struct vm86tss		tss_vm86;
 
 
@@ -90,25 +92,27 @@ void phantom_load_gdt()
     asm volatile("movw %w0,%%fs" : : "r" (0));
     asm volatile("movw %w0,%%gs" : : "r" (0));
 
-    // get it ready for reuse - we are called on exit from VM86 mode too
-    gdt[MAIN_TSS / 8].access &= ~ACC_TSS_BUSY;
-    gdt[VM86_TSS / 8].access &= ~ACC_TSS_BUSY;
-
-    // now load TSS
-    asm volatile("ltr %0" : : "rm" ((u_int16_t)MAIN_TSS) );
-
     // and activate the LDT
     wrldt(MAIN_LDT);
 
 }
 
 
+void phantom_load_main_tss()
+{
+    // get it ready for reuse - we are called on exit from VM86 mode too
+    gdt[MAIN_TSS / 8].access &= ~ACC_TSS_BUSY;
+    gdt[VM86_TSS / 8].access &= ~ACC_TSS_BUSY;
 
-// override
-//void base_gdt_load() { phantom_load_gdt(); }
+    // now load TSS
+    asm volatile("ltr %0" : : "rm" ((u_int16_t)MAIN_TSS) );
+}
+
 
 #define IS_SIZE (1024*16)
 static char intr_stack[IS_SIZE];
+
+static char cpu_intr_stack[MAX_CPUS][IS_SIZE];
 
 void phantom_init_descriptors(void)
 {
@@ -179,8 +183,37 @@ void phantom_init_descriptors(void)
 */
 
 
+    int i;
+    for( i = 0; i < MAX_CPUS; i++ )
+    {
+        cpu_tss[i].ss0 = KERNEL_DS;
+
+        cpu_tss[i].esp0 = (int) (cpu_intr_stack[i]+IS_SIZE-4);
+
+        cpu_tss[i].io_bit_map_offset = sizeof(tss);
+
+        make_descriptor(gdt, (CPU_TSS+i*8), kvtolin(&(cpu_tss[i])), sizeof(struct i386_tss)-1,
+                    ACC_PL_K | ACC_TSS | ACC_P, 0 );
+
+    }
+
     phantom_load_gdt();
+    phantom_load_main_tss();
 }
+
+
+
+void phantom_load_cpu_tss(int ncpu)
+{
+    // get it ready for reuse - we are called on exit from VM86 mode too
+    //gdt[MAIN_TSS / 8].access &= ~ACC_TSS_BUSY;
+
+    // now load TSS
+    asm volatile("ltr %0" : : "rm" ((u_int16_t)(CPU_TSS+ncpu*8)) );
+}
+
+
+
 
 
 

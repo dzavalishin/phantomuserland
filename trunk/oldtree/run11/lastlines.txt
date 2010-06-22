@@ -1,4 +1,0 @@
-req pageout fastsnapaid COW 0x81913000
-
-COW callback 0x81957000
-snapaid COW 0x81914000

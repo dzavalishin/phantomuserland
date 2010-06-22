@@ -139,7 +139,7 @@ NON_GPROF_ENTRY(MPentry)
 	 */
 mp_begin:	/* now running relocated at KERNBASE */
     CHECKPOINT(0x37, 4)
-//hlt
+// hlt
     call	EXT(smp_ap_start)			/* load i386 tables */
 
 	.data

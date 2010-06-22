@@ -61,6 +61,9 @@
 #ifndef	_I386_SEG_H_
 #define	_I386_SEG_H_
 
+#include <kernel/smp.h>
+
+
 #ifndef ASSEMBLER
 
 /* Format of a "pseudo-descriptor", used for loading the IDT and GDT.  */
@@ -196,9 +199,11 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
 #define	KERNEL_CS_16	0x40		/* for entering V86 */
 #define	KERNEL_DS_16	0x48		/* for entering V86 */
 
+#define CPU_TSS		0x50
+
 
 // ten more for any case
-#define	GDTSZ		(10+10)
+#define	GDTSZ		(10+10+MAX_CPUS)
 
 
 /*

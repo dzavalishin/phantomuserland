@@ -21,6 +21,7 @@
 #include <string.h>
 #include <i386/proc_reg.h>
 #include <phantom_libc.h>
+#include <kernel/smp.h>
 #include "thread_private.h"
 
 static int find_tid(phantom_thread_t *);
@@ -223,6 +224,56 @@ phantom_import_main_thread()
 
 }
 
+// Called per each CPU except for boot one.
+void
+phantom_import_cpu_thread(int ncpu)
+{
+    phantom_thread_t *t = calloc(1, sizeof(phantom_thread_t));
+
+    // Can't be run yet
+    t->sleep_flags = THREAD_SLEEP_LOCKED; 
+    t->thread_flags = 0;
+
+    //int ie = hal_save_cli();
+    //hal_spin_lock( &tid_lock );
+    t->tid = find_tid(t);
+
+    //assert(phantom_kernel_threads[t->tid] == 0);
+    //phantom_kernel_threads[t->tid] = t;
+
+    //hal_spin_unlock( &tid_lock );
+    //if(ie) hal_sti();
+
+#if 0
+    t->stack_size = 0;
+    t->stack = 0;
+#else
+
+    // This stack is unused but is needed for phantom_thread_state_init()
+    int ssize = 2*1024;
+    t->stack_size = ssize;
+    t->stack = calloc( 1, ssize );
+
+    assert(t->stack != 0);
+#endif
+    t->start_func_arg = 0;
+    t->start_func = 0;
+
+    phantom_thread_state_init(t);
+
+    t->priority = THREAD_PRIO_NORM;
+
+    // Let it be elegible to run
+    t->sleep_flags &= ~THREAD_SLEEP_LOCKED;
+
+    //GET_CURRENT_THREAD() = t;
+    SET_CURRENT_THREAD(t);
+
+    char *name = calloc(1, 20);
+    snprintf( name, 20, "CPU %d idle", ncpu );
+
+    hal_set_thread_name(name);
+}
 
 
 

@@ -212,6 +212,10 @@ int imps_probe(void);
 int imps_force(int ncpus);
 
 
+void install_ap_tramp(void *boot_address);
+void dump_mp_gdt(void *addr);
+
+
 /*
  *  Defines that use variables
  */
