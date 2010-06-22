@@ -868,7 +868,9 @@ static void do_smp_ap_start(void)
     while(1)
     {
 #if REAL_SMP
-        hal_sleep_msec(10);
+        //hal_sleep_msec(10);
+        ia32_pause(); // tell CPU we have nothing to do - must be halt here
+        phantom_scheduler_yield();
 #else
         halt();
 #endif
