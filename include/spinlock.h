@@ -24,7 +24,7 @@ void	hal_spin_lock(hal_spinlock_t *sl);
 void	hal_spin_unlock(hal_spinlock_t *sl);
 
 #if SPIN_DEBUG
-extern int global_lock_entry_count;
+extern int global_lock_entry_count[];
 #endif
 
 

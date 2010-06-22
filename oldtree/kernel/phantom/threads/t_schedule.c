@@ -432,7 +432,7 @@ void thread_block( int sleep_flag, hal_spinlock_t *lock_to_be_unlocked )
     hal_spin_lock(&schedlock);
 
 #if SPIN_DEBUG
-    assert(global_lock_entry_count == 2);
+    assert(global_lock_entry_count[GET_CPU_ID()] == 2);
 #endif
 
     phantom_thread_t *t = GET_CURRENT_THREAD();

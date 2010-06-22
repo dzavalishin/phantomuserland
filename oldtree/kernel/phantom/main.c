@@ -203,6 +203,10 @@ int main(int argc, char **argv, char **envp)
 
     detect_cpu(0);
     phantom_paging_init();
+
+    phantom_timer_pit_init(100,0);
+    phantom_timed_call_init(); // Too late? Move up?
+
     phantom_init_apic();
 
     // Stage is:
@@ -213,12 +217,7 @@ int main(int argc, char **argv, char **envp)
 
     phantom_pci_find_drivers( 0 );
 
-    phantom_timer_pit_init(100,0);
-
     //phantom_paging_init();
-
-    phantom_timed_call_init(); // Too late? Move up?
-
 
     // Threads startup
     {
