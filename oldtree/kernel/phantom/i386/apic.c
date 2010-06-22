@@ -23,6 +23,7 @@
 #include <hal.h>
 #include <phantom_libc.h>
 #include <i386/trap.h>
+#include <i386/proc_reg.h>
 
 // NB! Spurious must have lower bits = 1111
 #define APIC_SPURIOUS_VECTOR    (APIC_INT_BASE+31)
@@ -54,6 +55,9 @@ void phantom_init_apic(void)
     int rc = hal_alloc_vaddress( (void**)&apic_local_unit, 1);
     if(rc) panic("Can't alloc APIC vaddr");
 
+    relocate_apic();
+
+
     int pte = create_pte(0xFEE00000,
                          INTEL_PTE_VALID|INTEL_PTE_WRITE|
                          INTEL_PTE_WTHRU|INTEL_PTE_NCACHE
@@ -81,7 +85,7 @@ void phantom_init_apic(void)
     apic_local_unit->error_vector.r = APIC_ERROR_VECTOR;
 
     // must be after imps_probe and must get address from it
-    //phantom_io_apic_init( 0xFEC00000 );
+    phantom_io_apic_init( 0xFEC00000 );
 
 #if 1
     // Actually enable APIC, disable focus check (why?)
@@ -93,6 +97,16 @@ void phantom_init_apic(void)
 
     imps_probe();
 
+}
+
+
+void relocate_apic(void)
+{
+    u_int64_t aa = rdmsr( APIC_BASE_MSR );
+
+    aa &= 0xFFF;
+
+    wrmsr( APIC_BASE_MSR, aa | 0xFEE00000 | (1<<11) ); // make sure it is there
 }
 
 void apic_eoi()
@@ -149,6 +163,16 @@ void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
     apic_eoi();
 }
 
+int GET_CPU_ID(void)
+{
+    //asm volatile("movl %0" : : "m" (mystate));
+    return
+        have_apic ?
+            ((apic_local_unit->unit_id.r >> 24) & 0xF)
+        :
+            0
+        ;
+}
 
 
 /*
@@ -159,11 +183,6 @@ void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
 	"andb $0x0F,%al\n"
 
 
-int GET_CPU_ID(void)
-{
-    asm volatile("movl %0" : : "m" (mystate));
-
-}
 
         */
 

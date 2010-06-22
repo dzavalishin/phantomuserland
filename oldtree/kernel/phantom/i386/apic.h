@@ -24,6 +24,8 @@
 #define _PHANTOM_APIC_
 
 
+#define APIC_BASE_MSR 0x1B
+void relocate_apic(void);
 
 
 typedef struct ApicReg

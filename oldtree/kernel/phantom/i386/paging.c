@@ -61,9 +61,16 @@ void phantom_paging_init(void)
     }
 #endif
 
+    phantom_paging_start();
 
     // Load page directory phys addr to CR3
     // Note that pa = va now
+
+}
+
+
+void phantom_paging_start(void)
+{
     set_cr3((int)pdir);
 
     // Tell CPU to start paging
@@ -72,11 +79,7 @@ void phantom_paging_init(void)
                  jmp	1f             ;\
                  1:                     \
                  " : : "r" (get_cr0() | CR0_PG));
-
 }
-
-
-
 
 
 

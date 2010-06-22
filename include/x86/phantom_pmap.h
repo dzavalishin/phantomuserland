@@ -108,6 +108,9 @@ typedef unsigned int	pd_entry_t;
 
 
 void phantom_paging_init(void);
+void phantom_paging_start(void); // For SMP - to load pdir in next CPUs
+
+
 void phantom_map_page(linaddr_t la, pt_entry_t mapping );
 void phantom_unmap_page(linaddr_t la );
 
