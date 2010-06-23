@@ -51,6 +51,7 @@ struct phantom_thread
     const char *		name;
 
     void *                      stack;
+    physaddr_t                  stack_pa;
     size_t                      stack_size;
 
     // This is kernel/interrupt stack.
@@ -59,6 +60,7 @@ struct phantom_thread
     // It seems to be not needed for ring 0 only threads, but lets have it
     // this way now.
     void *                      kstack;
+    physaddr_t                  kstack_pa;
     size_t                      kstack_size;
     void *                      kstack_top; // What to load to ESP
 

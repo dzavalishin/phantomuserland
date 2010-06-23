@@ -39,7 +39,7 @@
 // Start of pool of virtual addresses that normally not backed with memory,
 // but used to map in some physical mem page for kernel access or CPU-based IO
 #define PHANTOM_AMAP_START_VADDR_POOL (__MEM_GB*1 + 0)
-#define PHANTOM_AMAP_SIZE_VADDR_POOL (__MEM_PAGE*4096)
+#define PHANTOM_AMAP_SIZE_VADDR_POOL (__MEM_PAGE*4096*4)
 
 // Virtual machine lives here
 //#define PHANTOM_AMAP_START_VM_POOL (__MEM_GB*2 + 0)
