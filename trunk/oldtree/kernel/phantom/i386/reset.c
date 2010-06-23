@@ -1,6 +1,7 @@
 #include <hal.h>
 #include <i386/pio.h>
-#include <i386/isa/isa.h>
+//#include <i386/isa/isa.h>
+#include <x86/isa.h>
 #include <phantom_libc.h>
 #include <kernel/init.h>
 
@@ -87,9 +88,6 @@ hal_cpu_reset_real(void) //__attribute__((noreturn))
     /* Wipe the IDT. */
     set_idt(&null_pdesc);
 
-    //null_idt.rd_limit = 0;
-    //null_idt.rd_base = 0;
-    //lidt(&null_idt);
 
     /* "good night, sweet prince .... <THUNK!>" */
     //breakpoint();

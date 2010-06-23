@@ -29,6 +29,7 @@
 #define APIC_SPURIOUS_VECTOR    (APIC_INT_BASE+31)
 #define APIC_TIMER_VECTOR 	(APIC_INT_BASE+30)
 #define APIC_ERROR_VECTOR       (APIC_INT_BASE+29)
+#define APIC_ICI_VECTOR         (APIC_INT_BASE+28)
 
 static int      have_apic = 0;
 
@@ -43,6 +44,8 @@ volatile ApicLocalUnit * apic_local_unit;
 
 
 
+
+// This one is called on CPU 0 (BSP)
 void phantom_init_apic(void)
 {
     if(!boot_cpu_has_apic())
@@ -71,6 +74,18 @@ void phantom_init_apic(void)
 
     have_apic = 1;
 
+    phantom_setup_apic();
+    imps_probe();
+
+    // must be after imps_probe and must get address from it
+    phantom_io_apic_init( 0xFEC00000 );
+
+}
+
+// This one is called on all CPUs
+void phantom_setup_apic(void)
+{
+
 #if 0
     apic_local_unit->divider_config.r = 0xA; // div 128
     apic_local_unit->init_count.r = 1024*1024; // some khz range?
@@ -84,8 +99,6 @@ void phantom_init_apic(void)
 
     apic_local_unit->error_vector.r = APIC_ERROR_VECTOR;
 
-    // must be after imps_probe and must get address from it
-    phantom_io_apic_init( 0xFEC00000 );
 
 #if 1
     // Actually enable APIC, disable focus check (why?)
@@ -95,9 +108,9 @@ void phantom_init_apic(void)
         ;
 #endif
 
-    imps_probe();
 
 }
+
 
 
 void relocate_apic(void)
@@ -114,9 +127,14 @@ void apic_eoi()
     apic_local_unit->eoi.r = 0; // 0 is critical for X2APIC
 }
 
+
+
+
+
 static void apic_timer()
 {
 }
+
 
 static void apic_spur()
 {
@@ -134,6 +152,14 @@ static void apic_err()
               );
 }
 
+
+static void apic_incoming_ici()
+{
+    SHOW_FLOW0( 10, "ICI interrupt" );
+}
+
+
+
 void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
 {
     (void) ts;
@@ -148,6 +174,10 @@ void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
 
     case APIC_ERROR_VECTOR:
         apic_err();
+        break;
+
+    case APIC_ICI_VECTOR:
+        apic_incoming_ici();
         break;
 
     case APIC_TIMER_VECTOR:
@@ -192,14 +222,14 @@ int GET_CPU_ID(void)
 
 
 
-void arch_smp_send_broadcast_ici(void)
+void phantom_smp_send_broadcast_ici(void)
 {
     int config;
 
     int ie = hal_save_cli();
 
     config = apic_local_unit->int_command[0].r & APIC_ICR1_WRITE_MASK;
-    apic_local_unit->int_command[0].r = config | 0xfd | APIC_ICR1_DELMODE_FIXED | APIC_ICR1_DESTMODE_PHYS | APIC_ICR1_DEST_ALL_BUT_SELF;
+    apic_local_unit->int_command[0].r = config | APIC_ICI_VECTOR | APIC_ICR1_DELMODE_FIXED | APIC_ICR1_DESTMODE_PHYS | APIC_ICR1_DEST_ALL_BUT_SELF;
 
     if(ie) hal_sti();
 }

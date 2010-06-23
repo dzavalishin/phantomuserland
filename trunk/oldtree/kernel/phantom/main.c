@@ -314,6 +314,9 @@ int main(int argc, char **argv, char **envp)
     // Start virtual machine in special startup (single thread) mode
     pvm_root_init();
 
+    // just test
+    //phantom_smp_send_broadcast_ici();
+
 
     SHOW_FLOW0( 2, "Will run phantom threads... ");
     // Virtual machine will be run now in normal mode
