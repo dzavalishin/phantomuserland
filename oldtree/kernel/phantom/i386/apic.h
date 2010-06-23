@@ -26,6 +26,7 @@
 
 #define APIC_BASE_MSR 0x1B
 void relocate_apic(void);
+void phantom_setup_apic(void);
 
 
 typedef struct ApicReg
@@ -266,6 +267,10 @@ void writeIoApic( u_int32_t reg, u_int32_t value);
 
 void setIoApicInput( int input, int vector, int level, int low_active );
 void dumpIoApicInputs(void);
+
+
+
+void phantom_smp_send_broadcast_ici(void);
 
 
 

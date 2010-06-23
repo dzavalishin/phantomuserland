@@ -860,6 +860,9 @@ static void do_smp_ap_start(void)
     smp_ap_booted = 1;
 
     phantom_load_idt(); // We can do this here as nothing relies on IDT before
+
+    phantom_setup_apic(); // now setup my own apic
+
     hal_sti();
 
     printf( "!! SMP AP %d START !!\n", ncpu );
