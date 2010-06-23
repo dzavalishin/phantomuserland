@@ -180,7 +180,9 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     else
     {
         // Free stack
-        free( t->stack );
+        // free( t->stack );
+        hal_pv_free( t->stack_pa, t->stack, t->stack_size );
+        hal_pv_free( t->kstack_pa, t->kstack, t->kstack_size );
     }
 
     // Remove from thread array

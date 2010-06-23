@@ -202,6 +202,7 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     //t->stack = calloc( 1, stacksize );
     hal_pv_alloc( &pa, &(t->stack), stacksize+PAGE_SIZE );
     hal_page_control( pa, t->stack, page_unmap, page_noaccess ); // poor man's guard page - TODO support in page fault
+    t->stack_pa = pa;
 
     //assert(t->stack != 0);
 
@@ -209,6 +210,7 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     //t->kstack = calloc( 1, stacksize );
     hal_pv_alloc( &pa, &(t->kstack), stacksize+PAGE_SIZE );
     hal_page_control( pa, t->kstack, page_unmap, page_noaccess ); // poor man's guard page - TODO support in page fault
+    t->kstack_pa = pa;
 
     t->kstack_top = t->kstack+t->kstack_size-4; // Why -4?
 

@@ -63,13 +63,14 @@ void phantom_thread_switch()
     phantom_thread_t *next = phantom_scheduler_select_thread_to_run();
     phantom_thread_t *old = GET_CURRENT_THREAD();
 
+    assert( !next->sleep_flags );
+
     if(next == old)
     {
         //printf("same thread selected\n");
         // threads_stat.samethread++;
 
-        if(old->sleep_flags)
-            panic("blocked thread selected");
+        //if(old->sleep_flags)            panic("blocked thread selected");
 
         goto exit;
     }
