@@ -154,10 +154,12 @@ void dumpf( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, voi
     (void) arg;
 
     if(flags == MEM_MAP_HI_RAM && (n_elem >= PAGE_SIZE*10) )
-        hal_physmem_add( from, n_elem/PAGE_SIZE );
+        hal_physmem_add((from + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1),
+                ((n_elem - (from & (PAGE_SIZE - 1))) & ~(PAGE_SIZE - 1)) / PAGE_SIZE );
 
     if(flags == MEM_MAP_LOW_RAM && (n_elem >= PAGE_SIZE))
-        hal_physmem_add_low( from, n_elem/PAGE_SIZE );
+        hal_physmem_add_low((from + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1),
+                ((n_elem - (from & (PAGE_SIZE - 1))) & ~(PAGE_SIZE - 1)) / PAGE_SIZE );
 
 
     int kmb = (int)(n_elem/1024);
@@ -191,8 +193,11 @@ static void make_mem_map(void)
 {
     amap_init(&ram_map, 0, MEM_SIZE, MEM_MAP_UNKNOWN );
 
-    SET_MEM(0, bootParameters.mem_lower * 1024, MEM_MAP_LOW_RAM );
-    SET_MEM(START_UPPER, START_UPPER + bootParameters.mem_upper * 1024, MEM_MAP_HI_RAM );
+    if (bootParameters.flags & MULTIBOOT_MEMORY)
+    {
+        SET_MEM(0, bootParameters.mem_lower * 1024, MEM_MAP_LOW_RAM );
+        SET_MEM(START_UPPER, bootParameters.mem_upper * 1024, MEM_MAP_HI_RAM );
+    }
 
     //amap_dump( &ram_map );
     //printf("------------\n");

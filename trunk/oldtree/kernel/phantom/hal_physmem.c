@@ -147,51 +147,9 @@ hal_init_physmem_alloc_thread(void)
 void
 hal_physmem_add( physaddr_t start, size_t npages )
 {
-    size_t i, j;
-
-    /* probing code assumes that paging is off
-     * if it is on, allocate virtual address and use
-     * hal_page_control to map physical page there
-     */
-    assert((get_cr0() & (CR0_PE | CR0_PG)) == CR0_PE);
-
-    if (start & (PAGE_SIZE - 1))
-        --npages;
-    start = (start + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
-
-    for (i = j = 0; i < npages; ++i)
-    {
-        volatile int *p = (void*)(start + i * PAGE_SIZE);
-
-        /* verify that we can effectively write to this physical page */
-        *p = 0;
-        if (*p == 0)
-        {
-            *p = -1;
-            if (*p == -1)
-                continue;
-        }
-
-        if (i != j)
-        {
-            printf("Phys mem: [ %08x - %08x [\n",
-                    start + j * PAGE_SIZE,
-                    start + i * PAGE_SIZE);
-            total_phys_pages += i - j;
-            phantom_phys_free_region(&pm_map, start/PAGE_SIZE + j, i - j);
-        }
-
-        j = i + 1;
-    }
-
-    if (i != j)
-    {
-        printf("Phys mem: [ %08x - %08x [\n",
-                start + j * PAGE_SIZE,
-                start + i * PAGE_SIZE);
-        total_phys_pages += i - j;
-        phantom_phys_free_region(&pm_map, start/PAGE_SIZE + j, i - j);
-    }
+    assert(!(start & (PAGE_SIZE - 1)));
+    total_phys_pages += npages;
+    phantom_phys_free_region(&pm_map, start/PAGE_SIZE, npages);
 }
 
 
