@@ -1394,6 +1394,8 @@ static int vm_regular_snaps_enabled = 0;
 
 void vm_enable_regular_snaps() { vm_regular_snaps_enabled = 1; }
 
+#if MEM_RECLAIM
+
 void physmem_try_to_reclaim_page(void)
 {
     vm_page *p = NULL;
@@ -1459,6 +1461,14 @@ static void balance_clean_dirty(void)
         }
     } while (need_pageout(dirty, clean));
 }
+
+#else
+
+static inline void balance_clean_dirty(void)
+{
+}
+
+#endif
 
 static void vm_map_lazy_pageout_thread(void)
 {
