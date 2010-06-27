@@ -96,10 +96,20 @@ static inline void vm_verify_snap(disk_page_no_t head)
 
 static hal_cond_t      deferred_alloc_thread_sleep;
 
-// Q of candidates to reclaim phys mem, starting from less used ones
-static queue_head_t		reclaim_q;
-static hal_mutex_t 		reclaim_q_mutex;
-static hal_cond_t      		reclaim_q_nonempty;
+/*
+ * Lock ordering for both clean and dirty queues:
+ * first lock vm_page, second -- *_q_mutex.
+ */
+// clean physical pages queue (to reclaim from the end)
+static hal_mutex_t 	    clean_q_mutex;
+static hal_cond_t 	    clean_q_nonempty;
+static queue_head_t     clean_q;
+static size_t           clean_q_size;
+// dirty physical pages queue (to pageout from the end)
+static hal_mutex_t 	    dirty_q_mutex;
+static queue_head_t     dirty_q;
+static size_t           dirty_q_size;
+
 
 
 // for each copy of system this address can't change - we
@@ -273,7 +283,6 @@ vm_page_init( vm_page *me, void *my_vaddr)
     // BUG? Page generation number will be zero?
     memset( me, 0, sizeof(vm_page) );
     me->virt_addr = my_vaddr;
-    //hal_cond_init(&me->sleepStone, "VM PG");
     hal_cond_init(&me->done, "VM PG");
     hal_mutex_init(&me->lock, "VM PG" );
     page_touch_history(me);
@@ -298,9 +307,11 @@ vm_map_init(unsigned long page_count)
 
     vm_map_start_of_virtual_address_space = (void *)hal_object_space_address();
 
-    queue_init(&reclaim_q);
-    hal_mutex_init(&reclaim_q_mutex, "MemReclaim");
-    hal_cond_init( &reclaim_q_nonempty, "HaveReclaim" );
+    queue_init(&clean_q);
+    hal_mutex_init(&clean_q_mutex, "CleanQueue");
+    hal_cond_init(&clean_q_nonempty, "CleanQueueNonempty");
+    queue_init(&dirty_q);
+    hal_mutex_init(&dirty_q_mutex, "DirtyQueue");
 
     hal_mutex_init(&vm_map_mutex, "VM Map");
 
@@ -373,6 +384,59 @@ void vm_map_finish(void)
 }
 
 
+// memory reclaiming helpers
+
+static int is_on_reclaim_q( vm_page *p )
+{
+    return p->reclaim_q_chain.next != 0;
+}
+
+static void put_on_clean_q(vm_page *p)
+{
+    assert(!is_on_reclaim_q(p));
+    hal_mutex_lock(&clean_q_mutex);
+    queue_enter(&clean_q, p, vm_page *, reclaim_q_chain);
+    ++clean_q_size;
+    hal_cond_broadcast(&clean_q_nonempty);
+    hal_mutex_unlock(&clean_q_mutex);
+}
+
+static void put_on_dirty_q(vm_page *p)
+{
+    assert(!is_on_reclaim_q(p));
+    hal_mutex_lock(&dirty_q_mutex);
+    queue_enter_first(&dirty_q, p, vm_page *, reclaim_q_chain);
+    ++dirty_q_size;
+    hal_mutex_unlock(&dirty_q_mutex);
+}
+
+static void remove_from_clean_q(vm_page *p)
+{
+    assert(clean_q_size > 0);
+    assert(is_on_reclaim_q(p));
+    hal_mutex_lock(&clean_q_mutex);
+    queue_remove(&clean_q, p, vm_page *, reclaim_q_chain);
+    --clean_q_size;
+    p->reclaim_q_chain.next = 0;
+    hal_mutex_unlock(&clean_q_mutex);
+}
+
+static void remove_from_dirty_q(vm_page *p)
+{
+    assert(dirty_q_size > 0);
+    assert(is_on_reclaim_q(p));
+    hal_mutex_lock(&dirty_q_mutex);
+    queue_remove(&dirty_q, p, vm_page *, reclaim_q_chain);
+    --dirty_q_size;
+    p->reclaim_q_chain.next = 0;
+    hal_mutex_unlock(&dirty_q_mutex);
+}
+
+static void move_to_dirty_q(vm_page *p)
+{
+    remove_from_clean_q(p);
+    put_on_dirty_q(p);
+}
 
 
 
@@ -500,6 +564,7 @@ vm_page_req_pageout(vm_page *me)
     me->pager_io.pager_callback = pageout_callback;
     me->pager_io.disk_page = me->curr_page;
 
+    remove_from_dirty_q(me);
     page_touch_history(me);
     hal_mutex_unlock(&me->lock);
     if(PAGEOUT_DEBUG||PAGING_DEBUG) hal_printf("really req pageout\n" );
@@ -523,8 +588,10 @@ void pageout_callback( pager_io_request *req, int write )
     req->pager_callback = 0;
 
     vmp->flag_phys_dirty = 0; // just saved out, we're clean
+    put_on_clean_q(vmp);
     vmp->flag_pager_io_busy = 0;
     page_touch_history(vmp);
+
     hal_cond_broadcast(&vmp->done);
 
     hal_mutex_unlock(&vmp->lock);
@@ -639,6 +706,7 @@ page_fault_snap_aid( vm_page *p, int  is_writing  )
     p->flag_phys_protect = 0;
 
     p->access_count++;
+    assert(p->flag_phys_dirty);
     p->flag_phys_dirty = 1; // we'll be dirty after return from trap
     page_touch_history(p);
 
@@ -704,6 +772,7 @@ pagein_callback( pager_io_request *p, int  pageout )
 
     page_touch_history(vmp);
     vmp->flag_phys_dirty = 0;
+    put_on_clean_q(vmp);
     vmp->flag_pager_io_busy = 0;
     hal_cond_broadcast(&vmp->done); // wakeup threads waiting for page
     hal_mutex_unlock(&vmp->lock);
@@ -774,6 +843,7 @@ page_fault_read( vm_page *p )
 
         page_clear_engine_clear_page(p->phys_addr);
         p->flag_phys_dirty = 0;
+        put_on_clean_q(p);
         p->flag_phys_protect = 1; // read access - see below.
 
         hal_page_control( p->phys_addr, p->virt_addr, page_map, page_ro );
@@ -821,6 +891,7 @@ page_fault_write( vm_page *p )
         if (is_in_snapshot_process && !p->flag_have_make &&
                 pager_dequeue_from_pageout(&p->pager_io))
         {
+            p->flag_phys_dirty ? put_on_dirty_q(p) : put_on_clean_q(p);
             page_touch_history(p);
             if(FAULT_DEBUG) hal_printf("dequeued 0x%X\n", p->virt_addr );
             p->flag_pager_io_busy = 0;
@@ -837,7 +908,12 @@ page_fault_write( vm_page *p )
     {
         page_touch_history(p);
         if(FAULT_DEBUG) hal_printf("solved meanwhile 0x%X\n", p->virt_addr );
-        p->flag_phys_dirty = 1; // we'll be dirty after return from trap
+        if (!p->flag_phys_dirty)
+        {
+            page_touch_history(p);
+            move_to_dirty_q(p);
+            p->flag_phys_dirty = 1; // we'll be dirty after return from trap
+        }
         return;
     }
 
@@ -869,6 +945,7 @@ page_fault_write( vm_page *p )
             p->flag_phys_protect = 0;
             p->access_count++;
             p->flag_phys_dirty = 1; // we'll be dirty after return from trap
+            move_to_dirty_q(p);
             if(FAULT_DEBUG) hal_printf("unprotect to write 0x%X\n", p->virt_addr );
         }
         return;
@@ -914,6 +991,7 @@ page_fault_write( vm_page *p )
         page_clear_engine_clear_page(p->phys_addr);
         hal_page_control( p->phys_addr, p->virt_addr, page_map, page_rw );
         p->flag_phys_dirty = 1;
+        put_on_dirty_q(p);
         return;
     }
 
@@ -934,7 +1012,11 @@ page_fault_write( vm_page *p )
         hal_cond_wait(&p->done, &p->lock);
     }
     page_touch_history(p);
-    p->flag_phys_dirty = 1;
+    if (p->flag_phys_mem)
+    {
+        p->flag_phys_dirty = 1;
+        move_to_dirty_q(p);
+    }
 }
 
 
@@ -1307,303 +1389,90 @@ void do_snapshot()
 // (runs in pager thread on a quite low prio)
 //---------------------------------------------------------------------------
 
-static volatile size_t reclaim_q_size = 0;
-#if MEM_RECLAIM
-
-static int is_on_reclaim_q( vm_page *p )
-{
-    return p->reclaim_q_chain.next != 0;
-}
-
-static void put_on_reclaim_q_last( vm_page *p )
-{
-    assert(!is_on_reclaim_q( p ) );
-    queue_enter( &reclaim_q, p, vm_page *, reclaim_q_chain);
-    int was0 = !reclaim_q_size;
-    reclaim_q_size++;
-    if(was0) hal_cond_broadcast( &reclaim_q_nonempty );
-}
-
-static void put_on_reclaim_q_first( vm_page *p )
-{
-    assert(!is_on_reclaim_q( p ) );
-    queue_enter_first( &reclaim_q, p, vm_page *, reclaim_q_chain);
-    int was0 = !reclaim_q_size;
-    reclaim_q_size++;
-    if(was0) hal_cond_broadcast( &reclaim_q_nonempty );
-}
-
-static void remove_from_reclaim_q( vm_page *p )
-{
-    assert(reclaim_q_size > 0);
-    reclaim_q_size--;
-    assert(is_on_reclaim_q( p ) );
-    queue_remove( &reclaim_q, p, vm_page *, reclaim_q_chain);
-    p->reclaim_q_chain.next = 0;
-}
-#endif // MEM_RECLAIM
-
-/**
- * page lock cannot be taken here,
- * because it may scan over the page currently
- * locked by the current thread inside page_fault
- */
-static vm_page *get_vmpage_synchronously(void)
-{
-    static volatile vm_page *start_here;
-    vm_page *p = start_here;
-    ptrdiff_t i;
-
-    if (p < vm_map_map || p >= vm_map_map_end)
-        p = vm_map_map;
-
-    for (i = 0; i < vm_map_map_end - vm_map_map; ++i)
-    {
-        /* no lock, will lock and re-verify later
-        */
-        if (p->flag_phys_mem && !p->flag_phys_dirty)
-        {
-            start_here = p;
-            return p;
-        }
-        if (++p >= vm_map_map_end)
-            p = vm_map_map;
-    }
-
-    for (i = 0; i < vm_map_map_end - vm_map_map; ++i)
-    {
-        /* no lock, will lock and re-verify later
-        */
-        if (p->flag_phys_mem)
-        {
-            start_here = p;
-            return p;
-        }
-        if (++p >= vm_map_map_end)
-            p = vm_map_map;
-    }
-
-    /* no physical mem in vm_map_map */
-    return NULL;
-}
-
-static vm_page *get_vmpage_to_reclaim(void)
-{
-    vm_page *p = NULL;
-
-    hal_mutex_lock(&reclaim_q_mutex);
-
-    if (reclaim_q_size == 0)
-    {
-        hal_mutex_unlock(&reclaim_q_mutex);
-        p = get_vmpage_synchronously();
-        hal_mutex_lock(&reclaim_q_mutex);
-    }
-    
-    if (!p)
-    {
-        while (reclaim_q_size == 0)
-        {
-            hal_cond_wait(&reclaim_q_nonempty, &reclaim_q_mutex);
-        }
-        reclaim_q_size--;
-        queue_remove_first( &reclaim_q, p, vm_page *, reclaim_q_chain );
-    }
-
-    hal_mutex_unlock(&reclaim_q_mutex);
-
-    return p;
-}
-
-void physmem_try_to_reclaim_page()
-{
-    //while(1)
-    {
-        vm_page *p = get_vmpage_to_reclaim();
-        if (!p)
-            return;
-
-        int got = 0;
-
-        hal_mutex_lock(&p->lock);
-
-        // This one is busy/useless/dirty and we have plenty of pretendents - forget it
-        if ((p->flag_pager_io_busy || !p->flag_phys_mem || p->flag_phys_dirty)
-                && reclaim_q_size > 100)
-            goto unlock;
-
-        /* One really important case here: io on page copy during snapshot.
-         * Must wait for it to finish in order to req_pageout.
-         */
-        while (p->flag_pager_io_busy)
-        {
-            page_touch_history(p);
-            hal_cond_wait(&p->done, &p->lock);
-        }
-
-        if (p->flag_phys_dirty)
-        {
-            page_touch_history(p);
-            vm_page_req_pageout(p);
-
-            while (p->flag_pager_io_busy)
-            {
-                hal_cond_wait(&p->done, &p->lock);
-            }
-        }
-
-        // Some activity or no mem or still dirty - no, thanx
-        if (p->flag_pager_io_busy || !p->flag_phys_mem || p->flag_phys_dirty)
-            goto unlock;
-
-        page_touch_history(p);
-        p->flag_phys_mem = 0; // Take it
-        phys_page_t paddr = p->phys_addr;
-        hal_page_control( paddr, p->virt_addr, page_unmap, page_noaccess );
-        got = 1;
-
-    unlock:
-        hal_mutex_unlock(&p->lock);
-
-        if( got )
-        {
-            hal_free_phys_page(paddr);
-            //SHOW_FLOW0(0, "MEM RECLAIM");
-            return;
-        }
-    }
-}
-
-
-
-
-
-//int  vm_map_last_snap_is_done = 0;
 
 static int vm_regular_snaps_enabled = 0;
 
 void vm_enable_regular_snaps() { vm_regular_snaps_enabled = 1; }
 
+void physmem_try_to_reclaim_page(void)
+{
+    vm_page *p = NULL;
+
+    hal_mutex_lock(&clean_q_mutex);
+    while (!clean_q_size)
+        hal_cond_wait(&clean_q_nonempty, &clean_q_mutex);
+    p = (vm_page*)queue_last(&clean_q);
+    hal_mutex_unlock(&clean_q_mutex);
+    if (p)
+    {
+        hal_mutex_lock(&p->lock);
+        if (p->flag_phys_mem && !p->flag_phys_dirty && is_on_reclaim_q(p))
+        {
+            page_touch_history(p);
+            remove_from_clean_q(p);
+            p->flag_phys_mem = 0; // Take it
+            phys_page_t paddr = p->phys_addr;
+            hal_page_control(paddr, p->virt_addr, page_unmap, page_noaccess);
+            hal_free_phys_page(paddr);
+        }
+        hal_mutex_unlock(&p->lock);
+    }
+}
+
+static inline int need_pageout(size_t dirty, size_t clean)
+{
+    if (!dirty)
+        return 0;
+    /* play with numbers */
+    if (clean < 8)
+        return dirty >= clean;
+    if (clean < 32)
+        return dirty > clean * 16;
+    return dirty > clean * 4096;
+}
+
+static void balance_clean_dirty(void)
+{
+    size_t clean;
+    size_t dirty;
+    do
+    {
+        vm_page *p;
+
+        hal_mutex_lock(&clean_q_mutex);
+        clean = clean_q_size;
+        hal_mutex_unlock(&clean_q_mutex);
+        hal_mutex_lock(&dirty_q_mutex);
+        dirty = dirty_q_size;
+        p = (vm_page*)queue_last(&dirty_q);
+        hal_mutex_unlock(&dirty_q_mutex);
+        if (need_pageout(dirty, clean))
+        {
+            hal_mutex_lock(&p->lock);
+            if (p->flag_phys_mem && p->flag_phys_dirty)
+            {
+                page_touch_history(p);
+                vm_page_req_pageout(p);
+                --dirty;
+            }
+            hal_mutex_unlock(&p->lock);
+        }
+    } while (need_pageout(dirty, clean));
+}
 
 static void vm_map_lazy_pageout_thread(void)
 {
     SHOW_FLOW0( 1, "Ready");
-    hal_set_thread_name("LazyReclaim");
-
-    vm_page *p = vm_map_map;
+    hal_set_thread_name("LazyPageout");
 
     while(1)
     {
         if( stop_lazy_pageout_thread )
             hal_exit_kernel_thread();
 
-        hal_sleep_msec( 100 ); // TODO: yield?
-        p++;
-        if( p >= vm_map_map_end ) p = vm_map_map;
+        hal_sleep_msec( 100 ); // TODO: cond_wait?
 
-#if MEM_RECLAIM
-        linaddr_t la = (linaddr_t)(p->virt_addr);
-
-        int acc = phantom_is_page_accessed(la);
-
-        if( acc )
-            p->idle_count = 0;
-        else
-            p->idle_count++;
-
-        // now react somehow by putting page with higher idle_count to reclaim queue?
-        // >1 reclaim queues? Or just sort such Q a bit, moving idler pages to start?
-
-        if(p->flag_phys_mem)
-        {
-            hal_mutex_lock(&reclaim_q_mutex);
-
-            hal_mutex_lock(&p->lock);
-
-            int onq = is_on_reclaim_q(p);
-
-            if( p->idle_count > 4 )
-            {
-                page_touch_history(p);
-                if(onq)
-                    remove_from_reclaim_q( p );
-                put_on_reclaim_q_first(p);
-                onq = 1;
-            }
-            else if( p->idle_count > 1 && low_free_physmem() && !onq  )
-            {
-                if(!onq)
-                {
-                    page_touch_history(p);
-                    put_on_reclaim_q_last(p);
-                    onq = 1;
-                }
-            }
-
-            // Active page
-            if( p->idle_count < 1 )
-            {
-                // We have lot of free mem - let him go
-                if(onq && have_lot_of_free_physmem())
-                {
-                    page_touch_history(p);
-                    remove_from_reclaim_q( p );
-                }
-
-                // Too bad - you're in the army now
-                if(!onq && low_low_free_physmem())
-                {
-                    page_touch_history(p);
-                    put_on_reclaim_q_last(p);
-                }
-            }
-
-            //reclaim_unlock:
-            hal_mutex_unlock(&p->lock);
-
-            hal_mutex_unlock(&reclaim_q_mutex);
-        }
-#endif
-
-
-        /*
-        // Now really reclaim mem keeping free phys mem count reasonably high
-
-        hal_mutex_lock(&reclaim_q_mutex);
-
-        check some physmem free page counter. if low, and !queue_empty(&reclaim_q)
-        {
-            queue_remove_first( &reclaim_q, p, vm_page *, reclaim_q_chain);
-        }
-        hal_mutex_unlock(&reclaim_q_mutex);
-
-        check some physmem free page counter. if !too! low, take CURRENT visiting page
-        and reclaim its memory. Possibly set some global mem thrash state.
-        Show user a window saying 'go buy some more RAM!' :)
-
-         */
-
-
-continue;
-
-        // has nothing to swap out?
-        if( !(p->flag_phys_mem) )
-            continue;
-        //printf("hpm ");
-        if( !(p->flag_phys_dirty) )
-            continue;
-        //printf("dty ");
-        // nowhere to swap to?
-        if( !(p->flag_have_curr) )
-        {
-            vm_page_req_deferred_disk_alloc(p);
-            continue;
-        }
-
-        hal_printf("o");
-        // allright, kick it!
-
-        vm_page_req_pageout(p);
+        balance_clean_dirty();
     }
 }
 
@@ -1660,42 +1529,6 @@ static void vm_map_deferred_disk_alloc_thread(void)
         // sleep is to check for situation where disk mem is not available for a long time
 
         pager_refill_free();
-
-        //hal_cli();  // TODO use sema!
-        hal_mutex_lock(&vm_map_mutex);
-#if 0
-        while(deferred_disk_allocations)
-        {
-            //hal_printf("\ndefered disk alloc request\n");
-
-            volatile vm_page *p = deferred_disk_allocations;
-            // off the q!
-            deferred_disk_allocations = deferred_disk_allocations->dfda_next;
-            p->flag_dfda_active = 0; // used as flag that we are on q;
-
-            if( p->flag_have_curr ) continue; // he has one.
-
-            disk_page_no_t temp;
-            if( pager_interrupt_alloc_page(&temp) )
-            {
-
-                //hal_printf("+");
-
-                p->curr_page = temp;
-                p->flag_have_curr = 1; // got it
-                p->flag_phys_dirty = 1; // disk page contents are wrong
-            }
-            else
-            {
-                hal_printf("?");
-                break; // to get to refill_free_reserve()
-            }
-
-        }
-#endif
-
-        hal_mutex_unlock(&vm_map_mutex);
-
     }
 }
 
