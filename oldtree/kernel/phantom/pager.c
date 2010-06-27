@@ -71,6 +71,7 @@ static disk_page_no_t                   free_reserve[free_reserve_size]; // for 
 static int                          free_reserve_n;
 
 
+static disk_page_io                 superblock_io;
 
 
 static disk_page_no_t     sb_default_page_numbers[] = DISK_STRUCT_SB_OFFSET_LIST;
@@ -150,6 +151,8 @@ pager_init(paging_device * device)
     hal_mutex_init(&pager_freelist_mutex, "PagerFree");
 
     disk_page_io_init(&freelist_head);
+    disk_page_io_init(&superblock_io);
+    disk_page_io_allocate(&superblock_io);
 
     pdev = device;
 
@@ -182,6 +185,7 @@ pager_finish()
 
     superblock.fs_is_clean = 1; // mark as clean
     pager_update_superblock();
+    disk_page_io_finish(&superblock_io);
 }
 
 
@@ -733,19 +737,18 @@ pager_get_superblock()
 
 
 
+
 void
 pager_update_superblock()
 {
-#if 1
-    disk_page_io sb;
-
-    disk_page_io_init(&sb);
     SHOW_FLOW0( 0, " updating superblock...");
 
-    phantom_calc_sb_checksum( &superblock );
-    *((phantom_disk_superblock *)disk_page_io_data(&sb)) = superblock;
+    assert(!(superblock_io.req.flag_pagein || superblock_io.req.flag_pageout));
 
-    disk_page_io_save_sync(&sb,sb_default_page_numbers[0]); // save root copy
+    phantom_calc_sb_checksum( &superblock );
+    *((phantom_disk_superblock *)disk_page_io_data(&superblock_io)) = superblock;
+
+    disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[0]); // save root copy
 
     if( need_fsck )
     {
@@ -753,14 +756,11 @@ pager_update_superblock()
     }
     else
     {
-        disk_page_io_save_sync(&sb,superblock.sb2_addr);
-        disk_page_io_save_sync(&sb,superblock.sb3_addr);
+        disk_page_io_save_sync(&superblock_io, superblock.sb2_addr);
+        disk_page_io_save_sync(&superblock_io, superblock.sb3_addr);
     }
 
-    disk_page_io_finish(&sb);
-
     SHOW_FLOW0( 0, " saved all 3");
-#endif
 }
 
 // ---------------------------------------------------------------------------
