@@ -38,6 +38,7 @@
 
 #include <i386/seg.h>
 
+#define FULL_STACK_TRACE
 
 /* We'll be using macros to fill in a table in data hunk 2
    while writing trap entrypoint routines at the same time.
@@ -155,13 +156,19 @@ EXCEPTION(0x1f,t_trap_1f)
  *		old ss		if trapped from user
  */
 ENTRY(phantom_alltraps)
-
+    .cfi_startproc
+    .cfi_def_cfa esp, 20
+    .cfi_offset eip, -12
     pusha				/* save the general registers */
+    .cfi_adjust_cfa_offset 32
+    .cfi_offset ebp, -44 
 trap_push_segs:
     pushl	%ds			/* and the segment registers */
     pushl	%es
     pushl	%fs
     pushl	%gs
+
+    .cfi_adjust_cfa_offset 16
 
     /* Note that we have to load the segment registers
      even if this is a trap from the kernel,
@@ -188,6 +195,7 @@ trap_from_user:
 
 
 #ifdef FULL_STACK_TRACE
+#define TS_EIP(r) 0x38(r)
 	/*
 	 * Fake a stack frame for back traces
 	 */
@@ -196,12 +204,14 @@ trap_from_user:
 	pushl	%ebp
 	movl	%esp,%ebp
 	pushl	%edx
+    .cfi_adjust_cfa_offset 12
 	call    EXT(phantom_kernel_trap)	/* to kernel trap routine */
 	movl	%ebp,%esp
 	popl	%ebp
 	popl	%edx
 #else
 	pushl	%esp
+    .cfi_adjust_cfa_offset 4
 	call    EXT(phantom_kernel_trap)	/* to kernel trap routine */
 	popl	%edx
 #endif
@@ -216,6 +226,8 @@ trap_from_user:
     popa				/* restore general registers */
     addl	$8,%esp			/* discard trap number and error code */
     iret				/* return from interrupt */
+
+    .cfi_endproc
 
 
 
