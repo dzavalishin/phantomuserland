@@ -222,7 +222,6 @@ ia32_pause(void)
 	__asm __volatile("pause");
 }
 
-
 /*
  * Global TLB flush (except for thise for pages marked PG_G)
  */

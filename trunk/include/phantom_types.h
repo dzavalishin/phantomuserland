@@ -67,6 +67,8 @@ typedef u_int32_t       	linaddr_t;
 
 
 typedef void *  		vmem_ptr_t;
+typedef unsigned long 	addr_t;
+//typedef void *  		addr_t;
 
 #ifndef _SIZE_T
 #define _SIZE_T

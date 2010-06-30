@@ -254,6 +254,13 @@ phantom_process_boot_options(void)
     while(c--)
     {
         const char *arg = *args++;
+
+        if( arg == 0 )
+        {
+            SHOW_ERROR0( 0, "Warning: boot option is NULL!");
+            continue;
+        }
+
         if( *arg != '-' )
             goto error;
 
@@ -285,7 +292,7 @@ phantom_process_boot_options(void)
         continue;
 
     error:
-        SHOW_ERROR( 0, "Warning: Unknownm boot option '%s'", arg);
+        SHOW_ERROR( 0, "Warning: Unknown boot option '%s'", arg);
     }
 
 }
