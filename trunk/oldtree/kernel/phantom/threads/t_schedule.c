@@ -11,6 +11,7 @@
 **/
 
 #include "thread_private.h"
+#include "../misc.h"
 
 #include <queue.h>
 #include <phantom_libc.h>

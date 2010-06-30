@@ -47,7 +47,7 @@ void phantom_io_apic_init( physaddr_t pa )
 
     int id = readIoApic(IOAPIC_ID);
     int ver = readIoApic(IOAPIC_VER);
-    int arb; // = readIoApic(IOAPIC_ARB);
+    //int arb; // = readIoApic(IOAPIC_ARB);
 
     int max_redirect_entry = (ver >> 16) & 0xFF;
 
@@ -56,7 +56,7 @@ void phantom_io_apic_init( physaddr_t pa )
           );
 
     have_io_apic = 1;
-
+#if 0
     int i;
 
     // Set them as is - this is wrong, we need to
@@ -75,7 +75,7 @@ void phantom_io_apic_init( physaddr_t pa )
 
     arb = readIoApic(IOAPIC_ARB);
     printf("IO APIC arbitration prio %d\n", arb );
-
+#endif
 }
 
 
@@ -91,7 +91,10 @@ void writeIoApic( u_int32_t reg, u_int32_t value)
    ioapic[4] = value;
 }
 
-
+void setIoApicId( int id )
+{
+    writeIoApic(IOAPIC_ID, id);
+}
 
 void setIoApicInput( int input, int vector, int level, int low_active )
 {

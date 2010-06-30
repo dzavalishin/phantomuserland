@@ -226,14 +226,16 @@ struct hash_iterator *hash_open(void *_hash_table, struct hash_iterator *i)
 
 void hash_close(void *_hash_table, struct hash_iterator *i, bool free_iterator)
 {
-	if(free_iterator)
-		free(i);
+    (void) _hash_table;
+    if(free_iterator)
+        free(i);
 }
 
 void hash_rewind(void *_hash_table, struct hash_iterator *i)
 {
-	i->ptr = NULL;
-	i->bucket = -1;
+    (void) _hash_table;
+    i->ptr = NULL;
+    i->bucket = -1;
 }
 
 void *hash_next(void *_hash_table, struct hash_iterator *i)

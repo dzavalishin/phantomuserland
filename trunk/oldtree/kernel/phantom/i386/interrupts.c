@@ -52,9 +52,10 @@ void def_soft_irq_handler(struct trap_state *ts)
 
 
 
-static void def_irq_handler(struct trap_state *s)
+void call_irq_handler(struct trap_state *s, unsigned irq)
 {
-    unsigned irq = s->err;
+    (void) s; // TODO pass to int handler?
+    //unsigned irq = s->err;
 
     if( irq >= PIC_IRQ_COUNT )
         panic("IRQ %d > max %d", irq, PIC_IRQ_COUNT-1 );
@@ -88,16 +89,16 @@ static void def_irq_handler(struct trap_state *s)
 void (*soft_irq_handler)(struct trap_state *) = def_soft_irq_handler;
 
 
-
-// TODO in fact we don't need this junk. Call def_irq_handler
+/*
+// TODO in fact we don't need this junk. Call call_irq_handler
 // directly!
 void (*pic_irq_handlers[PIC_IRQ_COUNT])(struct trap_state *ts) = {
-    def_irq_handler,	def_irq_handler,    def_irq_handler,	def_irq_handler,
-    def_irq_handler,	def_irq_handler,    def_irq_handler,	def_irq_handler,
-    def_irq_handler,	def_irq_handler,    def_irq_handler,	def_irq_handler,
-    def_irq_handler,	def_irq_handler,    def_irq_handler,	def_irq_handler
+    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler,
+    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler,
+    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler,
+    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler
 };
-
+*/
 
 
 
@@ -266,8 +267,10 @@ hal_PIC_interrupt_dispatcher(struct trap_state *ts, int mask)
 {
     check_global_lock_entry_count();
 
+    unsigned irq = ts->err;
+
     irq_nest++;
-    def_irq_handler(ts);
+    call_irq_handler(ts,irq);
     irq_nest--;
 
     check_global_lock_entry_count();
@@ -307,3 +310,7 @@ hal_PIC_interrupt_dispatcher(struct trap_state *ts, int mask)
     //ENABLE_SOFT_IRQ();
 #endif
 }
+
+
+
+

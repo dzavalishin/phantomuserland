@@ -25,6 +25,8 @@
 #include <errno.h>
 #include <assert.h>
 #include <threads.h>
+#include <kernel/init.h>
+
 
 #include "trfs.h"
 

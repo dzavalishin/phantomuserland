@@ -266,6 +266,8 @@ void writeIoApic( u_int32_t reg, u_int32_t value);
 #define IOAPIC_HI_ACTIVE 0
 
 void setIoApicInput( int input, int vector, int level, int low_active );
+void setIoApicId( int id );
+
 void dumpIoApicInputs(void);
 
 

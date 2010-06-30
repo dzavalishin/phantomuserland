@@ -18,6 +18,7 @@
 #include <phantom_libc.h>
 #include <string.h>
 #include <kernel/vm.h>
+#include <kernel/init.h>
 #include <x86/phantom_page.h>
 #include <x86/phantom_pmap.h>
 #include <hal.h>

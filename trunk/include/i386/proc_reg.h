@@ -223,6 +223,33 @@ ia32_pause(void)
 }
 
 
+/*
+ * Global TLB flush (except for thise for pages marked PG_G)
+ */
+static __inline void
+invltlb(void)
+{
+
+	//load_cr3(rcr3());
+    //set_cr3(get_cr3));
+
+    register unsigned int _temp__;
+    asm("mov %%cr3, %0" : "=r" (_temp__));
+    asm volatile("mov %0, %%cr3" : : "r" (_temp__));
+}
+
+/*
+ * TLB flush for an individual page (even if it has PG_G).
+ * Only works on 486+ CPUs (i386 does not have PG_G).
+ */
+static __inline void
+invlpg(unsigned int addr)
+{
+
+	__asm __volatile("invlpg %0" : : "m" (*(char *)addr) : "memory");
+}
+
+
 
 #if 0
 
@@ -366,31 +393,6 @@ wbinvd(void)
 
 
 
-/*
- * Global TLB flush (except for thise for pages marked PG_G)
- */
-static __inline void
-invltlb(void)
-{
-
-	//load_cr3(rcr3());
-    //set_cr3(get_cr3));
-
-    register unsigned int _temp__;
-    asm("mov %%cr3, %0" : "=r" (_temp__));
-    asm volatile("mov %0, %%cr3" : : "r" (_temp__));
-}
-
-/*
- * TLB flush for an individual page (even if it has PG_G).
- * Only works on 486+ CPUs (i386 does not have PG_G).
- */
-static __inline void
-invlpg(unsigned int addr)
-{
-
-	__asm __volatile("invlpg %0" : : "m" (*(char *)addr) : "memory");
-}
 
 static __inline unsigned int
 rfs(void)

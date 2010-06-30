@@ -178,6 +178,11 @@ static timedcall_t sched_timer =
     0, 20
 };
 
+void phantom_turn_off_pic_scheduler_timer(void)
+{
+    phantom_undo_timed_call( &sched_timer );
+}
+
 
 /**
  *
