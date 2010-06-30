@@ -27,6 +27,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <i386/trap.h>
 
 #include <i386/proc_reg.h>
 #include <i386/seg.h>
@@ -859,7 +860,7 @@ void smp_ap_start(void)
     panic(msg);
 }
 
-#define REAL_SMP 0
+#define REAL_SMP 1
 
 
 static void do_smp_ap_start(void)
@@ -887,6 +888,9 @@ static void do_smp_ap_start(void)
 
     printf( "!! SMP AP %d START !!\n", ncpu );
 
+    // Todo hack. need some good way to tell them they can go.
+    while (trap_panic == phantom_trap_handlers[T_PAGE_FAULT])
+        ia32_pause();
 
     while(1)
     {

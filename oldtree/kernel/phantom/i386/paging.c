@@ -6,6 +6,7 @@
 #include <x86/phantom_page.h>
 #include <i386/proc_reg.h>
 #include <hal.h>
+#include <machdep.h>
 
 #include "misc.h"
 #include "cpu.h"
@@ -176,7 +177,7 @@ phantom_dump_pdir()
         else
             printf( " -> %08X", pte_to_pa(*e) );
 
-        printf( " %s%s%s%s%s%s%s ", 
+        printf( " %s%s%s%s%s%s%s ",
 			*e & INTEL_PTE_GLOBAL ? " GLOBAL" : "",
 			*e & INTEL_PTE_MOD ? " MOD" : "",
 			*e & INTEL_PTE_REF ? " REF" : "",
@@ -193,4 +194,23 @@ phantom_dump_pdir()
     printf("\n");
 }
 
+
+void arch_cpu_invalidate_TLB_range(addr_t start, addr_t end)
+{
+    int num_pages = ((long)end)/PAGE_SIZE - ((long)start)/PAGE_SIZE;
+    while ( num_pages-- >= 0 ) {
+        //invalidate_TLB(start);
+        invlpg((unsigned int)start);
+        start += PAGE_SIZE;
+    }
+}
+
+void arch_cpu_invalidate_TLB_list(addr_t pages[], int num_pages)
+{
+    int i;
+    for(i=0; i<num_pages; i++) {
+        //invalidate_TLB(pages[i]);
+        invlpg((unsigned int)pages[i]);
+    }
+}
 

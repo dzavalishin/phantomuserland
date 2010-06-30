@@ -10,7 +10,7 @@
 
 // definitions to import newos code easily
 
-typedef unsigned long addr_t;
+//typedef unsigned long addr_t;
 //typedef unsigned int ssize_t;
 typedef int thread_id;
 
@@ -234,6 +234,13 @@ typedef int thread_id;
 #define ERR_DEV_TIMED_OUT         (ERR_DEV_GENERAL-1)
 #define ERR_DEV_HARDWARE_ERROR    (ERR_DEV_GENERAL-2)
 #define ERR_DEV_BUSY              (ERR_DEV_GENERAL-3)
+
+
+enum {
+	INT_NO_RESCHEDULE,
+	INT_RESCHEDULE
+};
+
 
 #endif // _NEWOS
 

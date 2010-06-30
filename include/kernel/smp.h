@@ -14,10 +14,26 @@ int GET_CPU_ID(void);
 void phantom_import_cpu_thread(int ncpu);
 void phantom_load_cpu_tss(int ncpu);
 
+// intercpu messages
+enum {
+	SMP_MSG_INVL_PAGE_RANGE = 0,
+	SMP_MSG_INVL_PAGE_LIST,
+	SMP_MSG_GLOBAL_INVL_PAGE,
+	SMP_MSG_RESCHEDULE,
+	SMP_MSG_CPU_HALT,
+	SMP_MSG_1,
+};
+
+
+enum {
+	SMP_MSG_FLAG_ASYNC = 0,
+	SMP_MSG_FLAG_SYNC,
+};
 
 
 int is_smp(void);
 int ncpus(void);
+
 
 #endif // !ASSEMBLER
 

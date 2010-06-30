@@ -57,7 +57,7 @@ START_O_FILE=entry.o
 phantom: $(START_O_FILE) \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
         test_amap.o \
-	events.o \
+	events.o smp.o \
        	heap/heap.o heap/heap_pool.o heap/secondaries.o boot_cmd_line.o \
        	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
        	ohci.o uhci.o uhci_rh.o uhci_util.o \
