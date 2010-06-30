@@ -15,6 +15,10 @@ void phantom_import_cpu_thread(int ncpu);
 void phantom_load_cpu_tss(int ncpu);
 
 
+
+int is_smp(void);
+int ncpus(void);
+
 #endif // !ASSEMBLER
 
 

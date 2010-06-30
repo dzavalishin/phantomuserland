@@ -18,12 +18,17 @@
 #include "../misc.h"
 #include "apic.h"
 #include "idt.h"
+#include "interrupts.h"
+
 
 #include <x86/phantom_pmap.h>
 #include <hal.h>
 #include <phantom_libc.h>
 #include <i386/trap.h>
 #include <i386/proc_reg.h>
+#include <kernel/init.h>
+
+
 
 // NB! Spurious must have lower bits = 1111
 #define APIC_SPURIOUS_VECTOR    (APIC_INT_BASE+31)
@@ -75,18 +80,21 @@ void phantom_init_apic(void)
     have_apic = 1;
 
     phantom_setup_apic();
-    imps_probe();
 
     // must be after imps_probe and must get address from it
     phantom_io_apic_init( 0xFEC00000 );
+
+    imps_probe();
+
 
 }
 
 // This one is called on all CPUs
 void phantom_setup_apic(void)
 {
-
 #if 0
+    phantom_turn_off_pic_scheduler_timer();
+
     apic_local_unit->divider_config.r = 0xA; // div 128
     apic_local_unit->init_count.r = 1024*1024; // some khz range?
 
@@ -133,6 +141,7 @@ void apic_eoi()
 
 static void apic_timer()
 {
+    phantom_scheduler_time_interrupt();
 }
 
 
@@ -162,8 +171,6 @@ static void apic_incoming_ici()
 
 void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
 {
-    (void) ts;
-
     vector += APIC_INT_BASE;
 
     switch(vector)
@@ -181,16 +188,37 @@ void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
         break;
 
     case APIC_TIMER_VECTOR:
-        {
-            // apic_eoi();
-            apic_timer();
-            // return;
-        }
+        apic_timer();
         break;
+
+    default:
+        {
+            // TODO will die on ints >= 16
+            check_global_lock_entry_count();
+
+            irq_nest++;
+            call_irq_handler(ts,vector);
+            irq_nest--;
+
+            check_global_lock_entry_count();
+        }
     }
 
     printf("APIC int %d ", vector);
     apic_eoi();
+
+    if(irq_nest)
+        return;
+
+#if USE_SOFTIRQ_DISABLE
+
+    // Now for soft IRQs
+    irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
+    hal_softirq_dispatcher(ts);
+    ENABLE_SOFT_IRQ();
+#else
+#error so?
+#endif
 }
 
 int GET_CPU_ID(void)

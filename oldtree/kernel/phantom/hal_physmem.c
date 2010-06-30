@@ -388,7 +388,7 @@ memcpy_v2p( physaddr_t to, void *from, size_t size )
 
         physaddr_t page = PREV_PAGE_ALIGN(to);
         int shift = to-page;
-        int part = PAGE_SIZE-shift;
+        size_t part = PAGE_SIZE-shift;
 
         if( part > size ) part = size;
 

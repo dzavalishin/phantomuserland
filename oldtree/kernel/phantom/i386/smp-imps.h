@@ -170,7 +170,7 @@ struct imps_interrupt
  *  "imps_enabled" is non-zero if the probe sequence found IMPS
  *  information and was successful.
  */
-extern int imps_enabled;
+//extern int imps_enabled;
 
 /*
  *  This contains the local APIC hardware address.
@@ -180,7 +180,7 @@ extern int imps_enabled;
 /*
  *  This represents the number of CPUs found.
  */
-extern int imps_num_cpus;
+//extern int imps_num_cpus;
 
 /*
  *  These map from virtual cpu numbers to APIC id's and back.

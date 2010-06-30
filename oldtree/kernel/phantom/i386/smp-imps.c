@@ -37,23 +37,16 @@
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 #include <kernel/smp.h>
+#include <kernel/init.h>
 
 #include <time.h>
 #include <errno.h>
 
 #include "rtc.h"
 
-/*
- *  XXXXX  The following absolutely must be defined!!!
- *
- *  The "KERNEL_PRINT" could be made a null macro with no danger, of
- *  course, but pretty much nothing would work without the other
- *  ones defined.
- */
 
 
 static volatile int     smp_ap_booted = 0;
-//extern volatile int     smp_ap_booted;
 
 #if 1
 #define CMOS_WRITE_BYTE(x,y)	rtcout(x,y) /* write unsigned char "y" at CMOS loc "x" */
@@ -65,9 +58,7 @@ static volatile int     smp_ap_booted = 0;
 #define PHYS_TO_VIRTUAL(x)	((void*)(x))	/* convert physical address "x" to virtual */
 #define VIRTUAL_TO_PHYS(x)	kvtophys(x)     /* convert virtual address "x" to physical */
 
-//#define UDELAY(x)		/* delay roughly at least "x" microsecs */
-#define TEST_BOOTED(x)		smp_ap_booted
-	/* test bootaddr x to see if CPU started */
+#define TEST_BOOTED(x)		smp_ap_booted	/* test bootaddr x to see if CPU started */
 #define READ_MSR_LO(x)		( (u_int32_t)rdmsr(x) )	/* Read MSR low function */
 #endif
 
@@ -148,9 +139,9 @@ static struct {
  *  Exported globals here.
  */
 
-volatile int imps_release_cpus = 0;
-int imps_enabled = 0;
-int imps_num_cpus = 1;
+//volatile int imps_release_cpus = 0;
+static int imps_enabled = 0;
+static int imps_num_cpus = 1;
 unsigned imps_lapic_addr = ((unsigned)(&lapic_dummy)) - LAPIC_ID;
 unsigned char imps_cpu_apic_map[IMPS_MAX_CPUS];
 unsigned char imps_apic_cpu_map[IMPS_MAX_CPUS];
@@ -261,7 +252,7 @@ boot_cpu(imps_processor *proc)
     //bootaddr = (512-64)*1024;
     //memcpy((char *)bootaddr, patch_code_start, patch_code_end - patch_code_start);
 
-    install_ap_tramp(bootaddr);
+    install_ap_tramp((void *)bootaddr);
 
     smp_ap_booted = 0;
 
@@ -413,25 +404,49 @@ add_ioapic(imps_ioapic *ioapic)
         return;
     }
 
-    /*  XXXXX  add OS-specific code here */
+    // TODO init IO APIC from here passing address and id. later work with io apic by id
+    setIoApicId( ioapic->id );
 }
 
 static void
 add_int(imps_interrupt *ii)
 {
     char * itname = "?";
-
-    switch(ii->type)
-    {
-    case IMPS_BCT_IO_INTERRUPT: 	itname = "io"; break;
-    case IMPS_BCT_LOCAL_INTERRUPT:      itname = "local"; break;
-    }
-
     char *busname = "? bus ";
+
     if(ii->source_bus_id < MAXBUSIDS)
         busname = bus_ids[ii->source_bus_id];
 
     if( 0 == busname ) busname = "?? bus";
+
+    int in_level = IOAPIC_EDGE_TRIGGERED;
+    int in_lowhi = IOAPIC_LO_ACTIVE;
+
+    if( 0 == strcmp( "ISA", busname ) )
+    {
+        in_level = IOAPIC_EDGE_TRIGGERED;
+        in_lowhi = IOAPIC_LO_ACTIVE;
+    }
+
+    if( 0 == strcmp( "PCI", busname ) )
+    {
+        in_level = IOAPIC_LEVEL_TRIGGERED;
+        in_lowhi = IOAPIC_LO_ACTIVE; // TODO check
+    }
+
+    switch(ii->type)
+    {
+    case IMPS_BCT_IO_INTERRUPT:
+        itname = "io";
+        // TODO will fail if more than one IO APIC - need to pass io apic id here to select one
+        setIoApicInput( ii->dest_apic_intin, ii->source_bus_irq, in_level, in_lowhi );
+        break;
+
+    case IMPS_BCT_LOCAL_INTERRUPT:
+        itname = "local";
+        break;
+    }
+
 
     SHOW_INFO( 0,  "Interrupt type %d (%s), int_type %d, flags %d",
            ii->type, itname, ii->int_type, ii->flags
@@ -442,6 +457,8 @@ add_int(imps_interrupt *ii)
                ii->source_bus_id, ii->source_bus_irq,
                ii->dest_apic_id, ii->dest_apic_intin
              );
+
+
 }
 
 
@@ -661,6 +678,7 @@ imps_scan(unsigned start, unsigned length)
     return 0;
 }
 
+#if 0
 /*
  *  This is the primary function to "force" SMP support, with
  *  the assumption that you have consecutively numbered APIC ids.
@@ -701,6 +719,8 @@ imps_force(int ncpus)
 
     return imps_num_cpus;
 }
+
+#endif
 
 
 /*
@@ -881,4 +901,20 @@ static void do_smp_ap_start(void)
 
     halt();
 }
+
+
+
+int is_smp(void)
+{
+    return imps_num_cpus > 1;
+}
+
+int ncpus(void)
+{
+    return imps_num_cpus;
+}
+
+
+
+
 
