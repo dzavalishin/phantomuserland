@@ -40,7 +40,7 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		serverSessionId = System.currentTimeMillis();
 		
-		String fn = "Phantom.ClassFile";
+		String fn = "Phantom.PartitionedDisk";
 		
 		String home = System.getenv("PHANTOM_HOME");
 		if( home != null )

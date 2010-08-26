@@ -28,7 +28,7 @@ static errno_t partSyncRead( struct phantom_disk_partition *p, void *to, long bl
 {
     assert(p->specific == 0);
     // Temp! Rewrite!
-    assert(p->base->block_size == p->block_size);
+    if(p->base) assert(p->base->block_size == p->block_size);
 
     if( checkRange( p, blockNo, nBlocks ) )
         return EINVAL;
@@ -41,7 +41,7 @@ static errno_t partSyncWrite( struct phantom_disk_partition *p, const void *from
 {
     assert(p->specific == 0);
     // Temp! Rewrite!
-    assert(p->base->block_size == p->block_size);
+    if(p->base) assert(p->base->block_size == p->block_size);
 
     if( checkRange( p, blockNo, nBlocks ) )
         return EINVAL;
@@ -113,6 +113,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     rq.flag_sleep = 1; // Don't return until done
 
     return partAsyncIo( p, &rq );
+    // ? return p->asyncIo( p, rq ); ?
 }
 
 errno_t phantom_sync_read_disk( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks )

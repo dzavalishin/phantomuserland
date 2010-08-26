@@ -860,7 +860,7 @@ void smp_ap_start(void)
     panic(msg);
 }
 
-#define REAL_SMP 1
+#define REAL_SMP 0
 
 
 static void do_smp_ap_start(void)
