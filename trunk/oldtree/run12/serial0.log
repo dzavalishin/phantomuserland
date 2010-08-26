@@ -1,0 +1,100 @@
+Init heap of 64 Mb
+heap_alloc_table = 0x5b8000, heap_base = 0x5c0000, heap_size = 0x3fff000
+physmem/hal_physmem_add_low: add low mem: 0x1000, 1 pages, 4 kb
+physmem/hal_physmem_add_low: add low mem: 0x3000, 36 pages, 144 kb
+physmem/hal_physmem_add_low: add low mem: 0x27000, 119 pages, 476 kb
+exec is 10
+Got string table 18 : 'fake'
+Warning: extra space in symtab leftx86 HAL init
+HAL init VM at 0x80000000
+arch_get_rtc_delta: GMT 13:3:1 26.8.2010
+CPU 0: family 6 model 3 stepping 3, string 'GenuineIntel'
+CPU 0: features: fpu de pse tsc msr pae mce cx8 apic sep pge cmov pat mmx fxsr sse sse2 sse3 
+findspeed: delaycount=50558 (tics=236)
+main timer usec_per_tick = 10000
+driver/loadpci: Loading PCI config:
+PCI 0.0: PCI & Memory (Intel) 8086:1237 class 6:0 (bridge: host bridge) if 0
+PCI 1.0: PIIX3 PCI-to-ISA Bridge (Triton II) (Intel) 8086:7000 class 6:1 (bridge: isa) if 0
+PCI 1.1: PIIX3 IDE Interface (Triton II) (Intel) 8086:7010 class 1:1 (mass storage: ide) if 80
+PCI 1.2: PIIX3 USB Host Controller (Triton II) (Intel) 8086:7020 class C:3 (bus: USB) if 0
+PCI 1.3: PIIX4/4E/4M Power Management Controller (Intel) 8086:7113 class 6:80 (bridge: other) if 0
+PCI 2.0: 64-bit VisualMedia Accelerator (Cirrus Logic) 1013:B8 class 3:0 (display: vga) if 0
+PCI 3.0: PCnet LANCE PCI Ethernet Controller (Advanced Micro Devices) 1022:2000 class 2:0 (network: ethernet) if 0
+PCI 4.0: VirtIO device (?) 1AF4:1001 class 1:0 (mass storage: scsi) if 0
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 0
+driver/probe_isa: Driver 'CGA' attached to ISA at 0x3D4 (IRQ -1)
+driver/probe_isa: Driver 'Beep' attached to ISA at 0x42 (IRQ -1)
+bios/driver_etc_smbios_probe: SMBios Version: 2.4
+bios/driver_etc_smbios_probe: SMBios BCD Revision: 2.4
+driver/probe_etc: Driver 'SMBios' attached
+Activating APIC...APIC ver. 0x1, unit id 0x0
+Activating IO APIC...IO APIC ver. 0x1, unit id 0x0, 24 inputs
+
+Phantom 0.09 (SVN ver  442:447M ) starting
+
+boot/net_stack_init: Init TCP/IP stack
+TRFS/phantom_trfs_init: inited
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 1
+driver/probe_pci: Probing driver 'AMD PcNet' for PCI dev 3:0 (Advanced Micro Devices:PCnet LANCE PCI Ethernet Controller 1022:2000 class 2:0)
+PCNET32:  probe
+TRFS/connect_trfs: started
+TRFS/trfs_recv: receiving
+PCNET32: Adding route...ok
+PCNET32: Adding default route...ok
+driver/probe_pci: Driver 'AMD PcNet' attached to PCI dev 3:0 (Advanced Micro Devices:PCnet LANCE PCI Ethernet Controller)
+driver/probe_isa: Driver 'PS2 Keyboard' attached to ISA at 0xFFFFFFFF (IRQ 1)
+driver/probe_isa: Driver 'PS2 Mouse' attached to ISA at 0xFFFFFFFF (IRQ 12)
+ne2000/driver_isa_ne2000_probe: Looking for NE2000 at 0x280
+ne2000/driver_isa_ne2000_probe: Looking for NE2000 at 0x300
+ne2000/driver_isa_ne2000_probe: Looking for NE2000 at 0x320
+ne2000/driver_isa_ne2000_probe: Looking for NE2000 at 0x340
+ne2000/driver_isa_ne2000_probe: Looking for NE2000 at 0x360
+
+Looking for VESA VBE... VESA ver 200 ptr 50000040, OEM 'VGABIOS Cirrus extension'
+Total 4K mem, cap: 0
+Lookup VESA modes:
+101,  640* 480/ 8, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+110,  640* 480/15, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+111,  640* 480/16, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+112,  640* 480/24, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: better
+103,  800* 600/ 8, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+113,  800* 600/15, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+114,  800* 600/16, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+115,  800* 600/24, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: better
+105, 1024* 768/ 8, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+116, 1024* 768/15, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+117, 1024* 768/16, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+118, 1024* 768/24, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: better
+107, 1280*1024/ 8, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+119, 1280*1024/15, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+11A, 1280*1024/16, mem E0000000 attr=bb<OK,RSV,COLR,GFX,~VGA,LINBUF>: not 24bpp
+VESA mode 280 1024*768 24bpp selected, mem at E0000000
+video/set_video_driver_bios_vesa_pa: VESA vaddr = 40320000, 1024 pages, 4 mbytes
+
+Setting VESA video mode 280
+video/phantom_start_video_driver: Skipping video drv select due to enforce
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 2
+driver/probe_isa: Driver 'LPT1' attached to ISA at 0x378 (IRQ 7)
+com/com_detect: com0: 82550 or 16550 chip
+driver/probe_isa: Driver 'COM1' attached to ISA at 0x3F8 (IRQ 4)
+dpc/dpc_init: Starting DPC
+disk/setup_simple_ide: Init
+disk/setup_simple_ide: Found PCI IDE, BM base reg=0xC000
+disk/setup_simple_ide: Found 2 devices, dev 0 is ATA, dev 1 is ATA.
+
+disk/simple_ide_idenify_device: --- Identifying IDE 0: 
+disk/simple_ide_idenify_device:  is not ATA, nSect=4 Mb Model: 'QEMU HARDDISK                           ' fixed, 48 bit LBA
+disk/simple_ide_idenify_device: --- Identifying IDE 1: 
+disk/simple_ide_idenify_device:  is not ATA, nSect=80 Mb Model: 'QEMU HARDDISK                           ' fixed, 48 bit LBA
+Checking superblock...pager/pager_get_superblock: root sb sys name = 'Unnamed Phantom system', checksum ok
+
+Superblock not found
+sb1 status 1, sb2 - 0, sb3 - 0
+root sb sb2 addr 0, sb3 addr 0, free start 1, free list 0, fs clean -1
+ incomplete filesystem found, fixing...pager/pager_update_superblock:  updating superblock...
+pager/pager_update_superblock:  saved all 3
+ Ok!
+fsck/phantom_fsck: *** check superblock ***
+fsck/phantom_fsck: *** check lists ***
+-- Last snap... Ok
+-- Prev snap... Ok
