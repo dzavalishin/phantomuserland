@@ -531,10 +531,6 @@ static void testrq();
 
 void phantom_trfs_init()
 {
-/*
-    if(connect_trfs())
-        return;
-*/
     queue_init(&requests);
     hal_mutex_init(&lock,"TRFS");
 
@@ -593,11 +589,69 @@ errno_t trfsAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
 void trfs_signal_done(trfs_queue_t *qe)
 {
     SHOW_FLOW0( 1, "done" );
-    pager_io_request_done( qe->orig_request );
+    if(qe->orig_request) pager_io_request_done( qe->orig_request );
 
     // panics
     free(qe);
 }
+
+
+#if !IO_RQ_SLEEP
+
+static void sync_report( struct pager_io_request *req, int write )
+{
+    SHOW_INFO( 0, "callback for 0x%p called, %s", req, write ? "wr" : "rd" );
+
+    if(req->flag_ioerror)
+        SHOW_ERROR( 0, "rc = %d", req->rc );
+    else
+        SHOW_FLOW0( 0, "success" );
+}
+
+
+static errno_t trfsSyncRead( struct phantom_disk_partition *p, void *to, long blockNo, int nBlocks )
+{
+    assert(p->specific != 0);
+
+    // TODO!
+    //if( checkRange( p, blockNo, nBlocks ) )        return EINVAL;
+
+    pager_io_request rq;
+    pager_io_request_init( &rq );
+
+
+    void *va;
+
+    hal_pv_alloc( &rq.phys_page, &va, 4096 );
+
+    // Which is correct?
+    rq.disk_page = blockNo;
+    rq.blockNo = blockNo;
+
+    rq.nSect = nBlocks;
+
+    rq.flag_pagein = 1;
+    rq.flag_pageout = 0;
+
+    rq.pager_callback = sync_report;
+
+    disk_enqueue( p, &rq );
+
+    return p->syncRead( p, to, blockNo+p->shift, nBlocks );
+}
+
+
+static errno_t trfsSyncWrite( struct phantom_disk_partition *p, const void *from, long blockNo, int nBlocks )
+{
+    assert(p->specific != 0);
+
+    // TODO!
+    //if( checkRange( p, blockNo, nBlocks ) )        return EINVAL;
+
+    //return p->syncWrite( p, from, blockNo+p->shift, nBlocks );
+    return EINVAL;
+}
+#endif
 
 
 phantom_disk_partition_t *phantom_create_trfs_partition_struct( long size )
@@ -611,7 +665,16 @@ phantom_disk_partition_t *phantom_create_trfs_partition_struct( long size )
     //struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
     //phantom_init_disk_q( q, startIoFunc );
 
-    ret->specific = 0;
+    //ret->specific = 0;
+
+    // Usually here is pointer to driver-specific structure. When we'll have more than one TRFSd instance, we'll keep instance struct here
+    ret->specific = "TRFS";  
+
+
+#if !IO_RQ_SLEEP
+    ret->syncRead = trfsSyncRead;
+    ret->syncWrite = trfsSyncWrite;
+#endif
 
     //q->device = private;
     //q->unit = unit; // if this is multi-unit device, let 'em distinguish
@@ -637,8 +700,15 @@ static void test_report( struct pager_io_request *req, int write )
 
 static void testrq()
 {
+#if 0
     phantom_disk_partition_t *p = phantom_create_trfs_partition_struct( 1024 );
 
+#if 1
+    errno_t ret = phantom_register_disk_drive(p);
+    if( ret )
+        SHOW_ERROR( 0, "Can't register TRFS drive: %d", ret );
+
+#else
     static pager_io_request rq;
     pager_io_request_init( &rq );
 
@@ -658,7 +728,8 @@ static void testrq()
     rq.pager_callback = test_report;
 
     disk_enqueue( p, &rq );
-
+#endif
+#endif
 }
 
 

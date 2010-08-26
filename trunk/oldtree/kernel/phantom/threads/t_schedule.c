@@ -18,7 +18,8 @@
 
 #define CHECK_SLEEP_FLAGS 1
 
-#define DIRECT_YIELD 1
+// For some reason SMP needs this, but snapshots are broken with DIRECT_YIELD 1
+#define DIRECT_YIELD 0
 
 static volatile int reschedule_request = 0;
 

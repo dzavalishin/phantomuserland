@@ -247,8 +247,6 @@ int main(int argc, char **argv, char **envp)
     printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
     phantom_process_boot_options();
 
-    //detect_cpu(0);
-
     // Used to refill list used to allocate physmem in interrupts
     hal_init_physmem_alloc_thread();
 
@@ -261,10 +259,6 @@ int main(int argc, char **argv, char **envp)
     phantom_init_vm86();
     phantom_init_vesa();
     phantom_start_video_driver();
-
-
-    //phantom_init_apic();
-    //pressEnter("after APIC");
 
 
     phantom_pci_find_drivers( 2 );

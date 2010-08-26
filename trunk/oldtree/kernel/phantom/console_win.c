@@ -161,6 +161,7 @@ static void phantom_debug_window_loop()
 
     hal_set_thread_name("Debug Win");
 
+    int wx = 600;
 
     while(1)
     {
@@ -193,6 +194,11 @@ static void phantom_debug_window_loop()
 
         phantom_dump_threads_buf(bp,len);
         phantom_debug_window_puts(buf);
+
+        if(wx == 600) wx = 620; else wx = 600;
+        drv_video_window_move( phantom_debug_window, wx, 50 );
+
+
     }
 }
 
