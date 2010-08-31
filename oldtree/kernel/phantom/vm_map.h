@@ -123,6 +123,9 @@ typedef struct vm_page
 #ifdef PAGE_TOUCH_HISTORY_SIZE
     void *              touch_history[PAGE_TOUCH_HISTORY_SIZE];
 #endif
+
+    int                 wired_count; // If nonzero, page must be present and can't be moved/paged out. Physical address must not change.
+
 } vm_page;
 
 void		vm_page_init( vm_page *me, void *my_vaddr);
@@ -232,6 +235,10 @@ int  foreach_pause(foreach_pause_counter *me);
 
 // Called from physmem allocator to get some more physram
 void physmem_try_to_reclaim_page(void);
+
+
+void wire_page_for_addr( void *addr );
+void unwire_page_for_addr( void *addr );
 
 
 

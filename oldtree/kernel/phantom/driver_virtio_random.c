@@ -45,6 +45,7 @@ phantom_device_t *driver_virtio_random_probe( pci_cfg_t *pci, int stage )
     assert(!hal_cond_init(&wait_4_data, "VirtRND"));
 
     vdev.interrupt = driver_virtio_random_interrupt;
+    vdev.name = "Random";
 
 
     if( virtio_probe( &vdev, pci ) )

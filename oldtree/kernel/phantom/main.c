@@ -176,6 +176,7 @@ static timedcall_t sched_timer =
 {
     (void *)phantom_scheduler_time_interrupt,
     0, 20
+
 };
 
 void phantom_turn_off_pic_scheduler_timer(void)
@@ -323,6 +324,8 @@ int main(int argc, char **argv, char **envp)
     vm_enable_regular_snaps();
 
     phantom_pci_find_drivers( 4 );
+
+trfs_testrq();
 
     printf("PRESS Q TO STOP PHANTOM");
     while(getchar() != 'Q')

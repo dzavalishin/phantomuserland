@@ -69,6 +69,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     }
 
     vdev.interrupt = driver_virtio_net_interrupt;
+    vdev.name = "Net";
 
     vdev.guest_features = 0;
 

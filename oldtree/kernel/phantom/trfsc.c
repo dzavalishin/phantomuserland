@@ -77,7 +77,7 @@ static int connect_trfs(void)
 
     trfs_addr.addr.len = 4;
     trfs_addr.addr.type = ADDR_TYPE_IP;
-    NETADDR_TO_IPV4(trfs_addr.addr) = IPV4_DOTADDR_TO_ADDR(192, 168, 1, 100);
+    NETADDR_TO_IPV4(trfs_addr.addr) = IPV4_DOTADDR_TO_ADDR(192, 168, 1, 101);
 
     int rc;
     if( 0 != (rc = udp_bind(trfs_socket, &trfs_addr)) )
@@ -542,7 +542,8 @@ void phantom_trfs_init()
     SHOW_FLOW0( 0, "inited" );
 
 
-    testrq();
+    // called from main later
+    //trfs_testrq();
 }
 
 
@@ -698,9 +699,10 @@ static void test_report( struct pager_io_request *req, int write )
 }
 
 
-static void testrq()
+//static
+void trfs_testrq()
 {
-#if 0
+#if 1
     phantom_disk_partition_t *p = phantom_create_trfs_partition_struct( 1024 );
 
 #if 1
@@ -730,6 +732,9 @@ static void testrq()
     disk_enqueue( p, &rq );
 #endif
 #endif
+
+    SHOW_FLOW0( 2, "testrq DONE");
+
 }
 
 

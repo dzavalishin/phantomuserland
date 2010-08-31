@@ -27,6 +27,8 @@ typedef struct virtio_ring
 
 typedef struct virtio_device
 {
+    char *	name;
+
     int         basereg; // IO base addr
     int         irq;     // Interrupt no
 

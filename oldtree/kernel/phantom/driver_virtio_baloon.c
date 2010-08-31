@@ -45,6 +45,7 @@ phantom_device_t *driver_virtio_baloon_probe( pci_cfg_t *pci, int stage )
     assert(!hal_cond_init(&wait_4_data, "VirtBaloon"));
 
     vdev.interrupt = driver_virtio_baloon_interrupt;
+    vdev.name = "Baloon";
 
 
     if( virtio_probe( &vdev, pci ) )
