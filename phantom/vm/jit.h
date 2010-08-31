@@ -17,6 +17,46 @@
 
 void jit_init(void);
 
+//! Compile JIT code for class
+void jit_compile(struct data_area_4_class *da);
+
+/*!
+ *
+ * struct data_area_4_class *da - class
+ * void *b_code                 - method bytecode
+ * int bc_size                  - size of bytecode
+ * pvm_object_t out             - output (binary) variable to put binary code to
+ *
+ */
+//void jit_compile_method( struct data_area_4_class *da, void *b_code, int bc_size, pvm_object_t out );
+
+// --------------------------------------------------------------------------
+// Enter/leave JIT code
+// --------------------------------------------------------------------------
+
+
+// JIT code runs with:
+// BX = thread da
+// ?? = this
+
+
+//! Continue in JIT mode
+//! Parm is struct data_area_4_thread *da
+#define SWITCH_TO_JIT(da,cthis) do {            					\
+    int ip = get_native_IP_from_bc_IP( int bytecode_IP, jit_address_map_t *map );       \
+    /* asm jmp ip */ \
+    } while(0);
+
+//! Return to interpreter
+//! Parm is struct data_area_4_thread *da
+#define SWITCH_FROM_JIT(da,cthis) do {                                                  \
+    /* asm get ip */ \
+    ip -= ip_base; \
+    int bc_ip = get_bc_IP_from_native_IP( int bytecode_IP, jit_address_map_t *map ); \\
+    /* set bytecode IP */ \
+    /* asm jmp bytecode interp - interpret next instr, throw, exit? */ \
+    } while(0); \
+
 // =========================================================================
 //                                        XX
 //                  X                      X

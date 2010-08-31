@@ -14,7 +14,9 @@
 #include <queue.h>
 #include <errno.h>
 
-#define IO_RQ_SLEEP 0
+#include <spinlock.h>
+
+#define IO_RQ_SLEEP 1
 
 typedef struct pager_io_request
 {
@@ -39,6 +41,7 @@ typedef struct pager_io_request
 #if IO_RQ_SLEEP
     unsigned char       flag_sleep; // calling thread will be put onsleep until IO is done // BUG - not used yet
     int                 sleep_tid; // thread which is put asleep due to flag_sleep
+    hal_spinlock_t      lock;
 #endif
 
     void                (*pager_callback)( struct pager_io_request *req, int write );
@@ -67,6 +70,8 @@ pager_io_request_init( pager_io_request *me)
 #if IO_RQ_SLEEP
         me->flag_sleep 		= 0;
         me->sleep_tid 		= 0;
+
+        hal_spin_init( &(me->lock));
 #endif
 }
 

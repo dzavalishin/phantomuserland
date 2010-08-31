@@ -318,3 +318,11 @@ int hal_save_cli() { return 1; }
 void hal_sti() {}
 void hal_cli() {}
 
+
+void wire_page_for_addr( void *addr ) {}
+
+void unwire_page_for_addr( void *addr ) {}
+
+
+
+

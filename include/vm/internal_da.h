@@ -333,6 +333,7 @@ struct data_area_4_world
 
 
 
+#define WEAKREF_SPIN 1
 
 
 
@@ -340,8 +341,11 @@ struct data_area_4_weakref
 {
     /** Object we point to */
     struct pvm_object   object;
-    //hal_spinlock_t      lock;   // interlocks access tp object from GC finalizer and from getting ref
+#if WEAKREF_SPIN
+    hal_spinlock_t      lock;   // interlocks access tp object from GC finalizer and from getting ref
+#else
     hal_mutex_t         mutex;
+#endif
 };
 
 

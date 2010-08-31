@@ -1726,13 +1726,8 @@ static void vm_verify_snap(disk_page_no_t head)
 //---------------------------------------------------------------------------
 
 
-//! Make page wired (fixed in phys mem, allways present)
-// It is guaranteed that after return and up to the call
-// to unwire_page_for_addr physical addr will be the same
-void wire_page_for_addr( void *addr )
+void wire_page( vm_page *p )
 {
-    vm_page *p = addr_to_vm_page((unsigned long) addr);
-
     p->wired_count++;
 
     if(!p->flag_phys_mem)
@@ -1745,17 +1740,34 @@ void wire_page_for_addr( void *addr )
 
         hal_mutex_unlock(&p->lock);
         */
-        volatile int val = *((char *)addr); // Just touch it
+        volatile int val = *((char *)p->virt_addr); // Just touch it
     }
+}
+
+void unwire_page( vm_page *p )
+{
+    assert(p->wired_count > 0);
+    p->wired_count--;
+}
+
+
+
+// TODO handle sized objects, so, possibly, more than one page is to be locked
+
+//! Make page wired (fixed in phys mem, allways present)
+// It is guaranteed that after return and up to the call
+// to unwire_page_for_addr physical addr will be the same
+void wire_page_for_addr( void *addr )
+{
+    vm_page *p = addr_to_vm_page((unsigned long) addr);
+    wire_page( p );
+
 }
 
 void unwire_page_for_addr( void *addr )
 {
     vm_page *p = addr_to_vm_page((unsigned long) addr);
-
-    assert(p->wired_count > 0);
-    p->wired_count--;
-
+    unwire_page( p );
 }
 
 

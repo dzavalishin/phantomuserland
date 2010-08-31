@@ -608,8 +608,11 @@ void pvm_internal_init_weakref(struct pvm_object_storage * os)
 {
     struct data_area_4_weakref *      da = (struct data_area_4_weakref *)os->da;
     da->object.data = 0;
-    //hal_spin_init( &da->lock );
+#if WEAKREF_SPIN
+    hal_spin_init( &da->lock );
+#else
     hal_mutex_init( &da->mutex, "WeakRef" );
+#endif
 }
 
 void pvm_gc_iter_weakref(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
@@ -634,17 +637,26 @@ struct pvm_object     pvm_create_weakref_object(struct pvm_object owned )
 
     // Interlocked to make sure no races can happen
     // (ref ass'ment seems to be non-atomic)
-    //int ie = hal_save_cli();
-    //hal_spin_lock( &da->lock );
+
+#if WEAKREF_SPIN
+    wire_page_for_addr( &da->lock );
+    int ie = hal_save_cli();
+    hal_spin_lock( &da->lock );
+#else
     hal_mutex_lock( &da->mutex );
+#endif
 
     // No ref inc!
     da->object = owned;
     owned.data->_satellites = ret;
 
+#if WEAKREF_SPIN
+    hal_spin_unlock( &da->lock );
+    if( ie ) hal_sti();
+    unwire_page_for_addr( &da->lock );
+#else
     hal_mutex_unlock( &da->mutex );
-    //hal_spin_unlock( &da->lock );
-    //if( ie ) hal_sti();
+#endif
 
     return ret;
 }
@@ -662,15 +674,24 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
 
     // All we do is return new reference to our object,
     // incrementing refcount before
-    //int ie = hal_save_cli();
-    //hal_spin_lock( &da->lock );
+
+#if WEAKREF_SPIN
+    wire_page_for_addr( &da->lock );
+    int ie = hal_save_cli();
+    hal_spin_lock( &da->lock );
+#else
     hal_mutex_lock( &da->mutex );
+#endif
 
     out = ref_inc_o( da->object );
 
+#if WEAKREF_SPIN
+    hal_spin_unlock( &da->lock );
+    if( ie ) hal_sti();
+    unwire_page_for_addr( &da->lock );
+#else
     hal_mutex_unlock( &da->mutex );
-    //hal_spin_unlock( &da->lock );
-    //if( ie ) hal_sti();
+#endif
 
     return out;
 }
@@ -721,12 +742,14 @@ void pvm_gc_finalizer_window( struct pvm_object_storage * os )
     // is it called?
 }
 
+#include <event.h>
 
 void pvm_restart_window( pvm_object_t o )
 {
     struct data_area_4_window *da = pvm_object_da( o, window );
 
     drv_video_window_enter_allwq( &da->w );
+    event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
 }
 
 
