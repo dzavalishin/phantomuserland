@@ -7,10 +7,10 @@ exec is 10
 Got string table 18 : 'fake'
 Warning: extra space in symtab leftx86 HAL init
 HAL init VM at 0x80000000
-arch_get_rtc_delta: GMT 13:3:1 26.8.2010
+arch_get_rtc_delta: GMT 21:16:52 31.8.2010
 CPU 0: family 6 model 3 stepping 3, string 'GenuineIntel'
 CPU 0: features: fpu de pse tsc msr pae mce cx8 apic sep pge cmov pat mmx fxsr sse sse2 sse3 
-findspeed: delaycount=50558 (tics=236)
+findspeed: delaycount=68181 (tics=175)
 main timer usec_per_tick = 10000
 driver/loadpci: Loading PCI config:
 PCI 0.0: PCI & Memory (Intel) 8086:1237 class 6:0 (bridge: host bridge) if 0
@@ -30,7 +30,7 @@ driver/probe_etc: Driver 'SMBios' attached
 Activating APIC...APIC ver. 0x1, unit id 0x0
 Activating IO APIC...IO APIC ver. 0x1, unit id 0x0, 24 inputs
 
-Phantom 0.09 (SVN ver  442:447M ) starting
+Phantom 0.09 (SVN ver  442:449M ) starting
 
 boot/net_stack_init: Init TCP/IP stack
 TRFS/phantom_trfs_init: inited
@@ -74,6 +74,15 @@ video/set_video_driver_bios_vesa_pa: VESA vaddr = 40320000, 1024 pages, 4 mbytes
 Setting VESA video mode 280
 video/phantom_start_video_driver: Skipping video drv select due to enforce
 driver/phantom_pci_find_drivers: Look for PCI devices, stage 2
+driver/probe_pci: Probing driver 'VirtIO Disk' for PCI dev 4:0 (?:VirtIO device 1AF4:1001 class 1:0)
+VirtIo/virtio_probe: probe got dev 0x1001 class 0x1 subclass 0x0
+VirtIo/virtio_probe: Ring 0 size 128, 
+VirtIo/virtio_ring_init: allocating 2 pages for vring, 
+Status is: 0x1
+Features are: 51000014
+Registered at IRQ 11 IO 0xC080
+VIRTIO disk size is 4 Mb
+driver/probe_pci: Driver 'VirtIO Disk' attached to PCI dev 4:0 (?:VirtIO device)
 driver/probe_isa: Driver 'LPT1' attached to ISA at 0x378 (IRQ 7)
 com/com_detect: com0: 82550 or 16550 chip
 driver/probe_isa: Driver 'COM1' attached to ISA at 0x3F8 (IRQ 4)
@@ -88,13 +97,233 @@ disk/simple_ide_idenify_device: --- Identifying IDE 1:
 disk/simple_ide_idenify_device:  is not ATA, nSect=80 Mb Model: 'QEMU HARDDISK                           ' fixed, 48 bit LBA
 Checking superblock...pager/pager_get_superblock: root sb sys name = 'Unnamed Phantom system', checksum ok
 
-Superblock not found
-sb1 status 1, sb2 - 0, sb3 - 0
-root sb sb2 addr 0, sb3 addr 0, free start 1, free list 0, fs clean -1
- incomplete filesystem found, fixing...pager/pager_update_superblock:  updating superblock...
-pager/pager_update_superblock:  saved all 3
- Ok!
+Looking for superblock at 256... Found superblock at 256
+Looking for superblock at 544... Found superblock at 544
+sb1 status 1, sb2 - 1, sb3 - 1
+root sb sb2 addr 256, sb3 addr 544, free start 4860, free list 17, fs clean -1
+ Warning: Disk FS minor version number is low: 0x2, mine is 0x3... all 3 superblocks are found and good, ok.
 fsck/phantom_fsck: *** check superblock ***
 fsck/phantom_fsck: *** check lists ***
 -- Last snap... Ok
 -- Prev snap... Ok
+-- Boot list... Ok
+-- Kernel... None
+-- Log list... None
+fsck/phantom_fsck: *** Finish! ***
+pager/pager_init_free_list: Pager init free list... 
+pager/pager_init_free_list:  ...DONE
+pager/pager_update_superblock:  updating superblock...
+pager/pager_update_superblock:  saved all 3
+Loading pagelist from 3501...boot/load_classes_module: Classes boot module is found
+
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 3
+driver/probe_pci: Probing driver 'USB OHCI' for PCI dev 1:2 (Intel:PIIX3 USB Host Controller (Triton II) 8086:7020 class C:3)
+OHCI  probe
+OHCI got subclass 3 (need 3), interface 0 (need 10)
+driver/probe_pci: Probing driver 'USB UHCI' for PCI dev 1:2 (Intel:PIIX3 USB Host Controller (Triton II) 8086:7020 class C:3)
+uhci/driver_uhci_probe: UHCI  probe
+uhci/driver_uhci_probe: UHCI io_port 0xc020
+uhci/driver_uhci_probe: UHCI  init
+uhci/uhci_init_hc: irq 11
+uhci/driver_uhci_probe: UHCI  ready
+driver/probe_pci: Driver 'USB UHCI' attached to PCI dev 1:2 (Intel:PIIX3 USB Host Controller (Triton II))
+net/udp_syslog_send: UDP syslog send '<7>Dec 10 23:48:26 10.0.2.123 Test of UDP syslog'
+
+UDP SEND port 514 to 514, len 56 (48)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.100, protocol 17, len 56
+ipv4_output src addr 10.0.2.123
+ARP: send request
+<7>Dec 10 23:48:26 Test of UDP syslog
+if_tx_thread: sending packet size 42
+pager/vm_map_deferred_disk_alloc_thread: Ready
+pager/vm_map_lazy_pageout_thread: Ready
+PCNET32: nic 0x5f1180 rx semaphore was signalled
+if_rx_thread: got ethernet packet, size 64
+ethernet 2 header: dest 52:54:0:12:34:56 src 52:55:a:0:2:2 type 0x806
+arp packet: src 52:55:a:0:2:2 10.0.2.2 dest 52:54:0:12:34:56 10.0.2.123 op 0x2
+arp_insert: ip addr 10.0.2.2 link_addr: type 1 len 6 addr 52:55:a:0:2:2
+if_tx_thread: sending packet size 90
+boot/main: Will run phantom threads... 
+driver/phantom_pci_find_drivers: Look for PCI devices, stage 4
+Disk Partition  ()
+ - type 0
+ - flags 40<IsDisk>
+ - blksz 512, start 0, size 1024
+ - no base, has specific
+TRFS/trfsAsyncIo: new request
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f3000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq
+TRFS/trfs_send: sending
+UDP SEND port 2052 to 2052, len 44 (36)
+ipv4_output: buf 0x5f4000, target_addr 192.168.1.101, protocol 17, len 44
+ipv4_output src addr 10.0.2.123
+if_tx_thread: sending packet size 78
+TRFS/trfs_resend_thread: rerequest
+TRFS/sendReadRq: send read rq

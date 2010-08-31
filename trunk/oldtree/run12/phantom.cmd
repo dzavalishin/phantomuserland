@@ -2,6 +2,8 @@ SET USB=-usb -usbdevice mouse
 SET USB=-usb 
 SET VIO=-drive file=vio.img,if=virtio,format=raw
 
+rem SET SCSI=-drive file=scsi.img,if=scsi,unit=0
+
 SET Q_PORTS= -parallel file:lpt_01.log  -serial file:serial0.log
 
 rem SET Q_NET=-net nic,model=ne2k_isa -net nic,model=ne2k_pci
@@ -29,6 +31,6 @@ rem mv serial0.log serial0.log.old
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-bin\qemu -smp 3 %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% -soundhw sb16
+bin\qemu -smp 3 %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% -soundhw sb16 -writeconfig qemu.cfg
 
 exit

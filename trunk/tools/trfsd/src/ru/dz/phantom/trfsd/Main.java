@@ -35,19 +35,22 @@ public class Main {
 	//private static FileInputStream stream;
 	private static RandomAccessFile file;
 	
-	private static FileChannel fchannel; 
+	//private static FileChannel fchannel; 
 	
 	public static void main(String[] args) throws IOException {
 		serverSessionId = System.currentTimeMillis();
 		
 		String fn = "Phantom.PartitionedDisk";
 		
-		String home = System.getenv("PHANTOM_HOME");
-		if( home != null )
+		if( false )
 		{
-			fn = home + "/build/classes";
+			String home = System.getenv("PHANTOM_HOME");
+			if( home != null )
+			{
+				fn = home + "/build/classes";
+			}
 		}
-		
+
 		System.out.println("TRFS Daemon, serving from "+fn);
 		//new BufferedInputStream( new FileInputStream("Phantom.PageFile"), BUF_SIZE);
 		//stream = new FileInputStream("Phantom.ClassFile");

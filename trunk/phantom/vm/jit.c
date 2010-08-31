@@ -477,7 +477,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
         case opcode_summon_this:
             if( debug_print_instr ) hal_printf("summon this; ");
             //os_push( ref_inc_o( this_object() ) );
-            jit_get_this( j );// AX, DX = thread ptr
+            jit_get_this( j );// AX, DX = this ptr
             jit_refinc( j, JIT_R_AX );
             jit_os_push( j );// push AX, DX
             break;
