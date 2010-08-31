@@ -186,11 +186,33 @@ static inline void page_touch_history_arg(vm_page *p, int arg)
 
 static void    page_fault( vm_page *p, int  is_writing );
 
+static vm_page *addr_to_vm_page(unsigned long addr)
+{
+    addr -= (unsigned int)vm_map_start_of_virtual_address_space; // X64 bug - int
+
+
+    if( addr >= ( ((unsigned long)vm_map_vm_page_count) * __MEM_PAGE) )
+    {
+        //dump_ds
+        panic("address 0x%X is outside of object space", addr);
+    }
+
+    int pageno = addr / __MEM_PAGE;
+
+    if(FAULT_DEBUG) hal_printf("fault 0x%X pgno %d\n", addr, pageno );
+
+    return vm_map_map + pageno;
+}
+
+
 static void
 vm_map_page_fault_handler( void *address, int  write, int ip )
 {
     (void) ip;
 
+#if 1
+    vm_page *vmp = addr_to_vm_page((unsigned long) address);
+#else
     // BUG! TODO! Stack growth? Object space growth?
     long addr = (unsigned int) address;
 
@@ -208,6 +230,8 @@ vm_map_page_fault_handler( void *address, int  write, int ip )
     vm_page *vmp = vm_map_map + pageno;
 
     if(FAULT_DEBUG) hal_printf("fault 0x%X pgno %d\n", addr, pageno );
+
+#endif
 
     hal_mutex_lock(&vmp->lock);
     page_touch_history_arg(vmp, ip);
@@ -1408,7 +1432,7 @@ void physmem_try_to_reclaim_page(void)
     if (p)
     {
         hal_mutex_lock(&p->lock);
-        if (p->flag_phys_mem && !p->flag_phys_dirty && is_on_reclaim_q(p))
+        if (p->flag_phys_mem && !p->flag_phys_dirty && is_on_reclaim_q(p) && !(p->wired_count))
         {
             page_touch_history(p);
             remove_from_clean_q(p);
@@ -1504,7 +1528,7 @@ static void vm_map_snapshot_thread(void)
             hal_exit_kernel_thread();
         }
 
-        hal_sleep_msec( 100000 ); 
+        hal_sleep_msec( 100000 );
         if( vm_regular_snaps_enabled )
             do_snapshot();
 
@@ -1696,4 +1720,54 @@ static void vm_verify_snap(disk_page_no_t head)
 }
 
 #endif
+
+//---------------------------------------------------------------------------
+// Wire/unwire code
+//---------------------------------------------------------------------------
+
+
+//! Make page wired (fixed in phys mem, allways present)
+// It is guaranteed that after return and up to the call
+// to unwire_page_for_addr physical addr will be the same
+void wire_page_for_addr( void *addr )
+{
+    vm_page *p = addr_to_vm_page((unsigned long) addr);
+
+    p->wired_count++;
+
+    if(!p->flag_phys_mem)
+    {
+        /*
+        hal_mutex_lock(&p->lock);
+        page_touch_history_arg(p, 0);
+
+        pagein somehow
+
+        hal_mutex_unlock(&p->lock);
+        */
+        volatile int val = *((char *)addr); // Just touch it
+    }
+}
+
+void unwire_page_for_addr( void *addr )
+{
+    vm_page *p = addr_to_vm_page((unsigned long) addr);
+
+    assert(p->wired_count > 0);
+    p->wired_count--;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 

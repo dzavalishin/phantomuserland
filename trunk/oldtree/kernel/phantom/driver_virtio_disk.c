@@ -41,6 +41,7 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
     }
 
     vdev.interrupt = driver_virtio_disk_interrupt;
+    vdev.name = "Disk";
 
     // Say we need it. Not sure, really, that we do. :)
     vdev.guest_features = VIRTIO_BLK_F_BARRIER;
@@ -78,11 +79,11 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
 
 #if 0
     printf("Will write to disk\n");
-getchar();
+//getchar();
     char test[512] = "Hello virtio disk";
     driver_virtio_disk_write( &vdev, kvtophys(test), 512 );
     printf("Write to disk requested\n");
-getchar();
+//getchar();
 #endif
 
     return dev;

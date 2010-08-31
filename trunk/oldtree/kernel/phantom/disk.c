@@ -1,3 +1,9 @@
+#define DEBUG_MSG_PREFIX "DiskIO"
+#include "debug_ext.h"
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include "disk.h"
 #include "disk_part_pc.h"
 #include <phantom_disk.h>
@@ -7,6 +13,10 @@
 #include <phantom_libc.h>
 #include <string.h>
 #include <kernel/vm.h>
+
+#include <threads/thread_private.h>
+
+#include "fs_map.h"
 
 // ------------------------------------------------------------
 // Basic partition processing proxies
@@ -55,6 +65,7 @@ static errno_t partSyncWrite( struct phantom_disk_partition *p, const void *from
 static errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
 {
     assert(p->specific == 0);
+    assert(p->base);
     // Temp! Rewrite!
     assert(p->base->block_size == p->block_size);
 
@@ -63,7 +74,7 @@ static errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *
 
     rq->blockNo += p->shift;
 
-    p->asyncIo( p, rq );
+    p->base->asyncIo( p, rq );
     return 0;
 }
 
@@ -91,6 +102,18 @@ static errno_t partAsyncWrite( struct phantom_disk_partition *p, long blockNo, i
 
 #if IO_RQ_SLEEP
 
+
+// moved to pager_io_request_done
+/*
+void io_wake( pager_io_request *rq )
+{
+    hal_spin_lock(&(rq->lock));
+    if(rq->flag_sleep)
+        thread_unblock( get_thread( rq->sleep_tid ), THREAD_SLEEP_IO );
+    rq->flag_sleep = 0;
+    hal_spin_unlock(&(rq->lock));
+}
+*/
 static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks, int isWrite )
 {
     assert( p->block_size < PAGE_SIZE );
@@ -107,13 +130,42 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     rq.blockNo = blockNo*m;
     rq.nSect   = nBlocks*m;
 
+    rq.rc = 0;
+
     if(isWrite) rq.flag_pageout = 1;
     else rq.flag_pagein = 1;
 
-    rq.flag_sleep = 1; // Don't return until done
 
-    return partAsyncIo( p, &rq );
-    // ? return p->asyncIo( p, rq ); ?
+    void *va;
+    hal_pv_alloc( &rq.phys_page, &va, nBlocks * p->block_size );
+
+    errno_t ret = EINVAL;
+
+    int ei = hal_save_cli();
+    hal_spin_lock(&(rq.lock));
+    rq.flag_sleep = 1; // Don't return until done
+    rq.sleep_tid = GET_CURRENT_THREAD()->tid;
+    if( (ret = p->asyncIo( p, &rq )) )
+    {
+        rq.flag_sleep = 0;
+        hal_spin_unlock(&(rq.lock));
+        if( ei ) hal_sti();
+        //return ret;
+        goto ret;
+    }
+    thread_block( THREAD_SLEEP_IO, &(rq.lock) );
+    if( ei ) hal_sti();
+
+    memcpy( to, va, nBlocks * p->block_size );
+    ret = rq.rc;
+
+    //return partAsyncIo( p, &rq );
+    //return p->asyncIo( p, rq );
+
+
+ret:
+    hal_pv_free( rq.phys_page, va, nBlocks * p->block_size );
+    return ret;
 }
 
 errno_t phantom_sync_read_disk( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks )
@@ -234,12 +286,15 @@ errno_t phantom_register_disk_drive(phantom_disk_partition_t *p)
 // ------------------------------------------------------------
 
 static void lookup_old_pc_partitions(phantom_disk_partition_t *p);
-static void lookup_phantom_fs(phantom_disk_partition_t *p);
+//static void lookup_phantom_fs(phantom_disk_partition_t *p);
 
 static void find_subpartitions(phantom_disk_partition_t *p)
 {
+    if( 0 == lookup_fs(p) )
+        return;
+
     lookup_old_pc_partitions(p);
-    lookup_phantom_fs(p);
+    //lookup_phantom_fs(p);
 }
 
 
@@ -259,22 +314,32 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
     if( phantom_sync_read_disk( p, buf, 0, 1 ))
         return;
 
+    SHOW_FLOW0( 1, "Got block 0" );
+    if( debug_level_flow > 10) hexdump( buf, sizeof(buf), "", 0);
 
     if( (buf[0x1FE] != 0x55) || (buf[0x1FF] != 0xAA) )
+    {
+        SHOW_ERROR0( 1, "No part table magic" );
         return;
+    }
+
+    SHOW_FLOW0( 1, "Has part table magic!" );
 
     p->flags |= PART_FLAG_IS_DIVIDED;
 
     int i; int pno = 0;
     for( i = 0x1BE; i <= 0x1EE; i += 16 )
     {
-        struct pc_partition *pp = (struct pc_partition *)buf+i;
+        struct pc_partition *pp = (struct pc_partition *)(buf+i);
+
+        SHOW_FLOW( 1, "Check partition %d, start %d, size %d, type 0x%02X", pno, pp->start, pp->size, pp->type );
 
         if(pp->size == 0)
             continue; // break?
 
-        phantom_disk_partition_t * newp = phantom_create_partition_struct( p, pp->start, pp->size);
+        phantom_disk_partition_t * newp = phantom_create_partition_struct( p, pp->start, pp->size );
         newp->type = pp->type;
+
 
         if(newp->type == PHANTOM_PARTITION_TYPE_ID)
         {
@@ -293,7 +358,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
 }
 
 
-
+/* Moved to fs_map.c
 static disk_page_no_t sbpos[] = DISK_STRUCT_SB_OFFSET_LIST;
 static int nsbpos = sizeof(sbpos)/sizeof(disk_page_no_t);
 
@@ -313,7 +378,7 @@ static void lookup_phantom_fs(phantom_disk_partition_t *p)
         }
     }
 }
-
+*/
 
 
 static void dump_partition(phantom_disk_partition_t *p)

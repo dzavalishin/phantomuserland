@@ -38,12 +38,14 @@ typedef struct
 // NB! No network drivers on stage 0!
 static pci_probe_t pci_drivers[] =
 {
-    //    { "VirtIO Disk", 	driver_virtio_disk_probe, 	2, VIRTIO_VENDOR, 0, 1 },
-    //    { "VirtIO Baloon", driver_virtio_baloon_probe, 2, VIRTIO_VENDOR, 0, 5 },
-    //    { "VirtIO Random",  driver_virtio_random_probe, 2, 0x1AF4, 0, 1 }, // TODO dev/dclass?
+#if 1
+    { "VirtIO Disk", 	driver_virtio_disk_probe, 	2, VIRTIO_VENDOR, 0, 1 },
+    { "VirtIO Baloon", 	driver_virtio_baloon_probe, 	2, VIRTIO_VENDOR, 0, 5 },
+    //{ "VirtIO Random",  driver_virtio_random_probe, 	2, VIRTIO_VENDOR, 0, 1 }, // TODO dev/dclass?
+#endif
 
 #if 1 && HAVE_NET
-    { "VirtIO Net",  	driver_virtio_net_probe, 	1, 0x1AF4, 0x1000, 0 }, // TODO dev/dclass?
+    { "VirtIO Net",  	driver_virtio_net_probe, 	1, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
     { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
     { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
@@ -258,7 +260,7 @@ static int probe_pci( int stage, pci_cfg_t *pci )
 
     SHOW_FLOW( 2, "%d PCI check vend %X dev %X cl %X", stage, pci->vendor_id, pci->device_id, pci->base_class );
 
-               unsigned int i;
+    unsigned int i;
     for( i = 0; i < sizeof(pci_drivers)/sizeof(pci_probe_t); i++ )
     {
         pci_probe_t *dp = &pci_drivers[i];

@@ -1,11 +1,13 @@
 #include "disk_q.h"
 #include <malloc.h>
 
+#include <threads/thread_private.h>
+
 
 #if IO_RQ_SLEEP
-static void awake(int tid);
+//static void awake(int tid);
 // returns tid
-static int putAsleep();
+//static int putAsleep();
 #endif
 
 
@@ -36,20 +38,35 @@ static void start_io(struct disk_q *q)
 
 
 void
-pager_io_request_done( pager_io_request *me )
+pager_io_request_done( pager_io_request *rq )
 {
     // NB! Callback can overwrite our request, so take what we need now
 #if IO_RQ_SLEEP
-    char sleep = me->flag_sleep;
-    int tid = me->sleep_tid;
+    //char sleep = me->flag_sleep;
+    //int tid = me->sleep_tid;
 #endif
 
-    if(me->pager_callback)
-        me->pager_callback( me, me->flag_pageout );
+    if(rq->pager_callback)
+        rq->pager_callback( rq, rq->flag_pageout );
 
 #if IO_RQ_SLEEP
-    if(sleep)
-        awake(tid);
+    //if(sleep)        awake(tid);
+
+    // Prelim check
+    if(rq->flag_sleep)
+    {
+        int ei = hal_save_cli();
+        hal_spin_lock(&(rq->lock));
+
+        // Locked check
+        if(rq->flag_sleep)
+            thread_unblock( get_thread( rq->sleep_tid ), THREAD_SLEEP_IO );
+
+        rq->flag_sleep = 0;
+        hal_spin_unlock(&(rq->lock));
+        if( ei ) hal_sti();
+    }
+
 #endif
 
 }
@@ -108,8 +125,7 @@ static errno_t queueAsyncIo( struct phantom_disk_partition *p, pager_io_request 
     UNLOCK();
 
 #if IO_RQ_SLEEP
-    if(rq->flag_sleep)
-        rq->sleep_tid = putAsleep();
+    //if(rq->flag_sleep)        rq->sleep_tid = putAsleep();
 #endif
 
     start_io(q);
@@ -155,7 +171,7 @@ phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *
 
 
 
-
+/*
 #if IO_RQ_SLEEP
 #include "threads/thread_private.h"
 
@@ -172,7 +188,7 @@ static int putAsleep()
     thread_block( THREAD_SLEEP_IO, 0 );
 }
 #endif
-
+*/
 
 
 
