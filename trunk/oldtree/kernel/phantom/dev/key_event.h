@@ -121,4 +121,7 @@ typedef struct _key_event {
 	u_int16_t keychar;
 } _key_event;
 
+void phantom_dev_keyboard_get_key( _key_event *out);
+
+
 #endif

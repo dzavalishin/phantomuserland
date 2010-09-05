@@ -66,5 +66,8 @@ int phantom_vm_threads_get_count(void);
 void hal_set_thread_name(const char *name);
 
 
+
+struct wtty *get_thread_ctty( struct phantom_thread *t );
+
 #endif // THREADS_H
 

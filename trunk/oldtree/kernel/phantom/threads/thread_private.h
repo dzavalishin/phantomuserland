@@ -43,7 +43,7 @@ struct phantom_thread
     // phantom thread ref, etc
     void *                      owner;
 
-    //wtty_t *			ctty;
+    wtty_t *			ctty; // "controlling" tty
 
     // if this thread runs Unix simulation process - here is it
     struct uuprocess *		u;

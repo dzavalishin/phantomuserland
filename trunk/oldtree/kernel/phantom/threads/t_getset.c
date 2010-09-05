@@ -87,3 +87,11 @@ hal_set_thread_name(const char *name)
 }
 
 
+
+
+struct wtty *get_thread_ctty( struct phantom_thread *t )
+{
+    return t->ctty;
+}
+
+
