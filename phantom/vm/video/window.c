@@ -71,6 +71,7 @@ common_window_init( drv_video_window_t *w,
     w->stall = 0;
 
     w->inKernelEventProcess = defaultWindowEventProcessor;
+    w->owner = 0;
 }
 
 

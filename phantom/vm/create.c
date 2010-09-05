@@ -10,6 +10,7 @@
  *
  **/
 
+#include <kernel/vm.h>
 
 #include "vm/root.h"
 #include "vm/exec.h"

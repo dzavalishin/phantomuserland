@@ -508,7 +508,6 @@ static o_restart_func_t find_restart_f( struct pvm_object _class )
 
 static void handle_object_at_restart( pvm_object_t o )
 {
-#warning crashes due to use of mutex in persistent object
 #if 1
     if(!(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
     {

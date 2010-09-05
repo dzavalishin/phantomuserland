@@ -10,19 +10,33 @@
 **/
 
 #define EVENTS_ENABLED 1
+#define KEY_EVENTS 1
+
+#define DEBUG_MSG_PREFIX "events"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 
 #include <threads.h>
 #include <event.h>
+#include <dev/key_event.h>
 #include <queue.h>
 #include <malloc.h>
 #include <hal.h>
 #include <string.h>
 #include <video.h>
+#include <console.h>
+#include <wtty.h>
 
 void drv_video_window_explode_event(struct ui_event *e);
 
 
-static void event_push_thread();
+static void event_push_thread(void);
+static void keyboard_read_thread(void);
+
+static int phantom_window_getc(void);
 
 static void allocate_event();
 static void push_event( struct ui_event *e );
@@ -69,21 +83,34 @@ void init_main_event_q()
 #if EVENTS_ENABLED
     hal_start_kernel_thread( event_push_thread );
 
+
     event_engine_active = 1;
 
-#if 0
+#if KEY_EVENTS
     phantom_set_console_getchar( phantom_window_getc );
-    phantom_dev_keyboard_start_events();
+    hal_start_kernel_thread(  keyboard_read_thread );
+    //phantom_dev_keyboard_start_events();
 #endif
 #endif
 }
 
 
-#if 0
+#if KEY_EVENTS
+
+#include "threads/thread_private.h"
+
 static int phantom_window_getc(void)
 {
     wtty_t *tty = &(GET_CURRENT_THREAD()->ctty);
-    return 0;
+
+    if(tty == 0)
+    {
+        SHOW_ERROR0( 0, "No wtty, phantom_window_getc loops forever" );
+        while(1)
+            hal_sleep_msec(10000);
+    }
+
+    return wtty_getc( tty );
 }
 #endif
 
@@ -498,6 +525,99 @@ locked:
 
     return ret;
 }
+
+
+
+
+
+
+
+
+
+static void keyboard_read_thread(void)
+{
+    hal_set_thread_name("KeyRead");
+
+    while(1)
+    {
+        _key_event ke;
+
+        phantom_dev_keyboard_get_key( &ke );
+        event_q_put_key( ke.keycode, ke.keychar, ke.modifiers );
+    }
+}
+
+
+
+static void wtty_wrap(wtty_t *w)
+{
+    if( w->getpos >= WTTY_BUFSIZE )        w->getpos = 0;
+    if( w->putpos >= WTTY_BUFSIZE )        w->putpos = 0;
+}
+
+
+int wtty_getc(wtty_t *w)
+{
+    int ret;
+
+    hal_mutex_lock(&w->mutex);
+
+    while(w->getpos == w->putpos)
+        hal_cond_wait( &w->cond, &w->mutex );
+
+    wtty_wrap(w);
+
+    ret = w->buf[w->getpos++];
+
+    hal_mutex_unlock(&w->mutex);
+
+    return ret;
+}
+
+/*
+void wtty_putc(wtty_t *w, int c)
+{
+    hal_mutex_lock(&w->mutex);
+    wtty_wrap(w);
+
+    hal_mutex_unlock(&w->mutex);
+}
+*/
+
+errno_t wtty_putc_nowait(wtty_t *w, int c)
+{
+    int ret = 0;
+    hal_mutex_lock(&w->mutex);
+    wtty_wrap(w);
+
+    if( (w->putpos+1 == w->getpos) || ( w->putpos+1 >= WTTY_BUFSIZE && w->getpos == 0 ) )
+    {
+        ret = ENOMEM;
+    }
+    else
+    {
+        w->buf[w->putpos++] = c;
+        hal_cond_signal( &w->cond );
+    }
+
+    hal_mutex_unlock(&w->mutex);
+    return ret;
+}
+
+
+wtty_t * wtty_init(void)
+{
+    wtty_t *w = calloc( 1, sizeof(wtty_t) );
+    assert(w);
+
+    //w->getpos = 0;
+    //w->putpos = 0;
+    hal_mutex_init( &w->mutex, "wtty" );
+    hal_cond_init( &w->cond, "wtty" );
+
+    return w;
+}
+
 
 
 

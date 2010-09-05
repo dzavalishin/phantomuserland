@@ -505,6 +505,12 @@ int phantom_dev_keyboard_getc(void)
     return buf.keychar;
 }
 
+// Used by event system
+void phantom_dev_keyboard_get_key( _key_event *out)
+{
+    _keyboard_read( out, 1);
+}
+
 
 #define K_OBUF_FUL 	0x01		/* output (from keybd) buffer full */
 

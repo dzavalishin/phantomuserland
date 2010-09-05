@@ -194,6 +194,7 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
 
     t->cpu_id = GET_CPU_ID();
 
+    t->ctty = wtty_init();
 
     // malloc uses mutex, so we have to use physalloc which is protected with spinlocks
     physaddr_t pa;

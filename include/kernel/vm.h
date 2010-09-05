@@ -16,5 +16,9 @@
 
 #endif
 
+void wire_page_for_addr( void *addr );
+void unwire_page_for_addr( void *addr );
+
+
 
 #endif // KERNEL_VM_H

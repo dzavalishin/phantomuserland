@@ -89,6 +89,7 @@ typedef struct drv_video_window
      * thread to do that.
      */
     void                (*inKernelEventProcess)( struct drv_video_window *w );
+    struct phantom_thread *owner;
 
     // bitmap itself
     rgba_t       	pixel[];

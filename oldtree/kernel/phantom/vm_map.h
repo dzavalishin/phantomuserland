@@ -10,6 +10,7 @@
 #define vm_mapH
 
 #include <queue.h>
+#include <kernel/vm.h>
 
 #include "spinlock.h"
 #include "pager.h"
@@ -236,9 +237,6 @@ int  foreach_pause(foreach_pause_counter *me);
 // Called from physmem allocator to get some more physram
 void physmem_try_to_reclaim_page(void);
 
-
-void wire_page_for_addr( void *addr );
-void unwire_page_for_addr( void *addr );
 
 
 

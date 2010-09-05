@@ -13,14 +13,25 @@
 #define WTTY_H
 
 #include <phantom_types.h>
-#include <queue.h>
+#include <hal.h>
+
+#define WTTY_BUFSIZE 128
 
 struct wtty
 {
-
+	char			buf[WTTY_BUFSIZE];
+	int				putpos;
+	int				getpos;
+	hal_mutex_t		mutex;
+	hal_cond_t		cond;
 };
 
 typedef struct wtty wtty_t;
+
+
+errno_t wtty_putc_nowait(wtty_t *w, int c);
+int wtty_getc(wtty_t *w);
+wtty_t * wtty_init(void);
 
 
 #endif // WTTY_H

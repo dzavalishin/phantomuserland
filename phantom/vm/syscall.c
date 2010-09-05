@@ -15,6 +15,7 @@
 #include <time.h>
 
 #include <kernel/snap_sync.h>
+#include <kernel/vm.h>
 
 #include "vm/syscall.h"
 #include "vm/object.h"

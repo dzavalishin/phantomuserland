@@ -280,7 +280,7 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
     tty->bg = COLOR_WHITE;
 
     drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE );
-    tty->w.title = "VM TTY Window";
+    tty->w.title = "VM TTY Window"; // BUG! Pointer from object space to kernel data seg! hacked around below in restart_tty
 
     {
     pvm_object_t o;
@@ -310,8 +310,14 @@ void pvm_gc_finalizer_tty( struct pvm_object_storage * os )
 
 void pvm_restart_tty( pvm_object_t o )
 {
-    struct data_area_4_tty *da = pvm_object_da( o, tty );
+    struct data_area_4_tty *tty = pvm_object_da( o, tty );
 
-    drv_video_window_enter_allwq( &da->w );
+    tty->w.title = "VM TTY Window"; // BUG! Pointer from object space to kernel data seg!
+
+    // BUG! How do we fill owner? We must have object ref here
+    tty->w.inKernelEventProcess = 0;
+    tty->w.owner = 0;
+
+    drv_video_window_enter_allwq( &tty->w );
 }
 
