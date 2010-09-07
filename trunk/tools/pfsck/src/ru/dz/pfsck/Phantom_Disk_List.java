@@ -1,13 +1,20 @@
-﻿public class Phantom_Disk_List extends Block
+﻿package ru.dz.pfsck;
+
+public class Phantom_Disk_List extends Block
 {
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
+	
+	public Phantom_Disk_List(Block block) {
+		map = block.map.duplicate();
+	}
+
+	//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 	//[DescriptionAttribute("num of first unused slot in list")]
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public System.UInt32 getUsed()
 	public final int getUsed()
 	{
 //C# TO JAVA CONVERTER TODO TASK: There is no Java equivalent to 'sizeof':
-		return BitConverter.ToUInt32(m_Buffer, sizeof(int));
+		return BitConverter.ToInt32(map, 4);
 	}
 
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
@@ -16,13 +23,13 @@
 //ORIGINAL LINE: public UInt32 getNext()
 	public final int getNext()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 8);
+		return BitConverter.ToInt32(map, 8);
 	}
 
-	public Phantom_Disk_List(byte[] buffer)
+	/*public Phantom_Disk_List(byte[] buffer)
 	{
 		m_Buffer = buffer;
-	}
+	}*/
 
 	public final java.util.ArrayList<Integer> getBlocksInList()
 	{
@@ -40,7 +47,7 @@
 		{
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: System.UInt32 НомерБлока = BitConverter.ToUInt32(m_Buffer, (int)(16 + (4 * i)));
-			int blockNo = BitConverter.ToUInt32(m_Buffer, (int)(16 + (4 * i)));
+			int blockNo = BitConverter.ToInt32(map, (int)(16 + (4 * i)));
 
 			blocks.add(blockNo);
 		}

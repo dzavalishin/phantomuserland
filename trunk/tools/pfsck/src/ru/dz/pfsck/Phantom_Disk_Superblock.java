@@ -1,4 +1,7 @@
-﻿public class Phantom_Disk_Superblock extends Block
+﻿package ru.dz.pfsck;
+
+
+public class Phantom_Disk_Superblock extends Block
 {
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 	//[DescriptionAttribute("Версия")]
@@ -7,21 +10,21 @@
 	public final int getVersion()
 	{
 //C# TO JAVA CONVERTER TODO TASK: There is no Java equivalent to 'sizeof':
-		return BitConverter.ToUInt32(m_Buffer, sizeof(int));
+		return BitConverter.ToUInt32(map, 4);
 	}
 
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public UInt32 getChecksum()
 	public final int getChecksum()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 8);
+		return BitConverter.ToUInt32(map, 8);
 	}
 
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public UInt32 getBlocksize()
 	public final int getBlocksize()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 12);
+		return BitConverter.ToUInt32(map, 12);
 	}
 
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
@@ -30,7 +33,7 @@
 //ORIGINAL LINE: public UInt32 getSb2_addr()
 	public final int getSb2_addr()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 16);
+		return BitConverter.ToUInt32(map, 16);
 	}
 
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
@@ -39,7 +42,7 @@
 //ORIGINAL LINE: public UInt32 getSb3_addr()
 	public final int getSb3_addr()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 20);
+		return BitConverter.ToUInt32(map, 20);
 	}
 
 	/** 
@@ -52,7 +55,7 @@
 //ORIGINAL LINE: public UInt32 getDisk_start_page()
 	public final int getDisk_start_page()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 24);
+		return BitConverter.ToUInt32(map, 24);
 	}
 
 	/** 
@@ -65,7 +68,7 @@
 //ORIGINAL LINE: public UInt32 getDisk_page_count()
 	public final int getDisk_page_count()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 28);
+		return BitConverter.ToUInt32(map, 28);
 	}
 
 	/** 
@@ -78,7 +81,7 @@
 //ORIGINAL LINE: public UInt32 getFree_start()
 	public final int getFree_start()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 32);
+		return BitConverter.ToUInt32(map, 32);
 	}
 
 	/** 
@@ -91,7 +94,7 @@
 //ORIGINAL LINE: public UInt32 getFree_list()
 	public final int getFree_list()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 36);
+		return BitConverter.ToUInt32(map, 36);
 	}
 
 	/** 
@@ -104,7 +107,7 @@
 //ORIGINAL LINE: public UInt32 getLast_snap()
 	public final int getLast_snap()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 44);
+		return BitConverter.ToUInt32(map, 44);
 	}
 
 	/** 
@@ -117,7 +120,7 @@
 //ORIGINAL LINE: public UInt32 getPrev_snap()
 	public final int getPrev_snap()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 64);
+		return BitConverter.ToUInt32(map, 64);
 	}
 
 	/** 
@@ -130,7 +133,7 @@
 //ORIGINAL LINE: public UInt32 getMagic2()
 	public final int getMagic2()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 84);
+		return BitConverter.ToUInt32(map, 84);
 	}
 
 	/** 
@@ -143,7 +146,7 @@
 //ORIGINAL LINE: public UInt32 getBoot_list()
 	public final int getBoot_list()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 88);
+		return BitConverter.ToUInt32(map, 88);
 	}
 
 	/** 
@@ -156,7 +159,7 @@
 //ORIGINAL LINE: public UInt32 getKernel_list()
 	public final int getKernel_list()
 	{
-		return BitConverter.ToUInt32(m_Buffer, 92);
+		return BitConverter.ToUInt32(map, 92);
 	}
 
 	//disk_page_no_t disk_start_page; // num of 1st page we can access
@@ -175,9 +178,9 @@
 
 	private long object_space_address; // Object space expects to be loaded here
 
-	public Phantom_Disk_Superblock(byte[] buffer)
+	public Phantom_Disk_Superblock(Block b)
 	{
-		m_Buffer = buffer;
+		map = b.map.duplicate();
 	}
 
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
@@ -190,7 +193,7 @@
 		int sum = 0;
 		while (count-- != 0)
 		{
-			sum += m_Buffer[count];
+			sum += map.get(count);
 		}
 
 		if (sum == 0)
@@ -200,18 +203,20 @@
 
 		return false;
 	}
-	//public override string ToString()
-	//{
-	//    return
-	//        "version: " + Version.ToString()
-	//        + "\r\nchecksum: " + Checksum.ToString()
-	//        + "\r\nsb2_addr: " + Sb2_addr.ToString()
-	//        + "\r\nsb3_addr: " + Sb3_addr.ToString()
-	//        + "\r\ndisk_start_page: " + Disk_start_page.ToString()
-	//        + "\r\ndisk_page_count: " + Disk_page_count.ToString()
-	//        + "\r\nfree_start: " + Free_start.ToString()
-	//        + "\r\nfree_list: " + Free_list.ToString()
-	//        + "\r\nboot_list: " + Boot_list.ToString()
-	//        + "\r\nkernel_list: " + Kernel_list.ToString();
-	//}
+	
+	@Override
+	public String toString()
+	{
+	    return
+	        "version: " + getVersion()
+	        + "\r\nchecksum: " + getChecksum()
+	        + "\r\nsb2_addr: " + getSb2_addr()
+	        + "\r\nsb3_addr: " + getSb3_addr()
+	        + "\r\ndisk_start_page: " + getDisk_start_page()
+	        + "\r\ndisk_page_count: " + getDisk_page_count()
+	        + "\r\nfree_start: " + getFree_start()
+	        + "\r\nfree_list: " + getFree_list()
+	        + "\r\nboot_list: " + getBoot_list()
+	        + "\r\nkernel_list: " + getKernel_list();
+	}
 }
