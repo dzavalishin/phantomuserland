@@ -1,39 +1,49 @@
 ﻿package ru.dz.pfsck;
 
+import java.nio.MappedByteBuffer;
+
 //public class Phantom_File_System_Checker
 //{
 //}
 
 public class Phantom_FS_Image
 {
-	private BinaryReader m_Reader;
+	private final MappedByteBuffer map;
+
+	public Phantom_FS_Image(MappedByteBuffer map) {
+		this.map = map;
+	}
+
+	
+	//private BinaryReader m_Reader;
 
 	public final int getBlockCount()
 	{
-		return (int)(m_Reader.BaseStream.getLength() / ConstantProvider.DISK_STRUCT_BS);
+		return map.limit() / ConstantProvider.DISK_STRUCT_BS;
+		//return (int)(m_Reader.BaseStream.getLength() / ConstantProvider.DISK_STRUCT_BS);
 	}
 
-	public Phantom_FS_Image(String ImageFileName)
-	{
-		FileStream stream = File.OpenRead(ImageFileName);
 
-		m_Reader = new BinaryReader(stream);
-	}
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
+	//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public Block ReadBlock(System.UInt32 nBlock)
 	public final Block ReadBlock(int nBlock)
 	{
-		m_Reader.BaseStream.Seek(nBlock * ConstantProvider.DISK_STRUCT_BS, SeekOrigin.Begin);
+		//m_Reader.BaseStream.Seek(nBlock * ConstantProvider.DISK_STRUCT_BS, SeekOrigin.Begin);
 
-		return ReadBlock();
+		byte [] buf = new byte[ConstantProvider.DISK_STRUCT_BS];
+		
+		map.get(buf, nBlock * ConstantProvider.DISK_STRUCT_BS, ConstantProvider.DISK_STRUCT_BS);
+		//MappedByteBuffer.wrap(buf);
+		
+		return new Block(buf);
 	}
 
 	public final Block ReadBlock()
 	{
-		Block b = new Block(m_Reader);
-
-		return b;
+		byte [] buf = new byte[ConstantProvider.DISK_STRUCT_BS];	
+		map.get(buf);		
+		return new Block(buf);
 	}
 
 	//TODO: добавить параметр «Ожидаемый тип блока»
@@ -53,14 +63,14 @@ public class Phantom_FS_Image
 		//    throw new Exception("Ошибка: в цепи обнаружен блок типа " + block.Magic.ToString() + ", ожидался тип " + ОжидаемыйТипБлока.ToString());
 		//}
 
-		Phantom_Disk_List list_block = new Phantom_Disk_List(block.m_Buffer);
+		Phantom_Disk_List list_block = new Phantom_Disk_List(block);
 
-		if (list.argvalue.Contains(nBlock))
+		if (list.argvalue.contains(nBlock))
 		{
 			throw new RuntimeException("Ошибка: циклическая ссылка в связных блоках");
 		}
 
-		list.argvalue.Add(nBlock);
+		list.argvalue.add(nBlock);
 
 		if (list_block.getNext() != 0)
 		{
@@ -72,7 +82,7 @@ public class Phantom_FS_Image
 //ORIGINAL LINE: public BlockList blockListContents(System.UInt32 nBlock, out ListDescriptor BlocksWithList)
 	public final BlockList blockListContents(int nBlock, RefObject<ListDescriptor> BlocksWithList)
 	{
-		BlockList list = new BlockList();
+		BlockList blist = new BlockList();
 
 		BlocksWithList.argvalue = null;
 
@@ -85,25 +95,25 @@ public class Phantom_FS_Image
 			{
 				Block block = ReadBlock(blockWithList);
 
-				Phantom_Disk_List list = new Phantom_Disk_List(block.m_Buffer);
+				Phantom_Disk_List list = new Phantom_Disk_List(block);
 
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (System.UInt32 blockNo in list.БлокиВСписке)
 				for (int blockNo : list.getBlocksInList())
 				{
-					list.Add(blockNo);
+					blist.add(blockNo);
 				}
 			}
 		}
 
-		return list;
+		return blist;
 	}
 
 	public final Phantom_Disk_Superblock getSuperBlock()
 	{
 		Block block = ReadBlock(ConstantProvider.DISK_STRUCT_SB_OFFSETS.First.getValue());
 
-		Phantom_Disk_Superblock sblock = new Phantom_Disk_Superblock(block.m_Buffer);
+		Phantom_Disk_Superblock sblock = new Phantom_Disk_Superblock(block);
 
 		return sblock;
 	}

@@ -1,14 +1,22 @@
 package ru.dz.pfsck;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+
 public class Block
 {
-	public byte[] m_Buffer;
+	//public byte[] m_Buffer;
+	ByteBuffer map;
 
 //C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 	//[Category("1. Общий"), DescriptionAttribute("Magic")]
 	public final Magics getMagic()
 	{
-		return (Magics)BitConverter.ToInt32(m_Buffer, 0);
+		//map.position(0);
+		//return (Magics)BitConverter.ToInt32(m_Buffer, 0);
+		return Magics.forValue( map.getInt(0) );
 	}
 
 	public Block()
@@ -17,13 +25,21 @@ public class Block
 
 	public Block(byte[] buffer)
 	{
-		m_Buffer = buffer;
+		map = MappedByteBuffer.wrap(buffer);
+		//m_Buffer = buffer;
 	}
 
-	public Block(BinaryReader reader)
+	public Block(InputStream reader)
 	{
-		m_Buffer = new byte[ConstantProvider.DISK_STRUCT_BS];
-		reader.Read(m_Buffer, 0, ConstantProvider.DISK_STRUCT_BS);
+		byte[] m_Buffer = new byte[ConstantProvider.DISK_STRUCT_BS];
+		try {
+			if( reader.read(m_Buffer) != ConstantProvider.DISK_STRUCT_BS )
+				throw new RuntimeException("Can' read block");
+		} catch (IOException e) {
+			throw new RuntimeException("Can' read block", e);
+		}
+		
+		map = MappedByteBuffer.wrap(m_Buffer);
 	}
 }
 

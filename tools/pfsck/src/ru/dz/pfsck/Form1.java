@@ -1,4 +1,8 @@
-﻿import javax.swing.*;
+﻿package ru.dz.pfsck;
+
+import java.nio.MappedByteBuffer;
+
+//import javax.swing.*;
 
 //using System.Data;
 //using System.Linq;
@@ -7,10 +11,12 @@
 //using u_int32_t = System.UInt32;
 //using disk_page_no_t = System.UInt32;
 
-public class Form1 extends Form
+public class Form1 //extends Form
 {
 	private Phantom_FS_Image m_Image;
+	private final MappedByteBuffer map;
 
+	/*
 	public Form1()
 	{
 		InitializeComponent();
@@ -18,8 +24,15 @@ public class Form1 extends Form
 //C# TO JAVA CONVERTER TODO TASK: Java has no equivalent to C#-style event wireups:
 		Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
 	}
+	*/
 
 
+	public Form1(MappedByteBuffer map) {
+		this.map = map;
+		
+		m_Image = new Phantom_FS_Image(map);
+	}
+	
 
 	public final void Check()
 	{
@@ -30,7 +43,7 @@ public class Form1 extends Form
 		OutputLine("");
 		OutputLine("");
 
-		OutputLine("Начало проверок файловой системы. " + new java.util.Date().ToLongTimeString() + "/");
+		OutputLine("Начало проверок файловой системы. " + new java.util.Date().toLocaleString() + "/");
 		OutputLine("-----------------");
 
 		BlockList freeList = null;
@@ -314,7 +327,7 @@ public class Form1 extends Form
 //ORIGINAL LINE: Dictionary<Magics, uint> magicsStatistics = new Dictionary<Magics, uint>();
 			java.util.HashMap<Magics, Integer> magicsStatistics = new java.util.HashMap<Magics, Integer>();
 
-			for (Magics enumVal : Enum.GetValues(Magics.class))
+			for( Magics enumVal : Magics.values() )
 			{
 				magicsStatistics.put(enumVal, 0);
 			}
@@ -331,7 +344,9 @@ public class Form1 extends Form
 
 				if (magicsStatistics.containsKey(block.getMagic()))
 				{
-					magicsStatistics.get(block.getMagic())++;
+					//magicsStatistics.get(block.getMagic())++;
+					Integer integer = magicsStatistics.get(block.getMagic());
+					integer = integer+1;
 				}
 			}
 
@@ -346,7 +361,7 @@ public class Form1 extends Form
 		///#endregion
 
 		OutputLine("");
-		OutputLine("Проверка файловой системы завершена. " + new java.util.Date().ToLongTimeString() + "/");
+		OutputLine("Проверка файловой системы завершена. " + new java.util.Date().toLocaleString() + "/");
 	}
 
 	public final void blockTypeCheck(ListDescriptor descriptor, Magics requestedType)
@@ -366,12 +381,14 @@ public class Form1 extends Form
 
 	public final void Output(String message)
 	{
-		textBox1.setText(textBox1.getText() + message);
+		//textBox1.setText(textBox1.getText() + message);
+		System.out.println(message);
 	}
 
 	public final void OutputLine(String message)
 	{
-		textBox1.setText(textBox1.getText() + message + "\r\n");
+		Output(message);
+		//textBox1.setText(textBox1.getText() + message + "\r\n");
 	}
 
 	public final void Output(Phantom_Disk_Superblock superblock)
@@ -389,15 +406,16 @@ public class Form1 extends Form
 
 	public final void Output(BlockList block_list)
 	{
-		OutputLine("  всего блоков " + block_list.size().toString());
+		OutputLine("  всего блоков " + block_list.size());
 		OutputLine("  «нулевых» блоков " + (new Integer(block_list.getNullCount())).toString());
 	}
 
 	public final void Output(ListDescriptor descriptor)
 	{
-		OutputLine("  количество блоков занимаемых описателем " + descriptor.size().toString());
+		OutputLine("  количество блоков занимаемых описателем " + descriptor.size());
 	}
 
+/*	
 	private void Application_ThreadException(Object sender, System.Threading.ThreadExceptionEventArgs e)
 	{
 		OutputLine("\r\nИсключение: " + e.Exception.Message);
@@ -456,14 +474,14 @@ public class Form1 extends Form
 	/** 
 	 Required designer variable.
 	 
-	*/
+	* /
 	private System.ComponentModel.IContainer components = null;
 
 	/** 
 	 Clean up any resources being used.
 	 
 	 @param disposing true if managed resources should be disposed; otherwise, false.
-	*/
+	* /
 	@Override
 	protected void dispose(boolean disposing)
 	{
@@ -481,7 +499,7 @@ public class Form1 extends Form
 	 Required method for Designer support - do not modify
 	 the contents of this method with the code editor.
 	 
-	*/
+	* /
 	private void InitializeComponent()
 	{
 		System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(Form1.class);
@@ -660,10 +678,10 @@ public class Form1 extends Form
 		this.ResumeLayout(false);
 
 	}
-
+*/
 //C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
 	///#endregion
-
+/*
 	private System.Windows.Forms.ListView listView1;
 	private System.Windows.Forms.ColumnHeader columnHeader1;
 	private System.Windows.Forms.PropertyGrid propertyGrid1;
@@ -674,4 +692,5 @@ public class Form1 extends Form
 	private System.Windows.Forms.ToolStrip toolStrip1;
 	private System.Windows.Forms.ToolStripButton toolStripButton1;
 	private System.Windows.Forms.ToolStripButton toolStripButton2;
+*/	
 }

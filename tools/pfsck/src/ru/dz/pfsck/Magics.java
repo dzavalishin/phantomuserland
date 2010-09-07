@@ -1,4 +1,6 @@
-﻿public enum Magics 
+﻿package ru.dz.pfsck;
+
+public enum Magics 
 {
 	DISK_STRUCT_MAGIC_SUPERBLOCK(0xC001AC1D),
 	DISK_STRUCT_MAGIC_SUPER_2(0xB0B0ADAD),

@@ -1,3 +1,5 @@
+package ru.dz.pfsck;
+
 //class УпакованныйСписокБлоков
 //{
 //    Dictionary<disk_page_no_t, disk_page_no_t> СписокИнтерваловБлоков;
@@ -21,7 +23,7 @@
 //    }
 //}
 
-public class BlockList extends java.util.ArrayList<u_int32_t>
+public class BlockList extends java.util.ArrayList<Integer>
 {
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public uint getКоличествоНулевыхСсылок()
