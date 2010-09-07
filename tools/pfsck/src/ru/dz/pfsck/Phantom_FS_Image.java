@@ -1,6 +1,8 @@
 ﻿package ru.dz.pfsck;
 
 import java.nio.MappedByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 //public class Phantom_File_System_Checker
 //{
@@ -8,6 +10,8 @@ import java.nio.MappedByteBuffer;
 
 public class Phantom_FS_Image
 {
+	Logger log = Logger.getLogger(Phantom_FS_Image.class.getName()); 
+	
 	private final MappedByteBuffer map;
 
 	public Phantom_FS_Image(MappedByteBuffer map) {
@@ -29,11 +33,15 @@ public class Phantom_FS_Image
 //ORIGINAL LINE: public Block ReadBlock(System.UInt32 nBlock)
 	public final Block ReadBlock(int nBlock)
 	{
+		//log.log(Level.SEVERE, "reading block "+nBlock);
+		System.out.println("reading block "+nBlock);
 		//m_Reader.BaseStream.Seek(nBlock * ConstantProvider.DISK_STRUCT_BS, SeekOrigin.Begin);
 
 		byte [] buf = new byte[ConstantProvider.DISK_STRUCT_BS];
+		//System.out.println("fs map limit = " + map.limit()/1024 + "kb" );
 		
-		map.get(buf, nBlock * ConstantProvider.DISK_STRUCT_BS, ConstantProvider.DISK_STRUCT_BS);
+		map.position(nBlock * ConstantProvider.DISK_STRUCT_BS);
+		map.get(buf, 0, ConstantProvider.DISK_STRUCT_BS);
 		//MappedByteBuffer.wrap(buf);
 		
 		return new Block(buf);
