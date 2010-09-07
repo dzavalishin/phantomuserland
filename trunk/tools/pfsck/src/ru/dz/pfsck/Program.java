@@ -18,7 +18,7 @@ public final class Program
 	public static void main(String[] args) throws IOException {
 		
 		File snapfn = new File(args[0]);
-		System.out.println("SnapDump: "+snapfn);
+		System.out.println("pfsck: "+snapfn);
 		
 		RandomAccessFile snap = new RandomAccessFile(snapfn,"r");
 		

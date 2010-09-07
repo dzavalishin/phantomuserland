@@ -29,6 +29,10 @@ public class Form1 //extends Form
 
 	public Form1(MappedByteBuffer map) {
 		this.map = map;
+		map.load();
+		
+		System.out.println("limit = " + map.limit() );
+		System.out.println("limit = " + map.limit()/1024 + "kb" );
 		
 		m_Image = new Phantom_FS_Image(map);
 	}
@@ -36,14 +40,14 @@ public class Form1 //extends Form
 
 	public final void Check()
 	{
-		OutputLine("«суперблок»");
+		OutputLine("superblock");
 		OutputLine("-----------------");
 		Output(m_Image.getSuperBlock());
 		OutputLine("");
 		OutputLine("");
 		OutputLine("");
 
-		OutputLine("Начало проверок файловой системы. " + new java.util.Date().toLocaleString() + "/");
+		OutputLine("Begin check " + new java.util.Date().toLocaleString() + "/");
 		OutputLine("-----------------");
 
 		BlockList freeList = null;
@@ -60,7 +64,7 @@ public class Form1 //extends Form
 			OutputLine("");
 			OutputLine("");
 			OutputLine("");
-			OutputLine("Загрузка списков в оперативную память");
+			OutputLine("Loading lists");
 			OutputLine("-----------------");
 
 			if (m_Image.getSuperBlock().getFree_list() != 0)

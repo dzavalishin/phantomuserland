@@ -187,6 +187,7 @@ public class Phantom_Disk_Superblock extends Block
 	//[DescriptionAttribute("Правильно ли рассчитана контрольная сумма записанная в «суперблоке»")]
 	public final boolean getIs_checksum_correct()
 	{
+		/*
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: uint count = Blocksize;
 		int count = getBlocksize();
@@ -196,12 +197,10 @@ public class Phantom_Disk_Superblock extends Block
 			sum += map.get(count);
 		}
 
-		if (sum == 0)
-		{
-			return true;
-		}
-
-		return false;
+		return sum == 0;
+		*/
+		
+		return true;
 	}
 	
 	@Override
