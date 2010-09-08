@@ -7,10 +7,8 @@ import java.nio.MappedByteBuffer;
 
 public class Block
 {
-	//public byte[] m_Buffer;
 	ByteBuffer map;
 
-//C# TO JAVA CONVERTER TODO TASK: Java annotations will not correspond to .NET attributes:
 	//[Category("1. Общий"), DescriptionAttribute("Magic")]
 	public final Magics getMagic()
 	{
@@ -27,7 +25,6 @@ public class Block
 	{
 		map = MappedByteBuffer.wrap(buffer);
 		map.order(Program.BYTE_ORDER);
-		//m_Buffer = buffer;
 	}
 
 	public Block(InputStream reader)

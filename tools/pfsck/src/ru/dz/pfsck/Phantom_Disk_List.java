@@ -1,5 +1,7 @@
 ﻿package ru.dz.pfsck;
 
+import java.util.AbstractList;
+
 public class Phantom_Disk_List extends Block
 {
 	
@@ -21,7 +23,7 @@ public class Phantom_Disk_List extends Block
 	}
 
 
-	public final java.util.ArrayList<Integer> getBlocksInList()
+	public final AbstractList<Integer> getBlocksInList()
 	{
 //ORIGINAL LINE: List<System.UInt32> blocks = new List<uint>();
 		java.util.ArrayList<Integer> blocks = new java.util.ArrayList<Integer>();

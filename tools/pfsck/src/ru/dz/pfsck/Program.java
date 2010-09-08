@@ -12,6 +12,7 @@ public final class Program
 {
 
 	public static final ByteOrder BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
+	private static int errors = 0;
 	//public static final ByteOrder BYTE_ORDER = ByteOrder.BIG_ENDIAN;
 
 	/**
@@ -33,5 +34,12 @@ public final class Program
 		
 		Form1 form = new Form1(map);
 		form.Check();
+		System.out.println("Finished, "+errors+" errors");
+	}
+
+	public static void reportError(String string) {
+		System.out.println("Error: "+string);
+		errors++;
+		
 	}
 }
