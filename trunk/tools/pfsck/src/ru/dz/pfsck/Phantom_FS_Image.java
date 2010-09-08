@@ -1,6 +1,7 @@
 ﻿package ru.dz.pfsck;
 
 import java.nio.MappedByteBuffer;
+import java.util.AbstractList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +30,7 @@ public class Phantom_FS_Image
 	public final Block ReadBlock(int nBlock)
 	{
 		//log.log(Level.SEVERE, "reading block "+nBlock);
-		System.out.println("reading block "+nBlock);
+		//System.out.println("reading block "+nBlock);
 		//m_Reader.BaseStream.Seek(nBlock * ConstantProvider.DISK_STRUCT_BS, SeekOrigin.Begin);
 
 		byte [] buf = new byte[ConstantProvider.DISK_STRUCT_BS];
@@ -66,16 +67,24 @@ public class Phantom_FS_Image
 		//}
 
 		Phantom_Disk_List list_block = new Phantom_Disk_List(block);
+		
+		System.out.println("Phantom_FS_Image.linkedBlockList() used = " + list_block.getUsed() );
+		AbstractList<Integer> blocksInList = list_block.getBlocksInList();
+		System.out.println("Phantom_FS_Image.linkedBlockList() = " + blocksInList );
+		list.argvalue.addAll(blocksInList);
 
 		if (list.argvalue.contains(nBlock))
 		{
-			throw new RuntimeException("Ошибка: циклическая ссылка в связных блоках, block no. "+nBlock);
+			//throw new RuntimeException("Ошибка: циклическая ссылка в связных блоках, block no. "+nBlock+" list is "+list.argvalue);
+			Program.reportError("Ошибка: циклическая ссылка в связных блоках, block no. "+nBlock+" list is "+list.argvalue);
+			return;
 		}
 
 		list.argvalue.add(nBlock);
 
 		if (list_block.getNext() != 0)
 		{
+			System.out.println( "Phantom_FS_Image.linkedBlockList() next = " + list_block.getNext() );
 			linkedBlockList(list_block.getNext(), list);
 		}
 	}

@@ -74,7 +74,7 @@ public class Form1 //extends Form
 				freeList = m_Image.blockListContents(superBlock.getFree_list(), tempRef_freeSpaceListDescriptor);
 				freeSpaceListDescriptor = tempRef_freeSpaceListDescriptor.argvalue;
 
-				OutputLine("▫Загружен список свободных блоков");
+				OutputLine("▫Free list loaded");
 				Output(freeSpaceListDescriptor);
 				Output(freeList);
 			}
@@ -85,7 +85,7 @@ public class Form1 //extends Form
 				lastShotContentList = m_Image.blockListContents(superBlock.getLast_snap(), tempRef_lastShotListDescriptor);
 				lastShotListDescriptor = tempRef_lastShotListDescriptor.argvalue;
 
-				OutputLine("▫Загружен список блоков последнего снимка");
+				OutputLine("▫Last snap loaded");
 				Output(lastShotListDescriptor);
 				Output(lastShotContentList);
 			}
@@ -96,12 +96,12 @@ public class Form1 //extends Form
 				prevShotContentList = m_Image.blockListContents(superBlock.getPrev_snap(), tempRef_prevShotListDescriptor);
 				prevShotListDescriptor = tempRef_prevShotListDescriptor.argvalue;
 
-				OutputLine("▫Загружен список блоков предыдущего снимка");
+				OutputLine("▫Prev snap loaded");
 				Output(prevShotListDescriptor);
 				Output(prevShotContentList);
 			}
 
-			OutputLine("Завершена");
+			OutputLine("Done");
 		}
 //C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
 		///#endregion
@@ -113,7 +113,7 @@ public class Form1 //extends Form
 //C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
 		///#region Проверка типов блоков в описателях списков
 		OutputLine("");
-		OutputLine("Проверка типов блоков в описателях списков");
+		OutputLine("Check magics");
 		OutputLine("-----------------");
 		if (freeSpaceListDescriptor != null)
 		{
@@ -127,14 +127,11 @@ public class Form1 //extends Form
 		{
 			blockTypeCheck(prevShotListDescriptor, Magics.DISK_STRUCT_MAGIC_SNAP_LIST);
 		}
-		OutputLine("Завершена");
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
+		OutputLine("Done");
 		///#endregion
 
 		//TODO: статистика пересечения снимков
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
 		///#region Статистика пересечения снимков
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
 		///#endregion
 
 //C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
@@ -149,9 +146,8 @@ public class Form1 //extends Form
 
 			if (freeSpaceListDescriptor != null)
 			{
-				Output("▫Содержимое списка описателей свободных блоков");
+				Output("▫Free list descr");
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (uint nBlock in freeSpaceListDescriptor)
 				for (int nBlock : freeSpaceListDescriptor)
 				{
@@ -166,9 +162,8 @@ public class Form1 //extends Form
 
 			if (freeList != null)
 			{
-				Output("▫Содержимое списка свободных блоков");
+				Output("▫Free list");
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (uint nBlock in freeList)
 				for (int nBlock : freeList)
 				{
@@ -202,7 +197,6 @@ public class Form1 //extends Form
 			{
 				Output("▫Содержимое списка блоков последнего снимка");
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (uint nBlock in lastShotContentList)
 				for (int nBlock : lastShotContentList)
 				{
@@ -217,9 +211,8 @@ public class Form1 //extends Form
 
 			if (prevShotListDescriptor != null)
 			{
-				Output("▫Содержимое списка описателей последнего снимка");
+				Output("▫Prev snap descr");
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (uint nBlock in prevShotListDescriptor)
 				for (int nBlock : prevShotListDescriptor)
 				{
@@ -234,9 +227,8 @@ public class Form1 //extends Form
 
 			if (prevShotContentList != null)
 			{
-				Output("▫Содержимое списка блоков предыдущего снимка");
+				Output("▫Prev snap block list");
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (uint nBlock in prevShotContentList)
 				for (int nBlock : prevShotContentList)
 				{
@@ -248,18 +240,15 @@ public class Form1 //extends Form
 
 				OutputLine("  Ok");
 			}
-			OutputLine("Завершена");
+			OutputLine("Done");
 
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
-			///#region Поиск неучтённых блоков
 			{
 				OutputLine("");
-				OutputLine("Поиск неучтённых блоков между disk_start_page и free_start");
+				OutputLine("Looking for unreferenced blocks between disk_start_page and free_start");
 				OutputLine("-----------------");
 				//List<uint> g = new List<uint>();
 				int count = 0;
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: for (uint nBlock = m_Image.СуперБлок.Disk_start_page; nBlock < m_Image.СуперБлок.Free_start; nBlock++)
+
 				for (int nBlock = superBlock.getDisk_start_page(); nBlock < superBlock.getFree_start(); nBlock++)
 				{
 					if (!t.containsKey(nBlock))
@@ -274,30 +263,23 @@ public class Form1 //extends Form
 					OutputLine("  не учтено блоков " + (new Integer(count)).toString() + " шт.");
 				}
 
-				OutputLine("Завершен");
+				OutputLine("Done");
 			}
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
-			///#endregion
 
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
-			///#region Поиск ссылок на блоки расположенные за границами disk_start_page и disk_start_page+disk_page_count
 			{
 				OutputLine("");
-				OutputLine("Поиск ссылок на блоки расположенные за границами disk_start_page и disk_start_page+disk_page_count");
+				OutputLine("Looking for references to blocks out of disk_start_page-disk_page_count");
 				OutputLine("-----------------");
 				//List<uint> g = new List<uint>();
 				int count = 0;
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: uint leftBorder = m_Image.СуперБлок.Disk_start_page;
+
 				int leftBorder = superBlock.getDisk_start_page();
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: uint rightBorder = m_Image.СуперБлок.Disk_start_page + m_Image.СуперБлок.Disk_page_count - 1;
-				int rightBorder = superBlock.getDisk_start_page() + superBlock.getDisk_page_count() - 1;
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: foreach (uint nBlock in t.Keys)
+
+				int rightBorder = superBlock.getDisk_page_count();
+
 				for (int nBlock : t.keySet())
 				{
-					if (nBlock < leftBorder || nBlock > rightBorder)
+					if (nBlock < leftBorder || nBlock >= rightBorder)
 					{
 						count++;
 					}
@@ -305,31 +287,32 @@ public class Form1 //extends Form
 
 				if (count > 0)
 				{
-					OutputLine("  обнаружено недопустимых ссылок " + (new Integer(count)).toString() + " шт.");
+					OutputLine("  out of bounds block references " + (new Integer(count)).toString() + " ");
 				}
 				else
 				{
-					OutputLine("Таких нет");
+					OutputLine("None");
 				}
 
-				OutputLine("Завершен");
+				OutputLine("Done");
 			}
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
-			///#endregion
 
 		}
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
-		///#endregion
 
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
-		///#region Статистика по меджикам
+		OutputLine("");
+		OutputLine("FS check finished. " + new java.util.Date().toLocaleString() + "/");
+	}
+
+	/** 
+	 * Magics statistics - how many blocks of given magic type exist. Inexact. :(
+	 **/
+	private void magicsStats() {
 		{
 			OutputLine("");
-			OutputLine("Статистика по типам блоков (есть вероятность ошибок в большую сторону, так как блоки данных могут быть приняты за блоки с меджиками)");
+			OutputLine("Block type statistics (есть вероятность ошибок в большую сторону, так как блоки данных могут быть приняты за блоки с меджиками)");
 			OutputLine("-----------------");
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: Dictionary<Magics, uint> magicsStatistics = new Dictionary<Magics, uint>();
+			//ORIGINAL LINE: Dictionary<Magics, uint> magicsStatistics = new Dictionary<Magics, uint>();
 			java.util.HashMap<Magics, Integer> magicsStatistics = new java.util.HashMap<Magics, Integer>();
 
 			for( Magics enumVal : Magics.values() )
@@ -337,13 +320,10 @@ public class Form1 //extends Form
 				magicsStatistics.put(enumVal, 0);
 			}
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: uint last_block = m_Image.СуперБлок.Disk_start_page + m_Image.СуперБлок.Disk_page_count - 1;
-			int last_block = superBlock.getDisk_start_page() + superBlock.getDisk_page_count() - 1;
+			//int last_block = superBlock.getDisk_start_page() + superBlock.getDisk_page_count() - 1;
+			int last_block = superBlock.getDisk_page_count();
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
-//ORIGINAL LINE: for (uint nBlock = m_Image.СуперБлок.Disk_start_page; nBlock <= last_block; nBlock++)
-			for (int nBlock = superBlock.getDisk_start_page(); nBlock <= last_block; nBlock++)
+			for (int nBlock = superBlock.getDisk_start_page(); nBlock < last_block; nBlock++)
 			{
 				Block block = m_Image.ReadBlock(nBlock);
 
@@ -360,18 +340,12 @@ public class Form1 //extends Form
 				OutputLine(magic.toString() + " " + magicsStatistics.get(magic).toString());
 			}
 
-			OutputLine("Завершена");
+			OutputLine("Done");
 		}
-//C# TO JAVA CONVERTER TODO TASK: There is no preprocessor in Java:
-		///#endregion
-
-		OutputLine("");
-		OutputLine("Проверка файловой системы завершена. " + new java.util.Date().toLocaleString() + "/");
 	}
 
 	public final void blockTypeCheck(ListDescriptor descriptor, Magics requestedType)
 	{
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (uint nBlock in descriptor)
 		for (int nBlock : descriptor)
 		{

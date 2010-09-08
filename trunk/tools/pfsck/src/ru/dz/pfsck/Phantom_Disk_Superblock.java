@@ -145,6 +145,10 @@ public class Phantom_Disk_Superblock extends Block
 	        + "\ndisk_page_count: " + getDisk_page_count()
 	        + "\nfree_start: " + getFree_start()
 	        + "\nfree_list: " + getFree_list()
+
+	        + "\nold snap:  " + ((getPrev_snap() != 0 ? (new Integer(getPrev_snap())).toString() : "none")) 
+			+ "\nthis snap: " + ((getLast_snap() != 0 ? (new Integer(getLast_snap())).toString() : "none"))
+	        
 	        + "\nboot_list: " + getBoot_list()
 	        + "\nkernel_list: " + getKernel_list();
 	}
