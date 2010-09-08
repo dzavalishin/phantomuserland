@@ -11,6 +11,9 @@ import java.nio.channels.FileChannel.MapMode;
 public final class Program
 {
 
+	public static final ByteOrder BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
+	//public static final ByteOrder BYTE_ORDER = ByteOrder.BIG_ENDIAN;
+
 	/**
 	 * @param args
 	 * @throws IOException 
@@ -25,7 +28,7 @@ public final class Program
 		FileChannel fc = snap.getChannel();
 		
 		MappedByteBuffer map = fc.map(MapMode.READ_ONLY, 0, fc.size());
-		map.order(ByteOrder.LITTLE_ENDIAN);
+		map.order(BYTE_ORDER);
 		
 		
 		Form1 form = new Form1(map);

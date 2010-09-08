@@ -15,6 +15,7 @@ public class Form1 //extends Form
 {
 	private Phantom_FS_Image m_Image;
 	private final MappedByteBuffer map;
+	private Phantom_Disk_Superblock superBlock;
 
 	/*
 	public Form1()
@@ -31,10 +32,12 @@ public class Form1 //extends Form
 		this.map = map;
 		map.load();
 		
-		System.out.println("limit = " + map.limit() );
+		//System.out.println("limit = " + map.limit() );
 		System.out.println("limit = " + map.limit()/1024 + "kb" );
 		
 		m_Image = new Phantom_FS_Image(map);
+		
+		superBlock = m_Image.getSuperBlock();
 	}
 	
 
@@ -42,11 +45,9 @@ public class Form1 //extends Form
 	{
 		OutputLine("superblock");
 		OutputLine("-----------------");
-		Output(m_Image.getSuperBlock());
+		Output(""+superBlock);
 		OutputLine("");
-		OutputLine("");
-		OutputLine("");
-
+//if(true) return;
 		OutputLine("Begin check " + new java.util.Date().toLocaleString() + "/");
 		OutputLine("-----------------");
 
@@ -67,10 +68,10 @@ public class Form1 //extends Form
 			OutputLine("Loading lists");
 			OutputLine("-----------------");
 
-			if (m_Image.getSuperBlock().getFree_list() != 0)
+			if (superBlock.getFree_list() != 0)
 			{
 				RefObject<ListDescriptor> tempRef_freeSpaceListDescriptor = new RefObject<ListDescriptor>(freeSpaceListDescriptor);
-				freeList = m_Image.blockListContents(m_Image.getSuperBlock().getFree_list(), tempRef_freeSpaceListDescriptor);
+				freeList = m_Image.blockListContents(superBlock.getFree_list(), tempRef_freeSpaceListDescriptor);
 				freeSpaceListDescriptor = tempRef_freeSpaceListDescriptor.argvalue;
 
 				OutputLine("▫Загружен список свободных блоков");
@@ -78,10 +79,10 @@ public class Form1 //extends Form
 				Output(freeList);
 			}
 
-			if (m_Image.getSuperBlock().getLast_snap() != 0)
+			if (superBlock.getLast_snap() != 0)
 			{
 				RefObject<ListDescriptor> tempRef_lastShotListDescriptor = new RefObject<ListDescriptor>(lastShotListDescriptor);
-				lastShotContentList = m_Image.blockListContents(m_Image.getSuperBlock().getLast_snap(), tempRef_lastShotListDescriptor);
+				lastShotContentList = m_Image.blockListContents(superBlock.getLast_snap(), tempRef_lastShotListDescriptor);
 				lastShotListDescriptor = tempRef_lastShotListDescriptor.argvalue;
 
 				OutputLine("▫Загружен список блоков последнего снимка");
@@ -89,10 +90,10 @@ public class Form1 //extends Form
 				Output(lastShotContentList);
 			}
 
-			if (m_Image.getSuperBlock().getPrev_snap() != 0)
+			if (superBlock.getPrev_snap() != 0)
 			{
 				RefObject<ListDescriptor> tempRef_prevShotListDescriptor = new RefObject<ListDescriptor>(prevShotListDescriptor);
-				prevShotContentList = m_Image.blockListContents(m_Image.getSuperBlock().getPrev_snap(), tempRef_prevShotListDescriptor);
+				prevShotContentList = m_Image.blockListContents(superBlock.getPrev_snap(), tempRef_prevShotListDescriptor);
 				prevShotListDescriptor = tempRef_prevShotListDescriptor.argvalue;
 
 				OutputLine("▫Загружен список блоков предыдущего снимка");
@@ -259,7 +260,7 @@ public class Form1 //extends Form
 				int count = 0;
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: for (uint nBlock = m_Image.СуперБлок.Disk_start_page; nBlock < m_Image.СуперБлок.Free_start; nBlock++)
-				for (int nBlock = m_Image.getSuperBlock().getDisk_start_page(); nBlock < m_Image.getSuperBlock().getFree_start(); nBlock++)
+				for (int nBlock = superBlock.getDisk_start_page(); nBlock < superBlock.getFree_start(); nBlock++)
 				{
 					if (!t.containsKey(nBlock))
 					{
@@ -288,10 +289,10 @@ public class Form1 //extends Form
 				int count = 0;
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: uint leftBorder = m_Image.СуперБлок.Disk_start_page;
-				int leftBorder = m_Image.getSuperBlock().getDisk_start_page();
+				int leftBorder = superBlock.getDisk_start_page();
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: uint rightBorder = m_Image.СуперБлок.Disk_start_page + m_Image.СуперБлок.Disk_page_count - 1;
-				int rightBorder = m_Image.getSuperBlock().getDisk_start_page() + m_Image.getSuperBlock().getDisk_page_count() - 1;
+				int rightBorder = superBlock.getDisk_start_page() + superBlock.getDisk_page_count() - 1;
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (uint nBlock in t.Keys)
 				for (int nBlock : t.keySet())
@@ -338,11 +339,11 @@ public class Form1 //extends Form
 
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: uint last_block = m_Image.СуперБлок.Disk_start_page + m_Image.СуперБлок.Disk_page_count - 1;
-			int last_block = m_Image.getSuperBlock().getDisk_start_page() + m_Image.getSuperBlock().getDisk_page_count() - 1;
+			int last_block = superBlock.getDisk_start_page() + superBlock.getDisk_page_count() - 1;
 
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: for (uint nBlock = m_Image.СуперБлок.Disk_start_page; nBlock <= last_block; nBlock++)
-			for (int nBlock = m_Image.getSuperBlock().getDisk_start_page(); nBlock <= last_block; nBlock++)
+			for (int nBlock = superBlock.getDisk_start_page(); nBlock <= last_block; nBlock++)
 			{
 				Block block = m_Image.ReadBlock(nBlock);
 
@@ -395,6 +396,7 @@ public class Form1 //extends Form
 		//textBox1.setText(textBox1.getText() + message + "\r\n");
 	}
 
+	/*
 	public final void Output(Phantom_Disk_Superblock superblock)
 	{
 		OutputLine("  версия 0x" + String.format("%08X", superblock.getVersion()));
@@ -407,7 +409,8 @@ public class Form1 //extends Form
 		OutputLine("  начало описателя списка свободных блоков " + (new Integer(superblock.getFree_list())).toString());
 		OutputLine("  free_start (начало монолитного свободного пространства) " + (new Integer(superblock.getFree_start())).toString());
 	}
-
+	*/
+	
 	public final void Output(BlockList block_list)
 	{
 		OutputLine("  всего блоков " + block_list.size());

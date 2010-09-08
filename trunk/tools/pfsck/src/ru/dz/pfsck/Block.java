@@ -26,6 +26,7 @@ public class Block
 	public Block(byte[] buffer)
 	{
 		map = MappedByteBuffer.wrap(buffer);
+		map.order(Program.BYTE_ORDER);
 		//m_Buffer = buffer;
 	}
 
@@ -40,6 +41,7 @@ public class Block
 		}
 		
 		map = MappedByteBuffer.wrap(m_Buffer);
+		map.order(Program.BYTE_ORDER);
 	}
 }
 
