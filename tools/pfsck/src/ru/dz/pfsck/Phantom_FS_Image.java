@@ -4,9 +4,6 @@ import java.nio.MappedByteBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//public class Phantom_File_System_Checker
-//{
-//}
 
 public class Phantom_FS_Image
 {
@@ -19,7 +16,6 @@ public class Phantom_FS_Image
 	}
 
 	
-	//private BinaryReader m_Reader;
 
 	public final int getBlockCount()
 	{
@@ -29,7 +25,6 @@ public class Phantom_FS_Image
 
 
 
-	//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public Block ReadBlock(System.UInt32 nBlock)
 	public final Block ReadBlock(int nBlock)
 	{
@@ -55,7 +50,6 @@ public class Phantom_FS_Image
 	}
 
 	//TODO: добавить параметр «Ожидаемый тип блока»
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public void linkedBlockList(System.UInt32 nBlock, ref ListDescriptor list)
 	public final void linkedBlockList(int nBlock, RefObject<ListDescriptor> list)
 	{
@@ -75,7 +69,7 @@ public class Phantom_FS_Image
 
 		if (list.argvalue.contains(nBlock))
 		{
-			throw new RuntimeException("Ошибка: циклическая ссылка в связных блоках");
+			throw new RuntimeException("Ошибка: циклическая ссылка в связных блоках, block no. "+nBlock);
 		}
 
 		list.argvalue.add(nBlock);
@@ -86,7 +80,6 @@ public class Phantom_FS_Image
 		}
 	}
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: public BlockList blockListContents(System.UInt32 nBlock, out ListDescriptor BlocksWithList)
 	public final BlockList blockListContents(int nBlock, RefObject<ListDescriptor> BlocksWithList)
 	{
@@ -97,7 +90,6 @@ public class Phantom_FS_Image
 		{
 			linkedBlockList(nBlock, BlocksWithList);
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (System.UInt32 blockWithList in BlocksWithList)
 			for (int blockWithList : BlocksWithList.argvalue)
 			{
@@ -105,7 +97,6 @@ public class Phantom_FS_Image
 
 				Phantom_Disk_List list = new Phantom_Disk_List(block);
 
-//C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
 //ORIGINAL LINE: foreach (System.UInt32 blockNo in list.БлокиВСписке)
 				for (int blockNo : list.getBlocksInList())
 				{
@@ -126,3 +117,4 @@ public class Phantom_FS_Image
 		return sblock;
 	}
 }
+
