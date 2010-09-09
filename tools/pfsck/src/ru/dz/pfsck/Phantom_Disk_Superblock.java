@@ -63,6 +63,13 @@ public class Phantom_Disk_Superblock extends Block
 		return BitConverter.ToUInt32(map, 36);
 	}
 
+	/** is FS clean */
+	public final boolean isClean()
+	{
+		return map.get(40) != 0; // 3 more unused chars follow
+	}
+	
+	
 	/** 
 	 the latest snapshot or 0 if no.	 
 	*/
@@ -150,6 +157,10 @@ public class Phantom_Disk_Superblock extends Block
 			+ "\nthis snap: " + ((getLast_snap() != 0 ? (new Integer(getLast_snap())).toString() : "none"))
 	        
 	        + "\nboot_list: " + getBoot_list()
-	        + "\nkernel_list: " + getKernel_list();
+	        + "\nkernel_list: " + getKernel_list()
+	        
+	        + "\n\nis clean: " + isClean()
+	        +"\n"
+	        ;
 	}
 }
