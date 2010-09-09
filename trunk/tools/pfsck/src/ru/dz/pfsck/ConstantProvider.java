@@ -1,15 +1,5 @@
 ﻿package ru.dz.pfsck;
 
-//C# TO JAVA CONVERTER NOTE: There is no Java equivalent to C# namespace aliases:
-//using u_int32_t = System.UInt32;
-//C# TO JAVA CONVERTER NOTE: There is no Java equivalent to C# namespace aliases:
-//using disk_page_no_t = System.UInt32;
-//C# TO JAVA CONVERTER NOTE: There is no Java equivalent to C# namespace aliases:
-//using char_t = System.SByte;
-//C# TO JAVA CONVERTER NOTE: There is no Java equivalent to C# namespace aliases:
-//using uchar_t = System.Byte;
-//C# TO JAVA CONVERTER NOTE: There is no Java equivalent to C# namespace aliases:
-//using long_t = System.Int64;
 
 public class ConstantProvider
 {

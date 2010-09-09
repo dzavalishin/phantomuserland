@@ -13,6 +13,7 @@ public final class Program
 
 	public static final ByteOrder BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
 	private static int errors = 0;
+	private static int fatalErrors = 0;
 	//public static final ByteOrder BYTE_ORDER = ByteOrder.BIG_ENDIAN;
 
 	/**
@@ -32,9 +33,11 @@ public final class Program
 		map.order(BYTE_ORDER);
 		
 		
-		Form1 form = new Form1(map);
+		FsChecker form = new FsChecker(map);
 		form.Check();
 		System.out.println("Finished, "+errors+" errors");
+		
+		System.exit( errors == 0 ? 0 : 1);
 	}
 
 	public static void reportError(String string) {
@@ -42,4 +45,18 @@ public final class Program
 		errors++;
 		
 	}
+
+	public static void reportFatalError(String string) {
+		System.out.println("Fatal error: "+string);
+		errors++;
+		fatalErrors ++;
+		
+	}
+
+
+	public static boolean isVerbose() {
+		return false;
+	}
+
+
 }

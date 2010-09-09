@@ -52,7 +52,7 @@ public class Phantom_FS_Image
 
 	//TODO: добавить параметр «Ожидаемый тип блока»
 //ORIGINAL LINE: public void linkedBlockList(System.UInt32 nBlock, ref ListDescriptor list)
-	public final void linkedBlockList(int nBlock, RefObject<ListDescriptor> list)
+	public final void loadLinkedBlockList(int nBlock, RefObject<ListDescriptor> list)
 	{
 		if (list.argvalue == null)
 		{
@@ -68,15 +68,19 @@ public class Phantom_FS_Image
 
 		Phantom_Disk_List list_block = new Phantom_Disk_List(block);
 		
-		System.out.println("Phantom_FS_Image.linkedBlockList() used = " + list_block.getUsed() );
 		AbstractList<Integer> blocksInList = list_block.getBlocksInList();
-		System.out.println("Phantom_FS_Image.linkedBlockList() = " + blocksInList );
+		
+		if(Program.isVerbose())
+		{
+			System.out.println("Phantom_FS_Image.linkedBlockList() used = " + list_block.getUsed() );
+			System.out.println("Phantom_FS_Image.linkedBlockList() = " + blocksInList );
+		}
 		list.argvalue.addAll(blocksInList);
 
 		if (list.argvalue.contains(nBlock))
 		{
 			//throw new RuntimeException("Ошибка: циклическая ссылка в связных блоках, block no. "+nBlock+" list is "+list.argvalue);
-			Program.reportError("Ошибка: циклическая ссылка в связных блоках, block no. "+nBlock+" list is "+list.argvalue);
+			Program.reportError("cyclic link in block list, list page block no. "+nBlock+" list is "+list.argvalue);
 			return;
 		}
 
@@ -84,8 +88,9 @@ public class Phantom_FS_Image
 
 		if (list_block.getNext() != 0)
 		{
-			System.out.println( "Phantom_FS_Image.linkedBlockList() next = " + list_block.getNext() );
-			linkedBlockList(list_block.getNext(), list);
+			if(Program.isVerbose())
+				System.out.println( "Phantom_FS_Image.linkedBlockList() next = " + list_block.getNext() );
+			loadLinkedBlockList(list_block.getNext(), list);
 		}
 	}
 
@@ -97,7 +102,7 @@ public class Phantom_FS_Image
 		BlocksWithList.argvalue = null;
 
 		{
-			linkedBlockList(nBlock, BlocksWithList);
+			loadLinkedBlockList(nBlock, BlocksWithList);
 
 //ORIGINAL LINE: foreach (System.UInt32 blockWithList in BlocksWithList)
 			for (int blockWithList : BlocksWithList.argvalue)

@@ -23,6 +23,7 @@ package ru.dz.pfsck;
 //    }
 //}
 
+@SuppressWarnings("serial")
 public class BlockList extends java.util.ArrayList<Integer>
 {
 //C# TO JAVA CONVERTER WARNING: Unsigned integer types have no direct equivalent in Java:
