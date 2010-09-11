@@ -274,7 +274,8 @@ void    pvm_win_window_thread()
     if(pvm_win_setup_window())
     {
         init_err = 1;
-        return; // BUG: report error
+        printf("pvm_win_setup_window failed\n");
+        return;
     }
 
     // Allocate enough memory for the BITMAPINFOHEADER and 256 RGBQUAD palette entries

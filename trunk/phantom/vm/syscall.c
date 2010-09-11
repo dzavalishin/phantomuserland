@@ -1519,6 +1519,7 @@ static int si_bitmap_8_fromstring(struct pvm_object me, struct data_area_4_threa
     SYSCALL_RETURN_NOTHING;
 }
 
+// TODO kill or move to tty/win?
 static int si_bitmap_9_paintto(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
@@ -1719,9 +1720,92 @@ static int si_window_5_tostring(struct pvm_object o, struct data_area_4_thread *
     SYSCALL_RETURN(pvm_create_string_object( "(window)" ));
 }
 
+static int win_clear_20(struct pvm_object me , struct data_area_4_thread *tc )
+{
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+
+    DEBUG_INFO;
+
+    da->x = da->y = 0;
+
+    drv_video_window_fill( &(da->w), da->bg );
+    drv_video_winblt( &(da->w) );
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+static int win_fill_22(struct pvm_object me , struct data_area_4_thread *tc )
+{
+    (void) me;
+    DEBUG_INFO;
+    SYSCALL_THROW_STRING( "not implemented" );
+}
 
 
-syscall_func_t	syscall_table_4_window[16] =
+static int win_setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
+{
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+
+    DEBUG_INFO;
+    int n_param = POP_ISTACK;
+
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    int color = POP_INT();
+    //(void) color;
+    //int attr = (short)color;
+    //da->fg = color;
+
+    da->fg.r = color >> 16;
+    da->fg.r = color >> 8;
+    da->fg.b = color >> 0;
+    da->fg.a = 0xFF;
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+
+/*
+static int win_putimage_23(struct pvm_object me , struct data_area_4_thread *tc )
+{
+    (void) me;
+    DEBUG_INFO;
+    SYSCALL_THROW_STRING( "not implemented" );
+}
+*/
+
+static int win_putimage_23(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    int y = POP_INT();
+    int x = POP_INT();
+    struct pvm_object _img = POP_ARG;
+
+    // TODO check class!
+    struct data_area_4_bitmap *_bmp = pvm_object_da( _img, bitmap );
+    //struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
+    struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
+
+    bitmap2bitmap(
+    		da->pixel, da->w.xsize, da->w.ysize, x, y,
+    		(rgba_t *)pixels, _bmp->xsize, _bmp->ysize, 0, 0,
+    		_bmp->xsize, _bmp->ysize
+    );
+    //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
+    drv_video_winblt( &(da->w) );
+
+    SYS_FREE_O(_img);
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+
+syscall_func_t	syscall_table_4_window[24] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -1731,8 +1815,12 @@ syscall_func_t	syscall_table_4_window[16] =
     &invalid_syscall, 	    	    &invalid_syscall,
     &invalid_syscall, 	    	    &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
-    &invalid_syscall,               &si_void_15_hashcode
+    &invalid_syscall,               &si_void_15_hashcode,
     // 16
+    &invalid_syscall,    	    &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
+    &win_clear_20,    		    &win_setcolor_21,
+    &win_fill_22,     		    &win_putimage_23,
 
 };
 DECLARE_SIZE(window);
