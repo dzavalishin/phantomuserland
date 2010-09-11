@@ -707,6 +707,17 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
 
 void pvm_internal_init_window(struct pvm_object_storage * os)
 {
+    struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
+
+    da->w.title = "Window"; // BUG! Pointer from object space to kernel data seg!
+    da->fg = COLOR_BLACK;
+    da->bg = COLOR_WHITE;
+    da->x = 0;
+    da->y = 0;
+
+    drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg );
+
+
     {
     pvm_object_t o;
     o.data = os;
@@ -730,17 +741,17 @@ struct pvm_object     pvm_create_window_object(struct pvm_object owned )
     pvm_object_t ret = pvm_object_create_fixed( pvm_get_window_class() );
     struct data_area_4_window *da = (struct data_area_4_window *)ret.data->da;
 
-    /*
-    // This object needs OS attention at restart
-    // TODO do it by class flag in create fixed or earlier?
-    pvm_add_object_to_restart_list( ret );
-    */
+
+
+
     return ret;
 }
 
 void pvm_gc_finalizer_window( struct pvm_object_storage * os )
 {
     // is it called?
+    struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
+    drv_video_window_destroy(&(da->w));
 }
 
 #include <event.h>
@@ -749,6 +760,7 @@ void pvm_restart_window( pvm_object_t o )
 {
     struct data_area_4_window *da = pvm_object_da( o, window );
 
+    da->w.title = "Window"; // BUG! Pointer from object space to kernel data seg!
     drv_video_window_enter_allwq( &da->w );
     event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
 }
