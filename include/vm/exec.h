@@ -20,7 +20,13 @@
 void pvm_exec(struct pvm_object current_thread);
 
 void pvm_exec_throw( const char *reason );
+
+//! Load current thread data to fast access copy fields in thread object data area
 void pvm_exec_load_fast_acc(struct data_area_4_thread *da);
+
+//! Save current thread data from fast access copy fields in thread object data area to actual places. In fact just IP is saved.
+void pvm_exec_save_fast_acc(struct data_area_4_thread *da);
+
 
 struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned method_index );
 void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_storage * code );
