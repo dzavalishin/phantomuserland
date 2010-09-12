@@ -1,7 +1,3 @@
-#if 1
-#include <newos/cbuf.h>
-#else
-
 /*
 ** Copyright 2001-2002, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
@@ -71,6 +67,5 @@ u_int16_t cksum16_2(void *buf1, int len1, void *buf2, int len2);
 
 
 
-#endif
 #endif
 

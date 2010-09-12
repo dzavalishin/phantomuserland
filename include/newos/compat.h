@@ -1,6 +1,15 @@
-#if 1 // moved to include/newos/compat.h
-#include <newos/compat.h>
-#else
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * NewOS code compatibility defines.
+ * Used to simplify adaptation of NewOS (and, possibly, Haiky) code.
+ *
+ *
+**/
+
 
 /*
 ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
@@ -11,6 +20,8 @@
 
 #include <phantom_types.h>
 
+
+#define SYS_MAX_OS_NAME_LEN 32
 
 // definitions to import newos code easily
 
@@ -247,6 +258,4 @@ enum {
 
 
 #endif // _NEWOS
-
-#endif // moved to include/newos/compat.h
 

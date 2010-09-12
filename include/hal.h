@@ -223,7 +223,12 @@ errno_t					hal_cond_destroy( hal_cond_t *c );
 
 
 
-struct hal_sem;
+struct hal_sem_impllll;
+
+struct hal_sem
+{
+    struct phantom_sem_impl     *impl;
+};
 
 typedef struct hal_sem hal_sem_t;
 
