@@ -1,5 +1,7 @@
 default:: all
 
+all: $(TARGET)
+
 INCDIRS += $(realpath $(PHANTOM_HOME))/include
 
 # hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
