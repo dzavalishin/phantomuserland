@@ -15,3 +15,5 @@ include $(BUILD_ROOT)/offsets/makerules
 generate:	generate.o
 	gcc -o generate generate.o
 	./generate
+
+CLEAN_FILES += generate generate.exe FieldOffsets.java field_offsets.h 

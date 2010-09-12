@@ -451,12 +451,6 @@ struct phantom_sem_impl
 };
 
 
-#if USE_NEW_SEMAS
-struct hal_sem
-{
-    struct phantom_sem_impl     *impl;
-};
-#endif // USE_NEW_SEMAS
 
 #endif // THREAD_PRIVATE_H
 
