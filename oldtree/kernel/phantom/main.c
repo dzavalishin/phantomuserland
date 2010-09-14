@@ -39,7 +39,7 @@
 #include "misc.h"
 #include "net.h"
 
-#include "timedcall.h"
+#include <kernel/timedcall.h>
 
 #include <sys/utsname.h>
 #include <stdlib.h>

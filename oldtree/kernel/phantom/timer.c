@@ -1,7 +1,7 @@
 #define OWN_TIMER 1
 
-#include "timedcall.h"
-#include "vm/syscall_tools.h"
+#include <kernel/timedcall.h>
+#include <vm/syscall_tools.h>
 #include "snap_sync.h"
 
 #include <phantom_libc.h>
