@@ -112,6 +112,8 @@ static void wake_sem_thread( void *arg )
     phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
     struct phantom_sem_impl *ci = t->waitsem->impl;
 
+    //printf("wake sem\n");
+
     queue_remove(&(ci->waiting_threads), t, phantom_thread_t *, chain);
 
     t->thread_flags |= THREAD_FLAG_TIMEDOUT;
@@ -128,6 +130,9 @@ hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
 
     if(s->impl == 0) checkinit(s);
     struct phantom_sem_impl *ci = s->impl;
+
+    long msec = ((uSec-1)/1000)+1;
+    if( msec == 0 && uSec != 0 ) msec = 1; // at least 1
 
     // save & dis preemtion
     int ie = hal_save_cli();
@@ -150,19 +155,21 @@ hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
         {
             // Now prepare timer
             t->sleep_event.lockp = &t->waitlock;
-            t->sleep_event.msecLater = ((uSec-1)/1000)+1;
+            t->sleep_event.msecLater = msec;
             t->sleep_event.f = wake_sem_thread;
             t->sleep_event.arg = (void *)t->tid;
 
             t->thread_flags &= ~THREAD_FLAG_TIMEDOUT;
-        }
 
-        phantom_request_timed_call( &t->sleep_event, TIMEDCALL_FLAG_CHECKLOCK );
+            phantom_request_timed_call( &t->sleep_event, TIMEDCALL_FLAG_CHECKLOCK );
+        }
 
         thread_block( THREAD_SLEEP_SEM, &t->waitlock );
 
         retcode = (t->thread_flags & THREAD_FLAG_TIMEDOUT) != 0;
         t->thread_flags &= ~THREAD_FLAG_TIMEDOUT;
+
+        if(retcode) goto exit_on_timeout;
 
         hal_spin_lock(&(ci->lock));
     }
@@ -170,10 +177,11 @@ hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
     ci->value -= val;
     hal_spin_unlock(&(ci->lock));
     //hal_spin_unlock(&(ci->lock));
+exit_on_timeout:
     hal_enable_preemption();
     if(ie) hal_sti();
 
-    return retcode;
+    return retcode ? ETIMEDOUT : 0;
 }
 
 
@@ -260,8 +268,36 @@ ret:
 }
 */
 
+errno_t sem_get_count(hal_sem_t *s, int *count)
+{
+    if(s->impl == 0 || count == 0)
+        return EINVAL;
+
+    //errno_t ret = 0;
+    struct phantom_sem_impl *ci = s->impl;
+
+    // save & dis preemtion
+    int ie = hal_save_cli();
+    hal_disable_preemption();
+    hal_spin_lock(&(ci->lock));
+
+
+    *count = ci->value;
+
+//exit:
+    hal_spin_unlock(&(ci->lock));
+    hal_enable_preemption();
+    if(ie) hal_sti();
+
+    return 0;
+}
+
+
+
+// BUG! Races! 
 void hal_sem_destroy(hal_sem_t *c)
 {
+    // BUG! Must unlock and signal killed sema! newos code relies on that
     //if(m->impl.owner != 0)        panic("locked mutex killed");
     free(c->impl);
     c->impl=0;
