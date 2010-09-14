@@ -1,15 +1,15 @@
 #define DEBUG_MSG_PREFIX "lpt"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "driver_map.h"
+#include <kernel/drivers.h>
 
 #include <i386/pio.h>
 #include <phantom_libc.h>
 
-#include "hal.h"
+#include <hal.h>
 
 /* machine independent definitions, it shall only depend on the ppbus
  * parallel port model */
