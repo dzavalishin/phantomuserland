@@ -1,0 +1,26 @@
+
+all: $(TARGET)
+
+prepare::
+
+CLEAN_FILES += $(TARGET) $(TARGET).dump $(TARGET).pe
+
+include $(BUILD_ROOT)/makerules
+
+PHANTOM_CFLAGS += -ffreestanding -W -Wall
+
+LD_ADDR=-Ttext 0
+
+LIBGCC := `gcc --print-libgcc-file-name`
+
+
+LIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
+
+$(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a
+	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+	objcopy -O elf32-i386 $@.pe $@
+	objdump -x -d $@ >$@.dump
+
+
+install:: $(TARGET)
+	cp $(TARGET) $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/$(TARGET)
