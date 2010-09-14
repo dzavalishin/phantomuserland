@@ -169,7 +169,7 @@ errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
 
     hal_mutex_lock(m);
 
-    return retcode;
+    return retcode ? ETIMEDOUT : 0;
 }
 
 
