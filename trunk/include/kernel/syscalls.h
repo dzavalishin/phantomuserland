@@ -174,3 +174,29 @@
 #define SYS_munmap              522	// +-
 
 
+
+
+// in newos.S
+
+#define SYS_create_port		1024	// +-
+#define SYS_close_port		1025	// +-
+#define SYS_delete_port		1026	// +-
+#define SYS_find_port		1027	// +-
+#define SYS_get_port_info      	1028	// +-
+#define SYS_get_port_bufsize   	1029	// +-
+#define SYS_get_port_bufsize_etc		1030	// +-
+#define SYS_get_port_count     	1031	// +-
+#define SYS_read_port		1032	// +-
+#define SYS_read_port_etc      	1033	// +-
+#define SYS_write_port		1034	// +-
+#define SYS_write_port_etc	1035	// +-
+#define SYS_set_port_owner     	1036	// +-
+#define SYS_get_next_port_info	1037	// +-
+//#define SYS		1038	// +-
+//#define SYS		1039	// +-
+
+
+
+
+
+

@@ -56,7 +56,7 @@ START_O_FILE=entry.o
 # driver_isa_beep.o
 phantom: $(START_O_FILE) \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
-        test_amap.o \
+        test_amap.o test_port.o \
 	events.o smp.o \
        	heap/heap.o heap/heap_pool.o heap/secondaries.o boot_cmd_line.o \
        	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
@@ -86,11 +86,12 @@ phantom: $(START_O_FILE) \
         fs_map.o \
         svn_version.o $(PLIBDIR)/libdev.a \
        	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
-       	i386/libi386.a $(DEPENDLIBS) $(TH_LIB)
+       	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(TH_LIB)
 
 	@echo "Linking $@ ---------------------------------------------"
 	@$(LD) $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(PLIBDIR)/libdev.a  	\
+		$(PLIBDIR)/libnewos.a \
                 $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a \
 		i386/libi386.a $(PLIBDIR)/libdev.a \
 		$(PHANTOM_LIBS) $(PLIBDIR)/libphantom_c.a \
