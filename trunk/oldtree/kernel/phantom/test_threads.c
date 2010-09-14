@@ -23,7 +23,7 @@
 
 #include "threads/thread_private.h"
 #include <hal.h>
-#include "timedcall.h"
+#include <kernel/timedcall.h>
 
 #define TEST_CHATTY 0
 

@@ -13,7 +13,7 @@
 #ifndef THREAD_PRIVATE_H
 #define THREAD_PRIVATE_H
 
-#include "../timedcall.h"
+#include <kernel/timedcall.h>
 #include "cpu_state.h"
 
 #include <phantom_types.h>
