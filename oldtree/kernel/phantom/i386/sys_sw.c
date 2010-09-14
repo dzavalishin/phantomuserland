@@ -542,6 +542,7 @@ void syscall_sw(struct trap_state *st)
         {
             ret = u->umask;
             u->umask = uarg[0];
+            break;
         }
 
     case SYS_kill:
@@ -559,6 +560,70 @@ void syscall_sw(struct trap_state *st)
     case SYS_munlock:
     case SYS_munlockall:
     case SYS_munmap:
+
+
+        // NewOS/BeOS/Haiku
+    case SYS_create_port:
+        {
+            // TODO check string length and final addr to be valid
+            AARG(const char *, name, 1, 0);
+            ret = port_create( uarg[0], name );
+            break;
+        }
+    case SYS_close_port:
+        ret = port_close( uarg[0] );
+        break;
+    case SYS_delete_port:
+        ret = port_delete( uarg[0] );
+        break;
+    case SYS_find_port:
+        {
+            // TODO check string length and final addr to be valid
+            AARG(const char *, name, 0, 0);
+            ret = port_find(name);
+            break;
+        }
+    case SYS_get_port_info:
+        {
+            AARG(struct port_info *, info, 1, sizeof(struct port_info));
+            ret = port_get_info( uarg[0], info)
+        }
+    case SYS_get_port_bufsize:
+        ret = port_buffer_size( uarg[0] );
+        break;
+    case SYS_get_port_bufsize_etc:
+        ret = port_buffer_size( uarg[0], uarg[1], uarg[2] );
+        break;
+    case SYS_get_port_count:
+        ret = port_count( uarg[0] );
+        break;
+    case SYS_read_port:
+        {
+            AARG(int32_t *, msg_code, 1, sizeof(int32_t));
+            AARG(void  *, msg_buffer, 2, uarg[3]);
+            ret = port_read( uarg[0],
+                             msg_code,
+                             msg_buffer,
+                             uarg[3]);
+
+        }
+    case SYS_write_port:
+        {
+            AARG(int32_t *, msg_code, 1, sizeof(int32_t));
+            AARG(void  *, msg_buffer, 2, uarg[3]);
+            ret = port_write( uarg[0],
+                             msg_code,
+                             msg_buffer,
+                             uarg[3]);
+
+        }
+    case SYS_read_port_etc:
+    case SYS_write_port_etc:
+    case SYS_set_port_owner:
+    case SYS_get_next_port_info:
+        goto unimpl;
+
+
     unimpl:
         SHOW_ERROR( 0, "Unimplemented syscall %d called", callno );
         err = ENOSYS;

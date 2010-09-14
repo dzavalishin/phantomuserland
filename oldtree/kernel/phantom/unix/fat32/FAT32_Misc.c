@@ -43,12 +43,12 @@
 void FATMisc_ClearLFN(f32_t *impl, u_int8_t  wipeTable)
 {
     int i;
-    FAT32_LFN.no_of_strings = 0;
+    impl->FAT32_LFN.no_of_strings = 0;
 
     // Zero out buffer also
     if (wipeTable)
         for (i=0;i<MAX_LONGFILENAME_ENTRIES;i++)
-            memset(FAT32_LFN.String[i], 0x00, 13);
+            memset(impl->FAT32_LFN.String[i], 0x00, 13);
 }
 //-----------------------------------------------------------------------------
 // FATMisc_cacheLFN - Function extracts long file name text from sector
@@ -59,26 +59,26 @@ void FATMisc_CacheLFN(f32_t *impl, BYTE *entryBuffer)
     BYTE LFNIndex, i;
     LFNIndex = entryBuffer[0] & 0x0F;
 
-    if (FAT32_LFN.no_of_strings==0)
-        FAT32_LFN.no_of_strings = LFNIndex;
+    if (impl->FAT32_LFN.no_of_strings==0)
+        impl->FAT32_LFN.no_of_strings = LFNIndex;
 
-    FAT32_LFN.String[LFNIndex-1][0] = entryBuffer[1];
-    FAT32_LFN.String[LFNIndex-1][1] = entryBuffer[3];
-    FAT32_LFN.String[LFNIndex-1][2] = entryBuffer[5];
-    FAT32_LFN.String[LFNIndex-1][3] = entryBuffer[7];
-    FAT32_LFN.String[LFNIndex-1][4] = entryBuffer[9];
-    FAT32_LFN.String[LFNIndex-1][5] = entryBuffer[0x0E];
-    FAT32_LFN.String[LFNIndex-1][6] = entryBuffer[0x10];
-    FAT32_LFN.String[LFNIndex-1][7] = entryBuffer[0x12];
-    FAT32_LFN.String[LFNIndex-1][8] = entryBuffer[0x14];
-    FAT32_LFN.String[LFNIndex-1][9] = entryBuffer[0x16];
-    FAT32_LFN.String[LFNIndex-1][10] = entryBuffer[0x18];
-    FAT32_LFN.String[LFNIndex-1][11] = entryBuffer[0x1C];
-    FAT32_LFN.String[LFNIndex-1][12] = entryBuffer[0x1E];
+    impl->FAT32_LFN.String[LFNIndex-1][0] = entryBuffer[1];
+    impl->FAT32_LFN.String[LFNIndex-1][1] = entryBuffer[3];
+    impl->FAT32_LFN.String[LFNIndex-1][2] = entryBuffer[5];
+    impl->FAT32_LFN.String[LFNIndex-1][3] = entryBuffer[7];
+    impl->FAT32_LFN.String[LFNIndex-1][4] = entryBuffer[9];
+    impl->FAT32_LFN.String[LFNIndex-1][5] = entryBuffer[0x0E];
+    impl->FAT32_LFN.String[LFNIndex-1][6] = entryBuffer[0x10];
+    impl->FAT32_LFN.String[LFNIndex-1][7] = entryBuffer[0x12];
+    impl->FAT32_LFN.String[LFNIndex-1][8] = entryBuffer[0x14];
+    impl->FAT32_LFN.String[LFNIndex-1][9] = entryBuffer[0x16];
+    impl->FAT32_LFN.String[LFNIndex-1][10] = entryBuffer[0x18];
+    impl->FAT32_LFN.String[LFNIndex-1][11] = entryBuffer[0x1C];
+    impl->FAT32_LFN.String[LFNIndex-1][12] = entryBuffer[0x1E];
 
     for (i=0; i<13; i++)
-        if (FAT32_LFN.String[LFNIndex-1][i]==0xFF)
-            FAT32_LFN.String[LFNIndex-1][i] = 0x20; // Replace with spaces
+        if (impl->FAT32_LFN.String[LFNIndex-1][i]==0xFF)
+            impl->FAT32_LFN.String[LFNIndex-1][i] = 0x20; // Replace with spaces
 }
 //-----------------------------------------------------------------------------
 // FATMisc_GetLFNCache: Get a copy of the long filename to into a string buffer
@@ -89,9 +89,9 @@ void FATMisc_GetLFNCache(f32_t *impl, BYTE *strOut)
     int lfncount = 0;
 
     // Copy LFN from LFN Cache into a string
-    for (index=0;index<FAT32_LFN.no_of_strings;index++)
+    for (index=0;index<impl->FAT32_LFN.no_of_strings;index++)
         for (i=0; i<13; i++)
-            strOut[lfncount++] = FAT32_LFN.String[index][i];
+            strOut[lfncount++] = impl->FAT32_LFN.String[index][i];
 
     // Null terminate string
     strOut[lfncount]='\0';
@@ -121,7 +121,7 @@ int FATMisc_If_LFN_Invalid(f32_t *impl, FAT32_ShortEntry *entry)
 //-----------------------------------------------------------------------------
 int FATMisc_If_LFN_Exists(f32_t *impl, FAT32_ShortEntry *entry)
 {
-    if ((entry->Attr!=FILE_ATTR_LFN_TEXT) && (entry->Name[0]!=FILE_HEADER_BLANK) && (entry->Name[0]!=FILE_HEADER_DELETED) && (entry->Attr!=FILE_ATTR_VOLUME_ID) && (!(entry->Attr&FILE_ATTR_SYSHID)) && (FAT32_LFN.no_of_strings))
+    if ((entry->Attr!=FILE_ATTR_LFN_TEXT) && (entry->Name[0]!=FILE_HEADER_BLANK) && (entry->Name[0]!=FILE_HEADER_DELETED) && (entry->Attr!=FILE_ATTR_VOLUME_ID) && (!(entry->Attr&FILE_ATTR_SYSHID)) && (impl->FAT32_LFN.no_of_strings))
         return 1;
     else
         return 0;

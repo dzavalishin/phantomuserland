@@ -2,7 +2,7 @@ MYNAME=newos
 
 BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
-TARGET	= $(MYNAME).a 
+TARGET	= lib$(MYNAME).a 
 
 SRCDIRS += $(BUILD_ROOT)/$(MYNAME)
 

@@ -77,9 +77,10 @@ int port_delete_owned_ports(proc_id owner);
 
 
 // temp: test
-void port_test(void);
-int	 port_test_thread_func(void* arg);
+//void port_test(void);
+//int	 port_test_thread_func(void* arg);
 
+/*
 // user-level API
 port_id		user_port_create(int32 queue_length, const char *name);
 int			user_port_close(port_id id);
@@ -111,6 +112,8 @@ int			user_port_write_etc(port_id port,
 				size_t buffer_size,
 				uint32 flags,
 				bigtime_t timeout);
+
+*/
 
 #endif // _NEWOS_PORT_H
 

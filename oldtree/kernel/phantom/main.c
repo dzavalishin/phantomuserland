@@ -251,6 +251,7 @@ int main(int argc, char **argv, char **envp)
     // Used to refill list used to allocate physmem in interrupts
     hal_init_physmem_alloc_thread();
 
+    port_init();
     net_stack_init();
 
     phantom_pci_find_drivers( 1 );

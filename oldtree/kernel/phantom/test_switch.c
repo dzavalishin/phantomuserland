@@ -110,8 +110,12 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(dpc);
     TEST(timed_call);
 
+    // must test after timed calls for it depends on them
+    TEST(ports);
+
     // These are very long, do 'em last
     TEST(threads);
+
 
     printf("-----\nPhantom test suite FINISHED\n" );
 

@@ -22,6 +22,7 @@ void test_fail_msg(errno_t rc, const char *msg); // Call from any test to return
 #define test_check_false(expr) if( expr ) test_fail_msg( -1, #expr " is not false at " __XSTRING(  __LINE__ ) );
 
 #define test_check_eq(expr, val) if( expr != val ) test_fail_msg( -1, #expr " != " #val " at " __XSTRING(  __LINE__ ) );
+#define test_check_ne(expr, val) if( expr == val ) test_fail_msg( -1, #expr " == " #val " at " __XSTRING(  __LINE__ ) );
 #define test_check_gt(expr, val) if( expr <= val ) test_fail_msg( -1, #expr " <= " #val " at " __XSTRING(  __LINE__ ) );
 #define test_check_ge(expr, val) if( expr < val ) test_fail_msg( -1, #expr " < " #val " at " __XSTRING(  __LINE__ ) );
 
@@ -69,6 +70,8 @@ int do_test_timed_call(const char *test_parm);
 
 
 int do_test_amap(const char *test_parm);
+
+int do_test_ports(const char *test_parm);
 
 
 #endif // TEST_H
