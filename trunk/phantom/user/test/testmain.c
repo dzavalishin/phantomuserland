@@ -7,6 +7,10 @@ extern void exit(int);
 int
 main(int ac, char **av, char **env)
 {
+	(void) ac;
+	(void) av;
+	(void) env;
+
 	int pid = getpid();
 	int tid = gettid();
 
