@@ -1,6 +1,6 @@
 BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
-TARGET	= libphantom_user.a pmod_test
+TARGET	= libphantom_user.a
 
 SRCDIRS += $(BUILD_ROOT)/user
 

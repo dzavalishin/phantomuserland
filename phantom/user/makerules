@@ -1,5 +1,7 @@
 PHANTOM_CFLAGS += -ffreestanding -W -Wall
 
+CLEAN_FILES += test/*.o crt/*.o pmod_test
+
 #W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
 #LD_ADDR=--script=ld.script
@@ -8,7 +10,12 @@ LD_ADDR=-Ttext 0
 //LIBGCC := `$(CC) --print-libgcc-file-name`
 LIBGCC := `gcc --print-libgcc-file-name`
 
-pmod_test: crt/crt0.o test/testmain.o ../lib/libphantom_c.a
+all: $(TARGET) pmod_test ../lib/crt0.o
+
+../lib/crt0.o: crt/crt0.o
+	cp crt/crt0.o ../lib/crt0.o
+
+pmod_test: crt/crt0.o test/testmain.o ../lib/libphantom_c.a ../lib/libphantom_user.a
 	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
 	objcopy -O elf32-i386 $@.pe $@
 	objdump -x -d $@ >$@.dump
