@@ -53,7 +53,7 @@ entry.o: crtn.o
 
 #START_O_FILE=$(OBJDIR)/lib/multiboot.o 
 START_O_FILE=entry.o
-# driver_isa_beep.o
+
 phantom: $(START_O_FILE) \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
         test_amap.o test_port.o \
@@ -72,8 +72,7 @@ phantom: $(START_O_FILE) \
         video_drv_basic_vga.o video_drv_basic_vga_tables.o video.o \
        	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
        	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
-        driver_isa_com.o driver_isa_lpt.o \
-        device.o driver_isa_vga_txt.o driver_isa_ne2000.o \
+        device.o driver_isa_ne2000.o \
        	driver_pci_pcnet32.o syslog.o driver_pci_intel82559.o \
         driver_pci_intel_etc.o \
        	symtab.o unix/dir.o \
