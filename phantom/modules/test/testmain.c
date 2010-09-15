@@ -2,42 +2,39 @@
 
 extern void exit(int);
 
-#define GET "GET /\n"
 
-int
-main(int ac, char **av, char **env)
+int main(int ac, char **av, char **env)
 {
-	(void) ac;
-	(void) av;
-	(void) env;
+    (void) ac;
+    (void) av;
+    (void) env;
 
-	int pid = getpid();
-	int tid = gettid();
+    ac--;
+    av++;
 
-	printf("printf: test module runs with pid %d tid %d\n", pid, tid );
+    const char *test_name = "all";
+    const char *test_parm = 0;
 
-	char buf[1024];
-	snprintf(buf, sizeof(buf), "syslog: test module runs with pid %d tid %d", pid, tid );
-    ssyslog( 0, buf );
-
-	int tcpfd = open("tcp://213.180.204.8:80", 0, 0 );
-
-	printf("tcp fd = %d\n", tcpfd);
-
-	write(tcpfd, GET, sizeof(GET));
-    sleepmsec(4000);
-	read(tcpfd, buf, 512);
-	buf[512] = 0;
-	printf("ya.ru: '%s'\n", buf );
-	close(tcpfd);
-
-
-    while(1)
+    if(ac)
     {
-        ssyslog( 0, "module test is running" );
-        sleepmsec(4000);
+        test_name = *av++;
+        ac--;
     }
 
+    if(ac)
+    {
+        test_parm = *av++;
+        ac--;
+    }
+
+    int pid = getpid();
+    int tid = gettid();
+
+    printf("Usermode test suite runs with pid %d tid %d\n", pid, tid );
+
+    run_test( test_name, test_parm );
+
+
     exit(0);
-    asm("int $3");
 }
+
