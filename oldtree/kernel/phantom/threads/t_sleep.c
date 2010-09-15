@@ -21,7 +21,7 @@
 #include <phantom_libc.h>
 
 #include "thread_private.h"
-#include "../timedcall.h"
+#include <kernel/timedcall.h>
 
 #include <phantom_libc.h>
 

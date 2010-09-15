@@ -282,6 +282,7 @@ int hal_is_preemption_disabled(void);
 
 void phantom_thread_init_conds(void);
 void phantom_thread_init_mutexes(void);
+void phantom_thread_init_sems(void);
 
 void phantom_thread_init_killer(void);
 

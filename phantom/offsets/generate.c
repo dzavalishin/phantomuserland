@@ -5,6 +5,7 @@
 
 
 #include <phantom_disk.h>
+#include <phantom_libc.h>
 
 #define FILE void
 
@@ -14,7 +15,7 @@ FILE *jout;
 
 static void out(const char *type, const char *field, const char *what, int data)
 {
-	static pad_spaces = "                                                                                                          ";
+	static char *pad_spaces = "                                                                                                          ";
 
 	int pad = 60-strlen(type)-strlen(field)-strlen(what);
 	fprintf(cout, "#define %s__%s__%s %.*s%d\n", type, field, what, pad, pad_spaces, data);
