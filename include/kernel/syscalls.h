@@ -4,7 +4,7 @@
 // +! = have in kernel, but impl is temporary or stub
 
 // in general.S
-#define SYS_exit		0	// ++
+#define SYS__exit		0	// ++
 #define SYS_ssyslog		1	// ++
 #define SYS_getpagesize		2	// ++
 #define SYS_personality		3	// +!
