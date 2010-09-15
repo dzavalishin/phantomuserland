@@ -2,7 +2,7 @@
 #include "SYS.h"
 
 
-SYSCALL(exit)
+SYSCALL(_exit)
 SYSCALL(ssyslog)
 SYSCALL(getpagesize)
 SYSCALL(personality)
