@@ -198,5 +198,6 @@ phantom_device_t * driver_intel_1237_bridge_probe( pci_cfg_t *pci, int stage )
 
 static errno_t check_piix4_isa_sanity(int port)
 {
+	(void) port;
     return 0;
 }

@@ -28,7 +28,8 @@
 #include <errno.h>
 
 #include "misc.h"
-#include "threads/thread_private.h"
+#include <threads.h>
+
 
 #include <elf.h>
 #include <kernel/unix.h>

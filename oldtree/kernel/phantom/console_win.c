@@ -8,7 +8,8 @@
 #include "console.h"
 #include "misc.h"
 
-#include "threads/thread_private.h"
+//#include "threads/thread_private.h"
+#include <threads.h>
 
 //#define CON_FONT drv_video_8x16san_font
 #define CON_FONT drv_video_8x16cou_font

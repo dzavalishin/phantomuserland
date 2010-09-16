@@ -99,20 +99,36 @@ static int bochs_video_probe()
 
 #define VBE_DISPI_LFB_PHYSICAL_ADDRESS  0xE0000000
 
+// need 4Mbytes aperture
+#define N_PAGES 1024
 
 static void bochs_map_video(int on_off)
 {
 
+
+    if( video_driver_bochs_vesa_emulator.screen = 0 )
+    {
+        void *vva;
+
+        if( hal_alloc_vaddress(&vva, N_PAGES) )
+        	panic("Can't alloc vaddress for %d videmem pages", N_PAGES);
+
+        video_driver_bochs_vesa_emulator.screen = vva;
+    }
+
+    /*
     int i;
-    // TODO alloc vaddr space
-    // TODO add to HAL map function to process more than 1 page
-    // need 4Mbytes aperture
-    for( i = 0; i < 1024; i++ )
+    // TO DO alloc vaddr space
+    // TO DO add to HAL map function to process more than 1 page
+    for( i = 0; i < N_PAGES; i++ )
     {
         int pa = VBE_DISPI_LFB_PHYSICAL_ADDRESS + (i << 12);
         char *p = (char *)phystokv( pa );
         hal_page_control( pa, p, on_off ? page_map : page_unmap, page_rw );
     }
+    */
+
+    hal_pages_control( pa, p, N_PAGES, on_off ? page_map : page_unmap, page_rw );
 
     video_driver_bochs_vesa_emulator.screen = (void *)phystokv( VBE_DISPI_LFB_PHYSICAL_ADDRESS );
 

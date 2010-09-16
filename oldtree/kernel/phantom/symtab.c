@@ -49,7 +49,8 @@ static void load_elf_symtab(
                             int text_section_load_addr
                            )
 {
-
+	// TODO use text_section_load_addr or remove it
+	(void) text_section_load_addr;
     Elf32_Sym *sym;
 
     int maxcount = nsymbols;

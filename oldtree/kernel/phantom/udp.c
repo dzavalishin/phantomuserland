@@ -10,7 +10,7 @@
 
 #include "atomic.h"
 #include "endian.h"
-#include "hal.h"
+#include <hal.h>
 
 
 #include "newos.h"
@@ -333,9 +333,9 @@ ssize_t udp_recvfrom(
 
 retry:
 //#warning timeout ignored
-#if ERR
+#if 1
     if(flags & SOCK_FLAG_TIMEOUT)
-        err = sem_acquire_etc(e->blocking_sem, 1, SEM_FLAG_TIMEOUT, timeout, NULL);
+        err = hal_sem_acquire_etc( &e->blocking_sem, 1, SEM_FLAG_TIMEOUT, timeout );
     else
 #endif
         err = sem_acquire(e->blocking_sem);

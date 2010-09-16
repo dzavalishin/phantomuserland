@@ -18,6 +18,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <phantom_libc.h>
 
 #include <threads.h>
 #include <event.h>

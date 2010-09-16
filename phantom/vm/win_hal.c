@@ -324,9 +324,16 @@ void wire_page_for_addr( void *addr ) {}
 void unwire_page_for_addr( void *addr ) {}
 
 
-struct wtty *get_thread_ctty( struct phantom_thread *t ) { return 0; }
+struct wtty *get_thread_ctty( struct phantom_thread *t )
+{
+    return 0;
+}
 
+errno_t wtty_putc_nowait( struct wtty *wt, int ch ) 
+{ 
+    putchar(ch); 
+    return 0; 
+}
 
-errno_t  wtty_putc_nowait( struct wtty *wt, int ch ) { putchar(ch); return 0; }
 
 

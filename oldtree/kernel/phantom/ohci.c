@@ -324,6 +324,9 @@ static int ohci_create_endpoint(hc_cookie *cookie, hc_endpoint **hc_endpoint,
 
 static int ohci_destroy_endpoint(hc_cookie *cookie, hc_endpoint *hc_endpoint)
 {
+	(void) cookie;
+	(void) hc_endpoint;
+
     // XXX implement
 
     return NO_ERROR;

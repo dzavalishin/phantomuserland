@@ -18,5 +18,5 @@ phantom_thread_t *   percpu_current_thread[MAX_CPUS];
 phantom_thread_t *   percpu_idlest_thread[MAX_CPUS];
 
 // indexed by tid, val 0 = no such thread
-phantom_thread_t *phantom_kernel_threads[MAX_THREADS];
+phantom_thread_t *	phantom_kernel_threads[MAX_THREADS];
 
