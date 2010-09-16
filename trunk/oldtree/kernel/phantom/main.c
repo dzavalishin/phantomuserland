@@ -141,7 +141,7 @@ static void net_stack_init();
 
 
 
-#include "threads/thread_private.h"
+//#include "threads/thread_private.h"
 #include "i386/interrupts.h"
 
 void
@@ -317,7 +317,7 @@ int main(int argc, char **argv, char **envp)
 
     // just test
     //phantom_smp_send_broadcast_ici();
-
+init_tetris();
 
     SHOW_FLOW0( 2, "Will run phantom threads... ");
     // Virtual machine will be run now in normal mode

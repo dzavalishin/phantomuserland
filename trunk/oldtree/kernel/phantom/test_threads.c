@@ -21,7 +21,8 @@
 #include <errno.h>
 #include "test.h"
 
-#include "threads/thread_private.h"
+//#include "threads/thread_private.h"
+#include <threads.h>
 #include <hal.h>
 #include <kernel/timedcall.h>
 
@@ -343,10 +344,10 @@ static void echo(  void *_a )
     printf("Echo: '%s'\n", _a);
 }
 
-static timedcall_t     t1 = { echo, "hello 5", 5 };
-static timedcall_t     t2 = { echo, "hello 100", 100 };
-static timedcall_t     t3 = { echo, "hello 2000", 2000 };
-static timedcall_t     t4 = { echo, "hello 10 000", 10000 };
+static timedcall_t     t1 = { echo, "hello 5", 		5,		0 };
+static timedcall_t     t2 = { echo, "hello 100", 	100,	0 };
+static timedcall_t     t3 = { echo, "hello 2000", 	2000,	0 };
+static timedcall_t     t4 = { echo, "hello 10 000", 10000,	0 };
 
 static char *msg = "timed func 5000";
 

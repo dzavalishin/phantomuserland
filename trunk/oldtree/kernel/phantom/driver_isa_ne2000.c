@@ -265,6 +265,8 @@ static void ne_interrupt( void *_dev )
     phantom_device_t * dev = _dev;
     struct ne *pvt = dev->drv_private;
 
+    (void) pvt;
+
     int status = inb( eth_nic_base+D8390_P0_ISR );
 
     // ack all

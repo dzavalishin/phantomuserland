@@ -1741,6 +1741,7 @@ void wire_page( vm_page *p )
         hal_mutex_unlock(&p->lock);
         */
         volatile int val = *((char *)p->virt_addr); // Just touch it
+        (void) val;
     }
 }
 

@@ -55,37 +55,36 @@ entry.o: crtn.o
 START_O_FILE=entry.o
 
 phantom: $(START_O_FILE) \
+	tetris.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
-        test_amap.o test_port.o \
-	events.o smp.o \
-       	heap/heap.o heap/heap_pool.o heap/secondaries.o boot_cmd_line.o \
-       	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
-       	ohci.o uhci.o uhci_rh.o uhci_util.o \
-        traps.o amap.o i386/pic.o hal_physmem.o physalloc.o \
-       	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
-       	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
-       	time.o console.o timedcall.o driver_pci_rtl8139.o dev/keyboard.o \
-        paging_device.o dpc.o spinlock.o hal.o fsck.o \
-        console_win.o vm_threads.o snap_sync.o ps2.o \
-       	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o video_drv_cirrus.o \
-        video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_bios_vesa.o \
-        video_drv_basic_vga.o video_drv_basic_vga_tables.o video.o \
-       	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
-       	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
-        device.o driver_isa_ne2000.o \
-       	driver_pci_pcnet32.o syslog.o driver_pci_intel82559.o \
-        driver_pci_intel_etc.o \
-       	symtab.o unix/dir.o \
-       	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
-        unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
-        unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fat32.o \
-        unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
+	test_amap.o test_port.o events.o smp.o \
+	heap/heap.o heap/heap_pool.o heap/secondaries.o boot_cmd_line.o \
+	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
+	ohci.o uhci.o uhci_rh.o uhci_util.o \
+	traps.o amap.o i386/pic.o hal_physmem.o physalloc.o \
+	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
+	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
+	time.o console.o timedcall.o driver_pci_rtl8139.o dev/keyboard.o \
+	paging_device.o dpc.o spinlock.o hal.o fsck.o \
+	console_win.o vm_threads.o snap_sync.o ps2.o \
+	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o video_drv_cirrus.o \
+	video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_bios_vesa.o \
+	video_drv_basic_vga.o video_drv_basic_vga_tables.o video.o \
+	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
+	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
+	device.o driver_isa_ne2000.o \
+	driver_pci_pcnet32.o syslog.o driver_pci_intel82559.o \
+	driver_pci_intel_etc.o symtab.o unix/dir.o \
+	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
+	unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
+	unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fat32.o \
+	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
-        unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
-        fs_map.o \
-        svn_version.o $(PLIBDIR)/libdev.a \
-       	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
-       	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(TH_LIB)
+	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
+	fs_map.o \
+	svn_version.o $(PLIBDIR)/libdev.a \
+	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
+	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(TH_LIB)
 
 	@echo "Linking $@ ---------------------------------------------"
 	@$(LD) $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \

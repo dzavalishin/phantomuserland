@@ -20,6 +20,7 @@
 #include <queue.h>
 #include <hal.h>
 #include <wtty.h>
+#include <threads.h>
 
 #include <kernel/smp.h>
 
@@ -125,7 +126,7 @@ struct phantom_thread
 };
 
 
-
+/*
 #define THREAD_FLAG_USER        0x0001 // runs in user mode - not imlp
 #define THREAD_FLAG_VM          0x0002 // runs virtual machine thread, owner points to phantom thread object??? GC??!
 #define THREAD_FLAG_JIT         0x0004 // JITted VM tread - not imlp
@@ -139,9 +140,9 @@ struct phantom_thread
 #define THREAD_FLAG_TIMEDOUT    0x0100 // Cond (or something else) was timed out
 #define THREAD_FLAG_UNDEAD      0x0200 // This thread can't be killed for some reason. Usually it's some special one like CPU idle thread.
 #define THREAD_FLAG_NOSCHEDULE  0x0400 // Must not be selected by scheduler in usual way - per CPU 'parking' (idlest) thread
+*/
 
-
-#define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)
+//#define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)
 
 
 #define THREAD_SLEEP_USER       0x0001 // just paused by user's call - must be unpaused manually
@@ -155,7 +156,7 @@ struct phantom_thread
 #define THREAD_SLEEP_ZOMBIE    	0x0100 // Waits for synchronous IO to complete
 
 
-
+/*
 #define THREAD_PRIO_NORM        0x7
 #define THREAD_PRIO_LOWEST      0x1
 #define THREAD_PRIO_LOW         0x2
@@ -166,9 +167,9 @@ struct phantom_thread
 
 // Or with prio to get realtime thread
 #define THREAD_PRIO_MOD_REALTIME     0x10
+*/
 
-
-typedef struct phantom_thread phantom_thread_t;
+//typedef struct phantom_thread phantom_thread_t;
 
 
 /**
@@ -206,18 +207,9 @@ void phantom_switch_context(
 
 
 
-extern phantom_thread_t *   percpu_current_thread[];
 
-//#define GET_CURRENT_THREAD() percpu_current_thread[0]
-#define GET_CURRENT_THREAD() get_current_thread()
 #define SET_CURRENT_THREAD(t) ({ percpu_current_thread[GET_CPU_ID()] = (t); (void)0;})
  
-static inline phantom_thread_t * get_current_thread(void)
-{
-    static phantom_thread_t dummy[MAX_CPUS];
-    int ncpu = GET_CPU_ID();
-    return percpu_current_thread[ncpu] ? percpu_current_thread[ncpu] : dummy + ncpu;
-}
 
 
 extern phantom_thread_t *   percpu_idlest_thread[];
@@ -226,14 +218,11 @@ extern phantom_thread_t *   percpu_idlest_thread[];
 
 
 
+
+
 extern phantom_thread_t *phantom_kernel_threads[];
 
-static inline phantom_thread_t * get_thread(int tid)
-{
-    assert(tid >=0 && tid <= MAX_THREADS);
-    assert(phantom_kernel_threads[tid] != 0);
-    return phantom_kernel_threads[tid];
-}
+
 
 extern hal_spinlock_t schedlock;
 
@@ -295,7 +284,6 @@ void phantom_thread_init_killer(void);
 extern int     t_thread_kill_request;
 void t_do_some_kills(void);
 
-errno_t t_kill_thread( int tid );
 
 
 // ----------------------------------------------------------------
@@ -416,8 +404,8 @@ void dump_thread_stacks(void);
 
 // ToDO move to more adequate header
 
-void hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ));
-void hal_set_thread_name(const char *name);
+//void hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ));
+//void hal_set_thread_name(const char *name);
 
 void phantom_dump_threads_buf(char *buf, int len);
 
@@ -452,6 +440,15 @@ struct phantom_sem_impl
 };
 
 
+
+/*
+#if USE_NEW_SEMAS
+struct hal_sem
+{
+    struct phantom_sem_impl     *impl;
+};
+#endif // USE_NEW_SEMAS
+*/
 
 #endif // THREAD_PRIVATE_H
 

@@ -75,6 +75,8 @@ static int seq_number = 0;
 
 phantom_device_t * driver_pcnet_pchome_probe( pci_cfg_t *pci, int stage )
 {
+	(void) stage;
+
     pcnet32 *nic = NULL;
 
     printf( DEV_NAME " probe\n");

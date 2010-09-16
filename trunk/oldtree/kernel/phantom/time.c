@@ -188,7 +188,7 @@ time_t uptime(void)
 }
 
 
-struct tm tm_a = { 60 }; // Make sure time will be read ASAP
+struct tm tm_a = { 60, 0, 0, 0, 0, 0 }; // Make sure time will be read ASAP
 struct tm tm_b;
 struct tm *current_time = &tm_a;
 

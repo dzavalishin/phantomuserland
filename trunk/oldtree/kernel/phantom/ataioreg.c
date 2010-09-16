@@ -2039,7 +2039,7 @@ int reg_packet( int dev,
       // Data transfer loop...
       // and check protocol failures...
 
-      if ( byteCnt > dpbc )
+      if ( ((long)byteCnt) > dpbc )
          reg_cmd_info.failbits |= FAILBIT6;
       reg_cmd_info.failbits |= prevFailBit7;
       prevFailBit7 = 0;
@@ -2052,7 +2052,7 @@ int reg_packet( int dev,
 
       if ( reg_drq_block_call_back )
       {
-         if ( byteCnt > reg_buffer_size )
+         if ( ((long)byteCnt) > reg_buffer_size )
          {
             reg_cmd_info.ec = 61;
             trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
@@ -2064,7 +2064,7 @@ int reg_packet( int dev,
       }
       else
       {
-         if ( ( reg_cmd_info.totalBytesXfer + byteCnt ) > reg_buffer_size )
+         if ( ((long)( reg_cmd_info.totalBytesXfer + byteCnt )) > reg_buffer_size )
          {
             reg_cmd_info.ec = 61;
             trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );

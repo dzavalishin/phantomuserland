@@ -16,6 +16,22 @@
 #include <phantom_libc.h>
 
 
+phantom_thread_t * get_current_thread(void)
+{
+    static phantom_thread_t dummy[MAX_CPUS];
+    int ncpu = GET_CPU_ID();
+    return percpu_current_thread[ncpu] ? percpu_current_thread[ncpu] : dummy + ncpu;
+}
+
+
+phantom_thread_t * get_thread(int tid)
+{
+    assert(tid >=0 && tid <= MAX_THREADS);
+    assert(phantom_kernel_threads[tid] != 0);
+    return phantom_kernel_threads[tid];
+}
+
+
 /**
  *
  * Set given thread's priority.

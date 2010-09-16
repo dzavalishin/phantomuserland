@@ -1,7 +1,9 @@
 #include "disk_q.h"
 #include <malloc.h>
 
-#include <threads/thread_private.h>
+// really needs private - thread_unblock!
+#include "threads/thread_private.h"
+//#include <threads.h>
 
 
 #if IO_RQ_SLEEP
@@ -173,7 +175,6 @@ phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *
 
 /*
 #if IO_RQ_SLEEP
-#include "threads/thread_private.h"
 
 static void awake(int tid)
 {

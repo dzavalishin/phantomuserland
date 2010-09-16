@@ -130,6 +130,9 @@ void    drv_video_window_fill( drv_video_window_t *win, rgba_t color );
 
 void 	drv_video_window_fill_rect( drv_video_window_t *win, rgba_t color, rect_t r );
 
+void	drv_video_window_pixel( drv_video_window_t *w, int x, int y, rgba_t color );
+
+
 void    drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp );
 
 

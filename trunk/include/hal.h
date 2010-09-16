@@ -246,7 +246,6 @@ void 					hal_sem_destroy( hal_sem_t *s );
 #define SEM_FLAG_TIMEOUT 2
 #define SEM_FLAG_INTERRUPTABLE 4
 
-// TODO ERR seems to be nonworking :(
 int 					hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec );
 
 
