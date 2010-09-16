@@ -54,6 +54,20 @@ drv_video_window_fill_rect( drv_video_window_t *w, rgba_t color, rect_t r )
     }
 }
 
+void
+drv_video_window_pixel( drv_video_window_t *w, int x, int y, rgba_t color )
+{
+    rect_t r;
+    r.x = x;
+    r.y = y;
+    r.xsize = r.ysize = 1;
+
+    if( rect_win_bounds( &r, w ) )
+        return;
+
+    rgba_t *dst = w->pixel + y*w->xsize + x;
+    *dst = color;
+}
 
 void
 drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
