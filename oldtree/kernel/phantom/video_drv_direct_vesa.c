@@ -1,3 +1,20 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Protected mode VESA driver, incomplete, untested.
+ *
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "video"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include "hal.h"
 #include "video.h"
 
@@ -73,7 +90,7 @@ static int direct_vesa_probe()
     hal_pages_control( ROM_pa, ROM_va, ROM_pages, page_map, page_ro );
 
     char *p = ROM_va;
-    printf("Look for VESA PM entry starting at 0x%X\n", p);
+    SHOW_FLOW( 0, "Look for VESA PM entry starting at 0x%X", p);
 
     char *entry = 0;
     int cnt = ROM_size;
@@ -83,7 +100,7 @@ static int direct_vesa_probe()
            p[0] == 'P' && p[1] == 'M' &&
            p[2] == 'I' && p[3] == 'D' )
         {
-            printf("Found VESA PM entry at 0x%X\n", p);
+            SHOW_FLOW( 0, "Found VESA PM entry at 0x%X", p);
             entry = p;
             break;
         }
@@ -91,7 +108,7 @@ static int direct_vesa_probe()
     }
 
     if(entry == NULL)
-        printf("no VESA PM entry");
+        SHOW_FLOW0( 0, "no VESA PM entry");
     else
     {
         //struct pm_vesa_header hdr = *((struct pm_vesa_header *)entry);
@@ -105,11 +122,11 @@ static int direct_vesa_probe()
             csum += *entry++;
 
         if(csum)
-            printf("VESA PM entry checksum is wrong");
+            SHOW_ERROR0( 0, "VESA PM entry checksum is wrong");
         else
         {
 #if 0
-            printf("gettig VESA PM BIOS copy");
+            SHOW_FLOW0( 1, "gettig VESA PM BIOS copy");
             load_pm_vesa( ROM_va, ROM_size, hdr_offset );
 #endif
         }
@@ -256,4 +273,5 @@ errno_t call_16bit_code( u_int16_t cs, u_int16_t ss, u_int16_t entry, struct tra
     // return to old stack
     // store regs
 
+    return ENXIO;
 }

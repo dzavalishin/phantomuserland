@@ -230,10 +230,19 @@ phantom_parse_cmd_line()
 int debug_max_level_flow  = 255;
 int debug_max_level_info  = 255;
 int debug_max_level_error = 255;
-int debug_boot_pause = 0;
 
+int debug_boot_pause = 0;
+int bootflag_no_vesa = 0;
 
 char *syslog_dest_address_string = 0;
+
+
+#define ISARG(__aname,__flag) do { \
+    if( !strcmp( arg, __aname ) ) \
+    { \
+        __flag = 1; \
+    	return 1;\
+    } } while(0)
 
 
 static int stringarg( const char *arg )
@@ -244,11 +253,15 @@ static int stringarg( const char *arg )
 
     SHOW_INFO( 0, "arg = %s", arg );
 
+    ISARG("pause", debug_boot_pause );
+    ISARG("novesa", bootflag_no_vesa );
+
+    /*
     if( !strcmp( arg, "pause" ) )
     {
         debug_boot_pause = 1;
         return 1;
-    }
+    }*/
 
 
     return 0;

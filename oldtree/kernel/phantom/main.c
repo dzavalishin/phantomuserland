@@ -269,7 +269,7 @@ int main(int argc, char **argv, char **envp)
     //pressEnter("will init vm86");
     phantom_init_vm86();
     //pressEnter("will init VESA");
-    phantom_init_vesa();
+    if(!bootflag_no_vesa) phantom_init_vesa();
     //pressEnter("will init graphics");
     phantom_start_video_driver();
 

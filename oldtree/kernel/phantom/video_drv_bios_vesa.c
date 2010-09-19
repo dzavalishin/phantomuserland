@@ -1,6 +1,21 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Real mode (bios) VESA driver.
+ *
+ * Most of this driver is in i386/vesa.c
+ *
+**/
+
+
 #define DEBUG_MSG_PREFIX "video"
-#include "debug_ext.h"
-static int debug_level_flow = 1;
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include "hal.h"
 #include "video.h"

@@ -1,3 +1,21 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Protected mode BOCHS virtual video card driver.
+ *
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "video"
+#include "debug_ext.h"
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include "hal.h"
 #include <kernel/vm.h>
 #include <x86/phantom_pmap.h>
@@ -95,6 +113,8 @@ static int bochs_video_probe()
     if( hal_alloc_vaddress((void **)&video_driver_bochs_vesa_emulator.screen, n_pages) )
         panic("Can't alloc vaddress for %d videmem pages", n_pages);
 
+    SHOW_FLOW( 7, "vmem va 0x%X", video_driver_bochs_vesa_emulator.screen);
+
 
     printf("Bochs VBE emulator ver 0x%x found\n", id);
     return 1;
@@ -109,7 +129,7 @@ static int bochs_video_probe()
 static void bochs_map_video(int on_off)
 {
 #if 1
-    assert( video_driver_bios_vesa.screen != 0 );
+    assert( video_driver_bochs_vesa_emulator.screen != 0 );
 
     hal_pages_control_etc(
                           VBE_DISPI_LFB_PHYSICAL_ADDRESS,
@@ -145,6 +165,17 @@ static int bochs_video_stop()
     video_drv_basic_vga_set_text_mode();
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 #if 0
 void test_vesa_emu()
