@@ -11,7 +11,6 @@
 #include "hal.h"
 //---------------------------------------------------------------------------
 
-void page_device_io_final_callback(void);
 
 
 
@@ -28,7 +27,7 @@ optimize head movement better */
 /* TODO: need queue management class here */
 
 
-    void 			pager_stop_io(); // called after io is complete
+    //void 			pager_stop_io(); // called after io is complete
     void 			pager_free_io_resources(pager_io_request *req);
 
     void                        pager_get_superblock(void);
@@ -68,7 +67,7 @@ optimize head movement better */
     void                pager_raise_request_priority(pager_io_request *p);
     int                 pager_dequeue_from_pageout(pager_io_request *p);
 
-    void                pager_io_done(void);
+    //void                pager_io_done(void);
 
     long                pager_object_space_address(void);
 

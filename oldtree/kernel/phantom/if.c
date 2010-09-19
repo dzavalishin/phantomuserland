@@ -287,7 +287,7 @@ static void if_tx_thread(void *args)
 
             cbuf_free_chain(buf);
 
-#if 1||NET_CHATTY
+#if 0||NET_CHATTY
             dprintf("if_tx_thread: sending packet size %ld\n", (long)len);
 #endif
             //sys_write(i->fd, i->tx_buf, 0, len);
@@ -313,7 +313,7 @@ static void if_rx_thread(void *args)
         //len = sys_read(i->fd, i->rx_buf, 0, sizeof(i->rx_buf));
         len = i->dev->dops.read(i->dev, i->rx_buf, sizeof(i->rx_buf));
 
-#if 1||NET_CHATTY
+#if 0||NET_CHATTY
         dprintf("if_rx_thread: got ethernet packet, size %ld\n", (long)len);
 #endif
         if(len < 0) {

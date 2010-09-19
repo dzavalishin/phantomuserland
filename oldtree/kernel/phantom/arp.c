@@ -24,7 +24,7 @@
 
 
 
-#define NET_CHATTY 1
+//#define NET_CHATTY 1
 
 
 

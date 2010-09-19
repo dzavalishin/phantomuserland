@@ -57,7 +57,9 @@ static pci_probe_t pci_drivers[] =
     { "USB OHCI",       driver_ohci_probe, 		3, 0, 0, OHCI_BASE_CLASS },
 #endif
 
+#if COMPILE_UHCI
     { "USB UHCI",       driver_uhci_probe, 		3, 0, 0, UHCI_BASE_CLASS },
+#endif
 
     // Chipset drivers, etc
 

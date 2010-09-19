@@ -723,7 +723,7 @@ ssize_t pcnet32_rx(pcnet32 *nic, char *buf, ssize_t buf_len)
         // consume 1 descriptor at a time, whether it's an error or a
         // valid packet.
         hal_sem_acquire( &(nic->rxring_sem) );
-        if(1||DEBUG) printf( DEV_NAME "nic %p rx semaphore was signalled\n", nic);
+        if(NET_CHATTY||DEBUG) printf( DEV_NAME "nic %p rx semaphore was signalled\n", nic);
 
         // the semaphor has been released at least once, so we will
         // lock the rxring and grab the next available descriptor.
@@ -927,7 +927,7 @@ static int pcnet32_get_address( struct phantom_device *dev, void *buf, int len)
 
     if(!nic)        return ERR_IO_ERROR;
 
-    if(len >= sizeof(nic->mac_addr)) {
+    if(len >= (int)sizeof(nic->mac_addr)) {
         memcpy(buf, nic->mac_addr, sizeof(nic->mac_addr));
     } else {
         err = ERR_VFS_INSUFFICIENT_BUF;

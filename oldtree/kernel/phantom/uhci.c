@@ -1,3 +1,5 @@
+#include "config.h"
+#if COMPILE_UHCI
 
 #define DEBUG_MSG_PREFIX "uhci"
 #include "debug_ext.h"
@@ -2666,4 +2668,7 @@ UHCI::ReadReg32(uint32 reg)
 
 
 #endif
+
+
+#endif // COMPILE_UHCI
 
