@@ -34,6 +34,7 @@ Kernel startup args are:
 -f=max_flow_level (0-255)
 -s=syslog_dest_ip_addr
 --pause - enables pause on pressEnter func call - for early kernel startup debug
+--novesa - skip BIOS (realmode interrupt) VESA init, used to test native graphics drivers
 }}}
 
 Module named 'classes' (just this name) is needed during the first boot only and passes basic class set for empty OS to initialize itself. Note that these classes are not embedded into the OS state automatically - they must be explicitly requested by class loader during first run, see below.
