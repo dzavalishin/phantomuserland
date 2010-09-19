@@ -26,7 +26,7 @@ rem SET DEBUG=
 
 rem SET Q_VGA=-vga std
 SET Q_VGA=-vga cirrus
-rem SET Q_VGA=-vga vmware
+SET Q_VGA=-vga vmware
 rem -virtioconsole 4
 
 rem rm serial0.log.old

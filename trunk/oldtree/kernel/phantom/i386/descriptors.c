@@ -53,7 +53,8 @@ struct i386_tss	       	cpu_tss[MAX_CPUS];
 struct vm86tss		tss_vm86;
 
 
-static void set_descriptor_limit( struct real_descriptor *d, unsigned limit )
+// used from direct VESA driver
+void set_descriptor_limit( struct real_descriptor *d, unsigned limit )
 {
     if (limit > 0xfffff)
     {

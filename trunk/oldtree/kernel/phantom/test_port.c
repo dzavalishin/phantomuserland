@@ -37,8 +37,8 @@ static void port_test_thread_func(void* arg)
 
     int msg_code;
     int n;
-    char buf[6];
-    buf[5] = "----";
+    char buf[6] = "-----";
+    //buf[5] = "----";
 
     static const char *expected = "abcd";
 

@@ -13,6 +13,7 @@
 
 extern struct multiboot_info bootParameters;
 
+extern int debug_boot_pause;
 
 
 

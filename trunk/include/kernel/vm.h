@@ -11,10 +11,11 @@
 #define lintokv(la)	((void *)(la))
 #define kvtolin(va)	((u_int32_t)(va))
 
+#endif
+
 #define phystokv(pa)	((void *)(pa))
 #define kvtophys(va)	((physaddr_t)(va))
 
-#endif
 
 void wire_page_for_addr( void *addr );
 void unwire_page_for_addr( void *addr );

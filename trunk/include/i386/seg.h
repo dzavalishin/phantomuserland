@@ -181,7 +181,7 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
 //#define	LDTSZ		4
 
 /*
- * Kernel descriptors for MACH - 32-bit flat address space.
+ * Kernel descriptors for Phantom - 32-bit flat address space.
  */
 #define MAIN_TSS	0x08
 
@@ -201,9 +201,18 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
 
 #define CPU_TSS		0x50
 
+#define	VBE3_CS_16	0x60		// VESA PM entry code
+#define	VBE3_DS_16	0x68		// VESA PM entry code as data
+#define	VBE3_BD_16	0x70		// VESA PM Bios Data Area replacement seg
+#define	VBE3_A0_16	0x78		// VESA PM A0000
+#define	VBE3_B0_16	0x80		// VESA PM B0000
+#define	VBE3_B8_16	0x88		// VESA PM B8000
+#define	VBE3_ST_16	0x90		// VESA PM stack
+#define	VBE3_DB_16	0x98		// VESA PM data buffer
+
 
 // ten more for any case
-#define	GDTSZ		(10+10+MAX_CPUS)
+#define	GDTSZ		(20+10+MAX_CPUS)
 
 
 /*

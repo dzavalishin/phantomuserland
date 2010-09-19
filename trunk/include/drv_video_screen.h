@@ -35,6 +35,8 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
 int video_zbuf_check( int linpos, u_int8_t zpos );
 
 
+//! Switch video bitblt functions, used to read/write videomem, to 32 bit mode. Default is 24 bit mode.
+void switch_screen_bitblt_to_32bpp(void);
 
 
 
@@ -256,6 +258,8 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
 
 void rgba2rgb_move( struct rgb_t *dest, const rgba_t *src, int nelem );
 void rgba2rgba_move( rgba_t *dest, const rgba_t *src, int nelem );
+void rgba2rgba_24_move( struct rgba_t *dest, const struct rgba_t *src, int nelem ); //! copies 24 bits, sets alpha byte to FF
+
 void rgb2rgba_move( rgba_t *dest, const struct rgb_t *src, int nelem );
 void int565_to_rgba_move( rgba_t *dest, const short int *src, int nelem );
 

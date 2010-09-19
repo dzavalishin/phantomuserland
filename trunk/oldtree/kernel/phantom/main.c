@@ -78,11 +78,16 @@
 
 
 
-static void pressEnter(char *text)
+void pressEnter(char *text)
 {
-    printf("%s\npress Enter...\n...", text);
-    while( getchar() >= ' ' )
-        ;
+    printf("%s\n", text);
+
+    if(debug_boot_pause)
+    {
+        printf("press Enter...\n...");
+        while( getchar() >= ' ' )
+            ;
+    }
 }
 
 //static void pause() { pressEnter("pause"); printf("\n"); }
@@ -117,7 +122,7 @@ void start_phantom()
 static void
 stop_phantom()
 {
-    pressEnter("finishing vm");
+    //pressEnter("finishing vm");
     vm_map_finish();
     vm_map_wait_for_finish();
 
@@ -213,6 +218,7 @@ int main(int argc, char **argv, char **envp)
     phantom_timer_pit_init(100,0);
     phantom_timed_call_init(); // Too late? Move up?
 
+
     //phantom_init_apic();
 
     // Stage is:
@@ -252,17 +258,23 @@ int main(int argc, char **argv, char **envp)
     hal_init_physmem_alloc_thread();
 
     port_init();
+    //pressEnter("will start net");
     net_stack_init();
 
+    //pressEnter("will look for drv stage 1");
     phantom_pci_find_drivers( 1 );
 
     init_main_event_q();
 
+    //pressEnter("will init vm86");
     phantom_init_vm86();
+    //pressEnter("will init VESA");
     phantom_init_vesa();
+    //pressEnter("will init graphics");
     phantom_start_video_driver();
 
 
+    //pressEnter("will look for drv stage 2");
     phantom_pci_find_drivers( 2 );
 
 #if HAVE_UNIX
@@ -319,11 +331,13 @@ int main(int argc, char **argv, char **envp)
     //phantom_smp_send_broadcast_ici();
 init_tetris();
 
+    //pressEnter("will run vm threads");
     SHOW_FLOW0( 2, "Will run phantom threads... ");
     // Virtual machine will be run now in normal mode
     activate_all_threads();
     vm_enable_regular_snaps();
 
+    //pressEnter("will look for drv stage 4");
     phantom_pci_find_drivers( 4 );
 
 trfs_testrq();
@@ -336,11 +350,11 @@ trfs_testrq();
 
     phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
 
-    pressEnter("will do a snap");
+    //pressEnter("will do a snap");
 
     stop_phantom();
 
-    pressEnter("will reboot");
+    //pressEnter("will reboot");
 
     return 0;
 }
