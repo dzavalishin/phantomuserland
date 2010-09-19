@@ -39,6 +39,8 @@ static hal_mutex_t              pager_freelist_mutex;
 
 
 
+static void                	pager_io_done(void);
+static void 			page_device_io_final_callback(void);
 
 
 
@@ -96,7 +98,7 @@ __debug_set_pager_q_bp()
 
 // called when io is done on page device
 /* TODO: must be called in DPC context! */
-void page_device_io_final_callback()
+static void page_device_io_final_callback()
 {
     pager_io_done();
 };
@@ -115,9 +117,6 @@ pager_can_grow() // can I grow pagespace
 }
 
 
-void
-pager_io_done()
-{ pager_stop_io(); }
 
 
 phantom_disk_superblock *
@@ -268,7 +267,7 @@ void pager_start_io() // called to start new io
 
 
 
-void pager_stop_io() // called after io is complete
+static void pager_io_done() // called after io is complete
 {
     //hal_printf("pager_stop_io... ");
     hal_mutex_lock(&pager_mutex);

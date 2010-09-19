@@ -20,6 +20,7 @@
 #include <video/font.h>
 #include <video/color.h>
 
+#include <event.h>
 
 #define VIDEO_ZBUF 1
 
@@ -90,7 +91,7 @@ typedef struct drv_video_window
      * window event queue. Supposed to process event or trigger waiting
      * thread to do that.
      */
-    void                (*inKernelEventProcess)( struct drv_video_window *w );
+    void                (*inKernelEventProcess)( struct drv_video_window *w, struct ui_event *e );
     struct phantom_thread *owner;
 
     // bitmap itself

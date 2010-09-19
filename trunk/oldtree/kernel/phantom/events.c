@@ -446,8 +446,20 @@ ret:
     if(later_gain) event_q_put_win( later_x, later_y, UI_EVENT_WIN_GOT_FOCUS, later_gain );
 
 
+    // Has no own event process thread, serve from here
     if(w != 0 && w->inKernelEventProcess)
-        w->inKernelEventProcess(w);
+    {
+        while(1)
+        {
+            struct ui_event e;
+            int got = drv_video_window_get_event( w, &e, 0 );
+
+            if(!got)
+                break;
+
+            w->inKernelEventProcess(w, &e);
+        }
+    }
 
 }
 

@@ -100,21 +100,22 @@ static void defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e 
     }
 }
 
-void defaultWindowEventProcessor( drv_video_window_t *w )
+void defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
+	/*
     struct ui_event e;
     int got = drv_video_window_get_event( w, &e, 0 );
 
     if(!got)
         return;
-
-    switch(e.type)
+	*/
+    switch(e->type)
     {
-    case UI_EVENT_TYPE_MOUSE: 	defaultMouseEventProcessor(w, &e); break;
+    case UI_EVENT_TYPE_MOUSE: 	defaultMouseEventProcessor(w, e); break;
 #if KEY_EVENTS
-    case UI_EVENT_TYPE_KEY:     defaultKeyEventProcessor(w, &e); break;
+    case UI_EVENT_TYPE_KEY:     defaultKeyEventProcessor(w, e); break;
 #endif
-    case UI_EVENT_TYPE_WIN:     defaultWinEventProcessor(w, &e); break;
+    case UI_EVENT_TYPE_WIN:     defaultWinEventProcessor(w, e); break;
     }
 }
 

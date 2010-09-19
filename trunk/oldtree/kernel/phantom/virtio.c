@@ -37,10 +37,10 @@ static void vio_irq_handler( void *arg )
 
     u_int8_t isr = inb( vd->basereg + VIRTIO_PCI_ISR );
 
-    SHOW_FLOW( 1, " !_INT_! %s ! ", vd->name );
-
     if(isr == 0)
         return; // Not ours
+
+    SHOW_FLOW( 1, " !_INT_! %s ! ", vd->name );
 
     // TODO?
     //if (isr & VIRTIO_PCI_ISR_CONFIG) {

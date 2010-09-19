@@ -5,7 +5,7 @@
 #ifndef _NEWOS_NET_H
 #define _NEWOS_NET_H
 
-#define NET_CHATTY 1
+#include <config.h>
 
 
 #include <errno.h>
