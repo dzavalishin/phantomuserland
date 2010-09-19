@@ -5,29 +5,42 @@
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel ready: yes
- * Preliminary: yes (needs cleanup and, possibly, data structures modifiation)
  *
  *
- **/
+**/
 
 #include "drv_video_screen.h"
 #include <assert.h>
+#include <sys/types.h>
 
 
-//void rgba2rgb_move( struct rgb_t *dest, const struct rgba_t *src, int nelem );
-//void rgba2rgba_move( struct rgba_t *dest, const struct rgba_t *src, int nelem );
-//void rgb2rgba_move( struct rgba_t *dest, const struct rgb_t *src, int nelem );
-
-// Now find pointer to the line on screen. As addresses go from left to right in
+// Find pointer to the line on screen. As addresses go from left to right in
 // both screen and sys coords, this is the only strange calculation here.
 
 // Zeroth line will have index of (scr y size - 1), right?
 
-#define DRV_VIDEO_REVERSE_LINESTART(ypos) (  ( video_drv->xsize * ((video_drv->ysize -1) - ypos) )*3 + video_drv->screen)
+#define DRV_VIDEO_REVERSE_LINESTART(ypos) ( (video_drv->xsize * ((video_drv->ysize -1) - ypos) ) * bit_mover_byte_step + video_drv->screen)
 
 
-#define DRV_VIDEO_FORWARD_LINESTART(ypos) ((video_drv->xsize * ypos)*3 + video_drv->screen)
+#define DRV_VIDEO_FORWARD_LINESTART(ypos) ( (video_drv->xsize * ypos) * bit_mover_byte_step + video_drv->screen)
 
+
+// movers. default to 24bpp
+// void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
+static void (*bit_zbmover_to_screen)( void *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos ) = (void *)rgba2rgb_zbmove;
+static void (*bit_mover_to_screen)( void *dest, const struct rgba_t *src, int nelem ) = (void *)rgba2rgb_move;
+static void (*bit_mover_from_screen)( struct rgba_t *dest, void *src, int nelem ) = (void *)rgb2rgba_move;
+static int      bit_mover_byte_step = 3;
+
+
+void switch_screen_bitblt_to_32bpp(void)
+{
+    bit_zbmover_to_screen = (void *)rgba2rgba_zbmove;
+    bit_mover_to_screen   = (void *)rgba2rgba_move;
+    bit_mover_from_screen = (void *)rgba2rgba_24_move;
+
+    bit_mover_byte_step = 4;
+}
 
 /**
  *
@@ -113,17 +126,17 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
         for( ; sline < yafter; sline++, wline++ )
         {
             // Screen start pos in line
-            char *s_start = DRV_VIDEO_REVERSE_LINESTART(sline) + xpos*3;
+            char *s_start = DRV_VIDEO_REVERSE_LINESTART(sline) + xpos*bit_mover_byte_step;
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
 #if VIDEO_ZBUF
             zbuf_t *zb = zbuf + ( (video_drv->xsize * ((video_drv->ysize-1) - sline)) + xpos);
             // 0xFF is a special value for mouse painting. XXX hack!
-            if(zpos == 0xFF) rgba2rgb_move( (void *)s_start, w_start, xlen );
-            else rgba2rgb_zbmove( (void *)s_start, w_start, zb, xlen, zpos );
+            if(zpos == 0xFF) bit_mover_to_screen( (void *)s_start, w_start, xlen );
+            else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xlen, zpos );
 #else
-            rgba2rgb_move( (void *)s_start, w_start, xlen );
+            bit_mover_to_screen( (void *)s_start, w_start, xlen );
 #endif
         }
     }
@@ -132,7 +145,7 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
         for( ; sline < yafter; sline++, wline++ )
         {
             // Screen start pos in line
-            char *s_start = DRV_VIDEO_FORWARD_LINESTART(sline) + xpos*3;
+            char *s_start = DRV_VIDEO_FORWARD_LINESTART(sline) + xpos*bit_mover_byte_step;
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
@@ -140,10 +153,10 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
             //zbuf_t *zb = zbuf + ((wline*xsize) + xshift);
             zbuf_t *zb = zbuf + ( (video_drv->xsize * sline) + xpos);
             // 0xFF is a special value for mouse painting. XXX hack!
-            if(zpos == 0xFF) rgba2rgb_move( (void *)s_start, w_start, xlen );
-            else rgba2rgb_zbmove( (void *)s_start, w_start, zb, xlen, zpos );
+            if(zpos == 0xFF) bit_mover_to_screen( (void *)s_start, w_start, xlen );
+            else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xlen, zpos );
 #else
-            rgba2rgb_move( (void *)s_start, w_start, xlen );
+            bit_mover_to_screen( (void *)s_start, w_start, xlen );
 #endif
         }
     }
@@ -232,12 +245,12 @@ void drv_video_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, i
         for( ; sline < yafter; sline++, wline++ )
         {
             // Screen start pos in line
-            char *s_start = DRV_VIDEO_REVERSE_LINESTART(sline) + xpos*3;
+            char *s_start = DRV_VIDEO_REVERSE_LINESTART(sline) + xpos*bit_mover_byte_step;
             // Window start pos in line
             struct rgba_t *w_start = to + ((wline*xsize) + xshift);
 
             //rgba2rgb_move( (void *)s_start, w_start, xlen );
-            rgb2rgba_move( w_start, (const void *)s_start, xlen );
+            bit_mover_from_screen( w_start, (const void *)s_start, xlen );
         }
     }
     else
@@ -245,12 +258,12 @@ void drv_video_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, i
         for( ; sline < yafter; sline++, wline++ )
         {
             // Screen start pos in line
-            char *s_start = DRV_VIDEO_FORWARD_LINESTART(sline) + xpos*3;
+            char *s_start = DRV_VIDEO_FORWARD_LINESTART(sline) + xpos*bit_mover_byte_step;
             // Window start pos in line
             struct rgba_t *w_start = to + ((wline*xsize) + xshift);
 
             //rgba2rgb_move( (void *)s_start, w_start, xlen );
-            rgb2rgba_move( w_start, (const void *)s_start, xlen );
+            bit_mover_from_screen( w_start, (const void *)s_start, xlen );
         }
     }
 
@@ -492,6 +505,22 @@ void rgba2rgba_move( struct rgba_t *dest, const struct rgba_t *src, int nelem )
             src++;
         }
 }
+
+void rgba2rgba_24_move( struct rgba_t *dest, const struct rgba_t *src, int nelem )
+{
+    while(nelem-- > 0)
+    {
+        if(src->a)
+        {
+            u_int32_t *d = (u_int32_t *)dest;
+            u_int32_t *s= (u_int32_t *)src;
+            *d = ((*s) & 0xFFFFFFu) | 0xFF000000u;
+        }
+        dest++;
+        src++;
+    }
+}
+
 
 
 void rgba2rgba_replicate( struct rgba_t *dest, const struct rgba_t *src, int nelem )

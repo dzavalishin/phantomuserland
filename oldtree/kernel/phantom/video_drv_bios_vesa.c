@@ -106,6 +106,30 @@ static void map_video(int on_off)
                           video_driver_bios_vesa.screen,
                           n_pages, on_off ? page_map : page_unmap, page_rw,
                           INTEL_PTE_WTHRU|INTEL_PTE_NCACHE );
+
+
+#if 0
+    u_int32_t *p = (void *)video_driver_bios_vesa.screen;
+    const int rep = 10240;
+    int i;
+
+    for( i = rep; i >=0; i-- )
+        *p++ = 0xFF0000FF;
+    for( i = rep; i >=0; i-- )
+        *p++ = 0xFF00FF00;
+    for( i = rep; i >=0; i-- )
+        *p++ = 0xFFFF0000;
+    for( i = rep; i >=0; i-- )
+        *p++ = 0xFF000000;
+
+
+    struct rgba_t buf[rep*4];
+
+    rgba2rgba_move( buf, (void *)video_driver_bios_vesa.screen, rep*4 );
+    rgba2rgba_24_move( (void *)p, buf, rep*4 );
+
+    pressEnter("video");
+#endif
 }
 
 

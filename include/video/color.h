@@ -1,12 +1,13 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <sys/cdefs.h>
 
 // Windows 'screen' driver works in BGR format :(
 #define BGR 1
 
 
-typedef struct rgb_t
+struct rgb_t
 {
 #if BGR
     unsigned char       b;
@@ -17,10 +18,12 @@ typedef struct rgb_t
     unsigned char       g;
     unsigned char       b;
 #endif
-} rgb_t;
+} __packed;
+
+typedef struct rgb_t rgb_t;
 
 
-typedef struct rgba_t
+struct rgba_t
 {
 #if BGR
     unsigned char       b;
@@ -32,8 +35,9 @@ typedef struct rgba_t
     unsigned char       b;
 #endif
     unsigned char       a;      // Alpha
-} rgba_t;
+} __packed;
 
+typedef struct rgba_t rgba_t;
 
 
 

@@ -67,6 +67,8 @@ int setVesaMode( u_int16_t mode )
 }
 
 
+#define PREFER_32BPP 1
+
 
 #define MAX_W 1024
 
@@ -86,6 +88,7 @@ void phantom_init_vesa(void)
     if( rc )
     {
         printf("failed, rc = %X\n", rc );
+//pressEnter("no VESA");
         return;
     }
     vi = &vi_buf;
@@ -102,6 +105,7 @@ void phantom_init_vesa(void)
 
     u_int16_t best_mode = -1;
     int best_width = -1;
+    int best_bpp = 24;
     struct VBEModeInfoBlock best_info;
 
     u_int16_t modes_buf[256];
@@ -150,12 +154,19 @@ void phantom_init_vesa(void)
             continue;
         }
 
+#if PREFER_32BPP
+        if( info.bits_per_pixel != 24 && info.bits_per_pixel != 32 )
+        {
+            printf("not 24 or 32 bpp\n");
+            continue;
+        }
+#else
         if( info.bits_per_pixel != 24 )
         {
             printf("not 24bpp\n");
             continue;
         }
-
+#endif
         if( info.memory_model != 6 )
         {
             printf("not direct color mem model (%d)\n", info.memory_model );
@@ -168,9 +179,23 @@ void phantom_init_vesa(void)
             continue;
         }
 
-        if( info.x_resolution > best_width && info.x_resolution <= MAX_W )
+#if PREFER_32BPP
+        if( info.bits_per_pixel < best_bpp )
+        {
+            printf("lower bpp\n");
+            continue;
+        }
+#endif
+
+        if(
+#if PREFER_32BPP
+           info.bits_per_pixel >= best_bpp &&
+#endif
+           info.x_resolution >= best_width && info.x_resolution <= MAX_W
+          )
         {
             best_width = info.x_resolution;
+            best_bpp = info.bits_per_pixel;
             best_mode = mode;
             best_info = info;
             printf("better\n");
@@ -183,6 +208,7 @@ void phantom_init_vesa(void)
     if( best_width < 0 )
     {
         printf("No suitable VESA mode found\n");
+//pressEnter("no VESA");
         return;
     }
 
@@ -194,11 +220,16 @@ void phantom_init_vesa(void)
            best_info.bits_per_pixel, best_info.phys_base_ptr
           );
 
-
+//pressEnter("will init VESA");
     video_driver_bios_vesa.xsize = best_info.x_resolution;
     video_driver_bios_vesa.ysize = best_info.y_resolution;
 
     int v_memsize = 64*1024*vi->total_memory;
+
+#if PREFER_32BPP
+    if(best_info.bits_per_pixel == 32)
+        switch_screen_bitblt_to_32bpp();
+#endif
 
     set_video_driver_bios_vesa_pa( best_info.phys_base_ptr, v_memsize );
     set_video_driver_bios_vesa_mode( best_mode | VBE_MODE_LINEAR );

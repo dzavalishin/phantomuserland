@@ -1,7 +1,8 @@
 #define DEBUG_MSG_PREFIX "boot"
 #include "debug_ext.h"
-static int debug_level_flow = 0;
-static int debug_level_error = 1;
+#define debug_level_info 10
+#define debug_level_flow 10
+#define debug_level_error 10
 
 #include <phantom_types.h>
 #include <phantom_assert.h>
@@ -50,12 +51,12 @@ phantom_parse_cmd_line()
 
     // Put defaults first
 
-    boot_argc = 0;
-    boot_argv = main_argv + 1; // Just 0
-
     main_argv = default_argv;
     main_argc = 1;
     main_env = default_env;
+
+    boot_argc = 0;
+    boot_argv = main_argv + 1; // Just 0
 
     if( ! (bootParameters.flags & MULTIBOOT_CMDLINE) )
     {
@@ -229,18 +230,37 @@ phantom_parse_cmd_line()
 int debug_max_level_flow  = 255;
 int debug_max_level_info  = 255;
 int debug_max_level_error = 255;
+int debug_boot_pause = 0;
 
 
 char *syslog_dest_address_string = 0;
 
 
+static int stringarg( const char *arg )
+{
+    if( *arg == '-' ) arg++;
+    if( *arg == '-' ) arg++;
+
+
+    SHOW_INFO( 0, "arg = %s", arg );
+
+    if( !strcmp( arg, "pause" ) )
+    {
+        debug_boot_pause = 1;
+        return 1;
+    }
+
+
+    return 0;
+}
+
 /**
  *
- * -d max_error_level (0-255)
- * -e max_error_level (0-255)
- * -i max_info_level (0-255)
- * -f max_flow_level (0-255)
- * -s syslog_dest_ip_addr
+ * -d=max_error_level (0-255)
+ * -e=max_error_level (0-255)
+ * -i=max_info_level (0-255)
+ * -f=max_flow_level (0-255)
+ * -s=syslog_dest_ip_addr
  *
 **/
 
@@ -250,10 +270,12 @@ phantom_process_boot_options(void)
     int c = boot_argc;
     const char **args = boot_argv;
 
+    SHOW_FLOW( 2, "argc = %d", c );
 
     while(c--)
     {
         const char *arg = *args++;
+        int alen = strlen( arg );
 
         if( arg == 0 )
         {
@@ -261,29 +283,38 @@ phantom_process_boot_options(void)
             continue;
         }
 
+        SHOW_INFO( 0, "arg = %s", arg );
+
+        if( stringarg( arg ) )
+            continue;
+
+
         if( *arg != '-' )
             goto error;
 
-        if( strlen( arg ) != 2 )
-            SHOW_ERROR( 0, "Warning: boot option '%s' length is not 2 chars", arg);
+        //if( strlen( arg ) != 2 )            SHOW_ERROR( 0, "Warning: boot option '%s' length is not 2 chars", arg);
 
         switch( arg[1] )
         {
         case 'd':
         case 'e':
-            debug_max_level_error = (int)atol( *args++ );
+            if(alen < 4 || arg[2] != '=') goto error;
+            debug_max_level_error = (int)atol( arg+3 );
             break;
 
         case 'f':
-            debug_max_level_flow = (int)atol( *args++ );
+            if(alen < 4 || arg[2] != '=') goto error;
+            debug_max_level_flow = (int)atol( arg+3 );
             break;
 
         case 'i':
-            debug_max_level_info = (int)atol( *args++ );
+            if(alen < 4 || arg[2] != '=') goto error;
+            debug_max_level_info = (int)atol( arg+3 );
             break;
 
         case 's':
-            syslog_dest_address_string = strdup( *args++ );
+            if(alen < 4 || arg[2] != '=') goto error;
+            syslog_dest_address_string = strdup( arg+3 );
             break;
 
         default:
