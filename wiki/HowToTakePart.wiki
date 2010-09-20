@@ -10,3 +10,10 @@
   * Take a look at CodingStyle to do it right.
 
 Very good start is to do some code review for the part you want to work on, and, possibly, to write some regression tests for it. 
+
+Some possible tasks:
+
+  * AHCI driver
+  * virtio disk/net drivers (partially done)
+  * USB HC drivers
+  * ARM port :)
