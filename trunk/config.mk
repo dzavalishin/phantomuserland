@@ -21,6 +21,7 @@ endif
 #endif
 #endif
 
+ARCH=ia32
 
 # How to compile phantom source
 
