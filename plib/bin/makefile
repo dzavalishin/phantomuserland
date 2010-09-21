@@ -17,7 +17,8 @@ ru.dz.phantom.system.regression_tests.pc ru.dz.phantom.system.runnable.pc \
 ru.dz.phantom.system.thread_test.pc phantom.util.map.pc \
 ru.dz.windows.root.pc ru.dz.phantom.backgrounds.pc ru.dz.phantom.resources.pc \
 phantom.osimpl.pc phantom.os.pc phantom.os.time.pc ru.dz.phantom.tetris.*.pc ru.dz.phantom.tetris.boot.pc \
-ru.dz.phantom.system.test*.pc 
+#ru.dz.phantom.system.test*.pc 
+
 	$(MKBULK) classes $(filter-out $(OFF) ,$^)
 #	cp classes g:/tftp/classes
 

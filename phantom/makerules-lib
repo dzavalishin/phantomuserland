@@ -16,6 +16,3 @@ $(TARGET): $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) )
 	$(AR) $(ARFLAGS)  $@ $?
 	cp $@ $(BUILD_ROOT)/lib
 
-
-
-

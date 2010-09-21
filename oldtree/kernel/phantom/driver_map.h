@@ -4,3 +4,5 @@
 
 #include <kernel/drivers.h>
 
+phantom_device_t * driver_etc_acpi_probe( const char *name, int stage );
+

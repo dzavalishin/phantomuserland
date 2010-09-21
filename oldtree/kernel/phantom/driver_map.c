@@ -146,6 +146,7 @@ typedef struct
 static etc_probe_t etc_drivers[] =
 {
     { "SMBios", 		driver_etc_smbios_probe, 	0 },
+    { "ACPI", 			driver_etc_acpi_probe, 		0 },
 
 };
 
