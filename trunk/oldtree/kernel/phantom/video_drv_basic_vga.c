@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Last resort VGA videodriver. System is nearly unusable with this.
+ * Sets 320*240 (so called 'X') mode.
+ *
+**/
+
 #include <kernel/vm.h>
 
 #include <phantom_libc.h>

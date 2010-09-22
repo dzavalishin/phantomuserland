@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Video drier search and probe code. Practically turned off
+ * if VESA is found. That's wrong.
+ *
+**/
+
 #define DEBUG_MSG_PREFIX "video"
 #include "debug_ext.h"
 static int debug_level_flow = 2;

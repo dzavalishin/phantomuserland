@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Cirrus driver, incomplete, untested.
+ *
+**/
+
 #define DEBUG_MSG_PREFIX "video"
 #include "debug_ext.h"
 static int debug_level_flow = 1;

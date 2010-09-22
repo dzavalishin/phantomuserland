@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * (C) dz@dz.ru 2004-2009
+ * (C) dz@dz.ru 2004-2010
  *
 **/
 

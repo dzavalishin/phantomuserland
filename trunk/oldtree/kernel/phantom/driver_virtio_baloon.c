@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Baloon virtio driver. Unfinished, not working.
+ *
+**/
+
 #include <phantom_libc.h>
 
 #include "i386/pci.h"

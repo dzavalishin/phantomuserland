@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Virtual machine threads handler.
+ *
+**/
+
 #include "config.h"
 
 #include <phantom_libc.h>

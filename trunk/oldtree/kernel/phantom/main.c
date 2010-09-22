@@ -2,12 +2,12 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel main
  *
  *
- **/
+**/
 
 #define DEBUG_MSG_PREFIX "boot"
 #include "debug_ext.h"

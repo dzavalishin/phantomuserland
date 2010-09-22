@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Console window - mostly debug.
+ *
+**/
+
 #include <i386/pio.h>
 #include <phantom_libc.h>
 #include <hal.h>

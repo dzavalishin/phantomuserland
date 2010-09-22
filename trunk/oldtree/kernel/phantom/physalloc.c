@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Page-level bitmap based allocator.
+ *
+**/
+
 #include <string.h>
 #include <phantom_assert.h>
 #include <malloc.h>

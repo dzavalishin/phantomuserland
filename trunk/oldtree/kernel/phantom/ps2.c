@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Quick and dirty PS2 mouse driver.
+ *
+**/
+
 #define DEBUG_MSG_PREFIX "mouse"
 #include "debug_ext.h"
 #define debug_level_flow 0
@@ -9,15 +19,19 @@
 
 #include "driver_map.h"
 #include "device.h"
-#include "hal.h"
+#include <hal.h>
 
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
 
 #include <event.h>
+#include <queue.h>
+
+//#include "dpc.h"
 
 
 #define PS2_DATA_ADDR 	0x60
 #define PS2_CTRL_ADDR 	0x64
+
 
 
 
@@ -33,6 +47,68 @@
 
 #define PS2_RES_ACK              0xFA
 #define PS2_RES_RESEND           0xFE
+
+
+#define MAX_EVENTS      64
+
+//dpc_request     mouse_dpc;
+
+static struct ui_event  ebuf[MAX_EVENTS];
+static int put_pos = 0;
+static int get_pos = 0;
+static hal_spinlock_t    elock;
+
+static hal_sem_t 	mouse_sem;
+
+static void put_buf(struct ui_event *e)
+{
+    int ie = hal_save_cli();
+    hal_spin_lock( &elock );
+
+    // Overflow - just loose it
+    if(
+       (put_pos == get_pos-1) ||
+       ((get_pos == 0) && (put_pos == MAX_EVENTS-1))
+      )
+        goto ret;
+
+    ebuf[put_pos++] = *e;
+
+    if(put_pos >= MAX_EVENTS)
+        put_pos = 0;
+
+ret:
+    hal_spin_unlock( &elock );
+    if(ie) hal_sti();
+}
+
+static int get_buf(struct ui_event *e)
+{
+    int ret = 1;
+
+    int ie = hal_save_cli();
+    hal_spin_lock( &elock );
+
+    if( get_pos == put_pos )
+    {
+        ret = 0;
+        goto fin;
+    }
+    *e = ebuf[get_pos++];
+    ret = 1;
+
+    if(get_pos >= MAX_EVENTS)
+        get_pos = 0;
+
+fin:
+    hal_spin_unlock( &elock );
+    if(ie) hal_sti();
+
+    return ret;
+}
+
+
+
 
 
 
@@ -61,6 +137,35 @@ unsigned char phantom_dev_ps2_state_buttons = 0;
 int phantom_dev_ps2_state_xpos = 0;
 int phantom_dev_ps2_state_ypos = 0;
 static int xsign, ysign, xval, yval;
+
+//static hal_mutex_t	mouse_mutex;
+//static hal_cond_t 	mouse_cond;
+
+
+static void push_event_thread(void *arg)
+{
+    (void) arg;
+
+    hal_set_thread_name("MouEvents");
+
+    while(1)
+    {
+        hal_sem_acquire( &mouse_sem );
+
+        if(video_drv->redraw_mouse_cursor != NULL)
+            video_drv->redraw_mouse_cursor();
+
+        //hal_mutex_lock( &mouse_mutex );
+
+        struct ui_event e;
+        while( get_buf(&e) )
+            event_q_put_e( &e );
+
+        //hal_mutex_unlock( &mouse_mutex );
+    }
+}
+
+
 
 
 // TODO 9th bit
@@ -122,15 +227,29 @@ void phantom_dev_ps2_int_handler( void *arg )
         {
             video_drv->mouse_x = phantom_dev_ps2_state_xpos;
             video_drv->mouse_y = phantom_dev_ps2_state_ypos;
-            if(video_drv->redraw_mouse_cursor != NULL)
-                video_drv->redraw_mouse_cursor();
 
+            //if(video_drv->redraw_mouse_cursor != NULL)                video_drv->redraw_mouse_cursor();
+
+            /*
             event_q_put_mouse(
                               phantom_dev_ps2_state_xpos,
                               phantom_dev_ps2_state_ypos,
                               phantom_dev_ps2_state_buttons
                              );
+                             */
 
+            struct ui_event e;
+            e.type = UI_EVENT_TYPE_MOUSE;
+            e.time = 0; // TODO put time
+            e.focus= 0;
+
+            e.m.buttons = phantom_dev_ps2_state_buttons;
+            e.abs_x = phantom_dev_ps2_state_xpos;
+            e.abs_y = phantom_dev_ps2_state_ypos;
+
+            put_buf(&e);
+            //dpc_request_trigger( &mouse_dpc, 0 );
+            hal_sem_release( &mouse_sem );
         }
     }
 
@@ -202,6 +321,12 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
     (void) port;
     (void) stage;
 
+    //dpc_request_init( &mouse_dpc, push_event );
+    //hal_mutex_init( &mouse_mutex, "MouseDrv" );
+    //hal_cond_init( &mouse_cond );
+    hal_sem_init( &mouse_sem, "MouseDrv" );
+    hal_spin_init( &elock );
+
     if( seq_number || phantom_dev_ps2_do_init())
         return 0;
 
@@ -211,8 +336,9 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
     dev->name = "PS/2 mouse";
     dev->seq_number = seq_number++;
 
-    return dev;
+    hal_start_kernel_thread((void*)push_event_thread);
 
+    return dev;
 }
 
 
@@ -233,7 +359,7 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
 
 
 
-#if 0
+#if 0 /*fold00*/
 //Mouse.inc by SANiK
 //License: Use as you wish, except to cause damage
 byte mouse_cycle=0;     //unsigned char

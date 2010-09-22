@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * ia32 traps support. TODO Must go to ARCH dir!
+ *
+**/
+
 #include <i386/trap.h>
 #include <i386/proc_reg.h>
 #include <i386/eflags.h>

@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * UDP.
+ *
+**/
+
 #include <config.h>
 
 #if HAVE_NET

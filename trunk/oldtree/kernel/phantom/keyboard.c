@@ -1,7 +1,23 @@
-/*
- ** Copyright 2001-2002, Travis Geiselbrecht. All rights reserved.
- ** Distributed under the terms of the NewOS License.
- */
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Keyboard driver. Based on NewOS driver, Copyright 2001-2002, Travis Geiselbrecht.
+ *
+ *
+**/
+
+
+
+//---------------------------------------------------------------------------
+
+#define DEBUG_MSG_PREFIX "ps2keyb"
+#include <debug_ext.h>
+#define debug_level_flow 7
+#define debug_level_error 10
+#define debug_level_info 10
 
 
 #include <hal.h>
@@ -118,140 +134,163 @@ retry:
 }
 
 
-static int transfer_to_event = 0;
+static int keyb_event_mode = 0;
+static void keyb_event_loop( void *arg );
 
 void phantom_dev_keyboard_start_events()
 {
-    transfer_to_event = 1;
+    if(!keyb_event_mode)
+        hal_start_kernel_thread((void*)keyb_event_loop);
+
+    keyb_event_mode = 1;
+}
+
+static void send_event_to_q(_key_event *event)
+{
+
+    static int shifts;
+
+    int dn = event->modifiers & KEY_MODIFIER_DOWN;
+
+    if( event->modifiers & KEY_MODIFIER_UP )
+        shifts |= UI_MODIFIER_KEYUP;
+
+    if( dn )
+        shifts &= ~UI_MODIFIER_KEYUP;
+
+    switch(event->keycode)
+    {
+    case KEY_LSHIFT:
+        shifts &= ~UI_MODIFIER_LSHIFT;
+        if(dn)
+            shifts |= UI_MODIFIER_LSHIFT;
+
+    set_comon_shift:
+        shifts &= ~UI_MODIFIER_SHIFT;
+        if( (shifts & UI_MODIFIER_LSHIFT) || (shifts & UI_MODIFIER_RSHIFT) )
+            shifts |= UI_MODIFIER_SHIFT;
+        break;
+
+    case KEY_RSHIFT:
+        shifts &= ~UI_MODIFIER_RSHIFT;
+        if(dn)
+            shifts |= UI_MODIFIER_RSHIFT;
+
+        goto set_comon_shift;
+
+
+
+    case KEY_LCTRL:
+        shifts &= ~UI_MODIFIER_LCTRL;
+        if(dn)
+            shifts |= UI_MODIFIER_LCTRL;
+
+    set_comon_ctrl:
+        shifts &= ~UI_MODIFIER_CTRL;
+        if( (shifts & UI_MODIFIER_LCTRL) || (shifts & UI_MODIFIER_RCTRL ) )
+            shifts |= UI_MODIFIER_CTRL;
+        break;
+
+    case KEY_RCTRL:
+        shifts &= ~UI_MODIFIER_RCTRL;
+        if(dn)
+            shifts |= UI_MODIFIER_RCTRL;
+
+        goto set_comon_ctrl;
+
+
+
+    case KEY_LALT:
+        shifts &= ~UI_MODIFIER_LALT;
+        if(dn)
+            shifts |= UI_MODIFIER_LALT;
+
+    set_comon_alt:
+        shifts &= ~UI_MODIFIER_ALT;
+        if( (shifts & UI_MODIFIER_LALT) || (shifts & UI_MODIFIER_RALT ) )
+            shifts |= UI_MODIFIER_ALT;
+        break;
+
+    case KEY_RALT:
+        shifts &= ~UI_MODIFIER_RALT;
+        if(dn)
+            shifts |= UI_MODIFIER_RALT;
+
+        goto set_comon_alt;
+
+
+    case KEY_LWIN:
+        if(dn)              shifts |= UI_MODIFIER_LWIN;
+        else             	shifts &= ~UI_MODIFIER_LWIN;
+
+    set_comon_win:
+        if( (shifts & UI_MODIFIER_LWIN) || (shifts & UI_MODIFIER_RWIN ) )
+            shifts |= UI_MODIFIER_WIN;
+        else
+            shifts &= ~UI_MODIFIER_WIN;
+        break;
+
+    case KEY_RWIN:
+        if(dn)              shifts |= UI_MODIFIER_RWIN;
+        else                shifts &= ~UI_MODIFIER_RWIN;
+        goto set_comon_win;
+
+
+
+
+    case KEY_CAPSLOCK:
+        if(dn)
+        {
+            if(shifts & UI_MODIFIER_CAPSLOCK)
+                shifts &= ~UI_MODIFIER_CAPSLOCK;
+            else
+                shifts |= UI_MODIFIER_CAPSLOCK;
+        }
+
+    case KEY_SCRLOCK:
+        if(dn)
+        {
+            if(shifts & UI_MODIFIER_SCRLOCK)
+                shifts &= ~UI_MODIFIER_SCRLOCK;
+            else
+                shifts |= UI_MODIFIER_SCRLOCK;
+        }
+
+    case KEY_PAD_NUMLOCK:
+        if(dn)
+        {
+            if(shifts & UI_MODIFIER_NUMLOCK)
+                shifts &= ~UI_MODIFIER_NUMLOCK;
+            else
+                shifts |= UI_MODIFIER_NUMLOCK;
+        }
+
+    }
+
+//#if 1 && (debug_level_flow >= 7)
+    {
+        char *kn = "";
+
+        switch(event->keycode)
+        {
+        case KEY_ARROW_DOWN: kn = "down"; break;
+        case KEY_ARROW_UP:   kn = "up"; break;
+        case KEY_ARROW_LEFT: kn = "left"; break;
+        case KEY_ARROW_RIGHT:kn = "right"; break;
+        }
+
+        //SHOW_FLOW( 0, "keyin %d %s", event->keycode, kn );
+        printf( "-- keyin %d %s --\n", event->keycode, kn );
+    }
+//#endif
+    event_q_put_key( event->keycode, event->keychar, shifts );
+
 }
 
 static void insert_in_buf(_key_event *event)
 {
-    if(transfer_to_event)
-    {
-        static int shifts;
-
-        int dn = event->modifiers & KEY_MODIFIER_DOWN;
-
-        if( event->modifiers & KEY_MODIFIER_UP )
-            shifts |= UI_MODIFIER_KEYUP;
-
-        if( dn )
-            shifts &= ~UI_MODIFIER_KEYUP;
-
-        switch(event->keycode)
-        {
-        case KEY_LSHIFT:
-            shifts &= ~UI_MODIFIER_LSHIFT;
-            if(dn)
-                shifts |= UI_MODIFIER_LSHIFT;
-
-        set_comon_shift:
-            shifts &= ~UI_MODIFIER_SHIFT;
-            if( (shifts & UI_MODIFIER_LSHIFT) || (shifts & UI_MODIFIER_RSHIFT) )
-                shifts |= UI_MODIFIER_SHIFT;
-            break;
-
-        case KEY_RSHIFT:
-            shifts &= ~UI_MODIFIER_RSHIFT;
-            if(dn)
-                shifts |= UI_MODIFIER_RSHIFT;
-
-            goto set_comon_shift;
-
-
-
-
-        case KEY_LCTRL:
-            shifts &= ~UI_MODIFIER_LCTRL;
-            if(dn)
-                shifts |= UI_MODIFIER_LCTRL;
-
-        set_comon_ctrl:
-            shifts &= ~UI_MODIFIER_CTRL;
-            if( (shifts & UI_MODIFIER_LCTRL) || (shifts & UI_MODIFIER_RCTRL ) )
-                shifts |= UI_MODIFIER_CTRL;
-            break;
-
-        case KEY_RCTRL:
-            shifts &= ~UI_MODIFIER_RCTRL;
-            if(dn)
-                shifts |= UI_MODIFIER_RCTRL;
-
-            goto set_comon_ctrl;
-
-
-
-        case KEY_LALT:
-            shifts &= ~UI_MODIFIER_LALT;
-            if(dn)
-                shifts |= UI_MODIFIER_LALT;
-
-        set_comon_alt:
-            shifts &= ~UI_MODIFIER_ALT;
-            if( (shifts & UI_MODIFIER_LALT) || (shifts & UI_MODIFIER_RALT ) )
-                shifts |= UI_MODIFIER_ALT;
-            break;
-
-        case KEY_RALT:
-            shifts &= ~UI_MODIFIER_RALT;
-            if(dn)
-                shifts |= UI_MODIFIER_RALT;
-
-            goto set_comon_alt;
-
-
-        case KEY_LWIN:
-            if(dn)              shifts |= UI_MODIFIER_LWIN;
-            else             	shifts &= ~UI_MODIFIER_LWIN;
-
-        set_comon_win:
-            if( (shifts & UI_MODIFIER_LWIN) || (shifts & UI_MODIFIER_RWIN ) )
-                shifts |= UI_MODIFIER_WIN;
-            else
-                shifts &= ~UI_MODIFIER_WIN;
-            break;
-
-        case KEY_RWIN:
-            if(dn)              shifts |= UI_MODIFIER_RWIN;
-            else                shifts &= ~UI_MODIFIER_RWIN;
-            goto set_comon_win;
-
-
-
-
-        case KEY_CAPSLOCK:
-            if(dn)
-            {
-                if(shifts & UI_MODIFIER_CAPSLOCK)
-                    shifts &= ~UI_MODIFIER_CAPSLOCK;
-                else
-                    shifts |= UI_MODIFIER_CAPSLOCK;
-            }
-
-        case KEY_SCRLOCK:
-            if(dn)
-            {
-                if(shifts & UI_MODIFIER_SCRLOCK)
-                    shifts &= ~UI_MODIFIER_SCRLOCK;
-                else
-                    shifts |= UI_MODIFIER_SCRLOCK;
-            }
-
-        case KEY_PAD_NUMLOCK:
-            if(dn)
-            {
-                if(shifts & UI_MODIFIER_NUMLOCK)
-                    shifts &= ~UI_MODIFIER_NUMLOCK;
-                else
-                    shifts |= UI_MODIFIER_NUMLOCK;
-            }
-
-        }
-
-        event_q_put_key( event->keycode, event->keychar, shifts );
-        return;
-    }
+    // can't call there in interrupt!
+    //if(keyb_event_mode) send_event_to_q(event);
 
     unsigned int temp_tail = tail;
 
@@ -549,4 +588,30 @@ int phantom_scan_console_getc(void)
 #endif
 
 }
+
+
+
+static void keyb_event_loop( void *arg )
+{
+    (void)arg;
+
+    hal_set_thread_name("KeyEvents");
+
+    while(1)
+    {
+        while(!keyb_event_mode)
+            hal_sleep_msec(10000);
+
+        _key_event buf;
+
+        _keyboard_read( &buf, 1);
+
+        printf( "-- key ev --\n" );
+        send_event_to_q( &buf );
+    }
+
+}
+
+
+
 
