@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * (new and unused) disk IO stack, incl. partitioning and fs search.
+ *
+**/
+
 #define DEBUG_MSG_PREFIX "DiskIO"
 #include "debug_ext.h"
 #define debug_level_flow 10

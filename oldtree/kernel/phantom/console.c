@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Console redirection.
+ *
+**/
+
 #include <phantom_libc.h>
 #include <i386/pio.h>
 #include <drv_video_screen.h>

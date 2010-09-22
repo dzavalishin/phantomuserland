@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Drivers probe/map.
+ *
+**/
+
 #define DEBUG_MSG_PREFIX "driver"
 #include "debug_ext.h"
 #define debug_level_flow 1
@@ -146,7 +156,7 @@ typedef struct
 static etc_probe_t etc_drivers[] =
 {
     { "SMBios", 		driver_etc_smbios_probe, 	0 },
-    { "ACPI", 			driver_etc_acpi_probe, 		0 },
+//    { "ACPI", 			driver_etc_acpi_probe, 		0 },
 
 };
 

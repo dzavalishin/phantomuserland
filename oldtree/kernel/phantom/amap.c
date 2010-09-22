@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Address space range based allocator.
+ *
+**/
+
 #include "amap.h"
 #include <malloc.h>
 #include <phantom_assert.h>

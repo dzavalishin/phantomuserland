@@ -1,5 +1,9 @@
 /**
  *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
  * Deferred procedure calls.
  * Callouts are done from special thread, not from
  * interrupt context.

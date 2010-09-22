@@ -1,9 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Realtek rtl 8139 net driver.
+ *
+**/
+
 #include <config.h>
 #if HAVE_NET
 
 
 /*
-** Copyright 2001-2002, Travis Geiselbrecht. All rights reserved.
+** original code copyright 2001-2002, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
 */
 

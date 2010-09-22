@@ -80,6 +80,7 @@ void    				hal_cli(void);
 void    				hal_sti(void);
 int                                     hal_is_sti(void); // returns true if ints enabled
 int                                     hal_save_cli(void); // cli and ret 1 if was enabled
+#define hal_cli_save hal_save_cli
 
 void 					phantom_mem_lock(void);
 void 					phantom_mem_unlock(void);

@@ -1,10 +1,14 @@
 /**
  *
+ * Phantom OS
  *
- * 
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
+ * Supposed to be hardware abstraction layer. Mix of different things
+ * in reality. Needs cleanup.
  *
 **/
+
 
 #include "config.h"
 

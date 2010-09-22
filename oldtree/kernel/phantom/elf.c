@@ -2,11 +2,11 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Binary code loader.
+ * ELF binary code loader. Usermode process starter - temp, rewrite, move out.
  *
- **/
+**/
 
 #if HAVE_UNIX
 

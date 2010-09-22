@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Main win/ui event management code.
  *
@@ -57,7 +57,8 @@ static queue_head_t     unused_events;  // list of unused event structs
 static queue_head_t     main_event_q;  	// list of generated events
 
 #define MIN_EVENT_POOL  128
-#define MAX_EVENT_POOL  512
+//#define MAX_EVENT_POOL  512
+#define MAX_EVENT_POOL  5120
 
 /**
  *
@@ -122,6 +123,7 @@ static int phantom_window_getc(void)
 static void allocate_event()
 {
     struct ui_event *e = calloc( 1, sizeof(struct ui_event) );
+    assert(e);
     queue_enter(&unused_events, e, struct ui_event *, echain);
 }
 
@@ -174,6 +176,10 @@ static int count_unused()
     int count = 0;
 
     hal_mutex_lock( &unused_q_mutex );
+
+    if(queue_empty(&unused_events))
+        return 0;
+
     struct ui_event *e;
     queue_iterate(&unused_events, e, struct ui_event *, echain)
     {
@@ -272,7 +278,7 @@ void event_q_put_key( int vkey, int ch, int modifiers )
     put_event(e);
 }
 
-
+/*
 //! Put mouse event onto the main e q
 void event_q_put_mouse( int x, int y, int buttons )
 {
@@ -289,7 +295,7 @@ void event_q_put_mouse( int x, int y, int buttons )
 
     put_event(e);
 }
-
+*/
 
 //! Put window event onto the main e q
 void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus )

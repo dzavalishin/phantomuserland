@@ -4,7 +4,7 @@
  *
  * Quite quick'n'dirty disk structures worker functions.
  *
- * (C) 2005-2008 dz.
+ * (C) 2005-2010 dz.
  *
 **/
 

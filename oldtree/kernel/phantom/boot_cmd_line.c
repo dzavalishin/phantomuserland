@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Command line parser.
+ *
+**/
+
 #define DEBUG_MSG_PREFIX "boot"
 #include "debug_ext.h"
 #define debug_level_info 10

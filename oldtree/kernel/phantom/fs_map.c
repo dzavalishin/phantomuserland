@@ -1,5 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Filesystem map. Looks up disk partition and finds suitable handler.
+ *
+**/
 
-#define DEBUG_MSG_PREFIX "driver"
+
+#define DEBUG_MSG_PREFIX "fsmap"
 #include "debug_ext.h"
 #define debug_level_flow 1
 #define debug_level_error 10

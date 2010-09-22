@@ -64,7 +64,7 @@ phantom: $(START_O_FILE) \
 	traps.o amap.o i386/pic.o hal_physmem.o physalloc.o \
 	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
 	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
-	time.o console.o timedcall.o driver_pci_rtl8139.o dev/keyboard.o \
+	time.o console.o timedcall.o driver_pci_rtl8139.o keyboard.o \
 	paging_device.o dpc.o spinlock.o hal.o fsck.o \
 	console_win.o vm_threads.o snap_sync.o ps2.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o video_drv_cirrus.o \

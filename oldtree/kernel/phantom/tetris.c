@@ -35,7 +35,7 @@
 
 static int rbits = 0;
 
-static int k_down = 0, k_right = 0;
+static int k_down = 0, k_up = 0, k_right = 0, k_left = 0;
 
 #define joystick_left() (rbits&1)
 #define joystick_right() (rbits&2)
@@ -155,6 +155,8 @@ void translate (const shape_t *t, coord_t c, int a, coord_t *res)
  */
 void draw_block (int h, int w, int visible)
 {
+    h = PITDEPTH - h - 1;
+
     h *= 5;
     w *= 5;
 
@@ -164,10 +166,8 @@ void draw_block (int h, int w, int visible)
     r.xsize = r.ysize = 4;
 
     if (visible) {
-        //gpanel_rect_filled (&display, h, w, h + 4, w + 4, 1);
         drv_video_window_fill_rect( tetris_window, COLOR_RED, r );
     } else {
-        //gpanel_rect_filled (&display, h, w, h + 4, w + 4, 0);
         drv_video_window_fill_rect( tetris_window, COLOR_BLACK, r );
 
         if (h == (PITDEPTH-1)*5)
@@ -298,13 +298,14 @@ static void tetris_window_loop(void *arg)
 {
     (void) arg;
 
+    hal_set_thread_name("KerTetris");
     SHOW_FLOW0( 2, "running");
 
     int ptype;              /* Piece type */
     int angle, anew;        /* Angle */
     int msec;               /* Timeout */
     coord_t c, cnew, *cp;
-    unsigned up_pressed = 0, left_pressed = 0;
+    //unsigned up_pressed = 0, left_pressed = 0;
     //unsigned right_pressed = 0; //, down_pressed = 0;
 
     newpiece:
@@ -339,7 +340,7 @@ static void tetris_window_loop(void *arg)
             if (msec <= 0) {
                 rbits = random(); // self-control :)
                 /* Timeout: move down */
-                SHOW_FLOW0( 2, "down");
+                SHOW_FLOW0( 7, "down");
                 msec = 500;
                 cnew.x++;
                 translate (&shape[ptype], cnew, anew, chk);
@@ -352,24 +353,19 @@ static void tetris_window_loop(void *arg)
                 goto check;
             }
 
-            if (! joystick_left ())
-                left_pressed = 0;
-            else if (! left_pressed) {
-                left_pressed = 1;
+            if ( k_up > 0 ) { 	// up: rotate
+                k_up--;
 
-                /* Left: rotate */
                 if (--anew < 0)
                     anew = 3;
                 translate (&shape[ptype], cnew, anew, chk);
                 goto check;
             }
 
-            if (! joystick_up ())
-                up_pressed = 0;
-            else if (! up_pressed) {
-                up_pressed = 1;
+            if ( k_left > 0 ) {
+                k_left--;
 
-                /* Up: move left. */
+                /* move left. */
                 if (cnew.y <= 0)
                     continue;
                 cnew.y--;
@@ -377,11 +373,8 @@ static void tetris_window_loop(void *arg)
                 goto check;
             }
 
-            //if (! joystick_down ())                down_pressed = 0;
-            //else if (! down_pressed) {
             if ( k_right > 0 ) {
                 k_right--;
-                //down_pressed = 1;
 
                 /* move right */
                 if (cnew.y >= PITWIDTH-1)
@@ -390,11 +383,6 @@ static void tetris_window_loop(void *arg)
                 translate (&shape[ptype], cnew, anew, chk);
                 goto check;
             }
-
-            /*if (! joystick_right ())
-                right_pressed = 0;
-            else if (! right_pressed) {
-                right_pressed = 1;*/
 
             if( k_down > 0 ) {
                 k_down--;
@@ -446,20 +434,35 @@ static void eventProcessor( drv_video_window_t *w, struct ui_event *e )
     //case UI_EVENT_TYPE_MOUSE: 	defaultMouseEventProcessor(w, &e); break;
 
     case UI_EVENT_TYPE_KEY:
+
+        // Ignore key up events
+        if(e->modifiers & UI_MODIFIER_KEYUP)
+            return;
+
         switch(e->k.vk)
         {
         case KEY_ARROW_DOWN:
             k_down++;
-            //SHOW_FLOW( 0, "KEY__DOWN %d", k_down );
+            SHOW_FLOW( 1, "KEY__DOWN %d", k_down );
+            break;
+
+        case KEY_ARROW_UP:
+            k_up++;
+            SHOW_FLOW( 1, "KEY__UP %d", k_down );
+            break;
+
+        case KEY_ARROW_LEFT:
+            k_left++;
+            SHOW_FLOW( 1, "KEY__LEFT %d", k_down );
             break;
 
         case KEY_ARROW_RIGHT:
             k_right++;
+            SHOW_FLOW( 1, "KEY__RIGHT %d", k_down );
             break;
         }
         return;
 
-    //case UI_EVENT_TYPE_WIN:     defaultWinEventProcessor(w, &e); break;
     }
 
     if(oldEventProcessor)
@@ -469,12 +472,8 @@ static void eventProcessor( drv_video_window_t *w, struct ui_event *e )
 
 void init_tetris ()
 {
-    //buttons_init ();
-
-    tetris_window = drv_video_window_create(
-                                            80, 150,
-                                            700, 550, COLOR_BLACK, "Tetris" );
-
+    tetris_window =
+        drv_video_window_create( 80, 150, 700, 550, COLOR_BLACK, "Tetris" );
 
     oldEventProcessor = tetris_window->inKernelEventProcess;
     tetris_window->inKernelEventProcess = eventProcessor;

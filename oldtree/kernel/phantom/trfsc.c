@@ -5,7 +5,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Trivial Remote File System client.
  * Paritally implemented, not complete, not tested well.
@@ -15,9 +15,9 @@
 
 #define DEBUG_MSG_PREFIX "TRFS"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 0
 
 #include "net.h"
 #include "udp.h"

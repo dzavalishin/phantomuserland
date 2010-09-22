@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Buses. Mostly unused.
+ *
+**/
+
 #include "device.h"
 
 phantom_bus_t etc_bus =

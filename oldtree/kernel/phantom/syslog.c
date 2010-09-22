@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Kernel syslog.
+ *
+**/
+
 #include <config.h>
 
 #include <sys/syslog.h>
