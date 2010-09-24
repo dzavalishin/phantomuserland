@@ -18,9 +18,9 @@
 //#include <pc/bios.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
+#include <kernel/drivers.h>
 #include <errno.h>
 
-#include "../driver_map.h"
 
 #include "acpi.h"
 
@@ -36,7 +36,7 @@ phantom_device_t * driver_etc_acpi_probe( const char *name, int stage )
 
     void * ep = acpi_identify();
 
-    SHOW_FLOW( 0, "found @ 0x%X", ep);
+    SHOW_FLOW( 0, "found @ 0x%p", ep);
 
     if( seq_number || ep == 0 ) return 0;
 
@@ -97,7 +97,7 @@ static void * acpi_identify()
 {
     char *a = 0;
 
-    a = lookfor( 0, 0x400 );    		if( a ) return a;
+    //a = lookfor( 0, 0x400 );    		if( a ) return a;
     a = lookfor( 0xE0000, 0x100000 );    	if( a ) return a;
 
     return 0;
