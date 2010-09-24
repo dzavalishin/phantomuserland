@@ -4,13 +4,13 @@ CLEAN_FILES += test/*.o crt/*.o pmod_test
 
 #W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
-#LD_ADDR=--script=ld.script
 LD_ADDR=-Ttext 0
 
 //LIBGCC := `$(CC) --print-libgcc-file-name`
 LIBGCC := `gcc --print-libgcc-file-name`
 
-all: $(TARGET) pmod_test ../lib/crt0.o
+#all: $(TARGET) pmod_test ../lib/crt0.o
+all: $(TARGET) ../lib/crt0.o
 
 ../lib/crt0.o: crt/crt0.o
 	cp crt/crt0.o ../lib/crt0.o
