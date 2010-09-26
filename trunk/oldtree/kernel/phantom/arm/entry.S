@@ -43,7 +43,7 @@ _reset:
 
     LDR         r1, = __bss_start__
     LDR         r2, = __bss_end__
-    LDR         r3, #0
+    LDR         r3, $0
 
 1:
     CMP         r1, r2
@@ -73,7 +73,9 @@ _reset:
 
     // Call main
 
-    LDR         r12, = EXT(phantom_multiboot_main)
+    //LDR         r12, = EXT(phantom_multiboot_main)
+.global phantom_multiboot_main
+    LDR         r12, =phantom_multiboot_main
     MOV         lr, pc
     BX          r12
 
@@ -87,8 +89,8 @@ _reset:
     .bss
     .align 12 // TODO use page size define
 
-#include "stack.h"
-
+//#include "stack.h"
+#define PHANTOM_START_STACK_SIZE (16*1024)
     .space	PHANTOM_START_STACK_SIZE
 __irq_stack_top__:
 
