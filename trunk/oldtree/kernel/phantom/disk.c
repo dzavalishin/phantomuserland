@@ -153,6 +153,8 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
 
     errno_t ret = EINVAL;
 
+    if(isWrite) memcpy( va, to, nBlocks * p->block_size );
+
     int ei = hal_save_cli();
     hal_spin_lock(&(rq.lock));
     rq.flag_sleep = 1; // Don't return until done
@@ -168,7 +170,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     thread_block( THREAD_SLEEP_IO, &(rq.lock) );
     if( ei ) hal_sti();
 
-    memcpy( to, va, nBlocks * p->block_size );
+    if(!isWrite) memcpy( to, va, nBlocks * p->block_size );
     ret = rq.rc;
 
     //return partAsyncIo( p, &rq );
