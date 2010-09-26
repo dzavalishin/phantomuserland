@@ -103,7 +103,8 @@ void init_main_event_q()
 
 static int phantom_window_getc(void)
 {
-    wtty_t *tty = &(GET_CURRENT_THREAD()->ctty);
+    //wtty_t *tty = &(GET_CURRENT_THREAD()->ctty);
+    wtty_t *tty = GET_CURRENT_THREAD()->ctty;
 
     if(tty == 0)
     {
