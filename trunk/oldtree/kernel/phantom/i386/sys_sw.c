@@ -47,7 +47,7 @@ extern struct utsname phantom_uname;
 //#include "vm86.h"
 
 #include "../misc.h"
-#include "../threads/thread_private.h"
+#include <thread_private.h>
 
 #define adjustin( uaddr, __st__ ) ( ((void*)uaddr) + ((int)u->mem_start))
 

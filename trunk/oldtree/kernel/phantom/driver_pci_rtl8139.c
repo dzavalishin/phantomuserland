@@ -28,9 +28,9 @@
 #include "newos.h"
 #include "net.h"
 
-#include "dev/rtl8139_dev.h"
-#include "dev/rtl8139_priv.h"
-#include "dev/if_rlreg.h"
+#include <dev/pci/rtl8139_dev.h>
+#include <dev/pci/rtl8139_priv.h>
+#include <dev/pci/if_rlreg.h>
 
 static int DEBUG = 0;
 
