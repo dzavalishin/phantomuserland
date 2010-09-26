@@ -10,7 +10,8 @@ INCDIRS += $(realpath $(PHANTOM_HOME))/include
 # hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare
 
-PHANTOM_CFLAGS += $(WARN) -m32 -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc
+PHANTOM_CFLAGS += $(WARN) -m32 -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc -std=gnu89
+PHANTOM_ASFLAGS += $(PHANTOM_CFLAGS) -DASSEMBLER -D__ASSEMBLY__
 
 vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
 vpath %.S $(SRCDIRS) $(MOSTLY_SRCDIRS)
@@ -30,7 +31,7 @@ OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
 
 %.o: %.S
 	@echo ---- cc $@
-	@gcc -c -o $@ $(PHANTOM_CFLAGS) $<
+	@gcc -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) $<
 
 
 .SUFFIXES:
