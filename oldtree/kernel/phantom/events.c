@@ -99,7 +99,7 @@ void init_main_event_q()
 
 #if KEY_EVENTS
 
-#include "threads/thread_private.h"
+#include <thread_private.h>
 
 static int phantom_window_getc(void)
 {

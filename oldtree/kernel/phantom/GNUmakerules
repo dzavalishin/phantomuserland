@@ -10,7 +10,7 @@ others::
 	cd $(realpath $(PHANTOM_HOME))/phantom/vm; make clean; make; 
 	cd $(realpath $(PHANTOM_HOME))/phantom/libc; make clean; make; 
 	cd i386; make clean; make; cd ..
-	cd threads; make clean; make; cd ..
+#	cd threads; make clean; make; cd ..
 
 #all:: others 
 all:: $(TARGETS)
@@ -19,9 +19,10 @@ all:: $(TARGETS)
 prepare::
 
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
-INCDIRS +=	$(realpath $(PHANTOM_HOME))/include threads 
+INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
+#threads 
 CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d
-PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=0
+PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=0 -std=gnu89
 
 
 CLIB   =
@@ -34,20 +35,22 @@ LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
 #OKLIBDIR=../../old/kernel/lib
 
-TH_LIB=threads/libthreads.a
+PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
+
+
+#TH_LIB=threads/libthreads.a
+TH_LIB=$(PLIBDIR)/libthreads.a
 PHANTOM_LIBS = 	$(TH_LIB) 
 
 
 
 LD_ADDR=--script=ld.script
 
-PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
 i386/libi386.a:
 	cd i386; make; cd ..
 
-threads/libthreads.a:
-	cd threads; make; cd ..
+//threads/libthreads.a:	cd threads; make; cd ..
 
 entry.o: crtn.o
 

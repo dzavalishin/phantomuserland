@@ -146,7 +146,6 @@ static void net_stack_init();
 
 
 
-//#include "threads/thread_private.h"
 #include "i386/interrupts.h"
 
 void

@@ -21,7 +21,6 @@
 #include <errno.h>
 #include "test.h"
 
-//#include "threads/thread_private.h"
 #include <threads.h>
 #include <hal.h>
 #include <kernel/timedcall.h>

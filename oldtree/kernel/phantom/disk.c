@@ -25,7 +25,7 @@
 #include <kernel/vm.h>
 
 // really need private
-#include <threads/thread_private.h>
+#include <thread_private.h>
 #include <threads.h>
 
 #include "fs_map.h"

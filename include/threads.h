@@ -101,5 +101,17 @@ struct hal_sem
 
 struct wtty *get_thread_ctty( struct phantom_thread *t );
 
+
+/**
+ *
+ * Called from timer interrupt 100 times per sec.
+ * Does not switch context. Just updates thread state
+ * and possibly requests reshedule + soft irq.
+ *
+**/
+
+void phantom_scheduler_time_interrupt(void);
+
+
 #endif // THREADS_H
 

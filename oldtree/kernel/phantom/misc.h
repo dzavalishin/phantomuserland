@@ -116,4 +116,4 @@ void run_test( const char *test_name, const char *test_parm );
 // -----------------------------------------------------------------------
 
 
-void phantom_scheduler_time_interrupt(void);
+//void phantom_scheduler_time_interrupt(void);

@@ -19,7 +19,7 @@
 #include <threads.h>
 
 // TEMP! Remove!
-#include "threads/thread_private.h"
+#include <thread_private.h>
 
 #include <vm/alloc.h>
 
