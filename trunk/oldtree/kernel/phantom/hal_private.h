@@ -4,7 +4,7 @@
 #include <hal.h>
 #include <kernel/vm.h>
 
-#include "threads/thread_private.h"
+#include <thread_private.h>
 
 
 #endif // HAL_PRIVATE_H

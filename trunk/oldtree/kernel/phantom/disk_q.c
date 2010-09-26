@@ -2,7 +2,7 @@
 #include <malloc.h>
 
 // really needs private - thread_unblock!
-#include "threads/thread_private.h"
+#include <thread_private.h>
 //#include <threads.h>
 
 

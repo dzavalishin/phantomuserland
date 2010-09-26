@@ -20,8 +20,6 @@
 #include <vm/syscall.h>
 
 #include <threads.h>
-// TEMP! Remove!
-//#include "threads/thread_private.h"
 
 #include "snap_sync.h"
 #include "hal.h"

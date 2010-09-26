@@ -342,15 +342,6 @@ void phantom_scheduler_yield( void );
 void phantom_scheduler_yield_locked(hal_spinlock_t *lock_to_be_unlocked);
 
 
-/**
- *
- * Called from timer interrupt 100 times per sec.
- * Does not switch context. Just updates thread state
- * and possibly requests ershedule + soft irq.
- *
-**/
-
-//void phantom_scheduler_time_interrupt(void);
 
 
 /**
