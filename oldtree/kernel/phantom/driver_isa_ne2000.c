@@ -26,7 +26,7 @@
 
 #include "driver_map.h"
 
-#include "net/ns8390.h"
+#include <dev/isa/ns8390.h>
 #include "device.h"
 #include "ethernet_defs.h"
 
