@@ -1,3 +1,5 @@
+// Does not work - kills world
+#if 0
 /*-
  * Copyright (c) 1990 The Regents of the University of California.
  * All rights reserved.
@@ -56,3 +58,5 @@ ENTRY(_alloca)
 	pushl	0(%ecx)
 	pushl	%eax		/* dummy to pop at callsite */
 	jmp	*%edx		/* "return" */
+
+#endif
