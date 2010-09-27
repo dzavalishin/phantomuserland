@@ -99,7 +99,9 @@ hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ))
 void
 hal_set_thread_name(const char *name)
 {
-    GET_CURRENT_THREAD()->name = name;
+    const char *old = GET_CURRENT_THREAD()->name;
+    GET_CURRENT_THREAD()->name = name ? strdup( name ) : 0;
+    if( old ) free((char *)old);
 }
 
 

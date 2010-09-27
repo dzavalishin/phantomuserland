@@ -77,6 +77,8 @@ struct ne
 
     int                 active;
     int                 interrupt_count;
+
+    hal_sem_t           interrupt_sem;
 };
 
 
@@ -186,6 +188,10 @@ phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
         SHOW_ERROR( 0, "IRQ %d is busy", irq );
         goto free2;
     }
+
+#if NE2000_INTR
+    hal_sem_init( &(pvt->interrupt_sem) );
+#endif
 
     pvt->thread = hal_start_kernel_thread_arg( ne2000_thread, dev );
 
@@ -302,11 +308,13 @@ static void ne2000_thread(void *_dev)
 
         SHOW_FLOW0( 1, "Thread ready, wait 4 sema" );
 
-        //hal_sem_acquire( &(nic->interrupt_sem) );
-
+#if NE2000_INTR
+        hal_sem_acquire( &(pvt->interrupt_sem) );
+#else
         // XXX BUG DUMB CODE
         while(pvt->interrupt_count <= 0)
             hal_sleep_msec(200);
+#endif
 
         pvt->interrupt_count--;
 

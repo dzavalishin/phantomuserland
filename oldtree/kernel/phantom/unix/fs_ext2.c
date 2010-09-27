@@ -151,6 +151,9 @@ static struct uufile ext2_root =
 
 static errno_t     ext2_open(struct uufile *f, int create, int write)
 {
+    (void) f;
+    (void) create;
+    (void) write;
     return 0;
 }
 
@@ -190,11 +193,17 @@ static uufile_t *  ext2_getRoot()
 
 static size_t      ext2_read(    struct uufile *f, void *dest, size_t bytes)
 {
+    (void) f;
+    (void) dest;
+    (void) bytes;
     return -1;
 }
 
 static size_t      ext2_write(   struct uufile *f, void *dest, size_t bytes)
 {
+    (void) f;
+    (void) dest;
+    (void) bytes;
     return -1;
 }
 

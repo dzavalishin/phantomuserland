@@ -95,6 +95,7 @@ BOOL FAT32_WriteFATSector(f32_t *impl, UINT32 sector)
     impl->FATBuffer.Writes++;
     return impl->FAT_WriteSector(impl, impl->FATBuffer.Sector, impl->FATBuffer.Data);
 #else
+    (void) impl;
     return TRUE;
 #endif
 }
@@ -114,7 +115,8 @@ BOOL FAT32_PurgeFATBuffer( f32_t *impl )
 
         impl->FATBuffer.Changed = FALSE;
     }
-
+#else
+    (void) impl;
 #endif
 
     return TRUE;

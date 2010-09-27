@@ -195,7 +195,6 @@ void jit_get_array_class( jit_out_t *j ); // AX, DX = ptr
 
 
 
-
 #endif // JIT_H
 
 

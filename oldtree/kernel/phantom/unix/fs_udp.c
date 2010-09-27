@@ -107,6 +107,9 @@ static struct uufile udpfs_root =
 
 static errno_t     udpfs_open(struct uufile *f, int create, int write)
 {
+    (void) f;
+    (void) create;
+    (void) write;
     return 0;
 }
 
@@ -225,6 +228,7 @@ static size_t      udpfs_getpath( struct uufile *f, void *dest, size_t bytes)
 // returns -1 for non-files
 static size_t      udpfs_getsize( struct uufile *f)
 {
+    (void) f;
     return -1;
 }
 
@@ -237,11 +241,16 @@ static void *      udpfs_copyimpl( void *impl )
 
 static errno_t     udpfs_stat(    struct uufile *f, struct stat *data)
 {
+    (void) f;
+    (void) data;
     return ESPIPE;
 }
 
 static int     	   udpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data)
 {
+    (void) f;
+    (void) request;
+    (void) data;
     *err = ENODEV;
     return -1;
 }
