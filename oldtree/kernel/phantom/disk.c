@@ -342,7 +342,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
     p->flags |= PART_FLAG_IS_DIVIDED;
 
     int i; int pno = 0;
-    for( i = 0x1BE; i <= 0x1EE; i += 16 )
+    for( i = 0x1BE; i <= 0x1EE; i += 16, pno++ )
     {
         struct pc_partition *pp = (struct pc_partition *)(buf+i);
 
@@ -363,7 +363,8 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
         }
 
         char pn[4] = "PC0";
-        pn[2] += pno++;
+        //pn[2] += pno++;
+        pn[2] += pno;
         strncpy(newp->name, pn, PARTITION_NAME_LEN-1);
 
         register_partition( newp );

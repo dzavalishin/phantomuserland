@@ -683,7 +683,7 @@ static void keyb_event_loop( void *arg )
 
         _keyboard_read( &buf, 1);
 
-        printf( "-- key ev --\n" );
+        //printf( "-- key ev --\n" );
         send_event_to_q( &buf );
     }
 

@@ -15,7 +15,7 @@
 
 #define DEBUG_MSG_PREFIX "tetris"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -443,22 +443,22 @@ static void eventProcessor( drv_video_window_t *w, struct ui_event *e )
         {
         case KEY_ARROW_DOWN:
             k_down++;
-            SHOW_FLOW( 1, "KEY__DOWN %d", k_down );
+            SHOW_FLOW( 2, "KEY__DOWN %d", k_down );
             break;
 
         case KEY_ARROW_UP:
             k_up++;
-            SHOW_FLOW( 1, "KEY__UP %d", k_down );
+            SHOW_FLOW( 2, "KEY__UP %d", k_down );
             break;
 
         case KEY_ARROW_LEFT:
             k_left++;
-            SHOW_FLOW( 1, "KEY__LEFT %d", k_down );
+            SHOW_FLOW( 2, "KEY__LEFT %d", k_down );
             break;
 
         case KEY_ARROW_RIGHT:
             k_right++;
-            SHOW_FLOW( 1, "KEY__RIGHT %d", k_down );
+            SHOW_FLOW( 2, "KEY__RIGHT %d", k_down );
             break;
         }
         return;
