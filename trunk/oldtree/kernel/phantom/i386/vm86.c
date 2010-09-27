@@ -535,7 +535,7 @@ void phantom_init_vm86(void)
 
 #if TSS_VM86_RETURN
     phantom_load_gdt(); // do we really need it?
-	phantom_load_main_tss(); // need?
+    phantom_load_main_tss(); // need?
 #endif
 
     void *	r0stack;
@@ -646,7 +646,7 @@ void phantom_v86_run(void *code, size_t size)
     {
         // Returned via longjmp - reset main TSS
         phantom_load_gdt(); // need?
-		phantom_load_main_tss(); // need? why?
+        phantom_load_main_tss(); // need? why?
         phantom_trap_handlers[T_GENERAL_PROTECTION] = saved_trap_handler;
 
         // let us use VM86 TSS again - in phantom_load_gdt

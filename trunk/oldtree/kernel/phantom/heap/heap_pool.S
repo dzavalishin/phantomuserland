@@ -1,6 +1,6 @@
 #include <x86/phantom_page.h>
 #include <mach/asm.h>
-#include "heap_local.h"
+#include <kernel/config.h>
 
 //	.data
 	.bss
