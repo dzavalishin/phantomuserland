@@ -56,9 +56,17 @@ static hal_cond_t              have_event;
 static queue_head_t     unused_events;  // list of unused event structs
 static queue_head_t     main_event_q;  	// list of generated events
 
+#if 1
 #define MIN_EVENT_POOL  128
-//#define MAX_EVENT_POOL  512
-#define MAX_EVENT_POOL  5120
+#define MAX_EVENT_POOL  512
+
+//#define MAX_EVENT_POOL  5120
+#else
+
+// FIXED: Dies instantly - Panic: recursive mutex lock in count_unused/hal_mutex_lock
+#define MIN_EVENT_POOL  1
+#define MAX_EVENT_POOL  3
+#endif
 
 /**
  *
@@ -71,8 +79,8 @@ void init_main_event_q()
     queue_init(&unused_events);
     queue_init(&main_event_q);
 
-    hal_mutex_init( &main_q_mutex, "MainEvQ" );
-    hal_mutex_init( &unused_q_mutex, "FreeEvQ" );
+    hal_mutex_init( &main_q_mutex, "Main EvQ" );
+    hal_mutex_init( &unused_q_mutex, "Free EvQ" );
 
     hal_cond_init( &have_event, "UIEvent" );
 
@@ -179,7 +187,10 @@ static int count_unused()
     hal_mutex_lock( &unused_q_mutex );
 
     if(queue_empty(&unused_events))
+    {
+        hal_mutex_unlock( &unused_q_mutex );
         return 0;
+    }
 
     struct ui_event *e;
     queue_iterate(&unused_events, e, struct ui_event *, echain)
