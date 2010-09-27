@@ -574,7 +574,7 @@ static void keyboard_read_thread(void)
         _key_event ke;
 
         phantom_dev_keyboard_get_key( &ke );
-        printf( "-- key ev %d --\n", ke.keycode );
+        //printf( "-- key ev %d --\n", ke.keycode );
         event_q_put_key( ke.keycode, ke.keychar, ke.modifiers );
     }
 }

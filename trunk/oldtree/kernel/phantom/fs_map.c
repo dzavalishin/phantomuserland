@@ -40,7 +40,7 @@ static fs_probe_t fs_drivers[] =
 {
 
     { "Phantom", 	fs_probe_phantom,	0 	 	},
-    //{ "FAT", 		fs_probe_fat, 	 	0		},
+    { "FAT", 		fs_probe_fat, 	 	0		},
     //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
     { "CD",  		fs_probe_cd, 	 	0		},
 
@@ -50,6 +50,7 @@ static fs_probe_t fs_drivers[] =
 
 errno_t lookup_fs(phantom_disk_partition_t *p)
 {
+    SHOW_INFO( 0, "Look for filesystems on partition %s", p->name );
     unsigned int i;
     for( i = 0; i < sizeof(fs_drivers)/sizeof(fs_probe_t); i++ )
     {
@@ -58,7 +59,7 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
         errno_t ret = fp->probe_f( p );
         if( ret ) continue;
 
-        SHOW_INFO( 0, "%s file sysem fount on partition %s", fp->name, p->name );
+        SHOW_INFO( 0, "%s file sysem found on partition %s", fp->name, p->name );
 
         if(!fp->use_f)
         {
@@ -131,6 +132,34 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
 
 
     return EINVAL;
+}
+
+
+errno_t fs_probe_fat(phantom_disk_partition_t *p)
+{
+    unsigned char buf[PAGE_SIZE];
+    SHOW_FLOW( 0, "%s look for FAT", p->name );
+    if( phantom_sync_read_disk( p, buf, 0, 1 ) )
+    {
+        SHOW_ERROR( 0, "%s can't read sector 0", p->name );
+        return EINVAL;
+    }
+
+    if( (buf[0x1FE] != 0x55) || (buf[0x1FF] != 0xAA) )
+    {
+        SHOW_ERROR0( 1, "No magic" );
+        return EINVAL;
+    }
+
+    u_int16_t blksize = *((u_int16_t *)(buf+0xb));
+    if( 512 != blksize )
+    {
+        SHOW_ERROR( 1, "Blocksize is !512, %d", blksize );
+        return EINVAL;
+    }
+
+
+    return 0;
 }
 
 
