@@ -86,17 +86,19 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 {
     int rc, ret = 0;
 
+    *buf = '\0';
+
     const char *slp = "?";
     switch(t->sleep_flags)
     {
-    case 0:                     slp = "_run_"; break;
-    case THREAD_SLEEP_USER:     slp = "USER"; break;
-    case THREAD_SLEEP_SLEEP:    slp = "SLEEP"; break;
-    case THREAD_SLEEP_COND:     slp = "COND"; break;
-    case THREAD_SLEEP_MUTEX:    slp = "MUTEX"; break;
-    case THREAD_SLEEP_SEM:      slp = "SEMA"; break;
-    case THREAD_SLEEP_LOCKED:   slp = "LOCK"; break;
-    case THREAD_SLEEP_IO:       slp = "IO"; break;
+    case 0:                     slp = " RUN "; break;
+    case THREAD_SLEEP_USER:     slp = "user"; break;
+    case THREAD_SLEEP_SLEEP:    slp = "sleep"; break;
+    case THREAD_SLEEP_COND:     slp = "cond"; break;
+    case THREAD_SLEEP_MUTEX:    slp = "mutex"; break;
+    case THREAD_SLEEP_SEM:      slp = "sema"; break;
+    case THREAD_SLEEP_LOCKED:   slp = "lock"; break;
+    case THREAD_SLEEP_IO:       slp = "io"; break;
     };
 
     rc = snprintf(buf, len, " %2d %02d %-5.5s %d %-10.10s ",
@@ -104,7 +106,7 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
                   t->priority,
                   slp,
                   t->cpu_id,
-                  t->name
+                  t->name ? t->name : "--"
           );
 
     len -= rc;
@@ -161,11 +163,16 @@ void phantom_dump_threads_buf(char *buf, int len)
     int i;
     for( i = 0; i < MAX_THREADS; i++ )
     {
+        // BUG! Races with thread kill code
         if( phantom_kernel_threads[i] == 0 )
             continue;
 
-        phantom_thread_t *t = phantom_kernel_threads[i];
-        rc = dump_thread_info_buf(buf,len,t);
+        phantom_thread_t t = *phantom_kernel_threads[i];
+
+        if( t.sleep_flags & THREAD_SLEEP_ZOMBIE )
+            continue;
+
+        rc = dump_thread_info_buf(buf,len,&t);
         buf += rc;
         len -= rc;
     }

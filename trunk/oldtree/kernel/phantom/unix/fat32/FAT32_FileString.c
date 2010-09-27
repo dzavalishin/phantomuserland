@@ -59,11 +59,11 @@ int FileString_PathTotalLevels(char *path)
     while (*path)
     {
         // Fast forward through actual subdir text to next slash
-        for (*path; *path;)
+        for(;*path;)
         {
             // If slash detected escape from for loop
             if (*path == '\\') { path++; break; }
-            *path++;
+            path++;
         }
 
         // Increase number of subdirs founds
@@ -108,7 +108,7 @@ int FileString_GetSubString(char *Path, int levelreq, char *output)
             output[copypnt++] = *Path;
 
         // Increment through path string
-        *Path++;
+        Path++;
     }
 
     // Null Terminate
@@ -201,7 +201,7 @@ int FileString_GetExtension(char *str)
         if (*strSrc=='.')
             dotPos = (int)(strSrc-str);
 
-        *strSrc++;
+        strSrc++;
     }
 
     return dotPos;

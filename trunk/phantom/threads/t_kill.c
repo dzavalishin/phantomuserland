@@ -160,12 +160,11 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     {
     }
 
-    // Cond timer?
 
     // Keeps mutexes? CAN'T CHECK!
 
     /*
-    // Sem?
+    // TODO Sem unlock?!
     if(t->waitsem)
     {
         SHOW_ERROR0( 0, "Killing thread w sem?!" );
@@ -188,6 +187,9 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     // Remove from thread array
     phantom_kernel_threads[t->tid] = 0;
 
+
+    if( t->name )
+        free((char *)t->name);
 
     // Free threead struct
     free( t );

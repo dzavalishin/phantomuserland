@@ -25,6 +25,7 @@
 #include <phantom_types.h>
 #include <string.h>
 #include <threads.h>
+#include <thread_private.h>
 #include <errno.h>
 
 #include "misc.h"

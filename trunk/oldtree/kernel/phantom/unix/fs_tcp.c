@@ -107,6 +107,9 @@ static struct uufile tcpfs_root =
 
 static errno_t     tcpfs_open(struct uufile *f, int create, int write)
 {
+    (void) f;
+    (void) create;
+    (void) write;
     return 0;
 }
 
@@ -241,11 +244,19 @@ static void *      tcpfs_copyimpl( void *impl )
 
 static errno_t     tcpfs_stat(    struct uufile *f, struct stat *data)
 {
+    (void) f;
+    (void) data;
+
     return ESPIPE;
 }
 
 static int     	   tcpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data)
 {
+    (void) f;
+    (void) err;
+    (void) request;
+    (void) data;
+
     *err = ENODEV;
     return -1;
 }

@@ -563,17 +563,18 @@ locked:
 
 
 
-
+// BUG wrong? Must use static void send_event_to_q(_key_event *event)?
 
 static void keyboard_read_thread(void)
 {
-    hal_set_thread_name("KeyRead");
+    hal_set_thread_name("KeyEvents");
 
     while(1)
     {
         _key_event ke;
 
         phantom_dev_keyboard_get_key( &ke );
+        printf( "-- key ev %d --\n", ke.keycode );
         event_q_put_key( ke.keycode, ke.keychar, ke.modifiers );
     }
 }

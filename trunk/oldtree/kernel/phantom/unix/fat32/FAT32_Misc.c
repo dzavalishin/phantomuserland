@@ -101,6 +101,8 @@ void FATMisc_GetLFNCache(f32_t *impl, BYTE *strOut)
 //-----------------------------------------------------------------------------
 int FATMisc_If_LFN_TextOnly(f32_t *impl, FAT32_ShortEntry *entry)
 {
+    (void) impl;
+
     if ((entry->Attr&0x0F)==FILE_ATTR_LFN_TEXT)
         return 1;
     else
@@ -111,6 +113,8 @@ int FATMisc_If_LFN_TextOnly(f32_t *impl, FAT32_ShortEntry *entry)
 //-----------------------------------------------------------------------------
 int FATMisc_If_LFN_Invalid(f32_t *impl, FAT32_ShortEntry *entry)
 {
+    (void) impl;
+
     if ((entry->Name[0]==FILE_HEADER_BLANK)||(entry->Name[0]==FILE_HEADER_DELETED)||(entry->Attr==FILE_ATTR_VOLUME_ID)||(entry->Attr&FILE_ATTR_SYSHID))
         return 1;
     else
@@ -131,6 +135,8 @@ int FATMisc_If_LFN_Exists(f32_t *impl, FAT32_ShortEntry *entry)
 //-----------------------------------------------------------------------------
 int FATMisc_If_noLFN_SFN_Only(f32_t *impl, FAT32_ShortEntry *entry)
 {
+    (void) impl;
+
     if ((entry->Attr!=FILE_ATTR_LFN_TEXT) && (entry->Name[0]!=FILE_HEADER_BLANK) && (entry->Name[0]!=FILE_HEADER_DELETED) && (entry->Attr!=FILE_ATTR_VOLUME_ID) && (!(entry->Attr&FILE_ATTR_SYSHID)))
         return 1;
     else
@@ -141,6 +147,8 @@ int FATMisc_If_noLFN_SFN_Only(f32_t *impl, FAT32_ShortEntry *entry)
 //-----------------------------------------------------------------------------
 int FATMisc_If_dir_entry(f32_t *impl, FAT32_ShortEntry *entry)
 {
+    (void) impl;
+
     if (entry->Attr&FILE_TYPE_DIR)
         return 1;
     else
@@ -151,6 +159,8 @@ int FATMisc_If_dir_entry(f32_t *impl, FAT32_ShortEntry *entry)
 //-----------------------------------------------------------------------------
 int FATMisc_If_file_entry(f32_t *impl, FAT32_ShortEntry *entry)
 {
+    (void) impl;
+
     if (entry->Attr&FILE_TYPE_FILE)
         return 1;
     else
@@ -176,6 +186,8 @@ int FATMisc_LFN_to_entry_count(char *filename)
 //-----------------------------------------------------------------------------
 void FATMisc_LFN_to_lfn_entry(f32_t *impl, char *filename, BYTE *buffer, int entry, BYTE sfnChk)
 {
+    (void) impl;
+
     int i;
     int nameIndexes[] = {1,3,5,7,9,0x0E,0x10,0x12,0x14,0x16,0x18,0x1C,0x1E};
 
@@ -220,6 +232,8 @@ void FATMisc_LFN_to_lfn_entry(f32_t *impl, char *filename, BYTE *buffer, int ent
 #ifdef INCLUDE_WRITE_SUPPORT
 void FATMisc_Create_sfn_entry(f32_t *impl, char *shortfilename, UINT32 size, UINT32 startCluster, FAT32_ShortEntry *entry)
 {
+    (void) impl;
+
     int i;
 
     // Copy short filename
@@ -251,6 +265,8 @@ void FATMisc_Create_sfn_entry(f32_t *impl, char *shortfilename, UINT32 size, UIN
 #ifdef INCLUDE_WRITE_SUPPORT
 BOOL FATMisc_CreateSFN(f32_t *impl, char *sfn_output, char *filename)
 {
+    (void) impl;
+
     int i;
     int dotPos = -1;
     char ext[3];
@@ -310,6 +326,8 @@ BOOL FATMisc_CreateSFN(f32_t *impl, char *sfn_output, char *filename)
 
 BOOL FATMisc_GenerateTail( f32_t *impl, char *sfn_output, char *sfn_input, UINT32 tailNum)
 {
+    (void) impl;
+
     int tail_chars;
     char tail_str[8];
 

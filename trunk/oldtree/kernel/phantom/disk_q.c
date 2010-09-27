@@ -42,10 +42,10 @@ static void start_io(struct disk_q *q)
 void
 pager_io_request_done( pager_io_request *rq )
 {
-    // NB! Callback can overwrite our request, so take what we need now
+    // NB! Callback can overwrite our request, so take what we need now - CAN'T!
 #if IO_RQ_SLEEP
-    //char sleep = me->flag_sleep;
-    //int tid = me->sleep_tid;
+    char sleep = rq->flag_sleep;
+    int tid = rq->sleep_tid;
 #endif
 
     if(rq->pager_callback)
@@ -55,14 +55,14 @@ pager_io_request_done( pager_io_request *rq )
     //if(sleep)        awake(tid);
 
     // Prelim check
-    if(rq->flag_sleep)
+    if(sleep)
     {
         int ei = hal_save_cli();
         hal_spin_lock(&(rq->lock));
 
         // Locked check
-        if(rq->flag_sleep)
-            thread_unblock( get_thread( rq->sleep_tid ), THREAD_SLEEP_IO );
+        if(sleep)
+            thread_unblock( get_thread( tid ), THREAD_SLEEP_IO );
 
         rq->flag_sleep = 0;
         hal_spin_unlock(&(rq->lock));

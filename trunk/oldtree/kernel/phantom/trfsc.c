@@ -702,7 +702,7 @@ static void test_report( struct pager_io_request *req, int write )
 //static
 void trfs_testrq()
 {
-#if 1
+#if 0
     phantom_disk_partition_t *p = phantom_create_trfs_partition_struct( 1024 );
 
 #if 1

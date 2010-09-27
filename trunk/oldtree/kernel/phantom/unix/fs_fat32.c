@@ -104,6 +104,9 @@ struct uufs fat32_fs =
 
 static errno_t     fat32_open(struct uufile *f, int create, int write)
 {
+    (void) f;
+    (void) create;
+    (void) write;
     return 0;
 }
 
@@ -120,6 +123,7 @@ static errno_t     fat32_close(struct uufile *f)
 // Create a file struct for given path
 static uufile_t *  fat32_namei(const char *filename)
 {
+    (void) filename;
     return 0;
 /*
     uufile_t *ret = create_uufile();
@@ -147,11 +151,17 @@ static uufile_t *  fat32_getRoot()
 
 static size_t      fat32_read(    struct uufile *f, void *dest, size_t bytes)
 {
+    (void) f;
+    (void) dest;
+    (void) bytes;
     return -1;
 }
 
 static size_t      fat32_write(   struct uufile *f, void *dest, size_t bytes)
 {
+    (void) f;
+    (void) dest;
+    (void) bytes;
     return -1;
 }
 
@@ -170,6 +180,7 @@ static size_t      fat32_getpath( struct uufile *f, void *dest, size_t bytes)
 // returns -1 for non-files
 static size_t      fat32_getsize( struct uufile *f)
 {
+    (void) f;
     return -1;
 }
 
@@ -184,6 +195,9 @@ static void *      fat32_copyimpl( void *impl )
 
 uufile_t *fat32_mount(errno_t *err, uufile_t *mount_point, uufile_t *device)
 {
+    (void) mount_point;
+
+
     uufile_t *ret = create_uufile();
     assert(ret);
 
@@ -217,6 +231,8 @@ uufile_t *fat32_mount(errno_t *err, uufile_t *mount_point, uufile_t *device)
 
 errno_t fat32_umount(uufile_t *mount_point, uufile_t *device)
 {
+    (void) device;
+
     if( !(mount_point->flags & UU_FILE_FLAG_MNT) )
         return EBADF; // ?
 

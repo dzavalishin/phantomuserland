@@ -9,8 +9,13 @@
  *
 **/
 
-#define IDE_INTR 0
-#define IDE_DMA 0
+#define TEST_NEW_DISK_IO_STACK 1
+
+
+
+
+#define IDE_INTR 1
+#define IDE_DMA 1
 
 #define REMAPPED_PAGING_IO (!IDE_DMA)
 
@@ -37,7 +42,17 @@
 #include "ataio.h"
 
 
+#if TEST_NEW_DISK_IO_STACK
+static hal_mutex_t      ide_io;
+void connect_ide_io(void);
+static dpc_request ide_dpc;
+static void dpc_func(void *a);
 
+#endif
+
+
+
+static int disk_sectors[4]; // max 4 devs
 
 
 static void        	paging_device_start_io(paging_device *me);
@@ -105,28 +120,38 @@ void setup_simple_ide()
     }
     //unsigned int bmAddr, unsigned int ataAddr )
 #endif
-   // 2) find out what devices are present -- this is the step
-   // many driver writers ignore.  You really can't just do
-   // resets and commands without first knowing what is out there.
-   // Even if you don't care the driver does care.
-   int numDev = reg_config();
-   SHOW_INFO( 0, "Found %d devices, dev 0 is %s, dev 1 is %s.\n",
-                  numDev,
-                  devTypeStr[ reg_config_info[0] ],
-                  devTypeStr[ reg_config_info[1] ] );
+    // 2) find out what devices are present -- this is the step
+    // many driver writers ignore.  You really can't just do
+    // resets and commands without first knowing what is out there.
+    // Even if you don't care the driver does care.
+    int numDev = reg_config();
+    SHOW_INFO( 0, "Found %d devices, dev 0 is %s, dev 1 is %s.\n",
+               numDev,
+               devTypeStr[ reg_config_info[0] ],
+               devTypeStr[ reg_config_info[1] ] );
 
-   int dev = 1;
+    int dev = 1;
 
-   int rc = reg_reset( 0, dev );
-   if ( rc )
-       panic("can't reset ide dev %d", dev );
+    int rc = reg_reset( 0, dev );
+    if ( rc )
+        panic("can't reset ide dev %d", dev );
 
 
-   test_ide_io();
+    test_ide_io();
 
-   simple_ide_idenify_device(0);
-   simple_ide_idenify_device(1);
+    simple_ide_idenify_device(0);
+    simple_ide_idenify_device(1);
 //getchar();
+
+#if TEST_NEW_DISK_IO_STACK
+    hal_mutex_init( &ide_io, "IDE IO" );
+
+    dpc_request_init( &ide_dpc, dpc_func);
+
+
+    //connect_ide_io();
+#endif
+
 }
 
 
@@ -141,6 +166,11 @@ static void simple_ide_write_page( void *buf, long physaddr, long page_no, int n
 {
     long secno = page_no * SECT_PER_PAGE;
 //printf("ide write %d\n", page_no); //hexdumpb( 0, buf, 256 ); getchar();
+
+#if TEST_NEW_DISK_IO_STACK
+    hal_mutex_lock( &ide_io );
+#endif
+
     int i;
     for( i = SECT_PER_PAGE; i > 0; i-- )
     {
@@ -165,11 +195,20 @@ static void simple_ide_write_page( void *buf, long physaddr, long page_no, int n
         physaddr += 512;
 
     }
+
+#if TEST_NEW_DISK_IO_STACK
+    hal_mutex_unlock( &ide_io );
+#endif
 }
 
 static void simple_ide_read_page( void *_buf, long physaddr, long page_no, int ndev )
 {
     int tries = 5;
+
+#if TEST_NEW_DISK_IO_STACK
+    hal_mutex_lock( &ide_io );
+#endif
+
 retry:;
     void *buf = _buf;
     long secno = page_no * SECT_PER_PAGE;
@@ -212,6 +251,11 @@ retry:;
         physaddr += 512;
 
     }
+
+#if TEST_NEW_DISK_IO_STACK
+    hal_mutex_unlock( &ide_io );
+#endif
+
 }
 
 
@@ -806,6 +850,8 @@ errno_t simple_ide_idenify_device(int dev)
                isRemovable ? "removable" : "fixed", is48bitAddr ? "48" : "28"
              );
 
+    disk_sectors[dev] = size;
+
     if( !(buf[49] & 0x0300) )
     {
         SHOW_ERROR0( 0, "Not LBA/DMA disk\n");
@@ -816,5 +862,173 @@ errno_t simple_ide_idenify_device(int dev)
 }
 
 
+
+
+
+#if TEST_NEW_DISK_IO_STACK
+
+#if !IDE_DMA
+#error Just DMA
+#endif
+
+#include <disk.h>
+
+
+static void d0_ide_write_page( long physaddr, long secno, int nsec )
+{
+    int ndev = 0;
+
+    hal_mutex_lock( &ide_io );
+
+    int i;
+    for( i = nsec; i > 0; i-- )
+    {
+        int rc = dma_pci_lba28(
+                               ndev, CMD_WRITE_DMA,
+                               0, 1, // feature reg, sect count
+                               secno, physaddr,
+                               1L );
+        if ( rc )
+            panic("IDE write failure sec %ld", secno);
+        secno++;
+        physaddr += 512;
+
+    }
+
+    hal_mutex_unlock( &ide_io );
+}
+
+static void d0_ide_read_page( long physaddr, long secno, int nsec )
+{
+    int ndev = 0;
+    int tries = 5;
+
+    hal_mutex_lock( &ide_io );
+
+retry:;
+    int i;
+    for( i = nsec; i > 0; i-- )
+    {
+        int rc = dma_pci_lba28(
+                               ndev, CMD_READ_DMA,
+                               0, 1, // feature reg, sect count
+                               secno, physaddr,
+                               1L );
+
+        if ( rc )
+        {
+            if( tries-- <= 0 )
+                panic("IDE read failure sec %ld", secno );
+            else
+            {
+                printf("IDE read failure sec %ld, retry", secno );
+                goto retry;
+            }
+        }
+        secno++;
+        physaddr += 512;
+    }
+
+    hal_mutex_unlock( &ide_io );
+}
+
+
+static pager_io_request *cur_rq;
+static void dpc_func(void *a)
+{
+    (void) a;
+
+    pager_io_request *rq = cur_rq;
+    assert(rq);
+    cur_rq = 0;
+
+    if(rq->flag_pageout)
+        d0_ide_write_page( rq->phys_page, rq->blockNo, rq->nSect );
+    else if(rq->flag_pagein)
+        d0_ide_read_page( rq->phys_page, rq->blockNo, rq->nSect );
+    else
+        panic("not rd not rw");
+
+    //rq->pager_callback( rq, rq->flag_pagein );
+    pager_io_request_done( rq );
+
+}
+
+
+errno_t simple_ide_AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    (void) p;
+
+    // Does it syncronously in fact
+
+    rq->flag_ioerror = 0;
+    rq->rc = 0;
+
+    assert( cur_rq == 0 );
+    cur_rq = rq;
+    dpc_request_trigger( &ide_dpc, 0);
+
+    return 0;
+}
+
+phantom_disk_partition_t *phantom_create_simple_ide_partition_struct( long size )
+{
+    phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size);
+
+    ret->asyncIo = simple_ide_AsyncIo;
+    ret->flags |= PART_FLAG_IS_WHOLE_DISK;
+
+
+    //struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
+    //phantom_init_disk_q( q, startIoFunc );
+
+    //ret->specific = 0;
+
+    // Usually here is pointer to driver-specific structure. When we'll have more than one TRFSd instance, we'll keep instance struct here
+    ret->specific = "TRFS";  
+    strlcpy( ret->name, "IDE0", sizeof(ret->name) );
+
+#if !IO_RQ_SLEEP
+#error I know async only
+#endif
+
+    //q->device = private;
+    //q->unit = unit; // if this is multi-unit device, let 'em distinguish
+
+    // errno_t phantom_register_disk_drive(ret);
+
+
+    return ret;
+}
+
+
+void connect_ide_io(void)
+{
+
+    int size = disk_sectors[0];
+
+    if(size <= 0)
+    {
+        SHOW_ERROR( 0, "Disk 0 size %d?", size );
+        return;
+    }
+
+
+    phantom_disk_partition_t *p = phantom_create_simple_ide_partition_struct( size );
+    if(p == 0)
+    {
+        SHOW_ERROR0( 0, "Failed to create whole disk partition" );
+        return;
+    }
+
+    errno_t err = phantom_register_disk_drive(p);
+    if(err)
+    {
+        SHOW_ERROR( 0, "Disk 0 err %d", err );
+        return;
+    }
+
+}
+#endif
 
 

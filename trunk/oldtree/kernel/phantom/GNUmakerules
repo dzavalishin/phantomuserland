@@ -22,7 +22,7 @@ SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 #threads 
 CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d
-PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=0 -std=gnu89
+PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=1 -std=gnu89
 
 
 CLIB   =
@@ -103,7 +103,8 @@ phantom: $(START_O_FILE) \
 	objcopy -O elf32-i386 $@.pe $@
 	cat < $@ > ../../run/tftp/$@
 #	objdump -x $@.pe >$@.pe.sym
-	gzip < $@ > ../../run/tftp/$@
+	gzip < $@ > ../../run/tftp/$@.gz
+	mv ../../run/tftp/$@.gz ../../run/tftp/$@
 #	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
 #	cd ../../run
 #	genisoimage -o cd.iso tftp

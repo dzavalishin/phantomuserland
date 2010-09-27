@@ -323,6 +323,8 @@ int main(int argc, char **argv, char **envp)
     net_test();
 #endif
 
+connect_ide_io();
+
     // Start virtual machine in special startup (single thread) mode
     pvm_root_init();
 

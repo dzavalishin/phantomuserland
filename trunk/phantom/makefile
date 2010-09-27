@@ -13,6 +13,6 @@ SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), offsets libc gl vm dev libphantom th
 all: all-subdirs
 
 clean: clean-subdirs
-	rm -f lib/*.a
+	rm -f lib/*.a lib/crt0.o 
 
 
