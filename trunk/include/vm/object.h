@@ -33,7 +33,7 @@ struct object_PVM_ALLOC_Header
     unsigned int		exact_size; // full object size including this header
 };
 
-
+// This struct is poorly named. In fact, it is an object reference!
 struct pvm_object
 {
     struct pvm_object_storage	* data;
@@ -42,6 +42,15 @@ struct pvm_object
 
 typedef struct pvm_object pvm_object_t;
 
+// This is object itself.
+//
+//   	_ah is allocation header, used by allocator/gc
+//   	_class is class object reference.
+//      _satellites is used to keep some related things such as weak ptr backlink
+//      _flags used to keep some shortcut info about object type
+//      _da_size is n of bytes in da[]
+//      da[] is object contents
+//
 // NB! See JIT assembly hardcode for object structure offsets
 struct pvm_object_storage
 {
