@@ -61,7 +61,7 @@ phantom: $(START_O_FILE) \
 	tetris.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o events.o smp.o \
-	heap/heap.o heap/heap_pool.o heap/secondaries.o boot_cmd_line.o \
+	heap/heap.o heap/heap_pool.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
 	ohci.o uhci.o uhci_rh.o uhci_util.o \
 	traps.o amap.o i386/pic.o hal_physmem.o physalloc.o \

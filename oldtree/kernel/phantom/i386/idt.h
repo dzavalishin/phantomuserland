@@ -32,18 +32,13 @@
  * to allow separate entrypoints for hardware interrupts.
  */
 
-/* On a standard PC, we only need 16 interrupt vectors,
-   because that's all the PIC hardware supports.  */
-/* XX But for some reason we program the PIC
-   to use vectors 0x40-0x4f rather than 0x20-0x2f.  Fix.  */
-//#define IDTSZ (0x20+0x20+0x10)
+/* For some reason we program the PIC to use vectors 0x40-0x4f rather than 0x20-0x2f.  Fix.  */
 #define IDTSZ 256
 
 #define PIC_INT_BASE 0x20
 #define APIC_INT_BASE 0x40
 
 
-//#include_next "idt.h"
 
 
 #define set_idt(pseudo_desc) \
@@ -51,10 +46,6 @@
 	asm volatile("lidt %0" : : "m" ((pseudo_desc)->limit)); \
     })
 
-
-
-
-//#include <mach/vm_param.h>
 
 #include <i386/seg.h>
 
@@ -65,13 +56,6 @@ extern struct real_gate idt[IDTSZ];
 #define fill_idt_gate(int_num, entry, selector, access, dword_count) \
 	fill_gate(&idt[int_num], entry, selector, access, dword_count)
 
-
-/*
-// Fill a gate in a CPU's IDT.
-#define fill_idt_gate(cpu, int_num, entry, selector, access) \
-	fill_gate(&(cpu)->tables.idt[int_num], entry, selector, access, 0)
-
- */
 
 
 
