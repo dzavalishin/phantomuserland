@@ -15,6 +15,7 @@ errno_t fs_probe_ext2(phantom_disk_partition_t *p);
 errno_t fs_probe_cd(phantom_disk_partition_t *p);
 
 
+errno_t fs_start_tiny_fat( phantom_disk_partition_t * );
 
 
 #endif // FS_MAP_H
