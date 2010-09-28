@@ -84,7 +84,7 @@ phantom: $(START_O_FILE) \
 	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
-	fs_map.o \
+	fs_map.o tinyfat.o \
 	svn_version.o $(PLIBDIR)/libdev.a \
 	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
 	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(TH_LIB)

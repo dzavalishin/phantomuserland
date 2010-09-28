@@ -268,9 +268,6 @@ void 					hal_time_tick(int tick_rate);
 // Debug tools
 
 
-//void                			hal_dump(char *data, int len);
-// void hexdump(const void *ptr, int length, const char *hdr, int flags);
-// phantom_libc
 
 extern void 				hal_assert_failed(char *file, int line);
 

@@ -40,7 +40,7 @@ static fs_probe_t fs_drivers[] =
 {
 
     { "Phantom", 	fs_probe_phantom,	0 	 	},
-    { "FAT", 		fs_probe_fat, 	 	0		},
+    { "FAT", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
     //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
     { "CD",  		fs_probe_cd, 	 	0		},
 
