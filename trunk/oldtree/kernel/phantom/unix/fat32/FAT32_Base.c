@@ -160,11 +160,18 @@ BOOL FAT32_Init(f32_t *impl, int rawDisk )
     CountofClusters = DataSec / impl->FAT32.SectorsPerCluster;
 
     if(CountofClusters < 4085)
+    {
+        printf("FAT12\n");
         // Volume is FAT12
         return FALSE;
+    }
+
     else if(CountofClusters < 65525)
+    {
+        printf("FAT16\n");
         // Volume is FAT16
         return FALSE;
+    }
 
     return TRUE;
 }

@@ -32,7 +32,7 @@ struct f32
 
     struct
     {
-        unsigned char     	Data[512];
+        unsigned char	Data[512];
         unsigned int 	Sector;
         unsigned int 	Changed;
         unsigned int 	Reads;
