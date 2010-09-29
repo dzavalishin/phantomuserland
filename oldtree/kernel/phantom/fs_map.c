@@ -34,13 +34,15 @@ typedef struct
 } fs_probe_t;
 
 
+static errno_t fs_start_fat( phantom_disk_partition_t * );
 
 
 static fs_probe_t fs_drivers[] =
 {
 
     { "Phantom", 	fs_probe_phantom,	0 	 	},
-    { "FAT", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
+    { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
+//    { "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
     //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
     { "CD",  		fs_probe_cd, 	 	0		},
 
@@ -138,7 +140,28 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
 errno_t fs_probe_fat(phantom_disk_partition_t *p)
 {
     unsigned char buf[PAGE_SIZE];
+
     SHOW_FLOW( 0, "%s look for FAT", p->name );
+
+    switch( p->type )
+    {
+    case 1: // FAT 12
+    case 4: // FAT 16 below 32M
+    case 6: // FAT 16 over 32M
+    case 7: // ExFAT 64
+        break;
+
+    case 0x0B: // FAT32 non-LBA?!
+        SHOW_FLOW( 0, "Warning: Part type is %d (non-LBA)", p->type );
+    case 0x0C: // FAT32 LBA
+    case 0x0E: // FAT16 LBA
+        break;
+
+    default:
+        SHOW_ERROR0( 1, "Not a FAT partition" );
+        return EINVAL;
+    }
+
     if( phantom_sync_read_disk( p, buf, 0, 1 ) )
     {
         SHOW_ERROR( 0, "%s can't read sector 0", p->name );
@@ -158,9 +181,99 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p)
         return EINVAL;
     }
 
+    u_int8_t signature = *((u_int8_t *)(buf+0x26));
+    SHOW_FLOW( 0, "signature is 0x%X", signature );
+    switch(signature)
+    {
+    case 0x28:
+    case 0x29: // DOS4
+        break;
+
+    default:
+        SHOW_ERROR0( 1, "Unknown signature" );
+        break;
+    }
+
+    u_int32_t serial = *((u_int32_t *)(buf+0x27));
+    SHOW_FLOW( 0, "serial num is 0x%X", serial );
+
+    // different FATs have it in different places. 
+#if 0
+
+#define FAT_LABEL_LEN 12
+    char label[FAT_LABEL_LEN];
+    memset( label, FAT_LABEL_LEN, 0 );
+    memcpy( label, buf+0x2B, FAT_LABEL_LEN-1 );
+
+    SHOW_FLOW( 0, "label is %.*s", FAT_LABEL_LEN-1, label );
+
+#define FAT_FSTYPE_LEN 9
+    char fstype[FAT_FSTYPE_LEN];
+    memset( fstype, FAT_FSTYPE_LEN, 0 );
+    memcpy( fstype, buf+0x2B, FAT_FSTYPE_LEN-1 );
+
+    SHOW_FLOW( 0, "fstype is %.*s", FAT_FSTYPE_LEN-1, fstype );
+
+#endif
 
     return 0;
 }
+
+#include "unix/fat32/define.h"
+#include "unix/fat32/FAT32_Access.h"
+
+
+static int f32r(struct f32 *impl, int sector, void *buf)
+{
+    phantom_disk_partition_t *p = (void*)impl->dev;
+
+    if( phantom_sync_read_disk( p, buf, sector, 1 ) )
+    {
+        SHOW_ERROR( 0, "%s can't read sector %d", p->name, sector );
+        return 0;
+    }
+
+    return 1;
+}
+
+static int f32w(struct f32 *impl, int sector, void *buf)
+{
+    (void) buf;
+    phantom_disk_partition_t *p = (void*)impl->dev;
+
+    //if( phantom_sync_write_disk( p, buf, sector, 1 ) )
+    {
+        SHOW_ERROR( 0, "%s can't write sector %d", p->name, sector );
+        return 0;
+    }
+
+    //return 1;
+}
+
+
+static errno_t fs_start_fat( phantom_disk_partition_t *p )
+{
+    SHOW_FLOW( 0, "trying to activate FAT on %s", p->name );
+
+    f32_t *f32 = calloc( 1, sizeof(f32_t) );
+    assert(f32);
+
+    // we do it wrong
+    f32->dev = (void *)p;
+    f32->FAT_WriteSector = f32w;
+    f32->FAT_ReadSector  = f32r;
+
+    if(!FAT32_InitFAT(f32,1))
+    {
+        SHOW_ERROR( 0, "FAT32 driver refused %s", p->name );
+        return EFTYPE;
+    }
+
+    FAT32_ShowFATDetails( f32 );
+
+    return 0;
+}
+
 
 
 
