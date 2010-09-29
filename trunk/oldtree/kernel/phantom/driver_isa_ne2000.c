@@ -13,6 +13,8 @@
 
 #if HAVE_NET
 
+#define NE2000_INTR 0
+
 #define DEBUG_MSG_PREFIX "ne2000"
 #include "debug_ext.h"
 #define debug_level_flow 2
@@ -78,14 +80,18 @@ struct ne
     int                 active;
     int                 interrupt_count;
 
-    hal_sem_t           interrupt_sem;
+    hal_sem_t           recv_interrupt_sem;
+    hal_sem_t           send_interrupt_sem;
+    hal_sem_t           reset_sem;
 };
 
 
 static void ne_reset(phantom_device_t * dev);
 static int ne_disable(phantom_device_t * dev);
-static errno_t ne_probe1(int ioaddr);
+
+static errno_t ne_probe0(unsigned int ioaddr);
 static errno_t ne_probe(phantom_device_t * dev);
+
 static void enable_multicast(phantom_device_t * dev);
 static void eth_pio_write(
                           phantom_device_t * dev,
@@ -107,6 +113,8 @@ static int ne_get_address( struct phantom_device *dev, void *buf, int len);
 
 static void ne_interrupt( void *_dev );
 static void ne2000_thread(void *_dev );
+
+static phantom_device_t * common_ne2000_probe( int port, int irq, int stage );
 
 
 phantom_device_t * driver_pci_ne2000_probe( pci_cfg_t *pci, int stage )
@@ -135,24 +143,45 @@ phantom_device_t * driver_pci_ne2000_probe( pci_cfg_t *pci, int stage )
 
     if( port == 0 ) return 0;
 
-    return driver_isa_ne2000_probe( port, irq, stage );
+    return common_ne2000_probe( port, irq, stage );
 
 }
 
 
 
+static void ne_ei(phantom_device_t * dev)
+{
+    //struct ne *pvt = dev->drv_private;
 
-static int seq_number = 0;
+    // Enable interrupts
+    outb( eth_nic_base+D8390_P0_IMR, 0xFF );
+    //outb( eth_nic_base+D8390_P0_IMR, D8390_ISR_PRX|D8390_ISR_PTX|D8390_ISR_RXE|D8390_ISR_TXE );
+}
+
 
 phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
 {
-    (void) stage;
-
     SHOW_FLOW( 0, "Looking for NE2000 at 0x%x", port );
 
     // BUG it does not work on PCI cards
-    //if( seq_number || ne_probe1(port) )        return 0;
-    if( ne_probe1(port) )        return 0;
+    //if( seq_number || ne_probe0(port) )        return 0;
+    if( ne_probe0(port) )
+    {
+        SHOW_ERROR( 1, "ne_probe0 failed for port 0x%X", port );
+        return 0;
+    }
+
+    return common_ne2000_probe( port, irq, stage );
+}
+
+
+static int seq_number = 0;
+
+static phantom_device_t * common_ne2000_probe( int port, int irq, int stage )
+{
+    (void) stage;
+
+    //if( seq_number || ne_probe0(port) )        return 0;
 
 
     phantom_device_t * dev = calloc(1, sizeof(phantom_device_t));
@@ -173,6 +202,21 @@ phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
     dev->drv_private = calloc( 1, sizeof(struct ne));
     assert( dev->drv_private != 0 );
 
+    struct ne *pvt = dev->drv_private;
+
+    hal_sem_init( &(pvt->reset_sem), "Ne2kReset" );
+
+#if NE2000_INTR
+    hal_sem_init( &(pvt->recv_interrupt_sem), "Ne2kRecv" );
+    hal_sem_init( &(pvt->send_interrupt_sem), "Ne2kSend" );
+
+
+    // Release send sema once so that we'll xmit first packet without a problem
+    // done in reset
+    //hal_sem_release( &(pvt->send_interrupt_sem) );
+
+#endif
+
     if( !ne_probe( dev ) )
     {
     free2:
@@ -181,7 +225,6 @@ phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
         return 0;
     }
 
-    struct ne *pvt = dev->drv_private;
 
     if( hal_irq_alloc( irq, &ne_interrupt, dev, HAL_IRQ_SHAREABLE ) )
     {
@@ -189,16 +232,10 @@ phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
         goto free2;
     }
 
-#if NE2000_INTR
-    hal_sem_init( &(pvt->interrupt_sem) );
-#endif
 
     pvt->thread = hal_start_kernel_thread_arg( ne2000_thread, dev );
 
-    // Enable interrupts?
-    outb( eth_nic_base+D8390_P0_IMR, 0xFF );
-    //outb( eth_nic_base+D8390_P0_IMR, D8390_ISR_PRX|D8390_ISR_PTX|D8390_ISR_RXE|D8390_ISR_TXE );
-
+    ne_ei(dev);
 
     pvt->active = 1;
 
@@ -282,19 +319,31 @@ static void ne_interrupt( void *_dev )
 
     // TODO ask thread to reset card
 
+#if NE2000_INTR
+
     if( status & D8390_ISR_PRX )
     {
         // some reception
-
+        hal_sem_release( &(pvt->recv_interrupt_sem) );
     }
 
+    if( status & D8390_ISR_PTX )
+    {
+        // some xmission
+        hal_sem_release( &(pvt->send_interrupt_sem) );
+    }
+
+    if( status & (D8390_ISR_RXE|D8390_ISR_TXE) )
+        hal_sem_release( &(pvt->reset_sem) );
+
+#endif
 }
 
 
 
 static void ne2000_thread(void *_dev)
 {
-    hal_set_thread_name("Ne2000Drv");
+    hal_set_thread_name("Ne2kDrv");
 
     phantom_device_t * dev = _dev;
     struct ne *pvt = dev->drv_private;
@@ -308,20 +357,19 @@ static void ne2000_thread(void *_dev)
 
         SHOW_FLOW0( 1, "Thread ready, wait 4 sema" );
 
-#if NE2000_INTR
-        hal_sem_acquire( &(pvt->interrupt_sem) );
-#else
-        // XXX BUG DUMB CODE
-        while(pvt->interrupt_count <= 0)
-            hal_sleep_msec(200);
-#endif
+        hal_sem_acquire( &(pvt->reset_sem) );
 
-        pvt->interrupt_count--;
+        // XXX BUG DUMB CODE
+        //while(pvt->interrupt_count <= 0)            hal_sleep_msec(200);
+        //pvt->interrupt_count--;
 
 
         // TODO reset card on some errors
 
-        //SHOW_FLOW( 1, "Finished iteration, status = 0x%x", read_csr(nic, PCNET_CSR_STATUS));
+        //SHOW_FLOW( 1, "Reset card, status = 0x%x", read_csr(nic, PCNET_CSR_STATUS));
+        SHOW_ERROR0( 0, "Reset card");
+        ne_reset(dev);
+        ne_ei(dev);
     }
 
 }
@@ -355,6 +403,34 @@ static void enable_multicast(phantom_device_t * dev)
     }
     outb( eth_nic_base + D8390_P0_COMMAND, D8390_COMMAND_RD2 + D8390_COMMAND_PS0 );
     outb( eth_nic_base + D8390_P0_RCR, 4 | 0x08 );
+}
+
+
+
+/**************************************************************************
+ NE_PROBE0 - Look for an adapter on the ISA bus
+ **************************************************************************/
+static errno_t ne_probe0(unsigned int ioaddr)
+{
+    //From the eCos driver
+    unsigned int regd;
+    unsigned int state;
+
+
+    state = inb(ioaddr);
+    outb(ioaddr, D8390_COMMAND_RD2 | D8390_COMMAND_PS1 | D8390_COMMAND_STP);
+    regd = inb(ioaddr + D8390_P0_TCR);
+
+    //phantom_spinwait(100);
+
+    if(inb(ioaddr + D8390_P0_TCR))
+    {
+        outb(ioaddr, state);
+        outb(ioaddr + D8390_P0_TCR, regd);
+        return ENXIO;
+    }
+
+    return 0;
 }
 
 
@@ -490,27 +566,6 @@ static void eth_pio_write( phantom_device_t * dev,
 }
 
 
-/**************************************************************************
- NE_PROBE1 - Look for an adapter on the ISA bus
- **************************************************************************/
-static errno_t ne_probe1(int ioaddr) {
-    //From the eCos driver
-    unsigned int regd;
-    unsigned int state;
-
-
-    state = inb(ioaddr);
-    outb(ioaddr, D8390_COMMAND_RD2 | D8390_COMMAND_PS1 | D8390_COMMAND_STP);
-    regd = inb(ioaddr + D8390_P0_TCR);
-
-    if (inb(ioaddr + D8390_P0_TCR)) {
-        outb(ioaddr, state);
-        outb(ioaddr + D8390_P0_TCR, regd);
-        return ENXIO;
-    }
-
-    return 0;
-}
 
 
 
@@ -565,6 +620,9 @@ static int ne_write(phantom_device_t * dev, const void *buf, int in_buflen )
         return ERR_INVALID_ARGS;
 
     // TODO sleep until have place in buf
+#if NE2000_INTR
+    hal_sem_acquire( &(pvt->send_interrupt_sem) );
+#endif
 
     eth_pio_write( dev, buf, pvt->eth_tx_start << 8, buflen);
 
@@ -668,6 +726,12 @@ static void ne_reset(phantom_device_t * dev)
     outb( eth_nic_base+D8390_P0_RCR, 4 ); /* allow rx broadcast frames */
 
     enable_multicast(dev);
+
+#if NE2000_INTR
+    // Release send sema once so that we'll xmit first packet without a problem
+    hal_sem_release( &(pvt->send_interrupt_sem) );
+#endif
+
 }
 
 
@@ -806,9 +870,15 @@ static int ne_read( struct phantom_device *dev, void *buf, int len)
     if(len < ETHERNET_MAX_SIZE)
         return ERR_VFS_INSUFFICIENT_BUF;
 
+    struct ne *pvt = dev->drv_private;
+
     int ret = 0;
     do {
         SHOW_FLOW( 7, "poll %d bytes", len );
+
+#if NE2000_INTR
+        hal_sem_acquire( &(pvt->recv_interrupt_sem) );
+#endif
         ret = ne_poll(dev, buf, len);
         if( ret <= 0 )
             hal_sleep_msec(200); // BUG! POLLING!

@@ -15,9 +15,9 @@
 
 #define DEBUG_MSG_PREFIX "TRFS"
 #include "debug_ext.h"
-#define debug_level_flow 0
+#define debug_level_flow 2
 #define debug_level_error 10
-#define debug_level_info 0
+#define debug_level_info 10
 
 #include "net.h"
 #include "udp.h"
@@ -77,7 +77,7 @@ static int connect_trfs(void)
 
     trfs_addr.addr.len = 4;
     trfs_addr.addr.type = ADDR_TYPE_IP;
-    NETADDR_TO_IPV4(trfs_addr.addr) = IPV4_DOTADDR_TO_ADDR(192, 168, 1, 101);
+    NETADDR_TO_IPV4(trfs_addr.addr) = IPV4_DOTADDR_TO_ADDR(192, 168, 1, 106);
 
     int rc;
     if( 0 != (rc = udp_bind(trfs_socket, &trfs_addr)) )
@@ -116,7 +116,7 @@ static errno_t trfs_send(void *pkt, int pktsize)
 
 static int trfs_recv(void *pkt, int pktsize)
 {
-    SHOW_FLOW0( 1, "receiving" );
+    SHOW_FLOW0( 3, "receiving" );
     return udp_recvfrom(trfs_socket, pkt, pktsize, &trfs_addr, 0, 0);
 }
 
@@ -150,7 +150,7 @@ static int getIoId()
 
 trfs_queue_t *findRequest( trfs_fio_t *recvFio, u_int32_t type )
 {
-    SHOW_FLOW( 2, "look for req such as fid %d ioid %d nSect %d start %ld", recvFio->fileId, recvFio->ioId, recvFio->nSectors, recvFio->startSector);
+    SHOW_FLOW( 6, "look for req such as fid %d ioid %d nSect %d start %ld", recvFio->fileId, recvFio->ioId, recvFio->nSectors, recvFio->startSector);
 
     trfs_queue_t *elt;
     hal_mutex_lock(&lock);
@@ -256,7 +256,7 @@ void trfs_process_received_data(trfs_queue_t *qe, trfs_fio_t *fio, void *data)
         SHOW_ERROR0( 0, "TRFS: firstIn >= oneAfterReq" );
         return;
     }
-    SHOW_FLOW0( 1, "got data" );
+    SHOW_FLOW0( 7, "got data" );
 
     int64_t _len = (int64_t) (oneAfterIn - firstIn);
 
@@ -443,7 +443,7 @@ static void trfs_recv_thread(void *arg)
 
         trfs_pkt_t *rq = (trfs_pkt_t *)buf;
 
-        SHOW_FLOW( 1, "got pkt type %d", rq->type );
+        SHOW_FLOW( 6, "got pkt type %d", rq->type );
 
         if(rq->sessionId != sessionId)
         {
@@ -702,7 +702,7 @@ static void test_report( struct pager_io_request *req, int write )
 //static
 void trfs_testrq()
 {
-#if 0
+#if 1
     phantom_disk_partition_t *p = phantom_create_trfs_partition_struct( 1024 );
 
 #if 1
