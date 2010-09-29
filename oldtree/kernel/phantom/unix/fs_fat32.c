@@ -213,9 +213,7 @@ uufile_t *fat32_mount(errno_t *err, uufile_t *mount_point, uufile_t *device)
 
     f32->dev = device;
 
-    // TODO muat pass 1 for last parameter and have partitions processed
-    // elsewhere
-    if(!FAT32_InitFAT(f32,0))
+    if(!FAT32_InitFAT(f32,1))
     {
         destroy_uufile(ret);
         *err = EFTYPE;
