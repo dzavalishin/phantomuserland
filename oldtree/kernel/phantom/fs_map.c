@@ -41,8 +41,8 @@ static fs_probe_t fs_drivers[] =
 {
 
     { "Phantom", 	fs_probe_phantom,	0 	 	},
-    { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
-//    { "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
+//    { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
+    { "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
     //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
     { "CD",  		fs_probe_cd, 	 	0		},
 
@@ -94,7 +94,7 @@ errno_t fs_probe_phantom(phantom_disk_partition_t *p)
     int i;
     for( i = 0; i < nsbpos; i++ )
     {
-        if( phantom_sync_read_disk( p, buf, sbpos[i], 1 ) )
+        if( phantom_sync_read_block( p, buf, sbpos[i], 1 ) )
             continue;
         if( phantom_calc_sb_checksum( sb ) )
         {
@@ -122,7 +122,7 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
     while(cd_sector < 64)
     {
 
-        if( phantom_sync_read_disk( p, buf, cd_sector * 4, 4 ) )
+        if( phantom_sync_read_sector( p, buf, cd_sector * 4, 4 ) )
             return EINVAL;
 
         if( strncmp( buf, cd_marker, 7 ) || (buf[7] != 0) )
@@ -162,7 +162,8 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p)
         return EINVAL;
     }
 
-    if( phantom_sync_read_disk( p, buf, 0, 1 ) )
+
+    if( phantom_sync_read_sector( p, buf, 0, 1 ) )
     {
         SHOW_ERROR( 0, "%s can't read sector 0", p->name );
         return EINVAL;
@@ -227,7 +228,7 @@ static int f32r(struct f32 *impl, int sector, void *buf)
 {
     phantom_disk_partition_t *p = (void*)impl->dev;
 
-    if( phantom_sync_read_disk( p, buf, sector, 1 ) )
+    if( phantom_sync_read_sector( p, buf, sector, 1 ) )
     {
         SHOW_ERROR( 0, "%s can't read sector %d", p->name, sector );
         return 0;
@@ -241,7 +242,7 @@ static int f32w(struct f32 *impl, int sector, void *buf)
     (void) buf;
     phantom_disk_partition_t *p = (void*)impl->dev;
 
-    //if( phantom_sync_write_disk( p, buf, sector, 1 ) )
+    //if( phantom_sync_write_sector( p, buf, sector, 1 ) )
     {
         SHOW_ERROR( 0, "%s can't write sector %d", p->name, sector );
         return 0;

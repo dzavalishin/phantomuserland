@@ -67,8 +67,13 @@ errno_t phantom_register_disk_drive(phantom_disk_partition_t *p);
 
 
 // These work with 4096 byte blocks
-errno_t phantom_sync_read_disk( phantom_disk_partition_t *, void *to, long blockNo, int nBlocks );
-errno_t phantom_sync_write_disk( phantom_disk_partition_t *, const void *from, long blockNo, int nBlocks );
+errno_t phantom_sync_read_block( phantom_disk_partition_t *, void *to, long blockNo, int nBlocks );
+errno_t phantom_sync_write_block( phantom_disk_partition_t *, const void *from, long blockNo, int nBlocks );
+
+// These work with native sized (512byte) sectors 
+errno_t phantom_sync_read_sector( phantom_disk_partition_t *, void *to, long sectorNo, int nSectors );
+errno_t phantom_sync_write_sector( phantom_disk_partition_t *, const void *from, long sectorNo, int nSectors );
+
 
 /** Start async disk io operation */
 void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq );

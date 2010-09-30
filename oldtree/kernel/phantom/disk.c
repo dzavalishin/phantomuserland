@@ -84,6 +84,7 @@ static errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *
     if( checkRange( p, rq->blockNo, rq->nSect ) )
         return EINVAL;
 
+    SHOW_FLOW( 9, "part io i sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
     rq->blockNo += p->shift;
 
     p->base->asyncIo( p, rq );
@@ -129,8 +130,6 @@ void io_wake( pager_io_request *rq )
 static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks, int isWrite )
 {
     assert( p->block_size < PAGE_SIZE );
-    int m = PAGE_SIZE/p->block_size;
-
 
     pager_io_request rq;
 
@@ -139,8 +138,8 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     rq.phys_page = (physaddr_t)phystokv(to);
     rq.disk_page = blockNo;
 
-    rq.blockNo = blockNo*m;
-    rq.nSect   = nBlocks*m;
+    rq.blockNo = blockNo;
+    rq.nSect   = nBlocks;
 
     rq.rc = 0;
 
@@ -182,15 +181,29 @@ ret:
     return ret;
 }
 
-errno_t phantom_sync_read_disk( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks )
+errno_t phantom_sync_read_block( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks )
 {
-    return startSync( p, to, blockNo, nBlocks, 0 );
+    int m = PAGE_SIZE/p->block_size;
+    return startSync( p, to, blockNo*m, nBlocks*m, 0 );
 }
 
-errno_t phantom_sync_write_disk( phantom_disk_partition_t *p, const void *to, long blockNo, int nBlocks )
+errno_t phantom_sync_write_block( phantom_disk_partition_t *p, const void *to, long blockNo, int nBlocks )
 {
-    return startSync( p, (void *)to, blockNo, nBlocks, 1 );
+    int m = PAGE_SIZE/p->block_size;
+    return startSync( p, (void *)to, blockNo*m, nBlocks*m, 1 );
 }
+
+errno_t phantom_sync_read_sector( phantom_disk_partition_t *p, void *to, long sectorNo, int nSectors )
+{
+    return startSync( p, to, sectorNo, nSectors, 0 );
+}
+
+errno_t phantom_sync_write_sector( phantom_disk_partition_t *p, const void *to, long sectorNo, int nSectors )
+{
+    return startSync( p, (void *)to, sectorNo, nSectors, 1 );
+}
+
+
 
 
 #else
@@ -325,10 +338,13 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
     if(!lookAt ) return;
 
     //p->syncRead( p, buf, 0, 1 );
-    if( phantom_sync_read_disk( p, buf, 0, 1 ))
+    if( phantom_sync_read_sector( p, buf, 0, 1 ))
         return;
 
-    SHOW_FLOW0( 1, "Got block 0" );
+    //hexdump(buf, 512, "", 0);
+
+
+    //SHOW_FLOW0( 1, "Got block 0" );
     if( debug_level_flow > 10) hexdump( buf, sizeof(buf), "", 0);
 
     if( (buf[0x1FE] != 0x55) || (buf[0x1FF] != 0xAA) )
