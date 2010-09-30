@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "VirtIo"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 9
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -30,6 +30,10 @@ static void virtio_release_descriptor_index(virtio_ring_t *r, int toRelease);
 static int virtio_get_free_descriptor_index(virtio_ring_t *r);
 
 static void virtio_notify( virtio_device_t *vd, int index );
+
+void virto_ring_dump(virtio_ring_t *r);
+
+
 
 static void vio_irq_handler( void *arg )
 {
@@ -72,6 +76,8 @@ int virtio_probe( virtio_device_t *vd, pci_cfg_t *pci )
     vd->basereg = pci->base[0];
     vd->pci = pci;
 
+    virtio_set_status( vd, VIRTIO_CONFIG_S_ACKNOWLEDGE );
+
     vd->host_features = virtio_get_features( vd );//inl(basereg+VIRTIO_PCI_HOST_FEATURES);
 
     if( (~(vd->host_features)) & vd->guest_features )
@@ -87,7 +93,8 @@ int virtio_probe( virtio_device_t *vd, pci_cfg_t *pci )
     //outl(basereg+VIRTIO_PCI_GUEST_FEATURES,  );
     virtio_set_features( vd, vd->guest_features );
 
-    virtio_set_status( vd, VIRTIO_CONFIG_S_ACKNOWLEDGE );
+    //moved up
+    //virtio_set_status( vd, VIRTIO_CONFIG_S_ACKNOWLEDGE );
 
     if( hal_irq_alloc( pci->interrupt, vio_irq_handler, vd, HAL_IRQ_SHAREABLE ) )
     {
@@ -206,11 +213,13 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
 
     int npages = (size-1+VIRTIO_PCI_VRING_ALIGN)/VIRTIO_PCI_VRING_ALIGN;
 
-    SHOW_FLOW( 3, "allocating %d pages for vring, ", npages );
+    SHOW_FLOW( 3, "allocating %d pages for vring of size %d ", npages, num );
 
     physaddr_t result;
     hal_alloc_phys_pages( &result, npages);
     void *buffer = phystokv(result);
+
+    // TODO map with nocache/wthrough
     hal_pages_control( result, buffer, npages, page_map, page_rw );
 
     memset( buffer, size, 0 );
@@ -227,6 +236,11 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     r->nAdded = 0;
     r->freeHead = 0;
     r->lastUsedIdx = 0;
+    r->totalSize = num;
+
+    virto_ring_dump(r);
+    SHOW_FLOW0(8, "will vring_init");
+    vring_init( &(r->vr), num, buffer, VIRTIO_PCI_VRING_ALIGN );
 
     int i;
     for( i = 0; i < num-1; i++ )
@@ -237,14 +251,28 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     r->vr.desc[num-1].flags = 0;
     r->vr.desc[num-1].next = -1;
 
-    vring_init( &(r->vr), num, buffer, VIRTIO_PCI_VRING_ALIGN );
-
+    virto_ring_dump(r);
 
     vd->rings[index] = r;
+    SHOW_FLOW0(8, "will virtio_set_q_physaddr");
     virtio_set_q_physaddr( vd, index, result );
+
+    //virto_ring_dump(r);
 }
 
 
+
+void virto_ring_dump(virtio_ring_t *r)
+{
+    if( debug_level_flow < 10 ) return;
+    printf("VRing: ");
+    int i;
+    for( i = 0; i < r->totalSize; i++ )
+    {
+        printf("->%d/%x\t", r->vr.desc[i].next, r->vr.desc[i].flags );
+    }
+    printf("\n");
+}
 
 
 
@@ -442,9 +470,13 @@ void virtio_kick(virtio_device_t *vd, int qindex)
 // must be called in lock
 static int virtio_get_free_descriptor_index(virtio_ring_t *r)
 {
+    // TODO assert spin locked
     assert(r->freeHead >= 0);
 
     int ret = r->freeHead;
+
+    SHOW_FLOW( 5, "r->freeHead=%d", r->freeHead );
+    virto_ring_dump(r);
 
     r->freeHead = r->vr.desc[r->freeHead].next;
 
@@ -454,6 +486,7 @@ static int virtio_get_free_descriptor_index(virtio_ring_t *r)
 // must be called in lock
 static void virtio_release_descriptor_index(virtio_ring_t *r, int toRelease)
 {
+    // TODO assert spin locked
     if(r->freeHead < 0)
         r->vr.desc[toRelease].flags = 0;
     else
