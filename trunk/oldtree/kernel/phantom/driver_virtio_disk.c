@@ -53,7 +53,7 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
     printf("Status is: 0x%x\n", status );
 
 
-    printf("Features are: %b\n", vdev.host_features, "\020\0BARRIER\1SIZE_MAX\2SEG_MAX\4GEOM\5RDONLY\6BLK_SIZE" );
+    printf("Features are: %b\n", vdev.host_features, "\020\1BARRIER\2SIZE_MAX\3SEG_MAX\5GEOM\6RDONLY\7BLK_SIZE" );
 
     rodisk = vdev.host_features & (1<<VIRTIO_BLK_F_RO);
     if(rodisk)
