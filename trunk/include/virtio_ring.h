@@ -9,6 +9,7 @@
  *
  * Copyright Rusty Russell IBM Corporation 2007. */
 #include <phantom_types.h>
+#include <sys/cdefs.h>
 
 /* This marks a buffer as continuing via the next field. */
 #define VRING_DESC_F_NEXT	1
@@ -35,14 +36,14 @@ struct vring_desc
 	u_int16_t flags;
 	/* We chain unused descriptors via this, too */
 	u_int16_t next;
-};
+} __packed;
 
 struct vring_avail
 {
 	u_int16_t flags;
 	u_int16_t idx;
 	u_int16_t ring[];
-};
+} __packed;
 
 /* u32 is used here for ids for padding reasons. */
 struct vring_used_elem
@@ -51,14 +52,14 @@ struct vring_used_elem
 	u_int32_t id;
 	/* Total length of the descriptor chain which was used (written to) */
 	u_int32_t len;
-};
+} __packed;
 
 struct vring_used
 {
 	u_int16_t flags;
 	u_int16_t idx;
 	struct vring_used_elem ring[];
-};
+} __packed;
 
 struct vring {
 	unsigned int num;
@@ -68,7 +69,7 @@ struct vring {
 	struct vring_avail *avail;
 
 	struct vring_used *used;
-};
+} __packed;
 
 /* The standard layout for the ring is a continuous chunk of memory which looks
  * like this.  We assume num is a power of 2.

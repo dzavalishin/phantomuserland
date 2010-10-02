@@ -4,6 +4,7 @@
  * compatible drivers/servers. */
 #include <phantom_types.h>
 #include <virtio_config.h>
+#include <sys/cdefs.h>
 
 /* The ID for virtio_net */
 #define VIRTIO_ID_NET	1
@@ -27,7 +28,8 @@ struct virtio_net_config
 {
 	/* The config defining mac address (if VIRTIO_NET_F_MAC) */
 	u_int8_t mac[6];
-} __attribute__((packed));
+} __packed;
+//} __attribute__((packed));
 
 /* This is the first element of the scatter-gather list.  If you don't
  * specify GSO or CSUM features, you can simply ignore the header. */
@@ -45,13 +47,15 @@ struct virtio_net_hdr
 	u_int16_t gso_size;		/* Bytes to append to hdr_len per frame */
 	u_int16_t csum_start;	/* Position to start checksumming from */
 	u_int16_t csum_offset;	/* Offset after that to place checksum */
-};
+} __packed;
+//};
 
 /* This is the version of the header to use when the MRG_RXBUF
  * feature has been negotiated. */
 struct virtio_net_hdr_mrg_rxbuf {
 	struct virtio_net_hdr hdr;
 	u_int16_t num_buffers;	/* Number of merged rx buffers */
-};
+} __packed;
+//};
 
 #endif /* _VIRTIO_NET_H */

@@ -3,6 +3,7 @@
 /* This header is BSD licensed so anyone can use the definitions to implement
  * compatible drivers/servers. */
 #include <virtio_config.h>
+#include <sys/cdefs.h>
 
 /* The ID for virtio_balloon */
 #define VIRTIO_ID_BALLOON	5
@@ -19,5 +20,5 @@ struct virtio_balloon_config
 	__le32 num_pages;
 	/* Number of pages we've actually got in balloon. */
 	__le32 actual;
-};
+} __packed;
 #endif /* _VIRTIO_BALLOON_H */
