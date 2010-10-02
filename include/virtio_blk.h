@@ -4,6 +4,7 @@
  * compatible drivers/servers. */
 #include <phantom_types.h>
 #include <virtio_config.h>
+#include <sys/cdefs.h>
 
 /* The ID for virtio_block */
 #define VIRTIO_ID_BLOCK	2
@@ -32,7 +33,8 @@ struct virtio_blk_config
 	} geometry;
 	/* block size of device (if VIRTIO_BLK_F_BLK_SIZE) */
 	u_int32_t blk_size;
-} __attribute__((packed));
+} __packed;
+//} __attribute__((packed));
 
 /* These two define direction. */
 #define VIRTIO_BLK_T_IN		0
@@ -53,7 +55,7 @@ struct virtio_blk_outhdr
 	u_int32_t ioprio;
 	/* Sector (ie. 512 byte offset) */
 	u_int32_t sector;
-};
+} __packed;
 
 /* And this is the final byte of the write scatter-gather list. */
 #define VIRTIO_BLK_S_OK		0
@@ -64,7 +66,7 @@ struct virtio_blk_outhdr
 struct virtio_blk_inhdr
 {
       unsigned char status;
-};
+} __packed;
 
 
 #endif /* _VIRTIO_BLK_H */
