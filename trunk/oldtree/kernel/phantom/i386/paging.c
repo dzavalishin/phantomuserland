@@ -1,3 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * ia32 page table support
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "paging"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include "../config.h"
 #include <malloc.h>
 #include <phantom_libc.h>

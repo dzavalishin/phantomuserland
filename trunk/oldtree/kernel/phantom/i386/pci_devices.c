@@ -1,3 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * PCI type/vendor/dev tables
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "pci"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include "pci_devices.h"
 #include <phantom_types.h>
 

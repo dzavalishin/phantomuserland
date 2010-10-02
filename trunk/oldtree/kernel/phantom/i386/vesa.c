@@ -1,3 +1,20 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * VESA video support
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "vesa"
+#include "debug_ext.h"
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <phantom_libc.h>
 #include <i386/vesa.h>
 #include <hal.h>
@@ -97,9 +114,9 @@ void phantom_init_vesa(void)
 //setTextVideoMode();
 
     char *oem_name = farTo32(vi->oem_ptr);
-    printf("VESA ver %X ptr %X, OEM '%s'\n", vi->version, vi->video_ptr, oem_name );
+    SHOW_INFO( 0, "VESA ver %X ptr %X, OEM '%s'", vi->version, vi->video_ptr, oem_name );
 
-    printf("Total %dK mem, cap: %b\n", 64*vi->total_memory/1024, vi->capabilities, "\020\01DAC 8bit\02not VGA compatible\03RAMDAC blank\04STEREO\05STEREO EVC" );
+    SHOW_INFO( 1, "Total %dK mem, cap: %b", 64*vi->total_memory/1024, vi->capabilities, "\020\01DAC 8bit\02not VGA compatible\03RAMDAC blank\04STEREO\05STEREO EVC" );
 //getchar();
     //struct VBEModeInfoBlock *vib = farTo32(vi->video_ptr);
 
@@ -114,7 +131,7 @@ void phantom_init_vesa(void)
     u_int16_t *modes = modes_buf;
 
 
-    printf("Lookup VESA modes:\n");
+    SHOW_FLOW0( 2, "Lookup VESA modes:");
     for(; *modes != 0xFFFF; modes++ )
     {
         u_int16_t mode = *modes;
@@ -129,7 +146,7 @@ void phantom_init_vesa(void)
 
         {
             const char *map = "\020\1OK\2RSV\3TTY\4COLR\5GFX\6~VGA\7~WIN\10LINBUF\11DSCAN\012INTRLACE\013TRIBUF\014STEREO\015DUALSTART";
-            printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
+            if( debug_level_flow >= 2 ) printf("%02X, %4d*%4d/%2d, mem %X attr=%b: ",
                    mode, 
                    info.x_resolution, info.y_resolution, info.bits_per_pixel,
                    info.phys_base_ptr,
@@ -138,51 +155,51 @@ void phantom_init_vesa(void)
         }
         if(! (info.attributes & 0x08 ))
         {
-            printf("not color\n");
+            if( debug_level_flow >= 2 ) printf("not color\n");
             continue;
         }
 
         if(! (info.attributes & 0x80 ))
         {
-            printf("not linear\n");
+            if( debug_level_flow >= 2 ) printf("not linear\n");
             continue;
         }
 
         if(! (info.attributes & 0x10 ))
         {
-            printf("not graphics\n");
+            if( debug_level_flow >= 2 ) printf("not graphics\n");
             continue;
         }
 
 #if PREFER_32BPP
         if( info.bits_per_pixel != 24 && info.bits_per_pixel != 32 )
         {
-            printf("not 24 or 32 bpp\n");
+            if( debug_level_flow >= 2 ) printf("not 24 or 32 bpp\n");
             continue;
         }
 #else
         if( info.bits_per_pixel != 24 )
         {
-            printf("not 24bpp\n");
+            if( debug_level_flow >= 2 ) printf("not 24bpp\n");
             continue;
         }
 #endif
         if( info.memory_model != 6 )
         {
-            printf("not direct color mem model (%d)\n", info.memory_model );
+            if( debug_level_flow >= 2 ) printf("not direct color mem model (%d)\n", info.memory_model );
             continue;
         }
 
         if( info.num_planes > 1 )
         {
-            printf("too much planes\n");
+            if( debug_level_flow >= 2 ) printf("too much planes\n");
             continue;
         }
 
 #if PREFER_32BPP
         if( info.bits_per_pixel < best_bpp )
         {
-            printf("lower bpp\n");
+            if( debug_level_flow >= 2 ) printf("lower bpp\n");
             continue;
         }
 #endif
@@ -198,23 +215,24 @@ void phantom_init_vesa(void)
             best_bpp = info.bits_per_pixel;
             best_mode = mode;
             best_info = info;
-            printf("better\n");
+            if( debug_level_flow >= 2 ) printf("better\n");
         }
         else
-            printf("worse\n");
+            if( debug_level_flow >= 2 ) printf("worse\n");
 
     }
 
     if( best_width < 0 )
     {
-        printf("No suitable VESA mode found\n");
+        //printf("No suitable VESA mode found\n");
+        SHOW_ERROR0( 0, "No suitable VESA mode found");
 //pressEnter("no VESA");
         return;
     }
 
     //u_int32_t physVidmemPtr = best_info.phys_base_ptr;
 
-    printf("VESA mode %d %d*%d %dbpp selected, mem at %X\n",
+    SHOW_INFO( 0, "VESA mode %d %d*%d %dbpp selected, mem at %X",
            best_mode,
            best_info.x_resolution, best_info.y_resolution,
            best_info.bits_per_pixel, best_info.phys_base_ptr
@@ -236,11 +254,11 @@ void phantom_init_vesa(void)
 
 
 #if VESA_ENFORCE
-    printf("Setting VESA video mode %d\n", best_mode );
+    SHOW_FLOW( 2, "Setting VESA video mode %d", best_mode );
     if( setVesaMode( best_mode | VBE_MODE_LINEAR ) )
     {
         // TODO reset VGA text mode here!
-        printf("Failed to set VESA video mode %d, VESA is assumed to be dead\n", best_mode );
+        SHOW_ERROR( 0, "Failed to set VESA video mode %d, VESA is assumed to be dead", best_mode );
         return;
     }
 

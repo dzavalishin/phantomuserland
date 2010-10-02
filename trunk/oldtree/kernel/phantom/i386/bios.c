@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * PC BIOS code
  *
@@ -12,7 +12,7 @@
 #include "debug_ext.h"
 #define debug_level_flow 6
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 2
 
 #include <string.h>
 #include <pc/bios.h>
@@ -224,7 +224,7 @@ phantom_device_t * driver_etc_smbios_probe( const char *name, int stage )
                ep->SMBIOS_Major, ep->SMBIOS_Minor);
 
     if(bcd2bin(ep->SMBIOS_BCD_Revision))
-        SHOW_INFO( 0, "SMBios BCD Revision: %u.%u",
+        SHOW_INFO( 4, "SMBios BCD Revision: %u.%u",
                    bcd2bin(ep->SMBIOS_BCD_Revision >> 4),
                    bcd2bin(ep->SMBIOS_BCD_Revision & 0x0f));
 
