@@ -1,3 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * ia32 PCI support
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "pci"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 /* $Id$
  **
  ** Copyright 1999 Brian J. Swetland. All rights reserved.
@@ -6,11 +22,6 @@
 
 #include <i386/pio.h>
 #include <phantom_libc.h>
-
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <fcntl.h>
-//#include <i386/io.h>
 
 #include <i386/pci.h>
 

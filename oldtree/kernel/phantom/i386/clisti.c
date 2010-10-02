@@ -8,7 +8,7 @@ void        hal_cli()
 
 void        hal_sti()
 {
-	__asm __volatile("sti");
+    __asm __volatile("sti");
 }
 
 int hal_is_sti()

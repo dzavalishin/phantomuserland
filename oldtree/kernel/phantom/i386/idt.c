@@ -1,3 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * ia32 idt support
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "idt"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include "../config.h"
 
 #include <i386/seg.h>
