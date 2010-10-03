@@ -132,6 +132,8 @@ static void dump_arp_packet(arp_packet *arp)
     dprintf(" ");
     dump_ipv4_addr(ntohl(arp->target_ipv4));
     dprintf(" op 0x%x\n", ntohs(arp->op));
+#else
+    (void)arp;
 #endif
 }
 

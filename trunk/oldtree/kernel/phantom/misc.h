@@ -21,10 +21,11 @@ extern int bootflag_no_vesa;
 int main();
 
 
+void phantom_map_mem_equally(void);
 
 
 
-
+void port_init(void);
 
 
 void phantom_start_video_driver(void);
@@ -102,6 +103,7 @@ void phantom_unix_fs_init(void);
 // -----------------------------------------------------------------------
 
 void check_global_lock_entry_count(void);
+void pressEnter(char *text);
 
 // -----------------------------------------------------------------------
 // Tests
@@ -110,6 +112,10 @@ void check_global_lock_entry_count(void);
 
 void run_test( const char *test_name, const char *test_parm );
 
+
+void trfs_testrq(void);
+void init_tetris(void);
+void connect_ide_io(void);
 
 // -----------------------------------------------------------------------
 // Scheduler

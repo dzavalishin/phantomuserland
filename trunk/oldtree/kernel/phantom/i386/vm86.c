@@ -10,10 +10,36 @@
 #include <i386/vesa.h>
 
 #include <hal.h>
+#include <threads.h>
 
 #include "vm86.h"
 
 #include "../misc.h"
+#include "ia32private.h"
+
+// Against warnings
+#if 1
+
+#define inb_W(p) __inb(p)
+#define inw_W(p) __inw(p)
+#define inl_W(p) __inl(p)
+
+#define outb_W(p,v) __outb(p,v)
+#define outw_W(p,v) __outw(p,v)
+#define outl_W(p,v) __outl(p,v)
+
+#else
+
+#define inb_W(p) inb(p)
+#define inw_W(p) inw(p)
+#define inl_W(p) inl(p)
+
+#define outb_W(p,v) outb(p,v)
+#define outw_W(p,v) outw(p,v)
+#define outl_W(p,v) outl(p,v)
+
+#endif
+
 
 static int vm86_ready = 0;
 
@@ -292,7 +318,7 @@ vm86_emulate(struct trap_state *ts)
             {
                 u_int8_t port = fubyte(++addr);
                 inc_ip++;
-                outl( port, ts->eax );
+                outl_W( port, ts->eax );
                 goto retok;
             }
         case 0xED: /* inl eax, (%dx) */
@@ -305,7 +331,7 @@ vm86_emulate(struct trap_state *ts)
             {
                 u_int8_t port = fubyte(++addr);
                 inc_ip++;
-                ts->eax = inl( port );
+                ts->eax = inl_W( port );
                 goto retok;
             }
 
@@ -405,7 +431,7 @@ vm86_emulate(struct trap_state *ts)
         {
         u_int8_t port = fubyte(++addr);
         inc_ip++;
-        outb( port, ts->eax & 0xFFu );
+        outb_W( port, ts->eax & 0xFFu );
         goto retok;
         }
 
@@ -413,7 +439,7 @@ vm86_emulate(struct trap_state *ts)
         {
         u_int8_t port = fubyte(++addr);
         inc_ip++;
-        outw( port, ts->eax & 0xFFFFu );
+        outw_W( port, ts->eax & 0xFFFFu );
         goto retok;
         }
 
@@ -421,14 +447,14 @@ vm86_emulate(struct trap_state *ts)
         {
             u_int8_t port = fubyte(++addr);
             inc_ip++;
-            ts->eax = (ts->eax & ~0xFFu) | (inb(port) & 0xFFu);
+            ts->eax = (ts->eax & ~0xFFu) | (inb_W(port) & 0xFFu);
             goto retok;
         }
     case 0xE5: /* inw ax, port */
         {
             u_int8_t port = fubyte(++addr);
             inc_ip++;
-            ts->eax = (ts->eax & ~0xFFFFu) | (inw(port) & 0xFFFFu);
+            ts->eax = (ts->eax & ~0xFFFFu) | (inw_W(port) & 0xFFFFu);
             goto retok;
         }
     case 0xEC: /* inb al, (%dx) */

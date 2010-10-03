@@ -179,8 +179,8 @@ static int ignore_handler(struct trap_state *ts)
 static timedcall_t sched_timer =
 {
     (void *)phantom_scheduler_time_interrupt,
-    0, 20
-
+    0, 20,
+    0, 0, { 0, 0 }, 0
 };
 
 void phantom_turn_off_pic_scheduler_timer(void)

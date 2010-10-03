@@ -27,6 +27,7 @@
 
 #include "unix/fs_fat32.h"
 #include "unix/fat32/define.h"
+#include "unix/fat32/FAT32_Access.h"
 
 
 

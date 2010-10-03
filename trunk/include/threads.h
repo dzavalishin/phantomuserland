@@ -134,6 +134,8 @@ void    hal_disable_preemption(void);
 void    hal_enable_preemption(void);
 
 
+//! Internal kernel debug print only
+void phantom_dump_threads_buf(char *buf, int len);
 
 
 

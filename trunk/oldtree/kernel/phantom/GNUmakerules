@@ -21,7 +21,7 @@ prepare::
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 #threads 
-CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d
+CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d
 PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=1 -std=gnu89
 
 

@@ -32,6 +32,7 @@
 #include <wtty.h>
 
 void drv_video_window_explode_event(struct ui_event *e);
+int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait );
 
 
 static void event_push_thread(void);
