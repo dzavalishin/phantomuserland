@@ -1,1 +1,3 @@
-
+store.o: store.c
+	gcc -c store.c
+        
