@@ -1,4 +1,8 @@
 #include <sys/unistd.h>
+#include <user/sys_getset.h>
+#include <phantom_libc.h>
+
+#include "test.h"
 
 extern void exit(int);
 

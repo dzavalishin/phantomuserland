@@ -14,6 +14,7 @@
 #define JIT_H
 
 #include <sys/types.h>
+#include "vm/internal_da.h"
 
 void jit_init(void);
 

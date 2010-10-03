@@ -17,6 +17,7 @@
 
 #include "thread_private.h"
 
+#define VERIFY_DEADLOCK 0
 
 
 static hal_spinlock_t init_lock;
@@ -62,6 +63,7 @@ static void checkinit(hal_mutex_t *m)
     if(ie) hal_sti();
 }
 
+#if VERIFY_DEADLOCK
 static void verify_mutex_deadlock(phantom_thread_t *t)
 {
     hal_mutex_t *m = t->waitmutex;
@@ -76,6 +78,7 @@ static void verify_mutex_deadlock(phantom_thread_t *t)
         m = o->waitmutex;
     }
 }
+#endif
 
 errno_t hal_mutex_lock(hal_mutex_t *m)
 {
@@ -105,8 +108,9 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
 
     GET_CURRENT_THREAD()->waitmutex = m; // just for debug
 
-    //verify_mutex_deadlock(GET_CURRENT_THREAD());
-
+#if VERIFY_DEADLOCK
+    verify_mutex_deadlock(GET_CURRENT_THREAD());
+#endif
     thread_block( THREAD_SLEEP_MUTEX, &(mi->lock) );
     // returns on unblock
     goto nounlock;

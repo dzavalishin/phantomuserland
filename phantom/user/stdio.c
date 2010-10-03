@@ -1,3 +1,5 @@
+#include <user/sys_fio.h>
+
 // min stdio helpers for libc printf to work
 
 int putchar( int c )

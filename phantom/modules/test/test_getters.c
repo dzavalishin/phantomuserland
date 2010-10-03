@@ -1,3 +1,5 @@
+#include <user/sys_getset.h>
+#include <phantom_libc.h>
 
 #include "test.h"
 
@@ -17,6 +19,8 @@ void test_get( const char *name, int val )
 
 int do_test_getters(const char *test_parm)
 {
+	(void)test_parm;
+
     //SYSCALL(getpagesize);
 
     //SYSCALL(personality);
@@ -55,6 +59,7 @@ int do_test_getters(const char *test_parm)
     TEST_SET(setuid);
     TEST_SET(setuid32);
 
+	return 0;
 }
 
 

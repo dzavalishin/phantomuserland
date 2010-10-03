@@ -38,22 +38,27 @@ phantom_thread_t * get_thread(int tid)
  *
 **/
 
-void
+errno_t
 hal_set_thread_priority( int tid, int prio )
 {
     assert( prio >= 0 && prio <= (THREAD_PRIO_HIGHEST|THREAD_PRIO_MOD_REALTIME) );
     phantom_thread_t * t = get_thread(tid);
     assert(t != 0);
-    t->priority = prio;
 
     if( t != GET_CURRENT_THREAD() )
+    {
         printf("Warning! Not self in hal_set_thread_priority()\n");
+        // wrong - thread possibly is on wrong run q!
+        /*
+         t_dequeue_runq(t);
+         t_enqueue_runq(t);
+         */
+        return EINVAL;
+    }
 
-#warning wrong - thread possibly is on wrong run q!
-    /*
-    t_dequeue_runq(t);
-    t_enqueue_runq(t);
-    */
+    t->priority = prio;
+
+    return 0;
 }
 
 /**

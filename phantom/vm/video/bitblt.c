@@ -250,7 +250,7 @@ void drv_video_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, i
             struct rgba_t *w_start = to + ((wline*xsize) + xshift);
 
             //rgba2rgb_move( (void *)s_start, w_start, xlen );
-            bit_mover_from_screen( w_start, (const void *)s_start, xlen );
+            bit_mover_from_screen( w_start, (void *)s_start, xlen );
         }
     }
     else
@@ -263,7 +263,7 @@ void drv_video_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, i
             struct rgba_t *w_start = to + ((wline*xsize) + xshift);
 
             //rgba2rgb_move( (void *)s_start, w_start, xlen );
-            bit_mover_from_screen( w_start, (const void *)s_start, xlen );
+            bit_mover_from_screen( w_start, (void *)s_start, xlen );
         }
     }
 

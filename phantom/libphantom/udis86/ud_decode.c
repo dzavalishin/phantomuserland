@@ -7,7 +7,9 @@
  */
 
 #include "ud_types.h"
-#include "string.h"
+#include <string.h>
+#include <assert.h>
+#include <phantom_libc.h>
 
 
 #include "ud_itab.h"
@@ -1138,10 +1140,13 @@ static int gen_hex( struct ud *u )
   if ( u->error ) return -1; 
   /* output buffer pointe */
   src_hex = ( char* ) u->insn_hexcode;
+  int size = sizeof(u->insn_hexcode);
   /* for each byte used to decode instruction */
   for ( i = 0; i < u->inp_ctr; ++i, ++src_ptr) {
-    sprintf( src_hex, "%02x", *src_ptr & 0xFF );
-    src_hex += 2;
+    int ret = snprintf( src_hex, size, "%02x", *src_ptr & 0xFF );
+    assert( ret > 0 );
+	size -= ret;
+    src_hex += ret;
   }
   return 0;
 }
