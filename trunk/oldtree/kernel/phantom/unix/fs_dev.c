@@ -245,7 +245,7 @@ void devfs_register_dev( phantom_device_t* dev )
 {
     const char *busname = dev->bus ? dev->bus->name : "nobus";
 
-    SHOW_FLOW( 2, "Registering dev %s.%d on bus %s in devfs",
+    SHOW_FLOW( 7, "Registering dev %s.%d on bus %s in devfs",
                dev->name, dev->seq_number,
                busname
                );

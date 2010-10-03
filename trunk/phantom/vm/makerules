@@ -1,10 +1,13 @@
 include ../../config.mk 
 
+all: $(TARGET) pvm_test
+
+
 W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
-libphantom_vm.a: 
-	ar crs $@ $(filter-out pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o,$^)
-	cp $@ ../lib
+#libphantom_vm.a: 
+#	ar crs $@ $(filter-out pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o,$^)
+#	cp $@ ../lib
 
 #winhal.o: winhal.c
 #	gcc $(W32GCC) $^
@@ -25,8 +28,6 @@ OSLIB= ../lib/libphantom_c.a
 endif
 
 
-pvm_test: pvm_main.o nonstandalone.o $(GLLIB)
-	gcc -g -ffreestanding -o $@ $^ $(OSLIB)
+pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a $(EXCLUDED_OBJFILES)
+	gcc -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a
 
-#pvm_test: pvm_main.o nonstandalone.o
-#	gcc -g -ffreestanding -o $@ $^ $(GLLIB)

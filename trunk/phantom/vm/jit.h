@@ -58,12 +58,12 @@ void jit_compile(struct data_area_4_class *da);
     } while(0); \
 
 // =========================================================================
-//                                        XX
-//                  X                      X
-// XX XXX   XXXX   XXXXX    XXXXX          X XXX    XXXX   XX XXX   XXXX
-//  XX  X  X    X   X           X          XX   X  XXXXXX   XX  X  XXXXXX
-//  X   X  X    X   X   X  XXXXXX          X    X  X        X   X  X
-// XXX XXX  XXXX    XXXX   XXXX XX        XXXXXX    XXXXX  XXX XXX  XXXXX
+//                                        **
+//                  *                      *
+// ** ***   ****   *****    *****          * ***    ****   ** ***   ****
+//  **  *  *    *   *           *          **   *  ******   **  *  ******
+//  *   *  *    *   *   *  ******          *    *  *        *   *  *
+// *** ***  ****    ****   **** **        ******    *****  *** ***  *****
 //
 // Don't you EVER remove or change there funcs. Each instance of OS keeps
 // these ordinals in JITted code.

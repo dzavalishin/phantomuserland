@@ -784,8 +784,7 @@ void pvm_exec(struct pvm_object current_thread)
             break;
 
             /**
-             * TODO
-             * A BIG NOTE for object creation
+             * TODO A BIG NOTE for object creation
              *
              * We must be SURE that it is NOT ever possible to pass
              * non-internal object as init data to internal and vice versa!

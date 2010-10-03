@@ -110,9 +110,10 @@ void pvm_root_init(void)
     pvm_root.class_loader = pvm_get_field( root, PVM_ROOT_OBJECT_CLASS_LOADER );
     pvm_root.kernel_environment = pvm_get_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT );
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
+    pvm_root.root_dir = pvm_get_field( root, PVM_ROOT_OBJECT_ROOT_DIR );
 
 
-//#warning cycle through restart objects here and call XXX
+    //cycle through restart objects here and call restart func
 #if 1
     int items = get_array_size(pvm_root.restart_list.data);
 
@@ -176,6 +177,7 @@ static void pvm_save_root_objects()
     pvm_set_field( root, PVM_ROOT_OBJECT_USERS_LIST, pvm_root.users_list );
     pvm_set_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT, pvm_root.kernel_environment );
     pvm_set_field( root, PVM_ROOT_OBJECT_OS_ENTRY, pvm_root.os_entry );
+    pvm_set_field( root, PVM_ROOT_OBJECT_ROOT_DIR, pvm_root.root_dir);
 
 }
 
@@ -259,6 +261,7 @@ static void pvm_create_root_objects()
     pvm_root.kernel_environment = pvm_create_object(pvm_get_array_class());
     pvm_root.restart_list = pvm_create_object( pvm_get_array_class() );
     pvm_root.users_list = pvm_create_object( pvm_get_array_class() );
+    pvm_root.root_dir = pvm_create_directory_object();
 
     ref_saturate_o(pvm_root.threads_list); //Need it?
     ref_saturate_o(pvm_root.kernel_environment); //Need it?
@@ -295,6 +298,8 @@ static void set_root_from_table()
     SET_ROOT_CLASS(closure,CLOSURE);
     SET_ROOT_CLASS(world,WORLD);
     SET_ROOT_CLASS(weakref, WEAKREF);
+    SET_ROOT_CLASS(window, WINDOW);
+    SET_ROOT_CLASS(directory, DIRECTORY);
 }
 
 
@@ -328,6 +333,7 @@ GCINLINE struct pvm_object     pvm_get_closure_class() { return pvm_root.closure
 GCINLINE struct pvm_object     pvm_get_world_class() { return pvm_root.world_class; }
 GCINLINE struct pvm_object     pvm_get_weakref_class() { return pvm_root.weakref_class; }
 GCINLINE struct pvm_object     pvm_get_window_class() { return pvm_root.window_class; }
+GCINLINE struct pvm_object     pvm_get_directory_class() { return pvm_root.directory_class; }
 
 #undef GCINLINE
 

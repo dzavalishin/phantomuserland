@@ -12,9 +12,9 @@
 
 #define DEBUG_MSG_PREFIX "physmem"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 0
 
 
 #include "config.h"
@@ -328,7 +328,7 @@ void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
 void
 hal_physmem_add_low( physaddr_t start, size_t npages )
 {
-    SHOW_INFO( 0, "add low mem: %p, %d pages, %d kb", start, npages, npages*4 );
+    SHOW_INFO( 1, "add low mem: %p, %d pages, %d kb", start, npages, npages*4 );
     phantom_phys_free_region( &low_map, start/PAGE_SIZE, npages );
 
     // Unmap it for any case

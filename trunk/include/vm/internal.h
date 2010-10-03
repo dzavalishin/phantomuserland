@@ -79,6 +79,7 @@ DEF_I(world)
 DEF_I(closure)
 DEF_I(weakref)
 DEF_I(window)
+DEF_I(directory)
 
 #undef DEF_I
 

@@ -27,7 +27,7 @@
 
 static void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
 
-// Gigant lock for now. TODO
+// TODO Object alloc - gigant lock for now. This is to be redone with separate locks for buckets/arenas.
 hal_mutex_t  alloc_mutex;
 
 

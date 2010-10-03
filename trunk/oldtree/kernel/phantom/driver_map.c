@@ -58,8 +58,8 @@ static pci_probe_t pci_drivers[] =
     { "VirtIO Net",  	driver_virtio_net_probe, 	1, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
     { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
-    { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
-    { "Intel i82559er", driver_intel_82559_probe, 	3, INTEL_VENDORID, 0x1209, 0 },
+//    { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
+//    { "Intel i82559er", driver_intel_82559_probe, 	3, INTEL_VENDORID, 0x1209, 0 },
 #endif // HAVE_NET
     { "Ne2000 PCI", 	driver_pci_ne2000_probe, 	1, 0x10ec, 0x8029, 0 },
 
@@ -131,7 +131,7 @@ static isa_probe_t isa_drivers[] =
 
     { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
 
-#if HAVE_NET
+#if HAVE_NET && 0
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 11 },
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x320, 11 },

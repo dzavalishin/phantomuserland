@@ -46,8 +46,8 @@
 #define PHANTOM_AMAP_START_VM_POOL (__MEM_GB*2)
 
 
-
-typedef enum page_mapped_t { page_unmap = 0, page_map = 1 } page_mapped_t;
+// page_map_io is supposed to create mapping which has cache disabled
+typedef enum page_mapped_t { page_unmap = 0, page_map = 1, page_map_io = 2 } page_mapped_t;
 typedef enum page_access_t { page_noaccess = 0, page_readonly = 1, page_readwrite = 2, page_ro = 1, page_rw = 2 } page_access_t;
 
 

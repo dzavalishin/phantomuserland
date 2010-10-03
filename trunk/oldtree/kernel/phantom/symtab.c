@@ -126,7 +126,7 @@ static void load_elf_hdr(Elf32_Shdr *header, int h_elements)
            (header[i].sh_type == SHT_PROGBITS)
           )
         {
-            printf("exec is %d\n", i);
+            //printf("exec is %d\n", i);
             text_section_header_index = i;
             text_section_load_addr = header[i].sh_addr;
         }
@@ -159,8 +159,8 @@ static void load_elf_hdr(Elf32_Shdr *header, int h_elements)
             char *strtab = (void *)(header[str_tab_index].sh_addr);
             //int strsize = header[str_tab_index].sh_size;
 
-            printf("Got string table %d : '%s'\n", str_tab_index, strtab+1);
-            if(DEBUG > 0) getchar();
+            //printf("Got string table %d : '%s'\n", str_tab_index, strtab+1);
+            //if(DEBUG > 0) getchar();
 
             load_elf_symtab(
                             symtab, symsize,

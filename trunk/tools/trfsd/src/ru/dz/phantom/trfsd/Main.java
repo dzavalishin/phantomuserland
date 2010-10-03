@@ -7,7 +7,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 public class Main {
@@ -129,7 +128,7 @@ public class Main {
 	
 	
 	
-	
+	static final int MAX_RQ_SECTORS = 2;
 
 	private static void process_read(InetAddress peer, int port, int fileId, int ioId, int nSectors,
 			int startSector ) throws IOException {
@@ -141,13 +140,12 @@ public class Main {
 			return;
 		}
 
-		if(nSectors > 2)
+		if(nSectors > MAX_RQ_SECTORS)
 		{
-			// 27 is EFBIG
-			//replyWithError(peer, port, 27, "Too many sectors requested");
-			//return;
-			nSectors = 2;
-			// TODO send multiple packets automatically
+			// recurse		
+			process_read(peer, port, fileId, ioId, nSectors-MAX_RQ_SECTORS, startSector+MAX_RQ_SECTORS );
+			
+			nSectors = MAX_RQ_SECTORS;
 		}
 
 		

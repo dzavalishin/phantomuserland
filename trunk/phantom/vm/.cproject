@@ -8,6 +8,8 @@
 <externalSettings/>
 <extensions>
 <extension id="org.eclipse.cdt.core.Cygwin_PE" point="org.eclipse.cdt.core.BinaryParser"/>
+<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 <extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -18,11 +20,11 @@
 <configuration artifactName="PhantomVM" buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.cygwin.base.486159555" name="Cygwin GCC" parent="org.eclipse.cdt.build.core.emptycfg">
 <folderInfo id="cdt.managedbuild.toolchain.gnu.cygwin.base.486159555.344762984" name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.cygwin.base.1522137489" name="cdt.managedbuild.toolchain.gnu.cygwin.base" superClass="cdt.managedbuild.toolchain.gnu.cygwin.base">
-<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.Cygwin_PE" id="cdt.managedbuild.target.gnu.platform.cygwin.base.1184001521" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.cygwin.base"/>
-<builder enableAutoBuild="true" id="cdt.managedbuild.target.gnu.builder.cygwin.base.748736208" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="-2" superClass="cdt.managedbuild.target.gnu.builder.cygwin.base"/>
+<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.Cygwin_PE;org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.cygwin.base.1184001521" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.cygwin.base"/>
+<builder enableAutoBuild="false" id="cdt.managedbuild.target.gnu.builder.cygwin.base.748736208" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="-2" superClass="cdt.managedbuild.target.gnu.builder.cygwin.base"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.cygwin.base.669015958" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.cygwin.base">
-<option id="gnu.both.asm.option.include.paths.1303237257" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;../..\include&quot;"/>
+<option id="gnu.both.asm.option.include.paths.1303237257" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="../../../include"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.766031813" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 </tool>

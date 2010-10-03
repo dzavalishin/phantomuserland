@@ -814,7 +814,6 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
 
     struct pvm_object new_class;
 
-    // TODO - is it available just in non-kernel builds?
     if( pvm_load_class_from_module(buf, &new_class))
     {
         const char *msg = " - class load error";
@@ -970,7 +969,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
     if( drv_video_bmpblt(_bmp,0,0,0) )
     	SYSCALL_THROW_STRING( "not a bitmap" );
 
-    drv_video_window_update_generation();
+    drv_video_window_repaint_all();
 
     // Remove it if will store bmp!
     SYS_FREE_O(_bmp);
@@ -1824,6 +1823,66 @@ syscall_func_t	syscall_table_4_window[24] =
 
 };
 DECLARE_SIZE(window);
+
+
+
+// --------- directory -------------------------------------------------------
+
+// TODO dir mutex!
+
+static int si_directory_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    (void)o;
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_string_object( "(directory)" ));
+}
+
+errno_t directory_put( struct pvm_object dir, const char *name, struct pvm_object o )
+{
+    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+    (void)da;
+    return ENOMEM;
+}
+
+pvm_object_t directory_get( struct pvm_object dir, const char *name )
+{
+    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+    (void)da;
+    return pvm_create_null_object();
+}
+
+errno_t directory_remove( struct pvm_object dir, const char *name )
+{
+    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+    (void)da;
+    return ENOMEM;
+}
+
+// Returns iterator
+pvm_object_t directory_iterate( struct pvm_object dir )
+{
+    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+    (void)da;
+    // TODO implement dir iterator
+    return pvm_create_null_object();
+}
+
+
+syscall_func_t	syscall_table_4_directory[16] =
+{
+    &si_void_0_construct,           &si_void_1_destruct,
+    &si_void_2_class,               &si_void_3_clone,
+    &si_void_4_equals,              &si_directory_5_tostring,
+    &si_void_6_toXML,               &si_void_7_fromXML,
+    // 8
+    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
+    &invalid_syscall,               &si_void_15_hashcode,
+
+};
+DECLARE_SIZE(directory);
+
 
 
 

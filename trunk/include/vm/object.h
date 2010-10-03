@@ -102,7 +102,7 @@ struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name);
 
 /**
  *
- * Is null*
+ * Is null
  *
 **/
 
@@ -134,7 +134,7 @@ void 			pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, st
 
 int                     get_array_size(struct pvm_object_storage *array);
 void 			pvm_append_array(struct pvm_object_storage *array, struct pvm_object value_to_append );
-void            pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop );
+void			pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop );
 
 // Debug
 
@@ -165,6 +165,7 @@ struct pvm_object     pvm_get_binary_class(void);
 struct pvm_object     pvm_get_bitmap_class(void);
 struct pvm_object     pvm_get_weakref_class(void);
 struct pvm_object     pvm_get_window_class(void);
+struct pvm_object     pvm_get_directory_class(void);
 
 
 struct pvm_object     pvm_create_null_object(void);
@@ -190,6 +191,10 @@ struct pvm_object     pvm_create_binary_object(int size, void *init);
 
 //struct pvm_object     pvm_create_weakref_object(void);
 struct pvm_object     pvm_create_weakref_object(struct pvm_object owned );
+
+
+struct pvm_object     pvm_create_directory_object(void);
+
 
 void     pvm_release_thread_object( struct pvm_object thread );
 

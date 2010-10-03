@@ -219,11 +219,12 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     hal_alloc_phys_pages( &result, npages);
     void *buffer = phystokv(result);
 
-    // TODO map with nocache/wthrough
+    //hal_pages_control( result, buffer, npages, page_map_io, page_rw );
     hal_pages_control( result, buffer, npages, page_map, page_rw );
 
     memset( buffer, size, 0 );
 
+    SHOW_FLOW( 3, "phys mem @%p-%p ", result, result+size );
 
 
     virtio_ring_t *r = (virtio_ring_t *)calloc( 1, sizeof(virtio_ring_t) );
@@ -238,7 +239,8 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     r->lastUsedIdx = 0;
     r->totalSize = num;
 
-    virto_ring_dump(r);
+    //virto_ring_dump(r);
+
     SHOW_FLOW0(8, "will vring_init");
     vring_init( &(r->vr), num, buffer, VIRTIO_PCI_VRING_ALIGN );
 
@@ -264,14 +266,50 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
 
 void virto_ring_dump(virtio_ring_t *r)
 {
-    if( debug_level_flow < 10 ) return;
-    printf("VRing: ");
+    //if( debug_level_flow < 10 ) return;
+
+    printf("VRing @%p totalSize=%d, index=%d, phys=%p, nFreeDesc=%d, freeHead=%d, lastUsedIdx=%d \n",
+           r,
+           r->totalSize, r->index, r->phys, r->nFreeDescriptors, r->freeHead, r->lastUsedIdx);
+
     int i;
+
+    printf("VRing desc @%p: ", r->vr.desc);
     for( i = 0; i < r->totalSize; i++ )
     {
-        printf("->%d/%x\t", r->vr.desc[i].next, r->vr.desc[i].flags );
+#if 0
+        printf("%d@%p->%d/%x, \t",
+               r->vr.desc[i].len, r->vr.desc[i].addr, 
+               (unsigned)(r->vr.desc[i].next), (unsigned)(r->vr.desc[i].flags)
+              );
+#else
+        printf("%d@%lp->", r->vr.desc[i].len, r->vr.desc[i].addr );
+        printf("%d/", r->vr.desc[i].next );
+        printf("%x, \t", r->vr.desc[i].flags );
+#endif
+
     }
     printf("\n");
+
+    printf("VRing avail @%p idx=%d fl=%x: ", r->vr.avail, r->vr.avail->idx, r->vr.avail->flags );
+    for( i = 0; i < r->totalSize && i < 10; i++ )
+    {
+        printf("%d\t",
+               r->vr.avail->ring[i]
+              );
+    }
+    printf("\n");
+
+#if 0
+    printf("VRing used @%p idx=%d fl=%x: ", r->vr.used, r->vr.used->idx, r->vr.used->flags );
+    for( i = 0; i < r->totalSize; i++ )
+    {
+        printf("%d(%d)\t",
+               r->vr.used->ring[i].id, r->vr.used->ring[i].len
+              );
+    }
+    printf("\n");
+#endif
 }
 
 
@@ -293,7 +331,7 @@ int virtio_attach_buffer(virtio_device_t *vd, int qindex,
     virtio_ring_t *r = vd->rings[qindex];
 
     VIRTIO_LOCK(r);
-    // TODO Errno?
+    // TODO Errno? Sleep waiting for interrupt, retry
     if(r->nFreeDescriptors == 0)
     {
         virtio_notify( vd, qindex ); // Try to kick host
@@ -332,16 +370,18 @@ int virtio_attach_buffer(virtio_device_t *vd, int qindex,
  *
  * Caller must call virtio_kick() after some of attaches.
  *
- */
+ * /
 int virtio_attach_buffers(virtio_device_t *vd, int qindex,
                           int nWrite, struct vring_desc *writeData,
                           int nRead, struct vring_desc *readData
                           )
 {
+    assert( (nRead > 0) || (nWrite > 0) );
+
     virtio_ring_t *r = vd->rings[qindex];
 
     VIRTIO_LOCK(r);
-    // TODO Errno?
+    // TODO Errno? Sleep waiting for interrupt, retry
     if(r->nFreeDescriptors < nWrite+nRead )
     {
         virtio_notify( vd, qindex ); // Try to kick host
@@ -350,23 +390,28 @@ int virtio_attach_buffers(virtio_device_t *vd, int qindex,
     }
 
     int descrIndex = -1;
-    int elem = 0;
+    int elem;
+    int last;
 
+    elem = 0;
     while(nRead-- > 0)
     {
-        int last = descrIndex;
+        last = descrIndex;
         descrIndex = virtio_get_free_descriptor_index(r);
         r->vr.desc[descrIndex] = readData[elem++];
-        r->vr.desc[descrIndex].flags = last < 0 ? 0 : VRING_DESC_F_NEXT;//isWrite ? VRING_DESC_F_WRITE : 0;
+        r->vr.desc[descrIndex].flags = (last < 0) ? 0 : VRING_DESC_F_NEXT;
         r->vr.desc[descrIndex].next = last;
     }
 
+    printf("descrIndex %d\n", descrIndex);
+
+    elem = 0;
     while(nWrite-- > 0)
     {
-        int last = descrIndex;
+        last = descrIndex;
         descrIndex = virtio_get_free_descriptor_index(r);
         r->vr.desc[descrIndex] = writeData[elem++];
-        r->vr.desc[descrIndex].flags = VRING_DESC_F_WRITE|(last < 0 ? 0 : VRING_DESC_F_NEXT);
+        r->vr.desc[descrIndex].flags = VRING_DESC_F_WRITE | ((last < 0) ? 0 : VRING_DESC_F_NEXT);
         r->vr.desc[descrIndex].next = last;
     }
 
@@ -377,8 +422,76 @@ int virtio_attach_buffers(virtio_device_t *vd, int qindex,
 
     VIRTIO_UNLOCK(r);
 
+    virto_ring_dump(r);
+
     return 0;
 }
+*/
+
+
+
+/**
+ *
+ * Attach scatter/gather lists to the queue.
+ *
+ * qindex - queue (ring) index.
+ *
+ * returns: zero on success
+ *
+ * Caller must call virtio_kick() after some of attaches.
+ *
+ */
+int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
+                          int nDesc, struct vring_desc *desc
+                          )
+{
+    assert( nDesc > 0 );
+
+    virtio_ring_t *r = vd->rings[qindex];
+
+    VIRTIO_LOCK(r);
+    // TODO Errno? Sleep waiting for interrupt, retry
+    if(r->nFreeDescriptors < nDesc )
+    {
+        virtio_notify( vd, qindex ); // Try to kick host
+        VIRTIO_UNLOCK(r);
+        return -1; // ENOSPC
+    }
+
+    int descrIndex = -1;
+    //int elem;
+    int last;
+
+    // We put im in reverse order, but we read them in reverse order as well
+    // So order is intact finally
+
+    //elem = 0;
+    while(nDesc-- > 0)
+    {
+        last = descrIndex;
+        descrIndex = virtio_get_free_descriptor_index(r);
+        r->vr.desc[descrIndex] = desc[nDesc];
+        r->vr.desc[descrIndex].next = last;
+
+        if(last < 0)
+            r->vr.desc[descrIndex].flags &=~VRING_DESC_F_NEXT;
+        else
+            r->vr.desc[descrIndex].flags |= VRING_DESC_F_NEXT;
+    }
+
+    int availPos = r->vr.avail->idx;
+    availPos %= r->vr.num;
+    r->vr.avail->ring[availPos] = descrIndex;
+    r->nAdded++;
+
+    VIRTIO_UNLOCK(r);
+
+    virto_ring_dump(r);
+
+    return 0;
+}
+
+
 
 
 
@@ -436,8 +549,48 @@ int virtio_detach_buffer( virtio_device_t *vd, int qindex,
     return 0;
 }
 
+// Wrong...
+int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
+                          int nDesc, struct vring_desc *desc, int *dataLen
+                          )
+{
+    virtio_ring_t *r = vd->rings[qindex];
+    int nout = 0;
+
+    VIRTIO_LOCK(r);
+    if( !virtio_have_used(r) )
+    {
+        VIRTIO_UNLOCK(r);
+        return -1;
+    }
+again:
+    ;
+    int pos = r->lastUsedIdx % r->vr.num;
+    unsigned int bufIndex = r->vr.used->ring[pos].id;
+
+    if(bufIndex >= r->vr.num)
+    {
+        VIRTIO_UNLOCK(r);
+        return -1;
+    }
+
+    dataLen[nout] = r->vr.used->ring[pos].len;
+    desc[nout] = r->vr.desc[bufIndex];
+    nout++;
 
 
+    int flagsCopy = r->vr.desc[bufIndex].flags;
+
+    virtio_release_descriptor_index(r, bufIndex);
+    r->lastUsedIdx++;
+
+    if( (flagsCopy & VRING_DESC_F_NEXT) )
+        goto again;
+
+
+    VIRTIO_UNLOCK(r);
+    return nout;
+}
 
 
 
@@ -449,6 +602,7 @@ void virtio_kick(virtio_device_t *vd, int qindex)
 
     mem_write_barrier();
 
+    // TODO atomic
     int add = r->nAdded;
     r->vr.avail->idx += add;
     r->nAdded -= add;
@@ -475,8 +629,8 @@ static int virtio_get_free_descriptor_index(virtio_ring_t *r)
 
     int ret = r->freeHead;
 
-    SHOW_FLOW( 5, "r->freeHead=%d", r->freeHead );
-    virto_ring_dump(r);
+    //SHOW_FLOW( 5, "r->freeHead=%d", r->freeHead );
+    //virto_ring_dump(r);
 
     r->freeHead = r->vr.desc[r->freeHead].next;
 

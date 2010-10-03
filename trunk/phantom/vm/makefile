@@ -1,10 +1,13 @@
 BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
-TARGET	= libphantom_vm.a pvm_test
+TARGET	= libphantom_vm.a
 
-SRCDIRS += $(BUILD_ROOT)/vm $(BUILD_ROOT)/vm/resources $(BUILD_ROOT)/vm/video
+SRCDIRS += $(BUILD_ROOT)/vm $(BUILD_ROOT)/vm/resources $(BUILD_ROOT)/vm/video $(BUILD_ROOT)/vm/cont
 
 INCDIRS += /usr/include/w32api/
+
+EXCLUDED_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o
+
 
 include $(BUILD_ROOT)/makerules-lib
 
