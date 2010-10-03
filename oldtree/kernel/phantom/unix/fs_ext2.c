@@ -27,10 +27,13 @@
 
 #include "unix/fs_ext2.h"
 
+
+//typedef u_int32_t	ino_t;
+
 // struttura tabella inode
 struct i_node_tab
 {
-    int 		i_node_n; // numero dell'inode
+    ino_t 		i_node_n; // numero dell'inode
     struct i_node 	inode; // informazioni generali inode
     // parametri per la gestione tabella inode
     int 		ref;
@@ -49,8 +52,8 @@ struct e2impl
 
     struct super_block *	super;
 
-    int 			dim_inode_table;
-    int 			free_inode; //numero elementi della tabella inode liberi
+    u_int32_t 			dim_inode_table;
+    ino_t 			free_inode; //numero elementi della tabella inode liberi
 
     struct i_node_tab *		inode_table;
     hal_mutex_t                 inode_lock; // inode table modif
@@ -58,14 +61,14 @@ struct e2impl
     struct group_descriptor  *	group_desc_table;
     hal_mutex_t                 group_lock; // inode table modif
 
-    int                         dim_block; // block size in bytes
-    int 			dim_ptr; // dimensione del blocco dati e puntatore
-    int 			dim_frag; // dimensione del blocco dati e puntatore
+    u_int32_t			dim_block; // block size in bytes
+    u_int32_t 			dim_ptr; // dimensione del blocco dati e puntatore
+    u_int32_t 			dim_frag; // dimensione del blocco dati e puntatore
 
-    int 			spb,bpg,gdpb,ipb,sbpos;
-    int 			number_of_groups; // numero gruppi di blocchi nel file
-    int 			inodes_per_block; // numero inode per blocco
-    int 			dir_entries_per_block; // numero directory entries per block
+    u_int32_t 			spb,bpg,gdpb,ipb,sbpos;
+    u_int32_t 			number_of_groups; // numero gruppi di blocchi nel file
+    u_int32_t 			inodes_per_block; // numero inode per blocco
+    u_int32_t 			dir_entries_per_block; // numero directory entries per block
 
 };
 
@@ -255,8 +258,8 @@ static void *      ext2_copyimpl( void *impl )
 
 
 
-static struct group_descriptor * get_group_desc( e2impl_t *impl, int grp);
-static int Inode2Block(e2impl_t *impl, int ino);
+static struct group_descriptor * get_group_desc( e2impl_t *impl, unsigned int grp);
+static int Inode2Block(e2impl_t *impl, ino_t ino);
 
 
 
@@ -305,7 +308,7 @@ static bool isDir(struct i_node* ino)
 
 
 // lettura di un inode dal disco
-static bool ReadInode(e2impl_t *impl, int ino, struct i_node* data)
+static bool ReadInode(e2impl_t *impl, ino_t ino, struct i_node* data)
 {
     int ino_block = Inode2Block(impl,ino);
     if (!ino_block)
@@ -341,7 +344,7 @@ static bool ReadInode(e2impl_t *impl, int ino, struct i_node* data)
 static int inode_LRU(e2impl_t *impl)
 {
     word lru = 0;
-    int i;
+    u_int32_t i;
 
     // The item sought and 'the least referenced in the last
     // 16 references in memory, the variable ref and '16-bit
@@ -357,9 +360,9 @@ static int inode_LRU(e2impl_t *impl)
 //--------------- Cerca inode e restituisce la posizione -------------------//
 
 // ERROR inode is not locked and can be deleted!
-static struct i_node *get_inode(e2impl_t *impl, int i_node_number)
+static struct i_node *get_inode(e2impl_t *impl, ino_t i_node_number)
 {
-    int i;
+    unsigned int i;
     int pos_inode = -1;
     struct i_node new_inode;
 
@@ -450,7 +453,7 @@ static bool init_inode_table(e2impl_t *impl)
 
 
 // given an inode tells me where and 'block is located in (0 error reading)
-static int Inode2Block(e2impl_t *impl, int ino)
+static int Inode2Block(e2impl_t *impl, ino_t ino)
 {
     struct group_descriptor* group_desc;
 
@@ -538,7 +541,7 @@ bool init_group_desc_table(e2impl_t *impl)
 }
 
 
-struct group_descriptor * get_group_desc( e2impl_t *impl, int grp)
+struct group_descriptor * get_group_desc( e2impl_t *impl, unsigned int grp)
 {
     if( grp > impl->number_of_groups)
     {
@@ -896,7 +899,7 @@ static bool Open_File( e2impl_t *impl, struct i_node* ino, word tipo_file )
         memset(fsl,0,sizeof(struct i_node));
         memcpy(fsl,ino,sizeof(struct i_node));
 
-        int i;
+        u_int32_t i;
         for (i=39;i<(ino->i_size+39);i++)
             printf("%c",fsl[i]);
         printf("\n\n\r");

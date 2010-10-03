@@ -363,6 +363,22 @@ struct data_area_4_window
 };
 
 
+// Very dumb implementation, redo with hash map or bin search or tree
+// Container entry has struct pvm_object at the beginning and the rest is 0-term name string
+struct data_area_4_directory
+{
+    u_int32_t                           elSize;         // size of one dir entry, bytes, defaults to 256
+
+    u_int32_t                           capacity;       // size of binary container in entries
+    u_int32_t                           nEntries;       // number of actual entries
+
+    struct pvm_object   		container;      // Where we actually hold it
+};
+
+
+
+
+
 
 
 

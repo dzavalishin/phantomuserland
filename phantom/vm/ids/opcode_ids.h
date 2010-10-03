@@ -89,7 +89,6 @@
 #define opcode_log_not   0x4F 
 
 
-// TODO: iload/isave
 #define opcode_is_load8   0x50  // load (push) this object's field on stack top
 #define opcode_is_save8   0x51  // save (pop) stack top to this object's field
 

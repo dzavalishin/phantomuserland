@@ -116,7 +116,7 @@ int phantom_virtual_machine_threads_stopped = 0;
 
 
 // -----------------------------------------------------------------------
-// TODO - implement those ones
+// TODO - implement mutex/sema code wor win sim environment
 
 
 int hal_mutex_init(hal_mutex_t *m, const char *name)

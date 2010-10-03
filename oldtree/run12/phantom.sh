@@ -9,4 +9,4 @@ Q_VGA="-vga std"
 rm serial0.log.old
 mv serial0.log serial0.log.old
 
-qemu $Q_VGA $Q_KQ $Q_MACHINE $Q_PORTS  $Q_DISKS  $Q_NET $VIO $USB
+bin/qemu $Q_VGA $Q_KQ $Q_MACHINE $Q_PORTS  $Q_DISKS  $Q_NET $VIO $USB

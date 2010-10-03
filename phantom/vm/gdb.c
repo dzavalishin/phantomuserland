@@ -390,7 +390,7 @@ void set_debug_traps(void)
  */
 extern void fltr_set_mem_err(void)
 {
-    /* FIXME: Needs to be written... */
+    /* TODO: Needs to be written... */
 }
 
 
@@ -517,7 +517,7 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
 
             /*
              * set the value of the CPU registers - return OK
-             * FIXME: Needs to be written
+             * TODO: Needs to be written
              */
         case 'G':
             {
@@ -603,7 +603,7 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
 
 
             /*
-             * Reset the whole machine (FIXME: system dependent)
+             * Reset the whole machine (TODO: system dependent)
              */
         case 'r':
             break;

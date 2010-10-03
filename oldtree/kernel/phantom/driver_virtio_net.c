@@ -40,7 +40,7 @@
 #endif
 
 
-static int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len);
+int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len);
 
 
 
@@ -71,6 +71,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     vdev.interrupt = driver_virtio_net_interrupt;
     vdev.name = "Net";
 
+    //vdev.guest_features = VIRTIO_NET_F_MAC; // Does not work on QEMU
     vdev.guest_features = 0;
 
     if( virtio_probe( &vdev, pci ) )
@@ -81,9 +82,9 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
 
     /* driver is ready */
     virtio_set_status( &vdev, VIRTIO_CONFIG_S_ACKNOWLEDGE );
-hal_sleep_msec(10);
+
     SHOW_INFO( 0, "Status is: 0x%X\n", virtio_get_status( &vdev ) );
-hal_sleep_msec(10);
+
 
 
 
@@ -113,6 +114,7 @@ hal_sleep_msec(10);
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = "VirtIO Network";
     dev->seq_number = seq_number++;
+    dev->drv_private = &vdev;
 
 
     vdev.guest_features  = vdev.host_features & (1 << VIRTIO_NET_F_MAC);
@@ -121,23 +123,24 @@ hal_sleep_msec(10);
 
     /* driver is ready */
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER );
-hal_sleep_msec(10);
+
     SHOW_INFO( 0, "Status is: 0x%X\n", virtio_get_status( &vdev ) );
     hal_sleep_msec(10);
 
     /* driver is ready */
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK);
     SHOW_INFO( 0, "Status is: 0x%X\n", virtio_get_status( &vdev ) );
-hal_sleep_msec(10);
 
+#if 0
     SHOW_FLOW0( 5, "Write to net" );
+    static char buf[1500] = "Hello world";
 
-    driver_virtio_net_write( &vdev, "Hello world", 12 );
-
+    driver_virtio_net_write( &vdev, buf, sizeof(buf) );
+#endif
     return dev;
 }
 
-static int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len)
+int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len)
 {
     struct vring_desc wr[2];
 
@@ -150,18 +153,15 @@ static int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len)
     tx_virtio_hdr->gso_size = 0;
     tx_virtio_hdr->hdr_len = 0;
 
-    // TODO must be 0th!
-    wr[1].addr = kvtophys(tx_virtio_hdr);
-    wr[1].len  = sizeof(*tx_virtio_hdr);
+    wr[0].addr = kvtophys(tx_virtio_hdr);
+    wr[0].len  = sizeof(*tx_virtio_hdr);
+    wr[0].flags = 0;
 
-    wr[0].addr = kvtophys(data);
-    wr[0].len  = len;
+    wr[1].addr = kvtophys(data);
+    wr[1].len  = len;
+    wr[1].flags = 0;
 
-    virtio_attach_buffers( vd, 0,
-                          2, wr,
-                          0, 0
-                          );
-
+    virtio_attach_buffers_list( vd, 0, 2, wr );
     virtio_kick( vd, 0);
 
     return 0;

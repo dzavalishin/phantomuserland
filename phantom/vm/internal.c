@@ -323,6 +323,19 @@ struct internal_class pvm_internal_classes[] =
         {0,0}
     },
 
+    {
+        ".internal.directory",
+        PVM_ROOT_OBJECT_DIRECTORY_CLASS,
+        syscall_table_4_directory,
+        pvm_internal_init_directory,
+        pvm_gc_iter_directory,
+        pvm_gc_finalizer_directory,
+        pvm_restart_directory, // no restart func
+        sizeof(struct data_area_4_directory),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,// TODO add DIR flag?
+        {0,0}
+    },
+
 
 };
 

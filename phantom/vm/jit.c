@@ -549,7 +549,6 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
             /**
-             * TODO
              * A BIG NOTE for object creation
              *
              * We must be SURE that it is NOT ever possible to pass

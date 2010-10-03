@@ -59,11 +59,15 @@ void virtio_get_config_struct( virtio_device_t *vd, void *buf, unsigned len );
 void virtio_set_config_struct( virtio_device_t *vd, const void *buf, unsigned len );
 
 
+int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
+                          int nDesc, struct vring_desc *desc
+                          );
+/*
 int virtio_attach_buffers(virtio_device_t *vd, int qindex,
                           int nWrite, struct vring_desc *writeData,
                           int nRead, struct vring_desc *readData
                           );
-
+*/
 int virtio_detach_buffer( virtio_device_t *vd, int qindex,
                           physaddr_t *buf, size_t *bufsize, size_t *datalen );
 

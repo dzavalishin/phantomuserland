@@ -502,6 +502,7 @@ void pvm_internal_init_mutex(struct pvm_object_storage * os)
     (void)os;
 
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
+    (void)da;
 
     //hal_spin_init( &da->lock );
 
@@ -741,6 +742,7 @@ struct pvm_object     pvm_create_window_object(struct pvm_object owned )
     pvm_object_t ret = pvm_object_create_fixed( pvm_get_window_class() );
     struct data_area_4_window *da = (struct data_area_4_window *)ret.data->da;
 
+    (void)da;
 
 
 
@@ -764,6 +766,95 @@ void pvm_restart_window( pvm_object_t o )
     drv_video_window_enter_allwq( &da->w );
     event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void pvm_internal_init_directory(struct pvm_object_storage * os)
+{
+    struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
+
+    da->elSize = 256;
+    da->capacity = 16;
+    da->nEntries = 0;
+
+    da->container = pvm_create_binary_object( da->elSize * da->capacity , 0 );
+}
+
+
+void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+	struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
+
+	struct data_area_4_binary *bin = pvm_object_da( da->container, binary );
+
+	void *bp = bin->data;
+	int i;
+	for( i = 0; i < da->nEntries; i++, bp += da->elSize )
+	{
+            gc_fcall( func, arg, *((pvm_object_t*)bp) );
+	}
+
+	gc_fcall( func, arg, da->container );
+}
+
+
+struct pvm_object     pvm_create_directory_object(void)
+{
+    pvm_object_t ret = pvm_object_create_fixed( pvm_get_directory_class() );
+
+    return ret;
+}
+
+// Unused, not supposed to be called
+void pvm_gc_finalizer_directory( struct pvm_object_storage * os )
+{
+    // is it called?
+    //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
+
+}
+
+// Unused, not supposed to be called
+void pvm_restart_directory( pvm_object_t o )
+{
+    //struct data_area_4_directory *da = pvm_object_da( o, directory );
+
+}
+
+
 
 
 

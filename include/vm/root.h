@@ -57,6 +57,8 @@ struct pvm_root_t
     struct pvm_object           weakref_class;
     struct pvm_object           window_class;
 
+    struct pvm_object           directory_class;
+
     struct pvm_object           null_object;
     struct pvm_object           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
     struct pvm_object           class_loader;           // Root class loader (user code)
@@ -65,6 +67,7 @@ struct pvm_root_t
     struct pvm_object           users_list;           	// Array? of users - NOT IMPLEMENTED
     struct pvm_object           kernel_environment;     // Array? of users - NOT IMPLEMENTED
     struct pvm_object           os_entry;               // Main OS services entry point
+    struct pvm_object           root_dir;               // Main OS services entry point
 
 
 };
@@ -159,6 +162,8 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_WINDOW_CLASS 29
 
+#define PVM_ROOT_OBJECT_DIRECTORY_CLASS 30
+
 // Runtime restoration facilities
 
 
@@ -178,8 +183,11 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_OS_ENTRY 70
 
+// Root object directory
+#define PVM_ROOT_OBJECT_ROOT_DIR 71
 
-#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_OBJECT_OS_ENTRY+32)
+
+#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_OBJECT_ROOT_DIR+32)
 
 
 

@@ -33,7 +33,7 @@ hal_spinlock_t  		allw_lock;
 // here we have a problem - some windows are persistent and
 // keep their generation. So on start we need to advance
 // generation twice to make sure all windows are catched up
-static int win_generation = 0;
+//static int win_generation = 0;
 
 
 
@@ -58,7 +58,7 @@ common_window_init( drv_video_window_t *w,
 
     w->li = w->ti = w->ri = w->bi = 0;
 
-    w->generation = 0;
+    //w->generation = 0;
 
     w->x = 0;
     w->y = 0;
@@ -203,9 +203,9 @@ void drv_video_window_destroy(drv_video_window_t *w)
 }
 
 
-void drv_video_window_update_generation(void)
+void drv_video_window_repaint_all(void)
 {
-    win_generation++;
+    //win_generation++;
     // redraw all here, or ask some thread to do that
     drv_video_window_t *w;
     int ie = hal_save_cli();
@@ -213,6 +213,8 @@ void drv_video_window_update_generation(void)
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
         drv_video_winblt( w );
+        if(w->flags & WFLAG_WIN_DECORATED)
+            win_make_decorations(w);
     }
     hal_spin_unlock( &allw_lock );
     if(ie) hal_sti();
@@ -221,13 +223,15 @@ void drv_video_window_update_generation(void)
 // TODO this is not needed anymore?
 void drv_video_window_preblit( drv_video_window_t *w )
 {
-    //window_basic_border( w, brdr, sizeof(brdr)/sizeof(rgba_t) );
+#if 0
+	//window_basic_border( w, brdr, sizeof(brdr)/sizeof(rgba_t) );
     if( (w->generation != win_generation) )
     {
         w->generation = win_generation;
         if(w->flags & WFLAG_WIN_DECORATED)
             win_make_decorations(w);
     }
+#endif
 }
 
 static void

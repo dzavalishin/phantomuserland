@@ -200,6 +200,9 @@ hal_page_control_etc(
     if(mapped == page_map)
         bits |= INTEL_PTE_VALID;
 
+    if(mapped == page_map_io)
+        bits |= INTEL_PTE_VALID|INTEL_PTE_WTHRU|INTEL_PTE_NCACHE;
+
     if(access == page_rw)
         bits |= INTEL_PTE_WRITE;
 
@@ -210,7 +213,7 @@ hal_page_control_etc(
     if(_DEBUG) hal_printf("Mapping VA 0x%X to PA 0x%X, pte is 0x%X\n",
                           page_start_addr, p, (long)pte );
 
-    if(mapped == page_map)
+    if(mapped != page_unmap )
         phantom_map_page( (linaddr_t)page_start_addr, pte );
     else
         phantom_unmap_page( (linaddr_t)page_start_addr );

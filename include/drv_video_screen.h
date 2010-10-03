@@ -62,6 +62,7 @@ typedef struct drv_video_bitmap
 
 #define WSTATE_WIN_FOCUSED              (1<<0)
 
+// SNAPSHOT WARNING: this structure is used in snapshotted objects. If you change it, old snapshots are invalid. Be careful.
 typedef struct drv_video_window
 {
     int         	xsize; // physical
@@ -69,7 +70,7 @@ typedef struct drv_video_window
 
     int                 x, y, z; // On screen
 
-    int                 generation; // used to redraw self and borders on global events
+    //int                 unused_generation; // used to redraw self and borders on global events
     int                 flags; // Not supposed to change during window's life
     int                 state; // Can change anytime
 
@@ -115,7 +116,7 @@ extern drv_video_bitmap_t 		pin_bmp; // Window pin button
 static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_window_t); }
 static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
 
-void drv_video_window_update_generation(void);
+void drv_video_window_repaint_all(void);
 
 // dynamic allocation
 drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg, const char* title );
