@@ -18,6 +18,10 @@
 #include <testenv.h>
 
 
+void run_test( const char *test_name, const char *test_parm );
+
+
+
 int do_test_getters(const char *test_parm);
 
 

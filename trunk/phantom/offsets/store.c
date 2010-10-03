@@ -1,6 +1,7 @@
 #include "offsets.h"
 
 #include <stdio.h>
+#include <string.h>
 
 //#define FILE void
 

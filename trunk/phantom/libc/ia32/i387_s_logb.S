@@ -41,5 +41,6 @@
 ENTRY(logb)
 	fldl	4(%esp)
 	fxtract
-	fstpl	%st
+	//fstpl	%st
+	fstp	%st
 	ret

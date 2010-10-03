@@ -20,6 +20,8 @@
 //#include <phantom_libc.h>
 #include <errno.h>
 #include <setjmp.h>
+#include <phantom_libc.h>
+#include <sys/unistd.h>
 
 //#include "misc.h"
 #include "test.h"

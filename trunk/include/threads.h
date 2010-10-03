@@ -113,5 +113,29 @@ struct wtty *get_thread_ctty( struct phantom_thread *t );
 void phantom_scheduler_time_interrupt(void);
 
 
+
+
+
+
+void*   hal_start_kernel_thread(void (*thread)(void));
+void    hal_exit_kernel_thread(void);
+
+// returns thread id, does not check for thread death
+int     hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
+int		hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
+
+
+errno_t hal_set_thread_priority( int tid, int prio );
+
+void    hal_set_thread_name(const char *name);
+
+
+void    hal_disable_preemption(void);
+void    hal_enable_preemption(void);
+
+
+
+
+
 #endif // THREADS_H
 

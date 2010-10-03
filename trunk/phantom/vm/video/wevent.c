@@ -26,6 +26,9 @@
 #include <spinlock.h>
 #include <wtty.h>
 
+#include <threads.h>
+
+
 #include "win_local.h"
 
 

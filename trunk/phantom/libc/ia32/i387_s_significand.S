@@ -41,5 +41,6 @@
 ENTRY(significand)
 	fldl	4(%esp)
 	fxtract
-	fstpl	%st(1)
+	//fstpl	%st(1)
+	fstp	%st(1)
 	ret

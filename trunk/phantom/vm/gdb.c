@@ -617,7 +617,7 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
              * There is no single step insn in the MIPS ISA, so we
              * use breakpoints and continue, instead.
              */
-#warning implement
+//#warning implement
             //single_step(regs);
             //flush_cache_all();
             return;
@@ -663,13 +663,13 @@ void breakpoint(void)
 
 int putDebugChar(char c)    /* write a single character      */
 {
-#warning implement
+//#warning implement
     return 0;
 }
 
 extern char getDebugChar(void)     /* read and return a single char */
 {
-#warning implement
+//#warning implement
     return 0;
 }
 

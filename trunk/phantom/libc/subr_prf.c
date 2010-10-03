@@ -72,8 +72,10 @@
 #include <stdarg.h>
 
 #include <phantom_libc.h>
-// spinlocks, preemtion
+// spinlocks
 #include <hal.h>
+// preemtion
+#include <threads.h>
 
 #define TOCONS	0x01
 #define TOTTY	0x02

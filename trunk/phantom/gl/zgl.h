@@ -378,4 +378,11 @@ static inline int gl_clipcode(float x,float y,float z,float w1)
     ((z>w)<<5) ;
 }
 
+
+
+void gl_resizeImageNoInterpolate_rgba2rgb(unsigned char *dest,int xsize_dest,int ysize_dest,
+                                 unsigned char *src,int xsize_src,int ysize_src);
+
+
+
 #endif /* _tgl_zgl_h_ */
