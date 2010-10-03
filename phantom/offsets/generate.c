@@ -1,4 +1,5 @@
 #include <sys/cdefs.h>
+#include "offsets.h"
 
 #define O(t,f)	out_offset(#t,#f, __builtin_offsetof(t,f) )
 //#define S(t,f)	out_size(#t,#f, sizeof(t,f) )
@@ -7,30 +8,12 @@
 #include <phantom_disk.h>
 #include <phantom_libc.h>
 
-#define FILE void
-
-FILE *cout;
-FILE *jout;
-
-
-static void out(const char *type, const char *field, const char *what, int data)
-{
-	static char *pad_spaces = "                                                                                                          ";
-
-	int pad = 60-strlen(type)-strlen(field)-strlen(what);
-	fprintf(cout, "#define %s__%s__%s %.*s%d\n", type, field, what, pad, pad_spaces, data);
-	fprintf(jout, "\tfinal static int %s__%s__%s %.*s= %d;\n", type, field, what, pad, pad_spaces, data);
-}
-
-static void out_offset(const char *type, const char *field, int offset)
-{
-    out(type, field, "OFFSET", offset);
-}
 
 
 
 
-static void generate()
+
+void generate()
 {
 	O(phantom_disk_superblock,magic);
 	O(phantom_disk_superblock,version);
@@ -70,18 +53,3 @@ static void generate()
 }
 
 
-int main(int ac, char **av)
-{
-	cout = fopen("field_offsets.h", "wt");
-	jout = fopen("FieldOffsets.java", "wt");
-
-	fprintf(jout, "package ru.dz.phantom;\n\n");
-	fprintf(jout, "class FieldOffsets {\n\n");
-	generate();
-	fprintf(jout, "\n\n}\n");
-
-	fclose(cout);
-	fclose(jout);
-
-	return (ferror(cout) || ferror(jout)) ? 1 : 0;
-}
