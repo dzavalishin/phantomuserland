@@ -21,6 +21,9 @@ int phantom_tcpip_active = 0;
 
 
 
+#define TFTP_TEST 0
+
+
 
 
 /*
@@ -70,6 +73,7 @@ struct tftp_t {
 };
 
 
+#if TFTP_TEST
 
 static int do_tftp_test(void *prot_data)
 {
@@ -187,7 +191,7 @@ static void tftp_test(void)
 }
 
 
-
+#endif
 
 
 
@@ -346,7 +350,9 @@ void udp_syslog_send(const char *prefix, const char *message)
 void net_test(void)
 {
     syslog(LOG_DEBUG|LOG_KERN,"Test of UDP syslog");
-    //tftp_test();
+#if TFTP_TEST
+    tftp_test();
+#endif
     //getchar();
 
 }

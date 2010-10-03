@@ -71,5 +71,9 @@ int virtio_attach_buffers(virtio_device_t *vd, int qindex,
 int virtio_detach_buffer( virtio_device_t *vd, int qindex,
                           physaddr_t *buf, size_t *bufsize, size_t *datalen );
 
+int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
+                          int nDesc, struct vring_desc *desc, int *dataLen
+                          );
+
 void virtio_kick(virtio_device_t *vd, int qindex);
 

@@ -26,6 +26,8 @@
 #include <event.h>
 #include <queue.h>
 
+#include <threads.h>
+
 //#include "dpc.h"
 
 

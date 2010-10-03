@@ -234,8 +234,9 @@ static void driver_virtio_disk_interrupt(virtio_device_t *vd, int isr )
     SHOW_FLOW0( 5, "got virtio DISK interrupt" );
 
     struct vring_desc cmd[3];
+    int dlen[3];
 
-    int nRead = virtio_detach_buffers_list( vd, 0, 3, cmd );
+    int nRead = virtio_detach_buffers_list( vd, 0, 3, cmd, dlen );
     if( nRead > 0 )
     {
         SHOW_FLOW( 5, "have %d used descriptors, will get 'em", nRead );

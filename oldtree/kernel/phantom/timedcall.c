@@ -305,7 +305,7 @@ void phantom_undo_timed_call(timedcall_t *entry)
 
     queue_remove(&tcEventQ, entry, timedcall_t *, chain);
 
-    if( !queue_end( &tcEventQ, tnext) )
+    if( !queue_end( &tcEventQ, (void *)tnext) )
         tnext->msecMore += more;
 
 unlock:

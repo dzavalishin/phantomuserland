@@ -18,6 +18,9 @@
 #include "hal.h"
 #include "video.h"
 
+//pressEnter
+#include "misc.h"
+
 #include <sys/cdefs.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -30,9 +33,15 @@
 
 #include <kernel/vm.h>
 
+#include "i386/ia32private.h"
+
+#define DO16BIT 0
+
+#if DO16BIT
+static errno_t load_pm_vesa( void *ROM_va, size_t ROM_size, size_t hdr_offset );
+#endif
 
 static int direct_vesa_probe();
-static errno_t load_pm_vesa( void *ROM_va, size_t ROM_size, size_t hdr_offset );
 errno_t call_16bit_code( u_int16_t cs, u_int16_t ss, u_int16_t entry, struct trap_state *ts );
 
 struct drv_video_screen_t        video_driver_direct_vesa =
@@ -125,9 +134,13 @@ static int direct_vesa_probe()
             SHOW_ERROR0( 0, "VESA PM entry checksum is wrong");
         else
         {
-#if 0
+#if DO16BIT
             SHOW_FLOW0( 1, "gettig VESA PM BIOS copy");
             load_pm_vesa( ROM_va, ROM_size, hdr_offset );
+#else
+            (void) hdr_offset;
+            (void) ROM_va;
+            (void) ROM_size;
 #endif
         }
     }
@@ -146,6 +159,7 @@ pressEnter("PM VESA done");
 #define STK_size 1024
 #define DBA_size 128*1024
 
+#if DO16BIT
 static void *data_buffer;
 
 static errno_t load_pm_vesa( void *in_ROM_va, size_t ROM_size, size_t hdr_offset )
@@ -205,9 +219,9 @@ static errno_t load_pm_vesa( void *in_ROM_va, size_t ROM_size, size_t hdr_offset
     make_descriptor(gdt, VBE3_B8_16, 0xB8000, 0xffff, ACC_PL_K | ACC_DATA_W, SZ_16 );
 
 
-    struct trap_state ts;
 
 #if 0
+    struct trap_state ts;
     errno_t ret;
     if( (ret = call_16bit_code( VBE3_CS_16, VBE3_ST_16, hdr->entryInit, &ts )) )
         return ret;
@@ -219,7 +233,7 @@ static errno_t load_pm_vesa( void *in_ROM_va, size_t ROM_size, size_t hdr_offset
     return 0;
 }
 
-
+#endif
 
 
 #if 0
@@ -263,6 +277,10 @@ static errno_t load_pm_vesa( void *in_ROM_va, size_t ROM_size, size_t hdr_offset
 
 errno_t call_16bit_code( u_int16_t cs, u_int16_t ss, u_int16_t entry, struct trap_state *ts )
 {
+    (void) cs;
+    (void) ss;
+    (void) entry;
+    (void) ts;
     // need AX, BX, CX, DX, ES, DI
 
     // load regs
@@ -275,3 +293,6 @@ errno_t call_16bit_code( u_int16_t cs, u_int16_t ss, u_int16_t entry, struct tra
 
     return ENXIO;
 }
+
+
+

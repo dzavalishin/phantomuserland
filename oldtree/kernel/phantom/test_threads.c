@@ -22,6 +22,8 @@
 #include "test.h"
 
 #include <threads.h>
+#include <thread_private.h>
+
 #include <hal.h>
 #include <kernel/timedcall.h>
 
@@ -134,7 +136,7 @@ static void thread1(void *a)
     FINISH();
 }
 
-
+/*
 static void t_sem_signal(void *a)
 {
     (void) a;
@@ -144,7 +146,7 @@ static void t_sem_signal(void *a)
         hal_sem_release( &s );
     }
 }
-
+*/
 
 static errno_t threads_test()
 {
@@ -343,10 +345,10 @@ static void echo(  void *_a )
     printf("Echo: '%s'\n", _a);
 }
 
-static timedcall_t     t1 = { echo, "hello 5", 		5,		0 };
-static timedcall_t     t2 = { echo, "hello 100", 	100,	0 };
-static timedcall_t     t3 = { echo, "hello 2000", 	2000,	0 };
-static timedcall_t     t4 = { echo, "hello 10 000", 10000,	0 };
+static timedcall_t     t1 = { echo, "hello 5", 		   5,	0, 0, { 0, 0 }, 0 };
+static timedcall_t     t2 = { echo, "hello 100",         100,	0, 0, { 0, 0 }, 0 };
+static timedcall_t     t3 = { echo, "hello 2000", 	2000,	0, 0, { 0, 0 }, 0 };
+static timedcall_t     t4 = { echo, "hello 10 000",    10000,	0, 0, { 0, 0 }, 0 };
 
 static char *msg = "timed func 5000";
 

@@ -878,6 +878,8 @@ static int ne_read( struct phantom_device *dev, void *buf, int len)
 
 #if NE2000_INTR
         hal_sem_acquire( &(pvt->recv_interrupt_sem) );
+#else
+        (void) pvt;
 #endif
         ret = ne_poll(dev, buf, len);
         if( ret <= 0 )

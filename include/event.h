@@ -99,6 +99,10 @@ void event_q_put_key( int vkey, int ch, int modifiers );
 //! Put window event onto the main e q
 void event_q_put_win( int x, int y, int info, struct drv_video_window *focus );
 
+//! Put any event onto the main e q
+void event_q_put_e( struct ui_event *in );
+
+
 //! Put global event onto the main e q, supposed that event system
 //! will decide which windows have to receive this event.
 //void event_q_put_global( int x, int y, int info );

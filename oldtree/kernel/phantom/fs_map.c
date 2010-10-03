@@ -41,7 +41,7 @@ static fs_probe_t fs_drivers[] =
 {
 
     { "Phantom", 	fs_probe_phantom,	0 	 	},
-//    { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
+    { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
     { "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
     //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
     { "CD",  		fs_probe_cd, 	 	0		},
@@ -70,7 +70,11 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
         }
 
         ret = fp->use_f( p );
-        if( ret ) continue;
+        if( ret )
+        {
+            SHOW_ERROR( 0, "%s file sysem driver rejecter partition %s", fp->name, p->name );
+            continue;
+        }
 
         SHOW_INFO( 0, "%s file sysem driver occupies partition %s", fp->name, p->name );
         return 0;
@@ -137,7 +141,7 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
 }
 
 
-errno_t fs_probe_fat(phantom_disk_partition_t *p)
+errno_t fs_probe_fat(phantom_disk_partition_t *p )
 {
     unsigned char buf[PAGE_SIZE];
 
@@ -219,6 +223,14 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p)
 
     return 0;
 }
+
+
+
+
+
+
+
+
 
 #include "unix/fat32/define.h"
 #include "unix/fat32/FAT32_Access.h"

@@ -24,6 +24,7 @@
 
 #include <newos/port.h>
 #include <hal.h>
+#include <threads.h>
 
 #include "test.h"
 

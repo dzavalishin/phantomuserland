@@ -564,7 +564,7 @@ int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
         return -1;
     }
 again:
-    ;
+    assert(nDesc > 0);
     int pos = r->lastUsedIdx % r->vr.num;
     unsigned int bufIndex = r->vr.used->ring[pos].id;
 
@@ -583,6 +583,8 @@ again:
 
     virtio_release_descriptor_index(r, bufIndex);
     r->lastUsedIdx++;
+
+    nDesc--;
 
     if( (flagsCopy & VRING_DESC_F_NEXT) )
         goto again;

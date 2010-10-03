@@ -67,6 +67,7 @@ void set_uufile_name( uufile_t *in, const char *name );
 void link_uufile( uufile_t *in );
 void unlink_uufile( uufile_t *in );
 
+void destroy_uufile(uufile_t *f);
 
 
 

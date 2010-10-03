@@ -398,8 +398,6 @@ void dump_thread_stacks(void);
 //void hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ));
 //void hal_set_thread_name(const char *name);
 
-void phantom_dump_threads_buf(char *buf, int len);
-
 
 // --------------------------------------------------------------
 // Cond/mutex impl

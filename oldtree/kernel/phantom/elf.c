@@ -75,6 +75,10 @@ static void 	kernel_protected_module_starter( void * _em );
 
 errno_t load_elf( void *_elf, size_t elf_size, const char *name )
 {
+
+    // TODO check that we do not access data out of elf image
+    (void)elf_size;
+
     struct Elf32_Ehdr *elf_header = (struct Elf32_Ehdr *)_elf;
 
     if( elf_check(elf_header) )
@@ -94,8 +98,8 @@ errno_t load_elf( void *_elf, size_t elf_size, const char *name )
     {
         Elf32_Phdr *ph = &program_header[i];
 
-        int bot = ph->p_vaddr;
-        int top = ph->p_vaddr + ph->p_memsz;
+        unsigned int bot = ph->p_vaddr;
+        unsigned int top = ph->p_vaddr + ph->p_memsz;
 
         if( bot < minaddr ) minaddr = bot;
         if( top > maxaddr ) maxaddr = top;

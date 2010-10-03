@@ -24,9 +24,11 @@
 #include <drv_video_screen.h>
 #include <video/color.h>
 #include <hal.h>
+#include <threads.h>
 
 
 #include "dev/key_event.h"
+#include "misc.h"
 
 //#include <stream/stream.h>
 //#include <gpanel/gpanel.h>

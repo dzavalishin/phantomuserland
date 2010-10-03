@@ -16,6 +16,8 @@
 
 #include "../config.h"
 
+#include "ia32private.h"
+
 #include <i386/eflags.h>
 #include <i386/trap.h>
 #include <i386/seg.h>
@@ -117,7 +119,7 @@ static char cpu_intr_stack[MAX_CPUS][IS_SIZE];
 
 void phantom_init_descriptors(void)
 {
-#warning need stacks alloc/free for intrs
+    // TODO need stacks alloc/free for intrs?
     tss.ss0 = KERNEL_DS;
 
     //tss.esp0 = get_esp(); // why?

@@ -25,9 +25,12 @@
 
 #include "fs_map.h"
 
+struct tiny_fat;
 
 struct __attribute__((packed)) fat_dir
 {
+    struct tiny_fat *fs; // owning fs
+
     u_int8_t  filename[11];
     u_int8_t  attribute;
     u_int8_t  reserved;
@@ -228,6 +231,8 @@ static struct fat_dir * find_file(tiny_fat_t *fs, const u_int8_t * const name)
     struct fat_dir * dir;
     dir = (struct fat_dir*)malloc(sizeof(struct fat_dir));
 
+    dir->fs = fs;
+
     hdd_read(fs->p, fs->FirstDataSector, fs->sec_buf, 1);
 
     for(i = 0; i < 512; i += 32)
@@ -293,6 +298,8 @@ void list_files(tiny_fat_t *fs)
     u_int32_t i;
 
     struct fat_dir * dir = (struct fat_dir*)malloc(sizeof(struct fat_dir));
+
+    dir->fs = fs;
 
     hdd_read( fs->p, fs->FirstDataSector, fs->sec_buf, 1);
 
@@ -513,5 +520,45 @@ errno_t fs_start_tiny_fat( phantom_disk_partition_t *p )
     return check_for_FAT16(fs);
 
 }
+
+
+
+
+
+
+
+
+
+
+
+#include <unix/uufile.h>
+
+
+
+size_t      fat16_read( struct uufile *f, void *dest, size_t bytes)
+{
+    struct fat_dir *dir = f->impl;
+
+    errno_t ret = fat_read( dir->fs, dir, f->pos, bytes, dest );
+    if( ret )
+        return -ret;
+
+    f->pos += bytes;
+
+    return bytes;
+}
+
+size_t      fat16_write( struct uufile *f, void *dest, size_t bytes)
+{
+    tiny_fat_t *fs = f->impl;
+
+    (void) fs;
+    (void) dest;
+    (void) bytes;
+    return -1;
+}
+
+
+
 
 

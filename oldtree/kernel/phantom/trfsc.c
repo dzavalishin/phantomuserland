@@ -30,6 +30,8 @@
 
 #include "trfs.h"
 
+#include "misc.h"
+
 // TODO put elements to the beginning of Q, remove (on resend)
 // from end. this way received replied will spend less time
 // searching q. possibly.
@@ -527,7 +529,7 @@ static void trfs_resend_thread(void *arg)
 // Init and interface
 // --------------------------------------------------------
 
-static void testrq();
+//static void testrq();
 
 void phantom_trfs_init()
 {
@@ -687,7 +689,7 @@ phantom_disk_partition_t *phantom_create_trfs_partition_struct( long size )
 }
 
 
-
+/*
 static void test_report( struct pager_io_request *req, int write )
 {
     SHOW_INFO( 0, "callback for 0x%p called, %s", req, write ? "wr" : "rd" );
@@ -697,7 +699,7 @@ static void test_report( struct pager_io_request *req, int write )
     else
         SHOW_FLOW0( 0, "success" );
 }
-
+*/
 
 //static
 void trfs_testrq()

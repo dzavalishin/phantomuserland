@@ -35,6 +35,8 @@ void set_uufile_name( uufile_t *out, const char *name )
 static uufile_t uuf_template =
 {
     // all zeros
+    0, 0, 0, 0,
+    0, 0, 0, { 0 }
 };
 
 uufile_t *create_uufile()

@@ -43,7 +43,7 @@ static size_t      tcpfs_getpath( struct uufile *f, void *dest, size_t bytes);
 // returns -1 for non-files
 static size_t      tcpfs_getsize( struct uufile *f);
 
-static void *      tcpfs_copyimpl( void *impl );
+//static void *      tcpfs_copyimpl( void *impl );
 
 
 struct uufileops tcpfs_fops =
@@ -232,6 +232,7 @@ static size_t      tcpfs_getpath( struct uufile *f, void *dest, size_t bytes)
 // returns -1 for non-files
 static size_t      tcpfs_getsize( struct uufile *f)
 {
+    (void) f;
     return -1;
 }
 

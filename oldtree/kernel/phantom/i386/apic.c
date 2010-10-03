@@ -28,6 +28,8 @@
 #include <i386/proc_reg.h>
 #include <kernel/init.h>
 
+// scheduler_time_interrupt
+#include <threads.h>
 
 
 // NB! Spurious must have lower bits = 1111
