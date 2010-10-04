@@ -19,6 +19,7 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
+#include <kernel/config.h>
 
 #include <threads.h>
 #include <event.h>
@@ -230,6 +231,7 @@ void event_q_put_e( struct ui_event *in )
 static void event_push_thread()
 {
     hal_set_thread_name("UIEventQ");
+	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {
@@ -569,6 +571,7 @@ locked:
 static void keyboard_read_thread(void)
 {
     hal_set_thread_name("KeyEvents");
+	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {

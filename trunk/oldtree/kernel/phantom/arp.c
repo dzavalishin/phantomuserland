@@ -477,7 +477,7 @@ static void arp_cleanup_thread(void)
     hal_set_thread_name("ARP Clean");
 
     for(;;) {
-        //thread_snooze(1000000 * 60); // 1 min
+        // 1 min
         hal_sleep_msec(60*1000);
 
         free_list = NULL;

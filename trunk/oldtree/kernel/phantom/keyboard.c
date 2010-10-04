@@ -673,6 +673,7 @@ static void keyb_event_loop( void *arg )
     (void)arg;
 
     hal_set_thread_name("KeyEvents");
+	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {

@@ -30,6 +30,7 @@
 #include <x86/phantom_page.h>
 #include <errno.h>
 #include <threads.h>
+#include <kernel/config.h>
 
 #include "paging_device.h"
 #include "hal.h"
@@ -326,7 +327,7 @@ paging_device_io_thread( void *arg )
     paging_device *me = (paging_device *)arg;
 
     hal_set_thread_name("Pager Dev");
-
+	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     SHOW_FLOW(9, "paging_device_io_thread started, me = %lx\n", me);
 
