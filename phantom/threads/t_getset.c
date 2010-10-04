@@ -61,6 +61,14 @@ hal_set_thread_priority( int tid, int prio )
     return 0;
 }
 
+errno_t hal_set_current_thread_priority( int prio )
+{
+    assert( prio >= 0 && prio <= (THREAD_PRIO_HIGHEST|THREAD_PRIO_MOD_REALTIME) );
+    phantom_thread_t * t = GET_CURRENT_THREAD();
+    t->priority = prio;
+}
+
+
 /**
  *
  * Get thread's priority.

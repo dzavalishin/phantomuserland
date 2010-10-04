@@ -125,7 +125,8 @@ int     hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
 int		hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
 
 
-errno_t hal_set_thread_priority( int tid, int prio );
+//errno_t hal_set_thread_priority( int tid, int prio );
+errno_t hal_set_current_thread_priority( int prio );
 
 void    hal_set_thread_name(const char *name);
 

@@ -10,9 +10,6 @@
 **/
 
 
-
-//---------------------------------------------------------------------------
-
 #define DEBUG_MSG_PREFIX "pager"
 #include "debug_ext.h"
 #define debug_level_flow 6
@@ -77,17 +74,6 @@ static disk_page_io                 superblock_io;
 
 
 static disk_page_no_t     sb_default_page_numbers[] = DISK_STRUCT_SB_OFFSET_LIST;
-
-
-
-      /*
-__debug_set_pager_q_bp()
-{
-    //set_b0( (~0x3) & kvtophys(&pagein_q_start), DR7_LEN_4, DR7_RW_DATA );
-    //set_b1( (~0x3) & kvtophys(&pageout_q_start), DR7_LEN_4, DR7_RW_DATA );
-
-}      */
-
 
 
 
@@ -189,21 +175,7 @@ pager_finish()
 
 
 
-/*
-void pager_free_io_resources(pager_io_request *req)
-{
 
-//BUG! Do we REALLY need it here?
-
-// handle flag_io_phys_mem?
-
-    if(req->free_vaddr) hal_v_address_space_free_page(req->virt_addr);
-    req->free_vaddr = 0;
-
-    if(req->free_mpage)  hal_free_phys_page(req->phys_page);
-    req->free_mpage = 0;
-}
-*/
 
 void pager_debug_print_q()
 {
@@ -238,12 +210,7 @@ void pager_start_io() // called to start new io
 
     if(_DEBUG) hal_printf("pager start io\n");
 
-    //set_b0( (~0x3) & kvtophys(pagein_q_start), DR7_LEN_4, DR7_RW_DATA );
-    //set_b1( (~0x3) & kvtophys(pageout_q_start), DR7_LEN_4, DR7_RW_DATA );
-
-
-    // pagein has absolute priority as
-    // system responce time depends on it - right?
+    // pagein has absolute priority as system response time depends on it - right?
     if(pagein_q_start)
     {
         pager_current_request = pagein_q_start;

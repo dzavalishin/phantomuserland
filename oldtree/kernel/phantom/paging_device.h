@@ -29,8 +29,8 @@
 struct vm_page;
 
 //#define REMAPPED_PAGING_IO (1)
-/* TODO: think over DPC usage here */
 
+// Actually, not a device, but paging io interface
 typedef struct paging_device
 {
     int                 n_pages;
@@ -55,6 +55,8 @@ typedef struct paging_device
     hal_cond_t		start_io_sema;
 
     hal_mutex_t         mutex;
+
+    void *		private; // Private part of impl
 } paging_device;
 
 

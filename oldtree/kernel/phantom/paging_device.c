@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Paging IO
  *
