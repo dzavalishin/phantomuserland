@@ -20,6 +20,8 @@
 
 #include <phantom_libc.h>
 #include <threads.h>
+#include <kernel/config.h>
+
 #include "dpc.h"
 
 //---------------------------------------------------------------------------
@@ -89,6 +91,7 @@ static int dpc_threads = 0;
 static void dpc_thread(void)
 {
     hal_set_thread_name("DPC Work");
+	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     dpc_init_ok = 1;
 

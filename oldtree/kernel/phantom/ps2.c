@@ -27,6 +27,7 @@
 #include <queue.h>
 
 #include <threads.h>
+#include <kernel/config.h>
 
 //#include "dpc.h"
 
@@ -149,6 +150,7 @@ static void push_event_thread(void *arg)
     (void) arg;
 
     hal_set_thread_name("MouEvents");
+	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {
