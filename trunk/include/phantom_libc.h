@@ -90,6 +90,7 @@ int sscanf(const char *ibuf, const char *fmt, ...);
 // console.c
 int getchar(void);
 int putchar(int c);
+int puts(const char *s);
 
 
 
