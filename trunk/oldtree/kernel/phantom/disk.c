@@ -207,14 +207,14 @@ errno_t phantom_sync_write_sector( phantom_disk_partition_t *p, const void *to, 
 
 
 #else
-errno_t phantom_sync_read_disk( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks )
+errno_t phantom_sync_read_block( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks )
 {
     assert( p->block_size < PAGE_SIZE );
     int m = PAGE_SIZE/p->block_size;
     return p->syncRead( p, to, blockNo*m, nBlocks*m );
 }
 
-errno_t phantom_sync_write_disk( phantom_disk_partition_t *p, const void *to, long blockNo, int nBlocks )
+errno_t phantom_sync_write_block( phantom_disk_partition_t *p, const void *to, long blockNo, int nBlocks )
 {
     assert( p->block_size < PAGE_SIZE );
     int m = PAGE_SIZE/p->block_size;
@@ -222,6 +222,8 @@ errno_t phantom_sync_write_disk( phantom_disk_partition_t *p, const void *to, lo
 }
 #endif
 
+
+//! Convert usual pager request to partition code style request snd start it
 void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq )
 {
     int m = PAGE_SIZE/p->block_size;

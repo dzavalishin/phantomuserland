@@ -75,6 +75,8 @@ static void t_empty(void *a)
 
 static void t_wait(void *a)
 {
+    hal_set_current_thread_priority( THREAD_PRIO_HIGH );
+
     char *name = a;
     while(!thread_stop_request)
     {
@@ -166,7 +168,6 @@ static errno_t threads_test()
 
     //phantom_create_thread( t_wait, "__TW__" );
     int tid = hal_start_kernel_thread_arg( t_wait, "__TW__" );
-    hal_set_thread_priority( tid, THREAD_PRIO_HIGH );
 
     i = 40;
     while(i-- > 0)
