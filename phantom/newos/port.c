@@ -10,7 +10,7 @@
 
 //#include <kernel/sem.h>
 //#include <kernel/int.h>
-//#include <kernel/debug.h>
+#include <kernel/debug.h>
 //#include <kernel/heap.h>
 //#include <kernel/vm.h>
 //#include <kernel/cbuf.h>
@@ -31,7 +31,6 @@ struct port_entry {
     port_id 			id;
     proc_id 			owner;
     int32 			capacity;
-    //int     			lock;
     hal_spinlock_t              lock;
     char			*name;
     hal_sem_t			read_sem;
@@ -62,7 +61,15 @@ static hal_spinlock_t port_spinlock;
 #define GRAB_PORT_LOCK(s) acquire_spinlock(&(s).lock)
 #define RELEASE_PORT_LOCK(s) release_spinlock(&(s).lock)
 
-//int port_init(kernel_args *ka)
+
+// internal API
+void dump_port_list(int argc, char **argv);
+static void _dump_port_info(struct port_entry *port);
+static void dump_port_info(int argc, char **argv);
+
+
+
+
 int port_init(void)
 {
     int i;
@@ -72,24 +79,14 @@ int port_init(void)
 
     sz = sizeof(struct port_entry) * MAX_PORTS;
 
-    /*
-    // create and initialize semaphore table
-    port_region = vm_create_anonymous_region(vm_get_kernel_aspace_id(), "port_table", (void **)&ports,
-                                             REGION_ADDR_ANY_ADDRESS, sz, REGION_WIRING_WIRED, LOCK_RW|LOCK_KERNEL);
-    if(port_region < 0) {
-        panic("unable to allocate kernel port table!\n");
-    }
-    */
-
     ports = calloc(1, sz);
-    //memset(ports, 0, sz);
 
     for(i=0; i<MAX_PORTS; i++)
         ports[i].id = -1;
 
     // add debugger commands
-    //dbg_add_command(&dump_port_list, "ports", "Dump a list of all active ports");
-    //dbg_add_command(&dump_port_info, "port", "Dump info about a particular port");
+    dbg_add_command(&dump_port_list, "ports", "Dump a list of all active ports");
+    dbg_add_command(&dump_port_info, "port", "Dump info about a particular port");
 
     ports_active = true;
 
@@ -107,12 +104,8 @@ void dump_port_list(int argc, char **argv)
     }
 }
 
-#if 0
+#if 1
 
-// internal API
-void dump_port_list(int argc, char **argv);
-static void _dump_port_info(struct port_entry *port);
-static void dump_port_info(int argc, char **argv);
 
 
 static void _dump_port_info(struct port_entry *port)

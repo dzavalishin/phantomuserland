@@ -55,6 +55,9 @@ static void defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e 
     //wtty_t *wt = t->ctty;
     wtty_t *wt = get_thread_ctty( t );
 
+	// Skip key release events
+	if(e->modifiers & UI_MODIFIER_KEYUP)
+		return;
 
     errno_t err = wtty_putc_nowait(wt, e->k.ch );
     if(err == ENOMEM)

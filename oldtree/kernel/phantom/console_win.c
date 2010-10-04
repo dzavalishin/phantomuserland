@@ -19,6 +19,7 @@
 #include "misc.h"
 
 #include <threads.h>
+#include <kernel/timedcall.h>
 
 //#define CON_FONT drv_video_8x16san_font
 #define CON_FONT drv_video_8x16cou_font
@@ -41,11 +42,11 @@ int 	set_fg(struct rgba_t c) { console_fg = c; return 0; }
 int 	set_bg(struct rgba_t c) { console_bg = c; return 0; }
 
 
-int phantom_console_window_puts(const char *s)
+static int ttx = 0, tty = 0;
+static int phantom_console_window_puts(const char *s)
 {
     if(phantom_console_window == 0)
         return 0;
-    static int ttx = 0, tty = 0;
 
     drv_video_font_tty_string( phantom_console_window, &CON_FONT,
     	s, console_fg, console_bg, &ttx, &tty );
@@ -54,19 +55,71 @@ int phantom_console_window_puts(const char *s)
     return 0;
 }
 
+
+
 static char cbuf[BUFS+1];
 static int cbufpos = 0;
 
+
+static void flush_stdout(void)
+{
+    if( cbufpos >= BUFS)
+        cbufpos = BUFS;
+    cbuf[cbufpos] = '\0';
+    phantom_console_window_puts(cbuf);
+    cbufpos = 0;
+}
+
+
+static timedcall_t cons_timer =
+{
+    (void *)flush_stdout,
+    0, 100,
+    0, 0, { 0, 0 }, 0
+};
+
+
+
+
+
 int phantom_console_window_putc(int c)
 {
-    cbuf[cbufpos++] = c;
+    phantom_undo_timed_call( &cons_timer );
 
-    if( cbufpos >= BUFS || c == '\n' )
+    switch(c)
     {
-        cbuf[cbufpos] = '\0';
-        phantom_console_window_puts(cbuf);
-        cbufpos = 0;
+    case '\b':
+        if(cbufpos > 0) cbufpos--;
+        return c;
+
+    case '\t':
+        while(cbufpos % 8)
+        {
+            if(cbufpos >= BUFS)
+                break;
+            cbuf[cbufpos++] = ' ';
+        }
+        return c;
+
+    case '\n':
+        cbuf[cbufpos++] = c;
+        goto flush;
+
+    case '\r':
+        cbuf[cbufpos++] = c;
+        goto flush;
+
+    default:
+        cbuf[cbufpos++] = c;
+        if( cbufpos >= BUFS )
+            goto flush;
+
+        phantom_request_timed_call( &cons_timer, 0 );
+        return c;
     }
+
+flush:
+    flush_stdout();
     return c;
 }
 
@@ -104,11 +157,18 @@ int phantom_debug_window_putc(int c)
 
 
 
+static int cw_puts(const char *s)
+{
+    while(*s)
+        phantom_console_window_putc(*s++);
+    return 0;
+}
+
 static struct console_ops win_ops =
 {
     .getchar 		= 0,
     .putchar 		= phantom_console_window_putc,
-    .puts       	= phantom_console_window_puts,
+    .puts       	= cw_puts,
     .set_fg_color       = set_fg,
     .set_bg_color       = set_bg,
 };
@@ -118,8 +178,6 @@ static void phantom_debug_window_loop();
 
 void phantom_init_console_window()
 {
-    //console_fg = COLOR_BLACK;
-    //console_bg = COLOR_LIGHTGRAY;
     console_fg = COLOR_LIGHTGRAY;
     console_bg = COLOR_BLACK;
 
@@ -137,8 +195,7 @@ void phantom_init_console_window()
 
     phantom_console_window = w;
 
-    //phantom_set_console_putchar( phantom_console_window_putc );
-    //phantom_set_console_puts( phantom_console_window_puts );
+	w->owner = GET_CURRENT_THREAD();
 
     phantom_set_console_ops( &win_ops );
     phantom_console_window_puts("Phantom console window\n");

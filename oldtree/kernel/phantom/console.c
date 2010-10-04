@@ -27,11 +27,6 @@ static void com_port_putc(char c)
 }
 
 
-/*
-static int (*getchar_impl)(void) = phantom_scan_console_getc;
-static int (*putchar_impl)(int) = driver_isa_vga_putc; // It (hopefully) works from point zero
-static int (*puts_impl)(const char *) = 0;
-*/
 int 	null_set_color(struct rgba_t c) {     (void) c; return 0; 	}
 
 static struct console_ops default_ops =
@@ -86,7 +81,14 @@ int putchar(int c)
 int
 puts(const char *s)
 {
-    if(ops->puts) return ops->puts(s);
+    if(ops->puts)
+    {
+        const char *sc = s;
+        while(*sc)
+            com_port_putc(*sc++);
+
+        return ops->puts(s);
+    }
 
     while(*s)
         putchar(*s++);

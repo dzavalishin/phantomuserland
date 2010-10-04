@@ -28,6 +28,7 @@
 #include <phantom_time.h>
 
 #include <kernel/init.h>
+#include <kernel/debug.h>
 
 #include "hal.h"
 #include "paging_device.h"
@@ -253,6 +254,8 @@ int main(int argc, char **argv, char **envp)
     printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
     phantom_process_boot_options();
 
+    dbg_init(); // Kernel command line debugger
+
     // Used to refill list used to allocate physmem in interrupts
     hal_init_physmem_alloc_thread();
 
@@ -341,11 +344,15 @@ init_tetris();
     //pressEnter("will look for drv stage 4");
     phantom_pci_find_drivers( 4 );
 
-trfs_testrq();
+//trfs_testrq();
 
+#if 0
     printf("PRESS Q TO STOP PHANTOM");
     while(getchar() != 'Q')
         ;
+#else
+    kernel_debugger();
+#endif
 
     phantom_finish_all_threads();
 
