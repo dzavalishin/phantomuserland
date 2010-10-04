@@ -90,7 +90,7 @@ static size_t      ext2_write(   struct uufile *f, void *dest, size_t bytes);
 static size_t      ext2_getpath( struct uufile *f, void *dest, size_t bytes);
 
 // returns -1 for non-files
-static size_t      ext2_getsize( struct uufile *f);
+static ssize_t     ext2_getsize( struct uufile *f);
 
 static void *      ext2_copyimpl( void *impl );
 
@@ -173,7 +173,9 @@ static errno_t     ext2_close(struct uufile *f)
 // Create a file struct for given path
 static uufile_t *  ext2_namei(const char *filename)
 {
-    uufile_t *ret = create_uufile();
+	(void) filename;
+
+	uufile_t *ret = create_uufile();
 
     ret->ops = &ext2_fops;
     ret->pos = 0;
@@ -223,9 +225,11 @@ static size_t      ext2_getpath( struct uufile *f, void *dest, size_t bytes)
 }
 
 // returns -1 for non-files
-static size_t      ext2_getsize( struct uufile *f)
+static ssize_t     ext2_getsize( struct uufile *f)
 {
-    return -1;
+	(void) f;
+
+	return -1;
 }
 
 static void *      ext2_copyimpl( void *impl )
@@ -775,7 +779,7 @@ static bool ReadIndirect1( e2impl_t *impl, int* dst, int* cnt, int blk)
 
 bool ReadIndirect2( e2impl_t *impl, int* dst, int* cnt, int blk)
 {
-    int i;
+    unsigned int i;
     if(*cnt <= 0)
     {
         return TRUE;
@@ -851,7 +855,7 @@ static bool read_file_blocklist( e2impl_t *impl, struct i_node* ino, int ptr_dir
             return FALSE;
         }
 
-        int i;
+        unsigned int i;
         // TODO: recheck the definition of the index
         for(i = 0; n && i < impl->dim_ptr; i++)
             if(!ReadIndirect2(impl,ptr,&n,r3[i]))
@@ -926,6 +930,18 @@ static bool Open_File( e2impl_t *impl, struct i_node* ino, word tipo_file )
     }
 
     return TRUE;
+}
+
+
+void ____ext2_unused()
+{
+	(void) get_inode;
+	(void) isDir;
+	(void) isFile;
+	(void) isFastSymbolicLink;
+	(void) Open_File;
+	(void) init_ext2;
+
 }
 
 

@@ -88,7 +88,7 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
-    size_t size = f->ops->getsize( f );
+    ssize_t size = f->ops->getsize( f );
 
     if(size < 0)
     {
@@ -170,6 +170,10 @@ int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data )
 
 int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, int statlink )
 {
+	(void) u;
+	(void) statlink;
+
+
     uufile_t * f = uu_namei( path );
     if( f == 0 )
     {
@@ -193,7 +197,9 @@ int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, in
 
 int usys_fstat( int *err, uuprocess_t *u, int fd, struct stat *data, int statlink )
 {
-    CHECK_FD(fd);
+	(void) statlink;
+
+	CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     if( !f->ops->stat )
@@ -209,6 +215,8 @@ int usys_fstat( int *err, uuprocess_t *u, int fd, struct stat *data, int statlin
 
 int usys_truncate( int *err, uuprocess_t *u, const char *path, off_t length)
 {
+	(void) u;
+
     uufile_t * f = uu_namei( path );
     if( f == 0 )
     {

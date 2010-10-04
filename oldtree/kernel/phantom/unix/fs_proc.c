@@ -38,7 +38,7 @@ static size_t      proc_write(   struct uufile *f, void *dest, size_t bytes);
 static size_t      proc_getpath( struct uufile *f, void *dest, size_t bytes);
 
 // returns -1 for non-files
-static size_t      proc_getsize( struct uufile *f);
+static ssize_t      proc_getsize( struct uufile *f);
 
 static void *      proc_copyimpl( void *impl );
 
@@ -104,6 +104,10 @@ static struct uufile proc_root =
 
 static errno_t     proc_open(struct uufile *f, int create, int write)
 {
+	(void) f;
+	(void) create;
+	(void) write;
+
     return 0;
 }
 
@@ -126,6 +130,8 @@ static errno_t     proc_close(struct uufile *f)
 
 static size_t r_about( struct uufile *f, void *dest, size_t bytes)
 {
+	(void) f;
+
     strncpy( dest, "Phantom ProcFS", bytes );
     return strlen(dest);
 }
@@ -171,11 +177,19 @@ static uufile_t *  proc_getRoot()
 
 static size_t      proc_read(    struct uufile *f, void *dest, size_t bytes)
 {
+	(void) f;
+	(void) dest;
+	(void) bytes;
+
     return -1;
 }
 
 static size_t      proc_write(   struct uufile *f, void *dest, size_t bytes)
 {
+	(void) f;
+	(void) dest;
+	(void) bytes;
+
     return -1;
 }
 
@@ -192,14 +206,18 @@ static size_t      proc_getpath( struct uufile *f, void *dest, size_t bytes)
 }
 
 // returns -1 for non-files
-static size_t      proc_getsize( struct uufile *f)
+static ssize_t      proc_getsize( struct uufile *f)
 {
+	(void) f;
+
     return -1;
 }
 
 static void *      proc_copyimpl( void *impl )
 {
-    return 0; //strdup(impl);
+	(void) impl;
+
+	return 0; //strdup(impl);
 }
 
 

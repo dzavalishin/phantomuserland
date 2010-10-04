@@ -42,7 +42,9 @@ static char hostname[MAX_UU_HOSTNAME+1] = "localhost";
 
 int usys_gethostname( int *err, uuprocess_t *u, char *data, size_t len )
 {
-    if( len < strlen(hostname) )
+	(void) u;
+
+    if( len < (unsigned)strlen(hostname) )
     {
         *err = ENAMETOOLONG;
         return -1;
@@ -55,6 +57,8 @@ int usys_gethostname( int *err, uuprocess_t *u, char *data, size_t len )
 
 int usys_sethostname( int *err, uuprocess_t *u, const char *data, size_t len )
 {
+	(void) u;
+
     if( len > MAX_UU_HOSTNAME )
     {
         *err = ENAMETOOLONG;
@@ -140,6 +144,9 @@ int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol)
 
 int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, socklen_t addrlen)
 {
+	(void)addrlen;
+	(void)my_addr;
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
@@ -222,6 +229,8 @@ int usys_accept(int *err, uuprocess_t *u, int fd, const struct sockaddr *acc_add
 
 int usys_listen(int *err, uuprocess_t *u, int fd, int backlog)
 {
+	(void)backlog;
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
@@ -245,10 +254,16 @@ int usys_listen(int *err, uuprocess_t *u, int fd, int backlog)
 
 int usys_getsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, void *optval, socklen_t *optlen)
 {
+	(void) optname;
+	(void) optlen;
+	(void) optval;
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
+	(void) us;
+
 
     if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
     {
@@ -333,7 +348,7 @@ int usys_getsockname(int *err, uuprocess_t *u, int fd, struct sockaddr *name, so
         return -1;
     }
 
-    if( *namelen < sizeof(us->addr) )
+    if( (unsigned)(*namelen) < sizeof(us->addr) )
     {
         *err = EINVAL;
         return -1;
@@ -363,7 +378,7 @@ int usys_getpeername(int *err, uuprocess_t *u, int fd, struct sockaddr *name, so
         return -1;
     }
 
-    if( *namelen < sizeof(struct sockaddr) )
+    if( (unsigned)(*namelen) < sizeof(struct sockaddr) )
     {
         *err = EINVAL;
         return -1;
@@ -397,11 +412,18 @@ ssize_t usys_recv(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen, in
 ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen, int flags,
                       struct sockaddr *from, socklen_t *fromlen)
 {
+	(void) fromlen;
+	(void) from;
+	(void) buflen;
+	(void) buf;
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
     int len = 0;
 
     struct uusocket *us = f->impl;
+	(void) us;
+
 
     if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
     {
@@ -420,11 +442,15 @@ ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen
 
 ssize_t usys_recvmsg(int *err, uuprocess_t *u, int fd, struct msghdr *msg, int flags)
 {
-    CHECK_FD(fd);
+	(void) msg;
+
+	CHECK_FD(fd);
     struct uufile *f = GETF(fd);
     int len = 0;
 
     struct uusocket *us = f->impl;
+	(void) us;
+
 
     if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
     {
@@ -454,11 +480,17 @@ ssize_t usys_send(int *err, uuprocess_t *u, int fd, const void *buf, size_t len,
 
 ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t buflen, int flags, const struct sockaddr *to, socklen_t tolen)
 {
+	(void) tolen;
+	(void) to;
+	(void) buflen;
+	(void) buf;
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
     int len = 0;
 
     struct uusocket *us = f->impl;
+	(void) us;
 
     if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
     {
@@ -478,11 +510,15 @@ ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t bu
 
 ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg, int flags)
 {
-    CHECK_FD(fd);
+	(void) msg;
+
+	CHECK_FD(fd);
     struct uufile *f = GETF(fd);
     int len = 0;
 
     struct uusocket *us = f->impl;
+	(void) us;
+
 
     if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
     {

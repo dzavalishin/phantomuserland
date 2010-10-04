@@ -41,7 +41,7 @@ static size_t      root_write(   struct uufile *f, void *dest, size_t bytes);
 static size_t      root_getpath( struct uufile *f, void *dest, size_t bytes);
 
 // returns -1 for non-files
-static size_t      root_getsize( struct uufile *f);
+static ssize_t     root_getsize( struct uufile *f);
 
 static void *      root_copyimpl( void *impl );
 
@@ -105,6 +105,9 @@ static struct uufile root_root =
 
 static errno_t     root_open(struct uufile *f, int create, int write)
 {
+	(void) create;
+	(void) write;
+
     link_uufile( f );
     return 0;
 }
@@ -142,11 +145,19 @@ static uufile_t *  root_getRoot()
 
 static size_t      root_read(    struct uufile *f, void *dest, size_t bytes)
 {
+	(void) f;
+	(void) dest;
+	(void) bytes;
+
     return -1;
 }
 
 static size_t      root_write(   struct uufile *f, void *dest, size_t bytes)
 {
+	(void) f;
+	(void) dest;
+	(void) bytes;
+
     return -1;
 }
 
@@ -162,13 +173,16 @@ static size_t      root_getpath( struct uufile *f, void *dest, size_t bytes)
 }
 
 // returns -1 for non-files
-static size_t      root_getsize( struct uufile *f)
+static ssize_t      root_getsize( struct uufile *f)
 {
+	(void) f;
+
     return -1;
 }
 
 static void *      root_copyimpl( void *impl )
 {
+	(void) impl;
     return 0; //strdup(impl);
 }
 
@@ -267,6 +281,8 @@ found:
 
 static errno_t rm_mount( const char* name, int flags )
 {
+	(void) flags;
+
 
     int i;
     for( i = 0; i < FS_MAX_MOUNT; i++ )
@@ -311,7 +327,12 @@ void phantom_unix_fs_init()
 
 int usys_mount( int *err, uuprocess_t *u, const char *source, const char *target, const char *fstype, int flags, const void *data )
 {
-    uufs_t *fs = 0;
+	(void) u;
+	(void) flags;
+	(void) fstype;
+
+
+	uufs_t *fs = 0;
 
     if( strcmp( data, "procfs" ) )
         fs = &proc_fs;
@@ -333,6 +354,8 @@ int usys_mount( int *err, uuprocess_t *u, const char *source, const char *target
 
 int usys_umount(int *err, uuprocess_t *u, const char *target, int flags )
 {
+	(void) u;
+
     *err = rm_mount( target, flags );
     return *err ? -1 : 0;
 }
