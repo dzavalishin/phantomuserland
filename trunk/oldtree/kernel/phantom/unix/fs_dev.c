@@ -39,7 +39,7 @@ static size_t      dev_write(   struct uufile *f, void *dest, size_t bytes);
 static size_t      dev_getpath( struct uufile *f, void *dest, size_t bytes);
 
 // returns -1 for non-files
-static size_t      dev_getsize( struct uufile *f);
+static ssize_t     dev_getsize( struct uufile *f);
 
 static void *      dev_copyimpl( void *impl );
 
@@ -129,6 +129,9 @@ static struct uufile dev_root =
 
 static errno_t     dev_open(struct uufile *f, int create, int write)
 {
+	(void) create;
+	(void) write;
+
     link_uufile( f );
     return 0;
 }
@@ -198,9 +201,11 @@ static size_t      dev_getpath( struct uufile *f, void *dest, size_t bytes)
 }
 
 // returns -1 for non-files
-static size_t      dev_getsize( struct uufile *f)
+static ssize_t      dev_getsize( struct uufile *f)
 {
-    return -1;
+	(void) f;
+
+	return -1;
 }
 
 static void *      dev_copyimpl( void *impl )
@@ -215,6 +220,8 @@ static void *      dev_copyimpl( void *impl )
 
 static size_t      con_read(    struct uufile *f, void *dest, size_t bytes)
 {
+	(void) f;
+
     int ret = bytes;
 
     char *cp = dest;
@@ -226,7 +233,9 @@ static size_t      con_read(    struct uufile *f, void *dest, size_t bytes)
 
 static size_t      con_write(   struct uufile *f, void *src, size_t bytes)
 {
-    int ret = bytes;
+	(void) f;
+
+	int ret = bytes;
 
     const char *cp = src;
     while(bytes--)

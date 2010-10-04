@@ -41,7 +41,7 @@ static int     	   udpfs_ioctl(   struct uufile *f, errno_t *err, int request, v
 static size_t      udpfs_getpath( struct uufile *f, void *dest, size_t bytes);
 
 // returns -1 for non-files
-static size_t      udpfs_getsize( struct uufile *f);
+static ssize_t     udpfs_getsize( struct uufile *f);
 
 //static void *      udpfs_copyimpl( void *impl );
 
@@ -226,7 +226,7 @@ static size_t      udpfs_getpath( struct uufile *f, void *dest, size_t bytes)
 }
 
 // returns -1 for non-files
-static size_t      udpfs_getsize( struct uufile *f)
+static ssize_t      udpfs_getsize( struct uufile *f)
 {
     (void) f;
     return -1;

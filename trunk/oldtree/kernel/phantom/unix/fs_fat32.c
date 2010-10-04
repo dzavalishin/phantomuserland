@@ -48,7 +48,7 @@ static size_t      fat32_write(   struct uufile *f, void *dest, size_t bytes);
 static size_t      fat32_getpath( struct uufile *f, void *dest, size_t bytes);
 
 // returns -1 for non-files
-static size_t      fat32_getsize( struct uufile *f);
+static ssize_t     fat32_getsize( struct uufile *f);
 
 //static void *      fat32_copyimpl( void *impl );
 
@@ -179,7 +179,7 @@ static size_t      fat32_getpath( struct uufile *f, void *dest, size_t bytes)
 }
 
 // returns -1 for non-files
-static size_t      fat32_getsize( struct uufile *f)
+static ssize_t      fat32_getsize( struct uufile *f)
 {
     (void) f;
     return -1;

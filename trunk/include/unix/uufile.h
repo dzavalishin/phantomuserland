@@ -24,7 +24,7 @@ struct uufileops
     size_t      (*getpath)( struct uufile *f, void *dest, size_t bytes);
 
     // returns -1 for non-files?
-    size_t      (*getsize)( struct uufile *f);
+    ssize_t      (*getsize)( struct uufile *f);
     errno_t     (*setsize)( struct uufile *f, size_t size);
 
     errno_t     (*chmod)( struct uufile *f, int mode);
