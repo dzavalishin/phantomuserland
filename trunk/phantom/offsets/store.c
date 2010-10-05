@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-//#define FILE void
-
-
 FILE *cout;
 FILE *jout;
 
@@ -36,14 +33,17 @@ int main(int ac, char **av)
     generate();
     fprintf(jout, "\n\n}\n");
 
-    fclose(cout);
-    fclose(jout);
+    fflush(cout);
+    fflush(jout);
 
     if( (ferror(cout) || ferror(jout) ) )
     {
         printf("File write error\n");
         return 1;
     }
+
+    fclose(cout);
+    fclose(jout);
 
     return 0;
 }
