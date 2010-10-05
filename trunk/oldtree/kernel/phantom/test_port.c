@@ -31,6 +31,7 @@
 
 static port_id test_p1, test_p2, test_p3, test_p4;
 
+static volatile int port_test_thread_func_finished = 0;
 
 static void port_test_thread_func(void* arg)
 {
@@ -66,6 +67,8 @@ static void port_test_thread_func(void* arg)
     SHOW_INFO0( 0, "porttest: end port_test_thread_func()");
     test_check_eq(n,0);
 #endif
+
+    port_test_thread_func_finished = 1;
 }
 
 
@@ -153,7 +156,8 @@ int do_test_ports(const char *test_parm)
 
     // TODO Fix
     //thread_wait_on_thread(t, NULL);
-    hal_sleep_msec(1000);
+    while(!port_test_thread_func_finished)
+        hal_sleep_msec(10);
 
     SHOW_INFO0( 0, "porttest: close p1");
     port_close(test_p2);
