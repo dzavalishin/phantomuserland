@@ -27,7 +27,11 @@
 #include <threads.h>
 
 #include <kernel/init.h>
+#include <kernel/debug.h>
 
+
+
+static void cmd_mem_stat( int ac, char **av );
 
 
 #define USE_RESERVE 0
@@ -141,6 +145,8 @@ hal_init_physmem_alloc_thread(void)
 #if USE_RESERVE
     hal_start_thread( replentishThread, 0, THREAD_FLAG_KERNEL );
 #endif
+    dbg_add_command(&cmd_mem_stat, "mem", "Physical memory stats");
+
 }
 
 
@@ -576,6 +582,33 @@ static void replentishThread(void *arg)
 }
 
 #endif // USE_RESERVE
+
+
+#define PG2MB(__p, __div) ((int) ( ((__p) * 4096L) / (__div) ))
+
+static void dump_mem_stat( physalloc_t *map, const char *name, long div, const char *unit )
+{
+    int total = PG2MB(map->total_size, div);
+    int free = PG2MB( (map->total_size - map->n_used_pages), div );
+    int used = PG2MB(map->n_used_pages, div);
+    printf("  %-14s: %5d %s total, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
+}
+
+
+
+
+static void cmd_mem_stat( int ac, char **av )
+{
+    (void) ac;
+    (void) av;
+
+    dump_mem_stat( &vm_map, "Address space", 1024L*1024, "Mb" );
+    dump_mem_stat( &pm_map, "Hi mem", 1024L*1024, "Mb"  );
+    dump_mem_stat( &low_map, "Low mem", 1024L, "Kb"  );
+}
+
+
+
 
 
 

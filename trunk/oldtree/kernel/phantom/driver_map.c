@@ -28,6 +28,15 @@
 #include <virtio_net.h>
 #include <virtio_rng.h>
 
+#include <kernel/debug.h>
+
+
+static void add_alldevs( phantom_device_t *dev );
+static void dump_alldevs( int ac, char **av );
+
+
+
+
 #define SPECIAL_VIRTIO_MAP 0
 
 // very simple drivers to devices mapping structure
@@ -210,6 +219,9 @@ static int loadpci()
     if(load_once) return 0;
     load_once = 1;
 
+
+
+
     SHOW_FLOW0( 1, "Loading PCI config:");
 
     // TODO we need to count buses ourself and
@@ -303,6 +315,7 @@ static int probe_pci( int stage, pci_cfg_t *pci )
                   );
 
             phantom_bus_add_dev( &pci_bus, dev );
+            add_alldevs( dev );
 
             return 1;
         }
@@ -347,6 +360,7 @@ static int probe_virtio( int stage, pci_cfg_t *pci )
                   );
 
             phantom_bus_add_dev( &pci_bus, dev );
+            add_alldevs( dev );
 
             return 1;
         }
@@ -377,6 +391,7 @@ static int probe_isa( int stage )
             SHOW_INFO( 0, "Driver '%s' attached to ISA at 0x%X (IRQ %d)",
                        dp->name, dp->port, dp->irq );
             phantom_bus_add_dev( &isa_bus, dev );
+            add_alldevs( dev );
         }
         dp->minstage = 1000; // prevent it from being processed next time
     }
@@ -402,6 +417,7 @@ static int probe_etc( int stage )
         {
             SHOW_INFO( 0, "Driver '%s' attached", dp->name );
             phantom_bus_add_dev( &etc_bus, dev );
+            add_alldevs( dev );
             dp->minstage = ~0; // prevent it from being processed next time
         }
     }
@@ -424,6 +440,12 @@ int phantom_pci_find_drivers( int stage )
         return -1;
     }
     SHOW_FLOW( 0, "Look for PCI devices, stage %d", stage );
+
+    if(stage == 3)
+    {
+        // add the debug command
+        dbg_add_command(&dump_alldevs, "devs", "List all of the device drivers");
+    }
 
     int i;
 
@@ -463,4 +485,37 @@ int phantom_pci_find_drivers( int stage )
 
 
 
+
+
+
+
+#define MAXALLDEV 256
+
+static phantom_device_t *alldevs[MAXALLDEV];
+static int nalldevs = 0;
+
+
+static void add_alldevs( phantom_device_t *dev )
+{
+    if(nalldevs >= MAXALLDEV)
+    {
+        SHOW_ERROR0( 0, "Too many devices!");
+        return;
+    }
+
+    alldevs[nalldevs++] = dev;
+
+}
+
+
+static void dump_alldevs( int ac, char **av )
+{
+    (void) ac;
+    (void) av;
+
+    int i;
+    for( i = 0; i < nalldevs; i++ )
+        printf( "%s,\t", alldevs[i]->name );
+    printf("\n");
+}
 

@@ -39,3 +39,5 @@ phantom_bus_t root_bus =
 };
 
 
+// TODO kernel debugger cmd - list devs
+

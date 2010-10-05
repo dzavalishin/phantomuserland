@@ -7,6 +7,8 @@
 
 #include "../misc.h"
 
+#include <kernel/debug.h>
+
 #define addr_t u_int32_t
 #define NULL 0
 
@@ -136,7 +138,7 @@ static void do_phantom_heap_init(addr_t new_heap_base, unsigned int new_heap_siz
 
 
     // set up some debug commands
-    //dbg_add_command(&dump_bin_list, "heap_bindump", "dump stats about bin usage");
+    dbg_add_command(&dump_bin_list, "heap-bindump", "dump stats about bin usage");
 
     // Mutex init uses malloc! First allocate it (malloc will run unprotected),
     // then assign, turning on protection
