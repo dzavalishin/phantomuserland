@@ -28,17 +28,23 @@ void out_offset(const char *type, const char *field, int offset)
 
 int main(int ac, char **av)
 {
-	cout = fopen("field_offsets.h", "wt");
-	jout = fopen("FieldOffsets.java", "wt");
+    cout = fopen("field_offsets.h", "wt");
+    jout = fopen("FieldOffsets.java", "wt");
 
-	fprintf(jout, "package ru.dz.phantom;\n\n");
-	fprintf(jout, "class FieldOffsets {\n\n");
-	generate();
-	fprintf(jout, "\n\n}\n");
+    fprintf(jout, "package ru.dz.phantom;\n\n");
+    fprintf(jout, "class FieldOffsets {\n\n");
+    generate();
+    fprintf(jout, "\n\n}\n");
 
-	fclose(cout);
-	fclose(jout);
+    fclose(cout);
+    fclose(jout);
 
-	return (ferror(cout) || ferror(jout)) ? 1 : 0;
+    if( (ferror(cout) || ferror(jout) ) )
+    {
+        printf("File write error\n");
+        return 1;
+    }
+
+    return 0;
 }
 
