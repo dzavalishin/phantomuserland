@@ -28,6 +28,7 @@
 #include <disk.h>
 
 #include <hal.h>
+#include <threads.h>
 
 #include "ataio.h"
 
