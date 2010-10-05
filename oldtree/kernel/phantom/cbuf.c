@@ -1,4 +1,5 @@
 #include <config.h>
+#include <kernel/debug.h>
 #if HAVE_NET
 
 #include "newos.h"
@@ -975,9 +976,12 @@ int cbuf_extend_tail(cbuf *head, size_t extend_bytes)
     return NO_ERROR;
 }
 
-#if 0
+#if 1
 static void dbg_dump_cbuf_freelists(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
+
     cbuf *buf;
 
     dprintf("cbuf_free_list:\n");
@@ -1047,7 +1051,7 @@ int cbuf_init()
     hal_spin_init( &cbuf_lowlevel_spinlock );
 
     // add the debug command
-    //dbg_add_command(&dbg_dump_cbuf_freelists, "cbuf_freelist", "Dumps the cbuf free lists");
+    dbg_add_command(&dbg_dump_cbuf_freelists, "cbuf_freelist", "Dumps the cbuf free lists");
 
     err = hal_mutex_init(&cbuf_free_list_lock, "cbuf free");
     if(err < 0) {

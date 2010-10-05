@@ -16,11 +16,11 @@
  ** Distributed under the terms of the NewOS License.
  */
 
+#include <kernel/debug.h>
 /*
  #include <kernel/kernel.h>
  #include <kernel/cbuf.h>
  #include <kernel/lock.h>
- #include <kernel/debug.h>
  #include <kernel/heap.h>
  #include <kernel/khash.h>
  #include <kernel/sem.h>
@@ -422,7 +422,7 @@ static void dump_socket(tcp_socket *s)
     dprintf("\tunacked_data_len %d write_buffer %p (%ld)\n", s->unacked_data_len, s->write_buffer, cbuf_get_len(s->write_buffer));
 }
 
-/*
+
 static void dump_socket_info(int argc, char **argv)
 {
     if(argc < 2) {
@@ -432,19 +432,24 @@ static void dump_socket_info(int argc, char **argv)
 
     // if the argument looks like a hex number, treat it as such
     if(strlen(argv[1]) > 2 && argv[1][0] == '0' && argv[1][1] == 'x') {
-        unsigned long num = atoul(argv[1]);
+        long num = atol(argv[1]);
 
-        if(is_kernel_address(num)) {
+        // TODO implement is_kernel_address(addr)
+        //if(is_kernel_address(num))
+        {
             // XXX semi-hack
             dump_socket((tcp_socket *)num);
             return;
         }
     }
 }
-*/
-/*
+
+
 static void list_sockets(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
+
     struct hash_iterator i;
     tcp_socket *s;
 
@@ -458,7 +463,7 @@ static void list_sockets(int argc, char **argv)
         dprintf("\n");
     }
 }
-*/
+
 
 static int bind_local_address(tcp_socket *s, netaddr *remote_addr)
 {
@@ -1763,8 +1768,8 @@ int tcp_init(void)
 
     next_ephemeral_port = random() % 32000 + 1024;
 
-    //dbg_add_command(&dump_socket_info, "tcp_socket", "dump info about socket at address");
-    //dbg_add_command(&list_sockets, "tcp_sockets", "list all active tcp sockets");
+    dbg_add_command(&dump_socket_info, "tcp_socket", "dump info about socket at address");
+    dbg_add_command(&list_sockets, "tcp_sockets", "list all active tcp sockets");
 
     return 0;
 }

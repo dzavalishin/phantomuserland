@@ -12,12 +12,18 @@
 #define debug_level_info 10
 
 
+#include <kernel/init.h>
 #include <kernel/timedcall.h>
+#include <kernel/debug.h>
+
 #include "misc.h"
+
 #include <spinlock.h>
 #include <assert.h>
 #include <phantom_libc.h>
 
+
+void dump_timed_call_queue();
 
 
 static hal_spinlock_t 	timedcall_lock;
@@ -322,7 +328,7 @@ unlock:
 extern void wake_sleeping_thread( void *arg );
 
 
-void dump_timed_call_queue()
+void dump_timed_call_queue(void)
 {
     timedcall_t *entry;
     int index = 0;
@@ -345,4 +351,17 @@ void dump_timed_call_queue()
     }
 }
 
+
+static void dump_timed_call_queue_cmd(int ac, char **av)
+{
+    (void) ac;
+    (void) av;
+
+    dump_timed_call_queue();
+}
+
+void phantom_timed_call_init2(void)
+{
+    dbg_add_command(&dump_timed_call_queue_cmd, "timedcalls", "List all of the timed call entries");
+}
 

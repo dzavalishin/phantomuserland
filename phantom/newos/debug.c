@@ -441,10 +441,10 @@ static void cmd_help(int argc, char **argv)
 {
     struct debugger_command *cmd;
 
-    dprintf("debugger commands:\r\n");
+    dprintf("debugger commands:\n\n");
     cmd = commands;
     while(cmd != NULL) {
-        dprintf("%-32s\t\t%s\r\n", cmd->cmd, cmd->description);
+        dprintf("%-32s\t\t%s\n", cmd->cmd, cmd->description);
         cmd = cmd->next;
     }
 }

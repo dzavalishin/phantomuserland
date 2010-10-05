@@ -7,6 +7,7 @@
 
 void hal_init_vm_map(void);
 void phantom_timed_call_init(void);
+void phantom_timed_call_init2(void);
 
 void phantom_heap_init(void);
 //void hal_init_physmem_alloc( physaddr_t start, size_t npages );

@@ -293,6 +293,9 @@ int main(int argc, char **argv, char **envp)
     //getchar();
     dpc_init();
 
+    phantom_timed_call_init2();
+
+
     // -----------------------------------------------------------------------
     // If this is test run, switch to test code
     // -----------------------------------------------------------------------
