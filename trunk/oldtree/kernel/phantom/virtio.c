@@ -563,9 +563,10 @@ int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
         VIRTIO_UNLOCK(r);
         return -1;
     }
-again:
     assert(nDesc > 0);
     int pos = r->lastUsedIdx % r->vr.num;
+    r->lastUsedIdx++;
+
     unsigned int bufIndex = r->vr.used->ring[pos].id;
 
     if(bufIndex >= r->vr.num)
@@ -575,19 +576,24 @@ again:
     }
 
     dataLen[nout] = r->vr.used->ring[pos].len;
+
+again:
     desc[nout] = r->vr.desc[bufIndex];
     nout++;
 
 
     int flagsCopy = r->vr.desc[bufIndex].flags;
+    int nextCopy = r->vr.desc[bufIndex].next;
 
     virtio_release_descriptor_index(r, bufIndex);
-    r->lastUsedIdx++;
 
     nDesc--;
 
     if( (flagsCopy & VRING_DESC_F_NEXT) )
+    {
+        bufIndex = nextCopy;
         goto again;
+    }
 
 
     VIRTIO_UNLOCK(r);
