@@ -34,7 +34,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#include "FAT32_Filestring.h"
+#include "FAT32_FileString.h"
 
 //-----------------------------------------------------------------------------
 // FileString_PathTotalLevels: Take a filename and path and count the sub levels

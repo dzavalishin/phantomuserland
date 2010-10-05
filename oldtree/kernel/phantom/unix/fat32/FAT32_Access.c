@@ -38,7 +38,7 @@
 #include "FAT32_Table.h"
 #include "FAT32_Access.h"
 #include "FAT32_Write.h"
-#include "FAT32_Filestring.h"
+#include "FAT32_FileString.h"
 #include "FAT32_Misc.h"
 
 //-----------------------------------------------------------------------------

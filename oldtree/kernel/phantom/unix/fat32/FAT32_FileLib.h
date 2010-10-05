@@ -1,5 +1,5 @@
 #include "unix/fat32/define.h"
-#include "FAT32_opts.h"
+#include "FAT32_Opts.h"
 
 #ifndef __FILELIB_H__
 #define __FILELIB_H__

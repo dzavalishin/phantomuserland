@@ -2,7 +2,7 @@
 
 #include "unix/fat32/define.h"
 #include "FAT32_Definitions.h"
-#include "FAT32_opts.h"
+#include "FAT32_Opts.h"
 
 #ifndef __FATMISC_H__
 #define __FATMISC_H__
