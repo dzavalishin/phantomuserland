@@ -110,8 +110,6 @@ void pressEnter(char *text);
 // -----------------------------------------------------------------------
 
 
-void run_test( const char *test_name, const char *test_parm );
-
 
 void trfs_testrq(void);
 void init_tetris(void);

@@ -15,6 +15,7 @@
 
 #include "arp.h"
 #include "udp.h"
+#include "tcp.h"
 
 #include "net.h"
 
@@ -811,9 +812,9 @@ int ipv4_input(cbuf *buf, ifnet *i)
     // demultiplex and hand to the proper module
     switch(protocol) {
     case IP_PROT_ICMP:  return icmp_input(buf, i, src);
-#if ERR
+
     case IP_PROT_TCP:   return tcp_input(buf, i, src, dest);
-#endif
+
     case IP_PROT_UDP:   return udp_input(buf, i, src, dest);
     default:
         dprintf("ipv4_receive: packet with unknown protocol (%d)\n", protocol);

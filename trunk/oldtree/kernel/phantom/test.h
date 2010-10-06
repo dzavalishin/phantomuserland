@@ -24,6 +24,9 @@ int do_test_malloc(const char *test_parm);
 int do_test_udp_send(const char *test_parm);
 int do_test_udp_syslog(const char *test_parm);
 
+int do_test_tcp_connect(const char *test_parm);
+
+
 // TODO test TCP? how?
 
 // TODO test TRFS? how?

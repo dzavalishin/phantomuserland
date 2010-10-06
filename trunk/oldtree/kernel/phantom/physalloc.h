@@ -24,6 +24,7 @@ struct physalloc
     hal_spinlock_t      lock;
 
     u_int32_t           total_size; // max num of alloc units
+    u_int32_t           allocable_size; // max num of allocatable units - is not used by allocator, for stat print only
 
     /** Bit == 1 if page is used. */
     map_elem_t 		*map; //[MAP_SIZE_ELEM];

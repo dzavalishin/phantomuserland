@@ -66,6 +66,7 @@ static char *args[MAX_ARGS] = { NULL, };
 
 static void cmd_reboot(int argc, char **argv);
 static void cmd_help(int argc, char **argv);
+static void cmd_test(int argc, char **argv);
 
 
 
@@ -250,7 +251,7 @@ static void kernel_debugger_loop()
             int ac = argc;
             while(ac-- > 0)
             {
-                printf("arg = %s\n", *av++);
+                printf("arg = '%s'\n", *av++);
             }
         }
 
@@ -296,6 +297,9 @@ static int dbg_init2()
     dbg_add_command(&cmd_help, "help", "List all debugger commands");
     dbg_add_command(&cmd_reboot, "reboot", "Reboot");
     //dbg_add_command(&cmd_gdb, "gdb", "Connect to remote gdb. May supply an optional iframe.");
+
+
+    dbg_add_command(&cmd_test, "test", "Run named test (possibly with parameter)");
 
     /*
     int ret = arch_dbg_con_init2();
@@ -447,6 +451,14 @@ static void cmd_help(int argc, char **argv)
         dprintf("%-32s\t\t%s\n", cmd->cmd, cmd->description);
         cmd = cmd->next;
     }
+}
+
+static void cmd_test(int argc, char **argv)
+{
+    const char *parm = argc > 2 ? argv[2] : 0;
+
+    dprintf("running test %s (%s):\n\n", argv[1], parm ? parm : "no parameter");
+    run_test( argv[2], parm );
 }
 
 

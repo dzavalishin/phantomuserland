@@ -67,6 +67,8 @@ hal_init_vm_map(void)
                                  PHANTOM_AMAP_SIZE_VADDR_POOL/PAGE_SIZE
                             );
 
+    vm_map.allocable_size = PHANTOM_AMAP_SIZE_VADDR_POOL/PAGE_SIZE;
+
     // No! Later! See main.c
     //hal_init_physmem_alloc_thread();
 }
@@ -155,6 +157,7 @@ hal_physmem_add( physaddr_t start, size_t npages )
 {
     assert(!(start & (PAGE_SIZE - 1)));
     total_phys_pages += npages;
+    pm_map.allocable_size += npages;
     phantom_phys_free_region(&pm_map, start/PAGE_SIZE, npages);
 }
 
@@ -336,6 +339,8 @@ hal_physmem_add_low( physaddr_t start, size_t npages )
 {
     SHOW_INFO( 1, "add low mem: %p, %d pages, %d kb", start, npages, npages*4 );
     phantom_phys_free_region( &low_map, start/PAGE_SIZE, npages );
+
+    low_map.allocable_size += npages;
 
     // Unmap it for any case
     //hal_pages_control( start, 0, npages, page_unmap, page_noaccess );
@@ -584,14 +589,14 @@ static void replentishThread(void *arg)
 #endif // USE_RESERVE
 
 
-#define PG2MB(__p, __div) ((int) ( ((__p) * 4096L) / (__div) ))
+#define PG2MB(__p, __div) ((int) ( ((__p) * 4L) / (__div) ))
 
 static void dump_mem_stat( physalloc_t *map, const char *name, long div, const char *unit )
 {
-    int total = PG2MB(map->total_size, div);
-    int free = PG2MB( (map->total_size - map->n_used_pages), div );
+    int total = PG2MB(map->allocable_size, div);
+    int free = PG2MB( (map->allocable_size - map->n_used_pages), div );
     int used = PG2MB(map->n_used_pages, div);
-    printf("  %-14s: %5d %s total, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
+    printf("  %-14s: %5d %s, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
 }
 
 
@@ -602,9 +607,9 @@ static void cmd_mem_stat( int ac, char **av )
     (void) ac;
     (void) av;
 
-    dump_mem_stat( &vm_map, "Address space", 1024L*1024, "Mb" );
-    dump_mem_stat( &pm_map, "Hi mem", 1024L*1024, "Mb"  );
-    dump_mem_stat( &low_map, "Low mem", 1024L, "Kb"  );
+    dump_mem_stat( &vm_map, "Address space", 1024L, "Mb" );
+    dump_mem_stat( &pm_map, "Hi mem", 1024L, "Mb"  );
+    dump_mem_stat( &low_map, "Low mem", 1L, "Kb"  );
 }
 
 
