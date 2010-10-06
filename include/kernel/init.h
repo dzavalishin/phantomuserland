@@ -1,6 +1,13 @@
 #ifndef INIT_H
 #define INIT_H
 
+// Tests
+
+
+void run_test( const char *test_name, const char *test_parm );
+
+
+
 // Startup/init                               
 
 #include <sys/types.h>

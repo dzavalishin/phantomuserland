@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <setjmp.h>
 
+#include <kernel/init.h>
+
 #include "misc.h"
 #include "test.h"
 
@@ -105,6 +107,9 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(udp_send);
     TEST(udp_syslog);
+
+    TEST(tcp_connect);
+
 
     // These are long
     TEST(dpc);

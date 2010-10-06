@@ -20,7 +20,7 @@ main(int ac, char **av, char **env)
 	snprintf(buf, sizeof(buf), "syslog: test module runs with pid %d tid %d", pid, tid );
     ssyslog( 0, buf );
 
-	int tcpfd = open("tcp://213.180.204.8:80", 0, 0 );
+	int tcpfd = open("tcp://87.250.250.3:80", 0, 0 );
 
 	printf("tcp fd = %d\n", tcpfd);
 

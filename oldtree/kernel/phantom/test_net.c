@@ -24,6 +24,7 @@
 
 #include "net.h"
 #include "udp.h"
+#include "tcp.h"
 
 #include "test.h"
 
@@ -92,6 +93,8 @@ int do_test_udp_send(const char *test_parm)
 int do_test_udp_syslog(const char *test_parm)
 {
 #if HAVE_NET
+    if(test_parm == 0 || *test_parm == 0)
+        test_parm = "Hello world";
     syslog(LOG_DEBUG|LOG_KERN, "Test of UDP syslog: '%s'", test_parm );
 #else
     (void) test_parm;
@@ -99,4 +102,67 @@ int do_test_udp_syslog(const char *test_parm)
 #endif
     return 0;
 }
+
+
+int do_test_tcp_connect(const char *test_parm)
+{
+#if HAVE_NET
+    void *prot_data;
+
+    if(test_parm == 0 || *test_parm == 0)
+        test_parm = "87.250.250.3:80";
+
+    int ip0, ip1, ip2, ip3, port;
+
+    if( 5 != sscanf( test_parm, "%d.%d.%d.%d:%d", &ip0, &ip1, &ip2, &ip3, &port ) )
+    {
+        return 0;
+    }
+
+    sockaddr addr;
+    addr.port = port;
+
+    addr.addr.len = 4;
+    addr.addr.type = ADDR_TYPE_IP;
+    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(ip0, ip2, ip2, ip3);
+
+
+    SHOW_FLOW0( 0, "TCP - create socket");
+    if( tcp_open(&prot_data) )
+    {
+        SHOW_ERROR0(0, "can't prepare endpoint");
+    fail:
+        return 0;
+    }
+
+    SHOW_FLOW0( 0, "TCP - will connect to Yandex");
+    if( tcp_connect( prot_data, &addr) )
+    {
+        SHOW_ERROR(0, "can't connect to %s", test_parm);
+        goto fail;
+    }
+    SHOW_FLOW0( 0, "TCP - connected to Yandex, read");
+
+    char buf[1024];
+
+
+    memset( buf, 0, sizeof(buf) );
+    //strlcpy( buf, "GET /\r\n", sizeof(buf) );
+    strlcpy( buf, "GET /\n", sizeof(buf) );
+    int nwrite = tcp_sendto( prot_data, buf, 6, &addr);
+    SHOW_FLOW( 0, "TCP - write = %d (%s)", nwrite, buf);
+
+
+    memset( buf, 0, sizeof(buf) );
+    int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*10 );
+    buf[sizeof(buf)-1] = 0;
+
+    SHOW_FLOW( 0, "TCP - read = %d (%s)", nread, buf);
+
+    tcp_close(prot_data);
+
+#endif
+    return 0;
+}
+
 
