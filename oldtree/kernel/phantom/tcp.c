@@ -8,9 +8,14 @@
  *
 **/
 
+#define NET_CHATTY 0
+
 #include <config.h>
+#include <kernel/stats.h>
 
 #if HAVE_NET
+
+
 /*
  ** Copyright 2001-2004, Travis Geiselbrecht. All rights reserved.
  ** Distributed under the terms of the NewOS License.
@@ -187,7 +192,8 @@ static int next_ephemeral_port = 1024;
 #define SYN_RETRANSMIT_TIMEOUT 1000000
 #define MAX_RETRANSMIT_TIMEOUT 90000000 /* 90 secs */
 
-#define FIN_RETRANSMIT_TIMEOUT 5000
+#define FIN_RETRANSMIT_TIMEOUT 3000000 /* 3 sec */
+//#define FIN_RETRANSMIT_TIMEOUT 5000
 #define PERSIST_TIMEOUT 500
 #define ACK_DELAY 200
 #define DEFAULT_RX_WINDOW_SIZE (32*1024)
@@ -506,12 +512,15 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     uint16 data_len;
     uint32 highest_sequence;
 
+    STAT_INC_CNT(STAT_CNT_TCP_RX);
+
     header = cbuf_get_ptr(buf, 0);
     header_len = ((ntohs(header->length_flags) >> 12) & 0x0f) * 4;
 
 #if NET_CHATTY
-    dprintf("tcp_input: src port %d, dest port %d, buf len %d, checksum 0x%x, flags 0x%x\n",
-            ntohs(header->source_port), ntohs(header->dest_port), (int)cbuf_get_len(buf), ntohs(header->checksum), ntohs(header->length_flags) & 0x3f);
+    dprintf("tcp_input: src port %d, dest port %d, buf len %d, checksum 0x%x, flags 0x%b\n",
+            ntohs(header->source_port), ntohs(header->dest_port), (int)cbuf_get_len(buf), ntohs(header->checksum),
+            ntohs(header->length_flags) & 0x3f, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG");
 #endif
 
     // check to see if the length looks correct
@@ -587,7 +596,22 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     }
 
 #if NET_CHATTY
-    dprintf("tcp_input: socket %p, state 0x%x\n", s, s->state);
+    const char *state_name = "?";
+    switch(s->state) {
+    case STATE_CLOSED:                  state_name = "closed";          break;
+    case STATE_SYN_SENT:                state_name = "syn_sent";        break;
+    case STATE_ESTABLISHED:             state_name = "establ";          break;
+    case STATE_CLOSE_WAIT:              state_name = "close_wait";      break;
+    case STATE_LAST_ACK:                state_name = "last_ack";        break;
+    case STATE_FIN_WAIT_1:              state_name = "fin_wait_1";      break;
+    case STATE_FIN_WAIT_2:              state_name = "fin_wait_2";      break;
+    case STATE_CLOSING:                 state_name = "closing";         break;
+    case STATE_LISTEN:                  state_name = "listen";          break;
+    case STATE_SYN_RCVD:                state_name = "syn_rcvd";        break;
+    case STATE_TIME_WAIT:               state_name = "time_wait";       break;
+    }
+
+    dprintf("tcp_input: socket %p, state 0x%x (%s)\n", s, s->state, state_name);
 #endif
 
     switch(s->state) {
@@ -1093,9 +1117,6 @@ int tcp_close(void *prot_data)
     }
 
     // wake up anyone that may be blocked on this socket
-    //hal_sem_release(s->accept_sem, 1);
-    //hal_sem_release(s->read_sem, 1);
-    //hal_sem_release(s->write_sem, 1);
     hal_sem_release(&s->accept_sem);
     hal_sem_release(&s->read_sem);
     hal_sem_release(&s->write_sem);
@@ -1666,6 +1687,8 @@ static void tcp_send(ipv4_addr dest_addr, uint16 dest_port, ipv4_addr src_addr, 
     tcp_pseudo_header pheader;
     tcp_header *header;
     cbuf *header_buf;
+
+    STAT_INC_CNT(STAT_CNT_TCP_TX);
 
     // grab a buf large enough to hold the header + options
     header_buf = cbuf_get_chain(sizeof(tcp_header) + options_length);
