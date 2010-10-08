@@ -58,7 +58,7 @@ static void fsck_create_map()
     if(map_created)
         panic("FSCK: create map twice");
 
-    // TODO disk size HARDCODED - 256Gb
+    // TODO fsck disk size HARDCODED - 256Gb
     //amap_init( &map, 0, 0x4000000, MAP_UNKNOWN );
     amap_init( &map, 0, ~0, MAP_UNKNOWN );
     map_created = 1;

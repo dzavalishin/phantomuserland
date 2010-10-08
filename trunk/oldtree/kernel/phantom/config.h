@@ -1,5 +1,7 @@
 
+#ifndef NET_CHATTY
 #define NET_CHATTY 0
+#endif
 
 #define MEM_RECLAIM 0
 

@@ -24,6 +24,7 @@
 
 
 #include <kernel/vm.h>
+#include <kernel/stats.h>
 #include <threads.h>
 
 #include <i386/trap.h>
@@ -139,6 +140,7 @@ void *              vm_map_get_object_address_space_start() { return vm_map_star
 
 //static volatile vm_page *deferred_disk_allocations = 0;
 
+/* unused
 unsigned char      phantom_vm_generation; // system's current generation number
 
 // generation is cycling, do special comparison
@@ -150,7 +152,7 @@ __inline__ static int page_generation_is_less( unsigned char page_gen )
     else
         return page_gen < phantom_vm_generation;
 }
-
+*/
 
 #ifdef PAGE_TOUCH_HISTORY_SIZE
 static void page_touch_history(vm_page *p)
@@ -1399,7 +1401,9 @@ void do_snapshot()
 
     // DONE!
     hal_printf("\nSnapshot done!\n");
-    //if(SNAP_DEBUG) getchar();
+
+    STAT_INC_CNT(STAT_CNT_SNAPSHOT);
+
 
     hal_sleep_msec(20000);
     hal_printf("\nSnapshot 10 sec more wait\n");
@@ -1730,6 +1734,7 @@ void wire_page( vm_page *p )
 {
     p->wired_count++;
 
+    // TODO stats
     if(!p->flag_phys_mem)
     {
         /*

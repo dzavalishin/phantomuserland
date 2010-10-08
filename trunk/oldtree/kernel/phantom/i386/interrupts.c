@@ -16,6 +16,7 @@
 
 #include <phantom_libc.h>
 #include <phantom_assert.h>
+#include <kernel/stats.h>
 #include <hal.h>
 
 #include "interrupts.h"
@@ -103,21 +104,6 @@ void call_irq_handler(struct trap_state *s, unsigned irq)
 
 
 void (*soft_irq_handler)(struct trap_state *) = def_soft_irq_handler;
-
-
-/*
-// TODO in fact we don't need this junk. Call call_irq_handler
-// directly!
-void (*pic_irq_handlers[PIC_IRQ_COUNT])(struct trap_state *ts) = {
-    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler,
-    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler,
-    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler,
-    call_irq_handler,	call_irq_handler,    call_irq_handler,	call_irq_handler
-};
-*/
-
-
-
 
 
 
@@ -264,6 +250,7 @@ void hal_softirq_dispatcher(struct trap_state *ts)
             hal_sti();
 
             softirqs[sirq].ihandler(softirqs[sirq].arg);
+            STAT_INC_CNT(STAT_CNT_SOFTINT);
 
             hal_cli();
 
@@ -303,6 +290,7 @@ hal_PIC_interrupt_dispatcher(struct trap_state *ts, int mask)
         outb( 0x21, mask );
     }
 
+    STAT_INC_CNT(STAT_CNT_INTERRUPT);
 
     if(irq_nest)
         return;

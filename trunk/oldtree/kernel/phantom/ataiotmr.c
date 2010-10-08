@@ -17,8 +17,6 @@
 // more picky about the status it sees at various times.  A real
 // BIOS probably would not check the status as carefully.
 //
-// Compile with one of the Borland C or C++ compilers.
-//
 // This C source file contains functions to access the BIOS
 // Time of Day information and to set and check the command
 // time out period.
@@ -28,6 +26,8 @@
 
 
 #include <time.h>
+#include <threads.h>
+#include <kernel/config.h>
 
 #include "ataio.h"
 
@@ -35,20 +35,20 @@
 
 
 
-long tmr_1s_count;            // number of I/O port reads required
+static long tmr_1s_count;            // number of I/O port reads required
                               //    for a 1s delay
-long tmr_1ms_count;           // number of I/O port reads required
+static long tmr_1ms_count;           // number of I/O port reads required
                               //    for a 1ms delay
-long tmr_1us_count;           // number of I/O port reads required
+static long tmr_1us_count;           // number of I/O port reads required
                               //    for a 1us delay
-long tmr_500ns_count;         // number of I/O port reads required
+static long tmr_500ns_count;         // number of I/O port reads required
                               //    for a 500ns delay
 
 
 
-long tmr_time_out = 20L;      // max command execution time in seconds
+static long tmr_time_out = 20L;      // max command execution time in seconds
 
-long tmr_cmd_start_time;      // command start time - see the
+static long tmr_cmd_start_time;      // command start time - see the
                               // tmr_set_timeout() and
                               // tmr_chk_timeout() functions.
 
@@ -60,11 +60,9 @@ long tmr_cmd_start_time;      // command start time - see the
 //**************************************************************
 
 // TODO without using time() - it is too heavy
-// TODO in fact driver must not need this but
-//      rely on some timed callout instead
+// in fact driver must not need this but rely on some timed callout instead
 
 void tmr_set_timeout( void )
-
 {
     // get the command start time
     tmr_cmd_start_time = time(0);
@@ -90,6 +88,10 @@ int tmr_chk_timeout( void )
     // timed out?
     if ( curTime >= ( tmr_cmd_start_time + tmr_time_out ) )
         return 1;      // yes
+
+#if SIMPLE_IDE_YIELD
+    phantom_scheduler_yield();
+#endif
 
     // no timeout yet
     return 0;
@@ -189,7 +191,6 @@ void tmr_get_delay_counts( void )
 //**************************************************************
 
 void tmr_delay_1ms( long count )
-
 {
    long loopcnt = tmr_1ms_count * count;
 

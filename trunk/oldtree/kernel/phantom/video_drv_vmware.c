@@ -126,18 +126,6 @@ static void bochs_map_video(int on_off)
         video_driver_bochs_vesa_emulator.screen = vva;
     }
 
-    /*
-    int i;
-    // TO DO alloc vaddr space
-    // TO DO add to HAL map function to process more than 1 page
-    for( i = 0; i < N_PAGES; i++ )
-    {
-        int pa = VBE_DISPI_LFB_PHYSICAL_ADDRESS + (i << 12);
-        char *p = (char *)phystokv( pa );
-        hal_page_control( pa, p, on_off ? page_map : page_unmap, page_rw );
-    }
-    */
-
     hal_pages_control( pa, p, N_PAGES, on_off ? page_map : page_unmap, page_rw );
 
     video_driver_bochs_vesa_emulator.screen = (void *)phystokv( VBE_DISPI_LFB_PHYSICAL_ADDRESS );
@@ -158,44 +146,5 @@ static int bochs_video_stop()
     return 0;
 }
 
-
-void test_vesa_emu()
-{
-    printf("\n\nEntering graphics mode, press enter...");
-    getchar();
-
-#if 0
-    //vid_VesaDriver_SetVideoMode(1024,768,24);
-    if( vbe_set(BOCHS_VIDEO_DRV_DEFAULT_X_SIZE, BOCHS_VIDEO_DRV_DEFAULT_Y_SIZE, 24) )
-    {
-        printf("No VBE, can't set graph mode\n");
-        return;
-    }
-
-    /*
-    char *p = phystokv(VBE_DISPI_LFB_PHYSICAL_ADDRESS);
-    //char *p = VBE_DISPI_LFB_PHYSICAL_ADDRESS;
-
-    // TODO need 4Mbytes aperture
-    hal_page_control( VBE_DISPI_LFB_PHYSICAL_ADDRESS, p, page_map, page_rw );
-    */
-
-    bochs_map_video(1);
-#endif
-    bochs_video_start();
-
-    char *p = video_driver_bochs_vesa_emulator.screen;
-
-    int len = 1000*100;
-    while(len--)
-        *p++ = 0xFF;
-
-
-    printf("\n\nLeaving graphics mode, press enter...");
-    getchar();
-
-    bochs_video_stop();
-
-}
 
 

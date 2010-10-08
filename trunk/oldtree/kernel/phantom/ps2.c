@@ -172,7 +172,7 @@ static void push_event_thread(void *arg)
 
 
 
-// TODO 9th bit
+// TODO mouse 9th bit
 
 void phantom_dev_ps2_int_handler( void *arg )
 {
@@ -212,9 +212,6 @@ void phantom_dev_ps2_int_handler( void *arg )
 
     if(inbytepos == 0)
     {
-        // TODO 32bit int dependent
-        //if(xsign) xval = 0xFFFFFF00 || xval;
-        //if(ysign) yval = 0xFFFFFF00 || yval;
         phantom_dev_ps2_state_xpos += xval;
         phantom_dev_ps2_state_ypos += yval;
 

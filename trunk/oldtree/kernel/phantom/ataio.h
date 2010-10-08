@@ -1,11 +1,7 @@
 #include <hal.h>
 #include <kernel/vm.h>
 
-// !!!! TEMP !!!!
 
-
-
-//#error convert 16 bit data types to 32 bit ones
 
 
 //********************************************************************
@@ -262,19 +258,8 @@ extern int dma_pci_prd_type;     // type of PRD list to use
 #define PRD_TYPE_COMPLEX 1       // use PRD buffer, complex list
 #define PRD_TYPE_LARGE   2       // use I/O buffer, overlay I/O buffer
 
-//extern long dma_pci_largeMaxB;   // max LARGE dma transfer size in bytes
-//extern long dma_pci_largeMaxS;   // max LARGE dma transfer size in sectors
 
-#if 0
-extern unsigned long far * dma_pci_largePrdBufPtr;  // LARGE PRD buffer ptr
-extern unsigned char far * dma_pci_largeIoBufPtr;   // LARGE PRD I/O address
-
-extern unsigned long far * dma_pci_prd_ptr;  // current PRD buffer address
-#else
-// TODO - replace with physical addr?
-#endif
-
-extern int dma_pci_num_prd;                  // current number of PRD entries
+//extern int dma_pci_num_prd;                  // current number of PRD entries
 
 //**************************************************************
 //
@@ -627,8 +612,8 @@ extern int reg_packet( int dev,
 //
 //**************************************************************
 
-extern long tmr_time_out;           // command time out in seconds
-
+//extern long tmr_time_out;           // command time out in seconds
+/*
 extern long tmr_cmd_start_time;     // command start time
 
 extern long tmr_1s_count;           // number of I/O port reads required
@@ -639,7 +624,7 @@ extern long tmr_1us_count;          // number of I/O port reads required
                                     //    for a 1us delay
 extern long tmr_500ns_count;        // number of I/O port reads required
                                     //    for a 500ns delay
-
+*/
 //**************************************************************
 //
 // Public functions in ATAIOTMR.C
