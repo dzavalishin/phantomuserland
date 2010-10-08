@@ -139,40 +139,6 @@ int int_enable_irq( int shared, int irqNum,
    return 0;
 }
 
-//*************************************************************
-//
-// Disable interrupt mode.
-//
-// If the int_enable_irq() function has been called,
-// this function MUST be called before exiting to DOS.
-//
-//*************************************************************
-
-void int_disable_irq( void )
-{
-#if 0
-#error rewrite
-   // if our interrupt handler is installed now,
-   // restore the system's (the original) interrupt handler.
-
-   if ( int_got_it_now )
-   {
-
-      // Disable interrupts.
-      // Restore the system's interrupt vector.
-      // Enable interrupts.
-
-      disable();
-      setvect( int_int_vector, int_org_int_vect );
-      enable();
-   }
-
-   // Reset all the interrupt data.
-
-   int_use_intr_flag = 0;
-   int_got_it_now = 0;
-#endif
-}
 
 //*************************************************************
 //
