@@ -40,8 +40,7 @@ __FBSDID("$FreeBSD: src/sys/libkern/moddi3.c,v 1.9.26.1 2008/11/25 02:59:29 kens
 /*
  * Return remainder after dividing two signed quads.
  *
- * XXX
- * If -1/2 should produce -1 on this machine, this code is wrong.
+ * XXX If -1/2 should produce -1 on this machine, this code is wrong.
  */
 quad_t
 __moddi3(a, b)

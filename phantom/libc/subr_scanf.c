@@ -117,8 +117,8 @@ vsscanf(const char *inp, char const *fmt0, va_list ap)
 	nassigned = 0;
 	nconversions = 0;
 	nread = 0;
-	base = 0;		/* XXX just to keep gcc happy */
-	ccfn = NULL;		/* XXX just to keep gcc happy */
+	base = 0;		/* just to keep gcc happy */
+	ccfn = NULL;		/* just to keep gcc happy */
 	for (;;) {
 		c = *fmt++;
 		if (c == 0)
