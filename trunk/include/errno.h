@@ -41,12 +41,21 @@
 #ifndef _SYS_ERRNO_H_
 #define _SYS_ERRNO_H_
 
+#include <phantom_types.h>
+
 // TODO this shouldnt'be used in kernel! redo!
 //#ifndef KERNEL
 //extern int errno;			/* global error number */
 //#endif
 
 typedef int errno_t;
+
+
+int strerror_r(errno_t errnum, char *strerrbuf, size_t buflen);
+char *strerror(errno_t num);
+
+
+
 
 
 #define	EPERM		1		/* Operation not permitted */

@@ -42,7 +42,7 @@
 //#include <stdio.h>
 
 // Won't work in Phantom anyway. Need to replace with more trivial imlp.
-#if 0
+#if 1
 
 #define	UPREFIX		"Unknown error"
 
@@ -83,41 +83,21 @@ int
 strerror_r(int errnum, char *strerrbuf, size_t buflen)
 {
 	int retval = 0;
-#if defined(NLS)
-	int saved_errno = errno;
-	nl_catd catd;
-	catd = catopen("libc", NL_CAT_LOCALE);
-#endif
 
 	if (errnum < 1 || errnum >= sys_nerr) {
 		errstr(errnum,
-#if defined(NLS)
-			catgets(catd, 1, 0xffff, UPREFIX),
-#else
 			UPREFIX,
-#endif
 			strerrbuf, buflen);
 		retval = EINVAL;
 	} else {
 		if (strlcpy(strerrbuf,
-#if defined(NLS)
-			catgets(catd, 1, errnum, sys_errlist[errnum]),
-#else
 			sys_errlist[errnum],
-#endif
 			buflen) >= buflen)
 		retval = ERANGE;
 	}
 
-#if defined(NLS)
-	catclose(catd);
-	errno = saved_errno;
-#endif
-
 	return (retval);
 }
-
-// TODO kill this!
 
 char *
 strerror(int num)
@@ -125,9 +105,13 @@ strerror(int num)
 	static char ebuf[256];
 
 	if (strerror_r(num, ebuf, sizeof(ebuf)) != 0)
-            errno = EINVAL;
-	return (ebuf);
+        return "strerror failed";
+	return ebuf;
 }
 
 
 #endif
+
+
+
+
