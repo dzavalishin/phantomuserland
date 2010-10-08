@@ -203,9 +203,6 @@ int main(int argc, char **argv, char **envp)
 
     init_irq_allocator();
 
-    // BUG - called second time?
-    //phantom_init_descriptors();
-
     init_multiboot_symbols();
 
     hal_init(
@@ -215,11 +212,10 @@ int main(int argc, char **argv, char **envp)
     detect_cpu(0);
     phantom_paging_init();
 
+    phantom_init_stat_counters();
+
     phantom_timer_pit_init(100,0);
     phantom_timed_call_init(); // Too late? Move up?
-
-
-    //phantom_init_apic();
 
     // Stage is:
     //   0 - very early in the boot - interrupts can be used only
@@ -228,8 +224,6 @@ int main(int argc, char **argv, char **envp)
     //   3 - late and optional and slow junk
 
     phantom_pci_find_drivers( 0 );
-
-    //phantom_paging_init();
 
     // Threads startup
     {
@@ -294,7 +288,7 @@ int main(int argc, char **argv, char **envp)
     dpc_init();
 
     phantom_timed_call_init2();
-
+    phantom_init_stat_counters2();
 
     // -----------------------------------------------------------------------
     // If this is test run, switch to test code

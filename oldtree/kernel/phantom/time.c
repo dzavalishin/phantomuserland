@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Time keeping.
+ *
+**/
+
 
 #include "hal.h"
 #include "newos.h"
@@ -89,6 +99,7 @@ void hal_time_tick(int tick_rate)
             secDivider -= 1000;
             // Once a sec
             update_tm();
+            stat_update_second_stats();
         }
     }
 }

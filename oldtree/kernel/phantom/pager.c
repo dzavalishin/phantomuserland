@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include <kernel/vm.h>
+#include <kernel/stats.h>
 
 #include <phantom_disk.h>
 
@@ -244,6 +245,9 @@ static void pager_io_done() // called after io is complete
 
     pager_io_request *last = pager_current_request;
 //set_dr7(0); // turn off all debug registers
+
+    STAT_INC_CNT( last->flag_pageout ? STAT_CNT_PAGEOUT : STAT_CNT_PAGEIN );
+
     if(pagein_is_in_process)
     {
         pager_debug_print_q();

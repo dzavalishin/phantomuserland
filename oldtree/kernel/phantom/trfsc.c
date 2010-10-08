@@ -616,7 +616,7 @@ static errno_t trfsSyncRead( struct phantom_disk_partition *p, void *to, long bl
 {
     assert(p->specific != 0);
 
-    // TODO!
+    // TODO TRFSc check range
     //if( checkRange( p, blockNo, nBlocks ) )        return EINVAL;
 
     pager_io_request rq;
@@ -648,7 +648,7 @@ static errno_t trfsSyncWrite( struct phantom_disk_partition *p, const void *from
 {
     assert(p->specific != 0);
 
-    // TODO!
+    // TODO checkRange
     //if( checkRange( p, blockNo, nBlocks ) )        return EINVAL;
 
     //return p->syncWrite( p, from, blockNo+p->shift, nBlocks );

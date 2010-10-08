@@ -3,6 +3,7 @@
 	<name>Phantom Kernel</name>
 	<comment></comment>
 	<projects>
+		<project>PhantomLibc</project>
 		<project>PhantomVM</project>
 	</projects>
 	<buildSpec>

@@ -46,8 +46,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
 
 
 #if 0
-    // TODO
-    // Enable superpage support if we have it.
+    // TODO Enable superpage support if we have it.
     if (cpu.feature_flags & CPUF_4MB_PAGES)
     {
         set_cr4(get_cr4() | CR4_PSE);

@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <threads.h>
 #include <kernel/config.h>
+#include <kernel/stats.h>
 
 #include "paging_device.h"
 #include "hal.h"

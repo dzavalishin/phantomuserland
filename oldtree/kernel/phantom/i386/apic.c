@@ -43,10 +43,10 @@ static int      have_apic = 0;
 volatile ApicLocalUnit * apic_local_unit;
 
 /*
- Local todo:
-   1. Connect with scheduler (set task_pri by scheduler)
-   2. Use APIC timer for scheduler/task switch
-   3. IPI for TLB invalidation
+
+  todo 1. Connect with scheduler (set task_pri by scheduler)
+  todo 2. Use APIC timer for scheduler/task switch
+  todo 3. IPI for TLB invalidation
  */
 
 

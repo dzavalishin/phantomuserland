@@ -524,7 +524,7 @@ static void basic_vga_map_video(int on_off)
 }
 
 
-// TODO 400*300
+// TODO VGA 400*300
 struct drv_video_screen_t        video_driver_basic_vga =
 {
     "Basic VGA",

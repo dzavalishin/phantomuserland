@@ -2,9 +2,13 @@
  *
  * Phantom OS
  *
- * (C) dz@dz.ru 2004-2010
+ * Copyright (C) 2004-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Virtual memory map.
+ * Maps VM page to phys mem page and pagefile page(s).
  *
 **/
+
 
 #ifndef vm_mapH
 #define vm_mapH
@@ -24,14 +28,6 @@ void vm_enable_regular_snaps( void );
 // time. It's state is well-known without an in-memory descripting object.
 
 
-//---------------------------------------------------------------------------
-//
-//  Virtual memory map
-//
-//  Maps VM page to phys mem page and pagefile page(s)
-//
-//---------------------------------------------------------------------------
-
 //
 // Spinlock usage guide:
 //
@@ -46,10 +42,9 @@ void vm_enable_regular_snaps( void );
 //
 hal_spinlock_t    vm_page_lock;
 
+/* unused
 extern unsigned char      phantom_vm_generation; // system's current generation number
-
-// BUG!!
-/* TODO : Add 'dont-touch' flag that will sleepify all faulting on this page threads! */
+*/
 
 #define ONEBIT
 //#define ONEBIT :1
@@ -128,6 +123,11 @@ typedef struct vm_page
     int                 wired_count; // If nonzero, page must be present and can't be moved/paged out. Physical address must not change.
 
 } vm_page;
+
+
+#undef ONEBIT
+
+
 
 void		vm_page_init( vm_page *me, void *my_vaddr);
 

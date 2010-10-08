@@ -9,6 +9,7 @@
 **/
 
 #include <config.h>
+#include <kernel/stats.h>
 
 #if HAVE_NET
 /*
@@ -158,6 +159,8 @@ int udp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     udp_queue_elem *qe;
     uint16 port;
     int err;
+
+    STAT_INC_CNT(STAT_CNT_UDP_RX);
 
     header = cbuf_get_ptr(buf, 0);
 
@@ -442,6 +445,8 @@ ssize_t udp_sendto(void *prot_data, const void *inbuf, ssize_t len, sockaddr *to
 #endif
     // send it away
     err = ipv4_output(buf, NETADDR_TO_IPV4(toaddr->addr), IP_PROT_UDP);
+
+    STAT_INC_CNT(STAT_CNT_UDP_TX);
 
     // if it returns ARP_QUEUED, then it's actually okay
     if(err == ERR_NET_ARP_QUEUED) {

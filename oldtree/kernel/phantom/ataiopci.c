@@ -279,7 +279,7 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
     // convert PRD buffer seg:off to a physical address
     // and write into BMIDE PRD address registers.
 
-    dma_pci_num_prd = numPrd;
+    //dma_pci_num_prd = numPrd;
     outw( pio_bmide_base_addr + BM_PRD_ADDR_LOW,
           (unsigned int) ( dma_pci_prd_pa & 0x0000ffffL ) );
     outw( pio_bmide_base_addr + BM_PRD_ADDR_HIGH,
@@ -408,7 +408,7 @@ int dma_pci_config( unsigned int regAddr )
 #endif
 
     // ... current size of the SIMPLE/COMPLEX PRD buffer
-    dma_pci_num_prd = 0;
+    //dma_pci_num_prd = 0;
 
     // read the BM status reg and save the upper 3 bits.
     statReg = sub_readBusMstrStatus() & 0x60;
