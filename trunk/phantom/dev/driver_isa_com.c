@@ -41,7 +41,7 @@ typedef struct
     int 	parity;
 } com_port_t;
 
-static void com_setbaud(int speed);
+static void com_setbaud(struct phantom_device *dev, int speed);
 
 
 
@@ -162,7 +162,7 @@ phantom_device_t * driver_isa_com_probe( int port, int irq, int stage )
     cp->dataBits = 8;
     cp->parity = 0;
 
-    com_setbaud(cp->baudRate);
+    com_setbaud(dev, cp->baudRate);
 
     return dev;
 }
@@ -301,11 +301,14 @@ static int com_write(struct phantom_device *dev, const void *buf, int len)
 static void com_setbaud(struct phantom_device *dev, int speed)
 {
     int addr = dev->iobase;
-    int unit = dev->seq_number;
+    //int unit = dev->seq_number;
 
     outb(LINE_CTL(addr), iDLAB);
+	// TODO: com speed setup
+#if 0
     outb(BAUD_LSB(addr), divisorreg[speed] & 0xff);
     outb(BAUD_MSB(addr), divisorreg[speed] >> 8);
+#endif
 }
 
 
