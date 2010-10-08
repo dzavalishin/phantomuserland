@@ -10,7 +10,7 @@
 void init_statements(void);
 int get_path(int no,char *name,int max_len);
 
-void ste_error_to_str(int error,char *descr);
+void ste_error_to_str(int error,char *descr, int size);
 
 int parse_string(char *in);
 int parse_info(scan_info *info);
