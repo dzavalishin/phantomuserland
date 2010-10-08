@@ -9,4 +9,8 @@
 #define PHANTOM_SYS_THREAD_PRIO (THREAD_PRIO_MOD_REALTIME|THREAD_PRIO_HIGH)
 
 
+// Simple IDE driver has bysy loop waitng 4 inetrrupt.
+// Let it give out CPU.
+#define SIMPLE_IDE_YIELD 1
+
 #endif // CONFIG_H

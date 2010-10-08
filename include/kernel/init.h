@@ -61,5 +61,9 @@ void phantom_trfs_init(void);
 
 void phantom_turn_off_pic_scheduler_timer(void);
 
+void phantom_init_stat_counters(void);
+void phantom_init_stat_counters2(void);
+
+
 #endif // INIT_H
 
