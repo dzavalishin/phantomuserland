@@ -335,7 +335,7 @@ void pvm_object_print(struct pvm_object o )
             struct data_area_4_string *da = (struct data_area_4_string *)&(o.data->da);
             int len = da->length;
             unsigned const char *sp = da->data;
-/* TODO -odz -cdebug : BUG! From unicode! */
+/* TODO BUG! From unicode! */
             while( len-- )
                 {
                 putchar(*sp++);

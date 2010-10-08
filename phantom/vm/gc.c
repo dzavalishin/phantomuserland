@@ -120,7 +120,7 @@ void run_gc()
     if (debug_memory_leaks) printf("gc finished!\n");
     if (debug_memory_leaks) pvm_memcheck();  // visualization
 
-    //TODO refine sinchronization
+    //TODO refine synchronization
     //phantom_virtual_machine_threads_stopped--;
     hal_mutex_unlock( &alloc_mutex );
 }

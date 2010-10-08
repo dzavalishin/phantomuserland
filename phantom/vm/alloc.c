@@ -361,7 +361,7 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
 {
     pvm_object_storage_t * data = 0;
 
-    hal_mutex_lock( &alloc_mutex );  //TODO avoid Gigant lock
+    hal_mutex_lock( &alloc_mutex );  // TODO avoid Giant lock
 
     int ngc = 1;
     do {
@@ -375,6 +375,7 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
         if(ngc-- <= 0)
             break;
 
+#if 0
         printf("\n out of mem looking for %d bytes, arena %d. Run GC... \n", size, arena);
 
         /*
@@ -382,11 +383,10 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
          * GC will free objects just allocated but not yet linked to parents. Highly destructive!
          *
          */
-
         hal_mutex_unlock( &alloc_mutex );
         run_gc();
         hal_mutex_lock( &alloc_mutex );
-
+#endif
     } while(1);
 
     hal_mutex_unlock( &alloc_mutex );
