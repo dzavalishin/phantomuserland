@@ -27,6 +27,5 @@
 //#include <sys/cdefs.h>
 //__FBSDID("$FreeBSD: src/lib/libc/gen/errno.c,v 1.1.32.1 2008/11/25 02:59:29 kensmith Exp $");
 
-// TODO this is wrong to have global errno in kernel!
 
 //int errno;

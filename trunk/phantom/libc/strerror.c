@@ -30,19 +30,11 @@
 //#include <sys/cdefs.h>
 //__FBSDID("$FreeBSD: src/lib/libc/string/strerror.c,v 1.16.6.1 2008/11/25 02:59:29 kensmith Exp $");
 
-//#if defined(NLS)
-//#include <nl_types.h>
-//#endif
 
 #include <phantom_libc.h>
 
 #include <limits.h>
 #include <errno.h>
-//#include <string.h>
-//#include <stdio.h>
-
-// Won't work in Phantom anyway. Need to replace with more trivial imlp.
-#if 1
 
 #define	UPREFIX		"Unknown error"
 
@@ -102,6 +94,7 @@ strerror_r(int errnum, char *strerrbuf, size_t buflen)
 char *
 strerror(int num)
 {
+	printf("Warning: strerror used");
 	static char ebuf[256];
 
 	if (strerror_r(num, ebuf, sizeof(ebuf)) != 0)
@@ -109,8 +102,6 @@ strerror(int num)
 	return ebuf;
 }
 
-
-#endif
 
 
 

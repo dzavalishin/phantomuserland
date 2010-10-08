@@ -43,8 +43,7 @@
 #include <phantom_libc.h>
 #include <kernel/init.h>
 
-#if 0
-// TODO check for atexit not to be used and kill later
+#if !defined(KERNEL)
 
 /*
  * an ANSI compliant atexit function
@@ -54,8 +53,7 @@ typedef void (*void_function_ptr)();
 static void_function_ptr _atexit_functions[32];
 static int _atexit_index = 0;
 
-int _atexit(function)
-     void (*function)();
+int _atexit(void (*function)())
 {
      /*
       * We must support at least 32 atexit functions
@@ -68,8 +66,7 @@ int _atexit(function)
      return 0;
 }
      
-int atexit(function)
-     void (*function)();
+int atexit(void (*function)())
 {
      return _atexit(function);
 }
@@ -77,7 +74,7 @@ int atexit(function)
 /*
  * Call atexit functions in reverse order.
  */
-void _run_atexits()
+static void _run_atexits(void)
 {
      int i;
 
@@ -89,6 +86,8 @@ void _run_atexits()
 
 void exit(int code)
 {
-    //_run_atexits();
+#if !defined(KERNEL)
+    _run_atexits();
+#endif
     _exit(code);
 }
