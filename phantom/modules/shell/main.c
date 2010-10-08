@@ -17,31 +17,36 @@
 
 int main(int argc,char *argv[])
 {
-	char buf[1024];
+    // TODO bring in good malloc/free and implement sbrk()!
+    static char arena[1024*1024];
+    init_malloc( arena, sizeof(arena) );
 
-	init_vars();
-	init_statements();
-	init_arguments(argc,argv);
 
-	if(af_script_file_name != NULL){
-		run_script(af_script_file_name);
-		if(af_exit_after_script) exit(0);
-	}
+    init_vars();
+    init_statements();
+    init_arguments(argc,argv);
 
-	/*
-	for(;;) {
+    if(af_script_file_name != NULL){
+        run_script(af_script_file_name);
+        if(af_exit_after_script) exit(0);
+    }
 
-		printf("> ");
+    /*
+     char buf[1024];
 
-		fgets(buf, sizeof(buf), stdin);
- 		if(strlen(buf) > 0) {
-			parse_string(buf);
-		}
-		buf[0] = '\0';
-	}
-	*/
+     for(;;) {
 
-	return 0;
+     printf("> ");
+
+     fgets(buf, sizeof(buf), stdin);
+     if(strlen(buf) > 0) {
+     parse_string(buf);
+     }
+     buf[0] = '\0';
+     }
+     */
+
+    return 0;
 }
 
 
