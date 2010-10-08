@@ -29,6 +29,9 @@ void			tenmicrosec(void);
 //
 struct tm *		current_time;
 
+// Called once a second to update per second ststistics
+void stat_update_second_stats(void);
+
 #include <vm/internal_da.h>
 void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc);
 
