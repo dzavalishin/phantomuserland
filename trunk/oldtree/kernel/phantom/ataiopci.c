@@ -1,23 +1,15 @@
-/*
+/**
+ *
  * dz - removed LARGE mode at all for simplicity.
  *
- *
- */
-
-#define MEM_USE_MEMALIGN 1
+**/
 
 #include <i386/pio.h>
 #include <phantom_libc.h>
 #include <phantom_types.h>
 
-#if MEM_USE_MEMALIGN
-// smemalign
 #include <malloc.h>
 
-#endif
-
-
-//#error convert 16 bit data types to 32 bit ones
 
 
 //********************************************************************
@@ -45,8 +37,6 @@
 // mastering READ/WRITE DMA commands for ATA and ATAPI.
 //********************************************************************
 
-//#include <dos.h>
-
 #include "ataio.h"
 
 #define DEBUG_PCI 0x00  // not zero for debug
@@ -54,7 +44,6 @@
                         // 0x02 debug LARGE PRD
 
 #if DEBUG_PCI & 0x02
-//   #include <stdio.h>
    extern unsigned char LFB[128];
    extern void prt( void );
    extern void pstr( unsigned char * s );
@@ -125,15 +114,6 @@ void * dma_pci_prd_va;
 physaddr_t dma_pci_prd_pa;
 
 
-#if 1
-//unsigned long far * dma_pci_largePrdBufPtr;  // LARGE PRD buffer ptr
-//unsigned char far * dma_pci_largeIoBufPtr;   // LARGE PRD I/O address
-
-//unsigned long far * dma_pci_prd_ptr;   // current PRD buffer address
-#else
-// phys addr
-#endif
-
 int dma_pci_num_prd;                   // current number of PRD entries
 
 // private data...
@@ -147,9 +127,6 @@ int dma_pci_num_prd;                   // current number of PRD entries
 #define MAX_PRD (MAX_SEG*4L)                    // number of PRDs required
 
 #define PRD_BUF_SIZE (48+(2*MAX_PRD*8))         // size of PRD list buffer
-
-//static unsigned char prdBuf[PRD_BUF_SIZE];  // PRD buffer address
-//static unsigned long far * prdBufPtr;           // PRD addr (seg:off) off is 0
 
 // BMIDE data
 
@@ -356,9 +333,7 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
 //***********************************************************
 
 int dma_pci_config( unsigned int regAddr )
-
 {
-
     // check reg address
 
     if ( regAddr & 0x0007 )       // error if regs addr
@@ -460,7 +435,6 @@ int dma_pci_config( unsigned int regAddr )
 
 void dma_pci_set_max_xfer( unsigned int seg, unsigned int off,
                            long bufSize )
-
 {
     u_int32_t bufStart;       // buffer starting physical memory address
     u_int32_t bufEnd;         // buffer ending physical memory address (+1)
@@ -782,9 +756,7 @@ int dma_pci_chs( int dev, int cmd,
                  unsigned int cyl, unsigned int head, unsigned int sect,
                  unsigned int seg, unsigned int off,
                  long numSect )
-
 {
-
     // Setup current command information.
 
     sub_zero_return_data();
