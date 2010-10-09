@@ -236,6 +236,10 @@ u_int16_t	letoh16 __P((u_int16_t));*/
 
 #endif /* BYTE_ORDER */
 
+
+#define	_BYTEORDER_PROTOTYPED
+#define	_BYTEORDER_FUNC_DEFINED
+
 #define htons htobe16
 #define htonl htobe32
 #define htonll htobe64

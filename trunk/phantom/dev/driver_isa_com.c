@@ -300,12 +300,12 @@ static int com_write(struct phantom_device *dev, const void *buf, int len)
 
 static void com_setbaud(struct phantom_device *dev, int speed)
 {
+#if 0
     int addr = dev->iobase;
     //int unit = dev->seq_number;
 
-    outb(LINE_CTL(addr), iDLAB);
 	// TODO: com speed setup
-#if 0
+    outb(LINE_CTL(addr), iDLAB);
     outb(BAUD_LSB(addr), divisorreg[speed] & 0xff);
     outb(BAUD_MSB(addr), divisorreg[speed] >> 8);
 #endif

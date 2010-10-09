@@ -3,7 +3,11 @@
 
 #include <phantom_types.h>
 
-typedef int socklen_t;
+#ifndef _SOCKLEN_T_DECLARED
+//typedef	__socklen_t	socklen_t;
+typedef	int	socklen_t;
+#define	_SOCKLEN_T_DECLARED
+#endif
 
 
 

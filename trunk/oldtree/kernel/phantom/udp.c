@@ -353,8 +353,9 @@ retry:
 #endif
         err = sem_acquire(e->blocking_sem);
 
-    if(err < 0)
-        return err;
+    //if(err < 0)
+    if(err)
+        return -err;
 
     // pop an item off the list, if there are any
     mutex_lock(&e->lock);
@@ -362,7 +363,12 @@ retry:
     mutex_unlock(&e->lock);
 
     if(!qe)
+    {
+#if 1||NET_CHATTY
+        printf("UDP read retry");
+#endif
         goto retry;
+    }
 
     // we have the data, copy it out
     //err = cbuf_user_memcpy_from_chain(buf, qe->buf, 0, min(qe->len, len));

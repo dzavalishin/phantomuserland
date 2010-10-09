@@ -20,6 +20,17 @@ extern int			*stat_sec_counters;
 #define		STAT_CNT_UDP_RX 			8
 #define		STAT_CNT_UDP_TX 			9
 
+#define		STAT_CNT_PMEM_ALLOC			10
+#define		STAT_CNT_PMEM_FREE			11
+#define		STAT_CNT_VA_ALLOC			12
+#define		STAT_CNT_VA_FREE			13
+#define		STAT_CNT_LOMEM_ALLOC		14
+#define		STAT_CNT_LOMEM_FREE			15
+
+#define		STAT_CNT_DNS_REQ			16
+#define		STAT_CNT_DNS_ANS			17
+
+
 void stat_increment_counter( int nCounter );
 
 #define STAT_INC_CNT( ___nCounter ) do { \
@@ -27,6 +38,11 @@ void stat_increment_counter( int nCounter );
 	stat_sec_counters[___nCounter]++; \
 	} while(0)
 
+
+#define STAT_INC_CNT_N( ___nCounter, ___val ) do { \
+	assert( ___nCounter < MAX_STAT_COUNTERS ); \
+	stat_sec_counters[___nCounter] += ___val; \
+	} while(0)
 
 
 
