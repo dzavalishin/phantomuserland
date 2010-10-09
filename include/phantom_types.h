@@ -72,6 +72,7 @@ typedef unsigned long 	addr_t;
 
 #ifndef _SIZE_T
 #define _SIZE_T
+#define	_SIZE_T_DECLARED
 typedef unsigned int		size_t;
 typedef int			ssize_t;
 #endif //_SIZE_T

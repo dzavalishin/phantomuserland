@@ -28,6 +28,7 @@
 
 #include <kernel/init.h>
 #include <kernel/debug.h>
+#include <kernel/stats.h>
 
 
 
@@ -85,6 +86,9 @@ hal_alloc_vaddress(void **result, int num) // alloc address of a page, but not m
         *result = 0;
         return rc;
     }
+
+    STAT_INC_CNT_N(STAT_CNT_VA_ALLOC, num);
+
     *result = (void *)(ret * PAGE_SIZE);
     //printf("hal_alloc_vaddress req %d pages, ret 0x%X (internal %d)\n", num, *result, ret );
     return rc;
@@ -95,6 +99,7 @@ void
 hal_free_vaddress(void *addr, int num)
 {
     assert( ( ((int)addr) & (PAGE_SIZE-1)) == 0 );
+    STAT_INC_CNT_N(STAT_CNT_VA_FREE, num);
     phantom_phys_free_region( &vm_map, (int)((int)addr) / PAGE_SIZE, num );
 }
 
@@ -198,6 +203,10 @@ hal_alloc_phys_pages(physaddr_t *result, int npages) // alloc and not map
         *result = 0;
         return rc;
     }
+
+    STAT_INC_CNT_N(STAT_CNT_PMEM_ALLOC, npages);
+
+
     *result = (physaddr_t)(ret * PAGE_SIZE);
 //printf("PhysMem alloc %08X-%08X\n",           *result, (physaddr_t)((ret+npages) * PAGE_SIZE) );
     return rc;
@@ -211,6 +220,8 @@ hal_free_phys_pages(physaddr_t  paddr, int npages)
     // Unmap it for any case
     hal_pages_control( paddr, 0, npages, page_unmap, page_noaccess );
     phantom_phys_free_region( &pm_map, (int)((int)paddr) / PAGE_SIZE, npages );
+
+    STAT_INC_CNT_N(STAT_CNT_PMEM_FREE, npages);
 }
 
 
@@ -260,6 +271,8 @@ hal_alloc_phys_page(physaddr_t  *result)
         return rc;
     }
 
+    STAT_INC_CNT_N(STAT_CNT_PMEM_ALLOC, 1);
+
     *result = (physaddr_t)(ret * PAGE_SIZE);
 //printf("PhysMem alloc %08X\n", *result );
     return rc;
@@ -268,6 +281,7 @@ hal_alloc_phys_page(physaddr_t  *result)
 void
 hal_free_phys_page(physaddr_t  paddr) // alloc and not map - WILL PANIC if page is mapped!
 {
+    STAT_INC_CNT_N(STAT_CNT_PMEM_FREE, 1);
     hal_free_phys_pages(paddr, 1);
 }
 
@@ -358,6 +372,8 @@ hal_alloc_phys_pages_low(physaddr_t *result, int npages) // alloc and not map
         return rc;
     }
 
+    STAT_INC_CNT_N(STAT_CNT_LOMEM_ALLOC, npages);
+
     *result = (physaddr_t)(ret * PAGE_SIZE);
     //printf("hal_alloc_phys_pages_low req %d pages, ret 0x%X (internal %d)\n", npages, *result, ret );
     return rc;
@@ -368,6 +384,7 @@ hal_free_phys_pages_low(physaddr_t  paddr, int npages)
 {
     assert( ( ((int)paddr) & (PAGE_SIZE-1)) == 0 );
 
+    STAT_INC_CNT_N(STAT_CNT_LOMEM_FREE, npages);
     // Unmap it for any case
     //hal_pages_control( paddr, 0, npages, page_unmap, page_noaccess );
     phantom_phys_free_region( &low_map, (int)((int)paddr) / PAGE_SIZE, npages );

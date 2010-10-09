@@ -21,5 +21,9 @@ typedef	u_int16_t	uint16_t;
 typedef	u_int32_t	uint32_t;
 typedef	u_int64_t	uint64_t;
 
+#define _UINT8_T_DECLARED
+#define	_UINT16_T_DECLARED
+#define	_UINT32_T_DECLARED
+
 
 #endif // SHORTTYPES_H

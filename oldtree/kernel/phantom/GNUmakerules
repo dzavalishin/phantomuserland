@@ -6,15 +6,7 @@ TARGETS = phantom
 
 deafult: $(TARGETS)
 
-others::
-	cd $(realpath $(PHANTOM_HOME))/phantom/vm; make clean; make; 
-	cd $(realpath $(PHANTOM_HOME))/phantom/libc; make clean; make; 
-	cd i386; make clean; make; cd ..
-#	cd threads; make clean; make; cd ..
-
-#all:: others 
 all:: $(TARGETS)
-#	make clean; make
 
 prepare::
 
@@ -22,7 +14,7 @@ SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 #threads 
 CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d
-PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=1 -std=gnu89
+PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=1 -std=gnu89 -DKERNEL
 
 
 CLIB   =
@@ -84,7 +76,7 @@ phantom: $(START_O_FILE) \
 	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
-	fs_map.o tinyfat.o stats.o \
+	fs_map.o tinyfat.o stats.o resolve.o \
 	svn_version.o $(PLIBDIR)/libdev.a \
 	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
 	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(TH_LIB)

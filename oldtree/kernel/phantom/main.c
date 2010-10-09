@@ -343,6 +343,9 @@ init_tetris();
 
 //trfs_testrq();
 
+    ngethostbyname("ya.ru");
+
+
 #if 0
     printf("PRESS Q TO STOP PHANTOM");
     while(getchar() != 'Q')
