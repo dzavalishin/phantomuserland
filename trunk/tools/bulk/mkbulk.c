@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <pvm_bulk.h>
+//#include "../../include/vm/bulk.h"
 
 FILE *outf;
 
@@ -32,6 +33,7 @@ int fn2cn( char *out, const char *in, int outsz )
     return 1;
 }
 
+/*
 void save_hdr( char *classnm, long size )
 {
     struct pvm_bulk_class_head h;
@@ -41,7 +43,7 @@ void save_hdr( char *classnm, long size )
     //return 1 ==
     fwrite( &h, sizeof(h), 1, outf );
 }
-
+*/
 
 void copyf( FILE *outfp, FILE *infp, int lencheck )
 {
@@ -105,7 +107,7 @@ int main( int ac, char **av )
         exit(1);
     }
 
-    printf("Writing bulk to %s: ", outfn);
+    //printf("Writing bulk to %s: ", outfn);
 
 
     while( ac-- )
@@ -125,7 +127,7 @@ int main( int ac, char **av )
             continue;
         }
 
-        printf("%s%c ", infn, ac == 0 ? ' ' : ',' );
+        //printf("%s%c ", infn, ac == 0 ? ' ' : ',' );
 
         if( fseek( inf, 0, SEEK_END ) )
         {
@@ -150,7 +152,7 @@ int main( int ac, char **av )
     }
 
     fclose(outf);
-    printf("done\n");
+    //printf("done\n");
     return 0;
 }
 
