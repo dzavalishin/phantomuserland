@@ -24,7 +24,7 @@ public class PlcMain {
 	public PlcMain() { }
 
 	public static void main(String[] args) {
-		System.out.println( Version.NAME + " " +Version.VERSION+ ", build from "+CompileDate.getDate());
+		//System.out.println( Version.NAME + " " +Version.VERSION+ ", build from "+CompileDate.getDate());
 
 		if(args.length < 1)
 		{
@@ -64,7 +64,7 @@ public class PlcMain {
 				continue;
 			}
 			
-			System.out.println("Compiling " + arg);
+			//System.out.println("Compiling " + arg);
 
 			compile(arg);
 		}
@@ -114,8 +114,8 @@ public class PlcMain {
 			//Node all = 
 			g.parse();
 
-			System.out.println("");
-			System.out.println("");
+			//System.out.println("");
+			//System.out.println("");
 
 			//g.print();
 
@@ -129,14 +129,15 @@ public class PlcMain {
 				//outf.delete();
 				System.out.println(">> "+g.get_error_count()+" errors found");
 			}
-			else
-				System.out.println(">> EOF");
+			//else				System.out.println(">> EOF");
 		} catch( PlcException e )
 		{
 			//cg.finalizer(); // close file
 			//cg = null;
 			//outf.delete();
 			System.out.println("Compile failed: "+e.toString());
+			// TODO in fact we should try to compile as many classes as possible instead 
+			System.exit(1);		
 		}
 	}
 
