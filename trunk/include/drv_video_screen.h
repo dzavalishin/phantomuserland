@@ -29,12 +29,6 @@
 typedef u_int8_t zbuf_t;
 extern zbuf_t *zbuf;
 
-void video_zbuf_init(void);
-void video_zbuf_reset(void);
-void video_zbuf_reset_square(int x, int y, int xsize, int ysize );
-void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos );
-int video_zbuf_check( int linpos, u_int8_t zpos );
-
 
 //! Switch video bitblt functions, used to read/write videomem, to 32 bit mode. Default is 24 bit mode.
 void switch_screen_bitblt_to_32bpp(void);
@@ -190,13 +184,13 @@ struct drv_video_screen_t
 
     void 	(*update) (void);
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
     void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos);
     void 	(*winblt) (const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
-#else
-    void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-    void 	(*winblt) (const drv_video_window_t *from, int xpos, int ypos);
-#endif
+//#else
+//    void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
+//    void 	(*winblt) (const drv_video_window_t *from, int xpos, int ypos);
+//#endif
     void 	(*readblt) ( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
     // Callbacks - to be filled by OS before driver init - BUG - kill!
@@ -222,21 +216,21 @@ extern void drv_video_null(void);
 drv_video_bitmap_t *      drv_video_get_default_mouse_bmp(void);
 
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
 
 extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
 extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
 extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
 extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
 
-#else
+//#else
 
-extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos);
-extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos);
+//extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
+//extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
+//extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos);
+//extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos);
 
-#endif
+//#endif
 
 //    void 	(*readblt) (const rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
@@ -248,11 +242,11 @@ void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize
 //void drv_video_bitblt_worker(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
 void drv_video_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos);
-#else
-void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
-#endif
+//#else
+//void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
+//#endif
 
 
 
@@ -296,27 +290,38 @@ void drv_video_mouse_on_deflt(void);
 
 void drv_video_window_preblit( drv_video_window_t *w );
 
-
+void mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
+void mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
 
 //void drv_video_bitblt(const char *from, int xpos, int ypos, int xsize, int ysize);
 #define drv_video_update() video_drv->update()
 #define drv_video_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
 
-#if VIDEO_ZBUF
-#define drv_video_bitblt(from, xpos, ypos, xsize, ysize, zpos)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize, ysize, zpos), video_drv->mouse_enable() )
-#define drv_video_winblt(from)                                  ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y, (from)->z), video_drv->mouse_enable() )
-#else
-#define drv_video_bitblt(from, xpos, ypos, xsize,ysize)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
-#define drv_video_winblt(from)                           ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y), video_drv->mouse_enable() )
-#endif
+//#if VIDEO_ZBUF
+
+#define drv_video_bitblt(from, xpos, ypos, xsize, ysize, zpos)  ( \
+    mouse_disable_p(video_drv, xpos, ypos, xsize, ysize), \
+    video_drv->bitblt(from, xpos, ypos, xsize, ysize, zpos), \
+    mouse_enable_p(video_drv, xpos, ypos, xsize, ysize ) )
+
+#define drv_video_winblt(from)                                  ( \
+    mouse_disable_p(video_drv, (from)->x, (from)->y, (from)->xsize, (from)->ysize ), \
+    drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y, (from)->z), \
+    mouse_enable_p(video_drv, (from)->x, (from)->y, (from)->xsize, (from)->ysize ) )
+
+//#else
+//#define drv_video_bitblt(from, xpos, ypos, xsize,ysize)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
+//#define drv_video_winblt(from)                           ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y), video_drv->mouse_enable() )
+//#endif
 
 // These are special for mouse pointer code - they're not try to disable mouse
 #define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
-#if VIDEO_ZBUF
+
+//#if VIDEO_ZBUF
 #define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, 0xFF)
-#else
-#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize )
-#endif
+//#else
+//#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize )
+//#endif
 
 #define drv_video_set_mouse_cursor(nc) 		video_drv->set_mouse_cursor(nc)
 #define drv_video_draw_mouse()            	video_drv->redraw_mouse_cursor()
@@ -352,6 +357,19 @@ void replicate2window_hor( drv_video_window_t *dest, int destX, int destY,
 
 void window_basic_border( drv_video_window_t *dest, const rgba_t *src, int srcSize );
 
+
+
+
+void video_zbuf_init(void);
+void video_zbuf_reset(void);
+void video_zbuf_reset_square(int x, int y, int xsize, int ysize );
+void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos );
+void video_zbuf_reset_win( drv_video_window_t *w );
+
+int video_zbuf_check( int linpos, u_int8_t zpos );
+
+// Set z order for window according to its position in all win q
+void drv_video_window_rezorder_all(void);
 
 
 

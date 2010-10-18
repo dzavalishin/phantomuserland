@@ -5,17 +5,11 @@ NB! Kernel is not available now, so QEMU part can be skipped.
 
 1. set PHANTOM_HOME env var to point to this directory.
 
-2. set PHANTOM_TFTP env var to point to tftp directory your 
-   QEMU will serve tftp contents from. (As far as I understand QEMU has
-   some bug forcing this dir to be in the root of current disk in Windows)
+2. Edit config.mk
 
-   UPD: QEMU 10 doesn't have this bug with tftp.
+3. make install
 
-3. Edit config.mk
-
-4. make install
-
-5. type "pvm_test.exe" and press Enter. Phantom Windows test environment 
+4. type "pvm_test.exe" and press Enter. Phantom Windows test environment 
    must start and show some fancy background and some shit over it.
 
 For Windows-based Phantom code test and debug the path is:

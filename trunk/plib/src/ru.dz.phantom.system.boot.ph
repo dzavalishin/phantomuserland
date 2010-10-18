@@ -42,6 +42,8 @@ import .ru.dz.phantom.system.thread_test;
 
 import .ru.dz.phantom.backgrounds;
 import .internal.bitmap;
+import .internal.window;
+import .internal."class";
 
 import .phantom.osimpl;
 
@@ -58,7 +60,7 @@ class boot
     var debug : int;
     var boot_object : .internal.object;
 
-    var loader_class : class_loader;
+    var loader_class : .internal."class"; // class_loader;
     var loader : class_loader;
 
     var reg_test_class;
@@ -69,6 +71,9 @@ class boot
     var windows : .ru.dz.windows.root;
 
     var run : .ru.dz.phantom.system.thread_test;
+
+    var shell_name : string;
+    var shell_class : .internal."class";
 
     // They call us here
     void startup(var _boot_object @const ) [8]
@@ -108,7 +113,7 @@ class boot
 
         // compiler regression tests
 
-        reg_test = new .ru.dz.phantom.system.regression_tests();
+	reg_test = new .ru.dz.phantom.system.regression_tests();
         print("Starting compiler regression tests\n");
         reg_test.run(boot_object);
         print("Finished compiler regression tests\n");
@@ -128,8 +133,10 @@ class boot
         // Pass it to OS to be made accessible from all threads
 	boot_object.22( oi ); 
 
+	shell_name = oi.getKernelEnvironmentValue("root.shell");
+
         print("Env root.shell=");
-        print(oi.getKernelEnvironmentValue("root.shell"));
+        print(shell_name);
         print("\n");
         print("Env root.init=");
         print(oi.getKernelEnvironmentValue("root.init"));
@@ -147,7 +154,10 @@ class boot
 
         print("Finished windows tests\n");
 
-        run = new .ru.dz.phantom.system.thread_test();
+        //run = new .ru.dz.phantom.system.thread_test();
+
+        shell_class = load_class(shell_name);
+        run = new *(shell_class)();
 
         boot_object.18(run);
         //run.8(this);
@@ -163,7 +173,7 @@ class boot
         bkg = new .ru.dz.phantom.backgrounds();
         bmp = new .internal.bitmap();
 
-        print("\nwill load bitmap...\n");
+        print("----------------------\nwill load bitmap...\n");
         var bmstring : string;
         bmstring = bkg.getBackgroundImage();
         bmp.loadFromString(bmstring);
@@ -171,7 +181,14 @@ class boot
 
         // Now set background!
         boot_object.20(bmp);
+        /*
+		var win : .internal.window;
 
+		win = new .internal.window();
+		win.setWinPosition(0,0);
+		win.setTitle("Background");
+		win.drawImage( 0, 0, bmp );
+		*/
     }
 
 
@@ -194,7 +211,7 @@ class boot
         boot_object.16(input);
     }
 
-    .internal.object load_class( var name : string )
+    .internal."class" load_class( var name : string )
     {
         return boot_object.8(name);
     }

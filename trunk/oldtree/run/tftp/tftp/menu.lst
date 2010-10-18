@@ -31,6 +31,12 @@ module=(nd)/classes
 module=(nd)/pmod_test
 boot 
 
+title=phantom THREAD TEST
+kernel=(nd)/phantom -d=10 root.shell=ru.dz.phantom.system.thread_test --
+module=(nd)/classes
+module=(nd)/pmod_test
+boot 
+
 
 title=phantom (more debug)
 kernel=(nd)/phantom -d=20 -- 

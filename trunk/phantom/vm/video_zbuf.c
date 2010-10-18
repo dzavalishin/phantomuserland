@@ -47,6 +47,22 @@ void video_zbuf_reset()
 }
 
 
+
+/**
+ *
+ * Reset given square to 0 for window.
+ *
+**/
+
+void video_zbuf_reset_win( drv_video_window_t *w )
+{
+    // XXX HACK alert - hardcoded decorations size
+    const int bw = 3;
+    video_zbuf_reset_square( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21 );
+}
+
+
+
 /**
  *
  * Reset given square to given z position. Usually to zero.
@@ -74,7 +90,7 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
     int ys;
     for(ys = 0; ys < ysize; ys++)
     {
-        int linpos = out.x + out.y*zbwidth;
+        int linpos = out.x + ( (video_drv->ysize-1) - out.y) *zbwidth;
         out.y++;
         memset( zbuf+linpos, zpos, out.xsize );
     }

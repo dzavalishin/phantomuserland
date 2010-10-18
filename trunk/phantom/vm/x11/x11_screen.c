@@ -175,9 +175,9 @@ int pvm_x11_init()
         if( init_err ) break;
         if( init_ok )
         {
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
             video_zbuf_init();
-#endif
+//#endif
             return 0;
         }
 

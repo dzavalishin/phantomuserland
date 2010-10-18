@@ -29,6 +29,9 @@ static int debug_print = 0;
 
 #define tty_font &drv_video_8x16san_font
 
+#define BS 1024
+
+
 //---------------------------------------------------------------------------
 // Display
 //---------------------------------------------------------------------------
@@ -80,7 +83,6 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
     int len = pvm_get_str_len( _text );
     const char * data = (const char *)pvm_get_str_data(_text);
 
-#define BS 1024
     char buf[BS+2];
 
     if( len > BS ) len = BS;
@@ -96,10 +98,7 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
     struct rgba_t bg = da->bg;
 
     drv_video_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
-    //drv_video_winblt( &(da->w), da->w.x, da->w.y);
     drv_video_winblt( &(da->w) );
-
-    //advance_cursor(written);
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -110,11 +109,10 @@ static int getwc_16(struct pvm_object me , struct data_area_4_thread *tc )
     DEBUG_INFO;
     char c[1];
 
+    // XXX syscall blocks!
     c[0] = phantom_dev_keyboard_getc();
 
     SYSCALL_RETURN( pvm_create_string_object_binary( c, 1 ));
-
-    //SYSCALL_THROW_STRING( "not implemented" );
 }
 
 
@@ -151,17 +149,11 @@ static int gotoxy_19(struct pvm_object me , struct data_area_4_thread *tc )
 
     CHECK_PARAM_COUNT(n_param, 2);
 
-    int gox = POP_INT();
     int goy = POP_INT();
-
-    //printf("gotoxy char %d,%d\n", gox, goy );
+    int gox = POP_INT();
 
     da->x = da->font_width * gox;
     da->y = da->font_height * goy;
-
-    //printf("gotoxy pix %d,%d\n", da->x, da->y );
-    //printf("gotoxy font %d,%d\n", da->font_width, da->font_height );
-    //validate_xy(da);
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -216,7 +208,51 @@ static int putblock_23(struct pvm_object me , struct data_area_4_thread *tc )
 
 
 
-syscall_func_t	syscall_table_4_tty[24] =
+static int tty_setWinPos_24(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_tty      *da = pvm_data_area( me, tty );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 2);
+
+    int y = POP_INT();
+    int x = POP_INT();
+
+    drv_video_window_move( &(da->w), x, y );
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+static int tty_setWinTitle_25(struct pvm_object me , struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_tty      *da = pvm_data_area( me, tty );
+
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    struct pvm_object _text = POP_ARG;
+    ASSERT_STRING(_text);
+
+    int len = pvm_get_str_len( _text );
+    const char * data = (const char *)pvm_get_str_data(_text);
+
+    if( len > PVM_MAX_TTY_TITLE-1 ) len = PVM_MAX_TTY_TITLE-1 ;
+    strlcpy( da->title, data, len+1 );
+    //buf[len] = 0;
+
+    SYS_FREE_O(_text);
+
+    drv_video_window_set_title( &(da->w), da->w.title );
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+
+
+syscall_func_t	syscall_table_4_tty[32] =
 {
     &si_void_0_construct,           	&si_void_1_destruct,
     &si_void_2_class,               	&si_void_3_clone,
@@ -232,6 +268,11 @@ syscall_func_t	syscall_table_4_tty[24] =
     &debug_18,               		&gotoxy_19,
     &clear_20,    			&setcolor_21,
     &fill_22,     			&putblock_23,
+    // 24
+    &tty_setWinPos_24,               	&tty_setWinTitle_25,
+    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,               	&invalid_syscall,
 
 };
 DECLARE_SIZE(tty);

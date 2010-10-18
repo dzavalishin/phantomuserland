@@ -258,6 +258,8 @@ struct data_area_4_boot
 //#define PVM_MAX_TTY_PIXELS (1280*1024)
 #define PVM_MAX_TTY_PIXELS (PVM_DEF_TTY_XSIZE*PVM_DEF_TTY_YSIZE)
 
+#define PVM_MAX_TTY_TITLE 128
+
 struct data_area_4_tty
 {
     drv_video_window_t           	w;
@@ -269,6 +271,8 @@ struct data_area_4_tty
     int 				xsize, ysize; // in chars
     int                                 x, y; // in pixels
     rgba_t                       	fg, bg; // colors
+
+    char                                title[PVM_MAX_TTY_TITLE+1];
 };
 
 
@@ -360,6 +364,9 @@ struct data_area_4_window
 
     int                                 x, y; // in pixels
     rgba_t                       	fg, bg; // colors
+
+    struct pvm_object   		event_handler;
+    char                                title[PVM_MAX_TTY_TITLE+1];
 };
 
 

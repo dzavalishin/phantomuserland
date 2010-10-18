@@ -11,6 +11,7 @@
 **/
 
 package .internal;
+import .ru.dz.phantom.handler;
 
 /**
  *
@@ -28,7 +29,7 @@ package .internal;
  *
 **/
 
-class binary
+class window
 {
 	int	getXSize() [16] {}
 	int	getYSize() [17] {}
@@ -36,23 +37,29 @@ class binary
 	int	getX() [18] {}
 	int	getY() [19] {}
 
-	void	setSize( var xsize : int, var ysize : int ) [20] {}
-	void	setPosition( var x : int, var y : int ) [21] {}
 
-	void 	clear() [22] {}
+	void 	clear() [20] {}
+	void 	fill(var fg : int) [21] {}
 
-	void	setBg( var bg : int ) [23] {}
-	void	setFg( var bg : int ) [24] {}
- 
-	void	drawLine( var x : int, var y : int, var xsize : int, var ysize : int ) [25] {}
-	void	drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [26] {}
-
-	void	fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [27] {}
-	void	fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [28] {}
+	void	setBg( var bg : int ) [22] {}
+	void	setFg( var fg : int ) [23] {}
 
 	// todo will need font parameter
-	void	drawString( var x : int, var y : int, var s : string ) [29] {}
+	void	drawString( var x : int, var y : int, var s : string ) [24] {}
+	void	drawImage( var x : int, var y : int, var img : string ) [25] {}
+
+	void	setWinSize( var xsize : int, var ysize : int ) [26] {}
+	void	setWinPosition( var x : int, var y : int ) [27] {}
 
 
+ 
+	void	drawLine( var x : int, var y : int, var xsize : int, var ysize : int ) [28] {}
+	void	drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [29] {}
+
+	void	fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [30] {}
+	void	fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [31] {}
+
+	void	setEventHandler( var handler : .ru.dz.phantom.handler ) [32] {}
+	void	setTitle( var title : string ) [33] {}
 
 };

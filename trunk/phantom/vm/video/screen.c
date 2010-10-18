@@ -23,7 +23,7 @@ void drv_video_null() {}
 
 
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
 
 
 void drv_video_bitblt_forw(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos )
@@ -47,7 +47,7 @@ void 	drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypo
     drv_video_bitblt_worker( from->pixel, xpos, ypos, from->xsize, from->ysize, 1, zpos );
 }
 
-
+/*
 #else
 
 
@@ -75,7 +75,7 @@ void 	drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypo
 }
 
 #endif
-
+*/
 
 
 
