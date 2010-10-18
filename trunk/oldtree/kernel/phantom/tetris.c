@@ -168,17 +168,17 @@ void draw_block (int h, int w, int visible)
     r.xsize = r.ysize = 4;
 
     if (visible) {
-        drv_video_window_fill_rect( tetris_window, COLOR_RED, r );
+        drv_video_window_fill_rect( tetris_window, COLOR_LIGHTRED, r );
     } else {
         drv_video_window_fill_rect( tetris_window, COLOR_BLACK, r );
 
         if (h == (PITDEPTH-1)*5)
-            drv_video_window_pixel ( tetris_window, w + 2, h + 4, COLOR_LIGHTRED);
+            drv_video_window_pixel ( tetris_window, w + 2, h + 4, COLOR_LIGHTBLUE);
 
         if (w == 0)
-            drv_video_window_pixel ( tetris_window, w, h + 2, COLOR_LIGHTRED);
+            drv_video_window_pixel ( tetris_window, w, h + 2, COLOR_LIGHTGREEN);
         else if (w % 20 == 15)
-            drv_video_window_pixel ( tetris_window, w + 4, h + 2, COLOR_LIGHTRED);
+            drv_video_window_pixel ( tetris_window, w + 4, h + 2, COLOR_LIGHTGREEN);
     }
 }
 
@@ -475,7 +475,7 @@ static void eventProcessor( drv_video_window_t *w, struct ui_event *e )
 void init_tetris ()
 {
     tetris_window =
-        drv_video_window_create( 80, 150, 700, 550, COLOR_BLACK, "Tetris" );
+        drv_video_window_create( 60, 120, 700, 550, COLOR_BLACK, "Tetris" );
 
     oldEventProcessor = tetris_window->inKernelEventProcess;
     tetris_window->inKernelEventProcess = eventProcessor;
