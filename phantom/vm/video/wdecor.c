@@ -153,9 +153,6 @@ void win_make_decorations(drv_video_window_t *w)
                                        );
 
     w3->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
-    //hal_spin_lock( &allw_lock );
-    //queue_enter(&allwindows, w3, drv_video_window_t *, chain);
-    //hal_spin_unlock( &allw_lock );
 
     w3->x = w->x-bordr_size; w3->y = w->y+w->ysize; //+bordr_size;
     w3->z = w->z;

@@ -145,6 +145,7 @@ errno_t dns_request(unsigned char *host, ipv4_addr server, ipv4_addr *result)
 #endif
     {
         printf("Failed.\n");
+        return ENOENT;
     }
     printf("Received.\n");
 

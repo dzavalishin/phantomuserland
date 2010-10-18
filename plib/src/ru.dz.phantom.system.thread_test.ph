@@ -28,6 +28,8 @@ class thread_test // extends runnable
         console = new .internal.io.tty();
         incr = 1;
 
+		//console.moveWindow(0,0);
+
         while(1)
         {
             console.putws("Thread is running... ");

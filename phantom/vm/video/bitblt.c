@@ -51,11 +51,11 @@ void switch_screen_bitblt_to_32bpp(void)
  *
  **/
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
-#else
-    void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse)
-#endif
+//#else
+//void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse)
+//#endif
 {
     //printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
     assert(video_drv->screen != 0);
@@ -130,14 +130,14 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
             zbuf_t *zb = zbuf + ( (video_drv->xsize * ((video_drv->ysize-1) - sline)) + xpos);
             // 0xFF is a special value for mouse painting. XXX hack!
             if(zpos == 0xFF) bit_mover_to_screen( (void *)s_start, w_start, xlen );
             else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xlen, zpos );
-#else
-            bit_mover_to_screen( (void *)s_start, w_start, xlen );
-#endif
+//#else
+//            bit_mover_to_screen( (void *)s_start, w_start, xlen );
+//#endif
         }
     }
     else
@@ -149,15 +149,15 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
             //zbuf_t *zb = zbuf + ((wline*xsize) + xshift);
             zbuf_t *zb = zbuf + ( (video_drv->xsize * sline) + xpos);
             // 0xFF is a special value for mouse painting. XXX hack!
             if(zpos == 0xFF) bit_mover_to_screen( (void *)s_start, w_start, xlen );
             else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xlen, zpos );
-#else
-            bit_mover_to_screen( (void *)s_start, w_start, xlen );
-#endif
+//#else
+//            bit_mover_to_screen( (void *)s_start, w_start, xlen );
+//#endif
         }
     }
 

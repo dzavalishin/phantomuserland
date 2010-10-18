@@ -35,7 +35,7 @@ class bootstarap
      * to kernel with multiboot bootloader.
      *
     **/
-    .internal."class" loadClass( var name : .internal.string ) {8] {}
+    .internal."class" loadClass( var name : .internal.string ) [8] {}
 
     /**
      *

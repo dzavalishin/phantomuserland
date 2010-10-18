@@ -43,6 +43,12 @@ void drv_video_window_draw_box( drv_video_window_t *w,
 
 void drv_video_window_move( drv_video_window_t *w, int x, int y );
 
+//! Warning - caller must check buffer size!
+void drv_video_window_resize( drv_video_window_t *w, int xsize, int ysize );
+
+void drv_video_window_set_title( drv_video_window_t *w,  const char *title );
+
+
 void drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out );
 // ------------------------------------------------------------------------
 // Kernel video stuff

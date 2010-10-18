@@ -28,11 +28,11 @@ int drv_video_bmpblt( struct pvm_object _bmp, int xpos, int ypos, int zpos )
     struct data_area_4_bitmap *bmp = pvm_object_da( _bmp, bitmap );
     struct data_area_4_binary *bin = pvm_object_da( bmp->image, binary );
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
     drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize, (zbuf_t)zpos );
-#else
-    drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize );
-#endif
+//#else
+//    drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize );
+//#endif
 
     return 0;
 }

@@ -311,6 +311,8 @@ void paging_device_thread_do_io(paging_device *me)
     }
     SHOW_FLOW0(7, " ...DONE\n");
 
+    STAT_INC_CNT(STAT_CNT_BLOCK_IO);
+
 #endif
 
     SHOW_FLOW0(8, "Trigger IO completion DPC... ");

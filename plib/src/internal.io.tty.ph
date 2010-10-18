@@ -41,5 +41,7 @@ class tty
 	void	clear() [20] {}
 	void	setcolor( var color : int ) [21] {}
 
+	void	moveWindow( var x : int, var y : int ) [24] {}
+	void	setTitle( var title : string ) [25] {}
 
 };

@@ -108,6 +108,8 @@ drv_video_window_create(
     drv_video_window_t *w = private_drv_video_window_create(xsize, ysize);
     drv_video_window_init( w, xsize, ysize, x, y, bg );
     w->title = title;
+    // Repaint title
+    event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
     return w;
 }
 
@@ -163,6 +165,8 @@ void drv_video_window_enter_allwq( drv_video_window_t *w)
     queue_enter(&allwindows, w, drv_video_window_t *, chain);
     hal_spin_unlock( &allw_lock );
     if(ie) hal_sti();
+
+    drv_video_window_rezorder_all();
 }
 
 
@@ -205,7 +209,6 @@ void drv_video_window_destroy(drv_video_window_t *w)
 
 void drv_video_window_repaint_all(void)
 {
-    //win_generation++;
     // redraw all here, or ask some thread to do that
     drv_video_window_t *w;
     int ie = hal_save_cli();
@@ -219,6 +222,45 @@ void drv_video_window_repaint_all(void)
     hal_spin_unlock( &allw_lock );
     if(ie) hal_sti();
 }
+
+
+/*!
+ *
+ * Reset Z order for all the windows.
+ *
+ */
+void drv_video_window_rezorder_all(void)
+{
+    drv_video_window_t *w;
+
+    int ie = hal_save_cli();
+    hal_spin_lock( &allw_lock );
+
+    int next_z = 0;
+
+    queue_iterate(&allwindows, w, drv_video_window_t *, chain)
+    {
+        // Actually start with 1
+        next_z++;
+
+        if( w->z == next_z )
+            continue;
+
+        w->z = next_z;
+        video_zbuf_reset_win( w ); // TODO rezet z buf in event too?
+        event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+        event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
+    }
+
+    hal_spin_unlock( &allw_lock );
+    if(ie) hal_sti();
+}
+
+
+
+
+
+
 
 // TODO this is not needed anymore?
 void drv_video_window_preblit( drv_video_window_t *w )
@@ -266,6 +308,7 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
     event_q_put_global( &e );
 
     event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+    event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
 
 }
 
@@ -305,6 +348,53 @@ drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out )
     out->xsize = w->xsize;
     out->ysize = w->ysize;
 }
+
+
+void drv_video_window_set_title( drv_video_window_t *w, const char *title )
+{
+    w->title = title;
+    event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+    event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
+}
+
+
+int mouse_intersects(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )
+{
+    rect_t r;
+
+    r.x = xpos;
+    r.y = ypos;
+    r.xsize = xsize;
+    r.ysize = ysize;
+
+    rect_t m;
+
+    r.x = video_drv->mouse_x;
+    r.y = video_drv->mouse_y;
+    r.xsize = 16; // BUG mouse size hardcode
+    r.ysize = 16;
+
+    rect_t o;
+
+    return rect_mul( &o, &r, &m );
+}
+
+
+
+
+void mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )
+{
+    if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
+        video_drv->mouse_disable();
+}
+
+
+void mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )
+{
+    //if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
+        video_drv->mouse_enable();
+}
+
 
 
 

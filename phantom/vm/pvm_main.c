@@ -232,11 +232,11 @@ void videotest()
     {
         fillw( (i+2)*10, (i+2)*20, (i+4)*10 );
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
         drv_video_bitblt(win, 0, i*10, wxsize, wysize, i & 1 ? 0xFF : 0x55 );
-#else
-        drv_video_bitblt(win, 0, i*10, wxsize, wysize );
-#endif
+//#else
+//        drv_video_bitblt(win, 0, i*10, wxsize, wysize );
+//#endif
         //drv_win_screen_update();
         //drv_video_update();
     }
@@ -268,7 +268,7 @@ void videotest()
 
     getchar();
 
-#if VIDEO_ZBUF
+//#if VIDEO_ZBUF
     video_zbuf_reset();
 
     fillw( 0xFF, 0, 0 );
@@ -279,7 +279,7 @@ void videotest()
     fillw( 0, 0xFF, 0 );
     drv_video_bitblt(win, 575, 120, wxsize, wysize, 0xEE );
     drv_video_bitblt(win, 700, 400, wxsize, wysize, 0xEE );
-#endif
+//#endif
     video_zbuf_reset();
 
 //getchar();
