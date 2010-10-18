@@ -20,6 +20,7 @@
 #include <vm/syscall.h>
 
 #include <threads.h>
+#include <thread_private.h>
 
 #include "snap_sync.h"
 #include "hal.h"
@@ -34,15 +35,53 @@ static volatile int n_vm_threads = 0;
 static volatile int all_threads_started = 0;
 
 
-
-static void thread_death_handler( void *arg )
+static void remove_vm_thread_from_list(pvm_object_storage_t *os)
 {
-    (void) arg;
+    // TODO check that is is a thread
 
+    int nthreads  = get_array_size(pvm_root.threads_list.data);
+
+    if( !nthreads )
+        printf("There were 0 live threads in image, and some thread is dead. Now -1?");
+
+    int nkill = 0;
+    while(nthreads--)
+    {
+        struct pvm_object th =  pvm_get_array_ofield(pvm_root.threads_list.data, nthreads );
+        pvm_check_is_thread( th );
+        if( th.data == os )
+        {
+            pvm_set_array_ofield(pvm_root.threads_list.data, nthreads, pvm_create_null_object() );
+            nkill++;
+        }
+    }
+
+    if(1 != nkill)
+        printf("Nkill = %d\n", nkill);
+}
+
+
+static void thread_death_handler( phantom_thread_t *t )
+{
     //struct pvm_object current_thread = *((struct pvm_object *)arg);
     n_vm_threads--;
 
     printf("thread_death_handler called\n");
+
+    pvm_object_storage_t *os = t->owner;
+    if( os == 0 )
+    {
+        printf("!!! thread_death_handler - no pointer to Vm thread object!\n");
+        return;
+    }
+
+    assert( os->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
+
+    //struct data_area_4_thread * tda = ((struct data_area_4_thread *)&(os->da));
+
+
+    remove_vm_thread_from_list(os);
+
 }
 
 
@@ -75,6 +114,9 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 
     struct data_area_4_thread *tda = pvm_object_da( new_thread, thread );
     tda->tid = tid;
+
+    phantom_thread_t *t = get_thread(tid);
+    t->owner = new_thread.data;
 
     while(args_used > 0)
         hal_sleep_msec(1);

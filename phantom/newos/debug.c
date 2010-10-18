@@ -199,26 +199,36 @@ static int debug_parse_line(char *buf, char **argv, int *argc, int max_args)
 
     strcpy(parse_line, buf);
 
+    hexdump(buf, strlen(buf), "", 0 );
+
     // scan all of the whitespace out of this
     while(isspace(parse_line[pos]))
         pos++;
 
-    //if(!isspace(parse_line[0])) {
     argv[0] = parse_line+pos;
     *argc = 1;
-    //} else {        *argc = 0;    }
 
     while(parse_line[pos] != '\0')
     {
         if(isspace(parse_line[pos]))
         {
+        	//printf("parse - end arg '%s'\n", parse_line+pos);
             parse_line[pos] = '\0';
+
             // scan all of the whitespace out of this
-            while(isspace(parse_line[++pos]))
-                ;
+            while(1)
+            {
+            	char ch = parse_line[++pos];
+            	if(!isspace(ch))
+            		break;
+            }
+
+            //printf("parse - next arg '%s'\n", parse_line+pos);
+
             if(parse_line[pos] == '\0')
                 break;
-            argv[*argc] = &parse_line[pos];
+
+            argv[*argc] = parse_line+pos;
             (*argc)++;
 
             if(*argc >= max_args - 1)
