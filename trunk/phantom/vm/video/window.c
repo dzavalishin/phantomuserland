@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Windowing system internals and housekeeping.
  *
@@ -396,5 +396,36 @@ void mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, in
 }
 
 
+
+
+void drv_video_window_to_bottom(drv_video_window_t *w)
+{
+    int ie = hal_save_cli();
+    hal_spin_lock( &allw_lock );
+
+    queue_remove(&allwindows, w, drv_video_window_t *, chain);
+    queue_enter_first(&allwindows, w, drv_video_window_t *, chain);
+
+    hal_spin_unlock( &allw_lock );
+    if(ie) hal_sti();
+
+    drv_video_window_rezorder_all();
+    drv_video_window_repaint_all();
+}
+
+void drv_video_window_to_top(drv_video_window_t *w)
+{
+    int ie = hal_save_cli();
+    hal_spin_lock( &allw_lock );
+
+    queue_remove(&allwindows, w, drv_video_window_t *, chain);
+    queue_enter(&allwindows, w, drv_video_window_t *, chain);
+
+    hal_spin_unlock( &allw_lock );
+    if(ie) hal_sti();
+
+    drv_video_window_rezorder_all();
+    drv_video_window_repaint_all();
+}
 
 

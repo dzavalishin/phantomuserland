@@ -8,6 +8,13 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "console"
+#include "debug_ext.h"
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <i386/pio.h>
 #include <phantom_libc.h>
 #include <hal.h>
@@ -20,6 +27,8 @@
 
 #include <threads.h>
 #include <kernel/timedcall.h>
+
+
 
 //#define CON_FONT drv_video_8x16san_font
 #define CON_FONT drv_video_8x16cou_font

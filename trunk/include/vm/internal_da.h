@@ -102,8 +102,8 @@ struct data_area_4_string
 // NB! See JIT assembly hardcode for object structure offsets
 struct data_area_4_class
 {
-    unsigned int		object_flags;			// object of this class will have such flags
-    unsigned int		object_data_area_size;	// object of this class will have data area of this size
+    unsigned int			object_flags;			// object of this class will have such flags
+    unsigned int			object_data_area_size;	// object of this class will have data area of this size
     struct pvm_object		object_default_interface; // default one
     //syscall_func_t  *class_sys_table;
     //unsigned int	class_sys_table_size;
@@ -111,6 +111,9 @@ struct data_area_4_class
 
     struct pvm_object		class_name;
     struct pvm_object		class_parent;
+
+    struct pvm_object		ip2line_maps; // array of maps: ip->line number
+    struct pvm_object		method_names; // array of method names
 
     // TODO add c'tor ptr and GC iterator func ptr for internal ones
 };

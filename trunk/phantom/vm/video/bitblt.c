@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel ready: yes
  *
@@ -51,11 +51,7 @@ void switch_screen_bitblt_to_32bpp(void)
  *
  **/
 
-//#if VIDEO_ZBUF
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
-//#else
-//void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse)
-//#endif
 {
     //printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
     assert(video_drv->screen != 0);
@@ -113,6 +109,8 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
 
     //char *lowest_line = ((drv_video_screen.ysize -1) - ypos) + drv_video_screen.screen;
 
+    // We took it in account
+    if(xpos < 0) xpos = 0;
 
     int sline = ypos;
     int wline = 0;

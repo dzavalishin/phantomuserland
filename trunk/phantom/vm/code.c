@@ -11,8 +11,6 @@
 
 #include "phantom_libc.h"
 
-//#include "vm/internal_da.h"
-//#include "vm/exec.h"
 #include "vm/code.h"
 #include "vm/object_flags.h"
 #include "vm/exception.h"
@@ -20,6 +18,7 @@
 #define hal_printf printf
 
 #define int_size() 4
+#define long_size() 8
 
 
 int
@@ -32,8 +31,26 @@ pvm_code_do_get_int( const unsigned char *addr )
     v |= ((unsigned int)addr[1]) << 16;
     v |= ((unsigned int)addr[0]) << 24;
     return (int)v;
-
 }
+
+int
+pvm_code_do_get_int64( const unsigned char *addr )
+{
+    unsigned long v;
+
+    v = addr[7];
+    v |= ((unsigned long)addr[6]) << 8;
+    v |= ((unsigned long)addr[5]) << 16;
+    v |= ((unsigned long)addr[4]) << 24;
+    v |= ((unsigned long)addr[3]) << 32;
+    v |= ((unsigned long)addr[2]) << 40;
+    v |= ((unsigned long)addr[1]) << 48;
+    v |= ((unsigned long)addr[0]) << 56;
+
+    return (long)v;
+}
+
+
 
 static void
 throw_bounds( int ip, int max_IP, char *where )
@@ -76,6 +93,15 @@ int pvm_code_get_int32(struct pvm_code_handler *code)
     code->IP += int_size();
     return ret;
 }
+
+long pvm_code_get_int64(struct pvm_code_handler *code)
+{
+    pvm_code_check_bounds( code, code->IP+long_size()-1, "get_int64" );
+    long ret = pvm_code_do_get_int64( code->code+code->IP );
+    code->IP += long_size();
+    return ret;
+}
+
 
 unsigned int pvm_code_get_rel_IP_as_abs(struct pvm_code_handler *code)
 {
