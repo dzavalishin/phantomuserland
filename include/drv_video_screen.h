@@ -110,17 +110,24 @@ extern drv_video_bitmap_t 		pin_bmp; // Window pin button
 static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_window_t); }
 static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
 
-void drv_video_window_repaint_all(void);
+void 	drv_video_window_repaint_all(void);
+
+
 
 // dynamic allocation
 drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg, const char* title );
 // free dynamically allocated window
-void drv_video_window_free(drv_video_window_t *w);
+void 	drv_video_window_free(drv_video_window_t *w);
 
 // init for statically allocated ones
-void drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg );
+void 	drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg );
 // destroy for statically allocated ones
-void drv_video_window_destroy(drv_video_window_t *w);
+void 	drv_video_window_destroy(drv_video_window_t *w);
+
+
+
+void 	drv_video_window_to_top(drv_video_window_t *w);
+void 	drv_video_window_to_bottom(drv_video_window_t *w);
 
 
 void    drv_video_window_clear( drv_video_window_t *win );

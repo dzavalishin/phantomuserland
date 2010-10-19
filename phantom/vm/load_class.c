@@ -18,6 +18,7 @@
 #include <endian.h>
 
 #include "vm/object.h"
+#include "vm/internal_da.h"
 #include "vm/code.h"
 #include "vm/bulk.h"
 #include "vm/alloc.h"
@@ -42,7 +43,7 @@ struct method_loader_handler
 {
     struct pvm_code_handler 		ch;
 
-    //struct pvm_object 			my_name;
+    struct pvm_object 			my_name;
     struct pvm_object 			my_code;
     int            			my_ordinal;
 };
@@ -59,8 +60,8 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
 
     if(debug_print) printf("Method is: " );
     if(debug_print) pvm_object_print( name );
-    //mh->my_name = name; //- not used
-    ref_dec_o(name);
+    mh->my_name = name;
+    //ref_dec_o(name);
 
     mh->my_ordinal = pvm_code_get_int32(&(mh->ch));
     if(debug_print) printf(", ordinal %d\n", mh->my_ordinal );
@@ -77,14 +78,6 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
 
 int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *out )
 {
-    /*
-     struct pvm_code_handler ch;
-
-     ch.code = data;
-     ch.IP_max = size;
-     ch.IP = 0;
-     */
-
     const unsigned char *rec_start = (const unsigned char *)data;
     int record_size = 0;
 
@@ -96,6 +89,9 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
 
     struct pvm_object iface;
+    struct pvm_object ip2line_maps;
+    struct pvm_object method_names;
+
     int got_class_header = 0;
 
     for( ; rec_start < (const unsigned char *)data + fsize; rec_start = rec_start+record_size )
@@ -167,8 +163,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 #endif
                 ref_dec_o(base_name);
 
+                // TODO BREAK ALERT make sure base class is not internal
 
                 iface = pvm_create_interface_object( n_method_slots, base_class );
+                ip2line_maps = pvm_object_create_dynamic( pvm_get_array_class(), n_method_slots );
+                method_names = pvm_object_create_dynamic( pvm_get_array_class(), n_method_slots );
 
             }
             break;
@@ -180,12 +179,43 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 //methods.push_back(mh);
                 //iface.save( mh.my_ordinal, mh.my_code );
                 pvm_set_ofield( iface, mh.my_ordinal, mh.my_code );
+                pvm_set_ofield( method_names, mh.my_ordinal, mh.my_name );
             }
             break;
 
         case 'S': // method signature
             {
                 if(debug_print) printf("\n" );
+            }
+            break;
+
+        case 'l': // IP to line num map
+            {
+                struct pvm_code_handler h;
+                h.IP = 0;
+                h.code = ptr;
+                h.IP_max = record_size - (ptr-rec_start);
+
+                if(debug_print) printf("line num map\n" );
+                int ordinal = pvm_code_get_int32(&h);
+                int mapsize = pvm_code_get_int32(&h);
+
+
+                pvm_object_t map = pvm_create_binary_object(mapsize*(sizeof(struct vm_code_linenum)), 0);
+
+                struct data_area_4_binary *bin= pvm_object_da( map, binary );
+
+                struct vm_code_linenum *sp = bin->data;
+
+                int i;
+                for( i = 0 ; i < mapsize; i++ )
+                {
+                	sp->ip = pvm_code_get_int32(&h);
+                	sp->line = pvm_code_get_int32(&h);
+                	sp++;
+                }
+
+                pvm_set_ofield( ip2line_maps, ordinal, map );
             }
             break;
         }
@@ -208,6 +238,10 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
     //da.class_name       =
 
     struct pvm_object new_class = pvm_create_class_object(class_name, iface, sizeof(struct pvm_object) * n_object_slots);
+
+    struct data_area_4_class *cda= pvm_object_da( new_class, class );
+    cda->ip2line_maps = ip2line_maps;
+    cda->method_names = method_names;
 
     *out = new_class;
     return 0;

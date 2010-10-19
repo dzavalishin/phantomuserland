@@ -955,6 +955,8 @@ static int si_bootstrap_19_create_binary(struct pvm_object me, struct data_area_
     SYSCALL_RETURN( pvm_create_binary_object(nbytes, NULL) );
 }
 
+static drv_video_window_t *back_win = 0;
+
 static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct data_area_4_thread *tc )
 {
     (void)me;
@@ -965,12 +967,43 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
     struct pvm_object _bmp = POP_ARG;
 
+#if 1
+
     // BUG! Must store it and repaint on OS restart
     if( drv_video_bmpblt(_bmp,0,0,0) )
     	SYSCALL_THROW_STRING( "not a bitmap" );
 
-    drv_video_window_repaint_all();
 
+    drv_video_window_repaint_all();
+#else
+    // TODO black screen :(
+
+    if( !pvm_object_class_is( _bmp, pvm_get_bitmap_class() ) )
+    	SYSCALL_THROW_STRING( "not a bitmap" );
+
+    struct data_area_4_bitmap *bmp = pvm_object_da( _bmp, bitmap );
+    struct data_area_4_binary *bin = pvm_object_da( bmp->image, binary );
+
+
+    if(back_win == 0)
+    	back_win = drv_video_window_create( video_drv->xsize, video_drv->ysize, 0, 0, COLOR_BLACK, "Background" );
+
+    back_win->flags &= ~WFLAG_WIN_DECORATED;
+
+    drv_video_window_to_bottom(back_win);
+
+    //drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize, (zbuf_t)zpos );
+
+
+    bitmap2bitmap(
+    		back_win->pixel, back_win->xsize, back_win->ysize, 0, 0,
+                     (void *)bin->data, bmp->xsize, bmp->ysize, 0, 0,
+                     bmp->xsize, bmp->ysize
+                    );
+
+    //drv_video_winblt(back_win);
+    drv_video_window_repaint_all();
+#endif
     // Remove it if will store bmp!
     SYS_FREE_O(_bmp);
 
