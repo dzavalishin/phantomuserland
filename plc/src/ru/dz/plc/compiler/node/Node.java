@@ -170,6 +170,7 @@ abstract public class Node {
 		}
 		if(context !=null)			c.emitComment("Line "+context.getLineNumber());
 		log.fine("Node "+this+" codegen");
+		c.recordLineNumberToIPMapping(context.getLineNumber());
 		generate_my_code(c,s);
 	}
 

@@ -20,7 +20,7 @@ public class Codegen extends opcode_ids {
 	private ForwardAddressMap fmap = new ForwardAddressMap();
 	private BackAddressMap    bmap = new BackAddressMap();
 
-	//private long                start_position_in_file = 0;
+	private long                start_position_in_file = 0;
 
 	// ------------------------------------------------------------------------
 	// labels
@@ -49,9 +49,13 @@ public class Codegen extends opcode_ids {
 	public Codegen(RandomAccessFile f, FileWriter lst ) throws IOException {
 		this.os = f;
 		this.lst  = lst;
-		//start_position_in_file = os.getFilePointer();
+		start_position_in_file = os.getFilePointer();
 	}
 
+	public long getIP() throws IOException
+	{
+		return os.getFilePointer() - start_position_in_file;
+	}
 
 	public Codegen() {
 		this.os = null;
@@ -60,7 +64,7 @@ public class Codegen extends opcode_ids {
 	public void set_os(RandomAccessFile f, FileWriter lst ) throws IOException {
 		this.os = f;
 		this.lst  = lst;
-		//start_position_in_file = os.getFilePointer();
+		start_position_in_file = os.getFilePointer();
 	}
 
 	private void list(String s) throws IOException 
@@ -641,6 +645,22 @@ public class Codegen extends opcode_ids {
 
 	public void emitComment(String string) throws IOException {
 		list("; "+string);		
+	}
+
+	Map<Long,Integer> IpToLine = new HashMap<Long, Integer>();
+
+	public void recordLineNumberToIPMapping(int lineNumber) {
+		try {
+			long ip = getIP();
+			
+			IpToLine.put(ip, lineNumber);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+		
 	}
 
 }
