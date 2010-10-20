@@ -91,16 +91,14 @@ errno_t t_kill_thread( int tid );
 
 
 
-/*
-struct hal_sem
-{
-    struct phantom_sem_impl     *impl;
-};
-*/
 
 
 struct wtty *get_thread_ctty( struct phantom_thread *t );
 
+//! Returns 'owner' field, which is, for VM threads, is used to keep pointer to VM thread object
+void *get_thread_owner( struct phantom_thread *t );
+
+int get_thread_flags( struct phantom_thread *t );
 
 /**
  *

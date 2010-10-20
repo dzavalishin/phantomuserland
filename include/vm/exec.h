@@ -19,7 +19,7 @@
 
 void pvm_exec(struct pvm_object current_thread);
 
-void pvm_exec_throw( const char *reason );
+void pvm_exec_panic( const char *reason );
 
 //! Load current thread data to fast access copy fields in thread object data area
 void pvm_exec_load_fast_acc(struct data_area_4_thread *da);

@@ -548,9 +548,8 @@ pager_fix_incomplete_format()
         pager_put_to_free_list(i);
         }
 
-    // FIXME object_space_address const is wrong?
     if( 0 == superblock.object_space_address )
-        superblock.object_space_address = 0x1400000; // Win32 likes it to be here
+        superblock.object_space_address = PHANTOM_AMAP_START_VM_POOL;
 
     pager_update_superblock();
 }

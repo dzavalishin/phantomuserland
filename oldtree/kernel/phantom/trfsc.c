@@ -331,8 +331,6 @@ static errno_t sendWriteRq( trfs_queue_t *qe )
 {
     assert( qe->type == TRFS_QEL_TYPE_WRITE );
 
-    // TODO #warning decompose in more packets?
-
     // Wrong! It counts max trfs_pkt_t size, not one for write rq
     int nDataBytes = sizeof(trfs_pkt_t) + (qe->fio.nSectors * 512);
     int nPktBytes = sizeof(trfs_pkt_t) + nDataBytes;
