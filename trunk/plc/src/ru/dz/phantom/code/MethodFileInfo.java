@@ -15,8 +15,8 @@ import ru.dz.plc.util.PlcException;
 
 public class MethodFileInfo extends FileInfo {
 
-    Method m;
-    CodeGeneratorState s;
+    private Method m;
+    private CodeGeneratorState s;
 	private final FileWriter lst;
 
     public MethodFileInfo(RandomAccessFile os, FileWriter lst, Method m, CodeGeneratorState s ) {
@@ -30,10 +30,9 @@ public class MethodFileInfo extends FileInfo {
       EmptyPlcException {
       Fileops.put_string_bin( os, m.name );
       Fileops.put_int32( os, m.ordinal );
-      //Codegen c = new Codegen( os );
+
       m.get_cg().set_os(os, lst);
-      //if(m.code != null) m.code.generate_code ( c, s );
-      //else c.emit_ret(); // empty function code
+
       m.generate_code( s );
       long end = os.getFilePointer();
       m.get_cg().relocate_all(); // it will seek to the last relocation point

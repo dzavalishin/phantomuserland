@@ -165,6 +165,12 @@ public class Method
 
   }
 
+public int getOrdinal() {
+	if(ordinal < 0)
+		System.out.println("Method.getOrdinal(): ordinal < 0");
+	return ordinal; 
+	}
+
 
 };
 

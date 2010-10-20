@@ -647,7 +647,7 @@ public class Codegen extends opcode_ids {
 		list("; "+string);		
 	}
 
-	Map<Long,Integer> IpToLine = new HashMap<Long, Integer>();
+	private Map<Long,Integer> IpToLine = new HashMap<Long, Integer>();
 
 	public void recordLineNumberToIPMapping(int lineNumber) {
 		try {
@@ -661,6 +661,11 @@ public class Codegen extends opcode_ids {
 			
 		}
 		
+	}
+
+
+	public Map<Long, Integer> getIpToLine() {
+		return IpToLine;
 	}
 
 }

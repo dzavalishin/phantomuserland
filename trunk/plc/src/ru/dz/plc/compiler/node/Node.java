@@ -168,9 +168,12 @@ abstract public class Node {
 			_l.generate_code(c, s);
 			move_between_stacks(c, _l.is_on_int_stack());
 		}
-		if(context !=null)			c.emitComment("Line "+context.getLineNumber());
+		if(context != null)
+		{
+			c.emitComment("Line "+context.getLineNumber());
+			c.recordLineNumberToIPMapping(context.getLineNumber());
+		}
 		log.fine("Node "+this+" codegen");
-		c.recordLineNumberToIPMapping(context.getLineNumber());
 		generate_my_code(c,s);
 	}
 
