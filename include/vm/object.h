@@ -116,6 +116,8 @@ struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name);
 
 int pvm_object_class_is( struct pvm_object object, struct pvm_object tclass );
 
+//#define pvm_class_check(__o,__c) if(!pvm_object_class_is( __o, __c )) pvm_panic("Wrong class");
+
 /**
  *
  * Access object fields.

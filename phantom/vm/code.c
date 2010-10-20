@@ -12,6 +12,7 @@
 #include "phantom_libc.h"
 
 #include "vm/code.h"
+#include "vm/exec.h"
 #include "vm/object_flags.h"
 #include "vm/exception.h"
 
@@ -130,7 +131,6 @@ struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
 
 void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, struct pvm_object code)
 {
-    // TODO: these asserts must just raise an exception in Phantom code, nothing more. ??
     if( !(code.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
         pvm_exec_panic("exec: not a code object");
 

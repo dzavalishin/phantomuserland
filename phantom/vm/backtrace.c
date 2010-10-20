@@ -87,4 +87,40 @@ static void pvm_backtrace(void)
 }
 
 
+int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
+{
+	if(!pvm_object_class_is( tclass, pvm_get_class_class() ))
+	{
+		printf("pvm_ip_to_linenum: not a class\n");
+		return 0;
+	}
+
+	struct data_area_4_class *cda= pvm_object_da( tclass, class );
+	pvm_object_t ip2line_maps = cda->ip2line_maps;
+	//cda->method_names = method_names;
+
+	pvm_object_t map = pvm_get_ofield( ip2line_maps, method_ordinal );
+
+	struct data_area_4_binary * bin = pvm_object_da( map, binary );
+
+	int nrecords = (map.data->_da_size)/sizeof(struct vm_code_linenum);
+
+	struct vm_code_linenum *sp = bin->data;
+
+
+
+	int i;
+	for( i = 0; i < nrecords; i++)
+	{
+		// TODO bin search, array must be sorted
+		if( sp[i].ip >= ip )
+		{
+			if( i == 0 )
+				return 0;
+
+			return sp[i-1].line;
+		}
+	}
+}
+
 
