@@ -268,16 +268,28 @@ public class Codegen extends opcode_ids {
 	}
 
 	public void emitIConst_8bit(byte val) throws IOException {
-		// TODO autogenerate 0 or 1 constants?
-		put_byte(opcode_iconst_8bit);
-		put_byte(val);
+		if(val == 0)
+			put_byte(opcode_iconst_0);
+		else if(val == 1)
+			put_byte(opcode_iconst_1);
+		else
+		{
+			put_byte(opcode_iconst_8bit);
+			put_byte(val);
+		}
 		list("const "+val);
 	}
 
 	public void emitIConst_32bit(int val) throws IOException {
-		// TODO autogenerate 0 or 1 constants?
-		put_byte(opcode_iconst_32bit);
-		put_int32(val);
+		if(val == 0)
+			put_byte(opcode_iconst_0);
+		else if(val == 1)
+			put_byte(opcode_iconst_1);
+		else
+		{
+			put_byte(opcode_iconst_32bit);
+			put_int32(val);
+		}
 		list("const "+val);
 	}
 
