@@ -22,10 +22,11 @@ public class MethodLineNumbersFileInfo extends FileInfo {
 
 		Map<Long, Integer> map = cg.getIpToLine();
 		
-		// Num of entries
+		// Method ordinal
 		Fileops.put_int32( os, m.getOrdinal() );
+		// Num of entries
 		Fileops.put_int32( os, map.size() );
-		System.out.println("MethodLineNumbersFileInfo nentries = "+map.size());
+		//System.out.println("MethodLineNumbersFileInfo nentries = "+map.size());
 		
 		// Each entry
 		for( Long ip : map.keySet() )
@@ -33,7 +34,7 @@ public class MethodLineNumbersFileInfo extends FileInfo {
 			int line = map.get(ip);
 			Fileops.put_int64( os, ip );
 			Fileops.put_int32( os, line );
-			System.out.println("ip "+ip+" -> line "+line);
+			//System.out.println("ip "+ip+" -> line "+line);
 		}
 		
 	}

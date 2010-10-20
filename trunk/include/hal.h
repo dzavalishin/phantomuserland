@@ -42,7 +42,6 @@
 #define PHANTOM_AMAP_SIZE_VADDR_POOL (__MEM_PAGE*4096*4)
 
 // Virtual machine lives here
-//#define PHANTOM_AMAP_START_VM_POOL (__MEM_GB*2 + 0)
 #define PHANTOM_AMAP_START_VM_POOL (__MEM_GB*2)
 
 

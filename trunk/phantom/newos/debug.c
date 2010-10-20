@@ -199,7 +199,7 @@ static int debug_parse_line(char *buf, char **argv, int *argc, int max_args)
 
     strcpy(parse_line, buf);
 
-    hexdump(buf, strlen(buf), "", 0 );
+    //hexdump(buf, strlen(buf), "", 0 );
 
     // scan all of the whitespace out of this
     while(isspace(parse_line[pos]))
@@ -255,6 +255,7 @@ static void kernel_debugger_loop()
         debug_read_line(line_buf[cur_line], LINE_BUF_SIZE);
         debug_parse_line(line_buf[cur_line], args, &argc, MAX_ARGS);
 
+        /*
         printf("argc = %d\n", argc);
         {
             char **av = args;
@@ -264,6 +265,7 @@ static void kernel_debugger_loop()
                 printf("arg = '%s'\n", *av++);
             }
         }
+		*/
 
         if(argc <= 0)
             continue;

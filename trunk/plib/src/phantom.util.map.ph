@@ -40,9 +40,8 @@ class map
             return 0;
 
         pairs[index] = key;
-        index = index + 1;
-        pairs[index] = value;
-        index = index + 1;
+        pairs[index+1] = value;
+        index = index + 2;
 
         return 1;
     }

@@ -250,11 +250,6 @@ hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapp
 
 
 
-//void * 		hal_alloc_page() { return smemalign(hal_mem_pagesize(),hal_mem_pagesize()); }
-//void   		hal_free_page(void *page) { sfree(page,hal_mem_pagesize()); }
-
-
-
 
 
 // -----------------------------------------------------------------------
@@ -319,78 +314,6 @@ hal_dump(char *data, int len)
 
 
 
-
-
-
-#if !USE_NEW_SEMAS
-
-// -----------------------------------------------------------------------
-//
-// semaphores - used by newos code, mostly?
-//
-// -----------------------------------------------------------------------
-
-
-
-
-
-int hal_sem_init( hal_sem_t *s, const char *name )
-{
-    return hal_cond_init( &(s->c), name ) || hal_mutex_init( &(s->m), name );
-}
-
-void hal_sem_release( hal_sem_t *s )
-{
-    hal_mutex_lock( &(s->m) );
-    s->posted++;
-    hal_cond_broadcast( &(s->c) );
-    hal_mutex_unlock( &(s->m) );
-}
-
-
-int hal_sem_acquire( hal_sem_t *s )
-{
-    if( hal_mutex_lock( &(s->m) ) )
-        return -1;
-
-    s->posted--;
-    while(s->posted < 0)
-        hal_cond_wait( &(s->c), &(s->m) );
-    hal_mutex_unlock( &(s->m) );
-    return 0;
-}
-
-
-void hal_sem_destroy( hal_sem_t *s )
-{
-    hal_cond_destroy( &(s->c) );
-    hal_mutex_destroy( &(s->m) );
-}
-
-int hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout );
-
-
-// TODO ERR seems to be nonworking :(
-int hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
-{
-    assert(!(flags & ~SEM_FLAG_TIMEOUT));
-
-    if( hal_mutex_lock( &(s->m) ) )
-        return -1;
-
-    s->posted -= val;
-    while(s->posted < 0)
-    {
-        if(flags & SEM_FLAG_TIMEOUT )
-            hal_cond_timedwait( &(s->c), &(s->m), ((uSec-1)/1000)+1 );
-        else
-            hal_cond_wait( &(s->c), &(s->m) );
-    }
-    hal_mutex_unlock( &(s->m) );
-    return 0;
-}
-
-#endif
 
 
 

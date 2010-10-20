@@ -127,3 +127,14 @@ struct wtty *get_thread_ctty( struct phantom_thread *t )
 }
 
 
+
+void *get_thread_owner( struct phantom_thread *t )
+{
+    return t->owner;
+}
+
+
+int get_thread_flags( struct phantom_thread *t )
+{
+	return t->thread_flags;
+}
