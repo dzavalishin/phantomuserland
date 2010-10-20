@@ -150,10 +150,12 @@ public class MethodTable {
 
 			MethodFileInfo mf = new MethodFileInfo(os, lst, m, s);
 			mf.write();
-			//mf.reWrite();
 
 			MethodSignatureFileInfo ms = new MethodSignatureFileInfo(os, m, s);
 			ms.write();
+			
+			MethodLineNumbersFileInfo ml = new MethodLineNumbersFileInfo(os,m);
+			ml.write();
 
 			s.set_method( null );
 			lst.write("--\nmethod end\n\n");
