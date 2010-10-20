@@ -13,7 +13,7 @@
 **/
 
 #include <stdarg.h>
-//#include <stdlib.h>
+#include <threads.h>
 
 
 #include "event.h"
@@ -167,6 +167,10 @@ void phantom_activate_thread()
 }
 
 
+void hal_exit_kernel_thread()
+{
+	panic("hal_exit_kernel_thread");
+}
 
 void phantom_snapper_wait_4_threads()
 {
@@ -229,6 +233,12 @@ void phantom_wakeup_after_msec(long msec)
 {
     hal_sleep_msec(msec);
 }
+
+
+phantom_thread_t * get_current_thread() { return 0; }
+
+
+void *get_thread_owner( phantom_thread_t *t ) { return 0; }
 
 
 

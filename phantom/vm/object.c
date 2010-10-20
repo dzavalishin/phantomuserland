@@ -15,6 +15,7 @@
 #include "vm/exception.h"
 #include "vm/internal_da.h"
 #include "vm/object_flags.h"
+#include "vm/exec.h"
 
 #include <phantom_libc.h>
 
@@ -63,12 +64,12 @@ struct pvm_object  pvm_get_array_ofield(struct pvm_object_storage *o, unsigned i
        !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) ) ||
        !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )
       )
-        pvm_exec_throw( "attempt to do an array op to non-array" );
+        pvm_exec_panic( "attempt to do an array op to non-array" );
 
     struct data_area_4_array *da = (struct data_area_4_array *)&(o->da);
 
     if( slot >= da->used_slots )
-        pvm_exec_throw( "load: array index out of bounds" );
+        pvm_exec_panic( "load: array index out of bounds" );
 
     return pvm_get_ofield( da->page, slot);
 }
@@ -82,7 +83,7 @@ void pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struc
        !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) ) ||
        !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )
       )
-        pvm_exec_throw( "attempt to do an array op to non-array" );
+        pvm_exec_panic( "attempt to do an array op to non-array" );
 
     struct data_area_4_array *da = (struct data_area_4_array *)&(o->da);
 
@@ -147,7 +148,7 @@ void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_
         }
     }
 
-    pvm_exec_throw( "attempt to remove non existing element from array" );
+    pvm_exec_panic( "attempt to remove non existing element from array" );
 }
 
 
@@ -168,13 +169,13 @@ pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
         {
             return pvm_get_array_ofield( o, slot );
         }
-        pvm_exec_throw( "attempt to load from internal" );
+        pvm_exec_panic( "attempt to load from internal" );
     }
 
     if( slot >= da_po_limit(o) )
     {
         // BUG! if i am vector - grow here!
-        pvm_exec_throw( "save: slot index out of bounds" );
+        pvm_exec_panic( "save: slot index out of bounds" );
     }
 
     verify_o(da_po_ptr(o->da)[slot]);
@@ -191,13 +192,13 @@ pvm_get_ofield( struct pvm_object op, unsigned int slot )
         {
             return pvm_get_array_ofield( op.data, slot );
         }
-        pvm_exec_throw( "attempt to load from internal" );
+        pvm_exec_panic( "attempt to load from internal" );
     }
 
     if( slot >= da_po_limit(op.data) )
     {
         // BUG! if i am vector - grow here!
-        pvm_exec_throw( "load: slot index out of bounds" );
+        pvm_exec_panic( "load: slot index out of bounds" );
     }
 
     verify_o(da_po_ptr((op.data)->da)[slot]);
@@ -217,13 +218,13 @@ pvm_set_field( struct pvm_object_storage *o, unsigned int slot, struct pvm_objec
             pvm_set_array_ofield( o, slot, value );
             return;
         }
-        pvm_exec_throw( "attempt to save to internal" );
+        pvm_exec_panic( "attempt to save to internal" );
     }
 
     if( slot >= da_po_limit(o) )
     {
         // BUG! if i am vector - grow here!
-        pvm_exec_throw( "load: slot index out of bounds" );
+        pvm_exec_panic( "load: slot index out of bounds" );
     }
 
     if(da_po_ptr(o->da)[slot].data)     ref_dec_o(da_po_ptr(o->da)[slot]);  //decr old value
@@ -242,13 +243,13 @@ pvm_set_ofield( struct pvm_object op, unsigned int slot, struct pvm_object value
             pvm_set_array_ofield( op.data, slot, value );
             return;
         }
-        pvm_exec_throw( "attempt to save to internal" );
+        pvm_exec_panic( "attempt to save to internal" );
     }
 
     if( slot >= da_po_limit(op.data) )
     {
         // BUG! if i am vector - grow here!
-        pvm_exec_throw( "slot index out of bounds" );
+        pvm_exec_panic( "slot index out of bounds" );
     }
 
     if(da_po_ptr((op.data)->da)[slot].data) ref_dec_o(da_po_ptr((op.data)->da)[slot]);  //decr old value
@@ -399,6 +400,10 @@ void dumpo( int addr )
     }
 }
 
+void pvm_object_dump(struct pvm_object o )
+{
+	dumpo((int)o.data); // 64 BIT BUG
+}
 
 void pvm_check_is_thread( struct pvm_object new_thread )
 {
