@@ -30,7 +30,7 @@
 int debug_print = 0;
 
 
-
+static int vm_code_linenum_cmp(const void *, const void *);
 
 
 
@@ -205,7 +205,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
                 struct data_area_4_binary *bin= pvm_object_da( map, binary );
 
-                struct vm_code_linenum *sp = bin->data;
+                struct vm_code_linenum *sp = (void *)bin->data;
 
                 int i;
                 for( i = 0 ; i < mapsize; i++ )
@@ -214,6 +214,8 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 	sp->line = pvm_code_get_int32(&h);
                 	sp++;
                 }
+
+                qsort( bin->data, mapsize, sizeof(struct vm_code_linenum), vm_code_linenum_cmp );
 
                 pvm_set_ofield( ip2line_maps, ordinal, map );
             }
@@ -245,6 +247,15 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
     *out = new_class;
     return 0;
+}
+
+
+
+static int vm_code_linenum_cmp(const void *_a, const void *_b)
+{
+	const struct vm_code_linenum *a = _a;
+	const struct vm_code_linenum *b = _b;
+	return (a->ip == b->ip) ? 0 : ( (a->ip > b->ip) ? 1 : 0 );
 }
 
 
