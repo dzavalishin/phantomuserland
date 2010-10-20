@@ -72,12 +72,14 @@ public class Codegen extends opcode_ids {
 		if(lst == null ) return;
 		lst.write("  ");
 		lst.write(s); 
+		lst.write("\n//  @"+getIP());
 		lst.write('\n');
 	}
 	private void listlbl(String s) throws IOException 
 	{
 		if(lst == null ) return;
 		lst.write(s); 
+		lst.write("\n//  @"+getIP());
 		lst.write('\n');
 	}
 	
