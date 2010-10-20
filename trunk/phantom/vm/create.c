@@ -8,7 +8,7 @@
  * Preliminary: no
  *
  *
- **/
+**/
 
 #include <kernel/vm.h>
 
@@ -322,7 +322,7 @@ struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_obj
 	struct pvm_object * data_area = (struct pvm_object *)ret.data->da;
 
 	if(pvm_is_null( parent_class ))
-		pvm_exec_throw( "create interface: parent is null" );
+		pvm_exec_panic( "create interface: parent is null" );
 
 	struct pvm_object_storage *base_i =  ((struct data_area_4_class*)parent_class.data->da)->object_default_interface.data;
 
@@ -330,7 +330,7 @@ struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_obj
 
 	if(base_icount > n_methods)
 	{
-		//pvm_exec_throw( "create interface: child has less methods than parent" );
+		//pvm_exec_panic( "create interface: child has less methods than parent" );
 		base_icount = n_methods; // TODO: what?
 	}
 

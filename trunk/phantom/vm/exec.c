@@ -85,14 +85,6 @@ int debug_print_instr = 0;
 **/
 
 
-/* Poor man's exceptions */
-void pvm_exec_throw( const char *reason )
-{
-    pvm_memcheck();
-    // TODO: longjmp?
-    panic("pvm_exec_throw: %s", reason );
-}
-
 
 void pvm_exec_load_fast_acc(struct data_area_4_thread *da)
 {
@@ -228,7 +220,7 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
             printf("\n");
             //getchar();
 
-            pvm_exec_throw( "unwind: nowhere to return" );
+            pvm_exec_panic( "unwind: nowhere to return" );
         }
         free_call_frame( da->call_frame, da );
 
@@ -666,7 +658,7 @@ void pvm_exec(struct pvm_object current_thread)
             if( debug_print_instr ) hal_printf("o2i; ");
             {
                 struct pvm_object o = os_pop();
-                if( o.data == 0 ) pvm_exec_throw("o2i(null)");
+                if( o.data == 0 ) pvm_exec_panic("o2i(null)");
                 is_push( pvm_get_int( o ) );
                 ref_dec_o(o);
             }
@@ -774,7 +766,7 @@ void pvm_exec(struct pvm_object current_thread)
                 ref_dec_o(name);
                 // TODO: Need throw here?
                 if( pvm_is_null( cl ) ) {
-                    pvm_exec_throw("summon by name: null class");
+                    pvm_exec_panic("summon by name: null class");
                     //hal_printf("summon by name: null class");
                     //pvm_exec_do_throw(da);
                     break;
@@ -1053,7 +1045,7 @@ void pvm_exec(struct pvm_object current_thread)
             }
 
             hal_printf("Unknown op code 0x%X\n", instruction );
-            pvm_exec_throw( "thread exec: unknown opcode" ); //, instruction );
+            pvm_exec_panic( "thread exec: unknown opcode" ); //, instruction );
             //exit(33);
         }
     }
@@ -1065,12 +1057,12 @@ void pvm_exec(struct pvm_object current_thread)
 static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index )
 {
     if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
-        pvm_exec_throw( "pvm_exec_find_syscall: not a class object" );
+        pvm_exec_panic( "pvm_exec_find_syscall: not a class object" );
 
     struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
 
     // TODO fix this back
-    //if( syscall_index >= da->class_sys_table_size )                        pvm_exec_throw("find_syscall: syscall_index no out of table size" );
+    //if( syscall_index >= da->class_sys_table_size )                        pvm_exec_panic("find_syscall: syscall_index no out of table size" );
 
     syscall_func_t *tab = pvm_internal_classes[da->sys_table_id].syscalls_table;
     return tab[syscall_index];
@@ -1086,7 +1078,7 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned 
 {
 	if( o.data == 0 )
 	{
-		pvm_exec_throw( "pvm_exec_find_method: null object!" );
+		pvm_exec_panic( "pvm_exec_find_method: null object!" );
 	}
 
 	struct pvm_object_storage *iface = o.interface;
@@ -1095,19 +1087,19 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned 
     	if( o.data->_class.data == 0 )
     	{
             //dumpo(o.data);
-            pvm_exec_throw( "pvm_exec_find_method: no interface and no class!" );
+            pvm_exec_panic( "pvm_exec_find_method: no interface and no class!" );
     	}
         iface = pvm_object_da( o.data->_class, class )->object_default_interface.data;
     }
 
     if( iface == 0 )
-        pvm_exec_throw( "pvm_exec_find_method: no interface found" );
+        pvm_exec_panic( "pvm_exec_find_method: no interface found" );
 
     if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
-        pvm_exec_throw( "pvm_exec_find_method: not an interface object" );
+        pvm_exec_panic( "pvm_exec_find_method: not an interface object" );
 
     if(method_index > da_po_limit(iface))
-        pvm_exec_throw( "pvm_exec_find_method: method index is out of bounds" );
+        pvm_exec_panic( "pvm_exec_find_method: method index is out of bounds" );
 
     return da_po_ptr(iface->da)[method_index].data;
 }
@@ -1176,7 +1168,7 @@ static struct pvm_object pvm_exec_compose_object(
 
     int max = das/sizeof(struct pvm_object);
 
-    if( to_pop > max ) pvm_exec_throw("compose: cant compose so many fields");
+    if( to_pop > max ) pvm_exec_panic("compose: cant compose so many fields");
 
     int i;
     for( i = 0; i < to_pop; i++ )
@@ -1216,7 +1208,7 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
 // TODO: implement!
 struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
 {
-    //pvm_exec_throw("pvm_exec_lookup_class_by_name: not implemented");
+    //pvm_exec_panic("pvm_exec_lookup_class_by_name: not implemented");
 
     // Try internal
     struct pvm_object ret = pvm_lookup_internal_class(name);

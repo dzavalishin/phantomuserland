@@ -366,7 +366,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             if( debug_print_instr ) hal_printf("o2i; ");
             {
                 //struct pvm_object o = os_pop();
-                //if( o.data == 0 ) pvm_exec_throw("o2i(null)");
+                //if( o.data == 0 ) pvm_exec_panic("o2i(null)");
                 //is_push( pvm_get_int( o ) );
                 //ref_dec_o(o);
 
@@ -539,7 +539,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
                 ref_dec_o(name);
                 // TODO: Need throw here?
                 if( pvm_is_null( cl ) ) {
-                    pvm_exec_throw("summon by name: null class");
+                    pvm_exec_panic("summon by name: null class");
                     //hal_printf("summon by name: null class");
                     //pvm_exec_do_throw(da);
                     break;
@@ -941,7 +941,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             hal_printf("Unknown op code 0x%X\n", instruction );
 
             return ENOENT;
-            //pvm_exec_throw( "thread exec: unknown opcode" ); //, instruction );
+            //pvm_exec_panic( "thread exec: unknown opcode" ); //, instruction );
             //exit(33);
         }
     }

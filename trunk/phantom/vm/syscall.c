@@ -955,7 +955,11 @@ static int si_bootstrap_19_create_binary(struct pvm_object me, struct data_area_
     SYSCALL_RETURN( pvm_create_binary_object(nbytes, NULL) );
 }
 
+#define BACK_WIN 0
+
+#if BACK_WIN
 static drv_video_window_t *back_win = 0;
+#endif
 
 static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct data_area_4_thread *tc )
 {
@@ -967,7 +971,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
     struct pvm_object _bmp = POP_ARG;
 
-#if 1
+#if !BACK_WIN
 
     // BUG! Must store it and repaint on OS restart
     if( drv_video_bmpblt(_bmp,0,0,0) )

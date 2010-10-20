@@ -33,19 +33,19 @@ pvm_code_do_get_int( const unsigned char *addr )
     return (int)v;
 }
 
-int
+unsigned long long
 pvm_code_do_get_int64( const unsigned char *addr )
 {
     unsigned long v;
 
     v = addr[7];
-    v |= ((unsigned long)addr[6]) << 8;
-    v |= ((unsigned long)addr[5]) << 16;
-    v |= ((unsigned long)addr[4]) << 24;
-    v |= ((unsigned long)addr[3]) << 32;
-    v |= ((unsigned long)addr[2]) << 40;
-    v |= ((unsigned long)addr[1]) << 48;
-    v |= ((unsigned long)addr[0]) << 56;
+    v |= ((unsigned long long)addr[6]) << 8;
+    v |= ((unsigned long long)addr[5]) << 16;
+    v |= ((unsigned long long)addr[4]) << 24;
+    v |= ((unsigned long long)addr[3]) << 32;
+    v |= ((unsigned long long)addr[2]) << 40;
+    v |= ((unsigned long long)addr[1]) << 48;
+    v |= ((unsigned long long)addr[0]) << 56;
 
     return (long)v;
 }
@@ -57,7 +57,7 @@ throw_bounds( int ip, int max_IP, char *where )
 {
     static char errtext[200]; // BUG!!
     snprintf(errtext, 199, "%s: IP out of bounds (IP=%d, max=%d)", where, ip, max_IP );
-    pvm_exec_throw( errtext );
+    pvm_exec_panic( errtext );
 }
 
 
@@ -94,10 +94,10 @@ int pvm_code_get_int32(struct pvm_code_handler *code)
     return ret;
 }
 
-long pvm_code_get_int64(struct pvm_code_handler *code)
+unsigned long long pvm_code_get_int64(struct pvm_code_handler *code)
 {
     pvm_code_check_bounds( code, code->IP+long_size()-1, "get_int64" );
-    long ret = pvm_code_do_get_int64( code->code+code->IP );
+    unsigned long long ret = pvm_code_do_get_int64( code->code+code->IP );
     code->IP += long_size();
     return ret;
 }
@@ -132,7 +132,7 @@ void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, struct pvm_obje
 {
     // TODO: these asserts must just raise an exception in Phantom code, nothing more. ??
     if( !(code.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
-        pvm_exec_throw("exec: not a code object");
+        pvm_exec_panic("exec: not a code object");
 
     struct data_area_4_code *da = (struct data_area_4_code *)&(code.data->da);
 
