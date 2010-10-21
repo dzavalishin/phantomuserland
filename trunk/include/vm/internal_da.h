@@ -65,6 +65,9 @@ struct data_area_4_call_frame
     struct pvm_object  		this_object;
 
     struct pvm_object		prev; // where to return!
+
+    int                 	ordinal; // num of method we run
+
 };
 
 
