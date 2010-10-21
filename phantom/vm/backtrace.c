@@ -18,6 +18,11 @@
 
 static void pvm_backtrace(void);
 
+pvm_object_t pvm_get_method_name( pvm_object_t tclass, int method_ordinal );
+int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip);
+
+
+
 /* Poor man's exceptions */
 void pvm_exec_panic( const char *reason )
 {
@@ -69,14 +74,27 @@ static void pvm_backtrace(void)
 
 	while( !pvm_is_null(sframe) )
 	{
+		//if( !pvm_object_class_is(sframe, pvm_get_stack_frame_class()) ) ??!
+
 		struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
 
 		printf("pvm_backtrace frame:\n");
 		pvm_object_dump(sframe);
 		printf("pvm_backtrace frame this:\n");
-		pvm_object_dump(fda->this_object);
+		pvm_object_t thiso = fda->this_object;
+		pvm_object_dump(thiso);
 		printf("pvm_backtrace frame IP: %d\n", fda->IP);
 
+		pvm_object_t tclass = thiso.data->_class;
+		int ord = fda->ordinal;
+
+		int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
+		pvm_object_t mname = pvm_get_method_name( tclass, ord );
+
+		pvm_object_print(mname);
+		printf(":%d\n", lineno);
+
+		printf("\n\n");
 		sframe = fda->prev;
 	}
 
@@ -105,7 +123,7 @@ int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
 
 	int nrecords = (map.data->_da_size)/sizeof(struct vm_code_linenum);
 
-	struct vm_code_linenum *sp = bin->data;
+	struct vm_code_linenum *sp = (void *)bin->data;
 
 
 
@@ -121,6 +139,20 @@ int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
 			return sp[i-1].line;
 		}
 	}
+
+	return 0;
 }
 
+
+pvm_object_t pvm_get_method_name( pvm_object_t tclass, int method_ordinal )
+{
+	struct data_area_4_class *cda= pvm_object_da( tclass, class );
+	pvm_object_t mnames = cda->method_names;
+
+	if( pvm_is_null(mnames))
+		return pvm_get_null_object();
+
+	pvm_object_t name = pvm_get_ofield( mnames, method_ordinal );
+	return name;
+}
 

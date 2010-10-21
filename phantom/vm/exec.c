@@ -268,6 +268,7 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
 
 static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned int method_index, unsigned int n_param )
 {
+	cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
 
     // allocate places on stack
