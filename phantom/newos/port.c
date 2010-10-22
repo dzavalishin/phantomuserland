@@ -821,7 +821,8 @@ port_write_etc(port_id id,
     // 		slot is a thread-local variable
 
     if (res != 0) {
-        dprintf("write_port_etc: res unknown error %d\n", res);
+		if(res != ETIMEDOUT)
+        	dprintf("write_port_etc: res unknown error %d\n", res);
         return -res; // negative errno
     }
 
