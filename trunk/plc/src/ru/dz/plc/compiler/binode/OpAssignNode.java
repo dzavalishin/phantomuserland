@@ -66,7 +66,7 @@ public class OpAssignNode extends BiNode {
 				if (type == null || type.is_unknown()) type = f.getType();
 				check_assignment_types(f.getName(), type,_r.getType());
 				c.emitOsDup(); // return a copy
-				c.emitSave(f.get_ordinal());
+				c.emitSave(f.getOrdinal());
 				if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
 				return;
 			}

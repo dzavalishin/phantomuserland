@@ -83,7 +83,7 @@ public class IdentNode extends Node {
 		if( f != null )
 		{
 			//if (type == null || type.is_unknown()) type = f.get_type();
-			c.emitLoad(f.get_ordinal());
+			c.emitLoad(f.getOrdinal());
 			return;
 		}
 

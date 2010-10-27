@@ -25,7 +25,7 @@ public class FieldTable {
 		for( Iterator<PhantomField> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomField m = i.next();
-			if( m.ordinal == ord ) return true;
+			if( m.getOrdinal() == ord ) return true;
 		}
 		return false;
 	}
@@ -70,7 +70,7 @@ public class FieldTable {
 		for( Iterator<PhantomField> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomField m = i.next();
-			if( m.ordinal > max ) max = m.ordinal;
+			if( m.getOrdinal() > max ) max = m.getOrdinal();
 		}
 
 		return max+1;
