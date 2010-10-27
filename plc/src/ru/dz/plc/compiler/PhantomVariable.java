@@ -26,12 +26,6 @@ public class PhantomVariable
     this.type = type;
   }
 
-  @Deprecated
-  public PhantomType  get_type() { return type; }
-
-  @Deprecated
-  public String   get_name() { return name; }
-
   public String getName() { return name; }
   public PhantomType  getType() { return type; }
 

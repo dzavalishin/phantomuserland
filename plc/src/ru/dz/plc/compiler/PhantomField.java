@@ -11,14 +11,16 @@ package ru.dz.plc.compiler;
 
 public class PhantomField extends PhantomVariable
 {
-  int      ordinal;
+	private int      ordinal;
 
-  PhantomField( String name, PhantomType type , int n)
-  {
-    super( name, type );
-    ordinal = n;
-  }
+	PhantomField( String name, PhantomType type , int n)
+	{
+		super( name, type );
+		ordinal = n;
+	}
 
-  public int      get_ordinal() { return ordinal; }
+	public int      getOrdinal() { return ordinal; }
+
+	
 
 };
