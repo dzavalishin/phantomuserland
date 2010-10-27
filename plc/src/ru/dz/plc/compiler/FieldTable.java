@@ -1,7 +1,12 @@
 package ru.dz.plc.compiler;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
 import java.util.*;
+
+import ru.dz.phantom.code.FieldFileInfo;
 import ru.dz.plc.util.*;
 
 /**
@@ -74,6 +79,20 @@ public class FieldTable {
 		}
 
 		return max+1;
+	}
+
+	public void codegen(RandomAccessFile os, FileWriter lst,
+			CodeGeneratorState s, String version) throws PlcException 
+	{
+		for( PhantomField f : table.values())
+		{
+			FieldFileInfo info = new FieldFileInfo(os, lst, f);
+			try {
+				info.write();
+			} catch (IOException e) {
+				throw new PlcException("Writing field "+f.getName(), e.toString());
+			}
+		}
 	}
 
 }

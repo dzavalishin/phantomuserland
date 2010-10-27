@@ -277,6 +277,7 @@ public class PhantomClass {
 	{
 		CodeGeneratorState s = new CodeGeneratorState(this);
 		mt.codegen(os, lst, s, version);
+		ft.codegen(os, lst, s, version);
 	}
 
 	public void preprocess(ParseState ps) throws PlcException
