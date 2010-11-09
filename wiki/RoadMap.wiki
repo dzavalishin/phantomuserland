@@ -33,6 +33,7 @@ Not so easy, but we need it, sooner or later.
   * *IDE driver cleanup*. Existing driver is very strange. *started*
   * *Partition lookup code*. Partially implemented. *need tests*
   * *IP stack tests and userland interface*. 
+  * *ARM port*
 
 Not critical, but can be done relatively easily.
 
