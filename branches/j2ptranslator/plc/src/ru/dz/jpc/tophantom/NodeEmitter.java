@@ -21,7 +21,7 @@ public class NodeEmitter {
 	}
 
 	public Node pop()	
-	{				
+	{
 		log.finer("pop "+stack.get(0));
 		return stack.remove(0);	
 	}
@@ -53,7 +53,7 @@ public class NodeEmitter {
 	 * between flow control operators. 
 	 * @param n node to emit.
 	 */
-	public void emitLinear(Node n) 
+	private void emitLinear(Node n) 
 	{
 		if(!stack.isEmpty()) 
 		{
@@ -77,23 +77,4 @@ public class NodeEmitter {
 		out.add(sn);		
 	}
 
-    public int getCurrentStackSize() {
-        return stack.size();
-    }
-    public Node getLastOutNodeByIndex(int index) {
-        Node result = null;
-
-        if (out != null) {
-            for (int i=out.size()-1, count=0; i>=0; i--) {
-                Node node = out.get(i);
-                if (node instanceof JumpTargetNode || node instanceof JumpNode) continue;
-
-                if (index == count++) {
-                    result = node;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
 }

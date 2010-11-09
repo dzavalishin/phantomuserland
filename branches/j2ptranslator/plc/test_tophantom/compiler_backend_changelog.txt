@@ -63,3 +63,12 @@ ru.dz.jpc.tophantom.node.binode.ValLeTransNode
 ru.dz.jpc.tophantom.node.binode.ValLtTransNode
     rewrite method (calculate node type if child is .internal.object):
         public void find_out_my_type() throws PlcException;
+
+
+2010.11.09
+ru.dz.plc.compiler.binode.BiNode
+  changed method (calculate node type by left and right subnode types, JumpTargetNode has unknown type)
+    public void find_out_my_type() throws PlcException;
+      //todo hack, need to remove and refactor [
+      else if( l_type != null &&  r_type instanceof PhTypeUnknown ) type = l_type;
+      //todo ]

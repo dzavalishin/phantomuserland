@@ -43,7 +43,7 @@ class InsGen extends Opcode {
 
 		if(ins.label != 0)
 		{
-			ns.emitLinear( new JumpTargetNode(ins.label) );
+            ns.push( new JumpTargetNode(ins.label) );
 		}
 		
 		String ident = o.name.substring(0, 1) + "v" + (ins.val + o.var);
@@ -386,24 +386,8 @@ class InsGen extends Opcode {
 			d.println(assign(ins) + stack2nd(ins) +o.opr+ stacktop(ins) + ";");
 
 			{
-                Node operand2 = null;
-                Node operand1 = null;
-                if (ns.getCurrentStackSize() >= 2) {
-                    operand2 = ns.pop();
-                    operand1 = ns.pop();
-                }
-                else {
-                    if (ns.getCurrentStackSize() == 1) {
-                        operand2 = ns.pop();
-                        operand1 = ns.getLastOutNodeByIndex(0);
-                    } else {
-                        operand2 = ns.getLastOutNodeByIndex(0);
-                        operand1 = ns.getLastOutNodeByIndex(1);
-                    }
-                }
-
-//                Node operand2 = ns.pop();
-//                Node operand1 = ns.pop();
+                Node operand2 = ns.pop();
+                Node operand1 = ns.pop();
 
 				Node op = null;
 
@@ -461,32 +445,24 @@ class InsGen extends Opcode {
 			gengoto(d, m, ins, ins.val);
 
             {
-                Node p1 = null;
-                if (ns.getCurrentStackSize() >= 1) {
-                    p1 = ns.pop();
-                }
-                else {
-                    p1 = ns.getLastOutNodeByIndex(0);
-                }
-                
-//                Node p1 = ns.pop();
+                Node p1 = ns.pop();
                 Node p2 = (o.name.equals("ifnonnull") || o.name.equals("ifnull")) ? new NullNode() : new IntConstNode(0);
 
 				String cmpop = o.opr.trim();
 
 				// Reverse op! We use JZ, not JNZ!
-				if(cmpop.equals("<="))      ns.emitLinear(new ValGtTransNode(p1,p2));
-				else if(cmpop.equals("<"))  ns.emitLinear(new ValGeTransNode(p1,p2));
-				else if(cmpop.equals(">=")) ns.emitLinear(new ValLtTransNode(p1,p2));
-				else if(cmpop.equals(">"))  ns.emitLinear(new ValLeTransNode(p1,p2));
-                else if(cmpop.equals("==")) ns.emitLinear(new ValNeqTransNode(p1,p2));
-                else if(cmpop.equals("!=")) ns.emitLinear(new ValEqTransNode(p1,p2));
+				if(cmpop.equals("<="))      ns.push(new ValGtTransNode(p1,p2));
+				else if(cmpop.equals("<"))  ns.push(new ValGeTransNode(p1,p2));
+				else if(cmpop.equals(">=")) ns.push(new ValLtTransNode(p1,p2));
+				else if(cmpop.equals(">"))  ns.push(new ValLeTransNode(p1,p2));
+                else if(cmpop.equals("==")) ns.push(new ValNeqTransNode(p1,p2));
+                else if(cmpop.equals("!=")) ns.push(new ValEqTransNode(p1,p2));
 				else
 				{
 					System.out.print("Unknown if '"+cmpop+"' ");
 					break;
 				}
-				ns.emitLinear(new JzNode(target(m, ins.val)));
+				ns.push(new JzNode(target(m, ins.val)));
 
 //                if (o.name.equals("ifle")) {
 //                    String labelNo = c.getLabel();
@@ -507,23 +483,8 @@ class InsGen extends Opcode {
 			{
 				//Node go = new JumpNode(target(m, ins.val));
 
-                Node p2 = null;
-                Node p1 = null;
-                if (ns.getCurrentStackSize() >= 2) {
-                    p2 = ns.pop();
-                    p1 = ns.pop();
-                }
-                else {
-                    if (ns.getCurrentStackSize() == 1) {
-                        p2 = ns.pop();
-                        p1 = ns.getLastOutNodeByIndex(0);
-                    } else {
-                        p2 = ns.getLastOutNodeByIndex(0);
-                        p1 = ns.getLastOutNodeByIndex(1);
-                    }
-                }
-//                Node p2 = ns.pop();
-//                Node p1 = ns.pop();
+                Node p2 = ns.pop();
+                Node p1 = ns.pop();
 
 //				Node p1 = ns.pop();
 //				Node p2 = ns.pop();
@@ -531,18 +492,18 @@ class InsGen extends Opcode {
 				String cmpop = o.opr.trim();
 
 				// Reverse op! We use JZ, not JNZ!
-				if(cmpop.equals("<="))		ns.emitLinear(new ValGtTransNode(p1,p2));
-				else if(cmpop.equals("<"))		ns.emitLinear(new ValGeTransNode(p1,p2));
-				else if(cmpop.equals(">="))		ns.emitLinear(new ValLtTransNode(p1,p2));
-				else if(cmpop.equals(">"))		ns.emitLinear(new ValLeTransNode(p1,p2));
-                else if(cmpop.equals("=="))		ns.emitLinear(new ValNeqTransNode(p1,p2));
-                else if(cmpop.equals("!="))		ns.emitLinear(new ValEqTransNode(p1,p2));
+				if(cmpop.equals("<="))		ns.push(new ValGtTransNode(p1,p2));
+				else if(cmpop.equals("<"))		ns.push(new ValGeTransNode(p1,p2));
+				else if(cmpop.equals(">="))		ns.push(new ValLtTransNode(p1,p2));
+				else if(cmpop.equals(">"))		ns.push(new ValLeTransNode(p1,p2));
+                else if(cmpop.equals("=="))		ns.push(new ValNeqTransNode(p1,p2));
+                else if(cmpop.equals("!="))		ns.push(new ValEqTransNode(p1,p2));
 				else
 				{
 					System.out.print("Unknown if '"+cmpop+"' ");
 					break;
 				}
-				ns.emitLinear(new JzNode(target(m, ins.val)));
+                ns.push(new JzNode(target(m, ins.val)));
 
 			}
 			return;
@@ -574,7 +535,7 @@ class InsGen extends Opcode {
 			d.print("\t");
 			gengoto(d, m, ins, ins.val);
 			
-			ns.emitLinear(new JumpNode(target(m, ins.val)));
+			ns.push(new JumpNode(target(m, ins.val)));
 			
 			return;
 

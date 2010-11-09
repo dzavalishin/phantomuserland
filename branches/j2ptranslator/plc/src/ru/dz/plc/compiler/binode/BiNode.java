@@ -57,6 +57,9 @@ abstract public class BiNode extends Node {
     if( _r != null ) r_type = _r.getType();
 
     if( l_type != null && l_type.equals( r_type ) ) type = l_type;
+    //todo hack, need to remove and refactor [
+    else if( l_type != null &&  r_type instanceof PhTypeUnknown ) type = l_type;
+    //todo ]
     else type = new PhTypeUnknown();
   }
 
