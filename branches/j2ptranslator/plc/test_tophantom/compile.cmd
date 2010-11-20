@@ -9,4 +9,6 @@ javac -cp . obj_test.java
 
 javac compare.java
 javac loop.java
+javac logic.java
+
 

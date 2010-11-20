@@ -22,6 +22,7 @@ import .translation.java.test.obj_test;
 import .translation.java.test.b;
 import .translation.java.test.compare;
 import .translation.java.test.loop;
+import .translation.java.test.logic;
 
 attribute const * ->!;
 
@@ -55,6 +56,8 @@ class translation_regression_tests
         print("\n\nRun compare test\n");
         run_compare(new .translation.java.test.compare());
 
+        print("\n\nRun logic test\n");
+        run_logic(new .translation.java.test.logic());
 
         print("\n\nRun loop\n");
         run_loop(new .translation.java.test.loop());
@@ -188,10 +191,10 @@ class translation_regression_tests
         log_str(c_obj.iflt(10), "iflt: ");
         log_str(c_obj.iflt(0), "iflt: ");
 
-        log_str(c_obj.ifge(2-3), "ifle: ");
+        log_str(c_obj.ifge(2-3), "ifge: ");
 
-        log_str(c_obj.ifgt(2-3), "iflt: ");
-        log_str(c_obj.ifgt(0), "iflt: ");
+        log_str(c_obj.ifgt(2-3), "ifgt: ");
+        log_str(c_obj.ifgt(0), "ifgt: ");
 
         log_str(c_obj.ifeq(1), "ifeq: ");
         log_str(c_obj.ifne(0), "ifne: ");
@@ -229,35 +232,13 @@ class translation_regression_tests
         print("\n    ifnull(test): failure");
 
 
+        log_str(c_obj.if_acmpeq("test"), "if_acmpeq(not null): ");
+        log_str(c_obj.if_acmpne("test"), "if_acmpne(not null): ");
 
-        print("\n  logic");
-        log_str(c_obj.logic_and_and(10), "logic_and_and(10): ");
-        log_str(c_obj.logic_and_and2(10), "logic_and_and2(10): ");
-        log_str(c_obj.logic_and_and_n(1), "logic_and_and_n(1): ");
-        log_str(c_obj.logic_and_and_n(2), "logic_and_and_n(2): ");
-        log_str(c_obj.logic_and_and2_n(1), "logic_and_and2_n(1): ");
-        log_str(c_obj.logic_and_and2_n(2), "logic_and_and2_n(2): ");
-        log_str(c_obj.logic_and_and2_n(3), "logic_and_and2_n(3): ");
-        log_str(c_obj.logic_and_and_zero_n(1), "logic_and_and_zero_n(1): ");
-//        log_str(c_obj.logic_and_and_zero_n(2), "logic_and_and_zero_n(2): ");
-
-        log_str(c_obj.logic_or_or(2), "logic_or_or(2): ");
-        log_str(c_obj.logic_or_or2(2), "logic_or_or2(2): ");
-        log_str(c_obj.logic_or_or_n(1), "logic_or_or_n(1): ");
-        log_str(c_obj.logic_or_or2_n(1), "logic_or_or2_n(1): ");
-        log_str(c_obj.logic_or_or_zero_n(3), "logic_or_or_zero_n(3): ");
-//        log_str(c_obj.logic_or_or_zero_n(2), "logic_or_or_zero_n(2): ");
+        log_str(c_obj.if_acmpeq(null), "if_acmpeq(null): ");
+        log_str(c_obj.if_acmpne(null), "if_acmpne(null): ");
 
 
-        log_str(c_obj.logic_and(5), "logic_and(5): ");
-        log_str(c_obj.logic_and_n(1), "logic_and_n(1): ");
-        log_str(c_obj.logic_or(2), "logic_or(2): ");
-        log_str(c_obj.logic_or_n(1), "logic_or_n(1): ");
-
-
-
-        log_str(c_obj.logic_not(1), "logic_not(1): ");
-        log_str(c_obj.logic_not_n(5), "logic_not_n(5): ");
     }
 
 
@@ -266,5 +247,35 @@ class translation_regression_tests
     void run_loop(var l_obj : .translation.java.test.loop) {
 
         log_str(l_obj.loop_for(), "loop_for(): ");
+    }
+
+    void run_logic(var l_obj : .translation.java.test.logic) {
+        log_str(l_obj.logic_and_and(10), "logic_and_and(10): ");
+        log_str(l_obj.logic_and_and2(10), "logic_and_and2(10): ");
+        log_str(l_obj.logic_and_and_n(1), "logic_and_and_n(1): ");
+        log_str(l_obj.logic_and_and_n(2), "logic_and_and_n(2): ");
+        log_str(l_obj.logic_and_and2_n(1), "logic_and_and2_n(1): ");
+        log_str(l_obj.logic_and_and2_n(2), "logic_and_and2_n(2): ");
+        log_str(l_obj.logic_and_and2_n(3), "logic_and_and2_n(3): ");
+        log_str(l_obj.logic_and_and_zero_n(1), "logic_and_and_zero_n(1): ");
+//        log_str(l_obj.logic_and_and_zero_n(2), "logic_and_and_zero_n(2): ");
+
+        log_str(l_obj.logic_or_or(2), "logic_or_or(2): ");
+        log_str(l_obj.logic_or_or2(2), "logic_or_or2(2): ");
+        log_str(l_obj.logic_or_or_n(1), "logic_or_or_n(1): ");
+        log_str(l_obj.logic_or_or2_n(1), "logic_or_or2_n(1): ");
+        log_str(l_obj.logic_or_or_zero_n(3), "logic_or_or_zero_n(3): ");
+//        log_str(l_obj.logic_or_or_zero_n(2), "logic_or_or_zero_n(2): ");
+
+
+        log_str(l_obj.logic_and(5), "logic_and(5): ");
+        log_str(l_obj.logic_and_n(1), "logic_and_n(1): ");
+        log_str(l_obj.logic_or(2), "logic_or(2): ");
+        log_str(l_obj.logic_or_n(1), "logic_or_n(1): ");
+
+
+
+        log_str(l_obj.logic_not(1), "logic_not(1): ");
+        log_str(l_obj.logic_not_n(5), "logic_not_n(5): ");
     }
 };

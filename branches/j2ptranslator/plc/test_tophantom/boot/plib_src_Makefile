@@ -1,0 +1,41 @@
+all: classes
+
+#PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
+PLC=C:/bin/phantomuserland/trunk/build/bin/plc.cmd
+
+
+# read stub.object.ph to understand
+roots::
+	$(PLC) stub.object.ph
+	$(PLC) stub.class.ph
+	$(PLC) internal.string.ph
+	$(PLC) internal.int.ph
+	$(PLC) internal.class.ph
+	$(PLC) internal.object.ph
+	$(PLC) internal.string.ph
+	$(PLC) internal.int.ph
+	$(PLC) internal.class.ph
+
+../bin/internal.object.pc: internal.object.ph
+	make roots
+
+#../bin/internal.int.pc: roots
+#../bin/internal.string.pc: roots
+
+classes: \
+     ../bin/internal.object.pc ../bin/internal.int.pc ../bin/internal.string.pc \
+     ../bin/internal.binary.pc ../bin/internal.class.pc \
+     ../bin/internal.io.tty.pc \
+     ../bin/internal.bitmap.pc ../bin/phantom.user.pc ../bin/phantom.util.map.pc \
+     ../bin/ru.dz.phantom.backgrounds.pc ../bin/phantom.os.time.pc \
+     ../bin/internal.world.pc ../bin/phantom.osimpl.pc ../bin/phantom.os.pc \
+     ../bin/phantom.environment.pc \
+     ../bin/internal.thread.pc \
+#     ../bin/
+
+
+
+#PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
+
+../bin/%.pc: %.ph
+	$(PLC) $<
