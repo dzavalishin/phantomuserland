@@ -1,7 +1,7 @@
 rmdir /S /Q translation
 
 mkdir tmp
-cp ./*.java ./tmp
+copy .\*.java .\tmp
 rem cp ./*.cmd ./tmp
 rem cp ./*.pc ./tmp
 del a.*
@@ -10,8 +10,9 @@ del compare.*
 del field.*
 del loop.*
 del logic.*
+del array.*
 del obj_test.*
 del translation.*.*
 del translation_*.*
-cp ./tmp/*.java .
+copy .\tmp\*.java .
 rmdir /S /Q tmp

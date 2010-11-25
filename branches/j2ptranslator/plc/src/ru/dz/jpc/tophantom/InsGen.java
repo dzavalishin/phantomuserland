@@ -190,6 +190,7 @@ class InsGen extends Opcode {
 				PhantomType type = new PhantomType(pc);
 
 				ns.push(new NewNode(type,null,null));
+
 			}
 			return;
 
@@ -221,7 +222,14 @@ class InsGen extends Opcode {
 			}
 			d.println(assign(ins) +
 					"anewarray(&cl_" + s + "," + stacktop(ins) + ");");
-			break;
+//			break;
+            {
+                ensureAutoVariable(ps, ident);
+                PhantomType type = getPhantomType(s);
+                ns.pop(); // remove array size
+                ns.push(new NewNode(type,null,null));
+            }
+            return;
 
 		case ANEWA:			// anewarray
 			c = (ClassRef)ins.con.value;			// result class
@@ -236,8 +244,15 @@ class InsGen extends Opcode {
 						Names.classref(s.substring(n)) + "," +
 						(n + 1) + ",1," + stacktop(ins) + ");");
 			}
-			break;
+//			break;
 
+            {
+                ensureAutoVariable(ps, ident);
+                PhantomType type = getPhantomType(c.name);
+                ns.pop(); // remove array size
+                ns.push(new NewNode(type,null,null));
+            }
+            return;
 		case MNEWA:			// multianewarray
 			c = (ClassRef)ins.con.value;		// result class
 			s = c.name;
@@ -266,7 +281,21 @@ class InsGen extends Opcode {
 					stack2nd(ins) + "," + stacktop(ins) + ");");
 			d.println(assign(ins) + "((struct " + s + "array*)" +
 					stack2nd(ins) + ")->data[" + stacktop(ins) + "];");
-			break;
+//			break;
+
+            {
+//                ensureAutoVariable(ps, ident);
+                Node arrayIndex = ns.pop();
+                IdentTransNode identVar = (IdentTransNode)ns.pop();
+
+                PhantomType arrayType = getArrayType(o.name);
+                identVar.setType(arrayType);
+                updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
+                
+                OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
+                ns.push(array);
+            }
+            return;
 
 		case ARRAYSTORE:	       	// iastore, fastore, aastore,...
 			checkref(d, ins, -3);	
@@ -283,8 +312,23 @@ class InsGen extends Opcode {
 			}
 			d.println("\t((struct " + s + "array*)" + stackvar(ins,-3) +
 					")->data[" + stack2nd(ins) + "] = " + stacktop(ins) + ";");
-			break;
+//			break;
 
+            {
+//                ensureAutoVariable(ps, ident);
+                Node value = ns.pop();
+                Node arrayIndex = ns.pop();
+                IdentTransNode identVar = (IdentTransNode)ns.pop();
+
+                PhantomType arrayType = getArrayType(o.name);
+                identVar.setType(arrayType);
+                updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
+
+                OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
+                OpAssignNode assign = new OpAssignTransNode(array, value);
+                ns.push(assign);
+            }
+            return;
 		case DUP:			// dup
 			d.println(assign(ins) + stacktop(ins) + ";");
 
@@ -740,8 +784,24 @@ class InsGen extends Opcode {
 
 
 	private static void ensureAutoVariable(ParseState ps, String ident) throws PlcException {
-		if(ps.get_method().svars.get_var(ident) == null)
-			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false,null))));
+		if(ps.get_method().svars.get_var(ident) == null) {
+//			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false,null))));
+            ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhTypeObject()));
+        }
+    }
+//    private static void setTypeStackVariable(ParseState ps, String ident, PhantomType type) throws PlcException {
+//        if (type instanceof PhTypeInt && ps.get_method().isvars.get_var(ident) == null) {
+//            ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, type));
+//        }
+//        else if (ps.get_method().svars.get_var(ident) == null){
+//            ps.get_method().svars.add_stack_var(new PhantomVariable(ident, type));
+//        }
+//    }
+    private static void updateArrayTypeStackVariable(ParseState ps, String ident, PhantomType type) throws PlcException {
+        PhantomStackVar stackVar = ps.get_method().svars.get_var(ident);
+        if (stackVar != null){
+            stackVar.setType(type);
+        }
     }
 
 //    private static void setTypeAutoVariable(ParseState ps, String type) throws PlcException {
@@ -866,6 +926,30 @@ class InsGen extends Opcode {
     }
 
 
+    public static PhantomType getArrayType(String operationName) throws PlcException {
+        switch (operationName.charAt(0)) {
+            case 'i':
+                return new PhantomType(ClassMap.get_map().get(".internal.int",false, null), true);
+            case 'a':
+                return new PhantomType(ClassMap.get_map().get(".internal.object",false, null), true);
+            case 'b': // byte or boolean
+            case 'c': // char
+            case 'd': // double
+            case 'f': // float
+            case 'l': // long
+            case 's': // short
+            default:
+                System.out.println("unknown array type "+operationName);
+                break;
+        }
+        return null;
+    }
+
+    public static PhantomType getPhantomType(String javaType) throws PlcException {
+        if ("java.lang.String".equals(javaType)) return new PhTypeString();
+        else if ("int".equals(javaType)) return new PhTypeInt();
+        else return new PhTypeObject();
+    }
 
 	//  ancestor(cl, h) -- is the hashed classname h our class or a superclass? 
 

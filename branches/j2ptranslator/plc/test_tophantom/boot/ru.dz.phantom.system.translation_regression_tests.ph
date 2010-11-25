@@ -23,6 +23,7 @@ import .translation.java.test.b;
 import .translation.java.test.compare;
 import .translation.java.test.loop;
 import .translation.java.test.logic;
+import .translation.java.test.array;
 
 attribute const * ->!;
 
@@ -62,6 +63,8 @@ class translation_regression_tests
         print("\n\nRun loop\n");
         run_loop(new .translation.java.test.loop());
 
+        print("\n\nRun array\n");
+        run_array(new .translation.java.test.array());
 
         print("\n\n");
     }
@@ -278,4 +281,10 @@ class translation_regression_tests
         log_str(l_obj.logic_not(1), "logic_not(1): ");
         log_str(l_obj.logic_not_n(5), "logic_not_n(5): ");
     }
+
+    void run_array(var a_obj : .translation.java.test.array) {
+        log_str(a_obj.array_int(), "array_int(): ");
+        log_str(a_obj.array_string(), "array_string(): ");
+    }
+
 };

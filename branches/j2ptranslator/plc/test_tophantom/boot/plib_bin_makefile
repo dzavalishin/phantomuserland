@@ -23,7 +23,7 @@ ru.dz.windows.root.pc ru.dz.phantom.backgrounds.pc \
 phantom.osimpl.pc phantom.os.pc phantom.os.time.pc \
 translation.phantom.test.a.pc translation.phantom.test.field.pc translation.phantom.test.obj_test.pc \
 translation.java.test.b.pc translation.java.test.a.pc translation.java.test.field.pc translation.java.test.obj_test.pc translation.java.test.compare.pc \
-translation.java.test.loop.pc translation.java.test.logic.pc \
+translation.java.test.loop.pc translation.java.test.logic.pc translation.java.test.array.pc \
 ru.dz.phantom.system.translation_regression_tests.pc
 #translation.run_test.pc translation.a.pc java.translation.b.pc java.translation.test.pc
 #ru.dz.phantom.tetris.playingfield.pc ru.dz.phantom.tetris.figure.pc ru.dz.phantom.tetris.imagesmanager.pc \

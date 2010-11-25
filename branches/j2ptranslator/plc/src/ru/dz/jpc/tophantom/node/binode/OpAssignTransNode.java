@@ -69,36 +69,36 @@ public class OpAssignTransNode extends OpAssignNode {
 				if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
 			}
 		}
-//		else if( _l.getClass() == OpSubscriptNode.class )
-//		{
-//			// this is assignment to array element
-//			OpSubscriptNode dest = (OpSubscriptNode)_l;
-//
-//			Node atom = dest.getLeft();
-//			Node subscr = dest._r;
-//
-//			// array object to assign to
-//			atom.generate_code(c,s);
-//			move_between_stacks(c, atom.is_on_int_stack());
-//
-//			// put value to assign
-//			if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
-//			else System.out.println("OpAssignNode.generate_my_code() _r is null!");
-//
-//			// put subscript
-//			subscr.generate_code(c,s);
-//			move_between_stacks(c, subscr.is_on_int_stack());
-//
-//			c.emitCall(11,2); // Method number 11, 2 parameters
-//			// NB! Must return copy of assigned stuff! NB! Must increment refcount!
-//			// (currently does, make sure it will)
-//			if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
-//
-//			PhantomType destType = new PhantomType( atom.getType().get_class() );
-//
-//			//check_assignment_types("container element", type, _r.getType());
-//			check_assignment_types("container element", destType, _r.getType());
-//		}
+		else if( _l instanceof OpSubscriptNode )
+		{
+			// this is assignment to array element
+			OpSubscriptNode dest = (OpSubscriptNode)_l;
+
+			Node atom = dest.getLeft();
+			Node subscr = dest.getRight();
+
+			// array object to assign to
+			atom.generate_code(c,s);
+			move_between_stacks(c, atom.is_on_int_stack());
+
+			// put value to assign
+			if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
+			else System.out.println("OpAssignNode.generate_my_code() _r is null!");
+
+			// put subscript
+			subscr.generate_code(c,s);
+			move_between_stacks(c, subscr.is_on_int_stack());
+
+			c.emitCall(11,2); // Method number 11, 2 parameters
+			// NB! Must return copy of assigned stuff! NB! Must increment refcount!
+			// (currently does, make sure it will)
+			if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
+
+			PhantomType destType = new PhantomType( atom.getType().get_class() );
+
+			//check_assignment_types("container element", type, _r.getType());
+			check_assignment_types("container element", destType, _r.getType());
+		}
 		else
 			throw new PlcException("= Node", "unknown left Node", _l.toString() );
 
