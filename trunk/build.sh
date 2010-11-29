@@ -5,7 +5,4 @@
 export PHANTOM_HOME="`pwd`"
 [ -L phantom/kernel ] || ln -s ../oldtree/kernel/phantom phantom/kernel
 make -C phantom "$@"
-make -C phantom/dev "$@"
-make -C oldtree/kernel/phantom/i386 "$@"
-make -C oldtree/kernel/phantom/threads "$@"
 make -C oldtree/kernel/phantom "$@"
