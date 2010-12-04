@@ -10,7 +10,7 @@ INCDIRS += $(realpath $(PHANTOM_HOME))/include
 # hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare
 
-PHANTOM_CFLAGS += $(WARN) -m32 -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc -std=gnu89 -DKERNEL
+PHANTOM_CFLAGS += $(WARN) -m32 -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -fno-stack-protector -nostdinc -std=gnu89 -DKERNEL
 PHANTOM_ASFLAGS += $(PHANTOM_CFLAGS) -DASSEMBLER -D__ASSEMBLY__ -DKERNEL
 
 vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)

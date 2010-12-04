@@ -36,8 +36,6 @@ specbuf.o: zgl.h zfeatures.h
 glx.o: zgl.h zfeatures.h
 nglx.o: zgl.h zfeatures.h
 zline.o: zgl.h zfeatures.h zline.h
-
-ztriangle.o: ztriangle.c ztriangle.h zgl.h zfeatures.h
-	$(CC) $(CFLAGS) -Wno-uninitialized $(INCLUDES) -c $*.c
+ztriangle.o: zgl.h zfeatures.h ztriangle.h
 
 -include *.d
