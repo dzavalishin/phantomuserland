@@ -1,0 +1,13 @@
+BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
+
+TARGET  = libTinyGL.a
+
+SRCDIRS += $(BUILD_ROOT)/gl
+
+INCDIRS += $(BUILD_ROOT)/gl
+
+PHANTOM_CFLAGS += -DHAVE_CONFIG_H -DOSKIT_X86 -DOSKIT_X86_PC -DINDIRECT_OSENV
+
+include $(BUILD_ROOT)/makerules-lib
+
+include $(BUILD_ROOT)/gl/makerules
