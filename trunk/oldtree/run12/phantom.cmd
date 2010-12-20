@@ -4,8 +4,9 @@ rem SOUND=-soundhw sb16
 rem SET USB=-usb -usbdevice mouse
 rem SET USB=-usb 
 
-rem SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
-SET VIO=-drive file=vio.img,if=virtio,format=raw
+SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
+rem SET VIO=-drive file=vio.img,if=virtio,format=raw
+rem SET VIO=-net nic,model=virtio
 
 rem SET SCSI=-drive file=scsi.img,if=scsi,unit=0
 

@@ -119,7 +119,9 @@ ENTRY(phantom_thread_fp_init)
     ret
 
     */
-#if 0
+
+#if FXSAVE
+//#if 1
 
 /* void i386_fsave(void *fpu_state); * /
 FUNCTION(i386_fsave):

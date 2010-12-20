@@ -66,13 +66,6 @@ void phantom_start_boot_modules(void);
 struct multiboot_module *phantom_multiboot_find(const char *string);
 
 
-// to softirq
-
-#define SOFT_IRQ_THREADS        31
-
-
-
-
 
 errno_t load_elf( void *_elf, size_t elf_size, const char *name );
 

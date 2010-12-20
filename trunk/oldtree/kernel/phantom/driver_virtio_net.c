@@ -9,14 +9,14 @@
  *
 **/
 
-#include <config.h>
+#include <kernel/config.h>
 
 #if HAVE_NET
 
 
 #define DEBUG_MSG_PREFIX "VirtIo.Net"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -30,6 +30,7 @@
 
 #include "driver_map.h"
 #include "device.h"
+#include <x86/phantom_page.h>
 
 #define DEBUG 0
 
@@ -41,6 +42,7 @@
 
 
 int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len);
+static void provide_buffers(virtio_device_t *vd);
 
 
 
@@ -131,12 +133,15 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK);
     SHOW_INFO( 0, "Status is: 0x%X\n", virtio_get_status( &vdev ) );
 
+    provide_buffers(&vdev);
+
 #if 0
     SHOW_FLOW0( 5, "Write to net" );
     static char buf[1500] = "Hello world";
 
     driver_virtio_net_write( &vdev, buf, sizeof(buf) );
 #endif
+
     return dev;
 }
 
@@ -144,7 +149,13 @@ int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len)
 {
     struct vring_desc wr[2];
 
-    struct virtio_net_hdr *tx_virtio_hdr = (void *)calloc(1, sizeof(struct virtio_net_hdr));
+    // NB - crashes in this case!
+    //struct virtio_net_hdr *tx_virtio_hdr = (void *)calloc(1, sizeof(struct virtio_net_hdr));
+
+    struct virtio_net_hdr *tx_virtio_hdr;
+    physaddr_t pa;
+
+    hal_pv_alloc( &pa, (void **)&tx_virtio_hdr, sizeof(struct virtio_net_hdr) );
 
     tx_virtio_hdr->flags = 0;
     tx_virtio_hdr->csum_offset = 0;
@@ -153,7 +164,8 @@ int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len)
     tx_virtio_hdr->gso_size = 0;
     tx_virtio_hdr->hdr_len = 0;
 
-    wr[0].addr = kvtophys(tx_virtio_hdr);
+    //wr[0].addr = kvtophys(tx_virtio_hdr);
+    wr[0].addr = pa;
     wr[0].len  = sizeof(*tx_virtio_hdr);
     wr[0].flags = 0;
 
@@ -166,6 +178,30 @@ int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len)
 
     return 0;
 }
+
+static void provide_buffers(virtio_device_t *vd)
+{
+	struct vring_desc rd[2];
+
+	physaddr_t	pa;
+	assert( 0 == hal_alloc_phys_page(&pa));
+
+	SHOW_FLOW( 9, "pa = %p", pa );
+
+    rd[0].addr = pa;
+    rd[0].len  = sizeof(struct virtio_net_hdr);
+    rd[0].flags = 0;
+
+    rd[1].addr = pa + sizeof(struct virtio_net_hdr);
+    rd[1].len  = PAGE_SIZE - sizeof(struct virtio_net_hdr);
+    rd[1].flags = VRING_DESC_F_WRITE;
+
+    virtio_attach_buffers_list( vd, 1, 2, rd );
+
+	virtio_kick( vd, 0);
+
+}
+
 
 
 

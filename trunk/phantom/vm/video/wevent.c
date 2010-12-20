@@ -48,7 +48,7 @@ static void defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e 
     if( t == 0 )
     {
         //SHOW_ERROR0( 1, "Key event for unowned window" );
-        printf( "Key event for unowned window" );
+        //printf( "Key event for unowned window" );
         return;
     }
 
@@ -76,6 +76,7 @@ static void defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e 
 
 static void defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
+	printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
     switch(e->w.info)
     {
     case UI_EVENT_WIN_GOT_FOCUS:
@@ -108,13 +109,8 @@ static void defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e 
 
 void defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-	/*
-    struct ui_event e;
-    int got = drv_video_window_get_event( w, &e, 0 );
+	printf("defaultWindowEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
 
-    if(!got)
-        return;
-	*/
     switch(e->type)
     {
     case UI_EVENT_TYPE_MOUSE: 	defaultMouseEventProcessor(w, e); break;

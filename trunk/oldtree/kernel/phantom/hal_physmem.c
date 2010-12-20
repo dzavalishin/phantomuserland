@@ -17,7 +17,7 @@
 #define debug_level_info 0
 
 
-#include "config.h"
+#include <kernel/config.h>
 #include "hal_private.h"
 #include <i386/proc_reg.h>
 #include <x86/phantom_page.h>

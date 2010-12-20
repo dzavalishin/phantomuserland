@@ -17,7 +17,7 @@
 #define debug_level_info 10
 
 
-#include "config.h"
+#include <kernel/config.h>
 
 #include <x86/phantom_page.h>
 #include <i386/proc_reg.h>

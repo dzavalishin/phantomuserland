@@ -26,6 +26,7 @@ struct cpu_state_save
 
     // exactly 4 or 8 ints above to guarantee 16-byte alignment
 
+	// NB! Must be aligned at 16 byte boundary!
     u_int8_t            fxstate[512];
 };
 

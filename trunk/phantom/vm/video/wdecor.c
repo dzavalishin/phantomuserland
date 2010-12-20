@@ -145,6 +145,7 @@ void win_make_decorations(drv_video_window_t *w)
 #if 1
     int title_size = 18;
 
+    int zless = (w->z == 0) ? 0 : (w->z - 1);
 
     drv_video_window_t *w3 =
         private_drv_video_window_create(
@@ -155,7 +156,7 @@ void win_make_decorations(drv_video_window_t *w)
     w3->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
 
     w3->x = w->x-bordr_size; w3->y = w->y+w->ysize; //+bordr_size;
-    w3->z = w->z;
+    w3->z = zless;
 
     w3->bg = (w->state & WSTATE_WIN_FOCUSED) ? title_back_color_focus : title_back_color_nofocus;
 
@@ -184,7 +185,7 @@ void win_make_decorations(drv_video_window_t *w)
     //hal_spin_unlock( &allw_lock );
 
     w2->x = w->x-bordr_size; w2->y = w->y-bordr_size;
-    w2->z = w->z;
+    w2->z = zless;
 
     w2->bg = w->bg;
 

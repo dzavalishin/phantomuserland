@@ -8,7 +8,7 @@
  *
 **/
 
-#include <config.h>
+#include <kernel/config.h>
 
 #include <sys/syslog.h>
 #include <stdarg.h>

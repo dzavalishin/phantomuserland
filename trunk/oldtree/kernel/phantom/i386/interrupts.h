@@ -37,9 +37,6 @@ void (*soft_irq_handler)(struct trap_state *);
 
 void hal_softirq_dispatcher(struct trap_state *ts);
 
-void hal_request_softirq( int sirq );
-void hal_set_softirq_handler( int sirq, void (*func)(void *), void *_arg );
-
 // used in apic
 void call_irq_handler(struct trap_state *s, unsigned irq);
 

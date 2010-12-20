@@ -27,6 +27,8 @@ queue_head_t     	allwindows = { &allwindows, &allwindows };
 //static
 drv_video_window_t *	focused_window = 0;
 
+//char wild_ptr_catch[2048];
+
 //static
 hal_spinlock_t  		allw_lock;
 
@@ -82,18 +84,7 @@ drv_video_window_t *private_drv_video_window_create(int xsize, int ysize)
     if(w == 0)
         return 0;
 
-    //w->xsize = xsize;
-    //w->ysize = ysize;
-    //w->z = 0xFE; // quite atop
-
-    //w->li = w->ti = w->ri = w->bi = 0;
-
-    //queue_init(&(w->events));
-    //w->events_count = 0;
-    //w->stall = 0;
-
     common_window_init( w, xsize, ysize );
-
     return w;
 }
 
@@ -124,13 +115,7 @@ drv_video_window_init( drv_video_window_t *w,
 {
     common_window_init( w, xsize, ysize );
 
-    //w->xsize = xsize;
-    //w->ysize = ysize;
-
-    //w->li = w->ti = w->ri = w->bi = 0;
-
     w->flags = WFLAG_WIN_DECORATED;
-    //w->generation = 0;
 
     w->x = x;
     w->y = y;
@@ -139,19 +124,7 @@ drv_video_window_init( drv_video_window_t *w,
 
     w->title = "?";
 
-    //queue_init(&(w->events));
-    //w->events_count = 0;
-    //w->stall = 0;
-
     win_make_decorations(w);
-
-    /*
-    int ie = hal_save_cli();
-    hal_spin_lock( &allw_lock );
-    queue_enter(&allwindows, w, drv_video_window_t *, chain);
-    hal_spin_unlock( &allw_lock );
-    if(ie) hal_sti();
-    */
 
     drv_video_window_enter_allwq(w);
 
@@ -236,11 +209,11 @@ void drv_video_window_rezorder_all(void)
     int ie = hal_save_cli();
     hal_spin_lock( &allw_lock );
 
-    int next_z = 0;
+    int next_z = 1;
 
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
-        // Actually start with 1
+        // Actually start with 2, leave 0 for background and 1 for decorations of bottom win
         next_z++;
 
         if( w->z == next_z )

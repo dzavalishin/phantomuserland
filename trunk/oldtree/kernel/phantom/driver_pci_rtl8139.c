@@ -8,8 +8,14 @@
  *
 **/
 
-#include <config.h>
+#include <kernel/config.h>
 #if HAVE_NET
+
+#define DEBUG_MSG_PREFIX "RTL8139"
+#include "debug_ext.h"
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 
 /*
@@ -50,6 +56,7 @@ static void rtl8139_stop(rtl8139 *rtl);
 int rtl8139_init(rtl8139 *rtl);
 
 static void rtl8139_int(void* data);
+static void rtl8139_softint(void* data);
 
 
 
@@ -154,9 +161,6 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
 
 
     nic->irq = pci->interrupt;
-
-    /// XXX BUG HACK
-    //nic->irq = 15;
 
     int i;
     for (i = 0; i < 6; i++)
@@ -499,6 +503,15 @@ int rtl8139_init(rtl8139 *rtl)
         goto err1;
     }
 
+    rtl->softirq = hal_alloc_softirq();
+    if( rtl->softirq < 0 )
+    {
+        SHOW_ERROR0( 0, "Unable to get softirq" );
+        goto err2;
+    }
+
+    hal_set_softirq_handler( rtl->softirq, &rtl8139_softint, rtl );
+
     /* create a rx and tx buf
     rtl->rxbuf_region = vm_create_anonymous_region(vm_get_kernel_aspace_id(), "rtl8139_rxbuf", (void **)&rtl->rxbuf,
                                                    REGION_ADDR_ANY_ADDRESS, 64*1024 + 16, REGION_WIRING_WIRED_CONTIG, LOCK_KERNEL|LOCK_RW);
@@ -630,6 +643,9 @@ int rtl8139_init(rtl8139 *rtl)
     RTL_WRITE_8(rtl, RT_CFG9346, 0);
 
     return 0;
+
+err2:
+    hal_irq_free( rtl->irq, &rtl8139_int, rtl );
 
 err1:
     //vm_delete_region(vm_get_kernel_aspace_id(), rtl->region);
@@ -865,8 +881,10 @@ static int rtl8139_rxint(rtl8139 *rtl, u_int16_t int_status)
     if(!(RTL_READ_8(rtl, RT_CHIPCMD) & RT_CMD_RX_BUF_EMPTY))
     {
         //hal_sem_release_etc(rtl->rx_sem, 1, SEM_FLAG_NO_RESCHED);
-        hal_sem_release(&rtl->rx_sem);
+        //hal_sem_release(&rtl->rx_sem);
         //rc = INT_RESCHEDULE;
+        rtl->rx_rq++;
+        hal_request_softirq( rtl->softirq );
     }
 
     return rc;
@@ -879,7 +897,7 @@ static int rtl8139_txint(rtl8139 *rtl, u_int16_t int_status)
     int rc = 0; //INT_NO_RESCHEDULE;
 
     // transmit ok
-    	printf("tx %d\n", int_status);
+    printf("tx %d\n", int_status);
     if(int_status & RT_INT_TX_ERR) {
         printf("err tx int:\n");
         rtl8139_dumptxstate(rtl);
@@ -897,11 +915,36 @@ static int rtl8139_txint(rtl8139 *rtl, u_int16_t int_status)
         if(++rtl->last_txbn >= 4)
             rtl->last_txbn = 0;
         //hal_sem_release_etc(rtl->tx_sem, 1, SEM_FLAG_NO_RESCHED);
-        hal_sem_release(&rtl->tx_sem);
+        //hal_sem_release(&rtl->tx_sem);
         //rc = INT_RESCHEDULE;
+        rtl->tx_rq++;
+        hal_request_softirq( rtl->softirq );
     }
 
     return rc;
+}
+
+static void rtl8139_softint(void* data)
+{
+    rtl8139 *rtl = (rtl8139 *)data;
+
+    SHOW_FLOW0( 11, "softint" );
+
+    if(rtl->rx_rq)
+    {
+        hal_sem_release(&rtl->rx_sem);
+        //rc = INT_RESCHEDULE;
+        rtl->rx_rq--;
+    }
+
+
+    if(rtl->tx_rq)
+    {
+        hal_sem_release(&rtl->tx_sem);
+        //rc = INT_RESCHEDULE;
+        rtl->tx_rq--;
+    }
+
 }
 
 static void rtl8139_int(void* data)
@@ -909,7 +952,7 @@ static void rtl8139_int(void* data)
     int rc = 0; //INT_NO_RESCHEDULE;
     rtl8139 *rtl = (rtl8139 *)data;
 
-printf(DEV_NAME "interrupt\n");
+    //printf(DEV_NAME "interrupt\n");
 
     hal_spin_lock(&rtl->reg_spinlock);
     // Disable interrupts

@@ -14,7 +14,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "../config.h"
+#include <kernel/config.h>
 #include <malloc.h>
 #include <phantom_libc.h>
 

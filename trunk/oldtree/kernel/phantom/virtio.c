@@ -253,7 +253,7 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     r->vr.desc[num-1].flags = 0;
     r->vr.desc[num-1].next = -1;
 
-    virto_ring_dump(r);
+    //virto_ring_dump(r);
 
     vd->rings[index] = r;
     SHOW_FLOW0(8, "will virtio_set_q_physaddr");
@@ -608,9 +608,10 @@ void virtio_kick(virtio_device_t *vd, int qindex)
 {
     virtio_ring_t *r = vd->rings[qindex];
 
+    SHOW_FLOW( 2, "Will kick %p, q %d", vd, qindex);
+
     mem_write_barrier();
 
-    // TODO atomic
     int add = r->nAdded;
     r->vr.avail->idx += add;
     r->nAdded -= add;

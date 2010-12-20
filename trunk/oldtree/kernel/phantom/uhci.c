@@ -1,4 +1,4 @@
-#include "config.h"
+#include <kernel/config.h>
 #if COMPILE_UHCI
 
 #define DEBUG_MSG_PREFIX "uhci"

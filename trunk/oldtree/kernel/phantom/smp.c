@@ -24,7 +24,7 @@
 
 #include "newos.h"
 
-#include "config.h"
+#include <kernel/config.h>
 
 #include <phantom_libc.h>
 #include <kernel/smp.h>

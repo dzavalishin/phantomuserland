@@ -353,12 +353,20 @@ void pvm_restart_tty( pvm_object_t o )
 {
     struct data_area_4_tty *tty = pvm_object_da( o, tty );
 
-    tty->w.title = "VM TTY Window"; // BUG! Pointer from object space to kernel data seg!
+    printf("restart TTY\n");
+
+    tty->w.title = "VM TTY Window (restarted)"; // BUG! Pointer from object space to kernel data seg!
 
     // BUG! How do we fill owner? We must have object ref here
     tty->w.inKernelEventProcess = 0;
     tty->w.owner = 0;
 
+    queue_init(&(tty->w.events));
+    tty->w.events_count = 0;
+
     drv_video_window_enter_allwq( &tty->w );
+
+    //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, &tty->w );
+    //event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &tty->w );
 }
 

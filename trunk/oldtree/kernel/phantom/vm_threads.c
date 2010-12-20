@@ -8,7 +8,7 @@
  *
 **/
 
-#include "config.h"
+#include <kernel/config.h>
 
 #include <phantom_libc.h>
 
