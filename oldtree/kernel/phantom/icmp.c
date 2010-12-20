@@ -8,7 +8,7 @@
  *
 **/
 
-#include <config.h>
+#include <kernel/config.h>
 
 #if HAVE_NET
 

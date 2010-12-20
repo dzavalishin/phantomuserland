@@ -1,4 +1,4 @@
-#include <config.h>
+#include <kernel/config.h>
 #include <kernel/debug.h>
 #if HAVE_NET
 

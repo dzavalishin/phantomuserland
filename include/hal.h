@@ -162,9 +162,24 @@ void        				hal_register_page_fault_handler(void (*page_fault_handler)( void
 
 #define HAL_IRQ_SHAREABLE 1
 //#define HAL_IRQ_PRIVATE 1
+//#define HAL_IRQ_SOFT 2
+
+/*! 
+ * Irq with softirq callback. If primary irq func() returns HAL_IRQ_SOFT 
+ * or is null, soft_func will be called in non-irq (in interrupted thread's) context.
+**/
+//int 					hal_irq_alloc_soft( int irq, int (*func)(void *arg), void *arg, int (*soft_func)(void *soft_arg), void *soft_arg, int is_shareable );
 
 int 					hal_irq_alloc( int irq, void (*func)(void *arg), void *arg, int is_shareable );
 void 					hal_irq_free( int irq, void (*func)(void *arg), void *arg );
+
+
+#define SOFT_IRQ_THREADS        31
+
+void 					hal_request_softirq( int sirq );
+void 					hal_set_softirq_handler( int sirq, void (*func)(void *), void *_arg );
+
+int  					hal_alloc_softirq(void);
 
 void 					hal_enable_softirq(void);
 void 					hal_disable_softirq(void);

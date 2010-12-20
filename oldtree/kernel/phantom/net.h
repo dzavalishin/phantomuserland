@@ -5,7 +5,7 @@
 #ifndef _NEWOS_NET_H
 #define _NEWOS_NET_H
 
-#include <config.h>
+#include <kernel/config.h>
 
 
 #include <errno.h>

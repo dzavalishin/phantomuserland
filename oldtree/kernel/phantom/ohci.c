@@ -1,4 +1,4 @@
-#include "config.h"
+#include <kernel/config.h>
 
 #if COMPILE_OHCI
 

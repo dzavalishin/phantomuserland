@@ -11,22 +11,26 @@
 typedef struct rtl8139 {
 	int 		irq;
 	physaddr_t 	phys_base;
-        size_t 		phys_size;
+	size_t 		phys_size;
 
-        void * 		virt_base;
+	void * 		virt_base;
 
-        u_int16_t 	io_port;
+	u_int16_t 	io_port;
 
-        u_int8_t 	mac_addr[6];
+	u_int8_t 	mac_addr[6];
+
+	int			softirq;
+	int			rx_rq; // triggered in interrupt, processed in softint
+	int			tx_rq; // triggered in interrupt, processed in softint
 
 	int 		txbn;
-        int 		last_txbn;
+	int 		last_txbn;
 
 	void * 		rxbuf;
-        hal_sem_t 	rx_sem;
+    hal_sem_t 	rx_sem;
 
 	void * 		txbuf;
-        hal_sem_t 	tx_sem;
+    hal_sem_t 	tx_sem;
 
 	hal_mutex_t 	lock;
 	hal_spinlock_t 	reg_spinlock;

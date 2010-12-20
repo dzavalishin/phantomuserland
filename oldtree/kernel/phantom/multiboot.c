@@ -31,7 +31,7 @@
 
 
 #include "misc.h"
-#include "config.h"
+#include <kernel/config.h>
 
 
 struct multiboot_info bootParameters;

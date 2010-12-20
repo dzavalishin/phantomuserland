@@ -8,7 +8,7 @@
  *
 **/
 
-#include <config.h>
+#include <kernel/config.h>
 #include <kernel/stats.h>
 
 #define DEBUG_MSG_PREFIX "dns"

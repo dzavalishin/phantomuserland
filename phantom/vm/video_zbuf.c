@@ -15,7 +15,7 @@
 
 /** Z buffer itself. */
 
-u_int8_t *zbuf = 0;
+zbuf_t *zbuf = 0;
 
 static u_int32_t zbsize = 0;
 static u_int32_t zbwidth = 0;
@@ -26,7 +26,7 @@ void video_zbuf_init()
 {
     if(zbuf) free(zbuf);
 
-    zbsize = video_drv->xsize * video_drv->ysize;
+    zbsize = video_drv->xsize * video_drv->ysize * sizeof(zbuf_t);
     zbwidth = video_drv->xsize;
 
     zbuf = malloc( zbsize );
@@ -90,9 +90,9 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
     int ys;
     for(ys = 0; ys < ysize; ys++)
     {
-        int linpos = out.x + ( (video_drv->ysize-1) - out.y) *zbwidth;
+        int linpos = out.x + ( (video_drv->ysize-1) - out.y) * zbwidth;
         out.y++;
-        memset( zbuf+linpos, zpos, out.xsize );
+        memset( zbuf+linpos, zpos, out.xsize * sizeof(zbuf_t) );
     }
 }
 

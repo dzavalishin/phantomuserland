@@ -64,30 +64,40 @@ void phantom_thread_state_init(phantom_thread_t *t)
     STACK_PUSH(esp,0);// CR2
 
     t->cpu.esp = (int)esp;
+/*
+	// God knows why it works just once for importing main thread,
+	// then causes 'no fpu' exception 7 err 0
+#if 0 && FXSAVE
+    //char mystate[512];
+    //char his_state[512];
 
-#if 0
-    char mystate[512];
-    char his_state[512];
+	// We need two 16 bytes alinged buffers
+	char state_buffer[512*2 + 16];  
+
+	char  *my_state = state_buffer;
+
+	while( ((unsigned)my_state) & 0xFu )
+		my_state++;
+
+	char *his_state = my_state+512;
+
     //phantom_thread_fp_init( mystate, t->cpu.fxstate );
-FXDEBUG(double x = 0.0 + 1.0);
+//FXDEBUG(double x = 0.0 + 1.0);
 
-    //asm volatile("fxsave %0" : : "m" (&mystate));
-    i386_fxsave(&mystate);
-FXDEBUG(hexdump( &mystate, 512, "FXSTATE our", 0));
+    //asm volatile("fxsave %0" : : "m" (my_state));
+    i386_fxsave(my_state);
+//FXDEBUG(hexdump( &mystate, 512, "FXSTATE our", 0));
     asm volatile("finit " : : );
 
-    i386_fxsave(&his_state);
-FXDEBUG(hexdump( &mystate, 512, "FXSTATE init", 0));
+    //asm volatile("fxsave %0" : : "m" (his_state));
+    i386_fxsave(his_state);
+//FXDEBUG(hexdump( &mystate, 512, "FXSTATE init", 0));
 
-
-#if 0
-    i386_fxsave(&(t->cpu.fxstate));
-#else
-    //memmove( &(t->cpu.fxstate), &his_state, 512 );
-#endif
-    i386_fxrstor(&mystate);
+    i386_fxrstor(my_state);
+    //asm volatile("fxrstor %0" : : "m" (my_state));
 
 #endif
+*/
 }
 
 void switch_to_user_mode()

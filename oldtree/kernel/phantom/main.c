@@ -16,7 +16,7 @@
 #define debug_level_info 10
 
 
-#include "config.h"
+#include <kernel/config.h>
 
 #include "svn_version.h"
 

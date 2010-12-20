@@ -117,8 +117,6 @@ struct data_area_4_class
 
     struct pvm_object		ip2line_maps; // array of maps: ip->line number
     struct pvm_object		method_names; // array of method names
-
-    // TODO add c'tor ptr and GC iterator func ptr for internal ones
 };
 
 

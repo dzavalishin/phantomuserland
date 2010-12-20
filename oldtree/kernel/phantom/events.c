@@ -174,6 +174,8 @@ static void put_event(struct ui_event *e)
 {
     if(!event_engine_active) return; // Just ignore
 
+    SHOW_FLOW(8, "%p", e);
+
     hal_mutex_lock( &main_q_mutex );
     queue_enter(&main_event_q, e, struct ui_event *, echain);
     hal_cond_broadcast( &have_event );
@@ -249,6 +251,8 @@ static void event_push_thread()
 
         queue_remove_first(&main_event_q, e, struct ui_event *, echain);
         hal_mutex_unlock( &main_q_mutex );
+
+        SHOW_FLOW(8, "%p", e);
 
         // Deliver to 'em
         push_event(e);
@@ -402,8 +406,8 @@ static void select_event_target(struct ui_event *e)
 
 }
 
-
-
+// Debug only!
+#define DIRECT_DRIVE 1
 
 //! Select target and put event to window queue.
 void drv_video_window_receive_event(struct ui_event *e)
@@ -451,9 +455,18 @@ void drv_video_window_receive_event(struct ui_event *e)
 
     if( w->events_count < MAX_WINDOW_EVENTS )
     {
-        queue_enter(&(w->events), e, struct ui_event *, echain);
+    	SHOW_FLOW(8, "e %p -> w %p", e, w);
+
+#if DIRECT_DRIVE
+        if(w != 0 && w->inKernelEventProcess)
+            w->inKernelEventProcess(w, e);
+
+
+#else
+    	queue_enter(&(w->events), e, struct ui_event *, echain);
         w->events_count++;
         w->stall = 0;
+#endif
     }
     else
         w->stall = 1;
@@ -466,7 +479,7 @@ ret:
     if(later_lost) event_q_put_win( later_x, later_y, UI_EVENT_WIN_LOST_FOCUS, later_lost );
     if(later_gain) event_q_put_win( later_x, later_y, UI_EVENT_WIN_GOT_FOCUS, later_gain );
 
-
+#if !DIRECT_DRIVE
     // Has no own event process thread, serve from here
     if(w != 0 && w->inKernelEventProcess)
     {
@@ -478,9 +491,12 @@ ret:
             if(!got)
                 break;
 
+            SHOW_FLOW(8, "%p, w=%p, us=%p", &e, e.focus, w);
+
             w->inKernelEventProcess(w, &e);
         }
     }
+#endif
 
 }
 
@@ -512,6 +528,8 @@ void drv_video_window_explode_event(struct ui_event *e)
 }
 
 
+#define DIRECT_DRIVE 1
+
 
 //! Get next event for this window
 int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait )
@@ -540,6 +558,7 @@ int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int w
 locked:
     if( w->events_count > 0 )
     {
+    	assert(!queue_empty(&(w->events)));
         queue_remove_first(&(w->events), tmp, struct ui_event *, echain);
         w->events_count--;
         ret = 1;
@@ -552,7 +571,12 @@ locked:
 
     if( ret )
     {
+    	SHOW_FLOW(8, "tmp %p, w=%p", tmp, tmp->focus);
+
         *e = *tmp;
+
+        SHOW_FLOW(8, "e %p, w=%p", e, e->focus);
+
         // Bring it back to main Q engine
         return_unused_event(tmp);
     }
@@ -686,22 +710,6 @@ static void send_event_to_q(_key_event *event)
 
     }
 
-#if 0 && (debug_level_flow >= 7)
-    {
-        char *kn = "";
-
-        switch(event->keycode)
-        {
-        case KEY_ARROW_DOWN: kn = "down"; break;
-        case KEY_ARROW_UP:   kn = "up"; break;
-        case KEY_ARROW_LEFT: kn = "left"; break;
-        case KEY_ARROW_RIGHT:kn = "right"; break;
-        }
-
-        //SHOW_FLOW( 0, "keyin %d %s", event->keycode, kn );
-        printf( "-- keyin %d %s --\n", event->keycode, kn );
-    }
-#endif
     event_q_put_key( event->keycode, event->keychar, shifts );
 
 }

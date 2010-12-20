@@ -121,7 +121,7 @@ void pvm_root_init(void)
 
     if( !pvm_is_null( pvm_root.restart_list ) )
     {
-        printf("Processing restart list.\n");
+        printf("Processing restart list: %d items.\n", items);
         for( i = 0; i < items; i++ )
         {
             pvm_object_t wr = pvm_get_array_ofield(pvm_root.restart_list.data, i);

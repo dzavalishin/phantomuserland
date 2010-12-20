@@ -34,6 +34,10 @@ struct handler_q
 {
     void 			(*ihandler)(void *);
     void 		*	arg;
+
+    //int 			(*shandler)(void *);
+    //void 		*	sarg;
+
     int                 	is_shareable;
 
     queue_chain_t               chain;
@@ -107,7 +111,6 @@ void (*soft_irq_handler)(struct trap_state *) = def_soft_irq_handler;
 
 
 
-// turned off while not ready
 int hal_irq_alloc( int irq, void (*func)(void *arg), void *_arg, int is_shareable )
 {
     if( irq < 0 && irq >= PIC_IRQ_COUNT )
@@ -220,6 +223,16 @@ void hal_request_softirq( int sirq )
 
 void hal_enable_softirq() { ENABLE_SOFT_IRQ(); }
 void hal_disable_softirq() { DISABLE_SOFT_IRQ(); }
+
+// TODO free softirq?
+static int next_softirq = 0;
+int  					
+hal_alloc_softirq(void)
+{
+	if( next_softirq >= SOFT_IRQ_THREADS )
+		return -1;
+	return next_softirq++;
+}
 
 
 /**

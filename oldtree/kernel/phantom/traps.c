@@ -68,6 +68,13 @@ void dump_ss(struct trap_state *st)
            st->err);
     if (st->trapno == T_PAGE_FAULT)
         printf("page fault linear address %08x\n", st->cr2);
+
+    if(phantom_symtab_getname)
+    {
+        printf("EIP %6p: %s\n", st->eip, phantom_symtab_getname((void *)st->eip) ); // TODO 64 bit machdep
+    }
+
+
     //if(!from_user)
         stack_dump_ebp((void *)st->ebp);
 }
@@ -91,6 +98,7 @@ int trap_panic(struct trap_state *ts)
     int type = ts->trapno;
 
     panic("Unexpected trap %s\n", trap_name(type));
+
 
     return -1;
 }

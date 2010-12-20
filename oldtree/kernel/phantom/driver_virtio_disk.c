@@ -95,7 +95,14 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
     printf("Will write to disk\n");
 //getchar();
     static char test[512] = "Hello virtio disk";
-    driver_virtio_disk_write( &vdev, kvtophys(test), sizeof(test) );
+
+    physaddr_t pa;
+    void *va;
+    hal_pv_alloc( &pa, &va, sizeof(test) );
+
+    strlcpy( va, test, sizeof(test) );
+
+    driver_virtio_disk_write( &vdev, pa, sizeof(test) );
     printf("Write to disk requested\n");
 //getchar();
 #endif
@@ -118,29 +125,41 @@ int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len)
 
     struct vring_desc cmd[3];
 
-    struct vioBlockReq          *vreq = (void *)calloc(1, sizeof(struct vioBlockReq));
+    struct vioBlockReq          *vreq; // = (void *)calloc(1, sizeof(struct vioBlockReq));
 
-    //struct virtio_blk_outhdr *ohdr = (void *)calloc(1, sizeof(struct virtio_blk_outhdr));
-    //struct virtio_blk_inhdr  *ihdr = (void *)calloc(1, sizeof(struct virtio_blk_inhdr));
+    physaddr_t pa;
+    hal_pv_alloc( &pa, (void **)&vreq, sizeof(struct vioBlockReq) );
+
+
     struct virtio_blk_outhdr *ohdr = &(vreq->ohdr);
-    struct virtio_blk_inhdr  *ihdr = &(vreq->ihdr);
+    //struct virtio_blk_inhdr  *ihdr = &(vreq->ihdr);
     vreq->rq = 0;
 
     ohdr->type = VIRTIO_BLK_T_OUT;
     ohdr->ioprio = 0;
     ohdr->sector = 0;
 
-    cmd[0].addr = kvtophys(ohdr);
-    cmd[0].len  = sizeof(*ohdr);
+    cmd[0].addr = pa + __offsetof(struct vioBlockReq, ohdr);
+    cmd[0].len  = sizeof(struct virtio_blk_outhdr);
     cmd[0].flags= 0;
 
     cmd[1].addr = data;
     cmd[1].len  = len;
     cmd[1].flags= 0;
 
-    cmd[2].addr = kvtophys(ihdr);
-    cmd[2].len  = sizeof(*ihdr);
+#if 0
+    cmd[2].addr = pa + __offsetof(struct vioBlockReq, ihdr);
+    cmd[2].len  = sizeof(struct virtio_blk_inhdr);
     cmd[2].flags= VRING_DESC_F_WRITE;
+#else
+    physaddr_t pa2;
+    void *va2;
+    hal_pv_alloc( &pa2, &va2, sizeof(struct virtio_blk_inhdr) );
+
+    cmd[2].addr = pa2;
+    cmd[2].len  = sizeof(struct virtio_blk_inhdr);
+    cmd[2].flags= VRING_DESC_F_WRITE;
+#endif
 
     virtio_attach_buffers_list( vd, 0, 3, cmd );
     virtio_kick( vd, 0);

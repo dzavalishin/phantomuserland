@@ -14,7 +14,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "config.h"
+#include <kernel/config.h>
 
 #include <phantom_libc.h>
 
@@ -63,8 +63,8 @@ static pci_probe_t pci_drivers[] =
     //{ "VirtIO Random",  driver_virtio_random_probe, 	2, VIRTIO_VENDOR, 0, 1 }, // TODO dev/dclass?
 #endif
 
-#if 1 && HAVE_NET
     { "VirtIO Net",  	driver_virtio_net_probe, 	1, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
+#if 1 && HAVE_NET
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
     { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
 //    { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
