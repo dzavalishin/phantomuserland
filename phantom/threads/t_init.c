@@ -22,7 +22,11 @@ static void haltme( void *a )
     (void) a;
     //hal_set_thread_priority( GET_CURRENT_THREAD()->tid, THREAD_PRIO_IDLE );
 
-    hal_set_thread_name("<Halt_Me>");
+
+    // Hack - this thread can't call malloc (it has sema and we can't wait), so set name manually
+    //hal_set_thread_name("<Halt_Me>");
+    GET_CURRENT_THREAD()->name = "<Halt_Me>";
+    // BUG - next call to hal_set_thread_name will crash due to attempt to free static string
 
     while(1)
     {
