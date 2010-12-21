@@ -56,7 +56,7 @@ phantom: $(START_O_FILE) \
 	heap/heap.o heap/heap_pool.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
 	ohci.o uhci.o uhci_rh.o uhci_util.o \
-	traps.o amap.o i386/pic.o hal_physmem.o physalloc.o \
+	traps.o amap.o hal_physmem.o physalloc.o \
 	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
 	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
 	time.o console.o timedcall.o driver_pci_rtl8139.o keyboard.o \
