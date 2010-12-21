@@ -1,6 +1,6 @@
 #include <mach/asm.h>
 
-/* void i386_cpuid(unsigned int selector, unsigned int *data); */
+// Phantom native code syscall entry point
 ENTRY(syscall)
     pushl	$0                      // 0 -> err
     pushl       %eax                    // syscall no ->trapno
