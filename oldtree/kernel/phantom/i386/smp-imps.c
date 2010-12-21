@@ -43,7 +43,7 @@
 #include <time.h>
 #include <errno.h>
 
-#include "rtc.h"
+#include <kernel/ia32/rtc.h>
 
 
 

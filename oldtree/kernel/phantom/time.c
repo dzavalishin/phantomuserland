@@ -13,7 +13,9 @@
 #include "newos.h"
 #include "misc.h"
 
-#include "i386/rtc.h"
+//#include "i386/rtc.h"
+#include <kernel/ia32/rtc.h>
+
 
 #include <time.h>
 #include <string.h>

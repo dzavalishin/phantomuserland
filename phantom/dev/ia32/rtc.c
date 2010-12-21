@@ -8,7 +8,8 @@
 #include <hal.h>
 #include <time.h>
 
-#include "rtc.h"
+//#include "rtc.h"
+#include <kernel/ia32/rtc.h>
 
 // TODO header
 // TODO hal spinlocks
