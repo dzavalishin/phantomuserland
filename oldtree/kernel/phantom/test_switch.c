@@ -105,6 +105,8 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(malloc);
     TEST(amap);
 
+    TEST(sem);
+
     TEST(udp_send);
     TEST(udp_syslog);
 
@@ -117,6 +119,7 @@ void run_test( const char *test_name, const char *test_parm )
 
     // must test after timed calls for it depends on them
     TEST(ports);
+
 
     // These are very long, do 'em last
     TEST(threads);

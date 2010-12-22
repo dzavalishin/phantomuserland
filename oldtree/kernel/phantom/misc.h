@@ -39,7 +39,7 @@ int detect_cpu(int curr_cpu);
 
 // TODO move to time.h
 /* wait by spinning: number of milliseconds to delay */
-void phantom_spinwait(int millis);
+//void phantom_spinwait(int millis);
 // Uptime in seconds
 time_t uptime(void);
 

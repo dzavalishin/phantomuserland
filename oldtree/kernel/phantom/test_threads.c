@@ -422,6 +422,88 @@ int do_test_timed_call(const char *test_parm)
 
 
 
+// -----------------------------------------------------------------------
+// Semaphores
+// -----------------------------------------------------------------------
+
+static hal_sem_t 	ts;
+static volatile int 	stop_sem_test = 0;
+static volatile int 	sem_released = 0;
+static int 		softirq = -1;
+
+static void sem_rel(void *a)
+{
+    (void) a;
+    hal_sleep_msec( 300 );
+    printf("sema release 1 (direct)\n");
+    sem_released = 1;
+    hal_sem_release( &ts );
+
+    hal_sleep_msec( 300 );
+    printf("sema release 2 (softirq %d)\n", softirq );
+    sem_released = 1;
+    hal_request_softirq( softirq );
+
+    /*
+    while(!stop_sem_test)
+    {
+        hal_sleep_msec( 500 );
+    }
+
+    */
+}
+
+
+static void sem_softirq(void *a)
+{
+    (void) a;
+    printf("sema softirq\n");
+    hal_sleep_msec( 10 );
+    sem_released = 1;
+    hal_sem_release( &ts );
+}
+
+
+int do_test_sem(const char *test_parm)
+{
+    (void) test_parm;
+    printf("Testing semaphores\n");
+
+    hal_sem_init(&ts, "semTest");
+
+
+
+    softirq = hal_alloc_softirq();
+    if( softirq < 0 )
+        test_fail_msg( 1, "Unable to get softirq" );
+
+    hal_set_softirq_handler( softirq, sem_softirq, 0 );
+
+    //int tid =
+    hal_start_kernel_thread_arg( sem_rel, 0 );
+
+    printf("sema wait 1\n");
+
+    // Direct
+    sem_released = 0;
+    hal_sem_acquire( &ts );
+    test_check_eq(sem_released,1);
+
+    hal_sleep_msec( 100 );
+
+    printf("sema wait 2\n");
+
+    // Softirq
+    sem_released = 0;
+    hal_sem_acquire( &ts );
+    test_check_eq(sem_released,1);
+
+    stop_sem_test = 1;
+
+    printf("Done testing semaphores\n");
+    return 0;
+
+}
 
 
 
