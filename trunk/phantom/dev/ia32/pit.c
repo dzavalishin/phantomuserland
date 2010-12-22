@@ -4,9 +4,9 @@
 
 #include <hal.h>
 #include <time.h>
-#include "../misc.h"
+//#include "../misc.h"
 
-#include "pit.h"
+#include <i386/isa/pit.h>
 
 
 int	hz = HZ;		/* number of ticks per second */
