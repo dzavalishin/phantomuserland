@@ -430,6 +430,7 @@ static hal_sem_t 	ts;
 static volatile int 	stop_sem_test = 0;
 static volatile int 	sem_released = 0;
 static int 		softirq = -1;
+static int              rc = -1;
 
 static void sem_rel(void *a)
 {
@@ -451,6 +452,14 @@ static void sem_rel(void *a)
     }
 
     */
+}
+
+
+static void sem_etc(void *a)
+{
+    (void) a;
+    rc = hal_sem_acquire_etc( &ts, 1, SEM_FLAG_TIMEOUT, 1000L*200L );
+    sem_released = 1;
 }
 
 
@@ -497,6 +506,19 @@ int do_test_sem(const char *test_parm)
     sem_released = 0;
     hal_sem_acquire( &ts );
     test_check_eq(sem_released,1);
+
+    hal_sleep_msec( 100 );
+
+
+    printf("sema timeout\n");
+    sem_released = 0;
+    hal_start_kernel_thread_arg( sem_etc, 0 );
+    hal_sleep_msec( 100 );
+    test_check_eq(sem_released,0);
+    hal_sleep_msec( 120 );
+    test_check_eq(sem_released,1);
+    test_check_eq( rc, ETIMEDOUT);
+
 
     stop_sem_test = 1;
 
