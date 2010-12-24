@@ -23,6 +23,7 @@
 #define PORT_FLAG_INTERRUPTABLE 4
 #define PORT_FLAG_USE_USER_MEMCPY 0x80000000
 
+/*
 typedef int port_id;
 typedef int proc_id;
 
@@ -34,6 +35,10 @@ struct port_info {
 	int32 queue_count;
 	int32 total_count;
 };
+*/
+
+#include <newos/portinfo.h>
+
 
 //int port_init(kernel_args *ka);
 int port_init(void);
