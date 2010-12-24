@@ -20,7 +20,13 @@ pmod_test: crt/crt0.o test/testmain.o ../lib/libphantom_c.a ../lib/libphantom_us
 	objcopy -O elf32-i386 $@.pe $@
 	objdump -x -d $@ >$@.dump
 
+pmod_regress: crt/crt0.o regress/main.o ../lib/libphantom_c.a ../lib/libphantom_user.a
+	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+	objcopy -O elf32-i386 $@.pe $@
+	objdump -x -d $@ >$@.dump
 
-install:: pmod_test
-	cp pmod_test $(realpath $(PHANTOM_HOME))oldtree/run/tftp/
+
+install:: pmod_test pmod_regress
+	cp pmod_test $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/
+	cp pmod_regress $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/
 #G:/Projects/phantom/trunk/run/tftp/pmod_test
