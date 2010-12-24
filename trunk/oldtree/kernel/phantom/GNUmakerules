@@ -1,7 +1,6 @@
 ifndef _phantom_x86_makerules_
 _phantom_x86_makerules__ = yes
 
-
 TARGETS = phantom
 
 deafult: $(TARGETS)
@@ -12,9 +11,9 @@ prepare::
 
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
-#threads 
+
 CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d
-PHANTOM_CFLAGS += -DHAVE_NET=1 -DHAVE_UNIX=1 -std=gnu89 -DKERNEL
+PHANTOM_CFLAGS += -include ../../../include/kernel/config.h -std=gnu89 -DKERNEL
 
 
 CLIB   =
@@ -25,12 +24,8 @@ DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))
 
 LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
-#OKLIBDIR=../../old/kernel/lib
-
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
-
-#TH_LIB=threads/libthreads.a
 TH_LIB=$(PLIBDIR)/libthreads.a
 PHANTOM_LIBS = 	$(TH_LIB) 
 
@@ -54,7 +49,7 @@ phantom: $(START_O_FILE) \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o events.o smp.o \
 	heap/heap.o heap/heap_pool.o boot_cmd_line.o \
-	multiboot.o stack.o disk.o disk_q.o i386/paging.o elf.o tcp.o \
+	multiboot.o stack.o disk.o disk_q.o tcp.o \
 	ohci.o uhci.o uhci_rh.o uhci_util.o \
 	traps.o amap.o hal_physmem.o physalloc.o \
 	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
@@ -69,7 +64,8 @@ phantom: $(START_O_FILE) \
 	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
 	device.o driver_isa_ne2000.o \
 	driver_pci_pcnet32.o syslog.o driver_pci_intel82559.o \
-	driver_pci_intel_etc.o symtab.o unix/dir.o \
+	driver_pci_intel_etc.o \
+	elf.o symtab.o unix/dir.o \
 	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
 	unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
 	unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fat32.o \

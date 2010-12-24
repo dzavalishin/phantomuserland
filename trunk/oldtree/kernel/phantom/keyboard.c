@@ -38,6 +38,9 @@
 #define KEYB_EVENT_PUSH_THREAD 0
 #define KEYB_USE_SEMA 1
 
+#define USE_SOFTIRQ 0
+static int softirq = -1;
+
 /* TODO: MOVE THIS TO A PRIVATE HEADER FILE */
 #ifndef min
 #define min(x,y) ((x)<(y)?(x):(y))
@@ -181,11 +184,19 @@ static void insert_in_buf(_key_event *event)
     keyboard_buf[tail].modifiers = event->modifiers;
     keyboard_buf[tail].keychar = event->keychar;
     tail = temp_tail;
+
+#if USE_SOFTIRQ
+    hal_request_softirq( softirq );
+#else
+
 #if KEYB_USE_SEMA
     hal_sem_release( &keyboard_sem );
 #else
     hal_cond_broadcast( &keyboard_sem );
 #endif
+
+#endif
+
 }
 
 static void handle_set1_keycode(unsigned char key)
@@ -356,7 +367,17 @@ void phantom_dev_keyboard_start_events()
 
 
 
-
+#if USE_SOFTIRQ
+void softirq_handler( void *_arg )
+{
+    (void) _arg;
+#if KEYB_USE_SEMA
+    hal_sem_release( &keyboard_sem );
+#else
+    hal_cond_broadcast( &keyboard_sem );
+#endif
+}
+#endif
 
 
 
@@ -371,6 +392,14 @@ static int maininited = 0;
 static void maininit()
 {
     if(maininited) return;
+
+#if USE_SOFTIRQ
+    softirq = hal_alloc_softirq();
+    if( softirq < 0 )
+        panic( "Unable to get softirq" );
+
+    hal_set_softirq_handler( softirq, &softirq_handler, 0 );
+#endif
 
 #if KEYB_USE_SEMA
     if( hal_sem_init(&keyboard_sem, "KBD") )
