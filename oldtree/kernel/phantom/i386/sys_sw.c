@@ -23,7 +23,7 @@
 #include <i386/ldt.h>
 //#include <i386/tss.h>
 //#include <i386/proc_reg.h>
-//#include <i386/pio.h>
+#include <newos/port.h>
 #include <sys/syslog.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
@@ -55,7 +55,7 @@ extern struct utsname phantom_uname;
 errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int len );
 
 #define CHECKA(a,count) do { \
-    int __addr = (int)(a); \
+    unsigned int __addr = (int)(a); \
     if( __addr < mina || (__addr+count) >= maxa ) \
         { \
         ret = -1; \
@@ -67,7 +67,7 @@ errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int
 #define AARG(type, var, index, size) \
     type var = adjustin( uarg[index], st ); \
     do { \
-    int __addr = (int)(var); \
+    unsigned int __addr = (int)(var); \
     if( __addr < mina || (__addr+size) >= maxa ) \
         { \
         ret = -1; \
@@ -133,7 +133,7 @@ void syscall_sw(struct trap_state *st)
 
     switch(callno)
     {
-    case SYS_exit:
+    case SYS__exit:
         // TODO housekeeping?
         SHOW_FLOW( 2, "exit %d", uarg[0] );
         hal_exit_kernel_thread();
@@ -160,7 +160,7 @@ void syscall_sw(struct trap_state *st)
     case SYS_getpagesize:       ret = PAGE_SIZE; break;
 
     case SYS_personality:
-        if(uarg[0] == 0xffffffff)
+        if( ((unsigned) uarg[0]) == 0xffffffff)
         {
             ret = 0; // Say we're Linux... well...to some extent.
             break;
@@ -369,7 +369,7 @@ void syscall_sw(struct trap_state *st)
             int iovcnt = uarg[2];
             AARG(struct iovec *, list, 1, sizeof(struct iovec) * iovcnt);
 
-            int onerc;
+            unsigned int onerc;
             int lp;
 
             for( lp = 0; lp < iovcnt; lp++ )
@@ -378,12 +378,13 @@ void syscall_sw(struct trap_state *st)
                 CHECKA(addr,list[lp].iov_len);
                 onerc = usys_read(&err, u, fd, addr, list[lp].iov_len );
 
+                /*
                 if( onerc < 0 )
                 {
                     ret = -1;
                     goto err_ret;
                 }
-
+                */
                 ret += onerc;
                 if( onerc < list[lp].iov_len )
                     break;
@@ -397,7 +398,7 @@ void syscall_sw(struct trap_state *st)
             int iovcnt = uarg[2];
             AARG(struct iovec *, list, 1, sizeof(struct iovec) * iovcnt);
 
-            int onerc;
+            unsigned int onerc;
             int lp;
 
             for( lp = 0; lp < iovcnt; lp++ )
@@ -406,12 +407,13 @@ void syscall_sw(struct trap_state *st)
                 CHECKA(addr,list[lp].iov_len);
                 onerc = usys_write(&err, u, fd, addr, list[lp].iov_len );
 
+                /*
                 if( onerc < 0 )
                 {
                     ret = -1;
                     goto err_ret;
                 }
-
+                */
                 ret += onerc;
                 if( onerc < list[lp].iov_len )
                     break;
@@ -586,13 +588,13 @@ void syscall_sw(struct trap_state *st)
     case SYS_get_port_info:
         {
             AARG(struct port_info *, info, 1, sizeof(struct port_info));
-            ret = port_get_info( uarg[0], info)
+            ret = port_get_info( uarg[0], info);
         }
     case SYS_get_port_bufsize:
         ret = port_buffer_size( uarg[0] );
         break;
     case SYS_get_port_bufsize_etc:
-        ret = port_buffer_size( uarg[0], uarg[1], uarg[2] );
+        ret = port_buffer_size_etc( uarg[0], uarg[1], uarg[2] );
         break;
     case SYS_get_port_count:
         ret = port_count( uarg[0] );
@@ -609,10 +611,11 @@ void syscall_sw(struct trap_state *st)
         }
     case SYS_write_port:
         {
-            AARG(int32_t *, msg_code, 1, sizeof(int32_t));
+            //AARG(int32_t *, msg_code, 1, sizeof(int32_t));
+            //AARG(int32_t, msg_code, 1, sizeof(int32_t));
             AARG(void  *, msg_buffer, 2, uarg[3]);
             ret = port_write( uarg[0],
-                             msg_code,
+                             uarg[1],
                              msg_buffer,
                              uarg[3]);
 
