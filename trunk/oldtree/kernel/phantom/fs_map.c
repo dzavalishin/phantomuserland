@@ -34,17 +34,21 @@ typedef struct
 } fs_probe_t;
 
 
+#if HAVE_UNIX
 static errno_t fs_start_fat( phantom_disk_partition_t * );
+#endif // HAVE_UNIX
 
 
 static fs_probe_t fs_drivers[] =
 {
 
     { "Phantom", 	fs_probe_phantom,	0 	 	},
+#if HAVE_UNIX
     { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
     { "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
     //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
     { "CD",  		fs_probe_cd, 	 	0		},
+#endif // HAVE_UNIX
 
 };
 
@@ -110,6 +114,10 @@ errno_t fs_probe_phantom(phantom_disk_partition_t *p)
 
     return EINVAL;
 }
+
+
+
+#if HAVE_UNIX
 
 static char cd_marker[] = { 1, 67, 68, 48, 48, 49, 1 };
 
@@ -288,6 +296,7 @@ static errno_t fs_start_fat( phantom_disk_partition_t *p )
 }
 
 
+#endif // HAVE_UNIX
 
 
 
@@ -597,6 +606,7 @@ http://www.alumni.caltech.edu/~pje/
 
 
 */
+
 
 
 

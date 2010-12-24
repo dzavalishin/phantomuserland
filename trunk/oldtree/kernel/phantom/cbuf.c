@@ -1,6 +1,8 @@
 #include <kernel/config.h>
 #include <kernel/debug.h>
-#if HAVE_NET
+
+// Used in other code as well
+//#if HAVE_NET
 
 #include "newos.h"
 #include "cbuf.h"
@@ -1147,5 +1149,5 @@ int cmp_netaddr(netaddr *addr1, netaddr *addr2)
 
 
 
-#endif // HAVE_NET
+//#endif // HAVE_NET
 

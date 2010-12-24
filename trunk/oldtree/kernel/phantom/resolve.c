@@ -8,6 +8,9 @@
  *
 **/
 
+#if HAVE_NET
+
+
 #include <kernel/config.h>
 #include <kernel/stats.h>
 
@@ -434,6 +437,7 @@ ipv4_addr ngethostbyname(unsigned char *host)
 
 
 
+#endif // HAVE_NET
 
 
 

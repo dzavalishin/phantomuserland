@@ -30,6 +30,9 @@
 #include <kernel/init.h>
 #include <kernel/debug.h>
 
+#include <newos/port.h>
+
+
 #include "hal.h"
 #include "paging_device.h"
 #include "vm_map.h"
@@ -330,7 +333,7 @@ connect_ide_io();
 
     // just test
     //phantom_smp_send_broadcast_ici();
-init_tetris();
+//init_tetris();
 
     //pressEnter("will run vm threads");
     SHOW_FLOW0( 2, "Will run phantom threads... ");
@@ -343,7 +346,9 @@ init_tetris();
 
 //trfs_testrq();
 
+#if HAVE_NET
     ngethostbyname("ya.ru");
+#endif // HAVE_NET
 
 
 #if 0
@@ -440,9 +445,10 @@ static void load_classes_module()
 
 static void net_stack_init()
 {
+    cbuf_init();
+
 #if HAVE_NET
     SHOW_FLOW0( 1, "Init TCP/IP stack" );
-    cbuf_init();
     net_timer_init();
     if_init();
     ethernet_init();

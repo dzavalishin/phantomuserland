@@ -25,7 +25,7 @@ void phantom_map_mem_equally(void);
 
 
 
-void port_init(void);
+//void port_init(void);
 
 
 void phantom_start_video_driver(void);
