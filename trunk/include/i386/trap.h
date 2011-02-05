@@ -140,6 +140,8 @@ void dump_ss(struct trap_state *st);
 const char *trap_name(unsigned int trapnum);
 int trap_panic(struct trap_state *ts);
 
+// Check if current thread is usermode and convert trap to thread kill
+void phantom_check_user_trap( struct trap_state *ts );
 
 
 
