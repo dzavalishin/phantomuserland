@@ -10,7 +10,7 @@ LD_ADDR=-Ttext 0
 LIBGCC := `gcc --print-libgcc-file-name`
 
 #all: $(TARGET) pmod_test ../lib/crt0.o
-all: $(TARGET) ../lib/crt0.o
+all: $(TARGET) ../lib/crt0.o pmod_test pmod_regress
 
 ../lib/crt0.o: crt/crt0.o
 	cp crt/crt0.o ../lib/crt0.o
