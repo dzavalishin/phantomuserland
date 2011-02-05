@@ -13,6 +13,9 @@
 #include "thread_private.h"
 #include <kernel/init.h>
 
+
+static volatile int have_idlest = 0;
+
 //static phantom_thread_t *idlest;
 
 // This is not an ideal solution. This one
@@ -27,6 +30,8 @@ static void haltme( void *a )
     //hal_set_thread_name("<Halt_Me>");
     GET_CURRENT_THREAD()->name = "<Halt_Me>";
     // BUG - next call to hal_set_thread_name will crash due to attempt to free static string
+
+    have_idlest = 1;
 
     while(1)
     {
@@ -74,6 +79,8 @@ phantom_threads_init()
     GET_IDLEST_THREAD()->priority = THREAD_PRIO_IDLE;
     t_enqueue_runq(GET_IDLEST_THREAD());
     hal_sti();
+
+    //while( !have_idlest )        hal_sleep_msec(10);
 
 }
 
