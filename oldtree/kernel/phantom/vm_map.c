@@ -188,13 +188,14 @@ static inline void page_touch_history_arg(vm_page *p, int arg)
 
 static void    page_fault( vm_page *p, int  is_writing );
 
-static vm_page *addr_to_vm_page(unsigned long addr)
+static vm_page *addr_to_vm_page(unsigned long addr, struct trap_state *ts)
 {
     addr -= (unsigned int)vm_map_start_of_virtual_address_space; // X64 bug - int
 
 
     if( addr >= ( ((unsigned long)vm_map_vm_page_count) * __MEM_PAGE) )
     {
+        if( ts ) phantom_check_user_trap( ts );
         //dump_ds
         panic("address 0x%X is outside of object space", addr);
     }
@@ -208,12 +209,12 @@ static vm_page *addr_to_vm_page(unsigned long addr)
 
 
 static void
-vm_map_page_fault_handler( void *address, int  write, int ip )
+vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state *ts )
 {
     (void) ip;
 
 #if 1
-    vm_page *vmp = addr_to_vm_page((unsigned long) address);
+    vm_page *vmp = addr_to_vm_page((unsigned long) address, ts);
 #else
     // BUG! TODO! Stack growth? Object space growth?
     long addr = (unsigned int) address;
@@ -274,7 +275,7 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
             }
         }
 
-        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip );
+        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip, ts );
         /*
          if (enabled)			cli();
          */
@@ -1765,14 +1766,14 @@ void unwire_page( vm_page *p )
 // to unwire_page_for_addr physical addr will be the same
 void wire_page_for_addr( void *addr )
 {
-    vm_page *p = addr_to_vm_page((unsigned long) addr);
+    vm_page *p = addr_to_vm_page((unsigned long) addr, 0);
     wire_page( p );
 
 }
 
 void unwire_page_for_addr( void *addr )
 {
-    vm_page *p = addr_to_vm_page((unsigned long) addr);
+    vm_page *p = addr_to_vm_page((unsigned long) addr, 0);
     unwire_page( p );
 }
 
