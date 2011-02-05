@@ -124,6 +124,7 @@ void run_test( const char *test_name, const char *test_parm )
     // These are very long, do 'em last
     TEST(threads);
 
+    //TEST(userland);
 
     printf("-----\nPhantom test suite FINISHED\n" );
 

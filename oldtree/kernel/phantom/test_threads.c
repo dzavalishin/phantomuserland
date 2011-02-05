@@ -426,6 +426,8 @@ int do_test_timed_call(const char *test_parm)
 // Semaphores
 // -----------------------------------------------------------------------
 
+#define TEST_SOFTIRQ 0
+
 static hal_sem_t 	ts;
 static volatile int 	stop_sem_test = 0;
 static volatile int 	sem_released = 0;
@@ -440,11 +442,12 @@ static void sem_rel(void *a)
     sem_released = 1;
     hal_sem_release( &ts );
 
+#if TEST_SOFTIRQ
     hal_sleep_msec( 300 );
     printf("sema release 2 (softirq %d)\n", softirq );
     sem_released = 1;
     hal_request_softirq( softirq );
-
+#endif
     /*
     while(!stop_sem_test)
     {
@@ -502,10 +505,12 @@ int do_test_sem(const char *test_parm)
 
     printf("sema wait 2\n");
 
+#if TEST_SOFTIRQ
     // Softirq
     sem_released = 0;
     hal_sem_acquire( &ts );
     test_check_eq(sem_released,1);
+#endif
 
     hal_sleep_msec( 100 );
 

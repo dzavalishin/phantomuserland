@@ -171,7 +171,7 @@ static int ignore_handler(struct trap_state *ts)
 {
     (void) ts;
 
-    hal_sti(); // It works in open interrupts
+    //hal_sti(); // It works in open interrupts - NOOO! We carry user spinlock here, so we have to be in closed interrupts up to unlock!
     phantom_scheduler_soft_interrupt();
     // it returns with soft irqs disabled
     hal_enable_softirq();
