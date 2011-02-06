@@ -13,7 +13,7 @@
 #define COMPILE_UHCI 0
 
 #define HAVE_NET 1
-#define HAVE_UNIX 1
+#define HAVE_UNIX 0
 
 // 64 Mbytes of heap for start - TODO dynamic heap growth
 #define PHANTOM_START_HEAP_SIZE (1024*1024*64)

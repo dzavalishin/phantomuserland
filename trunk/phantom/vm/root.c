@@ -114,7 +114,7 @@ void pvm_root_init(void)
 
 
     //cycle through restart objects here and call restart func
-#if 1
+#if COMPILE_EXPERIMENTAL
     int items = get_array_size(pvm_root.restart_list.data);
 
     pvm_object_t wrc = pvm_get_weakref_class();
@@ -514,7 +514,7 @@ static o_restart_func_t find_restart_f( struct pvm_object _class )
 
 static void handle_object_at_restart( pvm_object_t o )
 {
-#if 1
+#if COMPILE_EXPERIMENTAL
     if(!(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
     {
         printf( "not internal object in restart list!" );
