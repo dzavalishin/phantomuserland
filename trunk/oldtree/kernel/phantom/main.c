@@ -150,7 +150,7 @@ static void net_stack_init();
 
 
 
-#include "i386/interrupts.h"
+#include <kernel/interrupts.h>
 
 void
 phantom_scheduler_request_soft_irq()

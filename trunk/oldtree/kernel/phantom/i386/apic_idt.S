@@ -12,7 +12,7 @@
 #include <mach/asm.h>
 //#include <i386/isa/pic_regs.h>
 
-#include "interrupts.h"
+#include <kernel/interrupts.h>
 
 
 // TODO EBX is not really used

@@ -115,6 +115,9 @@ const char *stat_counter_name[MAX_STAT_COUNTERS] =
     "DNS requests",
     "DNS answers",
 
+    "Thread switches",
+    "Thread reselects",
+
 };
 
 

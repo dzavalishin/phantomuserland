@@ -105,6 +105,9 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(malloc);
     TEST(amap);
 
+    // TODO Moved here for fast softirq test. move back!
+    TEST(threads);
+
     TEST(sem);
 
     TEST(udp_send);
@@ -122,7 +125,7 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are very long, do 'em last
-    TEST(threads);
+    //TEST(threads);
 
     //TEST(userland);
 

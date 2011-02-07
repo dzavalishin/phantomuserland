@@ -19,7 +19,7 @@
 #include <kernel/stats.h>
 #include <hal.h>
 
-#include "interrupts.h"
+#include <kernel/interrupts.h>
 
 #include <i386/trap.h>
 #include <i386/pio.h>

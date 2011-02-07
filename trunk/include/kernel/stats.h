@@ -30,6 +30,8 @@ extern int			*stat_sec_counters;
 #define		STAT_CNT_DNS_REQ			16
 #define		STAT_CNT_DNS_ANS			17
 
+#define		STAT_CNT_THREAD_SW			18
+#define		STAT_CNT_THREAD_SAME		19
 
 void stat_increment_counter( int nCounter );
 

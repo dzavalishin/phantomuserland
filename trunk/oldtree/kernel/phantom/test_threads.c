@@ -28,6 +28,7 @@
 #include <kernel/timedcall.h>
 
 #define TEST_CHATTY 0
+#define TEST_SOFTIRQ 1
 
 
 static volatile int thread_activity_counter = 0;
@@ -426,7 +427,6 @@ int do_test_timed_call(const char *test_parm)
 // Semaphores
 // -----------------------------------------------------------------------
 
-#define TEST_SOFTIRQ 0
 
 static hal_sem_t 	ts;
 static volatile int 	stop_sem_test = 0;
@@ -470,7 +470,7 @@ static void sem_softirq(void *a)
 {
     (void) a;
     printf("sema softirq\n");
-    hal_sleep_msec( 10 );
+    //hal_sleep_msec( 10 );
     sem_released = 1;
     hal_sem_release( &ts );
 }

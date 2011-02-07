@@ -24,6 +24,8 @@
 
 #include <queue.h>
 #include <phantom_libc.h>
+#include <kernel/interrupts.h>
+#include <kernel/stats.h>
 
 // TSS - TODO - move to machdep thread switch code
 #include <i386/tss.h>
@@ -39,6 +41,8 @@ void phantom_thread_switch()
 {
     int ie = hal_save_cli();
     hal_spinlock_t *toUnlock = 0;
+
+	STAT_INC_CNT(STAT_CNT_THREAD_SW);
 
     if(GET_CURRENT_THREAD()->sw_unlock == &schedlock)
     {
@@ -67,11 +71,7 @@ void phantom_thread_switch()
 
     if(next == old)
     {
-        //printf("same thread selected\n");
-        // threads_stat.samethread++;
-
-        //if(old->sleep_flags)            panic("blocked thread selected");
-
+		STAT_INC_CNT(STAT_CNT_THREAD_SAME);
         goto exit;
     }
 
@@ -82,12 +82,10 @@ void phantom_thread_switch()
 
     // do it before - after we will have stack switched and can't access
     // correct 'next'
-    //GET_CURRENT_THREAD() = next;
     SET_CURRENT_THREAD(next);
 
     hal_enable_softirq();
     phantom_switch_context(old, next, toUnlock );
-    // threads_stat.switches++;
     hal_disable_softirq();
 
     {
