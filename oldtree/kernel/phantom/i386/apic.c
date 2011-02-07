@@ -18,7 +18,7 @@
 #include "../misc.h"
 #include "apic.h"
 #include "idt.h"
-#include "interrupts.h"
+#include <kernel/interrupts.h>
 
 
 #include <x86/phantom_pmap.h>

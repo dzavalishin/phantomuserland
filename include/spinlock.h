@@ -3,7 +3,7 @@
 #ifndef spinlockH
 #define spinlockH
 
-#define SPIN_DEBUG 0
+#define SPIN_DEBUG 1
 
 #define spinlock_lock(l,s) hal_spin_lock(l)
 #define spinlock_unlock(l,s) hal_spin_unlock(l)
