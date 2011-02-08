@@ -14,3 +14,7 @@ int     open(char const *, int, ...);
 int close(int fd);
 
 int chdir(const char *name);
+int mkdir(const char *name);
+
+int unlink(const char *name);
+int link(const char *n1, const char *n2);
