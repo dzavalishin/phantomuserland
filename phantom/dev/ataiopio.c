@@ -1,3 +1,4 @@
+#if 0
 //#define __inline /**/
 //#define inline /**/
 
@@ -690,3 +691,4 @@ void pio_rep_outdword( unsigned int addrDataReg,
 #endif
 
 // end ataiopio.c
+#endif

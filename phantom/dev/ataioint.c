@@ -1,3 +1,4 @@
+#if 0
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOINT.C
 //
@@ -208,3 +209,4 @@ void dump_ide_stats()
 }
 
 // end ataioint.c
+#endif

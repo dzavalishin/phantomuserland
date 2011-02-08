@@ -1,3 +1,4 @@
+#if 0
 /*
  * dz - removed LARGE mode at all for simplicity.
  *
@@ -1245,3 +1246,4 @@ int dma_pci_packet( ataio_t *ata, int dev,
 }
 
 // end ataiopci.c
+#endif

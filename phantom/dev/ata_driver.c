@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -595,5 +596,6 @@ static errno_t ata_idenify_device( ataio_t *ata, int dev, long *retSize)
 
 
 
+#endif
 
 

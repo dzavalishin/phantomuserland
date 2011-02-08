@@ -1,3 +1,4 @@
+#if 0
 //#error convert 16 bit data types to 32 bit ones
 
 
@@ -1268,3 +1269,4 @@ const char * trc_llt_dump2( void )
 }
 
 // end ataiotrc.c
+#endif

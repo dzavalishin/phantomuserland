@@ -1,3 +1,4 @@
+#if 0
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOTMR.C
 //
@@ -286,3 +287,4 @@ void tmr_delay_xfer( void )
 }
 
 // end ataiotmr.c
+#endif
