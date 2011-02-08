@@ -1,5 +1,3 @@
-//#include "types.h"
-//#include "stat.h"
 #include <user/sys_misc.h>
 #include <user/sys_fio.h>
 #include <stdio.h>
