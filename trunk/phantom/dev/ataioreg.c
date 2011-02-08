@@ -1,3 +1,4 @@
+#if 0
 
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOREG.C
@@ -2202,3 +2203,4 @@ int reg_packet( ataio_t *ata, int dev,
 }
 
 // end ataioreg.c
+#endif

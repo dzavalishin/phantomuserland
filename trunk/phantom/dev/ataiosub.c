@@ -1,3 +1,4 @@
+#if 0
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOSUB.C
 //
@@ -347,3 +348,4 @@ void sub_writeBusMstrStatus( ataio_t *ata, unsigned char x )
 }
 
 // end ataiosub.c
+#endif
