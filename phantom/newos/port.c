@@ -174,6 +174,7 @@ port_create(int32 queue_length, const char *name)
     int 	name_len;
     void 	*q;
     proc_id	owner;
+    int __newos_intstate;
 
     if(ports_active == false)
         return -ENXIO;
@@ -233,7 +234,8 @@ port_create(int32 queue_length, const char *name)
     owner = 0;
     //owner = proc_get_current_proc_id();
 
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
     GRAB_PORT_LIST_LOCK();
 
     // find the first empty spot
@@ -292,6 +294,7 @@ int
 port_close(port_id id)
 {
     int		slot;
+    int     __newos_intstate;
 
     if(ports_active == false)   return -ENXIO;
     if(id < 0)                  return -EINVAL;
@@ -299,7 +302,9 @@ port_close(port_id id)
     slot = id % MAX_PORTS;
 
     // walk through the sem list, trying to match name
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
+
     GRAB_PORT_LOCK(ports[slot]);
 
     if (ports[slot].id != id) {
@@ -325,6 +330,7 @@ port_delete(port_id id)
     sem_id	r_sem, w_sem;
     int capacity;
     int i;
+    int __newos_intstate;
 
     char *old_name;
     struct port_msg *q;
@@ -334,7 +340,8 @@ port_delete(port_id id)
 
     slot = id % MAX_PORTS;
 
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
@@ -379,12 +386,14 @@ port_find(const char *port_name)
 {
     int i;
     int ret_val = -EINVAL;
+    int __newos_intstate;
 
     if(ports_active == false)   return -ENXIO;
     if(port_name == NULL)	return -EINVAL;
 
     // lock list of ports
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
     GRAB_PORT_LIST_LOCK();
 
     // loop over list
@@ -409,6 +418,7 @@ int
 port_get_info(port_id id, struct port_info *info)
 {
     int slot;
+    int __newos_intstate;
 
     if(ports_active == false)	return -ENXIO;
     if (info == NULL)        	return -EINVAL;
@@ -416,7 +426,8 @@ port_get_info(port_id id, struct port_info *info)
 
     slot = id % MAX_PORTS;
 
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
@@ -447,6 +458,7 @@ port_get_next_port_info(proc_id proc,
                         struct port_info *info)
 {
     int slot;
+    int __newos_intstate;
 
     if(ports_active == false)	return -ENXIO;
     if (cookie == NULL)        	return -EINVAL;
@@ -461,7 +473,8 @@ port_get_next_port_info(proc_id proc,
     }
 
     // spinlock
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
     GRAB_PORT_LIST_LOCK();
 
     info->id = -1; // used as found flag
@@ -508,13 +521,15 @@ port_buffer_size_etc(port_id id,
     int res;
     int t;
     int len;
+    int __newos_intstate;
 
     if(ports_active == false)	return -ENXIO;
     if(id < 0)                  return -EINVAL;
 
     slot = id % MAX_PORTS;
 
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
@@ -566,13 +581,15 @@ port_count(port_id id)
 {
     int slot;
     int count;
+    int __newos_intstate;
 
     if(ports_active == false)   return -ENXIO;
     if(id < 0)                  return -EINVAL;
 
     slot = id % MAX_PORTS;
 
-    int_disable_interrupts();
+    //int_disable_interrupts();
+    __newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
@@ -618,7 +635,7 @@ port_read_etc(port_id id,
     int		t;
     cbuf*	msg_store;
     int32	code;
-    //int		err;
+    int		ei;
 
     if(ports_active == false)        			return -ENXIO;
     if(id < 0)        					return -EINVAL;
@@ -630,7 +647,7 @@ port_read_etc(port_id id,
 
     slot = id % MAX_PORTS;
 
-    int ei = hal_save_cli();
+    ei = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
@@ -771,7 +788,7 @@ port_write_etc(port_id id,
     int h;
     cbuf* msg_store;
     int c1, c2;
-    int err;
+    int err, ei;
 
     if(ports_active == false)           return -ENXIO;
     if(id < 0)        			return -EINVAL;
@@ -785,7 +802,7 @@ port_write_etc(port_id id,
     if (buffer_size > PORT_MAX_MESSAGE_SIZE)
         return -EINVAL;
 
-    int ei = hal_save_cli();
+    ei = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {

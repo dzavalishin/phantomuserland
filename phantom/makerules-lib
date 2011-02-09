@@ -3,6 +3,11 @@ all: $(TARGET)
 
 prepare::
 
+analyse::
+		@echo --- preprocessing for $(TARGET)_sources.E
+		$(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) $(filter-out $(NOT_ANALYSE), $(CFILES) ) > ../../$(TARGET)_sources.E
+
+
 CLEAN_FILES += $(TARGET)
 
 

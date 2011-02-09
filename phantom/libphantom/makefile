@@ -1,8 +1,9 @@
 BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
-TARGET	= libphantom.a 
+TARGET	= libphantom.a
 
-SRCDIRS += $(BUILD_ROOT)/libphantom $(BUILD_ROOT)/libphantom/udis86 
+#SRCDIRS += $(BUILD_ROOT)/libphantom $(BUILD_ROOT)/libphantom/udis86 
+SRCDIRS += $(BUILD_ROOT)/libphantom 
 
 INCDIRS += ../kernel
 

@@ -17,3 +17,6 @@ generate:	generate.o store.o
 	./generate
 
 CLEAN_FILES += generate generate.exe FieldOffsets.java field_offsets.h 
+
+analyse:: 
+	# none

@@ -27,9 +27,9 @@ static void stack_dump_one(void *ebp)
 
 void stack_dump_ebp(void *ebp)
 {
+    int i;
     printf("Stack:\n");
 
-    int i;
     for( i = 0; i < MAX_DEPTH; i++ )
     {
         if( ebp == 0 )

@@ -435,6 +435,7 @@ int dbg_add_command(void (*func)(int, char **), const char *name, const char *de
     cmd->cmd = name;
     cmd->description = desc;
 
+    {
     int_disable_interrupts();
     acquire_spinlock(&dbg_spinlock);
 
@@ -443,6 +444,7 @@ int dbg_add_command(void (*func)(int, char **), const char *name, const char *de
 
     release_spinlock(&dbg_spinlock);
     int_restore_interrupts();
+    }
 
     return NO_ERROR;
 }
