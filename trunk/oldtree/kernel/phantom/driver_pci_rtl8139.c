@@ -29,7 +29,7 @@
 #include <i386/pio.h>
 #include "driver_map.h"
 
-#include "ethernet_defs.h"
+#include <kernel/ethernet_defs.h>
 
 #include "newos.h"
 #include "net.h"

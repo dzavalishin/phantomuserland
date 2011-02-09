@@ -8,7 +8,7 @@
 #include "driver_pci_intel82559.h"
 #include "driver_pci_intel82559_priv.h"
 
-#include "ethernet_defs.h"
+#include <kernel/ethernet_defs.h>
 
 //#include "newos.h"
 #include "net.h"
