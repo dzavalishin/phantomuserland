@@ -65,5 +65,8 @@ void phantom_init_stat_counters(void);
 void phantom_init_stat_counters2(void);
 
 
+void phantom_unix_proc_init(void);
+
+
 #endif // INIT_H
 
