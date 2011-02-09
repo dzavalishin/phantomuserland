@@ -9,6 +9,10 @@ all:: $(TARGETS)
 
 prepare::
 
+analyse::
+		@$(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES) >../../../kernel_sources.E
+
+
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 

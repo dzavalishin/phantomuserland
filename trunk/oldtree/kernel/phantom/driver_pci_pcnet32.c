@@ -11,6 +11,13 @@
 #include <kernel/config.h>
 #if HAVE_NET
 
+#define DEBUG_MSG_PREFIX "PCNET32"
+#include "debug_ext.h"
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <phantom_libc.h>
 #include <i386/pio.h>
 #include <threads.h>
@@ -26,6 +33,10 @@
 
 #define WW()
 //#define WW() getchar()
+
+
+#define PCNET_USE_SOFTIRQ 0
+
 
 
 #define DEV_NAME "PCNET32: "
@@ -64,6 +75,7 @@ static u_int16_t gringlens[] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 };
 
 static pcnet32 *pcnet32_new(u_int32_t initmode, u_int16_t rxbuffer_size, u_int16_t txbuffer_size);
 static void pcnet32_int(void*);
+static void pcnet32_softint(void* data);
 
 // call this to enable a receive buffer so the controller can fill it.
 static void rxdesc_init(pcnet32 *nic, u_int16_t index);
@@ -89,7 +101,7 @@ phantom_device_t * driver_pcnet_pchome_probe( pci_cfg_t *pci, int stage )
 
     pcnet32 *nic = NULL;
 
-    printf( DEV_NAME " probe\n");
+    SHOW_FLOW0( 0, "probe");
 WW();
     nic = pcnet32_new( PCNET_INIT_MODE0 | PCNET_INIT_RXLEN_128 | PCNET_INIT_TXLEN_32,
                       2048, 2048);
@@ -476,6 +488,16 @@ int pcnet32_init(pcnet32 *nic)
         return -1;
     }
 
+    nic->softirq = hal_alloc_softirq();
+    if( nic->softirq < 0 )
+    {
+        SHOW_ERROR0( 0, "Unable to get softirq" );
+        goto unmap_irq;
+    }
+
+    hal_set_softirq_handler( nic->softirq, &pcnet32_softint, nic );
+
+
     if(DEBUG) printf( DEV_NAME "device mapped irq 0x%x\n", nic->irq ); //+ 0x20);
 
     nic->virt_base = 0; // should generate a panic if someone tries to use it
@@ -488,7 +510,7 @@ int pcnet32_init(pcnet32 *nic)
         if( hal_alloc_vaddress(&va, pages) )
         {
             if(DEBUG) printf(DEV_NAME "can't alloc addr space\n");
-            goto unmap_irq;
+            goto unmap_irq; // TODO free softirq!
         }
 
         hal_pages_control( (int)nic->phys_base, va, pages, page_map, page_rw );
@@ -541,6 +563,14 @@ unmap_irq:
 }
 
 
+
+static void pcnet32_softint(void* data)
+{
+    pcnet32 *nic = (pcnet32 *)data;
+    hal_sem_release(&(nic->rxring_sem));
+    SHOW_FLOW0( 0, "softirq");
+}
+
 static void pcnet32_int(void* data)
 {
     pcnet32 *nic = (pcnet32 *)data;
@@ -563,7 +593,11 @@ static void pcnet32_int(void* data)
     nic->interrupt_status = status;
 
     //sem_release_etc(nic->interrupt_sem, 1, SEM_FLAG_NO_RESCHED);
+#if PCNET_USE_SOFTIRQ
+    hal_request_softirq( nic->softirq );
+#else
     hal_sem_release( &(nic->interrupt_sem) );
+#endif
 
     nic->interrupt_count++;
 
@@ -733,7 +767,8 @@ ssize_t pcnet32_rx(pcnet32 *nic, char *buf, ssize_t buf_len)
         // consume 1 descriptor at a time, whether it's an error or a
         // valid packet.
         hal_sem_acquire( &(nic->rxring_sem) );
-        if(NET_CHATTY||DEBUG) printf( DEV_NAME "nic %p rx semaphore was signalled\n", nic);
+        SHOW_FLOW( 9, "nic %p rx semaphore was signalled", nic);
+        //if(NET_CHATTY||DEBUG) printf( DEV_NAME "nic %p rx semaphore was signalled\n", nic);
 
         // the semaphor has been released at least once, so we will
         // lock the rxring and grab the next available descriptor.

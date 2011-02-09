@@ -68,6 +68,8 @@ struct pcnet32
     int irq;
     addr_t phys_base;
 
+    int softirq;
+
     //addr_t phys_size;
     u_int32_t phys_size;
 
