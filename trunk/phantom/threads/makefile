@@ -1,6 +1,6 @@
 BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
-TARGET	= libthreads.a 
+TARGET	= libthreads.a
 
 SRCDIRS += $(BUILD_ROOT)/threads $(BUILD_ROOT)/threads/$(ARCH)
 

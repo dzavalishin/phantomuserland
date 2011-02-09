@@ -15,4 +15,5 @@ all: all-subdirs
 clean: clean-subdirs
 	rm -f lib/*.a lib/crt0.o 
 
+analyse:: analyse-subdirs
 

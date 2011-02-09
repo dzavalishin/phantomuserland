@@ -27,4 +27,11 @@ clean::
 	# kernel
 	cd phantom; make clean; cd ..
 	cd oldtree/kernel; make clean; cd ../..
+	-rm *.E all_sources
 
+analyse::
+	cd phantom; make analyse; cd ..
+	cd oldtree/kernel; make analyse; cd ../..
+	#cat *.E >all_sources
+	#rm *.E
+	splint +gnuextensions +nolib +boolint *.E >ana
