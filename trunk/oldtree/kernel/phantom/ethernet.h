@@ -17,7 +17,7 @@
 #define ETHERNET_MIN_SIZE (ETHERNET_HEADER_SIZE+46)
 */
 
-#include "ethernet_defs.h"
+#include <kernel/ethernet_defs.h>
 
 
 typedef uint8 ethernet_addr[6];
