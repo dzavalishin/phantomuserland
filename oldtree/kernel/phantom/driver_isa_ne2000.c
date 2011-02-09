@@ -30,7 +30,7 @@
 
 #include <dev/isa/ns8390.h>
 #include "device.h"
-#include "ethernet_defs.h"
+#include <kernel/ethernet_defs.h>
 
 #include "newos.h"
 #include "net.h"
