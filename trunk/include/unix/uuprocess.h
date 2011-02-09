@@ -17,7 +17,7 @@ struct uuprocess
 {
 	//hal_mutex_t		lock;
 
-    int                 pid;
+    int                 pid; // < 0 for unused struct
     int                 ppid;
     int                 pgrp_pid;
     int                 sess_pid;
@@ -30,6 +30,7 @@ struct uuprocess
     char                cmd[MAX_UU_CMD];
     struct uufile *     fd[MAX_UU_FD];
     int                 tids[MAX_UU_TID];
+    int                 ntids;
 
     struct uufile *     cwd;
 
@@ -49,6 +50,7 @@ struct uuprocess
 typedef struct uuprocess uuprocess_t;
 
 uuprocess_t *uu_create_process(int ppid);
+void uu_proc_add_thread( uuprocess_t *p, int tid );
 
 
 #endif // UUPROCESS_H
