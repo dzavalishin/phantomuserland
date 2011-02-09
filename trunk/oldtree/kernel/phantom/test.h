@@ -17,6 +17,7 @@
 
 
 int do_test_malloc(const char *test_parm);
+int do_test_physmem(const char *test_parm);
 
 // TODO test amap
 // TODO test physmem alloc: allocator separately and core/locore/vaddr instances separately

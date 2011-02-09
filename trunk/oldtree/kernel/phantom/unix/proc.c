@@ -60,14 +60,25 @@ static uuprocess_t *get_proc()
 
 
 
-uuprocess_t *uu_create_process(int ppid)
+uuprocess_t *uu_create_process(int ppid, struct exe_module *em)
 {
     hal_mutex_lock(&proc_lock);
     //uuprocess_t *p = calloc( 1, sizeof(uuprocess_t) );
     uuprocess_t *p = get_proc();
     assert(p);
+    assert(em);
+
+    // Caller must increment
+    assert( em->refcount > 0 );
 
     memset( p, 0, sizeof(uuprocess_t) );
+
+    p->em = em;
+
+    p->mem_start = em->mem_start;
+    p->mem_end = em->mem_end;
+
+    strncpy( p->cmd, em->name, MAX_UU_CMD );
 
     p->pid = get_pid();
 
@@ -140,12 +151,31 @@ static int get_pid()
     }
 }
 
+// Called on proc death in proc mutex, so - interlocked
+static void uu_unlink_exe_module( struct exe_module *em )
+{
+    assert(em);
+    assert(em->refcount > 0);
+
+    em->refcount--;
+    if(em->refcount > 0)
+        return;
+
+    hal_pv_free( em->pa, em->mem_start, em->mem_size );
+    free(em);
+}
+
+
 // Process death handler. called on no threads left.
 static void uu_proc_death(uuprocess_t *p)
 {
     SHOW_FLOW( 1, "Process %d dies", p->pid );
 
     // TODO cleanup!
+
+    struct exe_module * em = p->em;
+
+    uu_unlink_exe_module(em);
 }
 
 // Called in thread death callback.

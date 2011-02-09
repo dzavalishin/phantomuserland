@@ -280,6 +280,7 @@ int main(int argc, char **argv, char **envp)
     // Before boot modules init Unix-like environment
     // as modules have access to it
     phantom_unix_fs_init();
+    phantom_unix_proc_init();
 
 
     // Start modules bootloader brought us

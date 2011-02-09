@@ -38,28 +38,6 @@
 //#include <unix/uufile.h>
 #include <sys/fcntl.h>
 
-// This structure is pointed by thread that is running it
-// and describes loadable execution unit
-struct exe_module
-{
-    const char * 	name; // debug only
-    u_int32_t           start;
-    u_int32_t           esp;
-
-    // possibly here we have to have syscall service pointer
-    //physaddr_t  	phys_cs;
-    u_int16_t           cs_seg;
-    linaddr_t           cs_linear;
-    size_t  		cs_pages;
-
-    //physaddr_t  	phys_ds;
-    u_int16_t           ds_seg;
-    linaddr_t           ds_linear;
-    size_t  		ds_pages;
-
-    void *              mem_start;
-    void *              mem_end; // above last addr
-};
 
 
 static errno_t elf_check(struct Elf32_Ehdr *elf_header);
@@ -103,11 +81,8 @@ errno_t load_elf( void *_elf, size_t elf_size, const char *name )
 
         if( bot < minaddr ) minaddr = bot;
         if( top > maxaddr ) maxaddr = top;
-
-        //elf_load_segment(src, &program_header[i]);
     }
 
-    //assert( minaddr >= 0 );
     if( minaddr != 0 )
         SHOW_ERROR( 0, "min addr not zero: 0x%X", minaddr );
 
@@ -137,7 +112,7 @@ errno_t load_elf( void *_elf, size_t elf_size, const char *name )
         Elf32_Phdr *ph = program_header+i;
         if( elf_load_seg(ph, _elf, va) )
         {
-            // TODO free mem?
+            hal_pv_free( pa, va, memsize );
             return ENXIO;
         }
 
@@ -160,13 +135,18 @@ errno_t load_elf( void *_elf, size_t elf_size, const char *name )
     // For kernel protected modlue allocata LDT, set segments, set LDT for thread,
     // start module in LDT.
     struct exe_module *em = calloc( sizeof(struct exe_module), 1 );
+    em->refcount++;
 
     // TODO Need some table of running modules?
 
     em->mem_start = va;
     em->mem_end = va+memsize;
 
-    em->name = name;
+
+    em->mem_size = memsize;
+    em->pa = pa;
+
+    strncpy( em->name, name, MAX_UU_CMD );
     em->start = elf_header->e_entry;
     em->esp = memsize - sizeof(int); // Why -sizeof(int) ?
 
@@ -197,20 +177,7 @@ errno_t load_elf( void *_elf, size_t elf_size, const char *name )
 
 static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t start, u_int32_t esp)
 {
-
-    /*
-
-    Push:
-
-    SS
-    ESP
-    EFLAGS
-    CS
-    EIP
-    */
-
-
-
+    // Push sequence: SS ESP EFLAGS CS EIP
     // Set up a stack structure for switching to user mode.
     asm volatile("  \
                  sti; \
@@ -235,6 +202,7 @@ static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t star
 }
 
 
+static void reopen_stdioe(uuprocess_t *u, const char *fname);
 
 static void kernel_protected_module_starter( void * _em )
 {
@@ -244,14 +212,7 @@ static void kernel_protected_module_starter( void * _em )
 
     hal_set_thread_name(em->name);
 
-    uuprocess_t *u = uu_create_process(-1); // no parent PID?
-
-    u->mem_start = em->mem_start;
-    u->mem_end = em->mem_end;
-
-    u->umask = 022;
-
-    strncpy( u->cmd, em->name, MAX_UU_CMD );
+    uuprocess_t *u = uu_create_process(-1, em); // no parent PID?
 
 #if 0
     u->tids[0] = GET_CURRENT_THREAD()->tid;
@@ -260,25 +221,28 @@ static void kernel_protected_module_starter( void * _em )
     uu_proc_add_thread( u, GET_CURRENT_THREAD()->tid );
 #endif
 
+    reopen_stdioe(u,"/dev/tty");
+
+    switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, em->start, em->esp );
+}
+
+
+static void reopen_stdioe(uuprocess_t *u, const char *fname)
+{
     int err;
     usys_close( &err, u, 0 );
     usys_close( &err, u, 1 );
     usys_close( &err, u, 2 );
 
-    if( usys_open( &err, u, "/dev/tty", O_RDONLY, 0 ) != 0 )
-        SHOW_ERROR( 0, "can't open stdin, %d", err );
+    if( usys_open( &err, u, fname, O_RDONLY, 0 ) != 0 )
+        SHOW_ERROR( 0, "can't open %s for stdin, %d", fname, err );
 
-    if( usys_open( &err, u, "/dev/tty", O_WRONLY, 0 ) != 1 )
-        SHOW_ERROR( 0, "can't open stdout, %d", err );
+    if( usys_open( &err, u, fname, O_WRONLY, 0 ) != 1 )
+        SHOW_ERROR( 0, "can't open %s for stdout, %d", fname, err );
 
-    if( usys_open( &err, u, "/dev/tty", O_WRONLY, 0 ) != 2 )
-        SHOW_ERROR( 0, "can't open stderr, %d", err );
-
-
-
-    switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, em->start, em->esp );
+    if( usys_open( &err, u, fname, O_WRONLY, 0 ) != 2 )
+        SHOW_ERROR( 0, "can't open %s for stderr, %d", fname, err );
 }
-
 
 
 
