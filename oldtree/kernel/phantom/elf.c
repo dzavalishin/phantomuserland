@@ -244,12 +244,7 @@ static void kernel_protected_module_starter( void * _em )
 
     hal_set_thread_name(em->name);
 
-    // HACK, use unix/... code to allocate and register this
-    //uuprocess_t *u = calloc( 1, sizeof(uuprocess_t) );
-
     uuprocess_t *u = uu_create_process(-1); // no parent PID?
-
-    GET_CURRENT_THREAD()->u = u;
 
     u->mem_start = em->mem_start;
     u->mem_end = em->mem_end;
@@ -257,7 +252,13 @@ static void kernel_protected_module_starter( void * _em )
     u->umask = 022;
 
     strncpy( u->cmd, em->name, MAX_UU_CMD );
+
+#if 0
     u->tids[0] = GET_CURRENT_THREAD()->tid;
+    GET_CURRENT_THREAD()->u = u;
+#else
+    uu_proc_add_thread( u, GET_CURRENT_THREAD()->tid );
+#endif
 
     int err;
     usys_close( &err, u, 0 );
