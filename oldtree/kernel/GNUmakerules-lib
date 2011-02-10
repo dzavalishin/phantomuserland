@@ -12,8 +12,8 @@ endif
 #LIBOUT=../old/kernel/lib
 LIBOUT=$(PHANTOM_SRCDIR)/../kernel/lib
 
-#all: $(_LIBS) $(addprefix $(LIBOUT)/lib/, $(_LIBS))
-all: $(_LIBS) $(addprefix $(LIBOUT)/, $(_LIBS))
+#all: $(_LIBS) $(addprefix $(LIBOUT)/, $(_LIBS))
+all: $(_LIBS)
 
 prepare::
 

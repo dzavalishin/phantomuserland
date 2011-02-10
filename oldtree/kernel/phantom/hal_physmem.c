@@ -69,6 +69,9 @@ hal_init_vm_map(void)
                             );
 
     vm_map.allocable_size = PHANTOM_AMAP_SIZE_VADDR_POOL/PAGE_SIZE;
+    //vm_map.n_used_pages = vm_map.allocable_size;
+    vm_map.n_used_pages = 0;
+
 
     // No! Later! See main.c
     //hal_init_physmem_alloc_thread();
@@ -135,14 +138,18 @@ hal_init_physmem_alloc(void)
 #if USE_RESERVE
     hal_spin_init(&pm_lock);
 #endif
-    // 64 bit problem
+    // FIXME 64 bit problem
     phantom_phys_alloc_init( &pm_map, MAXPAGES ); // All the possible mem
+    pm_map.n_used_pages = pm_map.allocable_size = 0;
+
     //phantom_phys_free_region( &pm_map, start/PAGE_SIZE, npages );
 
     // Unmap it for any case
     //hal_pages_control( start, 0, npages, page_unmap, page_noaccess );
 
     phantom_phys_alloc_init( &low_map, 0x100000/PAGE_SIZE ); // All the possible low mem
+    low_map.n_used_pages = 0; //low_map.allocable_size = 0x100000/PAGE_SIZE;
+    low_map.allocable_size = 0;
 
 }
 
@@ -163,6 +170,7 @@ hal_physmem_add( physaddr_t start, size_t npages )
     assert(!(start & (PAGE_SIZE - 1)));
     total_phys_pages += npages;
     pm_map.allocable_size += npages;
+    pm_map.n_used_pages += npages;
     phantom_phys_free_region(&pm_map, start/PAGE_SIZE, npages);
 }
 
@@ -355,6 +363,7 @@ hal_physmem_add_low( physaddr_t start, size_t npages )
     phantom_phys_free_region( &low_map, start/PAGE_SIZE, npages );
 
     low_map.allocable_size += npages;
+    low_map.n_used_pages += npages;
 
     // Unmap it for any case
     //hal_pages_control( start, 0, npages, page_unmap, page_noaccess );
