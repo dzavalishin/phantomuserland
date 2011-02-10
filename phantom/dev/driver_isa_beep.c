@@ -36,12 +36,15 @@
 //! \param frequency The frequency of the sound.
 void sound(u_int32_t frequency)
 {
+	int ie;
+	u_int32_t div;
+
     if( (frequency<19) || (frequency>22000) )
         return;
 
-    u_int32_t div = TIMER_FREQ / frequency;
+    div = TIMER_FREQ / frequency;
 
-    int ie = hal_save_cli();
+    ie = hal_save_cli();
 
     outb( 0x61, inb(0x61) | 3 );
     outb( TIMER_MODE, 0xB6);
@@ -105,6 +108,8 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage )
 {
+	phantom_device_t * dev;
+
     (void) port;
     (void) irq;
     (void) stage;
@@ -113,7 +118,7 @@ phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage )
 
     // TODO check if we really have this hardware. How?
 
-    phantom_device_t * dev = malloc(sizeof(phantom_device_t));
+    dev = malloc(sizeof(phantom_device_t));
     dev->name = "BEEP";
     dev->seq_number = seq_number++;
 
