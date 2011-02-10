@@ -93,7 +93,7 @@ errno_t hal_sem_acquire(hal_sem_t *c)
 
         t->waitsem   = c;
 
-        thread_block( THREAD_SLEEP_SEM, &t->waitlock );
+        thread_block( THREAD_SLEEP_SEM, &t->waitlock ); //-V112
         hal_spin_lock(&(ci->lock));
     }
 
@@ -164,7 +164,7 @@ hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
             phantom_request_timed_call( &t->sleep_event, TIMEDCALL_FLAG_CHECKLOCK );
         }
 
-        thread_block( THREAD_SLEEP_SEM, &t->waitlock );
+        thread_block( THREAD_SLEEP_SEM, &t->waitlock ); //-V112
 
         retcode = (t->thread_flags & THREAD_FLAG_TIMEDOUT) != 0;
         t->thread_flags &= ~THREAD_FLAG_TIMEDOUT;

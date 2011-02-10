@@ -300,7 +300,7 @@ static int com_write(struct phantom_device *dev, const void *buf, int len)
 
 static void com_setbaud(struct phantom_device *dev, int speed)
 {
-    int addr = dev->iobase;
+    //int addr = dev->iobase;
     //int unit = dev->seq_number;
 
     int divisor = 0x0C; // 9600
@@ -318,9 +318,13 @@ static void com_setbaud(struct phantom_device *dev, int speed)
     case 2400:		divisor = 0x30; break;
     }
 
+	// for some reason kills debugging com output in qemu
+
+#if 0
     outb(LINE_CTL(addr), iDLAB);
     outb(BAUD_LSB(addr), divisor & 0xff);
     outb(BAUD_MSB(addr), divisor >> 8);
+#endif
 
 
 #if 0

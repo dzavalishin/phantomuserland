@@ -111,7 +111,7 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
 #if VERIFY_DEADLOCK
     verify_mutex_deadlock(GET_CURRENT_THREAD());
 #endif
-    thread_block( THREAD_SLEEP_MUTEX, &(mi->lock) );
+    thread_block( THREAD_SLEEP_MUTEX, &(mi->lock) ); //-V112
     // returns on unblock
     goto nounlock;
 
