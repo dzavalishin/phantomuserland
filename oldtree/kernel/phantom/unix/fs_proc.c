@@ -71,10 +71,11 @@ static errno_t     proc_open(struct uufile *, int create, int write);
 static errno_t     proc_close(struct uufile *);
 
 // Create a file struct for given path
-static uufile_t *  proc_namei(const char *filename);
+static uufile_t *  proc_namei(uufs_t *fs, const char *filename);
 
 // Return a file struct for fs root
-static uufile_t *  proc_getRoot();
+static uufile_t *  proc_getRoot(uufs_t *fs);
+static errno_t     proc_dismiss(uufs_t *fs);
 
 
 struct uufs proc_fs =
@@ -84,6 +85,9 @@ struct uufs proc_fs =
     .close 	= proc_close,
     .namei 	= proc_namei,
     .root 	= proc_getRoot,
+    .dismiss    = proc_dismiss,
+
+    .impl       = 0,
 };
 
 
@@ -138,9 +142,11 @@ static size_t r_about( struct uufile *f, void *dest, size_t bytes)
 
 
 // Create a file struct for given path
-static uufile_t *  proc_namei(const char *filename)
+static uufile_t *  proc_namei( uufs_t *fs, const char *filename)
 {
     size_t (*pread)( struct uufile *f, void *dest, size_t bytes);
+
+    (void) fs;
 
     if( strcmp( filename, "about" ) )
         pread = &r_about;
@@ -165,9 +171,18 @@ static uufile_t *  proc_namei(const char *filename)
 }
 
 // Return a file struct for fs root
-static uufile_t *  proc_getRoot()
+static uufile_t *  proc_getRoot(uufs_t *fs)
 {
+    (void) fs;
+
     return &proc_root;
+}
+
+static errno_t     proc_dismiss(uufs_t *fs)
+{
+    (void) fs;
+    // TODO impl
+    return 0;
 }
 
 

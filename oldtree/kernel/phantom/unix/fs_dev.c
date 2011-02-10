@@ -94,10 +94,12 @@ static errno_t     dev_open(struct uufile *, int create, int write);
 static errno_t     dev_close(struct uufile *);
 
 // Create a file struct for given path
-static uufile_t *  dev_namei(const char *filename);
+static uufile_t *  dev_namei(uufs_t *fs, const char *filename);
 
 // Return a file struct for fs root
-static uufile_t *  dev_getRoot();
+static uufile_t *  dev_getRoot(uufs_t *fs);
+
+static errno_t     dev_dismiss(uufs_t *fs);
 
 
 struct uufs dev_fs =
@@ -107,6 +109,9 @@ struct uufs dev_fs =
     .close 	= dev_close,
     .namei 	= dev_namei,
     .root 	= dev_getRoot,
+    .dismiss    = dev_dismiss,
+
+    .impl       = 0,
 };
 
 
@@ -143,8 +148,10 @@ static errno_t     dev_close(struct uufile *f)
 }
 
 // Create a file struct for given path
-static uufile_t *  dev_namei(const char *filename)
+static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
 {
+    (void) fs;
+
     struct uufileops *ops = 0;
 
     if( 0 == strcmp( filename, "tty" ) )
@@ -165,9 +172,17 @@ static uufile_t *  dev_namei(const char *filename)
 }
 
 // Return a file struct for fs root
-static uufile_t *  dev_getRoot()
+static uufile_t *  dev_getRoot(uufs_t *fs)
 {
+    (void) fs;
     return &dev_root;
+}
+
+
+static errno_t     dev_dismiss(uufs_t *fs)
+{
+    (void) fs;
+    return 0;
 }
 
 

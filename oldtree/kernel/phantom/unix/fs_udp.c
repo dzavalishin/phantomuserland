@@ -74,10 +74,11 @@ static errno_t     udpfs_open(struct uufile *, int create, int write);
 static errno_t     udpfs_close(struct uufile *);
 
 // Create a file struct for given path
-static uufile_t *  udpfs_namei(const char *filename);
+static uufile_t *  udpfs_namei(uufs_t *fs, const char *filename);
 
 // Return a file struct for fs root
-static uufile_t *  udpfs_getRoot();
+static uufile_t *  udpfs_getRoot(uufs_t *fs);
+static errno_t     udpfs_dismiss(uufs_t *fs);
 
 
 struct uufs udp_fs =
@@ -87,6 +88,9 @@ struct uufs udp_fs =
     .close 	= udpfs_close,
     .namei 	= udpfs_namei,
     .root 	= udpfs_getRoot,
+    .dismiss    = udpfs_dismiss,
+
+    .impl       = 0,
 };
 
 
@@ -130,9 +134,11 @@ static errno_t     udpfs_close(struct uufile *f)
 
 
 // Create a file struct for given path
-static uufile_t *  udpfs_namei(const char *filename)
+static uufile_t *  udpfs_namei(uufs_t *fs, const char *filename)
 {
     int ip0, ip1, ip2, ip3, port;
+
+    (void) fs;
 
     if( 5 != sscanf( filename, "%d.%d.%d.%d:%d", &ip0, &ip1, &ip2, &ip3, &port ) )
     {
@@ -176,9 +182,17 @@ static uufile_t *  udpfs_namei(const char *filename)
 }
 
 // Return a file struct for fs root
-static uufile_t *  udpfs_getRoot()
+static uufile_t *  udpfs_getRoot(uufs_t *fs)
 {
+    (void) fs;
     return &udpfs_root;
+}
+
+static errno_t     udpfs_dismiss(uufs_t *fs)
+{
+    (void) fs;
+    // TODO impl
+    return 0;
 }
 
 

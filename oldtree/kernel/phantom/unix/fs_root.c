@@ -72,10 +72,11 @@ static errno_t     root_open(struct uufile *, int create, int write);
 static errno_t     root_close(struct uufile *);
 
 // Create a file struct for given path
-static uufile_t *  root_namei(const char *filename);
+static uufile_t *  root_namei(uufs_t *fs, const char *filename);
 
 // Return a file struct for fs root
-static uufile_t *  root_getRoot();
+static uufile_t *  root_getRoot(uufs_t *fs);
+static errno_t     root_dismiss(uufs_t *fs);
 
 
 struct uufs root_fs =
@@ -85,6 +86,9 @@ struct uufs root_fs =
     .close 	= root_close,
     .namei 	= root_namei,
     .root 	= root_getRoot,
+    .dismiss    = root_dismiss,
+
+    .impl       = 0,
 };
 
 
@@ -120,22 +124,33 @@ static errno_t     root_close(struct uufile *f)
 
 
 // Create a file struct for given path
-static uufile_t *  root_namei(const char *filename)
+static uufile_t *  root_namei(uufs_t *_fs, const char *filename)
 {
     char namerest[FS_MAX_PATH_LEN];
+
+    (void) _fs;
 
     uufs_t * fs = find_mount( filename, namerest );
 
     if( fs == 0 )
         return 0;
 
-    return fs->namei( namerest );
+    return fs->namei( fs, namerest );
 }
 
 // Return a file struct for fs root
-static uufile_t *  root_getRoot()
+static uufile_t *  root_getRoot(uufs_t *fs)
 {
+    (void) fs;
     return &root_root;
+}
+
+
+static errno_t     root_dismiss(uufs_t *fs)
+{
+    (void) fs;
+    // TODO impl
+    return 0;
 }
 
 

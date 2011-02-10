@@ -79,10 +79,11 @@ static errno_t     fat32_open(struct uufile *, int create, int write);
 static errno_t     fat32_close(struct uufile *);
 
 // Create a file struct for given path
-static uufile_t *  fat32_namei(const char *filename);
+static uufile_t *  fat32_namei(uufs_t *fs, const char *filename);
 
 // Return a file struct for fs root
-static uufile_t *  fat32_getRoot();
+static uufile_t *  fat32_getRoot(uufs_t *fs);
+static errno_t     fat32_dismiss(uufs_t *fs);
 
 
 struct uufs fat32_fs =
@@ -92,6 +93,9 @@ struct uufs fat32_fs =
     .close 	= fat32_close,
     .namei 	= fat32_namei,
     .root 	= fat32_getRoot,
+    .dismiss    = fat32_dismiss,
+
+    .impl       = 0,
 };
 
 
@@ -122,7 +126,7 @@ static errno_t     fat32_close(struct uufile *f)
 }
 
 // Create a file struct for given path
-static uufile_t *  fat32_namei(const char *filename)
+static uufile_t *  fat32_namei(uufs_t *fs, const char *filename)
 {
     (void) filename;
     return 0;
@@ -139,10 +143,16 @@ static uufile_t *  fat32_namei(const char *filename)
 }
 
 // Return a file struct for fs root
-static uufile_t *  fat32_getRoot()
+static uufile_t *  fat32_getRoot(uufs_t *fs)
 {
     return 0;
     //return &fat32_root;
+}
+
+static errno_t  fat32_dismiss(uufs_t *fs)
+{
+    // TODO impl
+    return 0;
 }
 
 
