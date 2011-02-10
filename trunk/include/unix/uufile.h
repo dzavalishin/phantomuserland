@@ -100,16 +100,23 @@ uufile_t *lookup_dir( uufile_t *dir, const char *name, int create, uufile_t *(*c
 struct uufs
 {
     char *              name; // Just FS type name
+
+    void *              impl; // This instance's implementation state
+
 	// called after we got uufile and need really do an open op
     errno_t             (*open)(struct uufile *, int create, int write);
+
 	// Close disposes file - it can't be used after that
     errno_t             (*close)(struct uufile *);
 
     // Create a file struct for given path
-    uufile_t *		(*namei)(const char *filename);
+    uufile_t *          (*namei)(struct uufs *fs, const char *filename);
 
     // Return a file struct for fs root
-    uufile_t *		(*root)(void);
+    uufile_t *          (*root)(struct uufs *fs);
+
+	// Dispose fs itself
+    errno_t             (*dismiss)(struct uufs *fs);
 };
 
 typedef struct uufs uufs_t;

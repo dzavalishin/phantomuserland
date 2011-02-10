@@ -74,10 +74,11 @@ static errno_t     tcpfs_open(struct uufile *, int create, int write);
 static errno_t     tcpfs_close(struct uufile *);
 
 // Create a file struct for given path
-static uufile_t *  tcpfs_namei(const char *filename);
+static uufile_t *  tcpfs_namei(uufs_t *fs, const char *filename);
 
 // Return a file struct for fs root
-static uufile_t *  tcpfs_getRoot();
+static uufile_t *  tcpfs_getRoot(uufs_t *fs);
+static errno_t     tcpfs_dismiss(uufs_t *fs);
 
 
 struct uufs tcp_fs =
@@ -87,6 +88,9 @@ struct uufs tcp_fs =
     .close 	= tcpfs_close,
     .namei 	= tcpfs_namei,
     .root 	= tcpfs_getRoot,
+    .dismiss    = tcpfs_dismiss,
+
+    .impl       = 0,
 };
 
 
@@ -130,9 +134,11 @@ static errno_t     tcpfs_close(struct uufile *f)
 
 
 // Create a file struct for given path
-static uufile_t *  tcpfs_namei(const char *filename)
+static uufile_t *  tcpfs_namei(uufs_t *fs, const char *filename)
 {
     int ip0, ip1, ip2, ip3, port;
+
+    (void) fs;
 
     if( 5 != sscanf( filename, "%d.%d.%d.%d:%d", &ip0, &ip1, &ip2, &ip3, &port ) )
     {
@@ -180,9 +186,17 @@ static uufile_t *  tcpfs_namei(const char *filename)
 }
 
 // Return a file struct for fs root
-static uufile_t *  tcpfs_getRoot()
+static uufile_t *  tcpfs_getRoot(uufs_t *fs)
 {
+    (void) fs;
     return &tcpfs_root;
+}
+
+static errno_t     tcpfs_dismiss(uufs_t *fs)
+{
+    (void) fs;
+    // TODO impl
+    return 0;
 }
 
 

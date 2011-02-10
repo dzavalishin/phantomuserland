@@ -121,10 +121,11 @@ static errno_t     ext2_open(struct uufile *, int create, int write);
 static errno_t     ext2_close(struct uufile *);
 
 // Create a file struct for given path
-static uufile_t *  ext2_namei(const char *filename);
+static uufile_t *  ext2_namei(uufs_t *fs, const char *filename);
 
 // Return a file struct for fs root
-static uufile_t *  ext2_getRoot();
+static uufile_t *  ext2_getRoot(uufs_t *fs);
+static errno_t     ext2_dismiss(uufs_t *fs);
 
 
 struct uufs ext2_fs =
@@ -134,6 +135,9 @@ struct uufs ext2_fs =
     .close 	= ext2_close,
     .namei 	= ext2_namei,
     .root 	= ext2_getRoot,
+    .dismiss    = ext2_dismiss,
+
+    .impl       = 0,
 };
 
 
@@ -171,11 +175,12 @@ static errno_t     ext2_close(struct uufile *f)
 }
 
 // Create a file struct for given path
-static uufile_t *  ext2_namei(const char *filename)
+static uufile_t *  ext2_namei(uufs_t *fs, const char *filename)
 {
-	(void) filename;
+    (void) filename;
+    (void) fs;
 
-	uufile_t *ret = create_uufile();
+    uufile_t *ret = create_uufile();
 
     ret->ops = &ext2_fops;
     ret->pos = 0;
@@ -186,9 +191,19 @@ static uufile_t *  ext2_namei(const char *filename)
 }
 
 // Return a file struct for fs root
-static uufile_t *  ext2_getRoot()
+static uufile_t *  ext2_getRoot(uufs_t *fs)
 {
+    (void) fs;
+    // TODO impl
     return &ext2_root;
+}
+
+
+static errno_t  ext2_dismiss(uufs_t *fs)
+{
+    (void) fs;
+    // TODO impl
+    return 0;
 }
 
 
