@@ -1,4 +1,3 @@
-#define DEBUG_MSG_PREFIX "com"
 #include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
@@ -300,10 +299,30 @@ static int com_write(struct phantom_device *dev, const void *buf, int len)
 
 static void com_setbaud(struct phantom_device *dev, int speed)
 {
-#if 0
     int addr = dev->iobase;
     //int unit = dev->seq_number;
 
+    int divisor = 0x0C; // 9600
+
+    switch(speed)
+    {
+
+    case 115200:	divisor = 0x01; break;
+    case 57600:		divisor = 0x02; break;
+    case 38400:		divisor = 0x03; break;
+    case 19200:		divisor = 0x06; break;
+
+    case 9600:		divisor = 0x0C; break;
+    case 4800:		divisor = 0x18; break;
+    case 2400:		divisor = 0x30; break;
+    }
+
+    outb(LINE_CTL(addr), iDLAB);
+    outb(BAUD_LSB(addr), divisor & 0xff);
+    outb(BAUD_MSB(addr), divisor >> 8);
+
+
+#if 0
 	// TODO: com speed setup
     outb(LINE_CTL(addr), iDLAB);
     outb(BAUD_LSB(addr), divisorreg[speed] & 0xff);
