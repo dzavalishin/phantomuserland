@@ -31,6 +31,7 @@
 
 
 static jmp_buf jb;
+static int nFailed = 0;
 
 void test_fail(errno_t rc)
 {
@@ -81,6 +82,7 @@ void report( int rc, const char *test_name )
         return;
     }
 
+    nFailed++;
     printf("!!! KERNEL TEST FAILED: %s -> %d\n", test_name, rc );
     // todo strerror(rc)
 }
@@ -130,6 +132,13 @@ void run_test( const char *test_name, const char *test_parm )
 
     //TEST(userland);
 
-    printf("-----\nPhantom test suite FINISHED\n" );
+    printf("\n-----\n" );
+    if(nFailed)
+        printf("some tests FAILED\n" );
+    else
+        printf("all tests PASSED\n" );
+
+    printf( "-----\nPhantom test suite FINISHED\n-----\n" );
 
 }
+
