@@ -1,4 +1,4 @@
-// BUG duplicated in kernel/i386 for kernel mode
+// BUG duplicated in phantom/user for usermode
 
 /* 
  * Mach Operating System

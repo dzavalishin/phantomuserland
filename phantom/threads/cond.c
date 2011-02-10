@@ -91,7 +91,7 @@ errno_t hal_cond_wait(hal_cond_t *c, hal_mutex_t *m)
 
     t->waitcond   = c;
 
-    thread_block( THREAD_SLEEP_COND, &t->waitlock );
+    thread_block( THREAD_SLEEP_COND, &t->waitlock ); //-V112
 
     //hal_spin_unlock(&t->waitlock);
 
@@ -118,7 +118,7 @@ static void wake_cond_thread( void *arg )
     queue_remove(&(ci->waiting_threads), t, phantom_thread_t *, chain);
 
     t->thread_flags |= THREAD_FLAG_TIMEDOUT;
-    thread_unblock( t, THREAD_SLEEP_COND );
+    thread_unblock( t, THREAD_SLEEP_COND ); //-V112
 }
 
 
