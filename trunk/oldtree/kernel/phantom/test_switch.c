@@ -105,11 +105,10 @@ void run_test( const char *test_name, const char *test_parm )
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
     TEST(physmem);
+    TEST(physalloc_gen);
     TEST(malloc);
     TEST(amap);
 
-    // TODO Moved here for fast softirq test. move back!
-    TEST(threads);
 
     TEST(sem);
 
@@ -128,7 +127,7 @@ void run_test( const char *test_name, const char *test_parm )
 
 
     // These are very long, do 'em last
-    //TEST(threads);
+    TEST(threads);
 
     //TEST(userland);
 

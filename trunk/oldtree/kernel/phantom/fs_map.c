@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "fsmap"
 #include "debug_ext.h"
-#define debug_level_flow 1
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -36,6 +36,9 @@ typedef struct
 
 #if HAVE_UNIX
 static errno_t fs_start_fat( phantom_disk_partition_t * );
+
+errno_t fs_start_ff( phantom_disk_partition_t * );
+
 #endif // HAVE_UNIX
 
 
@@ -46,6 +49,9 @@ static fs_probe_t fs_drivers[] =
 #if HAVE_UNIX
     { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
     { "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
+
+    { "FAT", 		fs_probe_fat, 	 	fs_start_ff		},
+
     //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
     { "CD",  		fs_probe_cd, 	 	0		},
 #endif // HAVE_UNIX
@@ -294,6 +300,9 @@ static errno_t fs_start_fat( phantom_disk_partition_t *p )
 
     return 0;
 }
+
+
+
 
 
 #endif // HAVE_UNIX

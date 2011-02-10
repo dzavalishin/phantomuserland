@@ -327,12 +327,12 @@ void phantom_unix_fs_init()
 
 int usys_mount( int *err, uuprocess_t *u, const char *source, const char *target, const char *fstype, int flags, const void *data )
 {
-	(void) u;
-	(void) flags;
-	(void) fstype;
+    (void) u;
+    (void) flags;
+    (void) fstype;
 
 
-	uufs_t *fs = 0;
+    uufs_t *fs = 0;
 
     if( strcmp( data, "procfs" ) )
         fs = &proc_fs;
@@ -354,7 +354,7 @@ int usys_mount( int *err, uuprocess_t *u, const char *source, const char *target
 
 int usys_umount(int *err, uuprocess_t *u, const char *target, int flags )
 {
-	(void) u;
+    (void) u;
 
     *err = rm_mount( target, flags );
     return *err ? -1 : 0;

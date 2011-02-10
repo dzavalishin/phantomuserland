@@ -42,7 +42,7 @@ static void do_phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_uni
     memset( arena->map, 0xFF, n_map_elems );
 
     arena->alloc_last_pos = 0;
-    arena->n_used_pages = 0;
+    arena->n_used_pages = n_alloc_units;
     arena->total_size = n_alloc_units;
     arena->inited = 1;
     hal_spin_unlock(&(arena->lock));
@@ -135,9 +135,13 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
 {
     assert(arena->inited);
     //assert(start >= 0 &&
-    assert( start < arena->total_size &&
+    /*assert( start < arena->total_size &&
             n_pages < arena->total_size &&
-            start + n_pages < arena->total_size);
+            start + n_pages < arena->total_size);*/
+
+    assert( start < arena->total_size );
+    assert( n_pages < arena->total_size );
+    assert( start + n_pages < arena->total_size );
 
     while(n_pages)
     {
@@ -151,6 +155,7 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
             arena->map[elem_no] = 0;
             n_pages -= BITS_PER_ELEM;
             start += BITS_PER_ELEM;
+            arena->n_used_pages -= BITS_PER_ELEM;
             continue;
         }
 
@@ -159,9 +164,11 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
         arena->map[elem_no] &= ~mask;
 
         n_pages--;
+        arena->n_used_pages--;
         start++;
     }
-    arena->n_used_pages -= n_pages;
+    //arena->n_used_pages -= n_pages;
+    assert(n_pages == 0);
 }
 
 

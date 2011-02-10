@@ -18,6 +18,7 @@
 
 int do_test_malloc(const char *test_parm);
 int do_test_physmem(const char *test_parm);
+int do_test_physalloc_gen(const char *test_parm);
 
 // TODO test physmem alloc: allocator separately and core/locore/vaddr instances separately
 
