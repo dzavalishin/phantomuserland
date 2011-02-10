@@ -19,7 +19,6 @@
 int do_test_malloc(const char *test_parm);
 int do_test_physmem(const char *test_parm);
 
-// TODO test amap
 // TODO test physmem alloc: allocator separately and core/locore/vaddr instances separately
 
 int do_test_udp_send(const char *test_parm);
@@ -46,10 +45,9 @@ int do_test_tcp_connect(const char *test_parm);
 
 // TODO test elf load
 
-
 // TODO test time of day, sleep, spin sleeps, etc
 
-// TODO test threads, mutexes, conds, semas incl timeouts
+// TODO test mutexes, conds, semas incl timeouts
 
 int do_test_threads(const char *test_parm);
 
