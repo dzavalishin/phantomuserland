@@ -1,3 +1,5 @@
 fte-config.zip -         configuration file to (partially) support Phantom 
                          language in FTE highlighting editor. 
                          See http://fte.sourceforge.net/
+
+experiments    -         experimental code, not to be used in real builds
