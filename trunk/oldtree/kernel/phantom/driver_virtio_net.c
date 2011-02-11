@@ -80,19 +80,19 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
         return 0;
 
     u_int8_t status = virtio_get_status( &vdev ); //inb(basereg+VIRTIO_PCI_STATUS);
-    SHOW_INFO( 0, "Status is: 0x%X\n", status );
+    SHOW_INFO( 11, "Status is: 0x%X", status );
 
     /* driver is ready */
     virtio_set_status( &vdev, VIRTIO_CONFIG_S_ACKNOWLEDGE );
 
-    SHOW_INFO( 0, "Status is: 0x%X\n", virtio_get_status( &vdev ) );
+    SHOW_INFO( 11, "Status is: 0x%X", virtio_get_status( &vdev ) );
 
 
 
 
 
 
-    SHOW_INFO( 1, "Host features are: 0x%b\n", vdev.host_features, "\020\1CSUM\2GUEST_CSUM\6MAC\7GSO\x8GUEST_TSO4\x9GUEST_TSO6\xaGUEST_ECN\xbGUEST_UFO\xcHOST_TSO4\xdHOST_TSO6\xeHOST_ECN\xfHOST_UFO\x10MRG_RXBUF" );
+    SHOW_INFO( 1, "Host features are: 0x%b", vdev.host_features, "\020\1CSUM\2GUEST_CSUM\6MAC\7GSO\x8GUEST_TSO4\x9GUEST_TSO6\xaGUEST_ECN\xbGUEST_UFO\xcHOST_TSO4\xdHOST_TSO6\xeHOST_ECN\xfHOST_UFO\x10MRG_RXBUF" );
 
     struct virtio_net_config cfg;
     virtio_get_config_struct( &vdev, &cfg, sizeof(cfg) );
@@ -111,7 +111,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     }
 
 
-    SHOW_INFO( 1, "Registered at IRQ %d, IO 0x%X\n", vdev.irq, vdev.basereg );
+    SHOW_INFO( 1, "Registered at IRQ %d, IO 0x%X", vdev.irq, vdev.basereg );
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = "VirtIO Network";
@@ -123,15 +123,16 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     virtio_set_features( &vdev, vdev.guest_features );
 
 
-    /* driver is ready */
+    /* driver is ready * /
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER );
 
-    SHOW_INFO( 0, "Status is: 0x%X\n", virtio_get_status( &vdev ) );
+    SHOW_INFO( 0, "Status is: 0x%X", virtio_get_status( &vdev ) );
     hal_sleep_msec(10);
+    */
 
     /* driver is ready */
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK);
-    SHOW_INFO( 0, "Status is: 0x%X\n", virtio_get_status( &vdev ) );
+    SHOW_INFO( 11, "Status is: 0x%X", virtio_get_status( &vdev ) );
 
     provide_buffers(&vdev);
 
@@ -181,12 +182,12 @@ int driver_virtio_net_write(virtio_device_t *vd, void *data, size_t len)
 
 static void provide_buffers(virtio_device_t *vd)
 {
-	struct vring_desc rd[2];
+    struct vring_desc rd[2];
 
-	physaddr_t	pa;
-	assert( 0 == hal_alloc_phys_page(&pa));
+    physaddr_t	pa;
+    assert( 0 == hal_alloc_phys_page(&pa));
 
-	SHOW_FLOW( 9, "pa = %p", pa );
+    SHOW_FLOW( 9, "pa = %p", pa );
 
     rd[0].addr = pa;
     rd[0].len  = sizeof(struct virtio_net_hdr);
@@ -198,7 +199,7 @@ static void provide_buffers(virtio_device_t *vd)
 
     virtio_attach_buffers_list( vd, 1, 2, rd );
 
-	virtio_kick( vd, 0);
+    virtio_kick( vd, 0);
 
 }
 

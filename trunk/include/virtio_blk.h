@@ -54,7 +54,7 @@ struct virtio_blk_outhdr
 	/* io priority. */
 	u_int32_t ioprio;
 	/* Sector (ie. 512 byte offset) */
-	u_int32_t sector;
+	u_int64_t sector;
 } __packed;
 
 /* And this is the final byte of the write scatter-gather list. */

@@ -11,7 +11,7 @@
 #define DEBUG_MSG_PREFIX "VioDisk"
 #include "debug_ext.h"
 #define debug_level_info 10
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 
 #include <phantom_libc.h>
@@ -68,14 +68,14 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
     //printf("Status is: 0x%x\n", status );
 
 
-    printf("Features are: %b\n", vdev.host_features, "\020\1BARRIER\2SIZE_MAX\3SEG_MAX\5GEOM\6RDONLY\7BLK_SIZE" );
+    SHOW_FLOW( 1, "Features are: %b", vdev.host_features, "\020\1BARRIER\2SIZE_MAX\3SEG_MAX\5GEOM\6RDONLY\7BLK_SIZE" );
 
     rodisk = vdev.host_features & (1<<VIRTIO_BLK_F_RO);
     if(rodisk)
-        printf("Disk is RDONLY\n");
+        SHOW_FLOW0( 1, "Disk is RDONLY");
 
 
-    printf("Registered at IRQ %d IO 0x%X\n", vdev.irq, vdev.basereg );
+    SHOW_FLOW( 1, "Registered at IRQ %d IO 0x%X", vdev.irq, vdev.basereg );
 
     phantom_device_t * dev = (phantom_device_t *)malloc(sizeof(phantom_device_t));
     dev->name = "VirtIO Disk";
@@ -87,11 +87,11 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
     struct virtio_blk_config cfg;
     virtio_get_config_struct( &vdev, &cfg, sizeof(cfg) );
 
-    printf("VIRTIO disk size is %d Mb\n", cfg.capacity/2048 );
+    SHOW_FLOW( 1, "VIRTIO disk size is %d Mb", cfg.capacity/2048 );
 
     virtio_set_status( &vdev, VIRTIO_CONFIG_S_DRIVER|VIRTIO_CONFIG_S_DRIVER_OK );
 
-#if 0
+#if 1
     printf("Will write to disk\n");
 //getchar();
     static char test[512] = "Hello virtio disk";
@@ -121,6 +121,8 @@ struct vioBlockReq
 
 // virtio-blk header not in correct element
 
+static char *va2;
+
 int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len)
 {
 
@@ -140,9 +142,10 @@ int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len)
     ohdr->ioprio = 0;
     ohdr->sector = 0;
 
-    cmd[2].addr = pa + __offsetof(struct vioBlockReq, ohdr);
-    cmd[2].len  = sizeof(struct virtio_blk_outhdr);
-    cmd[2].flags= 0;
+    cmd[0].addr = pa + __offsetof(struct vioBlockReq, ohdr);
+    //cmd[2].addr = pa;
+    cmd[0].len  = sizeof(struct virtio_blk_outhdr);
+    cmd[0].flags= 0;
 
     cmd[1].addr = data;
     cmd[1].len  = len;
@@ -154,13 +157,15 @@ int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len)
     cmd[2].flags= VRING_DESC_F_WRITE;
 #else
     physaddr_t pa2;
-    void *va2;
-    hal_pv_alloc( &pa2, &va2, sizeof(struct virtio_blk_inhdr) );
+    hal_pv_alloc( &pa2, (void **)&va2, sizeof(struct virtio_blk_inhdr) );
 
-    cmd[0].addr = pa2;
-    cmd[0].len  = sizeof(struct virtio_blk_inhdr);
-    cmd[0].flags= VRING_DESC_F_WRITE;
+    cmd[2].addr = pa2;
+    cmd[2].len  = sizeof(struct virtio_blk_inhdr);
+    cmd[2].flags= VRING_DESC_F_WRITE;
 #endif
+
+    *va2 = 0;
+    SHOW_FLOW( 5, "disk result va2 = %d", *va2);
 
     virtio_attach_buffers_list( vd, 0, 3, cmd );
     virtio_kick( vd, 0);
@@ -253,19 +258,21 @@ static void driver_virtio_disk_interrupt(virtio_device_t *vd, int isr )
 
     SHOW_FLOW0( 5, "got virtio DISK interrupt" );
 
-    struct vring_desc cmd[3];
+    struct vring_desc cmd[10];
     int dlen;
 
-    int nRead = virtio_detach_buffers_list( vd, 0, 3, cmd, &dlen );
+    int nRead = virtio_detach_buffers_list( vd, 0, 10, cmd, &dlen );
     if( nRead > 0 )
     {
-        SHOW_FLOW( 5, "have %d used descriptors, will get 'em", nRead );
+        SHOW_FLOW( 5, "have %d used descriptors, will get 'em (dlen = %d)", nRead, dlen );
 
         int i;
         for( i = 0; i < nRead; i++ )
-            SHOW_FLOW( 6, "desc %d len %d\n", i, cmd[i].len );
+            SHOW_FLOW( 6, "desc %2d len %4d   next %6d flags %b", i, cmd[i].len, cmd[i].next, cmd[i].flags, "\020\1NEXT\2WRITE" );
 
     }
+
+    SHOW_FLOW( 5, "disk result va2 = %d", *va2);
 }
 
 
