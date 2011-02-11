@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "VirtIo"
 #include "debug_ext.h"
-#define debug_level_flow 9
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -44,14 +44,15 @@ static void vio_irq_handler( void *arg )
     if(isr == 0)
         return; // Not ours
 
-    SHOW_FLOW( 1, " !_INT_! %s ! ", vd->name );
+    //SHOW_FLOW( 1, " !_INT_! %s ! -> %p", vd->name, vd->interrupt );
+    SHOW_FLOW( 1, " !_INT_! %s !", vd->name );
 
     // TODO VIRTIO_PCI_ISR_CONFIG
     //if (isr & VIRTIO_PCI_ISR_CONFIG) {
 
 
     if(vd->interrupt != 0)
-        vd->interrupt( vd, isr );
+        (vd->interrupt)( vd, isr );
 }
 
 
@@ -244,6 +245,7 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     SHOW_FLOW0(8, "will vring_init");
     vring_init( &(r->vr), num, buffer, VIRTIO_PCI_VRING_ALIGN );
 
+#if 1
     int i;
     for( i = 0; i < num-1; i++ )
     {
@@ -252,6 +254,17 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     }
     r->vr.desc[num-1].flags = 0;
     r->vr.desc[num-1].next = -1;
+#else
+    r->freeHead = num-1;
+    int i;
+    for( i = num-1; i > 0; i-- )
+    {
+        r->vr.desc[i].flags = VRING_DESC_F_NEXT;
+        r->vr.desc[i].next = i-1;
+    }
+    r->vr.desc[0].flags = 0;
+    r->vr.desc[0].next = -1;
+#endif
 
     //virto_ring_dump(r);
 
@@ -486,7 +499,7 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
 
     VIRTIO_UNLOCK(r);
 
-    virto_ring_dump(r);
+    //virto_ring_dump(r);
 
     return 0;
 }
@@ -575,15 +588,18 @@ int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
         return -1;
     }
 
-    dataLen[nout] = r->vr.used->ring[pos].len;
+    *dataLen = r->vr.used->ring[pos].len;
 
 again:
+
+
     desc[nout] = r->vr.desc[bufIndex];
     nout++;
 
-
     int flagsCopy = r->vr.desc[bufIndex].flags;
     int nextCopy = r->vr.desc[bufIndex].next;
+
+    SHOW_FLOW( 2, "detach desc from pos %d -> %d", bufIndex, nextCopy );
 
     virtio_release_descriptor_index(r, bufIndex);
 
@@ -592,7 +608,10 @@ again:
     if( (flagsCopy & VRING_DESC_F_NEXT) )
     {
         bufIndex = nextCopy;
-        goto again;
+        if(nDesc > 0)
+            goto again;
+        else
+            SHOW_ERROR0(0, "Can't recv descriptor");
     }
 
 
