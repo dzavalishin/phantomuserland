@@ -60,54 +60,6 @@ static uuprocess_t *get_proc()
 
 
 
-uuprocess_t *uu_create_process(int ppid, struct exe_module *em)
-{
-    hal_mutex_lock(&proc_lock);
-    //uuprocess_t *p = calloc( 1, sizeof(uuprocess_t) );
-    uuprocess_t *p = get_proc();
-    assert(p);
-    assert(em);
-
-    // Caller must increment
-    assert( em->refcount > 0 );
-
-    memset( p, 0, sizeof(uuprocess_t) );
-
-    p->em = em;
-
-    p->mem_start = em->mem_start;
-    p->mem_end = em->mem_end;
-
-    strncpy( p->cmd, em->name, MAX_UU_CMD );
-
-    p->pid = get_pid();
-
-    p->ppid = p->pid;
-    p->pgrp_pid = p->pid;
-    p->sess_pid = p->pid;
-
-    p->uid = p->euid = p->gid = p->egid = -1;
-    p->umask = 0664;
-
-    int i;
-    for( i = 0; i < MAX_UU_TID; i++ )
-        p->tids[i] = -1;
-
-    uuprocess_t * parent = proc_by_pid(ppid);
-    if( parent )
-    {
-        p->ppid = ppid;
-        p->pgrp_pid = parent->pgrp_pid;
-        p->sess_pid = parent->sess_pid;
-        p->ctty = parent->ctty;
-        p->cwd = copy_uufile( parent->cwd );
-        p->umask = parent->umask;
-    }
-
-
-    hal_mutex_unlock(&proc_lock);
-    return p;
-};
 
 
 static uuprocess_t * proc_by_pid(int pid)
@@ -193,6 +145,64 @@ static void uu_proc_thread_kill( phantom_thread_t *t )
 }
 
 
+
+// -----------------------------------------------------------------------
+// Public
+// -----------------------------------------------------------------------
+
+
+uuprocess_t *uu_create_process(int ppid, struct exe_module *em)
+{
+    hal_mutex_lock(&proc_lock);
+    //uuprocess_t *p = calloc( 1, sizeof(uuprocess_t) );
+    uuprocess_t *p = get_proc();
+    assert(p);
+    assert(em);
+
+    // Caller must increment
+    assert( em->refcount > 0 );
+
+    memset( p, 0, sizeof(uuprocess_t) );
+
+    p->em = em;
+
+    p->mem_start = em->mem_start;
+    p->mem_end = em->mem_end;
+
+    strncpy( p->cmd, em->name, MAX_UU_CMD );
+
+    p->pid = get_pid();
+
+    p->ppid = p->pid;
+    p->pgrp_pid = p->pid;
+    p->sess_pid = p->pid;
+
+    p->uid = p->euid = p->gid = p->egid = -1;
+    p->umask = 0664;
+
+    int i;
+    for( i = 0; i < MAX_UU_TID; i++ )
+        p->tids[i] = -1;
+
+    uuprocess_t * parent = proc_by_pid(ppid);
+    if( parent )
+    {
+        p->ppid = ppid;
+        p->pgrp_pid = parent->pgrp_pid;
+        p->sess_pid = parent->sess_pid;
+        p->ctty = parent->ctty;
+        p->cwd = copy_uufile( parent->cwd );
+        p->umask = parent->umask;
+    }
+
+
+    hal_mutex_unlock(&proc_lock);
+    return p;
+};
+
+
+
+
 // Add thread to process.
 void uu_proc_add_thread( uuprocess_t *p, int tid )
 {
@@ -267,6 +277,11 @@ void uu_proc_rm_thread( uuprocess_t *p, int tid )
 
 
 
+// -----------------------------------------------------------------------
+// Debug
+// -----------------------------------------------------------------------
+
+
 
 static void dbg_ps(int argc, char **argv)
 {
@@ -291,6 +306,55 @@ static void dbg_ps(int argc, char **argv)
 
 
 }
+
+
+
+// -----------------------------------------------------------------------
+// unix syscalls
+// -----------------------------------------------------------------------
+
+
+
+int usys_kill(int *err, uuprocess_t *u, int pid, int sig)
+{
+    hal_mutex_lock(&proc_lock);
+    panic("kill is not implemented");
+    hal_mutex_unlock(&proc_lock);
+}
+
+
+
+int usys_waitpid(int *err, uuprocess_t *u, int pid, int *status, int options)
+{
+    int retpid = -1;
+
+    hal_mutex_lock(&proc_lock);
+
+    if( pid <= 0 )
+    {
+        *err = EINVAL;
+            retpid = -1;
+    }
+    else
+    {
+        uuprocess_t * p = proc_by_pid(pid);
+        if( p == 0 || (p->ppid != u->pid ) )
+        {
+            *err = ECHILD;
+            retpid = -1;
+            goto finish;
+        }
+
+    }
+
+finish:
+
+    hal_mutex_unlock(&proc_lock);
+
+
+    return retpid;
+}
+
 
 
 

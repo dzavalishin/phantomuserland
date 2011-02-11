@@ -73,3 +73,11 @@ ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t le
 ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg, int flags);
 
 
+int usys_kill(int *err, uuprocess_t *u, int pid, int sig);
+
+int usys_waitpid(int *err, uuprocess_t *u, int pid, int *status, int options);
+
+
+
+
+

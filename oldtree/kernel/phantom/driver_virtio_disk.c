@@ -119,6 +119,7 @@ struct vioBlockReq
     pager_io_request            *rq;
 } __packed;
 
+// virtio-blk header not in correct element
 
 int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len)
 {
@@ -139,9 +140,9 @@ int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len)
     ohdr->ioprio = 0;
     ohdr->sector = 0;
 
-    cmd[0].addr = pa + __offsetof(struct vioBlockReq, ohdr);
-    cmd[0].len  = sizeof(struct virtio_blk_outhdr);
-    cmd[0].flags= 0;
+    cmd[2].addr = pa + __offsetof(struct vioBlockReq, ohdr);
+    cmd[2].len  = sizeof(struct virtio_blk_outhdr);
+    cmd[2].flags= 0;
 
     cmd[1].addr = data;
     cmd[1].len  = len;
@@ -156,9 +157,9 @@ int driver_virtio_disk_write(virtio_device_t *vd, physaddr_t data, size_t len)
     void *va2;
     hal_pv_alloc( &pa2, &va2, sizeof(struct virtio_blk_inhdr) );
 
-    cmd[2].addr = pa2;
-    cmd[2].len  = sizeof(struct virtio_blk_inhdr);
-    cmd[2].flags= VRING_DESC_F_WRITE;
+    cmd[0].addr = pa2;
+    cmd[0].len  = sizeof(struct virtio_blk_inhdr);
+    cmd[0].flags= VRING_DESC_F_WRITE;
 #endif
 
     virtio_attach_buffers_list( vd, 0, 3, cmd );

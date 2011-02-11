@@ -548,7 +548,28 @@ void syscall_sw(struct trap_state *st)
         }
 
     case SYS_kill:
+        {
+            ret = usys_kill( &err, u, uarg[0], uarg[1] );
+            break;
+        }
+
+    case SYS_waitpid:
+        {
+            AARG(int *, addr, 1, sizeof(int));
+            ret = usys_waitpid( &err, u, uarg[0], addr, uarg[2] );
+            break;
+        }
+
+    case SYS_wait:
+        {
+            AARG(int *, addr, 0, sizeof(int));
+            ret = usys_waitpid( &err, u, -1, addr, 0 );
+            break;
+        }
+
+
     case SYS_clone:
+        goto unimpl;
 
 
     case SYS_madvise:
@@ -562,6 +583,7 @@ void syscall_sw(struct trap_state *st)
     case SYS_munlock:
     case SYS_munlockall:
     case SYS_munmap:
+        goto unimpl;
 
 
         // NewOS/BeOS/Haiku
