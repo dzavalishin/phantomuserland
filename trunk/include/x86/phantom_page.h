@@ -8,4 +8,4 @@
 // Align to address of page which contains addr x
 #define PREV_PAGE_ALIGN(x) ((x) & ~(PAGE_SIZE-1))
 
-#define ALIGN(x,___how) (((x) + ((___how)-1)) & ~((___how)-1))
+#define ALIGN_AT(x,___how) (((x) + ((___how)-1)) & ~((___how)-1))

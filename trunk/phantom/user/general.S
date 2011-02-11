@@ -35,3 +35,5 @@ SYSCALL(kill)
 SYSCALL(umask)
 SYSCALL(clone)
 
+SYSCALL(wait)
+SYSCALL(waitpid)
