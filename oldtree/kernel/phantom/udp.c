@@ -25,7 +25,6 @@
 
 
 #include "newos.h"
-#include "cbuf.h"
 #include "udp.h"
 
 #include "misc.h"

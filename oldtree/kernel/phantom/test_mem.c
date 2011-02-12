@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "test"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 8
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -230,7 +230,7 @@ static void get_some(int times)
         igot[igp].size = sz;
         igot[igp].pos = ret;
 
-        SHOW_FLOW( 1, "get %7d @ %7d", igot[igp].size, igot[igp].pos);
+        SHOW_FLOW( 10, "get %7d @ %7d", igot[igp].size, igot[igp].pos);
 
         return;
     }
@@ -250,7 +250,7 @@ static void put_some(int times)
         if( igot[++igp].size == 0 )
             continue;
 
-        SHOW_FLOW( 1, "put %7d @ %7d", igot[igp].size, igot[igp].pos);
+        SHOW_FLOW( 10, "put %7d @ %7d", igot[igp].size, igot[igp].pos);
 
         phantom_phys_free_region( &pm_map, igot[igp].pos, igot[igp].size );
         igot[igp].size = 0;

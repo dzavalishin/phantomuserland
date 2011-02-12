@@ -22,6 +22,8 @@ int do_test_physalloc_gen(const char *test_parm);
 
 // TODO test physmem alloc: allocator separately and core/locore/vaddr instances separately
 
+int do_test_cbuf(const char *test_parm);
+
 int do_test_udp_send(const char *test_parm);
 int do_test_udp_syslog(const char *test_parm);
 

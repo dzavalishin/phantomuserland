@@ -5,7 +5,7 @@
 #ifndef _NEWOS_KERNEL_NET_ETHERNET_H
 #define _NEWOS_KERNEL_NET_ETHERNET_H
 
-#include "cbuf.h"
+#include <newos/cbuf.h>
 #include "newos.h"
 
 /*

@@ -5,7 +5,7 @@
 //#if HAVE_NET
 
 #include "newos.h"
-#include "cbuf.h"
+#include <newos/cbuf.h>
 #include "net.h"
 
 #include "misc.h"
@@ -17,7 +17,7 @@
 #endif
 
 #define ALLOCATE_CHUNK (PAGE_SIZE * 16)
-#define CBUF_REGION_SIZE (1*1024*1024)
+#define CBUF_REGION_SIZE (8*1024*1024)
 #define CBUF_BITMAP_SIZE (CBUF_REGION_SIZE / CBUF_LEN)
 
 static cbuf *cbuf_free_list;
@@ -978,7 +978,7 @@ int cbuf_extend_tail(cbuf *head, size_t extend_bytes)
     return NO_ERROR;
 }
 
-#if 1
+
 static void dbg_dump_cbuf_freelists(int argc, char **argv)
 {
     (void) argc;
@@ -996,50 +996,9 @@ static void dbg_dump_cbuf_freelists(int argc, char **argv)
         dprintf("%p ", buf);
     dprintf("\n");
 }
-#endif
 
-void cbuf_test()
-{
-    cbuf *buf, *buf2;
-    char temp[1024];
-    unsigned int i;
 
-    dprintf("starting cbuffer test\n");
 
-    buf = cbuf_get_chain(32);
-    if(!buf)
-        panic("cbuf_test: failed allocation of 32\n");
-
-    buf2 = cbuf_get_chain(3*1024*1024);
-    if(!buf2)
-        panic("cbuf_test: failed allocation of 3mb\n");
-
-    buf = cbuf_merge_chains(buf2, buf);
-
-    cbuf_free_chain(buf);
-
-    dprintf("allocating too much...\n");
-
-    buf = cbuf_get_chain(128*1024*1024);
-    if(buf)
-        panic("cbuf_test: should have failed to allocate 128mb\n");
-
-    dprintf("touching memory allocated by cbuf\n");
-
-    buf = cbuf_get_chain(7*1024*1024);
-    if(!buf)
-        panic("cbuf_test: failed allocation of 7mb\n");
-
-    for(i=0; i < sizeof(temp); i++)
-        temp[i] = i;
-    for(i=0; i<7*1024*1024 / sizeof(temp); i++) {
-        if(i % 128 == 0) dprintf("%Lud\n", (long long)(i*sizeof(temp)));
-        cbuf_memcpy_to_chain(buf, i*sizeof(temp), temp, sizeof(temp));
-    }
-    cbuf_free_chain(buf);
-
-    dprintf("finished cbuffer test\n");
-}
 
 int cbuf_init()
 {
@@ -1063,6 +1022,7 @@ int cbuf_init()
 
     //cbuf_region_id = vm_create_anonymous_region(vm_get_kernel_aspace_id(), "cbuf region",                                                (void **)&cbuf_region, REGION_ADDR_ANY_ADDRESS, CBUF_REGION_SIZE, REGION_WIRING_LAZY, LOCK_RW|LOCK_KERNEL);
 
+	// TODO pv_alloc
     cbuf_region = malloc(CBUF_REGION_SIZE);
     if(cbuf_region == 0) {
         panic("cbuf_init: error creating cbuf region\n");
