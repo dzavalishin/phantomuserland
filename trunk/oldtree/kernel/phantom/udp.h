@@ -11,7 +11,7 @@
 #include <kernel/net/socket.h>
 */
 #include "net.h"
-#include "cbuf.h"
+#include <newos/cbuf.h>
 
 int udp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_address);
 int udp_open(void **prot_data);

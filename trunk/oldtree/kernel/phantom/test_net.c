@@ -29,6 +29,56 @@
 #include "test.h"
 
 
+int do_test_cbuf(const char *test_parm)
+{
+    cbuf *buf, *buf2;
+    char temp[1024];
+    unsigned int i;
+
+    (void) test_parm;
+
+    SHOW_FLOW0( 0, "starting cbuffer test");
+
+    buf = cbuf_get_chain(32);
+    if(!buf)
+        test_fail_msg( EINVAL, "cbuf_test: failed allocation of 32");
+
+    buf2 = cbuf_get_chain(3*1024*1024);
+    if(!buf2)
+        test_fail_msg( EINVAL, "cbuf_test: failed allocation of 3mb");
+
+    buf = cbuf_merge_chains(buf2, buf);
+
+    test_check_eq( 3*1024*1024 + 32, cbuf_get_len(buf) );
+
+    cbuf_free_chain(buf);
+
+    SHOW_FLOW0( 0, "allocating too much...");
+
+    buf = cbuf_get_chain(128*1024*1024);
+    if(buf)
+        test_fail_msg( EINVAL, "cbuf_test: should have failed to allocate 128mb");
+
+    SHOW_FLOW0( 0, "touching memory allocated by cbufn");
+
+    buf = cbuf_get_chain(7*1024*1024);
+    if(!buf)
+        test_fail_msg( EINVAL, "cbuf_test: failed allocation of 7mb");
+
+    for(i=0; i < sizeof(temp); i++)
+        temp[i] = i;
+    for(i=0; i<7*1024*1024 / sizeof(temp); i++) {
+        //if(i % 128 == 0) dprintf("%Lud\n", (long long)(i*sizeof(temp)));
+        cbuf_memcpy_to_chain(buf, i*sizeof(temp), temp, sizeof(temp));
+    }
+    cbuf_free_chain(buf);
+
+    SHOW_FLOW0( 0, "finished cbuffer test");
+
+    return 0;
+}
+
+
 
 int do_test_udp_send(const char *test_parm)
 {
@@ -132,7 +182,7 @@ int do_test_tcp_connect(const char *test_parm)
     {
         SHOW_ERROR0(0, "can't prepare endpoint");
     fail:
-        return 0;
+        return EIO;
     }
 
     SHOW_FLOW0( 0, "TCP - will connect to Yandex");

@@ -13,7 +13,7 @@
 */
 
 #include "net.h"
-#include "cbuf.h"
+#include <newos/cbuf.h>
 
 int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_address);
 int tcp_open(void **prot_data);

@@ -14,7 +14,7 @@
 #include "nqueue.h"
 
 #include "newos.h"
-#include "cbuf.h"
+#include <newos/cbuf.h>
 
 #include "device.h"
 

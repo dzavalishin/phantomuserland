@@ -8,7 +8,7 @@
 //#include <kernel/net/if.h>
 //#include <kernel/net/ipv4.h>
 #include "net.h"
-#include "cbuf.h"
+#include <newos/cbuf.h>
 #include "newos.h"
 
 enum {
