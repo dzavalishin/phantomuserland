@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "VirtIo"
 #include "debug_ext.h"
-#define debug_level_flow 7
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -45,7 +45,7 @@ static void vio_irq_handler( void *arg )
         return; // Not ours
 
     //SHOW_FLOW( 1, " !_INT_! %s ! -> %p", vd->name, vd->interrupt );
-    SHOW_FLOW( 1, " !_INT_! %s !", vd->name );
+    //SHOW_FLOW( 1, " !_INT_! %s !", vd->name );
 
     // TODO VIRTIO_PCI_ISR_CONFIG
     //if (isr & VIRTIO_PCI_ISR_CONFIG) {
