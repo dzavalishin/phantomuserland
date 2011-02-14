@@ -34,6 +34,15 @@
 #include <kernel/config.h>
 
 
+static int file_inited = 0;
+
+static void __file_init_func(void) __attribute__ ((constructor));
+
+static void __file_init_func(void)
+{
+	file_inited = 1;
+}
+
 struct multiboot_info bootParameters;
 
 static void make_mem_map(void);
@@ -83,13 +92,13 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
     hal_sti();
 
 
+    // Call constructors.
+    __phantom_run_constructors();
 
-/*
-#ifdef __ELF__
-    // Call init code.
-    __phantom_init();
-#endif
-*/
+    if(!file_inited)
+    	SHOW_ERROR0(0, "Constructors failed!");
+	else
+    	SHOW_FLOW0(0, "Constructors OK!");
 
     phantom_parse_cmd_line();
 

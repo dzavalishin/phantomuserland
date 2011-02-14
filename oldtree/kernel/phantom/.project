@@ -3,7 +3,9 @@
 	<name>Phantom Kernel</name>
 	<comment></comment>
 	<projects>
+		<project>libphantom</project>
 		<project>Phantom Libc</project>
+		<project>PhantomDev</project>
 		<project>PhantomLibc</project>
 		<project>PhantomNewos</project>
 		<project>PhantomVM</project>
