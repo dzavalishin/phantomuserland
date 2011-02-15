@@ -9,12 +9,15 @@
 **/
 
 
-#define DEBUG_MSG_PREFIX "mouse"
+#define DEBUG_MSG_PREFIX "bootp"
 #include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include "udp.h"
+#include <time.h>
+#include <errno.h>
 
 
 /*	$NetBSD: bootp.c,v 1.14 1998/02/16 11:10:54 drochner Exp $	*/
@@ -56,9 +59,10 @@
 #include <sys/cdefs.h>
 //__FBSDID("$FreeBSD: src/lib/libstand/bootp.c,v 1.6.6.1 2008/11/25 02:59:29 kensmith Exp $");
 
-#include <sys/types.h>
+//#include <sys/types.h>
 #include <netinet/in.h>
-#include <netinet/in_systm.h>
+#include <arpa/inet.h>
+//#include <netinet/in_systm.h>
 
 #include <string.h>
 
@@ -71,9 +75,24 @@
 #include "bootp.h"
 
 
-struct in_addr servip;
+static struct in_addr servip;
+static struct in_addr gateip;
+static struct in_addr rootip;
+static struct in_addr myip;
 
-static n_long	nmask, smask;
+
+static char rootpath[1024];
+static char hostname[1024];
+static char bootfile[1024];
+
+
+
+
+
+//static n_long	nmask, smask;
+//static long	nmask, smask;
+//static u_int32_t smask;
+static unsigned int smask;
 
 static time_t	bot;
 
@@ -83,8 +102,8 @@ static	char vm_cmu[4] = VM_CMU;
 #endif
 
 /* Local forwards */
-static	ssize_t bootpsend(struct iodesc *, void *, size_t);
-static	ssize_t bootprecv(struct iodesc *, void *, size_t, time_t);
+static	ssize_t bootpsend(void *udp_sock, struct bootp *bp, size_t);
+static	ssize_t bootprecv(void *udp_sock, struct bootp *bp, size_t);
 static	int vend_rfc1048(u_char *, u_int);
 #ifdef BOOTP_VEND_CMU
 static	void vend_cmu(u_char *);
@@ -95,332 +114,426 @@ static char expected_dhcpmsgtype = -1, dhcp_ok;
 struct in_addr dhcp_serverip;
 #endif
 
+
+static int xid = 0;
+
+
 /* Fetch required bootp infomation */
-void
-bootp(int sock, int flag)
+static errno_t do_bootp(void *udp_sock, void *mac_addr, int flag)
 {
-	struct iodesc *d;
-	struct bootp *bp;
-	struct {
-		u_char header[HEADER_SIZE];
-		struct bootp wbootp;
-	} wbuf;
-	struct {
-		u_char header[HEADER_SIZE];
-		struct bootp rbootp;
-	} rbuf;
+    struct bootp *bp;
 
-        SHOW_FLOW( 1, "bootp: socket=%d", sock);
+    struct {
+        //u_char header[HEADER_SIZE];
+        struct bootp wbootp;
+    } wbuf;
 
-	if (!bot)
-		bot = getsecs();
-	
-	if (!(d = socktodesc(sock))) {
-		printf("bootp: bad socket. %d\n", sock);
-		return;
-	}
+    struct {
+        //u_char header[HEADER_SIZE];
+        struct bootp rbootp;
+    } rbuf;
 
-        SHOW_FLOW( 1, "bootp: d=%lx", (long)d);
+    SHOW_FLOW0( 1, "bootp start");
 
-	bp = &wbuf.wbootp;
-	bzero(bp, sizeof(*bp));
+    if (!bot)
+        bot = time(0);
 
-	bp->bp_op = BOOTREQUEST;
-	bp->bp_htype = 1;		/* 10Mb Ethernet (48 bits) */
-	bp->bp_hlen = 6;
-	bp->bp_xid = htonl(d->xid);
-	MACPY(d->myea, bp->bp_chaddr);
-	strncpy(bp->bp_file, bootfile, sizeof(bp->bp_file));
-	bcopy(vm_rfc1048, bp->bp_vend, sizeof(vm_rfc1048));
+
+
+    bp = &wbuf.wbootp;
+    bzero(bp, sizeof(*bp));
+
+    bp->bp_op = BOOTREQUEST;
+    bp->bp_htype = 1;		/* 10Mb Ethernet (48 bits) */
+    bp->bp_hlen = 6;
+    bp->bp_xid = htonl(xid);
+
+    //MACPY(d->myea, bp->bp_chaddr);
+    memcpy( bp->bp_chaddr, mac_addr, 6 );
+
+    //strncpy(bp->bp_file, bootfile, sizeof(bp->bp_file));
+    bcopy(vm_rfc1048, bp->bp_vend, sizeof(vm_rfc1048));
 #ifdef SUPPORT_DHCP
-	bp->bp_vend[4] = TAG_DHCP_MSGTYPE;
-	bp->bp_vend[5] = 1;
-	bp->bp_vend[6] = DHCPDISCOVER;
+    bp->bp_vend[4] = TAG_DHCP_MSGTYPE;
+    bp->bp_vend[5] = 1;
+    bp->bp_vend[6] = DHCPDISCOVER;
 
-	/*
-	 * If we are booting from PXE, we want to send the string
-	 * 'PXEClient' to the DHCP server so you have the option of
-	 * only responding to PXE aware dhcp requests.
-	 */
-	if (flag & BOOTP_PXE) {
-		bp->bp_vend[7] = TAG_CLASSID;
-		bp->bp_vend[8] = 9;
-		bcopy("PXEClient", &bp->bp_vend[9], 9);
-		bp->bp_vend[18] = TAG_END;
-	} else
-		bp->bp_vend[7] = TAG_END;
+    /*
+     * If we are booting from PXE, we want to send the string
+     * 'PXEClient' to the DHCP server so you have the option of
+     * only responding to PXE aware dhcp requests.
+     */
+    if (flag & BOOTP_PXE) {
+        bp->bp_vend[7] = TAG_CLASSID;
+        bp->bp_vend[8] = 9;
+        bcopy("PXEClient", &bp->bp_vend[9], 9);
+        bp->bp_vend[18] = TAG_END;
+    } else
+        bp->bp_vend[7] = TAG_END;
 #else
-	bp->bp_vend[4] = TAG_END;
+    bp->bp_vend[4] = TAG_END;
 #endif
 
-	d->myip.s_addr = INADDR_ANY;
-	d->myport = htons(IPPORT_BOOTPC);
-	d->destip.s_addr = INADDR_BROADCAST;
-	d->destport = htons(IPPORT_BOOTPS);
+    //d->myip.s_addr = INADDR_ANY;
+    //d->myport = htons(IPPORT_BOOTPC);
+    //d->destip.s_addr = INADDR_BROADCAST;
+    //d->destport = htons(IPPORT_BOOTPS);
 
 #ifdef SUPPORT_DHCP
-	expected_dhcpmsgtype = DHCPOFFER;
-	dhcp_ok = 0;
+    expected_dhcpmsgtype = DHCPOFFER;
+    dhcp_ok = 0;
 #endif
 
-	if(sendrecv(d,
-		    bootpsend, bp, sizeof(*bp),
-		    bootprecv, &rbuf.rbootp, sizeof(rbuf.rbootp))
-	   == -1) {
-	    printf("bootp: no reply\n");
-	    return;
-	}
+
+    sockaddr src_addr;
+    src_addr.port = IPPORT_BOOTPC; // local port
+
+    src_addr.addr.len = 4;
+    src_addr.addr.type = ADDR_TYPE_IP;
+    // INADDR_ANY
+    NETADDR_TO_IPV4(src_addr.addr) = IPV4_DOTADDR_TO_ADDR(0, 0, 0, 0);
+
+    if( 0 != udp_bind(udp_sock, &src_addr) )
+    {
+        SHOW_ERROR0( 0, "can't bind UDP address");
+        return ENOTCONN;
+    }
+
+    /*
+    sockaddr dest_addr;
+    dest_addr.port = IPPORT_BOOTPS; // dest port
+
+    dest_addr.addr.len = 4;
+    dest_addr.addr.type = ADDR_TYPE_IP;
+    // INADDR_BROADCAST
+    NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
+    */
+
+    //if( 0 != udp_sendto(udp_sock, bp, sizeof(*bp), &dest_addr) )
+    if( 0 != bootpsend(udp_sock, bp, sizeof(*bp)) )
+    {
+        SHOW_ERROR0( 0, "can't send UDP");
+        return ECONNREFUSED;
+    }
+
+    //if( 0 >= udp_recvfrom(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l) )
+    if( 0 >= bootprecv(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp)) )
+    {
+        SHOW_ERROR0( 0, "no reply");
+        return ETIMEDOUT;
+    }
+
+    
+
+
+    /*
+    if(sendrecv(d,
+                bootpsend, bp, sizeof(*bp),
+                bootprecv, &rbuf.rbootp, sizeof(rbuf.rbootp))
+       == -1) {
+        SHOW_ERROR0( 0, "no reply");
+        return;
+    }*/
 
 #ifdef SUPPORT_DHCP
-	if(dhcp_ok) {
-		u_int32_t leasetime;
-		bp->bp_vend[6] = DHCPREQUEST;
-		bp->bp_vend[7] = TAG_REQ_ADDR;
-		bp->bp_vend[8] = 4;
-		bcopy(&rbuf.rbootp.bp_yiaddr, &bp->bp_vend[9], 4);
-		bp->bp_vend[13] = TAG_SERVERID;
-		bp->bp_vend[14] = 4;
-		bcopy(&dhcp_serverip.s_addr, &bp->bp_vend[15], 4);
-		bp->bp_vend[19] = TAG_LEASETIME;
-		bp->bp_vend[20] = 4;
-		leasetime = htonl(300);
-		bcopy(&leasetime, &bp->bp_vend[21], 4);
-		if (flag & BOOTP_PXE) {
-			bp->bp_vend[25] = TAG_CLASSID;
-			bp->bp_vend[26] = 9;
-			bcopy("PXEClient", &bp->bp_vend[27], 9);
-			bp->bp_vend[36] = TAG_END;
-		} else
-			bp->bp_vend[25] = TAG_END;
+    if(dhcp_ok)
+    {
+        u_int32_t leasetime;
+        bp->bp_vend[6] = DHCPREQUEST;
+        bp->bp_vend[7] = TAG_REQ_ADDR;
+        bp->bp_vend[8] = 4;
+        bcopy(&rbuf.rbootp.bp_yiaddr, &bp->bp_vend[9], 4);
+        bp->bp_vend[13] = TAG_SERVERID;
+        bp->bp_vend[14] = 4;
+        bcopy(&dhcp_serverip.s_addr, &bp->bp_vend[15], 4);
+        bp->bp_vend[19] = TAG_LEASETIME;
+        bp->bp_vend[20] = 4;
+        leasetime = htonl(300);
+        bcopy(&leasetime, &bp->bp_vend[21], 4);
+        if (flag & BOOTP_PXE) {
+            bp->bp_vend[25] = TAG_CLASSID;
+            bp->bp_vend[26] = 9;
+            bcopy("PXEClient", &bp->bp_vend[27], 9);
+            bp->bp_vend[36] = TAG_END;
+        } else
+            bp->bp_vend[25] = TAG_END;
 
-		expected_dhcpmsgtype = DHCPACK;
+        expected_dhcpmsgtype = DHCPACK;
 
-		if(sendrecv(d,
-			    bootpsend, bp, sizeof(*bp),
-			    bootprecv, &rbuf.rbootp, sizeof(rbuf.rbootp))
-		   == -1) {
-			printf("DHCPREQUEST failed\n");
-			return;
-		}
-	}
+
+        if( 0 != bootpsend(udp_sock, bp, sizeof(*bp)) )
+        {
+            SHOW_ERROR0( 0, "can't send UDP");
+            return ECONNREFUSED;
+        }
+
+        //if( 0 >= udp_recvfrom(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l) )
+        if( 0 >= bootprecv(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp)) )
+        {
+            SHOW_ERROR0( 0, "no reply");
+            return ETIMEDOUT;
+        }
+
+
+        /*
+        if(sendrecv(d,
+                    bootpsend, bp, sizeof(*bp),
+                    bootprecv, &rbuf.rbootp, sizeof(rbuf.rbootp))
+           == -1) {
+            SHOW_ERROR0( 0, "DHCPREQUEST failed");
+            return;
+        }*/
+    }
 #endif
 
-	myip = d->myip = rbuf.rbootp.bp_yiaddr;
-	servip = rbuf.rbootp.bp_siaddr;
-	if(rootip.s_addr == INADDR_ANY) rootip = servip;
-	bcopy(rbuf.rbootp.bp_file, bootfile, sizeof(bootfile));
-	bootfile[sizeof(bootfile) - 1] = '\0';
+    myip = rbuf.rbootp.bp_yiaddr;
+    servip = rbuf.rbootp.bp_siaddr;
+    //if(rootip.s_addr == INADDR_ANY) rootip = servip;
+    bcopy(rbuf.rbootp.bp_file, bootfile, sizeof(bootfile));
+    bootfile[sizeof(bootfile) - 1] = '\0';
 
-	if (IN_CLASSA(ntohl(myip.s_addr)))
-		nmask = htonl(IN_CLASSA_NET);
-	else if (IN_CLASSB(ntohl(myip.s_addr)))
-		nmask = htonl(IN_CLASSB_NET);
-	else
-		nmask = htonl(IN_CLASSC_NET);
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("'native netmask' is %s\n", intoa(nmask));
-#endif
+    /*
+    if (IN_CLASSA(ntohl(myip.s_addr)))
+        nmask = htonl(IN_CLASSA_NET);
+    else if (IN_CLASSB(ntohl(myip.s_addr)))
+        nmask = htonl(IN_CLASSB_NET);
+    else
+        nmask = htonl(IN_CLASSC_NET);
 
-	/* Check subnet mask against net mask; toss if bogus */
-	if ((nmask & smask) != nmask) {
-#ifdef BOOTP_DEBUG
-		if (debug)
-			printf("subnet mask (%s) bad\n", intoa(smask));
-#endif
-		smask = 0;
-	}
+    SHOW_FLOW( 1, "'native netmask' is %s", intoa(nmask));
 
-	/* Get subnet (or natural net) mask */
-	netmask = nmask;
-	if (smask)
-		netmask = smask;
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("mask: %s\n", intoa(netmask));
-#endif
+    // Check subnet mask against net mask; toss if bogus 
+    if ((nmask & smask) != nmask) {
+        SHOW_ERROR( 1, "subnet mask (%s) bad", intoa(smask));
+        smask = 0;
+    }
+    */
 
-	/* We need a gateway if root is on a different net */
-	if (!SAMENET(myip, rootip, netmask)) {
-#ifdef BOOTP_DEBUG
-		if (debug)
-			printf("need gateway for root ip\n");
-#endif
-	}
+    /* Get subnet (or natural net) mask 
+    netmask = nmask;
+    if (smask)
+    netmask = smask;
+    */
 
-	/* Toss gateway if on a different net */
-	if (!SAMENET(myip, gateip, netmask)) {
-#ifdef BOOTP_DEBUG
-		if (debug)
-			printf("gateway ip (%s) bad\n", inet_ntoa(gateip));
-#endif
-		gateip.s_addr = 0;
-	}
+    //SHOW_FLOW( 1, "mask: %s", intoa(smask));
+    SHOW_FLOW( 1, "mask: 0x%08X", smask);
 
-	/* Bump xid so next request will be unique. */
-	++d->xid;
+    /* We need a gateway if root is on a different net * /
+    if (!SAMENET(myip, rootip, netmask)) {
+        SHOW_FLOW( 1, "need gateway for root ip");
+    }
+
+    / * Toss gateway if on a different net * /
+    if (!SAMENET(myip, gateip, netmask)) {
+        SHOW_FLOW( 1, "gateway ip (%s) bad", inet_ntoa(gateip));
+        gateip.s_addr = 0;
+    } */
+
+    SHOW_FLOW( 1, "gateway ip (%s) bad", inet_ntoa(gateip) );
+
+    /* Bump xid so next request will be unique. */
+    ++xid;
+
+    return 0;
 }
 
 /* Transmit a bootp request */
 static ssize_t
-bootpsend(d, pkt, len)
-	struct iodesc *d;
-	void *pkt;
-	size_t len;
+bootpsend(void *udp_sock, struct bootp *bp, size_t len)
 {
-	struct bootp *bp;
+    bp->bp_secs = htons((u_short)(time(0) - bot));
 
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("bootpsend: d=%lx called.\n", (long)d);
-#endif
+    SHOW_FLOW0( 1, "bootpsend: calling sendudp" );
 
-	bp = pkt;
-	bp->bp_secs = htons((u_short)(getsecs() - bot));
+    //return (sendudp(d, pkt, len));
 
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("bootpsend: calling sendudp\n");
-#endif
+    sockaddr dest_addr;
+    dest_addr.port = IPPORT_BOOTPS; // dest port
 
-	return (sendudp(d, pkt, len));
+    dest_addr.addr.len = 4;
+    dest_addr.addr.type = ADDR_TYPE_IP;
+    // INADDR_BROADCAST
+    NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
+
+    if( 0 != udp_sendto(udp_sock, bp, len, &dest_addr) )
+    {
+        SHOW_ERROR0( 0, "can't send UDP");
+        return -1;
+    }
+
+    return len;
 }
 
 static ssize_t
-bootprecv(d, pkt, len, tleft)
-struct iodesc *d;
-void *pkt;
-size_t len;
-time_t tleft;
+bootprecv(void *udp_sock, struct bootp *bp, size_t len)
 {
-	ssize_t n;
-	struct bootp *bp;
+    SHOW_FLOW0( 1, "bootp_recv");
 
-#ifdef BOOTP_DEBUGx
-	if (debug)
-		printf("bootp_recvoffer: called\n");
-#endif
+    sockaddr dest_addr;
+    dest_addr.port = IPPORT_BOOTPS; // dest port
 
-	n = readudp(d, pkt, len, tleft);
-	if (n == -1 || n < sizeof(struct bootp) - BOOTP_VENDSIZE)
-		goto bad;
+    dest_addr.addr.len = 4;
+    dest_addr.addr.type = ADDR_TYPE_IP;
+    // INADDR_BROADCAST
+    NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
 
-	bp = (struct bootp *)pkt;
-	
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("bootprecv: checked.  bp = 0x%lx, n = %d\n",
-		    (long)bp, (int)n);
-#endif
-	if (bp->bp_xid != htonl(d->xid)) {
-#ifdef BOOTP_DEBUG
-		if (debug) {
-			printf("bootprecv: expected xid 0x%lx, got 0x%x\n",
-			    d->xid, ntohl(bp->bp_xid));
-		}
-#endif
-		goto bad;
-	}
+    int n;
 
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("bootprecv: got one!\n");
-#endif
+    if( 0 >= ( n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l)) )
+    {
+        SHOW_ERROR0( 0, "no reply");
+        return -1;
+    }
 
-	/* Suck out vendor info */
-	if (bcmp(vm_rfc1048, bp->bp_vend, sizeof(vm_rfc1048)) == 0) {
-		if(vend_rfc1048(bp->bp_vend, sizeof(bp->bp_vend)) != 0)
-		    goto bad;
-	}
+    if (n == -1 || n < (int)(sizeof(struct bootp) - BOOTP_VENDSIZE))
+        goto bad;
+
+    SHOW_FLOW( 1, "bootprecv: checked.  bp = 0x%lx, n = %d",
+               (long)bp, (int)n);
+
+    if (bp->bp_xid != htonl(xid)) {
+        SHOW_FLOW( 1, "bootprecv: expected xid 0x%lx, got 0x%x",
+                   xid, ntohl(bp->bp_xid));
+        goto bad;
+    }
+
+    SHOW_FLOW0( 1, "bootprecv: got one!");
+
+    /* Suck out vendor info */
+    if (bcmp(vm_rfc1048, bp->bp_vend, sizeof(vm_rfc1048)) == 0) {
+        if(vend_rfc1048(bp->bp_vend, sizeof(bp->bp_vend)) != 0)
+            goto bad;
+    }
 #ifdef BOOTP_VEND_CMU
-	else if (bcmp(vm_cmu, bp->bp_vend, sizeof(vm_cmu)) == 0)
-		vend_cmu(bp->bp_vend);
+    else if (bcmp(vm_cmu, bp->bp_vend, sizeof(vm_cmu)) == 0)
+        vend_cmu(bp->bp_vend);
 #endif
-	else
-		printf("bootprecv: unknown vendor 0x%lx\n", (long)bp->bp_vend);
+    else
+        SHOW_ERROR( 0, "bootprecv: unknown vendor 0x%lx", (long)bp->bp_vend);
 
-	return(n);
+    return(n);
 bad:
-	errno = 0;
-	return (-1);
+    //errno = 0;
+    return (-1);
 }
 
 static int
-vend_rfc1048(cp, len)
-	u_char *cp;
-	u_int len;
+vend_rfc1048(u_char *cp, u_int len)
 {
-	u_char *ep;
-	int size;
-	u_char tag;
+    u_char *ep;
+    int size;
+    u_char tag;
 
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("vend_rfc1048 bootp info. len=%d\n", len);
-#endif
-	ep = cp + len;
+    SHOW_FLOW( 1, "vend_rfc1048 bootp info. len=%d", len);
 
-	/* Step over magic cookie */
-	cp += sizeof(int);
+    ep = cp + len;
 
-	while (cp < ep) {
-		tag = *cp++;
-		size = *cp++;
-		if (tag == TAG_END)
-			break;
+    /* Step over magic cookie */
+    cp += sizeof(int);
 
-		if (tag == TAG_SUBNET_MASK) {
-			bcopy(cp, &smask, sizeof(smask));
-		}
-		if (tag == TAG_GATEWAY) {
-			bcopy(cp, &gateip.s_addr, sizeof(gateip.s_addr));
-		}
-		if (tag == TAG_SWAPSERVER) {
-			/* let it override bp_siaddr */
-			bcopy(cp, &rootip.s_addr, sizeof(swapip.s_addr));
-		}
-		if (tag == TAG_ROOTPATH) {
-			strncpy(rootpath, (char *)cp, sizeof(rootpath));
-			rootpath[size] = '\0';
-		}
-		if (tag == TAG_HOSTNAME) {
-			strncpy(hostname, (char *)cp, sizeof(hostname));
-			hostname[size] = '\0';
-		}
+    while (cp < ep) {
+        tag = *cp++;
+        size = *cp++;
+        if (tag == TAG_END)
+            break;
+
+        if (tag == TAG_SUBNET_MASK) {
+            bcopy(cp, &smask, sizeof(smask));
+        }
+        if (tag == TAG_GATEWAY) {
+            bcopy(cp, &gateip.s_addr, sizeof(gateip.s_addr));
+        }
+        if (tag == TAG_SWAPSERVER) {
+            /* let it override bp_siaddr */
+            bcopy(cp, &rootip.s_addr, sizeof(rootip.s_addr));
+        }
+        if (tag == TAG_ROOTPATH) {
+            strncpy(rootpath, (char *)cp, sizeof(rootpath));
+            rootpath[size] = '\0';
+        }
+        if (tag == TAG_HOSTNAME) {
+            strncpy(hostname, (char *)cp, sizeof(hostname));
+            hostname[size] = '\0';
+        }
 #ifdef SUPPORT_DHCP
-		if (tag == TAG_DHCP_MSGTYPE) {
-			if(*cp != expected_dhcpmsgtype)
-			    return(-1);
-			dhcp_ok = 1;
-		}
-		if (tag == TAG_SERVERID) {
-			bcopy(cp, &dhcp_serverip.s_addr,
-			      sizeof(dhcp_serverip.s_addr));
-		}
+        if (tag == TAG_DHCP_MSGTYPE) {
+            if(*cp != expected_dhcpmsgtype)
+                return(-1);
+            dhcp_ok = 1;
+        }
+        if (tag == TAG_SERVERID) {
+            bcopy(cp, &dhcp_serverip.s_addr,
+                  sizeof(dhcp_serverip.s_addr));
+        }
 #endif
-		cp += size;
-	}
-	return(0);
+        cp += size;
+    }
+    return(0);
 }
 
 #ifdef BOOTP_VEND_CMU
 static void
-vend_cmu(cp)
-	u_char *cp;
+vend_cmu(u_char *cp)
 {
-	struct cmu_vend *vp;
+    struct cmu_vend *vp;
 
-#ifdef BOOTP_DEBUG
-	if (debug)
-		printf("vend_cmu bootp info.\n");
-#endif
-	vp = (struct cmu_vend *)cp;
+    SHOW_FLOW0( 1, "vend_cmu bootp info.");
 
-	if (vp->v_smask.s_addr != 0) {
-		smask = vp->v_smask.s_addr;
-	}
-	if (vp->v_dgate.s_addr != 0) {
-		gateip = vp->v_dgate;
-	}
+    vp = (struct cmu_vend *)cp;
+
+    if (vp->v_smask.s_addr != 0) {
+        smask = vp->v_smask.s_addr;
+    }
+    if (vp->v_dgate.s_addr != 0) {
+        gateip = vp->v_dgate;
+    }
 }
 #endif
+
+
+
+
+
+
+
+errno_t bootp(ifnet *iface)
+{
+    void *udp_sock;
+    char mac_addr[6];
+
+    int err = iface->dev->dops.get_address(iface->dev, mac_addr, 6);
+    if(err < 0) {
+        SHOW_ERROR0( 0, "can't get interface MAC address");
+        return ENXIO;
+    }
+
+
+    if( xid == 0 )
+        xid = (int)time(0) ^ 0x1E0A4F; // Some strange number :)
+
+    if( udp_open(&udp_sock) )
+    {
+        SHOW_ERROR0( 0, "UDP - can't prepare endpoint");
+        return ENOTSOCK;
+    }
+
+    errno_t e = do_bootp(udp_sock, mac_addr, 0);
+
+    udp_close(udp_sock);
+
+    if(e)
+        SHOW_ERROR( 0, "error %d", e);
+
+
+    return e;
+}
+
+
+
+
+
+
+
+
+
+
