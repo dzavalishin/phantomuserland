@@ -1,4 +1,5 @@
 #include <sys/utsname.h>
+#include <kernel/boot.h>
 #include "svn_version.h"
 
 
