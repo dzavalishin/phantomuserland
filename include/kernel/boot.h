@@ -10,5 +10,8 @@ extern const char **main_env;
 extern int boot_argc;
 extern const char **boot_argv;
 
+#include <sys/utsname.h>
+extern struct utsname phantom_uname;
+
 
 #endif // BOOT_H

@@ -71,7 +71,7 @@
 /* Required for byteorder(3) functions. */
 #include <machine/endian.h>
 
-#include <shorttypes.h>
+//#include <shorttypes.h>
 
 #include <endian.h>
 
@@ -80,6 +80,7 @@
 #define	INET_ADDRSTRLEN		16
 #define	INET6_ADDRSTRLEN	46
 
+/*
 #ifndef _UINT16_T_DECLARED
 typedef	__uint16_t	uint16_t;
 #define	_UINT16_T_DECLARED
@@ -94,9 +95,10 @@ typedef	__uint32_t	uint32_t;
 typedef	uint32_t	in_addr_t;
 #define	_IN_ADDR_T_DECLARED
 #endif
+*/
 
 #ifndef _IN_PORT_T_DECLARED
-typedef	uint16_t	in_port_t;
+typedef	u_int16_t	in_port_t;
 #define	_IN_PORT_T_DECLARED
 #endif
 
@@ -149,10 +151,10 @@ struct in_addr {
 __BEGIN_DECLS
 #ifndef _BYTEORDER_PROTOTYPED
 #define	_BYTEORDER_PROTOTYPED
-uint32_t	 htonl(uint32_t);
-uint16_t	 htons(uint16_t);
-uint32_t	 ntohl(uint32_t);
-uint16_t	 ntohs(uint16_t);
+u_int32_t	 htonl(u_int32_t);
+u_int16_t	 htons(u_int16_t);
+u_int32_t	 ntohl(u_int32_t);
+u_int16_t	 ntohs(u_int16_t);
 #endif
 
 in_addr_t	 inet_addr(const char *);
