@@ -1,3 +1,5 @@
+#ifndef UTSNAME_H
+#define UTSNAME_H
 
 #define _UTSNAME_LENGTH 257
 
@@ -36,3 +38,5 @@ struct utsname
 /* Put information about the system in NAME.  */
 extern int uname (struct utsname *__name) __THROW;
 
+
+#endif // UTSNAME_H

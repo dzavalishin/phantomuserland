@@ -35,7 +35,7 @@
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
-#include <shorttypes.h>
+//#include <shorttypes.h>
 #include <machine/endian.h>
 
 /* Protocols common to RFC 1700, POSIX, and X/Open. */
@@ -47,6 +47,7 @@
 #define	INADDR_ANY		(u_int32_t)0x00000000
 #define	INADDR_BROADCAST	(u_int32_t)0xffffffff	/* must be masked */
 
+/*
 #ifndef _UINT8_T_DECLARED
 typedef	__uint8_t		uint8_t;
 #define	_UINT8_T_DECLARED
@@ -61,20 +62,21 @@ typedef	__uint16_t		uint16_t;
 typedef	__uint32_t		uint32_t;
 #define	_UINT32_T_DECLARED
 #endif
+*/
 
 #ifndef _IN_ADDR_T_DECLARED
-typedef	uint32_t		in_addr_t;
+typedef	u_int32_t		in_addr_t;
 #define	_IN_ADDR_T_DECLARED
 #endif
 
 #ifndef _IN_PORT_T_DECLARED
-typedef	uint16_t		in_port_t;
+typedef	u_int16_t		in_port_t;
 #define	_IN_PORT_T_DECLARED
 #endif
 
 #ifndef _SA_FAMILY_T_DECLARED
 // TODO move to types.h
-typedef	uint8_t	__sa_family_t;
+typedef	u_int8_t	__sa_family_t;
 
 typedef	__sa_family_t		sa_family_t;
 #define	_SA_FAMILY_T_DECLARED
@@ -120,7 +122,7 @@ struct sockaddr_storage {
 
 /* Socket address, internet style. */
 struct sockaddr_in {
-	uint8_t	sin_len;
+	u_int8_t	sin_len;
 	sa_family_t	sin_family;
 	in_port_t	sin_port;
 	struct	in_addr sin_addr;
@@ -132,10 +134,10 @@ struct sockaddr_in {
 #ifndef _BYTEORDER_PROTOTYPED
 #define	_BYTEORDER_PROTOTYPED
 __BEGIN_DECLS
-uint32_t	htonl(uint32_t);
-uint16_t	htons(uint16_t);
-uint32_t	ntohl(uint32_t);
-uint16_t	ntohs(uint16_t);
+u_int32_t	htonl(u_int32_t);
+u_int16_t	htons(u_int16_t);
+u_int32_t	ntohl(u_int32_t);
+u_int16_t	ntohs(u_int16_t);
 __END_DECLS
 #endif
 
@@ -537,12 +539,12 @@ struct ip_mreq_source {
  * Filter APIs. [RFC3678]
  */
 struct group_req {
-	uint32_t		gr_interface;	/* interface index */
+	u_int32_t		gr_interface;	/* interface index */
 	struct sockaddr_storage	gr_group;	/* group address */
 };
 
 struct group_source_req {
-	uint32_t		gsr_interface;	/* interface index */
+	u_int32_t		gsr_interface;	/* interface index */
 	struct sockaddr_storage	gsr_group;	/* group address */
 	struct sockaddr_storage	gsr_source;	/* source address */
 };
@@ -555,9 +557,9 @@ struct group_source_req {
  * the RFC 3678 libc functions and the kernel.
  */
 struct __msfilterreq {
-	uint32_t		 msfr_ifindex;	/* interface index */
-	uint32_t		 msfr_fmode;	/* filter mode for group */
-	uint32_t		 msfr_nsrcs;	/* # of sources in msfr_srcs */
+	u_int32_t		 msfr_ifindex;	/* interface index */
+	u_int32_t		 msfr_fmode;	/* filter mode for group */
+	u_int32_t		 msfr_nsrcs;	/* # of sources in msfr_srcs */
 	struct sockaddr_storage	 msfr_group;	/* group address */
 	struct sockaddr_storage	*msfr_srcs;	/* pointer to the first member
 						 * of a contiguous array of
@@ -573,14 +575,14 @@ struct sockaddr;
  * The RFC specifies uint_t for the 6th argument to [sg]etsourcefilter().
  * We use uint32_t here to be consistent.
  */
-int	setipv4sourcefilter(int, struct in_addr, struct in_addr, uint32_t,
-	    uint32_t, struct in_addr *);
-int	getipv4sourcefilter(int, struct in_addr, struct in_addr, uint32_t *,
-	    uint32_t *, struct in_addr *);
-int	setsourcefilter(int, uint32_t, struct sockaddr *, socklen_t,
-	    uint32_t, uint32_t, struct sockaddr_storage *);
-int	getsourcefilter(int, uint32_t, struct sockaddr *, socklen_t,
-	    uint32_t *, uint32_t *, struct sockaddr_storage *);
+int	setipv4sourcefilter(int, struct in_addr, struct in_addr, u_int32_t,
+	    u_int32_t, struct in_addr *);
+int	getipv4sourcefilter(int, struct in_addr, struct in_addr, u_int32_t *,
+	    u_int32_t *, struct in_addr *);
+int	setsourcefilter(int, u_int32_t, struct sockaddr *, socklen_t,
+	    u_int32_t, u_int32_t, struct sockaddr_storage *);
+int	getsourcefilter(int, u_int32_t, struct sockaddr *, socklen_t,
+	    u_int32_t *, u_int32_t *, struct sockaddr_storage *);
 
 /*
  * Filter modes; also used to represent per-socket filter mode internally.
