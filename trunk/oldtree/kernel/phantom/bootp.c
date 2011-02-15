@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "bootp"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -212,7 +212,7 @@ static errno_t do_bootp(void *udp_sock, void *mac_addr, int flag)
     //if( 0 != udp_sendto(udp_sock, bp, sizeof(*bp), &dest_addr) )
     if( 0 != bootpsend(udp_sock, bp, sizeof(*bp)) )
     {
-        SHOW_ERROR0( 0, "can't send UDP");
+        SHOW_ERROR0( 0, "can't send UDP packet");
         return ECONNREFUSED;
     }
 
@@ -263,7 +263,7 @@ static errno_t do_bootp(void *udp_sock, void *mac_addr, int flag)
 
         if( 0 != bootpsend(udp_sock, bp, sizeof(*bp)) )
         {
-            SHOW_ERROR0( 0, "can't send UDP");
+            SHOW_ERROR0( 0, "can't send UDP 2");
             return ECONNREFUSED;
         }
 
@@ -329,7 +329,14 @@ static errno_t do_bootp(void *udp_sock, void *mac_addr, int flag)
         gateip.s_addr = 0;
     } */
 
-    SHOW_FLOW( 1, "gateway ip (%s) bad", inet_ntoa(gateip) );
+    SHOW_FLOW( 1, "my ip:      %s", inet_ntoa(myip) );
+    SHOW_FLOW( 1, "gateway ip: %s", inet_ntoa(gateip) );
+    SHOW_FLOW( 1, "root ip:    %s", inet_ntoa(rootip) );
+    SHOW_FLOW( 1, "server ip:  %s", inet_ntoa(servip) );
+
+    SHOW_FLOW( 1, "rootpath:  '%s'", rootpath );
+    SHOW_FLOW( 1, "hostname:  '%s'", hostname );
+    SHOW_FLOW( 1, "bootfile:  '%s'", bootfile );
 
     /* Bump xid so next request will be unique. */
     ++xid;
@@ -355,13 +362,14 @@ bootpsend(void *udp_sock, struct bootp *bp, size_t len)
     // INADDR_BROADCAST
     NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
 
-    if( 0 != udp_sendto(udp_sock, bp, len, &dest_addr) )
+    int rc = udp_sendto(udp_sock, bp, len, &dest_addr);
+    if( 0 != rc )
     {
-        SHOW_ERROR0( 0, "can't send UDP");
+        SHOW_ERROR( 0, "can't send UDP, rc = %d", rc);
         return -1;
     }
 
-    return len;
+    return 0;
 }
 
 static ssize_t
@@ -375,21 +383,21 @@ bootprecv(void *udp_sock, struct bootp *bp, size_t len)
     dest_addr.addr.len = 4;
     dest_addr.addr.type = ADDR_TYPE_IP;
     // INADDR_BROADCAST
-    NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
+    //NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
+    NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0, 0, 0, 0);
 
-    int n;
+    int n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 10000000l);
 
-    if( 0 >= ( n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l)) )
+    if( 0 >= n )
     {
-        SHOW_ERROR0( 0, "no reply");
+        SHOW_ERROR( 0, "UDP recv err = %d", n);
         return -1;
     }
 
     if (n == -1 || n < (int)(sizeof(struct bootp) - BOOTP_VENDSIZE))
         goto bad;
 
-    SHOW_FLOW( 1, "bootprecv: checked.  bp = 0x%lx, n = %d",
-               (long)bp, (int)n);
+    SHOW_FLOW( 1, "bootprecv: recv %d bytes", n);
 
     if (bp->bp_xid != htonl(xid)) {
         SHOW_FLOW( 1, "bootprecv: expected xid 0x%lx, got 0x%x",
