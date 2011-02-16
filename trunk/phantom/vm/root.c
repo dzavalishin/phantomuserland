@@ -28,6 +28,7 @@
 #include "vm/bulk.h"
 
 #include <kernel/boot.h>
+#include <kernel/debug.h>
 
 //#include "vm/systable_id.h"
 
@@ -45,6 +46,8 @@ static void load_kernel_boot_env(void);
 
 static void handle_object_at_restart( pvm_object_t o );
 
+static void runclass(int, char **);
+
 
 /**
  *
@@ -59,6 +62,9 @@ static void handle_object_at_restart( pvm_object_t o );
 void pvm_root_init(void)
 {
     struct pvm_object_storage *root = get_root_object_storage();
+
+    dbg_add_command( runclass, "runclass", "runclass class [method ordinal] - create object of given class and run method (ord 8 by default)");
+
 
     if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
     {
@@ -148,6 +154,8 @@ void pvm_root_init(void)
         printf("Done processing restart list.\n");
     }
 #endif
+
+
 }
 
 
@@ -532,5 +540,52 @@ void pvm_add_object_to_restart_list( pvm_object_t o )
     pvm_object_t wr = pvm_create_weakref_object(o);
     // TODO sync?
     pvm_append_array( pvm_root.restart_list.data, wr );
+}
+
+
+
+void create_and_run_object(const char *class_name, int method )
+{
+    if( method < 0 )
+        method = 8;
+
+    struct pvm_object name = pvm_create_string_object(class_name);
+
+    struct pvm_object user_class = pvm_exec_lookup_class_by_name(name);
+
+
+    if( pvm_is_null(user_class))
+    {
+        //SHOW_ERROR( 0, "Unable to load class '%s'", class_name );
+        printf( "Unable to load class '%s'\n", class_name );
+        return;
+    }
+
+    struct pvm_object user_o = pvm_create_object( user_class );
+    ref_dec_o(user_class);
+
+    pvm_exec_run_method(user_o, method, 0, 0);
+    ref_dec_o(user_o);
+}
+
+
+static void runclass(int ac, char **av)
+{
+    int method = 8;
+
+    if( ac < 1 || ac > 2 )
+    {
+        printf("runclass class_name [method ordinal]\n");
+        return;
+    }
+
+    const char *cname = *av++;
+
+    if( ac > 1 )
+    {
+        method = atol( *av++ );
+    }
+
+    create_and_run_object(cname, method );
 }
 

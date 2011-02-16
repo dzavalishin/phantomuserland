@@ -101,6 +101,9 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
     dev->seq_number = seq_number++;
     dev->drv_private = &vdev;
 
+
+
+
     virtio_set_status( &vdev, VIRTIO_CONFIG_S_DRIVER );
 
     struct virtio_blk_config cfg;

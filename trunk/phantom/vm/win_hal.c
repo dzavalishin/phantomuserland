@@ -346,4 +346,20 @@ errno_t wtty_putc_nowait( struct wtty *wt, int ch )
 }
 
 
+#if 0
+int dbg_add_command(void (*func)(int, char **), const char *name, const char *desc)
+{
+    return 0;
+}
 
+#else
+int GET_CPU_ID() { return 0; }
+
+void hal_cpu_reset_real() { exit(33); }
+
+void run_test( void )
+{
+	printf("sorry, not in hosted env\n");
+}
+
+#endif

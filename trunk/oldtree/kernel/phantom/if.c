@@ -2,6 +2,13 @@
 
 #if HAVE_NET
 
+#define DEBUG_MSG_PREFIX "if"
+#include "debug_ext.h"
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 /*
  ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
  ** Distributed under the terms of the NewOS License.
@@ -150,7 +157,6 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
             goto err2;
         }
 
-        //dev->dops.get_address
         err = dev->dops.get_address(dev, &address->addr.addr[0], 6);
         if(err < 0) {
             kfree(address);
@@ -196,8 +202,11 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
         err = if_boot_interface(i);
         if(err < 0)
             goto err2;
+
+        //bootp(i);
     }
     *_i = i;
+
 
     return NO_ERROR;
 
@@ -220,6 +229,83 @@ void if_bind_link_address(ifnet *i, ifaddr *addr)
 {
     i->link_addr = addr;
 }
+
+
+
+/*
+ TODO simplify
+
+  net = addr & netmask
+  router = addr
+
+*/
+
+void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net, int router, int def_router)
+{
+    ifaddr *address;
+
+    // set the ip address for this net interface
+    address = malloc(sizeof(ifaddr));
+    address->addr.len = 4;
+    address->addr.type = ADDR_TYPE_IP;
+    NETADDR_TO_IPV4(address->addr) = addr;
+
+    address->netmask.len = 4;
+    address->netmask.type = ADDR_TYPE_IP;
+    NETADDR_TO_IPV4(address->netmask) = netmask;
+
+    address->broadcast.len = 4;
+    address->broadcast.type = ADDR_TYPE_IP;
+    NETADDR_TO_IPV4(address->broadcast) = bcast;
+
+    if_bind_address(interface, address);
+
+    // set up an initial routing table
+
+    int rc;
+    if( (rc = ipv4_route_add( net, netmask, router, interface->id) ) )
+    {
+        SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
+    }
+    else
+    {
+        SHOW_INFO0( 1, "Adding route - ok");
+    }
+
+
+    SHOW_INFO0( 1, "Adding default route...");
+    if( (rc = ipv4_route_add_default( router, interface->id, def_router ) ) )
+    {
+        SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
+    }
+    else
+    {
+        SHOW_INFO0( 1, "Adding route - ok");
+    }
+
+    // Now try to get something real :)
+    bootp(interface);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 int if_output(cbuf *b, ifnet *i)
 {

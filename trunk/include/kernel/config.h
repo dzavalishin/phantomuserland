@@ -29,23 +29,35 @@
 // Let it give out CPU.
 #define SIMPLE_IDE_YIELD 1
 
+#ifndef ASSEMBLER
 
-#if 0
+#if 1
+
+#include <string.h>
+
+#define STRAY_CATCH_SIZE (4096*2)
+
+void phantom_debug_register_stray_catch( void *buf, int bufs, const char *name );
+
 // define in each source an array of zeroes to try to catch stray pointers.
 // even if we can't really catch 'em, do it so that enabling and disabling
 // these arrays will, possibly, affect bugs and, if so, show us that bug is
 // caused by stray pointer.
-static char stray_pointer_catch_bss[4096];
-static char stray_pointer_catch_data[4096] = "0000"; // enforce it to be in data seg
+static char stray_pointer_catch_bss[STRAY_CATCH_SIZE];
+static char stray_pointer_catch_data[STRAY_CATCH_SIZE] = "0000"; // enforce it to be in data seg
 
 static void register_stray_catch_buf(void) __attribute__ ((constructor));
 static void register_stray_catch_buf(void) 
 {
-	(void) stray_pointer_catch_bss;
-	(void) stray_pointer_catch_data;
+    memset( stray_pointer_catch_data+4, 0, STRAY_CATCH_SIZE-4 );
+	
+	phantom_debug_register_stray_catch( stray_pointer_catch_bss, STRAY_CATCH_SIZE, " bss" );
+	phantom_debug_register_stray_catch( stray_pointer_catch_data, STRAY_CATCH_SIZE, " data" );
 }
 
 #endif
+
+#endif // ASSEMBLER
 
 
 #endif // CONFIG_H

@@ -4,7 +4,7 @@ rem SOUND=-soundhw sb16
 rem SET USB=-usb -usbdevice mouse
 rem SET USB=-usb 
 
-SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
+rem SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw
 rem SET VIO=-net nic,model=virtio
 
@@ -16,10 +16,12 @@ SET Q_PORTS= -serial file:serial0.log
 
 rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ../run/tftp
 rem    -net nic,model=rtl8139 -net nic,model=i82559er -net nic,model=pcnet -net nic,model=ne2k_isa
-SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../run/tftp
 rem SET Q_NET= -net nic,model=virtio -net nic,model=pcnet  -net user -tftp tftp
 rem SET Q_NET= -net nic,model=pcnet -net nic,model=virtio   -net user -tftp tftp
 rem SET Q_NET=  -net nic,model=rtl8139  -net user -tftp tftp
+
+SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../run/tftp
+
 
 rem SET Q_MACHINE=-M isapc
 rem SET Q_MACHINE=-m 85

@@ -22,6 +22,7 @@
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 #include <kernel/barriers.h>
+#include <x86/phantom_page.h>
 
 static u_int32_t virtio_get_q_size( virtio_device_t *vd, int index );
 static void virtio_ring_init(virtio_device_t *vd, int index, int num );
@@ -194,7 +195,9 @@ static u_int32_t virtio_get_q_size( virtio_device_t *vd, int index )
 static void virtio_set_q_physaddr( virtio_device_t *vd, int index, physaddr_t addr )
 {
     outw( vd->basereg+VIRTIO_PCI_QUEUE_SEL, index );
-    outw( vd->basereg+VIRTIO_PCI_QUEUE_PFN, addr/VIRTIO_PCI_VRING_ALIGN  );
+    //outw( vd->basereg+VIRTIO_PCI_QUEUE_PFN, addr/VIRTIO_PCI_VRING_ALIGN  );
+    outl( vd->basereg+VIRTIO_PCI_QUEUE_PFN, addr/VIRTIO_PCI_VRING_ALIGN  );
+    //printf("set q %d addr %p\n", index, addr/VIRTIO_PCI_VRING_ALIGN );
 }
 
 
@@ -216,12 +219,20 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
 
     SHOW_FLOW( 3, "allocating %d pages for vring of size %d ", npages, num );
 
+
+#if 0
     physaddr_t result;
     hal_alloc_phys_pages( &result, npages);
     void *buffer = phystokv(result);
 
     //hal_pages_control( result, buffer, npages, page_map_io, page_rw );
     hal_pages_control( result, buffer, npages, page_map, page_rw );
+#else
+    physaddr_t result;
+    void *buffer;
+    // TODO nocache?
+    hal_pv_alloc( &result, &buffer, npages*PAGE_SIZE );
+#endif
 
     memset( buffer, size, 0 );
 
@@ -234,6 +245,7 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     hal_spin_init(&r->lock);
     r->index = index;
     r->phys = result;
+    r->mem_bytes = npages*PAGE_SIZE;
     r->nFreeDescriptors = num;
     r->nAdded = 0;
     r->freeHead = 0;
@@ -461,7 +473,16 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
     assert( nDesc > 0 );
 
     virtio_ring_t *r = vd->rings[qindex];
+#if 0
+    // impossible for dump_phys can do only aligned addresses
+    int i;
+    for( i = 0; i<nDesc; i++ )
+    {
+    	printf("dump desc %d: %d @ %p\n", i, desc[i].len, desc[i].addr );
+    	dump_phys(desc[i].addr, desc[i].len);
+    }
 
+#endif
     VIRTIO_LOCK(r);
     // TODO Errno? Sleep waiting for interrupt, retry
     if(r->nFreeDescriptors < nDesc )
@@ -637,6 +658,12 @@ void virtio_kick(virtio_device_t *vd, int qindex)
 
     mem_barrier();
 
+    //virtio_dump_phys(r);
+
+    //outw( vd->basereg+VIRTIO_PCI_QUEUE_SEL, qindex );
+    //printf( "physaddr is %x\n, ", inl( vd->basereg+VIRTIO_PCI_QUEUE_PFN ) );
+
+
 #if 0 // temp notify allways
     if( !(r->vr.used->flags & VRING_USED_F_NO_NOTIFY) )
 #endif
@@ -678,5 +705,36 @@ static void virtio_release_descriptor_index(virtio_ring_t *r, int toRelease)
     r->vr.desc[toRelease].next = r->freeHead;
     r->freeHead = toRelease;
 }
+
+
+
+
+void dump_phys( physaddr_t a, size_t len )
+{
+    printf( "dump physaddr %p\n, ", a );
+
+	char buf[PAGE_SIZE];
+	while(len > 0)
+	{
+		int ml = len;
+		if(ml > PAGE_SIZE) ml = PAGE_SIZE;
+
+		len -= ml;
+
+		memcpy_p2v(buf, a, ml);
+
+		a += ml;
+
+		hexdump( buf, ml, "", 0);
+	}
+}
+
+void virtio_dump_phys(virtio_ring_t *r)
+{
+	dump_phys(r->phys, r->mem_bytes);
+}
+
+
+
 
 

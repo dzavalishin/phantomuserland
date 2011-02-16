@@ -1040,12 +1040,16 @@ int cbuf_init()
     for(i=0; i<CBUF_BITMAP_SIZE/8; i++)
         cbuf_bitmap[i] = 0;
 
-#if 0
-    buf = allocate_cbuf_mem(ALLOCATE_CHUNK);
-    if(buf == NULL)
-        return ERR_NO_MEMORY;
-    cbuf_free_chain_noblock(buf);
-#endif
+
+    // initialize noblock list
+    for( i=0; i < 10 ; i++ )
+    {
+        buf = allocate_cbuf_mem(ALLOCATE_CHUNK);
+        if(buf == NULL)
+            return ERR_NO_MEMORY;
+        cbuf_free_chain_noblock(buf);
+    }
+
     buf = allocate_cbuf_mem(ALLOCATE_CHUNK);
     if(buf == NULL)
         return ERR_NO_MEMORY;

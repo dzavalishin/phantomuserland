@@ -488,8 +488,11 @@ static void arp_cleanup_thread(void)
         free_list = NULL;
         last = NULL;
         e = arp_cache_entries;
-        while(e) {
-            if(now - e->last_used_time > 1000000LL * 60 * 5) {
+        while(e)
+        {
+            // keep broadcast mapping
+            if( (now - e->last_used_time > 1000000LL * 60 * 5) && (e->ip_addr != 0xFFFFFFFF) )
+            {
                 // remove it from the list
                 if(last)
                     last->all_next = e->all_next;
@@ -535,6 +538,15 @@ int arp_init(void)
     arp_table = hash_init(256, offsetof(arp_cache_entry, next), &arp_cache_compare, &arp_cache_hash);
     if(!arp_table)
         return -1;
+
+    {
+    netaddr eth;
+
+    eth.len = 6;
+    eth.type = ADDR_TYPE_ETHERNET;
+    memset(&eth.addr[0], 0xFF, 6);
+    arp_insert( 0xFFFFFFFF, &eth);
+    }
 
     //thread_resume_thread(thread_create_kernel_thread("arp cache cleaner", &arp_cleanup_thread, NULL));
     //thread_resume_thread(thread_create_kernel_thread("arp retransmit thread", &arp_retransmit_thread, NULL));

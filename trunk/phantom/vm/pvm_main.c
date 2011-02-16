@@ -396,9 +396,14 @@ int main(int argc, char* argv[])
 
     pvm_root_init();
 
+#if 0
 //ui_loop( argc, argv, "test");
     printf("\nPhantom code finished\n" );
     getchar();
+#else
+    dbg_init();
+    kernel_debugger();
+#endif
 
 #if 0
     pvm_memcheck();

@@ -169,56 +169,7 @@ WW();
     }
     else
     {
-        ifaddr *address;
-
-        // set the ip address for this net interface
-        address = malloc(sizeof(ifaddr));
-        address->addr.len = 4;
-        address->addr.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->addr) = WIRED_ADDRESS;
-
-        address->netmask.len = 4;
-        address->netmask.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->netmask) = WIRED_NETMASK; 
-
-        address->broadcast.len = 4;
-        address->broadcast.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->broadcast) = WIRED_BROADCAST;
-
-        if_bind_address(interface, address);
-
-        // set up an initial routing table
-
-        printf(DEV_NAME "Adding route...");
-        int rc;
-        if( (rc = ipv4_route_add(
-                                 WIRED_NET,
-                                 WIRED_NETMASK,
-                                 WIRED_ROUTER,
-                                 interface->id) ) )
-        {
-            printf("failed, rc = %d\n", rc);
-        }
-        else
-        {
-            printf("ok\n");
-        }
-
-
-        printf(DEV_NAME "Adding default route...");
-        if( (rc = ipv4_route_add_default(
-                                         WIRED_ROUTER,
-                                         interface->id,
-                                         DEF_ROUTE_ROUTER
-                                        ) ) )
-        {
-            printf("failed, rc = %d\n", rc);
-        }
-        else
-        {
-            printf("ok\n");
-        }
-
+        if_simple_setup(interface, WIRED_ADDRESS, WIRED_NETMASK, WIRED_BROADCAST, WIRED_NET, WIRED_ROUTER, DEF_ROUTE_ROUTER );
     }
 
 

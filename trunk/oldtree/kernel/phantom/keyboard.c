@@ -35,11 +35,20 @@
 
 #include "console.h"
 
+
+static int      keyb_init = 0;
+
+
+
 #define KEYB_EVENT_PUSH_THREAD 0
 #define KEYB_USE_SEMA 1
 
 #define USE_SOFTIRQ 0
+
+#if USE_SOFTIRQ
 static int softirq = -1;
+#endif
+
 
 /* TODO: MOVE THIS TO A PRIVATE HEADER FILE */
 #ifndef min
@@ -109,6 +118,12 @@ static int _keyboard_read(_key_event *buf, u_int32_t len)
     u_int32_t copied_events = 0;
     u_int32_t copy_len;
     //int rc;
+
+    if( !keyb_init )
+    {
+        hal_sleep_msec(2000);
+        return 0;
+    }
 
     /* clamp the input len value */
     len = min(len, keyboard_buf_len - 1);
@@ -415,7 +430,7 @@ static void maininit()
 }
 
 
-int phantom_dev_keyboard_init(int irq)
+static int phantom_dev_keyboard_init(int irq)
 {
     maininit();
     leds = 0;
@@ -453,45 +468,14 @@ phantom_device_t * driver_isa_ps2k_probe( int port, int irq, int stage )
     dev->name = "PS/2 keyboard";
     dev->seq_number = seq_number++;
 
+    keyb_init = 1;
+
     return dev;
 
 }
 
 
 
-#if 0
-int direct_trygetchar_hook_trygetchar(void)
-{
-    unsigned int saved_tail;
-    _key_event buf;
-
-    //printf("interrupt driven keyboard hook is called\n");
-again:
-    // critical section
-    hal_mutex_lock(&keyboard_read_mutex);
-
-    saved_tail = tail;
-    if(head == saved_tail) {
-        hal_mutex_unlock(&keyboard_read_mutex);
-        return -1;
-    } else {
-        memcpy(&buf, &keyboard_buf[head], sizeof(_key_event) );
-
-        head = (head + 1) % keyboard_buf_len;
-    }
-    if(head != saved_tail) {
-        // we did not empty the keyboard queue
-        hal_cond_broadcast( &keyboard_sem );
-    }
-
-    hal_mutex_unlock(&keyboard_read_mutex);
-
-    if(buf.modifiers != KEY_MODIFIER_DOWN)
-        goto again;
-
-    return buf.keychar;
-}
-#endif
 
 int phantom_dev_keyboard_getc(void)
 {
@@ -510,6 +494,8 @@ void phantom_dev_keyboard_get_key( _key_event *out)
     _keyboard_read( out, 1);
 }
 
+
+#if 1
 
 #define K_OBUF_FUL 	0x01		/* output (from keybd) buffer full */
 
@@ -548,7 +534,7 @@ int phantom_scan_console_getc(void)
 #endif
 
 }
-
+#endif
 
 
 #if KEYB_EVENT_PUSH_THREAD

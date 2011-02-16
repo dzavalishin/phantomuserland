@@ -49,7 +49,7 @@ errno_t hal_sem_init(hal_sem_t *c, const char *name )
 static void checkinit(hal_sem_t *c)
 {
     // in spinlock!
-
+	int ie = hal_save_cli();
     hal_spin_lock(&init_lock);
 
     struct phantom_sem_impl *ci = c->impl;
@@ -65,6 +65,7 @@ static void checkinit(hal_sem_t *c)
     hal_sem_init(c,"?Static");
 
     hal_spin_unlock(&init_lock);
+	if(ie) hal_sti();
 }
 
 
