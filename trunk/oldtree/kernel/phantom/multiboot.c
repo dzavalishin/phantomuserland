@@ -43,6 +43,15 @@ static void __file_init_func(void)
 	file_inited = 1;
 }
 
+static void __file_init_func2(void) __attribute__ ((constructor));
+
+static void __file_init_func2(void)
+{
+	file_inited = 1;
+}
+
+
+
 struct multiboot_info bootParameters;
 
 static void make_mem_map(void);

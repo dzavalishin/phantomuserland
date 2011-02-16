@@ -6,21 +6,7 @@
        .text : 
 		{ 
 		*(.text) 
-
-        /* static ctors */
-/*
-        __preinit_array_start = .;
-        KEEP(*(.preinit_array*))
-        __preinit_array_end = .;
-*/
-        __init_array_start  = .;
-/*
-        KEEP(*(.init_array*))
-*/
-		KEEP(*(.ctors))
-        __init_array_end    = .;
-
-    		
+   		
 		PROVIDE (etext = .);
 		}
 
@@ -29,7 +15,35 @@
 		PROVIDE (_data_start__ = .);
 		PROVIDE (__data_start__ = .);
                 *(.data) 
-                }
+
+/*
+		SORT(CONSTRUCTORS)
+*/
+        /* static ctors */
+/*
+        __preinit_array_start = .;
+        KEEP(*(.preinit_array*))
+        __preinit_array_end = .;
+*/
+
+        }
+
+/*
+        PROVIDE(__init_array_start  = .);
+*/
+
+
+.init_array     : { 
+		__init_array_start  = .;
+		KEEP(*(.init_array))
+		KEEP(*(.ctors)) 
+		__init_array_end    = .;
+}
+
+/*
+        PROVIDE(__init_array_end    = .);
+*/
+
 
        .rdata /*BLOCK(__section_alignment__)*/ : 
 		{ *(.rdata) }
