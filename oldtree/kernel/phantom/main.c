@@ -60,6 +60,8 @@
 // phys addr
 #include <kernel/vm.h>
 
+#include <netinet/resolv.h>
+
 
 
 //#define N_OBJMEM_PAGES ((1024L*1024*128)/4096)
@@ -204,6 +206,9 @@ int main(int argc, char **argv, char **envp)
 {
     (void) envp;
 
+	// check for stray ptrs here
+	stray();
+
     init_irq_allocator();
 
     init_multiboot_symbols();
@@ -291,6 +296,9 @@ int main(int argc, char **argv, char **envp)
     //getchar();
     dpc_init();
 
+    init_stray_checker();
+
+
     phantom_timed_call_init2();
     phantom_init_stat_counters2();
 
@@ -327,6 +335,18 @@ int main(int argc, char **argv, char **envp)
     net_test();
 #endif
 
+#if HAVE_NET
+    //ngethostbyname("ya.ru");
+
+    {
+        in_addr_t out;
+        name2ip( &out, "ya.ru", 0 );
+        name2ip( &out, "ya.ru", 0 );
+    }
+
+#endif // HAVE_NET
+
+
 connect_ide_io();
 
     // Start virtual machine in special startup (single thread) mode
@@ -347,9 +367,6 @@ connect_ide_io();
 
 //trfs_testrq();
 
-#if HAVE_NET
-    ngethostbyname("ya.ru");
-#endif // HAVE_NET
 
 
 #if 0
@@ -460,6 +477,8 @@ static void net_stack_init()
     tcp_init();
     //socket_init();
     //net_control_init();
+
+    resolver_init();
 
     phantom_trfs_init();
 

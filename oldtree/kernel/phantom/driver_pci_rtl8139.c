@@ -210,6 +210,8 @@ WW();
     }
     else
     {
+        if_simple_setup( interface, WIRED_ADDRESS, WIRED_NETMASK, WIRED_BROADCAST, WIRED_NET, WIRED_ROUTER, DEF_ROUTE_ROUTER );
+/*
         ifaddr *address;
 
         // set the ip address for this net interface
@@ -259,7 +261,7 @@ WW();
         {
             printf("ok\n");
         }
-
+*/
     }
 
 WW();

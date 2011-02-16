@@ -35,11 +35,12 @@
 #include <arpa/inet.h>
 #include "udp.h"
 
+#include <netinet/resolv.h>
 
 
 // TODO resolver eats memory, see malloc
 
-static void ChangetoDnsNameFormat (unsigned char*,unsigned char*);
+static void ChangetoDnsNameFormat (unsigned char* dns, const unsigned char* host);
 static unsigned char* ReadName (unsigned char*,unsigned char*,int*);
 
 ipv4_addr  ngethostbyname (unsigned char*);
@@ -48,7 +49,7 @@ ipv4_addr  ngethostbyname (unsigned char*);
 
 
 
-errno_t dns_request(unsigned char *host, ipv4_addr server, ipv4_addr *result)
+errno_t dns_request(const unsigned char *host, ipv4_addr server, ipv4_addr *result)
 {
     unsigned char buf[65536], *qname, *reader;
     int i, j, stop;
@@ -63,13 +64,13 @@ errno_t dns_request(unsigned char *host, ipv4_addr server, ipv4_addr *result)
     int res = udp_open(&s);
     if( res )
     {
-        printf("Can't get socket");
+        SHOW_ERROR0( 0, "Can't get socket");
         return ENOTSOCK;
     }
 #else
     int s = socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP); //UDP packet for DNS queries
 #endif
-    printf("got sock\n");
+    //SHOW_FLOW0( 2, "got sock");
 
 #ifdef KERNEL
     sockaddr addr;
@@ -121,20 +122,20 @@ errno_t dns_request(unsigned char *host, ipv4_addr server, ipv4_addr *result)
 
     STAT_INC_CNT(STAT_CNT_DNS_REQ);
 
-    printf("Sending Packet...\n");
+    SHOW_FLOW0( 3, "Sending Packet");
     int sendLen = sizeof(struct DNS_HEADER) + qname_len + sizeof(struct QUESTION);
 #ifdef KERNEL
     int ret = udp_sendto( s, buf, sendLen, &addr);
-    if( ret != sendLen )
+    if( ret )
 #else
     if(sendto(s,(char*)buf, sendLen, 0, (struct sockaddr*)&dest, sizeof(dest)) != sendLen)
 #endif
     {
-        printf("Error sending DNS req, %d\n", ret);
+        SHOW_ERROR( 0, "Error sending req, %d", ret);
+        goto reterr;
     }
-    printf("Sent\n");
+    SHOW_FLOW0( 3, "Sent");
 
-    printf("nReceiving answer...\n");
 #ifdef KERNEL
     long tmo = 1000L*1000L*2; // 2 sec
     //long tmo = 1000L*10;
@@ -147,10 +148,10 @@ errno_t dns_request(unsigned char *host, ipv4_addr server, ipv4_addr *result)
     if(ret == 0)
 #endif
     {
-        printf("Failed.\n");
-        return ENOENT;
+        SHOW_ERROR0( 1, "Failed");
+        goto reterr;
     }
-    printf("Received.\n");
+    SHOW_FLOW0( 3, "Received");
 
     STAT_INC_CNT(STAT_CNT_DNS_ANS);
 
@@ -293,12 +294,15 @@ errno_t dns_request(unsigned char *host, ipv4_addr server, ipv4_addr *result)
         if( ntohs(answers[i].resource->type) == 1 ) //IPv4 address
         {
             *result = *( (long*)answers[i].rdata);
+            udp_close(s);
             return 0;
         }
     }
 
+reterr:
     // No direct answer
     *result = 0;
+    udp_close(s);
 
     return ENOENT;
 }
@@ -319,7 +323,7 @@ static unsigned char* ReadName( unsigned char* reader, unsigned char* buffer, in
     {
         if(*reader>=192)
         {
-            offset = (*reader)*256 + *(reader+1) - 49152; //49152 = 11000000 00000000 
+            offset = (*reader)*256 + *(reader+1) - 49152; //49152 = 11000000 00000000
             reader = buffer + offset - 1;
             jumped = 1; //we have jumped to another location so counting wont go up!
         }
@@ -354,14 +358,14 @@ static unsigned char* ReadName( unsigned char* reader, unsigned char* buffer, in
 
 
 //this will convert www.google.com to 3www6google3com ;got it <img src="http://www.binarytides.com/blog/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley">
-static void ChangetoDnsNameFormat(unsigned char* dns, unsigned char* _host)
+static void ChangetoDnsNameFormat(unsigned char* dns, const unsigned char* _host)
 {
     unsigned char copy[128];
     strlcpy( (char*)copy, (const char*)_host, 127 );
     strcat( (char*)copy, "..");
     unsigned char* host = copy;
 
-    printf("format: '%s'\n", host );
+    //printf("format: '%s'\n", host );
 
 
     int lock = 0 , i;
@@ -415,23 +419,196 @@ ipv4_addr ngethostbyname(unsigned char *host)
 
         if(sleft-- <= 0 || server == 0)
         {
-            printf("No more places to look in, give up\n");
+            SHOW_ERROR0( 1, "No more places to look in, give up");
             return 0;
         }
 
 
-        printf("look in %s\n", inet_ntoa(* (struct in_addr*)&server) );
+        SHOW_FLOW( 2, "look in %s", inet_ntoa(* (struct in_addr*)&server) );
         errno_t res = dns_request(host, server, &result );
 
         if( res == 0 || result != 0 )
         {
-            printf("DNS andwer is %s\n", inet_ntoa(* (struct in_addr*)&result) );
+            SHOW_FLOW( 2, "answer is %s", inet_ntoa(* (struct in_addr*)&result) );
             return result;
         }
     }
 
     return 0;
 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef struct rcache_entry {
+    struct rcache_entry *next;
+    struct rcache_entry *all_next;
+    char *host;
+    ipv4_addr ip_addr;
+    bigtime_t last_used_time;
+} rcache_entry;
+
+
+
+
+
+static int rcache_compare(void *_e, const void *_key)
+{
+    rcache_entry *e = _e;
+    const char *host = _key;
+
+    return ( 0 != strcmp( e->host, host ) );
+}
+
+/*
+static unsigned int rcache_hash(void *_e, const void *_key, unsigned int range)
+{
+    rcache_entry *e = _e;
+    const char *key = _key;
+
+    if(e)
+        key = e->host;
+
+    int result = 0;
+
+    while(*key)
+        result += *key++;
+
+    return result % range;
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static int 	inited = 0;
+//static void *	rcache;
+static mutex 	rcache_mutex;
+
+
+void resolver_init()
+{
+    hal_mutex_init(&rcache_mutex, "resolver");
+
+    /*
+    rcache = hash_init(256, offsetof(rcache_entry, next), &rcache_compare, &rcache_hash);
+    if(!rcache)
+        return -1;
+    */
+
+    inited = 1;
+}
+
+// TODO VERY DUMB CACHE
+// TODO cache must keep multimple addr entries
+
+#define CACHE_SIZE 32
+static rcache_entry     ca[CACHE_SIZE];
+static int              inspos = 0;
+
+errno_t lookup_cache( in_addr_t *out, const char *name )
+{
+    int i;
+    for( i = 0; i < CACHE_SIZE; i++ )
+    {
+        if( ca[i].host == 0 )
+            continue;
+
+        if( !rcache_compare( ca+i, name) )
+        {
+            *out = ca[i].ip_addr;
+            return 0;
+        }
+    }
+    return ENOENT;
+}
+
+void store_to_cache( in_addr_t addr, const char *name )
+{
+    ++inspos;
+    if(inspos >= CACHE_SIZE)
+        inspos = 0;
+
+    if( ca[inspos].host )
+        free(ca[inspos].host);
+
+    ca[inspos].host = strdup(name);
+    ca[inspos].ip_addr = addr;
+    //ca[inspos].last_used_time = system_time();
+}
+
+
+
+errno_t name2ip( in_addr_t *out, const char *name, int flags )
+{
+    if(!inited)
+        return ENXIO;
+
+    int tries = 20;
+
+    if(flags & RESOLVER_FLAG_NORETRY)
+        tries = 1;
+
+    ipv4_addr 	result;
+    //ipv4_addr 	next_servers[MAX_DNS_SERVERS];
+
+    ipv4_addr *	sptr = servers;
+    int         sleft = MAX_DNS_SERVERS;
+
+    if( !(flags & RESOLVER_FLAG_NORCACHE) )
+        if( lookup_cache( out, name ) == 0 )
+        {
+            SHOW_FLOW0( 1, "got from cache");
+            return 0;
+        }
+
+    if( flags & RESOLVER_FLAG_NOWAIT )
+        return ESRCH;
+
+    while(tries--)
+    {
+        ipv4_addr 	server = *sptr++;
+
+        if(sleft-- <= 0 || server == 0)
+        {
+            SHOW_ERROR0( 1, "No more places to look in, give up\n");
+            return ENOENT;
+        }
+
+        SHOW_FLOW( 1, "look in %s", inet_ntoa(* (struct in_addr*)&server) );
+        errno_t res = dns_request( (const unsigned char *)name, server, &result );
+
+        if( res == 0 )//|| result != 0 )
+        {
+            SHOW_FLOW( 1, "answer is %s", inet_ntoa(* (struct in_addr*)&result) );
+            *out = result;
+            if( !(flags & RESOLVER_FLAG_NOWCACHE) )
+                store_to_cache( result, name );
+            return 0;
+        }
+    }
+
+    return ENOENT;
 }
 
 

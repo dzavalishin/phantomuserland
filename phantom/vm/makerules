@@ -25,9 +25,9 @@ GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o
 #GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o ../lib/libphantom_c.a 
 
 ifeq ($(OSTYPE),cygwin)
-OSLIB = -lgdi32 
+OSLIB = -lgdi32 ../lib/libphantom.a
 else
-OSLIB= ../lib/libphantom_c.a 
+OSLIB= ../lib/libphantom_c.a ../lib/libphantom.a 
 endif
 
 

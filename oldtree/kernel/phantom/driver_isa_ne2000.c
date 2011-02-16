@@ -247,6 +247,8 @@ static phantom_device_t * common_ne2000_probe( int port, int irq, int stage )
     }
     else
     {
+        if_simple_setup(interface, WIRED_ADDRESS, WIRED_NETMASK, WIRED_BROADCAST, WIRED_NET, WIRED_ROUTER, DEF_ROUTE_ROUTER );
+/*
         ifaddr *address;
 
         // set the ip address for this net interface
@@ -295,7 +297,7 @@ static phantom_device_t * common_ne2000_probe( int port, int irq, int stage )
         {
             SHOW_INFO0( 1, "Adding route - ok");
         }
-
+*/
     }
 
 

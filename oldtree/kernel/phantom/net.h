@@ -166,6 +166,9 @@ int if_output(cbuf *b, ifnet *i);
 int if_register_interface(int type, ifnet **_i, phantom_device_t *dev);
 
 
+void if_simple_setup( ifnet *interface, int addr, int netmask, int bcast, int net, int router, int def_router );
+
+
 
 
 
@@ -183,6 +186,7 @@ int ipv4_get_mss_for_dest(ipv4_addr dest_addr, uint32 *mss);
 int ipv4_input(cbuf *buf, ifnet *i);
 int ipv4_output(cbuf *buf, ipv4_addr target_addr, int protocol);
 
+
 void dump_ipv4_addr(ipv4_addr addr);
 
 
@@ -190,8 +194,13 @@ int icmp_input(cbuf *buf, ifnet *i, ipv4_addr source_ipaddr);
 
 
 
+
+
 int loopback_input(cbuf *buf, ifnet *i);
 int loopback_output(cbuf *buf, ifnet *i, netaddr *target, int protocol_type);
+
+
+
 
 
 int loopback_init(void);
@@ -206,8 +215,13 @@ int tcp_init(void);
 int ipv4_init(void);
 int if_init(void);
 
+
+
+
 int net_timer_init(void);
 
+
+errno_t bootp(ifnet *iface);
 
 
 void udp_syslog_send(const char *prefix, const char *message);

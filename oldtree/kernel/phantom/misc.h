@@ -19,6 +19,7 @@ extern int bootflag_no_vesa;
 
 
 int main();
+void init_stray_checker(void);
 
 
 void phantom_map_mem_equally(void);
@@ -50,6 +51,9 @@ void hal_cpu_reset_real(void);
 
 
 void net_test(void);
+
+void resolver_init(void);
+
 
 #endif // MISC_H
 

@@ -64,9 +64,9 @@ static pci_probe_t pci_drivers[] =
 #endif
 
 #if 1 && HAVE_NET
-    { "VirtIO Net",  	driver_virtio_net_probe, 	1, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
+    { "VirtIO Net",  	driver_virtio_net_probe, 	2, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
-    { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
+//    { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
 //    { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
 //    { "Intel i82559er", driver_intel_82559_probe, 	3, INTEL_VENDORID, 0x1209, 0 },
     { "Ne2000 PCI", 	driver_pci_ne2000_probe, 	1, 0x10ec, 0x8029, 0 },

@@ -235,9 +235,9 @@ static void event_push_thread()
     hal_set_thread_name("UIEventQ");
 	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
+#if EVENTS_ENABLED && 0
     while(1)
     {
-#if EVENTS_ENABLED
         remove_extra_unused();
 
         struct ui_event *e;
@@ -259,8 +259,13 @@ static void event_push_thread()
 
         // window code will return when done
         //return_unused_event(e);
-#endif
     }
+#else
+    while(1)
+    {
+    	hal_sleep_msec(20000);
+    }
+#endif
 
 
 }
