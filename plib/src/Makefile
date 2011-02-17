@@ -1,9 +1,13 @@
 all: classes
 
+vpath %.pc ../bin
+
+
 # read stub.object.ph to understand
 roots::
 	$(PLC) stub.object.ph
 	$(PLC) stub.class.ph
+	$(PLC) stub.thread.ph
 	$(PLC) internal.string.ph
 	$(PLC) internal.int.ph
 	$(PLC) internal.class.ph
@@ -12,33 +16,36 @@ roots::
 	$(PLC) internal.int.ph
 	$(PLC) internal.class.ph
 
-../bin/internal.object.pc: internal.object.ph
-	make roots
+phantom.environment.pc: phantom.util.map.pc
 
-#../bin/internal.int.pc: roots
-#../bin/internal.string.pc: roots
+internal.object.pc: internal.object.ph
+	make roots
+	make classes
+	rm ../bin/internal.thread.pc
+	make classes
 
 classes: \
-     ../bin/internal.object.pc ../bin/internal.int.pc ../bin/internal.string.pc \
-     ../bin/internal.binary.pc ../bin/internal.class.pc \
-     ../bin/internal.io.tty.pc \
-     ../bin/internal.bitmap.pc ../bin/phantom.user.pc ../bin/phantom.util.map.pc \
-     ../bin/ru.dz.phantom.backgrounds.pc ../bin/ru.dz.phantom.resources.pc \
-     ../bin/phantom.os.time.pc \
-     ../bin/internal.world.pc ../bin/phantom.osimpl.pc ../bin/phantom.os.pc \
-     ../bin/phantom.environment.pc \
-     ../bin/internal.thread.pc ../bin/ru.dz.phantom.system.thread_test.pc \
-#     ../bin/
+     internal.object.pc internal.int.pc internal.string.pc \
+     internal.binary.pc internal.class.pc internal.io.tty.pc \
+     internal.bitmap.pc phantom.user.pc phantom.util.map.pc \
+     ru.dz.phantom.backgrounds.pc ru.dz.phantom.resources.pc \
+     phantom.os.time.pc \
+     internal.world.pc phantom.osimpl.pc phantom.os.pc \
+     phantom.environment.pc \
+     internal.thread.pc ru.dz.phantom.system.thread_test.pc \
+     
 
 
 
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
 
-../bin/%.pc: %.ph
-	$(PLC) $<
+%.pc: %.ph
+	@echo -:- $<
+	@$(PLC) $<
 
-
+#-include ../bin/*.d
 
 clean::
-	rm *.ph~
+	-rm ../bin/*.pc
+	-rm *.ph~
         

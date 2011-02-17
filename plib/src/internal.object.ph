@@ -12,6 +12,8 @@
 
 package .internal;
 
+import .internal."class";
+
 /**
  *
  * This class has internal implementation (as everything in
