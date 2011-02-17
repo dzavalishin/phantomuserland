@@ -15,6 +15,7 @@
 
 #include <kernel/timedcall.h>
 #include "cpu_state.h"
+#include <i386/trap.h>
 
 #include <phantom_types.h>
 #include <queue.h>
@@ -98,6 +99,9 @@ struct phantom_thread
 
     //void (*handler)( phantom_thread_t * )
     void *                      death_handler; // func to call if thread is killed
+
+    // Func to call on trap (a la unix signals), returns nonzero if can't handle
+    int 			(*trap_handler)( int sig_no, struct trap_state *ts );
     // --------------------------------------------------------------
     // Scheduler part
     // --------------------------------------------------------------

@@ -250,6 +250,36 @@ invlpg(unsigned int addr)
 
 
 
+
+
+
+
+
+
+
+static __inline unsigned int
+rdr6(void)
+{
+	unsigned int	data;
+	__asm __volatile("movl %%dr6,%0" : "=r" (data));
+	return (data);
+}
+
+static __inline void
+load_dr6(unsigned int dr6)
+{
+	__asm __volatile("movl %0,%%dr6" : : "r" (dr6));
+}
+
+
+
+
+
+
+
+
+
+
 #if 0
 
 #define	get_ldt() \
@@ -552,19 +582,6 @@ load_dr5(unsigned int dr5)
 	__asm __volatile("movl %0,%%dr5" : : "r" (dr5));
 }
 
-static __inline unsigned int
-rdr6(void)
-{
-	unsigned int	data;
-	__asm __volatile("movl %%dr6,%0" : "=r" (data));
-	return (data);
-}
-
-static __inline void
-load_dr6(unsigned int dr6)
-{
-	__asm __volatile("movl %0,%%dr6" : : "r" (dr6));
-}
 
 static __inline unsigned int
 rdr7(void)
