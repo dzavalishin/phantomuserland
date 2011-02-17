@@ -75,6 +75,9 @@
 #define DR6_B1		0x00000002
 #define DR6_B0		0x00000001
 
+// have in i386/proc_reg.h
+
+#if 0
 
 #include <mach/inline.h>
 
@@ -191,6 +194,6 @@ MACH_INLINE void set_b3(unsigned addr, unsigned len, unsigned rw)
 		| DR7_GE | DR7_G3);
 }
 
-
+#endif
 
 #endif /* _MACH_I386_DEBUG_REG_H_ */
