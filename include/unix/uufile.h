@@ -145,5 +145,10 @@ extern struct uufs dev_fs;
 extern struct uufs proc_fs;
 
 
+
+
+errno_t auto_mount( const char *name, uufs_t *fs );
+
+
 #endif // UUFILE_H
 

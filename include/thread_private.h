@@ -230,6 +230,13 @@ extern phantom_thread_t *phantom_kernel_threads[];
 
 extern hal_spinlock_t schedlock;
 
+// lock for thread array manipulation, taken to be
+// sure thread is not killed till we do smthing.
+extern hal_spinlock_t tidlock;
+
+
+
+
 /**
  *
  * Adds flag to sleep flags of thread, removes thread from
