@@ -307,7 +307,6 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
 void
 vm_page_init( vm_page *me, void *my_vaddr)
 {
-    // BUG? Page generation number will be zero?
     memset( me, 0, sizeof(vm_page) );
     me->virt_addr = my_vaddr;
     hal_cond_init(&me->done, "VM PG");

@@ -203,9 +203,6 @@ static errno_t load_pm_vesa( void *in_ROM_va, size_t ROM_size, size_t hdr_offset
     hdr->codeAsDataSel = VBE3_DS_16;
     hdr->protectedMode = 0xFF;
 
-    // BUG include something
-    extern struct real_descriptor 	gdt[GDTSZ];
-
     // load segment descriptors!
 
     make_descriptor(gdt, VBE3_CS_16, ROM_pa, ROM_size-1, ACC_PL_K | ACC_CODE_R, SZ_16 );

@@ -225,6 +225,8 @@ int main(int argc, char **argv, char **envp)
     phantom_timer_pit_init(100,0);
     phantom_timed_call_init(); // Too late? Move up?
 
+    //init_buses();
+
     // Stage is:
     //   0 - very early in the boot - interrupts can be used only
     //   1 - boot, most of kernel infrastructure is there
@@ -367,6 +369,7 @@ connect_ide_io();
 
 //trfs_testrq();
 
+    init_buses();
 
 
 #if 0

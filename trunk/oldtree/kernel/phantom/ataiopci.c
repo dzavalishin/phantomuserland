@@ -7,6 +7,7 @@
 #include <i386/pio.h>
 #include <phantom_libc.h>
 #include <phantom_types.h>
+#include <x86/phantom_page.h>
 
 #include <malloc.h>
 
@@ -349,9 +350,8 @@ int dma_pci_config( unsigned int regAddr )
         return 0;                  // PCI DMA is disabled.
 
 #if 1
-    // TODO replace 4096 with native page size definition
 #if 0
-    dma_pci_prd_va = smemalign( 4096, PRD_BUF_SIZE );
+    dma_pci_prd_va = smemalign( PAGE_SIZE, PRD_BUF_SIZE );
     dma_pci_prd_pa = kvtophys(dma_pci_prd_va);
 #else
 
