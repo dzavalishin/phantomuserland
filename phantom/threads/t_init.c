@@ -57,6 +57,9 @@ static void haltme( void *a )
 void
 phantom_threads_init()
 {
+    //hal_spin_init(&tidlock);
+
+
     phantom_scheduler_init();
 
     phantom_thread_init_conds();
