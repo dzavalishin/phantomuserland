@@ -49,6 +49,7 @@ disk_page_io_wait(disk_page_io *me)
     while( req.flag_pagein || req.flag_pageout )
         hal_sleep( &req );
 #else
+    // BUG! polling!
     while( me->req.flag_pagein || me->req.flag_pageout )
         hal_sleep_msec( 10 );
 #endif

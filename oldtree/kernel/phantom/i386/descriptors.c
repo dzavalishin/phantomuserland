@@ -43,7 +43,7 @@
 
 
 
-
+#include "ia32private.h"
 
 struct real_descriptor 	gdt[GDTSZ];
 struct real_descriptor 	ldt[LDTSZ];

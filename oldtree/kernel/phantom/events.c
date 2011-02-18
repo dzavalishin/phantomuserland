@@ -235,7 +235,7 @@ static void event_push_thread()
     hal_set_thread_name("UIEventQ");
 	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
-#if EVENTS_ENABLED && 0
+#if EVENTS_ENABLED && 1
     while(1)
     {
         remove_extra_unused();
