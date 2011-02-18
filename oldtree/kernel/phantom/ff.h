@@ -817,7 +817,9 @@ typedef struct {
 
 
 
+#include <unix/uufile.h>
 
+uufs_t *fatff_create_fs( FATFS *ffs );
 
 
 

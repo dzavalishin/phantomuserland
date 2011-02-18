@@ -262,7 +262,8 @@ static uufs_t * find_mount( const char* name, char *namerest )
 }
 
 // TODO lock!
-static errno_t add_mount( const char* path, const char *name, uufs_t *fs )
+static
+errno_t add_mount( const char* path, const char *name, uufs_t *fs )
 {
     // NB! path must finish with /
 
@@ -374,6 +375,21 @@ int usys_umount(int *err, uuprocess_t *u, const char *target, int flags )
     *err = rm_mount( target, flags );
     return *err ? -1 : 0;
 }
+
+
+
+
+
+errno_t auto_mount( const char *name, uufs_t *fs )
+{
+    static int am_index = 0;
+
+    static char mpath[32];
+    snprintf( mpath, sizeof(mpath), "/amnt%d", am_index ++ );
+
+    return add_mount( mpath, name, fs );
+}
+
 
 #endif // HAVE_UNIX
 

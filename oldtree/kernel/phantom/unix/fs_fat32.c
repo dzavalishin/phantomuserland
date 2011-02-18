@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Ext2 FS
+ * FAT FS
  *
  *
 **/
