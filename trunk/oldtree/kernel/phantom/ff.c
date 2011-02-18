@@ -3332,6 +3332,7 @@ DSTATUS disk_status (phantom_disk_partition_t *dev)
 #endif
 
 
+
 errno_t fs_start_ff( phantom_disk_partition_t *p )
 {
     FATFS *fs = calloc( sizeof(FATFS), 1);
@@ -3374,6 +3375,19 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
 
 
     f_close ( &f);
+#endif
+
+#if HAVE_UNIX
+    uufs_t *ufs = fatff_create_fs( fs );
+    if( !ufs )
+    {
+        SHOW_ERROR( 0, "can't create uufs for %s", p->name );
+    }
+
+    if( ufs && auto_mount( p->name, ufs ) )
+    {
+        SHOW_ERROR( 0, "can't automount %s", p->name );
+    }
 #endif
 
     return 0;

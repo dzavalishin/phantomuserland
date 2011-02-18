@@ -272,7 +272,7 @@ static void phantom_debug_window_loop()
         phantom_debug_window_puts(buf);
 
         if(wx == 600) wx = 620; else wx = 600;
-        //drv_video_window_move( phantom_debug_window, wx, 50 );
+        drv_video_window_move( phantom_debug_window, wx, 50 );
 
 
     }
