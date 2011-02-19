@@ -7,6 +7,11 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <sys/stat.h>
+
+#include <user/sys_phantom.h>
+
+
 #include "file_utils.h"
 #include "statements.h"
 #include "shell_defs.h"
@@ -64,18 +69,28 @@ int find_file_in_path(const char *file_name,char *found_name,unsigned int max_si
 }
 
 
-int exec_file(int argc,char *argv[],int *retcode)
+int exec_file(int argc, const char *argv[],int *retcode)
 {
+    (void) argc;
+
     char filename[255];
     int pid;
 
     if( !find_file_in_path(argv[0],filename,SCAN_SIZE)) return SHE_FILE_NOT_FOUND;
 
+    /*
     pid = _kern_proc_create_proc(filename,filename, argv, argc, 5, 0);
 
     if(pid < 0) return SHE_CANT_EXECUTE;
 
     _kern_proc_wait_on_proc(pid, retcode);
+    */
+
+    pid = phantom_run( filename, argv, 0, P_RUN_WAIT );
+    if(pid < 0) return SHE_CANT_EXECUTE;
+
+    // TODO wait and get rc
+    *retcode = 0;
 
     return SHE_NO_ERROR;
 }
@@ -83,21 +98,17 @@ int exec_file(int argc,char *argv[],int *retcode)
 
 int read_file_in_buffer(const char *filename,char **buffer)
 {
-#if 1
-    return -ENOMEM;
-#else
-
-    struct file_stat stat;
+    struct stat istat;
     int file_no;
     int err;
     int size;
 
     *buffer = NULL;
 
-    err = _kern_rstat(filename,&stat);
+    err = stat(filename,&istat);
     if(err < 0) return err;
 
-    *buffer = malloc(stat.size+1);
+    *buffer = malloc(istat.st_size+1);
     if(*buffer == 0) return -ENOMEM;
 
     file_no = open(filename,0);
@@ -107,12 +118,11 @@ int read_file_in_buffer(const char *filename,char **buffer)
         return file_no;
     }
 
-    size = pread(file_no, *buffer, stat.size, 0);
+    size = read(file_no, *buffer, istat.st_size );
 
     close(file_no);
 
     if(size < 0) free(*buffer);
 
     return size;
-#endif
 }

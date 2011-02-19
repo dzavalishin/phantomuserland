@@ -397,7 +397,7 @@ static int handle_exec(scan_info *info,shell_value **out)
 
     argc = parse_line(statement,argv,64,redirect_in,redirect_out);
 
-    err = exec_file(argc,argv,&retcode);
+    err = exec_file(argc,(const char **)argv,&retcode);
 
     if(err != SHE_NO_ERROR) goto err;
 

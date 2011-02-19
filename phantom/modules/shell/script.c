@@ -13,110 +13,110 @@
 
 static int add_string_to_list(text_file *data,char *text)
 {
-	text_item *item;
+    text_item *item;
 
-	item = malloc(sizeof(text_item));
-	if(item == NULL) return SHE_NO_MEMORY;
+    item = malloc(sizeof(text_item));
+    if(item == NULL) return SHE_NO_MEMORY;
 
-	item->text = text;
-	item->next = NULL;
+    item->text = text;
+    item->next = NULL;
 
-	if(data->top != NULL) data->top->next = item;
-	if(data->list == NULL) data->list = item;
+    if(data->top != NULL) data->top->next = item;
+    if(data->list == NULL) data->list = item;
 
-	data->top = item;
+    data->top = item;
 
-	return SHE_NO_ERROR;
+    return SHE_NO_ERROR;
 }
 
 void  free_text_file(text_file *data)
 {
-	text_item *current;
-	text_item *next;
+    text_item *current;
+    text_item *next;
 
-	current = data->list;
+    current = data->list;
 
-	while(current != NULL){
+    while(current != NULL){
 
-		next = current->next;
-		free(current);
-		current = next;
+        next = current->next;
+        free(current);
+        current = next;
 
-	}
+    }
 
-	free(data->buffer);
-	data->buffer = NULL;
-	data->list   = NULL;
-	data->top    = NULL;
+    free(data->buffer);
+    data->buffer = NULL;
+    data->list   = NULL;
+    data->top    = NULL;
 }
 
 
 int  read_text_file(const char *filename,text_file *data)
 {
-	char *scan;
-	char *old;
-	int err;
-	int size;
-	char realfilename[256];
+    char *scan;
+    char *old;
+    int err;
+    int size;
+    char realfilename[256];
 
-	if( !find_file_in_path(filename,realfilename,SCAN_SIZE)){
+    if( !find_file_in_path(filename,realfilename,SCAN_SIZE)){
 
-		printf("can't find '%s' \n",filename);
-		return SHE_FILE_NOT_FOUND;
+        printf("can't find '%s' \n",filename);
+        return SHE_FILE_NOT_FOUND;
 
-	}
+    }
 
-	size = read_file_in_buffer(realfilename,&(data->buffer));
+    size = read_file_in_buffer(realfilename,&(data->buffer));
 
-	if(size < 0) return size;
+    if(size < 0) return size;
 
-	scan  = data->buffer;
-	data->top = NULL;
-	data->list = NULL;
+    scan  = data->buffer;
+    data->top = NULL;
+    data->list = NULL;
 
-	while(size >0){
+    while(size >0){
 
-		err = add_string_to_list(data, scan);
-		if(err <0) goto err;
+        err = add_string_to_list(data, scan);
+        if(err <0) goto err;
 
-		old = scan;
+        old = scan;
 
-		while((size > 0) && (*scan != 10)) {
-			scan++;
-			size--;
-		}
+        while((size > 0) && (*scan != 10)) {
+            scan++;
+            size--;
+        }
 
-		*scan=0;
-		scan++;
-		size--;
-	}
-	return 0;
+        *scan=0;
+        scan++;
+        size--;
+    }
+    return 0;
 err:
-	printf("error\n");
-	free_text_file(data);
-	return err;
+    printf("error\n");
+    free_text_file(data);
+    return err;
 }
 
 
 int run_script(const char *file_name)
 {
-	scan_info info;
-	int err = init_scan_info_by_file(file_name,&info);
-	if(err != SHE_NO_ERROR) return err;
+    scan_info info;
+    int err = init_scan_info_by_file(file_name,&info);
+    if(err != SHE_NO_ERROR) return err;
 
-	while(info.current != NULL){
+    while(info.current != NULL){
 
-		err = parse_info(&info);
-		if(err != SHE_NO_ERROR) break;
+        err = parse_info(&info);
+        if(err != SHE_NO_ERROR) break;
 
-		if(scan_info_next_line(&info)) {
-			err = SHE_SCAN_ERROR;
-			break;
-		}
+        if(scan_info_next_line(&info)) {
+            err = SHE_SCAN_ERROR;
+            break;
+        }
 
-	}
+    }
 
-	free_text_file(&(info.data));
-	return err;
+    free_text_file(&(info.data));
+    return err;
 }
 
