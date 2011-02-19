@@ -25,6 +25,7 @@
 #include <multiboot.h>
 #include <kernel/boot.h>
 #include <elf.h>
+#include <unix/uuprocess.h>
 
 #include <i386/isa/pic.h>
 #include <i386/isa/pic_regs.h>
@@ -43,12 +44,6 @@ static void __file_init_func(void)
 	file_inited = 1;
 }
 
-static void __file_init_func2(void) __attribute__ ((constructor));
-
-static void __file_init_func2(void)
-{
-	file_inited = 1;
-}
 
 
 
@@ -447,7 +442,11 @@ void phantom_start_boot_modules()
         void *code = (void *)phystokv(module->mod_start);
         size_t size = module->mod_end - module->mod_start;
 
-        errno_t err = load_elf( code, size, mn );
+        int pid = uu_create_process(-1);
+        const char* av[] = { mn, 0 };
+        uu_proc_setargs( pid, av, 0 );
+
+        errno_t err = uu_run_binary( pid, code, size );
         if(err)
         {
             char errbuf[1024];

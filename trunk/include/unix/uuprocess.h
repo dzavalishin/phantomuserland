@@ -71,6 +71,10 @@ struct uuprocess
     struct uutty *      ctty;
 
     char                cmd[MAX_UU_CMD];
+    const char **       argv;
+    int                 argc;
+    const char **       envp;
+
     struct uufile *     fd[MAX_UU_FD];
     int                 tids[MAX_UU_TID];
     int                 ntids;
@@ -94,8 +98,22 @@ struct uuprocess
 
 typedef struct uuprocess uuprocess_t;
 
-uuprocess_t *uu_create_process(int ppid, struct exe_module *em);
-void uu_proc_add_thread( uuprocess_t *p, int tid );
+//uuprocess_t *uu_create_process(int ppid, struct exe_module *em);
+//void uu_proc_add_thread( uuprocess_t *p, int tid );
+//uuprocess_t *uu_create_process( int ppid );
+
+int uu_create_process( int ppid );
+
+errno_t uu_proc_add_thread( int pid, int tid );
+errno_t uu_proc_rm_thread( int pid, int tid );
+errno_t uu_proc_setargs( int pid, const char **av, const char **env );
+errno_t uu_proc_set_exec( int pid, struct exe_module *em);
+
+
+errno_t uu_run_file( int pid, const char *fname );
+errno_t uu_run_binary( int pid, void *_elf, size_t elf_size );
+
+uuprocess_t * 	proc_by_pid(int pid);
 
 
 #endif // UUPROCESS_H

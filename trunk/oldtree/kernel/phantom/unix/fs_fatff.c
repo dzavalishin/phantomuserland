@@ -29,6 +29,7 @@
 
 
 
+static errno_t fresult2errno(FRESULT fr);
 
 
 // -----------------------------------------------------------------------
@@ -48,6 +49,8 @@ static ssize_t     fatff_getsize( struct uufile *f);
 
 //static void *      fatff_copyimpl( void *impl );
 
+static errno_t     fatff_stat( struct uufile *f, struct stat *dest );
+
 
 static struct uufileops fatff_fops =
 {
@@ -59,7 +62,7 @@ static struct uufileops fatff_fops =
 
 //    .copyimpl   = fatff_copyimpl,
 
-    //.stat       = fatff_stat,
+    .stat       = fatff_stat,
     //.ioctl      = fatff_ioctl,
 };
 
@@ -136,6 +139,8 @@ static errno_t     fatff_close(struct uufile *f)
         free(f->impl);
         f->impl = 0;
     }
+
+    unlink_uufile( f );
     return 0;
 }
 
@@ -145,17 +150,14 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     FATFS *ffs = fs->impl;
     FIL *fp = calloc( 1, sizeof(FIL) );
 
-    FRESULT r = f_open (
-                      ffs,
-                      fp,			/* Pointer to the blank file object */
-                      filename,	/* Pointer to the file name */
-
-                      // TODO wrong. need real open's request here to handle create/open existing fail
-                      FA_READ|FA_WRITE			/* Access mode and file open mode flags */
-                     );
+    FRESULT r = f_open ( ffs, fp, filename,
+                         // TODO wrong. need real open's request here to handle create/open existing fail
+                         FA_READ|FA_WRITE
+                       );
 
     if( r )
     {
+        SHOW_FLOW( 1, "f_open %s res = %d", filename, r );
         free(fp);
         return 0;
     }
@@ -166,6 +168,8 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     ret->pos = 0;
     ret->fs = fs;
     ret->impl = fp;
+
+    set_uufile_name( ret, filename );
 
     return ret;
 }
@@ -245,6 +249,45 @@ static ssize_t      fatff_getsize( struct uufile *f)
     return -1;
 }
 
+
+
+static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
+{
+    //FIL *fp = f->impl;
+    FATFS *ffs = f->fs->impl;
+    const char *name = f->name;
+    FILINFO fi;
+
+    SHOW_FLOW( 1, "stat %s", name );
+    FRESULT r = f_stat ( ffs, name, &fi );
+    SHOW_FLOW( 1, "stat res = %d", r );
+
+    if(!r)
+    {
+        memset( dest, 0, sizeof(struct stat) );
+
+        dest->st_nlink = 1;
+        dest->st_uid = -1;
+        dest->st_gid = -1;
+
+        dest->st_size = fi.fsize;
+
+        dest->st_mode = 0555; // r-xr-xr-x
+
+        if(fi.fattrib & AM_DIR)            dest->st_mode |= S_IFDIR; else dest->st_mode = _S_IFREG;
+
+        if(!(fi.fattrib & AM_RDO))         dest->st_mode |= 0222;
+
+        if( (fi.fattrib & AM_LFN) || (fi.fattrib & AM_VOL) )
+            dest->st_mode &= ~ (_S_IFREG||S_IFDIR);
+
+    }
+
+    return fresult2errno(r);
+}
+
+
+
 /*
 static void *      fatff_copyimpl( void *impl )
 {
@@ -259,7 +302,9 @@ static void *      fatff_copyimpl( void *impl )
 uufile_t *fatff_mount(errno_t *err, uufile_t *mount_point, uufile_t *device)
 {
     (void) mount_point;
+    (void) device;
 
+    *err = ENXIO;
     return 0;
     /*
 
@@ -305,6 +350,35 @@ errno_t fatff_umount(uufile_t *mount_point, uufile_t *device)
 
 
 
+
+
+static errno_t fresult2errno(FRESULT fr)
+{
+    switch(fr)
+    {
+    case FR_OK:         		return 0;
+    case FR_DISK_ERR:                   return EIO;
+    case FR_INT_ERR:                    return EFAULT;
+    case FR_NOT_READY:                  return ENXIO;
+    case FR_NO_FILE:                    return ENOENT;
+    case FR_NO_PATH:                    return ENOENT;
+    case FR_INVALID_NAME:               return ENOENT;
+    case FR_DENIED:                     return EPERM;
+    case FR_EXIST:                      return EEXIST;
+    case FR_INVALID_OBJECT:             return EBADF;
+    case FR_WRITE_PROTECTED:            return EACCES;
+    case FR_INVALID_DRIVE:              return ENXIO;
+    case FR_NOT_ENABLED:                return E2BIG;
+    case FR_NO_FILESYSTEM:              return ENXIO;
+    case FR_MKFS_ABORTED:               return ENXIO;
+    case FR_TIMEOUT:                    return EAGAIN;
+    case FR_LOCKED:                     return EBUSY;
+    case FR_NOT_ENOUGH_CORE:            return ENOMEM;
+    case FR_TOO_MANY_OPEN_FILES:        return EMFILE;
+    }
+
+    return ENODEV;
+}
 
 
 

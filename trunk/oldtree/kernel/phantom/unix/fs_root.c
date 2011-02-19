@@ -249,14 +249,17 @@ static uufs_t * find_mount( const char* name, char *namerest )
         }
     }
 
-    // part of name after the mount point
-    strncpy( namerest, name+maxlen, FS_MAX_PATH_LEN );
+    if( ret )
+    {
+        // part of name after the mount point
+        strncpy( namerest, name+maxlen, FS_MAX_PATH_LEN );
 
-    SHOW_FLOW( 2, "got '%s' (%s) for '%s', rest = '%s'",
-               m_path,
-               m_name,
-               name, namerest
-               );
+        SHOW_FLOW( 2, "got '%s' (%s) for '%s', rest = '%s'",
+                   m_path,
+                   m_name,
+                   name, namerest
+                 );
+    }
 
     return ret;
 }

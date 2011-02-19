@@ -648,6 +648,14 @@ void syscall_sw(struct trap_state *st)
     case SYS_get_next_port_info:
         goto unimpl;
 
+    case phantom_run:
+
+    case phantom_method:
+    case phantom_toobject:
+    case phantom_fromobject:
+    case phantom_intmethod:
+    case phantom_strmethod:
+        goto unimpl;
 
     unimpl:
         SHOW_ERROR( 0, "Unimplemented syscall %d called", callno );

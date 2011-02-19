@@ -4,10 +4,10 @@
 // +! = have in kernel, but impl is temporary or stub
 
 // in general.S
-#define SYS__exit		0	// ++
-#define SYS_ssyslog		1	// ++
-#define SYS_getpagesize		2	// ++
-#define SYS_personality		3	// +!
+#define SYS__exit               0	// ++
+#define SYS_ssyslog             1	// ++
+#define SYS_getpagesize         2	// ++
+#define SYS_personality         3	// +!
 #define SYS_uname               4	// ++ - test!
 #define SYS_sync                5	// +-
 #define SYS_sysinfo             6	// +-
@@ -18,8 +18,8 @@
 
 
 
-#define SYS_sleepmsec		16	// ++
-#define SYS_nanosleep		17	// +-
+#define SYS_sleepmsec           16	// ++
+#define SYS_nanosleep           17	// +-
 #define SYS_time                18	// +-
 #define SYS_getitimer           19	// +-
 #define SYS_setitimer           20	// +-
@@ -28,10 +28,10 @@
 
 
 // in getset.S
-#define SYS_gettid		32	// ++
-#define SYS_getpid		33	// ++
-#define SYS_getuid		34	// ++
-#define SYS_getuid32		35	// ++
+#define SYS_gettid              32	// ++
+#define SYS_getpid              33	// ++
+#define SYS_getuid              34	// ++
+#define SYS_getuid32            35	// ++
 #define SYS_getpgid             36	// ++
 #define SYS_getpgrp             37	// ++
 #define SYS_getppid             38	// ++
@@ -203,5 +203,13 @@
 
 
 
+// in phantom.S
+
+#define SYS_phantom_run         2048	// +-
+#define SYS_phantom_method      2049
+#define SYS_phantom_toobject    2050
+#define SYS_phantom_fromobject  2051
+#define SYS_phantom_intmethod   2052
+#define SYS_phantom_strmethod   2053
 
 

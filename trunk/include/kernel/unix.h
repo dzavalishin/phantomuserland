@@ -18,7 +18,7 @@ int uu_find_fd( uuprocess_t *u, uufile_t *f  );
 int usys_open(  int *err, uuprocess_t *u, const char *name, int flags, int mode );
 int usys_creat( int *err, uuprocess_t *u, const char *name, int mode );
 int usys_read(  int *err, uuprocess_t *u, int fd, void *addr, int count );
-int usys_write( int *err, uuprocess_t *u, int fd, void *addr, int count );
+int usys_write( int *err, uuprocess_t *u, int fd, const void *addr, int count );
 int usys_close( int *err, uuprocess_t *u, int fd );
 int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence );
 int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data );

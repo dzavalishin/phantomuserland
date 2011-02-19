@@ -47,8 +47,8 @@ static fs_probe_t fs_drivers[] =
 
     { "Phantom", 	fs_probe_phantom,	0 	 	},
 #if HAVE_UNIX
-    { "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
-    { "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
+    //{ "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
+    //{ "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
 
     { "FAT", 		fs_probe_fat, 	 	fs_start_ff		},
 
