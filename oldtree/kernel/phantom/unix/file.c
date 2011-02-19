@@ -21,6 +21,7 @@ uufile_t *copy_uufile( uufile_t *in )
     if(in->ops && in->ops->copyimpl && in->impl)
         out->impl = in->ops->copyimpl( in->impl );
 
+    out->refcount = 1;
     return out;
 }
 

@@ -71,7 +71,7 @@ struct multiboot_module *phantom_multiboot_find(const char *string);
 
 
 
-errno_t load_elf( void *_elf, size_t elf_size, const char *name );
+//errno_t load_elf( void *_elf, size_t elf_size, const char *name );
 
 errno_t get_uldt_cs_ds(
                        linaddr_t cs_base, u_int16_t *ocs, size_t cs_limit,

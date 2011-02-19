@@ -35,23 +35,66 @@
 #include <elf.h>
 #include <kernel/unix.h>
 #include <unix/uuprocess.h>
+#include <kunix.h>
+
 //#include <unix/uufile.h>
-#include <sys/fcntl.h>
+//#include <sys/fcntl.h>
 
 
 
-static errno_t elf_check(struct Elf32_Ehdr *elf_header);
-static errno_t elf_load_seg(Elf32_Phdr *ph, void *src, void *dst);
+static errno_t 	elf_check(struct Elf32_Ehdr *elf_header);
+static errno_t 	elf_load_seg(Elf32_Phdr *ph, void *src, void *dst);
 
-static void 	kernel_protected_module_starter( void * _em );
+static void 	kernel_protected_module_starter( void * _u );
+
+static errno_t 	load_elf( struct exe_module **emo, void *_elf, size_t elf_size );
 
 
 
+
+errno_t uu_run_binary( int pid, void *_elf, size_t elf_size )
+{
+
+    struct exe_module *em;
+    errno_t e = load_elf( &em, _elf, elf_size );
+    if( e ) return e;
+
+    if( (e = uu_proc_set_exec( pid, em ) ) )
+    {
+        SHOW_ERROR( 0, "Can't set em for pid %d", pid );
+        return e;
+    }
+
+    hal_start_thread( kernel_protected_module_starter, (void *)pid, 0 );
+
+    return 0;
+}
+
+
+errno_t uu_run_file( int pid, const char *fname )
+{
+    void *odata;
+    int osize;
+    SHOW_FLOW( 2, "loading %s", fname );
+
+    errno_t ke = k_load_file( &odata, &osize, fname );
+
+    if( !ke )
+    {
+        SHOW_FLOW( 2, "running %s", fname );
+        ke = uu_run_binary( pid, odata, osize );
+        free( odata );
+        return ke;
+    }
+
+    SHOW_ERROR( 0, "%s read error %d", fname, ke );
+    return ke;
+}
 
 
 // Loads final relocated executable
 
-errno_t load_elf( void *_elf, size_t elf_size, const char *name )
+errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 {
 
     // TODO check that we do not access data out of elf image
@@ -146,7 +189,6 @@ errno_t load_elf( void *_elf, size_t elf_size, const char *name )
     em->mem_size = memsize;
     em->pa = pa;
 
-    strncpy( em->name, name, MAX_UU_CMD );
     em->start = elf_header->e_entry;
     em->esp = memsize - sizeof(int); // Why -sizeof(int) ?
 
@@ -168,7 +210,7 @@ errno_t load_elf( void *_elf, size_t elf_size, const char *name )
 
     SHOW_FLOW( 1, "cs 0x%X, ds 0x%X, entry 0x%x", em->cs_seg, em->ds_seg, em->start );
 
-    hal_start_thread( kernel_protected_module_starter, em, 0 );
+    *emo = em;
 
     return 0;
 }
@@ -202,47 +244,26 @@ static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t star
 }
 
 
-static void reopen_stdioe(uuprocess_t *u, const char *fname);
 
-static void kernel_protected_module_starter( void * _em )
+static void kernel_protected_module_starter( void * _pid )
 {
-    struct exe_module *em = _em;
+    int pid = (int) _pid;
+    uuprocess_t *u = proc_by_pid(pid);
+    assert(u);
+    struct exe_module *em = u->em;
+    assert(em);
 
-    SHOW_FLOW( 3, "Module %s thread started", em->name );
+    const char *name = u->cmd;
 
-    hal_set_thread_name(em->name);
+    SHOW_FLOW( 3, "Module %s thread started", name );
 
-    uuprocess_t *u = uu_create_process(-1, em); // no parent PID?
+    hal_set_thread_name(name);
 
-#if 0
-    u->tids[0] = GET_CURRENT_THREAD()->tid;
-    GET_CURRENT_THREAD()->u = u;
-#else
-    uu_proc_add_thread( u, GET_CURRENT_THREAD()->tid );
-#endif
-
-    reopen_stdioe(u,"/dev/tty");
+    uu_proc_add_thread( pid, GET_CURRENT_THREAD()->tid );
 
     switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, em->start, em->esp );
 }
 
-
-static void reopen_stdioe(uuprocess_t *u, const char *fname)
-{
-    int err;
-    usys_close( &err, u, 0 );
-    usys_close( &err, u, 1 );
-    usys_close( &err, u, 2 );
-
-    if( usys_open( &err, u, fname, O_RDONLY, 0 ) != 0 )
-        SHOW_ERROR( 0, "can't open %s for stdin, %d", fname, err );
-
-    if( usys_open( &err, u, fname, O_WRONLY, 0 ) != 1 )
-        SHOW_ERROR( 0, "can't open %s for stdout, %d", fname, err );
-
-    if( usys_open( &err, u, fname, O_WRONLY, 0 ) != 2 )
-        SHOW_ERROR( 0, "can't open %s for stderr, %d", fname, err );
-}
 
 
 
@@ -291,6 +312,8 @@ static errno_t elf_load_seg(Elf32_Phdr *seg, void *src, void *dst)
 
     return 0;
 }
+
+
 
 
 #endif // HAVE_UNIX

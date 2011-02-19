@@ -6,13 +6,19 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <unix/uufile.h>
-#include <unix/uuprocess.h>
 #include <malloc.h>
 #include <string.h>
 #include <stdio.h>
+
+#include <sys/fcntl.h>
+
 #include <kernel/init.h>
 #include <kernel/debug.h>
+#include <kernel/unix.h>
+
+#include <unix/uufile.h>
+#include <unix/uuprocess.h>
+
 #include <threads.h>
 #include <thread_private.h>
 
@@ -21,11 +27,16 @@ uuprocess_t     	proc[MAX_UU_PROC];
 static int      	next_pid = 10;
 static hal_mutex_t      proc_lock;
 
-static int get_pid();
-static uuprocess_t * proc_by_pid(int pid);
-void uu_proc_rm_thread( uuprocess_t *p, int tid ); // static?
+static int 		get_pid();
+//static uuprocess_t * 	proc_by_pid(int pid);
 
-static void dbg_ps(int argc, char **argv);
+static void 		reopen_stdioe(uuprocess_t *u, const char *fname);
+
+static const char**	dup_argv(int *oac, const char**, const char *replace_exe);
+static void 		free_argv(const char**);
+static void 		flatten_argv( char* out, int len, const char** argv );
+
+static void 		dbg_ps(int argc, char **argv);
 
 
 
@@ -62,7 +73,7 @@ static uuprocess_t *get_proc()
 
 
 
-static uuprocess_t * proc_by_pid(int pid)
+uuprocess_t * proc_by_pid(int pid)
 {
     if(pid < 0) return 0;
 
@@ -141,7 +152,7 @@ static void uu_proc_thread_kill( phantom_thread_t *t )
 
     SHOW_FLOW( 1, "Thread %d of process %d dies", t->tid, p->pid );
 
-    uu_proc_rm_thread( p, t->tid );
+    uu_proc_rm_thread( p->pid, t->tid );
 }
 
 
@@ -151,25 +162,13 @@ static void uu_proc_thread_kill( phantom_thread_t *t )
 // -----------------------------------------------------------------------
 
 
-uuprocess_t *uu_create_process(int ppid, struct exe_module *em)
+int uu_create_process( int ppid )
 {
     hal_mutex_lock(&proc_lock);
-    //uuprocess_t *p = calloc( 1, sizeof(uuprocess_t) );
     uuprocess_t *p = get_proc();
     assert(p);
-    assert(em);
-
-    // Caller must increment
-    assert( em->refcount > 0 );
 
     memset( p, 0, sizeof(uuprocess_t) );
-
-    p->em = em;
-
-    p->mem_start = em->mem_start;
-    p->mem_end = em->mem_end;
-
-    strncpy( p->cmd, em->name, MAX_UU_CMD );
 
     p->pid = get_pid();
 
@@ -194,21 +193,24 @@ uuprocess_t *uu_create_process(int ppid, struct exe_module *em)
         p->cwd = copy_uufile( parent->cwd );
         p->umask = parent->umask;
     }
+    else
+    {
+        reopen_stdioe( p, "/dev/tty" );
+    }
 
 
     hal_mutex_unlock(&proc_lock);
-    return p;
+    return p->pid;
 };
 
 
 
 
 // Add thread to process.
-void uu_proc_add_thread( uuprocess_t *p, int tid )
+errno_t uu_proc_add_thread( int pid, int tid )
 {
     assert( tid >= 0 );
-    assert( p );
-    assert( p->pid >= 0 );
+    assert( pid > 0 );
 
     phantom_thread_t *t = get_thread(tid);
     assert( t );
@@ -217,6 +219,13 @@ void uu_proc_add_thread( uuprocess_t *p, int tid )
     hal_set_thread_death_handler(uu_proc_thread_kill);
 
     hal_mutex_lock(&proc_lock);
+
+    uuprocess_t * p = proc_by_pid(pid);
+    if( !p )
+    {
+        hal_mutex_unlock(&proc_lock);
+        return ESRCH;
+    }
 
     int done = 0;
 
@@ -237,20 +246,24 @@ void uu_proc_add_thread( uuprocess_t *p, int tid )
     if(!done) panic("out of thread slots for proc");
 
     hal_mutex_unlock(&proc_lock);
+    return 0;
 }
 
 // remove (dead) thread from process.
-void uu_proc_rm_thread( uuprocess_t *p, int tid )
+errno_t uu_proc_rm_thread( int pid, int tid )
 {
     assert( tid >= 0 );
-    assert( p );
-    assert(p->ntids > 0);
-
-    // Not sure we can
-    //phantom_thread_t *t get_thread(tid);
-    //assert( t );
 
     hal_mutex_lock(&proc_lock);
+
+    uuprocess_t * p = proc_by_pid(pid);
+    if( !p )
+    {
+        hal_mutex_unlock(&proc_lock);
+        return ESRCH;
+    }
+
+    assert(p->ntids > 0);
 
     int done = 0;
 
@@ -272,9 +285,157 @@ void uu_proc_rm_thread( uuprocess_t *p, int tid )
         uu_proc_death(p);
 
     hal_mutex_unlock(&proc_lock);
-
+    return 0;
 }
 
+errno_t uu_proc_setargs( int pid, const char **av, const char **env )
+{
+    errno_t r = 0;
+    hal_mutex_lock(&proc_lock);
+
+    uuprocess_t * u = proc_by_pid(pid);
+    if( u )
+    {
+        if(u->argv) free_argv(u->argv);
+        if(u->envp) free_argv(u->envp);
+
+        u->argv = dup_argv( &u->argc, av, 0 );
+        u->envp = dup_argv( 0, env, 0 );
+
+        flatten_argv( u->cmd, MAX_UU_CMD, u->argv );
+    }
+    else
+        r = ESRCH;
+
+    hal_mutex_unlock(&proc_lock);
+    return r;
+}
+
+errno_t uu_proc_set_exec( int pid, struct exe_module *em)
+{
+    assert(em);
+    // Caller must increment
+    assert( em->refcount > 0 );
+
+    errno_t r = 0;
+    hal_mutex_lock(&proc_lock);
+
+    uuprocess_t * p = proc_by_pid(pid);
+    if( p )
+    {
+        if( p->em )
+        {
+            // todo unlink em
+            SHOW_ERROR( 0, "Process %d already has em", pid );
+        }
+
+        p->em = em;
+
+        p->mem_start = em->mem_start;
+        p->mem_end = em->mem_end;
+
+        const char *name = "?";
+        if( p->argv[0] )
+            name = p->argv[0];
+
+        strncpy( em->name, name, MAX_UU_CMD );
+
+    }
+    else
+        r = ESRCH;
+
+    hal_mutex_unlock(&proc_lock);
+    return r;
+}
+
+
+// -----------------------------------------------------------------------
+// Tools
+// -----------------------------------------------------------------------
+
+
+static void reopen_stdioe(uuprocess_t *u, const char *fname)
+{
+    int err;
+    usys_close( &err, u, 0 );
+    usys_close( &err, u, 1 );
+    usys_close( &err, u, 2 );
+
+    if( usys_open( &err, u, fname, O_RDONLY, 0 ) != 0 )
+        SHOW_ERROR( 0, "can't open %s for stdin, %d", fname, err );
+
+    if( usys_open( &err, u, fname, O_WRONLY, 0 ) != 1 )
+        SHOW_ERROR( 0, "can't open %s for stdout, %d", fname, err );
+
+    if( usys_open( &err, u, fname, O_WRONLY, 0 ) != 2 )
+        SHOW_ERROR( 0, "can't open %s for stderr, %d", fname, err );
+}
+
+
+static const char**dup_argv( int *oac, const char**av, const char *replace_exe)
+{
+    const char *def = 0;
+    if( av == 0 )
+        av = &def;
+
+    const char ** avc = av;
+    int ac = 0;
+
+    assert(av);
+
+    while(*av++)
+        ac++;
+
+    if( oac ) *oac = ac;
+
+    if( replace_exe == 0 )
+        replace_exe = avc[0];
+
+    const char ** avr = calloc( ac+1, sizeof(char *) );
+
+    while( ac-- )
+    {
+        avr[ac] = strdup( ac ? avc[ac] : replace_exe );
+        SHOW_FLOW( 1, "argv[%d] added '%s'", ac, avr[ac] );
+    }
+
+    return avr;
+}
+
+
+// TODO use it in killing u
+static void free_argv(const char**av)
+{
+    const char ** avc = av;
+    assert(av);
+
+    while(*av)
+    {
+        free((void *)(*av++));
+    }
+    free(avc);
+}
+
+
+static void
+flatten_argv( char* out, int len, const char** av )
+{
+    assert(av);
+    assert(out);
+    assert(len > 0);
+
+    *out = 0;
+
+    while(*av)
+    {
+        SHOW_FLOW( 1, "argv add '%s'", *av );
+        strlcat( out, *av++, len );
+        if(*av) strlcat( out, " ", len );
+    }
+
+    SHOW_FLOW( 1, "argv flattenned to '%s'", out );
+
+}
 
 
 // -----------------------------------------------------------------------

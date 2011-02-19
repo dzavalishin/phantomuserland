@@ -1,5 +1,22 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix syscalls - file io
+ *
+ *
+**/
+
 
 #if HAVE_UNIX
+
+#define DEBUG_MSG_PREFIX "funix"
+#include "debug_ext.h"
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 
 #include <unix/uufile.h>
@@ -59,7 +76,7 @@ int usys_read(int *err, uuprocess_t *u, int fd, void *addr, int count )
     return ret;
 }
 
-int usys_write(int *err, uuprocess_t *u, int fd, void *addr, int count )
+int usys_write(int *err, uuprocess_t *u, int fd, const void *addr, int count )
 {
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);

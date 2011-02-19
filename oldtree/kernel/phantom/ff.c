@@ -20,12 +20,28 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-
 #include "ff.h"			/* FatFs configurations and declarations */
 
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
+
+#include <unix/uuprocess.h>
+
+
+/*---------------------------------------*/
+/* Prototypes for disk control functions */
+
+/* RTC function */
+static DWORD get_fattime (void);
+
+//int assign_drives (int, int);
+static DSTATUS disk_initialize (phantom_disk_partition_t *dev);
+static DSTATUS disk_status (phantom_disk_partition_t *dev);
+
+static DRESULT disk_read ( phantom_disk_partition_t *dev, BYTE*, DWORD, BYTE);
+static DRESULT disk_write (phantom_disk_partition_t *dev, const BYTE*, DWORD, BYTE);
+static DRESULT disk_ioctl (phantom_disk_partition_t *dev, BYTE, void*);
 
 /*--------------------------------------------------------------------------
 
@@ -3243,7 +3259,7 @@ FRESULT f_mkfs (
 
 //int assign_drives (int a, int b) { return 0 ; }
 
-DRESULT disk_read ( phantom_disk_partition_t *dev, BYTE* data, DWORD sector, BYTE nsect)
+static DRESULT disk_read ( phantom_disk_partition_t *dev, BYTE* data, DWORD sector, BYTE nsect)
 {
     if( phantom_sync_read_sector( dev, data, sector, nsect ) )
     {
@@ -3254,7 +3270,7 @@ DRESULT disk_read ( phantom_disk_partition_t *dev, BYTE* data, DWORD sector, BYT
     return 0;
 }
 
-DRESULT disk_write( phantom_disk_partition_t *dev, const BYTE* data, DWORD sector, BYTE nsect)
+static DRESULT disk_write( phantom_disk_partition_t *dev, const BYTE* data, DWORD sector, BYTE nsect)
 {
     if( phantom_sync_write_sector( dev, data, sector, nsect ) )
     {
@@ -3267,7 +3283,7 @@ DRESULT disk_write( phantom_disk_partition_t *dev, const BYTE* data, DWORD secto
 
 
 
-DRESULT disk_ioctl (phantom_disk_partition_t *dev, BYTE cmd, void* data)
+static DRESULT disk_ioctl (phantom_disk_partition_t *dev, BYTE cmd, void* data)
 {
     switch(cmd)
     {
@@ -3312,17 +3328,18 @@ DRESULT disk_ioctl (phantom_disk_partition_t *dev, BYTE cmd, void* data)
 }
 
 
-DWORD get_fattime (void) { return 0 ; }
+// TODO fat time!
+static DWORD get_fattime (void) { return 0 ; }
 
 // does the trick...
 
-DSTATUS disk_initialize (phantom_disk_partition_t *dev)
+static DSTATUS disk_initialize (phantom_disk_partition_t *dev)
 {
     (void) dev;
     return 0 ;
 }
 
-DSTATUS disk_status (phantom_disk_partition_t *dev)
+static DSTATUS disk_status (phantom_disk_partition_t *dev)
 {
     (void) dev;
     return 0 ;
@@ -3331,6 +3348,8 @@ DSTATUS disk_status (phantom_disk_partition_t *dev)
 
 #endif
 
+
+#include <kunix.h>
 
 
 errno_t fs_start_ff( phantom_disk_partition_t *p )
@@ -3388,6 +3407,35 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
     {
         SHOW_ERROR( 0, "can't automount %s", p->name );
     }
+
+
+    if(0) {
+        void *odata;
+        int osize;
+        const char *fname = "/amnt0/ReadMe.txt";
+
+        errno_t ke = k_load_file( &odata, &osize, fname );
+        if( !ke )
+        {
+            printf("%s = '%s'", fname, odata );
+            free( odata );
+        }
+        else
+            SHOW_ERROR( 0, "%s read error %d", fname, ke );
+
+    }
+
+    {
+    int pid = uu_create_process(-1);
+    const char* av[] = { "pmod", 0 };
+    uu_proc_setargs( pid, av, 0 );
+
+    if( uu_run_file( pid, "pregress" ) )
+        if( uu_run_file( pid, "/amnt0/pregress" ) )
+            uu_run_file( pid, "/amnt0/ptest" );
+
+    }
+
 #endif
 
     return 0;
