@@ -2,14 +2,21 @@
  ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
  ** Distributed under the terms of the NewOS License.
  */
-#include <user/sys_fio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
+
+#include <user/sys_fio.h>
+#include <user/sys_phantom.h>
+#include <user/sys_getset.h>
+#include <user/sys_misc.h>
+
 #include <phantom_types.h>
 //#include <newos/tty_priv.h>
+#include <sys/stat.h>
 
 #include "commands.h"
 #include "file_utils.h"
@@ -26,12 +33,12 @@ struct command cmds[] = {
     {NULL, NULL}
 };
 
-int cmd_exec(int argc, char *argv[])
+int cmd_exec(int argc, const char *argv[])
 {
-    return cmd_create_proc(argc - 1,argv+1);
+    return cmd_create_proc(argc - 1, argv+1 );
 }
 
-int cmd_create_proc(int argc,char *argv[])
+int cmd_create_proc(int argc, const char *argv[])
 {
     bool must_wait=1;
     pid_t pid;
@@ -69,20 +76,30 @@ int cmd_create_proc(int argc,char *argv[])
         }
     }
 
-#if 0
-    pid = _kern_proc_create_proc(filename,filename, argv, argc, 5, PROC_FLAG_SUSPENDED|PROC_FLAG_NEW_PGROUP);
+#if 1
+    pid = phantom_run( filename, argv, 0, P_RUN_NEW_PGROUP | (must_wait ? P_RUN_WAIT : 0) );
+    //pid = _kern_proc_create_proc(filename,filename, argv, argc, 5, PROC_FLAG_SUSPENDED|PROC_FLAG_NEW_PGROUP);
+
     if(pid >= 0) {
+/*
         int retcode;
 
         if(must_wait) {
-            ioctl(0, _TTY_IOCTL_SET_PGRP, &pid, sizeof(pgrp_id));
-            _kern_send_proc_signal(pid, SIGCONT);
-            _kern_proc_wait_on_proc(pid, &retcode);
-            pid = -1;
-            ioctl(0, _TTY_IOCTL_SET_PGRP, &pid, sizeof(pgrp_id));
+            //ioctl(0, _TTY_IOCTL_SET_PGRP, &pid, sizeof(pgrp_id));
+            //setpgrp(pid);
+            tcsetpgrp( 0, pid );
+
+            //_kern_send_proc_signal(pid, SIGCONT);
+            waitpid(pid, &retcode, 0);
+            //pid = -1;
+            //ioctl(0, _TTY_IOCTL_SET_PGRP, &pid, sizeof(pgrp_id));
+            //setpgrp(-1);
+            tcsetpgrp( 0, -1 );
+
         } else {
-            _kern_send_proc_signal(pid, SIGCONT);
+            //_kern_send_proc_signal(pid, SIGCONT);
         }
+*/
     } else
 #endif
     {
@@ -183,31 +200,25 @@ int cmd_pwd(int argc, char *argv[])
 
 int cmd_stat(int argc, char *argv[])
 {
-#if 1
-    (void) argc;
-    (void) argv;
-
-    printf("not implemented\n");
-#else
     int rc;
-    struct file_stat stat;
+    struct stat istat;
 
     if(argc < 2) {
         printf("not enough arguments to stat\n");
         return 0;
     }
 
-    rc = _kern_rstat(argv[1], &stat);
+    rc = stat(argv[1], &istat);
     if(rc >= 0) {
         printf("stat of file '%s': \n", argv[1]);
-        printf("vnid 0x%x\n", (unsigned int)stat.vnid);
-        printf("type %d\n", stat.type);
-        printf("size %d\n", (int)stat.size);
+        //printf("vnid 0x%x\n", (unsigned int)istat.vnid);
+        printf("mode %o\n", istat.st_mode);
+        printf("size %d\n", (int)istat.st_size);
     } else {
         printf("stat failed for file '%s'\n", argv[1]);
     }
     return 0;
-#endif
+
 }
 
 int cmd_help(int argc, char *argv[])

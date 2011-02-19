@@ -15,6 +15,9 @@
 #include "args.h"
 
 
+static void getline( char *buf, int size );
+
+
 int main(int argc,char *argv[])
 {
     // TODO bring in good malloc/free and implement sbrk()!
@@ -26,27 +29,43 @@ int main(int argc,char *argv[])
     init_statements();
     init_arguments(argc,argv);
 
-    if(af_script_file_name != NULL){
+    if(af_script_file_name != NULL)
+    {
         run_script(af_script_file_name);
         if(af_exit_after_script) exit(0);
     }
 
-    /*
      char buf[1024];
 
      for(;;) {
 
-     printf("> ");
+         printf("> ");
 
-     fgets(buf, sizeof(buf), stdin);
-     if(strlen(buf) > 0) {
-     parse_string(buf);
+         getline(buf, sizeof(buf));
+         if(strlen(buf) > 0) {
+             parse_string(buf);
+         }
+         buf[0] = '\0';
      }
-     buf[0] = '\0';
-     }
-     */
 
     return 0;
+}
+
+
+static void getline( char *buf, int size )
+{
+    int nread = 0;
+    char *bp = buf;
+
+    while( nread < size-1 )
+    {
+        read( 0, bp, 1 );
+        if( *bp == '\n' )
+            break;
+        bp++;
+    }
+
+    *bp = 0;
 }
 
 
