@@ -648,13 +648,13 @@ void syscall_sw(struct trap_state *st)
     case SYS_get_next_port_info:
         goto unimpl;
 
-    case phantom_run:
+    case SYS_phantom_run:
 
-    case phantom_method:
-    case phantom_toobject:
-    case phantom_fromobject:
-    case phantom_intmethod:
-    case phantom_strmethod:
+    case SYS_phantom_method:
+    case SYS_phantom_toobject:
+    case SYS_phantom_fromobject:
+    case SYS_phantom_intmethod:
+    case SYS_phantom_strmethod:
         goto unimpl;
 
     unimpl:
