@@ -16,6 +16,60 @@
 #include <phantom_libc.h>
 
 
+
+
+
+errno_t t_set_owner( tid_t tid, void *owner )
+{
+    int ret = 0;
+    TA_LOCK();
+
+    phantom_thread_t *t = get_thread(tid);
+    if( t == 0 )
+    {
+        ret = ESRCH;
+        goto err;
+    }
+
+    t->owner = owner;
+
+err:
+    TA_UNLOCK();
+    return ret;
+}
+
+errno_t t_get_owner( tid_t tid, void **owner )
+{
+    int ret = 0;
+    TA_LOCK();
+
+    assert(owner);
+
+    phantom_thread_t *t = get_thread(tid);
+    if( t == 0 )
+    {
+        ret = ESRCH;
+        goto err;
+    }
+
+    *owner = t->owner;
+
+err:
+    TA_UNLOCK();
+    return ret;
+}
+
+
+
+
+
+
+
+// -----------------------------------------------------------
+// old - to rewrite & kill
+
+
+
 phantom_thread_t * get_current_thread(void)
 {
     static phantom_thread_t dummy[MAX_CPUS];

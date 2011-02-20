@@ -6,4 +6,5 @@ extern int personality(int kind);
 
 extern int gethostname(const char *buf, int bs);
 
+extern int waitpid( int pid, int *status, int options);
 

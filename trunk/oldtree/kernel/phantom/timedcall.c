@@ -132,22 +132,6 @@ static void local_request_timed_call( timedcall_t *entry, u_int32_t flags )
 
 
 
-/*
-static void wakethread( void *arg )
-{
-    //phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
-    //t_unblock(t, ?? );
-}
-
-// TODO impl
-void phantom_request_timed_thread_wake( int tid, long timeMsec )
-{
-    panic("not impl");
-
-    phantom_request_timed_func( wakethread, (void *)tid, timeMsec, 0 );
-}
-*/
-
 static void signal_cond(void *arg)
 {
     hal_cond_signal((hal_cond_t *)arg);

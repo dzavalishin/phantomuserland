@@ -115,21 +115,22 @@ static void start_new_vm_thread(struct pvm_object new_thread)
     struct data_area_4_thread *tda = pvm_object_da( new_thread, thread );
     tda->tid = tid;
 
-    phantom_thread_t *t = get_thread(tid);
-    t->owner = new_thread.data;
+    t_set_owner( tid, new_thread.data );
+    //phantom_thread_t *t = get_thread(tid);
+    //t->owner = new_thread.data;
 
     while(args_used > 0)
         hal_sleep_msec(1);
 }
 
 
-//static
+/* static
 phantom_thread_t* vm_thread_2_kernel_thread(struct pvm_object vm_thread)
 {
     struct data_area_4_thread *tda = pvm_object_da( vm_thread, thread );
     return get_thread(tda->tid);
 }
-
+*/
 
 int phantom_vm_threads_get_count() { return n_vm_threads; }
 

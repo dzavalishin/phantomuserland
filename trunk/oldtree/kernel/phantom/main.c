@@ -372,10 +372,16 @@ connect_ide_io();
     init_buses();
 
 
-#if 0
+#if 1
+    /*
     printf("PRESS Q TO STOP PHANTOM");
     while(getchar() != 'Q')
-        ;
+    ;
+    */
+
+    while(1)
+        hal_sleep_msec(20000);
+
 #else
     kernel_debugger();
 #endif

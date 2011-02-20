@@ -486,16 +486,17 @@ void parse_vars_in_string(const char *string,char *out,int max_len)
     *out_scan= 0;
 }
 
-
+#define REDIR 0
 
 
 static int launch(int (*cmd)(int, char **), int argc, char **argv, char *r_in, char *r_out)
 {
+    int retval= 0;
+#if REDIR
     int saved_in;
     int saved_out;
     int new_in;
     int new_out;
-    int retval= 0;
     int err;
 
     if(strcmp(r_in, "")!= 0) {
@@ -534,20 +535,22 @@ static int launch(int (*cmd)(int, char **), int argc, char **argv, char *r_in, c
     dup2(new_out, 1);
     close(new_in);
     close(new_out);
-
+#endif
     retval= cmd(argc, argv);
-
+#if REDIR
     dup2(saved_in, 0);
     dup2(saved_out, 1);
     close(saved_in);
     close(saved_out);
-
+#endif
     return 0;
 
+#if REDIR
 err_2:
     close(new_in);
 err_1:
     return err;
+#endif
 }
 
 

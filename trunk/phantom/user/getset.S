@@ -38,4 +38,5 @@ SYSCALL(setreuid)
 SYSCALL(setreuid32)
 SYSCALL(setuid)
 SYSCALL(setuid32)
+SYSCALL(setpgrp) 
 

@@ -57,6 +57,7 @@
 #define SYS_setreuid32          57	// +-
 #define SYS_setuid              58	// +-
 #define SYS_setuid32            59	// +-
+#define SYS_setpgrp             60	// ++
 
 
 

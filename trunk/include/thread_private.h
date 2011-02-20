@@ -31,6 +31,13 @@
 
 #define MAX_THREADS 1024
 
+// Thread struct/array access lock - to prevent accessing killed thread
+// TODO - take in kill!
+#define TA_LOCK() hal_spin_lock( &schedlock )
+#define TA_UNLOCK() hal_spin_unlock( &schedlock )
+
+
+
 struct uuprocess;
 
 struct phantom_thread
@@ -232,7 +239,8 @@ extern hal_spinlock_t schedlock;
 
 // lock for thread array manipulation, taken to be
 // sure thread is not killed till we do smthing.
-extern hal_spinlock_t tidlock;
+// USE shedlock!
+//extern hal_spinlock_t tidlock;
 
 
 
@@ -441,14 +449,6 @@ struct phantom_sem_impl
 
 
 
-/*
-#if USE_NEW_SEMAS
-struct hal_sem
-{
-    struct phantom_sem_impl     *impl;
-};
-#endif // USE_NEW_SEMAS
-*/
 
 #endif // THREAD_PRIVATE_H
 

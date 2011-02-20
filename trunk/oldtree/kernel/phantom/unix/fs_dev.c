@@ -32,7 +32,7 @@
 
 
 static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes);
-static size_t      dev_write(   struct uufile *f, void *dest, size_t bytes);
+static size_t      dev_write(   struct uufile *f, const void *dest, size_t bytes);
 //static errno_t     dev_stat(    struct uufile *f, struct ??);
 //static errno_t     dev_ioctl(   struct uufile *f, struct ??);
 
@@ -65,7 +65,7 @@ static struct uufileops dev_fops =
 
 
 static size_t      con_read(    struct uufile *f, void *dest, size_t bytes);
-static size_t      con_write(   struct uufile *f, void *dest, size_t bytes);
+static size_t      con_write(   struct uufile *f, const void *dest, size_t bytes);
 
 // Console - hack
 static struct uufileops con_fops =
@@ -197,7 +197,7 @@ static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes)
     return dev->dops.read( dev, dest, bytes );
 }
 
-static size_t      dev_write(   struct uufile *f, void *src, size_t bytes)
+static size_t      dev_write(   struct uufile *f, const void *src, size_t bytes)
 {
     phantom_device_t* dev = f->impl;
     if(dev->dops.write == 0) return -1;
@@ -235,9 +235,11 @@ static void *      dev_copyimpl( void *impl )
 
 static size_t      con_read(    struct uufile *f, void *dest, size_t bytes)
 {
-	(void) f;
+    (void) f;
 
     int ret = bytes;
+
+    SHOW_FLOW( 10, "Read tty for %d bytes", bytes );
 
     char *cp = dest;
     while(bytes--)
@@ -246,11 +248,11 @@ static size_t      con_read(    struct uufile *f, void *dest, size_t bytes)
     return ret;
 }
 
-static size_t      con_write(   struct uufile *f, void *src, size_t bytes)
+static size_t      con_write(   struct uufile *f, const void *src, size_t bytes)
 {
-	(void) f;
+    (void) f;
 
-	int ret = bytes;
+    int ret = bytes;
 
     const char *cp = src;
     while(bytes--)

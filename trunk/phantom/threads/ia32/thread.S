@@ -12,8 +12,8 @@
 
 #include <mach/asm.h>
 #include "cpu_state.h"
-
-#define KERNEL 0
+            
+#define SAVE_CR2 1
 
 // called and returns with interrupts disabled
 /* void phantom_switch_context(
@@ -38,7 +38,7 @@ ENTRY(phantom_switch_context)
     pushl       %ebx
     pushl       %edi
     pushl       %esi
-#if KERNEL
+#if SAVE_CR2
     //pushl    	%cr2
     movl        %cr2, %esi
 #endif
@@ -53,7 +53,7 @@ ENTRY(phantom_switch_context)
     movl	CSTATE_ESP(%eax), %esp
 
     popl        %esi
-#if KERNEL
+#if SAVE_CR2
     movl        %esi, %cr2
     //popl        %cr2
 #endif

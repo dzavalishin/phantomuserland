@@ -1,6 +1,17 @@
 #ifndef THREADS_H
 #define THREADS_H
 
+#include <phantom_types.h>
+#include <errno.h>
+
+// Good clean tid based threads interface
+
+errno_t t_set_owner( tid_t tid, void *owner );
+errno_t t_get_owner( tid_t tid, void **owner );
+
+
+
+
 // TODO remove it from here when everything is moved in.
 #include <hal.h>
 

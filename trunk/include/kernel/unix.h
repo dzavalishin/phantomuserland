@@ -78,6 +78,7 @@ int usys_kill(int *err, uuprocess_t *u, int pid, int sig);
 int usys_waitpid(int *err, uuprocess_t *u, int pid, int *status, int options);
 
 
+int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, const char **uep, int flags );
 
 
 

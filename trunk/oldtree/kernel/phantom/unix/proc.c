@@ -195,9 +195,13 @@ int uu_create_process( int ppid )
     }
     else
     {
-        reopen_stdioe( p, "/dev/tty" );
+        //reopen_stdioe( p, "/dev/tty" );
     }
 
+    SHOW_FLOW( 11, "ctty %p", p->ctty );
+
+    // allways, while there is no files inherited
+    reopen_stdioe( p, "/dev/tty" );
 
     hal_mutex_unlock(&proc_lock);
     return p->pid;
@@ -516,6 +520,27 @@ finish:
     return retpid;
 }
 
+
+// to get flags. it will be better to get 'em to separate include
+#include <user/sys_phantom.h>
+
+int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, const char **uep, int flags )
+{
+    int pid = uu_create_process(u->pid);
+
+    if( pid < 0 )
+    {
+        *err = EPROCLIM; // TODO is it?
+        return -1;
+    }
+
+    uu_proc_setargs( pid, uav, uep );
+    *err= uu_run_file( pid, fname );
+
+    // TODO if run file failed, process still exists!
+
+    return *err ? -1 : pid;
+}
 
 
 

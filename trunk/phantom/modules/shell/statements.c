@@ -763,7 +763,7 @@ int parse_info(scan_info *info)
 
 void init_statements(void){
 
-    shell_var_set_text(NAME_VAR_PATH,".:/:/boot:/boot/bin");
+    shell_var_set_text(NAME_VAR_PATH,".:/:/boot:/boot/bin:/amnt0");
 
 }
 
