@@ -76,7 +76,13 @@ int cmd_create_proc(int argc, const char *argv[])
         }
     }
 
+
 #if 1
+
+	// HACK! unsure!
+	argv[argc] = 0;
+
+	printf("sh will run '%s'\n", filename);
     pid = phantom_run( filename, argv, 0, P_RUN_NEW_PGROUP | (must_wait ? P_RUN_WAIT : 0) );
     //pid = _kern_proc_create_proc(filename,filename, argv, argc, 5, PROC_FLAG_SUSPENDED|PROC_FLAG_NEW_PGROUP);
 
@@ -103,7 +109,7 @@ int cmd_create_proc(int argc, const char *argv[])
     } else
 #endif
     {
-        printf("Error: cannot execute '%s'\n", filename);
+        printf("Error: cannot execute '%s', ret %d\n", filename, pid );
         return 0; // should be -1, but the shell would exit
     }
 

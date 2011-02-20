@@ -2,6 +2,7 @@
 #include <unix/uuprocess.h>
 #include <sys/socket.h>
 #include <dirent.h>
+#include <signal.h>
 
 struct sockaddr;
 
@@ -79,6 +80,10 @@ int usys_waitpid(int *err, uuprocess_t *u, int pid, int *status, int options);
 
 
 int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, const char **uep, int flags );
+
+
+int usys_sigpending( int *err, uuprocess_t *u, sigset_t * set);
+sighandler_t usys_signal( int *err, uuprocess_t *u, int signum, sighandler_t handler);
 
 
 

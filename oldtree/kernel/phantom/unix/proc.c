@@ -18,6 +18,7 @@
 
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
+#include <unix/uusignal.h>
 
 #include <threads.h>
 #include <thread_private.h>
@@ -198,10 +199,18 @@ int uu_create_process( int ppid )
         //reopen_stdioe( p, "/dev/tty" );
     }
 
+    sig_init( &(p->signals) );
+
+
+    // Mostly created, do final things
+
+
     SHOW_FLOW( 11, "ctty %p", p->ctty );
 
     // allways, while there is no files inherited
     reopen_stdioe( p, "/dev/tty" );
+
+
 
     hal_mutex_unlock(&proc_lock);
     return p->pid;
@@ -421,8 +430,7 @@ static void free_argv(const char**av)
 }
 
 
-static void
-flatten_argv( char* out, int len, const char** av )
+static void flatten_argv( char* out, int len, const char** av )
 {
     assert(av);
     assert(out);
@@ -483,8 +491,18 @@ static void dbg_ps(int argc, char **argv)
 int usys_kill(int *err, uuprocess_t *u, int pid, int sig)
 {
     hal_mutex_lock(&proc_lock);
-    panic("kill is not implemented");
+
+    //panic("kill is not implemented");
+    uuprocess_t * p = proc_by_pid(pid);
+    int ret = 0;
+    sig_send( &p->signals, sig );
+
     hal_mutex_unlock(&proc_lock);
+
+    if(ret)
+        *err = EINVAL;
+
+    return ret;
 }
 
 
@@ -511,7 +529,7 @@ int usys_waitpid(int *err, uuprocess_t *u, int pid, int *status, int options)
         }
 
     }
-
+#warning impl
 finish:
 
     hal_mutex_unlock(&proc_lock);
@@ -530,10 +548,12 @@ int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, co
 
     if( pid < 0 )
     {
+        SHOW_ERROR( 0, "out of processes running %s", fname );
         *err = EPROCLIM; // TODO is it?
         return -1;
     }
 
+    SHOW_FLOW( 6, "run '%s' setargs", fname );
     uu_proc_setargs( pid, uav, uep );
     *err= uu_run_file( pid, fname );
 

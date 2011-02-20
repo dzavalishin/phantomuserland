@@ -38,9 +38,13 @@
 #include <sys/utsname.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
+
 #include <dirent.h>
+#include <signal.h>
 
 #include <unix/uuprocess.h>
+#include <unix/uusignal.h>
+
 extern struct utsname phantom_uname;
 
 #include <hal.h>
@@ -53,7 +57,7 @@ extern struct utsname phantom_uname;
 
 //static void *adjustin( int uaddr, struct trap_state *st );
 errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int len );
-errno_t user_args_load( int mina, int maxa, char **oav, int omax,  char **iav );
+errno_t user_args_load( int mina, int maxa, char **oav, int omax,  const char **iav );
 
 #define CHECKA(a,count) do { \
     unsigned int __addr = (int)(a); \
@@ -91,7 +95,7 @@ errno_t user_args_load( int mina, int maxa, char **oav, int omax,  char **iav );
     } while(0)
 */
 
-void syscall_sw(struct trap_state *st)
+static void do_syscall_sw(struct trap_state *st)
 {
 #if HAVE_UNIX
     int callno = st->eax;
@@ -630,7 +634,7 @@ void syscall_sw(struct trap_state *st)
                              msg_code,
                              msg_buffer,
                              uarg[3]);
-
+            break;
         }
     case SYS_write_port:
         {
@@ -641,7 +645,7 @@ void syscall_sw(struct trap_state *st)
                              uarg[1],
                              msg_buffer,
                              uarg[3]);
-
+            break;
         }
     case SYS_read_port_etc:
     case SYS_write_port_etc:
@@ -652,12 +656,20 @@ void syscall_sw(struct trap_state *st)
     case SYS_phantom_run:
         {
             // extern int phantom_run(const char *fname, const char **argv, const char **envp, int flags);
-            AARG(void  *, msg_buffer, 0, 1);
-            AARG(char **, uav, 1, 1);
-            AARG(char **, uep, 2, 1);
+            AARG(const char  *, fname, 0, 1);
+
+            AARG(const char **, uav,   1, 4);
+            AARG(const char **, uep,   2, 4);
+
+            if( 0 == uarg[1] ) uav = 0;
+            if( 0 == uarg[2] ) uep = 0;
+
+            SHOW_FLOW( 2, "run %s flags 0x%b", fname, uarg[3], "\020\1<WAIT>\2<NEWWIN>\3<NEWPGRP>" );
 
             char *a[1024];
             char *e[1024];
+
+            SHOW_FLOW( 2, "run %s load args", fname );
 
             if(
                user_args_load( mina, maxa, a, 1024, uav ) ||
@@ -666,10 +678,12 @@ void syscall_sw(struct trap_state *st)
             {
                 ret = -1;
                 err = EFAULT;
+                SHOW_ERROR( 0, "fault reading args for %s", fname );
                 goto err_ret;
             }
 
-            ret = usys_run( &err, u,uarg[0], uav, uep, uarg[3] );
+            ret = usys_run( &err, u, fname, uav, uep, uarg[3] );
+            break;
         }
 
     case SYS_phantom_method:
@@ -678,6 +692,37 @@ void syscall_sw(struct trap_state *st)
     case SYS_phantom_intmethod:
     case SYS_phantom_strmethod:
         goto unimpl;
+
+
+
+    case SYS_sigpending:
+        {
+            AARG(sigset_t *, set, 0, sizeof(sigset_t *));
+            ret = usys_sigpending( &err, u, set);
+            break;
+        }
+
+    case SYS_signal:
+        {
+#if 0
+            AARG(sighandler_t, hand, 1, sizeof(sighandler_t));
+            hand = usys_signal( &err, u, uarg[0], hand);
+            // FIXME 64 bit error
+            ret = ((int)hand) - mina; // Convert pointer back
+#else
+            // We do not use pointer (ret and uarg 1), so we don't have to convert it
+            ret = (int)usys_signal( &err, u, uarg[0], (void *)uarg[1]);
+#endif
+            break;
+        }
+
+    case SYS_sigprocmask:
+    //case raise:
+    case SYS_sigaction:
+    case SYS_siginterrupt:
+    case SYS_sigsuspend:
+        goto unimpl;
+
 
     unimpl:
         SHOW_ERROR( 0, "Unimplemented syscall %d called", callno );
@@ -700,6 +745,193 @@ err_ret:
     st->eax = ret;
     st->edx = err;
 }
+
+
+
+
+errno_t sig_deliver( struct trap_state *st, int nsig, void *handler )
+{
+    u_int32_t   old_eip = st->eip;
+    u_int32_t   old_esp = st->esp;
+
+#warning unimpl
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+void sig_init(signal_handling_t *sh)
+{
+    memset( sh, 0, sizeof(signal_handling_t) );
+    sh->signal_mask 	= SIG_DEF_IGNORE;
+    sh->signal_stop     = SIG_DEF_STOP;
+    sh->signal_cont     = SIG_DEF_CONT;
+}
+
+// Translate signals to user
+void sig_exec(signal_handling_t *sh, struct trap_state *st)
+{
+
+    // Mask off ignored ones
+    u_int32_t s = sh->signal_pending & sh->signal_mask;
+
+
+    u_int32_t do_stop = s & sh->signal_stop;
+    u_int32_t do_cont = s & sh->signal_cont;
+
+    u_int32_t do_kill = s & ~(do_stop|do_cont);
+
+    if(do_cont)
+    {
+        do_stop = 0; // Cont overrides
+
+        // We're going to process all of these
+        sh->signal_pending &= ~do_cont;
+
+        SHOW_ERROR( 0, "Unimplemented sysgnal cont %x", do_cont );
+    }
+
+    if(do_stop)
+    {
+        // We're going to process all of these
+        sh->signal_pending &= ~do_stop;
+
+        SHOW_ERROR( 0, "Unimplemented sysgnal stop %x", do_stop );
+    }
+
+
+    int i;
+    for( i = 0; i < NSIGNAL; i++ )
+    {
+        u_int32_t sel = 1<<i;
+
+        // Not this?
+        if( !(sel & s) )
+            continue;
+
+        void *uhandler = sh->signal_handler[i];
+        if( uhandler == SIG_DFL )
+        {
+            int killme = do_kill & s;
+            if(killme)
+            {
+                SHOW_ERROR( 0, "Unimplemented sygnal kill %d", i );
+            }
+        }
+        else if( uhandler == (void *)SIG_IGN )
+        {
+            // None
+        }
+        else
+        {
+            // TODO mask here?
+            sig_deliver( st, i, uhandler );
+        }
+
+    }
+
+}
+
+// Send a signal (turn bit on)
+void sig_send(signal_handling_t *sh, int signal )
+{
+    assert( signal >= 0 && signal < NSIGNAL );
+    sh->signal_pending |= (1 << signal);
+}
+
+
+
+// called on trap state before return to produce signal handling in u a space
+void execute_signals(uuprocess_t *u, struct trap_state *st)
+{
+    signal_handling_t *sh = &u->signals;
+    sig_exec(sh, st);
+}
+
+
+
+int usys_sigpending( int *err, uuprocess_t *u, sigset_t * set)
+{
+    signal_handling_t *sh = &u->signals;
+    *set = sh->signal_pending;
+    return 0;
+}
+
+sighandler_t usys_signal( int *err, uuprocess_t *u, int signum, sighandler_t handler)
+{
+#warning impl
+    signal_handling_t *sh = &u->signals;
+    if( signum < 0 || signum > _SIG_MAXSIG )
+    {
+        *err = EINVAL;
+        return (void *)SIG_ERR;
+    }
+
+    sighandler_t ret = sh->signal_handler[signum];
+
+    sh->signal_handler[signum] = handler;
+
+    if( handler == (void *)SIG_IGN)
+        sh->signal_mask |= (1<<signum);
+    else
+        sh->signal_mask &= ~(1<<signum);
+
+    return ret;
+}
+
+
+
+
+
+
+void syscall_sw(struct trap_state *st)
+{
+    phantom_thread_t *t = GET_CURRENT_THREAD();
+    uuprocess_t *u = t->u;
+/*
+    int ret;
+    if( (ret = setjmp(u->signal_jmpbuf)) )
+    {
+        execute_signals(u, st);
+        return;
+    }
+*/
+    do_syscall_sw(st);
+    //execute_signals(u, st);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 static void *adjustin( int uaddr, struct trap_state *st )
@@ -726,12 +958,12 @@ errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int
 
 
 
-errno_t user_args_load( int mina, int maxa, char **oav, int omax,  char **iav )
+errno_t user_args_load( int mina, int maxa, char **oav, int omax,  const char **iav )
 {
     omax--; // leave one for zero ptr
     while( omax-- )
     {
-        if( 0 == *iav )
+        if( (0 == iav) || (0 == *iav) )
             break;
         // todo 64 bit bug mina/maxa must be 64 bits
         // do (long for 64 bits) integer ops for else

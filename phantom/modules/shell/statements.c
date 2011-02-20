@@ -538,7 +538,7 @@ void ste_error_to_str(int error,char *descr, int size)
 // name    : return buffer
 // max_len : max size of text in return buffer
 
-int get_path(int no,char *name,int max_len)
+int get_path( int no, char *name, int max_len)
 {
     int cnt=no;
     int len_cnt = max_len;

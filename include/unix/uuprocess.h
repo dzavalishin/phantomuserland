@@ -1,6 +1,8 @@
 #ifndef UUPROCESS_H
 #define UUPROCESS_H
 
+#include <signal.h>
+
 
 #define MAX_UU_FD       256
 #define MAX_UU_TID      128
@@ -95,6 +97,8 @@ struct uuprocess
     void *				mem_end;		// first address above proc mem
 
 	struct exe_module * em;
+
+    signal_handling_t   signals;
 };
 
 typedef struct uuprocess uuprocess_t;

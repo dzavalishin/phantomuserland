@@ -10,6 +10,7 @@
 
 #include "device.h"
 #include <kernel/debug.h>
+#include <kernel/init.h>
 
 phantom_bus_t etc_bus =
 {
