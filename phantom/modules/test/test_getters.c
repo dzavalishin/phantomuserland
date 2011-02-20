@@ -31,7 +31,6 @@ int do_test_getters(const char *test_parm)
     TEST_GET(getpid);
     TEST_GET(getuid);
     TEST_GET(getuid32);
-    TEST_GET(getpgid);
     TEST_GET(getpgrp);
     TEST_GET(getppid);
     TEST_GET(getegid);
@@ -41,6 +40,7 @@ int do_test_getters(const char *test_parm)
     TEST_GET(getgid);
     TEST_GET(getgid32);
 
+	test_get( "getpgid", getpgid(getpid()) );
 
     // Secod val is to set to
     TEST_SET(setgid);
