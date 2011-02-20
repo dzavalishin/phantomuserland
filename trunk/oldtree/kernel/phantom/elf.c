@@ -135,7 +135,8 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
     int maxpage = ((maxaddr-1) / PAGE_SIZE) + 1;
 
     // TODO implement stack somehow better with SS growing down
-    int stack_pages = 64*1024/PAGE_SIZE;
+    int stack_size = 64*1024;
+    int stack_pages = stack_size/PAGE_SIZE;
 
     maxpage += stack_pages;
 
@@ -192,6 +193,7 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
     em->start = elf_header->e_entry;
     em->esp = memsize - sizeof(int); // Why -sizeof(int) ?
 
+    em->stack_bottom = memsize-stack_size;
     // TODO DS must not intersect with CS
     // TODO CS size is wrong (includes DS)
 
@@ -243,7 +245,59 @@ static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t star
                 );
 }
 
+// _esp - user esp value (in user addr space)
+// ouseraddr - resulting user address of pushed object
 
+static errno_t user_push( struct exe_module *em, int *ouseraddr, const void *data, int size )
+{
+    // TODO 64 bit err - int addr
+    int min_esp = em->stack_bottom+(32*1024); // Leave him at least 32K?
+
+    int esp = em->esp;
+
+    // todo align?
+    esp -= size;
+    if( esp < min_esp )
+        return ENOMEM;
+
+    void *dest = em->mem_start + esp;
+    memcpy( dest, data, size );
+
+    if(ouseraddr) *ouseraddr = esp;
+    em->esp = esp;
+    return 0;
+}
+
+static errno_t user_push_args( struct exe_module *em, const char **av, int *ouseraddr )
+{
+    const char **avp;
+    int ac = 0;
+
+    if( av != 0 )
+    {
+        for( avp = av; *avp; avp++ )
+            ac++;
+    }
+
+    const char *uav[ac+1];
+
+    int i;
+    for( i = 0; i < ac; i++ )
+    {
+        int oaddr;
+
+        if( user_push( em, &oaddr, av[i], strlen(av[i])+1 ) )
+            return ENOMEM;
+
+        uav[i] = (void *)oaddr;
+    }
+
+    uav[ac] = 0;
+
+    hexdump( uav, sizeof(const char *) * (ac+1), 0, 0 );
+
+    return user_push( em, ouseraddr, uav, sizeof(const char *) * (ac+1) );
+}
 
 static void kernel_protected_module_starter( void * _pid )
 {
@@ -260,6 +314,28 @@ static void kernel_protected_module_starter( void * _pid )
     hal_set_thread_name(name);
 
     uu_proc_add_thread( pid, GET_CURRENT_THREAD()->tid );
+
+    int prev_esp = em->esp;
+
+    int ava, enva, tmp;
+
+#if 1
+    // todo check success
+    user_push_args( em, u->envp, &enva );
+    user_push_args( em, u->argv, &ava );
+
+    tmp = 0; // put zero arg after usual ac/av/envp
+    user_push( em, 0, &tmp, sizeof(tmp) );
+
+    user_push( em, 0, &(enva), sizeof(enva) );
+    user_push( em, 0, &(ava), sizeof(ava) );
+    user_push( em, 0, &(u->argc), sizeof(u->argc) );
+#endif
+    tmp = ~0; // __start retaddr - make it invalid
+    user_push( em, 0, &tmp, sizeof(tmp) );
+
+    SHOW_FLOW( 4, "pushed %d bytes", prev_esp - em->esp );
+
 
     switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, em->start, em->esp );
 }

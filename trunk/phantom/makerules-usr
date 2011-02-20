@@ -13,14 +13,21 @@ LD_ADDR=-Wl,-Ttext,0
 
 LIBGCC := `gcc --print-libgcc-file-name`
 
-
 LIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
+#INSTALL_DIR=$(realpath $(PHANTOM_HOME))/oldtree/run/tftp/$(TARGET)
+INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/bin/$(TARGET)
+
+
+# install anyway
 $(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a
-	gcc -g -m32 -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
-	objcopy -O elf32-i386 $@.pe $@
-	objdump -x -d $@ >$@.dump
+	@echo --- Link $(TARGET)
+	@gcc -g -m32 -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+	@objcopy -O elf32-i386 $@.pe $@
+	cp $(TARGET) $(INSTALL_DIR)
+
+#	objdump -x -d $@ >$@.dump
 
 
 install:: $(TARGET)
-	cp $(TARGET) $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/$(TARGET)
+	cp $(TARGET) $(INSTALL_DIR)
