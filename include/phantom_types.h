@@ -91,6 +91,7 @@ typedef unsigned int _ino_t;
 typedef unsigned int ino_t;
 typedef int	_pid_t;
 typedef _pid_t	pid_t;
+typedef int	tid_t;
 typedef unsigned short _mode_t;
 typedef _mode_t	mode_t;
 typedef int	_sigset_t;

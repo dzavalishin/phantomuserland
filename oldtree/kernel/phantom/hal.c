@@ -261,8 +261,6 @@ hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapp
 static void
 kernel_thread_starter(void *func)
 {
-    //hal_printf("Starting thread at 0x%X", func );
-
     void (*thread)(void) = (void (*)(void))func;
     thread();
 
@@ -273,29 +271,20 @@ kernel_thread_starter(void *func)
 void*
 hal_start_kernel_thread(void (*thread)(void))
 {
-    //phantom_thread_t *t =
     return phantom_create_thread( kernel_thread_starter, thread, THREAD_FLAG_KERNEL );
 }
 
 
 
+
+
+
+
+
+
+
+
 /*
-void
-hal_exit_kernel_thread(void)
-{
-    //panic("can't kill some kernel thread");
-    t_kill_thread( GET_CURRENT_THREAD()->tid );
-}
-*/
-
-
-
-
-
-
-
-
-
 void
 hal_dump(char *data, int len)
 {
@@ -311,7 +300,7 @@ hal_dump(char *data, int len)
     }
 }
 
-
+*/
 
 
 

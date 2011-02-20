@@ -3430,9 +3430,9 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
     const char* av[] = { "pmod", 0 };
     uu_proc_setargs( pid, av, 0 );
 
-    if( uu_run_file( pid, "pregress" ) )
-        if( uu_run_file( pid, "/amnt0/pregress" ) )
-            uu_run_file( pid, "/amnt0/ptest" );
+    //if( uu_run_file( pid, "/amnt0/sh" ) )        uu_run_file( pid, "/amnt0/ptest" );
+
+    uu_run_file( pid, "/amnt0/sh" );
 
     }
 

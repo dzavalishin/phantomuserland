@@ -12,6 +12,10 @@
 #define EVENTS_ENABLED 1
 #define KEY_EVENTS 1
 
+// Debug only!
+#define DIRECT_DRIVE 1
+
+
 #define DEBUG_MSG_PREFIX "events"
 #include <debug_ext.h>
 #define debug_level_flow 0
@@ -113,6 +117,7 @@ void init_main_event_q()
 
 static int phantom_window_getc(void)
 {
+    //SHOW_FLOW0( 11, "window getc" );
     //wtty_t *tty = &(GET_CURRENT_THREAD()->ctty);
     wtty_t *tty = GET_CURRENT_THREAD()->ctty;
 
@@ -411,8 +416,6 @@ static void select_event_target(struct ui_event *e)
 
 }
 
-// Debug only!
-#define DIRECT_DRIVE 1
 
 //! Select target and put event to window queue.
 void drv_video_window_receive_event(struct ui_event *e)
@@ -729,7 +732,7 @@ static void send_event_to_q(_key_event *event)
 static void keyboard_read_thread(void)
 {
     hal_set_thread_name("KeyEvents");
-	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {
@@ -754,6 +757,8 @@ static void wtty_wrap(wtty_t *w)
 int wtty_getc(wtty_t *w)
 {
     int ret;
+
+    SHOW_FLOW( 11, "wtty getc %p", w );
 
     hal_mutex_lock(&w->mutex);
 
@@ -785,8 +790,11 @@ errno_t wtty_putc_nowait(wtty_t *w, int c)
     hal_mutex_lock(&w->mutex);
     wtty_wrap(w);
 
+    SHOW_FLOW( 11, "wtty putc %p", w );
+
     if( (w->putpos+1 == w->getpos) || ( w->putpos+1 >= WTTY_BUFSIZE && w->getpos == 0 ) )
     {
+        SHOW_ERROR0( 10, "wtty putc fail" );
         ret = ENOMEM;
     }
     else

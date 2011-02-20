@@ -178,8 +178,7 @@ phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *
 
 static void awake(int tid)
 {
-    phantom_thread_t *t = get_thread(tid);
-    thread_unblock( t, THREAD_SLEEP_IO );
+    thread_unblock_tid( tid, THREAD_SLEEP_IO );
 }
 
 

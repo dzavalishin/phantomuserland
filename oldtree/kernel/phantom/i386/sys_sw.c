@@ -53,6 +53,7 @@ extern struct utsname phantom_uname;
 
 //static void *adjustin( int uaddr, struct trap_state *st );
 errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int len );
+errno_t user_args_load( int mina, int maxa, char **oav, int omax,  char **iav );
 
 #define CHECKA(a,count) do { \
     unsigned int __addr = (int)(a); \
@@ -649,6 +650,27 @@ void syscall_sw(struct trap_state *st)
         goto unimpl;
 
     case SYS_phantom_run:
+        {
+            // extern int phantom_run(const char *fname, const char **argv, const char **envp, int flags);
+            AARG(void  *, msg_buffer, 0, 1);
+            AARG(char **, uav, 1, 1);
+            AARG(char **, uep, 2, 1);
+
+            char *a[1024];
+            char *e[1024];
+
+            if(
+               user_args_load( mina, maxa, a, 1024, uav ) ||
+               user_args_load( mina, maxa, e, 1024, uep )
+              )
+            {
+                ret = -1;
+                err = EFAULT;
+                goto err_ret;
+            }
+
+            ret = usys_run( &err, u,uarg[0], uav, uep, uarg[3] );
+        }
 
     case SYS_phantom_method:
     case SYS_phantom_toobject:
@@ -702,4 +724,30 @@ errno_t copyout( unsigned useraddr, unsigned mina, unsigned maxa, void *src, int
     return 0;
 }
 
+
+
+errno_t user_args_load( int mina, int maxa, char **oav, int omax,  char **iav )
+{
+    omax--; // leave one for zero ptr
+    while( omax-- )
+    {
+        if( 0 == *iav )
+            break;
+        // todo 64 bit bug mina/maxa must be 64 bits
+        // do (long for 64 bits) integer ops for else
+        // iav will be incremented by mina * sizeof(void*)
+        *oav = (void *) (((long int)(*iav)) + mina);
+        if( ((long int)*oav) > maxa )
+            return EFAULT;
+
+        SHOW_FLOW( 7, "argv %s", *oav );
+
+        oav++;
+        iav++;
+    }
+
+    *oav = 0;
+
+    return 0;
+}
 

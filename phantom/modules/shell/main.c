@@ -1,7 +1,7 @@
 /*
-** Copyright 2001, Travis Geiselbrecht. All rights reserved.
-** Distributed under the terms of the NewOS License.
-*/
+ ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
+ ** Distributed under the terms of the NewOS License.
+ */
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -35,18 +35,21 @@ int main(int argc,char *argv[])
         if(af_exit_after_script) exit(0);
     }
 
-     char buf[1024];
+    printf("Phantom Simple Unix Box Shell is running, pid %d\n", getpid());
 
-     for(;;) {
 
-         printf("> ");
+    char buf[1024];
 
-         getline(buf, sizeof(buf));
-         if(strlen(buf) > 0) {
-             parse_string(buf);
-         }
-         buf[0] = '\0';
-     }
+    for(;;) {
+
+        printf("> ");
+
+        getline(buf, sizeof(buf));
+        if(strlen(buf) > 0) {
+            parse_string(buf);
+        }
+        buf[0] = '\0';
+    }
 
     return 0;
 }
@@ -60,6 +63,11 @@ static void getline( char *buf, int size )
     while( nread < size-1 )
     {
         read( 0, bp, 1 );
+
+        //printf("!-%c", *bp);
+        //printf("%c", *bp);
+        write( 1, bp, 1 );
+
         if( *bp == '\n' )
             break;
         bp++;
