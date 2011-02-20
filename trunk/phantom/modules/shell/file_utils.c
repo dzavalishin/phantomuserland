@@ -41,7 +41,7 @@ int exists_file(const char *file_name)
 {
     int handle = open(file_name,0);
     int exists;
-    exists =( handle >= 0);
+    exists = (handle >= 0);
     if(exists) close(handle);
     return exists;
 }

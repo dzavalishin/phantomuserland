@@ -8,6 +8,8 @@
 
 uufile_t *copy_uufile( uufile_t *in )
 {
+    if( in == 0 ) return 0;
+
     uufile_t *out = calloc( 1, sizeof(uufile_t) );
     *out = *in;
     hal_mutex_init( &out->mutex, "uufile" );

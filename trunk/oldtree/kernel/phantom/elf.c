@@ -294,7 +294,7 @@ static errno_t user_push_args( struct exe_module *em, const char **av, int *ouse
 
     uav[ac] = 0;
 
-    hexdump( uav, sizeof(const char *) * (ac+1), 0, 0 );
+    //hexdump( uav, sizeof(const char *) * (ac+1), 0, 0 );
 
     return user_push( em, ouseraddr, uav, sizeof(const char *) * (ac+1) );
 }

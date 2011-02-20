@@ -166,6 +166,19 @@
 #define SYS_waitpid             266 // +-
 
 
+#define SYS_sigpending          267 // --
+#define SYS_sigprocmask         268 // --
+#define SYS_raise               269 // --
+#define SYS_sigaction           270 // --
+
+#define SYS_signal              271 // --
+
+#define SYS_siginterrupt        272 // --
+#define SYS_sigsuspend          273 // --
+
+
+
+
 // in mmap.S
 #define SYS_madvise             512	// +-
 #define SYS_mincore             513	// +-

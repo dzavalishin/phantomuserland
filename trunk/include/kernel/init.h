@@ -12,6 +12,8 @@ void run_test( const char *test_name, const char *test_parm );
 
 #include <sys/types.h>
 
+void __phantom_run_constructors(void);
+
 void hal_init_vm_map(void);
 void phantom_timed_call_init(void);
 void phantom_timed_call_init2(void);
@@ -66,6 +68,8 @@ void phantom_init_stat_counters2(void);
 
 
 void phantom_unix_proc_init(void);
+
+void init_buses(void);
 
 
 #endif // INIT_H
