@@ -33,8 +33,8 @@
 
 // Thread struct/array access lock - to prevent accessing killed thread
 // TODO - take in kill!
-#define TA_LOCK() hal_spin_lock( &schedlock )
-#define TA_UNLOCK() hal_spin_unlock( &schedlock )
+#define TA_LOCK() int ___sie = hal_save_cli(); hal_spin_lock( &schedlock )
+#define TA_UNLOCK() hal_spin_unlock( &schedlock ); if(___sie) hal_sti()
 
 
 

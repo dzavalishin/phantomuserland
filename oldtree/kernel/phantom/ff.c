@@ -3432,7 +3432,7 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
 
     //if( uu_run_file( pid, "/amnt0/sh" ) )        uu_run_file( pid, "/amnt0/ptest" );
 
-    uu_run_file( pid, "/amnt0/sh" );
+    uu_run_file( pid, "/amnt0/bin/sh" );
 
     }
 

@@ -1,6 +1,6 @@
 default:: all
 
-SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), offsets libc gl dev libphantom threads newos user vm modules/test modules/regress)
+SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), offsets libc gl dev libphantom threads newos user vm modules)
 
 
 %.MAKE:
@@ -11,6 +11,9 @@ SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), offsets libc gl dev libphantom threa
 %: %-subdirs ;
 
 all: all-subdirs
+
+install: install-subdirs
+
 
 clean: clean-subdirs
 	rm -f lib/*.a lib/crt0.o 

@@ -14,7 +14,7 @@ main(int ac, char **av, char **env)
 	int pid = getpid();
 	int tid = gettid();
 
-	printf("printf: test module runs with pid %d tid %d\n", pid, tid );
+	printf("printf: tcpdemo module runs with pid %d tid %d\n", pid, tid );
 
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "syslog: test module runs with pid %d tid %d", pid, tid );
@@ -34,7 +34,7 @@ main(int ac, char **av, char **env)
 
     while(1)
     {
-        ssyslog( 0, "module test is running" );
+        ssyslog( 0, "module tcpdemo is running" );
         sleepmsec(40000);
     }
 
