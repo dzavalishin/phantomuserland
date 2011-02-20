@@ -8,5 +8,7 @@ include $(BUILD_ROOT)/makerules-usr
 
 include $(BUILD_ROOT)/modules/test/makerules
 
+INSTALL_DIR=$(realpath $(PHANTOM_HOME))/oldtree/run/tftp/$(TARGET)
+
 analyse::
 	#

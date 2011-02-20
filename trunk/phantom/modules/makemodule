@@ -1,6 +1,6 @@
 BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
-TARGET	= pmod_$(SHORT_NAME)
+TARGET	= $(SHORT_NAME)
 
 SRCDIRS += $(BUILD_ROOT)/modules/$(SHORT_NAME)
 
