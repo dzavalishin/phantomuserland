@@ -24,6 +24,8 @@ int usys_close( int *err, uuprocess_t *u, int fd );
 int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence );
 int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data );
 
+int usys_pipe(int *err, uuprocess_t *u, int *fds );
+
 
 int usys_chdir( int *err, uuprocess_t *u, const char *path );
 int usys_fchdir(int *err, uuprocess_t *u, int fd );

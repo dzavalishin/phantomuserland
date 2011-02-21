@@ -17,7 +17,8 @@ struct uufs;
 struct uufileops
 {
     size_t      (*read)(    struct uufile *f, void *dest, size_t bytes);
-    size_t      (*write)(   struct uufile *f, const void *dest, size_t bytes);
+    size_t      (*write)(   struct uufile *f, const void *src, size_t bytes);
+
     errno_t     (*stat)(    struct uufile *f, struct stat *dest);
     int         (*ioctl)(   struct uufile *f, errno_t *err, int request, void *data );
 

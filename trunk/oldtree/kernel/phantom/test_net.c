@@ -22,6 +22,8 @@
 #include <sys/syslog.h>
 #include <errno.h>
 
+#include <netinet/resolv.h>
+
 #include "net.h"
 #include "udp.h"
 #include "tcp.h"
@@ -152,6 +154,24 @@ int do_test_udp_syslog(const char *test_parm)
 #endif
     return 0;
 }
+
+int do_test_resolver(const char *test_parm)
+{
+    (void) test_parm;
+#if HAVE_NET
+    in_addr_t out;
+
+    // Force resolver to do it from DNS, not from cache
+    test_check_eq( 0, name2ip( &out, "ya.ru", RESOLVER_FLAG_NORCACHE ) );
+
+    // Now do from cache
+    test_check_eq( 0, name2ip( &out, "ya.ru", RESOLVER_FLAG_NOWAIT ) );
+
+    // TODO compare results
+#endif
+    return 0;
+}
+
 
 
 int do_test_tcp_connect(const char *test_parm)

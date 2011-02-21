@@ -27,6 +27,8 @@
 #include <dirent.h>
 #include <phantom_types.h>
 
+#include "unix/fs_pipe.h"
+
 //int uu_find_fd( uuprocess_t *u, uufile_t * f );
 
 
@@ -382,6 +384,30 @@ int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp )
     return -1;
 }
 
+
+int usys_pipe(int *err, uuprocess_t *u, int *fds )
+{
+    uufile_t *f1;
+    uufile_t *f2;
+
+    pipefs_make_pipe( &f1, &f2 );
+
+    int fd1 = uu_find_fd( u, f1 );
+    int fd2 = uu_find_fd( u, f2 );
+
+    if( (fd1 < 0) || (fd2 < 0)  )
+    {
+        f1->fs->close( f1 );
+        f2->fs->close( f2 );
+        *err = EMFILE;
+        return -1;
+    }
+
+    fds[0] = fd1;
+    fds[1] = fd2;
+
+    return 0;
+}
 
 
 // -----------------------------------------------------------------------
