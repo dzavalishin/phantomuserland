@@ -14,6 +14,7 @@ uufile_t *copy_uufile( uufile_t *in )
     *out = *in;
     hal_mutex_init( &out->mutex, "uufile" );
     out->pos = 0;
+    out->refcount = 0;
 
     if( in->name )
         out->name = strdup( in->name );
