@@ -1,3 +1,5 @@
+rem SET SND=-soundhw sb16
+
 SET USB=-usb -usbdevice mouse
 SET USB=-usb 
 SET VIO=-drive file=vio.img,if=virtio,format=raw
@@ -29,6 +31,6 @@ rem mv serial0.log serial0.log.old
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-bin\qemu -smp 3 %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% -soundhw sb16
+bin\qemu -smp 3 %Q_VGA% -s %Q_KQ% -L lib %Q_MACHINE% %Q_PORTS%  %Q_DISKS%  %Q_NET% %VIO% %USB% %SND%
 
 exit

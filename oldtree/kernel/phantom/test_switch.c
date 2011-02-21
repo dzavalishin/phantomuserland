@@ -115,6 +115,7 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(cbuf);
     TEST(udp_send);
     TEST(udp_syslog);
+    TEST(resolver);
 
     TEST(tcp_connect);
 

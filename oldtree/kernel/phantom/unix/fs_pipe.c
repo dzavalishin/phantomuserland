@@ -13,7 +13,7 @@
 
 
 #define DEBUG_MSG_PREFIX "pipefs"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
@@ -23,6 +23,8 @@
 #include <malloc.h>
 #include <string.h>
 #include "device.h"
+
+#include "unix/fs_pipe.h"
 
 
 #define PIPE_BUFS       1024

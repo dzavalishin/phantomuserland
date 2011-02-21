@@ -60,7 +60,6 @@
 // phys addr
 #include <kernel/vm.h>
 
-#include <netinet/resolv.h>
 
 
 
@@ -336,17 +335,6 @@ int main(int argc, char **argv, char **envp)
     phantom_tcpip_active = 1; // Tell them we finished initing network
     net_test();
 #endif
-
-#if HAVE_NET
-    //ngethostbyname("ya.ru");
-
-    {
-        in_addr_t out;
-        name2ip( &out, "ya.ru", 0 );
-        name2ip( &out, "ya.ru", 0 );
-    }
-
-#endif // HAVE_NET
 
 
 connect_ide_io();

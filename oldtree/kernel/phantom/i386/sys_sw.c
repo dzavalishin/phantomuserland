@@ -266,6 +266,14 @@ static void do_syscall_sw(struct trap_state *st)
             ret = usys_chdir(&err, u, path );
             break;
         }
+
+    case SYS_pipe:
+        {
+            AARG(int *, fds, 0, sizeof(int) * 2);
+            ret = usys_pipe( &err, u, fds );
+            break;
+        }
+
     case SYS_link:
     case SYS_unlink:
     case SYS__llseek:
@@ -277,7 +285,6 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_getcwd:
     case SYS_lstat64:
     case SYS_mknod:
-    case SYS_pipe:
     case SYS_symlink:
         goto unimpl;
 
