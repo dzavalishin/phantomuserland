@@ -361,6 +361,29 @@ err:
 }
 
 
+int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize )
+{
+    if(bufsize < 2)
+    {
+        *err = EINVAL;
+        return -1;
+    }
+
+    *buf = 0;
+
+    if(!u->cwd)
+    {
+        strlcpy( buf, "/", bufsize );
+        return 0;
+    }
+
+    //size_t ret =
+    u->cwd->ops->getpath( u->cwd, buf, bufsize );
+    return 0;
+}
+
+
+
 int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp )
 {
     CHECK_FD(fd);
@@ -408,6 +431,94 @@ int usys_pipe(int *err, uuprocess_t *u, int *fds )
 
     return 0;
 }
+
+
+// -----------------------------------------------------------------------
+// others
+// -----------------------------------------------------------------------
+
+
+int usys_rm( int *err, uuprocess_t *u, const char *name )
+{
+    uufile_t * f = uu_namei( name );
+    if( f == 0 )
+    {
+        *err = ENOENT;
+        return -1;
+    }
+
+    if( 0 == f->ops->unlink)
+    {
+        *err = ENXIO;
+        return -1;
+    }
+
+    *err = f->ops->unlink( f );
+    f->fs->close( f );
+
+    if( *err )
+        return -1;
+
+    return 0;
+}
+
+int usys_dup2(int *err, uuprocess_t *u, int src_fd, int dst_fd )
+{
+    // TODO lock fd[] access
+
+    CHECK_FD_RANGE(dst_fd);
+    CHECK_FD(src_fd);
+
+    struct uufile *f = GETF(src_fd);
+
+    if( u->fd[dst_fd] != 0)
+        usys_close( err, u, dst_fd );
+
+    link_uufile( f );
+    u->fd[dst_fd] = f;
+
+    return 0;
+}
+
+int usys_dup(int *err, uuprocess_t *u, int src_fd )
+{
+    // TODO lock fd[] access
+    CHECK_FD(src_fd);
+
+    struct uufile *f = GETF(src_fd);
+
+    link_uufile( f );
+
+    int fd = uu_find_fd( u, f  );
+
+    if( fd < 0 )
+    {
+        unlink_uufile( f );
+        *err = EMFILE;
+        return -1;
+    }
+
+    return fd;
+}
+
+int usys_symlink(int *err, uuprocess_t *u, const char *src, const char *dst )
+{
+    // find fs by path
+
+    /*
+    *err = f->fs->symlink( f, src, dst );
+
+    return *err ? -1 : 0;
+    */
+
+
+    *err = ENXIO;
+    return -1;
+}
+
+
+
+
 
 
 // -----------------------------------------------------------------------

@@ -34,7 +34,7 @@
 
 
 static size_t      tcpfs_read(    struct uufile *f, void *dest, size_t bytes);
-static size_t      tcpfs_write(   struct uufile *f, void *dest, size_t bytes);
+static size_t      tcpfs_write(   struct uufile *f, const void *src, size_t bytes);
 static errno_t     tcpfs_stat(    struct uufile *f, struct stat *data);
 static int     	   tcpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data);
 
@@ -214,7 +214,7 @@ static size_t      tcpfs_read(    struct uufile *f, void *buf, size_t len)
     return tcp_recvfrom( s->prot_data, buf, len, &s->addr, 0, 0 );
 }
 
-static size_t      tcpfs_write(   struct uufile *f, void *buf, size_t len)
+static size_t      tcpfs_write(   struct uufile *f, const void *buf, size_t len)
 {
     struct uusocket *s = f->impl;
 

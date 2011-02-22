@@ -41,6 +41,7 @@
 
 #include <dirent.h>
 #include <signal.h>
+#include <time.h>
 
 #include <unix/uuprocess.h>
 #include <unix/uusignal.h>
@@ -192,18 +193,31 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_getpid:            ret = u->pid; break;
     case SYS_getpgrp:           ret = u->pgrp_pid; break;
     case SYS_getppid:           ret = u->ppid; break;
-    case SYS_getpgid:
 
+    case SYS_getpgid:
+        goto unimpl;
+
+    case SYS_time:
+        {
+            time_t t = time(0);
+
+            AARG(time_t *, tp, 0, sizeof(time_t));
+
+            *tp = t;
+            ret = t;
+            break;
+        }
 
     case SYS_sync:
     case SYS_sysinfo:
     case SYS_sysfs:
     case SYS_klogctl:
+
     case SYS_shutdown:
     case SYS_reboot:
 
+
     case SYS_nanosleep:
-    case SYS_time:
     case SYS_getitimer:
     case SYS_setitimer:
     case SYS_gettimeofday:
@@ -274,18 +288,45 @@ static void do_syscall_sw(struct trap_state *st)
             break;
         }
 
-    case SYS_link:
+    case SYS_rmdir:
     case SYS_unlink:
+        {
+            AARG(const char *, name, 0, 1);
+            ret = usys_rm( &err, u, name );
+            break;
+        }
+
+
+    case SYS_dup:
+        ret = usys_dup( &err, u, uarg[0] );
+        break;
+
+    case SYS_dup2:
+        ret = usys_dup2( &err, u, uarg[0], uarg[1] );
+        break;
+
+    case SYS_symlink:
+        {
+            AARG(const char *, n1, 0, 1);
+            AARG(const char *, n2, 1, 1);
+            ret = usys_symlink( &err, u, n1, n2 );
+            break;
+        }
+
+    case SYS_getcwd:
+        {
+            goto unimpl;
+            //AARG(const char *, buf, 0, uarg[1]);
+            //ret = usys_getcwd( &err, u, buf, uarg[1] );
+            //break;
+        }
+
+    case SYS_link:
     case SYS__llseek:
     case SYS_chroot:
     case SYS_mkdir:
-    case SYS_rmdir:
-    case SYS_dup:
-    case SYS_dup2:
-    case SYS_getcwd:
     case SYS_lstat64:
     case SYS_mknod:
-    case SYS_symlink:
         goto unimpl;
 
     case SYS_mount:
@@ -515,11 +556,17 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_socketcall:
     case SYS_socketpair:
 
+    case SYS_nice:
+        {
+            // int nice = uarg[0];
+            // set thr prio
+            // break;
+            goto unimpl;
+        }
 
     case SYS_brk:
     case SYS_fork:
     case SYS_vfork:
-    case SYS_nice:
         goto unimpl;
 
     case SYS_ioctl:
@@ -694,6 +741,12 @@ static void do_syscall_sw(struct trap_state *st)
         }
 
     case SYS_phantom_method:
+        // AARG(const char *, m_name, 0, 1);
+        // int nfd = aarg[1];
+        // AARG(int *, fds, 0, sizeof(int)*nfd);
+
+        // ret = usys_pmethod( &err, u, m_name, int nfd, int fds[] );
+
     case SYS_phantom_toobject:
     case SYS_phantom_fromobject:
     case SYS_phantom_intmethod:
@@ -754,12 +807,26 @@ err_ret:
 }
 
 
+#define SIG_PUSH(__v_) *((u_int32_t *)(mina+(--(st->esp)))) = (__v_)
 
 
-errno_t sig_deliver( struct trap_state *st, int nsig, void *handler )
+errno_t sig_deliver( uuprocess_t *u, struct trap_state *st, int nsig, void *handler )
 {
     u_int32_t   old_eip = st->eip;
-    u_int32_t   old_esp = st->esp;
+    //u_int32_t   old_esp = st->esp;
+#if 1
+
+    addr_t mina = (addr_t)u->mem_start;
+
+    // Push args backwards
+    SIG_PUSH(0); // one more zero arg for any case :)
+    SIG_PUSH(nsig);
+
+    // Push cur IP
+    SIG_PUSH(old_eip);
+    // Change IP to handler address
+    st->eip = (addr_t)handler;
+#endif
 
 #warning unimpl
 
@@ -782,7 +849,7 @@ void sig_init(signal_handling_t *sh)
 }
 
 // Translate signals to user
-void sig_exec(signal_handling_t *sh, struct trap_state *st)
+void sig_exec(uuprocess_t *u, signal_handling_t *sh, struct trap_state *st)
 {
 
     // Mask off ignored ones
@@ -838,7 +905,7 @@ void sig_exec(signal_handling_t *sh, struct trap_state *st)
         else
         {
             // TODO mask here?
-            sig_deliver( st, i, uhandler );
+            sig_deliver( u, st, i, uhandler );
         }
 
     }
@@ -858,13 +925,15 @@ void sig_send(signal_handling_t *sh, int signal )
 void execute_signals(uuprocess_t *u, struct trap_state *st)
 {
     signal_handling_t *sh = &u->signals;
-    sig_exec(sh, st);
+    sig_exec(u, sh, st);
 }
 
 
 
 int usys_sigpending( int *err, uuprocess_t *u, sigset_t * set)
 {
+    (void) err;
+
     signal_handling_t *sh = &u->signals;
     *set = sh->signal_pending;
     return 0;
@@ -899,8 +968,8 @@ sighandler_t usys_signal( int *err, uuprocess_t *u, int signum, sighandler_t han
 
 void syscall_sw(struct trap_state *st)
 {
-    phantom_thread_t *t = GET_CURRENT_THREAD();
-    uuprocess_t *u = t->u;
+    //phantom_thread_t *t = GET_CURRENT_THREAD();
+    //uuprocess_t *u = t->u;
 /*
     int ret;
     if( (ret = setjmp(u->signal_jmpbuf)) )

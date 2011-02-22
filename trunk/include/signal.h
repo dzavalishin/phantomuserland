@@ -223,14 +223,7 @@ typedef struct signal_handling
 
 } signal_handling_t;
 
-
-void sig_init(signal_handling_t *sh);
-
-// Translate signals to user
-void sig_exec(signal_handling_t *sh, struct trap_state *st);
-
-// Send a signal (turn bit on)
-void sig_send(signal_handling_t *sh, int signal );
+#include <unix/uusignal.h>
 
 
 #endif // KERNEL
