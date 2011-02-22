@@ -720,8 +720,8 @@ static void do_syscall_sw(struct trap_state *st)
 
             SHOW_FLOW( 2, "run %s flags 0x%b", fname, uarg[3], "\020\1<WAIT>\2<NEWWIN>\3<NEWPGRP>" );
 
-            char *a[1024];
-            char *e[1024];
+            const char *a[1024];
+            const char *e[1024];
 
             SHOW_FLOW( 2, "run %s load args", fname );
 
@@ -736,7 +736,7 @@ static void do_syscall_sw(struct trap_state *st)
                 goto err_ret;
             }
 
-            ret = usys_run( &err, u, fname, uav, uep, uarg[3] );
+            ret = usys_run( &err, u, fname, a, e, uarg[3] );
             break;
         }
 
