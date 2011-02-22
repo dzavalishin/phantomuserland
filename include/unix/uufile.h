@@ -31,6 +31,9 @@ struct uufileops
     errno_t     (*chmod)( struct uufile *f, int mode);
     errno_t     (*chown)( struct uufile *f, int user, int grp);
 
+    errno_t     (*unlink)( struct uufile *f );
+
+
 	// used when clone file
     void *      (*copyimpl)( void *impl);
 };
@@ -112,6 +115,9 @@ struct uufs
 
     // Create a file struct for given path
     uufile_t *          (*namei)(struct uufs *fs, const char *filename);
+
+    errno_t             (*symlink)(struct uufs *fs, const char *src, const char *dst);
+
 
     // Return a file struct for fs root
     uufile_t *          (*root)(struct uufs *fs);

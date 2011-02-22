@@ -83,7 +83,7 @@ static bool		init_ext2(e2impl_t *impl);
 
 
 static size_t      ext2_read(    struct uufile *f, void *dest, size_t bytes);
-static size_t      ext2_write(   struct uufile *f, void *dest, size_t bytes);
+static size_t      ext2_write(   struct uufile *f, const void *src, size_t bytes);
 //static errno_t     ext2_stat(    struct uufile *f, struct ??);
 //static errno_t     ext2_ioctl(   struct uufile *f, struct ??);
 
@@ -219,7 +219,7 @@ static size_t      ext2_read(    struct uufile *f, void *dest, size_t bytes)
     return -1;
 }
 
-static size_t      ext2_write(   struct uufile *f, void *dest, size_t bytes)
+static size_t      ext2_write(   struct uufile *f, const void *dest, size_t bytes)
 {
     (void) f;
     (void) dest;

@@ -38,7 +38,7 @@ static errno_t fresult2errno(FRESULT fr);
 
 
 static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes);
-static size_t      fatff_write(   struct uufile *f, void *dest, size_t bytes);
+static size_t      fatff_write(   struct uufile *f, const void *src, size_t bytes);
 //static errno_t     fatff_stat(    struct uufile *f, struct ??);
 //static errno_t     fatff_ioctl(   struct uufile *f, struct ??);
 
@@ -222,7 +222,7 @@ static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes)
     return res;
 }
 
-static size_t      fatff_write(   struct uufile *f, void *dest, size_t bytes)
+static size_t      fatff_write(   struct uufile *f, const void *dest, size_t bytes)
 {
     (void) f;
     (void) dest;

@@ -26,9 +26,21 @@ int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data );
 
 int usys_pipe(int *err, uuprocess_t *u, int *fds );
 
+int usys_dup2(int *err, uuprocess_t *u, int src_fd, int dst_fd );
+int usys_dup(int *err, uuprocess_t *u, int src_fd );
+
+int usys_symlink(int *err, uuprocess_t *u, const char *src, const char *dst );
+
+
+
+int usys_rm( int *err, uuprocess_t *u, const char *name );
+
 
 int usys_chdir( int *err, uuprocess_t *u, const char *path );
 int usys_fchdir(int *err, uuprocess_t *u, int fd );
+
+int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize );
+
 
 int usys_mount( int *err, uuprocess_t *u, const char *source, const char *target, const char *fstype, int flags, const void *data );
 int usys_umount(int *err, uuprocess_t *u, const char *target, int flags );
