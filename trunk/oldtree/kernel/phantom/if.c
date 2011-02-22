@@ -232,6 +232,13 @@ void if_bind_link_address(ifnet *i, ifaddr *addr)
 
 
 
+
+static void bootp_thread(void *args)
+{
+    bootp(args);
+}
+
+
 /*
  TODO simplify
 
@@ -283,8 +290,12 @@ void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net
         SHOW_INFO0( 1, "Adding route - ok");
     }
 
+#if 0
+    hal_start_kernel_thread_arg( bootp_thread, interface );
+#else
     // Now try to get something real :)
     bootp(interface);
+#endif
 }
 
 
