@@ -4,6 +4,8 @@
 #include <signal.h>
 //#include <unix/uuprocess.h>
 
+struct uuprocess;
+
 errno_t sig_deliver( struct uuprocess *u, struct trap_state *st, int nsig, void *handler );
 
 void sig_init( signal_handling_t *sh );

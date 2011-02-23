@@ -34,8 +34,8 @@ static uufs_t *    find_mount( const char* name, char *namerest );
 
 
 static size_t      root_read(    struct uufile *f, void *dest, size_t bytes);
-static size_t      root_write(   struct uufile *f, void *dest, size_t bytes);
-//static errno_t     root_stat(    struct uufile *f, struct ??);
+static size_t      root_write(   struct uufile *f, const void *src, size_t bytes);
+static errno_t     root_stat( struct uufile *f, struct stat *dest );
 //static errno_t     root_ioctl(   struct uufile *f, struct ??);
 
 static size_t      root_getpath( struct uufile *f, void *dest, size_t bytes);
@@ -56,7 +56,7 @@ static struct uufileops root_fops =
 
     .copyimpl   = root_copyimpl,
 
-    //.stat       = root_stat,
+    .stat       = root_stat,
     //.ioctl      = root_ioctl,
 };
 
@@ -98,6 +98,7 @@ static struct uufile root_root =
     .pos        = 0,
     .fs         = &root_fs,
     .name       = "/",
+    .flags      = UU_FILE_FLAG_DIR
 };
 
 
@@ -118,6 +119,9 @@ static errno_t     root_open(struct uufile *f, int create, int write)
 
 static errno_t     root_close(struct uufile *f)
 {
+    if( f == &root_root )
+        return 0;
+
     unlink_uufile( f );
     return 0;
 }
@@ -133,7 +137,16 @@ static uufile_t *  root_namei(uufs_t *_fs, const char *filename)
     uufs_t * fs = find_mount( filename, namerest );
 
     if( fs == 0 )
+    {
+        if( 0 == strcmp(filename, "/") )
+        {
+            //uufile_t *ret = create_uufile();
+            //set_uufile_name( ret, filename );
+            return &root_root;
+        }
+
         return 0;
+    }
 
     return fs->namei( fs, namerest );
 }
@@ -160,18 +173,18 @@ static errno_t     root_dismiss(uufs_t *fs)
 
 static size_t      root_read(    struct uufile *f, void *dest, size_t bytes)
 {
-	(void) f;
-	(void) dest;
-	(void) bytes;
+    (void) f;
+    (void) dest;
+    (void) bytes;
 
     return -1;
 }
 
-static size_t      root_write(   struct uufile *f, void *dest, size_t bytes)
+static size_t      root_write(   struct uufile *f, const void *src, size_t bytes)
 {
-	(void) f;
-	(void) dest;
-	(void) bytes;
+    (void) f;
+    (void) src;
+    (void) bytes;
 
     return -1;
 }
@@ -190,10 +203,33 @@ static size_t      root_getpath( struct uufile *f, void *dest, size_t bytes)
 // returns -1 for non-files
 static ssize_t      root_getsize( struct uufile *f)
 {
-	(void) f;
+    (void) f;
 
     return -1;
 }
+
+
+static errno_t     root_stat( struct uufile *f, struct stat *dest )
+{
+    const char *name = f->name;
+
+    SHOW_FLOW( 1, "stat %s", name );
+
+    memset( dest, 0, sizeof(struct stat) );
+
+    dest->st_nlink = 1;
+    dest->st_uid = -1;
+    dest->st_gid = -1;
+
+    dest->st_size = 0;
+    dest->st_mode = 0777; // rwxrwxrwx
+
+    // I have dirs only
+    dest->st_mode |= S_IFDIR;
+
+    return 0;
+}
+
 
 static void *      root_copyimpl( void *impl )
 {
