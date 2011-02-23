@@ -4,6 +4,13 @@
 #include <phantom_types.h>
 #include <phantom_time.h>
 
+// TODO check against POSIX
+struct timespec
+{
+	long		seconds;
+	long		nanoseconds;
+};
+
 // microseconds!
 bigtime_t 		hal_system_time(void); // uptime
 bigtime_t 		hal_local_time(void);  // real time/date

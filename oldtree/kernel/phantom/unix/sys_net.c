@@ -29,6 +29,7 @@
 #include <sys/unistd.h>
 //#include <sys/fcntl.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <phantom_types.h>
 
 #include <string.h>
@@ -141,11 +142,11 @@ int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol)
     return fd;
 }
 
-
+#warning impl?
 int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, socklen_t addrlen)
 {
-	(void)addrlen;
-	(void)my_addr;
+    (void)addrlen;
+    (void)my_addr;
 
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
@@ -186,9 +187,14 @@ int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, 
 
 
 
-#if 0
-int usys_accept(int *err, uuprocess_t *u, int fd, const struct sockaddr *acc_addr, socklen_t *addrlen)
+int usys_connect(int *err, uuprocess_t *u, int fd, const struct sockaddr *_ia, socklen_t addrlen)
 {
+    if( addrlen < (int)sizeof(struct sockaddr_in) )
+    {
+        *err = EINVAL;
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
@@ -200,12 +206,62 @@ int usys_accept(int *err, uuprocess_t *u, int fd, const struct sockaddr *acc_add
         return -1;
     }
 
+    struct sockaddr_in *ia = (void *)_ia;
+
+    sockaddr tmp_addr;
+
+    tmp_addr.port = ia->sin_port;
+    NETADDR_TO_IPV4(tmp_addr.addr) = ia->sin_addr.s_addr;
+
+    if( ia->sin_family != PF_INET )
+        SHOW_ERROR0( 0, "not inet addr?");
+
+    int tret = tcp_connect( us->prot_data, &tmp_addr );
+
+    // TODO ret code!
+    if( tret )
+        *err = ECONNREFUSED;
+    return tret ? -1 : 0;
+}
+
+
+
+#if 1
+int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, socklen_t *addrlen)
+{
+    CHECK_FD(fd);
+    struct uufile *f = GETF(fd);
+
+    struct uusocket *us = f->impl;
+
+    // todo require UU_FILE_FLAG_ACCEPTABLE
+    if( (u == 0) || ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)))
+    {
+        *err = ENOTSOCK;
+        return -1;
+    }
+
     //us->addr = my_addr;
 
-    int pe = tcp_accept(us->prot_data, tmp_addr);
+    void *new_socket;
+    sockaddr tmp_addr;
 
-    // TODO check len
-    acc_addr = tmp_addr;
+    int pe = tcp_accept(us->prot_data, &tmp_addr, new_socket);
+
+    if( *addrlen >= (int)sizeof(struct sockaddr_in) )
+    {
+        struct sockaddr_in ia;
+
+        ia.sin_len = sizeof(struct sockaddr_in);
+        ia.sin_port = tmp_addr.port;
+        ia.sin_addr.s_addr = NETADDR_TO_IPV4(tmp_addr.addr);
+        ia.sin_family = PF_INET;
+
+        *((struct sockaddr_in *)acc_addr) = ia;
+        *addrlen = sizeof(struct sockaddr_in);
+    }
+    else
+        *addrlen = 0;
 
     // TODO translate!
     if( pe )
@@ -214,9 +270,38 @@ int usys_accept(int *err, uuprocess_t *u, int fd, const struct sockaddr *acc_add
         return -1;
     }
 
-#error TODO impl
+    struct uusocket *rus = calloc(1, sizeof(struct uusocket));
+    if(rus == 0)
+    {
+        tcp_close( new_socket );
+        *err = ENOMEM;
+        return -1;
+    }
 
-    return *err ? -1 : 0;
+
+
+    uufile_t *rf = create_uufile();
+    assert(f);
+
+    rf->ops = &tcpfs_fops;
+
+    rf->pos = 0;
+    rf->fs = &tcp_fs;
+    rf->impl = rus;
+    rf->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP;
+
+    int rfd = uu_find_fd( u, rf );
+
+    if( rfd < 0 )
+    {
+        tcp_close( new_socket );
+        unlink_uufile( f );
+        free( us );
+        *err = EMFILE;
+        return -1;
+    }
+
+    return *err ? -1 : rfd;
 }
 #endif
 
@@ -534,6 +619,29 @@ ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg,
 
     *err = ENOSYS;
     return *err ? -1 : len;
+}
+
+
+// pipe's not good, need real tcp/ip machinery to be used
+
+int usys_socketpair( int *err, uuprocess_t *u, int domain, int type, int protocol, int socket_vector[2])
+{
+    /*
+    (void) type;
+    (void) protocol;
+
+    if( AF_UNIX != domain )
+    {
+        *err = EOPNOTSUPP;
+        return -1;
+    }
+
+    return usys_pipe( err, u, socket_vector );
+    */
+
+    *err = EOPNOTSUPP;
+    return -1;
+
 }
 
 

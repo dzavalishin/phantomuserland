@@ -83,7 +83,15 @@ errno_t user_args_load( int mina, int maxa, char **oav, int omax,  const char **
     } while(0)
 
 
-#define CHECK_CAP(CAP)
+#define CHECK_CAP(CAP) \
+    do { \
+    if( (u->uid != 0) && (u->euid != 0) ) \
+    { \
+        ret = -1; \
+    	err = EPERM; \
+        goto err_ret; \
+    } \
+    } while(0)
 /*
 #define CHECK_CAP(CAP) \
     do { \
@@ -207,6 +215,16 @@ static void do_syscall_sw(struct trap_state *st)
             ret = t;
             break;
         }
+    case SYS_nanosleep:
+        //int nanosleep(const struct timespec *, struct timespec *);
+        {
+            goto unimpl;
+            //AARG(struct timespec *,  req_time, 0, sizeof(struct timespec));
+            //AARG(struct timespec *, rest_time, 1, sizeof(struct timespec));
+            //ret = usys_nanosleep( &err, u, req_time, rest_time );
+            //break;
+        }
+
 
     case SYS_sync:
     case SYS_sysinfo:
@@ -217,17 +235,17 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_reboot:
 
 
-    case SYS_nanosleep:
+
     case SYS_getitimer:
     case SYS_setitimer:
     case SYS_gettimeofday:
 
 
     case SYS_setuid:
-    case SYS_setuid32:          //CHECK_CAP(CAP_SETGID); u->egid = uarg[0]; break;
+    case SYS_setuid32:          CHECK_CAP(CAP_SETUID); u->euid = uarg[0]; break;
 
     case SYS_setgid:            
-    case SYS_setgid32:          //CHECK_CAP(CAP_SETGID); u->egid = uarg[0]; break;
+    case SYS_setgid32:          CHECK_CAP(CAP_SETGID); u->egid = uarg[0]; break;
 
     case SYS_setgroups:
     case SYS_setgroups32:
@@ -251,11 +269,6 @@ static void do_syscall_sw(struct trap_state *st)
             int count = uarg[2];
             void *addr = adjustin( uarg[1], st );
             CHECKA(addr,count);
-            /*if( (int)addr < mina || (int)(addr+count) > maxa )
-            {
-                ret = -1;
-                err = EFAULT;
-            }*/
             ret = usys_read(&err, u, uarg[0], addr, count );
             break;
         }
@@ -264,11 +277,6 @@ static void do_syscall_sw(struct trap_state *st)
             int count = uarg[2];
             void *addr = adjustin( uarg[1], st );
             CHECKA(addr,count);
-            /*if( (int)addr < mina || (int)(addr+count) > maxa )
-            {
-                ret = -1;
-                err = EFAULT;
-            }*/
             ret = usys_write(&err, u, uarg[0], addr, count );
             break;
         }
@@ -321,10 +329,16 @@ static void do_syscall_sw(struct trap_state *st)
             //break;
         }
 
+    case SYS_mkdir:
+        {
+            AARG(const char *, path, 0, 2);
+            ret = usys_mkdir( &err, u, path );
+            break;
+        }
+
     case SYS_link:
     case SYS__llseek:
     case SYS_chroot:
-    case SYS_mkdir:
     case SYS_lstat64:
     case SYS_mknod:
         goto unimpl;
@@ -543,18 +557,87 @@ static void do_syscall_sw(struct trap_state *st)
         break;
 
     case SYS_accept:
-    case SYS_connect:
+        {
+            AARG( socklen_t *, len, 2, sizeof(socklen_t));
+            AARG( struct sockaddr *, acc_addr, 1, *len );
+            ret = usys_accept( &err, u, uarg[0], acc_addr, len );
+            break;
+        }
 
     case SYS_recv:
-    case SYS_recvfrom:
-    case SYS_recvmsg:
-    case SYS_send:
-    case SYS_sendto:
-    case SYS_sendmsg:
-    case SYS_sendfile:
+        {
+            int len = uarg[2];
+            AARG( void *, buf, 0, len );
+            ret =  usys_recv( &err, u, uarg[0], buf, len, uarg[3] );
+            break;
+        }
 
-    case SYS_socketcall:
+    case SYS_recvmsg:
+        {
+            AARG( struct msghdr *, msg, 0, sizeof(struct msghdr) );
+            ret = usys_recvmsg( &err, u, uarg[0], msg, uarg[2] );
+            break;
+        }
+
+    case SYS_send:
+        {
+            int len = uarg[2];
+            AARG( const void *, buf, 0, len );
+            ret =  usys_send( &err, u, uarg[0], buf, len, uarg[3] );
+            break;
+        }
+
+    case SYS_sendmsg:
+        {
+            AARG( const struct msghdr *, msg, 0, sizeof(struct msghdr) );
+            ret = usys_sendmsg( &err, u, uarg[0], msg, uarg[2] );
+            break;
+        }
+
+    case SYS_sendto:
+        {
+            socklen_t tolen = uarg[5];
+            AARG( const struct sockaddr *, to, 0, tolen );
+            int len = uarg[2];
+            AARG( const void *, buf, 0, len );
+            ret =  usys_sendto( &err, u, uarg[0], buf, len, uarg[3], to, tolen );
+            break;
+        }
+
+    case SYS_recvfrom:
+        {
+            AARG( socklen_t *, fromlen, 5, sizeof(socklen_t) );
+            AARG( struct sockaddr *, from, 0, *fromlen );
+            int len = uarg[2];
+            AARG( void *, buf, 0, len );
+            ret =  usys_recvfrom( &err, u, uarg[0], buf, len, uarg[3], from, fromlen );
+            break;
+        }
+
+
+
+    case SYS_connect:
+        // int connect(int socket, const struct sockaddr *address, socklen_t address_len);
+        {
+            int len = uarg[2];
+            AARG( struct sockaddr *, acc_addr, 1, len );
+            ret = usys_connect( &err, u, uarg[0], acc_addr, len );
+            break;
+        }
+
     case SYS_socketpair:
+        {
+            AARG( int *, sv, 3, sizeof(int) * 2 );
+            ret = usys_socketpair( &err, u, uarg[0], uarg[1], uarg[2], sv );
+            break;
+        }
+
+
+
+
+    case SYS_sendfile:
+    case SYS_socketcall:
+        goto unimpl;
 
     case SYS_nice:
         {
@@ -565,6 +648,12 @@ static void do_syscall_sw(struct trap_state *st)
         }
 
     case SYS_brk:
+        goto unimpl;
+        /*{
+            ret = usys_sbrk( &err, u, uarg[0] );
+            break;
+        }*/
+
     case SYS_fork:
     case SYS_vfork:
         goto unimpl;
