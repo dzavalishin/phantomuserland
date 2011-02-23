@@ -39,7 +39,7 @@ static errno_t fresult2errno(FRESULT fr);
 
 static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      fatff_write(   struct uufile *f, const void *src, size_t bytes);
-//static errno_t     fatff_stat(    struct uufile *f, struct ??);
+static errno_t     fatff_stat( struct uufile *f, struct stat *dest );
 //static errno_t     fatff_ioctl(   struct uufile *f, struct ??);
 
 static size_t      fatff_getpath( struct uufile *f, void *dest, size_t bytes);
@@ -49,7 +49,6 @@ static ssize_t     fatff_getsize( struct uufile *f);
 
 //static void *      fatff_copyimpl( void *impl );
 
-static errno_t     fatff_stat( struct uufile *f, struct stat *dest );
 
 
 static struct uufileops fatff_fops =

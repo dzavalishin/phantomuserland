@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "PCNET32"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -101,7 +101,7 @@ phantom_device_t * driver_pcnet_pchome_probe( pci_cfg_t *pci, int stage )
 
     pcnet32 *nic = NULL;
 
-    SHOW_FLOW0( 0, "probe");
+    SHOW_INFO0( 0, "probe");
 WW();
     nic = pcnet32_new( PCNET_INIT_MODE0 | PCNET_INIT_RXLEN_128 | PCNET_INIT_TXLEN_32,
                       2048, 2048);
@@ -519,7 +519,7 @@ static void pcnet32_softint(void* data)
 {
     pcnet32 *nic = (pcnet32 *)data;
     hal_sem_release(&(nic->rxring_sem));
-    SHOW_FLOW0( 0, "softirq");
+    SHOW_FLOW0( 7, "softirq");
 }
 
 static void pcnet32_int(void* data)

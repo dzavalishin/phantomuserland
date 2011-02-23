@@ -409,7 +409,7 @@ static const char**dup_argv( int *oac, const char**av, const char *replace_exe)
     while( ac-- )
     {
         avr[ac] = strdup( ac ? avc[ac] : replace_exe );
-        SHOW_FLOW( 1, "argv[%d] added '%s'", ac, avr[ac] );
+        SHOW_FLOW( 7, "argv[%d] added '%s'", ac, avr[ac] );
     }
 
     return avr;
@@ -440,12 +440,12 @@ static void flatten_argv( char* out, int len, const char** av )
 
     while(*av)
     {
-        SHOW_FLOW( 1, "argv add '%s'", *av );
+        SHOW_FLOW( 8, "argv add '%s'", *av );
         strlcat( out, *av++, len );
         if(*av) strlcat( out, " ", len );
     }
 
-    SHOW_FLOW( 1, "argv flattenned to '%s'", out );
+    SHOW_FLOW( 7, "argv flattenned to '%s'", out );
 
 }
 
@@ -553,7 +553,7 @@ int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, co
         return -1;
     }
 
-    SHOW_FLOW( 6, "run '%s' setargs", fname );
+    SHOW_FLOW( 7, "run '%s' setargs", fname );
     uu_proc_setargs( pid, uav, uep );
     *err= uu_run_file( pid, fname );
 

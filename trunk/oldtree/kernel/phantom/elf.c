@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "elf"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -75,7 +75,7 @@ errno_t uu_run_file( int pid, const char *fname )
 {
     void *odata;
     int osize;
-    SHOW_FLOW( 2, "loading %s", fname );
+    SHOW_FLOW( 3, "loading %s", fname );
 
     errno_t ke = k_load_file( &odata, &osize, fname );
 
@@ -210,7 +210,7 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
         return ENOMEM;
     }
 
-    SHOW_FLOW( 1, "cs 0x%X, ds 0x%X, entry 0x%x", em->cs_seg, em->ds_seg, em->start );
+    SHOW_FLOW( 7, "cs 0x%X, ds 0x%X, entry 0x%x", em->cs_seg, em->ds_seg, em->start );
 
     *emo = em;
 
