@@ -440,6 +440,7 @@ int usys_pipe(int *err, uuprocess_t *u, int *fds )
 
 int usys_rm( int *err, uuprocess_t *u, const char *name )
 {
+    (void) u;
     uufile_t * f = uu_namei( name );
     if( f == 0 )
     {
@@ -503,20 +504,42 @@ int usys_dup(int *err, uuprocess_t *u, int src_fd )
 
 int usys_symlink(int *err, uuprocess_t *u, const char *src, const char *dst )
 {
-    // find fs by path
+    (void) u;
+    char rest[FS_MAX_PATH_LEN];
 
-    /*
-    *err = f->fs->symlink( f, src, dst );
+    uufs_t * fs = uu_findfs( src, rest );
+    if( fs == 0 )
+    {
+        *err = ENOENT;
+        return -1;
+    }
 
+    if(fs->symlink == 0)
+        *err = ENXIO;
+    else
+        *err = fs->symlink( fs, rest, dst );
     return *err ? -1 : 0;
-    */
-
-
-    *err = ENXIO;
-    return -1;
 }
 
 
+int usys_mkdir( int *err, uuprocess_t *u, const char *path )
+{
+    (void) u;
+    char rest[FS_MAX_PATH_LEN];
+
+    uufs_t * fs = uu_findfs( path, rest );
+    if( fs == 0 )
+    {
+        *err = ENOENT;
+        return -1;
+    }
+
+    if(fs->mkdir == 0)
+        *err = ENXIO;
+    else
+        *err = fs->mkdir( fs, rest );
+    return *err ? -1 : 0;
+}
 
 
 

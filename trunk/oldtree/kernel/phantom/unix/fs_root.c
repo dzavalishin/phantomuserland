@@ -430,5 +430,25 @@ errno_t auto_mount( const char *name, uufs_t *fs )
 }
 
 
+
+// -----------------------------------------------------------------------
+// Find fs by path
+// -----------------------------------------------------------------------
+
+
+// Find fs for path and return rest of path
+
+uufs_t * uu_findfs(const char *filename, char *rest )
+{
+    if( filename[0] == '/' && filename[1] == 0 )
+        return &root_fs;
+
+    return find_mount( filename, rest );
+}
+
+
+
+
+
 #endif // HAVE_UNIX
 

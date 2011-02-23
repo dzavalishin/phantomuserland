@@ -112,6 +112,9 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
     if( nseg == 0 )
         return ENOEXEC;
 
+    // TODO determine code seg size and store it to limit
+    // sbrk from below
+
     unsigned minaddr = ~0;
     unsigned maxaddr = 0;
     int i;
@@ -142,6 +145,7 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 
     int memsize = maxpage*PAGE_SIZE;
 
+    // TODO alloc virt mem in persistent space!
     // * Allocate physical RAM
     // * Map it temporarily
     void *va;

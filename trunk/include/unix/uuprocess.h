@@ -42,9 +42,9 @@ struct exe_module
     linaddr_t           ds_linear;
     size_t              ds_pages;
 
-	// for pv_free
-	physaddr_t			pa;
-	size_t				mem_size;
+    // for pv_free
+    physaddr_t          pa;
+    size_t              mem_size;
 
     void *              mem_start; // va
     void *              mem_end; // above last addr
@@ -86,7 +86,7 @@ struct uuprocess
 
     int                 umask;
 
-    int					capas; // Capabilities == rights
+    int                 capas; // Capabilities == rights
 
     // Process address space is mapped to our main linear adrr space
     // as follows. These adresses are used in syscall processing.

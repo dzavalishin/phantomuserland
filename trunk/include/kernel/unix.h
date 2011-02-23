@@ -10,6 +10,10 @@ struct sockaddr;
 // Unix emulation related things
 
 uufile_t *uu_namei(const char *filename);
+// find fs by path. rest is FS_MAX_PATH_LEN bytes
+uufs_t * uu_findfs(const char *filename, char *rest );
+
+
 // Allocate a new fd in u for f
 int uu_find_fd( uuprocess_t *u, uufile_t *f  );
 
@@ -30,6 +34,7 @@ int usys_dup2(int *err, uuprocess_t *u, int src_fd, int dst_fd );
 int usys_dup(int *err, uuprocess_t *u, int src_fd );
 
 int usys_symlink(int *err, uuprocess_t *u, const char *src, const char *dst );
+int usys_mkdir( int *err, uuprocess_t *u, const char *path );
 
 
 
@@ -74,7 +79,10 @@ int usys_setsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, co
 int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol);
 int usys_bind(  int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, socklen_t addrlen);
 int usys_listen(int *err, uuprocess_t *u, int fd, int backlog);
+int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, socklen_t *addrlen);
+int usys_connect(int *err, uuprocess_t *u, int fd, const struct sockaddr *ia, socklen_t addrlen);
 
+int usys_socketpair( int *err, uuprocess_t *u, int domain, int type, int protocol, int socket_vector[2]);
 
 
 
@@ -88,12 +96,17 @@ ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t le
 ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg, int flags);
 
 
+
+
 int usys_kill(int *err, uuprocess_t *u, int pid, int sig);
 
 int usys_waitpid(int *err, uuprocess_t *u, int pid, int *status, int options);
 
-
 int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, const char **uep, int flags );
+
+int usys_brk( errno_t *err, uuprocess_t *u, int ds_size );
+
+
 
 
 int usys_sigpending( int *err, uuprocess_t *u, sigset_t * set);

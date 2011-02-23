@@ -117,6 +117,7 @@ struct uufs
     uufile_t *          (*namei)(struct uufs *fs, const char *filename);
 
     errno_t             (*symlink)(struct uufs *fs, const char *src, const char *dst);
+    errno_t             (*mkdir)(struct uufs *fs, const char *path);
 
 
     // Return a file struct for fs root
