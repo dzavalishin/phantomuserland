@@ -205,8 +205,8 @@ int main(int argc, char **argv, char **envp)
 {
     (void) envp;
 
-	// check for stray ptrs here
-	stray();
+    // check for stray ptrs here
+    stray();
 
     init_irq_allocator();
 
@@ -278,7 +278,6 @@ int main(int argc, char **argv, char **envp)
     //pressEnter("will init graphics");
     phantom_start_video_driver();
 
-
     //pressEnter("will look for drv stage 2");
     phantom_pci_find_drivers( 2 );
 
@@ -335,6 +334,7 @@ int main(int argc, char **argv, char **envp)
     phantom_tcpip_active = 1; // Tell them we finished initing network
     net_test();
 #endif
+
 
 
 connect_ide_io();

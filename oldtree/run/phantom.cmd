@@ -9,7 +9,7 @@ SET Q_NET= -net nic,model=virtio -net nic,model=pcnet -net nic,model=ne2k_isa  -
 rem SET Q_MACHINE=-M isapc
 SET Q_MACHINE=
 
-SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda snapcopy.img -hdb phantom.img 
+SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda fat:../../run/fat -hdb phantom.img 
 rem -hdc cd.iso
 
 SET Q_KQ= -no-kqemu

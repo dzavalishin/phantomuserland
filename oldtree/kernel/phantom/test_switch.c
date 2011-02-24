@@ -131,6 +131,10 @@ void run_test( const char *test_name, const char *test_parm )
     // These are very long, do 'em last
     TEST(threads);
 
+    TEST(absname);
+
+
+
     //TEST(userland);
 
     printf("\n-----\n" );
