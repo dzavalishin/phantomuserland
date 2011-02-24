@@ -494,6 +494,13 @@ int usys_kill(int *err, uuprocess_t *u, int pid, int sig)
 
     //panic("kill is not implemented");
     uuprocess_t * p = proc_by_pid(pid);
+
+    if(!p)
+    {
+        *err = ESRCH;
+        return -1;
+    }
+
     int ret = 0;
     sig_send( &p->signals, sig );
 
