@@ -69,6 +69,7 @@ int do_test_amap(const char *test_parm);
 int do_test_ports(const char *test_parm);
 
 
+int do_test_absname(const char *test_parm);
 int do_test_userland(const char *test_parm);
 
 

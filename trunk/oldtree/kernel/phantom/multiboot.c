@@ -69,7 +69,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
 
     // Program the PIC
     //phantom_pic_init(0x20, 0x28);
-	phantom_pic_init(PIC_VECTBASE, PIC_VECTBASE+8);
+    phantom_pic_init(PIC_VECTBASE, PIC_VECTBASE+8);
 
     // Disable all the IRQs
     phantom_pic_disable_all();
@@ -101,7 +101,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
 
     if(!file_inited)
     	SHOW_ERROR0(0, "Constructors failed!");
-	else
+    else
     	SHOW_FLOW0(0, "Constructors OK!");
 
     phantom_parse_cmd_line();

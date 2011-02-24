@@ -26,7 +26,61 @@
 #include <hal.h>
 #include <threads.h>
 
+#include <unix/uufile.h>
+
 #include "test.h"
+
+
+
+
+static void test_one(const char *b, const char *a, const char*expect)
+{
+    char o[FS_MAX_PATH_LEN*2];
+
+    SHOW_FLOW( 0, "'%s' + '%s'", b, a );
+
+    if( uu_absname( o, b, a ) )
+        test_fail_msg( EINVAL, "uu_absname failed" );
+
+    if( expect && strcmp( o, expect ) )
+    {
+        SHOW_ERROR(0, "Expected '%s', got '%s'", expect, o );
+        test_fail( EINVAL );
+    }
+
+}
+
+
+int do_test_absname(const char *test_parm)
+{
+    if(test_parm)
+        test_one("/abc/../def/./xyz", test_parm, 0 );
+
+
+    test_one("abc", 		"def", 		"/abc/def"	);
+    test_one("..", 		"def",		"/def"		);
+    test_one("abc", 		"..",		"/"		);
+    test_one("abc/.", 		"//def",	"/abc/def"	);
+    test_one("abc/../", 	"def",		"/def"		);
+    test_one("./abc", 		"../def",	"/def"		);
+    test_one("abc", 		"def/../xyz", 	"/abc/xyz"	);
+    test_one("/abc/../.../aa", 	"../def",	"/.../def"	);
+    test_one("/abc/xyz", 	"..",		"/abc"		);
+    test_one("../../abc", 	"def",		"/abc/def"	);
+    test_one("////abc//.././", 	"def",		"/def" 		);
+
+    test_one("abc/../", 	".", 		"/"		);
+    test_one("./abc", 		".",		"/abc"		);
+    test_one("abc", 		"def/../xyz/.",	"/abc/xyz"	);
+    test_one("/abc/../.../aa", 	"./def",	"/.../aa/def"	);
+    test_one("/abc/xyz.//.", 	".", 		"/abc/xyz."	);
+    test_one("../../abc..", 	".",		"/abc.."	);
+    test_one("////abc//.././..", ".", 		"/"		);
+
+    return 0;
+}
+
+
 
 
 static port_id uland_port;

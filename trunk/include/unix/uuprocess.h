@@ -2,7 +2,7 @@
 #define UUPROCESS_H
 
 #include <signal.h>
-
+#include <unix/uufile.h>
 
 #define MAX_UU_FD       256
 #define MAX_UU_TID      128
@@ -82,8 +82,8 @@ struct uuprocess
     int                 tids[MAX_UU_TID];
     int                 ntids;
 
-    struct uufile *     cwd;
-
+    struct uufile *     cwd_file;
+    char                cwd_path[FS_MAX_PATH_LEN];
     int                 umask;
 
     int                 capas; // Capabilities == rights

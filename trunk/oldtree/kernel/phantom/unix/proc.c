@@ -191,7 +191,8 @@ int uu_create_process( int ppid )
         p->pgrp_pid = parent->pgrp_pid;
         p->sess_pid = parent->sess_pid;
         p->ctty = parent->ctty;
-        p->cwd = copy_uufile( parent->cwd );
+        p->cwd_file = copy_uufile( parent->cwd_file );
+        memcpy( p->cwd_path, parent->cwd_path, FS_MAX_PATH_LEN );
         p->umask = parent->umask;
     }
     else

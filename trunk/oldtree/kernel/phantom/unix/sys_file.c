@@ -276,8 +276,16 @@ int usys_ftruncate(int *err, uuprocess_t *u, int fd, off_t length)
 // Dirs
 // -----------------------------------------------------------------------
 
-int usys_chdir( int *err, uuprocess_t *u,  const char *path )
+int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
 {
+    char path[FS_MAX_PATH_LEN];
+    if( uu_absname(path, u->cwd_path, in_path ) )
+    {
+        return ENOENT;
+    }
+
+    SHOW_FLOW( 1, "in '%s' cd '%s' abs '%s'", in_path, u->cwd_path, path );
+
     uufile_t * f = uu_namei( path );
     if( f == 0 )
     {
@@ -307,9 +315,11 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *path )
     if( sb.st_mode & _S_IFDIR)
     {
 #endif
-        if(u->cwd)
-            u->cwd->fs->close( u->cwd );
-        u->cwd = f;
+        if(u->cwd_file)
+            u->cwd_file->fs->close( u->cwd_file );
+        u->cwd_file = f;
+        //uu_absname( u->cwd_path, u->cwd_path, in_path );
+        strlcpy( u->cwd_path, path, FS_MAX_PATH_LEN );
         return 0;
 #if 0
     }
@@ -347,9 +357,15 @@ int usys_fchdir( int *err, uuprocess_t *u,  int fd )
     if( sb.st_mode & _S_IFDIR)
     {
 #endif
-        if(u->cwd)
-            u->cwd->fs->close( u->cwd );
-        u->cwd = copy_uufile( f );
+        if(u->cwd_file)
+            u->cwd_file->fs->close( u->cwd_file );
+        u->cwd_file = copy_uufile( f );
+
+        u->cwd_path[0] = 0;
+        if(u->cwd_file->ops->getpath)
+            u->cwd_file->ops->getpath( u->cwd_file, u->cwd_path, FS_MAX_PATH_LEN );
+
+
         return 0;
 #if 0
     }
@@ -370,7 +386,9 @@ int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize )
     }
 
     *buf = 0;
-
+#if 1
+    strlcpy( buf, u->cwd_path, bufsize );
+#else
     if(!u->cwd)
     {
         strlcpy( buf, "/", bufsize );
@@ -379,6 +397,8 @@ int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize )
 
     //size_t ret =
     u->cwd->ops->getpath( u->cwd, buf, bufsize );
+#endif
+
     return 0;
 }
 

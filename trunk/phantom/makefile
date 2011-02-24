@@ -11,6 +11,7 @@ SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), offsets libc gl dev libphantom threa
 %: %-subdirs ;
 
 all: all-subdirs
+	cd modules ; make install ; cd ..
 
 install: install-subdirs
 

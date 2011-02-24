@@ -216,6 +216,7 @@ static void do_syscall_sw(struct trap_state *st)
             break;
         }
     case SYS_nanosleep:
+        // todo check for POSIX compliance, make it interruptible by signals
         //int nanosleep(const struct timespec *, struct timespec *);
         {
             goto unimpl;
@@ -323,10 +324,10 @@ static void do_syscall_sw(struct trap_state *st)
 
     case SYS_getcwd:
         {
-            goto unimpl;
-            //AARG(const char *, buf, 0, uarg[1]);
-            //ret = usys_getcwd( &err, u, buf, uarg[1] );
-            //break;
+            //goto unimpl;
+            AARG(const char *, buf, 0, uarg[1]);
+            ret = usys_getcwd( &err, u, buf, uarg[1] );
+            break;
         }
 
     case SYS_mkdir:
