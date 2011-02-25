@@ -1,3 +1,5 @@
+#ifdef ARCH_ia32
+
 #include "pci_control.h"
 #include "cache.h"
 
@@ -734,3 +736,5 @@ void pci_scan()
     printf("\nPCI: finished\n");
 }
 #endif
+
+#endif // ARCH_ia32

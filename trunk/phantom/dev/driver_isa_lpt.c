@@ -1,3 +1,5 @@
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "lpt"
 #include <debug_ext.h>
 #define debug_level_flow 0
@@ -1302,3 +1304,4 @@ programs.  Version 0.96 fixed yet more errors.
 */
 
 
+#endif // ARCH_ia32

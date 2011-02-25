@@ -1,3 +1,5 @@
+#ifdef ARCH_ia32
+
 #include <mach/asm.h>
 
 ENTRY(jit_proto_get_null)
@@ -100,3 +102,4 @@ ENTRY(jit_proto_get_array_class_end)
         
 
 
+#endif // ARCH_ia32

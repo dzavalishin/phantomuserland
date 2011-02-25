@@ -81,6 +81,9 @@ int                                     hal_is_sti(void); // returns true if int
 int                                     hal_save_cli(void); // cli and ret 1 if was enabled
 #define hal_cli_save hal_save_cli
 
+// sti + halt
+void                                    hal_wait_for_interrupt(void);
+
 void 					phantom_mem_lock(void);
 void 					phantom_mem_unlock(void);
 

@@ -40,9 +40,9 @@ static void haltme( void *a )
             t_do_some_kills();
         hal_enable_preemption();
 
-        //osenv_softintr_enable();
         hal_sti();
-        asm volatile("hlt" : : );
+        //asm volatile("hlt" : : );
+        hal_wait_for_interrupt();
     }
 }
 

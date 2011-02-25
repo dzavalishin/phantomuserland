@@ -47,7 +47,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
     if(sl->lock)
     {
         printf("spinlock reenter detected, prev enter was here:\n");
-        stack_dump_ebp((void *)sl->ebp);
+        stack_dump_from((void *)sl->ebp);
         panic("reenter");
     }
 #endif

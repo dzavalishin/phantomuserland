@@ -20,7 +20,7 @@ void dump_thread_stack(phantom_thread_t *t)
 {
     void *ebp = (void *)t->cpu.ebp;
     printf("Thread %d EIP 0x%08X, ", t->tid, t->cpu.eip);
-    stack_dump_ebp(ebp);
+    stack_dump_from(ebp);
 }
 
 void dump_thread_info(phantom_thread_t *t)

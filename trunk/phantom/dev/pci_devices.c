@@ -8,6 +8,8 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "pci"
 #include <debug_ext.h>
 #define debug_level_flow 10
@@ -176,3 +178,4 @@ get_pci_class(u_int8_t base, u_int8_t sub_class)
 	}
 }
 
+#endif // ARCH_ia32

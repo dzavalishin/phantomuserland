@@ -1,7 +1,4 @@
-
-#HOST_CPU	= i686
-#HOST_ARCH	= x86
-#unix_host	= NONE
+ARCH_FLAGS      =
 
 export AS       = arm-elf-as
 export CC       = arm-elf-gcc
@@ -15,6 +12,15 @@ export NM       = arm-elf-nm
 AWK             = gawk
 YACC            = bison -y
 M4              = m4
+
+
+
+
+
+
+
+
+
 
 #INSTALL		= /usr/bin/install -c
 #INSTALL_PROGRAM	= ${INSTALL}
@@ -30,3 +36,7 @@ M4              = m4
 
 #PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inline-functions
 
+
+#HOST_CPU	= i686
+#HOST_ARCH	= x86
+#unix_host	= NONE
