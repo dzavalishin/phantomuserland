@@ -37,6 +37,10 @@
 #ifndef _I386_LDT_
 #define _I386_LDT_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 #include <i386/seg.h>
 
 /*

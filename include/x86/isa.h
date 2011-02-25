@@ -43,6 +43,11 @@
 #ifndef _ISA_H_
 #define	_ISA_H_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 /* BEWARE:  Included in both assembler and C code */
 
 /*

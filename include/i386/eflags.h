@@ -42,6 +42,10 @@
 #ifndef	_I386_EFLAGS_H_
 #define	_I386_EFLAGS_H_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 /*
  *	i386 flags register
  */

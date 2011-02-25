@@ -1,3 +1,7 @@
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 // x86 features from cpuid eax 1, ecx register
 #define X86_FPU   0x00000001 // x87 fpu
 #define X86_VME   0x00000002 // virtual 8086

@@ -50,6 +50,10 @@
 #ifndef	_I386_TSS_H_
 #define	_I386_TSS_H_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 /*
  *	i386 Task State Segment
  */

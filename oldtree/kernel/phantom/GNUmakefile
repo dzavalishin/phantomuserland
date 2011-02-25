@@ -5,7 +5,8 @@ OBJDIR		= ..
 prefix		= /usr/local
 exec_prefix	= ${prefix}
 
-include $(OBJDIR)/Makeconf
+include $(realpath $(PHANTOM_HOME))/config.mk
+include $(OBJDIR)/Makeconf-$(ARCH)
 
 ##### End of configuration section #####
 

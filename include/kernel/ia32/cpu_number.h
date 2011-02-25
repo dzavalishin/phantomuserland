@@ -24,6 +24,10 @@
 #ifndef _IMPS_CPU_NUMBER_
 #define _IMPS_CPU_NUMBER_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 
 #ifndef ASSEMBLER
 

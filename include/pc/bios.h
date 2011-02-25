@@ -27,6 +27,11 @@
  * $FreeBSD: src/sys/i386/include/pc/bios.h,v 1.14 2002/09/23 18:54:31 alfred Exp $
  */
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 #include <phantom_types.h>
 #include <sys/cdefs.h>
 

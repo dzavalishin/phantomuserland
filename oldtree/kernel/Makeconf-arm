@@ -18,7 +18,7 @@ INSTALL		= /usr/bin/install -c
 INSTALL_PROGRAM	= ${INSTALL}
 INSTALL_DATA	= ${INSTALL} -m 644
 
-DEFINES		=   
+DEFINES		= 
 CFLAGS		= 
 M4FLAGS		= -s
 

@@ -29,6 +29,10 @@ typedef unsigned long	Elf32_Off;
 typedef signed long	Elf32_Sword;
 typedef unsigned long	Elf32_Word;
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 /* Architecture identification parameters for i386.  */
 #define MY_EI_DATA	ELFDATA2LSB
 #define MY_E_MACHINE	EM_386

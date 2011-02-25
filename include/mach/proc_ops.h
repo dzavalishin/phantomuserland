@@ -23,6 +23,11 @@
 #include <mach/machine/vm_types.h>
 #include <mach/inline.h>
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 /* Returns the bit number of the most-significant set bit in `val',
    e.g. 0 for 1, 1 for 2-3, 2 for 4-7, etc.
    If `val' is 0 (i.e. no bits are set), the behavior is undefined.  */

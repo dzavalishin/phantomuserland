@@ -1,6 +1,11 @@
 #ifndef _I386_BITOPS_H
 #define _I386_BITOPS_H
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 /*
  * Copyright 1992, Linus Torvalds.
  */
