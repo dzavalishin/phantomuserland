@@ -1,5 +1,4 @@
 /**************************************************************************
-ETHERBOOT -  BOOTP/TFTP Bootstrap Program
 
 Author: Martin Renters
   Date: Jun/94

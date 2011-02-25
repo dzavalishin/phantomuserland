@@ -284,17 +284,19 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
         return ENOENT;
     }
 
-    SHOW_FLOW( 1, "in '%s' cd '%s' abs '%s'", in_path, u->cwd_path, path );
+    SHOW_FLOW( 8, "in '%s' cd '%s' abs '%s'", in_path, u->cwd_path, path );
 
     uufile_t * f = uu_namei( path );
     if( f == 0 )
     {
+        SHOW_ERROR( 1, "namei '%s' failed", path );
         *err = ENOENT;
         return -1;
     }
 
-    if( f->flags & UU_FILE_FLAG_DIR )
+    if( !(f->flags & UU_FILE_FLAG_DIR) )
     {
+        SHOW_ERROR( 1, "namei '%s' failed", path );
         *err = ENOTDIR;
         goto err;
     }
@@ -320,6 +322,7 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
         u->cwd_file = f;
         //uu_absname( u->cwd_path, u->cwd_path, in_path );
         strlcpy( u->cwd_path, path, FS_MAX_PATH_LEN );
+        SHOW_FLOW( 1, "cd to '%s'", path );
         return 0;
 #if 0
     }
@@ -327,6 +330,7 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
     *err = ENOTDIR;
 #endif
 err:
+    //unlink_uufile( f );
     f->fs->close( f );
     return -1;
 }
@@ -379,7 +383,9 @@ err:
 
 int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize )
 {
-    if(bufsize < 2)
+    ssize_t len = strlen(u->cwd_path);
+    SHOW_FLOW( 9, "bs %d len %d", bufsize, len );
+    if(bufsize < len+1)
     {
         *err = EINVAL;
         return -1;
@@ -388,6 +394,7 @@ int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize )
     *buf = 0;
 #if 1
     strlcpy( buf, u->cwd_path, bufsize );
+    return len+1;
 #else
     if(!u->cwd)
     {
@@ -397,9 +404,9 @@ int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize )
 
     //size_t ret =
     u->cwd->ops->getpath( u->cwd, buf, bufsize );
-#endif
 
     return 0;
+#endif
 }
 
 

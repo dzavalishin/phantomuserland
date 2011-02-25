@@ -324,8 +324,7 @@ static void do_syscall_sw(struct trap_state *st)
 
     case SYS_getcwd:
         {
-            //goto unimpl;
-            AARG(const char *, buf, 0, uarg[1]);
+            AARG(char *, buf, 0, uarg[1]);
             ret = usys_getcwd( &err, u, buf, uarg[1] );
             break;
         }

@@ -191,8 +191,9 @@ int cmd_pwd(int argc, char *argv[])
     char buf[128];
     char *cwd;
 
-    cwd= getcwd(buf, 128);
-    if (cwd)
+    cwd= buf;
+
+    if(getcwd(buf, 128) > 0)
     {
         printf("pwd: cwd=\'%s\'\n", cwd);
     }
