@@ -48,7 +48,8 @@ void panic(const char *__format, ...) __dead2;
 
 
 void stack_dump(void);
-void stack_dump_ebp(void *ebp);
+void stack_dump_from(void *ebp);
+void *arch_stack_get_start();
 
 
 extern char * (*phantom_symtab_getname)( void *addr );

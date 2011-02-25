@@ -12,6 +12,10 @@ include $(BUILD_ROOT)/offsets/makerules
 
 #generate.o:		generate.c 
 
+#we need this because when building for arm we still need default host's gcc to run executable
+#does it mean we're toast on arm, btw?
+CC=gcc
+
 generate:	generate.o store.o
 	gcc -m32 -o generate generate.o store.o
 	./generate

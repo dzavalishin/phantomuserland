@@ -25,7 +25,7 @@ static void stack_dump_one(void *ebp)
 }
 
 
-void stack_dump_ebp(void *ebp)
+void stack_dump_from(void *ebp)
 {
     int i;
     printf("Stack:\n");
@@ -42,9 +42,10 @@ void stack_dump_ebp(void *ebp)
 
 void stack_dump()
 {
-    void *ebp;
-    asm volatile ("movl %%ebp,%0" : "=r" (ebp));
-    stack_dump_ebp(ebp);
+    //void *ebp;
+    //asm volatile ("movl %%ebp,%0" : "=r" (ebp));
+	
+    stack_dump_from(arch_stack_get_start());
 
 }
 

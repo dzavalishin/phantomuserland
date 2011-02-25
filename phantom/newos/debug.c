@@ -1,3 +1,4 @@
+#if 0
 /*
  ** Copyright 2001-2004, Mark-Jan Bastian. All rights reserved.
  ** Distributed under the terms of the NewOS License.
@@ -477,3 +478,4 @@ static void cmd_test(int argc, char **argv)
 
 
 
+#endif

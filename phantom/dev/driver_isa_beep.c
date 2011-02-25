@@ -1,3 +1,4 @@
+#ifdef ARCH_ia32
 /*!
  *      \brief System speaker driver.
  *      \author Mostly based on driver from Andrea Righi <drizzt@inwind.it>
@@ -132,4 +133,5 @@ phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage )
 
 
 
+#endif // ARCH_ia32
 

@@ -1,3 +1,5 @@
+#ifdef ARCH_ia32
+
 #include <kernel/vm.h>
 
 #include <kernel/drivers.h>
@@ -261,3 +263,5 @@ direct_cons_putchar(int c)
     return 0;
 }
 #endif
+
+#endif // ARCH_ia32

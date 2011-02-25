@@ -1,3 +1,5 @@
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "com"
 #include <debug_ext.h>
 #define debug_level_flow 0
@@ -978,3 +980,5 @@ boolean_t	wait;
 
 
 #endif
+
+#endif // ARCH_ia32

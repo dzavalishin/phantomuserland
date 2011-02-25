@@ -496,7 +496,7 @@ static int memcheck_one(unsigned int i, void * start, void * end)
 
     struct pvm_object_storage *curr = start;
 
-    printf("Memcheck: checking object memory allocation consistency (at %p, %d bytes)\n", start, (end - start) );
+    printf("Memcheck: checking object memory allocation consistency (at %p, %ld bytes)\n", start, (long)(end - start) );
 
     while(((void *)curr) < end)
     {
@@ -542,12 +542,12 @@ static int memcheck_one(unsigned int i, void * start, void * end)
 
     if((void *)curr == end)
     {
-        printf("Memcheck: reached exact arena end at %p (%d bytes used)\n", curr, ((void *)curr) - start );
+        printf("Memcheck: reached exact arena end at %p (%ld bytes used)\n", curr, (long)(((void *)curr) - start) );
         if (debug_memory_leaks) memcheck_print_histogram(i);
         return 0;
     }
 
-    printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%p (%d bytes size)\n-----------------\n\n", curr, ((void *)curr) - start );
+    printf("\n\n-----------------\nMemcheck ERROR: reached out of arena end at 0x%p (%ld bytes size)\n-----------------\n\n", curr, (long) (((void *)curr) - start) );
     return 1;
 }
 

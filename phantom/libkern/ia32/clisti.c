@@ -1,6 +1,12 @@
 #include <i386/eflags.h>
 
 
+void hal_wait_for_interrupt(void)
+{
+    __asm __volatile("sti");
+    __asm __volatile("hlt" : : );
+}
+
 void        hal_cli()
 {
     __asm __volatile("cli" : : : "memory");

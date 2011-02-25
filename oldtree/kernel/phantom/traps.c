@@ -76,7 +76,7 @@ void dump_ss(struct trap_state *st)
 
 
     //if(!from_user)
-        stack_dump_ebp((void *)st->ebp);
+        stack_dump_from((void *)st->ebp);
 }
 
 
