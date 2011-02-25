@@ -21,11 +21,11 @@
 #include <x86/phantom_pmap.h>
 #include <x86/phantom_page.h>
 #include <i386/proc_reg.h>
+#include <kernel/ia32/cpu.h>
 #include <hal.h>
 #include <machdep.h>
 
 #include "misc.h"
-#include "cpu.h"
 
 static pd_entry_t *pdir;
 static pt_entry_t *ptabs;

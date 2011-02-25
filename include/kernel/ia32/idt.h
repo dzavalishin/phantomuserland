@@ -20,31 +20,42 @@
  *
  *      Author: Bryan Ford, University of Utah CSL
  */
-#ifndef _IMPS_CPU_NUMBER_
-#define _IMPS_CPU_NUMBER_
+
+#ifndef _I386AT_IDT_
+#define _I386AT_IDT_
 
 
-#ifndef ASSEMBLER
+/*
+ * Interrupt table must always be at least 32 entries long,
+ * to cover the basic i386 exception vectors.
+ * More-specific code will probably define it to be longer,
+ * to allow separate entrypoints for hardware interrupts.
+ */
 
-#include "apic.h"
+#define IDTSZ 256
 
-static inline int
-cpu_number()
-{
-	return apic_local_unit.unit_id.r >> 24;
-}
-
-#else ASSEMBLER
-
-//#include "impsasm.h"
-
-#define	CPU_NUMBER(reg)		\
-	movzbl	APIC_LOCAL_VA+APIC_LOCAL_UNIT_ID+3,reg
-
-#endif ASSEMBLER
+#define PIC_INT_BASE 0x20
+#define APIC_INT_BASE 0x40
 
 
-//#include "i386/cpu_number.h"
 
 
-#endif _IMPS_CPU_NUMBER_
+#define set_idt(pseudo_desc) \
+    ({ \
+	asm volatile("lidt %0" : : "m" ((pseudo_desc)->limit)); \
+    })
+
+
+#include <i386/seg.h>
+
+
+extern struct real_gate idt[IDTSZ];
+
+/* Fill a gate in the IDT.  */
+#define fill_idt_gate(int_num, entry, selector, access, dword_count) \
+	fill_gate(&idt[int_num], entry, selector, access, dword_count)
+
+
+
+
+#endif // _I386AT_IDT_

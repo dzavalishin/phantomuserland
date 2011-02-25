@@ -1,4 +1,4 @@
-#include "mmx.h"
+#include <kernel/ia32/mmx.h>
 #include <x86/phantom_page.h>
 
 //! \brief Clear a page using MMX extensions.

@@ -41,8 +41,8 @@
 #include "snap_sync.h"
 #include "pager.h"
 
-#include "i386/cpu.h"
-#include "i386/mmx.h"
+#include <kernel/ia32/cpu.h>
+//#include <kernel/ia32/mmx.h>
 
 #define volatile /* */
 

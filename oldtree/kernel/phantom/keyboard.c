@@ -24,6 +24,7 @@
 #include <i386/pio.h>
 
 #include <phantom_libc.h>
+#include <sys/libkern.h>
 
 #include <misc.h>
 #include <event.h>
@@ -50,10 +51,6 @@ static int softirq = -1;
 #endif
 
 
-/* TODO: MOVE THIS TO A PRIVATE HEADER FILE */
-#ifndef min
-#define min(x,y) ((x)<(y)?(x):(y))
-#endif
 
 
 static int  leds;
@@ -126,7 +123,7 @@ static int _keyboard_read(_key_event *buf, u_int32_t len)
     }
 
     /* clamp the input len value */
-    len = min(len, keyboard_buf_len - 1);
+    len = imin(len, keyboard_buf_len - 1);
 
 retry:
 #if KEYB_USE_SEMA

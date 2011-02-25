@@ -113,7 +113,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
 }
 
 
-#include "amap.h"
+#include <kernel/amap.h>
 
 static amap_t ram_map;
 

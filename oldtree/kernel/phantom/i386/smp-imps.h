@@ -15,11 +15,9 @@
 #ifndef _SMP_IMPS_H
 #define _SMP_IMPS_H
 
-/* make sure "apic.h" is included */
 #ifndef _APIC_REGS_H
-//#error		Must include "apic.h" before "smp-imps.h"
-#include "apic_regs.h"
-#endif  /* !_APIC_H */
+#include <kernel/ia32/apic_regs.h>
+#endif  
 
 /*
  *  Defines used.

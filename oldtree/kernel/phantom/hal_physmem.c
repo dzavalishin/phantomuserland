@@ -83,7 +83,15 @@ hal_alloc_vaddress(void **result, int num) // alloc address of a page, but not m
     physalloc_item_t ret;
 
     // TODO alloc_region steps by map_elem size, it takes 32 pages to fullfill request of 1 page!
-    int rc = phantom_phys_alloc_region( &vm_map, &ret, num );
+
+    errno_t rc;
+
+    if( num == 1)
+        rc = phantom_phys_alloc_page( &vm_map, &ret );
+    else
+        rc = phantom_phys_alloc_region( &vm_map, &ret, num );
+
+
     if( rc )
     {
         *result = 0;

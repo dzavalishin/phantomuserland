@@ -35,6 +35,8 @@ char *rindex(const char *p, int ch);
 char *strdup( const char *);
 char *strndup(const char *s, size_t n);
 
+char * strupr(char *in);
+
 
 void *memcpy(void *dst0, const void *src0, size_t length);
 void *memmove(void *dst0, const void *src0, size_t length);

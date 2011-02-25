@@ -14,11 +14,10 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "cpu.h"
 #include "../misc.h"
-#include "apic.h"
-#include "apic_regs.h"
-//#include "idt.h"
+#include <kernel/ia32/cpu.h>
+#include <kernel/ia32/apic.h>
+#include <kernel/ia32/apic_regs.h>
 
 #include <x86/phantom_pmap.h>
 #include <hal.h>

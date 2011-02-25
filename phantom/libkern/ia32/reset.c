@@ -1,14 +1,10 @@
 #include <hal.h>
 #include <i386/pio.h>
-//#include <i386/isa/isa.h>
 #include <x86/isa.h>
 #include <phantom_libc.h>
 #include <kernel/init.h>
+#include <kernel/ia32/idt.h>
 
-#include <misc.h>
-
-
-#include "idt.h"
 
 
 // TODO get DELAY from FrteeBSD too
@@ -32,7 +28,6 @@ hal_cpu_reset_real(void) //__attribute__((noreturn))
     int b;
 
 
-    //disable_intr();
     hal_cli();
 
     /*if (cpu == CPU_GEODE1100) {

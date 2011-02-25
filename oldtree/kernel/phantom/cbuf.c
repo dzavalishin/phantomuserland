@@ -4,6 +4,8 @@
 // Used in other code as well
 //#if HAVE_NET
 
+#include <hal.h>
+
 #include "newos.h"
 #include <newos/cbuf.h>
 #include "net.h"
@@ -1022,8 +1024,12 @@ int cbuf_init()
 
     //cbuf_region_id = vm_create_anonymous_region(vm_get_kernel_aspace_id(), "cbuf region",                                                (void **)&cbuf_region, REGION_ADDR_ANY_ADDRESS, CBUF_REGION_SIZE, REGION_WIRING_LAZY, LOCK_RW|LOCK_KERNEL);
 
-	// TODO pv_alloc
+#if 1
+    physaddr_t pa;
+    hal_pv_alloc( &pa, (void**)&cbuf_region, CBUF_REGION_SIZE );
+#else
     cbuf_region = malloc(CBUF_REGION_SIZE);
+#endif
     if(cbuf_region == 0) {
         panic("cbuf_init: error creating cbuf region\n");
         return ERR_NO_MEMORY;
