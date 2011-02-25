@@ -23,6 +23,11 @@
 #ifndef _MACH_I386_DEBUG_REG_H_
 #define _MACH_I386_DEBUG_REG_H_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 /* Bits in DR7 - debug control register */
 #define DR7_LEN3	0xc0000000
 #define DR7_RW3		0x30000000

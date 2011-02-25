@@ -5,7 +5,8 @@ OBJDIR		= .
 prefix		= /usr/local
 exec_prefix	= ${prefix}
 
-include $(OBJDIR)/Makeconf
+include $(realpath $(PHANTOM_HOME))/config.mk
+include $(OBJDIR)/Makeconf-$(ARCH)
 
 
 SUBDIRS		= $(filter-out $(PHANTOM_EXCLUDED_SUBDIRS), phantom/i386 phantom )
@@ -36,7 +37,6 @@ clean: clean-subdirs
 prepare:: prepare-subdirs
 
 distclean: distclean-subdirs
-#	rm -rf lib GNUmakefile Makeconf config.status config.cache config.log \		$(addsuffix /GNUmakefile,$(SUBDIRS)) boot/bsd/mkbsdimage
 
 
 # For testing

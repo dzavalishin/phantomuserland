@@ -63,6 +63,10 @@
 
 #include <kernel/smp.h>
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 
 #ifndef ASSEMBLER
 

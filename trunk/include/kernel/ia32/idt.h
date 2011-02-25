@@ -24,6 +24,10 @@
 #ifndef _I386AT_IDT_
 #define _I386AT_IDT_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 
 /*
  * Interrupt table must always be at least 32 entries long,

@@ -14,6 +14,10 @@
 #ifndef _APIC_REGS_H
 #define _APIC_REGS_H
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 /*
  *  APIC Defines.
  */

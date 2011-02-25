@@ -11,7 +11,7 @@ PHANTOM_CFLAGS += -ffreestanding -W -Wall
 
 LD_ADDR=-Wl,-Ttext,0
 
-LIBGCC := `gcc --print-libgcc-file-name`
+LIBGCC := `$(CC) --print-libgcc-file-name`
 
 LIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
@@ -22,8 +22,8 @@ INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/bin/$(TARGET)
 # install anyway
 $(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a
 	@echo --- Link $(TARGET)
-	@gcc -g -m32 -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
-	@objcopy -O elf32-i386 $@.pe $@
+	@$(CC) -g -m32 -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+	@$(OBJCOPY) -O elf32-i386 $@.pe $@
 	cp $(TARGET) $(INSTALL_DIR)
 
 #	objdump -x -d $@ >$@.dump

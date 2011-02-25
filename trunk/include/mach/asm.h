@@ -25,6 +25,12 @@
  */
 
 
+
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 #define S_ARG0	 4(%esp)
 #define S_ARG1	 8(%esp)
 #define S_ARG2	12(%esp)

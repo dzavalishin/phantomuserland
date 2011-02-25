@@ -1,6 +1,11 @@
 # $(realpath ) gives good cywgin path in Windows, and, I believe, is 
 # harmless in Unix.
 
+
+# add ARCH=arm to local-config.mk to compile for arm
+-include $(realpath $(PHANTOM_HOME))/local-config.mk
+
+
 # Directory where to put executables - supposed to be in PATH
 INST_BIN=$(realpath c:\bin\tools)
 
@@ -21,7 +26,9 @@ endif
 #endif
 #endif
 
+ifndef ARCH
 ARCH=ia32
+endif
 
 # How to compile phantom source
 

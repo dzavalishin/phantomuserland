@@ -23,6 +23,10 @@
 #ifndef _PHANTOM_APIC_
 #define _PHANTOM_APIC_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 
 #define APIC_BASE_MSR 0x1B
 void relocate_apic(void);

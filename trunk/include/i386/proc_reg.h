@@ -46,6 +46,11 @@
 #ifndef	_I386_PROC_REG_H_
 #define	_I386_PROC_REG_H_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 #ifndef ASSEMBLER
 
 #include <phantom_types.h>

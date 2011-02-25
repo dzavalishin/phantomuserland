@@ -3,14 +3,15 @@ default:: all
 all: $(TARGET)
 
 include $(realpath $(PHANTOM_HOME))/config.mk
+include $(realpath $(PHANTOM_HOME))/phantom/Makeconf-$(ARCH)
 
 
-INCDIRS += $(realpath $(PHANTOM_HOME))/include
+INCDIRS += $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/include/$(ARCH)
 
 # hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare
 
-COMMON_FLAGS= $(WARN) -m32 -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc -std=gnu89 -DKERNEL
+COMMON_FLAGS= $(WARN) -m32 -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc -std=gnu89 -DKERNEL -DARCH_$(ARCH)
 PHANTOM_CFLAGS  += $(COMMON_FLAGS) -fno-stack-protector
 PHANTOM_ASFLAGS += $(COMMON_FLAGS) -DASSEMBLER -D__ASSEMBLY__ -DKERNEL
 
@@ -28,11 +29,11 @@ OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
 
 %.o: %.c
 	@echo ---- cc $@
-	@gcc -c -o $@ $(PHANTOM_CFLAGS) $<
+	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) $<
 
 %.o: %.S
 	@echo ---- cc $@
-	@gcc -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) $<
+	@$(CC) -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) $<
 
 
 .SUFFIXES:

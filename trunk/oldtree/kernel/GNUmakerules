@@ -1,6 +1,8 @@
 ifndef _PHANTOM_makerules_
 _PHANTOM_makerules_ = yes
 
+include $(realpath $(PHANTOM_HOME))/config.mk
+
 # This is just here in case someone happens to include this before the
 # more specific GNUmakerules.  Otherwise the first (default) rule ends
 # up being the install rule. =(
@@ -11,7 +13,7 @@ include $(PHANTOM_SRCDIR)/GNUmakerules-$(HOST_ARCH)
 
 
 # Where to get includes and libraries from.
-INCDIRS += $(OBJDIR) $(PHANTOM_SRCDIR) $(realpath $(PHANTOM_HOME))/include
+INCDIRS += $(OBJDIR) $(PHANTOM_SRCDIR) $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/include/$(ARCH)
 LIBDIRS += $(OBJDIR)/lib
 
 # Compilation flags.
@@ -23,7 +25,7 @@ LIBDIRS += $(OBJDIR)/lib
 #	-I flags after -I- are searched for all include files.
 PHANTOM_CPPFLAGS	+= -W -Wall -MD $(DEFINES) -I. $(addprefix -iquote,$(SRCDIRS)) \
 		    $(addprefix -iquote,$(MOSTLY_SRCDIRS)) \
-		    $(addprefix -I,$(INCDIRS)) -nostdinc
+		    $(addprefix -I,$(INCDIRS)) -nostdinc -DARCH_$(ARCH)
 PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -W -Wall $(PHANTOM_FFLAGS) -fno-stack-protector
 PHANTOM_LDFLAGS	+= $(addprefix -L,$(LIBDIRS))
 

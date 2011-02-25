@@ -1,6 +1,10 @@
 #ifndef _PIO_H
 #define _PIO_H
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 #define SLOW_IO_BY_JUMPING
 
 /*

@@ -105,6 +105,12 @@ NEGLIGENCE, OR OTHER TORTIOUS ACTION, ARISING OUR OF OR IN CONNECTION
 WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 #define TXRX(addr)	(addr + 0)
 #define BAUD_LSB(addr)	(addr + 0)
 #define BAUD_MSB(addr)	(addr + 1)
