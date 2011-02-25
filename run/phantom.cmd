@@ -1,6 +1,7 @@
 @echo off
 
-SET QDIR=..\oldtree\run12
+rem SET QDIR=..\oldtree\run12
+SET QDIR=qemu\0.13.0
 
 rem SOUND=-soundhw sb16
 
@@ -20,7 +21,7 @@ SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../oldtr
 
 rem SET Q_MACHINE=-m 85
 
-SET Q_DISKS=-boot a -no-fd-bootchk -fda %QDIR%/img/grubfloppy.img -hda fat:fat -hdb phantom.img 
+SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda fat:fat -hdb phantom.img 
 
 rem SET Q_KQ=-enable-kqemu
 rem SET Q_KQ=-enable-kqemu -kernel-kqemu
@@ -33,7 +34,7 @@ rem -virtioconsole 4
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-%QDIR%\bin\qemu -smp 3 %Q_VGA% -s %Q_KQ% -L %QDIR%\lib %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND%
+%QDIR%\qemu -smp 3 %Q_VGA% -s %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND%
 
 exit
 
