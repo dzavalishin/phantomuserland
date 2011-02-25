@@ -2,8 +2,10 @@ ifndef _PHANTOM_makerules_x86_
 _PHANTOM_makerules_x86_ = yes
 
 
+PHANTOM_CFLAGS += -m32
 # Required compiler/assembler flags.
-PHANTOM_ASFLAGS	+= $(PHANTOM_CPPFLAGS) -DASSEMBLER
+PHANTOM_ASFLAGS	+= -m32 $(PHANTOM_CPPFLAGS) -DASSEMBLER
+PHANTOM_LDFLAGS += -m elf_i386
 
 
 # Assembly language source files.
