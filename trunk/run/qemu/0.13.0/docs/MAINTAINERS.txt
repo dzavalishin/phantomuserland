@@ -1,0 +1,88 @@
+QEMU Maintainers
+================
+
+Project leaders:
+----------------
+
+Fabrice Bellard
+Paul Brook
+
+CPU cores:
+----------
+
+x86                Fabrice Bellard
+ARM                Paul Brook
+SPARC              Blue Swirl
+MIPS               ?
+PowerPC            ?
+M68K               Paul Brook
+SH4                ?
+CRIS               Edgar E. Iglesias
+Alpha              ?
+MicroBlaze         Edgar E. Iglesias
+S390               ?
+
+Machines (sorted by CPU):
+-------------------------
+
+x86
+  pc.c                    Fabrice Bellard (new maintainer needed)
+ARM
+  integratorcp.c          Paul Brook
+  versatilepb.c           Paul Brook
+  Real View               Paul Brook
+  spitz.c                 Andrzej Zaborowski
+  palm.c                  Andrzej Zaborowski
+  nseries.c               Andrzej Zaborowski
+  stellaris.c             Paul Brook
+  gumstix.c               Thorsten Zitterell
+  mainstone.c             Armin Kuster
+  musicpal.c              Jan Kiszka
+SPARC
+  sun4u.c                 Blue Swirl
+  sun4m.c                 Blue Swirl
+MIPS
+  mips_r4k.c              Aurelien Jarno
+  mips_malta.c            Aurelien Jarno
+  mips_jazz.c             Hervé Poussineau
+  mips_mipssim.c          ?
+PowerPC
+  ppc_prep.c              ?
+  ppc_oldworld.c          Fabrice Bellard
+  ppc_chrp.c              Fabrice Bellard
+  ppc405_boards.c         ?
+M86K
+  mcf5208.c               Paul Brook
+  an5206.c                Paul Brook
+  dummy_m68k.c            Paul Brook
+SH4
+  shix.c                  ?
+  r2d.c                   Magnus Damm
+CRIS
+  etraxfs.c               Edgar E. Iglesias
+  axis_dev88.c            Edgar E. Iglesias
+Alpha
+MicroBlaze
+  petalogix_s3adsp1800.c  Edgar E. Iglesias
+S390
+  s390-*.c                Alexander Graf
+
+Generic Subsystems:
+-------------------  
+
+Dynamic translator        Fabrice Bellard
+Main loop                 Fabrice Bellard (new maintainer needed)
+TCG                       Fabrice Bellard
+IDE device                ?
+SCSI device               Paul Brook
+PCI layer                 Michael S. Tsirkin
+USB layer                 ?
+Block layer               ?
+Graphic layer             ?
+Audio device layer        Vassili Karpov (malc)
+Character device layer    ?
+Network device layer      ?
+GDB stub                  ?
+Linux user                ?
+Darwin user               ?
+SLIRP                     ?
