@@ -940,7 +940,6 @@ static int ne_get_address( struct phantom_device *dev, void *buf, int len)
 #if 0
 
 /**************************************************************************
- ETHERBOOT -  BOOTP/TFTP Bootstrap Program
 
  Author: Martin Renters
  Date: May/94
