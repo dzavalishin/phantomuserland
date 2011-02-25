@@ -8,7 +8,7 @@
  *
 **/
 
-#include "amap.h"
+#include <kernel/amap.h>
 #include <malloc.h>
 #include <phantom_assert.h>
 #include <phantom_libc.h>

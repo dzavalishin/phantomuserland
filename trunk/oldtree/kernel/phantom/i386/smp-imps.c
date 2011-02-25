@@ -70,7 +70,7 @@ static volatile int     smp_ap_booted = 0;
 
 #define IMPS_DEBUG 1
 
-#include "apic.h"
+#include <kernel/ia32/apic.h>
 #include "smp-imps.h"
 
 

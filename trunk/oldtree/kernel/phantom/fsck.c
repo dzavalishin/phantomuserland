@@ -15,7 +15,7 @@
 #define debug_level_info 10
 
 
-#include "amap.h"
+#include <kernel/amap.h>
 
 #include <phantom_disk.h>
 #include <errno.h>

@@ -1,3 +1,6 @@
+#ifndef AMAP_H
+#define AMAP_H
+
 
 // Address map style allocator.
 // Represents some addresable space where parts can have different
@@ -54,3 +57,4 @@ void amap_iterate_flags( amap_t *map, void (*f)( amap_elem_addr_t from, amap_ele
 
 void amap_dump( amap_t *map );
 
+#endif // AMAP_H

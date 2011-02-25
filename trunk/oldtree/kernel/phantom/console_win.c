@@ -190,7 +190,6 @@ void phantom_init_console_window()
     console_fg = COLOR_LIGHTGRAY;
     console_bg = COLOR_BLACK;
 
-    // Todo - autogenerate size and position out of screen size
     int xsize = 620, ysize = 200;
     int cw_x = 50, cw_y = 550;
     if( video_drv->ysize < 600 )
@@ -204,7 +203,7 @@ void phantom_init_console_window()
 
     phantom_console_window = w;
 
-	w->owner = GET_CURRENT_THREAD();
+    w->owner = GET_CURRENT_THREAD();
 
     phantom_set_console_ops( &win_ops );
     phantom_console_window_puts("Phantom console window\n");

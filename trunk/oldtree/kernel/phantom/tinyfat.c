@@ -193,19 +193,6 @@ static errno_t fat_read( tiny_fat_t *fs, struct fat_dir *dir, off_t pos, size_t 
 
 
 
-// TODO move to stdlib
-static char * strupr(char *name)
-{
-    char *ret = name;
-
-    for( ; *name; name++ )
-    {
-        if(islower(*name))
-            *name = toupper(*name);
-    }
-
-    return ret;
-}
 
 
 static u_int8_t * format_FAT_filename(const char * const filename, const u_int32_t i)

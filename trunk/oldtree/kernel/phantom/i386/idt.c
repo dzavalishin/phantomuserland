@@ -19,9 +19,9 @@
 #include <i386/seg.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
-#include "idt.h"
 
-#include "apic.h"
+#include <kernel/ia32/idt.h>
+#include <kernel/ia32/apic.h>
 
 //extern struct real_gate idt[];
 

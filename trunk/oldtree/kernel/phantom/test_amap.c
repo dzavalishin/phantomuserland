@@ -21,7 +21,7 @@
 #include <errno.h>
 #include "test.h"
 
-#include "amap.h"
+#include <kernel/amap.h>
 
 #define MAP_FREE 0
 #define MAP_USED 1

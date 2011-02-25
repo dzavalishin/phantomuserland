@@ -360,7 +360,7 @@ connect_ide_io();
     init_buses();
 
 
-#if 1
+#if 0
     /*
     printf("PRESS Q TO STOP PHANTOM");
     while(getchar() != 'Q')

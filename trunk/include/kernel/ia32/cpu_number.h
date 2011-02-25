@@ -1,3 +1,4 @@
+#warning who uses me?
 /* 
  * Copyright (c) 1994 The University of Utah and
  * the Computer Systems Laboratory at the University of Utah (CSL).
@@ -20,43 +21,31 @@
  *
  *      Author: Bryan Ford, University of Utah CSL
  */
-
-#ifndef _I386AT_IDT_
-#define _I386AT_IDT_
-
-
-/*
- * Interrupt table must always be at least 32 entries long,
- * to cover the basic i386 exception vectors.
- * More-specific code will probably define it to be longer,
- * to allow separate entrypoints for hardware interrupts.
- */
-
-/* For some reason we program the PIC to use vectors 0x40-0x4f rather than 0x20-0x2f.  Fix.  */
-#define IDTSZ 256
-
-#define PIC_INT_BASE 0x20
-#define APIC_INT_BASE 0x40
+#ifndef _IMPS_CPU_NUMBER_
+#define _IMPS_CPU_NUMBER_
 
 
+#ifndef ASSEMBLER
+
+#include <kernel/ia32/apic.h>
+
+static inline int
+cpu_number()
+{
+	return apic_local_unit.unit_id.r >> 24;
+}
+
+#else ASSEMBLER
+
+//#include "impsasm.h"
+
+#define	CPU_NUMBER(reg)		\
+	movzbl	APIC_LOCAL_VA+APIC_LOCAL_UNIT_ID+3,reg
+
+#endif ASSEMBLER
 
 
-#define set_idt(pseudo_desc) \
-    ({ \
-	asm volatile("lidt %0" : : "m" ((pseudo_desc)->limit)); \
-    })
+//#include "i386/cpu_number.h"
 
 
-#include <i386/seg.h>
-
-
-extern struct real_gate idt[IDTSZ];
-
-/* Fill a gate in the IDT.  */
-#define fill_idt_gate(int_num, entry, selector, access, dword_count) \
-	fill_gate(&idt[int_num], entry, selector, access, dword_count)
-
-
-
-
-#endif // _I386AT_IDT_
+#endif _IMPS_CPU_NUMBER_

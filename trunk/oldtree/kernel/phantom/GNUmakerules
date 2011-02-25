@@ -30,8 +30,7 @@ LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
-TH_LIB=$(PLIBDIR)/libthreads.a
-PHANTOM_LIBS = 	$(TH_LIB) 
+PHANTOM_LIBS = 	$(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a
 
 
 
@@ -55,7 +54,7 @@ phantom: $(START_O_FILE) \
 	heap/heap.o heap/heap_pool.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
 	ohci.o uhci.o uhci_rh.o uhci_util.o \
-	traps.o amap.o hal_physmem.o physalloc.o \
+	traps.o hal_physmem.o physalloc.o \
 	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
 	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
 	time.o console.o timedcall.o driver_pci_rtl8139.o keyboard.o \
@@ -79,7 +78,7 @@ phantom: $(START_O_FILE) \
 	fs_map.o tinyfat.o stats.o resolve.o \
 	svn_version.o $(PLIBDIR)/libdev.a $(PLIBDIR)/libphantom.a \
 	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
-	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(TH_LIB)
+	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(PHANTOM_LIBS)
 
 	@echo "Linking $@ ---------------------------------------------"
 	@$(LD) $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \

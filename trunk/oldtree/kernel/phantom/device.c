@@ -41,8 +41,6 @@ phantom_bus_t root_bus =
 };
 
 
-// TODO kernel debugger cmd - list devs
-
 static void dump_dev(phantom_device_t *dev )
 {
     if( dev == 0 )
