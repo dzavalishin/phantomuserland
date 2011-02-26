@@ -222,6 +222,7 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 }
 
 
+#if defined(ARCH_ia32)
 
 static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t start, u_int32_t esp)
 {
@@ -248,6 +249,13 @@ static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t star
                  : : "m" (cs), "m" (ds), "m" (start), "m" (esp)
                 );
 }
+
+#else
+static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t start, u_int32_t esp)
+{
+	panic("no user mode yet on ARM");
+}
+#endif
 
 // _esp - user esp value (in user addr space)
 // ouseraddr - resulting user address of pushed object

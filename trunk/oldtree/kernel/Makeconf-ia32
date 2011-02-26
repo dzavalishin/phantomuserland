@@ -1,3 +1,4 @@
+ARCH_FLAGS      = -m32
 
 HOST_CPU	= i686
 HOST_ARCH	= x86

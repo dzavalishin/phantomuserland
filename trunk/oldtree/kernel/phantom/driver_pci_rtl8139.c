@@ -9,7 +9,7 @@
 **/
 
 #include <kernel/config.h>
-#if HAVE_NET
+#if HAVE_NET && defined(ARCH_ia32)
 
 #define DEBUG_MSG_PREFIX "RTL8139"
 #include "debug_ext.h"

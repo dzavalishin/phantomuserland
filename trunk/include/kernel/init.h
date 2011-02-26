@@ -71,6 +71,8 @@ void phantom_unix_proc_init(void);
 
 void init_buses(void);
 
+void arch_float_init(void);
+
 
 #endif // INIT_H
 

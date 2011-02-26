@@ -13,7 +13,7 @@ analyse::
 		@$(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES) >../../../kernel_sources.E
 
 
-SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom #$(PHANTOM_SRCDIR)/phantom/i386
+SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom/$(ARCH)
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 
 CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d
@@ -55,9 +55,9 @@ phantom: $(START_O_FILE) \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
 	ohci.o uhci.o uhci_rh.o uhci_util.o \
 	traps.o hal_physmem.o physalloc.o \
-	main.o arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
+	arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
 	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
-	time.o console.o timedcall.o driver_pci_rtl8139.o keyboard.o \
+	time.o console.o timedcall.o driver_pci_rtl8139.o \
 	paging_device.o dpc.o spinlock.o hal.o fsck.o \
 	console_win.o vm_threads.o snap_sync.o ps2.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o video_drv_cirrus.o \
@@ -66,8 +66,8 @@ phantom: $(START_O_FILE) \
 	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
 	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
 	device.o driver_isa_ne2000.o \
-	driver_pci_pcnet32.o syslog.o driver_pci_intel82559.o \
-	driver_pci_intel_etc.o \
+	driver_pci_pcnet32.o driver_pci_intel82559.o \
+	driver_pci_intel_etc.o debug_console.o tlb.o \
 	elf.o unix/dir.o unix/kernel_file.o unix/fs_pipe.o unix/sys_time.o \
 	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
 	unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
@@ -75,7 +75,7 @@ phantom: $(START_O_FILE) \
 	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
-	fs_map.o tinyfat.o stats.o resolve.o \
+	fs_map.o tinyfat.o stats.o resolve.o main.o keyboard.o syslog.o \
 	svn_version.o $(PLIBDIR)/libdev.a $(PLIBDIR)/libphantom.a \
 	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
 	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(PHANTOM_LIBS)

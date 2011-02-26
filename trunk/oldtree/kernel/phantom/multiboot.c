@@ -82,7 +82,8 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
 
 
     // setup the floating point unit
-    asm volatile ("fninit"); // BUG! MACHDEP!
+    //asm volatile ("fninit"); // BUG! MACHDEP!
+    arch_float_init();
 
     // malloc will start allocating from fixed pool.
     phantom_heap_init();

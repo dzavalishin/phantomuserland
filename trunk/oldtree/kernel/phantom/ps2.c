@@ -8,6 +8,9 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
+
 #define DEBUG_MSG_PREFIX "mouse"
 #include "debug_ext.h"
 #define debug_level_flow 0
@@ -559,4 +562,6 @@ G=Tomi S=Engdahl O=hut ADMD=fumail C=fi    Department of Computer Science
 
 
 **/
+
+#endif // ARCH_ia32
 

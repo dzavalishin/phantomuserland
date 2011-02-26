@@ -8,6 +8,8 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "video"
 #include "debug_ext.h"
 static int debug_level_flow = 1;
@@ -250,5 +252,6 @@ Category: Video - Int 10h - C
 
 */
 
+#endif // ARCH_ia32
 
 

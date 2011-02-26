@@ -1,5 +1,4 @@
-//#define __inline /**/
-//#define inline /**/
+#ifdef ARCH_ia32
 
 
 //********************************************************************
@@ -754,3 +753,4 @@ void pio_rep_outdword( unsigned int addrDataReg,
 #endif
 
 // end ataiopio.c
+#endif // ARCH_ia32

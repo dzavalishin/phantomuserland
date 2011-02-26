@@ -1,5 +1,5 @@
 #include <kernel/config.h>
-#if HAVE_NET
+#if HAVE_NET && defined(ARCH_ia32)
 
 #include <phantom_libc.h>
 #include <i386/pio.h>

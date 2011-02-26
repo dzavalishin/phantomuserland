@@ -9,6 +9,8 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "VirtIo"
 #include "debug_ext.h"
 #define debug_level_flow 1
@@ -735,6 +737,7 @@ void virtio_dump_phys(virtio_ring_t *r)
 }
 
 
+#endif // ARCH_ia32
 
 
 

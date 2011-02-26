@@ -1,3 +1,5 @@
+#ifdef ARCH_ia32
+
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOINT.C
 //
@@ -274,3 +276,4 @@ void dump_ide_stats()
 }
 
 // end ataioint.c
+#endif // ARCH_ia32

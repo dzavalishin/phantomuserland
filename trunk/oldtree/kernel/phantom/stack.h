@@ -8,7 +8,5 @@ extern int  phantom_start_stack_size;
 
 #endif
 
-//#define PAGE_SHIFT	12
-
 #include <x86/phantom_page.h>
 

@@ -1,8 +1,4 @@
-// !!!!!!!!!!!! TEMP !!!!!!!!!!!!!!!!
-
-//#define far
-
-//#error convert 16 bit data types to 32 bit ones
+#ifdef ARCH_ia32
 
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOREG.C
@@ -2186,3 +2182,4 @@ int reg_packet( int dev,
 }
 
 // end ataioreg.c
+#endif // ARCH_ia32

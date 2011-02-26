@@ -24,7 +24,7 @@
 #include "net.h"
 #include "ethernet.h"
 
-#include "atomic.h"
+#include <kernel/atomic.h>
 #include "endian.h"
 #include "hal.h"
 
