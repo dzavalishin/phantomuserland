@@ -9,6 +9,8 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "video"
 #include "debug_ext.h"
 #define debug_level_flow 6
@@ -154,6 +156,7 @@ static int bochs_video_stop()
 
 
 
+#endif // ARCH_ia32
 
 
 

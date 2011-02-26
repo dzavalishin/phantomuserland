@@ -12,6 +12,7 @@
 
 #include <kernel/config.h>
 #include <kernel/stats.h>
+#include <kernel/atomic.h>
 
 #if HAVE_NET
 
@@ -45,7 +46,6 @@
 
 #include "khash.h"
 
-#include "atomic.h"
 #include "endian.h"
 #include "hal.h"
 

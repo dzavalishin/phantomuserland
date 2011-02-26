@@ -1,3 +1,4 @@
+#ifdef ARCH_ia32
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOSUB.C
 //
@@ -351,3 +352,4 @@ void sub_writeBusMstrStatus( unsigned char x )
 }
 
 // end ataiosub.c
+#endif // ARCH_ia32

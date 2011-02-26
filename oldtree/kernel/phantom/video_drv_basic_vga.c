@@ -9,6 +9,8 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
 #include <kernel/vm.h>
 
 #include <phantom_libc.h>
@@ -703,5 +705,6 @@ int read_vga_register(int port, int index)
    return inb(port+1);
 }
 
+#endif // ARCH_ia32
 
 

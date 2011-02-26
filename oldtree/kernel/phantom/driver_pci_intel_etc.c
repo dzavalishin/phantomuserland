@@ -1,3 +1,6 @@
+
+#if defined(ARCH_ia32)
+
 #define DEBUG_MSG_PREFIX "PIIX4"
 #include "debug_ext.h"
 #define debug_level_flow 10
@@ -201,3 +204,5 @@ static errno_t check_piix4_isa_sanity(int port)
 	(void) port;
     return 0;
 }
+
+#endif // defined(ARCH_ia32)

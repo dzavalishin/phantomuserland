@@ -8,6 +8,8 @@
  *
 **/
 
+#include <arm/psr.h>
+
 // todo: save contents of registers r1 and r2 in r7 and r8 to save off architecture ID and atags pointer passed in by bootloader 
 
 	.text
@@ -33,7 +35,7 @@ _start:
 
 
     .string "Phantom OS\r\n"
-    .string "Copyright (C) Dmitry Zavalishin, 2010.\r\n"
+    .string "Copyright (C) Dmitry Zavalishin, 2011.\r\n"
 
     .align 4
 
@@ -43,7 +45,8 @@ _reset:
 
     LDR         r1, = __bss_start__
     LDR         r2, = __bss_end__
-    LDR         r3, $0
+    //LDR         r3, #0
+	MOV         r3, #0
 
 1:
     CMP         r1, r2

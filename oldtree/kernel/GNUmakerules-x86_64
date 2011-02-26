@@ -2,9 +2,9 @@ ifndef _PHANTOM_makerules_x86_64_
 _PHANTOM_makerules_x86_64_ = yes
 
 
-PHANTOM_CFLAGS += -m32
+PHANTOM_CFLAGS += $(ARCH_FLAGS)
 # Required compiler/assembler flags.
-PHANTOM_ASFLAGS	+= -m32 $(PHANTOM_CPPFLAGS) -DASSEMBLER
+PHANTOM_ASFLAGS	+= $(ARCH_FLAGS) $(PHANTOM_CPPFLAGS) -DASSEMBLER
 PHANTOM_LDFLAGS += -m elf_i386
 
 

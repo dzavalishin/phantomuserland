@@ -11,7 +11,7 @@
 **/
 
 
-#if HAVE_NET
+#if HAVE_NET && defined(ARCH_ia32)
 
 #define NE2000_INTR 0
 

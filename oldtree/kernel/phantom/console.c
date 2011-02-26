@@ -9,26 +9,13 @@
 **/
 
 #include <phantom_libc.h>
-#include <i386/pio.h>
 #include <drv_video_screen.h>
-#include "console.h"
+#include <kernel/debug.h>
+
+#include <console.h>
 
 // This is a very simple console switch/redirection tool
 
-#define WAIT_COM_OUT 1
-
-#define PORT1 0x3F8
-
-static void com_port_putc(char c)
-{
-#if WAIT_COM_OUT
-    while(! (inb(PORT1+5) & 0x20) )
-        ;
-#endif
-    if( c == '\n' )
-        outb(PORT1, '\r' );
-    outb(PORT1, c);
-}
 
 
 int 	null_set_color(struct rgba_t c) {     (void) c; return 0; 	}
@@ -74,7 +61,8 @@ int getchar(void)
 
 int putchar(int c)
 {
-    com_port_putc(c);
+	// Send a copy to serial port or whatever...
+    debug_console_putc(c);
 
     if(ops->putchar) return ops->putchar(c);
     // No way to handle :(
@@ -89,7 +77,7 @@ puts(const char *s)
     {
         const char *sc = s;
         while(*sc)
-            com_port_putc(*sc++);
+            debug_console_putc(*sc++);
 
         return ops->puts(s);
     }

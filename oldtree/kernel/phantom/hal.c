@@ -11,6 +11,7 @@
 
 
 #include <kernel/config.h>
+#include <kernel/mmu.h>
 
 #include <phantom_libc.h>
 
@@ -52,41 +53,16 @@ int phantom_is_a_real_kernel() { return 1; }
 
 
 
-/*
- * Inline function to flush a page from the TLB.
- */
-static __inline__
-void ftlbentry(physaddr_t la)
-{
-    asm volatile("invlpg (%0)" : : "r" (la) : "memory");
-}
 
 
-
-
-
-// Used by kernel memory allocator to guard multithreaded allocation access
-//static hal_spinlock_t hal_mem_lock;
-
-//void phantom_mem_lock() { hal_spin_lock(&hal_mem_lock); }
-//void phantom_mem_unlock() { hal_spin_unlock(&hal_mem_lock); }
-
-
-
-void        hal_init( vmem_ptr_t va, long vs )
+void hal_init( vmem_ptr_t va, long vs )
 {
     printf("x86 HAL init\n");
 
     hal.object_vspace = va;
     hal.object_vsize = vs;
 
-    //hal_spin_init(&hal_mem_lock);
-
     pvm_alloc_init( va, vs );
-
-    //hal.object_vsize = 40 * 1024 * 1024; // 40 MB
-    //hal.object_vspace = start_of_virtual_address_space;
-    //hal.object_vspace = (void *)PHANTOM_AMAP_START_VM_POOL;
 
     hal_printf("HAL init VM at 0x%X\n", hal.object_vspace);
 

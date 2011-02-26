@@ -1,3 +1,5 @@
+#ifdef ARCH_ia32
+
 /**
  *
  * dz - removed LARGE mode at all for simplicity.
@@ -1273,3 +1275,4 @@ int dma_pci_packet( int dev,
 }
 
 // end ataiopci.c
+#endif // ARCH_ia32
