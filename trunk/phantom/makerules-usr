@@ -9,9 +9,9 @@ include $(BUILD_ROOT)/makerules
 
 PHANTOM_CFLAGS += -ffreestanding -W -Wall
 
-LD_ADDR=-Wl,-Ttext,0
+LD_ADDR=-Wl,-Ttext-segment,0
 
-LIBGCC := `$(CC) --print-libgcc-file-name`
+LIBGCC := `$(CC) $(ARCH_FLAGS) --print-libgcc-file-name`
 
 LIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
