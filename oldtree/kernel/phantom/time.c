@@ -56,6 +56,7 @@ static bigtime_t tz_delta;
 static char tz_name[64];
 
 
+static long long diff = 0; // time set machinery
 
 
 
@@ -81,8 +82,31 @@ int hal_time_init()
 static long msecDivider = 0;
 static long secDivider = 0;
 
+
+
 void hal_time_tick(int tick_rate)
 {
+    // We correct time by updating real_time_delta slowly
+
+    // Time correction logic
+    if( diff > 0 )
+    {
+        // Make time to move not more than twice the normal speed
+        int shift = (diff > tick_rate) ? tick_rate : ((int)diff);
+
+        real_time_delta += shift;
+        diff -= shift;
+    }
+
+    if( diff < 0 )
+    {
+        // Make time to move as slow as possible, but not slower :)
+        int shift = (-diff >= tick_rate) ? 1-tick_rate : ((int)diff);
+
+        real_time_delta += shift;
+        diff -= shift;
+    }
+
     int ei = hal_save_cli();
     hal_spin_lock(&sys_time_spinlock);
     sys_time += tick_rate;
@@ -171,6 +195,35 @@ bigtime_t hal_system_time_lores(void)
 bigtime_t hal_local_time(void)
 {
     return hal_system_time() + real_time_delta + tz_delta;
+}
+
+// 15 minutes
+#define TIME_JUMP_LIMIT (1000000LL*60*15)
+
+bigtime_t hal_set_system_time(bigtime_t target, int gmt)
+{
+    diff = 0; // To prevent old correction to continue in parallel
+
+    bigtime_t sysnow = hal_system_time()+ real_time_delta;
+    if(!gmt)
+        sysnow += tz_delta;
+
+    long long _diff = target - sysnow;
+
+    if(
+       ( (_diff > 0) && (_diff >  TIME_JUMP_LIMIT) )
+       ||
+       ( (_diff < 0) && (_diff < -TIME_JUMP_LIMIT) )
+      )
+    {
+        real_time_delta += _diff;
+        _diff = 0;
+    }
+
+    // Start correction
+    diff = _diff;
+
+    return _diff;
 }
 
 

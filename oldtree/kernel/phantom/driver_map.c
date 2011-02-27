@@ -164,6 +164,7 @@ typedef struct
 // NB! No network drivers on stage 0!
 static etc_probe_t etc_drivers[] =
 {
+    { "null",                   driver_null_probe,      	0 },
     { "SMBios", 		driver_etc_smbios_probe, 	0 },
 //    { "ACPI", 			driver_etc_acpi_probe, 		0 },
 

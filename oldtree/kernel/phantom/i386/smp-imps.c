@@ -27,7 +27,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <i386/trap.h>
+//#include <i386/trap.h>
 
 #include <i386/proc_reg.h>
 #include <i386/seg.h>
@@ -36,9 +36,11 @@
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
+
 #include <kernel/vm.h>
 #include <kernel/smp.h>
 #include <kernel/init.h>
+#include <kernel/trap.h>
 
 #include <time.h>
 #include <errno.h>

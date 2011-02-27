@@ -75,6 +75,7 @@ phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage );
 //                               Others
 // ---------------------------------------------------------------
 
+phantom_device_t * driver_null_probe( char *name, int stage );
 
 phantom_device_t * driver_etc_smbios_probe( const char *name, int stage );
 phantom_device_t * driver_etc_acpi_probe( const char *name, int stage );

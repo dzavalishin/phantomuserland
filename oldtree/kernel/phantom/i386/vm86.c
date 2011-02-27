@@ -1,6 +1,8 @@
 
 #include <kernel/init.h>
-#include <i386/trap.h>
+#include <kernel/trap.h>
+
+//#include <i386/trap.h>
 #include <setjmp.h>
 #include <x86/phantom_page.h>
 

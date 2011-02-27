@@ -50,6 +50,10 @@
 #warning Intel32 code! Wrong arch?
 #endif
 
+#ifndef GENERAL_TRAP_H
+#warning include <kernel/trap.h> instead!
+#endif
+
 
 /*
  * Hardware trap vectors for i386.
@@ -137,16 +141,12 @@ struct trap_state {
 #define TR_USIZE	((int)&((struct trap_state*)0)->v86_es)
 #define TR_V86SIZE	sizeof(struct trap_state)
 
-#define I386_N_TRAPS 32
+//#define I386_N_TRAPS 32
+#define ARCH_N_TRAPS 32
 
-int (*phantom_trap_handlers[I386_N_TRAPS])(struct trap_state *ts);
 
-void dump_ss(struct trap_state *st);
-const char *trap_name(unsigned int trapnum);
-int trap_panic(struct trap_state *ts);
+//int (*phantom_trap_handlers[I386_N_TRAPS])(struct trap_state *ts);
 
-// Check if current thread is usermode and convert trap to thread kill
-void phantom_check_user_trap( struct trap_state *ts );
 
 
 

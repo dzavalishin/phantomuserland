@@ -19,6 +19,7 @@
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
 #include <kernel/unix.h>
+#include <stdio.h>
 
 //static uufs_t *rootfs;
 extern struct uufs root_fs;
@@ -123,6 +124,38 @@ errno_t uu_absname( char *opath, const char *base, const char *_add )
     return 0;
 }
 
+
+int uu_break_path( const char *in, int maxpart, const char *oname[], int olen[] )
+{
+    int npart = 0;
+
+    if( *in == '/' ) in++;
+
+    const char *p = in;
+
+    while(npart < maxpart)
+    {
+        oname[npart] = p;
+
+        const char *end = strchr( p, '/' );
+        if( end )
+        {
+            olen[npart] = end-p;
+            p = end+1;
+            npart++;
+            continue;
+        }
+        else
+        {
+            olen[npart] = strlen(p);
+            npart++;
+            break;
+        }
+
+    }
+
+    return npart;
+}
 
 
 #endif // HAVE_UNIX

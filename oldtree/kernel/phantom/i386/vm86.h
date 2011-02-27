@@ -1,5 +1,6 @@
+#include <kernel/trap.h>
+
 #include <i386/eflags.h>
-#include <i386/trap.h>
 #include <i386/seg.h>
 #include <i386/tss.h>
 #include <i386/proc_reg.h>

@@ -154,6 +154,7 @@ extern struct uufs proc_fs;
 
 
 errno_t uu_absname( char *out_path, const char *base, const char *add );
+int uu_break_path( const char *in, int maxpart, const char *oname[], int olen[] );
 
 
 errno_t auto_mount( const char *name, uufs_t *fs );

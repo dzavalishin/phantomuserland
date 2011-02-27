@@ -3425,7 +3425,7 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
 
     }
 
-    if(0) {
+    if(1) {
     int pid = uu_create_process(-1);
     const char* av[] = { "sh", 0 };
     uu_proc_setargs( pid, av, 0 );
