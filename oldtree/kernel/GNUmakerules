@@ -10,6 +10,7 @@ default: all
 
 # Include architecture-specific rules.
 include $(PHANTOM_SRCDIR)/GNUmakerules-$(HOST_ARCH)
+include $(PHANTOM_SRCDIR)/Makeconf-$(ARCH)
 
 
 # Where to get includes and libraries from.
