@@ -76,6 +76,9 @@ int hal_time_init()
 
 
 
+// ------------------------------------------------------------------
+// Time machinery
+// ------------------------------------------------------------------
 
 
 
@@ -197,6 +200,12 @@ bigtime_t hal_local_time(void)
     return hal_system_time() + real_time_delta + tz_delta;
 }
 
+
+// ------------------------------------------------------------------
+// time set
+// ------------------------------------------------------------------
+
+
 // 15 minutes
 #define TIME_JUMP_LIMIT (1000000LL*60*15)
 
@@ -228,6 +237,15 @@ bigtime_t hal_set_system_time(bigtime_t target, int gmt)
 
 
 
+// ------------------------------------------------------------------
+// time_t
+// ------------------------------------------------------------------
+
+
+
+#define BIGTDIFF 1920962713L
+#define BUGTFACT 1000000LL
+
 
 time_t time(time_t *timer)
 {
@@ -236,7 +254,9 @@ time_t time(time_t *timer)
     //printf("time bigtime = %lld systime = %lld rt delta = %lld tzdelta = %lld\n", val, sys_time, real_time_delta, tz_delta );
 
     // ToDO last constant must be tuned
-    time_t t = (time_t)(val/1000000LL) - 1920962713L;
+    time_t t = (time_t)(val/BUGTFACT) - BIGTDIFF;
+    // or?
+    //time_t t = (time_t)( (val - BIGTDIFF) / BUGTFACT);
 
     if(timer != (time_t*)0)
     {
@@ -245,6 +265,22 @@ time_t time(time_t *timer)
     return t;
 }
 
+
+
+void set_time(time_t time)
+{
+
+    bigtime_t target = (time+BIGTDIFF) * BUGTFACT;
+    // or?
+    //bigtime_t target = (time * BUGTFACT) + BIGTDIFF;
+
+    hal_set_system_time( target, 1 );
+}
+
+
+
+
+
 // Uptime in seconds
 time_t uptime(void)
 {
@@ -252,6 +288,14 @@ time_t uptime(void)
     bigtime_t val = hal_system_time_lores();
     return (time_t)(val/1000000LL);
 }
+
+
+
+// ------------------------------------------------------------------
+// struct tm
+// ------------------------------------------------------------------
+
+
 
 
 struct tm tm_a = { 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // Make sure time will be read ASAP

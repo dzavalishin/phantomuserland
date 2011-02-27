@@ -238,7 +238,7 @@ void event_q_put_e( struct ui_event *in )
 static void event_push_thread()
 {
     hal_set_thread_name("UIEventQ");
-	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
 #if EVENTS_ENABLED && 1
     while(1)

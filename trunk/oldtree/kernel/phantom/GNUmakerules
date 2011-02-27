@@ -48,6 +48,7 @@ entry.o: crtn.o
 START_O_FILE=entry.o
 
 phantom: $(START_O_FILE) \
+	winsd.o sntp.o \
 	tetris.o ff.o bootp.o stray_check.o sbrk.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o test_userland.o events.o smp.o \
