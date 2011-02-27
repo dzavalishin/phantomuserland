@@ -14,8 +14,10 @@
 #define THREAD_PRIVATE_H
 
 #include <kernel/timedcall.h>
+#include <kernel/trap.h>
+
 #include "cpu_state.h"
-#include <i386/trap.h>
+//#include <i386/trap.h>
 
 #include <phantom_types.h>
 #include <queue.h>

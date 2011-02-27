@@ -28,7 +28,7 @@
 #include <kernel/stats.h>
 #include <threads.h>
 
-#include <i386/trap.h>
+//#include <i386/trap.h>
 #include <i386/proc_reg.h>
 #include <x86/phantom_pmap.h>
 #include <time.h>
@@ -43,6 +43,7 @@
 
 #include <kernel/ia32/cpu.h>
 //#include <kernel/ia32/mmx.h>
+#include <kernel/trap.h>
 
 #define volatile /* */
 

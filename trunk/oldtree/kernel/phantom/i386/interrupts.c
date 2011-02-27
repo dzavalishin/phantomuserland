@@ -20,8 +20,9 @@
 #include <hal.h>
 
 #include <kernel/interrupts.h>
+#include <kernel/trap.h>
 
-#include <i386/trap.h>
+//#include <i386/trap.h>
 #include <i386/pio.h>
 #include <i386/isa/pic.h>
 #include <queue.h>

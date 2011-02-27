@@ -8,9 +8,12 @@
  *
 **/
 
-#include <i386/trap.h>
+//#include <i386/trap.h>
 #include <i386/proc_reg.h>
 #include <i386/eflags.h>
+
+#include <kernel/trap.h>
+
 #include <phantom_assert.h>
 #include <phantom_libc.h>
 
@@ -110,7 +113,7 @@ int trap_panic(struct trap_state *ts)
  *
 **/
 
-int (*phantom_trap_handlers[I386_N_TRAPS])(struct trap_state *ts) = {
+int (*phantom_trap_handlers[ARCH_N_TRAPS])(struct trap_state *ts) = {
 	trap_panic, /* 0 */
 	trap_panic,
 	trap_panic,

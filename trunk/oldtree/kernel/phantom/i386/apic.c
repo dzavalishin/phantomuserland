@@ -24,9 +24,10 @@
 #include <x86/phantom_pmap.h>
 #include <hal.h>
 #include <phantom_libc.h>
-#include <i386/trap.h>
+//#include <i386/trap.h>
 #include <i386/proc_reg.h>
 #include <kernel/init.h>
+#include <kernel/trap.h>
 
 // scheduler_time_interrupt
 #include <threads.h>

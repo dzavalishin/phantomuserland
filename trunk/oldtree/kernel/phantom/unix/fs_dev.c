@@ -19,6 +19,7 @@
 #define debug_level_info 10
 
 #include <unix/uufile.h>
+#include <sys/libkern.h>
 //#include <unix/uuprocess.h>
 #include <malloc.h>
 #include <string.h>
@@ -33,7 +34,8 @@
 
 static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      dev_write(   struct uufile *f, const void *dest, size_t bytes);
-//static errno_t     dev_stat(    struct uufile *f, struct ??);
+static errno_t     dev_stat( struct uufile *f, struct stat *dest );
+
 //static errno_t     dev_ioctl(   struct uufile *f, struct ??);
 
 static size_t      dev_getpath( struct uufile *f, void *dest, size_t bytes);
@@ -54,7 +56,7 @@ static struct uufileops dev_fops =
 
     .copyimpl   = dev_copyimpl,
 
-    //.stat       = dev_stat,
+    .stat       = dev_stat,
     //.ioctl      = dev_ioctl,
 };
 
@@ -153,14 +155,46 @@ static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
     (void) fs;
 
     struct uufileops *ops = 0;
+    uufile_t *ret;
 
     if( 0 == strcmp( filename, "tty" ) )
+    {
         ops = &con_fops;
+        ret = create_uufile();
+    }
 
     if(ops == 0)
-        return 0;
+    {
+#define NPART 10
 
-    uufile_t *ret = create_uufile();
+        const char *oname[NPART];
+        int olen[NPART];
+
+        int nb = uu_break_path( filename, NPART, oname, olen );
+
+        if( nb > 2 || nb < 0 )
+            return 0;
+
+        char namebuf[FS_MAX_PATH_LEN];
+
+        strlcpy( namebuf, oname[0], imin( olen[0], FS_MAX_PATH_LEN ) );
+        uufile_t *busf = lookup_dir( &dev_root, namebuf, 0, create_dir );
+
+        if( nb == 1 )
+        {
+            ret = busf;
+        }
+        else
+        {
+            strlcpy( namebuf, oname[1], imin( olen[1], FS_MAX_PATH_LEN ) );
+            uufile_t *devf = lookup_dir( busf,      namebuf, 0, create_uufile );
+            ret = devf;
+        }
+
+        link_uufile( ret );
+    }
+
+    SHOW_FLOW( 0, "dev found '%s'", filename );
 
     ret->ops = ops;
     ret->pos = 0;
@@ -182,6 +216,27 @@ static uufile_t *  dev_getRoot(uufs_t *fs)
 static errno_t     dev_dismiss(uufs_t *fs)
 {
     (void) fs;
+    return 0;
+}
+
+
+static errno_t     dev_stat( struct uufile *f, struct stat *dest )
+{
+    memset( dest, 0, sizeof(struct stat) );
+
+    dest->st_nlink = 1;
+    dest->st_uid = -1;
+    dest->st_gid = -1;
+
+    dest->st_size = 0;
+
+    dest->st_mode = 0555; // r-xr-xr-x
+
+    if(f->flags && UU_FILE_FLAG_DIR)
+        dest->st_mode |= _S_IFDIR;
+    else
+        dest->st_mode |= _S_IFCHR;
+
     return 0;
 }
 
@@ -280,7 +335,7 @@ void devfs_register_dev( phantom_device_t* dev )
     snprintf( devname, FS_MAX_MOUNT_PATH, "%s%d", dev->name, dev->seq_number );
 
     uufile_t *busf = lookup_dir( &dev_root, busname, 1, create_dir );
-    uufile_t *devf = lookup_dir( busf, devname, 1, create_uufile );
+    uufile_t *devf = lookup_dir( busf,      devname, 1, create_uufile );
 
     if(devf->impl)
         SHOW_ERROR( 0, "Replacing dev %s on bus %s?", devname, busname );

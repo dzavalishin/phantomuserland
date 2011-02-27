@@ -77,6 +77,21 @@ int do_test_absname(const char *test_parm)
     test_one("../../abc..", 	".",		"/abc.."	);
     test_one("////abc//.././..", ".", 		"/"		);
 
+    int nb;
+
+#define NPART 10
+
+    const char *oname[NPART];
+    int olen[NPART];
+
+    nb = uu_break_path( "/aa/bb/ccc", NPART, oname, olen );
+
+    int i;
+    for( i = 0; i < nb; i ++ )
+    {
+        printf("part %d '%.*s'\n", i, olen[i], oname[i] );
+    }
+
     return 0;
 }
 

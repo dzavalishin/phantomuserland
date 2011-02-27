@@ -21,7 +21,7 @@
 #include "svn_version.h"
 
 #include <i386/proc_reg.h>
-#include <i386/trap.h>
+//#include <i386/trap.h>
 #include <i386/pio.h>
 
 #include <phantom_libc.h>
@@ -29,6 +29,8 @@
 
 #include <kernel/init.h>
 #include <kernel/debug.h>
+#include <kernel/trap.h>
+
 
 #include <newos/port.h>
 
@@ -360,7 +362,7 @@ connect_ide_io();
     init_buses();
 
 
-#if 0
+#if 1
     /*
     printf("PRESS Q TO STOP PHANTOM");
     while(getchar() != 'Q')

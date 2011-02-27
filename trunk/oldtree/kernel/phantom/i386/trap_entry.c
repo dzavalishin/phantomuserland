@@ -1,4 +1,7 @@
-#include <i386/trap.h>
+
+#include <kernel/trap.h>
+
+//#include <i386/trap.h>
 #include <i386/eflags.h>
 
 #include <phantom_assert.h>
