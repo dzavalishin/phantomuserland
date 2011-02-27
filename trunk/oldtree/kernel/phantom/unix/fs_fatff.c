@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "fat_ff_fs"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -156,7 +156,7 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
 
     if( r )
     {
-        SHOW_FLOW( 1, "f_open %s res = %d", filename, r );
+        SHOW_FLOW( 7, "f_open %s res = %d", filename, r );
         free(fp);
         return 0;
     }
@@ -257,9 +257,9 @@ static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
     const char *name = f->name;
     FILINFO fi;
 
-    SHOW_FLOW( 1, "stat %s", name );
+    SHOW_FLOW( 10, "stat %s", name );
     FRESULT r = f_stat ( ffs, name, &fi );
-    SHOW_FLOW( 1, "stat res = %d", r );
+    SHOW_FLOW( 7, "stat res = %d", r );
 
     if(!r)
     {

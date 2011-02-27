@@ -337,7 +337,7 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
     hal_irq_alloc( irq, phantom_dev_ps2_int_handler, 0, HAL_IRQ_SHAREABLE );
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
-    dev->name = "PS/2 mouse";
+    dev->name = "ps2-mouse";
     dev->seq_number = seq_number++;
 
     hal_start_kernel_thread((void*)push_event_thread);

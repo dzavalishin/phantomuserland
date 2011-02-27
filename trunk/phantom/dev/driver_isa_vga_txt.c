@@ -123,7 +123,7 @@ phantom_device_t * driver_isa_vga_probe( int port, int irq, int stage )
     }
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
-    dev->name = "VGA text mode console";
+    dev->name = "vga-console";
     dev->seq_number = seq_number++;
 
     //doputs("Test VGA console output\n");

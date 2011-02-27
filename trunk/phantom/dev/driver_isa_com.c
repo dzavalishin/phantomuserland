@@ -138,7 +138,7 @@ phantom_device_t * driver_isa_com_probe( int port, int irq, int stage )
     dev->iobase = port;
     dev->irq = irq;
 
-    dev->name = "COM";
+    dev->name = "com";
     dev->seq_number = seq_number++;
 
 

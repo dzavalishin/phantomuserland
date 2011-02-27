@@ -148,7 +148,7 @@ WW();
 
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
-    dev->name = "PcNet/PcHome network card";
+    dev->name = "pcnet";
     dev->seq_number = seq_number++;
     dev->drv_private = nic;
 

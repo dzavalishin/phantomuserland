@@ -104,7 +104,7 @@ phantom_device_t * driver_isa_lpt_probe( int port, int irq, int stage )
     lpt_addr = port;
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
-    dev->name = "LPT";
+    dev->name = "lpt";
     dev->seq_number = seq_number++;
 
     return dev;

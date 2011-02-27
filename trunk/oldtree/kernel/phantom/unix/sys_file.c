@@ -25,6 +25,7 @@
 #include <sys/unistd.h>
 #include <sys/fcntl.h>
 #include <dirent.h>
+#include <stdio.h>
 #include <phantom_types.h>
 
 #include "unix/fs_pipe.h"
@@ -35,6 +36,8 @@
 
 int usys_open( int *err, uuprocess_t *u, const char *name, int flags, int mode )
 {
+    SHOW_FLOW( 7, "open '%s'", name );
+
     uufile_t * f = uu_namei( name );
     if( f == 0 )
     {

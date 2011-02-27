@@ -98,6 +98,8 @@ errno_t unlink_dir_ent( uufile_t *dir, uufile_t *deu );
 // Find or create dir ent
 uufile_t *lookup_dir( uufile_t *dir, const char *name, int create, uufile_t *(*createf)() );
 
+// Return n-th entry's name.
+errno_t get_dir_entry_name( uufile_t *dir, int n, char *name );
 
 
 
