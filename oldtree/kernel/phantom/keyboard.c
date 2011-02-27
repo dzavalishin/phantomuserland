@@ -462,7 +462,7 @@ phantom_device_t * driver_isa_ps2k_probe( int port, int irq, int stage )
     //hal_irq_alloc( PS2_INTERRUPT, phantom_dev_ps2_int_handler, 0, HAL_IRQ_SHAREABLE );
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
-    dev->name = "PS/2 keyboard";
+    dev->name = "ps2-keyboard";
     dev->seq_number = seq_number++;
 
     keyb_init = 1;

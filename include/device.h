@@ -101,7 +101,7 @@ typedef struct phantom_device phantom_device_t;
 void devfs_register_dev( phantom_device_t* dev );
 
 
-#define phantom_bus_add_dev( bus, dev ) do { (dev)->next = (bus)->devices; (bus)->devices = (dev);  devfs_register_dev( dev ); } while(0)
+#define phantom_bus_add_dev( __bus, __dev ) do { (__dev)->next = (__bus)->devices; (__bus)->devices = (__dev); (__dev)->bus = (__bus); devfs_register_dev( __dev ); } while(0)
 #define phantom_bus_add_bus( bus, child_bus ) do { (child_bus)->next = (bus)->buses; (bus)->buses = (child_bus); } while(0)
 
 

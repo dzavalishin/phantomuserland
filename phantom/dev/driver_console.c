@@ -60,7 +60,7 @@ static int console_write(struct phantom_device *dev, const void *buf, int len)
 // TODO this is to be moved to driver_map.c and be kept in driver tables
 static int seq_number = 0;
 
-phantom_device_t * driver_console_probe( char *name, int stage )
+phantom_device_t * driver_console_probe( const char *name, int stage )
 {
     phantom_device_t * dev;
 

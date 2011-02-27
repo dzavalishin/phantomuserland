@@ -62,6 +62,7 @@ void destroy_uufile(uufile_t *f)
 
 void link_uufile( uufile_t *in )
 {
+    if( in == 0 ) return;
     in->refcount++;
 }
 

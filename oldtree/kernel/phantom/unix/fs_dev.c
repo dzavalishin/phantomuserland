@@ -20,7 +20,7 @@
 
 #include <unix/uufile.h>
 #include <sys/libkern.h>
-//#include <unix/uuprocess.h>
+#include <dirent.h>
 #include <malloc.h>
 #include <string.h>
 #include "device.h"
@@ -80,7 +80,7 @@ static struct uufileops con_fops =
 
     .copyimpl   = dev_copyimpl,
 
-    //.stat       = dev_stat,
+    .stat       = dev_stat,
     //.ioctl      = dev_ioctl,
 };
 
@@ -153,19 +153,37 @@ static errno_t     dev_close(struct uufile *f)
 static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
 {
     (void) fs;
+    SHOW_FLOW( 7, "dev lookup '%s'", filename );
 
-    struct uufileops *ops = 0;
-    uufile_t *ret;
+    //struct uufileops *ops = 0;
+    uufile_t *ret = 0;
 
     if( 0 == strcmp( filename, "tty" ) )
     {
-        ops = &con_fops;
         ret = create_uufile();
+        ret->ops = &con_fops;
+        ret->pos = 0;
+        ret->fs = &dev_fs;
+        ret->name = strdup( filename );
+        ret->impl = 0;
+
+        SHOW_FLOW( 8, "dev created '%s'", filename );
+
+        return ret;
     }
 
-    if(ops == 0)
+    if( (0 == strcmp( filename, "" )) || 0 == strcmp( filename, "/" ) )
+    {
+        //ops = &dev_fops;
+        ret = copy_uufile( &dev_root );
+        //link_uufile( ret );
+    }
+
+
+    if(ret == 0)
     {
 #define NPART 10
+        //ops = &dev_fops;
 
         const char *oname[NPART];
         int olen[NPART];
@@ -177,7 +195,7 @@ static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
 
         char namebuf[FS_MAX_PATH_LEN];
 
-        strlcpy( namebuf, oname[0], imin( olen[0], FS_MAX_PATH_LEN ) );
+        strlcpy( namebuf, oname[0], imin( olen[0]+1, FS_MAX_PATH_LEN ) );
         uufile_t *busf = lookup_dir( &dev_root, namebuf, 0, create_dir );
 
         if( nb == 1 )
@@ -186,21 +204,18 @@ static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
         }
         else
         {
-            strlcpy( namebuf, oname[1], imin( olen[1], FS_MAX_PATH_LEN ) );
+            strlcpy( namebuf, oname[1], imin( olen[1]+1, FS_MAX_PATH_LEN ) );
             uufile_t *devf = lookup_dir( busf,      namebuf, 0, create_uufile );
             ret = devf;
         }
 
-        link_uufile( ret );
+        // Separate copy for pos
+        //link_uufile( ret );
+        ret = copy_uufile( ret );
+
     }
 
-    SHOW_FLOW( 0, "dev found '%s'", filename );
-
-    ret->ops = ops;
-    ret->pos = 0;
-    ret->fs = &dev_fs;
-    ret->name = strdup( filename );
-    ret->impl = 0;
+    SHOW_FLOW( 7, "dev found '%s'", filename );
 
     return ret;
 }
@@ -247,15 +262,44 @@ static errno_t     dev_stat( struct uufile *f, struct stat *dest )
 
 static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes)
 {
+    if(f->flags && UU_FILE_FLAG_DIR)
+    {
+        SHOW_FLOW( 11, "Read dir for %d bytes, pos %d", bytes, f->pos );
+
+        struct dirent r;
+        if( bytes < sizeof(struct dirent) )
+            return -1;
+
+
+        char namebuf[FS_MAX_PATH_LEN];
+        if( get_dir_entry_name( f, f->pos++, namebuf ) )
+            return 0;
+
+        SHOW_FLOW( 7, "Read dir pos %d = '%s'", f->pos-1, namebuf );
+
+        r.d_ino = -1; // not 0 for some programs treat 0 as no entry
+        r.d_reclen = 0;
+        strlcpy( r.d_name, namebuf, FILENAME_MAX );
+        r.d_namlen = strlen( r.d_name );
+
+        *((struct dirent*)dest) = r;
+
+        return sizeof(struct dirent);
+    }
+
+
     phantom_device_t* dev = f->impl;
-    if(dev->dops.read == 0) return -1;
+    if(dev == 0 || dev->dops.read == 0) return -1;
     return dev->dops.read( dev, dest, bytes );
 }
 
 static size_t      dev_write(   struct uufile *f, const void *src, size_t bytes)
 {
+    if(f->flags && UU_FILE_FLAG_DIR)
+        return -1;
+
     phantom_device_t* dev = f->impl;
-    if(dev->dops.write == 0) return -1;
+    if(dev == 0 || dev->dops.write == 0) return -1;
     return dev->dops.write( dev, src, bytes );
 }
 
@@ -336,6 +380,12 @@ void devfs_register_dev( phantom_device_t* dev )
 
     uufile_t *busf = lookup_dir( &dev_root, busname, 1, create_dir );
     uufile_t *devf = lookup_dir( busf,      devname, 1, create_uufile );
+
+    if(busf->fs == 0)
+    {
+        busf->fs = &dev_fs;
+        busf->ops = &dev_fops;
+    }
 
     if(devf->impl)
         SHOW_ERROR( 0, "Replacing dev %s on bus %s?", devname, busname );

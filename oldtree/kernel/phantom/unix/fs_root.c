@@ -213,7 +213,7 @@ static errno_t     root_stat( struct uufile *f, struct stat *dest )
 {
     const char *name = f->name;
 
-    SHOW_FLOW( 1, "stat %s", name );
+    SHOW_FLOW( 7, "stat %s", name );
 
     memset( dest, 0, sizeof(struct stat) );
 
@@ -273,6 +273,8 @@ static uufs_t * find_mount( const char* name, char *namerest )
         if( mplen <= 0 )
             continue;
 
+        //SHOW_FLOW( 6, "find mount '%s'", name );
+
         if( 0 == strncmp( name, mount[i].path, mplen ) )
         {
             if( mplen > maxlen )
@@ -287,10 +289,13 @@ static uufs_t * find_mount( const char* name, char *namerest )
 
     if( ret )
     {
+        // Skip final /
+        if( '/' == *(name+maxlen) )
+            maxlen++;
         // part of name after the mount point
         strncpy( namerest, name+maxlen, FS_MAX_PATH_LEN );
 
-        SHOW_FLOW( 2, "got '%s' (%s) for '%s', rest = '%s'",
+        SHOW_FLOW( 7, "got '%s' (%s) for '%s', rest = '%s'",
                    m_path,
                    m_name,
                    name, namerest
@@ -327,8 +332,14 @@ found:
     strncpy( mount[i].path, path, FS_MAX_MOUNT_PATH );
     strncpy( mount[i].name, name, FS_MAX_MOUNT_PATH );
 
-    if( mount[i].path[strlen(mount[i].path) - 1] != '/' )
-        strcat(mount[i].path, "/" );
+    //if( mount[i].path[strlen(mount[i].path) - 1] != '/' )
+    //    strcat(mount[i].path, "/" );
+
+    // Kill final slash
+    int rlen = strlen(mount[i].path);
+    if( mount[i].path[rlen - 1] == '/' )
+        mount[i].path[rlen - 1] = 0;
+
 
     return 0;
 }

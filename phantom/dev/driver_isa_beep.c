@@ -120,7 +120,7 @@ phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage )
     // TODO check if we really have this hardware. How?
 
     dev = malloc(sizeof(phantom_device_t));
-    dev->name = "BEEP";
+    dev->name = "beeper";
     dev->seq_number = seq_number++;
 
     dev->dops.stop = beep_stop;
