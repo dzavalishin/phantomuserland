@@ -20,7 +20,8 @@
 #include <phantom_types.h>
 #include <string.h>
 #include <phantom_disk.h>
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
+//#include <x86/phantom_page.h>
 
 
 #include "fs_map.h"

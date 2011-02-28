@@ -36,8 +36,20 @@
 #ifndef _MACHINE_LIMITS_H_
 #define	_MACHINE_LIMITS_H_
 
-#define	CHAR_BIT	8		/* number of bits in a char */
+
+//#define	CHAR_BIT	8		/* number of bits in a char */
 #define	MB_LEN_MAX	6		/* Allow 31 bit UTF2 */
+
+#if 1
+
+#include <arch/arch-limits.h>
+
+#else
+
+
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
 
 /*
  * According to ANSI (section 2.2.4.2), the values below must be usable by
@@ -83,4 +95,6 @@
 #endif /* !_POSIX_SOURCE */
 #endif /* !_ANSI_SOURCE */
 
+
+#endif
 #endif /* !_MACHINE_LIMITS_H_ */

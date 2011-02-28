@@ -44,10 +44,12 @@
 #ifndef _SYS_ENDIAN_H_
 #define _SYS_ENDIAN_H_
 
+
+
 #ifndef _POSIX_SOURCE
 
-#define BYTE_ORDER LITTLE_ENDIAN
-//#include <sys/cdefs.h>
+//#define BYTE_ORDER LITTLE_ENDIAN
+#include <arch/arch_endian.h>
 
 #include <phantom_types.h>
 
@@ -75,21 +77,6 @@
 	    (__swap32gen_x & 0xff000000) >> 24);			\
 })
 
-#if 0
-// tried that way: gcc creates really stupid code
-#define __swap64gen(x) ({						\
-	u_int64_t __swap64gen_x = (x);					\
-									\
-	(u_int64_t)((__swap64gen_x & 0xff) << 56 |			\
-	    (__swap64gen_x & 0xff00) << 40 |				\
-	    (__swap64gen_x & 0xff0000) << 24 |				\
-	    (__swap64gen_x & 0xff000000) << 8 |			\
-	    (__swap64gen_x & 0xff00000000) >> 8 |			\
-	    (__swap64gen_x & 0xff0000000000) >> 24 |				\
-	    (__swap64gen_x & 0xff000000000000) >> 40 |				\
-	    (__swap64gen_x & 0xff00000000000000) >> 56);			\
-})
-#else
 #define __swap64gen(x) ({						\
 	u_int64_t __swap64gen_x = (x);					\
 	u_int32_t __swap64gen_low = __swap64gen_x & 0xffffffff; \
@@ -98,7 +85,7 @@
 	(u_int64_t)(((u_int64_t)(__swap32gen(__swap64gen_low)) << 32 | \
 		__swap32gen(__swap64gen_high)));	\
 })
-#endif
+
 
 #else /* __GNUC__ */
 

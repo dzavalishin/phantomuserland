@@ -28,11 +28,12 @@
 #include <i386/pio.h>
 #include <i386/seg.h>
 //#include <i386/trap.h>
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 #include <phantom_libc.h>
 
 #include <kernel/vm.h>
 #include <kernel/trap.h>
+#include <kernel/page.h>
 
 #include "i386/ia32private.h"
 

@@ -32,6 +32,8 @@
    a well-optimized microkernel will probably want to override it
    with something that allows better optimization.  */
 
+//#warning Arm trap state is wrong!
+
 struct trap_state {
 
     u_int32_t   r1;

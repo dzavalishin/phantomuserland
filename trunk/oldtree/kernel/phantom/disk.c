@@ -18,11 +18,12 @@
 #include "disk_part_pc.h"
 #include <phantom_disk.h>
 #include <assert.h>
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 #include <malloc.h>
 #include <phantom_libc.h>
 #include <string.h>
 #include <kernel/vm.h>
+#include <kernel/page.h>
 
 // really need private
 #include <thread_private.h>

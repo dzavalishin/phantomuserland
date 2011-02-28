@@ -27,11 +27,12 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 #include <errno.h>
 #include <threads.h>
 #include <kernel/config.h>
 #include <kernel/stats.h>
+#include <kernel/page.h>
 
 #include "paging_device.h"
 #include "hal.h"

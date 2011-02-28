@@ -24,7 +24,8 @@
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 #include <kernel/barriers.h>
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
+//#include <x86/phantom_page.h>
 
 static u_int32_t virtio_get_q_size( virtio_device_t *vd, int index );
 static void virtio_ring_init(virtio_device_t *vd, int index, int num );

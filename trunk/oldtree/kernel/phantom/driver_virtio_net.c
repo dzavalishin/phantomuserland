@@ -31,9 +31,10 @@
 #include "driver_map.h"
 #include "device.h"
 #include <kernel/ethernet_defs.h>
+#include <kernel/page.h>
 #include "net.h"
 
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 
 // FIXME some races prevent this driver from starting at stage 1
 
