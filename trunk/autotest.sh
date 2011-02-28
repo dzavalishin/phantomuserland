@@ -61,7 +61,7 @@ GRUB_MENU=tftp/tftp/menu.lst
 cd oldtree/run_test
 cp ../run/tftp/phantom tftp/
 
-for module in classes pmod_test
+for module in classes pmod_test pmod_tcpdemo
 do
 	[ -s tftp/$module ] || {
 		cp ../run/tftp/$module tftp/
