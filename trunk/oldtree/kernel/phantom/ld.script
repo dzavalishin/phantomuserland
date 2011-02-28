@@ -36,9 +36,11 @@
 
 .init_array     : { 
 		__init_array_start  = .;
+		_init_array_start  = .;
 		KEEP(*(.init_array))
 		KEEP(*(.ctors)) 
 		__init_array_end    = .;
+		_init_array_end    = .;
 }
 
 /*
