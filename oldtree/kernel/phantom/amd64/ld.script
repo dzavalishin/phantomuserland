@@ -1,0 +1,56 @@
+OUTPUT_FORMAT(elf64-x86-64)
+ENTRY(_start_of_kernel)
+SECTIONS
+{
+    . = KERNEL_VMA;
+
+    .text : AT(ADDR(.text) - KERNEL_VMA)
+    {
+        _code = .;
+        *(.text)
+        *(.rodata*)
+        . = ALIGN(4096);
+    }
+
+   .data : AT(ADDR(.data) - KERNEL_VMA)
+   {
+        _data = .;
+        *(.data)
+        . = ALIGN(4096);
+   }
+
+   .ehframe : AT(ADDR(.ehframe) - KERNEL_VMA)
+   {
+       _ehframe = .;
+       *(.ehframe)
+        . = ALIGN(4096);
+   }
+
+   .init_array     : { 
+		__init_array_start  = .;
+		KEEP(*(.init_array))
+		KEEP(*(.ctors)) 
+		__init_array_end    = .;
+   }
+
+   .bss : AT(ADDR(.bss) - KERNEL_VMA)
+   {
+       _bss = .;
+       *(.bss)
+
+       /*
+        * You usually need to include generated COMMON symbols
+        * under kernel BSS section or use gcc's -fno-common
+        */
+
+        *(COMMON)
+       . = ALIGN(4096);
+   }
+
+   _end = .;
+
+   /DISCARD/ :
+   {
+        *(.comment)
+   }
+}

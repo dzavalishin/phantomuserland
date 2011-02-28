@@ -12,7 +12,7 @@
 
 #include <kernel/config.h>
 #include <kernel/mmu.h>
-
+#include <kernel/page.h>
 #include <phantom_libc.h>
 
 #include <kernel/init.h>
@@ -25,7 +25,7 @@
 #include <vm/alloc.h>
 
 #include <x86/phantom_pmap.h>
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 #include <malloc.h>
 
 #include <i386/proc_reg.h>

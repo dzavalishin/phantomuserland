@@ -20,7 +20,7 @@
 #include <kernel/config.h>
 #include "hal_private.h"
 #include <i386/proc_reg.h>
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 #include <phantom_libc.h>
 #include "physalloc.h"
 #include <string.h>
@@ -29,7 +29,7 @@
 #include <kernel/init.h>
 #include <kernel/debug.h>
 #include <kernel/stats.h>
-
+#include <kernel/page.h>
 
 
 static void cmd_mem_stat( int ac, char **av );

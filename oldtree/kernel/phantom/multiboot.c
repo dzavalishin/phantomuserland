@@ -19,7 +19,8 @@
 #include <string.h>
 #include <kernel/vm.h>
 #include <kernel/init.h>
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
+//#include <x86/phantom_page.h>
 #include <x86/phantom_pmap.h>
 #include <hal.h>
 #include <multiboot.h>

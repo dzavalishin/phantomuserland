@@ -29,6 +29,10 @@
 #ifndef _MACH_SETJMP_H_PROCESSED_
 #define _MACH_SETJMP_H_PROCESSED_ 1
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
 /* XXX prefix these with mach_ so they don't interfere with higher layers?
    This stuff is included by cthreads.h.  */
 

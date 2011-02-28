@@ -59,6 +59,7 @@
     		_bss_start__ = . ;
     		__bss_start__ = . ;
 		*(.bss) 
+        *(COMMON)
 		_bss_end__ = . ;
 		__bss_end__ = . ;
 		}

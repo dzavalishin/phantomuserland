@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <kernel/vm.h>
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
+//#include <x86/phantom_page.h>
 
 #include "pagelist.h"
 #include "pager.h"

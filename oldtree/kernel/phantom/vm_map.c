@@ -28,7 +28,6 @@
 #include <kernel/stats.h>
 #include <threads.h>
 
-//#include <i386/trap.h>
 #include <i386/proc_reg.h>
 #include <x86/phantom_pmap.h>
 #include <time.h>
@@ -41,7 +40,9 @@
 #include "snap_sync.h"
 #include "pager.h"
 
-#include <kernel/ia32/cpu.h>
+#include <machdep.h>
+
+//#include <kernel/ia32/cpu.h>
 //#include <kernel/ia32/mmx.h>
 #include <kernel/trap.h>
 
@@ -252,35 +253,34 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 int
 vm_map_page_fault_trap_handler(struct trap_state *ts)
 {
+#ifdef ARCH_ia32
     if (ts->trapno == T_DEBUG)
     {
         //hal_printf("\n\n\n --- debug trap at EIP=0x%X --- \n\n\n", ts->eip );
         return 0;
     }
 
-    if (ts->trapno == T_PAGE_FAULT) {
-        //int enabled = hal_save_sti();
-
-        ts->cr2 = get_cr2();
+    if (ts->trapno == T_PAGE_FAULT)
+#endif
+    {
+        addr_t fa = arch_get_fault_address();
+#ifdef ARCH_ia32
+        ts->cr2 = fa;
+#endif
 
         {
-            unsigned long addr = (unsigned int) ts->cr2;
+            unsigned long addr = fa;
 
             addr -= (unsigned int)vm_map_start_of_virtual_address_space;
 
-            //if( addr < 0 || addr >= (vm_map_vm_page_count*__MEM_PAGE) )
             if( addr >= (vm_map_vm_page_count*__MEM_PAGE) )
             {
                 dump_ss(ts);
-                panic("fault address 0x%X is outside of object space, IP 0x%X", (unsigned int) ts->cr2, ts->eip);
+                panic("fault address 0x%p is outside of object space, IP 0x%X", fa, ts->eip);
             }
         }
 
-        vm_map_page_fault_handler( (void *)ts->cr2, ts->err & T_PF_WRITE, ts->eip, ts );
-        /*
-         if (enabled)			cli();
-         */
-
+        vm_map_page_fault_handler( (void *)fa, ts->err & T_PF_WRITE, ts->eip, ts );
         return 0;
     }
 
