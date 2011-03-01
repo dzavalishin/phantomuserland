@@ -1,15 +1,7 @@
-#ifndef CPU_STATE_H
-#define CPU_STATE_H
-
-#if 1
-#include <arch/arch-cpu_state.h>
-#else
-
 // temp off
 #define FXSAVE 0
 
 
-//#if (!defined ASSEMBLER) && (!defined ASM)
 #if (!defined ASSEMBLER) && (!defined __ASSEMBLY__)
 
 #include <phantom_types.h>
@@ -33,8 +25,6 @@ struct cpu_state_save
     u_int8_t            fxstate[512];
 };
 
-//#define THREAD_PUSH(t,val) (*(--((int *)t->cpu.esp) ) = (int)(val))
-
 #define STACK_PUSH(esp,val) (*(--esp) = (int)(val))
 
 
@@ -48,8 +38,3 @@ typedef struct cpu_state_save cpu_state_save_t;
 #define CSTATE_ESP              8
 #define CSTATE_EBP		12
 #define CSTATE_FXSTATE          16
-
-#endif
-
-#endif // CPU_STATE_H
-

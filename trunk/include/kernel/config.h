@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define HAVE_SMP 0
+
 #ifndef COMPILE_EXPERIMENTAL
 #define COMPILE_EXPERIMENTAL 0
 #endif  // COMPILE_EXPERIMENTAL
@@ -51,8 +53,8 @@ static void register_stray_catch_buf(void)
 {
     memset( stray_pointer_catch_data+4, 0, STRAY_CATCH_SIZE-4 );
 	
-	phantom_debug_register_stray_catch( stray_pointer_catch_bss, STRAY_CATCH_SIZE, " bss" );
-	phantom_debug_register_stray_catch( stray_pointer_catch_data, STRAY_CATCH_SIZE, " data" );
+    phantom_debug_register_stray_catch( stray_pointer_catch_bss, STRAY_CATCH_SIZE, " bss" );
+    phantom_debug_register_stray_catch( stray_pointer_catch_data, STRAY_CATCH_SIZE, " data" );
 }
 
 #endif

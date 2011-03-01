@@ -1,7 +1,11 @@
 #ifndef SMP_H
 #define SMP_H
 
-#define MAX_CPUS	16
+//#if HAVE_SMP
+#  define MAX_CPUS	16
+//#else
+//#  define MAX_CPUS	1
+//#endif // HAVE_SMP
 
 
 #ifndef ASSEMBLER
