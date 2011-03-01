@@ -39,7 +39,8 @@ RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 #trap "rm $0.lock" 0
 
 rm -f make.log
-make clean > /dev/null 2>&1
+#make clean > /dev/null 2>&1
+./build.sh clean > /dev/null 2>&1
 svn update | grep -v '^At revision' || {
 	[ "$FORCE" ] || die "$MSG"
 }
@@ -104,9 +105,10 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 
 qemu $QEMU_OPTS
 
-grep -iB 10 'Panic\|[^e]fault\|fail\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
+grep -iB 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
-grep 'PASSED\|FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
+grep -i 'fail\|test' serial0.log
+grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
 
 [ "$SNAPTEST" ] || exit 0
 
