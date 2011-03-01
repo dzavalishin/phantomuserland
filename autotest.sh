@@ -41,11 +41,15 @@ RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 rm -f make.log
 #make clean > /dev/null 2>&1
 ./build.sh clean > /dev/null 2>&1
+
+# clean unexpected failures
+GRUB_MENU=tftp/tftp/menu.lst
+svn diff | grep "^--- oldtree/run_test/$GRUB_MENU" && \
+	rm oldtree/run_test/$GRUB_MENU
 svn update | grep -v '^At revision' || {
 	[ "$FORCE" ] || die "$MSG"
 }
 
-GRUB_MENU=tftp/tftp/menu.lst
 [ "$COMPILE" ] && {
 	./build.sh > make.log 2>&1 || die "Make failure"
 	#make -C phantom/vm	>> make.log 2>&1 || die "Make failure in vm"
