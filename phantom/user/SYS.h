@@ -1,27 +1,25 @@
+/**
+ *
+ * Phantom OS multithreading library.
+ *
+ * Copyright (C) 2009-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Sycn: conds.
+ *
+ * Licensed under CPL 1.0, see LICENSE file.
+ *
+**/
+
+#include <kernel/syscalls.h>
+
+#ifdef ARCH_ia32
+
 /* 
- * Mach Operating System
- */
-/*
- * Copyright (c) 1983 Regents of the University of California.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms are permitted
- * provided that the above copyright notice and this paragraph are
- * duplicated in all such forms and that any documentation,
- * advertising materials, and other materials related to such
- * distribution and use acknowledge that the software was developed
- * by the University of California, Berkeley.  The name of the
- * University may not be used to endorse or promote products derived
- * from this software without specific prior written permission.
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- *
- *	@(#)SYS.h	5.4 (Berkeley) 6/27/88
+ * x86 version taken from Mach Operating System
  */
 
+
 #include <mach/asm.h>
-#include <kernel/syscalls.h>
 
 
 #ifdef __STDC__
@@ -42,3 +40,36 @@
 
 //.data
 //	.globl	LCL(cerror)
+
+#endif
+
+
+
+#ifdef ARCH_arm
+#include <arm/asm.h>
+
+
+
+//#define HASH #
+//#define PASTE(a,b) PASTE1(a,b)
+//#define PASTE1(a,b) a##b
+//#define PASTE1(a,b) a/**/b
+
+// not sure we need ret here as we don't "push le; mov lr, ip"
+//#define	SYSCALL(x)	ENTRY(x); ldr r12, = PASTE( HASH , SYS_##x ); swi  0x0;
+#define	SYSCALL(x)	ENTRY(x); ldr r12, = SYS_##x; swi  0x0;
+
+//#undef HASH
+//#undef PASTE
+//#undef PASTE1
+
+#endif
+
+
+
+#ifndef SYSCALL
+#  error no syscall for this architecture?
+#endif
+
+
+

@@ -1,3 +1,4 @@
+#if 0
 /* 
  * Mach Operating System
  * Copyright (c) 1991,1990,1989,1988 Carnegie Mellon University
@@ -45,3 +46,4 @@ ENTRY(trap_name) \
 #endif
 
 #endif	/* _MACH_I386_SYSCALL_SW_H_ */
+#endif
