@@ -1,5 +1,5 @@
 set confirm off
-symbol-file phantom
+symbol-file phantom.pe
 dir .
 dir ../../../phantom/vm
 dir ../../../phantom/libc
