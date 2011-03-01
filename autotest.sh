@@ -44,9 +44,9 @@ rm -f make.log
 
 # clean unexpected failures
 GRUB_MENU=tftp/tftp/menu.lst
-svn diff | grep "^--- oldtree/run_test/$GRUB_MENU" && \
+svn diff | grep -q "^--- oldtree/run_test/$GRUB_MENU" && \
 	rm oldtree/run_test/$GRUB_MENU
-svn update | grep '^At revision' && {
+svn update | grep -q '^At revision' && {
 	[ "$FORCE" ] || die "$MSG"
 }
 
