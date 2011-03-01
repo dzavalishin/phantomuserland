@@ -6,7 +6,9 @@ include $(realpath $(PHANTOM_HOME))/config.mk
 include $(realpath $(PHANTOM_HOME))/phantom/Makeconf-$(ARCH)
 
 
-INCDIRS += $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/include/$(ARCH)
+INCDIRS += $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/include/$(ARCH) \
+	$(PHANTOM_HOME)/include $(PHANTOM_HOME)/include/$(ARCH)
+
 
 # hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare

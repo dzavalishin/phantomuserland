@@ -21,8 +21,8 @@
 */
 
 #include <phantom_types.h>	/* for time_t */
-#include "phantom_libc.h"
-#include "limits.h"	/* for CHAR_BIT */
+#include <phantom_libc.h>
+#include <limits.h>	/* for CHAR_BIT */
 #include <phantom_time.h>
 
 
