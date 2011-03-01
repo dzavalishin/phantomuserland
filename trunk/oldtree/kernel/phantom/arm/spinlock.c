@@ -4,6 +4,10 @@
 #include <kernel/smp.h>
 #include <kernel/atomic.h>
 
+#if HAVE_SMP
+#error no SMP on arm yet
+#endif
+
 #if SPIN_DEBUG
 //#include <i386/proc_reg.h>
 #endif
@@ -38,6 +42,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
     }
 #endif
 
+#if HAVE_SMP
     while(1)
     {
         while(sl->lock != 0)
@@ -47,6 +52,9 @@ void hal_spin_lock(hal_spinlock_t *sl)
         if(atomic_set( &sl->lock, 1) == 0)
             break;
     }
+#else
+    sl->lock = 1;
+#endif
 
 #if SPIN_DEBUG
     global_lock_entry_count[GET_CPU_ID()]++;
