@@ -6,10 +6,9 @@ CLEAN_FILES += test/*.o crt/*.o pmod_test
 
 LD_ADDR=-Ttext 0
 
-//LIBGCC := `$(CC) --print-libgcc-file-name`
-LIBGCC := `gcc --print-libgcc-file-name`
+#LIBGCC := `$(CC) --print-libgcc-file-name`
+#LIBGCC := `gcc --print-libgcc-file-name`
 
-#all: $(TARGET) pmod_test ../lib/crt0.o
 all: $(TARGET) ../lib/crt0.o 
 #pmod_test pmod_regress
 
@@ -18,17 +17,17 @@ all: $(TARGET) ../lib/crt0.o
 
 MOD_LIBS=../lib/libphantom_c.a libphantom_user.a
 
-pmod_test: crt/crt0.o test/testmain.o $(MOD_LIBS)
-	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
-	objcopy -O elf32-i386 $@.pe $@
-	objdump -x -d $@ >$@.dump
+#pmod_test: crt/crt0.o test/testmain.o $(MOD_LIBS)
+#	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+#	objcopy -O elf32-i386 $@.pe $@
+#	objdump -x -d $@ >$@.dump
 
-pmod_regress: crt/crt0.o regress/main.o $(MOD_LIBS)
-	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
-	objcopy -O elf32-i386 $@.pe $@
-	objdump -x -d $@ >$@.dump
+#pmod_regress: crt/crt0.o regress/main.o $(MOD_LIBS)
+#	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+#	objcopy -O elf32-i386 $@.pe $@
+#	objdump -x -d $@ >$@.dump
 
 
-install:: pmod_test pmod_regress
-	cp pmod_test $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/
-	cp pmod_regress $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/
+#install:: pmod_test pmod_regress
+#	cp pmod_test $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/
+#	cp pmod_regress $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/

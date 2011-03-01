@@ -1,4 +1,3 @@
-#include <mach/asm.h>
 #include "SYS.h"
 
 SYSCALL(gethostname)

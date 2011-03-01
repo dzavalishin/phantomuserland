@@ -1,10 +1,7 @@
-#include <mach/asm.h>
 #include "SYS.h"
 
 //SYSCALL(getpagesize)
-
 //SYSCALL(personality)
-
 
 
 SYSCALL(gettid)
