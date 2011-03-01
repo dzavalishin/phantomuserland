@@ -107,7 +107,7 @@ qemu $QEMU_OPTS
 
 grep -iB 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
-grep -i 'fail\|test' serial0.log
+grep '[Ff][Aa][Ii][Ll]\|TEST' serial0.log
 grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
 
 [ "$SNAPTEST" ] || exit 0
