@@ -4,23 +4,27 @@
  *
  * Copyright (C) 2009-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Machine dependent C code, ia32.
+ * Machine dependent C code, arm.
  *
  * Licensed under CPL 1.0, see LICENSE file.
  *
 **/
 
+#if 0
+// Not done at all
+
+
 #include "thread_private.h"
 #include <phantom_libc.h>
-#include <i386/seg.h>
-#include <i386/eflags.h>
+//#include <i386/seg.h>
+//#include <i386/eflags.h>
 
-//#define FXDEBUG(a) a
-#define FXDEBUG(a)
 
 // asm code
 void phantom_thread_trampoline(void);
-//void phantom_thread_fp_init(void *temp, void *newstate );
+
+
+
 
 /**
  * Initializes what is needed for thread to be ready to
@@ -164,4 +168,5 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 }
 
 
+#endif
 

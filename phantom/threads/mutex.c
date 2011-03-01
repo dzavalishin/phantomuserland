@@ -2,7 +2,7 @@
  *
  * Phantom OS multithreading library.
  *
- * Copyright (C) 2009-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2009-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Sync: mutexes.
  *
