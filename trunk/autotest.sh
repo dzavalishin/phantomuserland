@@ -46,7 +46,7 @@ rm -f make.log
 GRUB_MENU=tftp/tftp/menu.lst
 svn diff | grep "^--- oldtree/run_test/$GRUB_MENU" && \
 	rm oldtree/run_test/$GRUB_MENU
-svn update | grep -v '^At revision' || {
+svn update | grep '^At revision' && {
 	[ "$FORCE" ] || die "$MSG"
 }
 
