@@ -55,6 +55,7 @@ static void checkinit(hal_mutex_t *m)
     if(mi != 0)
     {
         hal_spin_unlock(&init_lock);
+        if(ie) hal_sti();
         return;
     }
 
@@ -82,6 +83,8 @@ static void verify_mutex_deadlock(phantom_thread_t *t)
 
 errno_t hal_mutex_lock(hal_mutex_t *m)
 {
+    assert_not_interrupt();
+
     if(m->impl == 0) checkinit(m);
 
     struct phantom_mutex_impl* mi = m->impl;
@@ -160,6 +163,8 @@ ret:
 
 errno_t hal_mutex_destroy(hal_mutex_t *m)
 {
+    assert_not_interrupt();
+
     struct phantom_mutex_impl *mi = m->impl;
 
     if(mi->owner != 0)

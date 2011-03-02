@@ -15,8 +15,8 @@
 #define debug_level_info 10
 
 
-#include <kernel/ia32/cpu.h>
-#include "../misc.h"
+//#include <kernel/ia32/cpu.h>
+#include <kernel/init.h>
 
 #include <string.h>
 #include <phantom_libc.h>

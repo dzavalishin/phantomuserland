@@ -35,7 +35,6 @@ int phantom_pci_find_drivers( int stage );
 
 
 
-int detect_cpu(int curr_cpu);
 
 
 // TODO move to time.h
@@ -47,7 +46,7 @@ time_t uptime(void);
 
 
 
-void hal_cpu_reset_real(void);
+//void hal_cpu_reset_real(void);
 
 
 void net_test(void);

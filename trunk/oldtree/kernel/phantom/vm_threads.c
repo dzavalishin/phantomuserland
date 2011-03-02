@@ -2,11 +2,18 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Virtual machine threads handler.
  *
 **/
+
+#define DEBUG_MSG_PREFIX "vmthread"
+#include <debug_ext.h>
+#define debug_level_flow 2
+#define debug_level_error 10
+#define debug_level_info 10
+
 
 #include <kernel/config.h>
 
@@ -22,12 +29,13 @@
 #include <threads.h>
 #include <thread_private.h>
 
+#include <time.h>
+
 #include "snap_sync.h"
-#include "hal.h"
+#include <hal.h>
 
 
 
-#define DEBUG 0
 
 // TODO something against running the same thread twice or more times
 
@@ -42,7 +50,7 @@ static void remove_vm_thread_from_list(pvm_object_storage_t *os)
     int nthreads  = get_array_size(pvm_root.threads_list.data);
 
     if( !nthreads )
-        printf("There were 0 live threads in image, and some thread is dead. Now -1?");
+        SHOW_ERROR0( 0, "There were 0 live threads in image, and some thread is dead. Now -1?" );
 
     int nkill = 0;
     while(nthreads--)
@@ -71,7 +79,7 @@ static void thread_death_handler( phantom_thread_t *t )
     pvm_object_storage_t *os = t->owner;
     if( os == 0 )
     {
-        printf("!!! thread_death_handler - no pointer to Vm thread object!\n");
+        SHOW_ERROR0( 0, "!!! thread_death_handler - no pointer to Vm thread object!" );
         return;
     }
 
@@ -121,6 +129,25 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 
     while(args_used > 0)
         hal_sleep_msec(1);
+
+    if(tda->sleep_flag)
+    {
+        timedcall_t *e = &(tda->timer);
+        int didit = 0;
+
+        if(e->msecMore > 0 && e->msecLater > 0 )
+        {
+            // Thread is sleeping on timer, reactivate wakeup
+            phantom_wakeup_after_msec( e->msecMore, tda );
+            didit = 1;
+        }
+
+        if(!didit)
+        {
+            SHOW_ERROR( 0, "Sleeping VM thread has no means to wakeup (%p)", new_thread.data );
+        }
+
+    }
 }
 
 
@@ -168,12 +195,10 @@ void activate_all_threads()
 {
     int nthreads  = get_array_size(pvm_root.threads_list.data);
 
-#if DEBUG
-    if( nthreads )
-        printf("Activating %d threads", nthreads);
-    else
-        printf("There are 0 live threads in image, system must be dead :(");
-#endif
+    if( nthreads == 0 )
+        SHOW_ERROR0( 0, "There are 0 live threads in image, system must be dead :(" );
+
+    SHOW_FLOW( 3, "Activating %d threads", nthreads);
 
     while(nthreads--)
     {
@@ -191,10 +216,10 @@ void phantom_finish_all_threads(void)
     phantom_virtual_machine_stop_request = 1;
     phantom_virtual_machine_snap_request = 1;
 
-    if(DEBUG) printf("Finishing %d threads\n", n_vm_threads);
+    SHOW_FLOW( 2, "Finishing %d threads", n_vm_threads);
     while(n_vm_threads > 0)
     {
-        if(DEBUG) printf("Waiting for threads to finish, %d left\n", n_vm_threads);
+        SHOW_FLOW( 6, "Waiting for threads to finish, %d left", n_vm_threads);
         hal_sleep_msec(1);
         // For snapper may, possibly, decrement it till then
         phantom_virtual_machine_snap_request = 1;

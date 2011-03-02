@@ -49,11 +49,13 @@ static void do_request_timed_call( timedcall_t *newEntry, u_int32_t flags )
     newEntry->msecMore = 0;
     newEntry->flags = flags;
 
+    /* TIMEDCALL_FLAG_AUTOFREE requires call to free from interrupt :(
     if(
        (newEntry->flags & TIMEDCALL_FLAG_PERIODIC) &&
        (newEntry->flags & TIMEDCALL_FLAG_AUTOFREE)
       )
         panic("periodic autofree timed call requested");
+    */
 
     //if( newEntry.next != 0)        panic("next != null in phantom_request_timed_call");
 
@@ -131,7 +133,7 @@ static void local_request_timed_call( timedcall_t *entry, u_int32_t flags )
 
 
 
-
+/*
 static void signal_cond(void *arg)
 {
     hal_cond_signal((hal_cond_t *)arg);
@@ -152,11 +154,11 @@ void phantom_request_cond_broadcast( int msec, hal_cond_t *cond)
 {
     phantom_request_timed_func( broadcast_cond, cond, msec, 0 );
 }
+*/
 
 
 
-
-
+/* TIMEDCALL_FLAG_AUTOFREE requires call to free from interrupt :(
 
 void phantom_request_timed_func( timedcall_func_t f, void *arg, int msecLater, u_int32_t flags )
 {
@@ -168,7 +170,7 @@ void phantom_request_timed_func( timedcall_func_t f, void *arg, int msecLater, u
     phantom_request_timed_call( req, flags|TIMEDCALL_FLAG_AUTOFREE );
 }
 
-
+*/
 
 
 static void dputc(char c)
@@ -243,9 +245,10 @@ again:
             assert(ep->msecLater > 0);
             local_request_timed_call( ep, ep->flags );
         }
+        /* TIMEDCALL_FLAG_AUTOFREE requires call to free from interrupt :(
         else if( ep->flags & TIMEDCALL_FLAG_AUTOFREE )
             free( ep );
-
+        */
 
         if(!queue_empty(&tcEventQ))
         {
@@ -284,7 +287,9 @@ void phantom_undo_timed_call(timedcall_t *entry)
     hal_spin_lock( &timedcall_lock );
     //void *save_f = entry->f; // save
     //entry->f = 0; // make sure it won't fire in any case
-    assert( ! (entry->flags & TIMEDCALL_FLAG_AUTOFREE) );
+
+    // TIMEDCALL_FLAG_AUTOFREE requires call to free from interrupt :(
+    //assert( ! (entry->flags & TIMEDCALL_FLAG_AUTOFREE) );
 
     if( !is_on_q(entry) )
         goto unlock;

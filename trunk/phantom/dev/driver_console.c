@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Default console driver.
+ *
+ *
+**/
+
 
 #define DEBUG_MSG_PREFIX "console"
 #include <debug_ext.h>

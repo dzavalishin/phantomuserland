@@ -47,12 +47,14 @@ static void checkinit(hal_cond_t *c)
 {
     // in spinlock!
 
+    int ie = hal_save_cli();
     hal_spin_lock(&init_lock);
 
     struct phantom_cond_impl *ci = c->impl;
     if(ci != 0)
     {
         hal_spin_unlock(&init_lock);
+        if(ie) hal_sti();
         return;
     }
 
@@ -62,6 +64,7 @@ static void checkinit(hal_cond_t *c)
     hal_cond_init(c,"?Static");
 
     hal_spin_unlock(&init_lock);
+    if(ie) hal_sti();
 }
 
 
@@ -69,6 +72,8 @@ static void checkinit(hal_cond_t *c)
 
 errno_t hal_cond_wait(hal_cond_t *c, hal_mutex_t *m)
 {
+    assert_not_interrupt();
+
     if(c->impl == 0) checkinit(c);
     struct phantom_cond_impl *ci = c->impl;
 
@@ -125,6 +130,8 @@ static void wake_cond_thread( void *arg )
 
 errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
 {
+    assert_not_interrupt();
+
     if(c->impl == 0) checkinit(c);
     struct phantom_cond_impl *ci = c->impl;
 
@@ -182,7 +189,6 @@ errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
 
 errno_t hal_cond_signal(hal_cond_t *c)
 {
-
     if(c->impl == 0) checkinit(c);
     struct phantom_cond_impl *ci = c->impl;
 

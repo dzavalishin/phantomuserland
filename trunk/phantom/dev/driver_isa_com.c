@@ -1,3 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * PC serial port driver.
+ *
+ *
+**/
+
+
 #ifdef ARCH_ia32
 
 #define DEBUG_MSG_PREFIX "com"

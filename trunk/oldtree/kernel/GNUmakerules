@@ -174,16 +174,16 @@ distclean: clean
 # The `sed' line removes the dependencies being replaced,
 # the `for' line tacks the new dependencies to the end of the file,
 # and then the individual dependency files are deleted.
-comma := ,
-depend: $(wildcard *.d)
-	@if test -f depend; then sed $(patsubst %.d,-e '/^%\.o/$(comma)/^#/d',$^) <depend >depend.new; fi; true
-	@(for file in $^ /dev/null; do (cat $$file; echo '#'); done) >>depend.new
-	@mv -f depend.new depend
-	@if test "" != "$^"; then rm -f $^; fi; true
+#comma := ,
+#depend: $(wildcard *.d)
+#	@if test -f depend; then sed $(patsubst %.d,-e '/^%\.o/$(comma)/^#/d',$^) <depend >depend.new; fi; true
+#	@(for file in $^ /dev/null; do (cat $$file; echo '#'); done) >>depend.new
+#	@mv -f depend.new depend
+#	@if test "" != "$^"; then rm -f $^; fi; true
 
 
 # Include the dependency graph (if it exists).
--include depend
-
+#-include depend
+-include *.d
 
 endif

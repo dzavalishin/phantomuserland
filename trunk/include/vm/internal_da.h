@@ -18,7 +18,8 @@
 #include "vm/exception.h"
 #include "drv_video_screen.h"
 
-#include "hal.h"
+#include <hal.h>
+#include <kernel/timedcall.h>
 
 
 /** Extract (typed) object data area pointer from object pointer. */
@@ -133,21 +134,21 @@ struct pvm_code_handler
 // TODO - some sleep/wakeup support
 struct data_area_4_thread
 {
-    struct pvm_code_handler     		code; 		// Loaded by load_fast_acc from frame
+    struct pvm_code_handler             code;           // Loaded by load_fast_acc from frame
 
-    //unsigned long   		thread_id; // Too hard to implement and nobody needs
-    struct pvm_object  				call_frame; 	// current
+    //unsigned long   		              thread_id; // Too hard to implement and nobody needs
+    struct pvm_object  	                call_frame; 	// current
 
     // some owner pointer?
-    struct pvm_object 				owner;
-    struct pvm_object 				environment;
+    struct pvm_object                   owner;
+    struct pvm_object                   environment;
 
-    hal_spinlock_t 				spin; // used on manipulations with sleep_flag
+    hal_spinlock_t                      spin;           // used on manipulations with sleep_flag
 
-    volatile int                                sleep_flag;     // Is true if thread is put asleep in userland
-    //hal_cond_t   				wakeup_cond;    // Will sleep here
+    volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
+    timedcall_t                         timer;          // Who will wake us
 
-    int                                         tid;            // Actual kernel thread id - reloaded on each kernel restart
+    int                                 tid;            // Actual kernel thread id - reloaded on each kernel restart
 
 // fast access copies
 

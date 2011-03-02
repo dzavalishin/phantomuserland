@@ -48,21 +48,28 @@ int usys_open( int *err, uuprocess_t *u, const char *name, int flags, int mode )
     mode &= ~u->umask;
 
     // TODO pass mode to open
+    if( (f->fs == 0) || (f->fs->open == 0) )
+        goto unlink;
 
     *err = f->fs->open( f, flags & O_CREAT, (flags & O_WRONLY) || (flags & O_RDWR) );
     if( *err )
-        return -1;
+        goto unlink;
+
+    f->flags |= UU_FILE_FLAG_OPEN;
 
     int fd = uu_find_fd( u, f );
 
     if( fd < 0 )
     {
-        f->fs->close( f );
         *err = EMFILE;
-        return -1;
+        goto unlink;
     }
 
     return fd;
+
+unlink:
+    unlink_uufile( f );
+    return -1;
 }
 
 int usys_creat( int *err, uuprocess_t *u, const char *name, int mode )
@@ -75,6 +82,12 @@ int usys_read(int *err, uuprocess_t *u, int fd, void *addr, int count )
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
+    if( (f->ops == 0) || (f->ops->read == 0) )
+    {
+        *err = ENXIO;
+        return -1;
+    }
+
     int ret = f->ops->read( f, addr, count );
 
     if( ret < 0 ) *err = EIO;
@@ -85,6 +98,12 @@ int usys_write(int *err, uuprocess_t *u, int fd, const void *addr, int count )
 {
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
+
+    if( (f->ops == 0) || (f->ops->write == 0) )
+    {
+        *err = ENXIO;
+        return -1;
+    }
 
     int ret = f->ops->write( f, addr, count );
 
@@ -98,6 +117,7 @@ int usys_close(int *err, uuprocess_t *u, int fd )
     struct uufile *f = GETF(fd);
 
     uufs_t *fs = f->fs;
+    assert(fs->close != 0);
     *err = fs->close( f );
 
     u->fd[fd] = 0;
@@ -152,6 +172,12 @@ int usys_fchmod( int *err, uuprocess_t *u, int fd, int mode )
         goto err;
     }
 
+    if( (f->ops == 0) || (f->ops->chmod == 0) )
+    {
+        *err = ENXIO;
+        return -1;
+    }
+
     *err = f->ops->chmod( f, mode );
 err:
     return *err ? -1 : 0;
@@ -161,6 +187,12 @@ int usys_fchown( int *err, uuprocess_t *u, int fd, int user, int grp )
 {
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
+
+    if( (f->ops == 0) || (f->ops->chown == 0) )
+    {
+        *err = ENXIO;
+        return -1;
+    }
 
     if( f->ops->chown == 0)
     {
@@ -180,7 +212,13 @@ int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data )
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
-    if( !f->ops->ioctl)
+    if( (f->ops == 0) )
+    {
+        *err = ENXIO;
+        return -1;
+    }
+
+    if( !f->ops->ioctl )
     {
         *err = ENOTTY;
         return -1;
@@ -203,30 +241,29 @@ int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, in
         return -1;
     }
 
-    if( !f->ops->stat )
+    if( (f->ops == 0) || (f->ops->stat == 0) )
     {
-        *err = EACCES; // or what?
+        *err = ENXIO; // or what?
         return -1;
     }
 
     *err = f->ops->stat( f, data );
 
-    f->fs->close( f );
-
+    unlink_uufile( f );
     return *err ? -1 : 0;
 }
 
 
 int usys_fstat( int *err, uuprocess_t *u, int fd, struct stat *data, int statlink )
 {
-	(void) statlink;
+    (void) statlink;
 
-	CHECK_FD(fd);
+    CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
-    if( !f->ops->stat )
+    if( (!f->ops) || (!f->ops->stat) )
     {
-        *err = EACCES; // or what?
+        *err = ENXIO; // or what?
         return -1;
     }
 
@@ -237,7 +274,7 @@ int usys_fstat( int *err, uuprocess_t *u, int fd, struct stat *data, int statlin
 
 int usys_truncate( int *err, uuprocess_t *u, const char *path, off_t length)
 {
-	(void) u;
+    (void) u;
 
     uufile_t * f = uu_namei( path );
     if( f == 0 )
@@ -246,16 +283,15 @@ int usys_truncate( int *err, uuprocess_t *u, const char *path, off_t length)
         return -1;
     }
 
-    if( !f->ops->setsize )
+    if( (!f->ops) || ( !f->ops->setsize ) )
     {
-        *err = EACCES; // or what?
+        *err = ENXIO; // or what?
         return -1;
     }
 
     *err = f->ops->setsize( f, length );
 
-    f->fs->close( f );
-
+    unlink_uufile( f );
     return *err ? -1 : 0;
 }
 
@@ -264,9 +300,9 @@ int usys_ftruncate(int *err, uuprocess_t *u, int fd, off_t length)
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
-    if( !f->ops->setsize )
+    if( (!f->ops) || ( !f->ops->setsize ) )
     {
-        *err = EACCES; // or what?
+        *err = ENXIO; // or what?
         return -1;
     }
 
@@ -321,7 +357,8 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
     {
 #endif
         if(u->cwd_file)
-            u->cwd_file->fs->close( u->cwd_file );
+            unlink_uufile( u->cwd_file );
+
         u->cwd_file = f;
         //uu_absname( u->cwd_path, u->cwd_path, in_path );
         strlcpy( u->cwd_path, path, FS_MAX_PATH_LEN );
@@ -333,8 +370,7 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
     *err = ENOTDIR;
 #endif
 err:
-    //unlink_uufile( f );
-    f->fs->close( f );
+    unlink_uufile( f );
     return -1;
 }
 
@@ -365,7 +401,7 @@ int usys_fchdir( int *err, uuprocess_t *u,  int fd )
     {
 #endif
         if(u->cwd_file)
-            u->cwd_file->fs->close( u->cwd_file );
+            unlink_uufile( u->cwd_file );
         u->cwd_file = copy_uufile( f );
 
         u->cwd_path[0] = 0;
@@ -425,6 +461,12 @@ int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp )
         return -1;
     }
 
+    if( (!f->ops) || ( !f->ops->read ) )
+    {
+        *err = ENXIO; // or what?
+        return -1;
+    }
+
     int len = f->ops->read( f, dirp, sizeof(struct dirent) );
 
     if( len == 0 )
@@ -450,8 +492,8 @@ int usys_pipe(int *err, uuprocess_t *u, int *fds )
 
     if( (fd1 < 0) || (fd2 < 0)  )
     {
-        f1->fs->close( f1 );
-        f2->fs->close( f2 );
+        unlink_uufile( f1 );
+        unlink_uufile( f2 );
         *err = EMFILE;
         return -1;
     }
@@ -485,7 +527,7 @@ int usys_rm( int *err, uuprocess_t *u, const char *name )
     }
 
     *err = f->ops->unlink( f );
-    f->fs->close( f );
+    unlink_uufile( f );
 
     if( *err )
         return -1;

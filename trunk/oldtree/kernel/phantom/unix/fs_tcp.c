@@ -2,7 +2,7 @@
  *
  * Phantom OS Unix Box
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel tcp fs
  *
@@ -69,14 +69,9 @@ struct uufileops tcpfs_fops =
 // -----------------------------------------------------------------------
 
 
-//static uufile_t *  tcpfs_open(const char *name, int create, int write);
 static errno_t     tcpfs_open(struct uufile *, int create, int write);
 static errno_t     tcpfs_close(struct uufile *);
-
-// Create a file struct for given path
 static uufile_t *  tcpfs_namei(uufs_t *fs, const char *filename);
-
-// Return a file struct for fs root
 static uufile_t *  tcpfs_getRoot(uufs_t *fs);
 static errno_t     tcpfs_dismiss(uufs_t *fs);
 
@@ -100,6 +95,7 @@ static struct uufile tcpfs_root =
     .pos        = 0,
     .fs         = &tcp_fs,
     .name       = "/",
+    .flags      = UU_FILE_FLAG_NODESTROY|UU_FILE_FLAG_DIR,
 };
 
 
@@ -126,7 +122,6 @@ static errno_t     tcpfs_close(struct uufile *f)
         free(f->impl);
         f->impl = 0;
     }
-
 
     return 0;
 }
@@ -180,7 +175,7 @@ static uufile_t *  tcpfs_namei(uufs_t *fs, const char *filename)
     ret->pos = 0;
     ret->fs = &tcp_fs;
     ret->impl = us;
-    ret->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP;
+    ret->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP|UU_FILE_FLAG_OPEN|UU_FILE_FLAG_FREEIMPL; // TODO must be open in open
 
     return ret;
 }
@@ -224,8 +219,6 @@ static size_t      tcpfs_write(   struct uufile *f, const void *buf, size_t len)
     return tcp_sendto( s->prot_data, buf, len, &s->addr);
 }
 
-//static errno_t     tcpfs_stat(    struct uufile *f, struct ??);
-//static errno_t     tcpfs_ioctl(   struct uufile *f, struct ??);
 
 static size_t      tcpfs_getpath( struct uufile *f, void *dest, size_t bytes)
 {
