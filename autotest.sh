@@ -47,7 +47,7 @@ GRUB_MENU=tftp/tftp/menu.lst
 svn diff | grep -q "^--- oldtree/run_test/$GRUB_MENU" && \
 	rm oldtree/run_test/$GRUB_MENU
 SVN_OUT=`svn update`
-[ $? -ne 0 -o `echo "$SVN_OUT" | grep -q '^At revision'` ] && {
+[ $? -ne 0 -o `echo "$SVN_OUT" | grep '^At revision'` ] && {
 	[ "$FORCE" ] || die "$MSG"
 }
 
