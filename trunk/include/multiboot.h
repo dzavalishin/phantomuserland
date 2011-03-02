@@ -268,6 +268,7 @@ struct AddrRangeDesc
 
 
 extern struct multiboot_info bootParameters;
+struct multiboot_module *phantom_multiboot_find(const char *string);
 
 
 #endif //_MACH_I386_MULTIBOOT_H_

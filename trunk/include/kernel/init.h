@@ -74,6 +74,8 @@ void init_buses(void);
 
 void arch_float_init(void);
 
+void load_classes_module(); // vm bulk classes init
+
 
 #endif // INIT_H
 

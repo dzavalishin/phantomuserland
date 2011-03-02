@@ -32,7 +32,8 @@ int pvm_load_class_from_module( const char *class_name, struct pvm_object *out )
 int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *out );
 void pvm_bulk_init( pvm_bulk_seek_t sf, pvm_bulk_read_t rd );
 
-
+// Just load a file to mem
+int load_code(void **out_code, unsigned int *out_size, const char *fn);
 
 
 

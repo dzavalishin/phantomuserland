@@ -22,6 +22,7 @@
 #include "vm/internal_da.h"
 #include "vm/code.h"
 #include "win_bulk.h"
+#include "main.h"
 
 #define DEBUG 0
 
@@ -54,7 +55,7 @@ int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out
 
         rlen = readf( sizeof( struct pvm_bulk_class_head ), &ch );
         if( rlen != sizeof( struct pvm_bulk_class_head ) )
-            return -1;
+            break;
 
         if(DEBUG) printf("Bulk: checking class %s\n", ch.name);
 
@@ -63,6 +64,8 @@ int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out
         else
             skip(ch.data_length);
     }
+
+    return load_class_from_file( class_name, out);
 
 }
 

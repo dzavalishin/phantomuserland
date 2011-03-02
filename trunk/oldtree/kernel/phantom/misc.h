@@ -66,7 +66,6 @@ void phantom_start_boot_modules(void);
 
 #include <multiboot.h>
 
-struct multiboot_module *phantom_multiboot_find(const char *string);
 
 
 

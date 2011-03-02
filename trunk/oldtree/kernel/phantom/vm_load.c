@@ -1,0 +1,139 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Kernel main
+ *
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "vm_load"
+#include "debug_ext.h"
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
+
+#include <stdio.h>
+#include <malloc.h>
+#include <string.h>
+#include <assert.h>
+
+#include <multiboot.h>
+
+#include <kernel/init.h>
+#include <kernel/vm.h>
+
+#include <sys/fcntl.h>
+#include <sys/stat.h>
+#include <kunix.h>
+
+#include <vm/bulk.h>
+
+
+int load_code(void **out_code, unsigned int *out_size, const char *fn)
+{
+    long fsize = -1;
+
+    SHOW_FLOW( 6, "load '%s'", fn );
+
+    struct stat st;
+    if( k_stat( fn, &st, 0 ) )
+    {
+        SHOW_ERROR( 0, "can't stat '%s'", fn );
+        return ENOENT;
+    }
+
+    fsize = st.st_size;
+
+    int fd;
+    if( k_open( &fd, fn, _O_RDONLY, 0 ) )
+    {
+        SHOW_ERROR( 0, "can't open '%s'", fn );
+        return ENOENT;
+    }
+
+    unsigned char *code = (unsigned char *)malloc(fsize);
+    if( code == 0 )
+    {
+        SHOW_ERROR( 0, "can't alloc %d", fsize );
+        return ENOMEM;
+    }
+
+    int nread;
+    errno_t ret = k_read( &nread, fd, code, fsize );
+    if( ret || (fsize != nread) )
+    {
+        SHOW_ERROR( 0, "Can't read code: ret = %d", ret );
+        free( code );
+        return EIO;
+    }
+
+    k_close( fd );
+
+    *out_size = (unsigned)fsize;
+    *out_code = code;
+
+    return 0;
+}
+
+
+
+
+// -----------------------------------------------------------------------
+// Boot module classloader support
+// -----------------------------------------------------------------------
+
+
+
+static void *bulk_code;
+static unsigned int bulk_size;
+static void *bulk_read_pos;
+
+int bulk_seek_f( int pos )
+{
+    bulk_read_pos = bulk_code + pos;
+    return bulk_read_pos >= bulk_code + bulk_size;
+}
+
+int bulk_read_f( int count, void *data )
+{
+    if( count < 0 )
+        return -1;
+
+    int left = (bulk_code + bulk_size) - bulk_read_pos;
+
+    if( count > left )
+        count = left;
+
+    memcpy( data, bulk_read_pos, count );
+
+    bulk_read_pos += count;
+
+    return count;
+}
+
+void load_classes_module()
+{
+    // In fact we need this only if boot classloader is called,
+    // and it is called only if completely fresh system is set up
+    struct multiboot_module *classes_module = phantom_multiboot_find("classes");
+
+    SHOW_FLOW( 2, "Classes boot module is %sfound\n", classes_module ? "" : "not " );
+
+    bulk_read_pos = bulk_code;
+    bulk_size = 0;
+
+    if(classes_module != 0)
+    {
+        bulk_code = (void *)phystokv(classes_module->mod_start);
+        bulk_size = classes_module->mod_end - classes_module->mod_start;
+    }
+    else
+        panic("no boot classes module found");
+
+    pvm_bulk_init( bulk_seek_f, bulk_read_f );
+}
+
+
