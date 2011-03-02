@@ -28,7 +28,11 @@ typedef struct timedcall
 
 
 #define TIMEDCALL_FLAG_PERIODIC         (1 << 0)
+
+/* TIMEDCALL_FLAG_AUTOFREE requires call to free from interrupt :(
 #define TIMEDCALL_FLAG_AUTOFREE         (1 << 1)
+*/
+
 #define TIMEDCALL_FLAG_CHECKLOCK        (1 << 2)
 
 //#define TIMEDCALL_FLAG_THREADWAKE       (1 << 8)
@@ -38,13 +42,15 @@ typedef struct timedcall
 void phantom_process_timed_calls(void);
 
 void phantom_request_timed_call( timedcall_t *entry, u_int32_t flags );
-void phantom_request_timed_func( timedcall_func_t f, void *arg, int msecLater, u_int32_t flags );
 
+/* TIMEDCALL_FLAG_AUTOFREE requires call to free from interrupt :(
+void phantom_request_timed_func( timedcall_func_t f, void *arg, int msecLater, u_int32_t flags );
+*/
 
 
 //void phantom_request_timed_thread_wake( int tid, long timeMsec );
-void phantom_request_cond_signal( int msec, hal_cond_t *cond);
-void phantom_request_cond_broadcast( int msec, hal_cond_t *cond);
+//void phantom_request_cond_signal( int msec, hal_cond_t *cond);
+//void phantom_request_cond_broadcast( int msec, hal_cond_t *cond);
 
 // Un-request previously requested timed call
 void phantom_undo_timed_call(timedcall_t *entry);

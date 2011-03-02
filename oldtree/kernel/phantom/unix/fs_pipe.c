@@ -39,14 +39,8 @@
 
 static size_t      pipe_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      pipe_write(   struct uufile *f, const void *src, size_t bytes);
-//static errno_t     pipe_stat(    struct uufile *f, struct ??);
-//static errno_t     pipe_ioctl(   struct uufile *f, struct ??);
-
 static size_t      pipe_getpath( struct uufile *f, void *dest, size_t bytes);
-
-// returns -1 for non-files
 static ssize_t     pipe_getsize( struct uufile *f);
-
 static void *      pipe_copyimpl( void *impl );
 
 
@@ -71,16 +65,10 @@ static struct uufileops pipe_fops =
 // -----------------------------------------------------------------------
 
 
-//static uufile_t *  pipe_open(const char *name, int create, int write);
 static errno_t     pipe_open(struct uufile *, int create, int write);
 static errno_t     pipe_close(struct uufile *);
-
-// Create a file struct for given path
 static uufile_t *  pipe_namei(uufs_t *fs, const char *filename);
-
-// Return a file struct for fs root
 static uufile_t *  pipe_getRoot(uufs_t *fs);
-
 static errno_t     pipe_dismiss(uufs_t *fs);
 
 
@@ -103,7 +91,7 @@ static struct uufile pipe_root =
     .pos        = 0,
     .fs         = &pipe_fs,
     .name       = "/",
-    .flags      = UU_FILE_FLAG_DIR,
+    .flags      = UU_FILE_FLAG_DIR|UU_FILE_FLAG_NODESTROY,
     .impl       = 0, // dir will create if needed
 };
 
@@ -122,13 +110,6 @@ static errno_t     pipe_open(struct uufile *f, int create, int write)
     return ENOENT;
 }
 
-static errno_t     pipe_close(struct uufile *f)
-{
-    if( f->impl ) free(f->impl); f->impl = 0;
-
-    unlink_uufile( f );
-    return 0;
-}
 
 // Create a file struct for given path
 static uufile_t *  pipe_namei(uufs_t *fs, const char *filename)
@@ -172,9 +153,9 @@ static size_t      pipe_getpath( struct uufile *f, void *dest, size_t bytes)
 // returns -1 for non-files
 static ssize_t      pipe_getsize( struct uufile *f)
 {
-	(void) f;
+    (void) f;
 
-	return -1;
+    return -1;
 }
 
 static void *      pipe_copyimpl( void *impl )
@@ -200,6 +181,8 @@ struct pipe_buf
 
     int         kill; // = 1 to break pipe
 
+    int         ref; // refcount
+
     hal_cond_t  cond;
     hal_mutex_t mutex;
 };
@@ -210,6 +193,7 @@ static struct pipe_buf * init_pb(void)
     struct pipe_buf     *pb = calloc( 1, sizeof(struct pipe_buf) );
     hal_mutex_init( &pb->mutex, "pipe" );
     hal_cond_init( &pb->cond, "pipe" );
+    pb->ref = 2;
     return pb;
 }
 
@@ -226,17 +210,36 @@ void pipefs_make_pipe( uufile_t **f1, uufile_t **f2 )
     (*f1)->fs = &pipe_fs;
     (*f1)->name = "(unnamed pipe)";
     (*f1)->impl = pb1;
+    (*f1)->flags = UU_FILE_FLAG_OPEN|UU_FILE_FLAG_PIPE;
 
     (*f2)->ops = &pipe_fops;
     (*f2)->pos = 0;
     (*f2)->fs = &pipe_fs;
     (*f2)->name = "(unnamed pipe)";
     (*f2)->impl = pb1;
+    (*f2)->flags = UU_FILE_FLAG_OPEN|UU_FILE_FLAG_PIPE;
 
-
-    link_uufile( *f1 );
-    link_uufile( *f2 );
 }
+
+
+
+
+
+
+static errno_t     pipe_close(struct uufile *f)
+{
+    struct pipe_buf *pb = f->impl;
+    assert(pb->ref > 0);
+    pb->ref--;
+    if(pb->ref == 0)
+    {
+        hal_mutex_destroy(&pb->mutex);
+        hal_cond_destroy(&pb->cond);
+        free(pb);
+    }
+    return 0;
+}
+
 
 
 // TODO use ssize_t!

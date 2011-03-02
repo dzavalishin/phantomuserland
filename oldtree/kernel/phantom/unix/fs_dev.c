@@ -91,7 +91,6 @@ static struct uufileops con_fops =
 // -----------------------------------------------------------------------
 
 
-//static uufile_t *  dev_open(const char *name, int create, int write);
 static errno_t     dev_open(struct uufile *, int create, int write);
 static errno_t     dev_close(struct uufile *);
 
@@ -123,7 +122,7 @@ static struct uufile dev_root =
     .pos        = 0,
     .fs         = &dev_fs,
     .name       = "/",
-    .flags      = UU_FILE_FLAG_DIR,
+    .flags      = UU_FILE_FLAG_DIR|UU_FILE_FLAG_NODESTROY,
     .impl       = 0, // dir will create if needed
 };
 
@@ -136,16 +135,16 @@ static struct uufile dev_root =
 
 static errno_t     dev_open(struct uufile *f, int create, int write)
 {
-	(void) create;
-	(void) write;
+    (void) create;
+    (void) write;
+    (void) f;
 
-    link_uufile( f );
     return 0;
 }
 
 static errno_t     dev_close(struct uufile *f)
 {
-    unlink_uufile( f );
+    (void) f;
     return 0;
 }
 
@@ -166,6 +165,7 @@ static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
         ret->fs = &dev_fs;
         ret->name = strdup( filename );
         ret->impl = 0;
+        //ret->flags =
 
         SHOW_FLOW( 8, "dev created '%s'", filename );
 
@@ -174,16 +174,13 @@ static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
 
     if( (0 == strcmp( filename, "" )) || 0 == strcmp( filename, "/" ) )
     {
-        //ops = &dev_fops;
         ret = copy_uufile( &dev_root );
-        //link_uufile( ret );
     }
 
 
     if(ret == 0)
     {
 #define NPART 10
-        //ops = &dev_fops;
 
         const char *oname[NPART];
         int olen[NPART];
@@ -212,7 +209,6 @@ static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
         // Separate copy for pos
         //link_uufile( ret );
         ret = copy_uufile( ret );
-
     }
 
     SHOW_FLOW( 7, "dev found '%s'", filename );
@@ -303,8 +299,6 @@ static size_t      dev_write(   struct uufile *f, const void *src, size_t bytes)
     return dev->dops.write( dev, src, bytes );
 }
 
-//static errno_t     dev_stat(    struct uufile *f, struct ??);
-//static errno_t     dev_ioctl(   struct uufile *f, struct ??);
 
 static size_t      dev_getpath( struct uufile *f, void *dest, size_t bytes)
 {
@@ -317,13 +311,14 @@ static size_t      dev_getpath( struct uufile *f, void *dest, size_t bytes)
 // returns -1 for non-files
 static ssize_t      dev_getsize( struct uufile *f)
 {
-	(void) f;
+    (void) f;
 
-	return -1;
+    return -1;
 }
 
 static void *      dev_copyimpl( void *impl )
 {
+    // TODO dev refcount
     return impl; // Just a pointer to dev, can copy
 }
 

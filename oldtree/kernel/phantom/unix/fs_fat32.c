@@ -74,14 +74,9 @@ static struct uufileops fat32_fops =
 // -----------------------------------------------------------------------
 
 
-//static uufile_t *  fat32_open(const char *name, int create, int write);
 static errno_t     fat32_open(struct uufile *, int create, int write);
 static errno_t     fat32_close(struct uufile *);
-
-// Create a file struct for given path
 static uufile_t *  fat32_namei(uufs_t *fs, const char *filename);
-
-// Return a file struct for fs root
 static uufile_t *  fat32_getRoot(uufs_t *fs);
 static errno_t     fat32_dismiss(uufs_t *fs);
 
@@ -117,17 +112,14 @@ static errno_t     fat32_open(struct uufile *f, int create, int write)
 
 static errno_t     fat32_close(struct uufile *f)
 {
-    if( f->impl )
-    {
-        free(f->impl);
-        f->impl = 0;
-    }
+    (void) f;
     return 0;
 }
 
 // Create a file struct for given path
 static uufile_t *  fat32_namei(uufs_t *fs, const char *filename)
 {
+    (void) fs;
     (void) filename;
     return 0;
 /*
@@ -145,12 +137,14 @@ static uufile_t *  fat32_namei(uufs_t *fs, const char *filename)
 // Return a file struct for fs root
 static uufile_t *  fat32_getRoot(uufs_t *fs)
 {
+    (void) fs;
     return 0;
     //return &fat32_root;
 }
 
 static errno_t  fat32_dismiss(uufs_t *fs)
 {
+    (void) fs;
     // TODO impl
     return 0;
 }
@@ -226,7 +220,7 @@ uufile_t *fat32_mount(errno_t *err, uufile_t *mount_point, uufile_t *device)
 
     if(!FAT32_InitFAT(f32,1))
     {
-        destroy_uufile(ret);
+        unlink_uufile(ret);
         *err = EFTYPE;
         return 0;
     }

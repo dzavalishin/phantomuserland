@@ -40,11 +40,7 @@ static errno_t fresult2errno(FRESULT fr);
 static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      fatff_write(   struct uufile *f, const void *src, size_t bytes);
 static errno_t     fatff_stat( struct uufile *f, struct stat *dest );
-//static errno_t     fatff_ioctl(   struct uufile *f, struct ??);
-
 static size_t      fatff_getpath( struct uufile *f, void *dest, size_t bytes);
-
-// returns -1 for non-files
 static ssize_t     fatff_getsize( struct uufile *f);
 
 //static void *      fatff_copyimpl( void *impl );
@@ -72,14 +68,9 @@ static struct uufileops fatff_fops =
 // -----------------------------------------------------------------------
 
 
-//static uufile_t *  fatff_open(const char *name, int create, int write);
 static errno_t     fatff_open(struct uufile *, int create, int write);
 static errno_t     fatff_close(struct uufile *);
-
-// Create a file struct for given path
 static uufile_t *  fatff_namei(uufs_t *fs, const char *filename);
-
-// Return a file struct for fs root
 static uufile_t *  fatff_getRoot(uufs_t *fs);
 static errno_t     fatff_dismiss(uufs_t *fs);
 
@@ -117,9 +108,6 @@ uufs_t *fatff_create_fs( FATFS *ffs )
 
 static errno_t     fatff_open(struct uufile *f, int create, int write)
 {
-    //FIL *fp = f->impl;
-    //FATFS *ffs = f->fs->impl;
-
     (void) f;
     (void) create;
     (void) write;
@@ -129,21 +117,12 @@ static errno_t     fatff_open(struct uufile *f, int create, int write)
 static errno_t     fatff_close(struct uufile *f)
 {
     FIL *fp = f->impl;
-    //FATFS *ffs = f->fs->impl;
 
     f_close( fp );
 
-    if( f->impl )
-    {
-        free(f->impl);
-        f->impl = 0;
-    }
-
-    unlink_uufile( f );
     return 0;
 }
 
-// Create a file struct for given path
 static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
 {
     FATFS *ffs = fs->impl;
@@ -167,6 +146,8 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     ret->pos = 0;
     ret->fs = fs;
     ret->impl = fp;
+    ret->flags |= UU_FILE_FLAG_FREEIMPL;
+    ret->flags |= UU_FILE_FLAG_OPEN; // TODO this is wrong and must be gone - open in open!
 
     set_uufile_name( ret, filename );
 
@@ -176,12 +157,14 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
 // Return a file struct for fs root
 static uufile_t *  fatff_getRoot(uufs_t *fs)
 {
+    (void) fs;
     return 0;
     //return &fatff_root;
 }
 
 static errno_t  fatff_dismiss(uufs_t *fs)
 {
+    (void) fs;
     // free( fs->impl );
     // TODO impl
     return 0;
@@ -195,7 +178,6 @@ static errno_t  fatff_dismiss(uufs_t *fs)
 static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes)
 {
     FIL *fp = f->impl;
-    //FATFS *ffs = f->fs->impl;
 
     FRESULT r = f_lseek (
                          fp,		/* Pointer to the file object */
@@ -229,8 +211,6 @@ static size_t      fatff_write(   struct uufile *f, const void *dest, size_t byt
     return -1;
 }
 
-//static errno_t     fatff_stat(    struct uufile *f, struct ??);
-//static errno_t     fatff_ioctl(   struct uufile *f, struct ??);
 
 static size_t      fatff_getpath( struct uufile *f, void *dest, size_t bytes)
 {

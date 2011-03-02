@@ -49,13 +49,14 @@ errno_t hal_sem_init(hal_sem_t *c, const char *name )
 static void checkinit(hal_sem_t *c)
 {
     // in spinlock!
-	int ie = hal_save_cli();
+    int ie = hal_save_cli();
     hal_spin_lock(&init_lock);
 
     struct phantom_sem_impl *ci = c->impl;
     if(ci != 0)
     {
         hal_spin_unlock(&init_lock);
+        if(ie) hal_sti();
         return;
     }
 
@@ -65,7 +66,7 @@ static void checkinit(hal_sem_t *c)
     hal_sem_init(c,"?Static");
 
     hal_spin_unlock(&init_lock);
-	if(ie) hal_sti();
+    if(ie) hal_sti();
 }
 
 
@@ -73,6 +74,8 @@ static void checkinit(hal_sem_t *c)
 
 errno_t hal_sem_acquire(hal_sem_t *c)
 {
+    assert_not_interrupt();
+
     if(c->impl == 0) checkinit(c);
     struct phantom_sem_impl *ci = c->impl;
 
@@ -127,6 +130,8 @@ errno_t
 hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
 //errno_t hal_sem_timedwait( hal_sem_t *c, hal_mutex_t *m, long msecTimeout )
 {
+    assert_not_interrupt();
+
     int retcode = 0;
 
     if(s->impl == 0) checkinit(s);
@@ -298,6 +303,8 @@ errno_t sem_get_count(hal_sem_t *s, int *count)
 // BUG! Races! 
 void hal_sem_destroy(hal_sem_t *c)
 {
+    assert_not_interrupt();
+
     // BUG! Must unlock and signal killed sema! newos code relies on that
     //if(m->impl.owner != 0)        panic("locked mutex killed");
     free(c->impl);

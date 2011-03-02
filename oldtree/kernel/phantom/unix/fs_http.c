@@ -69,14 +69,9 @@ struct uufileops httpfs_fops =
 // -----------------------------------------------------------------------
 
 
-//static uufile_t *  httpfs_open(const char *name, int create, int write);
 static errno_t     httpfs_open(struct uufile *, int create, int write);
 static errno_t     httpfs_close(struct uufile *);
-
-// Create a file struct for given path
 static uufile_t *  httpfs_namei(uufs_t *fs, const char *filename);
-
-// Return a file struct for fs root
 static uufile_t *  httpfs_getRoot(uufs_t *fs);
 static errno_t     httpfs_dismiss(uufs_t *fs);
 
@@ -100,6 +95,7 @@ static struct uufile httpfs_root =
     .pos        = 0,
     .fs         = &http_fs,
     .name       = "/",
+    .flags      = UU_FILE_FLAG_NODESTROY,
 };
 
 
@@ -126,7 +122,6 @@ static errno_t     httpfs_close(struct uufile *f)
         free(f->impl);
         f->impl = 0;
     }
-
 
     return 0;
 }
@@ -180,7 +175,7 @@ static uufile_t *  httpfs_namei(uufs_t *fs, const char *filename)
     ret->pos = 0;
     ret->fs = &http_fs;
     ret->impl = us;
-    ret->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP;
+    ret->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP|UU_FILE_FLAG_OPEN; // TODO wrong! open in open!
 
     return ret;
 }

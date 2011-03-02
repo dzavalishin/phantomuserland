@@ -52,14 +52,21 @@ struct uufile
     hal_mutex_t         mutex; // serialize access
 };
 
+typedef struct uufile uufile_t;
+
 
 #define UU_FILE_FLAG_DIR        (1<<0) // Dir
 #define UU_FILE_FLAG_NET        (1<<1) // Socket
 #define UU_FILE_FLAG_TCP        (1<<2) // Stream
 #define UU_FILE_FLAG_UDP        (1<<3) // Dgram
 #define UU_FILE_FLAG_MNT        (1<<4) // Mount point - FS root
+#define UU_FILE_FLAG_PIPE       (1<<5) // Pipe
 
-typedef struct uufile uufile_t;
+
+#define UU_FILE_FLAG_OPEN       (1<< 8) // Is open now, unlink/destroy_uufile will close first
+#define UU_FILE_FLAG_FREEIMPL   (1<< 9) // On destroy implementation must be freed
+#define UU_FILE_FLAG_NODESTROY  (1<<10) // Do not destroy - it's a link to static instance
+
 
 
 uufile_t *copy_uufile( uufile_t *in );
@@ -71,7 +78,8 @@ void set_uufile_name( uufile_t *in, const char *name );
 void link_uufile( uufile_t *in );
 void unlink_uufile( uufile_t *in );
 
-void destroy_uufile(uufile_t *f);
+// use unlink
+//void destroy_uufile(uufile_t *f);
 
 
 

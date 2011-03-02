@@ -20,7 +20,7 @@ title=phantom ALL TESTS
 kernel=(nd)/phantom -d=20 -- -test all
 module=(nd)/classes
 module=(nd)/pmod_tcpdemo 
-#module=(nd)/pmod_test
+module=(nd)/pmod_test
 #module=(nd)/pmod_regress 
 boot 
 

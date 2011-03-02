@@ -33,10 +33,10 @@
 // struttura tabella inode
 struct i_node_tab
 {
-    ino_t 		i_node_n; // numero dell'inode
-    struct i_node 	inode; // informazioni generali inode
+    ino_t 			i_node_n; // numero dell'inode
+    struct i_node 		inode; // informazioni generali inode
     // parametri per la gestione tabella inode
-    int 		ref;
+    int 			ref;
 };
 
 
@@ -79,19 +79,13 @@ typedef struct e2impl e2impl_t;
 // Generic impl
 // -----------------------------------------------------------------------
 
-static bool		init_ext2(e2impl_t *impl);
+static bool        init_ext2(e2impl_t *impl);
 
 
 static size_t      ext2_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      ext2_write(   struct uufile *f, const void *src, size_t bytes);
-//static errno_t     ext2_stat(    struct uufile *f, struct ??);
-//static errno_t     ext2_ioctl(   struct uufile *f, struct ??);
-
 static size_t      ext2_getpath( struct uufile *f, void *dest, size_t bytes);
-
-// returns -1 for non-files
 static ssize_t     ext2_getsize( struct uufile *f);
-
 static void *      ext2_copyimpl( void *impl );
 
 
@@ -116,7 +110,6 @@ static struct uufileops ext2_fops =
 // -----------------------------------------------------------------------
 
 
-//static uufile_t *  ext2_open(const char *name, int create, int write);
 static errno_t     ext2_open(struct uufile *, int create, int write);
 static errno_t     ext2_close(struct uufile *);
 
@@ -147,6 +140,7 @@ static struct uufile ext2_root =
     .pos        = 0,
     .fs         = &ext2_fs,
     .impl       = "/",
+    .flags      = UU_FILE_FLAG_NODESTROY
 };
 
 
@@ -166,11 +160,7 @@ static errno_t     ext2_open(struct uufile *f, int create, int write)
 
 static errno_t     ext2_close(struct uufile *f)
 {
-    if( f->impl )
-    {
-        free(f->impl);
-        f->impl = 0;
-    }
+    (void) f;
     return 0;
 }
 
@@ -186,6 +176,7 @@ static uufile_t *  ext2_namei(uufs_t *fs, const char *filename)
     ret->pos = 0;
     ret->fs = &ext2_fs;
     ret->impl = calloc( 1, sizeof(e2impl_t) );
+    ret->flags |= UU_FILE_FLAG_FREEIMPL;
 
     return ret;
 }
@@ -227,8 +218,6 @@ static size_t      ext2_write(   struct uufile *f, const void *dest, size_t byte
     return -1;
 }
 
-//static errno_t     ext2_stat(    struct uufile *f, struct ??);
-//static errno_t     ext2_ioctl(   struct uufile *f, struct ??);
 
 static size_t      ext2_getpath( struct uufile *f, void *dest, size_t bytes)
 {

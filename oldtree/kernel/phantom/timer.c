@@ -1,5 +1,3 @@
-#define OWN_TIMER 1
-
 #include <kernel/timedcall.h>
 #include <vm/syscall_tools.h>
 #include "snap_sync.h"
@@ -22,6 +20,16 @@ wakeThread(void *arg)
 void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc)
 {
     printf("phantom_wakeup_after_msec %d\n", msec);
-    phantom_request_timed_func( wakeThread, (void *)tc, msec, 0 );
+    //phantom_request_timed_func( wakeThread, (void *)tc, msec, 0 );
+
+    // TODO check sleep_flag in os restart and restart timer as well?
+
+    timedcall_t *e = &(tc->timer);
+
+    e->arg = tc;
+    e->f = wakeThread;
+    e->msecLater = msec;
+
+    phantom_request_timed_call( e, 0 );
 }
 

@@ -82,4 +82,4 @@ extern char * (*phantom_symtab_getname)( void *addr );
 extern int      irq_nest; 
 
 
-#define assert_notint() assert(!(irq_nest & ~0xC0000000))
+#define assert_not_interrupt() assert(!(irq_nest & ~0xC0000000))

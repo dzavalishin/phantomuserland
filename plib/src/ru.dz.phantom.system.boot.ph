@@ -113,7 +113,7 @@ class boot
 
         // compiler regression tests
 
-	reg_test = new .ru.dz.phantom.system.regression_tests();
+        reg_test = new .ru.dz.phantom.system.regression_tests();
         print("Starting compiler regression tests\n");
         reg_test.run(boot_object);
         print("Finished compiler regression tests\n");
@@ -131,9 +131,9 @@ class boot
         var oi : .phantom.osimpl;
         oi = get_os_interface_object();
         // Pass it to OS to be made accessible from all threads
-	boot_object.22( oi ); 
+        boot_object.22( oi ); 
 
-	shell_name = oi.getKernelEnvironmentValue("root.shell");
+        shell_name = oi.getKernelEnvironmentValue("root.shell");
 
         print("Env root.shell=");
         print(shell_name);

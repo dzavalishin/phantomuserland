@@ -100,6 +100,7 @@ static struct uufile udpfs_root =
     .pos        = 0,
     .fs         = &udp_fs,
     .name       = "/",
+    .flags      = UU_FILE_FLAG_NODESTROY|UU_FILE_FLAG_DIR,
 };
 
 
@@ -176,7 +177,7 @@ static uufile_t *  udpfs_namei(uufs_t *fs, const char *filename)
     ret->pos = 0;
     ret->fs = &udp_fs;
     ret->impl = us;
-    ret->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_UDP;
+    ret->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_UDP|UU_FILE_FLAG_OPEN|UU_FILE_FLAG_FREEIMPL;
 
     return ret;
 }

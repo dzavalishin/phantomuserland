@@ -1,3 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * PC beeper driver.
+ *
+ *
+**/
+
+
 #ifdef ARCH_ia32
 /*!
  *      \brief System speaker driver.
@@ -32,13 +44,16 @@
 #define TIMER_FREQ      1193182L //!< Clock frequency for timer in PC.
 
 
+static timedcall_t e;
+
+
 
 //! \brief Start a sound using the speaker.
 //! \param frequency The frequency of the sound.
 void sound(u_int32_t frequency)
 {
-	int ie;
-	u_int32_t div;
+    int ie;
+    u_int32_t div;
 
     if( (frequency<19) || (frequency>22000) )
         return;
@@ -69,7 +84,12 @@ void nosound()
 void beep()
 {
     sound(DRV_BEEP_FREQ);
-    phantom_request_timed_func( nosound, 0, DRV_BEEP_TIME, 0 );
+
+    e.arg = 0;
+    e.f = (void *)nosound;
+    e.msecLater = DRV_BEEP_TIME;
+
+    phantom_request_timed_call( &e, 0 );
 }
 
 
@@ -109,7 +129,7 @@ static int seq_number = 0;
 
 phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage )
 {
-	phantom_device_t * dev;
+    phantom_device_t * dev;
 
     (void) port;
     (void) irq;

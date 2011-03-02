@@ -32,6 +32,7 @@ void phantom_map_mem_equally(void);
 void hal_init_vm_map(void);
 void phantom_timed_call_init(void);
 
+int detect_cpu(int curr_cpu);
 
 void hal_cpu_reset_real(void) __attribute__((noreturn));
 

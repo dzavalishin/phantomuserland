@@ -48,13 +48,29 @@ uufile_t *create_uufile()
     return copy_uufile( &uuf_template );
 }
 
-void destroy_uufile(uufile_t *f)
+static void destroy_uufile(uufile_t *f)
 {
-    // ToDO close?
+    if( f->flags & UU_FILE_FLAG_NODESTROY )
+        return;
+
+    if( f->flags & UU_FILE_FLAG_OPEN )
+    {
+        assert( f->fs != 0 );
+        f->fs->close( f );
+    }
+
+    if( f->flags & UU_FILE_FLAG_FREEIMPL )
+    {
+        if( f->impl )
+            free(f->impl);
+        f->impl = 0;
+    }
+
     if( f->name ) free((void *)f->name);
     f->name = 0;
-    //if( f->impl ) free(f->impl); f->impl = 0;
+
     //TODO assert mutex is not locked
+
     free(f);
 }
 
@@ -64,12 +80,14 @@ void link_uufile( uufile_t *in )
 {
     if( in == 0 ) return;
     in->refcount++;
+    assert( in->refcount > 0 );
 }
 
 
 
 void unlink_uufile( uufile_t *in )
 {
+    assert( in->refcount > 0 );
     in->refcount--;
     if(in->refcount == 0)
         destroy_uufile(in);

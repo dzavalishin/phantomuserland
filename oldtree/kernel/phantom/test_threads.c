@@ -341,18 +341,21 @@ int do_test_dpc(const char *test_parm)
 
 static volatile int called = 0;
 
+
+//static char *msg = "timed func 5000";
 static void echo(  void *_a )
 {
     called++;
     printf("Echo: '%s'\n", _a);
 }
 
+
 static timedcall_t     t1 = { echo, "hello 5", 		   5,	0, 0, { 0, 0 }, 0 };
 static timedcall_t     t2 = { echo, "hello 100",         100,	0, 0, { 0, 0 }, 0 };
 static timedcall_t     t3 = { echo, "hello 2000", 	2000,	0, 0, { 0, 0 }, 0 };
 static timedcall_t     t4 = { echo, "hello 10 000",    10000,	0, 0, { 0, 0 }, 0 };
+static timedcall_t     t5 = { echo, "hello  5 000",     5000,	0, 0, { 0, 0 }, 0 };
 
-static char *msg = "timed func 5000";
 
 int do_test_timed_call(const char *test_parm)
 {
@@ -387,7 +390,9 @@ int do_test_timed_call(const char *test_parm)
     phantom_request_timed_call( &t3, 0 );
     phantom_request_timed_call( &t4, 0 );
 
-    phantom_request_timed_func( echo, msg, 5000, 0 );
+    //TIMEDCALL_FLAG_AUTOFREE requires call to free from interrupt :(
+    //phantom_request_timed_func( echo, msg, 5000, 0 );
+    phantom_request_timed_call( &t5, 0 );
 
 #if DUMPQ
     dump_timed_call_queue();
