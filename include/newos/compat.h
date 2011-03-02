@@ -19,6 +19,7 @@
 #define _NEWOS_H
 
 #include <phantom_types.h>
+#include <kernel/page.h>
 
 
 #define SYS_MAX_OS_NAME_LEN 32
@@ -40,13 +41,13 @@ typedef int thread_id;
 #define false 0
 #define true 0xFF
 
-
+/*
 #ifndef PAGE_SIZE
 #define PAGE_SIZE 4096
 #else
 #warning PAGE_SIZE defined twice
 #endif
-
+*/
 #define PAGE_ALIGN(x) (((x) + (PAGE_SIZE-1)) & ~(PAGE_SIZE-1))
 
 

@@ -39,7 +39,7 @@ ENTRY(__modsi3)
 	ldmfd	sp!, {pc}
 
 .L_overflow:
-#if !defined(_KERNEL) && !defined(_STANDALONE)
+#if !defined(KERNEL) && !defined(_STANDALONE)
 	mov	r0, #8			/* SIGFPE */
 	bl	PIC_SYM(_C_LABEL(raise), PLT)	/* raise it */
 	mov	r0, #0

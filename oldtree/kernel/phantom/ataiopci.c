@@ -9,7 +9,7 @@
 #include <i386/pio.h>
 #include <phantom_libc.h>
 #include <phantom_types.h>
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
 
 #include <malloc.h>
 

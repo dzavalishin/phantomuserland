@@ -19,7 +19,7 @@ rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ../run/tftp
 SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../oldtree/run/tftp
 
 
-rem SET Q_MACHINE=-m 85
+#SET Q_MACHINE=-m 85
 
 SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda fat:fat -hdb phantom.img 
 

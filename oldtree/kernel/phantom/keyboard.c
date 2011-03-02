@@ -9,7 +9,7 @@
  *
 **/
 
-
+#ifdef ARCH_ia32
 
 //---------------------------------------------------------------------------
 
@@ -559,4 +559,5 @@ static void keyb_event_loop( void *arg )
 #endif
 
 
+#endif // ARCH_ia32
 

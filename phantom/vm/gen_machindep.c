@@ -11,7 +11,6 @@
 **/
 
 #include <phantom_assert.h>
-#include <x86/phantom_page.h>
 #include <phantom_types.h>
 
 #include <malloc.h>
@@ -32,6 +31,7 @@
 #include "ids/opcode_ids.h"
 
 #include <kernel/snap_sync.h>
+#include <kernel/page.h>
 
 #include "jit.h"
 

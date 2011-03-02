@@ -12,6 +12,7 @@ AWK		= gawk
 YACC		= bison -y
 M4		= m4
 
+TARGET_OBJECT_FORMAT=elf64-i386
 
 
 

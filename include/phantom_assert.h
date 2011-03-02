@@ -77,3 +77,9 @@ extern char * (*phantom_symtab_getname)( void *addr );
 //__BEGIN_DECLS
 //void __assert(const char *, const char *, int, const char *);
 //__END_DECLS
+
+// two top bits are 'no softint req' and 'softint disabled'
+extern int      irq_nest; 
+
+
+#define assert_notint() assert(!(irq_nest & ~0xC0000000))
