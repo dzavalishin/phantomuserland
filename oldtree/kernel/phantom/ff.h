@@ -456,7 +456,7 @@ TCHAR* f_gets (TCHAR*, int, FIL*);					/* Get a string from the file */
 /* Unicode support functions */
 #if _USE_LFN						/* Unicode - OEM code conversion */
 WCHAR ff_convert (WCHAR, UINT);		/* OEM-Unicode bidirectional conversion */
-static WCHAR ff_wtoupper (WCHAR);			/* Unicode upper-case conversion */
+//static WCHAR ff_wtoupper (WCHAR);			/* Unicode upper-case conversion */
 #if _USE_LFN == 3					/* Memory functions */
 void* ff_memalloc (UINT);			/* Allocate memory block */
 void ff_memfree (void*);			/* Free memory block */
@@ -466,9 +466,9 @@ void ff_memfree (void*);			/* Free memory block */
 /* Sync functions */
 #if _FS_REENTRANT
 int ff_cre_syncobj (BYTE, _SYNC_t*);/* Create a sync object */
-int ff_del_syncobj (_SYNC_t);		/* Delete a sync object */
-int ff_req_grant (_SYNC_t);			/* Lock sync object */
-void ff_rel_grant (_SYNC_t);		/* Unlock sync object */
+int ff_del_syncobj (_SYNC_t*);		/* Delete a sync object */
+int ff_req_grant (_SYNC_t*);			/* Lock sync object */
+void ff_rel_grant (_SYNC_t*);		/* Unlock sync object */
 #endif
 
 

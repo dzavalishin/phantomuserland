@@ -175,15 +175,15 @@ void arch_adjust_after_thread_switch(phantom_thread_t *t)
     // TODO machdep, header
     extern struct i386_tss  tss;
 
-    //phantom_thread_t *t = GET_CURRENT_THREAD();
+#warning not SMP compliant
+	// must find out which TSS is for our CPU and update it's esp0
     tss.esp0 = (addr_t)t->kstack_top;
 
     int ncpu = GET_CPU_ID();
     t->cpu_id = ncpu;
 
-#warning not SMP compliant
     // NO! - kill that "Or else CPU doesn't take in account esp0 change :("
-    phantom_load_main_tss();
+    //phantom_load_main_tss();
     //phantom_load_cpu_tss(ncpu);
 }
 
