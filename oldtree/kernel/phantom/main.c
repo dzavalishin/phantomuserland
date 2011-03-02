@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel main
  *
@@ -10,7 +10,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "boot"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
@@ -35,7 +35,7 @@
 #include <newos/port.h>
 
 
-#include "hal.h"
+#include <hal.h>
 #include "paging_device.h"
 #include "vm_map.h"
 #include "snap_sync.h"
@@ -51,7 +51,7 @@
 #include <stdlib.h>
 
 // pvm_bulk_init
-#include <vm/bulk.h>
+//#include <vm/bulk.h>
 
 // pvm_memcheck
 #include <vm/alloc.h>
@@ -142,7 +142,6 @@ stop_phantom()
 
 
 
-static void load_classes_module();
 static void net_stack_init();
 
 
@@ -384,62 +383,6 @@ void phantom_save_vmem(void)
 }
 
 
-
-
-// -----------------------------------------------------------------------
-// Boot module classloader support
-// -----------------------------------------------------------------------
-
-
-
-static void *bulk_code;
-static unsigned int bulk_size;
-static void *bulk_read_pos;
-
-int bulk_seek_f( int pos )
-{
-    bulk_read_pos = bulk_code + pos;
-    return bulk_read_pos >= bulk_code + bulk_size;
-}
-
-int bulk_read_f( int count, void *data )
-{
-    if( count < 0 )
-        return -1;
-
-    int left = (bulk_code + bulk_size) - bulk_read_pos;
-
-    if( count > left )
-        count = left;
-
-    memcpy( data, bulk_read_pos, count );
-
-    bulk_read_pos += count;
-
-    return count;
-}
-
-static void load_classes_module()
-{
-    // In fact we need this only if boot classloader is called,
-    // and it is called only if completely fresh system is set up
-    struct multiboot_module *classes_module = phantom_multiboot_find("classes");
-
-    SHOW_FLOW( 2, "Classes boot module is %sfound\n", classes_module ? "" : "not " );
-
-    bulk_read_pos = bulk_code;
-    bulk_size = 0;
-
-    if(classes_module != 0)
-    {
-        bulk_code = (void *)phystokv(classes_module->mod_start);
-        bulk_size = classes_module->mod_end - classes_module->mod_start;
-    }
-    else
-        panic("no boot classes module found");
-
-    pvm_bulk_init( bulk_seek_f, bulk_read_f );
-}
 
 
 
