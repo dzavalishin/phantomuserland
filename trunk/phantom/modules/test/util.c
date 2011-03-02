@@ -110,6 +110,7 @@ void run_test( const char *test_name, const char *test_parm )
     printf("Phantom usermode test suite\n-----\n" );
 
     TEST(getters);
+    TEST(setters);
 
     //TEST(malloc);
 

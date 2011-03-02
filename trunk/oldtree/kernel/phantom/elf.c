@@ -353,6 +353,8 @@ static void kernel_protected_module_starter( void * _pid )
 
     SHOW_FLOW( 4, "pushed %d bytes", prev_esp - em->esp );
 
+    // This sets
+    //arch_adjust_after_thread_switch(GET_CURRENT_THREAD());
 
     switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, em->start, em->esp );
 }

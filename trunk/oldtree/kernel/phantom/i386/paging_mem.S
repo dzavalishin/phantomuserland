@@ -1,5 +1,7 @@
 #include "mach/asm.h"
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
+
+//#include <x86/phantom_page.h>
 #include <x86/phantom_pmap.h>
 
 	.data

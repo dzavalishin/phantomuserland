@@ -1,10 +1,11 @@
 
 #include <kernel/init.h>
 #include <kernel/trap.h>
+#include <kernel/page.h>
 
 //#include <i386/trap.h>
 #include <setjmp.h>
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 
 #include <phantom_types.h>
 #include <phantom_libc.h>

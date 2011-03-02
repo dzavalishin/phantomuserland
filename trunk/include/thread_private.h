@@ -392,14 +392,14 @@ void phantom_scheduler_request_soft_irq(void); // enforce soft irq
 
 void phantom_thread_switch(void);
 
+// Do what is required (arch specific) after switching to a new thread
+void arch_adjust_after_thread_switch(phantom_thread_t *t);
 
 
 
 
 
-//void i386_fsave(void *fpu_state);
 void i386_fxsave(void *fpu_state);
-//void i386_frstor(void *fpu_state);
 void i386_fxrstor(void *fpu_state);
 
 
@@ -408,7 +408,7 @@ phantom_thread_t *phantom_create_thread( void (*func)(void *), void *arg, int fl
 
 
 
-void phantom_thread_in_interrupt_fork(void);
+//void phantom_thread_in_interrupt_fork(void);
 
 void dump_thread_stack(phantom_thread_t *t);
 void dump_thread_stacks(void);

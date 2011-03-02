@@ -29,6 +29,12 @@
 #include <unix/uuprocess.h>
 
 
+#define ff_convert(__c,__to) __c
+//#define ff_wtoupper(__c) (toupper((char)__c))
+static WCHAR ff_wtoupper(WCHAR __c)
+{
+    return toupper( (char)__c );
+}
 /*---------------------------------------*/
 /* Prototypes for disk control functions */
 
@@ -97,10 +103,10 @@ static WCHAR LfnBuf[_MAX_LFN+1];
 
 #elif _USE_LFN == 3 		/* LFN with dynamic LFN working buffer on the heap */
 #define	DEF_NAMEBUF			BYTE sfn[12]; WCHAR *lfn
-#define INIT_BUF(dobj)		{ lfn = ff_memalloc((_MAX_LFN + 1) * 2); \
+#define INIT_BUF(dobj)		{ lfn = calloc(1,(_MAX_LFN + 1) * 2); \
     if (!lfn) LEAVE_FF((dobj).fs, FR_NOT_ENOUGH_CORE); \
     (dobj).lfn = lfn;	(dobj).fn = sfn; }
-#define	FREE_BUF()			ff_memfree(lfn)
+#define	FREE_BUF()			free(lfn)
 
 #else
 #error Wrong LFN configuration.
@@ -718,23 +724,39 @@ static
 const BYTE LfnOfs[] = {1,3,5,7,9,14,16,18,20,22,24,28,30};	/* Offset of LFN chars in the directory entry */
 
 
+/* 1:Matched, 0:Not matched */
 static
-int cmp_lfn (			/* 1:Matched, 0:Not matched */
-                                                              WCHAR *lfnbuf,		/* Pointer to the LFN to be compared */
-                                                              BYTE *dir			/* Pointer to the directory entry containing a part of LFN */
+int cmp_lfn (
+             WCHAR *lfnbuf,		/* Pointer to the LFN to be compared */
+             BYTE *dir			/* Pointer to the directory entry containing a part of LFN */
             )
 {
     UINT i, s;
-    WCHAR wc, uc;
-
+    WCHAR wc, uc, fc;
 
     i = ((dir[LDIR_Ord] & 0xBF) - 1) * 13;	/* Get offset in the LFN buffer */
+
+#if 0
+putchar('\n');
+putchar('\n');
+hexdump(dir, 32, 0, 0 );
+
+hexdump(lfnbuf+i,10,0,0);
+putchar('\n');
+#endif
+
     s = 0; wc = 1;
     do {
         uc = LD_WORD(dir+LfnOfs[s]);	/* Pick an LFN character from the entry */
         if (wc) {	/* Last char has not been processed */
+            if (i >= _MAX_LFN)
+                return 0;  
+
             wc = ff_wtoupper(uc);		/* Convert it to upper case */
-            if (i >= _MAX_LFN || wc != ff_wtoupper(lfnbuf[i++]))	/* Compare it */
+            fc = ff_wtoupper(lfnbuf[i++]);
+//printf("cmp %d %d ('%c'-'%c') ", wc, fc, (char)wc, (char)fc);
+
+            if(wc != fc)	/* Compare it */
                 return 0;				/* Not matched */
         } else {
             if (uc != 0xFFFF) return 0;	/* Check filler */
@@ -907,6 +929,7 @@ FRESULT dir_find (
         res = move_window(dj->fs, dj->sect);
         if (res != FR_OK) break;
         dir = dj->dir;					/* Ptr to the directory entry of current index */
+//hexdump(dir,32, 0,0);
         c = dir[DIR_Name];
         if (c == 0) { res = FR_NO_FILE; break; }	/* Reached to end of table */
 #if _USE_LFN	/* LFN configuration */
@@ -3409,10 +3432,11 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
     }
 
 
-    if(0) {
+    if(1) {
         void *odata;
         int osize;
-        const char *fname = "/amnt0/ReadMe.txt";
+        //const char *fname = "/amnt0/ReadMe.txt";
+        const char *fname = "/amnt0/LongNameTest.txt";
 
         errno_t ke = k_load_file( &odata, &osize, fname );
         if( !ke )
@@ -3425,13 +3449,13 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
 
     }
 
-    if(1) {
-    int pid = uu_create_process(-1);
-    const char* av[] = { "sh", 0 };
-    uu_proc_setargs( pid, av, 0 );
+    if(0)
+    {
+        int pid = uu_create_process(-1);
+        const char* av[] = { "sh", 0 };
+        uu_proc_setargs( pid, av, 0 );
 
-    uu_run_file( pid, "/amnt0/bin/sh" );
-
+        uu_run_file( pid, "/amnt0/bin/sh" );
     }
 
 #endif
