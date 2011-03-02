@@ -29,7 +29,7 @@
 
 #ifdef ARCH_ia32
 // TSS - TODO - move to machdep thread switch code
-#include <i386/tss.h>
+//#include <i386/tss.h>
 #endif
 
 
@@ -45,7 +45,7 @@ void phantom_thread_switch()
     int ie = hal_save_cli();
     hal_spinlock_t *toUnlock = 0;
 
-	STAT_INC_CNT(STAT_CNT_THREAD_SW);
+    STAT_INC_CNT(STAT_CNT_THREAD_SW);
 
     if(GET_CURRENT_THREAD()->sw_unlock == &schedlock)
     {
@@ -74,7 +74,7 @@ void phantom_thread_switch()
 
     if(next == old)
     {
-		STAT_INC_CNT(STAT_CNT_THREAD_SAME);
+        STAT_INC_CNT(STAT_CNT_THREAD_SAME);
         goto exit;
     }
 
@@ -91,7 +91,7 @@ void phantom_thread_switch()
     phantom_switch_context(old, next, toUnlock );
     hal_disable_softirq();
 
-#ifdef ARCH_ia32
+#if 0 //def ARCH_ia32
     {
         // TODO machdep, header
         extern struct i386_tss	       	tss;
@@ -103,6 +103,8 @@ void phantom_thread_switch()
         t->cpu_id = GET_CPU_ID();
     }
 #endif
+    arch_adjust_after_thread_switch(GET_CURRENT_THREAD());
+
 exit:
     hal_spin_unlock(&schedlock);
 
@@ -168,6 +170,7 @@ void phantom_thread_switch()
     // threads_stat.switches++;
     hal_disable_softirq();
 
+    /*
     {
         // TODO machdep, header
         extern struct i386_tss	       	tss;
@@ -175,6 +178,9 @@ void phantom_thread_switch()
         phantom_thread_t *t = GET_CURRENT_THREAD();
         tss.esp0 = t->kstack_top;
     }
+    */
+
+    arch_adjust_after_thread_switch(GET_CURRENT_THREAD());
 
 exit:
     hal_spin_unlock(&schedlock);

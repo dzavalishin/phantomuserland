@@ -2,21 +2,23 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * MP - processor start, trampoline
  *
 **/
 
 #define DEBUG_MSG_PREFIX "smp"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
 #include <assert.h>
 #include <string.h>
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
+
+//#include <x86/phantom_page.h>
 #include <i386/proc_reg.h>
 
 #include "smp-imps.h"

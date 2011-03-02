@@ -177,7 +177,7 @@ int uu_create_process( int ppid )
     p->pgrp_pid = p->pid;
     p->sess_pid = p->pid;
 
-    p->uid = p->euid = p->gid = p->egid = -1;
+    p->uid = p->euid = p->gid = p->egid = 0; // Let it be root at start
     p->umask = 0664;
 
     int i;

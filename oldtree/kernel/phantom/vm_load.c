@@ -31,7 +31,7 @@
 
 #include <vm/bulk.h>
 
-
+// TODO use k_load_file?
 int load_code(void **out_code, unsigned int *out_size, const char *fn)
 {
     long fsize = -1;

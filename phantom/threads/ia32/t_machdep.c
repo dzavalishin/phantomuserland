@@ -10,10 +10,11 @@
  *
 **/
 
-#include "thread_private.h"
+#include <thread_private.h>
 #include <phantom_libc.h>
 #include <i386/seg.h>
 #include <i386/eflags.h>
+#include <i386/tss.h>
 
 //#define FXDEBUG(a) a
 #define FXDEBUG(a)
@@ -148,6 +149,10 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
     printf("---- !! phantom_thread_c_starter !! ---\n");
 #endif
 
+    // We're first time running here, set arch specific things up
+    // NB!! BEFORE enablings ints!
+    arch_adjust_after_thread_switch(t);;
+
     hal_sti(); // Make sure new thread is started with interrupts on
 
 #if 1
@@ -157,11 +162,28 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
     }
 #endif
 
+
     func(arg);
     t_kill_thread( t->tid );
     panic("thread %d returned from t_kill_thread", t->tid );
 
 }
 
+// Do what is required (arch specific) after switching to a new thread
+void arch_adjust_after_thread_switch(phantom_thread_t *t)
+{
+    // TODO machdep, header
+    extern struct i386_tss  tss;
 
+    //phantom_thread_t *t = GET_CURRENT_THREAD();
+    tss.esp0 = (addr_t)t->kstack_top;
+
+    int ncpu = GET_CPU_ID();
+    t->cpu_id = ncpu;
+
+#warning not SMP compliant
+    // NO! - kill that "Or else CPU doesn't take in account esp0 change :("
+    phantom_load_main_tss();
+    //phantom_load_cpu_tss(ncpu);
+}
 

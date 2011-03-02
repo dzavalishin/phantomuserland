@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "syscall"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -32,8 +32,7 @@
 #include <kernel/init.h>
 #include <kernel/unix.h>
 #include <kernel/trap.h>
-
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
 
 #include <kernel/syscalls.h>
 
@@ -107,6 +106,10 @@ errno_t user_args_load( int mina, int maxa, char **oav, int omax,  const char **
     } while(0)
 */
 
+
+//#include <i386/tss.h>
+
+
 static void do_syscall_sw(struct trap_state *st)
 {
 #if HAVE_UNIX
@@ -142,7 +145,13 @@ static void do_syscall_sw(struct trap_state *st)
     int *uarg = adjustin( user_esp, st );
     uarg++; // syscall func return addr
 
-    SHOW_FLOW( 7, "Syscall %d args %x, %x, %x", callno, uarg[0], uarg[1],uarg[2] );
+    //SHOW_FLOW( 10, "Syscall pid %2d tid %2d, our esp %p, user esp %p, t kstack %p", u->pid, t->tid, &st, user_esp, t->kstack_top );
+    SHOW_FLOW( 8, "Syscall %d args %x, %x, %x", callno, uarg[0], uarg[1],uarg[2] );
+
+    /*{
+        extern struct i386_tss	       	tss;
+        SHOW_FLOW( 7, "TSS esp0 = %p", (void *)tss.esp0  );
+    }*/
 
     int ret = 0;
     int err = 0;
