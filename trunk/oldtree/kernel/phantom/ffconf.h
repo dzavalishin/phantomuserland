@@ -90,7 +90,7 @@
 */
 
 
-#define	_USE_LFN	3		/* 0 to 3 */
+#define	_USE_LFN	2		/* 0 to 3 */
 #define	_MAX_LFN	255		/* Maximum LFN length to handle (12 to 255) */
 /* The _USE_LFN option switches the LFN support.
 /
@@ -168,9 +168,11 @@
 /* Include a header file here to define sync object types on the O/S */
 /* #include <windows.h>, <ucos_ii.h.h>, <semphr.h> or ohters. */
 
+#include <hal.h>
+
 #define _FS_REENTRANT	0		/* 0:Disable or 1:Enable */
 #define _FS_TIMEOUT		1000	/* Timeout period in unit of time ticks */
-#define	_SYNC_t			HANDLE	/* O/S dependent type of sync object. e.g. HANDLE, OS_EVENT*, ID and etc.. */
+#define	_SYNC_t			hal_mutex_t	/* O/S dependent type of sync object. e.g. HANDLE, OS_EVENT*, ID and etc.. */
 
 /* The _FS_REENTRANT option switches the reentrancy of the FatFs module.
 /

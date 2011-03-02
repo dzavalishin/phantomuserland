@@ -16,7 +16,7 @@
 
 #define DEBUG_MSG_PREFIX "ff"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -66,11 +66,6 @@ Module Private Definitions
 /*------------------------------------------------------------*/
 /* Work area                                                  */
 
-#if _VOLUMES
-//static    FATFS *FatFs[_VOLUMES];	/* Pointer to the file system objects (logical drives) */
-#else
-#error Number of drives must not be 0.
-#endif
 
 static
     WORD Fsid;				/* File system mount ID */
@@ -145,7 +140,8 @@ static int lock_fs (
                     FATFS *fs		/* File system object */
                    )
 {
-    return ff_req_grant(fs->sobj);
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
+    return ff_req_grant(&fs->sobj);
 }
 
 
@@ -155,11 +151,12 @@ void unlock_fs (
                 FRESULT res		/* Result code to be returned */
                )
 {
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
     if (res != FR_NOT_ENABLED &&
         res != FR_INVALID_DRIVE &&
         res != FR_INVALID_OBJECT &&
         res != FR_TIMEOUT) {
-        ff_rel_grant(fs->sobj);
+        ff_rel_grant(&fs->sobj);
     }
 }
 #endif
@@ -171,10 +168,11 @@ void unlock_fs (
 /*-----------------------------------------------------------------------*/
 #if _FS_SHARE
 
+/* Check if the file can be accessed */
 static
-FRESULT chk_lock (	/* Check if the file can be accessed */
-                                                               DIR* dj,		/* Directory object pointing the file to be checked */
-                                                               int acc			/* Desired access (0:Read, 1:Write, 2:Delete/Rename) */
+FRESULT chk_lock (
+                  DIR* dj,		/* Directory object pointing the file to be checked */
+                  int acc			/* Desired access (0:Read, 1:Write, 2:Delete/Rename) */
                  )
 {
     UINT i, be;
@@ -294,6 +292,7 @@ FRESULT move_window (
 {
     DWORD wsect;
 
+    SHOW_FLOW( 8, "fs %p dev %p", fs, fs->dev );
 
     wsect = fs->winsect;
     if (wsect != sector) {	/* Changed current window */
@@ -336,6 +335,7 @@ FRESULT sync (
 {
     FRESULT res;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     res = move_window(fs, 0);
     if (res == FR_OK) {
@@ -395,6 +395,7 @@ DWORD get_fat (
     UINT wc, bc;
     BYTE *p;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     if (clst < 2 || clst >= fs->n_fatent)	/* Chack range */
         return 1;
@@ -440,6 +441,7 @@ FRESULT put_fat (
     BYTE *p;
     FRESULT res;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     if (clst < 2 || clst >= fs->n_fatent) {	/* Check range */
         res = FR_INT_ERR;
@@ -919,6 +921,8 @@ FRESULT dir_find (
     BYTE a, ord, sum;
 #endif
 
+    SHOW_FLOW( 7, "fs %p dev %p", dj->fs, dj->fs->dev );
+
     res = dir_sdi(dj, 0);			/* Rewind directory object */
     if (res != FR_OK) return res;
 
@@ -980,6 +984,7 @@ FRESULT dir_read (
 #if _USE_LFN
     BYTE a, ord = 0xFF, sum = 0xFF;
 #endif
+    SHOW_FLOW( 7, "fs %p dev %p", dj->fs, dj->fs->dev );
 
     res = FR_NO_FILE;
     while (dj->sect) {
@@ -1026,7 +1031,6 @@ FRESULT dir_read (
 /*-----------------------------------------------------------------------*/
 /* Register an object to the directory                                   */
 /*-----------------------------------------------------------------------*/
-#if !_FS_READONLY
 
 /* FR_OK:Successful, FR_DENIED:No free entry or too many SFN collision, FR_DISK_ERR:Disk error */
 static
@@ -1127,7 +1131,6 @@ FRESULT dir_register (
 
     return res;
 }
-#endif /* !_FS_READONLY */
 
 
 
@@ -1135,7 +1138,6 @@ FRESULT dir_register (
 /*-----------------------------------------------------------------------*/
 /* Remove an object from the directory                                   */
 /*-----------------------------------------------------------------------*/
-#if !_FS_READONLY && !_FS_MINIMIZE
 
 /* FR_OK: Successful, FR_DISK_ERR: A disk error */
 static
@@ -1174,7 +1176,6 @@ FRESULT dir_remove (
 
     return res;
 }
-#endif /* !_FS_READONLY */
 
 
 
@@ -1491,6 +1492,7 @@ FRESULT follow_path (
     FRESULT res;
     BYTE *dir, ns;
 
+    SHOW_FLOW( 7, "fs %p dev %p", dj->fs, dj->fs->dev );
 
 #if _FS_RPATH
     if (*path == '/' || *path == '\\') { /* There is a heading separator */
@@ -1552,13 +1554,17 @@ BYTE check_fs (
                DWORD sect	/* Sector# (lba) to check if it is an FAT boot record or not */
               )
 {
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
+
     if (disk_read(fs->dev, fs->win, sect, 1) != RES_OK)	/* Load boot record */
         return 3;
+
     if (LD_WORD(&fs->win[BS_55AA]) != 0xAA55)		/* Check record signature (always placed at offset 510 even if the sector size is >512) */
         return 2;
 
     if ((LD_DWORD(&fs->win[BS_FilSysType]) & 0xFFFFFF) == 0x544146)	/* Check "FAT" string */
         return 0;
+
     if ((LD_DWORD(&fs->win[BS_FilSysType32]) & 0xFFFFFF) == 0x544146)
         return 0;
 
@@ -1586,6 +1592,8 @@ FRESULT chk_mounted (
     DWORD bsect, fasize, tsect, sysect, nclst, szbfat;
     WORD nrsv;
 //    const TCHAR *p = *path;
+
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     ENTER_FF(fs);						/* Lock file system */
 
@@ -1726,6 +1734,8 @@ FRESULT validate (	/* FR_OK(0): The object is valid, !=0: Invalid */
     if (!fs || !fs->fs_type || fs->id != id)
         return FR_INVALID_OBJECT;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
+
     ENTER_FF(fs);		/* Lock file system */
 
     if (disk_status(fs->dev) & STA_NOINIT)
@@ -1753,6 +1763,8 @@ FRESULT f_mount (
                  FATFS *fs		/* Pointer to new file system object (NULL for unmount)*/
                 )
 {
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
+
     if (fs) {
         fs->fs_type = 0;			/* Clear new fs object */
 #if _FS_REENTRANT					/* Create sync object for the new volume */
@@ -1768,12 +1780,14 @@ FRESULT f_umount (
                   FATFS *fs		/* Pointer to file system for unmount */
                 )
 {
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
+
     if (fs) {
 #if _FS_SHARE
         clear_lock(fs);
 #endif
 #if _FS_REENTRANT					/* Discard sync object of the current volume */
-        if (!ff_del_syncobj(fs->sobj)) return FR_INT_ERR;
+        if (!ff_del_syncobj(&fs->sobj)) return FR_INT_ERR;
 #endif
         fs->fs_type = 0;			/* Clear old fs object */
     }
@@ -1800,6 +1814,8 @@ FRESULT f_open (
     DEF_NAMEBUF;
 
     dj.fs = fs;
+
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     fp->fs = 0;			/* Clear file object */
 
@@ -1931,6 +1947,7 @@ FRESULT f_read (
     UINT rcnt, cc;
     BYTE csect, *rbuff = buff;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fp->fs, fp->fs->dev );
 
     *br = 0;	/* Initialize byte counter */
 
@@ -2025,6 +2042,7 @@ FRESULT f_write (
     const BYTE *wbuff = buff;
     BYTE csect;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fp->fs, fp->fs->dev );
 
     *bw = 0;	/* Initialize byte counter */
 
@@ -2134,6 +2152,7 @@ FRESULT f_sync (
     DWORD tim;
     BYTE *dir;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fp->fs, fp->fs->dev );
 
     res = validate(fp->fs, fp->id);		/* Check validity of the object */
     if (res == FR_OK) {
@@ -2178,6 +2197,8 @@ FRESULT f_close (
                 )
 {
     FRESULT res;
+
+    SHOW_FLOW( 7, "fs %p dev %p", fp->fs, fp->fs->dev );
 
 #if _FS_READONLY
     FATFS *fs = fp->fs;
@@ -2348,6 +2369,7 @@ FRESULT f_lseek (
 {
     FRESULT res;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fp->fs, fp->fs->dev );
 
     res = validate(fp->fs, fp->id);		/* Check validity of the object */
     if (res != FR_OK) LEAVE_FF(fp->fs, res);
@@ -2599,6 +2621,8 @@ FRESULT f_stat (
     DIR dj;
     DEF_NAMEBUF;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
+
     dj.fs = fs;
 
     res = chk_mounted( dj.fs, 0 );
@@ -2635,6 +2659,7 @@ FRESULT f_getfree (
     UINT i;
     BYTE fat, *p;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     /* Get drive number */
     res = chk_mounted( fs, 0);
@@ -2696,6 +2721,7 @@ FRESULT f_truncate (
     FRESULT res;
     DWORD ncl;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fp->fs, fp->fs->dev );
 
     res = validate(fp->fs, fp->id);		/* Check validity of the object */
     if (res == FR_OK) {
@@ -2747,6 +2773,8 @@ FRESULT f_unlink (
     BYTE *dir;
     DWORD dclst;
     DEF_NAMEBUF;
+
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     dj.fs = fs;
 
@@ -2817,6 +2845,8 @@ FRESULT f_mkdir (
     BYTE *dir, n;
     DWORD dsc, dcl, pcl, tim = get_fattime();
     DEF_NAMEBUF;
+
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     dj.fs = fs;
 
@@ -2893,6 +2923,8 @@ FRESULT f_chmod (
     DIR dj;
     BYTE *dir;
     DEF_NAMEBUF;
+
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
 
     dj.fs = fs;
 
@@ -2981,6 +3013,7 @@ FRESULT f_rename (
     DWORD dw;
     DEF_NAMEBUF;
 
+    SHOW_FLOW( 7, "fs %p dev %p", fs, fs->dev );
     djo.fs = fs;
 
     res = chk_mounted( djo.fs, 1 );
@@ -3441,7 +3474,7 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
         errno_t ke = k_load_file( &odata, &osize, fname );
         if( !ke )
         {
-            printf("%s = '%s'", fname, odata );
+            printf("%s = '%s'\n", fname, odata );
             free( odata );
         }
         else
@@ -3467,5 +3500,27 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
 
 
 
+int ff_cre_syncobj (BYTE b, _SYNC_t*m)
+{
+    (void) b;
+    return hal_mutex_init(m, "fatff");
+}
+
+int ff_del_syncobj(_SYNC_t *m)		/* Delete a sync object */
+{
+    return hal_mutex_destroy(m);
+}
+
+/* Lock sync object */
+int ff_req_grant(_SYNC_t *m)
+{
+    return hal_mutex_lock(m);
+}
+
+/* Unlock sync object */
+int ff_rel_grant(_SYNC_t *m)
+{
+    return hal_mutex_unlock(m);
+}
 
 

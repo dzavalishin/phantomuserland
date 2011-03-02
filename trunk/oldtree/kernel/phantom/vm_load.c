@@ -34,6 +34,7 @@
 // TODO use k_load_file?
 int load_code(void **out_code, unsigned int *out_size, const char *fn)
 {
+    errno_t ret;
     long fsize = -1;
 
     SHOW_FLOW( 6, "load '%s'", fn );
@@ -47,10 +48,12 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
 
     fsize = st.st_size;
 
+    SHOW_FLOW( 6, "will open '%s', %d bytes", fn, fsize );
+
     int fd;
-    if( k_open( &fd, fn, _O_RDONLY, 0 ) )
+    if( (ret = k_open( &fd, fn, _O_RDONLY, 0 )) )
     {
-        SHOW_ERROR( 0, "can't open '%s'", fn );
+        SHOW_ERROR( 0, "can't open '%s', err %d", fn, ret );
         return ENOENT;
     }
 
@@ -62,7 +65,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     }
 
     int nread;
-    errno_t ret = k_read( &nread, fd, code, fsize );
+    ret = k_read( &nread, fd, code, fsize );
     if( ret || (fsize != nread) )
     {
         SHOW_ERROR( 0, "Can't read code: ret = %d", ret );

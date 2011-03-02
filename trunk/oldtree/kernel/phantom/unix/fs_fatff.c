@@ -118,6 +118,8 @@ static errno_t     fatff_close(struct uufile *f)
 {
     FIL *fp = f->impl;
 
+    SHOW_FLOW( 7, "fp %p fs %p dev %p", fp, fp->fs, fp->fs->dev );
+
     f_close( fp );
 
     return 0;
@@ -146,7 +148,7 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     ret->pos = 0;
     ret->fs = fs;
     ret->impl = fp;
-    ret->flags |= UU_FILE_FLAG_FREEIMPL;
+    //ret->flags |= UU_FILE_FLAG_FREEIMPL;
     ret->flags |= UU_FILE_FLAG_OPEN; // TODO this is wrong and must be gone - open in open!
 
     set_uufile_name( ret, filename );
