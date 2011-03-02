@@ -51,6 +51,8 @@ SVN_OUT=`svn update`
 	[ "$FORCE" ] || die "$MSG"
 }
 
+echo "$SVN_OUT"
+
 [ "$COMPILE" ] && {
 	./build.sh > make.log 2>&1 || die "Make failure"
 	#make -C phantom/vm	>> make.log 2>&1 || die "Make failure in vm"
