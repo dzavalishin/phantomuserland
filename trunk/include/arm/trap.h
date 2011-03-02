@@ -11,13 +11,13 @@
 #endif
 
 
-#define	T_RESET         	0
-#define	T_INVALID_OPCODE	1		/* invalid op code */
+#define	T_RESET                 0
+#define	T_INVALID_OPCODE        1		/* invalid op code */
 #define	T_SOFT_INT              2		/* soft int instruction */
 #define	T_PREFETCH_ABORT        3
 #define	T_DATA_ABORT            4
 #define	T_RESERVED              5
-#define	T_IRQ			6
+#define	T_IRQ                   6
 #define	T_FRQ                   7
 
 

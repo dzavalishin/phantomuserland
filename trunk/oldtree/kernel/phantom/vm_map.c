@@ -266,8 +266,14 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
         addr_t fa = arch_get_fault_address();
 #ifdef ARCH_ia32
         ts->cr2 = fa;
+        addr_t ip = ts->eip;
+        int is_write = ts->err & T_PF_WRITE;
 #endif
-
+#ifdef ARCH_arm
+        addr_t ip = ts->ip;
+#  warning find out if it was a write op
+        int is_write = 0;
+#endif
         {
             unsigned long addr = fa;
 
@@ -276,11 +282,12 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
             if( addr >= (vm_map_vm_page_count*__MEM_PAGE) )
             {
                 dump_ss(ts);
-                panic("fault address 0x%p is outside of object space, IP 0x%X", fa, ts->eip);
+                panic("fault address 0x%p is outside of object space, IP 0x%X", fa, ip);
             }
         }
 
-        vm_map_page_fault_handler( (void *)fa, ts->err & T_PF_WRITE, ts->eip, ts );
+
+        vm_map_page_fault_handler( (void *)fa, is_write, ip, ts );
         return 0;
     }
 
@@ -393,8 +400,15 @@ vm_map_init(unsigned long page_count)
     hal_start_kernel_thread(vm_map_lazy_pageout_thread);
     hal_start_kernel_thread(vm_map_snapshot_thread);
 #endif
+
     // Ok, everything is ready now. Turn on pagefaults handling
+#ifdef ARCH_ia32
     phantom_trap_handlers[T_PAGE_FAULT] = vm_map_page_fault_trap_handler;
+#endif
+#ifdef ARCH_arm
+#  warning no page fault trap handler set
+#endif
+
 
 
 }

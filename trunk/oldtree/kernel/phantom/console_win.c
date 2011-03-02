@@ -15,7 +15,7 @@
 #define debug_level_info 10
 
 
-#include <i386/pio.h>
+//#include <i386/pio.h>
 #include <phantom_libc.h>
 #include <hal.h>
 #include <time.h>

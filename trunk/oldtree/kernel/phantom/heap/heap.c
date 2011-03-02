@@ -1,4 +1,4 @@
-#include <x86/phantom_page.h>
+//#include <x86/phantom_page.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <malloc.h>
@@ -8,6 +8,7 @@
 #include "../misc.h"
 
 #include <kernel/debug.h>
+#include <kernel/page.h>
 
 #define addr_t u_int32_t
 #define NULL 0

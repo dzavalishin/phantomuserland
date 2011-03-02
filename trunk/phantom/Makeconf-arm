@@ -18,29 +18,8 @@ YACC            = bison -y
 M4              = m4
 
 
+USR_LD_ADDR=-Wl,-Ttext-segment,0 -Wl,-Ttext,0
+
+TARGET_OBJECT_FORMAT=elf32-littlearm
 
 
-
-
-
-
-
-
-#INSTALL		= /usr/bin/install -c
-#INSTALL_PROGRAM	= ${INSTALL}
-#INSTALL_DATA	= ${INSTALL} -m 644
-
-#DEFINES		= 
-#CFLAGS		= 
-#M4FLAGS		= -s
-
-#INSTALL_INCDIR	= $(prefix)/include
-#INSTALL_BINDIR	= $(exec_prefix)/bin
-#INSTALL_LIBDIR	= $(exec_prefix)/lib
-
-#PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inline-functions
-
-
-#HOST_CPU	= i686
-#HOST_ARCH	= x86
-#unix_host	= NONE

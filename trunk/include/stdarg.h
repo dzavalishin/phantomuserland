@@ -43,8 +43,10 @@
 
 #include <phantom_types.h>
 
-//#define __GNUCLIKE_BUILTIN_STDARG
-
+// It fails on arm, don't know why
+#ifdef ARCH_arm
+#undef __GNUCLIKE_BUILTIN_STDARG
+#endif
 
 
 #ifndef _VA_LIST_DECLARED

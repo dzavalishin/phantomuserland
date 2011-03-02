@@ -1,8 +1,8 @@
-#include <i386/pio.h>
+//#include <i386/pio.h>
 #include <phantom_libc.h>
 
 
-#include "hal.h"
+#include <hal.h>
 #include "pager.h"
 #include "dpc.h"
 #include "vm_map.h"

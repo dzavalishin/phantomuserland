@@ -19,7 +19,7 @@
 
 #include <kernel/config.h>
 #include "hal_private.h"
-#include <i386/proc_reg.h>
+//#include <i386/proc_reg.h>
 //#include <x86/phantom_page.h>
 #include <phantom_libc.h>
 #include "physalloc.h"

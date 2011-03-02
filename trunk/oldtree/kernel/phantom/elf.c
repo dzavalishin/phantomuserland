@@ -21,7 +21,7 @@
 #include <kernel/page.h>
 
 //#include <x86/phantom_page.h>
-#include <i386/proc_reg.h>
+//#include <i386/proc_reg.h>
 #include <phantom_libc.h>
 #include <phantom_types.h>
 #include <string.h>
@@ -254,7 +254,11 @@ static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t star
 #else
 static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t start, u_int32_t esp)
 {
-	panic("no user mode yet on ARM");
+    (void) cs;
+    (void) ds;
+    (void) start;
+    (void) esp;
+    panic("no user mode yet on ARM");
 }
 #endif
 

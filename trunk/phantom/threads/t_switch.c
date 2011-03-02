@@ -27,8 +27,11 @@
 #include <kernel/interrupts.h>
 #include <kernel/stats.h>
 
+#ifdef ARCH_ia32
 // TSS - TODO - move to machdep thread switch code
 #include <i386/tss.h>
+#endif
+
 
 hal_spinlock_t schedlock;
 
@@ -88,6 +91,7 @@ void phantom_thread_switch()
     phantom_switch_context(old, next, toUnlock );
     hal_disable_softirq();
 
+#ifdef ARCH_ia32
     {
         // TODO machdep, header
         extern struct i386_tss	       	tss;
@@ -98,7 +102,7 @@ void phantom_thread_switch()
 
         t->cpu_id = GET_CPU_ID();
     }
-
+#endif
 exit:
     hal_spin_unlock(&schedlock);
 

@@ -1,8 +1,8 @@
-#include <x86/phantom_page.h>
-#include <mach/asm.h>
 #include <kernel/config.h>
+#include <kernel/page.h>
 
-//	.data
+#include <mach/asm.h>
+
 	.bss
         P2ALIGN(PAGE_SHIFT)
 

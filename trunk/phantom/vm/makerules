@@ -1,33 +1,33 @@
 include ../../config.mk 
 
-ifeq ($(OSTYPE),cygwin)
-all: $(TARGET) pvm_test
-else
+
+#ifeq ($(OSTYPE),cygwin)
+#all: $(TARGET) pvm_test
+#else
+#all: $(TARGET)
+#endif
+
 all: $(TARGET)
+
+ifeq ($(OSTYPE),cygwin)
+ifeq ($(ARCH),ia32)
+all: $(TARGET) pvm_test
 endif
+endif
+
 
 W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
-#libphantom_vm.a: 
-#	ar crs $@ $(filter-out pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o,$^)
-#	cp $@ ../lib
-
-#winhal.o: winhal.c
-#	gcc $(W32GCC) $^
-
-#winbulk.o: winbulk.c
-#	gcc $(W32GCC) $^
 
 nonstandalone.o: nonstandalone.c
 	gcc -m32 -c nonstandalone.c
 
 GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o 
-#GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o ../lib/libphantom_c.a 
 
 ifeq ($(OSTYPE),cygwin)
 OSLIB = -lgdi32 ../lib/libphantom.a
 else
-OSLIB= ../lib/libphantom_c.a ../lib/libphantom.a 
+OSLIB = ../lib/libphantom_c.a ../lib/libphantom.a
 endif
 
 

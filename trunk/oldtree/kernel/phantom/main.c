@@ -153,20 +153,6 @@ static void net_stack_init();
 
 
 
-#include <kernel/interrupts.h>
-
-void
-phantom_scheduler_request_soft_irq()
-{
-    hal_request_softirq(SOFT_IRQ_THREADS);
-    __asm __volatile("int $15");
-}
-
-void
-phantom_scheduler_schedule_soft_irq()
-{
-    hal_request_softirq(SOFT_IRQ_THREADS);
-}
 
 
 
@@ -246,7 +232,9 @@ int main(int argc, char **argv, char **envp)
     hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
     }
 
+#ifdef ARCH_ia32
     set_cr0( get_cr0() | CR0_WP );
+#endif
 
     phantom_init_apic(); // Starts other CPUs
 

@@ -9,6 +9,8 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "video"
 #include <debug_ext.h>
 #define debug_level_flow 6
@@ -294,4 +296,5 @@ errno_t call_16bit_code( u_int16_t cs, u_int16_t ss, u_int16_t entry, struct tra
 }
 
 
+#endif // ARCH_ia32
 

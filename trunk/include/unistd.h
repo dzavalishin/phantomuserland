@@ -19,6 +19,7 @@ extern "C" {
 #define SEEK_END 2
 
 void    _exit(int);
+void    exit(int);
 
 int     open(char const *, int, ...);
 int     close(int);
