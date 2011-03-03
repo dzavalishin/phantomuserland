@@ -98,3 +98,149 @@ unicode_to_utf8(const char  *src, int32_t *srcLen, char *dst, int32_t *dstLen)
     return dstCount > 0 ? 0 : ENOENT;
 }
 
+#if 0
+
+#define __FIN(__src) (((__src) & 192) != 128)
+
+
+#define __CHECKFIN() \
+    if(__FIN(*src)) \
+        { \
+            *nbyte = (unsigned char)(src-src2); \
+            return 32; \
+        }
+
+
+u_int32_t UTF8_To_Unicode(unsigned char * src2, size_t * nbyte)
+{
+    unsigned char* src = src2;
+
+    *nbyte=1;
+
+    if( *src == 0 )
+        return 0;
+
+    if( (*src & 128) == 0 )
+        return *src;
+
+    u_int32_t value = 0;
+
+    {
+        int curbit = 7;
+
+        *nbyte = 0;
+
+        while( *src & (1<<curbit) )
+        {
+            *nbyte++;
+            curbit--;
+        }
+    }
+
+    if(*nbyte == 4)
+    {
+        value |= (*src&7)<<18;
+        src++;
+
+        __CHECKFIN();
+
+        value |= (*src&63)<<12;
+        src++;
+
+        __CHECKFIN();
+
+        value |= (*src&63)<<6;
+        src++;
+
+        __CHECKFIN();
+    }
+
+    if(*nbyte == 3)
+    {
+        value |= (*src&15)<<12;
+        src++;
+
+        __CHECKFIN();
+
+        value |= (*src&63)<<6;
+        src++;
+
+        __CHECKFIN();
+    }
+
+    if(*nbyte == 2)
+    {
+        value |= (*src&31)<<6;
+        src++;
+
+        __CHECKFIN();
+    }
+
+    value |= (*src & 63);
+
+    return value;
+}
+
+#endif
+
+
+
+
+
+
+#if 0
+
+errno_t
+utf8_to_unicode(const char  *src, int32_t *srcLen, char *dst, int32_t *dstLen)
+
+std::wstring FromUtf8(const std::string& utf8string)
+    {
+        size_t widesize = utf8string.length();
+        if (sizeof(wchar_t) == 2)
+        {
+            wchar_t* widestringnative = new wchar_t[widesize+1];
+            const UTF8* sourcestart = reinterpret_cast<const UTF8*>(utf8string.c_str());
+            const UTF8* sourceend = sourcestart + widesize;
+            UTF16* targetstart = reinterpret_cast<UTF16*>(widestringnative);
+            UTF16* targetend = targetstart + widesize+1;
+            ConversionResult res = ConvertUTF8toUTF16
+		(&sourcestart, sourceend, &targetstart, targetend, strictConversion);
+            if (res != conversionOK)
+            {
+                delete [] widestringnative;
+                throw std::exception("La falla!");
+            }
+            *targetstart = 0;
+            std::wstring resultstring(widestringnative);
+            delete [] widestringnative;
+            return resultstring;
+        }
+        else if (sizeof(wchar_t) == 4)
+        {
+            wchar_t* widestringnative = new wchar_t[widesize];
+            const UTF8* sourcestart = reinterpret_cast<const UTF8*>(utf8string.c_str());
+            const UTF8* sourceend = sourcestart + widesize;
+            UTF32* targetstart = reinterpret_cast<UTF32*>(widestringnative);
+            UTF32* targetend = targetstart + widesize;
+            ConversionResult res = ConvertUTF8toUTF32
+		(&sourcestart, sourceend, &targetstart, targetend, strictConversion);
+            if (res != conversionOK)
+            {
+                delete [] widestringnative;
+                throw std::exception("La falla!");
+            }
+            *targetstart = 0;
+            std::wstring resultstring(widestringnative);
+            delete [] widestringnative;
+            return resultstring;
+        }
+        else
+        {
+            throw std::exception("La falla!");
+        }
+        return L"";
+    }
+
+
+#endif
+
