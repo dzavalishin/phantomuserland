@@ -12,21 +12,21 @@
 
 // todo: save contents of registers r1 and r2 in r7 and r8 to save off architecture ID and atags pointer passed in by bootloader 
 
-	.text
+    .text
     .code 32
 
     .global _start
     .func   _start
 _start:
     // Vect table
-    B           _reset  // reset
-    B           _reset  // undef instr
-    B           _reset  // soft int
-    B           _reset  // prefetch abort
-    B           _reset  // data abort
-    B           _reset  // reserved
-    B           _reset  // irq
-    B           _reset  // fiq
+    B           _trap_e_reset              // reset
+    B           _trap_e_undef              // undef instr
+    B           _trap_e_syscall            // SWI - soft int
+    B           _trap_e_prefetch_abort     // prefetch abort
+    B           _trap_e_data_abort         // data abort
+    B           _trap_e_addrexc            // 
+    B           _trap_e_irq                // irq
+    B           _trap_e_fiq                // fiq
 
     // Multiboot header for any case - need it here?
     .long	0x1BADB002		/* magic */
@@ -39,7 +39,7 @@ _start:
 
     .align 4
 
-_reset:
+_trap_e_reset:
 
     // Clear BSS
 
@@ -114,7 +114,64 @@ __cmain_stack_top__:
 
 
     .endfunc
+
+
+
+
+
+
+
+
+
+_trap_e_undef:
+
+_trap_e_syscall:
+    push        {r0-r12}
+
+    // read SWI instruction to R3
+    ldr         r3, [ lr, #-4 ]
+    mov         r4, #2
+    b           alltraps
+
+_trap_e_prefetch_abort:
+
+_trap_e_data_abort:
+
+_trap_e_addrexc:
+
+_trap_e_irq:
+
+_trap_e_fiq:
+
+
+
+
+alltraps:
+    mrs		r0, spsr_all		// Save spsr
+    push        r0
+
+    mov         r0, sp
+    push        r0
+
+    mov         r0, lr
+    push        r0
+
+    mrs     r2, cpsr_all 		/* Get the CPSR */
+    bic     r2, r2, #(PSR_MODE)	/* Fix for SVC mode */
+    orr     r2, r2, #(PSR_SVC32_MODE)
+    msr     cpsr_all, r2		/* Punch into SVC mode */
+
+
+
+
     .end
+
+
+
+
+
+
+
 
 
 #if 0
@@ -377,18 +434,6 @@ ENTRY_NP(cpu_halt)
 
 #endif	/* OFW */
 
-/*
- * setjump + longjmp
- */
-ENTRY(setjmp)
-	stmia	r0, {r4-r14}
-	mov	r0, #0x00000000
-	RET
-
-ENTRY(longjmp)
-	ldmia	r0, {r4-r14}
-	mov	r0, #0x00000001
-	RET
 
 	.data
 	.global _C_LABEL(esym)
