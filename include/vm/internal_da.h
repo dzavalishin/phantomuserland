@@ -391,6 +391,35 @@ struct data_area_4_directory
 
 
 
+#define IO_DA_BUFSIZE 4
+
+
+struct data_area_4_io
+{
+    u_int32_t                           in_count;       // num of objects waiting for get
+    u_int32_t                           out_count;      // num of objects put and not processed by kernel
+
+    // Buffers are small and we don't bother with cycle, just
+    // move contents. Input is on the right (higher index) side.
+    pvm_object_t			ibuf[IO_DA_BUFSIZE];
+    pvm_object_t			obuf[IO_DA_BUFSIZE];
+
+#if WEAKREF_SPIN
+    hal_spinlock_t      		lock;
+#else
+#error mutex?
+    hal_mutex_t         		mutex;
+    //struct pvm_object   		mutex;          // persistence-compatible mutex
+#endif
+
+    u_int32_t                           reset;          // not operational, unblock waiting threads
+};
+
+
+
+
+
+
 
 
 

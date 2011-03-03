@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel ready: yes
  * Preliminary: no
@@ -17,16 +17,16 @@
 #include <kernel/snap_sync.h>
 #include <kernel/vm.h>
 
-#include "vm/syscall.h"
-#include "vm/object.h"
-#include "vm/root.h"
-#include "vm/exec.h"
-#include "vm/bulk.h"
-#include "vm/alloc.h"
+#include <vm/syscall.h>
+#include <vm/object.h>
+#include <vm/root.h>
+#include <vm/exec.h>
+#include <vm/bulk.h>
+#include <vm/alloc.h>
 
-#include "vm/p2c.h"
+#include <vm/p2c.h>
 
-#include "vm/wrappers.h"
+#include <vm/wrappers.h>
 
 //extern syscall_func_t  pvm_exec_systables[PVM_SYSTABLE_SIZE][32];
 

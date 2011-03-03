@@ -87,6 +87,7 @@
  * invalid, they will cause localtime et. al. to return NULL. And calling
  * asctime with a NULL pointer causes an Invalid Page Fault. So watch it!
  */
+#if 0
 struct _stat
 {
 	_dev_t	st_dev;		/* Equivalent to drive number 0=A 1=B ... */
@@ -102,23 +103,22 @@ struct _stat
 	time_t	st_mtime;	/* Modified time */
 	time_t	st_ctime;	/* Creation time */
 };
-
+#endif
 #ifndef	_NO_OLDNAMES
 /* NOTE: Must be the same as _stat above. */
 struct stat
 {
-	dev_t	st_dev;		/* Equivalent to drive number 0=A 1=B ... */
-	ino_t	st_ino;		/* Always zero ? */
-	mode_t	st_mode;	/* See above constants */
-	short	st_nlink;	/* Number of links. */
-	short	st_uid;		/* User: Maybe significant on NT ? */
-	short	st_gid;		/* Group: Ditto */
-	dev_t	st_rdev;	/* Seems useless (not even filled in) */
-	off_t	st_size;	/* File size in bytes */
-	time_t	st_atime;	/* Accessed date (always 00:00 hrs local
-				 * on FAT) */
-	time_t	st_mtime;	/* Modified time */
-	time_t	st_ctime;	/* Creation time */
+	dev_t	st_dev;		// Equivalent to drive number 0=A 1=B ... 
+	ino_t	st_ino;		// Always zero ? 
+	mode_t	st_mode;	// See above constants 
+	short	st_nlink;	// Number of links. 
+	short	st_uid;		// User: Maybe significant on NT ? 
+	short	st_gid;		// Group: Ditto 
+	dev_t	st_rdev;	// Seems useless (not even filled in) 
+	off_t	st_size;	// File size in bytes 
+	time_t	st_atime;	// Accessed date (always 00:00 hrs local on FAT) 
+	time_t	st_mtime;	// Modified time 
+	time_t	st_ctime;	// Creation time 
 };
 #endif /* _NO_OLDNAMES */
 
@@ -166,9 +166,9 @@ extern "C" {
 #define __cdecl
 #endif
 
-_CRTIMP int __cdecl __MINGW_NOTHROW	_fstat (int, struct _stat*);
+_CRTIMP int __cdecl __MINGW_NOTHROW	_fstat (int, struct stat*);
 _CRTIMP int __cdecl __MINGW_NOTHROW	_chmod (const char*, int);
-_CRTIMP int __cdecl __MINGW_NOTHROW	_stat (const char*, struct _stat*);
+_CRTIMP int __cdecl __MINGW_NOTHROW	_stat (const char*, struct stat*);
 
 #ifndef	_NO_OLDNAMES
 

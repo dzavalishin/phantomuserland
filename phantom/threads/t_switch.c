@@ -42,6 +42,8 @@ hal_spinlock_t schedlock;
 // Must be called from softint handler, actually switches context
 void phantom_thread_switch()
 {
+    assert_not_interrupt();
+
     int ie = hal_save_cli();
     hal_spinlock_t *toUnlock = 0;
 

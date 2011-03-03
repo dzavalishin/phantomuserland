@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Real mode (bios) VESA driver.
  *
@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "video"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -103,7 +103,7 @@ void set_video_driver_bios_vesa_pa( physaddr_t pa, size_t size )
     video_driver_bios_vesa.screen = vva;
 
     //printf("VESA vaddr = %X, %d pages, %d mbytes\n", vva, n_pages, n_pages*4/1024 );
-    SHOW_FLOW( 1, "VESA vaddr = %X, %d pages, %d mbytes\n", vva, n_pages, n_pages*4/1024 );
+    SHOW_FLOW( 2, "VESA vaddr = %X, %d pages, %d mbytes", vva, n_pages, n_pages*4/1024 );
 }
 
 void set_video_driver_bios_vesa_mode( u_int16_t mode )

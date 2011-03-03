@@ -132,7 +132,7 @@ static void do_phantom_heap_init(addr_t new_heap_base, unsigned int new_heap_siz
     heap_size = new_heap_size - PAGE_SIZE;  // use above line instead if new_heap_size > sqr(PAGE_SIZE)/2
     heap_base = (unsigned int)heap_alloc_table + PAGE_ALIGN(heap_size / page_entries);
     heap_base_ptr = heap_base;
-    printf("heap_alloc_table = %p, heap_base = 0x%lx, heap_size = 0x%lx\n", heap_alloc_table, heap_base, heap_size);
+    //printf("heap_alloc_table = %p, heap_base = 0x%lx, heap_size = 0x%lx\n", heap_alloc_table, heap_base, heap_size);
 
     // zero out the heap alloc table at the base of the heap
     memset((void *)heap_alloc_table, 0, (heap_size / PAGE_SIZE) * sizeof(struct heap_page));
@@ -158,7 +158,7 @@ extern int phantom_start_heap_size;
 
 void phantom_heap_init(void)
 {
-    printf("Init heap of %d Mb\n", phantom_start_heap_size/(1024*1024L) );
+    //printf("Init heap of %d Mb\n", phantom_start_heap_size/(1024*1024L) );
     //printf("Init heap of %d bytes\n", phantom_start_heap_size );
     do_phantom_heap_init((int)&phantom_start_heap_start, phantom_start_heap_size);
 }

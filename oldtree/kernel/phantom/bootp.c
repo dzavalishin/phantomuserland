@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "bootp"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 2
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -145,7 +145,7 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
         struct bootp rbootp;
     } rbuf;
 
-    SHOW_FLOW0( 1, "bootp start");
+    SHOW_FLOW0( 3, "bootp start");
 
     if (!bstate->bot)
         bstate->bot = time(0);
@@ -352,7 +352,7 @@ bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
 {
     bp->bp_secs = htons((u_short)(time(0) - bstate->bot));
 
-    SHOW_FLOW0( 1, "bootpsend: calling sendudp" );
+    SHOW_FLOW0( 3, "bootpsend: calling sendudp" );
 
     sockaddr dest_addr;
     dest_addr.port = IPPORT_BOOTPS; // dest port
@@ -375,7 +375,7 @@ bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
 static ssize_t
 bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t len)
 {
-    SHOW_FLOW0( 1, "bootp_recv");
+    SHOW_FLOW0( 3, "bootp_recv");
 
     sockaddr dest_addr;
     dest_addr.port = IPPORT_BOOTPS; // dest port
@@ -397,15 +397,15 @@ bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
     if (n == -1 || n < (int)(sizeof(struct bootp) - BOOTP_VENDSIZE))
         goto bad;
 
-    SHOW_FLOW( 1, "bootprecv: recv %d bytes", n);
+    SHOW_FLOW( 3, "bootprecv: recv %d bytes", n);
 
     if (bp->bp_xid != htonl(xid)) {
-        SHOW_FLOW( 1, "bootprecv: expected xid 0x%lx, got 0x%x",
+        SHOW_ERROR( 1, "bootprecv: expected xid 0x%lx, got 0x%x",
                    xid, ntohl(bp->bp_xid));
         goto bad;
     }
 
-    SHOW_FLOW0( 1, "bootprecv: got one!");
+    SHOW_FLOW0( 3, "bootprecv: got one!");
 
     /* Suck out vendor info */
     if (bcmp(vm_rfc1048, bp->bp_vend, sizeof(vm_rfc1048)) == 0) {
@@ -432,7 +432,7 @@ vend_rfc1048(struct bootp_state *bstate, u_char *cp, u_int len)
     int size;
     u_char tag;
 
-    SHOW_FLOW( 1, "vend_rfc1048 bootp info. len=%d", len);
+    SHOW_FLOW( 3, "vend_rfc1048 bootp info. len=%d", len);
 
     ep = cp + len;
 
@@ -485,7 +485,7 @@ vend_cmu(struct bootp_state *bstate, u_char *cp)
 {
     struct cmu_vend *vp;
 
-    SHOW_FLOW0( 1, "vend_cmu bootp info.");
+    SHOW_FLOW0( 3, "vend_cmu bootp info.");
 
     vp = (struct cmu_vend *)cp;
 
@@ -540,16 +540,16 @@ errno_t bootp(ifnet *iface)
         SHOW_ERROR( 0, "error %d", e);
     else
     {
-        SHOW_FLOW( 0, "DHCP netmask: 0x%08X", bstate->smask);
+        SHOW_FLOW( 1, "DHCP netmask: 0x%08X", bstate->smask);
 
-        SHOW_FLOW( 0, "DHCP ip:      %s", inet_ntoa(bstate->myip) );
-        SHOW_FLOW( 1, "gateway ip:   %s", inet_ntoa(bstate->gateip) );
-        SHOW_FLOW( 1, "root ip:      %s", inet_ntoa(bstate->rootip) );
-        SHOW_FLOW( 1, "server ip:    %s", inet_ntoa(bstate->servip) );
+        SHOW_FLOW( 1, "DHCP ip:      %s", inet_ntoa(bstate->myip) );
+        SHOW_FLOW( 2, "gateway ip:   %s", inet_ntoa(bstate->gateip) );
+        SHOW_FLOW( 2, "root ip:      %s", inet_ntoa(bstate->rootip) );
+        SHOW_FLOW( 2, "server ip:    %s", inet_ntoa(bstate->servip) );
 
-        SHOW_FLOW( 1, "rootpath:     '%s'", bstate->rootpath );
-        SHOW_FLOW( 1, "hostname:     '%s'", bstate->hostname );
-        SHOW_FLOW( 1, "bootfile:     '%s'", bstate->bootfile );
+        SHOW_FLOW( 2, "rootpath:     '%s'", bstate->rootpath );
+        SHOW_FLOW( 2, "hostname:     '%s'", bstate->hostname );
+        SHOW_FLOW( 2, "bootfile:     '%s'", bstate->bootfile );
 
         // Now apply it to interface
 

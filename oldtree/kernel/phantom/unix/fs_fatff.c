@@ -236,12 +236,14 @@ static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
 {
     //FIL *fp = f->impl;
     FATFS *ffs = f->fs->impl;
-    const char *name = f->name;
+    //const char *name = f->name;
     FILINFO fi;
+    char lname[FS_MAX_PATH_LEN];
+    fi.lfname = lname;
 
-    SHOW_FLOW( 10, "stat %s", name );
-    FRESULT r = f_stat ( ffs, name, &fi );
-    SHOW_FLOW( 7, "stat res = %d", r );
+    SHOW_FLOW( 10, "stat '%s'", f->name );
+    FRESULT r = f_stat ( ffs, f->name, &fi );
+    SHOW_FLOW( 7, "stat lfname '%s' res = %d", lname, r );
 
     if(!r)
     {
@@ -261,7 +263,6 @@ static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
 
         if( (fi.fattrib & AM_LFN) || (fi.fattrib & AM_VOL) )
             dest->st_mode &= ~ (_S_IFREG||S_IFDIR);
-
     }
 
     return fresult2errno(r);

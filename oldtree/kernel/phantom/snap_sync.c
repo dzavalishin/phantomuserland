@@ -200,6 +200,8 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     while(thda->sleep_flag)
         hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
 
+// TODO if snap is active someone still can wake us up - resleep for snap then!
+
     //if(DEBUG) printf("Thread awaken, will report wakeup\n");
     phantom_virtual_machine_threads_stopped--;
 
@@ -220,10 +222,18 @@ printf("put thread asleep\n");
 
 void phantom_thread_wake_up( struct data_area_4_thread *thda )
 {
+    // TODO of course it is a bottleneck - need separate sync objects for threads
+    // we can't keep usual mutexes in objects for objects are in paged mem and mutex uses
+    // spinlock to run its internals
+    // TODO implement old unix style sleep( var address )/wakeup( var address )? 
+    hal_mutex_lock( &interlock_mutex );
+
     thda->sleep_flag--;
     //if(thda->sleep_flag <= 0)        hal_cond_broadcast( &thda->wakeup_cond );
     if(thda->sleep_flag <= 0)
         hal_cond_broadcast( &vm_thread_wakeup_cond );
+
+    hal_mutex_unlock( &interlock_mutex );
 }
 
 

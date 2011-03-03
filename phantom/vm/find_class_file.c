@@ -30,11 +30,11 @@ int load_class_from_file(const char *cn, struct pvm_object *out)
     {
         ".", // Reserved for getenv search
 
-        ".",
+//        ".",
         "/amnt0/class",
         "../../plib/bin",
-        "../compiler",
-        "./pcode",
+//        "../compiler",
+//        "./pcode",
         0
     };
 

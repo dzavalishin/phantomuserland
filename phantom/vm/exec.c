@@ -1021,7 +1021,7 @@ void pvm_exec(struct pvm_object current_thread)
     sys_sleep:
                 // Only sys can put thread asleep
                 // If we are snapped here we, possibly, will continue from
-                // the entry to this func. So save fasc acc and recheck
+                // the entry to this func. So save fast acc and recheck
                 // sleep condition on the func entry.
                 if(da->sleep_flag)
                 {

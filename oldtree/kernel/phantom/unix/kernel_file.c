@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 
-// Kernel's global 'process' strunc
+// Kernel's global 'process' struct
 static uuprocess_t k_u;
 
 void kernel_unix_init(void)
