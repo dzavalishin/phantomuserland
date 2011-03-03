@@ -348,7 +348,8 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 static void gc_clear_weakrefs(pvm_object_storage_t *p);
 
 
-static inline void ref_dec_p(pvm_object_storage_t *p)
+//static inline 
+void ref_dec_p(pvm_object_storage_t *p)
 {
     if( p == 0 ) return;
     debug_catch_object("--", p);
@@ -418,7 +419,8 @@ static inline void ref_dec_p(pvm_object_storage_t *p)
     }
 }
 
-static inline void ref_inc_p(pvm_object_storage_t *p)
+//static inline 
+void ref_inc_p(pvm_object_storage_t *p)
 {
     if( p == 0 ) return;
     debug_catch_object("++", p);
