@@ -15,6 +15,10 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <vm/object.h>
+#include <vm/alloc.h>
+#include <vm/object_flags.h>
+
 
 #include <kernel/config.h>
 #include <phantom_libc.h>
@@ -65,12 +69,35 @@ static void checkEnterMutex()
 
 static void checkLeaveMutex() { inmutex--; }
 
+// Need PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL so that ref_dec won't descent 
+pvm_object_storage_t p = 
+    { 
+	._ah.object_start_marker = PVM_OBJECT_START_MARKER,
+	._ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED|PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
+	._ah.refCount = 1
+    };
+
+static int n_t_empty = 0;
 
 static void t_empty(void *a)
 {
     (void) a;
+
+    ref_inc_p(&p);
+
     hal_sleep_msec( random() % 6000 );
     // TODO do some random things, such as sleep, set timer, etc
+
+    ref_inc_p(&p);
+    ref_inc_p(&p);
+    ref_inc_p(&p);
+    
+    ref_dec_p(&p);
+    ref_dec_p(&p);
+    ref_dec_p(&p);
+    ref_dec_p(&p);
+
+    n_t_empty--;
 }
 
 
@@ -159,6 +186,7 @@ static errno_t threads_test()
     hal_sem_init(&s, "threadTest");
 
     int i = 40;
+    n_t_empty = i;
     while(i-- > 0)
         phantom_create_thread( t_empty, "Empty", 0 );
 
@@ -192,6 +220,20 @@ static errno_t threads_test()
         SHOW_ERROR0( 0, "Can't stop thread" );
         return -1;
     }
+
+    while(n_t_empty > 0)
+    {
+        SHOW_FLOW( 0, "wait for %d threads", n_t_empty );
+        hal_sleep_msec(500);
+    }
+
+    if(p._ah.refCount != 1)
+    {
+        SHOW_ERROR( 0, "p._ah.refCount = %d", p._ah.refCount );
+        test_fail_msg( -1, "refcount" );
+    }
+    else
+        SHOW_ERROR( 0, "p._ah.refCount = %d, SUCCESS", p._ah.refCount );
 
     return 0;
 }

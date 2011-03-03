@@ -1,0 +1,11 @@
+Boot N800
+http://talk.maemo.org/showthread.php?t=4053
+
+http://guug.org/nit/nitdroid/
+
+
+
+HW
+
+http://pandaboard.org/content/platform
+http://www.zii.com/Developer/HardwarePlatform.aspx?cid=9&mid=33#Zii%20Development%20Kit%20-%20Z5010
