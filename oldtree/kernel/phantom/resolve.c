@@ -37,6 +37,9 @@
 
 #include <netinet/resolv.h>
 
+//
+//#define FIN '?'
+#define FIN '\0'
 
 // TODO resolver eats memory, see malloc
 
@@ -188,7 +191,7 @@ errno_t dns_request(const unsigned char *host, ipv4_addr server, ipv4_addr *resu
             for(j=0 ; j<ntohs(answers[i].resource->data_len) ; j++)
                 answers[i].rdata[j]=reader[j];
 
-            answers[i].rdata[ntohs(answers[i].resource->data_len)] = '?';
+            answers[i].rdata[ntohs(answers[i].resource->data_len)] = FIN;
 
             reader = reader + ntohs(answers[i].resource->data_len);
         }
@@ -227,7 +230,7 @@ errno_t dns_request(const unsigned char *host, ipv4_addr server, ipv4_addr *resu
             for(j=0;j<ntohs(addit[i].resource->data_len);j++)
                 addit[i].rdata[j]=reader[j];
 
-            addit[i].rdata[ntohs(addit[i].resource->data_len)]='?';
+            addit[i].rdata[ntohs(addit[i].resource->data_len)]= FIN;
             reader+=ntohs(addit[i].resource->data_len);
         }
         else
@@ -316,7 +319,7 @@ static unsigned char* ReadName( unsigned char* reader, unsigned char* buffer, in
     *count = 1;
     name = (unsigned char*)malloc(256);
 
-    name[0]='?';
+    name[0]=FIN;
 
     //read the names in 3www6google3com format
     while(*reader!=0)
@@ -337,7 +340,7 @@ static unsigned char* ReadName( unsigned char* reader, unsigned char* buffer, in
             (*count)++;
     }
 
-    name[p]='?'; //string complete
+    name[p]= FIN; //string complete
     if(jumped)
         //*count = *count + 1; //number of steps we actually moved forward in the packet
         (*count)++;
@@ -352,7 +355,7 @@ static unsigned char* ReadName( unsigned char* reader, unsigned char* buffer, in
         }
         name[i]='.';
     }
-    name[i-1]='?'; //remove the last dot
+    name[i-1]= FIN; //remove the last dot
     return name;
 }
 
@@ -383,7 +386,7 @@ static void ChangetoDnsNameFormat(unsigned char* dns, const unsigned char* _host
         }
     }
 
-    *dns++='?';
+    *dns++= FIN;
 }
 
 

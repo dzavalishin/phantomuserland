@@ -49,7 +49,8 @@ void hal_spin_lock(hal_spinlock_t *sl)
         {
             //smp_process_pending_ici(curr_cpu);
         }
-        if(atomic_set( &sl->lock, 1) == 0)
+        //if(atomic_set( &sl->lock, 1) == 0)
+        if(__sync_lock_test_and_set( &sl->lock, 1) == 0)
             break;
     }
 #else
