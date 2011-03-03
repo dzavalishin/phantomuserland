@@ -49,6 +49,9 @@ void ref_saturate_o(pvm_object_t o);
 void          ref_dec_o(pvm_object_t o);
 pvm_object_t  ref_inc_o(pvm_object_t o);
 
+void ref_dec_p(pvm_object_storage_t *p);
+void ref_inc_p(pvm_object_storage_t *p);
+
 
 
 // ------------------------------------------------------------

@@ -29,12 +29,7 @@
 #ifndef _MACH_SETJMP_H_PROCESSED_
 #define _MACH_SETJMP_H_PROCESSED_ 1
 
-#ifndef ARCH_ia32
-#warning Intel32 code! Wrong arch?
-#endif
-
-/* XXX prefix these with mach_ so they don't interfere with higher layers?
-   This stuff is included by cthreads.h.  */
+#ifdef ARCH_ia32
 
 /* XXX The original definition of jmp_buf[] causes problems using
  * libthreads when linked against NetBSD and FreeBSD's libc because
@@ -49,6 +44,19 @@
 #define _JBLEN 6
 #else
 #define _JBLEN 10
+#endif
+#endif
+
+
+#ifdef ARCH_arm
+// TODO float!
+// In fact we store r4-r14 = 11 i + 12+1f
+#define _JBLEN 96
+#endif
+
+
+#ifndef _JBLEN
+# error setjmp arch
 #endif
 
 typedef int jmp_buf[_JBLEN];		/* ebx, esi, edi, ebp, esp, eip */
