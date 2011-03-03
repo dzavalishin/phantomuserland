@@ -32,23 +32,44 @@
    a well-optimized microkernel will probably want to override it
    with something that allows better optimization.  */
 
-//#warning Arm trap state is wrong!
+#warning sync this with intr/trap asm entry code
 
-struct trap_state {
+struct trap_state
+{
+	unsigned int r0;
+	unsigned int r1;
+	unsigned int r2;
+	unsigned int r3;
+	unsigned int r4;
+	unsigned int r5;
+	unsigned int r6;
+	unsigned int r7;
+	unsigned int r8;
+	unsigned int r9;
+	unsigned int r10;
+	unsigned int r11;
+        unsigned int r12;
 
-    u_int32_t   r1;
-    u_int32_t   r0;
+        unsigned int spsr;
 
-    u_int32_t	trapno;
+	unsigned int usr_sp;
+	unsigned int usr_lr;
 
-    // Processor state 
-    u_int32_t   lr;
-    u_int32_t   sp;
-    u_int32_t   fp;
-    u_int32_t   ip;
-    u_int32_t   psr;
+        unsigned int trapno;
+	unsigned int intno;
 
+        unsigned int svc_sp;
+	unsigned int svc_lr;
+
+        unsigned int pc;
 };
+
+#ifdef ASSEMBLER
+#define TRAP_STATE_TRAPNO	64
+#define TRAP_STATE_INTNO	68
+#define TRAP_STATE_PC		80
+#endif
+
 
 /* The actual trap_state frame pushed by the processor
    varies in size depending on where the trap came from.  */
