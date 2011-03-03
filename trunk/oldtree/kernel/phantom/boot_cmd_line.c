@@ -222,15 +222,15 @@ phantom_parse_cmd_line()
     }
     *vector++ = 0;
 
-    SHOW_FLOW0( 1, "Boot argv:" );
+    SHOW_FLOW0( 0, "Boot argv:" );
     for( i = 0; i < boot_argc; i++ )
         SHOW_FLOW( 1, "\t%s", boot_argv[i] );
 
-    SHOW_FLOW0( 1, "Main argv:" );
+    SHOW_FLOW0( 0, "Main argv:" );
     for( i = 0; i < main_argc; i++ )
         SHOW_FLOW( 1, "\t%s", main_argv[i] );
 
-    SHOW_FLOW0( 1, "Main env:" );
+    SHOW_FLOW0( 0, "Main env:" );
     for( i = 0; i < main_envc; i++ )
         SHOW_FLOW( 1, "\t%s", main_env[i] );
 
@@ -261,7 +261,7 @@ static int stringarg( const char *arg )
     if( *arg == '-' ) arg++;
 
 
-    SHOW_INFO( 0, "arg = %s", arg );
+    SHOW_INFO( 5, "arg = %s", arg );
 
     ISARG("pause", debug_boot_pause );
     ISARG("novesa", bootflag_no_vesa );
@@ -293,7 +293,7 @@ phantom_process_boot_options(void)
     int c = boot_argc;
     const char **args = boot_argv;
 
-    SHOW_FLOW( 2, "argc = %d", c );
+    SHOW_FLOW( 7, "argc = %d", c );
 
     while(c--)
     {

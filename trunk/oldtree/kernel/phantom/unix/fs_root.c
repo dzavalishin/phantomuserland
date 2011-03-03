@@ -24,6 +24,8 @@
 #include <string.h>
 #include <phantom_libc.h>
 
+// mutex
+#include <hal.h>
 
 
 // -----------------------------------------------------------------------
@@ -232,7 +234,10 @@ struct mount_point
     uufs_t      *fs;
 };
 
-static struct mount_point      mount[FS_MAX_MOUNT];
+static struct mount_point      	mount[FS_MAX_MOUNT];
+
+static hal_mutex_t               mm;
+
 
 // This is a very simple impl
 static uufs_t * find_mount( const char* name, char *namerest )
@@ -241,6 +246,9 @@ static uufs_t * find_mount( const char* name, char *namerest )
     int maxlen = 0;
     const char *m_path;
     const char *m_name;
+
+    // lock modifications!
+    hal_mutex_lock( &mm );
 
     int i;
     for( i = 0; i < FS_MAX_MOUNT; i++ )
@@ -254,8 +262,10 @@ static uufs_t * find_mount( const char* name, char *namerest )
             continue;
 
         //SHOW_FLOW( 6, "find mount '%s'", name );
-
-        if( 0 == strncmp( name, mount[i].path, mplen ) )
+        if(
+           ( 0 == strncmp( name, mount[i].path, mplen ) ) &&
+           ((name[mplen] == '/') || (name[mplen] == '\0'))
+          )
         {
             if( mplen > maxlen )
             {
@@ -267,17 +277,18 @@ static uufs_t * find_mount( const char* name, char *namerest )
         }
     }
 
+    hal_mutex_unlock( &mm );
+
     if( ret )
     {
         // Skip final /
         if( '/' == *(name+maxlen) )
             maxlen++;
         // part of name after the mount point
-        strncpy( namerest, name+maxlen, FS_MAX_PATH_LEN );
+        strlcpy( namerest, name+maxlen, FS_MAX_PATH_LEN );
 
         SHOW_FLOW( 7, "got '%s' (%s) for '%s', rest = '%s'",
-                   m_path,
-                   m_name,
+                   m_path, m_name,
                    name, namerest
                  );
     }
@@ -297,6 +308,8 @@ errno_t add_mount( const char* path, const char *name, uufs_t *fs )
     if( strlen( name ) >= FS_MAX_MOUNT_PATH-1 )
         return E2BIG;
 
+    hal_mutex_lock( &mm );
+
     int i;
     for( i = 0; i < FS_MAX_MOUNT; i++ )
     {
@@ -305,12 +318,13 @@ errno_t add_mount( const char* path, const char *name, uufs_t *fs )
             continue;
         goto found;
     }
+    hal_mutex_unlock( &mm );
     return ENFILE;
 
 found:
     mount[i].fs = fs;
-    strncpy( mount[i].path, path, FS_MAX_MOUNT_PATH );
-    strncpy( mount[i].name, name, FS_MAX_MOUNT_PATH );
+    strlcpy( mount[i].path, path, FS_MAX_MOUNT_PATH );
+    strlcpy( mount[i].name, name, FS_MAX_MOUNT_PATH );
 
     //if( mount[i].path[strlen(mount[i].path) - 1] != '/' )
     //    strcat(mount[i].path, "/" );
@@ -320,6 +334,7 @@ found:
     if( mount[i].path[rlen - 1] == '/' )
         mount[i].path[rlen - 1] = 0;
 
+    hal_mutex_unlock( &mm );
 
     return 0;
 }
@@ -329,6 +344,7 @@ static errno_t rm_mount( const char* name, int flags )
 {
     (void) flags;
 
+    hal_mutex_lock ( &mm );
 
     int i;
     for( i = 0; i < FS_MAX_MOUNT; i++ )
@@ -337,19 +353,16 @@ static errno_t rm_mount( const char* name, int flags )
         if( mount[i].fs == 0 )
             continue;
 
-        if( strcmp( mount[i].path, name ) )
+        if( 0 == strcmp( mount[i].path, name ) )
         {
             mount[i].fs = 0;
+            hal_mutex_unlock ( &mm );
             return 0;
         }
 
-        if( strcmp( mount[i].name, name ) )
-        {
-            mount[i].fs = 0;
-            return 0;
-        }
     }
 
+    hal_mutex_unlock ( &mm );
     return ENOENT;
 }
 
@@ -359,6 +372,8 @@ static errno_t rm_mount( const char* name, int flags )
 
 void phantom_unix_fs_init()
 {
+    hal_mutex_init( &mm, "rootfs" );
+
     add_mount( "/dev", 		"devfs", 	&dev_fs );
     add_mount( "/proc", 	"procfs", 	&proc_fs );
     add_mount( "udp://", 	"udpfs", 	&udp_fs );

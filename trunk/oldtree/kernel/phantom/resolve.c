@@ -16,7 +16,7 @@
 
 #define DEBUG_MSG_PREFIX "dns"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -575,6 +575,8 @@ errno_t name2ip( in_addr_t *out, const char *name, int flags )
     ipv4_addr 	result;
     //ipv4_addr 	next_servers[MAX_DNS_SERVERS];
 
+    SHOW_FLOW( 1, "request '%s'", name );
+
     ipv4_addr *	sptr = servers;
     int         sleft = MAX_DNS_SERVERS;
 
@@ -598,7 +600,7 @@ errno_t name2ip( in_addr_t *out, const char *name, int flags )
             return ENOENT;
         }
 
-        SHOW_FLOW( 1, "look in %s", inet_ntoa(* (struct in_addr*)&server) );
+        SHOW_FLOW( 2, "look in %s", inet_ntoa(* (struct in_addr*)&server) );
         errno_t res = dns_request( (const unsigned char *)name, server, &result );
 
         if( res == 0 )//|| result != 0 )

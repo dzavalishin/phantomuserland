@@ -102,9 +102,9 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
     __phantom_run_constructors();
 
     if(!file_inited)
-    	SHOW_ERROR0(0, "Constructors failed!");
+    	SHOW_ERROR0(0, "FAIL: Constructors failed!");
     else
-    	SHOW_FLOW0(0, "Constructors OK!");
+    	SHOW_FLOW0( 7, "Constructors OK!");
 
     phantom_parse_cmd_line();
 

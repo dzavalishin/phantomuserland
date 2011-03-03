@@ -230,9 +230,10 @@ int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data )
 
 int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, int statlink )
 {
-	(void) u;
-	(void) statlink;
+    (void) u;
+    (void) statlink;
 
+    SHOW_FLOW( 7, "stat '%s'", path );
 
     uufile_t * f = uu_namei( path );
     if( f == 0 )
@@ -240,6 +241,8 @@ int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, in
         *err = ENOENT;
         return -1;
     }
+
+    SHOW_FLOW( 10, "stat aft namei '%s'", path );
 
     if( (f->ops == 0) || (f->ops->stat == 0) )
     {
@@ -249,7 +252,10 @@ int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, in
 
     *err = f->ops->stat( f, data );
 
+    SHOW_FLOW( 10, "stat aft stat '%s'", path );
+
     unlink_uufile( f );
+    SHOW_FLOW( 10, "stat aft unlink '%s'", path );
     return *err ? -1 : 0;
 }
 

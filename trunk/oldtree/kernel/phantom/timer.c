@@ -14,7 +14,7 @@ wakeThread(void *arg)
 }
 
 
-
+// TODO use spinlock to make sure wakeup won't happen until sleep
 // wakeup thread after a timeout
 
 void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc)

@@ -48,6 +48,9 @@ int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out
 
     if(DEBUG) printf("Bulk: looking for class %s\n", class_name);
 
+    if( 0 == load_class_from_file( class_name, out) )
+        return 0;
+
     while(1)
     {
         int rlen;
@@ -65,8 +68,7 @@ int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out
             skip(ch.data_length);
     }
 
-    return load_class_from_file( class_name, out);
-
+    return -1;
 }
 
 
