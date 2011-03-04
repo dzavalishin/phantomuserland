@@ -140,8 +140,11 @@ struct in_addr {
 #define	inet_net_pton		__inet_net_pton
 #define	inet_cidr_ntop		__inet_cidr_ntop
 #define	inet_cidr_pton		__inet_cidr_pton
+
 #define	inet_ntoa		__inet_ntoa
 #define	inet_ntoa_r		__inet_ntoa_r
+#define inet_itoa		__inet_itoa
+
 #define	inet_pton		__inet_pton
 #define	inet_ntop		__inet_ntop
 #define	inet_nsap_addr		__inet_nsap_addr
@@ -158,10 +161,14 @@ u_int16_t	 ntohs(u_int16_t);
 #endif
 
 in_addr_t	 inet_addr(const char *);
+
 /*const*/ char	*inet_ntoa(struct in_addr);
 char		*inet_ntoa_r(struct in_addr, char *buf, socklen_t size);
 const char	*inet_ntop(int, const void * __restrict, char * __restrict,
 		    socklen_t);
+
+char *__inet_itoa(u_int32_t ia);
+
 int		 inet_pton(int, const char * __restrict, void * __restrict);
 
 #if __BSD_VISIBLE

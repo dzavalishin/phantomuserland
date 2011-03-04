@@ -37,7 +37,7 @@
 
 #define DEBUG_MSG_PREFIX "sntp"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -57,6 +57,7 @@
 #include <sys/types.h>
 
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include "net.h"
 #include "udp.h"
@@ -97,6 +98,22 @@ struct SNTP_resync_args {
     u_int32_t interval;
 };
 
+
+static char * dumpt(time_t t)
+{
+    static char buf[100] = "?";
+    struct tm time;
+
+    printf("tm b = '%s'\n", buf);
+
+    localtime_rb( t, &time );
+    asctime_r( &time, buf, sizeof(buf) );
+
+    printf("tm b = '%s'\n", buf);
+
+    return buf;
+}
+
 static void SNTP_resync(void * arg)
 {
     u_int32_t server_addr = ((struct SNTP_resync_args *) arg)->server_addr;
@@ -110,6 +127,7 @@ static void SNTP_resync(void * arg)
 
     for (;;)
     {
+        SHOW_FLOW( 7, "request time from %s", inet_itoa(server_addr) );
         if (SNTPGetTime(&cur_server_addr, &t))
         {     /* if any error retry */
             if (cur_server_addr != server_addr && server_addr == 0xFFFFFFFF)
@@ -125,6 +143,8 @@ static void SNTP_resync(void * arg)
             } else              /* ... else wait 5 secs for next retry */
                 hal_sleep_msec(5000);
         } else {                /* no error */
+            //SHOW_FLOW( 7, "got time %ld, %s", t, dumpt(t) );
+
             set_time(t);          /* so set the time */
             retry = 0;
             hal_sleep_msec(interval); /* and wait the interval time */
@@ -199,7 +219,7 @@ error:
 }
 
 
-int NutSNTPStartThread(u_int32_t server_addr, u_int32_t interval)
+int init_sntp(u_int32_t server_addr, u_int32_t interval)
 {
     // NB! Just one instance!
     static struct SNTP_resync_args arg;

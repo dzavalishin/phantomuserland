@@ -350,6 +350,8 @@ connect_ide_io();
 
     init_buses();
 
+    // pool.ntp.org
+    init_sntp( IPV4_DOTADDR_TO_ADDR(85,21,78,91), 10000 );
 
 #if 1
     /*

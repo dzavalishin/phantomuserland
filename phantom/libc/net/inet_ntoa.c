@@ -52,6 +52,21 @@ __inet_ntoa(struct in_addr ina)
 	return buf;
 }
 
+char *
+__inet_itoa(u_int32_t ia)
+{
+	static char buf[4*sizeof "123"];
+	unsigned char *ucp = (unsigned char *)&ia;
+
+	snprintf(buf, sizeof(buf), "%d.%d.%d.%d",
+		ucp[0] & 0xff,
+		ucp[1] & 0xff,
+		ucp[2] & 0xff,
+		ucp[3] & 0xff);
+	return buf;
+}
+
+
 /*
 char *
 __inet_ntoa_r(struct in_addr ina, char *buf)
