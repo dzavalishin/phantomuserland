@@ -25,6 +25,7 @@
 
 #include <phantom_libc.h>
 #include <sys/libkern.h>
+#include <kernel/init.h>
 
 #include <misc.h>
 #include <event.h>

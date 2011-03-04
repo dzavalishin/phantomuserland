@@ -626,9 +626,12 @@ ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg,
 
 int usys_socketpair( int *err, uuprocess_t *u, int domain, int type, int protocol, int socket_vector[2])
 {
-    /*
+    (void) u;
+    (void) socket_vector;
+    (void) domain;
     (void) type;
     (void) protocol;
+    /*
 
     if( AF_UNIX != domain )
     {

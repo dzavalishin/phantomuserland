@@ -42,6 +42,8 @@ static long interruptible_sleep( int *interrupted, long msec )
 // TODO check ret val * errno against POSIX
 int usys_nanosleep( int *err, uuprocess_t *u,  const struct timespec *req_time, struct timespec *rest_time )
 {
+    (void) u;
+
     long rest;
     // The problem is that this sleep is signal interruptible
 

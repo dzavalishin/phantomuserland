@@ -232,12 +232,12 @@ void if_bind_link_address(ifnet *i, ifaddr *addr)
 
 
 
-
+/*
 static void bootp_thread(void *args)
 {
     bootp(args);
 }
-
+*/
 
 /*
  TODO simplify

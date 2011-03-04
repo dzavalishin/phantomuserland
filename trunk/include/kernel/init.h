@@ -76,6 +76,8 @@ void arch_float_init(void);
 
 void load_classes_module(); // vm bulk classes init
 
+void stray(void); // check for stray pointers
+
 
 #endif // INIT_H
 

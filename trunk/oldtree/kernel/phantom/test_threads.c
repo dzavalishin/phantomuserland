@@ -69,13 +69,32 @@ static void checkEnterMutex()
 
 static void checkLeaveMutex() { inmutex--; }
 
-// Need PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL so that ref_dec won't descent 
-pvm_object_storage_t p = 
-    { 
-	._ah.object_start_marker = PVM_OBJECT_START_MARKER,
-	._ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED|PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
-	._ah.refCount = 1
-    };
+// Need PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL so that ref_dec won't descent
+pvm_object_storage_t p =
+{
+/*
+    ._ah.object_start_marker = PVM_OBJECT_START_MARKER,
+    ._ah.refCount = 1,
+    ._ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED|PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
+
+    ._ah.gc_flags = 0,
+    ._ah.exact_size = 0, // Ok for refcount test :)
+*/
+    ._ah = {
+        .object_start_marker = PVM_OBJECT_START_MARKER,
+        .refCount = 1,
+        .alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED|PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
+
+        .gc_flags = 0,
+        .exact_size = 0, // Ok for refcount test :)
+    },
+
+    ._class       = {0,0},
+    ._satellites  = {0,0},
+    ._flags       = 0,
+    ._da_size     = 0
+
+};
 
 static int n_t_empty = 0;
 
@@ -91,7 +110,7 @@ static void t_empty(void *a)
     ref_inc_p(&p);
     ref_inc_p(&p);
     ref_inc_p(&p);
-    
+
     ref_dec_p(&p);
     ref_dec_p(&p);
     ref_dec_p(&p);
@@ -161,7 +180,7 @@ static void thread1(void *a)
             if(TEST_CHATTY) printf("Signalled cond\n");
         }
         YIELD();
-        
+
     }
     FINISH();
 }

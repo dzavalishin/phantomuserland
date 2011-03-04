@@ -437,7 +437,7 @@ struct phantom_mutex_impl
     const char*         	name;
     phantom_thread_t *          owner;
     queue_head_t		waiting_threads;
-
+    int                         readers; // N of readers in lock
 };
 
 

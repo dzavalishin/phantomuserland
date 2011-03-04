@@ -15,6 +15,8 @@
 #include <vm/p2c.h>
 #include <vm/alloc.h>
 
+#include <kernel/vm.h>
+#include <kernel/snap_sync.h>
 
 static int debug_print = 0;
 
