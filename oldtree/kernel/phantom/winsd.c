@@ -1,33 +1,33 @@
 
 /*
-  * Copyright (C) 2004 by Jean Pierre Gauthier. All rights reserved.
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted provided that the following conditions
-  * are met:
-  *
-  * 1. Redistributions of source code must retain the above copyright
-  *    notice, this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright
-  *    notice, this list of conditions and the following disclaimer in the
-  *    documentation and/or other materials provided with the distribution.
-  * 3. Neither the name of the copyright holders nor the names of
-  *    contributors may be used to endorse or promote products derived
-  *    from this software without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY <YOUR NAME> AND CONTRIBUTORS
-  * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-  * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL <YOUR NAME>
-  * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-  * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-  * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
-  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-  * SUCH DAMAGE.
-  */
+ * Copyright (C) 2004 by Jean Pierre Gauthier. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY <YOUR NAME> AND CONTRIBUTORS
+ * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL <YOUR NAME>
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
 
 /**********************************************************
  *
@@ -44,7 +44,7 @@
  * "http://name" command line (and even directly "name" as
  * command line if "name" is not a shared folder).
  *
-********************************************************* */
+ ********************************************************* */
 
 #define DEBUG_MSG_PREFIX "winsd"
 #include <debug_ext.h>
@@ -97,9 +97,10 @@ typedef struct {
     u_int32_t ip_addr;             /* end of answer */
 } WINSHEADER;
 
+static u_int32_t wins_ipaddr;
 
 
-static errno_t do_wins(void *prot_data, u_int8_t *encoded, u_int32_t ipaddr )
+static errno_t do_wins(void *prot_data, u_int8_t *encoded )
 {
     sockaddr addr;
     WINSHEADER pkt;
@@ -108,7 +109,7 @@ static errno_t do_wins(void *prot_data, u_int8_t *encoded, u_int32_t ipaddr )
     SHOW_FLOW( 1, "local compressed name='%s'", encoded);
 
     /* infinite loop / Netbios deamon */
-    for (;;) {                  
+    for (;;) {
 
         if( 0 >= (rc = udp_recvfrom(prot_data, &pkt, sizeof(WINSHEADER), &addr, 0, 0 )) )
         {
@@ -135,9 +136,9 @@ static errno_t do_wins(void *prot_data, u_int8_t *encoded, u_int32_t ipaddr )
         pkt.ttl = htonl((u_int32_t) 60);  /* 60 seconds validity */
         pkt.len_rep = htons(6);
         pkt.node_flags = pkt.node_type = pkt.quests = 0;     /* B-type node, etc... */
-        pkt.ip_addr = ipaddr;  /* Returned IP Address, end of answer */
+        pkt.ip_addr = wins_ipaddr;  /* Returned IP Address, end of answer */
 
-        addr.port = NETBIOS_UDP_PORT; 
+        addr.port = NETBIOS_UDP_PORT;
 
         if( 0 != (rc = udp_sendto(prot_data, &pkt, sizeof(WINSHEADER), &addr)) )
         {
@@ -154,7 +155,7 @@ static errno_t do_wins(void *prot_data, u_int8_t *encoded, u_int32_t ipaddr )
 
 /* ********************************************************* */
 /* name : netbios label (15 chars max), ipaddr : network ordered IP address bytes */
-static errno_t winsd_thread(char * name, u_int32_t ipaddr)
+static errno_t do_winsd_thread(char * name)
 {
     u_int8_t encoded[33];
     u_int8_t car;
@@ -173,7 +174,7 @@ static errno_t winsd_thread(char * name, u_int32_t ipaddr)
     /* label  'compression' */
     j = 0;
     for (i = 0; i < 16; i++)
-    {  
+    {
         car = toupper(i < len ? name[i] : ' ');
         if (i == 15)
             car = 0;
@@ -193,7 +194,7 @@ static errno_t winsd_thread(char * name, u_int32_t ipaddr)
         return EIO;
     }
 
-    errno_t ret = do_wins( prot_data, encoded, ipaddr );
+    errno_t ret = do_wins( prot_data, encoded );
     udp_close(prot_data);
 
     if( ret )
@@ -202,6 +203,27 @@ static errno_t winsd_thread(char * name, u_int32_t ipaddr)
     return ret;
 }
 
+static int n_wins_threads = 0;
+
+static void winsd_thread(void)
+{
+    n_wins_threads++;
+
+    do_winsd_thread("phantom");
+
+    n_wins_threads--;
+}
 
 
+void init_wins(u_int32_t ip_addr)
+{
+    wins_ipaddr = ip_addr;
+    if(n_wins_threads)
+    {
+        SHOW_ERROR0( 0 , "winsd is already running" );
+        return;
+    }
+
+    hal_start_kernel_thread(winsd_thread);
+}
 

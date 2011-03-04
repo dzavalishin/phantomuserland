@@ -22,7 +22,8 @@
 #include "file_utils.h"
 #include "shell_defs.h"
 
-struct command cmds[] = {
+struct command cmds[] =
+{
     {"exec", &cmd_exec},
     {"stat", &cmd_stat},
     {"mkdir", &cmd_mkdir},
@@ -33,9 +34,9 @@ struct command cmds[] = {
     {NULL, NULL}
 };
 
-int cmd_exec(int argc, const char *argv[])
+int cmd_exec(int argc, char *argv[])
 {
-    return cmd_create_proc(argc - 1, argv+1 );
+    return cmd_create_proc(argc - 1, (const char **)argv+1 );
 }
 
 int cmd_create_proc(int argc, const char *argv[])
@@ -52,7 +53,8 @@ int cmd_create_proc(int argc, const char *argv[])
         return 0;
     }
 
-    tmp =  argv[argc - 1];
+    // TODO we modify passed argv! redo!
+    tmp =  (char *)argv[argc - 1];
 
     if( !find_file_in_path(argv[0],filename,SCAN_SIZE)){
         printf("can't find '%s' \n",argv[0]);
@@ -80,9 +82,9 @@ int cmd_create_proc(int argc, const char *argv[])
 #if 1
 
 	// HACK! unsure!
-	argv[argc] = 0;
+    argv[argc] = 0;
 
-	printf("sh will run '%s'\n", filename);
+    printf("sh will run '%s'\n", filename);
     pid = phantom_run( filename, argv, 0, P_RUN_NEW_PGROUP | (must_wait ? P_RUN_WAIT : 0) );
     //pid = _kern_proc_create_proc(filename,filename, argv, argc, 5, PROC_FLAG_SUSPENDED|PROC_FLAG_NEW_PGROUP);
 
@@ -193,7 +195,8 @@ int cmd_pwd(int argc, char *argv[])
 
     cwd= buf;
 
-    if(getcwd(buf, 128) > 0)
+    // TODO rename syscall, implement getcwd wrapper
+    if( ((int)getcwd(buf, 128)) > 0)
     {
         printf("pwd: cwd=\'%s\'\n", cwd);
     }

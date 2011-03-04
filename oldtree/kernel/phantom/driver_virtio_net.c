@@ -241,7 +241,7 @@ int driver_virtio_net_write(virtio_device_t *vd, const void *idata, size_t len)
     //struct virtio_net_hdr *hdr = (struct virtio_net_hdr *)buf;
     void *data = buf+sizeof(struct virtio_net_hdr);
 
-    int maxlen = PAGE_SIZE - sizeof(struct virtio_net_hdr);
+    unsigned int maxlen = PAGE_SIZE - sizeof(struct virtio_net_hdr);
 
     if( len > maxlen )
     {
@@ -359,7 +359,7 @@ static void vnet_thread(void *_dev)
         unsigned int dlen;
 
         // recv q
-        int nRead = virtio_detach_buffers_list( vdev, 1, 2, rd, &dlen );
+        int nRead = virtio_detach_buffers_list( vdev, 1, 2, rd, (int *)&dlen );
         if( nRead > 0 )
         {
             // Some reception occured
@@ -413,7 +413,7 @@ static void vnet_thread(void *_dev)
 
 
         // xmit q
-        nRead = virtio_detach_buffers_list( vdev, 0, 2, rd, &dlen );
+        nRead = virtio_detach_buffers_list( vdev, 0, 2, rd, (int *)&dlen );
         if( nRead > 0 )
         {
             physaddr_t	pa = rd[0].addr;

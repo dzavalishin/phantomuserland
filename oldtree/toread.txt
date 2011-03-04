@@ -1,5 +1,7 @@
 http://en.wikipedia.org/wiki/Vidix
 
+http://gcc.gnu.org/onlinedocs/gcc-4.4.2/gcc/Atomic-Builtins.html#Atomic-Builtins
+
 http://www.aarongray.org/AODUBL/bookmarks.html
 
 http://aodfaq.wikispaces.com/

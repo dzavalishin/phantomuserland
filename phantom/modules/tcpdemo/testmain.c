@@ -1,4 +1,7 @@
 #include <sys/unistd.h>
+#include <user/sys_getset.h>
+#include <user/sys_fio.h>
+#include <stdio.h>
 
 extern void exit(int);
 

@@ -491,6 +491,8 @@ void parse_vars_in_string(const char *string,char *out,int max_len)
 
 static int launch(int (*cmd)(int, char **), int argc, char **argv, char *r_in, char *r_out)
 {
+    (void) r_in; // r_out will bother us to implement redir :)
+
     int retval= 0;
 #if REDIR
     int saved_in;
@@ -572,7 +574,7 @@ int shell_parse(const char *buf, int len)
 
     if(argc == 0) return 0;
 
-    handler = &cmd_create_proc;
+    handler = (void *)&cmd_create_proc;
 
     for(i=0; cmds[i].cmd_handler != NULL; i++) {
         if(strcmp(cmds[i].cmd_text,argv[0]) == 0){

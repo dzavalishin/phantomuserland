@@ -1,5 +1,7 @@
 #include <kernel/ia32/mmx.h>
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
+
+// TODO mmx must be turned on in kernel?
 
 //! \brief Clear a page using MMX extensions.
 void fast_clear_page( void *page )

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 #include "commands.h"
 #include "parse.h"
 #include "statements.h"
@@ -14,12 +15,17 @@
 #include "shell_vars.h"
 #include "args.h"
 
+#include "main.h"
+
+#include <user/sys_getset.h>
 
 static void getline( char *buf, int size );
 
 
 int main(int argc, char *argv[], char *envp[])
 {
+    (void) envp;
+
     // TODO bring in good malloc/free and implement sbrk()!
     static char arena[1024*1024];
     init_malloc( arena, sizeof(arena) );

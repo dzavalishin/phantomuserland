@@ -34,7 +34,7 @@
 #if 1
 int load_code(void **out_code, unsigned int *out_size, const char *fn)
 {
-    return k_load_file( out_code, out_size, fn );
+    return k_load_file( out_code, (int *)out_size, fn );
 }
 #else
 // TODO use k_load_file?

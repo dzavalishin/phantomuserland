@@ -35,7 +35,7 @@ typedef struct
 
 
 #if HAVE_UNIX
-static errno_t fs_start_fat( phantom_disk_partition_t * );
+//static errno_t fs_start_fat( phantom_disk_partition_t * );
 
 errno_t fs_start_ff( phantom_disk_partition_t * );
 
@@ -245,6 +245,7 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
 
 
 
+/*
 
 #include "unix/fat32/define.h"
 #include "unix/fat32/FAT32_Access.h"
@@ -300,7 +301,7 @@ static errno_t fs_start_fat( phantom_disk_partition_t *p )
 
     return 0;
 }
-
+*/
 
 
 

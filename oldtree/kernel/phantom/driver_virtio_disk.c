@@ -130,6 +130,7 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
 #endif
 
     phantom_disk_partition_t *p = phantom_create_virtio_partition_struct( cfg.capacity, &vdev );
+    (void) p;
 
 #if 0
     errno_t ret = phantom_register_disk_drive(p);

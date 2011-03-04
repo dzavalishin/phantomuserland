@@ -491,6 +491,8 @@ static void dbg_ps(int argc, char **argv)
 
 int usys_kill(int *err, uuprocess_t *u, int pid, int sig)
 {
+    (void) u;
+
     hal_mutex_lock(&proc_lock);
 
     //panic("kill is not implemented");
@@ -518,6 +520,9 @@ int usys_kill(int *err, uuprocess_t *u, int pid, int sig)
 int usys_waitpid(int *err, uuprocess_t *u, int pid, int *status, int options)
 {
     int retpid = -1;
+
+    (void) status;
+    (void) options;
 
     hal_mutex_lock(&proc_lock);
 

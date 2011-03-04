@@ -1,3 +1,5 @@
+#include "main.h"
+
 #define USED 1
 
 typedef struct {
