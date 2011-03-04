@@ -12,8 +12,12 @@ AWK		= gawk
 YACC		= bison -y
 M4		= m4
 
-# Need bot for different compilers need one or other. Create own ld script to fix?
-USR_LD_ADDR=-Wl,-Ttext-segment,0 -Wl,-Ttext,0
+# Need both for different compilers need one or other. Create own ld script to fix?
+ifeq ($(OSTYPE),cygwin)
+  USR_LD_ADDR=-Wl,-Ttext,0
+else
+  USR_LD_ADDR=-Wl,-Ttext-segment,0
+endif
 
 TARGET_OBJECT_FORMAT=elf32-i386
 
