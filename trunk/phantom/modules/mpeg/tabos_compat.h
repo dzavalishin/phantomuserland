@@ -9,12 +9,26 @@
 #define Write write
 #define Read read
 
+#define SendTo sendto
+#define RecvFrom recvfrom
+#define CloseSocket close
+#define Socket socket
+
+
 #define StringPrint snprintf
 #define StringCat strcat
 
 
+
+
 #define uint32 u_int32_t
 #define sint32 int32_t
+
+#define uint16 u_int16_t
+#define sint16 int16_t
+
+#define uint8 u_int8_t
+#define sint8 int8_t
 
 
 /*
