@@ -33,11 +33,11 @@
 
 #ifndef ASSEMBLER
 
-#if 1
+#if 0 && !defined(NO_STRAY_CHECK)
 
 #include <string.h>
 
-#define STRAY_CATCH_SIZE (4096*2)
+#define STRAY_CATCH_SIZE (128)
 
 void phantom_debug_register_stray_catch( void *buf, int bufs, const char *name );
 

@@ -396,6 +396,10 @@ int main(int argc, char* argv[])
 
     pvm_root_init();
 
+
+    // TODO use stray catcher in pvm_test too
+    //stray();
+
 #if 0
 //ui_loop( argc, argv, "test");
     printf("\nPhantom code finished\n" );
@@ -492,6 +496,13 @@ static void args(int argc, char* argv[])
 }
 
 
+void phantom_debug_register_stray_catch( void *a, int s, const char*n )
+{
+    // Ignore
+    (void) a;
+    (void) s;
+    (void) n;
+}
 
 
 

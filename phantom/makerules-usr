@@ -7,7 +7,7 @@ CLEAN_FILES += $(TARGET) $(TARGET).dump $(TARGET).pe
 
 include $(BUILD_ROOT)/makerules
 
-PHANTOM_CFLAGS += -ffreestanding -W -Wall
+PHANTOM_CFLAGS += -ffreestanding -W -Wall -DNO_STRAY_CHECK
 
 LIBGCC := `$(CC) $(ARCH_FLAGS) --print-libgcc-file-name`
 

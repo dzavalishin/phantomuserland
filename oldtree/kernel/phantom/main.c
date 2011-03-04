@@ -192,8 +192,10 @@ int main(int argc, char **argv, char **envp)
 {
     (void) envp;
 
+#ifdef STRAY_CATCH_SIZE
     // check for stray ptrs here
     stray();
+#endif
 
     init_irq_allocator();
 
