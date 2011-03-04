@@ -1,0 +1,95 @@
+CHANGES
+----------
+
+January 9, 1996 to July 17, 1996
+- cleaned up some code which gave warnings.
+- altered some code to be compatible with Sun CC compiler.
+  However, support in the makefile for non-ansi C compilers
+  has been dropped (this is a stupid thing to support).
+
+December 20, 1995 to January 9, 1996:
+
+verified on HHI #22, TCEH #23 bitstreams.
+
+ 1. new arguments format.  Got to be so many argument fields that
+    a new more consistent format was devised.
+
+ 2. Frame_Store_Flag (-f) option now controls lower layer prediciton
+    picture format (field or framewise)
+
+ 3. getpic() structural changes
+
+
+Since December 18, 1995:
+
+1. added special case for current B pictures subsframe.c which
+   loads entire reference frame for buffer substitution.
+
+2. fixed -l omission (-lXext) in Makefile that drives Tristan nuts everytime.
+
+
+Since December 14, 1995:
+
+ 1. organized frame buffer substitution routines into subspic.c
+ 2. added "big file" -b mode for Tristan ;-)
+
+
+Since July 4, 1994:
+
+1. Concatenated elementary sequences within same bitstream
+
+   Decode can now handle concatenated elementary video sequences of 
+   arbitrary parameters.
+  
+2. TRACE and VERBOSE #ifdef flags
+
+3. More disciplined naming convention
+
+   normative variables and bitstream elements defined in 13818 are 
+   verbatim, lower case.  Implementation specific routines and variables
+   are capitolized.
+
+4. Spatial scalability corrections  
+   - see Carsten's document (spatscal.doc)
+
+5. D-pictures (picture_coding_type==D_TYPE)
+
+   Only two small changes were necessary to accomodate D-pictures: 
+
+    a. in Decode_MPEG1_Intra_Block() added line which termines
+       subroutine after DC coefficient has been processed.
+
+    b. in picture_data(), added line which parses marker bit.
+
+
+ 6. forced decoder to display frame progressively (regardless of whether
+    the picture is frame structured or field structured) when -f flag
+    is invoked in the command line arguements.
+
+    also: progressive_frame now decides whether a frame is to be displayed
+     as a frame picture to two field pictures, rather than the older convention
+     of testing progressive_sequence.
+
+ 7. Adapted systems parser from Stefan's mpeg2play to mpeg2decode.
+    The major changes are:  
+
+    mpeg2dec.c: 
+     - fseek() called twice 
+
+    gethdr.c, getpic.c:
+     instances of Flush_Bits(par,32) changed to Flush_Bits32(par)
+
+    gethdr.c 
+     Get_Bits(par,32) changed to Get_32_Bits(par)
+
+    global.h
+      added rdmax, sysstream, and bfr[] to parameters struct.
+
+ 8. Restructuring of getpic.c:
+
+      a. moved picture pointer rotation into Update_Picture_Buffers()
+      b. moved picture output logic into Output_Current_Frame() to 
+         in anticipation of 3:2 pulldown
+
+
+
