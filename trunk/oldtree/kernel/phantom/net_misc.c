@@ -286,7 +286,7 @@ void udp_syslog_send(const char *message)
               syslog_src_addr,
               message);
 
-    SHOW_FLOW( 1, "UDP syslog send '%s'\n", buf);
+    SHOW_FLOW( 7, "UDP syslog send '%s'\n", buf);
 
     int rc;
     if( 0 != (rc = udp_sendto(syslog_socket, buf, strlen(buf), &syslog_addr)) )
@@ -319,7 +319,7 @@ void udp_syslog_send(const char *prefix, const char *message)
               syslog_src_addr,
               message);
 
-    SHOW_FLOW( 2, "UDP syslog send '%s'\n", buf);
+    SHOW_FLOW( 7, "UDP syslog send '%s'\n", buf);
 
     int rc;
     if( 0 != (rc = udp_sendto(syslog_socket, buf, strlen(buf), &syslog_addr)) )

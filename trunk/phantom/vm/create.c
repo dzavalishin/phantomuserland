@@ -674,6 +674,12 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
     //struct pvm_object out = da->object;
     struct pvm_object out;
 
+    // still crashes :(
+
+    // HACK HACK HACK BUG - wiring target too. TODO need wire size parameter for page cross situations!
+    wire_page_for_addr( &(da->object) );
+    wire_page_for_addr( da->object.data );
+
     // All we do is return new reference to our object,
     // incrementing refcount before
 
@@ -685,6 +691,10 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
     hal_mutex_lock( &da->mutex );
 #endif
 
+    // TODO should we check refcount before and return null if zero?
+    if( 0 == da->object.data->_ah.refCount )
+        printf("zero object in pvm_weakref_get_object\n");
+
     out = ref_inc_o( da->object );
 
 #if WEAKREF_SPIN
@@ -694,6 +704,9 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
 #else
     hal_mutex_unlock( &da->mutex );
 #endif
+
+    unwire_page_for_addr( da->object.data );
+    unwire_page_for_addr( &(da->object) );
 
     return out;
 }

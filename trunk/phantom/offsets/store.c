@@ -48,3 +48,11 @@ int main(int ac, char **av)
     return 0;
 }
 
+void phantom_debug_register_stray_catch( void *a, int s, const char*n )
+{
+    // Ignore
+    (void) a;
+    (void) s;
+    (void) n;
+}
+
