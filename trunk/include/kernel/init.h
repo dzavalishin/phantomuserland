@@ -1,6 +1,29 @@
 #ifndef INIT_H
 #define INIT_H
 
+
+/*
+static void __register_init(void) __attribute__ ((constructor));
+static void __register_init(void) 
+{
+    phantom_register_init_func(  );
+}
+
+#define INIT_NEED_NET           (1<< 0)
+#define INIT_NEED_DISK          (1<< 1)
+#define INIT_NEED_UI            (1<< 2)
+#define INIT_NEED_THREADS       (1<< 3)
+#define INIT_NEED_PORTS         (1<< 4)
+#define INIT_NEED_UNIX          (1<< 5)
+#define INIT_NEED_OBJECTS       (1<< 6)
+
+
+
+*/
+
+
+
+
 // Tests
 
 
