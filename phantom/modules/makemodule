@@ -10,3 +10,5 @@ include $(BUILD_ROOT)/makerules-usr
 
 analyse::
 	#
+
+#INSTALL_DIR=$(realpath $(PHANTOM_HOME))/oldtree/run/tftp/$(TARGET)

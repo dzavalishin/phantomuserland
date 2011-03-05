@@ -57,6 +57,7 @@ extern "C" {
     pid_t   		getpid(void);
     pid_t   		getppid(void);
 
+int     close(int __fildes );
 
 
 #if 0
@@ -82,7 +83,6 @@ int     _EXFUN(chown, (const char *__path, uid_t __owner, gid_t __group ));
 #if defined(__CYGWIN__) || defined(__rtems__)
 int     _EXFUN(chroot, (const char *__path ));
 #endif
-int     _EXFUN(close, (int __fildes ));
 #if defined(__CYGWIN__)
 size_t	_EXFUN(confstr, (int __name, char *__buf, size_t __len));
 #endif

@@ -16,7 +16,7 @@
 
 #define DEBUG_MSG_PREFIX "dns"
 #include "debug_ext.h"
-#define debug_level_flow 1
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -27,7 +27,9 @@
 #include <string.h>
 #include <sys/cdefs.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+#include <netinet/resolv.h>
 
 #include "resolve.h"
 
@@ -35,7 +37,6 @@
 #include <arpa/inet.h>
 #include "udp.h"
 
-#include <netinet/resolv.h>
 
 //
 //#define FIN '?'
@@ -54,7 +55,9 @@ ipv4_addr  ngethostbyname (unsigned char*);
 
 errno_t dns_request(const unsigned char *host, ipv4_addr server, ipv4_addr *result)
 {
-    unsigned char buf[65536], *qname, *reader;
+    unsigned char buf[32000];
+    //unsigned char buf[65536];
+    unsigned char *qname, *reader;
     int i, j, stop;
 
     struct RES_RECORD answers[20], auth[20], addit[20]; //the replies from the DNS server

@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "Unix/net"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -29,7 +29,10 @@
 #include <sys/unistd.h>
 //#include <sys/fcntl.h>
 #include <sys/socket.h>
+
 #include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include <phantom_types.h>
 
 #include <string.h>
@@ -60,13 +63,13 @@ int usys_sethostname( int *err, uuprocess_t *u, const char *data, size_t len )
 {
 	(void) u;
 
-    if( len > MAX_UU_HOSTNAME )
+    if( len+1 >= MAX_UU_HOSTNAME )
     {
         *err = ENAMETOOLONG;
         return -1;
     }
 
-    strncpy( hostname, data, len );
+    strlcpy( hostname, data, len+1 );
     hostname[len] = 0;
     return 0;
 }
@@ -497,18 +500,16 @@ ssize_t usys_recv(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen, in
 ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen, int flags,
                       struct sockaddr *from, socklen_t *fromlen)
 {
-	(void) fromlen;
-	(void) from;
-	(void) buflen;
-	(void) buf;
-
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
-    int len = 0;
 
     struct uusocket *us = f->impl;
-	(void) us;
 
+    if( *fromlen < (int)sizeof(struct sockaddr_in) )
+    {
+        *err = EINVAL;
+        return -1;
+    }
 
     if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
     {
@@ -519,17 +520,36 @@ ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen
     if( flags )
         SHOW_ERROR( 0, "I don't know this flag %d", flags );
 
+    sockaddr tmp_addr;
+    struct sockaddr_in *sfrom = (struct sockaddr_in *)from;
 
+    // FIXME TODO ERR allways times out in 5 sec
+    int len = udp_recvfrom( us->prot_data, buf, buflen, &tmp_addr, SOCK_FLAG_TIMEOUT, 5000000L );
+    if( len < 0 )
+    {
+        SHOW_ERROR( 7, "ret = %d", len );
+        *err = -len;
+        goto ret;
+    }
 
-    *err = ENOSYS;
+    SHOW_FLOW( 8, "flags %x", flags );
+    SHOW_FLOW( 7, "port %d, ip %s", tmp_addr.port, inet_itoa(htonl(NETADDR_TO_IPV4(tmp_addr.addr))) );
+
+    sfrom->sin_port = htons(tmp_addr.port);
+    sfrom->sin_addr.s_addr = htonl(NETADDR_TO_IPV4(tmp_addr.addr));
+    sfrom->sin_family = PF_INET;
+    sfrom->sin_len = sizeof(struct sockaddr_in);
+
+    *fromlen = sfrom->sin_len;
+ret:
     return *err ? -1 : len;
 }
 
 ssize_t usys_recvmsg(int *err, uuprocess_t *u, int fd, struct msghdr *msg, int flags)
 {
-	(void) msg;
+    (void) msg;
 
-	CHECK_FD(fd);
+    CHECK_FD(fd);
     struct uufile *f = GETF(fd);
     int len = 0;
 
@@ -565,17 +585,17 @@ ssize_t usys_send(int *err, uuprocess_t *u, int fd, const void *buf, size_t len,
 
 ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t buflen, int flags, const struct sockaddr *to, socklen_t tolen)
 {
-	(void) tolen;
-	(void) to;
-	(void) buflen;
-	(void) buf;
-
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
-    int len = 0;
 
     struct uusocket *us = f->impl;
 	(void) us;
+
+    if( tolen < (int)sizeof(struct sockaddr_in) )
+    {
+        *err = EINVAL;
+        return -1;
+    }
 
     if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
     {
@@ -583,14 +603,28 @@ ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t bu
         return -1;
     }
 
-
     if( flags )
         SHOW_ERROR( 0, "I don't know this flag %d", flags );
 
+    struct sockaddr_in *sto = (struct sockaddr_in *)to;
+
+    if( sto->sin_family != PF_INET )
+        SHOW_ERROR0( 0, "not inet addr?");
 
 
-    *err = ENOSYS;
-    return *err ? -1 : len;
+    sockaddr tmp_addr;
+
+    tmp_addr.port = ntohs(sto->sin_port);
+    NETADDR_TO_IPV4(tmp_addr.addr) = ntohl(sto->sin_addr.s_addr);
+
+
+    SHOW_FLOW( 8, "flags %x", flags );
+    SHOW_FLOW( 7, "port %d, ip %s", tmp_addr.port, inet_itoa(htonl(NETADDR_TO_IPV4(tmp_addr.addr))) );
+    int ret = udp_sendto( us->prot_data, buf, buflen, &tmp_addr);
+    if( ret < 0 )
+        *err = -ret;
+
+    return *err ? -1 : ret;
 }
 
 ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg, int flags)

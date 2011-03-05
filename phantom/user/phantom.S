@@ -8,4 +8,6 @@ SYSCALL(phantom_fromobject)
 SYSCALL(phantom_intmethod)
 SYSCALL(phantom_strmethod)
 
+SYSCALL(name2ip)
+
 
