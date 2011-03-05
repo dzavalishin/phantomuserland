@@ -1,0 +1,25 @@
+DEFINES = -DNO_BYTE_SWAPPING -DOS_Tabos
+TARGET = amp
+ADD_CFLAGS = -O6 -ffast-math -fomit-frame-pointer ${DEFINES}
+#ADD_CFLAGS = ${DEFINES}
+
+OBJ = dump.o formats.o getbits.o huffman.o\
+	layer3.o getdata.o misc2.o transform.o audio.o args.o\
+	position.o layer2.o util.o getopt.o\
+	getopt1.o audioIO_Tabos.o
+
+all: amp
+
+amp: $(OBJ) 
+	ld -o $(TARGET) $(CRT0) $(OBJ) $(LDFLAGS) -lc
+	strip $(TARGET)
+
+copy:
+	cp amp $(ROOT)/apps
+
+clean:
+	rm -f *.o *.a amp
+
+include $(TABOS)/include/scripts/inst.cfg
+include $(TABOS)/include/scripts/rules.inc
+include $(TABOS)/include/scripts/app.inc
