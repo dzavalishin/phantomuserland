@@ -21,9 +21,10 @@
 #define SYS_sleepmsec           16	// ++
 #define SYS_nanosleep           17	// +-
 #define SYS_time                18	// +-
-#define SYS_getitimer           19	// +-
-#define SYS_setitimer           20	// +-
-#define SYS_gettimeofday        21	// +-
+#define SYS_stime               19	// +-
+#define SYS_getitimer           20	// +-
+#define SYS_setitimer           21	// +-
+#define SYS_gettimeofday        22	// +-
 
 
 
@@ -150,6 +151,10 @@
 #define SYS_getpeername         145	// +!
 #define SYS_getsockname         146	// +!
 #define SYS_getsockopt          147	// +!
+
+
+#define SYS_name2ip             180	// +?
+
 
 // in general.S
 #define SYS_brk                 256	// +-

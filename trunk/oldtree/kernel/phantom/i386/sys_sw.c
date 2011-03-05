@@ -16,6 +16,7 @@
 
 #include <kernel/config.h>
 #include "../net.h"
+#include <netinet/resolv.h>
 
 #include <i386/eflags.h>
 //#include <i386/trap.h>
@@ -609,7 +610,7 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_sendto:
         {
             socklen_t tolen = uarg[5];
-            AARG( const struct sockaddr *, to, 0, tolen );
+            AARG( const struct sockaddr *, to, 4, tolen );
             int len = uarg[2];
             AARG( const void *, buf, 0, len );
             ret =  usys_sendto( &err, u, uarg[0], buf, len, uarg[3], to, tolen );
@@ -619,7 +620,7 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_recvfrom:
         {
             AARG( socklen_t *, fromlen, 5, sizeof(socklen_t) );
-            AARG( struct sockaddr *, from, 0, *fromlen );
+            AARG( struct sockaddr *, from, 4, *fromlen );
             int len = uarg[2];
             AARG( void *, buf, 0, len );
             ret =  usys_recvfrom( &err, u, uarg[0], buf, len, uarg[3], from, fromlen );
@@ -854,6 +855,16 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_phantom_strmethod:
         goto unimpl;
 
+
+    case SYS_name2ip:
+        {
+            AARG(in_addr_t *, out, 0, sizeof(in_addr_t));
+            AARG(const char *, name, 1, 1);
+
+            ret = name2ip( out, name, uarg[2] );
+            if( ret != 0 ) err = ret;
+        }
+        break;
 
 
     case SYS_sigpending:
