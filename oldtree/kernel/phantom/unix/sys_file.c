@@ -207,7 +207,7 @@ err:
 
 
 
-int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data )
+int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data, size_t len )
 {
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
@@ -224,7 +224,7 @@ int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data )
         return -1;
     }
 
-    return f->ops->ioctl( f, err, request, data );
+    return f->ops->ioctl( f, err, request, data, len );
 }
 
 

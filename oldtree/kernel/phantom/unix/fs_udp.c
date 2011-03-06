@@ -36,7 +36,7 @@
 static size_t      udpfs_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      udpfs_write(   struct uufile *f, const void *src, size_t bytes);
 static errno_t     udpfs_stat(    struct uufile *f, struct stat *data);
-static int     	   udpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data);
+static int     	   udpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int size );
 
 static size_t      udpfs_getpath( struct uufile *f, void *dest, size_t bytes);
 
@@ -261,7 +261,7 @@ static errno_t     udpfs_stat(    struct uufile *f, struct stat *data)
     return ESPIPE;
 }
 
-static int     	   udpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data)
+static int     	   udpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int size )
 {
     (void) f;
     (void) request;

@@ -57,18 +57,18 @@
 #include <sys/types.h>
 
 #include <netinet/in.h>
+#include <netinet/resolv.h>
 #include <arpa/inet.h>
 
 #include "net.h"
 #include "udp.h"
 
+#define RESOLVE 1
+
 
 static errno_t SNTPGetTime(u_int32_t * server_adr, time_t * t);
 
 
-#ifndef NUT_THREAD_SNTPSTACK
-#define NUT_THREAD_SNTPSTACK    256
-#endif
 
 typedef struct _sntpframe sntpframe;
 struct _sntpframe {
@@ -122,28 +122,47 @@ static void SNTP_resync(void * arg)
     int retry = 0;
     time_t t;
 
-    hal_set_thread_name("UIEventQ");
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    hal_set_thread_name("sntpd");
+    //hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     for (;;)
     {
         SHOW_FLOW( 7, "request time from %s", inet_itoa(server_addr) );
-        if (SNTPGetTime(&cur_server_addr, &t))
-        {     /* if any error retry */
-            if (cur_server_addr != server_addr && server_addr == 0xFFFFFFFF)
+        if(SNTPGetTime(&cur_server_addr, &t))
+        {
+            /* if any error retry * /
+            if(cur_server_addr != server_addr && server_addr == 0xFFFFFFFF)
             {
                 cur_server_addr = server_addr;
                 continue;
-            }
+            } */
 
-            if (retry++ >= 3)
+            retry++;
+            SHOW_FLOW( 7, "try %d", retry );
+#if RESOLVE
+            if(retry == 2 )
+            {
+                in_addr_t out;
+                char *host = "pool.ntp.org";
+
+                SHOW_FLOW( 7, "resolve again %s", host );
+                if( !name2ip( &out, host, RESOLVER_FLAG_NORCACHE ) )
+                {
+                    SHOW_FLOW( 7, "got new addr %s", inet_itoa(out) );
+                    server_addr = out;
+                    cur_server_addr = out;
+                }
+            }
+#endif
+            if(retry >= 3)
             { /* if numer of retries >= 3 wait 30 secs before next retry sequence ... */
                 retry = 0;
-                hal_sleep_msec(30000);
+                //hal_sleep_msec(30000);
             } else              /* ... else wait 5 secs for next retry */
-                hal_sleep_msec(5000);
+                hal_sleep_msec(1000);
         } else {                /* no error */
             //SHOW_FLOW( 7, "got time %ld, %s", t, dumpt(t) );
+            SHOW_FLOW( 7, "got time %ld", t );
 
             set_time(t);          /* so set the time */
             retry = 0;
@@ -189,15 +208,30 @@ static errno_t SNTPGetTime(u_int32_t * server_adr, time_t * t)
 
     data.mode = 0x1B;          /* LI, VN and Mode bit fields (all in u_char mode); */
 
-    if( udp_sendto( sock, &data, sizeof(data), &addr) )
+    if( (result = udp_sendto( sock, &data, sizeof(data), &addr)) )
+    {
+        if(result == ERR_NET_NO_ROUTE)
+        {
+            SHOW_ERROR( 0, "No route", result);
+        }
+        else
+            SHOW_ERROR( 0, "Can't send, rc = %d", result);
+
         goto error;
+    }
 retry:
     NETADDR_TO_IPV4(raddr.addr) = 0;
 
     /* Receive packet with timeout of 5s */
-    len = udp_recvfrom( sock, &data, sizeof(data), &raddr, SOCK_FLAG_TIMEOUT, 5000000L );
+    len = udp_recvfrom( sock, &data, sizeof(data), &raddr, SOCK_FLAG_TIMEOUT, 4000000L );
     if (len <= 0)
+    {
+        SHOW_ERROR( 0, "Can't recv, rc = %d", len);
+        result = -len;
         goto error;             /* error or timeout occured */
+    }
+
+    SHOW_FLOW( 7, "got %d bytes", len );
 
     if (raddr.port != SNTP_PORT || (data.mode & 0xc0) == 0xc0)       /* if source port is not SNTP_PORT or server is not in sync return */
     {
@@ -224,6 +258,12 @@ int init_sntp(u_int32_t server_addr, u_int32_t interval)
     // NB! Just one instance!
     static struct SNTP_resync_args arg;
 
+    in_addr_t out;
+#if RESOLVE
+    // Force resolver to do it from DNS, not from cache
+    if( !name2ip( &out, "pool.ntp.org", RESOLVER_FLAG_NORCACHE ) )
+        server_addr = out;
+#endif
     arg.server_addr = server_addr;
     arg.interval = interval;
 

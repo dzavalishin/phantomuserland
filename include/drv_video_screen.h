@@ -77,7 +77,7 @@ typedef struct drv_video_window
 
     const char* 	title;
 
-    queue_head_t       events; // Incoming events
+    queue_head_t        events; // Incoming events
     volatile int	events_count; // To prevent overfill of dead window q
 
     int                 stall; // True if event queue is overloaded and events are being lost

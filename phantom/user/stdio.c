@@ -1,4 +1,5 @@
 #include <user/sys_fio.h>
+#include <string.h>
 
 // min stdio helpers for libc printf to work
 
@@ -16,3 +17,10 @@ int getchar()
     return cc;
 }
 
+int puts(const char *s)
+{
+	int len = strlen(s);
+    write(1, s, len);
+	putchar( '\n' );
+	return len;
+}

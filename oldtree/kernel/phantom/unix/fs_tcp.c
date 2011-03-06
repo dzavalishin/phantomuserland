@@ -36,7 +36,7 @@
 static size_t      tcpfs_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      tcpfs_write(   struct uufile *f, const void *src, size_t bytes);
 static errno_t     tcpfs_stat(    struct uufile *f, struct stat *data);
-static int     	   tcpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data);
+static int     	   tcpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int size );
 
 static size_t      tcpfs_getpath( struct uufile *f, void *dest, size_t bytes);
 
@@ -258,7 +258,7 @@ static errno_t     tcpfs_stat(    struct uufile *f, struct stat *data)
     return ESPIPE;
 }
 
-static int     	   tcpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data)
+static int     	   tcpfs_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int size )
 {
     (void) f;
     (void) err;

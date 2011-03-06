@@ -31,7 +31,7 @@ static void common_thread_init(phantom_thread_t *t, int stacksize );
 static hal_spinlock_t tid_lock; //init?
 
 
-
+#define DEF_STACK_SIZE 128*1024
 
 
 
@@ -51,7 +51,7 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
     // inherit ctty
     t->ctty = GET_CURRENT_THREAD()->ctty;
 
-    common_thread_init(t, 64*1024 );
+    common_thread_init(t, DEF_STACK_SIZE );
     //t->priority = THREAD_PRIO_NORM;
 
 
@@ -119,7 +119,7 @@ phantom_import_main_thread()
 
     //assert(t->stack != 0);
 
-    common_thread_init(t, 64*1024 );
+    common_thread_init(t, DEF_STACK_SIZE );
 
     t->start_func_arg = 0;
     t->start_func = 0;
@@ -156,7 +156,7 @@ phantom_import_cpu_thread(int ncpu)
     t->start_func_arg = 0;
     t->start_func = 0;
 
-    common_thread_init(t, 64*1024 );
+    common_thread_init(t, DEF_STACK_SIZE );
     phantom_thread_state_init(t);
 
     t->thread_flags |= THREAD_FLAG_UNDEAD;

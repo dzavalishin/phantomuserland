@@ -14,7 +14,7 @@
 
 phantom_bus_t etc_bus =
 {
-    "unknown", PHANTOM_BUS_TYPE_UNKNOWN,
+    "etc", PHANTOM_BUS_TYPE_UNKNOWN,
     0, 0, 0,
 };
 

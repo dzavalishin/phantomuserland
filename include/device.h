@@ -2,6 +2,7 @@
 #define _PHANTOM_DEVICE_H
 
 #include "vm/object.h"
+#include <errno.h>
 
 
 struct phantom_device;
@@ -30,6 +31,9 @@ struct phantom_dev_ops
 
     // For network devices - get MAC addr
     int (*get_address)(struct phantom_device *dev, void *buf, int len);
+
+    // other ops :)
+    errno_t (*ioctl)(struct phantom_device *dev, int type, void *buf, int len);
 };
 
 typedef struct phantom_dev_ops phantom_dev_ops_t;
