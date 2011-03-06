@@ -38,6 +38,7 @@ struct rgba_t
 } __packed;
 
 typedef struct rgba_t rgba_t;
+typedef struct rgba_t color_t;
 
 
 

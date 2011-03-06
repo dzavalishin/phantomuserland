@@ -1,4 +1,4 @@
-
+#if 0
 /**
  *
  * Phantom OS
@@ -548,5 +548,6 @@ size_t      fat16_write( struct uufile *f, void *dest, size_t bytes)
 
 
 
+#endif
 
 

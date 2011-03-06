@@ -19,23 +19,37 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-
-#include <phantom_libc.h>
-#include <drv_video_screen.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/fcntl.h>
+#include <sys/unistd.h>
+#include <video/rect.h>
+#include <video/point.h>
 #include <video/color.h>
-#include <hal.h>
-#include <threads.h>
+#include <dev/key_event.h>
 
 
-#include "dev/key_event.h"
-#include "misc.h"
+static int fb;
 
-//#include <stream/stream.h>
-//#include <gpanel/gpanel.h>
-//#include <random/rand15.h>
-//#include "board-1986be91.h"
 
-static int rbits = 0;
+#define FB_SET_COLOR(__fd,__c) ioctl(__fd, IOCTL_FB_SETCOLOR, &__c,sizeof(__c) )
+#define FB_DRAW_BOX(__fd,__r) ioctl(__fd, IOCTL_FB_DRAWBOX, &__r,sizeof(__r) )
+#define FB_FILL_BOX(__fd,__r) ioctl(__fd, IOCTL_FB_FILLBOX, &__r,sizeof(__r) )
+#define FB_DRAW_LINE(__fd,__r) ioctl(__fd, IOCTL_FB_DRAWLINE, &__r,sizeof(__r) )
+#define FB_DRAW_PIXEL(__fd,__x, __y) \
+    do { point_t p; p.x = __x; p.y = __y; \
+    ioctl(__fd, IOCTL_FB_DRAWPIXEL, &p,sizeof(p) ); \
+    } while(0)
+
+
+//#include <drv_video_screen.h>
+
+
+//#include "dev/key_event.h"
+//#include "misc.h"
+
+
+//static int rbits = 0;
 
 static int k_down = 0, k_up = 0, k_right = 0, k_left = 0;
 
@@ -44,8 +58,9 @@ static int k_down = 0, k_up = 0, k_right = 0, k_left = 0;
 #define joystick_up() (rbits&4)
 //#define joystick_down() (k_down > 0 )
 
-static drv_video_window_t *tetris_window;
+//static drv_video_window_t *tetris_window;
 
+//void win_show(drv_video_window_t *w);
 
 #define PITWIDTH        12
 #define PITDEPTH        24
@@ -91,6 +106,9 @@ int pitcnt [PITDEPTH];
 coord_t old [NBLOCKS], new [NBLOCKS], chk [NBLOCKS];
 
 //gpanel_t display;
+
+void input(void);
+
 
 /*
  * Output piece coordinates given its center and angle
@@ -167,18 +185,34 @@ void draw_block (int h, int w, int visible)
     r.y = h;
     r.xsize = r.ysize = 4;
 
-    if (visible) {
-        drv_video_window_fill_rect( tetris_window, COLOR_LIGHTRED, r );
+    if (visible)
+    {
+        FB_SET_COLOR(fb,COLOR_LIGHTRED);
+        FB_FILL_BOX(fb,r);
+        //drv_video_window_fill_rect( tetris_window, COLOR_LIGHTRED, r );
     } else {
-        drv_video_window_fill_rect( tetris_window, COLOR_BLACK, r );
+        FB_SET_COLOR(fb,COLOR_BLACK);
+        FB_FILL_BOX(fb,r);
+        //drv_video_window_fill_rect( tetris_window, COLOR_BLACK, r );
+
+        FB_SET_COLOR(fb,COLOR_LIGHTBLUE);
 
         if (h == (PITDEPTH-1)*5)
-            drv_video_window_pixel ( tetris_window, w + 2, h + 4, COLOR_LIGHTBLUE);
+            FB_DRAW_PIXEL(fb, w + 2, h + 4);
+            //drv_video_window_pixel ( tetris_window, w + 2, h + 4, COLOR_LIGHTBLUE);
 
         if (w == 0)
-            drv_video_window_pixel ( tetris_window, w, h + 2, COLOR_LIGHTGREEN);
-        else if (w % 20 == 15)
-            drv_video_window_pixel ( tetris_window, w + 4, h + 2, COLOR_LIGHTGREEN);
+        {
+            FB_SET_COLOR(fb,COLOR_LIGHTGREEN);
+            FB_DRAW_PIXEL(fb, w, h + 2);
+            //drv_video_window_pixel ( tetris_window, w, h + 2, COLOR_LIGHTGREEN);
+        }
+        else
+            if (w % 20 == 15)
+            {
+                FB_DRAW_PIXEL(fb, w + 4, h + 2);
+                //drv_video_window_pixel ( tetris_window, w + 4, h + 2, COLOR_LIGHTGREEN);
+            }
     }
 }
 
@@ -215,7 +249,8 @@ void move (coord_t *old, coord_t *new)
         new++;
     }
 
-    drv_video_winblt( tetris_window );
+    //win_show( tetris_window );
+    ioctl(fb, IOCTL_FB_FLUSH, 0, 0 );
 }
 
 /*
@@ -296,11 +331,9 @@ static void stopped (coord_t *c)
 }
 
 
-static void tetris_window_loop(void *arg)
+static void tetris_window_loop(void)
 {
-    (void) arg;
 
-    hal_set_thread_name("KerTetris");
     SHOW_FLOW0( 2, "running");
 
     int ptype;              /* Piece type */
@@ -338,9 +371,11 @@ static void tetris_window_loop(void *arg)
             cnew = c;
             anew = angle;
 
-            rbits = 0;
+            input();
+
+            //rbits = 0;
             if (msec <= 0) {
-                rbits = random(); // self-control :)
+                //rbits = random(); // self-control :)
                 /* Timeout: move down */
                 SHOW_FLOW0( 7, "down");
                 msec = 500;
@@ -354,6 +389,7 @@ static void tetris_window_loop(void *arg)
                 }
                 goto check;
             }
+
 
             if ( k_up > 0 ) { 	// up: rotate
                 k_up--;
@@ -404,7 +440,7 @@ static void tetris_window_loop(void *arg)
                 }
             }
 
-            hal_sleep_msec(10);
+            sleepmsec(10);
             msec -= 10;
             continue;
 
@@ -426,9 +462,7 @@ static void tetris_window_loop(void *arg)
 
 }
 
-static void (*oldEventProcessor)( drv_video_window_t *w, struct ui_event *e );
-
-static void eventProcessor( drv_video_window_t *w, struct ui_event *e )
+static void process_event( struct ui_event *e )
 {
 
     switch(e->type)
@@ -445,45 +479,80 @@ static void eventProcessor( drv_video_window_t *w, struct ui_event *e )
         {
         case KEY_ARROW_DOWN:
             k_down++;
-            SHOW_FLOW( 2, "KEY__DOWN %d", k_down );
+            //SHOW_FLOW( 2, "KEY__DOWN %d", k_down );
             break;
 
         case KEY_ARROW_UP:
             k_up++;
-            SHOW_FLOW( 2, "KEY__UP %d", k_down );
+            //SHOW_FLOW( 2, "KEY__UP %d", k_down );
             break;
 
         case KEY_ARROW_LEFT:
             k_left++;
-            SHOW_FLOW( 2, "KEY__LEFT %d", k_down );
+            //SHOW_FLOW( 2, "KEY__LEFT %d", k_down );
             break;
 
         case KEY_ARROW_RIGHT:
             k_right++;
-            SHOW_FLOW( 2, "KEY__RIGHT %d", k_down );
+            //SHOW_FLOW( 2, "KEY__RIGHT %d", k_down );
             break;
         }
         return;
 
     }
 
-    if(oldEventProcessor)
-        oldEventProcessor(w, e);
 }
 
 
-void init_tetris ()
+int get_event( struct ui_event *e )
 {
-    tetris_window =
-        drv_video_window_create( 60, 120, 700, 550, COLOR_BLACK, "Tetris" );
+    int ret = read( fb, e, sizeof(struct ui_event) );
+    if( ret < 0 )
+        printf("-re- ");
 
-    oldEventProcessor = tetris_window->inKernelEventProcess;
-    tetris_window->inKernelEventProcess = eventProcessor;
+    return ret == sizeof(struct ui_event);
+}
+
+
+void input(void)
+{
+    struct ui_event e;
+
+    if(get_event( &e ))
+        process_event( &e );
+}
+
+
+int main()
+{
+    //tetris_window = drv_video_window_create( 60, 120, 700, 550, COLOR_BLACK, "Tetris" );
+
+    fb = open("/dev/etc/fb0", O_RDWR );
+
+    if( fb < 0 )
+    {
+        printf("can't open framebuf\n");
+        exit(1);
+    }
+
+    char a[2000];
+    memset( a, 0x6F, sizeof(a) );
+    write( fb, a, sizeof(a) );
+
+    rect_t r;
+    r.xsize = 60;
+    r.ysize = 120;
+    r.x = 700;
+    r.y = 550;
+
+    ioctl( fb, IOCTL_FB_SETBOUNDS, &r, sizeof(r) );
+
 
     /* Draw the pit */
     tetris_clear();
 
-    hal_start_kernel_thread((void*)tetris_window_loop);
+    tetris_window_loop();
 
+    return 0;
 }
 

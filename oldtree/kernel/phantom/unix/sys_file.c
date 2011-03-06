@@ -79,6 +79,7 @@ int usys_creat( int *err, uuprocess_t *u, const char *name, int mode )
 
 int usys_read(int *err, uuprocess_t *u, int fd, void *addr, int count )
 {
+    SHOW_FLOW(10, "rd %d", count);
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
@@ -88,6 +89,7 @@ int usys_read(int *err, uuprocess_t *u, int fd, void *addr, int count )
         return -1;
     }
 
+    SHOW_FLOW(9, "do rd %d", count);
     int ret = f->ops->read( f, addr, count );
 
     if( ret < 0 ) *err = EIO;

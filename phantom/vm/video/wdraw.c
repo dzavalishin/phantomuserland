@@ -68,7 +68,7 @@ drv_video_window_pixel( drv_video_window_t *w, int x, int y, rgba_t color )
     rgba_t *dst = w->pixel + y*w->xsize + x;
     *dst = color;
 }
-
+/*
 void
 drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
 {
@@ -79,7 +79,7 @@ drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bit
                  );
 
 }
-
+*/
 // SLOOOW! Checks bounds on each pixel
 
 #define _PLOT(w,x,y,c) do {\
