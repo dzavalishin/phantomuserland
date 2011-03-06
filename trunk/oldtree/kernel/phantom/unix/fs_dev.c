@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "devfs"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -34,14 +34,9 @@
 
 static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      dev_write(   struct uufile *f, const void *dest, size_t bytes);
-static errno_t     dev_stat( struct uufile *f, struct stat *dest );
+static errno_t     dev_stat(    struct uufile *f, struct stat *dest );
 static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int dlen );
-
-//static errno_t     dev_ioctl(   struct uufile *f, struct ??);
-
 static size_t      dev_getpath( struct uufile *f, void *dest, size_t bytes);
-
-// returns -1 for non-files
 static ssize_t     dev_getsize( struct uufile *f);
 
 static void *      dev_copyimpl( void *impl );
@@ -259,7 +254,7 @@ static errno_t     dev_stat( struct uufile *f, struct stat *dest )
 
 static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes)
 {
-    if(f->flags && UU_FILE_FLAG_DIR)
+    if(f->flags & UU_FILE_FLAG_DIR)
     {
         SHOW_FLOW( 11, "Read dir for %d bytes, pos %d", bytes, f->pos );
 
@@ -284,6 +279,7 @@ static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes)
         return sizeof(struct dirent);
     }
 
+    SHOW_FLOW( 10, "Read dev %d bytes", bytes );
 
     phantom_device_t* dev = f->impl;
     if(dev == 0 || dev->dops.read == 0) return -1;

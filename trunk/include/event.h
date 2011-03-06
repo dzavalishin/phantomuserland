@@ -46,6 +46,8 @@ struct ui_event
             rect_t              rect;           // If relevant...
         } w;
 
+
+        char                    fill[32];
     };
 
 };
@@ -88,6 +90,7 @@ typedef struct ui_event ui_event_t;
 
 
 
+// TODO move to kern/event.h and rest to video/event.h
 
 
 //! Put mouse event onto the main e q
@@ -110,6 +113,13 @@ void event_q_put_global( ui_event_t *e );
 
 //! Start sending keybd events from keybd driver - see keyboard.c
 void phantom_dev_keyboard_start_events(void);
+
+
+//! Get next event for this window
+int drv_video_window_get_event( struct drv_video_window *w, struct ui_event *e, int wait );
+
+//! Returns nonzero if processed event
+int defaultWindowEventProcessor( struct drv_video_window *w, struct ui_event *e );
 
 
 #endif // EVENT_H

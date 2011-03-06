@@ -268,6 +268,9 @@ void drv_video_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, i
 }
 
 
+#if 0
+
+
 void bitmap2bitmap(
                    struct rgba_t *dest, int destWidth, int destHeight, int destX, int destY,
                    const struct rgba_t *src, int srcWidth, int srcHeight, int srcX, int srcY,
@@ -349,7 +352,6 @@ void bitmap2bitmap(
 }
 
 
-//#if VIDEO_ZBUF
 
 void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos  )
 {
@@ -548,7 +550,7 @@ void int565_to_rgba_move( struct rgba_t *dest, const short int *src, int nelem )
 
 }
 
-//#endif
+#endif
 
 
 

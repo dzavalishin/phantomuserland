@@ -178,7 +178,7 @@ static void do_syscall_sw(struct trap_state *st)
 
 
     case SYS_sleepmsec:
-        SHOW_FLOW( 2, "sleepmsec %d", uarg[0] );
+        //SHOW_FLOW( 2, "sleepmsec %d", uarg[0] );
         hal_sleep_msec(uarg[0]);
         break;
 

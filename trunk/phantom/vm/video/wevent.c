@@ -36,12 +36,13 @@
 
 
 
-static void defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
+static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
+    return 0;
 }
 
 #if KEY_EVENTS
-static void defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
+static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
     struct phantom_thread * t = w->owner;
 
@@ -49,15 +50,15 @@ static void defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e 
     {
         //SHOW_ERROR0( 1, "Key event for unowned window" );
         //printf( "Key event for unowned window" );
-        return;
+        return 0;
     }
 
     //wtty_t *wt = t->ctty;
     wtty_t *wt = get_thread_ctty( t );
 
-	// Skip key release events
-	if(e->modifiers & UI_MODIFIER_KEYUP)
-		return;
+    // Skip key release events
+    if(e->modifiers & UI_MODIFIER_KEYUP)
+        return 1;
 
     errno_t err = wtty_putc_nowait(wt, e->k.ch );
     if(err == ENOMEM)
@@ -70,11 +71,11 @@ static void defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e 
         //SHOW_ERROR( 1, "Window putc error %d", err );
         printf( "Window putc error %d", err );
     }
-
+    return 1;
 }
 #endif
 
-static void defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
+static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
 	//printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
     switch(e->w.info)
@@ -103,21 +104,25 @@ static void defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e 
         }
         break;
 
+    default:
+        return 0;
 
     }
+
+    return 1;
 }
 
-void defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
+int defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
 	//printf("defaultWindowEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
 
     switch(e->type)
     {
-    case UI_EVENT_TYPE_MOUSE: 	defaultMouseEventProcessor(w, e); break;
+    case UI_EVENT_TYPE_MOUSE: 	return defaultMouseEventProcessor(w, e); 
 #if KEY_EVENTS
-    case UI_EVENT_TYPE_KEY:     defaultKeyEventProcessor(w, e); break;
+    case UI_EVENT_TYPE_KEY:     return defaultKeyEventProcessor(w, e); 
 #endif
-    case UI_EVENT_TYPE_WIN:     defaultWinEventProcessor(w, e); break;
+    case UI_EVENT_TYPE_WIN:     return defaultWinEventProcessor(w, e); 
     }
 }
 

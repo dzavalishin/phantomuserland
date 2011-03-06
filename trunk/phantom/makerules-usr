@@ -12,13 +12,14 @@ PHANTOM_CFLAGS += -ffreestanding -W -Wall -DNO_STRAY_CHECK
 LIBGCC := `$(CC) $(ARCH_FLAGS) --print-libgcc-file-name`
 
 LIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
+USR_LIBS=$(LIBDIR)/libtmalloc.a $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a $(LIBDIR)/libphantom.a
 
 #INSTALL_DIR=$(realpath $(PHANTOM_HOME))/oldtree/run/tftp/$(TARGET)
 INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/bin/$(TARGET)
 
 
 # install anyway
-$(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(LIBDIR)/libtmalloc.a $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a
+$(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(USR_LIBS)
 	@echo --- Link $(TARGET)
 	@$(CC) -g $(ARCH_FLAGS) -nostdlib -static -ffreestanding $(USR_LD_ADDR) -o $@.pe $^ $(LIBGCC)
 	@$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
