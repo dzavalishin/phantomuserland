@@ -1,6 +1,8 @@
 #ifndef _SYS_UNISTD_H
 #define _SYS_UNISTD_H
 
+#include <unistd.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

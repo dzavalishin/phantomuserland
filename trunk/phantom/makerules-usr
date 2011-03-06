@@ -18,7 +18,7 @@ INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/bin/$(TARGET)
 
 
 # install anyway
-$(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a
+$(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(LIBDIR)/libtmalloc.a $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a
 	@echo --- Link $(TARGET)
 	@$(CC) -g $(ARCH_FLAGS) -nostdlib -static -ffreestanding $(USR_LD_ADDR) -o $@.pe $^ $(LIBGCC)
 	@$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@

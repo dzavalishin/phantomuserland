@@ -35,6 +35,7 @@
 static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      dev_write(   struct uufile *f, const void *dest, size_t bytes);
 static errno_t     dev_stat( struct uufile *f, struct stat *dest );
+static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int dlen );
 
 //static errno_t     dev_ioctl(   struct uufile *f, struct ??);
 
@@ -57,7 +58,7 @@ static struct uufileops dev_fops =
     .copyimpl   = dev_copyimpl,
 
     .stat       = dev_stat,
-    //.ioctl      = dev_ioctl,
+    .ioctl      = dev_ioctl,
 };
 
 
@@ -320,6 +321,15 @@ static void *      dev_copyimpl( void *impl )
 {
     // TODO dev refcount
     return impl; // Just a pointer to dev, can copy
+}
+
+
+static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int dlen )
+{
+    phantom_device_t* dev = f->impl;
+    if(dev == 0 || dev->dops.ioctl == 0) return -1;
+    *err = dev->dops.ioctl( dev, request, data, dlen );
+    return *err ? -1 : 0;
 }
 
 

@@ -1,20 +1,22 @@
-#if 0
-//#include <gfx/gfx.h>
-
 #include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/fcntl.h>
+#include <sys/unistd.h>
+#include <video/rect.h>
 
-#include "tabos_compat.h"
 
 #define SCREEN_WIDTH	640
 #define SCREEN_HEIGHT	480
 
-struct sBitmap *psDesktop = 0;
-struct sBitmap *psImage = 0;
-unsigned int nWidth = 0, nHeight = 0;
+static int   fb = -1;
+
+//static struct sBitmap *psDesktop = 0;
+static struct sBitmap *psImage = 0;
+static unsigned int nWidth = 0, nHeight = 0;
 unsigned int nPosX = 0, nPosY = 0;
 
 void spoon_putpixel( int x, int y, unsigned int col ) {
-    unsigned short *pRam;
+    //unsigned short *pRam;
 
     if ( psImage ) {
         //pRam = ( unsigned short * ) psImage -> pnData;
@@ -29,15 +31,30 @@ void spoon_sync() {
 // -----------------------------------
 
 int init_spoon( int width, int height ) {
-    Print( "%dx%d\n", width, height );
+    printf( "Open framebuf %dx%d\n", width, height );
     nWidth = width;
     nHeight = height;
-/*
-    if ( InitGraphics() ) {
-        Print( "Could not init graphics\n" );
-        return -1;
+
+    fb = open("/dev/etc/fb0", O_RDWR );
+
+    if( fb < 0 )
+    {
+        printf("can't open framebuf\n");
+        exit(1);
     }
 
+    char a[2000];
+    memset( a, 0x6F, sizeof(a) );
+    write( fb, a, sizeof(a) );
+
+    rect_t r;
+    r.xsize = width;
+    r.ysize = height;
+    r.x = r.y = 0;
+
+    ioctl( fb, IOCTL_FB_SETBOUNDS, &r, sizeof(r) );
+
+/*
     if ( SetMode( SCREEN_WIDTH, SCREEN_HEIGHT, CS_RGB16, 60.0f ) ) {
         Print( "Could not set graphics mode\n" );
         return -1;
@@ -67,5 +84,3 @@ int init_spoon( int width, int height ) {
 void clean_spoon() {
     //CloseGraphics();
 }
-
-#endif

@@ -147,6 +147,7 @@ struct data_area_4_thread
 
     volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
     timedcall_t                         timer;          // Who will wake us
+    pvm_object_t                        sleep_chain;    // More threads sleeping on the same event, meaningless for running thread
 
     int                                 tid;            // Actual kernel thread id - reloaded on each kernel restart
 
@@ -403,6 +404,12 @@ struct data_area_4_io
     // move contents. Input is on the right (higher index) side.
     pvm_object_t			ibuf[IO_DA_BUFSIZE];
     pvm_object_t			obuf[IO_DA_BUFSIZE];
+
+    pvm_object_t                        in_sleep_chain;  // Threads sleeping for input
+    pvm_object_t                        out_sleep_chain; // Threads sleeping for output
+
+    u_int32_t				in_sleep_count;  // n of threads sleeping for input
+    u_int32_t				out_sleep_count; // n of threads sleeping for output
 
 #if WEAKREF_SPIN
     hal_spinlock_t      		lock;

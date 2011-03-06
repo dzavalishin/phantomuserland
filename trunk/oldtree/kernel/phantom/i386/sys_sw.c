@@ -675,7 +675,7 @@ static void do_syscall_sw(struct trap_state *st)
         {
             void *data = adjustin( uarg[2], st );
             CHECKA(data,0);
-            ret = usys_ioctl( &err, u, uarg[0], uarg[1], data );
+            ret = usys_ioctl( &err, u, uarg[0], uarg[1], data, uarg[3] );
             break;
         }
 

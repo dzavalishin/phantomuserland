@@ -13,7 +13,7 @@
 #define KEY_EVENTS 1
 
 // Debug only!
-#define DIRECT_DRIVE 1
+#define DIRECT_DRIVE 0
 
 
 #define DEBUG_MSG_PREFIX "events"
@@ -536,7 +536,7 @@ void drv_video_window_explode_event(struct ui_event *e)
 }
 
 
-#define DIRECT_DRIVE 1
+//#define DIRECT_DRIVE 1
 
 
 //! Get next event for this window

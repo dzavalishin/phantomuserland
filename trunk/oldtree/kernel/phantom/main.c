@@ -352,7 +352,7 @@ connect_ide_io();
 
     // pool.ntp.org
     //init_sntp( IPV4_DOTADDR_TO_ADDR(85,21,78,91), 10000 );
-    //init_sntp( IPV4_DOTADDR_TO_ADDR(83,229,210,18), 10000 );
+    //init_sntp( IPV4_DOTADDR_TO_ADDR(192,168,1,1), 10000 );
 
 
 #if 1

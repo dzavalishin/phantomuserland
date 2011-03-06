@@ -55,9 +55,11 @@ ipv4_addr  ngethostbyname (unsigned char*);
 
 errno_t dns_request(const unsigned char *host, ipv4_addr server, ipv4_addr *result)
 {
+    // TODO 64 k on stack?
     unsigned char buf[32000];
     //unsigned char buf[65536];
     unsigned char *qname, *reader;
+
     int i, j, stop;
 
     struct RES_RECORD answers[20], auth[20], addit[20]; //the replies from the DNS server

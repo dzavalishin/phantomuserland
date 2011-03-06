@@ -20,7 +20,7 @@ struct uufileops
     size_t      (*write)(   struct uufile *f, const void *src, size_t bytes);
 
     errno_t     (*stat)(    struct uufile *f, struct stat *dest);
-    int         (*ioctl)(   struct uufile *f, errno_t *err, int request, void *data );
+    int         (*ioctl)(   struct uufile *f, errno_t *err, int request, void *data, int dlen );
 
     size_t      (*getpath)( struct uufile *f, void *dest, size_t bytes);
 

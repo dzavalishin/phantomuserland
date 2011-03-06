@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -145,7 +146,13 @@ static int io_10_pre_get(struct pvm_object me, struct data_area_4_thread *tc )
     // TODO list of waiting threads?
     // Kernel must call SYSCALL_WAKE_THREAD_UP(tc);
     if( meda->in_count <= 0 )
+    {
+        //if( pvm_is_null( meda->get_sleep_chain ) )
+        tc->sleep_chain = meda->in_sleep_chain;
+        meda->in_sleep_chain = this thread;
+        meda->in_sleep_count++;
         SYSCALL_PUT_THIS_THREAD_ASLEEP();
+    }
 
     //UNLOCKME(me);
 
@@ -219,6 +226,18 @@ errno_t io_object_put(struct pvm_object ioo, struct pvm_object data )
     }
 
     meda->ibuf[meda->in_count++] = data;
+
+    if(meda->in_sleep_count > 0)
+    {
+        pvm_object_t wakeup = meda->in_sleep_chain; // todo check type
+        struct data_area_4_io *wda = pvm_object_da( wakeup, thread );
+
+        meda->in_sleep_chain = wda->in_sleep_chain;
+        meda->in_sleep_count--;
+
+        SYSCALL_WAKE_THREAD_UP(wda);
+    }
+
     UNLOCKME(meda);
 
     return 0;
@@ -458,3 +477,4 @@ DECLARE_SIZE(io);
 
 
 
+#endif
