@@ -29,20 +29,18 @@ Not so easy, but we need it, sooner or later.
 
 == Kernel Tasks ==
 
-  * *VirtIO drivers*. Have partial VirtIO environment, need complete disk and net drivers.
+  * *VirtIO drivers*. Have incomplete disk driver, net driver in progress.
   * *IDE driver cleanup*. Existing driver is very strange. *started*
   * *Partition lookup code*. Partially implemented. *need tests*
   * *IP stack tests and userland interface*. 
-  * *ARM port*
+  * *ARM port*. Started, have most of arch dependent parts separated from main code.
 
 Not critical, but can be done relatively easily.
 
-  * *Disk selection*. Right now Phantom looks for its disk in hardcoded places.
+  * *Disk selection*. Right now Phantom looks for its disk in hardcoded places. Partitioning system reckognizes Phantom partitions and disks. Has to be connected to pager.
 
 
 = General Project Support Tasks =
-
-We need volunteers for these:
 
   * *Doxygen*. And code documentation too.
   * *Test suite*, regular regression test setup. *mostly ok*
@@ -58,4 +56,4 @@ We need volunteers for these:
   * *LLVM fast code*. In addition to posix subsystem it would be nice to have a specific LLVM subsystem which can offer programmers hispeed, but portable (to Phantom on other arch) programming framework. The same CS/DS binary objects, but executable code is LLVM-level and passed through LLVM backend before being run for the first time.
   * *OpenGL*. In fact, it is quite easy to get TinyGL working (it is already done for kernel), but we need a clean userland interface and understanding of interoperation for multiiple simult. threads doing GL rendering in a same env.
   * *Sound drivers*. At least some very simple AC97 wave output one? *in progress*
-  * *Video codecs environment*. Seems to be requiring Posix/LLVM support first. The first goal is to be able to give it an MPEG binary for playing.
+  * *Video codecs environment*. Seems to be requiring Posix/LLVM support first. The first goal is to be able to give it an MPEG binary for playing. *Quite near now*
