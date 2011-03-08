@@ -5,8 +5,10 @@
 #include <virtio_pci.h>
 #include <virtio_rng.h>
 
-#include "driver_map.h"
-#include "device.h"
+//#include "driver_map.h"
+//#include "device.h"
+#include <device.h>
+#include <kernel/drivers.h>
 
 
 //static short basereg;

@@ -1,8 +1,18 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Intel PIIX4 driver. Incomplete. Untested.
+ *
+**/
+
 
 #if defined(ARCH_ia32)
 
 #define DEBUG_MSG_PREFIX "PIIX4"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
@@ -10,7 +20,9 @@
 
 #include <phantom_libc.h>
 #include <i386/pio.h>
-#include "driver_map.h"
+//#include "driver_map.h"
+#include <device.h>
+#include <kernel/drivers.h>
 
 #include "intel_piix4_regs.h"
 
