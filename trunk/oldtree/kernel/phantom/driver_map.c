@@ -18,9 +18,10 @@
 
 #include <phantom_libc.h>
 
-#include "i386/pci.h"
-#include "driver_map.h"
-#include "device.h"
+#include <i386/pci.h>
+
+#include <device.h>
+#include <kernel/drivers.h>
 
 #include "misc.h"
 
@@ -86,6 +87,9 @@ static pci_probe_t pci_drivers[] =
     //{ "PIC/Mem 1237", 	driver_intel_1237_bridge_probe,	3, INTEL_VENDORID, 0x1237, 0 },
     //{ "PIIX4 PM", 	driver_intel_PIIX4_pm_probe,	3, INTEL_VENDORID, 0x7113, 0 },
 
+    { "es1370", 	driver_es1370_probe,		2, ENSONIQ_VENDORID, 0x5000, 0 },
+    //{ "es1370", 	driver_es1370_probe,		2, 0x1274, 0x5000, 0 },
+    
 };
 
 
@@ -148,7 +152,15 @@ static isa_probe_t isa_drivers[] =
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x360, 11 },
 #endif
 
-//    { "SB16",         driver_isa_sb16_probe,  3, 0x220, 5 },
+#if 0
+    { "SB16",          driver_isa_sb16_probe,  2, 0x210, 5 },
+    { "SB16",          driver_isa_sb16_probe,  2, 0x220, 5 },
+    { "SB16",          driver_isa_sb16_probe,  2, 0x230, 5 },
+    { "SB16",          driver_isa_sb16_probe,  2, 0x240, 5 },
+    { "SB16",          driver_isa_sb16_probe,  2, 0x250, 5 },
+    { "SB16",          driver_isa_sb16_probe,  2, 0x260, 5 },
+#endif
+//    { "AdLib",         driver_isa_sdlib_probe, 3, 0x388, 8 },
 };
 
 

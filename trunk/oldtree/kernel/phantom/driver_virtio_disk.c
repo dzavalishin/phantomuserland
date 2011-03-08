@@ -28,8 +28,10 @@
 #include <sys/cdefs.h>
 
 
-#include "driver_map.h"
-#include "device.h"
+//#include "driver_map.h"
+//#include "device.h"
+#include <device.h>
+#include <kernel/drivers.h>
 
 
 //static short basereg;

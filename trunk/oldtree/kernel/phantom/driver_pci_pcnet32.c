@@ -21,7 +21,9 @@
 #include <phantom_libc.h>
 #include <i386/pio.h>
 #include <threads.h>
-#include "driver_map.h"
+//#include "driver_map.h"
+#include <device.h>
+#include <kernel/drivers.h>
 
 #include "driver_pci_pcnet32.h"
 #include "driver_pci_pcnet32_priv.h"
@@ -97,7 +99,7 @@ static int seq_number = 0;
 
 phantom_device_t * driver_pcnet_pchome_probe( pci_cfg_t *pci, int stage )
 {
-	(void) stage;
+    (void) stage;
 
     pcnet32 *nic = NULL;
 

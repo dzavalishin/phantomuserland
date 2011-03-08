@@ -3,7 +3,9 @@
 
 #include <phantom_libc.h>
 #include <i386/pio.h>
-#include "driver_map.h"
+//#include "driver_map.h"
+#include <device.h>
+#include <kernel/drivers.h>
 
 #include "driver_pci_intel82559.h"
 #include "driver_pci_intel82559_priv.h"
