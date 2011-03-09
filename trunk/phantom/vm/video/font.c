@@ -113,10 +113,10 @@ void 	drv_video_font_scroll_line(
 static color_t cmap[] =
 {
     _C_COLOR_BLACK,
-    _C_COLOR_RED,
-    _C_COLOR_GREEN,
+    _C_COLOR_LIGHTRED,
+    _C_COLOR_LIGHTGREEN,
     _C_COLOR_YELLOW,
-    _C_COLOR_BLUE,
+    _C_COLOR_LIGHTBLUE,
     _C_COLOR_MAGENTA,
     _C_COLOR_CYAN,
     _C_COLOR_LIGHTGRAY //_C_COLOR_WHITE

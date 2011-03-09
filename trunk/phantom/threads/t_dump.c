@@ -93,9 +93,9 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 
     switch(t->sleep_flags)
     {
-    case 0:                     slp = " RUN "; scol = "\x1b[35m"; break;
+    case 0:                     slp = " RUN "; scol = "\x1b[32m"; break;
     case THREAD_SLEEP_USER:     slp = "user"; break;
-    case THREAD_SLEEP_SLEEP:    slp = "sleep"; scol = "\x1b[32m"; break;
+    case THREAD_SLEEP_SLEEP:    slp = "sleep"; scol = "\x1b[34m"; break;
     case THREAD_SLEEP_COND:     slp = "cond"; break;
     case THREAD_SLEEP_MUTEX:    slp = "mutex"; break;
     case THREAD_SLEEP_SEM:      slp = "sema"; break;
