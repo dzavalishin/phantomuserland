@@ -24,7 +24,7 @@ void printout( void ) {
 
 static int audio_fd;
 static int mixer_fd;
-static int volumeIoctl;
+//static int volumeIoctl;
 
 /* audioOpen() */
 /* should open the audio device, perform any special initialization		 */
@@ -32,15 +32,15 @@ static int volumeIoctl;
 /* it is not -1 */
 void audioOpen( int frequency, int stereo, int volume ) {
     //int supportedMixers;
-    int play_format = AFMT_S16_LE;
-    char anName[ 256 ] = "sb16";
+    //    int play_format = AFMT_S16_LE;
+    char anName[ 256 ] = "es1370";
     char *pnTmp;
 
     /*
-    if ( GetStandardOutput( anName ) ) {
-        die( "Unable to get standard audio output\n" );
-        }
-    */
+     if ( GetStandardOutput( anName ) ) {
+     die( "Unable to get standard audio output\n" );
+     }
+     */
 
     Print( "Default Output: [%s]\n", anName );
 
@@ -51,16 +51,19 @@ void audioOpen( int frequency, int stereo, int volume ) {
         die( "Unable to allocate memory\n" );
     }
 
-    StringPrint( pnTmp, ll, "/dev/sound/%s/dsp", anName );
+    StringPrint( pnTmp, ll, "/dev/pci/%s", anName );
 
     if ( ( audio_fd = Open( pnTmp, O_WRONLY ) ) < 0 ) {
         die( "Unable to open the audio device\n" );
     }
     DB( audio, msg( "Audio device opened on %d\n", audio_fd ); )
 
-        if ( IoControl( audio_fd, SNDCTL_DSP_SETFMT, &play_format ) < 0 ) {
-            die( "Unable to set required audio format\n" );
-        }
+    int play_format;
+
+    play_format = 1;
+    if ( ioctl( audio_fd, IOCTL_SOUND_SIGNED, &play_format, sizeof(int) ) < 0 ) {
+        die( "Unable to set required audio format\n" );
+    }
 
     StringPrint( pnTmp, ll, "/dev/sound/%s/mixer", anName );
     if ( ( mixer_fd = open( pnTmp, O_RDWR ) ) < 0 ) {
@@ -70,7 +73,7 @@ void audioOpen( int frequency, int stereo, int volume ) {
 
 #if 0
     if ( IoControl( mixer_fd, SOUND_MIXER_READ_DEVMASK,
-                     &supportedMixers ) == -1 ) {
+                    &supportedMixers, sizeof(int) ) == -1 ) {
         warn( "Unable to get mixer info assuming master volume\n" );
         volumeIoctl = SOUND_MIXER_WRITE_VOLUME;
     } else {
@@ -83,15 +86,15 @@ void audioOpen( int frequency, int stereo, int volume ) {
 #endif
 
     /* Set 1 or 2 channels */
-    stereo = ( stereo ? 1 : 0 );
+    stereo = ( stereo ? 2 : 1 );
     DB( audio, msg( "Setting stereo to %d\n", stereo ) )
-        if ( IoControl( audio_fd, SNDCTL_DSP_STEREO, &stereo ) < 0 ) {
+        if ( ioctl( audio_fd, IOCTL_SOUND_NCHANNELS, &stereo, sizeof(int) ) < 0 ) {
             die( "Unable to set stereo/mono\n" );
         }
 
     /* Set the output frequency */
     DB( audio, msg( "Setting freq to %d Hz\n", frequency ) )
-        if ( IoControl( audio_fd, SNDCTL_DSP_SPEED, &frequency ) < 0 ) {
+        if ( ioctl( audio_fd, IOCTL_SOUND_SAMPLERATE, &frequency, sizeof(int) ) < 0 ) {
             die( "Unable to set frequency: %d\n", frequency );
         }
 
@@ -110,11 +113,10 @@ void audioOpen( int frequency, int stereo, int volume ) {
 void audioSetVolume( int volume ) {
     DB( audio, msg( "Setting volume to: %d\n", volume ); )
 
-        volume = ( volume << 8 ) + volume;
-    if ( ( mixer_fd != -1 ) && ( volumeIoctl != 0 ) ) {
-        if ( IoControl( mixer_fd, volumeIoctl, &volume ) < 0 ) {
-            warn( "Unable to set sound volume\n" );
-        }
+    volume = ( volume << 8 ) + volume;
+    if ( ioctl( audio_fd, IOCTL_SOUND_VOLUME, &volume, sizeof(int) ) < 0 )
+    {
+        warn( "Unable to set sound volume\n" );
     }
 }
 
@@ -123,7 +125,7 @@ void audioSetVolume( int volume ) {
 inline void audioFlush() {
     DB( audio, msg( "audio: flush %d\n", audio_fd ) );
 
-    if ( IoControl( audio_fd, SNDCTL_DSP_RESET, 0 ) == -1) {
+    if ( IoControl( audio_fd, IOCTL_SOUND_RESET, 0 ) == -1) {
         die( "Unable to reset audio device\n" );
     }
 }

@@ -1,0 +1,154 @@
+The following changes have been made to debug spatial scalability:
+
+gethdr.c
+--------
+
+Temporal_reference is used to compute the frame number of each frame,
+named true_framenum.  The periodic reset at each GOP header as well as
+the wrap of temporal_reference at 1024 cause a base value
+temp_ref_base to be incremented accordingly.
+
+spatscal.c
+----------
+
+getspatref()
+
+A potential problem: Variable char fname[32] was dimensioned
+statically and too small.
+
+true_framenum is used instead of lower_layer_temporal_reference to
+determine the lower layer frame to be read for spatial prediction.
+
+The verification of lower_layer_temporal_reference is not possible
+since the temporal reference values that have been encoded into the
+base layer bitstream are not available to the enhancement layer
+decoder.
+
+Since there is no decoder timing information available, the rules on
+which frames can legally be used as spatial prediction frames cannot
+be checked.
+
+Lower layer frames are read field-wise or frame-wise, depending on the
+lower_layer_progressive_frame flag. Consistency between layers is
+checked since the file format for frame and field pictures differs.
+
+Note that the base layer decoder must not use the -f option to enforce
+frame-wise storage.
+
+Note further that only yuv image format (option -o0) is supported as
+input format.
+
+spatpred()
+
+The code for the various combinations of llprog_frame, llfieldsel and
+prog_frame has been completed and verified with the tceh_conf23
+bitstream that uses all permissive combinations.
+
+
+getpic.c
+--------
+
+A small bug when storing an I- or P-frame: The prog_frame flag that
+the decoder knows when storing the oldrefframe belongs to the current
+refframe. Therefore the old value of the flag needs to be memorized.
+
+
+store.c
+-------
+
+A potential problem: the filename variables char outname[32],
+tmpname[32] are statically dimensioned and quite small.
+
+
+The concept of time in this video decoder software
+--------------------------------------------------
+
+When decoding a non-scalable bitstream, the frame number (i.e.
+temporal position) of the current I- or P-frame can be derived
+implicitly from the number of preceding B-frames after they have been
+decoded. Therefore the temporal_reference entry in the picture header
+is somewhat redundant and does not necessarily have to be evaluated in
+the decoding process.
+
+Decoding of the enhancement layer of a spatial scalable hierarchy,
+however, requires to know the temporal position of each frame at the
+instant when it is decoded, since data from a lower layer reference
+frame has to be incorporated.
+
+In the architecture of this video-only decoder decoding of a spatial
+scalable hierarchy of bitstreams is done by calling mpeg2decode once
+for the base layer bitstream and a second time for the enhancement
+layer bitstream, indicating where the decoded base layer frames can be
+found (option -s<filename>).
+
+Here the concept of time is only present in the form of frame numbers.
+Therefore spatial scalable bitstream hierarchies can only be handled
+under the assumption that base and enhancement layer bitstreams are
+decoded to image sequences where corresponding images of both layers
+have identical frame numbers.
+
+More specifically this means that base and enhancement layer
+bitstreams must contain video with the same frame rate. Furthermore
+only the temporally coincident frame of the base layer can be accessed
+for spatial prediction by the enhancement layer decoder, since it is
+not possible to resolve unambiguously the lower_layer_temporal_reference 
+which is meant to further specify the lower layer reference frame.
+
+======================== SPATIAL.DOC ========================0
+
+Decoding a spatial scalable hierarchy of bitstreams
+---------------------------------------------------
+
+With this video-only decoder decoding of a spatial scalable hierarchy
+of bitstreams is done by calling mpeg2decode once for the base layer
+bitstream and a second time for the enhancement layer bitstream,
+indicating where the decoded base layer frames can be found
+(using option -s and supplying <spatial base filename>).
+
+mpeg2decode -r -o0 base.mpg base%d%c
+mpeg2decode -r -o0 -f -s base%d%c enh.mpg enh%d
+
+Note that the base layer decoder must not use the -f option to enforce
+frame-wise storage.
+
+Note further that only yuv image format (option -o0) is supported as
+input format.
+
+
+Timing / layer synchronisation in this video decoder software
+-------------------------------------------------------------
+
+When decoding a non-scalable bitstream, the frame number (i.e.
+temporal position) of the current I- or P-frame can be derived
+implicitly from the number of preceding B-frames after they have been
+decoded. Therefore the temporal_reference entry in the picture header
+is somewhat redundant and does not necessarily have to be evaluated in
+the decoding process.
+
+Decoding of the enhancement layer of a spatial scalable hierarchy,
+however, requires to know the temporal position of each frame at the
+instant when it is decoded, since data from a lower layer reference
+frame has to be incorporated.
+
+The concept of time is only present in the form of frame numbers.
+Therefore spatial scalable bitstream hierarchies can only be handled
+under the assumption that base and enhancement layer bitstreams are
+decoded to image sequences where corresponding images of both layers
+have identical frame numbers.
+
+More specifically this means that base and enhancement layer
+bitstreams must contain video with the same frame rate. Furthermore
+only the temporally coincident frame of the base layer can be accessed
+for spatial prediction by the enhancement layer decoder, since it is
+not possible to resolve unambiguously the lower_layer_temporal_reference
+which is meant to further specify the lower layer reference frame.
+
+Lower layer frames are read field-wise or frame-wise, depending on the
+lower_layer_progressive_frame flag. Consistency between layers in this
+respect is checked since the file format for frame and field pictures
+differs.
+
+
+
+
+

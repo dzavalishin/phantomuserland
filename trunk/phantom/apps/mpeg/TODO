@@ -1,0 +1,73 @@
+ 1. Test bitstream
+    Small example bitstream (128x128 pixel dimensions) which employs all 
+    picture_structure (top field, bottom field, frame), picture_coding_type 
+    (I, P, and B), macroblock_type (forwards/backwards/interpolated, 
+    intra/non-intra, coded/not-coded, quant/no quant, etc.), and 
+    motion_type (field, frame, 16X8, dual prime) modes.
+
+ 2. add trace printing for mpeg1 getblk routines.
+
+ 3. modify getsys.c to parse program layer bitstreams (Systems)
+    with variable-length packets.
+
+ 4. 24 bit X11 display
+    (borrow from Berkeley or find way for our code to use their interface)
+
+ 5. MPEG-2 Transport layer systems streams parsing 
+
+ 6. Document IPR issue 
+
+   provide CableLabs URL
+   how IPR relates to our disclaimer.
+
+ 7. TIFF library support (YCbCr 4:4:4, 4:2:2, and 4:2:0 pictures)
+[deferred]
+  
+10.  IDCT rounding
+  As per IDCT corridgendum (Savatier, MPEG 95/XXX)
+  [done, but verified ?]
+
+
+12. green dots in can
+  [ appears to be a display issue, probably related to convmat[] 
+    error ]
+
+19. move Dual_Prime calculation into picture_data()
+
+20. motion vector calculation to include tappable stages to test
+    whether elements fall within [low:high] range.
+
+21. Integrate verifier routines 
+
+22. Inter-layer verification routines
+    - check base and enhancement layers (e.g. SNR)
+
+23. Spatial verification
+   - considering that no base layer is available.
+
+24. SNR verification
+   [ done ]
+
+25. DP verification
+   [ not done.  No longer any bitstreams with Data Partitioning distributed
+     since DP is not part of any official Profile ]
+
+26. merge all global bitsteam element variables into 
+    common data structure (similar to layer_data).  This is needed
+    for the verifier (whether or not headers in SNR and DP streams
+    are identical where needed to that of the base layer).
+
+27. investigate why MS-DOS wants an extra % sign for filename patterns
+     when more than one filename pattern is used in the command line argument
+
+28. convert -t (trace) flag into levels, merge with Verbose.
+
+29. seek to a specified frame number (support for MCI-like functions)
+
+30. document the "flash" VLC table decoding method in detail. 
+    (namely how to map tables in Annex B to those in getvlc.h)
+
+31. MPEG-2 program stream compatibility
+   (a few minor bits of difference in the system header ).
+
+--------
