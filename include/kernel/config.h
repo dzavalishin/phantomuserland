@@ -40,7 +40,7 @@
 
 #ifndef ASSEMBLER
 
-#if 0 && !defined(NO_STRAY_CHECK)
+#ifndef NO_STRAY_CHECK
 
 #include <string.h>
 

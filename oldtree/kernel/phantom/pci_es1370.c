@@ -15,7 +15,7 @@
 #define debug_level_info 10
 
 #include <kernel/drivers.h>
-#include <kernel/libkern.h>
+#include <sys/libkern.h>
 
 #include <i386/pio.h>
 #include <errno.h>
