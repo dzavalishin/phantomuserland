@@ -1,7 +1,7 @@
 default:: all
 
 # TODO divide in bin and modules
-SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), cat echo grep kill ln ls mkdir rm shell wc tcpdemo test )
+SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), echo grep kill ln ls mkdir rm shell wc tcpdemo test )
 
 
 %.MAKE:
