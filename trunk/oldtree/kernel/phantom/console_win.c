@@ -142,7 +142,7 @@ int phantom_debug_window_puts(const char *s)
     drv_video_font_tty_string( phantom_debug_window, &DEB_FONT,
     	s, console_fg, console_bg, &ttxd, &ttyd );
 
-    drv_video_winblt( phantom_debug_window );
+    //drv_video_winblt( phantom_debug_window );
     return 0;
 }
 
@@ -182,6 +182,11 @@ static struct console_ops win_ops =
     .set_bg_color       = set_bg,
 };
 
+#define DEBWIN_X 600
+#define DEBWIN_Y 10
+#define DEBWIN_XS 400
+#define DEBWIN_YS 500
+
 
 static void phantom_debug_window_loop();
 
@@ -210,8 +215,8 @@ void phantom_init_console_window()
 
 
     phantom_debug_window = drv_video_window_create(
-                        400, 450,
-                        600, 50, console_bg, "Threads" );
+                        DEBWIN_XS, DEBWIN_YS,
+                        DEBWIN_X, DEBWIN_Y, console_bg, "Threads" );
 
     phantom_debug_window_puts("Phantom debug window\n");
 
@@ -228,6 +233,27 @@ void phantom_stop_console_window()
 //---------------------------------------------------------------------------
 
 #define DEBBS 200000
+
+#define PROGRESS_H 4
+
+static void put_progress()
+{
+    rect_t progress_rect;
+    progress_rect.x = 0;
+    //progress_rect.y = DEBWIN_YS-PROGRESS_H;
+    progress_rect.y = 0;
+    progress_rect.ysize = PROGRESS_H;
+    progress_rect.xsize = 0;
+
+    extern int vm_map_do_for_percentage;
+
+    progress_rect.xsize = DEBWIN_XS;
+    drv_video_window_fill_rect( phantom_debug_window, COLOR_GREEN, progress_rect );
+
+    progress_rect.xsize = (vm_map_do_for_percentage*DEBWIN_XS)/100;
+    drv_video_window_fill_rect( phantom_debug_window, COLOR_LIGHTGREEN, progress_rect );
+}
+
 
 static void phantom_debug_window_loop()
 {
@@ -246,6 +272,8 @@ static void phantom_debug_window_loop()
         ttyd = 370;
         ttxd = 0;
 #endif
+        //put_progress();
+
         void *bp = buf;
         int len = DEBBS;
         int rc;
@@ -259,7 +287,7 @@ static void phantom_debug_window_loop()
         tmp = current_time;
         mt = *tmp;
 
-        rc = snprintf(bp, len, " Step %d, uptime %d days, %02d:%02d:%02d\n Today is %02d/%02d/%04d %02d:%02d:%02d\n",
+        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m\n Today is %02d/%02d/%04d %02d:%02d:%02d\n",
                       step++, days, hr, min, (int)sec,
                       mt.tm_mday, mt.tm_mon, mt.tm_year+1900,
                       mt.tm_hour, mt.tm_min, mt.tm_sec
@@ -272,6 +300,9 @@ static void phantom_debug_window_loop()
 
         if(wx == 600) wx = 620; else wx = 600;
         //drv_video_window_move( phantom_debug_window, wx, 50 );
+
+        put_progress();
+        drv_video_winblt( phantom_debug_window );
 
     }
 }

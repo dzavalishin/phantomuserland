@@ -115,7 +115,7 @@ static char * dumpt(time_t t)
 void SNTP_resync(u_int32_t server_addr, u_int32_t interval)
 {
     u_int32_t cur_server_addr = server_addr;
-    int retry = 0;
+    int retry = 2; // if no answer on given addr, go to dns immediately
     time_t t;
 
     for (;;)
@@ -135,8 +135,8 @@ void SNTP_resync(u_int32_t server_addr, u_int32_t interval)
                 sleepmsec(100);
 
                 printf("will resolve\n");
-		in_addr_t out;
-                if( !name2ip( &out, "pool.ntp.org", RESOLVER_FLAG_NORCACHE ) )
+		in_addr_t out; // ticktock.net.ru  ru.pool.org pool.ntp.org
+                if( !name2ip( &out, "ntp3.ntp-servers.net", RESOLVER_FLAG_NORCACHE ) )
                 {
                     server_addr = cur_server_addr = ntohl(out);
                     printf( "resolved to %s\n", inet_itoa(htonl(server_addr)) );

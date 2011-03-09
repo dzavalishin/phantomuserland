@@ -89,22 +89,24 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
     *buf = '\0';
 
     const char *slp = "?";
+    const char *scol = "";
+
     switch(t->sleep_flags)
     {
-    case 0:                     slp = " RUN "; break;
+    case 0:                     slp = " RUN "; scol = "\x1b[35m"; break;
     case THREAD_SLEEP_USER:     slp = "user"; break;
-    case THREAD_SLEEP_SLEEP:    slp = "sleep"; break;
+    case THREAD_SLEEP_SLEEP:    slp = "sleep"; scol = "\x1b[32m"; break;
     case THREAD_SLEEP_COND:     slp = "cond"; break;
     case THREAD_SLEEP_MUTEX:    slp = "mutex"; break;
     case THREAD_SLEEP_SEM:      slp = "sema"; break;
     case THREAD_SLEEP_LOCKED:   slp = "lock"; break;
-    case THREAD_SLEEP_IO:       slp = "io"; break;
+    case THREAD_SLEEP_IO:       slp = "io"; scol = "\x1b[33m"; break;
     };
 
-    rc = snprintf(buf, len, " %2d %02d %-5.5s %d %-10.10s ",
+    rc = snprintf(buf, len, " %2d %02d %s%-5.5s %d %-10.10s \x1b[37m",
                   t->tid,
                   t->priority,
-                  slp,
+                  scol, slp,
                   t->cpu_id,
                   t->name ? t->name : "--"
           );
