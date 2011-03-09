@@ -1097,14 +1097,15 @@ page_fault( vm_page *p, int  is_writing )
 }
 
 
-
-
+// Used to show progress
+int vm_map_do_for_percentage = 0;
 
 
 // we depend on do_for not modifying interrupts disable status
 void
 vm_map_do_for( vmem_page_func_t func, bool_vmem_page_func_t predicate )
 {
+    size_t total = vm_map_map_end-vm_map_map;
     vm_page *i;
     for( i = vm_map_map; i < vm_map_map_end; i++ )
     {
@@ -1114,7 +1115,9 @@ vm_map_do_for( vmem_page_func_t func, bool_vmem_page_func_t predicate )
             func( i );
         }
         hal_mutex_unlock(&i->lock);
+        vm_map_do_for_percentage = (100L*(i-vm_map_map))/total;
     }
+    vm_map_do_for_percentage = 100;
 }
 
 void

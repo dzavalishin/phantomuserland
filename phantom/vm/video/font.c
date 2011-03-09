@@ -13,7 +13,7 @@
 #include "drv_video_screen.h"
 #include <assert.h>
 #include <string.h>
-//#include <mem.h>
+#include <phantom_libc.h>
 
 static __inline__ int _bpc(const drv_video_font_t *font)
 {
@@ -110,14 +110,27 @@ void 	drv_video_font_scroll_line(
 }
 
 
+static color_t cmap[] =
+{
+    _C_COLOR_BLACK,
+    _C_COLOR_RED,
+    _C_COLOR_GREEN,
+    _C_COLOR_YELLOW,
+    _C_COLOR_BLUE,
+    _C_COLOR_MAGENTA,
+    _C_COLOR_CYAN,
+    _C_COLOR_LIGHTGRAY //_C_COLOR_WHITE
+};
+
 __inline__ void drv_video_font_tty_string(
                                           drv_video_window_t *win,
                                           const drv_video_font_t *font,
                                           const char *s,
-                                          const rgba_t color,
+                                          const rgba_t _color,
                                           const rgba_t back,
                                           int *x, int *y )
 {
+    rgba_t color = _color;
     int nc = strlen(s);
     //int startx = *x;
 
@@ -140,6 +153,40 @@ __inline__ void drv_video_font_tty_string(
             *x = 0;
             s++;
             continue;
+        }
+        else if( *s == 0x1B ) // esc
+        {
+            s++; nc--;
+            if( *s != '[' )
+                continue;
+            s++; nc--;
+
+            if( *s == 0 )
+                continue;
+
+            int v = 0;
+            while( isdigit(*s) )
+            {
+                v *= 10;
+                v += (*s - '0');
+                s++; nc--;
+            }
+
+            if( *s == 0 )
+                continue;
+
+            switch(*s++)
+            {
+            case 'm':
+                v -= 30;
+                if( v > 7 )
+                    continue;
+                color = cmap[v];
+            default:
+                continue;
+            }
+
+
         }
         else if( drv_video_font_draw_char( win, font, *s, color, *x, *y ) )
         {

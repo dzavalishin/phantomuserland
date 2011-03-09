@@ -122,12 +122,12 @@ static void SNTP_resync(void * arg)
     int retry = 0;
     time_t t;
 
-    hal_set_thread_name("sntpd");
+    hal_set_thread_name("sntp");
     //hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     for (;;)
     {
-        SHOW_FLOW( 7, "request time from %s", inet_itoa(server_addr) );
+        SHOW_FLOW( 7, "request time from %s", inet_itoa(htonl(server_addr)) );
         if(SNTPGetTime(&cur_server_addr, &t))
         {
             /* if any error retry * /

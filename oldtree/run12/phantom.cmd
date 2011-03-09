@@ -24,7 +24,7 @@ SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../run/t
 
 
 rem SET Q_MACHINE=-M isapc
-rem SET Q_MACHINE=-m 85
+SET Q_MACHINE=-m 256
 
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda fat12.img -hdb phantom.img 
 rem SET Q_DISKS=-boot a -fda img/grubfloppy.img -hda fat12.img -hdb phantom.img 
