@@ -21,7 +21,7 @@ Q_NET=" -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../oldtree/
 Q_DISKS="-boot a -no-fd-bootchk -fda $QDIR/img/grubfloppy.img -hda fat:fat -hdb phantom.img "
 
 # Q_KQ=-enable-kqemu
-# Q_KQ=-enable-kqemu -kernel-kqemu
+Q_KQ=-enable-kqemu -kernel-kqemu
 
 # Q_VGA=-vga std
 # Q_VGA=-vga cirrus
@@ -31,7 +31,7 @@ set Q_VGA="-vga vmware"
 rm serial0.log.old1
 mv serial0.log.old serial0.log.old1
 mv serial0.log serial0.log.old
-$QDIR/bin/qemu -smp 3 $Q_VGA -s $Q_KQ -L $QDIR/lib $Q_MACHINE $Q_PORTS $Q_DISKS $Q_NET $VIO $USB $SOUND
+qemu -smp 3 $Q_VGA -s $Q_KQ -L $QDIR/lib $Q_MACHINE $Q_PORTS $Q_DISKS $Q_NET $VIO $USB $SOUND
 
 exit
 
