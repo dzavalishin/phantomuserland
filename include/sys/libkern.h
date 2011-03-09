@@ -54,29 +54,9 @@ static __inline quad_t qabs(quad_t a) { return (a < 0 ? -a : a); }
 
 #if 0
 
-#include <sys/cdefs.h>
-#include <sys/types.h>
-#ifdef _KERNEL
-#include <sys/systm.h>
-#endif
-
-#ifndef	LIBKERN_INLINE
-#define	LIBKERN_INLINE  static __inline
-#define	LIBKERN_BODY
-#endif
-
-/* BCD conversions. */
-extern const u_char	bcd2bin_data[];
-extern const u_char	bin2bcd_data[];
-extern const char	hex2ascii_data[];
-
-#define	bcd2bin(bcd)	(bcd2bin_data[bcd])
-#define	bin2bcd(bin)	(bin2bcd_data[bin])
-#define	hex2ascii(hex)	(hex2ascii_data[hex])
 
 
 /* Prototypes for non-quad routines. */
-struct malloc_type;
 uint32_t arc4random(void);
 void	 arc4rand(void *ptr, u_int len, int reseed);
 int	 bcmp(const void *, const void *, size_t);
@@ -97,30 +77,10 @@ int	 flsl(long);
 int	 fnmatch(const char *, const char *, int);
 void	 gets(char *, size_t, int);
 int	 locc(int, char *, u_int);
-void	 qsort(void *base, size_t nmemb, size_t size,
-	    int (*compar)(const void *, const void *));
-void	 qsort_r(void *base, size_t nmemb, size_t size, void *thunk,
-	    int (*compar)(void *, const void *, const void *));
-u_long	 random(void);
 char	*index(const char *, int);
 char	*rindex(const char *, int);
 int	 scanc(u_int, const u_char *, const u_char *, int);
 int	 skpc(int, int, char *);
-void	 srandom(u_long);
-int	 strcasecmp(const char *, const char *);
-char	*strcat(char * __restrict, const char * __restrict);
-int	 strcmp(const char *, const char *);
-char	*strcpy(char * __restrict, const char * __restrict);
-char	*strdup(const char *__restrict, struct malloc_type *);
-size_t	 strlcat(char *, const char *, size_t);
-size_t	 strlcpy(char *, const char *, size_t);
-size_t	 strlen(const char *);
-int	 strncasecmp(const char *, const char *, size_t);
-int	 strncmp(const char *, const char *, size_t);
-char	*strncpy(char * __restrict, const char * __restrict, size_t);
-char	*strsep(char **, const char *delim);
-size_t	 strspn(const char *, const char *);
-char	*strstr(const char *, const char *);
 int	 strvalid(const char *, size_t);
 
 extern uint32_t crc32_tab[];
@@ -144,39 +104,6 @@ crc32(const void *buf, size_t size)
 	return (crc ^ ~0U);
 }
 
-static __inline int
-memcmp(const void *b1, const void *b2, size_t len)
-{
-	return (bcmp(b1, b2, len));
-}
-
-LIBKERN_INLINE void *memset(void *, int, size_t);
-#ifdef LIBKERN_BODY
-LIBKERN_INLINE void *
-memset(void *b, int c, size_t len)
-{
-	char *bb;
-
-	if (c == 0)
-		bzero(b, len);
-	else
-		for (bb = (char *)b; len--; )
-			*bb++ = c;
-	return (b);
-}
-#endif
-
-static __inline char *
-strchr(const char *p, int ch)
-{
-	return (index(p, ch));
-}
-
-static __inline char *
-strrchr(const char *p, int ch)
-{
-	return (rindex(p, ch));
-}
 
 /* fnmatch() return values. */
 #define	FNM_NOMATCH	1	/* Match failed. */
