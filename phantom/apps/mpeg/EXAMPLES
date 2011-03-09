@@ -1,0 +1,49 @@
+EXAMPLES:
+
+1. to decode a bitstream with double precision IDCT, such as 
+   to create a reference reconstruction set of frames:
+
+    mpeg2decode -r -f -o0 rec%d  -b bitstream.mpg
+
+2. to decode a bitstream with fast integer IDCT, such as 
+   to create a test reconstruction set of frames:
+
+    mpeg2decode -f -o0 rec%d -b bitstream.mpg 
+
+3. To substitute reference pictures with external reference 
+   pictures (ref%d):
+
+    mpeg2decode -f -x ref%d -b bitstream.mpg -o0 rec%d
+
+
+4. Same as 3. only using a single large concatenated file for the
+   sequence of reconstruction frames.
+
+    mpeg2decode -f -g -x ref%d bitstream.mpg -o0 rec%d
+
+5. Decode an SNR enhancement bitstream at the same time as base layer
+   stream:
+
+    mpeg2decode -o0 rec%d -e snr_bitstream.mpg -b base_bitstream.mpg 
+
+6. Decode a Spatially scalable bitstream
+
+   Step 1: create lower layer reconstruction
+
+     mpeg2decode -f -o0 llrec%d -b base_layer.mpg
+
+   Step 2: decode enhancement bitstream, combined reconstruction.
+
+     mpeg2decode -f -l llrec%d -b enhancement_layer.mpg -o0 rec%d
+
+------------
+     where:
+      -o0             specifies .Y, .U, .V input
+      -f              specifies field interleaved format
+      -b              is the bitstream flag
+      -g              specifies substitute file is a large concatendated one.
+      -e              substitution flag
+      ref.pic         filename of substitution sequence
+      bitstream.mpg   bitstream
+      test%d          output file pattern
+

@@ -1,0 +1,44 @@
+January 9, 1995:
+=====
+Pre-release caveats:
+
+  - has only been tested with gcc.  (I'm not sure we will even bother
+    with acc, or cc in the future).
+
+  - I'm fully aware of the warnings received by -Wall 
+
+  - Verifier still not integrated (due to complexity), although 
+    experimental vbv_delay code included in verify.c
+
+
+  
+December 20, 1995
+===============================================================
+Frame buffer substitution edition of decoder.
+
+Restrictions:
+ - temporal_reference in bitstream must be correct.
+
+ - substitute pictures must have pixel (luminance samples) width 
+   and height equal to coded_picture_width (mb_width*16) and 
+   coded_picture_height (mb_height*16) rather than horizontal_size
+   and vertical_size, respectively.
+
+ - all input pictures must be interleaved into a frame.
+
+ - frame count (index) is based on absolute display frame order with
+   no repeated (3:2 pulldown) fields or frames. 
+
+--------------------------------------------------------
+Notes: 
+
+ - command line arguements in this edition differ from verifier
+   style.  This decoder's arguments are the same as the 
+   public distribution's (July 4, 1994) code .
+
+   please note that this code, with frame buffer substitution, when it 
+   is released will use the verifier style of arguments.
+
+ - Carsten's updated spatial scalability decoder routines have been
+   incorperated.
+
