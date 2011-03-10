@@ -1,6 +1,7 @@
 #include <drv_video_screen.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
+#include <assert.h>
 
 #include <video/rect.h>
 
@@ -88,11 +89,18 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
         return;
 
     int ys;
-    for(ys = 0; ys < ysize; ys++)
+    for(ys = 0; ys < out.ysize; ys++)
     {
         int linpos = out.x + ( (video_drv->ysize-1) - out.y) * zbwidth;
         out.y++;
-        memset( zbuf+linpos, zpos, out.xsize * sizeof(zbuf_t) );
+
+        void *p = zbuf+linpos;
+        size_t len = out.xsize * sizeof(zbuf_t);
+
+        assert( p >= (void*)zbuf );
+        assert( p+len < ((void*)zbuf)+zbsize );
+
+        memset( p, zpos, len );
     }
 }
 

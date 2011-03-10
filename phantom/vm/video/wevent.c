@@ -124,6 +124,8 @@ int defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 #endif
     case UI_EVENT_TYPE_WIN:     return defaultWinEventProcessor(w, e); 
     }
+
+    return 0;
 }
 
 

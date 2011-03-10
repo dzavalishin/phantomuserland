@@ -38,10 +38,12 @@ hal_spinlock_t  		allw_lock;
 //static int win_generation = 0;
 
 
-
-
-
-
+/*
+void drv_video_init_all_windows_queue(void)
+{
+	queue_init(&allwindows);
+}
+*/
 
 void drv_video_window_free(drv_video_window_t *w)
 {
