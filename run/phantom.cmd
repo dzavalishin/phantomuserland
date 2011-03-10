@@ -3,7 +3,10 @@
 rem SET QDIR=..\oldtree\run12
 SET QDIR=qemu\0.13.0
 
-rem SOUND=-soundhw sb16
+set QEMU_AUDIO_DRV=dsound
+set QEMU_AUDIO_DRV=sdl
+rem set QEMU_AUDIO_DRV=fmod
+set SOUND=-soundhw sb16,es1370
 
 rem SET USB=-usb -usbdevice mouse
 rem SET USB=-usb 
@@ -19,7 +22,7 @@ rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ../run/tftp
 SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../oldtree/run/tftp
 
 
-rem SET Q_MACHINE=-m 85
+SET Q_MACHINE=-m 256
 
 SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda fat:fat -hdb phantom.img 
 
