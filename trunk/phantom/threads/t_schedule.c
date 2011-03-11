@@ -104,7 +104,7 @@ static volatile int phantom_scheduler_soft_interrupt_reenter = 0;
 void phantom_scheduler_soft_interrupt(void)
 {
     //#warning dummy?
-
+//putchar("`");
     // if curr thread disables preemption or scheduler lock is here,
     // don't interfere! BUT - if thread has sleep_flags, then we are
     // called to switch it off, so do it!

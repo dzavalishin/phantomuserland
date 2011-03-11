@@ -36,7 +36,7 @@ void panic(const char *fmt, ...)
     va_start(ap, fmt);
     vprintf(fmt, ap);
     printf("\n");
-
+getchar();
     stack_dump();
 
     dump_thread_stacks();

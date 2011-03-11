@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "threads"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -41,12 +41,14 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
 {
     assert( ! (flags & ~CREATION_POSSIBLE_FLAGS) );
 
+    SHOW_FLOW( 7, "flags = %b", flags, "\020\1USER\2VM\3JIT\4NATIVE\5KERNEL\6?PF\7?PA\10?CH\11TIMEOUT\12UNDEAD\13NOSCHED" );
     phantom_thread_t *t = calloc(1, sizeof(phantom_thread_t));
 
     // Can't be run yet
     t->sleep_flags = THREAD_SLEEP_LOCKED; 
 
     t->tid = find_tid(t);
+    SHOW_FLOW( 7, "tid = %d", t->tid );
 
     // inherit ctty
     t->ctty = GET_CURRENT_THREAD()->ctty;
@@ -54,18 +56,21 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
     common_thread_init(t, DEF_STACK_SIZE );
     //t->priority = THREAD_PRIO_NORM;
 
+    SHOW_FLOW( 7, "cpu = %d", t->cpu_id );
 
 
     t->start_func_arg = arg;
     t->start_func = func;
 
     phantom_thread_state_init(t);
+    SHOW_FLOW0( 7, "phantom_thread_state_init done" );
 
     t->thread_flags |= flags;
     // Let it be elegible to run
     t->sleep_flags &= ~THREAD_SLEEP_LOCKED;
 
     t_enqueue_runq(t);
+    SHOW_FLOW0( 7, "on run q" );
 
     return t;
 
