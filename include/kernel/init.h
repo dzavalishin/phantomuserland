@@ -64,6 +64,8 @@ void phantom_threads_init(void);
 
 void phantom_load_gdt(void);
 
+void arch_debug_console_init(void);
+
 void phantom_init_descriptors(void);
 void phantom_fill_idt(void);
 void phantom_load_idt(void);

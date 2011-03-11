@@ -42,6 +42,7 @@ phantom_device_t * driver_pcnet_pchome_probe( pci_cfg_t *pci, int stage );
 #define RTL8139_VENDORID                      0x10EC
 #define RTL8139_DEVICEID                      0x8139
 phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage );
+phantom_device_t * driver_rtl_8169_probe( pci_cfg_t *pci, int stage );
 
 phantom_device_t * driver_intel_82559_probe( pci_cfg_t *pci, int stage );
 

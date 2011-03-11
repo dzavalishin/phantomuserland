@@ -13,5 +13,9 @@ extern const char **boot_argv;
 #include <sys/utsname.h>
 extern struct utsname phantom_uname;
 
+extern int debug_boot_pause;
+extern int bootflag_no_vesa;
+extern int bootflag_no_comcon;
+
 
 #endif // BOOT_H
