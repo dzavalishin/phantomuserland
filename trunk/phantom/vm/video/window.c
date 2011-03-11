@@ -76,6 +76,10 @@ common_window_init( drv_video_window_t *w,
 
     w->inKernelEventProcess = defaultWindowEventProcessor;
     w->owner = 0;
+
+    w->w_title = 0;
+    w->w_decor = 0;
+    w->owner = 0;
 }
 
 
@@ -179,6 +183,13 @@ void drv_video_window_destroy(drv_video_window_t *w)
             drv_video_window_get_event( w, &e, 0 );
     }
 
+    if(w->w_title)
+        drv_video_window_free(w->w_title);
+    w->w_title = 0;
+
+    if(w->w_decor)
+        drv_video_window_free(w->w_decor);
+    w->w_decor = 0;
 }
 
 
@@ -235,6 +246,7 @@ void drv_video_window_rezorder_all(void)
 
 
 
+void drv_video_window_preblit( drv_video_window_t *w ) __attribute__((__deprecated__));
 
 
 // TODO this is not needed anymore?
