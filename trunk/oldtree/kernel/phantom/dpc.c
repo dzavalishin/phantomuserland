@@ -26,7 +26,7 @@
 
 //---------------------------------------------------------------------------
 
-#define MULTIPLE_DPC_THREADS 0
+#define MULTIPLE_DPC_THREADS 1
 
 
 hal_spinlock_t         	dpc_request_lock;

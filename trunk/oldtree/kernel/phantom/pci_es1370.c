@@ -105,7 +105,7 @@ phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
 
     if( hal_irq_alloc( dev->irq, &es1370_interrupt, dev, HAL_IRQ_SHAREABLE ) )
     {
-        SHOW_ERROR( 0, "IRQ %d is busy", 15 );
+        SHOW_ERROR( 0, "IRQ %d is busy", dev->irq );
         goto free;
     }
 

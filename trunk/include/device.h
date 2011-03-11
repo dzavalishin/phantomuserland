@@ -3,6 +3,7 @@
 
 #include "vm/object.h"
 #include <errno.h>
+#include <sys/types.h>
 
 
 struct phantom_device;
@@ -70,6 +71,15 @@ struct phantom_bus
     struct phantom_device *     devices; // list
     struct phantom_bus *        buses; // child buses list
     struct phantom_bus *        next; // if i'm a child - here is my next sibling
+
+    u_int32_t			(*read32)(u_int32_t addr);
+    void			(*write32)(u_int32_t addr, u_int32_t value);
+
+    u_int16_t			(*read16)(u_int32_t addr);
+    void			(*write16)(u_int32_t addr, u_int16_t value);
+
+    u_int8_t			(*read8)(u_int32_t addr);
+    void			(*write8)(u_int32_t addr, u_int8_t value);
 };
 
 typedef struct phantom_bus phantom_bus_t;
