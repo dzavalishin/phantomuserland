@@ -1,3 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * arm spinlocks
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "paging"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include <spinlock.h>
 #include <hal.h>
 #include <phantom_libc.h>

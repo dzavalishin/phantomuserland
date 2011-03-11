@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * ARM heap pool.
+ *
+**/
+
 #include <kernel/config.h>
 #include <kernel/page.h>
 
