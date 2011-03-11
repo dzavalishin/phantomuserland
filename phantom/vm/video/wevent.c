@@ -38,6 +38,11 @@
 
 static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
+    printf("defaultMouseEventProcessor buttons %x, %-%d", e->m.buttons, e->abs_x, e->abs_y);
+
+    if( e->m.buttons )
+        drv_video_window_to_top(w->w_owner);
+
     return 0;
 }
 

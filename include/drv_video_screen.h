@@ -56,6 +56,7 @@ typedef struct drv_video_bitmap
 #define WFLAG_WIN_NOTINALL            0x00000002
 
 #define WSTATE_WIN_FOCUSED              (1<<0)
+#define WSTATE_WIN_DRAGGED              (1<<1)
 
 // SNAPSHOT WARNING: this structure is used in snapshotted objects. If you change it, old snapshots are invalid. Be careful.
 typedef struct drv_video_window
@@ -64,6 +65,7 @@ typedef struct drv_video_window
     int 		ysize;
 
     int                 x, y, z; // On screen
+    int                 dx, dy;  // Drag base (see titleMouseEventProcessor)
 
     //int                 unused_generation; // used to redraw self and borders on global events
     int                 flags; // Not supposed to change during window's life
@@ -89,6 +91,10 @@ typedef struct drv_video_window
      */
     int                 (*inKernelEventProcess)( struct drv_video_window *w, struct ui_event *e );
     struct phantom_thread *owner;
+
+    struct drv_video_window     *w_title; // child window - title
+    struct drv_video_window     *w_decor; // child window - decorations
+    struct drv_video_window     *w_owner; // my parent window
 
     // bitmap itself
     rgba_t       	pixel[];
