@@ -140,13 +140,14 @@ boot
 rm phantom.img
 touch phantom.img
 dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img
-dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img
+dd conv=nocreat conv=notrunc bs=4096 count=1 seek=15 if=img/phantom.superblock of=phantom.img
 #dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024
 
 for pass in 1 2
 do
-	echo "===> pass $pass"
+	echo "
+===> pass $pass"
 	qemu $QEMU_OPTS &
 	QEMU_PID=$!
 
@@ -154,10 +155,19 @@ do
 	do
 		sleep 2
 		ps -p $QEMU_PID >/dev/null || {
-			echo "FATAL! Phantom crashed"
+			echo "
+
+FATAL! Phantom crashed"
 			break
 		}
 		grep -i 'snapshot done' serial0.log && break
+		grep '^Panic' serial0.log && {
+			echo "
+
+FATAL! Phantom cycled"
+			kill $QEMU_PID
+			break
+		}
 	done
 
 	grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log
