@@ -266,7 +266,8 @@ static void phantom_debug_window_loop()
 
     while(1)
     {
-        hal_sleep_msec(1000);
+        //hal_sleep_msec(1000);
+        hal_sleep_msec(100);
 #if 1
         drv_video_window_clear( phantom_debug_window );
         ttyd = 370;

@@ -63,9 +63,11 @@ typedef struct rtl8169 {
 
 #define BUFSIZE_PER_FRAME 2048
 
+/*
 int rtl8169_detect(rtl8169 **rtl);
 int rtl8169_init(rtl8169 *rtl);
 void rtl8169_xmit(rtl8169 *rtl, const char *ptr, ssize_t len);
 ssize_t rtl8169_rx(rtl8169 *rtl, char *buf, ssize_t buf_len);
+*/
 
 #endif

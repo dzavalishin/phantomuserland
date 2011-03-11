@@ -128,7 +128,7 @@ static int rtl8139_get_address( struct phantom_device *dev, void *buf, int len)
 static int seq_number = 0;
 
 
-
+/*
 static rtl8139 *rtl8139_new()
 {
     rtl8139 *rtl;
@@ -142,7 +142,7 @@ static rtl8139 *rtl8139_new()
 
     return rtl;
 }
-
+*/
 
 
 
@@ -151,16 +151,15 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
     (void) stage;
     rtl8139 * nic = NULL;
 
-    printf( DEV_NAME " probe\n" );
+    SHOW_FLOW0( 1, "probe" );
 
-    nic = rtl8139_new();
-
+    //nic = rtl8139_new();
+    nic = calloc(1, sizeof(rtl8139));
     if (nic == NULL)
     {
-        if(DEBUG) printf(DEV_NAME "out of mem\n");
+        SHOW_ERROR0( 0, "out of mem");
         return 0;
     }
-
 
     nic->irq = pci->interrupt;
 
@@ -171,30 +170,25 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
         {
             nic->phys_base = pci->base[i];
             nic->phys_size = pci->size[i];
-            printf( DEV_NAME "base 0x%lx, size 0x%lx\n", nic->phys_base, nic->phys_size);
+            SHOW_INFO( 0,  "base 0x%lx, size 0x%lx", nic->phys_base, nic->phys_size );
         } else if( pci->base[i] > 0) {
             nic->io_port = pci->base[i];
-            if(DEBUG) printf( DEV_NAME "io_port 0x%x\n", nic->io_port);
+            SHOW_INFO( 0,  "io_port 0x%x", nic->io_port );
         }
     }
 
-    printf( DEV_NAME "stop\n");
+    SHOW_FLOW0( 1, "stop" );
     rtl8139_stop(nic);
     hal_sleep_msec(10);
 
-    printf( DEV_NAME "init\n");
+    SHOW_FLOW0( 1, "init");
     if (rtl8139_init(nic) < 0)
     {
-        //if(DEBUG)
-        printf( DEV_NAME "init failed\n");
-WW();
-        // TODO cleanup
-        //rtl8139_delete(nic);
+        SHOW_ERROR0( 0, "init failed");
         return 0;
     }
 
     //rtl8139_start(nic);
-
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = DEV_NAME " network card";
@@ -208,65 +202,12 @@ WW();
     ifnet *interface;
     if( if_register_interface( IF_TYPE_ETHERNET, &interface, dev) )
     {
-        printf(DEV_NAME "Failed to register interface for %s", dev->name );
+        SHOW_ERROR( 0,  "Failed to register interface for %s", dev->name );
     }
     else
     {
         if_simple_setup( interface, WIRED_ADDRESS, WIRED_NETMASK, WIRED_BROADCAST, WIRED_NET, WIRED_ROUTER, DEF_ROUTE_ROUTER );
-/*
-        ifaddr *address;
-
-        // set the ip address for this net interface
-        address = malloc(sizeof(ifaddr));
-        address->addr.len = 4;
-        address->addr.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->addr) = WIRED_ADDRESS;
-
-        address->netmask.len = 4;
-        address->netmask.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->netmask) = WIRED_NETMASK; 
-
-        address->broadcast.len = 4;
-        address->broadcast.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->broadcast) = WIRED_BROADCAST;
-
-        if_bind_address(interface, address);
-
-        // set up an initial routing table
-
-        printf(DEV_NAME "Adding route...");
-        int rc;
-        if( (rc = ipv4_route_add(
-                                 WIRED_NET,
-                                 WIRED_NETMASK,
-                                 WIRED_ROUTER,
-                                 interface->id) ) )
-        {
-            printf("failed, rc = %d\n", rc);
-        }
-        else
-        {
-            printf("ok\n");
-        }
-
-
-        printf(DEV_NAME "Adding default route...");
-        if( (rc = ipv4_route_add_default(
-                                         WIRED_ROUTER,
-                                         interface->id,
-                                         DEF_ROUTE_ROUTER
-                                        ) ) )
-        {
-            printf("failed, rc = %d\n", rc);
-        }
-        else
-        {
-            printf("ok\n");
-        }
-*/
     }
-
-WW();
 
     return dev;
 

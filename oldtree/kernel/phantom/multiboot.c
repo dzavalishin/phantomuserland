@@ -19,12 +19,12 @@
 #include <string.h>
 #include <kernel/vm.h>
 #include <kernel/init.h>
+#include <kernel/boot.h>
 #include <kernel/page.h>
-//#include <x86/phantom_page.h>
+
 #include <x86/phantom_pmap.h>
 #include <hal.h>
 #include <multiboot.h>
-#include <kernel/boot.h>
 #include <elf.h>
 #include <unix/uuprocess.h>
 
@@ -81,6 +81,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
     phantom_fill_idt();
     phantom_load_idt();
 
+    arch_debug_console_init();
 
     // setup the floating point unit
     //asm volatile ("fninit"); // BUG! MACHDEP!

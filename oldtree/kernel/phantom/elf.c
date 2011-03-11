@@ -55,7 +55,7 @@ static errno_t 	load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 
 errno_t uu_run_binary( int pid, void *_elf, size_t elf_size )
 {
-
+//return EIO;
     struct exe_module *em;
     errno_t e = load_elf( &em, _elf, elf_size );
     if( e ) return e;

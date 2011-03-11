@@ -13,8 +13,6 @@
 
 extern struct multiboot_info bootParameters;
 
-extern int debug_boot_pause;
-extern int bootflag_no_vesa;
 
 
 

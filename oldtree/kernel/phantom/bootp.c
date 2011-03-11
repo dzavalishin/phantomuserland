@@ -1,3 +1,4 @@
+#if HAVE_NET
 /**
  *
  * Phantom OS
@@ -613,5 +614,6 @@ errno_t bootp(ifnet *iface)
 
 
 
+#endif // HAVE_NET
 
 

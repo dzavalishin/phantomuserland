@@ -69,6 +69,7 @@ cirrus_check:
 
 static int cirrus_probe()
 {
+#if HAVE_VESA
     RM_REGS regs;
     int i, card;
 
@@ -125,6 +126,9 @@ static int cirrus_probe()
     SHOW_FLOW( 1, "Cirrus %s found\n", detect_info[cir_card].desc );
 
     return 0;
+#else // vesa
+    return 0;
+#endif // vesa
 }
 
 static int cirrus_start()

@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "video"
 #include "debug_ext.h"
-static int debug_level_flow = 2;
+static int debug_level_flow = 1;
 
 #include <phantom_libc.h>
 
@@ -94,10 +94,17 @@ static int was_enforced = 0;
 
 static void video_post_start()
 {
-#if VIDEO_ZBUF
+
     video_zbuf_init();
-#endif
+    //drv_video_init_all_windows_queue(); // static init is ok
+
+
+    //hal_sleep_msec(10000);
+    SHOW_FLOW0( 3, "Video console init" );
+
     phantom_init_console_window();
+    //hal_sleep_msec(10000);
+    SHOW_FLOW0( 3, "Video mouse cursor init" );
     drv_video_set_mouse_cursor(drv_video_get_default_mouse_bmp());
 }
 
@@ -111,14 +118,19 @@ void phantom_start_video_driver(void)
     }
 
     phantom_select_video_driver();
-//getchar();
+
+    //hal_sleep_msec(10000);
+    SHOW_FLOW0( 2, "Video start" );
+
     int res = 1;
-//getchar();
     if(video_drv) res = video_drv->start();
     // TODO if start fails, mark driver as not working and select again
 
     if( res )
         panic("I don't know how to work with this video hardware, sorry");
+
+    //hal_sleep_msec(10000);
+    SHOW_FLOW0( 2, "Video post-start" );
     video_post_start();
 }
 

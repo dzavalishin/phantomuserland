@@ -48,12 +48,12 @@ entry.o: crtn.o
 START_O_FILE=entry.o
 
 #isa_sb16.o
-phantom: $(START_O_FILE) \
+phantom: $(START_O_FILE) driver_pci_rtl8169.o \
 	winsd.o sntp.o vm_load.o pci_es1370.o  \
 	tetris.o ff.o bootp.o stray_check.o sbrk.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o test_userland.o events.o smp.o \
-	heap/heap.o heap_pool.o boot_cmd_line.o \
+	heap.o heap_pool.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
 	ohci.o uhci.o uhci_rh.o uhci_util.o \
 	traps.o hal_physmem.o physalloc.o sched.o \

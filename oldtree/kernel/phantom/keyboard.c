@@ -182,6 +182,7 @@ retry:
 
 static void insert_in_buf(_key_event *event)
 {
+
     // can't call there in interrupt!
     //if(keyb_event_mode) send_event_to_q(event);
 

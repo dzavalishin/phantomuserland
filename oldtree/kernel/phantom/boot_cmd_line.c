@@ -243,6 +243,7 @@ int debug_max_level_error = 255;
 
 int debug_boot_pause = 0;
 int bootflag_no_vesa = 0;
+int bootflag_no_comcon = 0;
 
 char *syslog_dest_address_string = 0;
 
@@ -265,13 +266,7 @@ static int stringarg( const char *arg )
 
     ISARG("pause", debug_boot_pause );
     ISARG("novesa", bootflag_no_vesa );
-
-    /*
-    if( !strcmp( arg, "pause" ) )
-    {
-        debug_boot_pause = 1;
-        return 1;
-    }*/
+	ISARG("nocom", bootflag_no_comcon );
 
 
     return 0;

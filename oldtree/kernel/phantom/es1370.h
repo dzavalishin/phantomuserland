@@ -189,8 +189,8 @@ typedef struct es1370_private
     int         adc_active;
     int         dac_active;
 
-    int		adc_bitsPerSample;
-    int		dac_bitsPerSample;
+    //int		adc_bitsPerSample;
+    //int		dac_bitsPerSample;
 
     int		oddDac2;
     int         oddAdc;
@@ -203,6 +203,13 @@ typedef struct es1370_private
 
     size_t      dac2BufferSize;
     size_t      adcBufferSize;
+
+    int         samplerate;
+    int         nchannels;
+    int         nbits;
+    int         silence;
+
+    int		writtenSamples; // dac2 - count of samples we actually sent
 
 } es1370_t;
 
