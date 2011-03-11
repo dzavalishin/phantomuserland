@@ -27,6 +27,7 @@
 #include <phantom_libc.h>
 #include <phantom_time.h>
 
+#include <kernel/boot.h>
 #include <kernel/init.h>
 #include <kernel/debug.h>
 #include <kernel/trap.h>
@@ -92,8 +93,12 @@ void pressEnter(char *text)
     if(debug_boot_pause)
     {
         printf("press Enter...\n...");
+#if 0
         while( getchar() >= ' ' )
             ;
+#else
+        hal_sleep_msec(10000);
+#endif
     }
 }
 
@@ -262,14 +267,16 @@ int main(int argc, char **argv, char **envp)
 
     init_main_event_q();
 
+#if HAVE_VESA
     //pressEnter("will init vm86");
     phantom_init_vm86();
     //pressEnter("will init VESA");
     if(!bootflag_no_vesa) phantom_init_vesa();
+#endif
     //pressEnter("will init graphics");
     phantom_start_video_driver();
 
-    //pressEnter("will look for drv stage 2");
+    pressEnter("will look for drv stage 2");
     phantom_pci_find_drivers( 2 );
 
 #if HAVE_UNIX
@@ -278,19 +285,22 @@ int main(int argc, char **argv, char **envp)
     phantom_unix_fs_init();
     phantom_unix_proc_init();
 
-
     // Start modules bootloader brought us
     phantom_start_boot_modules();
 #endif // HAVE_UNIX
 
     //arch_get_rtc_delta(); // Read PC clock
-    //getchar();
+    pressEnter("will run DPC");
     dpc_init();
 
+#ifdef STRAY_CATCH_SIZE
     init_stray_checker();
+#endif
 
 
+    pressEnter("will run phantom_timed_call_init2");
     phantom_timed_call_init2();
+    pressEnter("will run phantom_init_stat_counters2");
     phantom_init_stat_counters2();
 
     // -----------------------------------------------------------------------

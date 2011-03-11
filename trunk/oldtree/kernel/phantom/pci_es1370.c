@@ -10,7 +10,7 @@
 #define DEV_NAME "es1370"
 #define DEBUG_MSG_PREFIX "es1370"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 9
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <hal.h>
 #include <time.h>
+#include <sys/ioctl.h>
 
 #include "es1370.h"
 
@@ -42,6 +43,10 @@ static void es1370_interrupt(void *arg);
 static void start_dac(phantom_device_t *dev);
 
 
+static void readSamplesFromRecordBuffer(phantom_device_t *dev);
+static void writeSamplesToPlaybackBuffer(phantom_device_t *dev);
+
+
 
 static int es1370_start(phantom_device_t *dev);
 static int es1370_stop(phantom_device_t *dev);
@@ -49,6 +54,7 @@ static int es1370_stop(phantom_device_t *dev);
 static int es1370_write(phantom_device_t *dev, const void *buf, int len);
 static int es1370_read(phantom_device_t *dev, void *buf, int len);
 
+static int es1370_ioctl(struct phantom_device *dev, int type, void *buf, int len);
 
 
 static int seq_number = 0;
@@ -95,6 +101,7 @@ phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
     dev->dops.stop  = es1370_stop;
     dev->dops.read  = es1370_read;
     dev->dops.write = es1370_write;
+    dev->dops.ioctl = es1370_ioctl;
 
     if( hal_irq_alloc( dev->irq, &es1370_interrupt, dev, HAL_IRQ_SHAREABLE ) )
     {
@@ -151,11 +158,18 @@ static errno_t init_es1370(phantom_device_t *dev)
     es->dac_active = 0;
     es->adc_active = 0;
 
-    es->adc_bitsPerSample = 16;
-    es->dac_bitsPerSample = 16;
+    es->silence = 0;
+
+    es->samplerate = 44100;
+    es->nchannels = 2;
+    es->nbits = 16;
+    //es->adc_bitsPerSample = 16;
+    //es->dac_bitsPerSample = 16;
 
     es->oddDac2 = 0;
     es->oddAdc = 0;
+
+    es->writtenSamples = 0;
 
     int size_bytes = ES1370_BUFSIZE;
 
@@ -171,7 +185,6 @@ static errno_t init_es1370(phantom_device_t *dev)
     //set_sampling_rate(u_int32_t rate)
     return 0;
 }
-
 
 
 
@@ -270,12 +283,12 @@ static void setRecordFormat(phantom_device_t *dev, u8 channels, u8 bits)
 
 
 
-void play(phantom_device_t *dev)
+static void play(phantom_device_t *dev)
 {
     es1370_t *es = dev->drv_private;
     assert(es->dac_active);
     //u8 bits = lineDac2->getBitsPerSample();
-    u8 bits = 16;
+    u8 bits = es->nbits;
 
     u32 control = inl(dev->iobase + ES1370_SERIAL_CONTROL);
     control &= ~(SerialP2endinc | SerialP2stinc | SerialP2loopsel | SerialP2pause | SerialP2dacsen);
@@ -287,7 +300,7 @@ void play(phantom_device_t *dev)
     outl(dev->iobase + ES1370_CONTROL, control); // start DMA
 }
 
-void record(phantom_device_t *dev)
+static void record(phantom_device_t *dev)
 {
     u32 control = inl(dev->iobase + ES1370_SERIAL_CONTROL);
     control &= ~SerialR1loopsel;
@@ -336,20 +349,24 @@ static void start_dac(phantom_device_t *dev)
     //u16 rate = line->getSamplingRate();
     //u8 bits = line->getBitsPerSample();
     //u8 silence = (bits == 8) ? 128 : 0;
-    u16 rate = 44100;
-    u8 bits = 16;
-    u8 channels = 2;
-    u8 silence = 0;
-    memset(es->dac2Buffer, silence, es->dac2BufferSize);
+
+    //u16 rate = 44100;
+    u8 bits = es->nbits;
+    u8 channels = es->nchannels;
+    //u8 silence = 0;
+    memset(es->dac2Buffer, es->silence, es->dac2BufferSize);
 
     setPlayBuffer(dev, es->dac2BufferPa, es->dac2BufferSize);
     setPlaybackSampleCount(dev, es->dac2BufferSize / 2 / channels / (bits / 8));
-    setSamplingRate(dev, rate);
+    setSamplingRate(dev, es->samplerate);
     setPlaybackFormat(dev, channels, bits);
 
     es->dac_active = 1;
 
     play(dev);
+    // Fill the first buffer now or else it is won't be double buffer
+    writeSamplesToPlaybackBuffer(dev);
+
 }
 
 static void start_adc(phantom_device_t *dev)
@@ -364,15 +381,15 @@ static void start_adc(phantom_device_t *dev)
     //u8 bits = line->getBitsPerSample();
     //u8 silence = (bits == 8) ? 128 : 0;
 
-    u16 rate = 44100;
-    u8 bits = 16;
-    u8 channels = 2;
-    u8 silence = 0;
-    memset(es->adcBuffer, silence, es->dac2BufferSize);
+    //u16 rate = 44100;
+    u8 bits = es->nbits;
+    u8 channels = es->nchannels;
+    //u8 silence = 0;
+    memset(es->adcBuffer, es->silence, es->dac2BufferSize);
 
     setRecordBuffer(dev, es->adcBufferPa, es->adcBufferSize);
     setRecordSampleCount(dev, es->adcBufferSize / 2 / channels / (bits / 8));
-    setSamplingRate(dev, rate);
+    setSamplingRate(dev, es->samplerate);
     setRecordFormat(dev, channels, bits);
 
     record(dev);
@@ -408,12 +425,51 @@ void stop_adc(phantom_device_t *dev)
 }
 
 
+#if 0
+static const char  intro[] = {
+#include "intro.ci"
+};
+
+static void sw_memcpy( char *o, const char *i, size_t nc )
+{
+    char c1, c2;
+
+    while( nc > 1 )
+    {
+        c1 = *i++;
+        c2 = *i++;
+        *o++ = c2;
+        *o++ = c1;
+        nc -= 2;
+    }
+}
 
 
+size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
+{
+    static const char *ip = intro;
+    static int         is = sizeof(intro);
 
+    int res = 0;
 
+    //if( is < 4 ) return 0;
 
+    while( (len > 3) && (is > 3) )
+    {
+        int nc = imin(len, is ) & ~3; // 4 bytes min
+        sw_memcpy( ptr, ip, nc );
+        len -= nc;
+        ptr += nc;
+        res += nc;
 
+        ip += nc;
+        is -= nc;
+    }
+
+    return res;
+}
+
+#else
 
 
 size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
@@ -432,20 +488,18 @@ size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 
     return res;
 }
+#endif
 
 
 
 
-
-int writeSamplesToPlaybackBuffer(phantom_device_t *dev)
+static void writeSamplesToPlaybackBuffer(phantom_device_t *dev)
 {
     es1370_t *es = dev->drv_private;
 
     u8* ptr = es->dac2Buffer;
-    if (es->oddDac2)
-    {
+    if(es->oddDac2)
         ptr += es->dac2BufferSize / 2;
-    }
 
     unsigned int count = read_play_stream(dev, ptr, es->dac2BufferSize / 2);
     if (count == 0)
@@ -455,19 +509,19 @@ int writeSamplesToPlaybackBuffer(phantom_device_t *dev)
     else
     {
         //u8 bits = lineDac2->getBitsPerSample();
-        u8 bits = 16;
+        //u8 bits = es->nbits;
         if (count < es->dac2BufferSize / 2)
         {
-            u8 silence = (bits == 8) ? 128 : 0;
-            memset(ptr + count, silence, es->dac2BufferSize / 2 - count);
+            //u8 silence = (bits == 8) ? 128 : 0;
+            memset(ptr + count, es->silence, es->dac2BufferSize / 2 - count);
         }
         es->oddDac2 = !es->oddDac2; // select the other buffer.
-    }
 
-    return 0;
+        es->writtenSamples += es->dac2BufferSize / 2;
+    }
 }
 
-int readSamplesFromRecordBuffer(phantom_device_t *dev)
+static void readSamplesFromRecordBuffer(phantom_device_t *dev)
 {
     es1370_t *es = dev->drv_private;
 
@@ -485,16 +539,14 @@ int readSamplesFromRecordBuffer(phantom_device_t *dev)
     }
     else
     {
-        u8 bits = es->adc_bitsPerSample;
+        //u8 bits = es->nbits;//es->adc_bitsPerSample;
         if (count < es->adcBufferSize / 2)
         {
-            u8 silence = (bits == 8) ? 128 : 0;
-            memset(ptr + count, silence, es->adcBufferSize / 2 - count);
+            //u8 silence = (bits == 8) ? 128 : 0;
+            memset(ptr + count, es->silence, es->adcBufferSize / 2 - count);
         }
         es->oddAdc = !es->oddAdc; // select the other buffer.
     }
-
-    return 0;
 }
 
 
@@ -530,8 +582,31 @@ static void es1370_interrupt(void *arg)
             writeSamplesToPlaybackBuffer(dev);
             control |= SerialP2inten;
             outl(dev->iobase + ES1370_SERIAL_CONTROL, control);
-//start_dac(dev);
         }
+
+        // Attempt to refill buffers if underflow is detected.
+        // Helps somehow, but not completely.
+
+    moreRefill:;
+        unsigned int nSamples = inl( dev->iobase+Dac2SampleCountRegister );
+        unsigned nBytes = (nSamples >> 16) * 4;
+
+        //SHOW_FLOW( 1, "?refill %d-%d", 4*(nSamples & 0xFFFF), nBytes );
+        if( nBytes < 2048 )
+        {
+            SHOW_FLOW( 1, "refill %d", nBytes );
+            writeSamplesToPlaybackBuffer(dev);
+            goto moreRefill;
+        }
+
+        /*
+        SHOW_FLOW( 1, "?refill %d-%d", es->writtenSamples, nSamples );
+        if( es->writtenSamples - nSamples < es->dac2BufferSize/2 )
+        {
+            SHOW_FLOW( 1, "refill %d-%d", es->writtenSamples, nSamples );
+            writeSamplesToPlaybackBuffer(dev);
+        }
+        */
     }
 
     if(status & StatusAdc)
@@ -545,7 +620,6 @@ static void es1370_interrupt(void *arg)
 
             control |= SerialR1inten;
             outl(dev->iobase + ES1370_SERIAL_CONTROL, control);
-//start_adc(dev);
         }
     }
 
@@ -713,4 +787,68 @@ static int es1370_write(phantom_device_t *dev, const void *buf, int len)
 }
 
 
+#define RD_INT() *((u_int32_t*)buf)
+
+static int es1370_ioctl(struct phantom_device *dev, int type, void *buf, int len)
+{
+    es1370_t *es = dev->drv_private;
+    int tmp;
+
+    if( len < (int)sizeof(u_int32_t) )
+        return -1;
+
+    switch(type)
+    {
+    case IOCTL_SOUND_SAMPLERATE:
+        es->samplerate = RD_INT();
+        set_sampling_rate(dev, es->samplerate);
+        break;
+
+    case IOCTL_SOUND_NCHANNELS:
+        es->nchannels = RD_INT();
+        goto setformat;
+        //break;
+
+    case IOCTL_SOUND_BITS:
+        tmp = RD_INT();
+        if( tmp != 8 && tmp != 16 )
+            return -1; // TODO errno?
+        es->nbits = tmp;
+        goto setformat;
+        //break;
+
+    case IOCTL_SOUND_SIGNED:
+        {
+            tmp = RD_INT();
+            tmp = tmp ? ~0 : 0; // All ones (masked below) for signed, zero otherwise
+
+            u_int32_t mask = ~0; // All zeroes
+            int shift = 32 - (es->nbits-1);
+
+            es->silence = tmp & (mask >> shift);
+            SHOW_FLOW(0, "%d bits silence = 0x%x", es->silence );
+        }
+        break;
+
+    case IOCTL_SOUND_VOLUME:
+        {
+            tmp = RD_INT();
+            setCodec(CodecVolMasterL, tmp);
+            setCodec(CodecVolMasterR, tmp);
+        }
+        break;
+
+
+    default:
+        return -1;
+    }
+
+    return 0;
+
+setformat:
+    setPlaybackFormat(dev, es->nchannels, es->nbits);
+    setRecordFormat(  dev, es->nchannels, es->nbits);
+
+    return 0;
+}
 

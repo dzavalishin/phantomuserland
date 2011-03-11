@@ -1,4 +1,4 @@
-
+#if HAVE_NET
 /*
  * Copyright (C) 2004 by Jean Pierre Gauthier. All rights reserved.
  *
@@ -226,4 +226,11 @@ void init_wins(u_int32_t ip_addr)
 
     hal_start_kernel_thread(winsd_thread);
 }
+#else // HAVE_NET
+#include <sys/types.h>
+void init_wins(u_int32_t ip_addr)
+{
+    (void) ip_addr;
+}
+#endif // HAVE_NET
 

@@ -71,6 +71,11 @@ static pci_probe_t pci_drivers[] =
 //    { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
 //    { "Intel i82559er", driver_intel_82559_probe, 	3, INTEL_VENDORID, 0x1209, 0 },
     { "Ne2000 PCI", 	driver_pci_ne2000_probe, 	1, 0x10ec, 0x8029, 0 },
+
+    { "RTL 8169", 	driver_rtl_8169_probe, 		1, RTL8139_VENDORID, 0x8169, 0 },
+    { "RTL 8129", 	driver_rtl_8169_probe, 		1, RTL8139_VENDORID, 0x8129, 0 },
+    { "RTL 8168", 	driver_rtl_8169_probe, 		1, RTL8139_VENDORID, 0x8168, 0 }, // TODO problems possible
+
 #endif // HAVE_NET
 
 #if COMPILE_OHCI

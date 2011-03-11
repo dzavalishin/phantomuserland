@@ -7,7 +7,6 @@
  * Path manipulations and name to "inode" mapping
  *
 **/
-#if HAVE_UNIX
 
 #define DEBUG_MSG_PREFIX "syscall"
 #include "debug_ext.h"
@@ -21,6 +20,8 @@
 #include <kernel/unix.h>
 #include <stdio.h>
 
+#if HAVE_UNIX
+
 //static uufs_t *rootfs;
 extern struct uufs root_fs;
 
@@ -32,6 +33,9 @@ uufile_t *uu_namei(const char *filename)
 
     return root_fs.namei(&root_fs, filename);
 }
+
+#endif // HAVE_UNIX
+
 
 errno_t uu_absname( char *opath, const char *base, const char *_add )
 {
@@ -158,5 +162,4 @@ int uu_break_path( const char *in, int maxpart, const char *oname[], int olen[] 
 }
 
 
-#endif // HAVE_UNIX
 

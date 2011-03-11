@@ -9,13 +9,13 @@
  *
 **/
 
-#define TEST_NEW_DISK_IO_STACK 1
+#define TEST_NEW_DISK_IO_STACK 0
 
 
 
 
 #define IDE_INTR 1
-#define IDE_DMA 1
+#define IDE_DMA 0
 
 #define REMAPPED_PAGING_IO (!IDE_DMA)
 
@@ -1034,6 +1034,8 @@ void connect_ide_io(void)
     }
 
 }
+#else
+void connect_ide_io(void) {}
 #endif
 
 
