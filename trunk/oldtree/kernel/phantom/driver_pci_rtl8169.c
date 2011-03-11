@@ -39,6 +39,149 @@
 #include "net.h"
 
 
+#define WIRED_ADDRESS 	IPV4_DOTADDR_TO_ADDR(10, 0, 2, 121)
+#define WIRED_NETMASK 	0xffffff00
+#define WIRED_BROADCAST IPV4_DOTADDR_TO_ADDR(10, 0, 2, 0xFF)
+
+#define WIRED_NET 	IPV4_DOTADDR_TO_ADDR(10, 0, 2, 0)
+#define WIRED_ROUTER    IPV4_DOTADDR_TO_ADDR(10, 0, 2, 121)
+
+#define DEF_ROUTE_ROUTER        IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2)
+
+
+
+static int rtl8169_init(rtl8169 *r);
+static void rtl8169_int(void* data);
+
+static ssize_t rtl8169_rx(rtl8169 *r, char *buf, ssize_t buf_len);
+static void rtl8169_xmit(rtl8169 *r, const char *ptr, ssize_t len);
+
+
+static int rtl8169_read( struct phantom_device *dev, void *buf, int len)
+{
+    rtl8169 *nic = (rtl8169 *)dev->drv_private;
+
+    if(len < ETHERNET_MAX_SIZE)
+        return ERR_VFS_INSUFFICIENT_BUF;
+    return rtl8169_rx(nic, buf, len);
+}
+
+static int rtl8169_write(struct phantom_device *dev, const void *buf, int len)
+{
+    rtl8169 *nic = (rtl8169 *)dev->drv_private;
+
+    if(len < 0)
+        return ERR_INVALID_ARGS;
+
+    rtl8169_xmit(nic, buf, len);
+    return len;
+}
+
+
+static int rtl8169_get_address( struct phantom_device *dev, void *buf, int len)
+{
+    rtl8169 *nic = (rtl8169 *)dev->drv_private;
+    int err = NO_ERROR;
+
+    if(!nic)        return ERR_IO_ERROR;
+
+    if(len >= (int)sizeof(nic->mac_addr)) {
+        memcpy(buf, nic->mac_addr, sizeof(nic->mac_addr));
+    } else {
+        err = ERR_VFS_INSUFFICIENT_BUF;
+    }
+
+    return err;
+}
+
+
+
+phantom_device_t * driver_rtl_8169_probe( pci_cfg_t *pci, int stage )
+{
+    (void) stage;
+    rtl8169 * nic = NULL;
+    static int seq_number = 0;
+
+    SHOW_FLOW0( 1, "probe" );
+
+    //nic = rtl8169_new();
+    nic = calloc(1, sizeof(rtl8169));
+    if (nic == NULL)
+    {
+        SHOW_ERROR0( 0, "out of mem");
+        return 0;
+    }
+
+    nic->irq = pci->interrupt;
+
+    int i;
+    for (i = 0; i < 6; i++)
+    {
+        if (pci->base[i] > 0xffff)
+        {
+            nic->phys_base = pci->base[i];
+            nic->phys_size = pci->size[i];
+            SHOW_INFO( 0,  "base 0x%lx, size 0x%lx", nic->phys_base, nic->phys_size );
+        } else if( pci->base[i] > 0) {
+            nic->io_port = pci->base[i];
+            SHOW_INFO( 0,  "io_port 0x%x", nic->io_port );
+        }
+    }
+
+#if 0
+    SHOW_FLOW0( 1, "stop" );
+    rtl8169_stop(nic);
+    hal_sleep_msec(10);
+#endif
+
+    SHOW_FLOW0( 1, "init");
+    if (rtl8169_init(nic) < 0)
+    {
+        SHOW_ERROR0( 0, "init failed");
+        return 0;
+    }
+
+
+
+    phantom_device_t * dev = malloc(sizeof(phantom_device_t));
+    dev->name = "rtl8169";
+    dev->seq_number = seq_number++;
+    dev->drv_private = nic;
+
+    dev->dops.read = rtl8169_read;
+    dev->dops.write = rtl8169_write;
+    dev->dops.get_address = rtl8169_get_address;
+
+    ifnet *interface;
+    if( if_register_interface( IF_TYPE_ETHERNET, &interface, dev) )
+    {
+        SHOW_ERROR( 0,  "Failed to register interface for %s", dev->name );
+    }
+    else
+    {
+        if_simple_setup( interface, WIRED_ADDRESS, WIRED_NETMASK, WIRED_BROADCAST, WIRED_NET, WIRED_ROUTER, DEF_ROUTE_ROUTER );
+    }
+
+    return dev;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #if 1
 #define RTL_WRITE_8(r, reg, dat) \
     *(volatile uint8 *)((r)->virt_base + (reg)) = (dat)
@@ -94,26 +237,6 @@
 #define TXBUF_P(r, num) ((r)->txbuf_phys + (num) * BUFSIZE_PER_FRAME)
 
 
-static int rtl8169_int(void*);
-
-struct vendor_dev_match {
-    int vendor;
-    int device;
-};
-static const struct vendor_dev_match match[] = {
-    { 0x10ec, 0x8169 },
-    { 0x10ec, 0x8129 },
-};
-
-/*
-static addr_t vtophys(const void *virt)
-{
-    addr_t phys = 0;
-
-    vm_get_page_mapping(vm_get_kernel_aspace_id(), (addr_t)virt, &phys);
-    return phys;
-}
-*/
 
 static inline int inc_rx_idx_full(rtl8169 *r)
 {
@@ -237,7 +360,9 @@ static void rtl8169_setup_descriptors(rtl8169 *r)
     RTL_WRITE_32(r, REG_RDSAR_HIGH, r->rxdesc_phys >> 32);
 }
 
-int rtl8169_init(rtl8169 *r)
+
+
+static int rtl8169_init(rtl8169 *r)
 {
     //bigtime_t time;
     int err = -1;
@@ -257,7 +382,7 @@ int rtl8169_init(rtl8169 *r)
     size_t n_pages = BYTES_TO_PAGES(r->phys_size);
 
     hal_alloc_vaddress( (void **)&r->virt_base, n_pages); // alloc address of a page, but not memory
-    hal_pages_control_etc( r->phys_base, r->virt_base, n_pages, page_map_io, page_rw, 0 );
+    hal_pages_control_etc( r->phys_base, (void *)r->virt_base, n_pages, page_map_io, page_rw, 0 );
 
     SHOW_INFO(2, "rtl8169 mapped at address 0x%lx\n", r->virt_base);
 
@@ -490,7 +615,7 @@ static int rtl8169_rxint(rtl8169 *r, uint16 int_status)
         SHOW_FLOW(3, "rxint: got %d frames, idx_full = %d, idx_free = %d\n", i, r->rx_idx_full, r->rx_idx_free);
 
         if (i > 0) {
-#warning SEM_FLAG_NO_RESCHED
+//TODO #warning SEM_FLAG_NO_RESCHED
             //hal_sem_release_etc( &r->rx_sem, 1, SEM_FLAG_NO_RESCHED);
             hal_sem_release( &r->rx_sem );
             rc = INT_RESCHEDULE;
@@ -522,7 +647,7 @@ static int rtl8169_txint(rtl8169 *r, uint16 int_status)
         SHOW_FLOW(3, "txint: sent %d frames, idx_full = %d, idx_free = %d\n", i, r->tx_idx_full, r->tx_idx_free);
 
         if (i > 0) {
-#warning SEM_FLAG_NO_RESCHED
+//TODO #warning SEM_FLAG_NO_RESCHED
             //hal_sem_release_etc(r->tx_sem, 1, SEM_FLAG_NO_RESCHED);
             hal_sem_release(&r->tx_sem);
             rc = INT_RESCHEDULE;
@@ -532,7 +657,7 @@ static int rtl8169_txint(rtl8169 *r, uint16 int_status)
     return rc;
 }
 
-static int rtl8169_int(void* data)
+static void rtl8169_int(void* data)
 {
     int rc = INT_NO_RESCHEDULE;
     rtl8169 *r = (rtl8169 *)data;
@@ -557,7 +682,7 @@ static int rtl8169_int(void* data)
 done:
     release_spinlock(&r->reg_spinlock);
 
-    return rc;
+    //return rc;
 }
 
 
