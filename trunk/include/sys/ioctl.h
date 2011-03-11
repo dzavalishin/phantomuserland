@@ -33,6 +33,8 @@
 #define IOCTL_G_SOUND 'S'
 #define _IOI_SOUND(__n) _IOWINT(IOCTL_G_SOUND,__n)
 
+#define IOCTL_SOUND_RESET            _IOC(IOC_VOID,IOCTL_G_SOUND,0,0)
+
 #define IOCTL_SOUND_SAMPLERATE       _IOI_SOUND(1)
 #define IOCTL_SOUND_NCHANNELS        _IOI_SOUND(2)
 #define IOCTL_SOUND_BITS             _IOI_SOUND(3)

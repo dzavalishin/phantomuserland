@@ -2,10 +2,20 @@
 #define CONFIG_H
 
 #define HAVE_SMP 0
+#define HAVE_NET 1
+#define HAVE_UNIX 0
+#define HAVE_VESA 1
+
+#if !defined(NO_STRAY_CHECK)
+# define HAVE_STRAY 0
+#endif
+
 
 #ifndef COMPILE_EXPERIMENTAL
 #define COMPILE_EXPERIMENTAL 0
 #endif  // COMPILE_EXPERIMENTAL
+
+
 
 #ifndef NET_CHATTY
 #define NET_CHATTY 0
@@ -16,8 +26,6 @@
 #define COMPILE_OHCI 0
 #define COMPILE_UHCI 0
 
-#define HAVE_NET 1
-#define HAVE_UNIX 1
 
 
 
@@ -40,7 +48,7 @@
 
 #ifndef ASSEMBLER
 
-#ifndef NO_STRAY_CHECK
+#if HAVE_STRAY
 
 #include <string.h>
 

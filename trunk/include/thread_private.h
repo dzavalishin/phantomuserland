@@ -45,7 +45,7 @@ struct uuprocess;
 struct phantom_thread
 {
     /** NB! Exactly first! Accessed from asm. */
-    cpu_state_save_t       	cpu;
+    cpu_state_save_t            cpu;
 
     int                         cpu_id; // on which CPU this thread is dispatched now
 
@@ -54,12 +54,12 @@ struct phantom_thread
     // phantom thread ref, etc
     void *                      owner;
 
-    wtty_t *			ctty; // "controlling" tty
+    wtty_t *                    ctty; // "controlling" tty
 
     // if this thread runs Unix simulation process - here is it
-    struct uuprocess *		u;
+    struct uuprocess *          u;
 
-    const char *		name;
+    const char *                name;
 
     void *                      stack;
     physaddr_t                  stack_pa;
@@ -76,7 +76,7 @@ struct phantom_thread
     void *                      kstack_top; // What to load to ESP
 
     void *                      start_func_arg;
-    void        		(*start_func)(void *);
+    void                        (*start_func)(void *);
 
     u_int32_t                   thread_flags; // THREAD_FLAG_xxx
 
