@@ -1,5 +1,6 @@
 
-PHANTOM_SRCDIR	= .
+#PHANTOM_SRCDIR	= .
+PHANTOM_SRCDIR	= $(realpath $(PHANTOM_HOME))/oldtree/kernel
 OBJDIR		= .
 
 prefix		= /usr/local

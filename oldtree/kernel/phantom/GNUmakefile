@@ -1,5 +1,5 @@
 
-PHANTOM_SRCDIR	= ..
+PHANTOM_SRCDIR	= $(realpath $(PHANTOM_HOME))/oldtree/kernel
 OBJDIR		= ..
 
 prefix		= /usr/local
@@ -10,5 +10,4 @@ include $(OBJDIR)/Makeconf-$(ARCH)
 
 ##### End of configuration section #####
 
-#include $(PHANTOM_SRCDIR)/machdep/$(HOST_ARCH)/GNUmakerules
 include $(PHANTOM_SRCDIR)/phantom/GNUmakerules
