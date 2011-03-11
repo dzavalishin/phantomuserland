@@ -3,7 +3,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * arm page table support
  *

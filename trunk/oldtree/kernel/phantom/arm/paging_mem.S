@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * ARM pagetable mem.
+ *
+**/
+
 #include "arm/asm.h"
 #include <arm/pmap.h>
 #include <kernel/page.h>

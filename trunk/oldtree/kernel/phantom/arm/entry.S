@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * ARM startup code. Not compiled even once. Not sure that it is right at all.
  *
