@@ -41,6 +41,8 @@ RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 rm -f make.log
 #make clean > /dev/null 2>&1
 ./build.sh clean > /dev/null 2>&1
+# this is temporary until build cleanup is fixed
+make -C oldtree/kernel/phantom/i386 clean > /dev/null 2>&1
 
 # clean unexpected failures
 GRUB_MENU=tftp/tftp/menu.lst
@@ -134,12 +136,13 @@ boot
 " > $GRUB_MENU
 
 # before running again
-#touch phantom.img
-#dd bs=4096 count=1 if=img/phantom.superblock of=phantom.img
-#dd conv=nocreat bs=4096 seek=1 count=20480 if=/dev/zero of=phantom.img
+#cp ../run/phantom.img .
+rm phantom.img
+touch phantom.img
+dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img
+dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img
 #dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024
-#dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024
-cp ../run/phantom.img .
+dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024
 
 for pass in 1 2
 do
