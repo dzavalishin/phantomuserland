@@ -16,8 +16,9 @@ while [ $# -gt 0 ]
 do
 	case "$1" in
 	-f)	FORCE=1	;;
-	-w)	WARN=1	;;
-	-v)	MSG="No updates for today" ;;
+	-w)	WARN=1
+		MSG="No updates for today"
+	;;
 	-nc)	unset COMPILE	;;
 	-ng)	unset DISPLAY	;;
 	-ns)	unset SNAPTEST	;;
@@ -140,7 +141,7 @@ boot
 rm phantom.img
 touch phantom.img
 dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img
-dd conv=nocreat conv=notrunc bs=4096 count=1 seek=15 if=img/phantom.superblock of=phantom.img
+dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img
 #dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024
 
@@ -162,16 +163,18 @@ FATAL! Phantom crashed"
 		}
 		grep -i 'snapshot done' serial0.log && break
 		grep '^Panic' serial0.log && {
-			echo "
+			grep '^- ' serial0.log || {
+				echo "
 
 FATAL! Phantom cycled"
-			kill $QEMU_PID
-			break
+				kill $QEMU_PID
+				break
+			}
 		}
 	done
 
-	grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log
-	ps -p $QEMU_PID || break
+	grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log && break
+	ps -p $QEMU_PID >/dev/null || break
 
 	while (ps -p $QEMU_PID >/dev/null)
 	do
