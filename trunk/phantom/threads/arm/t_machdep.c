@@ -10,14 +10,14 @@
  *
 **/
 
-#if 0
+#if 1
 // Not done at all
 
 
 #include "thread_private.h"
 #include <phantom_libc.h>
-//#include <i386/seg.h>
-//#include <i386/eflags.h>
+#include <cpu_state.h>
+#include <arm/psr.h>
 
 
 // asm code
@@ -32,42 +32,43 @@ void phantom_thread_trampoline(void);
  */
 void phantom_thread_state_init(phantom_thread_t *t)
 {
-    t->cpu.esp = (int)(t->stack + t->stack_size);
-    t->cpu.ebp = 0;
-    t->cpu.eip = (int)phantom_thread_trampoline;
-    //t->cpu.flags = 0;
+    t->cpu.sp = (int)(t->stack + t->stack_size);
+    t->cpu.fp = 0;
+    t->cpu.ip = (int)phantom_thread_trampoline;
+    t->cpu.lr = 0;
+    t->cpu.cpsr = PSR_SYS32_MODE; // We will change it to user mode later
 
-    t->owner = 0;
-    t->u = 0;
-    t->thread_flags = 0;//THREAD_FLAG_KERNEL;
 
-    t->waitcond = 0;
+    int *sp = (int *)(t->cpu.sp);
 
-    hal_spin_init( &(t->waitlock));
+    // Simulate prev func's stack frame, of all zeroes, for stack trace to stop here
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
 
-    queue_init(&(t->chain));
-    queue_init(&(t->runq_chain));
-
-    t->sw_unlock = 0;
-
-    t->preemption_disabled = 0;
-
-    int *esp = (int *)(t->cpu.esp);
 
     // --- Will be popped by thread switch code ---
-    // Simulate phantom_switch_context's three params
-    STACK_PUSH(esp,0); // ridiculous?
-    STACK_PUSH(esp,0);
-    STACK_PUSH(esp,0);
 
-    STACK_PUSH(esp,t->cpu.eip); // as if we called func
+    // Now contents for "pop {r4-r12}" in context stwitch, 9 registers
 
-    STACK_PUSH(esp,t);// EBX
-    STACK_PUSH(esp,t->start_func_arg);// EDI
-    STACK_PUSH(esp,t->start_func);// ESI
-    STACK_PUSH(esp,0);// CR2
+    // I don't know regisrers order for "pop {r4-r12}", so I do it twice :)
 
-    t->cpu.esp = (int)esp;
+
+    STACK_PUSH(sp,t->start_func); 	// R4
+    STACK_PUSH(sp,t->start_func_arg);	// R5
+    STACK_PUSH(sp,t);			// R6
+
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+
+    STACK_PUSH(sp,t);			// R6
+    STACK_PUSH(sp,t->start_func_arg);	// R5
+    STACK_PUSH(sp,t->start_func); 	// R4
+
+    t->cpu.sp = (int)sp;
 /*
 	// God knows why it works just once for importing main thread,
 	// then causes 'no fpu' exception 7 err 0
@@ -108,45 +109,16 @@ void switch_to_user_mode()
 {
     //asm("ljmp %0, $0" : : "i" (USER_CS));
 
-    /*
-
-    Push:
-
-    SS
-    ESP
-    EFLAGS
-    CS
-    EIP
-
-    */
-
-    // Set up a stack structure for switching to user mode.
-    asm volatile("  \
-                 sti; \
-                 mov %1, %%ax; \
-                 mov %%ax, %%ds; \
-                 mov %%ax, %%es; \
-                 mov %%ax, %%fs; \
-                 mov %%ax, %%gs; \
-                 \
-                 mov %%esp, %%eax; \
-                 pushl %1; \
-                 pushl %%eax; \
-                 pushf; \
-                 pushl %0; \
-                 push $1f; \
-                 iret; \
-                 1: \
-                 "
-                 : : "i" (USER_CS), "i" (USER_DS)
-                );
 }
 
 void
 phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 {
+    SET_CURRENT_THREAD(t);
     // Thread switch locked it befor switching into us, we have to unlock
     hal_spin_unlock(&schedlock);
+
+    // TODO all arch thread starters and context
 
 #if DEBUG
     printf("---- !! phantom_thread_c_starter !! ---\n");
@@ -164,7 +136,6 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
     func(arg);
     t_kill_thread( t->tid );
     panic("thread %d returned from t_kill_thread", t->tid );
-
 }
 
 
