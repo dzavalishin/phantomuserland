@@ -17,13 +17,10 @@
 	P2ALIGN(ARM_PD_SHIFT)
 	.globl	EXT(phantom_pdir_mem)
 LEXT(phantom_pdir_mem)
-#warning wrong size
-	.space	PAGE_SIZE
+	.space	ARM_PD_SIZE
 
 	P2ALIGN(ARM_PT_SHIFT)
 	.globl	EXT(phantom_ptab_mem)
 LEXT(phantom_ptab_mem)
-
-#warning wrong size
-	.space  PAGE_SIZE*NPDE
+	.space  ARM_PT_SIZE*NPDE
 	
