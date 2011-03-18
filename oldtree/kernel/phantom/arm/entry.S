@@ -55,22 +55,22 @@ _trap_e_reset:
 
     // Set stacks
 
-    MSR         CPSR_c, #(IRQ_MODE | I_BIT | F_BIT)
-    LDR         sp, = __irq_stack_top__
-
-    MSR         CPSR_c, #(SVC_MODE | I_BIT | F_BIT)
-    LDR         sp, = __svc_stack_top__
-
-    MSR         CPSR_c, #(FIQ_MODE | I_BIT | F_BIT)
+    MSR         CPSR_c, #(PSR_FIQ32_MODE | I_BIT | F_BIT)
     LDR         sp, = __fiq_stack_top__
 
-    MSR         CPSR_c, #(ABT_MODE | I_BIT | F_BIT)
+    MSR         CPSR_c, #(PSR_IRQ32_MODE | I_BIT | F_BIT)
+    LDR         sp, = __irq_stack_top__
+
+    MSR         CPSR_c, #(PSR_SVC32_MODE | I_BIT | F_BIT)
+    LDR         sp, = __svc_stack_top__
+
+    MSR         CPSR_c, #(PSR_ABT32_MODE | I_BIT | F_BIT)
     LDR         sp, = __abt_stack_top__
 
-    MSR         CPSR_c, #(UND_MODE | I_BIT | F_BIT)
+    MSR         CPSR_c, #(PSR_UND32_MODE | I_BIT | F_BIT)
     LDR         sp, = __und_stack_top__
 
-    MSR         CPSR_c, #(SYS_MODE | I_BIT | F_BIT)
+    MSR         CPSR_c, #(PSR_SYS32_MODE | I_BIT | F_BIT)
     LDR         sp, = __cmain_stack_top__
 
 
@@ -148,13 +148,9 @@ _trap_e_fiq:
 
 alltraps:
     mrs		r0, spsr_all		// Save spsr
-    push        r0
-
-    mov         r0, sp
-    push        r0
-
-    mov         r0, lr
-    push        r0
+    mov         r1, sp
+    mov         r2, lr
+    push        {r0-r2}
 
     mrs     r2, cpsr_all 		/* Get the CPSR */
     bic     r2, r2, #(PSR_MODE)	/* Fix for SVC mode */
