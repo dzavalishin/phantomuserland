@@ -32,7 +32,7 @@
    a well-optimized microkernel will probably want to override it
    with something that allows better optimization.  */
 
-#warning sync this with intr/trap asm entry code
+//#warning sync this with intr/trap asm entry code
 
 struct trap_state
 {
