@@ -39,8 +39,8 @@ static __inline int imax(int a, int b) { return (a > b ? a : b); }
 static __inline int imin(int a, int b) { return (a < b ? a : b); }
 static __inline long lmax(long a, long b) { return (a > b ? a : b); }
 static __inline long lmin(long a, long b) { return (a < b ? a : b); }
-static __inline u_int max(u_int a, u_int b) { return (a > b ? a : b); }
-static __inline u_int min(u_int a, u_int b) { return (a < b ? a : b); }
+static __inline u_int umax(u_int a, u_int b) { return (a > b ? a : b); }
+static __inline u_int umin(u_int a, u_int b) { return (a < b ? a : b); }
 static __inline quad_t qmax(quad_t a, quad_t b) { return (a > b ? a : b); }
 static __inline quad_t qmin(quad_t a, quad_t b) { return (a < b ? a : b); }
 static __inline u_long ulmax(u_long a, u_long b) { return (a > b ? a : b); }

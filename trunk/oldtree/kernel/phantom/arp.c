@@ -17,6 +17,7 @@
  */
 #include <time.h>
 #include <string.h>
+#include <threads.h>
 
 #include "arp.h"
 

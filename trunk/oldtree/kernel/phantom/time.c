@@ -86,11 +86,11 @@ static long msecDivider = 0;
 static long secDivider = 0;
 
 
-
+//! Called from timer interrupt
 void hal_time_tick(int tick_rate)
 {
     // We correct time by updating real_time_delta slowly
-
+//putchar('#');
     // Time correction logic
     if( diff > 0 )
     {
@@ -131,6 +131,7 @@ void hal_time_tick(int tick_rate)
             stat_update_second_stats();
         }
     }
+//putchar('^');
 }
 
 int (*arch_get_tick_rate)(void);

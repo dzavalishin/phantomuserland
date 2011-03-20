@@ -156,7 +156,9 @@ void win_make_decorations(drv_video_window_t *w)
                                             title_size+bordr_size*2
                                            );
 
-        w3->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+        //w3->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+        drv_video_window_enter_allwq(w3);
+
 
         w3->inKernelEventProcess = titleWindowEventProcessor;
 
@@ -168,7 +170,10 @@ void win_make_decorations(drv_video_window_t *w)
     w->w_title->y = w->y+w->ysize; //+bordr_size;
     w->w_title->z = zless;
 
-    w->w_title->bg = (w->state & WSTATE_WIN_FOCUSED) ? title_back_color_focus : title_back_color_nofocus;
+    int focused = w->state & WSTATE_WIN_FOCUSED;
+    if( w->w_title && w->w_title->state & WSTATE_WIN_FOCUSED) focused = 1;
+
+    w->w_title->bg = focused ? title_back_color_focus : title_back_color_nofocus;
 
     drv_video_window_fill( w->w_title, w->w_title->bg );
     window_basic_border( w->w_title, brdr, bordr_size );
@@ -218,11 +223,13 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
     switch(e->w.info)
     {
     case UI_EVENT_WIN_GOT_FOCUS:
-        w->w_owner->state |= WSTATE_WIN_FOCUSED;
+        //w->w_owner->state |= WSTATE_WIN_FOCUSED;
+        w->state |= WSTATE_WIN_FOCUSED;
         goto redecorate;
 
     case UI_EVENT_WIN_LOST_FOCUS:
-        w->w_owner->state &= ~WSTATE_WIN_FOCUSED;
+        //w->w_owner->state &= ~WSTATE_WIN_FOCUSED;
+        w->state &= ~WSTATE_WIN_FOCUSED;
         goto redecorate;
 
     case UI_EVENT_WIN_DESTROYED:
@@ -253,7 +260,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
 static int titleMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-    printf("titleMouseEventProcessor buttons %x, %-%d", e->m.buttons, e->abs_x, e->abs_y);
+    //printf("titleMouseEventProcessor buttons %x, %d-%d", e->m.buttons, e->abs_x, e->abs_y);
 
     if( e->m.buttons == 0 )
     {
@@ -291,7 +298,7 @@ static int titleMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
 static int titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-    printf("titleWindowEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
+    //printf("!! titleWindowEventProcessor e=%p, e.w=%p, w=%p\r", e, e->focus, w);
 
     switch(e->type)
     {

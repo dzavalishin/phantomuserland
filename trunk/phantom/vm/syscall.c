@@ -955,7 +955,7 @@ static int si_bootstrap_19_create_binary(struct pvm_object me, struct data_area_
     SYSCALL_RETURN( pvm_create_binary_object(nbytes, NULL) );
 }
 
-#define BACK_WIN 0
+#define BACK_WIN 1
 
 #if BACK_WIN
 static drv_video_window_t *back_win = 0;
@@ -993,6 +993,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
     	back_win = drv_video_window_create( video_drv->xsize, video_drv->ysize, 0, 0, COLOR_BLACK, "Background" );
 
     back_win->flags &= ~WFLAG_WIN_DECORATED;
+    back_win->flags |= WFLAG_WIN_NOFOCUS;
 
     drv_video_window_to_bottom(back_win);
 

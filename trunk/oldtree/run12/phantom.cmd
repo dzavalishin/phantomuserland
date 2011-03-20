@@ -1,5 +1,9 @@
+rem QEMU_AUDIO_DRV=wav
+set QEMU_AUDIO_DRV=dsound
 rem echo off
-rem SOUND=-soundhw sb16
+rem SET SOUND=-soundhw sb16,adlib,es1370,ac97
+SET SOUND=-soundhw sb16,adlib,es1370
+rem SOUND=-soundhw all
 
 rem SET USB=-usb -usbdevice mouse
 rem SET USB=-usb 

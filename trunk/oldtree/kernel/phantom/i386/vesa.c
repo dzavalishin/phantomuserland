@@ -253,9 +253,15 @@ void phantom_init_vesa(void)
     set_video_driver_bios_vesa_mode( best_mode | VBE_MODE_LINEAR );
 
 
+
 #if VESA_ENFORCE
     SHOW_FLOW( 2, "Setting VESA video mode %d", best_mode );
-    if( setVesaMode( best_mode | VBE_MODE_LINEAR ) )
+    //int imask = phantom_pic_get_irqmask();     // It seems that setting videomode kills all interrupts!
+    int set_rc = setVesaMode( best_mode | VBE_MODE_LINEAR );
+    //phantom_pic_set_irqmask(imask);
+    //phantom_timer0_start(); // Gets lost after set vesa :(
+
+    if( set_rc )
     {
         // TODO reset VGA text mode here!
         SHOW_ERROR( 0, "Failed to set VESA video mode %d, VESA is assumed to be dead", best_mode );

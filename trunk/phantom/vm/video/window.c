@@ -234,8 +234,18 @@ void drv_video_window_rezorder_all(void)
 
         w->z = next_z;
         video_zbuf_reset_win( w ); // TODO rezet z buf in event too?
-        event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
-        event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
+        //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+        //event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
+    }
+
+    // From top to bottom
+    for( w = (drv_video_window_t *) queue_last(&allwindows);
+         !queue_end(&allwindows, (queue_entry_t)w);
+         w = (drv_video_window_t *) queue_prev(&w->chain))
+    {
+        // Don't touch children (decor & title)
+        if( w->w_owner == 0 )
+            event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
     }
 
     hal_spin_unlock( &allw_lock );
@@ -246,22 +256,21 @@ void drv_video_window_rezorder_all(void)
 
 
 
-void drv_video_window_preblit( drv_video_window_t *w ) __attribute__((__deprecated__));
 
 
+#if 0
 // TODO this is not needed anymore?
 void drv_video_window_preblit( drv_video_window_t *w )
 {
-#if 0
-	//window_basic_border( w, brdr, sizeof(brdr)/sizeof(rgba_t) );
+/*	//window_basic_border( w, brdr, sizeof(brdr)/sizeof(rgba_t) );
     if( (w->generation != win_generation) )
     {
         w->generation = win_generation;
         if(w->flags & WFLAG_WIN_DECORATED)
             win_make_decorations(w);
-    }
-#endif
+    }*/
 }
+#endif
 
 static void
 do_window_resize( drv_video_window_t *w, int xsize, int ysize )
@@ -280,6 +289,11 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
     int ox = w->x;
     int oy = w->x;
     video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+    if( w->w_title )
+        video_zbuf_reset_square( w->w_title->x, w->w_title->y, w->w_title->xsize, w->w_title->ysize );
+    if( w->w_decor )
+        video_zbuf_reset_square( w->w_decor->x, w->w_decor->y, w->w_decor->xsize, w->w_decor->ysize );
+
     w->x = x;
     w->y = y;
 
@@ -294,7 +308,7 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
 
     event_q_put_global( &e );
 
-    event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+    //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
     event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
 
 }
@@ -340,7 +354,7 @@ drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out )
 void drv_video_window_set_title( drv_video_window_t *w, const char *title )
 {
     w->title = title;
-    event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+    //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
     event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
 }
 

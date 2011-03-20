@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "threads"
 #include <debug_ext.h>
-#define debug_level_flow 7
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -90,6 +90,32 @@ hal_start_thread(void (*thread)(void *arg), void *arg, int flags)
     phantom_thread_t *t = phantom_create_thread( thread, arg, flags );
     return t->tid;
 }
+
+
+
+static void
+kernel_thread_starter(void *func)
+{
+    void (*thread)(void) = (void (*)(void))func;
+    thread();
+
+    panic("some kernel thread is dead");
+}
+
+
+void *
+hal_start_kernel_thread(void (*thread)(void))
+{
+    return phantom_create_thread( kernel_thread_starter, thread, THREAD_FLAG_KERNEL );
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -224,6 +250,22 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     t->kstack_top = t->kstack+t->kstack_size-4; // Why -4?
 
     //assert(t->kstack != 0);
+
+    t->owner = 0;
+    t->u = 0;
+    t->thread_flags = 0;;
+
+    t->waitcond = 0;
+
+    hal_spin_init( &(t->waitlock));
+
+    queue_init(&(t->chain));
+    queue_init(&(t->runq_chain));
+
+    t->sw_unlock = 0;
+
+    t->preemption_disabled = 0;
+
 }
 
 

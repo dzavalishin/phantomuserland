@@ -121,6 +121,8 @@ int drv_video_window_get_event( struct drv_video_window *w, struct ui_event *e, 
 //! Returns nonzero if processed event
 int defaultWindowEventProcessor( struct drv_video_window *w, struct ui_event *e );
 
+//! Just for debug
+int get_n_events_in_q(void); 
 
 #endif // EVENT_H
 

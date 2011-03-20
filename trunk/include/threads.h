@@ -122,6 +122,16 @@ int get_thread_flags( struct phantom_thread *t );
 void phantom_scheduler_time_interrupt(void);
 
 
+/**
+ *
+ * Called from interrupt finalizer (when interrupt state
+ * is actually exited, but iret not executed.
+ * Used to switch context, if needed.
+ *
+**/
+
+void phantom_scheduler_soft_interrupt(void);
+
 
 
 
@@ -131,7 +141,7 @@ void    hal_exit_kernel_thread(void);
 
 // returns thread id, does not check for thread death
 int     hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
-int		hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
+int     hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
 
 
 //errno_t hal_set_thread_priority( int tid, int prio );

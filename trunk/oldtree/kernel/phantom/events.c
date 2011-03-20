@@ -61,6 +61,13 @@ static hal_cond_t              have_event;
 // Each main Q event is on one of these qs
 static queue_head_t     unused_events;  // list of unused event structs
 static queue_head_t     main_event_q;  	// list of generated events
+static int		events_in_q = 0;
+
+
+
+int get_n_events_in_q() { return events_in_q; }
+
+
 
 #if 1
 #define MIN_EVENT_POOL  128
@@ -180,8 +187,8 @@ static void put_event(struct ui_event *e)
     if(!event_engine_active) return; // Just ignore
 
     SHOW_FLOW(8, "%p", e);
-
     hal_mutex_lock( &main_q_mutex );
+    events_in_q++;
     queue_enter(&main_event_q, e, struct ui_event *, echain);
     hal_cond_broadcast( &have_event );
     hal_mutex_unlock( &main_q_mutex );
@@ -255,6 +262,7 @@ static void event_push_thread()
             panic("out of events");
 
         queue_remove_first(&main_event_q, e, struct ui_event *, echain);
+        events_in_q--;
         hal_mutex_unlock( &main_q_mutex );
 
         SHOW_FLOW(8, "%p", e);
@@ -386,6 +394,10 @@ static void select_event_target(struct ui_event *e)
 
     e->focus = focused_window;
 
+    // If focused window is being dragged - don't try to change focus - TODO global push_focus_lock/push_focus_lock?
+    if( (focused_window != 0) && (focused_window->state & WSTATE_WIN_DRAGGED) )
+        return;
+
     // Keys are delivered to focused window only
     if( e->type == UI_EVENT_TYPE_KEY )
         return;
@@ -400,6 +412,8 @@ static void select_event_target(struct ui_event *e)
     //hal_spin_lock( &allw_lock );
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
+        if( w->flags & WFLAG_WIN_NOFOCUS )
+            continue;
         if( w->z < wz )
             continue;
 
@@ -491,17 +505,36 @@ ret:
     // Has no own event process thread, serve from here
     if(w != 0 && w->inKernelEventProcess)
     {
-        while(1)
-        {
-            struct ui_event e;
-            int got = drv_video_window_get_event( w, &e, 0 );
+        struct ui_event e;
+        int got = drv_video_window_get_event( w, &e, 0 );
 
-            if(!got)
-                break;
+        while(got)
+        {
+            struct ui_event e2;
+            if( drv_video_window_get_event( w, &e2, 0 ) )
+            {
+                // 2 repaints follow
+                if((e.type == e2.type) && (e.w.info == e2.w.info) && (e.focus == e2.focus))
+                {
+                    if((e.w.info == UI_EVENT_WIN_REPAINT) || (e.w.info == UI_EVENT_WIN_REDECORATE))
+                    {
+                        SHOW_FLOW0( 1, "combined repaint" );
+                        // Choose more powerful spell
+                        e.w.info = UI_EVENT_WIN_REDECORATE;
+                        // Eat one
+                        //e = e2;
+                    continue;
+                    }
+                }
+            }
+            else
+                got = 0;
+
 
             SHOW_FLOW(8, "%p, w=%p, us=%p", &e, e.focus, w);
 
             w->inKernelEventProcess(w, &e);
+            e = e2;
         }
     }
 #endif

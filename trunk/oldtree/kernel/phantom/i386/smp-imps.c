@@ -52,8 +52,8 @@
 static volatile int     smp_ap_booted = 0;
 
 #if 1
-#define CMOS_WRITE_BYTE(x,y)	rtcout(x,y) /* write unsigned char "y" at CMOS loc "x" */
-#define CMOS_READ_BYTE(x)	rtcin(x) /* read unsigned char at CMOS loc "x" */
+#define CMOS_WRITE_BYTE(x,y)	isa_rtc_write_reg(x,y) /* write unsigned char "y" at CMOS loc "x" */
+#define CMOS_READ_BYTE(x)	    isa_rtc_read_reg(x) /* read unsigned char at CMOS loc "x" */
 
 //#define PHYS_TO_VIRTUAL(x)	phystokv(x)	/* convert physical address "x" to virtual */
 //#define VIRTUAL_TO_PHYS(x)	kvtophys(x)     /* convert virtual address "x" to physical */

@@ -2,15 +2,14 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel ready: yes
- * Preliminary: yes (needs cleanup and, possibly, data structures modifiation)
  *
  *
 **/
 
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
 #include <assert.h>
 #include <string.h>
 #include <phantom_libc.h>

@@ -39,3 +39,8 @@ analyse::
 
 rea::
 	splint +gnuextensions +nolib +boolint *.E >ana
+
+-include $(realpath $(PHANTOM_HOME))/local-config.mk
+
+boot:: #all
+	cp oldtree/run/tftp/* $(HW_BOOT_DEST)

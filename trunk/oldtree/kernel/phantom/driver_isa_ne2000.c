@@ -38,7 +38,6 @@
 #include "net.h"
 
 #include <driver_isa_ne2000.h>
-#include <driver_isa_ne2000_priv.h>
 
 #include <errno.h>
 

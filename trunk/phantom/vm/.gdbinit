@@ -17,6 +17,6 @@ break main
 
 break panic
 
-break si_bootstrap_22_set_os_interface
+break videotest
 
 run

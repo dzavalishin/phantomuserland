@@ -24,6 +24,7 @@
 //#include "driver_map.h"
 #include <device.h>
 #include <kernel/drivers.h>
+#include <kernel/vm.h>
 
 #include "driver_pci_pcnet32.h"
 #include "driver_pci_pcnet32_priv.h"

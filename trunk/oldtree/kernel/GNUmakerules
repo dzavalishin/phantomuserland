@@ -185,5 +185,6 @@ distclean: clean
 # Include the dependency graph (if it exists).
 #-include depend
 -include *.d
+-include d/*.d
 
 endif

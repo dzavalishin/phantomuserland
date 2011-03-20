@@ -55,7 +55,7 @@
 #include "net.h"
 #include "udp.h"
 
-//#include <cfg/os.h>
+#include <threads.h>
 #include <stdlib.h>
 #include <string.h>
 

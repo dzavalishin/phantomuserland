@@ -125,7 +125,7 @@ static int _keyboard_read(_key_event *buf, u_int32_t len)
     }
 
     /* clamp the input len value */
-    len = imin(len, keyboard_buf_len - 1);
+    len = umin(len, keyboard_buf_len - 1);
 
 retry:
 #if KEYB_USE_SEMA
@@ -147,16 +147,16 @@ retry:
     } else {
         // copy out of the buffer
         if(head < saved_tail)
-            copy_len = min(len, saved_tail - head);
+            copy_len = umin(len, saved_tail - head);
         else
-            copy_len = min(len, keyboard_buf_len - head);
+            copy_len = umin(len, keyboard_buf_len - head);
         memcpy(buf, &keyboard_buf[head], copy_len * sizeof(_key_event));
         copied_events = copy_len;
         head = (head + copy_len) % keyboard_buf_len;
         if(head == 0 && saved_tail > 0 && copied_events < len) {
             // we wrapped around and have more bytes to read
             // copy the first part of the buffer
-            copy_len = min(saved_tail, len - copied_events);
+            copy_len = umin(saved_tail, len - copied_events);
             memcpy(&buf[copied_events], &keyboard_buf[0], copy_len * sizeof(_key_event));
             copied_events += copy_len;
             head = copy_len;

@@ -20,29 +20,29 @@
 #include <threads.h>
 
 // TEMP! Remove!
-#include <thread_private.h>
+//#include <thread_private.h>
 
 #include <vm/alloc.h>
 
-#include <x86/phantom_pmap.h>
+//#include <x86/phantom_pmap.h>
 //#include <x86/phantom_page.h>
 #include <malloc.h>
 
-#include <i386/proc_reg.h>
-#include <i386/eflags.h>
+//#include <i386/proc_reg.h>
+//#include <i386/eflags.h>
 
 
-#include "hal.h"
+#include <hal.h>
 #include "hal_private.h"
 
-#include "spinlock.h"
+//#include "spinlock.h"
 
-#define volatile /* none */
+//#define volatile /* none */
 
 
 struct hardware_abstraction_level    	hal;
 
-static int _DEBUG = 0;
+//static int _DEBUG = 0;
 
 
 int phantom_is_a_real_kernel() { return 1; }
@@ -77,7 +77,7 @@ vmem_ptr_t hal_object_space_address() {
 }
 
 
-void    hal_halt()
+void hal_halt()
 {
     //fflush(stderr);
     printf("\n\nhal halt called, exiting.\n");
@@ -86,9 +86,10 @@ void    hal_halt()
 }
 
 
+//void hal_printf( char *format, ... ) __attribte__((__deprecated__));
 
 
-void        hal_printf( char *format, ... )
+void hal_printf( char *format, ... )
 {
     va_list argList;
     va_start(argList, format);
@@ -99,7 +100,7 @@ void        hal_printf( char *format, ... )
 
 #include <sys/syslog.h>
 
-void        hal_log( char *format, ... )
+void hal_log( char *format, ... )
 {
     va_list argList;
     va_start(argList, format);
@@ -157,47 +158,6 @@ hal_page_control(
 }
 
 
-
-void
-hal_page_control_etc(
-                     physaddr_t  p, void *page_start_addr,
-                     page_mapped_t mapped, page_access_t access,
-                     u_int32_t flags
-                )
-{
-    assert(PAGE_ALIGNED(p));
-    assert(PAGE_ALIGNED((unsigned)page_start_addr));
-    assert((flags & INTEL_PTE_PFN) == 0);
-
-    if(mapped != page_map) access = page_noaccess;
-
-    int bits = INTEL_PTE_USER | flags; // We need it for V86 mode - REDO IN A MORE SPECIFIC WAY, so that only VM86 pages are user accessible
-
-    if(mapped == page_map)
-        bits |= INTEL_PTE_VALID;
-
-    if(mapped == page_map_io)
-        bits |= INTEL_PTE_VALID|INTEL_PTE_WTHRU|INTEL_PTE_NCACHE;
-
-    if(access == page_rw)
-        bits |= INTEL_PTE_WRITE;
-
-    pt_entry_t	pte;
-
-    pte = create_pte(p, bits);
-
-    if(_DEBUG) hal_printf("Mapping VA 0x%X to PA 0x%X, pte is 0x%X\n",
-                          page_start_addr, p, (long)pte );
-
-    if(mapped != page_unmap )
-        phantom_map_page( (linaddr_t)page_start_addr, pte );
-    else
-        phantom_unmap_page( (linaddr_t)page_start_addr );
-    ftlbentry((int)page_start_addr);
-}
-
-
-
 void
 hal_pages_control( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapped, page_access_t access )
 {
@@ -230,56 +190,9 @@ hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapp
 
 // -----------------------------------------------------------------------
 //
-// threads
+// assert
 //
 // -----------------------------------------------------------------------
-
-static void
-kernel_thread_starter(void *func)
-{
-    void (*thread)(void) = (void (*)(void))func;
-    thread();
-
-    panic("some kernel thread is dead");
-}
-
-
-void*
-hal_start_kernel_thread(void (*thread)(void))
-{
-    return phantom_create_thread( kernel_thread_starter, thread, THREAD_FLAG_KERNEL );
-}
-
-
-
-
-
-
-
-
-
-
-
-/*
-void
-hal_dump(char *data, int len)
-{
-    int i;
-    for( i = 0; i < len; i++)
-    {
-        if( (i != 0) && (0 == (i % 64)) )
-            printf("\n");
-        int c = *data;
-        if( c < ' ' ) c = '.';
-        //printf("%c.%02X ", c, *data++ );
-        printf("%c", *data++ );
-    }
-}
-
-*/
-
-
-
 
 
 

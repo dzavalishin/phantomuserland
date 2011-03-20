@@ -35,6 +35,8 @@ static int paging_inited = 0;
 
 void phantom_paging_init(void)
 {
+    set_cr0( get_cr0() | CR0_WP );
+
     // On ia32 - allocate all the possible page tables, for simplicity
     extern char phantom_pdir_mem[];
     extern char phantom_ptab_mem[];

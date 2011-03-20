@@ -10,6 +10,9 @@
 # define HAVE_STRAY 0
 #endif
 
+#define DRIVE_SCHED_FROM_RTC 0
+
+
 
 #ifndef COMPILE_EXPERIMENTAL
 #define COMPILE_EXPERIMENTAL 0

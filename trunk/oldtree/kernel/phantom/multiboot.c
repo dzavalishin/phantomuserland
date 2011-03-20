@@ -53,8 +53,14 @@ struct multiboot_info bootParameters;
 static void make_mem_map(void);
 
 void
-phantom_multiboot_main(physaddr_t multibootboot_info_pa)
+phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
 {
+    if( cookie == 0x36d76289 )
+    {
+        printf("Not multiboot2 ready!");
+        while(1)
+            ;
+    }
 
     bootParameters = *(struct multiboot_info*)phystokv(multibootboot_info_pa);
 
@@ -106,6 +112,13 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa)
     	SHOW_ERROR0(0, "FAIL: Constructors failed!");
     else
     	SHOW_FLOW0( 7, "Constructors OK!");
+
+
+    printf("mb1 %s video: mode %d\n",
+           ((bootParameters.flags & MULTIBOOT_VIDEO_INFO) ? "have" : "no"),
+           bootParameters.vbe_mode
+          );
+    
 
     phantom_parse_cmd_line();
 

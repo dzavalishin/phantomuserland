@@ -270,7 +270,7 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
         int is_write = ts->err & T_PF_WRITE;
 #endif
 #ifdef ARCH_arm
-        addr_t ip = ts->ip;
+        addr_t ip = ts->pc;
 #  warning find out if it was a write op
         int is_write = 0;
 #endif

@@ -16,6 +16,7 @@ phantom_bus_t etc_bus =
 {
     "etc", PHANTOM_BUS_TYPE_UNKNOWN,
     0, 0, 0,
+    0, 0, 0, 0, 0, 0, // r/w 32-16-8
 };
 
 
@@ -23,6 +24,7 @@ phantom_bus_t pci_bus =
 {
     "pci", PHANTOM_BUS_TYPE_PCI,
     0, 0, &etc_bus,
+    0, 0, 0, 0, 0, 0, // r/w 32-16-8
 };
 
 
@@ -30,6 +32,7 @@ phantom_bus_t isa_bus =
 {
     "isa", PHANTOM_BUS_TYPE_ISA,
     0, 0, &pci_bus,
+    0, 0, 0, 0, 0, 0, // r/w 32-16-8
 };
 
 
@@ -38,6 +41,7 @@ phantom_bus_t root_bus =
 {
     "root", PHANTOM_BUS_TYPE_ROOT,
     0, &isa_bus, 0,
+    0, 0, 0, 0, 0, 0, // r/w 32-16-8
 };
 
 
