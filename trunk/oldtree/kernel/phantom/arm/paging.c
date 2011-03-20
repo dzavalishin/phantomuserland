@@ -43,6 +43,7 @@
 #define debug_level_info 10
 
 #include <kernel/config.h>
+#include <kernel/init.h>
 #include <malloc.h>
 #include <phantom_libc.h>
 
@@ -51,8 +52,11 @@
 #include <hal.h>
 #include <machdep.h>
 
-typedef pd_entry_t u_int32_t;
-typedef pt_entry_t u_int32_t;
+//typedef pd_entry_t u_int32_t;
+//typedef pt_entry_t u_int32_t;
+
+typedef u_int32_t pd_entry_t;
+typedef u_int32_t pt_entry_t;
 
 
 static __inline__ pd_entry_t pa_to_pde(physaddr_t pa)
@@ -64,6 +68,9 @@ static __inline__ pd_entry_t pa_to_pde(physaddr_t pa)
     // domain is left ot be zero
     return e;
 }
+
+static void phantom_paging_start(void);
+
 
 static pd_entry_t *pdir;
 static pt_entry_t *ptabs;
@@ -97,6 +104,8 @@ void phantom_paging_init(void)
         ptep += ARM_PT_SIZE;
     }
 
+    // TODO Set the Domain Access register. Get from entry.S
+
     // needed by phantom_map_mem_equally();
     paging_inited = 1;
 
@@ -106,18 +115,15 @@ void phantom_paging_init(void)
 }
 
 
-void phantom_paging_start(void)
+static void phantom_paging_start(void)
 {
-
-    set_cr3((int)pdir);
-
     // Set pagedir address
     asm volatile("                           \
                  mcr p15, 0, %0, C2, C0, 0  ;\
                  " : : "r" ((int)pdir));
 
 
-    // s=1&r=0 s is 8
+    // s=1&r=0 s is bit 8
     // TODO - d cache enable? ORR R1, #0x4
     // TODO - i cache enable? ORR R1, #(1<<12)
     // TODO before enabling cache add invalidation logic to invlpg below!
@@ -166,7 +172,7 @@ static __inline__ void invlpg(addr_t start)
 // Find PTE for given lin addr
 // Since our map is in one piece (all page tables are following each other),
 // we can do it remarkably easy!
-#define get_pte( la ) (ptabs + lin2lin_ptenum(la))
+#define get_pte( la ) (ptabs + lin2linear_ptenum(la))
 
 
 void phantom_map_page(linaddr_t la, pt_entry_t mapping )
