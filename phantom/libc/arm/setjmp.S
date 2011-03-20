@@ -9,7 +9,7 @@
 ENTRY(setjmp)
 	/* Store fp registers * /
 	sfm	f4, 4, [r0], #48
-	/* Store fpsr * /
+	// Store fpsr 
 	rfs	r1
 	str	r1, [r0], #0x0004
 	*/
@@ -21,7 +21,7 @@ ENTRY(setjmp)
 ENTRY(longjmp)
 	/* Restore fp registers * /
 	lfm	f4, 4, [r0], #48
-	/* Restore fpsr * /
+	// Restore fpsr 
 	ldr	r4, [r0], #0x0004
 	wfs	r4
 	*/
