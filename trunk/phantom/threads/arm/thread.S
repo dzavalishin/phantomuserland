@@ -73,7 +73,7 @@ ENTRY(phantom_switch_context)
 
 
         
-#if 0
+#if 1
     /**
      * new thread starts here with
      *   r4 -> r0 = func
@@ -88,7 +88,7 @@ ENTRY(phantom_thread_trampoline)
     mov         r1, r5 // arg
     mov         r2, r6 // thread struct addr
     // Just jump there
-    b           EXT(phantom_thread_c_starter)
+    b           _C_LABEL(phantom_thread_c_starter)
     //hlt // not reached
 
 

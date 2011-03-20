@@ -141,3 +141,11 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 
 #endif
 
+
+
+void dump_thread_stack(phantom_thread_t *t)
+{
+    void *fp = (void *)t->cpu.fp;
+    printf("Thread %d IP 0x%08X, ", t->tid, t->cpu.ip);
+    stack_dump_from(fp);
+}
