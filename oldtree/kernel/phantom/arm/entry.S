@@ -9,6 +9,7 @@
 **/
 
 #include <arm/psr.h>
+#include <arm/asm.h>
 
 // todo: save contents of registers r1 and r2 in r7 and r8 to save off architecture ID and atags pointer passed in by bootloader 
 
@@ -45,8 +46,7 @@ _trap_e_reset:
 
     LDR         r1, = __bss_start__
     LDR         r2, = __bss_end__
-    //LDR         r3, #0
-	MOV         r3, #0
+    MOV         r3, #0
 
 1:
     CMP         r1, r2
@@ -74,6 +74,12 @@ _trap_e_reset:
     LDR         sp, = __cmain_stack_top__
 
 
+
+    // Set the Domain Access register. TODO move to paging start code
+    // 0101b repeated = 5
+    ldr     	r0, = 0x55555555
+    mcr		p15, 0, r0, c3, c0, 0
+
     // Call main
 
     //LDR         r12, = EXT(phantom_multiboot_main)
@@ -82,12 +88,20 @@ _trap_e_reset:
     MOV         lr, pc
     BX          r12
 
+    // No return supposed, die somehow
     // Cause exception - TODO call some kind of hard reboot
-    SWI         0xFFFFFF
+    //SWI         0xFFFFFF
+    adr		r0, .Lmainreturned
+    mov         lr, pc // attempt to return will bring here
+    b		_C_LABEL(panic)
+    /* NOTEACHED */
 
 
     .data
     .align 12 // TODO use page size define
+
+.Lmainreturned:
+	.asciz	"main() returned"
 
     .bss
     .align 12 // TODO use page size define
@@ -117,6 +131,36 @@ __cmain_stack_top__:
 
 
 
+/**
+ *
+ * General idea is:
+ *
+ * - save R0-R6 to whatever stack we got
+ *
+ * - put specific data to R3 (swi code, for example)
+ * - put trap number (index in trap array) to R4
+ * - put LR we got to R2, correcting it as needed
+ *
+ *
+ * ! jump to alltraps
+ *
+ * - put SPSR (old PSR) to R0
+ * - put SP we have to R1
+ * - switch to SYS32 mode (and to it's stack, sure) - KEEP interrupts closed!
+ *
+ * - leave R5 as scratch for later code
+ *
+ * - find if we're from user mode, if so - switch to curr thread's kernel stack, saving old stack in R6
+ *
+ * - Get stuff off the stack we used before (R1 keeps its SP now) and build return record and trap_state on actual stack
+ *
+ * ? Do smthng with FP (R11)
+ *
+ * - Still with ints closed call C handler, passing trap_state address in R0
+ *
+ * - Cleanup junk and leave trap
+ *
+**/
 
 
 
@@ -124,9 +168,165 @@ __cmain_stack_top__:
 
 
 _trap_e_undef:
+    push        {r0-r6}
+    mov         r4, #1
+    mov         r2, lr
+    b           alltraps
+
+_trap_e_syscall:
+    push        {r0-r6}
+
+    // read SWI instruction to R3
+    ldr         r3, [ lr, #-4 ]
+
+    mov         r4, #2
+    mov         r2, lr
+    b           alltraps
+
+_trap_e_prefetch_abort:
+    push        {r0-r6}
+    mov         r4, #3
+    sub         r2, lr, #4 // ret one instr back
+    b           alltraps
+
+_trap_e_data_abort:
+    push        {r0-r6}
+    mov         r4, #4
+    sub         r2, lr, #8 // ret 2 instr back
+    b           alltraps
+
+_trap_e_addrexc:
+    push        {r0-r6}
+    mov         r4, #5
+    mov         r2, lr // TODO fix lr?
+    b           alltraps
+
+_trap_e_irq:
+    push        {r0-r6}
+    mov         r4, #6
+    sub         r2, lr, #4 // ret one instr back
+    b           alltraps
+
+_trap_e_fiq:
+    push        {r0-r6}
+    mov         r4, #7
+    sub         r2, lr, #4 // ret one instr back
+    b           alltraps
+
+
+
+
+alltraps:
+
+    mrs		r0, spsr_all		// Save spsr
+    mov         r1, sp
+
+    // switch to SYS mode
+
+    mrs     	r5, cpsr_all
+    bic     	r5, r5, #(PSR_MODE)
+    orr     	r5, r5, #(PSR_SYS32_MODE|I_BIT|F_BIT)
+    msr     	cpsr_all, r5	   
+
+    and         r5, r0, #(PSR_MODE)     // Extract mode bits
+    subs        r5, r5, #(PSR_USR32_MODE)
+    bne         not_user
+
+    // TODO here we have to load cur thread's kernel stack top to SP
+
+    // TODO Set it up in thread switch code. Not so easy on SMP :(
+    mov         r6, sp
+//.global curr_thread_k0_stack_top
+//    LDR         r5, =curr_thread_k0_stack_top
+//    mov         SP, [r5]
+
+not_user:
+
+    // We're on a steady stack now.
+
+    // Lets build exception return frame first - ? No.
+
+    // Build trap_state
+
+    push        {r0}          // SPSR
+    push        {r2}          // LR = his PC
+
+    push        {r3}          // Specific info - fro swi it's swi instruction itself
+    push        {r4}          // trapno
+
+    push        {lr}  	    // user mode lr
+    push        {r6}  	    // user mode sp we saved above when switched to kernel stack - or junk
+
+    push        {r7-r12}    // Now save the rest of user's registers, at last
+
+    // Now we're free to use R7-R10 (11 is FP, 12 is not saved by callee)
+
+    mov         r7, r1      // This is the stack pointer we used to store original R0-R6
+
+    ldmfd       r7, {r0-r6} // Get 'em back, don't bother to update R7
+    push        {r0-r6}     // Now re-store to correct stack
+
+    // Do smth with FP? Clear, at least?
+    mov         r11, #0
+
+    //mov         r10, sp     // r10 is callee saved, store trap_state there for us
+    mov         r0, sp      // here is the arg to C function - address of struct trap_state we just built
+    bl          _C_LABEL(arm_trap)
+
+    // Here we have R10 pointing to struct trap_state, and most of the other registers are free to be used
+
+    // Turn off IRQ/FIQ
+    mrs     	r5, cpsr_all
+    orr     	r5, r5, #(I_BIT|F_BIT)
+    msr     	cpsr_all, r5	   
+
+    // Will return through SVC mode
+
+    LDR         r9, = __svc_stack_top__
+
+    ldmia	sp!, {r0-r6} // Get from our trap_state
+    stmdb       r9!, {r0-r6}  // push to SVC stack
+
+    ldmia	sp!, {r7-r12} // This is final, don't touch 'em anymore
+
+    // Now we can use just R0-6
+
+    ldmia	sp!, {r1-r6} // Get special stuff: R6=spsr, R5=lr, R4=intno (ignore), R3=trapno (ignore), R2=usr_lr, R1=usr_sp
+
+    // That's all , now old SP is unused and will be overwritten below
+
+    mov         lr, r2
+    mov         sp, r1
+
+    MSR         CPSR_c, #(PSR_SVC32_MODE | I_BIT | F_BIT)
+
+    msr     	spsr, r6
+    mov         lr, r5
+
+    pop         {r0-r6}
+
+    // move lr to pc and spsr to cpsr
+    movs        pc, lr
+
+    // Finita
+
+
+#if 0
+
+
+
+_trap_e_undef:
 
 _trap_e_syscall:
     push        {r0-r12}
+
+    mrs		r0, spsr_all		// Save spsr
+    mov         r1, sp
+    mov         r2, lr
+    push        {r0-r2}
+
+    mrs     r2, cpsr_all 		/* Get the CPSR */
+
 
     // read SWI instruction to R3
     ldr         r3, [ lr, #-4 ]
@@ -168,7 +368,7 @@ alltraps:
 
 
 
-
+#endif
 
 #if 0
 
