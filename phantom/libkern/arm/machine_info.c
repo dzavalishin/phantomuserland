@@ -24,7 +24,7 @@
 
 int detect_cpu(int curr_cpu)
 {
-	printf("CPU %d: features: %s\n", curr_cpu, cpu->arch.feature_string);
+	//printf("CPU %d: features: %s\n", curr_cpu, cpu->arch.feature_string);
 #warning implement
 	return 0;
 }
@@ -35,7 +35,7 @@ int detect_cpu(int curr_cpu)
 
 int boot_cpu_has_apic(void)
 {
-	SHOW_ERROR0( 0, "Request for APIC existance on arm" );
+    SHOW_ERROR0( 0, "Request for APIC existance on arm" );
     return 0;
 }
 
