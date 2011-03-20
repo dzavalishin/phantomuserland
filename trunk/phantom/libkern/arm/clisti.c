@@ -24,6 +24,7 @@
 void hal_wait_for_interrupt(void)
 {
     hal_sti();
+    // TODO ARM9 has "MCR p15,0,Rd,c7,c0,4" wait for interrupt
     __asm __volatile("wfi" : : );
 }
 
