@@ -43,6 +43,7 @@ void phantom_timed_call_init(void)
 
 static void do_request_timed_call( timedcall_t *newEntry, u_int32_t flags )
 {
+    assert(!hal_is_sti());
 
     // Still call it later - for any case :)
     if( newEntry->msecLater < 0 ) newEntry->msecLater = 0;
@@ -175,7 +176,7 @@ void phantom_request_timed_func( timedcall_func_t f, void *arg, int msecLater, u
 
 static void dputc(char c)
 {
-#if debug_level_flow > 2
+#if 0 || debug_level_flow > 2
     putchar(c);
 #else
     (void) c;
@@ -192,6 +193,7 @@ void phantom_process_timed_calls()
 {
     if(!inited) return;
 
+    int ie = hal_save_cli();
     hal_spin_lock( &timedcall_lock );
     dputc('.');
 
@@ -232,11 +234,14 @@ again:
             next_ep->msecMore += ep->msecMore;
         }
 
-		// It is not supposed that callee will sleep, but for any case
-		// unlock the spinlock
+        // It is not supposed that callee will sleep, but for any case
+        // unlock the spinlock
     	hal_spin_unlock( &timedcall_lock );
+        //if(ie) hal_sti();
         // call
         if(ep->f) ep->f(ep->arg);
+        //ie =
+        hal_save_cli(); // Just cli!
     	hal_spin_lock( &timedcall_lock );
 
         // reattach? free?
@@ -259,6 +264,9 @@ again:
 
 unlock:
     hal_spin_unlock( &timedcall_lock );
+    if(ie) hal_sti();
+
+    dputc('_');
 }
 
 

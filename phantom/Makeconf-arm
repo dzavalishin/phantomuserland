@@ -1,4 +1,4 @@
-ARCH_FLAGS      =
+ARCH_FLAGS      = -msoft-float
 
 
 BIN_PREFIX=arm-elf-

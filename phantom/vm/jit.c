@@ -110,13 +110,13 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
 
         unsigned char instruction = pvm_code_get_byte(&(da->code));
-        //hal_printf("instr 0x%02X ", instruction);
+        //printf("instr 0x%02X ", instruction);
 
 
         switch(instruction)
         {
         case opcode_nop:
-            //if( debug_print_instr ) hal_printf("nop; ");
+            //if( debug_print_instr ) printf("nop; ");
             break;
 
         case opcode_debug:
@@ -124,30 +124,30 @@ errno_t pvm_jit(struct pvm_object current_thread)
             {
                 int type = pvm_code_get_byte(&(da->code)); //cf->cs.get_instr( cf->IP );
 
-                //hal_printf("\n\nDebug 0x%02X", type );
+                //printf("\n\nDebug 0x%02X", type );
                 if( type & 0x80 )
                 {
-                    //hal_printf(" (" );
+                    //printf(" (" );
                     pvm_object_t o = pvm_code_get_string(&(da->code));
                     //pvm_object_print(o);
                     ref_dec_o(o);
-                    //hal_printf(")" );
+                    //printf(")" );
                 }
 
                 if( type & 0x01 ) debug_print_instr = 1;
                 if( type & 0x02 ) debug_print_instr = 0;
 
                 /*
-                if( is_empty() ) hal_printf(", istack empty");
-                else                    hal_printf(",\n\tistack top = %d", is_top() );
-                if( os_empty() ) hal_printf(", ostack empty");
+                if( is_empty() ) printf(", istack empty");
+                else                    printf(",\n\tistack top = %d", is_top() );
+                if( os_empty() ) printf(", ostack empty");
                 else
                 {
-                    hal_printf(",\n\tostack top = {" );
+                    printf(",\n\tostack top = {" );
                     pvm_object_print( os_top() );
-                    hal_printf("}" );
+                    printf("}" );
                 }
-                hal_printf(";\n\n");
+                printf(";\n\n");
                 */
             }
 
@@ -157,7 +157,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             // int stack ops ---------------------------------------
 
         case opcode_is_dup:
-            if( debug_print_instr ) hal_printf("is dup; ");
+            if( debug_print_instr ) printf("is dup; ");
             {
                 //is_push(is_top());
                 jit_is_top( j ); // AX = stack top
@@ -166,20 +166,20 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_is_drop:
-            if( debug_print_instr ) hal_printf("is drop; ");
+            if( debug_print_instr ) printf("is drop; ");
             //is_pop();
             jit_is_pop( j );
             break;
 
         case opcode_iconst_0:
-            if( debug_print_instr ) hal_printf("iconst 0; ");
+            if( debug_print_instr ) printf("iconst 0; ");
             //is_push(0);
             jit_iconst( j, 0 ); // mov 0, %ax
             jit_is_push( j );// push AX
             break;
 
         case opcode_iconst_1:
-            if( debug_print_instr ) hal_printf("iconst 1; ");
+            if( debug_print_instr ) printf("iconst 1; ");
             //is_push(1);
             jit_iconst( j, 1 ); // mov 1, %ax
             jit_is_push( j );// push AX
@@ -191,7 +191,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
                 //is_push(v);
                 jit_iconst( j, v ); // mov v, %ax
                 jit_is_push( j );// push AX
-                if( debug_print_instr ) hal_printf("iconst8 = %d; ", v);
+                if( debug_print_instr ) printf("iconst8 = %d; ", v);
                 break;
             }
 
@@ -201,13 +201,13 @@ errno_t pvm_jit(struct pvm_object current_thread)
                 //is_push(v);
                 jit_iconst( j, v ); // mov v, %ax
                 jit_is_push( j );// push AX
-                if( debug_print_instr ) hal_printf("iconst32 = %d; ", v);
+                if( debug_print_instr ) printf("iconst32 = %d; ", v);
                 break;
             }
 
 
         case opcode_isum:
-            if( debug_print_instr ) hal_printf("isum; ");
+            if( debug_print_instr ) printf("isum; ");
             /*{
                 //int add = is_pop();
                 //is_push( is_pop() + add );
@@ -221,7 +221,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_imul:
-            if( debug_print_instr ) hal_printf("imul; ");
+            if( debug_print_instr ) printf("imul; ");
             {
                 //int mul = is_pop();
                 //is_push( is_pop() * mul );
@@ -230,7 +230,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_isubul:
-            if( debug_print_instr ) hal_printf("isubul; ");
+            if( debug_print_instr ) printf("isubul; ");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -239,7 +239,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_isublu:
-            if( debug_print_instr ) hal_printf("isublu; ");
+            if( debug_print_instr ) printf("isublu; ");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -248,7 +248,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_idivul:
-            if( debug_print_instr ) hal_printf("idivul; ");
+            if( debug_print_instr ) printf("idivul; ");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -257,7 +257,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_idivlu:
-            if( debug_print_instr ) hal_printf("idivlu; ");
+            if( debug_print_instr ) printf("idivlu; ");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -266,25 +266,25 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_ior:
-            if( debug_print_instr ) hal_printf("ior; ");
+            if( debug_print_instr ) printf("ior; ");
             //{ int operand = is_pop();	is_push( is_pop() | operand ); }
             jit_binary_op( j, jit_gen_binor );
             break;
 
         case opcode_iand:
-            if( debug_print_instr ) hal_printf("iand; ");
+            if( debug_print_instr ) printf("iand; ");
             //{ int operand = is_pop();	is_push( is_pop() & operand ); }
             jit_binary_op( j, jit_gen_binand );
             break;
 
         case opcode_ixor:
-            if( debug_print_instr ) hal_printf("ixor; ");
+            if( debug_print_instr ) printf("ixor; ");
             //{ int operand = is_pop();	is_push( is_pop() ^ operand ); }
             jit_binary_op( j, jit_gen_binxor );
             break;
 
         case opcode_inot:
-            if( debug_print_instr ) hal_printf("inot; ");
+            if( debug_print_instr ) printf("inot; ");
             //{ int operand = is_pop();	is_push( ~operand ); }
             jit_unary_op( j, jit_gen_binnot );
             break;
@@ -292,7 +292,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
 
         case opcode_log_or:
-            if( debug_print_instr ) hal_printf("lor; ");
+            if( debug_print_instr ) printf("lor; ");
             /*{
                 int o1 = is_pop();
                 int o2 = is_pop();
@@ -302,7 +302,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_log_and:
-            if( debug_print_instr ) hal_printf("land; ");
+            if( debug_print_instr ) printf("land; ");
             /*{
                 int o1 = is_pop();
                 int o2 = is_pop();
@@ -312,7 +312,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_log_xor:
-            if( debug_print_instr ) hal_printf("lxor; ");
+            if( debug_print_instr ) printf("lxor; ");
             /*{
                 int o1 = is_pop() ? 1 : 0;
                 int o2 = is_pop() ? 1 : 0;
@@ -322,7 +322,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_log_not:
-            if( debug_print_instr ) hal_printf("lnot; ");
+            if( debug_print_instr ) printf("lnot; ");
             /*{
                 int operand = is_pop();
                 is_push( !operand );
@@ -332,22 +332,22 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
 
         case opcode_ige:	// >=
-            if( debug_print_instr ) hal_printf("ige; ");
+            if( debug_print_instr ) printf("ige; ");
             //{ int operand = is_pop();	is_push( is_pop() >= operand ); }
             jit_binary_op( j, jit_gen_ige );
             break;
         case opcode_ile:	// <=
-            if( debug_print_instr ) hal_printf("ile; ");
+            if( debug_print_instr ) printf("ile; ");
             //{ int operand = is_pop();	is_push( is_pop() <= operand ); }
             jit_binary_op( j, jit_gen_ile );
             break;
         case opcode_igt:	// >
-            if( debug_print_instr ) hal_printf("igt; ");
+            if( debug_print_instr ) printf("igt; ");
             //{ int operand = is_pop();	is_push( is_pop() > operand ); }
             jit_binary_op( j, jit_gen_igt );
             break;
         case opcode_ilt:	// <
-            if( debug_print_instr ) hal_printf("ilt; ");
+            if( debug_print_instr ) printf("ilt; ");
             //{ int operand = is_pop();	is_push( is_pop() < operand ); }
             jit_binary_op( j, jit_gen_ilt );
             break;
@@ -355,7 +355,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
 
         case opcode_i2o:
-            if( debug_print_instr ) hal_printf("i2o; ");
+            if( debug_print_instr ) printf("i2o; ");
             //os_push(pvm_create_int_object(is_pop()));
             jit_is_pop( j );// is pop -> AX
             jit_gen_call( j, JIT_F_CREATE_INT_OBJ ); // pvm_create_int_object
@@ -363,7 +363,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_o2i:
-            if( debug_print_instr ) hal_printf("o2i; ");
+            if( debug_print_instr ) printf("o2i; ");
             {
                 //struct pvm_object o = os_pop();
                 //if( o.data == 0 ) pvm_exec_panic("o2i(null)");
@@ -379,7 +379,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
 
         case opcode_os_eq:
-            if( debug_print_instr ) hal_printf("os eq; ");
+            if( debug_print_instr ) printf("os eq; ");
             {
                 //struct pvm_object o1 = os_pop();
                 //struct pvm_object o2 = os_pop();
@@ -403,7 +403,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             }
 
         case opcode_os_neq:
-            if( debug_print_instr ) hal_printf("os neq; ");
+            if( debug_print_instr ) printf("os neq; ");
             {
                 /*
                 struct pvm_object o1 = os_pop();
@@ -430,7 +430,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             }
 
         case opcode_os_isnull:
-            if( debug_print_instr ) hal_printf("isnull; ");
+            if( debug_print_instr ) printf("isnull; ");
             {
                 struct pvm_object o1 = os_pop();
                 is_push( pvm_is_null( o1 ) );
@@ -449,7 +449,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             }
 
         case opcode_os_push_null:
-            if( debug_print_instr ) hal_printf("push null; ");
+            if( debug_print_instr ) printf("push null; ");
             {
                 //os_push( pvm_get_null_object() );
                 jit_get_null( j );// AX = 0 DX = 0
@@ -461,21 +461,21 @@ errno_t pvm_jit(struct pvm_object current_thread)
             // summoning, special ----------------------------------------------------
 
         case opcode_summon_null:
-            if( debug_print_instr ) hal_printf("push null; ");
+            if( debug_print_instr ) printf("push null; ");
             //os_push( pvm_get_null_object() ); // TODO BUG: so what opcode_os_push_null is for then?
             jit_get_null( j );// AX = 0 DX = 0
             jit_os_push( j );// push AX, DX
             break;
 
         case opcode_summon_thread:
-            if( debug_print_instr ) hal_printf("summon thread; ");
+            if( debug_print_instr ) printf("summon thread; ");
             //os_push( ref_inc_o( current_thread ) );
             jit_get_thread( j );// AX, DX = thread ptr
             jit_os_push( j );// push AX, DX
             break;
 
         case opcode_summon_this:
-            if( debug_print_instr ) hal_printf("summon this; ");
+            if( debug_print_instr ) printf("summon this; ");
             //os_push( ref_inc_o( this_object() ) );
             jit_get_this( j );// AX, DX = this ptr
             jit_refinc( j, JIT_R_AX );
@@ -483,7 +483,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_summon_class_class:
-            if( debug_print_instr ) hal_printf("summon class class; ");
+            if( debug_print_instr ) printf("summon class class; ");
             // it has locked refcount
             //os_push( pvm_get_class_class() );
             jit_get_class_class( j );// AX, DX = ptr
@@ -491,7 +491,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_summon_interface_class:
-            if( debug_print_instr ) hal_printf("summon interface class; ");
+            if( debug_print_instr ) printf("summon interface class; ");
             // locked refcnt
             //os_push( pvm_get_interface_class() );
             jit_get_iface_class( j );// AX, DX = ptr
@@ -499,7 +499,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_summon_code_class:
-            if( debug_print_instr ) hal_printf("summon code class; ");
+            if( debug_print_instr ) printf("summon code class; ");
         	// locked refcnt
             //os_push( pvm_get_code_class() );
             jit_get_code_class( j );// AX, DX = thread ptr
@@ -507,7 +507,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_summon_int_class:
-            if( debug_print_instr ) hal_printf("summon int class; ");
+            if( debug_print_instr ) printf("summon int class; ");
         	// locked refcnt
             //os_push( pvm_get_int_class() );
             jit_get_int_class( j );// AX, DX = thread ptr
@@ -515,7 +515,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_summon_string_class:
-            if( debug_print_instr ) hal_printf("summon string class; ");
+            if( debug_print_instr ) printf("summon string class; ");
             // locked refcnt
             //os_push( pvm_get_string_class() );
             jit_get_string_class( j );// AX, DX = thread ptr
@@ -523,7 +523,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_summon_array_class:
-            if( debug_print_instr ) hal_printf("summon array class; ");
+            if( debug_print_instr ) printf("summon array class; ");
         	// locked refcnt
             //os_push( pvm_get_array_class() );
             jit_get_array_class( j );// AX, DX = thread ptr
@@ -533,14 +533,14 @@ errno_t pvm_jit(struct pvm_object current_thread)
         case opcode_summon_by_name:
             {
 #error do it
-                if( debug_print_instr ) hal_printf("summon by name; ");
+                if( debug_print_instr ) printf("summon by name; ");
                 struct pvm_object name = pvm_code_get_string(&(da->code));
                 struct pvm_object cl = pvm_exec_lookup_class_by_name( name );
                 ref_dec_o(name);
                 // TODO: Need throw here?
                 if( pvm_is_null( cl ) ) {
                     pvm_exec_panic("summon by name: null class");
-                    //hal_printf("summon by name: null class");
+                    //printf("summon by name: null class");
                     //pvm_exec_do_throw(da);
                     break;
                 }
@@ -559,7 +559,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
 
         case opcode_new:
-            if( debug_print_instr ) hal_printf("new; ");
+            if( debug_print_instr ) printf("new; ");
             {
                 //pvm_object_t cl = os_pop();
                 //os_push( pvm_create_object( cl ) );
@@ -572,7 +572,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_copy:
-            if( debug_print_instr ) hal_printf("copy; ");
+            if( debug_print_instr ) printf("copy; ");
             {
                 //pvm_object_t o = os_pop();
                 //os_push( pvm_copy_object( o ) );
@@ -591,7 +591,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             // compose/decompose
 #if 0
         case opcode_os_compose32:
-            if( debug_print_instr ) hal_printf(" compose32; ");
+            if( debug_print_instr ) printf(" compose32; ");
             {
                 int num = pvm_code_get_int32(&(da->code));
                 struct pvm_object in_class = os_pop();
@@ -600,7 +600,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_os_decompose:
-            if( debug_print_instr ) hal_printf(" decompose; ");
+            if( debug_print_instr ) printf(" decompose; ");
             {
                 struct pvm_object to_decomp = os_pop();
                 int num = da_po_limit(to_decomp.data);
@@ -619,7 +619,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
         case opcode_sconst_bin:
 #error
-            if( debug_print_instr ) hal_printf("sconst bin; ");
+            if( debug_print_instr ) printf("sconst bin; ");
             //os_push(pvm_code_get_string(&(da->code)));
             {
                 int constid = jit_alloc_string_const( j, pvm_code_get_string( &(da->code) ) );
@@ -636,7 +636,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
         case opcode_jmp:
             {
                 int newip = pvm_code_get_rel_IP_as_abs(&(da->code));
-                if( debug_print_instr ) hal_printf("jmp %d; ", newip );
+                if( debug_print_instr ) printf("jmp %d; ", newip );
                 //da->code.IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 jit_jump( newip );
             }
@@ -646,25 +646,25 @@ errno_t pvm_jit(struct pvm_object current_thread)
         case opcode_djnz:
             {
 #error impl
-                if( debug_print_instr ) hal_printf("djnz " );
+                if( debug_print_instr ) printf("djnz " );
                 int new_IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 //is_top()--;
                 is_push( is_pop() - 1 );
                 if( is_top() ) da->code.IP = new_IP;
 
-                if( debug_print_instr ) hal_printf("(%d) -> %d; ", is_top() , new_IP );
+                if( debug_print_instr ) printf("(%d) -> %d; ", is_top() , new_IP );
             }
             break;
 
         case opcode_jz:
             {
 #error impl
-                if( debug_print_instr ) hal_printf("jz " );
+                if( debug_print_instr ) printf("jz " );
                 int new_IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 int test = is_pop();
                 if( !test ) da->code.IP = new_IP;
 
-                if( debug_print_instr ) hal_printf("(%d) -> %d; ", test , new_IP );
+                if( debug_print_instr ) printf("(%d) -> %d; ", test , new_IP );
             }
             break;
 
@@ -672,31 +672,31 @@ errno_t pvm_jit(struct pvm_object current_thread)
         case opcode_switch:
             {
 #error impl
-                if( debug_print_instr ) hal_printf("switch ");
+                if( debug_print_instr ) printf("switch ");
                 unsigned int tabsize    = pvm_code_get_int32(&(da->code));
                 int shift               = pvm_code_get_int32(&(da->code));
                 unsigned int divisor    = pvm_code_get_int32(&(da->code));
                 int stack_top = is_pop();
 
-                if( debug_print_instr ) hal_printf("(%d+%d)/%d, ", stack_top, shift, divisor );
+                if( debug_print_instr ) printf("(%d+%d)/%d, ", stack_top, shift, divisor );
 
 
                 unsigned int start_table_IP = da->code.IP;
                 unsigned int displ = (stack_top+shift)/divisor;
                 unsigned int new_IP = start_table_IP+(tabsize*4); // default
 
-                if( debug_print_instr ) hal_printf("displ %d, etab addr %d ", displ, new_IP );
+                if( debug_print_instr ) printf("displ %d, etab addr %d ", displ, new_IP );
 
 
                 if( displ < tabsize )
                 {
                     da->code.IP = start_table_IP+(displ*4); // BUG! 4!
-                    if( debug_print_instr ) hal_printf("load from %d, ", da->code.IP );
+                    if( debug_print_instr ) printf("load from %d, ", da->code.IP );
                     new_IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 }
                 da->code.IP = new_IP;
 
-                if( debug_print_instr ) hal_printf("switch(%d) ->%d; ", displ, new_IP );
+                if( debug_print_instr ) printf("switch(%d) ->%d; ", displ, new_IP );
             }
             break;
 
@@ -704,16 +704,16 @@ errno_t pvm_jit(struct pvm_object current_thread)
         case opcode_ret:
             {
 #error impl
-                if( DEB_CALLRET || debug_print_instr ) hal_printf( "\nret     (stack_depth %d -> ", da->stack_depth );
+                if( DEB_CALLRET || debug_print_instr ) printf( "\nret     (stack_depth %d -> ", da->stack_depth );
                 struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
 
                 if( pvm_is_null( ret ) )
                 {
-                    if( DEB_CALLRET || debug_print_instr ) hal_printf( "exit thread)\n");
+                    if( DEB_CALLRET || debug_print_instr ) printf( "exit thread)\n");
                     return;  // exit thread
                 }
                 pvm_exec_do_return(da);
-                if( DEB_CALLRET || debug_print_instr ) hal_printf( "%d); ", da->stack_depth );
+                if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
             }
             break;
 
@@ -721,16 +721,16 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
         case opcode_throw:
 #error impl
-            if( DEB_CALLRET || debug_print_instr ) hal_printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+            if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
             pvm_exec_do_throw(da);
-            if( DEB_CALLRET || debug_print_instr ) hal_printf( "%d); ", da->stack_depth );
+            if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
             break;
 
         case opcode_push_catcher:
             {
 #error impl
                 unsigned addr = pvm_code_get_rel_IP_as_abs(&(da->code));
-                if( debug_print_instr ) hal_printf("push catcher %u; ", addr );
+                if( debug_print_instr ) printf("push catcher %u; ", addr );
                 //cf->push_catcher( addr, os_pop() );
                 //call_frame.estack().push(exception_handler(os_pop(),addr));
 
@@ -747,7 +747,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
         case opcode_pop_catcher:
 #error impl
-            if( debug_print_instr ) hal_printf("pop catcher; ");
+            if( debug_print_instr ) printf("pop catcher; ");
             //cf->pop_catcher();
             //call_frame.estack().pop();
             ref_dec_o( es_pop().object );
@@ -783,7 +783,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             // object stack --------------------------------------------------------------
 
         case opcode_os_dup:
-            if( debug_print_instr ) hal_printf("os dup; ");
+            if( debug_print_instr ) printf("os dup; ");
             {
                 //pvm_object_t o = os_top();
                 //os_push( ref_inc_o( o ) );
@@ -794,14 +794,14 @@ errno_t pvm_jit(struct pvm_object current_thread)
             break;
 
         case opcode_os_drop:
-            if( debug_print_instr ) hal_printf("os drop; ");
+            if( debug_print_instr ) printf("os drop; ");
             //ref_dec_o( os_pop() );
             jit_os_pop( j );// pop AX = data, DX = iface
             jit_refdec( j, JIT_R_AX );
             break;
 
         case opcode_os_pull32:
-            if( debug_print_instr ) hal_printf("os pull; ");
+            if( debug_print_instr ) printf("os pull; ");
             {
                 //pvm_object_t o = os_pull(pvm_code_get_int32(&(da->code)));
                 //os_push( ref_inc_o( o ) );
@@ -938,7 +938,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
                 break;
             }
 
-            hal_printf("Unknown op code 0x%X\n", instruction );
+            printf("Unknown op code 0x%X\n", instruction );
 
             return ENOENT;
             //pvm_exec_panic( "thread exec: unknown opcode" ); //, instruction );

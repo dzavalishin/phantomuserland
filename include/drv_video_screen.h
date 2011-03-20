@@ -51,10 +51,12 @@ typedef struct drv_video_bitmap
 
 
 
-#define WFLAG_WIN_DECORATED           0x00000001
+#define WFLAG_WIN_DECORATED             (1<<0)
 // This is temp win, not included in allwindows list
-#define WFLAG_WIN_NOTINALL            0x00000002
-
+#define WFLAG_WIN_NOTINALL            	(1<<1)
+// Don't bring focus to this window
+#define WFLAG_WIN_NOFOCUS               (1<<2)
+										
 #define WSTATE_WIN_FOCUSED              (1<<0)
 #define WSTATE_WIN_DRAGGED              (1<<1)
 
@@ -302,7 +304,9 @@ void drv_video_mouse_on_deflt(void);
 
 
 
-void drv_video_window_preblit( drv_video_window_t *w );
+//void drv_video_window_preblit( drv_video_window_t *w );
+void drv_video_window_preblit( drv_video_window_t *w ) __attribute__((__deprecated__));
+
 
 void mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
 void mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
@@ -318,9 +322,10 @@ void mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, in
     video_drv->bitblt(from, xpos, ypos, xsize, ysize, zpos), \
     mouse_enable_p(video_drv, xpos, ypos, xsize, ysize ) )
 
+// removed drv_video_window_preblit(from), 
 #define drv_video_winblt(from)                                  ( \
     mouse_disable_p(video_drv, (from)->x, (from)->y, (from)->xsize, (from)->ysize ), \
-    drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y, (from)->z), \
+    video_drv->winblt(from, (from)->x, (from)->y, (from)->z), \
     mouse_enable_p(video_drv, (from)->x, (from)->y, (from)->xsize, (from)->ysize ) )
 
 //#else

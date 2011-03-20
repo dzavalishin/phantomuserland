@@ -1,10 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * PC timer (8254)
+ *
+**/
+
 
 #include <i386/pio.h>
 #include <phantom_libc.h>
 
 #include <hal.h>
 #include <time.h>
-//#include "../misc.h"
 
 #include <i386/isa/pit.h>
 
@@ -12,26 +21,24 @@
 int	hz = HZ;		/* number of ticks per second */
 
 
-int pitctl_port  = PITCTL;		/* For 386/20 Board */
-int pitctr0_port = PITCTR0;	/* For 386/20 Board */
-int pitctr1_port = PITCTR1;	/* For 386/20 Board */
-int pitctr2_port = PITCTR2;	/* For 386/20 Board */
+static int pitctl_port  = PITCTL;		/* For 386/20 Board */
+static int pitctr0_port = PITCTR0;	/* For 386/20 Board */
+//static int pitctr1_port = PITCTR1;	/* For 386/20 Board */
+//static int pitctr2_port = PITCTR2;	/* For 386/20 Board */
+
 /* We want PIT 0 in square wave mode */
+static int pit0_mode = PIT_C0|PIT_NDIVMODE|PIT_READMODE ;
 
-int pit0_mode = PIT_C0|PIT_NDIVMODE|PIT_READMODE ;
 
+static unsigned int delaycount;		/* loop count in trying to delay for 1 millisecond */
 
-unsigned int delaycount;		/* loop count in trying to delay for
-* 1 millisecond
-*/
-
+// Used in asm code
 unsigned long ten_microsec_sleep_loop_count = 50;		/* loop count for 10 microsecond wait.
 MUST be initialized for those who
 insist on calling "tenmicrosec"
 it before the clock has been
 initialized.
 */
-unsigned int clknumb = CLKNUM;		/* interrupt interval for timer 0 */
 
 #define uWAIT 0
 
@@ -51,20 +58,16 @@ void phantom_spinwait(int millis)
 
 
 #define COUNT   10000   /* should be a multiple of 1000! */
+#define PIT_COUNTDOWN PIT_READMODE|PIT_NDIVMODE
 
 static void findspeed()
 {
-    //unsigned int flags;
     unsigned char byte;
     unsigned int leftover;
-    //int i;
-    //int j;
-    int s;
 
-    s = hal_save_cli(); //sploff();                 /* disable interrupts */
+    int s = hal_save_cli(); 		// disable interrupts
 
     /* Put counter in count down mode */
-#define PIT_COUNTDOWN PIT_READMODE|PIT_NDIVMODE
     outb(pitctl_port, PIT_COUNTDOWN);
 
     /* output a count of -1 to counter 0 */
@@ -74,8 +77,8 @@ static void findspeed()
     phantom_spinwait(1);
 
     /* Read the value left in the counter */
-    byte = inb(pitctr0_port);	/* least siginifcant */
-    leftover = inb(pitctr0_port);	/* most significant */
+    byte = inb(pitctr0_port);		// least siginifcant
+    leftover = inb(pitctr0_port);	// most significant
     leftover = (leftover<<8) + byte ;
 
     /*
@@ -86,9 +89,10 @@ static void findspeed()
 
     /* we arrange calculation so that it doesn't overflow */
     delaycount = ((COUNT/1000) * CLKNUM) / (0xffff-leftover);
+
     printf("findspeed: delaycount=%d (tics=%d)\n", delaycount, (0xffff-leftover));
-    //splon(s);         /* restore interrupt state */
-    if(s) hal_sti();
+    
+    if(s) hal_sti();                    // restore interrupt state
 }
 
 
@@ -158,46 +162,70 @@ void phantom_timer0_start(void)
     unsigned char	byte;
     int s;
 
-    //intpri[0] = SPLHI;
-    //form_pic_mask();
-
     findspeed();
-//#if uWAIT
     microfind();
-//#endif
-    s = hal_save_cli(); //sploff();         /* disable interrupts */
+
+    s = hal_save_cli(); 	// disable interrupts
 
     /* Since we use only timer 0, we program that.
      * 8254 Manual specifically says you do not need to program
      * timers you do not use
      */
+
     outb(pitctl_port, pit0_mode);
-    clknumb = CLKNUM/hz;
+
+    unsigned int clknumb = CLKNUM/hz;
+
     byte = clknumb;
     outb(pitctr0_port, byte);
+
     byte = clknumb>>8;
     outb(pitctr0_port, byte);
-    //splon(s);         /* restore interrupt state */
-    if(s) hal_sti();
+    
+    if(s) hal_sti();            // restore interrupt state
 }
 
 
-// TODO this code must be gone in src release!
-// Now replace OSENV stuff
-
-
-static void(*handler)();
 
 static int usec_per_tick = 10000; // 100 Hz
 
+//static int revive_pit_int_cnt = 0;
+static int revive_pit_int_cnt = 0;
+static int revive_rtc_int_cnt = 0;
+
 static void timer_int_handler()
 {
+putchar('#');
+    revive_pit_int_cnt++;
+    //putchar('|');
     hal_time_tick(usec_per_tick);
-
-    //phantom_scheduler_time_interrupt();
-
-    //if(handler != 0) handler();
+putchar('^');
 }
+
+
+void t0_revive(void)
+{
+    // Called from RTC interrupt
+    revive_rtc_int_cnt++;
+
+    if(revive_rtc_int_cnt > 300)
+    {
+        revive_rtc_int_cnt = 0;
+        if(revive_pit_int_cnt < 2)
+        {
+            int m = phantom_pic_get_irqmask();
+            printf("hal_time_tick locked, mask = %X\n", m );
+            //phantom_timer0_start();
+
+            // Clear lower bit
+            //phantom_pic_set_irqmask(m & ~1);
+        }
+
+        revive_pit_int_cnt = 0;
+    }
+}
+
+
 
 static int pit_arch_get_tick_rate(void)
 {
@@ -224,24 +252,20 @@ static bigtime_t pit_arch_get_time_delta(void)
 int
 phantom_timer_pit_init(int freq, void (*timer_intr)())
 {
-    int rc;
 
-    //if(freq != HZ)        panic( /*__FUNCTION__*/ "phantom_timer_pit_init: freq is %d, not %d", freq, HZ);
     assert(freq == HZ);
 
 
-    // TODO why do we start first and setup intr handler after?
-    phantom_timer0_start();
+    // Install interrupt handler. Not shareable!
+    int rc = hal_irq_alloc(0, timer_int_handler, 0, 0);
+    if(rc)
+        panic( "phantom_timer_pit_init: can't install intr handler %x", rc);
+
 
     usec_per_tick = 1000000/hz;
     printf("main timer usec_per_tick = %d\n", usec_per_tick);
 
-    handler = timer_intr;
-
-    // Install interrupt handler.
-    if ((rc = hal_irq_alloc(0, timer_int_handler, 0, 0)))
-    //if ((rc = hal_irq_alloc(0, timer_intr, 0, 0)))
-        panic( /*__FUNCTION__*/ "phantom_timer_pit_init: can't install intr handler %x", rc);
+    phantom_timer0_start();
 
     srandom(pit_read(0)); // try to init random gen
 
@@ -271,17 +295,13 @@ phantom_timer_pit_init(int freq, void (*timer_intr)())
     if (ei) hal_sti();
 #endif
 
+    init_rtc_timer_interrupts();
+
+
     return freq;
 }
 
 
-/*
-void
-phantom_timer_pit_shutdown()
-{
-    osenv_irq_free(0, handler, 0);
-}
-*/
 
 
 /*

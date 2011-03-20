@@ -686,6 +686,7 @@ void phantom_v86_run(void *code, size_t size)
         return;
     }
 
+    //hal_cli();
     asm("ljmp %0, $0" : : "i" (VM86_TSS));
     phantom_trap_handlers[T_GENERAL_PROTECTION] = saved_trap_handler;
 

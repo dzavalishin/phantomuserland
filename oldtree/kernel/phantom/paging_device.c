@@ -15,7 +15,7 @@
 
 
 #define IDE_INTR 1
-#define IDE_DMA 0
+#define IDE_DMA 1
 
 #define REMAPPED_PAGING_IO (!IDE_DMA)
 

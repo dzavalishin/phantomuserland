@@ -1,3 +1,4 @@
+#ifdef ARCH_ia32
 /**
  *
  * Phantom OS
@@ -851,4 +852,6 @@ setformat:
 
     return 0;
 }
+
+#endif // ARCH_ia32
 

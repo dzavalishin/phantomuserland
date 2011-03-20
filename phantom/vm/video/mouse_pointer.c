@@ -14,6 +14,9 @@
 #include "drv_video_screen.h"
 #include <phantom_libc.h>
 
+#define ms_hot_shift_x 0
+#define ms_hot_shift_y (mpointer->ysize)
+
 
 static drv_video_bitmap_t *mpointer = 0;
 static char mouse_is_on_screen = 0;
@@ -29,6 +32,7 @@ static void get_mouse()
     if(!mouse_is_on_screen) return;
     interlock++;
     //drv_video_bitblt(mpointer->pixel, drv_video_win32.mouse_x, drv_video_win32.mouse_y, mpointer->xsize, mpointer->ysize);
+    // TODO hardcoded mouse hot point
     drv_video_bitblt_ms(screencopy->pixel, last_mouse_x, last_mouse_y, mpointer->xsize, mpointer->ysize);
     mouse_is_on_screen = 0;
     interlock--;
@@ -40,9 +44,10 @@ static void put_mouse()
     if(mouse_is_on_screen) get_mouse();
     interlock++;
 
-    int mx = video_drv->mouse_x;
-    int my = video_drv->mouse_y;
+    int mx = video_drv->mouse_x - ms_hot_shift_x;
+    int my = video_drv->mouse_y - ms_hot_shift_y;
 
+    // TODO hardcoded mouse hot point
     drv_video_readblt_ms(screencopy->pixel, mx, my, mpointer->xsize, mpointer->ysize);
     drv_video_bitblt_ms(mpointer->pixel, mx, my, mpointer->xsize, mpointer->ysize);
 

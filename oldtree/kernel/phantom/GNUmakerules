@@ -16,7 +16,7 @@ analyse::
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom/$(ARCH)
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 
-CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d
+CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d d/*.d
 PHANTOM_CFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -std=gnu89 -DKERNEL
 
 
@@ -36,6 +36,10 @@ PHANTOM_LIBS = 	$(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a
 
 LD_ADDR=--script=ld.script
 
+ifeq ($(ARCH),ia32)
+L386=i386/libi386.a
+endif
+
 
 i386/libi386.a:
 	cd i386; make; cd ..
@@ -50,7 +54,7 @@ START_O_FILE=entry.o
 #isa_sb16.o
 phantom: $(START_O_FILE) driver_pci_rtl8169.o \
 	winsd.o sntp.o vm_load.o pci_es1370.o  \
-	tetris.o ff.o bootp.o stray_check.o sbrk.o \
+	ff.o bootp.o stray_check.o sbrk.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o test_userland.o events.o smp.o \
 	heap.o heap_pool.o boot_cmd_line.o \
@@ -60,7 +64,7 @@ phantom: $(START_O_FILE) driver_pci_rtl8169.o \
 	arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
 	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
 	time.o console.o timedcall.o driver_pci_rtl8139.o \
-	paging_device.o dpc.o spinlock.o hal.o fsck.o \
+	paging_device.o paging.o dpc.o spinlock.o hal.o fsck.o \
 	console_win.o vm_threads.o snap_sync.o ps2.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o video_drv_cirrus.o \
 	video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_bios_vesa.o \
@@ -77,30 +81,32 @@ phantom: $(START_O_FILE) driver_pci_rtl8169.o \
 	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
-	fs_map.o tinyfat.o stats.o resolve.o main.o keyboard.o syslog.o \
+	fs_map.o stats.o resolve.o main.o keyboard.o syslog.o \
 	svn_version.o $(PLIBDIR)/libdev.a $(PLIBDIR)/libphantom.a \
 	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
-	i386/libi386.a $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(PHANTOM_LIBS)
+	$(L386) $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(PHANTOM_LIBS)
 
 	@echo "Linking $@ ---------------------------------------------"
 	@gcc -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(PLIBDIR)/libdev.a  	\
 		$(PLIBDIR)/libnewos.a \
 		$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a \
-		i386/libi386.a $(PLIBDIR)/libdev.a \
+		$(L386) $(PLIBDIR)/libdev.a \
 		$(PHANTOM_LIBS) $(PLIBDIR)/libphantom_c.a \
-		i386/libi386.a $(PLIBDIR)/libphantom.a \
+		$(L386) $(PLIBDIR)/libphantom.a \
 		$(CLIB) $(LIBGCC) crtn.o 
 #	../objcopy-ph -O elf32-i386 $@.pe $@
 	objcopy -O elf32-i386 $@.pe $@
 	cat < $@ > ../../run/tftp/$@
+	cat < $@ > ../../../run/fat/boot/$@
 #	objdump -x $@.pe >$@.pe.sym
-	gzip < $@ > ../../run/tftp/$@.gz
-	mv ../../run/tftp/$@.gz ../../run/tftp/$@
+#	gzip < $@ > ../../run/tftp/$@.gz
+#	mv ../../run/tftp/$@.gz ../../run/tftp/$@
 #	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
 #	cd ../../run
 #	genisoimage -o cd.iso tftp
 	@echo --- kernel build finished
+	-mv -t d *.d
 
 
 

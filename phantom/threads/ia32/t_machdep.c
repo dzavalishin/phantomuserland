@@ -34,20 +34,6 @@ void phantom_thread_state_init(phantom_thread_t *t)
     t->cpu.eip = (int)phantom_thread_trampoline;
     //t->cpu.flags = 0;
 
-    t->owner = 0;
-    t->u = 0;
-    t->thread_flags = 0;//THREAD_FLAG_KERNEL;
-
-    t->waitcond = 0;
-
-    hal_spin_init( &(t->waitlock));
-
-    queue_init(&(t->chain));
-    queue_init(&(t->runq_chain));
-
-    t->sw_unlock = 0;
-
-    t->preemption_disabled = 0;
 
     int *esp = (int *)(t->cpu.esp);
 
@@ -103,19 +89,16 @@ void phantom_thread_state_init(phantom_thread_t *t)
 
 void switch_to_user_mode()
 {
-    //asm("ljmp %0, $0" : : "i" (USER_CS));
-
-    /*
-
-    Push:
-
-    SS
-    ESP
-    EFLAGS
-    CS
-    EIP
-
-    */
+    /**
+     *    Push order:
+     *
+     *    SS
+     *    ESP
+     *    EFLAGS
+     *    CS
+     *    EIP
+     *
+    **/
 
     // Set up a stack structure for switching to user mode.
     asm volatile("  \
@@ -142,6 +125,7 @@ void switch_to_user_mode()
 void
 phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 {
+    SET_CURRENT_THREAD(t);
     // Thread switch locked it befor switching into us, we have to unlock
     hal_spin_unlock(&schedlock);
 
@@ -187,3 +171,12 @@ void arch_adjust_after_thread_switch(phantom_thread_t *t)
     //phantom_load_cpu_tss(ncpu);
 }
 
+
+
+
+void dump_thread_stack(phantom_thread_t *t)
+{
+    void *ebp = (void *)t->cpu.ebp;
+    printf("Thread %d EIP 0x%08X, ", t->tid, t->cpu.eip);
+    stack_dump_from(ebp);
+}

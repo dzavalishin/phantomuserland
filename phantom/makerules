@@ -43,8 +43,9 @@ OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
 
 
 clean:
-	-rm -rf *.[doa] *.bak depend $(CLEAN_FILES)
-
+	-rm -rf *.[doa] *.bak depend $(CLEAN_FILES) d/*.d
+	-rmdir d
 
 -include *.d
+-include d/*.d
 

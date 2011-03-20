@@ -1,3 +1,21 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * PC real time clock interface. Time of day and date.
+ *
+ *
+ **/
+
+
+#define DEBUG_MSG_PREFIX "rtc-tm"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
+
 // From FreeBSD clock.c
 
 #include <x86/isa.h>
@@ -8,92 +26,110 @@
 #include <hal.h>
 #include <time.h>
 
-//#include "rtc.h"
 #include <kernel/ia32/rtc.h>
+#include <kernel/ia32/rtc_regs.h>
 
 // TODO header
 // TODO hal spinlocks
 
-#define RTC_LOCK
-#define RTC_UNLOCK
+#define RTC_LOCK      int ie = hal_save_cli()
+#define RTC_UNLOCK    if(ie) hal_sti()
 
 
-static	int	rtc_reg = -1;
+//static	int	rtc_reg = -1;
+static unsigned int nmi_flag = 0; // high bit == 1 to off NMI
+
+#define SPEND_TIME inb(0x84)
 
 
 /*
  * RTC support routines
  */
 
-int
-rtcin(int reg)
+unsigned int isa_rtc_read_reg(int reg)
 {
-	u_char val;
+    u_char val;
 
-	RTC_LOCK;
-	if (rtc_reg != reg) {
-		inb(0x84);
-		outb(IO_RTC, reg);
-		rtc_reg = reg;
-		inb(0x84);
-	}
-	val = inb(IO_RTC + 1);
-	RTC_UNLOCK;
-	return (val);
+    RTC_LOCK;
+    //if (rtc_reg != reg)
+    {
+        SPEND_TIME;
+        outb(IO_RTC, reg|nmi_flag);
+        //rtc_reg = reg;
+        SPEND_TIME;
+    }
+    val = inb(IO_RTC + 1);
+    RTC_UNLOCK;
+    return (val);
 }
 
-void
-writertc(int reg, u_char val)
+void isa_rtc_write_reg(int reg, u_char val)
 {
 
-	RTC_LOCK;
-	if (rtc_reg != reg) {
-		inb(0x84);
-		outb(IO_RTC, reg);
-		rtc_reg = reg;
-		inb(0x84);
-	}
-	outb(IO_RTC + 1, val);
-	inb(0x84);
-	RTC_UNLOCK;
+    RTC_LOCK;
+    //if (rtc_reg != reg)
+    {
+        SPEND_TIME;
+        outb(IO_RTC, reg|nmi_flag);
+        //rtc_reg = reg;
+        SPEND_TIME;
+    }
+    outb(IO_RTC + 1, val);
+    SPEND_TIME;
+    RTC_UNLOCK;
 }
 
+
+void isa_rtc_nmi_off(void)
+{
+    // We turn off NMI and reselect reg D as recommended
+    nmi_flag = RTC_NMI_DIS;
+    isa_rtc_read_reg(0x0D);
+}
+
+void isa_rtc_nmi_on(void)
+{
+    // We turn on NMI and reselect reg D as recommended
+    nmi_flag = RTC_NMI_ENA;
+    isa_rtc_read_reg(0x0D);
+}
+
+
+
+
+/*
 // satisfy old code
-void
-rtcout(unsigned char reg, unsigned char val)
+void rtcout(unsigned char reg, unsigned char val)
 {
-    writertc( reg, val );
+    isa_rtc_write_reg( reg, val );
 }
+*/
+
 
 
 static __inline int
 readrtc(int port)
 {
-    return(bcd2bin(rtcin(port)));
+    return(bcd2bin(isa_rtc_read_reg(port)));
+}
+
+
+static void check_update_in_progress(void)
+{
+    int ntries = 1000;
+    static int say_times = 10;
+
+    // Check if update is in progress
+    while( (isa_rtc_read_reg(0x0A) & RTC_A_UIP) && (ntries-- > 0) )
+        SPEND_TIME;
+
+    if( (ntries <= 0) && (say_times-- > 0) )
+        printf("RTC read - timed out waiting for update end\n");
 }
 
 
 
 
-enum {
-    RTC_SEC   = 0,
-    RTC_SECALRM	= 1,	/* seconds alarm */
-    RTC_MIN   = 2,
-    RTC_MINALRM	= 3,	/* minutes alarm */
-    RTC_HOUR  = 4,
-    RTC_HRSALRM	= 5,	/* hours alarm */
-    RTC_WDAY	= 6,	/* week day */
-    RTC_DAY   = 7,
-    RTC_MONTH = 8,
-    RTC_YEAR  = 9,
-
-    RTC_BASELO	= 0x15,	/* low byte of basemem size */
-    RTC_BASEHI	= 0x16,	/* high byte of basemem size */
-    RTC_EXTLO	= 0x17,	/* low byte of extended mem size */
-    RTC_EXTHI	= 0x18,	/* low byte of extended mem size */
-
-    RTC_CENTURY = 0x32
-};
 
 
 const bigtime_t usecs_per_day = 86400000000LL;
@@ -111,20 +147,22 @@ static int is_leap_year(int year)
 
 bigtime_t arch_get_rtc_delta(void)
 {
-    int oldsec, sec, min, hour;
+    //int oldsec
+    int sec, min, hour;
     int day, month, year, century;
     bigtime_t val;
 
-retry:
+    isa_rtc_nmi_off();
+
+    check_update_in_progress();
+//retry:
     min = readrtc(RTC_MIN);
-    if(min < 0 || min > 59)
-        min = 0;
+    if(min < 0 || min > 59)        min = 0;
     hour = readrtc(RTC_HOUR);
-    if(hour < 0 || hour > 23)
-        hour = 0;
+    if(hour < 0 || hour > 23)      hour = 0;
     month = readrtc(RTC_MONTH);
-    if(month < 1 || month > 12)
-        month = 1;
+    if(month < 1 || month > 12)    month = 1;
+
     day = readrtc(RTC_DAY);
     if(day < 1 || day > month_days[month-1])
         day = 1;
@@ -139,6 +177,7 @@ retry:
             year += 1900;
     }
 
+    /*
     // keep reading the second counter until it changes
     oldsec = readrtc(RTC_SEC);
     while((sec = readrtc(RTC_SEC)) == oldsec)
@@ -147,7 +186,11 @@ retry:
         // we just wrapped around, and potentially changed
         // all of the other counters, retry everything
         goto retry;
-    }
+    }*/
+
+    sec = readrtc(RTC_SEC);
+
+    isa_rtc_nmi_on();
 
     // convert these values into usecs since Jan 1, 1 AD
     val = (365 * (year - 1) - (year / 4) + (year / 400)) * usecs_per_day;
@@ -163,7 +206,11 @@ retry:
 
 void rtc_read_tm( struct tm *out )
 {
-retry:
+    isa_rtc_nmi_off();
+
+    check_update_in_progress();
+
+//retry:
     out->tm_min = readrtc(RTC_MIN);
     out->tm_hour = readrtc(RTC_HOUR);
     out->tm_mon = readrtc(RTC_MONTH);
@@ -186,6 +233,7 @@ retry:
 
     out->tm_wday = readrtc(RTC_WDAY);
 
+    /*
     // keep reading the second counter until it changes
     int sec;
     int oldsec = readrtc(RTC_SEC);
@@ -197,5 +245,10 @@ retry:
         goto retry;
     }
     out->tm_sec=sec;
+    */
+
+    out->tm_sec = readrtc(RTC_SEC);
+
+    isa_rtc_nmi_on();
 }
 

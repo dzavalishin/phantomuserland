@@ -20,9 +20,9 @@
 
 #include "svn_version.h"
 
-#include <i386/proc_reg.h>
+//#include <i386/proc_reg.h>
 //#include <i386/trap.h>
-#include <i386/pio.h>
+//#include <i386/pio.h>
 
 #include <phantom_libc.h>
 #include <phantom_time.h>
@@ -52,7 +52,7 @@
 #include <stdlib.h>
 
 // pvm_bulk_init
-//#include <vm/bulk.h>
+#include <threads.h>
 
 // pvm_memcheck
 #include <vm/alloc.h>
@@ -172,7 +172,7 @@ static int ignore_handler(struct trap_state *ts)
     return 0;
 }
 
-
+#if !DRIVE_SCHED_FROM_RTC
 static timedcall_t sched_timer =
 {
     (void *)phantom_scheduler_time_interrupt,
@@ -184,7 +184,7 @@ void phantom_turn_off_pic_scheduler_timer(void)
 {
     phantom_undo_timed_call( &sched_timer );
 }
-
+#endif
 
 /**
  *
@@ -234,14 +234,17 @@ int main(int argc, char **argv, char **envp)
     // Replace with?
     phantom_trap_handlers[15] = ignore_handler;
     phantom_threads_init();
+#if !DRIVE_SCHED_FROM_RTC // run from int 8 - rtc timer
     phantom_request_timed_call( &sched_timer, TIMEDCALL_FLAG_PERIODIC );
+#endif
     hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
     }
 
-#ifdef ARCH_ia32
+/* Gone to arch dep paging init where it belongs
+  # ifdef ARCH_ia32
     set_cr0( get_cr0() | CR0_WP );
-#endif
-
+  # endif
+*/
     phantom_init_apic(); // Starts other CPUs
 
     {
@@ -299,9 +302,9 @@ int main(int argc, char **argv, char **envp)
 
 
     pressEnter("will run phantom_timed_call_init2");
-    phantom_timed_call_init2();
+    //phantom_timed_call_init2();
     pressEnter("will run phantom_init_stat_counters2");
-    phantom_init_stat_counters2();
+    //phantom_init_stat_counters2();
 
     // -----------------------------------------------------------------------
     // If this is test run, switch to test code

@@ -365,15 +365,6 @@ void phantom_scheduler_yield_locked(hal_spinlock_t *lock_to_be_unlocked);
 
 
 
-/**
- *
- * Called from interrupt finalizer (when interrupt state
- * is actually exited, but iret not executed.
- * Used to switch context, if needed.
- *
-**/
-
-void phantom_scheduler_soft_interrupt(void);
 
 
 void phantom_scheduler_schedule_soft_irq(void); // do not enforce, just make it come in some near future

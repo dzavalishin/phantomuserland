@@ -98,7 +98,7 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
         size_t len = out.xsize * sizeof(zbuf_t);
 
         assert( p >= (void*)zbuf );
-        assert( p+len < ((void*)zbuf)+zbsize );
+        assert( p+len <= ((void*)zbuf)+zbsize );
 
         memset( p, zpos, len );
     }

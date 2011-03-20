@@ -41,7 +41,7 @@ static char *envbuf[MAXENVBUF] = { 0 };
 
 
 
-
+#if 0
 
 static const int MaxColor     = 110;
 
@@ -155,8 +155,6 @@ void flame(drv_video_window_t *w)
 static struct rgba_t win[wysize*wxsize];
 
 
-static int size = 40*1024*1024;
-static void *mem;
 
 
 static void fillw(char r, char g, char b )
@@ -307,10 +305,12 @@ void videotest()
 
 
 
+#endif
 
 
 
-
+static int size = 40*1024*1024;
+static void *mem;
 
 
 
@@ -370,9 +370,11 @@ int main(int argc, char* argv[])
 
     hal_init( mem, size );
 
-    //videotest();
-
-    //getchar();
+#if 0
+    videotest();
+    getchar();
+    exit(0);
+#endif
 
     char *dir = getenv("PHANTOM_HOME");
     char *rest = "plib/bin/classes";

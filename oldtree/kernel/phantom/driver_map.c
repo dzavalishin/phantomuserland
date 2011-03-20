@@ -58,13 +58,13 @@ typedef struct
 // NB! No network drivers on stage 0!
 static pci_probe_t pci_drivers[] =
 {
-#if 1
+#if 0
     { "VirtIO Disk", 	driver_virtio_disk_probe, 	2, VIRTIO_VENDOR, 0, 1 },
     { "VirtIO Baloon", 	driver_virtio_baloon_probe, 	2, VIRTIO_VENDOR, 0, 5 },
     //{ "VirtIO Random",  driver_virtio_random_probe, 	2, VIRTIO_VENDOR, 0, 1 }, // TODO dev/dclass?
 #endif
 
-#if 1 && HAVE_NET
+#if 0 && HAVE_NET
     { "VirtIO Net",  	driver_virtio_net_probe, 	2, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
 //    { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
@@ -133,6 +133,7 @@ typedef struct
 // NB! No network drivers on stage 0!
 static isa_probe_t isa_drivers[] =
 {
+#if 0
     { "LPT1", 		driver_isa_lpt_probe, 	2, 0x378, 7 },
     { "LPT2", 		driver_isa_lpt_probe, 	2, 0x278, 5 },
 
@@ -140,14 +141,14 @@ static isa_probe_t isa_drivers[] =
     { "COM2",		driver_isa_com_probe,   2, 0x2F8, 3 },
     { "COM3",		driver_isa_com_probe,   2, 0x3E8, 4 },
     { "COM4",		driver_isa_com_probe,   2, 0x2E8, 3 },
-
+#endif
     { "CGA", 		driver_isa_vga_probe, 	0, 0x3D4, -1 },
     { "MDA", 		driver_isa_vga_probe, 	0, 0x3B4, -1 },
 
     { "PS2 Keyboard", 	driver_isa_ps2k_probe, 	1, -1, 1 },
     { "PS2 Mouse", 	driver_isa_ps2m_probe, 	1, -1, 12 },
 
-    { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
+//    { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
 
 #if HAVE_NET && 0
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
@@ -181,13 +182,14 @@ typedef struct
 // NB! No network drivers on stage 0!
 static etc_probe_t etc_drivers[] =
 {
-    { "null",                   driver_null_probe,      	0 },
+#if 0
     { "console",                driver_console_probe,    	0 },
+    { "null",                   driver_null_probe,      	0 },
     { "fb",                     driver_framebuf_probe,    	0 },
 
     { "SMBios", 		driver_etc_smbios_probe, 	0 },
 //    { "ACPI", 			driver_etc_acpi_probe, 		0 },
-
+#endif
 };
 
 

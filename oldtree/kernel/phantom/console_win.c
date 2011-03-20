@@ -19,6 +19,7 @@
 #include <phantom_libc.h>
 #include <hal.h>
 #include <time.h>
+#include <event.h> // get_n_events_in_q()
 
 
 #include "video.h"
@@ -27,6 +28,8 @@
 
 #include <threads.h>
 #include <kernel/timedcall.h>
+
+#define TIMED_FLUSH 0
 
 
 
@@ -80,21 +83,23 @@ static void flush_stdout(void)
 }
 
 
+#if TIMED_FLUSH
 static timedcall_t cons_timer =
 {
     (void *)flush_stdout,
     0, 100,
     0, 0, { 0, 0 }, 0
 };
-
+#endif
 
 
 
 
 int phantom_console_window_putc(int c)
 {
+#if TIMED_FLUSH
     phantom_undo_timed_call( &cons_timer );
-
+#endif
     switch(c)
     {
     case '\b':
@@ -123,7 +128,9 @@ int phantom_console_window_putc(int c)
         if( cbufpos >= BUFS )
             goto flush;
 
+#if TIMED_FLUSH
         phantom_request_timed_call( &cons_timer, 0 );
+#endif
         return c;
     }
 
@@ -288,8 +295,9 @@ static void phantom_debug_window_loop()
         tmp = current_time;
         mt = *tmp;
 
-        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m\n Today is %02d/%02d/%04d %02d:%02d:%02d\n",
+        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m, %d events\n Today is %02d/%02d/%04d %02d:%02d:%02d\n",
                       step++, days, hr, min, (int)sec,
+                      get_n_events_in_q(),
                       mt.tm_mday, mt.tm_mon, mt.tm_year+1900,
                       mt.tm_hour, mt.tm_min, mt.tm_sec
                      );

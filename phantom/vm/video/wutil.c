@@ -65,11 +65,11 @@ void rect_add( rect_t *out, rect_t *a, rect_t *b )
 {
     assert(out);
 
-    out->x = min( a->x, b->x );
-    out->y = min( a->y, b->y );
+    out->x = imin( a->x, b->x );
+    out->y = imin( a->y, b->y );
 
-    unsigned xr = max( a->x + a->xsize, b->x + b->xsize );
-    unsigned yr = max( a->y + a->ysize, b->y + b->ysize );
+    unsigned xr = imax( a->x + a->xsize, b->x + b->xsize );
+    unsigned yr = imax( a->y + a->ysize, b->y + b->ysize );
 
     out->xsize = xr - out->x;
     out->ysize = yr - out->y;
@@ -80,11 +80,11 @@ int rect_mul( rect_t *out, rect_t *a, rect_t *b )
 {
     assert(out);
 
-    out->x = max( a->x, b->x );
-    out->y = max( a->y, b->y );
+    out->x = imax( a->x, b->x );
+    out->y = imax( a->y, b->y );
 
-    unsigned xr = min( a->x + a->xsize, b->x + b->xsize );
-    unsigned yr = min( a->y + a->ysize, b->y + b->ysize );
+    unsigned xr = imin( a->x + a->xsize, b->x + b->xsize );
+    unsigned yr = imin( a->y + a->ysize, b->y + b->ysize );
 
     out->xsize = xr - out->x;
     out->ysize = yr - out->y;
