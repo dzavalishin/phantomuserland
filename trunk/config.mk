@@ -30,6 +30,11 @@ ifndef ARCH
 ARCH=ia32
 endif
 
+ifndef BOARD
+BOARD=$(ARCH)-default
+endif
+
+
 # How to compile phantom source
 
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
