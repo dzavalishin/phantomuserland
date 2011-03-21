@@ -186,5 +186,5 @@ distclean: clean
 #-include depend
 -include *.d
 -include d/*.d
-
+-include $(ARCH)/boards/*.d
 endif
