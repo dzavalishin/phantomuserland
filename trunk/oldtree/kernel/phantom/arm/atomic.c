@@ -1,28 +1,11 @@
-#if 0
 
-/* int atomic_add(int *val, int incr) */
+#if HAVE_SMP
+#error not SMP safe
+#endif
 
-
-/* int atomic_and(int *val, int incr) */
-
-/* int atomic_or(int *val, int incr) */
-
-/* int atomic_set(int *val, int set_to) */
-
-atomic_set_32(volatile uint32_t *address, uint32_t setmask)
-{
-	__with_interrupts_disabled(*address |= setmask);
-	
-}
-
-
-/* int test_and_set(int *val, int set_to, int test_val) */
-
-
-
-
-
-
+#ifndef HAVE_SMP
+#warning does not check for SMP
+#endif
 
 
 
@@ -53,6 +36,54 @@ atomic_set_32(volatile uint32_t *address, uint32_t setmask)
 			: "r" (cpsr_save)	\
 			: "cc" );		\
 	} while(0)
+
+
+
+
+
+
+
+
+
+
+
+
+int atomic_add(int *val, int incr) 
+{
+    __with_interrupts_disabled(*val += incr);
+    return *val;
+}
+
+
+/* int atomic_and(int *val, int incr) */
+
+/* int atomic_or(int *val, int incr) */
+
+/* int atomic_set(int *val, int set_to) */
+/*
+int atomic_set_32(volatile u_int32_t *address, u_int32_t setmask)
+{
+    __with_interrupts_disabled(*address |= setmask);
+}
+*/
+
+/* int test_and_set(int *val, int set_to, int test_val) */
+
+
+
+
+
+
+
+
+
+#if 0
+
+
+
+
+
+
 
 
 

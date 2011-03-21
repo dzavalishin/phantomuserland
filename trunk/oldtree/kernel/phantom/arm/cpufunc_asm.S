@@ -73,13 +73,7 @@ ENTRY(cpu_read_cache_config)
 	mrc	p15, 0, r0, c0, c0, 1
 	RET
 
-ENTRY(cpufunc_faultstatus)
-	mrc	p15, 0, r0, c5, c0, 0
-	RET
 
-ENTRY(cpufunc_faultaddress)
-	mrc	p15, 0, r0, c6, c0, 0
-	RET
 
 
 /*
