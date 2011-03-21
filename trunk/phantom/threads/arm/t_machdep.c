@@ -105,12 +105,25 @@ void phantom_thread_state_init(phantom_thread_t *t)
 */
 }
 
+addr_t  curr_thread_k0_stack_top;
+void arch_adjust_after_thread_switch(phantom_thread_t *t)
+{
+#if HAVE_SMP
+#  error rewrite me
+#endif
+    // It is used in trap entry code to switch to correct stack if
+    // trap is from userland. TODO not SMP compilant
+    curr_thread_k0_stack_top = (addr_t)t->kstack_top;
+}
+
 void switch_to_user_mode()
 {
     //asm("ljmp %0, $0" : : "i" (USER_CS));
 
 }
 
+
+// TODO it seems pretty arch independent. Merge with ia32 and move to general code?
 void
 phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 {
@@ -123,6 +136,10 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 #if DEBUG
     printf("---- !! phantom_thread_c_starter !! ---\n");
 #endif
+
+    // We're first time running here, set arch specific things up
+    // NB!! BEFORE enablings ints!
+    arch_adjust_after_thread_switch(t);;
 
     hal_sti(); // Make sure new thread is started with interrupts on
 

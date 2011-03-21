@@ -19,6 +19,7 @@
 #include <arm/memio.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <stdio.h>
 
 
 // ARM periph devices, usually, have 8 id bytes in upper part
@@ -31,7 +32,7 @@
 errno_t arm_id_shift( addr_t base, int shift, u_int32_t part_num, u_int32_t cellId, int verbose )
 {
     int level = verbose ? 0 : 1;
-    errno res = 0;
+    errno_t res = 0;
 
     u_int32_t id;
 
@@ -44,7 +45,7 @@ errno_t arm_id_shift( addr_t base, int shift, u_int32_t part_num, u_int32_t cell
                (id & 0xFFF),
                (id>>12) & 0xFF,
                (id>>20) & 0x0F,
-               (id>>24) & 0xFF,
+               (id>>24) & 0xFF
              );
 
     if( (id & 0xFFF) != part_num)
@@ -67,13 +68,13 @@ errno_t arm_id_shift( addr_t base, int shift, u_int32_t part_num, u_int32_t cell
     }
 
 
-    return ret;
+    return res;
 }
 
 
-errno_t arm_id_shift( addr_t base, u_int32_t part_num, u_int32_t cellId, int verbose )
+errno_t arm_id( addr_t base, u_int32_t part_num, u_int32_t cellId, int verbose )
 {
-    return arm_id( base, ID_DEF_SHIFT, part_num, cellId, verbose );
+    return arm_id_shift( base, ID_DEF_SHIFT, part_num, cellId, verbose );
 }
 
 

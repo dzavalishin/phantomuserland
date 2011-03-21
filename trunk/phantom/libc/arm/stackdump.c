@@ -53,7 +53,7 @@ void stack_dump_from(void *fp)
 
 void stack_dump()
 {
-    stack_dump_from(arch_stack_get_start());
+    stack_dump_from(arch_get_frame_pointer());
 }
 
 
