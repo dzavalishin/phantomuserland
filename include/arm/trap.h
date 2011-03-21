@@ -50,7 +50,6 @@ struct trap_state
 	unsigned int r11;
         unsigned int r12;
 
-        unsigned int spsr;
 
 	unsigned int usr_sp;
 	unsigned int usr_lr;
@@ -58,10 +57,11 @@ struct trap_state
         unsigned int trapno;
 	unsigned int intno;
 
-        unsigned int svc_sp;
-	unsigned int svc_lr;
+        //unsigned int svc_sp;
+	//unsigned int svc_lr;
 
         unsigned int pc;
+        unsigned int spsr;
 };
 
 #ifdef ASSEMBLER
