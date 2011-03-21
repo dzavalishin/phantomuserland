@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Virtual mem macros.
+ *
+ *
+**/
+
 #ifndef KERNEL_VM_H
 #define KERNEL_VM_H
 

@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Boot time parameters and flags.
+ *
+ *
+**/
+
 #ifndef BOOT_H
 #define BOOT_H
 

@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Pagesize-related macros.
+ *
+ *
+**/
+
 #ifndef PAGE_H
 #define PAGE_H
 

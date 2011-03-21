@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Configuration. Turn on/off kernel parts.
+ *
+ *
+**/
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
@@ -5,6 +16,20 @@
 #define HAVE_NET 1
 #define HAVE_UNIX 0
 #define HAVE_VESA 1
+
+#define MEM_RECLAIM 0
+
+
+#ifdef ARCH_ia32
+#define HAVE_PCI 1
+#endif
+
+
+#ifndef HAVE_PCI
+#define HAVE_PCI 0
+#endif
+
+
 
 #if !defined(NO_STRAY_CHECK)
 # define HAVE_STRAY 0
@@ -24,7 +49,6 @@
 #define NET_CHATTY 0
 #endif
 
-#define MEM_RECLAIM 0
 
 #define COMPILE_OHCI 0
 #define COMPILE_UHCI 0
