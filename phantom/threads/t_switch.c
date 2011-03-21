@@ -102,10 +102,12 @@ void phantom_thread_switch()
         // TODO 64 bug
         tss.esp0 = (int)t->kstack_top;
 
-        t->cpu_id = GET_CPU_ID();
     }
 #endif
-    arch_adjust_after_thread_switch(GET_CURRENT_THREAD());
+    phantom_thread_t *t = GET_CURRENT_THREAD();
+
+    t->cpu_id = GET_CPU_ID();
+    arch_adjust_after_thread_switch(t);
 
 exit:
     hal_spin_unlock(&schedlock);

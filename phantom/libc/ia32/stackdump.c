@@ -42,11 +42,7 @@ void stack_dump_from(void *ebp)
 
 void stack_dump()
 {
-    //void *ebp;
-    //asm volatile ("movl %%ebp,%0" : "=r" (ebp));
-	
-    stack_dump_from(arch_stack_get_start());
-
+    stack_dump_from(arch_get_frame_pointer());
 }
 
 
