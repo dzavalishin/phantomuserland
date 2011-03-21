@@ -1,10 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Address map style allocator.
+ *
+ * Represents some addresable space where parts can have different attributes.
+ *
+**/
+
 #ifndef AMAP_H
 #define AMAP_H
 
 
-// Address map style allocator.
-// Represents some addresable space where parts can have different
-// attributes.
 
 
 #include <queue.h>

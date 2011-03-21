@@ -1,11 +1,35 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * General interrupt engine.
+ *
+ *
+**/
+
 #ifndef _INTERRUPTS_H
 #define _INTERRUPTS_H
 
 #define         SOFT_IRQ_NOT_PENDING 	0x80000000
 #define         SOFT_IRQ_DISABLED 	0x40000000
 
+#ifdef ARCH_ia32
 // Main PIC has 16 inputs
-#define PIC_IRQ_COUNT 16
+//#define PIC_IRQ_COUNT 16
+// How many different interrupts kernel can allocate
+#define MAX_IRQ_COUNT 32
+#endif
+
+#ifdef ARCH_arm
+#define MAX_IRQ_COUNT 32
+#endif
+
+
+#ifndef MAX_IRQ_COUNT
+#error Unknown architecture
+#endif
 
 #define SOFT_IRQ_COUNT 32
 

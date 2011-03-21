@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Boot time init junkyard. Must be cleaned up somehow.
+ *
+ *
+**/
+
 #ifndef INIT_H
 #define INIT_H
 

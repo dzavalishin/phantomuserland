@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Trap/interrupt context structure. See arch/...
+ *
+ *
+**/
+
 
 #ifndef GENERAL_TRAP_H
 #define GENERAL_TRAP_H
@@ -30,6 +41,9 @@ int 		trap_panic(struct trap_state *ts);
 
 // Check if current thread is usermode and convert trap to thread kill
 void 		phantom_check_user_trap( struct trap_state *ts );
+
+//! Return signal number for this kind of trap - machdep
+int             trap2signo( struct trap_state *ts );
 
 
 #endif // GENERAL_TRAP_H

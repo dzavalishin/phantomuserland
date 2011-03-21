@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Kernel functions implementing Unix syscalls.
+ *
+ *
+**/
+
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
 #include <sys/socket.h>

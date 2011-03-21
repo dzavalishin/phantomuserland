@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Timed calls. NB! Interrupt-time!
+ *
+ *
+**/
+
 #ifndef TIMEDCALL_H
 #define TIMEDCALL_H
 
