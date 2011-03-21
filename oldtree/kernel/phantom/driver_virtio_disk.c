@@ -1,8 +1,9 @@
+#ifdef ARCH_ia32
 /**
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * VirtIO disk driver. Not finished, kills world.
  *
@@ -523,4 +524,5 @@ static phantom_disk_partition_t *phantom_create_virtio_partition_struct( long si
 
 
 
+#endif // ARCH_ia32
 

@@ -75,7 +75,7 @@ static void timer_int_handler()
 }
 
 
-int phantom_timer_init(int freq)
+void icp_timer0_init(int freq)
 {
     usec_per_tick = freq*1000;
 

@@ -1,3 +1,4 @@
+#ifdef ARCH_ia32
 /**
  *
  * Phantom OS
@@ -424,7 +425,7 @@ paging_device_start_read(
                          paging_device *me,
 
                          disk_page_no_t disk,
-                         phys_page_t mem,
+                         physaddr_t mem,
                          void (*callback)() )
 {
     if( me->io_is_in_progress ) panic("io_is_in_progress in start read");
@@ -449,7 +450,7 @@ paging_device_start_write(
                            paging_device *me,
 
                            disk_page_no_t disk,
-                           phys_page_t mem,
+                           physaddr_t mem,
                            void (*callback)() )
 {
     if( me->io_is_in_progress ) panic("io_is_in_progress in start write");
@@ -567,7 +568,7 @@ static void test_ide_io(void)
    {
        int secno = 0;
        int ndev = 1;
-       phys_page_t physaddr;
+       physaddr_t physaddr;
        void *vaddr, *va2;
 
        if( hal_alloc_vaddress( &vaddr, 1 ) )
@@ -987,10 +988,7 @@ phantom_disk_partition_t *phantom_create_simple_ide_partition_struct( long size 
     //struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
     //phantom_init_disk_q( q, startIoFunc );
 
-    //ret->specific = 0;
-
-    // Usually here is pointer to driver-specific structure. When we'll have more than one TRFSd instance, we'll keep instance struct here
-    ret->specific = "TRFS";  
+    ret->specific = 0;
     strlcpy( ret->name, "IDE0", sizeof(ret->name) );
 
 #if !IO_RQ_SLEEP
@@ -1039,3 +1037,4 @@ void connect_ide_io(void) {}
 #endif
 
 
+#endif // ARCH_ia32

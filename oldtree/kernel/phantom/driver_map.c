@@ -133,6 +133,7 @@ typedef struct
 // NB! No network drivers on stage 0!
 static isa_probe_t isa_drivers[] =
 {
+#ifdef ARCH_ia32
 #if 0
     { "LPT1", 		driver_isa_lpt_probe, 	2, 0x378, 7 },
     { "LPT2", 		driver_isa_lpt_probe, 	2, 0x278, 5 },
@@ -167,6 +168,8 @@ static isa_probe_t isa_drivers[] =
     { "SB16",          driver_isa_sb16_probe,  2, 0x260, 5 },
 #endif
 //    { "AdLib",         driver_isa_sdlib_probe, 3, 0x388, 8 },
+#endif // ia32
+
 };
 
 
@@ -195,7 +198,7 @@ static etc_probe_t etc_drivers[] =
 
 
 
-
+#if HAVE_PCI
 
 typedef struct
 {
@@ -393,6 +396,10 @@ static int probe_virtio( int stage, pci_cfg_t *pci )
 }
 #endif
 
+#endif // HAVE_PCI
+
+
+
 
 static int probe_isa( int stage )
 {
@@ -457,12 +464,14 @@ static int probe_etc( int stage )
 
 int phantom_pci_find_drivers( int stage )
 {
+#if HAVE_PCI
     if(loadpci())
     {
         SHOW_ERROR0( 0, "Can not load PCI devices table" );
         return -1;
     }
     SHOW_FLOW( 0, "Look for PCI devices, stage %d", stage );
+#endif
 
     if(stage == 3)
     {
@@ -472,6 +481,7 @@ int phantom_pci_find_drivers( int stage )
 
     int i;
 
+#if HAVE_PCI
     for(i = 0; i <= MAXPCI; i++ )
     {
         if( (!allpci[i].filled) || allpci[i].used )
@@ -496,7 +506,9 @@ int phantom_pci_find_drivers( int stage )
 //getchar();
     printf("Finished looking for VirtIO PCI devices, stage %d", stage );
 #endif
+#endif // HAVE_PCI
 
+    SHOW_FLOW( 2, "Start looking for ISA devices, stage %d", stage );
     probe_isa( stage );
     SHOW_FLOW( 2, "Finished looking for ISA devices, stage %d", stage );
     //getchar();

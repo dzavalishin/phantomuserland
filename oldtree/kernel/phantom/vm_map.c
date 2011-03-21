@@ -28,8 +28,11 @@
 #include <kernel/stats.h>
 #include <threads.h>
 
+#ifdef ARCH_ia32
 #include <i386/proc_reg.h>
 #include <x86/phantom_pmap.h>
+#endif
+
 #include <time.h>
 
 
@@ -84,7 +87,7 @@ static void vm_map_snapshot_thread(void);
 
 
 static void page_clear_engine_init(void);
-static void page_clear_engine_clear_page(phys_page_t p);
+static void page_clear_engine_clear_page(physaddr_t p);
 
 #define VERIFY_SNAP
 #ifdef VERIFY_SNAP
@@ -281,6 +284,7 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
 
             if( addr >= (vm_map_vm_page_count*__MEM_PAGE) )
             {
+                phantom_check_user_trap( ts );
                 dump_ss(ts);
                 panic("fault address 0x%p is outside of object space, IP 0x%X", fa, ip);
             }
@@ -847,7 +851,7 @@ page_fault_read( vm_page *p )
 
     // Allocate phys mem
     {
-        phys_page_t newp;
+        physaddr_t newp;
 
         // TODO: on alloc fail just wake up pageout thread and sleep on
         // some 'mem avail' event, then retry.
@@ -999,7 +1003,7 @@ page_fault_write( vm_page *p )
     // try to alloc phys page. if cant - kick allocator to find free space
     // (this will result in swapout, usually), then schedule dpc and put
     // thread to sleep
-    phys_page_t newp;
+    physaddr_t newp;
 
     while(hal_alloc_phys_page(&newp))
     {
@@ -1459,7 +1463,7 @@ void physmem_try_to_reclaim_page(void)
             page_touch_history(p);
             remove_from_clean_q(p);
             p->flag_phys_mem = 0; // Take it
-            phys_page_t paddr = p->phys_addr;
+            physaddr_t paddr = p->phys_addr;
             hal_page_control(paddr, p->virt_addr, page_unmap, page_noaccess);
             hal_free_phys_page(paddr);
         }
@@ -1618,7 +1622,7 @@ static void page_clear_engine_init(void)
 
 // Clear phys page from some special vaddress
 // TODO perCPU vaddress and no spinlock?
-static void page_clear_engine_clear_page(phys_page_t p)
+static void page_clear_engine_clear_page(physaddr_t p)
 {
     int enabled = hal_save_cli();
     hal_spin_lock(&page_clear_lock);

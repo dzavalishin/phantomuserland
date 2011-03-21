@@ -53,8 +53,9 @@ static int bios_vesa_stop()
 {
     map_video(0);
 //#if !VESA_ENFORCE
+#ifdef ARCH_ia32
     setTextVideoMode();
-//#endif
+#endif
     // Allways OK
     return 0;
 }

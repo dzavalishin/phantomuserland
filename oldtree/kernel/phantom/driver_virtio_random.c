@@ -1,3 +1,15 @@
+#ifdef ARCH_ia32
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Random numbers virtio driver. Unfinished, not working.
+ *
+**/
+
+
 #include <phantom_libc.h>
 
 #include "i386/pci.h"
@@ -66,3 +78,6 @@ phantom_device_t *driver_virtio_random_probe( pci_cfg_t *pci, int stage )
 
     return dev;
 }
+
+#endif // ARCH_ia32
+
