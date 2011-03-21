@@ -26,10 +26,10 @@ void debug_console_putc(int c)
 
 void arch_debug_console_init(void)
 {
-	short divisor = 115200 / dbg_baud_rate;
+    short divisor = 115200 / dbg_baud_rate;
 
-	outb( PORT+3, 0x80 );	/* set up to load divisor latch	*/
-	outb( PORT, divisor & 0xf );		/* LSB */
-	outb( PORT+1, divisor >> 8 );		/* MSB */
-	outb( PORT+3, 3 );		/* 8N1 */
+    outb( PORT+3, 0x80 );	/* set up to load divisor latch	*/
+    outb( PORT, divisor & 0xf );		/* LSB */
+    outb( PORT+1, divisor >> 8 );		/* MSB */
+    outb( PORT+3, 3 );		/* 8N1 */
 }

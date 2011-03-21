@@ -59,7 +59,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
 
 #if SPIN_DEBUG
     global_lock_entry_count[GET_CPU_ID()]++;
-    sl->ebp = get_ebp();
+    sl->ebp = arch_get_frame_pointer();
 #endif
 }
 
@@ -85,7 +85,7 @@ void check_global_lock_entry_count()
     if(global_lock_entry_count)
     {
         printf("some spinunlock locked!");
-        stack_dump_ebp( get_ebp() );
+        stack_dump_ebp( arch_get_frame_pointer() );
     }
 #endif
 }
