@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Kernel threads. Move to kernel/.
+ *
+ *
+**/
+
 #ifndef THREADS_H
 #define THREADS_H
 

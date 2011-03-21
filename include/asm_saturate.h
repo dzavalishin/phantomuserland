@@ -6,8 +6,6 @@
  *
  * GC refcount saturated inc/dec.
  *
- * Kernel ready: yes
- * Preliminary: no
  *
  *
 **/
@@ -25,6 +23,9 @@ addl $1, %0
 adcl $0, %0
 subl $2, %0
 */
+
+// newer arms have saturated add
+// look for saturated add in SSE?
 
 /*
 

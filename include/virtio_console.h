@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Virtio console devices.
+ *
+ *
+**/
+
 #ifndef _VIRTIO_CONSOLE_H
 #define _VIRTIO_CONSOLE_H
 #include <phantom_types.h>

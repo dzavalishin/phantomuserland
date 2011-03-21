@@ -4,10 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Quite quick'n'dirty disk structures design.
- *
- * Kernel ready: yes
- * Preliminary: no
+ * Phantom's native disk structures.
  *
  *
 **/
@@ -209,10 +206,10 @@ struct phantom_disk_blocklist
 
 struct phantom_disk_boot_progress_page
 {
-	u_int32_t			magic; 			// 32 bits  - DISK_STRUCT_MAGIC_PROGRESS_PAGE	
-	u_int32_t			boot_retry;		// Number of boot try
-	u_int32_t 			checksum;		// ?
-	u_int32_t 			_reserved;		// ?
+	u_int32_t               magic; 			// 32 bits  - DISK_STRUCT_MAGIC_PROGRESS_PAGE
+	u_int32_t               boot_retry;		// Number of boot try
+	u_int32_t             	checksum;		// ?
+	u_int32_t     	        _reserved;		// ?
 
 	// General status flags
 	unsigned char		boot_success;	// System boot up well

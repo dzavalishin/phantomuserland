@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * C stndard lib. TODO extend.
+ *
+ *
+**/
+
 #ifndef __STDLIB_H__
 #define __STDLIB_H__
 

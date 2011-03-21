@@ -26,52 +26,10 @@
 extern const int sys_nerr;
 extern const char *const sys_errlist[];
 
-#if 1
 #include <string.h>
-#else
-int strerror_r(int errnum, char *strerrbuf, size_t buflen);
-
-size_t strlcat(char *dst, const char *src, size_t  siz);
-size_t strlcpy(char *dst, const char *src, size_t siz);
-
-
-
-int strcmp(const char *s1, const char *s2);
-int strncmp(const char *s1, const char *s2, size_t n);
-
-char *strcat(char *s, const char *add);
-char *strcpy(char *to, const char *from);
-int strlen(const char *string);
-char *strncpy(char *to, const char *from, int count);
-
-char *strchr(const char *p, int ch);
-char *index(const char *p, int ch);
-
-char *strrchr(const char *p, int ch);
-char *rindex(const char *p, int ch);
-
-void *memcpy(void *dst0, const void *src0, size_t length);
-void *memmove(void *dst0, const void *src0, size_t length);
-void bcopy(const void *src0, void *dst0, size_t length);
-
-
-void bzero(void *dst0, size_t length);
-void *memset(void *dst0, int c0, size_t length);
-
-long atol(const char *str);
-long strtol(const char *nptr, char **endptr, int base); 
-quad_t strtoq(const char *nptr, char **endptr, int base);
-u_quad_t strtouq(const char *nptr, char **endptr, int base);
-
-#endif
-
-
-#if 1
 #include <stdlib.h>
-#else
-void _exit(int code);
-void exit(int code);
-#endif
+
+
 
 int kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
 int vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap);

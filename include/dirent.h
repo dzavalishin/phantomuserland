@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix dirent. TODO cleanup this mess! Make it binary compatible w. Linux.
+ *
+ *
+**/
+
 /*
  * DIRENT.H (formerly DIRLIB.H)
  * This file has no copyright assigned and is placed in the Public Domain.

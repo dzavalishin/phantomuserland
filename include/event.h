@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Window system event.
+ *
+ *
+**/
+
 #ifndef EVENT_H
 #define EVENT_H
 

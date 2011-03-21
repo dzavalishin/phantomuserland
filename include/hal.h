@@ -2,15 +2,13 @@
  *
  * Phantom OS - Phantom kernel include file.
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * Hardware abstraction level.
  *
  *
 **/
 
-// TODO ia32 specific!
 
 #ifndef HAL_H
 #define HAL_H
@@ -35,6 +33,9 @@
 #include <phantom_assert.h>
 #include <errno.h>
 #include <spinlock.h>
+
+#include <machdep.h>
+
 
 #define __MEM_GB 0x40000000u
 #define __MEM_PAGE 4096
@@ -112,13 +113,13 @@ long        				hal_free_phys_mem_4_paging(void); // how much of phys mem is ava
 void					hal_page_control( physaddr_t  p, void *page_start_addr, page_mapped_t mapped, page_access_t access );
 void					hal_pages_control( physaddr_t  p, void *page_start_addr, int n_pages, page_mapped_t mapped, page_access_t access );
 
-void	hal_page_control_etc(
-                     physaddr_t  p, void *page_start_addr,
-                     page_mapped_t mapped, page_access_t access,
-                     u_int32_t flags
-                );
+void					hal_page_control_etc(
+                                                             physaddr_t  p, void *page_start_addr,
+                                                             page_mapped_t mapped, page_access_t access,
+                                                             u_int32_t flags
+                                                            );
 
-void	hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapped, page_access_t access, u_int32_t flags );
+void					hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapped_t mapped, page_access_t access, u_int32_t flags );
 
 
 void * 					hal_alloc_page(void); // allocate (identically) mapped mem page in kern addr space
@@ -144,9 +145,9 @@ void                                    hal_free_phys_pages_low(physaddr_t  padd
 
 
 
-void		hal_copy_page_v2p( physaddr_t to, void *from );
-void		memcpy_p2v( void *to, physaddr_t from, size_t size );
-void		memcpy_v2p( physaddr_t to, void *from, size_t size );
+void					hal_copy_page_v2p( physaddr_t to, void *from );
+void					memcpy_p2v( void *to, physaddr_t from, size_t size );
+void					memcpy_v2p( physaddr_t to, void *from, size_t size );
 
 
 

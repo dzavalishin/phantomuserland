@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Block io requests queue.
+ *
+ *
+**/
+
 #ifndef DISK_Q_H
 #define DISK_Q_H
 
@@ -12,7 +23,6 @@
 struct disk_q
 {
     unsigned                            struct_id;
-    //struct phantom_disk_partition       root_part;
 
     // Used by driver to link with it's private device struct
     void                                *device;

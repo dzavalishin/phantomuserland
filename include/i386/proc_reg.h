@@ -162,7 +162,7 @@ get_esp(void)
 	__asm __volatile("movl %%esp,%0" : "=rm" (sel));
 	return (sel);
 }
-
+/*
 static __inline unsigned int
 get_ebp(void)
 {
@@ -170,7 +170,7 @@ get_ebp(void)
 	__asm __volatile("movl %%ebp,%0" : "=rm" (sel));
 	return (sel);
 }
-
+*/
 
 
 static __inline unsigned int

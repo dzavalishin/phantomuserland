@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Reasonable subset of unistd. Fix?
+ *
+ *
+**/
+
 /*
 ** Copyright 2001-2004 Travis Geiselbrecht. All rights reserved.
 ** Copyright 2002, Manuel J. Petit. All rights reserved.
@@ -25,8 +36,8 @@ int     open(char const *, int, ...);
 int     close(int);
 int     dup(int);
 int     dup2(int, int);
-int		unlink(const char *);
-int		fsync(int);
+int	unlink(const char *);
+int	fsync(int);
 void	sync(void);
 
 off_t   lseek(int, off_t, int);
@@ -42,20 +53,20 @@ int   chdir(const char *);
 char *getcwd(char *, size_t);
 char *getwd(char *);
 
-int		pipe(int fds[2]);
+int	pipe(int fds[2]);
 
 /* not strictly supposed to be here, and doesn't quite match unix ioctl() */
-int		ioctl(int, int, void *, size_t);
+int	ioctl(int, int, void *, size_t);
 
 /* process groups */
-int setpgid(pid_t pid, pid_t pgid);
-pid_t getpgid(pid_t pid);
-int setpgrp(void);
-pid_t getpgrp(void);
+int 	setpgid(pid_t pid, pid_t pgid);
+pid_t 	getpgid(pid_t pid);
+int 	setpgrp(void);
+pid_t 	getpgrp(void);
 
 /* sessions */
-pid_t getsid(pid_t pid);
-pid_t setsid(void);
+pid_t 	getsid(pid_t pid);
+pid_t 	setsid(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Block io - partitions/hierarchical processing modules.
+ *
+ *
+**/
+
 #ifndef DISK_H
 #define DISK_H
 

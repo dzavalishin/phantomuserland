@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Virtio block devices.
+ *
+ *
+**/
+
 #ifndef _VIRTIO_BLK_H
 #define _VIRTIO_BLK_H
 /* This header is BSD licensed so anyone can use the definitions to implement
