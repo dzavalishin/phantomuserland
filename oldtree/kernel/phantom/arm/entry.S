@@ -16,6 +16,9 @@
     .text
     .code 32
 
+    .globl	_start_of_kernel
+_start_of_kernel:
+
     .global _start
     .func   _start
 _start:
@@ -39,6 +42,7 @@ _start:
     .string "Copyright (C) Dmitry Zavalishin, 2011.\r\n"
 
     .align 4
+
 
 _trap_e_reset:
 
@@ -236,9 +240,9 @@ alltraps:
 
     // TODO Set it up in thread switch code. Not so easy on SMP :(
     mov         r6, sp
-//.global curr_thread_k0_stack_top
-//    LDR         r5, =curr_thread_k0_stack_top
-//    mov         SP, [r5]
+.global EXT(curr_thread_k0_stack_top)
+    LDR         r5, = EXT(curr_thread_k0_stack_top)
+    ldr         SP, [r5]
 
 not_user:
 
