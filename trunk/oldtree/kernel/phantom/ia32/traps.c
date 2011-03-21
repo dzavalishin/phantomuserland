@@ -94,6 +94,7 @@ static int trap_ignore(struct trap_state *ts)
     return 0;
 }
 
+/*
 //static
 int trap_panic(struct trap_state *ts)
 {
@@ -105,7 +106,7 @@ int trap_panic(struct trap_state *ts)
 
     return -1;
 }
-
+*/
 
 /**
  *
