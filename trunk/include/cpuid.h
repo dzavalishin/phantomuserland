@@ -6,9 +6,6 @@
  *
  * CPU identification headers.
  *
- * Kernel ready: yes
- * Preliminary: no
- *
  *
 **/
 

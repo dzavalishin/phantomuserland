@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * In-kernel stdio-like stuff.
+ *
+ *
+**/
+
 #ifndef KUNIX_H
 #define KUNIX_H
 
@@ -13,7 +24,7 @@ errno_t k_seek( int *pos, int fd, int offset, int whence );
 errno_t k_stat( const char *path, struct stat *data, int statlink );
 errno_t k_close( int fd );
 
-// Data malloced and to be freed by caller
+// Data buffer is malloc'ed and to be freed by caller
 errno_t k_load_file( void **odata, int *osize, const char *fname );
 
 

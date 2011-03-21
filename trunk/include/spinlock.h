@@ -1,5 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Spinlocks.
+ *
+ *
+**/
 
-//---------------------------------------------------------------------------
+
 #ifndef spinlockH
 #define spinlockH
 
@@ -9,8 +19,6 @@
 #define spinlock_unlock(l,s) hal_spin_unlock(l)
 #define spinlock_init(l) hal_spin_init(l)
 
-// ------------------------------------------------------------------------------------------
-// SPINLOCKS
 
 struct hal_spinlock {
     volatile int lock;

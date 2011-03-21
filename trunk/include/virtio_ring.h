@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Virtio ring structure definition.
+ *
+ *
+**/
+
 #ifndef _VIRTIO_RING_H
 #define _VIRTIO_RING_H
 /* An interface for efficient virtio implementation, currently for use by KVM

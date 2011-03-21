@@ -1,9 +1,20 @@
 /**
  *
- * $Log: pager_io_req.h,v $
- * Revision 1.4  2005/01/06 21:27:18  dz
- * cleanup before first vm run
+ * Phantom OS
  *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * (block dev) IO request structure.
+ *
+ *
+**/
+
+/**
+ *
+ * Historically was used by paging only.
+ * 
+ * Maybe it is reasonable now to break it into the pager req and
+ * regular io req?
  *
 **/
 
@@ -20,36 +31,35 @@
 
 typedef struct pager_io_request
 {
-    //void *              virt_addr;        // virtual add or 0 if not mapped
-    phys_page_t         phys_page;        // prev state copy for save to make_page. used on snap make
-    disk_page_no_t      disk_page;        // where on disk is this
+    physaddr_t          phys_page;        	// physmem address
+    disk_page_no_t      disk_page;        	// disk address in pages - as pager requested (ignored by io code)
 
     // TODO mustdie - together w. pager's queue
-    struct pager_io_request *  next_page;        // used for pager or some other queue
+    struct pager_io_request *  next_page;       // used for pager or some other queue
 
     // Used internally by disk partitions support/driver code
-    long                blockNo;         	// disk sector (usually 512-byte) no
-    int                 nSect;                 	// no of disk sectors
+    long                blockNo;         	// disk sector (usually 512-byte) no - this is what real io code looks at
+    int                 nSect;                 	// no of disk sectors to be transferred
 
-    unsigned char       flag_pagein; // : 1;
-    unsigned char       flag_pageout; // : 1;
+    unsigned char       flag_pagein;            // Read
+    unsigned char       flag_pageout;           // Write
 
-    unsigned char       flag_ioerror; // : 1; // BUG - not used yet
+    unsigned char       flag_ioerror; 		// BUG - not used yet - TODO replace by rc below
 
-    unsigned char       flag_urgent; // : 1; // BUG - not used yet
+    unsigned char       flag_urgent;  		// BUG - not used yet
 
 #if IO_RQ_SLEEP
-    unsigned char       flag_sleep; // calling thread will be put onsleep until IO is done // BUG - not used yet
-    int                 sleep_tid; // thread which is put asleep due to flag_sleep
+    // I true - calling thread will be put onsleep until IO is done 
+    unsigned char       flag_sleep;             // BUG - not used yet
+    int                 sleep_tid; 		// Thread which was put asleep due to flag_sleep - filled by io code
     hal_spinlock_t      lock;
 #endif
 
     void                (*pager_callback)( struct pager_io_request *req, int write );
 
-    queue_chain_t       disk_chain; // disk io q chain
-    //struct queue_entry	disk_chain; // disk io q chain
+    queue_chain_t       disk_chain; 		// Disk io q chain
 
-    errno_t 		rc; // driver return code
+    errno_t 		rc; 			// Driver return code
 } pager_io_request;
 
 

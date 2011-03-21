@@ -4,8 +4,6 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
  *
  *
 **/
@@ -13,6 +11,8 @@
 
 #ifndef PVM_BULK_H
 #define PVM_BULK_H
+
+#warning not me
 
 #include <vm/bulk.h>
 

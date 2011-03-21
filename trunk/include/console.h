@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Console IO.
+ *
+ *
+**/
+
 #ifndef _PHANTOM_CONSOLE_H
 #define _PHANTOM_CONSOLE_H
 
@@ -8,21 +19,24 @@ struct console_ops
     int 	(*getchar)(void);
     int 	(*putchar)(int);
     int 	(*puts)(const char *);
+
+    // TODO remove - ANSI is used instead
     int 	(*set_fg_color)(struct rgba_t);
     int 	(*set_bg_color)(struct rgba_t);
 };
 
-void phantom_set_console_ops( struct console_ops *ops );
+void 	phantom_set_console_ops( struct console_ops *ops );
 
 // Obsolete
-void phantom_set_console_getchar( int (*_getchar_impl)(void) );
-void phantom_set_console_putchar( int (*putchar_impl)(int) );
-void phantom_set_console_puts( int (*puts_impl)(const char *) );
+void 	phantom_set_console_getchar( int (*_getchar_impl)(void) );
+void 	phantom_set_console_putchar( int (*putchar_impl)(int) );
+void 	phantom_set_console_puts( int (*puts_impl)(const char *) );
 
-int driver_isa_vga_putc(int c);
+// TODO machdep
+int 	driver_isa_vga_putc(int c);
 
 // non-interrupt keyb
-int phantom_scan_console_getc(void);
+int 	phantom_scan_console_getc(void);
 
 void    console_set_fg_color( struct rgba_t );
 

@@ -20,8 +20,8 @@
 struct wtty
 {
 	char			buf[WTTY_BUFSIZE];
-	int				putpos;
-	int				getpos;
+	int			putpos;
+	int			getpos;
 	hal_mutex_t		mutex;
 	hal_cond_t		cond;
 };
@@ -29,9 +29,9 @@ struct wtty
 typedef struct wtty wtty_t;
 
 
-errno_t wtty_putc_nowait(wtty_t *w, int c);
-int wtty_getc(wtty_t *w);
-wtty_t * wtty_init(void);
+errno_t 	wtty_putc_nowait(wtty_t *w, int c);
+int 		wtty_getc(wtty_t *w);
+wtty_t * 	wtty_init(void);
 
 
 #endif // WTTY_H

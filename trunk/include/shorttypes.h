@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Short type names.
+ *
+ *
+**/
+
 #ifndef SHORTTYPES_H
 #define SHORTTYPES_H
 

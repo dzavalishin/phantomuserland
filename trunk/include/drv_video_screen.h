@@ -2,11 +2,9 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: yes (needs cleanup and, possibly, data structures modifiation)
- *
+ * Video subsystem.
  *
 **/
 
@@ -33,10 +31,6 @@ extern zbuf_t *zbuf;
 
 //! Switch video bitblt functions, used to read/write videomem, to 32 bit mode. Default is 24 bit mode.
 void switch_screen_bitblt_to_32bpp(void);
-
-
-
-
 
 
 

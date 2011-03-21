@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Excerpt from 32-bit ELF definitions.
+ *
+ *
+**/
+
 #ifndef ELF_H
 #define ELF_H
 

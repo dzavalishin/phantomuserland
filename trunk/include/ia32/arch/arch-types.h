@@ -1,27 +1,38 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Arch-specific type definitions.
+ *
+ *
+**/
+
 
 #ifndef __BIT_TYPES_DEFINED__
 #define __BIT_TYPES_DEFINED__
 
-typedef	__signed char          int8_t;
-typedef	unsigned char        u_int8_t;
-typedef	short                 int16_t;
-typedef	unsigned short      u_int16_t;
+typedef	__signed char          	int8_t;
+typedef	unsigned char        	u_int8_t;
+typedef	short                 	int16_t;
+typedef	unsigned short      	u_int16_t;
 
 #ifndef __INT32_DEFINED__
 #define __INT32_DEFINED__
-typedef	signed int            int32_t;
+typedef	signed int            	int32_t;
 #endif
 
-typedef	unsigned int        u_int32_t;
+typedef	unsigned int        	u_int32_t;
 
-typedef	signed long long      int64_t;
-typedef	unsigned long long  u_int64_t;
+typedef	signed long long      	int64_t;
+typedef	unsigned long long  	u_int64_t;
 
 #endif
 
 
-typedef void *  		    vmem_ptr_t;
-typedef unsigned long 	    addr_t;
+typedef void *			vmem_ptr_t;
+typedef unsigned long 	    	addr_t;
 
 // physical mem address 	
 typedef u_int32_t       	physaddr_t;
@@ -30,9 +41,9 @@ typedef u_int32_t       	linaddr_t;
 
 
 #ifndef _STDINT_H
-typedef	u_int32_t		    uintptr_t;
-typedef	int32_t			    ptrdiff_t;
-typedef u_int32_t 		    register_t;
+typedef	u_int32_t		uintptr_t;
+typedef	int32_t			ptrdiff_t;
+typedef u_int32_t 		register_t;
 #endif
 
 
@@ -41,9 +52,9 @@ typedef u_int32_t 		    register_t;
 #ifndef _SIZE_T
 #define _SIZE_T     	
 #define	_SIZE_T_DECLARED
-typedef unsigned        intsize_t;
-typedef int             ssize_t;
-typedef unsigned int    size_t;
+typedef unsigned        	intsize_t;
+typedef int             	ssize_t;
+typedef unsigned int    	size_t;
 #endif //_SIZE_T
 
 #ifndef _OFF_T

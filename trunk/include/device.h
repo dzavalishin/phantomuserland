@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Device. Currently driver publishes just one device, but it will change.
+ *
+ *
+**/
+
 #ifndef _PHANTOM_DEVICE_H
 #define _PHANTOM_DEVICE_H
 

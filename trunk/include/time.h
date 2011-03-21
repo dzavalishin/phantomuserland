@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Time stuff. TODO move to kernel/.
+ *
+ *
+**/
+
 #ifndef TIME_H
 #define TIME_H
 

@@ -51,6 +51,10 @@
 #endif
 #define	_ASM_LABEL(x)	x
 
+#define EXT(x) _C_LABEL(x)
+#define LEXT(x) _C_LABEL(x) :
+
+
 #ifndef _JB_MAGIC__SETJMP
 #define _JB_MAGIC__SETJMP       0x4278f500
 #define _JB_MAGIC_SETJMP        0x4278f501

@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Memory allocation.
+ *
+ *
+**/
+
 #ifndef MALLOC_H
 #define MALLOC_H
 

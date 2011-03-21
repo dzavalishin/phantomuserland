@@ -2,7 +2,7 @@
  *
  * Phantom OS multithreading library.
  *
- * Copyright (C) 2009-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2009-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Local header.
  *
@@ -15,9 +15,9 @@
 
 #include <kernel/timedcall.h>
 #include <kernel/trap.h>
+#include <kernel/smp.h>
 
-#include "cpu_state.h"
-//#include <i386/trap.h>
+#include <cpu_state.h>
 
 #include <phantom_types.h>
 #include <queue.h>
@@ -25,8 +25,7 @@
 #include <wtty.h>
 #include <threads.h>
 
-#include <kernel/smp.h>
-
+// No. Killed.
 #define USE_FORK_LUKE 0
 
 #define LATENCY_DEBUG 0
@@ -139,23 +138,6 @@ struct phantom_thread
 };
 
 
-/*
-#define THREAD_FLAG_USER        0x0001 // runs in user mode - not imlp
-#define THREAD_FLAG_VM          0x0002 // runs virtual machine thread, owner points to phantom thread object??? GC??!
-#define THREAD_FLAG_JIT         0x0004 // JITted VM tread - not imlp
-#define THREAD_FLAG_NATIVE      0x0008 // runs native code objetct - not imlp
-#define THREAD_FLAG_KERNEL      0x0010 // runs some kernel private stuff
-
-#define THREAD_FLAG_PREFORK     0x0020 // it to be forked
-#define THREAD_FLAG_PARENT      0x0040 // after fork - parent
-#define THREAD_FLAG_CHILD       0x0080 // after fork - child
-
-#define THREAD_FLAG_TIMEDOUT    0x0100 // Cond (or something else) was timed out
-#define THREAD_FLAG_UNDEAD      0x0200 // This thread can't be killed for some reason. Usually it's some special one like CPU idle thread.
-#define THREAD_FLAG_NOSCHEDULE  0x0400 // Must not be selected by scheduler in usual way - per CPU 'parking' (idlest) thread
-*/
-
-//#define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)
 
 
 #define THREAD_SLEEP_USER       0x0001 // just paused by user's call - must be unpaused manually
@@ -169,18 +151,6 @@ struct phantom_thread
 #define THREAD_SLEEP_ZOMBIE    	0x0100 // Waits for synchronous IO to complete
 
 
-/*
-#define THREAD_PRIO_NORM        0x7
-#define THREAD_PRIO_LOWEST      0x1
-#define THREAD_PRIO_LOW         0x2
-#define THREAD_PRIO_HIGH        0xC
-#define THREAD_PRIO_HIGHEST     0xF
-
-#define THREAD_PRIO_IDLE        0x0
-
-// Or with prio to get realtime thread
-#define THREAD_PRIO_MOD_REALTIME     0x10
-*/
 
 //typedef struct phantom_thread phantom_thread_t;
 
