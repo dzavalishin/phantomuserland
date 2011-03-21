@@ -1,8 +1,9 @@
+#ifdef ARCH_ia32
 /**
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Baloon virtio driver. Unfinished, not working.
  *
@@ -76,3 +77,7 @@ phantom_device_t *driver_virtio_baloon_probe( pci_cfg_t *pci, int stage )
 
     return dev;
 }
+
+#endif // ARCH_ia32
+
+

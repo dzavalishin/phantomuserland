@@ -52,7 +52,9 @@ entry.o: crtn.o
 START_O_FILE=entry.o
 
 #isa_sb16.o
-phantom: $(START_O_FILE) driver_pci_rtl8169.o \
+phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o\
+	driver_pci_rtl8169.o intrdisp.o mem_icp_timer.o \
+	paging_mem.o user_trap.o \
 	winsd.o sntp.o vm_load.o pci_es1370.o  \
 	ff.o bootp.o stray_check.o sbrk.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
@@ -87,7 +89,7 @@ phantom: $(START_O_FILE) driver_pci_rtl8169.o \
 	$(L386) $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(PHANTOM_LIBS)
 
 	@echo "Linking $@ ---------------------------------------------"
-	@gcc -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
+	@$(CC) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(PLIBDIR)/libdev.a  	\
 		$(PLIBDIR)/libnewos.a \
 		$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a \

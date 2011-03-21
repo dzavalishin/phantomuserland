@@ -224,7 +224,7 @@ errno_t phantom_sync_write_block( phantom_disk_partition_t *p, const void *to, l
 #endif
 
 
-//! Convert usual pager request to partition code style request snd start it
+//! Convert usual pager request to partition code style request and start it
 void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq )
 {
     int m = PAGE_SIZE/p->block_size;

@@ -55,7 +55,7 @@ typedef struct vm_page
     struct pager_io_request pager_io;
 
     void *              virt_addr;     	// where phys_addr is mapped
-    phys_page_t         phys_addr;      // our phys mem page, if any
+    physaddr_t          phys_addr;      // our phys mem page, if any
 
     // Can't touch pager_io data
     unsigned char       flag_pager_io_busy      ONEBIT;

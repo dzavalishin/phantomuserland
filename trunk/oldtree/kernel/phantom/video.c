@@ -31,6 +31,7 @@ static int debug_level_flow = 1;
 
 struct drv_video_screen_t *video_drivers[] =
 {
+#ifdef ARCH_ia32
     &video_driver_basic_vga,
 #if !JUST_VGA
     &video_driver_cirrus,
@@ -41,6 +42,13 @@ struct drv_video_screen_t *video_drivers[] =
     &video_driver_bios_vesa,
 #endif
 #endif
+
+#endif //ia32
+
+#ifdef ARCH_arm
+
+#endif // ARCH_arm
+
 };
 
 

@@ -28,12 +28,11 @@
 #include <elf.h>
 #include <unix/uuprocess.h>
 
-#include <i386/isa/pic.h>
-#include <i386/isa/pic_regs.h>
 
 
 #include "misc.h"
 #include <kernel/config.h>
+#include <kernel/board.h>
 
 
 static int file_inited = 0;
@@ -64,6 +63,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
 
     bootParameters = *(struct multiboot_info*)phystokv(multibootboot_info_pa);
 
+    board_init_early();
 
 #if 0
     // TODO Enable superpage support if we have it.
@@ -73,19 +73,13 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
     }
 #endif
 
+    board_init_cpu_management(); // idt/gdt/ldt
 
-    // Program the PIC
-    //phantom_pic_init(0x20, 0x28);
-    phantom_pic_init(PIC_VECTBASE, PIC_VECTBASE+8);
+    board_init_interrupts();
 
-    // Disable all the IRQs
-    phantom_pic_disable_all();
-
-
-
-    phantom_init_descriptors();
-    phantom_fill_idt();
-    phantom_load_idt();
+    //phantom_init_descriptors();
+    //phantom_fill_idt();
+    //phantom_load_idt();
 
     arch_debug_console_init();
 

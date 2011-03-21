@@ -17,6 +17,7 @@
 
 
 #include <kernel/config.h>
+#include <kernel/board.h>
 
 #include "svn_version.h"
 
@@ -215,7 +216,7 @@ int main(int argc, char **argv, char **envp)
 
     phantom_init_stat_counters();
 
-    phantom_timer_pit_init(100,0);
+    board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
     //init_buses();
@@ -240,12 +241,7 @@ int main(int argc, char **argv, char **envp)
     hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
     }
 
-/* Gone to arch dep paging init where it belongs
-  # ifdef ARCH_ia32
-    set_cr0( get_cr0() | CR0_WP );
-  # endif
-*/
-    phantom_init_apic(); // Starts other CPUs
+    board_start_smp();
 
     {
         extern const char* SVN_Version;
@@ -270,11 +266,13 @@ int main(int argc, char **argv, char **envp)
 
     init_main_event_q();
 
+#ifdef ARCH_ia32
 #if HAVE_VESA
     //pressEnter("will init vm86");
     phantom_init_vm86();
     //pressEnter("will init VESA");
     if(!bootflag_no_vesa) phantom_init_vesa();
+#endif
 #endif
     //pressEnter("will init graphics");
     phantom_start_video_driver();
@@ -328,7 +326,9 @@ int main(int argc, char **argv, char **envp)
     //pressEnter("will start phantom");
     start_phantom();
 
+#ifdef ARCH_ia32
     phantom_check_disk_check_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
+#endif
 
     load_classes_module();
 
@@ -341,7 +341,9 @@ int main(int argc, char **argv, char **envp)
 
 
 
+#ifdef ARCH_ia32
 connect_ide_io();
+#endif
 
     // Start virtual machine in special startup (single thread) mode
     pvm_root_init();
@@ -384,7 +386,9 @@ connect_ide_io();
 
     phantom_finish_all_threads();
 
+#ifdef ARCH_ia32
     phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
+#endif
 
     //pressEnter("will do a snap");
 
@@ -398,7 +402,9 @@ connect_ide_io();
 
 void phantom_save_vmem(void)
 {
+#ifdef ARCH_ia32
     phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
+#endif
 }
 
 

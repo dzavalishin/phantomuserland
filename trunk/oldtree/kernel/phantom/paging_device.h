@@ -38,8 +38,8 @@ typedef struct paging_device
     int                 io_is_in_progress;
     int                 is_write;
 
-    disk_page_no_t       disk;           // Disk block number (incoming parameter)
-    phys_page_t         mem;
+    disk_page_no_t      disk;           // Disk block number (incoming parameter)
+    physaddr_t          mem;
 
     void                (*callback)();
 
@@ -77,8 +77,8 @@ paging_device_pages_available(paging_device *me) { return me->n_pages; } // size
 /* TODO: Add error variable to callback */
 //void                paging_device_start_read (paging_device *me, disk_page_no_t disk, phys_page_t mem, void *vmem, void (*callback)() );
 //void                paging_device_start_write(paging_device *me, disk_page_no_t disk, phys_page_t mem, void *vmem, void (*callback)() );
-void                paging_device_start_read (paging_device *me, disk_page_no_t disk, phys_page_t mem, void (*callback)() );
-void                paging_device_start_write(paging_device *me, disk_page_no_t disk, phys_page_t mem, void (*callback)() );
+void                paging_device_start_read (paging_device *me, disk_page_no_t disk, physaddr_t mem, void (*callback)() );
+void                paging_device_start_write(paging_device *me, disk_page_no_t disk, physaddr_t mem, void (*callback)() );
 
 void                paging_device_start_read_rq (paging_device *me, pager_io_request *, void (*callback)() );
 void                paging_device_start_write_rq(paging_device *me, pager_io_request *, void (*callback)() );

@@ -16,33 +16,6 @@
 
 #include "misc.h"
 
-static int trap2sig( struct trap_state *ts );
-
-void
-phantom_check_user_trap( struct trap_state *ts )
-{
-    phantom_thread_t *t = GET_CURRENT_THREAD();
-
-    if(t->thread_flags & THREAD_FLAG_USER)
-    {
-        // Try thread trap handler first. If it returns zero - trap
-        // is supposed to be handled
-        if(t->trap_handler)
-        {
-            int sig_no = trap2sig(ts);
-            if( 0 == ( t->trap_handler( sig_no, ts ) ) )
-                return;
-        }
-
-        int tid = t->tid;
-        printf("Usermode thread %d killed due to unexpected trap\n", tid);
-        t_kill_thread( tid );
-        // Will panic below if returned
-        printf("Usermode trap panic in thread %d\n", tid);
-        trap_panic(ts);
-    }
-    // Not user mode, return
-}
 
 
 
@@ -70,7 +43,7 @@ phantom_kernel_trap( struct trap_state *ts )
 }
 
 
-static int trap2sig( struct trap_state *ts )
+int trap2signo( struct trap_state *ts )
 {
     int		sig_no = 0;
 
