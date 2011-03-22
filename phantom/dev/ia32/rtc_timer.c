@@ -109,7 +109,9 @@ static void rtc_interrupt(void *a)
 
     t0_revive();
 
+#if RTC_DEBUG
     putchar('$');
+#endif
 #if DRIVE_SCHED_FROM_RTC
     phantom_scheduler_time_interrupt();
 #endif

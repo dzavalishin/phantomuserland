@@ -195,11 +195,15 @@ static int revive_rtc_int_cnt = 0;
 
 static void timer_int_handler()
 {
+#if RTC_DEBUG
 putchar('#');
+#endif
     revive_pit_int_cnt++;
     //putchar('|');
     hal_time_tick(usec_per_tick);
+#if RTC_DEBUG
 putchar('^');
+#endif
 }
 
 
