@@ -72,7 +72,7 @@ vmem_ptr_t 				hal_object_space_address(void);
 
 
 
-void        				hal_init( vmem_ptr_t va, long vs );
+void                    hal_init( vmem_ptr_t va, long vs );
 
 void    				hal_init_object_vmem(void *start_of_virtual_address_space);
 
@@ -95,7 +95,7 @@ void 					phantom_mem_unlock(void);
 void    				hal_sleep_msec( int miliseconds );
 
 void    				hal_printf( char *format, ... );
-void        				hal_log( char *format, ... );
+void                    hal_log( char *format, ... );
 
 
 // paging support

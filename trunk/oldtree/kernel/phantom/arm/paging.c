@@ -37,7 +37,7 @@
 
 #define DEBUG_MSG_PREFIX "paging"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 9
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -109,6 +109,10 @@ void phantom_paging_init(void)
     paging_inited = 1;
 
     phantom_map_mem_equally();
+
+	// FIXME bring to board def
+	hal_pages_control( 0x10000000, (void *)0x10000000, 0xE0000, page_map_io, page_rw );
+	//hal_pages_control( 0x10000000, (void *)0x10000000, 0xE0000, page_map, page_rw );
 
     SHOW_FLOW0( 2, "mem mapped" );
 
@@ -331,7 +335,7 @@ hal_page_control_etc(
     assert(PAGE_ALIGNED((unsigned)page_start_addr));
     assert(flags == 0); // lets make 'em portable too
 
-    if(mapped != page_map) access = page_noaccess;
+    if(mapped == page_unmap) access = page_noaccess;
 
     // We need it for V86 mode - REDO IN A MORE SPECIFIC WAY, so that only VM86 pages are user accessible
     pt_entry_t bits = ARM_PTE_TYPE_SM_PAGE;
@@ -352,7 +356,7 @@ hal_page_control_etc(
 
     pte = create_pte(p, bits);
 
-    SHOW_FLOW( 7, "Map VA 0x%X to PA 0x%X, pte=0x%X\n",
+    SHOW_FLOW( 10, "Map VA 0x%X to PA 0x%X, pte=0x%X\n",
                           page_start_addr, p, (long)pte );
 
     if(mapped != page_unmap )

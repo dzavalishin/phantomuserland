@@ -15,8 +15,6 @@ Startts from lowest reg number. Highest reg number in highest mem addr.
 */
 
 
-// KILLME TEMP BUG XXX
-int GET_CPU_ID() { return 0; }
 
 
 static char *trap_type[8] =

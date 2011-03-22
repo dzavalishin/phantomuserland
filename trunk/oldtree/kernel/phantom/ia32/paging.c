@@ -41,7 +41,7 @@ hal_page_control_etc(
     assert(PAGE_ALIGNED((unsigned)page_start_addr));
     assert((flags & INTEL_PTE_PFN) == 0);
 
-    if(mapped != page_map) access = page_noaccess;
+    if(mapped == page_unmap) access = page_noaccess;
 
     int bits = INTEL_PTE_USER | flags; // We need it for V86 mode - REDO IN A MORE SPECIFIC WAY, so that only VM86 pages are user accessible
 

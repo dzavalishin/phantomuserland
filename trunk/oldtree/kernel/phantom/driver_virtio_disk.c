@@ -1,4 +1,5 @@
 #ifdef ARCH_ia32
+
 /**
  *
  * Phantom OS
@@ -525,4 +526,5 @@ static phantom_disk_partition_t *phantom_create_virtio_partition_struct( long si
 
 
 #endif // ARCH_ia32
+
 
