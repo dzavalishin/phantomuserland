@@ -18,7 +18,7 @@
 
 
 
-
+/*
 void
 phantom_kernel_trap( struct trap_state *ts )
 {
@@ -41,7 +41,7 @@ phantom_kernel_trap( struct trap_state *ts )
         panic("Trap handler failed for trap %s\n", trap_name(trapno));
     }
 }
-
+*/
 
 int trap2signo( struct trap_state *ts )
 {

@@ -9,11 +9,27 @@
  *
 **/
 
+#include <kernel/amap.h>
+
+struct phantom_device;
+
+typedef struct
+{
+    const char *	name;
+    struct phantom_device * (*probe_f)( int port, int irq, int stage );        // Driver probe func
+    int 		minstage; // How early we can be called
+    int 		port; // can be zero, driver supposed to find itself
+    int 		irq; // can be zero, driver supposed to find itself
+} isa_probe_t;
+
+
+
+
 //! The first function called by init code at all.
 //! At this point all we have is stack. Do what is
 //! needed earliest to prepare for later startup
 //! code. Such as enable hardware components, correct
-//! memory access, etc etc.
+//! memory access, relocate kernel, etc etc.
 void board_init_early(void);
 
 
@@ -21,6 +37,16 @@ void board_init_early(void);
 //! as descriptor tables, etc.
 void board_init_cpu_management(void);
 
+
+//! For drivers which have no standard way of finding its
+//! device ports/memory/irq, produce list of possible mappings
+//! to probe for devices at known addresses. Or, if board has
+//! some meanings of automatic device detection, use 'em.
+//! This function calls back to phantom_register_drivers().
+void board_make_driver_map(void);
+
+//! Called back by board code to pass drivers list.
+void phantom_register_drivers(isa_probe_t *drivers );
 
 
 //! This must bring alive interrupts from main OS timer
@@ -41,8 +67,41 @@ void board_interrupt_enable(int irq);
 void board_interrupt_disable(int irq);
 
 //! Disable all the possible interrupt lines. Not cli!
-void board_interrupts_disable_all(int irq);
+void board_interrupts_disable_all(void);
 
 
 //! Start other SMP processors and corresponding infrastructure
 void board_start_smp(void);
+
+
+
+
+//! Produce map of system's memory using MEM_MAP_ attributes.
+//! Most notably MEM_MAP_HI_RAM and MEM_MAP_KERNEL must be
+//! filled in. MEM_MAP_KERNEL will get identical mapping and
+//! _RAM will be added to phys ram pool.
+void board_fill_memory_map( amap_t *ram_map );
+
+#define MEM_MAP_UNKNOWN 1
+#define MEM_MAP_LOW_RAM 2
+#define MEM_MAP_HI_RAM  3
+#define MEM_MAP_DEV_MEM 4
+#define MEM_MAP_BIOS_DA 5
+#define MEM_MAP_KERNEL  6
+#define MEM_MAP_MODULE  7
+#define MEM_MAP_MOD_NAME  8
+#define MEM_MAP_MODTAB  9
+#define MEM_MAP_ARGS    10
+#define MEM_MAP_ELF_HDR 11
+#define MEM_MAP_ELF_SEC 12
+
+#define MEM_MAP_NOTHING 0
+
+
+
+
+
+
+
+
+

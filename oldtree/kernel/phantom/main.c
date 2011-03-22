@@ -227,7 +227,7 @@ int main(int argc, char **argv, char **envp)
     //   2 - disks which Phantom will live in must be found here
     //   3 - late and optional and slow junk
 
-    phantom_pci_find_drivers( 0 );
+    phantom_find_drivers( 0 );
 
     // Threads startup
     {
@@ -262,7 +262,7 @@ int main(int argc, char **argv, char **envp)
     net_stack_init();
 
     //pressEnter("will look for drv stage 1");
-    phantom_pci_find_drivers( 1 );
+    phantom_find_drivers( 1 );
 
     init_main_event_q();
 
@@ -278,7 +278,7 @@ int main(int argc, char **argv, char **envp)
     phantom_start_video_driver();
 
     pressEnter("will look for drv stage 2");
-    phantom_pci_find_drivers( 2 );
+    phantom_find_drivers( 2 );
 
 #if HAVE_UNIX
     // Before boot modules init Unix-like environment
@@ -332,7 +332,7 @@ int main(int argc, char **argv, char **envp)
 
     load_classes_module();
 
-    phantom_pci_find_drivers( 3 );
+    phantom_find_drivers( 3 );
 
 #if HAVE_NET
     phantom_tcpip_active = 1; // Tell them we finished initing network
@@ -359,7 +359,7 @@ connect_ide_io();
     vm_enable_regular_snaps();
 
     //pressEnter("will look for drv stage 4");
-    phantom_pci_find_drivers( 4 );
+    phantom_find_drivers( 4 );
 
 //trfs_testrq();
 

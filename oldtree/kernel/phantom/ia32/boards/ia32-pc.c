@@ -9,6 +9,7 @@
 **/
 
 #include <kernel/board.h>
+#include <kernel/init.h>
 
 #include <i386/isa/pic.h>
 #include <i386/isa/pic_regs.h>
@@ -52,7 +53,7 @@ void board_init_interrupts(void)
     phantom_pic_disable_all();
 }
 
-void board_interrupts_disable_all(int irq)
+void board_interrupts_disable_all(void)
 {
     phantom_pic_disable_all();
 }
@@ -70,4 +71,14 @@ void board_interrupt_disable(int irq)
     phantom_pic_disable_irq(irq);
 }
 
+
+// -----------------------------------------------------------------------
+// Drivers
+// -----------------------------------------------------------------------
+
+
+void board_make_driver_map(void)
+{
+    //phantom_register_drivers(driver_map);
+}
 

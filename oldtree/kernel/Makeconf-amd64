@@ -4,6 +4,9 @@ HOST_CPU	= i686
 HOST_ARCH	= x86
 unix_host	= NONE
 
+TARGET_OBJECT_FORMAT=elf64-i386
+
+
 export CC	= gcc
 export LD	= ld
 export STRIP	= strip

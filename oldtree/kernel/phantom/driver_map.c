@@ -15,6 +15,8 @@
 #define debug_level_info 10
 
 #include <kernel/config.h>
+#include <kernel/init.h>
+#include <kernel/board.h>
 
 #include <phantom_libc.h>
 
@@ -54,6 +56,9 @@ typedef struct
 } pci_probe_t;
 
 #define VIRTIO_VENDOR 0x1AF4
+
+
+#if HAVE_PCI
 
 // NB! No network drivers on stage 0!
 static pci_probe_t pci_drivers[] =
@@ -120,15 +125,11 @@ static virtio_probe_t virtio_drivers[] =
 };
 #endif
 
+#endif // HAVE_PCI
 
-typedef struct
-{
-    const char *name;
-    phantom_device_t * (*probe_f)( int port, int irq, int stage );        // Driver probe func
-    int minstage; // How early we can be called
-    int port; // can be zero, driver supposed to find itself
-    int irq; // can be zero, driver supposed to find itself
-} isa_probe_t;
+
+
+static isa_probe_t *board_drivers = 0;
 
 // NB! No network drivers on stage 0!
 static isa_probe_t isa_drivers[] =
@@ -170,6 +171,8 @@ static isa_probe_t isa_drivers[] =
 //    { "AdLib",         driver_isa_sdlib_probe, 3, 0x388, 8 },
 #endif // ia32
 
+    // End of list marker
+    { 0, 0, 0, 0, 0 },
 };
 
 
@@ -401,12 +404,12 @@ static int probe_virtio( int stage, pci_cfg_t *pci )
 
 
 
-static int probe_isa( int stage )
+static int probe_isa( int stage, isa_probe_t *idrivers )
 {
     unsigned int i;
-    for( i = 0; i < sizeof(isa_drivers)/sizeof(isa_probe_t); i++ )
+    for( i = 0; idrivers[i].probe_f != 0; i++ )
     {
-        isa_probe_t *dp = &isa_drivers[i];
+        isa_probe_t *dp = idrivers+i;
 
         SHOW_FLOW( 2, "check %s stage %d minstage %d", dp->name, stage, dp->minstage );
         if( stage < dp->minstage )
@@ -462,16 +465,17 @@ static int probe_etc( int stage )
 //   2 - disks which Phantom will live in must be found here
 //   3 - late and optional and slow junk
 
-int phantom_pci_find_drivers( int stage )
+int phantom_find_drivers( int stage )
 {
-#if HAVE_PCI
-    if(loadpci())
+    if( stage == 0 )
     {
-        SHOW_ERROR0( 0, "Can not load PCI devices table" );
-        return -1;
-    }
-    SHOW_FLOW( 0, "Look for PCI devices, stage %d", stage );
+#if HAVE_PCI
+        if(loadpci())
+            SHOW_ERROR0( 0, "Can not load PCI devices table" );
 #endif
+        // Get driver mappoings from board specific code
+        board_make_driver_map();
+    }
 
     if(stage == 3)
     {
@@ -479,9 +483,10 @@ int phantom_pci_find_drivers( int stage )
         dbg_add_command(&dump_alldevs, "devs", "List all of the device drivers");
     }
 
+#if HAVE_PCI
     int i;
 
-#if HAVE_PCI
+    SHOW_FLOW( 0, "Look for PCI devices, stage %d", stage );
     for(i = 0; i <= MAXPCI; i++ )
     {
         if( (!allpci[i].filled) || allpci[i].used )
@@ -509,8 +514,15 @@ int phantom_pci_find_drivers( int stage )
 #endif // HAVE_PCI
 
     SHOW_FLOW( 2, "Start looking for ISA devices, stage %d", stage );
-    probe_isa( stage );
+    probe_isa( stage, isa_drivers );
     SHOW_FLOW( 2, "Finished looking for ISA devices, stage %d", stage );
+
+    if(board_drivers)
+    {
+        SHOW_FLOW( 2, "Start looking for board devices, stage %d", stage );
+        probe_isa( stage, board_drivers );
+        SHOW_FLOW( 2, "Finished looking for board devices, stage %d", stage );
+    }
     //getchar();
     probe_etc( stage );
     SHOW_FLOW( 2, "Finished looking for other devices, stage %d", stage );
@@ -520,6 +532,10 @@ int phantom_pci_find_drivers( int stage )
 
 
 
+void phantom_register_drivers(isa_probe_t *drivers )
+{
+     board_drivers = drivers;
+}
 
 
 

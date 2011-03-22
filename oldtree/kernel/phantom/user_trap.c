@@ -14,6 +14,32 @@
 #include <phantom_libc.h>
 #include <threads.h>
 #include <thread_private.h>
+#include "misc.h"
+
+
+//! This is what called from low-level asm trap code
+void
+phantom_kernel_trap( struct trap_state *ts )
+{
+    int trapno = ts->trapno;
+
+    check_global_lock_entry_count(); // Debug
+
+    int (*handler)(struct trap_state *ts)
+        = phantom_trap_handlers[trapno];
+
+    if(handler == 0)
+    {
+        phantom_check_user_trap( ts ); // returns only if not an user mode thread
+        trap_panic(ts);
+    }
+
+    if(handler(ts))
+    {
+        dump_ss(ts);
+        panic("Trap handler failed for trap %s\n", trap_name(trapno));
+    }
+}
 
 
 

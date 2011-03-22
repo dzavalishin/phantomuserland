@@ -98,7 +98,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o\
 		$(L386) $(PLIBDIR)/libphantom.a \
 		$(CLIB) $(LIBGCC) crtn.o 
 #	../objcopy-ph -O elf32-i386 $@.pe $@
-	objcopy -O elf32-i386 $@.pe $@
+	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > ../../run/tftp/$@
 	cat < $@ > ../../../run/fat/boot/$@
 #	objdump -x $@.pe >$@.pe.sym

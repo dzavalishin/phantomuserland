@@ -29,7 +29,6 @@ void phantom_map_mem_equally(void);
 
 void phantom_start_video_driver(void);
 
-int phantom_pci_find_drivers( int stage );
 
 
 

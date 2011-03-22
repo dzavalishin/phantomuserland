@@ -1,4 +1,3 @@
-#if 1
 /**
  *
  * Phantom OS
@@ -38,7 +37,7 @@
 
 #define DEBUG_MSG_PREFIX "paging"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -110,8 +109,12 @@ void phantom_paging_init(void)
     paging_inited = 1;
 
     phantom_map_mem_equally();
+
+    SHOW_FLOW0( 2, "mem mapped" );
+
     phantom_paging_start();
 
+    SHOW_FLOW0( 2, "paging started" );
 }
 
 
@@ -349,7 +352,7 @@ hal_page_control_etc(
 
     pte = create_pte(p, bits);
 
-    SHOW_FLOW( 7, "Mapping VA 0x%X to PA 0x%X, pte is 0x%X\n",
+    SHOW_FLOW( 7, "Map VA 0x%X to PA 0x%X, pte=0x%X\n",
                           page_start_addr, p, (long)pte );
 
     if(mapped != page_unmap )
@@ -366,4 +369,3 @@ hal_page_control_etc(
 
 
 
-#endif
