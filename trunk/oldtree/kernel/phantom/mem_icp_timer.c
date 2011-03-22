@@ -60,8 +60,10 @@
 static int usec_per_tick = 10000; // 100 Hz
 
 
-static void timer_int_handler()
+static void timer_int_handler(void *arg)
 {
+    (void) arg;
+
     // This, possibly, can lead to lost timer interrupts.
     W32( BASE+TMR_REG_CONTROL, SETUP );
     W32( BASE+TMR_REG_INT_CLR, 0 );
@@ -77,12 +79,20 @@ static void timer_int_handler()
 
 void icp_timer0_init(int freq)
 {
+    // TODO hardcoded interrupt
+    int irq = 5;
+
+    if( hal_irq_alloc( irq, &timer_int_handler, 0, HAL_IRQ_SHAREABLE ) )
+    {
+        SHOW_ERROR( 0, "IRQ %d is busy", irq );
+        return;
+    }
+
     usec_per_tick = freq*1000;
 
     int count = 1000000/freq; // 1 MHz/freq
 
     W32( BASE+TMR_REG_LOAD, count );
-
     W32( BASE+TMR_REG_CONTROL, SETUP|TMR_CTL_IE );
 }
 

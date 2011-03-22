@@ -45,11 +45,25 @@ static void __file_init_func(void)
 }
 
 
+#include <kernel/amap.h>
+
+static amap_t ram_map;
+
+//#define MEM_SIZE (((long)~(int)0)+1)
+#define MEM_SIZE 0x100000000LL
+#define SET_MEM(st,len,type) e(amap_modify( &ram_map, st, len, type))
+
+static void e( errno_t err )
+{
+    if(err) panic("mem map init err = %d", err );
+}
+
 
 
 struct multiboot_info bootParameters;
 
 static void make_mem_map(void);
+static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg );
 
 void
 phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
@@ -84,17 +98,28 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
     arch_debug_console_init();
 
     // setup the floating point unit
-    //asm volatile ("fninit"); // BUG! MACHDEP!
     arch_float_init();
 
     // malloc will start allocating from fixed pool.
     phantom_heap_init();
 
-    /* Initialize the memory allocator and find all available memory.  */
-    make_mem_map();
+    // Initialize the memory allocator and find all available memory.
+    amap_init(&ram_map, 0, MEM_SIZE, MEM_MAP_UNKNOWN );
 
-    // BUG - it seems that interrupts at this point CAN'T be
-    // enabled and will lead to major crush
+
+#ifdef ARCH_ia32
+    make_mem_map();
+#else
+    board_fill_memory_map(&ram_map);
+#endif
+
+    // Suppose it to be machindep. Override if board didn't mention the kernel :)
+    extern char _start_of_kernel[], end[];
+    SET_MEM(kvtophys(_start_of_kernel), end-_start_of_kernel, MEM_MAP_KERNEL);
+
+    hal_init_physmem_alloc();
+    amap_iterate_all( &ram_map, process_mem_region, 0 );
+
     // Time to enable interrupts
     hal_sti();
 
@@ -123,24 +148,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
 }
 
 
-#include <kernel/amap.h>
 
-static amap_t ram_map;
-
-#define MEM_MAP_UNKNOWN 1
-#define MEM_MAP_LOW_RAM 2
-#define MEM_MAP_HI_RAM  3
-#define MEM_MAP_DEV_MEM 4
-#define MEM_MAP_BIOS_DA 5
-#define MEM_MAP_KERNEL  6
-#define MEM_MAP_MODULE  7
-#define MEM_MAP_MOD_NAME  8
-#define MEM_MAP_MODTAB  9
-#define MEM_MAP_ARGS    10
-#define MEM_MAP_ELF_HDR 11
-#define MEM_MAP_ELF_SEC 12
-
-#define MEM_MAP_NOTHING 0
 
 
 static char *nameTab[] =
@@ -163,16 +171,10 @@ static char *nameTab[] =
 
 #define START_UPPER 0x100000
 
-//#define MEM_SIZE (((long)~(int)0)+1)
-#define MEM_SIZE 0x100000000LL
-
-static void e( errno_t err )
-{
-    if(err) panic("mem map init err = %d", err );
-}
 
 
-void dumpf( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg )
+
+static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg )
 {
     (void) arg;
 
@@ -210,11 +212,9 @@ void dumpf( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, voi
 }
 
 
-#define SET_MEM(st,len,type) e(amap_modify( &ram_map, st, len, type))
 
 static void make_mem_map(void)
 {
-    amap_init(&ram_map, 0, MEM_SIZE, MEM_MAP_UNKNOWN );
 
     if (bootParameters.flags & MULTIBOOT_MEMORY)
     {
@@ -231,8 +231,8 @@ static void make_mem_map(void)
     // TODO somehow exclude VESA videomem?
     // TODO skip known CPU memmapped devs? APIC?
 
-    extern char _start_of_kernel[], end[];
-    SET_MEM(kvtophys(_start_of_kernel), end-_start_of_kernel, MEM_MAP_KERNEL);
+    //extern char _start_of_kernel[], end[];
+    //SET_MEM(kvtophys(_start_of_kernel), end-_start_of_kernel, MEM_MAP_KERNEL);
 
 
     if(bootParameters.flags & MULTIBOOT_CMDLINE)
@@ -294,8 +294,6 @@ static void make_mem_map(void)
     }
     //amap_dump( &ram_map );
 
-    hal_init_physmem_alloc();
-    amap_iterate_all( &ram_map, dumpf, 0 );
 
 
     //asm volatile ("hlt");
@@ -399,6 +397,7 @@ static const char *skip_path(const char *mn)
 
 struct multiboot_module *phantom_multiboot_find(const char *string)
 {
+#if defined(ARCH_ia32)
     struct multiboot_module *m = (struct multiboot_module*)
         phystokv(bootParameters.mods_addr);
     unsigned i;
@@ -417,7 +416,9 @@ struct multiboot_module *phantom_multiboot_find(const char *string)
         if( strcmp(mn, (char *)string) == 0)
             return &m[i];
     }
-
+#else
+    (void) string;
+#endif
     return 0;
 }
 
@@ -431,7 +432,7 @@ struct multiboot_module *phantom_multiboot_find(const char *string)
 
 void phantom_start_boot_modules()
 {
-#if HAVE_UNIX
+#if HAVE_UNIX && defined(ARCH_ia32)
     struct multiboot_module *m = (struct multiboot_module*)
         phystokv(bootParameters.mods_addr);
     unsigned i;

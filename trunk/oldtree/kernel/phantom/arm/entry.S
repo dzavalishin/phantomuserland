@@ -275,7 +275,7 @@ not_user:
 
     //mov         r10, sp     // r10 is callee saved, store trap_state there for us
     mov         r0, sp      // here is the arg to C function - address of struct trap_state we just built
-    bl          _C_LABEL(arm_trap)
+    bl          _C_LABEL(phantom_kernel_trap)
 
     // Here we have R10 pointing to struct trap_state, and most of the other registers are free to be used
 

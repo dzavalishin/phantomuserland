@@ -1,5 +1,7 @@
 ARCH_FLAGS      =
 
+TARGET_OBJECT_FORMAT=elf32-littlearm
+
 HOST_CPU	= i686
 HOST_ARCH	= x86
 unix_host	= NONE

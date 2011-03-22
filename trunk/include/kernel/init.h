@@ -32,6 +32,7 @@ static void __register_init(void)
 
 */
 
+int phantom_find_drivers( int stage );
 
 
 

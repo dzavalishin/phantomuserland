@@ -68,4 +68,13 @@ void board_interrupts_disable_all(int irq)
 }
 
 
+// -----------------------------------------------------------------------
+// Drivers
+// -----------------------------------------------------------------------
+
+
+void board_make_driver_map(void)
+{
+    //phantom_register_drivers(driver_map);
+}
 

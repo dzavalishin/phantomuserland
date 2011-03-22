@@ -1,5 +1,8 @@
 ARCH_FLAGS      = -m32
 
+TARGET_OBJECT_FORMAT=elf32-i386
+
+
 HOST_CPU	= i686
 HOST_ARCH	= x86
 unix_host	= NONE

@@ -20,7 +20,7 @@
 #define SERIAL_TX_BUFFER_FULL (1 << 5)
 #define SERIAL_RX_BUFFER_EMPTY (1 << 4)
 
-void debug_console_putc(int c)
+static void do_putc(int c)
 {
     /* Wait until the serial buffer is empty */
     while (*(volatile unsigned long*)(SERIAL_BASE + SERIAL_FLAG_REGISTER) 
@@ -29,6 +29,12 @@ void debug_console_putc(int c)
     *(volatile unsigned long*)SERIAL_BASE = c;
 }
 
+void debug_console_putc(int c)
+{
+    if(c=='\n')
+        do_putc('\r');
+    do_putc(c);
+}
 
 int debug_console_getc(void)
 {

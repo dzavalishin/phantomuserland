@@ -1,0 +1,27 @@
+Host Bridge/DRAM Controller (Intel) 8086:2770 class 6:0
+Integrated Graphics Device (Intel) 8086:2772 class 3:0
+Microsoft UAA Bus HD Audio (Intel) 8086:27D8 class 4:3 
+? (Intel) 8086:27D0 class 6:4 (bridge: PCI) 
+
+? (Intel) 8086:27CC class C:3 (bus: USB) if 20
+PCI 29.0: USB UHCI Controller (Intel) 8086:27C8 class C:3 (bus: USB) if 0
+PCI 29.1: USB UHCI Controller (Intel) 8086:27C9 class C:3 (bus: USB) if 0
+PCI 29.2: USB UHCI Controller (Intel) 8086:27CA class C:3 (bus: USB) if 0
+PCI 29.3: USB UHCI Controller (Intel) 8086:27CB class C:3 (bus: USB) if 0
+
+Hub Interface to PCI Bridge (Intel) 8086:244E class 6:4
+
+Intel 82801GB/GR (ICH7 Family) LPC Interface Controller 8086:27B8 class 6:1
+Ultra ATA-Controller (Intel) 8086:27DF class 1:1
+
+82801 GB Serial ATA Storage Controllers (Intel) 8086:27C0 class 1:1
+
+Gigabit Ethernet LOM (Realtek Semiconductor) 10EC:8168 class 2:0
+SMBus Controller (Intel) 8086:27DA class C:5
+
+
+
+
+
+
+
