@@ -32,6 +32,21 @@ static int icp_irq_dispatch(struct trap_state *ts);
 void board_init_early(void)
 {
 
+    // Relocate trap table to address 0
+    extern unsigned int _start_of_kernel[];
+    unsigned int *atzero = 0;
+
+    unsigned int shift = &_start_of_kernel;
+
+    // Copy branch instructions, correcting (relative) target
+    // address by distance we move them to.
+    int i;
+    for( i = 0; i < 8; i++ )
+    {
+        atzero[i] = _start_of_kernel[i] + shift;
+    }
+
+
 }
 
 void board_init_cpu_management(void)
@@ -232,6 +247,10 @@ void board_fill_memory_map( amap_t *ram_map )
 //    int len = 256*1024*1024;
     int len = 128*1024*1024;
     assert( 0 == amap_modify( ram_map, uptokernel, len-uptokernel, MEM_MAP_HI_RAM) );
+
+	//int start = 0x10000000;
+	//len =       0xFFFFFFFF-start;
+    //assert( 0 == amap_modify( ram_map, start, len, MEM_MAP_DEV_MEM) );
 }
 
 

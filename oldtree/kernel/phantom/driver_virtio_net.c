@@ -1,4 +1,5 @@
 #ifdef ARCH_ia32
+
 /**
  *
  * Phantom OS
@@ -875,5 +876,5 @@ DRIVER ( "VIRTIO-NET", nic_driver, pci_driver, virtnet_driver,
 
 #endif // HAVE_NET
 
-#endif // ARCH_ia32
 
+#endif // ARCH_ia32

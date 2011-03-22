@@ -80,7 +80,7 @@ static void timer_int_handler(void *arg)
 void icp_timer0_init(int freq)
 {
     // TODO hardcoded interrupt
-    int irq = 5;
+    int irq = 6;
 
     if( hal_irq_alloc( irq, &timer_int_handler, 0, HAL_IRQ_SHAREABLE ) )
     {

@@ -13,3 +13,16 @@ phantom_scheduler_schedule_soft_irq()
 {
     hal_request_softirq(SOFT_IRQ_THREADS);
 }
+
+#if HAVE_SMP
+#error no SMP support for arm target
+#endif
+
+#ifndef HAVE_SMP
+#warning no HAVE_SMP definition
+#endif
+
+int GET_CPU_ID(void)
+{
+    return 0;
+}

@@ -80,4 +80,3 @@ phantom_device_t *driver_virtio_random_probe( pci_cfg_t *pci, int stage )
 }
 
 #endif // ARCH_ia32
-

@@ -148,7 +148,7 @@ static isa_probe_t isa_drivers[] =
     { "MDA", 		driver_isa_vga_probe, 	0, 0x3B4, -1 },
 
     { "PS2 Keyboard", 	driver_isa_ps2k_probe, 	1, -1, 1 },
-    { "PS2 Mouse", 	driver_isa_ps2m_probe, 	1, -1, 12 },
+//    { "PS2 Mouse", 	driver_isa_ps2m_probe, 	1, -1, 12 },
 
 //    { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
 

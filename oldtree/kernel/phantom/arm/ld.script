@@ -1,26 +1,76 @@
-SECTIONS {
-        . = 0x00000000;
-        .text : {
-              /* * (vectors); */
-              * (.text);
-        }
-        .rodata : {
-              * (.rodata);
-        }
-        flash_sdata = .;
+/*OUTPUT_FORMAT(pei-i386)*/
 
-        . = 0xA0000000;
-        ram_sdata = .;
-        .data : AT (flash_sdata) {
-              * (.data);
-        }
-        ram_edata = .;
-        data_size = ram_edata - ram_sdata;
+     SECTIONS
+     {
+       . = 0x100000;
+       .text : 
+		{ 
+		PROVIDE (_start = .);
+		*(.text) 
+   		
+		PROVIDE (etext = .);
+		}
 
-        sbss = .;
-        .bss : {
-             * (.bss);
+       .data /*BLOCK(__section_alignment__)*/ : 
+		{ 
+		PROVIDE (_data_start__ = .);
+		PROVIDE (__data_start__ = .);
+                *(.data) 
+
+/*
+		SORT(CONSTRUCTORS)
+*/
+        /* static ctors */
+/*
+        __preinit_array_start = .;
+        KEEP(*(.preinit_array*))
+        __preinit_array_end = .;
+*/
+
         }
-        ebss = .;
-        bss_size = ebss - sbss;
+
+/*
+        PROVIDE(__init_array_start  = .);
+*/
+
+
+.init_array     : { 
+		__init_array_start  = .;
+		_init_array_start  = .;
+		KEEP(*(.init_array))
+		KEEP(*(.ctors)) 
+		__init_array_end    = .;
+		_init_array_end    = .;
 }
+
+/*
+        PROVIDE(__init_array_end    = .);
+*/
+
+
+       .rdata /*BLOCK(__section_alignment__)*/ : 
+		{ *(.rdata) }
+
+       .idata /*BLOCK(__section_alignment__)*/ : 
+		{ *(.idata) }
+
+       .bss /*BLOCK(__section_alignment__)*/ :
+ 		{ 
+    		_bss_start__ = . ;
+    		__bss_start__ = . ;
+		*(.bss) 
+        *(COMMON)
+		_bss_end__ = . ;
+		__bss_end__ = . ;
+		}
+
+  .endjunk /*BLOCK(__section_alignment__)*/ :
+  {
+    /* end is deprecated, don't use it */
+    PROVIDE (end = .);
+    PROVIDE ( _end = .);
+    _end__ = .;
+    __end__ = .;
+  }
+
+     }

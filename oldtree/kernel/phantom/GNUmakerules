@@ -34,7 +34,7 @@ PHANTOM_LIBS = 	$(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a
 
 
 
-LD_ADDR=--script=ld.script
+LD_ADDR=--script=$(ARCH)/ld.script
 
 ifeq ($(ARCH),ia32)
 L386=i386/libi386.a
@@ -115,6 +115,8 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o\
 
 svn_version.c::
 	@echo "---- (creating svn_version.c)"
-	@echo -n 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
+	@echo 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
+
+#	@echo -n 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
 
 endif

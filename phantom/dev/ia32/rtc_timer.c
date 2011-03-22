@@ -36,6 +36,7 @@
 //#define RTC_UNLOCK    if(ie) hal_sti()
 
 static void rtc_interrupt(void *a);
+//static void dump_rtc(void);
 
 
 void init_rtc_timer_interrupts(void)
@@ -53,6 +54,7 @@ void init_rtc_timer_interrupts(void)
     rate &= 0x0F; //rate must be above 2 and not over 15. (this is a safe-guard to be sure it isn't over 15)
 
     isa_rtc_nmi_off();
+//dump_rtc();
 
     // Set rate
 
@@ -122,6 +124,15 @@ static void rtc_interrupt(void *a)
 
 }
 
-
-
+/*
+static void dump_rtc(void)
+{
+    int i, v;
+    for( i = 0; i < 0x100; i++ )
+    {
+        v = isa_rtc_read_reg( i );
+        printf("RTC(%3x) = %4x\n", i, v );
+    }
+}
+*/
 
