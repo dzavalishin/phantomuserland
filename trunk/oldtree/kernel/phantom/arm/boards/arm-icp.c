@@ -38,12 +38,15 @@ void board_init_early(void)
 
     unsigned int shift = &_start_of_kernel;
 
+    assert(0==(shift&3));
+
     // Copy branch instructions, correcting (relative) target
-    // address by distance we move them to.
+    // address by distance we move them to. Branch address lacks
+    // lower 2 bits (allways 0), so divide shift by 4
     int i;
     for( i = 0; i < 8; i++ )
     {
-        atzero[i] = _start_of_kernel[i] + shift;
+        atzero[i] = _start_of_kernel[i] + (shift/4);
     }
 
 

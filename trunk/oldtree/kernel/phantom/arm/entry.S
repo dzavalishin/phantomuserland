@@ -166,8 +166,8 @@ __cmain_stack_top__:
  *
 **/
 
-
-
+.text
+//.code 32
 
 
 

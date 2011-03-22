@@ -29,6 +29,8 @@ void hal_wait_for_interrupt(void)
 }
 
 
+// gcc generates code which does not affect IRQ/FIQ flags!
+#if 0
 /**
  *
  * Gets the value of the CPSR.
@@ -41,7 +43,7 @@ void hal_wait_for_interrupt(void)
 static inline unsigned __get_cpsr(void)
 {
     unsigned long retval;
-    asm volatile (" mrs  %0, cpsr" : "=r" (retval) : /* no inputs */  );
+    asm volatile ("mrs  %0, cpsr_all" : "=r" (retval) : /* no inputs */  );
     return retval;
 }
 
@@ -53,10 +55,10 @@ static inline unsigned __get_cpsr(void)
 **/
 static inline void __set_cpsr(unsigned val)
 {
-    asm volatile (" msr  cpsr, %0" : /* no outputs */ : "r" (val)  );
+    asm volatile ("msr  cpsr_all, %0" : /* no outputs */ : "r" (val)  );
 }
 
-
+#endif
 
 
 
@@ -87,7 +89,7 @@ void hal_sti()
 
 int hal_is_sti()
 {
-    return __get_cpsr() & IRQ_MASK;
+    return !(__get_cpsr() & IRQ_MASK);
 }
 
 int hal_save_cli()
@@ -100,7 +102,7 @@ int hal_save_cli()
         __set_cpsr(_cpsr | IRQ_MASK);
     while (!(__get_cpsr() & IRQ_MASK));
 
-    return _cpsr & IRQ_MASK;
+    return !(_cpsr & IRQ_MASK);
 }
 
 
