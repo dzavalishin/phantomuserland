@@ -28,7 +28,33 @@
 #include <video.h>
 //#include "video_drv_icp_vga.h"
 
-#define VRAM_PHYSICAL_ADDRESS  0x00200000
+#define VGA_800x600 0
+#define VGA_1024x768 1
+
+
+
+#define LCDTiming0 		0xC0000000
+#define LCDTiming1 		0xC0000004
+#define LCDTiming2 		0xC0000008
+#define LCDTiming3 		0xC000000C
+
+#define LCDUPBASE               0xC0000010
+#define LCDLPBASE               0xC0000014
+
+#define LCDControl              0xC000001C
+
+
+static physaddr_t       pa;
+static void *           va;
+
+
+//#define VRAM_PHYSICAL_ADDRESS  0x00200000
+// Kernel is loaded at 1 Mb, so use mem below it, but 1 page above trap vectors
+//#define VRAM_PHYSICAL_ADDRESS  0x00001000
+#define VRAM_PHYSICAL_ADDRESS  pa
+
+#define VRAM_SIZE (1280*1024*4)
+
 
 // TODO move to integrator/cp header
 #define CP_IDFIELD 0xCB000000
@@ -45,8 +71,16 @@ static int icp_video_stop();
 struct drv_video_screen_t        video_driver_icp =
 {
     "Integrator/CP",
+#if VGA_1024x768
+    1024, 820,
+#if VGA_800x600
+    // size
+    800, 600,
+#else
     // size
     640, 480,
+#endif
+#endif
     // mouse x y flags
     0, 0, 0,
 
@@ -88,41 +122,79 @@ mouse_enable:          	drv_video_mouse_on_deflt,
 //static int n_pages = 1024;
 static int icp_video_probe()
 {
+    if(va == 0)
+        hal_pv_alloc( &pa, &va, VRAM_SIZE );
+
     // TODO switch to virtual on paging start?
-    video_driver_icp.screen = (void *)VRAM_PHYSICAL_ADDRESS;
+    video_driver_icp.screen = va;
+    //video_driver_icp.screen = (void *)VRAM_PHYSICAL_ADDRESS;
 
     int id = MEM(CP_IDFIELD);
     if( id != ICP_ID)
     {
-        printf("Integrator/CP oard id is %x, not %x\n", id, ICP_ID );
+        printf("Integrator/CP board id is %x, not %x\n", id, ICP_ID );
         return 0;
     }
 
-    volatile unsigned int *lp = (void *)0xC0000000;
 
-    /*
-    lp[0x10>>2] = (int)VRAM_PHYSICAL_ADDRESS;
-    lp[0x1C>>2] =
-        1 | // controller enable
-        (2 << 1) | // 4 bpp
-        0
-        ;
-    */
+#define PIX_PER_LINE_MASK 0xFC
+#define PIX_PER_LINE_SHIFT 2
 
-    // this sets 640*480, TODO 800*600
 
+#if VGA_1024x768
+    // 1024*768 - this won't work on real hw!
     MEM(0x10000014) = 0xA05F;
-    MEM(0x1000001C) = 0x12C11;
+    //MEM(0x1000001C) = 0x12C11; // 25MHz
+    MEM(0x1000001C) = 0xD061; // 36 MHz?
 
-    MEM(0xC0000000) = 0x3F1F3F9C;
-    MEM(0xC0000004) = 0x080B61DF;
-    MEM(0xC0000008) = 0x067F3800;
+    int tm0 = 0x3F1F3F9C;
 
-    MEM(0xC0000010) = (int)VRAM_PHYSICAL_ADDRESS;
-    MEM(0xC0000014) = (int)VRAM_PHYSICAL_ADDRESS;
+    tm0 &= ~PIX_PER_LINE_MASK;
+    //tm0 |= (63) << PIX_PER_LINE_SHIFT;
+    tm0 |= ((video_driver_icp.xsize/16)-1) << PIX_PER_LINE_SHIFT;
+
+    MEM(LCDTiming0) = tm0;
+
+    MEM(LCDTiming1) = (video_driver_icp.ysize)-1;
+    //MEM(LCDTiming1) = 728-1;
+
+    MEM(LCDTiming2) = 0x067F3800;
+
+#else
+#if VGA_800x600
+    // 800*600 - this won't work on real hw!
+    MEM(0x10000014) = 0xA05F;
+    //MEM(0x1000001C) = 0x12C11; // 25MHz
+    MEM(0x1000001C) = 0xD061; // 36 MHz?
+
+    int tm0 = 0x3F1F3F9C;
+
+    tm0 &= ~PIX_PER_LINE_MASK;
+    tm0 |= (49) << PIX_PER_LINE_SHIFT;
+
+    MEM(LCDTiming0) = tm0;
+
+    //MEM(LCDTiming1) = 0x080B61DF;
+    MEM(LCDTiming1) = 600-1;
+
+    MEM(LCDTiming2) = 0x067F3800;
+
+#else
+    // this sets 640*480, TODO 800*600
+    MEM(0x10000014) = 0xA05F;
+    MEM(0x1000001C) = 0x12C11; // 25MHz
+
+    MEM(LCDTiming0) = 0x3F1F3F9C;
+    MEM(LCDTiming1) = 0x080B61DF;
+    MEM(LCDTiming2) = 0x067F3800;
+#endif
+#endif
+
+    MEM(LCDUPBASE) = (int)VRAM_PHYSICAL_ADDRESS;
+    //MEM(0xC0000014) = (int)VRAM_PHYSICAL_ADDRESS;
 
     //MEM(0xC000001C) = 0x1829; // 16 bpp
-    MEM(0xC000001C) = 0x182B; // 24 bpp
+    MEM(LCDControl) = 0x182B; // 24 bpp
 
     //MEM(0x1000000C) = 0x3e005;
 
@@ -149,10 +221,11 @@ static void icp_map_video(int on_off)
     hal_pages_control_etc(
                           VBE_DISPI_LFB_PHYSICAL_ADDRESS,
                           video_driver_icp.screen,
-                          n_pages, on_off ? page_map : page_unmap, page_rw,
-                          INTEL_PTE_WTHRU|INTEL_PTE_NCACHE );
+                          n_pages, on_off ? page_map_io : page_unmap, page_rw, 0 );
 */
 }
+
+
 
 static int icp_video_start()
 {
