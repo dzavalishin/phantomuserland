@@ -232,6 +232,8 @@ alltraps:
     orr     	r5, r5, #(PSR_SYS32_MODE|I_BIT|F_BIT)
     msr     	cpsr_all, r5	   
 
+    mov         r6, sp
+
     and         r5, r0, #(PSR_MODE)     // Extract mode bits
     subs        r5, r5, #(PSR_USR32_MODE)
     bne         not_user
@@ -239,7 +241,6 @@ alltraps:
     // TODO here we have to load cur thread's kernel stack top to SP
 
     // TODO Set it up in thread switch code. Not so easy on SMP :(
-    mov         r6, sp
 .global EXT(curr_thread_k0_stack_top)
     LDR         r5, = EXT(curr_thread_k0_stack_top)
     ldr         SP, [r5]
@@ -259,7 +260,8 @@ not_user:
     push        {r4}          // trapno
 
     push        {lr}  	    // user mode lr
-    push        {r6}  	    // user mode sp we saved above when switched to kernel stack - or junk
+    push        {r6}  	    // user mode sp we saved above when switched to kernel stack
+    //push        {r1}  	    // user mode sp we saved above
 
     push        {r7-r12}    // Now save the rest of user's registers, at last
 
@@ -271,7 +273,7 @@ not_user:
     push        {r0-r6}     // Now re-store to correct stack
 
     // Do smth with FP? Clear, at least?
-    mov         r11, #0
+    //mov         r11, #0
 
     //mov         r10, sp     // r10 is callee saved, store trap_state there for us
     mov         r0, sp      // here is the arg to C function - address of struct trap_state we just built
