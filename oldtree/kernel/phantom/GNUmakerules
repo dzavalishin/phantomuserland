@@ -54,7 +54,7 @@ START_O_FILE=entry.o
 #isa_sb16.o
 phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o\
 	driver_pci_rtl8169.o intrdisp.o mem_icp_timer.o \
-	paging_mem.o user_trap.o mem_lanc111.o \
+	paging_mem.o user_trap.o mem_lanc111.o video_drv_icp_vga.o \
 	winsd.o sntp.o vm_load.o pci_es1370.o  \
 	ff.o bootp.o stray_check.o sbrk.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
