@@ -12,6 +12,7 @@
 #include <kernel/trap.h>
 #include <kernel/interrupts.h>
 
+#include <hal.h>
 #include <assert.h>
 #include <stdio.h>
 #include <arm/memio.h>
@@ -27,7 +28,7 @@
 
 
 static int icp_irq_dispatch(struct trap_state *ts);
-
+static void sched_soft_int( void *a );
 
 void board_init_early(void)
 {
@@ -36,7 +37,7 @@ void board_init_early(void)
     extern unsigned int _start_of_kernel[];
     unsigned int *atzero = 0;
 
-    unsigned int shift = &_start_of_kernel;
+    unsigned int shift = (unsigned int)&_start_of_kernel;
 
     assert(0==(shift&3));
 
@@ -87,7 +88,6 @@ void board_init_interrupts(void)
 {
     board_interrupts_disable_all();
     phantom_trap_handlers[T_IRQ] = icp_irq_dispatch;
-
 }
 
 void board_interrupts_disable_all(void)
@@ -132,6 +132,37 @@ static int icp_irq_dispatch(struct trap_state *ts)
     return 0; // We're ok
 }
 
+
+
+static volatile int sched_int_flag = 0;
+
+void sched_soft_int( void *a )
+{
+    W32(ICP_PRI_INTERRUPT_SOFT_CLEAR, 1); // Disable soft IRQ 0
+    sched_int_flag = 0;
+    // It works in CLOSED interrupts - We carry user spinlock here, so we have to be in closed interrupts up to unlock!
+    phantom_scheduler_soft_interrupt();
+    // it returns with soft irqs disabled
+    hal_enable_softirq();
+}
+
+void board_sched_cause_soft_irq(void)
+{
+    static int firsttime = 1;
+
+    if(firsttime)
+    {
+        // IRQ 0 is software-only, used to switch off the blocked thread
+        assert( 0==hal_irq_alloc( 0, &sched_soft_int, 0, HAL_IRQ_SHAREABLE ) );
+        firsttime = 0;
+    }
+
+
+    W32(ICP_PRI_INTERRUPT_SOFT_SET, 1); // Lowest one
+    sched_int_flag = 1;
+    hal_wait_for_interrupt();
+    assert(sched_int_flag == 0);
+}
 
 
 // -----------------------------------------------------------------------
