@@ -20,6 +20,10 @@ static int debug_level_flow = 1;
 
 #include "misc.h"
 
+#ifdef ARCH_arm
+extern struct drv_video_screen_t        video_driver_icp;
+#endif // ARCH_arm
+
 
 // TODO: panic must switch to text mode!
 
@@ -46,7 +50,7 @@ struct drv_video_screen_t *video_drivers[] =
 #endif //ia32
 
 #ifdef ARCH_arm
-
+	&video_driver_icp,
 #endif // ARCH_arm
 
 };
