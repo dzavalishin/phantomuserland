@@ -39,6 +39,11 @@ phantom_kernel_trap( struct trap_state *ts )
         dump_ss(ts);
         panic("Trap handler failed for trap %s\n", trap_name(trapno));
     }
+
+#if ARCH_arm
+    // Why just on arm? Will do any harm on PC? Need to check return value from handler to skip SoftIRQ processing?
+    //hal_softirq_dispatcher(ts);
+#endif
 }
 
 

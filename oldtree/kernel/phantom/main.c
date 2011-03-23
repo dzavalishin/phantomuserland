@@ -235,9 +235,12 @@ int main(int argc, char **argv, char **envp)
 
     // Threads startup
     {
+#if ARCH_ia32
     // HACK!!! Used to give away CPU in thread switch
     // Replace with?
     phantom_trap_handlers[15] = ignore_handler;
+#endif
+
     phantom_threads_init();
 #if !DRIVE_SCHED_FROM_RTC // run from int 8 - rtc timer
     phantom_request_timed_call( &sched_timer, TIMEDCALL_FLAG_PERIODIC );

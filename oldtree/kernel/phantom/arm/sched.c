@@ -2,14 +2,15 @@
 #include <threads.h>
 
 void
-phantom_scheduler_request_soft_irq()
+phantom_scheduler_request_soft_irq(void)
 {
     hal_request_softirq(SOFT_IRQ_THREADS);
-    __asm __volatile("swi 0xFFF"); // TODO who catches that 0xFFF?
+    //__asm __volatile("swi 0xFFF"); // TODO who catches that 0xFFF?
+    board_sched_cause_soft_irq();
 }
 
 void
-phantom_scheduler_schedule_soft_irq()
+phantom_scheduler_schedule_soft_irq(void)
 {
     hal_request_softirq(SOFT_IRQ_THREADS);
 }
