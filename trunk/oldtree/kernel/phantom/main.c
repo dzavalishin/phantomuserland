@@ -216,6 +216,10 @@ int main(int argc, char **argv, char **envp)
 
     phantom_init_stat_counters();
 
+#ifdef ARCH_arm
+    //test_swi();
+#endif
+
     board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
