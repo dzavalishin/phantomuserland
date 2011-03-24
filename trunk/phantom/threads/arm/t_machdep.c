@@ -32,11 +32,14 @@ void phantom_thread_trampoline(void);
  */
 void phantom_thread_state_init(phantom_thread_t *t)
 {
+    u_int32_t my_cpsr = __get_cpsr();
+
     t->cpu.sp = (int)(t->stack + t->stack_size);
     t->cpu.fp = 0;
-    t->cpu.ip = (int)phantom_thread_trampoline;
-    t->cpu.lr = 0;
-    t->cpu.cpsr = PSR_SYS32_MODE; // We will change it to user mode later
+    //t->cpu.ip = (int)phantom_thread_trampoline; // IDIOT! :)
+    t->cpu.lr = (int)phantom_thread_trampoline;
+    //t->cpu.cpsr = PSR_SYS32_MODE|F_BIT|I_BIT; // We will change it to user mode later
+    t->cpu.cpsr = my_cpsr|F_BIT|I_BIT; // We will change it to user mode later
 
 
     int *sp = (int *)(t->cpu.sp);
@@ -53,12 +56,10 @@ void phantom_thread_state_init(phantom_thread_t *t)
 
     // Now contents for "pop {r4-r12}" in context stwitch, 9 registers
 
-    // I don't know regisrers order for "pop {r4-r12}", so I do it twice :)
 
-
-    STACK_PUSH(sp,t->start_func); 	// R4
-    STACK_PUSH(sp,t->start_func_arg);	// R5
     STACK_PUSH(sp,t);			// R6
+    STACK_PUSH(sp,t->start_func_arg);	// R5
+    STACK_PUSH(sp,t->start_func); 	// R4
 
     STACK_PUSH(sp,0);
     STACK_PUSH(sp,0);
@@ -127,8 +128,12 @@ void switch_to_user_mode()
 void
 phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 {
-    SET_CURRENT_THREAD(t);
-    // Thread switch locked it befor switching into us, we have to unlock
+    t = GET_CURRENT_THREAD();
+    arg = t->start_func_arg;
+    func = t->start_func;
+
+    //SET_CURRENT_THREAD(t);
+    // Thread switch locked it before switching into us, we have to unlock
     hal_spin_unlock(&schedlock);
 
     // TODO all arch thread starters and context

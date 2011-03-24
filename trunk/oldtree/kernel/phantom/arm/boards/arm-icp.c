@@ -11,6 +11,7 @@
 #include <kernel/board.h>
 #include <kernel/trap.h>
 #include <kernel/interrupts.h>
+#include <kernel/driver.h>
 
 #include <hal.h>
 #include <assert.h>
@@ -132,13 +133,19 @@ static int icp_irq_dispatch(struct trap_state *ts)
     return 0; // We're ok
 }
 
-
+/* This does not work. We must come to scheduler with hardware interrupts turned off,
+ so we can't use hw intr controller for that purpose. Or we must mask off all other
+ interrupts which is pain in the butt and not reliable in terms of portability. (even
+ integrator cp has 3! interrupt controllers)
 
 static volatile int sched_int_flag = 0;
 
 void sched_soft_int( void *a )
 {
+    (void) a;
+
     W32(ICP_PRI_INTERRUPT_SOFT_CLEAR, 1); // Disable soft IRQ 0
+    //W32(ICP_PRI_INTERRUPT_SOFT_CLEAR, ~0); // Disable soft IRQ 0
     sched_int_flag = 0;
     // It works in CLOSED interrupts - We carry user spinlock here, so we have to be in closed interrupts up to unlock!
     phantom_scheduler_soft_interrupt();
@@ -157,11 +164,22 @@ void board_sched_cause_soft_irq(void)
         firsttime = 0;
     }
 
-
+    assert(hal_is_sti());
     W32(ICP_PRI_INTERRUPT_SOFT_SET, 1); // Lowest one
+    //W32(ICP_PRI_INTERRUPT_SOFT_SET, ~0); // Fire
     sched_int_flag = 1;
-    hal_wait_for_interrupt();
+
+    while(sched_int_flag) // HACK!!!
+        hal_wait_for_interrupt();
+
     assert(sched_int_flag == 0);
+}
+
+*/
+
+void board_sched_cause_soft_irq(void)
+{
+    phantom_scheduler_soft_interrupt();
 }
 
 
@@ -181,10 +199,16 @@ void board_sched_cause_soft_irq(void)
 // Primary IRQ controller 0x14000000 - done
 // Sec int controller 0xCA000000 - just disabled
 
+phantom_device_t * driver_pl011_uart_probe( int port, int irq, int stage );
+
 
 // NB! No network drivers on stage 0!
 static isa_probe_t board_drivers[] =
 {
+
+//    { "UART0", 		driver_pl011_uart_probe, 	1, 0x16000000, 1 },
+    { "UART1", 		driver_pl011_uart_probe, 	1, 0x17000000, 2 },
+
 /*
     { "GPIO", 		driver_mem_icp_gpio_probe, 	0, 0xC9000000, 0 },
     { "LCD", 		driver_mem_icp_lcd_probe, 	0, 0xC0000000, 22 },
@@ -195,8 +219,6 @@ static isa_probe_t board_drivers[] =
     { "PL050.kb",      	driver_mem_pl050_kb_probe,   	1, 0x18000000, 3 },
     { "PL050.ms",      	driver_mem_pl050_ms_probe,   	1, 0x19000000, 4 },
 
-    { "UART0", 		driver_mem_pl011_uart_probe, 	2, 0x16000000, 1 },
-    { "UART1", 		driver_mem_pl011_uart_probe, 	2, 0x17000000, 2 },
 
     { "RTC", 		driver_mem_icp_rtc_probe, 	0, 0x15000000, 8 },
 
@@ -226,16 +248,22 @@ void board_make_driver_map(void)
 // stubs
 // -----------------------------------------------------------------------
 
-
+#warning stubs!
 void  paging_device_start_read_rq( void *pdev, void *pager_current_request, void *page_device_io_final_callback )
 {
+    (void) pdev;
+    (void) pager_current_request;
+    (void) page_device_io_final_callback;
 }
 
 void  paging_device_start_write_rq( void *pdev, void *pager_current_request, void *page_device_io_final_callback )
 {
+    (void) pdev;
+    (void) pager_current_request;
+    (void) page_device_io_final_callback;
 }
 
-void init_paging_device()
+void init_paging_device(void)
 {
 }
 
@@ -252,8 +280,10 @@ int phantom_scan_console_getc(void)
 
 int phantom_dev_keyboard_get_key()
 {
-#warning completely wrong!!!
-    return debug_console_getc();
+//#warning completely wrong!!!
+    //    return debug_console_getc();
+    while(1)
+        hal_sleep_msec(10000);
 }
 
 

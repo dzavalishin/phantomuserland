@@ -9,6 +9,10 @@
 #define SYS_MODE 0x1F /* System Mode */
 #endif
 
+#ifndef ASSEMBLER
+unsigned int __get_cpsr(void);
+#endif
+
 #define I_BIT    0x80 /* when I bit is set, IRQ is disabled */
 #define F_BIT    0x40 /* when F bit is set, FIQ is disabled */
 
