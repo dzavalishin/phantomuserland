@@ -36,12 +36,12 @@ errno_t arm_id_shift( addr_t base, int shift, u_int32_t part_num, u_int32_t cell
 
     u_int32_t id;
 
-    id =  R32(base+shift+0)        & 0xFF;
-    id = (R32(base+shift+1) <<  8) & 0xFF;
-    id = (R32(base+shift+2) << 16) & 0xFF;
-    id = (R32(base+shift+3) << 24) & 0xFF;
+    id  =  R32(base+shift+0)        & 0xFF;
+    id |= (R32(base+shift+1) <<  8) & 0xFF;
+    id |= (R32(base+shift+2) << 16) & 0xFF;
+    id |= (R32(base+shift+3) << 24) & 0xFF;
 
-    SHOW_INFO( level, "Part no %x, designer %x, rev. %d, conf %x",
+    SHOW_INFO( level, "@%x+%x: Part no %x, designer %x, rev. %d, conf %x", base, shift,
                (id & 0xFFF),
                (id>>12) & 0xFF,
                (id>>20) & 0x0F,
@@ -50,20 +50,18 @@ errno_t arm_id_shift( addr_t base, int shift, u_int32_t part_num, u_int32_t cell
 
     if( (id & 0xFFF) != part_num)
     {
-        SHOW_ERROR( level, "Expected %x part number, got %x",
-                    (id & 0xFFF), part_num );
+        SHOW_ERROR( level, "Expected %x part number, got %x", part_num, (id & 0xFFF) );
         res = ENXIO;
     }
 
-    id =  R32(base+shift+4)        & 0xFF;
-    id = (R32(base+shift+5) <<  8) & 0xFF;
-    id = (R32(base+shift+6) << 16) & 0xFF;
-    id = (R32(base+shift+7) << 24) & 0xFF;
+    id  =  R32(base+shift+4)        & 0xFF;
+    id |= (R32(base+shift+5) <<  8) & 0xFF;
+    id |= (R32(base+shift+6) << 16) & 0xFF;
+    id |= (R32(base+shift+7) << 24) & 0xFF;
 
     if( id != cellId)
     {
-        SHOW_ERROR( level, "Expect %x cell id, got %x",
-                    id, cellId );
+        SHOW_ERROR( level, "Expect %x cell id, got %x", cellId, id );
         res = ENXIO;
     }
 

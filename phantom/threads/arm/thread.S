@@ -37,7 +37,7 @@ ENTRY(phantom_switch_context)
     // Save R11/FP
     str         r11, [ r0, #CSTATE_FP ]
     // Save R15/IP
-    str         r15, [ r0, #CSTATE_IP ]
+    //str         r15, [ r0, #CSTATE_IP ]
     // Save R14/LR
     str         r14, [ r0, #CSTATE_LR ]
     // Save R13/SP
@@ -52,7 +52,7 @@ ENTRY(phantom_switch_context)
     msr         cpsr, r3
 
     // Load R15/IP
-    ldr         r15, [ r1, #CSTATE_IP ]
+    //ldr         r15, [ r1, #CSTATE_IP ]
     // Save R14/LR
     ldr         r14, [ r1, #CSTATE_LR ]
     // Save R13/SP
@@ -64,12 +64,16 @@ ENTRY(phantom_switch_context)
     pop         {r4-r12}
 
     // Unlock (set to zero) given spinlock
-    mov         r0, #0
-    str         r0, [ r2 ]
+    //mov         r0, #0
+    //str         r0, [ r2 ]
+
+    mov         r0, r2
+    //bl    	EXT(hal_spin_unlock)
+    b    	EXT(hal_spin_unlock)
 
 
     // Return to new thread's saved link register.
-    mov         r15, r14
+    //mov         r15, r14
 
 
         

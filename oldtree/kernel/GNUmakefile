@@ -10,7 +10,11 @@ include $(realpath $(PHANTOM_HOME))/config.mk
 include $(OBJDIR)/Makeconf-$(ARCH)
 
 
+ifeq ($(ARCH),ia32)
 SUBDIRS		= $(filter-out $(PHANTOM_EXCLUDED_SUBDIRS), phantom/i386 phantom )
+else
+SUBDIRS		= $(filter-out $(PHANTOM_EXCLUDED_SUBDIRS), phantom )
+endif
 
 
 

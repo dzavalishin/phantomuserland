@@ -1,0 +1,12 @@
+
+Max Filippov - a lot of work with paging/snapshotting system and low level
+kernel code.
+
+Leond Pauzner - GC/refcount/object land allocator, tail recursion 
+optimizations for VM.
+
+Irek Akhtyamov - Parts of Java/Phantom bytecode convertor.
+
+Seva Glushchenko - daily regression test environment, QA.
+
+dz - the rest...
