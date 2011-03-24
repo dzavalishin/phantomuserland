@@ -18,7 +18,14 @@ YACC            = bison -y
 M4              = m4
 
 
-USR_LD_ADDR=-Wl,-Ttext-segment,0 -Wl,-Ttext,0
+#USR_LD_ADDR=-Wl,-Ttext-segment,0 -Wl,-Ttext,0
+
+ifeq ($(OSTYPE),cygwin)
+  USR_LD_ADDR=-Wl,-Ttext,0
+else
+  USR_LD_ADDR=-Wl,-Ttext-segment,0
+endif
+
 
 TARGET_OBJECT_FORMAT=elf32-littlearm
 
