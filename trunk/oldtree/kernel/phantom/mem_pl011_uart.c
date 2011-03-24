@@ -147,17 +147,17 @@ void pl011_interrupt( void *arg )
     pl011 *uart = (pl011 *)dev->drv_private;
 
 
-    int irq = R32(PL011_UARTRIS);
+    int irq = R32(dev->iobase + PL011_UARTRIS);
 
     if(irq & (PL011_RXIRQ|PL011_RXTIMEOUTIRQ))
     {
-        W32( PL011_UARTICR, PL011_RXIRQ|PL011_RXTIMEOUTIRQ );
+        W32( dev->iobase + PL011_UARTICR, PL011_RXIRQ|PL011_RXTIMEOUTIRQ );
         hal_sem_release( &uart->rx_sem );
     }
 
     if(irq & PL011_TXIRQ)
     {
-        W32( PL011_UARTICR, PL011_TXIRQ );
+        W32( dev->iobase + PL011_UARTICR, PL011_TXIRQ );
         hal_sem_release( &uart->tx_sem );
     }
 }

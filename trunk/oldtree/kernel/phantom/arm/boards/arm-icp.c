@@ -200,6 +200,7 @@ void board_sched_cause_soft_irq(void)
 // Sec int controller 0xCA000000 - just disabled
 
 phantom_device_t * driver_pl011_uart_probe( int port, int irq, int stage );
+phantom_device_t * driver_pl031_rtc_probe( int port, int irq, int stage );
 
 
 // NB! No network drivers on stage 0!
@@ -208,6 +209,8 @@ static isa_probe_t board_drivers[] =
 
 //    { "UART0", 		driver_pl011_uart_probe, 	1, 0x16000000, 1 },
     { "UART1", 		driver_pl011_uart_probe, 	1, 0x17000000, 2 },
+
+    { "RTC", 		driver_pl031_rtc_probe, 	0, 0x15000000, 8 },
 
 /*
     { "GPIO", 		driver_mem_icp_gpio_probe, 	0, 0xC9000000, 0 },
@@ -220,7 +223,6 @@ static isa_probe_t board_drivers[] =
     { "PL050.ms",      	driver_mem_pl050_ms_probe,   	1, 0x19000000, 4 },
 
 
-    { "RTC", 		driver_mem_icp_rtc_probe, 	0, 0x15000000, 8 },
 
     { "LEDS", 		driver_mem_icp_leds_probe, 	0, 0x1A000000, 0 },
 
