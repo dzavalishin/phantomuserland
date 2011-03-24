@@ -1,7 +1,12 @@
 /**
  *
+ * Phantom OS
  *
- * 
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Call function from timer interrupt.
+ * Delay is in msec.
+ *
  *
 **/
 
