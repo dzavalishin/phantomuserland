@@ -222,8 +222,10 @@ phantom_device_t * driver_pl011_uart_probe( int port, int irq, int stage )
 {
     (void) stage;
 
+#if ARCH_arm
     if( arm_id( port, 0x011, 0xB105F00D, 1 ) )
         return 0;
+#endif
 
     uart_init( port );
 
