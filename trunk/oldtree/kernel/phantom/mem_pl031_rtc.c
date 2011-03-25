@@ -120,9 +120,11 @@ phantom_device_t * driver_pl031_rtc_probe( int port, int irq, int stage )
 {
     (void) stage;
 
+#if ARCH_arm
     if( arm_id( port, 0x031, 0xB105F00D, 1 ) )
         //return 0;
         SHOW_ERROR0( 0, "id failed" );
+#endif
 
     pl031_init( port );
 
