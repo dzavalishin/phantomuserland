@@ -14,6 +14,8 @@
 #include <i386/isa/pic.h>
 #include <i386/isa/pic_regs.h>
 
+extern char board_name[] = "PC32";
+
 
 void board_init_early(void)
 {

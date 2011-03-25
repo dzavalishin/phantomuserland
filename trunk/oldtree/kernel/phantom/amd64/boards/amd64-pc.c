@@ -10,6 +10,10 @@
 
 
 #include <kernel/board.h>
+#include <kernel/init.h>
+
+extern char board_name[] = "PC64";
+
 
 // TODO simply inlude ia32 code here? we copy everything...
 
