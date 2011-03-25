@@ -130,9 +130,11 @@ phantom_device_t * driver_pl181_mmc_probe( int port, int irq, int stage )
 {
     (void) stage;
 
+#if ARCH_arm
     if( arm_id( port, 0x181, 0xB105F00D, 1 ) )
         //return 0;
         SHOW_ERROR0( 0, "id failed" );
+#endif
 
     pl181_init( port );
 
