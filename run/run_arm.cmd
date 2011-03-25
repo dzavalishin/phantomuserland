@@ -11,6 +11,7 @@ rem SET STOP=-S
 rem -append "-d=20 -- -test all"
 
 rm -f serial0.log 
-%QDIR%\qemu-system-arm -s -L %QDIR%/bios -kernel fat/boot/phantom -sd phantom.img -mtdblock vio.img %SER% %STOP% %Q_NET% -writeconfig arm.cfg
+%QDIR%\qemu-system-arm -s -L %QDIR%/bios -kernel fat/boot/phantom -sd phantom.img -mtdblock vio.img %SER% %STOP% %Q_NET% 
+rem -writeconfig arm.cfg
 
 rem qemu-system-arm -kernel zImage.integrator -initrd arm_root.img

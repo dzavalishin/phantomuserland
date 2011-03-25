@@ -27,6 +27,7 @@
 
 char board_name[] = "Integrator/CP";
 
+static char * symtab_getname( void *addr );
 
 
 static int icp_irq_dispatch(struct trap_state *ts);
@@ -52,7 +53,8 @@ void board_init_early(void)
         atzero[i] = _start_of_kernel[i] + (shift/4);
     }
 
-
+    // TODO wrong place - must be in arm arch code
+    //phantom_symtab_getname = symtab_getname;
 }
 
 void board_init_cpu_management(void)
@@ -70,6 +72,21 @@ void board_start_smp(void)
 {
     // I'm single-CPU board, sorry.
 }
+
+// -----------------------------------------------------------------------
+// Arm -mpoke-function-name
+// -----------------------------------------------------------------------
+
+/*
+static char * symtab_getname( void *addr )
+{
+    int len = *(int*)(addr-4);
+    if( (len & 0xFF000000) != 0xFF000000 )
+        return "?";
+
+    return (char *)(addr - 4 - (len&0xFFFFFF));
+}
+*/
 
 // -----------------------------------------------------------------------
 // Interrupts processing

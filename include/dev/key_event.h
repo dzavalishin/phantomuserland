@@ -108,10 +108,10 @@ typedef enum {
 	KEY_BLANK,
 } extended_keys;
 
-#define KEY_LED_SCROLL			0x1
-#define KEY_LED_NUM				0x2
-#define KEY_LED_CAPS			0x4
-#define KEY_LED_COMPOSE			0x8	/* on SUN Type 4 */
+#define KEY_LED_SCROLL                  0x1
+#define KEY_LED_NUM                     0x2
+#define KEY_LED_CAPS                    0x4
+#define KEY_LED_COMPOSE                 0x8	/* on SUN Type 4 */
 
 #define _KEYBOARD_IOCTL_SET_LEDS 10000
 

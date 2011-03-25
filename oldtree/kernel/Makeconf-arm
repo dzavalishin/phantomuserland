@@ -1,4 +1,4 @@
-ARCH_FLAGS      =
+ARCH_FLAGS      = -mpoke-function-name
 
 TARGET_OBJECT_FORMAT=elf32-littlearm
 
