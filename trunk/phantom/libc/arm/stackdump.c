@@ -20,15 +20,17 @@ char * (*phantom_symtab_getname)( void *addr ) = 0;
 
 static void stack_dump_one(void *fp)
 {
-    void *addr = *( ((void**)fp) - 1);
-    if( addr == 0 )
+    if( fp == 0 )
         return;
+
+    //void *addr = *( ((void**)fp) - 1);
+    void *addr = *( ((void**)fp));
 
     printf("- %8p", addr);
 
     if(phantom_symtab_getname)
     {
-        printf(": %s\n", phantom_symtab_getname(addr) );
+        printf(": %s\n", phantom_symtab_getname(addr-8) );
     }
     else
         printf("\n");

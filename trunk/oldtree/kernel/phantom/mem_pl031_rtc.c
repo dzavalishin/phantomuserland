@@ -158,7 +158,7 @@ phantom_device_t * driver_pl031_rtc_probe( int port, int irq, int stage )
 
     return dev;
 
-free2:
+//free2:
     free( dev );
 //free1:
 

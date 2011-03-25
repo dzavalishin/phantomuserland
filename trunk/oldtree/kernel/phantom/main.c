@@ -314,7 +314,7 @@ int main(int argc, char **argv, char **envp)
     // -----------------------------------------------------------------------
     // If this is test run, switch to test code
     // -----------------------------------------------------------------------
-
+#if !defined(ARCH_arm)
     if( argc >= 3 && (0 == strcmp( argv[1], "-test" )) )
     {
         SHOW_FLOW0( 0, "Sleep before tests to settle down boot activities" );
@@ -324,6 +324,14 @@ int main(int argc, char **argv, char **envp)
         SHOW_FLOW0( 0, "Test done, reboot");
         exit(0);
     }
+#else
+    {
+        SHOW_FLOW0( 0, "Will run all tests" );
+        run_test( "all", "" );
+        SHOW_FLOW0( 0, "Test done, reboot");
+        exit(0);
+    }
+#endif
 
     // -----------------------------------------------------------------------
     // Now starting object world infrastructure
