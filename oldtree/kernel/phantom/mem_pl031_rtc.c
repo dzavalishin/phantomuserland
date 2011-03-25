@@ -115,6 +115,8 @@ static int pl031_write(struct phantom_device *dev, const void *buf, int len)
 
 static int seq_number = 0;
 
+// Bus is 24MHz, we need 8, so divide by 3. Must go to board definitions!
+#define PL050_BUS_FREQ_DIVIDER 3
 
 phantom_device_t * driver_pl031_rtc_probe( int port, int irq, int stage )
 {
@@ -144,13 +146,13 @@ phantom_device_t * driver_pl031_rtc_probe( int port, int irq, int stage )
     //dev->iomem = ;
     //dev->iomemsize = ;
 
-
+/* on stage 0 it is not possible?
     if( hal_irq_alloc( irq, &pl031_interrupt, dev, HAL_IRQ_SHAREABLE ) )
     {
         SHOW_ERROR( 0, "IRQ %d is busy", irq );
         goto free2;
     }
-
+*/
 
 
 

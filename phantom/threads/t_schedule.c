@@ -450,7 +450,7 @@ static int t_assign_time(void)
 void thread_block( int sleep_flag, hal_spinlock_t *lock_to_be_unlocked )
 {
     assert(lock_to_be_unlocked != &schedlock);
-	assert(!IS_SOFT_IRQ_DISABLED());
+    assert(!IS_SOFT_IRQ_DISABLED());
 
     int ie = hal_save_cli();
     hal_spin_lock(&schedlock);

@@ -12,6 +12,9 @@
 #ifndef INIT_H
 #define INIT_H
 
+extern char arch_name[];
+extern char board_name[];
+
 
 /*
 static void __register_init(void) __attribute__ ((constructor));

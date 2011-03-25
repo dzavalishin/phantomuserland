@@ -25,6 +25,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+char board_name[] = "Integrator/CP";
 
 
 
@@ -201,6 +202,10 @@ void board_sched_cause_soft_irq(void)
 
 phantom_device_t * driver_pl011_uart_probe( int port, int irq, int stage );
 phantom_device_t * driver_pl031_rtc_probe( int port, int irq, int stage );
+phantom_device_t * driver_pl181_mmc_probe( int port, int irq, int stage );
+
+phantom_device_t * driver_pl050_keyb_probe( int port, int irq, int stage );
+phantom_device_t * driver_pl050_mouse_probe( int port, int irq, int stage );
 
 
 // NB! No network drivers on stage 0!
@@ -212,15 +217,17 @@ static isa_probe_t board_drivers[] =
 
     { "RTC", 		driver_pl031_rtc_probe, 	0, 0x15000000, 8 },
 
+    { "MMC",		driver_pl181_mmc_probe,   	1, 0x1C000000, 23 }, // And 24 - how do we give 2 irqs?
+
+    { "PL050.kb",      	driver_pl050_keyb_probe,   	1, 0x18000000, 3 },
+    { "PL050.ms",      	driver_pl050_mouse_probe,   	1, 0x19000000, 4 },
+
 /*
     { "GPIO", 		driver_mem_icp_gpio_probe, 	0, 0xC9000000, 0 },
     { "LCD", 		driver_mem_icp_lcd_probe, 	0, 0xC0000000, 22 },
 
     { "touch",		driver_mem_icp_touch_probe,   	1, 0x1E000000, 28 },
     { "PL041.Audio",   	driver_mem_pl041_audio_probe,   2, 0x1D000000, 25 },
-    { "MMC",		driver_mem_icp_mmc_probe,   	2, 0x1C000000, 23 }, // And 24 - how do we give 2 irqs?
-    { "PL050.kb",      	driver_mem_pl050_kb_probe,   	1, 0x18000000, 3 },
-    { "PL050.ms",      	driver_mem_pl050_ms_probe,   	1, 0x19000000, 4 },
 
 
 

@@ -11,38 +11,24 @@
 
 
 #include <kernel/config.h>
+#include <kernel/init.h>
 #include <kernel/mmu.h>
 #include <kernel/page.h>
-#include <phantom_libc.h>
 
-#include <kernel/init.h>
+#include <phantom_libc.h>
+#include <malloc.h>
 
 #include <threads.h>
 
-// TEMP! Remove!
-//#include <thread_private.h>
-
 #include <vm/alloc.h>
-
-//#include <x86/phantom_pmap.h>
-//#include <x86/phantom_page.h>
-#include <malloc.h>
-
-//#include <i386/proc_reg.h>
-//#include <i386/eflags.h>
-
 
 #include <hal.h>
 #include "hal_private.h"
 
-//#include "spinlock.h"
-
-//#define volatile /* none */
 
 
 struct hardware_abstraction_level    	hal;
 
-//static int _DEBUG = 0;
 
 
 int phantom_is_a_real_kernel() { return 1; }
@@ -50,21 +36,14 @@ int phantom_is_a_real_kernel() { return 1; }
 
 
 
-
-
-
-
-
 void hal_init( vmem_ptr_t va, long vs )
 {
-    printf("x86 HAL init\n");
 
     hal.object_vspace = va;
     hal.object_vsize = vs;
 
+    printf("HAL init: %s %s, VM @ 0x%x\n", arch_name, board_name, hal.object_vspace );
     pvm_alloc_init( va, vs );
-
-    hal_printf("HAL init VM at 0x%X\n", hal.object_vspace);
 
     hal_init_vm_map();
 
@@ -85,8 +64,6 @@ void hal_halt()
     exit(1);
 }
 
-
-//void hal_printf( char *format, ... ) __attribte__((__deprecated__));
 
 
 void hal_printf( char *format, ... )
@@ -142,10 +119,6 @@ hal_check_addr_is_in_object_vmem( void *test )
     if( !hal_addr_is_in_object_vmem( test ) )
         panic("address not in object arena range");
 }
-
-
-
-
 
 
 void

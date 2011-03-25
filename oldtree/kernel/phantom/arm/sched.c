@@ -7,7 +7,12 @@ phantom_scheduler_request_soft_irq(void)
     hal_request_softirq(SOFT_IRQ_THREADS);
     //__asm __volatile("swi 0xFFF"); // TODO who catches that 0xFFF?
     //board_sched_cause_soft_irq();
+
+    // We call phantom_scheduler_soft_interrupt directly, and usually it is called in softirq,
+    // so exepects softirqs to be enabled. Fulfill.
+    //ENABLE_SOFT_IRQ();
     phantom_scheduler_soft_interrupt();
+    ENABLE_SOFT_IRQ();
 
 }
 
