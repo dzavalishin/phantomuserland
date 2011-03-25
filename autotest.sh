@@ -142,12 +142,12 @@ boot
 rm phantom.img
 touch phantom.img
 echo ": zeroing virtual disk..."
-dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img > /dev/null
+dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img 2> /dev/null
 echo ": instantating superblock..."
-dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img > /dev/null
+dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img 2> /dev/null
 #dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 > /dev/null
 echo ": zeroing vio..."
-dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 > /dev/null
+dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 
 for pass in 1 2
 do
