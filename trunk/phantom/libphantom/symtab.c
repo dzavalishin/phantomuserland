@@ -164,6 +164,7 @@ static void load_elf_hdr(Elf32_Shdr *header, int h_elements)
 
 void init_multiboot_symbols(void)
 {
+#ifdef ARCH_ia32
     if(bootParameters.flags & MULTIBOOT_ELF_SHDR)
     {
         if(DEBUG > 0) printf("have multiboot ELF SHDR, %d entries, %d bytes, %d shndx\n",
@@ -180,5 +181,5 @@ void init_multiboot_symbols(void)
     {
         if(DEBUG > 0) printf("have multiboot a.out symbols, %d bytes\n", bootParameters.syms.a.tabsize);
     }
-
+#endif
 }
