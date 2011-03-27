@@ -21,7 +21,7 @@ typedef	unsigned long long  u_int64_t;
 
 
 typedef void *  		    vmem_ptr_t;
-typedef unsigned long 	    addr_t;
+typedef u_int64_t 	        addr_t;
 
 // physical mem address 	
 typedef u_int64_t       	physaddr_t;
