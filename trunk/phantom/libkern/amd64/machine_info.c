@@ -15,7 +15,7 @@
 #define debug_level_info 10
 
 
-//#include <kernel/ia32/cpu.h>
+#include <kernel/ia32/cpu.h>
 #include <kernel/init.h>
 
 #include <string.h>
