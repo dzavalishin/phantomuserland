@@ -12,8 +12,12 @@
 #include <kernel/board.h>
 #include <kernel/init.h>
 
-extern char board_name[] = "PC64";
+char board_name[] = "PC64";
 
+#include "../../ia32/boards/common-pc.c"
+
+
+#if 0
 
 // TODO simply inlude ia32 code here? we copy everything...
 
@@ -81,4 +85,5 @@ void board_make_driver_map(void)
 {
     //phantom_register_drivers(driver_map);
 }
+#endif
 
