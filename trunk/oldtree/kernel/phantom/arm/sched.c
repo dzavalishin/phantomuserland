@@ -11,8 +11,10 @@ phantom_scheduler_request_soft_irq(void)
     // We call phantom_scheduler_soft_interrupt directly, and usually it is called in softirq,
     // so exepects softirqs to be enabled. Fulfill.
     //ENABLE_SOFT_IRQ();
+    int ie = hal_save_cli();
     phantom_scheduler_soft_interrupt();
     ENABLE_SOFT_IRQ();
+    if(ie) hal_sti();
 
 }
 

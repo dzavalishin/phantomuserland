@@ -108,6 +108,15 @@ int handle_swi(struct trap_state *ts)
 
     int swino = ts->intno & 0xFFFFFF;
 
+    // If no real angel exist, return -1 to caller
+    if( swino == 0x123456 )
+    {
+        ts->r0 = -1;
+        ts->r1 = -1;
+        return 0;
+    }
+
+
     // TODO magic number! define! used to request scheduler softint
     if( swino == 0xFFF )
         phantom_scheduler_schedule_soft_irq();
