@@ -3,19 +3,19 @@
 
 #include <mach/asm.h>
 
-	.bss
-        P2ALIGN(PAGE_SHIFT)
+    .bss
+    P2ALIGN(PAGE_SHIFT)
 
-	.globl	EXT(phantom_start_heap_start)
+    .globl	EXT(phantom_start_heap_start)
 LEXT(phantom_start_heap_start)
 
-	.space	PHANTOM_START_HEAP_SIZE
+    .space	PHANTOM_START_HEAP_SIZE
 
-	.globl	EXT(phantom_start_heap_end)
+    .globl	EXT(phantom_start_heap_end)
 LEXT(phantom_start_heap_end)
 	
-	.data
-	.globl	EXT(phantom_start_heap_size)
+    .data
+    .globl	EXT(phantom_start_heap_size)
 LEXT(phantom_start_heap_size)
-	.long	PHANTOM_START_HEAP_SIZE
+    .long	PHANTOM_START_HEAP_SIZE
 
