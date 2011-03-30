@@ -30,8 +30,9 @@ int 	strncmp(const char *s1, const char *s2, size_t n);
 
 char *	strcat(char *s, const char *add);
 char *	strcpy(char *to, const char *from);
-int 	strlen(const char *string);
-char *	strncpy(char *to, const char *from, int count);
+//int 	strlen(const char *string);
+size_t 	strlen(const char *string);
+char *	strncpy(char *to, const char *from, ssize_t count);
 
 char *	strchr(const char *p, int ch);
 char *	index(const char *p, int ch);
