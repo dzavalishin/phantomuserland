@@ -80,7 +80,7 @@ static int debug_print = 0;
 int invalid_syscall(struct pvm_object o, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
-printf("invalid syscal for object: "); dumpo( (int)(o.data) );//pvm_object_print( o ); printf("\n");
+printf("invalid syscal for object: "); dumpo( (addr_t)(o.data) );//pvm_object_print( o ); printf("\n");
 //printf("invalid value's class: "); pvm_object_print( o.data->_class); printf("\n");
     SYSCALL_THROW_STRING( "invalid syscall called" );
 }
@@ -176,7 +176,7 @@ int si_void_15_hashcode(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object(
-       ((int)me.data)^0x3685A634^((int)&si_void_15_hashcode)
+       ((addr_t)me.data)^0x3685A634^((addr_t)&si_void_15_hashcode)
                                                      ));
 }
 

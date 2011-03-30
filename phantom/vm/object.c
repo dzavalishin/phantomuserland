@@ -32,7 +32,7 @@ static inline void verify_p( pvm_object_storage_t *p )
 
     if( p && ! pvm_object_is_allocated_light(p))
     {
-        dumpo((int)p);
+        dumpo((addr_t)p);
         //pvm_object_is_allocated_assert(p);
         panic("freed object accessed");
     }
@@ -363,7 +363,7 @@ void print_object_flags(struct pvm_object_storage *o)
 
 // For debugging - to call from GDB - arg is object storage!
 
-void dumpo( int addr )
+void dumpo( addr_t addr )
 {
     struct pvm_object_storage *o = (struct pvm_object_storage *)addr;
 
@@ -395,14 +395,14 @@ void dumpo( int addr )
     else
     {
         // Don't dump class class
-        printf("Class: { "); dumpo( (int)(o->_class.data) ); printf("}\n");
+        printf("Class: { "); dumpo( (addr_t)(o->_class.data) ); printf("}\n");
         //pvm_object_print( o->_class );
     }
 }
 
 void pvm_object_dump(struct pvm_object o )
 {
-	dumpo((int)o.data); // 64 BIT BUG
+	dumpo((addr_t)o.data);
 }
 
 void pvm_check_is_thread( struct pvm_object new_thread )

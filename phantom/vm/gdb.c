@@ -166,7 +166,7 @@ extern char getDebugChar(void);     /* read and return a single char */
 static void getpacket(char *buffer);
 static void putpacket(char *buffer);
 static int hex(unsigned char ch);
-static int hexToInt(char **ptr, int *intValue);
+static int hexToInt(char **ptr, addr_t *intValue);
 static unsigned char *mem2hex(char *mem, char *buf, int count, int may_fault);
 
 
@@ -398,7 +398,7 @@ extern void fltr_set_mem_err(void)
  * While we find nice hex chars, build an int.
  * Return number of chars processed.
  */
-static int hexToInt(char **ptr, int *intValue)
+static int hexToInt(char **ptr, addr_t *intValue)
 {
     int numChars = 0;
     int hexValue;
@@ -471,8 +471,8 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
                                //gdb_pt_regs *regs,int sigval)
 {
     //int trap;			/* Trap type */
-    int addr;
-    int length;
+    addr_t addr;
+    size_t length;
     char *ptr;
     //unsigned long *stack;
 
@@ -581,7 +581,7 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
         case 'c':
             /* try to read optional parameter, pc unchanged if no parm */
             {
-                int addr;
+                addr_t addr;
 
                 ptr = &input_buffer[1];
 

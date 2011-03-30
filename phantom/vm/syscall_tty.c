@@ -131,7 +131,7 @@ static int debug_18(struct pvm_object me , struct data_area_4_thread *tc )
 
     //pvm_object_print( o );
     printf("\n\nobj dump: ");
-    dumpo((int)(o.data));
+    dumpo((addr_t)(o.data));
     printf("\n\n");
 
     SYS_FREE_O(o);
