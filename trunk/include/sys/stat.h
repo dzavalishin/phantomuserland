@@ -131,7 +131,7 @@ struct _stati64 {
     short st_uid;
     short st_gid;
     _dev_t st_rdev;
-    __int64 st_size;
+    int64_t st_size;
     time_t st_atime;
     time_t st_mtime;
     time_t st_ctime;
@@ -146,7 +146,7 @@ struct __stat64
     short st_uid;
     short st_gid;
     _dev_t st_rdev;
-    __int64 st_size;
+    int64_t st_size;
     __time64_t st_atime;
     __time64_t st_mtime;
     __time64_t st_ctime;
@@ -188,10 +188,10 @@ _CRTIMP int __cdecl __MINGW_NOTHROW _fstat64 (int, struct __stat64*);
 _CRTIMP int __cdecl __MINGW_NOTHROW _stat64 (const char*, struct __stat64*);
 #endif /* __MSVCRT_VERSION__ >= 0x0601 */
 #if !defined ( _WSTAT_DEFINED) /* also declared in wchar.h */
-_CRTIMP int __cdecl __MINGW_NOTHROW	_wstat(const wchar_t*, struct _stat*);
-_CRTIMP int __cdecl __MINGW_NOTHROW	_wstati64 (const wchar_t*, struct _stati64*);
+//_CRTIMP int __cdecl __MINGW_NOTHROW	_wstat(const wchar_t*, struct _stat*);
+//_CRTIMP int __cdecl __MINGW_NOTHROW	_wstati64 (const wchar_t*, struct _stati64*);
 #if __MSVCRT_VERSION__ >= 0x0601
-_CRTIMP int __cdecl __MINGW_NOTHROW _wstat64 (const wchar_t*, struct __stat64*);
+//_CRTIMP int __cdecl __MINGW_NOTHROW _wstat64 (const wchar_t*, struct __stat64*);
 #endif /* __MSVCRT_VERSION__ >= 0x0601 */
 #define _WSTAT_DEFINED
 #endif /* _WSTAT_DEFIND */
