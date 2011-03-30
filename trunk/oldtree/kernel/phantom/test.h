@@ -54,6 +54,8 @@ int do_test_tcp_connect(const char *test_parm);
 
 // TODO test mutexes, conds, semas incl timeouts
 
+int do_test_01_threads(const char *test_parm);
+
 int do_test_threads(const char *test_parm);
 
 int do_test_dpc(const char *test_parm);

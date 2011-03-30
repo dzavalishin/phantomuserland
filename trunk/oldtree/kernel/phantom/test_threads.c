@@ -601,12 +601,110 @@ int do_test_sem(const char *test_parm)
 
 
 
+// -----------------------------------------------------------------------
+// Thread state intact
+// -----------------------------------------------------------------------
+
+static volatile int zo_run = 2;
+static volatile int zo_fail = 0;
+
+#define zo_check_eq(a,b) if((a) != (b)) zo_fail = 1
+
+
+static void thread_ones(void *a)
+{
+    (void) a;
+
+    register int a01 = 1;
+    register int a02 = 1;
+    register int a03 = 1;
+    register int a04 = 1;
+    register int a05 = 1;
+    register int a06 = 1;
+    register int a07 = 1;
+    register int a08 = 1;
+    register int a09 = 1;
+    register int a10 = 1;
+
+
+    int c = 2000;
+    while( c-- > 0 )
+    {
+        hal_sleep_msec(1);
+
+        zo_check_eq(a01,1);
+        zo_check_eq(a02,1);
+        zo_check_eq(a03,1);
+        zo_check_eq(a04,1);
+        zo_check_eq(a05,1);
+        zo_check_eq(a06,1);
+        zo_check_eq(a07,1);
+        zo_check_eq(a08,1);
+        zo_check_eq(a09,1);
+        zo_check_eq(a10,1);
+    }
+
+    zo_run--;
+}
 
 
 
+static void thread_zeroes(void *a)
+{
+    (void) a;
+
+    register int a01 = 0;
+    register int a02 = 0;
+    register int a03 = 0;
+    register int a04 = 0;
+    register int a05 = 0;
+    register int a06 = 0;
+    register int a07 = 0;
+    register int a08 = 0;
+    register int a09 = 0;
+    register int a10 = 0;
 
 
+    int c = 2000;
+    while( c-- > 0 )
+    {
+        hal_sleep_msec(1);
 
+        zo_check_eq(a01,0);
+        zo_check_eq(a02,0);
+        zo_check_eq(a03,0);
+        zo_check_eq(a04,0);
+        zo_check_eq(a05,0);
+        zo_check_eq(a06,0);
+        zo_check_eq(a07,0);
+        zo_check_eq(a08,0);
+        zo_check_eq(a09,0);
+        zo_check_eq(a10,0);
+    }
+
+    zo_run--;
+}
+
+
+int do_test_01_threads(const char *test_parm)
+{
+    (void) test_parm;
+    printf("Testing thread state integrity\n");
+
+    hal_start_kernel_thread_arg( thread_ones, 0 );
+    hal_start_kernel_thread_arg( thread_zeroes, 0 );
+
+    printf("Wait for 01 threads to finish\n");
+
+    while(zo_run)
+        hal_sleep_msec(1);
+
+
+    if(zo_fail)
+        test_fail_msg( -1, "data corruption" );
+
+    return 0;
+}
 
 
 
