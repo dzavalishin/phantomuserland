@@ -1,3 +1,4 @@
+#ifdef ARCH_arm
 /**
  *
  * Phantom OS
@@ -40,7 +41,7 @@ typedef struct {
 
 
 
-static void pl031_init( int port )
+static void pl031_init( addr_t port )
 {
 
     W32(port+RTCIMSC, 0); // No interrupts
@@ -171,5 +172,6 @@ phantom_device_t * driver_pl031_rtc_probe( int port, int irq, int stage )
 
 
 
+#endif
 
 

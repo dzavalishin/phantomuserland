@@ -1,3 +1,4 @@
+#ifdef ARCH_arm
 /*
  * PL011 UART driver
  *
@@ -75,7 +76,7 @@ char uart_rx_char(unsigned long base)
  * standard rates such as: 1200, 2400, 3600, 4800, 7200,
  * 9600, 14400, 19200, 28800, 38400, 57600 76800, 115200.
  */
-void pl011_set_baudrate(unsigned long base, unsigned int baud,
+void pl011_set_baudrate(addr_t base, unsigned int baud,
                         unsigned int clkrate)
 {
     const unsigned int uartclk = 24000000;	/* 24Mhz clock fixed on pb926 */
@@ -201,7 +202,7 @@ static int pl011_write(struct phantom_device *dev, const void *buf, int len)
             hal_sem_acquire( &uart->tx_sem );
 
         unsigned int val = *cp++;
-        W32( val, dev->iobase + PL011_UARTDR );
+        W32( dev->iobase + PL011_UARTDR, val );
         done++;
         len--;
     }
@@ -224,7 +225,8 @@ phantom_device_t * driver_pl011_uart_probe( int port, int irq, int stage )
 
 #if ARCH_arm
     if( arm_id( port, 0x011, 0xB105F00D, 1 ) )
-        return 0;
+        SHOW_ERROR0( 0, "id failed" );
+        //return 0;
 #endif
 
     uart_init( port );
@@ -277,4 +279,5 @@ free2:
 
 
 
+#endif
 
