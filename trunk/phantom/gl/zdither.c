@@ -113,7 +113,7 @@ void ZB_ditherFrameBuffer(ZBuffer *zb,unsigned char *buf,
   register unsigned char *dest;
   register unsigned short *pp;
 
-  assert( ((long)buf & 1) == 0 && (linesize & 1) == 0);
+  assert( ((addr_t)buf & 1) == 0 && (linesize & 1) == 0);
 
   for(yk=0;yk<4;yk++) {
     for(xk=0;xk<4;xk+=2) {
