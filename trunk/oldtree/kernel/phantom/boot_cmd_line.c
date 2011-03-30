@@ -68,12 +68,19 @@ phantom_parse_cmd_line()
     boot_argc = 0;
     boot_argv = main_argv + 1; // Just 0
 
+#ifdef ARCH_ia32
     if( ! (bootParameters.flags & MULTIBOOT_CMDLINE) )
+#endif
     {
         return;
     }
 
+#ifdef ARCH_ia32
     const char* cmdline = (const char*)phystokv(bootParameters.cmdline);
+#else
+    const char* cmdline = "";
+#endif
+
 
     SHOW_FLOW( 2, "Cmdline: '%s'", cmdline );
 

@@ -38,7 +38,7 @@ void vm_test()
 
     while(1)
     {
-        if( ! (((int)addr) % 0x800) )
+        if( ! (((addr_t)addr) % 0x800) )
         {
             putchar('?');            //fflush(stdout);
         }
@@ -77,7 +77,7 @@ void vm_test()
     addr = obj_space;
     while(1)
     {
-        if( ! (((int)addr) % 0x800) )
+        if( ! (((addr_t)addr) % 0x800) )
         {
             hal_printf("."); //fflush(stdout);
             //hal_sleep_msec( 55 );
