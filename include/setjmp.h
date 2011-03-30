@@ -40,12 +40,16 @@
 #define _JBLEN 96
 #endif
 
+#ifdef ARCH_amd64
+#define	_JBLEN	12		// Size of the jmp_buf on AMD64. 
+#endif
+
 
 #ifndef _JBLEN
 # error setjmp arch
 #endif
 
-typedef int jmp_buf[_JBLEN];		/* ebx, esi, edi, ebp, esp, eip */
+typedef int jmp_buf[_JBLEN];
 
 
 extern int setjmp (jmp_buf);
