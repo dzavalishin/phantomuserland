@@ -12,18 +12,29 @@
 #ifndef _INTERRUPTS_H
 #define _INTERRUPTS_H
 
-#define         SOFT_IRQ_NOT_PENDING 	0x80000000
-#define         SOFT_IRQ_DISABLED 	0x40000000
+#define         SOFT_IRQ_NOT_PENDING    0x80000000
+#define         SOFT_IRQ_DISABLED       0x40000000
+
+// TODO this must go to board specific include file for it depends on hw more than on CPU
+
+// How many different interrupts kernel can allocate
 
 #ifdef ARCH_ia32
-// Main PIC has 16 inputs
-//#define PIC_IRQ_COUNT 16
-// How many different interrupts kernel can allocate
-#define MAX_IRQ_COUNT 32
+// Main PIC has 16 inputs, but on APIC 24 interrupts are usually available
+#define         MAX_IRQ_COUNT 32
+#endif
+
+#ifdef ARCH_amd64
+// Main PIC has 16 inputs, but on APIC 24 interrupts are usually available
+#define         MAX_IRQ_COUNT 32
 #endif
 
 #ifdef ARCH_arm
-#define MAX_IRQ_COUNT 32
+#define         MAX_IRQ_COUNT 32
+#endif
+
+#ifdef ARCH_mips
+#define         MAX_IRQ_COUNT 64
 #endif
 
 
@@ -61,7 +72,8 @@ void (*soft_irq_handler)(struct trap_state *);
 
 void hal_softirq_dispatcher(struct trap_state *ts);
 
-// used in apic
+// TODO move softint part here
+//! Arch independent part - calls IRQ handler
 void call_irq_handler(struct trap_state *s, unsigned irq);
 
 
