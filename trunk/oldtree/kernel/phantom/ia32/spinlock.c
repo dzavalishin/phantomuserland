@@ -59,7 +59,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
 
 #if SPIN_DEBUG
     global_lock_entry_count[GET_CPU_ID()]++;
-    sl->ebp = arch_get_frame_pointer();
+    sl->ebp = (addr_t)arch_get_frame_pointer();
 #endif
 }
 

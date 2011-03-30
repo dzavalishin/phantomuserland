@@ -1,3 +1,3 @@
 #include <kernel/init.h>
 
-extern char arch_name[] = "ia32";
+char arch_name[] = "ia32";
