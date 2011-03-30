@@ -41,7 +41,7 @@
 
 #include <phantom_libc.h>
 
-int strlen(const char *string)
+size_t strlen(const char *string)
 {
     register const char *ret = string;
 
