@@ -9,6 +9,9 @@
  *
 **/
 
+#ifndef _K_BOARD_H
+#define _K_BOARD_H
+
 #include <kernel/amap.h>
 
 struct phantom_device;
@@ -104,4 +107,5 @@ void board_fill_memory_map( amap_t *ram_map );
 
 
 
+#endif // _K_BOARD_H
 
