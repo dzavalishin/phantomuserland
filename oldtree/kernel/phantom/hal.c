@@ -110,7 +110,7 @@ hal_init_object_vmem(void *start_of_virtual_address_space)
 int
 hal_addr_is_in_object_vmem( void *test )
 {
-    return ((int)test) >= ((int)hal.object_vspace) && ((int)test) < ((int)hal.object_vspace)+hal.object_vsize;
+    return ((addr_t)test) >= ((addr_t)hal.object_vspace) && ((addr_t)test) < ((addr_t)hal.object_vspace)+hal.object_vsize;
 }
 
 void

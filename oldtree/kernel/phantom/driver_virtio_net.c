@@ -23,19 +23,22 @@
 #define debug_level_info 10
 
 #include <phantom_libc.h>
+
 #include <kernel/vm.h>
+#include <kernel/drivers.h>
+#include <kernel/ethernet_defs.h>
+#include <kernel/page.h>
 
 #include "i386/pci.h"
 #include "virtio.h"
 #include <virtio_pci.h>
 #include <virtio_net.h>
 
+#include <threads.h>
+
 //#include "driver_map.h"
 //#include "device.h"
 #include <device.h>
-#include <kernel/drivers.h>
-#include <kernel/ethernet_defs.h>
-#include <kernel/page.h>
 #include "net.h"
 
 //#include <x86/phantom_page.h>

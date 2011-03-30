@@ -104,6 +104,8 @@ void run_test( const char *test_name, const char *test_parm )
 
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
+    TEST(01_threads);
+
     TEST(physmem);
     TEST(physalloc_gen);
     TEST(malloc);

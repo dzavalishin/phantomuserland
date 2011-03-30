@@ -7,7 +7,7 @@ struct pc_partition
 {
     u_int8_t        	bootable;
 
-    u_int8_t      	_head;
+    u_int8_t            _head;
     u_int16_t           _sec_cyl;
 
     u_int8_t            type;

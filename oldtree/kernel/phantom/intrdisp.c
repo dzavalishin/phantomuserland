@@ -62,9 +62,9 @@ void init_irq_allocator(void)
 
 void def_soft_irq_handler(struct trap_state *ts)
 {
-#ifdef ARCH_ia32
+//#ifdef ARCH_ia32
     dump_ss(ts);
-#endif
+//#endif
     panic("\nDefault softint handler called!\n");
 }
 
