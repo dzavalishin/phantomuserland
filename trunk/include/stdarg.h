@@ -43,8 +43,8 @@
 
 #include <phantom_types.h>
 
-// It fails on arm, don't know why
-#ifdef ARCH_arm
+// It fails on arm & mips, don't know why
+#if defined(ARCH_arm) || defined(ARCH_mips)
 #undef __GNUCLIKE_BUILTIN_STDARG
 #endif
 
