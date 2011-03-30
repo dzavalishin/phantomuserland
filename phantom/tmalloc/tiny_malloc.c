@@ -37,12 +37,12 @@ static UNIT* compact( UNIT *p, unsigned nsize )
                 }
             }
             bsize = 0;
-            best = p = (UNIT *)( (unsigned)p + (psize & ~USED) );
+            best = p = (UNIT *)( (addr_t)p + (psize & ~USED) );
         }
         else
         {
             bsize += psize;
-            p = (UNIT *)( (unsigned)p + psize );
+            p = (UNIT *)( (addr_t)p + psize );
         }
     }
 
@@ -65,12 +65,12 @@ void free( void *ptr )
     {
         UNIT *p;
 
-        p = (UNIT *)( (unsigned)ptr - sizeof(UNIT) );
+        p = (UNIT *)( (addr_t)ptr - sizeof(UNIT) );
         p->size &= ~USED;
     }
 }
 
-void *malloc( unsigned size )
+void *malloc( size_t size )
 {
     if(!inited) { printf("init_malloc!\n"); exit(33); }
 
@@ -94,7 +94,7 @@ void *malloc( unsigned size )
 
     if( fsize >= size + sizeof(UNIT) )
     {
-        msys.free = (UNIT *)( (unsigned)p + size );
+        msys.free = (UNIT *)( (addr_t)p + size );
         msys.free->size = fsize - size;
     }
     else
@@ -105,7 +105,7 @@ void *malloc( unsigned size )
 
     p->size = size | USED;
 
-    return (void *)( (unsigned)p + sizeof(UNIT) );
+    return (void *)( (addr_t)p + sizeof(UNIT) );
 }
 
 void init_malloc( void *heap, unsigned len )
