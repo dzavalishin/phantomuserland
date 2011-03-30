@@ -24,15 +24,15 @@
 #include <i386/pio.h>
 #include <i386/pci.h>
 #include <hal.h>
+#include <threads.h>
 #include <phantom_assert.h>
 
 #include <device.h>
 #include <kernel/drivers.h>
-//#include "driver_map.h"
+#include <kernel/ethernet_defs.h>
 
 #include <dev/isa/ns8390.h>
 //#include "device.h"
-#include <kernel/ethernet_defs.h>
 
 #include "newos.h"
 #include "net.h"
