@@ -60,14 +60,16 @@ static void e( errno_t err )
 
 
 
+#ifdef ARCH_ia32
 struct multiboot_info bootParameters;
-
+#endif
 static void make_mem_map(void);
 static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg );
 
 void
 phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
 {
+#ifdef ARCH_ia32
     if( cookie == 0x36d76289 )
     {
         printf("Not multiboot2 ready!");
@@ -76,7 +78,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
     }
 
     bootParameters = *(struct multiboot_info*)phystokv(multibootboot_info_pa);
-
+#endif
     board_init_early();
 
 #if 0
@@ -133,11 +135,12 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
     	SHOW_FLOW0( 7, "Constructors OK!");
 
 
+#ifdef ARCH_ia32
     printf("mb1 %s video: mode %d\n",
            ((bootParameters.flags & MULTIBOOT_VIDEO_INFO) ? "have" : "no"),
            bootParameters.vbe_mode
           );
-    
+#endif    
 
     phantom_parse_cmd_line();
 
@@ -212,6 +215,7 @@ static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, 
 }
 
 
+#ifdef ARCH_ia32
 
 static void make_mem_map(void)
 {
@@ -299,7 +303,7 @@ static void make_mem_map(void)
     //asm volatile ("hlt");
 }
 
-
+#endif
 
 
 static void map_eq( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg )
@@ -370,6 +374,7 @@ void phantom_map_mem_equally()
 }
 
 
+#ifdef ARCH_ia32
 
 static const char *skip_path(const char *mn)
 {
@@ -387,7 +392,7 @@ static const char *skip_path(const char *mn)
     return mn;
 }
 
-
+#endif
 
 /**
  *
