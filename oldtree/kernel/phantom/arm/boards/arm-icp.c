@@ -12,6 +12,7 @@
 #include <kernel/trap.h>
 #include <kernel/interrupts.h>
 #include <kernel/driver.h>
+#include <kernel/stats.h>
 
 #include <hal.h>
 #include <assert.h>
@@ -125,9 +126,22 @@ static void process_irq(struct trap_state *ts, int irq)
 
     board_interrupt_disable(irq);
 
+    irq_nest++;
     call_irq_handler( ts, irq );
+    irq_nest--;
 
     board_interrupt_enable(irq); // TODO Wrong! Int handler might disable itself! Keep local mask.
+
+    STAT_INC_CNT(STAT_CNT_INTERRUPT);
+
+    if(irq_nest)
+        return;
+
+    // Now for soft IRQs
+    irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
+    hal_softirq_dispatcher(ts);
+    ENABLE_SOFT_IRQ();
+
 }
 
 

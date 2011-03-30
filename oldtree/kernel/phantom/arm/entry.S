@@ -317,53 +317,27 @@ not_user:
     // Finita
 
 
+
+
+
+
+ENTRY(call_arm_angel)
+    swi 	#0x123456
+    mov         pc, lr
+    
+
+
+
+
+
+
+
+
+
+
+
+
 #if 0
-
-
-
-_trap_e_undef:
-
-_trap_e_syscall:
-    push        {r0-r12}
-
-    mrs		r0, spsr_all		// Save spsr
-    mov         r1, sp
-    mov         r2, lr
-    push        {r0-r2}
-
-    mrs     r2, cpsr_all 		/* Get the CPSR */
-
-
-    // read SWI instruction to R3
-    ldr         r3, [ lr, #-4 ]
-    mov         r4, #2
-    b           alltraps
-
-_trap_e_prefetch_abort:
-
-_trap_e_data_abort:
-
-_trap_e_addrexc:
-
-_trap_e_irq:
-
-_trap_e_fiq:
-
-
-
-
-alltraps:
-    mrs		r0, spsr_all		// Save spsr
-    mov         r1, sp
-    mov         r2, lr
-    push        {r0-r2}
-
-    mrs     r2, cpsr_all 		/* Get the CPSR */
-    bic     r2, r2, #(PSR_MODE)	/* Fix for SVC mode */
-    orr     r2, r2, #(PSR_SVC32_MODE)
-    msr     cpsr_all, r2		/* Punch into SVC mode */
-
-
 
 
     .end
