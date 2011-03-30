@@ -1,3 +1,4 @@
+#ifdef ARCH_arm
 /**
  *
  * Phantom OS
@@ -368,7 +369,7 @@ char kmi_keyboard_read(unsigned long base, struct keyboard_state *state)
 
 
 
-static void pl050_init( int port, int div )
+static void pl050_init( addr_t port, int div )
 {
     // Turn off all
     W32( port + PL050_KMICR, 0 );
@@ -615,4 +616,5 @@ phantom_device_t * driver_pl050_mouse_probe( int port, int irq, int stage )
 
 
 
+#endif
 

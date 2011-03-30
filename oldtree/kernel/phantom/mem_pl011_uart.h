@@ -40,11 +40,11 @@
 #define _write32(v,a) W32(a,v)
 
 
-static void pl011_set_baudrate(unsigned long base, unsigned int baud,
+static void pl011_set_baudrate(addr_t base, unsigned int baud,
                         unsigned int clkrate);
 
 #define PL011_UARTEN	(1 << 0)
-static inline void pl011_uart_enable(unsigned long base)
+static inline void pl011_uart_enable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -55,7 +55,7 @@ static inline void pl011_uart_enable(unsigned long base)
     return;
 }
 
-static inline void pl011_uart_disable(unsigned long base)
+static inline void pl011_uart_disable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -67,7 +67,7 @@ static inline void pl011_uart_disable(unsigned long base)
 }
 
 #define PL011_TXE	(1 << 8)
-static inline void pl011_tx_enable(unsigned long base)
+static inline void pl011_tx_enable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -77,7 +77,7 @@ static inline void pl011_tx_enable(unsigned long base)
     return;
 }
 
-static inline void pl011_tx_disable(unsigned long base)
+static inline void pl011_tx_disable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -88,7 +88,7 @@ static inline void pl011_tx_disable(unsigned long base)
 }
 
 #define PL011_RXE	(1 << 9)
-static inline void pl011_rx_enable(unsigned long base)
+static inline void pl011_rx_enable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -98,7 +98,7 @@ static inline void pl011_rx_enable(unsigned long base)
     return;
 }
 
-static inline void pl011_rx_disable(unsigned long base)
+static inline void pl011_rx_disable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -109,7 +109,7 @@ static inline void pl011_rx_disable(unsigned long base)
 }
 
 #define PL011_TWO_STOPBITS_SELECT	(1 << 3)
-static inline void pl011_set_stopbits(unsigned long base, int stopbits)
+static inline void pl011_set_stopbits(addr_t base, int stopbits)
 {
     unsigned int val = 0;
 
@@ -125,7 +125,7 @@ static inline void pl011_set_stopbits(unsigned long base, int stopbits)
 }
 
 #define PL011_PARITY_ENABLE	(1 << 1)
-static inline void pl011_parity_enable(unsigned long base)
+static inline void pl011_parity_enable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -135,7 +135,7 @@ static inline void pl011_parity_enable(unsigned long base)
     return;
 }
 
-static inline void pl011_parity_disable(unsigned long base)
+static inline void pl011_parity_disable(addr_t base)
 {
     unsigned int val = 0;
 
@@ -146,7 +146,7 @@ static inline void pl011_parity_disable(unsigned long base)
 }
 
 #define PL011_PARITY_EVEN	(1 << 2)
-static inline void pl011_set_parity_even(unsigned long base)
+static inline void pl011_set_parity_even(addr_t base)
 {
     unsigned int val = 0;
 
@@ -156,7 +156,7 @@ static inline void pl011_set_parity_even(unsigned long base)
     return;
 }
 
-static inline void pl011_set_parity_odd(unsigned long base)
+static inline void pl011_set_parity_odd(addr_t base)
 {
     unsigned int val = 0;
 
@@ -167,7 +167,7 @@ static inline void pl011_set_parity_odd(unsigned long base)
 }
 
 #define	PL011_ENABLE_FIFOS	(1 << 4)
-static inline void pl011_enable_fifos(unsigned long base)
+static inline void pl011_enable_fifos(addr_t base)
 {
     unsigned int val = 0;
 
@@ -177,7 +177,7 @@ static inline void pl011_enable_fifos(unsigned long base)
     return;
 }
 
-static inline void pl011_disable_fifos(unsigned long base)
+static inline void pl011_disable_fifos(addr_t base)
 {
     unsigned int val = 0;
 
@@ -188,7 +188,7 @@ static inline void pl011_disable_fifos(unsigned long base)
 }
 
 /* Sets the transfer word width for the data register. */
-static inline void pl011_set_word_width(unsigned long base, int size)
+static inline void pl011_set_word_width(addr_t base, int size)
 {
     unsigned int val = 0;
     if(size < 5 || size > 8)	/* Default is 8 */
@@ -224,7 +224,7 @@ static inline void pl011_set_word_width(unsigned long base, int size)
  * 4	rxfifo >= 7/8 full	txfifo <= 7/8 full
  * 5-7	reserved		reserved
  */
-static inline void pl011_set_irq_fifolevel(unsigned long base, \
+static inline void pl011_set_irq_fifolevel(addr_t base, \
                                            unsigned int xfer, unsigned int level)
 {
     if(xfer != 1 && xfer != 0)	/* Invalid fifo */

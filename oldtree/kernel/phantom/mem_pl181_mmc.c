@@ -1,3 +1,4 @@
+#ifdef ARCH_arm
 /**
  *
  * Phantom OS
@@ -193,4 +194,5 @@ free2:
 
 
 
+#endif // ARCH_arm
 
