@@ -360,6 +360,7 @@ int main(int argc, char **argv, char **envp)
 connect_ide_io();
 #endif
 
+    SHOW_FLOW0( 2, "Will init phantom root... ");
     // Start virtual machine in special startup (single thread) mode
     pvm_root_init();
 

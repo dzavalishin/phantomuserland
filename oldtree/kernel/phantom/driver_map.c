@@ -17,13 +17,13 @@
 #include <kernel/config.h>
 #include <kernel/init.h>
 #include <kernel/board.h>
+#include <kernel/drivers.h>
 
 #include <phantom_libc.h>
 
 #include <i386/pci.h>
 
 #include <device.h>
-#include <kernel/drivers.h>
 
 #include "misc.h"
 
@@ -63,7 +63,7 @@ typedef struct
 // NB! No network drivers on stage 0!
 static pci_probe_t pci_drivers[] =
 {
-#if 0
+#if 1
     { "VirtIO Disk", 	driver_virtio_disk_probe, 	2, VIRTIO_VENDOR, 0, 1 },
     { "VirtIO Baloon", 	driver_virtio_baloon_probe, 	2, VIRTIO_VENDOR, 0, 5 },
     //{ "VirtIO Random",  driver_virtio_random_probe, 	2, VIRTIO_VENDOR, 0, 1 }, // TODO dev/dclass?
@@ -103,27 +103,6 @@ static pci_probe_t pci_drivers[] =
 };
 
 
-#if SPECIAL_VIRTIO_MAP
-// This one for virtio
-
-typedef struct
-{
-    const char *name;
-    phantom_device_t * (*probe_f)( pci_cfg_t *pci, int stage );        // Driver probe func
-    int minstage; // How early we can be called
-    int subdev; // Subsystem dev id
-
-} virtio_probe_t;
-
-// NB! No network drivers on stage 0!
-static virtio_probe_t virtio_drivers[] =
-{
-    { "VirtIO Disk", driver_virtio_disk_probe, 2, VIRTIO_ID_BLOCK },
-    { "VirtIO Net",  driver_virtio_net_probe, 2, VIRTIO_ID_NET }, 
-    { "VirtIO Random",  driver_virtio_random_probe, 2, VIRTIO_ID_RNG }, 
-
-};
-#endif
 
 #endif // HAVE_PCI
 
@@ -134,42 +113,6 @@ static isa_probe_t *board_drivers = 0;
 // NB! No network drivers on stage 0!
 static isa_probe_t isa_drivers[] =
 {
-#ifdef ARCH_ia32
-#if 0
-    { "LPT1", 		driver_isa_lpt_probe, 	2, 0x378, 7 },
-    { "LPT2", 		driver_isa_lpt_probe, 	2, 0x278, 5 },
-
-    { "COM1",		driver_isa_com_probe,   2, 0x3F8, 4 },
-    { "COM2",		driver_isa_com_probe,   2, 0x2F8, 3 },
-    { "COM3",		driver_isa_com_probe,   2, 0x3E8, 4 },
-    { "COM4",		driver_isa_com_probe,   2, 0x2E8, 3 },
-#endif
-    { "CGA", 		driver_isa_vga_probe, 	0, 0x3D4, -1 },
-    { "MDA", 		driver_isa_vga_probe, 	0, 0x3B4, -1 },
-
-    { "PS2 Keyboard", 	driver_isa_ps2k_probe, 	1, -1, 1 },
-//    { "PS2 Mouse", 	driver_isa_ps2m_probe, 	1, -1, 12 },
-
-//    { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
-
-#if HAVE_NET && 0
-    { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 11 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, 0x320, 11 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, 0x340, 11 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, 0x360, 11 },
-#endif
-
-#if 0
-    { "SB16",          driver_isa_sb16_probe,  2, 0x210, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x220, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x230, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x240, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x250, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x260, 5 },
-#endif
-//    { "AdLib",         driver_isa_sdlib_probe, 3, 0x388, 8 },
-#endif // ia32
 
     // End of list marker
     { 0, 0, 0, 0, 0 },
@@ -188,11 +131,11 @@ typedef struct
 // NB! No network drivers on stage 0!
 static etc_probe_t etc_drivers[] =
 {
-#if 0
     { "console",                driver_console_probe,    	0 },
     { "null",                   driver_null_probe,      	0 },
     { "fb",                     driver_framebuf_probe,    	0 },
 
+#if defined(ARCH_ia32)
     { "SMBios", 		driver_etc_smbios_probe, 	0 },
 //    { "ACPI", 			driver_etc_acpi_probe, 		0 },
 #endif
@@ -231,19 +174,12 @@ static void show_pci( pci_cfg_t* pci )
 
 #define MAXPCI 512
 static pci_record_t allpci[MAXPCI];
-#if SPECIAL_VIRTIO_MAP
-static pci_record_t virtio_pci[MAXPCI];
-#endif
 static int load_once = 0;
 
 static int loadpci()
 {
     int bus,dev,func;
     int pci_slot = 0;
-
-#if SPECIAL_VIRTIO_MAP
-    int virtio_slot = 0;
-#endif
 
     if(load_once) return 0;
     load_once = 1;
@@ -284,27 +220,16 @@ static int loadpci()
                     {
                         show_pci(&allpci[pci_slot].pci);
 
-#if SPECIAL_VIRTIO_MAP
-                        if( allpci[pci_slot].pci.vendor_id == 0x1AF4 )
-                        {
-                            virtio_pci[virtio_slot].pci = allpci[pci_slot].pci;
-                            virtio_pci[virtio_slot].filled = 1;
-                            virtio_pci[virtio_slot].used = 0;
-                            virtio_slot++;
-                        }
-                        else
-#endif
-                        {
-                            allpci[pci_slot].used = 0;
-                            allpci[pci_slot].filled = 1;
-                            pci_slot++;
-                        }
+                        allpci[pci_slot].used = 0;
+                        allpci[pci_slot].filled = 1;
+                        pci_slot++;
+
                     }
                 }
             }
         }
     }
-//getchar();
+
     return 0;
 }
 
@@ -351,53 +276,10 @@ static int probe_pci( int stage, pci_cfg_t *pci )
         else
             SHOW_ERROR0( 1, "Failed");
     }
-//getchar();
-    return 0;
-}
-
-
-#if SPECIAL_VIRTIO_MAP
-static int probe_virtio( int stage, pci_cfg_t *pci )
-{
-    printf("VirtIO look for driver for PCI dev %d:%d (%s:%s %X:%X class %X:%X)\n",
-                   pci->dev, pci->func,
-                   get_pci_vendor(pci->vendor_id), get_pci_device( pci->vendor_id, pci->device_id ),
-                   pci->vendor_id, pci->device_id,
-                   pci->base_class, pci->sub_class
-                  );
-
-
-    int i;
-    for( i = 0; i < sizeof(virtio_drivers)/sizeof(virtio_probe_t); i++ )
-    {
-        virtio_probe_t *dp = &virtio_drivers[i];
-
-        if( stage < dp->minstage )
-            continue;
-        if( pci->device_id != dp->subdev )
-            continue;
-
-        phantom_device_t *dev = dp->probe_f( pci, stage );
-
-        if( dev != 0 )
-        {
-            printf("VirtIO driver '%s' attached to PCI dev %d:%d (%s:%s %X:%X class %X:%X)\n",
-                   dp->name, pci->dev, pci->func,
-                   get_pci_vendor(pci->vendor_id), get_pci_device( pci->vendor_id, pci->device_id ),
-                   pci->vendor_id, pci->device_id,
-                   pci->base_class, pci->sub_class
-                  );
-
-            phantom_bus_add_dev( &pci_bus, dev );
-            add_alldevs( dev );
-
-            return 1;
-        }
-    }
 
     return 0;
 }
-#endif
+
 
 #endif // HAVE_PCI
 
