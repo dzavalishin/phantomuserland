@@ -103,7 +103,7 @@ static __inline__ unsigned int        	hal_min_pagesize(void) { return __MEM_PAG
 static __inline__ unsigned int        	hal_mem_pagesize(void) { return __MEM_PAGE; }
 void *      		  		hal_paged_space(void); // where paged memory starts
 void        				hal_grow_paged_space( unsigned add_bytes );
-static __inline__ int                 	hal_address_is_aligned( void *addr ) { return ( ((int)addr)%hal_min_pagesize() ) == 0; }
+static __inline__ int                 	hal_address_is_aligned( void *addr ) { return ( ((addr_t)addr)%hal_min_pagesize() ) == 0; }
 
 
 

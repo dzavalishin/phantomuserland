@@ -115,7 +115,7 @@ struct phantom_device
     struct phantom_device *     next;
 
     // Main resources
-    int                         iobase;
+    addr_t                      iobase;
     int                         irq;
     physaddr_t                  iomem;
     size_t                      iomemsize;
