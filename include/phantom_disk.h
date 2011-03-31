@@ -123,7 +123,7 @@ typedef struct phantom_disk_superblock
 	unsigned char			prev_short_journal_flags; //  - NOT IMPL
 	unsigned char			prev_long_journal_flags; //  - NOT IMPL
 
-} phantom_disk_superblock;
+} __attribute__((__packed__)) phantom_disk_superblock;
 
 void phantom_disk_format( struct phantom_disk_superblock *sb, unsigned int n_pages, const char *sysname );
 int phantom_calc_sb_checksum( struct phantom_disk_superblock *sb );
