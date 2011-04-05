@@ -40,10 +40,7 @@ RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 #trap "rm $0.lock" 0
 
 rm -f make.log
-#make clean > /dev/null 2>&1
-./build.sh clean > /dev/null 2>&1
-# this is temporary until build cleanup is fixed
-make -C oldtree/kernel/phantom/i386 clean > /dev/null 2>&1
+make clean > /dev/null 2>&1
 
 # clean unexpected failures
 GRUB_MENU=tftp/tftp/menu.lst
@@ -57,13 +54,13 @@ SVN_OUT=`svn update`
 echo "$SVN_OUT"
 
 [ "$COMPILE" ] && {
-	./build.sh > make.log 2>&1 || die "Make failure"
+	#./build.sh > make.log 2>&1 || die "Make failure"
 	#make -C phantom/vm	>> make.log 2>&1 || die "Make failure in vm"
 	#make all > make.log 2>&1 || die "Make failure"
 	#make -C phantom/dev	>> make.log 2>&1 || die "Make failure in dev"
 	#make -C phantom/newos	>> make.log 2>&1 || die "Make failure in newos"
 	#make -C phantom/threads	>> make.log 2>&1 || die "Make failure in threads"
-	#make all >> make.log 2>&1 || die "Make failure"
+	make all >> make.log 2>&1 || die "Make failure"
 	[ "$WARN" ] && grep : make.log
 
 	tail make.log
@@ -117,7 +114,7 @@ qemu $QEMU_OPTS
 
 grep -iB 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
-grep '[Ff][Aa][Ii][Ll]\|TEST' serial0.log
+grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' serial0.log
 grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
 
 [ "$SNAPTEST" ] || exit 0
