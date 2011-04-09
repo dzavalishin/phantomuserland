@@ -557,27 +557,45 @@ class InsGen extends Opcode {
 			}
 			return;
 
-		case TBLSW:			// tableswitch
-			n = ins.more[1] - 3;		// correction factor
-			d.println("\tswitch (" + stacktop(ins) + ") {");
-			for (int i = 3; i < ins.more.length; i++) {
-				d.print("\t\tcase " + (i + n) + ": \t");
-				gengoto(d, m, ins, ins.more[i]);
-			}
-			d.print("\t\tdefault:\t");
-			gengoto(d, m, ins, ins.more[0]);
-			d.println("\t}");
-			break;
+		case TBLSW:			// [tableswitch]
+// toba [
+//			n = ins.more[1] - 3;		// correction factor
+//			d.println("\tswitch (" + stacktop(ins) + ") {");
+//			for (int i = 3; i < ins.more.length; i++) {
+//				d.print("\t\tcase " + (i + n) + ": \t");
+//				gengoto(d, m, ins, ins.more[i]);
+//			}
+//			d.print("\t\tdefault:\t");
+//			gengoto(d, m, ins, ins.more[0]);
+//			d.println("\t}");
+// toba ]
 
-		case LKPSW:			// lookupswitch
-			d.println("\tswitch (" + stacktop(ins) + ") {");
-			for (int i = 2; i < ins.more.length; i += 2) {
-				d.print("\t\tcase " + ins.more[i] + ": \t");
-				gengoto(d, m, ins, ins.more[i + 1]);
-			}
-			d.print("\t\tdefault:\t");
-			gengoto(d, m, ins, ins.more[0]);
-			d.println("\t}");
+            {
+                Node p1 = ns.pop();
+                n = ins.more[1] - 3;		// correction factor
+                for (int i = 3; i < ins.more.length; i++) {
+                    Node p2 = new IntConstNode(i + n);
+
+                    ns.push(new ValEqTransNode(p1,p2));
+                    ns.push(new JzNode(target(m, ins.more[i])));
+                }
+                // default
+                ns.push(new JumpNode(target(m, ins.more[0])));
+
+                return;
+            }
+
+		case LKPSW:			// [lookupswitch]
+// toba [
+//			d.println("\tswitch (" + stacktop(ins) + ") {");
+//			for (int i = 2; i < ins.more.length; i += 2) {
+//				d.print("\t\tcase " + ins.more[i] + ": \t");
+//				gengoto(d, m, ins, ins.more[i + 1]);
+//			}
+//			d.print("\t\tdefault:\t");
+//			gengoto(d, m, ins, ins.more[0]);
+//			d.println("\t}");
+// toba ]
 
             {
                 Node p1 = ns.pop();
@@ -587,6 +605,7 @@ class InsGen extends Opcode {
                     ns.push(new ValEqTransNode(p1,p2));
                     ns.push(new JzNode(target(m, ins.more[i + 1])));
                 }
+                // default
                 ns.push(new JumpNode(target(m, ins.more[0])));
 
                 return;

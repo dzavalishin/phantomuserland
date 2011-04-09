@@ -298,7 +298,14 @@ class translation_regression_tests
         log_str(s_obj.lookupswitch_last(), "lookupswitch_last(): ");
         log_str(s_obj.lookupswitch_default(), "lookupswitch_default(): ");
         log_str(s_obj.lookupswitch_last_default(), "lookupswitch_last_default(): ");
-        log_str(s_obj.lookupswitch_brake(), "lookupswitch_brake(): ");
+        log_str(s_obj.lookupswitch_break(), "lookupswitch_break(): ");
+
+        log_str(s_obj.tableswitch(), "tableswitch(): ");
+        log_str(s_obj.tableswitch_last(), "tableswitch_last(): ");
+        log_str(s_obj.tableswitch_default(), "tableswitch_default(): ");
+        log_str(s_obj.tableswitch_last_default(), "tableswitch_last_default(): ");
+        log_str(s_obj.tableswitch_break(), "tableswitch_break(): ");
+
     }
 
 

@@ -1,21 +1,7 @@
 package translation.java.test;
 
 class switch_test {
-/*
-    String tableswitch() {
-        int i = 1;
-        String result = "failure";
 
-        switch(i)	{
-            case 1:  result = "ok";
-            case 2:  result = "ok2";
-            case 3:  result = "ok3";
-            default:  result = "failure default";
-        }
-
-        return result;
-    }
-*/
     String lookupswitch() {
         int i = 33;
         String result = "failure";
@@ -71,7 +57,7 @@ class switch_test {
     }
 
 
-    String lookupswitch_brake() {
+    String lookupswitch_break() {
         int i = 22;
         String result = "failure";
 
@@ -80,6 +66,75 @@ class switch_test {
             case 22: { result = "ok"; break; }
             case 33: { result = "failure33"; break; }
             default: { result = "failureDefault"; break; }
+        }
+
+        return result;
+    }
+
+
+    String tableswitch() {
+        int i = 13;
+        String result = "failure";
+
+        switch(i)	{
+            case 11:  result = "failure11";
+            case 12:  result = "failure12";
+            case 13:  result = "ok";
+        }
+
+        return result;
+    }
+
+    String tableswitch_last() {
+        int i = 11;
+        String result = "failure";
+
+        switch(i)	{
+            case 11:  result = "failure11";
+            case 12:  result = "failure12";
+            case 13:  result = "ok";
+        }
+
+        return result;
+    }
+
+    String tableswitch_default() {
+        int i = 44;
+        String result = "failure";
+
+        switch(i)	{
+            case 11:  result = "failure11";
+            case 12:  result = "failure12";
+            case 13:  result = "failure13";
+            default:  result = "ok";
+        }
+
+        return result;
+    }
+
+    String tableswitch_last_default() {
+        int i = 11;
+        String result = "failure";
+
+        switch(i)	{
+            case 11:  result = "failure11";
+            case 12:  result = "failure12";
+            case 13:  result = "failure13";
+            default:  result = "ok";
+        }
+
+        return result;
+    }
+
+    String tableswitch_break() {
+        int i = 12;
+        String result = "failure";
+
+        switch(i)	{
+            case 11:  result = "failure11"; break;
+            case 12:  result = "ok"; break;
+            case 13:  result = "failure13"; break;
+            default:  result = "failureDefault"; break;
         }
 
         return result;
