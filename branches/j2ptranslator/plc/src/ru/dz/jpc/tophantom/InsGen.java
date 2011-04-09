@@ -115,7 +115,9 @@ class InsGen extends Opcode {
 		case LOAD:			// iload, aload_<n>, fload, ...
 			d.println(assign(ins) + ident + ";");
 			{
-				ensureAutoVariable(ps, ident);
+                ensureAutoVariable(ps, ident);
+//                if (o.name.startsWith("iload")) ensureIntAutoVariable(ps, ident);
+//				else ensureAutoVariable(ps, ident);
 				
 				if(o.name.equals("aload_0"))
 					ns.push(new ThisNode(myClass));
@@ -130,7 +132,10 @@ class InsGen extends Opcode {
 			d.println("\t" + s.substring(0, 1) + "v" + (ins.val + o.var) +
 					" = " + s + ";");
 
-			ensureAutoVariable(ps, ident);
+            ensureAutoVariable(ps, ident);
+//            if (o.name.startsWith("istore")) ensureIntAutoVariable(ps, ident);
+//			else ensureAutoVariable(ps, ident);
+
 			ns.push( new OpAssignTransNode( new IdentTransNode(ident), ns.pop()) );
 
 			return;
@@ -573,8 +578,19 @@ class InsGen extends Opcode {
 			d.print("\t\tdefault:\t");
 			gengoto(d, m, ins, ins.more[0]);
 			d.println("\t}");
-			break;
 
+            {
+                Node p1 = ns.pop();
+                for (int i = 2; i < ins.more.length; i += 2) {
+                    Node p2 = new IntConstNode(ins.more[i]);
+
+                    ns.push(new ValEqTransNode(p1,p2));
+                    ns.push(new JzNode(target(m, ins.more[i + 1])));
+                }
+                ns.push(new JumpNode(target(m, ins.more[0])));
+
+                return;
+            }
 		case GOTO:			// goto
 			d.print("\t");
 			gengoto(d, m, ins, ins.val);
@@ -789,6 +805,12 @@ class InsGen extends Opcode {
             ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhTypeObject()));
         }
     }
+    private static void ensureIntAutoVariable(ParseState ps, String ident) throws PlcException {
+        if(ps.get_method().isvars.get_var(ident) == null) {
+            ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, new PhTypeInt()));
+        }
+    }
+
 //    private static void setTypeStackVariable(ParseState ps, String ident, PhantomType type) throws PlcException {
 //        if (type instanceof PhTypeInt && ps.get_method().isvars.get_var(ident) == null) {
 //            ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, type));

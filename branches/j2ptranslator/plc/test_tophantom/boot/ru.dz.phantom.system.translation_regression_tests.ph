@@ -24,6 +24,7 @@ import .translation.java.test.compare;
 import .translation.java.test.loop;
 import .translation.java.test.logic;
 import .translation.java.test.array;
+import .translation.java.test.switch_test;
 
 attribute const * ->!;
 
@@ -65,6 +66,9 @@ class translation_regression_tests
 
         print("\n\nRun array\n");
         run_array(new .translation.java.test.array());
+
+        print("\n\nRun switch\n");
+        run_switch(new .translation.java.test.switch_test());
 
         print("\n\n");
     }
@@ -283,8 +287,19 @@ class translation_regression_tests
     }
 
     void run_array(var a_obj : .translation.java.test.array) {
-        log_str(a_obj.array_int(), "array_int(): ");
-        log_str(a_obj.array_string(), "array_string(): ");
+//        log_str(a_obj.array_int(), "array_int(): ");
+          print("\n    array_int(): failure");
+//        log_str(a_obj.array_string(), "array_string(): ");
+          print("\n    array_string(): failure");
     }
+
+    void run_switch(var s_obj : .translation.java.test.switch_test) {
+        log_str(s_obj.lookupswitch(), "lookupswitch(): ");
+        log_str(s_obj.lookupswitch_last(), "lookupswitch_last(): ");
+        log_str(s_obj.lookupswitch_default(), "lookupswitch_default(): ");
+        log_str(s_obj.lookupswitch_last_default(), "lookupswitch_last_default(): ");
+        log_str(s_obj.lookupswitch_brake(), "lookupswitch_brake(): ");
+    }
+
 
 };

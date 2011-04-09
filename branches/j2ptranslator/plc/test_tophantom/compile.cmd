@@ -11,5 +11,7 @@ javac compare.java
 javac loop.java
 javac logic.java
 javac array.java
+javac switch_test.java
+
 
 

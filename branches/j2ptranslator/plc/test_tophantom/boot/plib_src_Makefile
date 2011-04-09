@@ -1,7 +1,7 @@
 all: classes
 
 #PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
-PLC=C:/bin/phantomuserland/trunk/build/bin/plc.cmd
+PLC=C:/bin/phantom/phantomuserland/trunk/build/bin/plc.cmd
 
 
 # read stub.object.ph to understand

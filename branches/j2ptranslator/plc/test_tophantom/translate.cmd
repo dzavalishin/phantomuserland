@@ -7,7 +7,4 @@ java -cp ..\out\production\plc\;. ru.dz.jpc.tophantom.Trans -c . compare.class >
 java -cp ..\out\production\plc\;. ru.dz.jpc.tophantom.Trans -c . loop.class >loop.log
 java -cp ..\out\production\plc\;. ru.dz.jpc.tophantom.Trans -c . logic.class >logic.log
 java -cp ..\out\production\plc\;. ru.dz.jpc.tophantom.Trans -c . array.class >array.log
-
-
-
-
+java -cp ..\out\production\plc\;. ru.dz.jpc.tophantom.Trans -c . switch_test.class >switch_test.log

@@ -7,6 +7,4 @@ javap -verbose -s -l field >field.jdump
 javap -verbose -s -l loop >loop.jdump
 javap -verbose -s -l loop >logic.jdump
 javap -verbose -s -l array >array.jdump
-
-
-
+javap -verbose -s -l switch_test >switch_test.jdump

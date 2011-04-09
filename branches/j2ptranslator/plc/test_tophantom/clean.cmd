@@ -11,6 +11,7 @@ del field.*
 del loop.*
 del logic.*
 del array.*
+del switch_test.*
 del obj_test.*
 del translation.*.*
 del translation_*.*

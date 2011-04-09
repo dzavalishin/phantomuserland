@@ -7,3 +7,4 @@ java -cp ..\out\production\plc\;. ru.dz.jpc.pcdump.PcDump translation.java.test.
 java -cp ..\out\production\plc\;. ru.dz.jpc.pcdump.PcDump translation.java.test.loop.pc >loop.pcdump
 java -cp ..\out\production\plc\;. ru.dz.jpc.pcdump.PcDump translation.java.test.logic.pc >logic.pcdump
 java -cp ..\out\production\plc\;. ru.dz.jpc.pcdump.PcDump translation.java.test.array.pc >array.pcdump
+java -cp ..\out\production\plc\;. ru.dz.jpc.pcdump.PcDump translation.java.test.switch_test.pc >switch_test.pcdump
