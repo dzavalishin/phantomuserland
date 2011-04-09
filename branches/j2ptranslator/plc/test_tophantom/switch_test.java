@@ -71,6 +71,18 @@ class switch_test {
         return result;
     }
 
+    String lookupswitch_const_break() {
+        String result = "failure";
+
+        switch(22)	{
+            case 11: { result = "failure11"; break; }
+            case 22: { result = "ok"; break; }
+            case 33: { result = "failure33"; break; }
+            default: { result = "failureDefault"; break; }
+        }
+
+        return result;
+    }
 
     String tableswitch() {
         int i = 13;
@@ -131,6 +143,19 @@ class switch_test {
         String result = "failure";
 
         switch(i)	{
+            case 11:  result = "failure11"; break;
+            case 12:  result = "ok"; break;
+            case 13:  result = "failure13"; break;
+            default:  result = "failureDefault"; break;
+        }
+
+        return result;
+    }
+
+    String tableswitch_const_break() {
+        String result = "failure";
+
+        switch(12)	{
             case 11:  result = "failure11"; break;
             case 12:  result = "ok"; break;
             case 13:  result = "failure13"; break;

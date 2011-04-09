@@ -116,9 +116,7 @@ class InsGen extends Opcode {
 			d.println(assign(ins) + ident + ";");
 			{
                 ensureAutoVariable(ps, ident);
-//                if (o.name.startsWith("iload")) ensureIntAutoVariable(ps, ident);
-//				else ensureAutoVariable(ps, ident);
-				
+
 				if(o.name.equals("aload_0"))
 					ns.push(new ThisNode(myClass));
 				else
@@ -133,8 +131,6 @@ class InsGen extends Opcode {
 					" = " + s + ";");
 
             ensureAutoVariable(ps, ident);
-//            if (o.name.startsWith("istore")) ensureIntAutoVariable(ps, ident);
-//			else ensureAutoVariable(ps, ident);
 
 			ns.push( new OpAssignTransNode( new IdentTransNode(ident), ns.pop()) );
 
@@ -576,7 +572,7 @@ class InsGen extends Opcode {
                 for (int i = 3; i < ins.more.length; i++) {
                     Node p2 = new IntConstNode(i + n);
 
-                    ns.push(new ValEqTransNode(p1,p2));
+                    ns.push(new ValNeqTransNode(p1,p2));
                     ns.push(new JzNode(target(m, ins.more[i])));
                 }
                 // default
@@ -602,7 +598,7 @@ class InsGen extends Opcode {
                 for (int i = 2; i < ins.more.length; i += 2) {
                     Node p2 = new IntConstNode(ins.more[i]);
 
-                    ns.push(new ValEqTransNode(p1,p2));
+                    ns.push(new ValNeqTransNode(p1,p2));
                     ns.push(new JzNode(target(m, ins.more[i + 1])));
                 }
                 // default
@@ -822,11 +818,6 @@ class InsGen extends Opcode {
 		if(ps.get_method().svars.get_var(ident) == null) {
 //			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false,null))));
             ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhTypeObject()));
-        }
-    }
-    private static void ensureIntAutoVariable(ParseState ps, String ident) throws PlcException {
-        if(ps.get_method().isvars.get_var(ident) == null) {
-            ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, new PhTypeInt()));
         }
     }
 
