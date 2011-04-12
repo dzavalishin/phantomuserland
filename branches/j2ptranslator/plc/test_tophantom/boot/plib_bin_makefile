@@ -2,10 +2,8 @@ all:: classes
 
 #MKBULK=mkbulk
 #PLC=plc.cmd
-#MKBULK=$(realpath $(PHANTOM_HOME))/build/bin/mkbulk
-#PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
-MKBULK=C:/bin/phantom/phantomuserland/trunk/build/bin/mkbulk
-PLC=C:/bin/phantom/phantomuserland/trunk/build/bin/plc.cmd
+MKBULK=C:/bin/phantomuserland/trunk/build/bin/mkbulk
+PLC=C:/bin/phantomuserland/trunk/build/bin/plc.cmd
 
 OFF=internal.object.pc internal.io.tty.pc 
 
@@ -16,24 +14,28 @@ OFF=internal.object.pc internal.io.tty.pc
 #test.util.pc 
 
 classes: internal.int.pc internal.io.tty.pc internal.object.pc internal.string.pc \
-ru.dz.phantom.system.boot.pc ru.dz.phantom.system.class_loader.pc \
+ru.dz.phantom.system.class_loader.pc \
 ru.dz.phantom.system.runnable.pc \
 ru.dz.phantom.system.thread_test.pc phantom.util.map.pc \
 ru.dz.windows.root.pc ru.dz.phantom.backgrounds.pc \
 phantom.osimpl.pc phantom.os.pc phantom.os.time.pc \
-translation.phantom.test.a.pc translation.phantom.test.field.pc translation.phantom.test.obj_test.pc \
 translation.java.test.b.pc translation.java.test.a.pc translation.java.test.field.pc translation.java.test.obj_test.pc translation.java.test.compare.pc \
 translation.java.test.loop.pc translation.java.test.logic.pc translation.java.test.array.pc translation.java.test.switch_test.pc \
-ru.dz.phantom.system.translation_regression_tests.pc
+ru.dz.phantom.system.translation_regression_tests.pc ru.dz.phantom.system.boot.pc
 #translation.run_test.pc translation.a.pc java.translation.b.pc java.translation.test.pc
 #ru.dz.phantom.tetris.playingfield.pc ru.dz.phantom.tetris.figure.pc ru.dz.phantom.tetris.imagesmanager.pc \
 #ru.dz.phantom.tetris.utilites.pc ru.dz.phantom.tetris.io.pc ru.dz.phantom.tetris.mainmodule.pc
 	$(MKBULK) classes $(filter-out $(OFF) ,$^)
 	#cp classes c:/bin/phantom/classes
 
-%.pc: ../src/%.ph
-	$(PLC) $<
 
+%.pc: ../src/%.ph
+	@echo --- plc $<
+	@$(PLC) $<
+
+
+install: classes
+	cp classes ../../oldtree/run/tftp
 
 clean: 
-	rm *.pc *.lst *.lstc classes
+	-rm *.pc *.lst *.lstc classes *.d

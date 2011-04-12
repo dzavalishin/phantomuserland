@@ -229,6 +229,9 @@ public class PhantomType {
 		return get_class().can_be_assigned_from( src.get_class() );
 	}
 
+    public void set_is_container(boolean is_container) {
+        this._is_container = is_container;
+    }
 }
 
 

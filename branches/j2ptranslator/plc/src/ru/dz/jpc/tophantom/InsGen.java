@@ -208,50 +208,71 @@ class InsGen extends Opcode {
 					ckinstance(ins, c.name) + ";");
 			break;
 
-		case NEWA:			// newarray
-			switch (ins.val) {
-			case T_BOOLEAN:	s = "boolean";	break;
-			case T_CHAR:	s = "char";	break;
-			case T_FLOAT:	s = "float";	break;
-			case T_DOUBLE:	s = "double";	break;
-			case T_BYTE:	s = "byte";	break;
-			case T_SHORT:	s = "short";	break;
-			case T_INT:	s = "int";	break;
-			case T_LONG:	s = "long";	break;
-			default:	throw new VerifyError
-			("newarray(" + ins.val + ") at pc=" + ins.pc);
-			}
-			d.println(assign(ins) +
-					"anewarray(&cl_" + s + "," + stacktop(ins) + ");");
-//			break;
+		case NEWA:			// [newarray]
+// toba [
+//			switch (ins.val) {
+//			case T_BOOLEAN:	s = "boolean";	break;
+//			case T_CHAR:	s = "char";	break;
+//			case T_FLOAT:	s = "float";	break;
+//			case T_DOUBLE:	s = "double";	break;
+//			case T_BYTE:	s = "byte";	break;
+//			case T_SHORT:	s = "short";	break;
+//			case T_INT:	s = "int";	break;
+//			case T_LONG:	s = "long";	break;
+//			default:	throw new VerifyError
+//			("newarray(" + ins.val + ") at pc=" + ins.pc);
+//			}
+//			d.println(assign(ins) +
+//					"anewarray(&cl_" + s + "," + stacktop(ins) + ");");
+// toba ]
             {
+//                switch (ins.val) {
+//                case T_BOOLEAN:	s = "boolean";	break;
+//                case T_CHAR:	s = "char";	break;
+//                case T_FLOAT:	s = "float";	break;
+//                case T_DOUBLE:	s = "double";	break;
+//                case T_BYTE:	s = "byte";	break;
+//                case T_SHORT:	s = "short";	break;
+//                case T_INT:	s = "int";	break;
+//                case T_LONG:	s = "long";	break;
+//                default:	throw new VerifyError("newarray(" + ins.val + ") at pc=" + ins.pc);
+//                }
+//                PhantomType type = getPhantomType(s);
+                PhantomType arrayType = getVoidArrayType();
+
                 ensureAutoVariable(ps, ident);
-                PhantomType type = getPhantomType(s);
+
                 ns.pop(); // remove array size
-                ns.push(new NewNode(type,null,null));
+                NewNode newNode = new NewNode(arrayType, null, null);
+                ns.push(newNode);
             }
             return;
 
-		case ANEWA:			// anewarray
-			c = (ClassRef)ins.con.value;			// result class
-			s = c.name;
-			for (n = 0; s.charAt(n) == '['; n++)
-				;					// n = class dimensions
-			if (n == 0) {
-				d.println(assign(ins) + "anewarray(&cl_" +
-						Names.hashclass(s) + ".C," + stacktop(ins) + ");");
-			} else {
-				d.println(assign(ins) + "vmnewarray(&" +
-						Names.classref(s.substring(n)) + "," +
-						(n + 1) + ",1," + stacktop(ins) + ");");
-			}
-//			break;
+		case ANEWA:			// [anewarray]
+// toba [
+//			c = (ClassRef)ins.con.value;			// result class
+//			s = c.name;
+//			for (n = 0; s.charAt(n) == '['; n++)
+//				;					// n = class dimensions
+//			if (n == 0) {
+//				d.println(assign(ins) + "anewarray(&cl_" +
+//						Names.hashclass(s) + ".C," + stacktop(ins) + ");");
+//			} else {
+//				d.println(assign(ins) + "vmnewarray(&" +
+//						Names.classref(s.substring(n)) + "," +
+//						(n + 1) + ",1," + stacktop(ins) + ");");
+//			}
+// toba ]
 
             {
+//                PhantomType type = getPhantomType(c.name);
+                PhantomType arrayType = getVoidArrayType();
+
                 ensureAutoVariable(ps, ident);
-                PhantomType type = getPhantomType(c.name);
+
                 ns.pop(); // remove array size
-                ns.push(new NewNode(type,null,null));
+                NewNode newNode = new NewNode(arrayType, null, null);
+                ns.push(newNode);
             }
             return;
 		case MNEWA:			// multianewarray
@@ -274,22 +295,25 @@ class InsGen extends Opcode {
 			break;
 
 		case ARRAYLOAD:			// iaload, faload, aaload,...
-			checkref(d, ins, -2);
-			s = o.name.substring(0,1);	// i,f,a,...
-			d.println("\tif ((unsigned)" + stacktop(ins) +
-					" >= ((struct " + s + "array*)" + stack2nd(ins) +
-					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" + 
-					stack2nd(ins) + "," + stacktop(ins) + ");");
-			d.println(assign(ins) + "((struct " + s + "array*)" +
-					stack2nd(ins) + ")->data[" + stacktop(ins) + "];");
-//			break;
+// toba [
+//			checkref(d, ins, -2);
+//			s = o.name.substring(0,1);	// i,f,a,...
+//			d.println("\tif ((unsigned)" + stacktop(ins) +
+//					" >= ((struct " + s + "array*)" + stack2nd(ins) +
+//					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" +
+//					stack2nd(ins) + "," + stacktop(ins) + ");");
+//			d.println(assign(ins) + "((struct " + s + "array*)" +
+//					stack2nd(ins) + ")->data[" + stacktop(ins) + "];");
+// toba ]
 
             {
 //                ensureAutoVariable(ps, ident);
                 Node arrayIndex = ns.pop();
                 IdentTransNode identVar = (IdentTransNode)ns.pop();
 
-                PhantomType arrayType = getArrayType(o.name);
+//                PhantomType arrayType = getArrayType(o.name);
+                PhantomType arrayType = getVoidArrayType();
+
                 identVar.setType(arrayType);
                 updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
                 
@@ -299,21 +323,22 @@ class InsGen extends Opcode {
             return;
 
 		case ARRAYSTORE:	       	// iastore, fastore, aastore,...
-			checkref(d, ins, -3);	
-			s = o.name.substring(0,1);	// i,f,a,...
-			d.println("\tif ((unsigned)" + stack2nd(ins) +
-					" >= ((struct " + s + "array*)" + stackvar(ins,-3) +
-					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" + 
-					stackvar(ins,-3) + "," + stack2nd(ins) + ");");
-			if ((o.flags & INST) != 0) {	// aastore must check type
-				d.println("\tif (" + stacktop(ins) + " && !instanceof(" +
-						stacktop(ins) + ",((struct aarray*)" + stackAt(ins, -3) +
-				")->class->elemclass,0))");
-				d.println("\t\tthrowArrayStoreException(0);");
-			}
-			d.println("\t((struct " + s + "array*)" + stackvar(ins,-3) +
-					")->data[" + stack2nd(ins) + "] = " + stacktop(ins) + ";");
-//			break;
+// toba [
+//			checkref(d, ins, -3);
+//			s = o.name.substring(0,1);	// i,f,a,...
+//			d.println("\tif ((unsigned)" + stack2nd(ins) +
+//					" >= ((struct " + s + "array*)" + stackvar(ins,-3) +
+//					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" +
+//					stackvar(ins,-3) + "," + stack2nd(ins) + ");");
+//			if ((o.flags & INST) != 0) {	// aastore must check type
+//				d.println("\tif (" + stacktop(ins) + " && !instanceof(" +
+//						stacktop(ins) + ",((struct aarray*)" + stackAt(ins, -3) +
+//				")->class->elemclass,0))");
+//				d.println("\t\tthrowArrayStoreException(0);");
+//			}
+//			d.println("\t((struct " + s + "array*)" + stackvar(ins,-3) +
+//					")->data[" + stack2nd(ins) + "] = " + stacktop(ins) + ";");
+// toba ]
 
             {
 //                ensureAutoVariable(ps, ident);
@@ -321,7 +346,9 @@ class InsGen extends Opcode {
                 Node arrayIndex = ns.pop();
                 IdentTransNode identVar = (IdentTransNode)ns.pop();
 
-                PhantomType arrayType = getArrayType(o.name);
+//                PhantomType arrayType = getArrayType(o.name);
+                PhantomType arrayType = getVoidArrayType();
+
                 identVar.setType(arrayType);
                 updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
 
@@ -957,6 +984,12 @@ class InsGen extends Opcode {
         return null;
     }
 
+    public static PhantomType getVoidArrayType() {
+//                PhantomType arrayType = new PhantomType(ClassMap.get_map().get(".internal.void",false, null), true);
+        PhantomType arrayType = new PhTypeVoid();
+        arrayType.set_is_container(true);
+        return arrayType;
+    }
 
     public static PhantomType getArrayType(String operationName) throws PlcException {
         switch (operationName.charAt(0)) {

@@ -287,10 +287,10 @@ class translation_regression_tests
     }
 
     void run_array(var a_obj : .translation.java.test.array) {
-//        log_str(a_obj.array_int(), "array_int(): ");
-          print("\n    array_int(): failure");
-//        log_str(a_obj.array_string(), "array_string(): ");
-          print("\n    array_string(): failure");
+        log_int(7, a_obj.array_int(), "array_int(): ");
+//        print("\n    array_int(): failure");
+        log_str(a_obj.array_string(), "array_string(): ");
+//        print("\n    array_string(): failure");
     }
 
     void run_switch(var s_obj : .translation.java.test.switch_test) {

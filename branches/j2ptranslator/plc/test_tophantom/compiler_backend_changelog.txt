@@ -72,3 +72,10 @@ ru.dz.plc.compiler.binode.BiNode
       //todo hack, need to remove and refactor [
       else if( l_type != null &&  r_type instanceof PhTypeUnknown ) type = l_type;
       //todo ]
+
+2011.04.12
+ru.dz.plc.compiler.PhantomType
+  add method
+    public void set_is_container(boolean is_container) {
+        this._is_container = is_container;
+    }
