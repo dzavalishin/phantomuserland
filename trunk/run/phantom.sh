@@ -21,7 +21,7 @@ Q_NET=" -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../oldtree/
 Q_DISKS="-boot a -no-fd-bootchk -fda $QDIR/img/grubfloppy.img -hda fat:fat -hdb phantom.img "
 
 # Q_KQ=-enable-kqemu
-Q_KQ=-enable-kqemu -kernel-kqemu
+Q_KQ="-enable-kqemu -kernel-kqemu"
 
 # Q_VGA=-vga std
 # Q_VGA=-vga cirrus
