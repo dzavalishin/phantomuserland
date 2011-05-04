@@ -23,7 +23,7 @@ endif
 
 # How to recursively descend into subdirectories to make general targets such as `all'.
 %.MAKE:
-	@$(MAKE) -j 1 -C $(dir $@) $(basename $(notdir $@))
+	@$(MAKE) -j 16 -C $(dir $@) $(basename $(notdir $@))
 %-subdirs: $(addsuffix /%.MAKE,$(SUBDIRS)) ;
 
 # By default, make any target by descending into subdirectories.
