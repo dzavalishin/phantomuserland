@@ -133,3 +133,108 @@ boot_code:
     .long	0
 
 
+
+
+
+
+#if 0
+
+
+
+
+    // -----------------------------------------------------------------------
+    // Call 16 bit PM code. Used in PM vesa interface.
+    // -----------------------------------------------------------------------
+    //
+    // errno_t call_16bit_code( u_int32_t cs, u_int32_t ss, u_int32_t entry, struct trap_state *ts );
+    //
+    // NB! Passed CS must be 16 bit selector. That's all we need to switch to 16 bit mode
+    //
+    // NB! Must be called with ints disabled!
+    //
+    // -----------------------------------------------------------------------
+
+    .data
+    // We store here 32 bit ESP when calling PM16
+saved_pm16_esp:
+    .long	0
+
+saved_pm16_entry:
+    .long	0
+
+saved_pm16_ss:
+    .long	0
+
+saved_pm16_cs:
+    .long	0
+
+    .text
+    .code32
+
+ENTRY(call_16bit_vesa)
+    // Make sure!
+    cli
+
+    push %ebp
+    movl %esp, %ebp
+
+    pusha
+
+
+    movl	4(%esp),%eax			// cs
+    movl	8(%esp),%ebx			// ss
+    movl	12(%esp),%ecx			// entry
+    movl	16(%esp),%edx			// *ts
+
+    movl        %eax, saved_pm16_cs(0)
+    movl        %ebx, saved_pm16_ss(0)
+    movl        %ecx, saved_pm16_entry(0)
+
+    movl        %esp, saved_pm16_esp(0)
+
+
+    push        %cs
+    pushl        $done_vesa_pm16
+
+    //call        *%ecx
+
+    /**
+     *
+     *    SS
+     *    ESP
+     *    EFLAGS
+     *    CS
+     *    EIP
+     *
+    **/
+
+
+    iret
+
+    .code16
+done_vesa_pm16:
+
+    // restore world
+
+    ljmp KERNEL_CS, $1f
+    .code32
+1:
+
+    movw KERNEL_DS, %ds
+    movw KERNEL_DS, %es
+    movw KERNEL_DS, %ss
+
+    movw 0, %fs
+    movw 0, %gs
+
+    movl        saved_pm16_esp(0), %esp
+
+    popa
+
+    pop %ebp
+
+    ret
+
+#endif
+
+
