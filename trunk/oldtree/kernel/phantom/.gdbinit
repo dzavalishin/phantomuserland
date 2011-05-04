@@ -14,11 +14,15 @@ target remote localhost:1234
 set logging file gdb.log
 set logging on
 
-source -v .gdb-local
 
 break panic
-break pvm_exec_throw
+break pvm_exec_panic
 
 break main
 
-break phantom_switch_context
+source -v .gdb-local
+
+#break phantom_switch_context
+#break do_test_physmem
+break do_test_sem
+
