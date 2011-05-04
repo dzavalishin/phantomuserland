@@ -770,7 +770,7 @@ static bool ReadIndirect1( e2impl_t *impl, int* dst, int* cnt, int blk)
         return FALSE;
     }
 
-    /*int*/ m = min( *cnt, impl->dim_ptr );
+    /*int*/ m = imin( *cnt, impl->dim_ptr );
     // se cnt < dim_ptr vuol dire che non tutti gli indici
     // dei blocchi del blocco indice sono occupati dal file
     memcpy(dst,r1,m<<2);
