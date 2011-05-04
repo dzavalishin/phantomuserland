@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "devfs"
 #include "debug_ext.h"
-#define debug_level_flow 7
+#define debug_level_flow 3
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -371,7 +371,7 @@ void devfs_register_dev( phantom_device_t* dev )
 {
     const char *busname = dev->bus ? dev->bus->name : "nobus";
 
-    SHOW_FLOW( 7, "Registering dev %s.%d on bus %s in devfs",
+    SHOW_FLOW( 4, "Registering dev %s.%d on bus %s in devfs",
                dev->name, dev->seq_number,
                busname
                );
