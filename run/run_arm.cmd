@@ -6,7 +6,7 @@ rem SET SER=-serial vc
 SET Q_NET= -net user -tftp ../oldtree/run/tftp -net nic,model=smc91c111
 
 
-rem SET STOP=-S
+SET STOP=-S
 
 rem -append "-d=20 -- -test all"
 

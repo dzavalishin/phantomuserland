@@ -4,7 +4,7 @@ SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), offsets libc gl dev libphantom threa
 
 
 %.MAKE:
-	@$(MAKE) -C $(dir $@) $(basename $(notdir $@))
+	@$(MAKE) -j16 -C $(dir $@) $(basename $(notdir $@))
 %-subdirs: $(addsuffix /%.MAKE,$(SUBDIRS)) ;
 
 # By default, make any target by descending into subdirectories.
