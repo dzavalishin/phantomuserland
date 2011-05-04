@@ -11,6 +11,7 @@ HW_BOOT_DEST=/mnt/nfs/phantom-test-machine/boot
 #     Arm port is in progress and amd64 supposed to be the next target.
 #ARCH=ia32
 #ARCH=arm
+#ARCH=mips
 #ARCH=amd64
 
 # --- TODO what hardware configuration we build for.

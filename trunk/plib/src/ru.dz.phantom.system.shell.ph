@@ -29,13 +29,14 @@ class shell //extends runnable
 
     void run(var parent_object @const ) [8]
     {
+/*
 		win = new .internal.window();
 		win.setWinPosition(500,310);
 		win.setTitle("Window!");
 		win.setFg(0); // black
 		win.drawBox( 10, 10, 20, 20 );
 		win.drawString( 22, 22, "Say Hello to Win!" );
-
+*/
         console = new .internal.io.tty();
         incr = 1;
 
