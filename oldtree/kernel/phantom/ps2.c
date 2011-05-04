@@ -20,8 +20,9 @@
 #include <i386/pio.h>
 #include <phantom_libc.h>
 
-#include "driver_map.h"
-#include "device.h"
+//#include "driver_map.h"
+#include <kernel/device.h>
+#include <kernel/drivers.h>
 #include <hal.h>
 
 #include <drv_video_screen.h>
