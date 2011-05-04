@@ -27,7 +27,7 @@ LIBDIRS += $(OBJDIR)/lib
 PHANTOM_CPPFLAGS	+= -W -Wall -MD $(DEFINES) -I. $(addprefix -iquote,$(SRCDIRS)) \
 		    $(addprefix -iquote,$(MOSTLY_SRCDIRS)) \
 		    $(addprefix -I,$(INCDIRS)) -nostdinc -DARCH_$(ARCH)
-PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -W -Wall $(PHANTOM_FFLAGS) -fno-stack-protector
+PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -W -Wall $(PHANTOM_FFLAGS) -fno-stack-protector -pipe
 PHANTOM_LDFLAGS	+= $(addprefix -L,$(LIBDIRS))
 
 # Add a `-g' if the debug option is set.
