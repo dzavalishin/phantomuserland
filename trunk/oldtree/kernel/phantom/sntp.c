@@ -98,7 +98,7 @@ struct SNTP_resync_args {
     u_int32_t interval;
 };
 
-
+#if 0
 static char * dumpt(time_t t)
 {
     static char buf[100] = "?";
@@ -113,6 +113,7 @@ static char * dumpt(time_t t)
 
     return buf;
 }
+#endif
 
 static void SNTP_resync(void * arg)
 {

@@ -264,6 +264,7 @@ static int     	   tcpfs_ioctl(   struct uufile *f, errno_t *err, int request, v
     (void) err;
     (void) request;
     (void) data;
+    (void) size;
 
     *err = ENODEV;
     return -1;

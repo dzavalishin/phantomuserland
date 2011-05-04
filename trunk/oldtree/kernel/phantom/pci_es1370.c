@@ -475,6 +475,7 @@ size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 
 size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 {
+    (void) dev;
     char meander[] = "adgjlorzzroljgda                "; // really poor man's sine ;)
     int res = 0;
 

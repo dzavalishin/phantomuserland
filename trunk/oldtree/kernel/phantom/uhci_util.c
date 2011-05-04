@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <i386/pio.h>
 
-#include "driver_map.h"
+//#include "driver_map.h"
 
 #include <queue.h>
 

@@ -266,6 +266,7 @@ static int     	   udpfs_ioctl(   struct uufile *f, errno_t *err, int request, v
     (void) f;
     (void) request;
     (void) data;
+    (void) size;
     *err = ENODEV;
     return -1;
 }
