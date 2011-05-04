@@ -10,7 +10,7 @@
  *
 **/
 
-#define TEST_NEW_DISK_IO_STACK 0
+#define TEST_NEW_DISK_IO_STACK 1
 
 
 
@@ -1023,6 +1023,8 @@ void connect_ide_io(void)
         SHOW_ERROR0( 0, "Failed to create whole disk partition" );
         return;
     }
+
+    p->specific = -1; // must be not 0 for real disk
 
     errno_t err = phantom_register_disk_drive(p);
     if(err)

@@ -16,7 +16,7 @@ analyse::
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom/$(ARCH)
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 
-CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d d/*.d
+CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d d/*.d $(ARCH)/boards/*.o
 PHANTOM_CFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -std=gnu89 -DKERNEL
 
 
@@ -27,6 +27,7 @@ include $(PHANTOM_SRCDIR)/GNUmakerules
 DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))
 
 LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
+#LIBGCC := 
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
@@ -40,19 +41,21 @@ ifeq ($(ARCH),ia32)
 L386=i386/libi386.a
 endif
 
+ifeq ($(ARCH),arm)
+ARCH_OBJS=angel.o
+endif
+
 
 i386/libi386.a:
 	cd i386; make; cd ..
 
-//threads/libthreads.a:	cd threads; make; cd ..
 
 entry.o: crtn.o
 
-#START_O_FILE=$(OBJDIR)/lib/multiboot.o 
 START_O_FILE=entry.o
 
 #isa_sb16.o
-phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o\
+phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	driver_pci_rtl8169.o intrdisp.o mem_icp_timer.o mem_pl181_mmc.o  \
 	paging_mem.o user_trap.o mem_lanc111.o video_drv_icp_vga.o \
 	winsd.o sntp.o vm_load.o pci_es1370.o mem_pl011_uart.o mem_pl031_rtc.o \
@@ -97,7 +100,6 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o\
 		$(PHANTOM_LIBS) $(PLIBDIR)/libphantom_c.a \
 		$(L386) $(PLIBDIR)/libphantom.a \
 		$(CLIB) $(LIBGCC) crtn.o 
-#	../objcopy-ph -O elf32-i386 $@.pe $@
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > ../../run/tftp/$@
 	cat < $@ > ../../../run/fat/boot/$@

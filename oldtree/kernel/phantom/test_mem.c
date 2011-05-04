@@ -99,7 +99,7 @@ int do_test_malloc(const char *test_parm)
 int do_test_physmem(const char *test_parm)
 {
     (void) test_parm;
-
+#if !defined(ARCH_arm)
     void *va;
     physaddr_t pa;
 
@@ -170,6 +170,7 @@ int do_test_physmem(const char *test_parm)
 #endif
 
     hal_pv_free( pa, va, MSIZE );
+#endif //!defined(ARCH_arm)
 
     return 0;
 }

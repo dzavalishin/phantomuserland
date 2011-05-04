@@ -195,7 +195,7 @@ static void    page_fault( vm_page *p, int  is_writing );
 
 static vm_page *addr_to_vm_page(unsigned long addr, struct trap_state *ts)
 {
-    addr -= (unsigned int)vm_map_start_of_virtual_address_space; // X64 bug - int
+    addr -= (addr_t)vm_map_start_of_virtual_address_space;
 
 
     if( addr >= ( ((unsigned long)vm_map_vm_page_count) * __MEM_PAGE) )
@@ -219,7 +219,7 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
     (void) ip;
 
 #if 1
-    vm_page *vmp = addr_to_vm_page((unsigned long) address, ts);
+    vm_page *vmp = addr_to_vm_page((addr_t) address, ts);
 #else
     // BUG! TODO! Stack growth? Object space growth?
     long addr = (unsigned int) address;
@@ -272,6 +272,12 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
         addr_t ip = ts->eip;
         int is_write = ts->err & T_PF_WRITE;
 #endif
+#ifdef ARCH_amd64
+#warning is_write
+        //ts->cr2 = fa;
+        addr_t ip = ts->hw_rip;
+        int is_write = ts->hw_err & T_PF_WRITE;
+#endif
 #ifdef ARCH_arm
         addr_t ip = ts->pc;
 #  warning find out if it was a write op
@@ -280,7 +286,7 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
         {
             unsigned long addr = fa;
 
-            addr -= (unsigned int)vm_map_start_of_virtual_address_space;
+            addr -= (addr_t)vm_map_start_of_virtual_address_space;
 
             if( addr >= (vm_map_vm_page_count*__MEM_PAGE) )
             {
@@ -1185,7 +1191,7 @@ static void kick_pageout(vm_page *p)
         vm_page_req_pageout(p);
         cnt++;
     }
-    if(SNAP_DEBUG && 0 == (0xFFFFF & (int)p->virt_addr) )
+    if(SNAP_DEBUG && 0 == (0xFFFFF & (addr_t)p->virt_addr) )
     {
         hal_printf("0x%X (%d)\n", p->virt_addr, cnt );
         cnt = 0;
@@ -1287,6 +1293,9 @@ static void wait_commit_snap(vm_page *p)
     }
 }
 
+// TODO if we page out page, which is unchanged since THE SNAP and page fault comes (somebody wants to write to that
+// page) we need to do COW too!
+
 void do_snapshot()
 {
     int			  enabled; // interrupts
@@ -1299,6 +1308,7 @@ void do_snapshot()
 
     // This pageout request is not nesessary, but makes snap to catch a more later state.
     // If we skip this pageout, a lot of pages will go to 'after snap' state.
+    // TODO try to find some heuristic to pageout just pages modified long ago?
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
     if(SNAP_STEPS_DEBUG) syslog( 0, "wait 4 pgout to settle\n");
 
@@ -1787,14 +1797,14 @@ void unwire_page( vm_page *p )
 // to unwire_page_for_addr physical addr will be the same
 void wire_page_for_addr( void *addr )
 {
-    vm_page *p = addr_to_vm_page((unsigned long) addr, 0);
+    vm_page *p = addr_to_vm_page((addr_t) addr, 0);
     wire_page( p );
 
 }
 
 void unwire_page_for_addr( void *addr )
 {
-    vm_page *p = addr_to_vm_page((unsigned long) addr, 0);
+    vm_page *p = addr_to_vm_page((addr_t) addr, 0);
     unwire_page( p );
 }
 

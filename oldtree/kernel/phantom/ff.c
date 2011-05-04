@@ -3465,7 +3465,7 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
     }
 
 
-    if(1) {
+    if(0) {
         void *odata;
         int osize;
         //const char *fname = "/amnt0/ReadMe.txt";
