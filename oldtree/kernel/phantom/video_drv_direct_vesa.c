@@ -46,7 +46,9 @@ static errno_t load_pm_vesa( void *ROM_va, size_t ROM_size, size_t hdr_offset );
 #endif
 
 static int direct_vesa_probe();
-errno_t call_16bit_code( u_int16_t cs, u_int16_t ss, u_int16_t entry, struct trap_state *ts );
+
+// First three are really 16 bit, use 32 just to make things cleaner
+errno_t call_16bit_code( u_int32_t cs, u_int32_t ss, u_int32_t entry, struct trap_state *ts );
 
 struct drv_video_screen_t        video_driver_direct_vesa =
 {
@@ -80,30 +82,37 @@ mouse_enable:          	drv_video_mouse_on_deflt,
 struct pm_vesa_header
 {
     char         signature[4];
-    u_int16_t    entryPoint;
-    u_int16_t    entryInit;      // offset of init func
-    u_int16_t    biosDataSel;
+    u_int16_t    entryPoint;    // offset of main entry point
+    u_int16_t    entryInit;     // offset of init func
+    u_int16_t    biosDataSel;   // at least 0x600 bytes of scratch for BIOS code - clean
     u_int16_t    A0000Sel;
     u_int16_t    B0000Sel;
     u_int16_t    B8000Sel;
-    u_int16_t    codeAsDataSel;
+    u_int16_t    codeAsDataSel; // access code seg as data
     u_int8_t     protectedMode;
     u_int8_t     checksum;
 } __packed;
 
 
+#define PBUF 1
+#define ROM_SIZE (32*1024)
+
 static int direct_vesa_probe()
 {
     const int ROM_pa = 0xC0000;
-    const int ROM_size = 32*1024;
+    const int ROM_size = ROM_SIZE;
+
+#if PBUF
+    char ROM_va[ROM_SIZE];
+    memcpy_p2v( ROM_va, ROM_pa, ROM_SIZE );
+#else
     const int ROM_pages = ROM_size/PAGE_SIZE;
-
     char *ROM_va = (char *)phystokv(ROM_pa);
-
     hal_pages_control( ROM_pa, ROM_va, ROM_pages, page_map, page_ro );
+#endif
 
     char *p = ROM_va;
-    SHOW_FLOW( 0, "Look for VESA PM entry starting at 0x%X", p);
+    SHOW_FLOW( 0, "Look for VESA PM entry starting at 0x%X", ROM_pa);
 
     char *entry = 0;
     int cnt = ROM_size;
@@ -145,11 +154,17 @@ static int direct_vesa_probe()
             (void) hdr_offset;
             (void) ROM_va;
             (void) ROM_size;
+
+            struct pm_vesa_header *h = ((void *)ROM_va)+hdr_offset;
+
+            SHOW_FLOW( 1, "init: %x, entry %x", h->entryInit, h->entryPoint );
 #endif
         }
     }
 
+#if !PBUF
     hal_pages_control( ROM_pa, ROM_va, ROM_pages, page_unmap, page_ro );
+#endif
 pressEnter("PM VESA done");
 
     // Experimental code
@@ -220,16 +235,19 @@ static errno_t load_pm_vesa( void *in_ROM_va, size_t ROM_size, size_t hdr_offset
     make_descriptor(gdt, VBE3_B8_16, 0xB8000, 0xffff, ACC_PL_K | ACC_DATA_W, SZ_16 );
 
 
+    int ie = hal_save_cli();
 
 #if 0
     struct trap_state ts;
     errno_t ret;
     if( (ret = call_16bit_code( VBE3_CS_16, VBE3_ST_16, hdr->entryInit, &ts )) )
-        return ret;
+        goto err;
 
     if( (ret = call_16bit_code( VBE3_CS_16, VBE3_ST_16, hdr->entryPoint, &ts )) )
-        return ret;
+        goto err;
 #endif
+err:
+    if(ie) hal_sti();
 
     return 0;
 }
@@ -276,7 +294,7 @@ static errno_t load_pm_vesa( void *in_ROM_va, size_t ROM_size, size_t hdr_offset
 
 
 
-errno_t call_16bit_code( u_int16_t cs, u_int16_t ss, u_int16_t entry, struct trap_state *ts )
+errno_t call_16bit_code( u_int32_t cs, u_int32_t ss, u_int32_t entry, struct trap_state *ts )
 {
     (void) cs;
     (void) ss;
