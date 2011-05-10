@@ -43,7 +43,7 @@
 #define MODE_M							0x22
 
 // Keypresses
-#define Escape							0x001b
+//#define Escape							0x001b
 
 // Videomode attributes
 #define TVU_TEXT						0x0001

@@ -1,3 +1,6 @@
+vic
+http://infocenter.arm.com/help/topic/com.arm.doc.ddi0273a/DDI0273.pdf
+
 CP15
 http://www.heyrick.co.uk/assembler/coprocmnd.html
 

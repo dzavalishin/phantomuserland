@@ -97,6 +97,9 @@ void phantom_unix_fs_init(void);
 void check_global_lock_entry_count(void);
 void pressEnter(char *text);
 
+void DumpVgaMode(void);
+
+
 // -----------------------------------------------------------------------
 // Tests
 // -----------------------------------------------------------------------
