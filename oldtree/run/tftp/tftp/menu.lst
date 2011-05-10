@@ -62,10 +62,10 @@ module=(nd)/pmod_tcpdemo
 boot 
 
 
-title=phantom (more debug)
-kernel=(nd)/phantom -d=20 -- 
-module=(nd)/classes
-module=(nd)/pmod_tcpdemo 
+title=phantom (no VESA)
+kernel=(nd)/phantom -d=20 -novesa -- -novesa
+#module=(nd)/classes
+#module=(nd)/pmod_tcpdemo 
 #module=(nd)/pmod_test
 #module=(nd)/pmod_regress 
 boot 
