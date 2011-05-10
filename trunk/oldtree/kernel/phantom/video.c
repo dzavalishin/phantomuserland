@@ -39,9 +39,12 @@ struct drv_video_screen_t *video_drivers[] =
     &video_driver_basic_vga,
 #if !JUST_VGA
     &video_driver_cirrus,
-    &video_driver_bochs_vesa_emulator,
+//    &video_driver_bochs_vesa_emulator,
     // test one. never reports success
     &video_driver_direct_vesa,
+
+    // General reg clone driver
+    &video_driver_gen_clone,
 #if !VESA_ENFORCE
     &video_driver_bios_vesa,
 #endif

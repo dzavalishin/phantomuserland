@@ -88,7 +88,9 @@ phantom_device_t * driver_framebuf_probe( const char *name, int stage );
 
 phantom_device_t * driver_etc_smbios_probe( const char *name, int stage );
 phantom_device_t * driver_etc_acpi_probe( const char *name, int stage );
-    	
+
+// Generic registers cloning SVGA driver
+phantom_device_t * driver_video_gen_clone_pci_probe( pci_cfg_t *pci, int stage );
 
 
 

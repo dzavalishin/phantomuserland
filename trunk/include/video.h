@@ -65,6 +65,8 @@ extern struct drv_video_screen_t        video_driver_basic_vga;
 extern struct drv_video_screen_t        video_driver_direct_vesa;
 extern struct drv_video_screen_t        video_driver_bios_vesa;
 extern struct drv_video_screen_t        video_driver_cirrus;
+extern struct drv_video_screen_t        video_driver_gen_clone;
+
 
 // TODO call from text vga console drvr?
 // Can be called from any driver (or anywhere) to reset VGA to text mode
