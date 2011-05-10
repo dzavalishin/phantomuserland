@@ -23,6 +23,9 @@
 
 #include "console.h"
 
+// void DumpVgaMode(void)
+#include "misc.h"
+
 
 struct basic_VGA_Vmode basic_VGA_Mode;
 
@@ -704,6 +707,58 @@ int read_vga_register(int port, int index)
    outb(port, index);
    return inb(port+1);
 }
+
+
+
+
+
+
+
+// indexed = 0 for single reg
+// indexed = N for N indirect registers
+static void dreg( const char *name, int regbase, int indexed )
+{
+    printf(".%s = { ", name);
+
+    if( !indexed )
+        printf("0x%x ", inb(regbase));
+    else
+    {
+        int port = 0;
+        for(port = 0; port < indexed; port++)
+        {
+            outb( regbase, port );
+            int v = inb( regbase+1 );
+
+            printf("0x%x, ", v );
+        }
+    }
+
+    printf("}, // %s\n", name);
+}
+
+
+
+
+void DumpVgaMode(void)
+{
+    dreg( "CRTC", 0x03D4, 256 );
+    dreg( "ATTR", 0x03C0, 256 );
+    dreg( "SEQR", 0x03C4, 256 );
+    dreg( "GRAC", 0x03CE, 256 );
+    dreg( "MSR",  0x03CC, 0 ); // Wr = 0x03C2
+    dreg( "FCR",  0x03CA, 0 ); // Wr = 0x03DA
+    dreg( "DACW", 0x03C8, 256 );
+    dreg( "GF2D", 0x03D6, 256 );
+
+    inb(STATUS_ADDR);
+}
+
+
+
+
+
+
 
 #endif // ARCH_ia32
 

@@ -21,6 +21,7 @@
 #include <video.h>
 #include "vm86.h"
 
+// void DumpVgaMode(void)
 #include "../misc.h"
 
 #define VBE_RET ( (tss_vm86.tss.eax & 0xFFFFu) != 0x004F ? 0 : (tss_vm86.tss.eax & 0xFFFFu) )
@@ -269,6 +270,12 @@ void phantom_init_vesa(void)
     }
 
     phantom_enforce_video_driver(&video_driver_bios_vesa);
+
+
+    if(debug_level_info > 0)
+        DumpVgaMode();
+
+
 #endif
 }
 
