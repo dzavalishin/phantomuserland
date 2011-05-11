@@ -154,6 +154,25 @@ void pvm_root_init(void)
 
         printf("Done processing restart list.\n");
     }
+#else
+    int items = get_array_size(pvm_root.restart_list.data);
+
+    if( !pvm_is_null( pvm_root.restart_list ) )
+    {
+        printf("Processing restart list: %d items.\n", items);
+        for( i = 0; i < items; i++ )
+        {
+            pvm_object_t o = pvm_get_array_ofield(pvm_root.restart_list.data, i);
+
+            if(!pvm_is_null(o) )
+                handle_object_at_restart(o);
+
+            // TODO if has just one link - delete it. In fact, must do it in GC.
+        }
+
+        printf("Done processing restart list.\n");
+    }
+
 #endif
 
 
@@ -527,7 +546,7 @@ static o_restart_func_t find_restart_f( struct pvm_object _class )
 
 static void handle_object_at_restart( pvm_object_t o )
 {
-#if COMPILE_EXPERIMENTAL
+//#if COMPILE_EXPERIMENTAL
     if(!(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
     {
         printf( "not internal object in restart list!" );
@@ -536,7 +555,7 @@ static void handle_object_at_restart( pvm_object_t o )
     o_restart_func_t rf = find_restart_f( o.data->_class );
 
     if(rf) rf(o);
-#endif
+//#endif
 }
 
 
@@ -546,6 +565,8 @@ void pvm_add_object_to_restart_list( pvm_object_t o )
     pvm_object_t wr = pvm_create_weakref_object(o);
     // TODO sync?
     pvm_append_array( pvm_root.restart_list.data, wr );
+#else
+    pvm_append_array( pvm_root.restart_list.data, o );
 #endif
 }
 
