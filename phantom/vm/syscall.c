@@ -1656,6 +1656,7 @@ syscall_func_t	syscall_table_4_world[16] =
 DECLARE_SIZE(world);
 
 
+#if COMPILE_WEAKREF
 // --------- weakref -------------------------------------------------------
 
 static int si_weakref_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
@@ -1745,7 +1746,7 @@ syscall_func_t	syscall_table_4_weakref[16] =
 DECLARE_SIZE(weakref);
 
 
-
+#endif
 
 
 

@@ -120,7 +120,8 @@ void pvm_root_init(void)
 
 
     //cycle through restart objects here and call restart func
-#if COMPILE_EXPERIMENTAL
+//#if COMPILE_EXPERIMENTAL
+#if COMPILE_WEAKREF
     int items = get_array_size(pvm_root.restart_list.data);
 
     pvm_object_t wrc = pvm_get_weakref_class();
@@ -305,7 +306,9 @@ static void set_root_from_table()
     SET_ROOT_CLASS(bitmap,BITMAP);
     SET_ROOT_CLASS(closure,CLOSURE);
     SET_ROOT_CLASS(world,WORLD);
+#if COMPILE_WEAKREF
     SET_ROOT_CLASS(weakref, WEAKREF);
+#endif
     SET_ROOT_CLASS(window, WINDOW);
     SET_ROOT_CLASS(directory, DIRECTORY);
 }
@@ -339,7 +342,9 @@ GCINLINE struct pvm_object     pvm_get_binary_class() { return pvm_root.binary_c
 GCINLINE struct pvm_object     pvm_get_bitmap_class() { return pvm_root.bitmap_class; }
 GCINLINE struct pvm_object     pvm_get_closure_class() { return pvm_root.closure_class; }
 GCINLINE struct pvm_object     pvm_get_world_class() { return pvm_root.world_class; }
+#if COMPILE_WEAKREF
 GCINLINE struct pvm_object     pvm_get_weakref_class() { return pvm_root.weakref_class; }
+#endif
 GCINLINE struct pvm_object     pvm_get_window_class() { return pvm_root.window_class; }
 GCINLINE struct pvm_object     pvm_get_directory_class() { return pvm_root.directory_class; }
 
@@ -537,9 +542,11 @@ static void handle_object_at_restart( pvm_object_t o )
 
 void pvm_add_object_to_restart_list( pvm_object_t o )
 {
+#if COMPILE_WEAKREF
     pvm_object_t wr = pvm_create_weakref_object(o);
     // TODO sync?
     pvm_append_array( pvm_root.restart_list.data, wr );
+#endif
 }
 
 

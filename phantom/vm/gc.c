@@ -488,6 +488,7 @@ pvm_object_t  ref_inc_o(pvm_object_t o)
 
 static void gc_clear_weakrefs(pvm_object_storage_t *p)
 {
+#if COMPILE_WEAKREF
     // This impl assumes object _satellites field is used for
     // holding weakref backpointer only
 
@@ -495,6 +496,7 @@ static void gc_clear_weakrefs(pvm_object_storage_t *p)
     struct pvm_object w = p->_satellites;
 
     si_weakref_9_resetMyObject( w );
+#endif
 }
 
 
