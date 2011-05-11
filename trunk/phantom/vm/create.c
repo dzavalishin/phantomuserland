@@ -605,6 +605,7 @@ void pvm_gc_iter_closure(gc_iterator_call_t func, struct pvm_object_storage * os
 
 
 
+#if COMPILE_WEAKREF
 
 void pvm_internal_init_weakref(struct pvm_object_storage * os)
 {
@@ -711,7 +712,7 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
     return out;
 }
 
-
+#endif
 
 
 

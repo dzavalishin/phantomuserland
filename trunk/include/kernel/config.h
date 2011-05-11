@@ -54,6 +54,7 @@
 #define COMPILE_UHCI 0
 
 
+#define COMPILE_WEAKREF 0
 
 
 

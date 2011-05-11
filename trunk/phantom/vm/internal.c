@@ -266,6 +266,7 @@ struct internal_class pvm_internal_classes[] =
         {0,0}
     },
 
+#if COMPILE_WEAKREF
     {
         ".internal.weakref",
         PVM_ROOT_OBJECT_WEAKREF_CLASS,
@@ -278,7 +279,7 @@ struct internal_class pvm_internal_classes[] =
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
         {0,0}
     },
-
+#endif
     {
         ".internal.world",
         PVM_ROOT_OBJECT_WORLD_CLASS,
