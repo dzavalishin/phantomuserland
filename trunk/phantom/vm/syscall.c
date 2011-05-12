@@ -1811,3 +1811,34 @@ DECLARE_SIZE(directory);
 
 
 
+
+// --------- connection -------------------------------------------------------
+
+static int si_connection_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    (void)o;
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_string_object( "(connection)" ));
+}
+
+
+syscall_func_t	syscall_table_4_connection[16] =
+{
+    &si_void_0_construct,           &si_void_1_destruct,
+    &si_void_2_class,               &si_void_3_clone,
+    &si_void_4_equals,              &si_connection_5_tostring,
+    &si_void_6_toXML,               &si_void_7_fromXML,
+    // 8
+    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
+    &invalid_syscall,               &si_void_15_hashcode,
+
+};
+DECLARE_SIZE(connection);
+
+
+
+
+
+

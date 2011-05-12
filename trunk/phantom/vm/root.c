@@ -330,6 +330,7 @@ static void set_root_from_table()
 #endif
     SET_ROOT_CLASS(window, WINDOW);
     SET_ROOT_CLASS(directory, DIRECTORY);
+    SET_ROOT_CLASS(connection, CONNECTION);
 }
 
 
@@ -366,6 +367,7 @@ GCINLINE struct pvm_object     pvm_get_weakref_class() { return pvm_root.weakref
 #endif
 GCINLINE struct pvm_object     pvm_get_window_class() { return pvm_root.window_class; }
 GCINLINE struct pvm_object     pvm_get_directory_class() { return pvm_root.directory_class; }
+GCINLINE struct pvm_object     pvm_get_connection_class() { return pvm_root.connection_class; }
 
 #undef GCINLINE
 

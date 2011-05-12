@@ -427,6 +427,15 @@ struct data_area_4_io
 
 
 
+struct data_area_4_connection
+{
+    void *                              kernel;         // Stuff in kernel that serves us
+
+    char                                name[1024];     // Used to reconnect on restart
+};
+
+
+
 
 
 

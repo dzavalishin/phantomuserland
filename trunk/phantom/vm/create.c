@@ -880,6 +880,66 @@ void pvm_restart_directory( pvm_object_t o )
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+void pvm_internal_init_connection(struct pvm_object_storage * os)
+{
+    struct data_area_4_connection      *da = (struct data_area_4_connection *)os->da;
+
+    da->kernel = 0;
+    memset( da->name, sizeof(da->name), 0 );
+
+}
+
+
+struct pvm_object     pvm_create_connection_object(void)
+{
+    pvm_object_t ret = pvm_object_create_fixed( pvm_get_connection_class() );
+
+    return ret;
+}
+
+// Unused, not supposed to be called
+void pvm_gc_finalizer_connection( struct pvm_object_storage * os )
+{
+    // is it called?
+    //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
+
+}
+
+// Unused, not supposed to be called
+void pvm_restart_connection( pvm_object_t o )
+{
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    da->kernel = 0;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // -----------------------------------------------------------------------
 // Specials
 // -----------------------------------------------------------------------
