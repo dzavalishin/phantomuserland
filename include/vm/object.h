@@ -169,6 +169,7 @@ struct pvm_object     pvm_get_bitmap_class(void);
 struct pvm_object     pvm_get_weakref_class(void);
 struct pvm_object     pvm_get_window_class(void);
 struct pvm_object     pvm_get_directory_class(void);
+struct pvm_object     pvm_get_connection_class(void);
 
 
 struct pvm_object     pvm_create_null_object(void);
@@ -197,6 +198,7 @@ struct pvm_object     pvm_create_weakref_object(struct pvm_object owned );
 
 
 struct pvm_object     pvm_create_directory_object(void);
+struct pvm_object     pvm_create_connection_object(void);
 
 
 void     pvm_release_thread_object( struct pvm_object thread );

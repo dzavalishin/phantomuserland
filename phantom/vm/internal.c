@@ -337,6 +337,21 @@ struct internal_class pvm_internal_classes[] =
         {0,0}
     },
 
+    {
+        ".internal.connection",
+        PVM_ROOT_OBJECT_CONNECTION_CLASS,
+        syscall_table_4_connection,
+        pvm_internal_init_connection,
+        0 /*pvm_gc_iter_connection*/,
+        pvm_gc_finalizer_connection,
+        pvm_restart_connection, // no restart func
+        sizeof(struct data_area_4_connection),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        {0,0}
+    },
+
 
 };
 
