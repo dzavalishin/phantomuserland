@@ -434,6 +434,8 @@ struct data_area_4_connection
     char                                name[1024];     // Used to reconnect on restart
 };
 
+errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc);
+errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc);
 
 
 

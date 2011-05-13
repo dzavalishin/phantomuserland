@@ -1821,6 +1821,55 @@ static int si_connection_5_tostring(struct pvm_object o, struct data_area_4_thre
     SYSCALL_RETURN(pvm_create_string_object( "(connection)" ));
 }
 
+static int si_connection_8_connect(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+
+    pvm_object_t _s = POP_ARG;
+
+    if(IS_PHANTOM_STRING(_s))
+    {
+        SYS_FREE_O(_s);
+        SYSCALL_THROW_STRING( "not a string arg" );
+    }
+
+    int slen = pvm_get_str_len(_s);
+
+    if( slen+1 > sizeof( da->name ) )
+    {
+        SYS_FREE_O(_s);
+        SYSCALL_THROW_STRING( "string arg too long" );
+    }
+
+    strncpy( da->name, pvm_get_str_data(_s), slen + 1 );
+    SYS_FREE_O(_s);
+
+    printf("Connect to %s\n", da->name );
+
+    int ret = pvm_connect_object(o,tc);
+
+    SYSCALL_RETURN(pvm_create_int_object( ret ) );
+}
+
+
+static int si_connection_9_disconnect(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    //struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 0);
+
+    int ret = pvm_disconnect_object(o,tc);
+
+    SYSCALL_RETURN(pvm_create_int_object( ret ) );
+}
+
 
 syscall_func_t	syscall_table_4_connection[16] =
 {
@@ -1829,7 +1878,7 @@ syscall_func_t	syscall_table_4_connection[16] =
     &si_void_4_equals,              &si_connection_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &invalid_syscall, 	    	    &invalid_syscall,
+    &si_connection_8_connect, 	    &si_connection_9_disconnect,
     &invalid_syscall, 	    	    &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode,

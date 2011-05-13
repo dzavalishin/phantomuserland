@@ -363,3 +363,12 @@ void run_test( void )
 }
 
 #endif
+
+
+
+errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
+errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
+
+
+
+

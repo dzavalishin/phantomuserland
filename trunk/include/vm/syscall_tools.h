@@ -46,6 +46,7 @@
     } while(0)
 
 //             SYSCALL_THROW_STRING( /*"not a string arg: "*/  __func__ );
+// TODO it does not SYS_FREE_O(obj)!
 #define ASSERT_STRING(obj) \
     do { \
 	if( !IS_PHANTOM_STRING(obj) ) \
