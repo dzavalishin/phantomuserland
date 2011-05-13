@@ -423,13 +423,21 @@ struct data_area_4_io
 };
 
 
+struct data_area_4_connection;
+
+struct pvm_connection_ops
+{
+    //
+    //errno_t     check_operation( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc );
+    int         (*do_operation)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc );
+};
 
 
 
 
 struct data_area_4_connection
 {
-    void *                              kernel;         // Stuff in kernel that serves us
+    struct pvm_connection_ops *         kernel;         // Stuff in kernel that serves us
 
     char                                name[1024];     // Used to reconnect on restart
 };
