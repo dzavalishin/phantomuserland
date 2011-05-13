@@ -619,3 +619,26 @@ static void runclass(int ac, char **av)
     create_and_run_object(cname, method );
 }
 
+
+
+
+
+int pvm_connect_object(pvm_object_t o, struct data_area_4_thread *tc)
+{
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    pvm_add_object_to_restart_list( o ); // TODO must check it's there
+
+    return phantom_connect_object( da, tc);
+}
+
+int pvm_disconnect_object(pvm_object_t o, struct data_area_4_thread *tc)
+{
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    return phantom_disconnect_object( da, tc);
+}
+
+
+
+
