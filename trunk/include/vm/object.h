@@ -17,6 +17,7 @@
 #include <limits.h>
 #include <errno.h>
 
+//struct pvm_object_storage;
 
 // This structure must be first in any object
 // for garbage collector to work ok
@@ -54,12 +55,12 @@ typedef struct pvm_object pvm_object_t;
 // NB! See JIT assembly hardcode for object structure offsets
 struct pvm_object_storage
 {
-    struct object_PVM_ALLOC_Header	_ah;
+    struct object_PVM_ALLOC_Header      _ah;
 
-    struct pvm_object  		        _class;
-    struct pvm_object  		        _satellites; // Points to chain of objects related to this one
-    u_int32_t				_flags; // TODO int! Need more flags
-    unsigned int			_da_size; // in bytes!
+    struct pvm_object                   _class;
+    struct pvm_object                   _satellites; // Points to chain of objects related to this one
+    u_int32_t                           _flags; 
+    unsigned int                        _da_size; // in bytes!
 
     unsigned char                       da[];
 };

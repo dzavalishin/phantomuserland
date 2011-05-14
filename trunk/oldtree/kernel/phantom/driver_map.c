@@ -242,6 +242,8 @@ static int loadpci()
 
 static int probe_pci( int stage, pci_cfg_t *pci )
 {
+    //pci_cfg_t cpci = *_pci;
+    //pci_cfg_t *pci = &cpci;
 
     SHOW_FLOW( 2, "%d PCI check vend %X dev %X cl %X", stage, pci->vendor_id, pci->device_id, pci->base_class );
 

@@ -1870,6 +1870,63 @@ static int si_connection_9_disconnect(struct pvm_object o, struct data_area_4_th
     SYSCALL_RETURN(pvm_create_int_object( ret ) );
 }
 
+static int si_connection_10_check(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    int op_index = POP_INT();
+
+    int ret = 0;
+
+    if( da->kernel == 0 || da->kernel->check_operation || da->kernel->req_wake )
+    {
+        ret = ENXIO;
+    }
+    else
+    {
+        ret = da->kernel->check_operation( op_index, da, tc );
+        if( ret )
+        {
+            // TODO races?
+            ret = da->kernel->req_wake( op_index, da, tc );
+            if( ret == 0 )
+                SYSCALL_PUT_THIS_THREAD_ASLEEP();
+        }
+    }
+
+    SYSCALL_RETURN(pvm_create_int_object( ret ) );
+}
+
+static int si_connection_11_do(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 2);
+
+    int op_index = POP_INT();
+    pvm_object_t arg = POP_ARG;
+
+    int ret = 0;
+
+    if( da->kernel == 0 || da->kernel->do_operation )
+    {
+        ret = ENXIO;
+    }
+    else
+    {
+        ret = da->kernel->do_operation( op_index, da, tc, arg );
+    }
+
+    SYS_FREE_O(arg);
+    SYSCALL_RETURN(pvm_create_int_object( ret ) );
+}
+
 
 syscall_func_t	syscall_table_4_connection[16] =
 {
@@ -1879,7 +1936,7 @@ syscall_func_t	syscall_table_4_connection[16] =
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
     &si_connection_8_connect, 	    &si_connection_9_disconnect,
-    &invalid_syscall, 	    	    &invalid_syscall,
+    &si_connection_10_check, 	    &si_connection_11_do,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode,
 

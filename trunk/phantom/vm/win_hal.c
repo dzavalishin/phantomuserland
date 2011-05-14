@@ -25,30 +25,34 @@
 #include "vm/alloc.h"
 #include "video/win_local.h"
 
+//#include <sys/types.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
+       
+#include "winhal.h"
+
+#include <windows.h>
+
 
 struct hardware_abstraction_level    	hal;
 
 int phantom_is_a_real_kernel() { return 0; }
 
 
-void        hal_init( vmem_ptr_t va, long vs )
+
+void hal_init( vmem_ptr_t va, long vs )
 {
-	printf("Win32 HAL init\n");
+    printf("Win32 HAL init\n");
 
-	hal.object_vspace = va;
-	hal.object_vsize = vs;
+    hal.object_vspace = va;
+    hal.object_vsize = vs;
 
-	pvm_alloc_init( va, vs );
-
-	//hal.object_vsize = 40 * 1024 * 1024; // 40 MB
-
-	//hal.object_vspace = (void *)PHANTOM_AMAP_START_VM_POOL;
-
-	//printf("HAL init VM at 0x%X\n", hal.object_vspace);
+    pvm_alloc_init( va, vs );
 
 
-	//hal_init_vm_map();
-
+    //int rc =
+    CreateThread( 0, 0, (void *) &winhal_debug_srv_thread, 0, 0, 0);
+    //if( rc) printf("Win32 can't run debugger thread\n");
 }
 
 vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
@@ -339,10 +343,10 @@ struct wtty *get_thread_ctty( struct phantom_thread *t )
     return 0;
 }
 
-errno_t wtty_putc_nowait( struct wtty *wt, int ch ) 
-{ 
-    putchar(ch); 
-    return 0; 
+errno_t wtty_putc_nowait( struct wtty *wt, int ch )
+{
+    putchar(ch);
+    return 0;
 }
 
 

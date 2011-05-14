@@ -549,9 +549,11 @@ static o_restart_func_t find_restart_f( struct pvm_object _class )
 static void handle_object_at_restart( pvm_object_t o )
 {
 //#if COMPILE_EXPERIMENTAL
+    printf( "restart 0x%p\n", o.data );
+
     if(!(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
     {
-        printf( "not internal object in restart list!" );
+        printf( "not internal object in restart list!\n" );
         return;
     }
     o_restart_func_t rf = find_restart_f( o.data->_class );

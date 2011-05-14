@@ -38,8 +38,12 @@ struct drv_video_screen_t *video_drivers[] =
 #ifdef ARCH_ia32
     &video_driver_basic_vga,
 #if !JUST_VGA
-    &video_driver_cirrus,
-//    &video_driver_bochs_vesa_emulator,
+
+    // Incomplete, and suspected to break VESA driver
+    //&video_driver_cirrus,
+
+    // &video_driver_bochs_vesa_emulator,
+
     // test one. never reports success
     &video_driver_direct_vesa,
 
