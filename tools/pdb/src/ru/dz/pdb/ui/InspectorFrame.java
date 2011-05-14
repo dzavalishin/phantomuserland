@@ -4,10 +4,12 @@ import javax.swing.JFrame;
 
 import ru.dz.pdb.CmdException;
 import ru.dz.pdb.Main;
+import ru.dz.pdb.phantom.ObjectHeader;
 
 public class InspectorFrame extends JFrame {
 	private long phantomObjectAddress;
 	private byte[] object;
+	private ObjectHeader parsed;
 
 	public InspectorFrame(long phantomObjectAddress) {
 		this.phantomObjectAddress = phantomObjectAddress;
@@ -19,6 +21,8 @@ public class InspectorFrame extends JFrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			object = new byte[0];
+			parsed = new ObjectHeader(object);
+			
 		}
 		
 		
