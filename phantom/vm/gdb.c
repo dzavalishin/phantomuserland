@@ -111,7 +111,7 @@ static void get_regs(gdb_pt_regs *r, struct data_area_4_thread *da)
     r->r_ostack = da->_ostack;
     r->r_istack = da->_istack;
     r->r_estack = da->_estack;
-          
+
     r->r_ip	= da->code.IP;
     r->r_this	= da->_this_object;
     r->r_frame	= da->call_frame;
@@ -207,12 +207,16 @@ static void getpacket(char *buffer)
     int count;
     unsigned char ch;
 
-    do {
+    while(1)
+    {
+        printf("GDB read pkt " );
         /*
          * wait around for the start character,
          * ignore all other characters
          */
         while ((ch = (getDebugChar() & 0x7f)) != '$') ;
+
+        printf("GDB pkt start " );
 
         checksum = 0;
         xmitcsum = -1;
@@ -230,14 +234,19 @@ static void getpacket(char *buffer)
             count = count + 1;
         }
 
+        printf("GDB pkt # " );
+
         if (count >= BUFMAX)
             continue;
 
         buffer[count] = 0;
 
         if (ch == '#') {
+
             xmitcsum = hex(getDebugChar() & 0x7f) << 4;
             xmitcsum |= hex(getDebugChar() & 0x7f);
+
+            printf("GDB got csum " );
 
             if (checksum != xmitcsum)
                 putDebugChar('-');	/* failed checksum */
@@ -261,8 +270,14 @@ static void getpacket(char *buffer)
                 }
             }
         }
+
+        if(checksum != xmitcsum)
+        {
+            printf("GDB my check = %x, his = %x", checksum, xmitcsum );
+            continue;
+        }
+        break;
     }
-    while (checksum != xmitcsum);
 }
 
 /*
@@ -311,7 +326,7 @@ static unsigned char *mem2hex(char *mem, char *buf, int count, int may_fault)
 {
     unsigned char ch;
 
-    assert(!may_fault);
+    //assert(!may_fault);
 
     /*	set_mem_fault_trap(may_fault); */
 
@@ -462,25 +477,11 @@ void gdb_stub_send_signal(int sigval)
     putpacket(output_buffer);	/* send it off... */
 }
 
-/*
- * This function does all command processing for interfacing to gdb.  It
- * returns 1 if you should skip the instruction at the trap address, 0
- * otherwise.
- */
-void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
-                               //gdb_pt_regs *regs,int sigval)
+void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
 {
-    //int trap;			/* Trap type */
     addr_t addr;
     size_t length;
     char *ptr;
-    //unsigned long *stack;
-
-
-    /*
-     * reply to host that an exception has occurred
-     */
-    gdb_stub_send_signal(signal);
 
     /*
      * Wait for input from remote GDB
@@ -488,6 +489,8 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
     while (1) {
         output_buffer[0] = 0;
         getpacket(input_buffer);
+
+        printf("GDB cmd '%s'\n", input_buffer );
 
         switch (input_buffer[0])
         {
@@ -509,9 +512,9 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
                 //gdb_stub_get_non_pt_regs(regs);
                 ptr = output_buffer;
                 ptr = (char *)mem2hex((char *)&r,ptr,sizeof(r),0);
-            //ptr=  mem2hex((char *)regs,ptr,sizeof(s390_regs_common),FALSE);
-            //ptr=  mem2hex((char *)&regs->crs[0],ptr,NUM_CRS*CR_SIZE,FALSE);
-            //ptr = mem2hex((char *)&regs->fp_regs, ptr,sizeof(s390_fp_regs));
+                //ptr=  mem2hex((char *)regs,ptr,sizeof(s390_regs_common),FALSE);
+                //ptr=  mem2hex((char *)&regs->crs[0],ptr,NUM_CRS*CR_SIZE,FALSE);
+                //ptr = mem2hex((char *)&regs->fp_regs, ptr,sizeof(s390_fp_regs));
             }
             break;
 
@@ -525,15 +528,15 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
                 ptr=input_buffer;
                 hex2mem (ptr, (char *)&r,sizeof(r), 0);
                 set_regs(&r, da);
-            /*
-            hex2mem (ptr, (char *)regs,sizeof(s390_regs_common), FALSE);
-            ptr+=sizeof(s390_regs_common)*2;
-            hex2mem (ptr, (char *)regs->crs[0],NUM_CRS*CR_SIZE, FALSE);
-            ptr+=NUM_CRS*CR_SIZE*2;
-            hex2mem (ptr, (char *)regs->fp_regs,sizeof(s390_fp_regs), FALSE);
-            gdb_stub_set_non_pt_regs(regs);
-            */
-            strcpy(output_buffer,"OK");
+                /*
+                 hex2mem (ptr, (char *)regs,sizeof(s390_regs_common), FALSE);
+                 ptr+=sizeof(s390_regs_common)*2;
+                 hex2mem (ptr, (char *)regs->crs[0],NUM_CRS*CR_SIZE, FALSE);
+                 ptr+=NUM_CRS*CR_SIZE*2;
+                 hex2mem (ptr, (char *)regs->fp_regs,sizeof(s390_fp_regs), FALSE);
+                 gdb_stub_set_non_pt_regs(regs);
+                 */
+                strcpy(output_buffer,"OK");
             }
             break;
 
@@ -547,6 +550,7 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
                 && *ptr++ == ','
                 && hexToInt(&ptr, &length))
             {
+                printf("GDB read mem %d @ 0x%p\n", length, (void *)addr );
                 if (mem2hex((char *)addr, output_buffer, length, 1))
                     break;
                 strcpy (output_buffer, "E03");
@@ -617,14 +621,40 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
              * There is no single step insn in the MIPS ISA, so we
              * use breakpoints and continue, instead.
              */
-//#warning implement
+            //#warning implement
             //single_step(regs);
             //flush_cache_all();
             return;
             /* NOTREACHED */
 
-        //}
-        break;
+            //}
+            break;
+
+            /*
+             * Phantom specific
+             */
+        case ':':
+            ptr = &input_buffer[2];
+
+            switch(input_buffer[1])
+            {
+
+                // return persistent address space start addr
+            case 'p':
+                {
+                    void *a = hal_object_space_address();
+                    mem2hex( (char *)&a, output_buffer, sizeof(a), 1);
+                    //printf(":p answer '%s'\n", output_buffer );
+                    break;
+                }
+
+            default:
+                strcpy(output_buffer,"E00"); // TODO check
+
+            }
+
+            break;
+
 
         }			/* switch */
 
@@ -632,9 +662,32 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
          * reply to the request
          */
 
+        printf("GDB answer '%s'\n", output_buffer );
+
         putpacket(output_buffer);
 
     } /* while */
+}
+
+
+/*
+ * This function does all command processing for interfacing to gdb.  It
+ * returns 1 if you should skip the instruction at the trap address, 0
+ * otherwise.
+ */
+void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
+                               //gdb_pt_regs *regs,int sigval)
+{
+    //int trap;			/* Trap type */
+    //unsigned long *stack;
+
+
+    /*
+     * reply to host that an exception has occurred
+     */
+    gdb_stub_send_signal(signal);
+    gdb_stub_handle_cmds(da, signal);
+
 }
 
 /*
@@ -659,7 +712,7 @@ void breakpoint(void)
 
 
 
-
+#if 0
 
 int putDebugChar(char c)    /* write a single character      */
 {
@@ -673,5 +726,5 @@ extern char getDebugChar(void)     /* read and return a single char */
     return 0;
 }
 
-
+#endif
 

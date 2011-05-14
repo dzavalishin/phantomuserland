@@ -1,4 +1,6 @@
-QDIR=../oldtree/run12
+QDIR=../oldtree/run12/bin
+#QDIR="qemu/0.13.0"
+QBIN=qemu
 
 # SOUND=-soundhw sb16
 
@@ -25,13 +27,19 @@ Q_KQ="-enable-kqemu -kernel-kqemu"
 
 # Q_VGA=-vga std
 # Q_VGA=-vga cirrus
-set Q_VGA="-vga vmware"
+Q_VGA="-vga vmware"
 # -virtioconsole 4
+
+[ -s local.sh ] && {
+echo Loading local.sh
+. ./local.sh
+}
 
 rm serial0.log.old1
 mv serial0.log.old serial0.log.old1
 mv serial0.log serial0.log.old
-qemu -smp 3 $Q_VGA -s $Q_KQ -L $QDIR/lib $Q_MACHINE $Q_PORTS $Q_DISKS $Q_NET $VIO $USB $SOUND
+echo Run "$QDIR/$QBIN"
+$QDIR/$QBIN -smp 3 $Q_VGA -s $Q_KQ -L $QDIR/lib $Q_MACHINE $Q_PORTS $Q_DISKS $Q_NET $VIO $USB $SOUND
 
 exit
 

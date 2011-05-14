@@ -3,14 +3,18 @@ package ru.dz.pdb;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 public class HostConnector {
 	private static final int BUFMAX = 20480;
+	private static final int PVM_ALLOC_HDR_SIZE = 16;
 	private Socket s;
 	
 	public HostConnector() throws UnknownHostException, IOException {
 		s = new Socket(InetAddress.getByName("127.0.0.1") , 1256);
+		
+		s.setSoTimeout(300);
 	}
 
 	private void putDebugChar(byte c) throws IOException
@@ -27,19 +31,25 @@ public class HostConnector {
 	/*
 	 * send the packet in buffer.
 	 */
-	private void putpacket(String buffer) throws IOException
+	private void putpacket(String buffer) throws IOException, CmdException
 	{
 	    int checksum;
 	    int count;
 	    char ch;
-
+	    int tries = 10;
+	    
 	    int blen = buffer.length();
 	    
 	    /*
 	     * $<packet info>#<checksum>.
 	     */
 
-	    do {
+	    while(true)
+	    {
+	    	if( tries-- <= 0 )
+	    		throw new CmdException("No ack");
+	    	
+		    System.out.println("HostConnector.putpacket("+buffer+")");
 	        putDebugChar((byte) '$');
 	        checksum = 0;
 	        count = 0;
@@ -48,16 +58,38 @@ public class HostConnector {
 	        {
 	        	ch = buffer.charAt(count);
 	            putDebugChar((byte)ch);
-	            checksum += ch;
+	            checksum += 0xFF & ((int)ch);
 	            count++;
 	        }
 
 	        putDebugChar((byte) '#');
+	        checksum &= 0xFF;
 	        putDebugChar(hexchars(checksum >> 4));
 	        putDebugChar(hexchars(checksum & 0xf));
 
+	        //putDebugChar((byte) '\n');
+	        
+	        try {
+	        	byte c = (byte) (getDebugChar() & 0x7f);
+	        	if( c == '+' )
+	        	{
+	        		System.out.println("HostConnector.putpacket() got ACK");
+	        		return;
+	        	}
+	        	else if( c == '-' )
+	        	{
+	        		System.out.println("HostConnector.putpacket() got NAK");
+	        	}
+	        	else 
+	        	{
+	        		System.out.println("HostConnector.putpacket() got not +/- but '"+(char)c+"'");
+	        	}
+	        } catch (SocketTimeoutException e)
+	        {
+	        	continue;
+	        }
 	    }
-	    while ((getDebugChar() & 0x7f) != '+');
+	    
 	}
 	
 
@@ -82,6 +114,8 @@ public class HostConnector {
 	    while((ch = (char) (getDebugChar() & 0x7f)) != '$') 
 	    	;
 
+	    System.out.println("HostConnector.getpacket() $");
+	    
 	    checksum = 0;
 	    xmitcsum = (char) -1;
 	    count = 0;
@@ -93,7 +127,7 @@ public class HostConnector {
 	    	ch = (char) (getDebugChar() & 0x7f);
 	    	if (ch == '#')
 	    		break;
-	    	checksum = (char) (checksum + ch);
+	    	checksum = (byte) (checksum + ch);
 	    	buffer.append( ch );
 	    	count = count + 1;
 	    }
@@ -177,7 +211,7 @@ public class HostConnector {
 	
 	
 	
-	private String execCmd( String req ) throws IOException, ChecksumException
+	private String execCmd( String req ) throws IOException, ChecksumException, CmdException
 	{
 		int tries = 5;
 		while(tries-- > 0)
@@ -193,12 +227,23 @@ public class HostConnector {
 		throw new ChecksumException();
 	}
 	
+
+	private int intAt(byte[] ah, int pos) {
+		int i;
+		
+		i =  ah[pos+0];
+		i |= ah[pos+1] << 8;
+		i |= ah[pos+2] << 16;
+		i |= ah[pos+3] << 24;
+		
+		return i;
+	}
 	
 	
     /*
      * mAA..AA,LLLL  Read LLLL bytes at address AA..AA
      */
-	public byte[] cmdGetMem(int address, int size) throws CmdException
+	public byte[] cmdGetMem(long address, int size) throws CmdException
 	{
 		String cmd = String.format("m%x,%x", address, size );
 		try {
@@ -209,6 +254,34 @@ public class HostConnector {
 			hex2mem(reply, result, size);
 			return result;
 			
+		} catch (IOException e) {
+			throw new CmdException("IO error", e);
+		} catch (ChecksumException e) {
+			throw new CmdException("Checksum error", e);
+		}
+	}
+
+	public byte[] cmdGetObject(long address) throws CmdException
+	{
+		System.err.println(String.format("cmdGetObject @%X", address));
+		
+		byte[] ah = cmdGetMem( address, PVM_ALLOC_HDR_SIZE);
+		
+		int oSize = intAt(ah,3*4);
+		System.err.println(String.format("osize %X", oSize));
+		
+		byte[] o = cmdGetMem( address, oSize);
+		return o;
+	}
+
+	// Get persistent pool start address 
+	public long cmdGetPoolAddress() throws CmdException
+	{
+		String cmd = String.format(":p" );
+		try {
+			
+			String reply = execCmd(cmd);
+			return Long.parseLong(reply, 16);
 		} catch (IOException e) {
 			throw new CmdException("IO error", e);
 		} catch (ChecksumException e) {

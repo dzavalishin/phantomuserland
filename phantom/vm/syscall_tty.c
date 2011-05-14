@@ -353,7 +353,7 @@ void pvm_restart_tty( pvm_object_t o )
 {
     struct data_area_4_tty *tty = pvm_object_da( o, tty );
 
-    printf("restart TTY\n");
+    printf( "restart TTY %p\n", tty );
 
     tty->w.title = "VM TTY Window (restarted)"; // BUG! Pointer from object space to kernel data seg!
 

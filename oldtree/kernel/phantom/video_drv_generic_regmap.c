@@ -141,14 +141,15 @@ static int n_pages = 1024;
 static int seq_number = 0;
 phantom_device_t * driver_video_gen_clone_pci_probe( pci_cfg_t *pci, int stage )
 {
-    if( stage )
+    (void) stage;
+
+    if( seq_number )
     {
         SHOW_ERROR0( 0, "Just one");
         return 0;
     }
 
-
-    SHOW_FLOW0( 1, "probe" );
+    SHOW_FLOW( 1, "probe vid %x dev %x", pci->vendor_id, pci->device_id );
 
     vcard = calloc(1, sizeof(gen_clone));
     dev = malloc(sizeof(phantom_device_t));
@@ -159,22 +160,34 @@ phantom_device_t * driver_video_gen_clone_pci_probe( pci_cfg_t *pci, int stage )
     }
 
     dev->irq = pci->interrupt;
+    dev->iomem = 0;
 
     int i;
     for (i = 0; i < 6; i++)
     {
         if (pci->base[i] > 0xffff)
         {
-            dev->iomem = pci->base[i];
-            dev->iomemsize = pci->size[i];
-
-            n_pages = dev->iomemsize/PAGE_SIZE; // FIXME partial page
-
-            SHOW_INFO( 0,  "base 0x%lx, size 0x%lx", dev->iomem, dev->iomemsize );
-        } else if( pci->base[i] > 0) {
+            if( dev->iomem == 0 )
+            {
+                dev->iomem = pci->base[i] & ~0xF; // Clear lower bits - TODO move to some common driver startup code
+                dev->iomemsize = pci->size[i];
+                n_pages = dev->iomemsize/PAGE_SIZE; // FIXME partial page
+                SHOW_INFO( 0,  "base 0x%lx, size 0x%lx", dev->iomem, dev->iomemsize );
+            }
+            else
+                SHOW_ERROR( 0,  "unused base 0x%lx, size 0x%lx", pci->base[i], pci->size[i] );
+        }
+        else if( pci->base[i] > 0)
+        {
             dev->iobase = pci->base[i];
             SHOW_INFO( 0,  "io_port 0x%x", dev->iobase );
         }
+    }
+
+    if(dev->iomem == 0 )
+    {
+        SHOW_ERROR0( 0, "no mem defined");
+        goto free;
     }
 
     SHOW_FLOW0( 1, "init");
@@ -190,6 +203,7 @@ phantom_device_t * driver_video_gen_clone_pci_probe( pci_cfg_t *pci, int stage )
     dev->drv_private = vcard;
 
 
+    SHOW_INFO0( 1, "inited");
     return dev;
 
 free:
@@ -232,6 +246,8 @@ static void gen_clone_map_video(int on_off)
 {
     assert( video_driver_gen_clone.screen != 0 );
 
+    SHOW_FLOW( 7, "map vmem va 0x%X pa 0x%x", video_driver_gen_clone.screen, dev->iomem );
+
     hal_pages_control_etc(
                           dev->iomem,
                           video_driver_gen_clone.screen,
@@ -249,7 +265,6 @@ static int gen_clone_video_start()
 static int gen_clone_video_stop()
 {
     gen_clone_map_video(0);
-    
     video_drv_basic_vga_set_text_mode();
     return 0;
 }

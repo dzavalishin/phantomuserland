@@ -19,6 +19,7 @@
 #include "drv_video_screen.h"
 
 #include <hal.h>
+#include <errno.h>
 #include <kernel/timedcall.h>
 
 
@@ -427,9 +428,19 @@ struct data_area_4_connection;
 
 struct pvm_connection_ops
 {
-    //
-    //errno_t     check_operation( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc );
-    int         (*do_operation)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc );
+    // No block!
+
+    // Check if op can be done, return 0 if so
+    errno_t     (*check_operation)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc );
+
+    // request to wake me up when ready
+    errno_t     (*req_wake)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc );
+
+    // Actually do op 
+    errno_t     (*do_operation)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc, pvm_object_t o );
+
+    // Finish connection
+    errno_t     (*disconnect)( struct data_area_4_connection *c, struct data_area_4_thread *tc );
 };
 
 
