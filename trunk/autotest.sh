@@ -1,5 +1,6 @@
 #!/bin/sh
-export PHANTOM_HOME=`dirname $0`
+cd `dirname $0`
+export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
 
