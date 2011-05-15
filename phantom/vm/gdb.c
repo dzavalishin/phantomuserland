@@ -487,6 +487,8 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
      * Wait for input from remote GDB
      */
     while (1) {
+        printf("GDB wait for cmd\n" );
+
         output_buffer[0] = 0;
         getpacket(input_buffer);
 
@@ -642,9 +644,10 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 // return persistent address space start addr
             case 'p':
                 {
-                    void *a = hal_object_space_address();
-                    mem2hex( (char *)&a, output_buffer, sizeof(a), 1);
+                    //void *a = hal_object_space_address();
+                    //mem2hex( (char *)&a, output_buffer, sizeof(a), 1);
                     //printf(":p answer '%s'\n", output_buffer );
+                    snprintf( output_buffer, sizeof(output_buffer), "%lx", (long) hal_object_space_address() );
                     break;
                 }
 

@@ -77,7 +77,7 @@ void gdb_stub_handle_cmds(void *da, int signal);
 void winhal_debug_srv_thread(int *arg)
 {
     (void) arg;
-    printf("Debug server running\n");
+    //printf("Debug server running\n");
 
     int ls = socket( PF_INET, SOCK_STREAM, 0);
     //int ls = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -96,7 +96,7 @@ void winhal_debug_srv_thread(int *arg)
         struct sockaddr_in client_addr;
         unsigned int clinetLen = sizeof(client_addr);
 
-        printf("Debug server accept\n");
+        //printf("Debug server accept\n");
         cfd = accept( ls, (struct sockaddr *) &client_addr, &clinetLen );
         if (cfd == -1)
         {
@@ -107,10 +107,10 @@ void winhal_debug_srv_thread(int *arg)
 
         //while(1)
         {
-            printf("Debug server read cmds\n");
+            //printf("Debug server read cmds\n");
             if(!setjmp(finish_gdb_socket))
                 gdb_stub_handle_cmds(0, 0);
-            printf("Debug server finished read cmds\n");
+            printf("Debug server close connection\n");
         }
 
         close(cfd);

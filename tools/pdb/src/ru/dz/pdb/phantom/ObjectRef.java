@@ -2,6 +2,8 @@ package ru.dz.pdb.phantom;
 
 import java.nio.ByteBuffer;
 
+import ru.dz.pdb.Main;
+
 
 
 /**
@@ -15,16 +17,16 @@ import java.nio.ByteBuffer;
  *
  */
 public class ObjectRef {
-	private int dataAddr;
-	private int interfaceAddr;
+	private long dataAddr;
+	private long interfaceAddr;
 
 	/**
 	 * 
 	 * @param bb buffer to load from
-	 * @param addr start address of object
+	 * @param pos start position of object
 	 */
-	public ObjectRef(ByteBuffer bb, int addr) {
-		bb.position(addr);
+	public ObjectRef(ByteBuffer bb, int pos) {
+		bb.position(pos);
 		
 		dataAddr = bb.getInt();
 		interfaceAddr = bb.getInt();		
@@ -45,7 +47,8 @@ public class ObjectRef {
 	}
 
 	
-	public int getDataAddr()      {		return dataAddr;	}
-	public int getInterfaceAddr() {		return interfaceAddr;	}
-	
+	public long getDataAddr()      {		return dataAddr;	}
+	public long getInterfaceAddr() {		return interfaceAddr;	}
+
+	public ObjectHeader getObject() { return Main.getPhantomObject(dataAddr); }
 }
