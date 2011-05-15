@@ -42,7 +42,7 @@ int phantom_is_a_real_kernel() { return 0; }
 
 void hal_init( vmem_ptr_t va, long vs )
 {
-    printf("Win32 HAL init\n");
+    printf("Win32 HAL init @%p\n", va);
 
     hal.object_vspace = va;
     hal.object_vsize = vs;
