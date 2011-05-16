@@ -72,7 +72,7 @@ int debug_print_instr = 0;
 
 #define es_push( i ) 	pvm_estack_push( da->_estack, i )
 #define es_pop() 	pvm_estack_pop( da->_estack )
-#define es_empty()  pvm_estack_empty( da->_estack )
+#define es_empty()      pvm_estack_empty( da->_estack )
 
 
 #define this_object()   (da->_this_object)
@@ -1209,8 +1209,6 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
 // TODO: implement!
 struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
 {
-    //pvm_exec_panic("pvm_exec_lookup_class_by_name: not implemented");
-
     // Try internal
     struct pvm_object ret = pvm_lookup_internal_class(name);
     if( !pvm_is_null(ret) )
@@ -1267,8 +1265,6 @@ pvm_exec_run_method(
     cfda->this_object = ref_inc_o( this_object );
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
-
-//printf("here!\n");
 
     pvm_exec( thread );
 

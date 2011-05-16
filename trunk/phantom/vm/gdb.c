@@ -216,7 +216,7 @@ static void getpacket(char *buffer)
          */
         while ((ch = (getDebugChar() & 0x7f)) != '$') ;
 
-        printf("GDB pkt start " );
+        //printf("GDB pkt start " );
 
         checksum = 0;
         xmitcsum = -1;
@@ -246,7 +246,7 @@ static void getpacket(char *buffer)
             xmitcsum = hex(getDebugChar() & 0x7f) << 4;
             xmitcsum |= hex(getDebugChar() & 0x7f);
 
-            printf("GDB got csum " );
+            //printf("GDB got csum " );
 
             if (checksum != xmitcsum)
                 putDebugChar('-');	/* failed checksum */
@@ -480,14 +480,15 @@ void gdb_stub_send_signal(int sigval)
 void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
 {
     addr_t addr;
-    size_t length;
+    addr_t length; // need size_t, but hex2int decodes addr_t
+    //size_t length;
     char *ptr;
 
     /*
      * Wait for input from remote GDB
      */
     while (1) {
-        printf("GDB wait for cmd\n" );
+        //printf("GDB wait for cmd\n" );
 
         output_buffer[0] = 0;
         getpacket(input_buffer);
@@ -552,7 +553,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                 && *ptr++ == ','
                 && hexToInt(&ptr, &length))
             {
-                printf("GDB read mem %d @ 0x%p\n", length, (void *)addr );
+                printf("GDB read mem %d @ 0x%p\n", (int)length, (void *)addr );
                 if (mem2hex((char *)addr, output_buffer, length, 1))
                     break;
                 strcpy (output_buffer, "E03");
@@ -619,10 +620,6 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
              * Step to next instruction
              */
         case 's':
-            /*
-             * There is no single step insn in the MIPS ISA, so we
-             * use breakpoints and continue, instead.
-             */
             //#warning implement
             //single_step(regs);
             //flush_cache_all();
@@ -648,6 +645,52 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     //mem2hex( (char *)&a, output_buffer, sizeof(a), 1);
                     //printf(":p answer '%s'\n", output_buffer );
                     snprintf( output_buffer, sizeof(output_buffer), "%lx", (long) hal_object_space_address() );
+                    break;
+                }
+
+                // Create object
+            case 'c':
+                {
+                    pvm_object_t cns = pvm_create_string_object(ptr);
+                    if( pvm_is_null(cns) )
+                    {
+                        strcpy(output_buffer, "E03"); // TODO check 03
+                        break;
+                    }
+
+                    pvm_object_t c = pvm_exec_lookup_class_by_name(cns);
+                    if( pvm_is_null(c) )
+                    {
+                        strcpy(output_buffer, "E02"); // TODO check 02
+                        break;
+                    }
+
+                    pvm_object_t o = pvm_create_object(c);
+                    if( pvm_is_null(o) )
+                    {
+                        strcpy(output_buffer, "E01"); // TODO check 01
+                        break;
+                    }
+
+                    // TODO add to kernel objects list (object must be available from root)
+
+                    snprintf( output_buffer, sizeof(output_buffer), "%lx, %lx", (long)o.data, (long)o.interface  );
+                    break;
+                }
+
+            case 'r':
+                {
+                    addr_t mode;
+                    if(hexToInt(&ptr, &mode))
+                    {
+                        printf("GDB snapshots %s\n", mode ? "on" : "off" );
+                        // TODO implement
+                        strcpy(output_buffer,"E01");
+                        //snprintf( output_buffer, sizeof(output_buffer), "OK" );
+                    }
+                    else
+                        strcpy(output_buffer,"E01");
+
                     break;
                 }
 
@@ -692,26 +735,6 @@ void gdb_stub_handle_exception(struct data_area_4_thread *da, int signal)
     gdb_stub_handle_cmds(da, signal);
 
 }
-
-/*
- * This function will generate a breakpoint exception.  It is used at the
- * beginning of a program to sync up with a debugger and can be used
- * otherwise as a quick means to stop program execution and "break" into
- * the debugger.
-void breakpoint(void)
-{
-    if (!gdb_stub_initialised)
-        return;
-    __asm__ __volatile__(
-                         ".globl	breakinst\n"
-                         "breakinst:\t.word   %0\n\t"
-                         :
-                         : "i" (S390_BREAKPOINT_U16)
-                         :
-                        );
-}
- */
-
 
 
 
