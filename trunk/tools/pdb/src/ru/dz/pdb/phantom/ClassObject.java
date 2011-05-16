@@ -1,8 +1,15 @@
 package ru.dz.pdb.phantom;
 
+import java.awt.GridBagConstraints;
 import java.nio.ByteBuffer;
 
-public class ClassObject {
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import ru.dz.pdb.Main;
+import ru.dz.pdb.ui.bits.RefButton;
+
+public class ClassObject implements IInternalObject {
 	private byte [] data;
 	
 	private int instance_object_flags;
@@ -39,4 +46,17 @@ public class ClassObject {
 	}
 	
 	public String getClassName() { return class_name.getObject().getAsString(); }
+
+	@Override
+	public void populatePanel(JPanel panel, GridBagConstraints gbc) {
+		panel.add( new JLabel("Name:      \t'"+Main.getPhantomString(class_name)+"'"), gbc );
+
+		panel.add( new JLabel("SysId:     \t"+sys_table_id+""), gbc );
+		panel.add( new JLabel("InstDa:    \t"+instance_object_da_size+""), gbc );
+		panel.add( new JLabel("InstFlags: \t"+instance_object_flags+""), gbc );
+
+		panel.add( new RefButton(class_parent,"Parent"), gbc );				
+
+		
+	}
 }

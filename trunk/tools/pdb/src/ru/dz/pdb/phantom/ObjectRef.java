@@ -46,9 +46,9 @@ public class ObjectRef {
 		this.interfaceAddr = ifAddr;		
 	}
 
-	
-	public long getDataAddr()      {		return dataAddr;	}
-	public long getInterfaceAddr() {		return interfaceAddr;	}
+	// TODO 64 bit problem
+	public long getDataAddr()      {		return 0xFFFFFFFF & (long)dataAddr;	}
+	public long getInterfaceAddr() {		return 0xFFFFFFFF & (long)interfaceAddr;	}
 
 	public ObjectHeader getObject() { return Main.getPhantomObject(dataAddr); }
 }
