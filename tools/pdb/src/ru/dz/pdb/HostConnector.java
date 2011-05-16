@@ -296,4 +296,17 @@ public class HostConnector {
 		}
 	}
 
+	public void disconnect() {
+		/*
+		try {
+			s.shutdownInput();
+			s.shutdownOutput();
+			s.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/		
+	}
+
 }
