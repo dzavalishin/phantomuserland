@@ -234,6 +234,24 @@ public class HostConnector {
 		throw new ChecksumException();
 	}
 
+	private void execOkCmd(String cmd) {
+		try {
+			String reply = execCmd(cmd);
+			if( !reply.equals("OK") )
+				System.out.println("HostConnector.execOkCmd() - NOT OK: "+reply);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ChecksumException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CmdException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+
+	
 
 	private int intAt(byte[] ah, int pos) {
 		int i;
@@ -296,6 +314,11 @@ public class HostConnector {
 		}
 	}
 
+	public void cmdRunClass(String runClassName, int runClassMethod) {
+		String cmd = String.format(":r%x,%s", runClassMethod, runClassName );
+		execOkCmd(cmd);
+	}
+	
 	public void disconnect() {
 		/*
 		try {
@@ -308,5 +331,6 @@ public class HostConnector {
 		}
 		*/		
 	}
+
 
 }
