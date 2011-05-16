@@ -140,6 +140,12 @@ public class Main {
 		return s.getAsString();
 	}
 
+	private static void runClass(String runClassName, int runClassMethod) {
+		hc.cmdRunClass(runClassName,runClassMethod);		
+	}
+	
+	
+	
 	public static void doQuit() 
 	{
 		hc.disconnect();
@@ -292,4 +298,48 @@ public class Main {
 		return returnVal == JFileChooser.APPROVE_OPTION;
 	}
 
+	// --------------------------------------------------------------------
+	// Project
+	// --------------------------------------------------------------------
+	
+	public static void runLastClass() {
+		if( project.getRunClassName() == null )
+		{
+			if(!selectClassToRun())
+				return;
+		}
+		
+		System.out.println("Main.runClass("+project.getRunClassName()+","+project.getRunClassMethod()+")");
+		runClass(project.getRunClassName(),project.getRunClassMethod());
+	}
+
+
+	public static void runClass() {
+		if(!selectClassToRun())
+			return;
+		runLastClass();
+		
+	}
+
+	private static boolean selectClassToRun() {
+		if(project == null) project = new Project();
+		
+		//String cn = JOptionPane.showInputDialog(null, project.getRunClassName(), "Class to run", JOptionPane.QUESTION_MESSAGE);
+		//String cn = (String) JOptionPane.showInputDialog(null,null, "Class to run", JOptionPane.QUESTION_MESSAGE, null, null, project.getRunClassName());
+		String cn = JOptionPane.showInputDialog("Class to run", project.getRunClassName());
+		if( (cn == null) || (cn.length() == 0))
+			return false;
+		
+		//String meth = JOptionPane.showInputDialog(null, project.getRunClassMethod(), "Methon number to run", JOptionPane.QUESTION_MESSAGE);
+		String meth = JOptionPane.showInputDialog("Method number to run", project.getRunClassMethod());
+		if( (meth == null) || (meth.length() == 0))
+			return false;
+		
+		project.setRunClassName(cn);
+		project.setRunClassMethod(Integer.parseInt(meth));
+		
+		return true;
+	}
+
+	
 }

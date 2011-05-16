@@ -644,7 +644,24 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     //void *a = hal_object_space_address();
                     //mem2hex( (char *)&a, output_buffer, sizeof(a), 1);
                     //printf(":p answer '%s'\n", output_buffer );
-                    snprintf( output_buffer, sizeof(output_buffer), "%lx", (long) hal_object_space_address() );
+                    snprintf( output_buffer, sizeof(output_buffer), "%lx", (unsigned long) hal_object_space_address() );
+                    break;
+                }
+
+                // Run class method (create object and run in new thread)
+            case 'r':
+                {
+                    if( (!hexToInt(&ptr, &addr)) || *ptr++ != ',' || *ptr++ == 0 )
+                    {
+                        strcpy(output_buffer, "E03"); // TODO check 03
+                        break;
+                    }
+
+                    const char *class_name = ptr;
+                    int method = (int)addr;
+
+                    create_and_run_object(class_name, method );
+                    strcpy(output_buffer, "OK");
                     break;
                 }
 
@@ -678,7 +695,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     break;
                 }
 
-            case 'r':
+            case 's':
                 {
                     addr_t mode;
                     if(hexToInt(&ptr, &mode))

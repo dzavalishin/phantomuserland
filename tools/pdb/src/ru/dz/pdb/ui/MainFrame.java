@@ -162,6 +162,42 @@ public class MainFrame extends JFrame
 		}
 
 
+		
+		{
+			JMenu menu = new JMenu("Debug"); //$NON-NLS-1$
+			menu.setMnemonic(KeyEvent.VK_D);
+			//menu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.ALT_MASK));
+			menuBar.add(menu);
+
+			{
+				JMenuItem item = new JMenuItem("Run last"); //$NON-NLS-1$
+				item.setToolTipText("Run last class"); //$NON-NLS-1$
+				menu.setMnemonic(KeyEvent.VK_R);
+				//menu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+				menu.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) { Main.runLastClass(); }
+				});
+			}
+			
+			{
+				JMenuItem item = new JMenuItem("Run class"); //$NON-NLS-1$
+				item.setToolTipText("Run class"); //$NON-NLS-1$
+				//menu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK|ActionEvent.CTRL_MASK));
+				menu.setMnemonic(KeyEvent.VK_C);
+				menu.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) { Main.runClass(); }
+				});
+			}
+
+		}
+		
+		
+		
+		
+		
+		
 		{
 			JMenu helpMenu = new JMenu("Help"); //$NON-NLS-1$
 			helpMenu.setMnemonic(KeyEvent.VK_F1);

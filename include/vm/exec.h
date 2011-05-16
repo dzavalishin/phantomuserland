@@ -41,6 +41,8 @@ pvm_exec_run_method(
                    );
 
 
+void create_and_run_object(const char *class_name, int method );
+
 #endif // PVM_EXEC_H
 
 
