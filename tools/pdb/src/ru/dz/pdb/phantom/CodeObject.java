@@ -4,8 +4,11 @@ import java.awt.GridBagConstraints;
 
 import javax.swing.JPanel;
 
+import ru.dz.pdb.ui.bits.HexView;
+
 public class CodeObject implements IInternalObject {
 	private byte [] data;
+	private HexView hexView;
 
 	public CodeObject(ObjectHeader oh) throws InvalidObjectOperationException {
 		if( (oh.getObjectFlags() & ObjectHeader.PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) == 0 )
@@ -16,8 +19,9 @@ public class CodeObject implements IInternalObject {
 	
 	@Override
 	public void populatePanel(JPanel p, GridBagConstraints gbc) {
-		// TODO Auto-generated method stub
+		hexView = new HexView(data);
 
+		p.add(hexView,gbc);
 	}
 
 }
