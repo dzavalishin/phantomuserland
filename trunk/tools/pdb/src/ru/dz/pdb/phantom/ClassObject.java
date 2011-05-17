@@ -2,6 +2,7 @@ package ru.dz.pdb.phantom;
 
 import java.awt.GridBagConstraints;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,6 +34,7 @@ public class ClassObject implements IInternalObject {
 	private void loadMe()
 	{
 		ByteBuffer bb = ByteBuffer.wrap(data);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
 
 		instance_object_flags = bb.getInt();
 		instance_object_da_size = bb.getInt();
@@ -53,10 +55,13 @@ public class ClassObject implements IInternalObject {
 
 		panel.add( new JLabel("SysId:     \t"+sys_table_id+""), gbc );
 		panel.add( new JLabel("InstDa:    \t"+instance_object_da_size+""), gbc );
-		panel.add( new JLabel("InstFlags: \t"+instance_object_flags+""), gbc );
+		panel.add( new JLabel("InstFlags: \t0x"+Integer.toHexString(instance_object_flags)+""), gbc );
 
 		panel.add( new RefButton(class_parent,"Parent"), gbc );				
+		panel.add( new RefButton(default_interface,"Interface"), gbc );				
 
+		panel.add( new RefButton(ip2line_maps,"IP->Line"), gbc );				
+		panel.add( new RefButton(method_names,"Method names"), gbc );				
 		
 	}
 }

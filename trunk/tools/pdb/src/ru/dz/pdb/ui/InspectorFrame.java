@@ -110,6 +110,11 @@ public class InspectorFrame extends JFrame {
 
 		panel.add( new JSeparator(SwingConstants.VERTICAL), gbc );
 
+		int refCount = parsed.getRefCount();
+		if(refCount == 0x7FFFFFFF)
+			panel.add( new JLabel("| Ref: SAT"), gbc );
+		else
+			panel.add( new JLabel("| Ref: "+refCount), gbc );
 		panel.add( new JLabel("| Flags: "+parsed.getFlagsList()+" | "), gbc );
 
 		panel.add( new JSeparator(SwingConstants.VERTICAL), gbc );
