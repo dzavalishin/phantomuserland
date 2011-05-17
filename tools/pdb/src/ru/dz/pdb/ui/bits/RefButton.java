@@ -1,11 +1,8 @@
 package ru.dz.pdb.ui.bits;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
 
 import ru.dz.pdb.Main;
@@ -24,8 +21,10 @@ public class RefButton extends JButton {
 		address = o.getDataAddr();
 		//setSize(new Dimension(40, 36));
 		loadMe(buttonText);
+		
+		
 		//setMinimumSize(new Dimension(40, 36));
-		validate();
+		//validate();
 	}
 
 	public RefButton(long address, String buttonText) {
@@ -40,7 +39,9 @@ public class RefButton extends JButton {
 			}});		
 		setToolTipText(Long.toHexString(address));
 		setText(buttonText);
-	}
+		if( address == 0 )
+			setEnabled(false);
+}
 
 	protected void openRef() {
 		Main.inspectObject(address);		

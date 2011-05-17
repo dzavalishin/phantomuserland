@@ -30,7 +30,7 @@ public class ObjectHeader {
 
 	private ByteBuffer bb;
 
-	private int objectRefCount;
+	private int refCount;
 	private byte allocFlags;
 	private byte gcFlags;
 	private int exactSize;
@@ -60,7 +60,7 @@ public class ObjectHeader {
 		if(objectMarker != PVM_OBJECT_START_MARKER)
 			System.out.println("ObjectHeader.loadMe() marker is wrong @"+Long.toHexString(phantomObjectAddress));
 
-		objectRefCount = bb.getInt();
+		refCount = bb.getInt();
 
 
 		allocFlags = bb.get();
@@ -135,8 +135,10 @@ public class ObjectHeader {
 
 
 	public boolean isInternal() {
-		// 0x02 is interface and its da is the same as for usual object
-		return ((objectFlags & 0x80) != 0) && ((objectFlags & 0x02) == 0);
+		// interface da is the same as for usual object
+		return 
+		((objectFlags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) != 0) && 
+		((objectFlags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) == 0);
 	}
 
 	/**
@@ -225,4 +227,6 @@ public class ObjectHeader {
 		}
 
 	}
+
+	public int getRefCount() { return refCount;	}
 }
