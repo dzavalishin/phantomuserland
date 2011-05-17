@@ -136,13 +136,13 @@ boot
 " > $GRUB_MENU
 
 # before running again
-#cp ../run/phantom.img .
-rm phantom.img
-touch phantom.img
-echo ": zeroing virtual disk..."
-dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img 2> /dev/null
-echo ": instantating superblock..."
-dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img 2> /dev/null
+cp ../run/phantom.img .
+#rm phantom.img
+#touch phantom.img
+#echo ": zeroing virtual disk..."
+#dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img 2> /dev/null
+#echo ": instantating superblock..."
+#dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img 2> /dev/null
 #dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 > /dev/null
 echo ": zeroing vio..."
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
@@ -175,7 +175,10 @@ FATAL! Phantom cycled"
 		}
 	done
 
-	grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log && break
+	grep -q '^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log && {
+		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log
+		break
+	}
 	ps -p $QEMU_PID >/dev/null || break
 
 	while (ps -p $QEMU_PID >/dev/null)
