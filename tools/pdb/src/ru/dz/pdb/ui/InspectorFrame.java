@@ -2,8 +2,10 @@ package ru.dz.pdb.ui;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -63,6 +65,12 @@ public class InspectorFrame extends JFrame {
 
 		gbc.gridx = 0;
 		gbc.gridy = GridBagConstraints.RELATIVE;	
+
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+
+		gbc.insets = new Insets(2, 2, 2, 2);
+		//gbc.ipadx = 4;		gbc.ipady = 4;
+
 		JPanel topPanel = new JPanel(new GridBagLayout());
 		contentPane.add(topPanel, gbc);
 		poulateTopPanel(topPanel);
@@ -73,9 +81,14 @@ public class InspectorFrame extends JFrame {
 		//Panel mainPanel = new Panel();		
 		poulateMainPanel(mainPanel);
 
+
 		JScrollPane scroll = new JScrollPane(mainPanel);
-		scroll.setPreferredSize(new Dimension(150, 200));
+		scroll.setPreferredSize(new Dimension(450, 200));
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+
+		//scroll.getHorizontalScrollBar().setValue(0);
+
 		contentPane.add(scroll, gbc); 
 
 	}
@@ -101,7 +114,7 @@ public class InspectorFrame extends JFrame {
 		else
 		{
 			try {
-				panel.add( new JLabel(" Refs: "+parsed.getDaRefsCount()), gbc );
+				panel.add( new JLabel(" Slots: "+parsed.getDaRefsCount()), gbc );
 			} catch (InvalidObjectOperationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -112,10 +125,24 @@ public class InspectorFrame extends JFrame {
 
 		int refCount = parsed.getRefCount();
 		if(refCount == 0x7FFFFFFF)
-			panel.add( new JLabel("| Ref: SAT"), gbc );
+			panel.add( new JLabel("| RefCnt: SAT"), gbc );
 		else
-			panel.add( new JLabel("| Ref: "+refCount), gbc );
-		panel.add( new JLabel("| Flags: "+parsed.getFlagsList()+" | "), gbc );
+			panel.add( new JLabel("| RefCnt: "+refCount), gbc );
+
+		//panel.add( new JLabel(" | Flags: "+parsed.getFlagsList()+" | "), gbc );
+
+		if(parsed.getObjectFlags() != 0) {
+			//panel.add( new JLabel(" | Flags: "), gbc );
+			panel.add( new JLabel(" | "), gbc );
+			
+			JLabel fl = new JLabel(parsed.getFlagsList());
+			fl.setFont(new Font(fl.getFont().getFontName(),Font.BOLD,fl.getFont().getSize()));
+			fl.setToolTipText("flags");
+			panel.add( fl, gbc );
+			
+		}
+
+		panel.add( new JLabel(" | "), gbc );
 
 		panel.add( new JSeparator(SwingConstants.VERTICAL), gbc );
 
@@ -135,6 +162,10 @@ public class InspectorFrame extends JFrame {
 
 		gbc.gridx = 0;
 		gbc.gridy = GridBagConstraints.RELATIVE;	
+
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+
+		gbc.insets = new Insets(2, 2, 0, 2);
 
 		if(parsed == null)
 		{
