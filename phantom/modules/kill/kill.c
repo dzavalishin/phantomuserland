@@ -13,7 +13,7 @@ main(int argc, char **argv)
     }
 
     for(i=1; i<argc; i++)
-        kill((int)atol(argv[i]));
+    kill((int)atol(argv[i]));
 
     return 0;
 }

@@ -557,6 +557,9 @@ finish:
 
 int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, const char **uep, int flags )
 {
+    if(flags)
+        SHOW_ERROR( 0, "flags not impl: %x", flags );
+
     int pid = uu_create_process(u->pid);
 
     if( pid < 0 )

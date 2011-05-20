@@ -22,9 +22,11 @@
 #include <string.h>
 #include <assert.h>
 
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
 
 #include "gcc_replacements.h"
+
+#include "winhal.h"
 
 #define VSCREEN_WIDTH 1024
 #define VSCREEN_HEIGHT 768

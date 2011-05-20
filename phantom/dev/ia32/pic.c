@@ -13,6 +13,7 @@
 
 #include <phantom_types.h>
 #include <phantom_assert.h>
+#include <phantom_libc.h>
 
 //#include <i386/ipl.h>
 #include <i386/isa/pic_regs.h>

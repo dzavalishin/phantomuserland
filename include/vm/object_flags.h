@@ -27,6 +27,10 @@
 	 unsigned int POSF_GET_##name(unsigned int v) { return v & val; }
 */
 
+// object must not be modofied at all - NOT IMPLEMENTED
+POSF(IS_IMMUTABLE, 0x2000)
+
+
 // flag object as having finalizer
 POSF(IS_FINALIZER, 0x1000)
 
@@ -78,6 +82,8 @@ POSF(IS_CODE,0x01)
 
 // These are set on creation by class
 
+// object must not be modified at all - NOT IMPLEMENTED
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE 0x2000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER 0x1000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE 0x800
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD 0x400
