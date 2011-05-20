@@ -20,6 +20,7 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ru.dz.pdb.debugger.ClassMap;
+import ru.dz.pdb.phantom.ClassObject;
 import ru.dz.pdb.phantom.ObjectHeader;
 import ru.dz.pdb.phantom.ObjectRef;
 import ru.dz.pdb.ui.InspectorFrame;
@@ -70,6 +71,9 @@ public class Main {
 		}
 
 		log.severe("Starting");
+		
+		cmap = new ClassMap();
+		
 		hc = new HostConnector();
 
 		mainFrame = new MainFrame();
@@ -122,12 +126,12 @@ public class Main {
 
 
 
-	public static void getPhantomClass(ObjectRef classRef) {
-		cmap.get(classRef);
+	public static ClassObject getPhantomClass(ObjectRef classRef) {
+		return cmap.get(classRef);
 	}
 
-	public static void getPhantomClass(long address) {
-		cmap.get(address);
+	public static ClassObject getPhantomClass(long address) {
+		return cmap.get(address);
 	}
 
 	public static String getPhantomString(ObjectRef pString) {

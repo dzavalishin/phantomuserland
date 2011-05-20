@@ -260,10 +260,10 @@ public class HostConnector {
 	private int intAt(byte[] ah, int pos) {
 		int i;
 
-		i =  ah[pos+0];
-		i |= ah[pos+1] << 8;
-		i |= ah[pos+2] << 16;
-		i |= ah[pos+3] << 24;
+		i =  (((int)ah[pos+0]) & 0xFF);
+		i |= (((int)ah[pos+1]) & 0xFF) << 8;
+		i |= (((int)ah[pos+2]) & 0xFF) << 16;
+		i |= (((int)ah[pos+3]) & 0xFF) << 24;
 
 		return i;
 	}
