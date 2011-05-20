@@ -64,4 +64,6 @@ public class ClassObject implements IInternalObject {
 		panel.add( new RefButton(method_names,"Method names"), gbc );				
 		
 	}
+
+	public int getSysTableId() { return sys_table_id; }
 }

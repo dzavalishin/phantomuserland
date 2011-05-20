@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Vector;
 
+import ru.dz.pdb.Main;
+
 public class ObjectHeader {
 
 	public static final int  PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE       = 0x2000;
@@ -234,13 +236,36 @@ public class ObjectHeader {
 			}
 			else
 			{
-				System.out.println("unknown internal");
-				throw new InvalidObjectOperationException("No avatar for unknown internal, flags "+Integer.toHexString(getObjectFlags()));			
+				//System.out.println("unknown internal");
+
+			
+				ClassObject classObject = Main.getPhantomClass(getClassRef());
+				
+				if(classObject == null)			
+					throw new InvalidObjectOperationException("No avatar for unknown internal, flags "+Integer.toHexString(getObjectFlags()));			
+				
+				int sysTableId = classObject.getSysTableId();
+				
+				if(sysTableId == 0)
+					throw new InvalidObjectOperationException("Void object?");
+				
+				switch(sysTableId)
+				{
+				case 6:
+					System.out.println("array");
+					return new ArrayObject(this);
+					
+				case 8: // Thread
+					return new ThreadObject(this);
+					
+				default:
+					throw new InvalidObjectOperationException("Unknown sys id "+sysTableId);
+				}
 			}
 		}
 		else
 		{
-			throw new InvalidObjectOperationException("No avatar"); 
+			throw new InvalidObjectOperationException("No avatar");
 		}
 
 	}
