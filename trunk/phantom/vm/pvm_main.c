@@ -25,6 +25,7 @@
 
 #include <phantom_libc.h>
 #include <kernel/boot.h>
+#include <kernel/debug.h>
 
 #include "vm/root.h"
 //#include "vm/bulk.h"

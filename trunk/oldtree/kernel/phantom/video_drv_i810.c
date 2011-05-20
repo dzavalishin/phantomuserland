@@ -82,6 +82,8 @@ static int n_pages = 1024;
 static int seq_number = 0;
 phantom_device_t * driver_intel_810_pci_probe( pci_cfg_t *pci, int stage )
 {
+    (void) stage;
+
     if( seq_number )
     {
         SHOW_ERROR0( 0, "Just one");

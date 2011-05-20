@@ -469,6 +469,7 @@ static int ne_probe(phantom_device_t * dev)
         c = inb(eth_asic_base + NE_RESET);
         outb( eth_asic_base + NE_RESET, c );
         (void) inb(0x84);
+
         outb( eth_nic_base + D8390_P0_COMMAND, D8390_COMMAND_STP | D8390_COMMAND_RD2 );
         outb( eth_nic_base + D8390_P0_RCR, D8390_RCR_MON );
         outb( eth_nic_base + D8390_P0_DCR, D8390_DCR_FT1 | D8390_DCR_LS );
@@ -476,8 +477,10 @@ static int ne_probe(phantom_device_t * dev)
         outb( eth_nic_base + D8390_P0_PSTOP, MEM_16384 );
         eth_pio_write( dev, (unsigned char *) test, 8192, sizeof(test));
         eth_pio_read( dev, 8192, testbuf, sizeof(test));
+
         if (!memcmp(test, testbuf, sizeof(test)))
             goto out;
+
         pvt->eth_flags |= FLAG_16BIT;
         pvt->eth_memsize = MEM_32768;
         pvt->eth_tx_start = 64;
@@ -487,10 +490,12 @@ static int ne_probe(phantom_device_t * dev)
         outb( eth_nic_base + D8390_P0_PSTOP, MEM_32768);
         eth_pio_write( dev, (unsigned char *) test, 16384, sizeof(test));
         eth_pio_read( dev, 16384, testbuf, sizeof(test));
+
         if (!memcmp(testbuf, test, sizeof(test)))
             goto out;
 
-#warning we get here regardless of if above
+        SHOW_ERROR0( 0, "Last memcmp?");
+//#warning we get here regardless of if above
 
     out:
         if (eth_nic_base == 0)

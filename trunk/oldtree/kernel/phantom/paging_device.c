@@ -1024,7 +1024,7 @@ void connect_ide_io(void)
         return;
     }
 
-    p->specific = -1; // must be not 0 for real disk
+    p->specific = (void *)-1; // must be not 0 for real disk
 
     errno_t err = phantom_register_disk_drive(p);
     if(err)

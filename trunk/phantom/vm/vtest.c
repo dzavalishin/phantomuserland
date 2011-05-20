@@ -1,5 +1,7 @@
 #include <phantom_libc.h>
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
+
+#include "winhal.h"
 
 #define WXS 240
 #define WYS 160

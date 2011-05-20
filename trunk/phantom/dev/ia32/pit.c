@@ -16,6 +16,9 @@
 #include <time.h>
 
 #include <i386/isa/pit.h>
+#include <i386/isa/pic.h>
+
+#include "ia32drv.h"
 
 
 int	hz = HZ;		/* number of ticks per second */

@@ -17,6 +17,7 @@
 #define debug_level_info 10
 
 
+#include "ia32drv.h"
 
 #include <x86/isa.h>
 #include <i386/pio.h>
@@ -118,7 +119,7 @@ static void rtc_interrupt(void *a)
     phantom_scheduler_time_interrupt();
 #endif
 
-    int usec_per_tick = 1000000/128;
+    //int usec_per_tick = 1000000/128;
     //hal_time_tick(usec_per_tick);
     //hal_time_tick(10000); // lie a bit?
 

@@ -18,9 +18,10 @@
 #include <pc/bios.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
+#include <kernel/drivers.h>
 #include <errno.h>
 
-#include "../driver_map.h"
+//#include "../driver_map.h"
 
 #define BIOS_START	0xe0000
 #define BIOS_SIZE	0x20000
