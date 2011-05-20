@@ -1,9 +1,12 @@
 package ru.dz.pdb.ui.bits;
 
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -11,27 +14,65 @@ import javax.swing.JFrame;
 public class HexView extends JComponent 
 {
 	private static final int N_CHARS_PER_LINE = 16;
+	private static final int SPACE = 4;
 	private final byte[] data;
 
+	private Font myFont; 
+	private int fontSize = 12;
+	private Dimension d = new Dimension( N_CHARS_PER_LINE*32*2, 18 ); 
+	
 	public HexView(byte[] data) {
 		this.data = data;
-		setSize(getLineWidth(),getNLines()*getLineHeight());
+
+		//myFont = new Font(Font.MONOSPACED, Font.BOLD, fontSize);	
+		myFont = new Font(Font.MONOSPACED, Font.PLAIN, fontSize);
+		
+		//setSize(getLineWidth(),getNLines()*getLineHeight());
+		Dimension vd = new Dimension( getLineWidth() + SPACE*2, getNLines()*getLineHeight() + SPACE*2 );
+		setSize(vd);
+		setMinimumSize(vd);
+		setPreferredSize(vd);
 		//setVisible(true);
-		repaint();
+		//repaint();
 	}
 
+	
+	private boolean sizeSet = false; 
+	
+	private void doSetSize(Graphics2D g2d) 
+	{		
+		String txt = byteArrayToHexString(data, 0*N_CHARS_PER_LINE, N_CHARS_PER_LINE);
+		
+		//Graphics2D g2d = (Graphics2D) getComponentGraphics(null);
+		FontRenderContext frc = g2d.getFontRenderContext();
+		Rectangle2D stringBounds = myFont.getStringBounds(txt, frc);
+		
+		d.height = (int) stringBounds.getHeight();
+		d.width  = (int) stringBounds.getWidth();
+		
+		sizeSet = true;
+	}
+	
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
 		super.paintComponent(g);
 		
-		g.setColor(Color.lightGray);
-		g.fillRect(0, 0, getWidth(), getHeight());
+		if(!sizeSet)
+			doSetSize(g2d);
+		
+		g2d.setFont(myFont);
+		
+		g2d.setColor(Color.white);
+		g2d.fillRect(0, 0, getWidth(), getHeight());
+
+		g2d.setColor(Color.black);
+		//g2d.drawString("safgjfg", 4, 10);
 		
 		int lineHeight = getLineHeight();
-		int lineWidth = getLineWidth();
+		//int lineWidth = getLineWidth();
 		
-		g.setColor(Color.black);
 		int n_lines = getNLines();
 		
 		for(int i = 0; i < n_lines; i++)
@@ -42,25 +83,22 @@ public class HexView extends JComponent
 
 
 
+	private void drawLine(int i, Graphics2D g2d, int height) {
+		String line = byteArrayToHexString(data, i*N_CHARS_PER_LINE, N_CHARS_PER_LINE);
+		//System.out.println("HexView.drawLine(\""+line+"\")");
+		g2d.drawString(line, SPACE, (i+1)*height + SPACE );
+	}
 
+	
+	
 	private int getNLines() {
 		return 1+((data.length-1)/N_CHARS_PER_LINE);
 	}
 
-	private void drawLine(int i, Graphics2D g2d, int height) {
-		String line = byteArrayToHexString(data, i*N_CHARS_PER_LINE, N_CHARS_PER_LINE);
-		System.out.println("HexView.drawLine(\""+line+"\")");
-		g2d.drawString(line, 4, i*height);
-	}
 
-	private int getLineWidth() {
-		return N_CHARS_PER_LINE*32;
-	}
-
-
-	private int getLineHeight() {
-		return 20;		
-	}
+	private int getLineWidth() { return d.width; }
+	
+	public int getLineHeight() { return d.height; }
 
 
 
@@ -80,8 +118,9 @@ public class HexView extends JComponent
 
 	static String byteArrayToHexString( byte in[], int start, int len ) 
 	{
-		byte ch;
-		int i; 
+		//byte ch;
+		int i;
+		int fill = len;
 
 		if (in == null || in.length <= 0)
 			return null;
@@ -89,14 +128,17 @@ public class HexView extends JComponent
 		if(start+len > in.length)
 			len = in.length-start;
 		
-		StringBuilder out = new StringBuilder(in.length * 4 + 2);
+		StringBuilder out = new StringBuilder(in.length * 4 + 10);
 
-		for(i = start; i < start+len; i++) 
-		{
-			out.append(String.format("%02X", in[i]));
-		}
+		out.append("| ");
+		
+		for(i = start; i < start+len; i++) 	
+			out.append(String.format("%02X ", in[i]));		
 
-		out.append(' ');
+		for(; i < start+fill; i++) 
+			out.append("  ");
+
+		out.append(" | ");
 
 		for(i = start; i < start+len; i++) 
 		{
@@ -105,14 +147,23 @@ public class HexView extends JComponent
 			out.append(c);
 		}
 
+		for(; i < start+fill; i++) 
+			out.append(' ');
+		
+		out.append(" |");
+		
 		return out.toString();
 	}    
 
 	public static void main(String[] args) {
 		JFrame f = new JFrame();
 		
+		//f.setLayout(new GridBagLayout());
+		//f.setLayout(new BoxLayout(null,BoxLayout.X_AXIS));
+		//f.setLayout(new 
+		
 		byte[] t = {0,1,2,0x4E};
-		f.add(new HexView(t));
+		f.getContentPane().add(new HexView(t));
 		f.pack();
 		f.setVisible(true);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
