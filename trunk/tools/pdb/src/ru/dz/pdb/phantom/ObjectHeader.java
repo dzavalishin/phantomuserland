@@ -252,11 +252,23 @@ public class ObjectHeader {
 				switch(sysTableId)
 				{
 				case 6:
-					System.out.println("array");
+					//System.out.println("array");
 					return new ArrayObject(this);
 					
-				case 8: // Thread
+				case 8: 
 					return new ThreadObject(this);
+					
+				case 9: 
+					return new CallFrameObject(this);
+
+				case 10: 
+					return new IStackObject(this);
+				
+				case 11: 
+					return new OStackObject(this);
+					
+				case 12: 
+					return new EStackObject(this);
 					
 				default:
 					throw new InvalidObjectOperationException("Unknown sys id "+sysTableId);
