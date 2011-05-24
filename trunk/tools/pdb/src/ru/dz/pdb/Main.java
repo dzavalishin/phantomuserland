@@ -302,8 +302,13 @@ public class Main {
 		return returnVal == JFileChooser.APPROVE_OPTION;
 	}
 
+	public static Project getProject()
+	{
+		return project;
+	}
+	
 	// --------------------------------------------------------------------
-	// Project
+	// Run
 	// --------------------------------------------------------------------
 	
 	public static void runLastClass() {

@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import ru.dz.pdb.Main;
+
 public class FileProgramSource extends AbstractProgramSource 
 {
 	
@@ -16,7 +18,8 @@ public class FileProgramSource extends AbstractProgramSource
 		if( className.startsWith(".") )
 			className = className.substring(1);
 		
-		File fn = new File(className);
+		File fn = Main.getProject().findSourceFile(className);
+		//File fn = new File(className);
 		
 		FileInputStream fstream = new FileInputStream(fn);
 	    DataInputStream in = new DataInputStream(fstream);
