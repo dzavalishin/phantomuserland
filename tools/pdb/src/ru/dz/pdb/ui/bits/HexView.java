@@ -8,10 +8,9 @@ import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-public class HexView extends JComponent 
+public class HexView extends LinesView 
 {
 	private static final int N_CHARS_PER_LINE = 16;
 	private static final int SPACE = 4;
