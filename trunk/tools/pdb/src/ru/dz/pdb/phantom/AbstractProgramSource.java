@@ -11,4 +11,16 @@ public abstract class AbstractProgramSource implements IProgramSource
 		return lines.get(lineNo);
 	}
 
+	@Override
+	public void dump() 
+	{
+		int i = 0;
+		for( String l : lines )
+		{
+			System.out.print(String.format("%4d: ", i++));
+			System.out.println(l);
+		}
+		
+	}
+	
 }

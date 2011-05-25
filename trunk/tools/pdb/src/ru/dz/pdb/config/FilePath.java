@@ -28,9 +28,11 @@ public class FilePath {
 
 	public File find(String shortName)
 	{
+		
 		for( File prefix : path )
 		{
 			File full = new File( prefix, shortName );
+			System.out.println("FilePath.find() look in "+full);
 			if(full.canRead())
 				return full;
 		}
