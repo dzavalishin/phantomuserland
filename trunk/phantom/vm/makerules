@@ -31,6 +31,6 @@ OSLIB = ../lib/libphantom_c.a ../lib/libphantom.a
 endif
 
 
-pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a $(EXCLUDED_OBJFILES)
-	gcc -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a
+pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(EXCLUDED_OBJFILES)
+	gcc -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a 
 
