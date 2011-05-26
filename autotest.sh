@@ -62,6 +62,7 @@ echo "$SVN_OUT"
 	#make -C phantom/newos	>> make.log 2>&1 || die "Make failure in newos"
 	#make -C phantom/threads	>> make.log 2>&1 || die "Make failure in threads"
 	make all >> make.log 2>&1 || die "Make failure"
+	grep -B1 'error:\|] Error' make.log && die "Make failure"
 	[ "$WARN" ] && grep : make.log
 
 	tail make.log
