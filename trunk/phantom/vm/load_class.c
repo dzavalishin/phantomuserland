@@ -206,9 +206,14 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 // TODO BREAK ALERT make sure base class is not internal
 
                 iface = pvm_create_interface_object( n_method_slots, base_class );
-                ip2line_maps = pvm_object_create_dynamic( pvm_get_array_class(), n_method_slots );
-                method_names = pvm_object_create_dynamic( pvm_get_array_class(), n_method_slots );
-                field_names = pvm_object_create_dynamic( pvm_get_array_class(), n_object_slots );
+
+                ip2line_maps = pvm_create_object( pvm_get_array_class() );
+                method_names = pvm_create_object( pvm_get_array_class() );
+                field_names = pvm_create_object( pvm_get_array_class() );
+
+                //ip2line_maps = pvm_object_create_dynamic( pvm_get_array_class(), n_method_slots );
+                //method_names = pvm_object_create_dynamic( pvm_get_array_class(), n_method_slots );
+                //field_names = pvm_object_create_dynamic( pvm_get_array_class(), n_object_slots );
 
             }
             break;
@@ -231,7 +236,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 h.code = ptr;
                 h.IP_max = record_data_size;
 
-                if(debug_print) printf("line num map\n" );
+                if(debug_print) printf("line num map\n");
                 int ordinal = pvm_code_get_int32(&h);
                 int mapsize = pvm_code_get_int32(&h);
 

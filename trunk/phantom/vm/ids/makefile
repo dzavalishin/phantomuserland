@@ -12,6 +12,9 @@ clean:
 
 opcode_ids.java: opcode_ids.definitions  inc_txt2java/*
 	$(CPP) -Iinc_txt2java opcode_ids.definitions $@
+	cp $@ $(PHANTOM_HOME)/tools/pdb/src/phantom/code/opcode_ids.java
+	cp $@ $(PHANTOM_HOME)/plc/src/phantom/code/opcode_ids.java
+
 #	rm opcode_ids.java
 #	mv opcode_ids.i opcode_ids.java
 

@@ -629,6 +629,46 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
             //}
             break;
 
+
+            /*
+             * Query
+             */
+        case 'q':
+            ptr = &input_buffer[2];
+            {
+                static int startTid = 0;
+                if( 0 == strcmp( ptr, "fThreadInfo" ))
+                {
+                    startTid = 0;
+                    goto sendThreadList;
+                }
+                if( 0 == strcmp( ptr, "sThreadInfo" ))
+                {
+                sendThreadList:
+                    ;
+                    ptr = output_buffer;
+#if 0
+                    int maxcnt = BUFMAX/(sizeof(int)*3);
+                    while(maxcnt-- > 0)
+                    {
+                        // put hex list of tids sep by comma
+                    }
+#else
+                    if(startTid == 0)
+                    {
+                        // just one thread in pvm_test yet
+                        snprintf( output_buffer, sizeof(output_buffer), "%lx", (unsigned long) 1 );
+                        startTid++;
+                    }
+                    else
+                        snprintf( output_buffer, sizeof(output_buffer), "l" );
+#endif
+                    break;
+                }
+            }
+            break;
+
+
             /*
              * Phantom specific
              */
