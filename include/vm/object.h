@@ -27,8 +27,8 @@
 
 struct object_PVM_ALLOC_Header
 {
-    unsigned int		object_start_marker;
-    volatile int32_t    refCount; // for fast dealloc of locally-owned objects. If grows to INT_MAX it will be fixed at that value and ignored further. Such objects will be GC'ed in usual way
+    unsigned int                object_start_marker;
+    volatile int32_t            refCount; // for fast dealloc of locally-owned objects. If grows to INT_MAX it will be fixed at that value and ignored further. Such objects will be GC'ed in usual way
     unsigned char		alloc_flags;
     unsigned char		gc_flags;
     unsigned int		exact_size; // full object size including this header
