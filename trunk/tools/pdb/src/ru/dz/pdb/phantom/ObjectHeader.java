@@ -217,7 +217,8 @@ public class ObjectHeader {
 		{
 			if((objectFlags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING) != 0)
 			{
-				throw new InvalidObjectOperationException("No avatar for string internal");			
+				return new StringObject(this);			
+				//throw new InvalidObjectOperationException("No avatar for string internal");			
 			}
 			else if((objectFlags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT) != 0)
 			{
