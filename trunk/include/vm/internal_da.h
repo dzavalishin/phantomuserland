@@ -107,11 +107,10 @@ struct data_area_4_string
 // NB! See JIT assembly hardcode for object structure offsets
 struct data_area_4_class
 {
-    unsigned int			object_flags;			// object of this class will have such flags
-    unsigned int			object_data_area_size;	// object of this class will have data area of this size
+    unsigned int                object_flags;			// object of this class will have such flags
+    unsigned int                object_data_area_size;	// object of this class will have data area of this size
     struct pvm_object		object_default_interface; // default one
-    //syscall_func_t  *class_sys_table;
-    //unsigned int	class_sys_table_size;
+
     unsigned int    		sys_table_id; // See above - index into the kernel's syscall tables table
 
     struct pvm_object		class_name;
@@ -308,8 +307,8 @@ struct data_area_4_mutex
 
 struct data_area_4_binary
 {
-    int                 placeholder; // GCC refuses to have only unsized array in a struct
-    unsigned char 	data[];
+    int                 data_size; // GCC refuses to have only unsized array in a struct
+    unsigned char       data[];
 };
 
 
