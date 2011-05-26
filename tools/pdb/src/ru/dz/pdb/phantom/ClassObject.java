@@ -22,6 +22,7 @@ public class ClassObject implements IInternalObject {
 	private ObjectRef class_parent;
 	private ObjectRef ip2line_maps;
 	private ObjectRef method_names;
+	private ObjectRef field_names;
 
 	public ClassObject(ObjectHeader oh) throws InvalidObjectOperationException {
 		if( (oh.getObjectFlags() & ObjectHeader.PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS) == 0 )
@@ -45,12 +46,14 @@ public class ClassObject implements IInternalObject {
 
 		ip2line_maps = new ObjectRef(bb);
 		method_names = new ObjectRef(bb);
+		field_names = new ObjectRef(bb);
 	}
 	
 	public String getClassName() { return class_name.getObject().getAsString(); }
 
 	@Override
-	public void populatePanel(JPanel panel, GridBagConstraints gbc) {
+	public void populatePanel(JPanel panel, GridBagConstraints gbc) 
+	{
 		panel.add( new JLabel("Name:      \t'"+Main.getPhantomString(class_name)+"'"), gbc );
 
 		panel.add( new JLabel("SysId:     \t"+sys_table_id+""), gbc );
@@ -62,7 +65,7 @@ public class ClassObject implements IInternalObject {
 
 		panel.add( new RefButton(ip2line_maps,"IP->Line"), gbc );				
 		panel.add( new RefButton(method_names,"Method names"), gbc );				
-		
+		panel.add( new RefButton(field_names,"Field names"), gbc );						
 	}
 
 	public int getSysTableId() { return sys_table_id; }
