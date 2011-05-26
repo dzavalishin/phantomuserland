@@ -1,9 +1,8 @@
+
+
 package phantom.code;
 
 public class opcode_ids {
-
-
-
 protected static final byte opcode_nop = (byte)0x00;
 protected static final byte opcode_debug = (byte)0x01;
 protected static final byte opcode_skipz = (byte)0x02; // not impl - and will not be...
@@ -20,7 +19,6 @@ protected static final byte opcode_short_call_3 = (byte)0x0C;
 protected static final byte opcode_call_8bit = (byte)0x0D;
 protected static final byte opcode_call_32bit = (byte)0x0E;
 protected static final byte opcode_sys_8bit = (byte)0x0F;
-
 
 protected static final byte opcode_is_dup = (byte)0x10;
 protected static final byte opcode_is_drop = (byte)0x11;
@@ -42,7 +40,7 @@ protected static final byte opcode_os_pull32 = (byte)0x1C; // copy opbject n ste
 //id(opcode_os_assign32,0x1D) // copy stack top opbject n steps down the ostack. pull 0 is nop;
 
 
-// TODO: this is for local vars
+// this is for local vars
 protected static final byte opcode_os_get32 = (byte)0x1E; // get value from stack absolute-addressed slot, push on top
 protected static final byte opcode_os_set32 = (byte)0x1F; // pop stack top, set value in stack absolute-addressed slot
 
@@ -57,9 +55,12 @@ protected static final byte opcode_iconst_1 = (byte)0x21;
 protected static final byte opcode_iconst_8bit = (byte)0x22;
 protected static final byte opcode_iconst_32bit = (byte)0x23;
 protected static final byte opcode_sconst_bin = (byte)0x24;
+// for binconst 0x25
 
-protected static final byte opcode_is_get32 = (byte)0x26;	// get value from stack absolute-addressed slot, push on top
-protected static final byte opcode_is_set32 = (byte)0x27;	// pop stack top, set value in stack absolute-addressed slot
+// this is for integer local vars
+protected static final byte opcode_is_get32 = (byte)0x26; // get value from stack absolute-addressed slot, push on top
+protected static final byte opcode_is_set32 = (byte)0x27; // pop stack top, set value in stack absolute-addressed slot
+
 
 
 protected static final byte opcode_summon_thread = (byte)0x30;
@@ -176,7 +177,4 @@ protected static final byte opcode_call_1C = (byte)0xBC;
 protected static final byte opcode_call_1D = (byte)0xBD;
 protected static final byte opcode_call_1E = (byte)0xBE;
 protected static final byte opcode_call_1F = (byte)0xBF;
-
-
-
 }

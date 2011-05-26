@@ -549,7 +549,7 @@ struct pvm_object     pvm_create_binary_object(int size, void *init)
 	struct pvm_object ret = pvm_object_create_dynamic( pvm_get_binary_class(), size + sizeof(struct data_area_4_binary) );
 
 	struct data_area_4_binary *da = (struct data_area_4_binary *)ret.data->da;
-	//da->code_size = size;
+	da->data_size = size;
 	if( init != NULL ) memcpy( da->data, init, size );
 	return ret;
 }
