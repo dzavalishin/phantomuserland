@@ -1,4 +1,4 @@
 package ru.dz.plc;
 class CompileDate {
-static String getDate() { return " Wed Oct 27 13:41:16 2010 "; }
+static String getDate() { return " Thu May 26 00:03:40 2011 "; }
 };
