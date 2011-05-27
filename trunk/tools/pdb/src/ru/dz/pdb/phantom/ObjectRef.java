@@ -51,4 +51,9 @@ public class ObjectRef {
 	public long getInterfaceAddr() {		return 0xFFFFFFFF & (long)interfaceAddr;	}
 
 	public ObjectHeader getObject() { return Main.getPhantomObject(dataAddr); }
+	
+	@Override
+	public String toString() {
+		return Long.toHexString(dataAddr);
+	}
 }

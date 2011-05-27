@@ -54,10 +54,13 @@ public class MainFrame extends JFrame
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 		gbc.insets = new Insets(2, 2, 2, 2);
 		
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		
 		JPanel topPanel = new JPanel(new GridBagLayout());
 		contentPane.add(topPanel, gbc);
 		poulateTopPanel(topPanel);
 
+		gbc.fill = GridBagConstraints.BOTH;
 		//gbc.gridx = 0;
 		//gbc.gridy = 1;	
 		JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -74,6 +77,9 @@ public class MainFrame extends JFrame
 		gbc.gridy = 0;	
 
 		gbc.anchor = GridBagConstraints.NORTHWEST;
+		
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+
 		//panel.add( new JLabel("--"), gbc );
 		//panel.add( new ThreadListPanel(), gbc );
 

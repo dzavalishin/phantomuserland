@@ -174,6 +174,11 @@ public class Main {
 		return ret;
 	}
 
+	public static String getThreadExtraInfo(int tid) throws CmdException {
+		return hc.cmdThreadExtraInfo(tid);
+	}
+
+	
 	// --------------------------------------------------------------------
 	// Stop
 	// --------------------------------------------------------------------

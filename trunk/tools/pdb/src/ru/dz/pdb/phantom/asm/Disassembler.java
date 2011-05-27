@@ -50,9 +50,9 @@ public class Disassembler extends opcode_ids {
 		
 		case opcode_skipz: 				return simple("skipz?");
 		case opcode_skipnz:				return simple("skipnz?");
-		case opcode_djnz:				return intarg("djnz", getInt());
-		case opcode_jz:					return intarg("jz", getInt());
-		case opcode_jmp:				return intarg("jmp", getInt());
+		case opcode_djnz:				{ int ip = getIp(); return intarg("djnz", ip+getInt()); }
+		case opcode_jz:					{ int ip = getIp(); return intarg("jz", ip+getInt()); }
+		case opcode_jmp:				{ int ip = getIp(); return intarg("jmp", ip+getInt()); }
 		case opcode_switch:				{ getInt(); getInt(); getInt(); return simple("switch"); }
 		case opcode_ret:				return simple("ret");
 		case opcode_short_call_0:		return simple("short_call_0");
@@ -226,6 +226,9 @@ public class Disassembler extends opcode_ids {
 		return new PhantomInstruction(name);
 	}
 
+	/*private PhantomInstruction jump(String name, int arg) {
+		return new PhantomInstruction(name, arg);
+	}*/
 	
 	
 	private byte getByte() {
@@ -257,14 +260,21 @@ public class Disassembler extends opcode_ids {
 		return ret;
 	}
 
+	private int getIp() {
+		return ip;
+	}
 
 	
 	public void dump()
 	{
 		jumpTo(0);
 		while(hasNext())
+		{
+			System.out.print( String.format("%04X: ", getIp() ));
 			System.out.println(next().toString());
+		}
 	}
+
 
 	public static void main(String[] args) {
 		byte [] data = 
