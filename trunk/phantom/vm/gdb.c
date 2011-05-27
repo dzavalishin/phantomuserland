@@ -455,12 +455,43 @@ void gdb_stub_get_non_pt_regs(gdb_pt_regs *regs)
     */
 }
 
+
+
 void gdb_stub_set_non_pt_regs(gdb_pt_regs *regs)
 {
 #warning implement
     //restore_fp_regs1(&regs->fp_regs);
 }
 #endif
+
+
+static void repl( char *name, char from, char to )
+{
+    for(;*name;name++)
+        if( *name == from )
+            *name = to;
+}
+
+
+
+static void report_tid_extra_info(char *sbuf, int bufmax, int tid)
+{
+    int t_run = 0;
+
+    char name[BUFMAX];
+
+    strlcpy( name, "NameWith,Comma", BUFMAX );
+    repl( name, ',', '?' );
+
+    snprintf(
+             sbuf, bufmax, "status=%s,name=%s,object=%x,",
+             (t_run ? "run" : "stop"),
+             name,
+             0
+            );
+}
+
+
 
 void gdb_stub_send_signal(int sigval)
 {
@@ -632,9 +663,11 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
 
             /*
              * Query
+             *
+             * http://sourceware.org/gdb/onlinedocs/gdb/General-Query-Packets.html
              */
         case 'q':
-            ptr = &input_buffer[2];
+            ptr = &input_buffer[1];
             {
                 static int startTid = 0;
                 if( 0 == strcmp( ptr, "fThreadInfo" ))
@@ -657,7 +690,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                     if(startTid == 0)
                     {
                         // just one thread in pvm_test yet
-                        snprintf( output_buffer, sizeof(output_buffer), "%lx", (unsigned long) 1 );
+                        snprintf( output_buffer, sizeof(output_buffer), "m %lx", (unsigned long) 1 );
                         startTid++;
                     }
                     else
@@ -665,6 +698,19 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
 #endif
                     break;
                 }
+
+                int tid;
+                if( 1 == sscanf( ptr, "ThreadExtraInfo,%d", &tid ) )
+                {
+                    char sbuf[BUFMAX];
+                    report_tid_extra_info(sbuf, BUFMAX, tid);
+                    mem2hex(sbuf, output_buffer, strlen(sbuf), 0);
+                    break;
+                }
+
+                //strcpy(output_buffer,"E00");
+                break;
+
             }
             break;
 
