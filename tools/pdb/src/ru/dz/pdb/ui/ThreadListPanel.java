@@ -66,6 +66,12 @@ public class ThreadListPanel extends JTable {
 		getColumnModel().getColumn(4).setResizable(true);
 	}
 
+	public void reload() {
+		ThreadListTableModel m = (ThreadListTableModel)getModel();
+		m.reload();
+		m.fireTableDataChanged();
+	}
+
 
 
 }
@@ -79,6 +85,11 @@ class ThreadListTableModel extends AbstractTableModel
 	private Map<Integer,ThreadInfo> threadInfoList = new TreeMap<Integer,ThreadInfo>();
 
 	public ThreadListTableModel() {
+		reload();
+	}
+	
+	void reload()
+	{
 		try {
 			threadList = Main.getThreadList();
 		} catch (CmdException e) {

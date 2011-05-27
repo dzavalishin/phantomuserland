@@ -50,7 +50,15 @@ public class ClassObject implements IInternalObject {
 	}
 	
 	public String getClassName() { return class_name.getObject().getAsString(); }
+	/*public String getParentName() {
+		if(class_parent == null)
+			return "-";
+		ObjectHeader cobject = class_parent.getObject();
+		return  class_name.getObject().getAsString(); 
+		}*/
 
+	public int getSysId() { return sys_table_id; }
+	
 	@Override
 	public void populatePanel(JPanel panel, GridBagConstraints gbc) 
 	{

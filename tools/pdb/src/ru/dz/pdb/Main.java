@@ -384,5 +384,17 @@ public class Main {
 		return true;
 	}
 
+	static String saddr = "0"; 
+	public static void inspect() {
+		String s = JOptionPane.showInputDialog("Address of object to inspect", saddr);
+		if( (s == null) || (s.length() == 0))
+			return;
+		
+		saddr = s;
+		inspectObject(Integer.decode(saddr));
+	}
+
+	public static ClassMap getClassMap() { return cmap; }
+
 
 }
