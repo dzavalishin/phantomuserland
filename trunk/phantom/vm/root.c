@@ -120,7 +120,7 @@ void pvm_root_init(void)
 
 
     //cycle through restart objects here and call restart func
-//#if COMPILE_EXPERIMENTAL
+#if COMPILE_EXPERIMENTAL
 #if COMPILE_WEAKREF
     int items = get_array_size(pvm_root.restart_list.data);
 
@@ -173,6 +173,7 @@ void pvm_root_init(void)
         printf("Done processing restart list.\n");
     }
 
+#endif
 #endif
 
 
