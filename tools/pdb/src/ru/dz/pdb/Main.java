@@ -28,6 +28,8 @@ import ru.dz.pdb.phantom.ObjectHeader;
 import ru.dz.pdb.phantom.ObjectRef;
 import ru.dz.pdb.ui.InspectorFrame;
 import ru.dz.pdb.ui.MainFrame;
+//import de.javasoft.plaf.synthetica.SyntheticaBlackEyeLookAndFeel;
+//import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
 
 //import ru.dz.gardemarine.ui.logger.LogWindowLogHandler;
 
@@ -54,6 +56,7 @@ public class Main {
 	// Main
 	// --------------------------------------------------------------------
 
+
 	/**
 	 * Well. Pdb main.
 	 * @param args
@@ -64,9 +67,12 @@ public class Main {
 	public static void main(String[] args) throws UnknownHostException, IOException, CmdException {
 		try { 
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			//UIManager.setLookAndFeel(new SyntheticaBlackEyeLookAndFeel());
+			//UIManager.setLookAndFeel(new SyntheticaStandardLookAndFeel());
 		} 
 		catch (Exception e) {/* ignore inability to set l&f */}
 
+	    
 		{
 			Logger rootLogger = Logger.getLogger(""); // root	
 			// TODO fixme

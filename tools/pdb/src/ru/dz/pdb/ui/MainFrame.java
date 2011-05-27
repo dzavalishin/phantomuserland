@@ -39,6 +39,8 @@ public class MainFrame extends JFrame
 		populateMe();
 		setJMenuBar(makeMenu());
 
+		setAlwaysOnTop(true);
+		
 		pack();
 		setVisible(true);
 	}
