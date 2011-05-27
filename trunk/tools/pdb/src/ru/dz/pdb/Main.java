@@ -1,6 +1,10 @@
 package ru.dz.pdb;
 
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.Encoder;
 import java.beans.ExceptionListener;
+import java.beans.Expression;
+import java.beans.PersistenceDelegate;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
@@ -16,11 +20,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.sun.security.auth.UserPrincipal;
 
 import ru.dz.pdb.debugger.ClassMap;
 import ru.dz.pdb.phantom.ClassObject;
@@ -28,6 +35,7 @@ import ru.dz.pdb.phantom.ObjectHeader;
 import ru.dz.pdb.phantom.ObjectRef;
 import ru.dz.pdb.ui.InspectorFrame;
 import ru.dz.pdb.ui.MainFrame;
+import ru.dz.pdb.ui.config.ConfigFrame;
 //import de.javasoft.plaf.synthetica.SyntheticaBlackEyeLookAndFeel;
 //import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
 
@@ -41,13 +49,15 @@ import ru.dz.pdb.ui.MainFrame;
 public class Main {
 	private static final Logger log = Logger.getLogger(Main.class.getName()); 
 
+	public static final String PREF_KEY_PROJECT_FILE = "ru.dz.phantom.pdb.ProjectFile";	
+	
 	private static HostConnector hc;
 	private static ClassMap cmap;
-
 	private static MainFrame mainFrame;
-
 	private static long objectSpaceStart;
 
+	private static Preferences userPref = Preferences.userRoot();
+	
 	public static HostConnector getHc() {
 		return hc;
 	}
@@ -72,7 +82,7 @@ public class Main {
 		} 
 		catch (Exception e) {/* ignore inability to set l&f */}
 
-	    
+
 		{
 			Logger rootLogger = Logger.getLogger(""); // root	
 			// TODO fixme
@@ -83,6 +93,10 @@ public class Main {
 
 		cmap = new ClassMap();
 
+		
+		project.setProjectFileName(new File(userPref.get(PREF_KEY_PROJECT_FILE, "Phantom.pd")));
+		loadProject();
+		
 		hc = new HostConnector();
 
 		mainFrame = new MainFrame();
@@ -90,7 +104,7 @@ public class Main {
 		objectSpaceStart = hc.cmdGetPoolAddress();
 
 		inspectRootObject();
-		
+
 		/*{
 		List<Integer> tl = getThreadList();
 		System.out.println("getThreadList() = "+tl);
@@ -184,7 +198,7 @@ public class Main {
 		return hc.cmdThreadExtraInfo(tid);
 	}
 
-	
+
 	// --------------------------------------------------------------------
 	// Stop
 	// --------------------------------------------------------------------
@@ -215,7 +229,10 @@ public class Main {
 	{
 		if(!selectProjectFile("Open project"))
 			return;
-
+		loadProject();
+	}
+	public static void loadProject()
+	{
 		FileInputStream fin = null;
 		try {
 			fin = new FileInputStream(project.getProjectFileName());
@@ -279,6 +296,7 @@ public class Main {
 				return;
 		}
 
+		userPref.put(PREF_KEY_PROJECT_FILE, project.getProjectFileName().toString());
 
 		File tmp = new File(project.getProjectFileName()+NEW_SFX);
 		FileOutputStream fout;
@@ -290,6 +308,30 @@ public class Main {
 		}
 		BufferedOutputStream bout = new BufferedOutputStream(fout, 128*1024);
 		XMLEncoder encoder = new XMLEncoder(bout);
+
+		//encoder.setPersistenceDelegate(File.class, new DefaultPersistenceDelegate( new String[]{ "canonicalPath" }) );
+		encoder.setPersistenceDelegate(File.class, new PersistenceDelegate() {
+
+			@Override
+			protected Expression instantiate(Object oldInstance, Encoder out) {
+				//File f = (File)oldInstance;
+				return new Expression(oldInstance,
+						oldInstance.getClass(),
+						"new",
+						new Object[]{ oldInstance.toString() });
+
+				/*try {
+
+					//return new Expression(f, f.getCanonicalPath(), "getField", new Object[]{f.getName()});
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return null;
+				}*/
+
+			}
+		});
+
 
 		//encoder.setOwner(getConstantState());
 
@@ -347,6 +389,13 @@ public class Main {
 		return project;
 	}
 
+	private static ConfigFrame config;
+	public static void editProject() {
+		if(config == null)
+			config = new ConfigFrame();
+		config.setVisible(true);
+	}
+
 	// --------------------------------------------------------------------
 	// Run
 	// --------------------------------------------------------------------
@@ -395,12 +444,13 @@ public class Main {
 		String s = JOptionPane.showInputDialog("Address of object to inspect", saddr);
 		if( (s == null) || (s.length() == 0))
 			return;
-		
+
 		saddr = s;
 		inspectObject(Integer.decode(saddr));
 	}
 
 	public static ClassMap getClassMap() { return cmap; }
+
 
 
 }

@@ -23,6 +23,7 @@ import javax.swing.KeyStroke;
 
 import ru.dz.pdb.Main;
 import ru.dz.pdb.misc.AboutFrame;
+import ru.dz.pdb.misc.VisualHelpers;
 
 
 public class MainFrame extends JFrame 
@@ -40,7 +41,7 @@ public class MainFrame extends JFrame
 		setJMenuBar(makeMenu());
 
 		setAlwaysOnTop(true);
-		
+
 		pack();
 		setVisible(true);
 	}
@@ -123,15 +124,17 @@ public class MainFrame extends JFrame
 
 		//panel.add( new JLabel("Inspect:"), gbc );
 
-		JButton iRoot = new JButton(new AbstractAction("Root") {		
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Main.inspectRootObject();
+		{
+			JButton iRoot = new JButton(new AbstractAction("Root") {		
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					Main.inspectRootObject();
 
-			}
-		});		
-		panel.add( iRoot, gbc );
-
+				}
+			});
+			iRoot.setIcon(VisualHelpers.loadIcon("root.png"));
+			panel.add( iRoot, gbc );
+		}
 		{
 			JButton b = new JButton(new AbstractAction("Reload") {		
 				@Override
@@ -139,7 +142,8 @@ public class MainFrame extends JFrame
 					reloadContent();
 
 				}
-			});		
+			});
+			b.setIcon(VisualHelpers.loadIcon("download.png"));
 			panel.add( b, gbc );
 		}
 		//panel.add( new RefButton(parsed.getClassRef(),"Class"), gbc );
@@ -151,7 +155,7 @@ public class MainFrame extends JFrame
 	protected void reloadContent() {
 		tlPanel.reload();
 		clPanel.reload();
-		
+
 	}
 
 	private JMenuBar makeMenu()
@@ -194,13 +198,23 @@ public class MainFrame extends JFrame
 
 			{
 				JMenuItem item = new JMenuItem("Save project as");
-				item.setMnemonic(KeyEvent.VK_A);
-				item.setAccelerator(KeyStroke.getKeyStroke(
-						KeyEvent.VK_A, ActionEvent.ALT_MASK));
+				//item.setMnemonic(KeyEvent.VK_A);
+				//item.setAccelerator(KeyStroke.getKeyStroke(	KeyEvent.VK_A, ActionEvent.ALT_MASK));
 				item.setToolTipText("Save project to file");
 				fileMenu.add(item);
 				item.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) { Main.saveProjectAs(); }
+				});
+			}
+
+			{
+				JMenuItem item = new JMenuItem("Edit project");
+				//item.setMnemonic(KeyEvent.VK_R);
+				//item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+				//item.setToolTipText("Reconnect to host");
+				fileMenu.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) { Main.editProject(); }
 				});
 			}
 

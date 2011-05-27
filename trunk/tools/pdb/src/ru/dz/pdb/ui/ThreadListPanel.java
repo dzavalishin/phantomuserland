@@ -7,12 +7,15 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import ru.dz.pdb.CmdException;
 import ru.dz.pdb.Main;
+import ru.dz.pdb.misc.VisualHelpers;
 import ru.dz.pdb.phantom.ObjectRef;
 import ru.dz.pdb.ui.ThreadListTableModel.ThreadInfo;
 import ru.dz.pdb.ui.bits.RefButton;
@@ -134,8 +137,9 @@ class ThreadListTableModel extends AbstractTableModel
 		{
 		case 1:			return info.getName();			
 		//case 2:			return new RefButton(info.getRef(),"Ref");			
-		case 2:			return info.getRef();
-		case 3:			return info.isRunning() ? "RUN" : "stop";
+		case 2:			return info.getRef().toString();
+		//case 3:			return info.isRunning() ? "RUN" : "stop";
+		case 3:			return info.isRunning() ? VisualHelpers.loadIcon("run.png") : VisualHelpers.loadIcon("stop.png");
 		case 4:			return info.toString();
 		}
 
@@ -148,29 +152,20 @@ class ThreadListTableModel extends AbstractTableModel
 		return false;
 	}
 
-
-	/*
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		switch(columnIndex)
 		{
-		case 0:
-			return Integer.class;
+		//case 2:			return RefButton.class;
+		case 3:			return ImageIcon.class;
 		}
-		return null;
+		return Object.class;
+		//return String.class;
 	}
+	
 
-	@Override
-	public void addTableModelListener(TableModelListener l) {
-		// TODO Auto-generated method stub
+	/*
 
-	}
-
-	@Override
-	public void removeTableModelListener(TableModelListener l) {
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
