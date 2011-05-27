@@ -11,6 +11,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,9 +74,9 @@ public class Main {
 		}
 
 		log.severe("Starting");
-		
+
 		cmap = new ClassMap();
-		
+
 		hc = new HostConnector();
 
 		mainFrame = new MainFrame();
@@ -81,6 +84,12 @@ public class Main {
 		objectSpaceStart = hc.cmdGetPoolAddress();
 
 		inspectRootObject();
+		
+		/*{
+		List<Integer> tl = getThreadList();
+		System.out.println("getThreadList() = "+tl);
+		}*/
+
 	}
 
 	// Get object from attached host
@@ -120,7 +129,7 @@ public class Main {
 
 	public static void inspectRootObject() 
 	{
-		System.out.println(String.format("Main.main() pool start 0x%X", objectSpaceStart) );
+		//System.out.println(String.format("Main.main() pool start 0x%X", objectSpaceStart) );
 		inspectObject( objectSpaceStart );
 	}
 
@@ -147,9 +156,29 @@ public class Main {
 	private static void runClass(String runClassName, int runClassMethod) {
 		hc.cmdRunClass(runClassName,runClassMethod);		
 	}
-	
-	
-	
+
+	// --------------------------------------------------------------------
+	// Threads
+	// --------------------------------------------------------------------
+
+	public static List<Integer> getThreadList() throws CmdException
+	{
+		List<Integer> ret = new ArrayList<Integer>();
+
+		if( !hc.fThreadInfo(ret) )
+			return ret;
+
+		while( hc.sThreadInfo(ret) )
+			;
+
+		return ret;
+	}
+
+	// --------------------------------------------------------------------
+	// Stop
+	// --------------------------------------------------------------------
+
+
 	public static void doQuit() 
 	{
 		hc.disconnect();
@@ -225,10 +254,10 @@ public class Main {
 
 		if( (!selectProjectFile("Save project as")) || (project.getProjectFileName() == null ))
 			return;
-		
+
 		saveProject();
 	}
-	
+
 	public static void saveProject()  {
 		if(project == null )
 			project = new Project();
@@ -238,7 +267,7 @@ public class Main {
 			if( (!selectProjectFile("Save project as")) || (project.getProjectFileName() == null ) )
 				return;
 		}
-		
+
 
 		File tmp = new File(project.getProjectFileName()+NEW_SFX);
 		FileOutputStream fout;
@@ -291,14 +320,14 @@ public class Main {
 		chooser.setFileFilter(filter);
 		chooser.setCurrentDirectory(new File("."));
 		chooser.setDialogTitle(dialogTitle);
-		
+
 		chooser.setSelectedFile(project.getProjectFileName());
-		
+
 		int returnVal = chooser.showOpenDialog(null);
 
 		if(returnVal == JFileChooser.APPROVE_OPTION) 
 			project.setProjectFileName(new File(chooser.getSelectedFile().getName()));
-		
+
 		return returnVal == JFileChooser.APPROVE_OPTION;
 	}
 
@@ -306,18 +335,18 @@ public class Main {
 	{
 		return project;
 	}
-	
+
 	// --------------------------------------------------------------------
 	// Run
 	// --------------------------------------------------------------------
-	
+
 	public static void runLastClass() {
 		if( project.getRunClassName() == null )
 		{
 			if(!selectClassToRun())
 				return;
 		}
-		
+
 		System.out.println("Main.runClass("+project.getRunClassName()+","+project.getRunClassMethod()+")");
 		runClass(project.getRunClassName(),project.getRunClassMethod());
 	}
@@ -327,28 +356,28 @@ public class Main {
 		if(!selectClassToRun())
 			return;
 		runLastClass();
-		
+
 	}
 
 	private static boolean selectClassToRun() {
 		if(project == null) project = new Project();
-		
+
 		//String cn = JOptionPane.showInputDialog(null, project.getRunClassName(), "Class to run", JOptionPane.QUESTION_MESSAGE);
 		//String cn = (String) JOptionPane.showInputDialog(null,null, "Class to run", JOptionPane.QUESTION_MESSAGE, null, null, project.getRunClassName());
 		String cn = JOptionPane.showInputDialog("Class to run", project.getRunClassName());
 		if( (cn == null) || (cn.length() == 0))
 			return false;
-		
+
 		//String meth = JOptionPane.showInputDialog(null, project.getRunClassMethod(), "Methon number to run", JOptionPane.QUESTION_MESSAGE);
 		String meth = JOptionPane.showInputDialog("Method number to run", project.getRunClassMethod());
 		if( (meth == null) || (meth.length() == 0))
 			return false;
-		
+
 		project.setRunClassName(cn);
 		project.setRunClassMethod(Integer.parseInt(meth));
-		
+
 		return true;
 	}
 
-	
+
 }

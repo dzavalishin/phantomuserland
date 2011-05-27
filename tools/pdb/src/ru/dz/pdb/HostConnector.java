@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +33,28 @@ public class HostConnector {
 		return c;
 	}
 
+	
+	
+	public void disconnect() {
+		/*
+		try {
+			s.shutdownInput();
+			s.shutdownOutput();
+			s.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/		
+	}
+
+	
+	// --------------------------------------------------------------------
+	// Packets
+	// --------------------------------------------------------------------
+	
+	
+	
 	/*
 	 * send the packet in buffer.
 	 */
@@ -162,6 +185,10 @@ public class HostConnector {
 
 
 
+	// --------------------------------------------------------------------
+	// hex
+	// --------------------------------------------------------------------
+	
 
 
 	private byte hexchars(int i) {
@@ -207,18 +234,10 @@ public class HostConnector {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+	// --------------------------------------------------------------------
+	// Generic cmd processing
+	// --------------------------------------------------------------------
+	
 
 
 
@@ -269,6 +288,12 @@ public class HostConnector {
 	}
 
 
+	// --------------------------------------------------------------------
+	// Commands
+	// --------------------------------------------------------------------
+	
+	
+	
 	/*
 	 * mAA..AA,LLLL  Read LLLL bytes at address AA..AA
 	 */
@@ -322,19 +347,50 @@ public class HostConnector {
 		String cmd = String.format(":r%x,%s", runClassMethod, runClassName );
 		execOkCmd(cmd);
 	}
+
+	// --------------------------------------------------------------------
+	// Threads
+	// --------------------------------------------------------------------
 	
-	public void disconnect() {
-		/*
-		try {
-			s.shutdownInput();
-			s.shutdownOutput();
-			s.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/		
+	
+	public boolean fThreadInfo(List<Integer> ret) throws CmdException {
+		return doThreadInfo("qfThreadInfo", ret);
 	}
 
+	public boolean sThreadInfo(List<Integer> ret) throws CmdException {
+		return doThreadInfo("qsThreadInfo", ret);
+	}
+
+	private boolean doThreadInfo(String cmd, List<Integer> ret) throws CmdException {
+		try {
+			String reply = execCmd(cmd);
+			if(reply.equalsIgnoreCase("l"))
+				return false;
+		
+			String[] tids = reply.split(",");
+			//System.out.println("HostConnector.doThreadInfo("+cmd+") = '"+reply+"'");
+			for( String ts : tids )
+			{
+				int radix = 10;
+				if(ts.startsWith("0x")||ts.startsWith("0X"))
+				{
+					ts = ts.substring(2);
+					radix = 16;
+				}
+				
+				int tid = Integer.parseInt(ts, radix);
+				ret.add(tid);
+			}
+			
+			return true;
+
+		} catch (IOException e) {
+			throw new CmdException("IO error", e);
+		} catch (ChecksumException e) {
+			throw new CmdException("Checksum error", e);
+		}
+		
+		//return false;
+	}	
 
 }
