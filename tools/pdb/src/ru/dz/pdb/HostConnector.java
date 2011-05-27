@@ -5,13 +5,14 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HostConnector {
 	private static final Logger log = Logger.getLogger(HostConnector.class.getName()); 
-	
+
 	private static final int BUFMAX = 20480;
 	private static final int PVM_ALLOC_HDR_SIZE = 16;
 	private Socket s;
@@ -33,8 +34,8 @@ public class HostConnector {
 		return c;
 	}
 
-	
-	
+
+
 	public void disconnect() {
 		/*
 		try {
@@ -45,16 +46,16 @@ public class HostConnector {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		*/		
+		 */		
 	}
 
-	
+
 	// --------------------------------------------------------------------
 	// Packets
 	// --------------------------------------------------------------------
-	
-	
-	
+
+
+
 	/*
 	 * send the packet in buffer.
 	 */
@@ -167,7 +168,7 @@ public class HostConnector {
 			xmitcsum |= hex((char) (getDebugChar() & 0x7f));
 
 			checksum &= 0xFF;
-			
+
 			if (checksum != xmitcsum)
 			{
 				log.log(Level.WARNING,String.format("HostConnector.getpacket() my csum %x his %x ", checksum , xmitcsum));
@@ -188,7 +189,7 @@ public class HostConnector {
 	// --------------------------------------------------------------------
 	// hex
 	// --------------------------------------------------------------------
-	
+
 
 
 	private byte hexchars(int i) {
@@ -215,7 +216,7 @@ public class HostConnector {
 
 
 
-	/*
+	/**
 	 * convert the hex array buf into binary to be placed in mem
 	 * return a pointer to the character AFTER the last byte written
 	 */
@@ -237,9 +238,9 @@ public class HostConnector {
 	// --------------------------------------------------------------------
 	// Generic cmd processing
 	// --------------------------------------------------------------------
-	
 
 
+	private static Object sema = new Object(); 
 
 	private String execCmd( String req ) throws IOException, ChecksumException, CmdException
 	{
@@ -247,8 +248,10 @@ public class HostConnector {
 		while(tries-- > 0)
 		{
 			try {
-				putpacket(req);
-				return getpacket();				
+				synchronized (sema) {
+					putpacket(req);
+					return getpacket();
+				}
 			} catch (ChecksumException e) {
 				log.log(Level.SEVERE,"Packet checksum error");
 			}
@@ -274,7 +277,7 @@ public class HostConnector {
 		}		
 	}
 
-	
+
 
 	private int intAt(byte[] ah, int pos) {
 		int i;
@@ -291,9 +294,9 @@ public class HostConnector {
 	// --------------------------------------------------------------------
 	// Commands
 	// --------------------------------------------------------------------
-	
-	
-	
+
+
+
 	/*
 	 * mAA..AA,LLLL  Read LLLL bytes at address AA..AA
 	 */
@@ -351,8 +354,8 @@ public class HostConnector {
 	// --------------------------------------------------------------------
 	// Threads
 	// --------------------------------------------------------------------
-	
-	
+
+
 	public boolean fThreadInfo(List<Integer> ret) throws CmdException {
 		return doThreadInfo("qfThreadInfo", ret);
 	}
@@ -366,7 +369,12 @@ public class HostConnector {
 			String reply = execCmd(cmd);
 			if(reply.equalsIgnoreCase("l"))
 				return false;
-		
+
+			if(!reply.startsWith("m "))
+				throw new CmdException("ThreadInfo syntax: "+reply);
+
+			reply = reply.substring(2); // skip "m "
+
 			String[] tids = reply.split(",");
 			//System.out.println("HostConnector.doThreadInfo("+cmd+") = '"+reply+"'");
 			for( String ts : tids )
@@ -377,11 +385,11 @@ public class HostConnector {
 					ts = ts.substring(2);
 					radix = 16;
 				}
-				
+
 				int tid = Integer.parseInt(ts, radix);
 				ret.add(tid);
 			}
-			
+
 			return true;
 
 		} catch (IOException e) {
@@ -389,8 +397,31 @@ public class HostConnector {
 		} catch (ChecksumException e) {
 			throw new CmdException("Checksum error", e);
 		}
-		
+
 		//return false;
 	}	
+
+
+	public String cmdThreadExtraInfo(int tid) throws CmdException {
+		try {
+			String reply = execCmd("qThreadExtraInfo,"+tid);
+
+			if(reply.startsWith("E"))
+				throw new CmdException("Error: "+reply);
+
+			byte[] mem = new byte[reply.length()/2];
+			hex2mem(reply, mem, mem.length);
+
+			return new String(mem,Charset.forName("UTF-8"));
+
+		} catch (IOException e) {
+			throw new CmdException("IO error", e);
+		} catch (ChecksumException e) {
+			throw new CmdException("Checksum error", e);
+		}
+
+	}	
+
+
 
 }

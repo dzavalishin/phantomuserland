@@ -52,12 +52,20 @@ public class PhantomInstruction {
 		this.sarg = null;
 	}
 
+	private String argToString(boolean has, int arg) {
+		if(!has)
+			return "";
+		
+		return String.format(" %d (0x%X)", arg, arg );
+	}
+	
 	@Override
 	public String toString() {
 		return 
 			name + 
-			(hasArg1 ? " "+Integer.toString(arg1) : "") +
-			(hasArg2 ? " "+Integer.toString(arg2) : "")
+			argToString(hasArg1, arg1) +
+			argToString(hasArg2, arg2) +
+			( (sarg != null) ? " \"" + new String(sarg) + "\"" : "" )
 			;
 	}
 	

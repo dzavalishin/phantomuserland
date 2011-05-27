@@ -18,7 +18,7 @@ public class RefButton extends JButton {
 	private long address;
 
 	public RefButton(ObjectRef o, String buttonText) {
-		address = o.getDataAddr();
+		address = (o == null) ? 0 : o.getDataAddr();
 		//setSize(new Dimension(40, 36));
 		loadMe(buttonText);
 		
