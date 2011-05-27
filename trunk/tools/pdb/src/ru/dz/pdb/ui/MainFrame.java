@@ -1,9 +1,10 @@
 package ru.dz.pdb.ui;
 
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Panel;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -15,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
 import ru.dz.pdb.Main;
@@ -47,35 +50,49 @@ public class MainFrame extends JFrame
 
 		gbc.gridx = 0;
 		gbc.gridy = GridBagConstraints.RELATIVE;	
-		Panel topPanel = new Panel(new GridBagLayout());
+
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+		gbc.insets = new Insets(2, 2, 2, 2);
+		
+		JPanel topPanel = new JPanel(new GridBagLayout());
 		contentPane.add(topPanel, gbc);
 		poulateTopPanel(topPanel);
 
 		//gbc.gridx = 0;
 		//gbc.gridy = 1;	
-		Panel mainPanel = new Panel(new GridBagLayout());
+		JPanel mainPanel = new JPanel(new GridBagLayout());
 		contentPane.add(mainPanel, gbc);
 		poulateMainPanel(mainPanel);
 
 	}
 
-	private void poulateMainPanel(Panel panel) {
+	private void poulateMainPanel(JPanel panel) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.weightx = gbc.weighty = 1;
 
 		gbc.gridx = GridBagConstraints.RELATIVE;
 		gbc.gridy = 0;	
 
-		panel.add( new JLabel("--"), gbc );
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+		//panel.add( new JLabel("--"), gbc );
+		//panel.add( new ThreadListPanel(), gbc );
 
+		
+		JScrollPane scroll = new JScrollPane(new ThreadListPanel());
+		scroll.setPreferredSize(new Dimension(450, 200));
+		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		panel.add( scroll, gbc );
 	}
 
-	private void poulateTopPanel(Panel panel) {
+	private void poulateTopPanel(JPanel panel) {
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.weightx = gbc.weighty = 1;
 
 		gbc.gridx = GridBagConstraints.RELATIVE;
 		gbc.gridy = 0;	
+
+		gbc.anchor = GridBagConstraints.NORTHWEST;
 
 		panel.add( new JLabel("Inspect:"), gbc );
 
