@@ -61,7 +61,8 @@ public class InspectorFrame extends JFrame {
 		contentPane.setLayout(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.weightx = gbc.weighty = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
 
 		gbc.gridx = 0;
 		gbc.gridy = GridBagConstraints.RELATIVE;	
@@ -71,10 +72,16 @@ public class InspectorFrame extends JFrame {
 		gbc.insets = new Insets(2, 2, 2, 2);
 		//gbc.ipadx = 4;		gbc.ipady = 4;
 
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		
 		JPanel topPanel = new JPanel(new GridBagLayout());
 		contentPane.add(topPanel, gbc);
 		poulateTopPanel(topPanel);
 
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		
 		//gbc.gridx = 0;
 		//gbc.gridy = 1;	
 		JPanel mainPanel = new JPanel(new GridBagLayout());		
@@ -99,6 +106,11 @@ public class InspectorFrame extends JFrame {
 
 		gbc.gridx = GridBagConstraints.RELATIVE;
 		gbc.gridy = 0;	
+
+		gbc.anchor = GridBagConstraints.NORTH;
+		
+		//gbc.fill = GridBagConstraints.BOTH;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 
 		if(parsed == null)
 		{
@@ -166,6 +178,9 @@ public class InspectorFrame extends JFrame {
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 
 		gbc.insets = new Insets(2, 2, 0, 2);
+
+		gbc.fill = GridBagConstraints.BOTH;
+		//gbc.fill = GridBagConstraints.HORIZONTAL;
 
 		if(parsed == null)
 		{

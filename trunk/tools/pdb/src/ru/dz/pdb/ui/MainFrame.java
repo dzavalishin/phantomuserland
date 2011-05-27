@@ -18,6 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
 import ru.dz.pdb.Main;
@@ -26,6 +27,9 @@ import ru.dz.pdb.misc.AboutFrame;
 
 public class MainFrame extends JFrame 
 {
+	protected ThreadListPanel tlPanel = new ThreadListPanel();
+	protected ClassListPanel clPanel = new ClassListPanel();
+
 	public MainFrame() {
 		setTitle( "Phantom OS object debugger");
 
@@ -46,23 +50,24 @@ public class MainFrame extends JFrame
 		contentPane.setLayout(new GridBagLayout());
 
 		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.weightx = gbc.weighty = 1;
+		gbc.weightx = 1;
+		gbc.weighty = 0;
 
 		gbc.gridx = 0;
 		gbc.gridy = GridBagConstraints.RELATIVE;	
 
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 		gbc.insets = new Insets(2, 2, 2, 2);
-		
+
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		
+
 		JPanel topPanel = new JPanel(new GridBagLayout());
 		contentPane.add(topPanel, gbc);
 		poulateTopPanel(topPanel);
 
 		gbc.fill = GridBagConstraints.BOTH;
-		//gbc.gridx = 0;
-		//gbc.gridy = 1;	
+		gbc.weightx = 1;
+		gbc.weighty = 1;
 		JPanel mainPanel = new JPanel(new GridBagLayout());
 		contentPane.add(mainPanel, gbc);
 		poulateMainPanel(mainPanel);
@@ -77,18 +82,32 @@ public class MainFrame extends JFrame
 		gbc.gridy = 0;	
 
 		gbc.anchor = GridBagConstraints.NORTHWEST;
-		
-		gbc.fill = GridBagConstraints.HORIZONTAL;
 
-		//panel.add( new JLabel("--"), gbc );
-		//panel.add( new ThreadListPanel(), gbc );
+		gbc.fill = GridBagConstraints.BOTH;
 
-		
-		JScrollPane scroll = new JScrollPane(new ThreadListPanel());
-		scroll.setPreferredSize(new Dimension(450, 200));
-		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		
-		panel.add( scroll, gbc );
+		Dimension pref = new Dimension(450, 200);
+
+		JTabbedPane tabs = new JTabbedPane();
+
+		{
+			//tlPanel = new ThreadListPanel();
+			JScrollPane scroll = new JScrollPane(tlPanel);
+			scroll.setPreferredSize(pref);
+			scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+			tabs.addTab("Threads", scroll);
+		}
+
+		{
+			JScrollPane scroll = new JScrollPane(clPanel);
+			scroll.setPreferredSize(pref);
+			scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+			tabs.addTab("Classes", scroll);
+		}
+
+		//panel.add( scroll, gbc );
+		panel.add( tabs, gbc );
 	}
 
 	private void poulateTopPanel(JPanel panel) {
@@ -100,7 +119,7 @@ public class MainFrame extends JFrame
 
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 
-		panel.add( new JLabel("Inspect:"), gbc );
+		//panel.add( new JLabel("Inspect:"), gbc );
 
 		JButton iRoot = new JButton(new AbstractAction("Root") {		
 			@Override
@@ -111,11 +130,27 @@ public class MainFrame extends JFrame
 		});		
 		panel.add( iRoot, gbc );
 
+		{
+			JButton b = new JButton(new AbstractAction("Reload") {		
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					reloadContent();
+
+				}
+			});		
+			panel.add( b, gbc );
+		}
 		//panel.add( new RefButton(parsed.getClassRef(),"Class"), gbc );
 		//panel.add( new RefButton(parsed.getObjectSatellites(),"Sat"), gbc );
 
 	}
 
+
+	protected void reloadContent() {
+		tlPanel.reload();
+		clPanel.reload();
+		
+	}
 
 	private JMenuBar makeMenu()
 	{
@@ -142,7 +177,7 @@ public class MainFrame extends JFrame
 					public void actionPerformed(ActionEvent e) { Main.openProject(); }
 				});
 			}
-			
+
 			{
 				JMenuItem item = new JMenuItem("Save project");
 				item.setMnemonic(KeyEvent.VK_S);
@@ -170,6 +205,19 @@ public class MainFrame extends JFrame
 			fileMenu.addSeparator();
 
 			{
+				JMenuItem item = new JMenuItem("Reconnect");
+				//item.setMnemonic(KeyEvent.VK_R);
+				//item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+				item.setToolTipText("Reconnect to host");
+				fileMenu.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) { Main.getHc().reconnect();; }
+				});
+			}
+
+			fileMenu.addSeparator();
+
+			{
 				JMenuItem itemQuit = new JMenuItem("Quit"); //$NON-NLS-1$
 				//itemQuit.setMnemonic(KeyEvent.VK_Q);
 				itemQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
@@ -185,7 +233,7 @@ public class MainFrame extends JFrame
 		}
 
 
-		
+
 		{
 			JMenu menu = new JMenu("Debug"); //$NON-NLS-1$
 			menu.setMnemonic(KeyEvent.VK_D);
@@ -195,14 +243,14 @@ public class MainFrame extends JFrame
 			{
 				JMenuItem item = new JMenuItem("Run last"); //$NON-NLS-1$
 				item.setToolTipText("Run last class"); //$NON-NLS-1$
-				menu.setMnemonic(KeyEvent.VK_R);
+				//menu.setMnemonic(KeyEvent.VK_R);
 				//menu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
 				menu.add(item);
 				item.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) { Main.runLastClass(); }
 				});
 			}
-			
+
 			{
 				JMenuItem item = new JMenuItem("Run class"); //$NON-NLS-1$
 				item.setToolTipText("Run class"); //$NON-NLS-1$
@@ -214,13 +262,42 @@ public class MainFrame extends JFrame
 				});
 			}
 
+			menu.addSeparator();
+
+			{
+				JMenuItem item = new JMenuItem("Inspect"); //$NON-NLS-1$
+				item.setMnemonic(KeyEvent.VK_I);
+				item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.ALT_MASK));
+
+				item.setToolTipText("Inspect object by address"); //$NON-NLS-1$
+				menu.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) { Main.inspect(); }
+				});
+			}			
+
+			{
+				JMenuItem item = new JMenuItem("Inspect Root"); //$NON-NLS-1$
+				//itemQuit.setMnemonic(KeyEvent.VK_Q);
+				//item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+				//itemQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0/*ActionEvent.ALT_MASK*/));
+				item.setMnemonic(KeyEvent.VK_R);
+				item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+
+				item.setToolTipText("Inspect root object"); //$NON-NLS-1$
+				menu.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) { Main.inspectRootObject(); }
+				});
+			}			
+
 		}
-		
-		
-		
-		
-		
-		
+
+
+
+
+
+
 		{
 			JMenu helpMenu = new JMenu("Help"); //$NON-NLS-1$
 			helpMenu.setMnemonic(KeyEvent.VK_F1);

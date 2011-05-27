@@ -17,9 +17,17 @@ public class HostConnector {
 	private static final int PVM_ALLOC_HDR_SIZE = 16;
 	private Socket s;
 
-	public HostConnector() throws UnknownHostException, IOException {
-		s = new Socket(InetAddress.getByName("127.0.0.1") , 1256);
+	private InetAddress host;
 
+	private static Object commSema = new Object(); 
+
+	public HostConnector() throws UnknownHostException, IOException {
+		host = InetAddress.getByName("127.0.0.1");
+		connect();
+	}
+
+	private void connect() throws IOException {
+		s = new Socket( host , 1256);
 		s.setSoTimeout(300);
 	}
 
@@ -48,6 +56,25 @@ public class HostConnector {
 		}
 		 */		
 	}
+
+	// Something is wrong with it - doesnt work, kills communications
+	public void reconnect() {
+		//synchronized (commSema) 
+		{
+			try {
+
+				//s.shutdownInput();
+				//s.shutdownOutput();
+				s.close();
+
+				connect();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}	
 
 
 	// --------------------------------------------------------------------
@@ -240,7 +267,6 @@ public class HostConnector {
 	// --------------------------------------------------------------------
 
 
-	private static Object sema = new Object(); 
 
 	private String execCmd( String req ) throws IOException, ChecksumException, CmdException
 	{
@@ -248,7 +274,7 @@ public class HostConnector {
 		while(tries-- > 0)
 		{
 			try {
-				synchronized (sema) {
+				synchronized (commSema) {
 					putpacket(req);
 					return getpacket();
 				}
@@ -420,7 +446,8 @@ public class HostConnector {
 			throw new CmdException("Checksum error", e);
 		}
 
-	}	
+	}
+
 
 
 

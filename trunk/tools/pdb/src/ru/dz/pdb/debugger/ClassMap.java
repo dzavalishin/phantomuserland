@@ -1,5 +1,6 @@
 package ru.dz.pdb.debugger;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,4 +50,6 @@ public class ClassMap {
 	{
 		return get( classRef.getDataAddr() );
 	}
+
+	public Collection<ClassObject> getList() { return map.values(); }
 }
