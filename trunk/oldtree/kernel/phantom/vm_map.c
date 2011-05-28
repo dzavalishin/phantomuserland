@@ -92,10 +92,14 @@ static void page_clear_engine_clear_page(physaddr_t p);
 #define VERIFY_SNAP
 #ifdef VERIFY_SNAP
 static void vm_verify_snap(disk_page_no_t head);
+static void vm_verify_vm(void);
 #else
 static inline void vm_verify_snap(disk_page_no_t head)
 {
     (void)head;
+}
+static void vm_verify_vm(void)
+{
 }
 #endif
 
@@ -1325,6 +1329,8 @@ void do_snapshot()
 
     enabled = hal_save_cli();
 
+    vm_verify_vm();
+
     // START!
     is_in_snapshot_process = 1;
 
@@ -1704,6 +1710,19 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
         }
     }
     return current;
+}
+
+static void vm_verify_vm(void)
+{
+    size_t current = 0;
+    int np;
+
+    for (np = 0; np < vm_map_map_end - vm_map_map; np++)
+    {
+        size_t page_offset = np * PAGE_SIZE;
+        current = vm_verify_page(vm_map_start_of_virtual_address_space + page_offset,
+                page_offset, current, hal.object_vsize);
+    }
 }
 
 static void vm_verify_snap(disk_page_no_t head)
