@@ -41,8 +41,11 @@ public class MultiuseNode extends Node {
 	@Override
 	protected void generate_my_code(Codegen c, CodeGeneratorState s)
 			throws IOException, PlcException {
+
+		if(myWrapper.getUseCount() != 0 )
+			System.out.println("MultiuseNode.generate_my_code() use count == 0");
 		
-		boolean multiuse = myWrapper.getUseCount() != 0;
+		boolean multiuse = myWrapper.getUseCount() > 1;
 		
 		if(multiuse)
 		{

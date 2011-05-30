@@ -28,7 +28,8 @@ public class JumpTargetNode extends Node {
 		this.labelString = labelString;
 		labelNo = -1;
 	}
-	public String toString()  {    return "label "+labelNo;  }
+	
+	public String toString()  {    return "label "+ ((labelNo < 0) ? labelString : ""+labelNo );  }
 	public void find_out_my_type() throws PlcException { if(type == null) type = new PhTypeUnknown(); }
 	public boolean is_const() { return true; }
 

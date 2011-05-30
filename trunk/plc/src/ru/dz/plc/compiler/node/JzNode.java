@@ -29,7 +29,9 @@ public class JzNode extends Node {
 		this.labelNo = -1;
 	}
 
-	public String toString()  {    return "jz "+labelNo;  }
+	//public String toString()  {    return "jz "+labelNo;  }
+	public String toString()  {    return "jz "+ ((labelNo < 0) ? label : ""+labelNo );  }
+	
 	public void find_out_my_type() throws PlcException { if(type == null) type = new PhTypeUnknown(); }
 	public boolean is_const() { return true; }
 
