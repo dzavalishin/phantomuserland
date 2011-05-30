@@ -57,7 +57,7 @@
 <MOVE to="3" from="2" />   
 <pos line="12" text="    return os.system(cmd, 'hi', 'there')" />   
 <STRING reg="5" content="system" len="6"  />
-<GET out="4" left="3" right="5" />   
+<GET toreg="4" class="3" fieldName="5" />   
 <MOVE to="5" from="1" />   
 <STRING reg="6" content="hi" len="2"  />
 <STRING reg="7" content="there" len="5"  />
@@ -81,7 +81,7 @@
 <GGET to="3" gVarName="bind" />   
 <GGET to="4" gVarName="myclass" />   
 <STRING reg="6" content="load" len="4"  />
-<GET out="4" left="4" right="6" />   
+<GET toreg="4" class="4" fieldName="6" />   
 <MOVE to="5" from="1" />   
 <PARAMS out="2" inStart="4" inNum="2" />   
 <CALL ret="2" func="3" params="2" />   
@@ -91,7 +91,7 @@
 <GGET to="3" gVarName="bind" />   
 <GGET to="4" gVarName="myclass" />   
 <STRING reg="6" content="system" len="6"  />
-<GET out="4" left="4" right="6" />   
+<GET toreg="4" class="4" fieldName="6" />   
 <MOVE to="5" from="1" />   
 <PARAMS out="2" inStart="4" inNum="2" />   
 <CALL ret="2" func="3" params="2" />   
@@ -110,7 +110,7 @@
 <pos line="1" text="class myclass:" />   
 <GGET to="3" gVarName="myclass" />   
 <STRING reg="4" content="__new__" len="7"  />
-<GET out="3" left="3" right="4" />   
+<GET toreg="3" class="3" fieldName="4" />   
 <MOVE to="4" from="1" />   
 <PARAMS out="2" inStart="4" inNum="1" />   
 <CALL ret="2" func="3" params="2" />   

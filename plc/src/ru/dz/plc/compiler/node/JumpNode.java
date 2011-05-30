@@ -29,7 +29,9 @@ public class JumpNode extends Node {
 		this.labelNo = -1;
 	}
 	
-	public String toString()  {    return "jmp "+labelNo;  }
+	//public String toString()  {    return "jmp "+labelNo;  }
+	public String toString()  {    return "jump "+ ((labelNo < 0) ? label: ""+labelNo );  }
+
 	public void find_out_my_type() throws PlcException { if(type == null) type = new PhTypeUnknown(); }
 	public boolean is_const() { return true; }
 

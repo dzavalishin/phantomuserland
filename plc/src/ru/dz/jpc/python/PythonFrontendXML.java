@@ -2,6 +2,7 @@ package ru.dz.jpc.python;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,18 +19,26 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.binode.CallArgNode;
 import ru.dz.plc.compiler.binode.NewNode;
 import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.OpPlusNode;
+import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.binode.ValEqNode;
 import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.JumpTargetNode;
 import ru.dz.plc.compiler.node.JzNode;
+import ru.dz.plc.compiler.node.MethodNode;
 import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.OpNotNode;
 import ru.dz.plc.compiler.node.ReturnNode;
+import ru.dz.plc.compiler.trinode.OpMethodCallNode;
 import ru.dz.plc.util.PlcException;
 
 public class PythonFrontendXML {
@@ -125,7 +134,7 @@ public class PythonFrontendXML {
 			}
 			else
 			{
-				System.out.println("Unknown node: "+nname);
+				System.out.println("Unknown top node: "+nname);
 			}
 		}
 		
@@ -172,6 +181,9 @@ public class PythonFrontendXML {
 		// These two are saved in DefFunc and used in PythonCode
 		int funcOutReg = -1;
 		int funcCodeLen = -1;
+		
+		// This one is defined in if node and used in jump node
+		int ifReg = -1;
 		
 		NodeList childNodes = n.getChildNodes();
 		for( int i = 0; i < childNodes.getLength(); i++  )
@@ -234,10 +246,19 @@ public class PythonFrontendXML {
 			}
 			else if(nname.equals("dict"))
 			{
-				int outReg = getInt(cn,"out");
-				int inStartReg = getInt(cn,"inStart");
-				int inRegsNum = getInt(cn,"inNum");
-
+				int outReg = 0;
+				int inStartReg = 0;
+				int inRegsNum = 0;
+				
+				if(haveParam(cn, "inNum"))
+				{
+					outReg = getInt(cn,"out");
+					inStartReg = getInt(cn,"inStart");
+					inRegsNum = getInt(cn,"inNum");
+				}
+				else
+					outReg = getInt(cn,"reg");
+				
 				setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false,null)), null, null) );
 				// TODO use some map style container for dictionary
 				// TODO here we must fill a new dictionary - compose?
@@ -263,6 +284,13 @@ public class PythonFrontendXML {
 				int toReg = getInt(cn,"toreg");
 				int objectReg = getInt(cn,"class");
 				int nameregReg = getInt(cn,"fieldName");
+
+				/*
+				int toReg = getInt(cn,"out");
+				int objectReg = getInt(cn,"left");
+				int nameregReg = getInt(cn,"right");
+				*/
+				
 				// TODO implement
 				setRegister(toReg, new EmptyNode() );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
@@ -271,7 +299,7 @@ public class PythonFrontendXML {
 			{
 				int fromReg = getInt(cn,"fromreg");
 				int objectReg = getInt(cn,"class");
-				int nameregReg = getInt(cn,"fieldName");
+				String nameregReg = getString(cn,"fieldName");
 				// TODO implement
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
@@ -291,23 +319,52 @@ public class PythonFrontendXML {
 			{				
 				setRegister(cn, "out", new ValEqNode(useRegister(cn,"left"),useRegister(cn,"right")) );
 			}
-			/*else if(nname.equals("if"))
+			else if(nname.equals("if"))
 			{
-				useRegister(cn, "reg")
-				
-				new JzNode()
-			}*/
+				if(ifReg >= 0)
+					System.out.println("PythonFrontendXML.loadCode() pref if unused!!");
+				ifReg = getInt(cn, "reg");
+			}
 			else if(nname.equals("label"))
 			{				
 				out.add(  new JumpTargetNode(getString(cn,"name")) );
 			}
 			else if(nname.equals("jump"))
 			{
-				out.add(  new JumpNode(getString(cn, "label")) );				
+				String label = getString(cn, "label");
+				if(ifReg >= 0)
+				{
+					out.add(new SequenceNode(new OpNotNode( getRegister(ifReg).use() ), new JzNode(label)) );
+					ifReg = -1;
+				}
+				else					
+					out.add(  new JumpNode(label) );				
 			}
 			else if(nname.equals("none"))
 			{				
 				setRegister(getInt(cn,"reg"),  new NullNode() );
+			}
+			else if(nname.equals("params"))
+			{		
+				int reg = getInt(cn,"inStart");
+				int count = getInt(cn,"inNum");
+				
+				ru.dz.plc.compiler.node.Node args = new EmptyNode();
+				
+				while(count-- > 0)
+				{
+					args = new CallArgNode(getRegister(reg++).use(), args);
+				}
+				
+				
+				setRegister(getInt(cn,"out"),  args );
+			}
+			else if(nname.equals("call"))
+			{				
+				ru.dz.plc.compiler.node.Node func = new MethodNode(0); //getRegister(getInt(cn,"func")).use();
+				ru.dz.plc.compiler.node.Node args = getRegister(getInt(cn,"params")).use();
+				ru.dz.plc.compiler.node.Node object = new MethodNode(0); // TODO wrong
+				setRegister(getInt(cn,"ret"),  new OpMethodCallNode(object, func, args) );
 			}
 			else if(nname.equals("deffunc"))
 			{
@@ -324,7 +381,21 @@ public class PythonFrontendXML {
 				System.out.println("Unknown node: "+nname);
 			}
 			
-		}		
+		}	
+		
+		PrintStream ps = System.out;
+		//PhantomClass pc = new PhantomClass("?PythonClass"); // TODO wrong
+		PhantomClass pc = new PhantomClass(".internal.object"); // TODO WRONG!
+		ParseState pstate = new ParseState(pc );
+
+		pstate.set_method(new Method("mname", new PhantomType(new PhantomClass(".internal.object"))));
+		
+		for( ru.dz.plc.compiler.node.Node in : out )
+		{
+			in.preprocess(pstate);
+			in.print(ps);
+			ps.format("\n-\n");
+		}
 	}
 
 
@@ -339,6 +410,9 @@ public class PythonFrontendXML {
 		return cn.getAttributes().getNamedItem(name).getNodeValue();		
 	}
 
+	private boolean haveParam(Node cn, String name) {
+		return cn.getAttributes().getNamedItem(name) != null;		
+	}
 
 	private int getInt(Node cn, String name) {
 		return Integer.parseInt(cn.getAttributes().getNamedItem(name).getNodeValue());		
