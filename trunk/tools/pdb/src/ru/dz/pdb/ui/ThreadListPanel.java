@@ -7,9 +7,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
@@ -17,43 +15,14 @@ import ru.dz.pdb.CmdException;
 import ru.dz.pdb.Main;
 import ru.dz.pdb.misc.VisualHelpers;
 import ru.dz.pdb.phantom.ObjectRef;
-import ru.dz.pdb.ui.ThreadListTableModel.ThreadInfo;
-import ru.dz.pdb.ui.bits.RefButton;
 
 public class ThreadListPanel extends JTable {
 	protected static final Logger log = Logger.getLogger(ThreadListPanel.class.getName()); 
 
-	//private ThreadListTableModel dm = new ThreadListTableModel();
-	//private List<Integer> threadList = new LinkedList<Integer>();
-	//private TableColumnModel cm = new ThreadListTableColumnModel();
-
-
 	public ThreadListPanel() {
-		//JTable t = new JTable(dm,cm);
-		//super(dm);
 		super(new ThreadListTableModel());
-		//add(t);
-		/*		
-		try {
-			threadList = Main.getThreadList();
-		} catch (CmdException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 */
-		//Dimension preferredSize = new Dimension(300, 180);
-		//t.setPreferredSize(preferredSize);
-
-		/*
-		TableColumn c1 = new TableColumn();
-		c1.setHeaderValue("TID");
-		t.addColumn(c1 );
-		 */
-
 		setFillsViewportHeight(true);
-
 		setShowGrid(true);
-		//t.setAutoCreateColumnsFromModel(true);
 		//t.setRowSelectionAllowed(true);
 
 		getColumnModel().getColumn(0).setPreferredWidth(16); 
@@ -74,8 +43,6 @@ public class ThreadListPanel extends JTable {
 		m.reload();
 		m.fireTableDataChanged();
 	}
-
-
 
 }
 
@@ -108,17 +75,10 @@ class ThreadListTableModel extends AbstractTableModel
 	public int getColumnCount() { return columnNames.length; }
 
 	@Override
-	public String getColumnName(int col) {
-		//return "tid";
-		//System.out.println("ThreadListPanel.ThreadListTableModel.getColumnName()"+col);
-		return columnNames[col];
-	}
+	public String getColumnName(int col) { return columnNames[col]; }
 
 	@Override
-	public int getRowCount() {
-		//System.out.println("ThreadListPanel.ThreadListTableModel.getRowCount() = "+threadList.size());
-		return threadList.size();
-	}
+	public int getRowCount() { return threadList.size(); }
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
@@ -163,15 +123,6 @@ class ThreadListTableModel extends AbstractTableModel
 		//return String.class;
 	}
 	
-
-	/*
-
-
-	@Override
-	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		// ignore			
-	}
-	 */
 
 
 	class ThreadInfo
