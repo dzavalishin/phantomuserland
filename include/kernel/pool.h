@@ -47,8 +47,12 @@ pool_t *create_pool_ext( int inital_elems, int arena_size );
 pool_t *create_pool();
 errno_t destroy_pool(pool_t *);
 
+//! Inaccurate - no mutex taken
 int pool_get_free( pool_t *pool );
+//! Inaccurate - no mutex taken
 int pool_get_used( pool_t *pool );
+
+errno_t pool_foreach( pool_t *pool, errno_t (*ff)(void *el) );
 
 
 void *pool_get_el( pool_t *pool, pool_handle_t handle );
