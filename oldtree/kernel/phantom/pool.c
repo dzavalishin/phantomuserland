@@ -204,6 +204,7 @@ pool_handle_t pool_create_el( pool_t *pool, void *arg )
 
     a->refc[ne]++;
     a->ptrs[ne] = e;
+    a->nused++;
 
     hal_mutex_unlock( &pool->mutex );
 

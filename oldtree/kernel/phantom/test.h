@@ -67,6 +67,7 @@ int do_test_timed_call(const char *test_parm);
 
 
 int do_test_amap(const char *test_parm);
+int do_test_pool(const char *test_parm);
 
 int do_test_ports(const char *test_parm);
 
