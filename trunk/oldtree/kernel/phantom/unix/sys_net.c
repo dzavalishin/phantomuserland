@@ -145,7 +145,6 @@ int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol)
     return fd;
 }
 
-#warning impl?
 int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, socklen_t addrlen)
 {
     (void)addrlen;
@@ -173,7 +172,6 @@ int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, 
     else if( f->flags & UU_FILE_FLAG_UDP )
     {
         pe = udp_bind(us->prot_data, &us->addr);
-
     }
     else
     {
