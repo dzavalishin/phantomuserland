@@ -35,7 +35,7 @@
 #include <kernel/drivers.h>
 #include <kernel/ethernet_defs.h>
 
-#include "newos.h"
+//#include "newos.h"
 #include "net.h"
 
 

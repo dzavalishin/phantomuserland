@@ -10,7 +10,7 @@
 #include <phantom_libc.h>
 
 #include "net.h"
-#include "newos.h"
+//#include "newos.h"
 
 #include "ethernet.h"
 #include "arp.h"

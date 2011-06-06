@@ -6,7 +6,8 @@
 #include <phantom_libc.h>
 
 #include "nqueue.h"
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 
 
 typedef struct queue_typed {

@@ -26,7 +26,7 @@
 #include "hal.h"
 
 
-#include "newos.h"
+//#include "newos.h"
 
 
 typedef struct icmp_header {

@@ -34,7 +34,8 @@
 #include <dev/isa/ns8390.h>
 //#include "device.h"
 
-#include "newos.h"
+//#include "newos.h"
+//#include <compat/newos.h>
 #include "net.h"
 
 #include <driver_isa_ne2000.h>

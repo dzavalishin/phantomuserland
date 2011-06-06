@@ -5,7 +5,8 @@
 #ifndef _KERNEL_KHASH_H
 #define _KERNEL_KHASH_H
 
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 
 struct hash_iterator {
 	void *ptr;

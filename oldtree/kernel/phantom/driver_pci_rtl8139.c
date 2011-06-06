@@ -33,7 +33,7 @@
 
 #include <kernel/ethernet_defs.h>
 
-#include "newos.h"
+//#include "newos.h"
 #include "net.h"
 
 #include <dev/pci/rtl8139_dev.h>

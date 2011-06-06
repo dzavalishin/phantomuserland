@@ -9,7 +9,8 @@
 //#include <kernel/net/ipv4.h>
 #include "net.h"
 #include <newos/cbuf.h>
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 
 enum {
 	ARP_CALLBACK_CODE_OK = 0,

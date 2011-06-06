@@ -22,7 +22,8 @@
 #define acquire_spinlock hal_spin_lock
 #define release_spinlock hal_spin_unlock
 
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 
 #include <kernel/config.h>
 

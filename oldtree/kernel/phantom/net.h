@@ -13,7 +13,8 @@
 
 #include "nqueue.h"
 
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 #include <newos/cbuf.h>
 
 #include "device.h"
