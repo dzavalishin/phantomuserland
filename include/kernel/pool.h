@@ -28,7 +28,7 @@ typedef struct pool
 {
     // This element will be deleted now
     void    	(*destroy)(void *pool_elem);
-    // This element was just created
+    // This element must be created
     void *   	(*init)(void *arg);
 
     hal_mutex_t	mutex;
@@ -52,7 +52,7 @@ int pool_get_free( pool_t *pool );
 //! Inaccurate - no mutex taken
 int pool_get_used( pool_t *pool );
 
-errno_t pool_foreach( pool_t *pool, errno_t (*ff)(void *el) );
+errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle) );
 
 
 void *pool_get_el( pool_t *pool, pool_handle_t handle );
