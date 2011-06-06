@@ -1037,3 +1037,4 @@ kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_lis
 
   #endif // DDB
   */
+

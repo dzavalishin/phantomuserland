@@ -13,6 +13,7 @@
 #include <kernel/libkern.h>
 #include <malloc.h>
 #include <string.h>
+#include <stdio.h>
 
 
 
@@ -23,6 +24,10 @@ static void free_arenas( int narenas, pool_arena_t *a );
 #define HANDLE_2_ARENA(h) ( (h>>16) & 0xFFFF )
 #define HANDLE_2_ELEM(h) ( h & 0xFFFF )
 #define MK_HANDLE(a,e) ( ((a & 0xFFFF)<<16) | (e & 0xFFFF) )
+
+// -----------------------------------------------------------------------
+// pool iface
+// -----------------------------------------------------------------------
 
 
 pool_t *create_pool() { return create_pool_ext( 512, 256 ); }
@@ -50,6 +55,54 @@ pool_t *create_pool_ext( int inital_elems, int arena_size )
 }
 
 
+errno_t destroy_pool(pool_t *p)
+{
+    pool_arena_t *a = p->arenas;
+    // if( flag_autoclean ) // remove all els
+
+    // assert empty
+    int i;
+    for( i = 0; i < p->narenas; i++ )
+        assert( a[i].nused == 0 );
+
+    // free arenas
+    free_arenas( p->narenas, a );
+
+    free(p);
+    return 0;
+}
+
+
+int pool_get_free( pool_t *pool )
+{
+    pool_arena_t *a = pool->arenas;
+    int nfree = 0;
+
+    int i;
+    for( i = 0; i < pool->narenas; i++ )
+        nfree += a[i].arena_size - a[i].nused;
+
+    return nfree;
+}
+
+int pool_get_used( pool_t *pool )
+{
+    pool_arena_t *a = pool->arenas;
+    int nused = 0;
+
+    int i;
+    for( i = 0; i < pool->narenas; i++ )
+        nused += a[i].nused;
+
+    return nused;
+}
+
+
+// -----------------------------------------------------------------------
+// pool workers
+// -----------------------------------------------------------------------
+
+
 // Warning - if shrink, topmost arena elements will be lost!
 void resize_pool( pool_t *p, int narenas )
 {
@@ -68,6 +121,9 @@ void resize_pool( pool_t *p, int narenas )
 }
 
 
+// -----------------------------------------------------------------------
+// pool arenas workers
+// -----------------------------------------------------------------------
 
 
 static pool_arena_t * alloc_arenas( int arena_size, int narenas, pool_t *init )
@@ -112,23 +168,6 @@ static void free_arenas( int narenas, pool_arena_t *a )
 
 
 
-void destroy_pool(pool_t *p)
-{
-    pool_arena_t *a = p->arenas;
-    // if( flag_autoclean ) // remove all els
-
-    // assert empty
-    int i;
-    for( i = 0; i < p->narenas; i++ )
-        assert( a[i].nused == 0 );
-
-    // free arenas
-    free_arenas( p->narenas, a );
-
-    free(p);
-}
-
-
 
 
 
@@ -141,17 +180,23 @@ void destroy_pool(pool_t *p)
 
 
 //! Called in lock!
-static void do_destroy_el( pool_t *pool, pool_arena_t *a, int ne );
+static errno_t do_destroy_el( pool_t *pool, pool_arena_t *a, int ne );
 //! Called in lock!
 static pool_handle_t find_free_el( pool_t *pool );
 
 
-#define CHECK_ARENA(na) if( ((na) > pool->narenas) || ((na) < 0)) panic("arena id is wrong")
+#define CHECK_ARENA(na) if( ((na) > pool->narenas) || ((na) < 0)) panic("arena id is wrong: %d", na)
 
 #define GET_ARENA(na) ({ CHECK_ARENA(na); pool->arenas+(na); })
 
-#define CHECK_EL(_a,_ne) ({ int __ne = (_ne); if( ((__ne) > (_a)->arena_size) || ((__ne) < 0) || ((_a)->ptrs[(__ne)] == 0) ) panic("arena el is wrong"); })
+#define CHECK_EL(_a,_ne) ({ int __ne = (_ne); if( ((__ne) > (_a)->arena_size) || ((__ne) < 0) ) panic("arena el is wrong"); })
+#define CHECK_ZERO(_a,_ne) ({ int __ne = (_ne); if( (_a)->ptrs[(__ne)] == 0 ) panic("arena el is zero"); })
 #define CHECK_REF(_a,_ne) ({ int __ne = (_ne); if( ((_a)->refc[(__ne)] <= 0) ) panic("arena el ref <= 0"); })
+
+
+// -----------------------------------------------------------------------
+// el iface
+// -----------------------------------------------------------------------
 
 
 void *pool_get_el( pool_t *pool, pool_handle_t handle )
@@ -162,6 +207,7 @@ void *pool_get_el( pool_t *pool, pool_handle_t handle )
     int ne = HANDLE_2_ELEM(handle);
     pool_arena_t *a = GET_ARENA(na);
     CHECK_EL(a,ne);
+    CHECK_ZERO(a,ne);
     CHECK_REF(a,ne);
 
     a->refc[ne]++;
@@ -170,37 +216,66 @@ void *pool_get_el( pool_t *pool, pool_handle_t handle )
 }
 
 
-void pool_release_el( pool_t *pool, pool_handle_t handle )
+errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
 {
+    errno_t ret = 0;
     hal_mutex_lock( &pool->mutex );
 
     int na = HANDLE_2_ARENA(handle);
     int ne = HANDLE_2_ELEM(handle);
     pool_arena_t *a = GET_ARENA(na);
     CHECK_EL(a,ne);
+    CHECK_ZERO(a,ne);
     CHECK_REF(a,ne);
 
-    a->refc[ne]--;
-    if(pool->flag_autodestroy)
-        do_destroy_el( pool, a, ne );
+    if( pool->flag_nofail )
+        assert(a->refc[ne] > 0);
+    else
+        if( a->refc[ne] <= 0 )
+        {
+            ret = ENOENT;
+            goto finish;
+        }
 
+    a->refc[ne]--;
+    if( (pool->flag_autodestroy) && (a->refc[ne] == 0) )
+        ret = do_destroy_el( pool, a, ne );
+
+finish:
     hal_mutex_unlock( &pool->mutex );
+    return ret;
 }
 
 
-void pool_destroy_el( pool_t *pool, pool_handle_t handle )
+errno_t pool_destroy_el( pool_t *pool, pool_handle_t handle )
 {
+    errno_t ret = 0;
     hal_mutex_lock( &pool->mutex );
 
     int na = HANDLE_2_ARENA(handle);
     int ne = HANDLE_2_ELEM(handle);
     pool_arena_t *a = GET_ARENA(na);
     CHECK_EL(a,ne);
-    if( (a->refc[ne] > 0) ) panic("arena el ref > 0 on destroy");
 
-    do_destroy_el( pool, a, ne );
+    if( a->refc[ne] != 0 )
+    {
+        if( pool->flag_nofail )
+            panic("arena el ref != 0 on destroy");
+        else
+        {
+            ret = (a->refc[ne] > 0) ? EEXIST : ENOENT;
+            goto finish;
+        }
+    }
 
+    if( a->ptrs[ne] != 0 )
+        ret = do_destroy_el( pool, a, ne );
+    else
+        ret = ENOENT;
+
+finish:
     hal_mutex_unlock( &pool->mutex );
+    return ret;
 }
 
 
@@ -212,6 +287,8 @@ pool_handle_t pool_create_el( pool_t *pool, void *arg )
     // TODO grow
 
     ret = find_free_el( pool );
+    if( ret < 0 )
+        goto fail;
 
     int na = HANDLE_2_ARENA(ret);
     int ne = HANDLE_2_ELEM(ret);
@@ -231,9 +308,10 @@ pool_handle_t pool_create_el( pool_t *pool, void *arg )
     a->ptrs[ne] = e;
     a->nused++;
 
+fail:
     hal_mutex_unlock( &pool->mutex );
 
-    if( (ret < 0) || pool->flag_nofail )
+    if( (ret < 0) && pool->flag_nofail )
         panic("out of mem in pool");
 
     return ret;
@@ -241,19 +319,30 @@ pool_handle_t pool_create_el( pool_t *pool, void *arg )
 
 
 
+// -----------------------------------------------------------------------
+// el workers
+// -----------------------------------------------------------------------
 
 
-static void do_destroy_el( pool_t *pool, pool_arena_t *a, int ne )
+
+static errno_t do_destroy_el( pool_t *pool, pool_arena_t *a, int ne )
 {
+    if( pool->flag_nofail )
+        assert(a->refc[ne] == 0);
+    else
+        if(a->refc[ne] != 0)
+            return ENOENT;
+
     assert(a->nused > 0);
     assert(a->nused < a->arena_size );
-    assert(a->refc[ne] == 0);
 
     if( pool->destroy )
         pool->destroy( a->ptrs[ne] );
 
     a->ptrs[ne] = 0;
     a->nused--;
+
+    return 0;
 }
 
 static pool_handle_t find_free_el( pool_t *pool )
@@ -280,7 +369,7 @@ rewrap:
         goto rewrap;
     }
 
-    if( as[HANDLE_2_ARENA(h)].nused > as[HANDLE_2_ARENA(h)].arena_size )
+    if( as[HANDLE_2_ARENA(h)].nused >= as[HANDLE_2_ARENA(h)].arena_size )
         goto next_arena;
 
     // Now we have arena with some free place
@@ -289,14 +378,16 @@ rewrap:
     int i;
     for( i = 0; i < as[na].arena_size; i++ )
     {
-        if( as[na].ptrs[i] == 0 )
+        if( (as[na].ptrs[i] == 0) && (as[na].refc[i] == 0) )
         {
             pool->last_handle = MK_HANDLE(na,i);
             return pool->last_handle;
         }
 
     }
-    goto rewrap;
+    //goto rewrap;
+    printf("? no free in arena with nused <= arena_size");
+    goto next_arena;
 
     return -1;
 }

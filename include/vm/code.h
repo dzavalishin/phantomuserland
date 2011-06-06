@@ -29,7 +29,7 @@ int					pvm_code_do_get_int( const unsigned char *addr );
 
 struct vm_code_linenum
 {
-	long		ip;
-	int			line;
+	long        ip;
+	int	        line;
 };
 

@@ -20,18 +20,17 @@ CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o
 PHANTOM_CFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -std=gnu89 -DKERNEL
 
 
-CLIB   =
+CLIB   = $(PLIBDIR)/libphantom_c.a
 
 include $(PHANTOM_SRCDIR)/GNUmakerules
 
 DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))
 
 LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
-#LIBGCC := 
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
-PHANTOM_LIBS = 	$(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a
+PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a
 
 
 
@@ -88,19 +87,11 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
 	fs_map.o stats.o resolve.o main.o keyboard.o syslog.o arch_name.o \
-	svn_version.o $(PLIBDIR)/libdev.a $(PLIBDIR)/libphantom.a \
-	$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a  \
-	$(L386) $(DEPENDLIBS) $(PLIBDIR)/libnewos.a $(PHANTOM_LIBS)
+	svn_version.o	$(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 
 	@echo "Linking $@ ---------------------------------------------"
 	@$(CC) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
-		-o $@.pe $(filter-out %.a,$^) $(PLIBDIR)/libdev.a  	\
-		$(PLIBDIR)/libnewos.a \
-		$(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libTinyGL.a $(PLIBDIR)/libphantom_c.a \
-		$(L386) $(PLIBDIR)/libdev.a \
-		$(PHANTOM_LIBS) $(PLIBDIR)/libphantom_c.a \
-		$(L386) $(PLIBDIR)/libphantom.a \
-		$(CLIB) $(LIBGCC) crtn.o 
+		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > ../../run/tftp/$@
 	cat < $@ > ../../../run/fat/boot/$@

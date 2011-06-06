@@ -9,7 +9,7 @@
  *
 **/
 
-#define DEBUG_MSG_PREFIX "test"
+#define DEBUG_MSG_PREFIX "test.pool"
 #include "debug_ext.h"
 #define debug_level_flow 10
 #define debug_level_error 10
@@ -28,43 +28,127 @@ static pool_t *pool;
 
 #define MAX 200
 
+static pool_handle_t  hs[MAX];
+static int hsp = 0;
+
+static pool_handle_t  _pop()
+{
+    assert(hsp > 0);
+    return hs[--hsp];
+}
+
+static void _push(pool_handle_t h)
+{
+    assert(hsp < MAX);
+    hs[hsp++] = h;
+}
+
+static int _empty() { return hsp == 0; }
+
+
+
+
+static void _show_free()
+{
+    SHOW_INFO( 0, "%d free, %d used in pool", pool_get_free( pool ), pool_get_used( pool ) );
+}
+
 
 static void _create_free( int i )
 {
+    SHOW_INFO( 0, "create/free %d", i );
+
     while(i-- > 0)
     {
+        //printf("%d ", i);
         pool_handle_t  h = pool_create_el( pool, "aaa" );
-        pool_release_el( pool, h );
+        test_check_ge(h, 0);
+        test_check_false(pool_release_el( pool, h ));
         //pool_destroy_el( pool, h );
+        //if( (i%10) == 0 ) printf(".");
+        //if( (i%100) == 0 ) printf("\n");
     }
+    //printf("\n");
+    _show_free();
 }
-
 
 static void _create( int i )
 {
+    SHOW_INFO( 0, "create %d", i );
+
     while(i-- > 0)
-        pool_create_el( pool, "aaa" );
+    {
+        pool_handle_t  h = pool_create_el( pool, "aaa" );
+        test_check_ge(h, 0);
+        _push( h );
+    }
+    _show_free();
 }
+
+
+static void _release( int i)
+{
+    SHOW_INFO( 0, "release %d", i );
+
+    while(i-- > 0)
+        test_check_false(pool_release_el( pool, _pop() ));
+    _show_free();
+}
+
+static void _release_all()
+{
+    SHOW_INFO0( 0, "release all" );
+
+    while(!_empty())
+        test_check_false(pool_release_el( pool, _pop() ));
+    _show_free();
+}
+
 
 int do_test_pool(const char *test_parm)
 {
     (void) test_parm;
 
     pool = create_pool();
+    pool->flag_nofail = 0; // return errors, don't panic
 
+    _show_free();
+
+    pool_handle_t  h;
+
+    SHOW_FLOW0( 0, "check make/kill" );
+    h = pool_create_el( pool, "aaa" );
+    test_check_false(h < 0);
+    _show_free();
+    test_check_false(pool_release_el( pool, h ));
+    _show_free();
+
+    test_check_true( 0 == pool_get_used( pool ) );
+
+    //SHOW_FLOW0( 0, "check pool_destroy_el fail" );
+    test_check_false(!pool_destroy_el( pool, h )); // must fail
+
+    test_check_true( 0 == pool_get_used( pool ) );
+
+    SHOW_FLOW0( 0, "check mass make/kill" );
     _create_free( 500 );
 
+    SHOW_FLOW0( 0, "check create + mass make/kill" );
     _create(20);
-
     _create_free( 500 );
 
-    //_release(10);
+    SHOW_FLOW0( 0, "check kill/make/kill" );
+    _release(10);
     _create(20);
-    //_release(10);
+    _release(10);
 
+    SHOW_FLOW0( 0, "check mass make/kill" );
     _create_free( 500 );
 
-    //destroy_pool(pool);
+    SHOW_FLOW0( 0, "check release all" );
+    _release_all();
+
+    test_check_false(destroy_pool(pool));
     return 0;
 }
 

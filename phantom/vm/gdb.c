@@ -133,16 +133,6 @@ static void set_regs(gdb_pt_regs *r, struct data_area_4_thread *da)
 
 
 
-/*
-#include <asm/gdb-stub.h>
-#include <linux/string.h>
-#include <linux/kernel.h>
-#include <linux/signal.h>
-#include <linux/sched.h>
-#include <linux/mm.h>
-#include <asm/pgtable.h>
-#include <asm/system.h>
-*/
 
 /*
  * external low-level support routines
@@ -234,7 +224,7 @@ static void getpacket(char *buffer)
             count = count + 1;
         }
 
-        printf("GDB pkt # " );
+        //printf("GDB pkt # " );
 
         if (count >= BUFMAX)
             continue;
@@ -694,7 +684,10 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
                         startTid++;
                     }
                     else
+                    {
+                        //printf("startTid != 0\n" );
                         snprintf( output_buffer, sizeof(output_buffer), "l" );
+                    }
 #endif
                     break;
                 }
