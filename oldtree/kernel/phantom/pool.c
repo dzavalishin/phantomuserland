@@ -335,6 +335,7 @@ static errno_t do_destroy_el( pool_t *pool, pool_arena_t *a, int ne )
 
     assert(a->nused > 0);
     assert(a->nused < a->arena_size );
+    assert(a->ptrs[ne]);
 
     if( pool->destroy )
         pool->destroy( a->ptrs[ne] );
