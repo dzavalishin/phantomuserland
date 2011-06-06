@@ -405,7 +405,7 @@ void set_debug_traps(void)
  */
 extern void fltr_set_mem_err(void)
 {
-    /* TODO: Needs to be written... */
+    /* Needs to be written... */
 }
 
 
@@ -641,7 +641,7 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
 
 
             /*
-             * Reset the whole machine (TODO: system dependent)
+             * Reset the whole machine (system dependent)
              */
         case 'r':
             break;

@@ -20,8 +20,6 @@ disk_page_io_allocate(disk_page_io *me)
 {
     if(me->mem_allocated) return;
 
-    //me->mem = hal_alloc_page();//malloc( hal_mem_pagesize() ); // BUG. Are we sure we're not in interrupt?
-    //me->req.phys_page = kvtophys(me->mem);
     hal_pv_alloc( &(me->req.phys_page), &(me->mem), PAGE_SIZE );
 
     me->mem_allocated = 1;
@@ -34,7 +32,6 @@ disk_page_io_release(disk_page_io *me)
     if( me->req.flag_pagein || me->req.flag_pageout )
         panic("disk_page_cacher_release: operation is in progress");
     if(!me->mem_allocated) return;
-    //hal_free_page(me->mem);
 
     hal_pv_free( me->req.phys_page, me->mem, PAGE_SIZE );
 
@@ -51,6 +48,7 @@ disk_page_io_wait(disk_page_io *me)
         hal_sleep( &req );
 #else
     // BUG! polling!
+    //hal_sleep_msec( 1 ); // XXX BUG TODO turn on and kernel will crash - why?
     while( me->req.flag_pagein || me->req.flag_pageout )
         hal_sleep_msec( 10 );
 #endif

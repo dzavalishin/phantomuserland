@@ -28,8 +28,8 @@
 #define kvtophys(va)	((physaddr_t)(va))
 
 
-void wire_page_for_addr( void *addr );
-void unwire_page_for_addr( void *addr );
+void wire_page_for_addr( void *addr, size_t count );
+void unwire_page_for_addr( void *addr, size_t count );
 
 
 

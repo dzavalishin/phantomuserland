@@ -370,6 +370,8 @@ static void start_dac(phantom_device_t *dev)
 
 }
 
+static void start_adc(phantom_device_t *dev) __attribute__((used));
+
 static void start_adc(phantom_device_t *dev)
 {
     es1370_t *es = dev->drv_private;

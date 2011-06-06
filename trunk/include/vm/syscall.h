@@ -13,8 +13,7 @@
 #ifndef SYSCALL_H
 #define SYSCALL_H
 
-#include "vm/syscall_tools.h"
-//#include "vm/systable_id.h"
+#include <vm/syscall_tools.h>
 
 void phantom_activate_thread(struct pvm_object new_thread);
 

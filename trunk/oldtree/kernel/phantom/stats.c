@@ -27,7 +27,7 @@ int			*to_zero_counters;
 
 
 //! Keeps totals per this OS run
-long		stat_total_counters[MAX_STAT_COUNTERS];
+long                    stat_total_counters[MAX_STAT_COUNTERS];
 
 int			stat_total_seconds = 0;
 
@@ -117,6 +117,9 @@ const char *stat_counter_name[MAX_STAT_COUNTERS] =
 
     "Thread switches",
     "Thread reselects",
+
+    "Wire page requests",
+    "Wire page pageins",
 
 };
 

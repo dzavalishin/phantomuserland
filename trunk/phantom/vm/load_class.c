@@ -412,7 +412,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
         return 1;
 
 
-    // BUG! Need to check that class name and file name correspond?
+    // TODO BUG! Need to check that class name and file name correspond?
 
     //if(debug_print) printf("Loaded %d methods\n", methods.size() );
 

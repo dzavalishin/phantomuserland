@@ -49,17 +49,10 @@ static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e
 #if KEY_EVENTS
 static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-    struct phantom_thread * t = w->owner;
-
-    if( t == 0 )
-    {
-        //SHOW_ERROR0( 1, "Key event for unowned window" );
-        //printf( "Key event for unowned window" );
+    wtty_t *wt;
+    if( 0 != t_get_ctty( w->owner, &wt ) )
         return 0;
-    }
 
-    //wtty_t *wt = t->ctty;
-    wtty_t *wt = get_thread_ctty( t );
 
     // Skip key release events
     if(e->modifiers & UI_MODIFIER_KEYUP)

@@ -63,7 +63,7 @@ typedef struct
 // NB! No network drivers on stage 0!
 static pci_probe_t pci_drivers[] =
 {
-#if 1
+#if 0
     { "VirtIO Disk", 	driver_virtio_disk_probe, 	2, VIRTIO_VENDOR, 0, 1 },
     { "VirtIO Baloon", 	driver_virtio_baloon_probe, 	2, VIRTIO_VENDOR, 0, 5 },
     //{ "VirtIO Random",  driver_virtio_random_probe, 	2, VIRTIO_VENDOR, 0, 1 }, // TODO dev/dclass?

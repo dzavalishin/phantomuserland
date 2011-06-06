@@ -113,7 +113,7 @@ void pvm_ostack_abs_set( struct data_area_4_object_stack* rootda, int abs_pos, s
         abs_pos -= pagesize;
     }
 
-    //TODO: assert should be here instead of decrement - it is an error in bytecode compilator/implementation
+    //TODO: assert should be here instead of decrement - it is an error in bytecode compiler/implementation
     if (pvm_object_da(c,object_stack)->stack[abs_pos].data != 0) ref_dec_o( pvm_object_da(c,object_stack)->stack[abs_pos] ); //decr prev value - avoid memory leak
 
     pvm_object_da(c,object_stack)->stack[abs_pos] = val;

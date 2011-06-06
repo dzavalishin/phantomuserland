@@ -380,7 +380,7 @@ errno_t io_object_get(pvm_object_t ioo, pvm_object_t *data  )
 
 
 
-// TODO set some var to some value - parameters control, like ioctl
+// set some var to some value - parameters control, like ioctl
 static int io_12_setvar(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
@@ -403,7 +403,7 @@ static int io_12_setvar(struct pvm_object me, struct data_area_4_thread *tc )
 }
 
 
-// TODO get some var's value - parameters readout, like ioctl
+// get some var's value - parameters readout, like ioctl
 static int io_13_getvar(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;

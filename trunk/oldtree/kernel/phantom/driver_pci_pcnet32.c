@@ -118,9 +118,6 @@ WW();
 
     nic->irq = pci->interrupt;
 
-    /// XXX BUG HACK
-    //nic->irq = 15;
-
     int i;
     for (i = 0; i < 6; i++)
     {

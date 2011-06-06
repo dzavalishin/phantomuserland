@@ -244,6 +244,10 @@ phantom_thread_t * get_current_thread() { return 0; }
 
 void *get_thread_owner( phantom_thread_t *t ) { return 0; }
 
+int get_current_tid() { return -1; }
+errno_t t_get_owner( int tid, void ** owner ) { return ENOENT; }
+
+errno_t t_get_ctty( tid_t tid, struct wtty **ct ) { return ENOENT; }
 
 
 void panic(const char *fmt, ...)
@@ -333,9 +337,9 @@ void hal_sti() {}
 void hal_cli() {}
 
 
-void wire_page_for_addr( void *addr ) {}
+void wire_page_for_addr( void *addr, size_t len ) {}
 
-void unwire_page_for_addr( void *addr ) {}
+void unwire_page_for_addr( void *addr, size_t len ) {}
 
 
 struct wtty *get_thread_ctty( struct phantom_thread *t )

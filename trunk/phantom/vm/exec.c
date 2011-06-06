@@ -132,7 +132,6 @@ static void pvm_exec_save( struct data_area_4_thread *da, unsigned slot )
 static void pvm_exec_iload( struct data_area_4_thread *da, unsigned slot )
 {
     if( debug_print_instr ) printf("is load %d; ", slot);
-    // TODO pvm_get_asint must return int and do not change refcount
     int v = pvm_get_int( pvm_get_ofield( this_object(), slot) );
     is_push( v );
 }
@@ -354,31 +353,6 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
 
 
 
-/*
- *
- * This must be, possibly, killed, no?
- * At least it can't be used widely. The only known 'fair' use
- * is boot code execution, which must happen only once in system's life.
- *
- * Second known use is call to userland class lookup/load code, which must
- * be redone with a separate thread. Calling thread must then be stopped out
- * of the interpreter to make sure snaps are safe.
- *
-void pvm_exec_loop_kludge(struct pvm_object current_thread)
-{
-    struct data_area_4_thread *da = (struct data_area_4_thread *)&(current_thread.data->da);
-    // TODO: check for current_thread to be thread for real
-
-    pvm_exec_load_fast_acc(da); // For any case
-
-    while(1)
-    {
-    }
-}
- */
-
-
-
 /**
  *
  * Well... here is the root of all evil. The bytecode interpreter itself.
@@ -403,10 +377,12 @@ void pvm_exec_loop_kludge(struct pvm_object current_thread)
  *
 **/
 
-void pvm_exec(struct pvm_object current_thread)
+void pvm_exec(pvm_object_t current_thread)
 {
+    if( !pvm_object_class_is( current_thread, pvm_get_thread_class() ))
+        panic("attempt to run not a thread");
+
     struct data_area_4_thread *da = (struct data_area_4_thread *)&(current_thread.data->da);
-    // TODO: check for current_thread to be thread for real
 
     pvm_exec_load_fast_acc(da); // For any case
 
@@ -709,7 +685,7 @@ void pvm_exec(struct pvm_object current_thread)
 
         case opcode_summon_null:
             if( debug_print_instr ) printf("push null; ");
-            os_push( pvm_get_null_object() ); // TODO BUG: so what opcode_os_push_null is for then?
+            os_push( pvm_get_null_object() ); // so what opcode_os_push_null is for then?
             break;
 
         case opcode_summon_thread:
@@ -804,7 +780,7 @@ void pvm_exec(struct pvm_object current_thread)
             }
             break;
 
-            // TODO if you want to enable these, work out refcount
+            // if you want to enable these, work out refcount
             // and security issues first!
             // compose/decompose
 #if 0
@@ -893,7 +869,7 @@ void pvm_exec(struct pvm_object current_thread)
 
                 if( displ < tabsize )
                 {
-                    da->code.IP = start_table_IP+(displ*4); // BUG! 4!
+                    da->code.IP = start_table_IP+(displ*4); // TODO BUG! 4!
                     if( debug_print_instr ) printf("load from %d, ", da->code.IP );
                     new_IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 }
@@ -1216,7 +1192,7 @@ struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
 
     /*
      *
-     * BUG! This executes code in a tight loop. It will prevent
+     * TODO BUG! This executes code in a tight loop. It will prevent
      * snaps from being done. Redo with a separate thread start.
      *
      * Run class loader in the main pvm_exec() loop? Hmmm.
@@ -1236,7 +1212,7 @@ struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
 
 /*
  *
- * BUG! This executes code in a tight loop. It will prevent
+ * TODO BUG! This executes code in a tight loop. It will prevent
  * snaps from being done. Redo with a separate thread start.
  *
  */

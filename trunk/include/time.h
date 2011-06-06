@@ -57,6 +57,9 @@ extern bigtime_t (*arch_get_time_delta)(void);
 time_t 			time(time_t *timer);
 void 			set_time(time_t time);
 
+//! Fast, but less accurate time, sec
+time_t fast_time(void);
+
 
 #define phantom_spinwait_msec phantom_spinwait
 

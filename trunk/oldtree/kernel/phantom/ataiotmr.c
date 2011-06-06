@@ -66,7 +66,7 @@ static long tmr_cmd_start_time;      // command start time - see the
 void tmr_set_timeout( void )
 {
     // get the command start time
-    tmr_cmd_start_time = time(0);
+    tmr_cmd_start_time = fast_time();
 }
 
 //**************************************************************
@@ -84,7 +84,7 @@ int tmr_chk_timeout( void )
     assert(hal_is_sti());
 
     // get current time
-    curTime = time(0);
+    curTime = fast_time();
 
     // timed out?
     if ( curTime >= ( tmr_cmd_start_time + tmr_time_out ) )
@@ -137,10 +137,10 @@ void tmr_get_delay_counts( void )
    while ( retry )
    {
       // wait until the timer ticks
-      startTime = time(0);//tmr_read_bios_timer();
+      startTime = fast_time();//tmr_read_bios_timer();
       while ( 1 )
       {
-         curTime = time(0);//tmr_read_bios_timer();
+         curTime = fast_time();//tmr_read_bios_timer();
          if ( curTime != startTime )
             break;
       }
@@ -152,7 +152,7 @@ void tmr_get_delay_counts( void )
             tmr_waste_time( 7 );
          count += 100 ;
          // check timer
-         curTime = time(0);//tmr_read_bios_timer();
+         curTime = fast_time();//tmr_read_bios_timer();
          // pass midnight?
          /*if ( curTime < startTime )
          {
@@ -273,8 +273,8 @@ void tmr_delay_xfer( void )
    unsigned long lw;
    assert(hal_is_sti());
    trc_llt( 0, 0, TRC_LLT_DELAY2 );
-   lw = time(0); //tmr_read_bios_timer();
-   while ( lw == time(0) ) //tmr_read_bios_timer() )
+   lw = fast_time(); //tmr_read_bios_timer();
+   while ( lw == fast_time() ) //tmr_read_bios_timer() )
       /* do nothing */ ;
 }
 

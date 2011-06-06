@@ -580,7 +580,7 @@ static void clearPlane(int plane, char clc)
 
 static void clrscr()
 {
-    // TODO: 4 planes at once
+    // TODO? 4 planes at once
     if( basic_VGA_Mode.attrib & TVU_UNCHAINED )
     {
         int plane;

@@ -174,7 +174,6 @@ pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
 
     if( slot >= da_po_limit(o) )
     {
-        // BUG! if i am vector - grow here!
         pvm_exec_panic( "save: slot index out of bounds" );
     }
 
@@ -197,7 +196,6 @@ pvm_get_ofield( struct pvm_object op, unsigned int slot )
 
     if( slot >= da_po_limit(op.data) )
     {
-        // BUG! if i am vector - grow here!
         pvm_exec_panic( "load: slot index out of bounds" );
     }
 
@@ -223,7 +221,6 @@ pvm_set_field( struct pvm_object_storage *o, unsigned int slot, struct pvm_objec
 
     if( slot >= da_po_limit(o) )
     {
-        // BUG! if i am vector - grow here!
         pvm_exec_panic( "load: slot index out of bounds" );
     }
 
@@ -248,7 +245,6 @@ pvm_set_ofield( struct pvm_object op, unsigned int slot, struct pvm_object value
 
     if( slot >= da_po_limit(op.data) )
     {
-        // BUG! if i am vector - grow here!
         pvm_exec_panic( "slot index out of bounds" );
     }
 
@@ -332,16 +328,15 @@ void pvm_object_print(struct pvm_object o )
         printf( "%d", pvm_get_int( o ) );
 
     if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
+    {
+        struct data_area_4_string *da = (struct data_area_4_string *)&(o.data->da);
+        int len = da->length;
+        unsigned const char *sp = da->data;
+        while( len-- )
         {
-            struct data_area_4_string *da = (struct data_area_4_string *)&(o.data->da);
-            int len = da->length;
-            unsigned const char *sp = da->data;
-/* TODO BUG! From unicode! */
-            while( len-- )
-                {
-                putchar(*sp++);
-                }
+            putchar(*sp++);
         }
+    }
 }
 
 void print_object_flags(struct pvm_object_storage *o)
@@ -380,7 +375,6 @@ void dumpo( addr_t addr )
         struct data_area_4_string *da = (struct data_area_4_string *)&(o->da);
         int len = da->length;
         unsigned const char *sp = da->data;
-        /* TODO: BUG! From unicode! */
         while( len-- )
         {
             putchar(*sp++);

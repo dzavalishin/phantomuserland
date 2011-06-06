@@ -438,7 +438,6 @@ static int phantom_dev_keyboard_init(int irq)
 
     head = tail = 0;
 
-    // todo - NOT shareable, really?
     hal_irq_alloc( irq, (void *)handle_keyboard_interrupt, 0, HAL_IRQ_SHAREABLE );
 
     direct_trygetchar_hook_active = 1;
@@ -503,7 +502,7 @@ int phantom_scan_console_getc(void)
 {
 #if 1
     // TODO PIECE OF JUNK!
-    // just wait some key - REDO!
+    // just waits for some key - REDO!
 
     do {
 

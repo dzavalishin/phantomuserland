@@ -52,7 +52,7 @@ static int debug_print = 0;
     curr_xy.Y += written / consoleInfo.dwSize.X;
     curr_xy.X += written % consoleInfo.dwSize.X;
 
-    // BUG! Need scrolling here?
+    // Need scrolling here?
     validate_xy();
     }
 */
@@ -109,7 +109,7 @@ static int getwc_16(struct pvm_object me , struct data_area_4_thread *tc )
     DEBUG_INFO;
     char c[1];
 
-    // XXX syscall blocks!
+    // TODO XXX syscall blocks!
     c[0] = phantom_dev_keyboard_getc();
 
     SYSCALL_RETURN( pvm_create_string_object_binary( c, 1 ));
@@ -321,7 +321,8 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
     tty->bg = COLOR_WHITE;
 
     drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE );
-    tty->w.title = "VM TTY Window"; // BUG! Pointer from object space to kernel data seg! hacked around below in restart_tty
+    strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
+    tty->w.title = tty->title;
 
     {
     pvm_object_t o;
@@ -355,11 +356,11 @@ void pvm_restart_tty( pvm_object_t o )
 
     printf( "restart TTY %p\n", tty );
 
-    tty->w.title = "VM TTY Window (restarted)"; // BUG! Pointer from object space to kernel data seg!
+    tty->w.title = tty->title; // need? must be correct in snap
 
     // BUG! How do we fill owner? We must have object ref here
     tty->w.inKernelEventProcess = 0;
-    tty->w.owner = 0;
+    tty->w.owner = -1;
 
     queue_init(&(tty->w.events));
     tty->w.events_count = 0;

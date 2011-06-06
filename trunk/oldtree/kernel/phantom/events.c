@@ -35,6 +35,7 @@
 #include <video.h>
 #include <console.h>
 #include <wtty.h>
+#include <time.h>
 
 void drv_video_window_explode_event(struct ui_event *e);
 int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait );
@@ -304,7 +305,7 @@ void event_q_put_key( int vkey, int ch, int modifiers )
 
     struct ui_event *e = get_unused();
     e->type = UI_EVENT_TYPE_KEY;
-    e->time = 0; // TODO put time
+    e->time = fast_time();
     e->focus= 0;
 
     e->k.vk = vkey;
@@ -323,7 +324,7 @@ void event_q_put_mouse( int x, int y, int buttons )
 
     struct ui_event *e = get_unused();
     e->type = UI_EVENT_TYPE_MOUSE;
-    e->time = 0; // TODO put time
+    e->time = fast_time();
     e->focus= 0;
 
     e->m.buttons = buttons;
@@ -341,7 +342,7 @@ void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus 
 
     struct ui_event *e = get_unused();
     e->type = UI_EVENT_TYPE_WIN;
-    e->time = 0; // TODO put time
+    e->time = fast_time();
     e->focus= focus;
 
     e->w.info = info;
@@ -363,7 +364,7 @@ void event_q_put_global( ui_event_t *ie )
     *e = *ie;
 
     e->type = UI_EVENT_TYPE_GLOBAL;
-    e->time = 0; // TODO put time
+    e->time = fast_time();
     e->focus= 0;
 
     put_event(e);
