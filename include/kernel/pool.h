@@ -6,7 +6,18 @@
  *
  * Pool of kernel structs accessed with handle.
  *
- **/
+ * TODO poosibly use for: timed calls, threads, disks/partitions,
+ *      exe_modules, drivers, wttys, windows, file descriptors,
+ *      siginfos, processes, io requests, semas, fs instances,
+ *      buses, udp/tcp endpoints, cpus, interrupt controllers,
+ *      USB hcs and other structs, ports, uusockets, uufiles,
+ *      uufses, fonts, bitmaps, virtio devices, trfs stuff,
+ *      paging_devices, sound ports
+ *      what else?
+ *
+ * TODO add magic to handle's upper byte to detect correct handle
+ *
+**/
 
 #include <hal.h>
 #include <errno.h>
