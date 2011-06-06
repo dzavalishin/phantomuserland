@@ -24,7 +24,8 @@
 #include <hal.h>
 
 
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 #include "udp.h"
 
 #include "misc.h"

@@ -9,13 +9,10 @@
 **/
 
 
-#include "hal.h"
-#include "newos.h"
+#include <hal.h>
+#include <compat/newos.h>
 #include "misc.h"
-
-//#include "i386/rtc.h"
 #include <kernel/ia32/rtc.h>
-
 
 #include <time.h>
 #include <string.h>

@@ -13,7 +13,7 @@
 
 #include "hal.h"
 #include "khash.h"
-#include "newos.h"
+//#include "newos.h"
 
 
 #define VERIFY_TABLE 0

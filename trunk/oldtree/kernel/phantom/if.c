@@ -27,7 +27,7 @@
 #include "hal.h"
 
 
-#include "newos.h"
+//#include "newos.h"
 
 #include "misc.h"
 

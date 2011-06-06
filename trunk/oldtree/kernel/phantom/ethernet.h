@@ -6,7 +6,8 @@
 #define _NEWOS_KERNEL_NET_ETHERNET_H
 
 #include <newos/cbuf.h>
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 
 /*
 #define PROT_TYPE_IPV4 0x0800

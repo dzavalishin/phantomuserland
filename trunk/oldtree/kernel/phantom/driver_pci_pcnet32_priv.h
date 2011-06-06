@@ -10,7 +10,8 @@
 #include "hal.h"
 #include "hal_private.h"
 
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 
 //#define addr_t void *
 //typedef void * addr_t;

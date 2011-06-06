@@ -7,8 +7,9 @@
 
 #include <phantom_libc.h>
 
-#include "hal.h"
-#include "newos.h"
+#include <hal.h>
+//#include "newos.h"
+#include <compat/newos.h>
 
 typedef void (*net_timer_callback)(void *);
 

@@ -51,7 +51,7 @@
 
 #include "nqueue.h"
 
-#include "newos.h"
+//#include "newos.h"
 //#include "cbuf.h"
 #include "tcp.h"
 #include "net_timer.h"

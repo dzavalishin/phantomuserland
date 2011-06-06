@@ -27,7 +27,8 @@
 #include "endian.h"
 #include "hal.h"
 
-#include "newos.h"
+#include <compat/newos.h>
+//#include "newos.h"
 
 #include "misc.h"
 

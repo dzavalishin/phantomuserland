@@ -9,7 +9,8 @@
 
 #if 0
 #include "uhci.h"
-#include "newos.h"
+//#include "newos.h"
+#include <compat/newos.h>
 
 #define DEBUG_MSG_PREFIX "usb"
 #include "debug_ext.h"

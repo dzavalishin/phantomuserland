@@ -7,7 +7,9 @@
  ** Distributed under the terms of the NewOS License.
  */
 
-#include "newos.h"
+#include <compat/newos.h>
+//#include "newos.h"
+
 #include <kernel/vm.h>
 #include <x86/phantom_pmap.h>
 #include <hal.h>
