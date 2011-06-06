@@ -69,7 +69,7 @@ static void _create_free( int i )
         //if( (i%100) == 0 ) printf("\n");
     }
     //printf("\n");
-    _show_free();
+    //_show_free();
 }
 
 static void _create( int i )
@@ -82,7 +82,7 @@ static void _create( int i )
         test_check_ge(h, 0);
         _push( h );
     }
-    _show_free();
+    //_show_free();
 }
 
 
@@ -92,7 +92,7 @@ static void _release( int i)
 
     while(i-- > 0)
         test_check_false(pool_release_el( pool, _pop() ));
-    _show_free();
+    //_show_free();
 }
 
 static void _release_all()
@@ -101,7 +101,7 @@ static void _release_all()
 
     while(!_empty())
         test_check_false(pool_release_el( pool, _pop() ));
-    _show_free();
+    //_show_free();
 }
 
 
@@ -117,13 +117,24 @@ int do_test_pool(const char *test_parm)
     pool_handle_t  h;
 
     SHOW_FLOW0( 0, "check make/kill" );
-    h = pool_create_el( pool, "aaa" );
-    test_check_false(h < 0);
-    _show_free();
-    test_check_false(pool_release_el( pool, h ));
-    _show_free();
 
+    void *el0 = "aaa";
+    h = pool_create_el( pool, el0 );
+    test_check_false(h < 0);
+    //_show_free();
+    test_check_true( 1 == pool_get_used( pool ) );
+
+    void *el = pool_get_el( pool, h );
+    test_check_eq( el0, el );
+    test_check_true( 2 == pool_get_used( pool ) );
+
+    test_check_false(pool_release_el( pool, h ));
+    test_check_true( 1 == pool_get_used( pool ) );
+
+    test_check_false(pool_release_el( pool, h ));
     test_check_true( 0 == pool_get_used( pool ) );
+    //_show_free();
+
 
     //SHOW_FLOW0( 0, "check pool_destroy_el fail" );
     test_check_false(!pool_destroy_el( pool, h )); // must fail
@@ -147,6 +158,7 @@ int do_test_pool(const char *test_parm)
 
     SHOW_FLOW0( 0, "check release all" );
     _release_all();
+    test_check_true( 0 == pool_get_used( pool ) );
 
     test_check_false(destroy_pool(pool));
     return 0;
