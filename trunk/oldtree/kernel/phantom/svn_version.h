@@ -1,2 +1,2 @@
 const char* svn_version(void);
-#define PHANTOM_VERSION_STR "0.1"
+#define PHANTOM_VERSION_STR "0.2"

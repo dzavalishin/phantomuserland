@@ -24,7 +24,7 @@
 
 
 //void 		pager_stop_io(); // called after io is complete
-void 		pager_free_io_resources(pager_io_request *req);
+void        pager_free_io_resources(pager_io_request *req);
 
 void        pager_get_superblock(void);
 void        pager_update_superblock(void);
@@ -53,7 +53,7 @@ int         pager_interrupt_alloc_page(disk_page_no_t *out);
 int         pager_alloc_page(disk_page_no_t *out);
 void        pager_free_page( disk_page_no_t );
 
-int        	pager_can_grow(); // can I grow pagespace
+int         pager_can_grow(); // can I grow pagespace
 
 
 void        pager_enqueue_for_pagein ( pager_io_request *p );
@@ -73,14 +73,14 @@ void        pager_refill_free(void);
 
 //! called to start new io
 //! called under sema!
-void 		pager_start_io();
+void        pager_start_io();
 
 
 
-void 		phantom_fsck(int do_rebuild );
+void        phantom_fsck(int do_rebuild );
 
 
-void 		phantom_free_snap(
+void        phantom_free_snap(
 		disk_page_no_t old_snap_start,
 		disk_page_no_t curr_snap_start,
 		disk_page_no_t new_snap_start
