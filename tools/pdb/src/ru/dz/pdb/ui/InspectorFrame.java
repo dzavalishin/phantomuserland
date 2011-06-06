@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
 import ru.dz.pdb.CmdException;
@@ -73,7 +74,7 @@ public class InspectorFrame extends JFrame {
 		//gbc.ipadx = 4;		gbc.ipady = 4;
 
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-		
+
 		JPanel topPanel = new JPanel(new GridBagLayout());
 		contentPane.add(topPanel, gbc);
 		poulateTopPanel(topPanel);
@@ -81,22 +82,41 @@ public class InspectorFrame extends JFrame {
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.weightx = 1;
 		gbc.weighty = 1;
-		
+
 		//gbc.gridx = 0;
 		//gbc.gridy = 1;	
-		JPanel mainPanel = new JPanel(new GridBagLayout());		
-		//Panel mainPanel = new Panel();		
-		poulateMainPanel(mainPanel);
+		JTabbedPane tabs = new JTabbedPane();
+
+		{
+			JPanel mainPanel = new JPanel(new GridBagLayout());		
+			//Panel mainPanel = new Panel();		
+			poulateMainPanel(mainPanel);
 
 
-		JScrollPane scroll = new JScrollPane(mainPanel);
-		scroll.setPreferredSize(new Dimension(450, 200));
-		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+			JScrollPane scroll = new JScrollPane(mainPanel);
+			scroll.setPreferredSize(new Dimension(450, 200));
+			scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 
-		//scroll.getHorizontalScrollBar().setValue(0);
+			//scroll.getHorizontalScrollBar().setValue(0);
 
-		contentPane.add(scroll, gbc); 
+			tabs.addTab("Main", scroll);
+		}
+
+		{
+			DumpPanel mainPanel = new DumpPanel(parsed.getDaData());		
+
+
+			JScrollPane scroll = new JScrollPane(mainPanel);
+			scroll.setPreferredSize(new Dimension(450, 200));
+			scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+			tabs.addTab("Dump", scroll);
+		}
+
+
+		//contentPane.add(scroll, gbc); 
+		contentPane.add(tabs, gbc); 
 
 	}
 
@@ -108,7 +128,7 @@ public class InspectorFrame extends JFrame {
 		gbc.gridy = 0;	
 
 		gbc.anchor = GridBagConstraints.NORTH;
-		
+
 		//gbc.fill = GridBagConstraints.BOTH;
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 
@@ -146,12 +166,12 @@ public class InspectorFrame extends JFrame {
 		if(parsed.getObjectFlags() != 0) {
 			//panel.add( new JLabel(" | Flags: "), gbc );
 			panel.add( new JLabel(" | "), gbc );
-			
+
 			JLabel fl = new JLabel(parsed.getFlagsList());
 			fl.setFont(new Font(fl.getFont().getFontName(),Font.BOLD,fl.getFont().getSize()));
 			fl.setToolTipText("flags");
 			panel.add( fl, gbc );
-			
+
 		}
 
 		panel.add( new JLabel(" | "), gbc );

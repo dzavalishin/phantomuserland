@@ -12,6 +12,11 @@ public abstract class AbstractProgramSource implements IProgramSource
 	}
 
 	@Override
+	public int getLinesCount() {
+		return lines.size();
+	}
+	
+	@Override
 	public void dump() 
 	{
 		int i = 0;

@@ -20,7 +20,7 @@ public class ClassObject implements IInternalObject {
 
 	private ObjectRef class_name;
 	private ObjectRef class_parent;
-	private ObjectRef ip2line_maps;
+	private ObjectRef ip2line_map;
 	private ObjectRef method_names;
 	private ObjectRef field_names;
 
@@ -44,7 +44,7 @@ public class ClassObject implements IInternalObject {
 		class_name = new ObjectRef(bb);
 		class_parent = new ObjectRef(bb);
 
-		ip2line_maps = new ObjectRef(bb);
+		ip2line_map = new ObjectRef(bb);
 		method_names = new ObjectRef(bb);
 		field_names = new ObjectRef(bb);
 	}
@@ -71,10 +71,11 @@ public class ClassObject implements IInternalObject {
 		panel.add( new RefButton(class_parent,"Parent"), gbc );				
 		panel.add( new RefButton(default_interface,"Interface"), gbc );				
 
-		panel.add( new RefButton(ip2line_maps,"IP->Line"), gbc );				
+		panel.add( new RefButton(ip2line_map,"IP->Line"), gbc );				
 		panel.add( new RefButton(method_names,"Method names"), gbc );				
 		panel.add( new RefButton(field_names,"Field names"), gbc );						
 	}
 
 	public int getSysTableId() { return sys_table_id; }
+	public ObjectRef getIp2LineMapRef() { return ip2line_map; }
 }
