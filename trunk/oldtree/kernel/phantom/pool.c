@@ -21,6 +21,9 @@
 static pool_arena_t * alloc_arenas( int arena_size, int narenas, pool_t * init );
 static void free_arenas( int narenas, pool_arena_t *a );
 
+static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(void *el) );
+
+
 #define HANDLE_2_ARENA(h) ( (h>>16) & 0xFFFF )
 #define HANDLE_2_ELEM(h) ( h & 0xFFFF )
 #define MK_HANDLE(a,e) ( ((a & 0xFFFF)<<16) | (e & 0xFFFF) )
@@ -95,6 +98,18 @@ int pool_get_used( pool_t *pool )
         nused += a[i].nused;
 
     return nused;
+}
+
+
+errno_t pool_foreach( pool_t *pool, errno_t (*ff)(void *el) )
+{
+    errno_t ret = 0;
+    hal_mutex_lock( &pool->mutex );
+
+    ret = do_pool_foreach( pool, ff );
+
+    hal_mutex_unlock( &pool->mutex );
+    return ret;
 }
 
 
@@ -327,6 +342,8 @@ fail:
 
 static errno_t do_destroy_el( pool_t *pool, pool_arena_t *a, int ne )
 {
+    ASSERT_LOCKED_MUTEX(&pool->mutex);
+
     if( pool->flag_nofail )
         assert(a->refc[ne] == 0);
     else
@@ -348,6 +365,8 @@ static errno_t do_destroy_el( pool_t *pool, pool_arena_t *a, int ne )
 
 static pool_handle_t find_free_el( pool_t *pool )
 {
+    ASSERT_LOCKED_MUTEX(&pool->mutex);
+
     pool_handle_t h = pool->last_handle;
     pool_arena_t * as = pool->arenas;
     int wrapped = 0;
@@ -396,6 +415,40 @@ rewrap:
 
 
 
+static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(void *el) )
+{
+    ASSERT_LOCKED_MUTEX(&pool->mutex);
+
+    errno_t ret = 0;
+    pool_arena_t *as = pool->arenas;
+
+    int i,j;
+    for( i = 0; i < pool->narenas; i++ )
+    {
+        if( as[i].nused == 0 )
+            continue;
+
+        for( j = 0; j < as[i].arena_size; j++ )
+        {
+            if( (as[i].ptrs[j] != 0) && (as[i].refc[j] != 0) )
+            {
+                hal_mutex_unlock( &pool->mutex );
+                ret =ff( as[i].ptrs[j] );
+                hal_mutex_lock( &pool->mutex );
+
+                if( ret )
+                    return ret;
+            }
+
+            if( as[i].nused == 0 )
+                break;
+
+        }
+
+    }
+
+    return ret;
+}
 
 
 

@@ -113,6 +113,18 @@ ret:
     return 0;
 }
 
+int
+hal_mutex_is_locked(hal_mutex_t *m)
+{
+    if(m->impl == 0)
+        return 0;
+
+    struct phantom_mutex_impl* mi = m->impl;
+
+    return mi->owner != 0;
+}
+
+
 #if 0
 
 // ------------------------------------------------------------------
