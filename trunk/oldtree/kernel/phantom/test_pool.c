@@ -106,16 +106,22 @@ static void _release_all()
 
 static int ff_count;
 static void *ff_el;
-static errno_t _ff(void *el)
+static errno_t _ff(pool_t *pool, void *el, pool_handle_t handle)
 {
+    (void) pool;
+    (void) handle;
+
     ff_el = el;
     ff_count++;
     return 0;
 }
 
-static errno_t _ff_fail(void *el)
+static errno_t _ff_fail(pool_t *pool, void *el, pool_handle_t handle)
 {
+    (void) pool;
+    (void) handle;
     (void) el;
+
     return ENOMEM;
 }
 
