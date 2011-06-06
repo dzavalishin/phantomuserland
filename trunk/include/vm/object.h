@@ -240,6 +240,12 @@ void pvm_check_is_thread( struct pvm_object new_thread );
     da->object_default_interface; \
     })
 
+#define pvm_is_internal_class(co) \
+    ({  \
+    struct data_area_4_class *da = pvm_object_da( co, class );  \
+    da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL; \
+    })
+
 
 #endif // PVM_OBJECT_H
 

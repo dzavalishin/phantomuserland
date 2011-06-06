@@ -13,7 +13,7 @@ rem SET USB=-usb
 
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw
-rem SET VIO=-net nic,model=virtio
+SET VIO=-net nic,model=virtio
 
 SET Q_PORTS= -serial file:serial0.log
 
@@ -38,6 +38,8 @@ del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
 %QDIR%\qemu -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND%
+
+grep KERNEL.TEST serial0.log
 
 exit
 

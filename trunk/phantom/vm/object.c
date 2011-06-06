@@ -321,21 +321,38 @@ pvm_copy_object( struct pvm_object in_object )
  *
 **/
 
-
-void pvm_object_print(struct pvm_object o )
+static void pvm_puts(struct pvm_object o )
 {
-    if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT)
-        printf( "%d", pvm_get_int( o ) );
-
     if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
         struct data_area_4_string *da = (struct data_area_4_string *)&(o.data->da);
         int len = da->length;
         unsigned const char *sp = da->data;
+        /* TODO BUG! From unicode! */
         while( len-- )
         {
             putchar(*sp++);
         }
+    }
+    else
+        printf( "?" );
+}
+
+void pvm_object_print(struct pvm_object o )
+{
+    if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT)
+    {
+        printf( "%d", pvm_get_int( o ) );
+    }
+    else if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
+    {
+        pvm_puts( o );
+    }
+    else 
+    {
+        pvm_object_t r = pvm_exec_run_method( o, 5, 0, 0 ); // ToString
+        pvm_puts( r );
+        ref_dec_o( r );
     }
 }
 

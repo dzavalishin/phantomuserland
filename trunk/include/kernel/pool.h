@@ -9,6 +9,7 @@
  **/
 
 #include <hal.h>
+#include <errno.h>
 #include <phantom_types.h>
 
 typedef int pool_handle_t;
@@ -44,11 +45,15 @@ typedef struct pool
 
 pool_t *create_pool_ext( int inital_elems, int arena_size );
 pool_t *create_pool();
-void destroy_pool(pool_t *);
+errno_t destroy_pool(pool_t *);
+
+int pool_get_free( pool_t *pool );
+int pool_get_used( pool_t *pool );
+
 
 void *pool_get_el( pool_t *pool, pool_handle_t handle );
-void pool_release_el( pool_t *pool, pool_handle_t handle );
-void pool_destroy_el( pool_t *pool, pool_handle_t handle );
+errno_t pool_release_el( pool_t *pool, pool_handle_t handle );
+errno_t pool_destroy_el( pool_t *pool, pool_handle_t handle );
 
 //! Returns handle or -1 if unable to create element
 //! Arg is element itself (if pool->init == 0) or arg to init

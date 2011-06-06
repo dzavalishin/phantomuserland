@@ -710,10 +710,10 @@ int read_vga_register(int port, int index)
 
 
 
+#define DUMP_VGA_REGS 0
 
 
-
-
+#if DUMP_VGA_REGS
 // indexed = 0 for single reg
 // indexed = N for N indirect registers
 static void dreg( const char *name, int regbase, int indexed )
@@ -736,12 +736,13 @@ static void dreg( const char *name, int regbase, int indexed )
 
     printf("}, // %s\n", name);
 }
-
+#endif
 
 
 
 void DumpVgaMode(void)
 {
+#if DUMP_VGA_REGS
     dreg( "CRTC", 0x03D4, 256 );
     dreg( "ATTR", 0x03C0, 256 );
     dreg( "SEQR", 0x03C4, 256 );
@@ -752,6 +753,7 @@ void DumpVgaMode(void)
     dreg( "GF2D", 0x03D6, 256 );
 
     inb(STATUS_ADDR);
+#endif
 }
 
 

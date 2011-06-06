@@ -18,9 +18,9 @@
 
 #define DEBUG_MSG_PREFIX "VirtIo.Net"
 #include "debug_ext.h"
-#define debug_level_flow 10
-#define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_flow 11
+#define debug_level_error 11
+#define debug_level_info 11
 
 #include <phantom_libc.h>
 
@@ -184,15 +184,15 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     virtio_set_features( &vdev, vdev.guest_features );
 
 
-    /* driver is ready * /
+    // driver is ready
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER );
-
     SHOW_INFO( 0, "Status is: 0x%X", virtio_get_status( &vdev ) );
     hal_sleep_msec(10);
-    */
+
 
     /* driver is ready */
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK);
+    //virtio_set_status( &vdev,  VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK );
     SHOW_INFO( 11, "Status is: 0x%X", virtio_get_status( &vdev ) );
 
 
@@ -259,6 +259,9 @@ int driver_virtio_net_write(virtio_device_t *vd, const void *idata, size_t len)
     memset( buf, 0, PAGE_SIZE );
     memcpy( data, idata, len );
 
+    //hexdump( idata, len, 0, 0 );
+    //hexdump( buf, sizeof(struct virtio_net_hdr) + len, 0, 0 );
+
     // put data
     memcpy_v2p( pa, buf, PAGE_SIZE );
 
@@ -292,9 +295,8 @@ int driver_virtio_net_write(virtio_device_t *vd, const void *idata, size_t len)
     wr[1].len  = len;
     wr[1].flags = 0;
 
-    virtio_attach_buffers_list( vd, 0, 2, wr );
 #endif
-
+    virtio_attach_buffers_list( vd, 0, 2, wr );
     virtio_kick( vd, 0);
 
     return len;
@@ -351,6 +353,8 @@ static void vnet_thread(void *_dev)
         SHOW_FLOW0( 1, "Thread ready, wait 4 sema" );
 
         hal_sem_acquire( &(vnet->sem) );
+
+        SHOW_FLOW0( 1, "Thread sema activated" );
 
 #if 1
         while( vnet->recv_buffers_in_driver < MIN_RECV_BUF )
@@ -424,13 +428,13 @@ static void vnet_thread(void *_dev)
         {
             physaddr_t	pa = rd[0].addr;
             // Some reception occured
-            SHOW_FLOW( 1, "Got xmit buffer %p", pa );
+            SHOW_FLOW( 1, "Got back xmit buffer %p", pa );
 
             if( nRead != 1)
-                SHOW_ERROR( 1, "Got xmit chain %d", nRead );
+                SHOW_ERROR( 1, "Got back xmit chain %d", nRead );
 
             if( dlen > PAGE_SIZE || dlen < sizeof(struct virtio_net_hdr))
-                SHOW_ERROR( 1, "Got xmit dlen %d", dlen );
+                SHOW_ERROR( 1, "Got back xmit dlen %d", dlen );
 
             hal_free_phys_page(pa);
         }

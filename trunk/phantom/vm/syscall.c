@@ -1356,8 +1356,8 @@ syscall_func_t	syscall_table_4_cond[16] =
     &si_void_4_equals,              &si_cond_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_cond_8_wait,      &si_cond_9_twait,
-    &si_cond_10_broadcast,&si_cond_11_signal,
+    &si_cond_8_wait,      	    &si_cond_9_twait,
+    &si_cond_10_broadcast,	    &si_cond_11_signal,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
@@ -1373,6 +1373,15 @@ static int si_binary_5_tostring(struct pvm_object o, struct data_area_4_thread *
     (void)o;
     DEBUG_INFO;
     // TODO hexdump
+
+    if(1)
+    {
+        struct data_area_4_binary *da = pvm_object_da( o, binary );
+        int size = o.data->_da_size - sizeof( struct data_area_4_binary );
+
+        hexdump( da->data, size, "", 0);
+    }
+
     SYSCALL_RETURN(pvm_create_string_object( "(binary)" ));
 }
 
