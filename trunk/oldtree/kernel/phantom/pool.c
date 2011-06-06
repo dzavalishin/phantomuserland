@@ -112,6 +112,31 @@ static void free_arenas( int narenas, pool_arena_t *a )
 
 
 
+void destroy_pool(pool_t *p)
+{
+    pool_arena_t *a = p->arenas;
+    // if( flag_autoclean ) // remove all els
+
+    // assert empty
+    int i;
+    for( i = 0; i < p->narenas; i++ )
+        assert( a[i].nused == 0 );
+
+    // free arenas
+    free_arenas( p->narenas, a );
+
+    free(p);
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

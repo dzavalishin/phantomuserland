@@ -37,13 +37,14 @@ typedef struct pool
 
     int 	last_handle; // RR alloc pointer
 
-    int         flag_autodestroy;
-    int         flag_nofail; // panics if can't create element
+    int         flag_autoclean; // clean pool on pool destroy
+    int         flag_autodestroy; // destroy el on refcount == 0
+    int         flag_nofail; // panics if smthng wrong, never returns error
 } pool_t;
 
 pool_t *create_pool_ext( int inital_elems, int arena_size );
 pool_t *create_pool();
-//void destroy_pool(pool_t *);
+void destroy_pool(pool_t *);
 
 void *pool_get_el( pool_t *pool, pool_handle_t handle );
 void pool_release_el( pool_t *pool, pool_handle_t handle );
