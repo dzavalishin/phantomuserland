@@ -169,7 +169,6 @@ void phantom_enforce_video_driver(struct drv_video_screen_t *vd)
 
     int res;
     if(video_drv) res = video_drv->start();
-    // TODO if start fails, mark driver as not working and select again
 
     if( res )
         panic("I don't know how to work with this video hardware, sorry");

@@ -32,7 +32,7 @@
 
 static void put_on_dev(uhci_td_t td)
 {
-    // TODO impl
+#warning impl
 }
 
 
@@ -59,7 +59,7 @@ errno_t uhci_enqueue_request(uhci *u, uhci_req *req)
     return 0;
 }
 
-// TODO impl
+#warning impl
 #define IS_PROCESSED(el) 0
 
 int on_dev_q(uhci_td_t);

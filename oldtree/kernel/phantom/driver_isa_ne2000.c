@@ -164,8 +164,6 @@ phantom_device_t * driver_isa_ne2000_probe( int port, int irq, int stage )
 {
     SHOW_FLOW( 0, "Looking for NE2000 at 0x%x", port );
 
-    // BUG it does not work on PCI cards
-    //if( seq_number || ne_probe0(port) )        return 0;
     if( ne_probe0(port) )
     {
         SHOW_ERROR( 1, "ne_probe0 failed for port 0x%X", port );
@@ -181,9 +179,6 @@ static int seq_number = 0;
 static phantom_device_t * common_ne2000_probe( int port, int irq, int stage )
 {
     (void) stage;
-
-    //if( seq_number || ne_probe0(port) )        return 0;
-
 
     phantom_device_t * dev = calloc(1, sizeof(phantom_device_t));
     assert(dev != 0);
@@ -361,10 +356,6 @@ static void ne2000_thread(void *_dev)
         SHOW_FLOW0( 1, "Thread ready, wait 4 sema" );
 
         hal_sem_acquire( &(pvt->reset_sem) );
-
-        // XXX BUG DUMB CODE
-        //while(pvt->interrupt_count <= 0)            hal_sleep_msec(200);
-        //pvt->interrupt_count--;
 
 
         // TODO reset card on some errors

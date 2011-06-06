@@ -78,7 +78,7 @@ void def_soft_irq_handler(struct trap_state *ts)
 
 void call_irq_handler(struct trap_state *s, unsigned irq)
 {
-    (void) s; // TODO pass to int handler?
+    (void) s; // TODO? pass to int handler?
 
     if( irq >= MAX_IRQ_COUNT )
         panic("IRQ %d > max %d", irq, MAX_IRQ_COUNT-1 );
@@ -146,12 +146,14 @@ int hal_irq_alloc( int irq, void (*func)(void *arg), void *_arg, int is_shareabl
     out->arg = _arg;
     out->is_shareable = is_shareable;
 
-    // TODO just mask off IRQ when modifying it's handlers list
+    // mask off IRQ when modifying it's handlers list
+    board_interrupt_disable(irq);
 
     int ie = hal_save_cli();
     hal_spin_lock(&irq_list_lock);
-    // BUG Not SMP clean. Queue insert is not atomic, will break
-    // if interrupt is executed on other CPU
+    // Queue insert is not atomic, will break
+    // if interrupt is executed on other CPU.
+    // That is why we disable irq on controller before doing this.
     queue_enter(&heads[irq], out, struct handler_q *, chain);
 
     // Do it in spinlock to avoid races with disable_irq
@@ -170,7 +172,10 @@ void hal_irq_free( int irq, void (*func)(void *arg), void *_arg )
     if( irq < 0 && irq >= MAX_IRQ_COUNT )
         panic("IRQ %d > max %d", irq, MAX_IRQ_COUNT-1 );
 
-    // TODO just mask off IRQ when modifying it's handlers list
+    // Queue manipulationt is not atomic, will break
+    // if interrupt is executed on other CPU.
+    // That is why we disable irq on controller before doing this.
+    board_interrupt_disable(irq);
 
     struct handler_q *it;
 
@@ -183,11 +188,8 @@ void hal_irq_free( int irq, void (*func)(void *arg), void *_arg )
             queue_remove(&heads[irq], it, struct handler_q *, chain);
 
 
-            if(queue_empty( &heads[irq] ))
-            {
-                // Do it in spinlock to avoid races with disable_irq
-                board_interrupt_disable(irq);
-            }
+            if(!queue_empty( &heads[irq] ))
+                board_interrupt_enable(irq);
 
             // TODO free struct!
 

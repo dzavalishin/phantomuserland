@@ -318,36 +318,36 @@ static struct pvm_object create_interface_worker( int n_methods )
 
 struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_object parent_class )
 {
-	struct pvm_object	ret = create_interface_worker( n_methods );
-	struct pvm_object * data_area = (struct pvm_object *)ret.data->da;
+    struct pvm_object	ret = create_interface_worker( n_methods );
+    struct pvm_object * data_area = (struct pvm_object *)ret.data->da;
 
-	if(pvm_is_null( parent_class ))
-		pvm_exec_panic( "create interface: parent is null" );
+    if(pvm_is_null( parent_class ))
+        pvm_exec_panic( "create interface: parent is null" );
 
-	struct pvm_object_storage *base_i =  ((struct data_area_4_class*)parent_class.data->da)->object_default_interface.data;
+    struct pvm_object_storage *base_i =  ((struct data_area_4_class*)parent_class.data->da)->object_default_interface.data;
 
-	int base_icount = da_po_limit(base_i);
+    int base_icount = da_po_limit(base_i);
 
-	if(base_icount > n_methods)
-	{
-		//pvm_exec_panic( "create interface: child has less methods than parent" );
-		base_icount = n_methods; // TODO: what?
-	}
+    if(base_icount > n_methods)
+    {
+        printf( "create interface: child has less methods than parent\n" );
+        base_icount = n_methods;
+    }
 
-	int i = 0;
-	// copy methods from parent
-	for( ; i < base_icount; i++ )
-	{
-		pvm_object_t baseMethod = (da_po_ptr(base_i->da))[i];
-		ref_inc_o(baseMethod);
-		data_area[i] = baseMethod;
-	}
+    int i = 0;
+    // copy methods from parent
+    for( ; i < base_icount; i++ )
+    {
+        pvm_object_t baseMethod = (da_po_ptr(base_i->da))[i];
+        ref_inc_o(baseMethod);
+        data_area[i] = baseMethod;
+    }
 
-	// fill others with nulls
-	for( ; i < n_methods; i++ )
-		data_area[i] = pvm_get_null_object(); // null
+    // fill others with nulls
+    for( ; i < n_methods; i++ )
+        data_area[i] = pvm_get_null_object(); // null
 
-	return ret;
+    return ret;
 }
 
 
@@ -482,7 +482,7 @@ void pvm_gc_iter_array(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 void pvm_internal_init_boot(struct pvm_object_storage * os)
 {
-     (void)os; 
+     (void)os;
      // Nohing!
 }
 
@@ -669,10 +669,6 @@ struct pvm_object     pvm_create_weakref_object(struct pvm_object owned )
 struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
 {
     struct data_area_4_weakref *da = pvm_object_da( wr, weakref );
-
-    // HACK HACK HACK BUG - we access target here to prevent
-    // page fault in spinlock!
-    //struct pvm_object out = da->object;
     struct pvm_object out;
 
     // still crashes :(
@@ -724,7 +720,9 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
 {
     struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
 
-    da->w.title = "Window"; // BUG! Pointer from object space to kernel data seg!
+    strlcpy( da->title, "Window", sizeof(da->title) );
+
+    da->w.title = da->title;
     da->fg = COLOR_BLACK;
     da->bg = COLOR_WHITE;
     da->x = 0;
@@ -778,7 +776,7 @@ void pvm_restart_window( pvm_object_t o )
 
     printf("restart WIN\n");
 
-    da->w.title = "Window"; // BUG! Pointer from object space to kernel data seg!
+    da->w.title = da->title; // must be correct in snap? don't reset?
 
     queue_init(&(da->w.events));
     da->w.events_count = 0;
@@ -908,7 +906,18 @@ struct pvm_object     pvm_create_connection_object(void)
     return ret;
 }
 
-// Unused, not supposed to be called
+void pvm_gc_iter_connection(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+    struct data_area_4_connection      *da = (struct data_area_4_connection *)os->da;
+
+    pvm_object_t ot;
+    ot.interface = 0;
+    ot.data = (void *) (((addr_t)da->owner)-DA_OFFSET());
+
+    gc_fcall( func, arg, ot );
+}
+
+
 void pvm_gc_finalizer_connection( struct pvm_object_storage * os )
 {
     // is it called?
@@ -983,10 +992,10 @@ void   pvm_release_thread_object( struct pvm_object thread )
 {
     // the thread was decr once... while executing class loader code... TODO: should be rewritten!
 
-	// remove from system threads list.
-	pvm_pop_array(pvm_root.threads_list.data, thread);
+    // remove from system threads list.
+    pvm_pop_array(pvm_root.threads_list.data, thread);
 
-	ref_dec_o( thread );  //free now
+    ref_dec_o( thread );  //free now
 }
 
 

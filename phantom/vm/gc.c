@@ -60,7 +60,7 @@ void gc_collect_cycles()
 
 // -----------------------------------------------------------------------
 // Ok, poor man's GC:  stop-the-world mark/sweep
-// TODO implement some more serious GC
+// implement some more serious GC
 // -----------------------------------------------------------------------
 
 
@@ -76,8 +76,6 @@ static void mark_tree_o(pvm_object_t o, void *arg);
 static void gc_process_children(gc_iterator_call_t f, pvm_object_storage_t *p, void *arg);
 
 
-//// TODO include
-//extern int phantom_virtual_machine_threads_stopped;
 static volatile int  gc_n_run = 0;
 static unsigned char  gc_flags_last_generation = 0;
 

@@ -237,6 +237,7 @@ void phantom_finish_all_threads(void)
 errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc)
 {
     const char *name = da->name;
+    da->owner = tc;
 
     return ENOMEM; 
 }

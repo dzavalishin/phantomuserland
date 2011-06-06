@@ -16,51 +16,63 @@
 #include <phantom_libc.h>
 
 
+int get_current_tid(void)
+{
+    return get_current_thread()->tid;
+}
 
 
+#define GETT() \
+    phantom_thread_t *t = get_thread(tid); \
+    if( t == 0 )                           \
+    {                                      \
+        ret = ESRCH;                       \
+        goto err;                          \
+    }
+
+
+#define PRE()    \
+    int ret = 0; \
+    TA_LOCK();   \
+    GETT()
+
+#define POST()   \
+    err:         \
+    TA_UNLOCK(); \
+    return ret;
 
 errno_t t_set_owner( tid_t tid, void *owner )
 {
-    int ret = 0;
-    TA_LOCK();
-
-    phantom_thread_t *t = get_thread(tid);
-    if( t == 0 )
-    {
-        ret = ESRCH;
-        goto err;
-    }
+    PRE()
 
     t->owner = owner;
 
-err:
-    TA_UNLOCK();
-    return ret;
+    POST()
 }
 
 errno_t t_get_owner( tid_t tid, void **owner )
 {
-    int ret = 0;
-    TA_LOCK();
-
     assert(owner);
-
-    phantom_thread_t *t = get_thread(tid);
-    if( t == 0 )
-    {
-        ret = ESRCH;
-        goto err;
-    }
-
+    PRE()
     *owner = t->owner;
-
-err:
-    TA_UNLOCK();
-    return ret;
+    POST()
 }
 
 
 
+errno_t t_set_ctty( tid_t tid, struct wtty *ct )
+{
+    PRE()
+    t->ctty = ct;
+    POST()
+}
+
+errno_t t_get_ctty( tid_t tid, struct wtty **ct )
+{
+    PRE()
+    *ct = t->ctty;
+    POST()
+}
 
 
 
@@ -76,6 +88,7 @@ phantom_thread_t * get_current_thread(void)
     int ncpu = GET_CPU_ID();
     return percpu_current_thread[ncpu] ? percpu_current_thread[ncpu] : dummy + ncpu;
 }
+
 
 
 phantom_thread_t * get_thread(int tid)

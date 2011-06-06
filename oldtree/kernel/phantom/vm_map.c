@@ -225,7 +225,7 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 #if 1
     vm_page *vmp = addr_to_vm_page((addr_t) address, ts);
 #else
-    // BUG! TODO! Stack growth? Object space growth?
+    // TODO! Stack growth? Object space growth?
     long addr = (unsigned int) address;
 
     addr -= (unsigned int)vm_map_start_of_virtual_address_space;
@@ -1652,7 +1652,7 @@ static void page_clear_engine_clear_page(physaddr_t p)
     //memset( page_clear_vaddr, '#', __MEM_PAGE );
     memset( page_clear_vaddr, 0, __MEM_PAGE );
 
-    // BUG! Broken!
+    // TODO Broken!
     //fast_clear_page( page_clear_vaddr );
 
     hal_page_control( p, page_clear_vaddr, page_unmap, page_ro );
@@ -1785,9 +1785,11 @@ void wire_page( vm_page *p )
 {
     p->wired_count++;
 
-    // TODO stats
+    STAT_INC_CNT( STAT_CNT_WIRE );
+
     if(!p->flag_phys_mem)
     {
+        STAT_INC_CNT( STAT_CNT_WIRE_PAGEIN );
         /*
         hal_mutex_lock(&p->lock);
         page_touch_history_arg(p, 0);
@@ -1809,22 +1811,33 @@ void unwire_page( vm_page *p )
 
 
 
-// TODO handle sized objects, so, possibly, more than one page is to be locked
-
 //! Make page wired (fixed in phys mem, allways present)
 // It is guaranteed that after return and up to the call
 // to unwire_page_for_addr physical addr will be the same
-void wire_page_for_addr( void *addr )
+void wire_page_for_addr( void *addr, size_t count )
 {
-    vm_page *p = addr_to_vm_page((addr_t) addr, 0);
-    wire_page( p );
+    void *pp = (void *)PREV_PAGE_ALIGN((addr_t)addr);
+    ssize_t c = count;
+    c += addr-pp;
 
+    do{
+        wire_page( addr_to_vm_page((addr_t) pp, 0) );
+        c -= PAGE_SIZE;
+        pp += PAGE_SIZE;
+    } while( c > 0 );
 }
 
-void unwire_page_for_addr( void *addr )
+void unwire_page_for_addr( void *addr, size_t count )
 {
-    vm_page *p = addr_to_vm_page((addr_t) addr, 0);
-    unwire_page( p );
+    void *pp = (void *)PREV_PAGE_ALIGN((addr_t)addr);
+    ssize_t c = count;
+    c += addr-pp;
+
+    do{
+        unwire_page( addr_to_vm_page((addr_t) pp, 0) );
+        c -= PAGE_SIZE;
+        pp += PAGE_SIZE;
+    } while( c > 0 );
 }
 
 

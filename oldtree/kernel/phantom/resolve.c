@@ -527,7 +527,7 @@ void resolver_init()
     inited = 1;
 }
 
-// TODO VERY DUMB CACHE
+// VERY DUMB CACHE
 // TODO cache must keep multimple addr entries
 
 #define CACHE_SIZE 32

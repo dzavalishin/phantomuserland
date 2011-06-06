@@ -394,7 +394,6 @@ static void vnet_thread(void *_dev)
                 if( hdr->flags || hdr->gso_type)
                 SHOW_ERROR( 1, "Hdr flags/gso != 0 (%x/%x)", hdr->flags, hdr->gso_type );
 
-                // TODO really recv data
                 if(vnet->read_max > 0)
                 {
                     hal_mutex_lock( &vnet->recv_mutex );

@@ -17,8 +17,15 @@
 
 // Good clean tid based threads interface
 
-errno_t t_set_owner( tid_t tid, void *owner );
-errno_t t_get_owner( tid_t tid, void **owner );
+tid_t           get_current_tid(void);
+errno_t         t_kill_thread( tid_t tid );
+
+errno_t         t_set_owner( tid_t tid, void *owner );
+errno_t         t_get_owner( tid_t tid, void **owner );
+
+struct wtty;
+errno_t         t_set_ctty( tid_t tid, struct wtty * );
+errno_t         t_get_ctty( tid_t tid, struct wtty ** );
 
 
 
@@ -103,7 +110,6 @@ void hal_set_thread_name(const char *name);
 
 
 
-errno_t t_kill_thread( int tid );
 
 
 
@@ -115,12 +121,12 @@ errno_t t_kill_thread( int tid );
 
 
 
-struct wtty *get_thread_ctty( struct phantom_thread *t );
+struct wtty *get_thread_ctty( struct phantom_thread *t )  __attribute__((deprecated));
 
 //! Returns 'owner' field, which is, for VM threads, is used to keep pointer to VM thread object
-void *get_thread_owner( struct phantom_thread *t );
+void *get_thread_owner( struct phantom_thread *t )  __attribute__((deprecated));
 
-int get_thread_flags( struct phantom_thread *t );
+int get_thread_flags( struct phantom_thread *t ) __attribute__((deprecated));
 
 /**
  *

@@ -448,6 +448,7 @@ struct pvm_connection_ops
 
 struct data_area_4_connection
 {
+    struct data_area_4_thread *         owner;		// Just this one can use
     struct pvm_connection_ops *         kernel;         // Stuff in kernel that serves us
 
     char                                name[1024];     // Used to reconnect on restart

@@ -215,7 +215,7 @@ void phantom_init_console_window()
 
     phantom_console_window = w;
 
-    w->owner = GET_CURRENT_THREAD();
+    w->owner = get_current_tid();
 
     phantom_set_console_ops( &win_ops );
     phantom_console_window_puts("Phantom console window\n");

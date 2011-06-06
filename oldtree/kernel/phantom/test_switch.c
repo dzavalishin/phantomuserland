@@ -83,8 +83,7 @@ void report( int rc, const char *test_name )
     }
 
     nFailed++;
-    printf("!!! KERNEL TEST FAILED: %s -> %d\n", test_name, rc );
-    // todo strerror(rc)
+    printf("!!! KERNEL TEST FAILED: %s -> %d (%s)\n", test_name, rc, strerror(rc) );
 }
 
 

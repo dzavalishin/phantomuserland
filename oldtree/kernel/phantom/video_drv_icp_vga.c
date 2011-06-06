@@ -111,9 +111,6 @@ mouse_enable:          	drv_video_mouse_on_deflt,
 #endif
 };
 
-// TODO temp!
-//struct drv_video_screen_t        *video_drv = &video_driver_icp;
-
 
 #define ICP_ID 0x41034003
 
@@ -180,7 +177,7 @@ static int icp_video_probe()
     MEM(LCDTiming2) = 0x067F3800;
 
 #else
-    // this sets 640*480, TODO 800*600
+    // this sets 640*480
     MEM(0x10000014) = 0xA05F;
     MEM(0x1000001C) = 0x12C11; // 25MHz
 

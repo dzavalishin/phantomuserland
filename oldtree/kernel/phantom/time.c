@@ -303,6 +303,8 @@ struct tm tm_a = { 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // Make sure time will be
 struct tm tm_b;
 struct tm *current_time = &tm_a;
 
+static time_t fast_time_val = 0;
+
 // Supposed to be called once a sec
 static void update_tm()
 {
@@ -314,15 +316,19 @@ static void update_tm()
 
     *tmnew = *tmold;
     tmnew->tm_sec++;
+    fast_time_val++;
 
-    if( tmnew->tm_sec >= 60 )
+    if( (tmnew->tm_sec >= 60) || (fast_time_val == 0) )
+    {
         rtc_read_tm( tmnew );
+        fast_time_val = time(0);
+    }
 
     current_time = tmnew;
 }
 
-
-
+//! Fast, but less accurate time, sec
+time_t fast_time(void) { return fast_time_val; }
 
 
 

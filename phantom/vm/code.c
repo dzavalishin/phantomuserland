@@ -56,8 +56,8 @@ pvm_code_do_get_int64( const unsigned char *addr )
 static void
 throw_bounds( int ip, int max_IP, char *where )
 {
-    static char errtext[200]; // BUG!!
-    snprintf(errtext, 199, "%s: IP out of bounds (IP=%d, max=%d)", where, ip, max_IP );
+    char errtext[200];
+    snprintf(errtext, sizeof(errtext)-1, "%s: IP out of bounds (IP=%d, max=%d)", where, ip, max_IP );
     pvm_exec_panic( errtext );
 }
 

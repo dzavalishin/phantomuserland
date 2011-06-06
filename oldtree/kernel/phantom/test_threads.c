@@ -46,7 +46,6 @@ static hal_sem_t s;
 //#define YIELD() hal_sleep_msec(400)
 #define YIELD() hal_sleep_msec(40)
 
-// TODO call kill thread when implemented
 //#define FINISH() do { hal_sleep_msec(1000); } while(1)
 #define FINISH()
 
@@ -259,7 +258,6 @@ static errno_t threads_test()
 
 // TODO check that we passed after cond wait on permission
 // TODO timeouts, incl manual awake of timed cond and sema
-// TODO semas
 
 int do_test_threads(const char *test_parm)
 {

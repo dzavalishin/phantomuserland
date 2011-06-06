@@ -462,7 +462,6 @@ errno_t pvm_jit(struct pvm_object current_thread)
 
         case opcode_summon_null:
             if( debug_print_instr ) printf("push null; ");
-            //os_push( pvm_get_null_object() ); // TODO BUG: so what opcode_os_push_null is for then?
             jit_get_null( j );// AX = 0 DX = 0
             jit_os_push( j );// push AX, DX
             break;
@@ -537,7 +536,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
                 struct pvm_object name = pvm_code_get_string(&(da->code));
                 struct pvm_object cl = pvm_exec_lookup_class_by_name( name );
                 ref_dec_o(name);
-                // TODO: Need throw here?
+                // Need throw here?
                 if( pvm_is_null( cl ) ) {
                     pvm_exec_panic("summon by name: null class");
                     //printf("summon by name: null class");
@@ -586,7 +585,7 @@ errno_t pvm_jit(struct pvm_object current_thread)
             }
             break;
 
-            // TODO if you want to enable these, work out refcount
+            // if you want to enable these, work out refcount
             // and security issues first!
             // compose/decompose
 #if 0

@@ -972,8 +972,6 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
     struct pvm_object _bmp = POP_ARG;
 
 #if !BACK_WIN
-
-    // BUG! Must store it and repaint on OS restart
     if( drv_video_bmpblt(_bmp,0,0,0) )
     	SYSCALL_THROW_STRING( "not a bitmap" );
 
@@ -1629,10 +1627,9 @@ static int si_world_8_getMyThread(struct pvm_object o, struct data_area_4_thread
 
     struct pvm_object out;
 
-    //out.data = tc; //TODO: BUG: type mismatch!
     out.data =
         (pvm_object_storage_t *)
-        (tc - DA_OFFSET()); // XXX HACK!
+        (tc - DA_OFFSET()); // TODO XXX HACK!
     out.interface = thread_iface;
 
     SYSCALL_RETURN( ref_inc_o( out ) );

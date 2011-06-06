@@ -16,13 +16,7 @@
 
 // Physical memory allocator, page by page
 
-// todo dynamic map size, passed in init (for fsck)
-// todo pass map ptr from outside, give out
-//    macros to produce map size in bytes so that
-//    it can be statically allocated (for kernel page maps,
-//    which can't be alllocated with malloc!)
-
-// todo if we change memory allocation seriously, change kvtophys()
+// TODO if we change memory allocation seriously, change kvtophys()
 // and phystokv() as well
 
 

@@ -32,8 +32,8 @@
 
 #include <threads.h>
 #include <kernel/config.h>
+#include <time.h>
 
-//#include "dpc.h"
 
 
 #define PS2_DATA_ADDR 	0x60
@@ -245,7 +245,7 @@ void phantom_dev_ps2_int_handler( void *arg )
 
             struct ui_event e;
             e.type = UI_EVENT_TYPE_MOUSE;
-            e.time = 0; // TODO put time
+            e.time = fast_time();
             e.focus= 0;
 
             e.m.buttons = phantom_dev_ps2_state_buttons;
@@ -296,8 +296,6 @@ void phantom_dev_ps2_send_aux(unsigned char aux)
 
 static int phantom_dev_ps2_do_init( void )
 {
-    // TODO check if we have ISA at all :)
-
     int tries = 10000;
     // Purge buffer
     while( tries-- > 0 && inb( PS2_CTRL_ADDR ) & 0x01 )

@@ -17,6 +17,7 @@
 #define debug_level_info 10
 
 #include <assert.h>
+#include <errno.h>
 
 #include <kernel/vm.h>
 #include <kernel/stats.h>
@@ -440,7 +441,7 @@ int pager_dequeue_from_pageout(pager_io_request *p)
 //
 // ---------------------------------------------------------------------------
 
-int read_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
+errno_t read_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
 {
     disk_page_io sb;
 
@@ -452,7 +453,7 @@ int read_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
         *out = * ((phantom_disk_superblock *)disk_page_io_data(&sb));
 
         disk_page_io_finish( &sb );
-        return 1;
+        return ENOENT;
         }
 
     disk_page_io_finish( &sb );
@@ -464,10 +465,6 @@ int find_superblock(
     disk_page_no_t *pages, int n_pages,
     disk_page_no_t exclude, disk_page_no_t *where )
 {
-// BUG! We must check somehow for disk page number to be in our disk
-// limits here. Lets hope driver will do it for us. But, then, we have to
-// check for IO errors somehow!
-
     int i;
     for( i = 0; i < n_pages; i++ )
     {
@@ -496,7 +493,7 @@ pager_fix_incomplete_format()
 
     disk_page_no_t     sb2a, sb3a, free, max;
 
-    // BUG! Use some more sophisticated selection alg.
+    // TODO: Use some more sophisticated selection alg.
     sb2a = sb_default_page_numbers[1];
     sb3a = sb_default_page_numbers[2];
 
@@ -854,7 +851,7 @@ pager_interrupt_alloc_page(disk_page_no_t *out)
     if( free_reserve_n )
         {
         *out = free_reserve[--free_reserve_n];
-        // BUG! Schedule a DPC to refill ASAP!
+        // TODO: Schedule a DPC to refill ASAP!
         hal_mutex_unlock(&pager_freelist_mutex);
         return 1;
         }
@@ -958,10 +955,26 @@ pager_free_page( disk_page_no_t page_no )
     if( ((unsigned long)page_no) < ((unsigned long)pager_superblock_ptr()->disk_start_page))
         panic("Free: freeing block below disk start: %ld < %ld", (unsigned long)page_no, (unsigned long)pager_superblock_ptr()->disk_start_page );
 
+#if 0
+    int i;
+    for( i = 0; i < (sizeof(sb_default_page_numbers)/sizeof(sb_default_page_numbers[0])); i ++ )
+    {
+        if(page_no == sb_default_page_numbers[i])
+            SHOW_ERROR( 0, "tried to free possible superblock @%d", page_no );
+    }
+#endif
+    if(
+       ((pager_superblock_ptr()->sb2_addr != 0) && (page_no == pager_superblock_ptr()->sb2_addr) )
+       ||
+       ((pager_superblock_ptr()->sb3_addr != 0) && (page_no == pager_superblock_ptr()->sb3_addr) )
+      )
+    {
+        SHOW_ERROR( 0, "tried to free superblock @%d", page_no );
+        panic("tried to free superblock");
+    }
 
-    // BUG! - check for other superblocks?
-    if(page_no == 0) panic("tried to free superblock");
-    // BUG! We can increment superblock.free_start if it looks approptiate?
+
+    // TODO? We can increment superblock.free_start if it looks approptiate?
     pager_put_to_free_list( page_no );
 }
 
