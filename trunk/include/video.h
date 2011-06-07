@@ -22,7 +22,7 @@
 
 
 //! Convert HSI color to RGB one
-rgba_t Hsi2Rgb(double H, double S, double I );
+//rgba_t Hsi2Rgb(double H, double S, double I );
 
 
 void drv_video_window_draw_line( drv_video_window_t *w,

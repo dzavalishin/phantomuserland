@@ -58,8 +58,6 @@ __inline__ int drv_video_font_draw_char(
     {
         rgba_t *wp = win->pixel + x + (yc*win->xsize);
 
-        //wp[0] = wp[1] = wp[2] = wp[3] = color;
-
         const char *fp = fcp + ((font->ysize - fyc) * bpcx );
         int bc = bpcx;
         for(; bc >= 0; bc-- )
