@@ -246,6 +246,21 @@ void *pool_get_el( pool_t *pool, pool_handle_t handle )
     return a->ptrs[ne];
 }
 
+int pool_el_refcount( pool_t *pool, pool_handle_t handle )
+{
+    //hal_mutex_lock( &pool->mutex );
+
+    int na = HANDLE_2_ARENA(handle);
+    int ne = HANDLE_2_ELEM(handle);
+    pool_arena_t *a = GET_ARENA(na);
+    CHECK_EL(a,ne);
+    CHECK_ZERO(a,ne);
+    CHECK_REF(a,ne);
+
+    //hal_mutex_unlock( &pool->mutex );
+    return a->refc[ne];
+}
+
 
 errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
 {

@@ -12,7 +12,7 @@
 #ifndef _PHANTOM_DEVICE_H
 #define _PHANTOM_DEVICE_H
 
-#include "vm/object.h"
+#include <vm/object.h>
 #include <errno.h>
 #include <sys/types.h>
 
