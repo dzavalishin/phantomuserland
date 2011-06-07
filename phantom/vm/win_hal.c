@@ -139,6 +139,11 @@ int hal_mutex_unlock(hal_mutex_t *m)
 }
 
 
+int hal_mutex_is_locked(hal_mutex_t *m)
+{
+    return 1;
+}
+
 
 int hal_cond_init( hal_cond_t *c, const char *name )
 {

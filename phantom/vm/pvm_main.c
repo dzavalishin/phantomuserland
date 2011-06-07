@@ -362,6 +362,7 @@ int main(int argc, char* argv[])
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 
     pvm_win_init();
+    init_new_windows();
 
     drv_video_set_mouse_cursor(drv_video_get_default_mouse_bmp());
 
@@ -376,6 +377,13 @@ int main(int argc, char* argv[])
     getchar();
     exit(0);
 #endif
+
+#if 0
+    new_videotest();
+    getchar();
+    exit(0);
+#endif
+
 
     char *dir = getenv("PHANTOM_HOME");
     char *rest = "plib/bin/classes";

@@ -79,7 +79,7 @@ common_window_init( drv_video_window_t *w,
 
     w->w_title = 0;
     w->w_decor = 0;
-    w->owner = 0;
+    w->w_owner = 0;
 }
 
 
