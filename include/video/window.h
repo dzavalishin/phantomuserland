@@ -80,10 +80,12 @@ void		w_set_visible( pool_handle_t h, int v );
 
 void    	w_clear( pool_handle_t h );
 void    	w_fill( pool_handle_t h, rgba_t color );
-//void 		w_fill_rect( pool_handle_t h, rgba_t color, rect_t r );
+void 		w_fill_rect( pool_handle_t h, rgba_t color, rect_t r );
 //void		w_pixel( pool_handle_t h, int x, int y, rgba_t color );
 //void    	w_draw_bitmap( pool_handle_t h, int x, int y, drv_video_bitmap_t *bmp );
 
+void 		w_draw_h_line( pool_handle_t h, rgba_t color, int x, int y, int len );
+void 		w_draw_v_line( pool_handle_t h, rgba_t color, int x, int y, int len );
 
 
 

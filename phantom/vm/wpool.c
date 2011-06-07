@@ -123,10 +123,6 @@ static void do_w_resize( window_t *w, int xsize, int ysize )
 }
 
 
-void w_resize(pool_handle_t h, int xsize, int ysize)
-{
-    DOW(h, do_w_resize( w, xsize, ysize ); );
-}
 
 
 static void do_w_blt( window_t *w )
@@ -159,6 +155,15 @@ static void 	do_w_repaint_all()
     //rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 }
 
+// -----------------------------------------------------------------------
+// State/pos
+// -----------------------------------------------------------------------
+
+void w_resize(pool_handle_t h, int xsize, int ysize)
+{
+    DOW(h, do_w_resize( w, xsize, ysize ); );
+}
+
 
 void w_set_visible( pool_handle_t h, int v )
 {
@@ -178,24 +183,6 @@ void w_set_visible( pool_handle_t h, int v )
     pool_release_el( wp, h );
 }
 
-
-void do_w_fill( window_t *w, rgba_t color )
-{
-    int i = (w->xsize * w->ysize) - 1;
-    for( ; i >= 0; i-- )
-        w->pixel[i] = color;
-}
-
-
-void w_fill( pool_handle_t h, rgba_t color )
-{
-    DOW(h, do_w_fill( w, color ); do_w_blt( w ); );
-}
-
-void w_clear( pool_handle_t h )
-{
-    DOW(h, do_w_fill( w, w->bg ); do_w_blt( w ); );
-}
 
 
 
@@ -238,6 +225,136 @@ void w_set_z_order( pool_handle_t h, int zorder )
     pool_release_el( wp, h );
 }
 
+// -----------------------------------------------------------------------
+// Rect/point in win
+// -----------------------------------------------------------------------
+
+
+int rect_w_bounds( rect_t *r, window_t *w )
+{
+    if( r->x < 0 )
+    {
+        r->xsize += r->x;
+        r->x = 0;
+    }
+
+    if( r->y < 0 )
+    {
+        r->ysize += r->y;
+        r->y = 0;
+    }
+
+    if( r->x+r->xsize >= w->xsize )
+        r->xsize = w->xsize-r->x;
+
+    if( r->y+r->ysize >= w->ysize )
+        r->ysize = w->ysize-r->y;
+
+    return (r->xsize <= 0) || (r->ysize <= 0);
+}
+
+
+int point_in_w( int x, int y, window_t *w )
+{
+    if( x < w->x || y < w->y )
+        return 0;
+
+    if( x > w->x + w->xsize )
+        return 0;
+
+    if( y > w->y + w->ysize )
+        return 0;
+
+    return 1;
+}
+
+// -----------------------------------------------------------------------
+// Output
+// -----------------------------------------------------------------------
+
+void do_w_fill( window_t *w, rgba_t color )
+{
+    int i = (w->xsize * w->ysize) - 1;
+    for( ; i >= 0; i-- )
+        w->pixel[i] = color;
+}
+
+
+void w_fill( pool_handle_t h, rgba_t color )
+{
+    DOW(h, do_w_fill( w, color ); do_w_blt( w ); );
+}
+
+void w_clear( pool_handle_t h )
+{
+    DOW(h, do_w_fill( w, w->bg ); do_w_blt( w ); );
+}
+
+
+void do_w_fill_rect( window_t *w, rgba_t color, rect_t r )
+{
+    if( rect_w_bounds( &r, w ) )
+        return;
+
+    int yp = r.y + r.ysize - 1;
+    for( ; yp >= r.y; yp-- )
+    {
+        rgba_t *dst = w->pixel + yp*w->xsize + r.x;
+        rgba2rgba_replicate( dst, &color, r.xsize );
+    }
+}
+
+void w_fill_rect( pool_handle_t h, rgba_t color, rect_t r )
+{
+    DOW(h, do_w_fill_rect( w, color, r ); do_w_blt( w ); );
+}
+
+
+void do_w_draw_h_line( window_t *w, rgba_t color, int x, int y, int len )
+{
+    rect_t r;
+
+    r.x = x;
+    r.y = y;
+    r.xsize = len;
+    r.ysize = 1;
+
+    if( rect_w_bounds( &r, w ) )
+        return;
+
+    rgba_t *dst = w->pixel + r.y*w->xsize + r.x;
+    rgba2rgba_replicate( dst, &color, r.xsize );
+}
+
+void w_draw_h_line( pool_handle_t h, rgba_t color, int x, int y, int len )
+{
+    DOW(h, do_w_draw_h_line( w, color, x, y, len ); do_w_blt( w ); );
+}
+
+void do_w_draw_v_line( window_t *w, rgba_t color, int x, int y, int len )
+{
+    rect_t r;
+
+    r.x = x;
+    r.y = y;
+    r.xsize = 1;
+    r.ysize = len;
+
+    if( rect_w_bounds( &r, w ) )
+        return;
+
+    int yp = r.y + r.ysize - 1;
+    for( ; yp >= r.y; yp-- )
+    {
+        rgba_t *dst = w->pixel + yp*w->xsize + r.x;
+        *dst = color;
+    }
+}
+
+void w_draw_v_line( pool_handle_t h, rgba_t color, int x, int y, int len )
+{
+    DOW(h, do_w_draw_v_line( w, color, x, y, len ); do_w_blt( w ); );
+}
 
 
 // -----------------------------------------------------------------------
@@ -260,11 +377,21 @@ void new_videotest()
     w_fill( w2, COLOR_LIGHTGREEN );
     w_set_z_order( w2, 30 );
 
-    video_zbuf_reset_z(50);
+    //video_zbuf_reset_z(50);
 
     w_moveto( w2, 50, 50 );
 
-    video_zbuf_paint();
+    rect_t r;
+
+    r.x = r.y = 50;
+    r.xsize = r.ysize = 20;
+
+    w_fill_rect( w1, COLOR_BLACK, r );
+
+    w_draw_h_line( w1, COLOR_YELLOW, 50, 50, 20 );
+    w_draw_v_line( w1, COLOR_YELLOW, 50, 50, 20 );
+
+    //video_zbuf_paint();
 }
 
 
