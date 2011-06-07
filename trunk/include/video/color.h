@@ -82,6 +82,8 @@ extern rgba_t COLOR_LIGHTMAGENTA;
 #define _C_COLOR_CYAN  { 0xFF, 0xFF, 0x00, 0xFF }
 
 
+//! Convert HSI color to RGB one
+rgba_t Hsi2Rgb(double H, double S, double I );
 
 
 
