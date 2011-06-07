@@ -171,7 +171,7 @@ void drv_video_window_fill_box( drv_video_window_t *w,
 
 
 void drv_video_window_draw_box( drv_video_window_t *w,
-                                 int x,int y,int lx,int ly,
+                                 int x,int y,int lx, int ly,
                                  rgba_t c)
 {
     drv_video_window_draw_line(w,x,y,x+lx-1,y,c);

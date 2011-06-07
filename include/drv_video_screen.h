@@ -19,6 +19,8 @@
 #include <video/color.h>
 #include <video/bitmap.h>
 #include <video/window.h>
+#include <video/vops.h>
+#include <video/zbuf.h>
 
 #include <event.h>
 
@@ -26,11 +28,6 @@
 
 
 
-typedef u_int8_t zbuf_t;
-//typedef u_int32_t zbuf_t;
-extern zbuf_t *zbuf;
-
-void video_zbuf_turn_upside(int v);
 
 
 //! Switch video bitblt functions, used to read/write videomem, to 32 bit mode. Default is 24 bit mode.
@@ -185,29 +182,6 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
 
 
 
-void rgba2rgb_move( struct rgb_t *dest, const rgba_t *src, int nelem );
-void rgba2rgba_move( rgba_t *dest, const rgba_t *src, int nelem );
-void rgba2rgba_24_move( struct rgba_t *dest, const struct rgba_t *src, int nelem ); //! copies 24 bits, sets alpha byte to FF
-
-void rgb2rgba_move( rgba_t *dest, const struct rgb_t *src, int nelem );
-void int565_to_rgba_move( rgba_t *dest, const short int *src, int nelem );
-
-void rgba2rgba_replicate( rgba_t *dest, const rgba_t *src, int nelem );
-
-
-void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos  );
-void rgb2rgba_zbmove( struct rgba_t *dest, const struct rgb_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
-void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
-void rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
-void int565_to_rgba_zbmove( struct rgba_t *dest, const short int *src, zbuf_t *zb, int nelem, zbuf_t zpos );
-
-
-
-void bitmap2bitmap(
-		rgba_t *dest, int destWidth, int destHeight, int destX, int destY,
-		const rgba_t *src, int srcWidth, int srcHeight, int srcX, int srcY,
-		int moveWidth, int moveHeight
-);
 
 
 

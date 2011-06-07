@@ -272,7 +272,7 @@ int point_in_w( int x, int y, window_t *w )
 // Output
 // -----------------------------------------------------------------------
 
-void do_w_fill( window_t *w, rgba_t color )
+static void do_w_fill( window_t *w, rgba_t color )
 {
     int i = (w->xsize * w->ysize) - 1;
     for( ; i >= 0; i-- )
@@ -291,7 +291,7 @@ void w_clear( pool_handle_t h )
 }
 
 
-void do_w_fill_rect( window_t *w, rgba_t color, rect_t r )
+static void do_w_fill_rect( window_t *w, rgba_t color, rect_t r )
 {
     if( rect_w_bounds( &r, w ) )
         return;
@@ -309,8 +309,29 @@ void w_fill_rect( pool_handle_t h, rgba_t color, rect_t r )
     DOW(h, do_w_fill_rect( w, color, r ); do_w_blt( w ); );
 }
 
+static void
+do_w_pixel( window_t *w, int x, int y, rgba_t color )
+{
+    rect_t r;
+    r.x = x;
+    r.y = y;
+    r.xsize = r.ysize = 1;
 
-void do_w_draw_h_line( window_t *w, rgba_t color, int x, int y, int len )
+    if( rect_w_bounds( &r, w ) )
+        return;
+
+    rgba_t *dst = w->pixel + y*w->xsize + x;
+    *dst = color;
+}
+
+void w_pixel( pool_handle_t h, int x, int y, rgba_t color )
+{
+    DOW(h, do_w_pixel( w, x, y, color ); );
+}
+
+
+
+static void do_w_draw_h_line( window_t *w, rgba_t color, int x, int y, int len )
 {
     rect_t r;
 
@@ -331,7 +352,7 @@ void w_draw_h_line( pool_handle_t h, rgba_t color, int x, int y, int len )
     DOW(h, do_w_draw_h_line( w, color, x, y, len ); do_w_blt( w ); );
 }
 
-void do_w_draw_v_line( window_t *w, rgba_t color, int x, int y, int len )
+static void do_w_draw_v_line( window_t *w, rgba_t color, int x, int y, int len )
 {
     rect_t r;
 
@@ -357,6 +378,114 @@ void w_draw_v_line( pool_handle_t h, rgba_t color, int x, int y, int len )
 }
 
 
+static void do_w_draw_rect( window_t *w, rgba_t c,
+                                 int x,int y,int lx, int ly
+                                 )
+{
+    //do_w_draw_line( w, x,      y,      x+lx-1, y,      c);
+    //do_w_draw_line( w, x,      y+ly-1, x+lx-1, y+ly-1, c);
+    //do_w_draw_line( w, x,      y,      x,      y+ly-1, c);
+    //do_w_draw_line( w, x+lx-1, y,      x+lx-1, y+ly-1, c);
+
+    do_w_draw_h_line( w, c, x,      y,      lx );
+    do_w_draw_h_line( w, c, x,      y+ly,   lx );
+    do_w_draw_v_line( w, c, x,      y,      ly );
+    do_w_draw_v_line( w, c, x+lx-1, y,      ly );
+}
+
+void w_draw_rect( pool_handle_t h, rgba_t c,
+                                 int x, int y, int lx, int ly
+                                 )
+{
+    DOW(h, do_w_draw_rect( w, c, x, y, lx, ly );  );
+}
+
+// -----------------------------------------------------------------------
+// Line
+// -----------------------------------------------------------------------
+
+
+// SLOOOW! Checks bounds on each pixel
+
+#define _PLOT(w,x,y,c) do {\
+    if((x) > 0 && (y) > 0 && (x) < (w)->xsize && (y) <= (w)->ysize)\
+    (w)->pixel[(x)+(y)*(w)->xsize] = c;\
+    } while(0)\
+
+// fast, but can DAMAGE MEMORY - check bounds before calling
+
+#define _UNCH_PLOT(w,x,y,c) do {\
+    (w)->pixel[(x)+(y)*(w)->xsize] = c;\
+    } while(0)\
+
+
+static inline int SGN(int v) { return v == 0 ? 0 : ( (v > 0) ? 1 : -1); }
+
+
+
+static void do_w_draw_line( window_t *w, rgba_t c, int x1, int y1, int x2, int y2)
+{
+    int a,x,y;
+    int i;
+    int d;
+
+    int dx = x2-x1;
+    int dy = y2-y1;
+
+    //if (!dx) { vline(w,x1,y1,y2,c); return }
+    //if (!dy) { hline(w,x1,y1,x2,c); return }
+
+    if (abs(dx) > abs(dy))
+    {
+        d=SGN(dx);
+
+        a = (dx == 0) ? 0 : (dy<<16) / abs(dx);
+
+        for( i=x1,y=32768+(y1<<16); i != x2; i += d,y += a )
+            _PLOT(w,i,(int)(y>>16),c);
+    }
+    else
+    {
+        d=SGN(dy);
+
+        a = (dy == 0) ? 0 : ((dx<<16) / abs(dy));
+
+        for( i=y1,x=32768+(x1<<16); i != y2; i += d,x += a )
+            _PLOT(w,(int)(x>>16),i,c);
+    }
+
+    _PLOT(w,x2,y2,c);
+
+}
+
+
+void w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 )
+{
+    DOW(h, do_w_draw_line( w, color, x, y, x2, y2 ); do_w_blt( w ); );
+}
+
+
+// -----------------------------------------------------------------------
+// Scroll
+// -----------------------------------------------------------------------
+
+
+
+errno_t w_scroll_hor( pool_handle_t h, int x, int y, int xs, int ys, int s )
+{
+    errno_t ret = 0;
+    window_t *w = pool_get_el(wp,h);
+
+    if( x < 0 || y < 0 || x+xs > w->xsize || y+ys > w->ysize )
+        ret = EINVAL;
+    else
+        video_scroll_hor( w->pixel+x+(y*w->xsize), xs, ys, w->xsize, s, w->bg );
+
+    pool_release_el( wp, h );
+    return ret;
+}
+
+
 // -----------------------------------------------------------------------
 // test
 // -----------------------------------------------------------------------
@@ -367,6 +496,8 @@ void new_videotest()
     w_clear( wb );
     w_set_z_order( wb, 0 );
 
+    w_blt( wb );
+
     printf("create win\n");
     pool_handle_t w1 = w_create( 200, 300 );
     printf("fill win\n");
@@ -376,6 +507,9 @@ void new_videotest()
     w_moveto( w2, 100, 100 );
     w_fill( w2, COLOR_LIGHTGREEN );
     w_set_z_order( w2, 30 );
+
+    w_blt( w1 );
+    w_blt( w2 );
 
     //video_zbuf_reset_z(50);
 
@@ -390,6 +524,16 @@ void new_videotest()
 
     w_draw_h_line( w1, COLOR_YELLOW, 50, 50, 20 );
     w_draw_v_line( w1, COLOR_YELLOW, 50, 50, 20 );
+    w_draw_line( w1, COLOR_RED, 50, 50, 70-1, 70-1 );
+
+    w_draw_rect( w1, COLOR_BLACK,
+                 100, 50, 30, 40 );
+
+    w_scroll_hor( w1, 60, 60, 80, 80, 10 );
+    w_draw_rect( w1, COLOR_BLACK, 60, 60, 20, 20 );
+
+    w_blt( w1 );
+    w_blt( w2 );
 
     //video_zbuf_paint();
 }
