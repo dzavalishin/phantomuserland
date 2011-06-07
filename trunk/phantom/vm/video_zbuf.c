@@ -147,3 +147,21 @@ void video_zbuf_dump()
 }
 
 
+void video_zbuf_paint()
+{
+    // TODO replace FF with define - and in blitter too!
+    //drv_video_bitblt( zbuf, 0, 0, video_drv->xsize, video_drv->ysize, 0xFF);
+    rgb_t *d = video_drv->screen;
+    zbuf_t *zbp = zbuf;
+
+    int np = video_drv->xsize * video_drv->ysize;
+    while( np-- )
+    {
+        d->r = d->g = d->b = *zbp++;
+        d++;
+    }
+
+}
+
+
+

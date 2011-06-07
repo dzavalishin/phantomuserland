@@ -19,6 +19,9 @@
  *
 **/
 
+#ifndef POOL_H
+#define POOL_H
+
 #include <hal.h>
 #include <errno.h>
 #include <phantom_types.h>
@@ -46,6 +49,8 @@ typedef struct pool
 
     pool_arena_t *arenas;
     int 	narenas;
+
+    int         magic;          // pool magic id - to check that handle is for this pool
 
     int 	last_handle; // RR alloc pointer
 
@@ -77,4 +82,5 @@ int pool_el_refcount( pool_t *pool, pool_handle_t handle );
 //! Arg is element itself (if pool->init == 0) or arg to init
 pool_handle_t pool_create_el( pool_t *pool, void *arg );
 
+#endif // POOL_H
 

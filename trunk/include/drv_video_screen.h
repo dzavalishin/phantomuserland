@@ -164,37 +164,19 @@ extern void drv_video_null(void);
 drv_video_bitmap_t *      drv_video_get_default_mouse_bmp(void);
 
 
-//#if VIDEO_ZBUF
-
 extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
 extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
 extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
 extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
 
-//#else
-
-//extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-//extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize);
-//extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos);
-//extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos);
-
-//#endif
-
-//    void 	(*readblt) (const rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
 void drv_video_readblt_forw( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
 
 // RGB videospace access workers
-//void drv_video_bitblt_worker(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
 void drv_video_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
-
-//#if VIDEO_ZBUF
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos);
-//#else
-//void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse);
-//#endif
 
 
 
@@ -236,43 +218,31 @@ void drv_video_mouse_on_deflt(void);
 
 
 
-//void drv_video_window_preblit( drv_video_window_t *w );
 void drv_video_window_preblit( drv_video_window_t *w ) __attribute__((__deprecated__));
 
 
 void mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
 void mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
 
-//void drv_video_bitblt(const char *from, int xpos, int ypos, int xsize, int ysize);
 #define drv_video_update() video_drv->update()
 #define drv_video_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
 
-//#if VIDEO_ZBUF
 
 #define drv_video_bitblt(from, xpos, ypos, xsize, ysize, zpos)  ( \
     mouse_disable_p(video_drv, xpos, ypos, xsize, ysize), \
     video_drv->bitblt(from, xpos, ypos, xsize, ysize, zpos), \
     mouse_enable_p(video_drv, xpos, ypos, xsize, ysize ) )
 
-// removed drv_video_window_preblit(from), 
 #define drv_video_winblt(from)                                  ( \
     mouse_disable_p(video_drv, (from)->x, (from)->y, (from)->xsize, (from)->ysize ), \
     video_drv->winblt(from, (from)->x, (from)->y, (from)->z), \
     mouse_enable_p(video_drv, (from)->x, (from)->y, (from)->xsize, (from)->ysize ) )
 
-//#else
-//#define drv_video_bitblt(from, xpos, ypos, xsize,ysize)  ( video_drv->mouse_disable(), video_drv->bitblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
-//#define drv_video_winblt(from)                           ( video_drv->mouse_disable(), drv_video_window_preblit(from), video_drv->winblt(from, (from)->x, (from)->y), video_drv->mouse_enable() )
-//#endif
 
 // These are special for mouse pointer code - they're not try to disable mouse
 #define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
 
-//#if VIDEO_ZBUF
 #define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, 0xFF)
-//#else
-//#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize )
-//#endif
 
 #define drv_video_set_mouse_cursor(nc) 		video_drv->set_mouse_cursor(nc)
 #define drv_video_draw_mouse()            	video_drv->redraw_mouse_cursor()
