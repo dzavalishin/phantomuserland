@@ -102,7 +102,7 @@ struct drv_video_screen_t        video_driver_gen_clone =
 {
     "GenericClone",
     // size
-    1024, 768,
+    1024, 768, 24,
     // mouse x y flags
     0, 0, 0,
 

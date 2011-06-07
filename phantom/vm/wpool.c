@@ -156,6 +156,7 @@ static void 	do_w_repaint_all()
 {
     //errno_t e =
     pool_foreach( wp, wpaint );
+    //rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 }
 
 
@@ -219,6 +220,25 @@ void w_moveto( pool_handle_t h, int x, int y )
     pool_release_el( wp, h );
 }
 
+// just for test
+void w_set_z_order( pool_handle_t h, int zorder )
+{
+    window_t *w = pool_get_el(wp,h);
+
+    int down = w->z > zorder;
+    if( down )
+        video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+
+    w->z = zorder;
+    if( down )
+        do_w_repaint_all();
+    else
+        do_w_blt( w );
+
+    pool_release_el( wp, h );
+}
+
+
 
 // -----------------------------------------------------------------------
 // test
@@ -226,6 +246,10 @@ void w_moveto( pool_handle_t h, int x, int y )
 
 void new_videotest()
 {
+    pool_handle_t wb = w_create( video_drv->xsize, video_drv->ysize );
+    w_clear( wb );
+    w_set_z_order( wb, 0 );
+
     printf("create win\n");
     pool_handle_t w1 = w_create( 200, 300 );
     printf("fill win\n");
@@ -234,8 +258,13 @@ void new_videotest()
     pool_handle_t w2 = w_create( 200, 300 );
     w_moveto( w2, 100, 100 );
     w_fill( w2, COLOR_LIGHTGREEN );
+    w_set_z_order( w2, 30 );
 
-    video_zbuf_paint();
+    //video_zbuf_reset_z(50);
+
+    w_moveto( w2, 50, 50 );
+
+    //video_zbuf_paint();
 }
 
 

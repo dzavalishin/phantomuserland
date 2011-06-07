@@ -43,7 +43,7 @@ struct drv_video_screen_t        video_driver_i810 =
 {
     "Intel810",
     // size
-    800, 600,
+    800, 600, 32,
     // mouse x y flags
     0, 0, 0,
 

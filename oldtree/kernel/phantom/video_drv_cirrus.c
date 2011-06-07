@@ -151,7 +151,7 @@ struct drv_video_screen_t        video_driver_cirrus =
 {
     "Cirrus SVGA",
     // size
-    0, 0,
+    0, 0, 24,
     // mouse x y flags
     0, 0, 0,
 

@@ -32,7 +32,7 @@ struct drv_video_screen_t        drv_video_x11 =
 {
     "X11",
     // size
-    0, 0,
+    0, 0, 24,
     // mouse x y flags
     0, 0, 0,
 

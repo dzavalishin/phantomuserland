@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
     exit(0);
 #endif
 
-#if 0
+#if 1
     new_videotest();
     getchar();
     exit(0);

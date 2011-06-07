@@ -64,7 +64,7 @@ struct drv_video_screen_t        video_driver_bios_vesa =
 {
     "BIOS Vesa",
     // size
-    0, 0,
+    0, 0, 24,
     // mouse x y flags
     0, 0, 0,
 

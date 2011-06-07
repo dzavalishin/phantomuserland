@@ -72,7 +72,7 @@ struct drv_video_screen_t        video_driver_icp =
 {
     "Integrator/CP",
 #if VGA_1024x768
-    1024, 820,
+    1024, 820, 32,
 #if VGA_800x600
     // size
     800, 600,

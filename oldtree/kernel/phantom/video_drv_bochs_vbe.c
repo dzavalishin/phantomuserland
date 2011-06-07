@@ -40,6 +40,8 @@ struct drv_video_screen_t        video_driver_bochs_vesa_emulator =
     "Bochs VBE emulator",
     // size
     BOCHS_VIDEO_DRV_DEFAULT_X_SIZE, BOCHS_VIDEO_DRV_DEFAULT_Y_SIZE,
+    // bpp
+    24,
     // mouse x y flags
     0, 0, 0,
 
