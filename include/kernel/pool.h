@@ -70,6 +70,9 @@ void *pool_get_el( pool_t *pool, pool_handle_t handle );
 errno_t pool_release_el( pool_t *pool, pool_handle_t handle );
 errno_t pool_destroy_el( pool_t *pool, pool_handle_t handle );
 
+//! Inaccurate - no mutex taken
+int pool_el_refcount( pool_t *pool, pool_handle_t handle );
+
 //! Returns handle or -1 if unable to create element
 //! Arg is element itself (if pool->init == 0) or arg to init
 pool_handle_t pool_create_el( pool_t *pool, void *arg );
