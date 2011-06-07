@@ -260,11 +260,11 @@ void new_videotest()
     w_fill( w2, COLOR_LIGHTGREEN );
     w_set_z_order( w2, 30 );
 
-    //video_zbuf_reset_z(50);
+    video_zbuf_reset_z(50);
 
     w_moveto( w2, 50, 50 );
 
-    //video_zbuf_paint();
+    video_zbuf_paint();
 }
 
 

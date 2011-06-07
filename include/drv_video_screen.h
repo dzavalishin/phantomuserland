@@ -30,6 +30,8 @@ typedef u_int8_t zbuf_t;
 //typedef u_int32_t zbuf_t;
 extern zbuf_t *zbuf;
 
+void video_zbuf_turn_upside(int v);
+
 
 //! Switch video bitblt functions, used to read/write videomem, to 32 bit mode. Default is 24 bit mode.
 void switch_screen_bitblt_to_32bpp(void);

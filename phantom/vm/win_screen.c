@@ -380,6 +380,7 @@ int pvm_win_init()
         {
 //#if VIDEO_ZBUF
             video_zbuf_init();
+            video_zbuf_turn_upside(1);
 //#endif
             return 0;
         }
