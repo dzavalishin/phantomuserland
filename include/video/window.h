@@ -86,6 +86,7 @@ void 		w_fill_rect( pool_handle_t h, rgba_t color, rect_t r );
 
 void 		w_draw_h_line( pool_handle_t h, rgba_t color, int x, int y, int len );
 void 		w_draw_v_line( pool_handle_t h, rgba_t color, int x, int y, int len );
+void 		w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 );
 
 
 
