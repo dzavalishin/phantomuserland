@@ -80,6 +80,10 @@ void video_zbuf_reset_square(int x, int y, int xsize, int ysize )
     video_zbuf_reset_square_z( x, y, xsize, ysize, 0 );
 }
 
+static int zb_upside = 0;
+void video_zbuf_turn_upside(int v) { zb_upside = v; }
+
+
 void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos )
 {
     rect_t out;
@@ -96,8 +100,12 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
     int ys;
     for(ys = 0; ys < out.ysize; ys++)
     {
-        //int linpos = out.x + ( (video_drv->ysize-1) - out.y) * zbwidth;
-        int linpos = out.x + out.y * zbwidth;
+        int linpos;
+        if( zb_upside )
+            linpos = out.x + out.y * zbwidth;
+        else
+            linpos = out.x + ( (video_drv->ysize-1) - out.y) * zbwidth;
+
         out.y++;
 
         void *p = zbuf+linpos;
@@ -155,7 +163,7 @@ void video_zbuf_dump()
 
 void video_zbuf_paint()
 {
-
+#if 1
     if(video_drv->bpp == 24)
     {
         int np = video_drv->xsize * video_drv->ysize;
@@ -167,7 +175,8 @@ void video_zbuf_paint()
             d++;
         }
     }
-    //if(video_drv->bpp == 32)
+    if(video_drv->bpp == 32)
+#endif
     {
         int np = video_drv->xsize * video_drv->ysize;
         zbuf_t *zbp = zbuf;
