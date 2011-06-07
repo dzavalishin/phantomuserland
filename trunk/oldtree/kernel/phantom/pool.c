@@ -23,10 +23,12 @@ static void free_arenas( int narenas, pool_arena_t *a );
 
 static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle) );
 
-
-#define HANDLE_2_ARENA(h) ( (h>>16) & 0xFFFF )
+#define HANDLE_2_MAGIC(h) ( (h>>24) & 0xFF )
+#define HANDLE_2_ARENA(h) ( (h>>16) & 0xFF )
 #define HANDLE_2_ELEM(h) ( h & 0xFFFF )
-#define MK_HANDLE(a,e) ( ((a & 0xFFFF)<<16) | (e & 0xFFFF) )
+#define MK_HANDLE(p,a,e) ( ((((p)->magic) & 0xFF)<<24) | ((a & 0xFF)<<16) | (e & 0xFFFF) )
+
+static int next_magic = 1;
 
 // -----------------------------------------------------------------------
 // pool iface
@@ -44,11 +46,16 @@ pool_t *create_pool_ext( int inital_elems, int arena_size )
     pool_t *p = calloc( sizeof(pool_t), 1 );
     assert( p );
 
+    p->magic = next_magic++;
+
     hal_mutex_init( &p->mutex, "arena" );
 
     hal_mutex_lock( &p->mutex );
 
     p->narenas = 1+((inital_elems-1)/arena_size);
+
+    assert(p->narenas < 256);
+
     p->arenas = alloc_arenas( arena_size, p->narenas, 0 );
 
     p->flag_autodestroy = 1;
@@ -224,6 +231,7 @@ static pool_handle_t find_free_el( pool_t *pool );
 #define CHECK_ZERO(_a,_ne) ({ int __ne = (_ne); if( (_a)->ptrs[(__ne)] == 0 ) panic("arena el is zero"); })
 #define CHECK_REF(_a,_ne) ({ int __ne = (_ne); if( ((_a)->refc[(__ne)] <= 0) ) panic("arena el ref <= 0"); })
 
+#define CHECK_MAGIC(_p,_h) ({ int __hm = HANDLE_2_MAGIC(_h); if( ((_p)->magic != __hm) ) panic("arena magic"); })
 
 // -----------------------------------------------------------------------
 // el iface
@@ -232,6 +240,8 @@ static pool_handle_t find_free_el( pool_t *pool );
 
 void *pool_get_el( pool_t *pool, pool_handle_t handle )
 {
+    CHECK_MAGIC(pool,handle);
+
     hal_mutex_lock( &pool->mutex );
 
     int na = HANDLE_2_ARENA(handle);
@@ -264,6 +274,8 @@ int pool_el_refcount( pool_t *pool, pool_handle_t handle )
 
 errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
 {
+    CHECK_MAGIC(pool,handle);
+
     errno_t ret = 0;
     hal_mutex_lock( &pool->mutex );
 
@@ -295,6 +307,8 @@ finish:
 
 errno_t pool_destroy_el( pool_t *pool, pool_handle_t handle )
 {
+    CHECK_MAGIC(pool,handle);
+
     errno_t ret = 0;
     hal_mutex_lock( &pool->mutex );
 
@@ -416,7 +430,7 @@ rewrap:
         int na;
     next_arena:
         na = 1 + HANDLE_2_ARENA(h);
-        h = MK_HANDLE(na,0);
+        h = MK_HANDLE(pool,na,0);
         goto rewrap;
     }
 
@@ -431,7 +445,7 @@ rewrap:
     {
         if( (as[na].ptrs[i] == 0) && (as[na].refc[i] == 0) )
         {
-            pool->last_handle = MK_HANDLE(na,i);
+            pool->last_handle = MK_HANDLE(pool,na,i);
             return pool->last_handle;
         }
 
