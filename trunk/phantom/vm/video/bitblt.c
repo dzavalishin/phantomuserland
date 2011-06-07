@@ -40,6 +40,7 @@ void switch_screen_bitblt_to_32bpp(void)
     bit_mover_from_screen = (void *)rgba2rgba_24_move;
 
     bit_mover_byte_step = 4;
+    video_drv->bpp = 32;
 }
 
 /**

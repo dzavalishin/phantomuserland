@@ -48,6 +48,11 @@ void video_zbuf_reset()
 }
 
 
+void video_zbuf_reset_z(int z)
+{
+    memset( zbuf, z, zbsize );
+}
+
 
 /**
  *
@@ -91,7 +96,8 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
     int ys;
     for(ys = 0; ys < out.ysize; ys++)
     {
-        int linpos = out.x + ( (video_drv->ysize-1) - out.y) * zbwidth;
+        //int linpos = out.x + ( (video_drv->ysize-1) - out.y) * zbwidth;
+        int linpos = out.x + out.y * zbwidth;
         out.y++;
 
         void *p = zbuf+linpos;
@@ -149,18 +155,30 @@ void video_zbuf_dump()
 
 void video_zbuf_paint()
 {
-    // TODO replace FF with define - and in blitter too!
-    //drv_video_bitblt( zbuf, 0, 0, video_drv->xsize, video_drv->ysize, 0xFF);
-    rgb_t *d = video_drv->screen;
-    zbuf_t *zbp = zbuf;
 
-    int np = video_drv->xsize * video_drv->ysize;
-    while( np-- )
+    if(video_drv->bpp == 24)
     {
-        d->r = d->g = d->b = *zbp++;
-        d++;
+        int np = video_drv->xsize * video_drv->ysize;
+        zbuf_t *zbp = zbuf;
+        rgb_t *d = (void *)video_drv->screen;
+        while( np-- )
+        {
+            d->r = d->g = d->b = *zbp++;
+            d++;
+        }
     }
-
+    //if(video_drv->bpp == 32)
+    {
+        int np = video_drv->xsize * video_drv->ysize;
+        zbuf_t *zbp = zbuf;
+        rgba_t *d = (void *)video_drv->screen;
+        while( np-- )
+        {
+            d->r = d->g = d->b = *zbp++;
+            d->a = 0xFF;
+            d++;
+        }
+    }
 }
 
 

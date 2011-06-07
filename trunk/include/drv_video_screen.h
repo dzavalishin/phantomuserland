@@ -115,6 +115,7 @@ struct drv_video_screen_t
 
     int         xsize;
     int 	ysize;
+    int 	bpp;
 
     int 	mouse_x;
     int         mouse_y;

@@ -276,9 +276,12 @@ static void handle_set1_keycode(unsigned char key)
         // do some special checks here
         switch(event.keycode) {
             // special stuff
+        case KEY_F11:
         case KEY_PRTSCRN:
-            panic("Keyboard Requested Halt\n");
-            break;
+            //panic("Keyboard Requested Halt\n");
+            printf("print scrn\n");
+            video_zbuf_paint();
+            return;
         case KEY_F12:
             hal_cpu_reset_real();
             break;

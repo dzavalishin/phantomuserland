@@ -534,7 +534,7 @@ struct drv_video_screen_t        video_driver_basic_vga =
 {
     "Basic VGA",
     // size
-    320, 240,
+    320, 240, 8,
     // mouse x y flags
     0, 0, 0,
 
