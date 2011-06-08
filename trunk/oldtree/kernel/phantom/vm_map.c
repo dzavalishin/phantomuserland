@@ -89,15 +89,20 @@ static void vm_map_snapshot_thread(void);
 static void page_clear_engine_init(void);
 static void page_clear_engine_clear_page(physaddr_t p);
 
-#define VERIFY_SNAP
-#ifdef VERIFY_SNAP
+#define VERIFY_SNAP // verify on-disk snapshot consistency after snapshot
+//#define VERIFY_VM_SNAP // verify VM consistency before snapshot
+
 static void vm_verify_snap(disk_page_no_t head);
 static void vm_verify_vm(void);
-#else
+
+#ifndef VERIFY_SNAP
 static inline void vm_verify_snap(disk_page_no_t head)
 {
     (void)head;
 }
+#endif
+
+#if !defined(VERIFY_SNAP) || !defined(VERIFY_VM_SNAP)
 static void vm_verify_vm(void)
 {
 }
@@ -1712,6 +1717,7 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
     return current;
 }
 
+#ifdef VERIFY_VM_SNAP
 static void vm_verify_vm(void)
 {
     size_t current = 0;
@@ -1724,6 +1730,7 @@ static void vm_verify_vm(void)
                 page_offset, current, hal.object_vsize);
     }
 }
+#endif
 
 static void vm_verify_snap(disk_page_no_t head)
 {
@@ -1752,7 +1759,7 @@ static void vm_verify_snap(disk_page_no_t head)
         if (progress != np * 100 / (vm_map_map_end - vm_map_map))
         {
             progress = np * 100 / (vm_map_map_end - vm_map_map);
-            if(SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot: %d%%\n", progress);
+            if(SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot: %d%%\r", progress);
         }
         if (!pagelist_read_seq(&loader, &block))
         {
@@ -1772,6 +1779,7 @@ static void vm_verify_snap(disk_page_no_t head)
 
     pagelist_finish( &loader );
     disk_page_io_release(&page_io);
+    if(SNAP_STEPS_DEBUG) hal_printf("Snapshot verification complete\n");
 }
 
 #endif
