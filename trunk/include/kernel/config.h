@@ -18,6 +18,10 @@
 #define HAVE_VESA 1
 
 #define MEM_RECLAIM 0
+// verify on-disk snapshot consistency after snapshot
+#define VERIFY_SNAP 1
+// verify VM consistency before snapshot
+#define VERIFY_VM_SNAP 0
 
 
 #ifdef ARCH_ia32
