@@ -70,7 +70,7 @@ static pci_probe_t pci_drivers[] =
     { "VirtIO Net",  	driver_virtio_net_probe, 	2, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
 #endif
 
-#if 0 && HAVE_NET
+#if 1 && HAVE_NET
     { "AMD PcNet",   	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCNET_DEVICEID, 0 },
 //    { "AMD PcHome",  	driver_pcnet_pchome_probe, 	1, AMD_VENDORID, PCHOME_DEVICEID, 0 },
 //    { "RTL 8139", 	driver_rtl_8139_probe, 		1, RTL8139_VENDORID, RTL8139_DEVICEID, 0 },
