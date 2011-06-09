@@ -14,8 +14,8 @@ QBIN=qemu
 Q_PORTS=" -serial file:serial0.log"
 
 
-# Q_NET= -net nic,model=ne2k_pci -net user -tftp ../run/tftp
-Q_NET=" -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../oldtree/run/tftp"
+# Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
+Q_NET=" -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp"
 
 
 # Q_MACHINE=-m 85

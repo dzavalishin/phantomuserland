@@ -2,8 +2,6 @@ include ../config.mk
 
 install: tools boot
 
-TFTP_PATH=../oldtree/run/tftp/tftp
-
 boot: classes menu.lst #phantom
 	cp $^ $(TFTP_PATH)
 

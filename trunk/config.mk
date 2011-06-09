@@ -9,6 +9,9 @@
 # Directory where to put executables - supposed to be in PATH
 INST_BIN=$(realpath c:\bin\tools)
 
+TFTP_PATH=$(realpath $(PHANTOM_HOME))/run/tftp
+
+
 ifndef OSTYPE
 ifeq ($(OS),Windows_NT)
 OSTYPE=cygwin

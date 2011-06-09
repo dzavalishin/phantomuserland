@@ -14,7 +14,6 @@ LIBGCC := `$(CC) $(ARCH_FLAGS) --print-libgcc-file-name`
 LIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 USR_LIBS=$(LIBDIR)/libtmalloc.a $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a $(LIBDIR)/libphantom.a
 
-#INSTALL_DIR=$(realpath $(PHANTOM_HOME))/oldtree/run/tftp/$(TARGET)
 INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/bin/$(TARGET)
 
 

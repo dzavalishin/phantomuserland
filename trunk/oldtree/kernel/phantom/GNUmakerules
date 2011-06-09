@@ -93,14 +93,14 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	@$(CC) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
-	cat < $@ > ../../run/tftp/$@
+	cat < $@ > $(TFTP_PATH)/$@
 	cat < $@ > ../../../run/fat/boot/$@
 #	objdump -x $@.pe >$@.pe.sym
-#	gzip < $@ > ../../run/tftp/$@.gz
-#	mv ../../run/tftp/$@.gz ../../run/tftp/$@
+#	gzip < $@ > $(TFTP_PATH)/$@.gz
+#	mv $(TFTP_PATH)/$@.gz $(TFTP_PATH)/$@
 #	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
 #	cd ../../run
-#	genisoimage -o cd.iso tftp
+#	genisoimage -o cd.iso $(TFTP_PATH)
 	@echo --- kernel build finished
 	-mv -t d *.d
 
