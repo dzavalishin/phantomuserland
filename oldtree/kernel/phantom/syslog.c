@@ -52,6 +52,7 @@ void
 
     char prefix_buf[32];
     {
+#if 0
         struct tm tmb;
         localtime_rb(hal_local_time(), &tmb);
 
@@ -61,8 +62,15 @@ void
                   monNames[tmb.tm_mon], tmb.tm_mday,
                   tmb.tm_hour, tmb.tm_min, tmb.tm_sec
                 );
+#endif
     }
 
+    snprintf( prefix_buf, sizeof(prefix_buf)-1,
+		"<%d>%s %02d %02d:%02d:%02d",
+		pri, monNames[current_time->tm_mon],
+		current_time->tm_mday,	current_time->tm_hour,
+		current_time->tm_min,	current_time->tm_sec
+                );
     char msg_buf[800];
     (void)vsnprintf(msg_buf, sizeof(msg_buf)-1, fmt, ap);
 
