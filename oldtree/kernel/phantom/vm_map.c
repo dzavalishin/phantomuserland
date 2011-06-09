@@ -89,24 +89,8 @@ static void vm_map_snapshot_thread(void);
 static void page_clear_engine_init(void);
 static void page_clear_engine_clear_page(physaddr_t p);
 
-#define VERIFY_SNAP // verify on-disk snapshot consistency after snapshot
-//#define VERIFY_VM_SNAP // verify VM consistency before snapshot
-
 static void vm_verify_snap(disk_page_no_t head);
 static void vm_verify_vm(void);
-
-#ifndef VERIFY_SNAP
-static inline void vm_verify_snap(disk_page_no_t head)
-{
-    (void)head;
-}
-#endif
-
-#if !defined(VERIFY_SNAP) || !defined(VERIFY_VM_SNAP)
-static void vm_verify_vm(void)
-{
-}
-#endif
 
 
 static hal_cond_t      deferred_alloc_thread_sleep;
@@ -1666,7 +1650,7 @@ static void page_clear_engine_clear_page(physaddr_t p)
     if (enabled) hal_sti();
 }
 
-#ifdef VERIFY_SNAP
+#if VERIFY_SNAP || VERIFY_VM_SNAP
 
 #include <vm/object.h>
 #include <vm/alloc.h>
@@ -1717,20 +1701,34 @@ static size_t vm_verify_page(void *data, size_t page_offset, size_t current, siz
     return current;
 }
 
-#ifdef VERIFY_VM_SNAP
+#endif
+
+#if VERIFY_VM_SNAP
+
 static void vm_verify_vm(void)
 {
     size_t current = 0;
     int np;
 
+    if(SNAP_STEPS_DEBUG) hal_printf("Verifying VM before snapshot...\n");
     for (np = 0; np < vm_map_map_end - vm_map_map; np++)
     {
         size_t page_offset = np * PAGE_SIZE;
         current = vm_verify_page(vm_map_start_of_virtual_address_space + page_offset,
                 page_offset, current, hal.object_vsize);
     }
+    if(SNAP_STEPS_DEBUG) hal_printf("VM verification icomplete\n");
 }
+
+#else
+
+static void vm_verify_vm(void)
+{
+}
+
 #endif
+
+#if VERIFY_SNAP
 
 static void vm_verify_snap(disk_page_no_t head)
 {
@@ -1782,7 +1780,15 @@ static void vm_verify_snap(disk_page_no_t head)
     if(SNAP_STEPS_DEBUG) hal_printf("Snapshot verification complete\n");
 }
 
+#else
+
+static inline void vm_verify_snap(disk_page_no_t head)
+{
+    (void)head;
+}
+
 #endif
+
 
 //---------------------------------------------------------------------------
 // Wire/unwire code
