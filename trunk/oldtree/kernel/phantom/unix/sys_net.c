@@ -244,7 +244,7 @@ int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, soc
 
     //us->addr = my_addr;
 
-    void *new_socket;
+    void *new_socket = NULL;
     sockaddr tmp_addr;
 
     int pe = tcp_accept(us->prot_data, &tmp_addr, new_socket);

@@ -1742,7 +1742,7 @@ static void vm_verify_snap(disk_page_no_t head)
     if (!head)
         return;
 
-    if(SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot...\n");
+    if (SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot \n");
 
     disk_page_io_allocate(&page_io);
     pagelist_init(&loader, head, 0, DISK_STRUCT_MAGIC_SNAP_LIST);
@@ -1753,11 +1753,16 @@ static void vm_verify_snap(disk_page_no_t head)
     {
         size_t page_offset = np * PAGE_SIZE;
         disk_page_no_t block;
+	short percentage = np * 100 / (vm_map_map_end - vm_map_map);
 
-        if (progress != np * 100 / (vm_map_map_end - vm_map_map))
+        if (progress != percentage)
         {
-            progress = np * 100 / (vm_map_map_end - vm_map_map);
-            if(SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot: %d%%\r", progress);
+            progress = percentage;
+            if (SNAP_STEPS_DEBUG)
+	    {
+		if (progress % 10) hal_printf(". ", progress);
+		else hal_printf(".%d%%\n", progress);
+	    }
         }
         if (!pagelist_read_seq(&loader, &block))
         {
@@ -1777,7 +1782,7 @@ static void vm_verify_snap(disk_page_no_t head)
 
     pagelist_finish( &loader );
     disk_page_io_release(&page_io);
-    if(SNAP_STEPS_DEBUG) hal_printf("Snapshot verification complete\n");
+    if (SNAP_STEPS_DEBUG) hal_printf("Snapshot verification complete\n");
 }
 
 #else
