@@ -1,7 +1,8 @@
 @echo off
-
+rem http://dietpc.org/windows/qemu/
 rem SET QDIR=..\oldtree\run12
-SET QDIR=qemu\0.13.0
+rem SET QDIR=qemu\0.13.0
+SET QDIR=qemu\0.14.1
 
 set QEMU_AUDIO_DRV=dsound
 set QEMU_AUDIO_DRV=sdl
@@ -18,8 +19,8 @@ SET VIO=-net nic,model=virtio
 SET Q_PORTS= -serial file:serial0.log
 
 
-rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ../run/tftp
-SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ../oldtree/run/tftp
+rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
+SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp
 
 
 SET Q_MACHINE=-m 256

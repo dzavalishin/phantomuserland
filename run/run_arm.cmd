@@ -3,7 +3,7 @@ SET QDIR=qemu\0.13.0
 SET SER=-serial file:serial0.log
 rem SET SER=-serial vc 
 
-SET Q_NET= -net user -tftp ../oldtree/run/tftp -net nic,model=smc91c111
+SET Q_NET= -net user -tftp ./tftp -net nic,model=smc91c111
 
 
 SET STOP=-S

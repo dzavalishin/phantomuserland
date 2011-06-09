@@ -1,3 +1,5 @@
+include ../../config.mk
+
 all:: classes
 
 MKBULK=mkbulk
@@ -28,7 +30,7 @@ phantom.osimpl.pc phantom.os.pc phantom.os.time.pc ru.dz.phantom.tetris.*.pc ru.
 
 
 install: classes
-	cp classes ../../oldtree/run/tftp
+	cp classes $(TFTP_PATH)
 
 clean: 
 	-rm *.pc *.lst *.lstc classes *.d

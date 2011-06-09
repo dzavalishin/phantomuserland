@@ -28,6 +28,3 @@ MOD_LIBS=../lib/libphantom_c.a libphantom_user.a
 #	objdump -x -d $@ >$@.dump
 
 
-#install:: pmod_test pmod_regress
-#	cp pmod_test $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/
-#	cp pmod_regress $(realpath $(PHANTOM_HOME))/oldtree/run/tftp/
