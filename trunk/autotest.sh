@@ -69,19 +69,20 @@ echo "$SVN_OUT"
 }
 
 cd oldtree/run_test
-cp ../run/tftp/phantom tftp/
+TFTP_PATH=../../run/tftp
+cp $TFTP_PATH/phantom tftp/
 
 for module in classes pmod_test pmod_tcpdemo
 do
 	[ -s tftp/$module ] || {
-		cp ../run/tftp/$module tftp/
+		cp $TFTP_PATH/$module tftp/
 		continue
 	}
 
-	[ tftp/$module -ot ../run/tftp/$module ] || continue
+	[ tftp/$module -ot $TFTP_PATH/$module ] || continue
 
 	echo "$module is renewed"
-	cp ../run/tftp/$module tftp/
+	cp $TFTP_PATH/$module tftp/
 done
 
 rm -f serial0.log
@@ -91,7 +92,7 @@ rm -f serial0.log
 
 QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 	-M pc -smp 4 -s -boot a -no-reboot \
-	-net nic,model=pcnet -net user
+	-net nic,model=ne2k_pci -net user
 	-parallel file:lpt_01.log \
 	-serial file:serial0.log \
 	-tftp tftp \
