@@ -24,6 +24,7 @@
 #include <phantom_types.h>
 #include <queue.h>
 #include <errno.h>
+#include <kernel/pool.h>
 
 #include <spinlock.h>
 
@@ -48,18 +49,20 @@ typedef struct pager_io_request
 
     unsigned char       flag_urgent;  		// BUG - not used yet
 
-#if IO_RQ_SLEEP
+//#if IO_RQ_SLEEP
     // I true - calling thread will be put onsleep until IO is done 
     unsigned char       flag_sleep;             // BUG - not used yet
     int                 sleep_tid; 		// Thread which was put asleep due to flag_sleep - filled by io code
     hal_spinlock_t      lock;
-#endif
+//#endif
 
     void                (*pager_callback)( struct pager_io_request *req, int write );
 
     queue_chain_t       disk_chain; 		// Disk io q chain
 
     errno_t 		rc; 			// Driver return code
+
+    pool_handle_t       phandle;                // This partition is to be released after io is done - see
 } pager_io_request;
 
 

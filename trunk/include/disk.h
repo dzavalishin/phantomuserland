@@ -13,8 +13,40 @@
 #define DISK_H
 
 #include <errno.h>
+#include <kernel/pool.h>
 #include <hal.h>
 #include "pager_io_req.h"
+
+// -----------------------------------------------------------------------
+// New handle based stuff
+// -----------------------------------------------------------------------
+
+
+typedef struct partition_handle
+{
+    pool_handle_t       h;
+} partition_handle_t;
+
+partition_handle_t      dpart_create(partition_handle_t base, long shift, long size);
+
+// These work with 4096 byte blocks
+errno_t dpart_read_block( partition_handle_t h, void *to, long blockNo, int nBlocks );
+errno_t dpart_write_block( partition_handle_t h, const void *from, long blockNo, int nBlocks );
+
+// These work with native sized (512byte) sectors 
+errno_t dpart_read_sector( partition_handle_t h, void *to, long sectorNo, int nSectors );
+errno_t dpart_write_sector( partition_handle_t h, const void *from, long sectorNo, int nSectors );
+
+
+/** Start async disk io operation */
+void dpart_enqueue( partition_handle_t h, pager_io_request *rq );
+void dpart_release_async( pool_handle_t h );
+
+
+// -----------------------------------------------------------------------
+// Old stuff
+// -----------------------------------------------------------------------
+
 
 #define MAX_DISK_PARTITIONS 64
 
@@ -32,6 +64,9 @@ struct phantom_disk_partition
     int         flags;
     int         type;           // 0-0xFF is PC part types
 
+    partition_handle_t self; // my handle - to release it on async io done
+
+    partition_handle_t baseh;
     struct phantom_disk_partition *base; //
 
     void        *specific;      // Specific data (following methods know how to handle)
@@ -71,7 +106,7 @@ typedef struct phantom_disk_partition phantom_disk_partition_t;
 #define PART_FLAG_IS_WHOLE_DISK		0x0040
 
 
-phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition_t *base, long shift, long size);
+phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition_t *base, long shift, long size) __attribute__((deprecated));
 
 errno_t phantom_register_disk_drive(phantom_disk_partition_t *p);
 
