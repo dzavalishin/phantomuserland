@@ -223,7 +223,7 @@ int main(int argc, char **argv, char **envp)
     board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
-    //init_buses();
+    phantom_init_part_pool();
 
     // Stage is:
     //   0 - very early in the boot - interrupts can be used only

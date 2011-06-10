@@ -29,7 +29,7 @@ struct exe_module
 
     u_int32_t           start; // code entry point
     u_int32_t           esp;
-	u_int32_t			stack_bottom; // user addr
+    u_int32_t           stack_bottom; // user addr
 
     // possibly here we have to have syscall service pointer
     //physaddr_t  	phys_cs;

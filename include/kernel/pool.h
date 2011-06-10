@@ -6,16 +6,36 @@
  *
  * Pool of kernel structs accessed with handle.
  *
- * TODO poosibly use for: timed calls, threads, disks/partitions,
- *      exe_modules, drivers, wttys, windows, file descriptors,
- *      siginfos, processes, io requests, semas, fs instances,
- *      buses, udp/tcp endpoints, cpus, interrupt controllers,
- *      USB hcs and other structs, ports, uusockets, uufiles,
- *      uufses, fonts, bitmaps, virtio devices, trfs stuff,
- *      paging_devices, sound ports
+ * TODO poosibly use for:
+ *	timed calls,
+ *	threads                 - already handle-based
+ *	disks/partitions,
+ *      exe_modules,            - TODO unix/exec.c
+ *	drivers,
+ *	wttys,
+ *	file descriptors,
+ *      siginfos,
+ *	processes,              - already handle-based
+ *	io requests,
+ *	semas,
+ *	fs instances,
+ *      buses,
+ *	udp/tcp endpoints,
+ *	cpus,
+ *	interrupt controllers,
+ *      USB hcs and other structs,
+ *	ports,
+ *	uusockets,
+ *	uufiles,
+ *      uufses,
+ *	virtio devices,
+ *	trfs stuff,
+ *      paging_devices,
+ *	sound ports
+ *	fonts,
+ *	bitmaps,
+ *	windows                 - in progress
  *      what else?
- *
- * TODO add magic to handle's upper byte to detect correct handle
  *
 **/
 

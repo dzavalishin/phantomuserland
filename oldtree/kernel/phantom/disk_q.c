@@ -51,6 +51,10 @@ pager_io_request_done( pager_io_request *rq )
     if(rq->pager_callback)
         rq->pager_callback( rq, rq->flag_pageout );
 
+    if( rq->phandle >= 0 )
+        dpart_release_async( rq->phandle );
+
+
 #if IO_RQ_SLEEP
     //if(sleep)        awake(tid);
 

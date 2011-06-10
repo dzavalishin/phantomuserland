@@ -73,24 +73,8 @@ static errno_t partSyncWrite( struct phantom_disk_partition *p, const void *from
 }
 #endif
 
-// NB!! pager_io_request's disk block no is IGNORED! Parameter is used!
-// Parameter has to be in partition's block size
-static errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
-{
-    assert(p->specific == 0);
-    assert(p->base);
-    // Temp! Rewrite!
-    assert(p->base->block_size == p->block_size);
+extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 
-    if( checkRange( p, rq->blockNo, rq->nSect ) )
-        return EINVAL;
-
-    SHOW_FLOW( 9, "part io i sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
-    rq->blockNo += p->shift;
-
-    p->base->asyncIo( p, rq );
-    return 0;
-}
 
 /*
 // NB!! pager_io_request's disk block no is IGNORED! Parameter is used!
@@ -283,6 +267,7 @@ phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition
     //ret->asyncWrite = partAsyncWrite;
 
     ret->base = base;
+    ret->baseh.h = -1;
 
     return ret;
 }
