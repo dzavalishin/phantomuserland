@@ -17,6 +17,7 @@
 
 #include <kernel/drivers.h>
 #include <kernel/page.h>
+#include <kernel/atomic.h>
 #include <kernel/libkern.h>
 
 #include <i386/pio.h>
@@ -25,11 +26,15 @@
 #include <hal.h>
 #include <time.h>
 
+#include <pager_io_req.h>
+
 #include <dev/pci/ahci.h>
 
 typedef struct
 {
     int                 	exist;
+
+    u_int32_t                   c_started; // which commands are started - to compare with running list
 
     physaddr_t          	clb_p;
     struct ahci_cmd_list*	clb;
@@ -38,6 +43,8 @@ typedef struct
     void *              	fis;
 
     struct ahci_cmd_tab *       cmds;
+
+    pager_io_request *          reqs[AHCI_CL_SIZE];
 } ahci_port_t;
 
 
@@ -58,6 +65,10 @@ static int ahci_write(phantom_device_t *dev, const void *buf, int len);
 static int ahci_read(phantom_device_t *dev, void *buf, int len);
 
 //static int ahci_ioctl(struct phantom_device *dev, int type, void *buf, int len);
+
+
+static void ahci_process_finished_cmd(phantom_device_t *dev, int nport);
+
 
 
 
@@ -199,7 +210,7 @@ static int ahci_init_port(phantom_device_t *dev, int nport)
         p->clb[i].cmd_table_phys = pa + (i*cmd_bytes);
     }
 
-    WP32( dev, nport, AHCI_P_IE, 0xFFFF ); // Turn on all... 
+    WP32( dev, nport, AHCI_P_IE, 0xFFFF ); // Turn on all...
 
     WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD );
     WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_ST );
@@ -262,6 +273,22 @@ static int ahci_init(phantom_device_t *dev)
         nport++;
     }
 
+    // now tell us something
+
+    printf("AHCI flags: %s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+           cap & (1 << 31) ? "64bit " : "",
+           cap & (1 << 30) ? "ncq " : "",
+           cap & (1 << 28) ? "ilck " : "",
+           cap & (1 << 27) ? "stag " : "",
+           cap & (1 << 26) ? "pm " : "",
+           cap & (1 << 25) ? "led " : "",
+           cap & (1 << 24) ? "clo " : "",
+           cap & (1 << 19) ? "nz " : "",
+           cap & (1 << 18) ? "only " : "",
+           cap & (1 << 17) ? "pmp " : "",
+           cap & (1 << 15) ? "pio " : "",
+           cap & (1 << 14) ? "slum " : "",
+	       cap & (1 << 13) ? "part " : "");
 
     return 0;
 }
@@ -281,6 +308,8 @@ static void ahci_port_interrupt(phantom_device_t *dev, int nport)
     }
 
     SHOW_FLOW( 1, "Interrupt from port %d, is %X", nport, is );
+
+    ahci_process_finished_cmd(dev, nport);
 }
 
 
@@ -318,13 +347,15 @@ static void ahci_wait_for_port_interrupt(phantom_device_t *dev, int nport)
 
 static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 {
-    //int slot = 0;
+    ahci_t *a = dev->drv_private;
 
     while(1)
     {
         u_int32_t slots = RP32(dev, nport, AHCI_P_CI);
 
         slots &= RP32(dev, nport, AHCI_P_SACT );
+
+        slots |= a->port[nport].c_started;
 
         int slot = ffr(slots);
         if( slot == 0 )
@@ -336,14 +367,18 @@ static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 
 }
 
+
+
 // returns cmd index
 static void ahci_start_cmd(phantom_device_t *dev, int nport, int ncmd)
 {
+    ahci_t *a = dev->drv_private;
     WP32( dev, nport, AHCI_P_CI, 1 >> ncmd);
+    atomic_or( &(a->port[nport].c_started), 1 >> ncmd );
 }
 
 // returns cmd index
-static int ahci_build_cmd(phantom_device_t *dev, int nport, int isWrite, physaddr_t pa, size_t dlen )
+static int ahci_build_cmd(phantom_device_t *dev, int nport, pager_io_request *req )
 {
     ahci_t *a = dev->drv_private;
 
@@ -354,17 +389,76 @@ static int ahci_build_cmd(phantom_device_t *dev, int nport, int isWrite, physadd
     struct ahci_cmd_tab *       cmd = a->port[nport].cmds+pFreeSlot;
     struct ahci_cmd_list*	cp = a->port[nport].clb+pFreeSlot;
 
+    a->port[nport].reqs[pFreeSlot] = req;
+
     cp->prd_length = 1;
-    cp->cmd_flags = (isWrite ? AHCI_CMD_WRITE : 0);
+    cp->cmd_flags = ( (req->flag_pageout) ? AHCI_CMD_WRITE : 0);
     cp->bytecount = 0;
 
-    cmd->prd_tab[0].dba = pa;
-    cmd->prd_tab[0].dbc = dlen;
+    // TODO assert req->nSect * 512 < max size per prd
+
+    cmd->prd_tab[0].dba = req->phys_page;
+    cmd->prd_tab[0].dbc = req->nSect * 512;
 
     return pFreeSlot;
 }
 
 
+static void ahci_finish_cmd(phantom_device_t *dev, int nport, int slot)
+{
+    ahci_t *a = dev->drv_private;
+    //ahci_port_t *p = a->port+nport;
+
+    //struct ahci_cmd_tab *       cmd = a->port[nport].cmds+slot;
+    struct ahci_cmd_list*	cp = a->port[nport].clb+slot;
+    pager_io_request *          req = a->port[nport].reqs[slot];
+
+    // Now do it
+
+    req->rc = 0;
+
+    // TODO check error!
+
+    if( cp->bytecount != req->nSect * 512 )
+    {
+        req->rc = EIO;
+        req->flag_ioerror = 1;
+    }
+
+    if(req) pager_io_request_done( req );
+}
+
+
+static void ahci_process_finished_cmd(phantom_device_t *dev, int nport)
+{
+    ahci_t *a = dev->drv_private;
+
+    while(a->port[nport].c_started)
+    {
+        // TODO in splinlock to prevent races?
+
+        u_int32_t slots = RP32( dev, nport, AHCI_P_CI );
+        u_int32_t done = a->port[nport].c_started & ~slots;
+
+        if( done == 0 )
+            return;
+
+        int slot = ffr(slots);
+        if( slot == 0 )
+            return;
+
+        slot--; // 0 = none
+
+        SHOW_FLOW( 8, "found completed slot %d on port %d ", slot, nport );
+
+
+        ahci_finish_cmd( dev, nport, slot );
+
+        // eat it
+        atomic_and( &(a->port[nport].c_started), ~(1 >> slot) );
+    }
+
+}
 
 
 
