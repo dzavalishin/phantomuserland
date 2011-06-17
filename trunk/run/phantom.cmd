@@ -18,6 +18,7 @@ SET VIO=-net nic,model=virtio
 
 SET Q_PORTS= -serial file:serial0.log
 
+SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 
 
 rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
 SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp
@@ -38,7 +39,7 @@ rem -virtioconsole 4
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-%QDIR%\qemu -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND%
+%QDIR%\qemu -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI%
 
 grep KERNEL.TEST serial0.log
 
