@@ -52,16 +52,6 @@ static __inline int abs(int a) { return (a < 0 ? -a : a); }
 static __inline long labs(long a) { return (a < 0 ? -a : a); }
 static __inline quad_t qabs(quad_t a) { return (a < 0 ? -a : a); }
 
-#if 0
-
-
-
-/* Prototypes for non-quad routines. */
-uint32_t arc4random(void);
-void	 arc4rand(void *ptr, u_int len, int reseed);
-int	 bcmp(const void *, const void *, size_t);
-void	*bsearch(const void *, const void *, size_t,
-	    size_t, int (*)(const void *, const void *));
 #ifndef	HAVE_INLINE_FFS
 int	 ffs(int);
 #endif
@@ -74,6 +64,25 @@ int	 fls(int);
 #ifndef	HAVE_INLINE_FLSL
 int	 flsl(long);
 #endif
+
+/*
+ * Find First Reset bit
+ */
+int ffr(int mask);
+
+
+#if 0
+
+
+
+/* Prototypes for non-quad routines. */
+uint32_t arc4random(void);
+void	 arc4rand(void *ptr, u_int len, int reseed);
+int	 bcmp(const void *, const void *, size_t);
+void	*bsearch(const void *, const void *, size_t,
+	    size_t, int (*)(const void *, const void *));
+
+
 int	 fnmatch(const char *, const char *, int);
 void	 gets(char *, size_t, int);
 int	 locc(int, char *, u_int);

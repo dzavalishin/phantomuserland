@@ -101,4 +101,8 @@ phantom_device_t * driver_video_gen_clone_pci_probe( pci_cfg_t *pci, int stage )
 
 
 
+phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage );
+
+
+
 #endif // DRIVERS_H

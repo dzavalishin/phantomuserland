@@ -1,4 +1,4 @@
-SET QDIR=qemu\0.13.0
+SET QDIR=qemu\0.14.1
 
 SET SER=-serial file:serial0.log
 rem SET SER=-serial vc 
