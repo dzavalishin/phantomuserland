@@ -22,4 +22,7 @@ int dbg_add_command(void (*func)(int, char **), const char *name, const char *de
 void debug_console_putc(int c);
 
 
+void phantom_dump_windows_buf(char *bp, int len);
+
+
 #endif // KERNEL_DEBUG_H

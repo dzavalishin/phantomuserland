@@ -67,25 +67,26 @@ typedef struct pager_io_request
 
 
 static __inline__ void
-pager_io_request_init( pager_io_request *me)
+pager_io_request_init( pager_io_request *me )
 { 
-	me->flag_pagein 	= 0;
-	me->flag_pageout 	= 0;
-        me->flag_ioerror 	= 0;
-        me->flag_urgent 	= 0;
+    me->flag_pagein 	= 0;
+    me->flag_pageout 	= 0;
+    me->flag_ioerror 	= 0;
+    me->flag_urgent 	= 0;
 
-        me->rc                  = 0;
+    me->rc                  = 0;
 
-        me->blockNo             = 0;
-        me->nSect               = 0;
+    me->blockNo             = 0;
+    me->nSect               = 0;
 
-        me->pager_callback 	= 0;
+    me->pager_callback 	= 0;
 #if IO_RQ_SLEEP
-        me->flag_sleep 		= 0;
-        me->sleep_tid 		= 0;
+    me->flag_sleep 		= 0;
+    me->sleep_tid 		= 0;
 
-        hal_spin_init( &(me->lock));
+    hal_spin_init( &(me->lock));
 #endif
+    me->phandle         = -1;
 }
 
 

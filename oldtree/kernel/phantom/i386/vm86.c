@@ -1,11 +1,24 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * VM86 support
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "vm86"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <kernel/init.h>
 #include <kernel/trap.h>
 #include <kernel/page.h>
 
-//#include <i386/trap.h>
 #include <setjmp.h>
-//#include <x86/phantom_page.h>
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
@@ -573,6 +586,7 @@ void phantom_init_vm86(void)
     assert(PAGE_ALIGNED(VM86_EXE_SIZE));
 
     hal_alloc_phys_pages_low( (physaddr_t *) (&r0stack), VM86_R0_STACK_SIZE/PAGE_SIZE);
+    //r0stack = calloc( VM86_R0_STACK_SIZE, 1 );
     hal_alloc_phys_pages_low( (physaddr_t *) (&exe), VM86_EXE_SIZE/PAGE_SIZE);
 
 
@@ -581,7 +595,7 @@ void phantom_init_vm86(void)
     if( ((int)exe) & 0xF )
         panic("VM86 memory unaligned");
 
-    //printf("VM86 region address is %X, R0 stack is %X\n", exe, stack );
+    SHOW_INFO( 7, "VM86 region address is 0x%X, R0 stack is 0x%X", exe, r0stack );
 
     {
     // TODO BUG -sizeof(int) needed?
@@ -686,12 +700,12 @@ void phantom_v86_run(void *code, size_t size)
         return;
     }
 
-    //hal_cli();
+    hal_cli();
     asm("ljmp %0, $0" : : "i" (VM86_TSS));
     phantom_trap_handlers[T_GENERAL_PROTECTION] = saved_trap_handler;
 
     hal_enable_preemption();
-    //hal_sti();
+    hal_sti();
 
 }
 
