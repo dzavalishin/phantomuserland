@@ -55,7 +55,7 @@ errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
     if( checkRange( p, rq->blockNo, rq->nSect ) )
         return EINVAL;
 
-    SHOW_FLOW( 9, "part io i sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
+    SHOW_FLOW( 11, "part io i sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
     rq->blockNo += p->shift;
 
     p->base->asyncIo( p, rq );

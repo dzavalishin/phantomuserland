@@ -430,3 +430,29 @@ void drv_video_window_to_top(drv_video_window_t *w)
 }
 
 
+#include <kernel/debug.h>
+
+void phantom_dump_windows_buf(char *bp, int len)
+{
+    drv_video_window_t *w;
+    int ie = hal_save_cli();
+    hal_spin_lock( &allw_lock );
+    queue_iterate(&allwindows, w, drv_video_window_t *, chain)
+    {
+        int pn = snprintf( bp, len, "%s%3dx%3d @%3dx%3d z %2d fl%b st%b %s%.10s\x1b[37m\n",
+                           (w->state & WSTATE_WIN_FOCUSED) ? "\x1b[32m" : "",
+                           w->xsize, w->ysize, w->x, w->y, w->z,
+                           w->flags, "\020\1Decor\2NotInAll\3NoFocus\4NoPixels",
+                           w->state, "\020\1Focused\2Dragged\3Visible",
+                           (w->stall ? "STALL " : ""),
+                           //w->events_count, w->owner,
+                           (w->title ? w->title : "??")
+                         );
+        len -= pn;
+        bp += pn;
+    }
+    hal_spin_unlock( &allw_lock );
+    if(ie) hal_sti();
+}
+
+

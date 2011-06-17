@@ -233,9 +233,10 @@ hal_free_phys_pages(physaddr_t  paddr, int npages)
 {
     assert( ( ((int)paddr) & (PAGE_SIZE-1)) == 0 );
 
-    // Unmap it for any case
-    hal_pages_control( paddr, 0, npages, page_unmap, page_noaccess );
-    phantom_phys_free_region( &pm_map, (int)((int)paddr) / PAGE_SIZE, npages );
+    // Unmap it for any case - NO, IDIOT! It unmaps page 0!
+    //hal_pages_control( paddr, 0, npages, page_unmap, page_noaccess );
+
+    phantom_phys_free_region( &pm_map, (int) (paddr / PAGE_SIZE), npages );
 
     STAT_INC_CNT_N(STAT_CNT_PMEM_FREE, npages);
 }
@@ -354,7 +355,7 @@ void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
     hal_pages_control( pa, va, npages, page_unmap, page_noaccess );
 
     hal_free_vaddress(va, npages);
-    hal_free_phys_pages( pa, npages);
+    hal_free_phys_pages( pa, npages); // TODO BUG causes crash in VM86 if called before
 }
 
 

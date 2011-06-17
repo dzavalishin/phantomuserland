@@ -30,9 +30,115 @@
 
 #include <dev/pci/ahci.h>
 
+#define ATA_CMD_IDENT	0xEC	/* Identify Device		*/
+
+#define ATA_CMD_RD_DMA	0xC8	/* Read DMA (with retries)	*/
+#define ATA_CMD_RD_DMAN	0xC9	/* Read DMS ( no  retries)	*/
+#define ATA_CMD_WR_DMA	0xCA	/* Write DMA (with retries)	*/
+#define ATA_CMD_WR_DMAN	0xCB	/* Write DMA ( no  retires)	*/
+/*
+ * structure returned by ATA_CMD_IDENT, as per ANSI ATA2 rev.2f spec
+ */
+typedef struct hd_driveid {
+    unsigned short	config;		/* lots of obsolete bit flags */
+    unsigned short	cyls;		/* "physical" cyls */
+    unsigned short	reserved2;	/* reserved (word 2) */
+    unsigned short	heads;		/* "physical" heads */
+    unsigned short	track_bytes;	/* unformatted bytes per track */
+    unsigned short	sector_bytes;	/* unformatted bytes per sector */
+    unsigned short	sectors;	/* "physical" sectors per track */
+    unsigned short	vendor0;	/* vendor unique */
+    unsigned short	vendor1;	/* vendor unique */
+    unsigned short	vendor2;	/* vendor unique */
+    unsigned char	serial_no[20];	/* 0 = not_specified */
+    unsigned short	buf_type;
+    unsigned short	buf_size;	/* 512 byte increments; 0 = not_specified */
+    unsigned short	ecc_bytes;	/* for r/w long cmds; 0 = not_specified */
+    unsigned char	fw_rev[8];	/* 0 = not_specified */
+    unsigned char	model[40];	/* 0 = not_specified */
+    unsigned char	max_multsect;	/* 0=not_implemented */
+    unsigned char	vendor3;	/* vendor unique */
+    unsigned short	dword_io;	/* 0=not_implemented; 1=implemented */
+    unsigned char	vendor4;	/* vendor unique */
+    unsigned char	capability;	/* bits 0:DMA 1:LBA 2:IORDYsw 3:IORDYsup*/
+    unsigned short	reserved50;	/* reserved (word 50) */
+    unsigned char	vendor5;	/* vendor unique */
+    unsigned char	tPIO;		/* 0=slow, 1=medium, 2=fast */
+    unsigned char	vendor6;	/* vendor unique */
+    unsigned char	tDMA;		/* 0=slow, 1=medium, 2=fast */
+    unsigned short	field_valid;	/* bits 0:cur_ok 1:eide_ok */
+    unsigned short	cur_cyls;	/* logical cylinders */
+    unsigned short	cur_heads;	/* logical heads */
+    unsigned short	cur_sectors;	/* logical sectors per track */
+    unsigned short	cur_capacity0;	/* logical total sectors on drive */
+    unsigned short	cur_capacity1;	/*  (2 words, misaligned int)     */
+    unsigned char	multsect;	/* current multiple sector count */
+    unsigned char	multsect_valid;	/* when (bit0==1) multsect is ok */
+    unsigned int	lba_capacity;	/* total number of sectors */
+    unsigned short	dma_1word;	/* single-word dma info */
+    unsigned short	dma_mword;	/* multiple-word dma info */
+    unsigned short  eide_pio_modes; /* bits 0:mode3 1:mode4 */
+    unsigned short  eide_dma_min;	/* min mword dma cycle time (ns) */
+    unsigned short  eide_dma_time;	/* recommended mword dma cycle time (ns) */
+    unsigned short  eide_pio;       /* min cycle time (ns), no IORDY  */
+    unsigned short  eide_pio_iordy; /* min cycle time (ns), with IORDY */
+    unsigned short	words69_70[2];	/* reserved words 69-70 */
+    unsigned short	words71_74[4];	/* reserved words 71-74 */
+    unsigned short  queue_depth;	/*  */
+    unsigned short  words76_79[4];	/* reserved words 76-79 */
+    unsigned short  major_rev_num;	/*  */
+    unsigned short  minor_rev_num;	/*  */
+    unsigned short  command_set_1;	/* bits 0:Smart 1:Security 2:Removable 3:PM */
+    unsigned short	command_set_2;	/* bits 14:Smart Enabled 13:0 zero 10:lba48 support*/
+    unsigned short  cfsse;		/* command set-feature supported extensions */
+    unsigned short  cfs_enable_1;	/* command set-feature enabled */
+    unsigned short  cfs_enable_2;	/* command set-feature enabled */
+    unsigned short  csf_default;	/* command set-feature default */
+    unsigned short  	dma_ultra;	/*  */
+    unsigned short	word89;		/* reserved (word 89) */
+    unsigned short	word90;		/* reserved (word 90) */
+    unsigned short	CurAPMvalues;	/* current APM values */
+    unsigned short	word92;		/* reserved (word 92) */
+    unsigned short	hw_config;	/* hardware config */
+    unsigned short	words94_99[6];/* reserved words 94-99 */
+    /*unsigned long long  lba48_capacity; /--* 4 16bit values containing lba 48 total number of sectors */
+    unsigned short	lba48_capacity[4]; /* 4 16bit values containing lba 48 total number of sectors */
+    unsigned short	words104_125[22];/* reserved words 104-125 */
+    unsigned short	last_lun;	/* reserved (word 126) */
+    unsigned short	word127;	/* reserved (word 127) */
+    unsigned short	dlf;		/* device lock function
+    * 15:9	reserved
+    * 8	security level 1:max 0:high
+    * 7:6	reserved
+    * 5	enhanced erase
+    * 4	expire
+    * 3	frozen
+    * 2	locked
+    * 1	en/disabled
+    * 0	capability
+    */
+    unsigned short  csfo;		/* current set features options
+    * 15:4	reserved
+    * 3	auto reassign
+    * 2	reverting
+    * 1	read-look-ahead
+    * 0	write cache
+    */
+    unsigned short	words130_155[26];/* reserved vendor words 130-155 */
+    unsigned short	word156;
+    unsigned short	words157_159[3];/* reserved vendor words 157-159 */
+    unsigned short	words160_162[3];/* reserved words 160-162 */
+    unsigned short	cf_advanced_caps;
+    unsigned short	words164_255[92];/* reserved words 164-255 */
+} hd_driveid_t;
+
+
+
+
 typedef struct
 {
     int                 	exist;
+    u_int32_t                   nSect;
 
     u_int32_t                   c_started; // which commands are started - to compare with running list
 
@@ -68,6 +174,12 @@ static int ahci_read(phantom_device_t *dev, void *buf, int len);
 
 
 static void ahci_process_finished_cmd(phantom_device_t *dev, int nport);
+
+static errno_t ahci_do_iquiry(phantom_device_t *dev, int nport, void *data, size_t data_len );
+
+
+static void dump_ataid(hd_driveid_t *ataid);
+//static void ahci_dump_port_info(phantom_device_t *dev, int nport );
 
 
 
@@ -172,7 +284,7 @@ static inline void WP32( phantom_device_t *dev, int port, int displ, u_int32_t v
 #define R32(__d,__p) ( *((u_int32_t*)( ((int)(__d)->iomem) + (int)(__p))) )
 
 
-static int ahci_init_port(phantom_device_t *dev, int nport)
+static errno_t ahci_init_port(phantom_device_t *dev, int nport)
 {
     ahci_t *a = dev->drv_private;
 
@@ -214,6 +326,24 @@ static int ahci_init_port(phantom_device_t *dev, int nport)
 
     WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD );
     WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_ST );
+
+    //ahci_dump_port_info( dev, nport );
+
+    if(1){
+    hd_driveid_t id;
+
+    errno_t rc = ahci_do_iquiry( dev, nport, &id, sizeof(id) );
+    if(rc)
+    {
+        SHOW_ERROR( 0, "ahci_do_iquiry rc = %d", rc );
+        return rc;
+    }
+
+    p->nSect = id.lba_capacity;
+
+    dump_ataid( &id );
+    }
+
 
     return 0;
 }
@@ -369,16 +499,27 @@ static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 
 
 
-// returns cmd index
 static void ahci_start_cmd(phantom_device_t *dev, int nport, int ncmd)
 {
     ahci_t *a = dev->drv_private;
     WP32( dev, nport, AHCI_P_CI, 1 >> ncmd);
-    atomic_or( &(a->port[nport].c_started), 1 >> ncmd );
+    atomic_or( (int *)&(a->port[nport].c_started), 1 >> ncmd );
 }
 
+
+static void ahci_wait_cmd(phantom_device_t *dev, int nport, int ncmd)
+{
+    //ahci_t *a = dev->drv_private;
+
+    while( RP32( dev, nport, AHCI_P_CI ) & (1 >> ncmd) )
+    {
+        hal_sleep_msec( 1 );
+    }
+}
+
+
 // returns cmd index
-static int ahci_build_cmd(phantom_device_t *dev, int nport, pager_io_request *req )
+static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request *req )
 {
     ahci_t *a = dev->drv_private;
 
@@ -400,6 +541,59 @@ static int ahci_build_cmd(phantom_device_t *dev, int nport, pager_io_request *re
     cmd->prd_tab[0].dba = req->phys_page;
     cmd->prd_tab[0].dbc = req->nSect * 512;
 
+    u_int8_t fis[20];
+
+    /* Construct the FIS */
+    fis[0] = 0x27;		/* Host to device FIS. */
+    fis[1] = 1 << 7;	/* Command FIS. */
+    fis[2] = (req->flag_pageout) ? ATA_CMD_WR_DMA : ATA_CMD_RD_DMA;	/* Command byte. */
+
+    u_int32_t lba = req->blockNo;
+
+    /* LBA address, only support LBA28 in this driver */
+    fis[4] = lba;
+    fis[5] = lba >> 8;
+    fis[6] = lba >> 16;
+    fis[7] = ( (lba >> 24) & 0x0f) | 0xe0;
+
+    u_int32_t nSect = req->nSect;
+
+    assert( 0 == (nSect & 0xFFFF0000) );
+    /* Sector Count */
+    fis[12] = nSect;
+    fis[13] = nSect >> 8;
+
+    memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
+
+    return pFreeSlot;
+}
+
+
+// returns cmd index
+static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_t fis_len, physaddr_t data, size_t data_len, int isWrite )
+{
+    ahci_t *a = dev->drv_private;
+
+    int pFreeSlot = ahci_find_free_cmd( dev, nport );
+
+    assert(pFreeSlot<AHCI_CL_SIZE);
+
+    struct ahci_cmd_tab *       cmd = a->port[nport].cmds+pFreeSlot;
+    struct ahci_cmd_list*	cp = a->port[nport].clb+pFreeSlot;
+
+    a->port[nport].reqs[pFreeSlot] = 0;
+
+    cp->prd_length = 1;
+    cp->cmd_flags = ( isWrite ? AHCI_CMD_WRITE : 0);
+    cp->bytecount = 0;
+
+    // TODO assert data_len < max size per prd
+
+    memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), fis_len ) );
+
+    cmd->prd_tab[0].dba = data;
+    cmd->prd_tab[0].dbc = data_len;
+
     return pFreeSlot;
 }
 
@@ -419,7 +613,7 @@ static void ahci_finish_cmd(phantom_device_t *dev, int nport, int slot)
 
     // TODO check error!
 
-    if( cp->bytecount != req->nSect * 512 )
+    if( cp->bytecount != ((unsigned) (req->nSect * 512)) )
     {
         req->rc = EIO;
         req->flag_ioerror = 1;
@@ -455,15 +649,59 @@ static void ahci_process_finished_cmd(phantom_device_t *dev, int nport)
         ahci_finish_cmd( dev, nport, slot );
 
         // eat it
-        atomic_and( &(a->port[nport].c_started), ~(1 >> slot) );
+        atomic_and( (int *)&(a->port[nport].c_started), ~(1 >> slot) );
     }
 
 }
 
 
 
+static errno_t ahci_sync_read(phantom_device_t *dev, int nport, void *fis, size_t fis_len, void *data, size_t data_len )
+{
+    errno_t rc = 0;
+
+    physaddr_t pa;
+    void *va;
+    hal_pv_alloc( &pa, &va, data_len );
+    //va = calloc( data_len, 1 );    pa = va;
+
+    SHOW_FLOW( 7, "pa %p va %p", pa, va );
+
+    int slot = ahci_build_fis_cmd( dev, nport, fis, fis_len, pa, data_len, 0 );
+    ahci_start_cmd( dev, nport, slot );
+    ahci_wait_cmd( dev, nport, slot );
+
+    memcpy( data, va, data_len );
+    hal_pv_free( pa, va, data_len );
+
+    ahci_t *a = dev->drv_private;
+    struct ahci_cmd_list*	cp = a->port[nport].clb+slot;
+
+    // check error
+
+    if( cp->bytecount != data_len )
+        rc = EIO;
+
+    return rc;
+}
 
 
+/* SCSI INQUIRY */
+
+static errno_t ahci_do_iquiry(phantom_device_t *dev, int nport, void *data, size_t data_len )
+{
+    u_int8_t fis[20];
+
+    /* Construct the FIS */
+    fis[0] = 0x27;		/* Host to device FIS. */
+    fis[1] = 1 << 7;	/* Command FIS. */
+    fis[2] = ATA_CMD_IDENT;	/* Command byte. */
+
+    errno_t rc = ahci_sync_read( dev, nport, fis, sizeof(fis), data, data_len );
+
+    //if( rc )
+    return rc;
+}
 
 
 
@@ -493,6 +731,50 @@ static int ahci_write(phantom_device_t *dev, const void *buf, int len)
 
     return -1;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static void dump_ataid(hd_driveid_t *ataid)
+{
+    SHOW_INFO( 0, "lba_capacity = %d Kb", ataid->lba_capacity/2 );
+
+    SHOW_INFO( 0, "(49) capability 	= 0x%x", ataid->capability);
+    SHOW_INFO( 0, "(53) field_valid 	= 0x%x", ataid->field_valid);
+    SHOW_INFO( 0, "(63) dma_mword 	= 0x%x", ataid->dma_mword);
+    SHOW_INFO( 0, "(64) eide_pio_modes 	= 0x%x", ataid->eide_pio_modes);
+    SHOW_INFO( 0, "(75) queue_depth 	= 0x%x", ataid->queue_depth);
+    SHOW_INFO( 0, "(80) major_rev_num 	= 0x%x", ataid->major_rev_num);
+    SHOW_INFO( 0, "(81) minor_rev_num 	= 0x%x", ataid->minor_rev_num);
+    SHOW_INFO( 0, "(82) command_set_1 	= 0x%x", ataid->command_set_1);
+    SHOW_INFO( 0, "(83) command_set_2 	= 0x%x", ataid->command_set_2);
+    SHOW_INFO( 0, "(84) cfsse 		= 0x%x", ataid->cfsse);
+    SHOW_INFO( 0, "(85) cfs_enable_1 	= 0x%x", ataid->cfs_enable_1);
+    SHOW_INFO( 0, "(86) cfs_enable_2 	= 0x%x", ataid->cfs_enable_2);
+    SHOW_INFO( 0, "(87) csf_default 	= 0x%x", ataid->csf_default);
+    SHOW_INFO( 0, "(88) dma_ultra 	= 0x%x", ataid->dma_ultra);
+    SHOW_INFO( 0, "(93) hw_config 	= 0x%x", ataid->hw_config);
+}
+
+
 
 
 

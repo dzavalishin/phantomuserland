@@ -17,6 +17,10 @@ classes-clean::
 	# classes
 	cd plib; make clean; cd ..
 
+up::
+	$(MAKE) clean
+	svn up
+	$(MAKE) all
 
 all::
 	# kernel
