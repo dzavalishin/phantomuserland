@@ -1,7 +1,7 @@
 #default:: all
 
 # amp mpeg ping 
-SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), cat echo grep kill ln ls mkdir rm shell sntp tetris wavplay wc )
+SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), cat echo grep kill ln ls mkdir rm sh sntp tetris wavplay wc )
 
 
 %.MAKE:
