@@ -10,7 +10,7 @@
 INST_BIN=$(realpath c:\bin\tools)
 
 TFTP_PATH=$(realpath $(PHANTOM_HOME))/run/tftp
-
+BOOT_PATH=$(realpath $(PHANTOM_HOME))/run/fat/boot
 
 ifndef OSTYPE
 ifeq ($(OS),Windows_NT)

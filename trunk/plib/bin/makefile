@@ -31,6 +31,7 @@ phantom.osimpl.pc phantom.os.pc phantom.os.time.pc ru.dz.phantom.tetris.*.pc ru.
 
 install: classes
 	cp classes $(TFTP_PATH)
+	cp classes $(BOOT_PATH)
 
 clean: 
 	-rm *.pc *.lst *.lstc classes *.d
