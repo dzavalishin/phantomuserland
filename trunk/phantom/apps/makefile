@@ -1,6 +1,6 @@
-default:: all
+#default:: all
 
-SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), sntp )
+SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), sntp wc )
 
 
 %.MAKE:

@@ -11,4 +11,4 @@ include $(BUILD_ROOT)/makerules-usr
 analyse::
 	#
 
-#INSTALL_DIR=$(TFTP_PATH)/$(TARGET)
+#INSTALL_DIR=$(BOOT_PATH)/$(TARGET)
