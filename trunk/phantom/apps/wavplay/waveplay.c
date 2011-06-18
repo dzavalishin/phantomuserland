@@ -48,7 +48,7 @@
 #define IOCTL 0
 
 
-/* ´Ø¿ô¥×¥í¥È¥¿¥¤¥× */
+/* Ø¿×¥È¥ */
 int readWaveFile(int fd, PWAVEFORMAT pwavefmt, u_int *datasize);
 int openDSP(const char* devname, PWAVEFORMAT pwf);
 int CloseDSP(int fd);
@@ -56,13 +56,13 @@ int playWave(int data_fd, int dsp_fd, u_int datasize);
 int playRaw(int data_fd, int dsp_fd);
 int play(const char* filename);
 
-/* ¥°¥í¡¼¥Ð¥ëÊÑ¿ô */
+/* í¡¼Ð¥Ñ¿ */
 static int vflag = 1;
 static int cflag = 0;
 static int rflag = 0;
-static int sampling_rate = 44100;
-static int channels = 2;
-static int bits_per_sample = 16;
+//static int sampling_rate = 44100;
+//static int channels = 2;
+//static int bits_per_sample = 16;
 
 static size_t bsize = DEFAULT_BUFFERSIZE;
 static char *dsp_fname = DEFAULT_DSP;
@@ -219,13 +219,13 @@ int readWaveFile(int fd, PWAVEFORMAT pwavefmt, u_int *datasize)
         }
         else if (header == H_DATA)
         {
-            /* ¥Õ¥¡¥¤¥ë¥Ý¥¤¥ó¥¿¤¬data¥Á¥ã¥ó¥¯¤ËÅþÃ£¤·¤¿¤é´Ø¿ô¤ò½ªÎ» */
+            /* Õ¥Ý¥ó¥¿¤dataó¥¯¤Ã£Ø¿Î» */
             *datasize = (u_int)size;
             return 0;
         }
         else
         {
-            /* Í¾·×¤Ê¥Á¥ã¥ó¥¯¤ÏÆÉ¤ßÈô¤Ð¤¹ */
+            /* Í¾×¤Ê¥ó¥¯¤É¤Ð¤ */
             lseek(fd, size, SEEK_CUR);
         }
     }
@@ -250,7 +250,7 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
     if ((fd = open( devname, O_WRONLY)) < 0)
         return fd;
 
-    /* ¥Á¥ã¥ó¥Í¥ë(STEREO or MONAURAL)¤òÀßÄê */
+    /* Í¥(STEREO or MONAURAL) */
     if ( (int)(pwf->nChannels) == 1 ) {
         arg = 0;
     } else {
@@ -294,7 +294,7 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
 #endif
 
 #if IOCTL
-    /* ÎÌ»Ò²½¥Ó¥Ã¥È¿ô(8 or 16Bit)¤òÀßÄê */
+    /* Ì»Ò²Ó¥Ã¥È¿(8 or 16Bit) */
     arg = (int)(pwf->wBitsPerSample);
     status = ioctl(fd, SNDCTL_DSP_SETFMT, arg);
     if (status < 0)
