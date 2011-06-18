@@ -1,2 +1,2 @@
-SHORT_NAME=shell
+SHORT_NAME=sh
 include ../makeapp
