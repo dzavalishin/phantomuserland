@@ -323,7 +323,7 @@ vm_page_init( vm_page *me, void *my_vaddr)
     hal_cond_init(&me->done, "VM PG");
     hal_mutex_init(&me->lock, "VM PG" );
     page_touch_history(me);
-	pager_io_request_init( &me->pager_io );
+    pager_io_request_init( &me->pager_io );
 }
 
 

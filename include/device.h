@@ -46,6 +46,12 @@ struct phantom_dev_ops
 
     // other ops :)
     errno_t (*ioctl)(struct phantom_device *dev, int type, void *buf, int len);
+
+    // rich man's ioctl
+    errno_t	(*getproperty)( struct phantom_device *dev, const char *pName, char *pValue, int vlen );
+    errno_t	(*setproperty)( struct phantom_device *dev, const char *pName, const char *pValue );
+    errno_t	(*listproperties)( struct phantom_device *dev, int nProperty, char *pValue, int vlen );
+
 };
 
 typedef struct phantom_dev_ops phantom_dev_ops_t;

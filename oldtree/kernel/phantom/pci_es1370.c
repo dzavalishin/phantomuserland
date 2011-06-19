@@ -57,6 +57,11 @@ static int es1370_read(phantom_device_t *dev, void *buf, int len);
 
 static int es1370_ioctl(struct phantom_device *dev, int type, void *buf, int len);
 
+static errno_t	es1370_getproperty( struct phantom_device *dev, const char *pName, char *pValue, int vlen );
+static errno_t	es1370_setproperty( struct phantom_device *dev, const char *pName, const char *pValue );
+static errno_t	es1370_listproperties( struct phantom_device *dev, int nProperty, char *pValue, int vlen );
+
+
 
 static int seq_number = 0;
 phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
@@ -103,6 +108,10 @@ phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
     dev->dops.read  = es1370_read;
     dev->dops.write = es1370_write;
     dev->dops.ioctl = es1370_ioctl;
+
+    dev->dops.getproperty = es1370_getproperty;
+    dev->dops.setproperty = es1370_setproperty;
+    dev->dops.listproperties = es1370_listproperties;
 
     if( hal_irq_alloc( dev->irq, &es1370_interrupt, dev, HAL_IRQ_SHAREABLE ) )
     {
@@ -155,6 +164,7 @@ static errno_t init_es1370(phantom_device_t *dev)
 
     outl(dev->iobase+ES1370_SERIAL_CONTROL, 0);
 
+    hal_sem_init( &es->w_sem, DEV_NAME );
 
     es->dac_active = 0;
     es->adc_active = 0;
@@ -427,8 +437,36 @@ void stop_adc(phantom_device_t *dev)
     es->adc_active = 0;
 }
 
+#if 1
+// get from userland
 
-#if 0
+size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
+{
+    es1370_t *es = dev->drv_private;
+    int res = 0;
+
+    while(len > 0 && es->w_len > 0)
+    {
+        int nc = imin(len, es->w_len );
+        memcpy( ptr, es->w_buf, nc );
+        len -= nc;
+        ptr += nc;
+        res += nc;
+        es->w_buf += nc;
+        es->w_len += nc;
+    }
+
+    if( es->w_len <= 0 )
+        hal_sem_release( &es->w_sem );
+
+    return res;
+}
+
+
+#else
+// generate itself
+
+#if 1
 static const char  intro[] = {
 #include "intro.ci"
 };
@@ -492,6 +530,7 @@ size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 
     return res;
 }
+#endif
 #endif
 
 
@@ -783,9 +822,13 @@ static int es1370_read(phantom_device_t *dev, void *buf, int len)
 
 static int es1370_write(phantom_device_t *dev, const void *buf, int len)
 {
-    (void) dev;
-    (void) buf;
-    (void) len;
+    es1370_t *es = dev->drv_private;
+
+    // TODO mutex!
+
+    es->w_buf = buf;
+    es->w_len = len;
+    hal_sem_acquire( &es->w_sem );
 
     return -1;
 }
@@ -855,6 +898,69 @@ setformat:
 
     return 0;
 }
+
+typedef enum
+{
+    pt_int32,
+    pt_mstring,         // malloced string
+} property_type_t;
+
+typedef struct {
+    property_type_t     type;
+    const char 		*name;
+    void                *val;
+    size_t              offset;
+    void *              (*valp)(void *context, size_t offset );
+    errno_t             (*setf)(void *context, const char *val);
+    errno_t             (*getf)(void *context, char *val, size_t len);
+    char                **val_list; // for enums
+} property_t;
+
+
+
+//static const char *pList = "sampleRate,bits,channels,signed,volume";
+static const char *pList = "sampleRate";
+
+static errno_t es1370_listproperties( struct phantom_device *dev, int nProperty, char *pValue, int vlen )
+{
+    (void) dev;
+
+    if( nProperty > 0 ) return ENOENT;
+
+    strlcpy( pValue, pList, vlen );
+    return 0;
+}
+
+
+static errno_t	es1370_getproperty( struct phantom_device *dev, const char *pName, char *pValue, int vlen )
+{
+    es1370_t *es = dev->drv_private;
+
+    if(0 == stricmp(pName, "samplerate"))
+    {
+        snprintf( pValue, vlen, "%d", es->samplerate );
+        return 0;
+    }
+
+    return ENOTTY;
+}
+
+static errno_t	es1370_setproperty( struct phantom_device *dev, const char *pName, const char *pValue )
+{
+    es1370_t *es = dev->drv_private;
+
+    if(0 == stricmp(pName, "samplerate"))
+    {
+        if( 1 != sscanf( pValue, "%d", &es->samplerate ) )
+            return EINVAL;
+        set_sampling_rate(dev, es->samplerate);
+        return 0;
+    }
+
+    return ENOTTY;
+}
+
+
 
 #endif // ARCH_ia32
 

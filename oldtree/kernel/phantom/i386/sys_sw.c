@@ -856,6 +856,35 @@ static void do_syscall_sw(struct trap_state *st)
         goto unimpl;
 
 
+    case SYS_setproperty:
+        {
+            AARG(const char *, pName, 1, 1); // TODO check zero term string!
+            AARG(const char *, pValue, 2, 1);
+
+            usys_setproperty( &err, u, uarg[0], pName, pValue );
+            ret = err;
+        }
+        break;
+
+    case SYS_getproperty:
+        {
+            AARG(const char *, pName, 1, 1); // TODO check zero term string!
+            AARG(const char *, pValue, 2, uarg[3]);
+
+            usys_getproperty( &err, u, uarg[0], pName, pValue, uarg[3] );
+            ret = err;
+        }
+        break;
+
+    case SYS_listproperties:
+        {
+            AARG(char *, buf, 2, uarg[3]);
+            usys_listproperties( &err, u, uarg[0], uarg[1], buf, uarg[3] );
+            ret = err;
+        }
+        break;
+
+
     case SYS_name2ip:
         {
             AARG(in_addr_t *, out, 0, sizeof(in_addr_t));

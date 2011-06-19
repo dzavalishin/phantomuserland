@@ -137,6 +137,11 @@
 #define SYS_readdir             117	// +! no impl in fsystems
 #define SYS_stat                118	// ++
 
+// Specific for Phantom - like ioctl, but property like
+// setproperty( "samplerate", "44100" );
+#define SYS_getproperty         119	// --
+#define SYS_setproperty         120	// --
+#define SYS_listproperties      121	// --
 
 
 

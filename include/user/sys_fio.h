@@ -1,4 +1,5 @@
 #include <phantom_types.h>
+#include <errno.h>
 
 //int write( int, void *, int);
 //int read( int, void *, int);
@@ -22,3 +23,11 @@ int link(const char *n1, const char *n2);
 
 // in sys/stat.h
 //int stat( const char *name, struct stat* );
+
+// returns name of property with sequential number nProperty, or error
+errno_t listproperties( int fd, int nProperty, char *buf, int buflen );
+
+errno_t getproperty( int fd, const char *pName, char *buf, int buflen );
+errno_t setproperty( int fd, const char *pName, const char *pValue );
+
+

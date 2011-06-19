@@ -99,7 +99,7 @@ static pci_probe_t pci_drivers[] =
     //{ "PIC/Mem 1237", 	driver_intel_1237_bridge_probe,	3, INTEL_VENDORID, 0x1237, 0 },
     //{ "PIIX4 PM", 	driver_intel_PIIX4_pm_probe,	3, INTEL_VENDORID, 0x7113, 0 },
 
-//    { "es1370", 	driver_es1370_probe,		2, ENSONIQ_VENDORID, 0x5000, 0 },
+    { "es1370", 	driver_es1370_probe,		2, ENSONIQ_VENDORID, 0x5000, 0 },
     //{ "es1370", 	driver_es1370_probe,		2, 0x1274, 0x5000, 0 },
 
 //    { "i810 Video",     driver_intel_810_pci_probe,     1, INTEL_VENDORID, 0x2772, 0 },

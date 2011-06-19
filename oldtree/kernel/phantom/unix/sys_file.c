@@ -563,7 +563,7 @@ int usys_dup2(int *err, uuprocess_t *u, int src_fd, int dst_fd )
 
 int usys_dup(int *err, uuprocess_t *u, int src_fd )
 {
-    // TODO lock fd[] access
+    // TODO lock fd[] access -- use pool!
     CHECK_FD(src_fd);
 
     struct uufile *f = GETF(src_fd);
@@ -620,6 +620,58 @@ int usys_mkdir( int *err, uuprocess_t *u, const char *path )
         *err = fs->mkdir( fs, rest );
     return *err ? -1 : 0;
 }
+
+
+// -----------------------------------------------------------------------
+// Phantom specific - properties
+// -----------------------------------------------------------------------
+
+
+errno_t usys_setproperty( int *err, uuprocess_t *u, int fd, const char *pName, const char *pValue )
+{
+    CHECK_FD(fd);
+    struct uufile *f = GETF(fd);
+
+    if( 0 == f->ops->setproperty)
+        *err = ENOTTY;
+    else
+        *err = f->ops->setproperty( f, pName, pValue );
+
+    //*err = ENOTTY;
+
+    return *err;
+}
+
+errno_t usys_getproperty( int *err, uuprocess_t *u, int fd, const char *pName, char *pValue, size_t vlen )
+{
+    CHECK_FD(fd);
+    struct uufile *f = GETF(fd);
+
+    if( 0 == f->ops->getproperty)
+        *err = ENOTTY;
+    else
+        *err = f->ops->getproperty( f, pName, pValue, vlen );
+
+    //*err = ENOTTY;
+
+    return *err;
+}
+
+errno_t usys_listproperties( int *err, uuprocess_t *u, int fd, int nProperty, char *buf, int buflen )
+{
+    CHECK_FD(fd);
+    struct uufile *f = GETF(fd);
+
+    if( 0 == f->ops->listproperties)
+        *err = ENOTTY;
+    else
+        *err = f->ops->listproperties( f, nProperty, buf, buflen );
+
+    //*err = ENOTTY;
+
+    return *err;
+}
+
 
 
 
