@@ -21,7 +21,7 @@ int do_test_misc(const char *test_parm)
     struct utsname phantom_uname;
     test_check_eq(uname(&phantom_uname), 0);
 
-    printf("uland: uname sys %s\n\tnode %s\n\trel %s\n\tver %s\n\tmachine %s\n\tdomain %s\n",
+    printf("uland: uname sys '%s'\n\tnode    %s\n\trel    %s\n\tver     %s\n\tmachine %s\n\tdomain  %s\n",
            phantom_uname.sysname,
            phantom_uname.nodename,
            phantom_uname.release,
