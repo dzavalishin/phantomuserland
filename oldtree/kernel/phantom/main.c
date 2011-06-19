@@ -198,6 +198,9 @@ int main(int argc, char **argv, char **envp)
 {
     (void) envp;
 
+    //strlcpy( phantom_uname.machine, arch_name, sizeof(phantom_uname.machine) );
+    snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
+
 #ifdef STRAY_CATCH_SIZE
     // check for stray ptrs here
     stray();
@@ -256,7 +259,7 @@ int main(int argc, char **argv, char **envp)
         strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
     }
 
-    printf("\nPhantom " PHANTOM_VERSION_STR " (SVN ver %s) starting\n\n", svn_version() );
+    printf("\nPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\n\n", svn_version(), phantom_uname.machine );
     phantom_process_boot_options();
 
     dbg_init(); // Kernel command line debugger
