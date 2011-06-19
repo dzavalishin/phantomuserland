@@ -25,6 +25,8 @@ void run_test( const char *test_name, const char *test_parm );
 int do_test_getters(const char *test_parm);
 int do_test_setters(const char *test_parm);
 
+int do_test_misc(const char *test_parm);
+
 
 int do_test_udp_send(const char *test_parm);
 int do_test_udp_syslog(const char *test_parm);
