@@ -39,6 +39,11 @@ static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, voi
 static size_t      dev_getpath( struct uufile *f, void *dest, size_t bytes);
 static ssize_t     dev_getsize( struct uufile *f);
 
+static errno_t	   dev_listproperties( struct uufile *f, int nProperty, char *buf, size_t buflen );
+static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *buf, size_t buflen );
+static errno_t	   dev_setproperty( struct uufile *f, const char *pName, const char *pVal );
+
+
 static void *      dev_copyimpl( void *impl );
 
 
@@ -54,6 +59,10 @@ static struct uufileops dev_fops =
 
     .stat       = dev_stat,
     .ioctl      = dev_ioctl,
+
+    .getproperty        = dev_getproperty,
+    .setproperty        = dev_setproperty,
+    .listproperties     = dev_listproperties,
 };
 
 
@@ -326,6 +335,28 @@ static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, voi
     if(dev == 0 || dev->dops.ioctl == 0) return -1;
     *err = dev->dops.ioctl( dev, request, data, dlen );
     return *err ? -1 : 0;
+}
+
+static errno_t	   dev_listproperties( struct uufile *f, int nProperty, char *buf, size_t buflen )
+{
+    phantom_device_t* dev = f->impl;
+    if(dev == 0 || dev->dops.listproperties == 0) return ENOTTY;
+    return dev->dops.listproperties( dev, nProperty, buf, buflen );
+}
+
+static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *buf, size_t buflen )
+{
+    phantom_device_t* dev = f->impl;
+    if(dev == 0 || dev->dops.getproperty == 0) return ENOTTY;
+    return dev->dops.getproperty( dev, pName, buf, buflen );
+}
+
+
+static errno_t	   dev_setproperty( struct uufile *f, const char *pName, const char *pVal )
+{
+    phantom_device_t* dev = f->impl;
+    if(dev == 0 || dev->dops.setproperty == 0) return ENOTTY;
+    return dev->dops.setproperty( dev, pName, pVal );
 }
 
 

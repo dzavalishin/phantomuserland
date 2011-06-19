@@ -85,6 +85,8 @@ pager_io_request_init( pager_io_request *me )
     me->sleep_tid 		= 0;
 
     hal_spin_init( &(me->lock));
+
+	me->phandle             = -1;
 #endif
     me->phandle         = -1;
 }

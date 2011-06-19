@@ -211,6 +211,10 @@ typedef struct es1370_private
 
     int		writtenSamples; // dac2 - count of samples we actually sent
 
+    hal_sem_t   w_sem;
+    const void *w_buf;
+    size_t      w_len;
+
 } es1370_t;
 
 

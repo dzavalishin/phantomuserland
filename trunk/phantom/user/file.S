@@ -56,4 +56,7 @@ SYSCALL(readlink)
 SYSCALL(readdir)
 SYSCALL(stat)
 
+SYSCALL(getproperty)
+SYSCALL(setproperty)
+SYSCALL(listproperties)
 

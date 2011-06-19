@@ -72,6 +72,10 @@ int usys_fchown( int *err, uuprocess_t *u, int fd, int user, int grp );
 
 int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp );
 
+errno_t usys_setproperty( int *err, uuprocess_t *u, int fd, const char *pName, const char *pValue );
+errno_t usys_getproperty( int *err, uuprocess_t *u, int fd, const char *pName, char *pValue, size_t vlen );
+errno_t usys_listproperties( int *err, uuprocess_t *u, int fd, int nProperty, char *buf, int buflen );
+
 
 
 
