@@ -112,19 +112,12 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(getters);
     TEST(setters);
 
-    //TEST(malloc);
+    TEST(misc);
 
-    //TEST(udp_send);
-    //TEST(udp_syslog);
 
-    // These are long
-    //TEST(timer);
-
-    // must test after timed calls for it depends on them
+    // need responding part in kernel, now fails
     //TEST(ports);
 
-    // These are very long, do 'em last
-    //TEST(threads);
 
 
     printf("-----\nPhantom usermode test suite FINISHED\n" );
