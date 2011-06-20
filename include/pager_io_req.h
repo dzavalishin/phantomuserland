@@ -58,9 +58,9 @@ typedef struct pager_io_request
 
     void                (*pager_callback)( struct pager_io_request *req, int write );
 
-    queue_chain_t       disk_chain; 		// Disk io q chain
+    queue_chain_t       disk_chain;             // Disk io q chain
 
-    errno_t 		rc; 			// Driver return code
+    errno_t             rc;                     // Driver return code
 
     pool_handle_t       phandle;                // This partition is to be released after io is done - see
 } pager_io_request;

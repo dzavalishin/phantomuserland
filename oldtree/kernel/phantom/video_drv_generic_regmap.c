@@ -13,9 +13,9 @@
 
 #define DEBUG_MSG_PREFIX "video-clone"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 0
 
 
 #include <hal.h>

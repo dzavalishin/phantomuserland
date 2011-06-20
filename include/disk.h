@@ -71,10 +71,10 @@ struct phantom_disk_partition
 
     void        *specific;      // Specific data (following methods know how to handle)
 
-#if !IO_RQ_SLEEP
-    errno_t     (*syncRead)( struct phantom_disk_partition *p, void *to, long blockNo, int nBlocks );
-    errno_t     (*syncWrite)( struct phantom_disk_partition *p, const void *from, long blockNo, int nBlocks );
-#endif
+//#if !IO_RQ_SLEEP
+//    errno_t     (*syncRead)( struct phantom_disk_partition *p, void *to, long blockNo, int nBlocks );
+//    errno_t     (*syncWrite)( struct phantom_disk_partition *p, const void *from, long blockNo, int nBlocks );
+//#endif
 
 // NB!! pager_io_request's disk block no is IGNORED! 
     errno_t     (*asyncIo)( struct phantom_disk_partition *p,  pager_io_request *rq );

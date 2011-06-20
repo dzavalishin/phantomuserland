@@ -1738,7 +1738,7 @@ static void vm_verify_snap(disk_page_no_t head)
     pagelist loader;
     size_t current = 0;
 
-    disk_page_io page_io = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, { 0, 0 }, 0, { 0, 0 }, 0 }, 0, 0};
+    disk_page_io page_io = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, { 0, 0 }, 0, { 0, 0 }, 0, 0 }, 0, 0 };
 
     if (!head)
         return;
