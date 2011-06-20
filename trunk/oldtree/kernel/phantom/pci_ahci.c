@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <hal.h>
 #include <time.h>
+#include <disk.h>
 
 #include <pager_io_req.h>
 
@@ -137,6 +138,9 @@ typedef struct hd_driveid {
 
 typedef struct
 {
+    phantom_device_t *		dev;            // disk io needs it
+    int                         nport;
+
     int                 	exist;
     u_int32_t                   nSect;
 
@@ -175,12 +179,13 @@ static int ahci_read(phantom_device_t *dev, void *buf, int len);
 
 static void ahci_process_finished_cmd(phantom_device_t *dev, int nport);
 
-static errno_t ahci_do_iquiry(phantom_device_t *dev, int nport, void *data, size_t data_len );
+static errno_t ahci_do_inquiry(phantom_device_t *dev, int nport, void *data, size_t data_len );
 
 
 static void dump_ataid(hd_driveid_t *ataid);
 //static void ahci_dump_port_info(phantom_device_t *dev, int nport );
 
+static void ahci_connect_port( ahci_port_t *p );
 
 
 
@@ -292,6 +297,9 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
 
     ahci_port_t *p = a->port+nport;
 
+    p->dev = dev;
+    p->nport = nport;
+
     // TODO 64bit -- NEED some define that we support 64 bit on this arch
 
     hal_pv_alloc( &(p->clb_p), (void**)&(p->clb), 1024 );
@@ -324,24 +332,27 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
 
     WP32( dev, nport, AHCI_P_IE, 0xFFFF ); // Turn on all...
 
-    WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD );
-    WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_ST );
+    WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_POD );
+    WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_ST|AHCI_P_CMD_ACTIVE|AHCI_P_CMD_POD );
 
     //ahci_dump_port_info( dev, nport );
 
-    if(1){
+    {
     hd_driveid_t id;
 
-    errno_t rc = ahci_do_iquiry( dev, nport, &id, sizeof(id) );
+    errno_t rc = ahci_do_inquiry( dev, nport, &id, sizeof(id) );
     if(rc)
     {
-        SHOW_ERROR( 0, "ahci_do_iquiry rc = %d", rc );
+        SHOW_ERROR( 0, "ahci_do_inquiry rc = %d", rc );
         return rc;
     }
 
     p->nSect = id.lba_capacity;
 
     dump_ataid( &id );
+
+    ahci_connect_port( p );
+
     }
 
 
@@ -532,6 +543,8 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     a->port[nport].reqs[pFreeSlot] = req;
 
+    SHOW_FLOW( 9, "rq sect %d", req->blockNo );
+
     cp->prd_length = 1;
     cp->cmd_flags = ( (req->flag_pageout) ? AHCI_CMD_WRITE : 0);
     cp->bytecount = 0;
@@ -545,7 +558,7 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     /* Construct the FIS */
     fis[0] = 0x27;		/* Host to device FIS. */
-    fis[1] = 1 << 7;	/* Command FIS. */
+    fis[1] = 1 << 7;	        /* Command FIS. */
     fis[2] = (req->flag_pageout) ? ATA_CMD_WR_DMA : ATA_CMD_RD_DMA;	/* Command byte. */
 
     u_int32_t lba = req->blockNo;
@@ -564,6 +577,9 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     fis[13] = nSect >> 8;
 
     memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
+
+    unsigned fl = 16;
+    cp->cmd_flags |= fl>>2;
 
     return pFreeSlot;
 }
@@ -586,6 +602,8 @@ static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_
     cp->prd_length = 1;
     cp->cmd_flags = ( isWrite ? AHCI_CMD_WRITE : 0);
     cp->bytecount = 0;
+
+    cp->cmd_flags |= fis_len >> 2;
 
     // TODO assert data_len < max size per prd
 
@@ -688,7 +706,7 @@ static errno_t ahci_sync_read(phantom_device_t *dev, int nport, void *fis, size_
 
 /* SCSI INQUIRY */
 
-static errno_t ahci_do_iquiry(phantom_device_t *dev, int nport, void *data, size_t data_len )
+static errno_t ahci_do_inquiry(phantom_device_t *dev, int nport, void *data, size_t data_len )
 {
     u_int8_t fis[20];
 
@@ -736,18 +754,9 @@ static int ahci_write(phantom_device_t *dev, const void *buf, int len)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+//---------------------------------------------------------------------------
+// Debug
+//---------------------------------------------------------------------------
 
 
 
@@ -775,10 +784,94 @@ static void dump_ataid(hd_driveid_t *ataid)
 }
 
 
+//---------------------------------------------------------------------------
+// Disk io interface
+//---------------------------------------------------------------------------
+
+// TODO specific must contain port, not dev! and need dev ptr in port
+
+
+
+static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_request *rq )
+{
+    ahci_port_t *p = part->specific;
+    phantom_device_t *dev = p->dev;
+
+    rq->flag_ioerror = 0;
+    rq->rc = 0;
+
+    int slot = ahci_build_req_cmd(dev, p->nport, rq );
+    ahci_start_cmd( dev, p->nport, slot );
+
+    return 0;
+}
+
+phantom_disk_partition_t *phantom_create_ahci_partition_struct( ahci_port_t *p, long size )
+{
+    //phantom_device_t *dev = p->dev;
+
+    phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size );
+
+    ret->asyncIo = ahci_AsyncIo;
+    ret->flags |= PART_FLAG_IS_WHOLE_DISK;
+
+
+    //struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
+    //phantom_init_disk_q( q, startIoFunc );
+
+    ret->specific = p;
+    strlcpy( ret->name, "AHCI0", sizeof(ret->name) );
+
+
+    //q->device = private;
+    //q->unit = unit; // if this is multi-unit device, let 'em distinguish
+
+    // errno_t phantom_register_disk_drive(ret);
+
+    return ret;
+}
+
+
+static void ahci_connect_port( ahci_port_t *p )
+{
+
+    int size = p->nSect;
+
+    if(size <= 0)
+    {
+        SHOW_ERROR( 0, "Disk %d size %d?", p->nport, size );
+        return;
+    }
+
+    phantom_disk_partition_t *part = phantom_create_ahci_partition_struct( p, size );
+    if(part == 0)
+    {
+        SHOW_ERROR0( 0, "Failed to create whole disk partition" );
+        return;
+    }
+// hangs
+#if 0
+    errno_t err = phantom_register_disk_drive(part);
+    if(err)
+    {
+        SHOW_ERROR( 0, "Disk %d err %d", p->nport, err );
+        return;
+    }
+#endif
+}
+
 
 
 
 
 
 #endif // ARCH_ia32
+
+
+
+
+
+
+
+
 
