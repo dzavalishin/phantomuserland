@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "pipefs"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -225,10 +225,13 @@ void pipefs_make_pipe( uufile_t **f1, uufile_t **f2 )
 
 
 
-
+// TODO use pools!
 static errno_t     pipe_close(struct uufile *f)
 {
     struct pipe_buf *pb = f->impl;
+
+    SHOW_FLOW( 10, "pb @%p", pb );
+
     assert(pb->ref > 0);
     pb->ref--;
     if(pb->ref == 0)
@@ -242,7 +245,7 @@ static errno_t     pipe_close(struct uufile *f)
 
 
 
-// TODO use ssize_t!
+// TODO use ssize_t! use cbuf?
 static size_t      pipe_read(    struct uufile *f, void *dest, size_t bytes)
 {
     struct pipe_buf *pb = f->impl;
@@ -251,26 +254,33 @@ static size_t      pipe_read(    struct uufile *f, void *dest, size_t bytes)
     if(pb->kill)
         return 0;
 
+    SHOW_FLOW( 10, "pb @%p", pb );
+
     hal_mutex_lock(&pb->mutex);
 
     while(pb->contains == 0)
     {
+        SHOW_FLOW( 9, "have %d bytes, sleep", pb->contains );
         hal_cond_wait(&pb->cond, &pb->mutex);
         if(pb->kill)
             goto ret;
     }
 
     if( bytes > pb->contains )
-        ret = bytes = pb->contains;
+        bytes = pb->contains;
 
     size_t part = bytes;
     if( part > PIPE_BUFS - pb->getpos )
         part = PIPE_BUFS - pb->getpos;
 
+    SHOW_FLOW( 9, "req %d bytes, part %d", bytes, part );
+
     memcpy( dest, pb->buf + pb->getpos, part );
+    ret += part;
     dest += part;
     bytes -= part;
     pb->getpos += part;
+    pb->contains -= part;
 
     if(pb->getpos >= PIPE_BUFS)
         pb->getpos = 0;
@@ -281,9 +291,11 @@ static size_t      pipe_read(    struct uufile *f, void *dest, size_t bytes)
         part = bytes;
 
         memcpy( dest, pb->buf + pb->getpos, part );
+        ret += part;
         dest += part;
         bytes -= part;
         pb->getpos += part;
+        pb->contains -= part;
     }
 
     assert(bytes == 0);
@@ -304,26 +316,33 @@ static size_t      pipe_write(   struct uufile *f, const void *src, size_t bytes
     if(pb->kill)
         return 0;
 
+    SHOW_FLOW( 10, "pb @%p", pb );
+
     hal_mutex_lock(&pb->mutex);
 
     while(pb->contains >= PIPE_BUFS)
     {
+        SHOW_FLOW( 9, "have %d bytes, sleep", pb->contains );
         hal_cond_wait(&pb->cond,&pb->mutex);
         if(pb->kill)
             goto ret;
     }
 
     if( bytes > PIPE_BUFS - pb->contains )
-        ret = bytes = PIPE_BUFS - pb->contains;
+        bytes = PIPE_BUFS - pb->contains;
 
     size_t part = bytes;
     if( part > PIPE_BUFS - pb->putpos )
         part = PIPE_BUFS - pb->putpos;
 
+    SHOW_FLOW( 9, "req %d bytes, part %d", bytes, part );
+
     memcpy( pb->buf + pb->putpos, src, part );
+    ret += part;
     src += part;
     bytes -= part;
     pb->putpos += part;
+    pb->contains += part;
 
     if(pb->putpos >= PIPE_BUFS)
         pb->putpos = 0;
@@ -334,13 +353,17 @@ static size_t      pipe_write(   struct uufile *f, const void *src, size_t bytes
         part = bytes;
 
         memcpy( pb->buf + pb->putpos, src, part );
+        ret += part;
         src += part;
         bytes -= part;
         pb->putpos += part;
+        pb->contains += part;
     }
 
     // TODO separate r/w conds
     hal_cond_signal(&pb->cond);
+
+    SHOW_FLOW( 9, "ret %d", ret );
 
 ret:
     hal_mutex_unlock(&pb->mutex);
