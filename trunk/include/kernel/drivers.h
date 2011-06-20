@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Driver entries. TODO reimplement with constructor func which registers driver into the global map.
+ *
+ *
+**/
+
 #ifndef DRIVERS_H
 #define DRIVERS_H
 

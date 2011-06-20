@@ -106,6 +106,8 @@ extern phantom_bus_t isa_bus;
 extern phantom_bus_t pci_bus;
 extern phantom_bus_t etc_bus;
 
+struct properties;
+
 struct phantom_device
 {
     const char *                name;
@@ -125,6 +127,9 @@ struct phantom_device
     int                         irq;
     physaddr_t                  iomem;
     size_t                      iomemsize;
+
+    struct properties           *props;
+
 };
 
 typedef struct phantom_device phantom_device_t;
