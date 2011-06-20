@@ -11,7 +11,6 @@
 
 #ifdef ARCH_ia32
 
-//---------------------------------------------------------------------------
 
 #define DEBUG_MSG_PREFIX "ps2keyb"
 #include <debug_ext.h>
@@ -26,6 +25,7 @@
 #include <phantom_libc.h>
 #include <sys/libkern.h>
 #include <kernel/init.h>
+#include <kernel/properties.h>
 
 #include <misc.h>
 #include <event.h>
@@ -453,6 +453,26 @@ static int phantom_dev_keyboard_init(int irq)
 }
 
 
+//---------------------------------------------------------------------------
+// Properties
+//---------------------------------------------------------------------------
+
+
+static void * prop_valp(struct properties *ps, void *context, size_t offset ) { (void) ps; (void) context, (void) offset; return 0; }
+
+static property_t proplist[] =
+{
+    { pt_int32, "leds", 0, &leds, 0, (void *)set_leds, 0, 0 },
+};
+
+static properties_t props = { ".dev", proplist, PROP_COUNT(proplist), prop_valp };
+
+
+//---------------------------------------------------------------------------
+// Device
+//---------------------------------------------------------------------------
+
+
 
 static int seq_number = 0;
 
@@ -469,6 +489,11 @@ phantom_device_t * driver_isa_ps2k_probe( int port, int irq, int stage )
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = "ps2-keyboard";
     dev->seq_number = seq_number++;
+
+    dev->props = &props;
+    dev->dops.listproperties = gen_dev_listproperties;
+    dev->dops.getproperty = gen_dev_getproperty;
+    dev->dops.setproperty = gen_dev_setproperty;
 
     keyb_init = 1;
 

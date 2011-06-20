@@ -24,6 +24,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "device.h"
+#include <kernel/properties.h>
 
 
 
@@ -340,14 +341,18 @@ static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, voi
 static errno_t	   dev_listproperties( struct uufile *f, int nProperty, char *buf, size_t buflen )
 {
     phantom_device_t* dev = f->impl;
-    if(dev == 0 || dev->dops.listproperties == 0) return ENOTTY;
+    if(dev == 0 ) return ENOTTY;
+    if(dev->dops.listproperties == 0) 
+	return gen_dev_listproperties( dev, nProperty, buf, buflen );
     return dev->dops.listproperties( dev, nProperty, buf, buflen );
 }
 
 static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *buf, size_t buflen )
 {
     phantom_device_t* dev = f->impl;
-    if(dev == 0 || dev->dops.getproperty == 0) return ENOTTY;
+    if(dev == 0) return ENOTTY;
+    if(dev->dops.getproperty == 0) 
+        return gen_dev_getproperty( dev, pName, buf, buflen );
     return dev->dops.getproperty( dev, pName, buf, buflen );
 }
 
@@ -355,7 +360,9 @@ static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *bu
 static errno_t	   dev_setproperty( struct uufile *f, const char *pName, const char *pVal )
 {
     phantom_device_t* dev = f->impl;
-    if(dev == 0 || dev->dops.setproperty == 0) return ENOTTY;
+    if(dev == 0) return ENOTTY;
+    if(dev->dops.setproperty == 0) 
+        return gen_dev_setproperty( dev, pName, pVal );
     return dev->dops.setproperty( dev, pName, pVal );
 }
 

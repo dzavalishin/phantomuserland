@@ -26,7 +26,8 @@ typedef enum
 struct property;
 
 typedef struct properties {
-    u_int32_t           prefix;         // 4-byte char prefix of this group, like 'dev.', 'gen.' or 'fsp.'
+    //u_int32_t           prefix;         // 4-byte char prefix of this group, like 'dev.', 'gen.' or 'fsp.'
+    const char *          prefix;         // 4-byte char prefix of this group, like 'dev.', 'gen.' or 'fsp.'
 
     struct property     *list;
     size_t              lsize;
