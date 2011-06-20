@@ -7,7 +7,7 @@ SET QDIR=qemu\0.14.1
 set QEMU_AUDIO_DRV=dsound
 set QEMU_AUDIO_DRV=sdl
 rem set QEMU_AUDIO_DRV=fmod
-set SOUND=-soundhw sb16,es1370
+rem set SOUND=-soundhw sb16,es1370
 
 rem SET USB=-usb -usbdevice mouse
 rem SET USB=-usb 
