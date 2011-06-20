@@ -1,0 +1,69 @@
+color yellow/blue yellow/magenta
+
+timeout=3
+title=phantom FAST
+kernel=(hd0,0)/boot/phantom -d=10 -- 
+module=(hd0,0)/boot/classes
+#module=(hd0,0)/boot/pmod_tcpdemo 
+#module=(hd0,0)/boot/pmod_test
+#module=(hd0,0)/boot/pmod_regress 
+boot 
+
+title=phantom ALL TESTS
+kernel=(hd0,0)/boot/phantom -d=20 -- -test all
+module=(hd0,0)/boot/classes
+module=(nd0,0)/boot/pmod_test
+boot 
+
+
+title=phantom (boot from NET)
+kernel=(hd0,0)/boot/phantom -d=10 -- 
+module=(hd0,0)/boot/classes
+module=(hd0,0)/boot/pmod_tcpdemo 
+#module=(hd0,0)/boot/pmod_test
+#module=(hd0,0)/boot/pmod_regress 
+boot 
+
+
+title=phantom (pause)
+kernel=(hd0,0)/boot/phantom -d=10 -pause -- 
+module=(hd0,0)/boot/classes
+module=(hd0,0)/boot/pmod_tcpdemo 
+#module=(hd0,0)/boot/pmod_test
+#module=(hd0,0)/boot/pmod_regress 
+boot 
+
+
+
+title=phantom (alt boot class)
+kernel=(hd0,0)/boot/phantom -d=10 root.boot=ru.dz.phantom.tetris.boot --
+module=(hd0,0)/boot/classes
+module=(hd0,0)/boot/pmod_tcpdemo 
+#module=(hd0,0)/boot/pmod_test
+#module=(hd0,0)/boot/pmod_regress 
+boot 
+
+title=phantom (alt shell class)
+kernel=(hd0,0)/boot/phantom -d=10 root.shell=ru.dz.phantom.system.shell --
+module=(hd0,0)/boot/classes
+module=(hd0,0)/boot/pmod_tcpdemo 
+#module=(hd0,0)/boot/pmod_test
+#module=(hd0,0)/boot/pmod_regress 
+boot 
+
+title=phantom THREAD TEST
+kernel=(hd0,0)/boot/phantom -d=10 root.shell=ru.dz.phantom.system.thread_test --
+module=(hd0,0)/boot/classes
+module=(hd0,0)/boot/pmod_tcpdemo 
+#module=(hd0,0)/boot/pmod_test
+#module=(hd0,0)/boot/pmod_regress 
+boot 
+
+
+title=phantom (no VESA)
+kernel=(hd0,0)/boot/phantom -d=20 -novesa -- -novesa
+#module=(hd0,0)/boot/classes
+#module=(hd0,0)/boot/pmod_tcpdemo 
+#module=(hd0,0)/boot/pmod_test
+#module=(hd0,0)/boot/pmod_regress 
+boot 
