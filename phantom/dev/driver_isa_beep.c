@@ -23,6 +23,7 @@
 #define debug_level_info 10
 
 #include <kernel/drivers.h>
+#include <kernel/properties.h>
 
 #include <i386/pio.h>
 #include <phantom_libc.h>
@@ -31,7 +32,7 @@
 #include <kernel/timedcall.h>
 
 //! Default beep frequency
-#define DRV_BEEP_FREQ        0x440
+#define DRV_BEEP_FREQ        880
 
 //! Default beep duration (msec)
 #define DRV_BEEP_TIME        20
@@ -80,10 +81,12 @@ void nosound()
     if(ie) hal_sti();
 }
 
+static int freq = DRV_BEEP_FREQ;
+
 //! \brief Play a system beep.
 void beep()
 {
-    sound(DRV_BEEP_FREQ);
+    sound(freq);
 
     e.arg = 0;
     e.f = (void *)nosound;
@@ -91,6 +94,21 @@ void beep()
 
     phantom_request_timed_call( &e, 0 );
 }
+
+
+//---------------------------------------------------------------------------
+// Properties
+//---------------------------------------------------------------------------
+
+
+static void * prop_valp(struct properties *ps, void *context, size_t offset ) { (void) ps; (void) context, (void) offset; return 0; }
+
+static property_t proplist[] =
+{
+    { pt_int32, "frequency", 0, &freq, 0, 0, 0, 0 },
+};
+
+static properties_t props = { ".dev", proplist, PROP_COUNT(proplist), prop_valp };
 
 
 
@@ -142,6 +160,11 @@ phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage )
     dev = malloc(sizeof(phantom_device_t));
     dev->name = "beeper";
     dev->seq_number = seq_number++;
+
+    dev->props = &props;
+    dev->dops.listproperties = gen_dev_listproperties;
+    dev->dops.getproperty = gen_dev_getproperty;
+    dev->dops.setproperty = gen_dev_setproperty;
 
     dev->dops.stop = beep_stop;
 

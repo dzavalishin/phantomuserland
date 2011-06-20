@@ -36,7 +36,7 @@ struct uufileops
     // rich man's ioctl
     errno_t	(*getproperty)( struct uufile *f, const char *pName, char *pValue, int vlen );
     errno_t	(*setproperty)( struct uufile *f, const char *pName, const char *pValue );
-    errno_t	(*listproperties)( struct uufile *f, int nProperty, char *pValue, int vlen );
+    errno_t	(*listproperties)( struct uufile *f, int nProperty, char *pValue, size_t vlen );
 
 	// used when clone file
     void *      (*copyimpl)( void *impl);

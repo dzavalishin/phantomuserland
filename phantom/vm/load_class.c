@@ -31,7 +31,7 @@
 int debug_print = 0;
 
 
-static int vm_code_linenum_cmp(const void *, const void *);
+static int vm_code_linenum_cmp(const void *, const void *) __attribute__((used));
 
 
 
@@ -232,7 +232,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
         case 'l': // IP to line num map
             {
 
-                if(1||debug_print) printf(" line num map\n");
+                if(debug_print) printf(" line num map\n");
                 int ordinal = pvm_code_get_int32(&h);
                 int mapsize = pvm_code_get_int32(&h);
 
@@ -243,17 +243,22 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
                 struct vm_code_linenum *sp = (void *)bin->data;
 
-                int i;
-                for( i = 0 ; i < mapsize; i++, sp++ )
+                //qsort( bin->data, mapsize, sizeof(struct vm_code_linenum), vm_code_linenum_cmp );
+
+                if(debug_print)
                 {
-                	sp->ip = pvm_code_get_int32(&h);
+                    int i;
+                    for( i = 0 ; i < mapsize; i++, sp++ )
+                    {
+                        sp->ip = pvm_code_get_int32(&h);
                         sp->line = pvm_code_get_int32(&h);
 
                         printf("map l %d -> ip %ld\n", sp->line, sp->ip );
+                    }
+
+                    printf("! "); pvm_object_print( map ); printf(" !\n");
                 }
 
-                //qsort( bin->data, mapsize, sizeof(struct vm_code_linenum), vm_code_linenum_cmp );
-                printf("! "); pvm_object_print( map ); printf(" !\n");
                 pvm_set_ofield( ip2line_maps, ordinal, map );
             }
             break;
