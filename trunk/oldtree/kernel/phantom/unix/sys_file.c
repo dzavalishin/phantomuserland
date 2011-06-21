@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "funix"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -122,9 +122,11 @@ int usys_close(int *err, uuprocess_t *u, int fd )
     assert(fs->close != 0);
     *err = fs->close( f );
 
+    //SHOW_FLOW( 8, "*err %d", *err );
+
     u->fd[fd] = 0;
 
-    return err ? -1 : 0;
+    return *err ? -1 : 0;
 }
 
 int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
