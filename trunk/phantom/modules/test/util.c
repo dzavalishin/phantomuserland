@@ -114,7 +114,6 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(misc);
 
-    // not implemented yet
     TEST(pipe);
 
     // need responding part in kernel, now fails
