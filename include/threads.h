@@ -29,6 +29,22 @@ errno_t         t_get_ctty( tid_t tid, struct wtty ** );
 
 
 
+// returns thread id, does not check for thread death
+tid_t           hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
+tid_t           hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
+
+
+errno_t         hal_set_current_thread_priority( int prio );
+#define hal_set_current_thread_name hal_set_thread_name
+void            hal_set_thread_name(const char *name);
+
+
+void            hal_disable_preemption(void);
+void            hal_enable_preemption(void);
+
+
+
+
 
 // TODO remove it from here when everything is moved in.
 #include <hal.h>
@@ -156,19 +172,6 @@ void phantom_scheduler_soft_interrupt(void);
 void*   hal_start_kernel_thread(void (*thread)(void));
 void    hal_exit_kernel_thread(void);
 
-// returns thread id, does not check for thread death
-int     hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
-int     hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
-
-
-//errno_t hal_set_thread_priority( int tid, int prio );
-errno_t hal_set_current_thread_priority( int prio );
-
-void    hal_set_thread_name(const char *name);
-
-
-void    hal_disable_preemption(void);
-void    hal_enable_preemption(void);
 
 
 //! Internal kernel debug print only
