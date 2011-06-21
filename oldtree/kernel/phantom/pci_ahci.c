@@ -30,6 +30,7 @@
 #include <pager_io_req.h>
 
 #include <dev/pci/ahci.h>
+#include <dev/sata.h>
 
 #define ATA_CMD_IDENT	0xEC	/* Identify Device		*/
 
@@ -37,6 +38,11 @@
 #define ATA_CMD_RD_DMAN	0xC9	/* Read DMS ( no  retries)	*/
 #define ATA_CMD_WR_DMA	0xCA	/* Write DMA (with retries)	*/
 #define ATA_CMD_WR_DMAN	0xCB	/* Write DMA ( no  retires)	*/
+
+#define ATA_CMD_READ_DMA_EXT                 0x25
+#define ATA_CMD_WRITE_DMA_EXT                0x35
+
+
 /*
  * structure returned by ATA_CMD_IDENT, as per ANSI ATA2 rev.2f spec
  */
@@ -513,8 +519,9 @@ static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 static void ahci_start_cmd(phantom_device_t *dev, int nport, int ncmd)
 {
     ahci_t *a = dev->drv_private;
-    WP32( dev, nport, AHCI_P_CI, 1 >> ncmd);
-    atomic_or( (int *)&(a->port[nport].c_started), 1 >> ncmd );
+    SHOW_FLOW( 8, "start slot %d on port %d ", ncmd, nport );
+    WP32( dev, nport, AHCI_P_CI, 1 << ncmd);
+    atomic_or( (int *)&(a->port[nport].c_started), 1 << ncmd );
 }
 
 
@@ -522,7 +529,7 @@ static void ahci_wait_cmd(phantom_device_t *dev, int nport, int ncmd)
 {
     //ahci_t *a = dev->drv_private;
 
-    while( RP32( dev, nport, AHCI_P_CI ) & (1 >> ncmd) )
+    while( RP32( dev, nport, AHCI_P_CI ) & (1 << ncmd) )
     {
         hal_sleep_msec( 1 );
     }
@@ -553,13 +560,14 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     cmd->prd_tab[0].dba = req->phys_page;
     cmd->prd_tab[0].dbc = req->nSect * 512;
+    cmd->prd_tab[0].dbc |= AHCI_PRD_IPC; // Req interrupt!
 
     u_int8_t fis[20];
 
     /* Construct the FIS */
     fis[0] = 0x27;		/* Host to device FIS. */
     fis[1] = 1 << 7;	        /* Command FIS. */
-    fis[2] = (req->flag_pageout) ? ATA_CMD_WR_DMA : ATA_CMD_RD_DMA;	/* Command byte. */
+    fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA_EXT : ATA_CMD_READ_DMA_EXT;	/* Command byte. */
 
     u_int32_t lba = req->blockNo;
 
@@ -571,6 +579,8 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     u_int32_t nSect = req->nSect;
 
+    assert(nSect <= 16);
+
     assert( 0 == (nSect & 0xFFFF0000) );
     /* Sector Count */
     fis[12] = nSect;
@@ -578,7 +588,7 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
 
-    unsigned fl = 16;
+    unsigned fl = sizeof(fis_reg_h2d_t);
     cp->cmd_flags |= fl>>2;
 
     return pFreeSlot;
@@ -645,6 +655,8 @@ static void ahci_process_finished_cmd(phantom_device_t *dev, int nport)
 {
     ahci_t *a = dev->drv_private;
 
+    SHOW_FLOW( 7, "look for completed slots on port %d, started %x ", nport, a->port[nport].c_started );
+
     while(a->port[nport].c_started)
     {
         // TODO in splinlock to prevent races?
@@ -655,7 +667,7 @@ static void ahci_process_finished_cmd(phantom_device_t *dev, int nport)
         if( done == 0 )
             return;
 
-        int slot = ffr(slots);
+        int slot = ffs(done);
         if( slot == 0 )
             return;
 
@@ -663,11 +675,10 @@ static void ahci_process_finished_cmd(phantom_device_t *dev, int nport)
 
         SHOW_FLOW( 8, "found completed slot %d on port %d ", slot, nport );
 
-
         ahci_finish_cmd( dev, nport, slot );
 
         // eat it
-        atomic_and( (int *)&(a->port[nport].c_started), ~(1 >> slot) );
+        atomic_and( (int *)&(a->port[nport].c_started), ~(1 << slot) );
     }
 
 }
@@ -803,6 +814,12 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
     int slot = ahci_build_req_cmd(dev, p->nport, rq );
     ahci_start_cmd( dev, p->nport, slot );
 
+#if 0
+    hal_cli();
+    ahci_process_finished_cmd( dev, p->nport );
+    hal_sti();
+    //ahci_process_finished_cmd( dev, p->nport );
+#endif
     return 0;
 }
 

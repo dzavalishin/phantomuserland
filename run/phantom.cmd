@@ -43,6 +43,7 @@ ren serial0.log serial0.log.old
 %QDIR%\qemu -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI%
 
 grep KERNEL.TEST serial0.log
+grep USERMODE.TEST serial0.log
 
 exit
 
