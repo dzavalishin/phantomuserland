@@ -46,7 +46,13 @@ int do_test_pipe(const char *test_parm)
     test_check_eq(0, strcmp( data, buf ));
 
     printf("pipe close\n");
-    test_check_eq(close(fd[0]),0);
+    rc = close(fd[0]);
+    if(rc)
+    {
+        printf("pipe close expected 0, got %d\n", rc );
+        test_fail_msg( -1, "pipe close" );
+    }
+
     test_check_eq(close(fd[1]),0);
 
     printf("pipe done\n");
