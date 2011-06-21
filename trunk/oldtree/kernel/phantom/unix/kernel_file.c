@@ -14,8 +14,8 @@
 
 #define DEBUG_MSG_PREFIX "kunix"
 #include "debug_ext.h"
-#define debug_level_flow 10
-#define debug_level_error 10
+#define debug_level_flow 0
+#define debug_level_error 0
 #define debug_level_info 10
 
 #include <sys/fcntl.h>
