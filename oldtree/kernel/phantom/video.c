@@ -48,7 +48,7 @@ struct drv_video_screen_t *video_drivers[] =
     &video_driver_direct_vesa,
 
     // General reg clone driver
-    &video_driver_gen_clone,
+//    &video_driver_gen_clone,
 #if !VESA_ENFORCE
     &video_driver_bios_vesa,
 #endif

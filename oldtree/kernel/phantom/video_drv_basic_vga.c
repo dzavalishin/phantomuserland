@@ -17,11 +17,11 @@
 #include <i386/pio.h>
 
 
-#include "hal.h"
-#include "video.h"
+#include <hal.h>
+#include <video.h>
 #include "video_drv_basic_vga.h"
 
-#include "console.h"
+#include <console.h>
 
 // void DumpVgaMode(void)
 #include "misc.h"
