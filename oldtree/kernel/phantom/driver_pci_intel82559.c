@@ -12,8 +12,7 @@
 
 #include <kernel/ethernet_defs.h>
 
-//#include "newos.h"
-#include "net.h"
+#include <kernel/net.h>
 
 
 #if 0

@@ -7,7 +7,6 @@
 
 #include <phantom_types.h>
 #include <hal.h>
-#include "hal_private.h"
 
 /* Contains the usb declarations needed to deal with USB Host Controller
  * modules. Used internally by the USB stack

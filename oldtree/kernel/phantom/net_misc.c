@@ -3,13 +3,13 @@
 #if HAVE_NET
 
 #define DEBUG_MSG_PREFIX "net"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "net.h"
-#include "udp.h"
+#include <kernel/net.h>
+#include <kernel/net/udp.h>
 
 #include <phantom_libc.h>
 #include <endian.h>

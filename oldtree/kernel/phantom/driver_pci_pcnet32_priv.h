@@ -7,15 +7,9 @@
 
 
 #include <phantom_types.h>
-#include "hal.h"
-#include "hal_private.h"
-
-//#include "newos.h"
+#include <hal.h>
 #include <compat/newos.h>
 
-//#define addr_t void *
-//typedef void * addr_t;
-//#define ssize_t u_int32_t
 
 struct pcnet32_rxdesc
 {

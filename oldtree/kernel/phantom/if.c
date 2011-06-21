@@ -14,10 +14,10 @@
  ** Distributed under the terms of the NewOS License.
  */
 
-#include "nqueue.h"
+#include <newos/nqueue.h>
 
 #include "khash.h"
-#include "net.h"
+#include <kernel/net.h>
 #include "ethernet.h"
 
 #include <kernel/atomic.h>

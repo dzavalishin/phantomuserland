@@ -10,7 +10,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "test"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
@@ -24,9 +24,9 @@
 
 #include <netinet/resolv.h>
 
-#include "net.h"
-#include "udp.h"
-#include "tcp.h"
+#include <kernel/net.h>
+#include <kernel/net/udp.h>
+#include <kernel/net/tcp.h>
 
 #include "test.h"
 

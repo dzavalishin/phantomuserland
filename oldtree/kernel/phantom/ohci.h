@@ -7,7 +7,6 @@
 
 #include <phantom_types.h>
 #include <hal.h>
-#include "hal_private.h"
 #include "usb_spec.h"
 #include "usb_hc.h"
 

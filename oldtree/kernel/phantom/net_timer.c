@@ -7,7 +7,6 @@
  ** Distributed under the terms of the NewOS License.
  */
 
-//#include "hal_private.h"
 #include <threads.h>
 
 #include "net_timer.h"

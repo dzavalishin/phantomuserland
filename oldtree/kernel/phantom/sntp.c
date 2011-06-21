@@ -60,8 +60,8 @@
 #include <netinet/resolv.h>
 #include <arpa/inet.h>
 
-#include "net.h"
-#include "udp.h"
+#include <kernel/net.h>
+#include <kernel/net/udp.h>
 
 #define RESOLVE 1
 

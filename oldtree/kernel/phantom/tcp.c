@@ -46,14 +46,13 @@
 
 #include "khash.h"
 
-#include "endian.h"
-#include "hal.h"
+#include <endian.h>
+#include <hal.h>
 
-#include "nqueue.h"
+#include <newos/nqueue.h>
 
-//#include "newos.h"
 //#include "cbuf.h"
-#include "tcp.h"
+#include <kernel/net/tcp.h>
 #include "net_timer.h"
 
 #include "misc.h"

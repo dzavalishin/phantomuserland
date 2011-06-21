@@ -17,10 +17,10 @@
  ** Distributed under the terms of the NewOS License.
  */
 
-#include "arp.h"
+#include <kernel/net/arp.h>
 
 #include "khash.h"
-#include "net.h"
+#include <kernel/net.h>
 #include "ethernet.h"
 
 #include <kernel/atomic.h>
@@ -28,7 +28,6 @@
 #include "hal.h"
 
 #include <compat/newos.h>
-//#include "newos.h"
 
 #include "misc.h"
 

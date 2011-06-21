@@ -16,7 +16,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "udp.h"
+#include <kernel/net/udp.h>
 #include <time.h>
 #include <errno.h>
 
@@ -72,10 +72,9 @@
 
 #define SUPPORT_DHCP
 
-//#include "stand.h"
-#include "net.h"
+#include <kernel/net.h>
 //#include "netif.h"
-#include "bootp.h"
+#include <kernel/net/bootp.h>
 
 
 

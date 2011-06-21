@@ -27,14 +27,12 @@
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 #include <i386/pio.h>
-//#include "driver_map.h"
+
 #include <device.h>
+
 #include <kernel/drivers.h>
-
 #include <kernel/ethernet_defs.h>
-
-//#include "newos.h"
-#include "net.h"
+#include <kernel/net.h>
 
 #include <dev/pci/rtl8139_dev.h>
 #include <dev/pci/rtl8139_priv.h>

@@ -12,13 +12,11 @@
 
 #include <phantom_libc.h>
 
-#include "i386/pci.h"
-#include "virtio.h"
+//#include "i386/pci.h"
+#include <kernel/virtio.h>
 #include <virtio_pci.h>
 #include <virtio_rng.h>
 
-//#include "driver_map.h"
-//#include "device.h"
 #include <device.h>
 #include <kernel/drivers.h>
 

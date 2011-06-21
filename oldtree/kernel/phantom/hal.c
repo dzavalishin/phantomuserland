@@ -23,7 +23,6 @@
 #include <vm/alloc.h>
 
 #include <hal.h>
-#include "hal_private.h"
 
 
 
