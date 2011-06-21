@@ -23,10 +23,8 @@
 #include "endian.h"
 #include <hal.h>
 
-
-//#include "newos.h"
 #include <compat/newos.h>
-#include "udp.h"
+#include <kernel/net/udp.h>
 
 #include "misc.h"
 

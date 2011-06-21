@@ -4,7 +4,6 @@
  *
  * Copyright (C) 2009 B Labs Ltd.
  */
-//#include <libdev/uart.h>
 
 #define DEBUG_MSG_PREFIX "pl011"
 #include "debug_ext.h"
@@ -17,7 +16,7 @@
 #include <kernel/arm/devid.h>
 #include <hal.h>
 #include <arm/memio.h>
-#include "mem_pl011_uart.h"
+#include <dev/mem/mem_pl011_uart.h>
 
 /* Error status bits in receive status register */
 #define PL011_FE		(1 << 0)

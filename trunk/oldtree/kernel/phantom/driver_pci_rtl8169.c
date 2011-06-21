@@ -34,9 +34,7 @@
 #include <kernel/vm.h>
 #include <kernel/drivers.h>
 #include <kernel/ethernet_defs.h>
-
-//#include "newos.h"
-#include "net.h"
+#include <kernel/net.h>
 
 
 #define WIRED_ADDRESS 	IPV4_DOTADDR_TO_ADDR(10, 0, 2, 121)

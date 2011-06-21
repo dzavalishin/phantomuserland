@@ -11,7 +11,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "VioDisk"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_info 10
 #define debug_level_flow 10
 #define debug_level_error 10
@@ -19,8 +19,7 @@
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 
-#include "i386/pci.h"
-#include "virtio.h"
+#include <kernel/virtio.h>
 #include <virtio_pci.h>
 #include <virtio_blk.h>
 

@@ -12,20 +12,19 @@
 #ifdef ARCH_ia32
 
 #define DEBUG_MSG_PREFIX "VirtIo"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "virtio.h"
-#include "hal.h"
+#include <kernel/virtio.h>
+#include <hal.h>
 #include <virtio_pci.h>
 #include <i386/pio.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 #include <kernel/barriers.h>
 #include <kernel/page.h>
-//#include <x86/phantom_page.h>
 
 static u_int32_t virtio_get_q_size( virtio_device_t *vd, int index );
 static void virtio_ring_init(virtio_device_t *vd, int index, int num );

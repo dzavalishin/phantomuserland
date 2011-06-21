@@ -17,7 +17,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "net.h"
+#include <kernel/net.h>
 #include "udp.h"
 
 #include <unix/uufile.h>

@@ -9,25 +9,22 @@
 
 #include <time.h>
 
-#include "nqueue.h"
+#include <newos/nqueue.h>
 
 #include "net_timer.h"
 
-#include "arp.h"
-#include "udp.h"
-#include "tcp.h"
+#include <kernel/net/arp.h>
+#include <kernel/net/udp.h>
+#include <kernel/net/tcp.h>
 
-#include "net.h"
+#include <kernel/net.h>
 
 #include "khash.h"
 #include "ethernet.h"
 
 #include <kernel/atomic.h>
 #include "endian.h"
-#include "hal.h"
-
-
-//#include "newos.h"
+#include <hal.h>
 
 #include "misc.h"
 

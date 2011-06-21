@@ -9,7 +9,7 @@
 //#include "newos.h"
 #include <compat/newos.h>
 #include <newos/cbuf.h>
-#include "net.h"
+#include <kernel/net.h>
 
 #include "misc.h"
 

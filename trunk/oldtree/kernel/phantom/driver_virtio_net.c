@@ -17,7 +17,7 @@
 
 
 #define DEBUG_MSG_PREFIX "VirtIo.Net"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 11
 #define debug_level_error 11
 #define debug_level_info 11
@@ -29,17 +29,14 @@
 #include <kernel/ethernet_defs.h>
 #include <kernel/page.h>
 
-#include "i386/pci.h"
-#include "virtio.h"
+#include <kernel/virtio.h>
 #include <virtio_pci.h>
 #include <virtio_net.h>
 
 #include <threads.h>
 
-//#include "driver_map.h"
-//#include "device.h"
 #include <device.h>
-#include "net.h"
+#include <kernel/net.h>
 
 //#include <x86/phantom_page.h>
 

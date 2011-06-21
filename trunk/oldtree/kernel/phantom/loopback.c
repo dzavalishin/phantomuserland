@@ -9,11 +9,10 @@
 
 #include <phantom_libc.h>
 
-#include "net.h"
-//#include "newos.h"
+#include <kernel/net.h>
 
 #include "ethernet.h"
-#include "arp.h"
+#include <kernel/net/arp.h>
 
 #include "misc.h"
 

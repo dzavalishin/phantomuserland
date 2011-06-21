@@ -5,10 +5,8 @@
 
 #include <phantom_libc.h>
 
-#include "nqueue.h"
-//#include "newos.h"
 #include <compat/newos.h>
-
+#include <newos/nqueue.h>
 
 typedef struct queue_typed {
     queue_element *head;

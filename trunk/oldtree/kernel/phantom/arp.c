@@ -19,10 +19,9 @@
 #include <string.h>
 #include <threads.h>
 
-#include "arp.h"
-
+#include <kernel/net/arp.h>
 #include "khash.h"
-#include "net.h"
+#include <kernel/net.h>
 #include "ethernet.h"
 
 #include <kernel/atomic.h>

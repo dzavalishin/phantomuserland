@@ -9,5 +9,4 @@ extern int  phantom_start_stack_size;
 #endif
 
 #include <kernel/page.h>
-//#include <x86/phantom_page.h>
 

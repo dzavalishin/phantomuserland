@@ -21,7 +21,7 @@
 #include <kernel/arm/devid.h>
 #include <hal.h>
 #include <arm/memio.h>
-#include "mem_pl181_mmc.h"
+#include <dev/mem/mem_pl181_mmc.h>
 
 
 

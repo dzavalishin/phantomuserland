@@ -18,7 +18,7 @@
  */
 
 #include "khash.h"
-#include "net.h"
+#include <kernel/net.h>
 #include "ethernet.h"
 
 #include <kernel/atomic.h>

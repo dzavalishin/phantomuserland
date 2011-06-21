@@ -31,11 +31,11 @@
 #include <netinet/in.h>
 #include <netinet/resolv.h>
 
-#include "resolve.h"
+#include <kernel/net/resolve.h>
 
 #include <endian.h>
 #include <arpa/inet.h>
-#include "udp.h"
+#include <kernel/net/udp.h>
 
 
 //

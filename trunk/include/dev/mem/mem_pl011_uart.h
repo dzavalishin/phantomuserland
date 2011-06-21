@@ -5,8 +5,6 @@
 #ifndef __PL011_H__
 #define __PL011_H__
 
-//#include <l4/config.h> /* To get PLATFORM */
-//#include <libdev/io.h>
 #include <arm/memio.h>
 
 

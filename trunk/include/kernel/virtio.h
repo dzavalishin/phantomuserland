@@ -2,7 +2,7 @@
 #include <phantom_types.h>
 #include <virtio_ring.h>
 #include <hal.h>
-#include "i386/pci.h"
+#include <i386/pci.h>
 
 typedef struct virtio_ring
 {
@@ -54,36 +54,36 @@ typedef struct virtio_device
 
 
 
-int 		virtio_probe( virtio_device_t *vd, pci_cfg_t *pci );
-void 		virtio_reset( virtio_device_t *vd );
+int         virtio_probe( virtio_device_t *vd, pci_cfg_t *pci );
+void        virtio_reset( virtio_device_t *vd );
 
-u_int8_t 	virtio_get_status( virtio_device_t *vd );
-void 		virtio_set_status( virtio_device_t *vd, u_int8_t status );
+u_int8_t    virtio_get_status( virtio_device_t *vd );
+void        virtio_set_status( virtio_device_t *vd, u_int8_t status );
 
-u_int32_t 	virtio_get_features( virtio_device_t *vd );
-void 		virtio_set_features( virtio_device_t *vd, u_int32_t features );
+u_int32_t   virtio_get_features( virtio_device_t *vd );
+void        virtio_set_features( virtio_device_t *vd, u_int32_t features );
 
-void 		virtio_get_config_struct( virtio_device_t *vd, void *buf, unsigned len );
-void 		virtio_set_config_struct( virtio_device_t *vd, const void *buf, unsigned len );
+void        virtio_get_config_struct( virtio_device_t *vd, void *buf, unsigned len );
+void        virtio_set_config_struct( virtio_device_t *vd, const void *buf, unsigned len );
 
 
-int 		virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
+int         virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
                                            int nDesc, struct vring_desc *desc
                                           );
 /*
-int 		virtio_attach_buffers(virtio_device_t *vd, int qindex,
+int         virtio_attach_buffers(virtio_device_t *vd, int qindex,
                           int nWrite, struct vring_desc *writeData,
                           int nRead, struct vring_desc *readData
                           );
 */
-int 		virtio_detach_buffer( virtio_device_t *vd, int qindex,
+int         virtio_detach_buffer( virtio_device_t *vd, int qindex,
                                       physaddr_t *buf, size_t *bufsize, size_t *datalen );
 
-int 		virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
+int         virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
                                            int nDesc, struct vring_desc *desc, int *dataLen
                                           );
 
-void 		virtio_kick(virtio_device_t *vd, int qindex);
+void        virtio_kick(virtio_device_t *vd, int qindex);
 
 
 

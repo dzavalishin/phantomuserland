@@ -19,8 +19,8 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "net.h"
-#include "udp.h"
+#include <kernel/net.h>
+#include <kernel/net/udp.h>
 #include "disk.h"
 #include <errno.h>
 #include <assert.h>

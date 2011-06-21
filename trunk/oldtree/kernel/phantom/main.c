@@ -45,7 +45,7 @@
 #include "vm/root.h"
 #include "video.h"
 #include "misc.h"
-#include "net.h"
+#include <kernel/net.h>
 
 #include <kernel/timedcall.h>
 

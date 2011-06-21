@@ -31,8 +31,8 @@
  *
  */
 
-#include "mem_pl050_ps2.h"
-#include "mem_pl050_keymap.h"
+#include <dev/mem/mem_pl050_ps2.h>
+#include <dev/mem/mem_pl050_keymap.h>
 
 #if 0
 

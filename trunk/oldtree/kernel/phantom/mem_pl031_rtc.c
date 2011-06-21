@@ -21,7 +21,7 @@
 #include <kernel/arm/devid.h>
 #include <hal.h>
 #include <arm/memio.h>
-//#include "mem_pl031_rtc.h"
+//#include <dev/mem/mem_pl031_rtc.h>
 
 
 #define RTCDR           0x00

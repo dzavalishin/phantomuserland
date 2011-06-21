@@ -31,8 +31,7 @@
 
 #include <kernel/ethernet_defs.h>
 
-//#include "newos.h"
-#include "net.h"
+#include <kernel/net.h>
 
 #define WW()
 //#define WW() getchar()

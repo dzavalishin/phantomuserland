@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <phantom_libc.h>
 #include <time.h>
-#include "net.h"
+#include <kernel/net.h>
 
 /*
  * syslog, vsyslog --
