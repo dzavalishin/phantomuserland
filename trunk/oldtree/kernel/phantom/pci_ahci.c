@@ -164,7 +164,7 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 
     if( ahci_init(dev) )
         goto free1;
-getchar();
+//getchar();
     return dev;
 
 free1:
