@@ -16,7 +16,8 @@
 //#include "boot.h" // boot_add_hd
 
 struct usbdrive_s {
-    struct drive_s drive;
+#warning fixme
+    //struct drive_s drive;
     struct usb_pipe *bulkin, *bulkout;
 };
 

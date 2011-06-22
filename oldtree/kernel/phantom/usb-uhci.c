@@ -5,6 +5,7 @@
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
 #include <compat/seabios.h>
+#include <i386/pio.h>
 
 //#include "util.h" // dprintf
 //#include "pci.h" // pci_bdf_to_bus
@@ -42,7 +43,7 @@ uhci_hub_detect(struct usbhub_s *hub, u32 port)
     // XXX - if just powered up, need to wait for USB_TIME_ATTDB?
 
     // Begin reset on port
-    outw(USBPORTSC_PR, ioport);
+    outw(ioport, USBPORTSC_PR);
     msleep(USB_TIME_DRSTR);
     return 0;
 }
@@ -55,13 +56,13 @@ uhci_hub_reset(struct usbhub_s *hub, u32 port)
     u16 ioport = cntl->iobase + USBPORTSC1 + port * 2;
 
     // Finish reset on port
-    outw(0, ioport);
+    outw(ioport, 0);
     udelay(6); // 64 high-speed bit times
     u16 status = inw(ioport);
     if (!(status & USBPORTSC_CCS))
         // No longer connected
         return -1;
-    outw(USBPORTSC_PE, ioport);
+    outw(ioport, USBPORTSC_PE);
     return !!(status & USBPORTSC_LSDA);
 }
 
@@ -71,7 +72,7 @@ uhci_hub_disconnect(struct usbhub_s *hub, u32 port)
 {
     struct usb_uhci_s *cntl = container_of(hub->cntl, struct usb_uhci_s, usb);
     u16 ioport = cntl->iobase + USBPORTSC1 + port * 2;
-    outw(0, ioport);
+    outw(ioport, 0);
 }
 
 static struct usbhub_op_s uhci_HubOp = {
@@ -108,12 +109,12 @@ reset_uhci(struct usb_uhci_s *cntl, u16 bdf)
     pci_config_writew(bdf, USBLEGSUP, USBLEGSUP_RWC);
 
     // Reset the HC
-    outw(USBCMD_HCRESET, cntl->iobase + USBCMD);
+    outw(cntl->iobase + USBCMD, USBCMD_HCRESET);
     udelay(5);
 
     // Disable interrupts and commands (just to be safe).
-    outw(0, cntl->iobase + USBINTR);
-    outw(0, cntl->iobase + USBCMD);
+    outw(cntl->iobase + USBINTR, 0);
+    outw(cntl->iobase + USBCMD, 0);
 }
 
 static void
@@ -144,7 +145,7 @@ configure_uhci(void *data)
     memset(intr_qh, 0, sizeof(*intr_qh));
     intr_qh->element = UHCI_PTR_TERM;
     intr_qh->link = (u32)term_qh | UHCI_PTR_QH;
-    int i;
+    unsigned int i;
     for (i=0; i<ARRAY_SIZE(fl->links); i++)
         fl->links[i] = (u32)intr_qh | UHCI_PTR_QH;
     cntl->framelist = fl;
@@ -152,16 +153,16 @@ configure_uhci(void *data)
     barrier();
 
     // Set the frame length to the default: 1 ms exactly
-    outb(USBSOF_DEFAULT, cntl->iobase + USBSOF);
+    outb(cntl->iobase + USBSOF, USBSOF_DEFAULT);
 
     // Store the frame list base address
-    outl((u32)fl->links, cntl->iobase + USBFLBASEADD);
+    outl(cntl->iobase + USBFLBASEADD, (u32)fl->links );
 
     // Set the current frame number
-    outw(0, cntl->iobase + USBFRNUM);
+    outw(cntl->iobase + USBFRNUM, 0);
 
     // Mark as configured and running with a 64-byte max packet.
-    outw(USBCMD_RS | USBCMD_CF | USBCMD_MAXP, cntl->iobase + USBCMD);
+    outw(cntl->iobase + USBCMD, USBCMD_RS | USBCMD_CF | USBCMD_MAXP);
 
     // Find devices
     int count = check_uhci_ports(cntl);
@@ -171,7 +172,7 @@ configure_uhci(void *data)
         return;
 
     // No devices found - shutdown and free controller.
-    outw(0, cntl->iobase + USBCMD);
+    outw(cntl->iobase + USBCMD, 0);
 fail:
     free(term_td);
     free(fl);
@@ -517,7 +518,7 @@ uhci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
     int devaddr = dummy->devaddr | (dummy->ep << 7);
     // Determine number of entries needed for 2 timer ticks.
     int ms = 1<<frameexp;
-    int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms);
+    unsigned int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms);
     count = ALIGN(count, 2);
     struct uhci_pipe *pipe = malloc_low(sizeof(*pipe));
     struct uhci_td *tds = malloc_low(sizeof(*tds) * count);
@@ -533,7 +534,7 @@ uhci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
     pipe->iobase = cntl->iobase;
 
     int toggle = 0;
-    int i;
+    unsigned int i;
     for (i=0; i<count; i++) {
         tds[i].link = (i==count-1 ? (u32)&tds[0] : (u32)&tds[i+1]);
         tds[i].status = (uhci_maxerr(3) | (lowspeed ? TD_CTRL_LS : 0)
@@ -579,7 +580,7 @@ uhci_poll_intr(struct usb_pipe *p, void *data)
     ASSERT16();
     if (! CONFIG_USB_UHCI)
         return -1;
-
+#if 0
     struct uhci_pipe *pipe = container_of(p, struct uhci_pipe, pipe);
     struct uhci_td *td = GET_FLATPTR(pipe->next_td);
     u32 status = GET_FLATPTR(td->status);
@@ -601,6 +602,6 @@ uhci_poll_intr(struct usb_pipe *p, void *data)
     barrier();
     SET_FLATPTR(td->status, (uhci_maxerr(0) | (status & TD_CTRL_LS)
                              | TD_CTRL_ACTIVE));
-
+#endif
     return 0;
 }

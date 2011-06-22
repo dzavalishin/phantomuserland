@@ -419,7 +419,7 @@ ohci_alloc_bulk_pipe(struct usb_pipe *dummy)
 {
     if (! CONFIG_USB_OHCI)
         return NULL;
-    dprintf(1, "OHCI Bulk transfers not supported.\n");
+    SHOW_FLOW(1, "OHCI Bulk transfers not supported.");
     return NULL;
 }
 
@@ -445,7 +445,7 @@ ohci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
     int devaddr = dummy->devaddr | (dummy->ep << 7);
     // Determine number of entries needed for 2 timer ticks.
     int ms = 1<<frameexp;
-    int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms)+1;
+    unsigned int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms)+1;
     struct ohci_pipe *pipe = malloc_low(sizeof(*pipe));
     struct ohci_td *tds = malloc_low(sizeof(*tds) * count);
     void *data = malloc_low(maxpacket * count);
@@ -462,7 +462,7 @@ ohci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
     ed->hwTailP = (u32)&tds[count-1];
     ed->hwINFO = devaddr | (maxpacket << 16) | (lowspeed ? ED_LOWSPEED : 0);
 
-    int i;
+    unsigned int i;
     for (i=0; i<count-1; i++) {
         tds[i].hwINFO = TD_DP_IN | TD_T_TOGGLE | TD_CC;
         tds[i].hwCBP = (u32)data + maxpacket * i;
@@ -500,7 +500,7 @@ ohci_poll_intr(struct usb_pipe *p, void *data)
     ASSERT16();
     if (! CONFIG_USB_OHCI)
         return -1;
-
+#if 0
     struct ohci_pipe *pipe = container_of(p, struct ohci_pipe, pipe);
     struct ohci_td *tds = GET_FLATPTR(pipe->tds);
     struct ohci_td *head = (void*)(GET_FLATPTR(pipe->ed.hwHeadP) & ~(ED_C|ED_H));
@@ -529,6 +529,6 @@ ohci_poll_intr(struct usb_pipe *p, void *data)
     SET_FLATPTR(tail->hwBE, (u32)intrdata + maxpacket - 1);
     barrier();
     SET_FLATPTR(pipe->ed.hwTailP, (u32)next);
-
+#endif
     return 0;
 }
