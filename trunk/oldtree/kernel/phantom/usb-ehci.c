@@ -4,6 +4,10 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
+#if CONFIG_USB_EHCI
+
+#define DEBUG_MSG_PREFIX "ehci"
+
 #include <compat/seabios.h>
 
 //#include "util.h" // dprintf
@@ -52,7 +56,7 @@ ehci_note_port(struct usb_ehci_s *cntl)
         // No full/low speed devices found.
         return;
     // Start companion controllers.
-    int i;
+    unsigned int i;
     for (i=0; i<ARRAY_SIZE(cntl->companion); i++) {
         u16 type = cntl->companion[i].type;
         if (type == USB_TYPE_UHCI)
@@ -212,7 +216,7 @@ configure_ehci(void *data)
     intr_qh->info2 = (0x01 << QH_SMASK_SHIFT);
     intr_qh->token = QTD_STS_HALT;
     intr_qh->qtd_next = intr_qh->alt_next = EHCI_PTR_TERM;
-    int i;
+    unsigned int i;
     for (i=0; i<ARRAY_SIZE(fl->links); i++)
         fl->links[i] = (u32)intr_qh | EHCI_PTR_QH;
     writel(&cntl->regs->periodiclistbase, (u32)fl);
@@ -260,7 +264,7 @@ ehci_init(u16 bdf, int busid, int compbdf)
     struct ehci_caps *caps = (void*)(baseaddr & PCI_BASE_ADDRESS_MEM_MASK);
     u32 hcc_params = readl(&caps->hccparams);
     if (hcc_params & HCC_64BIT_ADDR) {
-        dprintf(1, "No support for 64bit EHCI\n");
+        SHOW_ERROR0(1, "No support for 64bit EHCI");
         return -1;
     }
 
@@ -276,8 +280,8 @@ ehci_init(u16 bdf, int busid, int compbdf)
             , pci_bdf_to_bus(bdf), pci_bdf_to_dev(bdf)
             , pci_bdf_to_fn(bdf), cntl->regs);
 
-#warning fixme
-#if 0
+//#warning fixme
+#if 1
     pci_config_maskw(bdf, PCI_COMMAND, 0, PCI_COMMAND_MASTER);
 
     // XXX - check for and disable SMM control?
@@ -313,6 +317,7 @@ ehci_init(u16 bdf, int busid, int compbdf)
 static int
 ehci_wait_qh(struct usb_ehci_s *cntl, struct ehci_qh *qh)
 {
+    (void) cntl;
     // XXX - 500ms just a guess
     u64 end = calc_future_tsc(500);
     for (;;) {
@@ -647,7 +652,7 @@ ehci_send_bulk(struct usb_pipe *p, int dir, void *data, int datasize)
 
     return 0;
 fail:
-    dprintf(1, "ehci_send_bulk failed\n");
+    SHOW_ERROR0(1, "ehci_send_bulk failed");
     SET_FLATPTR(pipe->qh.qtd_next, EHCI_PTR_TERM);
     SET_FLATPTR(pipe->qh.alt_next, EHCI_PTR_TERM);
     // XXX - halt qh?
@@ -671,7 +676,7 @@ ehci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
     int maxpacket = dummy->maxpacket;
     // Determine number of entries needed for 2 timer ticks.
     int ms = 1<<frameexp;
-    int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms);
+    unsigned int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms);
     struct ehci_pipe *pipe = memalign_low(EHCI_QH_ALIGN, sizeof(*pipe));
     struct ehci_qtd *tds = memalign_low(EHCI_QTD_ALIGN, sizeof(*tds) * count);
     void *data = malloc_low(maxpacket * count);
@@ -697,7 +702,7 @@ ehci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
                       | (0x1c << QH_CMASK_SHIFT));
     pipe->qh.qtd_next = (u32)tds;
 
-    int i;
+    unsigned int i;
     for (i=0; i<count; i++) {
         struct ehci_qtd *td = &tds[i];
         td->qtd_next = (i==count-1 ? (u32)tds : (u32)&td[1]);
@@ -734,9 +739,12 @@ fail:
 int
 ehci_poll_intr(struct usb_pipe *p, void *data)
 {
-    ASSERT16();
+    //(void) p;
+    //(void) data;
+    //ASSERT16();
     if (! CONFIG_USB_EHCI)
         return -1;
+#if 1
     struct ehci_pipe *pipe = container_of(p, struct ehci_pipe, pipe);
     struct ehci_qtd *td = GET_FLATPTR(pipe->next_td);
     u32 token = GET_FLATPTR(td->token);
@@ -760,6 +768,10 @@ ehci_poll_intr(struct usb_pipe *p, void *data)
     barrier();
     SET_FLATPTR(td->token, (ehci_explen(maxpacket) | QTD_STS_ACTIVE
                             | QTD_PID_IN | ehci_maxerr(3)));
-
+#endif
     return 0;
 }
+
+
+#endif // CONFIG_USB_EHCI
+

@@ -305,8 +305,8 @@ static void phantom_debug_window_loop()
         bp += rc;
         len -= rc;
 
-        //phantom_dump_threads_buf(bp,len);
-        phantom_dump_windows_buf(bp,len);
+        phantom_dump_threads_buf(bp,len);
+        //phantom_dump_windows_buf(bp,len);
         phantom_debug_window_puts(buf);
 
         if(wx == 600) wx = 620; else wx = 600;

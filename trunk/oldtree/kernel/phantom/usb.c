@@ -4,6 +4,8 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
+#define DEBUG_MSG_PREFIX "usb"
+
 #include <compat/seabios.h>
 
 //#include "util.h" // dprintf
@@ -19,6 +21,131 @@
 #include "usb-msc.h" // usb_msc_init
 #include "usb.h" // struct usb_s
 //#include "biosvar.h" // GET_GLOBAL
+
+#include <time.h>
+#include <i386/pio.h>
+
+struct extended_bios_data_area_s usb_ebda2;
+
+
+
+u64 calc_future_tsc(u32 msecs)
+{
+    return hal_system_time() + ( ((u64)1000) * msecs );
+}
+
+u64 calc_future_tsc_usec(u32 usecs)
+{
+    return hal_system_time() + usecs;
+}
+
+int check_tsc(u64 end)
+{
+    int r = hal_system_time() >= end;
+
+    if( r )
+        SHOW_ERROR0( 2, "timed out" );
+
+    return r;
+}
+
+#define CONFIG_PCI_ROOT1 0x00
+#define CONFIG_PCI_ROOT2 0x00
+
+#define PORT_PCI_CMD           0x0cf8
+#define PORT_PCI_REBOOT        0x0cf9
+#define PORT_PCI_DATA          0x0cfc
+
+void pci_config_writel(u16 bdf, u32 addr, u32 val)
+{
+    outl( PORT_PCI_CMD, 0x80000000 | (bdf << 8) | (addr & 0xfc) );
+    outl( PORT_PCI_DATA, val);
+}
+
+void pci_config_writew(u16 bdf, u32 addr, u16 val)
+{
+    outl( PORT_PCI_CMD, 0x80000000 | (bdf << 8) | (addr & 0xfc));
+    outw( PORT_PCI_DATA + (addr & 2), val);
+}
+
+void pci_config_writeb(u16 bdf, u32 addr, u8 val)
+{
+    outl( PORT_PCI_CMD, (0x80000000 | (bdf << 8) | (addr & 0xfc)) );
+    outb( PORT_PCI_DATA + (addr & 3), val);
+}
+
+u32 pci_config_readl(u16 bdf, u32 addr)
+{
+    outl( PORT_PCI_CMD, 0x80000000 | (bdf << 8) | (addr & 0xfc));
+    return inl(PORT_PCI_DATA);
+}
+
+u16 pci_config_readw(u16 bdf, u32 addr)
+{
+    outl( PORT_PCI_CMD, 0x80000000 | (bdf << 8) | (addr & 0xfc));
+    return inw(PORT_PCI_DATA + (addr & 2));
+}
+
+u8 pci_config_readb(u16 bdf, u32 addr)
+{
+    outl( PORT_PCI_CMD, 0x80000000 | (bdf << 8) | (addr & 0xfc));
+    return inb(PORT_PCI_DATA + (addr & 3));
+}
+
+void
+pci_config_maskw(u16 bdf, u32 addr, u16 off, u16 on)
+{
+    u16 val = pci_config_readw(bdf, addr);
+    val = (val & ~off) | on;
+    pci_config_writew(bdf, addr, val);
+}
+
+// Helper function for foreachpci() macro - return next device
+int
+pci_next(int bdf, int *pmax)
+{
+    if (pci_bdf_to_fn(bdf) == 1
+        && (pci_config_readb(bdf-1, PCI_HEADER_TYPE) & 0x80) == 0)
+        // Last found device wasn't a multi-function device - skip to
+        // the next device.
+        bdf += 7;
+
+    int max = *pmax;
+    for (;;) {
+        if (bdf >= max) {
+            if (CONFIG_PCI_ROOT1 && bdf <= (CONFIG_PCI_ROOT1 << 8))
+                bdf = CONFIG_PCI_ROOT1 << 8;
+            else if (CONFIG_PCI_ROOT2 && bdf <= (CONFIG_PCI_ROOT2 << 8))
+                bdf = CONFIG_PCI_ROOT2 << 8;
+            else
+            	return -1;
+            *pmax = max = bdf + 0x0100;
+        }
+
+        u16 v = pci_config_readw(bdf, PCI_VENDOR_ID);
+        if (v != 0x0000 && v != 0xffff)
+            // Device is present.
+            break;
+
+        if (pci_bdf_to_fn(bdf) == 0)
+            bdf += 8;
+        else
+            bdf += 1;
+    }
+
+    // Check if found device is a bridge.
+    u32 v = pci_config_readb(bdf, PCI_HEADER_TYPE);
+    v &= 0x7f;
+    if (v == PCI_HEADER_TYPE_BRIDGE || v == PCI_HEADER_TYPE_CARDBUS) {
+        v = pci_config_readl(bdf, PCI_PRIMARY_BUS);
+        int newmax = (v & 0xff00) + 0x0100;
+        if (newmax > max)
+            *pmax = newmax;
+    }
+
+    return bdf;
+}
+
 
 
 /****************************************************************
@@ -38,8 +165,10 @@ free_pipe(struct usb_pipe *pipe)
         return uhci_free_pipe(pipe);
     case USB_TYPE_OHCI:
         return ohci_free_pipe(pipe);
+#if CONFIG_USB_EHCI
     case USB_TYPE_EHCI:
         return ehci_free_pipe(pipe);
+#endif
     }
 }
 
@@ -54,8 +183,10 @@ alloc_default_control_pipe(struct usb_pipe *dummy)
         return uhci_alloc_control_pipe(dummy);
     case USB_TYPE_OHCI:
         return ohci_alloc_control_pipe(dummy);
+#if CONFIG_USB_EHCI
     case USB_TYPE_EHCI:
         return ehci_alloc_control_pipe(dummy);
+#endif
     }
 }
 
@@ -71,8 +202,10 @@ send_control(struct usb_pipe *pipe, int dir, const void *cmd, int cmdsize
         return uhci_control(pipe, dir, cmd, cmdsize, data, datasize);
     case USB_TYPE_OHCI:
         return ohci_control(pipe, dir, cmd, cmdsize, data, datasize);
+#if CONFIG_USB_EHCI
     case USB_TYPE_EHCI:
         return ehci_control(pipe, dir, cmd, cmdsize, data, datasize);
+#endif
     }
 }
 
@@ -97,8 +230,10 @@ alloc_bulk_pipe(struct usb_pipe *pipe, struct usb_endpoint_descriptor *epdesc)
         return uhci_alloc_bulk_pipe(&dummy);
     case USB_TYPE_OHCI:
         return ohci_alloc_bulk_pipe(&dummy);
+#if CONFIG_USB_EHCI
     case USB_TYPE_EHCI:
         return ehci_alloc_bulk_pipe(&dummy);
+#endif
     }
 }
 
@@ -111,8 +246,10 @@ usb_send_bulk(struct usb_pipe *pipe_fl, int dir, void *data, int datasize)
         return uhci_send_bulk(pipe_fl, dir, data, datasize);
     case USB_TYPE_OHCI:
         return ohci_send_bulk(pipe_fl, dir, data, datasize);
+#if CONFIG_USB_EHCI
     case USB_TYPE_EHCI:
         return ehci_send_bulk(pipe_fl, dir, data, datasize);
+#endif
     }
 }
 
@@ -134,8 +271,10 @@ alloc_intr_pipe(struct usb_pipe *pipe, struct usb_endpoint_descriptor *epdesc)
         return uhci_alloc_intr_pipe(&dummy, frameexp);
     case USB_TYPE_OHCI:
         return ohci_alloc_intr_pipe(&dummy, frameexp);
+#if CONFIG_USB_EHCI
     case USB_TYPE_EHCI:
         return ehci_alloc_intr_pipe(&dummy, frameexp);
+#endif
     }
 }
 
@@ -148,8 +287,10 @@ usb_poll_intr(struct usb_pipe *pipe_fl, void *data)
         return uhci_poll_intr(pipe_fl, data);
     case USB_TYPE_OHCI:
         return ohci_poll_intr(pipe_fl, data);
+#if CONFIG_USB_EHCI
     case USB_TYPE_EHCI:
         return ehci_poll_intr(pipe_fl, data);
+#endif
     }
 }
 
@@ -264,7 +405,10 @@ usb_set_address(struct usbhub_s *hub, int port, int speed)
         dummy.path = (u64)-1;
         cntl->defaultpipe = defpipe = alloc_default_control_pipe(&dummy);
         if (!defpipe)
+        {
+            SHOW_ERROR( 2, "alloc def pipe failed at port %d", port );
             return NULL;
+        }
     }
     defpipe->speed = speed;
     if (hub->pipe) {
@@ -289,7 +433,10 @@ usb_set_address(struct usbhub_s *hub, int port, int speed)
     req.wLength = 0;
     int ret = send_default_control(defpipe, &req, NULL);
     if (ret)
+    {
+        SHOW_ERROR( 2, "send def control failed at port %d", port );
         return NULL;
+    }
 
     msleep(USB_TIME_SETADDR_RECOVERY);
 
@@ -346,8 +493,10 @@ configure_usb_device(struct usb_pipe *pipe)
     int imax = (void*)config + config->wTotalLength - (void*)iface;
     if (iface->bInterfaceClass == USB_CLASS_HUB)
         ret = usb_hub_init(pipe);
+#if CONFIG_USB_MSC
     else if (iface->bInterfaceClass == USB_CLASS_MASS_STORAGE)
         ret = usb_msc_init(pipe, iface, imax);
+#endif
     else
         ret = usb_hid_init(pipe, iface, imax);
     if (ret)
@@ -369,20 +518,27 @@ usb_init_hub_port(void *data)
     // Detect if device present (and possibly start reset)
     int ret = hub->op->detect(hub, port);
     if (ret)
+    {
         // No device present
+        SHOW_ERROR( 2, "No dev at port %d", port );
         goto done;
+    }
 
     // Reset port and determine device speed
     mutex_lock(&hub->cntl->resetlock);
     ret = hub->op->reset(hub, port);
     if (ret < 0)
+    {
         // Reset failed
+        SHOW_ERROR( 2, "Reset failed at port %d", port );
         goto resetfail;
+    }
 
     // Set address of port
     struct usb_pipe *pipe = usb_set_address(hub, port, ret);
     if (!pipe) {
         hub->op->disconnect(hub, port);
+        SHOW_ERROR( 2, "Set address failed at port %d", port );
         goto resetfail;
     }
     mutex_unlock(&hub->cntl->resetlock);
@@ -406,18 +562,26 @@ void
 usb_enumerate(struct usbhub_s *hub)
 {
     u32 portcount = hub->portcount;
-    hub->threads = portcount;
+    //hub->threads = portcount;
+    hub->threads = 0;
 
     // Launch a thread for every port.
-    int i;
-    for (i=0; i<portcount; i++) {
+    unsigned int i;
+    for (i=0; i<portcount; i++)
+    {
+        SHOW_FLOW( 2, "Look at port %d", i );
+
         hub->port = i;
-        run_thread(usb_init_hub_port, hub);
+        hub->threads++;
+
+        //run_thread(usb_init_hub_port, hub);
+        //while (hub->threads)            yield();
+        usb_init_hub_port( hub );
     }
 
     // Wait for threads to complete.
-    while (hub->threads)
-        yield();
+    //while (hub->threads)        yield();
+
 }
 
 void
@@ -447,8 +611,10 @@ usb_setup(void)
             for (;;) {
                 if (ehcicode == PCI_CLASS_SERIAL_USB_EHCI) {
                     // Found an ehci controller.
+#if CONFIG_USB_EHCI
                     int ret = ehci_init(ehcibdf, count++, bdf);
                     if (ret)
+#endif
                         // Error
                         break;
                     count += found;
