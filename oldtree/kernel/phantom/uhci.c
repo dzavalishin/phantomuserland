@@ -1,3 +1,5 @@
+#if 0
+
 #include <kernel/config.h>
 #if COMPILE_UHCI
 
@@ -2672,3 +2674,5 @@ UHCI::ReadReg32(uint32 reg)
 
 #endif // COMPILE_UHCI
 
+
+#endif

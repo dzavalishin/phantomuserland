@@ -1,3 +1,4 @@
+#if 0
 /*
  * Copyright 2004-2006, Haiku Inc. All rights reserved.
  * Distributed under the terms of the MIT License.
@@ -198,4 +199,5 @@ typedef struct
 #define QH_NEXT_IS_QH  			0x02
 #define QH_LINK_MASK			0xfffffff0
 
+#endif
 #endif

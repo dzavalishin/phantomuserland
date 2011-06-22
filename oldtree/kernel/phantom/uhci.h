@@ -1,4 +1,4 @@
-
+#if 0
 #include <sys/cdefs.h>
 
 //#include "uhcireg.h"
@@ -41,3 +41,4 @@ typedef struct uhci_req {
 } __packed uhci_req_t ;
 
 
+#endif

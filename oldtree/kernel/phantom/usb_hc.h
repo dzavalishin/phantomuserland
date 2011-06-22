@@ -1,3 +1,5 @@
+#if 0
+
 /*
 ** Copyright 2003, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
@@ -55,5 +57,7 @@ struct usb_hc_module_hooks {
 	int (*enqueue_transfer)(hc_cookie *cookie, hc_endpoint *endpoint, usb_hc_transfer *transfer);
 };
 */
+
+#endif
 
 #endif

@@ -1,3 +1,5 @@
+#if 0
+
 	/*
 ** Copyright 2003, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
@@ -182,3 +184,4 @@ typedef struct {
 
 #endif
 
+#endif
