@@ -75,7 +75,7 @@ usb_kbd_init(struct usb_pipe *pipe, struct usb_endpoint_descriptor *epdesc)
     if (!keyboard_pipe)
         return -1;
 
-    dprintf(1, "USB keyboard initialized\n");
+    SHOW_FLOW0(1, "USB keyboard initialized\n");
     return 0;
 }
 
@@ -100,7 +100,7 @@ usb_mouse_init(struct usb_pipe *pipe, struct usb_endpoint_descriptor *epdesc)
     if (!mouse_pipe)
         return -1;
 
-    dprintf(1, "USB mouse initialized\n");
+    SHOW_FLOW0(1, "USB mouse initialized\n");
     return 0;
 }
 
@@ -121,7 +121,7 @@ usb_hid_init(struct usb_pipe *pipe
     struct usb_endpoint_descriptor *epdesc = findEndPointDesc(
         iface, imax, USB_ENDPOINT_XFER_INT, USB_DIR_IN);
     if (!epdesc) {
-        dprintf(1, "No usb hid intr in?\n");
+        SHOW_FLOW0(1, "No usb hid intr in?\n");
         return -1;
     }
 
@@ -218,18 +218,18 @@ handle_key(struct keyevent *data)
     dprintf(9, "Got key %x %x\n", data->modifiers, data->keys[0]);
 
     // Load old keys.
-    u16 ebda_seg = get_ebda_seg();
+    //u16 ebda_seg = get_ebda_seg();
     struct usbkeyinfo old;
     old.data = GET_EBDA2(ebda_seg, usbkey_last.data);
 
     // Check for keys no longer pressed.
     int addpos = 0;
-    int i;
+    unsigned int i;
     for (i=0; i<ARRAY_SIZE(old.keys); i++) {
         u8 key = old.keys[i];
         if (!key)
             break;
-        int j;
+        unsigned int j;
         for (j=0;; j++) {
             if (j>=ARRAY_SIZE(data->keys)) {
                 // Key released.
@@ -343,9 +343,12 @@ handle_mouse(struct mouseevent *data)
     s8 x = data->x, y = -data->y;
     u8 flag = ((data->buttons & 0x7) | (1<<3)
                | (x & 0x80 ? (1<<4) : 0) | (y & 0x80 ? (1<<5) : 0));
+#warning fixme
+#if 0
     process_mouse(flag);
     process_mouse(x);
     process_mouse(y);
+#endif
 }
 
 // Check if a USB mouse event is pending and process it if so.

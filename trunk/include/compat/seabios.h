@@ -39,18 +39,33 @@
 #define MODE16 0
 #define ASSERT16() panic("16 bit USB code called")
 
+#define VAR16VISIBLE
+#define VAR16
+
+
 // TODO check - Used by 16 bit only code?
 #define FLATPTR_TO_SEG(v) (v)
 #define FLATPTR_TO_OFFSET(v) (v)
+
+
 
 #define CONFIG_USB 1
 #define CONFIG_USB_EHCI 1
 #define CONFIG_USB_OHCI 1
 #define CONFIG_USB_UHCI 1
+#define CONFIG_USB_MOUSE 1
+#define CONFIG_USB_KEYBOARD 1
+#define CONFIG_USB_HUB 1
+#define CONFIG_USB_MSC 1
+
+
 
 #define mutex_lock hal_mutex_lock
 #define mutex_unlock hal_mutex_unlock
-
+#define malloc_high malloc
+#define malloc_low malloc
+#define malloc_tmphigh malloc
+#define malloc_tmplow malloc
 
 
 
@@ -76,6 +91,24 @@
 
 
 
+static inline void writel(void *addr, u32 val) {
+    *(volatile u32 *)addr = val;
+}
+static inline void writew(void *addr, u16 val) {
+    *(volatile u16 *)addr = val;
+}
+static inline void writeb(void *addr, u8 val) {
+    *(volatile u8 *)addr = val;
+}
+static inline u32 readl(const void *addr) {
+    return *(volatile const u32 *)addr;
+}
+static inline u16 readw(const void *addr) {
+    return *(volatile const u16 *)addr;
+}
+static inline u8 readb(const void *addr) {
+    return *(volatile const u8 *)addr;
+}
 
 
 static inline u32 __ffs(u32 word)
@@ -116,6 +149,38 @@ static inline u32 __fls(u32 word)
 
 #define barrier() __asm__ __volatile__("": : :"memory")
 
+
+// ps2port.h
+
+// Keyboard commands
+#define ATKBD_CMD_SETLEDS       0x10ed
+#define ATKBD_CMD_SSCANSET      0x10f0
+#define ATKBD_CMD_GETID         0x02f2
+#define ATKBD_CMD_ENABLE        0x00f4
+#define ATKBD_CMD_RESET_DIS     0x00f5
+#define ATKBD_CMD_RESET_BAT     0x02ff
+
+// Mouse commands
+#define PSMOUSE_CMD_SETSCALE11  0x00e6
+#define PSMOUSE_CMD_SETSCALE21  0x00e7
+#define PSMOUSE_CMD_SETRES      0x10e8
+#define PSMOUSE_CMD_GETINFO     0x03e9
+#define PSMOUSE_CMD_GETID       0x02f2
+#define PSMOUSE_CMD_SETRATE     0x10f3
+#define PSMOUSE_CMD_ENABLE      0x00f4
+#define PSMOUSE_CMD_DISABLE     0x00f5
+#define PSMOUSE_CMD_RESET_BAT   0x02ff
+
+struct usbkeyinfo {
+    union {
+        struct {
+            u8 modifiers;
+            u8 repeatcount;
+            u8 keys[6];
+        };
+        u64 data;
+    };
+};
 
 
 #endif // COMPAT_SEABIOS_H
