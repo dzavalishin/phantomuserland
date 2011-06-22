@@ -68,6 +68,8 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
     {
         fs_probe_t *fp = &fs_drivers[i];
 
+        SHOW_INFO( 0, "probe %s fs on %s", fp->name, p->name );
+
         errno_t ret = fp->probe_f( p );
         if( ret ) continue;
 
@@ -176,7 +178,10 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
         break;
 
     default:
-        SHOW_ERROR0( 1, "Not a FAT partition" );
+        if(p->flags & PART_FLAG_IS_WHOLE_DISK)
+            break;
+
+        SHOW_ERROR( 1, "Not a FAT partition type 0x%X", p->type );
         return EINVAL;
     }
 

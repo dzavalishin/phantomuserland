@@ -42,6 +42,8 @@ typedef struct
     phantom_device_t *		dev;            // disk io needs it
     int                         nport;
 
+    int                         sig;            // Signature
+
     int                 	exist;
     u_int32_t                   nSect;
 
@@ -162,8 +164,9 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 
     if( ahci_init(dev) )
         goto free1;
-
+getchar();
     return dev;
+
 free1:
     free(es);
 
@@ -234,6 +237,60 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
         p->clb[i].cmd_table_phys = pa + (i*cmd_bytes);
     }
 
+    // Reset port
+
+    WP32( dev, nport, AHCI_P_CMD, 0 ); // All off
+    WP32( dev, nport, AHCI_P_SCTL, 1 ); // Reset
+    hal_sleep_msec(2); // need 1 msec
+    WP32( dev, nport, AHCI_P_SCTL, 0 ); // Reset done
+
+    u_int32_t sata_status = RP32( dev, nport, AHCI_P_SSTS );
+    if( (0xF & (sata_status >> 8)) == 0 )
+    {
+        SHOW_ERROR( 0, DEV_NAME " port %d dev not present (IPM)", nport );
+        p->exist = 0;
+        return ENXIO;
+    }
+    if( (0xF & (sata_status >> 4)) == 0 )
+    {
+        SHOW_ERROR( 0, DEV_NAME " port %d dev not present (SPD)", nport );
+        p->exist = 0;
+        return ENXIO;
+    }
+    if( (0xF & (sata_status >> 0)) == 0 )
+    {
+        SHOW_ERROR( 0, DEV_NAME " port %d phy offline, %X", nport, 0xF & sata_status );
+        p->exist = 0;
+        return ENXIO;
+    }
+
+
+    p->sig = RP32( dev, nport, AHCI_P_SIG );
+    if( p->sig == SATA_SIG_ATA )
+        SHOW_INFO( 0, DEV_NAME " port %d is ATA", nport );
+    else
+    {
+        switch( p->sig )
+        {
+        case SATA_SIG_ATAPI:
+            SHOW_INFO( 0, DEV_NAME " port %d is ATAPI, disabled", nport );
+            break;
+        case SATA_SIG_SEMB:
+            SHOW_INFO( 0, DEV_NAME " port %d is bridge, disabled", nport );
+            break;
+        case SATA_SIG_PM:
+            SHOW_INFO( 0, DEV_NAME " port %d is port multiplier, disabled", nport );
+            break;
+        default:
+            SHOW_INFO( 0, DEV_NAME " port %d is unknown sig %X, disabled", nport, p->sig );
+            break;
+        }
+        p->exist = 0;
+        return ENXIO;
+    }
+
+    // Start port
+
     WP32( dev, nport, AHCI_P_IE, 0xFFFF ); // Turn on all...
 
     WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_POD );
@@ -242,21 +299,20 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
     //ahci_dump_port_info( dev, nport );
 
     {
-    hd_driveid_t id;
+        hd_driveid_t id;
 
-    errno_t rc = ahci_do_inquiry( dev, nport, &id, sizeof(id) );
-    if(rc)
-    {
-        SHOW_ERROR( 0, "ahci_do_inquiry rc = %d", rc );
-        return rc;
-    }
+        errno_t rc = ahci_do_inquiry( dev, nport, &id, sizeof(id) );
+        if(rc)
+        {
+            SHOW_ERROR( 0, "ahci_do_inquiry rc = %d", rc );
+            return rc;
+        }
 
-    p->nSect = id.lba_capacity;
+        p->nSect = id.lba_capacity;
 
-    dump_ataid( &id );
+        dump_ataid( &id );
 
-    ahci_connect_port( p );
-
+        ahci_connect_port( p );
     }
 
 
@@ -279,7 +335,7 @@ static int ahci_init(phantom_device_t *dev)
     u_int32_t r = R32(dev,AHCI_GHC);
     if( ! (r & AHCI_GHC_AE ) )
     {
-        SHOW_INFO( 1, "AHI ENABLE for " DEV_NAME " is off (%X)", r );
+        SHOW_INFO( 1, "AHCI ENABLE for " DEV_NAME " is off (%X)", r );
 
         W32(dev,AHCI_GHC, r | AHCI_GHC_AE );
 
@@ -371,6 +427,13 @@ static void ahci_port_interrupt(phantom_device_t *dev, int nport)
     ahci_t *a = dev->drv_private;
 
     u_int32_t is = RP32( dev, nport, AHCI_P_IS );
+
+    u_int32_t sata_status = RP32( dev, nport, AHCI_P_SSTS );
+    u_int32_t sata_control= RP32( dev, nport, AHCI_P_SCTL );
+    u_int32_t sata_error  = RP32( dev, nport, AHCI_P_SERR );
+    u_int32_t sata_active = RP32( dev, nport, AHCI_P_SACT );
+
+    // Ack interrupt
     WP32( dev, nport, AHCI_P_IS, is );
 
     if( !a->port[nport].exist )
@@ -381,6 +444,8 @@ static void ahci_port_interrupt(phantom_device_t *dev, int nport)
     }
 
     SHOW_FLOW( 1, "Interrupt from port %d, is %X", nport, is );
+    SHOW_FLOW( 1, "st %X ctl %X err %X act %X ", sata_status, sata_control, sata_error, sata_active );
+
 
     //ahci_process_finished_cmd(dev, nport);
     hal_sem_release( &a->finsem );
@@ -395,7 +460,7 @@ static void ahci_interrupt(void *arg)
     u_int32_t ports = R32(dev,AHCI_IS);
     u_int32_t ports_copy = ports;
 
-    SHOW_FLOW( 1, "Interrupt from " DEV_NAME ", ports %X", ports );
+    SHOW_FLOW( 10, "Interrupt from " DEV_NAME ", ports %X", ports );
 
     int nport = 0;
     while(ports)
@@ -419,7 +484,7 @@ static void ahci_wait_for_port_interrupt(phantom_device_t *dev, int nport)
     hal_sleep_msec(1);
 }
 
-
+//TODO check max slots value!
 static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 {
     ahci_t *a = dev->drv_private;
@@ -478,7 +543,7 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     a->port[nport].reqs[pFreeSlot] = req;
 
-    SHOW_FLOW( 9, "rq sect %d", req->blockNo );
+    SHOW_FLOW( 6, "rq sect %d", req->blockNo );
 
     cp->prd_length = 1;
     cp->cmd_flags = ( (req->flag_pageout) ? AHCI_CMD_WRITE : 0);
@@ -487,10 +552,14 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     // TODO assert req->nSect * 512 < max size per prd
 
     cmd->prd_tab[0].dba = req->phys_page;
-    cmd->prd_tab[0].dbc = req->nSect * 512;
+    cmd->prd_tab[0].dbc = (req->nSect * 512) - 1; // dbc of 0 means 1 byte!!!!
+
+    // This is wrong interrupt cause?
     cmd->prd_tab[0].dbc |= AHCI_PRD_IPC; // Req interrupt!
 
     u_int8_t fis[20];
+
+    bzero( fis, sizeof(fis) );
 
     /* Construct the FIS */
     fis[0] = 0x27;		/* Host to device FIS. */
@@ -499,24 +568,35 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     u_int32_t lba = req->blockNo;
 
-    /* LBA address, only support LBA28 in this driver */
+    /* LBA48 address */
     fis[4] = lba;
     fis[5] = lba >> 8;
     fis[6] = lba >> 16;
-    fis[7] = ( (lba >> 24) & 0x0f) | 0xe0;
+    fis[7] = 1 << 6; // LBA48
+
+    fis[8] = lba >> 24;
+    fis[9] = 0; // use for upper LBA bytes later
+    fis[10] = 0;
+
+
 
     u_int32_t nSect = req->nSect;
 
-    assert(nSect <= 16);
+    assert(nSect <= 16); // One PRD can't process more
 
     assert( 0 == (nSect & 0xFFFF0000) );
     /* Sector Count */
     fis[12] = nSect;
     fis[13] = nSect >> 8;
 
+
     memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
 
+    //hexdump( cmd->cfis, sizeof(fis), 0, 0 );
+    hexdump( cp, sizeof(*cp), 0, 0 );
+
     unsigned fl = sizeof(fis_reg_h2d_t);
+    //unsigned fl = 16;
     cp->cmd_flags |= fl>>2;
 
     return pFreeSlot;
@@ -548,7 +628,7 @@ static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_
     memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), fis_len ) );
 
     cmd->prd_tab[0].dba = data;
-    cmd->prd_tab[0].dbc = data_len;
+    cmd->prd_tab[0].dbc = data_len-1;
 
     return pFreeSlot;
 }
@@ -564,18 +644,21 @@ static void ahci_finish_cmd(phantom_device_t *dev, int nport, int slot)
     pager_io_request *          req = a->port[nport].reqs[slot];
 
     // Now do it
-
-    req->rc = 0;
-
-    // TODO check error!
-
-    if( cp->bytecount != ((unsigned) (req->nSect * 512)) )
+    if( req != 0 )
     {
-        req->rc = EIO;
-        req->flag_ioerror = 1;
-    }
+        req->rc = 0;
 
-    if(req) pager_io_request_done( req );
+        // TODO check error!
+#if 1
+        if( cp->bytecount != ((unsigned) (req->nSect * 512)) )
+        {
+            req->rc = EIO;
+            req->flag_ioerror = 1;
+            SHOW_ERROR( 1, "IO error port %d, expected %d bytes, got %d", nport, req->nSect * 512, cp->bytecount );
+        }
+#endif
+        pager_io_request_done( req );
+    }
 }
 
 
