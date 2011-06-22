@@ -914,7 +914,7 @@ static void ahci_connect_port( ahci_port_t *p )
         return;
     }
 // hangs
-#if 1
+#if 0
     errno_t err = phantom_register_disk_drive(part);
     if(err)
     {

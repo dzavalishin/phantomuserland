@@ -4,6 +4,8 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
+#define DEBUG_MSG_PREFIX "usb-hub"
+
 #include <compat/seabios.h>
 
 //#include "util.h" // dprintf

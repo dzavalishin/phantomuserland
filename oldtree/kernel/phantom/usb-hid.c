@@ -4,6 +4,8 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
+#define DEBUG_MSG_PREFIX "usb-hid"
+
 #include <compat/seabios.h>
 
 //#include "util.h" // dprintf
@@ -173,6 +175,8 @@ struct keyevent {
 static void
 prockeys(u16 keys)
 {
+#warning connect me
+#if 0
     if (keys > 0xff) {
         u8 key = keys>>8;
         if (key == 0xe1) {
@@ -185,6 +189,7 @@ prockeys(u16 keys)
         process_key(key);
     }
     process_key(keys);
+#endif
 }
 
 // Handle a USB key press/release event.
@@ -223,7 +228,7 @@ handle_key(struct keyevent *data)
     old.data = GET_EBDA2(ebda_seg, usbkey_last.data);
 
     // Check for keys no longer pressed.
-    int addpos = 0;
+    unsigned int addpos = 0;
     unsigned int i;
     for (i=0; i<ARRAY_SIZE(old.keys); i++) {
         u8 key = old.keys[i];

@@ -308,6 +308,7 @@ int main(int argc, char **argv, char **envp)
     init_stray_checker();
 #endif
 
+    usb_setup();
 
     pressEnter("will run phantom_timed_call_init2");
     //phantom_timed_call_init2();
@@ -352,6 +353,7 @@ int main(int argc, char **argv, char **envp)
 
     phantom_find_drivers( 3 );
 
+
 #if HAVE_NET
     phantom_tcpip_active = 1; // Tell them we finished initing network
     net_test();
@@ -383,6 +385,7 @@ connect_ide_io();
 //trfs_testrq();
 
     init_buses();
+
 
     // pool.ntp.org
     //init_sntp( IPV4_DOTADDR_TO_ADDR(85,21,78,91), 10000 );

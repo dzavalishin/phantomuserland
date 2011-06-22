@@ -4,6 +4,8 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
+#define DEBUG_MSG_PREFIX "ohci"
+
 #include <compat/seabios.h>
 
 //#include "util.h" // dprintf
@@ -175,7 +177,12 @@ configure_ohci(void *data)
     struct usb_ohci_s *cntl = data;
 
     // Allocate memory
-    struct ohci_hcca *hcca = memalign_high(256, sizeof(*hcca));
+    //struct ohci_hcca *hcca = memalign_high(256, sizeof(*hcca));
+
+    // poor man's memalign
+    void *hcca_b = malloc( 256 + sizeof(struct ohci_hcca) );
+    struct ohci_hcca *hcca = (void *) ( ((addr_t)hcca_b) & (~0xFF) );
+
     struct ohci_ed *intr_ed = malloc_high(sizeof(*intr_ed));
     if (!hcca || !intr_ed) {
         warn_noalloc();
@@ -184,7 +191,7 @@ configure_ohci(void *data)
     memset(hcca, 0, sizeof(*hcca));
     memset(intr_ed, 0, sizeof(*intr_ed));
     intr_ed->hwINFO = ED_SKIP;
-    int i;
+    unsigned int i;
     for (i=0; i<ARRAY_SIZE(hcca->int_table); i++)
         hcca->int_table[i] = (u32)intr_ed;
 
@@ -201,7 +208,7 @@ configure_ohci(void *data)
 err:
     stop_ohci(cntl);
 free:
-    free(hcca);
+    free(hcca_b);
     free(intr_ed);
 }
 
@@ -417,15 +424,20 @@ ohci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
 struct usb_pipe *
 ohci_alloc_bulk_pipe(struct usb_pipe *dummy)
 {
+    (void) dummy;
     if (! CONFIG_USB_OHCI)
         return NULL;
-    SHOW_FLOW(1, "OHCI Bulk transfers not supported.");
+    SHOW_FLOW0(1, "OHCI Bulk transfers not supported.");
     return NULL;
 }
 
 int
 ohci_send_bulk(struct usb_pipe *p, int dir, void *data, int datasize)
 {
+    (void) p;
+    (void) dir;
+    (void) data;
+    (void) datasize;
     return -1;
 }
 
@@ -497,6 +509,9 @@ err:
 int
 ohci_poll_intr(struct usb_pipe *p, void *data)
 {
+    (void) p;
+    (void) data;
+
     ASSERT16();
     if (! CONFIG_USB_OHCI)
         return -1;

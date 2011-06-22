@@ -4,6 +4,8 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
+#define DEBUG_MSG_PREFIX "usb-msc"
+
 #include <compat/seabios.h>
 
 //#include "util.h" // dprintf
@@ -15,9 +17,13 @@
 //#include "disk.h" // DTYPE_USB
 //#include "boot.h" // boot_add_hd
 
+#include <endian.h>
+
+#if CONFIG_USB_MSC
+
 struct usbdrive_s {
 #warning fixme
-    //struct drive_s drive;
+    struct drive_s drive;
     struct usb_pipe *bulkin, *bulkout;
 };
 
@@ -103,7 +109,7 @@ usb_cmd_data(struct disk_op_s *op, void *cdbcmd, u16 blocksize)
 
 fail:
     // XXX - reset connection
-    dprintf(1, "USB transmission failed\n");
+    SHOW_ERROR0(1, "USB transmission failed");
     op->count = 0;
     return DISK_RET_EBADTRACK;
 }
@@ -142,19 +148,19 @@ process_usb_op(struct disk_op_s *op)
  ****************************************************************/
 
 static int
-setup_drive_cdrom(struct disk_op_s *op, char *desc)
+setup_drive_cdrom(struct disk_op_s *op)
 {
     op->drive_g->blksize = CDROM_SECTOR_SIZE;
     op->drive_g->sectors = (u64)-1;
-    struct usb_pipe *pipe = container_of(
-        op->drive_g, struct usbdrive_s, drive)->bulkout;
-    int prio = bootprio_find_usb(pipe->cntl->bdf, pipe->path);
-    boot_add_cd(op->drive_g, desc, prio);
+
+    //struct usb_pipe *pipe = container_of( op->drive_g, struct usbdrive_s, drive)->bulkout;
+    //int prio = bootprio_find_usb(pipe->cntl->bdf, pipe->path);
+    //boot_add_cd(op->drive_g, desc, prio);
     return 0;
 }
 
 static int
-setup_drive_hd(struct disk_op_s *op, char *desc)
+setup_drive_hd(struct disk_op_s *op)
 {
     struct cdbres_read_capacity info;
     int ret = cdb_read_capacity(op, &info);
@@ -165,7 +171,7 @@ setup_drive_hd(struct disk_op_s *op, char *desc)
     u32 blksize = ntohl(info.blksize), sectors = ntohl(info.sectors);
     if (blksize != DISK_SECTOR_SIZE) {
         if (blksize == CDROM_SECTOR_SIZE)
-            return setup_drive_cdrom(op, desc);
+            return setup_drive_cdrom(op);
         dprintf(1, "Unsupported USB MSC block size %d\n", blksize);
         return -1;
     }
@@ -174,10 +180,9 @@ setup_drive_hd(struct disk_op_s *op, char *desc)
     dprintf(1, "USB MSC blksize=%d sectors=%d\n", blksize, sectors);
 
     // Register with bcv system.
-    struct usb_pipe *pipe = container_of(
-        op->drive_g, struct usbdrive_s, drive)->bulkout;
-    int prio = bootprio_find_usb(pipe->cntl->bdf, pipe->path);
-    boot_add_hd(op->drive_g, desc, prio);
+    //struct usb_pipe *pipe = container_of( op->drive_g, struct usbdrive_s, drive)->bulkout;
+    //int prio = bootprio_find_usb(pipe->cntl->bdf, pipe->path);
+    //boot_add_hd(op->drive_g, desc, prio);
 
     return 0;
 }
@@ -229,6 +234,8 @@ usb_msc_init(struct usb_pipe *pipe
     int ret = cdb_get_inquiry(&dop, &data);
     if (ret)
         goto fail;
+
+#if 1
     char vendor[sizeof(data.vendor)+1], product[sizeof(data.product)+1];
     char rev[sizeof(data.rev)+1];
     strtcpy(vendor, data.vendor, sizeof(vendor));
@@ -237,27 +244,31 @@ usb_msc_init(struct usb_pipe *pipe
     nullTrailingSpace(product);
     strtcpy(rev, data.rev, sizeof(rev));
     nullTrailingSpace(rev);
+#endif
+
     int pdt = data.pdt & 0x1f;
     int removable = !!(data.removable & 0x80);
-    dprintf(1, "USB MSC vendor='%s' product='%s' rev='%s' type=%d removable=%d\n"
-            , vendor, product, rev, pdt, removable);
+    dprintf(1, "USB MSC vendor='%s' product='%s' rev='%s' type=%d removable=%d\n" , vendor, product, rev, pdt, removable);
     udrive_g->drive.removable = removable;
 
     if (pdt == USB_MSC_TYPE_CDROM) {
-        char *desc = znprintf(MAXDESCSIZE, "DVD/CD [USB Drive %s %s %s]"
-                              , vendor, product, rev);
-        ret = setup_drive_cdrom(&dop, desc);
+        //char *desc = znprintf(MAXDESCSIZE, "DVD/CD [USB Drive %s %s %s]"                              , vendor, product, rev);
+        ret = setup_drive_cdrom(&dop); //, desc);
     } else {
-        char *desc = znprintf(MAXDESCSIZE, "USB Drive %s %s %s"
-                              , vendor, product, rev);
-        ret = setup_drive_hd(&dop, desc);
+        //char *desc = znprintf(MAXDESCSIZE, "USB Drive %s %s %s"                              , vendor, product, rev);
+        ret = setup_drive_hd(&dop); //, desc);
     }
     if (ret)
         goto fail;
 
     return 0;
 fail:
-    dprintf(1, "Unable to configure USB MSC device.\n");
+    SHOW_ERROR0(1, "Unable to configure USB MSC device.");
     free(udrive_g);
     return -1;
 }
+
+
+#endif // CONFIG_USB_MSC
+
+

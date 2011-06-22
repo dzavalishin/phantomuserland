@@ -4,8 +4,11 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
+#define DEBUG_MSG_PREFIX "uhci"
+
 #include <compat/seabios.h>
 #include <i386/pio.h>
+#include <time.h>
 
 //#include "util.h" // dprintf
 //#include "pci.h" // pci_bdf_to_bus
@@ -57,7 +60,8 @@ uhci_hub_reset(struct usbhub_s *hub, u32 port)
 
     // Finish reset on port
     outw(ioport, 0);
-    udelay(6); // 64 high-speed bit times
+    //udelay(6); // 64 high-speed bit times
+    tenmicrosec();
     u16 status = inw(ioport);
     if (!(status & USBPORTSC_CCS))
         // No longer connected
@@ -85,6 +89,7 @@ static struct usbhub_op_s uhci_HubOp = {
 static int
 check_uhci_ports(struct usb_uhci_s *cntl)
 {
+    SHOW_FLOW0( 2, "Look for UHCI ports" );
     ASSERT32FLAT();
     struct usbhub_s hub;
     memset(&hub, 0, sizeof(hub));
@@ -110,7 +115,8 @@ reset_uhci(struct usb_uhci_s *cntl, u16 bdf)
 
     // Reset the HC
     outw(cntl->iobase + USBCMD, USBCMD_HCRESET);
-    udelay(5);
+    //udelay(5);
+    tenmicrosec();
 
     // Disable interrupts and commands (just to be safe).
     outw(cntl->iobase + USBINTR, 0);
@@ -122,9 +128,12 @@ configure_uhci(void *data)
 {
     struct usb_uhci_s *cntl = data;
 
+    //struct uhci_framelist *fl = memalign_high(sizeof(*fl), sizeof(*fl));
+    void *fl_b = malloc(sizeof(struct uhci_framelist)+4096);
+    struct uhci_framelist *fl = (void *) ( ((addr_t)fl_b) & ~(4096-1) );
+
     // Allocate ram for schedule storage
     struct uhci_td *term_td = malloc_high(sizeof(*term_td));
-    struct uhci_framelist *fl = memalign_high(sizeof(*fl), sizeof(*fl));
     struct uhci_qh *intr_qh = malloc_high(sizeof(*intr_qh));
     struct uhci_qh *term_qh = malloc_high(sizeof(*term_qh));
     if (!term_td || !fl || !intr_qh || !term_qh) {
@@ -175,7 +184,7 @@ configure_uhci(void *data)
     outw(cntl->iobase + USBCMD, 0);
 fail:
     free(term_td);
-    free(fl);
+    free(fl_b);
     free(intr_qh);
     free(term_qh);
     free(cntl);
@@ -496,7 +505,7 @@ uhci_send_bulk(struct usb_pipe *p, int dir, void *data, int datasize)
     SET_FLATPTR(pipe->toggle, !!toggle);
     return 0;
 fail:
-    dprintf(1, "uhci_send_bulk failed\n");
+    SHOW_FLOW0(1, "uhci_send_bulk failed");
     SET_FLATPTR(pipe->qh.element, UHCI_PTR_TERM);
     uhci_waittick(GET_FLATPTR(pipe->iobase));
     return -1;
@@ -577,10 +586,10 @@ fail:
 int
 uhci_poll_intr(struct usb_pipe *p, void *data)
 {
-    ASSERT16();
+    //ASSERT16();
     if (! CONFIG_USB_UHCI)
         return -1;
-#if 0
+
     struct uhci_pipe *pipe = container_of(p, struct uhci_pipe, pipe);
     struct uhci_td *td = GET_FLATPTR(pipe->next_td);
     u32 status = GET_FLATPTR(td->status);
@@ -592,6 +601,7 @@ uhci_poll_intr(struct usb_pipe *p, void *data)
 
     // Copy data.
     void *tddata = GET_FLATPTR(td->buffer);
+
     memcpy_far(GET_SEG(SS), data
                , FLATPTR_TO_SEG(tddata), (void*)FLATPTR_TO_OFFSET(tddata)
                , uhci_expected_length(token));
@@ -602,6 +612,6 @@ uhci_poll_intr(struct usb_pipe *p, void *data)
     barrier();
     SET_FLATPTR(td->status, (uhci_maxerr(0) | (status & TD_CTRL_LS)
                              | TD_CTRL_ACTIVE));
-#endif
+
     return 0;
 }
