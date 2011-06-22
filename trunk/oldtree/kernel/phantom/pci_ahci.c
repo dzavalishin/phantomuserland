@@ -11,7 +11,7 @@
 #define DEV_NAME "ahci"
 #define DEBUG_MSG_PREFIX "ahci"
 #include <debug_ext.h>
-#define debug_level_flow 9
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -35,7 +35,7 @@
 #include <dev/ata.h>
 
 #define MAX_PORTS 32
-
+#define RECV_FIS_SIZE 4096
 
 typedef struct
 {
@@ -214,10 +214,10 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
     //WP32( dev, nport, AHCI_P_CLBU, p->clb_p >> 32 );
     memset( p->clb, 1024, 0 );
 
-    hal_pv_alloc( &(p->fis_p), (void**)&(p->fis), 4096 );
+    hal_pv_alloc( &(p->fis_p), (void**)&(p->fis), RECV_FIS_SIZE );
     WP32( dev, nport, AHCI_P_FB, p->fis_p );
     //WP32( dev, nport, AHCI_P_FBU, p->fis_p >> 32 );
-    memset( p->fis, 4096, 0 );
+    memset( p->fis, RECV_FIS_SIZE, 0 );
 
     // We allocate 32 commands at once and fill phys addresses right now
 
@@ -425,6 +425,7 @@ static void finalize_thread(void *arg)
 static void ahci_port_interrupt(phantom_device_t *dev, int nport)
 {
     ahci_t *a = dev->drv_private;
+    ahci_port_t *p = a->port+nport;
 
     u_int32_t is = RP32( dev, nport, AHCI_P_IS );
 
@@ -436,16 +437,45 @@ static void ahci_port_interrupt(phantom_device_t *dev, int nport)
     // Ack interrupt
     WP32( dev, nport, AHCI_P_IS, is );
 
-    if( !a->port[nport].exist )
+    if( !p->exist )
     {
         SHOW_ERROR( 1, "Interrupt from nonexisting port %d, is %X", nport, is );
         WP32( dev, nport, AHCI_P_IE, 0 ); // Turn off!
         return;
     }
 
-    SHOW_FLOW( 1, "Interrupt from port %d, is %X", nport, is );
-    SHOW_FLOW( 1, "st %X ctl %X err %X act %X ", sata_status, sata_control, sata_error, sata_active );
+    SHOW_FLOW( 10, "Interrupt from port %d, is %X", nport, is );
+    SHOW_FLOW( 10, "st %X ctl %X err %X act %X ", sata_status, sata_control, sata_error, sata_active );
 
+
+    //if( is & (AHCI_P_IX_DHR|AHCI_P_IX_PS|AHCI_P_IX_DS|AHCI_P_IX_UF) )
+    //    hexdump( p->fis, 0xA0, 0, 0 );
+
+    if( is & (AHCI_P_IX_DHR) )
+    {
+        fis_reg_d2h_t *fis = (void *)p->fis+0x40;
+        printf("D2Host FIS I%d S%02x E%x D%02x:\n", fis->i, fis->status, fis->error, fis->device);
+        hexdump( p->fis+0x40, 0x14, 0, 0 );
+
+    }
+
+    if( is & (AHCI_P_IX_PS) )
+    {
+        printf("PIO setup FIS:\n");
+        hexdump( p->fis+0x20, 0x14, 0, 0 );
+    }
+
+    if( is & (AHCI_P_IX_DS) )
+    {
+        printf("DMA setup FIS:\n");
+        hexdump( p->fis, 0x1C, 0, 0 );
+    }
+
+    if( is & (AHCI_P_IX_UF) )
+    {
+        printf("Unknown FIS:\n");
+        hexdump( p->fis+0x60, 0xA0-0x60, 0, 0 );
+    }
 
     //ahci_process_finished_cmd(dev, nport);
     hal_sem_release( &a->finsem );
@@ -589,11 +619,10 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     fis[12] = nSect;
     fis[13] = nSect >> 8;
 
-
     memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
 
     //hexdump( cmd->cfis, sizeof(fis), 0, 0 );
-    hexdump( cp, sizeof(*cp), 0, 0 );
+    //hexdump( cp, sizeof(*cp), 0, 0 );
 
     unsigned fl = sizeof(fis_reg_h2d_t);
     //unsigned fl = 16;
@@ -629,6 +658,7 @@ static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_
 
     cmd->prd_tab[0].dba = data;
     cmd->prd_tab[0].dbc = data_len-1;
+    cmd->prd_tab[0].dbc |= AHCI_PRD_IPC; // Req interrupt!
 
     return pFreeSlot;
 }
@@ -732,6 +762,8 @@ static errno_t ahci_do_inquiry(phantom_device_t *dev, int nport, void *data, siz
 {
     u_int8_t fis[20];
 
+    bzero( fis, sizeof(fis) );
+
     /* Construct the FIS */
     fis[0] = 0x27;		/* Host to device FIS. */
     fis[1] = 1 << 7;	/* Command FIS. */
@@ -832,7 +864,7 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
     hal_sti();
     //ahci_process_finished_cmd( dev, p->nport );
 #endif
-    hal_sem_release( &a->finsem );
+    //hal_sem_release( &a->finsem );
 
 
     return 0;

@@ -1,3 +1,5 @@
+#if 0
+
 /*	$NetBSD: uhcireg.h,v 1.15 2002/02/11 11:41:30 augustss Exp $	*/
 /*	$FreeBSD: src/sys/dev/usb/uhcireg.h,v 1.22.18.1 2008/11/25 02:59:29 kensmith Exp $	*/
 
@@ -200,5 +202,7 @@ typedef struct {
 } uhci_qh_t;
 
 #endif /* _DEV_PCI_UHCIREG_H_ */
+
+#endif
 
 #endif

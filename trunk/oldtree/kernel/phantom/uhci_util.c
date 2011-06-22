@@ -1,7 +1,9 @@
+#if 0
+
 #ifdef ARCH_ia32
 
 #define DEBUG_MSG_PREFIX "uhci"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
@@ -42,3 +44,5 @@ UHCI_LinkDescriptors(uhci_td *first, uhci_td *second)
 
 
 #endif // ARCH_ia32
+
+#endif

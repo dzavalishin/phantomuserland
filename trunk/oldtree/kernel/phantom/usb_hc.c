@@ -1,3 +1,5 @@
+#if 0
+
 /**
  *
  * Phantom OS
@@ -14,3 +16,4 @@ int USB_BusNum, USB_DevNum, USB_VendorID, USB_DeviceID;
 int USB_BaseAddr, USB_IntLine;
 
 
+#endif
