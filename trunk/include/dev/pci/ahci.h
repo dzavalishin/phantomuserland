@@ -27,6 +27,13 @@
  * $FreeBSD: src/sys/dev/ahci/ahci.h,v 1.1.2.17 2011/06/10 08:49:38 mav Exp $
  */
 
+
+#ifndef AHCI_H
+#define AHCI_H
+
+
+
+
 /* ATA register defines */
 #define ATA_DATA                        0       /* (RW) data */
 
@@ -327,7 +334,11 @@ struct ahci_cmd_list {
     u_int16_t                   prd_length;     /* PRD entries */
     u_int32_t                   bytecount;
     u_int64_t                   cmd_table_phys; /* 128byte aligned */
+
+    u_int32_t                   resrvd[4];
 } __packed;
+
+#if 0
 
 /* misc defines */
 #define ATA_IRQ_RID                     0
@@ -508,4 +519,9 @@ enum ahci_err_type {
 	bus_write_multi_4((res), (offset), (addr), (count))
 #define ATA_OUTSL_STRM(res, offset, addr, count) \
     bus_write_multi_stream_4((res), (offset), (addr), (count))
+
+#endif
+
+
+#endif // AHCI_H
 
