@@ -121,6 +121,9 @@ static isa_probe_t board_drivers[] =
 #endif
 //    { "AdLib",         driver_isa_sdlib_probe, 3, 0x388, 8 },
 
+    { "floppy",        driver_isa_floppy_probe,  2, 0, 0 }, // hardcoded in driver
+    { "floppy",        driver_isa_floppy_probe,  2, 0, 0 }, // two of them!
+
     // End of list marker
     { 0, 0, 0, 0, 0 },
 };

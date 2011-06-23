@@ -89,6 +89,8 @@ phantom_device_t * driver_isa_beep_probe( int port, int irq, int stage );
 
 phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage );
 
+phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage );
+
 // ---------------------------------------------------------------
 //                               Video
 // ---------------------------------------------------------------

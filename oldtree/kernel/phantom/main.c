@@ -308,7 +308,7 @@ int main(int argc, char **argv, char **envp)
     init_stray_checker();
 #endif
 
-    floppy_setup();
+    //floppy_setup();
     usb_setup();
 
     pressEnter("will run phantom_timed_call_init2");
