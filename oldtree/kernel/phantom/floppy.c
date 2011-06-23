@@ -1,9 +1,12 @@
-// 16bit code to access floppy drives.
+// code to access floppy drives.
 //
 // Copyright (C) 2008,2009  Kevin O'Connor <kevin@koconnor.net>
 // Copyright (C) 2002  MandrakeSoft S.A.
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
+//
+// Converted for Phantom by dz (C) 2011
+//
 
 #define DEBUG_MSG_PREFIX "floppy"
 
@@ -36,15 +39,19 @@
 #define FLOPPY_GAPLEN 0x1B
 #define FLOPPY_FORMAT_GAPLEN 0x6c
 
+#define NFLOPPY 2
 
 
 static u8 floppy_last_data_rate;
 static u8 floppy_motor_counter;
 static u8 floppy_recalibration_status, floppy_recalibration_status;
 static u8 floppy_return_status[8];
-static u8 floppy_track[2];
-static u8 floppy_media_state[2];
 
+static u8 floppy_track[NFLOPPY];
+static u8 floppy_media_state[NFLOPPY];
+
+
+static struct drive_s *drive[NFLOPPY];
 
 
 // Floppy "Disk Base Table"
@@ -170,9 +177,14 @@ init_floppy(int floppyid, unsigned int ftype)
 static void
 addFloppy(int floppyid, int ftype)
 {
+    assert(floppyid < NFLOPPY);
+
     struct drive_s *drive_g = init_floppy(floppyid, ftype);
     if (!drive_g)
         return;
+
+    drive[floppyid] = drive_g;
+
     //char *desc = znprintf(MAXDESCSIZE, "Floppy [drive %c]", 'A' + floppyid);
     //int bdf = pci_find_class(PCI_CLASS_BRIDGE_ISA); /* isa-to-pci bridge */
     //int prio = bootprio_find_fdc_device(bdf, PORT_FD_BASE, floppyid);
@@ -180,7 +192,7 @@ addFloppy(int floppyid, int ftype)
 }
 
 
-static void handle_0e(void *arg);
+static void floppy_interrupt(void *arg);
 
 /*
 void
@@ -204,7 +216,7 @@ floppy_setup(void)
 
     //enable_hwirq(6, FUNC16());
 
-    if( hal_irq_alloc( 6, &handle_0e, 0, HAL_IRQ_SHAREABLE ) )
+    if( hal_irq_alloc( 6, &floppy_interrupt, 0, HAL_IRQ_SHAREABLE ) )
     {
         SHOW_ERROR( 0, "IRQ %d is busy", 6 );
         return;
@@ -248,7 +260,7 @@ floppy_reset_controller(void)
 static int
 wait_floppy_irq(void)
 {
-    ASSERT16();
+    //ASSERT16();
     u8 v;
     for (;;) {
         if (!GET_BDA(floppy_motor_counter))
@@ -258,7 +270,7 @@ wait_floppy_irq(void)
             break;
         // Could use wait_irq() here, but that causes issues on
         // bochs, so use yield() instead.
-        yield();
+        //yield();
     }
 
     v &= ~FRS_TIMEOUT;
@@ -311,10 +323,10 @@ floppy_pio(u8 *cmd, u8 cmdlen)
 }
 
 static int
-floppy_cmd(struct disk_op_s *op, u16 count, u8 *cmd, u8 cmdlen)
+floppy_cmd( u32 addr, u16 count, u8 *cmd, u8 cmdlen)
 {
     // es:bx = pointer to where to place information from diskette
-    u32 addr = (u32)op->buf_fl;
+    //u32 addr = (u32)op->buf_fl;
 
     // check for 64K boundary overrun
     u16 end = count - 1;
@@ -452,6 +464,7 @@ check_recal_drive(struct drive_s *drive_g)
  * Floppy handlers
  ****************************************************************/
 
+/*
 static void
 lba2chs(struct disk_op_s *op, u8 *track, u8 *sector, u8 *head)
 {
@@ -468,29 +481,62 @@ lba2chs(struct disk_op_s *op, u8 *track, u8 *sector, u8 *head)
     tmp /= nlh;
     *track = tmp;
 }
+*/
 
+static void
+lba2chs1( struct drive_s *drive_g, u32 lba, u8 *track, u8 *sector, u8 *head)
+{
+    u32 tmp = lba + 1;
+    u16 nlspt = GET_GLOBAL(drive_g->lchs.spt);
+    *sector = tmp % nlspt;
+
+    tmp /= nlspt;
+    u16 nlh = GET_GLOBAL(drive_g->lchs.heads);
+    *head = tmp % nlh;
+
+    tmp /= nlh;
+    *track = tmp;
+}
+
+
+#if 0
 // diskette controller reset
 static int
-floppy_reset(struct disk_op_s *op)
+floppy_reset(u8 floppyid)
 {
-    u8 floppyid = GET_GLOBAL(op->drive_g->cntl_id);
+    assert(floppyid < NFLOPPY);
+    //u8 floppyid = GET_GLOBAL(op->drive_g->cntl_id);
     set_diskette_current_cyl(floppyid, 0); // current cylinder
     return DISK_RET_SUCCESS;
 }
+#endif
 
 // Read Diskette Sectors
 static int
-floppy_read(struct disk_op_s *op)
+floppy_read(u8 floppyid, int sectNo, int sectCount, u32 addr )
 {
-    int res = check_recal_drive(op->drive_g);
+    assert(floppyid < NFLOPPY);
+
+    int res = 0;
+    //*done = 0;
+
+    struct drive_s *drive_g = drive[floppyid];
+    if(drive_g == 0)
+    {
+        res = DISK_RET_EPARAM;
+        goto fail;
+    }
+
+    res = check_recal_drive(drive_g);
     if (res)
         goto fail;
 
     u8 track, sector, head;
-    lba2chs(op, &track, &sector, &head);
+    //lba2chs(op, &track, &sector, &head);
+    lba2chs1( drive_g, sectNo, &track, &sector, &head);
 
     // send read-normal-data command (9 bytes) to controller
-    u8 floppyid = GET_GLOBAL(op->drive_g->cntl_id);
+    //u8 floppyid = GET_GLOBAL(drive_g->cntl_id);
     u8 data[12];
     data[0] = 0xe6; // e6: read normal data
     data[1] = (head << 2) | floppyid; // HD DR1 DR2
@@ -498,11 +544,11 @@ floppy_read(struct disk_op_s *op)
     data[3] = head;
     data[4] = sector;
     data[5] = FLOPPY_SIZE_CODE;
-    data[6] = sector + op->count - 1; // last sector to read on track
+    data[6] = sector + sectCount - 1; // last sector to read on track
     data[7] = FLOPPY_GAPLEN;
     data[8] = FLOPPY_DATALEN;
 
-    res = floppy_cmd(op, op->count * DISK_SECTOR_SIZE, data, 9);
+    res = floppy_cmd( addr, sectCount * DISK_SECTOR_SIZE, data, 9);
     if (res)
         goto fail;
 
@@ -515,23 +561,29 @@ floppy_read(struct disk_op_s *op)
     set_diskette_current_cyl(floppyid, track);
     return DISK_RET_SUCCESS;
 fail:
-    op->count = 0; // no sectors read
+    //op->count = 0; // no sectors read
+    //*done = 0;
     return res;
 }
 
 // Write Diskette Sectors
 static int
-floppy_write(struct disk_op_s *op)
+floppy_write(u8 floppyid, int sectNo, int sectCount, u32 addr )
 {
-    int res = check_recal_drive(op->drive_g);
+    assert(floppyid < NFLOPPY);
+
+    struct drive_s *drive_g = drive[floppyid];
+
+    int res = check_recal_drive(drive_g);
     if (res)
         goto fail;
 
     u8 track, sector, head;
-    lba2chs(op, &track, &sector, &head);
+    //lba2chs(op, &track, &sector, &head);
+    lba2chs1( drive_g, sectNo, &track, &sector, &head);
 
     // send write-normal-data command (9 bytes) to controller
-    u8 floppyid = GET_GLOBAL(op->drive_g->cntl_id);
+    //u8 floppyid = GET_GLOBAL(op->drive_g->cntl_id);
     u8 data[12];
     data[0] = 0xc5; // c5: write normal data
     data[1] = (head << 2) | floppyid; // HD DR1 DR2
@@ -539,11 +591,11 @@ floppy_write(struct disk_op_s *op)
     data[3] = head;
     data[4] = sector;
     data[5] = FLOPPY_SIZE_CODE;
-    data[6] = sector + op->count - 1; // last sector to write on track
+    data[6] = sector + sectCount - 1; // last sector to write on track
     data[7] = FLOPPY_GAPLEN;
     data[8] = FLOPPY_DATALEN;
 
-    res = floppy_cmd(op, op->count * DISK_SECTOR_SIZE, data, 9);
+    res = floppy_cmd( addr, sectCount * DISK_SECTOR_SIZE, data, 9);
     if (res)
         goto fail;
 
@@ -559,10 +611,11 @@ floppy_write(struct disk_op_s *op)
     set_diskette_current_cyl(floppyid, track);
     return DISK_RET_SUCCESS;
 fail:
-    op->count = 0; // no sectors read
+    //op->count = 0; // no sectors read
     return res;
 }
 
+#if 0
 // Verify Diskette Sectors
 static int
 floppy_verify(struct disk_op_s *op)
@@ -582,7 +635,9 @@ fail:
     op->count = 0; // no sectors read
     return res;
 }
+#endif
 
+#if 0
 // format diskette track
 static int
 floppy_format(struct disk_op_s *op)
@@ -616,8 +671,9 @@ floppy_format(struct disk_op_s *op)
     set_diskette_current_cyl(floppyid, 0);
     return DISK_RET_SUCCESS;
 }
+#endif
 
-#if 1
+#if 0
 int
 process_floppy_op(struct disk_op_s *op)
 {
@@ -647,7 +703,7 @@ process_floppy_op(struct disk_op_s *op)
  ****************************************************************/
 
 // INT 0Eh Diskette Hardware ISR Entry Point
-static void handle_0e(void *arg)
+static void floppy_interrupt(void *arg)
 {
     (void) arg;
 
@@ -694,6 +750,9 @@ floppy_tick(void)
 
 #include <pager_io_req.h>
 #include <disk.h>
+#include <errno.h>
+
+static hal_mutex_t fmutex;
 
 static errno_t floppy_AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
 {
@@ -701,29 +760,46 @@ static errno_t floppy_AsyncIo( struct phantom_disk_partition *p, pager_io_reques
 
     // Does it syncronously in fact
 
+    hal_mutex_lock( &fmutex );
+
+    u8 floppyid = ((int)p->specific)-1;
+
     rq->flag_ioerror = 0;
     rq->rc = 0;
+
+    if(rq->flag_pageout)
+        rq->rc = floppy_write(floppyid, rq->blockNo, rq->nSect, rq->phys_page );
+    else
+        rq->rc = floppy_read(floppyid, rq->blockNo, rq->nSect, rq->phys_page );
+
+    if(rq->rc)
+    {
+        rq->flag_ioerror = 1;
+        rq->rc = EIO;
+    }
 
     //assert( cur_rq == 0 );
     //cur_rq = rq;
     //dpc_request_trigger( &ide_dpc, 0);
 
+    hal_mutex_unlock( &fmutex );
+
     return 0;
 }
 
-static phantom_disk_partition_t *phantom_create_floppy_partition_struct( long size )
+static phantom_disk_partition_t *phantom_create_floppy_partition_struct( long size, int unit )
 {
     phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size);
 
     ret->asyncIo = floppy_AsyncIo;
     ret->flags |= PART_FLAG_IS_WHOLE_DISK;
 
+    ret->specific = (void *)unit; // must be not 0 for real disk
 
     //struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
     //phantom_init_disk_q( q, startIoFunc );
 
-    ret->specific = 0;
-    strlcpy( ret->name, "Floppy0", sizeof(ret->name) );
+    snprintf( ret->name, sizeof(ret->name), "Floppy%d", unit );
 
 
     //q->device = private;
@@ -751,11 +827,13 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 
     if( seq_number == 0 )
     {
+        hal_mutex_init( &fmutex, "floppyIo" );
+
         outb( PORT_DMA1_MASK_REG, 0x02 );
 
         //enable_hwirq(6, FUNC16());
 
-        if( hal_irq_alloc( 6, &handle_0e, 0, HAL_IRQ_SHAREABLE ) )
+        if( hal_irq_alloc( 6, &floppy_interrupt, 0, HAL_IRQ_SHAREABLE ) )
         {
             SHOW_ERROR( 0, "IRQ %d is busy", 6 );
             return 0;
@@ -784,21 +862,21 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         seq_number++;
 
 #if 0
-        int size = 14400*2;
-        phantom_disk_partition_t *p = phantom_create_floppy_partition_struct( size );
+        int size = 1440*2; // TODO set actual from driver?
+        phantom_disk_partition_t *p = phantom_create_floppy_partition_struct( size, seq_number );
         if(p == 0)
         {
             SHOW_ERROR0( 0, "Failed to create floppy disk partition" );
-            return;
+            //return 0;
         }
-
-        p->specific = (void *)seq_number; // must be not 0 for real disk
-
-        errno_t err = phantom_register_disk_drive(p);
-        if(err)
+        else
         {
-            SHOW_ERROR( 0, "floppy %d err %d", seq_number, err );
-            return;
+            errno_t err = phantom_register_disk_drive(p);
+            if(err)
+            {
+                SHOW_ERROR( 0, "floppy %d err %d", seq_number, err );
+                //return;
+            }
         }
 #endif
     }
