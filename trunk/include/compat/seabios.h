@@ -36,6 +36,8 @@
 #define CONFIG_USB_HUB 1
 #define CONFIG_USB_MSC 0
 
+#define CONFIG_FLOPPY 1
+#define CONFIG_COREBOOT 0
 
 
 
@@ -105,6 +107,7 @@ void pci_config_maskw(u16 bdf, u32 addr, u16 off, u16 on);
 
 #define VAR16VISIBLE
 #define VAR16
+#define VAR16FIXED(addr)
 
 
 // TODO check - Used by 16 bit only code?
@@ -424,11 +427,17 @@ strtcpy(char *dest, const char *src, size_t len)
 #define CMD_SEEK    0x07
 #define CMD_ISREADY 0x10
 
+struct chs_s {
+    u16 heads;      // # heads
+    u16 cylinders;  // # cylinders
+    u16 spt;        // # sectors / track
+};
+
 
 struct drive_s {
     u8 type;            // Driver type (DTYPE_*)
     u8 floppy_type;     // Type of floppy (only for floppy drives).
-    //struct chs_s lchs;  // Logical CHS
+    struct chs_s lchs;  // Logical CHS
     u64 sectors;        // Total sectors count
     u32 cntl_id;        // Unique id for a given driver type.
     u8 removable;       // Is media removable (currently unused)
@@ -436,7 +445,7 @@ struct drive_s {
     // Info for EDD calls
     u8 translation;     // type of translation
     u16 blksize;        // block size
-    //struct chs_s pchs;  // Physical CHS
+    struct chs_s pchs;  // Physical CHS
 };
 
 struct disk_op_s {
@@ -474,6 +483,40 @@ struct cdbres_inquiry {
 #define DTYPE_USB      0x06
 #define DTYPE_VIRTIO   0x07
 #define DTYPE_AHCI     0x08
+
+#define PORT_FD_BASE           0x03f0
+#define PORT_FD_DOR            0x03f2
+#define PORT_FD_STATUS         0x03f4
+#define PORT_FD_DATA           0x03f5
+#define PORT_HD_DATA           0x03f6
+#define PORT_FD_DIR            0x03f7
+
+#define PORT_DMA_ADDR_2        0x0004
+#define PORT_DMA_CNT_2         0x0005
+#define PORT_DMA1_MASK_REG     0x000a
+#define PORT_DMA1_MODE_REG     0x000b
+#define PORT_DMA1_CLEAR_FF_REG 0x000c
+#define PORT_DMA1_MASTER_CLEAR 0x000d
+#define PORT_DMA_PAGE_2        0x0081
+#define PORT_DMA2_MASK_REG     0x00d4
+#define PORT_DMA2_MODE_REG     0x00d6
+#define PORT_DMA2_MASTER_CLEAR 0x00da
+
+// BDA floppy_recalibration_status bitdefs
+#define FRS_TIMEOUT (1<<7)
+
+// BDA floppy_media_state bitdefs
+#define FMS_DRIVE_STATE_MASK        (0x07)
+#define FMS_MEDIA_DRIVE_ESTABLISHED (1<<4)
+#define FMS_DOUBLE_STEPPING         (1<<5)
+#define FMS_DATA_RATE_MASK          (0xc0)
+
+
+#define CLEARBITS_BDA(var, val) do { var &= ~val; } while (0)
+#define SETBITS_BDA(var, val) do { var |= val; } while (0)                                     
+
+#define GET_BDA(var) (var)
+#define SET_BDA(var, val) ((var) = (val))
 
 
 #endif // COMPAT_SEABIOS_H

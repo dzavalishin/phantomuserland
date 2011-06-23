@@ -8,6 +8,7 @@
 #define DEBUG_MSG_PREFIX "floppy"
 
 #include <i386/pio.h>
+#include <device.h>
 #include <kernel/ia32/rtc.h>
 #include <compat/seabios.h>
 
@@ -181,6 +182,7 @@ addFloppy(int floppyid, int ftype)
 
 static void handle_0e(void *arg);
 
+/*
 void
 floppy_setup(void)
 {
@@ -209,7 +211,7 @@ floppy_setup(void)
     }
 
 }
-
+*/
 
 // Find a floppy type that matches a given image size.
 int
@@ -685,3 +687,54 @@ floppy_tick(void)
             outb( PORT_FD_DOR, inb(PORT_FD_DOR) & 0xcf );
     }
 }
+
+// -----------------------------------------------------------------------
+// OS interface
+// -----------------------------------------------------------------------
+
+static int seq_number = 0;
+phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
+{
+    (void) stage;
+    (void) port;
+    (void) irq;
+
+    if (! CONFIG_FLOPPY)
+        return 0;
+
+    SHOW_FLOW0( 3, "init floppy drives" );
+
+    if( seq_number == 0 )
+    {
+        outb( PORT_DMA1_MASK_REG, 0x02 );
+
+        //enable_hwirq(6, FUNC16());
+
+        if( hal_irq_alloc( 6, &handle_0e, 0, HAL_IRQ_SHAREABLE ) )
+        {
+            SHOW_ERROR( 0, "IRQ %d is busy", 6 );
+            return 0;
+        }
+    }
+
+    u8 type = isa_rtc_read_reg(CMOS_FLOPPY_DRIVE_TYPE);
+
+    phantom_device_t * ret = 0;
+
+    if( (seq_number == 0) && (type & 0xf0) )
+    {
+        addFloppy(0, type >> 4);
+    }
+
+    if( (seq_number == 1) && (type & 0x0f) )
+    {
+        addFloppy(1, type & 0x0f);
+    }
+
+    if( ret )
+        seq_number++;
+
+    return ret;
+}
+
+
