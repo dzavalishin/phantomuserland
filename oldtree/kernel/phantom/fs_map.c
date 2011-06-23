@@ -192,6 +192,8 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
         return EINVAL;
     }
 
+    //hexdump( buf, 512, 0, 0 );
+
     if( (buf[0x1FE] != 0x55) || (buf[0x1FF] != 0xAA) )
     {
         SHOW_ERROR0( 1, "No magic" );

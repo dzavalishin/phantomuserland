@@ -9,11 +9,16 @@
 //
 
 #define DEBUG_MSG_PREFIX "floppy"
+#define debug_level_flow 9
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <i386/pio.h>
 #include <device.h>
 #include <kernel/ia32/rtc.h>
 #include <compat/seabios.h>
+
+
 
 /*
 #include "types.h" // u8
@@ -44,7 +49,7 @@
 
 static u8 floppy_last_data_rate;
 static u8 floppy_motor_counter;
-static u8 floppy_recalibration_status, floppy_recalibration_status;
+static u8 floppy_recalibration_status;
 static u8 floppy_return_status[8];
 
 static u8 floppy_track[NFLOPPY];
@@ -194,37 +199,7 @@ addFloppy(int floppyid, int ftype)
 
 static void floppy_interrupt(void *arg);
 
-/*
-void
-floppy_setup(void)
-{
-    if (! CONFIG_FLOPPY)
-        return;
-    SHOW_FLOW0( 3, "init floppy drives" );
-
-    if (CONFIG_COREBOOT) {
-        // XXX - disable floppies on coreboot for now.
-    } else {
-        u8 type = isa_rtc_read_reg(CMOS_FLOPPY_DRIVE_TYPE);
-        if (type & 0xf0)
-            addFloppy(0, type >> 4);
-        if (type & 0x0f)
-            addFloppy(1, type & 0x0f);
-    }
-
-    outb( PORT_DMA1_MASK_REG, 0x02 );
-
-    //enable_hwirq(6, FUNC16());
-
-    if( hal_irq_alloc( 6, &floppy_interrupt, 0, HAL_IRQ_SHAREABLE ) )
-    {
-        SHOW_ERROR( 0, "IRQ %d is busy", 6 );
-        return;
-    }
-
-}
-*/
-
+#if 0
 // Find a floppy type that matches a given image size.
 int
 find_floppy_type(u32 size)
@@ -237,7 +212,7 @@ find_floppy_type(u32 size)
     }
     return -1;
 }
-
+#endif
 
 /****************************************************************
  * Low-level floppy IO
@@ -270,7 +245,7 @@ wait_floppy_irq(void)
             break;
         // Could use wait_irq() here, but that causes issues on
         // bochs, so use yield() instead.
-        //yield();
+        yield();
     }
 
     v &= ~FRS_TIMEOUT;
@@ -673,30 +648,6 @@ floppy_format(struct disk_op_s *op)
 }
 #endif
 
-#if 0
-int
-process_floppy_op(struct disk_op_s *op)
-{
-    if (!CONFIG_FLOPPY)
-        return 0;
-
-    switch (op->command) {
-    case CMD_RESET:
-        return floppy_reset(op);
-    case CMD_READ:
-        return floppy_read(op);
-    case CMD_WRITE:
-        return floppy_write(op);
-    case CMD_VERIFY:
-        return floppy_verify(op);
-    case CMD_FORMAT:
-        return floppy_format(op);
-    default:
-        op->count = 0;
-        return DISK_RET_EPARAM;
-    }
-}
-#endif
 
 /****************************************************************
  * HW irqs
@@ -727,7 +678,7 @@ static void floppy_interrupt(void *arg)
 }
 
 // Called from int08 handler.
-void
+static void
 floppy_tick(void)
 {
     if (! CONFIG_FLOPPY)
@@ -744,33 +695,61 @@ floppy_tick(void)
     }
 }
 
+// Reset DMA controller
+static void
+init_dma(void)
+{
+    // first reset the DMA controllers
+    outb( PORT_DMA1_MASTER_CLEAR, 0 );
+    outb( PORT_DMA2_MASTER_CLEAR, 0 );
+
+    // then initialize the DMA controllers
+    outb( PORT_DMA2_MODE_REG, 0xc0 );
+    outb( PORT_DMA2_MASK_REG, 0x00 );
+}
+
+
 // -----------------------------------------------------------------------
 // OS interface
 // -----------------------------------------------------------------------
 
+#include <kernel/page.h>
 #include <pager_io_req.h>
 #include <disk.h>
 #include <errno.h>
+#include <dpc.h>
+
+#define LOWBUF_SZ (64*1024)
 
 static hal_mutex_t fmutex;
+static dpc_request fd_dpc;
+static pager_io_request *cur_rq;
+static u8 rq_floppyid;
 
-static errno_t floppy_AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+static physaddr_t lowbuf_p;
+static void *     lowbuf_v;
+
+static void dpc_func(void *a)
 {
-    (void) p;
+    (void) a;
 
-    // Does it syncronously in fact
+    pager_io_request *rq = cur_rq;
+    assert(rq);
+    cur_rq = 0;
 
-    hal_mutex_lock( &fmutex );
-
-    u8 floppyid = ((int)p->specific)-1;
-
-    rq->flag_ioerror = 0;
-    rq->rc = 0;
+    size_t bytes = rq->nSect * 512;
 
     if(rq->flag_pageout)
-        rq->rc = floppy_write(floppyid, rq->blockNo, rq->nSect, rq->phys_page );
+    {
+        memcpy_p2v( lowbuf_v, rq->phys_page, bytes );
+        rq->rc = floppy_write( rq_floppyid, rq->blockNo, rq->nSect, lowbuf_p );
+    }
     else
-        rq->rc = floppy_read(floppyid, rq->blockNo, rq->nSect, rq->phys_page );
+    {
+        rq->rc = floppy_read( rq_floppyid, rq->blockNo, rq->nSect, lowbuf_p );
+        memcpy_v2p( rq->phys_page, lowbuf_v, bytes );
+        //hexdump( lowbuf_v, bytes, 0, 0 );
+    }
 
     if(rq->rc)
     {
@@ -778,11 +757,32 @@ static errno_t floppy_AsyncIo( struct phantom_disk_partition *p, pager_io_reques
         rq->rc = EIO;
     }
 
-    //assert( cur_rq == 0 );
-    //cur_rq = rq;
-    //dpc_request_trigger( &ide_dpc, 0);
+    //rq->pager_callback( rq, rq->flag_pagein );
+    pager_io_request_done( rq );
 
-    hal_mutex_unlock( &fmutex );
+}
+
+
+static errno_t floppy_AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    (void) p;
+
+    // Does it syncronously in fact
+
+    //hal_mutex_lock( &fmutex );
+
+    assert( cur_rq == 0 );
+
+    rq_floppyid = ((int)p->specific)-1;
+    cur_rq = rq;
+
+    rq->flag_ioerror = 0;
+    rq->rc = 0;
+
+
+    dpc_request_trigger( &fd_dpc, 0);
+
+    //hal_mutex_unlock( &fmutex );
 
     return 0;
 }
@@ -812,6 +812,14 @@ static phantom_disk_partition_t *phantom_create_floppy_partition_struct( long si
 }
 
 
+static timedcall_t floppy_timer =
+{
+    (void *)floppy_tick, 0,
+    20, // msec
+    0, // spin
+
+    0, { 0, 0 }, 0
+};
 
 static int seq_number = 0;
 phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
@@ -823,15 +831,26 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
     if (! CONFIG_FLOPPY)
         return 0;
 
-    SHOW_FLOW0( 3, "init floppy drives" );
-
     if( seq_number == 0 )
     {
+        SHOW_FLOW0( 3, "init floppy controller" );
+        init_dma();
+
         hal_mutex_init( &fmutex, "floppyIo" );
+        dpc_request_init( &fd_dpc, dpc_func );
+
+        //hal_pv_alloc( &lowbuf_p, &lowbuf_v, LOWBUF_SZ );
+        int npages = BYTES_TO_PAGES(LOWBUF_SZ);
+
+        assert( !hal_alloc_phys_pages_low( &lowbuf_p, npages ) );
+        assert( !hal_alloc_vaddress( &lowbuf_v, npages ) );
+
+        hal_pages_control( lowbuf_p, lowbuf_v, npages, page_map_io, page_readwrite );
+
 
         outb( PORT_DMA1_MASK_REG, 0x02 );
 
-        //enable_hwirq(6, FUNC16());
+        phantom_request_timed_call( &floppy_timer, TIMEDCALL_FLAG_PERIODIC );
 
         if( hal_irq_alloc( 6, &floppy_interrupt, 0, HAL_IRQ_SHAREABLE ) )
         {
@@ -839,6 +858,8 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
             return 0;
         }
     }
+
+    SHOW_FLOW0( 3, "init floppy drives" );
 
     u8 type = isa_rtc_read_reg(CMOS_FLOPPY_DRIVE_TYPE);
 
@@ -861,7 +882,7 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
     {
         seq_number++;
 
-#if 0
+#if 1
         int size = 1440*2; // TODO set actual from driver?
         phantom_disk_partition_t *p = phantom_create_floppy_partition_struct( size, seq_number );
         if(p == 0)
@@ -871,12 +892,17 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         }
         else
         {
+#if 0
+            run_thread((void *)phantom_register_disk_drive,p);
+#else
             errno_t err = phantom_register_disk_drive(p);
             if(err)
             {
                 SHOW_ERROR( 0, "floppy %d err %d", seq_number, err );
                 //return;
             }
+#endif
+
         }
 #endif
     }
