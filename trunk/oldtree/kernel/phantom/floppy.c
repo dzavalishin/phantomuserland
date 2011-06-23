@@ -692,6 +692,51 @@ floppy_tick(void)
 // OS interface
 // -----------------------------------------------------------------------
 
+#include <pager_io_req.h>
+#include <disk.h>
+
+static errno_t floppy_AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    (void) p;
+
+    // Does it syncronously in fact
+
+    rq->flag_ioerror = 0;
+    rq->rc = 0;
+
+    //assert( cur_rq == 0 );
+    //cur_rq = rq;
+    //dpc_request_trigger( &ide_dpc, 0);
+
+    return 0;
+}
+
+static phantom_disk_partition_t *phantom_create_floppy_partition_struct( long size )
+{
+    phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size);
+
+    ret->asyncIo = floppy_AsyncIo;
+    ret->flags |= PART_FLAG_IS_WHOLE_DISK;
+
+
+    //struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
+    //phantom_init_disk_q( q, startIoFunc );
+
+    ret->specific = 0;
+    strlcpy( ret->name, "Floppy0", sizeof(ret->name) );
+
+
+    //q->device = private;
+    //q->unit = unit; // if this is multi-unit device, let 'em distinguish
+
+    // errno_t phantom_register_disk_drive(ret);
+
+
+    return ret;
+}
+
+
+
 static int seq_number = 0;
 phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 {
@@ -720,19 +765,43 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
     u8 type = isa_rtc_read_reg(CMOS_FLOPPY_DRIVE_TYPE);
 
     phantom_device_t * ret = 0;
+    int gotit = 0;
 
     if( (seq_number == 0) && (type & 0xf0) )
     {
         addFloppy(0, type >> 4);
+        gotit = 1;
     }
 
     if( (seq_number == 1) && (type & 0x0f) )
     {
         addFloppy(1, type & 0x0f);
+        gotit = 1;
     }
 
-    if( ret )
+    if( gotit )
+    {
         seq_number++;
+
+#if 0
+        int size = 14400*2;
+        phantom_disk_partition_t *p = phantom_create_floppy_partition_struct( size );
+        if(p == 0)
+        {
+            SHOW_ERROR0( 0, "Failed to create floppy disk partition" );
+            return;
+        }
+
+        p->specific = (void *)seq_number; // must be not 0 for real disk
+
+        errno_t err = phantom_register_disk_drive(p);
+        if(err)
+        {
+            SHOW_ERROR( 0, "floppy %d err %d", seq_number, err );
+            return;
+        }
+#endif
+    }
 
     return ret;
 }
