@@ -131,8 +131,8 @@ void pci_config_maskw(u16 bdf, u32 addr, u16 off, u16 on);
 #define SET_FLATPTR(ptr, val) do { (ptr) = (val); } while (0)
 
 // TODO check use!
-#define MAKE_FLATPTR(seg,off) ((void*)(((u32)(seg)<<4)+(u32)(off)))
-
+//#define MAKE_FLATPTR(seg,off) ((void*)(((u32)(seg)<<4)+(u32)(off)))
+#define MAKE_FLATPTR(seg,off) ((void*)(off))
 
 
 #define memcpy_far( __toseg, __tooff, __fromseg, __fromoff, __len ) memcpy( __tooff, __fromoff, __len )

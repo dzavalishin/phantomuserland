@@ -10,7 +10,8 @@ rem set QEMU_AUDIO_DRV=fmod
 rem set SOUND=-soundhw sb16,es1370
 
 rem SET USB=-usb -usbdevice mouse
-rem SET USB=-usb 
+rem SET USB=-usb -usbdevice serial::tcp:ya.ru:80
+rem SET USB=-usb -usbdevice keyboard
 
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw
