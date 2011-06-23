@@ -56,7 +56,7 @@ START_O_FILE=entry.o
 
 #isa_sb16.o
 phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
-	$(USB_O) \
+	$(USB_O) floppy.o \
 	disk_cache.o properties.o \
 	pci_ahci.o driver_pci_rtl8169.o intrdisp.o mem_icp_timer.o mem_pl181_mmc.o \
         video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \
