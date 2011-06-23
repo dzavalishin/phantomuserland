@@ -858,12 +858,7 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
     int slot = ahci_build_req_cmd(dev, p->nport, rq );
     ahci_start_cmd( dev, p->nport, slot );
 
-#if 0
-    hal_cli();
-    ahci_process_finished_cmd( dev, p->nport );
-    hal_sti();
-    //ahci_process_finished_cmd( dev, p->nport );
-#endif
+    // uncomment to forse check op result now
     //hal_sem_release( &a->finsem );
 
 
