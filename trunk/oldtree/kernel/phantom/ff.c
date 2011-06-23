@@ -3488,7 +3488,9 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
         const char* av[] = { "sh", 0 };
         uu_proc_setargs( pid, av, 0 );
 
-        uu_run_file( pid, "/amnt0/bin/sh" );
+        if( uu_run_file( pid, "/amnt0/bin/sh" ) )
+            if( uu_run_file( pid, "/amnt1/bin/sh" ) )
+                uu_run_file( pid, "/amnt2/bin/sh" );
     }
 
 #endif

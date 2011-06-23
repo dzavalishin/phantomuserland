@@ -20,9 +20,18 @@
 
 
 #include <debug_ext.h>
+
+#ifndef debug_level_flow
 #define debug_level_flow 10
+#endif
+
+#ifndef debug_level_error
 #define debug_level_error 10
+#endif
+
+#ifndef debug_level_info
 #define debug_level_info 10
+#endif
 
 
 
