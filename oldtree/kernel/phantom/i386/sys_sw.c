@@ -15,7 +15,7 @@
 #define debug_level_info 10
 
 #include <kernel/config.h>
-#include "../net.h"
+#include <kernel/net.h>
 #include <netinet/resolv.h>
 
 #include <i386/eflags.h>
