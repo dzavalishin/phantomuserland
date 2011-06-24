@@ -21,13 +21,20 @@ int get_current_tid(void)
     return get_current_thread()->tid;
 }
 
+static phantom_thread_t * get_n_thread(int tid)
+{
+    assert(tid >=0 && tid <= MAX_THREADS);
+    //assert(phantom_kernel_threads[tid] != 0);
+    return phantom_kernel_threads[tid];
+}
+
 
 #define GETT() \
-    phantom_thread_t *t = get_thread(tid); \
-    if( t == 0 )                           \
-    {                                      \
-        ret = ESRCH;                       \
-        goto err;                          \
+    phantom_thread_t *t = get_n_thread(tid); \
+    if( t == 0 )                             \
+    {                                        \
+        ret = ESRCH;                         \
+        goto err;                            \
     }
 
 
