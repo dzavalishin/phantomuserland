@@ -46,32 +46,6 @@ static errno_t checkRange( struct phantom_disk_partition *p, long blockNo, int n
     return 0;
 }
 
-#if !IO_RQ_SLEEP
-static errno_t partSyncRead( struct phantom_disk_partition *p, void *to, long blockNo, int nBlocks )
-{
-    assert(p->specific == 0);
-    // Temp! Rewrite!
-    if(p->base) assert(p->base->block_size == p->block_size);
-
-    if( checkRange( p, blockNo, nBlocks ) )
-        return EINVAL;
-
-    return p->syncRead( p, to, blockNo+p->shift, nBlocks );
-}
-
-
-static errno_t partSyncWrite( struct phantom_disk_partition *p, const void *from, long blockNo, int nBlocks )
-{
-    assert(p->specific == 0);
-    // Temp! Rewrite!
-    if(p->base) assert(p->base->block_size == p->block_size);
-
-    if( checkRange( p, blockNo, nBlocks ) )
-        return EINVAL;
-
-    return p->syncWrite( p, from, blockNo+p->shift, nBlocks );
-}
-#endif
 
 extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 
@@ -98,7 +72,6 @@ static errno_t partAsyncWrite( struct phantom_disk_partition *p, long blockNo, i
 // Upper level disk io functions
 // ------------------------------------------------------------
 
-#if IO_RQ_SLEEP
 
 
 // moved to pager_io_request_done
@@ -191,21 +164,6 @@ errno_t phantom_sync_write_sector( phantom_disk_partition_t *p, const void *to, 
 
 
 
-#else
-errno_t phantom_sync_read_block( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks )
-{
-    assert( p->block_size < PAGE_SIZE );
-    int m = PAGE_SIZE/p->block_size;
-    return p->syncRead( p, to, blockNo*m, nBlocks*m );
-}
-
-errno_t phantom_sync_write_block( phantom_disk_partition_t *p, const void *to, long blockNo, int nBlocks )
-{
-    assert( p->block_size < PAGE_SIZE );
-    int m = PAGE_SIZE/p->block_size;
-    return p->syncWrite( p, to, blockNo*m, nBlocks*m );
-}
-#endif
 
 
 //! Convert usual pager request to partition code style request and start it
@@ -256,11 +214,6 @@ phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition
     ret->flags = 0;
 
     ret->specific = 0;
-
-#if !IO_RQ_SLEEP
-    ret->syncRead = partSyncRead;
-    ret->syncWrite = partSyncWrite;
-#endif
 
     ret->asyncIo = partAsyncIo;
     //ret->asyncRead = partAsyncRead;
