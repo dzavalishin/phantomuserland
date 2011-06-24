@@ -74,21 +74,20 @@ pager_io_request_init( pager_io_request *me )
     me->flag_ioerror 	= 0;
     me->flag_urgent 	= 0;
 
-    me->rc                  = 0;
+    me->rc              = 0;
 
-    me->blockNo             = 0;
-    me->nSect               = 0;
+    me->blockNo         = 0;
+    me->nSect           = 0;
 
     me->pager_callback 	= 0;
-#if IO_RQ_SLEEP
+//#if IO_RQ_SLEEP
     me->flag_sleep 		= 0;
     me->sleep_tid 		= 0;
 
     hal_spin_init( &(me->lock));
 
-	me->phandle             = -1;
-#endif
-    me->phandle         = -1;
+	me->phandle         = -1;
+//#endif
 }
 
 

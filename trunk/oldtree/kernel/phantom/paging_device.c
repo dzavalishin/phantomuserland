@@ -991,10 +991,6 @@ phantom_disk_partition_t *phantom_create_simple_ide_partition_struct( long size 
     ret->specific = 0;
     strlcpy( ret->name, "IDE0", sizeof(ret->name) );
 
-#if !IO_RQ_SLEEP
-#error I know async only
-#endif
-
     //q->device = private;
     //q->unit = unit; // if this is multi-unit device, let 'em distinguish
 
