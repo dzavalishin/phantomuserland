@@ -20,10 +20,10 @@
 #include <kernel/net.h>
 
 #include "khash.h"
-#include "ethernet.h"
+#include <kernel/net/ethernet.h>
 
 #include <kernel/atomic.h>
-#include "endian.h"
+#include <endian.h>
 #include <hal.h>
 
 #include "misc.h"

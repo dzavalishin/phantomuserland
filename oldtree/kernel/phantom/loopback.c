@@ -11,7 +11,7 @@
 
 #include <kernel/net.h>
 
-#include "ethernet.h"
+#include <kernel/net/ethernet.h>
 #include <kernel/net/arp.h>
 
 #include "misc.h"
