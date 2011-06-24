@@ -9,16 +9,15 @@
 **/
 
 #define DEBUG_MSG_PREFIX "DiskIO"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 2
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "disk.h"
-#include "disk_part_pc.h"
+#include <disk.h>
+#include <pc/disk_partition.h>
 #include <phantom_disk.h>
 #include <assert.h>
-//#include <x86/phantom_page.h>
 #include <malloc.h>
 #include <phantom_libc.h>
 #include <string.h>

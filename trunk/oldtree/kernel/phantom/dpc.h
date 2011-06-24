@@ -17,8 +17,8 @@
 
 #include <assert.h>
 
-#include "spinlock.h"
-#include "hal.h"
+#include <spinlock.h>
+#include <hal.h>
 //---------------------------------------------------------------------------
 
 // interrupt processing helpers

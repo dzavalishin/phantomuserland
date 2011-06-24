@@ -3,7 +3,7 @@
 #if HAVE_NET
 
 #define DEBUG_MSG_PREFIX "if"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
@@ -18,18 +18,17 @@
 
 #include "khash.h"
 #include <kernel/net.h>
-#include "ethernet.h"
+#include <kernel/net/ethernet.h>
 
 #include <kernel/atomic.h>
 #include <threads.h>
 
-#include "endian.h"
-#include "hal.h"
-
-
-//#include "newos.h"
+#include <endian.h>
+#include <hal.h>
 
 #include "misc.h"
+
+
 
 #define IF_PRIO 0
 

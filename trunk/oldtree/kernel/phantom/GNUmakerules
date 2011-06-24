@@ -67,7 +67,6 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	test_amap.o test_port.o test_userland.o test_pool.o events.o smp.o \
 	heap.o heap_pool.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
-	ohci.o uhci.o uhci_rh.o uhci_util.o \
 	traps.o hal_physmem.o physalloc.o sched.o \
 	arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
 	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \

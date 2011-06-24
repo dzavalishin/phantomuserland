@@ -12,13 +12,13 @@
 #if HAVE_UNIX
 
 #define DEBUG_MSG_PREFIX "udpfs"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
 #include <kernel/net.h>
-#include "udp.h"
+#include <kernel/net/udp.h>
 
 #include <unix/uufile.h>
 #include <unix/uunet.h>

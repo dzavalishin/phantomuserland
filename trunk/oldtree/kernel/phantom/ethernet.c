@@ -21,11 +21,11 @@
 
 #include "khash.h"
 #include <kernel/net.h>
-#include "ethernet.h"
+#include <kernel/net/ethernet.h>
 
 #include <kernel/atomic.h>
-#include "endian.h"
-#include "hal.h"
+#include <endian.h>
+#include <hal.h>
 
 #include <compat/newos.h>
 
