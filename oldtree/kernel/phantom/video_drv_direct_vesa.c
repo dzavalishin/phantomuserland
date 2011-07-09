@@ -17,8 +17,9 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "hal.h"
-#include "video.h"
+#include <hal.h>
+#include <video.h>
+#include <video/screen.h>
 
 //pressEnter
 #include "misc.h"
@@ -29,8 +30,6 @@
 
 #include <i386/pio.h>
 #include <i386/seg.h>
-//#include <i386/trap.h>
-//#include <x86/phantom_page.h>
 #include <phantom_libc.h>
 
 #include <kernel/vm.h>

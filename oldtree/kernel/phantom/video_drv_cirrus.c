@@ -11,16 +11,17 @@
 #ifdef ARCH_ia32
 
 #define DEBUG_MSG_PREFIX "video"
-#include "debug_ext.h"
+#include <debug_ext.h>
 static int debug_level_flow = 1;
 
-#include "hal.h"
-#include "video.h"
+#include <hal.h>
+#include <video.h>
+#include <video/screen.h>
 
 #include <x86/phantom_pmap.h>
 
 #include <i386/pio.h>
-#include "i386/vm86.h"
+#include <i386/vm86.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 
