@@ -1738,14 +1738,18 @@ static void vm_verify_snap(disk_page_no_t head)
     pagelist loader;
     size_t current = 0;
 
-    disk_page_io page_io = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, { 0, 0 }, 0, { 0, 0 }, 0, 0 }, 0, 0 };
+    //disk_page_io page_io = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, { 0, 0 }, 0, { 0, 0 }, 0, 0, 0 }, 0, 0 };
+    disk_page_io page_io;
+
 
     if (!head)
         return;
 
     if (SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot \n");
 
+    disk_page_io_init(&page_io);
     disk_page_io_allocate(&page_io);
+
     pagelist_init(&loader, head, 0, DISK_STRUCT_MAGIC_SNAP_LIST);
 
     pagelist_seek(&loader);
