@@ -29,6 +29,7 @@
 
 #include <misc.h>
 #include <event.h>
+#include <video/zbuf.h>
 
 #include <dev/key_event.h>
 
@@ -91,6 +92,25 @@ const u_int16_t pc_keymap_set1_e0[128] = {
 };
 
 
+// 0 - alnum, 1 - func, 2 - shift
+
+const u_int16_t pc_keymap_isfunc_set1[128] = {
+    /* 0x00 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    /* 0x10 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0,
+    /* 0x20 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0,
+    /* 0x30 */ 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 2, 1, 1, 1, 1, 1,
+    /* 0x40 */ 1, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    /* 0x50 */ 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+};
+
+static const int pc_keymap_isfunc_set1_e0[128] = {
+    /* 0x00 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    /* 0x10 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0,
+    /* 0x20 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    /* 0x30 */ 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0,
+    /* 0x40 */ 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1,
+    /* 0x50 */ 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 1, 0, 0
+};
 
 
 
@@ -221,6 +241,7 @@ static void handle_set1_keycode(unsigned char key)
     char queue_event = 1; // we will by default queue the key
     static char seen_e0 = 0;
     static char seen_e1 = 0;
+    int has_char = 0;
 
     event.modifiers = 0;
 
@@ -244,6 +265,7 @@ static void handle_set1_keycode(unsigned char key)
 
         // do the keycode lookup
         event.keycode = pc_keymap_set1_e0[key];
+        has_char = pc_keymap_isfunc_set1_e0[key];
 
         if(event.keycode == 0) {
             queue_event = 0;
@@ -262,6 +284,7 @@ static void handle_set1_keycode(unsigned char key)
 
         // do the keycode lookup
         event.keycode = pc_keymap_set1[key];
+        has_char = pc_keymap_isfunc_set1[key];
 
         // by default we're gonna queue this thing
 
@@ -294,7 +317,7 @@ static void handle_set1_keycode(unsigned char key)
             break;
         }
 
-        event.keychar = event.keycode;
+        event.keychar = (has_char < 2) ? event.keycode : 0;
 
         switch( event.keycode )
         {

@@ -29,7 +29,7 @@
 #include <phantom_libc.h>
 
 #include <video.h>
-//#include "video_drv_icp_vga.h"
+#include <video/screen.h>
 
 typedef struct video_clone_regs
 {
