@@ -5,7 +5,7 @@ SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), cat echo grep kill ln ls mkdir mode 
 
 
 %.MAKE:
-	@$(MAKE) -j 6 -C $(dir $@) $(basename $(notdir $@))
+	@$(MAKE) -C $(dir $@) $(basename $(notdir $@))
 %-subdirs: $(addsuffix /%.MAKE,$(SUBDIRS)) ;
 
 # By default, make any target by descending into subdirectories.
