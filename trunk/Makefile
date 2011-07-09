@@ -1,3 +1,6 @@
+include config.mk
+MAKEFLAGS += --no-print-directory
+
 default::
 	@echo make all or make install
 
@@ -9,13 +12,13 @@ install::
 
 classes::
 	# classes
-	cd plib; make all; cd ..
-	cd apps/tetris/tetris; make all; cd ../..
-	cd plib; make all; cd ..
+	$(MAKE) -C plib all
+	$(MAKE) -C apps/tetris/tetris all
+	$(MAKE) -C plib all
 
 classes-clean::
 	# classes
-	cd plib; make clean; cd ..
+	$(MAKE) -C plib clean
 
 up::
 	$(MAKE) clean
@@ -24,18 +27,21 @@ up::
 
 all::
 	# kernel
-	cd phantom; make all; cd ..
-	cd oldtree/kernel; make all; cd ../..
+	$(MAKE) -C phantom
+ifeq ($(ARCH),ia32)
+	$(MAKE) -C oldtree/kernel/phantom/i386
+endif
+	$(MAKE) -C oldtree/kernel
 
 clean::
 	# kernel
-	cd phantom; make clean; cd ..
-	cd oldtree/kernel; make clean; cd ../..
+	$(MAKE) -C phantom clean
+	$(MAKE) -C oldtree/kernel clean
 	-rm -f *.E all_sources
 
 analyse::
-	cd phantom; make analyse; cd ..
-	cd oldtree/kernel; make analyse; cd ../..
+	$(MAKE) -C phantom analyse
+	$(MAKE) -C oldtree/kernel analyse
 	-rm -f libTinyGL.a_sources.E 
 	#cat *.E >all_sources
 	#rm *.E
@@ -44,7 +50,9 @@ analyse::
 rea::
 	splint +gnuextensions +nolib +boolint *.E >ana
 
--include $(realpath $(PHANTOM_HOME))/local-config.mk
+
+run:: all
+	cd run; sh ./phantom_clean.sh
 
 boot:: #all
 	cp oldtree/run/tftp/* $(HW_BOOT_DEST)
