@@ -1,3 +1,5 @@
+#if HAVE_USB
+
 // Code for handling EHCI USB controllers.
 //
 // Copyright (C) 2010  Kevin O'Connor <kevin@koconnor.net>
@@ -676,7 +678,11 @@ ehci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
     int maxpacket = dummy->maxpacket;
     // Determine number of entries needed for 2 timer ticks.
     int ms = 1<<frameexp;
-    unsigned int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms);
+
+    //unsigned int count = DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms);
+    unsigned int count = usb_intr_pipe_count(ms);
+
+
     struct ehci_pipe *pipe = memalign_low(EHCI_QH_ALIGN, sizeof(*pipe));
     struct ehci_qtd *tds = memalign_low(EHCI_QTD_ALIGN, sizeof(*tds) * count);
     void *data = malloc_low(maxpacket * count);
@@ -775,3 +781,4 @@ ehci_poll_intr(struct usb_pipe *p, void *data)
 
 #endif // CONFIG_USB_EHCI
 
+#endif // HAVE_USB
