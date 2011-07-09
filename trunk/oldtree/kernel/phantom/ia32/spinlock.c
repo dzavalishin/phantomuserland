@@ -29,6 +29,13 @@
 
 #if SPIN_DEBUG
 int global_lock_entry_count[MAX_CPUS] = {};
+
+static void spin_dump(hal_spinlock_t *sl)
+{
+    printf("spinlock reenter detected, prev enter was here:\n");
+    stack_dump_from((void *)(sl->ebp));
+    panic("reenter");
+}
 #endif
 
 
@@ -45,11 +52,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
 
 #if SPIN_DEBUG
     if(sl->lock)
-    {
-        printf("spinlock reenter detected, prev enter was here:\n");
-        stack_dump_from((void *)sl->ebp);
-        panic("reenter");
-    }
+        spin_dump(sl);
 #endif
 
     while( !  _spin_try_lock( &(sl->lock)  ) )
@@ -67,25 +70,25 @@ void hal_spin_unlock(hal_spinlock_t *sl)
 {
     if (sl) // Scheduler sometimes calls us will sl == 0
     {
-    assert(sl->lock);
+        assert(sl->lock);
 #if SPIN_DEBUG
-    sl->ebp = 0;
-    global_lock_entry_count[GET_CPU_ID()]--;
+        sl->ebp = 0;
+        global_lock_entry_count[GET_CPU_ID()]--;
 #endif
-    _spin_unlock(&(sl->lock));
-	}
+        _spin_unlock(&(sl->lock));
+    }
     if(hal_is_sti())
-        printf("\n!spinunlock STI!\n");
+        printf("\n!spin unlock STI!\n");
 }
 
 
 void check_global_lock_entry_count()
 {
-#if SPIN_DEBUG && 0
-    if(global_lock_entry_count)
+#if SPIN_DEBUG && 1
+    if(global_lock_entry_count[GET_CPU_ID()] > 1)
     {
-        printf("some spinunlock locked!");
-        stack_dump_ebp( arch_get_frame_pointer() );
+        printf("some spinlock locked!");
+        stack_dump_from( arch_get_frame_pointer() );
     }
 #endif
 }
