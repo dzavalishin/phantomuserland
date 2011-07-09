@@ -1,11 +1,16 @@
 #ifndef COMPAT_SEABIOS_H
 #define COMPAT_SEABIOS_H
 
+/*
 #warning PIT_TICK_RATE and PIT_TICK_INTERVAL are wrong!
 
 #define PIT_TICK_RATE 1193180   // Underlying HZ of PIT
 #define PIT_TICK_INTERVAL 65536 // Default interval for 18.2Hz timer
+*/
 
+// How many transfers we must prepare so that they will
+// be still there before the next call to interrupt pipe poll func
+unsigned int usb_intr_pipe_count(int ms);
 
 
 #include <compat/shorttype-def.h>
