@@ -94,7 +94,7 @@ static void load_elf_symtab(
     }
 
     if(space_left > 0)
-        printf("Warning: extra space left in symtab\n");
+        printf("Warning: extra space left in symtab: %d\n", space_left );
 
     qsort(symbols, n_symbols, sizeof(*symbols), compare_symbols);
 
