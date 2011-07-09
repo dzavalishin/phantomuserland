@@ -17,6 +17,8 @@
 
 #define WTTY_BUFSIZE 128
 
+// See 'tid_t owner' field of window to understand how key events reach some thread
+
 struct wtty
 {
 	char			buf[WTTY_BUFSIZE];
@@ -31,6 +33,8 @@ typedef struct wtty wtty_t;
 
 errno_t 	wtty_putc_nowait(wtty_t *w, int c);
 int 		wtty_getc(wtty_t *w);
+int             wtty_is_empty(wtty_t *w);
+
 wtty_t * 	wtty_init(void);
 
 
