@@ -19,6 +19,7 @@
 
 #include <hal.h>
 #include <video.h>
+#include <video/screen.h>
 
 #include <x86/phantom_pmap.h>
 

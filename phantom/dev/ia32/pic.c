@@ -248,10 +248,12 @@ void phantom_pic_enable_irq(unsigned int irq_no)
     }
     if(ie) hal_sti();
 
+#if 0
     {
         int m = phantom_pic_get_irqmask();
         printf("eirq mask = %X\n", m );
     }
+#endif
 }
 
 
