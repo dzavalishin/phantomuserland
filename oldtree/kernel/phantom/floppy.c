@@ -8,8 +8,23 @@
 // Converted for Phantom by dz (C) 2011
 //
 
+#undef HAVE_FLOPPY
+#define HAVE_FLOPPY 0
+
+#if !HAVE_FLOPPY
+#include <device.h>
+phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
+{
+    (void) stage;
+    (void) port;
+    (void) irq;
+
+    return 0;
+}
+#else // HAVE_FLOPPY
+
 #define DEBUG_MSG_PREFIX "floppy"
-#define debug_level_flow 9
+#define debug_level_flow 8
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -18,7 +33,11 @@
 #include <kernel/ia32/rtc.h>
 #include <compat/seabios.h>
 
+// use disk queue
+#define FLOPPY_Q 1
 
+// driver serves 2 units
+#define NFLOPPY 2
 
 /*
 #include "types.h" // u8
@@ -44,7 +63,6 @@
 #define FLOPPY_GAPLEN 0x1B
 #define FLOPPY_FORMAT_GAPLEN 0x6c
 
-#define NFLOPPY 2
 
 
 static u8 floppy_last_data_rate;
@@ -716,18 +734,103 @@ init_dma(void)
 #include <kernel/page.h>
 #include <pager_io_req.h>
 #include <disk.h>
+#include <disk_q.h>
 #include <errno.h>
 #include <dpc.h>
 
+static void floppy_test( phantom_disk_partition_t *p );
+
+
 #define LOWBUF_SZ (64*1024)
+static physaddr_t lowbuf_p;
+static void *     lowbuf_v;
+
+static dpc_request fd_dpc;
+
+#if FLOPPY_Q
+
+// Serves both uits
+static phantom_disk_partition_t *both;
+static struct disk_q *fdq;
+
+static void startIo( struct disk_q *q )
+{
+    fdq = q; // it is allways the same
+    dpc_request_trigger( &fd_dpc, 0 );
+}
+
+static void dpc_func(void *a)
+{
+    (void) a;
+
+    pager_io_request *rq = fdq->current;
+    assert(rq);
+
+    SHOW_FLOW( 9, "starting io on rq %p", rq );
+
+    size_t bytes = rq->nSect * 512;
+    errno_t rc;
+
+    if(rq->flag_pageout)
+    {
+        memcpy_p2v( lowbuf_v, rq->phys_page, bytes );
+        rc = floppy_write( rq->unit, rq->blockNo, rq->nSect, lowbuf_p );
+    }
+    else
+    {
+        rc = floppy_read( rq->unit, rq->blockNo, rq->nSect, lowbuf_p );
+        memcpy_v2p( rq->phys_page, lowbuf_v, bytes );
+        //hexdump( lowbuf_v, bytes, 0, 0 );
+    }
+
+    SHOW_FLOW( 9, "calling iodone on q %p, rq %p", fdq, rq );
+    assert(rq == fdq->current);
+    fdq->ioDone( fdq, rc ? EIO : 0 );
+}
+
+errno_t u0AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    //assert(p->base);
+    //assert(p->base->block_size == p->block_size);
+
+    rq->unit = 0;
+
+    SHOW_FLOW( 11, "part io sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
+
+    return both->asyncIo( both, rq );
+}
+
+errno_t u1AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    //assert(p->base);
+    //assert(p->base->block_size == p->block_size);
+
+    rq->unit = 1;
+
+    SHOW_FLOW( 11, "floppy unit io sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
+
+    return both->asyncIo( both, rq );
+}
+
+static errno_t floppyDequeue( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    (void) p;
+
+    if( 0 == both->dequeue )
+        return ENODEV;
+
+    SHOW_FLOW( 11, "dequeue rq %p", rq );
+
+    return both->dequeue( both, rq );
+
+
+#else
+
 
 static hal_mutex_t fmutex;
-static dpc_request fd_dpc;
 static pager_io_request *cur_rq;
 static u8 rq_floppyid;
 
-static physaddr_t lowbuf_p;
-static void *     lowbuf_v;
 
 static void dpc_func(void *a)
 {
@@ -759,7 +862,6 @@ static void dpc_func(void *a)
 
     //rq->pager_callback( rq, rq->flag_pagein );
     pager_io_request_done( rq );
-
 }
 
 
@@ -787,6 +889,9 @@ static errno_t floppy_AsyncIo( struct phantom_disk_partition *p, pager_io_reques
     return 0;
 }
 
+}
+
+
 static phantom_disk_partition_t *phantom_create_floppy_partition_struct( long size, int unit )
 {
     phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size);
@@ -810,6 +915,7 @@ static phantom_disk_partition_t *phantom_create_floppy_partition_struct( long si
 
     return ret;
 }
+#endif
 
 
 static timedcall_t floppy_timer =
@@ -836,7 +942,9 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         SHOW_FLOW0( 3, "init floppy controller" );
         init_dma();
 
+#if !FLOPPY_Q
         hal_mutex_init( &fmutex, "floppyIo" );
+#endif
         dpc_request_init( &fd_dpc, dpc_func );
 
         //hal_pv_alloc( &lowbuf_p, &lowbuf_v, LOWBUF_SZ );
@@ -857,6 +965,11 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
             SHOW_ERROR( 0, "IRQ %d is busy", 6 );
             return 0;
         }
+#if FLOPPY_Q
+        int size = 1440*2; // TODO set actual from driver?
+        both = phantom_create_disk_partition_struct( size, 0, 0, startIo );
+
+#endif
     }
 
     SHOW_FLOW0( 3, "init floppy drives" );
@@ -882,9 +995,29 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
     {
         seq_number++;
 
-#if 1
+#if FLOPPY_Q
+        int size = 1440*2; // TODO set actual from driver?
+        phantom_disk_partition_t *p = phantom_create_partition_struct( both, 0, size );
+        p->flags |= PART_FLAG_IS_WHOLE_DISK;
+        p->specific = (void *)-1; // disk supposed to have that
+        p->base = 0; // and don't have this
+        p->dequeue = floppyDequeue;
+        switch( seq_number )
+        {
+        case 1:
+            p->asyncIo = u0AsyncIo; break;
+        case 2:
+            p->asyncIo = u1AsyncIo; break;
+        default:
+            panic("floppy unit?");
+        }
+        snprintf( p->name, sizeof(p->name), "Floppy%d", seq_number-1  );
+
+#else
         int size = 1440*2; // TODO set actual from driver?
         phantom_disk_partition_t *p = phantom_create_floppy_partition_struct( size, seq_number );
+#endif // Q
+
         if(p == 0)
         {
             SHOW_ERROR0( 0, "Failed to create floppy disk partition" );
@@ -892,22 +1025,79 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         }
         else
         {
-#if 0
-            run_thread((void *)phantom_register_disk_drive,p);
-#else
             errno_t err = phantom_register_disk_drive(p);
             if(err)
             {
                 SHOW_ERROR( 0, "floppy %d err %d", seq_number, err );
                 //return;
             }
-#endif
-
         }
-#endif
+
+        floppy_test(p);
+
     }
 
     return ret;
 }
+
+// -----------------------------------------------------------------------
+// Test code
+// -----------------------------------------------------------------------
+
+#define TEST_BUF_SIZE 4096
+#define TEST_RQ_COUNT 100
+
+
+static int callbacks = 0;
+
+static void callback( struct pager_io_request *req, int write )
+{
+    (void) write;
+
+    callbacks++;
+
+    if(req->rc != 0 )
+        SHOW_ERROR( 0, "rc %d", req->rc );
+}
+
+
+static void floppy_test( phantom_disk_partition_t *p )
+{
+    physaddr_t pa;
+    void *va;
+
+    hal_pv_alloc( &pa, &va, TEST_BUF_SIZE );
+
+    int i = TEST_RQ_COUNT;
+
+    while( i-- > 0 )
+    {
+        pager_io_request *rq = calloc(1,sizeof(pager_io_request));
+        pager_io_request_init( rq );
+
+        rq->phys_page = pa;
+        rq->blockNo = 0;
+        rq->nSect = 4;
+        rq->flag_pagein = 1;
+        rq->pager_callback = callback;
+
+        //disk_enqueue( p, rq );
+        p->asyncIo( p, rq );
+    }
+
+    hal_sleep_msec(2000);
+
+    if(callbacks != TEST_RQ_COUNT)
+        SHOW_ERROR( 0, "FAILED, requseted %d, got %d", TEST_RQ_COUNT, callbacks );
+    else
+        SHOW_INFO( 0, "floppy io test PASSED, requseted %d, got %d", TEST_RQ_COUNT, callbacks );
+
+}
+
+
+
+#endif // HAVE_FLOPPY
+
+
 
 
