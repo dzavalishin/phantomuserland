@@ -8,7 +8,6 @@
 #define _PCI_H
 
 #include <phantom_types.h>
-//#include <blt/types.h>
 
 typedef struct 
 {
