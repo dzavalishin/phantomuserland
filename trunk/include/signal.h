@@ -130,6 +130,10 @@ typedef struct siginfo {
 
 typedef void (*sighandler_t)(int);
 
+#define SIG_DFL 0
+#define SIG_IGN 1
+#define SIG_ERR -1
+
 
 
 #ifndef KERNEL
@@ -143,9 +147,6 @@ int raise(int sig);
 
 sighandler_t signal(int signum, sighandler_t handler);
 
-#define SIG_DFL 0
-#define SIG_IGN 1
-#define SIG_ERR -1
 
 struct sigaction
 {
