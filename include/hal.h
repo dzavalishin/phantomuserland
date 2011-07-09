@@ -228,8 +228,9 @@ errno_t					hal_cond_destroy( hal_cond_t *c );
 
 
 
-
-
+#if 1
+#include <kernel/sem.h>
+#else
 
 struct hal_sem_impllll;
 
@@ -256,7 +257,7 @@ void 					hal_sem_destroy( hal_sem_t *s );
 
 int 					hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec );
 
-
+#endif
 
 
 // ------------------------------------------------------------------------------------------
