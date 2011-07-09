@@ -9,7 +9,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "syscall"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
@@ -19,11 +19,8 @@
 #include <netinet/resolv.h>
 
 #include <i386/eflags.h>
-//#include <i386/trap.h>
 #include <i386/seg.h>
 #include <i386/ldt.h>
-//#include <i386/tss.h>
-//#include <i386/proc_reg.h>
 #include <newos/port.h>
 #include <sys/syslog.h>
 #include <phantom_types.h>
@@ -37,7 +34,6 @@
 
 #include <kernel/syscalls.h>
 
-//#include <i386/vesa.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
@@ -52,7 +48,6 @@
 extern struct utsname phantom_uname;
 
 #include <hal.h>
-//#include "vm86.h"
 
 #include "../misc.h"
 #include <thread_private.h>
@@ -869,7 +864,7 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_getproperty:
         {
             AARG(const char *, pName, 1, 1); // TODO check zero term string!
-            AARG(const char *, pValue, 2, uarg[3]);
+            AARG(char *, pValue, 2, uarg[3]);
 
             usys_getproperty( &err, u, uarg[0], pName, pValue, uarg[3] );
             ret = err;
@@ -1082,7 +1077,7 @@ int usys_sigpending( int *err, uuprocess_t *u, sigset_t * set)
 
 sighandler_t usys_signal( int *err, uuprocess_t *u, int signum, sighandler_t handler)
 {
-#warning impl
+//#warning impl
     signal_handling_t *sh = &u->signals;
     if( signum < 0 || signum > _SIG_MAXSIG )
     {
