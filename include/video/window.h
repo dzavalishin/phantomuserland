@@ -9,6 +9,10 @@
 
 #include <kernel/pool.h>
 
+#define VIDEO_T_IN_D 0
+#define T_IN_D VIDEO_T_IN_D
+
+
 
 #define WFLAG_WIN_DECORATED             (1<<0)
 // This is temp win, not included in allwindows list
@@ -130,7 +134,9 @@ typedef struct drv_video_window
 
     tid_t               owner;
 
+#if !VIDEO_T_IN_D
     struct drv_video_window     *w_title; // child window - title
+#endif
     struct drv_video_window     *w_decor; // child window - decorations
     struct drv_video_window     *w_owner; // my parent window
 
