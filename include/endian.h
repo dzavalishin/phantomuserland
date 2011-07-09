@@ -45,6 +45,7 @@
 #define _SYS_ENDIAN_H_
 
 
+#define UPPER32OF64(__a64) ( (sizeof(__a64) > 32) ? ((__a64) >> 32) : 0 )
 
 #ifndef _POSIX_SOURCE
 
