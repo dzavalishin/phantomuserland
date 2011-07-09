@@ -41,11 +41,13 @@ errno_t fs_start_ff( phantom_disk_partition_t * );
 
 #endif // HAVE_UNIX
 
+errno_t fs_use_phantom(phantom_disk_partition_t *p);
+
 
 static fs_probe_t fs_drivers[] =
 {
 
-    { "Phantom", 	fs_probe_phantom,	0 	 	},
+    { "Phantom", 	fs_probe_phantom,	fs_use_phantom 	 	},
 #if HAVE_UNIX
     //{ "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
     //{ "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
@@ -101,9 +103,12 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
 static disk_page_no_t sbpos[] = DISK_STRUCT_SB_OFFSET_LIST;
 static int nsbpos = sizeof(sbpos)/sizeof(disk_page_no_t);
 
+#define MAX_PFS_PARTS 10
+static phantom_disk_partition_t *phantom_fs_partitions[MAX_PFS_PARTS];
+static int n_phantom_fs_partitions = 0;
+
 errno_t fs_probe_phantom(phantom_disk_partition_t *p)
 {
-
     char buf[PAGE_SIZE];
     phantom_disk_superblock *sb = (phantom_disk_superblock *)&buf;
 
@@ -115,7 +120,6 @@ errno_t fs_probe_phantom(phantom_disk_partition_t *p)
         if( phantom_calc_sb_checksum( sb ) )
         {
             p->flags |= PART_FLAG_IS_PHANTOM_FSSB;
-            // TODO use it somehow
             return 0;
         }
     }
@@ -123,6 +127,66 @@ errno_t fs_probe_phantom(phantom_disk_partition_t *p)
     return EINVAL;
 }
 
+errno_t fs_use_phantom(phantom_disk_partition_t *p)
+{
+    assert( p->flags | PART_FLAG_IS_PHANTOM_FSSB );
+
+    if(n_phantom_fs_partitions < MAX_PFS_PARTS)
+    {
+        phantom_fs_partitions[n_phantom_fs_partitions++] = p;
+        return 0;
+    }
+    else
+    {
+        SHOW_ERROR( 0, "Too many Phantom disks, skip %s", p->name);
+        return EMFILE;
+    }
+}
+
+
+phantom_disk_partition_t *select_phantom_partition(void)
+{
+    if(n_phantom_fs_partitions == 0)
+        panic("no Phantom disk");
+
+    if(n_phantom_fs_partitions == 1)
+    {
+        assert( phantom_fs_partitions[0] );
+        SHOW_FLOW( 1, "Just one Phantom disks found (%s)", phantom_fs_partitions[0]->name);
+        return phantom_fs_partitions[0];
+    }
+
+    printf("Select Phantom disk to boot:\n");
+    int i;
+    for( i = 0; i < n_phantom_fs_partitions; i++ )
+    {
+        phantom_disk_partition_t *p = phantom_fs_partitions[i];
+        if(p)
+            printf("%2d: %s\n", i, p->name );
+    }
+
+    do {
+
+        printf("Press digit (0-%d): \n", n_phantom_fs_partitions-1 );
+        char c = getchar();
+
+        if( c < '0' || c > '9' )
+            continue;
+
+        int n = c-'0';
+
+        if( (n > MAX_PFS_PARTS) || (n < 0) )
+            continue;
+
+        phantom_disk_partition_t *p = phantom_fs_partitions[n];
+
+        if( !p )
+            continue;
+
+        return p;
+
+    } while(1);
+}
 
 
 #if HAVE_UNIX
@@ -223,7 +287,7 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
     u_int32_t serial = *((u_int32_t *)(buf+0x27));
     SHOW_FLOW( 0, "serial num is 0x%X", serial );
 
-    // different FATs have it in different places. 
+    // different FATs have it in different places.
 #if 0
 
 #define FAT_LABEL_LEN 12
@@ -347,7 +411,7 @@ There are only a few differences, which do not affect most applications:
    5. ISO9660 permits only capital letters, digits and underscores in a file or directory name or extension, but DOS also permits a number of other punctuation marks.
    6. ISO9660 permits a file to have an extension but not a name, but DOS does not.
    7. DOS permits a directory to have an extension, but ISO9660 does not.
-   8. Directories on a CD-ROM are always sorted, as described below. 
+   8. Directories on a CD-ROM are always sorted, as described below.
 
 Of course, neither DOS, nor UNIX, nor any other operating system can WRITE files to a CD-ROM as it would to a floppy or hard disk, because a CD-ROM is not rewritable.
 Files must be written to the CD-ROM by a special program with special hardware.
@@ -370,27 +434,27 @@ MSCDEX does offer support for the kanji (Japanese) character set. However, this 
 Where ISO9660 requires file or directory names or extensions to be sorted, the usual ASCII collating sequence is used. That is, two different names or extensions are compared as follows:
 
    1. ASCII blanks (32) are added to the right end of the shorter name or extension, if necessary, to make it as long as the longer name or extension.
-   2. The first (leftmost) position in which the names or extensions are not identical determines the order. The name or extension with the lower ASCII code in that position appears first in the sorted order. 
+   2. The first (leftmost) position in which the names or extensions are not identical determines the order. The name or extension with the lower ASCII code in that position appears first in the sorted order.
 
 6. Multiple-Byte Values
 
 A 16-bit numeric value (usually called a word) may be represented on a CD-ROM in any of three ways:
 
 Little Endian Word:
-    The value occupies two consecutive bytes, with the less significant byte first. 
+    The value occupies two consecutive bytes, with the less significant byte first.
 Big Endian Word:
-    The value occupies two consecutive bytes, with the more significant byte first. 
+    The value occupies two consecutive bytes, with the more significant byte first.
 Both Endian Word:
-    The value occupies FOUR consecutive bytes; the first and second bytes contain the value expressed as a little endian word, and the third and fourth bytes contain the same value expressed as a big endian word. 
+    The value occupies FOUR consecutive bytes; the first and second bytes contain the value expressed as a little endian word, and the third and fourth bytes contain the same value expressed as a big endian word.
 
 A 32-bit numeric value (usually called a double word) may be represented on a CD-ROM in any of three ways:
 
 Little Endian Double Word:
-    The value occupies four consecutive bytes, with the least significant byte first and the other bytes in order of increasing significance. 
+    The value occupies four consecutive bytes, with the least significant byte first and the other bytes in order of increasing significance.
 Big Endian Double Word:
-    The value occupies four consecutive bytes, with the most significant first and the other bytes in order of decreasing significance. 
+    The value occupies four consecutive bytes, with the most significant first and the other bytes in order of decreasing significance.
 Both Endian Double Word:
-    The value occupies EIGHT consecutive bytes; the first four bytes contain the value expressed as a little endian double word, and the last four bytes contain the same value expressed as a big endian double word. 
+    The value occupies EIGHT consecutive bytes; the first four bytes contain the value expressed as a little endian double word, and the last four bytes contain the same value expressed as a big endian double word.
 
 7. The First Sixteen Sectors are Empty
 
@@ -523,7 +587,7 @@ The relative positions of any two records are determined as follows:
 
    1. If the levels are different, the directory with the lower level appears first. In particular, this implies that the root directory is always represented by the first record in the table, because it is the only directory with level 1.
    2. If the levels are identical, but the directories have different parents, then the directories are in the same relative positions as their parents.
-   3. Directories with the same level and the same parent are arranged in the order obtained by sorting on their names, as described in Section 5. 
+   3. Directories with the same level and the same parent are arranged in the order obtained by sorting on their names, as described in Section 5.
 
 10. Directories
 
@@ -585,7 +649,7 @@ The identifier for a subdirectory is its name. The identifier for a file consist
    2. If there is an extension, the ASCII code for a period (46). If there is no extension, this field is omitted.
    3. The extension, consisting of the ASCII codes for not more than three capital letters, digits and underscores. If there is no extension, this field is omitted.
    4. The ASCII code for a semicolon (59).
-   5. The ASCII code for 1 (49). [On other systems, this is the version number, consisting of the ASCII codes for a sequence of digits representing a number between 1 and 32767, inclusive.] 
+   5. The ASCII code for 1 (49). [On other systems, this is the version number, consisting of the ASCII codes for a sequence of digits representing a number between 1 and 32767, inclusive.]
 
 Some implementations for DOS omit (4) and (5), and some use punctuation marks other than underscores in file names and extensions.
 
@@ -594,7 +658,7 @@ Directory records other than the first two are sorted as follows:
    1. Records are sorted by name, as described above.
    2. Every series of records with the same name is sorted by extension, as described above. For this purpose, a record without an extension is sorted as though its extension consisted of ASCII blanks (32).
    3. [On other systems, every series of records with the same name and extension is sorted in order of decreasing version number.]
-   4. [On other systems, two records with the same name, extension and version number are permitted, if the first record is an associated file.] 
+   4. [On other systems, two records with the same name, extension and version number are permitted, if the first record is an associated file.]
 
 [ISO9660 permits names containing more than eight characters and extensions containing more than three characters, as long as both of them together contain no more than 30 characters.]
 

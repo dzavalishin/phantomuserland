@@ -1,3 +1,5 @@
+#if HAVE_USB
+
 // Main code for handling USB controllers and devices.
 //
 // Copyright (C) 2009  Kevin O'Connor <kevin@koconnor.net>
@@ -24,6 +26,7 @@
 
 #include <time.h>
 #include <i386/pio.h>
+#include <kernel/init.h>
 
 struct extended_bios_data_area_s usb_ebda2;
 
@@ -639,3 +642,5 @@ usb_setup(void)
             ohci_init(bdf, count++);
     }
 }
+
+#endif // HAVE_USB

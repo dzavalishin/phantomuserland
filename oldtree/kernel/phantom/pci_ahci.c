@@ -1,4 +1,16 @@
-#ifdef HAVE_PCI
+#if HAVE_PCI
+
+#if !HAVE_AHCI
+#include <device.h>
+#include <i386/pci.h>
+phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
+{
+    (void) pci;
+    (void) stage;
+    return 0;
+}
+#else // HAVE_AHCI
+
 /**
  *
  * Phantom OS
@@ -850,7 +862,7 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
 {
     ahci_port_t *p = part->specific;
     phantom_device_t *dev = p->dev;
-    ahci_t *a = dev->drv_private;
+    //ahci_t *a = dev->drv_private;
 
     rq->flag_ioerror = 0;
     rq->rc = 0;
@@ -924,6 +936,7 @@ static void ahci_connect_port( ahci_port_t *p )
 
 
 
+#endif // HAVE_AHCI
 #endif // HAVE_PCI
 
 

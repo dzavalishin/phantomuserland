@@ -54,6 +54,11 @@ disk_page_io_wait(disk_page_io *me)
 #endif
 }
 
+void disk_page_io_callback(disk_page_io *me)
+{
+    (void) me;
+}
+
 
 void
 disk_page_io_load_me_async(disk_page_io *me)

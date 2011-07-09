@@ -1,3 +1,5 @@
+#if HAVE_USB
+
 // Code for handling USB Human Interface Devices (HID).
 //
 // Copyright (C) 2009  Kevin O'Connor <kevin@koconnor.net>
@@ -172,11 +174,14 @@ struct keyevent {
 };
 
 // Translate data from KeyToScanCode[] to calls to process_key().
+static void process_key(u32 key)
+{
+    SHOW_INFO(0, "Goy USB keypress %x", key);
+}
+
 static void
 prockeys(u16 keys)
 {
-#warning connect me
-#if 0
     if (keys > 0xff) {
         u8 key = keys>>8;
         if (key == 0xe1) {
@@ -189,7 +194,6 @@ prockeys(u16 keys)
         process_key(key);
     }
     process_key(keys);
-#endif
 }
 
 // Handle a USB key press/release event.
@@ -345,11 +349,10 @@ handle_mouse(struct mouseevent *data)
 {
     dprintf(9, "Got mouse b=%x x=%x y=%x\n", data->buttons, data->x, data->y);
 
+#if 0
     s8 x = data->x, y = -data->y;
     u8 flag = ((data->buttons & 0x7) | (1<<3)
                | (x & 0x80 ? (1<<4) : 0) | (y & 0x80 ? (1<<5) : 0));
-#warning fixme
-#if 0
     process_mouse(flag);
     process_mouse(x);
     process_mouse(y);
@@ -426,3 +429,5 @@ usb_check_event(void)
     usb_check_key();
     usb_check_mouse();
 }
+
+#endif // HAVE_USB

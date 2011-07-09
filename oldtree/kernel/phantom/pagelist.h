@@ -6,18 +6,22 @@
 
 #include <phantom_disk.h>
 
-#include "pager_io_req.h"
-#include "spinlock.h"
+#include <pager_io_req.h>
+#include <spinlock.h>
+#include <kernel/sem.h>
 
 //---------------------------------------------------------------------------
 
 // all calls can sleep - not for interrupts
 typedef struct disk_page_io
 {
-    pager_io_request    req;
+    pager_io_request    req; // NB! Must be first!
 
-    int  mem_allocated;
-    void *mem;
+    int                 mem_allocated;
+    void *              mem;
+
+    hal_sem_t           done;
+
 } disk_page_io;
 
 
@@ -29,12 +33,15 @@ void disk_page_io_allocate(disk_page_io *me);
 void disk_page_io_load_me_async(disk_page_io *me);
 void disk_page_io_save_me_async(disk_page_io *me);
 
+void disk_page_io_callback(disk_page_io *me);
+
+
 static __inline__ void disk_page_io_init(disk_page_io *me) 
 { 
-	me->mem_allocated = 0; 
-	me->req.pager_callback = 0; 
-	pager_io_request_init(&me->req); 
-//puts("d p io init ok\n");
+    me->mem_allocated = 0;
+    //me->req.pager_callback = (void *)disk_page_io_callback;
+    pager_io_request_init(&me->req);
+    hal_sem_init( &(me->done), "dpio" );
 }
 
 static __inline__ void disk_page_io_finish(disk_page_io *me) { disk_page_io_release(me); }

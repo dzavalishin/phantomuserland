@@ -6,7 +6,6 @@
 
 #include <hal.h>
 
-//#include "newos.h"
 #include <compat/newos.h>
 #include <newos/cbuf.h>
 #include <kernel/net.h>

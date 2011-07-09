@@ -1,3 +1,6 @@
+#if HAVE_USB
+
+
 // Code for handling USB Mass Storage Controller devices.
 //
 // Copyright (C) 2010  Kevin O'Connor <kevin@koconnor.net>
@@ -18,6 +21,18 @@
 //#include "boot.h" // boot_add_hd
 
 #include <endian.h>
+
+
+#warning PIT_TICK_RATE and PIT_TICK_INTERVAL are wrong!
+
+#define PIT_TICK_RATE 1193180   // Underlying HZ of PIT
+#define PIT_TICK_INTERVAL 65536 // Default interval for 18.2Hz timer
+
+unsigned int usb_intr_pipe_count(int ms)
+{
+    return DIV_ROUND_UP(PIT_TICK_INTERVAL * 1000 * 2, PIT_TICK_RATE * ms);
+}
+
 
 #if CONFIG_USB_MSC
 
@@ -272,3 +287,4 @@ fail:
 #endif // CONFIG_USB_MSC
 
 
+#endif // HAVE_USB

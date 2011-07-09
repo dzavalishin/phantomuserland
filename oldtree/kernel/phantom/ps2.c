@@ -26,6 +26,7 @@
 #include <hal.h>
 
 #include <drv_video_screen.h>
+#include <video/screen.h>
 
 #include <event.h>
 #include <queue.h>
