@@ -120,5 +120,7 @@ void stray(void); // check for stray pointers
 
 void phantom_init_part_pool();
 
+void usb_setup();
+
 #endif // INIT_H
 
