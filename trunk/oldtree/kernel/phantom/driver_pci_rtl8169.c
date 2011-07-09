@@ -30,6 +30,7 @@
 #include <phantom_libc.h>
 #include <i386/pio.h>
 #include <device.h>
+#include <endian.h>
 
 #include <kernel/vm.h>
 #include <kernel/drivers.h>
@@ -329,7 +330,7 @@ static void rtl8169_setup_descriptors(rtl8169 *r)
         SHOW_FLOW(2, "setup_descriptors: rx buffer at %p, addr 0x%x\n", RXBUF(r, i), physaddr);
 
         r->rxdesc[i].rx_buffer_low = physaddr;
-        r->rxdesc[i].rx_buffer_high = physaddr >> 32;
+        r->rxdesc[i].rx_buffer_high = UPPER32OF64(physaddr);
         r->rxdesc[i].frame_len = BUFSIZE_PER_FRAME;
         r->rxdesc[i].flags = RTL_DESC_OWN | ((i == (NUM_RX_DESCRIPTORS - 1)) ? RTL_DESC_EOR : 0);
     }
@@ -340,7 +341,7 @@ static void rtl8169_setup_descriptors(rtl8169 *r)
         SHOW_FLOW(2, "setup_descriptors: tx buffer at %p, addr 0x%x\n", TXBUF(r, i), physaddr);
 
         r->txdesc[i].tx_buffer_low = physaddr;
-        r->txdesc[i].tx_buffer_high = physaddr >> 32;
+        r->txdesc[i].tx_buffer_high = UPPER32OF64(physaddr);
         r->txdesc[i].frame_len = 0; // will need to be filled in when transmitting
         r->txdesc[i].flags = (i == (NUM_TX_DESCRIPTORS - 1)) ? RTL_DESC_EOR : 0;
     }
@@ -353,9 +354,9 @@ static void rtl8169_setup_descriptors(rtl8169 *r)
 
     /* point the nic at the descriptors */
     RTL_WRITE_32(r, REG_TNPDS_LOW, r->txdesc_phys);
-    RTL_WRITE_32(r, REG_TNPDS_HIGH, r->txdesc_phys >> 32);
+    RTL_WRITE_32(r, REG_TNPDS_HIGH, UPPER32OF64(r->txdesc_phys) );
     RTL_WRITE_32(r, REG_RDSAR_LOW, r->rxdesc_phys);
-    RTL_WRITE_32(r, REG_RDSAR_HIGH, r->rxdesc_phys >> 32);
+    RTL_WRITE_32(r, REG_RDSAR_HIGH, UPPER32OF64(r->rxdesc_phys) );
 }
 
 
