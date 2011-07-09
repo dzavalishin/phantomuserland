@@ -20,9 +20,50 @@
 #include <phantom_types.h>
 #include <queue.h>
 
+int get_screen_xsize(void);
+int get_screen_ysize(void);
+int get_screen_bpp(void);
 
-//! Convert HSI color to RGB one
-//rgba_t Hsi2Rgb(double H, double S, double I );
+void w_request_async_repaint( rect_t *r );
+
+
+
+// ------------------------------------------------------------------------
+// Window interface - old, to be killed
+// ------------------------------------------------------------------------
+
+// malloc value to create drv_video_window_t
+static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_window_t); }
+static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
+
+
+// dynamic allocation
+drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg, const char* title );
+// free dynamically allocated window
+void 	drv_video_window_free(drv_video_window_t *w);
+
+// init for statically allocated ones
+void 	drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg );
+// destroy for statically allocated ones
+void 	drv_video_window_destroy(drv_video_window_t *w);
+
+
+
+void 	drv_video_window_to_top(drv_video_window_t *w);
+void 	drv_video_window_to_bottom(drv_video_window_t *w);
+
+
+void    drv_video_window_clear( drv_video_window_t *win );
+void    drv_video_window_fill( drv_video_window_t *win, rgba_t color );
+
+void 	drv_video_window_fill_rect( drv_video_window_t *win, rgba_t color, rect_t r );
+
+void	drv_video_window_pixel( drv_video_window_t *w, int x, int y, rgba_t color );
+
+
+void    drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp );
+
+
 
 
 void drv_video_window_draw_line( drv_video_window_t *w,
@@ -48,8 +89,32 @@ void drv_video_window_resize( drv_video_window_t *w, int xsize, int ysize );
 
 void drv_video_window_set_title( drv_video_window_t *w,  const char *title );
 
-
 void drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out );
+
+
+
+void 	drv_video_font_draw_string(
+                                           drv_video_window_t *win,
+                                           const drv_video_font_t *font,
+                                           const char *s, const rgba_t color,
+                                           int x, int y );
+void 	drv_video_font_scroll_line(
+                                           drv_video_window_t *win,
+                                           const struct drv_video_font_t *font, rgba_t color );
+
+void 	drv_video_font_scroll_pixels( drv_video_window_t *win, int npix, rgba_t color);
+
+// returns new x position
+void 	drv_video_font_tty_string(
+                                          drv_video_window_t *win,
+                                          const struct drv_video_font_t *font,
+                                          const char *s,
+                                          const rgba_t color,
+                                          const rgba_t back,
+                                          int *x, int *y );
+
+
+
 // ------------------------------------------------------------------------
 // Kernel video stuff
 // ------------------------------------------------------------------------
@@ -58,36 +123,11 @@ void drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out );
 void drv_video_window_enter_allwq( drv_video_window_t *w);
 
 
-
-
-extern struct drv_video_screen_t        video_driver_bochs_vesa_emulator;
-extern struct drv_video_screen_t        video_driver_basic_vga;
-extern struct drv_video_screen_t        video_driver_direct_vesa;
-extern struct drv_video_screen_t        video_driver_bios_vesa;
-extern struct drv_video_screen_t        video_driver_cirrus;
-extern struct drv_video_screen_t        video_driver_gen_clone;
-
-
-// TODO call from text vga console drvr?
-// Can be called from any driver (or anywhere) to reset VGA to text mode
-extern void video_drv_basic_vga_set_text_mode(void);
-
 // Redirect console output to this window. TODO: input?
 extern void phantom_init_console_window(void);
 void phantom_stop_console_window(void);
 
 
-void phantom_enforce_video_driver(struct drv_video_screen_t *vd);
-void set_video_driver_bios_vesa_pa( physaddr_t pa, size_t size );
-void set_video_driver_bios_vesa_mode( u_int16_t mode );
-
-// If 1, VESA will be used if found, even if other driver is found
-// If 0, VESA will fight for itself as usual driver
-// Now using 1, kernel traps if trying to do VM86 too late in boot process
-#define VESA_ENFORCE 1
-
-void setTextVideoMode(void); // Using int10
-int setVesaMode( u_int16_t mode ); // Using int10
 
 
 // ------------------------------------------------------------------------
