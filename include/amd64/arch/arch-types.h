@@ -20,19 +20,19 @@ typedef	unsigned long long  u_int64_t;
 #endif
 
 
-typedef void *  		    vmem_ptr_t;
-typedef u_int64_t 	        addr_t;
+typedef void *                vmem_ptr_t;
+typedef u_int64_t 	      addr_t;
 
 // physical mem address 	
-typedef u_int64_t       	physaddr_t;
+typedef u_int64_t             physaddr_t;
 // linear mem address
-typedef u_int64_t       	linaddr_t;
+typedef u_int64_t             linaddr_t;
 
 
 #ifndef _STDINT_H
-typedef	u_int64_t		    uintptr_t;
-typedef	int64_t			    ptrdiff_t;
-typedef u_int64_t 		    register_t;
+typedef	u_int64_t             uintptr_t;
+typedef	int64_t               ptrdiff_t;
+typedef u_int64_t             register_t;
 #endif
 
 
@@ -40,15 +40,15 @@ typedef u_int64_t 		    register_t;
 #ifndef _SIZE_T
 #define _SIZE_T     	
 #define	_SIZE_T_DECLARED
-typedef unsigned        intsize_t;
-typedef int64_t         ssize_t;
-typedef u_int64_t       size_t;
+typedef unsigned              intsize_t;
+typedef int64_t               ssize_t;
+typedef u_int64_t             size_t;
 #endif //_SIZE_T
 
 #ifndef _OFF_T
 #define _OFF_T
-typedef int			off_t;
-typedef int			_off_t;
+typedef int                   off_t;
+typedef int                  _off_t;
 #endif //_OFF_T
 
 
