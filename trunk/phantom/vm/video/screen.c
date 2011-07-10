@@ -10,7 +10,8 @@
  *
 **/
 
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
+#include <video/screen.h>
 
 // Placeholder for absent drv methods
 void drv_video_null() {}
@@ -57,4 +58,10 @@ void drv_video_readblt_rev( struct rgba_t *to, int xpos, int ypos, int xsize, in
 {
     drv_video_bitblt_reader( to, xpos, ypos, xsize, ysize, 1 );
 }
+
+
+
+int get_screen_xsize(void) { return video_drv->xsize; }
+int get_screen_ysize(void) { return video_drv->ysize; }
+int get_screen_bpp(void) { return video_drv->bpp; }
 
