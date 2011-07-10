@@ -264,12 +264,14 @@ typedef char TCHAR;
 
 #endif
 
+#include <kernel/disk_cache.h>
 
 
 /* File system object structure (FATFS) */
 
 typedef struct {
     phantom_disk_partition_t *dev;      // Device we live on
+    cache_t                     *cache; // Our cache, if any
 
     BYTE	fs_type;		/* FAT sub-type (0:Not mounted) */
     //BYTE	drv;			/* Physical drive number */
