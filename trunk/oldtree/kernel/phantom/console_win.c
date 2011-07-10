@@ -15,9 +15,9 @@
 #define debug_level_info 10
 
 
-//#include <i386/pio.h>
 #include <phantom_libc.h>
 #include <hal.h>
+#include <wtty.h>
 #include <time.h>
 #include <event.h> // get_n_events_in_q()
 
@@ -64,7 +64,7 @@ static int phantom_console_window_puts(const char *s)
     drv_video_font_tty_string( phantom_console_window, &CON_FONT,
     	s, console_fg, console_bg, &ttx, &tty );
 
-    drv_video_winblt( phantom_console_window );
+    drv_video_window_update( phantom_console_window );
     return 0;
 }
 
@@ -205,7 +205,7 @@ void phantom_init_console_window()
 
     int xsize = 620, ysize = 200;
     int cw_x = 50, cw_y = 550;
-    if( video_drv->ysize < 600 )
+    if( get_screen_ysize() < 600 )
     {
         cw_x = cw_y = 0;
     }
@@ -268,9 +268,37 @@ static void phantom_debug_window_loop()
     static char buf[DEBBS+1];
     int step = 0;
 
+    int show;
+
     hal_set_thread_name("Debug Win");
+    phantom_debug_window->owner = get_current_tid();
 
     int wx = 600;
+
+    // TODO HACK!
+    wtty_t *tty;
+    t_get_ctty( get_current_tid(), &tty );
+
+
+    if(tty && !wtty_is_empty(tty))
+    {
+        char c = wtty_getc( tty );
+        switch(c)
+        {
+        case '?':
+        case'h':
+            printf(
+                   "Commands:\n"
+                   "---------\n\n"
+                   "w\t- show windows list\n"
+                   "t\t- show threads list\n"
+                  );
+            break;
+        case 't':            show = 1; break;
+        case 'w':            show = 2; break;
+        }
+    }
+
 
     while(1)
     {
@@ -278,7 +306,7 @@ static void phantom_debug_window_loop()
         hal_sleep_msec(100);
 #if 1
         drv_video_window_clear( phantom_debug_window );
-        ttyd = 370;
+        ttyd = DEBWIN_YS-20;
         ttxd = 0;
 #endif
         //put_progress();
@@ -305,15 +333,25 @@ static void phantom_debug_window_loop()
         bp += rc;
         len -= rc;
 
-        phantom_dump_threads_buf(bp,len);
-        //phantom_dump_windows_buf(bp,len);
+        switch(show)
+        {
+        case 1:
+        default:
+            phantom_dump_threads_buf(bp,len);
+            break;
+
+        case 2:
+            phantom_dump_windows_buf(bp,len);
+            break;
+        }
+
         phantom_debug_window_puts(buf);
 
         if(wx == 600) wx = 620; else wx = 600;
         //drv_video_window_move( phantom_debug_window, wx, 50 );
 
         put_progress();
-        drv_video_winblt( phantom_debug_window );
+        drv_video_window_update( phantom_debug_window );
 
     }
 }
