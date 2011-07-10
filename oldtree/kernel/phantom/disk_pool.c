@@ -9,7 +9,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "part.pool"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
@@ -58,7 +58,9 @@ errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
     SHOW_FLOW( 11, "part io i sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
     rq->blockNo += p->shift;
 
-    p->base->asyncIo( p, rq );
+    // I believe its a crazy bug, how could it work?
+    //p->base->asyncIo( p, rq );
+    p->base->asyncIo( p->base, rq );
     return 0;
 }
 
