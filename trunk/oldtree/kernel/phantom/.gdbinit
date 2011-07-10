@@ -24,5 +24,5 @@ source -v .gdb-local
 
 #break phantom_switch_context
 #break do_test_physmem
-break driver_virtio_net_write
+#break driver_virtio_net_write
 
