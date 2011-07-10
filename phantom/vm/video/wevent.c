@@ -11,13 +11,11 @@
 
 
 
-/*
 #define DEBUG_MSG_PREFIX "wevent"
 #include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
-*/
 
 #include <video.h>
 #include <assert.h>
@@ -58,16 +56,55 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
     if(e->modifiers & UI_MODIFIER_KEYUP)
         return 1;
 
-    errno_t err = wtty_putc_nowait(wt, e->k.ch );
+    char ch = e->k.ch;
+
+    // This char is shift?
+    if( ch == 0 )
+        return 1;
+
+    if( e->modifiers & (UI_MODIFIER_SHIFT|UI_MODIFIER_CAPSLOCK) )
+    {
+        // TODO not a best place. implement keymaps in keybd driver
+        switch(ch)
+        {
+        case '1': ch = '!'; break;
+        case '2': ch = '@'; break;
+        case '3': ch = '#'; break;
+        case '4': ch = '$'; break;
+        case '5': ch = '%'; break;
+        case '6': ch = '^'; break;
+        case '7': ch = '&'; break;
+        case '8': ch = '*'; break;
+        case '9': ch = '('; break;
+        case '0': ch = ')'; break;
+
+        case '-': ch = '_'; break;
+        case '=': ch = '+'; break;
+        case '`': ch = '~'; break;
+        case '[': ch = '{'; break;
+        case ']': ch = '}'; break;
+        case '\\': ch = '|'; break;
+        case ';': ch = ':'; break;
+        case '\'': ch = '"'; break;
+        case ',': ch = '<'; break;
+        case '.': ch = '>'; break;
+        case '/': ch = '?'; break;
+        default:
+            ch = toupper(ch);
+            break;
+        }
+    }
+
+    errno_t err = wtty_putc_nowait(wt, ch );
     if(err == ENOMEM)
     {
-        //SHOW_ERROR0( 1, "Window keyb buffer overflow" );
-        printf( "Window keyb buffer overflow" );
+        SHOW_ERROR0( 1, "Window keyb buffer overflow" );
+        //printf( "Window keyb buffer overflow" );
     }
     else if(err)
     {
-        //SHOW_ERROR( 1, "Window putc error %d", err );
-        printf( "Window putc error %d", err );
+        SHOW_ERROR( 1, "Window putc error %d", err );
+        //printf( "Window putc error %d", err );
     }
     return 1;
 }
@@ -90,15 +127,17 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         break;
 
     case UI_EVENT_WIN_REPAINT:
-        drv_video_winblt( w );
+        _drv_video_winblt( w );
         break;
 
     case UI_EVENT_WIN_REDECORATE:
     redecorate:
         if(w->flags & WFLAG_WIN_DECORATED)
         {
+            w_lock();
             win_make_decorations(w);
-            drv_video_winblt( w );
+            _drv_video_winblt_locked( w );
+            w_unlock();
         }
         break;
 
