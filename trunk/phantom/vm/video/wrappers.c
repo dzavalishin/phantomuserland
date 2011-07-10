@@ -11,13 +11,15 @@
 **/
 
 
-#include "vm/internal_da.h"
-#include "drv_video_screen.h"
-#include "vm/wrappers.h"
+#include <vm/internal_da.h>
+#include <drv_video_screen.h>
+#include <video/screen.h>
+#include <vm/wrappers.h>
 
 
 // interfaces
 
+// TODO killme?
 // Returns nonzero if class is not bitmap
 int drv_video_bmpblt( struct pvm_object _bmp, int xpos, int ypos, int zpos )
 {

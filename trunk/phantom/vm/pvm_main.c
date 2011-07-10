@@ -27,15 +27,16 @@
 #include <kernel/boot.h>
 #include <kernel/debug.h>
 
-#include "vm/root.h"
+#include <vm/root.h>
 //#include "vm/bulk.h"
 //#include "vm/internal_da.h"
 
-#include "hal.h"
+#include <hal.h>
 #include "main.h"
 #include "win_bulk.h"
 
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
+#include <video/screen.h>
 
 #define MAXENVBUF 128
 static char *envbuf[MAXENVBUF] = { 0 };

@@ -22,6 +22,7 @@
 // min/max
 #include <sys/libkern.h>
 
+// rect coords must be win relative
 int rect_win_bounds( rect_t *r, drv_video_window_t *w )
 {
     if( r->x < 0 )
@@ -64,6 +65,18 @@ int point_in_win( int x, int y, drv_video_window_t *w )
 void rect_add( rect_t *out, rect_t *a, rect_t *b )
 {
     assert(out);
+
+    if( (a == 0) || (a->xsize == 0) || (a->ysize == 0) )
+    {
+        assert(b);
+        *out = *b;
+    }
+
+    if( (b == 0) || (b->xsize == 0) || (b->ysize == 0) )
+    {
+        assert(a);
+        *out = *a;
+    }
 
     out->x = imin( a->x, b->x );
     out->y = imin( a->y, b->y );
