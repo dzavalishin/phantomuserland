@@ -106,3 +106,35 @@ int rect_mul( rect_t *out, rect_t *a, rect_t *b )
 }
 
 
+#if !USE_ONLY_INDIRECT_PAINT
+
+void _drv_video_winblt_locked( drv_video_window_t *from )
+{
+    mouse_disable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
+    video_drv->winblt(from, from->x, from->y, from->z);
+    mouse_enable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
+}
+
+void _drv_video_winblt( drv_video_window_t *from )
+{
+    w_lock();
+    _drv_video_winblt_locked(from);
+    w_unlock();
+}
+
+
+void drv_video_winblt_locked( drv_video_window_t *from )
+{
+    mouse_disable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
+    video_drv->winblt(from, from->x, from->y, from->z);
+    mouse_enable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
+}
+
+void drv_video_winblt( drv_video_window_t *from )
+{
+    w_lock();
+    _drv_video_winblt_locked(from);
+    w_unlock();
+}
+
+#endif // USE_ONLY_INDIRECT_PAINT
