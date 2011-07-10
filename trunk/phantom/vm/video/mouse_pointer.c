@@ -11,7 +11,8 @@
 **/
 
 #include <stdlib.h>
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
+#include <video/screen.h>
 #include <phantom_libc.h>
 
 #define ms_hot_shift_x 0
