@@ -1,4 +1,4 @@
-QDIR=../oldtree/run12/bin
+QDIR="qemu/0.14.1"
 #QDIR="qemu/0.13.0"
 QBIN=qemu
 
@@ -20,10 +20,10 @@ Q_NET=" -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp"
 
 # Q_MACHINE=-m 85
 
-Q_DISKS="-boot a -no-fd-bootchk -fda $QDIR/img/grubfloppy.img -hda fat:fat -hdb phantom.img "
+Q_DISKS="-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda fat:fat -hdb phantom.img "
 
 # Q_KQ=-enable-kqemu
-Q_KQ="-enable-kqemu -kernel-kqemu"
+#Q_KQ="-kernel-kqemu"
 
 # Q_VGA=-vga std
 # Q_VGA=-vga cirrus
@@ -39,7 +39,7 @@ rm serial0.log.old1
 mv serial0.log.old serial0.log.old1
 mv serial0.log serial0.log.old
 echo Run "$QDIR/$QBIN"
-$QDIR/$QBIN -smp 3 $Q_VGA -s $Q_KQ -L $QDIR/lib $Q_MACHINE $Q_PORTS $Q_DISKS $Q_NET $VIO $USB $SOUND
+$QDIR/$QBIN -smp 3 $Q_VGA -s $Q_KQ -L $QDIR/bios $Q_MACHINE $Q_PORTS $Q_DISKS $Q_NET $VIO $USB $SOUND
 
 exit
 
