@@ -45,7 +45,14 @@ void        pager_flush_free_list(void);
 // NB! On pager_init() call pagefile must be good and healthy,
 // so if one needs some check and fix, it must be done
 // before.
+
+#if PAGING_PARTITION
+#include <disk.h>
+void partition_pager_init(phantom_disk_partition_t *p);
+#else
 void        pager_init(paging_device * device); // {  }
+#endif
+
 void        pager_finish(void);
 
 

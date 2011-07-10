@@ -126,7 +126,6 @@ void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, in
 
 
 
-
 static rgba_t brdr[] = {
     { 0x40, 0x40, 0x40, 0xFF },
     { 0x80, 0x80, 0x80, 0xFF },
@@ -136,17 +135,43 @@ static rgba_t brdr[] = {
 rgba_t title_back_color_focus   = { 122, 230, 251, 0xFF };
 rgba_t title_back_color_nofocus = { 122, 251, 195, 0xFF };
 
+static const int bordr_size = sizeof(brdr)/sizeof(rgba_t);
+static const int title_size = 18;
+
 
 static int titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e );
 
 
 void win_make_decorations(drv_video_window_t *w)
 {
-    int bordr_size = sizeof(brdr)/sizeof(rgba_t);
-#if 1
-    int title_size = 18;
+    w_assert_lock();
 
     int zless = (w->z == 0) ? 0 : (w->z - 1);
+
+    if( 0 == w->w_decor)
+    {
+#if VIDEO_T_IN_D
+        int dysize = w->ysize+bordr_size*3+title_size;
+#else
+        int dysize = w->ysize+bordr_size*2;
+#endif
+        drv_video_window_t *w2 = private_drv_video_window_create(w->xsize+bordr_size*2, dysize );
+
+        w2->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+        w2->w_owner = w;
+        w->w_decor = w2;
+    }
+
+    w->w_decor->x = w->x-bordr_size;
+    w->w_decor->y = w->y-bordr_size;
+    w->w_decor->z = zless;
+
+    w->w_decor->bg = w->bg;
+
+    drv_video_window_fill( w->w_decor, w->w_decor->bg );
+
+
+#if !VIDEO_T_IN_D
 
     if(w->w_title == 0)
     {
@@ -186,32 +211,98 @@ void win_make_decorations(drv_video_window_t *w)
     drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
     drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
 
-    drv_video_winblt(w->w_title);
+    _drv_video_winblt_locked(w->w_title);
     //drv_video_window_free(w3);
+#else
+    w->w_decor->inKernelEventProcess = titleWindowEventProcessor;
+
+    int focused = w->state & WSTATE_WIN_FOCUSED;
+    if( w->w_decor && w->w_decor->state & WSTATE_WIN_FOCUSED) focused = 1;
+
+    color_t bg = focused ? title_back_color_focus : title_back_color_nofocus;
+
+    rect_t r;
+    r.x = bordr_size;
+    r.y = w->ysize + bordr_size*2;
+    r.xsize = w->xsize;
+    r.ysize = title_size;
+
+    drv_video_window_fill_rect( w->w_decor, bg, r );
+
+    int bmp_y = w->ysize + bordr_size*2 + 2;
+
+    drv_video_font_draw_string( w->w_decor, &drv_video_8x16cou_font,
+                                w->title, COLOR_BLACK,
+                                bordr_size+3, bmp_y-4 );
+
+    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - close_bmp.xsize - 5, bmp_y, &close_bmp );
+    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, bmp_y, &pin_bmp );
+
+
+    // nSteps is x size, srcSize is y size
+    replicate2window_hor( w->w_decor, 0, w->ysize + bordr_size,
+                           w->w_decor->xsize, brdr, bordr_size );
+
 #endif
 
-    if( 0 == w->w_decor)
-    {
-        //int bordr_size = sizeof(brdr)/sizeof(rgba_t);
-        drv_video_window_t *w2 = private_drv_video_window_create(w->xsize+bordr_size*2, w->ysize+bordr_size*2);
 
-        w2->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
-        w2->w_owner = w;
-        w->w_decor = w2;
-    }
 
-    w->w_decor->x = w->x-bordr_size;
-    w->w_decor->y = w->y-bordr_size;
-    w->w_decor->z = zless;
-
-    w->w_decor->bg = w->bg;
-
-    drv_video_window_fill( w->w_decor, w->w_decor->bg );
     window_basic_border( w->w_decor, brdr, bordr_size );
+    _drv_video_winblt_locked(w->w_decor);
 
-    drv_video_winblt(w->w_decor);
-    //drv_video_window_free(w2);
+
+
+
+
+
+    // replace setting pos here with
+    //win_move_decorations(w);
+
+
+
 }
+
+
+
+void win_draw_decorations(drv_video_window_t *w)
+{
+    w_assert_lock();
+#if !VIDEO_T_IN_D
+    _drv_video_winblt_locked(w->w_title);
+#endif
+    _drv_video_winblt_locked(w->w_decor);
+}
+
+
+
+
+void win_move_decorations(drv_video_window_t *w)
+{
+    w_assert_lock();
+
+    int zless = (w->z == 0) ? 0 : (w->z - 1);
+
+#if !VIDEO_T_IN_D
+    if( 0 != w->w_title )
+    {
+        w->w_title->x = w->x-bordr_size;
+        w->w_title->y = w->y+w->ysize; //+bordr_size;
+        w->w_title->z = zless;
+    }
+#endif
+
+    if( 0 != w->w_decor )
+    {
+        w->w_decor->x = w->x-bordr_size;
+        w->w_decor->y = w->y-bordr_size;
+        w->w_decor->z = zless;
+    }
+}
+
+
+
+
+
 
 
 static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
@@ -236,7 +327,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         break;
 
     case UI_EVENT_WIN_REPAINT:
-        drv_video_winblt( w );
+        _drv_video_winblt( w );
         break;
 
     case UI_EVENT_WIN_REDECORATE:
@@ -245,8 +336,10 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
     redecorate:
         if(w->w_owner->flags & WFLAG_WIN_DECORATED)
         {
+            w_lock();
             win_make_decorations(w->w_owner);
-            drv_video_winblt( w->w_owner );
+            _drv_video_winblt_locked( w->w_owner );
+            w_unlock();
         }
         break;
 

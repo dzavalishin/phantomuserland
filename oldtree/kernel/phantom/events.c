@@ -15,6 +15,8 @@
 // Debug only!
 #define DIRECT_DRIVE 0
 
+#define DELIVER2THREAD 1
+
 
 #define DEBUG_MSG_PREFIX "events"
 #include <debug_ext.h>
@@ -68,6 +70,9 @@ static int		events_in_q = 0;
 
 int get_n_events_in_q() { return events_in_q; }
 
+#if DELIVER2THREAD
+static void w_event_deliver_thread(void);
+#endif
 
 
 #if 1
@@ -112,10 +117,15 @@ void init_main_event_q()
 
 #if KEY_EVENTS
     phantom_set_console_getchar( phantom_window_getc );
-    hal_start_kernel_thread(  keyboard_read_thread );
+    hal_start_kernel_thread( keyboard_read_thread );
     //phantom_dev_keyboard_start_events();
 #endif
 #endif
+
+#if DELIVER2THREAD
+    hal_start_kernel_thread( w_event_deliver_thread );
+#endif
+
 }
 
 
@@ -246,7 +256,8 @@ void event_q_put_e( struct ui_event *in )
 static void event_push_thread()
 {
     hal_set_thread_name("UIEventQ");
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    // +1 so that it is a bit higher than regular sys threads
+    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
 #if EVENTS_ENABLED && 1
     while(1)
@@ -381,10 +392,10 @@ void event_q_put_global( ui_event_t *ie )
 
 extern queue_head_t     	allwindows;
 extern drv_video_window_t *	focused_window;
-extern hal_spinlock_t  		allw_lock;
+//extern hal_spinlock_t  		allw_lock;
 
 
-//! Select target window 
+//! Select target window
 static void select_event_target(struct ui_event *e)
 {
     // Don't even try to select destination for this type of event
@@ -425,11 +436,85 @@ static void select_event_target(struct ui_event *e)
             e->focus = w;
             //break; // need to check all to make sure we selected topmost
         }
-        
+
     }
     //hal_spin_unlock( &allw_lock );
 
 }
+
+
+static void w_do_deliver_event(drv_video_window_t *w)
+{
+    if(w != 0 && w->inKernelEventProcess)
+    {
+        struct ui_event e;
+        int got = drv_video_window_get_event( w, &e, 0 );
+
+        while(got)
+        {
+            struct ui_event e2;
+            if( drv_video_window_get_event( w, &e2, 0 ) )
+            {
+                // 2 repaints follow
+                if((e.type == e2.type) && (e.w.info == e2.w.info) && (e.focus == e2.focus))
+                {
+                    if((e.w.info == UI_EVENT_WIN_REPAINT) || (e.w.info == UI_EVENT_WIN_REDECORATE))
+                    {
+                        SHOW_FLOW0( 1, "combined repaint" );
+                        // Choose more powerful spell
+                        //e.w.info = UI_EVENT_WIN_REDECORATE;
+                        // Eat one
+                        //e = e2;
+                        continue;
+                    }
+                }
+            }
+            else
+                got = 0;
+
+            SHOW_FLOW(8, "%p, w=%p, us=%p", &e, e.focus, w);
+
+            w->inKernelEventProcess(w, &e);
+            e = e2;
+        }
+    }
+}
+
+#if DELIVER2THREAD
+
+static hal_sem_t we_sem;
+
+static void w_event_deliver_thread(void)
+{
+    hal_sem_init( &we_sem, "wevent" );
+
+    hal_set_thread_name("WEvent");
+    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO+1);
+
+    while(1)
+    {
+        hal_sem_acquire( &we_sem ); // TODO need some 'acquire_all' method to eat all releases
+
+    restart:
+        w_lock();
+
+        drv_video_window_t *w;
+
+        queue_iterate_back(&allwindows, w, drv_video_window_t *, chain)
+        {
+            if( w->events_count )
+            {
+                w_unlock();
+                w_do_deliver_event(w);
+                goto restart;
+            }
+        }
+
+        w_unlock();
+    }
+}
+
+#endif
 
 
 //! Select target and put event to window queue.
@@ -438,8 +523,7 @@ void drv_video_window_receive_event(struct ui_event *e)
     assert(e);
     drv_video_window_t *w = 0;
 
-    int ie = hal_save_cli();
-    hal_spin_lock( &allw_lock );
+    w_lock();
 
     select_event_target(e);
 
@@ -452,7 +536,6 @@ void drv_video_window_receive_event(struct ui_event *e)
         goto ret;
     }
 
-	
     int later_x, later_y;
 
     // For now use any mouse event to change focus
@@ -483,8 +566,6 @@ void drv_video_window_receive_event(struct ui_event *e)
 #if DIRECT_DRIVE
         if(w != 0 && w->inKernelEventProcess)
             w->inKernelEventProcess(w, e);
-
-
 #else
     	queue_enter(&(w->events), e, struct ui_event *, echain);
         w->events_count++;
@@ -495,49 +576,19 @@ void drv_video_window_receive_event(struct ui_event *e)
         w->stall = 1;
 
 ret:
-    hal_spin_unlock( &allw_lock );
-    if(ie) hal_sti();
+    w_unlock();
 
     // It has mutex and can't be called in spinlock
     if(later_lost) event_q_put_win( later_x, later_y, UI_EVENT_WIN_LOST_FOCUS, later_lost );
     if(later_gain) event_q_put_win( later_x, later_y, UI_EVENT_WIN_GOT_FOCUS, later_gain );
 
-#if !DIRECT_DRIVE
+#if (!DIRECT_DRIVE) && (!DELIVER2THREAD)
     // Has no own event process thread, serve from here
-    if(w != 0 && w->inKernelEventProcess)
-    {
-        struct ui_event e;
-        int got = drv_video_window_get_event( w, &e, 0 );
+    w_do_deliver_event(w);
+#endif
 
-        while(got)
-        {
-            struct ui_event e2;
-            if( drv_video_window_get_event( w, &e2, 0 ) )
-            {
-                // 2 repaints follow
-                if((e.type == e2.type) && (e.w.info == e2.w.info) && (e.focus == e2.focus))
-                {
-                    if((e.w.info == UI_EVENT_WIN_REPAINT) || (e.w.info == UI_EVENT_WIN_REDECORATE))
-                    {
-                        SHOW_FLOW0( 1, "combined repaint" );
-                        // Choose more powerful spell
-                        e.w.info = UI_EVENT_WIN_REDECORATE;
-                        // Eat one
-                        //e = e2;
-                    continue;
-                    }
-                }
-            }
-            else
-                got = 0;
-
-
-            SHOW_FLOW(8, "%p, w=%p, us=%p", &e, e.focus, w);
-
-            w->inKernelEventProcess(w, &e);
-            e = e2;
-        }
-    }
+#if DELIVER2THREAD
+    hal_sem_release( &we_sem );
 #endif
 
 }
@@ -547,8 +598,16 @@ void drv_video_window_explode_event(struct ui_event *e)
 {
     drv_video_window_t *w;
 
-    int ie = hal_save_cli();
-    hal_spin_lock( &allw_lock );
+#if 1
+    if( e->w.info == UI_EVENT_GLOBAL_REPAINT_RECT )
+    {
+        w_request_async_repaint( &(e->w.rect) );
+        return;
+    }
+
+#endif
+
+    w_lock();
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
         rect_t  wr, isect;
@@ -563,9 +622,7 @@ void drv_video_window_explode_event(struct ui_event *e)
         }
 
     }
-    hal_spin_unlock( &allw_lock );
-    if(ie) hal_sti();
-
+    w_unlock();
 
 }
 
@@ -576,7 +633,7 @@ void drv_video_window_explode_event(struct ui_event *e)
 //! Get next event for this window
 int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait )
 {
-    int ie = 1;
+    //int ie = 1;
     int ret;
     struct ui_event *tmp;
 
@@ -586,17 +643,14 @@ int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int w
         while( w->events_count <= 0 )
             hal_sleep_msec( 100 );
 
-        ie = hal_save_cli();
-        hal_spin_lock( &allw_lock );
+        w_lock();
         if( w->events_count > 0 )
             goto locked;
 
-        hal_spin_unlock( &allw_lock );
-        if(ie) hal_sti();
+        w_unlock();
     }
 
-    ie = hal_save_cli();
-    hal_spin_lock( &allw_lock );
+    w_lock();
 locked:
     if( w->events_count > 0 )
     {
@@ -608,8 +662,7 @@ locked:
     else
         ret = 0;
 
-    hal_spin_unlock( &allw_lock );
-    if(ie) hal_sti();
+    w_unlock();
 
     if( ret )
     {
@@ -807,6 +860,12 @@ int wtty_getc(wtty_t *w)
 
     return ret;
 }
+
+int wtty_is_empty(wtty_t *w)
+{
+    return (w->getpos == w->putpos);
+}
+
 
 /*
 void wtty_putc(wtty_t *w, int c)

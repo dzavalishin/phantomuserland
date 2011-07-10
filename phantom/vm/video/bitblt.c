@@ -9,7 +9,8 @@
  *
 **/
 
-#include "drv_video_screen.h"
+#include <drv_video_screen.h>
+#include <video/screen.h>
 #include <assert.h>
 #include <sys/types.h>
 
@@ -33,14 +34,26 @@ static void (*bit_mover_from_screen)( struct rgba_t *dest, void *src, int nelem 
 static int      bit_mover_byte_step = 3;
 
 
-void switch_screen_bitblt_to_32bpp(void)
+void switch_screen_bitblt_to_32bpp( int use32bpp )
 {
-    bit_zbmover_to_screen = (void *)rgba2rgba_zbmove;
-    bit_mover_to_screen   = (void *)rgba2rgba_move;
-    bit_mover_from_screen = (void *)rgba2rgba_24_move;
+    if(use32bpp)
+    {
+        bit_zbmover_to_screen = (void *)rgba2rgba_zbmove;
+        bit_mover_to_screen   = (void *)rgba2rgba_move;
+        bit_mover_from_screen = (void *)rgba2rgba_24_move;
 
-    bit_mover_byte_step = 4;
-    video_drv->bpp = 32;
+        bit_mover_byte_step = 4;
+        video_drv->bpp = 32;
+    }
+    else
+    {
+        bit_zbmover_to_screen = (void *)rgba2rgb_zbmove;
+        bit_mover_to_screen   = (void *)rgba2rgb_move;
+        bit_mover_from_screen = (void *)rgb2rgba_move;
+
+        bit_mover_byte_step = 3;
+        video_drv->bpp = 24;
+    }
 }
 
 /**
@@ -129,14 +142,10 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
-//#if VIDEO_ZBUF
             zbuf_t *zb = zbuf + ( (video_drv->xsize * ((video_drv->ysize-1) - sline)) + xpos);
-            // 0xFF is a special value for mouse painting. XXX hack!
-            if(zpos == 0xFF) bit_mover_to_screen( (void *)s_start, w_start, xlen );
+            // ZBUF_TOP is a special value for mouse painting. XXX hack!
+            if(zpos == ZBUF_TOP) bit_mover_to_screen( (void *)s_start, w_start, xlen );
             else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xlen, zpos );
-//#else
-//            bit_mover_to_screen( (void *)s_start, w_start, xlen );
-//#endif
         }
     }
     else
@@ -148,15 +157,11 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*xsize) + xshift);
 
-//#if VIDEO_ZBUF
             //zbuf_t *zb = zbuf + ((wline*xsize) + xshift);
             zbuf_t *zb = zbuf + ( (video_drv->xsize * sline) + xpos);
-            // 0xFF is a special value for mouse painting. XXX hack!
-            if(zpos == 0xFF) bit_mover_to_screen( (void *)s_start, w_start, xlen );
+            // ZBUF_TOP is a special value for mouse painting. XXX hack!
+            if(zpos == ZBUF_TOP) bit_mover_to_screen( (void *)s_start, w_start, xlen );
             else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xlen, zpos );
-//#else
-//            bit_mover_to_screen( (void *)s_start, w_start, xlen );
-//#endif
         }
     }
 

@@ -106,8 +106,9 @@ void pressEnter(char *text)
 //static void pause() { pressEnter("pause"); printf("\n"); }
 
 
+#if !PAGING_PARTITION
 static paging_device pdev;
-
+#endif
 
 void start_phantom()
 {
@@ -116,12 +117,16 @@ void start_phantom()
 
     //pressEnter("will init paging dev");
 
+#if !PAGING_PARTITION
     // TODO size?
     init_paging_device( &pdev, "wd1", 1024*20); //4096 );
 
     //pressEnter("will init pager");
     pager_init(&pdev);
+#else
+    partition_pager_init(select_phantom_partition());
 
+#endif
 
     //pressEnter("will init VM map");
     // TODO BUG this +1 is due to allocator error:
@@ -308,8 +313,9 @@ int main(int argc, char **argv, char **envp)
     init_stray_checker();
 #endif
 
-    //floppy_setup();
+#if HAVE_USB
     usb_setup();
+#endif // HAVE_USB
 
     pressEnter("will run phantom_timed_call_init2");
     //phantom_timed_call_init2();
@@ -338,6 +344,10 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
 
+#ifdef ARCH_ia32
+    connect_ide_io();
+#endif
+
     // -----------------------------------------------------------------------
     // Now starting object world infrastructure
     // -----------------------------------------------------------------------
@@ -362,9 +372,6 @@ int main(int argc, char **argv, char **envp)
 
 
 
-#ifdef ARCH_ia32
-connect_ide_io();
-#endif
 
     SHOW_FLOW0( 2, "Will init phantom root... ");
     // Start virtual machine in special startup (single thread) mode

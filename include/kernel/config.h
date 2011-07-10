@@ -16,6 +16,11 @@
 #define HAVE_NET 1
 #define HAVE_UNIX 1
 #define HAVE_VESA 1
+#define HAVE_USB 1
+
+
+#define HAVE_FLOPPY 1
+#define HAVE_AHCI 1
 
 #define MEM_RECLAIM 0
 // verify on-disk snapshot consistency after snapshot
@@ -23,6 +28,11 @@
 // verify VM consistency before snapshot
 #define VERIFY_VM_SNAP 0
 
+#define SCREEN_UPDATE_THREAD 1
+
+#define PAGING_PARTITION 1
+
+#define USE_ONLY_INDIRECT_PAINT 1
 
 #ifdef ARCH_ia32
 #define HAVE_PCI 1
@@ -44,7 +54,7 @@
 
 
 #ifndef COMPILE_EXPERIMENTAL
-#define COMPILE_EXPERIMENTAL 0
+#define COMPILE_EXPERIMENTAL 1
 #endif  // COMPILE_EXPERIMENTAL
 
 

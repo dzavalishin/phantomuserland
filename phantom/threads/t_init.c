@@ -50,16 +50,17 @@ static void haltme( void *a )
 static void kill_thread_thread( void )
 {
     //(void) a;
-    hal_set_current_thread_priority( THREAD_PRIO_IDLE );
+    //hal_set_current_thread_priority( THREAD_PRIO_IDLE );
+    hal_set_current_thread_priority( THREAD_PRIO_LOW );
 
     hal_set_thread_name("Init");
 
     while(1)
     {
-        hal_disable_preemption();
-        if( t_thread_kill_request )
-            t_do_some_kills();
-        hal_enable_preemption();
+        //hal_disable_preemption();
+        //if( t_thread_kill_request )
+        t_do_some_kills();
+        //hal_enable_preemption();
 
         hal_sti();
         hal_wait_for_interrupt();

@@ -19,6 +19,7 @@
 #include <i386/vesa.h>
 #include <hal.h>
 #include <video.h>
+#include <video/screen.h>
 #include "vm86.h"
 
 // void DumpVgaMode(void)
@@ -247,7 +248,7 @@ void phantom_init_vesa(void)
 
 #if PREFER_32BPP
     if(best_info.bits_per_pixel == 32)
-        switch_screen_bitblt_to_32bpp();
+        switch_screen_bitblt_to_32bpp(1);
 #endif
 
     set_video_driver_bios_vesa_pa( best_info.phys_base_ptr, v_memsize );
