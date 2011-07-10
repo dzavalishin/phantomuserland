@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "pager"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -21,30 +21,36 @@
 
 #include <kernel/vm.h>
 #include <kernel/stats.h>
+#include <kernel/page.h>
 
 #include <phantom_disk.h>
 
 #include "pager.h"
 #include "pagelist.h"
 
+#if PAGING_PARTITION
+#include <disk.h>
+#endif
 
+#define free_reserve_size  32
+
+
+static hal_mutex_t              pager_freelist_mutex;
+static phantom_disk_superblock  superblock;
+
+
+#if !PAGING_PARTITION
 static int _DEBUG = 0;
 
 
-
 static hal_mutex_t              pager_mutex;
-static hal_mutex_t              pager_freelist_mutex;
-
-
-
 
 static void                	pager_io_done(void);
 static void 			page_device_io_final_callback(void);
 
 
-
-#define free_reserve_size  32
-
+static int                      pagein_is_in_process = 0;
+static int                      pageout_is_in_process = 0;
 
 static paging_device            *pdev;
 
@@ -58,30 +64,32 @@ static pager_io_request         *pageout_q_start = 0;
 static pager_io_request         *pageout_q_end = 0;
 //static int                      pageout_q_len;
 
-static int                      pagein_is_in_process = 0;
-static int                      pageout_is_in_process = 0;
+static disk_page_io             freelist_head;
+static disk_page_io             superblock_io;
+
+#endif
+
+static int                      need_fsck;
 
 
-static phantom_disk_superblock      superblock;
-static int                          need_fsck;
+static int                      freelist_inited = 0;
+static disk_page_no_t           free_reserve[free_reserve_size]; // for interrupt time allocs
+static int                      free_reserve_n;
+
+static union
+{
+    struct phantom_disk_blocklist free_head;
+    char __fill[PAGE_SIZE];
+} u;
 
 
-static disk_page_io                 freelist_head;
-static int                          freelist_inited = 0;
-static disk_page_no_t                   free_reserve[free_reserve_size]; // for interrupt time allocs
-static int                          free_reserve_n;
-
-
-static disk_page_io                 superblock_io;
-
-
-static disk_page_no_t     sb_default_page_numbers[] = DISK_STRUCT_SB_OFFSET_LIST;
-
+static disk_page_no_t           sb_default_page_numbers[] = DISK_STRUCT_SB_OFFSET_LIST;
 
 
 
 
 
+#if !PAGING_PARTITION
 
 
 // called when io is done on page device
@@ -104,7 +112,7 @@ pager_can_grow() // can I grow pagespace
     //else            return pdev->can_grow();
 }
 
-
+#endif
 
 
 phantom_disk_superblock *
@@ -122,9 +130,101 @@ pager_superblock_ptr()
 
 
 
+#if PAGING_PARTITION
+
+static phantom_disk_partition_t *pp;
+
+void partition_pager_init(phantom_disk_partition_t *p)
+{
+    pp = p;
+    assert(pp);
+
+    hal_mutex_init(&pager_freelist_mutex, "PagerFree");
+
+    SHOW_FLOW0( 1, "Pager get superblock" );
+    pager_get_superblock();
+
+    //phantom_dump_superblock(&superblock);    getchar();
+
+    pager_fast_fsck();
+
+    if( need_fsck )
+    {
+        panic("I don't have any fsck yet. I must die.\n");
+        pager_long_fsck();
+    }
+
+
+    //superblock.fs_is_clean = 0; // mark as dirty
+    pager_update_superblock();
+}
+
+
+void
+pager_finish()
+{
+    pager_flush_free_list();
+
+    superblock.fs_is_clean = 1; // mark as clean
+    pager_update_superblock();
+    //disk_page_io_finish(&superblock_io);
+}
+
+// TODO implement for partitioning code
+int pager_dequeue_from_pageout(pager_io_request *rq)
+{
+    return disk_dequeue( pp, rq );
+}
+
+// TODO implement for partitioning code
+void pager_raise_request_priority(pager_io_request *rq)
+{
+    (void) rq;
+}
+
+void pager_enqueue_for_pagein ( pager_io_request *rq )
+{
+    assert(rq->phys_page);
+    if( rq->flag_pagein ) panic("enqueue_for_pagein: page is already on pager queue (in)");
+    if( rq->flag_pageout ) panic("enqueue_for_pagein: page is already on pager queue (out)");
+
+    rq->flag_pagein = 1;
+    rq->next_page = 0;
+
+    disk_enqueue( pp, rq );
+
+}
+
+void pager_enqueue_for_pagein_fast ( pager_io_request *rq )
+{
+    rq->flag_urgent = 1;
+    pager_enqueue_for_pagein ( rq );
+}
+
+
+void pager_enqueue_for_pageout( pager_io_request *rq )
+{
+    assert(rq->phys_page);
+    if( rq->flag_pagein ) panic("enqueue_for_pagein: page is already on pager queue (in)");
+    if( rq->flag_pageout ) panic("enqueue_for_pagein: page is already on pager queue (out)");
+
+    rq->flag_pageout = 1;
+    rq->next_page = 0;
+
+    disk_enqueue( pp, rq );
+}
+
+
+void pager_enqueue_for_pageout_fast( pager_io_request *rq )
+{
+    rq->flag_urgent = 1;
+    pager_enqueue_for_pageout( rq );
+}
 
 
 
+
+#else
 void
 pager_init(paging_device * device)
 {
@@ -435,14 +535,104 @@ int pager_dequeue_from_pageout(pager_io_request *p)
     return dequeued;
 }
 
+#endif
+
 // ---------------------------------------------------------------------------
 //
 // Superblock works
 //
 // ---------------------------------------------------------------------------
 
-errno_t read_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
+void write_blocklist_sure( struct phantom_disk_blocklist *list, disk_page_no_t addr  )
 {
+#if PAGING_PARTITION
+    char buf[PAGE_SIZE];
+
+    * ((struct phantom_disk_blocklist *)buf) = *list;
+    assert(!phantom_sync_write_block( pp, buf, addr, 1 ));
+#else
+    panic("no old code here");
+    return 0;
+#endif
+}
+
+void read_blocklist_sure( struct phantom_disk_blocklist *list, disk_page_no_t addr  )
+{
+#if PAGING_PARTITION
+    char buf[PAGE_SIZE];
+
+    assert(!phantom_sync_read_block( pp, buf, addr, 1 ));
+    *list = * ((struct phantom_disk_blocklist *)buf);
+#else
+    panic("no old code here");
+    return 0;
+#endif
+}
+
+void write_freehead_sure( disk_page_no_t addr )
+{
+    write_blocklist_sure( &u.free_head, addr );
+}
+
+void read_freehead_sure()
+{
+    read_blocklist_sure( &u.free_head, superblock.free_list );
+}
+
+errno_t write_superblock(phantom_disk_superblock *in, disk_page_no_t addr )
+{
+#if PAGING_PARTITION
+    char buf[PAGE_SIZE];
+
+    * ((phantom_disk_superblock *)buf) = *in;
+    return phantom_sync_write_block( pp, buf, addr, 1 );
+#else
+    panic("no old code here");
+    return 0;
+#endif
+}
+
+
+errno_t read_uncheck_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
+{
+#if PAGING_PARTITION
+    char buf[PAGE_SIZE];
+
+    errno_t rc = phantom_sync_read_block( pp, buf, addr, 1 );
+    if( rc ) return rc;
+
+    *out = * ((phantom_disk_superblock *)buf);
+    return 0;
+#else
+    disk_page_io sb;
+
+    disk_page_io_init( &sb );
+    disk_page_io_load_sync(&sb, addr); // BUG! Must check for read error
+
+    *out = * ((phantom_disk_superblock *)disk_page_io_data(&sb));
+
+    disk_page_io_finish( &sb );
+    return 0;
+#endif
+}
+
+
+errno_t read_check_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
+{
+#if PAGING_PARTITION
+    char buf[PAGE_SIZE];
+
+    errno_t rc = phantom_sync_read_block( pp, buf, addr, 1 );
+    if( rc ) return rc;
+
+    if( phantom_calc_sb_checksum( (phantom_disk_superblock *)buf ))
+        {
+        *out = * ((phantom_disk_superblock *)buf);
+        return 0;
+        }
+
+    return ENOENT;
+#else
     disk_page_io sb;
 
     disk_page_io_init( &sb );
@@ -453,11 +643,12 @@ errno_t read_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
         *out = * ((phantom_disk_superblock *)disk_page_io_data(&sb));
 
         disk_page_io_finish( &sb );
-        return ENOENT;
+        return 0;
         }
 
     disk_page_io_finish( &sb );
-    return 0;
+    return ENOENT;
+#endif
 }
 
 int find_superblock(
@@ -474,7 +665,7 @@ int find_superblock(
 
         hal_printf("Looking for superblock at %d... ", curr );
 
-        if( read_superblock( out, curr ) )
+        if( !read_check_superblock( out, curr ) )
         {
             *where = curr;
             hal_printf("Found superblock at %d\n", curr );
@@ -515,19 +706,6 @@ pager_fix_incomplete_format()
 
     superblock.free_start = max;    // blocks, not covered by freelist start with this one
     superblock.free_list = free;    // head of free list
-
-    /*
-    {
-    phantom_disk_blocklist freelist;
-
-    freelist.head.magic = DISK_STRUCT_MAGIC_FREEHEAD;
-    freelist.head.used = 0;
-    freelist.head.next = 0;
-
-    *( (phantom_disk_blocklist *)freelist_head.data() ) = freelist;
-    freelist_head.save_sync(free);
-    }
-    */
 
     pager_format_empty_free_list_block( free );
 
@@ -572,6 +750,12 @@ pager_get_superblock()
     hal_printf("Checking superblock...");
     //getchar();
 
+#if PAGING_PARTITION
+    // TODO check rc
+    //phantom_sync_read_block( pp, &root_sb, sb_default_page_numbers[0], 1 );
+    assert(! read_uncheck_superblock( &root_sb, sb_default_page_numbers[0] ) );
+
+#else
     {
         disk_page_io                sb0;
 
@@ -585,7 +769,7 @@ pager_get_superblock()
 
         disk_page_io_finish(&sb0);
     }
-
+#endif
     root_sb_cs_ok = phantom_calc_sb_checksum( &root_sb );
 
     SHOW_FLOW( 0, "root sb sys name = '%.*s', checksum %s\n",
@@ -602,17 +786,18 @@ pager_get_superblock()
     disk_page_no_t     found_sb1;
     disk_page_no_t     found_sb2;
 
-    if(_DEBUG) hal_printf("Find sb1");
+    SHOW_FLOW0( 2, "Find sb1");
     
     sb1_ok = find_superblock( &sb1, sb_found_page_numbers, 2, 0, &found_sb1 );
     
-    if(_DEBUG) hal_printf(" ...DONE\n");
+    //if(_DEBUG) hal_printf(" ...DONE\n");
 
     if( sb1_ok )
     {
-        if(_DEBUG) hal_printf("Find sb2");
+        SHOW_FLOW0( 2, "Find sb2");
+        //if(_DEBUG) hal_printf("Find sb2");
         sb2_ok = find_superblock( &sb2, sb_found_page_numbers, 2, found_sb1, &found_sb2  );
-        if(_DEBUG) hal_printf(" ...DONE\n");
+        //if(_DEBUG) hal_printf(" ...DONE\n");
     }
 
     hal_printf("sb1 status %d, sb2 - %d, sb3 - %d\n", root_sb_cs_ok, sb1_ok, sb2_ok );
@@ -709,11 +894,35 @@ pager_update_superblock()
 {
     SHOW_FLOW0( 0, " updating superblock...");
 
+#if !PAGING_PARTITION
     assert(!(superblock_io.req.flag_pagein || superblock_io.req.flag_pageout));
+#endif
 
     phantom_calc_sb_checksum( &superblock );
-    *((phantom_disk_superblock *)disk_page_io_data(&superblock_io)) = superblock;
 
+#if PAGING_PARTITION
+    errno_t rc;
+
+    rc = write_superblock( &superblock, sb_default_page_numbers[0] );
+    if( rc ) SHOW_ERROR0( 0, "Superblock 1 (main) write error!" ); // TODO rc
+
+
+    if( need_fsck )
+    {
+        SHOW_ERROR0( 0, " disk is insane, will update root copy only (who called me here, btw?)...");
+    }
+    else
+    {
+        rc = write_superblock( &superblock, superblock.sb2_addr );
+        if( rc ) SHOW_ERROR0( 0, "Superblock 2 write error!" ); // TODO rc
+
+        rc = write_superblock( &superblock, superblock.sb3_addr );
+        if( rc ) SHOW_ERROR0( 0, "Superblock 3 write error!" ); // TODO rc
+
+        SHOW_FLOW0( 0, "saved all 3");
+    }
+#else
+    *((phantom_disk_superblock *)disk_page_io_data(&superblock_io)) = superblock;
     disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[0]); // save root copy
 
     if( need_fsck )
@@ -724,9 +933,10 @@ pager_update_superblock()
     {
         disk_page_io_save_sync(&superblock_io, superblock.sb2_addr);
         disk_page_io_save_sync(&superblock_io, superblock.sb3_addr);
+        SHOW_FLOW0( 0, " saved all 3");
     }
 
-    SHOW_FLOW0( 0, " saved all 3");
+#endif
 }
 
 // ---------------------------------------------------------------------------
@@ -747,21 +957,36 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
     freelist.head.used = 0;
     freelist.head.next = superblock.free_list;
 
+#if PAGING_PARTITION
+    u.free_head = freelist;
+    //errno_t rc = phantom_sync_write_block( pp, &freelist, fp, 1 );
+    //if( rc ) SHOW_ERROR0( 0, "empty freelist block write error!" ); // TODO rc
+    //write_blocklist_sure( &freelist, fp );
+    write_freehead_sure( fp );
+#else
     *( (struct phantom_disk_blocklist *)disk_page_io_data(&freelist_head) ) = freelist;
     disk_page_io_save_sync(&freelist_head,fp);
+#endif
 }
 
 void pager_flush_free_list(void)
 {
     hal_mutex_lock(&pager_freelist_mutex);
+
+#if PAGING_PARTITION
+    //errno_t rc = phantom_sync_write_block( pp, &u.free_head, superblock.free_list, 1 );
+    //if( rc ) SHOW_ERROR0( 0, "empty freelist block write error!" ); // TODO rc
+    write_freehead_sure( superblock.free_list );
+#else
     disk_page_io_save_sync(&freelist_head,superblock.free_list);
+#endif
     hal_mutex_unlock(&pager_freelist_mutex);
 }
 
 void
 pager_put_to_free_list( disk_page_no_t free_page )
 {
-    SHOW_FLOW0( 10, "Put to free... ");
+    SHOW_FLOW( 8, "Put to free %d", free_page);
     //spinlock_lock(&pager_freelist_lock, "put_to_free_list");
     hal_mutex_lock(&pager_freelist_mutex);
 // DO NOT use superblock free_start!
@@ -775,30 +1000,52 @@ pager_put_to_free_list( disk_page_no_t free_page )
     }
 
     if(!freelist_inited)
-        {
+    {
         if(superblock.free_list == 0 )
-            {
+        {
             pager_format_empty_free_list_block( free_page );
             superblock.free_list = free_page;
+#if !PAGING_PARTITION // format_empty assigns free_head
             disk_page_io_load_sync(&freelist_head,superblock.free_list);
+#endif
             freelist_inited = 1;
 
             hal_mutex_unlock(&pager_freelist_mutex);
             pager_update_superblock();
             return; // we used free page as freelist root, done now
-            }
+        }
         else
-            {
+        {
+#if PAGING_PARTITION
+            //errno_t rc = phantom_sync_read_block( pp, &u.free_head, superblock.free_list, 1 );
+            //if( rc ) panic( "empty freelist block read error!" );
+            read_freehead_sure();
+
+#else
             disk_page_io_load_sync(&freelist_head,superblock.free_list);
             freelist_inited = 1;
-            }
+#endif
         }
+    }
 
+#if PAGING_PARTITION
+    struct phantom_disk_blocklist *list = &u.free_head;
+#else
     struct phantom_disk_blocklist *list = (struct phantom_disk_blocklist *) disk_page_io_data(&freelist_head);
+#endif
 
     if( list->head.used >= N_REF_PER_BLOCK )
         {
+#if PAGING_PARTITION
+            //errno_t rc = phantom_sync_write_block( pp, &u.free_head, superblock.free_list, 1 );
+            //if( rc ) panic( "empty freelist block write error!" );
+            write_freehead_sure( superblock.free_list );
+
+#else
             disk_page_io_save_sync(&freelist_head,superblock.free_list);
+            //write_freehead_sure( superblock.free_list );
+
+#endif
             pager_format_empty_free_list_block( free_page );
             superblock.free_list = free_page;
 
@@ -819,20 +1066,27 @@ pager_init_free_list()
 
     if(freelist_inited)
     {
-        SHOW_FLOW0( 1, "Pager init free list - already done - skipped");
+        SHOW_FLOW0( 1, "already done - skipped");
 
         hal_mutex_unlock(&pager_freelist_mutex);
         return;
     }
 
-    SHOW_FLOW0( 2, "Pager init free list... ");
+    SHOW_FLOW0( 2, "start");
+
     if( need_fsck )
         panic("disk is insane, can't init freelist...");
 
     if(superblock.free_list == 0 )
         panic("superblock.free_list == 0, can't init freelist...");
 
+#if PAGING_PARTITION
+    //errno_t rc = phantom_sync_read_block( pp, &u.free_head, superblock.free_list, 1 );
+    //if( rc ) panic( "empty freelist block read error!" );
+    read_freehead_sure();
+#else
     disk_page_io_load_sync(&freelist_head,superblock.free_list);
+#endif
     freelist_inited = 1;
 
     hal_mutex_unlock(&pager_freelist_mutex);
@@ -865,7 +1119,11 @@ void
 pager_refill_free_reserve()
 {
     SHOW_FLOW0( 10, "Refill free reserve... ");
+#if PAGING_PARTITION
+    struct phantom_disk_blocklist *list = &u.free_head;
+#else
     struct phantom_disk_blocklist *list = (struct phantom_disk_blocklist *) disk_page_io_data(&freelist_head);
+#endif
 
     while( free_reserve_n < free_reserve_size )
         {
@@ -879,7 +1137,14 @@ pager_refill_free_reserve()
 
             free_reserve[free_reserve_n++] = superblock.free_list;
             superblock.free_list = list->head.next;
+#if PAGING_PARTITION
+            //errno_t rc = phantom_sync_read_block( pp, &u.free_head, superblock.free_list, 1 );
+            //if( rc ) panic( "empty freelist block read error!" );
+            read_freehead_sure();
+
+#else
             disk_page_io_load_sync(&freelist_head,superblock.free_list);
+#endif
 
             if( list->head.magic != DISK_STRUCT_MAGIC_FREEHEAD ||
                 list->head.used > N_REF_PER_BLOCK ||
@@ -914,7 +1179,7 @@ pager_refill_free_reserve()
 void
 pager_refill_free()
 {
-    if(_DEBUG) hal_printf("pager_refill_free... ");
+    SHOW_FLOW0( 3, "pager_refill_free... ");
     if(!freelist_inited) pager_init_free_list();
     hal_mutex_lock(&pager_freelist_mutex);
 
@@ -991,8 +1256,11 @@ int
 pager_fast_fsck()
 {
     pager_init_free_list();
+#if PAGING_PARTITION
+    struct phantom_disk_blocklist *flist = &u.free_head;
+#else
     struct phantom_disk_blocklist *flist = (struct phantom_disk_blocklist *) disk_page_io_data(&freelist_head);
-
+#endif
     if( flist->head.magic != DISK_STRUCT_MAGIC_FREEHEAD )
         {
         need_fsck = 1;

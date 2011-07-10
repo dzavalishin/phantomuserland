@@ -34,6 +34,7 @@
 // Basic partition processing proxies
 // ------------------------------------------------------------
 
+/*
 static errno_t checkRange( struct phantom_disk_partition *p, long blockNo, int nBlocks )
 {
     if( blockNo < 0 || blockNo > p->size )
@@ -44,28 +45,24 @@ static errno_t checkRange( struct phantom_disk_partition *p, long blockNo, int n
 
     return 0;
 }
-
+*/
 
 extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 
 
-/*
-// NB!! pager_io_request's disk block no is IGNORED! Parameter is used!
-// Parameter has to be in partition's block size
-static errno_t partAsyncWrite( struct phantom_disk_partition *p, long blockNo, int nSect, pager_io_request *rq )
+
+static errno_t partDequeue( struct phantom_disk_partition *p, pager_io_request *rq )
 {
-    assert(p->specific == 0);
-    // Temp! Rewrite!
-    assert(p->base->block_size == p->block_size);
+    assert(p->base);
 
-    if( checkRange( p, blockNo, nSect ) )
-        return EINVAL;
+    if( 0 == p->base->dequeue )
+        return ENODEV;
 
-    rq->blockNo += p->shift;
+    SHOW_FLOW( 11, "part dequeue rq %p", rq );
 
-    p->asyncWrite( p, rq );
-    return 0;
-} */
+    return p->base->dequeue( p->base, rq );
+}
+
 
 // ------------------------------------------------------------
 // Upper level disk io functions
@@ -73,17 +70,6 @@ static errno_t partAsyncWrite( struct phantom_disk_partition *p, long blockNo, i
 
 
 
-// moved to pager_io_request_done
-/*
-void io_wake( pager_io_request *rq )
-{
-    hal_spin_lock(&(rq->lock));
-    if(rq->flag_sleep)
-        thread_unblock( get_thread( rq->sleep_tid ), THREAD_SLEEP_IO );
-    rq->flag_sleep = 0;
-    hal_spin_unlock(&(rq->lock));
-}
-*/
 static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks, int isWrite )
 {
     assert( p->block_size < PAGE_SIZE );
@@ -92,7 +78,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
 
     pager_io_request_init( &rq );
 
-    rq.phys_page = (physaddr_t)phystokv(to);
+    rq.phys_page = (physaddr_t)phystokv(to); // why? redundant?
     rq.disk_page = blockNo;
 
     rq.blockNo = blockNo;
@@ -178,13 +164,26 @@ void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq )
     p->asyncIo( p, rq );
 }
 
+errno_t disk_dequeue( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    assert(p);
+    assert(rq);
+
+    //dump_partition(p);
+
+    if( 0 == p->dequeue )
+        return ENODEV;
+    return p->dequeue( p, rq );
+}
+
+
 
 // ------------------------------------------------------------
 // Partitions list management
 // ------------------------------------------------------------
 
 static void find_subpartitions(phantom_disk_partition_t *p);
-static void dump_partition(phantom_disk_partition_t *p);
+//static void dump_partition(phantom_disk_partition_t *p);
 
 static phantom_disk_partition_t partitions[MAX_DISK_PARTITIONS];
 static int nPartitions = 0;
@@ -215,8 +214,7 @@ phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition
     ret->specific = 0;
 
     ret->asyncIo = partAsyncIo;
-    //ret->asyncRead = partAsyncRead;
-    //ret->asyncWrite = partAsyncWrite;
+    ret->dequeue = partDequeue;
 
     ret->base = base;
     ret->baseh.h = -1;
@@ -329,30 +327,9 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
 }
 
 
-/* Moved to fs_map.c
-static disk_page_no_t sbpos[] = DISK_STRUCT_SB_OFFSET_LIST;
-static int nsbpos = sizeof(sbpos)/sizeof(disk_page_no_t);
-
-static void lookup_phantom_fs(phantom_disk_partition_t *p)
-{
-    char buf[PAGE_SIZE];
-    phantom_disk_superblock *sb = (phantom_disk_superblock *)&buf;
-
-    int i;
-    for( i = 0; i < nsbpos; i++ )
-    {
-        if( phantom_sync_read_disk( p, buf, sbpos[i], 1 ) )
-            continue;
-        if( phantom_calc_sb_checksum( sb ) )
-        {
-            p->flags |= PART_FLAG_IS_PHANTOM_FSSB;
-        }
-    }
-}
-*/
 
 
-static void dump_partition(phantom_disk_partition_t *p)
+void dump_partition(phantom_disk_partition_t *p)
 {
     printf("Disk Partition %s (%s)\n", p->name, p->label );
 

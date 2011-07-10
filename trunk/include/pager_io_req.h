@@ -63,30 +63,37 @@ typedef struct pager_io_request
     errno_t             rc;                     // Driver return code
 
     pool_handle_t       phandle;                // This partition is to be released after io is done - see
+
+    //struct disk_q	q;			// Disk q itself, used to start next req
+
+    int                 unit;                   // Used on devices that have one q but multiple units that can't work at once
+
 } pager_io_request;
 
 
 static __inline__ void
 pager_io_request_init( pager_io_request *me )
 { 
-    me->flag_pagein 	= 0;
-    me->flag_pageout 	= 0;
-    me->flag_ioerror 	= 0;
-    me->flag_urgent 	= 0;
+    me->flag_pagein     = 0;
+    me->flag_pageout    = 0;
+    me->flag_ioerror    = 0;
+    me->flag_urgent     = 0;
 
     me->rc              = 0;
 
     me->blockNo         = 0;
     me->nSect           = 0;
 
-    me->pager_callback 	= 0;
+    me->pager_callback  = 0;
 //#if IO_RQ_SLEEP
-    me->flag_sleep 		= 0;
-    me->sleep_tid 		= 0;
+    me->flag_sleep      = 0;
+    me->sleep_tid       = 0;
 
     hal_spin_init( &(me->lock));
 
-	me->phandle         = -1;
+    me->phandle         = -1;
+    //me->q               = 0;
+    me->unit            = 0;
 //#endif
 }
 

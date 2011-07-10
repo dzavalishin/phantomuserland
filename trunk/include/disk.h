@@ -71,9 +71,12 @@ struct phantom_disk_partition
 
     void        *specific;      // Specific data (following methods know how to handle)
 
-// NB!! pager_io_request's disk block no is IGNORED! 
-    errno_t     (*asyncIo)( struct phantom_disk_partition *p,  pager_io_request *rq );
-    //errno_t     (*asyncWrite)( struct phantom_disk_partition *p, pager_io_request *rq );
+    // NB!! pager_io_request's disk block no is IGNORED! 
+    errno_t     (*asyncIo)( struct phantom_disk_partition *p, pager_io_request *rq );
+
+    // Attempt to remove this request from queue, if possible
+    // Snapshot code relies on it a lot
+    errno_t     (*dequeue)( struct phantom_disk_partition *p, pager_io_request *rq );
 
 };
 
@@ -119,6 +122,13 @@ errno_t phantom_sync_write_sector( phantom_disk_partition_t *, const void *from,
 /** Start async disk io operation */
 void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq );
 
+/** Attempt to remove request from queue */
+errno_t disk_dequeue( struct phantom_disk_partition *p, pager_io_request *rq );
 
+
+//! Return partition for paging (Phantom "FS")
+phantom_disk_partition_t *select_phantom_partition(void);
+
+void dump_partition(phantom_disk_partition_t *p);
 
 #endif// DISK_H

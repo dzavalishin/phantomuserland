@@ -108,7 +108,7 @@ static int fb_write(struct phantom_device *dev, const void *buf, int len)
 
     memcpy( w->pixel, buf, len );
 
-    drv_video_winblt( w );
+    drv_video_window_update( w );
 
     return len;
 }
@@ -198,7 +198,7 @@ static int fb_ioctl(struct phantom_device *dev, int type, void *buf, int len)
     switch(type)
     {
     case IOCTL_FB_FLUSH:
-        drv_video_winblt( w );
+        drv_video_window_update( w );
         break;
 
     case IOCTL_FB_SETBOUNDS:

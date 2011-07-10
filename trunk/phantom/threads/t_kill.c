@@ -94,7 +94,7 @@ errno_t t_kill_thread( int tid )
 
         // TODO is it OK?
         hal_cli();
-        hal_spin_lock(&dummy_lock);
+        hal_spin_lock(&dummy_lock); // TODO SMP sync kill code on this to make sure thread we kill is blocked
 
         thread_block( THREAD_SLEEP_ZOMBIE, &dummy_lock );
 
@@ -109,26 +109,36 @@ errno_t t_kill_thread( int tid )
 
 // SMP BUG - kill interlock works on one CPU only.
 // on SMP it is possible for t_do_some_kills to run
-// before thread that must be killed is really blocked.
+// before thread that must be killed is really blocked. Use dummy_lock above to solve.
 
 void t_do_some_kills(void)
 {
     phantom_thread_t * t;
 
-    while(t_thread_kill_request)
+    while(1)
     {
         hal_mutex_lock( &kill_mutex );
+        hal_cond_wait( &kill_request, &kill_mutex );
 
-        assert( !queue_empty( &threads4kill ) );
-        queue_remove_first( &threads4kill, t, phantom_thread_t *, kill_chain);
+        while(t_thread_kill_request)
+        {
+            assert( !queue_empty( &threads4kill ) );
+            queue_remove_first( &threads4kill, t, phantom_thread_t *, kill_chain);
 
-        // If not - just put it to the q end and retry later
-        assert( t->sleep_flags & THREAD_SLEEP_ZOMBIE );
+            // If not - just put it to the q end and retry later
+            assert( t->sleep_flags & THREAD_SLEEP_ZOMBIE );
 
-        t_thread_kill_request--;
+            t_thread_kill_request--;
+            hal_mutex_unlock( &kill_mutex );
+
+            hal_disable_preemption();
+            SHOW_FLOW0( 1, "Killing" );
+            t_do_kill_thread( t );
+            hal_enable_preemption();
+
+            hal_mutex_lock( &kill_mutex );
+         }
         hal_mutex_unlock( &kill_mutex );
-
-        t_do_kill_thread( t );
     }
 }
 

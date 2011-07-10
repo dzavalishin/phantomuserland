@@ -17,7 +17,7 @@ SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom/$(ARCH)
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 
 CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d d/*.d $(ARCH)/boards/*.o
-PHANTOM_CFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -std=gnu89 -DKERNEL
+PHANTOM_CFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -Wall -std=gnu89 -DKERNEL
 
 
 CLIB   = $(PLIBDIR)/libphantom_c.a
@@ -56,7 +56,7 @@ START_O_FILE=entry.o
 
 #isa_sb16.o
 phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
-	$(USB_O) floppy.o \
+	$(USB_O) floppy.o ide_io.o \
 	disk_cache.o properties.o \
 	pci_ahci.o driver_pci_rtl8169.o intrdisp.o mem_icp_timer.o mem_pl181_mmc.o \
         video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \

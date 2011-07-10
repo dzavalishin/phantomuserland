@@ -64,6 +64,7 @@ void drv_video_mouse_on_deflt(void);
 
 #if !USE_ONLY_INDIRECT_PAINT
 
+/*
 static __inline__ void drv_video_winblt_locked( drv_video_window_t *from )
 {
     mouse_disable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
@@ -77,7 +78,7 @@ static __inline__ void drv_video_winblt( drv_video_window_t *from )
     drv_video_winblt_locked(from);
     w_unlock();
 }
-
+*/
 
 static __inline__ void drv_video_window_update( drv_video_window_t *w ) { drv_video_winblt( w ); }
 

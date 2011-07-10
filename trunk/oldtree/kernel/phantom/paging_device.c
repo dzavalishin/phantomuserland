@@ -1,4 +1,5 @@
 #ifdef ARCH_ia32
+#if !PAGING_PARTITION
 /**
  *
  * Phantom OS
@@ -23,7 +24,7 @@
 
 
 #define DEBUG_MSG_PREFIX "disk"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
@@ -1035,4 +1036,5 @@ void connect_ide_io(void) {}
 #endif
 
 
+#endif //!PAGING_PARTITION
 #endif // ARCH_ia32
