@@ -10,6 +10,8 @@
 **/
 
 #include <drv_video_screen.h>
+#include <video/screen.h>
+
 #include <assert.h>
 #include <kernel/pool.h>
 #include <kernel/libkern.h>
@@ -492,7 +494,7 @@ errno_t w_scroll_hor( pool_handle_t h, int x, int y, int xs, int ys, int s )
 
 void new_videotest()
 {
-    pool_handle_t wb = w_create( video_drv->xsize, video_drv->ysize );
+    pool_handle_t wb = w_create( get_screen_xsize(), get_screen_ysize() );
     w_clear( wb );
     w_set_z_order( wb, 0 );
 

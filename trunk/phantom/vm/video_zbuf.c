@@ -3,7 +3,10 @@
 #include <phantom_libc.h>
 #include <assert.h>
 
+#include <video.h>
 #include <video/rect.h>
+#include <video/zbuf.h>
+//#include <video/screen.h>
 
 /**
  *
@@ -27,15 +30,15 @@ void video_zbuf_init()
 {
     if(zbuf) free(zbuf);
 
-    zbsize = video_drv->xsize * video_drv->ysize * sizeof(zbuf_t);
-    zbwidth = video_drv->xsize;
+    zbsize = get_screen_xsize() * get_screen_ysize() * sizeof(zbuf_t);
+    zbwidth = get_screen_xsize();
 
     zbuf = malloc( zbsize );
 
     zbuf_rect.x = 0;
     zbuf_rect.y = 0;
-    zbuf_rect.xsize = video_drv->xsize;
-    zbuf_rect.ysize = video_drv->ysize;
+    zbuf_rect.xsize = get_screen_xsize();
+    zbuf_rect.ysize = get_screen_ysize();
 
     video_zbuf_reset();
 }
@@ -104,7 +107,7 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
         if( zb_upside )
             linpos = out.x + out.y * zbwidth;
         else
-            linpos = out.x + ( (video_drv->ysize-1) - out.y) * zbwidth;
+            linpos = out.x + ( (get_screen_ysize()-1) - out.y) * zbwidth;
 
         out.y++;
 
@@ -143,13 +146,14 @@ int video_zbuf_check( int linpos, u_int8_t zpos )
 void video_zbuf_dump()
 {
     int y;
-    int ysize = video_drv->ysize;
+    int ysize = get_screen_ysize();
+    int xsize = get_screen_xsize();
 
-    printf("zbuf dump %d*%d\n", video_drv->xsize, video_drv->ysize );
+    printf("zbuf dump %d*%d\n", xsize, ysize );
     for(y = 0; y < ysize; y++)
     {
         int x;
-        int xsize = video_drv->xsize;
+        int xsize = xsize;
 
         for( x = 0; x < xsize; x++ )
         {
@@ -161,12 +165,15 @@ void video_zbuf_dump()
 }
 
 
+#include <video/screen.h>
+
 void video_zbuf_paint()
 {
+    int np = get_screen_xsize() * get_screen_ysize();
+
 #if 1
-    if(video_drv->bpp == 24)
+    if(get_screen_bpp() == 24)
     {
-        int np = video_drv->xsize * video_drv->ysize;
         zbuf_t *zbp = zbuf;
         rgb_t *d = (void *)video_drv->screen;
         while( np-- )
@@ -175,10 +182,9 @@ void video_zbuf_paint()
             d++;
         }
     }
-    if(video_drv->bpp == 32)
+    if(get_screen_bpp() == 32)
 #endif
     {
-        int np = video_drv->xsize * video_drv->ysize;
         zbuf_t *zbp = zbuf;
         rgba_t *d = (void *)video_drv->screen;
         while( np-- )

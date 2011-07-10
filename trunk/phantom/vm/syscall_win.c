@@ -69,7 +69,7 @@ static int win_clear_20(struct pvm_object me , struct data_area_4_thread *tc )
     da->x = da->y = 0;
 
     drv_video_window_fill( &(da->w), da->bg );
-    drv_video_winblt( &(da->w) );
+    drv_video_window_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -177,7 +177,7 @@ static int win_putString_24(struct pvm_object me , struct data_area_4_thread *tc
 
     // TODO make a version of drv_video_font_tty_string that accepts non-zero terminated strings with len
     drv_video_font_tty_string( &(da->w), tty_font, buf, fg, bg, &x, &y );
-    drv_video_winblt( &(da->w) );
+    drv_video_window_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -208,7 +208,7 @@ static int win_putImage_25(struct pvm_object me, struct data_area_4_thread *tc )
     		_bmp->xsize, _bmp->ysize
     );
     //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
-    drv_video_winblt( &(da->w) );
+    drv_video_window_update( &(da->w) );
 
     SYS_FREE_O(_img);
 
