@@ -28,6 +28,8 @@
 
 #include <vm/wrappers.h>
 
+#include <video.h>
+
 //extern syscall_func_t  pvm_exec_systables[PVM_SYSTABLE_SIZE][32];
 
 
@@ -988,7 +990,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
 
     if(back_win == 0)
-    	back_win = drv_video_window_create( video_drv->xsize, video_drv->ysize, 0, 0, COLOR_BLACK, "Background" );
+    	back_win = drv_video_window_create( get_screen_xsize(), get_screen_ysize(), 0, 0, COLOR_BLACK, "Background" );
 
     back_win->flags &= ~WFLAG_WIN_DECORATED;
     back_win->flags |= WFLAG_WIN_NOFOCUS;
@@ -1586,7 +1588,7 @@ static int si_bitmap_9_paintto(struct pvm_object me, struct data_area_4_thread *
     		da->xsize, da->ysize
     );
     //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
-    drv_video_winblt( &(tty->w) );
+    drv_video_window_update( &(tty->w) );
 
     SYS_FREE_O(_tty);
 

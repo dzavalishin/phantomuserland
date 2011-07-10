@@ -57,6 +57,29 @@ void hal_init( vmem_ptr_t va, long vs )
 
 vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 
+// TODO tid_t
+tid_t hal_start_thread( void (*thread)(void *arg), void *arg, int flags )
+{
+    assert(!flags);
+
+    unsigned long tid;
+    if( 0 == CreateThread( 0, 0, (void *)thread, arg, 0, &tid ) )
+        panic("can't start window thread");
+
+    return tid;
+}
+
+
+void hal_set_current_thread_name( const char *name)
+{
+    (void) name;
+}
+
+errno_t hal_set_current_thread_priority(int p)
+{
+    (void) p;
+    return EINVAL;
+}
 
 
 void    hal_halt()
@@ -120,7 +143,7 @@ int phantom_virtual_machine_threads_stopped = 0;
 
 
 // -----------------------------------------------------------------------
-// TODO - implement mutex/sema code wor win sim environment
+// TODO - implement mutex/sema code for win sim environment
 
 
 int hal_mutex_init(hal_mutex_t *m, const char *name)
@@ -151,9 +174,24 @@ int hal_cond_init( hal_cond_t *c, const char *name )
 }
 
 
+int hal_sem_acquire( hal_sem_t *s )
+{
+    (void) s;
+    hal_sleep_msec(10);
+    return 0;
+}
 
+void hal_sem_release( hal_sem_t *s )
+{
+    (void) s;
+}
 
-
+int hal_sem_init( hal_sem_t *s, const char *name )
+{
+    (void) s;
+    (void) name;
+    return 0;
+}
 
 //int debug_print = 0;
 
@@ -381,6 +419,18 @@ void run_test( void )
 
 errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
 errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
+
+
+// -----------------------------------------------------------------------
+// debug_ext.h support
+// -----------------------------------------------------------------------
+
+// TODO replace with escapes
+void console_set_error_color() {}
+void console_set_normal_color() {}
+int debug_max_level_error = ~0;
+int debug_max_level_info = ~0;
+int debug_max_level_flow = ~0;
 
 
 
