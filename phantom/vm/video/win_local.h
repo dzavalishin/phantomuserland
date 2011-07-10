@@ -1,3 +1,6 @@
+#ifndef WIN_LOCAL
+#define WIN_LOCAL
+
 #include <video/screen.h>
 
 
@@ -24,4 +27,14 @@ static __inline__ void _drv_video_winblt( drv_video_window_t *from )
     w_unlock();
 }
 
+#else
+
+
+void _drv_video_winblt_locked( drv_video_window_t *from );                                                                           	
+void _drv_video_winblt( drv_video_window_t *from );
+void drv_video_winblt_locked( drv_video_window_t *from );
+void drv_video_winblt( drv_video_window_t *from );
+
 #endif // USE_ONLY_INDIRECT_PAINT
+
+#endif // WIN_LOCAL

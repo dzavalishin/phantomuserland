@@ -79,7 +79,8 @@ static __inline__ void drv_video_winblt( drv_video_window_t *from )
     w_unlock();
 }
 */
-
+	
+void drv_video_winblt( drv_video_window_t *from );
 static __inline__ void drv_video_window_update( drv_video_window_t *w ) { drv_video_winblt( w ); }
 
 #else
