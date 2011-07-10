@@ -1,3 +1,5 @@
+#if HAVE_USB
+
 // Code for handling standard USB hubs.
 //
 // Copyright (C) 2010  Kevin O'Connor <kevin@koconnor.net>
@@ -187,3 +189,5 @@ usb_hub_init(struct usb_pipe *pipe)
         return 0;
     return -1;
 }
+
+#endif // HAVE_USB
