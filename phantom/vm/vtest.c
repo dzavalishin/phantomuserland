@@ -2,6 +2,7 @@
 #include <drv_video_screen.h>
 
 #include "winhal.h"
+#include "video/win_local.h"
 
 #define WXS 240
 #define WYS 160
@@ -11,7 +12,7 @@ void videotest(void)
 
     drv_video_window_t *w = drv_video_window_create( WXS, WYS, 400, 400, COLOR_BLACK, "Test Window" );
 
-    drv_video_winblt( w );
+    _drv_video_winblt( w );
     drv_win_screen_update();
     getchar();
 
@@ -25,7 +26,7 @@ void videotest(void)
     drv_video_window_fill_box( w,  40, 32, 33, 10, COLOR_RED );
 
 
-    drv_video_winblt( w );
+    _drv_video_winblt( w );
     drv_win_screen_update();
     getchar();
 
