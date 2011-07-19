@@ -143,15 +143,46 @@ static errno_t     dev_open(struct uufile *f, int create, int write)
 {
     (void) create;
     (void) write;
-    (void) f;
 
-    return 0;
+    SHOW_FLOW( 9, "Open dev uufile %p", f );
+
+    phantom_device_t* dev = f->impl;
+
+    //if(dev == 0) return ENXIO;
+    if(dev == 0) return 0; // TODO console hack needs this - remove later
+
+    dev->open_count++;
+
+    if(dev->dops.start == 0) return 0; // Ok then
+
+    if(dev->open_count > 1)
+        return 0;
+
+    errno_t rc = dev->dops.start( dev );
+
+    if(rc)
+        dev->open_count--;
+
+    return rc;
 }
 
 static errno_t     dev_close(struct uufile *f)
 {
-    (void) f;
-    return 0;
+    SHOW_FLOW( 9, "Close dev uufile %p", f );
+
+    phantom_device_t* dev = f->impl;
+
+    //if(dev == 0) return ENXIO;
+    if(dev == 0) return 0; // TODO console hack needs this - remove later
+
+    dev->open_count--;
+
+    if(dev->dops.stop == 0) return 0; // Ok then
+
+    if(dev->open_count > 0)
+        return 0;
+
+    return dev->dops.stop( dev );
 }
 
 // Create a file struct for given path
@@ -298,7 +329,7 @@ static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes)
 
 static size_t      dev_write(   struct uufile *f, const void *src, size_t bytes)
 {
-    if(f->flags && UU_FILE_FLAG_DIR)
+    if(f->flags & UU_FILE_FLAG_DIR)
         return -1;
 
     phantom_device_t* dev = f->impl;
