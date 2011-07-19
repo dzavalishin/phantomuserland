@@ -193,3 +193,8 @@ void dpc_finish()
 
 }
 
+void dpc_panic(void)
+{
+    if(dpc_stop_request)
+        panic("DPC requested after dpc_finish()");
+}
