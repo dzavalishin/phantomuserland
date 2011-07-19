@@ -143,6 +143,12 @@ errno_t hal_set_current_thread_priority( int prio )
 	return 0;
 }
 
+int hal_get_current_thread_priority()
+{
+    phantom_thread_t * t = GET_CURRENT_THREAD();
+    return t->priority;
+}
+
 
 /**
  *

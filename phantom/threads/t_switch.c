@@ -174,16 +174,6 @@ void phantom_thread_switch()
     // threads_stat.switches++;
     hal_disable_softirq();
 
-    /*
-    {
-        // TODO machdep, header
-        extern struct i386_tss	       	tss;
-
-        phantom_thread_t *t = GET_CURRENT_THREAD();
-        tss.esp0 = t->kstack_top;
-    }
-    */
-
     arch_adjust_after_thread_switch(GET_CURRENT_THREAD());
 
 exit:
@@ -195,7 +185,7 @@ exit:
 #endif
 
 
-
+// TODO look sema code - it seems that we have to disable ALL preemption here - on every CPU
 void hal_disable_preemption(void)
 {
     GET_CURRENT_THREAD()->preemption_disabled++;
