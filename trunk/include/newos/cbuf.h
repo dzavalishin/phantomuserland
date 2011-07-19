@@ -42,8 +42,8 @@ int cbuf_is_contig_region(cbuf *buf, size_t start, size_t end);
 int cbuf_memcpy_to_chain(cbuf *chain, size_t offset, const void *_src, size_t len);
 int cbuf_memcpy_from_chain(void *dest, cbuf *chain, size_t offset, size_t len);
 
-int cbuf_user_memcpy_to_chain(cbuf *chain, size_t offset, const void *_src, size_t len);
-int cbuf_user_memcpy_from_chain(void *dest, cbuf *chain, size_t offset, size_t len);
+//int cbuf_user_memcpy_to_chain(cbuf *chain, size_t offset, const void *_src, size_t len);
+//int cbuf_user_memcpy_from_chain(void *dest, cbuf *chain, size_t offset, size_t len);
 
 u_int16_t cbuf_ones_cksum16(cbuf *chain, size_t offset, size_t len);
 u_int16_t cbuf_ones_cksum16_2(cbuf *chain, size_t offset, size_t len, void *buf, size_t buf_len);
