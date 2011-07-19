@@ -1106,6 +1106,7 @@ int vm_map_do_for_percentage = 0;
 
 
 // we depend on do_for not modifying interrupts disable status
+// XXX BUG? Mutex lock can switch thread and it means that interrupts will be enabled
 void
 vm_map_do_for( vmem_page_func_t func, bool_vmem_page_func_t predicate )
 {
@@ -1175,6 +1176,8 @@ static void mark_for_snap(vm_page *p)
     p->flag_phys_protect = 1;
 }
 
+//#define KICK_AT_ONCE 16
+//static int kick_pageout_sleep_count = 0;
 static void kick_pageout(vm_page *p)
 {
     page_touch_history(p);
@@ -1303,8 +1306,17 @@ void do_snapshot()
     // This pageout request is not nesessary, but makes snap to catch a more later state.
     // If we skip this pageout, a lot of pages will go to 'after snap' state.
     // TODO try to find some heuristic to pageout just pages modified long ago?
+
+    // Do it in lowest prio (but not IDLE) or else massive IO will kill world
+    int prio = hal_get_current_thread_priority();
+    hal_set_current_thread_priority( THREAD_PRIO_LOWEST );
+
+
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
     if(SNAP_STEPS_DEBUG) syslog( 0, "wait 4 pgout to settle\n");
+
+    // Back to orig prio
+    hal_set_current_thread_priority( prio );
 
     // commented out to stress the pager
     //hal_sleep_msec(30000); // sleep for 10 sec - why 10?
