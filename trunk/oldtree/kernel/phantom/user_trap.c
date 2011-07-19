@@ -10,6 +10,7 @@
 **/
 
 #include <kernel/trap.h>
+#include <kernel/interrupts.h>
 #include <phantom_assert.h>
 #include <phantom_libc.h>
 #include <threads.h>
@@ -51,6 +52,11 @@ phantom_kernel_trap( struct trap_state *ts )
 void
 phantom_check_user_trap( struct trap_state *ts )
 {
+    // In interrupt? Surely this is a kernel problem, don't
+    // deliver to curr thread!
+    if(IN_INTERRUPT())
+        return;
+
     phantom_thread_t *t = GET_CURRENT_THREAD();
 
     if(t->thread_flags & THREAD_FLAG_USER)
