@@ -271,37 +271,42 @@ static void phantom_debug_window_loop()
     int show;
 
     hal_set_thread_name("Debug Win");
+    // Which thread will receive typein for this window
     phantom_debug_window->owner = get_current_tid();
 
     int wx = 600;
 
-    // TODO HACK!
+    // Need separate ctty
+    t_set_ctty( get_current_tid(), wtty_init() );
+
+    // TODO HACK! Need ioctl to check num of bytes?
     wtty_t *tty;
     t_get_ctty( get_current_tid(), &tty );
 
 
-    if(tty && !wtty_is_empty(tty))
-    {
-        char c = wtty_getc( tty );
-        switch(c)
-        {
-        case '?':
-        case'h':
-            printf(
-                   "Commands:\n"
-                   "---------\n\n"
-                   "w\t- show windows list\n"
-                   "t\t- show threads list\n"
-                  );
-            break;
-        case 't':            show = 1; break;
-        case 'w':            show = 2; break;
-        }
-    }
-
-
     while(1)
     {
+
+        if(tty && !wtty_is_empty(tty))
+        {
+            char c = wtty_getc( tty );
+            switch(c)
+            {
+            case '?':
+            case'h':
+                printf(
+                       "Commands:\n"
+                       "---------\n"
+                       "w\t- show windows list\n"
+                       "t\t- show threads list\n"
+                      );
+                break;
+            case 't':            show = 1; break;
+            case 'w':            show = 2; break;
+            }
+        }
+
+
         //hal_sleep_msec(1000);
         hal_sleep_msec(100);
 #if 1
