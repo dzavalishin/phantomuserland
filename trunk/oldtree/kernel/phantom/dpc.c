@@ -22,7 +22,7 @@
 #include <threads.h>
 #include <kernel/config.h>
 
-#include "dpc.h"
+#include <kernel/dpc.h>
 
 //---------------------------------------------------------------------------
 

@@ -26,6 +26,7 @@
 
 #include <kernel/vm.h>
 #include <kernel/stats.h>
+#include <kernel/dpc.h>
 #include <threads.h>
 
 #ifdef ARCH_ia32
@@ -39,7 +40,6 @@
 
 #include "vm_map.h"
 #include "physalloc.h"
-#include "dpc.h"
 #include "snap_sync.h"
 #include "pager.h"
 

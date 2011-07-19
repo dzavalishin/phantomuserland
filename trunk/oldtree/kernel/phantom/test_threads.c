@@ -276,7 +276,7 @@ int do_test_threads(const char *test_parm)
 
 
 
-#include "dpc.h"
+#include <kernel/dpc.h>
 
 
 static dpc_request         dpc1;

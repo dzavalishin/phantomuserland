@@ -725,9 +725,10 @@ static void readSamplesFromRecordBuffer(phantom_device_t *dev)
 #if ES1370_CBUF
 static void w_dpc_func(void *arg)
 {
-    (void) arg;
+    phantom_device_t *dev = arg;
 
     writeSamplesToPlaybackBuffer(dev);
+    u_int32_t control = inl(dev->iobase + ES1370_SERIAL_CONTROL);
     control |= SerialP2inten;
     outl(dev->iobase + ES1370_SERIAL_CONTROL, control);
 }
@@ -762,7 +763,7 @@ static void es1370_interrupt(void *arg)
         if(es->dac_active)
         {
 #if ES1370_CBUF
-            dpc_request_trigger( &es->w_dpc, 0);
+            dpc_request_trigger( &es->w_dpc, dev);
 
 #else
             writeSamplesToPlaybackBuffer(dev);
