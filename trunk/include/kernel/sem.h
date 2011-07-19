@@ -33,8 +33,14 @@ void 					hal_sem_destroy( hal_sem_t *s );
 #define SEM_FLAG_NO_RESCHED 1
 #define SEM_FLAG_TIMEOUT 2
 #define SEM_FLAG_INTERRUPTABLE 4
+// Make sure acquire will block
+#define SEM_FLAG_ZERO 8
 
 int 					hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec );
+
+//* If positive - zeroes.
+errno_t                                 hal_sem_zero( hal_sem_t *s );
+
 
 #endif // SEM_H
 
