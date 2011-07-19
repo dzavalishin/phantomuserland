@@ -736,7 +736,7 @@ init_dma(void)
 #include <disk.h>
 #include <disk_q.h>
 #include <errno.h>
-#include <dpc.h>
+#include <kernel/dpc.h>
 
 static void floppy_test( phantom_disk_partition_t *p );
 

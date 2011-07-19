@@ -37,7 +37,7 @@
 #include <i386/pci.h>
 
 #include "ataio.h"
-#include "dpc.h"
+#include <kernel/dpc.h>
 
 
 

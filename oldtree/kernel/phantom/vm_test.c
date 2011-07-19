@@ -3,8 +3,8 @@
 
 
 #include <hal.h>
+#include <kernel/dpc.h>
 #include "pager.h"
-#include "dpc.h"
 #include "vm_map.h"
 
 

@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Paging IO
  *
@@ -19,8 +19,8 @@
 #include <phantom_libc.h>
 #include <phantom_types.h>
 
-#include "pager_io_req.h"
-#include "dpc.h"
+#include <pager_io_req.h>
+#include <kernel/dpc.h>
 
 //#define REMAPPED_PAGING_IO 0
 #define SIMPLE_IDE_DRIVER 1
