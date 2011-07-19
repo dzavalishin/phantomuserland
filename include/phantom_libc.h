@@ -45,6 +45,9 @@ int printf(const char *fmt, ...);
 int sscanf(const char *ibuf, const char *fmt, ...);
 
 
+void    perror(const char *);
+
+
 // console.c
 int getchar(void);
 int putchar(int c);
