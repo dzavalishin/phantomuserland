@@ -37,12 +37,15 @@
 
 #include "wavefmt.h"
 
+#include <user/tmalloc.h>
+
+
 //#define DEFAULT_DSP	"/dev/sb16"
 //#define DEFAULT_DSP	"/dev/sound/sb/dsp"
-#define DEFAULT_DSP	"/dev/isa/sb16"
+#define DEFAULT_DSP	"/dev/pci/es13700"
 //#define DEFAULT_DSP	"/dev/null"
-#define DEFAULT_BUFFERSIZE 2048
-#define perror	//
+#define DEFAULT_BUFFERSIZE (2048*8)
+//#define perror	//
 #define DEBUG 1
 
 #define IOCTL 0
@@ -70,9 +73,16 @@ static char *sbuf = NULL;
 
 int main( int argc, char **argv )
 {
+    // TODO bring in good malloc/free and implement sbrk()!
+    static char arena[1024*1024];
+    init_malloc( arena, sizeof(arena) );
+
+
     if ( argc == 1 ) {
-        printf( "Usage: wavplay [WAVE-File]\n" );
-        return -1;
+        //printf( "Usage: wavplay [WAVE-File]\n" );
+        //return -1;
+        return play( "/amnt0/siren.wav" );
+
     }
     return play( argv[ 1 ] );
 }
@@ -93,7 +103,7 @@ int play(const char* filename)
         if ((in_fd = open(filename, O_RDONLY)) < 0)
         {
             printf("%s - ", filename);
-            //perror("Open");
+            perror("Open");
             return in_fd;
         }
     }
@@ -147,7 +157,7 @@ int play(const char* filename)
     {
         if ((out_fd = openDSP(pnTmp, &wf)) < 0)
         {
-            //perror("openDSP");
+            perror("openDSP");
             close(in_fd);
             return -1;
         }
@@ -256,6 +266,15 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
     } else {
         arg = 1;
     }
+
+    if (fd < 0)
+    {
+        perror("openDSP");
+        close(fd);
+        return -1;
+    }
+
+
     //status = ioctl(fd, SNDCTL_DSP_STEREO, arg);
     /*if (status < 0)
      {
@@ -276,12 +295,11 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
     status = ioctl(fd, SNDCTL_DSP_SPEED, arg);
     if (status < 0)
     {
-        //perror("openDSP");
+        perror("openDSP");
         printf("Can't set sampling rate.\n");
         close(fd);
         return -1;
     }
-#endif
 
     if (vflag && (arg != (int)pwf->nSamplesPerSec))
     {
@@ -292,6 +310,8 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
 #ifdef DEBUG
     printf("DSP - Sampling rate: %d\n", arg);
 #endif
+#endif
+
 
 #if IOCTL
     /* ̻Ҳӥåȿ(8 or 16Bit) */
@@ -299,11 +319,10 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
     status = ioctl(fd, SNDCTL_DSP_SETFMT, arg);
     if (status < 0)
     {
-        //perror("openDSP");
+        perror("openDSP");
         close(fd);
         return -1;
     }
-#endif
     if (arg != (int)(pwf->wBitsPerSample))
     {
         if (vflag)
@@ -311,6 +330,7 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
         close(fd);
         return -1;
     }
+#endif
 
     return fd;
 }
@@ -329,7 +349,8 @@ int playRaw(int data_fd, int dsp_fd)
     {
         for (off = 0; nr; nr -= nw, off += nw)
         {
-            if ((nw = write(dsp_fd, sbuf + off, nr)) < 0)
+            nw = write(dsp_fd, sbuf + off, nr);
+            if(nw < 0)
             {
                 printf("Error: playRaw - Write data\n");
                 return -1;
@@ -373,6 +394,7 @@ int playWave(int data_fd, int dsp_fd, u_int datasize)
                 printf("Error: playWave - Write data\n");
                 return -1;
             }
+            //printf("wrote %d\n", nw);
         }
     }
 
