@@ -1,3 +1,4 @@
+
 #ifdef ARCH_ia32
 /**
  *
@@ -40,6 +41,7 @@ static void reset_codec(phantom_device_t *dev);
 static void set_sampling_rate(phantom_device_t *dev, u_int32_t rate);
 
 static void es1370_interrupt(void *arg);
+static void w_dpc_func(void *);
 
 static void start_dac(phantom_device_t *dev);
 
@@ -121,6 +123,12 @@ phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
 
     es1370_t *es = calloc(1,sizeof(es1370_t));
     assert(es);
+
+#if ES1370_CBUF
+    hal_spin_init( &es->w_lock );
+    dpc_request_init( &es->w_dpc, w_dpc_func );
+#endif
+
     dev->drv_private = es;
 
     if( init_es1370(dev) )
@@ -192,7 +200,7 @@ static errno_t init_es1370(phantom_device_t *dev)
     es->adcBufferSize = size_bytes;
 
     reset_codec(dev);
-    start_dac(dev);
+    //start_dac(dev);
     //set_sampling_rate(u_int32_t rate)
     return 0;
 }
@@ -364,7 +372,7 @@ static void start_dac(phantom_device_t *dev)
     //u16 rate = 44100;
     u8 bits = es->nbits;
     u8 channels = es->nchannels;
-    //u8 silence = 0;
+
     memset(es->dac2Buffer, es->silence, es->dac2BufferSize);
 
     setPlayBuffer(dev, es->dac2BufferPa, es->dac2BufferSize);
@@ -375,7 +383,7 @@ static void start_dac(phantom_device_t *dev)
     es->dac_active = 1;
 
     play(dev);
-    // Fill the first buffer now or else it is won't be double buffer
+    // Fill the first buffer now or else it won't be double buffer
     writeSamplesToPlaybackBuffer(dev);
 
 }
@@ -411,7 +419,7 @@ static void start_adc(phantom_device_t *dev)
 
 
 
-void stop_dac(phantom_device_t *dev)
+static void stop_dac(phantom_device_t *dev)
 {
     es1370_t *es = dev->drv_private;
 
@@ -426,7 +434,7 @@ void stop_dac(phantom_device_t *dev)
     es->dac_active = 0;
 }
 
-void stop_adc(phantom_device_t *dev)
+static void stop_adc(phantom_device_t *dev)
 {
     es1370_t *es = dev->drv_private;
 
@@ -438,14 +446,134 @@ void stop_adc(phantom_device_t *dev)
 }
 
 #if 1
+
+#if ES1370_CBUF
+
 // get from userland
 
-size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
+static size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 {
     es1370_t *es = dev->drv_private;
     int res = 0;
 
-    while(len > 0 && es->w_len > 0)
+    SHOW_FLOW( 1, "req %d", len );
+
+    int ie = hal_save_cli();
+    hal_spin_lock( &es->w_lock );
+
+    if(es->w_cbuf)
+    {
+        //size_t src_len = cbuf_get_len(es->w_cbuf) - es->w_read_pos;
+        size_t src_len = es->w_write_pos - es->w_read_pos;
+        int nc = imin(len, src_len );
+
+        if( nc > 0 )
+        {
+            assert(! cbuf_memcpy_from_chain(ptr, es->w_cbuf, es->w_read_pos, nc) );
+            len -= nc;
+            ptr += nc;
+            res += nc;
+            es->w_read_pos += nc;
+            hal_sem_release( &es->w_sem );
+        }
+    }
+
+    hal_spin_unlock( &es->w_lock );
+    if( ie ) hal_sti();
+
+    SHOW_FLOW( 1, "done %d", res );
+
+    return res;
+}
+
+static void trunc_cbuf(phantom_device_t *dev)
+{
+    es1370_t *es = dev->drv_private;
+
+    if(!es->w_cbuf)
+        return;
+
+    int ie = hal_save_cli();
+    hal_spin_lock( &es->w_lock );
+
+    //size_t clen = cbuf_get_len(es->w_cbuf);
+
+    if( es->w_read_pos > 0 )
+    {
+        SHOW_FLOW( 1, "before rpos %d wpos %d", es->w_read_pos, es->w_write_pos );
+        //cbuf *tcb = cbuf_truncate_head( es->w_cbuf, es->w_read_pos, 1);
+
+        es->w_cbuf = cbuf_truncate_head( es->w_cbuf, es->w_read_pos, 1);
+        es->w_write_pos -= es->w_read_pos;
+        es->w_read_pos = 0;
+        SHOW_FLOW( 1, "after rpos %d wpos %d", es->w_read_pos, es->w_write_pos );
+    }
+
+    hal_spin_unlock( &es->w_lock );
+    if( ie ) hal_sti();
+}
+
+#define MAX_CBUF (32*4096)
+
+static size_t write_play_stream(phantom_device_t *dev, const void *ptr, int len )
+{
+    es1370_t *es = dev->drv_private;
+
+    SHOW_FLOW( 1, "req %d", len );
+
+    int ie = hal_save_cli();
+    hal_spin_lock( &es->w_lock );
+
+    int nc, ret = 0;
+
+    int maxleft = MAX_CBUF - es->w_write_pos;
+    nc = imin( maxleft, len );
+
+    assert( nc >= 0 );
+    SHOW_FLOW( 1, "nc %d", nc );
+
+    if( nc > 0 )
+    {
+        if(!es->w_cbuf)
+        {
+            assert(es->w_write_pos == 0);
+            assert(es->w_read_pos == 0);
+            es->w_cbuf = cbuf_get_chain(nc);
+        }
+        else
+        {
+            assert(!cbuf_extend_tail(es->w_cbuf, nc));
+        }
+
+        assert(!cbuf_memcpy_to_chain( es->w_cbuf, es->w_write_pos, ptr, nc));
+    }
+
+    ret += nc;
+    es->w_write_pos += nc;
+
+    hal_sem_zero( &es->w_sem );
+
+    hal_spin_unlock( &es->w_lock );
+    if( ie ) hal_sti();
+
+    trunc_cbuf(dev);
+
+    if( len > ret )
+        hal_sem_acquire( &es->w_sem );
+
+    SHOW_FLOW( 1, "done %d", ret );
+
+    return ret;
+}
+
+#else // ES1370_CBUF
+
+static size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
+{
+    es1370_t *es = dev->drv_private;
+    int res = 0;
+
+    while( (len > 0) && (es->w_len > 0) )
     {
         int nc = imin(len, es->w_len );
         memcpy( ptr, es->w_buf, nc );
@@ -453,7 +581,7 @@ size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
         ptr += nc;
         res += nc;
         es->w_buf += nc;
-        es->w_len += nc;
+        es->w_len -= nc;
     }
 
     if( es->w_len <= 0 )
@@ -461,6 +589,9 @@ size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 
     return res;
 }
+
+#endif // ES1370_CBUF
+
 
 
 #else
@@ -486,7 +617,7 @@ static void sw_memcpy( char *o, const char *i, size_t nc )
 }
 
 
-size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
+static size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 {
     static const char *ip = intro;
     static int         is = sizeof(intro);
@@ -513,7 +644,7 @@ size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 #else
 
 
-size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
+static size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 {
     (void) dev;
     char meander[] = "adgjlorzzroljgda                "; // really poor man's sine ;)
@@ -545,19 +676,16 @@ static void writeSamplesToPlaybackBuffer(phantom_device_t *dev)
         ptr += es->dac2BufferSize / 2;
 
     unsigned int count = read_play_stream(dev, ptr, es->dac2BufferSize / 2);
+#if 0
     if (count == 0)
     {
         stop_dac(dev);
     }
     else
+#endif
     {
-        //u8 bits = lineDac2->getBitsPerSample();
-        //u8 bits = es->nbits;
         if (count < es->dac2BufferSize / 2)
-        {
-            //u8 silence = (bits == 8) ? 128 : 0;
-            memset(ptr + count, es->silence, es->dac2BufferSize / 2 - count);
-        }
+            memset(ptr + count, es->silence, (es->dac2BufferSize / 2) - count);
         es->oddDac2 = !es->oddDac2; // select the other buffer.
 
         es->writtenSamples += es->dac2BufferSize / 2;
@@ -594,6 +722,17 @@ static void readSamplesFromRecordBuffer(phantom_device_t *dev)
 
 
 
+#if ES1370_CBUF
+static void w_dpc_func(void *arg)
+{
+    (void) arg;
+
+    writeSamplesToPlaybackBuffer(dev);
+    control |= SerialP2inten;
+    outl(dev->iobase + ES1370_SERIAL_CONTROL, control);
+}
+#endif
+
 static void es1370_interrupt(void *arg)
 {
     phantom_device_t *dev = arg;
@@ -622,26 +761,34 @@ static void es1370_interrupt(void *arg)
         outl(dev->iobase + ES1370_SERIAL_CONTROL, control);
         if(es->dac_active)
         {
+#if ES1370_CBUF
+            dpc_request_trigger( &es->w_dpc, 0);
+
+#else
             writeSamplesToPlaybackBuffer(dev);
             control |= SerialP2inten;
             outl(dev->iobase + ES1370_SERIAL_CONTROL, control);
+#endif
         }
-
+#if 0
         // Attempt to refill buffers if underflow is detected.
         // Helps somehow, but not completely.
 
-    moreRefill:;
-        unsigned int nSamples = inl( dev->iobase+Dac2SampleCountRegister );
-        unsigned nBytes = (nSamples >> 16) * 4;
-
-        //SHOW_FLOW( 1, "?refill %d-%d", 4*(nSamples & 0xFFFF), nBytes );
-        if( nBytes < 2048 )
+        int maxRefill = 2;
+        while(maxRefill-- > 0)
         {
-            SHOW_FLOW( 1, "refill %d", nBytes );
-            writeSamplesToPlaybackBuffer(dev);
-            goto moreRefill;
-        }
+            unsigned int nSamples = inl( dev->iobase+Dac2SampleCountRegister );
+            unsigned nBytes = (nSamples >> 16) * 4;
 
+            //SHOW_FLOW( 1, "?refill %d-%d", 4*(nSamples & 0xFFFF), nBytes );
+            if( nBytes < 2048 )
+            {
+                SHOW_FLOW( 1, "refill %d", nBytes );
+                writeSamplesToPlaybackBuffer(dev);
+            }
+            else
+                break;
+        }
         /*
         SHOW_FLOW( 1, "?refill %d-%d", es->writtenSamples, nSamples );
         if( es->writtenSamples - nSamples < es->dac2BufferSize/2 )
@@ -650,6 +797,7 @@ static void es1370_interrupt(void *arg)
             writeSamplesToPlaybackBuffer(dev);
         }
         */
+#endif
     }
 
     if(status & StatusAdc)
@@ -726,6 +874,10 @@ static int _setCodec(phantom_device_t *dev, u8 codecControlRegister, u8 value)
 
 static void reset_codec(phantom_device_t *dev)
 {
+    es1370_t *es = dev->drv_private;
+
+    es->volume = DefaultGainLevel;
+
     setCodec(CodecResPd, RespdNormalOperation);
     setCodec(CodecCsel, 0); // set the clocks for codec.
     esSleep(200000); // 20msec
@@ -797,16 +949,33 @@ static void reset_codec(phantom_device_t *dev)
 
 static int es1370_start(phantom_device_t *dev)
 {
-    (void) dev;
+    es1370_t *es = dev->drv_private;
 
-    return -1;
+    SHOW_FLOW( 1, "dev %p", dev );
+    start_dac(dev);
+
+    setCodec(CodecVolMasterL, es->volume);
+    setCodec(CodecVolMasterR, es->volume);
+
+    return 0;
 }
 
 static int es1370_stop(phantom_device_t *dev)
 {
-    (void) dev;
+    //es1370_t *es = dev->drv_private;
 
-    return -1;
+    SHOW_FLOW( 1, "dev %p", dev );
+
+    setCodec(CodecVolMasterL, 0 );
+    setCodec(CodecVolMasterR, 0 );
+
+    stop_dac(dev);
+
+#if ES1370_CBUF
+    trunc_cbuf(dev);
+#endif
+
+    return 0;
 }
 
 
@@ -822,15 +991,34 @@ static int es1370_read(phantom_device_t *dev, void *buf, int len)
 
 static int es1370_write(phantom_device_t *dev, const void *buf, int len)
 {
+#if ES1370_CBUF
+    int ret = 0;
+
+    while( len > 0 )
+    {
+        size_t nc = write_play_stream( dev, buf, len );
+        buf += nc;
+        len -= nc;
+    }
+
+    return ret;
+#else
+
     es1370_t *es = dev->drv_private;
 
+    //SHOW_FLOW( 1, "dev %p buf %p len %d", dev, buf, len );
     // TODO mutex!
+
+    // Eats all positive sema value
+    hal_sem_zero( &es->w_sem );
 
     es->w_buf = buf;
     es->w_len = len;
+
     hal_sem_acquire( &es->w_sem );
 
-    return -1;
+    return len;
+#endif
 }
 
 
@@ -879,9 +1067,9 @@ static int es1370_ioctl(struct phantom_device *dev, int type, void *buf, int len
 
     case IOCTL_SOUND_VOLUME:
         {
-            tmp = RD_INT();
-            setCodec(CodecVolMasterL, tmp);
-            setCodec(CodecVolMasterR, tmp);
+            es->volume = RD_INT();
+            setCodec(CodecVolMasterL, es->volume);
+            setCodec(CodecVolMasterR, es->volume);
         }
         break;
 

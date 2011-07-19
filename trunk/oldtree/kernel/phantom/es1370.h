@@ -183,6 +183,12 @@
 #define ES1370_BUFSIZE 		(4096*2)
 
 
+#define ES1370_CBUF 1
+
+#if ES1370_CBUF
+#  include <newos/cbuf.h>
+#  include <kernel/dpc.h>
+#endif
 
 typedef struct es1370_private
 {
@@ -212,8 +218,20 @@ typedef struct es1370_private
     int		writtenSamples; // dac2 - count of samples we actually sent
 
     hal_sem_t   w_sem;
+#if ES1370_CBUF
+    cbuf *      w_cbuf;
+    hal_spinlock_t w_lock;
+
+    off_t       w_write_pos;
+    off_t       w_read_pos;
+
+    dpc_request w_dpc;
+#else
     const void *w_buf;
     size_t      w_len;
+#endif
+    int         volume;
+
 
 } es1370_t;
 
