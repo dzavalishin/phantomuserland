@@ -130,6 +130,7 @@ struct phantom_device
 
     struct properties           *props;
 
+    int                         open_count; // how many times was open
 };
 
 typedef struct phantom_device phantom_device_t;
