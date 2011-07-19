@@ -60,7 +60,7 @@ static UNIT* compact( UNIT *p, unsigned nsize )
 
 void free( void *ptr )
 {
-    if(!inited) { printf("init_malloc!\n"); exit(33); }
+    if(!inited) { printf("call init_malloc in main!\n"); exit(33); }
     if( ptr )
     {
         UNIT *p;
@@ -72,7 +72,7 @@ void free( void *ptr )
 
 void *malloc( size_t size )
 {
-    if(!inited) { printf("init_malloc!\n"); exit(33); }
+    if(!inited) { printf("call init_malloc in main!\n"); exit(33); }
 
     unsigned fsize;
     UNIT *p;
@@ -119,9 +119,9 @@ void init_malloc( void *heap, unsigned len )
     inited = 1;
 }
 
-
+/*
 void MSYS_Compact( void )
 {
     msys.free = compact( msys.heap, 0x7FFFFFFF );
 }
-
+*/
