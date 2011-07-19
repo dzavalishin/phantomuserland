@@ -17,8 +17,6 @@
 
 #include "thread_private.h"
 
-#if USE_NEW_SEMAS
-
 
 
 static hal_spinlock_t init_lock;
@@ -147,6 +145,9 @@ hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
 
     phantom_thread_t *t = GET_CURRENT_THREAD();
 
+    if( (flags & SEM_FLAG_ZERO) && (ci->value > 0) )
+        ci->value = 0;
+
     while( ci->value <= 0 )
     {
         t_queue_check(&(ci->waiting_threads), t);
@@ -192,6 +193,33 @@ exit_on_timeout:
 
 
 
+
+
+
+errno_t
+hal_sem_zero( hal_sem_t *s )
+{
+    assert_not_interrupt();
+
+    if(s->impl == 0) checkinit(s);
+    struct phantom_sem_impl *ci = s->impl;
+
+    // save & dis preemtion
+    int ie = hal_save_cli();
+    hal_disable_preemption();
+    hal_spin_lock(&(ci->lock));
+
+    int retcode = ci->value <= 0;
+
+    if( ci->value > 0 )
+        ci->value = 0;
+
+    hal_spin_unlock(&(ci->lock));
+    hal_enable_preemption();
+    if(ie) hal_sti();
+
+    return retcode ? EINVAL : 0;
+}
 
 
 
@@ -311,4 +339,3 @@ void hal_sem_destroy(hal_sem_t *c)
     c->impl=0;
 }
 
-#endif // USE_NEW_SEMAS
