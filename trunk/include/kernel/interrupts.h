@@ -52,6 +52,7 @@
 // two top bits are 'no softint req' and 'softint disabled'
 extern int      irq_nest; 
 
+#define         IN_INTERRUPT()          ((irq_nest & ~(SOFT_IRQ_NOT_PENDING|SOFT_IRQ_DISABLED)))
 
 #define         REQUEST_SOFT_IRQ()      (irq_nest &= ~SOFT_IRQ_NOT_PENDING )
 #define         CLEAR_SOFT_IRQ()        (irq_nest |= SOFT_IRQ_NOT_PENDING )
