@@ -1,3 +1,6 @@
+#define AHCI_Q 0
+#define AHCI_REG_DISK 0
+
 #if HAVE_PCI
 
 #if !HAVE_AHCI
@@ -39,6 +42,7 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 #include <time.h>
 #include <threads.h>
 #include <disk.h>
+#include <disk_q.h>
 
 #include <pager_io_req.h>
 
@@ -75,6 +79,8 @@ typedef struct
 
 typedef struct
 {
+    int                 nunit;
+
     int                 ncs;
     ahci_port_t         port[MAX_PORTS];
 
@@ -173,6 +179,8 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
     ahci_t *es = calloc(1,sizeof(ahci_t));
     assert(es);
     dev->drv_private = es;
+
+    es->nunit = seq_number-1;
 
     if( ahci_init(dev) )
         goto free1;
@@ -858,6 +866,22 @@ static void dump_ataid(hd_driveid_t *ataid)
 
 
 
+#if AHCI_Q
+
+static void startIo( struct disk_q *q )
+{
+    ahci_port_t *p = q->device;
+    pager_io_request *rq = q->current;
+    assert(rq);
+
+    rq->flag_ioerror = 0;
+    rq->rc = 0;
+
+    int slot = ahci_build_req_cmd(dev, p->nport, rq );
+    ahci_start_cmd( dev, p->nport, slot );
+}
+
+#else
 static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_request *rq )
 {
     ahci_port_t *p = part->specific;
@@ -876,10 +900,19 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
 
     return 0;
 }
+#endif
 
-phantom_disk_partition_t *phantom_create_ahci_partition_struct( ahci_port_t *p, long size )
+phantom_disk_partition_t *phantom_create_ahci_partition_struct( ahci_port_t *p, long size, int unit )
 {
+#if AHCI_Q
+    phantom_disk_partition_t * ret = phantom_create_disk_partition_struct( size, p, unit, startIo );
+
+    snprintf( ret->name, sizeof(ret->name), "AHCI%d", unit  );
+
+    return ret;
+#else
     //phantom_device_t *dev = p->dev;
+    //ahci_t *a = dev->drv_private;
 
     phantom_disk_partition_t * ret = phantom_create_partition_struct( 0, 0, size );
 
@@ -900,6 +933,7 @@ phantom_disk_partition_t *phantom_create_ahci_partition_struct( ahci_port_t *p, 
     // errno_t phantom_register_disk_drive(ret);
 
     return ret;
+#endif
 }
 
 
@@ -914,14 +948,21 @@ static void ahci_connect_port( ahci_port_t *p )
         return;
     }
 
-    phantom_disk_partition_t *part = phantom_create_ahci_partition_struct( p, size );
+    int unit = p->nport;
+
+    phantom_device_t *dev = p->dev;
+    ahci_t *a = dev->drv_private;
+
+    unit += 100*a->nunit;
+
+    phantom_disk_partition_t *part = phantom_create_ahci_partition_struct( p, size, unit );
     if(part == 0)
     {
         SHOW_ERROR0( 0, "Failed to create whole disk partition" );
         return;
     }
 // hangs
-#if 0
+#if AHCI_REG_DISK
     errno_t err = phantom_register_disk_drive(part);
     if(err)
     {

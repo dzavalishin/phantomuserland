@@ -91,7 +91,7 @@ static pci_probe_t pci_drivers[] =
     { "USB UHCI",       driver_uhci_probe, 		3, 0, 0, UHCI_BASE_CLASS },
 #endif
 
-    { "IDE AHCI",       driver_ahci_probe, 		1, INTEL_VENDORID, 0x2922, 0 },
+    { "IDE AHCI",       driver_ahci_probe, 		3, INTEL_VENDORID, 0x2922, 0 },
 
     // Chipset drivers, etc
 
