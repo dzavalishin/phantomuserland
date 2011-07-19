@@ -11,6 +11,7 @@
 #include <phantom_libc.h>
 #include <drv_video_screen.h>
 #include <kernel/debug.h>
+#include <kernel/interrupts.h>
 
 #include <console.h>
 
@@ -64,8 +65,10 @@ int putchar(int c)
 	// Send a copy to serial port or whatever...
     debug_console_putc(c);
 
-    if(ops->putchar) return ops->putchar(c);
+    if(!IN_INTERRUPT())
+        if(ops->putchar) return ops->putchar(c);
     // No way to handle :(
+
     return c;
 }
 
@@ -78,6 +81,9 @@ puts(const char *s)
         const char *sc = s;
         while(*sc)
             debug_console_putc(*sc++);
+
+        if(IN_INTERRUPT())
+            return 0;
 
         return ops->puts(s);
     }
