@@ -78,6 +78,9 @@ struct phantom_disk_partition
     // Snapshot code relies on it a lot
     errno_t     (*dequeue)( struct phantom_disk_partition *p, pager_io_request *rq );
 
+    // Attempt to raise this request's priority, if possible
+    // Snapshot code relies on it a lot
+    errno_t     (*raise)( struct phantom_disk_partition *p, pager_io_request *rq );
 };
 
 

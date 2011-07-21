@@ -326,6 +326,7 @@ int
 send_default_control(struct usb_pipe *pipe, const struct usb_ctrlrequest *req
                      , void *data)
 {
+    SHOW_FLOW( 6, "pipe %p datasize %d", pipe, req->wLength );
     return send_control(pipe, req->bRequestType & USB_DIR_IN
                         , req, sizeof(*req), data, req->wLength);
 }
@@ -334,6 +335,7 @@ send_default_control(struct usb_pipe *pipe, const struct usb_ctrlrequest *req
 static int
 get_device_info8(struct usb_pipe *pipe, struct usb_device_descriptor *dinfo)
 {
+    SHOW_FLOW0( 7, "enter" );
     struct usb_ctrlrequest req;
     req.bRequestType = USB_DIR_IN | USB_TYPE_STANDARD | USB_RECIP_DEVICE;
     req.bRequest = USB_REQ_GET_DESCRIPTOR;
@@ -346,6 +348,8 @@ get_device_info8(struct usb_pipe *pipe, struct usb_device_descriptor *dinfo)
 static struct usb_config_descriptor *
 get_device_config(struct usb_pipe *pipe)
 {
+    SHOW_FLOW0( 7, "enter" );
+
     struct usb_config_descriptor cfg;
 
     struct usb_ctrlrequest req;
@@ -372,6 +376,7 @@ get_device_config(struct usb_pipe *pipe)
 static int
 set_configuration(struct usb_pipe *pipe, u16 val)
 {
+    SHOW_FLOW0( 7, "enter" );
     struct usb_ctrlrequest req;
     req.bRequestType = USB_DIR_OUT | USB_TYPE_STANDARD | USB_RECIP_DEVICE;
     req.bRequest = USB_REQ_SET_CONFIGURATION;
@@ -393,7 +398,7 @@ usb_set_address(struct usbhub_s *hub, int port, int speed)
 {
     ASSERT32FLAT();
     struct usb_s *cntl = hub->cntl;
-    dprintf(3, "set_address %p\n", cntl);
+    dprintf(3, "cntl %p\n", cntl);
     if (cntl->maxaddr >= USB_MAXADDR)
         return NULL;
 
