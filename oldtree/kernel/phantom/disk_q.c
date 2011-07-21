@@ -186,7 +186,33 @@ static errno_t queueDequeue( struct phantom_disk_partition *p, pager_io_request 
 
 }
 
+static errno_t queueRaisePrio( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    SHOW_FLOW( 7, "dequeue rq %p", rq );
+    struct disk_q *q = (struct disk_q*)p->specific;
 
+    assert( q != 0 );
+    assert( q->struct_id == DISK_Q_STRUCT_ID );
+
+    errno_t ret = 0;
+
+    LOCK();
+    dump_q(q);
+
+    if( rq == q->current )
+        ret = EBUSY;
+    else
+    {
+        assert(!queue_empty(&(q->requests)));
+        // TODO assert that block is really in q
+        queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
+        queue_enter( &(q->requests), rq, pager_io_request *, disk_chain);
+    }
+
+    UNLOCK();
+
+    return ret;
+}
 
 // TODO start timer (timed call) on start io, call driver's reset entry point on timeout
 

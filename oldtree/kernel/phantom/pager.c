@@ -173,13 +173,13 @@ pager_finish()
 // TODO implement for partitioning code
 int pager_dequeue_from_pageout(pager_io_request *rq)
 {
-    return disk_dequeue( pp, rq );
+    return !disk_dequeue( pp, rq );
 }
 
 // TODO implement for partitioning code
 void pager_raise_request_priority(pager_io_request *rq)
 {
-    (void) rq;
+    disk_raise_priority( pp, rq );
 }
 
 void pager_enqueue_for_pagein ( pager_io_request *rq )

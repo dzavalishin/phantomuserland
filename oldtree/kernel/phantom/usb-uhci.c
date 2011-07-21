@@ -132,7 +132,9 @@ configure_uhci(void *data)
 
     //struct uhci_framelist *fl = memalign_high(sizeof(*fl), sizeof(*fl));
     void *fl_b = malloc(sizeof(struct uhci_framelist)+4096);
-    struct uhci_framelist *fl = (void *) ( ((addr_t)fl_b) & ~(4096-1) );
+    struct uhci_framelist *fl = (void *) ( (((addr_t)fl_b)+4096) & ~(4096-1) );
+
+    SHOW_FLOW( 8, "framelist %p", fl );
 
     // Allocate ram for schedule storage
     struct uhci_td *term_td = malloc_high(sizeof(*term_td));
@@ -205,7 +207,7 @@ uhci_init(u16 bdf, int busid)
     cntl->iobase = (pci_config_readl(bdf, PCI_BASE_ADDRESS_4)
                     & PCI_BASE_ADDRESS_IO_MASK);
 
-    dprintf(1, "UHCI init on dev %02x:%02x.%x (io=%x)\n"
+    dprintf(1, "UHCI init on dev %02x:%02x.%x (io=%x)"
             , pci_bdf_to_bus(bdf), pci_bdf_to_dev(bdf)
             , pci_bdf_to_fn(bdf), cntl->iobase);
 
@@ -224,6 +226,7 @@ uhci_init(u16 bdf, int busid)
 static int
 wait_qh(struct usb_uhci_s *cntl, struct uhci_qh *qh)
 {
+    //SHOW_FLOW( 5, "count = %d", count );
     // XXX - 500ms just a guess
     u64 end = calc_future_tsc(500);
     for (;;) {
@@ -232,7 +235,7 @@ wait_qh(struct usb_uhci_s *cntl, struct uhci_qh *qh)
         if (check_tsc(end)) {
             warn_timeout();
             struct uhci_td *td = (void*)(qh->element & ~UHCI_PTR_BITS);
-            dprintf(1, "Timeout on wait_qh %p (td=%p s=%x c=%x/%x)\n"
+            dprintf(1, "Timeout on wait_qh %p (td=%p s=%x c=%x/%x)"
                     , qh, td, td->status
                     , inw(cntl->iobase + USBCMD)
                     , inw(cntl->iobase + USBSTS));
@@ -246,6 +249,7 @@ wait_qh(struct usb_uhci_s *cntl, struct uhci_qh *qh)
 static void
 uhci_waittick(u16 iobase)
 {
+    SHOW_FLOW0( 6, "enter" );
     barrier();
     u16 startframe = inw(iobase + USBFRNUM);
     u64 end = calc_future_tsc(1000 * 5);
@@ -273,7 +277,7 @@ uhci_free_pipe(struct usb_pipe *p)
 {
     if (! CONFIG_USB_UHCI)
         return;
-    dprintf(7, "uhci_free_pipe %p\n", p);
+    dprintf(7, "uhci_free_pipe %p", p);
     struct uhci_pipe *pipe = container_of(p, struct uhci_pipe, pipe);
     struct usb_uhci_s *cntl = container_of(
         pipe->pipe.cntl, struct usb_uhci_s, usb);
@@ -308,7 +312,7 @@ uhci_alloc_control_pipe(struct usb_pipe *dummy)
         return NULL;
     struct usb_uhci_s *cntl = container_of(
         dummy->cntl, struct usb_uhci_s, usb);
-    dprintf(7, "uhci_alloc_control_pipe %p\n", &cntl->usb);
+    dprintf(7, "uhci_alloc_control_pipe %p", &cntl->usb);
 
     // Allocate a queue head.
     struct uhci_pipe *pipe = malloc_tmphigh(sizeof(*pipe));
@@ -338,7 +342,7 @@ uhci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
     ASSERT32FLAT();
     if (! CONFIG_USB_UHCI)
         return -1;
-    dprintf(5, "uhci_control %p\n", p);
+    dprintf(5, "uhci_control %p", p);
     struct uhci_pipe *pipe = container_of(p, struct uhci_pipe, pipe);
     struct usb_uhci_s *cntl = container_of(
         pipe->pipe.cntl, struct usb_uhci_s, usb);
@@ -354,6 +358,8 @@ uhci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
         warn_noalloc();
         return -1;
     }
+
+    SHOW_FLOW( 5, "count = %d, datasize = %d, maxpacket = %d", count, datasize, maxpacket );
 
     tds[0].link = (u32)&tds[1] | UHCI_PTR_DEPTH;
     tds[0].status = (uhci_maxerr(3) | (lowspeed ? TD_CTRL_LS : 0)
@@ -401,7 +407,7 @@ uhci_alloc_bulk_pipe(struct usb_pipe *dummy)
         return NULL;
     struct usb_uhci_s *cntl = container_of(
         dummy->cntl, struct usb_uhci_s, usb);
-    dprintf(7, "uhci_alloc_bulk_pipe %p\n", &cntl->usb);
+    dprintf(7, "uhci_alloc_bulk_pipe %p", &cntl->usb);
 
     // Allocate a queue head.
     struct uhci_pipe *pipe = malloc_low(sizeof(*pipe));
@@ -439,7 +445,7 @@ wait_td(struct uhci_td *td)
         yield();
     }
     if (status & TD_CTRL_ANY_ERROR) {
-        dprintf(1, "wait_td error - status=%x\n", status);
+        dprintf(1, "wait_td error - status=%x", status);
         return -2;
     }
     return 0;
@@ -454,7 +460,7 @@ uhci_send_bulk(struct usb_pipe *p, int dir, void *data, int datasize)
     if (! CONFIG_USB_UHCI)
         return -1;
     struct uhci_pipe *pipe = container_of(p, struct uhci_pipe, pipe);
-    dprintf(7, "uhci_send_bulk qh=%p dir=%d data=%p size=%d\n"
+    dprintf(7, "uhci_send_bulk qh=%p dir=%d data=%p size=%d"
             , &pipe->qh, dir, data, datasize);
     int maxpacket = GET_FLATPTR(pipe->pipe.maxpacket);
     int lowspeed = GET_FLATPTR(pipe->pipe.speed);
@@ -520,7 +526,7 @@ uhci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
         return NULL;
     struct usb_uhci_s *cntl = container_of(
         dummy->cntl, struct usb_uhci_s, usb);
-    dprintf(7, "uhci_alloc_intr_pipe %p %d\n", &cntl->usb, frameexp);
+    dprintf(7, "uhci_alloc_intr_pipe %p %d", &cntl->usb, frameexp);
 
     if (frameexp > 10)
         frameexp = 10;

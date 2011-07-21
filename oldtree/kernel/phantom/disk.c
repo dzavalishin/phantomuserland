@@ -177,6 +177,16 @@ errno_t disk_dequeue( struct phantom_disk_partition *p, pager_io_request *rq )
 }
 
 
+errno_t disk_raise_priority( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    assert(p);
+    assert(rq);
+
+    if( 0 == p->raise )
+        return ENODEV;
+    return p->raise( p, rq );
+}
+
 
 // ------------------------------------------------------------
 // Partitions list management
