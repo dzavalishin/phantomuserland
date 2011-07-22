@@ -489,14 +489,6 @@ static void move_to_dirty_q(vm_page *p)
 
 
 
-static int  is_unmapped( volatile vm_page *p ) { return !p->flag_phys_mem; }
-static int  is_mapped( volatile vm_page *p ) { return p->flag_phys_mem != 0; }
-
-void vm_map_for_unmapped( vmem_page_func_t func ) {     vm_map_do_for( func, is_unmapped ); }
-void vm_map_for_mapped( vmem_page_func_t func ) {     vm_map_do_for( func, is_mapped ); }
-
-
-
 // -------------
 // Global snapshot related variables
 int     is_in_snapshot_process = 0;
@@ -1106,33 +1098,36 @@ page_fault( vm_page *p, int  is_writing )
 // Used to show progress
 int vm_map_do_for_percentage = 0;
 
-
-// we depend on do_for not modifying interrupts disable status
-// XXX BUG? Mutex lock can switch thread and it means that interrupts will be enabled
-void
-vm_map_do_for( vmem_page_func_t func, bool_vmem_page_func_t predicate )
+static void
+vm_map_do_for_all( vmem_page_func_t func, int lock )
 {
     size_t total = vm_map_map_end-vm_map_map;
     vm_page *i;
     for( i = vm_map_map; i < vm_map_map_end; i++ )
     {
-        hal_mutex_lock(&i->lock);
-        if( predicate == 0 || predicate( i ) )
-        {
-            func( i );
-        }
-        hal_mutex_unlock(&i->lock);
+        if (lock)
+            hal_mutex_lock(&i->lock);
+        else
+            assert(!hal_mutex_is_locked(&i->lock));
+        func( i );
+        if (lock)
+            hal_mutex_unlock(&i->lock);
         vm_map_do_for_percentage = (100L*(i-vm_map_map))/total;
     }
     vm_map_do_for_percentage = 100;
 }
 
-void
+static void
 vm_map_for_all( vmem_page_func_t func )
 {
-    vm_map_do_for( func, 0 );
+    vm_map_do_for_all(func, 1);
 }
 
+static void
+vm_map_for_all_locked( vmem_page_func_t func )
+{
+    vm_map_do_for_all(func, 0);
+}
 
 
 
@@ -1350,7 +1345,7 @@ void do_snapshot()
     // TODO: we have top do more. such as stop oher CPUS, force VMs into the
     // special snap-friendly state, etc
 
-    vm_map_for_all( mark_for_snap );
+    vm_map_for_all_locked( mark_for_snap );
 
     syslog( 0, "done THE SNAP\n");
 
