@@ -251,6 +251,18 @@ static errno_t ideDequeue( struct phantom_disk_partition *p, pager_io_request *r
     return both->dequeue( both, rq );
 }
 
+static errno_t ideRaise( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    (void) p;
+
+    if( 0 == both->dequeue )
+        return ENODEV;
+
+    SHOW_FLOW( 11, "ide raise rq prio %p", rq );
+
+    return both->raise( both, rq );
+}
+
 
 
 static void make_unit_part( int unit, void *aio )
@@ -262,6 +274,7 @@ static void make_unit_part( int unit, void *aio )
     p->base = 0; // and don't have this
     p->asyncIo = aio;
     p->dequeue = ideDequeue;
+    p->raise = ideRaise;
     snprintf( p->name, sizeof(p->name), "Ide%d", unit );
     errno_t err = phantom_register_disk_drive(p);
     if(err)
