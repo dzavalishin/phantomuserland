@@ -905,6 +905,7 @@ page_fault_read( vm_page *p )
 
     hal_mutex_unlock(&p->lock);
     pager_enqueue_for_pagein(&p->pager_io);
+    pager_raise_request_priority(&p->pager_io);
     hal_mutex_lock(&p->lock);
 
     while (p->flag_pager_io_busy)
@@ -1050,6 +1051,7 @@ page_fault_write( vm_page *p )
     page_touch_history(p);
     hal_mutex_unlock(&p->lock);
     pager_enqueue_for_pagein(&p->pager_io);
+    pager_raise_request_priority(&p->pager_io);
     hal_mutex_lock(&p->lock);
 
     while (p->flag_pager_io_busy)
