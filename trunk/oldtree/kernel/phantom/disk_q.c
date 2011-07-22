@@ -178,6 +178,8 @@ static errno_t queueDequeue( struct phantom_disk_partition *p, pager_io_request 
         assert(!queue_empty(&(q->requests)));
         // TODO assert that block is really in q
         queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
+        rq->flag_pageout = 0;
+        rq->flag_pagein = 0;
     }
 
     UNLOCK();
@@ -236,6 +238,7 @@ phantom_disk_partition_t *phantom_create_disk_partition_struct(long size, void *
 
     ret->asyncIo = queueAsyncIo;
     ret->dequeue = queueDequeue;
+    ret->raise = queueRaisePrio;
     ret->flags |= PART_FLAG_IS_WHOLE_DISK;
 
     struct disk_q *q = calloc( 1, sizeof(struct disk_q) );
