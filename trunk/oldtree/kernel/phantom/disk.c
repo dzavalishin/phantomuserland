@@ -63,6 +63,18 @@ static errno_t partDequeue( struct phantom_disk_partition *p, pager_io_request *
     return p->base->dequeue( p->base, rq );
 }
 
+static errno_t partRaise( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    assert(p->base);
+
+    if( 0 == p->base->dequeue )
+        return ENODEV;
+
+    SHOW_FLOW( 11, "part raise rq %p", rq );
+
+    return p->base->raise( p->base, rq );
+}
+
 
 // ------------------------------------------------------------
 // Upper level disk io functions
@@ -225,6 +237,7 @@ phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition
 
     ret->asyncIo = partAsyncIo;
     ret->dequeue = partDequeue;
+    ret->raise   = partRaise;
 
     ret->base = base;
     ret->baseh.h = -1;

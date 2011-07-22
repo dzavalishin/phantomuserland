@@ -208,7 +208,7 @@ static errno_t queueRaisePrio( struct phantom_disk_partition *p, pager_io_reques
         assert(!queue_empty(&(q->requests)));
         // TODO assert that block is really in q
         queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
-        queue_enter( &(q->requests), rq, pager_io_request *, disk_chain);
+        queue_enter_first( &(q->requests), rq, pager_io_request *, disk_chain);
     }
 
     UNLOCK();
