@@ -67,7 +67,7 @@ static errno_t partRaise( struct phantom_disk_partition *p, pager_io_request *rq
 {
     assert(p->base);
 
-    if( 0 == p->base->dequeue )
+    if( 0 == p->base->raise )
         return ENODEV;
 
     SHOW_FLOW( 11, "part raise rq %p", rq );

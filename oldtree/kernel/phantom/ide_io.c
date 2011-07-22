@@ -255,7 +255,7 @@ static errno_t ideRaise( struct phantom_disk_partition *p, pager_io_request *rq 
 {
     (void) p;
 
-    if( 0 == both->dequeue )
+    if( 0 == both->raise )
         return ENODEV;
 
     SHOW_FLOW( 11, "ide raise rq prio %p", rq );
