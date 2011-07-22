@@ -32,6 +32,8 @@
 #include <disk.h>
 #endif
 
+#define USE_SYNC_IO 0
+
 #define free_reserve_size  32
 
 
@@ -64,9 +66,12 @@ static pager_io_request         *pageout_q_start = 0;
 static pager_io_request         *pageout_q_end = 0;
 //static int                      pageout_q_len;
 
+
+#endif
+
+#if !USE_SYNC_IO
 static disk_page_io             freelist_head;
 static disk_page_io             superblock_io;
-
 #endif
 
 static int                      need_fsck;
@@ -140,6 +145,12 @@ void partition_pager_init(phantom_disk_partition_t *p)
     assert(pp);
 
     hal_mutex_init(&pager_freelist_mutex, "PagerFree");
+
+#if !USE_SYNC_IO
+    disk_page_io_init(&freelist_head);
+    disk_page_io_init(&superblock_io);
+    disk_page_io_allocate(&superblock_io);
+#endif
 
     SHOW_FLOW0( 1, "Pager get superblock" );
     pager_get_superblock();
@@ -551,8 +562,9 @@ void write_blocklist_sure( struct phantom_disk_blocklist *list, disk_page_no_t a
     * ((struct phantom_disk_blocklist *)buf) = *list;
     assert(!phantom_sync_write_block( pp, buf, addr, 1 ));
 #else
+    (void) list;
+    (void) addr;
     panic("no old code here");
-    return 0;
 #endif
 }
 
@@ -564,8 +576,9 @@ void read_blocklist_sure( struct phantom_disk_blocklist *list, disk_page_no_t ad
     assert(!phantom_sync_read_block( pp, buf, addr, 1 ));
     *list = * ((struct phantom_disk_blocklist *)buf);
 #else
+    (void) list;
+    (void) addr;
     panic("no old code here");
-    return 0;
 #endif
 }
 
@@ -587,15 +600,17 @@ errno_t write_superblock(phantom_disk_superblock *in, disk_page_no_t addr )
     * ((phantom_disk_superblock *)buf) = *in;
     return phantom_sync_write_block( pp, buf, addr, 1 );
 #else
+    (void) in;
+    (void) addr;
     panic("no old code here");
-    return 0;
+    return EIO;
 #endif
 }
 
 
 errno_t read_uncheck_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
 {
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     char buf[PAGE_SIZE];
 
     errno_t rc = phantom_sync_read_block( pp, buf, addr, 1 );
@@ -619,7 +634,7 @@ errno_t read_uncheck_superblock(phantom_disk_superblock *out, disk_page_no_t add
 
 errno_t read_check_superblock(phantom_disk_superblock *out, disk_page_no_t addr )
 {
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     char buf[PAGE_SIZE];
 
     errno_t rc = phantom_sync_read_block( pp, buf, addr, 1 );
@@ -750,7 +765,7 @@ pager_get_superblock()
     hal_printf("Checking superblock...");
     //getchar();
 
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     // TODO check rc
     //phantom_sync_read_block( pp, &root_sb, sb_default_page_numbers[0], 1 );
     assert(! read_uncheck_superblock( &root_sb, sb_default_page_numbers[0] ) );
@@ -894,13 +909,13 @@ pager_update_superblock()
 {
     SHOW_FLOW0( 0, " updating superblock...");
 
-#if !PAGING_PARTITION
+#if !USE_SYNC_IO
     assert(!(superblock_io.req.flag_pagein || superblock_io.req.flag_pageout));
 #endif
 
     phantom_calc_sb_checksum( &superblock );
 
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     errno_t rc;
 
     rc = write_superblock( &superblock, sb_default_page_numbers[0] );
@@ -957,7 +972,7 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
     freelist.head.used = 0;
     freelist.head.next = superblock.free_list;
 
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     u.free_head = freelist;
     //errno_t rc = phantom_sync_write_block( pp, &freelist, fp, 1 );
     //if( rc ) SHOW_ERROR0( 0, "empty freelist block write error!" ); // TODO rc
@@ -973,7 +988,7 @@ void pager_flush_free_list(void)
 {
     hal_mutex_lock(&pager_freelist_mutex);
 
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     //errno_t rc = phantom_sync_write_block( pp, &u.free_head, superblock.free_list, 1 );
     //if( rc ) SHOW_ERROR0( 0, "empty freelist block write error!" ); // TODO rc
     write_freehead_sure( superblock.free_list );
@@ -1005,7 +1020,7 @@ pager_put_to_free_list( disk_page_no_t free_page )
         {
             pager_format_empty_free_list_block( free_page );
             superblock.free_list = free_page;
-#if !PAGING_PARTITION // format_empty assigns free_head
+#if !USE_SYNC_IO // format_empty assigns free_head
             disk_page_io_load_sync(&freelist_head,superblock.free_list);
 #endif
             freelist_inited = 1;
@@ -1016,7 +1031,7 @@ pager_put_to_free_list( disk_page_no_t free_page )
         }
         else
         {
-#if PAGING_PARTITION
+#if USE_SYNC_IO
             //errno_t rc = phantom_sync_read_block( pp, &u.free_head, superblock.free_list, 1 );
             //if( rc ) panic( "empty freelist block read error!" );
             read_freehead_sure();
@@ -1028,7 +1043,7 @@ pager_put_to_free_list( disk_page_no_t free_page )
         }
     }
 
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     struct phantom_disk_blocklist *list = &u.free_head;
 #else
     struct phantom_disk_blocklist *list = (struct phantom_disk_blocklist *) disk_page_io_data(&freelist_head);
@@ -1036,7 +1051,7 @@ pager_put_to_free_list( disk_page_no_t free_page )
 
     if( list->head.used >= N_REF_PER_BLOCK )
         {
-#if PAGING_PARTITION
+#if USE_SYNC_IO
             //errno_t rc = phantom_sync_write_block( pp, &u.free_head, superblock.free_list, 1 );
             //if( rc ) panic( "empty freelist block write error!" );
             write_freehead_sure( superblock.free_list );
@@ -1080,7 +1095,7 @@ pager_init_free_list()
     if(superblock.free_list == 0 )
         panic("superblock.free_list == 0, can't init freelist...");
 
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     //errno_t rc = phantom_sync_read_block( pp, &u.free_head, superblock.free_list, 1 );
     //if( rc ) panic( "empty freelist block read error!" );
     read_freehead_sure();
@@ -1119,7 +1134,7 @@ void
 pager_refill_free_reserve()
 {
     SHOW_FLOW0( 10, "Refill free reserve... ");
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     struct phantom_disk_blocklist *list = &u.free_head;
 #else
     struct phantom_disk_blocklist *list = (struct phantom_disk_blocklist *) disk_page_io_data(&freelist_head);
@@ -1137,7 +1152,7 @@ pager_refill_free_reserve()
 
             free_reserve[free_reserve_n++] = superblock.free_list;
             superblock.free_list = list->head.next;
-#if PAGING_PARTITION
+#if USE_SYNC_IO
             //errno_t rc = phantom_sync_read_block( pp, &u.free_head, superblock.free_list, 1 );
             //if( rc ) panic( "empty freelist block read error!" );
             read_freehead_sure();
@@ -1256,7 +1271,7 @@ int
 pager_fast_fsck()
 {
     pager_init_free_list();
-#if PAGING_PARTITION
+#if USE_SYNC_IO
     struct phantom_disk_blocklist *flist = &u.free_head;
 #else
     struct phantom_disk_blocklist *flist = (struct phantom_disk_blocklist *) disk_page_io_data(&freelist_head);

@@ -3,6 +3,8 @@ MAKEFLAGS += --no-print-directory
 
 default::
 	@echo make all or make install
+	@echo doing make all by default
+	$(MAKE) all
 
 install::
 	cd build ; make install
