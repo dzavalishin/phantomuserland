@@ -23,7 +23,7 @@
 #include <phantom_libc.h>
 #include <time.h>
 
-#include "hal.h"
+#include <hal.h>
 
 #include <x86/comreg.h>
 #include <kernel/page.h>

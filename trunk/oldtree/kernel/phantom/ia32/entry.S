@@ -123,7 +123,6 @@ boot_code:
     call	EXT(phantom_multiboot_main)
     //call	EXT(multiboot_main)
 
-    //#include <x86/phantom_page.h>
 #include <kernel/page.h>
     /* Data seg. Need PAGE_SHIFT defined! */
     .data

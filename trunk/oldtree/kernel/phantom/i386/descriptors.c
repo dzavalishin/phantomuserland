@@ -9,7 +9,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "i386desc"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
@@ -33,10 +33,6 @@
 #include <kernel/init.h>
 #include <kernel/trap.h>
 #include <kernel/page.h>
-
-//#include <x86/phantom_page.h>
-//#include <i386/vesa.h>
-
 
 #include <hal.h>
 #include "vm86.h"

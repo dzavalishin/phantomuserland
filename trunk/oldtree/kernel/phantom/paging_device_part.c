@@ -11,12 +11,12 @@
 **/
 
 #define DEBUG_MSG_PREFIX "part_pager_io"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <x86/phantom_page.h>
+#include <kernel/page.h>
 #include <errno.h>
 #include <threads.h>
 

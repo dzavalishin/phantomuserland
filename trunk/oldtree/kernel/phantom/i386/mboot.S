@@ -39,7 +39,6 @@
 #include <mach/asm.h>		/* miscellaneous asm macros */
 #include <kernel/page.h>
 
-//#include <x86/phantom_page.h>
 #include <i386/proc_reg.h>
 #include <i386/seg.h>
 

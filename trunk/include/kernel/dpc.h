@@ -23,8 +23,8 @@
 //---------------------------------------------------------------------------
 
 extern hal_cond_t   	dpc_thread_sleep_stone;
-extern volatile char	dpc_stop_request;
-
+extern volatile int	dpc_stop_request;
+extern volatile int     dpc_init_ok;
 
 typedef struct dpc_request
 {
@@ -53,6 +53,9 @@ void dpc_panic(void);
 static __inline__
 void dpc_request_move_to_beginning(dpc_request *me)
 {
+    if( (dpc_stop_request) || (!dpc_init_ok) )
+        dpc_panic();
+
     if(dpc_request_first == me)
         return;
 
@@ -86,7 +89,7 @@ dpc_request_init(dpc_request *me, void (*_func)(void *))
 static __inline__
 void dpc_request_trigger(dpc_request *me, void *_arg)
 {
-    if(dpc_stop_request)
+    if( (dpc_stop_request) || (!dpc_init_ok) )
         dpc_panic();
 
     //spinlock_lock( &dpc_request_lock, "trigger_dpc" );

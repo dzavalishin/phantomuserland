@@ -19,7 +19,6 @@
 #include <phantom_libc.h>
 
 #include <x86/phantom_pmap.h>
-//#include <x86/phantom_page.h>
 #include <i386/proc_reg.h>
 #include <kernel/ia32/cpu.h>
 #include <kernel/page.h>
