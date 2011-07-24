@@ -214,8 +214,12 @@ errno_t hal_mutex_init(hal_mutex_t *m, const char *name )
 }
 
 
+// BUG This is wrong - can't call malloc under spinlock (blocks)
 static void checkinit(hal_mutex_t *m)
 {
+#if 1
+    panic("init mutex!");
+#else
     // in spinlock!
 
     int ie = hal_save_cli();
@@ -232,6 +236,7 @@ static void checkinit(hal_mutex_t *m)
     hal_mutex_init(m,"?Static");
     hal_spin_unlock(&init_lock);
     if(ie) hal_sti();
+#endif
 }
 
 

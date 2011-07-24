@@ -43,9 +43,12 @@ errno_t hal_sem_init(hal_sem_t *c, const char *name )
 }
 
 
-
+// BUG This is wrong - can't call malloc under spinlock (blocks)
 static void checkinit(hal_sem_t *c)
 {
+#if 1
+    panic("init sema!");
+#else
     // in spinlock!
     int ie = hal_save_cli();
     hal_spin_lock(&init_lock);
@@ -65,6 +68,7 @@ static void checkinit(hal_sem_t *c)
 
     hal_spin_unlock(&init_lock);
     if(ie) hal_sti();
+#endif
 }
 
 

@@ -43,8 +43,12 @@ errno_t hal_cond_init(hal_cond_t *c, const char *name )
     return 0;
 }
 
+// BUG This is wrong - can't call malloc under spinlock (blocks)
 static void checkinit(hal_cond_t *c)
 {
+#if 1
+    panic("init cond!");
+#else
     // in spinlock!
 
     int ie = hal_save_cli();
@@ -65,6 +69,7 @@ static void checkinit(hal_cond_t *c)
 
     hal_spin_unlock(&init_lock);
     if(ie) hal_sti();
+#endif
 }
 
 
