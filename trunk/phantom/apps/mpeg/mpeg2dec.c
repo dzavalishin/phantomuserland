@@ -320,7 +320,7 @@ Example:       mpeg2decode -b bitstream.mpg -f -r -o0 rec%%d\n\
          \n");
     //ThreadExit(0);
 	Main_Bitstream_Flag = 1;
-	Main_Bitstream_Filename = "/mb.mpg";
+	Main_Bitstream_Filename = "/amnt0/test.m2v";
 	Output_Type = 6;
 	Output_Picture_Filename = "";
   }

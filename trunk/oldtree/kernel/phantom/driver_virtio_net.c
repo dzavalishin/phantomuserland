@@ -1,4 +1,4 @@
-#ifdef ARCH_ia32
+#if HAVE_PCI && HAVE_NET
 
 /**
  *
@@ -10,11 +10,6 @@
  *
  *
 **/
-
-#include <kernel/config.h>
-
-#if HAVE_NET
-
 
 #define DEBUG_MSG_PREFIX "VirtIo.Net"
 #include <debug_ext.h>
@@ -38,7 +33,6 @@
 #include <device.h>
 #include <kernel/net.h>
 
-//#include <x86/phantom_page.h>
 
 // FIXME some races prevent this driver from starting at stage 1
 
@@ -877,7 +871,4 @@ DRIVER ( "VIRTIO-NET", nic_driver, pci_driver, virtnet_driver,
 
 #endif
 
-#endif // HAVE_NET
-
-
-#endif // ARCH_ia32
+#endif // HAVE_NET && HAVE_PCI

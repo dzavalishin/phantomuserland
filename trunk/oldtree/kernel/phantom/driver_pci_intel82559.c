@@ -1,14 +1,13 @@
 #include <kernel/config.h>
-#if HAVE_NET && defined(ARCH_ia32)
+#if HAVE_NET && defined(HAVE_PCI)
 
 #include <phantom_libc.h>
 #include <i386/pio.h>
-//#include "driver_map.h"
 #include <device.h>
 #include <kernel/drivers.h>
 
-#include "driver_pci_intel82559.h"
-#include "driver_pci_intel82559_priv.h"
+#include <dev/pci/intel82559_dev.h>
+#include <dev/pci/intel82559_priv.h>
 
 #include <kernel/ethernet_defs.h>
 
@@ -477,4 +476,4 @@ static int mdio_write(long ioaddr, int phy_id, int location, int value)
 }
 #endif
 
-#endif // HAVE_NET
+#endif // HAVE_NET && HAVE_PCI

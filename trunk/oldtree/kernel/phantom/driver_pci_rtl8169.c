@@ -9,7 +9,7 @@
  **/
 
 #include <kernel/config.h>
-#if HAVE_NET && defined(ARCH_ia32)
+#if HAVE_NET && defined(HAVE_PCI)
 
 #define DEBUG_MSG_PREFIX "RTL8169 "
 #include <debug_ext.h>
@@ -685,4 +685,4 @@ done:
 }
 
 
-#endif
+#endif // HAVE_PCI

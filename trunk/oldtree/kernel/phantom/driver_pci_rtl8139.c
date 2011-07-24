@@ -9,10 +9,10 @@
 **/
 
 #include <kernel/config.h>
-#if HAVE_NET && defined(ARCH_ia32)
+#if HAVE_NET && defined(HAVE_PCI)
 
 #define DEBUG_MSG_PREFIX "RTL8139"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
@@ -942,5 +942,5 @@ static void rtl8139_int(void* data)
 
 
 
-#endif // HAVE_NET
+#endif // HAVE_NET && HAVE_PCI
 
