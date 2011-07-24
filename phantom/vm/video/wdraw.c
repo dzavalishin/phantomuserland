@@ -16,7 +16,7 @@
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
-#include <spinlock.h>
+//#include <spinlock.h>
 
 #include <sys/libkern.h>
 

@@ -1,11 +1,10 @@
 #include <assert.h>
 #include <kernel/vm.h>
 #include <kernel/page.h>
-//#include <x86/phantom_page.h>
 
 #include "pagelist.h"
 #include "pager.h"
-#include "hal.h"
+#include <hal.h>
 
 static int _DEBUG = 0;
 

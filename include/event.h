@@ -122,8 +122,6 @@ void event_q_put_e( struct ui_event *in );
 //void event_q_put_global( int x, int y, int info );
 void event_q_put_global( ui_event_t *e );
 
-//! Start sending keybd events from keybd driver - see keyboard.c
-void phantom_dev_keyboard_start_events(void);
 
 
 //! Get next event for this window

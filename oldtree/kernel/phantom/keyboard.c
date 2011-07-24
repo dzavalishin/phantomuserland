@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "ps2keyb"
 #include <debug_ext.h>
-#define debug_level_flow 7
+#define debug_level_flow 11
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -43,7 +43,6 @@ static int      keyb_init = 0;
 
 
 
-#define KEYB_EVENT_PUSH_THREAD 0
 #define KEYB_USE_SEMA 1
 
 #define USE_SOFTIRQ 0
@@ -356,7 +355,7 @@ static void handle_keyboard_interrupt(void)
 
     key = inb(0x60);
 
-    //printf("handle_keyboard_interrupt: key = 0x%x\n", key);
+    SHOW_FLOW( 11, "key = 0x%x", key);
 
     handle_set1_keycode(key);
 }
@@ -382,20 +381,6 @@ static void handle_keyboard_interrupt(void)
 
 
 
-
-
-#if KEYB_EVENT_PUSH_THREAD
-static int keyb_event_mode = 0;
-static void keyb_event_loop( void *arg );
-
-void phantom_dev_keyboard_start_events()
-{
-    if(!keyb_event_mode)
-        hal_start_kernel_thread((void*)keyb_event_loop);
-
-    keyb_event_mode = 1;
-}
-#endif
 
 
 
@@ -425,7 +410,7 @@ void softirq_handler( void *_arg )
 
 int phantom_dev_keyboard_getc(void);
 
-int direct_trygetchar_hook_active;
+//int direct_trygetchar_hook_active;
 
 static int maininited = 0;
 
@@ -465,9 +450,9 @@ static int phantom_dev_keyboard_init(int irq)
 
     hal_irq_alloc( irq, (void *)handle_keyboard_interrupt, 0, HAL_IRQ_SHAREABLE );
 
-    direct_trygetchar_hook_active = 1;
+    //direct_trygetchar_hook_active = 1;
 
-    //printf("interrupt driven keyboard driver is ready\n");
+    SHOW_INFO0( 0, "interrupt driven keyboard driver is ready" );
 
     phantom_set_console_getchar( phantom_dev_keyboard_getc );
 
@@ -586,29 +571,6 @@ int phantom_scan_console_getc(void)
 #endif
 
 
-#if KEYB_EVENT_PUSH_THREAD
-static void keyb_event_loop( void *arg )
-{
-    (void)arg;
-
-    hal_set_thread_name("KeyEvents");
-	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
-
-    while(1)
-    {
-        while(!keyb_event_mode)
-            hal_sleep_msec(10000);
-
-        _key_event buf;
-
-        _keyboard_read( &buf, 1);
-
-        //printf( "-- key ev --\n" );
-        send_event_to_q( &buf );
-    }
-
-}
-#endif
 
 
 #endif // ARCH_ia32

@@ -20,8 +20,6 @@
 #include <kernel/config.h>
 #include <kernel/page.h>
 
-//#include <x86/phantom_page.h>
-//#include <i386/proc_reg.h>
 #include <phantom_libc.h>
 #include <phantom_types.h>
 #include <string.h>

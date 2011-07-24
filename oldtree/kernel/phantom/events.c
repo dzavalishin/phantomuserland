@@ -118,7 +118,6 @@ void init_main_event_q()
 #if KEY_EVENTS
     phantom_set_console_getchar( phantom_window_getc );
     hal_start_kernel_thread( keyboard_read_thread );
-    //phantom_dev_keyboard_start_events();
 #endif
 #endif
 
@@ -392,7 +391,6 @@ void event_q_put_global( ui_event_t *ie )
 
 extern queue_head_t     	allwindows;
 extern drv_video_window_t *	focused_window;
-//extern hal_spinlock_t  		allw_lock;
 
 
 //! Select target window
@@ -421,7 +419,6 @@ static void select_event_target(struct ui_event *e)
     assert( e->type == UI_EVENT_TYPE_MOUSE );
 
     int wz = 0;
-    //hal_spin_lock( &allw_lock );
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
         if( w->flags & WFLAG_WIN_NOFOCUS )
@@ -438,7 +435,6 @@ static void select_event_target(struct ui_event *e)
         }
 
     }
-    //hal_spin_unlock( &allw_lock );
 
 }
 
@@ -814,8 +810,6 @@ static void send_event_to_q(_key_event *event)
 
 
 
-// BUG wrong? Must use static void send_event_to_q(_key_event *event)?
-
 static void keyboard_read_thread(void)
 {
     hal_set_thread_name("KeyEvents");
@@ -826,8 +820,6 @@ static void keyboard_read_thread(void)
         _key_event ke;
 
         phantom_dev_keyboard_get_key( &ke );
-        //printf( "-- key ev %d --\n", ke.keycode );
-        //event_q_put_key( ke.keycode, ke.keychar, ke.modifiers );
         send_event_to_q(&ke);
     }
 }

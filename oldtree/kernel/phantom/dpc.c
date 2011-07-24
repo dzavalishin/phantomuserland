@@ -29,12 +29,12 @@
 #define MULTIPLE_DPC_THREADS 1
 
 
-hal_spinlock_t         	dpc_request_lock;
-dpc_request *		dpc_request_first = 0;
-hal_cond_t		dpc_thread_sleep_stone;
-static hal_mutex_t 	unused_dpc_mutex; // cond needs it!
-volatile char		dpc_stop_request = 0;
-static volatile char	dpc_init_ok = 0;
+hal_spinlock_t          dpc_request_lock;
+dpc_request *           dpc_request_first = 0;
+hal_cond_t              dpc_thread_sleep_stone;
+static hal_mutex_t      unused_dpc_mutex; // cond needs it!
+volatile int            dpc_stop_request = 0;
+volatile int            dpc_init_ok = 0;
 
 
 static dpc_request *    dpc_request_find()
@@ -195,6 +195,6 @@ void dpc_finish()
 
 void dpc_panic(void)
 {
-    if(dpc_stop_request)
-        panic("DPC requested after dpc_finish()");
+    if( (dpc_stop_request) || (!dpc_init_ok) )
+        panic("DPC requested after dpc_finish() or before init");
 }

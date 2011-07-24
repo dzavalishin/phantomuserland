@@ -21,10 +21,6 @@
 
 #include "svn_version.h"
 
-//#include <i386/proc_reg.h>
-//#include <i386/trap.h>
-//#include <i386/pio.h>
-
 #include <phantom_libc.h>
 #include <phantom_time.h>
 
@@ -264,6 +260,10 @@ int main(int argc, char **argv, char **envp)
         strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
     }
 
+    pressEnter("will run DPC");
+    dpc_init();
+
+
     printf("\nPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\n\n", svn_version(), phantom_uname.machine );
     phantom_process_boot_options();
 
@@ -306,8 +306,6 @@ int main(int argc, char **argv, char **envp)
 #endif // HAVE_UNIX
 
     //arch_get_rtc_delta(); // Read PC clock
-    pressEnter("will run DPC");
-    dpc_init();
 
 #ifdef STRAY_CATCH_SIZE
     init_stray_checker();

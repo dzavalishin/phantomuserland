@@ -17,12 +17,11 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "hal.h"
-#include "video.h"
+#include <hal.h>
+#include <video.h>
 
 #include <x86/phantom_pmap.h>
 
-//#include <i386/pio.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 
