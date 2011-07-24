@@ -9,10 +9,10 @@
 **/
 
 #include <kernel/config.h>
-#if HAVE_NET && defined(ARCH_ia32)
+#if HAVE_NET && defined(HAVE_PCI)
 
 #define DEBUG_MSG_PREFIX "PCNET32"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
@@ -21,13 +21,12 @@
 #include <phantom_libc.h>
 #include <i386/pio.h>
 #include <threads.h>
-//#include "driver_map.h"
 #include <device.h>
 #include <kernel/drivers.h>
 #include <kernel/vm.h>
 
-#include "driver_pci_pcnet32.h"
-#include "driver_pci_pcnet32_priv.h"
+#include <dev/pci/pcnet32_dev.h>
+#include <dev/pci/pcnet32_priv.h>
 
 #include <kernel/ethernet_defs.h>
 
@@ -980,5 +979,5 @@ static int pcnet32_ioctl(dev_cookie cookie, int op, void *buf, size_t len)
 
 #endif
 
-#endif // HAVE_NET
+#endif // HAVE_NET && HAVE_PCI
 

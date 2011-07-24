@@ -1,4 +1,4 @@
-#ifdef ARCH_ia32
+#if HAVE_PCI
 /**
  *
  * Phantom OS
@@ -76,4 +76,4 @@ phantom_device_t *driver_virtio_random_probe( pci_cfg_t *pci, int stage )
     return dev;
 }
 
-#endif // ARCH_ia32
+#endif // HAVE_PCI

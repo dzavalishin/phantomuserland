@@ -35,7 +35,7 @@
 
 #include <kernel/net.h>
 
-#include <driver_isa_ne2000.h>
+//#include <driver_isa_ne2000.h>
 
 #include <errno.h>
 

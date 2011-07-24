@@ -12,7 +12,7 @@
 
 
 #define DEBUG_MSG_PREFIX "mouse"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
@@ -20,7 +20,6 @@
 #include <i386/pio.h>
 #include <phantom_libc.h>
 
-//#include "driver_map.h"
 #include <kernel/device.h>
 #include <kernel/drivers.h>
 #include <hal.h>

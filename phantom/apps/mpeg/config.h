@@ -42,3 +42,6 @@
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
+
+#define DEBUG 1
+

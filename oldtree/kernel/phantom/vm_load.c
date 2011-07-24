@@ -4,13 +4,21 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel main
+ * VM - code (class) loader helper
  *
+ *    * load from bulk (binary multi-class image brought from
+ *      kernel module or elsewhere)
+ *
+ *    * load from file (if some FS is available and UNIX subsys
+ *      compiled in.
+ *
+ *    * TODO load from network
+ *    * TODO check class signature - better do it in VM code
  *
 **/
 
 #define DEBUG_MSG_PREFIX "vm_load"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10

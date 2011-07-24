@@ -1,4 +1,4 @@
-#ifdef ARCH_ia32
+#ifdef HAVE_PCI
 
 /**
  *
@@ -524,6 +524,6 @@ static phantom_disk_partition_t *phantom_create_virtio_partition_struct( long si
 
 
 
-#endif // ARCH_ia32
+#endif // HAVE_PCI
 
 

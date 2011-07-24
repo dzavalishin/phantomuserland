@@ -1,5 +1,5 @@
 
-#ifdef ARCH_ia32
+#ifdef HAVE_PCI
 /**
  *
  * Phantom OS
@@ -26,7 +26,7 @@
 #include <time.h>
 #include <sys/ioctl.h>
 
-#include "es1370.h"
+#include <dev/pci/es1370.h>
 
 #define u32 u_int32_t
 #define u16 u_int16_t
@@ -1141,5 +1141,5 @@ static errno_t	es1370_setproperty( struct phantom_device *dev, const char *pName
 
 
 
-#endif // ARCH_ia32
+#endif // HAVE_PCI
 

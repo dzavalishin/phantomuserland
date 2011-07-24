@@ -9,7 +9,7 @@
  *
 **/
 
-#ifdef ARCH_ia32
+#if HAVE_PCI
 
 #define DEBUG_MSG_PREFIX "VirtIo"
 #include <debug_ext.h>
@@ -737,7 +737,7 @@ void virtio_dump_phys(virtio_ring_t *r)
 }
 
 
-#endif // ARCH_ia32
+#endif // HAVE_PCI
 
 
 

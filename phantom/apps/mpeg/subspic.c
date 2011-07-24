@@ -252,7 +252,7 @@ int Height;
   Size = Width*Height;
 
 #ifdef DEBUG
-  Print("SUBS: reading %s\n", filename);
+  Print("SUBS: reading %s\n", Filename);
 #endif
 
   if(!(Infile=Open(Filename,O_RDONLY|O_BINARY))<0)

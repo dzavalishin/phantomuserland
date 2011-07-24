@@ -1,4 +1,4 @@
-#ifdef ARCH_ia32
+#ifdef HAVE_PCI
 
 /**
  *
@@ -12,7 +12,6 @@
 
 #include <phantom_libc.h>
 
-//#include "i386/pci.h"
 #include <kernel/virtio.h>
 #include <virtio_pci.h>
 #include <virtio_rng.h>
@@ -77,6 +76,6 @@ phantom_device_t *driver_virtio_baloon_probe( pci_cfg_t *pci, int stage )
     return dev;
 }
 
-#endif // ARCH_ia32
+#endif // HAVE_PCI
 
 
