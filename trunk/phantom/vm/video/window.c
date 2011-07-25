@@ -15,7 +15,8 @@
 #include <event.h>
 //#include <spinlock.h>
 
-#include "hal.h"
+#include <hal.h>
+#include <kernel/init.h>
 #include "win_local.h"
 
 //static void defaultEventProcessor();
@@ -79,12 +80,16 @@ void w_assert_lock(void)
 
 
 
-/*
-void drv_video_init_all_windows_queue(void)
+
+void drv_video_init_windows(void)
 {
-	queue_init(&allwindows);
+#if ALLW_MUTEX
+    hal_mutex_init( &allw_mutex, "allw" );
+#else
+    hal_spin_init( &allw_lock ));
+#endif
 }
-*/
+
 
 void drv_video_window_free(drv_video_window_t *w)
 {

@@ -479,10 +479,12 @@ static void w_do_deliver_event(drv_video_window_t *w)
 #if DELIVER2THREAD
 
 static hal_sem_t we_sem;
+static int              we_inited = 0;
 
 static void w_event_deliver_thread(void)
 {
     hal_sem_init( &we_sem, "wevent" );
+    we_inited = 1;
 
     hal_set_thread_name("WEvent");
     hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO+1);
@@ -584,7 +586,8 @@ ret:
 #endif
 
 #if DELIVER2THREAD
-    hal_sem_release( &we_sem );
+    if(we_inited)
+        hal_sem_release( &we_sem );
 #endif
 
 }

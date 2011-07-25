@@ -18,6 +18,7 @@ static int debug_level_flow = 1;
 #include <video.h>
 #include <video/screen.h>
 #include <hal.h>
+#include <kernel/init.h>
 
 #include "misc.h"
 
@@ -116,7 +117,7 @@ static void video_post_start()
 {
 
     video_zbuf_init();
-    //drv_video_init_all_windows_queue(); // static init is ok
+    drv_video_init_windows(); 
 
 
     //hal_sleep_msec(10000);

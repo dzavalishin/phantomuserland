@@ -201,6 +201,7 @@ void phantom_thread_init_mutexes(void)
 
 errno_t hal_mutex_init(hal_mutex_t *m, const char *name )
 {
+    assert(m->impl == 0);
     m->impl = calloc(1, sizeof(struct phantom_mutex_impl));
     if(m->impl == 0) return ENOMEM;
 
