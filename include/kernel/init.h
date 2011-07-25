@@ -114,13 +114,15 @@ void init_buses(void);
 
 void arch_float_init(void);
 
-void load_classes_module(); // vm bulk classes init
+void load_classes_module(void); // vm bulk classes init
 
 void stray(void); // check for stray pointers
 
-void phantom_init_part_pool();
+void phantom_init_part_pool(void);
 
-void usb_setup();
+void usb_setup(void);
+
+void drv_video_init_windows(void);
 
 #endif // INIT_H
 
