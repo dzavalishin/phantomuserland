@@ -296,29 +296,7 @@ static errno_t     dev_stat( struct uufile *f, struct stat *dest )
 static size_t      dev_read(    struct uufile *f, void *dest, size_t bytes)
 {
     if(f->flags & UU_FILE_FLAG_DIR)
-    {
-        SHOW_FLOW( 11, "Read dir for %d bytes, pos %d", bytes, f->pos );
-
-        struct dirent r;
-        if( bytes < sizeof(struct dirent) )
-            return -1;
-
-
-        char namebuf[FS_MAX_PATH_LEN];
-        if( get_dir_entry_name( f, f->pos++, namebuf ) )
-            return 0;
-
-        SHOW_FLOW( 7, "Read dir pos %d = '%s'", f->pos-1, namebuf );
-
-        r.d_ino = -1; // not 0 for some programs treat 0 as no entry
-        r.d_reclen = 0;
-        strlcpy( r.d_name, namebuf, FILENAME_MAX );
-        r.d_namlen = strlen( r.d_name );
-
-        *((struct dirent*)dest) = r;
-
-        return sizeof(struct dirent);
-    }
+        return common_dir_read(f, dest, bytes);
 
     SHOW_FLOW( 10, "Read dev %d bytes", bytes );
 

@@ -124,15 +124,13 @@ static uufile_t *  root_namei(uufs_t *_fs, const char *filename)
 
     (void) _fs;
 
+    if( 0 == strcmp(filename, "/") )
+        return &root_root;
+
     uufs_t * fs = find_mount( filename, namerest );
 
     if( fs == 0 )
-    {
-        if( 0 == strcmp(filename, "/") )
-            return &root_root;
-
         return 0;
-    }
 
     return fs->namei( fs, namerest );
 }
@@ -158,9 +156,8 @@ static errno_t     root_dismiss(uufs_t *fs)
 
 static size_t      root_read(    struct uufile *f, void *dest, size_t bytes)
 {
-    (void) f;
-    (void) dest;
-    (void) bytes;
+    if(f->flags & UU_FILE_FLAG_DIR)
+        return common_dir_read(f, dest, bytes);
 
     return -1;
 }
@@ -334,6 +331,8 @@ found:
     if( mount[i].path[rlen - 1] == '/' )
         mount[i].path[rlen - 1] = 0;
 
+    lookup_dir( &root_root, mount[i].path, 1, create_dir );
+
     hal_mutex_unlock( &mm );
 
     return 0;
@@ -343,6 +342,13 @@ found:
 static errno_t rm_mount( const char* name, int flags )
 {
     (void) flags;
+
+    errno_t rc = unlink_dir_name( &root_root, name );
+    if( rc )
+    {
+        SHOW_ERROR( 1, "can't unlink %s", name );
+        return rc;
+    }
 
     hal_mutex_lock ( &mm );
 

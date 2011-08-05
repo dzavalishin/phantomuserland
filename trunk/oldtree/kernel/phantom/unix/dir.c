@@ -1,8 +1,19 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix dir code.
+ *
+ *
+**/
+
 #if HAVE_UNIX
 
-#define DEBUG_MSG_PREFIX "devfs"
+#define DEBUG_MSG_PREFIX "dir"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 7
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -12,6 +23,7 @@
 #include <stdio.h>
 #include <queue.h>
 #include <hal.h>
+#include <dirent.h>
 
 
 
@@ -187,6 +199,37 @@ errno_t get_dir_entry_name( uufile_t *dir, int pos, char *name )
     hal_mutex_unlock(&(i->mutex));
     return ENOENT;
 }
+
+// -----------------------------------------------------------------------
+// Interace
+// -----------------------------------------------------------------------
+
+
+int common_dir_read(struct uufile *f, void *dest, size_t bytes)
+{
+    SHOW_FLOW( 11, "Read dir for %d bytes, pos %d", bytes, f->pos );
+
+    struct dirent r;
+    if( bytes < sizeof(struct dirent) )
+        return -1;
+
+    char namebuf[FS_MAX_PATH_LEN];
+    if( get_dir_entry_name( f, f->pos++, namebuf ) )
+        return 0;
+
+    SHOW_FLOW( 7, "Read dir pos %d = '%s'", f->pos-1, namebuf );
+
+    r.d_ino = -1; // not 0 for some programs treat 0 as no entry
+    r.d_reclen = 0;
+    strlcpy( r.d_name, namebuf, FILENAME_MAX );
+    r.d_namlen = strlen( r.d_name );
+
+    *((struct dirent*)dest) = r;
+
+    return sizeof(struct dirent);
+}
+
+
 
 #endif // HAVE_UNIX
 
