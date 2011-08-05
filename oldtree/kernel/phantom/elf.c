@@ -90,7 +90,7 @@ errno_t uu_run_file( int pid, const char *fname )
     return ke;
 }
 
-
+#ifdef ARCH_ia32
 // Loads final relocated executable
 
 errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
@@ -219,6 +219,15 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 
     return 0;
 }
+
+#else // ARCH_ia32
+// Loads final relocated executable
+
+errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
+{
+    return ENOSYS;
+}
+#endif // ARCH_ia32
 
 
 #if defined(ARCH_ia32)

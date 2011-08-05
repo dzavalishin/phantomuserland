@@ -9,7 +9,7 @@
 **/
 
 #include <kernel/config.h>
-#if HAVE_NET && defined(HAVE_PCI)
+#if HAVE_NET && HAVE_PCI
 
 #define DEBUG_MSG_PREFIX "PCNET32"
 #include <debug_ext.h>

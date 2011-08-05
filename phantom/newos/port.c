@@ -176,6 +176,9 @@ port_create(int32 queue_length, const char *name)
     proc_id	owner;
     int __newos_intstate;
 
+    memset( &sem_r, 0, sizeof(sem_r) );
+    memset( &sem_w, 0, sizeof(sem_w) );
+
     if(ports_active == false)
         return -ENXIO;
 

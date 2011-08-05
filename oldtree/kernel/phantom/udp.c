@@ -248,9 +248,7 @@ ditch_packet:
 
 int udp_open(void **prot_data)
 {
-    udp_endpoint *e;
-
-    e = kmalloc(sizeof(udp_endpoint));
+    udp_endpoint *e = calloc( sizeof(udp_endpoint), 1 );
     if(!e)
         return ERR_NO_MEMORY;
 

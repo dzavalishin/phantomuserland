@@ -1,5 +1,5 @@
 #include <kernel/config.h>
-#if HAVE_NET && defined(HAVE_PCI)
+#if HAVE_NET && HAVE_PCI
 
 #include <phantom_libc.h>
 #include <i386/pio.h>

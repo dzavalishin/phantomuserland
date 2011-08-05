@@ -9,7 +9,7 @@
 **/
 
 
-#if defined(HAVE_PCI)
+#if HAVE_PCI
 
 #define DEBUG_MSG_PREFIX "PIIX4"
 #include <debug_ext.h>
@@ -217,4 +217,4 @@ static errno_t check_piix4_isa_sanity(int port)
     return 0;
 }
 
-#endif // defined(HAVE_PCI)
+#endif // HAVE_PCI
