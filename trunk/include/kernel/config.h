@@ -16,7 +16,6 @@
 #define HAVE_NET 1
 #define HAVE_UNIX 1
 #define HAVE_VESA 1
-#define HAVE_USB 1
 
 
 #define HAVE_FLOPPY 1
@@ -33,6 +32,7 @@
 
 #ifdef ARCH_ia32
 #define HAVE_PCI 1
+#define HAVE_USB 1
 #endif
 
 

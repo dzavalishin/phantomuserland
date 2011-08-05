@@ -1,4 +1,4 @@
-#ifdef HAVE_PCI
+#if HAVE_PCI
 
 /**
  *

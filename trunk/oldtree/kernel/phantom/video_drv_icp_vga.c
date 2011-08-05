@@ -22,11 +22,10 @@
 #include <kernel/vm.h>
 #include <x86/phantom_pmap.h>
 
-//#include <i386/pio.h>
 #include <phantom_libc.h>
 
 #include <video.h>
-//#include "video_drv_icp_vga.h"
+#include <video/screen.h>
 
 #define VGA_800x600 0
 #define VGA_1024x768 1
@@ -226,7 +225,7 @@ static void icp_map_video(int on_off)
 
 static int icp_video_start()
 {
-    switch_screen_bitblt_to_32bpp();
+    switch_screen_bitblt_to_32bpp(1);
     icp_map_video( 1 );
     return 0;
 }

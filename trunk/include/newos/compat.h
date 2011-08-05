@@ -57,11 +57,12 @@ typedef int thread_id;
 
 
 #define dprintf printf
-#define kmalloc malloc
+//#define kmalloc malloc
 #define kfree free
 
 #define ASSERT assert
 
+#define kmalloc(___sz) calloc((___sz),1)
 
 
 

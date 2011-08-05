@@ -166,7 +166,7 @@ int do_test_ports(const char *test_parm)
     SHOW_INFO( 0, "porttest: port_write ret %d", res);
     test_check_ne(res,0);
 
-#if 0
+#if 1
     SHOW_INFO0( 0, "porttest: testing delete p2");
     res = port_delete(test_p2);
     test_check_eq(res,0);
