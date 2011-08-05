@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "ps2keyb"
 #include <debug_ext.h>
-#define debug_level_flow 11
+#define debug_level_flow 4
 #define debug_level_error 10
 #define debug_level_info 10
 

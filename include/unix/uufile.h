@@ -113,6 +113,9 @@ uufile_t *lookup_dir( uufile_t *dir, const char *name, int create, uufile_t *(*c
 // Return n-th entry's name.
 errno_t get_dir_entry_name( uufile_t *dir, int n, char *name );
 
+// General impl of read syscall for dir
+int common_dir_read(struct uufile *f, void *dest, size_t bytes);
+
 
 
 struct uufs
