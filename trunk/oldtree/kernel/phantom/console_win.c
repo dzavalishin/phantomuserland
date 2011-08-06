@@ -8,6 +8,12 @@
  *
 **/
 
+// crashes :(
+#define TIMED_FLUSH 0
+// looses characters :(
+#define NET_TIMED_FLUSH 1
+
+
 #define DEBUG_MSG_PREFIX "console"
 #include "debug_ext.h"
 #define debug_level_flow 10
@@ -30,12 +36,9 @@
 #include <kernel/timedcall.h>
 #include <kernel/debug.h>
 
+#if NET_TIMED_FLUSH
 #include "net_timer.h"
-
-
-#define TIMED_FLUSH 0
-#define NET_TIMED_FLUSH 1
-
+#endif
 
 
 //#define CON_FONT drv_video_8x16san_font
@@ -76,18 +79,29 @@ static int phantom_console_window_puts(const char *s)
 
 static char cbuf[BUFS+1];
 static int cbufpos = 0;
+static hal_mutex_t buf_mutex;
 
 
 static void flush_stdout(void * arg)
 {
     (void) arg;
 
+    hal_mutex_lock( &buf_mutex );
     if( cbufpos >= BUFS)
         cbufpos = BUFS;
     cbuf[cbufpos] = '\0';
     phantom_console_window_puts(cbuf);
     cbufpos = 0;
+    hal_mutex_unlock( &buf_mutex );
 }
+
+static void put_buf( char c )
+{
+    hal_mutex_lock( &buf_mutex );
+    cbuf[cbufpos++] = c;
+    hal_mutex_unlock( &buf_mutex );
+}
+
 
 
 #if TIMED_FLUSH
@@ -118,30 +132,30 @@ int phantom_console_window_putc(int c)
     {
     case '\b':
         if(cbufpos > 0) cbufpos--;
-        return c;
+        goto noflush;
+        //return c;
 
     case '\t':
         while(cbufpos % 8)
         {
             if(cbufpos >= BUFS)
                 break;
-            cbuf[cbufpos++] = ' ';
+            put_buf(' ');
         }
-        return c;
+        goto noflush;
+        //return c;
 
     case '\n':
-        cbuf[cbufpos++] = c;
-        goto flush;
-
     case '\r':
-        cbuf[cbufpos++] = c;
+        put_buf( c );
         goto flush;
 
     default:
-        cbuf[cbufpos++] = c;
+        put_buf( c );
         if( cbufpos >= BUFS )
             goto flush;
 
+noflush:
 #if TIMED_FLUSH
         phantom_request_timed_call( &cons_timer, 0 );
 #endif
@@ -218,6 +232,8 @@ static void phantom_debug_window_loop();
 
 void phantom_init_console_window()
 {
+    hal_mutex_init( &buf_mutex, "console" );
+
     console_fg = COLOR_LIGHTGRAY;
     console_bg = COLOR_BLACK;
 
