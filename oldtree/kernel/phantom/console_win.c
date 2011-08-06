@@ -343,14 +343,12 @@ static void phantom_debug_window_loop()
         int hr = min/60; min %= 60;
         int days = hr/24; hr %= 24;
 
-        struct tm *tmp, mt;
-        tmp = current_time;
-        mt = *tmp;
+        struct tm mt = *current_time;
 
-        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m, %d events\n Today is %02d/%02d/%04d %02d:%02d:%02d\n",
+        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m, %d events\n Today is %04d/%02d/%02d %02d:%02d:%02d\n",
                       step++, days, hr, min, (int)sec,
                       get_n_events_in_q(),
-                      mt.tm_mday, mt.tm_mon, mt.tm_year+1900,
+                      mt.tm_year + 1900, mt.tm_mon, mt.tm_mday,
                       mt.tm_hour, mt.tm_min, mt.tm_sec
                      );
         bp += rc;
