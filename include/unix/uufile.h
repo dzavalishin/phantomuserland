@@ -116,6 +116,8 @@ errno_t get_dir_entry_name( uufile_t *dir, int n, char *name );
 // General impl of read syscall for dir
 int common_dir_read(struct uufile *f, void *dest, size_t bytes);
 
+extern struct uufileops common_dir_fops;
+
 
 
 struct uufs

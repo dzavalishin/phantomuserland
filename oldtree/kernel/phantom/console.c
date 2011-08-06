@@ -15,6 +15,9 @@
 
 #include <console.h>
 
+// GET_CPU_ID()
+#include <kernel/smp.h>
+
 // This is a very simple console switch/redirection tool
 
 
@@ -65,7 +68,7 @@ int putchar(int c)
 	// Send a copy to serial port or whatever...
     debug_console_putc(c);
 
-    if(!IN_INTERRUPT())
+    if( (!IN_INTERRUPT()) && (global_lock_entry_count[GET_CPU_ID()] == 0) )
         if(ops->putchar) return ops->putchar(c);
     // No way to handle :(
 

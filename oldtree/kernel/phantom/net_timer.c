@@ -15,9 +15,9 @@
 
 #include <time.h>
 
-//#define NET_TIMER_INTERVAL 200000 // 200 ms
+#define NET_TIMER_INTERVAL 100 // 100 ms
 
-#define NET_TIMER_INTERVAL 2000000 // 2000 ms
+//#define NET_TIMER_INTERVAL 2000000 // 2000 ms
 
 typedef struct {
     net_timer_event *next;
@@ -126,7 +126,7 @@ static void net_timer_runner(void *arg)
 
     for(;;) {
         //sem_acquire_etc(net_q.wait_sem, 1, SEM_FLAG_TIMEOUT, NET_TIMER_INTERVAL, NULL);
-        hal_sleep_msec(2000);
+        hal_sleep_msec(NET_TIMER_INTERVAL);
 
         now = system_time();
 //printf("(^)");
