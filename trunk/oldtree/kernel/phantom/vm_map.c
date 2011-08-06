@@ -362,13 +362,13 @@ vm_map_init(unsigned long page_count)
 
     if(pager_superblock_ptr()->last_snap == 0 )
     {
-        hal_printf("\n\nNo pagelist to load\n\n");
+        hal_printf("\n!!! No pagelist to load !!!\n");
         //panic("vmem load: no pagelist!");
     }
     else
     {
 
-        hal_printf("Loading pagelist from %d...", pager_superblock_ptr()->last_snap);
+        hal_printf("Loading pagelist from %d...\n", pager_superblock_ptr()->last_snap);
 
         pagelist loader;
         pagelist_init( &loader, pager_superblock_ptr()->last_snap, 0, DISK_STRUCT_MAGIC_SNAP_LIST );
@@ -379,7 +379,7 @@ vm_map_init(unsigned long page_count)
         {
             if( !pagelist_read_seq(&loader, &vm_map_map[np].prev_page) )
             {
-                printf("Incomplete pagelist\n");
+                printf("\n!!! Incomplete pagelist !!!\n");
                 //panic("Incomplete pagelist\n");
                 break;
             }
@@ -1294,7 +1294,7 @@ void do_snapshot()
 {
     int			  enabled; // interrupts
 
-    syslog( 0, "\nSnapshot start!\n");
+    syslog( 0, "snap: started");
     // prerequisites
     //
     // - no pages with flag_have_make can exist! check that?
@@ -1310,7 +1310,7 @@ void do_snapshot()
 
 
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
-    if(SNAP_STEPS_DEBUG) syslog( 0, "wait 4 pgout to settle\n");
+    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: wait 4 pgout to settle");
 
     // Back to orig prio
     hal_set_current_thread_priority( prio );
@@ -1318,7 +1318,7 @@ void do_snapshot()
     // commented out to stress the pager
     //hal_sleep_msec(30000); // sleep for 10 sec - why 10?
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "stop world\n");
+    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: stop world");
 
 
     // MUST BE BEFORE hal_mutex_lock!
@@ -1340,14 +1340,14 @@ void do_snapshot()
 
     // !!!! SnapShot !!!!
 
-    syslog( 0, "\nSnapshot THE SNAP...");
+    syslog( 0, "snap: hold still, say 'cheese!'...");
 
     // TODO: we have top do more. such as stop oher CPUS, force VMs into the
     // special snap-friendly state, etc
 
     vm_map_for_all_locked( mark_for_snap );
 
-    syslog( 0, "done THE SNAP\n");
+    syslog( 0, "snap: thank you ladies");
 
     if(enabled) hal_sti();
 
@@ -1360,13 +1360,13 @@ void do_snapshot()
     // write in a short time.
 
     // This pageout request is needed - if I skip it, snaps are incomplete
-    if(SNAP_STEPS_DEBUG) syslog( 0, "pgout\n");
+    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: pgout");
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
 
-    //if(SNAP_STEPS_DEBUG) syslog( 0, "snapshot go kick ass those lazy pages\n");
+    //if(SNAP_STEPS_DEBUG) syslog( 0, "snap: go kick ass those lazy pages");
     //if(SNAP_DEBUG) getchar();
 
-    syslog( 0, "snapshot will finalize_snap\n");
+    syslog( 0, "snap: will finalize_snap");
     // scan nonsnapped pages, snap them manually (or just access to cause
     // page fault??)
     vm_map_for_all( finalize_snap );
@@ -1385,11 +1385,11 @@ void do_snapshot()
     disk_page_no_t new_snap_head = 0;
 
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "Creating primary pagelist root\n");
+    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: creating primary pagelist root");
     if( !pager_alloc_page(&new_snap_head) ) panic("out of disk!");
 
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "Creating pagelist...\n");
+    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: creating pagelist...");
     //if(SNAP_DEBUG) getchar();
 
     {
@@ -1404,7 +1404,7 @@ void do_snapshot()
         pagelist_finish(&saver);
     }
 
-    if(SNAP_STEPS_DEBUG) syslog( 0, "Waiting for all pages to be flushed...\n");
+    if(SNAP_STEPS_DEBUG) syslog( 0, "snap: waiting for all pages to be flushed...");
     // make sure page data has been written
     vm_map_for_all( wait_commit_snap );
 
@@ -1437,13 +1437,13 @@ void do_snapshot()
 
 
     // DONE!
-    syslog( 0, "\nSnapshot done!\n");
+    syslog( 0, "Snapshot done!");
 
     STAT_INC_CNT(STAT_CNT_SNAPSHOT);
 
 
     hal_sleep_msec(20000);
-    syslog( 0, "\nSnapshot 10 sec more wait\n");
+    syslog( 0, "snap: wait for 10 sec more");
     hal_sleep_msec(10000);
 
 }

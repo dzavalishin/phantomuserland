@@ -134,4 +134,7 @@ phantom_disk_partition_t *select_phantom_partition(void);
 
 void dump_partition(phantom_disk_partition_t *p);
 
+/* make pager happy */
+errno_t disk_raise_priority( struct phantom_disk_partition *p, pager_io_request *rq );
+
 #endif// DISK_H

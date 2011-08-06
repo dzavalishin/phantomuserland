@@ -59,7 +59,7 @@ void
         snprintf( prefix_buf, sizeof(prefix_buf)-1,
                   "<%d>%s %02d %02d:%02d:%02d",
                   pri,
-                  monNames[tmb.tm_mon], tmb.tm_mday,
+                  monNames[tmb.tm_mon - 1], tmb.tm_mday,
                   tmb.tm_hour, tmb.tm_min, tmb.tm_sec
                 );
 #endif
@@ -67,7 +67,7 @@ void
 
     snprintf( prefix_buf, sizeof(prefix_buf)-1,
 		"<%d>%s %02d %02d:%02d:%02d",
-		pri, monNames[current_time->tm_mon],
+		pri, monNames[current_time->tm_mon - 1],
 		current_time->tm_mday,	current_time->tm_hour,
 		current_time->tm_min,	current_time->tm_sec
                 );
