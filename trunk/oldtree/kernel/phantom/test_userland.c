@@ -39,7 +39,7 @@ static void test_one(const char *b, const char *a, const char*expect)
 
     SHOW_FLOW( 0, "'%s' + '%s'", b, a );
 
-    if( uu_absname( o, b, a ) )
+    if( uu_make_absname( o, b, a ) )
         test_fail_msg( EINVAL, "uu_absname failed" );
 
     if( expect && strcmp( o, expect ) )

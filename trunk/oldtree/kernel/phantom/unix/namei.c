@@ -26,19 +26,75 @@
 extern struct uufs root_fs;
 
 // Creates uufile for given path name
-uufile_t *uu_namei(const char *filename)
+uufile_t *uu_namei(const char *filename, uuprocess_t *p)
 {
+    char buf[FS_MAX_PATH_LEN];
+
+    if( uu_normalize_path( buf, filename, p ) )
+        return 0;
+
     /* done in rootfs
     if( filename[0] == '/' && filename[1] == 0 )
         return copy_uufile( root_fs.root(&root_fs) );
     */
-    return root_fs.namei(&root_fs, filename);
+    return root_fs.namei(&root_fs, buf);
 }
 
 #endif // HAVE_UNIX
 
+//! Makes sure that buf contains correct abs fn for given
+//! (possibly relative) filaname and process (cwd)
+errno_t uu_normalize_path( char *buf, const char *filename, uuprocess_t *p )
+{
+    if( uu_is_absname( filename ) )
+        strlcpy( buf, filename, FS_MAX_PATH_LEN );
+    else
+    {
+        if( !p )
+        {
+            SHOW_ERROR( 0, "name is not abs (%s) and no process (cwd) given",
+                        filename
+                      );
+            return ENOENT;
+        }
 
-errno_t uu_absname( char *opath, const char *base, const char *_add )
+        errno_t rc = uu_make_absname( buf, p->cwd_path, filename );
+        if( rc )
+        {
+            SHOW_ERROR( 0, "uu_absname( '%s','%s' ) rc %d",
+                        p->cwd_path, filename, rc
+                      );
+            return rc;
+        }
+    }
+
+    return 0;
+}
+
+
+int uu_is_absname( const char *fn )
+{
+    if( *fn == '/' )
+        return 1;
+
+    // Check for 'udp://'
+
+    while( isalpha( *fn ) )
+        fn++;
+
+    if( *fn != ':' ) return 0;
+    fn++;
+    if( *fn != '/' ) return 0;
+    fn++;
+    if( *fn != '/' ) return 0;
+    fn++;
+
+    // TODO ask root FS if it has such path prefix?
+
+    return 0;
+}
+
+errno_t uu_make_absname( char *opath, const char *base, const char *_add )
 {
     assert(opath);
     assert(base);

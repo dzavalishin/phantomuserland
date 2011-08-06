@@ -13,7 +13,7 @@
 #if HAVE_UNIX
 
 #define DEBUG_MSG_PREFIX "funix"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
@@ -38,7 +38,7 @@ int usys_open( int *err, uuprocess_t *u, const char *name, int flags, int mode )
 {
     SHOW_FLOW( 7, "open '%s'", name );
 
-    uufile_t * f = uu_namei( name );
+    uufile_t * f = uu_namei( name, u );
     if( f == 0 )
     {
         *err = ENOENT;
@@ -239,7 +239,7 @@ int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, in
 
     SHOW_FLOW( 7, "stat '%s'", path );
 
-    uufile_t * f = uu_namei( path );
+    uufile_t * f = uu_namei( path, u );
     if( f == 0 )
     {
         *err = ENOENT;
@@ -286,7 +286,7 @@ int usys_truncate( int *err, uuprocess_t *u, const char *path, off_t length)
 {
     (void) u;
 
-    uufile_t * f = uu_namei( path );
+    uufile_t * f = uu_namei( path, u );
     if( f == 0 )
     {
         *err = ENOENT;
@@ -328,14 +328,13 @@ int usys_ftruncate(int *err, uuprocess_t *u, int fd, off_t length)
 int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
 {
     char path[FS_MAX_PATH_LEN];
-    if( uu_absname(path, u->cwd_path, in_path ) )
-    {
+
+    if( uu_normalize_path( path, in_path, u ) )
         return ENOENT;
-    }
 
     SHOW_FLOW( 8, "in '%s' cd '%s' abs '%s'", in_path, u->cwd_path, path );
 
-    uufile_t * f = uu_namei( path );
+    uufile_t * f = uu_namei( path, u );
     if( f == 0 )
     {
         SHOW_ERROR( 1, "namei '%s' failed", path );
@@ -345,7 +344,7 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
 
     if( !(f->flags & UU_FILE_FLAG_DIR) )
     {
-        SHOW_ERROR( 1, "namei '%s' failed", path );
+        SHOW_ERROR( 1, " '%s' not dir", path );
         *err = ENOTDIR;
         goto err;
     }
@@ -523,7 +522,7 @@ int usys_pipe(int *err, uuprocess_t *u, int *fds )
 int usys_rm( int *err, uuprocess_t *u, const char *name )
 {
     (void) u;
-    uufile_t * f = uu_namei( name );
+    uufile_t * f = uu_namei( name, u );
     if( f == 0 )
     {
         *err = ENOENT;

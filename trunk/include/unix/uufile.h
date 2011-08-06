@@ -172,8 +172,20 @@ extern struct uufs dev_fs;
 extern struct uufs proc_fs;
 
 
-errno_t uu_absname( char *out_path, const char *base, const char *add );
+//! Make absolute pathname having prefix and possible suffix
+errno_t uu_make_absname( char *out_path, const char *base, const char *add );
+
+//! Break path into the pieces
 int uu_break_path( const char *in, int maxpart, const char *oname[], int olen[] );
+
+//! True if fn is absolute
+int uu_is_absname( const char *fn );
+
+struct uuprocess;
+
+//! Makes sure that buf contains correct abs fn for given
+//! (possibly relative) filaname and process (cwd)
+errno_t uu_normalize_path( char *buf, const char *filename, struct uuprocess *p );
 
 
 errno_t auto_mount( const char *name, uufs_t *fs );
