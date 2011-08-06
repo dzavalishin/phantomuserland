@@ -34,7 +34,7 @@
 
 static uufs_t *    find_mount( const char* name, char *namerest );
 
-
+#if 0
 static size_t      root_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      root_write(   struct uufile *f, const void *src, size_t bytes);
 static errno_t     root_stat( struct uufile *f, struct stat *dest );
@@ -56,7 +56,7 @@ static struct uufileops root_fops =
     .stat       = root_stat,
     //.ioctl      = root_ioctl,
 };
-
+#endif
 
 
 
@@ -87,7 +87,8 @@ struct uufs root_fs =
 
 static struct uufile root_root =
 {
-    .ops 	= &root_fops,
+//    .ops 	= &root_fops,
+    .ops 	= &common_dir_fops,
     .pos        = 0,
     .fs         = &root_fs,
     .name       = "/",
@@ -99,7 +100,6 @@ static struct uufile root_root =
 // -----------------------------------------------------------------------
 // FS methods
 // -----------------------------------------------------------------------
-
 
 static errno_t     root_open(struct uufile *f, int create, int write)
 {
@@ -125,7 +125,8 @@ static uufile_t *  root_namei(uufs_t *_fs, const char *filename)
     (void) _fs;
 
     if( 0 == strcmp(filename, "/") )
-        return &root_root;
+        return copy_uufile( &root_root );
+        //return &root_root;
 
     uufs_t * fs = find_mount( filename, namerest );
 
@@ -153,6 +154,8 @@ static errno_t     root_dismiss(uufs_t *fs)
 // -----------------------------------------------------------------------
 // Generic impl
 // -----------------------------------------------------------------------
+
+#if 0
 
 static size_t      root_read(    struct uufile *f, void *dest, size_t bytes)
 {
@@ -212,11 +215,12 @@ static errno_t     root_stat( struct uufile *f, struct stat *dest )
 
 static void *      root_copyimpl( void *impl )
 {
+#warning HACK, dir must install own ops and do house keeping there
     (void) impl;
-    return 0; //strdup(impl);
+    return impl;
 }
 
-
+#endif
 
 
 // -----------------------------------------------------------------------

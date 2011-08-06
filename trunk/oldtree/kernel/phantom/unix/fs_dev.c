@@ -124,7 +124,8 @@ struct uufs dev_fs =
 
 static struct uufile dev_root =
 {
-    .ops 	= &dev_fops,
+    //.ops 	= &dev_fops,
+    .ops 	= &common_dir_fops,
     .pos        = 0,
     .fs         = &dev_fs,
     .name       = "/",
@@ -145,6 +146,9 @@ static errno_t     dev_open(struct uufile *f, int create, int write)
     (void) write;
 
     SHOW_FLOW( 9, "Open dev uufile %p", f );
+
+    if(f->flags && UU_FILE_FLAG_DIR)
+        return 0;
 
     phantom_device_t* dev = f->impl;
 
@@ -169,6 +173,9 @@ static errno_t     dev_open(struct uufile *f, int create, int write)
 static errno_t     dev_close(struct uufile *f)
 {
     SHOW_FLOW( 9, "Close dev uufile %p", f );
+
+    if(f->flags && UU_FILE_FLAG_DIR)
+        return 0;
 
     phantom_device_t* dev = f->impl;
 
@@ -334,6 +341,7 @@ static ssize_t      dev_getsize( struct uufile *f)
 
 static void *      dev_copyimpl( void *impl )
 {
+    //assert(!(f->flags & UU_FILE_FLAG_DIR));
     // TODO dev refcount
     return impl; // Just a pointer to dev, can copy
 }
@@ -341,6 +349,9 @@ static void *      dev_copyimpl( void *impl )
 
 static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, void *data, int dlen )
 {
+    if(f->flags & UU_FILE_FLAG_DIR)
+        return -1;
+
     phantom_device_t* dev = f->impl;
     if(dev == 0 || dev->dops.ioctl == 0) return -1;
     *err = dev->dops.ioctl( dev, request, data, dlen );
@@ -349,6 +360,9 @@ static int         dev_ioctl(   struct uufile *f, errno_t *err, int request, voi
 
 static errno_t	   dev_listproperties( struct uufile *f, int nProperty, char *buf, size_t buflen )
 {
+    if(f->flags & UU_FILE_FLAG_DIR)
+        return ENOSYS;
+
     phantom_device_t* dev = f->impl;
     if(dev == 0 ) return ENOTTY;
     if(dev->dops.listproperties == 0) 
@@ -358,6 +372,9 @@ static errno_t	   dev_listproperties( struct uufile *f, int nProperty, char *buf
 
 static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *buf, size_t buflen )
 {
+    if(f->flags & UU_FILE_FLAG_DIR)
+        return ENOSYS;
+
     phantom_device_t* dev = f->impl;
     if(dev == 0) return ENOTTY;
     if(dev->dops.getproperty == 0) 
@@ -368,6 +385,9 @@ static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *bu
 
 static errno_t	   dev_setproperty( struct uufile *f, const char *pName, const char *pVal )
 {
+    if(f->flags & UU_FILE_FLAG_DIR)
+        return ENOSYS;
+
     phantom_device_t* dev = f->impl;
     if(dev == 0) return ENOTTY;
     if(dev->dops.setproperty == 0) 
@@ -424,7 +444,7 @@ void devfs_register_dev( phantom_device_t* dev )
                );
 
     char devname[FS_MAX_MOUNT_PATH];
-    snprintf( devname, FS_MAX_MOUNT_PATH, "%s%d", dev->name, dev->seq_number );
+    snprintf( devname, FS_MAX_MOUNT_PATH, "%s.%d", dev->name, dev->seq_number );
 
     uufile_t *busf = lookup_dir( &dev_root, busname, 1, create_dir );
     uufile_t *devf = lookup_dir( busf,      devname, 1, create_uufile );
@@ -432,7 +452,7 @@ void devfs_register_dev( phantom_device_t* dev )
     if(busf->fs == 0)
     {
         busf->fs = &dev_fs;
-        busf->ops = &dev_fops;
+        //busf->ops = &dev_fops; // TODO BUG XXX it must be dir ops and create_dir sets 'em?
     }
 
     if(devf->impl)

@@ -22,7 +22,7 @@
 #include <event.h> // get_n_events_in_q()
 
 
-#include "video.h"
+#include <video.h>
 #include "console.h"
 #include "misc.h"
 
@@ -30,7 +30,11 @@
 #include <kernel/timedcall.h>
 #include <kernel/debug.h>
 
+#include "net_timer.h"
+
+
 #define TIMED_FLUSH 0
+#define NET_TIMED_FLUSH 1
 
 
 
@@ -74,8 +78,10 @@ static char cbuf[BUFS+1];
 static int cbufpos = 0;
 
 
-static void flush_stdout(void)
+static void flush_stdout(void * arg)
 {
+    (void) arg;
+
     if( cbufpos >= BUFS)
         cbufpos = BUFS;
     cbuf[cbufpos] = '\0';
@@ -93,7 +99,9 @@ static timedcall_t cons_timer =
 };
 #endif
 
-
+#if NET_TIMED_FLUSH
+static net_timer_event cons_upd_timer;
+#endif
 
 
 int phantom_console_window_putc(int c)
@@ -101,6 +109,11 @@ int phantom_console_window_putc(int c)
 #if TIMED_FLUSH
     phantom_undo_timed_call( &cons_timer );
 #endif
+
+#if NET_TIMED_FLUSH
+    cancel_net_timer(&cons_upd_timer);
+#endif
+
     switch(c)
     {
     case '\b':
@@ -132,11 +145,16 @@ int phantom_console_window_putc(int c)
 #if TIMED_FLUSH
         phantom_request_timed_call( &cons_timer, 0 );
 #endif
+
+#if NET_TIMED_FLUSH
+        set_net_timer(&cons_upd_timer, 100, flush_stdout, 0, 0 );
+#endif
+
         return c;
     }
 
 flush:
-    flush_stdout();
+    flush_stdout(0);
     return c;
 }
 

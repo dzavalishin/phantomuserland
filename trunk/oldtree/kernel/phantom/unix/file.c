@@ -12,7 +12,10 @@ uufile_t *copy_uufile( uufile_t *in )
 
     uufile_t *out = calloc( 1, sizeof(uufile_t) );
     *out = *in;
+
+    memset( &out->mutex, 0, sizeof(out->mutex) );
     hal_mutex_init( &out->mutex, "uufile" );
+
     out->pos = 0;
     //out->refcount = 0;
 

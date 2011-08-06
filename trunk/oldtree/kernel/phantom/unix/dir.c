@@ -25,10 +25,37 @@
 #include <hal.h>
 #include <dirent.h>
 
+static ssize_t     dir_getsize( struct uufile *f);
+static size_t      dir_getpath( struct uufile *f, void *dest, size_t bytes);
+
+static size_t      dir_write(   struct uufile *f, const void *src, size_t bytes);
+static size_t      dir_read(    struct uufile *f, void *dest, size_t bytes);
+
+static errno_t     dir_stat( struct uufile *f, struct stat *dest );
+
+static void *      dir_copyimpl( void *impl );
+
+
+struct uufileops common_dir_fops =
+{
+    .read 	= dir_read,
+    .write 	= dir_write,
+
+    .getpath 	= dir_getpath,
+    .getsize 	= dir_getsize,
+
+    .copyimpl   = dir_copyimpl,
+
+    .stat       = dir_stat,
+    //.ioctl      = dir_ioctl,
+};
+
+
 
 
 typedef struct dir_impl
 {
+    int                 refcount;
     hal_mutex_t         mutex;
     int                 nentries;
     queue_head_t        list; // TODO! SLOOOOW!
@@ -49,7 +76,10 @@ static void create_dir_impl( uufile_t *dir )
 
         queue_init( &(i->list) );
         hal_mutex_init( &(i->mutex), "UnixDir" );
+        i->refcount = 0;
     }
+
+    dir->ops = &common_dir_fops;
 }
 
 
@@ -199,6 +229,78 @@ errno_t get_dir_entry_name( uufile_t *dir, int pos, char *name )
     hal_mutex_unlock(&(i->mutex));
     return ENOENT;
 }
+
+// -----------------------------------------------------------------------
+// Methods
+// -----------------------------------------------------------------------
+
+
+
+// TODO use pool for impl!
+static void *      dir_copyimpl( void *impl )
+{
+    struct dir_impl *i = impl;
+    i->refcount++;
+    //(void) impl;
+    return impl; //strdup(impl);
+}
+
+
+static errno_t     dir_stat( struct uufile *f, struct stat *dest )
+{
+    const char *name = f->name;
+
+    SHOW_FLOW( 7, "stat %s", name );
+
+    memset( dest, 0, sizeof(struct stat) );
+
+    dest->st_nlink = 1;
+    dest->st_uid = -1;
+    dest->st_gid = -1;
+
+    dest->st_size = 0;
+    dest->st_mode = 0777; // rwxrwxrwx
+
+    dest->st_mode |= S_IFDIR;
+
+    return 0;
+}
+
+
+static size_t      dir_read(    struct uufile *f, void *dest, size_t bytes)
+{
+    assert(f->flags & UU_FILE_FLAG_DIR);
+    return common_dir_read(f, dest, bytes);
+}
+
+static size_t      dir_write(   struct uufile *f, const void *src, size_t bytes)
+{
+    (void) f;
+    (void) src;
+    (void) bytes;
+
+    return -1;
+}
+
+
+static size_t      dir_getpath( struct uufile *f, void *dest, size_t bytes)
+{
+    assert(f->flags & UU_FILE_FLAG_DIR);
+    if( bytes == 0 ) return 0;
+    // TODO get mountpoint
+    strncpy( dest, f->name, bytes );
+    return strlen(dest);
+}
+
+static ssize_t     dir_getsize( struct uufile *f)
+{
+    (void) f;
+
+    return -1;
+}
+
+
+
 
 // -----------------------------------------------------------------------
 // Interace

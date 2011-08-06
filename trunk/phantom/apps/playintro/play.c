@@ -7,7 +7,7 @@
 #include <sys/types.h>
 
 
-#define DEFAULT_DSP	"/dev/isa/es13700"
+#define DEFAULT_DSP	"/dev/pci/es1370.0"
 
 
 unsigned char samples[] =

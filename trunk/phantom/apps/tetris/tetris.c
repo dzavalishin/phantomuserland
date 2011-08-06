@@ -527,7 +527,7 @@ int main()
 {
     //tetris_window = drv_video_window_create( 60, 120, 700, 550, COLOR_BLACK, "Tetris" );
 
-    fb = open("/dev/etc/fb0", O_RDWR );
+    fb = open("/dev/etc/fb.0", O_RDWR );
 
     if( fb < 0 )
     {
