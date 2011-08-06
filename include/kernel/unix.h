@@ -5,7 +5,7 @@
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel functions implementing Unix syscalls.
- *
+ * Unix emulation related things.
  *
 **/
 
@@ -18,9 +18,9 @@
 struct sockaddr;
 
 
-// Unix emulation related things
+// Find uufile_t object for path, applying cwd if possible
+uufile_t *uu_namei(const char *filename, uuprocess_t *u );
 
-uufile_t *uu_namei(const char *filename);
 // find fs by path. rest is FS_MAX_PATH_LEN bytes
 uufs_t * uu_findfs(const char *filename, char *rest );
 

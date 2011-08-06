@@ -210,6 +210,7 @@ int uu_create_process( int ppid )
     else
     {
         //reopen_stdioe( p, "/dev/tty" );
+        strlcpy( p->cwd_path, "/", FS_MAX_PATH_LEN );
     }
 
     sig_init( &(p->signals) );
