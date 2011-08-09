@@ -91,7 +91,7 @@ int uu_is_absname( const char *fn )
 
     // TODO ask root FS if it has such path prefix?
 
-    return 0;
+    return 1;
 }
 
 errno_t uu_make_absname( char *opath, const char *base, const char *_add )

@@ -569,6 +569,16 @@ void store_to_cache( in_addr_t addr, const char *name )
 
 errno_t name2ip( in_addr_t *out, const char *name, int flags )
 {
+    int    ia, ib, ic, id;
+    if( 4 == sscanf( name, "%d.%d.%d.%d", &ia, &ib, &ic, &id ) )
+    {
+        // No resolver required, ip4 addr given
+        ipv4_addr iaddr = IPV4_DOTADDR_TO_ADDR( ia, ib, ic, id);
+        *out = htonl( iaddr );
+        SHOW_FLOW( 2, "parsed %s to %s", name, inet_ntoa(* (struct in_addr*)out) );
+        return 0;
+    }
+
     if(!inited)
         return ENXIO;
 

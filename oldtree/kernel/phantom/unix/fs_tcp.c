@@ -12,17 +12,17 @@
 #if HAVE_UNIX
 
 #define DEBUG_MSG_PREFIX "tcpfs"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
 #include <kernel/net.h>
 #include <kernel/net/tcp.h>
+#include <netinet/resolv.h>
 
 #include <unix/uufile.h>
 #include <unix/uunet.h>
-//#include <unix/uuprocess.h>
 #include <malloc.h>
 #include <string.h>
 
@@ -126,26 +126,51 @@ static errno_t     tcpfs_close(struct uufile *f)
     return 0;
 }
 
+#define TCPFS_RESOLVE 1
 
 
 // Create a file struct for given path
 static uufile_t *  tcpfs_namei(uufs_t *fs, const char *filename)
 {
-    int ip0, ip1, ip2, ip3, port;
-
+    int port;
     (void) fs;
 
+    SHOW_FLOW( 1, "%s", filename );
+
+#if TCPFS_RESOLVE
+    char as[128];
+    if( 2 != sscanf( filename, "%127[^:]:%d", as, &port ) )
+    {
+        SHOW_ERROR( 1, "Can't parse %s", filename );
+        return 0;
+    }
+
+    in_addr_t ip;
+    errno_t rc = name2ip( &ip, as, 0 );
+    if( rc )
+    {
+        SHOW_ERROR( 1, "resolve fail, name2ip = %d", rc );
+        return 0;
+    }
+
+#else
+    int ip0, ip1, ip2, ip3;
     if( 5 != sscanf( filename, "%d.%d.%d.%d:%d", &ip0, &ip1, &ip2, &ip3, &port ) )
     {
         return 0;
     }
+#endif
 
     sockaddr addr;
     addr.port = port;
 
     addr.addr.len = 4;
     addr.addr.type = ADDR_TYPE_IP;
+#if TCPFS_RESOLVE
+    NETADDR_TO_IPV4(addr.addr) = ntohl( ip );
+#else
     NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(ip0, ip2, ip2, ip3);
+#endif
 
     struct uusocket *us = calloc(1, sizeof(struct uusocket));
     if(us == 0)  return 0;
