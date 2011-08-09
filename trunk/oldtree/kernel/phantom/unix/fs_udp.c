@@ -19,10 +19,10 @@
 
 #include <kernel/net.h>
 #include <kernel/net/udp.h>
+#include <netinet/resolv.h>
 
 #include <unix/uufile.h>
 #include <unix/uunet.h>
-//#include <unix/uuprocess.h>
 #include <malloc.h>
 #include <string.h>
 
@@ -133,25 +133,50 @@ static errno_t     udpfs_close(struct uufile *f)
 }
 
 
+#define UDPFS_RESOLVE 1
+
 
 // Create a file struct for given path
 static uufile_t *  udpfs_namei(uufs_t *fs, const char *filename)
 {
-    int ip0, ip1, ip2, ip3, port;
+    int port;
 
     (void) fs;
 
+#if UDPFS_RESOLVE
+    char as[128];
+    if( 2 != sscanf( filename, "%127[^:]:%d", as, &port ) )
+    {
+        SHOW_ERROR( 1, "Can't parse %s", filename );
+        return 0;
+    }
+
+    in_addr_t ip;
+    errno_t rc = name2ip( &ip, as, 0 );
+    if( rc )
+    {
+        SHOW_ERROR( 1, "resolve fail, name2ip = %d", rc );
+        return 0;
+    }
+
+#else
+    int ip0, ip1, ip2, ip3;
     if( 5 != sscanf( filename, "%d.%d.%d.%d:%d", &ip0, &ip1, &ip2, &ip3, &port ) )
     {
         return 0;
     }
+#endif
 
     sockaddr addr;
     addr.port = port;
 
     addr.addr.len = 4;
     addr.addr.type = ADDR_TYPE_IP;
+#if UDPFS_RESOLVE
+    NETADDR_TO_IPV4(addr.addr) = ntohl( ip );
+#else
     NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(ip0, ip2, ip2, ip3);
+#endif
 
     struct uusocket *us = calloc(1, sizeof(struct uusocket));
     if(us == 0)  return 0;
@@ -165,10 +190,6 @@ static uufile_t *  udpfs_namei(uufs_t *fs, const char *filename)
         SHOW_ERROR0(0, "can't prepare endpoint");
         return 0;
     }
-
-
-
-
 
     uufile_t *ret = create_uufile();
 

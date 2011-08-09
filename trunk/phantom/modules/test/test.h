@@ -31,6 +31,7 @@ int do_test_pipe(const char *test_parm);
 
 int do_test_ports(const char *test_parm);
 
+int do_test_tcpfs(const char *test_parm);
 
 
 
