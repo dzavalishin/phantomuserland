@@ -75,6 +75,19 @@ static errno_t partRaise( struct phantom_disk_partition *p, pager_io_request *rq
     return p->base->raise( p->base, rq );
 }
 
+static errno_t partFence( struct phantom_disk_partition *p )
+{
+    assert(p->base);
+
+    if( 0 == p->base->fence )
+        return ENODEV;
+
+    SHOW_FLOW( 11, "part fence p %p", p );
+
+    return p->base->fence( p->base );
+}
+
+
 
 // ------------------------------------------------------------
 // Upper level disk io functions
@@ -199,6 +212,28 @@ errno_t disk_raise_priority( struct phantom_disk_partition *p, pager_io_request 
     return p->raise( p, rq );
 }
 
+errno_t disk_fence( struct phantom_disk_partition *p )
+{
+    assert(p);
+
+    if( 0 == p->fence )
+    {
+        SHOW_ERROR( 0, "no fence on part %s", p->name );
+        return ENODEV;
+    }
+
+    errno_t rc = p->fence( p );
+
+    if( rc )
+    {
+        SHOW_ERROR( 0, "fence failed on part %s, rc %d", p->name, rc );
+        hal_sleep_msec( 10000 ); // At least - some chance...
+    }
+
+
+    return rc;
+}
+
 
 // ------------------------------------------------------------
 // Partitions list management
@@ -238,6 +273,7 @@ phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition
     ret->asyncIo = partAsyncIo;
     ret->dequeue = partDequeue;
     ret->raise   = partRaise;
+    ret->fence   = partFence;
 
     ret->base = base;
     ret->baseh.h = -1;

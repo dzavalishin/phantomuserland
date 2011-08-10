@@ -1435,6 +1435,8 @@ void do_snapshot()
     // free journal part, which was created before this snap
     // was started
 
+    // Force all io to complete
+    pager_fence();
 
     // DONE!
     syslog( 0, "Snapshot done!");

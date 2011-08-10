@@ -232,6 +232,10 @@ void pager_enqueue_for_pageout_fast( pager_io_request *rq )
     pager_enqueue_for_pageout( rq );
 }
 
+errno_t pager_fence()
+{
+    return disk_fence( pp );
+}
 
 
 
@@ -545,6 +549,13 @@ int pager_dequeue_from_pageout(pager_io_request *p)
 
     return dequeued;
 }
+
+errno_t pager_fence()
+{
+    SHOW_ERROR0( 0, "No fence!" );
+    return ENODEV;
+}
+
 
 #endif
 
