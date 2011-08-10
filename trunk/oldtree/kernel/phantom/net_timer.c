@@ -67,6 +67,18 @@ static net_timer_event *peek_queue_head(void)
     return e;
 }
 
+static int _cancel_net_timer(net_timer_event *e)
+{
+    if(!e->pending) {
+        return ERR_GENERAL;
+    }
+
+    remove_from_queue(e);
+    e->pending = false;
+
+    return NO_ERROR;
+}
+
 int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback callback, void *args, int flags)
 {
     int err = NO_ERROR;
@@ -78,7 +90,7 @@ int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback 
             err = ERR_GENERAL;
             goto out;
         }
-        cancel_net_timer(e);
+        _cancel_net_timer(e);
     }
 
     // set up the timer
@@ -100,16 +112,7 @@ int cancel_net_timer(net_timer_event *e)
     int err = NO_ERROR;
 
     mutex_lock(&net_q.lock);
-
-    if(!e->pending) {
-        err = ERR_GENERAL;
-        goto out;
-    }
-
-    remove_from_queue(e);
-    e->pending = false;
-
-out:
+    err = _cancel_net_timer(e);
     mutex_unlock(&net_q.lock);
 
     return err;
