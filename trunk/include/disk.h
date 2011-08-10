@@ -81,6 +81,9 @@ struct phantom_disk_partition
     // Attempt to raise this request's priority, if possible
     // Snapshot code relies on it a lot
     errno_t     (*raise)( struct phantom_disk_partition *p, pager_io_request *rq );
+
+    // Sync - return after all prev reqs are done - PHYSICALLY! Ie not only reported as such, but really written!
+    errno_t     (*fence)( struct phantom_disk_partition *p );
 };
 
 
@@ -128,13 +131,26 @@ void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq );
 /** Attempt to remove request from queue */
 errno_t disk_dequeue( struct phantom_disk_partition *p, pager_io_request *rq );
 
+/** Attempt to raise req's priority */
+errno_t disk_raise_priority( struct phantom_disk_partition *p, pager_io_request *rq );
+
+/**
+ *
+ * Don't return until all preceding io requests on this partition are done.
+ *
+ * It's a big question if following io requests can be processed before this call returns.
+ * Seems like it is so, or else OS responce may be quite poor during this call.
+ *
+ * NB! Writes mut really make it to disk before this func returns.
+ *
+**/
+errno_t disk_fence( struct phantom_disk_partition *p );
+
 
 //! Return partition for paging (Phantom "FS")
 phantom_disk_partition_t *select_phantom_partition(void);
 
 void dump_partition(phantom_disk_partition_t *p);
 
-/* make pager happy */
-errno_t disk_raise_priority( struct phantom_disk_partition *p, pager_io_request *rq );
 
 #endif// DISK_H
