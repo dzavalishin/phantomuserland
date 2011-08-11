@@ -13,16 +13,17 @@
 
 
 #define DEBUG_MSG_PREFIX "devfs"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
 #include <unix/uufile.h>
-//#include <unix/uuprocess.h>
 #include <malloc.h>
 #include <string.h>
 
+#include "svn_version.h"
+#include <kernel/init.h>
 
 
 // -----------------------------------------------------------------------
@@ -110,13 +111,26 @@ static errno_t     proc_close(struct uufile *f)
     return 0;
 }
 
-static size_t r_about( struct uufile *f, void *dest, size_t bytes)
-{
-    (void) f;
+#define R_CONST(__name, __val) \
+  static size_t r_##__name( struct uufile *f, void *dest, size_t bytes) \
+  {                                                                     \
+      if(f->pos > 0)                                                    \
+          return 0;                                                     \
+                                                                        \
+      int nc = strlcpy( dest, __val, bytes );                           \
+      f->pos += nc;                                                     \
+      return nc;                                                        \
+  }
 
-    strncpy( dest, "Phantom ProcFS", bytes );
-    return strlen(dest);
-}
+
+R_CONST(about, "Phantom ProcFS")
+R_CONST(version, "Phantom " PHANTOM_VERSION_STR)
+
+R_CONST(arch, arch_name)
+R_CONST(board, board_name)
+
+#define R_SETFUNC(__name) if( 0 == strcmp( #__name, filename ) ) impl = r_##__name
+
 
 
 // Create a file struct for given path
@@ -125,11 +139,12 @@ static uufile_t *  proc_namei( uufs_t *fs, const char *filename)
     (void) fs;
     void *impl = 0;
 
-    if( strcmp( filename, "about" ) )
-        impl = r_about;
+    R_SETFUNC(about);
+    R_SETFUNC(version);
+    R_SETFUNC(arch);
+    R_SETFUNC(board);
 
-    if(impl == 0)
-        return 0;
+    if(impl == 0)        return 0;
 
     uufile_t *ret = create_uufile();
     ret->ops = &proc_fops;
@@ -160,6 +175,9 @@ static errno_t     proc_dismiss(uufs_t *fs)
 // -----------------------------------------------------------------------
 // Generic impl
 // -----------------------------------------------------------------------
+
+
+
 
 static size_t      proc_read(    struct uufile *f, void *dest, size_t bytes)
 {
