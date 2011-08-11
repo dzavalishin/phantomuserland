@@ -124,5 +124,7 @@ void usb_setup(void);
 
 void drv_video_init_windows(void);
 
+void init_wins(u_int32_t ip_addr);
+
 #endif // INIT_H
 
