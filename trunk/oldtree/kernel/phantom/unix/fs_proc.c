@@ -21,9 +21,12 @@
 #include <unix/uufile.h>
 #include <malloc.h>
 #include <string.h>
+#include <kernel/libkern.h>
 
+// data sources
 #include "svn_version.h"
 #include <kernel/init.h>
+#include <thread_private.h>
 
 
 // -----------------------------------------------------------------------
@@ -131,6 +134,21 @@ R_CONST(board, board_name)
 
 #define R_SETFUNC(__name) if( 0 == strcmp( #__name, filename ) ) impl = r_##__name
 
+// TODO are we sure we can give it all out?
+static size_t r_threads( struct uufile *f, void *dest, size_t bytes)
+{
+    phantom_thread_t out;
+    tid_t t = get_next_tid( f->pos, &out);
+    f->pos = t;
+
+    if( t < 0 )
+        return 0;
+
+    int nc = umin( bytes, sizeof(out) );
+    memcpy( dest, &out, nc );
+    return nc;
+}
+
 
 
 // Create a file struct for given path
@@ -143,6 +161,9 @@ static uufile_t *  proc_namei( uufs_t *fs, const char *filename)
     R_SETFUNC(version);
     R_SETFUNC(arch);
     R_SETFUNC(board);
+    R_SETFUNC(threads);
+
+
 
     if(impl == 0)        return 0;
 

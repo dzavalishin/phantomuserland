@@ -302,6 +302,34 @@ static int find_tid(phantom_thread_t *t)
     } while(1);
 }
 
+tid_t get_next_tid(tid_t tid, phantom_thread_t *out)
+{
+    tid_t ret = tid+1;
+    int ie = hal_save_cli();
+    hal_spin_lock( &tid_lock );
+
+    while( phantom_kernel_threads[ret] == 0 )
+    {
+        ret++;
+
+        if(ret >= MAX_THREADS)
+        {
+            ret = -1;
+            goto finish;
+        }
+    }
+
+    if(out)
+        *out = *phantom_kernel_threads[ret];
+
+finish:
+    hal_spin_unlock( &tid_lock );
+    if(ie) hal_sti();
+
+    return ret;
+}
+
+
 
 
 
