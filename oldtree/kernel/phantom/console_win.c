@@ -84,15 +84,17 @@ static hal_mutex_t buf_mutex;
 
 static void flush_stdout(void * arg)
 {
+    char text[BUFS + 1];
     (void) arg;
 
     hal_mutex_lock( &buf_mutex );
     if( cbufpos >= BUFS)
         cbufpos = BUFS;
     cbuf[cbufpos] = '\0';
-    phantom_console_window_puts(cbuf);
+    memcpy(text, cbuf, cbufpos + 1);
     cbufpos = 0;
     hal_mutex_unlock( &buf_mutex );
+    phantom_console_window_puts(text);
 }
 
 static void put_buf( char c )
