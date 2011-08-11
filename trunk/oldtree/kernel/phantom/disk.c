@@ -77,7 +77,7 @@ static errno_t partRaise( struct phantom_disk_partition *p, pager_io_request *rq
 
 static errno_t partFence( struct phantom_disk_partition *p )
 {
-    if( (0 == p->base) && (0 == p->base->fence) )
+    if( (0 == p->base) || (0 == p->base->fence) )
         return ENODEV;
 
     SHOW_FLOW( 11, "part fence p %p", p );
