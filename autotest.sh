@@ -117,7 +117,7 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 
 qemu $QEMU_OPTS
 
-grep -iB 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
+grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
 grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' serial0.log
 grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
