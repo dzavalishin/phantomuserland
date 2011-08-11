@@ -17,6 +17,9 @@ rem SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw
 SET VIO=-net nic,model=virtio
 
+rem SET Q_REDIR=-redir udp:123::123
+SET Q_REDIR=-redir udp:8023::23
+
 SET Q_PORTS= -serial file:serial0.log
 
 SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 
@@ -41,7 +44,7 @@ rem -virtioconsole 4
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-%QDIR%\qemu -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI%
+%QDIR%\qemu -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
 
 grep KERNEL.TEST serial0.log
 grep USERMODE.TEST serial0.log

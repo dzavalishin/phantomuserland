@@ -400,6 +400,8 @@ int main(int argc, char **argv, char **envp)
     //init_sntp( IPV4_DOTADDR_TO_ADDR(85,21,78,91), 10000 );
     //init_sntp( IPV4_DOTADDR_TO_ADDR(192,168,1,1), 10000 );
 
+	//init_wins(u_int32_t ip_addr);
+
 
 #if 1
     /*
