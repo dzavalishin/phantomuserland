@@ -163,6 +163,10 @@ struct phantom_thread
 void phantom_threads_init(void);
 
 
+//* Scan through threads
+tid_t get_next_tid(tid_t tid, phantom_thread_t *out);
+
+
 
 /**
  *
