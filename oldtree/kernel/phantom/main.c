@@ -279,7 +279,8 @@ int main(int argc, char **argv, char **envp)
     //pressEnter("will look for drv stage 1");
     phantom_find_drivers( 1 );
 
-    init_main_event_q();
+    // here it kills all by calling windowing funcs sometimes
+    //init_main_event_q();
 
 #ifdef ARCH_ia32
 #if HAVE_VESA
@@ -291,6 +292,8 @@ int main(int argc, char **argv, char **envp)
 #endif
     //pressEnter("will init graphics");
     phantom_start_video_driver();
+
+    init_main_event_q();
 
     pressEnter("will look for drv stage 2");
     phantom_find_drivers( 2 );
