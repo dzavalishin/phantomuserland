@@ -59,12 +59,17 @@ void *	memset(void *dst0, int c0, size_t length);
 
 long 	atol(const char *str);
 long 	strtol(const char *nptr, char **endptr, int base);
+unsigned long strtoul(const char * __restrict nptr, char ** __restrict endptr, int base);
+
 quad_t 	strtoq(const char *nptr, char **endptr, int base);
 u_quad_t strtouq(const char *nptr, char **endptr, int base);
 
 
 void *	memchr(const void *buf, int c, size_t len);
 void *	memscan(void *addr, int c, size_t size);
+void *  memccpy(void *t, const void *f, int c, size_t n);
+
+
 int 	strcoll(const char *s1, const char *s2);
 char *	strncat(char *dest, const char *src, size_t count);
 int 	strnicmp(const char *s1, const char *s2, size_t len);
@@ -80,6 +85,8 @@ size_t 	strxfrm(char *dest, const char *src, size_t n);
 char *	strnstrn(const char *s1, int l1, const char *s2, int l2);
 
 
+int     strncasecmp(const char *s1, const char *s2, size_t n);
+int     strcasecmp(const char *s1, const char *s2);
 
 
 

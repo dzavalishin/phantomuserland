@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1988, 1993
+ * Copyright (c) 1987, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,43 @@
  * SUCH DAMAGE.
  */
 
-#include <phantom_libc.h>
+#include <sys/cdefs.h>
+#include <string.h>
+#include <ctype.h>
 
+#if defined(LIBC_SCCS) && !defined(lint)
+static char sccsid[] = "@(#)strcasecmp.c	8.1 (Berkeley) 6/4/93";
+#endif /* LIBC_SCCS and not lint */
 
-//#include <stddef.h>
-#include <stdlib.h>
+//typedef unsigned char u_char;
 
-long
-atol(const char *str)
+int
+strcasecmp(const char *s1, const char *s2)
 {
-	return(strtol(str, (char **)0, 10));
+	register const u_char
+			*us1 = (const u_char *)s1,
+			*us2 = (const u_char *)s2;
+
+	while (tolower(*us1) == tolower(*us2++))
+		if (*us1++ == '\0')
+			return (0);
+	return (tolower(*us1) - tolower(*--us2));
+}
+
+int
+strncasecmp(const char *s1, const char *s2, size_t n)
+{
+	if (n != 0) {
+		register const u_char
+				*us1 = (const u_char *)s1,
+				*us2 = (const u_char *)s2;
+
+		do {
+			if (tolower(*us1) != tolower(*us2++))
+				return (tolower(*us1) - tolower(*--us2));
+			if (*us1++ == '\0')
+				break;
+		} while (--n != 0);
+	}
+	return (0);
 }

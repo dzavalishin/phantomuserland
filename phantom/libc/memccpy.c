@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 1988, 1993
+/*-
+ * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,25 @@
  * SUCH DAMAGE.
  */
 
-#include <phantom_libc.h>
+#if defined(LIBC_SCCS) && !defined(lint)
+static char sccsid[] = "@(#)memccpy.c	8.1 (Berkeley) 6/4/93";
+#endif /* LIBC_SCCS and not lint */
 
+#include <sys/cdefs.h>
+#include <string.h>
 
-//#include <stddef.h>
-#include <stdlib.h>
-
-long
-atol(const char *str)
+void *
+memccpy(void *t, const void *f, int c, size_t n)
 {
-	return(strtol(str, (char **)0, 10));
+
+	if (n) {
+		register unsigned char *tp = t;
+		register const unsigned char *fp = f;
+		register unsigned char uc = c;
+		do {
+			if ((*tp++ = *fp++) == uc)
+				return (tp);
+		} while (--n != 0);
+	}
+	return (0);
 }
