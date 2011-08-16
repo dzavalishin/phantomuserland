@@ -1,6 +1,8 @@
 default:: all
 
-SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), offsets libc gl dev libphantom threads newos vm libkern user tmalloc modules apps)
+# subdir offsets - turned off for seems to be bad idea :(
+
+SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS),  libc gl dev libphantom threads newos vm libkern user tmalloc modules apps)
 
 
 %.MAKE:
