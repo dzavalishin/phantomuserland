@@ -66,6 +66,19 @@
 #endif
 
 
+#ifdef ARCH_mips
+#include <mips/asm.h>
+
+// syscall instr has data field, but we don't use
+// pass syscall number in k0
+#define	SYSCALL(x)	LEAF(x); addiu k0, zero, SYS_##x; syscall; END(x);
+
+
+#endif
+
+
+
+
 
 #ifndef SYSCALL
 #  error no syscall for this architecture?
