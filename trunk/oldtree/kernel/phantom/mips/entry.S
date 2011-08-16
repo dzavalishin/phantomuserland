@@ -81,5 +81,67 @@ __startup_stack_top__:
 
 // TODO cp0 r16 config
 
+LEAF(hal_cli)
+#warning non-atomic dis intr
+    mfc0	t0, CP0_STATUS
+    li      t1, ~ST_IE
+    and    t0, t0, t1
+    mtc0	t0, CP0_STATUS
+    jr      ra
+    nop
+END(hal_cli)
 
+LEAF(hal_save_cli)
+#warning non-atomic dis intr
+    mfc0	v0, CP0_STATUS
+    li      t1, ~ST_IE
+    and     t0, v0, t1
+    mtc0	t0, CP0_STATUS
+    andi    v0, v0, ST_IE
+    jr      ra
+    nop
+END(hal_cli)
+
+LEAF(hal_is_sti)
+#warning non-atomic dis intr
+    mfc0	v0, CP0_STATUS
+    andi    v0, v0, ST_IE
+    jr      ra
+    nop
+END(hal_cli)
+
+
+LEAF(hal_sti)
+    mfc0	t0, CP0_STATUS
+    ori    t0, t0, ST_IE
+    mtc0	t0, CP0_STATUS
+    jr      ra
+    nop
+END(hal_sti)
+
+LEAF(hal_wait_for_interrupt)
+#warning no hal_wait_for_interrupt
+    jr      ra
+    nop
+END(hal_wait_for_interrupt)
+
+
+LEAF(arch_get_frame_pointer)
+    jr      ra
+    addiu   v0, fp, 0
+END(arch_get_frame_pointer)
+
+
+// int atomic_add(int *val, int incr) 
+LEAF(atomic_add)
+_add_again:
+    ll      t0, 0(a0)
+    addu    t1, t0, a2
+    addiu   v0, t1, 0 // ret val
+    sc      t1, 0(a0)
+    beqz    t1, _add_again
+
+    jr      ra
+    nop
+END(atomic_add)
 
