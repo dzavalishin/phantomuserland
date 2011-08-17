@@ -20,6 +20,7 @@
 
 #include <kernel/trap.h>
 #include <unix/uusignal.h>
+#include <unix/uuprocess.h>
 
 #define SIG_PUSH(__v_) *((u_int32_t *)(mina+(--(st->esp)))) = (__v_)
 
