@@ -196,7 +196,8 @@ void board_make_driver_map(void)
 
     //if( (id >> 24) != 0x41 )        SHOW_ERROR( 0, "Board manufacturer is %d, not %d", (id >> 24), 0x41 );
 
-    phantom_register_drivers(board_drivers);
+    // don't need - this window is directly accessible for kernel
+    //hal_pages_control( 0x14000000u, (void *)0xB4000000u, 0xE0000, page_map_io, page_rw );
 }
 
 

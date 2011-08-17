@@ -14,6 +14,5 @@ cp P:/projects/phantomos/trunk/phantom/barebone/mips/barebone.elf fat/boot/phant
 
 rm -f serial0.log 
 %QDIR%\qemu-system-mips -M mips -s -L %QDIR%/bios -kernel fat/boot/phantom.mips -sd phantom.img -mtdblock vio.img %SER% %STOP% %Q_NET% 
-rem -writeconfig arm.cfg
 
-rem qemu-system-arm -kernel zImage.integrator -initrd arm_root.img
+cat qemu/0.14.1/stderr.txt

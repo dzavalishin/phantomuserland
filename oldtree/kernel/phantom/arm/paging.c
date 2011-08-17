@@ -279,6 +279,7 @@ phantom_dump_pdir()
 
 
 
+// TODO this one is machindep
 void arch_cpu_invalidate_TLB_range(addr_t start, addr_t end)
 {
     int num_pages = ((long)end)/PAGE_SIZE - ((long)start)/PAGE_SIZE;
@@ -289,6 +290,7 @@ void arch_cpu_invalidate_TLB_range(addr_t start, addr_t end)
     }
 }
 
+// TODO this one is machindep
 void arch_cpu_invalidate_TLB_list(addr_t pages[], int num_pages)
 {
     int i;
@@ -363,7 +365,9 @@ hal_page_control_etc(
         phantom_map_page( (linaddr_t)page_start_addr, pte );
     else
         phantom_unmap_page( (linaddr_t)page_start_addr );
-    ftlbentry((int)page_start_addr);
+
+    invlpg((addr_t)page_start_addr);
+    //ftlbentry((int)page_start_addr);
 }
 
 
