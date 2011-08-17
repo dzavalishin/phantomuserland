@@ -68,6 +68,10 @@ struct trap_state
     unsigned int r31;
     unsigned int r32;
 
+    unsigned int pc;
+    unsigned int usr_sp;
+    unsigned int usr_fp;
+    unsigned int usr_ra;
 
     unsigned int trapno;
     unsigned int intno;     // 

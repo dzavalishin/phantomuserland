@@ -42,6 +42,25 @@ errno_t dpart_write_sector( partition_handle_t h, const void *from, long sectorN
 void dpart_enqueue( partition_handle_t h, pager_io_request *rq );
 void dpart_release_async( pool_handle_t h );
 
+/** Declare block as unused by fs (mostly for SSD) */
+void dpart_trim( partition_handle_t h, pager_io_request *rq );
+
+/** Attempt to raise req's priority */
+errno_t dpart_raise_priority( partition_handle_t h, pager_io_request *rq );
+
+/**
+ *
+ * Don't return until all preceding io requests on this partition are done.
+ *
+ * It's a big question if following io requests can be processed before this call returns.
+ * Seems like it is so, or else OS responce may be quite poor during this call.
+ *
+ * NB! Writes mut really make it to disk before this func returns.
+ *
+**/
+errno_t dpart_fence( partition_handle_t h );
+
+
 
 // -----------------------------------------------------------------------
 // Old stuff
@@ -84,6 +103,10 @@ struct phantom_disk_partition
 
     // Sync - return after all prev reqs are done - PHYSICALLY! Ie not only reported as such, but really written!
     errno_t     (*fence)( struct phantom_disk_partition *p );
+
+    // Trim - declare block to be unused by filesystem - not yet really 
+    // implemented, though it is more or less harmless just to ignore.
+    errno_t     (*trim)( struct phantom_disk_partition *p, pager_io_request *rq  );
 };
 
 
@@ -151,6 +174,11 @@ errno_t disk_fence( struct phantom_disk_partition *p );
 phantom_disk_partition_t *select_phantom_partition(void);
 
 void dump_partition(phantom_disk_partition_t *p);
+
+
+// must be static, but used in disk.c and defined in disk_pool.c
+extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
+extern errno_t partTrim( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 
 
 #endif// DISK_H

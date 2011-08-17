@@ -44,6 +44,9 @@
 #define	_JBLEN	12		// Size of the jmp_buf on AMD64. 
 #endif
 
+#ifdef ARCH_mips
+#define	_JBLEN	64*8		// Size of the jmp_buf on MIPS - 64 regs 64 bits each
+#endif
 
 #ifndef _JBLEN
 # error setjmp arch

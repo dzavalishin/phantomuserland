@@ -6,6 +6,7 @@
 
 struct uuprocess;
 
+// Machdep func to deliver signal to user thread
 errno_t sig_deliver( struct uuprocess *u, struct trap_state *st, int nsig, void *handler );
 
 void sig_init( signal_handling_t *sh );
