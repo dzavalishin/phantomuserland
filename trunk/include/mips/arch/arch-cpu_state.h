@@ -4,10 +4,10 @@
 
 struct cpu_state_save
 {
+    u_int32_t           gp;
     u_int32_t           sp;
-    u_int32_t           lr;
     u_int32_t           fp;
-    u_int32_t           sr; // cp0 r12 - status
+    u_int32_t           ra; // == pc
 
     // exactly 4 or 8 ints above to guarantee 16-byte alignment
     
@@ -23,8 +23,8 @@ typedef struct cpu_state_save cpu_state_save_t;
 #endif //ASSEMBLER
 
 
-#define CSTATE_SP               0
-#define CSTATE_LR               4
+#define CSTATE_GP               0
+#define CSTATE_SP               4
 #define CSTATE_FP               8
-#define CSTATE_SR              12
+#define CSTATE_RA              12
 //#define CSTATE_FXSTATE          20

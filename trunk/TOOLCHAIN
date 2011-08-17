@@ -1,0 +1,7 @@
+Linux:
+  gcc
+
+Windows:
+  X86 - Cygwin gcc
+
+  MIPS/ARM - http://opensource.zylin.com/gccbinary.html
