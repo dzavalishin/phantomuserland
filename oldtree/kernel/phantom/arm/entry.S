@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * ARM startup code. Not compiled even once. Not sure that it is right at all.
+ * ARM startup code. 
  *
 **/
 
