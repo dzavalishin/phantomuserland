@@ -73,8 +73,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	time.o console.o timedcall.o driver_pci_rtl8139.o \
 	paging_device.o paging.o dpc.o spinlock.o hal.o fsck.o \
 	console_win.o vm_threads.o snap_sync.o ps2.o \
-	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o video_drv_cirrus.o \
-	video_drv_direct_vesa.o video_drv_bochs_vbe.o \
+	video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_cirrus.o \
 	video_drv_basic_vga.o video_drv_basic_vga_tables.o video.o \
 	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
 	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
@@ -90,6 +89,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
         unix/signal.o \
 	fs_map.o stats.o resolve.o main.o keyboard.o syslog.o arch_name.o \
+	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
 	svn_version.o	$(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 
 	@echo "Linking $@ ---------------------------------------------"

@@ -1,4 +1,4 @@
-ARCH_FLAGS      = -EL -march=r4000
+ARCH_FLAGS      = -EL -march=r4000 -G 0
 #-msoft-float 
 #-mpoke-function-name
 

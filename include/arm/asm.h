@@ -1,5 +1,9 @@
 /*	$NetBSD: asm.h,v 1.5 2003/08/07 16:26:53 agc Exp $	*/
 
+#ifndef ARCH_arm
+#warning This is ARM code!
+#endif
+
 /*-
  * Copyright (c) 1990 The Regents of the University of California.
  * All rights reserved.

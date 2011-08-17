@@ -8,6 +8,10 @@
  *
 **/
 
+#ifndef ARCH_mips
+#warning This is MIPS code!
+#endif
+
 /*
  * LEAF - declare leaf routine
  */
@@ -79,3 +83,4 @@ symbol:         .frame  sp, framesize, rpc
 
 
 #define _C_LABEL(x) x
+#define EXT(x) x
