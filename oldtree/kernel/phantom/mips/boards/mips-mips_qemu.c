@@ -18,6 +18,8 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include <mips/cp0_regs.h>
+
 #define DEBUG_MSG_PREFIX "board"
 #include <debug_ext.h>
 #define debug_level_flow 6
@@ -74,16 +76,38 @@ static char * symtab_getname( void *addr )
 // Interrupts processing
 // -----------------------------------------------------------------------
 
+#define MIPS_ONCPU_INTERRUPTS 8
+
 
 void board_interrupt_enable(int irq)
 {
-    (void) irq;
+    assert_interrupts_disabled();
+
+    if(irq < MIPS_ONCPU_INTERRUPTS)
+    {
+        // irq mask in 15:8
+        unsigned mask = mips_read_cp0( 12 ); //CP0_STATUS );
+        mask |= 1 << (irq+8);
+        mips_write_cp0( 12, mask );
+        return;
+    }
+
 #warning todo
 }
 
 void board_interrupt_disable(int irq)
 {
-    (void) irq;
+    assert_interrupts_disabled();
+
+    if(irq < MIPS_ONCPU_INTERRUPTS)
+    {
+        // irq mask in 15:8
+        unsigned mask = mips_read_cp0( 12 );
+        mask &= ~(1 << (irq+8));
+        mips_write_cp0( 12, mask );
+        return;
+    }
+
 #warning todo
 }
 
