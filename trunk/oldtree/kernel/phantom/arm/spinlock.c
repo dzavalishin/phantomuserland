@@ -8,7 +8,7 @@
  *
 **/
 
-#define DEBUG_MSG_PREFIX "paging"
+#define DEBUG_MSG_PREFIX "spinlock"
 #include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
