@@ -4,21 +4,36 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * MIPS startup code. 
+ * MIPS startup code.
  *
 **/
 
 #include <mips/cp0_regs.h>
 #include <mips/asm.h>
 
-LEAF(_start)
-	.set	noreorder
-	.set	mips32
+LEAF(__lowmem__)
+    .set	noreorder
+    .set	mips32
+
+#if 1
+    // Exception vectors
+    //.org 0x80000000
+    .org 0x000
+    j _enter_exception_tlb_refill
+
+    .org 0x180
+    j _enter_exception_other
+
+    .org 0x200
+    j _enter_exception_interrupt
+#endif
 
     .globl	_start_of_kernel
 _start_of_kernel:
+    .globl	_start
+_start:
 
-	j _reset
+    j _reset
     nop // delay slot
 
     .string "Phantom OS\r\n"
@@ -70,7 +85,7 @@ _reset:
 loop:
     j	loop
     nop
-END(_start)
+END(__lowmem__)
 
 #define PHANTOM_START_STACK_SIZE (16*1024)
     .space	PHANTOM_START_STACK_SIZE
@@ -137,14 +152,127 @@ END(arch_get_frame_pointer)
 
 // int atomic_add(int *val, int incr) 
 LEAF(atomic_add)
-_add_again:
+_atomic_add_again:
     ll      t0, 0(a0)
     addu    t1, t0, a2
     addiu   v0, t1, 0 // ret val
     sc      t1, 0(a0)
-    beqz    t1, _add_again
+    beqz    t1, _atomic_add_again
 
     jr      ra
     nop
 END(atomic_add)
+
+
+// read excCode
+
+LEAF(_enter_exception_tlb_refill)
+    eret
+    nop // no delay slot after eret?
+END(_enter_exception_tlb_refill)
+
+NESTED(_enter_exception_other,0,sp)
+    .set	push
+    .set	noat
+
+    addi        sp, sp, -(4*4)
+
+    mfc0	t0, CP0_BADVADDR        // Offending virual address, if any
+    sw          t0, 0(sp)
+    mfc0	t0, CP0_STATUS          // Check if it is saved by hardware on stack
+    sw          t0, 4(sp)
+    mfc0	t0, CP0_EPC             // Exception program counter
+    sw          t0, 8(sp)
+    mfc0	t0, CP0_ERROREPC        // Error program counter
+    sw          t0, 12(sp)
+
+    addiu       a0, sp, 0               // move a0 <- sp
+    mfc0	a1, CP0_CAUSE           // Cause - incl interrupt num and exception type
+
+
+    //void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
+
+    jal hal_MIPS_exception_dispatcher
+    nop // delay
+
+    addi        sp, sp, (4*4)
+
+    eret
+    nop // no delay slot after eret?
+
+    .set	pop
+END(_enter_exception_other)
+
+NESTED(_enter_exception_interrupt,0,sp)
+    .set	push
+    .set	noat
+
+    addi        sp, sp, -(4*4)
+
+    mfc0	t0, CP0_BADVADDR        // Offending virual address, if any
+    sw          t0, 0(sp)
+    mfc0	t0, CP0_STATUS          // Check if it is saved by hardware on stack
+    sw          t0, 4(sp)
+    mfc0	t0, CP0_EPC             // Exception program counter
+    sw          t0, 8(sp)
+    mfc0	t0, CP0_ERROREPC        // Error program counter
+    sw          t0, 12(sp)
+
+    addiu       a0, sp, 0               // move a0 <- sp
+    mfc0	a1, CP0_CAUSE           // Cause - interrupt num
+
+    // void hal_MIPS_interrupt_dispatcher(struct trap_state *ts, int cause)
+
+    jal hal_MIPS_interrupt_dispatcher
+    nop // delay
+
+    addi        sp, sp, (4*4)
+
+    eret
+    nop // no delay slot after eret?
+
+    .set	pop
+END(_enter_exception_interrupt)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

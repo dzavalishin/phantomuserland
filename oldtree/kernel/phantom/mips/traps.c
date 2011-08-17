@@ -8,10 +8,45 @@
 
 static char *trap_type[ARCH_N_TRAPS] =
 {
-    "reset",
-    "cache error",
-    "tlb miss",
-    "xtlb miss",
+    "HW interrupt",
+    "TLB modification",
+    "TLB load",
+    "TLB store",
+    "Address error on data load or inst fetch",
+    "Address error on data store",
+    "Bus error accessing instruction",
+    "Bus error accessing data",
+    "Syscall",
+    "Breakpoint",
+    "Reserved opcode",
+    "No coprocessor",
+    "Arithmetic overflow",
+    "Trap",
+    "?14",
+    "Floating point exception",
+    "?16",
+    "?17",
+    "?18",
+    "?19",
+    "?20",
+    "?21",
+    "?22",
+
+    "Watcpoint",
+    "Machine check",
+
+    "?25",
+    "?26",
+    "?27",
+    "?28",
+    "?29",
+    "?30",
+    "?31",
+
+    "Reset",
+    "Cache error",
+    "TLB miss",
+    "xTLB miss",
     "?",
 };
 
@@ -62,18 +97,39 @@ int trap2signo( struct trap_state *ts )
 {
     int		sig_no = 0;
 
-    /*
-     * It probably makes no sense to pass all these signals to the
-     * application program.
-     */
     switch (ts->trapno)
     {
 
-    case -1: 	sig_no = SIGINT;  break;	// hardware interrupt 
-    case 0: 	sig_no = SIGSEGV; break;	// Reset? Impossible.
-    case 1: 	sig_no = SIGSEGV; break;	// prefetch abort
-    case 2: 	sig_no = SIGSEGV; break;	// data abort
-    case 3: 	sig_no = SIGSEGV; break;	// data abort
+    case T_INTERRUPT:
+        sig_no = SIGINT;  break;	// hardware interrupt
+
+    case T_ADDR_LOAD:
+    case T_ADDR_SAVE:
+    case T_CODE_BUS_ERR:
+    case T_DATA_BUS_ERR:
+        sig_no = SIGBUS; break;
+
+    case T_SYSCALL:
+        sig_no = SIGSYS; break;
+
+    case T_BREAK:
+    case T_TRAP:
+        sig_no = SIGTRAP; break;
+
+    case T_NO_INSTR:
+    case T_NO_CP:
+        sig_no = SIGILL; break;
+
+    case T_OVERFLOW:
+    case T_FPE:
+        sig_no = SIGFPE; break;
+
+    case T_CACHE_ERR:
+        sig_no = SIGBUS; break;
+
+    case T_TLB:
+    case T_XTLB:
+        sig_no = SIGSEGV; break;
 
     default:
         panic("No signal mapping for trap number: %d", ts->trapno);
@@ -106,5 +162,20 @@ int handle_swi(struct trap_state *ts)
     return 0;
 }
 */
+
+
+void hal_MIPS_interrupt_dispatcher(struct trap_state *ts, int cause)
+{
+    (void) cause;
+    (void) ts;
+    panic("interrupt");
+}
+
+void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
+{
+    (void) cause;
+    (void) ts;
+    panic("exception");
+}
 
 
