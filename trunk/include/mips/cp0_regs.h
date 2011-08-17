@@ -57,6 +57,13 @@
 #define ST_CU0		0x10000000	/* разрешение сопроцессора 0 */
 #define ST_CU1		0x20000000	/* разрешение сопроцессора 1 (FPU) */
 
+#ifndef ASSEMBLER
+
+int mips_read_cp0( int reg );
+void mips_write_cp0( int reg, int data );
+
+#endif // ASSEMBLER
+
 
 
 #endif // MIPS_CP0_REGS

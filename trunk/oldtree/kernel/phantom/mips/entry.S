@@ -150,6 +150,21 @@ LEAF(arch_get_frame_pointer)
 END(arch_get_frame_pointer)
 
 
+    //int mips_read_cp0( int reg );
+LEAF(mips_read_cp0)
+    mfc0	v0, a0
+    jr      ra
+    nop
+END(mips_read_cp0)
+
+    //void mips_write_cp0( int reg, int data );
+LEAF(mips_write_cp0)
+    mtc0	a1, a0
+    jr      ra
+    nop
+END(mips_write_cp0)
+
+
 // int atomic_add(int *val, int incr) 
 LEAF(atomic_add)
 _atomic_add_again:

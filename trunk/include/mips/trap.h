@@ -10,15 +10,33 @@
 #warning include <kernel/trap.h> instead!
 #endif
 
-#define ARCH_N_TRAPS            5
-
-#define	T_RESET                 0
-#define	T_CACHE_ERR             1
-#define	T_TLB                   2
-#define	T_XTLB                  3
-#define	T_OTHER                 4
+#define ARCH_N_TRAPS            37
 
 
+//#define	T_RESET                 (16+0) // can't happen
+#define	T_CACHE_ERR             (32+1)
+#define	T_TLB                   (32+2)
+#define	T_XTLB                  (32+3)
+//#define	T_OTHER                 4
+
+#define T_INTERRUPT             0 // HW interrupt
+
+#define	T_TLB_MOD               1 // TLB modification
+#define	T_TLB_LOAD              2 // TLB load
+#define	T_TLB_STORE             3 // TLB store
+
+#define T_ADDR_LOAD             4 // Address error on data load or inst fetch
+#define T_ADDR_SAVE             5 // Address error on data store
+#define T_CODE_BUS_ERR          6 // Bus error accessing instruction
+#define T_DATA_BUS_ERR          7 // Bus error accessing data
+#define T_SYSCALL               8 // Syscall :)
+#define T_BREAK                 9 // Breakpoint
+#define T_NO_INSTR             10 // Reserved opcode
+#define T_NO_CP                11 // No coprocessor
+#define T_OVERFLOW             12 // Arithmetic overflow
+#define T_TRAP                 13 // ?
+
+#define T_FPE                  15 // Floating point exception
 
 
 #ifndef ASSEMBLER
