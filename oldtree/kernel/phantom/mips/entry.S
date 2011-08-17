@@ -15,6 +15,9 @@ LEAF(_start)
 	.set	noreorder
 	.set	mips32
 
+    .globl	_start_of_kernel
+_start_of_kernel:
+
 	j _reset
     nop // delay slot
 
@@ -100,7 +103,7 @@ LEAF(hal_save_cli)
     andi    v0, v0, ST_IE
     jr      ra
     nop
-END(hal_cli)
+END(hal_save_cli)
 
 LEAF(hal_is_sti)
 #warning non-atomic dis intr
@@ -108,7 +111,7 @@ LEAF(hal_is_sti)
     andi    v0, v0, ST_IE
     jr      ra
     nop
-END(hal_cli)
+END(hal_is_sti)
 
 
 LEAF(hal_sti)
