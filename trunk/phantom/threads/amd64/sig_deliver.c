@@ -20,13 +20,14 @@
 
 #include <kernel/trap.h>
 #include <unix/uusignal.h>
+#include <unix/uuprocess.h>
 
 //#define SIG_PUSH(__v_) *((u_int32_t *)(mina+(--(st->esp)))) = (__v_)
 
 
 errno_t sig_deliver( uuprocess_t *u, struct trap_state *st, int nsig, void *handler )
 {
-	SHOW_ERROR0( 0, "Signal delivery s not implemented!");
+	SHOW_ERROR0( 0, "Signal delivery is not implemented!");
     return 0;
 }
 

@@ -27,7 +27,7 @@
 
 errno_t sig_deliver( uuprocess_t *u, struct trap_state *st, int nsig, void *handler )
 {
-	SHOW_ERROR0( 0, "Signal delivery s not implemented!");
+	SHOW_ERROR0( 0, "Signal delivery is not implemented!");
     return 0;
 }
 
