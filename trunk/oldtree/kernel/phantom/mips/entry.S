@@ -8,6 +8,10 @@
  *
 **/
 
+//#if __mips_isa_rev < 2
+//#warning MIPS ISA rev = __mips_isa_rev, need >= 2
+//#endif
+
 #include <mips/cp0_regs.h>
 #include <mips/asm.h>
 
@@ -59,6 +63,16 @@ _reset:
     /* set up stack */
     la	sp, __startup_stack_top__
 
+    // Clear BSS
+    la t0, __bss_start__
+    la t1, __bss_end__
+    addiu t3, zero, 0
+clear_bss_loop:
+    sb t3, 9(t0)
+    addiu t0, t0, 1
+    bne t0, t1, clear_bss_loop
+
+    // print hello to com port - remove!
  	lui	v0,0xB400
  	ori	v0,v0,0x3f8
  	li	v1,104
@@ -100,11 +114,15 @@ __startup_stack_top__:
 // TODO cp0 r16 config
 
 LEAF(hal_cli)
+#if 1
 #warning non-atomic dis intr
     mfc0	t0, CP0_STATUS
     li      t1, ~ST_IE
     and    t0, t0, t1
     mtc0	t0, CP0_STATUS
+#else
+    di
+#endif
     jr      ra
     nop
 END(hal_cli)

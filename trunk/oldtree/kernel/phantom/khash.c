@@ -1,6 +1,6 @@
 #include <kernel/config.h>
 
-#if HAVE_NET
+//#if HAVE_NET
 
 /*
 ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
@@ -295,5 +295,5 @@ void hash_dump(void *_hash_table)
 	}
 }
 
-#endif // HAVE_NET
+//#endif // HAVE_NET
 

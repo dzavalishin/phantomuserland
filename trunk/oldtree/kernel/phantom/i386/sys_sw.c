@@ -961,7 +961,7 @@ void syscall_sw(struct trap_state *st)
     }
 */
     do_syscall_sw( st );
-    //execute_signals(u, st);
+    execute_signals(u, st);
 }
 
 

@@ -41,8 +41,8 @@ static errno_t checkRange( struct phantom_disk_partition *p, long blockNo, int n
     return 0;
 }
 
-// NB!! pager_io_request's disk block no is IGNORED! Parameter is used!
-// Parameter has to be in partition's block size
+// NB!! pager_io_request's disk block no (disk_page) is IGNORED! blockNo is used!
+// blockNo has to be in partition's block size
 // TODO must be static
 //static
 errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
@@ -55,12 +55,38 @@ errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
     if( checkRange( p, rq->blockNo, rq->nSect ) )
         return EINVAL;
 
-    SHOW_FLOW( 11, "part io i sect %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
+    SHOW_FLOW( 11, "part io block %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
     rq->blockNo += p->shift;
 
     // I believe its a crazy bug, how could it work?
     //p->base->asyncIo( p, rq );
     p->base->asyncIo( p->base, rq );
+    return 0;
+}
+
+
+// NB!! pager_io_request's disk block no (disk_page) is IGNORED! blockNo is used!
+// blockNo has to be in partition's block size
+// TODO must be static
+//static
+errno_t partTrim( struct phantom_disk_partition *p, pager_io_request *rq )
+{
+    //assert(p->specific == 0);
+    //assert(p->base);
+
+    if( (0 == p->base) || (0 != p->specific) )
+        return ENODEV;
+
+    // Temp! Rewrite!
+    assert(p->base->block_size == p->block_size);
+
+    if( checkRange( p, rq->blockNo, rq->nSect ) )
+        return EINVAL;
+
+    SHOW_FLOW( 11, "part trim block %d, shift %d, o sect %d", rq->blockNo, p->shift, rq->blockNo + p->shift );
+    rq->blockNo += p->shift;
+
+    p->base->trim( p->base, rq );
     return 0;
 }
 
@@ -176,11 +202,94 @@ void dpart_enqueue( partition_handle_t h, pager_io_request *rq )
     rq->blockNo = rq->disk_page*m;
     rq->nSect = m;
 
+    rq->phandle = h.h;
+
     assert( rq->flag_ioerror == 0 );
     assert( rq->flag_pagein != rq->flag_pageout );
 
     p->asyncIo( p, rq );
 }
+
+/** Start async disk io operation */
+void dpart_trim( partition_handle_t h, pager_io_request *rq )
+{
+    // NB! We do not release it until IO is done - TODO release!
+    phantom_disk_partition_t *p = pool_get_el(pp,h.h);
+
+    int m = PAGE_SIZE/p->block_size;
+    rq->blockNo = rq->disk_page*m;
+    rq->nSect = m;
+
+    assert( rq->flag_ioerror == 0 );
+    assert( rq->flag_pagein != rq->flag_pageout );
+
+    // TODO following code (in the leaf function) must release partition
+    p->trim( p, rq );
+}
+
+
+#if 0
+errno_t dpart_dequeue( partition_handle_t h, pager_io_request *rq )
+{
+    phantom_disk_partition_t *p = pool_get_el(pp,h.h);
+
+    assert(p);
+    assert(rq);
+
+    //dump_partition(p);
+
+    if( 0 == p->dequeue )
+        return ENODEV;
+    // TODO following code (in the leaf function) must release partition
+    return p->dequeue( p, rq, h.h );
+}
+
+
+errno_t dpart_raise_priority( partition_handle_t h, pager_io_request *rq )
+{
+    phantom_disk_partition_t *p = pool_get_el(pp,h.h);
+
+    assert(p);
+    assert(rq);
+
+    if( 0 == p->raise )
+        return ENODEV;
+
+    // TODO following code (in the leaf function) must release partition
+    return p->raise( p, rq, h.h );
+}
+
+errno_t dpart_fence( partition_handle_t h )
+{
+    phantom_disk_partition_t *p = pool_get_el(pp,h.h);
+
+    assert(p);
+
+    if( 0 == p->fence )
+    {
+        SHOW_ERROR( 0, "no fence on part %s", p->name );
+        return ENODEV;
+    }
+
+    // TODO following code (in the leaf function) must release partition
+    errno_t rc = p->fence( p, h.h );
+
+    if( rc )
+    {
+        SHOW_ERROR( 0, "fence failed on part %s, rc %d", p->name, rc );
+        hal_sleep_msec( 10000 ); // At least - some chance...
+    }
+
+    return rc;
+}
+#endif
+
+
+
+
+
+
+
 
 
 

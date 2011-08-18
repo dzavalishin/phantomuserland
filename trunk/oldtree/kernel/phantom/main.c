@@ -227,6 +227,8 @@ int main(int argc, char **argv, char **envp)
     board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
+    net_timer_init();
+
     phantom_init_part_pool();
 
     // Stage is:
@@ -455,7 +457,7 @@ static void net_stack_init()
 
 #if HAVE_NET
     SHOW_FLOW0( 1, "Init TCP/IP stack" );
-    net_timer_init();
+//    net_timer_init();
     if_init();
     ethernet_init();
     arp_init();

@@ -1,6 +1,6 @@
 #include <kernel/config.h>
 
-#if HAVE_NET
+//#if HAVE_NET
 
 /*
  ** Copyright 2002, Travis Geiselbrecht. All rights reserved.
@@ -190,5 +190,5 @@ int net_timer_init(void)
     return 0;
 }
 
-#endif // HAVE_NET
+//#endif // HAVE_NET
 
