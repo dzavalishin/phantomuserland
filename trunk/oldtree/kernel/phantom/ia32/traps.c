@@ -17,8 +17,7 @@
 #include <phantom_libc.h>
 
 #include <signal.h>
-//#include <i386/proc_reg.h>
-#include <mach/debug_reg.h>
+#include <ia32/debug_reg.h>
 
 static char *trap_type[] = {
     "Divide error", "Debug trap",		"NMI",		"Breakpoint",

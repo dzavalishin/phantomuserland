@@ -9,7 +9,7 @@
 **/
 
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 #include <i386/isa/pic_regs.h>
 
 #include <kernel/interrupts.h>

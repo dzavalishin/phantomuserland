@@ -24,7 +24,7 @@
  * the rights to redistribute these changes.
  */
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 Entry(ntohl)
 ENTRY(htonl)

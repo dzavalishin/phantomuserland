@@ -1,5 +1,3 @@
-// BUG duplicated in phantom/user for usermode
-
 /* 
  * Mach Operating System
  * Copyright (c) 1991,1990,1989 Carnegie Mellon University
@@ -37,7 +35,7 @@
  *
  */
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 ENTRY(setjmp)
 ENTRY(_setjmp)

@@ -227,7 +227,6 @@ int main(int argc, char **argv, char **envp)
     board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
-    net_timer_init();
 
     phantom_init_part_pool();
 
@@ -253,6 +252,8 @@ int main(int argc, char **argv, char **envp)
 #endif
     hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
     }
+
+    net_timer_init();
 
     board_start_smp();
 

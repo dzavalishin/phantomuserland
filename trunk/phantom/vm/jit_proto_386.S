@@ -1,6 +1,6 @@
 #ifdef ARCH_ia32
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 ENTRY(jit_proto_get_null)
     movl $0, %eax

@@ -9,7 +9,7 @@
 **/
 
 #include <multiboot2.h>
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
     .text
 

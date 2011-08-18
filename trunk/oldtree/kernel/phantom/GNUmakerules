@@ -65,7 +65,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	ff.o bootp.o stray_check.o sbrk.o mem_pl050_ps2.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o test_userland.o test_pool.o events.o smp.o \
-	heap.o heap_pool.o boot_cmd_line.o \
+	heap.o heap_pool.o sys.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
 	traps.o hal_physmem.o physalloc.o sched.o \
 	arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
@@ -87,7 +87,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
-        unix/signal.o \
+        unix/signal.o unix/sys_sw.o \
 	fs_map.o stats.o resolve.o main.o keyboard.o syslog.o arch_name.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
 	svn_version.o	$(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
@@ -100,7 +100,6 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	cat < $@ > ../../../run/fat/boot/$@
 #	objdump -x $@.pe >$@.pe.sym
 #	gzip < $@ > $(TFTP_PATH)/$@.gz
-#	mv $(TFTP_PATH)/$@.gz $(TFTP_PATH)/$@
 #	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
 #	cd ../../run
 #	genisoimage -o cd.iso $(TFTP_PATH)
@@ -116,7 +115,5 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 svn_version.c::
 	@echo "---- (creating svn_version.c)"
 	@echo 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
-
-#	@echo -n 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
 
 endif

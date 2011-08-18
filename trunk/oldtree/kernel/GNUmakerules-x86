@@ -14,11 +14,11 @@ OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
 
 %.o: %.S 
 	$(PHANTOM_QUIET_MAKE_INFORM) "----- $<"
-	$(CC) -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) -MD $<
+	@$(CC) -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) -MD $<
 
 %.po: %.S 
 	$(PHANTOM_QUIET_MAKE_INFORM) "Assembling $<"
-	$(CC) -c -o $@ $(PHANTOM_ASFLAGS) -DGPROF -pg $(ASFLAGS) -MD $<
+	@$(CC) -c -o $@ $(PHANTOM_ASFLAGS) -DGPROF -pg $(ASFLAGS) -MD $<
 
 
 endif

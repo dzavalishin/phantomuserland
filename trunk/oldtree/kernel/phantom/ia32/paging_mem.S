@@ -1,4 +1,4 @@
-#include "mach/asm.h"
+#include "ia32/asm.h"
 #include <kernel/page.h>
 
 #include <x86/phantom_pmap.h>
