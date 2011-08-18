@@ -8,7 +8,7 @@
  *
 **/
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 ENTRY(signal_return_code_start)
 

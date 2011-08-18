@@ -10,7 +10,7 @@
  *
 **/
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 #include "cpu_state.h"
             
 #define SAVE_CR2 1

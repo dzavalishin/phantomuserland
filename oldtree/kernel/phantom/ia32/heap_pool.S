@@ -1,7 +1,7 @@
 #include <kernel/config.h>
 #include <kernel/page.h>
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
     .bss
     P2ALIGN(PAGE_SHIFT)

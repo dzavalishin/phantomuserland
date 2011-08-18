@@ -28,7 +28,7 @@
 #ifndef	_MACH_I386_SYSCALL_SW_H_
 #define _MACH_I386_SYSCALL_SW_H_
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 #if BSD_TRAP
 #define kernel_trap(trap_name,trap_number,number_args) \

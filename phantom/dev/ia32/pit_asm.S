@@ -1,4 +1,4 @@
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 // Waste 10 microseconds.
 

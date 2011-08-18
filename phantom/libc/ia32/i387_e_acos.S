@@ -33,7 +33,7 @@
  *	J.T. Conklin (jtc@wimsey.com), Winning Strategies, Inc.
  */
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 //RCSID("$\Id: e_acos.S,v 1.2 1994/08/19 11:12:52 jkh Exp $")
 

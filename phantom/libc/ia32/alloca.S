@@ -43,7 +43,7 @@
 /* like alloc, but automatic automatic free in return */
 
 //#include "DEFS.h"
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 ENTRY(_alloca)
 	popl	%edx		/*  pop return addr */

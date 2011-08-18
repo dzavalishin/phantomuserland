@@ -36,7 +36,7 @@
 
 //#include "opt_pmap.h"
 
-#include <mach/asm.h>		/* miscellaneous asm macros */
+#include <ia32/asm.h>		/* miscellaneous asm macros */
 #include <kernel/page.h>
 
 #include <i386/proc_reg.h>

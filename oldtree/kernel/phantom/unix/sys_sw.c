@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Syscalls entry point
+ * Syscalls dispatcher
  *
 **/
 
@@ -18,9 +18,9 @@
 #include <kernel/net.h>
 #include <netinet/resolv.h>
 
-#include <i386/eflags.h>
-#include <i386/seg.h>
-#include <i386/ldt.h>
+//#include <i386/eflags.h>
+//#include <i386/seg.h>
+//#include <i386/ldt.h>
 #include <newos/port.h>
 #include <sys/syslog.h>
 #include <phantom_types.h>
@@ -137,6 +137,9 @@ static void do_syscall_sw(struct trap_state *st)
     // call gate does not push eflags
     int user_esp = st->eflags;
 
+#ifndef ARCH_ia32
+#  warning machdep ia32 arg pass convention
+#endif
     // list of user syscsall arguments
     int *uarg = adjustin( user_esp, st );
     uarg++; // syscall func return addr

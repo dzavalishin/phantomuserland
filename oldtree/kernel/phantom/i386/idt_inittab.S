@@ -34,7 +34,7 @@
 
 
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 #include <i386/seg.h>
 

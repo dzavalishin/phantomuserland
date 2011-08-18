@@ -4,15 +4,13 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel stack for ia32. TODO move to ARCH dir!
+ * Kernel stack for ia32.
  *
 **/
 
-#include "mach/asm.h"
+#include <ia32/asm.h>
 #include "stack.h"
 
-// Can be BSS?
-//	.data
 	.bss
 
 	P2ALIGN(PAGE_SHIFT)

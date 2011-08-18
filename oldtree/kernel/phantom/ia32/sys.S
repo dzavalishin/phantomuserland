@@ -1,4 +1,4 @@
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 // Phantom native code syscall entry point
 ENTRY(syscall)

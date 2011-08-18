@@ -3,7 +3,7 @@
 ** Distributed under the terms of the NewOS License.
 */
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 .text
 
