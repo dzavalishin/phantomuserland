@@ -80,10 +80,10 @@ struct trap_state
 
 struct trap_state
 {
-    unsigned int r0;
-    unsigned int r1;
-    unsigned int r2;
-    unsigned int r3;
+    unsigned int r0;    // arg0, retval
+    unsigned int r1;    // arg1
+    unsigned int r2;    // arg2
+    unsigned int r3;    // arg3
     unsigned int r4;
     unsigned int r5;
     unsigned int r6;

@@ -3,6 +3,7 @@
 #include <phantom_assert.h>
 #include <stdio.h>
 #include <signal.h>
+#include <threads.h>
 
 
 
@@ -135,47 +136,95 @@ int trap2signo( struct trap_state *ts )
         panic("No signal mapping for trap number: %d", ts->trapno);
     }
 
-
     return sig_no;
 }
 
-/*
-int handle_swi(struct trap_state *ts)
-{
-    printf("r0=%d, r1=%d, r2=%d, R3=%d, r12=%d\n", ts->r0, ts->r1, ts->r2, ts->r3, ts->r12 );
-
-    int swino = ts->intno & 0xFFFFFF;
-
-    // If no real angel exist, return -1 to caller
-    if( swino == 0x123456 )
-    {
-        ts->r0 = -1;
-        ts->r1 = -1;
-        return 0;
-    }
 
 
-    // TODO magic number! define! used to request scheduler softint
-    if( swino == 0xFFF )
-        phantom_scheduler_schedule_soft_irq();
 
-    return 0;
-}
-*/
-
-
-void hal_MIPS_interrupt_dispatcher(struct trap_state *ts, int cause)
-{
-    (void) cause;
-    (void) ts;
-    panic("interrupt");
-}
-
+// Called from asm wrap
 void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
 {
     (void) cause;
     (void) ts;
-    panic("exception");
+
+    int trapno = (cause >> 2) & 0x1F; // 5 bits
+    ts->trapno = trapno;
+    ts->intno = 0;
+
+#warning fill or kill pc, usr_sp, usr_fp, usr_ra
+
+    switch( trapno )
+    {
+    case T_INTERRUPT:
+        {
+            int ipending = (cause >> 8) & 0xFF; // mask of pending interrupts
+
+            // Use softirq 0 for direct thread switch
+            if( ipending & 0x01 )
+            {
+                phantom_scheduler_soft_interrupt();
+                return;
+            }
+#warning here we must call boards specific interrup dispatch code
+            panic("interrupt %x", ipending);
+
+        }
+
+    case T_SYSCALL:
+        syscall_sw(ts);
+        return;
+
+#if 0
+    case T_TLB_MOD:
+    case T_TLB_LOAD:
+    case T_TLB_STORE:
+    case T_ADDR_LOAD:
+    case T_ADDR_SAVE:
+    case T_CODE_BUS_ERR:
+    case T_DATA_BUS_ERR:
+    case T_BREAK:
+    case T_NO_INSTR:
+    case T_NO_CP:
+    case T_OVERFLOW:
+    case T_TRAP:
+    case T_FPE:
+#endif
+
+    default:
+        phantom_kernel_trap( ts );
+        return;
+    }
+
 }
+
+// Called from asm wrap
+void hal_MIPS_interrupt_dispatcher(struct trap_state *ts, int cause)
+{
+    //(void) cause;
+    //(void) ts;
+    //panic("interrupt");
+    hal_MIPS_exception_dispatcher(ts, cause); // the same
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

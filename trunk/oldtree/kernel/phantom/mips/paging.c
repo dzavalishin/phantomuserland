@@ -167,7 +167,11 @@ static void write_tlb_entry( pt_entry_t *e, void *va )
 }
 
 // TODO on MIPS we can manually put new entry to TLB. make revalidate_pg()?
-static __inline__ void invlpg(addr_t start) { clear_tlb_entry( start ); }
+static __inline__ void invlpg(addr_t start)
+{
+    clear_tlb_entry( start );
+#warning clear corresp cache entries
+}
 
 #define lin2linear_ptenum(a) ( ((a) / 4096) )
 #define get_pte( la ) (ptab + lin2linear_ptenum(la))

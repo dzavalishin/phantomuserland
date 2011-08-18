@@ -42,6 +42,9 @@
 int (*phantom_trap_handlers[ARCH_N_TRAPS])(struct trap_state *ts);
 
 
+//! This is what called from low-level asm trap code
+void phantom_kernel_trap( struct trap_state *ts );
+
 
 void            dump_ss(struct trap_state *st);
 const char *    trap_name(unsigned int trapnum);
@@ -52,6 +55,9 @@ void            phantom_check_user_trap( struct trap_state *ts );
 
 //! Return signal number for this kind of trap - machdep
 int             trap2signo( struct trap_state *ts );
+
+// Unix syscall dispatcher
+void            syscall_sw(struct trap_state *st);
 
 
 #endif // GENERAL_TRAP_H
