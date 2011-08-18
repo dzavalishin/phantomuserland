@@ -13,6 +13,6 @@ rem -append "-d=20 -- -test all"
 rem cp P:/projects/phantomos/trunk/phantom/barebone/mips/barebone.elf fat/boot/phantom.mips
 
 rm -f serial0.log 
-%QDIR%\qemu-system-mips -M mips -m 256 -s -L %QDIR%/bios -kernel fat/boot/phantom.mips -sd phantom.img -mtdblock vio.img %SER% %STOP% %Q_NET% 
+%QDIR%\qemu-system-mipsel -M mips -m 256 -s -L %QDIR%/bios -kernel fat/boot/phantom.mips -sd phantom.img -mtdblock vio.img %SER% %STOP% %Q_NET% 
 
 cat qemu/0.14.1/stderr.txt
