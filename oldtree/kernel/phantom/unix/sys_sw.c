@@ -941,8 +941,29 @@ static void do_syscall_sw(struct trap_state *st)
 #endif // HAVE_UNIX
 
 err_ret:
+
+#ifdef ARCH_ia32
+#define _RET_OK
     st->eax = ret;
     st->edx = err;
+#endif
+
+#ifdef ARCH_mips
+#define _RET_OK
+    st->r2 = ret; // v0 (normal ret register, low)
+    st->r3 = err; // v1 (normal ret register, hi)
+#endif
+
+#ifdef ARCH_arm
+#define _RET_OK
+    st->r0 = ret; // normal ret register
+    st->r1 = err; // arg1 reg, we can safely use for return of errno
+#endif
+
+#ifndef _RET_OK
+#error arch ret
+#endif
+
 }
 
 

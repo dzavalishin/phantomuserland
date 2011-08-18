@@ -1,7 +1,9 @@
-#ARCH_FLAGS      = -EL -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
-ARCH_FLAGS      = -EB -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
+ARCH_FLAGS      = -EL -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
+#ARCH_FLAGS      = -EB -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
 #-msoft-float 
 #-mpoke-function-name
+
+TARGET_OBJECT_FORMAT=elf32-littlemips
 
 
 BIN_PREFIX=mips-elf-
@@ -19,7 +21,6 @@ AWK             = gawk
 YACC            = bison -y
 M4              = m4
 
-
 #USR_LD_ADDR=-Wl,-Ttext-segment,0 -Wl,-Ttext,0
 
 ifeq ($(OSTYPE),cygwin)
@@ -29,6 +30,5 @@ else
 endif
 
 
-TARGET_OBJECT_FORMAT=elf32-littlemips
 
 
