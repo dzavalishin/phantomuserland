@@ -31,6 +31,9 @@
 // PHYSALLOC_MAXPAGES
 #ifdef ARCH_ia32
 #include <ia32/phantom_pmap.h>
+#else
+#  warning PHYSALLOC_MAXPAGES defined for 32bit 4K pages
+#  define PHYSALLOC_MAXPAGES 0x400000
 #endif
 
 static void cmd_mem_stat( int ac, char **av );
