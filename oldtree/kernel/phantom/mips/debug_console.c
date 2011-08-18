@@ -23,6 +23,7 @@
 #define SERIAL_TX_EMPTY 0x20
 #define SERIAL_RX_READY 0x01
 
+#if 0
 static void debug_console_do_putc(int c)
 {
 #if 0
@@ -34,6 +35,10 @@ static void debug_console_do_putc(int c)
     /* Put our character, c, into the serial buffer */
     *((volatile unsigned long*)SERIAL_BASE) = c;
 }
+#else
+void debug_console_do_putc(int c); // in asm, entry.S
+
+#endif
 
 void debug_console_putc(int c)
 {

@@ -113,13 +113,32 @@ print_banner:
 eprint:	
 
     /* jump to main */
-    jal	main
+    jal	phantom_multiboot_main
     nop
 
 loop:
     j	loop
     nop
 END(__lowmem__)
+
+//void debug_console_do_putc(int c);
+LEAF(debug_console_do_putc)
+ 	lui	t0,0xB400
+ 	ori	t0,t0,0x3f8 // t0 = data reg
+    addiu t1, t0, 5 // t1 = status reg
+
+wait_tx:
+    lb t2, 0(t1) // read status reg
+    andi t2, 0x20 // tx empty bit
+    beqz t2, wait_tx
+	nop // delay slot
+
+ 	sb	a0, 0(t0)
+    
+    jr      ra
+	nop // delay slot
+
+END(debug_console_do_putc)
 
 #define PHANTOM_START_STACK_SIZE (16*1024)
     .space	PHANTOM_START_STACK_SIZE

@@ -151,15 +151,20 @@ static void do_phantom_heap_init(addr_t new_heap_base, unsigned int new_heap_siz
     heap_lock = &mutex;
 }
 
-extern char phantom_start_heap_start[];
-extern int phantom_start_heap_size;
 
 
 void phantom_heap_init(void)
 {
     //printf("Init heap of %d Mb\n", phantom_start_heap_size/(1024*1024L) );
     //printf("Init heap of %d bytes\n", phantom_start_heap_size );
-    do_phantom_heap_init((int)&phantom_start_heap_start, phantom_start_heap_size);
+#if 0 // def ARCH_mips
+    extern char __end__[];
+    do_phantom_heap_init((addr_t)&__end__, PHANTOM_START_HEAP_SIZE);
+#else
+    extern char phantom_start_heap_start[];
+    extern int phantom_start_heap_size;
+    do_phantom_heap_init((addr_t)&phantom_start_heap_start, phantom_start_heap_size);
+#endif
 }
 
 
