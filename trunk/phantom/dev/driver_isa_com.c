@@ -25,7 +25,7 @@
 
 #include <hal.h>
 
-#include <x86/comreg.h>
+#include <dev/isa/com_regs.h>
 
 /*
 
