@@ -18,24 +18,28 @@
 // this is for QEMU -M mips machine
 #define SERIAL_BASE 0xB40003f8u
 
-#define SERIAL_FLAG_REGISTER 0x18
-#define SERIAL_TX_BUFFER_FULL (1 << 5)
-#define SERIAL_RX_BUFFER_EMPTY (1 << 4)
+#define SERIAL_FLAG_REGISTER 5
 
-static void do_putc(int c)
+#define SERIAL_TX_EMPTY 0x20
+#define SERIAL_RX_READY 0x01
+
+static void debug_console_do_putc(int c)
 {
+#if 0
     /* Wait until the serial buffer is empty */
-    while (*(volatile unsigned long*)(SERIAL_BASE + SERIAL_FLAG_REGISTER) 
-                                       & (SERIAL_TX_BUFFER_FULL));
+    while(!*(volatile unsigned long*)(SERIAL_BASE + SERIAL_FLAG_REGISTER) 
+                                       & SERIAL_TX_EMPTY)
+        ;
+#endif
     /* Put our character, c, into the serial buffer */
-    *(volatile unsigned long*)SERIAL_BASE = c;
+    *((volatile unsigned long*)SERIAL_BASE) = c;
 }
 
 void debug_console_putc(int c)
 {
     if(c=='\n')
-        do_putc('\r');
-    do_putc(c);
+        debug_console_do_putc('\r');
+    debug_console_do_putc(c);
 }
 
 int debug_console_getc(void)
@@ -43,7 +47,7 @@ int debug_console_getc(void)
     char c;
 
     // Wait until the serial RX buffer is not empty
-    while (MEM(SERIAL_BASE + SERIAL_FLAG_REGISTER) & (SERIAL_RX_BUFFER_EMPTY))
+    while(!MEM(SERIAL_BASE + SERIAL_FLAG_REGISTER) & SERIAL_RX_READY)
         ;
     c = 0xFF & MEM(SERIAL_BASE);
 
