@@ -950,8 +950,8 @@ err_ret:
 
 void syscall_sw(struct trap_state *st)
 {
-    //phantom_thread_t *t = GET_CURRENT_THREAD();
-    //uuprocess_t *u = t->u;
+    phantom_thread_t *t = GET_CURRENT_THREAD();
+    uuprocess_t *u = t->u;
 /*
     int ret;
     if( (ret = setjmp(u->signal_jmpbuf)) )
