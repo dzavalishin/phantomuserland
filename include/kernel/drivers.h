@@ -12,7 +12,7 @@
 #ifndef DRIVERS_H
 #define DRIVERS_H
 
-#include <i386/pci.h>
+#include <kernel/bus/pci.h>
 #include <device.h>
 
 

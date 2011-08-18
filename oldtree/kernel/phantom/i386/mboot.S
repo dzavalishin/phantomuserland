@@ -39,8 +39,8 @@
 #include <ia32/asm.h>		/* miscellaneous asm macros */
 #include <kernel/page.h>
 
-#include <i386/proc_reg.h>
-#include <i386/seg.h>
+#include <ia32/proc_reg.h>
+#include <ia32/seg.h>
 
 //#include <machine/apicreg.h>
 //#include <machine/specialreg.h>

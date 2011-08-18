@@ -1,4 +1,4 @@
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <kernel/debug.h>
 #include <kernel/boot.h>
 #include <kernel/init.h>

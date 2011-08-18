@@ -18,7 +18,7 @@
 #include <string.h>
 #include <kernel/page.h>
 
-#include <i386/proc_reg.h>
+#include <ia32/proc_reg.h>
 
 #include "smp-imps.h"
 

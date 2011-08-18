@@ -14,7 +14,7 @@
 #include <time.h>
 #include <hal.h>
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 
 #define __init
 #define __exit

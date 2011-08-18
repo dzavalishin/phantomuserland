@@ -18,8 +18,9 @@
 #include <malloc.h>
 #include <phantom_libc.h>
 
-#include <x86/phantom_pmap.h>
-#include <i386/proc_reg.h>
+#include <ia32/phantom_pmap.h>
+#include <ia32/proc_reg.h>
+
 #include <kernel/ia32/cpu.h>
 #include <kernel/page.h>
 #include <hal.h>

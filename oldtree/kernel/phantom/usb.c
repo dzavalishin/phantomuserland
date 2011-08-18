@@ -10,11 +10,6 @@
 
 #include <compat/seabios.h>
 
-//#include "util.h" // dprintf
-//#include "pci.h" // foreachpci
-//#include "config.h" // CONFIG_*
-//#include "pci_regs.h" // PCI_CLASS_REVISION
-//#include "pci_ids.h" // PCI_CLASS_SERIAL_USB_UHCI
 #include "usb-uhci.h" // uhci_init
 #include "usb-ohci.h" // ohci_init
 #include "usb-ehci.h" // ehci_init
@@ -22,10 +17,9 @@
 #include "usb-hub.h" // usb_hub_init
 #include "usb-msc.h" // usb_msc_init
 #include "usb.h" // struct usb_s
-//#include "biosvar.h" // GET_GLOBAL
 
 #include <time.h>
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <kernel/init.h>
 
 struct extended_bios_data_area_s usb_ebda2;

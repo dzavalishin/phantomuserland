@@ -18,10 +18,10 @@ static int debug_level_flow = 1;
 #include <video.h>
 #include <video/screen.h>
 
-#include <x86/phantom_pmap.h>
+#include <ia32/phantom_pmap.h>
 
-#include <i386/pio.h>
-#include <i386/vm86.h>
+#include <ia32/pio.h>
+#include <ia32/vm86.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 

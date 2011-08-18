@@ -1,10 +1,14 @@
 #include <kernel/trap.h>
 
-#include <i386/eflags.h>
-#include <i386/seg.h>
-#include <i386/tss.h>
-#include <i386/proc_reg.h>
-#include <i386/pio.h>
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+#include <ia32/eflags.h>
+#include <ia32/seg.h>
+#include <ia32/tss.h>
+#include <ia32/proc_reg.h>
+#include <ia32/pio.h>
 
 #define VM86_R0_STACK_SIZE (1024*64)
 

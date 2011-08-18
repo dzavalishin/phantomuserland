@@ -16,15 +16,14 @@
 
 #include <kernel/config.h>
 
-#include "ia32private.h"
+#include <ia32/private.h>
 
-#include <i386/eflags.h>
-//#include <i386/trap.h>
-#include <i386/seg.h>
-#include <i386/tss.h>
-#include <i386/proc_reg.h>
-#include <i386/pio.h>
-#include <i386/ldt.h>
+#include <ia32/eflags.h>
+#include <ia32/seg.h>
+#include <ia32/tss.h>
+#include <ia32/proc_reg.h>
+#include <ia32/pio.h>
+#include <ia32/ldt.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
 
@@ -35,14 +34,13 @@
 #include <kernel/page.h>
 
 #include <hal.h>
-#include "vm86.h"
+#include <ia32/vm86.h>
 
 #include "../misc.h"
 
 
 
 
-#include "ia32private.h"
 
 struct real_descriptor 	gdt[GDTSZ];
 struct real_descriptor 	ldt[LDTSZ];

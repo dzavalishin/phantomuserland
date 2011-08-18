@@ -20,10 +20,10 @@
  ** Distributed under the terms of the OpenBLT License
  */
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <phantom_libc.h>
 
-#include <i386/pci.h>
+#include <kernel/bus/pci.h>
 
 typedef struct
 {

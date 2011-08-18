@@ -16,7 +16,7 @@
 
 #include <kernel/config.h>
 
-#include <i386/seg.h>
+#include <ia32/seg.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
 

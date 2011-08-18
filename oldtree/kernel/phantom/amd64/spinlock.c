@@ -6,7 +6,7 @@
 #include <kernel/smp.h>
 
 #if SPIN_DEBUG
-#include <i386/proc_reg.h>
+#include <amd64/proc_reg.h>
 #endif
 
 // -----------------------------------------------------------------------

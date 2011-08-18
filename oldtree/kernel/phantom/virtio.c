@@ -20,7 +20,7 @@
 #include <kernel/virtio.h>
 #include <hal.h>
 #include <virtio_pci.h>
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
 #include <kernel/barriers.h>

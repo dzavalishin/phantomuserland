@@ -1,6 +1,6 @@
 #include <hal.h>
-#include <i386/pio.h>
-#include <x86/isa.h>
+#include <ia32/pio.h>
+#include <ia32/pc/isa.h>
 #include <phantom_libc.h>
 #include <kernel/init.h>
 #include <kernel/ia32/idt.h>

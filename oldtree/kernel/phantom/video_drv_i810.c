@@ -21,16 +21,15 @@
 #include <hal.h>
 #include <kernel/vm.h>
 #include <kernel/device.h>
-#include <x86/phantom_pmap.h>
+#include <ia32/phantom_pmap.h>
 #include <kernel/page.h>
 
-#include <i386/pio.h>
-#include <i386/pci.h>
+#include <ia32/pio.h>
+#include <kernel/bus/pci.h>
 #include <phantom_libc.h>
 
 #include <video.h>
 #include <video/screen.h>
-//#include "video_drv_i810_vbe.h"
 
 static int i810_video_probe();
 static int i810_video_start();

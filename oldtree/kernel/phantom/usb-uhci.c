@@ -9,17 +9,11 @@
 #define DEBUG_MSG_PREFIX "uhci"
 
 #include <compat/seabios.h>
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <time.h>
 
-//#include "util.h" // dprintf
-//#include "pci.h" // pci_bdf_to_bus
-//#include "config.h" // CONFIG_*
-//#include "ioport.h" // outw
 #include "usb-uhci.h" // USBLEGSUP
-//#include "pci_regs.h" // PCI_BASE_ADDRESS_4
 #include "usb.h" // struct usb_s
-//#include "farptr.h" // GET_FLATPTR
 
 struct usb_uhci_s {
     struct usb_s usb;

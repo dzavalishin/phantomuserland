@@ -28,15 +28,15 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#include <i386/pio.h>
-#include <i386/seg.h>
+#include <ia32/pio.h>
+#include <ia32/seg.h>
 #include <phantom_libc.h>
 
 #include <kernel/vm.h>
 #include <kernel/trap.h>
 #include <kernel/page.h>
 
-#include "i386/ia32private.h"
+#include <ia32/private.h>
 
 #define DO16BIT 0
 

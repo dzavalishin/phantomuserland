@@ -2,7 +2,7 @@
 #include <phantom_types.h>
 #include <virtio_ring.h>
 #include <hal.h>
-#include <i386/pci.h>
+#include <kernel/bus/pci.h>
 
 typedef struct virtio_ring
 {

@@ -2,7 +2,7 @@
 #ifndef CIR_DEFS_H
 #define CIR_DEFS_H
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include "video_drv_basic_vga.h"
 
 //#include <pc.h>

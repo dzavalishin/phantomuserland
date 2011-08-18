@@ -12,9 +12,9 @@
 
 #include <thread_private.h>
 #include <phantom_libc.h>
-#include <i386/seg.h>
-#include <i386/eflags.h>
-#include <i386/tss.h>
+#include <ia32/seg.h>
+#include <ia32/eflags.h>
+#include <ia32/tss.h>
 
 //#define FXDEBUG(a) a
 #define FXDEBUG(a)

@@ -50,7 +50,7 @@
     })
 
 
-#include <i386/seg.h>
+#include <ia32/seg.h>
 
 
 extern struct real_gate idt[IDTSZ];

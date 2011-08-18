@@ -24,7 +24,7 @@
 // the PIO and DMA command execution and trace functions.
 //********************************************************************
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <phantom_libc.h>
 
 #include "ataio.h"

@@ -7,7 +7,7 @@
 
 #define MEM_USE_MEMALIGN 1
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <phantom_libc.h>
 #include <phantom_types.h>
 

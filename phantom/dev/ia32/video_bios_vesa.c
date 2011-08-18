@@ -21,7 +21,7 @@
 #include <video.h>
 #include <video/screen.h>
 
-#include <x86/phantom_pmap.h>
+#include <ia32/phantom_pmap.h>
 
 #include <phantom_libc.h>
 #include <kernel/vm.h>

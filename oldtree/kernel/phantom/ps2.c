@@ -17,7 +17,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <phantom_libc.h>
 
 #include <kernel/device.h>

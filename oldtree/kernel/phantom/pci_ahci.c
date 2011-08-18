@@ -5,7 +5,7 @@
 
 #if !HAVE_AHCI
 #include <device.h>
-#include <i386/pci.h>
+#include <kernel/bus/pci.h>
 phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 {
     (void) pci;
@@ -35,7 +35,7 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 #include <kernel/atomic.h>
 #include <kernel/libkern.h>
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <errno.h>
 #include <assert.h>
 #include <hal.h>

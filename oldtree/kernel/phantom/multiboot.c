@@ -22,7 +22,7 @@
 #include <kernel/boot.h>
 #include <kernel/page.h>
 
-#include <x86/phantom_pmap.h>
+#include <ia32/phantom_pmap.h>
 #include <hal.h>
 #include <multiboot.h>
 #include <elf.h>

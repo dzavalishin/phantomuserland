@@ -23,7 +23,7 @@
 #else
 
 #ifdef ARCH_ia32
-#include <i386/trap.h>
+#include <ia32/trap.h>
 
 #elif defined(ARCH_amd64)
 #include <amd64/trap.h>

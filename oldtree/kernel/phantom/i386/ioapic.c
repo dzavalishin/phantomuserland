@@ -18,11 +18,10 @@
 #include <kernel/ia32/cpu.h>
 #include <kernel/ia32/apic.h>
 #include <kernel/ia32/apic_regs.h>
+#include <ia32/phantom_pmap.h>
 
-#include <x86/phantom_pmap.h>
 #include <hal.h>
 #include <phantom_libc.h>
-//#include <i386/trap.h>
 
 static volatile u_int32_t* ioapic;
 static int max_redirect_entry = 23; // even first chips had 24 inputs

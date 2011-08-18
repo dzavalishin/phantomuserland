@@ -1,7 +1,7 @@
 #include "amd64/asm.h"
 #include <kernel/page.h>
 
-#include <x86/phantom_pmap.h>
+//#include <x86/phantom_pmap.h>
 
 	.data
 

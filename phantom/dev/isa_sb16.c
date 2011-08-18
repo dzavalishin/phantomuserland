@@ -19,7 +19,7 @@
 
 #include "driver_map.h"
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <sys/libkern.h>
 #include <phantom_libc.h>
 #include <time.h>

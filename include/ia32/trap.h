@@ -153,7 +153,7 @@ struct trap_state {
 
 #else // ASSEMBLER
 
-#include <mach/asm.h>
+#include <ia32/asm.h>
 
 #define UNEXPECTED_TRAP				\
 	movw	%ss,%ax				;\

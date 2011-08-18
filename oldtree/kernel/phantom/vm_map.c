@@ -30,8 +30,8 @@
 #include <threads.h>
 
 #ifdef ARCH_ia32
-#include <i386/proc_reg.h>
-#include <x86/phantom_pmap.h>
+#include <ia32/proc_reg.h>
+#include <ia32/phantom_pmap.h>
 #endif
 
 #include <time.h>

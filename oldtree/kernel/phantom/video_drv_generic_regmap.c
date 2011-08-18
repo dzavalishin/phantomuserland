@@ -22,10 +22,11 @@
 #include <kernel/vm.h>
 #include <kernel/page.h>
 #include <kernel/driver.h>
-#include <x86/phantom_pmap.h>
 
-#include <i386/pci.h>
-#include <i386/pio.h>
+#include <ia32/phantom_pmap.h>
+#include <kernel/bus/pci.h>
+#include <ia32/pio.h>
+
 #include <phantom_libc.h>
 
 #include <video.h>

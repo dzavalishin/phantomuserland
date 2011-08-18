@@ -19,7 +19,6 @@
 
 #include <malloc.h>
 #include <string.h>
-//#include <i386/proc_reg.h>
 #include <phantom_libc.h>
 #include <kernel/page.h>
 #include <kernel/smp.h>

@@ -36,12 +36,12 @@
 #include <kernel/page.h>
 
 #include "paging_device.h"
-#include "hal.h"
+#include <hal.h>
 
 #include <assert.h>
 #include <string.h>
 
-#include "i386/pci.h"
+#include <kernel/bus/pci.h>
 
 #include "ataio.h"
 
