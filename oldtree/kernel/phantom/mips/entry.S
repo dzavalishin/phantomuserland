@@ -24,14 +24,17 @@ LEAF(__lowmem__)
     //.org 0x80000000
     .org 0x000
     j _enter_exception_tlb_refill
+    nop // delay slot
 
     .org 0x180
     j _enter_exception_other
+    nop // delay slot
 
     .org 0x200
     j _enter_exception_interrupt
+    nop // delay slot
 #endif
-
+/*
     .globl	_start_of_kernel
 _start_of_kernel:
     .globl	_start
@@ -39,12 +42,17 @@ _start:
 
     j _reset
     nop // delay slot
-
-    .string "Phantom OS\r\n"
+*/
+banner:
+    .string "Phantom OS, MIPS Kernel\r\n"
     .string "Copyright (C) Dmitry Zavalishin, 2011.\r\n"
 
     .align 8
 
+    .globl	_start_of_kernel
+_start_of_kernel:
+    .globl	_start
+_start:
 
 _reset:
     /* Disable interrupts */
@@ -71,10 +79,12 @@ clear_bss_loop:
     sb t3, 9(t0)
     addiu t0, t0, 1
     bne t0, t1, clear_bss_loop
+    nop // delay slot
 
     // print hello to com port - remove!
  	lui	v0,0xB400
  	ori	v0,v0,0x3f8
+#if 0
  	li	v1,104
  	sb	v1,0(v0)
  	li	v1,101
@@ -90,8 +100,18 @@ clear_bss_loop:
  	sb	v1,0(v0)
  	li	v1,13
  	sb	v1,0(v0)
+#endif
+    la  t0, banner
+print_banner:
+	lb  t1, 0(t0)
+    addiu t0, t0, 1
+    beqz t1, eprint
+    nop // delay slot
+ 	sb	t1, 0(v0)
+    j print_banner
+    nop // delay slot
+eprint:	
 
-	
     /* jump to main */
     jal	main
     nop

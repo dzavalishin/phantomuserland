@@ -98,11 +98,10 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > $(TFTP_PATH)/$@
 	cat < $@ > ../../../run/fat/boot/$@
+	cat < $@ > ../../../run/fat/boot/$@.$(ARCH)
 #	objdump -x $@.pe >$@.pe.sym
 #	gzip < $@ > $(TFTP_PATH)/$@.gz
 #	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
-#	cd ../../run
-#	genisoimage -o cd.iso $(TFTP_PATH)
 	@echo --- kernel build finished
 	-mv -t d *.d
 	-mv -t d unix/*.d

@@ -11,6 +11,13 @@
 #include <kernel/config.h>
 #include <kernel/page.h>
 
+// default qemu mips machie can't accept more
+//#if BOARD==mips_default
+#undef PHANTOM_START_HEAP_SIZE
+#define PHANTOM_START_HEAP_SIZE (12*1024*1024)
+#warning Heap sz redefine
+//#endif
+
 #include <mips/asm.h>
 
     .bss
