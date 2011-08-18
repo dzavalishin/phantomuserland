@@ -74,6 +74,11 @@ void sig_exec(uuprocess_t *u, signal_handling_t *sh, struct trap_state *st)
     // Mask off ignored ones
     u_int32_t s = sh->signal_pending & sh->signal_mask;
 
+    // No signals?
+    if( !s )
+        return;
+
+    SHOW_FLOW( 1, "Signals %x (unmasked), %x (total)", s, sh->signal_pending );
 
     u_int32_t do_stop = s & sh->signal_stop;
     u_int32_t do_cont = s & sh->signal_cont;
@@ -87,7 +92,7 @@ void sig_exec(uuprocess_t *u, signal_handling_t *sh, struct trap_state *st)
         // We're going to process all of these
         sh->signal_pending &= ~do_cont;
 
-        SHOW_ERROR( 0, "Unimplemented sysgnal cont %x", do_cont );
+        SHOW_ERROR( 0, "Unimplemented signal cont %x", do_cont );
     }
 
     if(do_stop)
@@ -95,7 +100,7 @@ void sig_exec(uuprocess_t *u, signal_handling_t *sh, struct trap_state *st)
         // We're going to process all of these
         sh->signal_pending &= ~do_stop;
 
-        SHOW_ERROR( 0, "Unimplemented sysgnal stop %x", do_stop );
+        SHOW_ERROR( 0, "Unimplemented signal stop %x", do_stop );
     }
 
 
@@ -114,7 +119,7 @@ void sig_exec(uuprocess_t *u, signal_handling_t *sh, struct trap_state *st)
             int killme = do_kill & s;
             if(killme)
             {
-                SHOW_ERROR( 0, "Unimplemented sygnal kill %d", i );
+                SHOW_ERROR( 0, "Unimplemented signal kill %d", i );
             }
         }
         else if( uhandler == (void *)SIG_IGN )

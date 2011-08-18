@@ -12,11 +12,17 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define HAVE_SMP 0
-#define HAVE_NET 1
-#define HAVE_UNIX 1
-#define HAVE_VESA 1
-
+#ifdef ARCH_mips
+#  define HAVE_SMP 0
+#  define HAVE_NET 0
+#  define HAVE_UNIX 0
+#  define HAVE_VESA 0
+#else
+#  define HAVE_SMP 0
+#  define HAVE_NET 1
+#  define HAVE_UNIX 1
+#  define HAVE_VESA 1
+#endif
 
 #define HAVE_FLOPPY 1
 #define HAVE_AHCI 1

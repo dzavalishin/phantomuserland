@@ -106,8 +106,11 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 #	genisoimage -o cd.iso $(TFTP_PATH)
 	@echo --- kernel build finished
 	-mv -t d *.d
+	-mv -t d unix/*.d
 
-
+-include d/*.d
+-include *.d
+-include unix/*.d
 
 
 svn_version.c::

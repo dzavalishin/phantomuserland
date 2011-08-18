@@ -92,7 +92,6 @@ pager_io_request_done( pager_io_request *rq )
     if( phandle >= 0 )
         dpart_release_async( phandle );
 
-
     // Prelim check
     if(sleep)
     {

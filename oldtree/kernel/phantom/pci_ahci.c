@@ -212,8 +212,8 @@ static inline void WP32( phantom_device_t *dev, int port, int displ, u_int32_t v
 }
 
 
-#define W32(__d,__p,__v) ( *((u_int32_t*)(__d->iomem+(__p))) ) = __v
-#define R32(__d,__p) ( *((u_int32_t*)( ((int)(__d)->iomem) + (int)(__p))) )
+#define W32(__d,__p,__v) ( *((volatile u_int32_t*)(__d->iomem+(__p))) ) = __v
+#define R32(__d,__p) ( *((volatile u_int32_t*)( ((int)(__d)->iomem) + (int)(__p))) )
 
 
 static errno_t ahci_init_port(phantom_device_t *dev, int nport)

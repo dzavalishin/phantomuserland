@@ -47,7 +47,8 @@ static errno_t checkRange( struct phantom_disk_partition *p, long blockNo, int n
 }
 */
 
-extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
+//extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
+//extern errno_t partTrim( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 
 
 
@@ -84,6 +85,7 @@ static errno_t partFence( struct phantom_disk_partition *p )
 
     return p->base->fence( p->base );
 }
+
 
 
 
@@ -272,6 +274,7 @@ phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition
     ret->dequeue = partDequeue;
     ret->raise   = partRaise;
     ret->fence   = partFence;
+    ret->trim    = partTrim;
 
     ret->base = base;
     ret->baseh.h = -1;
