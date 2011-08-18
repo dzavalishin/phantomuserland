@@ -9,8 +9,8 @@
  *
 **/
 
-#include <i386/proc_reg.h>
-#include <i386/eflags.h>
+#include <amd64/proc_reg.h>
+#include <amd64/eflags.h>
 
 #include <kernel/trap.h>
 

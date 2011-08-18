@@ -9,7 +9,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "apic"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
@@ -18,14 +18,13 @@
 #include <kernel/ia32/cpu.h>
 #include <kernel/ia32/apic.h>
 #include <kernel/ia32/idt.h>
+#include <ia32/proc_reg.h>
+#include <ia32/phantom_pmap.h>
 #include <kernel/interrupts.h>
 
 
-#include <x86/phantom_pmap.h>
 #include <hal.h>
 #include <phantom_libc.h>
-//#include <i386/trap.h>
-#include <i386/proc_reg.h>
 #include <kernel/init.h>
 #include <kernel/trap.h>
 

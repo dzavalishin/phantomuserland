@@ -14,10 +14,5 @@ void	phantom_pic_disable_all(void);
 
 int 	phantom_pic_is_irq_pending(unsigned int irq_no);
 
-
-
-
-
-
 #endif // PIC_H
 

@@ -1,6 +1,11 @@
 #ifndef	_PHANTOM_PMAP_MACHINE_
 #define _PHANTOM_PMAP_MACHINE_
 
+#ifndef ARCH_ia32
+#warning Intel32 code! Wrong arch?
+#endif
+
+
 #ifndef ASSEMBLER
 #include <phantom_types.h>
 #endif
@@ -8,6 +13,8 @@
 #define NPDE 1024
 #define NPTE 1024
 
+// for physalloc - max pages to alloc
+#define PHYSALLOC_MAXPAGES (NPDE*NPTE)
 
 /*
  *	Hardware pte bit definitions (to be used directly on the ptes

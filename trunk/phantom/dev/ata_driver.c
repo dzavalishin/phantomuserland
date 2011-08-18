@@ -20,10 +20,9 @@
 
 
 
-#include <i386/pio.h>
-#include <i386/pci.h>
-//#include "driver_map.h"
-#include "device.h"
+#include <ia32/pio.h>
+#include <ia32/pci.h>
+#include <device.h>
 
 #include <disk_q.h>
 #include <disk.h>

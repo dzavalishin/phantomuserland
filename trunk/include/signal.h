@@ -18,8 +18,6 @@
 
 #include <sys/types.h>
 #include <kernel/trap.h>
-
-//#include <i386/trap.h>
 #include <errno.h>
 
 // supposed to be ia32/machine/signal.h

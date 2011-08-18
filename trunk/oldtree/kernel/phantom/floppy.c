@@ -28,7 +28,7 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <device.h>
 #include <kernel/ia32/rtc.h>
 #include <compat/seabios.h>

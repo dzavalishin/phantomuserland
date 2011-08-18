@@ -41,7 +41,7 @@
 #warning Intel32 code! Wrong arch?
 #endif
 
-#include <i386/seg.h>
+#include <ia32/seg.h>
 
 /*
  * User descriptors. Used to start native code (Unix?) threads.

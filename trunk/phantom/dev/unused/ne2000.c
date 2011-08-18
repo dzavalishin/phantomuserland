@@ -60,7 +60,7 @@
 #include "hal.h"
 
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include "ne2000.h"
 #include "ne2k.h"
 #include "ne2000err.h"

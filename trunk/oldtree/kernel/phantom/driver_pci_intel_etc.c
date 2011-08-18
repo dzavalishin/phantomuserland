@@ -19,8 +19,7 @@
 
 
 #include <phantom_libc.h>
-#include <i386/pio.h>
-//#include "driver_map.h"
+#include <ia32/pio.h>
 #include <device.h>
 #include <kernel/drivers.h>
 

@@ -27,12 +27,10 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-//#include <i386/trap.h>
-
-#include <i386/proc_reg.h>
-#include <i386/seg.h>
-#include <i386/isa/pic.h>
-#include <x86/phantom_pmap.h>
+#include <ia32/proc_reg.h>
+#include <ia32/seg.h>
+#include <kernel/bus/isa/pic.h>
+#include <ia32/phantom_pmap.h>
 
 #include <phantom_types.h>
 #include <phantom_libc.h>

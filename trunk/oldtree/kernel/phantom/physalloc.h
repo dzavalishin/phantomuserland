@@ -1,7 +1,7 @@
 #ifndef PHYSALLOC_H
 #define PHYSALLOC_H
 
-#include <x86/phantom_pmap.h>
+//#include <x86/phantom_pmap.h>
 
 #include <kernel/page.h>
 #include <errno.h>

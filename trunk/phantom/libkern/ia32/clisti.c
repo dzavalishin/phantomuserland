@@ -1,4 +1,4 @@
-#include <i386/eflags.h>
+#include <ia32/eflags.h>
 
 
 void hal_wait_for_interrupt(void)

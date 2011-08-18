@@ -2,7 +2,7 @@
 #if HAVE_NET && HAVE_PCI
 
 #include <phantom_libc.h>
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <device.h>
 #include <kernel/drivers.h>
 

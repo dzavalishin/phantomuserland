@@ -12,8 +12,8 @@
 #include <kernel/init.h>
 #include <kernel/drivers.h>
 
-#include <i386/isa/pic.h>
-#include <i386/isa/pic_regs.h>
+#include <kernel/bus/isa/pic.h>
+#include <dev/isa/pic_regs.h>
 
 // SHARED CODE!
 //char board_name[] = "PC32";

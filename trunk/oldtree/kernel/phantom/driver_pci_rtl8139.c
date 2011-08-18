@@ -26,7 +26,7 @@
 #include <hal.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
-#include <i386/pio.h>
+#include <ia32/pio.h>
 
 #include <device.h>
 

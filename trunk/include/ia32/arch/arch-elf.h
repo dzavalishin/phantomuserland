@@ -23,6 +23,8 @@
 #ifndef _MACH_I386_EXEC_ELF_H_
 #define _MACH_I386_EXEC_ELF_H_
 
+// TODO this file is unused - ise or kill
+
 typedef unsigned long	Elf32_Addr;
 typedef unsigned short	Elf32_Half;
 typedef unsigned long	Elf32_Off;

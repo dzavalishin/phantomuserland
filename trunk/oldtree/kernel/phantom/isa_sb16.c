@@ -18,14 +18,14 @@
 
 #include "driver_map.h"
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <sys/libkern.h>
 #include <phantom_libc.h>
 #include <time.h>
 
 #include <hal.h>
 
-#include <x86/comreg.h>
+//#include <x86/comreg.h>
 #include <kernel/page.h>
 
 #define BLOCK_LENGTH    512   /* Length of digitized sound output block     */

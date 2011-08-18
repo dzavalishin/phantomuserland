@@ -25,7 +25,7 @@
 #endif
 
 #if SPIN_DEBUG
-//#include <i386/proc_reg.h>
+//#include <arm/proc_reg.h>
 #endif
 
 // -----------------------------------------------------------------------

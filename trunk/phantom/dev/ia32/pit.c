@@ -9,14 +9,14 @@
 **/
 
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <phantom_libc.h>
 
 #include <hal.h>
 #include <time.h>
 
-#include <i386/isa/pit.h>
-#include <i386/isa/pic.h>
+#include <dev/isa/pit_regs.h>
+#include <kernel/bus/isa/pic.h>
 
 #include "ia32drv.h"
 

@@ -80,7 +80,7 @@
 #define DR6_B1		0x00000002
 #define DR6_B0		0x00000001
 
-// have in i386/proc_reg.h
+// have in ia32/proc_reg.h
 
 #if 0
 

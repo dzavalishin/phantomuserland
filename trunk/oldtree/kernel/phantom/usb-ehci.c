@@ -12,15 +12,8 @@
 
 #include <compat/seabios.h>
 
-//#include "util.h" // dprintf
-//#include "pci.h" // pci_bdf_to_bus
-//#include "config.h" // CONFIG_*
-//#include "ioport.h" // outw
 #include "usb-ehci.h" // struct ehci_qh
-//#include "pci_ids.h" // PCI_CLASS_SERIAL_USB_UHCI
-//#include "pci_regs.h" // PCI_BASE_ADDRESS_0
 #include "usb.h" // struct usb_s
-//#include "farptr.h" // GET_FLATPTR
 #include "usb-uhci.h" // init_uhci
 #include "usb-ohci.h" // init_ohci
 

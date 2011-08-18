@@ -34,7 +34,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <i386/pci.h>
+#include <kernel/bus/pci.h>
 
 #include "ataio.h"
 #include <kernel/dpc.h>

@@ -16,13 +16,13 @@
 #define NE2000_INTR 0
 
 #define DEBUG_MSG_PREFIX "ne2000"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 2
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <i386/pio.h>
-#include <i386/pci.h>
+#include <ia32/pio.h>
+#include <kernel/bus/pci.h>
 #include <hal.h>
 #include <threads.h>
 #include <phantom_assert.h>

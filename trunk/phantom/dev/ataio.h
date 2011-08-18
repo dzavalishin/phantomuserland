@@ -1,7 +1,7 @@
 #include <hal.h>
 #include <kernel/vm.h>
 #include <disk.h>
-#include <i386/pio.h>
+#include <ia32/pio.h>
 
 
 

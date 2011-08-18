@@ -35,8 +35,7 @@
 
 
 #include <ia32/asm.h>
-
-#include <i386/seg.h>
+#include <ia32/seg.h>
 
 #define FULL_STACK_TRACE
 

@@ -15,11 +15,10 @@
 #include <phantom_assert.h>
 #include <phantom_libc.h>
 
-//#include <i386/ipl.h>
-#include <i386/isa/pic_regs.h>
-#include <i386/isa/pic.h>
+#include <dev/isa/pic_regs.h>
+#include <kernel/bus/isa/pic.h>
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 
 #include <hal.h>
 

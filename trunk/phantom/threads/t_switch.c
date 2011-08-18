@@ -27,11 +27,6 @@
 #include <kernel/interrupts.h>
 #include <kernel/stats.h>
 
-#ifdef ARCH_ia32
-// TSS - TODO - move to machdep thread switch code
-//#include <i386/tss.h>
-#endif
-
 
 hal_spinlock_t schedlock;
 

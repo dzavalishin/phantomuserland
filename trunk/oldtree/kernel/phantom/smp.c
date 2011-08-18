@@ -31,7 +31,7 @@
 #include <kernel/smp.h>
 #include <spinlock.h>
 #include <hal.h>
-#include <i386/proc_reg.h>
+#include <ia32/proc_reg.h>
 #include <machdep.h>
 
 #define MSG_POOL_SIZE (_MAX_CPUS * 4)

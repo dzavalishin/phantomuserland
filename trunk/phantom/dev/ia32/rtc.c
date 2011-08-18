@@ -18,8 +18,8 @@
 
 // From FreeBSD clock.c
 
-#include <x86/isa.h>
-#include <i386/pio.h>
+#include <ia32/pc/isa.h>
+#include <ia32/pio.h>
 
 
 #include <phantom_libc.h>

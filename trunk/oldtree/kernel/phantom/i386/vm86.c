@@ -23,15 +23,15 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
 
-#include <i386/vesa.h>
+//#include <i386/vesa.h>
 
 #include <hal.h>
 #include <threads.h>
 
-#include "vm86.h"
+#include <ia32/vm86.h>
 
 #include "../misc.h"
-#include "ia32private.h"
+#include <ia32/private.h>
 
 // Against warnings
 #if 1

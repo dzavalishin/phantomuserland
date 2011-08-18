@@ -9,7 +9,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "driver"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
@@ -21,7 +21,7 @@
 
 #include <phantom_libc.h>
 
-#include <i386/pci.h>
+#include <kernel/bus/pci.h>
 
 #include <device.h>
 

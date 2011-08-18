@@ -28,6 +28,10 @@
 #include <kernel/stats.h>
 #include <kernel/page.h>
 
+// PHYSALLOC_MAXPAGES
+#ifdef ARCH_ia32
+#include <ia32/phantom_pmap.h>
+#endif
 
 static void cmd_mem_stat( int ac, char **av );
 
@@ -45,11 +49,9 @@ static void cmd_mem_stat( int ac, char **av );
 // -----------------------------------------------------------------------
 
 
-#define MAXPAGES (NPDE*NPTE)
-
 
 static physalloc_t   	vm_map;
-static map_elem_t    	mapbuf[MAP_SIZE_ELEM(MAXPAGES)];
+static map_elem_t    	mapbuf[MAP_SIZE_ELEM(PHYSALLOC_MAXPAGES)];
 
 
 //static void hal_init_physmem_alloc_thread(void);
@@ -58,7 +60,7 @@ static map_elem_t    	mapbuf[MAP_SIZE_ELEM(MAXPAGES)];
 void
 hal_init_vm_map(void)
 {
-    phantom_phys_alloc_init_static( &vm_map, MAXPAGES, mapbuf );
+    phantom_phys_alloc_init_static( &vm_map, PHYSALLOC_MAXPAGES, mapbuf );
 
     phantom_phys_free_region( &vm_map,
                                  PHANTOM_AMAP_START_VADDR_POOL/PAGE_SIZE,
@@ -144,7 +146,7 @@ hal_init_physmem_alloc(void)
     hal_spin_init(&pm_lock);
 #endif
     // FIXME 64 bit problem
-    phantom_phys_alloc_init( &pm_map, MAXPAGES ); // All the possible mem
+    phantom_phys_alloc_init( &pm_map, PHYSALLOC_MAXPAGES ); // All the possible mem
     pm_map.n_used_pages = pm_map.allocable_size = 0;
 
     //phantom_phys_free_region( &pm_map, start/PAGE_SIZE, npages );

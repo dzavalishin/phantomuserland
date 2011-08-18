@@ -18,7 +18,7 @@
 #include <kernel/drivers.h>
 #include <sys/libkern.h>
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <errno.h>
 #include <assert.h>
 #include <hal.h>

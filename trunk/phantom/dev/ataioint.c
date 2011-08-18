@@ -32,7 +32,7 @@
 
 #include "hal.h"
 
-#include <i386/pio.h>
+#include <ia32/pio.h>
 #include <phantom_libc.h>
 
 #include "ataio.h"

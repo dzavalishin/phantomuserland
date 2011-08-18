@@ -16,7 +16,7 @@
 
 
 #include <phantom_libc.h>
-#include <i386/vesa.h>
+#include <ia32/pc/vesa.h>
 #include <hal.h>
 #include <video.h>
 #include <video/screen.h>
