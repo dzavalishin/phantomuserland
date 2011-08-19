@@ -26,9 +26,9 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-char board_name[] = "QEMU -M mips";
+char board_name[] = "QEMU_M_mips";
 
-static char * symtab_getname( void *addr );
+//static char * symtab_getname( void *addr ) { (void) addr; return "?"; }
 
 
 static int icp_irq_dispatch(struct trap_state *ts);
@@ -86,9 +86,9 @@ void board_interrupt_enable(int irq)
     if(irq < MIPS_ONCPU_INTERRUPTS)
     {
         // irq mask in 15:8
-        unsigned mask = mips_read_cp0( 12 ); //CP0_STATUS );
+        unsigned mask = mips_read_cp0_status();
         mask |= 1 << (irq+8);
-        mips_write_cp0( 12, mask );
+        mips_write_cp0_status( mask );
         return;
     }
 
@@ -102,9 +102,9 @@ void board_interrupt_disable(int irq)
     if(irq < MIPS_ONCPU_INTERRUPTS)
     {
         // irq mask in 15:8
-        unsigned mask = mips_read_cp0( 12 );
+        unsigned mask = mips_read_cp0_status();
         mask &= ~(1 << (irq+8));
-        mips_write_cp0( 12, mask );
+        mips_write_cp0_status( mask );
         return;
     }
 

@@ -19,7 +19,6 @@ LEAF(__lowmem__)
     .set	noreorder
     .set	mips32
 
-#if 1
     // Exception vectors
     //.org 0x80000000
     .org 0x000
@@ -35,16 +34,7 @@ LEAF(__lowmem__)
     //j _enter_exception_interrupt
     j _enter_exception_other
     nop // delay slot
-#endif
-/*
-    .globl	_start_of_kernel
-_start_of_kernel:
-    .globl	_start
-_start:
 
-    j _reset
-    nop // delay slot
-*/
 banner:
     .string "Phantom OS, MIPS Kernel\r\n"
     .string "Copyright (C) Dmitry Zavalishin, 2011.\r\n"
@@ -212,22 +202,20 @@ LEAF(arch_get_frame_pointer)
     addiu   v0, fp, 0
 END(arch_get_frame_pointer)
 
-    // BUG XXX TODO wrong - reads one reg!
 #if 1
 
-    //int mips_read_cp0( int reg );
-LEAF(mips_read_cp0)
-    mfc0	v0, a0
+    //int mips_read_cp0_status();
+LEAF(mips_read_cp0_status)
     jr      ra
-    nop
-END(mips_read_cp0)
+    mfc0    v0, CP0_STATUS // delay slot
 
-    //void mips_write_cp0( int reg, int data );
-LEAF(mips_write_cp0)
-    mtc0	a1, a0
+END(mips_read_cp0_status)
+
+    //void mips_write_cp0_status( int data );
+LEAF(mips_write_cp0_status)
     jr      ra
-    nop
-END(mips_write_cp0)
+    mtc0    a0, CP0_STATUS // delay slot
+END(mips_write_cp0_status)
 
 #endif
 

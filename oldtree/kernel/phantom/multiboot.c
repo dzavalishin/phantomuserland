@@ -22,7 +22,8 @@
 #include <kernel/boot.h>
 #include <kernel/page.h>
 
-#include <ia32/phantom_pmap.h>
+//#include <ia32/phantom_pmap.h>
+
 #include <hal.h>
 #include <multiboot.h>
 #include <elf.h>
@@ -310,8 +311,8 @@ static void map_eq( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t fl
 {
     (void) arg;
 
-    int off = from & INTEL_OFFMASK;
-    unsigned pageaddr = (unsigned)(from & ~INTEL_OFFMASK); // Just page start addr
+    int off = from & PAGE_MASK;
+    unsigned pageaddr = (unsigned)(from & ~PAGE_MASK); // Just page start addr
     n_elem += off; // We moved start addr back, now fix len
 
     int n_pages = 1+((n_elem-1)/PAGE_SIZE);

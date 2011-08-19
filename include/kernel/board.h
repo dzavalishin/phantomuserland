@@ -101,8 +101,8 @@ void board_fill_memory_map( amap_t *ram_map );
 #define MEM_MAP_NOTHING 0
 
 
-
-
+//! Get character from debug console
+int debug_console_getc(void);
 
 
 

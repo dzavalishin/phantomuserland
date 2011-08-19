@@ -72,7 +72,7 @@
 
 
 
-#define INTEL_OFFMASK	0xfff	/* offset within page */
+//#define INTEL_OFFMASK	0xfff	/* offset within page - gone to arch_page.h */
 #define PDESHIFT	22	/* page descriptor shift */
 #define PDEMASK		0x3ff	/* mask for page descriptor index */
 #define PTESHIFT	12	/* page table shift */
