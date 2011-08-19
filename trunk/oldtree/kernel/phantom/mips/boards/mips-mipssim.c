@@ -4,7 +4,9 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Default QEMU MIPS machine (-M mips) hardware mappings.
+ * QEMU mipssim machine (-M mipssim) hardware mappings.
+ *
+ * Unfinished! Wrong! Move parts to arch dir?
  *
 **/
 
@@ -26,7 +28,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-char board_name[] = "QEMU_M_mips";
+char board_name[] = "mipssim";
 
 //static char * symtab_getname( void *addr ) { (void) addr; return "?"; }
 
@@ -49,7 +51,7 @@ void board_init_cpu_management(void)
 
 void board_init_kernel_timer(void)
 {
-    // mc146818rtc irq 8
+    // mc146818rtc irq 8??
 }
 
 void board_start_smp(void)
@@ -64,11 +66,6 @@ void board_start_smp(void)
 /*
 static char * symtab_getname( void *addr )
 {
-    int len = *(int*)(addr-4);
-    if( (len & 0xFF000000) != 0xFF000000 )
-        return "?";
-
-    return (char *)(addr - 4 - (len&0xFFFFFF));
 }
 */
 
@@ -173,8 +170,7 @@ void board_sched_cause_soft_irq(void)
 // Drivers
 // -----------------------------------------------------------------------
 
-#define ISA_IO 0xB4000000
-
+#define ISA_IO 0xBfd00000
 
 // TODO in fact, 0xB4000000 must be added in bus output functions
 
