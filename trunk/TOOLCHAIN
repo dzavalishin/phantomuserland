@@ -5,3 +5,9 @@ Windows:
   X86 - Cygwin gcc
 
   MIPS/ARM - http://opensource.zylin.com/gccbinary.html
+
+  MIPS little endian - http://code.google.com/p/uos-embedded/wiki/gcc_mipsel_ru
+
+Qemu
+
+  MIPS info (russian) http://code.google.com/p/vak-opensource/wiki/qemu_mips_machines

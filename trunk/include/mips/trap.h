@@ -39,6 +39,8 @@
 #define T_FPE                  15 // Floating point exception
 
 
+#define TRAP_STATE_SIZE (40*4)
+
 #ifndef ASSEMBLER
 
 
@@ -97,6 +99,9 @@ struct trap_state
 
     unsigned int error_pc; // CP0_ERROREPC
 
+    unsigned int hi;
+    unsigned int lo;
+
     //unsigned int usr_sp;
     //unsigned int usr_fp;
     //unsigned int usr_ra;
@@ -111,6 +116,8 @@ struct trap_state
 
 
 
+//! Called from exception handler on TLB refill events
+void tlb_refill_exception(struct trap_state *ts);
 
 
 

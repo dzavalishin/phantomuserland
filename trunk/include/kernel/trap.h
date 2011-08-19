@@ -37,7 +37,7 @@
 #endif
 
 
-
+#ifndef ASSEMBLER
 
 int (*phantom_trap_handlers[ARCH_N_TRAPS])(struct trap_state *ts);
 
@@ -56,8 +56,14 @@ void            phantom_check_user_trap( struct trap_state *ts );
 //! Return signal number for this kind of trap - machdep
 int             trap2signo( struct trap_state *ts );
 
-// Unix syscall dispatcher
+
+//! Unix syscall dispatcher
 void            syscall_sw(struct trap_state *st);
+
+//! Pagefault trap handler
+int vm_map_page_fault_trap_handler(struct trap_state *st);
+
+#endif // ASSEMBLER
 
 
 #endif // GENERAL_TRAP_H

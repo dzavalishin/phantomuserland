@@ -176,10 +176,13 @@ void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
         syscall_sw(ts);
         return;
 
-#if 0
-    case T_TLB_MOD:
     case T_TLB_LOAD:
     case T_TLB_STORE:
+        tlb_refill_exception(ts);
+        return;
+
+#if 0
+    case T_TLB_MOD:
     case T_ADDR_LOAD:
     case T_ADDR_SAVE:
     case T_CODE_BUS_ERR:

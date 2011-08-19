@@ -22,6 +22,7 @@
 
 #include <mips/pmap.h>
 #include <kernel/page.h>
+#include <kernel/trap.h>
 #include <hal.h>
 #include <machdep.h>
 
@@ -46,6 +47,13 @@ static int paging_inited;
 static pt_entry_t ptab[NPTE];
 
 
+
+#define lin2linear_ptenum(a) ( ((a) / 4096) )
+#define get_pte( la ) (ptab + lin2linear_ptenum(la))
+
+
+
+
 void phantom_paging_init(void)
 {
     memset( ptab, 0, sizeof ptab );
@@ -68,103 +76,97 @@ static void phantom_paging_start(void)
     SHOW_ERROR0( 2, "NOT impl paging start" );
 }
 
-//* Read TLB entry at given location
-static void read_tlb_entry_loc( pt_entry_t *e, int loc )
-{
-    SHOW_ERROR0( 2, "NOT impl" );
-}
 
-//* Write TLB entry at given location
-static void write_tlb_entry_loc( pt_entry_t *e, int loc )
-{
-    SHOW_ERROR0( 2, "NOT impl" );
-}
-
-//* Write TLB entry at random location
-static void write_tlb_entry_rnd( pt_entry_t *e )
-{
-    SHOW_ERROR0( 2, "NOT impl" );
-}
 
 
 //* Clear TLB
 static void clear_tlb()
 {
-    pt_entry_t te;
+    tlb_entry_t te;
     memset( &te, 0, sizeof te );
 
     int ie = hal_save_cli();
 
     int i;
     for( i = 0; i < NTLBE; i++ )
-        write_tlb_entry_loc( &te, i );
+        mips_tlb_write_index( i, &te );
 
     if(ie) hal_sti();
 }
 
 
 
+// TODO use mips_tlb_probe
 //* Clear entry for given virtual address. NB! Ignores 8 bit address space id field!
 static void clear_tlb_entry( addr_t va )
 {
-    pt_entry_t te;
+    tlb_entry_t te;
 
     if( va & (PAGE_SIZE-1) )
         SHOW_ERROR0( 2, "va low bits?" );
 
-    addr_t pageno = va >> PAGE_SHIFT;
+    //addr_t pageno = va >> PAGE_SHIFT;
 
     int ie = hal_save_cli();
 
     int i;
     for( i = 0; i < NTLBE; i++ )
     {
-        read_tlb_entry_loc( &te, i );
+        mips_tlb_read( i, &te );
 
-#warning impl
         // compare pageno to TLB va bits
-
-        // Clear entry
-        memset( &te, 0, sizeof te );
-        write_tlb_entry_loc( &te, i );
-
+        if( (te.v & TLB_V_ADDR_MASK) == (va & TLB_V_ADDR_MASK ) )
+        {
+            // Clear entry
+            memset( &te, 0, sizeof te );
+            mips_tlb_write_index( i, &te );
+        }
     }
 
     if(ie) hal_sti();
 }
 
 
-
+// unused
+#if 0
+// TODO use mips_tlb_probe
 //* Read entry for given virtual address. NB! Ignores 8 bit address space id field!
-static errno_t read_tlb_entry( pt_entry_t *e, addr_t va )
+static errno_t read_tlb_entry( tlb_entry_t *e, addr_t va )
 {
-    pt_entry_t te;
+    tlb_entry_t te;
 
     assert_int_disabled();
 
     if( va & (PAGE_SIZE-1) )
         SHOW_ERROR0( 2, "va low bits?" );
 
-    addr_t pageno = va >> PAGE_SHIFT;
+    //addr_t pageno = va >> PAGE_SHIFT;
 
     int i;
     for( i = 0; i < NTLBE; i++ )
     {
-        read_tlb_entry_loc( &te, i );
+        mips_tlb_read( i, &te );
 
-#warning impl
-        // compare pageno to TLB va bits
-
+        if( (te.v & TLB_V_ADDR_MASK) == (va & TLB_V_ADDR_MASK ) )
+        {
+            *e = te;
+            return 0;
+        }
     }
 
     return ENOENT;
 }
+#endif
 
-//* Write entry for given virtual address. NB! Ignores 8 bit address space id field!
-static void write_tlb_entry( pt_entry_t *e, void *va )
+/*
+//! Write entry for given virtual address. NB! Ignores 8 bit address space id field!
+static void write_tlb_entry( tlb_entry_t *e, void *va )
 {
-    write_tlb_entry_rnd( e );
+    (void) va;
+    //write_tlb_entry_rnd( e );
+    mips_tlb_write_random( e );
 }
+*/
 
 // TODO on MIPS we can manually put new entry to TLB. make revalidate_pg()?
 static __inline__ void invlpg(addr_t start)
@@ -173,8 +175,77 @@ static __inline__ void invlpg(addr_t start)
 #warning clear corresp cache entries
 }
 
-#define lin2linear_ptenum(a) ( ((a) / 4096) )
-#define get_pte( la ) (ptab + lin2linear_ptenum(la))
+
+//* Reload TLB entry with correct data
+errno_t load_tlb_entry( addr_t va, int write )
+{
+    clear_tlb_entry( va );
+
+    tlb_entry_t e;
+
+    pt_entry_t *e0 = get_pte( va & TLB_V_ADDR_MASK ); // low entry
+    pt_entry_t *e1 = get_pte( (va & TLB_V_ADDR_MASK) | TLB_V_ADDR_HI ); // hi entry
+
+    e.v = e0->v;
+    e.p0 = e0->p;
+    e.p1 = e1->p;
+
+    // Check if resulting PTE (not TLBE) is valid, if no - we have page fault
+    int is_hi = va & TLB_V_ADDR_HI;
+
+    if( is_hi )
+    {
+        if( ! (e.p1 & TLB_P_VALID) )
+            return EFAULT;
+
+        if( write && ! (e.p1 & TLB_P_DIRTY) )
+            return EROFS;
+    }
+    else
+    {
+        if( ! (e.p0 & TLB_P_VALID) )
+            return EFAULT;
+
+        if( write && ! (e.p0 & TLB_P_DIRTY) )
+            return EROFS;
+    }
+
+    mips_tlb_write_random( &e );
+    return 0;
+}
+
+
+//! Called from exception handler on TLB refill events
+void tlb_refill_exception(struct trap_state *ts)
+{
+    int write = ts->trapno == T_TLB_STORE;
+    addr_t va = ts->va;
+    errno_t rc = load_tlb_entry( va, write );
+
+    // Load was successfull? We got correct mapping in TLB?
+    if( rc == 0 )
+        return;
+
+    // No good mapping found. Page fault.
+    vm_map_page_fault_trap_handler(ts);
+
+    // Attempt to load entry again - page fault handler might provide mapping...
+    load_tlb_entry( va, write );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void phantom_map_page(linaddr_t la, pt_entry_t mapping )
@@ -182,8 +253,7 @@ void phantom_map_page(linaddr_t la, pt_entry_t mapping )
     assert(PAGE_ALIGNED(la));
     assert(paging_inited);
 
-#warning impl
-    //*get_pte(la) = (mapping & ~ARM_PTE_TYPE_MASK) | ARM_PTE_TYPE_SM_PAGE;
+    *get_pte(la) = mapping;
 
     invlpg(la);
 }
@@ -245,27 +315,20 @@ hal_page_control_etc(
     if(mapped == page_unmap) access = page_noaccess;
 
     pt_entry_t	pte;
-#if 0
-    // We need it for V86 mode - REDO IN A MORE SPECIFIC WAY, so that only VM86 pages are user accessible
-    pt_entry_t bits = ARM_PTE_TYPE_SM_PAGE;
 
-    if(mapped == page_map)
-        bits |= ARM_PTE_BUFFERED|ARM_PTE_CACHED;
-
-//    if(mapped == page_map_io)
-//        bits |= 0;
-
+    pte.v = ((linaddr_t)page_start_addr) & PTE_V_ADDR_MASK;
+    pte.p = p & TLB_P_ADDR_MASK;
 
     if(access == page_rw)
-        put_ap( &bits, ACC_KRW_URW );
-    else
-        put_ap( &bits, ACC_KRO_U00 ); // No other way :(
+        pte.p |= TLB_P_DIRTY;
+    pte.p |= TLB_P_VALID;
 
+    pte.p |= TLB_P_GLOBAL;
 
-    pte = create_pte(p, bits);
-#endif
-    SHOW_FLOW( 10, "Map VA 0x%X to PA 0x%X, pte=0x%X\n",
-                          page_start_addr, p, *(long*)&pte );
+#warning check global bit in all the funcs!
+
+    SHOW_FLOW( 10, "Map VA 0x%X to PA 0x%X, pte.v=0x%X pte.p=0x%X\n",
+                          page_start_addr, p, pte.v, pte.p );
 
     if(mapped != page_unmap )
         phantom_map_page( (linaddr_t)page_start_addr, pte );

@@ -259,27 +259,29 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
     if (ts->trapno == T_PAGE_FAULT)
 #endif
     {
-        addr_t fa = arch_get_fault_address();
 #ifdef ARCH_ia32
+        addr_t fa = arch_get_fault_address();
         ts->cr2 = fa;
         addr_t ip = ts->eip;
         int is_write = ts->err & T_PF_WRITE;
 #endif
 #ifdef ARCH_amd64
+        addr_t fa = arch_get_fault_address(); // TODO put it to trap_state!
 #warning is_write
         //ts->cr2 = fa;
         addr_t ip = ts->hw_rip;
         int is_write = ts->hw_err & T_PF_WRITE;
 #endif
 #ifdef ARCH_arm
+        addr_t fa = arch_get_fault_address(); // TODO put it to trap_state!
         addr_t ip = ts->pc;
 #  warning find out if it was a write op
         int is_write = 0;
 #endif
 #ifdef ARCH_mips
+        addr_t fa = ts->va;
         addr_t ip = ts->pc;
-#  warning find out if it was a write op
-        int is_write = 0;
+        int is_write = ts->trapno == T_TLB_STORE;
 #endif
         {
             unsigned long addr = fa;

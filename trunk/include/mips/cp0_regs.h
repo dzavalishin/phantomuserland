@@ -62,6 +62,8 @@
 int mips_read_cp0_status( void );
 void mips_write_cp0_status( int data );
 
+int mips_read_cp0_cpuid( void );
+
 
 
 #endif // ASSEMBLER

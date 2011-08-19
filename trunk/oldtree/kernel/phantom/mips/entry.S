@@ -14,6 +14,8 @@
 
 #include <mips/cp0_regs.h>
 #include <mips/asm.h>
+#include <mips/pmap.h>
+#include <kernel/trap.h>
 
 LEAF(__lowmem__)
     .set	noreorder
@@ -74,8 +76,8 @@ clear_bss_loop:
     nop // delay slot
 
     // print hello to com port - remove!
- 	lui	v0,0xB400
- 	ori	v0,v0,0x3f8
+    lui	v0,0xB400
+    ori	v0,v0,0x3f8
 #if 0
  	li	v1,104
  	sb	v1,0(v0)
@@ -95,7 +97,7 @@ clear_bss_loop:
 #endif
     la  t0, banner
 print_banner:
-	lb  t1, 0(t0)
+    lb  t1, 0(t0)
     addiu t0, t0, 1
     beqz t1, eprint
     nop // delay slot
@@ -107,6 +109,16 @@ eprint:
     addiu k1, zero, 0 // Init for CPU 0 - means init L2 cache too
     jal sys_init_cache
     nop // delay slot
+
+    // NB - see TLB_PAGEMASK define, use here?
+    // pagemask (cp0 r5) = 0 -> 4Kb page
+    mtc0	zero, CP0_PAGEMASK
+
+    // wired (cp0 r6) = 24 (half of TLB is wired)?
+    // wired (cp0 r6) = 0 (nothing is wired)
+    mtc0	zero, CP0_WIRED
+
+    // TODO cp0 r16 config
 
     /* jump to main */
     jal	phantom_multiboot_main
@@ -141,12 +153,7 @@ END(debug_console_do_putc)
 __startup_stack_top__:
 
 
-// pagemask (cp0 r5) = 0 -> 4Kb page
-// wired (cp0 r6) = 24 (half of TLB is wired)?
 
-// get pr id = (cp0 r15)
-
-// TODO cp0 r16 config
 
 LEAF(hal_cli)
 #if 1
@@ -202,7 +209,7 @@ LEAF(arch_get_frame_pointer)
     addiu   v0, fp, 0
 END(arch_get_frame_pointer)
 
-#if 1
+
 
     //int mips_read_cp0_status();
 LEAF(mips_read_cp0_status)
@@ -217,7 +224,20 @@ LEAF(mips_write_cp0_status)
     mtc0    a0, CP0_STATUS // delay slot
 END(mips_write_cp0_status)
 
-#endif
+
+
+// get pr id = (cp0 r15)
+//int mips_read_cp0_cpuid();
+LEAF(mips_read_cp0_cpuid)
+    jr      ra
+    mfc0    v0, CP0_PRID // delay slot
+END(mips_read_cp0_cpuid)
+
+
+
+
+
+
 
 // int atomic_add(int *val, int incr) 
 LEAF(atomic_add)
@@ -274,7 +294,7 @@ on_kernel_sp:
 good_k1:
     // push user state
 
-    addi        sp, sp, -(36*4)
+    addi        sp, sp, -TRAP_STATE_SIZE
 
     sw          $0,  0*4(sp)
     sw          $1,  1*4(sp)
@@ -325,6 +345,10 @@ good_k1:
     mfc0	t0, CP0_ERROREPC        // Error program counter
     sw          t0, 35*4(sp)
 
+    mfhi t0
+    sw          t0, 36*4(sp) // hi
+    mflo t0
+    sw          t0, 37*4(sp) // lo
 
     // inc exception entry count!
     la k0, curr_thread_k0_stack_top
@@ -364,6 +388,11 @@ good_k1:
 
     lw          t0, 35*4(sp)
     mtc0	t0, CP0_ERROREPC        // Error program counter
+
+    lw          t0, 36*4(sp) // hi
+    mthi t0
+    lw          t0, 37*4(sp) // lo
+    mtlo t0
 
     lw          $0,  0*4(sp)
     lw          $1,  1*4(sp)
@@ -407,7 +436,7 @@ good_k1:
 
     lw         $29, 29*4(sp) // pop sp last
 
-    //addi        sp, sp, (36*4)
+    //addi        sp, sp, TRAP_STATE_SIZE
     //addi        sp, k1, 0 // just restore old sp
 
 
@@ -426,8 +455,97 @@ END(_enter_exception_other)
 
 
 
+//  int mips_tlb_read( int index, struct mips_pt_entry *e );
+//! returns tlbhi
+LEAF(mips_tlb_read)
+    mtc0    a0, CP0_INDEX
 
+    tlbr
 
+    mfc0    t0, CP0_ENTRYLO0
+    mfc0    t1, CP0_ENTRYLO1
+    mfc0    v0, CP0_ENTRYHI
+
+    sw v0, MIPS_PT_ENTRY_V_OFF(a1) // mips_pt_entry.v
+    sw t0, MIPS_PT_ENTRY_P0_OFF(a1) // mips_pt_entry.p0
+    sw t1, MIPS_PT_ENTRY_P1_OFF(a1) // mips_pt_entry.p1
+    // ignore pagemask
+
+    jr      ra
+    nop // delay slot
+END(mips_tlb_read)
+
+#if 0
+//  int mips_tlb_probe( struct mips_pt_entry *e );
+//! Returns contents of Index reg after probe - top bit is failure to find TLB record
+LEAF(mips_tlb_probe)
+
+    // TODO check if this instruction works as expected here
+    lw t0, MIPS_PT_ENTRY_P0_OFF(a0) // mips_pt_entry.p0
+    lw t1, MIPS_PT_ENTRY_P1_OFF(a0) // mips_pt_entry.p1
+    lw t2, MIPS_PT_ENTRY_V_OFF(a0) // mips_pt_entry.v
+
+    mtc0    t0, CP0_ENTRYLO0
+    mtc0    t1, CP0_ENTRYLO1
+    mtc0    t2, CP0_ENTRYHI
+
+    // NB - see TLB_PAGEMASK define, use here?
+    // pagemask (cp0 r5) = 0 -> 4Kb page
+    mtc0	zero, CP0_PAGEMASK
+
+    ltbp
+
+    mfc0    v0, CP0_INDEX
+
+    jr      ra
+    nop // delay slot
+END(mips_tlb_probe)
+#endif
+
+//  void mips_tlb_write_index(int index, struct mips_pt_entry *e);
+LEAF(mips_tlb_write_index)
+
+    mtc0    a0, CP0_INDEX
+
+    lw t0, MIPS_PT_ENTRY_P0_OFF(a1) // mips_pt_entry.p0
+    lw t1, MIPS_PT_ENTRY_P1_OFF(a1) // mips_pt_entry.p1
+    lw t2, MIPS_PT_ENTRY_V_OFF(a1) // mips_pt_entry.v
+
+    mtc0    t0, CP0_ENTRYLO0
+    mtc0    t1, CP0_ENTRYLO1
+    mtc0    t2, CP0_ENTRYHI
+
+    // NB - see TLB_PAGEMASK define, use here?
+    // pagemask (cp0 r5) = 0 -> 4Kb page
+    mtc0	zero, CP0_PAGEMASK
+
+    tlbwi
+
+    jr      ra
+    nop // delay slot
+END(mips_tlb_write_index)
+
+//  void mips_tlb_write_random( struct mips_pt_entry *e );
+LEAF(mips_tlb_write_random)
+    //mtc0    a0, CP0_INDEX
+
+    lw t0, MIPS_PT_ENTRY_P0_OFF(a0) // mips_pt_entry.p0
+    lw t1, MIPS_PT_ENTRY_P1_OFF(a0) // mips_pt_entry.p1
+    lw t2, MIPS_PT_ENTRY_V_OFF(a0) // mips_pt_entry.v
+
+    mtc0    t0, CP0_ENTRYLO0
+    mtc0    t1, CP0_ENTRYLO1
+    mtc0    t2, CP0_ENTRYHI
+
+    // NB - see TLB_PAGEMASK define, use here?
+    // pagemask (cp0 r5) = 0 -> 4Kb page
+    mtc0	zero, CP0_PAGEMASK
+
+    tlbwr
+
+    jr      ra
+    nop // delay slot
+END(mips_tlb_write_random)
 
 
 
