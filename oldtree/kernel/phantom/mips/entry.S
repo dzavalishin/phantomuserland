@@ -23,7 +23,8 @@ LEAF(__lowmem__)
     // Exception vectors
     //.org 0x80000000
     .org 0x000
-    j _enter_exception_tlb_refill
+    //j _enter_exception_tlb_refill
+    j _enter_exception_other
     nop // delay slot
 
     .org 0x180
@@ -31,7 +32,8 @@ LEAF(__lowmem__)
     nop // delay slot
 
     .org 0x200
-    j _enter_exception_interrupt
+    //j _enter_exception_interrupt
+    j _enter_exception_other
     nop // delay slot
 #endif
 /*
@@ -210,6 +212,8 @@ LEAF(arch_get_frame_pointer)
     addiu   v0, fp, 0
 END(arch_get_frame_pointer)
 
+    // BUG XXX TODO wrong - reads one reg!
+#if 1
 
     //int mips_read_cp0( int reg );
 LEAF(mips_read_cp0)
@@ -225,6 +229,7 @@ LEAF(mips_write_cp0)
     nop
 END(mips_write_cp0)
 
+#endif
 
 // int atomic_add(int *val, int incr) 
 LEAF(atomic_add)
@@ -240,38 +245,183 @@ _atomic_add_again:
 END(atomic_add)
 
 
-// read excCode
-
-LEAF(_enter_exception_tlb_refill)
-    eret
-    nop // no delay slot after eret?
-END(_enter_exception_tlb_refill)
+/**
+ *
+ * curr_thread_k0_stack_top points to topmost address of current
+ * thread's kernel stack. We use word at this address - 4 to count
+ * entries to exception handler. So we load real sp with (top-4) & ~7
+ * to make sure we don't touch top count word and have sp aligned for
+ * MIPS rules
+ *
+**/
 
 NESTED(_enter_exception_other,0,sp)
     .set	push
     .set	noat
 
-    addi        sp, sp, -(4*4)
+    // switch to kernel stack, if needed
+
+    la k0, curr_thread_k0_stack_top
+    lw k0, 0(k0) // get var value
+    addiu k0, k0, -4 // step back to access counter
+    lw k1, 0(k0) // get count value
+
+    // not zero? ok, we already have good k0 stack, can proceed 
+    bnez k1, on_kernel_sp
+    nop // delay slot
+
+first_exception:
+    addiu k1, sp, 0 // put user sp to k1
+    //andi k0, k0, 0xFFFFFFF8 // clear lower 3 bits of new sp - align for MIPS
+    sra k0, k0, 3
+    sll k0, k0, 3
+    addiu sp, k0, 0 // set kernel stack
+
+    j good_k1
+    nop // delay slot
+
+on_kernel_sp:
+    addiu k1, sp, 0 // put sp to k1 for consistency
+
+good_k1:
+    // push user state
+
+    addi        sp, sp, -(36*4)
+
+    sw          $0,  0*4(sp)
+    sw          $1,  1*4(sp)
+    sw          $2,  2*4(sp)
+    sw          $3,  3*4(sp)
+
+    sw          $4,  4*4(sp)
+    sw          $5,  5*4(sp)
+    sw          $6,  6*4(sp)
+    sw          $7,  7*4(sp)
+
+    sw          $8,  8*4(sp)
+    sw          $9,  9*4(sp)
+    sw         $10, 10*4(sp)
+    sw         $11, 11*4(sp)
+
+    sw         $12, 12*4(sp)
+    sw         $13, 13*4(sp)
+    sw         $14, 14*4(sp)
+    sw         $15, 15*4(sp)
+
+    sw         $16, 16*4(sp)
+    sw         $17, 17*4(sp)
+    sw         $18, 18*4(sp)
+    sw         $19, 19*4(sp)
+
+    sw         $20, 20*4(sp)
+    sw         $21, 21*4(sp)
+    sw         $22, 22*4(sp)
+    sw         $23, 23*4(sp)
+
+    sw         $24, 24*4(sp)
+    sw         $25, 25*4(sp)
+    sw         $26, 26*4(sp)
+    sw         $27, 27*4(sp)
+
+    sw         $28, 28*4(sp)
+    sw         k1, 29*4(sp) // saved to k1 above
+    sw         $30, 30*4(sp)
+    sw         $31, 31*4(sp)
 
     mfc0	t0, CP0_BADVADDR        // Offending virual address, if any
-    sw          t0, 0(sp)
+    sw          t0, 32*4(sp)
     mfc0	t0, CP0_STATUS          // Check if it is saved by hardware on stack
-    sw          t0, 4(sp)
+    sw          t0, 33*4(sp)
     mfc0	t0, CP0_EPC             // Exception program counter
-    sw          t0, 8(sp)
+    sw          t0, 34*4(sp)
     mfc0	t0, CP0_ERROREPC        // Error program counter
-    sw          t0, 12(sp)
+    sw          t0, 35*4(sp)
 
-    addiu       a0, sp, 0               // move a0 <- sp
-    mfc0	a1, CP0_CAUSE           // Cause - incl interrupt num and exception type
 
+    // inc exception entry count!
+    la k0, curr_thread_k0_stack_top
+    lw k0, 0(k0) // get var value
+    addiu k0, k0, -4 // step back to access counter
+    lw k1, 0(k0) // get count value
+    addiu k1, k1, 1 // inc exception count
+    sw k1, 0(k0) // set count value
+
+    // TODO we can set k0 and k1 to some widely used values
+    // such as cpu number, thread struct, etc
 
     //void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
-
+    addiu       a0, sp, 0               // move a0 <- sp
+    mfc0	a1, CP0_CAUSE           // Cause - incl interrupt num and exception type
     jal hal_MIPS_exception_dispatcher
     nop // delay
 
-    addi        sp, sp, (4*4)
+    // dec exception entry count!
+    la k0, curr_thread_k0_stack_top
+    lw k0, 0(k0) // get var value
+    addiu k0, k0, -4 // step back to access counter
+    lw k1, 0(k0) // get count value
+    addiu k1, k1, -1 // inc exception count
+    sw k1, 0(k0) // set count value
+
+    // Restore all the regs
+
+    //lw          t0, 32*4(sp)
+    //mtc0	t0, CP0_BADVADDR        // Offending virual address, if any
+
+    lw          t0, 33*4(sp)
+    mtc0	t0, CP0_STATUS          // 
+
+    lw          t0, 34*4(sp)
+    mtc0	t0, CP0_EPC             // Exception program counter
+
+    lw          t0, 35*4(sp)
+    mtc0	t0, CP0_ERROREPC        // Error program counter
+
+    lw          $0,  0*4(sp)
+    lw          $1,  1*4(sp)
+    lw          $2,  2*4(sp)
+    lw          $3,  3*4(sp)
+
+    lw          $4,  4*4(sp)
+    lw          $5,  5*4(sp)
+    lw          $6,  6*4(sp)
+    lw          $7,  7*4(sp)
+
+    lw          $8,  8*4(sp)
+    lw          $9,  9*4(sp)
+    lw         $10, 10*4(sp)
+    lw         $11, 11*4(sp)
+
+    lw         $12, 12*4(sp)
+    lw         $13, 13*4(sp)
+    lw         $14, 14*4(sp)
+    lw         $15, 15*4(sp)
+
+    lw         $16, 16*4(sp)
+    lw         $17, 17*4(sp)
+    lw         $18, 18*4(sp)
+    lw         $19, 19*4(sp)
+
+    lw         $20, 20*4(sp)
+    lw         $21, 21*4(sp)
+    lw         $22, 22*4(sp)
+    lw         $23, 23*4(sp)
+
+    lw         $24, 24*4(sp)
+    lw         $25, 25*4(sp)
+    lw         $26, 26*4(sp)
+    lw         $27, 27*4(sp)
+
+    lw         $28, 28*4(sp)
+    //lw         k1, 29*4(sp) // saved to k1 so that we can use sp below
+    lw         $30, 30*4(sp)
+    lw         $31, 31*4(sp)
+
+    lw         $29, 29*4(sp) // pop sp last
+
+    //addi        sp, sp, (36*4)
+    //addi        sp, k1, 0 // just restore old sp
+
 
     eret
     nop // no delay slot after eret?
@@ -279,36 +429,6 @@ NESTED(_enter_exception_other,0,sp)
     .set	pop
 END(_enter_exception_other)
 
-NESTED(_enter_exception_interrupt,0,sp)
-    .set	push
-    .set	noat
-
-    addi        sp, sp, -(4*4)
-
-    mfc0	t0, CP0_BADVADDR        // Offending virual address, if any
-    sw          t0, 0(sp)
-    mfc0	t0, CP0_STATUS          // Check if it is saved by hardware on stack
-    sw          t0, 4(sp)
-    mfc0	t0, CP0_EPC             // Exception program counter
-    sw          t0, 8(sp)
-    mfc0	t0, CP0_ERROREPC        // Error program counter
-    sw          t0, 12(sp)
-
-    addiu       a0, sp, 0               // move a0 <- sp
-    mfc0	a1, CP0_CAUSE           // Cause - interrupt num
-
-    // void hal_MIPS_interrupt_dispatcher(struct trap_state *ts, int cause)
-
-    jal hal_MIPS_interrupt_dispatcher
-    nop // delay
-
-    addi        sp, sp, (4*4)
-
-    eret
-    nop // no delay slot after eret?
-
-    .set	pop
-END(_enter_exception_interrupt)
 
 
 

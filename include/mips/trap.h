@@ -52,15 +52,15 @@
 
 struct trap_state
 {
-    //unsigned int r0; // zero
-    unsigned int r1;
-    unsigned int r2;
-    unsigned int r3;
-    unsigned int r4;
-    unsigned int r5;
-    unsigned int r6;
-    unsigned int r7;
-    unsigned int r8;
+    unsigned int r0;   // zero, but keep to have aligned count
+    unsigned int r1;   // AT - asm temp
+    unsigned int r2;   // v0 - retval
+    unsigned int r3;   // v1 - ret hi
+    unsigned int r4;   // a0 - arg 0
+    unsigned int r5;   // a1 - arg 1
+    unsigned int r6;   // a2 - arg 2
+    unsigned int r7;   // a3 - arg 3
+    unsigned int r8;   // t0 - func temp, saved by caller
     unsigned int r9;
     unsigned int r10;
     unsigned int r11;
@@ -68,7 +68,7 @@ struct trap_state
     unsigned int r13;
     unsigned int r14;
     unsigned int r15;
-    unsigned int r16;
+    unsigned int r16;  // t0 - func var, saved by callee
     unsigned int r17;
     unsigned int r18;
     unsigned int r19;
@@ -76,20 +76,32 @@ struct trap_state
     unsigned int r21;
     unsigned int r22;
     unsigned int r23;
-    unsigned int r24;
-    unsigned int r25;
-    unsigned int r26;
-    unsigned int r27;
-    unsigned int r28;
-    unsigned int r29;
-    unsigned int r30;
-    unsigned int r31;
-    unsigned int r32;
+    unsigned int r24;  // t8
+    unsigned int r25;  // t9
+    unsigned int r26;  // k0, used only on kernel trap entry
+    unsigned int r27;  // k1, used only on kernel trap entry
+    unsigned int r28;  // gp
+    unsigned int r29;  // sp
+    unsigned int r30;  // fp/s8
+    unsigned int r31;  // ra
 
-    unsigned int pc;
-    unsigned int usr_sp;
-    unsigned int usr_fp;
-    unsigned int usr_ra;
+    // Offending virtual address for fault kind of exception
+    unsigned int va;       // CP0_BADVADDR
+
+    // Exception status
+    unsigned int status;   // CP0_STATUS
+
+    // This is not ra, but value stored by exception
+    // in special user pc register (epc)
+    unsigned int pc;       // CP0_EPC
+
+    unsigned int error_pc; // CP0_ERROREPC
+
+    //unsigned int usr_sp;
+    //unsigned int usr_fp;
+    //unsigned int usr_ra;
+
+    // All of the above are saved in asm. Those below - in C
 
     unsigned int trapno;
     unsigned int intno;     // 

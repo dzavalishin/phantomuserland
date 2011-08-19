@@ -79,6 +79,11 @@ void phantom_thread_state_init(phantom_thread_t *t)
     STACK_PUSH(sp,t->start_func); 	// R4
 
     t->cpu.sp = (int)sp;
+
+    // Top of stack word is used as exception entry count - see entry.S
+    int *s_top = t->kstack_top;
+    *s_top = 0;
+
 /*
 #if 0 && FXSAVE
     //char mystate[512];

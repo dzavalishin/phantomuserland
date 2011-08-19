@@ -76,7 +76,8 @@ void dump_ss(struct trap_state *st)
     printf("R13=%08x R14=%08x R15=%08x R16=%08x\n", st->r13, st->r14, st->r15, st->r16);
     // TODO rest 16
 
-    printf("GP(R28)=%08x SP(R29)=%08x FP(R30)=%08x RA(R31)=%08x PC=%08x\n",           st->r28, st->usr_sp, st->usr_fp, st->usr_ra, st->pc );
+    //printf("GP(R28)=%08x SP(R29)=%08x FP(R30)=%08x RA(R31)=%08x PC=%08x\n",           st->r28, st->usr_sp, st->usr_fp, st->usr_ra, st->pc );
+    printf("GP(R28)=%08x  PC=%08x\n",           st->r28, st->pc );
 
     printf("trapno %d: %s, intno %08x\n",
            st->trapno, trap_name(st->trapno),
