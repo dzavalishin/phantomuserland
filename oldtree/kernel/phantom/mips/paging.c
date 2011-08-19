@@ -248,7 +248,7 @@ void tlb_refill_exception(struct trap_state *ts)
 
 
 
-void phantom_map_page(linaddr_t la, pt_entry_t mapping )
+void phantom_map_page(linaddr_t la, pt_entry_t *mapping )
 {
     assert(PAGE_ALIGNED(la));
     assert(paging_inited);
@@ -327,11 +327,11 @@ hal_page_control_etc(
 
 #warning check global bit in all the funcs!
 
-    SHOW_FLOW( 10, "Map VA 0x%X to PA 0x%X, pte.v=0x%X pte.p=0x%X\n",
+    SHOW_FLOW( 10, "Map VA 0x%x to PA 0x%x, pte.v=0x%x pte.p=0x%x\n",
                           page_start_addr, p, pte.v, pte.p );
 
     if(mapped != page_unmap )
-        phantom_map_page( (linaddr_t)page_start_addr, pte );
+        phantom_map_page( (linaddr_t)page_start_addr, &pte );
     else
         phantom_unmap_page( (linaddr_t)page_start_addr );
 

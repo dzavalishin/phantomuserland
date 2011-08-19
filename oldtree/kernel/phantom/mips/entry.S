@@ -17,6 +17,10 @@
 #include <mips/pmap.h>
 #include <kernel/trap.h>
 
+#ifndef BOARD_ISA_IO
+#error BOARD_ISA_IO undefined
+#endif
+
 LEAF(__lowmem__)
     .set	noreorder
     .set	mips32
@@ -76,7 +80,8 @@ clear_bss_loop:
     nop // delay slot
 
     // print hello to com port - remove!
-    lui	v0,0xB400
+    //lui	v0,0xB400
+    lui	v0, (BOARD_ISA_IO>>16)
     ori	v0,v0,0x3f8
 #if 0
  	li	v1,104
@@ -131,8 +136,8 @@ END(__lowmem__)
 
 //void debug_console_do_putc(int c);
 LEAF(debug_console_do_putc)
- 	lui	t0,0xB400
- 	ori	t0,t0,0x3f8 // t0 = data reg
+    lui	t0, (BOARD_ISA_IO>>16)
+    ori	t0,t0,0x3f8 // t0 = data reg
     addiu t1, t0, 5 // t1 = status reg
 
 wait_tx:

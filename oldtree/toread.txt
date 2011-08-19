@@ -1,3 +1,11 @@
+
+AHCI, drivers
+http://www.koders.com/c/fid38869AA8E32832BBA219DF1716C6D7266FE22806.aspx?s=mpc8560
+http://www.koders.com/c/fid381C26DE905A16202DB29C6F646214753DADC789.aspx
+http://www.koders.com/c/fid31F8BF4537FD6A62DBBA6897855D3AC258C7DF38.aspx?s=mpc8560
+http://www.koders.com/c/fidB5DD799FD1DADFB6AE35C8814DA39E9FF741862B.aspx
+
+
 http://www.libusb.org/
 
 http://en.wikipedia.org/wiki/Vidix
