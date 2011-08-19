@@ -170,21 +170,19 @@ void board_sched_cause_soft_irq(void)
 // Drivers
 // -----------------------------------------------------------------------
 
-#define ISA_IO 0xBfd00000
 
-// TODO in fact, 0xB4000000 must be added in bus output functions
 
 // NB! No network drivers on stage 0!
 static isa_probe_t board_drivers[] =
 {
 #if 0
-    { "COM1",		driver_isa_com_probe,   2, ISA_IO|0x3F8u, 4 }, // Interrupts are wrong
-    { "COM2",		driver_isa_com_probe,   2, ISA_IO|0x2F8u, 3 },
+    { "COM1",		driver_isa_com_probe,   2, BOARD_ISA_IO|0x3F8u, 4 }, // Interrupts are wrong
+    { "COM2",		driver_isa_com_probe,   2, BOARD_ISA_IO|0x2F8u, 3 },
 
 #if HAVE_NET
-    { "NE2000", 	driver_isa_ne2000_probe,1, ISA_IO|0x280, 9 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, ISA_IO|0x300, 9 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, ISA_IO|0x320, 9 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x280, 9 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x300, 9 },
+    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x320, 9 },
 #endif
 #endif
 

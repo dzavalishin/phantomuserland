@@ -14,7 +14,11 @@ INCDIRS += $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/inclu
 # hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare
 
-COMMON_FLAGS= $(WARN) $(ARCH_FLAGS) -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc -std=gnu89 -DKERNEL -DARCH_$(ARCH) -DBOARD=$(BOARD) -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h
+COMMON_FLAGS= $(WARN) $(ARCH_FLAGS) -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc -std=gnu89 -DKERNEL -DARCH_$(ARCH) -DBOARD=$(BOARD) \
+  -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/arch-config.h \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/board-$(BOARD)-config.h 
+
 PHANTOM_CFLAGS  += $(COMMON_FLAGS) -fno-stack-protector
 PHANTOM_ASFLAGS += $(COMMON_FLAGS) -DASSEMBLER -D__ASSEMBLY__ -DKERNEL
 

@@ -8,4 +8,4 @@
  *
 **/
 
-#include "mips-mips_qemu.c"
+#include "mips-mipssim.c"
