@@ -112,6 +112,10 @@ print_banner:
     nop // delay slot
 eprint:	
 
+    addiu k1, zero, 0 // Init for CPU 0 - means init L2 cache too
+    jal sys_init_cache
+    nop // delay slot
+
     /* jump to main */
     jal	phantom_multiboot_main
     nop
