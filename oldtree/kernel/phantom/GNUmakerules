@@ -44,6 +44,10 @@ ifeq ($(ARCH),arm)
 ARCH_OBJS=angel.o
 endif
 
+ifeq ($(ARCH),mips)
+ARCH_OBJS=cache_cpu.o
+endif
+
 
 i386/libi386.a:
 	cd i386; make; cd ..
