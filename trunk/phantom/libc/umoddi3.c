@@ -37,15 +37,22 @@ __FBSDID("$FreeBSD: src/sys/libkern/umoddi3.c,v 1.8.26.1 2008/11/25 02:59:29 ken
 //#include <libkern/quad.h>
 #include "quad.h"
 
+#ifdef ARCH_mips
+#  warning this stuff dies on MIPS or on big endian code
+// __qdivrem gets called with wrong args
+#endif
+
 /*
  * Return remainder after dividing two unsigned quads.
  */
 u_quad_t
-__umoddi3(a, b)
-	u_quad_t a, b;
+//__umoddi3(a, b)
+//	u_quad_t a, b;
+__umoddi3(u_quad_t a, u_quad_t b)
 {
 	u_quad_t r;
 
 	(void)__qdivrem(a, b, &r);
-	return (r);
+
+	return r;
 }
