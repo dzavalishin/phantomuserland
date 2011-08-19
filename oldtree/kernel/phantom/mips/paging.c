@@ -253,7 +253,7 @@ void phantom_map_page(linaddr_t la, pt_entry_t *mapping )
     assert(PAGE_ALIGNED(la));
     assert(paging_inited);
 
-    *get_pte(la) = mapping;
+    *get_pte(la) = *mapping;
 
     invlpg(la);
 }

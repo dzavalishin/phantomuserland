@@ -59,9 +59,9 @@ typedef u_long digit;
  * We may assume len >= 0.  NOTE THAT THIS WRITES len+1 DIGITS.
  */
 static void
-__shl(register digit *p, register int len, register int sh)
+shl(digit *p, int len, int sh)
 {
-	register int i;
+	int i;
 
 	for (i = 0; i < len; i++)
 		p[i] = LHALF(p[i] << sh) | (p[i + 1] >> (HALF_BITS - sh));
@@ -82,7 +82,7 @@ __qdivrem(uq, vq, arq)
 {
 	union uu tmp;
 	digit *u, *v, *q;
-	register digit v1, v2;
+	digit v1, v2;
 	u_long qhat, rhat, t;
 	int m, n, d, j, i;
 	digit uspace[5], vspace[5], qspace[5];
@@ -182,8 +182,8 @@ __qdivrem(uq, vq, arq)
 	for (t = v[1]; t < B / 2; t <<= 1)
 		d++;
 	if (d > 0) {
-		__shl(&u[0], m + n, d);		/* u <<= d */
-		__shl(&v[1], n - 1, d);		/* v <<= d */
+		shl(&u[0], m + n, d);		/* u <<= d */
+		shl(&v[1], n - 1, d);		/* v <<= d */
 	}
 	/*
 	 * D2: j = 0.
@@ -192,7 +192,7 @@ __qdivrem(uq, vq, arq)
 	v1 = v[1];	/* for D3 -- note that v[1..n] are constant */
 	v2 = v[2];	/* for D3 */
 	do {
-		register digit uj0, uj1, uj2;
+		digit uj0, uj1, uj2;
 
 		/*
 		 * D3: Calculate qhat (\^q, in TeX notation).
@@ -210,9 +210,9 @@ __qdivrem(uq, vq, arq)
 			rhat = uj1;
 			goto qhat_too_big;
 		} else {
-			u_long nn = COMBINE(uj0, uj1);
-			qhat = nn / v1;
-			rhat = nn % v1;
+			u_long n = COMBINE(uj0, uj1);
+			qhat = n / v1;
+			rhat = n % v1;
 		}
 		while (v2 * qhat > COMBINE(rhat, uj2)) {
 	qhat_too_big:
