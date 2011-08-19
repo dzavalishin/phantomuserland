@@ -14,7 +14,7 @@
 // default qemu mips machie can't accept more
 #if 1
 #undef PHANTOM_START_HEAP_SIZE
-#define PHANTOM_START_HEAP_SIZE (14*1024*1024)
+#define PHANTOM_START_HEAP_SIZE (10*1024*1024)
 #warning Heap sz redefine
 #endif
 
