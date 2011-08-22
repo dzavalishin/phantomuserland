@@ -89,16 +89,21 @@ errno_t load_tlb_entry( addr_t va, int write );
 // Or with this to get higher part of TLB mapping addr
 #define TLB_V_ADDR_HI 0x1000
 
-#define TLB_P_ADDR_SHIFT 12
 #define TLB_P_ADDR_MASK 0xFFFFF000
+#define TLB_P_ADDR_SHIFT 6 // bits 31:12, start from bit 6 in reg
 
 #define TLB_P_CACHE_NONE     (0x2<<2)
 #define TLB_P_CACHE_WTHROUGH (0x3<<2)
 
-#define TLB_P_DIRTY 0x2
-#define TLB_P_VALID 0x1
-#warning check global bit def
-#define TLB_P_GLOBAL 0x80000000
+#define TLB_P_DIRTY 0x4
+#define TLB_P_VALID 0x2
+#define TLB_P_GLOBAL 0x1
+
+#define TLB_P_CACHE_SHIFT 3
+#define TLB_P_CACHE_MASK 0x7
+
+#define TLB_P_CACHE_UNCACHED 2
+#define TLB_P_CACHE_DEFAULT 3
 
 #define PTE_V_ADDR_MASK 0xFFFFF000
 

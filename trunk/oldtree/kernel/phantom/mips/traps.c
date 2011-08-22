@@ -202,6 +202,7 @@ void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
 
 }
 
+/*
 // Called from asm wrap
 void hal_MIPS_interrupt_dispatcher(struct trap_state *ts, int cause)
 {
@@ -210,7 +211,7 @@ void hal_MIPS_interrupt_dispatcher(struct trap_state *ts, int cause)
     //panic("interrupt");
     hal_MIPS_exception_dispatcher(ts, cause); // the same
 }
-
+*/
 
 
 

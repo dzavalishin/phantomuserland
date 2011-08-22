@@ -186,7 +186,7 @@ errno_t load_tlb_entry( addr_t va, int write )
     pt_entry_t *e0 = get_pte( va & TLB_V_ADDR_MASK ); // low entry
     pt_entry_t *e1 = get_pte( (va & TLB_V_ADDR_MASK) | TLB_V_ADDR_HI ); // hi entry
 
-    e.v = e0->v;
+    e.v = e0->v & TLB_V_ADDR_MASK; // One bit less than pte
     e.p0 = e0->p;
     e.p1 = e1->p;
 
@@ -314,18 +314,24 @@ hal_page_control_etc(
 
     if(mapped == page_unmap) access = page_noaccess;
 
+
     pt_entry_t	pte;
 
-    pte.v = ((linaddr_t)page_start_addr) & PTE_V_ADDR_MASK;
-    pte.p = p & TLB_P_ADDR_MASK;
+    pte.v = (((linaddr_t)page_start_addr) & PTE_V_ADDR_MASK);
+
+    pte.p = (p & TLB_P_ADDR_MASK) >> TLB_P_ADDR_SHIFT;
+
+    if(mapped == page_map_io)
+        pte.p |= TLB_P_CACHE_UNCACHED << TLB_P_CACHE_SHIFT;
+    else
+        pte.p |= TLB_P_CACHE_DEFAULT << TLB_P_CACHE_SHIFT;
+
 
     if(access == page_rw)
         pte.p |= TLB_P_DIRTY;
+
     pte.p |= TLB_P_VALID;
-
     pte.p |= TLB_P_GLOBAL;
-
-#warning check global bit in all the funcs!
 
     SHOW_FLOW( 10, "Map VA 0x%x to PA 0x%x, pte.v=0x%x pte.p=0x%x\n",
                           page_start_addr, p, pte.v, pte.p );

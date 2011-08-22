@@ -80,27 +80,16 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
 
     bootParameters = *(struct multiboot_info*)phystokv(multibootboot_info_pa);
 #endif
+    arch_init_early();
     board_init_early();
-
-#if 0
-    // TODO Enable superpage support if we have it.
-    if (cpu.feature_flags & CPUF_4MB_PAGES)
-    {
-        set_cr4(get_cr4() | CR4_PSE);
-    }
-#endif
 
     board_init_cpu_management(); // idt/gdt/ldt
 
     board_init_interrupts();
 
-    //phantom_init_descriptors();
-    //phantom_fill_idt();
-    //phantom_load_idt();
-
     arch_debug_console_init();
 
-    // setup the floating point unit
+    // setup the floating point unit on boot CPU
     arch_float_init();
 
     // malloc will start allocating from fixed pool.

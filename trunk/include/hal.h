@@ -39,14 +39,19 @@
 
 #define __MEM_GB 0x40000000u
 #define __MEM_PAGE 4096
+
+#ifndef PHANTOM_AMAP_START_VADDR_POOL
 // Start of pool of virtual addresses that normally not backed with memory,
 // but used to map in some physical mem page for kernel access or CPU-based IO
-#define PHANTOM_AMAP_START_VADDR_POOL (__MEM_GB*1 + 0)
-#define PHANTOM_AMAP_SIZE_VADDR_POOL (__MEM_PAGE*4096*4)
+#  define PHANTOM_AMAP_START_VADDR_POOL (__MEM_GB*1 + 0)
+#  define PHANTOM_AMAP_SIZE_VADDR_POOL (__MEM_PAGE*4096*4)
+#endif // PHANTOM_AMAP_START_VADDR_POOL
 
+// Some architectures define it in arch_config.h
+#ifndef PHANTOM_AMAP_START_VM_POOL
 // Virtual machine lives here
-#define PHANTOM_AMAP_START_VM_POOL (__MEM_GB*2)
-
+#  define PHANTOM_AMAP_START_VM_POOL (__MEM_GB*2)
+#endif // PHANTOM_AMAP_START_VM_POOL
 
 // page_map_io is supposed to create mapping which has cache disabled
 typedef enum page_mapped_t { page_unmap = 0, page_map = 1, page_map_io = 2 } page_mapped_t;
@@ -228,36 +233,8 @@ errno_t					hal_cond_destroy( hal_cond_t *c );
 
 
 
-#if 1
 #include <kernel/sem.h>
-#else
 
-struct hal_sem_impllll;
-
-struct hal_sem
-{
-    struct phantom_sem_impl     *impl;
-};
-
-typedef struct hal_sem hal_sem_t;
-
-
-int 					hal_sem_init( hal_sem_t *s, const char *name );
-
-void 					hal_sem_release( hal_sem_t *s );
-int 					hal_sem_acquire( hal_sem_t *s );
-
-errno_t 				sem_get_count(hal_sem_t *s, int *count);
-
-void 					hal_sem_destroy( hal_sem_t *s );
-
-#define SEM_FLAG_NO_RESCHED 1
-#define SEM_FLAG_TIMEOUT 2
-#define SEM_FLAG_INTERRUPTABLE 4
-
-int 					hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec );
-
-#endif
 
 
 // ------------------------------------------------------------------------------------------

@@ -112,7 +112,6 @@ void phantom_unix_proc_init(void);
 
 void init_buses(void);
 
-void arch_float_init(void);
 
 void load_classes_module(void); // vm bulk classes init
 
@@ -125,6 +124,12 @@ void usb_setup(void);
 void drv_video_init_windows(void);
 
 void init_wins(u_int32_t ip_addr);
+
+
+void arch_init_early(void);
+//void board_init_early(void);
+void arch_float_init(void);
+
 
 #endif // INIT_H
 
