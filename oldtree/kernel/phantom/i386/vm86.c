@@ -23,8 +23,6 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
 
-//#include <i386/vesa.h>
-
 #include <hal.h>
 #include <threads.h>
 

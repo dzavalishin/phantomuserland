@@ -1,5 +1,5 @@
 #ARCH_FLAGS      = -EL -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
-ARCH_FLAGS      = -EB -mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
+ARCH_FLAGS      = -EB -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt 
 
 #TARGET_OBJECT_FORMAT=elf32-littlemips
 TARGET_OBJECT_FORMAT=elf32-bigmips

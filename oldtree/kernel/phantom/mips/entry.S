@@ -23,7 +23,7 @@
 
 LEAF(__lowmem__)
     .set	noreorder
-    .set	mips32
+//    .set	mips32r2
 
     // Exception vectors
     //.org 0x80000000
@@ -161,49 +161,37 @@ __startup_stack_top__:
 
 
 LEAF(hal_cli)
-#if 1
-#warning non-atomic dis intr
-    mfc0	t0, CP0_STATUS
-    li      t1, ~ST_IE
-    and    t0, t0, t1
-    mtc0	t0, CP0_STATUS
-#else
-    di
-#endif
+    di      v0
+
     jr      ra
     nop
 END(hal_cli)
 
 LEAF(hal_save_cli)
-#warning non-atomic dis intr
-    mfc0	v0, CP0_STATUS
-    li      t1, ~ST_IE
-    and     t0, v0, t1
-    mtc0	t0, CP0_STATUS
-    andi    v0, v0, ST_IE
+    di      v0
     jr      ra
-    nop
+    andi    v0, v0, ST_IE // delay slot
 END(hal_save_cli)
 
 LEAF(hal_is_sti)
-#warning non-atomic dis intr
-    mfc0	v0, CP0_STATUS
-    andi    v0, v0, ST_IE
+    mfc0    v0, CP0_STATUS
     jr      ra
-    nop
+    andi    v0, v0, ST_IE // delay slot
 END(hal_is_sti)
 
 
 LEAF(hal_sti)
-    mfc0	t0, CP0_STATUS
-    ori    t0, t0, ST_IE
-    mtc0	t0, CP0_STATUS
+    //mfc0	t0, CP0_STATUS
+    //ori    t0, t0, ST_IE
+    //mtc0	t0, CP0_STATUS
+    ei      v0
     jr      ra
-    nop
+    andi    v0, v0, ST_IE // delay slot
 END(hal_sti)
 
 LEAF(hal_wait_for_interrupt)
-#warning no hal_wait_for_interrupt
+    wait
+    nop // need?
     jr      ra
     nop
 END(hal_wait_for_interrupt)
@@ -343,7 +331,7 @@ good_k1:
 
     mfc0	t0, CP0_BADVADDR        // Offending virual address, if any
     sw          t0, 32*4(sp)
-    mfc0	t0, CP0_STATUS          // Check if it is saved by hardware on stack
+    mfc0	t0, CP0_STATUS          // CPU status word
     sw          t0, 33*4(sp)
     mfc0	t0, CP0_EPC             // Exception program counter
     sw          t0, 34*4(sp)
@@ -362,6 +350,13 @@ good_k1:
     lw k1, 0(k0) // get count value
     addiu k1, k1, 1 // inc exception count
     sw k1, 0(k0) // set count value
+
+    // Go to kernel mode now. We'll return to exception mode on status reset below
+    mfc0	t0, CP0_STATUS          // get CPU status word
+    li          t1, ST_IE|ST_EXL|ST_UM  // Flags to reset in status - intr enable, in exception, user mode. TODO supervisor mode
+    not         t1                      // Invert
+    and         t0, t0, t1              // Reset 'em
+    mtc0	t0, CP0_STATUS          // set CPU status word
 
     // TODO we can set k0 and k1 to some widely used values
     // such as cpu number, thread struct, etc
@@ -386,7 +381,7 @@ good_k1:
     //mtc0	t0, CP0_BADVADDR        // Offending virual address, if any
 
     lw          t0, 33*4(sp)
-    mtc0	t0, CP0_STATUS          // 
+    mtc0	t0, CP0_STATUS          // Side effect: Return to exception mode
 
     lw          t0, 34*4(sp)
     mtc0	t0, CP0_EPC             // Exception program counter
