@@ -46,11 +46,12 @@ void board_init_cpu_management(void)
 }
 
 
-
+/* in arch
 void board_init_kernel_timer(void)
 {
     // mc146818rtc irq 8
 }
+*/
 
 void board_start_smp(void)
 {
