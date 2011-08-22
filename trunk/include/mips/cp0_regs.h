@@ -64,6 +64,9 @@ void mips_write_cp0_status( int data );
 
 int mips_read_cp0_cpuid( void );
 
+// Timer
+void mips_write_cp0_count( unsigned int data );
+void mips_write_cp0_compare( unsigned int data );
 
 
 #endif // ASSEMBLER

@@ -67,13 +67,14 @@ void phantom_paging_init(void)
 
     phantom_paging_start();
 
-    SHOW_FLOW0( 2, "paging started" );
+    //SHOW_FLOW0( 2, "paging started" );
 }
 
 
 static void phantom_paging_start(void)
 {
-    SHOW_ERROR0( 2, "NOT impl paging start" );
+    // MIPS has no specific unpaged mode, paging is active all the time
+    // SHOW_ERROR0( 2, "NOT impl paging start" );
 }
 
 

@@ -47,11 +47,11 @@ void board_init_cpu_management(void)
 }
 
 
-
+/* in arch
 void board_init_kernel_timer(void)
 {
     //icp_timer0_init(100);
-}
+} */
 
 void board_start_smp(void)
 {

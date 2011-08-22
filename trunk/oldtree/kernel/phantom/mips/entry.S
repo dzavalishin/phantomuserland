@@ -227,6 +227,17 @@ LEAF(mips_read_cp0_cpuid)
 END(mips_read_cp0_cpuid)
 
 
+    //void mips_write_cp0_compare( unsigned int data );
+LEAF(mips_write_cp0_compare)
+    jr      ra
+    mtc0    a0, CP0_COMPARE // delay slot
+END(mips_write_cp0_compare)
+
+    //void mips_write_cp0_count( unsigned int data );
+LEAF(mips_write_cp0_count)
+    jr      ra
+    mtc0    a0, CP0_COUNT // delay slot
+END(mips_write_cp0_count)
 
 
 

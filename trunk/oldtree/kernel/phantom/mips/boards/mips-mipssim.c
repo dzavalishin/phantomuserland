@@ -48,11 +48,11 @@ void board_init_cpu_management(void)
 }
 
 
-
+/* in arch
 void board_init_kernel_timer(void)
 {
     // mc146818rtc irq 8??
-}
+} */
 
 void board_start_smp(void)
 {
@@ -78,7 +78,8 @@ static char * symtab_getname( void *addr )
 
 void board_interrupt_enable(int irq)
 {
-    assert_interrupts_disabled();
+    //assert_interrupts_disabled();
+    int ie = hal_save_cli();
 
     if(irq < MIPS_ONCPU_INTERRUPTS)
     {
@@ -86,15 +87,19 @@ void board_interrupt_enable(int irq)
         unsigned mask = mips_read_cp0_status();
         mask |= 1 << (irq+8);
         mips_write_cp0_status( mask );
+        if(ie) hal_sti();
         return;
     }
 
 #warning todo
+
+    if(ie) hal_sti();
 }
 
 void board_interrupt_disable(int irq)
 {
-    assert_interrupts_disabled();
+    //assert_interrupts_disabled();
+    int ie = hal_save_cli();
 
     if(irq < MIPS_ONCPU_INTERRUPTS)
     {
@@ -102,10 +107,12 @@ void board_interrupt_disable(int irq)
         unsigned mask = mips_read_cp0_status();
         mask &= ~(1 << (irq+8));
         mips_write_cp0_status( mask );
+        if(ie) hal_sti();
         return;
     }
 
 #warning todo
+    if(ie) hal_sti();
 }
 
 void board_init_interrupts(void)
