@@ -93,17 +93,17 @@ static void addall( long *out, int *in )
 
 const char *stat_counter_name[MAX_STAT_COUNTERS] =
 {
-    "Interrupts          ",
-    "Block IOs           ",
-    "Pageins             ",
-    "Pageouts            ",
-    "Snapshots           ",
-    "SoftIRQ             ",
+    "Interrupts",
+    "Block IOs",
+    "Pageins",
+    "Pageouts",
+    "Snapshots",
+    "SoftIRQ",
 
-    "TCP recv            ",
-    "TCP send            ",
-    "UDP recv            ",
-    "UDP send            ",
+    "TCP recv",
+    "TCP send",
+    "UDP recv",
+    "UDP send",
 
     "PhysMem Alloc Pages",
     "PhysMem Free Pages",
@@ -120,6 +120,9 @@ const char *stat_counter_name[MAX_STAT_COUNTERS] =
 
     "Wire page requests",
     "Wire page pageins",
+
+    "Block IO Q size",
+    "Block sync IO",
 
 };
 
@@ -144,4 +147,22 @@ void stat_dump_all( int av, char **ac )
               );
     }
 }
+
+errno_t get_stats_record( int id, struct kernel_stats *out )
+{
+    if( id >= MAX_STAT_COUNTERS )
+        return EINVAL;
+
+    if( stat_counter_name[id] == 0 )
+        return EINVAL;
+
+    strlcpy( out->name, stat_counter_name[id], KERNEL_STATS_MAX_NAME );
+
+    out->current_per_second	= stat_per_sec_counters[id];
+    out->average_per_second	= stat_total_counters[id]/stat_total_seconds;
+    out->total              = stat_total_counters[id];
+ 
+    return 0;
+}
+
 
