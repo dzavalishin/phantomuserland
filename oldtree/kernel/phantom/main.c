@@ -253,6 +253,9 @@ int main(int argc, char **argv, char **envp)
     hal_set_softirq_handler( SOFT_IRQ_THREADS, (void *)phantom_scheduler_soft_interrupt, 0 );
     }
 
+    //SHOW_FLOW0( 0, "Will sleep" );
+    //hal_sleep_msec( 120000 );
+
     net_timer_init();
 
     board_start_smp();
@@ -295,6 +298,9 @@ int main(int argc, char **argv, char **envp)
 #endif
     //pressEnter("will init graphics");
     phantom_start_video_driver();
+
+    //SHOW_FLOW0( 0, "Will sleep" );
+    //hal_sleep_msec( 120000 );
 
     init_main_event_q();
 
@@ -341,6 +347,8 @@ int main(int argc, char **argv, char **envp)
     }
 #else
     {
+        (void) argv;
+        (void) argc;
         SHOW_FLOW0( 0, "Will run all tests" );
         run_test( "all", "" );
         SHOW_FLOW0( 0, "Test done, reboot");

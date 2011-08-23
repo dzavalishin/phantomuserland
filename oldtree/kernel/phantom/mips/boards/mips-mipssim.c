@@ -34,8 +34,8 @@ char board_name[] = "mipssim";
 //static char * symtab_getname( void *addr ) { (void) addr; return "?"; }
 
 
-static int icp_irq_dispatch(struct trap_state *ts);
-static void sched_soft_int( void *a );
+//static int icp_irq_dispatch(struct trap_state *ts);
+//static void sched_soft_int( void *a );
 
 void board_init_early(void)
 {
@@ -88,11 +88,12 @@ void board_interrupt_enable(int irq)
         unsigned mask = mips_read_cp0_status();
         mask |= 1 << (irq+8);
         mips_write_cp0_status( mask );
-        if(ie) hal_sti();
-        return;
     }
-
+    else
+    {
 #warning todo
+        SHOW_ERROR( 0, "unimpl irq %d", irq );
+    }
 
     if(ie) hal_sti();
 }
@@ -108,11 +109,12 @@ void board_interrupt_disable(int irq)
         unsigned mask = mips_read_cp0_status();
         mask &= ~(1 << (irq+8));
         mips_write_cp0_status( mask );
-        if(ie) hal_sti();
-        return;
+    }
+    else
+    {
+        SHOW_ERROR( 0, "unimpl irq %d", irq );
     }
 
-#warning todo
     if(ie) hal_sti();
 }
 
@@ -125,7 +127,13 @@ void board_init_interrupts(void)
 
 void board_interrupts_disable_all(void)
 {
-#warning todo
+    int ie = hal_save_cli();
+
+    unsigned mask = mips_read_cp0_status();
+    mask &= ~(0xFF << 8);
+    mips_write_cp0_status( mask );
+
+    if(ie) hal_sti();
 }
 
 // TODO this seems to be pretty arch indep?
@@ -133,8 +141,7 @@ static void process_irq(struct trap_state *ts, int irq)
 {
     (void) ts;
     (void) irq;
-#warning todo
-/*
+
     ts->intno = irq;
 
     board_interrupt_disable(irq);
@@ -154,15 +161,32 @@ static void process_irq(struct trap_state *ts, int irq)
     irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
     hal_softirq_dispatcher(ts);
     ENABLE_SOFT_IRQ();
-*/
+
 }
 
 
-static int icp_irq_dispatch(struct trap_state *ts)
+int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending)
 {
-    (void) ts;
-#warning todo
-    //process_irq(ts, nirq);
+    unsigned mask = mips_read_cp0_status();
+    mask >>= 8;
+    mask &= 0xFF;
+
+    pending &= mask;
+
+    u_int32_t   irqs;
+
+    while( (irqs = pending) != 0 )
+    {
+        int nirq = 0;
+        while( irqs )
+        {
+            if( irqs & 0x1 )
+                process_irq(ts, nirq);
+
+            irqs >>= 1;
+            nirq++;
+        }
+    }
 
     return 0; // We're ok
 }
@@ -170,7 +194,9 @@ static int icp_irq_dispatch(struct trap_state *ts)
 
 void board_sched_cause_soft_irq(void)
 {
-    phantom_scheduler_soft_interrupt();
+    //phantom_scheduler_soft_interrupt();
+
+#warning set soft int bit 0
 }
 
 
@@ -223,6 +249,7 @@ void board_make_driver_map(void)
 
     // don't need - this window is directly accessible for kernel
     //hal_pages_control( 0x14000000u, (void *)0xB4000000u, 0xE0000, page_map_io, page_rw );
+    phantom_register_drivers(board_drivers);
 }
 
 
