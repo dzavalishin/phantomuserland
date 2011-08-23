@@ -24,6 +24,8 @@
 #include <thread_private.h>
 //#include <threads.h>
 
+#include <kernel/stats.h>
+
 
 //static void dump_q(struct disk_q *q);
 
@@ -81,6 +83,8 @@ pager_io_request_done( pager_io_request *rq )
 
     int isWrite = rq->flag_pageout;
 
+    STAT_INC_CNT_N( STAT_CNT_DISK_Q_SIZE, -1 );
+
 #if PAGING_PARTITION
     rq->flag_pageout = 0;
     rq->flag_pagein  = 0;
@@ -91,6 +95,7 @@ pager_io_request_done( pager_io_request *rq )
 
     if( phandle >= 0 )
         dpart_release_async( phandle );
+
 
     // Prelim check
     if(sleep)

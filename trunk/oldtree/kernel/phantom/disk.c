@@ -23,6 +23,7 @@
 #include <string.h>
 #include <kernel/vm.h>
 #include <kernel/page.h>
+#include <kernel/stats.h>
 
 // really need private
 #include <thread_private.h>
@@ -114,6 +115,8 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     if(isWrite) rq.flag_pageout = 1;
     else rq.flag_pagein = 1;
 
+    STAT_INC_CNT(STAT_CNT_BLOCK_SYNC_IO);
+    STAT_INC_CNT( STAT_CNT_DISK_Q_SIZE ); // Will decrement on io done
 
     void *va;
     hal_pv_alloc( &rq.phys_page, &va, nBlocks * p->block_size );
@@ -186,6 +189,10 @@ void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq )
     assert( rq->flag_ioerror == 0 );
     assert( rq->flag_pagein != rq->flag_pageout );
 
+    STAT_INC_CNT(STAT_CNT_BLOCK_IO);
+
+    STAT_INC_CNT( STAT_CNT_DISK_Q_SIZE ); // Will decrement on io done
+
     p->asyncIo( p, rq );
 }
 
@@ -198,7 +205,12 @@ errno_t disk_dequeue( struct phantom_disk_partition *p, pager_io_request *rq )
 
     if( 0 == p->dequeue )
         return ENODEV;
-    return p->dequeue( p, rq );
+    errno_t rc =  p->dequeue( p, rq );
+
+    if( 0 == rc )
+        STAT_INC_CNT_N( STAT_CNT_DISK_Q_SIZE, -1 );
+
+    return rc;
 }
 
 

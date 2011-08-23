@@ -83,7 +83,7 @@ static long msecDivider = 0;
 static long secDivider = 0;
 
 
-//! Called from timer interrupt
+//! Called from timer interrupt, tick_rate is in uSec
 void hal_time_tick(int tick_rate)
 {
     // We correct time by updating real_time_delta slowly

@@ -202,6 +202,8 @@ void pager_enqueue_for_pagein ( pager_io_request *rq )
     rq->flag_pagein = 1;
     rq->next_page = 0;
 
+    STAT_INC_CNT( STAT_CNT_PAGEIN );
+
     disk_enqueue( pp, rq );
 
 }
@@ -221,6 +223,8 @@ void pager_enqueue_for_pageout( pager_io_request *rq )
 
     rq->flag_pageout = 1;
     rq->next_page = 0;
+
+    STAT_INC_CNT( STAT_CNT_PAGEOUT );
 
     disk_enqueue( pp, rq );
 }
