@@ -102,10 +102,6 @@ struct trap_state
     unsigned int hi;
     unsigned int lo;
 
-    //unsigned int usr_sp;
-    //unsigned int usr_fp;
-    //unsigned int usr_ra;
-
     // All of the above are saved in asm. Those below - in C
 
     unsigned int trapno;
