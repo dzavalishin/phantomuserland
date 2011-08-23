@@ -1,0 +1,4 @@
+http://refcards.com/docs/waetzigj/mips/mipsref.pdf
+
+MIPS32 4000
+http://www.usrmodem.ru/files/adsl/mips.pdf
