@@ -1,3 +1,3 @@
 #include <kernel/init.h>
 
-extern char arch_name[] = "mips";
+char arch_name[] = "mips";
