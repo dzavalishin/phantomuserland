@@ -4,11 +4,11 @@
 void
 phantom_scheduler_request_soft_irq(void)
 {
-#warning implement
-/*
     hal_request_softirq(SOFT_IRQ_THREADS);
+    board_sched_cause_soft_irq();
+/*
     //__asm __volatile("swi 0xFFF"); // TODO who catches that 0xFFF?
-    //board_sched_cause_soft_irq();
+    //
 
     // We call phantom_scheduler_soft_interrupt directly, and usually it is called in softirq,
     // so exepects softirqs to be enabled. Fulfill.
@@ -27,7 +27,7 @@ phantom_scheduler_schedule_soft_irq(void)
 }
 
 #if HAVE_SMP
-#error no SMP support for arm target
+#error no SMP support for mips target
 #endif
 
 #ifndef HAVE_SMP

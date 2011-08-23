@@ -59,10 +59,14 @@
 
 #ifndef ASSEMBLER
 
-int mips_read_cp0_status( void );
-void mips_write_cp0_status( int data );
+unsigned int mips_read_cp0_status( void );
+void mips_write_cp0_status( unsigned int data );
 
-int mips_read_cp0_cpuid( void );
+unsigned int mips_read_cp0_cause();
+void mips_write_cp0_cause( unsigned int data );
+
+
+unsigned int mips_read_cp0_cpuid( void );
 
 // Timer
 void mips_write_cp0_count( unsigned int data );
