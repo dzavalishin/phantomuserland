@@ -16,13 +16,31 @@ extern char arch_name[];
 extern char board_name[];
 
 
-/*
-static void __register_init(void) __attribute__ ((constructor));
-static void __register_init(void) 
+struct init_record
 {
-    phantom_register_init_func(  );
-}
+    struct init_record *next;
 
+    void (*init_1)(void);
+    int         flags_1;
+
+    void (*init_2)(void);
+    int         flags_2;
+
+    void (*init_3)(void);
+    int         flags_3;
+};
+
+void register_init_record( struct init_record *ir );
+
+#define INIT_ME(__inits) \
+    static struct init_record __init_record = { 0, __inits }; \
+    static void __register_init(void) __attribute__ ((constructor)); \
+    static void __register_init(void) \
+    { \
+    register_init_record( &__init_record ); \
+    }
+
+/*
 #define INIT_NEED_NET           (1<< 0)
 #define INIT_NEED_DISK          (1<< 1)
 #define INIT_NEED_UI            (1<< 2)
@@ -30,10 +48,15 @@ static void __register_init(void)
 #define INIT_NEED_PORTS         (1<< 4)
 #define INIT_NEED_UNIX          (1<< 5)
 #define INIT_NEED_OBJECTS       (1<< 6)
-
-
-
 */
+
+// After prepare all public interfaces must be callable
+#define INIT_LEVEL_PREPARE	1
+#define INIT_LEVEL_INIT         2
+#define INIT_LEVEL_LATE         3
+
+void run_init_functions( int level );
+
 
 int phantom_find_drivers( int stage );
 
