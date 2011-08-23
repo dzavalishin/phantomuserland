@@ -220,12 +220,15 @@ errno_t load_tlb_entry( addr_t va, int write )
 void tlb_refill_exception(struct trap_state *ts)
 {
     int write = ts->trapno == T_TLB_STORE;
-    addr_t va = ts->va;
+    addr_t va = ts->va & ~(PAGE_SIZE-1); // just page addr
+
     errno_t rc = load_tlb_entry( va, write );
 
     // Load was successfull? We got correct mapping in TLB?
     if( rc == 0 )
         return;
+
+    SHOW_FLOW( 8, "page fault va %x", ts->va );
 
     // No good mapping found. Page fault.
     vm_map_page_fault_trap_handler(ts);

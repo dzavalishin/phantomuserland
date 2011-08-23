@@ -282,20 +282,15 @@ long long arch_get_rtc_delta() { return 0LL; }
 
 void board_fill_memory_map( amap_t *ram_map )
 {
-    (void) ram_map;
-#warning todo
-
     extern char end[];
 
-    int uptokernel = (int)&end;
+    addr_t uptokernel = kvtophys(&end);
 
-//    int len = 256*1024*1024;
-    //int len = 128*1024*1024;
-    //assert( 0 == amap_modify( ram_map, uptokernel, len-uptokernel, MEM_MAP_HI_RAM) );
+    int len = 256*1024*1024; // Hardcode 256M of RAM
+    assert( 0 == amap_modify( ram_map, uptokernel, len-uptokernel, MEM_MAP_HI_RAM) );
 
-	//int start = 0x10000000;
-	//len =       0xFFFFFFFF-start;
-    //assert( 0 == amap_modify( ram_map, start, len, MEM_MAP_DEV_MEM) );
+    assert( 0 == amap_modify( ram_map, kvtophys(BOARD_ISA_IO),  BOARD_ISA_IO_LEN,  MEM_MAP_DEV_MEM) );
+    assert( 0 == amap_modify( ram_map, kvtophys(BOARD_ISA_MEM), BOARD_ISA_MEM_LEN, MEM_MAP_DEV_MEM) );
 }
 
 
