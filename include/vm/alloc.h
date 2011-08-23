@@ -26,6 +26,8 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 
 
 void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size );
+void pvm_alloc_threaded_init(void);
+
 void pvm_alloc_clear_mem(void);
 
 pvm_object_storage_t *get_root_object_storage(void);
@@ -57,9 +59,9 @@ void ref_inc_p(pvm_object_storage_t *p);
 // ------------------------------------------------------------
 // shared between alloc.c and gc.c
 
-
 // Gigant lock for now. TODO
-extern hal_mutex_t  alloc_mutex;
+extern hal_mutex_t  *vm_alloc_mutex;
+
 
 void * get_pvm_object_space_start(void);
 void * get_pvm_object_space_end(void);

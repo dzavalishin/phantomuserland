@@ -14,7 +14,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-//#include <cpuid.h>
+#include <mips/cp0_regs.h>
 
 #include <phantom_libc.h>
 #include <string.h>
@@ -88,7 +88,7 @@ get_brandid_string(u_int32_t brandid)
 void
 identify_cpu(void)
 {
-    u_int32_t id = mips_c0_get_id();
+    u_int32_t id = mips_read_cp0_cpuid();
 
     int rev = id & 0xFF;
     int vendor_id = (id>16) & 0xFF;

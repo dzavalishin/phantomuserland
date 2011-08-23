@@ -13,7 +13,28 @@ design desicions are final, so it is of no use to finalize all the
 implementation desisions now as well.
 
 Code is known to compile successfully with cygwin/linux gcc 4.3.4.
-Only ia32 target is ok, arm port is not finished.
+Only ia32 target is ok, arm/mips/amd64 port are not finished.
+
+
+
+BUILD
+
+  make all in trunk
+
+RUN
+
+  Run phantom.cmd/phantom.sh in trunk/run
+
+DEBUG
+
+  Run QEMU (see above) and then - gdb in trunk/oldtree/kernel/phantom
+
+  Kernel console is saved to trunk/run/serial0.log 
+
+  Kernel is able to send logging info to syslogd by UDP.
+  Currently syslogd address is hardcoded in net_misc.c.
+
+
 
 Best regards, Dmitry Zavalishin,
 Phantom project... how to say... inventor? :)

@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include <mips/cp0_regs.h>
+#include <mips/interrupt.h>
 
 #define DEBUG_MSG_PREFIX "board"
 #include <debug_ext.h>
@@ -31,17 +32,8 @@
 
 char board_name[] = "mipssim";
 
-//static char * symtab_getname( void *addr ) { (void) addr; return "?"; }
-
-
-//static int icp_irq_dispatch(struct trap_state *ts);
-//static void sched_soft_int( void *a );
-
 void board_init_early(void)
 {
-
-    // TODO wrong place - must be in arch code
-    //phantom_symtab_getname = symtab_getname;
 }
 
 void board_init_cpu_management(void)
@@ -49,32 +41,15 @@ void board_init_cpu_management(void)
 }
 
 
-/* in arch
-void board_init_kernel_timer(void)
-{
-    // mc146818rtc irq 8??
-} */
-
 void board_start_smp(void)
 {
     // I'm single-CPU board, sorry.
 }
 
-// -----------------------------------------------------------------------
-// Arm -mpoke-function-name
-// -----------------------------------------------------------------------
-
-/*
-static char * symtab_getname( void *addr )
-{
-}
-*/
 
 // -----------------------------------------------------------------------
 // Interrupts processing
 // -----------------------------------------------------------------------
-
-#define MIPS_ONCPU_INTERRUPTS 8
 
 
 void board_interrupt_enable(int irq)
@@ -83,12 +58,7 @@ void board_interrupt_enable(int irq)
     int ie = hal_save_cli();
 
     if(irq < MIPS_ONCPU_INTERRUPTS)
-    {
-        // irq mask in 15:8
-        unsigned mask = mips_read_cp0_status();
-        mask |= 1 << (irq+8);
-        mips_write_cp0_status( mask );
-    }
+        arch_interrupt_enable(irq);
     else
     {
 #warning todo
@@ -100,16 +70,10 @@ void board_interrupt_enable(int irq)
 
 void board_interrupt_disable(int irq)
 {
-    //assert_interrupts_disabled();
     int ie = hal_save_cli();
 
     if(irq < MIPS_ONCPU_INTERRUPTS)
-    {
-        // irq mask in 15:8
-        unsigned mask = mips_read_cp0_status();
-        mask &= ~(1 << (irq+8));
-        mips_write_cp0_status( mask );
-    }
+        arch_interrupt_disable(irq);
     else
     {
         SHOW_ERROR( 0, "unimpl irq %d", irq );
@@ -122,50 +86,17 @@ void board_interrupt_disable(int irq)
 void board_init_interrupts(void)
 {
     board_interrupts_disable_all();
-    //phantom_trap_handlers[T_IRQ] = icp_irq_dispatch;
-#warning todo
-
-
 }
 
 void board_interrupts_disable_all(void)
 {
     int ie = hal_save_cli();
 
-    unsigned mask = mips_read_cp0_status();
-    mask &= ~(0xFF << 8);
-    mips_write_cp0_status( mask );
+    arch_interrupts_disable_all();
 
     if(ie) hal_sti();
 }
 
-// TODO this seems to be pretty arch indep?
-static void process_irq(struct trap_state *ts, int irq)
-{
-    (void) ts;
-    (void) irq;
-
-    ts->intno = irq;
-
-    board_interrupt_disable(irq);
-
-    irq_nest++;
-    call_irq_handler( ts, irq );
-    irq_nest--;
-
-    board_interrupt_enable(irq); // TODO Wrong! Int handler might disable itself! Keep local mask.
-
-    STAT_INC_CNT(STAT_CNT_INTERRUPT);
-
-    if(irq_nest)
-        return;
-
-    // Now for soft IRQs
-    irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
-    hal_softirq_dispatcher(ts);
-    ENABLE_SOFT_IRQ();
-
-}
 
 
 int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending)
@@ -210,93 +141,35 @@ int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending)
 
 
 
-static void sched_soft_interrupt( void *a )
-{
-    (void) a;
-    //phantom_scheduler_soft_interrupt();
-    // Just do nothing - scheduler will be called from
-    // interrupt dispatcher in no-intr state, and req is
-    // reset there as well.
-}
-
-static int took_zero_intr = 0;
-
-void board_sched_cause_soft_irq(void)
-{
-    if( !took_zero_intr )
-    {
-        board_interrupt_enable(0);
-        assert(!hal_irq_alloc( 0, sched_soft_interrupt, 0, HAL_IRQ_SHAREABLE ));
-        took_zero_intr = 1;
-    }
-
-
-    int ie = hal_save_cli();
-
-    unsigned int cause = mips_read_cp0_cause();
-    //#warning set soft int bit 0
-    cause |= 1 << 8; // Lower bit - software irq 0
-    mips_write_cp0_cause( cause );
-
-    SHOW_FLOW( 8, "softirq cause now %x", cause );
-
-    hal_sti();
-
-    __asm__("wait"); // Now wait for IRQ
-
-    if(ie) hal_sti(); else hal_cli();
-}
 
 
 // -----------------------------------------------------------------------
 // Drivers
 // -----------------------------------------------------------------------
 
-
-
 // NB! No network drivers on stage 0!
 static isa_probe_t board_drivers[] =
 {
 #if 0
-    { "COM1",		driver_isa_com_probe,   2, BOARD_ISA_IO|0x3F8u, 4 }, // Interrupts are wrong
-    { "COM2",		driver_isa_com_probe,   2, BOARD_ISA_IO|0x2F8u, 3 },
+    { "COM1",		driver_isa_com_probe,   2, BOARD_ISA_IO|0x3F8u, 4 },
 
 #if HAVE_NET
-    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x280, 9 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x300, 9 },
-    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x320, 9 },
+    { "MipsNet", 	driver_isa_mipsnet_probe,2, BOARD_ISA_IO|0x4200, 2 },
+
+//    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x280, 9 },
+//    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x300, 9 },
+//    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x320, 9 },
 #endif
 #endif
 
-/*
-    { "IDE", 		??, 	2, 0xB4000170, 15 }, // 0x376 io2
-    { "IDE", 		??, 	2, 0xB40001F0, 14 }, // 0x3F6 io2
-    { "LCD", 		driver_mem_icp_lcd_probe, 	0, 0xC0000000, 22 },
-
-    { "touch",		driver_mem_icp_touch_probe,   	1, 0x1E000000, 28 },
-    { "PL041.Audio",   	driver_mem_pl041_audio_probe,   2, 0x1D000000, 25 },
-
-
-
-    { "LEDS", 		driver_mem_icp_leds_probe, 	0, 0x1A000000, 0 },
-
-    { "LAN91C111", 	driver_mem_LAN91C111_net_probe, 2, 0xC8000000, 27 },
-*/
 
     // End of list marker
     { 0, 0, 0, 0, 0 },
 };
 
 
-
 void board_make_driver_map(void)
 {
-    //int id = R32(ICP_IDFIELD);
-
-    //if( (id >> 24) != 0x41 )        SHOW_ERROR( 0, "Board manufacturer is %d, not %d", (id >> 24), 0x41 );
-
-    // don't need - this window is directly accessible for kernel
-    //hal_pages_control( 0x14000000u, (void *)0xB4000000u, 0xE0000, page_map_io, page_rw );
     phantom_register_drivers(board_drivers);
 }
 
@@ -324,15 +197,6 @@ void init_paging_device(void)
 {
 }
 
-int phantom_dev_keyboard_getc(void)
-{
-    return debug_console_getc();
-}
-
-int phantom_scan_console_getc(void)
-{
-    return debug_console_getc();
-}
 
 
 int phantom_dev_keyboard_get_key()

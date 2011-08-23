@@ -295,7 +295,7 @@ static void make_mem_map(void)
 
 #endif
 
-
+// TODO we call hal_pages_control before calling paging_init
 static void map_eq( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg )
 {
     (void) arg;
@@ -323,7 +323,7 @@ static void map_eq( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t fl
     case  MEM_MAP_DEV_MEM:
     case  MEM_MAP_BIOS_DA:
         hal_pages_control( pageaddr, (void *)pageaddr, n_pages,
-                           page_map, page_rw );
+                           page_map_io, page_rw );
         break;
 
     default:
@@ -335,8 +335,10 @@ static void map_eq( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t fl
 
 void phantom_map_mem_equally()
 {
+#ifdef ARCH_ia32
     // Low RAM
     hal_pages_control( 0, 0, 0x100000/PAGE_SIZE, page_map, page_rw );
+#endif
     amap_iterate_all( &ram_map, map_eq, 0 );
 
     // kernel was mapped RO. Now remap data seg r/w

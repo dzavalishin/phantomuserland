@@ -372,6 +372,7 @@ int main(int argc, char* argv[])
     setDiffMem( mem, malloc(size+1024*10), size );
 
     hal_init( mem, size );
+    //pvm_alloc_threaded_init(); // no threads yet - no lock
 
 #if 0
     videotest();

@@ -15,9 +15,9 @@
 //#include <kernel/snap_sync.h>
 
 
-#include "vm/alloc.h"
-#include "vm/internal.h"
-#include "vm/object_flags.h"
+#include <vm/alloc.h>
+#include <vm/internal.h>
+#include <vm/object_flags.h>
 
 
 
@@ -83,10 +83,15 @@ void run_gc()
 {
     int my_run = gc_n_run;
 
-    hal_mutex_lock( &alloc_mutex );
+    //hal_mutex_lock( &alloc_mutex );
+    if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock
 
     if (my_run != gc_n_run) // lock acquired when concurrent gc run finished
-        { hal_mutex_unlock( &alloc_mutex ); return; }
+    {
+        if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );  // TODO avoid Giant lock
+        //hal_mutex_unlock( &alloc_mutex );
+        return;
+    }
     gc_n_run++;
 
     gc_flags_last_generation++; // bump generation
@@ -120,7 +125,8 @@ void run_gc()
 
     //TODO refine synchronization
     //phantom_virtual_machine_threads_stopped--;
-    hal_mutex_unlock( &alloc_mutex );
+    //hal_mutex_unlock( &alloc_mutex );
+    if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );  // TODO avoid Giant lock
 }
 
 

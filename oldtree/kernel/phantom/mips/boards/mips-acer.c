@@ -17,9 +17,9 @@
 #include <hal.h>
 #include <assert.h>
 #include <stdio.h>
-//#include <arm/memio.h>
 
-//#include "arm-icp.h"
+#include <mips/cp0_regs.h>
+#include <mips/interrupt.h>
 
 #define DEBUG_MSG_PREFIX "board"
 #include <debug_ext.h>
@@ -27,19 +27,58 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+
+/*
+
+http://www.netbsd.org/Documentation/Hardware/Machines/ARC/riscspec.pdf
+
+http://www.sensi.org/~alec/mips/acer_pica.html
+
+	addr            size
+	--------------------------------------
+	00000000			mem
+	1fc00000 	7e000		BIOS mipsel_bios.bin
+	fff00000 	7e000		BIOS mipsel_bios.bin
+	11000000	1000000		ISA, mem
+	90000000 	1000000		ISA, io
+	40000000	60000000	Video memory
+	80001000	1000		Ethernet ctrlr
+	80002000	1000		SCSI ctrlr
+	80003000	1000		Floppy ctrlr
+	80004000	1000		RTC
+	80005000	1000		Keyb
+	80006000	1000		COM1
+	80007000	1000		COM2
+	80008000	1000		LPT
+	80009000	1000		NVRAM
+	8000d000 	1000		DMA memory
+	8000f000	1000		LED
+
+*/
+
+
 char board_name[] = "Acer Pica";
-
-static char * symtab_getname( void *addr );
-
-
-static int icp_irq_dispatch(struct trap_state *ts);
-static void sched_soft_int( void *a );
 
 void board_init_early(void)
 {
+    // install TLB entry for COM1 dev io
+    tlb_entry_t e;
 
-    // TODO wrong place - must be in arm arch code
-    //phantom_symtab_getname = symtab_getname;
+    addr_t v = 0xE0006000;
+    addr_t p = 0x80006000;
+
+    e.v = v & TLB_V_ADDR_MASK; // One bit less than pte
+    e.p0 = (p & TLB_P_ADDR_MASK) >> TLB_P_ADDR_SHIFT;
+
+    e.p0 |= TLB_P_CACHE_UNCACHED << TLB_P_CACHE_SHIFT;
+    e.p0 |= TLB_P_DIRTY;
+    e.p0 |= TLB_P_VALID;
+    e.p0 |= TLB_P_GLOBAL;
+
+    e.p1 = e.p0; // for simplicity, will be rearranged later
+
+    mips_tlb_write_random( &e );
+
 }
 
 void board_init_cpu_management(void)
@@ -47,31 +86,11 @@ void board_init_cpu_management(void)
 }
 
 
-/* in arch
-void board_init_kernel_timer(void)
-{
-    //icp_timer0_init(100);
-} */
-
 void board_start_smp(void)
 {
     // I'm single-CPU board, sorry.
 }
 
-// -----------------------------------------------------------------------
-// Arm -mpoke-function-name
-// -----------------------------------------------------------------------
-
-/*
-static char * symtab_getname( void *addr )
-{
-    int len = *(int*)(addr-4);
-    if( (len & 0xFF000000) != 0xFF000000 )
-        return "?";
-
-    return (char *)(addr - 4 - (len&0xFFFFFF));
-}
-*/
 
 // -----------------------------------------------------------------------
 // Interrupts processing
@@ -80,75 +99,54 @@ static char * symtab_getname( void *addr )
 
 void board_interrupt_enable(int irq)
 {
+    int ie = hal_save_cli();
+
+    if(irq < MIPS_ONCPU_INTERRUPTS)
+        arch_interrupt_enable(irq);
+    else
+    {
 #warning todo
+        SHOW_ERROR( 0, "unimpl irq %d", irq );
+    }
+
+    if(ie) hal_sti();
 }
 
 void board_interrupt_disable(int irq)
 {
-#warning todo
+    int ie = hal_save_cli();
+
+    if(irq < MIPS_ONCPU_INTERRUPTS)
+        arch_interrupt_disable(irq);
+    else
+    {
+        SHOW_ERROR( 0, "unimpl irq %d", irq );
+    }
+
+    if(ie) hal_sti();
 }
+
 
 void board_init_interrupts(void)
 {
     board_interrupts_disable_all();
-    //phantom_trap_handlers[T_IRQ] = icp_irq_dispatch;
-#warning todo
 }
 
 void board_interrupts_disable_all(void)
 {
-#warning todo
+    int ie = hal_save_cli();
+
+    arch_interrupts_disable_all();
+
+    if(ie) hal_sti();
+}
 }
 
-// TODO this seems to be pretty arch indep?
-static void process_irq(struct trap_state *ts, int irq)
-{
-#warning todo
-/*
-    ts->intno = irq;
-
-    board_interrupt_disable(irq);
-
-    irq_nest++;
-    call_irq_handler( ts, irq );
-    irq_nest--;
-
-    board_interrupt_enable(irq); // TODO Wrong! Int handler might disable itself! Keep local mask.
-
-    STAT_INC_CNT(STAT_CNT_INTERRUPT);
-
-    if(irq_nest)
-        return;
-
-    // Now for soft IRQs
-    irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
-    hal_softirq_dispatcher(ts);
-    ENABLE_SOFT_IRQ();
-*/
-}
-
-
-static int icp_irq_dispatch(struct trap_state *ts)
-{
-#warning todo
-    //process_irq(ts, nirq);
-
-    return 0; // We're ok
-}
-
-
-void board_sched_cause_soft_irq(void)
-{
-    phantom_scheduler_soft_interrupt();
-}
 
 
 // -----------------------------------------------------------------------
 // Drivers
 // -----------------------------------------------------------------------
-
-
-//phantom_device_t * driver_pl011_uart_probe( int port, int irq, int stage );
 
 
 // NB! No network drivers on stage 0!
@@ -158,14 +156,6 @@ static isa_probe_t board_drivers[] =
 
 /*
     { "GPIO", 		driver_mem_icp_gpio_probe, 	0, 0xC9000000, 0 },
-    { "LCD", 		driver_mem_icp_lcd_probe, 	0, 0xC0000000, 22 },
-
-    { "touch",		driver_mem_icp_touch_probe,   	1, 0x1E000000, 28 },
-    { "PL041.Audio",   	driver_mem_pl041_audio_probe,   2, 0x1D000000, 25 },
-
-
-
-    { "LEDS", 		driver_mem_icp_leds_probe, 	0, 0x1A000000, 0 },
 
     { "LAN91C111", 	driver_mem_LAN91C111_net_probe, 2, 0xC8000000, 27 },
 */
@@ -178,10 +168,6 @@ static isa_probe_t board_drivers[] =
 
 void board_make_driver_map(void)
 {
-    //int id = R32(ICP_IDFIELD);
-
-    //if( (id >> 24) != 0x41 )        SHOW_ERROR( 0, "Board manufacturer is %d, not %d", (id >> 24), 0x41 );
-
     phantom_register_drivers(board_drivers);
 }
 
@@ -209,15 +195,6 @@ void init_paging_device(void)
 {
 }
 
-int phantom_dev_keyboard_getc(void)
-{
-    return debug_console_getc();
-}
-
-int phantom_scan_console_getc(void)
-{
-    return debug_console_getc();
-}
 
 
 int phantom_dev_keyboard_get_key()
@@ -245,19 +222,17 @@ long long arch_get_rtc_delta() { return 0LL; }
 
 void board_fill_memory_map( amap_t *ram_map )
 {
-#warning todo
-
     extern char end[];
 
-    int uptokernel = (int)&end;
+    addr_t uptokernel = kvtophys(&end);
 
-//    int len = 256*1024*1024;
-    //int len = 128*1024*1024;
-    //assert( 0 == amap_modify( ram_map, uptokernel, len-uptokernel, MEM_MAP_HI_RAM) );
+    int len = 256*1024*1024; // Hardcode 256M of RAM
+    assert( 0 == amap_modify( ram_map, uptokernel, len-uptokernel, MEM_MAP_HI_RAM) );
 
-	//int start = 0x10000000;
-	//len =       0xFFFFFFFF-start;
-    //assert( 0 == amap_modify( ram_map, start, len, MEM_MAP_DEV_MEM) );
+    // IO mem
+    hal_pages_control( 0x80000000, (void *)0xE0000000, 0x10, page_map_io, page_rw );
+    
+    //assert( 0 == amap_modify( ram_map, 0x80000000, 0x10000, MEM_MAP_DEV_MEM) );
 }
 
 

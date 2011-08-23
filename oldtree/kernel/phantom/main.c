@@ -38,7 +38,7 @@
 #include "vm_map.h"
 #include "snap_sync.h"
 
-#include "vm/root.h"
+#include <vm/root.h>
 #include "video.h"
 #include "misc.h"
 #include <kernel/net.h>
@@ -206,14 +206,13 @@ int main(int argc, char **argv, char **envp)
     // check for stray ptrs here
     stray();
 #endif
+    run_init_functions( INIT_LEVEL_PREPARE );
 
     init_irq_allocator();
 
     init_multiboot_symbols();
 
-    hal_init(
-             (void *)PHANTOM_AMAP_START_VM_POOL,
-             N_OBJMEM_PAGES*4096L);
+    //hal_init(             (void *)PHANTOM_AMAP_START_VM_POOL,             N_OBJMEM_PAGES*4096L);
 
     detect_cpu(0);
     phantom_paging_init();
@@ -227,16 +226,8 @@ int main(int argc, char **argv, char **envp)
     board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
+    hal_init((void *)PHANTOM_AMAP_START_VM_POOL, N_OBJMEM_PAGES*4096L);
 
-    phantom_init_part_pool();
-
-    // Stage is:
-    //   0 - very early in the boot - interrupts can be used only
-    //   1 - boot, most of kernel infrastructure is there
-    //   2 - disks which Phantom will live in must be found here
-    //   3 - late and optional and slow junk
-
-    phantom_find_drivers( 0 );
 
     // Threads startup
     {
@@ -247,6 +238,9 @@ int main(int argc, char **argv, char **envp)
 #endif
 
     phantom_threads_init();
+    heap_init_mutex(); // After threads
+    pvm_alloc_threaded_init(); // After threads
+
 #if !DRIVE_SCHED_FROM_RTC // run from int 8 - rtc timer
     phantom_request_timed_call( &sched_timer, TIMEDCALL_FLAG_PERIODIC );
 #endif
@@ -258,6 +252,19 @@ int main(int argc, char **argv, char **envp)
 
     net_timer_init();
 
+    identify_cpu();
+    identify_hypervisor();
+
+    phantom_init_part_pool();
+
+    // Stage is:
+    //   0 - very early in the boot - interrupts can be used only
+    //   1 - boot, most of kernel infrastructure is there
+    //   2 - disks which Phantom will live in must be found here
+    //   3 - late and optional and slow junk
+
+    phantom_find_drivers( 0 );
+
     board_start_smp();
 
     {
@@ -268,6 +275,7 @@ int main(int argc, char **argv, char **envp)
 
     pressEnter("will run DPC");
     dpc_init();
+
 
 
     printf("\nPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\n\n", svn_version(), phantom_uname.machine );
@@ -391,7 +399,6 @@ int main(int argc, char **argv, char **envp)
 
     // just test
     //phantom_smp_send_broadcast_ici();
-//init_tetris();
 
     //pressEnter("will run vm threads");
     SHOW_FLOW0( 2, "Will run phantom threads... ");
@@ -466,7 +473,8 @@ static void net_stack_init()
 
 #if HAVE_NET
     SHOW_FLOW0( 1, "Init TCP/IP stack" );
-//    net_timer_init();
+    // used elsewhere, init earlier
+    //net_timer_init();
     if_init();
     ethernet_init();
     arp_init();
@@ -481,8 +489,6 @@ static void net_stack_init()
 
     phantom_trfs_init();
 
-
-    //beep(); // TODO test!
 #endif // HAVE_NET
 }
 
@@ -494,3 +500,44 @@ void _exit(int code)
 
     hal_cpu_reset_real();
 }
+
+// -----------------------------------------------------------------------
+// General init code
+// -----------------------------------------------------------------------
+
+static struct init_record *init_list_root = 0;
+void register_init_record( struct init_record *ir )
+{
+    ir->next = init_list_root;
+    init_list_root = ir;
+}
+
+static void run_next_init( int level, struct init_record *ir )
+{
+    if( ir == 0 )
+        return;
+
+    switch( level )
+    {
+    case INIT_LEVEL_PREPARE:
+        if(ir->init_1) ir->init_1(); break;
+
+    case INIT_LEVEL_INIT:
+        if(ir->init_2) ir->init_2(); break;
+
+    case INIT_LEVEL_LATE:
+        if(ir->init_3) ir->init_3(); break;
+
+    default:
+        SHOW_ERROR( 0, "wrong level %d", level );
+    }
+
+    //if( ir->next )
+    run_next_init( level, ir->next );
+}
+
+void run_init_functions( int level )
+{
+    run_next_init( level, init_list_root );
+}
+

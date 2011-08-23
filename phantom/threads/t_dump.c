@@ -19,6 +19,8 @@
 
 void dump_thread_info(phantom_thread_t *t)
 {
+    assert(threads_inited);
+
     printf("T%2d pri %02d blk %08X ",
            t->tid,
            t->priority,
@@ -43,6 +45,8 @@ void dump_thread_info(phantom_thread_t *t)
 
 void dump_thread_stacks()
 {
+    if(!threads_inited) return;
+
     int i;
     for( i = 0; i < MAX_THREADS; i++ )
     {
@@ -58,6 +62,8 @@ void dump_thread_stacks()
 
 void phantom_dump_threads()
 {
+    if(!threads_inited) return;
+
     int i;
     for( i = 0; i < MAX_THREADS; i++ )
     {

@@ -32,6 +32,7 @@ void phantom_thread_init_conds(void)
 
 errno_t hal_cond_init(hal_cond_t *c, const char *name )
 {
+    assert(threads_inited);
     assert(c->impl == 0);
     c->impl = calloc(1, sizeof(struct phantom_cond_impl));
     if(c->impl == 0) return ENOMEM;
