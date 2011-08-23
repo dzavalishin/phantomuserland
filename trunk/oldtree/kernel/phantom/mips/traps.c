@@ -68,16 +68,19 @@ void dump_ss(struct trap_state *st)
 
     //int from_user = (st->cs & 3) || (st->eflags & EFL_VM);
 
-    printf("Dump of arm state:\n" );
+    printf("Dump of mips state:\n" );
 
-    printf("R 0=(0)      R 1=%08x R 2=%08x R 3=%08x\n", st->r1, st->r2, st->r3);
-    printf("R 4=%08x R 5=%08x R 6=%08x R 7=%08x\n", st->r4, st->r5, st->r6, st->r7);
-    printf("R 8=%08x R 9=%08x R10=%08x R12=%08x\n", st->r8, st->r9, st->r10, st->r12);
-    printf("R13=%08x R14=%08x R15=%08x R16=%08x\n", st->r13, st->r14, st->r15, st->r16);
+    printf("Z = (0)      AT= %08x V0= %08x V1= %08x\n", st->r1, st->r2, st->r3);
+    printf("A0= %08x A1= %08x A2= %08x A3= %08x\n", st->r4, st->r5, st->r6, st->r7);
+    printf("T0= %08x T1= %08x T2= %08x T3= %08x\n", st->r8, st->r9, st->r10, st->r11);
+    printf("T4= %08x T5= %08x T6= %08x T7= %08x\n", st->r12, st->r13, st->r14, st->r15);
     // TODO rest 16
+    printf("S0= %08x S1= %08x S2= %08x S3= %08x\n", st->r16, st->r17, st->r18, st->r19);
+    printf("S4= %08x S5= %08x S6= %08x S7= %08x\n", st->r20, st->r21, st->r22, st->r23);
+    printf("T8= %08x T9= %08x K0= %08x K1= %08x\n", st->r24, st->r25, st->r26, st->r27);
+    printf("GP= %08x SP= %08x FP= %08x RA= %08x\n", st->r28, st->r29, st->r30, st->r31);
 
-    //printf("GP(R28)=%08x SP(R29)=%08x FP(R30)=%08x RA(R31)=%08x PC=%08x\n",           st->r28, st->usr_sp, st->usr_fp, st->usr_ra, st->pc );
-    printf("GP(R28)=%08x  PC=%08x\n",           st->r28, st->pc );
+    printf("HI= %08x LO= %08x PC= %08x\n",           st->hi, st->lo, st->pc );
 
     printf("trapno %d: %s, intno %08x\n",
            st->trapno, trap_name(st->trapno),
@@ -141,6 +144,7 @@ int trap2signo( struct trap_state *ts )
 }
 
 
+int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending);
 
 
 // Called from asm wrap
@@ -153,14 +157,15 @@ void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
     ts->trapno = trapno;
     ts->intno = 0;
 
-#warning fill or kill pc, usr_sp, usr_fp, usr_ra
-
     switch( trapno )
     {
     case T_INTERRUPT:
         {
             int ipending = (cause >> 8) & 0xFF; // mask of pending interrupts
 
+            mips_irq_dispatch(ts, ipending);
+
+/*
             // Use softirq 0 for direct thread switch
             if( ipending & 0x01 )
             {
@@ -169,7 +174,7 @@ void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
             }
 #warning here we must call boards specific interrup dispatch code
             panic("interrupt %x", ipending);
-
+*/
         }
 
     case T_SYSCALL:

@@ -322,7 +322,6 @@ static void phantom_debug_window_loop()
 
     while(1)
     {
-
         if(tty && !wtty_is_empty(tty))
         {
             char c = wtty_getc( tty );
@@ -345,6 +344,7 @@ static void phantom_debug_window_loop()
 
         //hal_sleep_msec(1000);
         hal_sleep_msec(100);
+#if 1
 #if 1
         drv_video_window_clear( phantom_debug_window );
         ttyd = DEBWIN_YS-20;
@@ -388,7 +388,7 @@ static void phantom_debug_window_loop()
 
         if(wx == 600) wx = 620; else wx = 600;
         //drv_video_window_move( phantom_debug_window, wx, 50 );
-
+#endif
         put_progress();
         drv_video_window_update( phantom_debug_window );
 
