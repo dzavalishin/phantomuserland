@@ -1,5 +1,6 @@
 #include <kernel/config.h>
 
+// used elsewhere
 //#if HAVE_NET
 
 /*
