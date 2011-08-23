@@ -25,6 +25,8 @@
 #include <wtty.h>
 #include <threads.h>
 
+extern int threads_inited;
+
 // No. Killed.
 #define USE_FORK_LUKE 0
 
