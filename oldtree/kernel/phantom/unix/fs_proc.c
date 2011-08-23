@@ -26,6 +26,7 @@
 // data sources
 #include "svn_version.h"
 #include <kernel/init.h>
+#include <kernel/stats.h>
 #include <thread_private.h>
 
 
@@ -149,6 +150,19 @@ static size_t r_threads( struct uufile *f, void *dest, size_t bytes)
     return nc;
 }
 
+static size_t r_stats( struct uufile *f, void *dest, size_t bytes)
+{
+    struct kernel_stats out;
+    errno_t rc = get_stats_record( f->pos++, &out );
+
+    if( rc )
+        return 0;
+
+    int nc = umin( bytes, sizeof(out) );
+    memcpy( dest, &out, nc );
+    return nc;
+}
+
 
 
 // Create a file struct for given path
@@ -162,6 +176,7 @@ static uufile_t *  proc_namei( uufs_t *fs, const char *filename)
     R_SETFUNC(arch);
     R_SETFUNC(board);
     R_SETFUNC(threads);
+    R_SETFUNC(stats);
 
 
 
