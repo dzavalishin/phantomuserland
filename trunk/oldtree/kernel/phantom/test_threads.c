@@ -643,6 +643,8 @@ static void thread_ones(void *a)
     }
 
     zo_run--;
+
+    hal_sleep_msec(10000);
 }
 
 
@@ -681,6 +683,7 @@ static void thread_zeroes(void *a)
     }
 
     zo_run--;
+    hal_sleep_msec(10000);
 }
 
 
@@ -695,7 +698,7 @@ int do_test_01_threads(const char *test_parm)
     printf("Wait for 01 threads to finish\n");
 
     while(zo_run)
-        hal_sleep_msec(1);
+        hal_sleep_msec(100);
 
 
     if(zo_fail)

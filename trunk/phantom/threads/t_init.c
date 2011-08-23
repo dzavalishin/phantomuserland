@@ -14,6 +14,8 @@
 #include <kernel/init.h>
 
 
+int threads_inited = 0;
+
 static volatile int have_idlest = 0;
 
 //static phantom_thread_t *idlest;
@@ -87,7 +89,9 @@ phantom_threads_init()
     phantom_thread_init_conds();
     phantom_thread_init_mutexes();
     phantom_thread_init_sems();
-    phantom_thread_init_killer();
+    //phantom_thread_init_killer();
+
+    threads_inited = 1; // phantom_import_main_thread needs it...
 
     // Create thread entry for this control flow
     phantom_import_main_thread();
@@ -96,6 +100,10 @@ phantom_threads_init()
 
     GET_IDLEST_THREAD() = phantom_create_thread( haltme, 0, THREAD_FLAG_KERNEL );
     GET_IDLEST_THREAD()->thread_flags |= THREAD_FLAG_NOSCHEDULE;
+
+    //threads_inited = 1;
+
+    phantom_thread_init_killer();
 
     // BUG! Bad hack! Fix and use hal_set_thread_priority() here!
     // BUG! On SMP will be really wrong!

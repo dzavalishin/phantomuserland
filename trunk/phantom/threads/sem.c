@@ -29,6 +29,7 @@ void phantom_thread_init_sems(void)
 
 errno_t hal_sem_init(hal_sem_t *c, const char *name )
 {
+    assert(threads_inited);
     assert(c->impl == 0);
     c->impl = calloc(1, sizeof(struct phantom_sem_impl));
     if(c->impl == 0) return ENOMEM;

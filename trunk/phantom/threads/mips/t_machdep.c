@@ -37,7 +37,7 @@ void phantom_thread_state_init(phantom_thread_t *t)
     t->cpu.fp = 0;
     t->cpu.ra = (int)phantom_thread_trampoline;
     t->cpu.status = mips_read_cp0_status(); // copy ours
-    //t->cpu.cpsr = my_cpsr|F_BIT|I_BIT; // We will change it to user mode later
+    t->cpu.status &= ~ST_IE; // Make sure interrupts are off in new thread
 
 
     int *sp = (int *)(t->cpu.sp);
@@ -146,8 +146,9 @@ void arch_adjust_after_thread_switch(phantom_thread_t *t)
 
 void switch_to_user_mode()
 {
-    //asm("ljmp %0, $0" : : "i" (USER_CS));
-
+    u_int32_t st = mips_read_cp0_status();
+    st |= ST_UM;
+    mips_write_cp0_status(st);
 }
 
 

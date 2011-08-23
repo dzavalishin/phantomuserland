@@ -18,11 +18,13 @@
 
 int get_current_tid(void)
 {
+    assert(threads_inited);
     return get_current_thread()->tid;
 }
 
 static phantom_thread_t * get_n_thread(int tid)
 {
+    assert(threads_inited);
     assert(tid >=0 && tid <= MAX_THREADS);
     //assert(phantom_kernel_threads[tid] != 0);
     return phantom_kernel_threads[tid];
@@ -39,6 +41,7 @@ static phantom_thread_t * get_n_thread(int tid)
 
 
 #define PRE()    \
+    assert(threads_inited); \
     int ret = 0; \
     TA_LOCK();   \
     GETT()
@@ -100,6 +103,7 @@ phantom_thread_t * get_current_thread(void)
 
 phantom_thread_t * get_thread(int tid)
 {
+    assert(threads_inited);
     assert(tid >=0 && tid <= MAX_THREADS);
     assert(phantom_kernel_threads[tid] != 0);
     return phantom_kernel_threads[tid];
@@ -115,6 +119,7 @@ phantom_thread_t * get_thread(int tid)
 errno_t
 hal_set_thread_priority( int tid, int prio )
 {
+    assert(threads_inited);
     assert( prio >= 0 && prio <= (THREAD_PRIO_HIGHEST|THREAD_PRIO_MOD_REALTIME) );
     phantom_thread_t * t = get_thread(tid);
     assert(t != 0);
@@ -137,6 +142,7 @@ hal_set_thread_priority( int tid, int prio )
 
 errno_t hal_set_current_thread_priority( int prio )
 {
+    assert(threads_inited);
     assert( prio >= 0 && prio <= (THREAD_PRIO_HIGHEST|THREAD_PRIO_MOD_REALTIME) );
     phantom_thread_t * t = GET_CURRENT_THREAD();
     t->priority = prio;
@@ -145,6 +151,7 @@ errno_t hal_set_current_thread_priority( int prio )
 
 int hal_get_current_thread_priority()
 {
+    assert(threads_inited);
     phantom_thread_t * t = GET_CURRENT_THREAD();
     return t->priority;
 }
@@ -160,6 +167,7 @@ int hal_get_current_thread_priority()
 int
 hal_get_thread_priority( int tid )
 {
+    assert(threads_inited);
     phantom_thread_t * t = get_thread(tid);
     assert(t != 0);
     return t->priority;
@@ -177,6 +185,7 @@ hal_get_thread_priority( int tid )
 void
 hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ))
 {
+    assert(threads_inited);
     GET_CURRENT_THREAD()->death_handler = (void *)handler;
 }
 
@@ -193,16 +202,18 @@ hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ))
 void
 hal_set_thread_name(const char *name)
 {
+    assert(threads_inited);
     const char *old = GET_CURRENT_THREAD()->name;
     GET_CURRENT_THREAD()->name = name ? strdup( name ) : 0;
     if( old ) free((char *)old);
 }
 
 
-
+#if 0
 
 struct wtty *get_thread_ctty( struct phantom_thread *t )
 {
+    assert(threads_inited);
     return t->ctty;
 }
 
@@ -210,11 +221,16 @@ struct wtty *get_thread_ctty( struct phantom_thread *t )
 
 void *get_thread_owner( struct phantom_thread *t )
 {
+    assert(threads_inited);
     return t->owner;
 }
 
 
 int get_thread_flags( struct phantom_thread *t )
 {
+    assert(threads_inited);
 	return t->thread_flags;
 }
+
+#endif
+

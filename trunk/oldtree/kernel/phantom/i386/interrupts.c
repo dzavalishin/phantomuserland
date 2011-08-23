@@ -39,7 +39,7 @@
 
 
 
-
+// TODO use process_irq()
 void
 hal_PIC_interrupt_dispatcher(struct trap_state *ts, int mask)
 {
@@ -70,24 +70,11 @@ hal_PIC_interrupt_dispatcher(struct trap_state *ts, int mask)
     if(irq_nest)
         return;
 
-#if USE_SOFTIRQ_DISABLE
-
     // Now for soft IRQs
     irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
     hal_softirq_dispatcher(ts);
     ENABLE_SOFT_IRQ();
 
-#else
-#warning do not select me
-
-    // Now for soft IRQs
-    //irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
-    irq_nest = SOFT_IRQ_NOT_PENDING;
-    irq_nest++; // Prevent softirqs from reenter
-    hal_softirq_dispatcher(ts);
-    irq_nest--;
-    //ENABLE_SOFT_IRQ();
-#endif
 }
 
 

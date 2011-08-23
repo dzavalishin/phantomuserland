@@ -101,11 +101,17 @@ void run_test( const char *test_name, const char *test_parm )
 {
     int all = 0 == strcmp(test_name, "all" );
 
+#ifndef ARCH_ia32
+    printf("sleeping 20 sec");
+    hal_sleep_msec(200000);
+#endif
+
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
     TEST(pool);
 
 #ifndef ARCH_ia32
+    TEST(sem);
     TEST(01_threads);
 #endif
 

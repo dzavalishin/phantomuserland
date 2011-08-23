@@ -77,6 +77,13 @@ void hal_softirq_dispatcher(struct trap_state *ts);
 //! Arch independent part - calls IRQ handler
 void call_irq_handler(struct trap_state *s, unsigned irq);
 
+//! Arch independent part - general irq process.
+//! Calls call_irq_handler, called by board specific IRQ
+//! handling code. Does irq_nest, statistics, calls
+//! hal_softirq_dispatcher(). 
+void process_irq(struct trap_state *ts, int irq);
+
+
 
 #endif
 

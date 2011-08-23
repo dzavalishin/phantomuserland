@@ -66,6 +66,8 @@ hal_spinlock_t dummy_lock;
 
 errno_t t_kill_thread( int tid )
 {
+    assert(threads_inited);
+
     phantom_thread_t * t = get_thread(tid);
     phantom_thread_t * curr = GET_CURRENT_THREAD();
 

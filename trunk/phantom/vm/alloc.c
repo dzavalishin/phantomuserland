@@ -28,7 +28,8 @@
 static void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
 
 // TODO Object alloc - gigant lock for now. This is to be redone with separate locks for buckets/arenas.
-hal_mutex_t  alloc_mutex;
+static hal_mutex_t  _vm_alloc_mutex;
+hal_mutex_t  *vm_alloc_mutex; // used in gc.c
 
 
 // Allocator and GC work in these bounds. NB! - pvm_object_space_end is OUT of arena
@@ -131,12 +132,18 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 
     init_arenas(_pvm_object_space_start, size);
 
-    if( hal_mutex_init( &alloc_mutex, "ObjAlloc" ) )
-        panic("Can't init allocator mutex");
 
     //init_gc();  // here, if needed
 }
 
+
+void pvm_alloc_threaded_init(void)
+{
+    if( hal_mutex_init( &_vm_alloc_mutex, "ObjAlloc" ) )
+        panic("Can't init allocator mutex");
+
+    vm_alloc_mutex = &_vm_alloc_mutex;
+}
 
 
 static void init_object_header(pvm_object_storage_t *op, unsigned int size)
@@ -361,7 +368,7 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
 {
     pvm_object_storage_t * data = 0;
 
-    hal_mutex_lock( &alloc_mutex );  // TODO avoid Giant lock
+    if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock
 
     int ngc = 1;
     do {
@@ -383,13 +390,13 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
          * GC will free objects just allocated but not yet linked to parents. Highly destructive!
          *
          */
-        hal_mutex_unlock( &alloc_mutex );
+        if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );
         run_gc();
-        hal_mutex_lock( &alloc_mutex );
+        if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );
 #endif
     } while(1);
 
-    hal_mutex_unlock( &alloc_mutex );
+    if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );
 
     return data;
 }

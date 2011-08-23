@@ -302,7 +302,37 @@ void hal_softirq_dispatcher(struct trap_state *ts)
 
 
 
+// -----------------------------------------------------------------------
+// general (arch indep) irq processing - can be replaced in arch
+// -----------------------------------------------------------------------
 
+#ifndef ARCH_ia32
+void process_irq(struct trap_state *ts, int irq)
+{
+    ts->intno = irq;
+
+    board_interrupt_disable(irq);
+
+    irq_nest++;
+    call_irq_handler( ts, irq );
+    irq_nest--;
+
+    check_global_lock_entry_count();
+
+    // Must bring interrupt hw to EOI state also - softint can switch context
+    board_interrupt_enable(irq); // TODO Wrong! Int handler might disable itself! Keep local mask.
+
+    STAT_INC_CNT(STAT_CNT_INTERRUPT);
+
+    if(irq_nest)
+        return;
+
+    // Now for soft IRQs
+    irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
+    hal_softirq_dispatcher(ts);
+    ENABLE_SOFT_IRQ();
+}
+#endif
 
 
 

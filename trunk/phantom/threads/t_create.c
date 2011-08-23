@@ -38,6 +38,7 @@ static hal_spinlock_t tid_lock; //init?
 phantom_thread_t *
 phantom_create_thread( void (*func)(void *), void *arg, int flags )
 {
+    assert(threads_inited);
     assert( ! (flags & ~CREATION_POSSIBLE_FLAGS) );
 
     SHOW_FLOW( 7, "flags = %b", flags, "\020\1USER\2VM\3JIT\4NATIVE\5KERNEL\6?PF\7?PA\10?CH\11TIMEOUT\12UNDEAD\13NOSCHED" );
@@ -172,6 +173,8 @@ phantom_import_main_thread()
 void
 phantom_import_cpu_thread(int ncpu)
 {
+    assert(threads_inited);
+
     // No malloc on new CPU before thread is imported! Malloc has mutex!
     physaddr_t pa; // unused
     phantom_thread_t *t; // = calloc(1, sizeof(phantom_thread_t));

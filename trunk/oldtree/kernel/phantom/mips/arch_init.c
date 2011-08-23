@@ -15,8 +15,37 @@
 #define debug_level_info 10
 
 #include <kernel/init.h>
+#include <kernel/board.h>
 #include <mips/cp0_regs.h>
+#include <mips/interrupt.h>
+#include <device.h>
 
+
+
+static u_int32_t		isa_read32(u_int32_t addr)                      { return *((u_int32_t*)(addr)); }
+static void			isa_write32(u_int32_t addr, u_int32_t value)    { *((u_int32_t*)(addr)) = value; }
+
+static u_int16_t		isa_read16(u_int32_t addr)                      { return *((u_int16_t*)(addr)); }
+static void			isa_write16(u_int32_t addr, u_int16_t value)    { *((u_int16_t*)(addr)) = value; }
+
+static u_int8_t			isa_read8(u_int32_t addr)               	{ return *((u_int8_t*)(addr)); }
+static void			isa_write8(u_int32_t addr, u_int8_t value)      { *((u_int8_t*)(addr)) = value; }
+
+
+
+void arch_init_early(void)
+{
+    isa_bus.read32 	= isa_read32;
+    isa_bus.write32 	= isa_write32;
+
+    isa_bus.read16      = isa_read16;
+    isa_bus.write16     = isa_write16;
+
+    isa_bus.read8   	= isa_read8;
+    isa_bus.write8      = isa_write8;
+
+
+}
 
 static void timer_interrupt( void *a );
 static int timer_compare_delta = 1000; // Default value of 2000 instructions
@@ -24,11 +53,6 @@ static int timer_compare_value = 0;
 
 static int usec_per_tick = 100000; // 100 Hz = HZ*1000
 
-void arch_init_early(void)
-{
-
-
-}
 
 void board_init_kernel_timer(void)
 {
@@ -54,6 +78,105 @@ static void timer_interrupt( void *a )
 
     hal_time_tick(usec_per_tick);
 }
+
+
+// -----------------------------------------------------------------------
+// Usually defined in board, but seems to be arch-wide
+// -----------------------------------------------------------------------
+
+int phantom_dev_keyboard_getc(void)
+{
+    return debug_console_getc();
+}
+
+int phantom_scan_console_getc(void)
+{
+    return debug_console_getc();
+}
+
+
+
+
+static void sched_soft_interrupt( void *a )
+{
+    (void) a;
+    // Just do nothing - scheduler will be called from
+    // interrupt dispatcher in no-intr state, and req is
+    // reset there as well.
+}
+
+static int took_zero_intr = 0;
+
+void board_sched_cause_soft_irq(void)
+{
+    if( !took_zero_intr )
+    {
+        board_interrupt_enable(0);
+        assert(!hal_irq_alloc( 0, sched_soft_interrupt, 0, HAL_IRQ_SHAREABLE ));
+        took_zero_intr = 1;
+    }
+
+
+    int ie = hal_save_cli();
+
+    unsigned int cause = mips_read_cp0_cause();
+    //#warning set soft int bit 0
+    cause |= 1 << 8; // Lower bit - software irq 0
+    mips_write_cp0_cause( cause );
+
+    SHOW_FLOW( 8, "softirq cause now %x", cause );
+
+    hal_sti();
+
+    __asm__("wait"); // Now wait for IRQ
+
+    if(ie) hal_sti(); else hal_cli();
+}
+
+
+
+
+
+
+void arch_interrupt_enable(int irq)
+{
+    assert_interrupts_disabled();
+    assert(irq < MIPS_ONCPU_INTERRUPTS);
+
+    // irq mask in 15:8
+    unsigned mask = mips_read_cp0_status();
+    mask |= 1 << (irq+8);
+    mips_write_cp0_status( mask );
+}
+
+
+void arch_interrupt_disable(int irq)
+{
+    assert_interrupts_disabled();
+    assert(irq < MIPS_ONCPU_INTERRUPTS);
+
+    // irq mask in 15:8
+    unsigned mask = mips_read_cp0_status();
+    mask &= ~(1 << (irq+8));
+    mips_write_cp0_status( mask );
+}
+
+
+void arch_interrupts_disable_all(void)
+{
+    assert_interrupts_disabled();
+
+    unsigned mask = mips_read_cp0_status();
+    mask &= ~(0xFF << 8);
+    mips_write_cp0_status( mask );
+}
+
+
+
+
+
+
+
 
 
 

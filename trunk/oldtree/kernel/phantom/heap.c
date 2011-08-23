@@ -140,15 +140,6 @@ static void do_phantom_heap_init(addr_t new_heap_base, unsigned int new_heap_siz
     // set up some debug commands
     dbg_add_command(&dump_bin_list, "heap-bindump", "dump stats about bin usage");
 
-    // Mutex init uses malloc! First allocate it (malloc will run unprotected),
-    // then assign, turning on protection
-
-    static hal_mutex_t mutex;
-    if(hal_mutex_init(&mutex,"Heap") < 0) {
-        panic("error creating heap mutex\n");
-    }
-
-    heap_lock = &mutex;
 }
 
 
@@ -168,15 +159,20 @@ void phantom_heap_init(void)
 }
 
 
-/*
-int heap_init_postsem(void)
+// Called after initing threads (and mutexes)
+void heap_init_mutex(void)
 {
-    if(hal_mutex_init(&heap_lock) < 0) {
+    // Mutex init uses malloc! First allocate it (malloc will run unprotected),
+    // then assign, turning on protection
+
+    static hal_mutex_t mutex;
+    if(hal_mutex_init(&mutex,"Heap") < 0) {
         panic("error creating heap mutex\n");
     }
-    return 0;
+
+    heap_lock = &mutex;
 }
-*/
+
 
 static char *raw_alloc(unsigned int size, int bin_index)
 {

@@ -120,29 +120,6 @@ void board_interrupts_disable_all(void)
     W32(SIC_INT_SOFTCLR, 0xFFFFFFFF);
 }
 
-static void process_irq(struct trap_state *ts, int irq)
-{
-    ts->intno = irq;
-
-    board_interrupt_disable(irq);
-
-    irq_nest++;
-    call_irq_handler( ts, irq );
-    irq_nest--;
-
-    board_interrupt_enable(irq); // TODO Wrong! Int handler might disable itself! Keep local mask.
-
-    STAT_INC_CNT(STAT_CNT_INTERRUPT);
-
-    if(irq_nest)
-        return;
-
-    // Now for soft IRQs
-    irq_nest = SOFT_IRQ_DISABLED|SOFT_IRQ_NOT_PENDING;
-    hal_softirq_dispatcher(ts);
-    ENABLE_SOFT_IRQ();
-
-}
 
 
 static int icp_irq_dispatch(struct trap_state *ts)

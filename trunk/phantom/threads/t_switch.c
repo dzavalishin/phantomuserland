@@ -38,6 +38,7 @@ hal_spinlock_t schedlock;
 void phantom_thread_switch()
 {
     assert_not_interrupt();
+    assert(threads_inited);
 
     int ie = hal_save_cli();
     hal_spinlock_t *toUnlock = 0;
@@ -88,17 +89,6 @@ void phantom_thread_switch()
     phantom_switch_context(old, next, toUnlock );
     hal_disable_softirq();
 
-#if 0 //def ARCH_ia32
-    {
-        // TODO machdep, header
-        extern struct i386_tss	       	tss;
-
-        phantom_thread_t *t = GET_CURRENT_THREAD();
-        // TODO 64 bug
-        tss.esp0 = (int)t->kstack_top;
-
-    }
-#endif
     phantom_thread_t *t = GET_CURRENT_THREAD();
 
     t->cpu_id = GET_CPU_ID();
@@ -116,6 +106,7 @@ exit:
 // Must be called from softint handler, actually switches context
 void phantom_thread_switch()
 {
+    assert(threads_inited);
     int ie = hal_save_cli();
 
     if(GET_CURRENT_THREAD()->sw_unlock == &schedlock)
@@ -183,17 +174,20 @@ exit:
 // TODO look sema code - it seems that we have to disable ALL preemption here - on every CPU
 void hal_disable_preemption(void)
 {
+    if(!threads_inited) return; // Printf calls us now and then
     GET_CURRENT_THREAD()->preemption_disabled++;
     assert(GET_CURRENT_THREAD()->preemption_disabled > 0);
 }
 
 void hal_enable_preemption(void)
 {
+    if(!threads_inited) return; // Printf calls us now and then
     assert(GET_CURRENT_THREAD()->preemption_disabled > 0);
     GET_CURRENT_THREAD()->preemption_disabled--;
 }
 
 int hal_is_preemption_disabled()
 {
+    if(!threads_inited) return 1; // Ok?
     return GET_CURRENT_THREAD()->preemption_disabled;
 }

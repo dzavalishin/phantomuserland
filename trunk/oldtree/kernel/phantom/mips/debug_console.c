@@ -16,7 +16,7 @@
 #define MEM(___a) *((volatile unsigned int *)(___a))
 
 // this is for QEMU -M mips machine
-#define SERIAL_BASE 0xB40003f8u
+#define DEBUG_CONSOLE_SERIAL_BASE 0xB40003f8u
 
 #define SERIAL_FLAG_REGISTER 5
 
@@ -28,12 +28,12 @@ static void debug_console_do_putc(int c)
 {
 #if 0
     /* Wait until the serial buffer is empty */
-    while(!*(volatile unsigned long*)(SERIAL_BASE + SERIAL_FLAG_REGISTER) 
+    while(!*(volatile unsigned long*)(DEBUG_CONSOLE_SERIAL_BASE + SERIAL_FLAG_REGISTER) 
                                        & SERIAL_TX_EMPTY)
         ;
 #endif
     /* Put our character, c, into the serial buffer */
-    *((volatile unsigned long*)SERIAL_BASE) = c;
+    *((volatile unsigned long*)DEBUG_CONSOLE_SERIAL_BASE) = c;
 }
 #else
 void debug_console_do_putc(int c); // in asm, entry.S
@@ -52,9 +52,9 @@ int debug_console_getc(void)
     char c;
 
     // Wait until the serial RX buffer is not empty
-    while(!MEM(SERIAL_BASE + SERIAL_FLAG_REGISTER) & SERIAL_RX_READY)
+    while(!MEM(DEBUG_CONSOLE_SERIAL_BASE + SERIAL_FLAG_REGISTER) & SERIAL_RX_READY)
         ;
-    c = 0xFF & MEM(SERIAL_BASE);
+    c = 0xFF & MEM(DEBUG_CONSOLE_SERIAL_BASE);
 
     return c;
 }

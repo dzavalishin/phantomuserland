@@ -28,6 +28,7 @@ phantom_bus_t pci_bus =
 };
 
 
+// io ops are inited in arch
 phantom_bus_t isa_bus =
 {
     "isa", PHANTOM_BUS_TYPE_ISA,

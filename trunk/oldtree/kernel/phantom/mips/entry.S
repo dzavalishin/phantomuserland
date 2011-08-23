@@ -144,12 +144,12 @@ wait_tx:
     lb t2, 0(t1) // read status reg
     andi t2, 0x20 // tx empty bit
     beqz t2, wait_tx
-	nop // delay slot
+    nop // delay slot
 
- 	sb	a0, 0(t0)
+    sb	a0, 0(t0)
     
     jr      ra
-	nop // delay slot
+    nop // delay slot
 
 END(debug_console_do_putc)
 
@@ -162,30 +162,26 @@ __startup_stack_top__:
 
 LEAF(hal_cli)
     di      v0
-
-    jr      ra
+    jr.hb   ra
     nop
 END(hal_cli)
 
 LEAF(hal_save_cli)
     di      v0
-    jr      ra
+    jr.hb   ra
     andi    v0, v0, ST_IE // delay slot
 END(hal_save_cli)
 
 LEAF(hal_is_sti)
     mfc0    v0, CP0_STATUS
-    jr      ra
+    jr.hb   ra
     andi    v0, v0, ST_IE // delay slot
 END(hal_is_sti)
 
 
 LEAF(hal_sti)
-    //mfc0	t0, CP0_STATUS
-    //ori    t0, t0, ST_IE
-    //mtc0	t0, CP0_STATUS
     ei      v0
-    jr      ra
+    jr.hb   ra
     andi    v0, v0, ST_IE // delay slot
 END(hal_sti)
 
@@ -206,29 +202,32 @@ END(arch_get_frame_pointer)
 
     //int mips_read_cp0_status();
 LEAF(mips_read_cp0_status)
-    jr      ra
-    mfc0    v0, CP0_STATUS // delay slot
-
+    mfc0    v0, CP0_STATUS
+    jr.hb   ra
+    nop // delay slot
 END(mips_read_cp0_status)
 
     //void mips_write_cp0_status( int data );
 LEAF(mips_write_cp0_status)
-    jr      ra
-    mtc0    a0, CP0_STATUS // delay slot
+    mtc0    a0, CP0_STATUS
+    jr.hb   ra
+    nop // delay slot
 END(mips_write_cp0_status)
 
 
     //int mips_read_cp0_cause();
 LEAF(mips_read_cp0_cause)
-    jr      ra
-    mfc0    v0, CP0_CAUSE // delay slot
+    mfc0    v0, CP0_CAUSE
+    jr.hb   ra
+    nop // delay slot
 
 END(mips_read_cp0_cause)
 
     //void mips_write_cp0_cause( int data );
 LEAF(mips_write_cp0_cause)
-    jr      ra
-    mtc0    a0, CP0_CAUSE // delay slot
+    mtc0    a0, CP0_CAUSE
+    jr.hb   ra
+    nop // delay slot
 END(mips_write_cp0_cause)
 
 
@@ -242,14 +241,16 @@ END(mips_read_cp0_cpuid)
 
     //void mips_write_cp0_compare( unsigned int data );
 LEAF(mips_write_cp0_compare)
-    jr      ra
-    mtc0    a0, CP0_COMPARE // delay slot
+    mtc0    a0, CP0_COMPARE
+    jr.hb   ra
+    nop // delay slot
 END(mips_write_cp0_compare)
 
     //void mips_write_cp0_count( unsigned int data );
 LEAF(mips_write_cp0_count)
-    jr      ra
-    mtc0    a0, CP0_COUNT // delay slot
+    mtc0    a0, CP0_COUNT
+    jr.hb   ra
+    nop // delay slot
 END(mips_write_cp0_count)
 
 
@@ -484,7 +485,9 @@ END(_enter_exception_other)
 LEAF(mips_tlb_read)
     mtc0    a0, CP0_INDEX
 
+    ehb
     tlbr
+    ehb
 
     mfc0    t0, CP0_ENTRYLO0
     mfc0    t1, CP0_ENTRYLO1
@@ -495,11 +498,11 @@ LEAF(mips_tlb_read)
     sw t1, MIPS_PT_ENTRY_P1_OFF(a1) // mips_pt_entry.p1
     // ignore pagemask
 
-    jr      ra
+    jr.hb   ra
     nop // delay slot
 END(mips_tlb_read)
 
-#if 0
+#if 1
 //  int mips_tlb_probe( struct mips_pt_entry *e );
 //! Returns contents of Index reg after probe - top bit is failure to find TLB record
 LEAF(mips_tlb_probe)
@@ -517,11 +520,13 @@ LEAF(mips_tlb_probe)
     // pagemask (cp0 r5) = 0 -> 4Kb page
     mtc0	zero, CP0_PAGEMASK
 
-    ltbp
+    ehb
+    tlbp
+    ehb
 
     mfc0    v0, CP0_INDEX
 
-    jr      ra
+    jr.hb   ra
     nop // delay slot
 END(mips_tlb_probe)
 #endif
@@ -543,9 +548,10 @@ LEAF(mips_tlb_write_index)
     // pagemask (cp0 r5) = 0 -> 4Kb page
     mtc0	zero, CP0_PAGEMASK
 
+    ehb
     tlbwi
 
-    jr      ra
+    jr.hb   ra
     nop // delay slot
 END(mips_tlb_write_index)
 
@@ -565,9 +571,10 @@ LEAF(mips_tlb_write_random)
     // pagemask (cp0 r5) = 0 -> 4Kb page
     mtc0	zero, CP0_PAGEMASK
 
+    ehb
     tlbwr
 
-    jr      ra
+    jr.hb   ra
     nop // delay slot
 END(mips_tlb_write_random)
 
