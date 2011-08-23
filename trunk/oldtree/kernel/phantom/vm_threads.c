@@ -227,7 +227,7 @@ void phantom_finish_all_threads(void)
 }
 
 
-
+/*
 // -----------------------------------------------------------------------
 // Put to separate src file
 // Connection object support
@@ -260,4 +260,6 @@ errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct dat
 
     return ret;
 }
+
+*/
 

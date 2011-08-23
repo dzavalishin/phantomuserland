@@ -64,10 +64,10 @@ START_O_FILE=entry.o
 
 #isa_sb16.o
 phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
-	$(USB_O) floppy.o ide_io.o \
+	$(USB_O) floppy.o ide_io.o vm_connect.o \
 	disk_cache.o properties.o \
 	pci_ahci.o driver_pci_rtl8169.o intrdisp.o mem_icp_timer.o mem_pl181_mmc.o \
-        video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \
+	video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \
 	paging_mem.o user_trap.o mem_lanc111.o video_drv_icp_vga.o \
 	winsd.o sntp.o vm_load.o pci_es1370.o mem_pl011_uart.o mem_pl031_rtc.o \
 	ff.o bootp.o stray_check.o sbrk.o mem_pl050_ps2.o \
@@ -95,7 +95,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
-        unix/signal.o unix/sys_sw.o \
+	unix/signal.o unix/sys_sw.o \
 	fs_map.o stats.o resolve.o main.o keyboard.o syslog.o \
 	arch_name.o arch_init.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
