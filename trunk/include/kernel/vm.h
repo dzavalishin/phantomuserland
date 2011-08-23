@@ -24,8 +24,15 @@
 
 #endif
 
-#define phystokv(pa)	((void *)(pa))
-#define kvtophys(va)	((physaddr_t)(va))
+#ifdef ARCH_mips
+// NB! We must give out PHYSICAL addresses, and kernel is linked to 0x80000000,
+// so we strip high bit from kernel address.
+#  define phystokv(pa)	((void *)(0x8000000  & (addr_t)(pa)))
+#  define kvtophys(va)	(0x7FFFFFFF & (physaddr_t)(va))
+#else
+#  define phystokv(pa)	((void *)(pa))
+#  define kvtophys(va)	((physaddr_t)(va))
+#endif
 
 
 void wire_page_for_addr( void *addr, size_t count );

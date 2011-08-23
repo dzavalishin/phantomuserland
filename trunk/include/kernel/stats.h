@@ -12,11 +12,29 @@
 #ifndef STATS_H
 #define STATS_H
 
+#include <errno.h>
+
+#define KERNEL_STATS_MAX_NAME 64
+
+struct kernel_stats
+{
+    char                name[KERNEL_STATS_MAX_NAME];
+
+    int                 current_per_second;
+    int                 average_per_second;
+    int                 total;
+};
+
+
+#ifdef KERNEL
+
 #define MAX_STAT_COUNTERS 128
 
 
 //! Counts value during one second
 extern int			*stat_sec_counters;
+
+errno_t get_stats_record( int id, struct kernel_stats *out );
 
 
 
@@ -47,6 +65,9 @@ extern int			*stat_sec_counters;
 #define		STAT_CNT_WIRE                           20
 #define         STAT_CNT_WIRE_PAGEIN                    21
 
+#define         STAT_CNT_DISK_Q_SIZE                    22
+#define         STAT_CNT_BLOCK_SYNC_IO                  23
+
 void stat_increment_counter( int nCounter );
 
 #define STAT_INC_CNT( ___nCounter ) do { \
@@ -60,6 +81,7 @@ void stat_increment_counter( int nCounter );
 	stat_sec_counters[___nCounter] += ___val; \
 	} while(0)
 
+#endif // KERNEL
 
 
 #endif // STATS_H
