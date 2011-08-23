@@ -106,7 +106,10 @@ void phantom_thread_state_init(phantom_thread_t *t)
 */
 }
 
-addr_t  curr_thread_k0_stack_top;
+// Or else we'll die in exception before threads are init.
+static char k0_emergncy_stack[1024];
+addr_t  curr_thread_k0_stack_top = k0_emergncy_stack + sizeof(k0_emergncy_stack) - 4;
+
 void arch_adjust_after_thread_switch(phantom_thread_t *t)
 {
 #if HAVE_SMP
