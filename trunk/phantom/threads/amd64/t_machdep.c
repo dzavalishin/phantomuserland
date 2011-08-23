@@ -31,24 +31,34 @@ void phantom_thread_state_init(phantom_thread_t *t)
 {
     t->cpu.rsp = (register_t)(t->stack + t->stack_size);
     t->cpu.rbp = 0;
-    t->cpu.rip = (register_t)phantom_thread_trampoline;
+    //t->cpu.rip = (register_t)phantom_thread_trampoline;
+    t->cpu.rip = (register_t)phantom_thread_c_starter; // trampoline is empty
     //t->cpu.flags = 0;
 
 
     int *rsp = (int *)(t->cpu.rsp);
 
     // --- Will be popped by thread switch code ---
-    // Simulate phantom_switch_context's three params
-    STACK_PUSH(rsp,0); // ridiculous?
-    STACK_PUSH(rsp,0);
-    STACK_PUSH(rsp,0);
+    // Simulate phantom_switch_context's three params - NO, they're in regs
+    //STACK_PUSH(rsp,0); // ridiculous?
+    //STACK_PUSH(rsp,0);
+    //STACK_PUSH(rsp,0);
 
     STACK_PUSH(rsp,t->cpu.rip); // as if we called func
 
+    /* 386
     STACK_PUSH(rsp,t);			// RBX
     STACK_PUSH(rsp,t->start_func_arg);	// RDI
     STACK_PUSH(rsp,t->start_func);	// RSI
     STACK_PUSH(rsp,0);			// CR2
+    */
+    STACK_PUSH(rsp,0);			// RBX
+    STACK_PUSH(rsp,0);			// R12
+    STACK_PUSH(rsp,0);			// R13
+    STACK_PUSH(rsp,0);			// R14
+    STACK_PUSH(rsp,0);			// R15
+    STACK_PUSH(rsp,0);			// CR2
+
 
     t->cpu.rsp = (register_t)rsp;
 /*
@@ -110,11 +120,11 @@ void switch_to_user_mode()
                  mov %%ax, %%fs; \
                  mov %%ax, %%gs; \
                  \
-                 mov %%rsp, %%eax; \
-                 pushl %1; \
-                 pushl %%eax; \
+                 mov %%rsp, %%rax; \
+                 push %1; \
+                 push %%rax; \
                  pushf; \
-                 pushl %0; \
+                 push %0; \
                  push $1f; \
                  iret; \
                  1: \
@@ -160,7 +170,7 @@ phantom_thread_c_starter(void)
     func(arg);
     t_kill_thread( t->tid );
     panic("thread %d returned from t_kill_thread", t->tid );
-
+    asm("hlt");
 }
 
 #if 0
