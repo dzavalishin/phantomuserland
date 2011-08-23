@@ -9,6 +9,12 @@ struct cpu_state_save
     u_int32_t           fp;
     u_int32_t           ra; // == pc
 
+    u_int32_t           status;
+
+    u_int32_t           u0;
+    u_int32_t           u1;
+    u_int32_t           u2;
+
     // exactly 4 or 8 ints above to guarantee 16-byte alignment
     
     // NB! Must be aligned at 16 byte boundary!
@@ -27,4 +33,5 @@ typedef struct cpu_state_save cpu_state_save_t;
 #define CSTATE_SP               4
 #define CSTATE_FP               8
 #define CSTATE_RA              12
+#define CSTATE_STATUS          16
 //#define CSTATE_FXSTATE          20

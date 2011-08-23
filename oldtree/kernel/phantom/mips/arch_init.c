@@ -33,7 +33,7 @@ void arch_init_early(void)
 void board_init_kernel_timer(void)
 {
     // dies
-#if 0
+#if 1
     int timer_irq = 7;
 
     // On-chip timer init

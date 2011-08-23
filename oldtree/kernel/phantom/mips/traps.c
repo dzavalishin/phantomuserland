@@ -174,7 +174,8 @@ void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
             }
 #warning here we must call boards specific interrup dispatch code
             panic("interrupt %x", ipending);
-*/
+            */
+            break;
         }
 
     case T_SYSCALL:

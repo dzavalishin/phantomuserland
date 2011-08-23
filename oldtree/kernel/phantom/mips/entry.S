@@ -153,7 +153,7 @@ wait_tx:
 
 END(debug_console_do_putc)
 
-#define PHANTOM_START_STACK_SIZE (16*1024)
+#define PHANTOM_START_STACK_SIZE (64*1024)
     .space	PHANTOM_START_STACK_SIZE
 __startup_stack_top__:
 
@@ -225,7 +225,7 @@ LEAF(mips_read_cp0_cause)
 
 END(mips_read_cp0_cause)
 
-    //void mips_write_cp0_status( int data );
+    //void mips_write_cp0_cause( int data );
 LEAF(mips_write_cp0_cause)
     jr      ra
     mtc0    a0, CP0_CAUSE // delay slot

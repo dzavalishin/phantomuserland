@@ -11,7 +11,8 @@
 **/
 
 #include <mips/asm.h>
-#include "cpu_state.h"
+#include <mips/cp0_regs.h>
+#include <cpu_state.h>
             
 /*
  * void phantom_switch_context(
@@ -27,10 +28,12 @@
  * called and returns with interrupts disabled
  */
 
+#define N_STACK_SLOTS 16
+
 // TODO save/restore page fault addr? Or just ensure we're reading it soon enough with intrs disabled?
 LEAF(phantom_switch_context)
     // save s0-s7 on stack, 8 regs * 4 bytes
-    addi        sp, sp, -(8*4)
+    addi        sp, sp, -(N_STACK_SLOTS*4)
 
     sw          s0, 0(sp)
     sw          s1, 4(sp)
@@ -41,6 +44,14 @@ LEAF(phantom_switch_context)
     sw          s6, 24(sp)
     sw          s7, 28(sp)
 
+    mfhi t0
+    sw          t0, 32(sp)
+    mflo t0
+    sw          t0, 36(sp)
+
+    mfc0	t0, CP0_STATUS
+    sw          t0, CSTATE_STATUS(a0)
+
     // Save SP
     sw          sp, CSTATE_SP(a0)
     // Save GP
@@ -50,14 +61,24 @@ LEAF(phantom_switch_context)
     // Save RA
     sw          ra, CSTATE_RA(a0)
 
+    // ------------------------- Switch
+
     // Load SP
-    lw          sp, CSTATE_SP(a0)
+    lw          sp, CSTATE_SP(a1)
     // Load GP
-    lw          gp, CSTATE_GP(a0)
+    lw          gp, CSTATE_GP(a1)
     // Load FP
-    lw          fp, CSTATE_FP(a0)
+    lw          fp, CSTATE_FP(a1)
     // Load RA
-    lw          ra, CSTATE_RA(a0)
+    lw          ra, CSTATE_RA(a1)
+
+    lw          t0, CSTATE_STATUS(a1)
+    mtc0	t0, CP0_STATUS
+
+    lw          t0, 32(sp)
+    mthi t0
+    lw          t0, 36(sp)
+    mtlo t0
 
     lw          s0, 0(sp)
     lw          s1, 4(sp)
@@ -68,13 +89,13 @@ LEAF(phantom_switch_context)
     lw          s6, 24(sp)
     lw          s7, 28(sp)
 
-    addi        sp, sp, (8*4)
+    addi        sp, sp, (N_STACK_SLOTS*4)
 
     // Unlock given spinlock
 
     addiu       a0, a2, 0
     j    	EXT(hal_spin_unlock)
-
+    nop // delay slot
 END(phantom_switch_context)
 
 

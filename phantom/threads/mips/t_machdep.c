@@ -12,10 +12,10 @@
 
 
 
-#include "thread_private.h"
+#include <thread_private.h>
 #include <phantom_libc.h>
 #include <cpu_state.h>
-#include <arm/psr.h>
+#include <mips/cp0_regs.h>
 
 
 // asm code
@@ -36,6 +36,7 @@ void phantom_thread_state_init(phantom_thread_t *t)
     t->cpu.gp = 0; // ?
     t->cpu.fp = 0;
     t->cpu.ra = (int)phantom_thread_trampoline;
+    t->cpu.status = mips_read_cp0_status(); // copy ours
     //t->cpu.cpsr = my_cpsr|F_BIT|I_BIT; // We will change it to user mode later
 
 
@@ -50,6 +51,17 @@ void phantom_thread_state_init(phantom_thread_t *t)
     STACK_PUSH(sp,0);
 
     // Stack - simulate saved by phantom_switch_context regs s0-s7
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+    STACK_PUSH(sp,0);
+
+    // Stack - simulate saved by phantom_switch_context hi, lo and placeholder
     STACK_PUSH(sp,0);
     STACK_PUSH(sp,0);
     STACK_PUSH(sp,0);
