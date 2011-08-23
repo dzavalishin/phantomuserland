@@ -25,7 +25,7 @@
 
 #define DEBUG_MSG_PREFIX "board"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -118,11 +118,14 @@ void board_interrupt_disable(int irq)
     if(ie) hal_sti();
 }
 
+
 void board_init_interrupts(void)
 {
     board_interrupts_disable_all();
     //phantom_trap_handlers[T_IRQ] = icp_irq_dispatch;
 #warning todo
+
+
 }
 
 void board_interrupts_disable_all(void)
@@ -171,32 +174,74 @@ int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending)
     mask >>= 8;
     mask &= 0xFF;
 
+    SHOW_FLOW( 8, "irq pending %x mask %x", pending, mask );
+
     pending &= mask;
 
-    u_int32_t   irqs;
+    u_int32_t   irqs = pending;
 
-    while( (irqs = pending) != 0 )
+    int nirq = 0;
+    while( irqs )
     {
-        int nirq = 0;
-        while( irqs )
-        {
-            if( irqs & 0x1 )
-                process_irq(ts, nirq);
+        if( irqs & 0x1 )
+            process_irq(ts, nirq);
 
-            irqs >>= 1;
-            nirq++;
-        }
+        irqs >>= 1;
+        nirq++;
+    }
+
+    // Have software IRQ requests?
+    if( pending & 0x3 )
+    {
+        int ie = hal_save_cli();
+
+        unsigned int cause = mips_read_cp0_cause();
+        cause &= ~(0x3 << 8); // reset software irq 0 & 1
+        mips_write_cp0_cause( cause );
+
+        if(ie) hal_sti();
     }
 
     return 0; // We're ok
 }
 
 
+
+static void sched_soft_interrupt( void *a )
+{
+    (void) a;
+    //phantom_scheduler_soft_interrupt();
+    // Just do nothing - scheduler will be called from
+    // interrupt dispatcher in no-intr state, and req is
+    // reset there as well.
+}
+
+static int took_zero_intr = 0;
+
 void board_sched_cause_soft_irq(void)
 {
-    //phantom_scheduler_soft_interrupt();
+    if( !took_zero_intr )
+    {
+        board_interrupt_enable(0);
+        assert(!hal_irq_alloc( 0, sched_soft_interrupt, 0, HAL_IRQ_SHAREABLE ));
+        took_zero_intr = 1;
+    }
 
-#warning set soft int bit 0
+
+    int ie = hal_save_cli();
+
+    unsigned int cause = mips_read_cp0_cause();
+    //#warning set soft int bit 0
+    cause |= 1 << 8; // Lower bit - software irq 0
+    mips_write_cp0_cause( cause );
+
+    SHOW_FLOW( 8, "softirq cause now %x", cause );
+
+    hal_sti();
+
+    __asm__("wait"); // Now wait for IRQ
+
+    if(ie) hal_sti(); else hal_cli();
 }
 
 

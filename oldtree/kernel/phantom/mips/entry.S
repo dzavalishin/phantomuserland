@@ -218,6 +218,19 @@ LEAF(mips_write_cp0_status)
 END(mips_write_cp0_status)
 
 
+    //int mips_read_cp0_cause();
+LEAF(mips_read_cp0_cause)
+    jr      ra
+    mfc0    v0, CP0_CAUSE // delay slot
+
+END(mips_read_cp0_cause)
+
+    //void mips_write_cp0_status( int data );
+LEAF(mips_write_cp0_cause)
+    jr      ra
+    mtc0    a0, CP0_CAUSE // delay slot
+END(mips_write_cp0_cause)
+
 
 // get pr id = (cp0 r15)
 //int mips_read_cp0_cpuid();
