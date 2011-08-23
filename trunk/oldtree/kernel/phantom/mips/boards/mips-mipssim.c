@@ -178,6 +178,20 @@ int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending)
 
     pending &= mask;
 
+    // Have software IRQ requests? Clear 'em BEFORE servicing,
+    // or they'll fire again as soon as interrupts are open
+    if( pending & 0x3 )
+    {
+        int ie = hal_save_cli();
+
+        unsigned int cause = mips_read_cp0_cause();
+        cause &= ~(0x3 << 8); // reset software irq 0 & 1
+        mips_write_cp0_cause( cause );
+
+        if(ie) hal_sti();
+    }
+
+
     u_int32_t   irqs = pending;
 
     int nirq = 0;
@@ -190,17 +204,6 @@ int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending)
         nirq++;
     }
 
-    // Have software IRQ requests?
-    if( pending & 0x3 )
-    {
-        int ie = hal_save_cli();
-
-        unsigned int cause = mips_read_cp0_cause();
-        cause &= ~(0x3 << 8); // reset software irq 0 & 1
-        mips_write_cp0_cause( cause );
-
-        if(ie) hal_sti();
-    }
 
     return 0; // We're ok
 }
