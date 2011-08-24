@@ -41,8 +41,12 @@ http://www.sensi.org/~alec/mips/acer_pica.html
 	fff00000 	7e000		BIOS mipsel_bios.bin
 	11000000	1000000		ISA, mem
 	90000000 	1000000		ISA, io
-	40000000	60000000	Video memory
-	80001000	1000		Ethernet ctrlr
+
+        40000000	? 4mb 1024*768	Video memory
+        60000000        ?               Video control, IRQ19
+        60200000        ?               Video control, extended
+
+        80001000	1000		Ethernet ctrlr
 	80002000	1000		SCSI ctrlr
 	80003000	1000		Floppy ctrlr
 	80004000	1000		RTC
@@ -155,9 +159,22 @@ static isa_probe_t board_drivers[] =
 
 
 /*
-    { "GPIO", 		driver_mem_icp_gpio_probe, 	0, 0xC9000000, 0 },
+    { "ps2_keyb",       driver_isa_ps2_keyb_probe,      0, PICA_SYS_KBD, 23 },
+    { "ps2_mouse",      driver_isa_mouse_keyb_probe,    0, PICA_SYS_KBD, 24 },
 
-    { "LAN91C111", 	driver_mem_LAN91C111_net_probe, 2, 0xC8000000, 27 },
+    { "com1",           driver_isa_com_probe, 	        2, PICA_SYS_COM1, 25 },
+    { "com2",           driver_isa_com_probe, 	        2, PICA_SYS_COM2, 26 },
+
+    { "lpt",            driver_isa_lpt_probe, 	        2, PICA_SYS_PAR1, 17 },
+
+    { "led",            driver_isa_led_probe, 	        2, R4030_V_LOCAL_IO_BASE+0xf000, -1 },
+
+    { "scsi",           driver_isa_scsi_probe, 	        2, PICA_SYS_SCSI, 21 }, // DMA0
+    { "rtc",            driver_isa_rtc_probe, 	        2, PICA_SYS_CLOCK, 31 },
+
+    { "sound",          driver_isa_jazz_sound_probe,    2, PICA_SYS_SOUND, 18 },
+    { "net",            driver_isa_sonic_net_probe,     2, PICA_SYS_SONIC, 21 },
+
 */
 
     // End of list marker
@@ -229,8 +246,14 @@ void board_fill_memory_map( amap_t *ram_map )
     int len = 256*1024*1024; // Hardcode 256M of RAM
     assert( 0 == amap_modify( ram_map, uptokernel, len-uptokernel, MEM_MAP_HI_RAM) );
 
-    // IO mem
-    hal_pages_control( 0x80000000, (void *)0xE0000000, 0x10, page_map_io, page_rw );
+    // Main IO mem
+    hal_pages_control( R4030_P_LOCAL_IO_BASE, (void *)R4030_V_LOCAL_IO_BASE, R4030_S_LOCAL_IO_BASE/PAGE_SIZE, page_map_io, page_rw );
+
+    // ISA IO -> mem
+    hal_pages_control( PICA_P_ISA_IO, (void *)PICA_V_ISA_IO, PICA_S_ISA_IO/PAGE_SIZE, page_map_io, page_rw );
+
+    // ISA MEM -> mem
+    hal_pages_control( PICA_P_ISA_MEM, (void *)PICA_V_ISA_MEM, PICA_S_ISA_MEM/PAGE_SIZE, page_map_io, page_rw );
     
     //assert( 0 == amap_modify( ram_map, 0x80000000, 0x10000, MEM_MAP_DEV_MEM) );
 }

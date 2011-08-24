@@ -15,6 +15,8 @@
 #include <mips/cp0_regs.h>
 #include <mips/asm.h>
 #include <mips/pmap.h>
+#include <mips/arch/board-mips-mipssim-defs.h>
+
 #include <kernel/trap.h>
 
 #ifndef BOARD_ISA_IO
