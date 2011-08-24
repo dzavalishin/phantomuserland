@@ -23,6 +23,7 @@
 
 #include <mips/cp0_regs.h>
 #include <mips/interrupt.h>
+#include <mips/arch/board-mips-mipssim-defs.h>
 
 #define DEBUG_MSG_PREFIX "board"
 #include <debug_ext.h>
@@ -146,6 +147,8 @@ int mips_irq_dispatch(struct trap_state *ts, u_int32_t pending)
 // -----------------------------------------------------------------------
 // Drivers
 // -----------------------------------------------------------------------
+
+phantom_device_t * driver_isa_mipsnet_probe( int port, int irq, int stage );
 
 // NB! No network drivers on stage 0!
 static isa_probe_t board_drivers[] =
