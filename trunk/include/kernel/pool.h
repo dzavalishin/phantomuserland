@@ -4,9 +4,10 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
+ * \brief
  * Pool of kernel structs accessed with handle.
  *
- * TODO poosibly use for:
+ * \todo TODO poosibly use for:
  *	timed calls,
  *	threads                 - already handle-based
  *	disks/partitions,
@@ -46,6 +47,12 @@
 #include <errno.h>
 #include <phantom_types.h>
 
+/**
+ * \ingroup Containers
+ * @{
+**/
+
+/** Pool item handle */
 typedef int pool_handle_t;
 
 struct pool_arena
@@ -58,6 +65,7 @@ struct pool_arena
 
 typedef struct pool_arena pool_arena_t;
 
+//! \brief Pool itself
 typedef struct pool
 {
     // This element will be deleted now
@@ -80,6 +88,7 @@ typedef struct pool
 } pool_t;
 
 pool_t *create_pool_ext( int inital_elems, int arena_size );
+//! \brief Create pool of default size
 pool_t *create_pool();
 errno_t destroy_pool(pool_t *);
 

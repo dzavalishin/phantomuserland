@@ -7,6 +7,12 @@
 #include <queue.h>
 #include <sys/stat.h>
 
+/**
+ * \ingroup Unix
+ * @{
+**/
+
+
 #define FS_MAX_MOUNT 64
 #define FS_MAX_MOUNT_PATH 128
 #define FS_MAX_PATH_LEN 1024
@@ -33,9 +39,11 @@ struct uufileops
 
     errno_t     (*unlink)( struct uufile *f );
 
-    // rich man's ioctl
+    //! rich man's ioctl - get property
     errno_t	(*getproperty)( struct uufile *f, const char *pName, char *pValue, int vlen );
+    //! rich man's ioctl - set property
     errno_t	(*setproperty)( struct uufile *f, const char *pName, const char *pValue );
+    //! rich man's ioctl - list properties
     errno_t	(*listproperties)( struct uufile *f, int nProperty, char *pValue, size_t vlen );
 
 	// used when clone file
@@ -67,9 +75,14 @@ typedef struct uufile uufile_t;
 #define UU_FILE_FLAG_PIPE       (1<<5) // Pipe
 
 
-#define UU_FILE_FLAG_OPEN       (1<< 8) // Is open now, unlink/destroy_uufile will close first
-#define UU_FILE_FLAG_FREEIMPL   (1<< 9) // On destroy implementation must be freed
-#define UU_FILE_FLAG_NODESTROY  (1<<10) // Do not destroy - it's a link to static instance
+//! Is open now, unlink/destroy_uufile will close first
+#define UU_FILE_FLAG_OPEN       (1<< 8) 
+
+//! On destroy implementation must be freed
+#define UU_FILE_FLAG_FREEIMPL   (1<< 9) 
+
+//! Do not destroy - it's a link to static instance
+#define UU_FILE_FLAG_NODESTROY  (1<<10) 
 
 
 
@@ -107,13 +120,13 @@ errno_t unlink_dir_name( uufile_t *dir, const char *name );
 //! Unlink by contaned uufile
 errno_t unlink_dir_ent( uufile_t *dir, uufile_t *deu );
 
-// Find or create dir ent
+//! Find or create dir ent
 uufile_t *lookup_dir( uufile_t *dir, const char *name, int create, uufile_t *(*createf)() );
 
-// Return n-th entry's name.
+//! Return n-th entry's name.
 errno_t get_dir_entry_name( uufile_t *dir, int n, char *name );
 
-// General impl of read syscall for dir
+//! General impl of read syscall for dir
 int common_dir_read(struct uufile *f, void *dest, size_t bytes);
 
 extern struct uufileops common_dir_fops;
@@ -126,23 +139,23 @@ struct uufs
 
     void *              impl; // This instance's implementation state
 
-	// called after we got uufile and need really do an open op
+	//! called after we got uufile and need really do an open op
     errno_t             (*open)(struct uufile *, int create, int write);
 
-	// Close disposes file - it can't be used after that
+	//! Close disposes file - it can't be used after that
     errno_t             (*close)(struct uufile *);
 
-    // Create a file struct for given path
+    //! Create a file struct for given path
     uufile_t *          (*namei)(struct uufs *fs, const char *filename);
 
     errno_t             (*symlink)(struct uufs *fs, const char *src, const char *dst);
     errno_t             (*mkdir)(struct uufs *fs, const char *path);
 
 
-    // Return a file struct for fs root
+    //! Return a file struct for fs root
     uufile_t *          (*root)(struct uufs *fs);
 
-	// Dispose fs itself
+	//! Dispose fs itself
     errno_t             (*dismiss)(struct uufs *fs);
 };
 

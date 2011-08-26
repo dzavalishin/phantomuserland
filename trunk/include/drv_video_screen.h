@@ -14,6 +14,13 @@
 #include <phantom_types.h>
 #include <queue.h>
 
+/**
+ * \ingroup Video
+ * \defgroup Video Graphics subsystem
+ * @{
+**/
+
+
 #include <video/rect.h>
 #include <video/font.h>
 #include <video/color.h>

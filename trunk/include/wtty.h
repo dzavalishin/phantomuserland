@@ -12,8 +12,14 @@
 #ifndef WTTY_H
 #define WTTY_H
 
+
 #include <phantom_types.h>
 #include <hal.h>
+
+/** \ingroup Threads
+ *  \defgroup Threads Window subsystem 'controlling terminal' data structures
+ *  @{
+ */
 
 #define WTTY_BUFSIZE 128
 
@@ -37,5 +43,6 @@ int             wtty_is_empty(wtty_t *w);
 
 wtty_t * 	wtty_init(void);
 
+/** @} */
 
 #endif // WTTY_H

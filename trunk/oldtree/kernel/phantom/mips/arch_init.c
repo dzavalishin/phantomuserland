@@ -19,31 +19,65 @@
 #include <mips/cp0_regs.h>
 #include <mips/interrupt.h>
 #include <device.h>
+#include <endian.h>
 
 
 
-static u_int32_t		isa_read32(u_int32_t addr)                      { return *((u_int32_t*)(addr)); }
-static void			isa_write32(u_int32_t addr, u_int32_t value)    { *((u_int32_t*)(addr)) = value; }
+static u_int32_t    isa_read32(u_int32_t addr)                      { return *((u_int32_t*)(BOARD_ISA_IO|addr)); }
+static void         isa_write32(u_int32_t addr, u_int32_t value)    { *((u_int32_t*)(BOARD_ISA_IO|addr)) = value; }
 
-static u_int16_t		isa_read16(u_int32_t addr)                      { return *((u_int16_t*)(addr)); }
-static void			isa_write16(u_int32_t addr, u_int16_t value)    { *((u_int16_t*)(addr)) = value; }
+static u_int16_t    isa_read16(u_int32_t addr)                      { return *((u_int16_t*)(BOARD_ISA_IO|addr)); }
+static void         isa_write16(u_int32_t addr, u_int16_t value)    { *((u_int16_t*)(BOARD_ISA_IO|addr)) = value; }
 
-static u_int8_t			isa_read8(u_int32_t addr)               	{ return *((u_int8_t*)(addr)); }
-static void			isa_write8(u_int32_t addr, u_int8_t value)      { *((u_int8_t*)(addr)) = value; }
+static u_int8_t     isa_read8(u_int32_t addr)                       { return *((u_int8_t*)(BOARD_ISA_IO|addr)); }
+static void         isa_write8(u_int32_t addr, u_int8_t value)      { *((u_int8_t*)(BOARD_ISA_IO|addr)) = value; }
+
+// Set from asm code
+u_int32_t mips_config_0, mips_config_1, mips_config_2, mips_config_3;
 
 
+void  mips_read_config_registers(void);
 
 void arch_init_early(void)
 {
-    isa_bus.read32 	= isa_read32;
-    isa_bus.write32 	= isa_write32;
+    isa_bus.read32      = isa_read32;
+    isa_bus.write32     = isa_write32;
 
     isa_bus.read16      = isa_read16;
     isa_bus.write16     = isa_write16;
 
-    isa_bus.read8   	= isa_read8;
+    isa_bus.read8       = isa_read8;
     isa_bus.write8      = isa_write8;
 
+    unsigned cfg = mips_read_cp0_config();
+
+#if BYTE_ORDER == BIG_ENDIAN
+    if( !(cfg&CONF_BE) )
+        SHOW_ERROR0( 0, "Big endian kernel on little endian CPU?" );
+#else
+    if( cfg&CONF_BE )
+        SHOW_ERROR0( 0, "Little endian kernel on big endian CPU?" );
+#endif
+
+    mips_read_config_registers();
+
+    int arch_revision = (mips_config_0 >> 10) & 0x7;
+    printf("Arch rev = %d\n", arch_revision );
+    //assert( arch_revision >= 2 );
+    if( arch_revision <2 )
+        printf("CPU arch rev < 2?\n");
+
+    int mmu_tlb_size = 1+ ( (mips_config_1 >> 25) & 0x3F );
+
+    int mmu_type = (mips_config_0 >> 7) & 0x7;
+    printf("MMU type = %d, TLB size = %d \n", mmu_type, mmu_tlb_size );
+    assert( mmu_type == 1 );
+
+    int vi_l1_i_cache = mips_config_0 & 0x40;
+    printf("I Cache tagged %s\n", vi_l1_i_cache ? "VIRTUAL! :(" : "physical");
+
+    int has_mt = mips_config_3 & 0x4;
+    if( has_mt ) printf("Has multithreading support\n");
 
 }
 

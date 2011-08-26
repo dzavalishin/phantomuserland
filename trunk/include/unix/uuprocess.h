@@ -4,30 +4,38 @@
 #include <signal.h>
 #include <unix/uufile.h>
 
+/**
+ * \ingroup Unix
+ * @{
+**/
+
 #define MAX_UU_FD       256
 #define MAX_UU_TID      128
 #define MAX_UU_CMD      256
 
 #define MAX_UU_PROC     2048
 
-// pids before this are reserved
+//! pids before this are reserved
 #define MIN_PID 10
 
 
 
-
-// This structure is pointed by processes that are running it
-// and describes loadable execution unit
-
-// In fact, currently this struct can't be reused because
-// CS and DS are allocated at once
+/**
+ * This structure is pointed by processes that are running it
+ * and describes loadable execution unit.
+ *
+ * In fact, currently this struct can't be reused because
+ * CS and DS are allocated at once.
+**/
 struct exe_module
 {
     int                 refcount;
 
-    char                name[MAX_UU_CMD]; // debug only
+    //! debug only
+    char                name[MAX_UU_CMD]; 
 
-    u_int32_t           start; // code entry point
+    //! code entry point
+    u_int32_t           start; 
     u_int32_t           esp;
     u_int32_t           stack_bottom; // user addr
 
@@ -63,7 +71,8 @@ struct uuprocess
 {
 	//hal_mutex_t		lock;
 
-    int                 pid; // < 0 for unused struct
+    //! < 0 for unused struct
+    int                 pid; 
     int                 ppid;
     int                 pgrp_pid;
     int                 sess_pid;
@@ -88,10 +97,10 @@ struct uuprocess
 
     int                 capas; // Capabilities == rights
 
-    // Process address space is mapped to our main linear adrr space
-    // as follows. These adresses are used in syscall processing.
-    // Any pointer from user process is first has mem_start added and
-    // then checked to be in mem_start-mem_end bounds.
+    //! Process address space is mapped to our main linear adrr space
+    //! as follows. These adresses are used in syscall processing.
+    //! Any pointer from user process is first has mem_start added and
+    //! then checked to be in mem_start-mem_end bounds.
 
     void *		mem_start;		// where it starts in linear addr space
     void *		mem_end;		// first address above proc mem

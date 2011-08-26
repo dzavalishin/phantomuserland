@@ -1,8 +1,5 @@
-del phantom.img
-rem touch phantom.img
-rem dd bs=4096 count=1 if=img/phantom.superblock of=phantom.img
-rem dd conv=nocreat bs=4096 seek=1 count=20480 if=/dev/zero of=phantom.img 
-rem dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024
-dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024
+sh zero_ph_img.sh
 
-..\oldtree\run12\bin\pfsformat phantom.img
+rem del phantom.img
+rem dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024
+rem ..\oldtree\run12\bin\pfsformat phantom.img

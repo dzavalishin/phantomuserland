@@ -153,15 +153,12 @@ phantom_device_t * driver_isa_mipsnet_probe( int port, int irq, int stage );
 // NB! No network drivers on stage 0!
 static isa_probe_t board_drivers[] =
 {
-#if 0
-    { "COM1",		driver_isa_com_probe,   2, BOARD_ISA_IO|0x3F8u, 4 },
+#if 1
+//    { "COM1",		driver_isa_com_probe,   2, BOARD_ISA_IO|0x3F8u, 4 },
 
 #if HAVE_NET
-    { "MipsNet", 	driver_isa_mipsnet_probe,2, BOARD_ISA_IO|0x4200, 2 },
+    { "MipsNet", 	driver_isa_mipsnet_probe,2, 0x4200, 2 },
 
-//    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x280, 9 },
-//    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x300, 9 },
-//    { "NE2000", 	driver_isa_ne2000_probe,1, BOARD_ISA_IO|0x320, 9 },
 #endif
 #endif
 

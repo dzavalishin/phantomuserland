@@ -1,7 +1,12 @@
 
+/**
+ * \ingroup Unix
+ * @{
+**/
+
 #define MAX_UU_HOSTNAME 255
 
-// This is pointed by uufile.impl
+//! This is pointed by uufile.impl
 
 struct uusocket
 {
@@ -9,7 +14,8 @@ struct uusocket
     int         type;           // need?
     int         protocol;
 
-    unsigned 	options;        // Bits, see setsockopt
+    //! Bits, see setsockopt
+    unsigned 	options;        
 
     sockaddr 	addr;
     void *	prot_data;  	// kern udp_open(&prot_data)/udp_close(prot_data)

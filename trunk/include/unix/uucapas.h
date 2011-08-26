@@ -1,6 +1,12 @@
 #ifndef UUCAPAS_H
 #define UUCAPAS_H
 
+/**
+ * \ingroup Unix
+ * \defgroup Unix Unix compatibility subsystem
+ * @{
+**/
+
 #define CAP_CHOWN		(1<<0)
 #define CAP_DAC_OVERRIDE	(1<<1)
 #define CAP_DAC_READ_SEARCH	(1<<2)

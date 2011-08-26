@@ -1,9 +1,12 @@
+
 #ifndef _VIRTIO_BALLOON_H
 #define _VIRTIO_BALLOON_H
-/* This header is BSD licensed so anyone can use the definitions to implement
- * compatible drivers/servers. */
 #include <virtio_config.h>
 #include <sys/cdefs.h>
+
+/** \ingroup Virtio
+ *  @{
+ */
 
 /* The ID for virtio_balloon */
 #define VIRTIO_ID_BALLOON	5
@@ -22,3 +25,5 @@ struct virtio_balloon_config
 	__le32 actual;
 } __packed;
 #endif /* _VIRTIO_BALLOON_H */
+
+/** @} */

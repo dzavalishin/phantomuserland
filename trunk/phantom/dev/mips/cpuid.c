@@ -49,24 +49,24 @@ struct brandid_map {
 
     {40,		"QED RM5230/5260"},
 
-    {128,		"MIPS 4Kc"},
-    {129,		"MIPS 5Kc"},
-    {130,		"MIPS 20Kc"},
-    {131,		"MIPS 4Kmp"},
-    {132,		"MIPS 4Kec"},
-    {133,		"MIPS 4KEmp"},
-    {134,		"MIPS 4KSc"},
-    {135,		"MIPS M4K"},
-    {136,		"MIPS 25Kf"},
-    {137,		"MIPS 5Ke"},
+    {128,		"4Kc"},
+    {129,		"5Kc"},
+    {130,		"20Kc"},
+    {131,		"4Kmp"},
+    {132,		"4Kec"},
+    {133,		"4KEmp"},
+    {134,		"4KSc"},
+    {135,		"M4K"},
+    {136,		"25Kf"},
+    {137,		"5Ke"},
 
-    {144,		"MIPS 4KEc (r2)"},
-    {145,		"MIPS 4KEmp (r2)"},
-    {146,		"MIPS 4KSd"},
-    {147,		"MIPS 24K"},
+    {144,		"4KEc (r2)"},
+    {145,		"4KEmp (r2)"},
+    {146,		"4KSd"},
+    {147,		"24K"},
 
-    {149,		"MIPS 34K"},
-    {150,		"MIPS 24KE"},
+    {149,		"34K"},
+    {150,		"24KE"},
 
     {0x00, NULL},
 };
@@ -97,12 +97,13 @@ identify_cpu(void)
 
     switch( vendor_id )
     {
-    case 0: cpu_vendor = "Prehistoric";
+    case 0: cpu_vendor = "Prehistoric"; break;
+    case 1: cpu_vendor = "MIPS?";       break;
     }
 
     const char *cpu_type = get_brandid_string( 0xFF & (id>>8) );
 
-    printf("cpu0: %s %s rev. %d\n", cpu_vendor, cpu_type, rev );
+    printf("cpu0: %s (%d) %s rev. %d\n", cpu_vendor, vendor_id, cpu_type, rev );
 }
 
 void

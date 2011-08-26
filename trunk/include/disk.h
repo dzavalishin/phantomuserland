@@ -17,6 +17,13 @@
 #include <hal.h>
 #include "pager_io_req.h"
 
+/**
+ * \ingroup BlockIO
+ * \defgroup BlockIO Block devices io
+ * @{
+**/
+
+
 // -----------------------------------------------------------------------
 // New handle based stuff
 // -----------------------------------------------------------------------
@@ -29,12 +36,14 @@ typedef struct partition_handle
 
 partition_handle_t      dpart_create(partition_handle_t base, long shift, long size);
 
-// These work with 4096 byte blocks
+//! Read 4096 byte blocks
 errno_t dpart_read_block( partition_handle_t h, void *to, long blockNo, int nBlocks );
+//! Write 4096 byte blocks
 errno_t dpart_write_block( partition_handle_t h, const void *from, long blockNo, int nBlocks );
 
-// These work with native sized (512byte) sectors 
+//! Read native sized (512byte) sectors 
 errno_t dpart_read_sector( partition_handle_t h, void *to, long sectorNo, int nSectors );
+//! Write native sized (512byte) sectors 
 errno_t dpart_write_sector( partition_handle_t h, const void *from, long sectorNo, int nSectors );
 
 
@@ -83,29 +92,30 @@ struct phantom_disk_partition
     int         flags;
     int         type;           // 0-0xFF is PC part types
 
-    partition_handle_t self; // my handle - to release it on async io done
+    //! my handle - to release it on async io done
+    partition_handle_t self; 
 
     partition_handle_t baseh;
     struct phantom_disk_partition *base; //
 
     void        *specific;      // Specific data (following methods know how to handle)
 
-    // NB!! pager_io_request's disk block no is IGNORED! 
+    //! NB!! pager_io_request's disk block no is IGNORED! 
     errno_t     (*asyncIo)( struct phantom_disk_partition *p, pager_io_request *rq );
 
-    // Attempt to remove this request from queue, if possible
-    // Snapshot code relies on it a lot
+    //! Attempt to remove this request from queue, if possible
+    //! Snapshot code relies on it a lot
     errno_t     (*dequeue)( struct phantom_disk_partition *p, pager_io_request *rq );
 
-    // Attempt to raise this request's priority, if possible
-    // Snapshot code relies on it a lot
+    //! Attempt to raise this request's priority, if possible
+    //! Snapshot code relies on it a lot
     errno_t     (*raise)( struct phantom_disk_partition *p, pager_io_request *rq );
 
-    // Sync - return after all prev reqs are done - PHYSICALLY! Ie not only reported as such, but really written!
+    //! Sync - return after all prev reqs are done - PHYSICALLY! Ie not only reported as such, but really written!
     errno_t     (*fence)( struct phantom_disk_partition *p );
 
-    // Trim - declare block to be unused by filesystem - not yet really 
-    // implemented, though it is more or less harmless just to ignore.
+    //! Trim - declare block to be unused by filesystem - not yet really 
+    //! implemented, though it is more or less harmless just to ignore.
     errno_t     (*trim)( struct phantom_disk_partition *p, pager_io_request *rq  );
 };
 
@@ -180,5 +190,6 @@ void dump_partition(phantom_disk_partition_t *p);
 extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 extern errno_t partTrim( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 
+/** @} */
 
 #endif// DISK_H
