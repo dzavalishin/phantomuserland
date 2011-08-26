@@ -9,6 +9,12 @@
  *
 **/
 
+/**
+ * \ingroup Net
+ * \defgroup Net Networking stuff
+ * @{
+**/
+
 #ifndef _ETHERNET_DEFS_H
 #define _ETHERNET_DEFS_H
 

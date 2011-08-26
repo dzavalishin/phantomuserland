@@ -12,6 +12,12 @@
 #ifndef INIT_H
 #define INIT_H
 
+/**
+ * \ingroup Init
+ * \defgroup Init Init - kernel startup
+ * @{
+**/
+
 extern char arch_name[];
 extern char board_name[];
 

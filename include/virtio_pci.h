@@ -9,6 +9,7 @@
  *
 **/
 
+
 /*
  * Virtio PCI driver
  *
@@ -28,6 +29,10 @@
 #define _VIRTIO_PCI_H
 
 #include <virtio_config.h>
+
+/** \ingroup Virtio
+ *  @{
+ */
 
 /* A 32-bit r/o bitmask of the features supported by the host */
 #define VIRTIO_PCI_HOST_FEATURES	0
@@ -73,3 +78,5 @@
  * x86 pagesize again. */
 #define VIRTIO_PCI_VRING_ALIGN		4096
 #endif
+
+/** @} */

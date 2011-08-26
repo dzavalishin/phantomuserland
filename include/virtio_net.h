@@ -9,6 +9,7 @@
  *
 **/
 
+
 #ifndef _VIRTIO_NET_H
 #define _VIRTIO_NET_H
 /* This header is BSD licensed so anyone can use the definitions to implement
@@ -16,6 +17,10 @@
 #include <phantom_types.h>
 #include <virtio_config.h>
 #include <sys/cdefs.h>
+
+/** \ingroup Virtio
+ *  @{
+ */
 
 /* The ID for virtio_net */
 #define VIRTIO_ID_NET	1
@@ -70,3 +75,5 @@ struct virtio_net_hdr_mrg_rxbuf {
 //};
 
 #endif /* _VIRTIO_NET_H */
+
+/** @} */

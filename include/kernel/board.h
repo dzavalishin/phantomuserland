@@ -14,6 +14,11 @@
 
 #include <kernel/amap.h>
 
+/**
+ * \ingroup Arch
+ * @{
+**/
+
 struct phantom_device;
 
 typedef struct

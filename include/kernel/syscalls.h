@@ -9,6 +9,10 @@
  *
 **/
 
+/**
+ * \ingroup Unix
+ * @{
+**/
 
 // -+ = +- syscall func. but have in kernel
 // +- = have syscall func. but +- impl in kernel

@@ -6,7 +6,6 @@
  *
  * Kernel threads. Move to kernel/.
  *
- *
 **/
 
 #ifndef THREADS_H
@@ -14,6 +13,12 @@
 
 #include <phantom_types.h>
 #include <errno.h>
+
+/**
+ * \ingroup Threads
+ * \defgroup Threads Threads and syncronization
+ * @{
+**/
 
 // Good clean tid based threads interface
 

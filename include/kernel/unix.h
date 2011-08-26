@@ -15,6 +15,11 @@
 #include <dirent.h>
 #include <signal.h>
 
+/**
+ * \ingroup Unix
+ * @{
+**/
+
 struct sockaddr;
 
 

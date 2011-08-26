@@ -70,10 +70,6 @@
 
 #endif
 
-/*!
- * \addtogroup xgSmscRegs
- */
-/*@{*/
 
 /*! 
  * \brief Bank select register. 
@@ -420,8 +416,4 @@ typedef struct _lanc111_nic lanc111_nic_t;
 
 /*@}*/
 
-/*!
- * \addtogroup xgNicLanc111
- */
-/*@{*/
 

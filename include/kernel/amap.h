@@ -13,12 +13,16 @@
 #ifndef AMAP_H
 #define AMAP_H
 
-
-
-
 #include <queue.h>
 #include <errno.h>
 #include <phantom_types.h>
+
+/**
+ * \ingroup Containers
+ * \defgroup Containers Containers - low level data organization
+ * @{
+**/
+
 
 typedef u_int64_t amap_elem_addr_t;
 typedef u_int64_t amap_elem_size_t;

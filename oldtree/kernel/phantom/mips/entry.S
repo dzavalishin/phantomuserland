@@ -56,17 +56,17 @@ _start:
 
 _reset:
     /* Disable interrupts */
-    mtc0	zero, CP0_STATUS
+    mtc0    zero, CP0_STATUS
 
     /* Disable watch exception. */
     mtc0    zero, CP0_WATCHLO
     mtc0    zero, CP0_WATCHHI
 
     /* disable kernel mode cache */
-    mfc0	t0, CP0_CONFIG
+    mfc0    t0, CP0_CONFIG
     and	t0, ~0x7
     ori	t0, 0x2
-    mtc0	t0, CP0_CONFIG
+    mtc0    t0, CP0_CONFIG
 
     /* set up stack */
     la	sp, __startup_stack_top__
@@ -256,7 +256,16 @@ LEAF(mips_write_cp0_count)
 END(mips_write_cp0_count)
 
 
+//int mips_read_cp0_config(void);
+LEAF(mips_read_cp0_config)
+    jr      ra
+    mfc0    v0, CP0_CONFIG // delay slot
+END(mips_read_cp0_config)
 
+
+// -----------------------------------------------------------------------
+// Atomic
+// -----------------------------------------------------------------------
 
 
 // int atomic_add(int *val, int incr) 
@@ -271,6 +280,11 @@ _atomic_add_again:
     jr      ra
     nop
 END(atomic_add)
+
+
+// -----------------------------------------------------------------------
+// Exceptions
+// -----------------------------------------------------------------------
 
 
 /**
@@ -479,6 +493,9 @@ END(_enter_exception_other)
 
 
 
+// -----------------------------------------------------------------------
+// TLB
+// -----------------------------------------------------------------------
 
 
 
@@ -583,8 +600,44 @@ END(mips_tlb_write_random)
 
 
 
+// -----------------------------------------------------------------------
+// Read config
+// -----------------------------------------------------------------------
 
 
+
+
+LEAF(mips_read_config_registers)
+  li t2, 0x80000000 // top bit
+
+  mfc0 t0, CP0_CONFIG
+  sw t0, mips_config_0
+
+  and  t1, t0, t2
+  beqz t1, no_more_ids
+  nop
+
+  mfc0 t0, CP0_CONFIG, 1
+  sw t0, mips_config_1
+
+  and  t1, t0, t2
+  beqz t1, no_more_ids
+  nop
+
+  mfc0 t0, CP0_CONFIG, 2
+  sw t0, mips_config_2
+
+  and  t1, t0, t2
+  beqz t1, no_more_ids
+  nop
+
+  mfc0 t0, CP0_CONFIG, 3
+  sw t0, mips_config_3
+
+no_more_ids:
+  jr ra
+  nop
+END(mips_read_config_registers)
 
 
 

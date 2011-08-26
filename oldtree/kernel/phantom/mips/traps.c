@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <threads.h>
+#include <mips/cp0_regs.h>
 
 
 
@@ -152,6 +153,15 @@ void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
 {
     (void) cause;
     (void) ts;
+
+    if( ts->status & ST_NMI )
+        panic("NMI");
+
+    if( ts->status & ST_TS )
+        panic("TLB shutdown");
+
+    if( ts->status & ST_ERL )
+        panic("Error level");
 
     int trapno = (cause >> 2) & 0x1F; // 5 bits
     ts->trapno = trapno;

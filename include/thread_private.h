@@ -25,6 +25,13 @@
 #include <wtty.h>
 #include <threads.h>
 
+/**
+ * \ingroup Threads
+ * \defgroup Threads Threads and syncronization
+ * @{
+**/
+
+
 extern int threads_inited;
 
 // No. Killed.
@@ -48,16 +55,18 @@ struct phantom_thread
     /** NB! Exactly first! Accessed from asm. */
     cpu_state_save_t            cpu;
 
-    int                         cpu_id; // on which CPU this thread is dispatched now
+    //! on which CPU this thread is dispatched now
+    int                         cpu_id; 
 
     int                         tid;
 
-    // phantom thread ref, etc
+    //! phantom thread ref, etc
     void *                      owner;
 
-    wtty_t *                    ctty; // "controlling" tty
+    //! "controlling" tty
+    wtty_t *                    ctty; 
 
-    // if this thread runs Unix simulation process - here is it
+    //! if this thread runs Unix simulation process - here is it
     struct uuprocess *          u;
 
     const char *                name;
@@ -95,8 +104,8 @@ struct phantom_thread
 
     hal_spinlock_t              waitlock;
 
-    queue_chain_t		chain; // used by mutex/cond code to chain waiting threads
-    queue_chain_t		kill_chain; // used kill code to chain threads to kill
+    queue_chain_t               chain; // used by mutex/cond code to chain waiting threads
+    queue_chain_t               kill_chain; // used kill code to chain threads to kill
 
     //* Used to wake with timer, see hal_sleep_msec
     timedcall_t                 sleep_event; 
@@ -107,10 +116,10 @@ struct phantom_thread
     int                         child_tid; // used by fork code
 
 
-    //void (*handler)( phantom_thread_t * )
+    //! void (*handler)( phantom_thread_t * )
     void *                      death_handler; // func to call if thread is killed
 
-    // Func to call on trap (a la unix signals), returns nonzero if can't handle
+    //! Func to call on trap (a la unix signals), returns nonzero if can't handle
     int 			(*trap_handler)( int sig_no, struct trap_state *ts );
     // --------------------------------------------------------------
     // Scheduler part
@@ -417,7 +426,7 @@ struct phantom_sem_impl
 };
 
 
-
+/** @} */
 
 #endif // THREAD_PRIVATE_H
 

@@ -9,6 +9,7 @@
  *
 **/
 
+
 #ifndef _VIRTIO_RING_H
 #define _VIRTIO_RING_H
 /* An interface for efficient virtio implementation, currently for use by KVM
@@ -21,6 +22,11 @@
  * Copyright Rusty Russell IBM Corporation 2007. */
 #include <phantom_types.h>
 #include <sys/cdefs.h>
+
+/** \ingroup Virtio
+ *  @{
+ */
+
 
 /* This marks a buffer as continuing via the next field. */
 #define VRING_DESC_F_NEXT	1
@@ -139,3 +145,5 @@ void vring_transport_features(struct virtio_device *vdev);
 irqreturn_t vring_interrupt(int irq, void *_vq);
 #endif /* __KERNEL__ */
 #endif /* _VIRTIO_RING_H */
+
+/** @} */

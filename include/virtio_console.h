@@ -17,6 +17,11 @@
 /* This header, excluding the #ifdef __KERNEL__ part, is BSD licensed so
  * anyone can use the definitions to implement compatible drivers/servers. */
 
+/** \ingroup Virtio
+ *  @{
+ */
+
+
 /* The ID for virtio console */
 #define VIRTIO_ID_CONSOLE	3
 
@@ -33,3 +38,5 @@ struct virtio_console_config {
 
 
 #endif /* _VIRTIO_CONSOLE_H */
+
+/** @} */

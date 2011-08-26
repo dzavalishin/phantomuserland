@@ -17,6 +17,11 @@
 #include <virtio_config.h>
 #include <sys/cdefs.h>
 
+/** \ingroup Virtio
+ *  @{
+ */
+
+
 /* The ID for virtio_block */
 #define VIRTIO_ID_BLOCK	2
 
@@ -81,3 +86,5 @@ struct virtio_blk_inhdr
 
 
 #endif /* _VIRTIO_BLK_H */
+
+/** @} */
