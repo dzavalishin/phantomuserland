@@ -1763,7 +1763,7 @@ static void vm_verify_snap(disk_page_no_t head)
     if (!head)
         return;
 
-    if (SNAP_STEPS_DEBUG) hal_printf("Verifying snapshot \n");
+    if (SNAP_STEPS_DEBUG) syslog( 0, "snap: verification started...");
 
     disk_page_io_init(&page_io);
     disk_page_io_allocate(&page_io);
@@ -1805,7 +1805,11 @@ static void vm_verify_snap(disk_page_no_t head)
 
     pagelist_finish( &loader );
     disk_page_io_release(&page_io);
-    if (SNAP_STEPS_DEBUG) hal_printf("Snapshot verification complete\n");
+    if (SNAP_STEPS_DEBUG)
+    {
+	hal_printf("\n");
+	syslog( 0, "snap: verification completed");
+    }
 }
 
 #else
