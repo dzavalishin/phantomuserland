@@ -167,6 +167,7 @@ do
 FATAL! Phantom crashed"
 			break
 		}
+		grep 'snap:' serial0.log
 		grep -i 'snapshot done' serial0.log && break
 		grep -q '^Panic' serial0.log && {
 			grep -q '^- ' serial0.log || {
