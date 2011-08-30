@@ -167,7 +167,6 @@ do
 FATAL! Phantom crashed"
 			break
 		}
-		grep 'snap:' serial0.log
 		grep -i 'snapshot done' serial0.log && break
 		grep -q '^Panic' serial0.log && {
 			grep -q '^- ' serial0.log || {
@@ -180,6 +179,7 @@ FATAL! Phantom cycled"
 		}
 	done
 
+	grep 'snap:' serial0.log
 	grep -q '^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log && {
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log
 		break
