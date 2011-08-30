@@ -59,7 +59,7 @@ static inline void verify_o( pvm_object_t o )
 
 struct pvm_object  pvm_get_array_ofield(struct pvm_object_storage *o, unsigned int slot  )
 {
-	verify_p(o);
+    verify_p(o);
     if(
        !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) ) ||
        !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )
@@ -181,6 +181,10 @@ pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
     return da_po_ptr(o->da)[slot];
 }
 
+// TODO BUG XXX - races possible, read obj, then other thread writes
+// to slot (derements refctr and kills object), then we attempt to
+// use it (even increment refctr) -> death. Need atomic (to slot write? to refcnt dec?)
+// refcnt incr here
 struct pvm_object
 pvm_get_ofield( struct pvm_object op, unsigned int slot )
 {
