@@ -20,6 +20,6 @@
 #define IS_PHANTOM_INT(obj) (obj.data->_class.data == pvm_get_int_class().data)
 #define IS_PHANTOM_STRING(obj) (obj.data->_class.data == pvm_get_string_class().data)
 
-#define EQ_STRING_P2C(obj,cstring) ((pvm_get_str_len(obj)==strlen((const char *)cstring))&&(0==strncmp((const char *)pvm_get_str_data(obj),(const char *)cstring,pvm_get_str_len(obj))))
+#define EQ_STRING_P2C(obj,cstring) ((((unsigned)pvm_get_str_len(obj))==strlen((const char *)cstring))&&(0==strncmp((const char *)pvm_get_str_data(obj),(const char *)cstring,pvm_get_str_len(obj))))
 
 #endif // P2C_H

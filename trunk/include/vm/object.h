@@ -141,9 +141,9 @@ void			pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_t
 
 // Debug
 
-void pvm_object_print( struct pvm_object );
-void pvm_object_dump( struct pvm_object o );
-void dumpo( addr_t addr );
+void                    pvm_object_print( struct pvm_object );
+void                    pvm_object_dump( struct pvm_object o );
+void                    dumpo( addr_t addr );
 
 /**
  *
