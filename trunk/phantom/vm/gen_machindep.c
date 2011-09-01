@@ -38,92 +38,17 @@
 
 int jit_init_unit( jit_out_t *j )
 {
+    /*
     j->nextLabel = 0;
     j->buf = 0;
     j->bufp = 0;
     j->bufsize = 0;
+    */
 
     return 0;
 }
 
 
-void jit_checkbuf( jit_out_t *j, int size )
-{
-    if( j->buf == 0 )
-    {
-        j->bufsize = PAGE_SIZE;
-
-        // TODO calc it! PAGE_ALIGN(size)?
-        while( j->bufsize < size )
-            j->bufsize += PAGE_SIZE;
-
-        j->buf = calloc( 1, j->bufsize );
-        j->bufp = j->buf;
-
-        assert(j->buf);
-
-        return;
-    }
-
-    int used = j->bufp - j->buf;
-
-    if( j->bufsize - used > size )
-        return;
-
-    //int shift = bufp - buf;
-
-    int oldsize = j->bufsize;
-
-    j->bufsize += PAGE_SIZE;
-    char *newb = calloc( 1, j->bufsize );
-    memmove( newb, j->buf, oldsize );
-    free( j->buf );
-
-    j->buf = newb;
-
-    j->bufp = j->buf+used;
-}
-
-
-// Put byte to output code buffer
-void jit_code_8( jit_out_t *j, u_int8_t code )
-{
-    jit_checkbuf( j, 1 );
-    *j->bufp++ = code;
-}
-
-// Put 32 bit int to output code buffer
-void jit_code_32( jit_out_t *j, u_int32_t code )
-{
-    jit_checkbuf( j, 4 );
-    *((u_int32_t*)j->bufp) = code;
-    j->bufp += sizeof(u_int32_t);
-}
-
-
-// Put binary code part to output code buffer
-void copy_jit_code( jit_out_t *j, void *code, size_t size )
-//void copy_jit_code( jit_out_t *j, char * code, int size )
-{
-    jit_checkbuf( j, size );
-    memmove( j->bufp, code, size );
-    j->bufp += size;
-}
-
-
-
-int jit_get_label( jit_out_t *j )
-{
-    return j->nextLabel++;
-}
-
-
-void jit_mark_label( jit_out_t *j, int jl )
-{
-    // Set label targer to current binary instr ptr
-
-    // Also make sure this ip is in crssref ip table
-}
 
 
 // --------------------------------------------------------------------------

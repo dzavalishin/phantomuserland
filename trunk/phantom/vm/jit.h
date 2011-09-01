@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * JIT header
  *
@@ -19,7 +19,10 @@
 void jit_init(void);
 
 //! Compile JIT code for class
-void jit_compile(struct data_area_4_class *da);
+//void jit_compile_class(struct data_area_4_class *da);
+
+//! Compile JIT code for method
+errno_t jit_compile_method(struct pvm_code_handler *code);
 
 /*!
  *
@@ -41,22 +44,6 @@ void jit_compile(struct data_area_4_class *da);
 // ?? = this
 
 
-//! Continue in JIT mode
-//! Parm is struct data_area_4_thread *da
-#define SWITCH_TO_JIT(da,cthis) do {            					\
-    int ip = get_native_IP_from_bc_IP( int bytecode_IP, jit_address_map_t *map );       \
-    /* asm jmp ip */ \
-    } while(0);
-
-//! Return to interpreter
-//! Parm is struct data_area_4_thread *da
-#define SWITCH_FROM_JIT(da,cthis) do {                                                  \
-    /* asm get ip */ \
-    ip -= ip_base; \
-    int bc_ip = get_bc_IP_from_native_IP( int bytecode_IP, jit_address_map_t *map ); \\
-    /* set bytecode IP */ \
-    /* asm jmp bytecode interp - interpret next instr, throw, exit? */ \
-    } while(0); \
 
 // =========================================================================
 //                                        **
@@ -93,21 +80,16 @@ enum jit_callable
 //void jit_kernel_func_table_init(void);
 
 
-enum jit_register
-{
-    JIT_R_AX, JIT_R_BX, JIT_R_CX, JIT_R_DX, JIT_R_SI, JIT_R_DI
-};
-
 
 struct jit_out
 {
     //! Next label id
-    int 	nextLabel;
+    //int 	nextLabel;
 
     // Code buffer
-    char *	buf;
-    char *	bufp; // Current put pos
-    int   	bufsize;
+    //char *	buf;
+    //char *	bufp; // Current put pos
+    //int   	bufsize;
 
     // map of interpreted IP to asm instr offset
 
@@ -118,36 +100,50 @@ struct jit_out
 typedef struct jit_out jit_out_t;
 
 
+struct jit_value
+{
+};
 
+typedef struct jit_value jit_value_t;
 
-
-void copy_jit_code( jit_out_t *j, void *start, size_t size );
-
-
-
-
-// --------------------------------------------------------------------------
-// Direct instructions
-// --------------------------------------------------------------------------
-
-void jit_gen_mov( jit_out_t *j, int src, int dst ); // src reg -> dst reg
-void jit_gen_cmp( jit_out_t *j, int src, int dst ); // dst = (dst == src)
-void jit_gen_neg( jit_out_t *j, int dst ); // dst = !dst
-
-void jit_jz( jit_out_t *, int jlabel );
-
-void jit_gen_push( jit_out_t *j, int src ); // Push reg
-void jit_gen_call( jit_out_t *j, enum jit_callable funcId );
 
 
 // --------------------------------------------------------------------------
 // Misc
 // --------------------------------------------------------------------------
 
+// Store curr IP as possible jump target
+void  jit_mark_possible_label(jit_out_t *j);
 
-void jit_o2int( jit_out_t *j );
-void jit_gen_isnull( jit_out_t *j, int dst ); // dst = (dst == 0)
+
+jit_value_t jit_o2int( jit_out_t *j, jit_value_t v );
+jit_value_t jit_gen_isnull( jit_out_t *j, jit_value_t ); // dst = (dst == 0)
 void jit_check_snap_request( jit_out_t *j );
+
+// TODO const list is just an array? easy to release all
+int jit_alloc_const( jit_out_t *j, pvm_object_t s );
+jit_value_t jit_get_const( jit_out_t *j, int id );
+
+
+void jit_push_arg( jit_out_t *j, jit_value_t v );
+jit_value_t jit_gen_call( jit_out_t *, enum jit_callable );
+
+jit_value_t jit_call_method( jit_out_t *j, int n_method, int n_param, int flags );
+
+
+void jit_ret( jit_out_t *j );
+void jit_throw( jit_out_t *j, jit_value_t v );
+
+jit_value_t jit_sys( jit_out_t *, int nsys ); // TODO fall asleep there
+
+
+void jit_jump( jit_out_t *j, int newip );
+void jit_jnz( jit_out_t *j, int newip, jit_value_t v );
+void jit_jz( jit_out_t *j, int newip, jit_value_t v );
+
+void jit_decrement( jit_out_t *j, jit_value_t v );
+
+
 
 
 // --------------------------------------------------------------------------
@@ -155,44 +151,95 @@ void jit_check_snap_request( jit_out_t *j );
 // --------------------------------------------------------------------------
 
 
-void jit_is_pop( jit_out_t *j ); // pop AX
-void jit_is_push( jit_out_t *j ); // push AX
-void jit_is_top( jit_out_t *j );
-void jit_iconst( jit_out_t *j, int const); // mov 0, %ax
+jit_value_t jit_is_pop( jit_out_t *j );
+void        jit_is_push( jit_out_t *j, jit_value_t );
+jit_value_t jit_is_top( jit_out_t *j );
+jit_value_t jit_iconst( jit_out_t *j, int const);
+
+jit_value_t jit_is_load( jit_out_t *j, int slot );
+jit_value_t jit_is_pull( jit_out_t *j, int slot );
+jit_value_t jit_is_absget( jit_out_t *j, int slot );
+
+jit_value_t jit_is_save( jit_out_t *j, int slot, jit_value_t  );
+jit_value_t jit_is_absset( jit_out_t *j, int slot, jit_value_t );
 
 
 // --------------------------------------------------------------------------
 // O Stack
 // --------------------------------------------------------------------------
 
-void jit_os_push( jit_out_t *j );
-void jit_os_pop( jit_out_t *j );
-void jit_os_top( jit_out_t *j );
+void        jit_os_push( jit_out_t *j, jit_value_t );
+jit_value_t jit_os_pop( jit_out_t *j );
+jit_value_t jit_os_top( jit_out_t *j );
+
+jit_value_t jit_os_load( jit_out_t *j, int slot );
+jit_value_t jit_os_pull( jit_out_t *j, int slot );
+jit_value_t jit_os_absget( jit_out_t *j, int slot );
+
+jit_value_t jit_os_save( jit_out_t *j, int slot, jit_value_t  );
+jit_value_t jit_os_absset( jit_out_t *j, int slot, jit_value_t );
+
+
+// --------------------------------------------------------------------------
+// E Stack
+// --------------------------------------------------------------------------
+
+void jit_es_push( jit_out_t *j, jit_value_t type, int addr );
+jit_value_t  jit_es_pop( jit_out_t *j );
+
 
 // --------------------------------------------------------------------------
 // Ref inc/dec
 // --------------------------------------------------------------------------
 
 
-void jit_refinc( jit_out_t *j, int reg );
-void jit_refdec( jit_out_t *j, int reg );
+jit_value_t jit_refinc( jit_out_t *j, jit_value_t );
+void jit_refdec( jit_out_t *j, jit_value_t );
 
 
 // --------------------------------------------------------------------------
 // Summon
 // --------------------------------------------------------------------------
 
-void jit_get_null( jit_out_t *j ); // AX = 0 DX = 0
-void jit_get_thread( jit_out_t *j ); // AX, DX = thread ptr
-void jit_get_this( jit_out_t *j ); // AX, DX = this ptr
-void jit_get_class_class( jit_out_t *j ); // AX, DX = ptr
-void jit_get_iface_class( jit_out_t *j ); // AX, DX = ptr
-void jit_get_code_class( jit_out_t *j ); // AX, DX = ptr
-void jit_get_int_class( jit_out_t *j ); // AX, DX = ptr
-void jit_get_strting_class( jit_out_t *j ); // AX, DX = ptr
-void jit_get_array_class( jit_out_t *j ); // AX, DX = ptr
+jit_value_t jit_get_null( jit_out_t *j );
+jit_value_t jit_get_thread( jit_out_t *j );
+jit_value_t jit_get_this( jit_out_t *j ); 
+jit_value_t jit_get_class_class( jit_out_t *j );
+jit_value_t jit_get_iface_class( jit_out_t *j );
+jit_value_t jit_get_code_class( jit_out_t *j );
+jit_value_t jit_get_int_class( jit_out_t *j );
+jit_value_t jit_get_string_class( jit_out_t *j );
+jit_value_t jit_get_array_class( jit_out_t *j );
 
 
+// --------------------------------------------------------------------------
+// ops
+// --------------------------------------------------------------------------
+
+
+
+jit_value_t jit_gen_binor( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_binand( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_binxor( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_logor( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_logand( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_logxor( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_ige( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_ile( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_igt( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_ilt( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_add( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_sub( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_mul( struct jit_out *j, jit_value_t a, jit_value_t b );
+jit_value_t jit_gen_div( struct jit_out *j, jit_value_t a, jit_value_t b );
+
+jit_value_t jit_gen_cmp( struct jit_out *j, jit_value_t a, jit_value_t b );
+//jit_value_t jit_gen_neg( struct jit_out *j, jit_value_t a );
+
+jit_value_t jit_gen_binnot( struct jit_out *j, jit_value_t a );
+jit_value_t jit_gen_lognot( struct jit_out *j, jit_value_t a );
+
+jit_value_t jit_is_null( struct jit_out *j, jit_value_t a );
 
 
 
