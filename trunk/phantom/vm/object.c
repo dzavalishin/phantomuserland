@@ -159,6 +159,7 @@ void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_
  *
 **/
 
+// TODO BUG XXX - races possible, see below
 struct pvm_object
 pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
 {

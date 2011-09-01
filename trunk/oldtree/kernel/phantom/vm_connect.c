@@ -51,11 +51,12 @@
 // Object handles support
 // -----------------------------------------------------------------------
 
+static pool_t *ko_pool;
+
 struct kohandle_entry {
     struct kohandle_entry *	next;
     pvm_object_t 		o;
-    //hal_mutex_t lock;
-    //int ref_count;
+    pool_handle_t               handle;
 };
 
 typedef struct kohandle_entry kohandle_entry_t;
@@ -82,15 +83,56 @@ static unsigned int kohandle_entry_hash_func(void *_e, const void *_key, unsigne
 static kohandle_entry_t *kohandles;
 static hal_mutex_t      kohandles_lock;
 
+
+
+static void pool_el_destroy(void *_el)
+{
+    kohandle_entry_t *el = _el;
+    SHOW_ERROR0( 0, "ko handle finalizer");
+
+    hal_mutex_lock(&kohandles_lock);
+    assert( 0 == hash_remove(kohandles, el) );
+    mutex_unlock(&kohandles_lock);
+
+    ref_dec_o(el->o); // We lost our ref - let vm refcount system know
+}
+
+static void *pool_el_create(void *init)
+{
+    (void) init;
+
+    kohandle_entry_t *el = calloc(1, sizeof(kohandle_entry_t));
+    SHOW_ERROR0( 0, "ko handle init");
+
+    el->next = 0;
+    el->handle = -1;
+    //el->o =
+
+    return el;
+}
+
+
+
 errno_t object_handles_init()
 {
     kohandles = hash_init(256, offsetof(kohandle_entry_t, next),
                           &kohandle_entry_compare_func,
                           &kohandle_entry_hash_func);
+
+
+    pool_t *ko_pool = create_pool();
+    ko_pool->destroy = pool_el_destroy;
+    ko_pool->init = pool_el_create;
+
     hal_mutex_init( &kohandles_lock, "kohandles" );
+
     return 0;
 }
 
+
+
+
+/*
 errno_t  object_assign_handle( ko_handle_t *h, pvm_object_t o )
 {
     kohandle_entry_t *e;
@@ -104,7 +146,7 @@ errno_t  object_assign_handle( ko_handle_t *h, pvm_object_t o )
         return ENOENT;
 
     // it is possible to get two objects with same data and different iface
-    //*h = o.data; // that simple - just use data address as handle
+    // *h = o.data; // that simple - just use data address as handle
     SHOW_ERROR0( 0, "Implement me" );
     (void) h;
 
@@ -119,30 +161,98 @@ errno_t  object_revoke_handle( ko_handle_t h, pvm_object_t o )
     SHOW_ERROR0( 0, "Implement me" );
     return EFAULT;
 }
+*/
 
 errno_t  handle_release_object( ko_handle_t *h )
 {
-    (void) h;
-    SHOW_ERROR0( 0, "Implement me" );
-    return EFAULT;
+    errno_t rc = pool_release_el( ko_pool, *h );
+    if(rc)
+        SHOW_ERROR( 0, "failed, %d", rc );
+    return rc;
 }
-
 
 // These two work after handle is assigned
 errno_t  object2handle( ko_handle_t *h, pvm_object_t o )
 {
-    (void) o;
-    (void) h;
-    SHOW_ERROR0( 0, "Implement me" );
-    return EFAULT;
+    assert(ko_pool);
+
+    // Try to find handle for already existing object
+    hal_mutex_lock(&kohandles_lock);
+    kohandle_entry_t *e = hash_lookup(kohandles, &o);
+    //if(e)         udp_endpoint_acquire_ref(e);
+
+    // Make sure it is really in pool and increment refcount
+    kohandle_entry_t *he = 0;
+
+    if(e)
+        he = pool_get_el( ko_pool, e->handle );
+
+    mutex_unlock(&kohandles_lock);
+
+    if(e)
+    {
+        if( !he )
+        {
+            SHOW_ERROR( 0, "Integrity fail: in hash, not in pool!? %p", o.data );
+            return ENOENT;
+        }
+
+        *h = e->handle;
+        // XXX TODO we must receive o ref which has refinc for us done on
+        // the caller's side, so we refdec if we didn't store it (already
+        // stored before. Right now ref inc/dec convention is wrong so we
+        // don't
+        //ref_dec_o(o); 
+        return 0;
+    }
+
+    // Not found.
+
+    // XXX TODO we must receive o ref which has refinc for us done on
+    // the caller's side, so we shouldn't.
+    // Right now ref inc/dec convention is wrong so we inc here
+    ref_inc_o(o);
+
+
+    pool_handle_t ph = pool_create_el( ko_pool, 0 );
+    if( ph < 0 )
+    {
+        SHOW_ERROR( 0, "Pool insert fail %p", o.data );
+        return ENOMEM;
+    }
+
+    he = pool_get_el( ko_pool, ph );
+    if( !he )
+    {
+        SHOW_ERROR( 0, "Integrity fail: not in pool after create!? %p", o.data );
+        return ENOENT;
+    }
+
+    he->handle = ph;
+    he->o = o;
+
+    hal_mutex_lock(&kohandles_lock);
+    if( hash_insert(kohandles, he) )
+    {
+        hal_mutex_unlock(&kohandles_lock);
+        SHOW_ERROR( 0, "Hash insert fail %p", o.data );
+        return EFAULT;
+    }
+    hal_mutex_unlock(&kohandles_lock);
+
+    *h = ph;
+
+    return 0;
 }
 
 errno_t  handle2object( pvm_object_t *o, ko_handle_t h )
 {
-    (void) o;
-    (void) h;
-    SHOW_ERROR0( 0, "Implement me" );
-    return EFAULT;
+    kohandle_entry_t *he = pool_get_el( ko_pool, h );
+    if(!he)
+        return ENOENT;
+
+    *o = he->o;
+    return 0;
 }
 
 

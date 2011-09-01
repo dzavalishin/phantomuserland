@@ -159,6 +159,11 @@ void arch_init_early(void);
 //void board_init_early(void);
 void arch_float_init(void);
 
+void heap_init_mutex( void );
+
+void identify_cpu(void);
+void identify_hypervisor(void);
+
 
 #endif // INIT_H
 

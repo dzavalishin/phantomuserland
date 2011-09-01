@@ -8,6 +8,7 @@
 
 #include <kernel/debug.h>
 #include <kernel/page.h>
+#include <kernel/init.h>
 
 #define addr_t u_int32_t
 #define NULL 0
