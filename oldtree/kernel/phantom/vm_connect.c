@@ -32,6 +32,7 @@
 #include <vm/khandle.h>
 
 #include <khash.h>
+#include <threads.h>
 
 
 /**
@@ -461,4 +462,94 @@ errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct dat
 
     return ret;
 }
+
+
+// -----------------------------------------------------------------------
+// Connection object callbacks
+// -----------------------------------------------------------------------
+
+struct cb_parm
+{
+    struct data_area_4_connection *	da;
+    pvm_object_t                        arg;
+};
+
+
+static void run_cb_thread(void *arg)
+{
+    hal_set_thread_name("conn cb");
+
+    struct cb_parm *p = arg;
+
+    struct pvm_object args[1] = { p->arg };
+    struct data_area_4_connection * da = p->da;
+
+    free(p);
+
+    SHOW_FLOW( 1, "cb conn '%s'", da->name );
+
+    while(da->n_active_callbacks > 16)
+    {
+        SHOW_ERROR( 1, "conn '%s' too much cb: %d", da->name, da->n_active_callbacks );
+        hal_sleep_msec(1000);
+    }
+
+    da->n_active_callbacks++; // TODO atomic?
+    pvm_exec_run_method(da->callback, da->callback_method, 1, args);
+    da->n_active_callbacks--; // TODO atomic?
+
+    SHOW_FLOW( 1, "cb conn '%s' done", da->name );
+
+    // Just die, no more meaning of life
+}
+
+static errno_t run_cb( struct data_area_4_connection *da, pvm_object_t o )
+{
+    struct cb_parm *p = calloc(1, sizeof(struct cb_parm));
+    if(!p)
+    {
+        ref_dec_o(o);
+        return ENOMEM;
+    }
+
+    p->da = da;
+    p->arg = o;
+
+    int tid = hal_start_thread( run_cb_thread, p, 0);
+
+    if( tid < 0 )
+    {
+        ref_dec_o(o);
+        free(p);
+        return EAGAIN;
+    }
+
+    return 0;
+}
+
+
+
+//! Call connection's callback with binary payload
+errno_t phantom_connection_callback_binary( struct data_area_4_connection *da, void *data, size_t size )
+{
+
+    pvm_object_t bo = pvm_create_binary_object( size, data );
+    if( pvm_isnull(bo) )
+        return ENOMEM;
+
+    return run_cb(da, bo);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
