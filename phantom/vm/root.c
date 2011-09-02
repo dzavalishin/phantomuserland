@@ -118,6 +118,9 @@ void pvm_root_init(void)
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
     pvm_root.root_dir = pvm_get_field( root, PVM_ROOT_OBJECT_ROOT_DIR );
 
+// Must create and assign empty one and kill old one after executing
+// to clear refs and delete orphans
+#warning restart list replacement
 
     //cycle through restart objects here and call restart func
 #if COMPILE_EXPERIMENTAL
@@ -575,6 +578,10 @@ void pvm_add_object_to_restart_list( pvm_object_t o )
 #endif
 }
 
+void pvm_remove_object_from_restart_list( pvm_object_t o )
+{
+    printf("!! unimpl pvm_remove_object_from_restart_list called !!\n");
+}
 
 
 void create_and_run_object(const char *class_name, int method )
@@ -630,6 +637,7 @@ int pvm_connect_object(pvm_object_t o, struct data_area_4_thread *tc)
 {
     struct data_area_4_connection *da = pvm_object_da( o, connection );
 
+    // must be done in phantom_connect_object
     pvm_add_object_to_restart_list( o ); // TODO must check it's there
 
     return phantom_connect_object( da, tc);
@@ -638,6 +646,8 @@ int pvm_connect_object(pvm_object_t o, struct data_area_4_thread *tc)
 int pvm_disconnect_object(pvm_object_t o, struct data_area_4_thread *tc)
 {
     struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    pvm_remove_object_from_restart_list( o );
 
     return phantom_disconnect_object( da, tc);
 }

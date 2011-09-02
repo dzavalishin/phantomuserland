@@ -915,6 +915,8 @@ void pvm_gc_iter_connection(gc_iterator_call_t func, struct pvm_object_storage *
     ot.data = (void *) (((addr_t)da->owner)-DA_OFFSET());
 
     gc_fcall( func, arg, ot );
+    gc_fcall( func, arg, da->p_kernel_state_object );
+    gc_fcall( func, arg, da->callback );
 }
 
 
@@ -922,16 +924,16 @@ void pvm_gc_finalizer_connection( struct pvm_object_storage * os )
 {
     // is it called?
     //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
-
+#warning disconnect!
 }
 
-// Unused, not supposed to be called
 void pvm_restart_connection( pvm_object_t o )
 {
     struct data_area_4_connection *da = pvm_object_da( o, connection );
-
+printf("restarting connection");
     da->kernel = 0;
 
+#warning restart!
 }
 
 

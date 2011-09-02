@@ -15,6 +15,7 @@ package .ru.dz.phantom.system;
 import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
+import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 
 attribute const * ->!;
@@ -26,6 +27,7 @@ class shell //extends runnable
     var incr :  int;
 
 	var win : .internal.window;
+    var conn : .internal.connection;
 
     void run(var parent_object @const ) [8]
     {
@@ -37,6 +39,9 @@ class shell //extends runnable
 		win.drawBox( 10, 10, 20, 20 );
 		win.drawString( 22, 22, "Say Hello to Win!" );
 */
+        conn = new .internal.connection();
+        conn.connect("timer");
+
         console = new .internal.io.tty();
         incr = 1;
 
@@ -45,7 +50,7 @@ class shell //extends runnable
 
         while(1)
         {
-            console.putws("I am shell!\n");
+            console.putws("I am connected shell!\n");
             console.putws("--------------------------------------------------\n");
             console.putws("Thread is running... ");
             incr = incr + 1;
