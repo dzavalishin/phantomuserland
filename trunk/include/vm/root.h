@@ -23,6 +23,7 @@ void phantom_setenv( const char *name, const char *value );
 int phantom_getenv( const char *name, char *value, int vsize );
 
 void pvm_add_object_to_restart_list( pvm_object_t o );
+void pvm_remove_object_from_restart_list( pvm_object_t o );
 
 int pvm_connect_object(pvm_object_t o, struct data_area_4_thread *tc);
 int pvm_disconnect_object(pvm_object_t o, struct data_area_4_thread *tc);

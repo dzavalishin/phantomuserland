@@ -460,6 +460,7 @@ struct data_area_4_connection
 
     pvm_object_t                        callback;
     int                                 callback_method;
+    int                                 n_active_callbacks;
 
     // Persistent kernel state, p_kernel_state_object is binary
     size_t                              p_kernel_state_size;
