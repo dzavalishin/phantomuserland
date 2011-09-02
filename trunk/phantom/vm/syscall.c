@@ -1840,10 +1840,10 @@ static int si_connection_8_connect(struct pvm_object o, struct data_area_4_threa
 
     pvm_object_t _s = POP_ARG;
 
-    if(IS_PHANTOM_STRING(_s))
+    if(!IS_PHANTOM_STRING(_s))
     {
         SYS_FREE_O(_s);
-        SYSCALL_THROW_STRING( "not a string arg" );
+        SYSCALL_THROW_STRING( "connection.connect: not a string arg" );
     }
 
     int slen = pvm_get_str_len(_s);
@@ -1857,7 +1857,7 @@ static int si_connection_8_connect(struct pvm_object o, struct data_area_4_threa
     strncpy( da->name, pvm_get_str_data(_s), slen + 1 );
     SYS_FREE_O(_s);
 
-    printf("Connect to %s\n", da->name );
+    printf(".internal.connection: Connect to '%s'\n", da->name );
 
     int ret = pvm_connect_object(o,tc);
 
@@ -1888,6 +1888,9 @@ static int si_connection_10_check(struct pvm_object o, struct data_area_4_thread
 
     int op_index = POP_INT();
 
+#if !PVM_CONNECTION_WAKE
+    int ret = ENXIO;
+#else
     int ret = 0;
 
     if( da->kernel == 0 || da->kernel->check_operation || da->kernel->req_wake )
@@ -1905,7 +1908,7 @@ static int si_connection_10_check(struct pvm_object o, struct data_area_4_thread
                 SYSCALL_PUT_THIS_THREAD_ASLEEP();
         }
     }
-
+#endif
     SYSCALL_RETURN(pvm_create_int_object( ret ) );
 }
 
@@ -1936,6 +1939,27 @@ static int si_connection_11_do(struct pvm_object o, struct data_area_4_thread *t
 }
 
 
+static int si_connection_12_set_callback(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 2);
+
+    int nmethod = POP_INT();
+    pvm_object_t callback_object = POP_ARG;
+
+    int ret = !pvm_isnull( da->callback );
+
+    // No sync - assume caller does it before getting real callbacks
+    da->callback = callback_object;
+    da->callback_method = nmethod;
+
+    SYSCALL_RETURN(pvm_create_int_object( ret ) );
+}
+
+
 syscall_func_t	syscall_table_4_connection[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
@@ -1945,7 +1969,7 @@ syscall_func_t	syscall_table_4_connection[16] =
     // 8
     &si_connection_8_connect, 	    &si_connection_9_disconnect,
     &si_connection_10_check, 	    &si_connection_11_do,
-    &invalid_syscall,               &invalid_syscall,
+    &si_connection_12_set_callback, &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode,
 
 };

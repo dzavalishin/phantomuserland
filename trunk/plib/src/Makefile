@@ -33,19 +33,21 @@ classes: \
      internal.world.pc phantom.osimpl.pc phantom.os.pc \
      phantom.environment.pc \
      internal.thread.pc ru.dz.phantom.system.thread_test.pc \
-     
+     internal.connection.pc
 
 
 
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
+BOOTCLASSES=$(realpath $(PHANTOM_HOME))/run/fat/class
 
 %.pc: %.ph
-	@echo -:- $<
+	@echo -:- $< - $@
 	@$(PLC) $<
+	cp ../bin/$@ $(BOOTCLASSES)
 
 #-include ../bin/*.d
 
 clean::
 	-rm ../bin/*.pc
 	-rm *.ph~
-        
+

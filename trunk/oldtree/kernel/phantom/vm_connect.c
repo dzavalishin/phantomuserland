@@ -94,7 +94,9 @@ static void pool_el_destroy(void *_el)
     assert( 0 == hash_remove(kohandles, el) );
     mutex_unlock(&kohandles_lock);
 
-    ref_dec_o(el->o); // We lost our ref - let vm refcount system know
+    pvm_remove_object_from_restart_list( el->o );
+#warning check ref dec
+    //ref_dec_o(el->o); // We lost our ref - let vm refcount system know - must be done above
 }
 
 static void *pool_el_create(void *init)
@@ -240,6 +242,8 @@ errno_t  object2handle( ko_handle_t *h, pvm_object_t o )
     }
     hal_mutex_unlock(&kohandles_lock);
 
+    pvm_add_object_to_restart_list( o ); // TODO must check it's there
+
     *h = ph;
 
     return 0;
@@ -347,11 +351,95 @@ void ko_spawn_method_callback( ko_handle_t *ko_this, int method, int nargs, ko_h
 // -----------------------------------------------------------------------
 
 
-errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc)
+#define FOURB(___str) (*((u_int32_t *)(___str)))
+
+struct conntab
+{
+    char *                      prefix;
+
+    size_t                      persistent_state_size;
+    size_t                      volatile_state_size;
+
+    struct pvm_connection_ops   ops;
+
+};
+
+static struct conntab connection_types_table[] =
+{
+    { "tmr:", 0, 0, { 0, 0, 0 } },
+};
+
+static int ctt_size = sizeof(connection_types_table)/sizeof(struct conntab);
+
+errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc )
 {
     const char *name = da->name;
     da->owner = tc;
 
+    // 4-byte prefix ("udp:") selects serving backend
+
+    // Need at least 4 byte string
+    if( (name[0] == 0) || (name[1] == 0) || (name[2] == 0) )
+        goto fail;
+
+    u_int32_t prefix = FOURB(name); // get 4 bytes
+
+    //if( prefix == FOURB("tmr:") )
+    int i;
+    for(i = 0; i < ctt_size; i++)
+    {
+        struct conntab *te = connection_types_table+i;
+        if( prefix != FOURB(te->prefix) )
+            continue;
+
+        // Found
+
+        da->kernel = &te->ops;
+        da->p_kernel_state_size = te->persistent_state_size;
+        da->v_kernel_state_size = te->volatile_state_size;
+
+        da->v_kernel_state = calloc(1,te->volatile_state_size);
+        if( da->v_kernel_state == 0)
+        {
+            da->kernel = 0;
+            return ENOMEM;
+        }
+        // now create object for persistent state
+
+        pvm_object_t bo = pvm_create_binary_object( te->persistent_state_size, 0);
+        if( pvm_isnull(bo) )
+        {
+            free(da->v_kernel_state);
+            da->v_kernel_state = 0;
+            da->kernel = 0;
+            return ENOMEM;
+        }
+
+        da->p_kernel_state_object = bo;
+        struct data_area_4_binary *bda = pvm_object_da( bo, binary );
+
+        da->p_kernel_state = &(bda->data);
+
+
+        errno_t ret;
+
+        // call init
+        if( da->kernel->init )
+            ret = da->kernel->init(da,tc);
+
+        // don't kill all?
+
+        if( ret )
+        {
+            SHOW_ERROR( 0, "object connection to dest '%s' init fail %d", name, ret );
+            da->kernel = 0;
+        }
+
+        return ret;
+    }
+
+fail:
+    SHOW_ERROR( 0, "object connection to unknown dest '%s' requested", name );
     return ENOMEM; 
 }
 

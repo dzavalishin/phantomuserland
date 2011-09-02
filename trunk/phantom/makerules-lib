@@ -22,6 +22,6 @@ ARFLAGS = crs
 $(TARGET): $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) )
 	$(AR) $(ARFLAGS)  $@ $?
 	cp $@ $(BUILD_ROOT)/lib
-	-mkdir -p d
-	mv -t d *.d
+	-@mkdir -p d
+	@mv -t d *.d
 

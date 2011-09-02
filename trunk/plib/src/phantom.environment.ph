@@ -28,6 +28,7 @@ class environment
 
     void init()
     {
+        // TODO why :== ?
         if( env :== null )
             env = new .phantom.util.map();
     }

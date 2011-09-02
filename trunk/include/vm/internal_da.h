@@ -426,8 +426,11 @@ struct data_area_4_io
 
 struct data_area_4_connection;
 
+#define PVM_CONNECTION_WAKE 0
+
 struct pvm_connection_ops
 {
+#if PVM_CONNECTION_WAKE
     // No block!
 
     // Check if op can be done, return 0 if so
@@ -435,9 +438,13 @@ struct pvm_connection_ops
 
     // request to wake me up when ready
     errno_t     (*req_wake)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc );
+#endif
 
     // Actually do op 
     errno_t     (*do_operation)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc, pvm_object_t o );
+
+    // Init connection
+    errno_t     (*init)( struct data_area_4_connection *c, struct data_area_4_thread *tc );
 
     // Finish connection
     errno_t     (*disconnect)( struct data_area_4_connection *c, struct data_area_4_thread *tc );
@@ -450,6 +457,18 @@ struct data_area_4_connection
 {
     struct data_area_4_thread *         owner;		// Just this one can use
     struct pvm_connection_ops *         kernel;         // Stuff in kernel that serves us
+
+    pvm_object_t                        callback;
+    int                                 callback_method;
+
+    // Persistent kernel state, p_kernel_state_object is binary
+    size_t                              p_kernel_state_size;
+    pvm_object_t                        p_kernel_state_object;
+    void *                              p_kernel_state;
+
+    // Volatile kernel state
+    size_t                              v_kernel_state_size;
+    void *                              v_kernel_state;
 
     char                                name[1024];     // Used to reconnect on restart
 };
