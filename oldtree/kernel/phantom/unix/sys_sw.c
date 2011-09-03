@@ -103,7 +103,6 @@ errno_t user_args_load( int mina, int maxa, char **oav, int omax,  const char **
 */
 
 
-//#include <i386/tss.h>
 
 
 static void do_syscall_sw(struct trap_state *st)
@@ -146,11 +145,6 @@ static void do_syscall_sw(struct trap_state *st)
 
     //SHOW_FLOW( 10, "Syscall pid %2d tid %2d, our esp %p, user esp %p, t kstack %p", u->pid, t->tid, &st, user_esp, t->kstack_top );
     SHOW_FLOW( 8, "Syscall %d args %x, %x, %x", callno, uarg[0], uarg[1],uarg[2] );
-
-    /*{
-        extern struct i386_tss	       	tss;
-        SHOW_FLOW( 7, "TSS esp0 = %p", (void *)tss.esp0  );
-    }*/
 
     int ret = 0;
     int err = 0;
