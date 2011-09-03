@@ -16,7 +16,7 @@ analyse::
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom/$(ARCH)
 INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
 
-CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d d/*.d $(ARCH)/boards/*.o
+CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d d/*.d $(ARCH)/boards/*.o $(ARCH)/boards/*.d
 PHANTOM_CFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -Wall -std=gnu89 -DKERNEL \
   -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/arch-config.h \
   -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/board-$(BOARD)-config.h 
@@ -77,7 +77,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
 	traps.o hal_physmem.o physalloc.o sched.o \
 	arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
-	cbuf.o atomic.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
+	cbuf.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
 	time.o console.o timedcall.o driver_pci_rtl8139.o \
 	paging_device.o paging.o dpc.o spinlock.o hal.o fsck.o \
 	console_win.o vm_threads.o snap_sync.o ps2.o \
@@ -114,6 +114,8 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	@echo --- kernel build finished
 	-mv -t d *.d
 	-mv -t d unix/*.d
+
+#	-mv -t d $(ARCH)/boards/*.d
 
 -include d/*.d
 -include *.d

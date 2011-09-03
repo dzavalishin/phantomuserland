@@ -199,7 +199,6 @@ int main(int argc, char **argv, char **envp)
 {
     (void) envp;
 
-    //strlcpy( phantom_uname.machine, arch_name, sizeof(phantom_uname.machine) );
     snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
 
 #ifdef STRAY_CATCH_SIZE
