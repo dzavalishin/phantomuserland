@@ -33,7 +33,7 @@ void	hal_spin_unlock(hal_spinlock_t *sl);
 
 static __inline__ int hal_spin_locked(hal_spinlock_t *sl) { return sl->lock; }
 
-#if SPIN_DEBUG
+#if SPIN_DEBUG && !HAVE_SMP
 extern int global_lock_entry_count[];
 #endif
 
