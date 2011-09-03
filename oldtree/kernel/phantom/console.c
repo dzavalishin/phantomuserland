@@ -68,7 +68,11 @@ int putchar(int c)
 	// Send a copy to serial port or whatever...
     debug_console_putc(c);
 
-    if( (!IN_INTERRUPT()) && (global_lock_entry_count[GET_CPU_ID()] == 0) )
+    int glock = 1;
+#if !HAVE_SMP
+    glock = global_lock_entry_count[GET_CPU_ID()] == 0;
+#endif
+    if( (!IN_INTERRUPT()) && glock )
         if(ops->putchar) return ops->putchar(c);
     // No way to handle :(
 
