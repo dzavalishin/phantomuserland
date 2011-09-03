@@ -27,7 +27,7 @@ internal.object.pc: internal.object.ph
 classes: \
      internal.object.pc internal.int.pc internal.string.pc \
      internal.binary.pc internal.class.pc internal.io.tty.pc \
-     internal.bitmap.pc phantom.user.pc phantom.util.map.pc \
+     internal.bitmap.pc internal.mutex.pc phantom.user.pc phantom.util.map.pc \
      ru.dz.phantom.backgrounds.pc ru.dz.phantom.resources.pc \
      phantom.os.time.pc \
      internal.world.pc phantom.osimpl.pc phantom.os.pc \
