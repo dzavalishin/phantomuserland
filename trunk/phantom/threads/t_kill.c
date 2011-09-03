@@ -167,16 +167,17 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     // If any timed call is scheduled - kill it
     phantom_undo_timed_call( &t->sleep_event );
 
+
+    if(t->ownmutex)
+        hal_mutex_unlock_if_owner();
+
+    /*
     // Cond?
     if(t->waitcond)
     {
     }
 
-
-    // Keeps mutexes? CAN'T CHECK!
-
-    /*
-    // TODO Sem unlock?!
+     // TODO Sem unlock?!
     if(t->waitsem)
     {
         SHOW_ERROR0( 0, "Killing thread w sem?!" );
@@ -198,7 +199,6 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
 
     // Remove from thread array
     phantom_kernel_threads[t->tid] = 0;
-
 
     if( t->name )
         free((char *)t->name);

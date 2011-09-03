@@ -15,6 +15,7 @@
 #include <ia32/seg.h>
 #include <ia32/eflags.h>
 #include <ia32/tss.h>
+#include <ia32/private.h>
 
 //#define FXDEBUG(a) a
 #define FXDEBUG(a)
@@ -122,6 +123,7 @@ void switch_to_user_mode()
                 );
 }
 
+#warning seems to machindep, move to common
 void
 phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 {
@@ -132,6 +134,7 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 #if DEBUG
     printf("---- !! phantom_thread_c_starter !! ---\n");
 #endif
+    t->cpu_id = GET_CPU_ID();
 
     // We're first time running here, set arch specific things up
     // NB!! BEFORE enablings ints!
@@ -156,14 +159,11 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
 // Do what is required (arch specific) after switching to a new thread
 void arch_adjust_after_thread_switch(phantom_thread_t *t)
 {
-    // TODO machdep, header
-    extern struct i386_tss  tss;
+//#warning not SMP compliant
+// must find out which TSS is for our CPU and update it's esp0
+    int ncpu = GET_CPU_ID();
+    cpu_tss[ncpu].esp0 = (addr_t)t->kstack_top;
 
-#warning not SMP compliant
-	// must find out which TSS is for our CPU and update it's esp0
-    tss.esp0 = (addr_t)t->kstack_top;
-
-    //int ncpu = GET_CPU_ID();
     //t->cpu_id = ncpu;
 
     // NO! - kill that "Or else CPU doesn't take in account esp0 change :("

@@ -75,7 +75,7 @@ static void checkinit(hal_sem_t *c)
 
 
 
-
+// TODO just call acquire_etc with default values
 errno_t hal_sem_acquire(hal_sem_t *c)
 {
     assert_not_interrupt();

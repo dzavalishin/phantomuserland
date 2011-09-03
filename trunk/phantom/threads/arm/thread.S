@@ -34,6 +34,9 @@ ENTRY(phantom_switch_context)
 
     push        {r4-r12}
 
+    mrs    	r4, spsr
+    push        {r4}
+
     // Save R11/FP
     str         r11, [ r0, #CSTATE_FP ]
     // Save R15/IP
@@ -50,6 +53,8 @@ ENTRY(phantom_switch_context)
     // Load CPSR - NB! - check for interrupts to be disabled!?
     ldr         r3,  [ r1, #CSTATE_CPSR ]
     msr         cpsr, r3
+    // NUTOS puts cpsr to spsr... why? kills all
+    //msr         spsr, r3
 
     // Load R15/IP
     //ldr         r15, [ r1, #CSTATE_IP ]
@@ -60,6 +65,8 @@ ENTRY(phantom_switch_context)
     // Save R11/FP
     ldr         r11, [ r1, #CSTATE_FP ]
 
+    pop        {r4}
+    //msr    	spsr, r4
 
     pop         {r4-r12}
 
