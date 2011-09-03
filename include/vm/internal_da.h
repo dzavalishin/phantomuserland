@@ -14,13 +14,15 @@
 #define PVM_INTERNAL_DA_H
 
 
-#include "vm/object.h"
-#include "vm/exception.h"
-#include "drv_video_screen.h"
+#include <vm/object.h>
+#include <vm/exception.h>
+#include <drv_video_screen.h>
 
 #include <hal.h>
 #include <errno.h>
+#include <sys/cdefs.h>
 #include <kernel/timedcall.h>
+#include <kernel/atomic.h>
 
 
 /** Extract (typed) object data area pointer from object pointer. */
@@ -33,6 +35,15 @@
 /** Slots access for noninternal object. */
 #define da_po_ptr(da)  ((struct pvm_object *)&da)
 
+pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st);
+
+static inline pvm_object_t pvm_da_to_object(void *da)
+{
+    const int off = __offsetof(pvm_object_storage_t,da);
+    pvm_object_storage_t *st = da-off;
+
+    return pvm_storage_to_object(st);
+}
 
 void pvm_fill_syscall_interface( struct pvm_object iface, int syscall_count );
 
@@ -149,6 +160,7 @@ struct data_area_4_thread
     volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
     timedcall_t                         timer;          // Who will wake us
     pvm_object_t                        sleep_chain;    // More threads sleeping on the same event, meaningless for running thread
+    int *				spin_to_unlock; // This spin will be unlocked after putting thread asleep
 
     int                                 tid;            // Actual kernel thread id - reloaded on each kernel restart
 
@@ -283,24 +295,49 @@ struct data_area_4_tty
 };
 
 
-#define MAX_MUTEX_THREADS 3
+//#define MAX_MUTEX_THREADS 3
+
+#if SMP
+#warning VM spinlocks
+#else
+#  define VM_SPIN_LOCK(___var) ({ hal_disable_preemption(); atomic_add(&(___var),1); assert( (___var) == 1 ); })
+#  define VM_SPIN_UNLOCK(___var) ({ atomic_add(&(___var),-1); hal_enable_preemption(); assert( (___var) == 0 ); })
+#endif
 
 struct data_area_4_mutex
 {
-    //hal_spinlock_t      lock;
     int                 poor_mans_pagefault_compatible_spinlock;
-    int         	can_sleep_on_snapshot; // how do we list waiting threads then?
+
+    struct data_area_4_thread *owner_thread;
 
     // Up to MAX_MUTEX_THREADS are stored here
-    pvm_object_t	waiting_threads[MAX_MUTEX_THREADS];
+    //pvm_object_t	waiting_threads[MAX_MUTEX_THREADS];
     // And the rest is here
     pvm_object_t	waiting_threads_array;
 
     int                 nwaiting;
+};
 
-    // TODO need queue!
-    /** Which thread is sleeping. */
-    //struct data_adrea_4_thread  *sleeping;
+struct data_area_4_cond
+{
+    int                 poor_mans_pagefault_compatible_spinlock;
+
+    struct data_area_4_thread *owner_thread;
+
+    pvm_object_t	waiting_threads_array;
+    int                 nwaiting;
+};
+
+struct data_area_4_sema
+{
+    int                 poor_mans_pagefault_compatible_spinlock;
+
+    struct data_area_4_thread *owner_thread;
+
+    pvm_object_t	waiting_threads_array;
+    int                 nwaiting;
+
+    int                 sem_value;
 };
 
 

@@ -95,11 +95,11 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
 // Thread sleep/wakeup
 // --------------------------------------------------------------------------
 
-#define SYSCALL_PUT_THIS_THREAD_ASLEEP() phantom_thread_put_asleep( tc )
+#define SYSCALL_PUT_THIS_THREAD_ASLEEP(__unl_spin) phantom_thread_put_asleep( tc, (__unl_spin) )
 #define SYSCALL_WAKE_THIS_THREAD_UP() phantom_thread_wake_up( tc )
 
-#define SYSCALL_PUT_THREAD_ASLEEP(thread) phantom_thread_put_asleep( thread )
-#define SYSCALL_WAKE_THREAD_UP(thread) phantom_thread_wake_up( thread )
+#define SYSCALL_PUT_THREAD_ASLEEP(__thread, __unl_spin) phantom_thread_put_asleep( (__thread), (__unl_spin) )
+#define SYSCALL_WAKE_THREAD_UP(__thread) phantom_thread_wake_up( (__thread) )
 
 // --------------------------------------------------------------------------
 // Types and syscall table declaration macro
