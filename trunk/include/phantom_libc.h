@@ -60,6 +60,23 @@ void srandom(u_int32_t seed);
 
 
 
+#if 1
+
+static inline int  isspace(unsigned int c) { return ((c) == ' ' || ((c) >= '\t' && (c) <= '\r')); }
+static inline int  isascii(unsigned int c) { return (((c) & ~0x7f) == 0); }
+static inline int  isupper(unsigned int c) { return ((c) >= 'A' && (c) <= 'Z'); }
+static inline int  islower(unsigned int c) { return ((c) >= 'a' && (c) <= 'z'); }
+static inline int  isalpha(unsigned int c) { return (isupper(c) || islower(c)); }
+static inline int  isdigit(unsigned int c) { return ((c) >= '0' && (c) <= '9'); }
+static inline int  isxdigit(unsigned int c) { return (isdigit(c) 
+			  || ((c) >= 'A' && (c) <= 'F') 
+			  || ((c) >= 'a' && (c) <= 'f')); }
+static inline int  isprint(unsigned int c) { return ((c) >= ' ' && (c) <= '~'); }
+
+static inline int  toupper(unsigned int c) { return ((c) - 0x20 * (((c) >= 'a') && ((c) <= 'z'))); }
+static inline int  tolower(unsigned int c) { return ((c) + 0x20 * (((c) >= 'A') && ((c) <= 'Z'))); }
+
+#else
 
 #define isspace(c)	((c) == ' ' || ((c) >= '\t' && (c) <= '\r'))
 #define isascii(c)	(((c) & ~0x7f) == 0)
@@ -75,6 +92,7 @@ void srandom(u_int32_t seed);
 #define toupper(c)	((c) - 0x20 * (((c) >= 'a') && ((c) <= 'z')))
 #define tolower(c)	((c) + 0x20 * (((c) >= 'A') && ((c) <= 'Z')))
 
+#endif
 
 
 extern char **environ;
