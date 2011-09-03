@@ -19,7 +19,7 @@
 
 #include <phantom_libc.h>
 
-#include "snap_sync.h"
+#include <kernel/snap_sync.h>
 #include <hal.h>
 
 //#define DEBUG 0
