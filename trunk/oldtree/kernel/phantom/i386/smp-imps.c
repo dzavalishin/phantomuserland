@@ -756,6 +756,7 @@ imps_force(int ncpus)
 int
 imps_probe(void)
 {
+    SHOW_FLOW0( 1, "Start secondary CPUs" );
     assert( 0 == hal_alloc_phys_pages_low( &bootaddr, 4 ) );
 
     int picmask = phantom_pic_get_irqmask();
@@ -860,7 +861,7 @@ void smp_ap_start(void)
     panic(msg);
 }
 
-#define REAL_SMP 0
+#define REAL_SMP 1
 
 
 static void do_smp_ap_start(void)
@@ -896,7 +897,7 @@ static void do_smp_ap_start(void)
     {
 #if REAL_SMP
         //hal_sleep_msec(10);
-        ia32_pause(); // tell CPU we have nothing to do - must be halt here
+        //ia32_pause(); // tell CPU we have nothing to do - must be halt here
         phantom_scheduler_yield();
 #else
         halt();
@@ -910,7 +911,11 @@ static void do_smp_ap_start(void)
 
 int is_smp(void)
 {
+#if HAVE_SMP
     return imps_num_cpus > 1;
+#else
+    return 0;
+#endif
 }
 
 int ncpus(void)

@@ -47,9 +47,11 @@ struct real_descriptor 	ldt[LDTSZ];
 
 struct real_gate 	idt[IDTSZ];
 
-struct i386_tss	       	tss;
+//struct i386_tss	       	tss;
 struct i386_tss	       	cpu_tss[MAX_CPUS];
 struct vm86tss		tss_vm86;
+
+#define main_tss (cpu_tss[0])
 
 
 // used from direct VESA driver
@@ -117,20 +119,20 @@ static char cpu_intr_stack[MAX_CPUS][IS_SIZE];
 void phantom_init_descriptors(void)
 {
     // TODO need stacks alloc/free for intrs?
-    tss.ss0 = KERNEL_DS;
+    main_tss.ss0 = KERNEL_DS;
 
-    //tss.esp0 = get_esp(); // why?
-    tss.esp0 = (int) (intr_stack+IS_SIZE-4);
+    //main_tss.esp0 = get_esp(); // why?
+    main_tss.esp0 = (int) (intr_stack+IS_SIZE-4);
 
-    tss.io_bit_map_offset = sizeof(tss);
+    main_tss.io_bit_map_offset = sizeof(main_tss);
 
     //tss_vm86.tss.ss0 = KERNEL_DS_16; // WHY!!!?
     tss_vm86.tss.ss0 = KERNEL_DS;
-    //tss.esp0 = get_esp(); // why?
+    //main_tss.esp0 = get_esp(); // why?
     tss_vm86.tss.io_bit_map_offset = sizeof(tss_vm86);
 
 
-    make_descriptor(gdt, MAIN_TSS, kvtolin(&tss), sizeof(tss)-1,
+    make_descriptor(gdt, MAIN_TSS, kvtolin(&main_tss), sizeof(main_tss)-1,
                     ACC_PL_K | ACC_TSS | ACC_P, 0 );
 
     make_descriptor(gdt, VM86_TSS, kvtolin(&tss_vm86), sizeof(tss_vm86)-1,
@@ -190,7 +192,7 @@ void phantom_init_descriptors(void)
 
         cpu_tss[i].esp0 = (int) (cpu_intr_stack[i]+IS_SIZE-4);
 
-        cpu_tss[i].io_bit_map_offset = sizeof(tss);
+        cpu_tss[i].io_bit_map_offset = sizeof(cpu_tss[0]);
 
         make_descriptor(gdt, (CPU_TSS+i*8), kvtolin(&(cpu_tss[i])), sizeof(struct i386_tss)-1,
                     ACC_PL_K | ACC_TSS | ACC_P, 0 );
