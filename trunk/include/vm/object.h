@@ -132,7 +132,7 @@ struct pvm_object       pvm_get_ofield( struct pvm_object, unsigned int no );
 void       		pvm_set_field( struct pvm_object_storage *, unsigned int no, struct pvm_object value );
 void       		pvm_set_ofield( struct pvm_object, unsigned int no, struct pvm_object value );
 
-// Need it here? It will be called by usual set filed ones...
+// Need it here? It will be called by usual set field ones...
 struct pvm_object  	pvm_get_array_ofield(struct pvm_object_storage *o, unsigned int slot  );
 void 			pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struct pvm_object value );
 
@@ -172,6 +172,10 @@ struct pvm_object     pvm_get_weakref_class(void);
 struct pvm_object     pvm_get_window_class(void);
 struct pvm_object     pvm_get_directory_class(void);
 struct pvm_object     pvm_get_connection_class(void);
+
+struct pvm_object     pvm_get_mutex_class(void);
+struct pvm_object     pvm_get_cond_class(void);
+struct pvm_object     pvm_get_sema_class(void);
 
 
 struct pvm_object     pvm_create_null_object(void);

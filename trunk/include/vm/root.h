@@ -65,6 +65,11 @@ struct pvm_root_t
     struct pvm_object           directory_class;
     struct pvm_object           connection_class;
 
+    struct pvm_object           mutex_class;
+    struct pvm_object           cond_class;
+    struct pvm_object           sema_class;
+
+
     struct pvm_object           null_object;
     struct pvm_object           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
     struct pvm_object           class_loader;           // Root class loader (user code)
@@ -171,6 +176,8 @@ extern struct pvm_root_t pvm_root;
 #define PVM_ROOT_OBJECT_DIRECTORY_CLASS 30
 
 #define PVM_ROOT_OBJECT_CONNECTION_CLASS 31
+
+#define PVM_ROOT_OBJECT_SEMA_CLASS 32
 
 // Runtime restoration facilities
 
