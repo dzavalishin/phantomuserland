@@ -28,7 +28,7 @@ void activate_all_threads(void);
 
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda );
 // Can be called from SYS code only
-void phantom_thread_put_asleep( struct data_area_4_thread *thda );
+void phantom_thread_put_asleep( struct data_area_4_thread *thda, int *spin_to_unlock );
 void phantom_thread_wake_up( struct data_area_4_thread *thda );
 
 
