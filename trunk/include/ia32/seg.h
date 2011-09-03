@@ -187,7 +187,7 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
 /*
  * Kernel descriptors for Phantom - 32-bit flat address space.
  */
-#define MAIN_TSS	0x08
+//#define MAIN_TSS	0x08
 
 // sysenter/sysexit want segments this way
 
@@ -204,6 +204,7 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
 #define	KERNEL_DS_16	0x48		/* for entering V86 */
 
 #define CPU_TSS		0x50
+#define MAIN_TSS	0x50  // Main TSS is TSS for CPU 0
 
 #define	VBE3_CS_16	0x60		// VESA PM entry code
 #define	VBE3_DS_16	0x68		// VESA PM entry code as data

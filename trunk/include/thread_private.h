@@ -46,7 +46,7 @@ extern int threads_inited;
 #define TA_LOCK() int ___sie = hal_save_cli(); hal_spin_lock( &schedlock )
 #define TA_UNLOCK() hal_spin_unlock( &schedlock ); if(___sie) hal_sti()
 
-
+#define MAX_THREAD_NAME_LEN 32
 
 struct uuprocess;
 
@@ -70,6 +70,7 @@ struct phantom_thread
     struct uuprocess *          u;
 
     const char *                name;
+    //const char                  name[MAX_THREAD_NAME_LEN+1];
 
     void *                      stack;
     physaddr_t                  stack_pa;
@@ -100,6 +101,7 @@ struct phantom_thread
      */
     hal_cond_t *                waitcond;
     hal_mutex_t *               waitmutex;
+    hal_mutex_t *               ownmutex;
     hal_sem_t *                 waitsem;
 
     hal_spinlock_t              waitlock;
@@ -280,6 +282,9 @@ void phantom_thread_init_mutexes(void);
 void phantom_thread_init_sems(void);
 
 void phantom_thread_init_killer(void);
+
+//! Used in thread kill
+void hal_mutex_unlock_if_owner(void);
 
 
 // ----------------------------------------------------------------
