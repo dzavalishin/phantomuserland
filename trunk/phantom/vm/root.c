@@ -335,6 +335,10 @@ static void set_root_from_table()
     SET_ROOT_CLASS(window, WINDOW);
     SET_ROOT_CLASS(directory, DIRECTORY);
     SET_ROOT_CLASS(connection, CONNECTION);
+
+    SET_ROOT_CLASS(mutex,MUTEX);
+    SET_ROOT_CLASS(cond,COND);
+    SET_ROOT_CLASS(sema,SEMA);
 }
 
 
@@ -372,6 +376,11 @@ GCINLINE struct pvm_object     pvm_get_weakref_class() { return pvm_root.weakref
 GCINLINE struct pvm_object     pvm_get_window_class() { return pvm_root.window_class; }
 GCINLINE struct pvm_object     pvm_get_directory_class() { return pvm_root.directory_class; }
 GCINLINE struct pvm_object     pvm_get_connection_class() { return pvm_root.connection_class; }
+
+GCINLINE struct pvm_object     pvm_get_mutex_class() { return pvm_root.mutex_class; }
+GCINLINE struct pvm_object     pvm_get_cond_class() { return pvm_root.cond_class; }
+GCINLINE struct pvm_object     pvm_get_sema_class() { return pvm_root.sema_class; }
+
 
 #undef GCINLINE
 
