@@ -86,8 +86,9 @@ void phantom_init_apic(void)
     // must be after imps_probe and must get address from it
     phantom_io_apic_init( 0xFEC00000 );
 
-    //imps_probe();
-
+#if HAVE_SMP
+    imps_probe();
+#endif
 
 }
 
