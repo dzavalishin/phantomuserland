@@ -39,10 +39,13 @@ struct hardware_abstraction_level    	hal;
 int phantom_is_a_real_kernel() { return 0; }
 
 
+static CRITICAL_SECTION default_critical;
 
 void hal_init( vmem_ptr_t va, long vs )
 {
     printf("Win32 HAL init @%p\n", va);
+
+    InitializeCriticalSection(&default_critical);
 
     hal.object_vspace = va;
     hal.object_vsize = vs;
@@ -54,6 +57,18 @@ void hal_init( vmem_ptr_t va, long vs )
     CreateThread( 0, 0, (void *) &winhal_debug_srv_thread, 0, 0, 0);
     //if( rc) printf("Win32 can't run debugger thread\n");
 }
+
+void hal_disable_preemption()
+{
+    EnterCriticalSection(&default_critical);
+}
+
+void hal_enable_preemption()
+{
+    LeaveCriticalSection(&default_critical);
+}
+
+
 
 vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 

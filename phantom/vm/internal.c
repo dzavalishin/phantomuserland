@@ -228,6 +228,32 @@ struct internal_class pvm_internal_classes[] =
     },
 
     {
+        ".internal.cond",
+        PVM_ROOT_OBJECT_COND_CLASS,
+        syscall_table_4_cond,
+        pvm_internal_init_cond,
+        0 /*pvm_gc_iter_cond*/,
+        0, // no finalizer
+        0, // no restart func
+        sizeof(struct data_area_4_cond),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
+        {0,0}
+    },
+
+    {
+        ".internal.sema",
+        PVM_ROOT_OBJECT_SEMA_CLASS,
+        syscall_table_4_sema,
+        pvm_internal_init_sema,
+        0 /*pvm_gc_iter_sema*/,
+        0, // no finalizer
+        0, // no restart func
+        sizeof(struct data_area_4_sema),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
+        {0,0}
+    },
+
+    {
         ".internal.binary",
         PVM_ROOT_OBJECT_BINARY_CLASS,
         syscall_table_4_binary,

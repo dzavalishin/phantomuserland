@@ -319,6 +319,17 @@ pvm_copy_object( struct pvm_object in_object )
 
 
 
+pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st)
+{
+    pvm_object_t ret;
+
+    ret.data = st;
+    ret.interface = pvm_get_default_interface(st).data;
+
+    return ret;
+}
+
+
 
 /**
  *

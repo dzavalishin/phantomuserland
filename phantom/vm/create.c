@@ -516,14 +516,78 @@ void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, 
     // Empty
 
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
-    int i;
+    //int i;
 
     gc_fcall( func, arg, da->waiting_threads_array );
 
-    for( i = 0; i < MAX_MUTEX_THREADS; i++ )
-        gc_fcall( func, arg, da->waiting_threads[i] );
+    //for( i = 0; i < MAX_MUTEX_THREADS; i++ )
+    //    gc_fcall( func, arg, da->waiting_threads[i] );
+
+
+    gc_fcall( func, arg, pvm_da_to_object(da->owner_thread) );
+}
+
+
+
+
+
+void pvm_internal_init_cond(struct pvm_object_storage * os)
+{
+    (void)os;
+
+    struct data_area_4_cond *      da = (struct data_area_4_cond *)os->da;
+    (void)da;
+
+    //hal_spin_init( &da->lock );
 
 }
+
+void pvm_gc_iter_cond(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+
+    struct data_area_4_cond *      da = (struct data_area_4_cond *)os->da;
+    //int i;
+
+    gc_fcall( func, arg, da->waiting_threads_array );
+
+    //for( i = 0; i < MAX_MUTEX_THREADS; i++ )
+    //    gc_fcall( func, arg, da->waiting_threads[i] );
+
+    gc_fcall( func, arg, pvm_da_to_object(da->owner_thread) );
+}
+
+
+
+
+void pvm_internal_init_sema(struct pvm_object_storage * os)
+{
+    (void)os;
+
+    struct data_area_4_sema *      da = (struct data_area_4_sema *)os->da;
+    (void)da;
+
+    //hal_spin_init( &da->lock );
+
+}
+
+void pvm_gc_iter_sema(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+
+    struct data_area_4_sema *      da = (struct data_area_4_sema *)os->da;
+    //int i;
+
+    gc_fcall( func, arg, da->waiting_threads_array );
+
+    //for( i = 0; i < MAX_MUTEX_THREADS; i++ )
+    //    gc_fcall( func, arg, da->waiting_threads[i] );
+
+    gc_fcall( func, arg, pvm_da_to_object(da->owner_thread) );
+}
+
+
+
+
+
 
 
 
