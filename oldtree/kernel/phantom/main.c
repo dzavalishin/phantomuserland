@@ -18,6 +18,7 @@
 
 #include <kernel/config.h>
 #include <kernel/board.h>
+#include <kernel/snap_sync.h>
 
 #include "svn_version.h"
 
@@ -36,7 +37,6 @@
 #include <hal.h>
 #include "paging_device.h"
 #include "vm_map.h"
-#include "snap_sync.h"
 
 #include <vm/root.h>
 #include "video.h"

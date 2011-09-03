@@ -30,6 +30,7 @@
 #include <vm/syscall.h>
 
 #include <vm/khandle.h>
+#include <vm/connect.h>
 
 #include <khash.h>
 #include <threads.h>
@@ -367,7 +368,7 @@ struct conntab
 
 static struct conntab connection_types_table[] =
 {
-    { "tmr:", 0, 0, { 0, 0, 0 } },
+    { "tmr:", sizeof(timedcall_t), sizeof(timedcall_t), CON_F_NAMES(timer) },
 };
 
 static int ctt_size = sizeof(connection_types_table)/sizeof(struct conntab);
@@ -399,28 +400,39 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
         da->p_kernel_state_size = te->persistent_state_size;
         da->v_kernel_state_size = te->volatile_state_size;
 
-        da->v_kernel_state = calloc(1,te->volatile_state_size);
-        if( da->v_kernel_state == 0)
+        if(te->volatile_state_size)
         {
-            da->kernel = 0;
-            return ENOMEM;
+            da->v_kernel_state = calloc(1,te->volatile_state_size);
+            if( da->v_kernel_state == 0)
+            {
+                da->kernel = 0;
+                return ENOMEM;
+            }
         }
+        else
+            da->v_kernel_state = 0;
+
         // now create object for persistent state
 
-        pvm_object_t bo = pvm_create_binary_object( te->persistent_state_size, 0);
-        if( pvm_isnull(bo) )
+        if(te->persistent_state_size)
         {
-            free(da->v_kernel_state);
-            da->v_kernel_state = 0;
-            da->kernel = 0;
-            return ENOMEM;
+            pvm_object_t bo = pvm_create_binary_object( te->persistent_state_size, 0);
+            if( pvm_isnull(bo) )
+            {
+                free(da->v_kernel_state);
+                da->v_kernel_state = 0;
+                da->kernel = 0;
+                return ENOMEM;
+            }
+
+            da->p_kernel_state_object = bo;
+            struct data_area_4_binary *bda = pvm_object_da( bo, binary );
+
+            da->p_kernel_state = &(bda->data);
+
         }
-
-        da->p_kernel_state_object = bo;
-        struct data_area_4_binary *bda = pvm_object_da( bo, binary );
-
-        da->p_kernel_state = &(bda->data);
-
+        else
+            da->v_kernel_state = 0;
 
         errno_t ret;
 
@@ -528,18 +540,31 @@ static errno_t run_cb( struct data_area_4_connection *da, pvm_object_t o )
 }
 
 
+#define GOGO(__o) \
+    if( pvm_isnull(__o) )        return ENOMEM; \
+    return run_cb(da, __o);
+
 
 //! Call connection's callback with binary payload
 errno_t phantom_connection_callback_binary( struct data_area_4_connection *da, void *data, size_t size )
 {
-
     pvm_object_t bo = pvm_create_binary_object( size, data );
-    if( pvm_isnull(bo) )
-        return ENOMEM;
-
-    return run_cb(da, bo);
+    GOGO(bo);
 }
 
+//! Call connection's callback with string payload
+errno_t phantom_connection_callback_string( struct data_area_4_connection *da, const char *data )
+{
+    pvm_object_t o = pvm_create_string_object( data );
+    GOGO(o);
+}
+
+//! Call connection's callback with int payload
+errno_t phantom_connection_callback_int( struct data_area_4_connection *da, int data )
+{
+    pvm_object_t o = pvm_create_int_object( data );
+    GOGO(o);
+}
 
 
 

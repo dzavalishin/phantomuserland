@@ -1,9 +1,10 @@
 #include <kernel/timedcall.h>
 #include <vm/syscall_tools.h>
-#include "snap_sync.h"
+#include <kernel/snap_sync.h>
 
 #include <phantom_libc.h>
 
+#warning i am obsolete
 
 static void
 wakeThread(void *arg)
