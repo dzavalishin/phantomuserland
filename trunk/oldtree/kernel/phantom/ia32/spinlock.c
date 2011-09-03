@@ -27,7 +27,8 @@
 	    _r__; }))
 
 
-#if SPIN_DEBUG
+#if SPIN_DEBUG && !HAVE_SMP
+#warning spin reenter debug on
 int global_lock_entry_count[MAX_CPUS] = {};
 
 static void spin_dump(hal_spinlock_t *sl)
@@ -50,7 +51,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
     if(hal_is_sti())
         printf("\n!spinlock STI!\n");
 
-#if SPIN_DEBUG
+#if SPIN_DEBUG && !HAVE_SMP
     if(sl->lock)
         spin_dump(sl);
 #endif
@@ -60,7 +61,7 @@ void hal_spin_lock(hal_spinlock_t *sl)
             ;
 
 
-#if SPIN_DEBUG
+#if SPIN_DEBUG && !HAVE_SMP
     global_lock_entry_count[GET_CPU_ID()]++;
     sl->ebp = (addr_t)arch_get_frame_pointer();
 #endif
@@ -71,7 +72,7 @@ void hal_spin_unlock(hal_spinlock_t *sl)
     if (sl) // Scheduler sometimes calls us will sl == 0
     {
         assert(sl->lock);
-#if SPIN_DEBUG
+#if SPIN_DEBUG && !HAVE_SMP
         sl->ebp = 0;
         global_lock_entry_count[GET_CPU_ID()]--;
 #endif
@@ -84,7 +85,7 @@ void hal_spin_unlock(hal_spinlock_t *sl)
 
 void check_global_lock_entry_count()
 {
-#if SPIN_DEBUG && 1
+#if SPIN_DEBUG && 1 && !HAVE_SMP
     if(global_lock_entry_count[GET_CPU_ID()] > 1)
     {
         printf("some spinlock locked!");
