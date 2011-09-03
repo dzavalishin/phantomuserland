@@ -400,7 +400,7 @@ bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
     SHOW_FLOW( 3, "bootprecv: recv %d bytes", n);
 
     if (bp->bp_xid != htonl(xid)) {
-        SHOW_ERROR( 1, "bootprecv: expected xid 0x%lx, got 0x%x",
+        SHOW_ERROR( 1, "bootprecv: expected xid 0x%x, got 0x%x",
                    xid, ntohl(bp->bp_xid));
         goto bad;
     }
