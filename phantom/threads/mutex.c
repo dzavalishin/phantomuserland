@@ -10,12 +10,20 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "threads"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
+
+
+#include <phantom_libc.h>
 #include <queue.h>
 #include <malloc.h>
 #include <hal.h>
 #include <errno.h>
 
-#include "thread_private.h"
+#include <thread_private.h>
 
 #define VERIFY_DEADLOCK 0
 
@@ -49,6 +57,7 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
     if(mi->owner == 0)
     {
         mi->owner = GET_CURRENT_THREAD();
+        GET_CURRENT_THREAD()->ownmutex = m; // to release on thread death
         goto ret;
     }
 
@@ -103,6 +112,7 @@ errno_t hal_mutex_unlock(hal_mutex_t *m)
     phantom_thread_t *next_owner = t_dequeue_highest_prio(&(mi->waiting_threads));
 
     mi->owner = next_owner;
+    next_owner->ownmutex = m; // to release on thread death
     thread_unblock( next_owner, THREAD_SLEEP_MUTEX );
 
 ret:
@@ -111,6 +121,22 @@ ret:
     if(ie) hal_sti();
 
     return 0;
+}
+
+void hal_mutex_unlock_if_owner(void)
+{
+    hal_mutex_t *m = GET_CURRENT_THREAD()->ownmutex;
+    if( !m ) return;
+
+    if(m->impl == 0) panic("unlock_if_owner of uninited mutex");
+
+    struct phantom_mutex_impl* mi = m->impl;
+    if( mi->owner != GET_CURRENT_THREAD())
+        return;
+
+    errno_t rc = hal_mutex_unlock(m);
+    if( rc )
+        SHOW_ERROR( 0, "failed to unlock mutex on thread death: %d", rc );
 }
 
 int

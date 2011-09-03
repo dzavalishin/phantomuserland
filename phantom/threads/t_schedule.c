@@ -455,7 +455,7 @@ void thread_block( int sleep_flag, hal_spinlock_t *lock_to_be_unlocked )
     int ie = hal_save_cli();
     hal_spin_lock(&schedlock);
 
-#if SPIN_DEBUG
+#if SPIN_DEBUG && !HAVE_SMP
     assert(global_lock_entry_count[GET_CPU_ID()] == 2);
 #endif
 
