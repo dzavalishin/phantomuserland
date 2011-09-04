@@ -313,7 +313,7 @@ struct data_area_4_mutex
     // Up to MAX_MUTEX_THREADS are stored here
     //pvm_object_t	waiting_threads[MAX_MUTEX_THREADS];
     // And the rest is here
-    pvm_object_t	waiting_threads_array;
+    pvm_object_t        waiting_threads_array;
 
     int                 nwaiting;
 };
@@ -324,7 +324,7 @@ struct data_area_4_cond
 
     struct data_area_4_thread *owner_thread;
 
-    pvm_object_t	waiting_threads_array;
+    pvm_object_t        waiting_threads_array;
     int                 nwaiting;
 };
 
@@ -334,7 +334,7 @@ struct data_area_4_sema
 
     struct data_area_4_thread *owner_thread;
 
-    pvm_object_t	waiting_threads_array;
+    pvm_object_t        waiting_threads_array;
     int                 nwaiting;
 
     int                 sem_value;
