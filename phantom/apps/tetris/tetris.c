@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 
 #define DEBUG_MSG_PREFIX "tetris"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
@@ -42,11 +42,6 @@ static int fb;
     } while(0)
 
 
-//#include <drv_video_screen.h>
-
-
-//#include "dev/key_event.h"
-//#include "misc.h"
 
 
 //static int rbits = 0;
@@ -58,9 +53,7 @@ static int k_down = 0, k_up = 0, k_right = 0, k_left = 0;
 #define joystick_up() (rbits&4)
 //#define joystick_down() (k_down > 0 )
 
-//static drv_video_window_t *tetris_window;
 
-//void win_show(drv_video_window_t *w);
 
 #define PITWIDTH        12
 #define PITDEPTH        24
@@ -105,7 +98,6 @@ int pit [PITDEPTH+1] [PITWIDTH];
 int pitcnt [PITDEPTH];
 coord_t old [NBLOCKS], new [NBLOCKS], chk [NBLOCKS];
 
-//gpanel_t display;
 
 void input(void);
 
@@ -205,13 +197,11 @@ void draw_block (int h, int w, int visible)
         {
             FB_SET_COLOR(fb,COLOR_LIGHTGREEN);
             FB_DRAW_PIXEL(fb, w, h + 2);
-            //drv_video_window_pixel ( tetris_window, w, h + 2, COLOR_LIGHTGREEN);
         }
         else
             if (w % 20 == 15)
             {
                 FB_DRAW_PIXEL(fb, w + 4, h + 2);
-                //drv_video_window_pixel ( tetris_window, w + 4, h + 2, COLOR_LIGHTGREEN);
             }
     }
 }
@@ -464,35 +454,57 @@ static void tetris_window_loop(void)
 
 static void process_event( struct ui_event *e )
 {
+    //SHOW_FLOW( 2, "e type %x exp %x", e->type, UI_EVENT_TYPE_KEY );
 
     switch(e->type)
     {
     //case UI_EVENT_TYPE_MOUSE: 	defaultMouseEventProcessor(w, &e); break;
 
+
     case UI_EVENT_TYPE_KEY:
+
+        //printf( "key %x/%x mod %x\n", e->k.vk, e->k.ch, e->modifiers );
 
         // Ignore key up events
         if(e->modifiers & UI_MODIFIER_KEYUP)
             return;
 
+        //printf( "keydown %x/%x exp %x\n", e->k.vk, e->k.ch, KEY_ARROW_DOWN );
+
+        switch(e->k.ch)
+        {
+        case ' ':
+            k_down++;
+            return;
+
+        case 0x1B:
+            close(fb);
+            exit(0);
+
+        }
+
         switch(e->k.vk)
         {
         case KEY_ARROW_DOWN:
+        case 0xB9:
             k_down++;
             //SHOW_FLOW( 2, "KEY__DOWN %d", k_down );
             break;
 
         case KEY_ARROW_UP:
+        case 0xBF:
             k_up++;
             //SHOW_FLOW( 2, "KEY__UP %d", k_down );
             break;
 
         case KEY_ARROW_LEFT:
+        case 0xBB:
             k_left++;
             //SHOW_FLOW( 2, "KEY__LEFT %d", k_down );
             break;
 
         case KEY_ARROW_RIGHT:
+        case 0xBD:
             k_right++;
             //SHOW_FLOW( 2, "KEY__RIGHT %d", k_down );
             break;
@@ -507,6 +519,7 @@ static void process_event( struct ui_event *e )
 int get_event( struct ui_event *e )
 {
     int ret = read( fb, e, sizeof(struct ui_event) );
+    //printf("-re- %d (exp %d)\n", ret, sizeof(struct ui_event) );
     if( ret < 0 )
         printf("-re- ");
 
@@ -519,13 +532,22 @@ void input(void)
     struct ui_event e;
 
     if(get_event( &e ))
+    {
+        //printf("pe %x\n", e.type );
         process_event( &e );
+    }
 }
 
 
 int main()
 {
-    //tetris_window = drv_video_window_create( 60, 120, 700, 550, COLOR_BLACK, "Tetris" );
+#warning check bss clean
+    k_right = 0;
+    k_left = 0;
+    k_down = 0;
+    k_up = 0;
+
+#warning process exit doesnt kill window
 
     fb = open("/dev/etc/fb.0", O_RDWR );
 
