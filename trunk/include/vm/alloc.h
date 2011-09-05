@@ -55,6 +55,9 @@ void ref_dec_p(pvm_object_storage_t *p);
 void ref_inc_p(pvm_object_storage_t *p);
 
 
+void do_ref_dec_p(pvm_object_storage_t *p); // for deferred refdec
+
+
 
 // ------------------------------------------------------------
 // shared between alloc.c and gc.c

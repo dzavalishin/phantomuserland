@@ -68,6 +68,11 @@ errno_t get_stats_record( int id, struct kernel_stats *out );
 #define         STAT_CNT_DISK_Q_SIZE                    22
 #define         STAT_CNT_BLOCK_SYNC_IO                  23
 
+#define         DEFERRED_REFDEC_RUNS                    32
+#define         DEFERRED_REFDEC_REQS                    33
+#define         DEFERRED_REFDEC_LOST                    34
+
+
 void stat_increment_counter( int nCounter );
 
 #define STAT_INC_CNT( ___nCounter ) do { \
