@@ -31,7 +31,7 @@
 
 #include <time.h>
 
-#include "snap_sync.h"
+#include <kernel/snap_sync.h>
 #include <hal.h>
 
 
