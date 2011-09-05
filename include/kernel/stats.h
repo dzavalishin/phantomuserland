@@ -101,5 +101,7 @@ void stat_increment_counter( int nCounter );
 
 #endif // KERNEL
 
+void phantom_dump_stats_buf(char *buf, int len);
+
 
 #endif // STATS_H

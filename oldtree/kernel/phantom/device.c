@@ -120,11 +120,12 @@ static void dbg_dump_devs(int argc, char **argv)
 
 }
 
-void init_buses(void)
+static void init_buses(void)
 {
-
     // add the debug command
     dbg_add_command(&dbg_dump_devs, "buses", "Dump buses and dev lists");
 
 }
+
+INIT_ME( 0, 0, init_buses )
 

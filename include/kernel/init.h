@@ -38,16 +38,16 @@ struct init_record
 
 void register_init_record( struct init_record *ir );
 
-#define INIT_ME(__inits) \
-    static struct init_record __init_record = { 0, __inits, 0, 0, 0, 0, 0 }; \
+#define INIT_ME(__init1,__init2,__init3) \
+    static struct init_record __init_record = { 0, __init1, 0, __init2, 0, __init3, 0 }; \
     static void __register_init(void) __attribute__ ((constructor)); \
     static void __register_init(void) \
     { \
     register_init_record( &__init_record ); \
     }
 
-#define STOP_ME(__stops) \
-    static struct init_record __stop_record = { 0, __stops, 0, 0, 0, 0, 0 }; \
+#define STOP_ME(__stop1) \
+    static struct init_record __stop_record = { 0, __stop1, 0, 0, 0, 0, 0 }; \
     static void __register_stop(void) __attribute__ ((constructor)); \
     static void __register_stop(void) \
     { \
@@ -66,11 +66,20 @@ void register_init_record( struct init_record *ir );
 */
 
 // After prepare all public interfaces must be callable
-#define INIT_LEVEL_PREPARE	1
+#define INIT_LEVEL_PREPARE      1
 #define INIT_LEVEL_INIT         2
 #define INIT_LEVEL_LATE         3
 
+// ?
+#define STOP_LEVEL_EARLY        1
+// Stop requesting others
+#define STOP_LEVEL_PREPARE      2
+// Stop serving
+#define STOP_LEVEL_STOP         3
+
+
 void run_init_functions( int level );
+void run_stop_functions( int level );
 
 
 int phantom_find_drivers( int stage );
@@ -130,8 +139,6 @@ void phantom_init_apic(void);
 
 void phantom_paging_init(void);
 
-void init_multiboot_symbols(void);
-
 int phantom_timer_pit_init(int freq, void (*timer_intr)());
 
 void init_irq_allocator(void);
@@ -142,13 +149,8 @@ void phantom_trfs_init(void);
 
 void phantom_turn_off_pic_scheduler_timer(void);
 
-void phantom_init_stat_counters(void);
-void phantom_init_stat_counters2(void);
-
 
 void phantom_unix_proc_init(void);
-
-void init_buses(void);
 
 
 void load_classes_module(void); // vm bulk classes init
@@ -167,6 +169,7 @@ void init_wins(u_int32_t ip_addr);
 void arch_init_early(void);
 //void board_init_early(void);
 void arch_float_init(void);
+void arch_threads_init(); // Do all that needed to prepare for thread switches
 
 void heap_init_mutex( void );
 

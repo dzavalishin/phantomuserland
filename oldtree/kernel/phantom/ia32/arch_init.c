@@ -15,8 +15,10 @@
 #define debug_level_info 10
 
 #include <kernel/init.h>
+#include <kernel/trap.h>
 #include <device.h>
 #include <ia32/pio.h>
+#include <threads.h>
 
 
 static u_int32_t		isa_read32(u_int32_t addr)                      { return inl(addr); }
@@ -49,3 +51,25 @@ void arch_init_early(void)
     }
 #endif
 }
+
+
+static int ignore_handler(struct trap_state *ts)
+{
+    (void) ts;
+
+    //hal_sti(); // It works in open interrupts - NOOO! We carry user spinlock here, so we have to be in closed interrupts up to unlock!
+    phantom_scheduler_soft_interrupt();
+    // it returns with soft irqs disabled
+    hal_enable_softirq();
+
+    return 0;
+}
+
+
+void arch_threads_init()
+{
+    // HACK!!! Used to give away CPU in thread switch
+    // Replace with?
+    phantom_trap_handlers[15] = ignore_handler;
+}
+

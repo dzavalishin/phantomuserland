@@ -33,7 +33,7 @@ static void deferred_refdec_init(void);
 static void deferred_refdec_thread(void *a);
 
 
-INIT_ME( deferred_refdec_init )
+INIT_ME( deferred_refdec_init, 0, 0 )
 //STOP_ME( deferred_refdec_stop )
 
 

@@ -162,7 +162,7 @@ static void load_elf_hdr(Elf32_Shdr *header, int h_elements)
 
 }
 
-void init_multiboot_symbols(void)
+static void init_multiboot_symbols(void)
 {
 #ifdef ARCH_ia32
     if(bootParameters.flags & MULTIBOOT_ELF_SHDR)
@@ -183,3 +183,6 @@ void init_multiboot_symbols(void)
     }
 #endif
 }
+
+INIT_ME( init_multiboot_symbols, 0, 0 )
+

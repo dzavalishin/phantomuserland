@@ -35,6 +35,7 @@
 #include <threads.h>
 #include <kernel/timedcall.h>
 #include <kernel/debug.h>
+#include <kernel/stats.h>
 
 #if NET_TIMED_FLUSH
 #include "net_timer.h"
@@ -262,7 +263,9 @@ void phantom_init_console_window()
                         DEBWIN_XS, DEBWIN_YS,
                         DEBWIN_X, DEBWIN_Y, console_bg, "Threads" );
 
-    phantom_debug_window_puts("Phantom debug window\n");
+    phantom_debug_window_puts("Phantom debug window\n\nt - threads\nw - windows\ns - stats\n");
+    drv_video_window_update( phantom_debug_window );
+    //hal_sleep_msec(4000);
 
     hal_start_kernel_thread(phantom_debug_window_loop);
 }
@@ -304,7 +307,7 @@ static void phantom_debug_window_loop()
     static char buf[DEBBS+1];
     int step = 0;
 
-    int show;
+    int show = 't';
 
     hal_set_thread_name("Debug Win");
     // Which thread will receive typein for this window
@@ -334,10 +337,14 @@ static void phantom_debug_window_loop()
                        "---------\n"
                        "w\t- show windows list\n"
                        "t\t- show threads list\n"
+                       "t\t- show stats\n"
                       );
                 break;
-            case 't':            show = 1; break;
-            case 'w':            show = 2; break;
+            case 't':            
+            case 'w':
+            case 's':
+                show = c;
+                break;
             }
         }
 
@@ -374,13 +381,17 @@ static void phantom_debug_window_loop()
 
         switch(show)
         {
-        case 1:
+        case 't':
         default:
             phantom_dump_threads_buf(bp,len);
             break;
 
-        case 2:
+        case 'w':
             phantom_dump_windows_buf(bp,len);
+            break;
+
+        case 's':
+            phantom_dump_stats_buf(bp,len);
             break;
         }
 

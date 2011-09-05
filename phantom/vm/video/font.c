@@ -151,6 +151,13 @@ __inline__ void drv_video_font_tty_string(
             s++;
             continue;
         }
+        else if( *s == '\t' )
+        {
+            while( *x % 8 )
+                (*x)++;
+            s++;
+            continue;
+        }
         else if( *s == 0x1B ) // esc
         {
             s++; nc--;

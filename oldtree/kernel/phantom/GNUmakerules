@@ -102,7 +102,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
 	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
 	unix/signal.o unix/sys_sw.o vm_cn_timer.o \
-	fs_map.o stats.o resolve.o main.o keyboard.o syslog.o \
+	fs_map.o resolve.o main.o keyboard.o syslog.o \
 	arch_name.o arch_init.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
 	svn_version.o	$(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)

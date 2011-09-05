@@ -2,17 +2,22 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Static constructors runner.
+ * Static constructors runner. General init/stop functions runner.
  *
  *
 **/
 
-// TODO doesn't really run constructors :(. see multiboot.c
+#define DEBUG_MSG_PREFIX "init"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 
 #include <sys/types.h>
+#include <phantom_libc.h>
 #include <kernel/init.h>
 
 /* These magic symbols are provided by the linker.  */
@@ -69,4 +74,85 @@ __libc_fini_array (void)
 //    _fini ();
 }
 */
+
+
+
+// -----------------------------------------------------------------------
+// General init code
+// -----------------------------------------------------------------------
+
+static struct init_record *init_list_root = 0;
+void register_init_record( struct init_record *ir )
+{
+    ir->next = init_list_root;
+    init_list_root = ir;
+}
+
+static void run_next_init( int level, struct init_record *ir )
+{
+    if( ir == 0 )
+        return;
+
+    switch( level )
+    {
+    case INIT_LEVEL_PREPARE:
+        if(ir->init_1) ir->init_1(); break;
+
+    case INIT_LEVEL_INIT:
+        if(ir->init_2) ir->init_2(); break;
+
+    case INIT_LEVEL_LATE:
+        if(ir->init_3) ir->init_3(); break;
+
+    default:
+        SHOW_ERROR( 0, "wrong level %d", level );
+    }
+
+    //if( ir->next )
+    run_next_init( level, ir->next );
+}
+
+void run_init_functions( int level )
+{
+    run_next_init( level, init_list_root );
+}
+
+
+static struct init_record *stop_list_root = 0;
+void register_stop_record( struct init_record *ir )
+{
+    ir->next = stop_list_root;
+    stop_list_root = ir;
+}
+
+static void run_next_stop( int level, struct init_record *ir )
+{
+    if( ir == 0 )
+        return;
+
+    switch( level )
+    {
+    case INIT_LEVEL_PREPARE:
+        if(ir->init_1) ir->init_1(); break;
+
+    case INIT_LEVEL_INIT:
+        if(ir->init_2) ir->init_2(); break;
+
+    case INIT_LEVEL_LATE:
+        if(ir->init_3) ir->init_3(); break;
+
+    default:
+        SHOW_ERROR( 0, "wrong level %d", level );
+    }
+
+    //if( ir->next )
+    run_next_init( level, ir->next );
+}
+
+void run_stop_functions( int level )
+{
+    run_next_stop( level, stop_list_root );
+}
+
+
 
