@@ -39,12 +39,21 @@ struct init_record
 void register_init_record( struct init_record *ir );
 
 #define INIT_ME(__inits) \
-    static struct init_record __init_record = { 0, __inits }; \
+    static struct init_record __init_record = { 0, __inits, 0, 0, 0, 0, 0 }; \
     static void __register_init(void) __attribute__ ((constructor)); \
     static void __register_init(void) \
     { \
     register_init_record( &__init_record ); \
     }
+
+#define STOP_ME(__stops) \
+    static struct init_record __stop_record = { 0, __stops, 0, 0, 0, 0, 0 }; \
+    static void __register_stop(void) __attribute__ ((constructor)); \
+    static void __register_stop(void) \
+    { \
+    register_stop_record( &__stop_record ); \
+    }
+
 
 /*
 #define INIT_NEED_NET           (1<< 0)
