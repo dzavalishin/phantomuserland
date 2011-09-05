@@ -48,7 +48,6 @@
 #include <sys/utsname.h>
 #include <stdlib.h>
 
-// pvm_bulk_init
 #include <threads.h>
 
 // pvm_memcheck
@@ -162,17 +161,6 @@ static void net_stack_init();
 
 
 
-static int ignore_handler(struct trap_state *ts)
-{
-    (void) ts;
-
-    //hal_sti(); // It works in open interrupts - NOOO! We carry user spinlock here, so we have to be in closed interrupts up to unlock!
-    phantom_scheduler_soft_interrupt();
-    // it returns with soft irqs disabled
-    hal_enable_softirq();
-
-    return 0;
-}
 
 #if !DRIVE_SCHED_FROM_RTC
 static timedcall_t sched_timer =
@@ -201,22 +189,18 @@ int main(int argc, char **argv, char **envp)
 
     snprintf( phantom_uname.machine, sizeof(phantom_uname.machine), "%s/%s", arch_name, board_name );
 
-#ifdef STRAY_CATCH_SIZE
-    // check for stray ptrs here
-    stray();
-#endif
     run_init_functions( INIT_LEVEL_PREPARE );
 
     init_irq_allocator();
 
-    init_multiboot_symbols();
-
     //hal_init(             (void *)PHANTOM_AMAP_START_VM_POOL,             N_OBJMEM_PAGES*4096L);
 
+    // TODO we have 2 kinds of ia32 cpuid code
     detect_cpu(0);
-    phantom_paging_init();
+    //identify_cpu();
+    identify_hypervisor();
 
-    phantom_init_stat_counters();
+    phantom_paging_init();
 
 #ifdef ARCH_arm
     //test_swi();
@@ -227,15 +211,9 @@ int main(int argc, char **argv, char **envp)
 
     hal_init((void *)PHANTOM_AMAP_START_VM_POOL, N_OBJMEM_PAGES*4096L);
 
-
     // Threads startup
     {
-#if ARCH_ia32
-    // HACK!!! Used to give away CPU in thread switch
-    // Replace with?
-    phantom_trap_handlers[15] = ignore_handler;
-#endif
-
+    arch_threads_init();
     phantom_threads_init();
     heap_init_mutex(); // After threads
     pvm_alloc_threaded_init(); // After threads
@@ -251,12 +229,10 @@ int main(int argc, char **argv, char **envp)
 
     net_timer_init();
 
-    identify_cpu();
-    identify_hypervisor();
 
     phantom_init_part_pool();
 
-    // Stage is:
+    // Driver stage is:
     //   0 - very early in the boot - interrupts can be used only
     //   1 - boot, most of kernel infrastructure is there
     //   2 - disks which Phantom will live in must be found here
@@ -294,6 +270,7 @@ int main(int argc, char **argv, char **envp)
 
     // here it kills all by calling windowing funcs sometimes
     //init_main_event_q();
+    run_init_functions( INIT_LEVEL_INIT );
 
 #ifdef ARCH_ia32
 #if HAVE_VESA
@@ -324,11 +301,7 @@ int main(int argc, char **argv, char **envp)
     phantom_start_boot_modules();
 #endif // HAVE_UNIX
 
-    //arch_get_rtc_delta(); // Read PC clock
 
-#ifdef STRAY_CATCH_SIZE
-    init_stray_checker();
-#endif
 
 #if HAVE_USB
     usb_setup();
@@ -336,8 +309,6 @@ int main(int argc, char **argv, char **envp)
 
     pressEnter("will run phantom_timed_call_init2");
     //phantom_timed_call_init2();
-    pressEnter("will run phantom_init_stat_counters2");
-    //phantom_init_stat_counters2();
 
     // -----------------------------------------------------------------------
     // If this is test run, switch to test code
@@ -410,8 +381,7 @@ int main(int argc, char **argv, char **envp)
 
 //trfs_testrq();
 
-    init_buses();
-
+    run_init_functions( INIT_LEVEL_LATE );
 
     // pool.ntp.org
     //init_sntp( IPV4_DOTADDR_TO_ADDR(85,21,78,91), 10000 );
@@ -440,7 +410,10 @@ int main(int argc, char **argv, char **envp)
     phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
 #endif
 
+    run_stop_functions( STOP_LEVEL_EARLY );
     //pressEnter("will do a snap");
+    run_stop_functions( STOP_LEVEL_PREPARE );
+    run_stop_functions( STOP_LEVEL_STOP );
 
     stop_phantom();
 
@@ -500,43 +473,4 @@ void _exit(int code)
     hal_cpu_reset_real();
 }
 
-// -----------------------------------------------------------------------
-// General init code
-// -----------------------------------------------------------------------
-
-static struct init_record *init_list_root = 0;
-void register_init_record( struct init_record *ir )
-{
-    ir->next = init_list_root;
-    init_list_root = ir;
-}
-
-static void run_next_init( int level, struct init_record *ir )
-{
-    if( ir == 0 )
-        return;
-
-    switch( level )
-    {
-    case INIT_LEVEL_PREPARE:
-        if(ir->init_1) ir->init_1(); break;
-
-    case INIT_LEVEL_INIT:
-        if(ir->init_2) ir->init_2(); break;
-
-    case INIT_LEVEL_LATE:
-        if(ir->init_3) ir->init_3(); break;
-
-    default:
-        SHOW_ERROR( 0, "wrong level %d", level );
-    }
-
-    //if( ir->next )
-    run_next_init( level, ir->next );
-}
-
-void run_init_functions( int level )
-{
-    run_next_init( level, init_list_root );
-}
 

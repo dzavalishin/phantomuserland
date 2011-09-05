@@ -38,7 +38,7 @@ int			stat_total_seconds = 0;
 
 void stat_dump_all( int av, char **ac );
 
-void phantom_init_stat_counters(void)
+static void phantom_init_stat_counters(void)
 {
     stat_sec_counters		= calloc( sizeof(int), MAX_STAT_COUNTERS );
     stat_per_sec_counters	= calloc( sizeof(int), MAX_STAT_COUNTERS );
@@ -51,10 +51,14 @@ void phantom_init_stat_counters(void)
     memset(stat_total_counters, 0, sizeof(stat_total_counters));
 }
 
-void phantom_init_stat_counters2(void)
+
+static void phantom_init_stat_counters2(void)
 {
     dbg_add_command(&stat_dump_all, "stats", "dump kernel event statistics");
 }
+
+INIT_ME( phantom_init_stat_counters, 0, phantom_init_stat_counters2 )
+
 
 
 void stat_increment_counter( int nCounter )
@@ -168,6 +172,49 @@ void stat_dump_all( int av, char **ac )
     }
 }
 
+void phantom_dump_stats_buf(char *buf, int len)
+{
+    int rc;
+    rc = snprintf(buf, len, "Statistics      \t\tper sec\ttotal/sec\t     total");
+    buf += rc;
+    len -= rc;
+
+
+    int i;
+    for( i = 0; i < MAX_STAT_COUNTERS; i++ )
+    {
+        if(*stat_counter_name[i] == 0)
+            continue;
+
+        // Out of space - skip zero lines
+        if(stat_total_counters[i] == 0)
+            continue;
+
+        if(stat_counter_name[i] == 0)
+            break;
+
+        char *scol = "\x1b[37m";
+
+        if(stat_per_sec_counters[i])
+            scol = "\x1b[33m";
+
+        rc = snprintf(buf, len, "\n%s%-20s\t%7d\t%10ld\t%10ld",
+                      scol,
+                      stat_counter_name[i],
+                      stat_per_sec_counters[i],
+                      stat_total_counters[i]/stat_total_seconds,
+                      stat_total_counters[i]
+                     );
+        buf += rc;
+        len -= rc;
+    }
+
+    if(len--)
+        *buf++ = 0;
+}
+
+
+
 errno_t get_stats_record( int id, struct kernel_stats *out )
 {
     if( id >= MAX_STAT_COUNTERS )
@@ -184,5 +231,8 @@ errno_t get_stats_record( int id, struct kernel_stats *out )
  
     return 0;
 }
+
+
+
 
 

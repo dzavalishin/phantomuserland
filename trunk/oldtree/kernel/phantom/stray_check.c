@@ -98,12 +98,9 @@ static void stray_catch_thread(void)
 }
 
 
-#endif // STRAY_CATCH_SIZE
 
-
-void init_stray_checker(void)
+static void init_stray_checker(void)
 {
-#ifdef STRAY_CATCH_SIZE
     hal_start_kernel_thread(&stray_catch_thread);
 
 #if 0
@@ -117,9 +114,14 @@ void init_stray_checker(void)
     }
 #endif
 
-#endif // STRAY_CATCH_SIZE
 
 }
+
+
+INIT_ME( stray, stray, init_stray_checker )
+
+
+#endif // STRAY_CATCH_SIZE
 
 
 
