@@ -353,7 +353,7 @@ static void gc_clear_weakrefs(pvm_object_storage_t *p);
 
 
 //static inline
-void ref_dec_p(pvm_object_storage_t *p)
+void do_ref_dec_p(pvm_object_storage_t *p)
 {
     if( p == 0 ) return;
     debug_catch_object("--", p);
@@ -422,6 +422,13 @@ void ref_dec_p(pvm_object_storage_t *p)
     //nokill:;
     }
 }
+
+void ref_dec_p(pvm_object_storage_t *p)
+{
+    do_ref_dec_p(p);
+}
+
+
 
 //static inline
 void ref_inc_p(pvm_object_storage_t *p)
