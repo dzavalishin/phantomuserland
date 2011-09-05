@@ -77,7 +77,10 @@ again:
     if( 0 == drv_video_window_get_event( w, &e, wait ) )
         return 0;
 
-    SHOW_FLOW( 1, "got e type %d", e.type );
+    if(e.type == UI_EVENT_TYPE_KEY)
+        SHOW_FLOW( 8, "got key e %x/%x '%c'", e.k.vk, e.k.ch, e.k.ch );
+    else
+        SHOW_FLOW( 8, "got e type %d", e.type );
     if(
        (e.type == UI_EVENT_TYPE_WIN) ||
        (e.type == UI_EVENT_TYPE_GLOBAL)

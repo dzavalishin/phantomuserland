@@ -38,7 +38,9 @@ import .ru.dz.phantom.system.class_loader;
 import .internal.io.tty;
 import .internal.binary;
 import .ru.dz.windows.root;
+
 import .ru.dz.phantom.system.thread_test;
+import .ru.dz.phantom.system.shell;
 
 import .ru.dz.phantom.backgrounds;
 import .internal.bitmap;
@@ -70,7 +72,8 @@ class boot
 
     var windows : .ru.dz.windows.root;
 
-    var run : .ru.dz.phantom.system.thread_test;
+//    var run : .ru.dz.phantom.system.thread_test;
+    var run : .ru.dz.phantom.system.shell;
 
     var shell_name : string;
     var shell_class : .internal."class";
@@ -123,7 +126,7 @@ class boot
 //print("Wait for 1 sec done\n");
 
         // TODO: This is temporary and is working only on first boot
-        setScreenBackgroud();
+        //setScreenBackgroud();
 
         console = new .internal.io.tty();
 
@@ -155,12 +158,20 @@ class boot
         print("Finished windows tests\n");
 
         //run = new .ru.dz.phantom.system.thread_test();
-
+        // TODO runtime class check!
         shell_class = load_class(shell_name);
         run = new *(shell_class)();
 
-        boot_object.18(run);
+        run.init();
+
+        boot_object.18(run); // Thread run
+        //boot_object.18(run); // 2nd thread in same object
+        run.go();
+
         //run.8(this);
+
+        // TODO: This is temporary and is working only on first boot
+        setScreenBackgroud();
 
     }
 
@@ -177,7 +188,7 @@ class boot
         var bmstring : string;
         bmstring = bkg.getBackgroundImage();
         bmp.loadFromString(bmstring);
-        print("have bitmap!...\n");
+        print("have bitmap...\n");
 
         // Now set background!
         boot_object.20(bmp);

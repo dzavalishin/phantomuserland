@@ -100,6 +100,7 @@ typedef struct ui_event ui_event_t;
 #define UI_EVENT_GLOBAL_REPAINT_RECT    1 //! Repaint all windows that intersect w. rect
 
 
+#ifdef KERNEL
 
 // TODO move to kern/event.h and rest to video/event.h
 
@@ -132,6 +133,9 @@ int defaultWindowEventProcessor( struct drv_video_window *w, struct ui_event *e 
 
 //! Just for debug
 int get_n_events_in_q(void); 
+
+#endif // KERNEL
+
 
 #endif // EVENT_H
 
