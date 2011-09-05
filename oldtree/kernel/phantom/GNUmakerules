@@ -9,8 +9,6 @@ all:: $(TARGETS)
 
 prepare::
 
-analyse::
-		@$(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES) >../../../kernel_sources.E
 
 
 SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom/$(ARCH)
@@ -27,6 +25,14 @@ PHANTOM_ASFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h 
 CLIB   = $(PLIBDIR)/libphantom_c.a
 
 include $(PHANTOM_SRCDIR)/GNUmakerules
+
+
+
+analyse::
+		clang -emit-ast $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
+#		clang --analyse $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
+
+
 
 DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))
 

@@ -124,6 +124,10 @@ const char *stat_counter_name[MAX_STAT_COUNTERS] =
     "Block IO Q size",
     "Block sync IO",
 
+    "Deferred refdec runs",
+    "Deferred refdec reqs",
+    "Deferred refdec lost",
+
 };
 
 

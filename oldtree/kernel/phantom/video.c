@@ -22,6 +22,10 @@ static int debug_level_flow = 1;
 
 #include "misc.h"
 
+#ifndef VESA_ENFORCE
+#  warning no VESA_ENFORCE def
+#endif
+
 #ifdef ARCH_arm
 extern struct drv_video_screen_t        video_driver_icp;
 #endif // ARCH_arm
