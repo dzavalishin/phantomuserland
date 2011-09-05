@@ -19,6 +19,7 @@
 #include <vm/internal.h>
 #include <vm/object_flags.h>
 
+#include <kernel/stats.h>
 
 
 #define debug_memory_leaks 0
@@ -402,8 +403,8 @@ void do_ref_dec_p(pvm_object_storage_t *p)
                 DEBUG_PRINT("-");
             } else
                 ref_dec_proccess_zero(p);
+        STAT_INC_CNT( OBJECT_FREE );
         }
-
         // if we decrement refcount and stil above zero - mark an object as potential cycle root;
         // and internal objects can't be a cycle root (sic!)
         else
@@ -460,6 +461,8 @@ void ref_inc_p(pvm_object_storage_t *p)
 void ref_saturate_p(pvm_object_storage_t *p)
 {
     debug_catch_object("!!", p);
+
+    STAT_INC_CNT( OBJECT_SATURATE );
 
     // Saturated object can't be a loop collection candidate. Can it?
     if ( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER ) {

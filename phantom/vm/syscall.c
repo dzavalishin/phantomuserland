@@ -1193,6 +1193,8 @@ DECLARE_SIZE(array);
 
 // --------- mutex -------------------------------------------------------
 
+#warning paging can swithc us off with "spin" locked, use kern mutex
+
 // NB - persistent mutexes!
 // TODO have a mark - can this mutex be locked at snapshot
 

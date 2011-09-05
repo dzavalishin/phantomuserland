@@ -12,8 +12,9 @@
 
 
 
-#include "vm/alloc.h"
-#include "vm/object_flags.h"
+#include <vm/alloc.h>
+#include <vm/object_flags.h>
+#include <kernel/stats.h>
 
 
 #define debug_memory_leaks 0
@@ -440,6 +441,8 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
     else
         created_large_o[arena]++;
 
+    // kern stat
+    STAT_INC_CNT( OBJECT_ALLOC );
     return data;
 }
 

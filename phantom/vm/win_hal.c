@@ -449,4 +449,8 @@ int debug_max_level_flow = ~0;
 
 
 
+void phantom_check_threads_pass_bytecode_instr_boundary( void )
+{
+    printf("!phantom_check_threads_pass_bytecode_instr_boundary unimpl!\n");
+}
 

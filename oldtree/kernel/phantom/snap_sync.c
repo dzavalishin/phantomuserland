@@ -273,4 +273,8 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
 }
 
 
+void phantom_check_threads_pass_bytecode_instr_boundary( void )
+{
+    SHOW_ERROR0( 0, "unimpl!");
+}
 
