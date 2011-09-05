@@ -34,7 +34,8 @@ classes: \
      phantom.environment.pc \
      internal.thread.pc ru.dz.phantom.system.thread_test.pc \
      internal.connection.pc \
-     ru.dz.phantom.system.shell_callback.pc ru.dz.phantom.system.shell.pc
+     ru.dz.phantom.system.shell_callback.pc ru.dz.phantom.system.shell.pc \
+     ru.dz.phantom.system.boot.pc
 
 
 

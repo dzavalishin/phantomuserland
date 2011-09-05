@@ -1215,6 +1215,7 @@ void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
     assert(!pvm_isnull(this_thread));
     assert(pvm_object_class_is( this_thread, pvm_get_thread_class() ) );
 
+    ref_inc_o(this_thread); // ?? hack?
     pvm_set_ofield( da->waiting_threads_array, da->nwaiting++, this_thread );
 
 //#warning have SYSCALL_PUT_THIS_THREAD_ASLEEP unlock the spinlock!
@@ -2089,7 +2090,7 @@ static int si_connection_11_do(struct pvm_object o, struct data_area_4_thread *t
 
     int ret = 0;
 
-    if( da->kernel == 0 || da->kernel->do_operation )
+    if( (da->kernel == 0) || (da->kernel->do_operation == 0) )
     {
         ret = ENXIO;
     }

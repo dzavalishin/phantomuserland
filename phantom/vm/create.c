@@ -499,22 +499,14 @@ void pvm_gc_iter_boot(gc_iterator_call_t func, struct pvm_object_storage * os, v
 
 void pvm_internal_init_mutex(struct pvm_object_storage * os)
 {
-    (void)os;
-
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
-    (void)da;
 
-    //hal_spin_init( &da->lock );
+    da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
 
 }
 
 void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-    //(void)func;
-    //(void)os;
-    //(void)arg;
-    // Empty
-
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
     //int i;
 
@@ -533,18 +525,13 @@ void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 void pvm_internal_init_cond(struct pvm_object_storage * os)
 {
-    (void)os;
-
     struct data_area_4_cond *      da = (struct data_area_4_cond *)os->da;
-    (void)da;
 
-    //hal_spin_init( &da->lock );
-
+    da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
 }
 
 void pvm_gc_iter_cond(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-
     struct data_area_4_cond *      da = (struct data_area_4_cond *)os->da;
     //int i;
 
@@ -561,13 +548,9 @@ void pvm_gc_iter_cond(gc_iterator_call_t func, struct pvm_object_storage * os, v
 
 void pvm_internal_init_sema(struct pvm_object_storage * os)
 {
-    (void)os;
-
     struct data_area_4_sema *      da = (struct data_area_4_sema *)os->da;
-    (void)da;
 
-    //hal_spin_init( &da->lock );
-
+    da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
 }
 
 void pvm_gc_iter_sema(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)

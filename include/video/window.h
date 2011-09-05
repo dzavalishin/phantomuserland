@@ -33,8 +33,8 @@
 
 typedef struct _phantom_window
 {
-    int         	xsize; // physical
-    int 		ysize;
+    int                 xsize; // physical
+    int                 ysize;
 
     int                 x, y, z; // On screen
     int                 dx, dy;  // Drag base (see titleMouseEventProcessor)
@@ -47,9 +47,9 @@ typedef struct _phantom_window
 
     int                 li, ti, ri, bi; // insets
 
-    rgba_t       	bg; // background color
+    rgba_t              bg; // background color
 
-    const char* 	title;
+    const char*         title;
 
     //queue_head_t        events; // Incoming events
     //volatile int        events_count; // To prevent overfill of dead window q

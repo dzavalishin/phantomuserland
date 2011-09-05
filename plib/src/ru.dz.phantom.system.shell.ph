@@ -15,6 +15,7 @@ package .ru.dz.phantom.system;
 import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
+import .internal.mutex;
 import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 import .ru.dz.phantom.system.shell_callback;
@@ -52,6 +53,19 @@ class shell //extends runnable
 
     var cb : shell_callback;
 
+    var mtx : .internal.mutex;
+
+    void init()
+    {
+        mtx = new .internal.mutex();
+        mtx.lock();
+    }
+
+    void go()
+    {
+        mtx.unlock();
+    }
+
     void run(var parent_object @const ) [8]
     {
 /*
@@ -69,6 +83,7 @@ class shell //extends runnable
 		console.moveWindow(10,10);
 		console.setTitle("VM Shell");
 
+
         // test of connections
         conn = new .internal.connection();
         conn.connect("tmr:");
@@ -81,18 +96,22 @@ class shell //extends runnable
 	    conn.invoke( 1000, 0 ); // op 0 - set timer, arg - msecs
 
 
-
         while(1)
         {
+            mtx.lock();
 
             console.putws("I am connected shell!\n");
             console.putws("--------------------------------------------------\n");
             console.putws("Thread is running... ");
-            incr = incr + 1;
-            console.putws(incr.5());
+            console.putws(incr.toString());
             console.putws("  ");
 
+            mtx.unlock();
+
+            incr = incr + 1;
         }
+
+
     }
 };
 

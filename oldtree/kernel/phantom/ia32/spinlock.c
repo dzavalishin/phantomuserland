@@ -28,7 +28,7 @@
 
 
 #if SPIN_DEBUG && !HAVE_SMP
-#warning spin reenter debug on
+//#warning spin reenter debug on
 int global_lock_entry_count[MAX_CPUS] = {};
 
 static void spin_dump(hal_spinlock_t *sl)
