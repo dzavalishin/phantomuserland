@@ -18,6 +18,9 @@ void phantom_snapper_reenable_threads( void );
 
 void phantom_snap_threads_interlock_init( void );
 
+// see vm/refdec.c for use
+void phantom_check_threads_pass_bytecode_instr_boundary( void );
+
 extern volatile int     phantom_virtual_machine_snap_request;
 extern volatile int     phantom_virtual_machine_stop_request; // Is one (with the phantom_virtual_machine_snap_request) when threads are asked to do harakiri
 

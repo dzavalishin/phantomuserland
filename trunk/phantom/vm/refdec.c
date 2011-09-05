@@ -4,8 +4,13 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Deferred refcount decrement (poor man's GC)
+ * Deferred refcount decrement - done this way to fight races:
+ *  - one thread reads object slot
+ *  - another thread overwrites that slot, decrements refcnt and kills obj
+ *  - first thread attempts to ref inc and corrupts memory
  *
+ * Here we make sure that we decrement refcount only after making
+ * sure that all threads pass bytecode instruction boundary.
  *
 **/
 
@@ -13,6 +18,7 @@
 #include <kernel/mutex.h>
 #include <kernel/stats.h>
 #include <kernel/atomic.h>
+#include <kernel/snap_sync.h>
 
 #include <threads.h>
 
@@ -115,11 +121,20 @@ void deferred_refdec(pvm_object_storage_t *os)
     }
 
 //long_way:
-    int pos = atomic_add( &refdec_put_ptr, 1);
+    int pos = atomic_add( &refdec_put_ptr, 1 );
     refdec_buffer[pos] = os;
 
 
 }
+
+/**
+ *
+ * Now here we actially perform decrements.
+ *
+ * We divide buffer into 2 parts. First one is filled,
+ * other is processed.
+ *
+**/
 
 
 static void deferred_refdec_thread(void *a)
@@ -135,30 +150,27 @@ static void deferred_refdec_thread(void *a)
 
         STAT_INC_CNT(DEFERRED_REFDEC_RUNS);
 
-        int new_put_ptr = (REFDEC_BUFFER_SIZE/2 + 1); // first one used to check low half overflow
+        // Decide where to switch put pointer
+        int new_put_ptr = REFDEC_BUFFER_HALF + 1; // first one used to check low half overflow
 
         // Was in upper page?
         if( refdec_put_ptr >= REFDEC_BUFFER_HALF )
             new_put_ptr = 0;
 
         int last_pos = atomic_set( &refdec_put_ptr, new_put_ptr);
-        int start_pos = (last_pos >= REFDEC_BUFFER_HALF) ? REFDEC_BUFFER_HALF : 0;
+        int start_pos = (last_pos >= REFDEC_BUFFER_HALF) ? REFDEC_BUFFER_HALF+1 : 0;
 
         // Check that all VM threads are either sleep or passed an bytecode instr boundary
-        //check_threads_pass_bytecode_instr_boundary();
-
-        // Switch page
-        //int clean_page = npage;
-        //npage = npage ? 0 : 1;
+        phantom_check_threads_pass_bytecode_instr_boundary();
 
         int pos;
         for( pos = start_pos; pos < last_pos; pos++ )
         {
-            pvm_object_storage_t *os;
+            pvm_object_storage_t volatile *os;
             os = refdec_buffer[pos];
 
             assert( os->_ah.refCount > 1);
-            do_ref_dec_p(os);
+            do_ref_dec_p((pvm_object_storage_t *)os);
         }
 
         hal_cond_broadcast(   &end_refdec_cond );
