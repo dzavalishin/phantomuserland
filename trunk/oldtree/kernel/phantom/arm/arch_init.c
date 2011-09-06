@@ -42,3 +42,6 @@ void arch_init_early(void)
 }
 
 
+void arch_threads_init()
+{
+}
