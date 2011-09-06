@@ -206,6 +206,9 @@ void arch_interrupts_disable_all(void)
 }
 
 
+void arch_threads_init()
+{
+}
 
 
 
