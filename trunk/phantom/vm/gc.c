@@ -427,6 +427,7 @@ void do_ref_dec_p(pvm_object_storage_t *p)
 void ref_dec_p(pvm_object_storage_t *p)
 {
     do_ref_dec_p(p);
+    //deferred_refdec(p);
 }
 
 

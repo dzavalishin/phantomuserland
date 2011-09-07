@@ -33,7 +33,7 @@ static void deferred_refdec_init(void);
 static void deferred_refdec_thread(void *a);
 
 
-INIT_ME( deferred_refdec_init, 0, 0 )
+INIT_ME( 0, deferred_refdec_init, 0 )
 //STOP_ME( deferred_refdec_stop )
 
 
@@ -169,7 +169,7 @@ static void deferred_refdec_thread(void *a)
             pvm_object_storage_t volatile *os;
             os = refdec_buffer[pos];
 
-            assert( os->_ah.refCount > 1);
+            assert( os->_ah.refCount > 0);
             do_ref_dec_p((pvm_object_storage_t *)os);
         }
 

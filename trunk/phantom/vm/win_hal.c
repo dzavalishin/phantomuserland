@@ -157,58 +157,6 @@ int phantom_virtual_machine_threads_stopped = 0;
 
 
 
-// -----------------------------------------------------------------------
-// TODO - implement mutex/sema code for win sim environment
-
-
-int hal_mutex_init(hal_mutex_t *m, const char *name)
-{
-    return 0;
-}
-
-int hal_mutex_lock(hal_mutex_t *m)
-{
-    return 0;
-}
-
-int hal_mutex_unlock(hal_mutex_t *m)
-{
-    return 0;
-}
-
-
-int hal_mutex_is_locked(hal_mutex_t *m)
-{
-    return 1;
-}
-
-
-int hal_cond_init( hal_cond_t *c, const char *name )
-{
-    return 0;
-}
-
-
-int hal_sem_acquire( hal_sem_t *s )
-{
-    (void) s;
-    hal_sleep_msec(10);
-    return 0;
-}
-
-void hal_sem_release( hal_sem_t *s )
-{
-    (void) s;
-}
-
-int hal_sem_init( hal_sem_t *s, const char *name )
-{
-    (void) s;
-    (void) name;
-    return 0;
-}
-
-//int debug_print = 0;
 
 
 
@@ -453,4 +401,143 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 {
     printf("!phantom_check_threads_pass_bytecode_instr_boundary unimpl!\n");
 }
+
+
+
+
+
+// -----------------------------------------------------------------------
+// TODO - implement mutex/sema code for win sim environment
+
+
+struct phantom_mutex_impl
+{
+    CRITICAL_SECTION cs;
+    const char *name;
+    int lock;
+};
+
+struct phantom_cond_impl
+{
+    //CONDITION_VARIABLE cv;
+    const char *name;
+};
+
+
+int hal_mutex_init(hal_mutex_t *m, const char *name)
+{
+    m->impl = calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+
+    InitializeCriticalSection( &(m->impl->cs) );
+
+    m->impl->name = name;
+    return 0;
+}
+
+int hal_mutex_lock(hal_mutex_t *m)
+{
+    assert(m->impl);
+    m->impl->lock++;
+    EnterCriticalSection( &(m->impl->cs) );
+    return 0;
+}
+
+int hal_mutex_unlock(hal_mutex_t *m)
+{
+    assert(m->impl);
+    LeaveCriticalSection( &(m->impl->cs) );
+    m->impl->lock--;
+    return 0;
+}
+
+
+int hal_mutex_is_locked(hal_mutex_t *m)
+{
+    assert(m->impl);
+    return m->impl->lock;
+}
+
+
+int hal_cond_init( hal_cond_t *c, const char *name )
+{
+    c->impl = calloc(1, sizeof(struct phantom_cond_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+    //InitializeConditionVariable( &(c->impl.cv) );
+    c->impl->name = name;
+    return 0;
+}
+
+
+errno_t hal_cond_wait( hal_cond_t *c, hal_mutex_t *m )
+{
+    assert(c->impl);
+    hal_sleep_msec(100);
+    //SleepConditionVariableCS( &(c->impl.cv), &(m->impl->cs), 0 );
+    return 0;
+}
+
+errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
+{
+    assert(c->impl);
+    hal_sleep_msec(msecTimeout);
+    //SleepConditionVariableCS( &(c->impl.cv), &(m->impl->cs), msecTimeout );
+    return 0;
+}
+
+
+errno_t hal_cond_signal( hal_cond_t *c )
+{
+    assert(c->impl);
+    //WakeConditionVariable( &(c->impl.cv) );
+    return 0;
+}
+
+errno_t hal_cond_broadcast( hal_cond_t *c )
+{
+    assert(c->impl);
+    //WakeAllConditionVariable( &(c->impl->cv) );
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+int hal_sem_acquire( hal_sem_t *s )
+{
+    (void) s;
+    hal_sleep_msec(10);
+    return 0;
+}
+
+void hal_sem_release( hal_sem_t *s )
+{
+    (void) s;
+}
+
+int hal_sem_init( hal_sem_t *s, const char *name )
+{
+    (void) s;
+    (void) name;
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 

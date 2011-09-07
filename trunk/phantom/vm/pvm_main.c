@@ -25,6 +25,7 @@
 
 #include <phantom_libc.h>
 #include <kernel/boot.h>
+#include <kernel/init.h>
 #include <kernel/debug.h>
 
 #include <vm/root.h>
@@ -336,6 +337,9 @@ int main(int argc, char* argv[])
 {
     printf("\n\n\n\n----- Phantom exec test v. 0.5\n\n");
 
+
+    run_init_functions( INIT_LEVEL_PREPARE );
+
     drv_video_win32.mouse = mouse_callback;
     video_drv = &drv_video_win32;
 
@@ -354,6 +358,9 @@ int main(int argc, char* argv[])
 
     hal_init( mem, size );
     //pvm_alloc_threaded_init(); // no threads yet - no lock
+
+    run_init_functions( INIT_LEVEL_INIT );
+    run_init_functions( INIT_LEVEL_LATE );
 
 #if 0
     videotest();
