@@ -5,6 +5,13 @@ http://www.koders.com/c/fid381C26DE905A16202DB29C6F646214753DADC789.aspx
 http://www.koders.com/c/fid31F8BF4537FD6A62DBBA6897855D3AC258C7DF38.aspx?s=mpc8560
 http://www.koders.com/c/fidB5DD799FD1DADFB6AE35C8814DA39E9FF741862B.aspx
 
+http://www.freebsd.org/cgi/cvsweb.cgi/src/sys/dev/ahci/ahci.c?rev=1.1.2.64;content-type=text%2Fplain
+
+http://lxr.free-electrons.com/source/drivers/ata/ahci.h
+http://code.coreboot.org/p/seabios/source/tree/master/src/ahci.h
+
+
+
 
 http://www.libusb.org/
 
