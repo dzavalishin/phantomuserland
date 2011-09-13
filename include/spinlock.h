@@ -23,6 +23,7 @@
 struct hal_spinlock {
     volatile int lock;
     volatile int ebp;
+    volatile int ei; // Interrupts status before lock - NB - used by wired_spin only
 };
 
 typedef struct hal_spinlock hal_spinlock_t;

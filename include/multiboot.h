@@ -267,7 +267,7 @@ struct AddrRangeDesc
 
 
 
-extern struct multiboot_info bootParameters;
+//extern struct multiboot_info bootParameters;
 struct multiboot_module *phantom_multiboot_find(const char *string);
 
 

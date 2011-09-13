@@ -222,7 +222,8 @@ wait_qh(struct usb_uhci_s *cntl, struct uhci_qh *qh)
 {
     //SHOW_FLOW( 5, "count = %d", count );
     // XXX - 500ms just a guess
-    u64 end = calc_future_tsc(500);
+    //u64 end = calc_future_tsc(500);
+    u64 end = calc_future_tsc(5000);
     for (;;) {
         if (qh->element & UHCI_PTR_TERM)
             return 0;

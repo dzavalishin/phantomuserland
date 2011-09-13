@@ -27,7 +27,7 @@ void video_zbuf_init(void);
 void video_zbuf_reset(void);
 void video_zbuf_reset_square(int x, int y, int xsize, int ysize );
 void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos );
-void video_zbuf_reset_win( drv_video_window_t *w );
+void video_zbuf_reset_win( window_handle_t w );
 
 int video_zbuf_check( int linpos, u_int8_t zpos );
 

@@ -63,7 +63,7 @@ void video_zbuf_reset_z(int z)
  *
 **/
 
-void video_zbuf_reset_win( drv_video_window_t *w )
+void video_zbuf_reset_win( window_handle_t w )
 {
     // TODO XXX HACK alert - hardcoded decorations size
     const int bw = 3;

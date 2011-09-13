@@ -348,6 +348,7 @@ int main(int argc, char* argv[])
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 
     pvm_win_init();
+    drv_video_init_windows();
     init_new_windows();
 
     drv_video_set_mouse_cursor(drv_video_get_default_mouse_bmp());

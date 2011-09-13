@@ -239,7 +239,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 }
 
 
-void phantom_thread_put_asleep( struct data_area_4_thread *thda, int *unlock_spin )
+void phantom_thread_put_asleep( struct data_area_4_thread *thda, VM_SPIN_TYPE *unlock_spin )
 {
     hal_mutex_lock( &interlock_mutex );
     // TODO atomic assign

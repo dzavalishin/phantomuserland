@@ -15,7 +15,7 @@
 //static	GR_WINDOW_ID	w1;		/* id for large window */
 //static	GR_GC_ID	gc1;		/* graphics context for text */
 
-drv_video_window_t *w1;
+window_handle_t w1;
 
 void errorcatcher();			/* routine to handle errors */
 

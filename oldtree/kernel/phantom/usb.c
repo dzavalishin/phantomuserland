@@ -570,6 +570,8 @@ usb_enumerate(struct usbhub_s *hub)
     //hub->threads = portcount;
     hub->threads = 0;
 
+    SHOW_FLOW( 0, "hub %p", hub );
+
     // Launch a thread for every port.
     unsigned int i;
     for (i=0; i<portcount; i++)

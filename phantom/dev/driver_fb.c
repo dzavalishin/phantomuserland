@@ -14,8 +14,8 @@
 #include <event.h>
 
 
-static int 			have_w = 0;
-static drv_video_window_t *	w = 0;
+static int              have_w = 0;
+static window_handle_t  w = 0;
 static color_t			color;
 
 static rect_t wbox =

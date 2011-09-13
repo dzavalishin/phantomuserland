@@ -143,6 +143,7 @@ int phantom_timer_pit_init(int freq, void (*timer_intr)());
 
 void init_irq_allocator(void);
 
+void phantom_start_video_driver(void);
 void init_main_event_q(void);
 
 void phantom_trfs_init(void);
@@ -175,6 +176,13 @@ void heap_init_mutex( void );
 
 void identify_cpu(void);
 void identify_hypervisor(void);
+
+struct multiboot_info;
+void setSymtabBootParameters(struct multiboot_info *bpp);
+
+void phantom_parse_cmd_line(struct multiboot_info *bootParameters);
+void phantom_process_boot_options(void);
+void phantom_start_boot_modules(void);
 
 
 #endif // INIT_H

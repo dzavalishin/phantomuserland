@@ -58,7 +58,10 @@ time_t 			time(time_t *timer);
 void 			set_time(time_t time);
 
 //! Fast, but less accurate time, sec
-time_t fast_time(void);
+time_t          fast_time(void);
+
+//! Uptime in seconds
+time_t          uptime(void);
 
 
 #define phantom_spinwait_msec phantom_spinwait

@@ -11,13 +11,13 @@
 
 // Boot state
 
-extern struct multiboot_info bootParameters;
+//extern struct multiboot_info bootParameters;
 
 
 
 
 int main();
-void init_stray_checker(void);
+//void init_stray_checker(void);
 
 
 void phantom_map_mem_equally(void);
@@ -27,7 +27,7 @@ void phantom_map_mem_equally(void);
 //void port_init(void);
 
 
-void phantom_start_video_driver(void);
+//void phantom_start_video_driver(void);
 
 
 
@@ -38,7 +38,7 @@ void phantom_start_video_driver(void);
 /* wait by spinning: number of milliseconds to delay */
 //void phantom_spinwait(int millis);
 // Uptime in seconds
-time_t uptime(void);
+//time_t uptime(void);
 
 
 
@@ -53,11 +53,11 @@ void resolver_init(void);
 
 #endif // MISC_H
 
-// To multiboot.h
+// To init.h
 
-void phantom_parse_cmd_line(void);
-void phantom_process_boot_options(void);
-void phantom_start_boot_modules(void);
+//void phantom_parse_cmd_line(struct multiboot_info *bootParameters);
+//void phantom_process_boot_options(void);
+//void phantom_start_boot_modules(void);
 
 
 
@@ -107,7 +107,7 @@ void DumpVgaMode(void);
 
 
 void trfs_testrq(void);
-void init_tetris(void);
+//void init_tetris(void);
 void connect_ide_io(void);
 
 // -----------------------------------------------------------------------

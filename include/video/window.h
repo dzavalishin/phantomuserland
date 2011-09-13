@@ -12,6 +12,11 @@
 #define VIDEO_T_IN_D 0
 #define T_IN_D VIDEO_T_IN_D
 
+#if NEW_WINDOWS
+typedef pool_handle_t window_handle_t;
+#else
+typedef struct drv_video_window * window_handle_t;
+#endif
 
 
 #define WFLAG_WIN_DECORATED             (1<<0)
@@ -61,7 +66,7 @@ typedef struct _phantom_window
      * window event queue. Supposed to process event or trigger waiting
      * thread to do that.
      */
-    int                 (*inKernelEventProcess)( struct drv_video_window *w, struct ui_event *e );
+    int                 (*inKernelEventProcess)( window_handle_t, struct ui_event *e );
 
     tid_t               owner;
 
@@ -94,6 +99,7 @@ void 		w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 
 
 
 
+#if !NEW_WINDOWS
 // -----------------------------------------------------------------------
 // Old windows
 // -----------------------------------------------------------------------
@@ -102,8 +108,8 @@ void 		w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 
 // SNAPSHOT WARNING: this structure is used in snapshotted objects. If you change it, old snapshots are invalid. Be careful.
 typedef struct drv_video_window
 {
-    int         	xsize; // physical
-    int 		ysize;
+    int                 xsize; // physical
+    int                 ysize;
 
     int                 x, y, z; // On screen
     int                 dx, dy;  // Drag base (see titleMouseEventProcessor)
@@ -116,12 +122,12 @@ typedef struct drv_video_window
 
     int                 li, ti, ri, bi; // insets
 
-    rgba_t       	bg; // background color
+    rgba_t              bg; // background color
 
-    const char* 	title;
+    const char*         title;
 
     queue_head_t        events; // Incoming events
-    volatile int	events_count; // To prevent overfill of dead window q
+    volatile int        events_count; // To prevent overfill of dead window q
 
     int                 stall; // True if event queue is overloaded and events are being lost
 
@@ -149,6 +155,6 @@ int rect_win_bounds( rect_t *r, drv_video_window_t *w );
 
 // returns nonzero if point is in window
 int point_in_win( int x, int y, drv_video_window_t *w );
-
+#endif // !new win
 
 #endif // WINDOW_H

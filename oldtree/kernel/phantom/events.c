@@ -346,7 +346,11 @@ void event_q_put_mouse( int x, int y, int buttons )
 */
 
 //! Put window event onto the main e q
+#if !NEW_WINDOWS
 void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus )
+#else
+void event_q_put_win( int x, int y, int info, window_handle_t focus )
+#endif
 {
     if(!event_engine_active) return; // Just ignore
 
@@ -390,8 +394,11 @@ void event_q_put_global( ui_event_t *ie )
 #include <drv_video_screen.h>
 
 extern queue_head_t     	allwindows;
+#if NEW_WINDOWS
+extern window_handle_t focused_window;
+#else
 extern drv_video_window_t *	focused_window;
-
+#endif
 
 //! Select target window
 static void select_event_target(struct ui_event *e)
@@ -400,7 +407,7 @@ static void select_event_target(struct ui_event *e)
     if( e->type == UI_EVENT_TYPE_WIN )
         return;
 
-    drv_video_window_t *w;
+    window_handle_t w;
 
     e->focus = focused_window;
 
@@ -439,7 +446,7 @@ static void select_event_target(struct ui_event *e)
 }
 
 
-static void w_do_deliver_event(drv_video_window_t *w)
+static void w_do_deliver_event(window_handle_t w)
 {
     if(w != 0 && w->inKernelEventProcess)
     {
@@ -496,7 +503,7 @@ static void w_event_deliver_thread(void)
     restart:
         w_lock();
 
-        drv_video_window_t *w;
+        window_handle_t w;
 
         queue_iterate_back(&allwindows, w, drv_video_window_t *, chain)
         {
@@ -519,14 +526,14 @@ static void w_event_deliver_thread(void)
 void drv_video_window_receive_event(struct ui_event *e)
 {
     assert(e);
-    drv_video_window_t *w = 0;
+    window_handle_t w = 0;
 
     w_lock();
 
     select_event_target(e);
 
-    drv_video_window_t *later_lost = 0;
-    drv_video_window_t *later_gain = 0;
+    window_handle_t later_lost = 0;
+    window_handle_t later_gain = 0;
 
     if( e->focus == 0 )
     {
@@ -595,7 +602,7 @@ ret:
 
 void drv_video_window_explode_event(struct ui_event *e)
 {
-    drv_video_window_t *w;
+    window_handle_t w;
 
 #if 1
     if( e->w.info == UI_EVENT_GLOBAL_REPAINT_RECT )
@@ -630,7 +637,7 @@ void drv_video_window_explode_event(struct ui_event *e)
 
 
 //! Get next event for this window
-int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait )
+int drv_video_window_get_event( window_handle_t w, struct ui_event *e, int wait )
 {
     //int ie = 1;
     int ret;

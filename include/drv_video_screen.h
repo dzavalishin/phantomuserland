@@ -68,6 +68,7 @@ void drv_video_mouse_on_deflt(void);
 
 
 
+#if !NEW_WINDOWS
 
 #if !USE_ONLY_INDIRECT_PAINT
 
@@ -105,7 +106,6 @@ static __inline__ void drv_video_window_update( drv_video_window_t *w )
 
 
 
-
 /**
  *
  * Replicates src to dest. src has one horiz. line of srcSize pixels.
@@ -130,7 +130,7 @@ void replicate2window_hor( drv_video_window_t *dest, int destX, int destY,
 
 void window_basic_border( drv_video_window_t *dest, const rgba_t *src, int srcSize );
 
-
+#endif
 
 
 
