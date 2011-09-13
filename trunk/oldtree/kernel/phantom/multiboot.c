@@ -62,7 +62,7 @@ static void e( errno_t err )
 
 
 #ifdef ARCH_ia32
-struct multiboot_info bootParameters;
+static struct multiboot_info bootParameters;
 #endif
 static void make_mem_map(void);
 static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg );
@@ -79,6 +79,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
     }
 
     bootParameters = *(struct multiboot_info*)phystokv(multibootboot_info_pa);
+    setSymtabBootParameters( &bootParameters ); // bring symab from lib
 #endif
     arch_init_early();
     board_init_early();
@@ -132,7 +133,7 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
           );
 #endif    
 
-    phantom_parse_cmd_line();
+    phantom_parse_cmd_line(&bootParameters);
 
     // Now time for kernel main
 

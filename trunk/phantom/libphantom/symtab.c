@@ -4,8 +4,6 @@
 #include <assert.h>
 #include <kernel/init.h>
 
-//#include "misc.h"
-
 
 #define DEBUG 0
 
@@ -162,24 +160,39 @@ static void load_elf_hdr(Elf32_Shdr *header, int h_elements)
 
 }
 
+
+static struct multiboot_info *symtabBootParameters;
+
+void setSymtabBootParameters(struct multiboot_info *bpp)
+{
+    symtabBootParameters = bpp;
+}
+
 static void init_multiboot_symbols(void)
 {
 #ifdef ARCH_ia32
-    if(bootParameters.flags & MULTIBOOT_ELF_SHDR)
+    if(symtabBootParameters == 0)
     {
-        if(DEBUG > 0) printf("have multiboot ELF SHDR, %d entries, %d bytes, %d shndx\n",
-                         bootParameters.syms.e.num,
-                         bootParameters.syms.e.size,
-                         bootParameters.syms.e.shndx
-                        );
-
-        Elf32_Shdr *header = (void *)bootParameters.syms.e.addr;
-        load_elf_hdr(header, bootParameters.syms.e.num);
+        printf("init mboot sym symtabBootParameters = 0\n");
+        return;
     }
 
-    if(bootParameters.flags & MULTIBOOT_AOUT_SYMS)
+    printf("init mboot sym symtabBootParameters->flags = %x\n", symtabBootParameters->flags);
+    if(symtabBootParameters->flags & MULTIBOOT_ELF_SHDR)
     {
-        if(DEBUG > 0) printf("have multiboot a.out symbols, %d bytes\n", bootParameters.syms.a.tabsize);
+        if(DEBUG > 0) printf("have multiboot ELF SHDR, %d entries, %d bytes, %d shndx\n",
+                         symtabBootParameters->syms.e.num,
+                         symtabBootParameters->syms.e.size,
+                         symtabBootParameters->syms.e.shndx
+                        );
+
+        Elf32_Shdr *header = (void *)symtabBootParameters->syms.e.addr;
+        load_elf_hdr(header, symtabBootParameters->syms.e.num);
+    }
+
+    if(symtabBootParameters->flags & MULTIBOOT_AOUT_SYMS)
+    {
+        if(DEBUG > 0) printf("have multiboot a.out symbols, %d bytes\n", symtabBootParameters->syms.a.tabsize);
     }
 #endif
 }

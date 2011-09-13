@@ -181,17 +181,14 @@ void draw_block (int h, int w, int visible)
     {
         FB_SET_COLOR(fb,COLOR_LIGHTRED);
         FB_FILL_BOX(fb,r);
-        //drv_video_window_fill_rect( tetris_window, COLOR_LIGHTRED, r );
     } else {
         FB_SET_COLOR(fb,COLOR_BLACK);
         FB_FILL_BOX(fb,r);
-        //drv_video_window_fill_rect( tetris_window, COLOR_BLACK, r );
 
         FB_SET_COLOR(fb,COLOR_LIGHTBLUE);
 
         if (h == (PITDEPTH-1)*5)
             FB_DRAW_PIXEL(fb, w + 2, h + 4);
-            //drv_video_window_pixel ( tetris_window, w + 2, h + 4, COLOR_LIGHTBLUE);
 
         if (w == 0)
         {

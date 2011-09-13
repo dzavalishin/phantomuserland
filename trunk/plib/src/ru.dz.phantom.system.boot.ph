@@ -165,7 +165,7 @@ class boot
         run.init();
 
         boot_object.18(run); // Thread run
-        //boot_object.18(run); // 2nd thread in same object
+        boot_object.18(run); // 2nd thread in same object
         run.go();
 
         //run.8(this);

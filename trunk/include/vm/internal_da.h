@@ -47,6 +47,24 @@ static inline pvm_object_t pvm_da_to_object(void *da)
 
 void pvm_fill_syscall_interface( struct pvm_object iface, int syscall_count );
 
+
+
+
+#if SMP
+#warning VM spinlocks
+#else
+
+//#  define VM_SPIN_LOCK(___var) ({ hal_disable_preemption(); atomic_add(&(___var),1); assert( (___var) == 1 ); })
+//#  define VM_SPIN_UNLOCK(___var) ({ atomic_add(&(___var),-1); hal_enable_preemption(); assert( (___var) == 0 ); })
+
+#  define VM_SPIN_LOCK(___var) ({ hal_wired_spin_lock(&___var); })
+#  define VM_SPIN_UNLOCK(___var) ({ hal_wired_spin_unlock(&___var); })
+#  define VM_SPIN_TYPE hal_spinlock_t
+#endif
+
+
+
+
 /**
  *
  * Internal objects data areas.
@@ -160,7 +178,7 @@ struct data_area_4_thread
     volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
     timedcall_t                         timer;          // Who will wake us
     pvm_object_t                        sleep_chain;    // More threads sleeping on the same event, meaningless for running thread
-    int *				spin_to_unlock; // This spin will be unlocked after putting thread asleep
+    VM_SPIN_TYPE *                      spin_to_unlock; // This spin will be unlocked after putting thread asleep
 
     int                                 tid;            // Actual kernel thread id - reloaded on each kernel restart
 
@@ -281,15 +299,19 @@ struct data_area_4_boot
 
 struct data_area_4_tty
 {
-    drv_video_window_t           	w;
+#if NEW_WINDOWS
+    window_handle_t                     w;
+    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
+#else
+    drv_video_window_t                  w;
     /** this field extends w and works as it's last field. */
-    rgba_t       			pixel[PVM_MAX_TTY_PIXELS];
-
+    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
+#endif
     int                                 font_height; // Font is hardcoded yet - BUG - but we cant have ptr to kernel from object
     int                                 font_width;
-    int 				xsize, ysize; // in chars
+    int                                 xsize, ysize; // in chars
     int                                 x, y; // in pixels
-    rgba_t                       	fg, bg; // colors
+    rgba_t                              fg, bg; // colors
 
     char                                title[PVM_MAX_TTY_TITLE+1];
 };
@@ -297,16 +319,11 @@ struct data_area_4_tty
 
 //#define MAX_MUTEX_THREADS 3
 
-#if SMP
-#warning VM spinlocks
-#else
-#  define VM_SPIN_LOCK(___var) ({ hal_disable_preemption(); atomic_add(&(___var),1); assert( (___var) == 1 ); })
-#  define VM_SPIN_UNLOCK(___var) ({ atomic_add(&(___var),-1); hal_enable_preemption(); assert( (___var) == 0 ); })
-#endif
 
 struct data_area_4_mutex
 {
-    int                 poor_mans_pagefault_compatible_spinlock;
+    //int                 poor_mans_pagefault_compatible_spinlock;
+    VM_SPIN_TYPE      poor_mans_pagefault_compatible_spinlock;
 
     struct data_area_4_thread *owner_thread;
 
@@ -320,7 +337,7 @@ struct data_area_4_mutex
 
 struct data_area_4_cond
 {
-    int                 poor_mans_pagefault_compatible_spinlock;
+    VM_SPIN_TYPE        poor_mans_pagefault_compatible_spinlock;
 
     struct data_area_4_thread *owner_thread;
 
@@ -330,7 +347,7 @@ struct data_area_4_cond
 
 struct data_area_4_sema
 {
-    int                 poor_mans_pagefault_compatible_spinlock;
+    VM_SPIN_TYPE        poor_mans_pagefault_compatible_spinlock;
 
     struct data_area_4_thread *owner_thread;
 
@@ -402,14 +419,19 @@ struct data_area_4_weakref
 
 struct data_area_4_window
 {
-    drv_video_window_t           	w;
+#if NEW_WINDOWS
+    window_handle_t                     w;
+    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
+#else
+    drv_video_window_t                  w;
     /** this field extends w and works as it's last field. */
-    rgba_t       			pixel[PVM_MAX_WIN_PIXELS];
+    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
+#endif
 
     int                                 x, y; // in pixels
-    rgba_t                       	fg, bg; // colors
+    rgba_t                              fg, bg; // colors
 
-    struct pvm_object   		event_handler;
+    struct pvm_object                   event_handler;
     char                                title[PVM_MAX_TTY_TITLE+1];
 };
 

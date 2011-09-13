@@ -389,8 +389,11 @@ errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct dat
 // -----------------------------------------------------------------------
 
 // TODO replace with escapes
-void console_set_error_color() {}
-void console_set_normal_color() {}
+void console_set_error_color() { printf("\x1b[31m"); }
+void console_set_normal_color() { printf("\x1b[37m"); }
+void console_set_message_color(void) { printf("\x1b[34m"); }
+void console_set_warning_color(void) { printf("\x1b[33m"); }
+
 int debug_max_level_error = ~0;
 int debug_max_level_info = ~0;
 int debug_max_level_flow = ~0;
@@ -532,7 +535,9 @@ int hal_sem_init( hal_sem_t *s, const char *name )
 
 
 
-
+void    console_set_fg_color( struct rgba_t c )
+{
+}
 
 
 

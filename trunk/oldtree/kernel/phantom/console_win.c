@@ -50,10 +50,13 @@
 #define BUFS 128
 
 
-
+#if NEW_WINDOWS
+window_handle_t phantom_console_window = 0;
+window_handle_t phantom_debug_window = 0;
+#else
 drv_video_window_t *phantom_console_window = 0;
 drv_video_window_t *phantom_debug_window = 0;
-
+#endif
 
 static rgba_t console_fg;
 static rgba_t console_bg;

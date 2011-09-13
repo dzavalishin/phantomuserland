@@ -8,15 +8,15 @@ typedef struct {
     int xsize,ysize;
     //GR_DRAW_ID drawable;
     //GR_GC_ID gc;
-    drv_video_window_t *w;
+    window_handle_t w;
     //int pixtype; /* pixel type in TinyGL */
 } TinyPhantomContext;
 
 
 TinyPhantomContext *PhantomCreateContext(int flags);
 
-void PhantomSwapBuffers( drv_video_window_t * drawable );
+void PhantomSwapBuffers( window_handle_t drawable );
 
-int PhantomMakeCurrent( drv_video_window_t * drawable,
+int PhantomMakeCurrent( window_handle_t drawable,
                         TinyPhantomContext *ctx);
 

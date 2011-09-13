@@ -65,8 +65,7 @@ static int glX_resize_viewport(GLContext *c,int *xsize_ptr,int *ysize_ptr)
 
 
 /* we assume here that drawable is a window */
-int PhantomMakeCurrent( drv_video_window_t * drawable,
-                        TinyPhantomContext *ctx)
+int PhantomMakeCurrent( window_handle_t drawable, TinyPhantomContext *ctx )
 {
     int mode, xsize, ysize;
     ZBuffer *zb;
@@ -113,7 +112,7 @@ int PhantomMakeCurrent( drv_video_window_t * drawable,
     return 1;
 }
 
-void PhantomSwapBuffers( drv_video_window_t * drawable )
+void PhantomSwapBuffers( window_handle_t drawable )
 {
     GLContext *gl_context;
     TinyPhantomContext *ctx;

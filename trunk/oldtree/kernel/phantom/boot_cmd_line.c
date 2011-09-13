@@ -55,7 +55,7 @@ static const char *default_env[] = {0};
 **/
 
 void
-phantom_parse_cmd_line()
+phantom_parse_cmd_line(struct multiboot_info *bootParameters)
 {
     int i;
 
@@ -69,14 +69,14 @@ phantom_parse_cmd_line()
     boot_argv = main_argv + 1; // Just 0
 
 #ifdef ARCH_ia32
-    if( ! (bootParameters.flags & MULTIBOOT_CMDLINE) )
+    if( ! (bootParameters->flags & MULTIBOOT_CMDLINE) )
 #endif
     {
         return;
     }
 
 #ifdef ARCH_ia32
-    const char* cmdline = (const char*)phystokv(bootParameters.cmdline);
+    const char* cmdline = (const char*)phystokv(bootParameters->cmdline);
 #else
     const char* cmdline = "";
 #endif

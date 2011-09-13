@@ -93,6 +93,8 @@ static void run_next_init( int level, struct init_record *ir )
     if( ir == 0 )
         return;
 
+    SHOW_FLOW( 0, "init %d ir %p (%p,%p,%p)", level, ir, ir->init_1, ir->init_2, ir->init_3 );
+
     switch( level )
     {
     case INIT_LEVEL_PREPARE:

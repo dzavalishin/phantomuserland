@@ -12,6 +12,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define NEW_WINDOWS 0
+
 #ifndef ARCH_ia32
 #  define HAVE_SMP 0
 #  define HAVE_NET 0

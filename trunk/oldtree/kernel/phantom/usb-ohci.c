@@ -20,6 +20,8 @@ struct usb_ohci_s {
     struct ohci_regs *regs;
 };
 
+static void dump_ohci_ed( struct ohci_ed *ed );
+
 
 /****************************************************************
  * Root hub
@@ -36,6 +38,7 @@ ohci_hub_detect(struct usbhub_s *hub, u32 port)
         return -1;
 
     // XXX - need to wait for USB_TIME_ATTDB if just powered up?
+    SHOW_FLOW( 0, "have dev on hub port %d", port );
 
     return 0;
 }
@@ -87,6 +90,8 @@ static struct usbhub_op_s ohci_HubOp = {
 static int
 check_ohci_ports(struct usb_ohci_s *cntl)
 {
+    SHOW_FLOW( 0, "%p", cntl );
+
     ASSERT32FLAT();
     // Turn on power for all devices on roothub.
     u32 rha = readl(&cntl->regs->roothub_a);
@@ -101,6 +106,7 @@ check_ohci_ports(struct usb_ohci_s *cntl)
     hub.cntl = &cntl->usb;
     hub.portcount = rha & RH_A_NDP;
     hub.op = &ohci_HubOp;
+    SHOW_FLOW( 0, "will enumerate, ctl %p", cntl );
     usb_enumerate(&hub);
     return hub.devcount;
 }
@@ -113,6 +119,8 @@ check_ohci_ports(struct usb_ohci_s *cntl)
 static int
 start_ohci(struct usb_ohci_s *cntl, struct ohci_hcca *hcca)
 {
+    SHOW_FLOW( 0, "ctl %p", cntl );
+
     u32 oldfminterval = readl(&cntl->regs->fminterval);
     u32 oldrwc = readl(&cntl->regs->control) & OHCI_CTRL_RWC;
 
@@ -157,6 +165,8 @@ start_ohci(struct usb_ohci_s *cntl, struct ohci_hcca *hcca)
               | OHCI_USB_OPER | oldrwc));
     readl(&cntl->regs->control); // flush writes
 
+    SHOW_FLOW( 0, "done, cntl %p", cntl );
+
     return 0;
 }
 
@@ -172,6 +182,8 @@ static void
 configure_ohci(void *data)
 {
     struct usb_ohci_s *cntl = data;
+
+    SHOW_FLOW( 0, "config OHCI %p", data );
 
     // Allocate memory
     //struct ohci_hcca *hcca = memalign_high(256, sizeof(*hcca));
@@ -221,7 +233,14 @@ ohci_init(u16 bdf, int busid)
     cntl->usb.type = USB_TYPE_OHCI;
 
     u32 baseaddr = pci_config_readl(bdf, PCI_BASE_ADDRESS_0);
-    cntl->regs = (void*)(baseaddr & PCI_BASE_ADDRESS_MEM_MASK);
+    baseaddr &= PCI_BASE_ADDRESS_MEM_MASK;
+
+
+    void *mapped;
+    hal_alloc_vaddress( &mapped, 1);
+    hal_page_control( baseaddr, mapped, page_map_io, page_rw );
+
+    cntl->regs = mapped;
 
     dprintf(1, "OHCI init on dev %02x:%02x.%x (regs=%p)\n"
             , pci_bdf_to_bus(bdf), pci_bdf_to_dev(bdf)
@@ -250,8 +269,10 @@ wait_ed(struct ohci_ed *ed)
 {
     // XXX - 500ms just a guess
     u64 end = calc_future_tsc(500);
+    //u64 end = calc_future_tsc(5000);
     for (;;) {
-        if (ed->hwHeadP == ed->hwTailP)
+        //if (ed->hwHeadP == ed->hwTailP) // QEMU increments it past tail
+        if (ed->hwHeadP >= ed->hwTailP)
             return 0;
         if (check_tsc(end)) {
             warn_timeout();
@@ -363,7 +384,7 @@ ohci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
 {
     if (! CONFIG_USB_OHCI)
         return -1;
-    dprintf(5, "ohci_control %p\n", p);
+    dprintf(5, "ohci_control pipe %p\n", p);
     if (datasize > 4096) {
         // XXX - should support larger sizes.
         warn_noalloc();
@@ -410,7 +431,13 @@ ohci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
     pipe->ed.hwINFO = devaddr | (maxpacket << 16) | (lowspeed ? ED_LOWSPEED : 0);
     writel(&cntl->regs->cmdstatus, OHCI_CLF);
 
+    dump_ohci_ed( &pipe->ed );
+
+    SHOW_FLOW( 0, "will wait_ed, pipe %x, &ed = %x", pipe, &pipe->ed );
     int ret = wait_ed(&pipe->ed);
+
+    dump_ohci_ed( &pipe->ed );
+
     pipe->ed.hwINFO = ED_SKIP;
     if (ret)
         ohci_waittick(cntl);
@@ -515,7 +542,7 @@ ohci_poll_intr(struct usb_pipe *p, void *data)
     ASSERT16();
     if (! CONFIG_USB_OHCI)
         return -1;
-#if 0
+#if 1
     struct ohci_pipe *pipe = container_of(p, struct ohci_pipe, pipe);
     struct ohci_td *tds = GET_FLATPTR(pipe->tds);
     struct ohci_td *head = (void*)(GET_FLATPTR(pipe->ed.hwHeadP) & ~(ED_C|ED_H));
@@ -547,5 +574,17 @@ ohci_poll_intr(struct usb_pipe *p, void *data)
 #endif
     return 0;
 }
+
+
+
+static void dump_ohci_ed( struct ohci_ed *ed )
+{
+    SHOW_INFO(1, "OHCI ed hwInfo %x tail=%p head=%p nextEd=%p",
+               ed->hwINFO,
+               ed->hwTailP,
+               ed->hwHeadP,
+               ed->hwNextED );
+}
+
 
 #endif // HAVE_USB

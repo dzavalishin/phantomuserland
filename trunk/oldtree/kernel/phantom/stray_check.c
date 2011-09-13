@@ -11,7 +11,7 @@
 
 
 #define DEBUG_MSG_PREFIX "stray"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <hal.h>
 #include <threads.h>
+//#include <kernel/init.h>
 
 #ifdef STRAY_CATCH_SIZE
 
