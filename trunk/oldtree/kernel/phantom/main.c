@@ -272,6 +272,9 @@ int main(int argc, char **argv, char **envp)
     //init_main_event_q();
     run_init_functions( INIT_LEVEL_INIT );
 
+    vesa3_bootstrap();
+
+
 #ifdef ARCH_ia32
 #if HAVE_VESA
     //pressEnter("will init vm86");

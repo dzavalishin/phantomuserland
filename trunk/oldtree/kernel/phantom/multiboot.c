@@ -63,8 +63,8 @@ static void e( errno_t err )
 
 #ifdef ARCH_ia32
 static struct multiboot_info bootParameters;
-#endif
 static void make_mem_map(void);
+#endif
 static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg );
 
 void
@@ -131,9 +131,10 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
            ((bootParameters.flags & MULTIBOOT_VIDEO_INFO) ? "have" : "no"),
            bootParameters.vbe_mode
           );
-#endif    
 
-    phantom_parse_cmd_line(&bootParameters);
+    if( bootParameters->flags & MULTIBOOT_CMDLINE )
+        phantom_parse_cmd_line((const char*)phystokv(bootParameters->cmdline));
+#endif    
 
     // Now time for kernel main
 

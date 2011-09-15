@@ -9,7 +9,7 @@
 **/
 
 #define DEBUG_MSG_PREFIX "boot"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_info 10
 #define debug_level_flow 0
 #define debug_level_error 10
@@ -24,21 +24,22 @@
 //#include <hal.h>
 #include "misc.h"
 
-//#define DEBUG 1
+static const char *default_argv[] = {"phantom", 0};
+static const char *default_env[] = {0};
+
+
 
 #define MAXTOK 1024
 
-int main_argc;
-const char **main_argv;
-int main_envc;
-const char **main_env;
+int main_argc = 1;
+const char **main_argv = default_argv;
+int main_envc = 0;
+const char **main_env = default_env;
 
-int boot_argc;
-const char **boot_argv;
+int boot_argc = 0;
+const char **boot_argv = default_argv + 1; // Just 0
 
 
-static const char *default_argv[] = {"phantom", 0};
-static const char *default_env[] = {0};
 
 
 /**
@@ -55,35 +56,11 @@ static const char *default_env[] = {0};
 **/
 
 void
-phantom_parse_cmd_line(struct multiboot_info *bootParameters)
+phantom_parse_cmd_line( const char* cmdline )
 {
     int i;
 
-    // Put defaults first
-
-    main_argv = default_argv;
-    main_argc = 1;
-    main_env = default_env;
-
-    boot_argc = 0;
-    boot_argv = main_argv + 1; // Just 0
-
-#ifdef ARCH_ia32
-    if( ! (bootParameters->flags & MULTIBOOT_CMDLINE) )
-#endif
-    {
-        return;
-    }
-
-#ifdef ARCH_ia32
-    const char* cmdline = (const char*)phystokv(bootParameters->cmdline);
-#else
-    const char* cmdline = "";
-#endif
-
-
     SHOW_FLOW( 2, "Cmdline: '%s'", cmdline );
-
 
     // Break cmd line into the tokens
 

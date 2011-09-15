@@ -250,6 +250,25 @@ errno_t get_uldt_cs_ds(
     return 0;
 }
 
+errno_t get_uldt_sel( u_int16_t *osel, linaddr_t sel_base, size_t sel_limit, int code, int is32 )
+{
+    if( (segsToUse >> 3) + 1 >= LDTSZ )
+        return ENOMEM;
+
+    u_int16_t s = segsToUse | 0x7;
+
+    segsToUse += 0x8; 
+
+
+    fill_ldt_descriptor(s, sel_base, 1 + (sel_limit-1)/PAGE_SIZE,
+                        ACC_PL_U | ( code ? ACC_CODE_R : ACC_DATA_W ), (is32 ? SZ_32 : 0) | SZ_G);
+
+    *osel = s;
+
+    return 0;
+}
+
+
 
 
 
