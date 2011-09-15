@@ -132,8 +132,8 @@ phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
            bootParameters.vbe_mode
           );
 
-    if( bootParameters->flags & MULTIBOOT_CMDLINE )
-        phantom_parse_cmd_line((const char*)phystokv(bootParameters->cmdline));
+    if( bootParameters.flags & MULTIBOOT_CMDLINE )
+        phantom_parse_cmd_line((const char*)phystokv(bootParameters.cmdline));
 #endif    
 
     // Now time for kernel main
