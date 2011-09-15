@@ -12,6 +12,8 @@
 #ifndef INIT_H
 #define INIT_H
 
+#include <errno.h>
+
 /**
  * \ingroup Init
  * \defgroup Init Init - kernel startup
@@ -180,9 +182,12 @@ void identify_hypervisor(void);
 struct multiboot_info;
 void setSymtabBootParameters(struct multiboot_info *bpp);
 
-void phantom_parse_cmd_line(struct multiboot_info *bootParameters);
+void phantom_parse_cmd_line(const char* cmdline);
 void phantom_process_boot_options(void);
 void phantom_start_boot_modules(void);
+
+
+errno_t vesa3_bootstrap(void);
 
 
 #endif // INIT_H

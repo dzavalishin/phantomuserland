@@ -5,7 +5,7 @@
 #ifndef _VESA3_H_
 #define _VESA3_H_
 
-#include <kernel/kernel.h>
+//#include <kernel/kernel.h>
 
 #define VESA_MAGIC ('P'|('M'<<8)|('I'<<16)|('D'<<24))  // 'PMID'
 

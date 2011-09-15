@@ -5,10 +5,14 @@
 #ifndef _I386_SELECTOR_H_
 #define _I386_SELECTOR_H_
 
-#include <arch/i386/types.h>
+//#include <arch/i386/types.h>
+#include <sys/types.h>
 
-typedef uint32 selector_id;
-typedef uint64 selector_type;
+//typedef u_int32_t selector_id;
+typedef u_int16_t selector_id;
+
+#if 0
+typedef u_int64_t selector_type;
 
 // DATA segments are read-only
 // CODE segments are execute-only
@@ -22,14 +26,15 @@ enum segment_type {
 };
 
 #define SELECTOR(base,limit,type,mode32) \
-	(((uint64)(((((uint32)base)>>16)&0xff) | (((uint32)base)&0xff000000) | ((type)<<9) | ((mode32)<<22) | (1<<15))<<32) \
-	| ( (limit) >= (1<<20) ? (((limit)>>12)&0xffff) | ((uint64)(((limit)>>12)&0xf0000)<<32) | ((uint64)1<<(23+32)) : ((limit)&0xffff) | ((uint64)((limit)&0xf0000)<<32) ) \
-	| ((((uint32)base)&0xffff)<<16))
+	(((u_int64_t)(((((u_int32_t)base)>>16)&0xff) | (((u_int32_t)base)&0xff000000) | ((type)<<9) | ((mode32)<<22) | (1<<15))<<32) \
+	| ( (limit) >= (1<<20) ? (((limit)>>12)&0xffff) | ((u_int64_t)(((limit)>>12)&0xf0000)<<32) | ((u_int64_t)1<<(23+32)) : ((limit)&0xffff) | ((u_int64_t)((limit)&0xf0000)<<32) ) \
+	| ((((u_int32_t)base)&0xffff)<<16))
 
 void			i386_selector_init( void *gdt );
 selector_id		i386_selector_add( selector_type selector );
 void			i386_selector_remove( selector_id id );
-selector_type	i386_selector_get( selector_id id );
+selector_type           i386_selector_get( selector_id id );
+#endif
 
 #endif
 

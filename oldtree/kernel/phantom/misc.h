@@ -67,12 +67,12 @@ void resolver_init(void);
 
 
 //errno_t load_elf( void *_elf, size_t elf_size, const char *name );
-
+/*
 errno_t get_uldt_cs_ds(
                        linaddr_t cs_base, u_int16_t *ocs, size_t cs_limit,
                        linaddr_t ds_base, u_int16_t *ods, size_t ds_limit
                       );
-
+*/
 
 void sound(u_int32_t frequency);
 void nosound(void);

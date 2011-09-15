@@ -36,6 +36,10 @@
 #include <unix/uuprocess.h>
 #include <kunix.h>
 
+#ifdef ARCH_ia32
+#include <ia32/private.h>
+#endif
+
 //#include <unix/uufile.h>
 //#include <sys/fcntl.h>
 
