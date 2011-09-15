@@ -343,9 +343,18 @@ static void phantom_debug_window_loop()
                        "t\t- show stats\n"
                       );
                 break;
-            case 't':            
+            case 't':
+                drv_video_window_set_title( phantom_debug_window,  "Threads" );
+                show = c;
+                break;
+
             case 'w':
+                drv_video_window_set_title( phantom_debug_window,  "Windows" );
+                show = c;
+                break;
+
             case 's':
+                drv_video_window_set_title( phantom_debug_window,  "Stats" );
                 show = c;
                 break;
             }

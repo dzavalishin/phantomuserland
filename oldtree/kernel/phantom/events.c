@@ -345,12 +345,10 @@ void event_q_put_mouse( int x, int y, int buttons )
 }
 */
 
+#if NEW_WINDOWS
+
 //! Put window event onto the main e q
-#if !NEW_WINDOWS
-void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus )
-#else
-void event_q_put_win( int x, int y, int info, window_handle_t focus )
-#endif
+void event_q_put_win( int x, int y, int info, pool_handle_t focus )
 {
     if(!event_engine_active) return; // Just ignore
 
@@ -366,6 +364,24 @@ void event_q_put_win( int x, int y, int info, window_handle_t focus )
     put_event(e);
 }
 
+#else
+//! Put window event onto the main e q
+void event_q_put_win( int x, int y, int info, window_handle_t focus )
+{
+    if(!event_engine_active) return; // Just ignore
+
+    struct ui_event *e = get_unused();
+    e->type = UI_EVENT_TYPE_WIN;
+    e->time = fast_time();
+    e->focus= focus;
+
+    e->w.info = info;
+    e->abs_x = x;
+    e->abs_y = y;
+
+    put_event(e);
+}
+#endif
 
 
 //! Put global event onto the main e q
@@ -394,11 +410,8 @@ void event_q_put_global( ui_event_t *ie )
 #include <drv_video_screen.h>
 
 extern queue_head_t     	allwindows;
-#if NEW_WINDOWS
-extern window_handle_t focused_window;
-#else
-extern drv_video_window_t *	focused_window;
-#endif
+
+extern window_handle_t 		focused_window;
 
 //! Select target window
 static void select_event_target(struct ui_event *e)

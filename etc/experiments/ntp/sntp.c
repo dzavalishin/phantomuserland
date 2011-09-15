@@ -15,6 +15,7 @@
 
 #define RESOLVE 0
 
+#define errno_t int
 
 static errno_t SNTPGetTime(u_int32_t * server_adr, time_t * t);
 
