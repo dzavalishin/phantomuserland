@@ -16,6 +16,7 @@
 #include <vm/object_flags.h>
 #include <kernel/stats.h>
 #include <kernel/page.h>
+#include <kernel/vm.h>
 
 
 #define debug_memory_leaks 0
@@ -241,41 +242,30 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
 
 void pvm_collapse_free(pvm_object_storage_t *op)
 {
-#if VM_UNMAP_UNUSED_OBJECTS
+//#if VM_UNMAP_UNUSED_OBJECTS
     if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock
 
     int arena = find_arena_by_address(op);
     if( arena < 0 )
         return;
 
+    void *start = (void *)op;
+    void *end = ( start < curr_a[arena] ) ? curr_a[arena] : end_a[arena];
     // Attempt to collapse up to 10 pages
-    alloc_collapse_with_next_free( op, PAGE_SIZE*10, end_a[arena], arena);
+    alloc_collapse_with_next_free( op, PAGE_SIZE*10, end, arena);
 
-    addr_t data_start = (addr_t) &(op->da);
-    size_t data_size  = op->_ah.exact_size;
+    addr_t page_start = PAGE_ALIGN((addr_t)start);
+    size_t size  = op->_ah.exact_size;  //adjust to page?
 
-    data_size -= __offsetof(pvm_object_storage_t, da);
-
-
-    if( data_size > PAGE_SIZE ) // TODO page size hardcode
+    while( size > PAGE_SIZE ) // TODO page size hardcode
     {
-        addr_t page_start = PAGE_ALIGN(data_start);
-
-        data_size -= ( page_start - data_start );
-
-        int maxp = 16; // not forever!
-
-        while( (data_size > PAGE_SIZE) && (maxp-- > 0) )
-        {
-            vm_map_page_mark_unused(page_start);
-            data_size  -= PAGE_SIZE;
-            page_start += PAGE_SIZE;
-        }
-
+        vm_map_page_mark_unused(page_start);
+        page_start += PAGE_SIZE;
+        size       -= PAGE_SIZE;
     }
 
     if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );  // TODO avoid Giant lock
-#endif
+//#endif
 }
 
 
