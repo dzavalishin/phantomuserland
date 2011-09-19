@@ -14,6 +14,9 @@
 
 #define NEW_WINDOWS 0
 
+#define VM_UNMAP_UNUSED_OBJECTS 0
+
+
 #ifndef ARCH_ia32
 #  define HAVE_SMP 0
 #  define HAVE_NET 0

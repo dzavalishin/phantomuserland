@@ -540,6 +540,10 @@ void    console_set_fg_color( struct rgba_t c )
 }
 
 
+void vm_map_page_mark_unused( addr_t page_start)
+{
+    //printf("asked to mark page unused\n");
+}
 
 
 

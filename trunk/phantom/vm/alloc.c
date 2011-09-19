@@ -15,6 +15,7 @@
 #include <vm/alloc.h>
 #include <vm/object_flags.h>
 #include <kernel/stats.h>
+#include <kernel/page.h>
 
 
 #define debug_memory_leaks 0
@@ -78,6 +79,19 @@ static inline int find_arena(unsigned int size, unsigned int flags, bool saturat
 
     return arena;
 }
+
+static inline int find_arena_by_address(void *memaddr)
+{
+    int i;
+    for( i = 0; i < ARENAS; i++ )
+    {
+        if( (memaddr >= start_a[i]) && (memaddr < end_a[i]) )
+            return i;
+    }
+    panic("arena not found for addr %p", memaddr);
+    // return -1;
+}
+
 
 static inline unsigned int round_size(unsigned int size, int arena)
 {
@@ -223,6 +237,45 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
         init_free_object_header(op, size);  //update exact_size
         DEBUG_PRINT1("%d", arena);
     }
+}
+
+void pvm_collapse_free(pvm_object_storage_t *op)
+{
+#if VM_UNMAP_UNUSED_OBJECTS
+    if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock
+
+    int arena = find_arena_by_address(op);
+    if( arena < 0 )
+        return;
+
+    // Attempt to collapse up to 10 pages
+    alloc_collapse_with_next_free( op, PAGE_SIZE*10, end_a[arena], arena);
+
+    addr_t data_start = (addr_t) &(op->da);
+    size_t data_size  = op->_ah.exact_size;
+
+    data_size -= __offsetof(pvm_object_storage_t, da);
+
+
+    if( data_size > PAGE_SIZE ) // TODO page size hardcode
+    {
+        addr_t page_start = PAGE_ALIGN(data_start);
+
+        data_size -= ( page_start - data_start );
+
+        int maxp = 16; // not forever!
+
+        while( (data_size > PAGE_SIZE) && (maxp-- > 0) )
+        {
+            vm_map_page_mark_unused(page_start);
+            data_size  -= PAGE_SIZE;
+            page_start += PAGE_SIZE;
+        }
+
+    }
+
+    if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );  // TODO avoid Giant lock
+#endif
 }
 
 

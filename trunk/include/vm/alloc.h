@@ -72,6 +72,10 @@ void * get_pvm_object_space_end(void);
 void refzero_process_children( pvm_object_storage_t *o );
 void ref_saturate_p(pvm_object_storage_t *p);
 
+// called by refcount code - collapse free objects and attempt to 
+// unmap 'em
+void pvm_collapse_free(pvm_object_storage_t *op); 
+
 
 
 
