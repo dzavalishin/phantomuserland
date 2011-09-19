@@ -159,7 +159,7 @@ phantom_thread_c_starter(void)
 
     hal_sti(); // Make sure new thread is started with interrupts on
 
-#if 1
+#if 0 // usermode loader does it himself
     if( THREAD_FLAG_USER & t->thread_flags )
     {
         //switch_to_user_mode();
