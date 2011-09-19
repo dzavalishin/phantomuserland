@@ -8,8 +8,17 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "con"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <phantom_libc.h>
 #include <drv_video_screen.h>
+#include <kernel/init.h>
+#include <kernel/libkern.h>
 #include <kernel/debug.h>
 #include <kernel/interrupts.h>
 
@@ -19,6 +28,10 @@
 #include <kernel/smp.h>
 
 // This is a very simple console switch/redirection tool
+
+
+static void dmesg_putchar(int c);
+static void dmesg_puts(const char *s);
 
 
 
@@ -76,6 +89,8 @@ int putchar(int c)
         if(ops->putchar) return ops->putchar(c);
     // No way to handle :(
 
+    dmesg_putchar(c);
+
     return c;
 }
 
@@ -91,6 +106,8 @@ puts(const char *s)
 
         if(IN_INTERRUPT())
             return 0;
+
+        dmesg_puts(s);
 
         return ops->puts(s);
     }
@@ -122,6 +139,112 @@ void console_set_fg_color( struct rgba_t fg )
 {
     if(ops->set_fg_color) ops->set_fg_color(fg);
 }
+
+
+// -----------------------------------------------------------------------
+// dmesg buffer
+// -----------------------------------------------------------------------
+
+
+#define DMESG_BS (1024*32)
+
+static hal_spinlock_t dm_spin;
+
+static char dm_buf[DMESG_BS];
+
+static char *dm_pp = dm_buf; // put ptr
+static char *dm_gp = dm_buf; // get ptr
+
+static size_t dm_rlen = 0;
+
+static void dmesg_init(void)
+{
+    hal_spin_init( &dm_spin );
+}
+
+INIT_ME( dmesg_init, 0, 0 );
+
+int dmesg_read_buf( char *out, size_t olen, off_t start )
+{
+    int ie = hal_save_cli();
+    hal_spin_lock( &dm_spin );
+
+    if( start == 0 )
+    {
+        dm_gp = dm_pp;
+        dm_rlen = DMESG_BS;
+
+        // Skip empty part if buffer is not full yet
+        while( (*dm_gp == 0) && (dm_gp < (dm_buf+DMESG_BS)) )
+            dm_gp++;
+
+    }
+
+    size_t len = umin( olen, dm_rlen );
+
+    // We can't! It calls us! Recurred spin!
+    //SHOW_FLOW( 1, "rd %d", len );
+
+    if( dm_gp+len > (dm_buf+DMESG_BS))
+    {
+        int part = dm_buf+DMESG_BS-dm_gp;
+
+        strncpy( out, dm_gp, part );
+        dm_rlen -= part;
+        len     -= part;
+        dm_gp   = dm_buf;
+    }
+
+    strncpy( out, dm_gp, len );
+    dm_rlen -= len;
+    dm_gp   += len;
+
+    hal_spin_unlock( &dm_spin );
+    if( ie ) hal_sti();
+
+    return len;
+}
+
+
+
+static void dmesg_wrap_pp(void)
+{
+    if(dm_pp >= dm_buf+DMESG_BS)
+        dm_pp = dm_buf;
+}
+
+static void dmesg_putchar(int c)
+{
+    int ie = hal_save_cli();
+    hal_spin_lock( &dm_spin );
+    dmesg_wrap_pp();
+    *dm_pp++ = c;
+    hal_spin_unlock( &dm_spin );
+    if( ie ) hal_sti();
+}
+
+static void dmesg_puts(const char *s)
+{
+    int ie = hal_save_cli();
+    hal_spin_lock( &dm_spin );
+
+    int maxput = DMESG_BS/2;
+
+    while( (*s) && maxput-- > 0 )
+    {
+        dmesg_wrap_pp();
+        *dm_pp++ = *s++;
+    }
+
+    hal_spin_unlock( &dm_spin );
+    if( ie ) hal_sti();
+}
+
+
+
+
+
+
 
 
 

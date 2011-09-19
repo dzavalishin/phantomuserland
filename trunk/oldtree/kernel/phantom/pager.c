@@ -1234,6 +1234,7 @@ pager_alloc_page(disk_page_no_t *out_page_no)
 
         hal_mutex_unlock(&pager_freelist_mutex);
         SHOW_FLOW( 11, " ...alloc DONE: %d", *out_page_no);
+        STAT_INC_CNT(STAT_PAGER_DISK_ALLOC);
         return 1;
     }
 
@@ -1246,6 +1247,7 @@ void
 pager_free_page( disk_page_no_t page_no )
 {
     SHOW_FLOW0( 11, "Free page... ");
+    STAT_INC_CNT(STAT_PAGER_DISK_FREE);
 
     if( ((unsigned long)page_no) < ((unsigned long)pager_superblock_ptr()->disk_start_page))
         panic("Free: freeing block below disk start: %ld < %ld", (unsigned long)page_no, (unsigned long)pager_superblock_ptr()->disk_start_page );
