@@ -153,6 +153,7 @@ __inline__ void drv_video_font_tty_string(
         }
         else if( *s == '\t' )
         {
+            (*x)++; // or else \t\t == \t
             while( *x % 8 )
                 (*x)++;
             s++;
