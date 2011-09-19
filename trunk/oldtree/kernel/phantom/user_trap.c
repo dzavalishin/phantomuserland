@@ -17,6 +17,10 @@
 #include <thread_private.h>
 #include "misc.h"
 
+#if ARCH_ia32
+#  include <ia32/seg.h>
+#endif
+
 
 //! This is what called from low-level asm trap code
 void
@@ -57,7 +61,14 @@ phantom_check_user_trap( struct trap_state *ts )
     if(IN_INTERRUPT())
         return;
 
+    // TODO move to some arch func?
+#if ARCH_ia32
+    if( ts->cs == KERNEL_CS )
+        return;
+#endif
+
     phantom_thread_t *t = GET_CURRENT_THREAD();
+    int tid = t->tid;
 
     if(t->thread_flags & THREAD_FLAG_USER)
     {
@@ -70,13 +81,13 @@ phantom_check_user_trap( struct trap_state *ts )
                 return;
         }
 
-        int tid = t->tid;
         printf("Usermode thread %d killed due to unexpected trap\n", tid);
         t_kill_thread( tid );
         // Will panic below if returned
         printf("Usermode trap panic in thread %d\n", tid);
         trap_panic(ts);
     }
+    printf("? trap not from kernel CS, and thread has no THREAD_FLAG_USER, tid %d\n", tid);
     // Not user mode, return
 }
 

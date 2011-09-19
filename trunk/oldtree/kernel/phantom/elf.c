@@ -68,7 +68,7 @@ errno_t uu_run_binary( int pid, void *_elf, size_t elf_size )
         return e;
     }
 
-    hal_start_thread( kernel_protected_module_starter, (void *)pid, 0 );
+    hal_start_thread( kernel_protected_module_starter, (void *)pid, THREAD_FLAG_USER );
 
     return 0;
 }

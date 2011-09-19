@@ -118,7 +118,8 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 {
     args_used++;
 
-    int tid = hal_start_thread(thread_run_func, &new_thread, THREAD_FLAG_VM|THREAD_FLAG_USER);
+    //int tid = hal_start_thread(thread_run_func, &new_thread, THREAD_FLAG_VM|THREAD_FLAG_USER);
+    int tid = hal_start_thread(thread_run_func, &new_thread, THREAD_FLAG_VM);
 
     struct data_area_4_thread *tda = pvm_object_da( new_thread, thread );
     tda->tid = tid;
