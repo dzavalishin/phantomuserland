@@ -329,6 +329,7 @@ static void ref_dec_proccess_zero(pvm_object_storage_t *p)
     DEBUG_PRINT("(X)");
     p->_ah.alloc_flags |= PVM_OBJECT_AH_ALLOCATOR_FLAG_REFZERO; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
     p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED; //beware of  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER
+    pvm_collapse_free(p);
 #endif
 }
 
@@ -401,6 +402,7 @@ void do_ref_dec_p(pvm_object_storage_t *p)
                 p->_ah.alloc_flags = PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE;
                 debug_catch_object("del", p);
                 DEBUG_PRINT("-");
+                pvm_collapse_free(p); 
             } else
                 ref_dec_proccess_zero(p);
         STAT_INC_CNT( OBJECT_FREE );

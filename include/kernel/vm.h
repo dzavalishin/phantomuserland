@@ -38,6 +38,7 @@
 void wire_page_for_addr( void *addr, size_t count );
 void unwire_page_for_addr( void *addr, size_t count );
 
+void vm_map_page_mark_unused( addr_t page_start);
 
 
 #endif // KERNEL_VM_H

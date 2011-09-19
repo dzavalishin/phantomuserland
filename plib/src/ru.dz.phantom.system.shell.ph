@@ -91,9 +91,9 @@ class shell //extends runnable
         cb = new shell_callback();
         cb.init( console );
 
-	    conn.setCallback( cb, 17 );
+        conn.setCallback( cb, 17 );
 
-	    conn.invoke( 1000, 0 ); // op 0 - set timer, arg - msecs
+        conn.invoke( 1000, 0 ); // op 0 - set timer, arg - msecs
 
 
         while(1)

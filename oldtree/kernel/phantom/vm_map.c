@@ -1889,6 +1889,36 @@ void unwire_page_for_addr( void *addr, size_t count )
 
 
 
+void vm_map_page_mark_unused( addr_t page_start )
+{
+#if VM_UNMAP_UNUSED_OBJECTS
+    //printf("asked to mark page %p unused\n", page_start);
+    vm_page *vmp = addr_to_vm_page( page_start, 0 );
+
+    hal_mutex_lock(&vmp->lock);
+
+    page_touch_history(vmp);
+
+    if(vmp->wired_count) goto done; // very strange, but ok, just skip it
+    if(vmp->flag_pager_io_busy) goto done; // don't mess
+    if(is_in_snapshot_process) goto done; // don't mess
+
+    /*
+    page_touch_history(p);
+    remove_from_clean_q(p);
+    p->flag_phys_mem = 0; // Take it
+    physaddr_t paddr = p->phys_addr;
+    hal_page_control(paddr, p->virt_addr, page_unmap, page_noaccess);
+    hal_free_phys_page(paddr);
+    */
+
+    vmp->flag_phys_dirty = 0; // just skip paging out
+
+    //page_fault( vmp, write );
+done:
+    hal_mutex_unlock(&vmp->lock);
+#endif
+}
 
 
 
