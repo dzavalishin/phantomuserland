@@ -68,8 +68,8 @@ errno_t get_stats_record( int id, struct kernel_stats *out );
 #define     STAT_CNT_DISK_Q_SIZE                    22
 #define     STAT_CNT_BLOCK_SYNC_IO                  23
 
-#define     STAT_skip1                              24
-#define     STAT_skip2                              25
+#define     STAT_PAGER_DISK_ALLOC                   24
+#define     STAT_PAGER_DISK_FREE                    25
 #define     STAT_skip3                              26
 #define     STAT_skip4                              27
 #define     STAT_skip5                              28

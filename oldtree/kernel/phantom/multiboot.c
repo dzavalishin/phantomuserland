@@ -68,7 +68,11 @@ static void make_mem_map(void);
 static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, u_int32_t flags, void *arg );
 
 void
+#ifdef ARCH_ia32
 phantom_multiboot_main(physaddr_t multibootboot_info_pa, int cookie)
+#else
+phantom_multiboot_main()
+#endif
 {
 #ifdef ARCH_ia32
     if( cookie == 0x36d76289 )

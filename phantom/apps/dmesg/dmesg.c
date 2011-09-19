@@ -2,7 +2,8 @@
 #include <user/sys_fio.h>
 #include <stdio.h>
 
-char buf[512];
+// It's better to read kernel buf in one piece
+char buf[32*1024];
 
 void
 cat(int fd)
@@ -11,8 +12,10 @@ cat(int fd)
 
     while((n = read(fd, buf, sizeof(buf))) > 0)
         write(1, buf, n);
-    if(n < 0){
-        printf("cat: read error\n");
+
+    if(n < 0)
+    {
+        printf("dmesg: read error\n");
         _exit(0);
     }
 }
@@ -32,8 +35,10 @@ main(int argc, char *argv[])
         printf("dmesg: cannot open %s\n", DMESG_F );
         _exit(0);
     }
+    printf("kernel messages:\n");
     cat(fd);
     close(fd);
+    printf("\n");
 
     return 0;
 }

@@ -48,5 +48,8 @@ void    console_set_normal_color(void);
 // TODO remove it from here, it is used temp. in syscalls!
 int phantom_dev_keyboard_getc(void);
 
+//! used in proc_fs
+int dmesg_read_buf( char *out, size_t olen, off_t start );
+
 
 #endif // _PHANTOM_CONSOLE_H

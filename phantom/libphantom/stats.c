@@ -128,8 +128,8 @@ const char *stat_counter_name[MAX_STAT_COUNTERS] =
     "Block IO Q size",
     "Block sync IO",
 
-    "",
-    "",
+    "Disk page alloc",
+    "Disk page free",
     "",
     "",
     "",

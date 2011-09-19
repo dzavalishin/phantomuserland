@@ -28,6 +28,7 @@
 #include <kernel/init.h>
 #include <kernel/stats.h>
 #include <thread_private.h>
+#include <console.h>
 
 
 // -----------------------------------------------------------------------
@@ -164,6 +165,17 @@ static size_t r_stats( struct uufile *f, void *dest, size_t bytes)
 }
 
 
+static size_t r_dmesg( struct uufile *f, void *dest, size_t bytes)
+{
+    int rd = dmesg_read_buf( dest, bytes, f->pos );
+    if( rd <= 0 )
+        return 0;
+
+    f->pos += rd;
+    return rd;
+}
+
+
 
 // Create a file struct for given path
 static uufile_t *  proc_namei( uufs_t *fs, const char *filename)
@@ -177,6 +189,7 @@ static uufile_t *  proc_namei( uufs_t *fs, const char *filename)
     R_SETFUNC(board);
     R_SETFUNC(threads);
     R_SETFUNC(stats);
+    R_SETFUNC(dmesg);
 
 
 
