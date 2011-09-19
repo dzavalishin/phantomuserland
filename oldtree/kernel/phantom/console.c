@@ -81,6 +81,8 @@ int putchar(int c)
 	// Send a copy to serial port or whatever...
     debug_console_putc(c);
 
+    dmesg_putchar(c);
+
     int glock = 1;
 #if !HAVE_SMP
     glock = global_lock_entry_count[GET_CPU_ID()] == 0;
@@ -88,8 +90,6 @@ int putchar(int c)
     if( (!IN_INTERRUPT()) && glock )
         if(ops->putchar) return ops->putchar(c);
     // No way to handle :(
-
-    dmesg_putchar(c);
 
     return c;
 }
@@ -104,10 +104,10 @@ puts(const char *s)
         while(*sc)
             debug_console_putc(*sc++);
 
+        dmesg_puts(s);
+
         if(IN_INTERRUPT())
             return 0;
-
-        dmesg_puts(s);
 
         return ops->puts(s);
     }
