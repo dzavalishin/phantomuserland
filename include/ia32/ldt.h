@@ -30,10 +30,6 @@
  * the rights to redistribute these changes.
  */
 
-/*
- * This file describes the standard LDT provided by default
- * to all user-level Mach tasks.
- */
 #ifndef _I386_LDT_
 #define _I386_LDT_
 
@@ -48,8 +44,10 @@
  */
 
 #define	USER_LDT_SCALL	0x07		/* system call gate */
-#define	USER_LDT_CS	0x17		/* user code segment */
-#define	USER_LDT_DS	0x1f		/* user data segment */
+
+// dyn alloc
+//#define	USER_LDT_CS	0x17		/* user code segment */
+//#define	USER_LDT_DS	0x1f		/* user data segment */
 
 #define	LDTSZ           256
 
