@@ -96,19 +96,9 @@ static int trap_ignore(struct trap_state *ts)
     return 0;
 }
 
-/*
-//static
-int trap_panic(struct trap_state *ts)
-{
-    dump_ss(ts);
-    int type = ts->trapno;
 
-    panic("Unexpected trap %s\n", trap_name(type));
-
-
-    return -1;
-}
-*/
+//#define NO_HANDLER trap_panic
+#define NO_HANDLER 0
 
 /**
  *
@@ -117,38 +107,39 @@ int trap_panic(struct trap_state *ts)
 **/
 
 int (*phantom_trap_handlers[ARCH_N_TRAPS])(struct trap_state *ts) = {
-	trap_panic, /* 0 */
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic, /* 7 */
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
+	NO_HANDLER, /* 0 */
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER, /* 7 */
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
 	trap_ignore,  // 15 spurios traps, not really used
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic, /* 23 */
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic,
-	trap_panic  /* 31 */
+//	NO_HANDLER,  // 15 spurios traps, not really used
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER, /* 23 */
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER,
+	NO_HANDLER  /* 31 */
 };
 
 

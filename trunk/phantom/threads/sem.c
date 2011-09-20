@@ -80,6 +80,8 @@ errno_t hal_sem_acquire(hal_sem_t *c)
 {
     assert_not_interrupt();
 
+    if(panic_reenter) return EFAULT;
+
     if(c->impl == 0) checkinit(c);
     struct phantom_sem_impl *ci = c->impl;
 
@@ -117,6 +119,8 @@ errno_t hal_sem_acquire(hal_sem_t *c)
 // Called from timer to wake thread on timeout
 static void wake_sem_thread( void *arg )
 {
+    if(panic_reenter) return;
+
     phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
     struct phantom_sem_impl *ci = t->waitsem->impl;
 
@@ -135,6 +139,8 @@ hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
 //errno_t hal_sem_timedwait( hal_sem_t *c, hal_mutex_t *m, long msecTimeout )
 {
     assert_not_interrupt();
+
+    if(panic_reenter) return EFAULT;
 
     int retcode = 0;
 
@@ -207,6 +213,8 @@ hal_sem_zero( hal_sem_t *s )
 {
     assert_not_interrupt();
 
+    if(panic_reenter) return EFAULT;
+
     if(s->impl == 0) checkinit(s);
     struct phantom_sem_impl *ci = s->impl;
 
@@ -233,6 +241,7 @@ hal_sem_zero( hal_sem_t *s )
 
 void hal_sem_release(hal_sem_t *c)
 {
+    if(panic_reenter) return;
 
     if(c->impl == 0) checkinit(c);
     struct phantom_sem_impl *ci = c->impl;
@@ -337,6 +346,8 @@ errno_t sem_get_count(hal_sem_t *s, int *count)
 // BUG! Races! 
 void hal_sem_destroy(hal_sem_t *c)
 {
+    if(panic_reenter) return;
+
     assert_not_interrupt();
 
     // BUG! Must unlock and signal killed sema! newos code relies on that

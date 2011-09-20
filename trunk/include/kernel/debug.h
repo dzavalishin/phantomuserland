@@ -21,6 +21,9 @@ int dbg_add_command(void (*func)(int, char **), const char *name, const char *de
 // Output copy of console output to some serial port or something
 void debug_console_putc(int c);
 
+// Read char from the debug console
+int debug_console_getc(void);
+
 
 void phantom_dump_windows_buf(char *bp, int len);
 

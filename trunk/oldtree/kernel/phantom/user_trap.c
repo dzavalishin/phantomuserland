@@ -35,7 +35,11 @@ phantom_kernel_trap( struct trap_state *ts )
 
     if(handler == 0)
     {
-        phantom_check_user_trap( ts ); // returns only if not an user mode thread
+
+#if 1 // off to debug stack trap on real AMD cpu
+        if( phantom_check_user_trap( ts ) ) // returns 0 if not an user mode thread, 1 if exception processed
+            return;
+#endif
         trap_panic(ts);
     }
 
@@ -52,19 +56,22 @@ phantom_kernel_trap( struct trap_state *ts )
 }
 
 
-
-void
+// returns nonzero if handled
+int
 phantom_check_user_trap( struct trap_state *ts )
 {
     // In interrupt? Surely this is a kernel problem, don't
     // deliver to curr thread!
     if(IN_INTERRUPT())
-        return;
+        return 0;
 
     // TODO move to some arch func?
 #if ARCH_ia32
     if( ts->cs == KERNEL_CS )
-        return;
+    {
+        //printf("kernel CS in trap\n");
+        return 0;
+    }
 #endif
 
     phantom_thread_t *t = GET_CURRENT_THREAD();
@@ -78,7 +85,7 @@ phantom_check_user_trap( struct trap_state *ts )
         {
             int sig_no = trap2signo(ts);
             if( 0 == ( t->trap_handler( sig_no, ts ) ) )
-                return;
+                return 1;
         }
 
         printf("Usermode thread %d killed due to unexpected trap\n", tid);
@@ -89,6 +96,8 @@ phantom_check_user_trap( struct trap_state *ts )
     }
     printf("? trap not from kernel CS, and thread has no THREAD_FLAG_USER, tid %d\n", tid);
     // Not user mode, return
+
+    return 0;
 }
 
 int trap_panic(struct trap_state *ts)

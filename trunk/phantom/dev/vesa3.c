@@ -583,7 +583,7 @@ errno_t vesa3_bootstrap(void)
 
 #endif
 
-    hexdump( video_bios, VESA_CODE_SIZE, 0, 0 );
+    //hexdump( video_bios, VESA_CODE_SIZE, 0, 0 );
 
     // find VESA VBE protected mode info block signature
     ptr = video_bios;
@@ -732,11 +732,11 @@ errno_t vesa3_bootstrap(void)
     sel_code = i386_selector_add( SELECTOR(video_bios,VESA_CODE_SIZE-1,CODE_r,false) );
     sel_stack = i386_selector_add( SELECTOR(bios_stack,VESA_STACK_SIZE-1,DATA_w,false) );
 #else
-    assert( get_uldt_sel( &pm_info->sel_bios_data, (linaddr_t)bios_data, vesa_data_size, 0, 0 ) );
-    assert( get_uldt_sel( &pm_info->sel_code,      (linaddr_t)video_bios, VESA_CODE_SIZE, 0, 0 ) );
+    assert( !get_uldt_sel( &pm_info->sel_bios_data, (linaddr_t)bios_data, vesa_data_size, 0, 0 ) );
+    assert( !get_uldt_sel( &pm_info->sel_code,      (linaddr_t)video_bios, VESA_CODE_SIZE, 0, 0 ) );
 
-    assert( get_uldt_sel( &sel_code,  (linaddr_t)video_bios, VESA_CODE_SIZE, 1, 0 ) );
-    assert( get_uldt_sel( &sel_stack, (linaddr_t)bios_stack, VESA_STACK_SIZE, 0, 0 ) );
+    assert( !get_uldt_sel( &sel_code,  (linaddr_t)video_bios, VESA_CODE_SIZE, 1, 0 ) );
+    assert( !get_uldt_sel( &sel_stack, (linaddr_t)bios_stack, VESA_STACK_SIZE, 0, 0 ) );
 
 #endif
 
@@ -777,7 +777,7 @@ errno_t vesa3_bootstrap(void)
         farcall.offset = 0;
 #if PH_LDT_SEL
         selector_id tmpsel;
-        assert( get_uldt_sel( &tmpsel, (linaddr_t)vesa3_call_retf, 0x20, 1, 0 ) );
+        assert( !get_uldt_sel( &tmpsel, (linaddr_t)vesa3_call_retf, 0x20, 1, 0 ) );
         farcall.seg = tmpsel;
 #else
         farcall.seg = i386_selector_add( SELECTOR(vesa3_call_retf,0x20-1,CODE_r,false) );
@@ -797,9 +797,9 @@ errno_t vesa3_bootstrap(void)
 
 
 #if PH_LDT_SEL
-    assert( get_uldt_sel( &pm_info->sel_a0000, (linaddr_t)video_mem,         0x10000, 0, 0 ) );
-    assert( get_uldt_sel( &pm_info->sel_b0000, (linaddr_t)video_mem+0x10000,  0x8000, 0, 0 ) );
-    assert( get_uldt_sel( &pm_info->sel_b8000, (linaddr_t)video_mem+0x18000,  0x8000, 0, 0 ) );
+    assert( !get_uldt_sel( &pm_info->sel_a0000, (linaddr_t)video_mem,         0x10000, 0, 0 ) );
+    assert( !get_uldt_sel( &pm_info->sel_b0000, (linaddr_t)video_mem+0x10000,  0x8000, 0, 0 ) );
+    assert( !get_uldt_sel( &pm_info->sel_b8000, (linaddr_t)video_mem+0x18000,  0x8000, 0, 0 ) );
 #else
     pm_info->sel_a0000 = i386_selector_add( SELECTOR(video_mem,0x10000-1,DATA_w,false) );
     pm_info->sel_b0000 = i386_selector_add( SELECTOR(video_mem+0x10000,0x10000-1,DATA_w,false) );
@@ -870,7 +870,7 @@ errno_t vesa3_bootstrap(void)
 
     bios_io_mem = calloc( 1, IO_SEL_SIZE );
     assert(bios_io_mem);
-    assert( get_uldt_sel( &bios_io_sel, kvtophys(bios_io_mem), IO_SEL_SIZE, 0, 0 ) );
+    assert( !get_uldt_sel( &bios_io_sel, kvtophys(bios_io_mem), IO_SEL_SIZE, 0, 0 ) );
 
 
     regs.ax = 0x4f00;

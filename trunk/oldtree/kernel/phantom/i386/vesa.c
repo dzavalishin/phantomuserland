@@ -118,7 +118,7 @@ void phantom_init_vesa(void)
     char *oem_name = farTo32(vi->oem_ptr);
     SHOW_INFO( 0, "VESA ver %X ptr %X, OEM '%s'", vi->version, vi->video_ptr, oem_name );
 
-    SHOW_INFO( 1, "Total %dK mem, cap: %b", 64*vi->total_memory/1024, vi->capabilities, "\020\01DAC 8bit\02not VGA compatible\03RAMDAC blank\04STEREO\05STEREO EVC" );
+    SHOW_INFO( 1, "Total %dMb mem, cap: %b", 64*vi->total_memory/1024, vi->capabilities, "\020\01DAC 8bit\02not VGA compatible\03RAMDAC blank\04STEREO\05STEREO EVC" );
 //getchar();
     //struct VBEModeInfoBlock *vib = farTo32(vi->video_ptr);
 
@@ -234,10 +234,10 @@ void phantom_init_vesa(void)
 
     //u_int32_t physVidmemPtr = best_info.phys_base_ptr;
 
-    SHOW_INFO( 0, "VESA mode %d %d*%d %dbpp selected, mem at %X",
+    SHOW_INFO( 0, "VESA mode %d %d*%d %dbpp selected, mem at %X, size is %d",
            best_mode,
            best_info.x_resolution, best_info.y_resolution,
-           best_info.bits_per_pixel, best_info.phys_base_ptr
+           best_info.bits_per_pixel, best_info.phys_base_ptr, vi->total_memory
           );
 
 //pressEnter("will init VESA");

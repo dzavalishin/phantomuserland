@@ -55,6 +55,8 @@ void phantom_scheduler_request_reschedule( /* reason? */ void )
 
 void phantom_scheduler_yield( void )
 {
+    if(panic_reenter) return;
+
     phantom_scheduler_request_reschedule( /* YIELD? */  );
 
     //assert(!hal_is_preemption_disabled()); // why?
@@ -103,6 +105,14 @@ static volatile int phantom_scheduler_soft_interrupt_reenter = 0;
 
 void phantom_scheduler_soft_interrupt(void)
 {
+    if(panic_reenter) 
+    {
+    // Stop all CPUs except for main one - TODO is it right?
+    if(GET_CPU_ID() != 0)
+       while(1)
+           hal_wait_for_interrupt();
+    return;
+    }
     //#warning dummy?
 //putchar("`");
     // if curr thread disables preemption or scheduler lock is here,

@@ -9,6 +9,8 @@
  *
 **/
 
+// TODO http://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html#ss1.1
+
 #ifdef ARCH_ia32
 
 
@@ -306,6 +308,10 @@ static void handle_set1_keycode(unsigned char key)
         case KEY_F12:
             hal_cpu_reset_real();
             break;
+        case KEY_PAD_MINUS:
+            panic("Keyboard panic request - RWIN key");
+            break;
+
         case KEY_SCRLOCK:
             if(event.modifiers & KEY_MODIFIER_DOWN)
             {
@@ -533,6 +539,7 @@ void phantom_dev_keyboard_get_key( _key_event *out)
 
 #define K_OBUF_FUL 	0x01		/* output (from keybd) buffer full */
 
+// TODO rename - board_....
 int phantom_scan_console_getc(void)
 {
 #if 1

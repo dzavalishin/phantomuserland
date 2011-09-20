@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "fsmap"
 #include "debug_ext.h"
-#define debug_level_flow 10
+#define debug_level_flow 2
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -151,7 +151,7 @@ phantom_disk_partition_t *select_phantom_partition(void)
     if(n_phantom_fs_partitions == 1)
     {
         assert( phantom_fs_partitions[0] );
-        SHOW_FLOW( 1, "Just one Phantom disks found (%s)", phantom_fs_partitions[0]->name);
+        SHOW_FLOW( 0, "Just one Phantom disks found (%s)", phantom_fs_partitions[0]->name);
         return phantom_fs_partitions[0];
     }
 

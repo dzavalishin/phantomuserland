@@ -238,6 +238,8 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 
 static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t start, u_int32_t esp)
 {
+    //cs |= 7; // cpl = low 2 bits = 3, bit 2 = LDT = 1
+    //ds |= 7;
     // Push sequence: SS ESP EFLAGS CS EIP
     // Set up a stack structure for switching to user mode.
     asm volatile("  \
@@ -256,6 +258,7 @@ static void switch_to_user_mode_cs_ds(u_int32_t cs, u_int32_t ds, u_int32_t star
                  pushf; \
                  pushl %%ebx; \
                  push %%esi; \
+                 xor %%ebp, %%ebp; \
                  iret; \
                  "
                  : : "m" (cs), "m" (ds), "m" (start), "m" (esp)
@@ -281,8 +284,9 @@ static errno_t user_push( struct exe_module *em, int *ouseraddr, const void *dat
     addr_t min_esp = em->stack_bottom+(32*1024); // Leave him at least 32K?
     addr_t esp = em->esp;
 
-    // todo align?
     esp -= size;
+    esp &= ~3; // align downwards to 4 bytes boundary
+
     if( esp < min_esp )
         return ENOMEM;
 
@@ -345,6 +349,7 @@ static void kernel_protected_module_starter( void * _pid )
 
     int ava, enva, tmp;
 
+
 #if 1
     // todo check success
     user_push_args( em, u->envp, &enva );
@@ -365,6 +370,14 @@ static void kernel_protected_module_starter( void * _pid )
     // This sets
     //arch_adjust_after_thread_switch(GET_CURRENT_THREAD());
 
+    // Dies on stack access fault on real hw!
+//return;
+
+#ifdef ARCH_ia32
+    SHOW_FLOW( 4, "go user, start 0x%x sp 0x%x, memsize 0x%x, ds limit 0x%x", em->start, em->esp, em->mem_size, ia32_lsl(em->ds_seg) );
+#else
+    SHOW_FLOW( 4, "go user, start 0x%x sp 0x%x, memsize 0x%x", em->start, em->esp, em->mem_size );
+#endif
     switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, em->start, em->esp );
 }
 

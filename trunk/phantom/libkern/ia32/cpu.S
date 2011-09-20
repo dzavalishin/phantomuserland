@@ -1,5 +1,12 @@
 #include <ia32/asm.h>
 
+// Load segment limit
+ENTRY(ia32_lsl)
+	movl	4(%esp),%eax		/* get selector */
+	lsl	%eax,%eax
+	ret
+
+
 /*
  * Set cr3
  */

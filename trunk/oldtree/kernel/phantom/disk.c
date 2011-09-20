@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "DiskIO"
 #include <debug_ext.h>
-#define debug_level_flow 2
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -99,6 +99,7 @@ static errno_t partFence( struct phantom_disk_partition *p )
 static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, int nBlocks, int isWrite )
 {
     assert( p->block_size < PAGE_SIZE );
+    SHOW_FLOW( 3, "blk %d", blockNo );
 
     pager_io_request rq;
 
@@ -129,6 +130,8 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
     hal_spin_lock(&(rq.lock));
     rq.flag_sleep = 1; // Don't return until done
     rq.sleep_tid = GET_CURRENT_THREAD()->tid;
+
+    SHOW_FLOW0( 3, "start io" );
     if( (ret = p->asyncIo( p, &rq )) )
     {
         rq.flag_sleep = 0;
@@ -138,6 +141,7 @@ static errno_t startSync( phantom_disk_partition_t *p, void *to, long blockNo, i
         goto ret;
     }
     thread_block( THREAD_SLEEP_IO, &(rq.lock) );
+    SHOW_FLOW0( 3, "unblock" );
     if( ei ) hal_sti();
 
     if(!isWrite) memcpy( to, va, nBlocks * p->block_size );

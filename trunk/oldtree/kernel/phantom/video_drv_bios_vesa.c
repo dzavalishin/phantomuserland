@@ -98,7 +98,7 @@ void set_video_driver_bios_vesa_pa( physaddr_t pa, size_t size )
 
     void *vva;
     if( hal_alloc_vaddress(&vva, n_pages) )
-        panic("Can't alloc vaddress for %d videmem pages", n_pages);
+        panic("Can't alloc vaddress for %d vidmem pages", n_pages);
 
     video_driver_bios_vesa.screen = vva;
 

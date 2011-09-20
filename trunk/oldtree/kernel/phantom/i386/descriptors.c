@@ -236,10 +236,12 @@ errno_t get_uldt_cs_ds(
     if( (segsToUse >> 3) + 1 >= LDTSZ )
         return ENOMEM;
 
-    u_int16_t cs = segsToUse | 0x7;
-    u_int16_t ds = segsToUse | 0xF;
+    SHOW_FLOW( 3, "User CS %p 0x%x bytes, DS %p 0x%x bytes", cs_base, cs_limit, ds_base, ds_limit );
 
-    segsToUse += 0x10; // dajte dva
+    u_int16_t cs = segsToUse | 0x7;
+    segsToUse += 0x08;
+    u_int16_t ds = segsToUse | 0x7;
+    segsToUse += 0x08;
 
 
     //fill_ldt_descriptor(cs, cs_base, 1 + (cs_limit-1)/PAGE_SIZE, ACC_PL_U|ACC_CODE_R, SZ_32|SZ_G);
@@ -248,7 +250,7 @@ errno_t get_uldt_cs_ds(
     fill_ldt_descriptor(cs, cs_base, cs_limit-1, ACC_PL_U|ACC_CODE_R, SZ_32);
     fill_ldt_descriptor(ds, ds_base, ds_limit-1, ACC_PL_U|ACC_DATA_W, SZ_32);
 
-#if 1
+#if 0
     struct real_descriptor *dsd = get_descriptor(ldt,ds);
     printf(
            "ds 0x%x: lim low %x, base low %x, base med %x, acc %x, lim hi %x, gran %x, base hi %x  (g must be %x)\ndump:\n",
