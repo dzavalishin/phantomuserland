@@ -204,7 +204,7 @@ int phantom_pci_find( pci_cfg_t *cfg, u_int16_t vendor_id, u_int16_t device_id )
 }
 
 
-int phantom_pci_find_class( pci_cfg_t *cfg, u_int16_t class_id )
+int phantom_pci_find_class( pci_cfg_t *cfg, u_int8_t class_id, u_int8_t subclass_id )
 {
     int bus,dev,func;
 
@@ -213,15 +213,19 @@ int phantom_pci_find_class( pci_cfg_t *cfg, u_int16_t class_id )
 
             if(phantom_pci_probe(bus,dev,0,cfg)) continue;
 
-            if( cfg->base_class == class_id )
+            if(
+                (cfg->base_class == class_id) &&
+                (cfg->sub_class == subclass_id)
+              )
                 return 0;
 
             if(cfg->header_type & 0x80)
             {
                 for(func=1;func<8;func++)
                 {
-                    if(!phantom_pci_probe(bus,dev,func,cfg) &&
-                       (cfg->base_class == class_id) )
+                    if( !phantom_pci_probe(bus,dev,func,cfg) &&
+                       (cfg->base_class == class_id) &&
+                       (cfg->sub_class == subclass_id) )
                         return 0;
                 }
             }

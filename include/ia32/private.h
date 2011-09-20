@@ -21,3 +21,5 @@ errno_t get_uldt_cs_ds(
                        linaddr_t ds_base, u_int16_t *ods, size_t ds_limit
                       );
 
+// load segment limit
+unsigned ia32_lsl( unsigned selector );

@@ -135,3 +135,17 @@ void board_make_driver_map(void)
     phantom_register_drivers(board_drivers);
 }
 
+//! Stop interrupts, timer, seconary CPUs...
+void board_panic_stop_world(void)
+{
+	board_interrupts_disable_all();
+}
+
+#include <console.h>
+
+
+//! Wait for a key press on default console - don't use interrupts, assume interrupts disabled
+void board_panic_wait_keypress(void)
+{
+    phantom_scan_console_getc();
+}

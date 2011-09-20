@@ -243,8 +243,8 @@ void phantom_init_console_window()
     console_fg = COLOR_LIGHTGRAY;
     console_bg = COLOR_BLACK;
 
-    int xsize = 620, ysize = 200;
-    int cw_x = 50, cw_y = 550;
+    int xsize = 620, ysize = 300;
+    int cw_x = 50, cw_y = 450;
     if( get_screen_ysize() < 600 )
     {
         cw_x = cw_y = 0;

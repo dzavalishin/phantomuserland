@@ -1,4 +1,5 @@
 #include <user/sys_misc.h>
+#include <user/sys_time.h>
 #include <user/sys_fio.h>
 #include <stdio.h>
 #include <sys/fcntl.h>
@@ -28,16 +29,21 @@ more(int fd)
             if( nl == 0 )
                 break;
 
-            write(1, bp, nl-bp);
-            bp = nl;
+            write(1, bp, nl-bp+1);
+            n -= nl-bp+1;
+            bp = nl+1;
 
             l++;
             if( l > MAXL )
             {
+#if 1
+                sleepmsec(2000);
+#else
                 char tmp;
                 write( confd, msg, sizeof(msg) );
                 read( confd, &tmp, 1);
                 write( confd, msg1, sizeof(msg1) );
+#endif
                 l = 0;
             }
 

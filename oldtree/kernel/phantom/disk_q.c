@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "disk_q"
 #include <debug_ext.h>
-#define debug_level_flow 5
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 

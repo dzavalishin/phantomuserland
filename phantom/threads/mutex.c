@@ -45,6 +45,8 @@ errno_t hal_mutex_lock(hal_mutex_t *m)
 {
     assert_not_interrupt();
 
+    if(panic_reenter) return EFAULT;
+
     if(m->impl == 0) checkinit(m);
 
     struct phantom_mutex_impl* mi = m->impl;
@@ -92,6 +94,8 @@ nounlock:
 errno_t hal_mutex_unlock(hal_mutex_t *m)
 {
     if(m->impl == 0) panic("unlock of uninited mutex");
+
+    if(panic_reenter) return 0;
 
     struct phantom_mutex_impl* mi = m->impl;
 
@@ -271,6 +275,8 @@ static void checkinit(hal_mutex_t *m)
 errno_t hal_mutex_destroy(hal_mutex_t *m)
 {
     assert_not_interrupt();
+
+    if(panic_reenter) return 0;
 
     struct phantom_mutex_impl *mi = m->impl;
 

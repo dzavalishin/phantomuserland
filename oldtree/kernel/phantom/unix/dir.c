@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "dir"
 #include <debug_ext.h>
-#define debug_level_flow 7
+#define debug_level_flow 2
 #define debug_level_error 10
 #define debug_level_info 10
 

@@ -108,10 +108,12 @@ static paging_device pdev;
 void start_phantom()
 {
     //pressEnter("will start Phantom");
+    SHOW_FLOW0( 2, "Will init snap interlock... ");
     phantom_snap_threads_interlock_init();
 
     //pressEnter("will init paging dev");
 
+    SHOW_FLOW0( 2, "Will init paging dev... ");
 #if !PAGING_PARTITION
     // TODO size?
     init_paging_device( &pdev, "wd1", 1024*20); //4096 );
@@ -120,9 +122,9 @@ void start_phantom()
     pager_init(&pdev);
 #else
     partition_pager_init(select_phantom_partition());
-
 #endif
 
+    SHOW_FLOW0( 2, "Will init vm map... ");
     //pressEnter("will init VM map");
     // TODO BUG this +1 is due to allocator error:
     // allocator insists on trying to access the byte
@@ -353,6 +355,7 @@ int main(int argc, char **argv, char **envp)
     phantom_check_disk_check_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
 #endif
 
+    SHOW_FLOW0( 2, "Will load classes module... ");
     load_classes_module();
 
     phantom_find_drivers( 3 );

@@ -31,6 +31,9 @@
  * @{
 **/
 
+//! Becomes nonzero in panic
+extern int panic_reenter;
+
 
 extern int threads_inited;
 

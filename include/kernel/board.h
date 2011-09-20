@@ -109,7 +109,12 @@ void board_fill_memory_map( amap_t *ram_map );
 //! Get character from debug console
 int debug_console_getc(void);
 
+//! Stop interrupts, timer, seconary CPUs...
+void board_panic_stop_world(void);
 
+
+//! Wait for a key press on default console - don't use interrupts, assume interrupts disabled
+void board_panic_wait_keypress(void);
 
 
 #endif // _K_BOARD_H

@@ -49,6 +49,8 @@ void wake_sleeping_thread( void *arg )
 void
 hal_sleep_msec( int timeMsec )
 {
+    if(panic_reenter) return;
+
     assert(threads_inited);
     phantom_thread_t *t = GET_CURRENT_THREAD();
 

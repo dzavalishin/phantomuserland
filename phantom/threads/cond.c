@@ -15,7 +15,7 @@
 #include <malloc.h>
 #include <errno.h>
 
-#include "thread_private.h"
+#include <thread_private.h>
 
 
 
@@ -81,6 +81,8 @@ errno_t hal_cond_wait(hal_cond_t *c, hal_mutex_t *m)
 {
     assert_not_interrupt();
 
+    if(panic_reenter) return EFAULT;
+
     if(c->impl == 0) checkinit(c);
     struct phantom_cond_impl *ci = c->impl;
 
@@ -123,6 +125,7 @@ static void wake_cond_thread( void *arg )
 {
     phantom_thread_t *t = get_thread( (int)arg ); // arg is tid
 
+    if(panic_reenter) return;
     if(t->waitcond == 0) return;
 
     struct phantom_cond_impl *ci = t->waitcond->impl;
@@ -138,6 +141,8 @@ static void wake_cond_thread( void *arg )
 errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
 {
     assert_not_interrupt();
+
+    if(panic_reenter) return EFAULT;
 
     if(c->impl == 0) checkinit(c);
     struct phantom_cond_impl *ci = c->impl;
@@ -196,6 +201,8 @@ errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
 
 errno_t hal_cond_signal(hal_cond_t *c)
 {
+    if(panic_reenter) return 0;
+
     if(c->impl == 0) checkinit(c);
     struct phantom_cond_impl *ci = c->impl;
 
@@ -235,6 +242,8 @@ ena:
 
 errno_t hal_cond_broadcast(hal_cond_t *c)
 {
+    if(panic_reenter) return 0;
+
     if(c->impl == 0) checkinit(c);
     struct phantom_cond_impl *ci = c->impl;
 
@@ -273,6 +282,8 @@ ret:
 
 errno_t hal_cond_destroy(hal_cond_t *c)
 {
+    if(panic_reenter) return 0;
+
     //if(m->impl.owner != 0)        panic("locked mutex killed");
     free(c->impl);
     c->impl=0;

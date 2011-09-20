@@ -13,9 +13,9 @@
 
 #define DEBUG_MSG_PREFIX "ide"
 #include <debug_ext.h>
-#define debug_level_flow 3
-#define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_flow 1
+#define debug_level_error 12
+#define debug_level_info 12
 
 #include <errno.h>
 #include <disk.h>
@@ -40,13 +40,15 @@
 #include <kernel/dpc.h>
 
 
+#define IO_PANIC 0
+#define BLOCKED_IO 0
 
 static errno_t simple_ide_idenify_device(int dev);
 
 
 
 static hal_mutex_t      ide_io;
-static long disk_sectors[4];
+static long 		disk_sectors[4];
 
 
 // TODO RENAME here and in phantom/dev/ata*
@@ -68,21 +70,34 @@ void setup_simple_ide()
 
     pci_cfg_t cfg;
     int found = !phantom_pci_find( &cfg, 0x8086, 0x7010 );
-    //int found = !phantom_pci_find_class( &cfg, 1 ); // class 1 is IDE
+    if(!found) found = !phantom_pci_find( &cfg, 0x1106, 0x0571 );
+
+    if(!found)
+    {
+        SHOW_ERROR0( 0 , "PCI IDE - no known vendor/dev, looking up by class" );
+        found = !phantom_pci_find_class( &cfg, 1, 1 ); // class 1.1 is IDE
+    }
 
     if(found)
     {
         bm_base_reg = cfg.base[4];
-        SHOW_INFO( 0 , "Found PCI IDE, BM base reg=0x%X", bm_base_reg );
+        SHOW_INFO( 0 , "Found PCI IDE, BM base reg=0x%X, irq %d", bm_base_reg, cfg.interrupt );
+
+        SHOW_INFO( 0 , "base 0 = 0x%X, base 1 = 0x%X, base 2 = 0x%X, base 3 = 0x%X, base 4 = 0x%X, base 5 = 0x%X", cfg.base[0], cfg.base[1], cfg.base[2], cfg.base[3], cfg.base[4], cfg.base[5] );
+        SHOW_INFO( 0 , "size 0 = 0x%X, size 1 = 0x%X, size 2 = 0x%X, size 3 = 0x%X, size 4 = 0x%X, size 5 = 0x%X", cfg.size[0], cfg.size[1], cfg.size[2], cfg.size[3], cfg.size[4], cfg.size[5] );
     }
+    else
+        SHOW_ERROR0( 0 , "PCI IDE not found" );
 
     pio_set_iobase_addr( 0x1f0, 0x3f0, 0 );
 
 
     if(found)
     {
+        //int bm_b2 = 0xc000+2;
+        int bm_b2 = bm_base_reg+2;
         int rc;
-        if( (rc = int_enable_irq( 0, 14, 0xc000+2, 0x1F0+7 )) )
+        if( (rc = int_enable_irq( 0, 14, bm_b2, 0x1F0+7 )) )
             printf("Error %d enabling IDE irq\n", rc );
 
         int dma_rc = dma_pci_config( bm_base_reg );
@@ -119,7 +134,6 @@ void setup_simple_ide()
 
 
 
-
 static errno_t ide_write( int ndev, long physaddr, long secno, int nsec )
 {
     hal_mutex_lock( &ide_io );
@@ -133,7 +147,13 @@ static errno_t ide_write( int ndev, long physaddr, long secno, int nsec )
                                secno, physaddr,
                                1L );
         if ( rc )
+        {
+#if IO_PANIC
             panic("IDE write failure sec %ld", secno);
+#else
+            return EIO;
+#endif
+        }
         secno++;
         physaddr += 512;
 
@@ -149,29 +169,67 @@ static errno_t ide_read( int ndev, long physaddr, long secno, int nsec )
 
     hal_mutex_lock( &ide_io );
 
+#if BLOCKED_IO
+retry:;
+    int rc = dma_pci_lba28(
+                               ndev, CMD_READ_DMA,
+                               0, nsec, // feature reg, sect count
+                               secno, physaddr,
+                               nsec );
+
+    if ( rc )
+    {
+            if( tries-- <= 0 )
+            {
+#if IO_PANIC
+                panic("IDE read failure sec %ld", secno );
+#else
+                hal_mutex_unlock( &ide_io );
+                return EIO;
+#endif
+            }
+            else
+            {
+                printf("IDE read failure sec %ld, retry\n", secno );
+                goto retry;
+            }
+    }
+#else // BLOCKED_IO
+
 retry:;
     int i;
     for( i = nsec; i > 0; i-- )
     {
+        SHOW_FLOW( 12, "start sect rd sect %d", secno );
         int rc = dma_pci_lba28(
                                ndev, CMD_READ_DMA,
                                0, 1, // feature reg, sect count
                                secno, physaddr,
                                1L );
+        SHOW_FLOW( 12, "end   sect rd sect %d", secno );
 
         if ( rc )
         {
             if( tries-- <= 0 )
+            {
+#if IO_PANIC
                 panic("IDE read failure sec %ld", secno );
+#else
+                hal_mutex_unlock( &ide_io );
+                return EIO;
+#endif
+            }
             else
             {
-                printf("IDE read failure sec %ld, retry", secno );
+                printf("IDE read failure sec %ld, retry\n", secno );
                 goto retry;
             }
         }
         secno++;
         physaddr += 512;
     }
+
+#endif // BLOCKED_IO
 
     hal_mutex_unlock( &ide_io );
     return 0;
@@ -201,9 +259,23 @@ static void dpc_func(void *a)
     pager_io_request *rq = ideq->current;
     assert(rq);
 
-    SHOW_FLOW( 9, "starting io on rq %p", rq );
+    if( (rq->unit > 1) || (rq->unit < 0) )
+    {
+        SHOW_ERROR( 1, "wrong IDE unit %d", rq->unit );
+        ideq->ioDone( ideq, ENXIO );
+        return;
+    }
 
-    //size_t bytes = rq->nSect * 512;
+    if( (rq->blockNo >= disk_sectors[rq->unit]) || (rq->blockNo < 0) )
+    {
+        SHOW_ERROR( 1, "wrong IDE blk %d on unit %d", rq->blockNo, rq->unit );
+        ideq->ioDone( ideq, EINVAL );
+        return;
+    }
+
+
+    SHOW_FLOW( 7, "starting io on rq %p blk %d", rq, rq->blockNo );
+
     errno_t rc;
 
     if(rq->flag_pageout)
@@ -215,7 +287,7 @@ static void dpc_func(void *a)
         rc = ide_read( rq->unit, rq->phys_page, rq->blockNo, rq->nSect );
     }
 
-    SHOW_FLOW( 9, "calling iodone on q %p, rq %p", ideq, rq );
+    SHOW_FLOW( 7, "calling iodone on q %p, rq %p", ideq, rq );
     assert(rq == ideq->current);
     ideq->ioDone( ideq, rc ? EIO : 0 );
 }
