@@ -1888,7 +1888,8 @@ void unwire_page_for_addr( void *addr, size_t count )
 }
 
 
-
+// TODO must unmap and free physmem, and resulting page must not go
+// to snap at all (must have 0 in pagelist = no pagein on snap load)
 void vm_map_page_mark_unused( addr_t page_start )
 {
 #if VM_UNMAP_UNUSED_OBJECTS

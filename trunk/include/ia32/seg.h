@@ -204,7 +204,7 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
 #define	KERNEL_DS_16	0x48		/* for entering V86 */
 
 #define CPU_TSS		0x50
-#define MAIN_TSS	0x50  // Main TSS is TSS for CPU 0
+#define MAIN_TSS	0x50            // Main TSS is TSS for CPU 0
 
 #define	VBE3_CS_16	0x60		// VESA PM entry code
 #define	VBE3_DS_16	0x68		// VESA PM entry code as data
@@ -235,17 +235,20 @@ void fill_gate(struct real_gate *gate, unsigned offset, unsigned short selector,
 //#define SEL_MASK (~0x3)
 #define SEL_MASK (~0x7)
 
+#define get_descriptor(array,sel) 	((struct real_descriptor *) (((char *)array) + (sel & SEL_MASK) ))
+
+
 #define make_descriptor(array, sel, base, limit, acc1, acc2) \
     { \
 	struct real_descriptor *g; \
 	g = (struct real_descriptor *) (((char *)array) + (sel & SEL_MASK) ); \
 	/*g->limit_low = limit & 0xffff;*/ \
-	g->base_low  = base & 0xffff; \
-	g->base_med  = (base >> 16) & 0xff; \
-	g->access    = acc1 | ACC_P; \
+	g->base_low  = (base) & 0xffff; \
+	g->base_med  = ((base) >> 16) & 0xff; \
+	g->access    = (acc1) | ACC_P; \
 	/*g->limit_high= limit >> 16;*/ \
-	g->granularity = acc2; \
-	g->base_high = base >> 24; \
+	g->granularity = (acc2); \
+	g->base_high = (base) >> 24; \
         set_descriptor_limit( g, limit ); \
     }
 

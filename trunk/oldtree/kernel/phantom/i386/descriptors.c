@@ -44,7 +44,6 @@
 
 struct real_descriptor 	gdt[GDTSZ];
 struct real_descriptor 	ldt[LDTSZ];
-
 struct real_gate 	idt[IDTSZ];
 
 //struct i386_tss	       	tss;
@@ -59,11 +58,16 @@ void set_descriptor_limit( struct real_descriptor *d, unsigned limit )
 {
     if (limit > 0xfffff)
     {
+        if( (limit+1) & 0xFFF )            printf("warning - big limit not aligned to page");
         limit >>= 12;
+        //limit = 1 + ((limit-1)/PAGE_SIZE);
         d->granularity |= SZ_G;
     }
     else
         d->granularity &= ~SZ_G;
+
+    //limit--; // ia32 wants it that way
+
     d->limit_low = limit & 0xffff;
     d->limit_high = limit >> 16;
 
@@ -238,11 +242,29 @@ errno_t get_uldt_cs_ds(
     segsToUse += 0x10; // dajte dva
 
 
-    fill_ldt_descriptor(cs, cs_base, 1 + (cs_limit-1)/PAGE_SIZE,
-                        ACC_PL_U|ACC_CODE_R, SZ_32|SZ_G);
+    //fill_ldt_descriptor(cs, cs_base, 1 + (cs_limit-1)/PAGE_SIZE, ACC_PL_U|ACC_CODE_R, SZ_32|SZ_G);
+    //fill_ldt_descriptor(ds, ds_base, 1 + (ds_limit-1)/PAGE_SIZE, ACC_PL_U|ACC_DATA_W, SZ_32|SZ_G);
 
-    fill_ldt_descriptor(ds, ds_base, 1 + (ds_limit-1)/PAGE_SIZE,
-                        ACC_PL_U|ACC_DATA_W, SZ_32|SZ_G);
+    fill_ldt_descriptor(cs, cs_base, cs_limit-1, ACC_PL_U|ACC_CODE_R, SZ_32);
+    fill_ldt_descriptor(ds, ds_base, ds_limit-1, ACC_PL_U|ACC_DATA_W, SZ_32);
+
+#if 1
+    struct real_descriptor *dsd = get_descriptor(ldt,ds);
+    printf(
+           "ds 0x%x: lim low %x, base low %x, base med %x, acc %x, lim hi %x, gran %x, base hi %x  (g must be %x)\ndump:\n",
+           ds,
+
+           dsd->limit_low,
+           dsd->base_low,
+           dsd->base_med,
+           dsd->access,
+           dsd->limit_high,
+           dsd->granularity,
+           dsd->base_high,
+           SZ_32|SZ_G
+          );
+    hexdump( dsd, sizeof(*dsd), 0, 0 );
+#endif
 
     *ocs = cs;
     *ods = ds;
@@ -260,8 +282,7 @@ errno_t get_uldt_sel( u_int16_t *osel, linaddr_t sel_base, size_t sel_limit, int
     segsToUse += 0x8; 
 
 
-    fill_ldt_descriptor(s, sel_base, 1 + (sel_limit-1)/PAGE_SIZE,
-                        ACC_PL_U | ( code ? ACC_CODE_R : ACC_DATA_W ), (is32 ? SZ_32 : 0) | SZ_G);
+    fill_ldt_descriptor(s, sel_base, sel_limit-1, ACC_PL_U | ( code ? ACC_CODE_R : ACC_DATA_W ), is32 ? SZ_32 : 0 );
 
     *osel = s;
 
