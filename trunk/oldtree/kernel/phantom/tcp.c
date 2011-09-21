@@ -53,7 +53,7 @@
 
 //#include "cbuf.h"
 #include <kernel/net/tcp.h>
-#include "net_timer.h"
+#include <kernel/net_timer.h>
 
 #include "misc.h"
 
@@ -118,7 +118,7 @@ typedef struct tcp_socket {
     queue_element accept_next; // must be first
     struct tcp_socket *next;
     tcp_state state;
-    mutex lock;
+    hal_mutex_t lock;
     int ref_count;
     int last_error;
 
@@ -140,7 +140,7 @@ typedef struct tcp_socket {
     net_timer_event ack_delay_timer;
 
     /* tx */
-    mutex write_lock;
+    hal_mutex_t write_lock;
     hal_sem_t write_sem;
     bool writers_waiting;
     uint32 tx_win_low;
@@ -184,7 +184,7 @@ typedef struct tcp_socket_key {
 } tcp_socket_key;
 
 static tcp_socket *socket_table;
-static mutex socket_table_lock;
+static hal_mutex_t socket_table_lock;
 static int next_ephemeral_port = 1024;
 
 /* the following are in bigtime_t units (microseconds) */

@@ -511,7 +511,7 @@ static unsigned int rcache_hash(void *_e, const void *_key, unsigned int range)
 
 static int 	inited = 0;
 //static void *	rcache;
-static mutex 	rcache_mutex;
+static hal_mutex_t 	rcache_mutex;
 
 
 void resolver_init()

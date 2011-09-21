@@ -76,7 +76,7 @@ typedef struct arp_cache_entry {
 
 // arp cache
 static void *arp_table;
-static mutex arp_table_mutex;
+static hal_mutex_t arp_table_mutex;
 static arp_cache_entry *arp_cache_entries;
 
 typedef struct arp_wait_request {
@@ -92,7 +92,7 @@ typedef struct arp_wait_request {
 
 // list of threads blocked on arp requests
 static arp_wait_request *arp_waiters;
-static mutex arp_wait_mutex;
+static hal_mutex_t arp_wait_mutex;
 static sem_id arp_wait_sem;
 
 static int arp_cache_compare(void *_e, const void *_key)

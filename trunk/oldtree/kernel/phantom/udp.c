@@ -64,7 +64,7 @@ typedef struct udp_queue {
 
 typedef struct udp_endpoint {
     struct udp_endpoint *next;
-    mutex lock;
+    hal_mutex_t lock;
     sem_id blocking_sem;
     uint16 port;
     udp_queue q;
@@ -72,7 +72,7 @@ typedef struct udp_endpoint {
 } udp_endpoint;
 
 static udp_endpoint *endpoints;
-static mutex endpoints_lock;
+static hal_mutex_t endpoints_lock;
 
 static int udp_endpoint_compare_func(void *_e, const void *_key)
 {

@@ -38,7 +38,7 @@
 #include <kernel/stats.h>
 
 #if NET_TIMED_FLUSH
-#include "net_timer.h"
+#include <kernel/net_timer.h>
 #endif
 
 
