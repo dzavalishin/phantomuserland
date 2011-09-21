@@ -110,7 +110,7 @@ static void rtc_interrupt(void *a)
 
     //RTC_UNLOCK;
 
-    t0_revive();
+    //t0_revive();
 
 #if RTC_DEBUG
     putchar('$');

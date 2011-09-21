@@ -141,7 +141,7 @@ typedef struct ifnet {
 	int (*link_input)(cbuf *buf, struct ifnet *i);
 	int (*link_output)(cbuf *buf, struct ifnet *i, netaddr *target, int protocol_type);
 	sem_id tx_queue_sem;
-        mutex tx_queue_lock;
+    hal_mutex_t tx_queue_lock;
 
         fixed_queue tx_queue;
 

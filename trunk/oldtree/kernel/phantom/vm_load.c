@@ -113,7 +113,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
 
 
 static void *bulk_code;
-static unsigned int bulk_size;
+static unsigned int bulk_size = 0;
 static void *bulk_read_pos;
 
 int bulk_seek_f( int pos )
@@ -145,7 +145,7 @@ void load_classes_module()
     // and it is called only if completely fresh system is set up
     struct multiboot_module *classes_module = phantom_multiboot_find("classes");
 
-    SHOW_FLOW( 2, "Classes boot module is %sfound\n", classes_module ? "" : "not " );
+    SHOW_FLOW( 2, "Classes boot module is %sfound", classes_module ? "" : "not " );
 
     bulk_read_pos = bulk_code;
     bulk_size = 0;
@@ -156,7 +156,11 @@ void load_classes_module()
         bulk_size = classes_module->mod_end - classes_module->mod_start;
     }
     else
-        panic("no boot classes module found");
+    {
+        // Don't panic - there are more ways to obtain classes
+        //SHOW_ERROR0( 0, "Classes boot module is not found" );
+        //panic("no boot classes module found");
+    }
 
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 }

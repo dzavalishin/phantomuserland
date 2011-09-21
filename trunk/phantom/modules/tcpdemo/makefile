@@ -10,7 +10,8 @@ include $(BUILD_ROOT)/makerules-usr
 
 include $(BUILD_ROOT)/modules/$(SHORT_NAME)/makerules
 
-INSTALL_DIR=$(TFTP_PATH)/$(TARGET)
+#INSTALL_DIR=$(TFTP_PATH)/$(TARGET)
+INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/boot/$(TARGET)
 
 analyse::
 	#

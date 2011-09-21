@@ -90,6 +90,7 @@ int setVesaMode( u_int16_t mode )
 
 
 #define MAX_W 1024
+//#define MAX_W 1280
 
 
 #define farTo32(fp) ( (void *) (((fp & 0xFFFF0000u) >> 12) | (fp & 0xFFFFu) ) )

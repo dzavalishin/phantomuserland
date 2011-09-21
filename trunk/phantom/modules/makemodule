@@ -12,3 +12,4 @@ analyse::
 	#
 
 #INSTALL_DIR=$(BOOT_PATH)/$(TARGET)
+INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/boot/$(TARGET)
