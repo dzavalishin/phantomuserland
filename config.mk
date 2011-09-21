@@ -40,7 +40,13 @@ endif
 
 # How to compile phantom source
 
+ifeq ($(OSTYPE),cygwin)
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
+MKBULK=$(realpath $(PHANTOM_HOME))/build/bin/mkbulk.exe
+else
+PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.sh
+MKBULK=$(realpath $(PHANTOM_HOME))/build/bin/mkbulk
+endif
 
 %.pc: %.ph
 	$(PLC) $<

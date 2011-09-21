@@ -1,3 +1,5 @@
+include ../../config.mk
+
 all: classes
 
 vpath %.pc ../bin
@@ -44,11 +46,6 @@ classes: \
      ru.dz.phantom.system.boot.pc
 
 
-ifeq ($(OSTYPE),cygwin)
-PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
-else
-PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.sh
-endif
 BOOTCLASSES=$(realpath $(PHANTOM_HOME))/run/fat/class
 
 %.pc: %.ph
