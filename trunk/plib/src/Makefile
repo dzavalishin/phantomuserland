@@ -19,10 +19,10 @@ roots::
 phantom.environment.pc: phantom.util.map.pc
 
 internal.object.pc: internal.object.ph
-	make roots
-	make classes
+	$(MAKE) roots
+	$(MAKE) classes
 	rm ../bin/internal.thread.pc
-	make classes
+	$(MAKE) classes
 
 classes: \
      internal.object.pc internal.int.pc internal.string.pc \
@@ -38,8 +38,11 @@ classes: \
      ru.dz.phantom.system.boot.pc
 
 
-
+ifeq ($(OSTYPE),cygwin)
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
+else
+PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.sh
+endif
 BOOTCLASSES=$(realpath $(PHANTOM_HOME))/run/fat/class
 
 %.pc: %.ph
@@ -52,4 +55,3 @@ BOOTCLASSES=$(realpath $(PHANTOM_HOME))/run/fat/class
 clean::
 	-rm ../bin/*.pc
 	-rm *.ph~
-

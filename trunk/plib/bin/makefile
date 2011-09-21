@@ -3,7 +3,11 @@ include ../../config.mk
 all:: classes
 
 MKBULK=mkbulk
+ifeq ($(OSTYPE),cygwin)
 PLC=plc.cmd
+else
+PLC=${PHANTOM_HOME}/build/bin/plc.sh
+endif
 
 OFF=internal.object.pc internal.io.tty.pc 
 
