@@ -1,7 +1,9 @@
 all::
-	cd src; make all; cd ..
-	cd bin; make all; cd ..
+	$(MAKE) -C src all
+	$(MAKE) -C ../apps/tetris/tetris all
+	$(MAKE) -C bin all
 
 clean::
-	cd src; make clean; cd ..
-	cd bin; make clean; cd ..
+	$(MAKE) -C src clean
+	$(MAKE) -C ../apps/tetris/tetris clean
+	$(MAKE) -C bin clean
