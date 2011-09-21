@@ -15,15 +15,17 @@
 #define debug_level_info 10
 
 #include <kernel/config.h>
+#include <kernel/physalloc.h>
 
 #include <ia32/private.h>
-
+#include <ia32/selector.h>
 #include <ia32/eflags.h>
 #include <ia32/seg.h>
 #include <ia32/tss.h>
 #include <ia32/proc_reg.h>
-#include <ia32/pio.h>
+//#include <ia32/pio.h>
 #include <ia32/ldt.h>
+
 #include <phantom_types.h>
 #include <phantom_libc.h>
 
@@ -226,23 +228,30 @@ void phantom_load_cpu_tss(int ncpu)
 extern int syscall(void);
 
 
-static int      segsToUse = 0x10;
-
 errno_t get_uldt_cs_ds(
                        linaddr_t cs_base, u_int16_t *ocs, size_t cs_limit,
                        linaddr_t ds_base, u_int16_t *ods, size_t ds_limit
                       )
 {
+    SHOW_FLOW( 3, "User CS %p 0x%x bytes, DS %p 0x%x bytes", cs_base, cs_limit, ds_base, ds_limit );
+
+#if 0
     if( (segsToUse >> 3) + 1 >= LDTSZ )
         return ENOMEM;
-
-    SHOW_FLOW( 3, "User CS %p 0x%x bytes, DS %p 0x%x bytes", cs_base, cs_limit, ds_base, ds_limit );
 
     u_int16_t cs = segsToUse | 0x7;
     segsToUse += 0x08;
     u_int16_t ds = segsToUse | 0x7;
     segsToUse += 0x08;
+#else
+    u_int16_t cs = alloc_ldt_selector();
+    u_int16_t ds = alloc_ldt_selector();
+    if( (cs == NULL_SELECTOR) || (ds == NULL_SELECTOR) )
+        return ENOMEM;
 
+    ds |= SELECTOR_USER;
+    cs |= SELECTOR_USER;
+#endif
 
     //fill_ldt_descriptor(cs, cs_base, 1 + (cs_limit-1)/PAGE_SIZE, ACC_PL_U|ACC_CODE_R, SZ_32|SZ_G);
     //fill_ldt_descriptor(ds, ds_base, 1 + (ds_limit-1)/PAGE_SIZE, ACC_PL_U|ACC_DATA_W, SZ_32|SZ_G);
@@ -276,13 +285,20 @@ errno_t get_uldt_cs_ds(
 
 errno_t get_uldt_sel( u_int16_t *osel, linaddr_t sel_base, size_t sel_limit, int code, int is32 )
 {
-    if( (segsToUse >> 3) + 1 >= LDTSZ )
+#if 0
+    if( (segsToUse >> 3) >= LDTSZ )
         return ENOMEM;
 
     u_int16_t s = segsToUse | 0x7;
 
-    segsToUse += 0x8; 
+    segsToUse += 0x8;
+#else
+    u_int16_t s = alloc_ldt_selector();
+    if( s == NULL_SELECTOR )
+        return ENOMEM;
 
+    s |= SELECTOR_USER;
+#endif
 
     fill_ldt_descriptor(s, sel_base, sel_limit-1, ACC_PL_U | ( code ? ACC_CODE_R : ACC_DATA_W ), is32 ? SZ_32 : 0 );
 
@@ -291,7 +307,66 @@ errno_t get_uldt_sel( u_int16_t *osel, linaddr_t sel_base, size_t sel_limit, int
     return 0;
 }
 
+#define USE_LDT_PHYSALLOC 1
 
 
 
+
+#if USE_LDT_PHYSALLOC
+static map_elem_t    	ldt_mapbuf[MAP_SIZE_ELEM(LDTSZ)];
+static physalloc_t   	ldt_map;
+#else
+static int      segsToUse = 0x10;
+#endif
+
+static void init_ldt_alloc(void)
+{
+    phantom_phys_alloc_init_static( &ldt_map, LDTSZ, ldt_mapbuf );
+    phantom_phys_free_region( &ldt_map, LDT_RESERVED, LDTSZ-LDT_RESERVED-1 ); // -1 = error in phantom_phys_free_region?
+    ldt_map.allocable_size = LDTSZ-LDT_RESERVED-1;
+    ldt_map.n_used_pages = 0;
+    // TODO stats?
+}
+
+INIT_ME(init_ldt_alloc, 0, 0)
+
+
+selector_id alloc_ldt_selector(void)
+{
+    //STAT_INC_CNT(STAT_CNT_LDT_ALLOC);
+#if USE_LDT_PHYSALLOC
+    physalloc_item_t ret;
+    errno_t rc = phantom_phys_alloc_page( &ldt_map, &ret );
+    if( rc )
+        return NULL_SELECTOR;
+    u_int16_t s = (((u_int16_t)ret) << 3) | SELECTOR_LDT;
+    SHOW_FLOW( 3, "alloc ldt sel %x", s );
+    return s;
+#else
+
+    if( (segsToUse >> 3) >= LDTSZ )
+        return NULL_SELECTOR;
+
+    u_int16_t s = segsToUse | SELECTOR_LDT;
+
+    segsToUse += 0x8;
+
+    return s;
+#endif
+}
+
+void free_ldt_selector(selector_id sel)
+{
+    assert(SELECTOR_IS_LDT(sel));
+    //STAT_INC_CNT(STAT_CNT_LDT_FREE);
+
+    fill_ldt_descriptor(sel, 0, 0, 0, 0 );
+
+#if USE_LDT_PHYSALLOC
+    SHOW_FLOW( 3, "free ldt sel %x", sel );
+    phantom_phys_free_page( &ldt_map, sel>>3 );
+#else
+    SHOW_ERROR( 0, "unimpl free ldt sel %x", sel );
+#endif
+}
 

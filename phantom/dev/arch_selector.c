@@ -5,7 +5,7 @@
  */
 
 #include <newos/compat.h>
-#include "ia32/vesa3/selector.h"
+#include <ia32/selector.h>
 
 #include <ia32/seg.h>
 #include <hal.h>

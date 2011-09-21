@@ -2,14 +2,26 @@
 ** Copyright 2002, Michael Noisternig. All rights reserved.
 ** Distributed under the terms of the NewOS License.
 */
-#ifndef _I386_SELECTOR_H_
-#define _I386_SELECTOR_H_
+#ifndef _IA32_SELECTOR_H_
+#define _IA32_SELECTOR_H_
 
 //#include <arch/i386/types.h>
 #include <sys/types.h>
 
 //typedef u_int32_t selector_id;
 typedef u_int16_t selector_id;
+
+selector_id alloc_ldt_selector(void);
+void free_ldt_selector(selector_id sel);
+
+#define NULL_SELECTOR   0
+
+
+#define SELECTOR_LDT    0x4 
+#define SELECTOR_USER   0x3
+
+#define SELECTOR_IS_LDT(__sel) ( __sel & 0x4 )
+#define SELECTOR_IS_USER(__sel) ( (__sel & 0x3) == 0x3 )
 
 #if 0
 typedef u_int64_t selector_type;
@@ -36,5 +48,5 @@ void			i386_selector_remove( selector_id id );
 selector_type           i386_selector_get( selector_id id );
 #endif
 
-#endif
+#endif // _IA32_SELECTOR_H_
 

@@ -18,8 +18,8 @@
 
 
 #include <kernel/config.h>
+#include <kernel/physalloc.h>
 #include <phantom_libc.h>
-#include "physalloc.h"
 #include <string.h>
 #include <threads.h>
 

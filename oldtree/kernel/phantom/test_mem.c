@@ -181,7 +181,7 @@ int do_test_physmem(const char *test_parm)
 // Physalloc (generic test)
 // -----------------------------------------------------------------------
 
-#include "physalloc.h"
+#include <kernel/physalloc.h>
 
 #define PA_PAGES (1024*1024)
 

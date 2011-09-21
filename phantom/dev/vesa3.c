@@ -10,7 +10,7 @@
 #include "ia32/vesa3/vesa3.h"
 #include "gtf.h"
 #include "ia32/vesa3/video_param_table.h"
-#include "ia32/vesa3/selector.h"
+#include <ia32/selector.h>
 
 #include <ia32/seg.h>
 #include <ia32/private.h>
