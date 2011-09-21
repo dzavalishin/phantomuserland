@@ -34,7 +34,13 @@ classes: \
      phantom.environment.pc \
      internal.thread.pc ru.dz.phantom.system.thread_test.pc \
      internal.connection.pc \
+     ru.dz.phantom.handler.pc \
+     internal.window.pc \
+     ru.dz.phantom.system.runnable.pc \
      ru.dz.phantom.system.shell_callback.pc ru.dz.phantom.system.shell.pc \
+     ru.dz.phantom.system.regression_tests.pc \
+     ru.dz.phantom.system.class_loader.pc \
+     ru.dz.windows.root.pc \
      ru.dz.phantom.system.boot.pc
 
 
