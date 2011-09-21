@@ -41,7 +41,7 @@
 #define LOSE_TX_PERCENTAGE 5
 
 static void *ifhash;
-static mutex ifhash_lock;
+static hal_mutex_t ifhash_lock;
 static if_id next_id;
 
 static int if_compare_func(void *_i, const void *_key)

@@ -221,7 +221,9 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
     do {
         void *o = (void *)op + size;
         pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
-        if ( ( o < end )  &&
+        if (
+             ( o < end )  &&
+             ( opppa < end )  &&
              ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE )  &&
              ( size < need_size * 32 ) //limit page in amount
            )
@@ -240,9 +242,10 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
     }
 }
 
+// suspected to break object land - alloc_collapse_with_next_free: assertion 'op->_ah.object_start_marker == PVM_OBJECT_START_MARKER' failed
 void pvm_collapse_free(pvm_object_storage_t *op)
 {
-//#if VM_UNMAP_UNUSED_OBJECTS
+#if VM_UNMAP_UNUSED_OBJECTS
     if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock
 
     int arena = find_arena_by_address(op);
@@ -265,7 +268,7 @@ void pvm_collapse_free(pvm_object_storage_t *op)
     }
 
     if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );  // TODO avoid Giant lock
-//#endif
+#endif
 }
 
 

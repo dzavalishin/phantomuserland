@@ -9,7 +9,7 @@
 #include <vm/alloc.h>
 #include <vm/p2c.h>
 #include <kernel/timedcall.h>
-#include <net_timer.h>
+#include <kernel/net_timer.h>
 #include <time.h>
 
 #define CN_TM_NET 1

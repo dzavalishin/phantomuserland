@@ -11,7 +11,7 @@
 
 #include <newos/nqueue.h>
 
-#include "net_timer.h"
+#include <kernel/net_timer.h>
 
 #include <kernel/net/arp.h>
 #include <kernel/net/udp.h>
@@ -61,7 +61,7 @@ typedef struct ipv4_routing_entry {
 
 // routing table
 static ipv4_routing_entry *route_table;
-static mutex route_table_mutex;
+static hal_mutex_t route_table_mutex;
 
 typedef struct ipv4_fragment {
     struct ipv4_fragment *hash_next;
@@ -90,7 +90,7 @@ static uint32 curr_identification;
 
 // fragment hash table
 static void *frag_table;
-static mutex frag_table_mutex;
+static hal_mutex_t frag_table_mutex;
 
 static net_timer_event frag_killer_event;
 

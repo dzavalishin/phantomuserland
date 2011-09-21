@@ -10,7 +10,7 @@
 
 #include <threads.h>
 
-#include "net_timer.h"
+#include <kernel/net_timer.h>
 
 #include "misc.h"
 
@@ -24,10 +24,10 @@ typedef struct {
     net_timer_event *next;
     net_timer_event *prev;
 
-    mutex  lock;
-    sem_id wait_sem;
+    hal_mutex_t      lock;
+    sem_id           wait_sem;
 
-    thread_id runner_thread;
+    thread_id        runner_thread;
 } net_timer_queue;
 
 static net_timer_queue net_q;
