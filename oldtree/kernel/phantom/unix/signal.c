@@ -20,6 +20,7 @@
 #include <kernel/trap.h>
 
 #include <signal.h>
+#include <threads.h>
 
 #include <unix/uuprocess.h>
 #include <unix/uusignal.h>
@@ -143,6 +144,25 @@ void sig_send(signal_handling_t *sh, int signal )
     sh->signal_pending |= (1 << signal);
 }
 
+void sig_send_to_current(int signal)
+{
+    tid_t tid = get_current_tid();
+    pid_t pid;
+
+    errno_t rc = t_get_pid( tid, &pid );
+    if( rc )
+    {
+        SHOW_ERROR( 0, "Attempt to send sig to thread %d with no corresponging process", tid );
+        return;
+    }
+
+    SHOW_FLOW( 3, "Send sig %d to pid %d", signal, pid );
+
+    uuprocess_t *u = proc_by_pid(pid);
+
+    signal_handling_t *sh = &u->signals;
+    sig_send( sh, signal );
+}
 
 
 // called on trap state before return to produce signal handling in u a space

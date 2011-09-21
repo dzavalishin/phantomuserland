@@ -168,13 +168,21 @@ static void uu_proc_thread_kill( phantom_thread_t *t )
 {
     assert(t);
 
-    uuprocess_t *p = t->u;
+    //uuprocess_t *p = t->u;
+    tid_t tid = t->tid;
+    pid_t pid;
 
-    assert(p);
+    if( t_get_pid( tid, &pid ) )
+    {
+        SHOW_ERROR( 1, "Thread %d must have pid but doesnt", tid );
+        return;
+    }
 
-    SHOW_FLOW( 1, "Thread %d of process %d dies", t->tid, p->pid );
+    //assert(p);
 
-    uu_proc_rm_thread( p->pid, t->tid );
+    SHOW_FLOW( 1, "Thread %d of process %d dies", tid, pid );
+
+    uu_proc_rm_thread( pid, tid );
 }
 
 
@@ -245,16 +253,22 @@ int uu_create_process( int ppid )
 // Add thread to process.
 errno_t uu_proc_add_thread( int pid, int tid )
 {
+    errno_t rc = 0;
+
     assert( tid >= 0 );
     assert( pid > 0 );
 
+/*
+    // TODO t_set_pid
     phantom_thread_t *t = get_thread(tid);
     assert( t );
     assert( t->u == 0 );
-
-    hal_set_thread_death_handler(uu_proc_thread_kill);
+*/
 
     hal_mutex_lock(&proc_lock);
+
+    rc = t_set_pid( tid, pid );
+    if( rc ) goto finish;
 
     uuprocess_t * p = proc_by_pid(pid);
     if( !p )
@@ -277,12 +291,14 @@ errno_t uu_proc_add_thread( int pid, int tid )
         break;
     }
 
-    t->u = p;
+    //t->u = p;
+    hal_set_thread_death_handler(uu_proc_thread_kill);
 
     if(!done) panic("out of thread slots for proc");
 
+finish:
     hal_mutex_unlock(&proc_lock);
-    return 0;
+    return rc;
 }
 
 // remove (dead) thread from process.

@@ -85,6 +85,20 @@ errno_t t_get_ctty( tid_t tid, struct wtty **ct )
 }
 
 
+errno_t t_set_pid( tid_t tid, pid_t pid )
+{
+    PRE()
+    t->pid = pid;
+    POST()
+}
+
+errno_t t_get_pid( tid_t tid, pid_t *pid )
+{
+    assert(pid);
+    PRE()
+    *pid = t->pid;
+    POST()
+}
 
 
 // -----------------------------------------------------------

@@ -62,7 +62,11 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
     if( ch == 0 )
         return 1;
 
-    if( e->modifiers & (UI_MODIFIER_SHIFT|UI_MODIFIER_CAPSLOCK) )
+    if( e->modifiers & UI_MODIFIER_CTRL )
+    {
+        ch &= 0x1F; // Control char
+    }
+    else if( e->modifiers & (UI_MODIFIER_SHIFT|UI_MODIFIER_CAPSLOCK) )
     {
         // TODO not a best place. implement keymaps in keybd driver
         switch(ch)

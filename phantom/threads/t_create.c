@@ -254,7 +254,8 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     //assert(t->kstack != 0);
 
     t->owner = 0;
-    t->u = 0;
+    //t->u = 0;
+    t->pid = NO_PID;
     t->thread_flags = 0;;
 
     t->waitcond = 0;

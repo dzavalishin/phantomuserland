@@ -20,6 +20,8 @@
  * @{
 **/
 
+#define NO_PID 0
+
 // Good clean tid based threads interface
 
 tid_t           get_current_tid(void);
@@ -32,6 +34,8 @@ struct wtty;
 errno_t         t_set_ctty( tid_t tid, struct wtty * );
 errno_t         t_get_ctty( tid_t tid, struct wtty ** );
 
+errno_t         t_set_pid( tid_t tid, pid_t pid );
+errno_t         t_get_pid( tid_t tid, pid_t *pid );
 
 
 // returns thread id, does not check for thread death

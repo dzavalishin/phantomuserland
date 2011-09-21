@@ -70,7 +70,8 @@ struct phantom_thread
     wtty_t *                    ctty; 
 
     //! if this thread runs Unix simulation process - here is it
-    struct uuprocess *          u;
+    //struct uuprocess *          u;
+    pid_t                       pid;
 
     const char *                name;
     //const char                  name[MAX_THREAD_NAME_LEN+1];
