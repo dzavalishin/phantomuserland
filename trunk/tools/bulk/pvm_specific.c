@@ -1,4 +1,4 @@
-#include <pvm_bulk.h>
+#include <vm/bulk.h>
 
 int fwrite( void *, int, int, void * );
 
