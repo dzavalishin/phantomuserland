@@ -105,7 +105,7 @@ errno_t user_args_load( int mina, int maxa, char **oav, int omax,  const char **
 
 
 
-static void do_syscall_sw(struct trap_state *st)
+static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
 {
 #if HAVE_UNIX
     int callno = st->eax;
@@ -125,8 +125,15 @@ static void do_syscall_sw(struct trap_state *st)
     */
 
 
-    phantom_thread_t *t = GET_CURRENT_THREAD();
-    uuprocess_t *u = t->u;
+    //phantom_thread_t *t = GET_CURRENT_THREAD();
+    //uuprocess_t *u = t->u;
+
+    /*
+    tid_t tid = get_current_tid();
+    pid_t pid;
+    assert( !t_get_pid( tid, &pid ));
+    uuprocess_t *u = proc_by_pid(pid);
+    */
 
     assert( u != 0 );
 
@@ -202,7 +209,7 @@ static void do_syscall_sw(struct trap_state *st)
     case SYS_getgid:            ret = u->gid; break;
     case SYS_getgid32:          ret = u->gid; break;
 
-    case SYS_gettid:            ret = t->tid; break;
+    case SYS_gettid:            ret = get_current_tid(); break;
     case SYS_getpid:            ret = u->pid; break;
     case SYS_getpgrp:           ret = u->pgrp_pid; break;
     case SYS_getppid:           ret = u->ppid; break;
@@ -965,11 +972,17 @@ err_ret:
 
 
 
-
+// TODO no interlock - process can be klled when we use it - use pool for processes!
 void syscall_sw(struct trap_state *st)
 {
-    phantom_thread_t *t = GET_CURRENT_THREAD();
-    uuprocess_t *u = t->u;
+    //phantom_thread_t *t = GET_CURRENT_THREAD();
+    //uuprocess_t *u = t->u;
+
+    tid_t tid = get_current_tid();
+    pid_t pid;
+    assert( !t_get_pid( tid, &pid ));
+    uuprocess_t *u = proc_by_pid(pid);
+
 /*
     int ret;
     if( (ret = setjmp(u->signal_jmpbuf)) )
@@ -978,7 +991,7 @@ void syscall_sw(struct trap_state *st)
         return;
     }
 */
-    do_syscall_sw( st );
+    do_syscall_sw( u, st );
     execute_signals(u, st);
 }
 

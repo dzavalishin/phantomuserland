@@ -23,6 +23,7 @@
 #include <dirent.h>
 #include <malloc.h>
 #include <string.h>
+#include <signal.h>
 #include "device.h"
 #include <kernel/properties.h>
 
@@ -410,7 +411,17 @@ static size_t      con_read(    struct uufile *f, void *dest, size_t bytes)
 
     char *cp = dest;
     while(bytes--)
-        *cp++ = getchar();
+    {
+        // TODO wrong place to send signal, signal must be sent to all session processes?
+        int c = getchar();
+        if( c == ('c' & 0x1F ) )
+        {
+            SHOW_FLOW0( 3, "Send SIGNTERM" );
+            sig_send_to_current(SIGTERM);
+            continue;
+        }
+        *cp++ = c;
+    }
 
     return ret;
 }
