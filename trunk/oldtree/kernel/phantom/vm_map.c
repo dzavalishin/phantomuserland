@@ -28,6 +28,7 @@
 #include <kernel/stats.h>
 #include <kernel/dpc.h>
 #include <kernel/snap_sync.h>
+#include <kernel/physalloc.h>
 
 #include <threads.h>
 
@@ -41,7 +42,6 @@
 
 
 #include "vm_map.h"
-#include "physalloc.h"
 #include "pager.h"
 
 #include <machdep.h>

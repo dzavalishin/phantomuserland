@@ -48,6 +48,10 @@
 // dyn alloc
 //#define	USER_LDT_CS	0x17		/* user code segment */
 //#define	USER_LDT_DS	0x1f		/* user data segment */
+// up to 8192
+
+// Selectors 0 and 1 are not used, 0 means none and used for syscall, 1 is just reserved
+#define LDT_RESERVED    2
 
 #define	LDTSZ           256
 
@@ -56,19 +60,17 @@
 
 extern struct real_descriptor ldt[LDTSZ];
 
-//#define make_descriptor(array, sel, base, limit, acc1, acc2)
 
 /* Fill a segment descriptor in the LDT.  */
 #define fill_ldt_descriptor(selector, base, limit, access, sizebits) \
 	make_descriptor(ldt, selector, base, limit, access, sizebits)
 
-/* Fill a segment descriptor in the LDT.  */
-//#define fill_ldt_descriptor(selector, base, limit, access, sizebits)
-//	fill_descriptor(&ldt[selector/8], base, limit, access, sizebits)
-
 #define fill_ldt_gate(selector, offset, dest_selector, access, word_count) \
 	fill_gate((struct real_gate*)&(ldt[(selector)/8]), \
 		  offset, dest_selector, access, word_count)
+
+
+
 
 #endif // !ASSEMBLER
 

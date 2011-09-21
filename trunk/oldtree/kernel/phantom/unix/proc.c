@@ -28,6 +28,10 @@
 #include <kernel/debug.h>
 #include <kernel/unix.h>
 
+#ifdef ARCH_ia32
+#include <ia32/selector.h>
+#endif
+
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
 #include <unix/uusignal.h>
@@ -150,6 +154,11 @@ static void uu_proc_death(uuprocess_t *p)
     // TODO cleanup!
 
     struct exe_module * em = p->em;
+
+#ifdef ARCH_ia32
+    free_ldt_selector(em->cs_seg);
+    free_ldt_selector(em->ds_seg);
+#endif
 
     uu_unlink_exe_module(em);
 }

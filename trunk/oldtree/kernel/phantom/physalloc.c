@@ -12,7 +12,7 @@
 #include <phantom_assert.h>
 #include <malloc.h>
 
-#include "physalloc.h"
+#include <kernel/physalloc.h>
 
 // Physical memory allocator, page by page
 
@@ -135,7 +135,7 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
 
     assert( start < arena->total_size );
     assert( n_pages < arena->total_size );
-    assert( start + n_pages < arena->total_size );
+    assert( start + n_pages < arena->total_size ); // TODO bug? <= ?
 
     while(n_pages)
     {
