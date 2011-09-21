@@ -170,10 +170,10 @@ FATAL! Phantom crashed"
 		grep -i 'snapshot done' serial0.log && break
 		grep -q '^Panic' serial0.log && {
 			sleep 10
-			tail -1 serial0.log | grep -q '^Panic' && {
+			tail -1 serial0.log | grep -q '^Press any' && {
 				echo "
 
-FATAL! Phantom cycled"
+FATAL! Phantom stopped (panic)"
 				kill $QEMU_PID
 				break
 			}
