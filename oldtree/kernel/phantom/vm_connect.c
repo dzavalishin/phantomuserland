@@ -368,7 +368,7 @@ struct conntab
 
 static struct conntab connection_types_table[] =
 {
-    { "tmr:", sizeof(timedcall_t), sizeof(timedcall_t), CON_F_NAMES(timer) },
+    { "tmr:", sizeof(net_timer_event), sizeof(net_timer_event), CON_F_NAMES(timer) },
 };
 
 static int ctt_size = sizeof(connection_types_table)/sizeof(struct conntab);

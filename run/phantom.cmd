@@ -28,12 +28,14 @@ SET Q_PORTS= -serial file:serial0.log
 SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 
 
 rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
-SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp
+rem SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp
+rem SET Q_NET= -net nic,model=rtl8139  -net user -tftp ./tftp
+SET Q_NET= -net nic,model=pcnet  -net user -tftp ./tftp
 
 
 SET Q_MACHINE=-m 256
 
-SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy.img -hda fat:fat -hdb phantom.img 
+SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img 
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img 
 
 rem SET Q_KQ=-enable-kqemu

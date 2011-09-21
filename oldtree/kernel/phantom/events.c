@@ -26,6 +26,7 @@
 
 #include <phantom_libc.h>
 #include <kernel/config.h>
+#include <kernel/mutex.h>
 
 #include <threads.h>
 #include <event.h>

@@ -125,25 +125,6 @@ static int rtl8139_get_address( struct phantom_device *dev, void *buf, int len)
 
 static int seq_number = 0;
 
-
-/*
-static rtl8139 *rtl8139_new()
-{
-    rtl8139 *rtl;
-
-    rtl = malloc(sizeof(rtl8139));
-    if(rtl == NULL) {
-        return 0;
-    }
-
-    memset(rtl, 0, sizeof(rtl8139));
-
-    return rtl;
-}
-*/
-
-
-
 phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
@@ -151,7 +132,6 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
 
     SHOW_FLOW0( 1, "probe" );
 
-    //nic = rtl8139_new();
     nic = calloc(1, sizeof(rtl8139));
     if (nic == NULL)
     {
@@ -413,15 +393,20 @@ int rtl8139_init(rtl8139 *rtl)
         goto err;
         }*/
 
-    int phys_size_pages = (((rtl->phys_size)-1)/4096)+1;
+    // Sometimes mem spot is not on page boundary!
+    unsigned offset = rtl->phys_base & (PAGE_SIZE-1);
+    unsigned phys_size_pages = (((rtl->phys_size + offset)-1)/PAGE_SIZE)+1;
+
     if(hal_alloc_vaddress( (void **)&rtl->virt_base, phys_size_pages ))
         panic(DEV_NAME "out of addr space");
 
+
     hal_pages_control(
-                      rtl->phys_base, rtl->virt_base,
+                      PREV_PAGE_ALIGN(rtl->phys_base), rtl->virt_base,
                       phys_size_pages,
                       page_map, page_rw );
 
+    //rtl->virt_base += offset;
 
     printf("rtl8139 mapped at address 0x%lx\n", rtl->virt_base);
 
@@ -633,7 +618,7 @@ static void rtl8139_dumptxstate(rtl8139 *rtl)
 void rtl8139_xmit(rtl8139 *rtl, const char *ptr, ssize_t len)
 {
     //printf("rtl8139_xmit...");
-    //restart:
+    restart:
     //hal_sem_acquire(rtl->tx_sem, 1);
     hal_sem_acquire(&rtl->tx_sem);
 
@@ -657,15 +642,16 @@ void rtl8139_xmit(rtl8139 *rtl, const char *ptr, ssize_t len)
     int_disable_interrupts();
     hal_spin_lock(&rtl->reg_spinlock);
 
-#if 0
+#if 1
     /* wait for clear-to-send */
     if(!(RTL_READ_32(rtl, RT_TXSTATUS0 + rtl->txbn*4) & RT_TX_HOST_OWNS)) {
         printf("rtl8139_xmit: no txbuf free\n");
-        rtl8139_dumptxstate(rtl);
+        //rtl8139_dumptxstate(rtl);
+        hal_sleep_msec(1);
         hal_spin_unlock(&rtl->reg_spinlock);
         int_restore_interrupts();
         hal_mutex_unlock(&rtl->lock);
-        hal_sem_release(rtl->tx_sem, 1);
+        hal_sem_release(&rtl->tx_sem);
         goto restart;
     }
 #endif

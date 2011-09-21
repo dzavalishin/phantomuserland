@@ -77,7 +77,7 @@ typedef int thread_id;
 #define mutex_init(m,name) hal_mutex_init(m)
 #define mutex_lock hal_mutex_lock
 #define mutex_unlock hal_mutex_unlock
-#define mutex hal_mutex_t
+//#define mutex hal_mutex_t
 #define mutex_destroy hal_mutex_destroy
 
 #define acquire_spinlock hal_spin_lock

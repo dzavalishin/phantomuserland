@@ -144,6 +144,8 @@ phantom_device_t * driver_video_gen_clone_pci_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
 
+return 0; // off
+
     if( seq_number )
     {
         SHOW_ERROR0( 0, "Just one");

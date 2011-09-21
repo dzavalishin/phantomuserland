@@ -21,8 +21,10 @@
 #include <hal.h>
 #include <errno.h>
 #include <sys/cdefs.h>
-#include <kernel/timedcall.h>
 #include <kernel/atomic.h>
+
+//#include <kernel/timedcall.h>
+#include <kernel/net_timer.h>
 
 
 /** Extract (typed) object data area pointer from object pointer. */
@@ -176,7 +178,8 @@ struct data_area_4_thread
     hal_spinlock_t                      spin;           // used on manipulations with sleep_flag
 
     volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
-    timedcall_t                         timer;          // Who will wake us
+    //timedcall_t                         timer;          // Who will wake us
+    net_timer_event                     timer;          // Who will wake us
     pvm_object_t                        sleep_chain;    // More threads sleeping on the same event, meaningless for running thread
     VM_SPIN_TYPE *                      spin_to_unlock; // This spin will be unlocked after putting thread asleep
 

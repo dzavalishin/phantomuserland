@@ -16,6 +16,7 @@
 
 #define VM_UNMAP_UNUSED_OBJECTS 0
 
+#define ATA_32_PIO 1
 
 #ifndef ARCH_ia32
 #  define HAVE_SMP 0

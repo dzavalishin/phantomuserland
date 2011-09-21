@@ -220,8 +220,8 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     }
     else
     {
-    if(thda->sleep_flag)
-        SHOW_ERROR(0, "Warn: vm th (da %x) sleep, no spin unlock", thda);
+        if(thda->sleep_flag)
+            SHOW_ERROR(0, "Warn: vm th (da %x) sleep, no spin unlock requested", thda);
     }
 
 

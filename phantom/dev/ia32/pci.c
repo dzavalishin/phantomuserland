@@ -126,12 +126,13 @@ int phantom_pci_probe(int bus, int dev, int func, pci_cfg_t *cfg)
                 v2 = 1 + ~v2;
                 if(v & 1) {
                     //printf("  * Base Register %d IO: %x (%x)\n",i,v&0xfff0,v2&0xffff);
-                    cfg->base[i] = v & 0xfff0; // TODO check if 0xfff0 is right
+                    //cfg->base[i] = v & 0xfff0; // TODO check if 0xfff0 is right
+                    cfg->base[i] = v & ~1; // zero lowest bit
                     cfg->size[i] = v2 & 0xffff;
                     cfg->is_mem[i] = 0;
                 } else {
                     //printf("  * Base Register %d MM: %x (%x)\n",i,v&0xfffffff0,v2);
-                    cfg->base[i] = v;
+                    cfg->base[i] = v & ~0xF; // zero 4 bits
                     cfg->size[i] = v2;
                     cfg->is_mem[i] = 1;
                 }

@@ -283,10 +283,13 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
     // and write into BMIDE PRD address registers.
 
     //dma_pci_num_prd = numPrd;
-    outw( pio_bmide_base_addr + BM_PRD_ADDR_LOW,
-          (unsigned int) ( dma_pci_prd_pa & 0x0000ffffL ) );
-    outw( pio_bmide_base_addr + BM_PRD_ADDR_HIGH,
-          (unsigned int) (( dma_pci_prd_pa >> 16 ) & 0x0000ffffL ) );
+#if ATA_32_PIO
+    outl( pio_bmide_base_addr + BM_PRD_ADDR_LOW, dma_pci_prd_pa );
+#else
+    // This works in QEMU and on real hw, dies on BOCHS
+    outw( pio_bmide_base_addr + BM_PRD_ADDR_LOW,  (unsigned int) ( dma_pci_prd_pa & 0x0000ffffL ) );
+    outw( pio_bmide_base_addr + BM_PRD_ADDR_HIGH, (unsigned int) (( dma_pci_prd_pa >> 16 ) & 0x0000ffffL ) );
+#endif
 
 #if 0 || DEBUG_PCI & 0x02
     {
@@ -352,30 +355,7 @@ int dma_pci_config( unsigned int regAddr )
         return 0;                  // PCI DMA is disabled.
 
 #if 1
-#if 0
-    dma_pci_prd_va = smemalign( PAGE_SIZE, PRD_BUF_SIZE );
-    dma_pci_prd_pa = kvtophys(dma_pci_prd_va);
-#else
-
-    /*
-    {
-        int npages = ((PRD_BUF_SIZE-1)/PAGE_SIZE) + 1;
-
-        if( hal_alloc_vaddress(&dma_pci_prd_va, npages) )
-            panic("out of vaddr");
-
-        if( hal_alloc_phys_pages( &dma_pci_prd_pa, npages) )
-        {
-            //hal_free_vaddress( dma_pci_prd_va, npages );
-            panic("out of physmem");
-        }
-
-        hal_pages_control( dma_pci_prd_pa, dma_pci_prd_va, npages, page_map, page_rw );
-    }
-    */
     hal_pv_alloc( &dma_pci_prd_pa, &dma_pci_prd_va, PRD_BUF_SIZE );
-
-#endif
 
 #else
     unsigned u_int16_t off;
