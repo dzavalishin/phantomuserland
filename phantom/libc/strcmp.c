@@ -1,3 +1,6 @@
+// We have asm version for this arch
+#ifndef ARCH_ia32
+
 /* 
  * Mach Operating System
  * Copyright (c) 1992,1991,1990,1989 Carnegie Mellon University
@@ -61,3 +64,5 @@ register int a, b;
 
 	return a-b;
 }
+
+#endif

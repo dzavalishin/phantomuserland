@@ -1,9 +1,8 @@
-// We have asm version for this arch
-#ifndef ARCH_ia32
-
-/*
- * Copyright (c) 1988, 1993
- *	The Regents of the University of California.  All rights reserved.
+/*-
+ * Copyright (c) 1990 The Regents of the University of California.
+ * All rights reserved.
+ *
+ * This code is derived from locore.s.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,38 +28,81 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <phantom_libc.h>
 
+#include <ia32/asm.h>
+__FBSDID("$FreeBSD: src/lib/libc/i386/string/bcopy.S,v 1.12.2.1.6.1 2010/12/21 17:09:25 kensmith Exp $");
 
-//#include <sys/cdefs.h>
-//__FBSDID("$FreeBSD: src/lib/libc/string/rindex.c,v 1.8.6.1 2008/11/25 02:59:29 kensmith Exp $");
-
-//#include <stddef.h>
-
-#ifdef STRRCHR
-//#include <string.h>
-
-char *
-strrchr
-#else
-//#include <strings.h>
-
-char *
-rindex
+#if 0
+	RCSID("$NetBSD: bcopy.S,v 1.6 1996/11/12 00:50:06 jtc Exp $")
 #endif
-(const char *p, int ch)
-{
-	char *save;
-	char c;
 
-	c = ch;
-	for (save = 0;; ++p) {
-		if (*p == c)
-			save = (char *)p;
-		if (*p == '\0')
-			return (save);
-	}
-	/* NOTREACHED */
-}
+	/*
+	 * (ov)bcopy (src,dst,cnt)
+	 *  ws@tools.de     (Wolfgang Solfrank, TooLs GmbH) +49-228-985800
+	 */
 
+#ifdef MEMCOPY
+ENTRY(memcpy)
+#else
+#ifdef MEMMOVE
+ENTRY(memmove)
+#else
+ENTRY(bcopy)
+#endif
+#endif
+	pushl	%esi
+	pushl	%edi
+#if defined(MEMCOPY) || defined(MEMMOVE)
+	movl	12(%esp),%edi
+	movl	16(%esp),%esi
+	movl	%edi,%eax
+#else
+	movl	12(%esp),%esi
+	movl	16(%esp),%edi
+#endif
+	movl	20(%esp),%ecx
+	movl	%edi,%edx
+	subl	%esi,%edx
+	cmpl	%ecx,%edx	/* overlapping? */
+	jb	1f
+	cld			/* nope, copy forwards. */
+	movl	%ecx,%edx
+	shrl	$2,%ecx		/* copy by words */
+	rep
+	movsl
+	movl	%edx,%ecx
+	andl	$3,%ecx		/* any bytes left? */
+	rep
+	movsb
+	popl	%edi
+	popl	%esi
+	ret
+1:
+	addl	%ecx,%edi	/* copy backwards. */
+	addl	%ecx,%esi
+	std
+	movl	%ecx,%edx
+	andl	$3,%ecx		/* any fractional bytes? */
+	decl	%edi
+	decl	%esi
+	rep
+	movsb
+	movl	%edx,%ecx	/* copy remainder by words */
+	shrl	$2,%ecx
+	subl	$3,%esi
+	subl	$3,%edi
+	rep
+	movsl
+	popl	%edi
+	popl	%esi
+	cld
+	ret
+#ifdef MEMCOPY
+END(memcpy)
+#else
+#ifdef MEMMOVE
+END(memmove)
+#else
+END(bcopy)
+#endif
 #endif
