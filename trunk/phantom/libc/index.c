@@ -1,3 +1,6 @@
+// We have asm version for this arch
+#ifndef ARCH_ia32
+
 /*-
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -58,3 +61,5 @@ index
 	}
 	/* NOTREACHED */
 }
+
+#endif

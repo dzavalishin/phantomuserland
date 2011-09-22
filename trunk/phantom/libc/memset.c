@@ -1,3 +1,6 @@
+// We have asm version for this arch
+#ifndef ARCH_ia32
+
 /*-
  * Copyright (c) 1990, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -128,3 +131,5 @@ memset(void *dst0, int c0, size_t length)
 		} while (--t != 0);
 	RETURN;
 }
+
+#endif

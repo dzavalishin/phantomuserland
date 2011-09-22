@@ -1,3 +1,6 @@
+// We have asm version for this arch
+#ifndef ARCH_ia32
+
 /* 
  * Mach Operating System
  * Copyright (c) 1992,1991,1990,1989 Carnegie Mellon University
@@ -54,3 +57,5 @@ char *strcpy(char *to, const char *from)
 
     return ret;
 }
+
+#endif
