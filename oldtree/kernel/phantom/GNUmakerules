@@ -105,7 +105,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	fs_map.o resolve.o main.o keyboard.o syslog.o \
 	arch_name.o arch_init.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
-	svn_version.o	$(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
+	svn_version.o profile.o  $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 
 	@echo "Linking $@ ---------------------------------------------"
 	@$(CC) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \

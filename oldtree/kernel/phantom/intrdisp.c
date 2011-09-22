@@ -17,6 +17,7 @@
 #include <phantom_libc.h>
 #include <phantom_assert.h>
 #include <kernel/stats.h>
+#include <kernel/profile.h>
 #include <hal.h>
 
 #include <kernel/interrupts.h>
@@ -88,6 +89,12 @@ void call_irq_handler(struct trap_state *s, unsigned irq)
         printf("\nNo handler for IRQ %d\n", irq);
         return;
     }
+
+#ifdef ARCH_ia32
+    // #define RTC interrupt
+    if( irq == 8 )
+        profiler_register_interrupt_hit( s->eip );
+#endif
 
     struct handler_q *it;
 
