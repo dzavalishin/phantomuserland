@@ -9,7 +9,7 @@
 
 #include <hal.h>
 //#include "newos.h"
-#include <compat/newos.h>
+//#include <compat/newos.h>
 
 typedef void (*net_timer_callback)(void *);
 
@@ -36,7 +36,7 @@ void clear_net_timer(net_timer_event *e);
 extern inline void clear_net_timer(net_timer_event *e)
 {
 	e->prev = e->next = NULL;
-	e->pending = false;
+	e->pending = 0;
 }
 
 #endif
