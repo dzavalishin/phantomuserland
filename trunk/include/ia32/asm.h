@@ -95,7 +95,8 @@
 #define data16	.byte 0x66
 #define addr16	.byte 0x67
 
-
+#define __FBSDID(x)
+#define END(x)
 
 #ifdef GPROF
 
