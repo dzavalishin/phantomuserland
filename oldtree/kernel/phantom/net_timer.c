@@ -16,6 +16,8 @@
 
 #include <time.h>
 
+#include <compat/newos.h>
+
 #define NET_TIMER_INTERVAL 100 // 100 ms
 
 //#define NET_TIMER_INTERVAL 2000000 // 2000 ms
