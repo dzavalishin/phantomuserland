@@ -31,7 +31,7 @@ cd $PHANTOM_HOME
 
 # check if another copy is running
 
-RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
+RUNNING=`ps xjf 2>/dev/null | grep $ME | grep -vw "grep\\|$$"`
 [ "$RUNNING" ] && {
 	echo "Another copy is running: $RUNNING"
 	exit 0
