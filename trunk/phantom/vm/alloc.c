@@ -257,14 +257,26 @@ void pvm_collapse_free(pvm_object_storage_t *op)
     // Attempt to collapse up to 10 pages
     alloc_collapse_with_next_free( op, PAGE_SIZE*10, end, arena);
 
-    addr_t page_start = PAGE_ALIGN((addr_t)start);
-    size_t size  = op->_ah.exact_size;  //adjust to page?
+    addr_t data_start = (addr_t) &(op->da);
+    size_t data_size  = op->_ah.exact_size;
 
-    while( size > PAGE_SIZE ) // TODO page size hardcode
+    data_size -= __offsetof(pvm_object_storage_t, da);
+
+
+    if( data_size > PAGE_SIZE ) // TODO page size hardcode
     {
-        vm_map_page_mark_unused(page_start);
-        page_start += PAGE_SIZE;
-        size       -= PAGE_SIZE;
+        addr_t page_start = PAGE_ALIGN(data_start);
+
+        data_size -= ( page_start - data_start );
+
+        int maxp = 16; // not forever!
+
+        while( (data_size > PAGE_SIZE) && (maxp-- > 0) )
+        {
+            vm_map_page_mark_unused(page_start);
+            data_size  -= PAGE_SIZE;
+            page_start += PAGE_SIZE;
+        }
     }
 
     if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );  // TODO avoid Giant lock
