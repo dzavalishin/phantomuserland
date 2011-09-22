@@ -29,8 +29,8 @@ SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide
 
 rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
 rem SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp
-rem SET Q_NET= -net nic,model=rtl8139  -net user -tftp ./tftp
-SET Q_NET= -net nic,model=pcnet  -net user -tftp ./tftp
+SET Q_NET= -net nic,model=rtl8139  -net user -tftp ./tftp
+rem SET Q_NET= -net nic,model=pcnet  -net user -tftp ./tftp
 
 
 SET Q_MACHINE=-m 256

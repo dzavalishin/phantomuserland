@@ -49,8 +49,9 @@ void init_rtc_timer_interrupts(void)
     //RTC_LOCK;
 
     // freq = 32768 >> (rate-1)
-    int rate = 9; // 128 Hz
+    //int rate = 9; // 128 Hz
     //int rate = 14; // 4 Hz - for test purposes
+    int rate = 3; // 8192 Hz - for profiling
 
     rate &= 0x0F; //rate must be above 2 and not over 15. (this is a safe-guard to be sure it isn't over 15)
 
