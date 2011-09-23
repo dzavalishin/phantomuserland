@@ -4,16 +4,16 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes?
+ * Object allocator header
  *
  *
- **/
+**/
 
 #ifndef PVM_ALLOC_H
 #define PVM_ALLOC_H
 
 #include <hal.h>
-#include "vm/object.h"
+#include <vm/object.h>
 
 
 
@@ -99,6 +99,67 @@ void pvm_collapse_free(pvm_object_storage_t *op);
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN 0x04
 // and this is for objects already in cycle candidates buffer -
 #define PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER 0x08
+
+
+// ------------------------------------------------------------
+// Persistent arenas machinery - in progress
+// ------------------------------------------------------------
+
+#include <kernel/mutex.h>
+
+#define PVM_ARENA_START_MARKER 0xAAAA77FE
+
+// Contains nothing at all, unallocated arena space
+#define PVM_ARENA_FLAG_EMPTY            (1<<0)
+// Contains objects, not arenas
+#define PVM_ARENA_FLAG_LEAF             (1<<1)
+// This is a per-thread arena - how do we find thread after restoring snap?
+#define PVM_ARENA_FLAG_THREAD           (1<<2)
+
+#define PVM_ARENA_FLAG_INT              (1<<8)
+#define PVM_ARENA_FLAG_FAST             (1<<9)
+#define PVM_ARENA_FLAG_SATURATED        (1<<10)
+
+// Object size < 1K
+#define PVM_ARENA_FLAG_1K               (1<<16)
+// Object size < 16K
+#define PVM_ARENA_FLAG_16K              (1<<17)
+#define PVM_ARENA_FLAG_64K              (1<<18)
+#define PVM_ARENA_FLAG_512K             (1<<19)
+
+
+struct persistent_arena
+{
+    int32_t             arena_start_marker;
+
+    // from beginning of this struct to arena end
+    int64_t             arena_full_size; 
+
+    int32_t             arena_flags;
+
+    // pointer to owning thread (data part) - used on startup only, not counted.
+    // must be cleaned by GC if thread is collected.
+    int64_t             arena_thread_ptr;
+
+    // Must be recreated on OS restart
+    hal_mutex_t         arena_mutex;
+};
+
+typedef struct persistent_arena persistent_arena_t;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
