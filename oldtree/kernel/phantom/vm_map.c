@@ -1918,6 +1918,8 @@ void vm_map_page_mark_unused( addr_t page_start )
     //page_fault( vmp, write );
 done:
     hal_mutex_unlock(&vmp->lock);
+#else
+    (void) page_start;
 #endif
 }
 

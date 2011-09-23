@@ -109,6 +109,7 @@ static inline unsigned int round_size(unsigned int size, int arena)
 
 pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
 
+// TODO must be rewritten - arena properties must be kept in persistent memory
 static void init_arenas( void * _pvm_object_space_start, unsigned int size )
 {
     pvm_object_space_start = _pvm_object_space_start;
@@ -263,7 +264,7 @@ void pvm_collapse_free(pvm_object_storage_t *op)
     data_size -= __offsetof(pvm_object_storage_t, da);
 
 
-    if( data_size > PAGE_SIZE ) // TODO page size hardcode
+    if( data_size > PAGE_SIZE )
     {
         addr_t page_start = PAGE_ALIGN(data_start);
 

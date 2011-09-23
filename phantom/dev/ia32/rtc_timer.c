@@ -27,7 +27,6 @@
 #include <hal.h>
 #include <time.h>
 
-//#include "rtc.h"
 #include <kernel/ia32/rtc.h>
 #include <kernel/ia32/rtc_regs.h>
 
@@ -60,14 +59,8 @@ void init_rtc_timer_interrupts(void)
 
     // Set rate
 
-    //outb(0x70, 0x0A); //set index to register A
-    //prev=inb(0x71);
-
     //get initial value of register A
     prev = isa_rtc_read_reg( 0x0A );
-
-    //outb(0x70, 0x0A); //reset index to A
-    //outb(0x71, (prev & 0xF0) | rate);
 
     //write only our rate to A. Note, rate is the bottom 4 bits.
     isa_rtc_write_reg( 0x0A, (prev & 0xF0) | rate );
@@ -75,14 +68,8 @@ void init_rtc_timer_interrupts(void)
 
     // Turn on regular interrupts
 
-    //outb(0x70, 0x0B); //set the index to register B
-    //prev=inb(0x71);
-
     //read the current value of register B
     prev = isa_rtc_read_reg( 0x0B );
-
-    //outb(0x70, 0x0B); //set the index again(a read will reset the index to register D)
-    //outb(0x71, prev | 0x40);
 
     //write the previous value or'd with 0x40. This turns on bit 6 of register B
     isa_rtc_write_reg( 0x0B, prev | 0x40 );
@@ -102,8 +89,6 @@ static void rtc_interrupt(void *a)
     //RTC_LOCK;
 
     // Ack RTC
-    //outb(0x70, 0x0C); //select register C
-    //inb(0x71); //just throw away contents.
 
     isa_rtc_nmi_off();
     isa_rtc_read_reg( 0x0C );

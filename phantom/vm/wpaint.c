@@ -70,7 +70,7 @@ static void do_paint_area()
     rect_t todo = total;
     int old_pq = paint_request;
 
-    total.ysize = total.ysize = 0;
+    total.xsize = total.ysize = 0;
 
     // Other thread changed something, we have collision.
     // For now just repaint all the screen.

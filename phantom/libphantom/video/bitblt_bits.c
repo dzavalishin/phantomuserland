@@ -98,7 +98,7 @@ void bitmap2bitmap(
 
 
 //#if VIDEO_ZBUF
-
+#if 1 // old code was in vm/video/bitblt.c
 void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos  )
 {
     int *isrc = (int *)src;
@@ -154,6 +154,10 @@ void rgb2rgba_zbmove( struct rgba_t *dest, const struct rgb_t *src, zbuf_t *zb, 
 }
 
 
+
+#if 0 // use asm version
+
+#if 0
 void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 {
     while(nelem-- > 0)
@@ -171,6 +175,45 @@ void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb
             zb++;
         }
 }
+#else
+
+#define ZBM_STEP \
+    {                                 \
+        if( src->a && (*zb <= zpos) ) \
+        {                             \
+            *zb = zpos;               \
+            *dest = *src;             \
+        }                             \
+                                      \
+        dest++;                       \
+        src++;                        \
+        zb++;                         \
+    }
+
+void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
+{
+    while(nelem > 8)
+    {
+        nelem -= 8;
+        ZBM_STEP
+        ZBM_STEP
+        ZBM_STEP
+        ZBM_STEP
+        ZBM_STEP
+        ZBM_STEP
+        ZBM_STEP
+        ZBM_STEP
+    }
+
+    while(nelem-- > 0)
+    {
+        ZBM_STEP
+    }
+}
+
+#endif
+
+#endif
 
 
 void rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
@@ -299,6 +342,7 @@ void int565_to_rgba_move( struct rgba_t *dest, const short int *src, int nelem )
 //#endif
 
 
+#endif
 
 
 
