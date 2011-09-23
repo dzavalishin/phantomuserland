@@ -73,7 +73,7 @@ void profiler_register_interrupt_hit( addr_t ip )
     map[ip]++;
     total_count++;
 
-    if( (total_count % 100000) == 0 )
+    if( (total_count % 10000) == 0 )
         profiler_dump_map();
 
 }
@@ -97,6 +97,7 @@ void profiler_dump_map( void )
 
         int count = map[i];
 
+		if( (int) ( ((100*(long long)count)/total_count)) )
         printf(
                "%6p: %6d (%2d%%) - %s\n",
                ip, count, (int) ( ((100*(long long)count)/total_count) ),
