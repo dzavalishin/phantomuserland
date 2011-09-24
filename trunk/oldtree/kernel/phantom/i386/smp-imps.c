@@ -40,6 +40,8 @@
 #include <kernel/init.h>
 #include <kernel/trap.h>
 
+#include <threads.h>
+
 #include <time.h>
 #include <errno.h>
 

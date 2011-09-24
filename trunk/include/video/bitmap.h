@@ -5,9 +5,9 @@
 
 typedef struct drv_video_bitmap
 {
-    int         	xsize;
-    int 		ysize;
-    rgba_t              pixel[];
+    int             xsize;
+    int             ysize;
+    rgba_t          pixel[];
 } drv_video_bitmap_t;
 
 extern drv_video_bitmap_t 		close_bmp; // Window close button

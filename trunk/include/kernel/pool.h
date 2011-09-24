@@ -80,7 +80,7 @@ typedef struct pool
 
     int         magic;          // pool magic id - to check that handle is for this pool
 
-    int 	last_handle; // RR alloc pointer
+    int         last_handle; // RR alloc pointer
 
     int         flag_autoclean; // clean pool on pool destroy
     int         flag_autodestroy; // destroy el on refcount == 0
@@ -97,7 +97,7 @@ int pool_get_free( pool_t *pool );
 //! Inaccurate - no mutex taken
 int pool_get_used( pool_t *pool );
 
-errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle) );
+errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg );
 
 
 void *pool_get_el( pool_t *pool, pool_handle_t handle );

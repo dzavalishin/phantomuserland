@@ -106,21 +106,23 @@ static void _release_all()
 
 static int ff_count;
 static void *ff_el;
-static errno_t _ff(pool_t *pool, void *el, pool_handle_t handle)
+static errno_t _ff(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     (void) pool;
     (void) handle;
+    (void) arg;
 
     ff_el = el;
     ff_count++;
     return 0;
 }
 
-static errno_t _ff_fail(pool_t *pool, void *el, pool_handle_t handle)
+static errno_t _ff_fail(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     (void) pool;
     (void) handle;
     (void) el;
+    (void) arg;
 
     return ENOMEM;
 }
@@ -153,11 +155,11 @@ int do_test_pool(const char *test_parm)
 
     ff_el = 0;
     ff_count = 0;
-    test_check_false(pool_foreach( pool, _ff ));
+    test_check_false(pool_foreach( pool, _ff, 0 ));
     test_check_eq( el0, ff_el );
     test_check_eq( ff_count, 1 );
 
-    test_check_eq(pool_foreach( pool, _ff_fail ), ENOMEM);
+    test_check_eq(pool_foreach( pool, _ff_fail, 0 ), ENOMEM);
 
     test_check_false(pool_release_el( pool, h ));
     test_check_true( 0 == pool_get_used( pool ) );
@@ -165,7 +167,7 @@ int do_test_pool(const char *test_parm)
 
     ff_el = 0;
     ff_count = 0;
-    test_check_false(pool_foreach( pool, _ff ));
+    test_check_false(pool_foreach( pool, _ff, 0 ));
     test_check_eq( 0, ff_el );
     test_check_eq( ff_count, 0 );
 
