@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "elf"
 #include "debug_ext.h"
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -38,6 +38,7 @@
 
 #ifdef ARCH_ia32
 #include <ia32/private.h>
+#include <compat/kolibri.h>
 #endif
 
 //#include <unix/uufile.h>
@@ -51,15 +52,21 @@ static errno_t 	elf_load_seg(Elf32_Phdr *ph, void *src, void *dst);
 static void 	kernel_protected_module_starter( void * _u );
 
 static errno_t 	load_elf( struct exe_module **emo, void *_elf, size_t elf_size );
+static errno_t 	load_kolibri( struct exe_module **emo, void *_elf, size_t elf_size );
 
 
 
 
 errno_t uu_run_binary( int pid, void *_elf, size_t elf_size )
 {
-//return EIO;
     struct exe_module *em;
-    errno_t e = load_elf( &em, _elf, elf_size );
+    errno_t e;
+
+    if( is_not_kolibri_exe( _elf ) )
+        e = load_elf( &em, _elf, elf_size );
+    else
+        e = load_kolibri( &em, _elf, elf_size );
+
     if( e ) return e;
 
     if( (e = uu_proc_set_exec( pid, em ) ) )
@@ -95,8 +102,90 @@ errno_t uu_run_file( int pid, const char *fname )
 }
 
 #ifdef ARCH_ia32
-// Loads final relocated executable
 
+
+errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
+{
+    errno_t rc;
+
+    SHOW_FLOW( 7, "Attempt to run Kolibri exe, size %d", exe_size );
+
+    if( exe_size < sizeof(kolibri_exe_hdr_t) )
+        return ENOEXEC;
+
+    kolibri_exe_hdr_t *hdr = _exe;
+
+    rc = is_not_kolibri_exe( hdr );
+    if( rc ) return rc;
+
+    int maxpage = BYTES_TO_PAGES(hdr->stack_end);
+    int memsize = maxpage*PAGE_SIZE;
+
+    size_t data_end = hdr->data_end;
+
+    /*
+    if( data_end > exe_size )
+    {
+        SHOW_ERROR( 0, "Kolibri EXE data_end %d > exe_size %d", data_end, exe_size );
+        return ENOEXEC;
+    }
+    */
+
+    if( hdr->start >= hdr->code_end )
+    {
+        SHOW_ERROR( 0, "Kolibri EXE hdr->start %d >= hdr->code_end %d", hdr->start, hdr->code_end );
+        return ENOEXEC;
+    }
+
+    void *va;
+    physaddr_t pa;
+    hal_pv_alloc( &pa, &va, memsize );
+
+    memset( va, 0, memsize ); // Clear BSS! :)
+    memcpy( va, _exe, data_end );
+
+    // For kernel protected modlue allocata LDT, set segments, set LDT for thread,
+    // start module in LDT.
+    struct exe_module *em = calloc( sizeof(struct exe_module), 1 );
+    em->refcount++;
+
+    // TODO Need some table of running modules?
+
+    em->mem_start = va;
+    em->mem_end = va+memsize;
+
+    em->mem_size = memsize;
+    em->pa = pa;
+
+    em->start = hdr->start;
+    em->esp = memsize - sizeof(int); // Why -sizeof(int) ?
+
+    em->stack_bottom = hdr->data_end; // TODO sanity check
+    // TODO DS must not intersect with CS
+    // TODO CS size is wrong (includes DS)
+
+    em->cs_pages = maxpage;
+    em->ds_pages = maxpage;
+
+    if( get_uldt_cs_ds(
+                       (int)va, &(em->cs_seg), memsize,
+                       (int)va, &(em->ds_seg), memsize
+                      ) )
+    {
+        SHOW_ERROR0( 0, "Can't allocate CS/DS in LDT" );
+        // TODO free mem?
+        return ENOMEM;
+    }
+
+    SHOW_FLOW( 7, "Kolibri exe cs 0x%X, ds 0x%X, entry 0x%x", em->cs_seg, em->ds_seg, em->start );
+
+    *emo = em;
+
+    return 0;
+
+}
+
+// Loads final relocated executable
 errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 {
 
@@ -231,7 +320,15 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
 {
     return ENOSYS;
 }
+
+errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
+{
+    return ENOSYS;
+}
+
 #endif // ARCH_ia32
+
+
 
 
 #if defined(ARCH_ia32)

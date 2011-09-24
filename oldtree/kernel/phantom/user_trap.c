@@ -88,7 +88,7 @@ phantom_check_user_trap( struct trap_state *ts )
                 return 1;
         }
 
-        printf("Usermode thread %d killed due to unexpected trap\n", tid);
+        printf("Usermode thread %d killed due to unexpected trap %d\n", tid, ts->trapno );
         t_kill_thread( tid );
         // Will panic below if returned
         printf("Usermode trap panic in thread %d\n", tid);

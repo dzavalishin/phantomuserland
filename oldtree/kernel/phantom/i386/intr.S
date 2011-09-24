@@ -169,6 +169,23 @@ call_handler:
 
 
 
+#define INTR_SYSCALL_ENTRY(label)                \
+    .data	2				;\
+    .long	0f				;\
+    .text					;\
+    P2ALIGN(TEXT_ALIGN)				;\
+0:						;\
+    pushl	$0             /* err code */	;\
+    pushl	$0             /* trap num */	;\
+    pusha                                       ;\
+    jmp	label
+
+    //jmp	EXT(label)
+
+	.data	2
+DATA(kolibri_entry_table)
+	.text
+INTR_SYSCALL_ENTRY(kolibri_syscall_entry)
 
 
 
@@ -176,6 +193,38 @@ call_handler:
 
 
 
+
+    P2ALIGN(TEXT_ALIGN)
+kolibri_syscall_entry:
+
+    // Save the rest of the standard trap frame
+    pushl	%ds
+    pushl	%es
+    pushl	%fs
+    pushl	%gs
+
+    // store stack ptr (struct trap_state *) to ESI to use as parameter
+    movl %esp, %esi
+
+    // Load the kernel's segment registers
+    movw	%ss,%dx
+    movw	%dx,%ds
+    movw	%dx,%es
+
+    cld
+    /* Call the interrupt handler with the trap frame as a parameter */
+    pushl	%esi    // trap state
+    call        EXT(kolibri_sys_dispatcher)
+    popl	%edx
+
+    /* Return from the interrupt */
+    popl	%gs
+    popl	%fs
+    popl	%es
+    popl	%ds
+    popa
+    addl	$4*2,%esp	/* Pop trap number and error code */
+    iret
 
 
 
