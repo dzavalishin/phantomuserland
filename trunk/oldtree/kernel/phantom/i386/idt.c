@@ -73,6 +73,9 @@ extern u_int32_t int_entry_table[];
 /* defined in apic_idt.S */
 extern u_int32_t apic_entry_table[];
 
+/* defined in intr.S */
+extern u_int32_t kolibri_entry_table[];
+
 
 
 void phantom_fill_idt(void)
@@ -105,18 +108,11 @@ void phantom_fill_idt(void)
                       ACC_PL_K|ACC_INTR_GATE, 0);
     }
 
+
+    fill_idt_gate( KOLIBRI_INT,
+                   kolibri_entry_table[0], KERNEL_CS,
+                   ACC_PL_U|ACC_INTR_GATE, 0);
+                   //ACC_PL_K|ACC_INTR_GATE, 0);
+
 }
 
-/*
-void phantom_init_idt()
-{
-    phantom_fill_idt();
-    phantom_load_idt();
-    struct region_descriptor rd;
-
-    rd.rd_limit = sizeof(idt) - 1;
-    rd.rd_base = kvtolin(&idt);
-
-    asm volatile("lidt (%0)" : : "r" (&rd));
-}
-*/

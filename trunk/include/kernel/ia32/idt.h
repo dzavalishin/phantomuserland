@@ -39,7 +39,10 @@
 #define IDTSZ 256
 
 #define PIC_INT_BASE 0x20
-#define APIC_INT_BASE 0x40
+// Kolibri syscall entry point
+#define KOLIBRI_INT 0x40
+#define APIC_INT_BASE 0x60
+#define LINUX_INT 0x80
 
 
 

@@ -62,8 +62,8 @@ __inline__ int drv_video_font_draw_char(
         int bc = bpcx;
         for(; bc >= 0; bc-- )
         {
+#if 0
             int xc = 0;
-            int xe = (bc == 0) ? (font->xsize % 8) : 8;
             for( ; xc < xe; xc++ )
             {
                 if( 0x80 & ((*fp) << xc) )
@@ -71,6 +71,17 @@ __inline__ int drv_video_font_draw_char(
                 wp++;
             }
             fp++;
+#else
+            int xe = (bc == 0) ? (font->xsize % 8) : 8;
+            char fb = *fp++;
+            while(xe--)
+            {
+                if( 0x80 & fb )
+                    *wp = color;
+                wp++;
+                fb <<= 1;
+            }
+#endif
         }
 
     }

@@ -108,6 +108,8 @@ struct uuprocess
     struct exe_module * em;
 
     signal_handling_t   signals;
+
+    void *              kolibri_state; // used for kolibri processes
 };
 
 typedef struct uuprocess uuprocess_t;

@@ -14,8 +14,8 @@
 // Special value of z coord which means that we draw anyway - used for mouse
 #define ZBUF_TOP 0xFF
 
-typedef u_int8_t zbuf_t;
-//typedef u_int32_t zbuf_t;
+//typedef u_int8_t zbuf_t;
+typedef u_int32_t zbuf_t;
 
 extern zbuf_t *zbuf;
 

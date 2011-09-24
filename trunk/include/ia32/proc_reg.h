@@ -277,6 +277,18 @@ load_dr6(unsigned int dr6)
 }
 
 
+#define	get_cr4() \
+    ({ \
+	register unsigned int _temp__; \
+	asm("mov %%cr4, %0" : "=r" (_temp__)); \
+	_temp__; \
+    })
+
+#define	set_cr4(value) \
+    ({ \
+	register unsigned int _temp__ = (value); \
+	asm volatile("mov %0, %%cr4" : : "r" (_temp__)); \
+     })
 
 
 
@@ -318,18 +330,6 @@ load_dr6(unsigned int dr6)
 	asm volatile("mov %0, %%cr3" : : "r" (_temp__)); \
      })
 
-#define	get_cr4() \
-    ({ \
-	register unsigned int _temp__; \
-	asm("mov %%cr4, %0" : "=r" (_temp__)); \
-	_temp__; \
-    })
-
-#define	set_cr4(value) \
-    ({ \
-	register unsigned int _temp__ = (value); \
-	asm volatile("mov %0, %%cr4" : : "r" (_temp__)); \
-     })
 
 #define	set_ts() \
 	set_cr0(get_cr0() | CR0_TS)
