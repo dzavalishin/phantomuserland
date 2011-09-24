@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <string.h>
 #include <kernel/sem.h>
+#include <kernel/pool.h>
 #include <video/window.h>
 
 /*
@@ -55,10 +56,27 @@ static inline errno_t is_not_kolibri_exe( kolibri_exe_hdr_t *exe )
 
 struct kolibri_process_state
 {
+    hal_mutex_t         lock; // general process lock - access to process resources
+
     hal_sem_t           event; // syscall 23 event
     u_int32_t           event_mask;
 
     window_handle_t     win;
+
+    pool_t              *buttons;
+};
+
+
+struct kolibri_button
+{
+    int         id;
+    rect_t      r;
+
+    int         flag_nopaint;
+    int         flag_noborder;
+
+    int         npixels;
+    rgba_t      *pixels;
 };
 
 

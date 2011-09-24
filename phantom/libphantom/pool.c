@@ -21,7 +21,7 @@
 static pool_arena_t * alloc_arenas( int arena_size, int narenas, pool_t * init );
 static void free_arenas( int narenas, pool_arena_t *a );
 
-static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle) );
+static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg );
 
 #define HANDLE_2_MAGIC(h) ( (h>>24) & 0xFF )
 #define HANDLE_2_ARENA(h) ( (h>>16) & 0xFF )
@@ -65,9 +65,10 @@ pool_t *create_pool_ext( int inital_elems, int arena_size )
 }
 
 
-static errno_t do_pool_killme(pool_t *pool, void *el, pool_handle_t handle)
+static errno_t do_pool_killme(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     (void) el;
+    (void) arg;
 
     while(!pool_release_el( pool, handle ))
         ;
@@ -80,7 +81,7 @@ errno_t destroy_pool(pool_t *p)
 
     pool_arena_t *a = p->arenas;
     if( p->flag_autoclean ) // remove all els
-        do_pool_foreach( p, do_pool_killme );
+        do_pool_foreach( p, do_pool_killme, (void *)0 );
 
 
     // assert empty
@@ -124,12 +125,12 @@ int pool_get_used( pool_t *pool )
 }
 
 
-errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle) )
+errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg )
 {
     errno_t ret = 0;
     hal_mutex_lock( &pool->mutex );
 
-    ret = do_pool_foreach( pool, ff );
+    ret = do_pool_foreach( pool, ff, arg );
 
     hal_mutex_unlock( &pool->mutex );
     return ret;
@@ -460,7 +461,7 @@ rewrap:
 
 
 
-static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle) )
+static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg )
 {
     ASSERT_LOCKED_MUTEX(&pool->mutex);
 
@@ -478,7 +479,7 @@ static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *
             if( (as[i].ptrs[j] != 0) && (as[i].refc[j] != 0) )
             {
                 hal_mutex_unlock( &pool->mutex );
-                ret = ff( pool, as[i].ptrs[j], MK_HANDLE(pool,i,j) );
+                ret = ff( pool, as[i].ptrs[j], MK_HANDLE(pool,i,j), arg );
                 hal_mutex_lock( &pool->mutex );
 
                 if( ret )

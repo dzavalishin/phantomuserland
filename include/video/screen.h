@@ -26,11 +26,11 @@ struct drv_video_screen_t
     const char  *name; // Driver name
 
     int         xsize;
-    int 	ysize;
+    int         ysize;
     //! Bits per pixel
-    int 	bpp;
+    int         bpp;
 
-    int 	mouse_x;
+    int         mouse_x;
     int         mouse_y;
     int         mouse_flags;
 
