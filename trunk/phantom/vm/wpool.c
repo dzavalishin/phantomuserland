@@ -142,7 +142,7 @@ void w_blt(pool_handle_t h)
     DOW(h, do_w_blt( w ); );
 }
 
-static errno_t wpaint(pool_t *pool, void *el, pool_handle_t handle)
+static errno_t wpaint(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     (void) pool;
     (void) handle;
@@ -153,7 +153,7 @@ static errno_t wpaint(pool_t *pool, void *el, pool_handle_t handle)
 static void 	do_w_repaint_all()
 {
     //errno_t e =
-    pool_foreach( wp, wpaint );
+    pool_foreach( wp, wpaint, 0 );
     //rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 }
 
