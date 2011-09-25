@@ -42,8 +42,8 @@
  * $FreeBSD: src/include/time.h,v 1.34.2.1.2.1 2008/11/25 02:59:29 kensmith Exp $
  */
 
-#ifndef _TIME_H_
-#define	_TIME_H_
+#ifndef _PHANTOM_TIME_H_
+#define	_PHANTOM_TIME_H_
 
 //#include <sys/cdefs.h>
 //#include <sys/_null.h>
@@ -97,4 +97,4 @@ struct tm *gmtime_r(const time_t *, struct tm *);
 struct tm *localtime_rb(bigtime_t timer, struct tm *tmb);
 
 
-#endif /* !_TIME_H_ */
+#endif /* _PHANTOM_TIME_H_ */

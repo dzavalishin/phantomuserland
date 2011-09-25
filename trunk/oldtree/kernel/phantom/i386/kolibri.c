@@ -22,13 +22,25 @@
 #include <ia32/proc_reg.h>
 
 #include <unix/uuprocess.h>
+#include <unix/uufile.h>
+#include <kunix.h>
+
 #include <kernel/unix.h>
+#include <time.h>
+#include <fcntl.h>
 
 #include <compat/kolibri.h>
 #include <video/color.h>
 #include <video.h>
 
-//static void kolibri_sys_printn(uuprocess_t *u, struct trap_state *st );
+
+#define fs_u_ptr( ___up, ___sz  ) ({ \
+    addr_t a = (addr_t)(___up); \
+    a += (addr_t)u->mem_start;  \
+    if(a+((size_t)___sz) > (addr_t)u->mem_end) { return KERR_FAULT; } \
+    if((___sz) == 0 && check_u_string( (const char *)a, (addr_t)u->mem_end ) ) { return KERR_FAULT; }; \
+    (void *)a; \
+    })
 
 
 #define u_ptr( ___up, ___sz  ) ({ \
@@ -61,6 +73,8 @@ static void *u_ptr( addr_t ___up, size_t sz )
 }
 */
 
+
+// TODO per thread!!
 static struct kolibri_process_state * get_kolibri_state(uuprocess_t *u)
 {
     if( u->kolibri_state == 0 )
@@ -88,6 +102,8 @@ void destroy_kolibri_state(uuprocess_t *u)
 {
     struct kolibri_process_state *ks = u->kolibri_state;
 
+    SHOW_FLOW0( 1, "Destroy Kolibri state" );
+
     if( ks == 0 )
         return;
 
@@ -102,9 +118,13 @@ void destroy_kolibri_state(uuprocess_t *u)
 }
 
 
-static void kolibri_sys_internal( uuprocess_t *u, struct trap_state *st )
+// ------------------------------------------------
+// Internal kernel funcs
+// ------------------------------------------------
+static void kolibri_sys_internal( uuprocess_t *u, struct kolibri_process_state * ks, struct trap_state *st )
 {
     (void) u;
+    (void) ks;
 
     int dummy = 0;
 
@@ -152,6 +172,133 @@ static void kolibri_sys_internal( uuprocess_t *u, struct trap_state *st )
 }
 
 
+// ------------------------------------------------
+// file funcs
+// ------------------------------------------------
+
+#define ret_on_err(_e) switch(e) {\
+    case ENOTDIR: \
+    case EEXIST: \
+    case ENOENT:	return KERR_NOENT; \
+    case EPERM: \
+    case EACCES:	return KERR_ACCESS_DENIED; \
+    case EIO:           return KERR_IO; \
+    case ENOMEM:        return KERR_NOMEM; \
+    case EFAULT:        return KERR_FAULT; \
+    case EROFS: \
+    case ENODEV:        return KERR_IVALID_FUNC; \
+    \
+    default: 		return KERR_IVALID_FUNC; \
+    }
+
+
+
+static int kolibri_get_fn( char *ofn, size_t ofnlen, kolibri_FILEIO *fi, uuprocess_t *u )
+{
+    char *ifn;
+
+    if( fi->r2 )
+    {
+        ifn = fs_u_ptr( &(fi->r2), 0 );
+    }
+    else
+    {
+        ifn = fs_u_ptr( fi->name, 0 );
+    }
+    if( strlen( ifn ) >= ofnlen )
+        return KERR_NOENT;
+
+    strlcpy( ofn, ifn, ofnlen );
+    return 0;
+}
+
+static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, struct trap_state *st )
+{
+    (void) ks;
+
+    kolibri_FILEIO *fi = fs_u_ptr( st->ebx, sizeof(kolibri_FILEIO) );
+    char fn[FS_MAX_PATH_LEN];
+
+    int rc = kolibri_get_fn( fn, sizeof(fn), fi, u );
+    if( rc )
+        return rc;
+
+    void *data = 0;
+
+    int fd, nbyte;
+    int mode = 0;
+    errno_t e = 0;
+
+    switch(fi->cmd)
+    {
+    case 0: // Read file
+    case 1: // Read dir
+    case 2: // Create file
+    case 3: // Write file
+        data = fs_u_ptr( fi->buff, fi->count );
+    }
+
+    switch(fi->cmd)
+    {
+    case 0: // Read file
+        {
+            e = k_open( &fd, fn, O_RDONLY, 0 );
+            ret_on_err(e);
+            e = k_read( &nbyte, fd, data, fi->count );
+            k_close( fd );
+            st->ebx = nbyte;
+            ret_on_err(e);
+            break;
+        }
+
+        {
+        case 2: // Create file
+            mode |= O_CREAT;
+        case 3: // Write file
+            mode |= O_RDWR;
+            e = k_open( &fd, fn, mode, 0666 );
+            ret_on_err(e);
+            e = k_write( &nbyte, fd, data, fi->count );
+            k_close( fd );
+            st->ebx = nbyte;
+            ret_on_err(e);
+            break;
+        }
+
+    case 4: // Set file size
+        rc = usys_truncate( &e, u, fn, fi->offset );
+        break;
+
+    case 7: // Run program
+        rc = usys_run( &e, u, fn, 0, 0, 0 );
+        break;
+
+    case 8: // Remove file
+        rc = usys_rm( &e, u, fn );
+        break;
+
+    case 9: // Create dir
+        rc = usys_mkdir( &e, u, fn );
+        break;
+
+    case 1: // Read dir
+    case 5: // Get file info
+    case 6: // Set file attr
+    default:
+        SHOW_ERROR( 0, "Unsupported fileio cmd %d", fi->cmd );
+        return KERR_ACCESS_DENIED;
+    }
+
+    ret_on_err(e);
+    return 0;
+}
+
+
+
+// ------------------------------------------------
+// Graphical calls helpers
+// ------------------------------------------------
+
 #define GET_POS_SIZE() \
     int xpos = st->ebx >> 16;      \
     int ypos = st->ecx >> 16;      \
@@ -196,6 +343,12 @@ static errno_t kolibri_kill_button(pool_t *pool, void *el, pool_handle_t handle,
     }
     return 0;
 }
+
+
+// ------------------------------------------------
+// Main Kolibro syscall dispatcher
+// ------------------------------------------------
+
 
 void kolibri_sys_dispatcher( struct trap_state *st )
 {
@@ -248,6 +401,28 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 2: // read key
+        {
+            st->eax = 1; // no key
+            //st->eax = 0x0000FF00 & (ch << 8); // have key
+        }
+        break;
+
+    case 3: // get time
+        {
+            struct tm *tmp;
+            struct tm mytime;
+            tmp = current_time;
+            mytime = *tmp;
+
+            u_int32_t bcd_s = BCD_BYTE(mytime.tm_sec);
+            u_int32_t bcd_m = BCD_BYTE(mytime.tm_min);
+            u_int32_t bcd_h = BCD_BYTE(mytime.tm_hour);
+
+            st->eax = (bcd_s << 16) | (bcd_m << 8) | bcd_h;
+        }
+        break;
+
     case 4: // draw text line
         {
             if( !ks->win )
@@ -289,6 +464,41 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 5: // sleep
+        {
+            int msec = st->ebx * 10;
+            hal_sleep_msec(msec);
+        }
+        break;
+
+    case 7: // draw image
+        {
+            rect_t r;
+
+            r.x = st->edx >> 16;
+            r.y = st->edx & 0xFFFF;
+
+            r.xsize = st->ecx >> 16;
+            r.ysize = st->ecx & 0xFFFF;
+
+            r.y = ks->win->ysize - r.y;
+
+            int npixels = r.xsize * r.ysize;
+
+            // st->ebx - BGR bitmap ptr
+            const struct rgb_t *src = u_ptr( st->ebx, npixels*3 );
+
+            rgba_t *pixels = calloc( sizeof(rgba_t), npixels );
+            rgb2rgba_move( pixels, src, npixels );
+
+            bitmap2bitmap(
+                          ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
+                          pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
+            free( pixels );
+
+        }
+        break;
+
     case 8: // button
         {
             if( !ks->win )
@@ -317,7 +527,6 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             r.y = ks->win->ysize - r.y;
 
             int npixels = r.xsize * r.ysize;
-            // st->ebx - BGR bitmap ptr
 
             color_t c = i2color( st->esi );
 
@@ -338,11 +547,25 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             cb->flag_nopaint = nopaint;
             cb->flag_noborder = noborder;
 
+            // st->ebx - BGR bitmap ptr
+            const struct rgb_t *src = u_ptr( st->ebx, npixels*3 );
+
+            cb->pixels = calloc( sizeof(rgba_t), npixels );
+            rgb2rgba_move( cb->pixels, src, npixels );
+
+            bitmap2bitmap(
+                          ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
+                          cb->pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
+
             // TODO paint button bitmap
             // TODO process button
 
             pool_release_el( ks->buttons, bh );
         }
+        break;
+
+    case 11: // get event bits
+        st->eax = ks->event_state & ks->event_mask;
         break;
 
     case 12: // begin/and repaint app win
@@ -514,7 +737,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             //const drv_video_font_t *font = nfont ? &drv_video_8x16ant_font : &drv_video_8x16cou_font ;
             const drv_video_font_t *font = &drv_video_8x16cou_font ;
 
-            SHOW_FLOW( 0, "pnum '%s'", p );
+            //SHOW_FLOW( 0, "pnum '%s'", p );
 
             // TODO clear bg
             drv_video_font_draw_string( ks->win, font, p, fg, xpos, ypos );
@@ -570,7 +793,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
     case 68:
         // Internal sys funcs
-        kolibri_sys_internal(u,st);
+        kolibri_sys_internal(u,ks,st);
+        break;
+
+    case 70:
+        // File funcs
+        st->eax = kolibri_sys_file(u,ks,st);
         break;
 
     default:
