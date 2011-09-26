@@ -114,7 +114,7 @@ errno_t k_seek(int *pos, int fd, int offset, int whence )
     if( err )
         return err;
 
-    *pos = ret;
+    if( pos ) *pos = ret;
     return 0;
 }
 

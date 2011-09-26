@@ -17,9 +17,12 @@
 #include <phantom_types.h>
 #include <phantom_libc.h>
 #include <threads.h>
+#include <thread_private.h>
 
 #include <kernel/trap.h>
 #include <ia32/proc_reg.h>
+
+#include <kernel/libkern.h>
 
 #include <unix/uuprocess.h>
 #include <unix/uufile.h>
@@ -33,6 +36,7 @@
 #include <video/color.h>
 #include <video.h>
 
+#include "../svn_version.h"
 
 #define fs_u_ptr( ___up, ___sz  ) ({ \
     addr_t a = (addr_t)(___up); \
@@ -64,6 +68,24 @@ static errno_t check_u_string( const char *a, addr_t mem_end )
     }
 }
 
+static struct kolibri_color_defaults color_defaults =
+{
+    { 0, 0xFF, 0, 0xFF },       // border
+    { 0, 0xFF, 0xFF, 0xFF },    // header
+
+    { 40, 40, 40, 0xFF },    // button_color;
+    { 0xFF, 0xFF, 0xFF, 0xFF },    // button_text_color
+    { 0xE0, 0xE0, 0xE0, 0xFF },    // title_text_color;
+
+    { 10, 10, 10, 0xFF },    // work_color;
+    { 40, 40, 40, 0xFF },    // work_button_color;
+    { 0xFF, 0xFF, 0xFF, 0xFF },    // work_button_text_color;
+
+    { 0xFF, 0xFF, 0xFF, 0xFF },    // work_text_color;
+    { 0, 0, 0xFF, 0xFF },    // work_graph_color;
+
+};
+
 /*
 static void *u_ptr( addr_t ___up, size_t sz )
 {
@@ -93,6 +115,8 @@ static struct kolibri_process_state * get_kolibri_state(uuprocess_t *u)
     ks->buttons->flag_autodestroy = 0;
 
     ks->event_mask = 0x7;
+
+    ks->key_input_scancodes = 0;
 
     return ks;
 }
@@ -171,6 +195,74 @@ static void kolibri_sys_internal( uuprocess_t *u, struct kolibri_process_state *
     }
 }
 
+// ------------------------------------------------
+// info/ctl funcs
+// ------------------------------------------------
+
+
+static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks, struct trap_state *st )
+{
+    (void) u;
+    (void) ks;
+
+    //int dummy = 0;
+
+    switch(st->ebx)
+    {
+    case 2:
+        {
+            int slot = st->ecx;
+            SHOW_ERROR( 0, "Unimplemented Kolibri kill by slot %d", slot );
+        }
+        break;
+
+    case 5: // TODO FAKE - get cpu freq
+        st->eax = 1 << 30; // about 1ghz ?
+        break;
+
+    case 8: // spkr
+        if( st->ecx == 1 ) // speaker?
+            st->eax = 0; // speaker is off
+        break;
+
+    case 9: // halt/reboot
+        // ecx 2 = turn off, 3 - reboot
+        // st->eax = 0; // ok
+        break;
+
+    case 13: // get version
+        {
+            static struct kolibri_kernel_version vs = { 0, 7, 7, 0, 0, 0 };
+
+            static char phan[] = "PHAN";
+            static char tom[] = "TOM ";
+
+            if(vs.svn_rev == 0)
+            {
+                sscanf( svn_version(), "%d", &vs.svn_rev );
+                SHOW_FLOW( 1, "Report SVN ver %d to Kolibri", vs.svn_rev );
+            }
+
+            int movsz = umin( sizeof(struct kolibri_kernel_version), 16 );
+            void *dest = u_ptr(st->ecx, 16);
+            memmove( dest, &vs, movsz );
+
+            if( st->esi == *(u_int32_t *)&phan[0] && st->edi == *(u_int32_t *)&tom[0])
+            {
+                st->esi = PHANTOM_VERSION_MAJ;
+                st->edi = PHANTOM_VERSION_MIN;
+                st->eax = *(u_int32_t *)&phan[0];
+                st->edx = *(u_int32_t *)&tom[0];
+            }
+        }
+        break;
+
+    default:
+        SHOW_ERROR( 0, "Unimplemented Kolibri 18 syscall ebx = %d", st->ebx );
+        st->eax = 2; // Most funcs return nonzero retcode in eax.
+    }
+}
+
 
 // ------------------------------------------------
 // file funcs
@@ -208,7 +300,16 @@ static int kolibri_get_fn( char *ofn, size_t ofnlen, kolibri_FILEIO *fi, uuproce
     if( strlen( ifn ) >= ofnlen )
         return KERR_NOENT;
 
-    strlcpy( ofn, ifn, ofnlen );
+    if( 0 == strnicmp( ifn, "/sys/", 5 ) )
+    {
+        // Replace /sys with /amnt0 - first disk automount dir
+        snprintf( ofn, ofnlen, "/amnt0/%s", ifn+5 );
+    }
+    else
+        strlcpy( ofn, ifn, ofnlen );
+
+    SHOW_FLOW( 5, "fn '%s'", ofn );
+
     return 0;
 }
 
@@ -242,9 +343,17 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
     {
     case 0: // Read file
         {
+            SHOW_FLOW( 5, "read %d @ %d", fi->count, fi->offset );
             e = k_open( &fd, fn, O_RDONLY, 0 );
             ret_on_err(e);
+            e = k_seek( 0, fd, fi->offset, 0 /* seek set */ );
+            if( e )
+            {
+                k_close( fd );
+                ret_on_err(e);
+            }
             e = k_read( &nbyte, fd, data, fi->count );
+            SHOW_FLOW( 5, "read %d done", nbyte );
             k_close( fd );
             st->ebx = nbyte;
             ret_on_err(e);
@@ -376,6 +485,13 @@ void kolibri_sys_dispatcher( struct trap_state *st )
     case 0: // make app win
         {
             GET_POS_SIZE();
+
+            // negative 16bit num
+            if( xpos & 0x8000 )
+                xpos = get_screen_xsize() - (0xFFFF - (0xFFFF & xpos));
+
+            if( ypos & 0x8000 )
+                ypos = get_screen_ysize() - (0xFFFF - (0xFFFF & ypos));
 
             ypos = get_screen_ysize() - ypos - ysize;
 
@@ -564,6 +680,61 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 9: // Get thread info
+        {
+            st->eax = MAX_THREADS;
+
+            struct kolibri_thread_info *ti = u_ptr( st->ebx, 1024 );
+            int slot = st->ecx;
+
+            if( slot >= MAX_THREADS )
+            {
+            no_slot:
+                ti->state = 9; // Slot is empty
+                break;
+            }
+
+            tid_t qtid;
+
+            if( slot == -1 )
+                qtid = get_current_tid();
+            else
+            {
+                if(0 == phantom_kernel_threads[slot])
+                    goto no_slot;
+
+                qtid = phantom_kernel_threads[slot]->tid;
+            }
+
+            phantom_thread_t *ptinfo = get_thread(qtid);
+            if(0 == ptinfo)
+                goto no_slot;
+
+            phantom_thread_t tinfo = *ptinfo;
+
+            bzero( ti, sizeof(struct kolibri_thread_info) );
+
+            strncpy( ti->name, tinfo.name, 11 );
+            ti->tid = qtid;
+
+            if( tinfo.sleep_flags & THREAD_SLEEP_ZOMBIE )
+                ti->state = 3; // dies
+            else if( tinfo.sleep_flags )
+                ti->state = 1; // blocked
+            else
+                ti->state = 0; // run
+
+
+            // Fake
+            ti->cpu_usage = 0;
+            ti->win_z_order = 0;
+            ti->ecx_win_slot = 1; // Oh no...
+            ti->mem_addr = 0;
+            ti->mem_size = 4096; // dunno how to access - via pid?
+            ti->event_mask = 0x7; // good guess :)
+        }
+        break;
+
     case 11: // get event bits
         st->eax = ks->event_state & ks->event_mask;
         break;
@@ -579,7 +750,10 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             }
 
             if( st->ebx == 2 )
+            {
+                SHOW_FLOW0( 1, "Repaint" );
                 drv_video_window_update( ks->win );
+            }
         }
         break;
 
@@ -595,6 +769,18 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             drv_video_window_draw_box( ks->win, xpos, ypos, xsize, ysize, c );
         }
+        break;
+
+    case 14: // get screen size
+        {
+            u_int32_t xs = 0xFFFF & (get_screen_xsize() - 1);
+            u_int32_t ys = 0xFFFF & (get_screen_ysize() - 1);
+            st->eax = (xs << 16) | ys;
+        }
+        break;
+
+    case 18: // Info + control
+        kolibri_sys_info(u,ks,st);
         break;
 
     case 23: // wait 4 event with timeout
@@ -745,6 +931,25 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 48: // colors & styles
+        {
+            switch(st->ebx)
+            {
+            case 3: // Get defaults
+                {
+                    size_t sz = st->edx;
+                    if( sz > sizeof(color_defaults) ) sz =- sizeof(color_defaults);
+                    void *buf = u_ptr( st->ecx, sz );
+                    memcpy( buf, &color_defaults, sz );
+                }
+                break;
+
+            default:
+                SHOW_ERROR( 0, "Unimplemented 48 syscall ebx = %d ecx = %d", st->ebx, st->ecx );
+                break;
+            }
+        }
+        break;
 
     case 54: // ?
         st->eax = 0x12345678;
@@ -788,6 +993,35 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             hal_mutex_unlock( &ks->lock );
 
+        }
+        break;
+
+    case 66: // keybd
+        {
+            switch( st->ebx )
+            {
+            case 1:
+                ks->key_input_scancodes = st->ecx;
+                break;
+
+            case 2: // get inp mode
+                st->eax = ks->key_input_scancodes;
+                break;
+
+            case 3: // get shifts state
+                st->eax = 0; // TODO - stub - nothing
+                break;
+
+            case 4: // set hot key
+                st->eax = 0; // TODO - stub - does nothing
+                break;
+
+            default:
+                SHOW_ERROR( 0, "Unimplemented 66 syscall ebx = %d", st->ebx );
+                break;
+
+
+            }
         }
         break;
 

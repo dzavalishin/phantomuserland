@@ -1,0 +1,40 @@
+Phantom implements experimental Kolibri/Menuet OS compatibility environment.
+
+Environment
+-----------
+
+Loading unpacked MENUET01 executables and serving int 0x40.
+Note that it is possible to have ELF executable and use 0x40 syscalls or
+MENUET01 executable and call Phantom POSIX syscalls. It is ok to mix
+syscalls in one app too.
+
+Version
+-------
+
+Corresponds to Kolibri 0.7.7.0, but not all of Kolibri API implemented.
+Dangerous and hardware-talking funcs are skipped.
+
+Func 18.13 (get kernel version) returns 0.7.7.0, Phantom kernel SVN rev
+number, and, if esi == "PHAN" and edi == "TOM ", returns
+
+    esi = Phantom major version num
+    edi = Phantom minor version num
+    eax = "PHAN"; // as int
+    edx = "TOM "; // as int
+
+
+
+Questions
+---------
+
+- Unsure if MENUET01 executables are run correctly - especially 
+  interpretation of header data/stack fields.
+
+- A lot of Kolibri executebles are compressed. Need decompressor code.
+
+Undocumented
+------------
+
+Fn. 0
+Negative win x/y pos - count from the other side of screen.
+

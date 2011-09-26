@@ -56,10 +56,18 @@ struct exe_module
 
     void *              mem_start; // va
     void *              mem_end; // above last addr
+
+    u_int32_t           flags;
+
+    addr_t              kolibri_cmdline_addr; // user addr
+    addr_t              kolibri_cmdline_size;
+
+    addr_t              kolibri_exename_addr; // user addr
+    addr_t              kolibri_exename_size;
 };
 
 
-
+#define EM_FLAG_KOLIBRI     (1<<16)
 
 
 

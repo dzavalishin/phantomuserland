@@ -119,7 +119,17 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
     if( rc ) return rc;
 
     int maxpage = BYTES_TO_PAGES(hdr->stack_end);
-    int memsize = maxpage*PAGE_SIZE;
+
+    {
+        int dpages = BYTES_TO_PAGES(hdr->data_end);
+        if( dpages > maxpage )
+            maxpage = dpages;
+    }
+
+    // TODO stack guard page
+    maxpage += 4; // Phantom puts stack at top of memory in any case, give stack some place to live
+
+    size_t memsize = maxpage*PAGE_SIZE;
 
     size_t data_end = hdr->data_end;
 
@@ -148,6 +158,18 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
     // start module in LDT.
     struct exe_module *em = calloc( sizeof(struct exe_module), 1 );
     em->refcount++;
+
+    em->flags = EM_FLAG_KOLIBRI;
+    em->kolibri_cmdline_addr = hdr->params;
+    em->kolibri_cmdline_size = 4095;
+    em->kolibri_exename_addr = hdr->exe_name;
+    em->kolibri_exename_size = 4095;
+
+    if( em->kolibri_cmdline_addr > memsize ) // Insane?
+        em->kolibri_cmdline_size = 0;
+
+    if( em->kolibri_exename_addr > memsize ) // Insane?
+        em->kolibri_exename_size = 0;
 
     // TODO Need some table of running modules?
 
@@ -446,6 +468,21 @@ static void kernel_protected_module_starter( void * _pid )
 
     int ava, enva, tmp;
 
+    if( em->flags & EM_FLAG_KOLIBRI )
+    {
+        if(em->kolibri_cmdline_size)
+            strlcpy( em->mem_start+em->kolibri_cmdline_addr, name, em->kolibri_cmdline_size );
+
+        if(em->kolibri_cmdline_size)
+        {
+            char *dest = em->mem_start+em->kolibri_cmdline_addr;
+            *dest = 0;
+
+            const char **avp = u->argv;
+            while(*avp++)
+                strlcat( dest, *avp, em->kolibri_cmdline_size );
+        }
+    }
 
 #if 1
     // todo check success
