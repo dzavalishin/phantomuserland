@@ -17,6 +17,7 @@
 #include <kernel/sem.h>
 #include <kernel/pool.h>
 #include <video/window.h>
+#include <video/color.h>
 
 /*
  db 'MENUET01'   ; 1. идентификатор исполняемого файла (8 байт)
@@ -65,6 +66,8 @@ struct kolibri_process_state
     window_handle_t     win;
 
     pool_t              *buttons;
+
+    u_int32_t           key_input_scancodes;
 };
 
 
@@ -81,6 +84,67 @@ struct kolibri_button
 };
 
 #define BCD_BYTE(___i) (((___i % 10) | ((___i / 10) << 4)) & 0xFF )
+
+
+struct kolibri_kernel_version
+{
+    char 	a, b, c, d; // x.y.z.w
+    char 	x; // unused
+    u_int32_t 	svn_rev;
+} __attribute__((__packed__));
+
+struct kolibri_thread_info
+{
+    u_int32_t           cpu_usage; // units?
+    u_int16_t           win_z_order;
+    u_int16_t           ecx_win_slot; // GOD HELP US... read http://wiki.kolibrios.org/wiki/SysFn09/ru
+    u_int16_t           reserved1;
+
+    char                name[11];
+    char                reserved2;
+
+    u_int32_t           mem_addr;
+    u_int32_t           mem_size; // -1 to real == descriptor limit?!
+
+    u_int32_t           tid;
+
+    u_int32_t           x;
+    u_int32_t           y;
+    u_int32_t           xsize;
+    u_int32_t           ysize;
+
+    u_int16_t           state; // 0 - run, 1 - blocked, 2 - blokc + wait 4 event??, 3 - zombie, 4 - exception zombie, 5 - wait 4 event, 9 - slot is empty
+    u_int16_t           reserved3;
+
+    // Client area
+    u_int32_t           cx;
+    u_int32_t           cy;
+    u_int32_t           cxsize;
+    u_int32_t           cysize;
+
+    u_int8_t            win_state; // & 0x1 - max, & 0x2 - min to tray, & 0x4 - rolled
+
+    u_int32_t           event_mask;
+} __attribute__((__packed__));
+
+
+struct kolibri_color_defaults
+{
+    rgba_t              border_color;
+    rgba_t              header_color;
+
+    rgba_t              button_color;
+    rgba_t              button_text_color;
+    rgba_t              title_text_color;
+
+    rgba_t              work_color;
+    rgba_t              work_button_color;
+    rgba_t              work_button_text_color;
+
+    rgba_t              work_text_color;
+    rgba_t              work_graph_color;
+
+} __attribute__((__packed__));
 
 
 // -----------------------------------------------------------------------
