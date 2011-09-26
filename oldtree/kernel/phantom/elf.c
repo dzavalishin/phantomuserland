@@ -462,7 +462,7 @@ static void kernel_protected_module_starter( void * _pid )
 
     hal_set_thread_name(name);
 
-    uu_proc_add_thread( pid, GET_CURRENT_THREAD()->tid );
+    uu_proc_add_thread( pid, get_current_tid() );
 
     int prev_esp = em->esp;
 
@@ -564,6 +564,38 @@ static errno_t elf_load_seg(Elf32_Phdr *seg, void *src, void *dst)
     return 0;
 }
 
+// Untested
+void kolibri_thread_starter( void * arg )
+{
+    struct kolibri_thread_start_parm *sp = arg;
+    assert(arg);
+
+    addr_t eip = sp->eip;
+    addr_t esp = sp->esp;
+
+    free(sp);
+
+    tid_t tid = get_current_tid();
+    pid_t pid;
+    assert( !t_get_pid( tid, &pid ));
+
+    uuprocess_t *u = proc_by_pid(pid);
+    assert(u);
+
+    struct exe_module *em = u->em;
+    assert(em);
+
+    const char *name = u->cmd;
+
+    SHOW_FLOW( 3, "Kolibri %s thread started", name );
+
+    hal_set_thread_name(name);
+
+    uu_proc_add_thread( pid, tid );
+
+    switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, eip, esp );
+
+}
 
 
 
