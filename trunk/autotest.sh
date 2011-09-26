@@ -190,11 +190,18 @@ FATAL! Phantom stopped (panic)"
 		}
 	done
 
-	grep 'snap:\|snapshot done' serial0.log
 	grep -q '^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log && {
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^Panic\|^T[0-9 ]' serial0.log
 		break
 	}
+
+	grep 'snap:\|Snapshot done' serial0.log || {
+		echo "
+ERROR! No snapshot activity in log! Aborted"
+		tail -10 serial0.log
+		break
+	}
+
 	ps -p $QEMU_PID >/dev/null || break
 
 	while (ps -p $QEMU_PID >/dev/null)
