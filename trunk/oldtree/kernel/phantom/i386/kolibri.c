@@ -38,6 +38,18 @@
 
 #include "../svn_version.h"
 
+
+static void request_update_timer( struct kolibri_process_state *ks, int msec );
+static void cancel_update_timer( struct kolibri_process_state *ks );
+
+static tid_t kolibri_start_thread( uuprocess_t *u, struct kolibri_process_state *ks, addr_t eip, addr_t esp );
+
+static void kolibri_sys_hw( uuprocess_t *u, struct kolibri_process_state * ks, struct trap_state *st );
+
+static void kolibri_send_event( tid_t tid, u_int32_t event_bits );
+
+static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks);
+
 #define fs_u_ptr( ___up, ___sz  ) ({ \
     addr_t a = (addr_t)(___up); \
     a += (addr_t)u->mem_start;  \
@@ -118,6 +130,9 @@ static struct kolibri_process_state * get_kolibri_state(uuprocess_t *u)
 
     ks->key_input_scancodes = 0;
 
+    //ks->win_update_timer
+    request_update_timer( ks, 1000 ); // to make sure we can call cancel... on destroying kolibri state
+
     return ks;
 }
 
@@ -133,12 +148,32 @@ void destroy_kolibri_state(uuprocess_t *u)
 
     u->kolibri_state = 0;
 
+    cancel_update_timer( ks );
+
     hal_sem_destroy( &ks->event );
     hal_mutex_destroy( &ks->lock );
 
     destroy_pool(ks->buttons);
 
     free(ks);
+}
+
+static void win_timed_update( void *arg )
+{
+    struct kolibri_process_state *ks = arg;
+    if(!ks->win)
+        return;
+    drv_video_window_update( ks->win );
+}
+
+static void request_update_timer( struct kolibri_process_state *ks, int msec )
+{
+    set_net_timer( &ks->win_update_timer, msec, win_timed_update, ks, 0 );
+}
+
+static void cancel_update_timer( struct kolibri_process_state *ks )
+{
+    cancel_net_timer( &ks->win_update_timer );
 }
 
 
@@ -481,7 +516,6 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         panic("no exit?");
         break;
 
-
     case 0: // make app win
         {
             GET_POS_SIZE();
@@ -513,14 +547,35 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                                               xpos, ypos, fill, "Kolibri" );
 
             drv_video_window_update( ks->win );
+            kolibri_send_event( get_current_tid(), EV_REDRAW );
+        }
+        break;
 
+    case 1: // put pixel
+        {
+            if( !ks->win )
+                break;
+
+            int x = st->ebx;
+            int y = st->ecx;
+            color_t c = i2color(st->edx); // TODO inverse
+
+            drv_video_window_pixel( ks->win, x, y, c );
         }
         break;
 
     case 2: // read key
         {
-            st->eax = 1; // no key
-            //st->eax = 0x0000FF00 & (ch << 8); // have key
+            u_int32_t e = get_event_bits(u,ks);
+            if( e & EV_KEY )
+            {
+                // TODO take mutex
+                char ch = ks->e.k.ch; // TODO check read mode - maybe we have to ret scancode
+                ks->have_e = 0; // consume event
+                st->eax = 0x0000FF00 & (ch << 8); // have key
+            }
+            else
+                st->eax = 1; // no key
         }
         break;
 
@@ -576,7 +631,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             // TODO clear bg
             drv_video_font_draw_string( ks->win, font, str, textc, xpos, ypos );
-
+            request_update_timer( ks, 50 );
         }
         break;
 
@@ -677,6 +732,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             // TODO process button
 
             pool_release_el( ks->buttons, bh );
+            request_update_timer( ks, 50 );
         }
         break;
 
@@ -735,8 +791,19 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 10: // wait for event forever
+        {
+            int rc = hal_sem_acquire_etc( &ks->event, 1, 0, 0 );
+            if(rc)
+            {
+                st->eax = 0;
+                break;
+            }
+            hal_sem_zero( &ks->event ); // eat all available count
+        }
+        // fall through...
     case 11: // get event bits
-        st->eax = ks->event_state & ks->event_mask;
+        st->eax = get_event_bits(u,ks);
         break;
 
     case 12: // begin/and repaint app win
@@ -768,6 +835,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             color_t c = i2color( st->edx );
 
             drv_video_window_draw_box( ks->win, xpos, ypos, xsize, ysize, c );
+            request_update_timer( ks, 50 );
         }
         break;
 
@@ -798,10 +866,31 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 st->eax = 0;
                 break;
             }
+            hal_sem_zero( &ks->event );
 
-            st->eax = 0; // TODO put event here
+            st->eax = get_event_bits(u,ks); 
         }
         break;
+
+    case 26: // hardware services
+        kolibri_sys_hw(u,ks,st);
+        break;
+
+    case 29: // get date
+        {
+            struct tm *tmp;
+            struct tm mytime;
+            tmp = current_time;
+            mytime = *tmp;
+
+            u_int32_t bcd_d = BCD_BYTE(mytime.tm_mday);
+            u_int32_t bcd_m = BCD_BYTE(mytime.tm_mon);
+            u_int32_t bcd_y = BCD_BYTE(mytime.tm_year);
+
+            st->eax = (bcd_d << 16) | (bcd_m << 8) | (bcd_y & 0xFF);
+        }
+        break;
+
 
     case 30: // chdir/getcwd
         switch( st->ebx )
@@ -843,6 +932,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             color_t c = i2color( st->edx );
 
             drv_video_window_draw_line( ks->win, xpos, ypos, xend, yend, c );
+            request_update_timer( ks, 50 );
         }
         break;
 
@@ -927,6 +1017,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             // TODO clear bg
             drv_video_font_draw_string( ks->win, font, p, fg, xpos, ypos );
+            request_update_timer( ks, 50 );
 
         }
         break;
@@ -951,8 +1042,103 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 51: // start thread
+        {
+            if( st->ebx != 1 )
+                break;
+            st->eax = kolibri_start_thread( u, ks, st->ecx, st->edx );
+        }
+        break;
+
     case 54: // ?
         st->eax = 0x12345678;
+        break;
+
+    case 60: // ipc
+        {
+            switch( st->ebx )
+            {
+
+            case 1: // set buf addr
+                {
+                    st->eax = 0; // success
+                    size_t sz = st->edx;
+                    void * bp = u_ptr( st->ecx, sz ); // NB! Due to sbrk and others we have to recheck access on real data move
+                    // u_ptr may have return on efault, assign below only
+                    ks->ipc_buf_addr = bp;
+                    ks->ipc_buf_size = sz;
+                }
+                break;
+
+            case 2: // send msg
+                {
+                    st->eax = 1;
+                    size_t sz = st->esi;
+                    void * bp = u_ptr( st->edx, sz ); // NB! Due to sbrk and others we have to recheck access on real data move
+
+                    // TODO take kolibri proc mutex
+
+                    // TODO if dest proc will die during we send msg, kernel will die too
+
+                    pid_t dpid;
+                    if(t_get_pid( st->ecx, &dpid ))
+                    {
+                        st->eax = 4; // no pid
+                        break;
+                    }
+
+                    uuprocess_t *u = proc_by_pid(dpid);
+                    if( 0 == u )
+                    {
+                        st->eax = 4; // no pid
+                        break;
+                    }
+
+                    struct kolibri_process_state * dest_ks = get_kolibri_state(u);
+                    if( 0 == dest_ks )
+                    {
+                        st->eax = 4; // no pid
+                        break;
+                    }
+
+                    kolibri_ipc_buf_t *buf = dest_ks->ipc_buf_addr;
+                    size_t bs = dest_ks->ipc_buf_size;
+
+                    if( buf == 0 )
+                    {
+                        st->eax = 1; // no buf
+                        break;
+                    }
+
+                    if( buf->busy )
+                    {
+                        st->eax = 2; // buf busy
+                        break;
+                    }
+
+                    size_t need_len = sz+sizeof(kolibri_ipc_msg_t);
+
+                    if(need_len > bs-buf->used)
+                    {
+                        st->eax = 3; // buf overflow
+                        break;
+                    }
+
+                    kolibri_ipc_msg_t *msg = buf->msg + bs - buf->used;
+                    buf->used += need_len;
+
+                    msg->tid = get_current_tid();
+                    msg->len = sz;
+                    memcpy( msg->data, bp, sz );
+                    st->eax = 0; // sent
+
+                    st->eax = 2; // buf busy
+
+                }
+                break;
+            }
+
+        }
         break;
 
     case 63: // debug board
@@ -996,6 +1182,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 64: // sbrk
+        {
+            // TODO check if ipc buf is still in addr space
+        }
+        break;
+
     case 66: // keybd
         {
             switch( st->ebx )
@@ -1025,6 +1217,28 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 67: // win move / resize
+        {
+            if( !ks->win )
+                break;
+
+            int x = st->ebx;
+            int y = st->ecx;
+            int xs =st->edx;
+            int ys =st->esi;
+
+            if( (x != -1) && (y != -1) )
+                drv_video_window_move( ks->win, x, y );
+
+            if( (xs != -1) && (ys != -1) )
+            {
+                // TODO resize - implement
+                //drv_video_window_resize( ks->win, xs, ys );
+            }
+
+        }
+        break;
+
     case 68:
         // Internal sys funcs
         kolibri_sys_internal(u,ks,st);
@@ -1035,6 +1249,18 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         st->eax = kolibri_sys_file(u,ks,st);
         break;
 
+    case 71: // Set win title
+        {
+            if( !ks->win )
+                break;
+            if( st->ebx == 1 ) // set title
+            {
+                const char *title = u_ptr( st->ecx, 0 );
+                drv_video_window_set_title( ks->win, title );
+            }
+        }
+        break;
+
     default:
         SHOW_ERROR( 0, "Unimplemented Kolibri syscall eax = %d", st->eax );
         st->eax = 2; // Most funcs return nonzero retcode in eax.
@@ -1042,13 +1268,125 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 }
 
 
+static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks)
+{
+    (void) u;
+    u_int32_t bits = ks->event_bits;
+
+    // TODO take ks mutex
+
+    // TODO here we must check next win q event
+    // and set corresp bits
+    if( ks->win && (!ks->have_e) )
+        ks->have_e = drv_video_window_get_event( ks->win, &ks->e, 0 );
+
+    if( ks->have_e )
+    {
+        switch( ks->e.type )
+        {
+        case UI_EVENT_TYPE_MOUSE: bits |= EV_MOUSE; break;
+        case UI_EVENT_TYPE_KEY:   bits |= EV_KEY;   break;
+        }
+    }
+
+    return bits & ks->event_mask;
+}
 
 
 
 
+void kolibri_thread_starter( void * arg );
+
+static tid_t kolibri_start_thread( uuprocess_t *u, struct kolibri_process_state *ks, addr_t eip, addr_t esp )
+{
+    (void) u;
+    (void) ks;
+
+    struct kolibri_thread_start_parm *sp = calloc(1,sizeof(struct kolibri_thread_start_parm));
+    if( sp == 0 )
+    {
+        SHOW_ERROR0( 0, "out of mem" );
+        return -1;
+    }
+
+    sp->eip = eip;
+    sp->esp = esp;
+
+    // todo check esp/eip sanity?
+    tid_t tid = hal_start_thread( kolibri_thread_starter, (void *)sp, THREAD_FLAG_USER );
+
+    return tid > 0 ? tid : -1;
+}
 
 
+static void kolibri_sys_hw( uuprocess_t *u, struct kolibri_process_state * ks, struct trap_state *st )
+{
+    (void) u;
+    (void) ks;
 
+    switch(st->ebx)
+    {
+    case 1:
+        st->eax = 0x330; // ? MPU port :)
+        break;
+
+    case 2: // keyb map/lang
+        if(st->ecx == 9)
+            st->eax = 1; // en
+        else
+            goto unknown;
+        break;
+
+    case 3: // CD dev
+    case 7: // HD dev
+    case 8: // HD part
+        st->eax = 0; // None
+        break;
+
+    case 5: // lang
+        st->eax = 1; // en
+        break;
+
+    case 9: // uptime in 0.1 sec
+        {
+            bigtime_t upt = hal_system_time(); // uptime, microsecs
+
+            upt /= 100000; // -> 0.1 sec
+
+            st->eax = (u_int32_t)upt; // None
+        }
+        break;
+
+    case 11: // is low level HDD access enabled?
+    case 12: // is low level PCI access enabled?
+        st->eax = 0; // No
+        break;
+
+    default:
+    unknown:
+        SHOW_ERROR( 0, "Unimplemented Kolibri 26 syscall ebx = %d", st->ebx );
+        st->eax = 2; // Most funcs return nonzero retcode in eax.
+    }
+}
+
+
+static void kolibri_send_event( tid_t tid, u_int32_t event_bits )
+{
+    pid_t pid;
+    if( t_get_pid( tid, &pid ) )
+        return;
+
+    uuprocess_t *u = proc_by_pid(pid);
+    if(!u)
+        return;
+
+    struct kolibri_process_state * ks = get_kolibri_state(u);
+    if(!ks)
+        return;
+
+    ks->event_bits |= event_bits;
+    hal_sem_zero( &ks->event );
+}
 
 
 

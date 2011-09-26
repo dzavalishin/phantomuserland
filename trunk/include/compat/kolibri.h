@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <string.h>
 #include <kernel/sem.h>
+#include <kernel/net_timer.h>
 #include <kernel/pool.h>
 #include <video/window.h>
 #include <video/color.h>
@@ -61,13 +62,20 @@ struct kolibri_process_state
 
     hal_sem_t           event; // syscall 23 event - release when set bit in event_state
     u_int32_t           event_mask;
-    u_int32_t           event_state; // Kolibri event bits
+    u_int32_t           event_bits; // Kolibri event bits
 
     window_handle_t     win;
+    net_timer_event 	win_update_timer;
 
     pool_t              *buttons;
 
     u_int32_t           key_input_scancodes;
+
+    void *              ipc_buf_addr;
+    size_t              ipc_buf_size;
+
+    struct ui_event 	e;
+    int                 have_e;
 };
 
 
@@ -147,6 +155,32 @@ struct kolibri_color_defaults
 } __attribute__((__packed__));
 
 
+struct kolibri_thread_start_parm
+{
+    addr_t eip;
+    addr_t esp;
+};
+
+
+struct kolibri_ipc_msg
+{
+    u_int32_t           tid;
+    u_int32_t           len;
+    char                data[];
+};
+
+typedef struct kolibri_ipc_msg kolibri_ipc_msg_t;
+
+
+struct kolibri_ipc_buf
+{
+    u_int32_t           busy;
+    u_int32_t           used;
+    kolibri_ipc_msg_t   msg[];
+};
+
+typedef struct kolibri_ipc_buf kolibri_ipc_buf_t;
+
 // -----------------------------------------------------------------------
 // original defs
 // -----------------------------------------------------------------------
@@ -162,6 +196,10 @@ struct kolibri_color_defaults
 #define EV_REDRAW      1
 #define EV_KEY         2
 #define EV_BUTTON      3
+#define EV_MOUSE       6
+#define EV_IPC         7
+#define EV_NET         8
+#define EV_DEBUG       9
 
 #define REL_SCREEN     0
 #define REL_WINDOW     1
