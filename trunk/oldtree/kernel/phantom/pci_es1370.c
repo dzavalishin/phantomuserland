@@ -11,7 +11,7 @@
 #define DEV_NAME "es1370"
 #define DEBUG_MSG_PREFIX "es1370"
 #include <debug_ext.h>
-#define debug_level_flow 9
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 

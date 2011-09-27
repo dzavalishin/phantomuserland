@@ -843,16 +843,28 @@ extern void sub_writeBusMstrStatus( unsigned char x );
 #define TRC_LLT_W_BM_CR 55  // write bus master cmd reg
 #define TRC_LLT_W_BM_SR 56  // write bus master status reg
 
+#define ATAIO_TRACE 0
+
 //**************************************************************
 //
 // Private functions in ATAIOTRC.C
 //
 //**************************************************************
 
+#if ATAIO_TRACE
+
 extern void trc_cht( void );
 
 extern void trc_llt( unsigned char addr,
                      unsigned char data,
                      unsigned char type );
+
+#else
+
+#define trc_cht( _none ) 
+#define trc_llt( addr, data, type ) 
+
+
+#endif
 
 // end ataio.h

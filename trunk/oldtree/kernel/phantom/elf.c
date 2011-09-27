@@ -161,9 +161,9 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
 
     em->flags = EM_FLAG_KOLIBRI;
     em->kolibri_cmdline_addr = hdr->params;
-    em->kolibri_cmdline_size = 4095;
+    em->kolibri_cmdline_size = KOLIBRI_CMD_LINE_MAX;
     em->kolibri_exename_addr = hdr->exe_name;
-    em->kolibri_exename_size = 4095;
+    em->kolibri_exename_size = KOLIBRI_CMD_PATH_MAX;
 
     if( em->kolibri_cmdline_addr > memsize ) // Insane?
         em->kolibri_cmdline_size = 0;

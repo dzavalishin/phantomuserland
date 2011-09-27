@@ -700,6 +700,7 @@ void trc_cht_types( int type )
 
 //**************************************************************
 
+#if ATAIO_TRACE
 // place an command or reset entry into
 // the command history trace buffer
 
@@ -738,6 +739,8 @@ void trc_cht( void )
    if ( chtCur >= MAX_CHT )
       chtCur = 0;
 }
+
+#endif
 
 //**************************************************************
 
@@ -1043,6 +1046,8 @@ static const char * reg_nm[]  // register names for trace
 
 //*********************************************************
 
+#if ATAIO_TRACE
+
 // place an entry into the low level trace buffer
 
 void trc_llt( unsigned char addr,
@@ -1073,6 +1078,8 @@ void trc_llt( unsigned char addr,
    lltBuf[lltCur].type = type;
    lltBuf[lltCur].rep = 1;
 }
+
+#endif
 
 //**************************************************************
 

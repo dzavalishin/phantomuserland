@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "ide"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 0
 #define debug_level_error 12
 #define debug_level_info 12
 
@@ -83,8 +83,8 @@ void setup_simple_ide()
         bm_base_reg = cfg.base[4];
         SHOW_INFO( 0 , "Found PCI IDE, BM base reg=0x%X, irq %d", bm_base_reg, cfg.interrupt );
 
-        SHOW_INFO( 0 , "base 0 = 0x%X, base 1 = 0x%X, base 2 = 0x%X, base 3 = 0x%X, base 4 = 0x%X, base 5 = 0x%X", cfg.base[0], cfg.base[1], cfg.base[2], cfg.base[3], cfg.base[4], cfg.base[5] );
-        SHOW_INFO( 0 , "size 0 = 0x%X, size 1 = 0x%X, size 2 = 0x%X, size 3 = 0x%X, size 4 = 0x%X, size 5 = 0x%X", cfg.size[0], cfg.size[1], cfg.size[2], cfg.size[3], cfg.size[4], cfg.size[5] );
+        SHOW_INFO( 8 , "base 0 = 0x%X, base 1 = 0x%X, base 2 = 0x%X, base 3 = 0x%X, base 4 = 0x%X, base 5 = 0x%X", cfg.base[0], cfg.base[1], cfg.base[2], cfg.base[3], cfg.base[4], cfg.base[5] );
+        SHOW_INFO( 8 , "size 0 = 0x%X, size 1 = 0x%X, size 2 = 0x%X, size 3 = 0x%X, size 4 = 0x%X, size 5 = 0x%X", cfg.size[0], cfg.size[1], cfg.size[2], cfg.size[3], cfg.size[4], cfg.size[5] );
     }
     else
         SHOW_ERROR0( 0 , "PCI IDE not found" );

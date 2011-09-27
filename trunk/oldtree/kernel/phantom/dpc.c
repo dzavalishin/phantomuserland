@@ -11,8 +11,8 @@
 **/
 
 #define DEBUG_MSG_PREFIX "dpc"
-#include "debug_ext.h"
-#define debug_level_flow 1
+#include <debug_ext.h>
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -161,7 +161,7 @@ static void dpc_timed_waker_thread(void)
 
 void dpc_init()
 {
-    SHOW_FLOW0( 0, "Starting DPC");
+    SHOW_FLOW0( 1, "Starting DPC");
     hal_cond_init( &dpc_thread_sleep_stone, "DPC" );
     spinlock_init( &dpc_request_lock );
 
@@ -181,7 +181,7 @@ void dpc_init()
         hal_sleep_msec(1); // wait for thread to start
     }
 
-    SHOW_FLOW0( 1, "DPC start done");
+    SHOW_FLOW0( 0, "DPC start done");
 }
 
 
