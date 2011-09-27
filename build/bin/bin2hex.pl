@@ -4,7 +4,7 @@
 #
 
 # number of characters per line
-$chars_per_line = 15;
+$chars_per_line = 8;
 
 # -------------------------------------
 

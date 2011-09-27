@@ -17,5 +17,7 @@ extern struct drv_video_font_t         drv_video_8x16rom_font;
 extern struct drv_video_font_t         drv_video_8x16san_font;
 extern struct drv_video_font_t         drv_video_8x16scr_font;
 
+extern struct drv_video_font_t         drv_video_kolibri1_font;
+extern struct drv_video_font_t         drv_video_kolibri2_font;
 
 #endif // FONT_H

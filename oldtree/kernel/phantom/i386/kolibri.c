@@ -34,6 +34,7 @@
 
 #include <compat/kolibri.h>
 #include <video/color.h>
+#include <video/screen.h>
 #include <video.h>
 
 #include "../svn_version.h"
@@ -49,6 +50,10 @@ static void kolibri_sys_hw( uuprocess_t *u, struct kolibri_process_state * ks, s
 static void kolibri_send_event( tid_t tid, u_int32_t event_bits );
 
 static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks);
+
+static int kolibri_copy_fn( char *ofn, size_t ofnlen, const char *ifn );
+
+
 
 #define fs_u_ptr( ___up, ___sz  ) ({ \
     addr_t a = (addr_t)(___up); \
@@ -158,21 +163,29 @@ void destroy_kolibri_state(uuprocess_t *u)
     free(ks);
 }
 
+static int upd_timer_set = 0;
+
 static void win_timed_update( void *arg )
 {
     struct kolibri_process_state *ks = arg;
     if(!ks->win)
         return;
-    drv_video_window_update( ks->win );
+    upd_timer_set = 0;
+
+    if(!ks->win_update_prevent)
+        drv_video_window_update( ks->win );
 }
 
 static void request_update_timer( struct kolibri_process_state *ks, int msec )
 {
+    if(upd_timer_set) return;
+    upd_timer_set = 1;
     set_net_timer( &ks->win_update_timer, msec, win_timed_update, ks, 0 );
 }
 
 static void cancel_update_timer( struct kolibri_process_state *ks )
 {
+    upd_timer_set = 0;
     cancel_net_timer( &ks->win_update_timer );
 }
 
@@ -204,11 +217,20 @@ static void kolibri_sys_internal( uuprocess_t *u, struct kolibri_process_state *
             st->eax = 0x60000000; // cache is on
         break;
 
-    case 11: // init heap
+    case 3: // TODO read msr
+        {
+            int msr_no = st->edx;
+            SHOW_FLOW( 2, "read MSR @ 0x%x", msr_no );
+            st->eax = 0; // fail
+            st->edx = 0; // top dword
+        }
+        break;
+
+    case 11: // TODO init heap
         st->eax = 0; // fail
         break;
 
-    case 12: // calloc
+    case 12: // TODO calloc
         {
             size_t size = st->ecx;
             SHOW_FLOW( 2, "malloc %d", size );
@@ -216,10 +238,44 @@ static void kolibri_sys_internal( uuprocess_t *u, struct kolibri_process_state *
         }
         break;
 
-    case 13: // free
+    case 13: // TODO free
         {
             addr_t mem = st->ecx;
             SHOW_FLOW( 2, "free @ 0x%p", mem );
+            st->eax = 0; // fail
+        }
+        break;
+
+    case 16: // load driver
+        {
+            const char *uDriverName = u_ptr( st->ecx, 0 );
+            SHOW_FLOW( 2, "load driver %s", uDriverName );
+            st->eax = 0; // fail
+        }
+        break;
+
+    case 19: // TODO load DLL
+        {
+            const char *uDllName = u_ptr( st->ecx, 0 );
+            //addr_t mem = st->ecx;
+
+            char fn[FS_MAX_PATH_LEN];
+
+            int rc = kolibri_copy_fn( fn, sizeof(fn), uDllName );
+            if( rc )
+            {
+                st->eax = 0; // fail
+                break;
+            }
+            SHOW_FLOW( 2, "load DLL %s", fn );
+            st->eax = 0; // fail
+        }
+        break;
+
+    case 22: // open SHM
+        {
+            const char *uShmName = u_ptr( st->ecx, 0 );
+            SHOW_FLOW( 2, "open shared memory '%s'", uShmName );
             st->eax = 0; // fail
         }
         break;
@@ -249,6 +305,10 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
             int slot = st->ecx;
             SHOW_ERROR( 0, "Unimplemented Kolibri kill by slot %d", slot );
         }
+        break;
+
+    case 4: // TODO FAKE - get idle CPU timeslots
+        st->eax = 1; // give some answer
         break;
 
     case 5: // TODO FAKE - get cpu freq
@@ -292,6 +352,28 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
         }
         break;
 
+    case 16: // TODO FAKE - get free mem, Kb
+        st->eax = 128; // give some answer
+        break;
+
+    case 17: // TODO FAKE - get all mem, Kb
+        st->eax = 1024; // give some answer
+        break;
+
+    case 21: // get slot by tid
+        {
+            tid_t tid = st->ecx;
+            //phantom_thread_t *tp = get_thread(int tid);
+            // TODO t_tid_is_valid()
+            if( (tid < 0) || (tid >= MAX_THREADS) || (phantom_kernel_threads[tid] == 0))
+            {
+                st->eax = 0; // fail
+                break;
+            }
+            st->eax = tid; // slot == tid in Phantom
+        }
+        break;
+
     default:
         SHOW_ERROR( 0, "Unimplemented Kolibri 18 syscall ebx = %d", st->ebx );
         st->eax = 2; // Most funcs return nonzero retcode in eax.
@@ -320,19 +402,8 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
     }
 
 
-
-static int kolibri_get_fn( char *ofn, size_t ofnlen, kolibri_FILEIO *fi, uuprocess_t *u )
+static int kolibri_copy_fn( char *ofn, size_t ofnlen, const char *ifn )
 {
-    char *ifn;
-
-    if( fi->r2 )
-    {
-        ifn = fs_u_ptr( &(fi->r2), 0 );
-    }
-    else
-    {
-        ifn = fs_u_ptr( fi->name, 0 );
-    }
     if( strlen( ifn ) >= ofnlen )
         return KERR_NOENT;
 
@@ -347,6 +418,38 @@ static int kolibri_get_fn( char *ofn, size_t ofnlen, kolibri_FILEIO *fi, uuproce
     SHOW_FLOW( 5, "fn '%s'", ofn );
 
     return 0;
+}
+
+static int kolibri_get_fn( char *ofn, size_t ofnlen, kolibri_FILEIO *fi, uuprocess_t *u )
+{
+    char *ifn;
+
+    if( fi->r2 )
+    {
+        ifn = fs_u_ptr( &(fi->r2), 0 );
+    }
+    else
+    {
+        ifn = fs_u_ptr( fi->name, 0 );
+    }
+#if 1
+    return kolibri_copy_fn( ofn, ofnlen, ifn );
+#else
+    if( strlen( ifn ) >= ofnlen )
+        return KERR_NOENT;
+
+    if( 0 == strnicmp( ifn, "/sys/", 5 ) )
+    {
+        // Replace /sys with /amnt0 - first disk automount dir
+        snprintf( ofn, ofnlen, "/amnt0/%s", ifn+5 );
+    }
+    else
+        strlcpy( ofn, ifn, ofnlen );
+
+    SHOW_FLOW( 5, "fn '%s'", ofn );
+
+    return 0;
+#endif
 }
 
 static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, struct trap_state *st )
@@ -493,7 +596,7 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
     (___r).ysize = st->ecx & 0xFFFF;  \
     })
 
-
+#define COORD_TO_REG(__x,__y) (((__x) & 0xFFFF) << 16)|((__y) & 0xFFFF)
 
 static inline color_t i2color( u_int32_t ic )
 {
@@ -554,6 +657,9 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         {
             GET_POS_SIZE();
 
+            xsize++;
+            ysize++;
+
             // negative 16bit num
             if( xpos & 0x8000 )
                 xpos = get_screen_xsize() - (0xFFFF - (0xFFFF & xpos));
@@ -595,6 +701,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             color_t c = i2color(st->edx); // TODO inverse
 
             drv_video_window_pixel( ks->win, x, y, c );
+            request_update_timer( ks, 50 );
         }
         break;
 
@@ -607,6 +714,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 char ch = ks->e.k.ch; // TODO check read mode - maybe we have to ret scancode
                 ks->have_e = 0; // consume event
                 st->eax = 0x0000FF00 & (ch << 8); // have key
+                SHOW_FLOW( 1, "read key '%c'", ch);
             }
             else
                 st->eax = 1; // no key
@@ -639,16 +747,24 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             ypos = ks->win->ysize - ypos;
 
             color_t textc = i2color(st->ecx);
-            //color_t bgc = i2color(st->edi);
+            color_t bgc = i2color(st->edi);
+
             int len = st->esi;
 
             char *str = u_ptr(st->edx, 0);
 
             int nfont = (st->ecx >> 28) & 0x3;
             int asciiz = (st->ecx >> 30) & 0x1;
-            //int clear_bg = (st->ecx >> 29) & 0x1;
+            int clear_bg = (st->ecx >> 29) & 0x1;
+
+            bgc.a = clear_bg ? 0xFF : 0;
 
             //SHOW_FLOW( 2, "string bg", xsize, ysize, xpos, ypos );
+
+            //const drv_video_font_t *font = nfont ? &drv_video_8x16ant_font : &drv_video_8x16cou_font ;
+            const drv_video_font_t *font = nfont ? &drv_video_kolibri2_font : &drv_video_kolibri1_font ;
+
+            ypos -= font->ysize;
 
             if( (!asciiz) && len > 255 )
                 break;
@@ -661,10 +777,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 str = buf;
             }
 
-            const drv_video_font_t *font = nfont ? &drv_video_8x16ant_font : &drv_video_8x16cou_font ;
-
-            // TODO clear bg
-            drv_video_font_draw_string( ks->win, font, str, textc, xpos, ypos );
+            drv_video_font_draw_string( ks->win, font, str, textc, bgc, xpos, ypos );
             request_update_timer( ks, 50 );
         }
         break;
@@ -686,21 +799,28 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             r.xsize = st->ecx >> 16;
             r.ysize = st->ecx & 0xFFFF;
 
-            r.y = ks->win->ysize - r.y;
+            //r.y = ks->win->ysize - r.y;
+            r.y = ks->win->ysize - r.y - r.ysize;
 
             int npixels = r.xsize * r.ysize;
 
             // st->ebx - BGR bitmap ptr
             const struct rgb_t *src = u_ptr( st->ebx, npixels*3 );
 
+#if 1
             rgba_t *pixels = calloc( sizeof(rgba_t), npixels );
             rgb2rgba_move( pixels, src, npixels );
 
-            bitmap2bitmap(
+            bitmap2bitmap_yflip(
                           ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
                           pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
             free( pixels );
-
+#else
+            bitmap2bitmap_yflip(
+                          ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
+                          src, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
+#endif
+            request_update_timer( ks, 50 );
         }
         break;
 
@@ -729,7 +849,8 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             rect_t r;
             GET_POS_RECT(r);
 
-            r.y = ks->win->ysize - r.y;
+            //r.y = ks->win->ysize - r.y;
+            r.y = ks->win->ysize - r.y - r.ysize;
 
             int npixels = r.xsize * r.ysize;
 
@@ -758,10 +879,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             cb->pixels = calloc( sizeof(rgba_t), npixels );
             rgb2rgba_move( cb->pixels, src, npixels );
 
-            bitmap2bitmap(
-                          ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
-                          cb->pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
-
+            if(!cb->flag_nopaint)
+            {
+                bitmap2bitmap_yflip(
+                              ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
+                              cb->pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
+            }
             // TODO paint button bitmap
             // TODO process button
 
@@ -847,11 +970,13 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             if( st->ebx == 1 )
             {
+                ks->win_update_prevent = 1;
                 // TODO remove all buttons
             }
 
             if( st->ebx == 2 )
             {
+                ks->win_update_prevent = 0;
                 SHOW_FLOW0( 1, "Repaint" );
                 drv_video_window_update( ks->win );
             }
@@ -881,8 +1006,27 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 17: // get screen button press
+        {
+            st->eax = 1; // empty
+            //st->eax = (button_id << 8); // empty
+        }
+        break;
+
     case 18: // Info + control
         kolibri_sys_info(u,ks,st);
+        break;
+
+    case 20: // play MIDI
+        {
+            st->eax = 1; // fail
+        }
+        break;
+
+    case 22: // set date/time
+        {
+            st->eax = 1; // fail
+        }
         break;
 
     case 23: // wait 4 event with timeout
@@ -903,6 +1047,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             hal_sem_zero( &ks->event );
 
             st->eax = get_event_bits(u,ks); 
+        }
+        break;
+
+    case 24: // CD
+        {
+            st->eax = 1; // fail
         }
         break;
 
@@ -948,6 +1098,46 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 37: // mouse
+        switch( st->ebx )
+        {
+        case 0:
+            st->eax = COORD_TO_REG(video_drv->mouse_x,get_screen_ysize() - video_drv->mouse_y);
+            break;
+
+        case 1:
+            {
+                int x = video_drv->mouse_x;
+                int y = get_screen_ysize() - video_drv->mouse_y;
+                if( ks->win )
+                {
+                    x -= ks->win->x;
+                    y -= ks->win->y;
+                }
+                st->eax = COORD_TO_REG(x,y);
+            }
+            break;
+
+        case 2:
+            st->eax = video_drv->mouse_flags;
+            break;
+
+        case 4: // TODO load cursor
+            SHOW_ERROR( 0, "Unimplemented mouse 37 syscall ebx = %d ecx = %d", st->ebx, st->ecx );
+            st->eax = 0; // failed - must ret cursor handle
+            break;
+
+        case 5: // TODO set cursor
+            // st->ecx; // cursor handle
+            //break;
+
+        case 6: // TODO rm cursor
+            // st->ecx; // cursor handle
+            SHOW_ERROR( 0, "Unimplemented mouse 37 syscall ebx = %d ecx = %d", st->ebx, st->ecx );
+            break;
+        }
+        break;
+
     case 38: // draw line
         {
             if( !ks->win )
@@ -974,10 +1164,22 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         ks->event_mask = st->ebx;
         break;
 
+    case 46: // access io ports
+        {
+            int start_port = st->ecx;
+            SHOW_ERROR( 0, "App requested access to io ports %d-%d", start_port, st->edx );
+            st->eax = 1; // fail
+        }
+        break;
+
     case 47: // print number
         if( !ks->win )
             break;
         {
+            //const drv_video_font_t *font = nfont ? &drv_video_8x16ant_font : &drv_video_8x16cou_font ;
+            //const drv_video_font_t *font = &drv_video_8x16cou_font;
+            const drv_video_font_t *font = &drv_video_kolibri1_font;
+
             color_t fg = i2color( st->esi );
             color_t bg = i2color( st->edi );
 
@@ -989,6 +1191,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             int ypos = st->edx & 0xFFFF;
 
             ypos = ks->win->ysize - ypos;
+            ypos -= font->ysize;
 
             int is_ptr = st->ebx & 0xF;
             int is_qword = (st->ebx >> 30) & 1;
@@ -1044,13 +1247,11 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 limit--;
             }
 
-            //const drv_video_font_t *font = nfont ? &drv_video_8x16ant_font : &drv_video_8x16cou_font ;
-            const drv_video_font_t *font = &drv_video_8x16cou_font ;
 
             //SHOW_FLOW( 0, "pnum '%s'", p );
 
             // TODO clear bg
-            drv_video_font_draw_string( ks->win, font, p, fg, xpos, ypos );
+            drv_video_font_draw_string( ks->win, font, p, fg, bg, xpos, ypos );
             request_update_timer( ks, 50 );
 
         }

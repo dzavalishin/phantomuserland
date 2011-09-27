@@ -40,7 +40,7 @@ struct rgba_t
 typedef struct rgba_t rgba_t;
 typedef struct rgba_t color_t;
 
-
+extern rgba_t COLOR_TRANSPARENT;
 
 extern rgba_t COLOR_BLACK;
 extern rgba_t COLOR_WHITE;

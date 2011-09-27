@@ -205,7 +205,7 @@ void win_make_decorations(drv_video_window_t *w)
 
     // BUG! It must be +3, not -1 on Y coord!
     drv_video_font_draw_string( w->w_title, &drv_video_8x16cou_font,
-                                w->title, COLOR_BLACK,
+                                w->title, COLOR_BLACK, COLOR_TRANSPARENT,
                                 bordr_size+3, bordr_size-1 );
 
     drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
@@ -232,7 +232,7 @@ void win_make_decorations(drv_video_window_t *w)
     int bmp_y = w->ysize + bordr_size*2 + 2;
 
     drv_video_font_draw_string( w->w_decor, &drv_video_8x16cou_font,
-                                w->title, COLOR_BLACK,
+                                w->title, COLOR_BLACK, COLOR_TRANSPARENT,
                                 bordr_size+3, bmp_y-4 );
 
     drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - close_bmp.xsize - 5, bmp_y, &close_bmp );

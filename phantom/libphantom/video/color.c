@@ -26,6 +26,7 @@ rgba_t Hsi2Rgb(double H, double S, double I )
 }
 
 */
+struct rgba_t COLOR_TRANSPARENT = { 0, 0, 0, 0 };
 
 struct rgba_t COLOR_BLACK = { 0, 0, 0, 0xFF };
 struct rgba_t COLOR_WHITE = { 0xFF, 0xFF, 0xFF, 0xFF };

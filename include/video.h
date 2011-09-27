@@ -96,7 +96,9 @@ void drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out );
 void 	drv_video_font_draw_string(
                                            drv_video_window_t *win,
                                            const drv_video_font_t *font,
-                                           const char *s, const rgba_t color,
+                                           const char *s, 
+                                           const rgba_t color,
+                                           const rgba_t bg,
                                            int x, int y );
 void 	drv_video_font_scroll_line(
                                            drv_video_window_t *win,

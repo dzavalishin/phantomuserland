@@ -69,6 +69,7 @@ struct kolibri_process_state
 
     window_handle_t     win;
     net_timer_event 	win_update_timer;
+    u_int32_t           win_update_prevent;
 
     pool_t              *buttons;
 
