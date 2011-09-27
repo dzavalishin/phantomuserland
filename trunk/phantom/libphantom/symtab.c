@@ -91,8 +91,7 @@ static void load_elf_symtab(
         }
     }
 
-    if(space_left > 0)
-        printf("Warning: extra space left in symtab: %d\n", space_left );
+    //if(space_left > 0)   printf("Warning: extra space left in symtab: %d\n", space_left );
 
     qsort(symbols, n_symbols, sizeof(*symbols), compare_symbols);
 
@@ -177,7 +176,7 @@ static void init_multiboot_symbols(void)
         return;
     }
 
-    printf("init mboot sym symtabBootParameters->flags = %x\n", symtabBootParameters->flags);
+    //printf("init mboot sym symtabBootParameters->flags = %x\n", symtabBootParameters->flags);
     if(symtabBootParameters->flags & MULTIBOOT_ELF_SHDR)
     {
         if(DEBUG > 0) printf("have multiboot ELF SHDR, %d entries, %d bytes, %d shndx\n",

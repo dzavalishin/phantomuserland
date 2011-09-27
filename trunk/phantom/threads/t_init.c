@@ -10,8 +10,9 @@
  *
 **/
 
-#include "thread_private.h"
+#include <thread_private.h>
 #include <kernel/init.h>
+#include <kernel/profile.h>
 
 
 int threads_inited = 0;
@@ -34,18 +35,15 @@ static void haltme( void *a )
     // BUG - next call to hal_set_thread_name will crash due to attempt to free static string
 
     have_idlest = 1;
+    //int cpu = GET_CPU_ID();
 
     while(1)
     {
-        /*
-        hal_disable_preemption();
-        if( t_thread_kill_request )
-            t_do_some_kills();
-        hal_enable_preemption();
-        */
         hal_sti();
-        //asm volatile("hlt" : : );
+
+        //percpu_idle_status[cpu] = 1;
         hal_wait_for_interrupt();
+        //percpu_idle_status[cpu] = 0; // TODO wrong - we have to do it in shceduler
     }
 }
 

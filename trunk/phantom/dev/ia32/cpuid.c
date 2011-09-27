@@ -1129,7 +1129,7 @@ identify_hypervisor(void)
          * implement portions of the M$ leafs.
          */
     }else{
-        printf("Base: Unknown Hypervisor type string!\n");
+        //printf("Base: Unknown Hypervisor type string!\n");
     }
 
     /* M$ Hypervisor from 2-7 (allow others to implement) */

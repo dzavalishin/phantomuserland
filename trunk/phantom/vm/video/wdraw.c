@@ -23,7 +23,27 @@
 #include "trig_func.inc"
 
 
+#if 0
+void
+drv_video_window_fill( drv_video_window_t *win, rgba_t color )
+{
+    int i = (win->xsize * win->ysize) - 1;
+#if defined(ARCH_ia32) && 0
+    asm volatile("cld ;   \
+                 mov %2, %%edi    ; \
+                 mov %1, %%eax    ; \
+                 mov %0, %%ecx    ; \
+                 rep stosl      ; \
+                 "
+                 : "m" (i), "m" (color), "m" (*(win->pixel)) : "%eax", "%ecx", "%edi"
+                );
 
+#else
+    for( ; i >= 0; i-- )
+        win->pixel[i] = color;
+#endif
+}
+#endif
 
 void
 drv_video_window_clear( drv_video_window_t *win )

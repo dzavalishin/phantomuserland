@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "init"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -93,7 +93,7 @@ static void run_next_init( int level, struct init_record *ir )
     if( ir == 0 )
         return;
 
-    SHOW_FLOW( 0, "init %d ir %p (%p,%p,%p)", level, ir, ir->init_1, ir->init_2, ir->init_3 );
+    SHOW_FLOW( 6, "init %d ir %p (%p,%p,%p)", level, ir, ir->init_1, ir->init_2, ir->init_3 );
 
     switch( level )
     {
