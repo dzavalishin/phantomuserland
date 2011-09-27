@@ -21,7 +21,7 @@ void videotest(void)
     drv_video_window_draw_line( w, 0, 0, WXS, WYS, COLOR_RED );
     drv_video_window_fill_ellipse( w, 30, 30, 15, 27, COLOR_BLUE );
 
-    drv_video_font_draw_string( w, &drv_video_8x16san_font, "Test font", COLOR_BLACK, 0, 0 );
+    drv_video_font_draw_string( w, &drv_video_8x16san_font, "Test font", COLOR_BLACK, COLOR_GREEN, 0, 0 );
 
     drv_video_window_fill_box( w,  40, 32, 33, 10, COLOR_RED );
 

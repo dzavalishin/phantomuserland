@@ -96,6 +96,78 @@ void bitmap2bitmap(
     }
 }
 
+// The same, but flips picture vertically
+void bitmap2bitmap_yflip(
+                   struct rgba_t *dest, int destWidth, int destHeight, int destX, int destY,
+                   const struct rgba_t *src, int srcWidth, int srcHeight, int srcX, int srcY,
+                   int moveWidth, int moveHeight
+                  )
+{
+    int leftExcessX = 0;
+
+    if( destX+moveWidth >= destWidth )
+        moveWidth = destWidth-destX;
+
+    if( destX <= 0)
+        leftExcessX = -destX;
+
+    if( srcX+moveWidth >= srcWidth )
+        moveWidth = srcWidth-srcX;
+
+    if( srcX <= 0 && ((-srcX) < leftExcessX) )
+        leftExcessX = -srcX;
+
+    if(leftExcessX)
+    {
+        moveWidth -= leftExcessX;
+        destX += leftExcessX;
+        srcX += leftExcessX;
+    }
+
+
+    int leftExcessY = 0;
+
+    if( destY+moveHeight >= destHeight )
+        moveHeight = destHeight-destY;
+
+    if( destY <= 0)
+        leftExcessY = -destY;
+
+    if( srcY+moveHeight >= srcHeight )
+        moveHeight = srcHeight-srcY;
+
+    if( srcY <= 0 && ((-srcY) < leftExcessY) )
+        leftExcessY = -srcY;
+
+    if(leftExcessY)
+    {
+        moveHeight -= leftExcessY;
+        destY += leftExcessY;
+        srcY += leftExcessY;
+    }
+
+    if( moveWidth <= 0 || moveHeight <= 0 )
+        return;
+
+    //printf("blit %d x %d", moveWidth, moveHeight );
+    //int srcShift = srcX * sizeof(struct rgba_t);
+    //int dstShift = destX* sizeof(struct rgba_t);
+    //int srcLineStep = srcWidth * sizeof(struct rgba_t);
+    //int dstLineStep = destWidth * sizeof(struct rgba_t);
+
+    const struct rgba_t *srcPtr = src + (srcY+moveHeight)*srcWidth + srcX;
+    struct rgba_t *dstPtr      = dest + destY*destWidth + destX;
+
+    int hcnt;
+    for(hcnt = moveHeight; hcnt; hcnt--)
+    {
+        rgba2rgba_move( dstPtr, srcPtr, moveWidth );
+        dstPtr += destWidth;
+        srcPtr -= srcWidth;
+    }
+}
+
+
 
 //#if VIDEO_ZBUF
 #if 1 // old code was in vm/video/bitblt.c

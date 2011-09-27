@@ -41,5 +41,12 @@ void bitmap2bitmap(
 		int moveWidth, int moveHeight
 );
 
+// + flip vert
+void bitmap2bitmap_yflip(
+                   struct rgba_t *dest, int destWidth, int destHeight, int destX, int destY,
+                   const struct rgba_t *src, int srcWidth, int srcHeight, int srcX, int srcY,
+                   int moveWidth, int moveHeight
+                  );
+
 
 #endif // VOPS_H
