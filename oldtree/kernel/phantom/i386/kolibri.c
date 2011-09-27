@@ -446,9 +446,9 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
 
             bzero( fi, 40 );
 
-            if( dest->st_mode & S_IFDIR )
+            if( ustat.st_mode & S_IFDIR )
                 fi->attr |= 0x10; // dir
-            else if(!(dest->st_mode & _S_IFREG))
+            else if(!(ustat.st_mode & _S_IFREG))
                 fi->attr |= 0x04; // system
             else
                 fi->attr |= 0x0; // regular
