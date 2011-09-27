@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "fsmap"
 #include "debug_ext.h"
-#define debug_level_flow 2
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 

@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "boot"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 4
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -113,7 +113,7 @@ void start_phantom()
 
     //pressEnter("will init paging dev");
 
-    SHOW_FLOW0( 2, "Will init paging dev... ");
+    SHOW_FLOW0( 5, "Will init paging dev... ");
 #if !PAGING_PARTITION
     // TODO size?
     init_paging_device( &pdev, "wd1", 1024*20); //4096 );
@@ -124,7 +124,7 @@ void start_phantom()
     partition_pager_init(select_phantom_partition());
 #endif
 
-    SHOW_FLOW0( 2, "Will init vm map... ");
+    SHOW_FLOW0( 5, "Will init vm map... ");
     //pressEnter("will init VM map");
     // TODO BUG this +1 is due to allocator error:
     // allocator insists on trying to access the byte
@@ -250,7 +250,7 @@ int main(int argc, char **argv, char **envp)
         strncpy( phantom_uname.release, SVN_Version, sizeof(phantom_uname.release) );
     }
 
-    pressEnter("will run DPC");
+    //pressEnter("will run DPC");
     dpc_init();
 
 
@@ -293,7 +293,7 @@ int main(int argc, char **argv, char **envp)
 
     init_main_event_q();
 
-    pressEnter("will look for drv stage 2");
+    //pressEnter("will look for drv stage 2");
     phantom_find_drivers( 2 );
 
 #if HAVE_UNIX

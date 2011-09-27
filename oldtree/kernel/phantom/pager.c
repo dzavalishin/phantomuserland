@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "pager"
 #include "debug_ext.h"
-#define debug_level_flow 7
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -777,7 +777,7 @@ pager_get_superblock()
     phantom_disk_superblock     sb2;
     int                         sb2_ok = 0;
 
-    hal_printf("Checking superblock...");
+    SHOW_FLOW0( 4, "Checking superblock...");
     //getchar();
 
 #if USE_SYNC_IO
@@ -830,8 +830,8 @@ pager_get_superblock()
         //if(_DEBUG) hal_printf(" ...DONE\n");
     }
 
-    hal_printf("sb1 status %d, sb2 - %d, sb3 - %d\n", root_sb_cs_ok, sb1_ok, sb2_ok );
-    hal_printf("root sb sb2 addr %d, sb3 addr %d, free start %d, free list %d, fs clean %d\n",
+    SHOW_FLOW( 7, "sb1 status %d, sb2 - %d, sb3 - %d\n", root_sb_cs_ok, sb1_ok, sb2_ok );
+    SHOW_FLOW( 7, "root sb sb2 addr %d, sb3 addr %d, free start %d, free list %d, fs clean %d\n",
                root_sb.sb2_addr, root_sb.sb3_addr,
                root_sb.free_start, root_sb.free_list,
                root_sb.fs_is_clean
@@ -844,10 +844,10 @@ pager_get_superblock()
         root_sb.fs_is_clean
       )
         {
-        printf(" incomplete filesystem found, fixing...");
+        SHOW_FLOW0( 0, "incomplete filesystem found, fixing...");
         superblock = root_sb;
         pager_fix_incomplete_format();
-        printf(" Ok!\n");
+        SHOW_FLOW0( 0, "incomplete format fixed");
 
         phantom_fsck( 0 );
 

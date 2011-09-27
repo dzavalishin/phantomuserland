@@ -95,11 +95,15 @@ static void reg_wait_poll( int we, int pe )
 
             trc_llt( 0, 0, TRC_LLT_INTRQ );  // yes
             if ( int_bmide_addr )
+            {
                trc_llt( 0, int_bm_status, TRC_LLT_R_BM_SR );
+            }
             status = int_ata_status;         // get status
             trc_llt( CB_STAT, status, TRC_LLT_INB );
             if ( int_bmide_addr )
+            {
                trc_llt( 0, 0x04, TRC_LLT_W_BM_SR );
+            }
             break;
          }
          if ( tmr_chk_timeout() )            // time out ?

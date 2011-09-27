@@ -376,7 +376,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
     {
         struct pc_partition *pp = (struct pc_partition *)(buf+i);
 
-        SHOW_FLOW( 1, "Check partition %d, start %d, size %d, type 0x%02X", pno, pp->start, pp->size, pp->type );
+        SHOW_FLOW( 2, "Check partition %d, start %d, size %d, type 0x%02X", pno, pp->start, pp->size, pp->type );
 
         if(pp->size == 0)
             continue; // break?

@@ -103,7 +103,7 @@ void phantom_init_vesa(void)
     int rc;
 
     struct VBEInfoBlock vi_buf;
-    printf("\nLooking for VESA VBE... " );
+    SHOW_FLOW0( 1, "Looking for VESA VBE... " );
     rc = getVesaControllerInfo( &vi_buf );
     if( rc )
     {

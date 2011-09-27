@@ -50,8 +50,28 @@ static void profiler_init(void)
 INIT_ME(0,0,profiler_init)
 
 
+// TODO per CPU in_idle flag set by corresponding idle thread,
+// 2 counters - in_idle_count, not_in_idle_count - once a second
+// calc CPU load
+
 void profiler_register_interrupt_hit( addr_t ip )
 {
+#if 0
+    // TODO wrong - loop through all CPUs or do it on percpu (on ia32 == APIC) timer.
+    // TODO In fact we must do it on regular timer interrupt - this one costs too much
+    int cpu = GET_CPU_ID();
+
+    int idle = percpu_idle_status[cpu];
+
+    percpu_idle_count[cpu][idle ? 1 : 0]++;
+
+    if( percpu_idle_count[cpu][0] + percpu_idle_count[cpu][1] > 1000 )
+    {
+        int load_percent = percpu_idle_count[cpu][0] * 100 / percpu_idle_count[cpu][1];
+        percpu_idle_count[cpu][0] = percpu_idle_count[cpu][1] = 0;
+        percpu_cpu_load[cpu] = load_percent;
+    }
+#endif
     if(!profiler_inited)
         return;
 
@@ -96,11 +116,14 @@ void profiler_dump_map( void )
             name = phantom_symtab_getname( (void *)ip );
 
         int count = map[i];
+        int percentage = (int) ( ((100*(long long)count)/total_count) );
 
-		if( (int) ( ((100*(long long)count)/total_count)) )
+#if PROFILER_SKIP_0_PERCENT
+        if(percentage == 0) continue;
+#endif
         printf(
                "%6p: %6d (%2d%%) - %s\n",
-               ip, count, (int) ( ((100*(long long)count)/total_count) ),
+               ip, count, percentage,
                name
               );
 

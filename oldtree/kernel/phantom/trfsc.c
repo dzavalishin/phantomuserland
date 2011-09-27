@@ -539,7 +539,7 @@ void phantom_trfs_init()
 
     trfs_inited = 1;
 
-    SHOW_FLOW0( 0, "inited" );
+    SHOW_FLOW0( 1, "inited" );
 
 
     // called from main later

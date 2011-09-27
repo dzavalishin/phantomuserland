@@ -304,6 +304,7 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
 // ------------------------------------------------
 
 #define ret_on_err(_e) switch(e) {\
+    case 0:            return 0; \
     case ENOTDIR: \
     case EEXIST: \
     case ENOENT:	return KERR_NOENT; \
@@ -378,6 +379,7 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
     {
     case 0: // Read file
         {
+            // TODO usys_...!
             SHOW_FLOW( 5, "read %d @ %d", fi->count, fi->offset );
             e = k_open( &fd, fn, O_RDONLY, 0 );
             ret_on_err(e);
@@ -400,6 +402,7 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
             mode |= O_CREAT;
         case 3: // Write file
             mode |= O_RDWR;
+            // TODO usys_...!
             e = k_open( &fd, fn, mode, 0666 );
             ret_on_err(e);
             e = k_write( &nbyte, fd, data, fi->count );
@@ -425,8 +428,39 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
         rc = usys_mkdir( &e, u, fn );
         break;
 
-    case 1: // Read dir
     case 5: // Get file info
+        {
+            data = fs_u_ptr( fi->buff, 40 );
+            kolibri_FILEINFO *fi = data;
+
+            struct stat ustat;
+
+            // TODO usys_stat!
+            rc = k_stat( fn, &ustat, 0 );
+            if( rc )
+            {
+                SHOW_ERROR( 0, "Can't stat %s", fn );
+                ret_on_err(e);
+                break;
+            }
+
+            bzero( fi, 40 );
+
+            if( dest->st_mode & S_IFDIR )
+                fi->attr |= 0x10; // dir
+            else if(!(dest->st_mode & _S_IFREG))
+                fi->attr |= 0x04; // system
+            else
+                fi->attr |= 0x0; // regular
+
+            fi->size = ustat.st_size;
+
+            fi->size_high = 0;
+            fi->flags = 0;
+
+            break;
+        }
+    case 1: // Read dir
     case 6: // Set file attr
     default:
         SHOW_ERROR( 0, "Unsupported fileio cmd %d", fi->cmd );

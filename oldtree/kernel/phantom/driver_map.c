@@ -105,7 +105,7 @@ static pci_probe_t pci_drivers[] =
 //    { "i810 Video",     driver_intel_810_pci_probe,     1, INTEL_VENDORID, 0x2772, 0 },
 
     // VMWARE pseudo-SVGA
-    { "Clone Regs Video", driver_video_gen_clone_pci_probe, 1, 0x15AD, 0x405, 0 },
+//    { "Clone Regs Video", driver_video_gen_clone_pci_probe, 1, 0x15AD, 0x405, 0 },
 
 
 };
