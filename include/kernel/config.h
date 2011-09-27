@@ -33,7 +33,7 @@
 #  define HAVE_VESA 1
 
 #define HAVE_FLOPPY 1
-#define HAVE_AHCI 1
+#define HAVE_AHCI 0
 #endif
 
 #define MEM_RECLAIM 0

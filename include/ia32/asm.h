@@ -44,11 +44,11 @@
 #define B_ARG2	16(%ebp)
 #define B_ARG3	20(%ebp)
 
-#ifdef i486
+//#ifdef i486
 #define TEXT_ALIGN	4
-#else
-#define TEXT_ALIGN	2
-#endif
+//#else
+//#define TEXT_ALIGN	2
+//#endif
 #define DATA_ALIGN	2
 #define ALIGN		TEXT_ALIGN
 

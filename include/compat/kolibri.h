@@ -43,6 +43,9 @@ struct kolibri_exe_hdr
     u_int32_t           exe_name; 	// icon??
 };
 
+#define KOLIBRI_CMD_LINE_MAX 256
+#define KOLIBRI_CMD_PATH_MAX 1024
+
 typedef struct kolibri_exe_hdr kolibri_exe_hdr_t;
 
 static inline errno_t is_not_kolibri_exe( kolibri_exe_hdr_t *exe )
