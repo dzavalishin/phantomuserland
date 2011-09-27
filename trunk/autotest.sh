@@ -172,14 +172,14 @@ do
 FATAL! Phantom crashed"
 			break
 		}
-		[ -s serial0.log ] && {
+		[ -s serial0.log ] || {
 			sleep 10
-			[ -s serial0.log ] && {
-				break
+			[ -s serial0.log ] || {
 				echo "
 
 FATAL! Phantom stalled (serial0.log is empty)"
 				kill $QEMU_PID
+				break
 			}
 		}
 		grep -iq 'snapshot done' serial0.log && break
