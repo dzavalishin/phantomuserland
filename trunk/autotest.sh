@@ -180,15 +180,16 @@ FATAL! Phantom stalled (serial0.log is empty)"
 		grep -iq 'snapshot done' serial0.log && break
 		grep -q '^\(\. \)\?Panic' serial0.log && {
 			sleep 10
-			tail -1 serial0.log | grep -q '^Press any' && {
-				echo "
-
-FATAL! Phantom stopped (panic)"
-				kill $QEMU_PID
-				break
-			}
+			break
 		}
 	done
+
+	tail -1 serial0.log | grep -q '^Press any' && {
+		echo "
+
+FATAL! Phantom stopped (panic)"
+		kill $QEMU_PID
+	}
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log && {
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log
