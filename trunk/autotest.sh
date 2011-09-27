@@ -33,8 +33,13 @@ cd $PHANTOM_HOME
 
 RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 [ "$RUNNING" ] && {
-	echo "Another copy is running: $RUNNING"
-	exit 0
+	(echo "$RUNNING" | grep -q defunct) || {
+		echo "Another copy is running: $RUNNING"
+		exit 0
+	}
+
+	echo "Previous test run stalled. Killing qemu..."
+	pkill qemu
 }
 #[ -s $0.lock ] && exit 0
 #touch $0.lock
