@@ -39,6 +39,7 @@
 #ifdef ARCH_ia32
 #include <ia32/private.h>
 #include <compat/kolibri.h>
+#include <lzma.h>
 #endif
 
 //#include <unix/uufile.h>
@@ -118,6 +119,49 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
     rc = is_not_kolibri_exe( hdr );
     if( rc ) return rc;
 
+
+    struct kolibri_pkck_hdr *kpck = _exe;
+    int kpacked = ( 0 == strncmp( "KPCK", kpck->ident, 4 ) );
+
+    if(kpacked)
+    {
+        SHOW_FLOW( 6, "Packed (PKCK) Kolibri exe, uncomp size %d", kpck->unpacked_size );
+        if( kpck->unpacked_size > MAX_COLIBRI_EXE_SIZE )
+            return ENOEXEC; // too big?
+
+        void *unp = calloc( 1, kpck->unpacked_size );
+        if( unp == 0 )
+            return ENOMEM;
+
+        size_t dest_len = kpck->unpacked_size;
+        size_t src_len = exe_size - sizeof(struct kolibri_pkck_hdr);
+        void *src = _exe + sizeof(struct kolibri_pkck_hdr);
+
+        rc = plain_lzma_decode( unp, &dest_len, src, &src_len, 0 );
+        if( rc )
+        {
+            SHOW_ERROR( 0, "KPCK unpack err %d", rc );
+            free(unp);
+            return ENOEXEC; 
+        }
+
+        rc = is_not_kolibri_exe( unp );
+        if( rc )
+        {
+            SHOW_ERROR( 0, "KPCK unpack - result is not Kolibri exe, err %d", rc );
+            free(unp);
+            return rc;
+        }
+
+        _exe = unp;
+        hdr = unp;
+        exe_size = dest_len;
+
+        //SHOW_ERROR0( 0, "Packed (PKCK) Kolibri exe not impl" );
+        //return ENXIO;
+    }
+
+
     int maxpage = BYTES_TO_PAGES(hdr->stack_end);
 
     {
@@ -144,6 +188,7 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
     if( hdr->start >= hdr->code_end )
     {
         SHOW_ERROR( 0, "Kolibri EXE hdr->start %d >= hdr->code_end %d", hdr->start, hdr->code_end );
+        if(kpacked) free(_exe);
         return ENOEXEC;
     }
 
@@ -188,6 +233,8 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
 
     em->cs_pages = maxpage;
     em->ds_pages = maxpage;
+
+    if(kpacked) free(_exe);
 
     if( get_uldt_cs_ds(
                        (int)va, &(em->cs_seg), memsize,

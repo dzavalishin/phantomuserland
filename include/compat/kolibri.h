@@ -43,13 +43,24 @@ struct kolibri_exe_hdr
     u_int32_t           exe_name; 	// icon??
 };
 
+struct kolibri_pkck_hdr
+{
+    char        	ident[4];
+    u_int32_t           unpacked_size;
+};
+
 #define KOLIBRI_CMD_LINE_MAX 256
-#define KOLIBRI_CMD_PATH_MAX 1024
+#define KOLIBRI_CMD_PATH_MAX 256
+
+#define MAX_COLIBRI_EXE_SIZE (16*1024*1024)
 
 typedef struct kolibri_exe_hdr kolibri_exe_hdr_t;
 
 static inline errno_t is_not_kolibri_exe( kolibri_exe_hdr_t *exe )
 {
+    if( 0 == strncmp( "KPCK", exe->ident, 4 ) )
+        return 0;
+
     if( strncmp( "MENUET01", exe->ident, 8 ) )
         return ENOEXEC;
 
