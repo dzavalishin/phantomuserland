@@ -29,17 +29,46 @@ done
 
 cd $PHANTOM_HOME
 
+preserve_log ( ) {
+	[ -d ../public_html/. ] || return
+
+	SAVED_LOG=../public_html/serial0.log
+
+	C=9
+
+	while [ $C -gt 0 ]
+	do
+		T=`expr $C - 1`
+
+		[ -e $SAVED_LOG.$T ] && mv $SAVED_LOG.$T $SAVED_LOG.$C
+		C=$T
+	done
+
+	[ -e $SAVED_LOG ] && mv $SAVED_LOG $SAVED_LOG.0
+
+	cp oldtree/run_test/serial0.log $SAVED_LOG
+
+	echo "The serial0.log can be viewed at
+
+http://misc.dz.ru/~`whoami`/serial0.log
+
+Previous copies are kept (serial0.log.0 through .9)"
+}
+
 # check if another copy is running
 
 RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 [ "$RUNNING" ] && {
-	(echo "$RUNNING" | grep -q defunct) || {
+	(echo "$RUNNING" | grep -q defunct) || \
+	(tail -1 oldtree/run_test/serial0.log | grep ^Press) || {
 		echo "Another copy is running: $RUNNING"
 		exit 0
 	}
 
 	echo "Previous test run stalled. Killing qemu..."
 	pkill qemu
+
+	preserve_log
 }
 #[ -s $0.lock ] && exit 0
 #touch $0.lock
@@ -198,6 +227,7 @@ FATAL! Phantom stopped (panic)"
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log && {
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log
+		preserve_log
 		break
 	}
 
@@ -205,6 +235,7 @@ FATAL! Phantom stopped (panic)"
 		echo "
 ERROR! No snapshot activity in log! Aborted"
 		tail -10 serial0.log
+		preserve_log
 		break
 	}
 
