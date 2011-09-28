@@ -1,11 +1,15 @@
 #ifndef FONT_H
 #define FONT_H
 
+#define FONT_FLAG_NONE                 0
+#define FONT_FLAG_PROPORTIONAL         (1<<0)
+
 typedef struct drv_video_font_t
 {
-    int         	xsize;
+    int         xsize;
     int 		ysize;
-    char *              font;
+    char *      font;
+    int 		flags;
 } drv_video_font_t;
 
 extern struct drv_video_font_t         drv_video_16x16_font;
