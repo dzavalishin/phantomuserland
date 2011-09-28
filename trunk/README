@@ -24,6 +24,7 @@ BUILD
 RUN
 
   Run phantom.cmd/phantom.sh in trunk/run
+  See doc/RUNNING for more details
 
 DEBUG
 
