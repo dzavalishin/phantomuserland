@@ -43,7 +43,7 @@
 int load_code(void **out_code, unsigned int *out_size, const char *fn)
 {
 #if HAVE_UNIX
-    return k_load_file( out_code, (int *)out_size, fn );
+    return k_load_file( out_code, out_size, fn );
 #else
     (void)out_code;
     (void)out_size;

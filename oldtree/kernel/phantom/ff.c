@@ -3508,7 +3508,7 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
 
     if(0) {
         void *odata;
-        int osize;
+        size_t osize;
         //const char *fname = "/amnt0/ReadMe.txt";
         const char *fname = "/amnt0/LongNameTest.txt";
 

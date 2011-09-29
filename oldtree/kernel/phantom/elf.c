@@ -85,7 +85,7 @@ errno_t uu_run_binary( int pid, void *_elf, size_t elf_size )
 errno_t uu_run_file( int pid, const char *fname )
 {
     void *odata;
-    int osize;
+    size_t osize;
     SHOW_FLOW( 3, "loading %s", fname );
 
     errno_t ke = k_load_file( &odata, &osize, fname );
