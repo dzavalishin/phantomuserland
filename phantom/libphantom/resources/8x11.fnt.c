@@ -357,5 +357,9 @@ static char drv_video_8x11_fnt[] = /* 2816 */
 ,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 /* end binary data. size = 2816 bytes */
 
-struct drv_video_font_t         drv_video_8x11_font = { 8, 11,  drv_video_8x11_fnt };
+struct drv_video_font_t         drv_video_8x11_font = {
+  8, 11,
+  drv_video_8x11_fnt,
+  FONT_FLAG_NONE
+ };
 //struct drv_video_font_t drv_video_kolibri1_font = { 6, 11,  drv_video_8x11_fnt };

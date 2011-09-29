@@ -294,4 +294,8 @@ char drv_video_kolibri1_fnt [] =
 /* end binary data. size = 2304 bytes */
 
 
-struct drv_video_font_t         drv_video_kolibri1_font = { 6, 9,  drv_video_kolibri1_fnt };
+struct drv_video_font_t         drv_video_kolibri1_font = { 
+  6, 9,  
+  drv_video_kolibri1_fnt,
+  FONT_FLAG_NONE
+ };

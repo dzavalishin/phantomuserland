@@ -2,7 +2,7 @@ BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
 TARGET	= libkern.a
 
-SRCDIRS += $(BUILD_ROOT)/libkern $(BUILD_ROOT)/libkern/$(ARCH) 
+SRCDIRS += $(BUILD_ROOT)/libkern $(BUILD_ROOT)/libkern/$(ARCH) $(BUILD_ROOT)/libkern/acpi
 #SRCDIRS += $(BUILD_ROOT)/libkern/net
 
 include $(BUILD_ROOT)/makerules-lib

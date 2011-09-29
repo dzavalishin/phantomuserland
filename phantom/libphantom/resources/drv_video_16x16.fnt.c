@@ -527,6 +527,10 @@ static char drv_video_16x16_fnt [] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 }; 
 
-struct drv_video_font_t         drv_video_16x16_font = { 16, 16,  drv_video_16x16_fnt };
+struct drv_video_font_t         drv_video_16x16_font = {
+  16, 16,
+  drv_video_16x16_fnt,
+  FONT_FLAG_NONE
+ };
 
 

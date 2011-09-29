@@ -118,6 +118,9 @@
 
 //#warning check me
 
+#define ACPI_USE_LOCAL_CACHE
+
+
 /*
  * Environment configuration. The purpose of this file is to interface ACPICA
  * to the local environment. This includes compiler-specific, OS-specific,
@@ -197,7 +200,7 @@
 
 #ifdef ACPI_APPLICATION
 #define ACPI_USE_SYSTEM_CLIBRARY
-#define ACPI_USE_LOCAL_CACHE
+//#define ACPI_USE_LOCAL_CACHE
 #endif
 
 /* Common debug support */
