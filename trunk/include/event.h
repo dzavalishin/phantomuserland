@@ -89,6 +89,34 @@ typedef struct ui_event ui_event_t;
 #define UI_MODIFIER_SCRLOCK             (1<<14)
 #define UI_MODIFIER_NUMLOCK             (1<<15)
 
+#define UI_MOD_Y_N(__mod, __y, __n ) \
+    ({ int m = (__mod); int yn; \
+    yn = m & (__y);  \
+    if( m & (__n) ) yn = 0; \
+    yn; \
+    })
+
+
+// Key is down and just control is pressed
+#define UI_MOD_CTRL_DOWN(__mod) \
+    ({ int m = (__mod); int yn; \
+    yn = m & UI_MODIFIER_CTRL;  \
+    if( m & UI_MODIFIER_SHIFT ) yn = 0; \
+    if( m & UI_MODIFIER_ALT ) yn = 0; \
+    if( m & UI_MODIFIER_KEYUP ) yn = 0; \
+    yn; \
+    })
+
+// Key is down and just control is pressed
+#define UI_MOD_ALT_DOWN(__mod) \
+    ({ int m = (__mod); int yn; \
+    yn = m & UI_MODIFIER_ALT;  \
+    if( m & UI_MODIFIER_SHIFT ) yn = 0; \
+    if( m & UI_MODIFIER_CTRL ) yn = 0; \
+    if( m & UI_MODIFIER_KEYUP ) yn = 0; \
+    yn; \
+    })
+
 
 #define UI_EVENT_WIN_GOT_FOCUS          1
 #define UI_EVENT_WIN_LOST_FOCUS         2

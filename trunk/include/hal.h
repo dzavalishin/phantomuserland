@@ -93,8 +93,8 @@ int                                     hal_save_cli(void); // cli and ret 1 if 
 // sti + halt
 void                                    hal_wait_for_interrupt(void);
 
-void 					phantom_mem_lock(void);
-void 					phantom_mem_unlock(void);
+//void 					phantom_mem_lock(void);
+//void 					phantom_mem_unlock(void);
 
 
 // void    				sleep_usec( int microseconds ) = 0;
@@ -156,6 +156,8 @@ void					memcpy_p2v( void *to, physaddr_t from, size_t size );
 void					memcpy_v2p( physaddr_t to, void *from, size_t size );
 
 
+size_t                                  pahantom_total_phys_mem_kb(void);
+size_t                                  pahantom_free_phys_mem_kb(void);
 
 
 int                 			hal_addr_is_in_object_vmem( void *test );

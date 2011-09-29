@@ -308,11 +308,57 @@ static void push_event( struct ui_event *e )
 
 
 
-
 //! Put key event onto the main e q
 void event_q_put_key( int vkey, int ch, int modifiers )
 {
     if(!event_engine_active) return; // Just ignore
+
+
+    // Process global hotkeys
+
+    switch( vkey )
+    {
+    case KEY_TAB:
+        SHOW_FLOW( 10, "Tab shifts = %x", modifiers );
+        if( UI_MOD_CTRL_DOWN(modifiers) || UI_MOD_ALT_DOWN(modifiers) )
+        {
+            SHOW_FLOW( 9, "Next win shifts = %x", modifiers );
+            window_handle_t later_lost = 0;
+            window_handle_t later_gain = 0;
+
+            // Next win
+            if(focused_window != 0)
+                later_lost = focused_window;
+            later_gain = drv_video_next_window(focused_window);
+            if( later_gain != focused_window )
+            {
+                focused_window = later_gain;
+
+                if(later_lost) event_q_put_win( 0, 0, UI_EVENT_WIN_LOST_FOCUS, later_lost );
+                if(later_gain)
+                {
+                    event_q_put_win( 0, 0, UI_EVENT_WIN_GOT_FOCUS, later_gain );
+                    drv_video_window_to_top(later_gain);
+                }
+            }
+            return;
+        }
+        break;
+
+    case KEY_F4:
+        SHOW_FLOW( 0, "F4 shifts = %x", modifiers );
+        break;
+
+    case KEY_LWIN:
+    case KEY_RWIN:
+        SHOW_FLOW( 0, "WIN shifts = %x", modifiers );
+        break;
+
+    case KEY_MENU:
+        SHOW_FLOW( 0, "MENU shifts = %x", modifiers );
+        break;
+
+    }
 
     struct ui_event *e = get_unused();
     e->type = UI_EVENT_TYPE_KEY;
@@ -410,13 +456,11 @@ void event_q_put_global( ui_event_t *ie )
 
 #include <drv_video_screen.h>
 
-extern queue_head_t     	allwindows;
-
-extern window_handle_t 		focused_window;
 
 //! Select target window
 static void select_event_target(struct ui_event *e)
 {
+
     // Don't even try to select destination for this type of event
     if( e->type == UI_EVENT_TYPE_WIN )
         return;

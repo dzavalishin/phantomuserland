@@ -157,4 +157,12 @@ int rect_win_bounds( rect_t *r, drv_video_window_t *w );
 int point_in_win( int x, int y, drv_video_window_t *w );
 #endif // !new win
 
+extern queue_head_t         allwindows;
+extern window_handle_t      focused_window;
+
+
+
+window_handle_t drv_video_next_window(window_handle_t curr);
+
+
 #endif // WINDOW_H
