@@ -8,6 +8,11 @@
  *
  *
 **/
+#define DEBUG_MSG_PREFIX "win"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <drv_video_screen.h>
 #include <assert.h>
@@ -103,6 +108,8 @@ static void
 common_window_init( drv_video_window_t *w,
                         int xsize, int ysize )
 {
+    w->state |= WSTATE_WIN_VISIBLE; // default state is visible
+
     w->xsize = xsize;
     w->ysize = ysize;
 
@@ -362,7 +369,61 @@ void drv_video_window_rezorder_all(void)
 
 
 
+window_handle_t drv_video_next_window(window_handle_t curr)
+{
+    int reasonable_tries = 1000;
+    window_handle_t next = curr;
 
+    if(next == 0)
+        next = (window_handle_t)queue_first(&allwindows);
+
+    do {
+
+        SHOW_FLOW( 3, "next = %x", (int)next );
+
+        if(reasonable_tries-- <= 0)
+        {
+            SHOW_ERROR0( 0, "loop?");
+            return curr;
+        }
+
+        next = (window_handle_t)queue_next(&next->chain);
+        if(queue_end(&allwindows, next))
+            next = (window_handle_t)queue_first(&allwindows);
+
+        // I'm decoration, don't choose me
+        if( next->w_owner )
+        {
+            SHOW_FLOW( 4, "next = %x has owner", (int)next );
+            continue;
+        }
+
+        // Don't choose unvisible ones
+        if( !(next->state & WSTATE_WIN_VISIBLE) )
+        {
+            SHOW_FLOW( 4, "next = %x not visible", (int)next );
+            continue;
+        }
+
+        // No focus means no focus
+        if( next->flags & WFLAG_WIN_NOFOCUS )
+        {
+            SHOW_FLOW( 4, "next = %x nofocus", (int)next );
+            continue;
+        }
+
+        if( next->flags & WFLAG_WIN_NOTINALL )
+        {
+            SHOW_ERROR0( 0, "WFLAG_WIN_NOTINALL in allw");
+            continue;
+        }
+
+        return next;
+    } while(next != curr);
+
+    // I'm alone here
+    return curr;
+}
 
 
 static void

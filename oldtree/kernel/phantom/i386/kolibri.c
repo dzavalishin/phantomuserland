@@ -352,12 +352,12 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
         }
         break;
 
-    case 16: // TODO FAKE - get free mem, Kb
-        st->eax = 128; // give some answer
+    case 16: // get free mem, Kb
+        st->eax = pahantom_free_phys_mem_kb();
         break;
 
-    case 17: // TODO FAKE - get all mem, Kb
-        st->eax = 1024; // give some answer
+    case 17: // get all mem, Kb
+        st->eax = pahantom_total_phys_mem_kb();
         break;
 
     case 21: // get slot by tid

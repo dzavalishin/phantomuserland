@@ -628,6 +628,8 @@ static void replentishThread(void *arg)
 
 #define PG2MB(__p, __div) ((int) ( ((__p) * 4L) / (__div) ))
 
+#define PG2KB(__p) ((__p) * 4)
+
 static void dump_mem_stat( physalloc_t *map, const char *name, long div, const char *unit )
 {
     int total = PG2MB(map->allocable_size, div);
@@ -636,6 +638,8 @@ static void dump_mem_stat( physalloc_t *map, const char *name, long div, const c
     printf("  %-14s: %5d %s, %5d %s free, %5d %s used\n", name, total, unit, free, unit, used, unit );
 }
 
+size_t pahantom_total_phys_mem_kb() { return PG2KB(pm_map.allocable_size); }
+size_t pahantom_free_phys_mem_kb() { return PG2KB( pm_map.allocable_size - pm_map.n_used_pages ); }
 
 
 
