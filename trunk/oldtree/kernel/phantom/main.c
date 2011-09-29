@@ -276,6 +276,8 @@ int main(int argc, char **argv, char **envp)
 
     //vesa3_bootstrap();
 
+    SHOW_FLOW( 0, "ACPI: %d" , InitializeFullAcpi() );
+
 
 #ifdef ARCH_ia32
 #if HAVE_VESA

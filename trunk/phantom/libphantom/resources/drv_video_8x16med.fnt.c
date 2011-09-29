@@ -271,5 +271,7 @@ char drv_video_8x16med_fnt [] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 }; 
 
-struct drv_video_font_t         drv_video_8x16med_font = { 8, 16,  drv_video_8x16med_fnt };
+struct drv_video_font_t         drv_video_8x16med_font = { 8, 16,  drv_video_8x16med_fnt,
+  FONT_FLAG_NONE
+ };
 

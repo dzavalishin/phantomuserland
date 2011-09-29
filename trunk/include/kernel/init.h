@@ -189,6 +189,8 @@ void phantom_start_boot_modules(void);
 
 errno_t vesa3_bootstrap(void);
 
+errno_t InitializeFullAcpi(void);
+
 
 #endif // INIT_H
 

@@ -142,7 +142,7 @@
  * code that will not execute the _OSI method unless _OS matches the string
  * below.  Therefore, change this string at your own risk.
  */
-#define ACPI_OS_NAME                    "Microsoft Windows NT"
+#define ACPI_OS_NAME                    "Phantom OS"
 
 /* Maximum objects in the various object caches */
 
@@ -231,8 +231,9 @@
 
 /* Constants used in searching for the RSDP in low memory */
 
-#define ACPI_EBDA_PTR_LOCATION          0x0000040E     /* Physical Address */
-#define ACPI_EBDA_PTR_LENGTH            2
+#define ACPI_EBDA_PTR_LOCATION          0x00000000     /* Physical Address */
+#define ACPI_EBDA_PTR_OFFSET            0x0000040E     /* Address offset */
+#define ACPI_EBDA_PTR_LENGTH            (2+ACPI_EBDA_PTR_OFFSET)
 #define ACPI_EBDA_WINDOW_SIZE           1024
 #define ACPI_HI_RSDP_WINDOW_BASE        0x000E0000     /* Physical Address */
 #define ACPI_HI_RSDP_WINDOW_SIZE        0x00020000
