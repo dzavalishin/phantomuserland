@@ -789,6 +789,70 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         break;
 
+    case 6: // TODO read ramdisk
+        {
+            char *ifn = u_ptr( st->ebx, 12 ); // NB! No final zero!
+
+            char fn[13];
+            strncpy( fn, ifn, 12 );
+            fn[12] = 0;
+
+            char *fnp = fn+11;
+            while( fnp >= fn )
+            {
+                if( *fnp <= ' ' ) *fnp = 0;
+                else break;
+                fnp--;
+            }
+
+            int start_block = st->ecx;
+            if( start_block <= 0 ) start_block = 1;
+
+            start_block--; // start from 0
+
+            int nblocks = st->edx;
+            if( nblocks <= 0 ) nblocks = 1;
+
+            size_t startpos = start_block*512;
+            size_t nbytes = nblocks*512;
+            size_t after_end_pos = startpos+nbytes;
+
+            char *buf = u_ptr( st->esi, nbytes ); // NB! No final zero!
+
+            SHOW_ERROR( 0, "read ramdisk '%s', start %d, %d blocks", fn, start_block, nblocks );
+
+            // TODO really - read from /sys?
+
+            char fname[256];
+            snprintf( fname, sizeof(fname), "/amnt0/%s", fn );
+
+            void *odata;
+            size_t osize;
+            errno_t rc = k_load_file( &odata, &osize, fname );
+            if( rc )
+            {
+                if( odata ) free(odata);
+                st->eax = -1;
+                break;
+            }
+
+            if( after_end_pos > osize )
+            {
+                nbytes -= (after_end_pos-osize);
+                after_end_pos = osize;
+            }
+
+            if( nbytes <= 0 )
+            {
+                st->eax = -1;
+                break;
+            }
+
+            memcpy( buf, odata+startpos, nbytes );
+            st->eax = nbytes;
+        }
+        break;
+
     case 7: // draw image
         {
             rect_t r;
@@ -1272,6 +1336,26 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             default:
                 SHOW_ERROR( 0, "Unimplemented 48 syscall ebx = %d ecx = %d", st->ebx, st->ecx );
+                break;
+            }
+        }
+        break;
+
+    case 50: // TODO window shape / scale
+        {
+        if( !ks->win )
+            break;
+            if( st->ebx == 0 )
+            {
+                int sz = ks->win->xsize * ks->win->ysize;
+                char *alpha_map = u_ptr( st->ecx, sz );
+                SHOW_ERROR( 0, "requested alpha map %p", alpha_map );
+                break;
+            }
+            if( st->ebx == 1 )
+            {
+                int scale = st->ecx;
+                SHOW_ERROR( 0, "requested scale %d", scale );
                 break;
             }
         }

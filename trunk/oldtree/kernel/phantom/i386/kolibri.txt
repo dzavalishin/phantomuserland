@@ -6,7 +6,7 @@ sys     status
 3	ok
 4	ok
 5	ok
-6	skip
+6	ok (can be done better)
 7	ok
 8		part
 9		part
