@@ -10,5 +10,7 @@ typedef struct rect
 void rect_add( rect_t *out, rect_t *a, rect_t *b );
 int rect_mul( rect_t *out, rect_t *a, rect_t *b );
 
+int point_in_rect( int x, int y, rect_t *r );
+
 
 #endif // VIDEO_RECT_H

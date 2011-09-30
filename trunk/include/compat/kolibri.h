@@ -83,6 +83,8 @@ struct kolibri_process_state
     u_int32_t           win_update_prevent;
 
     pool_t              *buttons;
+    u_int32_t           pressed_button_id;
+    u_int32_t           pressed_button_mouseb; // mouse buttons
 
     u_int32_t           key_input_scancodes;
 
@@ -93,6 +95,7 @@ struct kolibri_process_state
     int                 have_e;
 };
 
+typedef struct kolibri_process_state kolibri_state_t;
 
 struct kolibri_button
 {

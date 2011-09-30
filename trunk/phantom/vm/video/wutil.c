@@ -52,14 +52,29 @@ int point_in_win( int x, int y, drv_video_window_t *w )
     if( x < w->x || y < w->y )
         return 0;
 
-    if( x > w->x + w->xsize )
+    if( x >= w->x + w->xsize )
         return 0;
 
-    if( y > w->y + w->ysize )
+    if( y >= w->y + w->ysize )
         return 0;
 
     return 1;
 }
+
+int point_in_rect( int x, int y, rect_t *r )
+{
+    if( x < r->x || y < r->y )
+        return 0;
+
+    if( x >= r->x + r->xsize )
+        return 0;
+
+    if( y >= r->y + r->ysize )
+        return 0;
+
+    return 1;
+}
+
 
 
 void rect_add( rect_t *out, rect_t *a, rect_t *b )
