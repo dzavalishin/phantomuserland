@@ -116,6 +116,7 @@
 #ifndef __ACPI_H__
 #define __ACPI_H__
 
+//#define ACPI_DEBUG_OUTPUT
 /*
  * Public include files for use by code that will interface to ACPICA.
  *

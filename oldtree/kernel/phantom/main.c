@@ -19,6 +19,7 @@
 #include <kernel/config.h>
 #include <kernel/board.h>
 #include <kernel/snap_sync.h>
+#include <kernel/acpi.h>
 
 #include "svn_version.h"
 
@@ -133,19 +134,6 @@ void start_phantom()
 }
 
 
-
-static void
-stop_phantom()
-{
-    //pressEnter("finishing vm");
-    vm_map_finish();
-    vm_map_wait_for_finish();
-
-    //pressEnter("finishing pager");
-    pager_finish();
-
-    dpc_finish();
-}
 
 
 
@@ -391,11 +379,8 @@ int main(int argc, char **argv, char **envp)
 
     run_init_functions( INIT_LEVEL_LATE );
 
-    // pool.ntp.org
-    //init_sntp( IPV4_DOTADDR_TO_ADDR(85,21,78,91), 10000 );
-    //init_sntp( IPV4_DOTADDR_TO_ADDR(192,168,1,1), 10000 );
 
-	//init_wins(u_int32_t ip_addr);
+    //init_wins(u_int32_t ip_addr);
 
 
 #if 1
@@ -412,19 +397,7 @@ int main(int argc, char **argv, char **envp)
     kernel_debugger();
 #endif
 
-    phantom_finish_all_threads();
-
-#ifdef ARCH_ia32
-    phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
-#endif
-
-    run_stop_functions( STOP_LEVEL_EARLY );
-    //pressEnter("will do a snap");
-    run_stop_functions( STOP_LEVEL_PREPARE );
-    run_stop_functions( STOP_LEVEL_STOP );
-
-    stop_phantom();
-
+    phantom_shutdown(0);
     //pressEnter("will reboot");
 
     return 0;
@@ -477,6 +450,60 @@ static void net_stack_init()
 void _exit(int code)
 {
     (void) code;
+
+    hal_cpu_reset_real();
+}
+
+
+// -----------------------------------------------------------------------
+// Kill world
+// -----------------------------------------------------------------------
+
+void phantom_shutdown(int flags)
+{
+    static int reenter = 0;
+
+    if( reenter++ )
+    {
+        while(1)
+            hal_sleep_msec(1000);
+    }
+
+    t_migrate_to_boot_CPU(); // Make sure other CPUs are stopped
+
+    phantom_finish_all_threads();
+
+    run_stop_functions( STOP_LEVEL_EARLY );
+
+    if( !( flags & SHUTDOWN_FLAG_NOSYNC ) )
+    {
+#ifdef ARCH_ia32
+        phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
+#endif
+
+        //pressEnter("will do a snap");
+        run_stop_functions( STOP_LEVEL_PREPARE );
+        run_stop_functions( STOP_LEVEL_STOP );
+
+
+        //pressEnter("finishing vm");
+        vm_map_finish();
+        vm_map_wait_for_finish();
+
+        //pressEnter("finishing pager");
+        pager_finish();
+
+        dpc_finish();
+    }
+
+    if(flags & SHUTDOWN_FLAG_REBOOT)
+        acpi_reboot();
+    else
+        acpi_powerdown();
+
+
+    hal_sleep_msec(2000);
+    SHOW_ERROR0( 0, "Can't shoutdown, will attempt reset" );
 
     hal_cpu_reset_real();
 }

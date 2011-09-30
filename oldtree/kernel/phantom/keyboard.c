@@ -26,8 +26,10 @@
 
 #include <phantom_libc.h>
 #include <sys/libkern.h>
+
 #include <kernel/init.h>
 #include <kernel/properties.h>
+#include <kernel/drivers.h>
 
 #include <misc.h>
 #include <event.h>
@@ -36,7 +38,7 @@
 #include <dev/key_event.h>
 
 #include <device.h>
-#include <kernel/drivers.h>
+
 
 #include "console.h"
 
@@ -299,7 +301,7 @@ static void handle_set1_keycode(unsigned char key)
         // do some special checks here
         switch(event.keycode) {
             // special stuff
-        case KEY_F11:
+        case KEY_F10:
         case KEY_PRTSCRN:
             //panic("Keyboard Requested Halt\n");
             printf("print scrn\n");
@@ -308,6 +310,11 @@ static void handle_set1_keycode(unsigned char key)
         case KEY_F12:
             hal_cpu_reset_real();
             break;
+
+        case KEY_F11:
+            phantom_shutdown(0);
+            break;
+
         case KEY_PAD_MINUS:
             panic("Keyboard panic request - RWIN key");
             break;

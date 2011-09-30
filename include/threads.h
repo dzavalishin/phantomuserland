@@ -38,6 +38,15 @@ errno_t         t_set_pid( tid_t tid, pid_t pid );
 errno_t         t_get_pid( tid_t tid, pid_t *pid );
 
 
+// Switch on/off CPUs other than boot
+void            t_smp_enable(int yn);
+
+
+// Make sure we return executing on boot CPU
+void            t_migrate_to_boot_CPU(void);
+
+
+
 // returns thread id, does not check for thread death
 tid_t           hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
 tid_t           hal_start_thread(void (*thread)(void *arg), void *arg, int flags);

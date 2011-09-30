@@ -48,8 +48,8 @@ void register_init_record( struct init_record *ir );
     register_init_record( &__init_record ); \
     }
 
-#define STOP_ME(__stop1) \
-    static struct init_record __stop_record = { 0, __stop1, 0, 0, 0, 0, 0 }; \
+#define STOP_ME(__stop1,__stop2,__stop3) \
+    static struct init_record __stop_record = { 0, __stop1, 0, __stop2, 0, __stop3, 0 }; \
     static void __register_stop(void) __attribute__ ((constructor)); \
     static void __register_stop(void) \
     { \
@@ -79,6 +79,7 @@ void register_init_record( struct init_record *ir );
 // Stop serving
 #define STOP_LEVEL_STOP         3
 
+volatile int  phantom_stop_level; // zero on noraml operation, 1-2-3 on stop
 
 void run_init_functions( int level );
 void run_stop_functions( int level );
@@ -190,6 +191,15 @@ void phantom_start_boot_modules(void);
 errno_t vesa3_bootstrap(void);
 
 errno_t InitializeFullAcpi(void);
+
+// -----------------------------------------------------------------------
+// Finita
+// -----------------------------------------------------------------------
+
+#define SHUTDOWN_FLAG_REBOOT    (1<<0)
+#define SHUTDOWN_FLAG_NOSYNC    (1<<1)
+
+void phantom_shutdown(int flags);
 
 
 #endif // INIT_H

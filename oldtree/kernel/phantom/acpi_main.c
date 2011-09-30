@@ -1,6 +1,15 @@
 #include <acpi.h>
 #include <errno.h>
 
+//#include <acpi/acnamesp.h>
+
+#include <acpi/acconfig.h>
+#include <acpi/aclocal.h>
+#include <acpi/acobject.h>
+#include <acpi/acresrc.h>
+
+#include <acpi/acpixf.h>
+
 ACPI_MODULE_NAME    ("examples")
 
 ACPI_STATUS InstallHandlers (void);
@@ -42,8 +51,26 @@ static ACPI_STATUS walkCallback ( ACPI_HANDLE Object, UINT32 NestingLevel, void 
                     Info->HardwareId, Info->Address, Info->CurrentStatus);
             free(Info);
         }
+
     }
+
     printf("\n");
+
+    /*
+    if( Type == ACPI_TYPE_DEVICE )
+    {
+        ACPI_BUFFER rt_buf;
+        rt_buf.Length = ACPI_ALLOCATE_BUFFER;
+        ACPI_STATUS Status = AcpiGetIRQRoutingTable( Object, &rt_buf );
+        if(ACPI_SUCCESS (Status))
+        {
+            hexdump( rt_buf.Pointer, rt_buf.Length, 0, 0 );
+
+            AcpiRsDumpIrqList( rt_buf.Pointer );
+
+            free(rt_buf.Pointer);
+        }
+    } */
 
     return AE_OK;
 }
