@@ -13,6 +13,7 @@
 
 #include <kernel/config.h>
 #include <kernel/stats.h>
+#include <kernel/init.h>
 
 #define DEBUG_MSG_PREFIX "dns"
 #include "debug_ext.h"
@@ -602,7 +603,8 @@ errno_t name2ip( in_addr_t *out, const char *name, int flags )
             return 0;
         }
 
-    if( flags & RESOLVER_FLAG_NOWAIT )
+    // On OS stop don't produce network traffic
+    if( (flags & RESOLVER_FLAG_NOWAIT) || phantom_stop_level )
         return ESRCH;
 
     while(tries--)
@@ -632,7 +634,7 @@ errno_t name2ip( in_addr_t *out, const char *name, int flags )
 }
 
 
-
+//STOP_ME(stop_early,0,0)
 
 #endif // HAVE_NET
 

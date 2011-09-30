@@ -151,8 +151,12 @@ static void run_next_stop( int level, struct init_record *ir )
     run_next_init( level, ir->next );
 }
 
+volatile int  phantom_stop_level = 0;
+
+
 void run_stop_functions( int level )
 {
+    phantom_stop_level = level;
     run_next_stop( level, stop_list_root );
 }
 
