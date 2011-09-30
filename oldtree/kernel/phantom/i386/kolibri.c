@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "Kolibri"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 9
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -150,6 +150,13 @@ void destroy_kolibri_state(uuprocess_t *u)
 
     if( ks == 0 )
         return;
+
+    if( ks->win )
+    {
+        drv_video_window_free(ks->win);
+        ks->win = 0;
+    }
+
 
     u->kolibri_state = 0;
 
@@ -625,6 +632,46 @@ static errno_t kolibri_kill_button(pool_t *pool, void *el, pool_handle_t handle,
     return 0;
 }
 
+struct checkb
+{
+    kolibri_state_t *ks;
+    int x;
+    int y;
+    int mouseb;
+};
+
+static errno_t do_kolibri_check_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    (void) pool;
+    (void) handle;
+
+    struct kolibri_button *cb = el;
+    struct checkb *env = arg;
+
+    if( point_in_rect( env->x, env->y, &cb->r ) )
+    {
+        env->ks->pressed_button_id = cb->id;
+        env->ks->pressed_button_mouseb = env->mouseb;
+        kolibri_send_event( get_current_tid(), EV_BUTTON );
+    }
+
+    return 0;
+}
+
+static void kolibri_check_button(int x, int y, kolibri_state_t *ks, int mouseb )
+{
+    struct checkb env;
+
+    SHOW_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
+
+    env.x = x;
+    env.y = y;
+    env.ks = ks;
+    env.mouseb = mouseb;
+
+    pool_foreach( ks->buttons, do_kolibri_check_button, &env );
+}
+
 
 // ------------------------------------------------
 // Main Kolibro syscall dispatcher
@@ -1014,12 +1061,13 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
     case 10: // wait for event forever
         {
-            int rc = hal_sem_acquire_etc( &ks->event, 1, 0, 0 );
-            if(rc)
+            //int rc =
+            hal_sem_acquire_etc( &ks->event, 1, 0, 0 );
+            /*if(rc)
             {
                 st->eax = 0;
                 break;
-            }
+            }*/
             hal_sem_zero( &ks->event ); // eat all available count
         }
         // fall through...
@@ -1072,8 +1120,17 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
     case 17: // get screen button press
         {
-            st->eax = 1; // empty
-            //st->eax = (button_id << 8); // empty
+            if( ks->pressed_button_id == 0 )
+            {
+                st->eax = 1; // empty
+                break;
+            }
+
+            unsigned mb = ks->pressed_button_mouseb;
+            SHOW_FLOW( 1, "button mouseb %x", mb );
+            mb &= ~1; // kill lower bit
+
+            st->eax = ( (ks->pressed_button_id & 0xFFFFFF) << 8) | (mb&0xFF);
         }
         break;
 
@@ -1102,12 +1159,13 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 break;
             }
 
-            int rc = hal_sem_acquire_etc( &ks->event, 1, SEM_FLAG_TIMEOUT, 1000*timeout_msec );
-            if(rc)
+            //int rc =
+            hal_sem_acquire_etc( &ks->event, 1, SEM_FLAG_TIMEOUT, 1000*timeout_msec );
+            /*if(rc)
             {
                 st->eax = 0;
                 break;
-            }
+            }*/
             hal_sem_zero( &ks->event );
 
             st->eax = get_event_bits(u,ks); 
@@ -1343,8 +1401,8 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
     case 50: // TODO window shape / scale
         {
-        if( !ks->win )
-            break;
+            if( !ks->win )
+                break;
             if( st->ebx == 0 )
             {
                 int sz = ks->win->xsize * ks->win->ysize;
@@ -1592,20 +1650,30 @@ static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks
     (void) u;
     u_int32_t bits = ks->event_bits;
 
+    SHOW_ERROR( 11, "try read event, ebits %x", bits );
+
     // TODO take ks mutex
 
     // TODO here we must check next win q event
     // and set corresp bits
     if( ks->win && (!ks->have_e) )
+    {
         ks->have_e = drv_video_window_get_event( ks->win, &ks->e, 0 );
+        SHOW_ERROR( 10, "read event, %s", ks->have_e ? "got" : "none" );
+    }
 
     if( ks->have_e )
     {
         switch( ks->e.type )
         {
-        case UI_EVENT_TYPE_MOUSE: bits |= EV_MOUSE; break;
+        case UI_EVENT_TYPE_MOUSE:
+            bits |= EV_MOUSE;
+            if( ks->e.m.buttons )
+                kolibri_check_button( ks->e.rel_x, ks->e.rel_y, ks, ks->e.m.buttons );
+            break;
         case UI_EVENT_TYPE_KEY:   bits |= EV_KEY;   break;
         }
+        ks->have_e = 0;
     }
 
     return bits & ks->event_mask;

@@ -17,7 +17,7 @@ sys     status
 14	ok
 15		no		? desktop graphics
 16	skip
-17		no		! onscreen button
+17	debug		! onscreen button
 18		part
 20		fail	? midi
 21		no		! set sys parm

@@ -48,7 +48,6 @@ struct ui_event
 
         struct {
             int         	buttons;	// Bits correspond to buttons
-
         } m;
 
         // WIN and GLOBAL events

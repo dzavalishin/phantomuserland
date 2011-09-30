@@ -8,6 +8,12 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "pool"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
+
 
 #include <kernel/pool.h>
 #include <kernel/libkern.h>
@@ -72,6 +78,7 @@ static errno_t do_pool_killme(pool_t *pool, void *el, pool_handle_t handle, void
 
     while(!pool_release_el( pool, handle ))
         ;
+
     return 0;
 }
 
@@ -79,7 +86,10 @@ errno_t destroy_pool(pool_t *p)
 {
     hal_mutex_lock( &p->mutex ); // do_pool_foreach needs it
 
+    p->flag_nofail = 0; // don't panic!
+
     pool_arena_t *a = p->arenas;
+
     if( p->flag_autoclean ) // remove all els
         do_pool_foreach( p, do_pool_killme, (void *)0 );
 
@@ -88,7 +98,10 @@ errno_t destroy_pool(pool_t *p)
     //int i;
     //for( i = 0; i < p->narenas; i++ )
     //    assert( a[i].nused == 0 );
-    assert(0 == pool_get_used( p ));
+
+    if(pool_get_used( p ))
+        SHOW_ERROR( 0, "still %d used??", pool_get_used( p ));
+    //assert(0 == pool_get_used( p ));
 
     // free arenas
     free_arenas( p->narenas, a );
@@ -285,7 +298,7 @@ errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
     pool_arena_t *a = GET_ARENA(na);
     CHECK_EL(a,ne);
     CHECK_ZERO(a,ne);
-    CHECK_REF(a,ne);
+    //CHECK_REF(a,ne);
 
     if( pool->flag_nofail )
         assert(a->refc[ne] > 0);

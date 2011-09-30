@@ -221,6 +221,19 @@ void drv_video_window_destroy(drv_video_window_t *w)
 
 
 
+    {
+    rect_t wsize;
+    drv_video_window_get_bounds( w, &wsize );
+
+    ui_event_t e;
+    //struct ui_event e;
+    e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
+    e.w.rect = wsize;
+
+    event_q_put_global( &e );
+    }
+
+
     // drain event queue
     if( w->events_count > 0 )
     {
