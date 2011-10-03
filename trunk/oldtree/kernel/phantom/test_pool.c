@@ -197,6 +197,18 @@ int do_test_pool(const char *test_parm)
     test_check_true( 0 == pool_get_used( pool ) );
 
     test_check_false(destroy_pool(pool));
+
+    // Now test autodelete
+
+    SHOW_FLOW0( 0, "check autodelete" );
+    pool = create_pool();
+    pool->flag_nofail = 0; // return errors, don't panic
+    pool->flag_autoclean = 1;
+
+    _create( 100 );
+
+    test_check_false(destroy_pool(pool));
+
     return 0;
 }
 

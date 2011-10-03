@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "pool"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 
+static bool pool_el_exist( pool_t *pool, pool_handle_t handle );
 
 
 static pool_arena_t * alloc_arenas( int arena_size, int narenas, pool_t * init );
@@ -76,14 +77,17 @@ static errno_t do_pool_killme(pool_t *pool, void *el, pool_handle_t handle, void
     (void) el;
     (void) arg;
 
-    while(!pool_release_el( pool, handle ))
-        ;
+    SHOW_FLOW( 7, "autokill h %x", handle );
+
+    while(pool_el_exist( pool, handle ))
+        pool_release_el( pool, handle );
 
     return 0;
 }
 
 errno_t destroy_pool(pool_t *p)
 {
+    SHOW_FLOW( 5, "destroy pool %p", p );
     errno_t rc = 0;
 
     hal_mutex_lock( &p->mutex ); // do_pool_foreach needs it
@@ -288,6 +292,19 @@ int pool_el_refcount( pool_t *pool, pool_handle_t handle )
 
     //hal_mutex_unlock( &pool->mutex );
     return a->refc[ne];
+}
+
+static bool pool_el_exist( pool_t *pool, pool_handle_t handle )
+{
+    int na = HANDLE_2_ARENA(handle);
+    int ne = HANDLE_2_ELEM(handle);
+    pool_arena_t *a = GET_ARENA(na);
+    CHECK_EL(a,ne);
+
+    if( a->ptrs[ne] == 0 )
+        return 0;
+
+    return a->refc[ne] > 0;
 }
 
 

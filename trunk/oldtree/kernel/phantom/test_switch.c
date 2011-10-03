@@ -82,8 +82,11 @@ void report( int rc, const char *test_name )
         return;
     }
 
+    char rcs[128];
+    strerror_r(rc, rcs, sizeof(rcs));
+
     nFailed++;
-    printf("!!! KERNEL TEST FAILED: %s -> %d (%s)\n", test_name, rc, strerror(rc) );
+    printf("!!! KERNEL TEST FAILED: %s -> %d (%s)\n", test_name, rc, rcs );
 }
 
 
