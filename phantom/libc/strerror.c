@@ -51,55 +51,55 @@
  * statically linked binaries.
  */
 static void
-errstr(int num, char *uprefix, char *buf, size_t len)
+    errstr(int num, char *uprefix, char *buf, size_t len)
 {
-	char *t;
-	unsigned int uerr;
-	char tmp[EBUFSIZE];
+    char *t;
+    unsigned int uerr;
+    char tmp[EBUFSIZE];
 
-	t = tmp + sizeof(tmp);
-	*--t = '\0';
-	uerr = (num >= 0) ? num : -num;
-	do {
-		*--t = "0123456789"[uerr % 10];
-	} while (uerr /= 10);
-	if (num < 0)
-		*--t = '-';
-	*--t = ' ';
-	*--t = ':';
-	strlcpy(buf, uprefix, len);
-	strlcat(buf, t, len);
+    t = tmp + sizeof(tmp);
+    *--t = '\0';
+    uerr = (num >= 0) ? num : -num;
+    do {
+        *--t = "0123456789"[uerr % 10];
+    } while (uerr /= 10);
+    if (num < 0)
+        *--t = '-';
+    *--t = ' ';
+    *--t = ':';
+    strlcpy(buf, uprefix, len);
+    strlcat(buf, t, len);
 }
 
 int
 strerror_r(int errnum, char *strerrbuf, size_t buflen)
 {
-	int retval = 0;
+    int retval = 0;
 
-	if (errnum < 1 || errnum >= sys_nerr) {
-		errstr(errnum,
-			UPREFIX,
-			strerrbuf, buflen);
-		retval = EINVAL;
-	} else {
-		if (strlcpy(strerrbuf,
-			sys_errlist[errnum],
-			buflen) >= buflen)
-		retval = ERANGE;
-	}
+    if (errnum < 1 || errnum >= sys_nerr) {
+        errstr(errnum,
+               UPREFIX,
+               strerrbuf, buflen);
+        retval = EINVAL;
+    } else {
+        if (strlcpy(strerrbuf,
+                    sys_errlist[errnum],
+                    buflen) >= buflen)
+            retval = ERANGE;
+    }
 
-	return (retval);
+    return (retval);
 }
 
 char *
 strerror(int num)
 {
-	printf("Warning: strerror used");
-	static char ebuf[256];
+    printf("Warning: strerror(%d) used", num);
+    static char ebuf[256];
 
-	if (strerror_r(num, ebuf, sizeof(ebuf)) != 0)
+    if (strerror_r(num, ebuf, sizeof(ebuf)) != 0)
         return "strerror failed";
-	return ebuf;
+    return ebuf;
 }
 
 
