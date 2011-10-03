@@ -84,6 +84,8 @@ static errno_t do_pool_killme(pool_t *pool, void *el, pool_handle_t handle, void
 
 errno_t destroy_pool(pool_t *p)
 {
+    errno_t rc = 0;
+
     hal_mutex_lock( &p->mutex ); // do_pool_foreach needs it
 
     p->flag_nofail = 0; // don't panic!
@@ -100,7 +102,10 @@ errno_t destroy_pool(pool_t *p)
     //    assert( a[i].nused == 0 );
 
     if(pool_get_used( p ))
+    {
         SHOW_ERROR( 0, "still %d used??", pool_get_used( p ));
+        rc = EEXIST;
+    }
     //assert(0 == pool_get_used( p ));
 
     // free arenas
@@ -109,7 +114,7 @@ errno_t destroy_pool(pool_t *p)
     hal_mutex_unlock( &p->mutex );
 
     free(p);
-    return 0;
+    return rc;
 }
 
 
