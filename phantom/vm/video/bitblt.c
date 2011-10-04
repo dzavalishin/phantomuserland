@@ -45,7 +45,8 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
 #if defined(ARCH_ia32) && 0
         if(ARCH_HAS_FLAG(ARCH_IA32_SSE2))
         {
-            bit_zbmover_to_screen = (void *)sse_rgba2rgba_zbmove;
+            bit_zbmover_to_screen = (void *)auto_rgba2rgba_zbmove;
+
             printf("use sse bitblt mover\n");
         }
 #endif

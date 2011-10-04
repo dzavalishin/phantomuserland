@@ -1,5 +1,5 @@
 // temp off
-#define FXSAVE 0
+#define FXSAVE 1
 
 
 #if (!defined ASSEMBLER) && (!defined __ASSEMBLY__)

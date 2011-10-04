@@ -22,7 +22,8 @@
 #include <phantom_libc.h>
 #include <kernel/page.h>
 #include <kernel/smp.h>
-#include "thread_private.h"
+#include <kernel/init.h>
+#include <thread_private.h>
 
 static int find_tid(phantom_thread_t *);
 static void common_thread_init(phantom_thread_t *t, int stacksize );
@@ -43,6 +44,7 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
 
     SHOW_FLOW( 7, "flags = %b", flags, "\020\1USER\2VM\3JIT\4NATIVE\5KERNEL\6?PF\7?PA\10?CH\11TIMEOUT\12UNDEAD\13NOSCHED" );
     phantom_thread_t *t = calloc(1, sizeof(phantom_thread_t));
+    //phantom_thread_t *t = calloc_aligned(1, sizeof(phantom_thread_t),16); // align at 16 bytes for ia32 fxsave
 
     // Can't be run yet
     t->sleep_flags = THREAD_SLEEP_LOCKED; 
@@ -333,6 +335,48 @@ finish:
 }
 
 
+// Called from machdep thread start asm code
+
+void
+phantom_thread_c_starter(void)
+{
+    void (*func)(void *);
+    void *arg;
+    phantom_thread_t *t;
+
+    t = GET_CURRENT_THREAD();
+    arg = t->start_func_arg;
+    func = t->start_func;
+
+    // Thread switch locked it before switching into us, we have to unlock
+    hal_spin_unlock(&schedlock);
+
+#if DEBUG
+    printf("---- !! phantom_thread_c_starter !! ---\n");
+#endif
+    t->cpu_id = GET_CPU_ID();
+
+    arch_float_init();
+
+    // We're first time running here, set arch specific things up
+    // NB!! BEFORE enablings interrupts!
+    arch_adjust_after_thread_switch(t);
+
+
+    hal_sti(); // Make sure new thread is started with interrupts on
+
+#if 0 // usermode loader does it himself
+    if( THREAD_FLAG_USER & t->thread_flags )
+    {
+        //switch_to_user_mode();
+    }
+#endif
+
+
+    func(arg);
+    t_kill_thread( t->tid );
+    panic("thread %d returned from t_kill_thread", t->tid );
+}
 
 
 

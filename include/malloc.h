@@ -19,4 +19,8 @@ void free(void *);
 
 void *calloc(size_t n_elem, size_t elem_size);
 
+//! align = n bytes to align to
+void *calloc_aligned(size_t n_elem, size_t elem_size, size_t align);
+
+
 #endif // MALLOC_H
