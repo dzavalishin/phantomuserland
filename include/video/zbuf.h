@@ -11,6 +11,8 @@
 #ifndef ZBUF_H
 #define ZBUF_H
 
+#include <video/window.h>
+
 // Special value of z coord which means that we draw anyway - used for mouse
 #define ZBUF_TOP 0xFF
 

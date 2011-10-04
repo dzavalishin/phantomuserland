@@ -20,6 +20,7 @@
 #include <kernel/init.h>
 #include <kernel/debug.h>
 #include <stdio.h>
+#include <hal.h>
 
 static int profiler_inited = 0;
 

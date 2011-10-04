@@ -1,7 +1,8 @@
 #include "alpha-z.h"
 #include <stdio.h>
 
-#define N_PIX 16384
+#define N_PIX (16384*1)
+#define LOOP  (100000*2)
 
 int main()
 {
@@ -41,11 +42,11 @@ int main()
 #endif
 
 
-    for (i = 0; i < 100000; ++i) {
+    for (i = 0; i < LOOP; ++i) {
 #if V == 0
         rgba2rgba_zbmove(dest, src + 1, zb, N_PIX, 1);
 #elif V == 1
-        mmx_rgba2rgba_zbmove(dest, src + 1, zb, N_PIX, 1);
+        //mmx_rgba2rgba_zbmove(dest, src + 1, zb, N_PIX, 1);
 #elif V == 2
         sse_rgba2rgba_zbmove(dest, src, zb, N_PIX, 1);
 #elif V == 3

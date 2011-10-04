@@ -24,8 +24,9 @@
 
 #include <phantom_libc.h>
 
-#include <video.h>
+//#include <video.h>
 #include <video/screen.h>
+#include <video/internal.h>
 
 #define VGA_800x600 0
 #define VGA_1024x768 1

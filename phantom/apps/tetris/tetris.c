@@ -26,6 +26,7 @@
 #include <video/rect.h>
 #include <video/point.h>
 #include <video/color.h>
+#include <event.h>
 #include <dev/key_event.h>
 
 
@@ -538,7 +539,9 @@ void input(void)
 
 int main()
 {
-#warning check bss clean
+//#warning check bss clean
+    printf("initial k_ %d %d %d %d\n", k_right, k_left, k_down, k_up );
+
     k_right = 0;
     k_left = 0;
     k_down = 0;

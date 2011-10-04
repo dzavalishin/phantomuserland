@@ -12,7 +12,9 @@
 #ifndef _PHANTOM_CONSOLE_H
 #define _PHANTOM_CONSOLE_H
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
+#include <video/color.h>
+#include <sys/types.h>
 
 struct console_ops
 {

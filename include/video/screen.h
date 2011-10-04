@@ -14,6 +14,7 @@
 #include <video/color.h>
 #include <video/zbuf.h>
 #include <video/bitmap.h>
+#include <video/window.h>
 
 /**
  *
@@ -153,13 +154,38 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 
 // These are special for mouse pointer code - they're not try to disable mouse
 #define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
-
 #define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, 0xFF)
+
+
 
 #define drv_video_set_mouse_cursor(nc) 		video_drv->set_mouse_cursor(nc)
 #define drv_video_draw_mouse()            	video_drv->redraw_mouse_cursor()
 #define drv_video_mouse_off()             	video_drv->mouse_disable()
 #define drv_video_mouse_on()              	video_drv->mouse_enable()
+
+
+
+int get_screen_xsize(void);
+int get_screen_ysize(void);
+int get_screen_bpp(void);
+
+
+
+
+
+
+// ------------------------------------------------------------------------
+// Kernel video stuff
+// ------------------------------------------------------------------------
+
+// Used in window object restart func to re-enter window to OS all win q
+void drv_video_window_enter_allwq( drv_video_window_t *w);
+
+
+// Redirect console output to this window. TODO: input?
+extern void phantom_init_console_window(void);
+void phantom_stop_console_window(void);
+
 
 
 

@@ -16,11 +16,14 @@
 
 
 #include <phantom_libc.h>
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <kernel/init.h>
 #include <kernel/libkern.h>
 #include <kernel/debug.h>
 #include <kernel/interrupts.h>
+
+#include <video/window.h>
+
 
 #include <console.h>
 

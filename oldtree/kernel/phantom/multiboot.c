@@ -35,6 +35,9 @@
 #include <kernel/config.h>
 #include <kernel/board.h>
 
+unsigned int	arch_flags = 0; 
+
+
 
 static int file_inited = 0;
 
@@ -139,6 +142,11 @@ phantom_multiboot_main()
     if( bootParameters.flags & MULTIBOOT_CMDLINE )
         phantom_parse_cmd_line((const char*)phystokv(bootParameters.cmdline));
 #endif    
+
+    // TODO we have 2 kinds of ia32 cpuid code
+    detect_cpu(0);
+    //identify_cpu();
+    identify_hypervisor();
 
     // Now time for kernel main
 

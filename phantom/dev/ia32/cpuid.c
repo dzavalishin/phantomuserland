@@ -1066,6 +1066,7 @@ identify_cpu(void)
     }
 }
 
+
 void
 identify_hypervisor(void)
 {

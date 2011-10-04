@@ -11,6 +11,7 @@
 #include <video/color.h>
 #include <video/point.h>
 #include <video/rect.h>
+#include <video/window.h>
 #include <event.h>
 
 

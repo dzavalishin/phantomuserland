@@ -30,7 +30,7 @@ typedef u_int64_t             linaddr_t;
 
 
 #ifndef _STDINT_H
-typedef	u_int64_t             uintptr_t;
+//typedef	u_int64_t             uintptr_t;
 typedef	int64_t               ptrdiff_t;
 typedef u_int64_t             register_t;
 #endif
@@ -85,4 +85,13 @@ typedef        u_int64_t        vm_offset_t;
  */
 typedef        u_int64_t        vm_size_t;
 
+
+
+/* Integer types capable of holding object pointers */
+
+#ifndef __intptr_t_defined
+#define __intptr_t_defined
+typedef int64_t intptr_t;
+typedef u_int64_t uintptr_t;
+#endif
 

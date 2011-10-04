@@ -138,5 +138,5 @@ void set_cr3(int cr3);
 u_int32_t get_cr2(void);
 
 // hack/shortcut
-int boot_cpu_has_apic(void);
+//int boot_cpu_has_apic(void);
 

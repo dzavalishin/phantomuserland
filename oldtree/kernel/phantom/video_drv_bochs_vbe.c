@@ -25,8 +25,10 @@
 #include <ia32/pio.h>
 #include <phantom_libc.h>
 
-#include <video.h>
+//#include <video.h>
 #include <video/screen.h>
+#include <video/internal.h>
+
 #include "video_drv_bochs_vbe.h"
 
 static int bochs_video_probe();

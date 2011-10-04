@@ -185,10 +185,13 @@ int main(int argc, char **argv, char **envp)
 
     //hal_init(             (void *)PHANTOM_AMAP_START_VM_POOL,             N_OBJMEM_PAGES*4096L);
 
+    // moved pre main()
+#if 0
     // TODO we have 2 kinds of ia32 cpuid code
     detect_cpu(0);
     //identify_cpu();
     identify_hypervisor();
+#endif
 
     phantom_paging_init();
 
