@@ -20,6 +20,10 @@
 #include <phantom_libc.h>
 #include <kernel/init.h>
 
+// See kernel/boot.h
+unsigned int	arch_flags = 0; 
+
+
 /* These magic symbols are provided by the linker.  */
 extern void (*_preinit_array_start []) (void) __attribute__((weak));
 extern void (*_preinit_array_end []) (void) __attribute__((weak));

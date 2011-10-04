@@ -25,9 +25,9 @@ nonstandalone.o: nonstandalone.c
 GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o 
 
 ifeq ($(OSTYPE),cygwin)
-OSLIB = -lgdi32 ../lib/libphantom.a
+OSLIB = -lgdi32 ../lib/libtuned.a  ../lib/libphantom.a
 else
-OSLIB = ../lib/libphantom_c.a ../lib/libphantom.a
+OSLIB = ../lib/libtuned.a ../lib/libphantom_c.a ../lib/libphantom.a
 endif
 
 
