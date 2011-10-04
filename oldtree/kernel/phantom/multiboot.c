@@ -35,9 +35,6 @@
 #include <kernel/config.h>
 #include <kernel/board.h>
 
-unsigned int	arch_flags = 0; 
-
-
 
 static int file_inited = 0;
 

@@ -13,6 +13,7 @@
 #include <video/screen.h>
 #include <assert.h>
 #include <sys/types.h>
+#include <kernel/boot.h>
 
 
 // Find pointer to the line on screen. As addresses go from left to right in
@@ -41,7 +42,13 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
         bit_zbmover_to_screen = (void *)rgba2rgba_zbmove;
         bit_mover_to_screen   = (void *)rgba2rgba_move;
         bit_mover_from_screen = (void *)rgba2rgba_24_move;
-
+#if defined(ARCH_ia32) && 0
+        if(ARCH_HAS_FLAG(ARCH_IA32_SSE2))
+        {
+            bit_zbmover_to_screen = (void *)sse_rgba2rgba_zbmove;
+            printf("use sse bitblt mover\n");
+        }
+#endif
         bit_mover_byte_step = 4;
         video_drv->bpp = 32;
     }

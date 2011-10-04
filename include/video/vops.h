@@ -48,5 +48,9 @@ void bitmap2bitmap_yflip(
                    int moveWidth, int moveHeight
                   );
 
+#ifdef ARCH_ia32
+void sse_rgba2rgba_zbmove(struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos);
+#endif // ARCH_ia32
+
 
 #endif // VOPS_H

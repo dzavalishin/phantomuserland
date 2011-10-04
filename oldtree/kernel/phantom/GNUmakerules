@@ -40,7 +40,7 @@ LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
-PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a
+PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a
 
 
 
