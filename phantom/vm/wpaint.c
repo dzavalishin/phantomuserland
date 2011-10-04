@@ -9,7 +9,9 @@
  *
 **/
 
-#include <drv_video_screen.h>
+#include <video/screen.h>
+#include <video/internal.h>
+
 #include <assert.h>
 //#include <kernel/pool.h>
 #include <kernel/libkern.h>

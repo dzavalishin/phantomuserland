@@ -14,7 +14,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
@@ -23,6 +23,8 @@
 #include <hal.h>
 #include <kernel/init.h>
 #include "win_local.h"
+#include <video/window.h>
+#include <video/internal.h>
 
 //static void defaultEventProcessor();
 

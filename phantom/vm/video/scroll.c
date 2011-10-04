@@ -12,11 +12,13 @@
 
 
 
-#include "drv_video_screen.h"
+//#include "drv_video_screen.h"
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/libkern.h>
+#include <video/font.h>
+#include <video/window.h>
 
 
 

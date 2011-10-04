@@ -13,7 +13,7 @@
 #include <phantom_libc.h>
 
 
-#include "drv_video_screen.h"
+//#include "drv_video_screen.h"
 #include "vm/object.h"
 #include "vm/internal.h"
 #include "vm/internal_da.h"
@@ -23,6 +23,9 @@
 #include "vm/alloc.h"
 
 #include <console.h>
+
+#include <video/screen.h>
+#include <video/font.h>
 
 
 static int debug_print = 0;

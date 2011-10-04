@@ -24,7 +24,7 @@
 #include <kernel/drivers.h>
 #include <hal.h>
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <video/screen.h>
 
 #include <event.h>

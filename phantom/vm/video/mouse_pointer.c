@@ -11,7 +11,7 @@
 **/
 
 #include <stdlib.h>
-#include <drv_video_screen.h>
+#include <video/bitmap.h>
 #include <video/screen.h>
 #include <phantom_libc.h>
 

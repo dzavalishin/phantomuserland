@@ -10,12 +10,14 @@
 **/
 
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 //#include <video.h>
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
 //#include <spinlock.h>
+
+#include <video/internal.h>
 
 #include "win_local.h"
 

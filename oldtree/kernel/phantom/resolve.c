@@ -16,7 +16,7 @@
 #include <kernel/init.h>
 
 #define DEBUG_MSG_PREFIX "dns"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10

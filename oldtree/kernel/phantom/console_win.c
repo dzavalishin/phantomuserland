@@ -15,7 +15,7 @@
 
 
 #define DEBUG_MSG_PREFIX "console"
-#include "debug_ext.h"
+#include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
@@ -28,7 +28,10 @@
 #include <event.h> // get_n_events_in_q()
 
 
-#include <video.h>
+#include <video/window.h>
+#include <video/font.h>
+#include <video/screen.h>
+
 #include "console.h"
 #include "misc.h"
 

@@ -9,7 +9,11 @@
  *
 **/
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
+//#include <video/window.h>
+//#include <video/internal.h>
+#include <video/font.h>
+
 #include <assert.h>
 #include <string.h>
 #include <phantom_libc.h>
@@ -25,7 +29,7 @@ __inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, ch
     return font->font + c * _bpc(font);
 }
 
-static void font_reverse_x(drv_video_font_t *font);
+//static void font_reverse_x(drv_video_font_t *font);
 
 
 // Returns -1 if can't draw, 0 if done

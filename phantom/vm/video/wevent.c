@@ -17,7 +17,9 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include <video.h>
+#include <video/window.h>
+#include <video/internal.h>
+
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>

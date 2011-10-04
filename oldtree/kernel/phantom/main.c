@@ -40,7 +40,7 @@
 #include "vm_map.h"
 
 #include <vm/root.h>
-#include "video.h"
+//#include "video.h"
 #include "misc.h"
 #include <kernel/net.h>
 
