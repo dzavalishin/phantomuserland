@@ -694,13 +694,18 @@ void phantom_v86_run(void *code, size_t size)
         //gdt[VM86_TSS / 8].access &= ~ACC_TSS_BUSY;
 
         hal_enable_preemption();
+
+        asm("CLTS;\n"); // or else we have FP exception
+
         hal_sti();
         return;
     }
 
     hal_cli();
     asm("ljmp %0, $0" : : "i" (VM86_TSS));
+
     phantom_trap_handlers[T_GENERAL_PROTECTION] = saved_trap_handler;
+    asm("CLTS;\n"); // or else we have FP exception
 
     hal_enable_preemption();
     hal_sti();

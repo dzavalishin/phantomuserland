@@ -134,7 +134,7 @@ void switch_to_user_mode()
 }
 #endif
 
-
+#if 0 // use machundep
 void
 phantom_thread_c_starter(void)
 {
@@ -172,6 +172,7 @@ phantom_thread_c_starter(void)
     panic("thread %d returned from t_kill_thread", t->tid );
     asm("hlt");
 }
+#endif
 
 #if 0
 // Do what is required (arch specific) after switching to a new thread

@@ -152,6 +152,7 @@ void switch_to_user_mode()
 }
 
 
+#if 0 // use machundep
 // TODO it seems pretty arch independent. Merge with ia32 and move to general code?
 void
 phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
@@ -187,7 +188,7 @@ phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
     t_kill_thread( t->tid );
     panic("thread %d returned from t_kill_thread", t->tid );
 }
-
+#endif
 
 
 

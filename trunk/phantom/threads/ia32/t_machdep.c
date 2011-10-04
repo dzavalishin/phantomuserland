@@ -52,6 +52,7 @@ void phantom_thread_state_init(phantom_thread_t *t)
     STACK_PUSH(esp,0);// CR2
 
     t->cpu.esp = (int)esp;
+
 /*
 	// God knows why it works just once for importing main thread,
 	// then causes 'no fpu' exception 7 err 0
@@ -123,38 +124,6 @@ void switch_to_user_mode()
                 );
 }
 
-#warning seems to machindep, move to common
-void
-phantom_thread_c_starter(void (*func)(void *), void *arg, phantom_thread_t *t)
-{
-    SET_CURRENT_THREAD(t);
-    // Thread switch locked it befor switching into us, we have to unlock
-    hal_spin_unlock(&schedlock);
-
-#if DEBUG
-    printf("---- !! phantom_thread_c_starter !! ---\n");
-#endif
-    t->cpu_id = GET_CPU_ID();
-
-    // We're first time running here, set arch specific things up
-    // NB!! BEFORE enablings ints!
-    arch_adjust_after_thread_switch(t);;
-
-    hal_sti(); // Make sure new thread is started with interrupts on
-
-#if 0 // usermode loader does it himself
-    if( THREAD_FLAG_USER & t->thread_flags )
-    {
-        //switch_to_user_mode();
-    }
-#endif
-
-
-    func(arg);
-    t_kill_thread( t->tid );
-    panic("thread %d returned from t_kill_thread", t->tid );
-
-}
 
 // Do what is required (arch specific) after switching to a new thread
 void arch_adjust_after_thread_switch(phantom_thread_t *t)
