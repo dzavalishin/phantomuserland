@@ -9,7 +9,7 @@
  *
 **/
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
@@ -17,6 +17,10 @@
 
 #include "win_local.h"
 
+#include <video/window.h>
+#include <video/internal.h>
+#include <video/vops.h>
+#include <video/font.h>
 
 
 

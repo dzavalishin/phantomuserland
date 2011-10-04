@@ -9,7 +9,7 @@
  *
 **/
 
-#include <drv_video_screen.h>
+#include <video/vops.h>
 #include <video/screen.h>
 #include <assert.h>
 #include <sys/types.h>

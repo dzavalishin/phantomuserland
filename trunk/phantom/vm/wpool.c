@@ -9,8 +9,13 @@
  *
 **/
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <video/screen.h>
+
+#include <video/window.h>
+#include <video/internal.h>
+#include <video/vops.h>
+
 
 #include <assert.h>
 #include <kernel/pool.h>
@@ -32,7 +37,7 @@ static void 	do_w_blt( window_t *w );
 static void 	do_w_repaint_all();
 
 
-void init_new_windows()
+void init_new_windows(void)
 {
     wp = create_pool();
     wp->init = do_w_create;

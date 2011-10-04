@@ -1,20 +1,25 @@
-#include <drv_video_screen.h>
-#include <phantom_types.h>
-#include <phantom_libc.h>
-#include <assert.h>
-
-#include <video.h>
-#include <video/rect.h>
-#include <video/zbuf.h>
-//#include <video/screen.h>
-
 /**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
  * Z buffer implementation.
  *
  * Z buffer value 0 is lowest (most far) position. It is supposed to be used by background.
  *
 **/
+
+//#include <drv_video_screen.h>
+#include <phantom_types.h>
+#include <phantom_libc.h>
+#include <assert.h>
+
+//#include <video.h>
+#include <video/rect.h>
+#include <video/zbuf.h>
+#include <video/screen.h>
+
 
 
 /** Z buffer itself. */

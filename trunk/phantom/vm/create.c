@@ -12,17 +12,18 @@
 
 #include <kernel/vm.h>
 
-#include "vm/root.h"
-#include "vm/exec.h"
-#include "vm/object.h"
-#include "vm/object_flags.h"
-#include "vm/alloc.h"
-#include "vm/internal.h"
-#include "vm/internal_da.h"
+#include <vm/root.h>
+#include <vm/exec.h>
+#include <vm/object.h>
+#include <vm/object_flags.h>
+#include <vm/alloc.h>
+#include <vm/internal.h>
+#include <vm/internal_da.h>
 #include "ids/opcode_ids.h"
 
 #include <assert.h>
 
+#include <video/screen.h>
 
 
 /**

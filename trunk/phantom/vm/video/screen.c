@@ -10,7 +10,7 @@
  *
 **/
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <video/screen.h>
 
 // Placeholder for absent drv methods

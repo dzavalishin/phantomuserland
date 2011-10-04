@@ -12,7 +12,7 @@
 
 
 #include <vm/internal_da.h>
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <video/screen.h>
 #include <vm/wrappers.h>
 

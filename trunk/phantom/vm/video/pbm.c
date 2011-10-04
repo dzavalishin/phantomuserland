@@ -10,11 +10,13 @@
  *
 **/
 
-#include "drv_video_screen.h"
-#include "vm/internal_da.h"
-#include "vm/object.h"
+//#include "drv_video_screen.h"
+#include <vm/internal_da.h>
+#include <vm/object.h>
 //#include <stdlib.h>
 #include <phantom_libc.h>
+
+#include <video/bitmap.h>
 
 //static inline int isws(unsigned char c)
 static inline int isws(char c)

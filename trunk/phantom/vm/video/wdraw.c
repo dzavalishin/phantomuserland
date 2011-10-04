@@ -10,8 +10,12 @@
 **/
 
 
-#include <drv_video_screen.h>
-#include <video.h>
+//#include <drv_video_screen.h>
+//#include <video.h>
+
+#include <video/window.h>
+#include <video/internal.h>
+#include <video/vops.h>
 
 #include <assert.h>
 #include <phantom_libc.h>

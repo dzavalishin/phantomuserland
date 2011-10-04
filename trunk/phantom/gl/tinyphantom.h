@@ -3,6 +3,7 @@
 //#include <drv_video_screen.h>
 #include <video/window.h>
 #include <video/internal.h>
+#include <video/vops.h>
 
 typedef struct {
     GLContext *gl_context;

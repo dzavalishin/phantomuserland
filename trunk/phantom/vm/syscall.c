@@ -30,7 +30,10 @@
 
 #include <vm/wrappers.h>
 
-#include <video.h>
+//#include <video.h>
+#include <video/screen.h>
+#include <video/vops.h>
+#include <video/internal.h>
 
 //extern syscall_func_t  pvm_exec_systables[PVM_SYSTABLE_SIZE][32];
 

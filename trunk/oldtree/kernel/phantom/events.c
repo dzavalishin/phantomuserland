@@ -35,10 +35,13 @@
 #include <malloc.h>
 #include <hal.h>
 #include <string.h>
-#include <video.h>
 #include <console.h>
 #include <wtty.h>
 #include <time.h>
+
+#include <video/internal.h>
+#include <video/window.h>
+
 
 void drv_video_window_explode_event(struct ui_event *e);
 int drv_video_window_get_event( drv_video_window_t *w, struct ui_event *e, int wait );
@@ -454,7 +457,7 @@ void event_q_put_global( ui_event_t *ie )
 // Temporarily moved from vm/video/ here
 // -----------------------------------------------------------------
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 
 
 //! Select target window
