@@ -1326,35 +1326,37 @@ static void vmware_video_update(void)
 void vmware_draw_mouse_bp2(void)
 {
     SVGA_WriteReg(SVGA_REG_CURSOR_X, video_driver_vmware_svga.mouse_x );
-    SVGA_WriteReg(SVGA_REG_CURSOR_Y, video_driver_vmware_svga.mouse_y );
+    SVGA_WriteReg(SVGA_REG_CURSOR_Y, get_screen_ysize() - video_driver_vmware_svga.mouse_y );
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_SHOW);
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
 }
 
-#define ALPHA_BITS_RIGHT 1
+#define ALPHA_BITS_RIGHT 0
 
-static void alpha_to_bits_line( u_int32_t *bits, size_t ndwords, rgba_t *pixels, size_t npixels )
+static void alpha_to_bits_line( u_int8_t *bits, size_t noutbytes, rgba_t *pixels, size_t npixels, u_int32_t mask, bool invert )
 {
-    int bitsLeft = 32;
+    int bitsLeft = 8;
     *bits = 0;
-    while( (npixels-- > 0) && (ndwords > 0) )
+    while( (npixels-- > 0) && (noutbytes > 0) )
     {
         if( bitsLeft <= 0 )
         {
             bits++;
             *bits = 0;
-            bitsLeft = 32;
-            ndwords--;
+            bitsLeft = 8;
+            noutbytes--;
         }
 #if ALPHA_BITS_RIGHT
         *bits >>= 1;
 
-        if( pixels->a )
-            *bits |= 0x80000000;
+        //if( pixels->a )
+        if( (!!(*((int*)pixels) & mask)) ^ !!invert )
+            *bits |= 0x80;
 #else
         *bits <<= 1;
 
-        if( pixels->a )
+        //if( pixels->a )
+        if( (!!(*((int*)pixels) & mask)) ^ !!invert )
             *bits |= 1;
 #endif
         pixels++;
@@ -1362,14 +1364,14 @@ static void alpha_to_bits_line( u_int32_t *bits, size_t ndwords, rgba_t *pixels,
     }
 }
 
-static void dump_bits( u_int32_t *bits, size_t ndwords )
+static void dump_bits( u_int8_t *bits, size_t noutbytes )
 {
-    while( ndwords-- > 0 )
+    while( noutbytes-- > 0 )
     {
-        int bitsLeft = 32;
+        int bitsLeft = 8;
         while( bitsLeft-- > 0 )
         {
-            putchar( (*bits & 0x80000000) ? '*' : '.' );
+            putchar( (*bits & 0x80) ? '*' : '.' );
             *bits <<= 1;
         }
         bits++;
@@ -1380,28 +1382,38 @@ static void dump_bits( u_int32_t *bits, size_t ndwords )
 }
 
 
-static void alpha_to_bits( u_int32_t *bits, size_t ndwords, rgba_t *pixels, int xsize, int ysize )
+static void alpha_to_bits( u_int8_t *bits, size_t noutbytes, drv_video_bitmap_t *bmp, u_int32_t mask, bool invert )
 {
+    rgba_t *pixels = bmp->pixel;
+    int xsize = bmp->xsize;
+    int ysize = bmp->ysize;
+
     assert(xsize > 0);
     //assert(ysize > 0);
 
     int npixels = xsize * ysize;
-    size_t skip_dwords = ((xsize-1)/32)+1;
+    size_t skip_bytes = ((xsize-1)/8)+1;
 
-    //SHOW_FLOW( 0, "%d x %d, skip %d, npix %d", xsize, ysize, skip_dwords, npixels );
+    int ycnt = 0;
 
-    while( ysize-- > 0 )
+    //SHOW_FLOW( 0, "%d x %d, skip %d, npix %d", xsize, ysize, skip_bytes, npixels );
+
+    while( ycnt < ysize )
     {
-        alpha_to_bits_line( bits, skip_dwords, pixels, xsize );
-        //dump_bits( bits, skip_dwords );
-        bits += skip_dwords;
+        u_int8_t *bp = bits + (skip_bytes * (ysize-ycnt-1)); // flip y
+
+        alpha_to_bits_line( bp, skip_bytes, pixels, xsize, mask, invert );
+        //dump_bits( bp, skip_bytes );
         pixels += xsize;
         npixels -= xsize;
-        ndwords -= skip_dwords;
+        noutbytes -= skip_bytes;
+        //bits += skip_bytes;
+        ycnt++;
     }
 }
 
 
+#define CUR32 0
 
 void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
 {
@@ -1419,9 +1431,11 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
     cursorInfo.width = cursor->xsize;
     cursorInfo.height = cursor->ysize;
     cursorInfo.andMaskDepth = 1;   // ignored in qemu, but seems that must be 1
-    //cursorInfo.xorMaskDepth = 32;   // Value must be 1 or equal to BITS_PER_PIXEL
+#if CUR32
+    cursorInfo.xorMaskDepth = 32;   // Value must be 1 or equal to BITS_PER_PIXEL
+#else
     cursorInfo.xorMaskDepth = 1;   // mono is easier
-
+#endif
 
     uint32 andPitch = ((cursorInfo.andMaskDepth * cursorInfo.width + 31) >> 5) << 2;
     uint32 andSize = andPitch * cursorInfo.height;
@@ -1435,8 +1449,19 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
     andMask = (void*) (cmd + 1);
     xorMask = (void*) (andSize + (uint8*) andMask);
 
-    alpha_to_bits( andMask, andSize, cursor->pixel, cursor->xsize, cursor->ysize );
-    alpha_to_bits( xorMask, xorSize, cursor->pixel, cursor->xsize, cursor->ysize );
+    bzero(andMask, andSize);
+    memset(xorMask, 0xFF, xorSize);
+
+    alpha_to_bits( andMask, andSize, cursor, 0xFF000000, 1 );
+    alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
+
+#if CUR32
+    bitmap2bitmap_yflip(
+                   xorMask, cursor->xsize, cursor->ysize, 0, 0,
+                   cursor->pixel, cursor->xsize, cursor->ysize, 0, 0,
+                   cursor->xsize, cursor->ysize
+                  );
+#endif
 
     SVGA_FIFOCommitAll();
 }
