@@ -35,7 +35,9 @@
 #include <compat/kolibri.h>
 #include <video/color.h>
 #include <video/screen.h>
-#include <video.h>
+#include <video/window.h>
+#include <video/font.h>
+#include <video/vops.h>
 
 #include "../svn_version.h"
 

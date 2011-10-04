@@ -17,6 +17,7 @@
 
 #include <kernel/ia32/cpu.h>
 #include <kernel/init.h>
+#include <kernel/boot.h>
 
 #include <string.h>
 #include <phantom_libc.h>
@@ -227,15 +228,21 @@ int detect_cpu(int curr_cpu)
 	//dprintf("CPU %d: features: %s\n", curr_cpu, cpu->arch.feature_string);
 	printf("CPU %d: features: %s\n", curr_cpu, cpu->arch.feature_string);
 
+        if(boot_cpu.arch.feature[FEATURE_COMMON] & X86_APIC)
+            ARCH_SET_FLAG(ARCH_IA32_APIC);
+
+	if(cpu->arch.feature[FEATURE_COMMON] & X86_SSE2)
+            ARCH_SET_FLAG(ARCH_IA32_SSE2);
+
 	return 0;
 }
 
 
 
 
-
+/*
 int boot_cpu_has_apic(void)
 {
     return boot_cpu.arch.feature[FEATURE_COMMON] & X86_APIC;
 }
-
+*/

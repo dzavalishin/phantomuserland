@@ -22,8 +22,9 @@
 #include <string.h>
 #include <assert.h>
 
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
 #include <video/screen.h>
+#include <video/internal.h>
 
 #include "gcc_replacements.h"
 

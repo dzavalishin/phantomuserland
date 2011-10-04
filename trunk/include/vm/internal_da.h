@@ -16,7 +16,9 @@
 
 #include <vm/object.h>
 #include <vm/exception.h>
-#include <drv_video_screen.h>
+//#include <drv_video_screen.h>
+
+#include <video/window.h>
 
 #include <hal.h>
 #include <errno.h>

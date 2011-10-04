@@ -18,7 +18,8 @@
 #define debug_level_info 10
 
 #include <hal.h>
-#include <video.h>
+#include <video/screen.h>
+#include <video/internal.h>
 
 #include <ia32/phantom_pmap.h>
 

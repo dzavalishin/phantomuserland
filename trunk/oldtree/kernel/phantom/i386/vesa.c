@@ -18,7 +18,7 @@
 #include <phantom_libc.h>
 #include <ia32/pc/vesa.h>
 #include <hal.h>
-#include <video.h>
+//#include <video.h>
 #include <video/screen.h>
 #include "vm86.h"
 

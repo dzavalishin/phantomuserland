@@ -127,31 +127,31 @@ void hal_cpu_reset_real(void) __attribute__((noreturn));
 void phantom_threads_init(void);
 
 
-void phantom_load_gdt(void);
+void phantom_load_gdt(void); // TODO ia32
 
 void arch_debug_console_init(void);
 
-void phantom_init_descriptors(void);
-void phantom_fill_idt(void);
-void phantom_load_idt(void);
+void phantom_init_descriptors(void); // TODO ia32
+void phantom_fill_idt(void); // TODO ia32
+void phantom_load_idt(void); // TODO ia32
 
-void phantom_init_vm86(void);
-void phantom_init_vesa(void);
+void phantom_init_vm86(void); // TODO ia32
+void phantom_init_vesa(void); // TODO ia32
 
-void phantom_init_apic(void);
+void phantom_init_apic(void); // TODO ia32
 
 void phantom_paging_init(void);
 
-int phantom_timer_pit_init(int freq, void (*timer_intr)());
+int phantom_timer_pit_init(int freq, void (*timer_intr)()); // TODO ia32
 
 void init_irq_allocator(void);
 
 void phantom_start_video_driver(void);
 void init_main_event_q(void);
 
-void phantom_trfs_init(void);
+void phantom_trfs_init(void); // TODO INIT_ME?
 
-void phantom_turn_off_pic_scheduler_timer(void);
+void phantom_turn_off_pic_scheduler_timer(void); // TODO ia32
 
 
 void phantom_unix_proc_init(void);
@@ -167,7 +167,7 @@ void usb_setup(void);
 
 void drv_video_init_windows(void);
 
-void init_wins(u_int32_t ip_addr);
+void init_wins(u_int32_t ip_addr); // TODO INIT_ME
 
 
 void arch_init_early(void);

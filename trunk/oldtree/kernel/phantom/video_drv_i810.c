@@ -28,8 +28,9 @@
 #include <kernel/bus/pci.h>
 #include <phantom_libc.h>
 
-#include <video.h>
+//#include <video.h>
 #include <video/screen.h>
+#include <video/internal.h>
 
 static int i810_video_probe();
 static int i810_video_start();

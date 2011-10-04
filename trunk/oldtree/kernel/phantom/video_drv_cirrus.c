@@ -15,8 +15,9 @@
 static int debug_level_flow = 1;
 
 #include <hal.h>
-#include <video.h>
+//#include <video.h>
 #include <video/screen.h>
+#include <video/internal.h>
 
 #include <ia32/phantom_pmap.h>
 

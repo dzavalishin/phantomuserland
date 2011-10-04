@@ -26,6 +26,7 @@
 #include <hal.h>
 #include <phantom_libc.h>
 #include <kernel/init.h>
+#include <kernel/boot.h>
 #include <kernel/trap.h>
 
 // scheduler_time_interrupt
@@ -55,7 +56,8 @@ volatile ApicLocalUnit * apic_local_unit;
 // This one is called on CPU 0 (BSP)
 void phantom_init_apic(void)
 {
-    if(!boot_cpu_has_apic())
+    //if(!boot_cpu_has_apic())
+    if(!ARCH_HAS_FLAG(ARCH_IA32_APIC))
     {
         printf("Boot CPU has no APIC?!\n");
         return;

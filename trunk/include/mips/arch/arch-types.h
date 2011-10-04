@@ -30,7 +30,7 @@ typedef u_int32_t       	linaddr_t;
 
 
 #ifndef _STDINT_H
-typedef	u_int32_t		    uintptr_t;
+//typedef	u_int32_t		    uintptr_t;
 typedef	int32_t			    ptrdiff_t;
 typedef u_int32_t 		    register_t;
 #endif
@@ -83,4 +83,12 @@ typedef        natural_t        vm_offset_t;
  */
 typedef        natural_t        vm_size_t;
 
+
+/* Integer types capable of holding object pointers */
+
+#ifndef __intptr_t_defined
+#define __intptr_t_defined
+typedef int intptr_t;
+typedef unsigned int uintptr_t;
+#endif
 
