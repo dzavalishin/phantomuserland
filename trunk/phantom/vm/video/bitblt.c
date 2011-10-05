@@ -73,6 +73,15 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
  *
  **/
 
+#if 1
+
+void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
+{
+    drv_video_bitblt_part(from, xsize, ysize, 0, 0, xpos, ypos, xsize, ysize, reverse, zpos);
+}
+
+#else
+
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
 {
     //printf("bit blt pos (%d,%d) size (%d,%d)\n", xpos, ypos, xsize, ysize);
@@ -178,7 +187,135 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
     //drv_video_mouse_on();
 }
 
+#endif
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Put part of picture to screen
+void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
+{
+    assert(video_drv->screen != 0);
+
+    int dst_xafter = dst_xpos+xsize;
+    int dst_yafter = dst_ypos+ysize;
+
+    if( dst_xafter >= video_drv->xsize )
+    {
+        xsize -= (dst_xafter - video_drv->xsize);
+        //dst_xafter = video_drv->xsize;
+    }
+
+    if( dst_yafter >= video_drv->ysize )
+    {
+        ysize -= (dst_yafter - video_drv->ysize);
+        //dst_yafter = video_drv->ysize;
+    }
+
+    if( dst_xpos < 0 )
+    {
+        xsize -= (-dst_xpos);
+        dst_xpos = 0;
+    }
+
+    if( dst_ypos < 0 )
+    {
+        ysize -= (-dst_ypos);
+        dst_ypos = 0;
+    }
+
+
+    int src_xafter = src_xpos+xsize;
+    int src_yafter = src_ypos+ysize;
+
+
+    if( src_xafter >= src_xsize )
+    {
+        xsize -= (src_xafter - src_xsize);
+        //src_xafter = src_xsize;
+    }
+
+    if( src_yafter >= src_ysize )
+    {
+        ysize -= (src_yafter - src_ysize);
+        //src_yafter = src_ysize;
+    }
+
+    if( src_xpos < 0 )
+    {
+        xsize -= (-src_xpos);
+        src_xpos = 0;
+    }
+
+    if( src_ypos < 0 )
+    {
+        ysize -= (-src_ypos);
+        src_ypos = 0;
+    }
+
+    if( (xsize < 0) || (ysize < 0 ) )
+        return; // totally clipped off
+
+    if( src_ypos > 0 )
+        from += src_xsize*src_ypos; // Just skip some lines
+
+
+    // we possibly changed xsize - recalc both
+    dst_xafter = dst_xpos+xsize;
+    dst_yafter = dst_ypos+ysize;
+    src_xafter = src_xpos+xsize;
+    src_yafter = src_ypos+ysize;
+
+
+    int wline = 0; // we skipped ypos lines already
+    int sline = dst_ypos;
+
+
+    //printf("xlen = %d, sline = %d dst_yafter=%d \n", xlen, sline, dst_yafter );
+
+    if(reverse)
+    {
+
+        for( ; sline < dst_yafter; sline++, wline++ )
+        {
+            // Screen start pos in line
+            char *s_start = DRV_VIDEO_REVERSE_LINESTART(sline) + dst_xpos*bit_mover_byte_step;
+            // Window start pos in line
+            const struct rgba_t *w_start = from + ((wline*src_xsize) + src_xpos);
+
+            zbuf_t *zb = zbuf + ( (video_drv->xsize * ((video_drv->ysize-1) - sline)) + dst_xpos);
+            // ZBUF_TOP is a special value for mouse painting. XXX hack!
+            if(zpos == ZBUF_TOP) bit_mover_to_screen( (void *)s_start, w_start, xsize );
+            else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xsize, zpos );
+        }
+    }
+    else
+    {
+        for( ; sline < dst_yafter; sline++, wline++ )
+        {
+            // Screen start pos in line
+            char *s_start = DRV_VIDEO_FORWARD_LINESTART(sline) + dst_xpos*bit_mover_byte_step;
+            // Window start pos in line
+            const struct rgba_t *w_start = from + ((wline*src_xsize) + src_xpos);
+
+            //zbuf_t *zb = zbuf + ((wline*xsize) + xshift);
+            zbuf_t *zb = zbuf + ( (video_drv->xsize * sline) + dst_xpos);
+            // ZBUF_TOP is a special value for mouse painting. XXX hack!
+            if(zpos == ZBUF_TOP) bit_mover_to_screen( (void *)s_start, w_start, xsize );
+            else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xsize, zpos );
+        }
+    }
+}
 
 
 
