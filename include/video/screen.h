@@ -66,6 +66,16 @@ struct drv_video_screen_t
     void        (*mouse_disable)(void);
     void        (*mouse_enable)(void);
 
+    // Acceleration
+
+    // Screen to screen copy
+    void 	(*copy) (int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize );
+
+    // Screen rect clear
+    void 	(*clear) (int xpos, int ypos, int xsize, int ysize );
+
+    void 	(*bitblt_part) (const rgba_t *from, int src_stride, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos);
+
 };
 
 //
@@ -94,6 +104,9 @@ void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize
 // RGB videospace access workers
 void drv_video_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos);
+
+//void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos);
+void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos);
 
 
 
