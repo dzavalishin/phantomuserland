@@ -81,6 +81,8 @@ struct kolibri_process_state
     window_handle_t     win;
     net_timer_event 	win_update_timer;
     u_int32_t           win_update_prevent;
+    u_int32_t           win_alpha_scale;
+    u_int8_t            *win_user_alpha;
 
     pool_t              *buttons;
     u_int32_t           pressed_button_id;
