@@ -201,6 +201,10 @@ errno_t InitializeFullAcpi(void);
 
 void phantom_shutdown(int flags);
 
+#ifdef ARCH_ia32
+void ia32_intel_poweroff(void);
+#endif
+
 
 #endif // INIT_H
 

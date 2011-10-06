@@ -502,7 +502,12 @@ void phantom_shutdown(int flags)
     if(flags & SHUTDOWN_FLAG_REBOOT)
         acpi_reboot();
     else
+#ifdef ARCH_ia32
+    {
         acpi_powerdown();
+        ia32_intel_poweroff(); // if failed - try hack
+    }
+#endif
 
 
     hal_sleep_msec(2000);
