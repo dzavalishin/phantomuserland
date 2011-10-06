@@ -42,6 +42,8 @@
 #include "../svn_version.h"
 
 
+static void kolibri_reload_window_alpha(struct kolibri_process_state *ks);
+
 static void request_update_timer( struct kolibri_process_state *ks, int msec );
 static void cancel_update_timer( struct kolibri_process_state *ks );
 
@@ -131,11 +133,14 @@ static struct kolibri_process_state * get_kolibri_state(uuprocess_t *u)
 
     ks->buttons = create_pool();
     ks->buttons->flag_autoclean = 1;
-    ks->buttons->flag_autodestroy = 0;
+    ks->buttons->flag_autodestroy = 1;
 
     ks->event_mask = 0x7;
 
     ks->key_input_scancodes = 0;
+
+    ks->win_alpha_scale = 0;
+    ks->win_user_alpha = 0;
 
     //ks->win_update_timer
     request_update_timer( ks, 1000 ); // to make sure we can call cancel... on destroying kolibri state
@@ -1407,17 +1412,18 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 break;
             if( st->ebx == 0 )
             {
-                int sz = ks->win->xsize * ks->win->ysize;
-                char *alpha_map = u_ptr( st->ecx, sz );
-                SHOW_ERROR( 0, "requested alpha map %p", alpha_map );
+                int sz = (ks->win->xsize >> ks->win_alpha_scale) * (ks->win->ysize >> ks->win_alpha_scale);
+                ks->win_user_alpha = u_ptr( st->ecx, sz );
+                SHOW_ERROR( 0, "requested alpha map %p", ks->win_user_alpha );
                 break;
             }
             if( st->ebx == 1 )
             {
-                int scale = st->ecx;
-                SHOW_ERROR( 0, "requested scale %d", scale );
+                ks->win_alpha_scale = st->ecx;
+                SHOW_ERROR( 0, "requested scale %d", ks->win_alpha_scale );
                 break;
             }
+            kolibri_reload_window_alpha(ks);
         }
         break;
 
@@ -1779,6 +1785,43 @@ static void kolibri_send_event( tid_t tid, u_int32_t event_bits )
 
 
 
+static void kolibri_reload_window_alpha(struct kolibri_process_state *ks)
+{
+    int sz = (ks->win->xsize >> ks->win_alpha_scale) * (ks->win->ysize >> ks->win_alpha_scale);
+    int npixel = ks->win->xsize * ks->win->ysize;
+    rgba_t *pp = ks->win->pixel;
+
+    int scaled_sz = sz << ks->win_alpha_scale*2;
+
+    if( scaled_sz != npixel )
+    {
+        SHOW_ERROR( 1, "scale %d, npixel %d, sclaed sz %d, sz %d - window size does not match scale", ks->win_alpha_scale, npixel, scaled_sz, sz );
+        return;
+    }
+
+    int alpha_map_stride = ks->win->xsize >> ks->win_alpha_scale;
+
+    if( ks->win_user_alpha == 0 )
+    {
+        while(npixel-- > 0)
+        {
+            pp->a = 0xFF;
+            pp++;
+        }
+        return;
+    }
+
+    int x, y;
+    for( y = 0; y < ks->win->ysize; y++ )
+    {
+        for( x = 0; x < ks->win->xsize; x++ )
+        {
+            u_int8_t alpha_byte = ks->win_user_alpha[ (x >> ks->win_alpha_scale) + (ks->win->ysize-y-1) * alpha_map_stride ];
+            pp->a = alpha_byte ? 0xFF : 0;
+            pp++;
+        }
+    }
+}
 
 
 
