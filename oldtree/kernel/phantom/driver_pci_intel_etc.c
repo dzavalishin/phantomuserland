@@ -216,4 +216,37 @@ static errno_t check_piix4_isa_sanity(int port)
     return 0;
 }
 
+/*
+ Intel chipset power off
+
+        xor     cx, cx
+        dec     cx         ; = 0xFFFF
+        mov     dx, 0x404
+        in      ax, dx
+        cmp     ax, cx     ;примитивно понюхаем есть ли сей порт вообще в наличии?
+         jne    @a         ;если AX <> 0xFFFF - значит существует, будем выключать
+        mov     dx, 0x4004
+        in      ax, dx
+        cmp     ax, cx     ;тогда, может этот есть (т.е. 0x4004)?
+         je     @q
+@a:
+        mov     ah, 111100b
+        out     dx, ax     ; actual power off
+@q:
+
+*/
+
+#ifdef ARCH_ia32
+void ia32_intel_poweroff(void)
+{
+    u_int32_t ov = 0x3C; // 111100b
+    u_int32_t v;
+    if( inw( 0x404 ) != 0xFFFF )
+        outw( 0x404, ov );
+    else if( inw( 0x4004 ) != 0xFFFF )
+        outw( 0x4004, ov );
+
+}
+#endif // ARCH_ia32
+
 #endif // HAVE_PCI
