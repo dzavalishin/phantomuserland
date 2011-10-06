@@ -40,6 +40,8 @@
 
 static int DEBUG = 0;
 
+#define INTERRUPT_SEM 1
+
 // temp!
 #define INT_RESCHEDULE 1
 
@@ -56,8 +58,9 @@ static void rtl8139_stop(rtl8139 *rtl);
 int rtl8139_init(rtl8139 *rtl);
 
 static void rtl8139_int(void* data);
+#if !INTERRUPT_SEM
 static void rtl8139_softint(void* data);
-
+#endif
 
 
 
@@ -430,7 +433,7 @@ int rtl8139_init(rtl8139 *rtl)
         printf( DEV_NAME "unable to allocate irq %d\n", rtl->irq );
         goto err1;
     }
-
+#if !INTERRUPT_SEM
     rtl->softirq = hal_alloc_softirq();
     if( rtl->softirq < 0 )
     {
@@ -439,7 +442,7 @@ int rtl8139_init(rtl8139 *rtl)
     }
 
     hal_set_softirq_handler( rtl->softirq, &rtl8139_softint, rtl );
-
+#endif
     /* create a rx and tx buf
     rtl->rxbuf_region = vm_create_anonymous_region(vm_get_kernel_aspace_id(), "rtl8139_rxbuf", (void **)&rtl->rxbuf,
                                                    REGION_ADDR_ANY_ADDRESS, 64*1024 + 16, REGION_WIRING_WIRED_CONTIG, LOCK_KERNEL|LOCK_RW);
@@ -572,7 +575,9 @@ int rtl8139_init(rtl8139 *rtl)
 
     return 0;
 
+#if !INTERRUPT_SEM
 err2:
+#endif
     hal_irq_free( rtl->irq, &rtl8139_int, rtl );
 
 err1:
@@ -812,8 +817,12 @@ static int rtl8139_rxint(rtl8139 *rtl, u_int16_t int_status)
         //hal_sem_release_etc(rtl->rx_sem, 1, SEM_FLAG_NO_RESCHED);
         //hal_sem_release(&rtl->rx_sem);
         //rc = INT_RESCHEDULE;
+#if INTERRUPT_SEM
+        hal_sem_release(&rtl->rx_sem);
+#else
         rtl->rx_rq++;
         hal_request_softirq( rtl->softirq );
+#endif
     }
 
     return rc;
@@ -846,13 +855,19 @@ static int rtl8139_txint(rtl8139 *rtl, u_int16_t int_status)
         //hal_sem_release_etc(rtl->tx_sem, 1, SEM_FLAG_NO_RESCHED);
         //hal_sem_release(&rtl->tx_sem);
         //rc = INT_RESCHEDULE;
+
+#if INTERRUPT_SEM
+        hal_sem_release(&rtl->tx_sem);
+#else
         rtl->tx_rq++;
         hal_request_softirq( rtl->softirq );
+#endif
     }
 
     return rc;
 }
 
+#if !INTERRUPT_SEM
 static void rtl8139_softint(void* data)
 {
     rtl8139 *rtl = (rtl8139 *)data;
@@ -873,8 +888,8 @@ static void rtl8139_softint(void* data)
         //rc = INT_RESCHEDULE;
         rtl->tx_rq--;
     }
-
 }
+#endif // !INTERRUPT_SEM
 
 static void rtl8139_int(void* data)
 {
