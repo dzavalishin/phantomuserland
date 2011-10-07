@@ -32,6 +32,9 @@
 #ifndef _SVGA_REG_H_
 #define _SVGA_REG_H_
 
+#include <shorttypes.h>
+#include <sys/cdefs.h>
+
 /*
  * PCI device IDs.
  */
@@ -271,14 +274,14 @@ typedef
 struct SVGAGuestMemDescriptor {
    uint32 ppn;
    uint32 numPages;
-} PACKED
+} __packed
 SVGAGuestMemDescriptor;
 
 typedef
 struct SVGAGuestPtr {
    uint32 gmrId;
    uint32 offset;
-} PACKED
+} __packed
 SVGAGuestPtr;
 
 
@@ -313,7 +316,7 @@ struct SVGAGMRImageFormat {
 
       uint32 value;
    };
-} PACKED
+} __packed
 SVGAGMRImageFormat;
 
 /*
@@ -336,7 +339,7 @@ struct SVGAColorBGRX {
 
       uint32 value;
    };
-} PACKED
+} __packed
 SVGAColorBGRX;
 
 
@@ -359,14 +362,14 @@ struct SVGASignedRect {
    int32  top;
    int32  right;
    int32  bottom;
-} PACKED
+} __packed
 SVGASignedRect;
 
 typedef
 struct SVGASignedPoint {
    int32  x;
    int32  y;
-} PACKED
+} __packed
 SVGASignedPoint;
 
 
@@ -379,12 +382,24 @@ SVGASignedPoint;
  */
 
 #define SVGA_CAP_NONE               0x00000000
+#define SVGA_CAP_RECT_FILL          0x00000001
 #define SVGA_CAP_RECT_COPY          0x00000002
+
+#define SVGA_CAP_RECT_PAT_FILL		(1 << 2)
+#define SVGA_CAP_LEGACY_OFFSCREEN	(1 << 3)
+#define SVGA_CAP_RASTER_OP		(1 << 4)
+
 #define SVGA_CAP_CURSOR             0x00000020
 #define SVGA_CAP_CURSOR_BYPASS      0x00000040   // Legacy (Use Cursor Bypass 3 instead)
 #define SVGA_CAP_CURSOR_BYPASS_2    0x00000080   // Legacy (Use Cursor Bypass 3 instead)
 #define SVGA_CAP_8BIT_EMULATION     0x00000100
 #define SVGA_CAP_ALPHA_CURSOR       0x00000200
+
+#define SVGA_CAP_GLYPH			(1 << 10)
+#define SVGA_CAP_GLYPH_CLIPPING		(1 << 11)
+#define SVGA_CAP_OFFSCREEN_1		(1 << 12)
+#define SVGA_CAP_ALPHA_BLEND		(1 << 13)
+
 #define SVGA_CAP_3D                 0x00004000
 #define SVGA_CAP_EXTENDED_FIFO      0x00008000
 #define SVGA_CAP_MULTIMON           0x00010000   // Legacy multi-monitor support
@@ -854,7 +869,7 @@ struct SVGAScreenObject {
       int32 x;
       int32 y;
    } root;              // Only used if SVGA_SCREEN_HAS_ROOT is set.
-} PACKED
+} __packed
 SVGAScreenObject;
 
 
@@ -932,7 +947,7 @@ struct {
    uint32 y;
    uint32 width;
    uint32 height;
-} PACKED
+} __packed
 SVGAFifoCmdUpdate;
 
 
@@ -954,7 +969,7 @@ struct {
    uint32 destY;
    uint32 width;
    uint32 height;
-} PACKED
+} __packed
 SVGAFifoCmdRectCopy;
 
 
@@ -984,7 +999,7 @@ struct {
     * Followed by scanline data for AND mask, then XOR mask.
     * Each scanline is padded to a 32-bit boundary.
    */
-} PACKED
+} __packed
 SVGAFifoCmdDefineCursor;
 
 
@@ -1009,7 +1024,7 @@ struct {
    uint32 width;
    uint32 height;
    /* Followed by scanline data */
-} PACKED
+} __packed
 SVGAFifoCmdDefineAlphaCursor;
 
 
@@ -1032,7 +1047,7 @@ struct {
    uint32 width;
    uint32 height;
    uint32 reason;
-} PACKED
+} __packed
 SVGAFifoCmdUpdateVerbose;
 
 
@@ -1059,7 +1074,7 @@ struct {
    uint32 width;
    uint32 height;
    uint32 rop;       // Must be SVGA_ROP_COPY
-} PACKED
+} __packed
 SVGAFifoCmdFrontRopFill;
 
 
@@ -1081,7 +1096,7 @@ SVGAFifoCmdFrontRopFill;
 typedef
 struct {
    uint32 fence;
-} PACKED
+} __packed
 SVGAFifoCmdFence;
 
 
@@ -1101,7 +1116,7 @@ struct {
    uint32 nsid;
    uint32 size;
    /* followed by 'size' bytes of data */
-} PACKED
+} __packed
 SVGAFifoCmdEscape;
 
 
@@ -1134,7 +1149,7 @@ SVGAFifoCmdEscape;
 typedef
 struct {
    SVGAScreenObject screen;   // Variable-length according to version
-} PACKED
+} __packed
 SVGAFifoCmdDefineScreen;
 
 
@@ -1151,7 +1166,7 @@ SVGAFifoCmdDefineScreen;
 typedef
 struct {
    uint32 screenId;
-} PACKED
+} __packed
 SVGAFifoCmdDestroyScreen;
 
 
@@ -1207,7 +1222,7 @@ struct {
    SVGAGuestPtr        ptr;
    uint32              bytesPerLine;
    SVGAGMRImageFormat  format;
-} PACKED
+} __packed
 SVGAFifoCmdDefineGMRFB;
 
 
@@ -1245,7 +1260,7 @@ struct {
    SVGASignedPoint  srcOrigin;
    SVGASignedRect   destRect;
    uint32           destScreenId;
-} PACKED
+} __packed
 SVGAFifoCmdBlitGMRFBToScreen;
 
 
@@ -1294,7 +1309,7 @@ struct {
    SVGASignedPoint  destOrigin;
    SVGASignedRect   srcRect;
    uint32           srcScreenId;
-} PACKED
+} __packed
 SVGAFifoCmdBlitScreenToGMRFB;
 
 
@@ -1328,7 +1343,7 @@ SVGAFifoCmdBlitScreenToGMRFB;
 typedef
 struct {
    SVGAColorBGRX  color;
-} PACKED
+} __packed
 SVGAFifoCmdAnnotationFill;
 
 
@@ -1362,7 +1377,7 @@ typedef
 struct {
    SVGASignedPoint  srcOrigin;
    uint32           srcScreenId;
-} PACKED
+} __packed
 SVGAFifoCmdAnnotationCopy;
 
 #endif
