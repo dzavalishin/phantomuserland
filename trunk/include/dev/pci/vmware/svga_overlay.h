@@ -73,14 +73,14 @@ struct SVGAEscapeVideoSetRegs {
       uint32 registerId;
       uint32 value;
    } items[1];
-} PACKED
+} __packed
 SVGAEscapeVideoSetRegs;
 
 typedef
 struct SVGAEscapeVideoFlush {
    uint32 cmdType;
    uint32 streamId;
-} PACKED
+} __packed
 SVGAEscapeVideoFlush;
 
 
@@ -92,13 +92,13 @@ typedef
 struct {
    uint32 command;
    uint32 overlay;
-} PACKED
+} __packed
 SVGAFifoEscapeCmdVideoBase;
 
 typedef
 struct {
    SVGAFifoEscapeCmdVideoBase videoCmd;
-} PACKED
+} __packed
 SVGAFifoEscapeCmdVideoFlush;
 
 typedef
@@ -108,7 +108,7 @@ struct {
       uint32 regId;
       uint32 value;
    } items[1];
-} PACKED
+} __packed
 SVGAFifoEscapeCmdVideoSetRegs;
 
 typedef
@@ -118,7 +118,7 @@ struct {
       uint32 regId;
       uint32 value;
    } items[SVGA_VIDEO_NUM_REGS];
-} PACKED
+} __packed
 SVGAFifoEscapeCmdVideoSetAllRegs;
 
 
@@ -198,10 +198,10 @@ VMwareVideoGetAttributes(const SVGAOverlayFormat format,    // IN
        break;
 
     default:
-       return FALSE;
+       return 0;
     }
 
-    return TRUE;
+    return 1;
 }
 
 #endif // _SVGA_OVERLAY_H_
