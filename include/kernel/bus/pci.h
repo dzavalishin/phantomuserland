@@ -52,10 +52,15 @@ void phantom_pci_write(int bus, int dev, int func, int reg, u_int32_t v, int byt
 
 int phantom_pci_probe(int bus, int dev, int func, pci_cfg_t *cfg);
 
+void phantom_pci_enable(pci_cfg_t *cfg, int onoff);
+
 
 char *get_pci_vendor(int vid);
 char *get_pci_device(int vid, int did);
 char *get_pci_class(u_int8_t base, u_int8_t sub_class);
+
+
+#define PCI_CONFIG_COMMAND 4
 
 
 #endif

@@ -75,7 +75,7 @@ errno_t get_stats_record( int id, struct kernel_stats *out );
 #define     STAT_skip5                              28
 #define     STAT_skip6                              29
 #define     STAT_skip7                              30
-#define     STAT_skip8                              31
+#define     STAT_CNT_THREAD_IDLE			31
 
 
 #define     DEFERRED_REFDEC_RUNS                    32
