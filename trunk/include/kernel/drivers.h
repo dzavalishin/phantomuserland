@@ -97,6 +97,7 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage );
 
 phantom_device_t * driver_intel_810_pci_probe( pci_cfg_t *pci, int stage );
 
+phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage );
 
 // ---------------------------------------------------------------
 //                               Others
