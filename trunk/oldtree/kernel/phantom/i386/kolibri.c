@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "Kolibri"
 #include <debug_ext.h>
-#define debug_level_flow 9
+#define debug_level_flow 11
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -20,15 +20,17 @@
 #include <thread_private.h>
 
 #include <kernel/trap.h>
-#include <ia32/proc_reg.h>
-
+#include <kernel/init.h>
 #include <kernel/libkern.h>
 
+#include <ia32/proc_reg.h>
+
+
+#include <kernel/unix.h>
 #include <unix/uuprocess.h>
 #include <unix/uufile.h>
 #include <kunix.h>
 
-#include <kernel/unix.h>
 #include <time.h>
 #include <fcntl.h>
 
@@ -310,6 +312,8 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
     (void) u;
     (void) ks;
 
+    //errno_t rc;
+
     //int dummy = 0;
 
     switch(st->ebx)
@@ -337,6 +341,19 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
     case 9: // halt/reboot
         // ecx 2 = turn off, 3 - reboot
         // st->eax = 0; // ok
+        switch( st->ecx )
+        {
+        case 2:
+            phantom_shutdown(0);
+            break;
+        case 3:
+            phantom_shutdown(SHUTDOWN_FLAG_REBOOT);
+            break;
+        }
+
+        //st->eax = rc ? -1 : 0;
+        st->eax = -1; // returned? error.
+
         break;
 
     case 13: // get version
@@ -627,6 +644,42 @@ static inline color_t i2color( u_int32_t ic )
 
 
 
+
+struct checkb
+{
+    kolibri_state_t *ks;
+    int x;
+    int y;
+    int mouseb;
+};
+
+
+static void paint_button(window_handle_t win, struct kolibri_button *cb)
+{
+    drv_video_window_fill_rect( win, cb->color, cb->r );
+
+    if(!cb->flag_nopaint)
+    {
+        bitmap2bitmap_yflip(
+                            win->pixel, win->xsize, win->ysize, cb->r.x, cb->r.y,
+                            cb->pixels, cb->r.xsize, cb->r.ysize, 0, 0, cb->r.xsize, cb->r.ysize );
+    }
+
+    if(!cb->flag_noborder)
+    {
+        if( cb->mouse_in_bits & 1 )
+            drv_video_window_draw_rect( win, COLOR_BLACK, cb->r );
+    }
+}
+
+static void paint_changed_button(window_handle_t win, struct kolibri_button *cb)
+{
+    if( (cb->mouse_in_bits & 1) == ( (cb->mouse_in_bits>>1) & 1 ) )
+        return;
+
+    paint_button( win, cb );
+}
+
 static errno_t kolibri_kill_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     struct kolibri_button *cb = el;
@@ -639,13 +692,32 @@ static errno_t kolibri_kill_button(pool_t *pool, void *el, pool_handle_t handle,
     return 0;
 }
 
-struct checkb
+static errno_t do_kolibri_paint_changed_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
-    kolibri_state_t *ks;
-    int x;
-    int y;
-    int mouseb;
-};
+    (void) pool;
+    (void) handle;
+
+    struct kolibri_button *cb = el;
+    struct checkb *env = arg;
+
+    paint_changed_button( env->ks->win, cb);
+    return 0;
+}
+
+static void kolibri_paint_changed_buttons(kolibri_state_t *ks)
+{
+    struct checkb env;
+
+    //SHOW_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
+
+    env.x = -1;
+    env.y = -1;
+    env.ks = ks;
+    env.mouseb = 0;
+
+    pool_foreach( ks->buttons, do_kolibri_paint_changed_button, &env );
+}
+
 
 static errno_t do_kolibri_check_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
@@ -655,11 +727,19 @@ static errno_t do_kolibri_check_button(pool_t *pool, void *el, pool_handle_t han
     struct kolibri_button *cb = el;
     struct checkb *env = arg;
 
+    cb->mouse_in_bits <<= 1;
+
     if( point_in_rect( env->x, env->y, &cb->r ) )
     {
-        env->ks->pressed_button_id = cb->id;
-        env->ks->pressed_button_mouseb = env->mouseb;
-        kolibri_send_event( get_current_tid(), EV_BUTTON );
+        SHOW_FLOW( 1, "button @ %d.%d in range id %x", env->x, env->y, cb->id );
+        cb->mouse_in_bits |= 1;
+
+        if(env->mouseb)
+        {
+            env->ks->pressed_button_id = cb->id;
+            env->ks->pressed_button_mouseb = env->mouseb;
+            kolibri_send_event( get_current_tid(), EV_BUTTON );
+        }
     }
 
     return 0;
@@ -739,6 +819,8 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             ks->win = drv_video_window_create(
                                               xsize, ysize,
                                               xpos, ypos, fill, "Kolibri" );
+
+            ks->win->eventDeliverSema = &ks->event;
 
             drv_video_window_update( ks->win );
             kolibri_send_event( get_current_tid(), EV_REDRAW );
@@ -972,9 +1054,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             int npixels = r.xsize * r.ysize;
 
-            color_t c = i2color( st->esi );
 
-            drv_video_window_fill_rect( ks->win, c, r );
 
             pool_handle_t bh = pool_create_el( ks->buttons, calloc( 1, sizeof(struct kolibri_button) ) );
             struct kolibri_button *cb = pool_get_el( ks->buttons, bh );
@@ -990,6 +1070,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             cb->npixels = npixels;
             cb->flag_nopaint = nopaint;
             cb->flag_noborder = noborder;
+            cb->color = i2color( st->esi );
 
             // st->ebx - BGR bitmap ptr
             const struct rgb_t *src = u_ptr( st->ebx, npixels*3 );
@@ -997,14 +1078,15 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             cb->pixels = calloc( sizeof(rgba_t), npixels );
             rgb2rgba_move( cb->pixels, src, npixels );
 
+            drv_video_window_fill_rect( ks->win, cb->color, r );
+
             if(!cb->flag_nopaint)
             {
+
                 bitmap2bitmap_yflip(
                               ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
                               cb->pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
             }
-            // TODO paint button bitmap
-            // TODO process button
 
             pool_release_el( ks->buttons, bh );
             request_update_timer( ks, 50 );
@@ -1175,7 +1257,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             }*/
             hal_sem_zero( &ks->event );
 
-            st->eax = get_event_bits(u,ks); 
+            st->eax = get_event_bits(u,ks);
         }
         break;
 
@@ -1658,7 +1740,7 @@ static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks
     (void) u;
     u_int32_t bits = ks->event_bits;
 
-    SHOW_ERROR( 11, "try read event, ebits %x", bits );
+    SHOW_FLOW( 11, "try read event, ebits %x", bits );
 
     // TODO take ks mutex
 
@@ -1678,6 +1760,9 @@ static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks
             bits |= EV_MOUSE;
             if( ks->e.m.buttons )
                 kolibri_check_button( ks->e.rel_x, ks->e.rel_y, ks, ks->e.m.buttons );
+
+            kolibri_paint_changed_buttons(ks);
+
             break;
         case UI_EVENT_TYPE_KEY:   bits |= EV_KEY;   break;
         }

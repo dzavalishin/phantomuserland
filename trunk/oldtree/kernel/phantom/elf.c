@@ -125,7 +125,7 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
 
     if(kpacked)
     {
-        SHOW_FLOW( 6, "Packed (PKCK) Kolibri exe, uncomp size %d", kpck->unpacked_size );
+        SHOW_FLOW( 6, "Packed (PKCK) Kolibri exe, uncomp size %d flags 0x%x", kpck->unpacked_size, kpck->flags );
         if( kpck->unpacked_size > MAX_COLIBRI_EXE_SIZE )
             return ENOEXEC; // too big?
 

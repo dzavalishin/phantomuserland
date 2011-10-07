@@ -70,6 +70,7 @@ void phantom_set_console_ops( struct console_ops *in_ops )
 }
 
 
+static volatile int console_reenter = 0;
 
 int getchar(void)
 {
@@ -90,9 +91,13 @@ int putchar(int c)
 #if !HAVE_SMP
     glock = global_lock_entry_count[GET_CPU_ID()] == 0;
 #endif
-    if( (!IN_INTERRUPT()) && glock )
-        if(ops->putchar) return ops->putchar(c);
+
+    console_reenter++;
+    if( (!IN_INTERRUPT()) && glock && (console_reenter==1) )
+        if(ops->putchar)
+            ops->putchar(c);
     // No way to handle :(
+    console_reenter--;
 
     return c;
 }
@@ -109,10 +114,14 @@ puts(const char *s)
 
         dmesg_puts(s);
 
-        if(IN_INTERRUPT())
-            return 0;
+        int rc = 0;
 
-        return ops->puts(s);
+        console_reenter++;
+        if( (!IN_INTERRUPT()) && (console_reenter == 1) )
+            rc = ops->puts(s);
+        console_reenter--;
+
+        return rc;
     }
 
     while(*s)

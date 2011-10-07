@@ -509,6 +509,9 @@ static void select_event_target(struct ui_event *e)
 
 static void w_do_deliver_event(window_handle_t w)
 {
+    if(w != 0 && w->eventDeliverSema)
+        hal_sem_release(w->eventDeliverSema);
+
     if(w != 0 && w->inKernelEventProcess)
     {
         struct ui_event e;

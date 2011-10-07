@@ -11,6 +11,14 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+// If 1, VESA will be used if found, even if other driver is found
+// If 0, VESA will fight for itself as usual driver
+// Now using 1, kernel traps if trying to do VM86 too late in boot process
+#define VESA_ENFORCE 1
+
+
+#define VIDEO_PARTIAL_WIN_BLIT 1
+
 #include <video/color.h>
 #include <video/zbuf.h>
 #include <video/bitmap.h>
@@ -129,10 +137,6 @@ void phantom_enforce_video_driver(struct drv_video_screen_t *vd);
 void set_video_driver_bios_vesa_pa( physaddr_t pa, size_t size );
 void set_video_driver_bios_vesa_mode( u_int16_t mode );
 
-// If 1, VESA will be used if found, even if other driver is found
-// If 0, VESA will fight for itself as usual driver
-// Now using 1, kernel traps if trying to do VM86 too late in boot process
-#define VESA_ENFORCE 1
 
 void setTextVideoMode(void); // Using int10
 int setVesaMode( u_int16_t mode ); // Using int10

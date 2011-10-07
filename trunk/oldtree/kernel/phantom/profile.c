@@ -57,7 +57,7 @@ INIT_ME(0,0,profiler_init)
 
 void profiler_register_interrupt_hit( addr_t ip )
 {
-#if 0
+#if 1
     // TODO wrong - loop through all CPUs or do it on percpu (on ia32 == APIC) timer.
     // TODO In fact we must do it on regular timer interrupt - this one costs too much
     int cpu = GET_CPU_ID();
@@ -66,11 +66,15 @@ void profiler_register_interrupt_hit( addr_t ip )
 
     percpu_idle_count[cpu][idle ? 1 : 0]++;
 
-    if( percpu_idle_count[cpu][0] + percpu_idle_count[cpu][1] > 1000 )
+    int sum = percpu_idle_count[cpu][0] + percpu_idle_count[cpu][1];
+
+    if( sum > 100 )
     {
-        int load_percent = percpu_idle_count[cpu][0] * 100 / percpu_idle_count[cpu][1];
+        int load_percent = percpu_idle_count[cpu][0] * 100 / sum;
         percpu_idle_count[cpu][0] = percpu_idle_count[cpu][1] = 0;
         percpu_cpu_load[cpu] = load_percent;
+
+        percpu_idle_count[cpu][0] = percpu_idle_count[cpu][1] = 0;
     }
 #endif
     if(!profiler_inited)

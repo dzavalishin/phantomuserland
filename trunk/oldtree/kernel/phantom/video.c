@@ -15,8 +15,9 @@ static int debug_level_flow = 1;
 
 #include <phantom_libc.h>
 
-#include <video.h>
+//#include <video.h>
 #include <video/screen.h>
+//#include <video/screen.h>
 #include <hal.h>
 #include <kernel/init.h>
 
@@ -30,6 +31,8 @@ static int debug_level_flow = 1;
 extern struct drv_video_screen_t        video_driver_icp;
 #endif // ARCH_arm
 
+
+extern struct drv_video_screen_t        video_driver_vmware_svga;
 
 // TODO: panic must switch to text mode!
 
@@ -49,6 +52,8 @@ struct drv_video_screen_t *video_drivers[] =
     //&video_driver_cirrus,
 
     // &video_driver_bochs_vesa_emulator,
+
+    &video_driver_vmware_svga,
 
     // test one. never reports success
     &video_driver_direct_vesa,
@@ -136,11 +141,13 @@ static void video_post_start()
 
 void phantom_start_video_driver(void)
 {
+#if VESA_ENFORCE
     if( was_enforced && video_drv != 0 )
     {
         SHOW_FLOW0( 1, "Skipping video drv select due to enforce" );
         return;
     }
+#endif
 
     phantom_select_video_driver();
 

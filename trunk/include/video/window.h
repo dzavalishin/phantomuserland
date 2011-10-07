@@ -139,6 +139,9 @@ typedef struct drv_video_window
      */
     int                 (*inKernelEventProcess)( struct drv_video_window *w, struct ui_event *e );
 
+    // If not null - signalled on new event in win q
+    hal_sem_t           *eventDeliverSema;
+
     tid_t               owner;
 
 #if !VIDEO_T_IN_D
@@ -186,6 +189,7 @@ void 	drv_video_window_to_bottom(drv_video_window_t *w);
 void    drv_video_window_clear( drv_video_window_t *win );
 void    drv_video_window_fill( drv_video_window_t *win, rgba_t color );
 
+void 	drv_video_window_draw_rect( drv_video_window_t *win, rgba_t color, rect_t r );
 void 	drv_video_window_fill_rect( drv_video_window_t *win, rgba_t color, rect_t r );
 
 void	drv_video_window_pixel( drv_video_window_t *w, int x, int y, rgba_t color );

@@ -107,6 +107,7 @@ static pci_probe_t pci_drivers[] =
     // VMWARE pseudo-SVGA
 //    { "Clone Regs Video", driver_video_gen_clone_pci_probe, 1, 0x15AD, 0x405, 0 },
 
+    { "VmWare SVGA",     driver_vmware_svga_pci_probe,     0, 0x15AD, 0x0405, 0 },
 
 };
 

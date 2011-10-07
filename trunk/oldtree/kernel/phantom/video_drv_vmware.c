@@ -25,6 +25,7 @@
 #include <kernel/libkern.h>
 #include <phantom_libc.h>
 #include <video/screen.h>
+#include <video/internal.h>
 
 #include <dev/pci/vmware/svga_reg.h>
 #include <dev/pci/vmware/svga.h>
@@ -209,9 +210,9 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
 
+return 0;
     SHOW_FLOW0( 0, "Init" );
 
-//return 0;
     /*
      * Use the default base address for each memory region.
      * We must map at least ioBase before using ReadReg/WriteReg.
@@ -1412,7 +1413,7 @@ static void alpha_to_bits( u_int8_t *bits, size_t noutbytes, drv_video_bitmap_t 
     }
 }
 
-
+// QEMU converts color cursor to bw anyway
 #define CUR32 0
 
 void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
@@ -1453,9 +1454,13 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
     memset(xorMask, 0xFF, xorSize);
 
     alpha_to_bits( andMask, andSize, cursor, 0xFF000000, 1 );
+#if !CUR32
     alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
+#endif
+
 
 #if CUR32
+    //bitmap2bitmap(
     bitmap2bitmap_yflip(
                    xorMask, cursor->xsize, cursor->ysize, 0, 0,
                    cursor->pixel, cursor->xsize, cursor->ysize, 0, 0,
