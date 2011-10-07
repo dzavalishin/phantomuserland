@@ -24,6 +24,25 @@
 // min/max
 #include <sys/libkern.h>
 
+
+
+int rect_eq( rect_t *a, rect_t *b )
+{
+    return
+        (a->x     == b->x     ) &&
+        (a->y     == b->y     ) &&
+        (a->xsize == b->xsize ) &&
+        (a->ysize == b->ysize );
+}
+
+int rect_empty( rect_t *a )
+{
+    return (a->x > 0) && (a->y > 0);
+}
+
+
+
+
 // rect coords must be win relative
 int rect_win_bounds( rect_t *r, drv_video_window_t *w )
 {
@@ -121,6 +140,70 @@ int rect_mul( rect_t *out, rect_t *a, rect_t *b )
 
     return (out->xsize > 0) && (out->ysize > 0);
 }
+
+
+
+//! Returns two rectangles which together cover space which is
+//! covered by old, but not covered by new.
+int rect_sub( rect_t *out1, rect_t *out2, rect_t *old, rect_t *new )
+{
+    // out1 is big vertical rectangle, out2 - small horizontal
+    /*
+           +---------+
+           |         |   <-- new
+    +------+------+  |
+    | out1 |      |  |
+    |      +------+--+
+    |      | out2 |      <-- old
+    +------+------+
+    */
+
+    // decide it we moved to the right
+
+    if( new->x > old->x )
+    {
+        // right, out1 is leftmost part of old
+        *out1 = *old;
+        out1->xsize = new->x - old->x;
+    }
+    else
+    {
+        // left, out1 is rightmost part of old
+        *out1 = *old;
+        out1->xsize = old->x - new->x;
+        out1->x = new->x + new->xsize;
+    }
+
+    // decide it we moved up
+
+    // SIMPLIFIED - out1 and out2 overlap
+
+    if( new->y > old->y )
+    {
+        // up
+        *out2 = *old;
+        out2->ysize = new->y - old->y;
+    }
+    else
+    {
+        // down
+        *out2 = *old;
+        out2->ysize = old->y - new->y;
+        out2->y = new->y + new->ysize;
+    }
+
+    return (!rect_eq( out1, out2 )) && (!rect_empty(out2));
+
+}
+
+
+
+int rect_dump( rect_t *a )
+{
+    printf("rect @ %d/%d, sz %d x %d\n", a->x, a->y, a->xsize, a->ysize );
+}
+
+
 
 
 #if !USE_ONLY_INDIRECT_PAINT
