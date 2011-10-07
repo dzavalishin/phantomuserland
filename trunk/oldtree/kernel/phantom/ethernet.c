@@ -71,7 +71,10 @@ int ethernet_input(cbuf *buf, ifnet *i)
     uint16 type;
 
     if(cbuf_get_len(buf) < MIN_ETHERNET2_LEN)
+    {
+        cbuf_free_chain(buf);
         return -1;
+    }
 
     e2_head = cbuf_get_ptr(buf, 0);
     type = ntohs(e2_head->type);
