@@ -25,6 +25,8 @@
 
 #include <kernel/bus/pci.h>
 
+// TODO spinlock!
+
 typedef struct
 {
     u_int8_t reg:8;
@@ -234,6 +236,27 @@ int phantom_pci_find_class( pci_cfg_t *cfg, u_int8_t class_id, u_int8_t subclass
     }
 
     return -1;
+}
+
+/*
+ *    Enable or disable a device's memory and IO space. This must be
+ *    called to enable a device's resources after setting all
+ *    applicable BARs. Also enables/disables bus mastering.
+ */
+
+
+void phantom_pci_enable( pci_cfg_t *pci, int onoff )
+{
+    u_int32_t command = phantom_pci_read( pci->bus, pci->dev, pci->func, PCI_CONFIG_COMMAND, 2 );
+
+    /* Mem space enable, IO space enable, bus mastering. */
+    const u_int16_t flags = 0x0007;
+
+    if(onoff)        command |= flags;
+    else             command &= ~flags;
+
+    phantom_pci_write( pci->bus, pci->dev, pci->func, PCI_CONFIG_COMMAND, command, 2 );
+
 }
 
 
