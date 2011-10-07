@@ -10,6 +10,16 @@ typedef struct drv_video_bitmap
     rgba_t          pixel[];
 } drv_video_bitmap_t;
 
+typedef struct drv_video_cursor
+{
+    int             hotx;
+    int             hoty;
+
+    drv_video_bitmap_t bitmap;
+} drv_video_cursor_t;
+
+
+
 extern drv_video_bitmap_t 		close_bmp; // Window close button
 extern drv_video_bitmap_t 		pin_bmp; // Window pin button
 
