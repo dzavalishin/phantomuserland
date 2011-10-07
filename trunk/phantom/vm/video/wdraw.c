@@ -197,7 +197,10 @@ void drv_video_window_draw_box( drv_video_window_t *w,
 }
 
 
-
+void drv_video_window_draw_rect( drv_video_window_t *win, rgba_t color, rect_t r )
+{
+    drv_video_window_draw_box( win, r.x, r.y, r.xsize, r.ysize, color );
+}
 
 
 
