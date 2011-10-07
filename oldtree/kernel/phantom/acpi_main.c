@@ -1,3 +1,20 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * ACPI startup
+ *
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "acpi"
+#include <debug_ext.h>
+#define debug_level_flow 8
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include <acpi.h>
 #include <errno.h>
 
@@ -146,8 +163,9 @@ InitializeFullAcpi(void)
     }
 #endif
 
+#if 0
     AcpiWalkNamespace ( ACPI_TYPE_ANY, ACPI_ROOT_OBJECT, 16, walkCallback, 0, 0, 0 );
-
+#endif
 
 
     return 0;

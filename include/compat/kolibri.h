@@ -33,7 +33,7 @@
 
 struct kolibri_exe_hdr
 {
-    char        	ident[8];
+    char                ident[8];
     u_int32_t           version;
     u_int32_t           start;
     u_int32_t           code_end;
@@ -45,8 +45,9 @@ struct kolibri_exe_hdr
 
 struct kolibri_pkck_hdr
 {
-    char        	ident[4];
+    char                ident[4];
     u_int32_t           unpacked_size;
+    u_int32_t           flags;
 };
 
 #define KOLIBRI_CMD_LINE_MAX 256
@@ -103,9 +104,12 @@ struct kolibri_button
 {
     int         id;
     rect_t      r;
+    color_t     color;
 
     int         flag_nopaint;
     int         flag_noborder;
+
+    u_int32_t   mouse_in_bits;
 
     int         npixels;
     rgba_t      *pixels;

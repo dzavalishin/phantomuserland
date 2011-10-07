@@ -189,8 +189,9 @@ drv_video_window_init( drv_video_window_t *w,
 
     w_lock();
     //drv_video_winblt_locked( w->w_owner ); // need?
-    win_make_decorations(w);
+    //win_make_decorations(w);
     drv_video_window_enter_allwq(w);
+    win_make_decorations(w);
     w_unlock();
 }
 
@@ -284,7 +285,16 @@ void drv_video_window_repaint_all(void)
 // todo in screen coordinates, wtodo in win
 void repaint_win_part( drv_video_window_t *w, rect_t *wtodo, rect_t *todo  )
 {
+    int dst_xpos = wtodo->x + w->x; // todo->x
+    int dst_ypos = wtodo->y + w->y; // todo->y
 
+    drv_video_bitblt_part(
+                          w->pixel,
+                          w->xsize, w->ysize,
+                          wtodo->x, wtodo->y,
+                          dst_xpos, dst_ypos,
+                          wtodo->xsize, wtodo->ysize,
+                          1, w->z);
 
 }
 
@@ -306,8 +316,8 @@ void repaint_all_for_square( rect_t *todo )
 
         if( !rect_win_bounds( &wtodo, w ) )
         {
-            //repaint_win_part( w, wtodo, todo );
-            _drv_video_winblt_locked( w );
+            repaint_win_part( w, &wtodo, todo );
+            //_drv_video_winblt_locked( w );
             if(w->flags & WFLAG_WIN_DECORATED)
             {
                 //win_make_decorations(w);
@@ -449,7 +459,73 @@ do_window_resize( drv_video_window_t *w, int xsize, int ysize )
 
 
 
+// faster, but has artefacts at top when move down
+#if 0
 
+void
+drv_video_window_move( drv_video_window_t *w, int x, int y )
+{
+    ui_event_t e1, e2;
+    rect_t oldw;
+    rect_t neww;
+
+    e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
+    e2.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
+
+    w_lock();
+
+    oldw.x = w->x;
+    oldw.y = w->y;
+    oldw.xsize = w->xsize;
+    oldw.ysize = w->ysize;
+
+    // Suppose that decor overlaps us. If not - use add.
+    if( w->w_decor )
+    {
+        oldw.x = w->w_decor->x;
+        oldw.y = w->w_decor->y;
+        oldw.xsize = w->w_decor->xsize;
+        oldw.ysize = w->w_decor->ysize;
+        video_zbuf_reset_square( w->w_decor->x, w->w_decor->y, w->w_decor->xsize, w->w_decor->ysize );
+    }
+    else
+        video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+
+    w->x = x;
+    w->y = y;
+    win_move_decorations(w);
+
+    neww.x = w->x;
+    neww.y = w->y;
+    neww.xsize = w->xsize;
+    neww.ysize = w->ysize;
+
+    // Suppose that decor overlaps us. If not - use add.
+    if( w->w_decor )
+    {
+        neww.x = w->w_decor->x;
+        neww.y = w->w_decor->y;
+        neww.xsize = w->w_decor->xsize;
+        neww.ysize = w->w_decor->ysize;
+    }
+
+    int o2 = rect_sub( &e1.w.rect, &e2.w.rect, &oldw, &neww );
+
+    video_zbuf_reset_square( e1.w.rect.x, e1.w.rect.y, e1.w.rect.xsize, e1.w.rect.ysize );
+    event_q_put_global( &e1 );
+
+    //if( o2 )
+    {
+        video_zbuf_reset_square( e2.w.rect.x, e2.w.rect.y, e2.w.rect.xsize, e2.w.rect.ysize );
+        event_q_put_global( &e2 );
+    }
+
+    event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
+
+    w_unlock();
+}
+
+#else
 
 
 void
@@ -526,7 +602,7 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
 
     w_unlock();
 }
-
+#endif
 
 void
 drv_video_window_resize( drv_video_window_t *w, int xsize, int ysize )

@@ -32,6 +32,7 @@ typedef	int64_t		quad_t;
 
 #ifndef __cplusplus
 typedef u_int8_t        bool;
+typedef u_int8_t        Bool; // vmware svga
 #endif
 
 

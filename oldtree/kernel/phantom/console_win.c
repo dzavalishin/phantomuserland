@@ -39,6 +39,7 @@
 #include <kernel/timedcall.h>
 #include <kernel/debug.h>
 #include <kernel/stats.h>
+#include <kernel/profile.h>
 
 #if NET_TIMED_FLUSH
 #include <kernel/net_timer.h>
@@ -385,11 +386,11 @@ static void phantom_debug_window_loop()
 
         struct tm mt = *current_time;
 
-        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m, %d events\n Today is %04d/%02d/%02d %02d:%02d:%02d\n",
+        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m, %d events\n Today is %04d/%02d/%02d %02d:%02d:%02d, CPU 0 %d%% idle\n",
                       step++, days, hr, min, (int)sec,
                       get_n_events_in_q(),
                       mt.tm_year + 1900, mt.tm_mon, mt.tm_mday,
-                      mt.tm_hour, mt.tm_min, mt.tm_sec
+                      mt.tm_hour, mt.tm_min, mt.tm_sec, 100-percpu_cpu_load[0]
                      );
         bp += rc;
         len -= rc;

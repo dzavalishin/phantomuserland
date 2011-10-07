@@ -15,6 +15,8 @@
 
 #include <queue.h>
 #include <phantom_libc.h>
+#include <kernel/profile.h>
+#include <kernel/stats.h>
 
 #define CHECK_SLEEP_FLAGS 1
 
@@ -270,6 +272,8 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
 {
     assert(schedlock.lock);
 
+    percpu_idle_status[GET_CPU_ID()] = 0; // not idle
+
     // TODO find out if it is time to replentish ticks_left
 
     phantom_thread_t *ret = 0;
@@ -400,6 +404,8 @@ idle_no:
         goto retry;
     }
 #endif
+    STAT_INC_CNT(STAT_CNT_THREAD_IDLE);
+    percpu_idle_status[GET_CPU_ID()] = 1; // idle
     return GET_IDLEST_THREAD(); // No real thread is ready to run
 }
 
@@ -423,6 +429,20 @@ static int t_assign_time(void)
             haveTicks = 1;
     }
 
+    //if(haveTicks)        printf("t_assign_time - have ticks on norm runq\n");
+
+#if 0
+    if(!haveTicks)
+    {
+        int tid;
+        for( tid = 0; tid < MAX_THREADS; tid++ )
+        {
+            it = phantom_kernel_threads[tid];
+            it->ticks_left = NORM_TICKS + it->priority; // = giveTicks
+        }
+        return 1;
+    }
+#else
     if(!haveTicks)
     {
 #if 0
@@ -442,6 +462,7 @@ static int t_assign_time(void)
 
         return 1;
     }
+#endif
     return 0;
 }
 

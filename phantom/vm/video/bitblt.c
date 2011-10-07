@@ -73,7 +73,7 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
  *
  **/
 
-#if 1
+#if VIDEO_PARTIAL_WIN_BLIT
 
 void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
 {
