@@ -300,7 +300,7 @@ static void set_rgb332_palette()
 // ----------------------------------------------------------------
 
 
-static int basic_vga_probe() { return 1; } // TODO maybe some real probe??
+static int basic_vga_probe() { return VIDEO_PROBE_SUCCESS; } // TODO maybe some real probe??
 static int basic_vga_start();
 static int basic_vga_stop();
 

@@ -155,7 +155,7 @@ static int i810_init()
 static int i810_video_probe()
 {
     if(!seq_number)
-        return 0;
+        return VIDEO_PROBE_FAIL;
 
     if( hal_alloc_vaddress((void **)&video_driver_i810.screen, n_pages) )
         panic("Can't alloc vaddress for %d videmem pages", n_pages);
@@ -164,7 +164,7 @@ static int i810_video_probe()
 
 
     //printf("Intel board 0x%x found\n", id);
-    return 1;
+    return VIDEO_PROBE_SUCCESS;
 }
 
 

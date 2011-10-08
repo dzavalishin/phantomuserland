@@ -130,7 +130,7 @@ static int icp_video_probe()
     if( id != ICP_ID)
     {
         printf("Integrator/CP board id is %x, not %x\n", id, ICP_ID );
-        return 0;
+        return VIDEO_PROBE_FAIL;
     }
 
 
@@ -203,7 +203,7 @@ static int icp_video_probe()
 
 
     SHOW_INFO( 0, "Integrator/CP video %d*%d found",  video_driver_icp.xsize, video_driver_icp.ysize );
-    return 1;
+    return VIDEO_PROBE_SUCCESS;
 }
 
 

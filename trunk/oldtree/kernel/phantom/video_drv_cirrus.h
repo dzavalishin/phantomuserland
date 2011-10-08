@@ -15,6 +15,33 @@
 #define CIRRUS_ID_CLGD5436  (0x2B<<2)
 #define CIRRUS_ID_CLGD5446  (0x2E<<2)
 
+
+
+
+// sequencer 0x0f
+#define CIRRUS_MEMSIZE_512k        0x08
+#define CIRRUS_MEMSIZE_1M          0x10
+#define CIRRUS_MEMSIZE_2M          0x18
+#define CIRRUS_MEMFLAGS_BANKSWITCH 0x80	// bank switching is enabled.
+
+#define CIRRUS_MEMSIZE_MASK        0x18
+
+// sequencer 0x12
+#define CIRRUS_CURSOR_SHOW         0x01
+#define CIRRUS_CURSOR_HIDDENPEL    0x02
+#define CIRRUS_CURSOR_LARGE        0x04	// 64x64 if set, 32x32 if clear
+
+// sequencer 0x17
+#define CIRRUS_BUSTYPE_VLBFAST   0x10
+#define CIRRUS_BUSTYPE_PCI       0x20
+#define CIRRUS_BUSTYPE_VLBSLOW   0x30
+#define CIRRUS_BUSTYPE_ISA       0x38
+#define CIRRUS_MMIO_ENABLE       0x04
+#define CIRRUS_MMIO_USE_PCIADDR  0x40	// 0xb8000 if cleared.
+#define CIRRUS_MEMSIZEEXT_DOUBLE 0x80
+
+
+
 /*
 typedef enum {
     CLGD5426, //1

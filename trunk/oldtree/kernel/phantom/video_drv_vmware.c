@@ -100,7 +100,7 @@ mouse_enable:          	drv_video_mouse_on_deflt,
 
 static int vmware_video_probe()
 {
-    return gSVGA.found;
+    return gSVGA.found ? VIDEO_PROBE_SUCCESS : VIDEO_PROBE_FAIL;
 }
 
 

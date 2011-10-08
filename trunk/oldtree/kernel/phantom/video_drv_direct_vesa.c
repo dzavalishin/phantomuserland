@@ -168,7 +168,7 @@ static int direct_vesa_probe()
 pressEnter("PM VESA done");
 
     // Experimental code
-    return 0;
+    return VIDEO_PROBE_FAIL;
 }
 
 

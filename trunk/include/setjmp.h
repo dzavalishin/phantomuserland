@@ -55,9 +55,9 @@
 typedef int jmp_buf[_JBLEN];
 
 
-extern int setjmp (jmp_buf);
+extern int setjmp (jmp_buf) __attribute__((returns_twice));
 extern void longjmp (jmp_buf, int);
-extern int _setjmp (jmp_buf);
+extern int _setjmp (jmp_buf) __attribute__((returns_twice));
 extern void _longjmp (jmp_buf, int);
 
 #endif /* _MACH_SETJMP_H_PROCESSED_ */

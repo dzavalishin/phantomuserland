@@ -115,7 +115,7 @@ static int bochs_video_probe()
     int id = vbe_read(VBE_DISPI_INDEX_ID);
 
     if( id < VBE_DISPI_ID2 || id > VBE_DISPI_ID3 )
-        return 0;
+        return VIDEO_PROBE_FAIL;
 
     if( hal_alloc_vaddress((void **)&video_driver_bochs_vesa_emulator.screen, n_pages) )
         panic("Can't alloc vaddress for %d videmem pages", n_pages);
@@ -124,7 +124,7 @@ static int bochs_video_probe()
 
 
     printf("Bochs VBE emulator ver 0x%x found\n", id);
-    return 1;
+    return VIDEO_PROBE_SUCCESS;
 }
 
 
