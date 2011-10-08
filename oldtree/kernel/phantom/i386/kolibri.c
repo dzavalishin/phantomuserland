@@ -22,6 +22,7 @@
 #include <kernel/trap.h>
 #include <kernel/init.h>
 #include <kernel/libkern.h>
+#include <kernel/profile.h>
 
 #include <ia32/proc_reg.h>
 
@@ -326,7 +327,7 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
         break;
 
     case 4: // TODO FAKE - get idle CPU timeslots
-        st->eax = 1; // give some answer
+        st->eax = 100-percpu_cpu_load[0]; // in fact we return CPU 0 idle percentage
         break;
 
     case 5: // TODO FAKE - get cpu freq

@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "video"
 #include <debug_ext.h>
-static int debug_level_flow = 1;
+static int debug_level_flow = 3;
 
 #include <phantom_libc.h>
 
@@ -89,7 +89,7 @@ static void phantom_select_video_driver()
         struct drv_video_screen_t *drv = video_drivers[i];
 
         SHOW_FLOW( 2, "Probing %s video driver: ", drv->name);
-        if( !drv->probe() )
+        if( drv->probe() != VIDEO_PROBE_SUCCESS )
         {
             SHOW_FLOW( 2, "Video driver %s : No", drv->name);
             continue;
@@ -107,17 +107,61 @@ static void phantom_select_video_driver()
 
     if( selected_drv == NULL )
     {
-        printf("No video driver found!");
+        SHOW_FLOW0( 1, "No video driver found!");
     }
     else
     {
         if(video_drv != NULL)
             video_drv->stop();
 
-        SHOW_FLOW( 1, "The best is %s video driver\n", selected_drv->name);
+        SHOW_FLOW( 1, "The best is %s video driver", selected_drv->name);
         video_drv = selected_drv;
     }
 }
+
+static void select_accel_driver(void)
+{
+    struct drv_video_screen_t *selected_drv = NULL;
+
+    SHOW_FLOW0( 2, "Look for accelerating video driver" );
+
+    unsigned int i;
+    for( i = 0; i < (sizeof(video_drivers)/sizeof(struct drv_video_screen_t *)); i++ )
+    {
+        struct drv_video_screen_t *drv = video_drivers[i];
+
+        if( (drv->accel == 0) || (drv->accel == (void *)drv_video_null) )
+        {
+            SHOW_FLOW( 2, "Video driver %s : Not accelerated", drv->name);
+            continue;
+        }
+
+        SHOW_FLOW( 2, "Probing %s video driver: ", drv->name);
+        if( !drv->probe() )
+        {
+            SHOW_FLOW( 2, "Video driver %s : No", drv->name);
+            continue;
+        }
+        SHOW_FLOW( 2, "Video driver %s : Yes", drv->name);
+
+        selected_drv = drv;
+
+        break; // First one is ok
+    }
+
+    if( selected_drv == NULL )
+    {
+        SHOW_FLOW0( 1, "No video driver found!");
+    }
+    else
+    {
+        SHOW_FLOW( 1, "Adding acceleration from %s video driver", selected_drv->name);
+        selected_drv->accel();
+    }
+
+}
+
+
 
 static int was_enforced = 0;
 
@@ -128,12 +172,13 @@ static void video_post_start()
     video_zbuf_init();
     drv_video_init_windows(); 
 
+    // Have VESA driver, add companion accelerator if possible
+    if( was_enforced )
+        select_accel_driver();
 
-    //hal_sleep_msec(10000);
     SHOW_FLOW0( 3, "Video console init" );
-
     phantom_init_console_window();
-    //hal_sleep_msec(10000);
+
     SHOW_FLOW0( 3, "Video mouse cursor init" );
     drv_video_set_mouse_cursor(drv_video_get_default_mouse_bmp());
 }

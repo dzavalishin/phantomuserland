@@ -10,9 +10,10 @@
 
 #ifdef ARCH_ia32
 
-#define DEBUG_MSG_PREFIX "video"
+#define DEBUG_MSG_PREFIX "cirrus"
 #include <debug_ext.h>
-static int debug_level_flow = 1;
+#define debug_level_flow 9
+#define debug_level_error 10
 
 #include <hal.h>
 //#include <video.h>
@@ -30,25 +31,40 @@ static int debug_level_flow = 1;
 #include "video_drv_cirrus.h"
 
 static void map_video(int on_off);
+static void cirrus_unlock(void);
+
+static void cirrus_load_cursol_palette(void);
+static void cirrus_dump_cursol_palette(void) __attribute__((unused));
+
+static void currus_set_cursor_pos(void);
+static void cirrus_set_mouse_cursor( drv_video_bitmap_t *cursor );
+
 
 #define CL_VENDOR 0x1013
 
 static int cir_card = -1;
 
+#define CHIP_ID p0
+
+// p0 = chip id
 static pci_table_t cir_devices[] =
 {
-    { CL_VENDOR, CIRRUS_ID_CLGD5422, 0, 0, 0, "CLGD-5422", 0, 0, 0, 0, 0, 0 },
-    { CL_VENDOR, CIRRUS_ID_CLGD5426, 0, 0, 0, "CLGD-5426", 0, 0, 0, 0, 0, 0 },
-    { CL_VENDOR, CIRRUS_ID_CLGD5424, 0, 0, 0, "CLGD-5424", 0, 0, 0, 0, 0, 0 },
-    { CL_VENDOR, CIRRUS_ID_CLGD5428, 0, 0, 0, "CLGD-5428", 0, 0, 0, 0, 0, 0 },
-    { CL_VENDOR, CIRRUS_ID_CLGD5430, 0, 0, 0, "CLGD-5430", 0, 0, 0, 0, 0, 0 },
-    { CL_VENDOR, CIRRUS_ID_CLGD5434, 0, 0, 0, "CLGD-5434", 0, 0, 0, 0, 0, 0 },
-    { CL_VENDOR, CIRRUS_ID_CLGD5436, 0, 0, 0, "CLGD-5436", 0, 0, 0, 0, 0, 0 },
-    { CL_VENDOR, CIRRUS_ID_CLGD5446, 0, 0, 0, "CLGD-5446", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5422, 0, 0, 0, "CLGD-5422", 0, 0, 0x23, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5426, 0, 0, 0, "CLGD-5426", 0, 0, 0x24, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5424, 0, 0, 0, "CLGD-5424", 0, 0, 0x25, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5428, 0, 0, 0, "CLGD-5428", 0, 0, 0x26, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5430, 0, 0, 0, "CLGD-5430", 0, 0, 0x28, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5434, 0, 0, 0, "CLGD-5434", 0, 0, 0x2A, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5436, 0, 0, 0, "CLGD-5436", 0, 0, 0x2B, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5446, 0, 0, 0, "CLGD-5446", 0, 0, 0x2e, 0, 0, 0 },
 
 
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } // final all-zero marker
 };
+
+static pci_table_t *cir_device = 0;
+static int memsize = 0;
+
 
 /*
 CIRRUS_DETECT detect_info[]={
@@ -90,7 +106,6 @@ cirrus_check:
 
 static int cirrus_probe()
 {
-    int i;
 
     int part_id = read_vga_register( 0x3D4, 0x27 );
     SHOW_FLOW( 1, "Cirrus driver part Id (0x3D4,0x27) = 0x%X", part_id );
@@ -112,52 +127,69 @@ static int cirrus_probe()
         fail:
             write_vga_register( 0x3C4, 6, old6 );
             SHOW_FLOW0( 1, "Cirrus driver unable to identify chip directly");
+            return VIDEO_PROBE_FAIL;
         }
 
     }
 
-#if HAVE_VESA
-#if 0
-    RM_REGS regs;
-    regs.x.ax=0x1200;  //cirrus extended bios
-    regs.x.bx=0x81;    //get BIOS version
-    phantom_bios_int_10_args(&regs);
-
-    SHOW_FLOW( 1, "Cirrus driver BIOS 0x1200 81 ax=0x%X", regs.x.ax );
-
-    int card;
-    regs.x.ax=0x1200;  //cirrus extended bios
-    regs.x.bx=0x80;    //get chip version
-    phantom_bios_int_10_args(&regs);
-    card=regs.h.al;
-
-    SHOW_FLOW( 1, "Cirrus driver BIOS 0x1200 80 al=0x%X", card );
-
-    for (i=0;i<KNOWN_CARDS;i++)
-    {
-        if (card == detect_info[i].biosnum)
-        {
-            cir_card=i;
-            break;
-        }
-    }
-#endif
 
     pci_cfg_t cfg;
 
     cir_card = pci_find_any_in_table( &cfg, cir_devices );
 
     if( cir_card < 0 )
-        return 0; // No card
+        return VIDEO_PROBE_FAIL; // No card
+
+    cir_device = cir_devices+cir_card;
+
+    {
+        int dram = read_vga_register( 0x3C4, 0xF );
+        int conf = read_vga_register( 0x3C4, 0x17 );
+
+        switch(dram & CIRRUS_MEMSIZE_MASK)
+        {
+        case CIRRUS_MEMSIZE_512k: 	memsize = 512*1024; break;
+        case CIRRUS_MEMSIZE_1M: 	memsize = 1024*1024; break;
+        case CIRRUS_MEMSIZE_2M: 	memsize = 2*1024*1024; break;
+        }
+
+        if( conf & CIRRUS_MEMSIZEEXT_DOUBLE )
+            memsize *= 2;
+
+        SHOW_FLOW( 1, "Memsize reg=%x (%d Kb) conf=%x", dram, memsize/1024, conf );
+    }
+
+    cirrus_unlock();
+
+    //cirrus_dump_cursol_palette();
+    cirrus_load_cursol_palette();
+    //cirrus_dump_cursol_palette();
+
+    write_vga_register( 0x3C4, 0x13, 48 ); // Take 4Kb for mouse cursor
+
+    SHOW_FLOW( 1, "Cirrus %s found, chip id %x, expect %x", cir_devices[cir_card].name, part_id >> 2, cir_device->CHIP_ID );
+
+    return VIDEO_PROBE_ACCEL;
+}
 
 
+static errno_t cirrus_accel_start(void)
+{
+    if( cir_device == 0 )
+        return ENXIO;
+#if 0 // doesn't work
+    SHOW_FLOW( 0, "Cirrus accelerator add on start, chip %s", cir_device->name );
 
-    SHOW_FLOW( 1, "Cirrus %s found\n", cir_devices[cir_card].name );
+    // Take over mouse
+    video_drv->redraw_mouse_cursor = currus_set_cursor_pos;
+    video_drv->set_mouse_cursor = cirrus_set_mouse_cursor;
+
+    // Turn off unused funcs
+    video_drv->mouse_disable = drv_video_null;
+    video_drv->mouse_enable = drv_video_null;
+#endif
 
     return 0;
-#else // vesa
-    return 0;
-#endif // vesa
 }
 
 static int cirrus_start()
@@ -189,6 +221,7 @@ struct drv_video_screen_t        video_driver_cirrus =
 
 probe: 			cirrus_probe,
 start: 			cirrus_start,
+accel: 			cirrus_accel_start,
 stop:  			cirrus_stop,
 
 update: 		drv_video_null,
@@ -198,10 +231,10 @@ readblt: 		drv_video_readblt_rev,
 
 mouse:  		drv_video_null,
 
-redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
-set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
-mouse_disable:          drv_video_mouse_off_deflt,
-mouse_enable:          	drv_video_mouse_on_deflt,
+redraw_mouse_cursor: 	currus_set_cursor_pos,
+set_mouse_cursor:       cirrus_set_mouse_cursor,
+mouse_disable:          drv_video_null,
+mouse_enable:          	drv_video_null,
 };
 
 
@@ -243,6 +276,271 @@ static void map_video(int on_off)
 
 
 
+/* Unlock chipset-specific registers */
+
+static void cirrus_unlock(void)
+{
+    int vgaIOBase, temp;
+
+    /* Are we Mono or Color? */
+    vgaIOBase = (inb(0x3CC) & 0x01) ? 0x3D0 : 0x3B0;
+
+    outb(0x3C4, 0x06);
+    outb(0x3C5, 0x12);		/* unlock cirrus special */
+
+    /* Put the Vert. Retrace End Reg in temp */
+
+    outb(vgaIOBase + 4, 0x11);
+    temp = inb(vgaIOBase + 5);
+
+    /* Put it back with PR bit set to 0 */
+    /* This unprotects the 0-7 CRTC regs so */
+    /* they can be modified, i.e. we can set */
+    /* the timing. */
+
+    outb(vgaIOBase + 5, temp & 0x7F);
+}
+
+
+
+static void currus_set_cursor_pos(void)
+{
+#if 1
+    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
+
+    unsigned x = video_drv->mouse_x;
+    unsigned y = get_screen_ysize() - video_drv->mouse_y;
+
+    SHOW_FLOW( 10, "%d * %d", x, y );
+
+    write_vga_register( 0x3C4, 0x10 + ((x & 7) << 5), x >> 3 );
+    write_vga_register( 0x3C4, 0x11 + ((y & 7) << 5), y >> 3 );
+#endif
+}
+
+
+static void cirrus_load_cursol_palette(void)
+{
+    // hidden palette, 16 entries - for mouse cursor
+
+    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_HIDDENPEL|CIRRUS_CURSOR_SHOW );
+    outb( 0x3C8, 0 );
+
+    int i = 16*3; // 16 rgb
+    while( i-- > 0 )
+        outb( 0x3C9, 0xFF );
+
+    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
+}
+
+static void cirrus_dump_cursol_palette(void)
+{
+    // hidden palette, 16 entries - for mouse cursor
+
+    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_HIDDENPEL|CIRRUS_CURSOR_SHOW );
+    outb( 0x3C8, 0 );
+
+    int i = 16; // 16 rgb
+    while( i-- > 0 )
+    {
+        int r = inb( 0x3C9 );
+        int g = inb( 0x3C9 );
+        int b = inb( 0x3C9 );
+
+        printf("%2x %2x %2x\n", r, g, b );
+    }
+
+    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
+}
+
+
+static void cirrus_set_mouse_cursor( drv_video_bitmap_t *cursor )
+{
+    u_int8_t *src = video_drv->screen + memsize - 16 * 1024;
+    SHOW_FLOW( 0, "vram %p, src %p", video_drv->screen, src );
+
+    // optimal value is 48, it takes exact 4Kb from vram
+    int r13 = read_vga_register( 0x3C4, 0x13 );
+    src += (r13 & 0x3f) * 256;
+    SHOW_FLOW( 0, "r13 %d, src %p", r13, src );
+
+    // We use 32x32 cursor
+    int cbytes = 32*32*4; // 4K
+
+
+    memset( src, 0xFF, cbytes );
+    //SHOW_ERROR0( 0, "not impl");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+
+/* Indentify chipset, initialize and return non-zero if detected */
+
+static int cirrus_test(void)
+{
+    int oldlockreg;
+    int lockreg;
+
+    outb(0x3c4, 0x06);
+    oldlockreg = inb(0x3c5);
+
+    cirrus_unlock();
+
+    /* If it's a Cirrus at all, we should be */
+    /* able to read back the lock register */
+
+    outb(0x3C4, 0x06);
+    lockreg = inb(0x3C5);
+
+    /* Ok, if it's not 0x12, we're not a Cirrus542X. */
+    if (lockreg != 0x12) {
+	outb(0x3c4, 0x06);
+	outb(0x3c5, oldlockreg);
+	return 0;
+    }
+    /* The above check seems to be weak, so we also check the chip ID. */
+
+    outb(__svgalib_CRT_I, 0x27);
+    switch (inb(__svgalib_CRT_D) >> 2) {
+    case 0x22:
+    case 0x23:
+    case 0x24:
+    case 0x25:
+    case 0x26:
+    case 0x27:			/* 5429 */
+    case 0x28:			/* 5430 */
+    case 0x2A:			/* 5434 */
+    case 0x2B:			/* 5436 */
+	break;
+    default:
+	outb(0x3c4, 0x06);
+	outb(0x3c5, oldlockreg);
+	return 0;
+    }
+
+    if (cirrus_init(0, 0, 0))
+	return 0;		/* failure */
+    return 1;
+}
+
+/* Set display start address (not for 16 color modes) */
+/* Cirrus supports any address in video memory (up to 2Mb) */
+
+static void cirrus_setdisplaystart(int address)
+{
+    outw(0x3d4, 0x0d + ((address >> 2) & 0x00ff) * 256);	/* sa2-sa9 */
+    outw(0x3d4, 0x0c + ((address >> 2) & 0xff00));	/* sa10-sa17 */
+    inb(0x3da);			/* set ATC to addressing mode */
+    outb(0x3c0, 0x13 + 0x20);	/* select ATC reg 0x13 */
+    /* Cirrus specific bits 0,1 and 18,19,20: */
+    outb(0x3c0, (inb(0x3c1) & 0xf0) | (address & 3));
+    /* write sa0-1 to bits 0-1; other cards use bits 1-2 */
+    outb(0x3d4, 0x1b);
+    outb(0x3d5, (inb(0x3d5) & 0xf2)
+	 | ((address & 0x40000) >> 18)	/* sa18: write to bit 0 */
+	 |((address & 0x80000) >> 17)	/* sa19: write to bit 2 */
+	 |((address & 0x100000) >> 17));	/* sa20: write to bit 3 */
+    outb(0x3d4, 0x1d);
+    if (cirrus_memory > 2048)
+	outb(0x3d5, (inb(0x3d5) & 0x7f)
+	     | ((address & 0x200000) >> 14));	/* sa21: write to bit 7 */
+}
+
+
+static int cirrus_linear(int op, int param)
+{
+    if (op == LINEAR_ENABLE) {
+	cirrus_setlinear(0xE);
+	return 0;
+    }
+    if (op == LINEAR_DISABLE) {
+	cirrus_setlinear(0);
+	return 0;
+    }
+    if (cirrus_chiptype >= CLGD5424 && cirrus_chiptype <= CLGD5429) {
+	if (op == LINEAR_QUERY_BASE) {
+	    if (param == 0)
+		return 0xE00000;	/* 14MB */
+	    /*
+	     * Trying 64MB on a system with 16MB of memory is unsafe if the
+	     * card maps at 14MB. 14 MB was not attempted because of the
+	     * system memory check in vga_setlinearaddressing(). However,
+	     * linear addressing is enabled when looking at 64MB, causing a
+	     * clash between video card and system memory at 14MB.
+	     */
+	    if (__svgalib_physmem() <= 13 * 1024 * 1024) {
+		if (param == 1)
+		    return 0x4000000;	/* 64MB */
+		if (param == 2)
+		    return 0x4E00000;	/* 78MB */
+		if (param == 3)
+		    return 0x2000000;	/* 32MB */
+		if (param == 4)
+		    return 0x3E00000;	/* 62MB */
+	    }
+	    return -1;
+	}
+    }
+    if (cirrus_chiptype >= CLGD5430) {
+	if (op == LINEAR_QUERY_BASE) {
+	    if (param == 0)
+		return 0x04000000;	/* 64MB */
+	    if (param == 1)
+		return 0x80000000;	/* 2048MB */
+	    if (param == 2)
+		return 0x02000000;	/* 32MB */
+	    if (param == 3)
+		return 0x08000000;	/* 128MB */
+	    /* While we're busy, try some common PCI */
+	    /* motherboard-configured addresses as well. */
+	    /* We only read, so should be safe. */
+	    if (param == 4)
+		return 0xA0000000;
+	    if (param == 5)
+		return 0xA8000000;
+	    if (param == 6)
+		return 0xF0000000;
+	    if (param == 7)
+		return 0XFE000000;
+	    /*
+	     * Some PCI/VL motherboards only seem to let the
+	     * VL slave slot respond at addresses >= 2048MB.
+	     */
+	    if (param == 8)
+		return 0x84000000;
+	    if (param == 9)
+		return 0x88000000;
+	    return -1;
+	}
+    }
+    if (op == LINEAR_QUERY_RANGE || op == LINEAR_QUERY_GRANULARITY)
+	return 0;		/* No granularity or range. */
+    else
+	return -1;		/* Unknown function. */
+}
+
+
+
+
+#endif
 
 
 

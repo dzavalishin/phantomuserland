@@ -19,6 +19,8 @@
 
 #define VIDEO_PARTIAL_WIN_BLIT 1
 
+#include <errno.h>
+
 #include <video/color.h>
 #include <video/zbuf.h>
 #include <video/bitmap.h>
@@ -49,6 +51,7 @@ struct drv_video_screen_t
 
     int         (*probe) (void); // Returns true if hardware present, sets xsize/ysize.
     int         (*start) (void); // Start driver, switch to graphics mode.
+    errno_t     (*accel) (void); // Start driver in accelerating mode - video mode is already set by VESA, just add some acceleration to existing drv
     int         (*stop)  (void); // Stop driver, switch to text mode. Can be called in unstable kernel state, keep it simple.
 
     // Main interface
@@ -85,6 +88,13 @@ struct drv_video_screen_t
     void 	(*bitblt_part) (const rgba_t *from, int src_stride, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos);
 
 };
+
+#define VIDEO_PROBE_FAIL 0
+// Complete driver
+#define VIDEO_PROBE_SUCCESS 1
+// Not complete driver, just accelerator (can't set mode)
+#define VIDEO_PROBE_ACCEL 2 
+
 
 //
 extern struct drv_video_screen_t        drv_video_win32;

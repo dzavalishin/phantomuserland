@@ -229,7 +229,7 @@ static int gen_clone_init()
 static int gen_clone_video_probe()
 {
     if(!seq_number)
-        return 0;
+        return VIDEO_PROBE_FAIL;
 
     if( hal_alloc_vaddress((void **)&video_driver_gen_clone.screen, n_pages) )
         panic("Can't alloc vaddress for %d videmem pages", n_pages);
@@ -238,7 +238,7 @@ static int gen_clone_video_probe()
 
 
     //printf("Intel board 0x%x found\n", id);
-    return 1;
+    return VIDEO_PROBE_SUCCESS;
 }
 
 

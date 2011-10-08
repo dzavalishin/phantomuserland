@@ -36,7 +36,7 @@ static int bios_vesa_probe()
 {
     // Activated if VESA was found earlier in boot process.
     // See set_video_driver_bios_vesa_mode() below
-    return (vesaMode != -1);
+    return (vesaMode != -1) ? VIDEO_PROBE_SUCCESS : VIDEO_PROBE_FAIL;
 }
 
 static int bios_vesa_start()
