@@ -1,0 +1,13 @@
+PHANTOM_CFLAGS += -Ih -Isystem/include
+
+SRCDIRS := .
+FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
+CFILES := $(filter %.c,$(FILES))
+OBJFILES += $(patsubst %.c,%.o,$(notdir $(CFILES)))
+	
+
+%.o: %.c
+	@echo ---- cc $@
+	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) $<
+
+doom: $(OBJFILES)
