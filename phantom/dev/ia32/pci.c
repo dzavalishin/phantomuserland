@@ -238,6 +238,10 @@ int phantom_pci_find_class( pci_cfg_t *cfg, u_int8_t class_id, u_int8_t subclass
     return -1;
 }
 
+
+
+
+
 /*
  *    Enable or disable a device's memory and IO space. This must be
  *    called to enable a device's resources after setting all

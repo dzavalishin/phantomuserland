@@ -1,6 +1,17 @@
-/* $Id$
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * PCI bus support interfaces.
+ *
+ *
+**/
+
+/* 
 **
-** Copyright 1999 Brian J. Swetland. All rights reserved.
+** Portions copyright 1999 Brian J. Swetland. All rights reserved.
 ** Distributed under the terms of the OpenBLT License
 */
 
@@ -8,6 +19,7 @@
 #define _PCI_H
 
 #include <phantom_types.h>
+#include <errno.h>
 
 typedef struct 
 {
@@ -58,6 +70,41 @@ void phantom_pci_enable(pci_cfg_t *cfg, int onoff);
 char *get_pci_vendor(int vid);
 char *get_pci_device(int vid, int did);
 char *get_pci_class(u_int8_t base, u_int8_t sub_class);
+
+// Table to fing one of possible pci devices
+typedef struct 
+{
+    u_int16_t vendor_id;
+    u_int16_t device_id;
+	
+    u_int8_t base_class;
+    u_int8_t sub_class;
+
+    u_int8_t interface;
+
+    const char *name;             	
+
+    // Driver's internal id for this kind of dev
+    int         id; 
+
+    // Driver's internal parameters table
+    void *      param;
+
+    // Driver's internal parameters - set of four :)
+    int         p0; 
+    int         p1; 
+    int         p2; 
+    int         p3; 
+
+} pci_table_t;
+
+// returns table entry nimber (0-based) or -1
+// cfg is input
+int pci_find_in_table( pci_cfg_t *cfg,  pci_table_t *tab );
+
+// returns table entry nimber (0-based) or -1, looks in all pci devices
+// cfg is output
+int pci_find_any_in_table( pci_cfg_t *cfg, pci_table_t *tab );
 
 
 #define PCI_CONFIG_COMMAND 4

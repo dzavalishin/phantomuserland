@@ -5,8 +5,17 @@
 #include <ia32/pio.h>
 #include "video_drv_basic_vga.h"
 
-//#include <pc.h>
 
+#define CIRRUS_ID_CLGD5422  (0x23<<2)
+#define CIRRUS_ID_CLGD5426  (0x24<<2)
+#define CIRRUS_ID_CLGD5424  (0x25<<2)
+#define CIRRUS_ID_CLGD5428  (0x26<<2)
+#define CIRRUS_ID_CLGD5430  (0x28<<2)
+#define CIRRUS_ID_CLGD5434  (0x2A<<2)
+#define CIRRUS_ID_CLGD5436  (0x2B<<2)
+#define CIRRUS_ID_CLGD5446  (0x2E<<2)
+
+/*
 typedef enum {
     CLGD5426, //1
     CLGD5428, //1
@@ -25,8 +34,9 @@ typedef enum {
     CLGD7555, //13
     CLGD7556  //13
 } cirrus_types;
+*/
 
-#define KNOWN_CARDS 16
+//#define KNOWN_CARDS 16
 
 //54m30
 //54m40 - triple buffer, transparent color register
@@ -67,13 +77,14 @@ typedef enum {
  else SR17[6]=1,SR17[7:4]!=0
  */
 
+/*
 typedef struct {
     cirrus_types model;
     int biosnum,pcinum;
     char *desc;
     int family;
 } CIRRUS_DETECT;
-
+*/
 extern unsigned long af_mmio;
 
 #define GRX 0x3ce

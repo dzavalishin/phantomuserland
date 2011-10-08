@@ -292,6 +292,56 @@ static int probe_pci( int stage, pci_cfg_t *pci )
 }
 
 
+int pci_find_in_table( pci_cfg_t *cfg,  pci_table_t *tab )
+{
+    int i = 0;
+
+    for(;; tab++ )
+    {
+        if( (tab->vendor_id != 0) && (tab->vendor_id != cfg->vendor_id) )
+            continue;
+        if( (tab->device_id != 0) && (tab->device_id != cfg->device_id) )
+            continue;
+        if( (tab->base_class != 0) && (tab->base_class != cfg->base_class) )
+            continue;
+        if( (tab->sub_class != 0) && (tab->sub_class != cfg->sub_class) )
+            continue;
+        if( (tab->interface != 0) && (tab->interface != cfg->interface) )
+            continue;
+
+        return i;
+    }
+
+    return -1;
+}
+
+
+int pci_find_any_in_table( pci_cfg_t *cfg,  pci_table_t *tab )
+{
+
+    int i;
+
+    SHOW_FLOW0( 2, "Look for PCI devices" );
+    for(i = 0; i <= MAXPCI; i++ )
+    {
+        if( (!allpci[i].filled) || allpci[i].used )
+            continue;
+
+        int rc = pci_find_in_table( &allpci[i].pci, tab );
+
+        if( rc < 0 )
+            continue;
+
+        *cfg = allpci[i].pci;
+        return rc;
+    }
+    //SHOW_FLOW( 2, "Finished looking for PCI devices, stage %d", stage );
+
+    return -1;
+}
+
+
+
 #endif // HAVE_PCI
 
 

@@ -25,13 +25,32 @@ static int debug_level_flow = 1;
 #include <ia32/vm86.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
+#include <kernel/bus/pci.h>
 
 #include "video_drv_cirrus.h"
 
 static void map_video(int on_off);
 
+#define CL_VENDOR 0x1013
+
 static int cir_card = -1;
 
+static pci_table_t cir_devices[] =
+{
+    { CL_VENDOR, CIRRUS_ID_CLGD5422, 0, 0, 0, "CLGD-5422", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5426, 0, 0, 0, "CLGD-5426", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5424, 0, 0, 0, "CLGD-5424", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5428, 0, 0, 0, "CLGD-5428", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5430, 0, 0, 0, "CLGD-5430", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5434, 0, 0, 0, "CLGD-5434", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5436, 0, 0, 0, "CLGD-5436", 0, 0, 0, 0, 0, 0 },
+    { CL_VENDOR, CIRRUS_ID_CLGD5446, 0, 0, 0, "CLGD-5446", 0, 0, 0, 0, 0, 0 },
+
+
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } // final all-zero marker
+};
+
+/*
 CIRRUS_DETECT detect_info[]={
 { CLGD5426, 0x15, 0, "CLGD-5426", 0 },
 { CLGD5428, 0x18, 0, "CLGD-5428", 0 },
@@ -50,7 +69,7 @@ CIRRUS_DETECT detect_info[]={
 { CLGD7555, 0x46, 0, "CLGD-7555",-1 },
 { CLGD7556,  0x47, 0, "CLGD-7556",-1 }
 };
-
+*/
 
 /* from BIOS:
 
@@ -71,9 +90,7 @@ cirrus_check:
 
 static int cirrus_probe()
 {
-#if HAVE_VESA
-    RM_REGS regs;
-    int i, card;
+    int i;
 
     int part_id = read_vga_register( 0x3D4, 0x27 );
     SHOW_FLOW( 1, "Cirrus driver part Id (0x3D4,0x27) = 0x%X", part_id );
@@ -99,12 +116,16 @@ static int cirrus_probe()
 
     }
 
+#if HAVE_VESA
+#if 0
+    RM_REGS regs;
     regs.x.ax=0x1200;  //cirrus extended bios
     regs.x.bx=0x81;    //get BIOS version
     phantom_bios_int_10_args(&regs);
 
     SHOW_FLOW( 1, "Cirrus driver BIOS 0x1200 81 ax=0x%X", regs.x.ax );
 
+    int card;
     regs.x.ax=0x1200;  //cirrus extended bios
     regs.x.bx=0x80;    //get chip version
     phantom_bios_int_10_args(&regs);
@@ -120,12 +141,18 @@ static int cirrus_probe()
             break;
         }
     }
+#endif
 
-    if( cir_card == -1 )
+    pci_cfg_t cfg;
+
+    cir_card = pci_find_any_in_table( &cfg, cir_devices );
+
+    if( cir_card < 0 )
         return 0; // No card
 
 
-    SHOW_FLOW( 1, "Cirrus %s found\n", detect_info[cir_card].desc );
+
+    SHOW_FLOW( 1, "Cirrus %s found\n", cir_devices[cir_card].name );
 
     return 0;
 #else // vesa
@@ -209,8 +236,7 @@ static void map_video(int on_off)
     hal_pages_control_etc(
                           video_driver_cirrus_pa,
                           video_driver_cirrus.screen,
-                          n_pages, page_map, page_rw,
-                          INTEL_PTE_WTHRU|INTEL_PTE_NCACHE );
+                          n_pages, page_map_io, page_rw, 0 );
 }
 
 #endif
@@ -221,42 +247,6 @@ static void map_video(int on_off)
 
 
 
-/*
-
-Int 10/AH=12h/BL=80h
-
-----------------------
-
-Cirrus Logic BIOS - INQUIRE VGA TYPE
-
-AH = 12h
-BL = 80h
-
-Return:
-AX = controller type in bits 13-0 (see #0028)
-
-bit 14:
-???
-
-bit 15:
-???. BL = silicon revision number (bit 7 set if not available). BH = ??? bit 2 set if using CL-GD 6340 LCD interface
-
-See Also: AH=12h/BL=81h - AH=12h/BL=82h - AH=12h/BL=85h - AH=12h/BL=9Ah - AH=12h/BL=A1h
-
-(Table 0028) Values for Cirrus Logic video controller type: 0000h no extended alternate select support 0001h reserved 0002h CL-GD510/520 0003h CL-GD610/620 0004h CL-GD5320 0005h CL-GD6410 0006h CL-GD5410 0007h CL-GD6420 0008h CL-GD6412 0010h CL-GD5401 0011h CL-GD5402 0012h CL-GD5420 0013h CL-GD5422 0014h CL-GD5424 0015h CL-GD5426 0016h CL-GD5420r1 0017h CL-GD5402r1 0018h CL-GD5428 0019h CL-GD5429 0020h CL-GD6205/15/25 0021h CL-GD6215 0022h CL-GD6225 0023h CL-GD6235 0024h CL-GD6245 0030h CL-GD5432 0031h CL-GD5434 0032h CL-GD5430 0033h CL-GD5434 rev. E and F 0035h CL-GD5440 0036h CL-GD5436 0039h CL-GD5446 0040h CL-GD6440 0041h CL-GD7542 (Nordic) 0042h CL-GD7543 (Viking) 0043h CL-GD7541 (Nordic Lite) 0050h CL-GD5452 (Northstar) 0052h CL-GD5452 (Northstar) ???
-
-See Also: #0706 - #0717
-
-Category: Video - Int 10h - C
-
-----------------------
-
-
-
-
-
-
-*/
 
 #endif // ARCH_ia32
 
