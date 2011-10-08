@@ -49,11 +49,11 @@ struct drv_video_screen_t *video_drivers[] =
 #if !JUST_VGA
 
     // Incomplete, and suspected to break VESA driver
-    //&video_driver_cirrus,
+    &video_driver_cirrus,
 
     // &video_driver_bochs_vesa_emulator,
 
-    &video_driver_vmware_svga,
+    //&video_driver_vmware_svga,
 
     // test one. never reports success
     &video_driver_direct_vesa,

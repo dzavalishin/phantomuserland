@@ -429,14 +429,14 @@ struct data_area_4_window
     rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
 #else
     drv_video_window_t                  w;
-    /** this field extends w and works as it's last field. */
+    // this field extends w and works as it's last field. 
     rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
 #endif
 
     int                                 x, y; // in pixels
     rgba_t                              fg, bg; // colors
 
-    struct pvm_object                   event_handler;
+    struct pvm_object                   event_handler; // connection!
     char                                title[PVM_MAX_TTY_TITLE+1];
 };
 

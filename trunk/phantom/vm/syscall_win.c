@@ -89,10 +89,14 @@ static int win_fill_21(struct pvm_object me , struct data_area_4_thread *tc )
 
     rgba_t c;
 
+    /*
     c.r = color >> 16;
     c.r = color >> 8;
     c.b = color >> 0;
     c.a = 0xFF;
+    */
+
+    INT32_TO_RGBA(c, color);
 
     drv_video_window_fill( &(da->w), c );
 
@@ -113,10 +117,14 @@ static int win_setFGcolor_22(struct pvm_object me , struct data_area_4_thread *t
     int color = POP_INT();
     //da->fg = color;
 
+    /*
     da->fg.r = color >> 16;
-    da->fg.r = color >> 8;
+    da->fg.g = color >> 8;
     da->fg.b = color >> 0;
     da->fg.a = 0xFF;
+    */
+
+    INT32_TO_RGBA(da->fg, color);
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -131,12 +139,15 @@ static int win_setBGcolor_23(struct pvm_object me , struct data_area_4_thread *t
     CHECK_PARAM_COUNT(n_param, 1);
 
     int color = POP_INT();
-    //da->bg = color;
 
+    /*
     da->bg.r = color >> 16;
     da->bg.r = color >> 8;
     da->bg.b = color >> 0;
     da->bg.a = 0xFF;
+    */
+
+    INT32_TO_RGBA(da->bg, color);
 
     SYSCALL_RETURN_NOTHING;
 }

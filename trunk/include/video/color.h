@@ -2,6 +2,7 @@
 #define COLOR_H
 
 #include <sys/cdefs.h>
+#include <phantom_types.h>
 
 // Windows 'screen' driver works in BGR format :(
 #define BGR 1
@@ -60,6 +61,7 @@ extern rgba_t COLOR_MAGENTA;
 extern rgba_t COLOR_LIGHTMAGENTA;
 
 
+#define _C_COLOR_TRANSPARENT  { 0, 0, 0, 0 }
 
 #define _C_COLOR_BLACK  { 0, 0, 0, 0xFF }
 #define _C_COLOR_WHITE  { 0xFF, 0xFF, 0xFF, 0xFF }
@@ -85,6 +87,11 @@ extern rgba_t COLOR_LIGHTMAGENTA;
 //! Convert HSI color to RGB one
 rgba_t Hsi2Rgb(double H, double S, double I );
 
+// TODO what's on big endian?
+
+//#define INT32_TO_RGBA(rgba,i) (  = (i) )
+#define INT32_TO_RGBA(rgba,i) ( (rgba) = *((rgba_t*)&(i)) )
+#define RGBA_TO_INT32(i,rgba) ( (i) = (*(u_int32_t*)(&(rgba))) )
 
 
 #endif // COLOR_H
