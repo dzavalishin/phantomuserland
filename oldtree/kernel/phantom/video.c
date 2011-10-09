@@ -53,7 +53,7 @@ struct drv_video_screen_t *video_drivers[] =
 
     // &video_driver_bochs_vesa_emulator,
 
-    //&video_driver_vmware_svga,
+    &video_driver_vmware_svga,
 
     // test one. never reports success
     &video_driver_direct_vesa,

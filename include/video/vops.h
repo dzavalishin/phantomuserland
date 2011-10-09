@@ -16,6 +16,9 @@
 
 void video_scroll_hor( rgba_t *pixels, int xs, int ys, int lstep, int s, rgba_t bg );
 
+void rgba2rgba_move_noalpha( struct rgba_t *dest, const struct rgba_t *src, int nelem );
+void rgba2rgb_move_noalpha( struct rgb_t *dest, const struct rgba_t *src, int nelem );
+
 
 void rgba2rgb_move( struct rgb_t *dest, const rgba_t *src, int nelem );
 void rgba2rgba_move( rgba_t *dest, const rgba_t *src, int nelem );

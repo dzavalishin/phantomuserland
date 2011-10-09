@@ -263,4 +263,22 @@ void phantom_pci_enable( pci_cfg_t *pci, int onoff )
 
 }
 
+void phantom_pci_dump( pci_cfg_t *pci )
+{
+    u_int32_t command = phantom_pci_read( pci->bus, pci->dev, pci->func, PCI_CONFIG_COMMAND, 2 );
+
+    printf("Device Info: /bus/pci/%d/%d/%d\n",pci->bus,pci->dev,pci->func);
+
+    printf("  * Vendor: %x   Device: %x  Class/SubClass/Interface %X/%X/%X\n",
+           pci->vendor_id,pci->device_id,pci->base_class,pci->sub_class,pci->interface);
+
+    printf("  * Actual command: %b\n", command, "\020\1IO\2MEM\3BUSM\4SPEC\5WINV\6VGA\7PARERR\10?\11SERR\12FB2B\13DI" );
+
+    printf("  * Saved Status: %x  Command: %x  BIST/Type/Lat/CLS: %X/%X/%X/%X\n",
+           pci->status, pci->command, pci->bist, pci->header_type,
+           pci->latency_timer, pci->cache_line_size);
+
+}
+
+
 

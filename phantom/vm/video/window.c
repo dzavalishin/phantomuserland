@@ -288,13 +288,16 @@ void repaint_win_part( drv_video_window_t *w, rect_t *wtodo, rect_t *todo  )
     int dst_xpos = wtodo->x + w->x; // todo->x
     int dst_ypos = wtodo->y + w->y; // todo->y
 
+    u_int32_t flags;
+    win2blt_flags( &flags, w );
+
     drv_video_bitblt_part(
                           w->pixel,
                           w->xsize, w->ysize,
                           wtodo->x, wtodo->y,
                           dst_xpos, dst_ypos,
                           wtodo->xsize, wtodo->ysize,
-                          1, w->z);
+                          1, w->z, flags);
 
 }
 
@@ -349,6 +352,8 @@ void drv_video_window_rezorder_all(void)
         // Actually start with 2, leave 0 for background and 1 for decorations of bottom win
         next_z += 2;
 
+        w->state &= ~WSTATE_WIN_UNCOVERED; // mark all windows as possibly covered
+
         if( w->w_owner != 0 )
             continue;
 
@@ -372,21 +377,25 @@ void drv_video_window_rezorder_all(void)
         }
 
         video_zbuf_reset_win( w ); // TODO rezet z buf in event too?
-        //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
-        //event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
     }
 
+    int top_one = 1;
     // From top to bottom
-/*
-    for( w = (drv_video_window_t *) queue_last(&allwindows);
-         !queue_end(&allwindows, (queue_entry_t)w);
-         w = (drv_video_window_t *) queue_prev(&w->chain))
-*/
     queue_iterate_back(&allwindows, w, drv_video_window_t *, chain)
     {
         // Don't touch children (decor & title)
         if( w->w_owner == 0 )
+        {
+            if(top_one)
+            {
+                top_one = 0;
+                w->state |= WSTATE_WIN_UNCOVERED; // mark top one as uncovered
+                if(w->w_decor)
+                    w->w_decor->state |= WSTATE_WIN_UNCOVERED; // and its decor subwin too
+            }
+
             event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
+        }
     }
 }
 
@@ -413,7 +422,7 @@ window_handle_t drv_video_next_window(window_handle_t curr)
         }
 
         next = (window_handle_t)queue_next(&next->chain);
-        if(queue_end(&allwindows, next))
+        if(queue_end(&allwindows, (void *)next))
             next = (window_handle_t)queue_first(&allwindows);
 
         // I'm decoration, don't choose me
@@ -468,6 +477,8 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
     ui_event_t e1, e2;
     rect_t oldw;
     rect_t neww;
+
+    //w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
 
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e2.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
@@ -534,6 +545,8 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
     ui_event_t e1, e2, e3;
 
     w_lock();
+
+    //w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
 
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e2.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
@@ -610,6 +623,9 @@ drv_video_window_resize( drv_video_window_t *w, int xsize, int ysize )
     rect_t oldsize;
     rect_t newsize;
     rect_t maxsize;
+
+    //w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
+
     drv_video_window_get_bounds( w, &oldsize );
     do_window_resize(w, xsize, ysize);
     drv_video_window_get_bounds( w, &newsize );
@@ -693,6 +709,8 @@ void drv_video_window_to_bottom(drv_video_window_t *w)
 {
     w_lock();
 
+    w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
+
     queue_remove(&allwindows, w, drv_video_window_t *, chain);
     queue_enter_first(&allwindows, w, drv_video_window_t *, chain);
     drv_video_window_rezorder_all();
@@ -705,6 +723,8 @@ void drv_video_window_to_bottom(drv_video_window_t *w)
 void drv_video_window_to_top(drv_video_window_t *w)
 {
     w_lock();
+
+    w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
 
     queue_remove(&allwindows, w, drv_video_window_t *, chain);
     queue_enter(&allwindows, w, drv_video_window_t *, chain);

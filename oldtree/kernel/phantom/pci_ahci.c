@@ -1,5 +1,5 @@
 #define AHCI_Q 0
-#define AHCI_REG_DISK 0
+#define AHCI_REG_DISK 1
 
 #if HAVE_PCI
 
@@ -88,6 +88,8 @@ typedef struct
     hal_sem_t           finsem;
 } ahci_t;
 
+
+
 static void ahci_interrupt(void *arg);
 
 static int ahci_init(phantom_device_t *dev);
@@ -121,7 +123,11 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 
     SHOW_FLOW( 1, "Probe for " DEV_NAME " stage %d", stage );
 
+    phantom_pci_enable( pci, 1 );
+    phantom_pci_dump( pci );
+
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
+
 
     int i;
     for (i = 0; i < 6; i++)
@@ -886,7 +892,7 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
 {
     ahci_port_t *p = part->specific;
     phantom_device_t *dev = p->dev;
-    //ahci_t *a = dev->drv_private;
+    ahci_t *a = dev->drv_private;
 
     rq->flag_ioerror = 0;
     rq->rc = 0;
@@ -895,7 +901,7 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
     ahci_start_cmd( dev, p->nport, slot );
 
     // uncomment to forse check op result now
-    //hal_sem_release( &a->finsem );
+    hal_sem_release( &a->finsem );
 
 
     return 0;

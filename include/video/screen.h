@@ -19,6 +19,9 @@
 
 #define VIDEO_PARTIAL_WIN_BLIT 1
 
+#define VIDEO_NOZBUF_BLIT 0
+
+
 #include <errno.h>
 
 #include <video/color.h>
@@ -105,10 +108,13 @@ extern void drv_video_null(void);
 
 
 
+// Blitter can ignore z buffer
+#define BLT_FLAG_NOZBUF         (1<<0)
+// Blitter can ignore alpha byte
+#define BLT_FLAG_NOALPHA        (1<<1)
 
-
-extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
-extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos );
+extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
 
 #if !NEW_WINDOWS
 extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
@@ -121,10 +127,10 @@ void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize
 
 // RGB videospace access workers
 void drv_video_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
-void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos);
+void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags);
 
 //void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos);
-void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos);
+void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags);
 
 
 

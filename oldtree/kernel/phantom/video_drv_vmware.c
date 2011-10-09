@@ -34,6 +34,9 @@
 #define VMWARE_VIDEO_DRV_DEFAULT_X_SIZE 1024
 #define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 768
 
+static void dump_bits( u_int8_t *bits, size_t noutbytes ) __attribute__((unused));
+
+
 void vmware_draw_mouse_bp2(void);
 void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor );
 void vmware_mouse_on_bp2(void);
@@ -44,6 +47,10 @@ static int vmware_video_probe();
 static int vmware_video_start();
 static int vmware_video_stop();
 static void vmware_video_update(void);
+static errno_t vmware_accel_start(void);
+
+static void vmware_detect2(int xsize, int ysize, int bpp);
+
 
 u_int32_t SVGA_ReadReg(u_int32_t index);
 void SVGA_WriteReg(u_int32_t index,  u_int32_t value);
@@ -74,6 +81,7 @@ screen:			0,
 
 probe: 			vmware_video_probe,
 start: 			vmware_video_start,
+accel:                  vmware_accel_start,
 stop:   		vmware_video_stop,
 
 update: 		vmware_video_update,
@@ -94,10 +102,6 @@ mouse_enable:          	drv_video_mouse_on_deflt,
 
 
 
-#if 1
-//static void vbe_write(unsigned short index, unsigned short value) { SVGA_WriteReg(index, value); }
-//static int vbe_read(unsigned short index) { return SVGA_ReadReg(index); }
-
 static int vmware_video_probe()
 {
     return gSVGA.found ? VIDEO_PROBE_SUCCESS : VIDEO_PROBE_FAIL;
@@ -106,58 +110,6 @@ static int vmware_video_probe()
 
 
 
-#else
-static void vbe_write(unsigned short index, unsigned short value)
-{
-    outw(VBE_DISPI_IOPORT_INDEX, index);
-    outw(VBE_DISPI_IOPORT_DATA, value);
-}
-
-static int vbe_read(unsigned short index)
-{
-    outw(VBE_DISPI_IOPORT_INDEX, index);
-    return inw(VBE_DISPI_IOPORT_DATA);
-}
-
-
-// Return nonzero on err
-static int vbe_set(unsigned short xres, unsigned short yres, unsigned short bpp)
-{
-    vbe_write(VBE_DISPI_INDEX_ID, VBE_DISPI_ID2);
-    int id = vbe_read(VBE_DISPI_INDEX_ID);
-
-    printf("VmWare dev id 0x%x... ", id);
-    //getchar();
-
-    if( id < VBE_DISPI_ID2 || id > VBE_DISPI_ID3 )
-        return 1;
-
-    vbe_write(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);
-    vbe_write(VBE_DISPI_INDEX_XRES, xres);
-    vbe_write(VBE_DISPI_INDEX_YRES, yres);
-    vbe_write(VBE_DISPI_INDEX_BPP, bpp);
-    vbe_write(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_ENABLED | VBE_DISPI_LFB_ENABLED);
-
-    return 0;
-}
-
-static int vmware_video_probe()
-{
-    //printf("Probing for ");
-    vbe_write(VBE_DISPI_INDEX_ID, VBE_DISPI_ID2);
-    int id = vbe_read(VBE_DISPI_INDEX_ID);
-
-    if( id < VBE_DISPI_ID2 || id > VBE_DISPI_ID3 )
-        return 0;
-
-    printf("Bochs VBE emulator ver 0x%x found\n", id);
-    return 1;
-}
-#endif
-
-
-
-//#define VBE_DISPI_LFB_PHYSICAL_ADDRESS  0xE0000000
 
 // need 4Mbytes aperture
 #define N_PAGES 1024
@@ -177,16 +129,17 @@ static void vmware_map_video(int on_off)
 
     hal_pages_control( gSVGA.fbMem, video_driver_vmware_svga.screen, N_PAGES, on_off ? page_map_io : page_unmap, page_rw );
 
-    //video_driver_vmware_vesa_emulator.screen = (void *)phystokv( VBE_DISPI_LFB_PHYSICAL_ADDRESS );
-
 }
 
 static int vmware_video_start()
 {
+    vmware_detect2( video_driver_vmware_svga.xsize, video_driver_vmware_svga.ysize, video_driver_vmware_svga.bpp );
+
     switch_screen_bitblt_to_32bpp(1);
     vmware_map_video( 1 );
 
-    SVGA_SetMode( VMWARE_VIDEO_DRV_DEFAULT_X_SIZE, VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE, 32 );
+    // In fact, detect already set it - here we init fifo
+    SVGA_SetMode( video_driver_vmware_svga.xsize, video_driver_vmware_svga.ysize, video_driver_vmware_svga.bpp );
 
     return 0;
 }
@@ -200,8 +153,50 @@ static int vmware_video_stop()
     return 0;
 }
 
+static errno_t vmware_accel_start(void)
+{
+    if( !gSVGA.found )
+        return ENXIO;
+
+    vmware_detect2( video_drv->xsize, video_drv->ysize, video_drv->bpp );
+
+    // In fact, detect already set it - here we init fifo
+    SVGA_SetMode( video_drv->xsize, video_drv->ysize, video_drv->bpp );
+
+    video_drv->update = vmware_video_update;
+
+#if 1 // doesn't work
+    SHOW_FLOW( 0, "VmWare accelerator add on start, id %x", gSVGA.deviceVersionId );
+
+    if( gSVGA.capabilities & SVGA_CAP_CURSOR )
+    {
+        int cpb2 = gSVGA.capabilities & SVGA_CAP_CURSOR_BYPASS_2;
+        int alpha = gSVGA.capabilities & SVGA_CAP_ALPHA_CURSOR;
+        SHOW_FLOW( 2, "capas: cursor %s %s", (cpb2 ? "bypass2" : ""), alpha ? "alpha" : "(and/xor only)"  );
+
+        if(cpb2)
+        {
+            // Take over mouse
+            video_drv->redraw_mouse_cursor = vmware_draw_mouse_bp2;
+            video_drv->set_mouse_cursor    = vmware_set_mouse_cursor_bp2;
+            video_drv->mouse_disable       = vmware_mouse_off_bp2;
+            video_drv->mouse_enable        = vmware_mouse_on_bp2;
+        }
+
+    }
+#endif
+
+    /*
+    // now take over screen too - it seems that we ruin default vmem mapping somehow
+    vmware_map_video(1);
+    video_drv->screen = video_driver_vmware_svga.screen;
+    */
+    return 0;
+}
+
+
 // -----------------------------------------------------------------------
-// VMWARE SVGA II
+// VMWARE SVGA II probe
 // -----------------------------------------------------------------------
 
 
@@ -259,49 +254,9 @@ return 0;
 
     SHOW_FLOW( 0, "device version = %d", gSVGA.deviceVersionId & 0xFF );
 
-    // dz - original stub driver fails on reading fb size.
-    // apparently some sane numbers are needed in theese regs
-    SVGA_WriteReg(SVGA_REG_ENABLE, 0 );
-
 #if 0
-    SVGA_WriteReg(SVGA_REG_WIDTH, 1280 );
-    SVGA_WriteReg(SVGA_REG_HEIGHT, 1024 );
-    SVGA_WriteReg(SVGA_REG_BITS_PER_PIXEL, 32 );
-#else
-    SVGA_WriteReg(SVGA_REG_WIDTH, 1024 );
-    SVGA_WriteReg(SVGA_REG_HEIGHT, 768 );
-    SVGA_WriteReg(SVGA_REG_BITS_PER_PIXEL, 32 );
+    vmware_detect2();
 #endif
-    SVGA_WriteReg(SVGA_REG_ENABLE, 1 );
-
-
-    /*
-     * We must determine the FIFO and FB size after version
-     * negotiation, since the default version (SVGA_ID_0)
-     * does not support the FIFO buffer at all.
-     */
-
-    gSVGA.fifoSize = SVGA_ReadReg(SVGA_REG_MEM_SIZE);
-    gSVGA.fbSize = SVGA_ReadReg(SVGA_REG_FB_SIZE);
-
-    gSVGA.fbOffset = SVGA_ReadReg(SVGA_REG_FB_OFFSET);
-
-    SHOW_FLOW( 1, "framebuf size %dKb, offset %x, fifo size %d", gSVGA.fbSize/1024, gSVGA.fbOffset, gSVGA.fifoSize );
-
-    /*
-     * Sanity-check the FIFO and framebuffer sizes.
-     * These are arbitrary values.
-     */
-
-    if (gSVGA.fbSize < 0x100000) {
-        SHOW_ERROR( 0, "FB size (%d) very small, probably incorrect.", gSVGA.fbSize );
-        return 0;
-    }
-    if (gSVGA.fifoSize < 0x10000) {
-        SHOW_ERROR( 0, "FIFO size (%d) very small, probably incorrect.", gSVGA.fifoSize );
-        return 0;
-    }
-
     /*
      * If the device is new enough to support capability flags, get the
      * capabilities register.
@@ -359,17 +314,6 @@ return 0;
     }
 
 
-    {
-        void *vva;
-        int nfifo_pages = BYTES_TO_PAGES(gSVGA.fifoSize);
-
-        if( hal_alloc_vaddress(&vva, nfifo_pages) )
-            panic("Can't alloc vaddress for %d fifo pages", nfifo_pages);
-
-        gSVGA.fifoMem = vva;
-        hal_pages_control( gSVGA.fifoPhys, gSVGA.fifoMem, nfifo_pages, page_map_io, page_rw );
-    }
-
 
     /*
      * Optional interrupt initialization.
@@ -418,7 +362,57 @@ return 0;
 }
 
 
+static void vmware_detect2(int xsize, int ysize, int bpp)
+{
+    // dz - original stub driver fails on reading fb size.
+    // apparently some sane numbers are needed in theese regs
+    SVGA_WriteReg(SVGA_REG_ENABLE, 0 );
 
+    SVGA_WriteReg(SVGA_REG_WIDTH, 		xsize );
+    SVGA_WriteReg(SVGA_REG_HEIGHT, 		ysize );
+    SVGA_WriteReg(SVGA_REG_BITS_PER_PIXEL, 	bpp   );
+
+    SVGA_WriteReg(SVGA_REG_ENABLE, 1 );
+
+    /*
+     * We must determine the FIFO and FB size after version
+     * negotiation, since the default version (SVGA_ID_0)
+     * does not support the FIFO buffer at all.
+     */
+
+    gSVGA.fifoSize = SVGA_ReadReg(SVGA_REG_MEM_SIZE);
+    gSVGA.fbSize = SVGA_ReadReg(SVGA_REG_FB_SIZE);
+
+    gSVGA.fbOffset = SVGA_ReadReg(SVGA_REG_FB_OFFSET);
+
+    SHOW_FLOW( 1, "framebuf size %dKb, offset %x, fifo size %d", gSVGA.fbSize/1024, gSVGA.fbOffset, gSVGA.fifoSize );
+
+    /*
+     * Sanity-check the FIFO and framebuffer sizes.
+     * These are arbitrary values.
+     */
+
+    if (gSVGA.fbSize < 0x100000) {
+        SHOW_ERROR( 0, "FB size (%d) very small, probably incorrect.", gSVGA.fbSize );
+    }
+    if (gSVGA.fifoSize < 0x10000) {
+        SHOW_ERROR( 0, "FIFO size (%d) very small, probably incorrect.", gSVGA.fifoSize );
+    }
+
+    if(gSVGA.fifoMem == 0)
+    {
+        void *vva;
+        int nfifo_pages = BYTES_TO_PAGES(gSVGA.fifoSize);
+
+        if( hal_alloc_vaddress(&vva, nfifo_pages) )
+            panic("Can't alloc vaddress for %d fifo pages", nfifo_pages);
+
+        gSVGA.fifoMem = vva;
+        hal_pages_control( gSVGA.fifoPhys, gSVGA.fifoMem, nfifo_pages, page_map_io, page_rw );
+    }
+
+
+}
 
 
 

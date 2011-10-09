@@ -55,21 +55,29 @@ typedef struct
 	
 } pci_cfg_t;
 
-int phantom_pci_find(pci_cfg_t *cfg, u_int16_t vendor_id, u_int16_t device_id);
-int phantom_pci_find_class( pci_cfg_t *cfg, u_int8_t class_id, u_int8_t subclass_id );
+int		phantom_pci_find(pci_cfg_t *cfg, u_int16_t vendor_id, u_int16_t device_id);
+int 		phantom_pci_find_class( pci_cfg_t *cfg, u_int8_t class_id, u_int8_t subclass_id );
 
 
-u_int32_t phantom_pci_read(int bus, int dev, int func, int reg, int bytes);
-void phantom_pci_write(int bus, int dev, int func, int reg, u_int32_t v, int bytes);
+u_int32_t 	phantom_pci_read(int bus, int dev, int func, int reg, int bytes);
+void 		phantom_pci_write(int bus, int dev, int func, int reg, u_int32_t v, int bytes);
 
-int phantom_pci_probe(int bus, int dev, int func, pci_cfg_t *cfg);
+int 		phantom_pci_probe(int bus, int dev, int func, pci_cfg_t *cfg);
 
-void phantom_pci_enable(pci_cfg_t *cfg, int onoff);
+/*
+ *    Enable or disable a device's memory and IO space. This must be
+ *    called to enable a device's resources after setting all
+ *    applicable BARs. Also enables/disables bus mastering.
+ */
+
+void 		phantom_pci_enable(pci_cfg_t *cfg, int onoff);
+
+void		phantom_pci_dump( pci_cfg_t *pci );
 
 
-char *get_pci_vendor(int vid);
-char *get_pci_device(int vid, int did);
-char *get_pci_class(u_int8_t base, u_int8_t sub_class);
+char *		get_pci_vendor(int vid);
+char *		get_pci_device(int vid, int did);
+char *		get_pci_class(u_int8_t base, u_int8_t sub_class);
 
 // Table to fing one of possible pci devices
 typedef struct 
