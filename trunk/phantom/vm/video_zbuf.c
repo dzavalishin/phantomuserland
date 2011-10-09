@@ -76,6 +76,19 @@ void video_zbuf_reset_win( window_handle_t w )
 }
 
 
+/**
+ *
+ * Set given square to win z for window.
+ *
+**/
+
+void video_zbuf_set_win_z( window_handle_t w )
+{
+    // TODO XXX HACK alert - hardcoded decorations size
+    const int bw = 3;
+    video_zbuf_reset_square_z( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21, w->z );
+}
+
 
 /**
  *

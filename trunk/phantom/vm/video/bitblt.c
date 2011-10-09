@@ -31,6 +31,8 @@
 // void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 static void (*bit_zbmover_to_screen)( void *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos ) = (void *)rgba2rgb_zbmove;
 static void (*bit_mover_to_screen)( void *dest, const struct rgba_t *src, int nelem ) = (void *)rgba2rgb_move;
+static void (*bit_mover_to_screen_noalpha)( void *dest, const struct rgba_t *src, int nelem ) = (void *)rgba2rgb_move_noalpha;
+
 static void (*bit_mover_from_screen)( struct rgba_t *dest, void *src, int nelem ) = (void *)rgb2rgba_move;
 static int      bit_mover_byte_step = 3;
 
@@ -41,6 +43,7 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
     {
         bit_zbmover_to_screen = (void *)rgba2rgba_zbmove;
         bit_mover_to_screen   = (void *)rgba2rgba_move;
+        bit_mover_to_screen_noalpha = (void *)rgba2rgba_move_noalpha;
         bit_mover_from_screen = (void *)rgba2rgba_24_move;
 #if defined(ARCH_ia32) && 0
         if(ARCH_HAS_FLAG(ARCH_IA32_SSE2))
@@ -57,6 +60,7 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
     {
         bit_zbmover_to_screen = (void *)rgba2rgb_zbmove;
         bit_mover_to_screen   = (void *)rgba2rgb_move;
+        bit_mover_to_screen_noalpha = (void *)rgba2rgb_move_noalpha;
         bit_mover_from_screen = (void *)rgb2rgba_move;
 
         bit_mover_byte_step = 3;
@@ -75,9 +79,9 @@ void switch_screen_bitblt_to_32bpp( int use32bpp )
 
 #if VIDEO_PARTIAL_WIN_BLIT
 
-void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
+void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags)
 {
-    drv_video_bitblt_part(from, xsize, ysize, 0, 0, xpos, ypos, xsize, ysize, reverse, zpos);
+    drv_video_bitblt_part(from, xsize, ysize, 0, 0, xpos, ypos, xsize, ysize, reverse, zpos, flags);
 }
 
 #else
@@ -203,7 +207,7 @@ void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int 
 
 
 // Put part of picture to screen
-void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos)
+void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags )
 {
     assert(video_drv->screen != 0);
 
@@ -226,12 +230,14 @@ void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int
     {
         xsize -= (-dst_xpos);
         dst_xpos = 0;
+        src_xpos += (-dst_xpos);
     }
 
     if( dst_ypos < 0 )
     {
         ysize -= (-dst_ypos);
         dst_ypos = 0;
+        src_ypos += (-dst_ypos);
     }
 
 
@@ -255,12 +261,14 @@ void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int
     {
         xsize -= (-src_xpos);
         src_xpos = 0;
+        dst_xpos += (-src_xpos);
     }
 
     if( src_ypos < 0 )
     {
         ysize -= (-src_ypos);
         src_ypos = 0;
+        dst_ypos += (-src_ypos);
     }
 
     if( (xsize < 0) || (ysize < 0 ) )
@@ -280,8 +288,12 @@ void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int
     int wline = 0; // we skipped ypos lines already
     int sline = dst_ypos;
 
+    int noalpha = (flags & BLT_FLAG_NOZBUF) && (flags & BLT_FLAG_NOALPHA);
+    // ZBUF_TOP is a special value for mouse painting. XXX hack!
+    int nozbuf = (flags & BLT_FLAG_NOZBUF) || (zpos == ZBUF_TOP);
 
-    //printf("xlen = %d, sline = %d dst_yafter=%d \n", xlen, sline, dst_yafter );
+    if(nozbuf)
+        video_zbuf_reset_square_z( dst_xpos, dst_ypos, xsize, ysize, zpos );
 
     if(reverse)
     {
@@ -294,9 +306,9 @@ void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int
             const struct rgba_t *w_start = from + ((wline*src_xsize) + src_xpos);
 
             zbuf_t *zb = zbuf + ( (video_drv->xsize * ((video_drv->ysize-1) - sline)) + dst_xpos);
-            // ZBUF_TOP is a special value for mouse painting. XXX hack!
-            if(zpos == ZBUF_TOP) bit_mover_to_screen( (void *)s_start, w_start, xsize );
-            else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xsize, zpos );
+            if(noalpha)   	bit_mover_to_screen_noalpha( (void *)s_start, w_start, xsize );
+            else if(nozbuf)  	bit_mover_to_screen( (void *)s_start, w_start, xsize );
+            else         	bit_zbmover_to_screen( (void *)s_start, w_start, zb, xsize, zpos );
         }
     }
     else
@@ -308,11 +320,11 @@ void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*src_xsize) + src_xpos);
 
-            //zbuf_t *zb = zbuf + ((wline*xsize) + xshift);
             zbuf_t *zb = zbuf + ( (video_drv->xsize * sline) + dst_xpos);
-            // ZBUF_TOP is a special value for mouse painting. XXX hack!
-            if(zpos == ZBUF_TOP) bit_mover_to_screen( (void *)s_start, w_start, xsize );
-            else bit_zbmover_to_screen( (void *)s_start, w_start, zb, xsize, zpos );
+
+            if(noalpha)   	bit_mover_to_screen_noalpha( (void *)s_start, w_start, xsize );
+            else if(nozbuf)   	bit_mover_to_screen( (void *)s_start, w_start, xsize );
+            else         	bit_zbmover_to_screen( (void *)s_start, w_start, zb, xsize, zpos );
         }
     }
 }

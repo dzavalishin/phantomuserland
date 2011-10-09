@@ -337,6 +337,21 @@ void rgba2rgb_move( struct rgb_t *dest, const struct rgba_t *src, int nelem )
     }
 }
 
+void rgba2rgb_move_noalpha( struct rgb_t *dest, const struct rgba_t *src, int nelem )
+{
+    while(nelem-- > 0)
+    {
+        dest->r = src->r;
+        dest->g = src->g;
+        dest->b = src->b;
+        
+        dest++;
+        src++;
+    }
+}
+
+
+
 void rgb2rgba_move( struct rgba_t *dest, const struct rgb_t *src, int nelem )
 {
     while(nelem-- > 0)
@@ -366,6 +381,14 @@ void rgba2rgba_move( struct rgba_t *dest, const struct rgba_t *src, int nelem )
             src++;
         }
 }
+
+void rgba2rgba_move_noalpha( struct rgba_t *dest, const struct rgba_t *src, int nelem )
+{
+    while(nelem-- > 0)
+        *dest++ = *src++;
+}
+
+
 
 void rgba2rgba_24_move( struct rgba_t *dest, const struct rgba_t *src, int nelem )
 {

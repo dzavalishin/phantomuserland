@@ -27,11 +27,15 @@ typedef struct drv_video_window * window_handle_t;
 #define WFLAG_WIN_NOFOCUS               (1<<2)
 // Don't free window pixels
 #define WFLAG_WIN_NOPIXELS              (1<<3)
+// Can not treat all pixels alpha as 0xFF
+#define WFLAG_WIN_NOTOPAQUE             (1<<4)
 
 
 #define WSTATE_WIN_FOCUSED              (1<<0)
 #define WSTATE_WIN_DRAGGED              (1<<1)
 #define WSTATE_WIN_VISIBLE              (1<<2)
+// No one is above
+#define WSTATE_WIN_UNCOVERED            (1<<3)
 
 // -----------------------------------------------------------------------
 // New windows (in work)
@@ -239,6 +243,7 @@ extern window_handle_t      focused_window;
 
 window_handle_t drv_video_next_window(window_handle_t curr);
 
+void win2blt_flags( u_int32_t *flags, const drv_video_window_t *w );
 
 
 // -----------------------------------------------------------------------
