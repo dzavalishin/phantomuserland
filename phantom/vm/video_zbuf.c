@@ -10,6 +10,13 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "zbuf"
+#include <debug_ext.h>
+#define debug_level_flow 8
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 //#include <drv_video_screen.h>
 #include <phantom_types.h>
 #include <phantom_libc.h>
@@ -58,6 +65,7 @@ void video_zbuf_reset()
 
 void video_zbuf_reset_z(int z)
 {
+    SHOW_FLOW( 1, "%d", z );
     memset( zbuf, z, zbsize );
 }
 
@@ -105,8 +113,10 @@ static int zb_upside = 0;
 void video_zbuf_turn_upside(int v) { zb_upside = v; }
 
 
-void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos )
+void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
 {
+    SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
+
     rect_t out;
     rect_t a;
 
@@ -148,7 +158,7 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos
  * zpos is current window's z coordinate.
  *
 **/
-int video_zbuf_check( int linpos, u_int8_t zpos )
+int video_zbuf_check( int linpos, zbuf_t zpos )
 {
     if( zbuf[linpos] > zpos ) return 0;
     if( zbuf[linpos] == zpos ) return 1;

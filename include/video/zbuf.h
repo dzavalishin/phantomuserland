@@ -28,12 +28,12 @@ void video_zbuf_turn_upside(int v);
 void video_zbuf_init(void);
 void video_zbuf_reset(void);
 void video_zbuf_reset_square(int x, int y, int xsize, int ysize );
-void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, u_int8_t zpos );
+void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos );
 
 void video_zbuf_reset_win( window_handle_t w );
 void video_zbuf_set_win_z( window_handle_t w );
 
-int video_zbuf_check( int linpos, u_int8_t zpos );
+int video_zbuf_check( int linpos, zbuf_t zpos );
 
 // Set z order for window according to its position in all win q
 void drv_video_window_rezorder_all(void);
