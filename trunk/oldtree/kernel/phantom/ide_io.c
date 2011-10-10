@@ -26,6 +26,8 @@
 #include <kernel/stats.h>
 #include <kernel/page.h>
 #include <kernel/libkern.h>
+#include <kernel/info/idisk.h>
+
 #include <pager_io_req.h>
 
 #include <hal.h>
@@ -41,14 +43,16 @@
 
 
 #define IO_PANIC 0
-#define BLOCKED_IO 0
+#define BLOCKED_IO 1
 
 static errno_t simple_ide_idenify_device(int dev);
 
 
 
 static hal_mutex_t      ide_io;
-static long 		disk_sectors[4];
+//static long 		disk_sectors[4];
+
+static i_disk_t         disk_info[4];
 
 
 // TODO RENAME here and in phantom/dev/ata*
@@ -170,30 +174,50 @@ static errno_t ide_read( int ndev, long physaddr, long secno, int nsec )
     hal_mutex_lock( &ide_io );
 
 #if BLOCKED_IO
-retry:;
-    int rc = dma_pci_lba28(
-                               ndev, CMD_READ_DMA,
-                               0, nsec, // feature reg, sect count
-                               secno, physaddr,
-                               nsec );
+    //if(nsec > 1) printf("nsec %d\n", nsec );
 
-    if ( rc )
+retry:;
+    while( nsec > 0 )
     {
+        unsigned int secread = nsec;
+
+        if( secread > disk_info[ndev].maxMultSectors )
+            secread = disk_info[ndev].maxMultSectors;
+
+        // For some reason fails on QEMU if > 8
+        if( secread > 8 )
+            secread = 8;
+
+        if( secread > 1 )
+            secread &= ~1; // even num of sect
+
+        SHOW_FLOW( 11, "start sect rd sect %d + %d", secno, secread );
+        int rc = dma_pci_lba28(
+                               ndev, CMD_READ_DMA,
+                               0, secread, // feature reg, sect count
+                               secno, physaddr,
+                               secread );
+        SHOW_FLOW( 12, "end   sect rd sect %d", secno );
+
+        if ( rc )
+        {
             if( tries-- <= 0 )
             {
-#if IO_PANIC
-                panic("IDE read failure sec %ld", secno );
-#else
                 hal_mutex_unlock( &ide_io );
                 return EIO;
-#endif
             }
             else
             {
                 printf("IDE read failure sec %ld, retry\n", secno );
                 goto retry;
             }
+        }
+        secno += secread;
+        physaddr += (512*secread);
+        nsec -= secread;
     }
+
+
 #else // BLOCKED_IO
 
 retry:;
@@ -266,7 +290,7 @@ static void dpc_func(void *a)
         return;
     }
 
-    if( (rq->blockNo >= disk_sectors[rq->unit]) || (rq->blockNo < 0) )
+    if( (rq->blockNo >= (int)disk_info[rq->unit].nSectors) || (rq->blockNo < 0) )
     {
         SHOW_ERROR( 1, "wrong IDE blk %d on unit %d", rq->blockNo, rq->unit );
         ideq->ioDone( ideq, EINVAL );
@@ -339,7 +363,7 @@ static errno_t ideRaise( struct phantom_disk_partition *p, pager_io_request *rq 
 
 static void make_unit_part( int unit, void *aio )
 {
-    phantom_disk_partition_t *p = phantom_create_partition_struct( both, 0, disk_sectors[unit] );
+    phantom_disk_partition_t *p = phantom_create_partition_struct( both, 0, disk_info[unit].nSectors );
     assert(p);
     p->flags |= PART_FLAG_IS_WHOLE_DISK;
     p->specific = (void *)-1; // disk supposed to have that
@@ -364,7 +388,7 @@ void connect_ide_io(void)
     int have_dev_0 = !simple_ide_idenify_device(0);
     int have_dev_1 = !simple_ide_idenify_device(1);
 
-    long both_size = lmax(disk_sectors[0], disk_sectors[1]);
+    long both_size = lmax(disk_info[0].nSectors, disk_info[1].nSectors);
 
     both = phantom_create_disk_partition_struct( both_size, 0, 0, startIo );
 
@@ -392,7 +416,7 @@ void phantom_check_disk_save_virtmem( void * a, int n )
 
 
 
-
+/*
 static void intcpy( char *to, const char *from, int nwords )
 {
     while( nwords-- )
@@ -403,7 +427,7 @@ static void intcpy( char *to, const char *from, int nwords )
         to += 2;
         from += 2;
     }
-}
+}*/
 
 
 
@@ -437,12 +461,17 @@ errno_t simple_ide_idenify_device(int dev)
         return EIO;
     }
 
+    parse_i_disk_ata( &disk_info[dev], buf );
+    dump_i_disk( &disk_info[dev] );
+    
+#if 0
     //int isATA = buf[0] & 0x8000;
     int isATA = (buf[0] >> 15) & 0x1;
 
 
     int isRemovable = buf[0] & 0x0080;
     int is48bitAddr = (buf[IDENTIFY_48BIT_ADDRESSING] >> 10) & 0x1;
+    //int hasTrim = buf[169] & 0x1;
 
 #if 0
     if( !isATA )
@@ -478,7 +507,7 @@ errno_t simple_ide_idenify_device(int dev)
         SHOW_ERROR0( 0, "Not LBA/DMA disk");
         return ENXIO;
     }
-
+#endif
     return 0;
 }
 
