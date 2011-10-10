@@ -142,6 +142,54 @@ static errno_t ide_write( int ndev, long physaddr, long secno, int nsec )
 {
     hal_mutex_lock( &ide_io );
 
+#if BLOCKED_IO
+    int tries = 5;
+    //if(nsec > 1) printf("nsec %d\n", nsec );
+
+retry:;
+    while( nsec > 0 )
+    {
+        unsigned int secwr = nsec;
+
+        if( secwr > disk_info[ndev].maxMultSectors )
+            secwr = disk_info[ndev].maxMultSectors;
+
+        // For some reason fails on QEMU if > 8
+        if( secwr > 8 )
+            secwr = 8;
+
+        if( secwr > 1 )
+            secwr &= ~1; // even num of sect
+
+        SHOW_FLOW( 12, "start sect wr sect %d + %d", secno, secwr );
+        int rc = dma_pci_lba28(
+                               ndev, CMD_WRITE_DMA,
+                               0, secwr, // feature reg, sect count
+                               secno, physaddr,
+                               secwr );
+        SHOW_FLOW( 12, "end   sect wr sect %d", secno );
+
+        if ( rc )
+        {
+            if( tries-- <= 0 )
+            {
+                hal_mutex_unlock( &ide_io );
+                return EIO;
+            }
+            else
+            {
+                printf("IDE write failure sec %ld, retry\n", secno );
+                goto retry;
+            }
+        }
+        secno += secwr;
+        physaddr += (512*secwr);
+        nsec -= secwr;
+    }
+
+
+#else // BLOCKED_IO
+
     int i;
     for( i = nsec; i > 0; i-- )
     {
@@ -152,16 +200,13 @@ static errno_t ide_write( int ndev, long physaddr, long secno, int nsec )
                                1L );
         if ( rc )
         {
-#if IO_PANIC
-            panic("IDE write failure sec %ld", secno);
-#else
             return EIO;
-#endif
         }
         secno++;
         physaddr += 512;
 
     }
+#endif
 
     hal_mutex_unlock( &ide_io );
     return 0;
