@@ -409,6 +409,8 @@ window_handle_t drv_video_next_window(window_handle_t curr)
     int reasonable_tries = 1000;
     window_handle_t next = curr;
 
+    w_lock();
+
     if(next == 0)
         next = (window_handle_t)queue_first(&allwindows);
 
@@ -419,6 +421,7 @@ window_handle_t drv_video_next_window(window_handle_t curr)
         if(reasonable_tries-- <= 0)
         {
             SHOW_ERROR0( 0, "loop?");
+            w_unlock();
             return curr;
         }
 
@@ -453,9 +456,11 @@ window_handle_t drv_video_next_window(window_handle_t curr)
             continue;
         }
 
+        w_unlock();
         return next;
     } while(next != curr);
 
+    w_unlock();
     // I'm alone here
     return curr;
 }
