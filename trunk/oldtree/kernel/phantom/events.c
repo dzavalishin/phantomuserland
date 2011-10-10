@@ -486,6 +486,8 @@ static void select_event_target(struct ui_event *e)
 
     assert( e->type == UI_EVENT_TYPE_MOUSE );
 
+    w_assert_lock();
+
     int wz = 0;
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
