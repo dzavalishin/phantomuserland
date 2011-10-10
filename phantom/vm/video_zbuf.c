@@ -65,7 +65,7 @@ void video_zbuf_reset()
 
 void video_zbuf_reset_z(int z)
 {
-    SHOW_FLOW( 1, "%d", z );
+    //SHOW_FLOW( 1, "%d", z );
     memset( zbuf, z, zbsize );
 }
 
@@ -115,7 +115,7 @@ void video_zbuf_turn_upside(int v) { zb_upside = v; }
 
 void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
 {
-    SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
+    //SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
 
     rect_t out;
     rect_t a;
