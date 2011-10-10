@@ -225,6 +225,7 @@ void drv_video_window_destroy(drv_video_window_t *w)
 
 
     {
+    video_zbuf_reset_win( w );
     rect_t wsize;
     drv_video_window_get_bounds( w, &wsize );
 
