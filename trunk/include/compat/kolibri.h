@@ -91,6 +91,11 @@ struct kolibri_process_state
 
     u_int32_t           key_input_scancodes;
 
+    wtty_t *            keys;
+
+    int                 (*defaultEventProcess)( struct drv_video_window *w, struct ui_event *e );
+
+
     void *              ipc_buf_addr;
     size_t              ipc_buf_size;
 
@@ -217,6 +222,7 @@ typedef struct kolibri_ipc_buf kolibri_ipc_buf_t;
 #define BT_HIDE        0x40000000
 #define BT_DEL         0x80000000
 
+// This is bit number + 1
 #define EV_REDRAW      1
 #define EV_KEY         2
 #define EV_BUTTON      3
@@ -225,11 +231,16 @@ typedef struct kolibri_ipc_buf kolibri_ipc_buf_t;
 #define EV_NET         8
 #define EV_DEBUG       9
 
+#define KOLIBRI_SET_EVENT_BIT(bits,nb) ((bits) |= (1<<((nb)-1)))
+#define KOLIBRI_RESET_EVENT_BIT(bits,nb) ((bits) &= ~(1<<((nb)-1)))
+
+#define KOLIBRI_HAS_EVENT_BIT(bits,nb) ((bits) & (1<<((nb)-1)))
+
 #define REL_SCREEN     0
 #define REL_WINDOW     1
 
-#define FILE_NOT_FOUND 5
-#define FILE_EOF       6
+//#define FILE_NOT_FOUND 5
+//#define FILE_EOF       6
 
 
 //typedef unsigned int DWORD;

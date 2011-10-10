@@ -10,8 +10,8 @@
 
 #define DEBUG_MSG_PREFIX "Kolibri"
 #include <debug_ext.h>
-#define debug_level_flow 11
-#define debug_level_error 10
+#define debug_level_flow 8
+#define debug_level_error 9
 #define debug_level_info 10
 
 #include <phantom_types.h>
@@ -54,9 +54,9 @@ static tid_t kolibri_start_thread( uuprocess_t *u, struct kolibri_process_state 
 
 static void kolibri_sys_hw( uuprocess_t *u, struct kolibri_process_state * ks, struct trap_state *st );
 
-static void kolibri_send_event( tid_t tid, u_int32_t event_bits );
-
+static void kolibri_send_event( tid_t tid, u_int32_t event_id );
 static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks);
+static u_int32_t eat_event_bit(uuprocess_t *u, struct kolibri_process_state *ks);
 
 static int kolibri_copy_fn( char *ofn, size_t ofnlen, const char *ifn );
 
@@ -144,6 +144,9 @@ static struct kolibri_process_state * get_kolibri_state(uuprocess_t *u)
 
     ks->win_alpha_scale = 0;
     ks->win_user_alpha = 0;
+
+    ks->keys = wtty_init();
+    assert(ks->keys);
 
     //ks->win_update_timer
     request_update_timer( ks, 1000 ); // to make sure we can call cancel... on destroying kolibri state
@@ -823,6 +826,9 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             ks->win->eventDeliverSema = &ks->event;
 
+            ks->defaultEventProcess = ks->win->inKernelEventProcess;
+            ks->win->inKernelEventProcess = 0;
+
             drv_video_window_update( ks->win );
             kolibri_send_event( get_current_tid(), EV_REDRAW );
         }
@@ -844,12 +850,16 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
     case 2: // read key
         {
-            u_int32_t e = get_event_bits(u,ks);
-            if( e & EV_KEY )
+            //u_int32_t e =
+            get_event_bits(u,ks); // Need it here to suck in Phantom events
+            //if( KOLIBRI_HAS_EVENT_BIT(e, EV_KEY) )
+
+            if(!wtty_is_empty(ks->keys))
             {
+                //KOLIBRI_RESET_EVENT_BIT(e, EV_KEY);
                 // TODO take mutex
-                char ch = ks->e.k.ch; // TODO check read mode - maybe we have to ret scancode
-                ks->have_e = 0; // consume event
+                char ch = wtty_getc(ks->keys); // TODO check read mode - maybe we have to ret scancode
+                //ks->have_e = 0; // consume event
                 st->eax = 0x0000FF00 & (ch << 8); // have key
                 SHOW_FLOW( 1, "read key '%c'", ch);
             }
@@ -1162,7 +1172,8 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         }
         // fall through...
     case 11: // get event bits
-        st->eax = get_event_bits(u,ks);
+        //u_int32_t bits = get_event_bits(u,ks);
+        st->eax = eat_event_bit(u,ks);
         break;
 
     case 12: // begin/and repaint app win
@@ -1174,6 +1185,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             {
                 ks->win_update_prevent = 1;
                 // TODO remove all buttons
+                KOLIBRI_RESET_EVENT_BIT(ks->event_bits, EV_REDRAW);
             }
 
             if( st->ebx == 2 )
@@ -1258,7 +1270,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             }*/
             hal_sem_zero( &ks->event );
 
-            st->eax = get_event_bits(u,ks);
+            st->eax = eat_event_bit(u,ks);
         }
         break;
 
@@ -1311,6 +1323,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         break;
 
     case 37: // mouse
+        KOLIBRI_RESET_EVENT_BIT(ks->event_bits,EV_MOUSE);
         switch( st->ebx )
         {
         case 0:
@@ -1736,6 +1749,25 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 }
 
 
+static void kolibri_send_event( tid_t tid, u_int32_t event_id )
+{
+    pid_t pid;
+    if( t_get_pid( tid, &pid ) )
+        return;
+
+    uuprocess_t *u = proc_by_pid(pid);
+    if(!u)
+        return;
+
+    struct kolibri_process_state * ks = get_kolibri_state(u);
+    if(!ks)
+        return;
+
+    KOLIBRI_SET_EVENT_BIT( ks->event_bits, event_id );
+    hal_sem_release( &ks->event );
+}
+
+
 static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks)
 {
     (void) u;
@@ -1745,6 +1777,7 @@ static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks
 
     // TODO take ks mutex
 
+one_more:
     // TODO here we must check next win q event
     // and set corresp bits
     if( ks->win && (!ks->have_e) )
@@ -1755,24 +1788,67 @@ static u_int32_t get_event_bits(uuprocess_t *u, struct kolibri_process_state *ks
 
     if( ks->have_e )
     {
+        ks->have_e = 0;
+
+        SHOW_FLOW( 2, "got event type %d, ikep %p", ks->e.type, ks->win->inKernelEventProcess );
         switch( ks->e.type )
         {
         case UI_EVENT_TYPE_MOUSE:
-            bits |= EV_MOUSE;
+            SHOW_FLOW0( 10, "mou event" );
+            KOLIBRI_SET_EVENT_BIT(bits, EV_MOUSE);
             if( ks->e.m.buttons )
                 kolibri_check_button( ks->e.rel_x, ks->e.rel_y, ks, ks->e.m.buttons );
 
             kolibri_paint_changed_buttons(ks);
 
             break;
-        case UI_EVENT_TYPE_KEY:   bits |= EV_KEY;   break;
+
+        case UI_EVENT_TYPE_KEY:
+            SHOW_FLOW0( 10, "key event" );
+            //KOLIBRI_SET_EVENT_BIT(bits, EV_KEY);
+
+            if( ks->e.modifiers & UI_MODIFIER_KEYUP ) // Right? Or shall we give it to Kolibri app too?
+            {
+                SHOW_FLOW( 10, "skip keyup event type %d", ks->e.type );
+                goto one_more;
+            }
+
+            if( wtty_putc_nowait(ks->keys, ks->e.k.ch) )
+                SHOW_ERROR0( 1, "key lost" );
+            break;
+
+        default:
+            // some unknown stuff - get one more Phantom event
+            //SHOW_FLOW( 2, "skip event type %d", ks->e.type );
+
+            ks->defaultEventProcess(ks->win, &ks->e);
+
+            goto one_more;
         }
-        ks->have_e = 0;
     }
+
+    if(!wtty_is_empty(ks->keys))
+        KOLIBRI_SET_EVENT_BIT(bits, EV_KEY);
+
+    SHOW_FLOW( 10, "event bits %x, mask %x, out bits %x", bits, ks->event_mask, bits & ks->event_mask );
 
     return bits & ks->event_mask;
 }
 
+
+static u_int32_t eat_event_bit(uuprocess_t *u, struct kolibri_process_state *ks)
+{
+    u_int32_t bits = get_event_bits(u,ks);
+    if( bits == 0 ) return 0;
+
+    int bitno = ffs(bits);
+    if( bitno == 0 ) return 0;
+    KOLIBRI_RESET_EVENT_BIT(ks->event_bits,bitno);
+
+    SHOW_FLOW( 10, "event bit no %d", bitno );
+
+    return bitno;
+}
 
 
 
@@ -1851,23 +1927,6 @@ static void kolibri_sys_hw( uuprocess_t *u, struct kolibri_process_state * ks, s
 }
 
 
-static void kolibri_send_event( tid_t tid, u_int32_t event_bits )
-{
-    pid_t pid;
-    if( t_get_pid( tid, &pid ) )
-        return;
-
-    uuprocess_t *u = proc_by_pid(pid);
-    if(!u)
-        return;
-
-    struct kolibri_process_state * ks = get_kolibri_state(u);
-    if(!ks)
-        return;
-
-    ks->event_bits |= event_bits;
-    hal_sem_zero( &ks->event );
-}
 
 
 
