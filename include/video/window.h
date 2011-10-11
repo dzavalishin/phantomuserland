@@ -36,6 +36,8 @@ typedef struct drv_video_window * window_handle_t;
 #define WSTATE_WIN_VISIBLE              (1<<2)
 // No one is above
 #define WSTATE_WIN_UNCOVERED            (1<<3)
+// Pixels live in graphics device's framebuf - can use hw blitter
+#define WSTATE_WIN_INFB                 (1<<4)
 
 // -----------------------------------------------------------------------
 // New windows (in work)
