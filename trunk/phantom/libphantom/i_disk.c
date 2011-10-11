@@ -16,10 +16,19 @@ void dump_i_disk( i_disk_t *info )
     u_int64_t dsize = info->sectorSize * info->nSectors;
     dsize /= 1024*1024;
 
-    printf("Disk size %u Mb, sect %d b, multisect %d\n",
-           (int)dsize, info->sectorSize, info->maxMultSectors );
+    char *type_s = "?";
+    switch(info->type)
+    {
+    case unknown:    type_s = "unknown";	break;
+    case ata:        type_s = "ata"; 	break;
+    case atapi:      type_s = "atapi"; 	break;
+    case cf:         type_s = "cf"; 		break;
+    }
 
-    printf(" * Has: %b\n", info->has, "\020\1LBA28\2LBA48\3TRIM\4DMA\5SMART\6MULTISECT\7FLUSH" );
+    printf("Disk type %s size %u Mb, sect %d b, multisect %d\n",
+           type_s, (int)dsize, info->sectorSize, info->maxMultSectors );
+
+    printf(" * Has: %b\n", info->has, "\020\01LBA28\02LBA48\03Trim\04DMA\05Smart\06Multisector\07Flush\08Removable" );
 
     printf(" * Model '%s'\n", info->model );
     printf(" * Serial '%s'\n", info->serial );
@@ -81,6 +90,12 @@ void parse_i_disk_ata( i_disk_t *info, u_int16_t p[256] )
 
     if( p[83] & (1 <<12) )
         info->has |= I_DISK_HAS_FLUSH;
+
+    if( p[0] & 0x80 )
+        info->has |= I_DISK_HAS_REMOV;
+
+    if( p[0] & 0x8000 )
+        info->type = ata;
 
     //printf("msect %d\n", p[59] & ~0x100 );
 
