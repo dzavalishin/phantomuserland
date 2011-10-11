@@ -38,6 +38,10 @@
 #include <dev/pci/rtl8139_priv.h>
 #include <dev/pci/if_rlreg.h>
 
+#define IO_CHAT 0
+#define IO_DUMP 0
+
+
 static int DEBUG = 0;
 
 #define INTERRUPT_SEM 1
@@ -143,6 +147,7 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
     }
 
     nic->irq = pci->interrupt;
+    SHOW_INFO( 1, "irq %d", nic->irq );
 
     int i;
     for (i = 0; i < 6; i++)
@@ -229,147 +234,6 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
 
 #define MYRT_INTS (RT_INT_PCIERR | RT_INT_RX_ERR | RT_INT_RX_OK | RT_INT_TX_ERR | RT_INT_TX_OK | RT_INT_RXBUF_OVERFLOW)
 
-//static int rtl8139_int(void*);
-
-//static rtl8139 *rtl;
-# if 0
-int rtl8139_detect()
-{
-#if 1
-    return 1;
-#else
-    int i;
-    //pci_module_hooks *pci;
-    //pci_info pinfo;
-    char foundit = false;
-
-    /*if(module_get(PCI_BUS_MODULE_NAME, 0, (void **)&pci) < 0) {
-        printf("rtl8139_detect: no pci bus found..\n");
-        return -1;
-    }
-
-    for(i = 0; pci->get_nth_pci_info(i, &pinfo) >= NO_ERROR; i++) {
-        if(pinfo.vendor_id == RT_VENDORID && pinfo.device_id == RT_DEVICEID_8139) {
-            foundit = true;
-            break;
-        }
-        }*/
-
-    pcici_t tag;
-
-    {
-        unsigned char device;
-        char *vendor, *devname;
-
-        for (device = 0; device < pci_maxdevice; device++) {
-            unsigned long id;
-            tag = pcibus_tag (0,device,0);
-            id = pcibus_read (tag, 0);
-            if (id && id != 0xfffffffful) {
-
-                if(1)
-                {
-                    vendor = get_pci_vendor(id & 0xFFFF);
-                    devname = get_pci_device(id & 0xFFFF, (id>>16) & 0xFFFF);
-
-                    printf ("PCI device %d: id=%08lx (%s: %s)\n", device, id, vendor, devname);
-                }
-
-                if( (id & 0xFFFF) == RT_VENDORID && ((id>>16) & 0xFFFF) == RT_DEVICEID_8139) {
-                    foundit = true;
-                    break;
-                }
-
-            }
-        }
-
-    }
-
-
-
-
-    if(!foundit) {
-        printf("rtl8139_detect: didn't find device on pci bus\n");
-        return -1;
-    }
-
-    // we found one
-    printf("rtl8139_detect: found device at pci %d:%d:%d\n", pinfo.bus, pinfo.device, pinfo.function);
-
-    {
-        int irq = pcibus_read( tag, RL_PCI_INTLINE );
-        int phys_base = pcibus_read( tag, RL_PCI_LOMEM );
-        int io_port = pcibus_read( tag, RL_PCI_LOIO );
-
-        printf("rtl8139_detect: irq %d, phys base 0x%X, io base 0x%x\n", irq, phys_base, io_port );
-    }
-
-// not impl!
-return -1;
-
-    rtl = malloc(sizeof(rtl8139));
-    if(rtl == NULL) {
-        //return ERR_NO_MEMORY;
-        return 1;
-    }
-    memset(rtl, 0, sizeof(rtl8139));
-
-    /*
-    (rtl)->irq = pinfo.u.h0.interrupt_line;
-    // find the memory-mapped base
-    for(i=0; i<6; i++) {
-        if(pinfo.u.h0.base_registers[i] > 0xffff) {
-            (rtl)->phys_base = pinfo.u.h0.base_registers[i];
-            (rtl)->phys_size = pinfo.u.h0.base_register_sizes[i];
-            break;
-        } else if(pinfo.u.h0.base_registers[i] > 0) {
-            (rtl)->io_port = pinfo.u.h0.base_registers[i];
-
-            if(osenv_io_alloc( pinfo.u.h0.base_registers[i], 256))
-            {
-                printf("Can't allocate io registers from %d to %d\n",
-                       pinfo.u.h0.base_registers[i],
-                       pinfo.u.h0.base_registers[i] + 256 );
-
-                // stop me
-                (rtl)->phys_base = 0;
-                break;
-            }
-
-        }
-        }
-        */
-#if 0 // wrong as well :(
-    (rtl)->irq = pcibus_read( tag, RL_PCI_INTLINE );
-
-    (rtl)->phys_base = pcibus_read( tag, RL_PCI_LOMEM );
-
-    (rtl)->io_port = pcibus_read( tag, RL_PCI_LOIO );
-    if(osenv_io_alloc( (rtl)->io_port, 256))
-    {
-        printf("Can't allocate io registers from %d to %d\n",
-               (rtl)->io_port,
-               (rtl)->io_port + 256 );
-
-        // stop me
-        (rtl)->phys_base = 0;
-        break;
-    }
-#endif
-
-
-    if((rtl)->phys_base == 0) {
-        free(rtl);
-        rtl = NULL;
-        return -1;
-    }
-
-    printf("detected rtl8139 at irq %d, memory base 0x%lx, size 0x%lx\n", (rtl)->irq, (rtl)->phys_base, (rtl)->phys_size);
-
-    return 0;
-#endif
-}
-#endif
 
 
 
@@ -379,7 +243,7 @@ int rtl8139_init(rtl8139 *rtl)
 {
     //bigtime_t time;
     int err = -1;
-    addr_t temp;
+    //addr_t temp;
 
     printf("rtl8139_init: rtl %p\n", rtl);
 
@@ -396,8 +260,12 @@ int rtl8139_init(rtl8139 *rtl)
         goto err;
         }*/
 
+    {
     // Sometimes mem spot is not on page boundary!
     unsigned offset = rtl->phys_base & (PAGE_SIZE-1);
+
+    if(offset) SHOW_FLOW( 1, "physa offset %x", offset );
+
     unsigned phys_size_pages = (((rtl->phys_size + offset)-1)/PAGE_SIZE)+1;
 
     if(hal_alloc_vaddress( (void **)&rtl->virt_base, phys_size_pages ))
@@ -409,7 +277,9 @@ int rtl8139_init(rtl8139 *rtl)
                       phys_size_pages,
                       page_map, page_rw );
 
-    //rtl->virt_base += offset;
+    rtl->virt_base += offset;
+    }
+
 
     printf("rtl8139 mapped at address 0x%lx\n", rtl->virt_base);
 
@@ -426,13 +296,12 @@ int rtl8139_init(rtl8139 *rtl)
 
 
     printf( DEV_NAME "allocating irq %d\n", rtl->irq );
-    // set up the interrupt handler
-    //int_set_io_interrupt_handler(rtl->irq, &rtl8139_int, rtl, "rtl8139");
     if(hal_irq_alloc( rtl->irq, &rtl8139_int, rtl, HAL_IRQ_SHAREABLE ))
     {
         printf( DEV_NAME "unable to allocate irq %d\n", rtl->irq );
         goto err1;
     }
+
 #if !INTERRUPT_SEM
     rtl->softirq = hal_alloc_softirq();
     if( rtl->softirq < 0 )
@@ -465,8 +334,16 @@ int rtl8139_init(rtl8139 *rtl)
 #define RXBUF_SIZE (64*1024 + 16)
 #define TXBUF_SIZE 8*1024
 
+    physaddr_t tpa, rpa;
+#if 1
+    hal_pv_alloc( &rpa, ((void **)&rtl->rxbuf), RXBUF_SIZE );
+    hal_pv_alloc( &tpa, ((void **)&rtl->txbuf), TXBUF_SIZE );
+#else
     rtl->rxbuf = malloc(RXBUF_SIZE);
     rtl->txbuf = malloc(TXBUF_SIZE);
+    rpa = kvtophys( rtl->rxbuf );
+    tpa = kvtophys( rtl->txbuf );
+#endif
 
     if( rtl->rxbuf == 0 || rtl->txbuf == 0)
         panic(DEV_NAME "out of addr space");
@@ -524,26 +401,27 @@ int rtl8139_init(rtl8139 *rtl)
     // Setup RX buffers
     *(int *)rtl->rxbuf = 0;
     //vm_get_page_mapping(vm_get_kernel_aspace_id(), rtl->rxbuf, &temp);
-    temp = kvtophys( rtl->rxbuf );
-    printf("rx buffer will be at 0x%lx\n", temp);
-    RTL_WRITE_32(rtl, RT_RXBUF, temp);
+    //temp = kvtophys( rtl->rxbuf );
+    printf("rx buffer will be at 0x%lx\n", rpa);
+    RTL_WRITE_32(rtl, RT_RXBUF, rpa);
 
     // Setup TX buffers
     printf("tx buffer (virtual) is at 0x%lx\n", rtl->txbuf);
     *(int *)rtl->txbuf = 0;
     //vm_get_page_mapping(vm_get_kernel_aspace_id(), rtl->txbuf, &temp);
 
-    temp = kvtophys( rtl->txbuf );
+    //temp = kvtophys( rtl->txbuf );
 
-    RTL_WRITE_32(rtl, RT_TXADDR0, temp);
-    RTL_WRITE_32(rtl, RT_TXADDR1, temp + 2*1024);
-    printf("first half of txbuf at 0x%lx\n", temp);
+    RTL_WRITE_32(rtl, RT_TXADDR0, tpa);
+    RTL_WRITE_32(rtl, RT_TXADDR1, tpa + 2*1024);
+    printf("first half of txbuf at 0x%lx\n", tpa);
     *(int *)(rtl->txbuf + 4*1024) = 0;
     //vm_get_page_mapping(vm_get_kernel_aspace_id(), rtl->txbuf + 4*1024, &temp);
-    temp = kvtophys( rtl->txbuf + 4*1024 );
-    RTL_WRITE_32(rtl, RT_TXADDR2, temp);
-    RTL_WRITE_32(rtl, RT_TXADDR3, temp + 2*1024);
-    printf("second half of txbuf at 0x%lx\n", temp);
+    //temp = kvtophys( rtl->txbuf + 4*1024 );
+    tpa += 4*1024;
+    RTL_WRITE_32(rtl, RT_TXADDR2, tpa);
+    RTL_WRITE_32(rtl, RT_TXADDR3, tpa + 2*1024);
+    printf("second half of txbuf at 0x%lx\n", tpa);
 
     /*
      RTL_WRITE_32(rtl, RT_TXSTATUS0, RTL_READ_32(rtl, RT_TXSTATUS0) | 0xfffff000);
@@ -629,19 +507,12 @@ void rtl8139_xmit(rtl8139 *rtl, const char *ptr, ssize_t len)
 
     hal_mutex_lock(&rtl->lock);
 
-#if 0
-    {
-    printf("XMIT %d %x (%d)\n",rtl->txbn, ptr, len);
-
-    printf("dumping packet (hex):");
-    int i;
-    for(i=0; i<len; i++) {
-        if(i%8 == 0)
-            printf("\n");
-        printf("%02x ", 0xFFu & ptr[i]);
-    }
-    printf("\n");
-    }
+#if IO_CHAT
+    printf("XMIT %d %p (%d)\n",rtl->txbn, ptr, len );
+#endif
+#if IO_DUMP
+    printf("dumping packet (hex):\n" );
+    hexdump( ptr, len, 0, 0 );
 #endif
 
     int_disable_interrupts();
@@ -782,19 +653,9 @@ out:
     }
     hal_mutex_unlock(&rtl->lock);
 
-#if 0
-    {
-        int i;
-        printf("RX %x (%d)\n", buf, len);
-
-        printf("dumping packet:");
-        for(i=0; i<len; i++) {
-            if(i%8 == 0)
-                printf("\n");
-            printf("0x%02x ", buf[i]);
-        }
-        printf("\n");
-    }
+#if IO_CHAT
+    printf("RX %x (%d)\ndumping packet:\n", buf, len);
+    hexdump( buf, len, 0, 0 );
 #endif
 
     return rc;

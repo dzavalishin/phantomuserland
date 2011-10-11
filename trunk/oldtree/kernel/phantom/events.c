@@ -511,8 +511,7 @@ static void select_event_target(struct ui_event *e)
 
 static void w_do_deliver_event(window_handle_t w)
 {
-    if(w != 0 && w->eventDeliverSema)
-        hal_sem_release(w->eventDeliverSema);
+    //if(w != 0 && w->eventDeliverSema)        hal_sem_release(w->eventDeliverSema);
 
     if(w != 0 && w->inKernelEventProcess)
     {
@@ -575,9 +574,15 @@ static void w_event_deliver_thread(void)
         {
             if( w->events_count )
             {
-                w_unlock();
-                w_do_deliver_event(w);
-                goto restart;
+                if(w->eventDeliverSema)
+                    hal_sem_release(w->eventDeliverSema);
+
+                if(w->inKernelEventProcess)
+                {
+                    w_unlock();
+                    w_do_deliver_event(w);
+                    goto restart;
+                }
             }
         }
 
