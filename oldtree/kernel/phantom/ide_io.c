@@ -46,6 +46,7 @@
 #define BLOCKED_IO 1
 
 static errno_t simple_ide_idenify_device(int dev);
+static errno_t ide_reset( int ndev );
 
 
 
@@ -53,6 +54,7 @@ static hal_mutex_t      ide_io;
 //static long 		disk_sectors[4];
 
 static i_disk_t         disk_info[4];
+static int              have_dev[4];
 
 
 // TODO RENAME here and in phantom/dev/ata*
@@ -119,26 +121,73 @@ void setup_simple_ide()
                devTypeStr[ reg_config_info[0] ],
                devTypeStr[ reg_config_info[1] ] );
 
-    int dev = 0;
-
-    int rc = reg_reset( 0, dev );
-    if ( rc ) SHOW_ERROR( 0, "can't reset ide dev %d", dev );
-
-    dev = 1;
-
-    rc = reg_reset( 0, dev );
-    if ( rc ) SHOW_ERROR( 0, "can't reset ide dev %d", dev );
-
-
-
-
+    //ide_reset( 0 );
+    //ide_reset( 1 );
 }
 
 
+size_t limit_nsect( int ndev, size_t nsect )
+{
+    if( nsect > disk_info[ndev].maxMultSectors )
+        nsect = disk_info[ndev].maxMultSectors;
+
+    // For some reason fails on QEMU if > 8
+    if( nsect > 8 ) nsect = 8;
+    if( nsect > 1 ) nsect &= ~1; // even num of sect
+
+    return nsect;
+}
+
+static errno_t ide_reset( int ndev )
+{
+    hal_mutex_lock( &ide_io );
+    int rc = reg_reset( 0, ndev );
+    hal_mutex_unlock( &ide_io );
+
+    if ( rc ) SHOW_ERROR( 0, "can't reset ide dev %d", ndev );
+    return rc ? EIO : 0;
+}
 
 
+static errno_t ide_flush( int ndev )
+{
+    hal_mutex_lock( &ide_io );
+    int rc = reg_non_data_lba28( ndev, CMD_FLUSH_CACHE, 0, 0, 0 );
+    hal_mutex_unlock( &ide_io );
 
-static errno_t ide_write( int ndev, long physaddr, long secno, int nsec )
+    return rc ? EIO : 0;
+}
+
+#if 0
+static errno_t ide_trim( int ndev, long secno, size_t nsect )
+{
+    hal_mutex_lock( &ide_io );
+    while( nsect > 0 )
+    {
+        size_t count = limit_nsect( ndev, nsect );
+
+        SHOW_FLOW( 12, "start trim sect %d + %d", secno, count );
+        int rc = reg_non_data_lba28( ndev, CMD_??,
+                                     0, count, // feature reg, sect count
+                                     secno );
+        SHOW_FLOW( 12, "end   trim sect %d", secno );
+
+        if ( rc )
+        {
+            hal_mutex_unlock( &ide_io );
+            return EIO;
+        }
+        secno += count;
+        nsect -= count;
+    }
+
+    hal_mutex_unlock( &ide_io );
+    return 0;
+}
+#endif
+
+
+static errno_t ide_write( int ndev, long physaddr, long secno, size_t nsect )
 {
     hal_mutex_lock( &ide_io );
 
@@ -147,26 +196,15 @@ static errno_t ide_write( int ndev, long physaddr, long secno, int nsec )
     //if(nsec > 1) printf("nsec %d\n", nsec );
 
 retry:;
-    while( nsec > 0 )
+    while( nsect > 0 )
     {
-        unsigned int secwr = nsec;
+        size_t count = limit_nsect( ndev, nsect );
 
-        if( secwr > disk_info[ndev].maxMultSectors )
-            secwr = disk_info[ndev].maxMultSectors;
-
-        // For some reason fails on QEMU if > 8
-        if( secwr > 8 )
-            secwr = 8;
-
-        if( secwr > 1 )
-            secwr &= ~1; // even num of sect
-
-        SHOW_FLOW( 12, "start sect wr sect %d + %d", secno, secwr );
+        SHOW_FLOW( 12, "start sect wr sect %d + %d", secno, count );
         int rc = dma_pci_lba28(
                                ndev, CMD_WRITE_DMA,
-                               0, secwr, // feature reg, sect count
-                               secno, physaddr,
-                               secwr );
+                               0, count, // feature reg, sect count
+                               secno, physaddr, count );
         SHOW_FLOW( 12, "end   sect wr sect %d", secno );
 
         if ( rc )
@@ -182,9 +220,9 @@ retry:;
                 goto retry;
             }
         }
-        secno += secwr;
-        physaddr += (512*secwr);
-        nsec -= secwr;
+        secno += count;
+        nsect -= count;
+        physaddr += (512*count);
     }
 
 
@@ -212,36 +250,25 @@ retry:;
     return 0;
 }
 
-static errno_t ide_read( int ndev, long physaddr, long secno, int nsec )
+static errno_t ide_read( int ndev, long physaddr, long secno, size_t nsect )
 {
     int tries = 5;
 
     hal_mutex_lock( &ide_io );
 
 #if BLOCKED_IO
-    //if(nsec > 1) printf("nsec %d\n", nsec );
+    //if(nsec > 1) printf("nsec %d\n", nsect );
 
 retry:;
-    while( nsec > 0 )
+    while( nsect > 0 )
     {
-        unsigned int secread = nsec;
+        size_t count = limit_nsect( ndev, nsect );
 
-        if( secread > disk_info[ndev].maxMultSectors )
-            secread = disk_info[ndev].maxMultSectors;
-
-        // For some reason fails on QEMU if > 8
-        if( secread > 8 )
-            secread = 8;
-
-        if( secread > 1 )
-            secread &= ~1; // even num of sect
-
-        SHOW_FLOW( 11, "start sect rd sect %d + %d", secno, secread );
+        SHOW_FLOW( 11, "start sect rd sect %d + %d", secno, count );
         int rc = dma_pci_lba28(
                                ndev, CMD_READ_DMA,
-                               0, secread, // feature reg, sect count
-                               secno, physaddr,
-                               secread );
+                               0, count, // feature reg, sect count
+                               secno, physaddr, count );
         SHOW_FLOW( 12, "end   sect rd sect %d", secno );
 
         if ( rc )
@@ -257,9 +284,9 @@ retry:;
                 goto retry;
             }
         }
-        secno += secread;
-        physaddr += (512*secread);
-        nsec -= secread;
+        secno += count;
+        nsect -= count;
+        physaddr += (512*count);
     }
 
 
@@ -404,10 +431,29 @@ static errno_t ideRaise( struct phantom_disk_partition *p, pager_io_request *rq 
     return both->raise( both, rq );
 }
 
+// TODO stub!
+static errno_t ideFence( struct phantom_disk_partition *p )
+{
+    (void) p;
+    SHOW_ERROR0( 0, "Ide fence stub" );
+
+    if( have_dev[0] ) ide_flush( 0 );
+    if( have_dev[1] ) ide_flush( 1 );
+
+    return 0;
+}
+
 
 
 static void make_unit_part( int unit, void *aio )
 {
+    errno_t rc = ide_reset( unit );
+    if(rc)
+    {
+        SHOW_ERROR( 0, "skip IDE unit %d, can't reset", unit );
+        return;
+    }
+
     phantom_disk_partition_t *p = phantom_create_partition_struct( both, 0, disk_info[unit].nSectors );
     assert(p);
     p->flags |= PART_FLAG_IS_WHOLE_DISK;
@@ -416,6 +462,7 @@ static void make_unit_part( int unit, void *aio )
     p->asyncIo = aio;
     p->dequeue = ideDequeue;
     p->raise = ideRaise;
+    p->fence = ideFence;
     snprintf( p->name, sizeof(p->name), "Ide%d", unit );
     errno_t err = phantom_register_disk_drive(p);
     if(err)
@@ -430,17 +477,15 @@ void connect_ide_io(void)
 
     dpc_request_init( &ide_dpc, dpc_func );
 
-    int have_dev_0 = !simple_ide_idenify_device(0);
-    int have_dev_1 = !simple_ide_idenify_device(1);
+    have_dev[0] = !simple_ide_idenify_device(0);
+    have_dev[1] = !simple_ide_idenify_device(1);
 
     long both_size = lmax(disk_info[0].nSectors, disk_info[1].nSectors);
 
     both = phantom_create_disk_partition_struct( both_size, 0, 0, startIo );
 
-    if(have_dev_0)         make_unit_part( 0, u0AsyncIo );
-    if(have_dev_1)         make_unit_part( 1, u1AsyncIo );
-
-
+    if(have_dev[0])         make_unit_part( 0, u0AsyncIo );
+    if(have_dev[1])         make_unit_part( 1, u1AsyncIo );
 }
 
 
@@ -460,34 +505,7 @@ void phantom_check_disk_save_virtmem( void * a, int n )
 
 
 
-
-/*
-static void intcpy( char *to, const char *from, int nwords )
-{
-    while( nwords-- )
-    {
-        to[0] = from[1];
-        to[1] = from[0];
-
-        to += 2;
-        from += 2;
-    }
-}*/
-
-
-
-// Fields in the structure returned by the IDENTIFY DEVICE (ECh) and
-// IDENTIFY PACKET DEVICE (A1h) commands (WORD offsets)
-#define IDENTIFY_FIELD_VALIDITY        53
-#define IDENTIFY_DMA_MODES             63
-#define IDENTIFY_ADVANCED_PIO          64
-#define IDENTIFY_48BIT_ADDRESSING      83
-#define IDENTIFY_COMMAND_SET_SUPPORT   83
-#define IDENTIFY_COMMAND_SET_ENABLED   86
-#define IDENTIFY_UDMA_MODES            88
-
-
-
+// TODO ata/atapi/cfata
 errno_t simple_ide_idenify_device(int dev)
 {
     assert(dev < 4);
@@ -495,11 +513,8 @@ errno_t simple_ide_idenify_device(int dev)
     SHOW_INFO( 11, "--- Identifying IDE %d: ", dev );
 
     u_int16_t buf[256];
-    int rc = reg_pio_data_in_lba28(
-                                   dev, CMD_IDENTIFY_DEVICE, //CMD_IDENTIFY_DEVICE_PACKET,
-                                   0, 0,
-                                   0L, //0L,
-                                   buf, 1L, 0 );
+    int rc = reg_pio_data_in_lba28( dev, CMD_IDENTIFY_DEVICE, //CMD_IDENTIFY_DEVICE_PACKET,
+                                   0, 0, 0L, buf, 1L, 0 );
     if(rc)
     {
         SHOW_ERROR( 0 , "can't identify IDE %d", dev );
@@ -508,51 +523,7 @@ errno_t simple_ide_idenify_device(int dev)
 
     parse_i_disk_ata( &disk_info[dev], buf );
     dump_i_disk( &disk_info[dev] );
-    
-#if 0
-    //int isATA = buf[0] & 0x8000;
-    int isATA = (buf[0] >> 15) & 0x1;
 
-
-    int isRemovable = buf[0] & 0x0080;
-    int is48bitAddr = (buf[IDENTIFY_48BIT_ADDRESSING] >> 10) & 0x1;
-    //int hasTrim = buf[169] & 0x1;
-
-#if 0
-    if( !isATA )
-    {
-        printf("Not an ATA device\n");
-        return ENXIO;
-    }
-#endif
-
-    u_int32_t size = (buf[61] << 16) | buf[60];
-    //printf( "nSect=%d / %d ", buf[60], buf[61] );
-
-
-    char serial[21];
-    intcpy( serial, ((char*)&buf)+10*2, 10 );
-    serial[20] = 0;
-
-    char model[41];
-    intcpy( model, ((char*)&buf)+27*2, 20 );
-    model[40] = 0;
-
-    SHOW_INFO( 0, "IDE %d is %s ATA, nSect=%d Mb Model: '%s' %s, %s bit LBA",
-               dev,
-               isATA ? "" : "not",
-               size/2048, model,
-               isRemovable ? "removable" : "fixed", is48bitAddr ? "48" : "28"
-             );
-
-    disk_sectors[dev] = size;
-
-    if( !(buf[49] & 0x0300) )
-    {
-        SHOW_ERROR0( 0, "Not LBA/DMA disk");
-        return ENXIO;
-    }
-#endif
     return 0;
 }
 
