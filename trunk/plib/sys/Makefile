@@ -54,6 +54,8 @@ clean::
 
 # manual deps
 
+ru.dz.phantom.backgrounds.pc: ../resources/backgrounds/phantom_dz_new_1024_768.ppm
+
 internal.bitmap.pc:  internal.io.tty.pc
 
 internal.bootstrap.pc: phantom.osimpl.pc

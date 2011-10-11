@@ -134,7 +134,7 @@ const char *stat_counter_name[MAX_STAT_COUNTERS] =
     "",
     "",
     "",
-    "",
+    "Thread block",
     "Switch 2 idle thread",
 
     "Deferred refdec runs",

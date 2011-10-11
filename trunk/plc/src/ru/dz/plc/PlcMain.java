@@ -114,12 +114,8 @@ public class PlcMain {
 			//Node all = 
 			g.parse();
 
-			//System.out.println("");
-			//System.out.println("");
-
-			//g.print();
-
-			if(g.get_error_count() == 0) g.codegen();
+			if(g.get_error_count() == 0) 
+				g.codegen();
 
 			if(g.get_warning_count() > 0)
 				System.out.println(">> "+g.get_warning_count()+" warnings found");
@@ -132,9 +128,6 @@ public class PlcMain {
 			//else				System.out.println(">> EOF");
 		} catch( PlcException e )
 		{
-			//cg.finalizer(); // close file
-			//cg = null;
-			//outf.delete();
 			System.out.println("Compile failed: "+e.toString());
 			// TODO in fact we should try to compile as many classes as possible instead 
 			System.exit(1);		

@@ -152,12 +152,13 @@ public class ClassTable {
 				//c.print(ps);
 				
 				ps.format("%s: ", c.getName().substring(1)+".pc" );
-				ps.format("%s\n", c.getName().substring(1)+".ph" );
+				ps.format("%s", c.getName().substring(1)+".ph" );
 				
 				for( PhantomClass ref : c.getReferencedClasses() )
 				{
-					ps.format("\t%s\n", ref.getName().substring(1)+".ph" );
+					ps.format("\t%s", ref.getName().substring(1)+".pc" );
 				}
+				ps.format("\n");
 				
 				os.close();
 				ps.close();
