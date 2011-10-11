@@ -1432,6 +1432,10 @@ void do_snapshot()
     disk_page_no_t actual2 = pager_superblock_ptr()->last_snap;
 
     phantom_free_snap ( toFree, actual1, actual2 );
+
+    // Force all io to complete BEFORE updating superblock
+    pager_fence();
+
     pager_update_superblock();
 
     //#error not impl
