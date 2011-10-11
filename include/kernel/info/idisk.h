@@ -23,9 +23,16 @@
 #define I_DISK_HAS_SMART  (1<<4)
 #define I_DISK_HAS_MULT   (1<<5)
 #define I_DISK_HAS_FLUSH  (1<<6)
+#define I_DISK_HAS_REMOV  (1<<7)
+
+typedef enum {
+    unknown, ata, atapi, cf
+} i_disk_type_t;
 
 typedef struct {
     u_int32_t           has;
+
+    i_disk_type_t       type;
 
     u_int32_t           sectorSize;
     u_int32_t           nSectors;
