@@ -139,6 +139,8 @@ static struct kolibri_process_state * get_kolibri_state(uuprocess_t *u)
     ks->buttons->flag_autodestroy = 1;
 
     ks->event_mask = 0x7;
+    ks->event_bits = 1; // on first request return 'redraw' event - some code depends on it
+    hal_sem_release( &ks->event ); // make sure app will receive that event
 
     ks->key_input_scancodes = 0;
 
@@ -329,7 +331,7 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
         }
         break;
 
-    case 4: // TODO FAKE - get idle CPU timeslots
+    case 4: // get idle CPU timeslots
         st->eax = 100-percpu_cpu_load[0]; // in fact we return CPU 0 idle percentage
         break;
 
@@ -691,10 +693,21 @@ static errno_t kolibri_kill_button(pool_t *pool, void *el, pool_handle_t handle,
 
     if( cb->id == kill_id )
     {
+        pool_release_el( pool, handle );
         pool_destroy_el( pool, handle );
     }
     return 0;
 }
+
+static errno_t kolibri_kill_any_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    (void) el;
+    (void) arg;
+    pool_release_el( pool, handle );
+    pool_destroy_el( pool, handle );
+    return 0;
+}
+
 
 static errno_t do_kolibri_paint_changed_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
@@ -765,7 +778,7 @@ static void kolibri_check_button(int x, int y, kolibri_state_t *ks, int mouseb )
 
 
 // ------------------------------------------------
-// Main Kolibro syscall dispatcher
+// Main Kolibry syscall dispatcher
 // ------------------------------------------------
 
 
@@ -782,17 +795,19 @@ void kolibri_sys_dispatcher( struct trap_state *st )
     int ret = 0;
     errno_t err = 0;
 
-
-    switch(st->eax)
+    if( ((int)st->eax) == -1 )
     {
-    case -1:
         SHOW_FLOW( 2, "exit %d", 0 );
         hal_exit_kernel_thread();
         panic("no exit?");
-        break;
+    }
 
+    switch(st->eax & 0xFF)
+    {
     case 0: // make app win
         {
+            pool_foreach( ks->buttons, kolibri_kill_any_button, 0 );
+
             GET_POS_SIZE();
 
             xsize++;
@@ -1065,9 +1080,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             int npixels = r.xsize * r.ysize;
 
-
-
             pool_handle_t bh = pool_create_el( ks->buttons, calloc( 1, sizeof(struct kolibri_button) ) );
+            if( bh < 0 )
+            {
+                SHOW_ERROR0( 0, "out of buttons" );
+                break;
+            }
             struct kolibri_button *cb = pool_get_el( ks->buttons, bh );
 
             if( !cb )
@@ -1493,6 +1511,10 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                     void *buf = u_ptr( st->ecx, sz );
                     memcpy( buf, &color_defaults, sz );
                 }
+                break;
+
+            case 4: // Get skin title bar height - TODO not really implemented
+                st->eax = 16;
                 break;
 
             default:

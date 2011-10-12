@@ -76,7 +76,7 @@ typedef struct pool
     hal_mutex_t	mutex;
 
     pool_arena_t *arenas;
-    int 	narenas;
+    int         narenas;
 
     int         magic;          // pool magic id - to check that handle is for this pool
 

@@ -65,7 +65,7 @@ static void deferred_refdec_init(void)
 }
 
 
-static void deferred_refdec_stop(void)
+static void deferred_refdec_stop(void) //__attribute__((unused))
 {
     stop = 1;
     hal_cond_signal( &start_refdec_cond );
@@ -121,7 +121,7 @@ void deferred_refdec(pvm_object_storage_t *os)
     }
 
 //long_way:
-    int pos = atomic_add( &refdec_put_ptr, 1 );
+    int pos = atomic_add( (int *)&refdec_put_ptr, 1 );
     refdec_buffer[pos] = os;
 
 

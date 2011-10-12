@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Phantom OS team
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Window.
+ *
+**/
+
 #ifndef WINDOW_H
 #define WINDOW_H
 
@@ -155,6 +166,8 @@ typedef struct drv_video_window
 #endif
     struct drv_video_window     *w_decor; // child window - decorations
     struct drv_video_window     *w_owner; // my parent window
+
+    pool_t              *buttons;
 
     // bitmap itself
     rgba_t       	pixel[];

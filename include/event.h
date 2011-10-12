@@ -23,6 +23,7 @@ struct ui_event
     queue_chain_t               echain; // on q
 
     int				type; // UI_EVENT_TYPE_
+    int				extra; // used for button event - button id
 
     time_t	 	       	time;
 
@@ -122,9 +123,10 @@ typedef struct ui_event ui_event_t;
 #define UI_EVENT_WIN_DESTROYED          3
 #define UI_EVENT_WIN_REDECORATE         4 //! Repaint titlebar
 #define UI_EVENT_WIN_REPAINT            5 //! Repaint all
+#define UI_EVENT_WIN_BUTTON             6
 
 
-#define UI_EVENT_GLOBAL_REPAINT_RECT    1 //! Repaint all windows that intersect w. rect
+#define UI_EVENT_GLOBAL_REPAINT_RECT    (0xFF00|1) //! Repaint all windows that intersect w. rect
 
 
 #ifdef KERNEL
@@ -142,7 +144,7 @@ void event_q_put_key( int vkey, int ch, int modifiers );
 void event_q_put_win( int x, int y, int info, struct drv_video_window *focus );
 
 //! Put any event onto the main e q
-void event_q_put_e( struct ui_event *in );
+void event_q_put_e( ui_event_t *in );
 
 
 //! Put global event onto the main e q, supposed that event system

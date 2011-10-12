@@ -299,3 +299,9 @@ struct drv_video_font_t         drv_video_kolibri1_font = {
   drv_video_kolibri1_fnt,
   FONT_FLAG_NONE
  };
+
+struct drv_video_font_t         drv_video_kolibri2_font = { 
+  6, 9,  
+  drv_video_kolibri1_fnt,
+  FONT_FLAG_NONE
+ };
