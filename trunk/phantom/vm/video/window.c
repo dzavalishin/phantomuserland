@@ -14,7 +14,6 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-//#include <drv_video_screen.h>
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
@@ -24,6 +23,7 @@
 #include <kernel/init.h>
 #include "win_local.h"
 #include <video/window.h>
+#include <video/button.h>
 #include <video/internal.h>
 
 //static void defaultEventProcessor();
@@ -223,6 +223,8 @@ void drv_video_window_destroy(drv_video_window_t *w)
     event_q_put_win( w->x, w->y, UI_EVENT_WIN_DESTROYED, focused_window );
 
 
+    if(w->buttons)
+        destroy_buttons_pool(w->buttons);
 
     {
     video_zbuf_reset_win( w );

@@ -32,8 +32,6 @@ static void get_mouse()
 {
     if(!mouse_is_on_screen) return;
     interlock++;
-    //drv_video_bitblt(mpointer->pixel, drv_video_win32.mouse_x, drv_video_win32.mouse_y, mpointer->xsize, mpointer->ysize);
-    // TODO hardcoded mouse hot point
     drv_video_bitblt_ms(screencopy->pixel, last_mouse_x, last_mouse_y, mpointer->xsize, mpointer->ysize);
     mouse_is_on_screen = 0;
     interlock--;
@@ -89,7 +87,7 @@ void drv_video_mouse_on_deflt()
 {
     interlock++;
     mouse_on++;
-    if(mouse_on > 0)
+    if(mouse_on == 1)
         put_mouse();
     interlock--;
 }

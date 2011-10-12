@@ -2,14 +2,12 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Windowing system bodrers and other decorations.
  *
- *
 **/
 
-//#include <drv_video_screen.h>
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
@@ -21,6 +19,7 @@
 #include <video/internal.h>
 #include <video/vops.h>
 #include <video/font.h>
+#include <video/button.h>
 
 
 
@@ -124,7 +123,6 @@ void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, in
     r.x = dest->xsize-(stepOff);
     r.y = dest->ysize-(stepOff);
     drv_video_window_fill_rect( dest, COLOR_DARKGRAY, r );
-
 }
 
 
@@ -164,6 +162,12 @@ void win_make_decorations(drv_video_window_t *w)
         w2->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
         w2->w_owner = w;
         w->w_decor = w2;
+
+#if VIDEO_T_IN_D
+        int bmp_y = w->ysize + bordr_size*2 + 2;
+        // close button with id=1
+        w_add_button( w->w_decor, 1, 5, bmp_y, &close_bmp, 0 );
+#endif
     }
 
     w->w_decor->x = w->x-bordr_size;
@@ -193,6 +197,9 @@ void win_make_decorations(drv_video_window_t *w)
 
         w3->w_owner = w;
         w->w_title = w3;
+
+        // close button with id=1
+        w_add_button( w->w_title, 1, 5, 5, &close_bmp, 0 );
     }
 
     w->w_title->x = w->x-bordr_size;
@@ -210,7 +217,7 @@ void win_make_decorations(drv_video_window_t *w)
     // BUG! It must be +3, not -1 on Y coord!
     drv_video_font_draw_string( w->w_title, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
-                                bordr_size+3, bordr_size-1 );
+                                bordr_size+3 +20, bordr_size-1 );
 
     drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
     drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
@@ -249,6 +256,10 @@ void win_make_decorations(drv_video_window_t *w)
 
 #endif
 
+    w_repaint_buttons(w->w_decor);
+    w_repaint_buttons(w->w_title);
+
+    //drv_video_window_draw_bitmap( w->w_decor, 5, bmp_y, &close_bmp );
 
 
     window_basic_border( w->w_decor, brdr, bordr_size );

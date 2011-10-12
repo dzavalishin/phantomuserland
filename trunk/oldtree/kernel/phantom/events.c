@@ -41,6 +41,7 @@
 
 #include <video/internal.h>
 #include <video/window.h>
+#include <video/button.h>
 
 
 void drv_video_window_explode_event(struct ui_event *e);
@@ -634,6 +635,13 @@ void drv_video_window_receive_event(struct ui_event *e)
 
     e->abs_z = w->z;
     e->rel_z = 0;
+
+    // Not a best place - it can produce events too
+    if( e->type == UI_EVENT_TYPE_MOUSE )
+    {
+        ui_event_t ecopy = *e; // for any case
+        w_check_button( w, &ecopy );
+    }
 
     if( w->events_count < MAX_WINDOW_EVENTS )
     {

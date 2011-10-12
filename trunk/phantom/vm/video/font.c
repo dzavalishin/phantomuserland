@@ -13,6 +13,7 @@
 //#include <video/window.h>
 //#include <video/internal.h>
 #include <video/font.h>
+#include <kernel/libkern.h>
 
 #include <assert.h>
 #include <string.h>
@@ -26,7 +27,8 @@ static __inline__ int _bpc(const drv_video_font_t *font)
 __inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, char c )
 {
     //int bpc = font->ysize * (1 + ((font->xsize-1) / 8));
-    return font->font + c * _bpc(font);
+    const char *cp = font->font + c * _bpc(font);
+    return cp;
 }
 
 //static void font_reverse_x(drv_video_font_t *font);
@@ -39,12 +41,23 @@ __inline__ int drv_video_font_draw_char(
                                          char c, rgba_t color, rgba_t bg,
                                          int x, int y )
 {
+    bool p = FONT_FLAG_PROPORTIONAL & font->flags;
     const char *fcp  = drv_video_font_get_char( font, c );
+
+    int cwidth = font->xsize;
+    if(p)
+    {
+        int pw = *fcp++;
+        cwidth = umin(ffs(pw),font->xsize);
+    }
 
     //if(font->xsize < 0)        font_reverse_x((drv_video_font_t *)font);
 
     int xafter = x+font->xsize;
     int yafter = y+font->ysize;
+
+    // One char is used for width
+    //if( p ) yafter--;
 
     int bpcx = 1 + ((font->xsize-1) / 8);
 
@@ -59,7 +72,8 @@ __inline__ int drv_video_font_draw_char(
     // Completely visible
 
     int yc = y;
-    int fyc = 0;
+    // One char is used for width
+    int fyc = p ? 1 : 0;
     for( ; yc < yafter; yc++, fyc++ )
     {
         rgba_t *wp = win->pixel + x + (yc*win->xsize);

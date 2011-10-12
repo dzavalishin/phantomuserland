@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Phantom OS team
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Bitmap fonts.
+ *
+**/
+
 #ifndef FONT_H
 #define FONT_H
 

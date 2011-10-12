@@ -224,7 +224,7 @@ static void alloc_collapse_with_next_free(pvm_object_storage_t *op, unsigned int
         pvm_object_storage_t *opppa = (pvm_object_storage_t *)o;
         if (
              ( o < end )  &&
-             ( opppa < end )  &&
+             ( (void *)opppa < end )  &&
              ( opppa->_ah.alloc_flags == PVM_OBJECT_AH_ALLOCATOR_FLAG_FREE )  &&
              ( size < need_size * 32 ) //limit page in amount
            )
