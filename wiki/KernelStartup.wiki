@@ -41,14 +41,12 @@ Module named 'classes' (just this name) is needed during the first boot only and
 
 Any module named 'pmod_*' is kernel extension - part of Unix subsystem. In the development.
 
-Current kernel looks for Phantom HDD at IDE drive 1 (counting from 0), i.e. first slave. No partition table is taken in account, but first 16 4K blocks are skipped and not touched.
-
-TODO: It has to be possible to change it at least with kernel parameter, or, better, with partition table lookup. Corresponding code is partially written. (disk.c)
+Current kernel looks for Phantom formatted fs as whole disk or partition of type 0xD3 on first two IDE drives.
 
 
 == Drivers ==
 
-See tables in driver_map.c - ISA drivers are probed, PCI are started by looking up PCI config and looking up drivers by PCI codes. Drivers are started in 4 stages, se main.c
+See tables in driver_map.c and kernel/ia32/board/*.c - ISA drivers are probed, PCI are started by looking up PCI config and looking up drivers by PCI codes. Drivers are started in 4 stages, se main.c
 
 {{{
     // Stage is:
@@ -76,6 +74,7 @@ If compiled in, starts just before Phantom subsystem, and starts all pmod_ modul
 
 See unix/* sources.
 
+If FAT/FAT32 disk is found, it is mounted as /amnt[0-9] and /amntX/bin/sh is executed.
 
 = Phantom subsystem start =
 
@@ -83,7 +82,7 @@ See pvm_root_init()
 
 In signle thread:
  * On first start boot code is run.
- * On subsequent starts - nothing. (It supposed that some init code will be run instead of boot. Possibly. Later.)
+ * On subsequent starts - calls restart code for border objects.
 
 Multithread mode is started after single thread phantom code is finished.
 
