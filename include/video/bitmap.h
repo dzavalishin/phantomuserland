@@ -31,10 +31,14 @@ typedef struct drv_video_cursor
 
 
 
-extern drv_video_bitmap_t 		close_bmp; // Window close button
+extern drv_video_bitmap_t		close_bmp;
 extern drv_video_bitmap_t		close_pressed_bmp;
-extern drv_video_bitmap_t 		pin_bmp; // Window pin button
-
+extern drv_video_bitmap_t		pin_bmp;
+extern drv_video_bitmap_t		rollup_bmp;
+extern drv_video_bitmap_t		rollup_pressed_bmp;
+extern drv_video_bitmap_t		title_brown_bmp;
+extern drv_video_bitmap_t		title_green_bmp;
+extern drv_video_bitmap_t		title_violet_bmp;
 
 
 drv_video_bitmap_t *      drv_video_get_default_mouse_bmp(void);
