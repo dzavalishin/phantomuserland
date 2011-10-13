@@ -1,16 +1,15 @@
-SRCS=close.png.c pin.png.c close_pressed.png.c
-all::  $(SRCS)
-
-clean::
-	rm -f $(SRCS)
-
 CONV=java -cp $(PHANTOM_HOME)/build/jar/plc.jar ru.dz.pbitmap.Main
 
-#close.png.c: close.png
-#	$(CONV) $<
+SRCDIRS = .
+FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
+PNGFILES := $(filter %.png,$(FILES))
+CFILES += $(patsubst %.png,%.png.c,$(notdir $(PNGFILES)))
 
-#pin.png.c: pin.png
-#	$(CONV) $<
+all::     $(CFILES)
+
+clean::
+	rm -f $(CFILES) defs.h
 
 %.png.c: %.png
 	$(CONV) $<
+	 gawk -f defs.awk $@ >>defs.h
