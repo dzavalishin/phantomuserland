@@ -1,8 +1,10 @@
-all::  close.png.c pin.png.c
+RESDIR=$(PHANTOM_HOME)/plib/resources/buttons
+#CONV=java -cp $(PHANTOM_HOME)/build/jar/plc.jar ru.dz.pbitmap.Main
 
-pin.png.c: ../../../plib/resources/buttons/pin.png.c
-	cp $< .
+#vpath %.png $(RESDIR)
 
+#%.png.c: %.png
+#	$(CONV) $<
 
-close.png.c: ../../../plib/resources/buttons/close.png.c
-	cp $< .
+all::  #close.png.c pin.png.c close_pressed.png.c
+	cp $(RESDIR)/*.c .
