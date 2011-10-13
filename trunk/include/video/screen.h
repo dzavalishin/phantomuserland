@@ -187,7 +187,7 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 
 // These are special for mouse pointer code - they're not try to disable mouse
 #define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
-#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, 0xFF)
+#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, ZBUF_TOP)
 
 
 
