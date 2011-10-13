@@ -40,14 +40,16 @@ struct checkb
 
 
 
-static void paint_button(window_handle_t win, button_t *cb)
+static void paint_button(window_handle_t win, button_t *cb )
 {
+    bool pressed = !! (cb->pressed_bits & 1);
+
     drv_video_window_fill_rect( win, cb->color, cb->r );
 
     if( cb->bmp && ! (cb->flags & BUTTON_FLAG_NOPAINT) )
     {
 #if 1
-        drv_video_window_draw_bitmap( win, cb->r.x, cb->r.y, cb->bmp );
+        drv_video_window_draw_bitmap( win, cb->r.x, cb->r.y, pressed ? cb->bmp_pressed : cb->bmp );
 
 #else
         bitmap2bitmap(
@@ -68,7 +70,11 @@ static void paint_button(window_handle_t win, button_t *cb)
 
 static void paint_changed_button(window_handle_t win, button_t *cb)
 {
-    if( (cb->mouse_in_bits & 1) == ( (cb->mouse_in_bits>>1) & 1 ) )
+    if(
+       ((cb->mouse_in_bits & 1) == ( (cb->mouse_in_bits>>1) & 1 ))
+        &&
+       ((cb->pressed_bits & 1) == ( (cb->pressed_bits>>1) & 1 ))
+      )
         return;
 
     paint_button( win, cb );
@@ -123,6 +129,23 @@ static errno_t do_repaint_button(pool_t *pool, void *el, pool_handle_t handle, v
 }
 
 
+static errno_t do_reset_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    (void) pool;
+    (void) handle;
+
+    button_t *cb = el;
+    struct checkb *env = arg;
+
+    // Zero lower bits
+    cb->mouse_in_bits <<= 1;
+    cb->pressed_bits  <<= 1;
+
+    // And repaint
+    paint_button( env->w, cb );
+    return 0;
+}
+
 
 static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
@@ -133,6 +156,7 @@ static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, voi
     struct checkb *env = arg;
 
     cb->mouse_in_bits <<= 1;
+    cb->pressed_bits  <<= 1;
 
     if( point_in_rect( env->e.rel_x, env->e.rel_y, &cb->r ) )
     {
@@ -141,6 +165,8 @@ static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, voi
 
         if(env->e.m.buttons)
         {
+            cb->pressed_bits |= 1;
+
             ui_event_t e = env->e;
 
             e.type = UI_EVENT_TYPE_WIN;
@@ -216,6 +242,18 @@ void w_repaint_buttons(window_handle_t w)
     pool_foreach( w->buttons, do_repaint_button, &env );
 }
 
+void w_reset_buttons(window_handle_t w) // focus lost, mouse off window - make sure all buttons are off
+{
+    if(w->buttons == 0)
+        return;
+
+    struct checkb env;
+    bzero( &env, sizeof(env) );
+
+    env.w = w;
+
+    pool_foreach( w->buttons, do_reset_button, &env );
+}
 
 void w_check_button( window_handle_t w, ui_event_t *e )
 {
@@ -237,7 +275,7 @@ void w_check_button( window_handle_t w, ui_event_t *e )
 }
 
 
-void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, int flags )
+void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags )
 {
     // TODO take some mutex
     if(w->buttons == 0)
@@ -270,6 +308,7 @@ void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *
 
     cb->color = COLOR_RED;
     cb->bmp = bmp;
+    cb->bmp_pressed = pressed ? pressed : bmp;
 
     paint_button( w, cb );
 

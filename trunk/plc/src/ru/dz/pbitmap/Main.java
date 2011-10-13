@@ -1,7 +1,5 @@
 package ru.dz.pbitmap;
 
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
@@ -47,7 +45,7 @@ public class Main {
 		int w = image.getWidth();
 	    int h = image.getHeight();
 		
-		fw.write("#include \"drv_video_screen.h\"\n\n");
+		fw.write("#include <video/screen.h>\n\n");
 		
 		fw.write("drv_video_bitmap_t "+varBase+"_bmp = {" + w +", "+ h +", { \n");
 		//fw.write("char "+varBase+"_data[] = {\n");

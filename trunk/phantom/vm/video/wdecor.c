@@ -166,7 +166,7 @@ void win_make_decorations(drv_video_window_t *w)
 #if VIDEO_T_IN_D
         int bmp_y = w->ysize + bordr_size*2 + 2;
         // close button with id=1
-        w_add_button( w->w_decor, 1, 5, bmp_y, &close_bmp, 0 );
+        w_add_button( w->w_decor, 1, 5, bmp_y, &close_bmp, &close_pressed_bmp, 0 );
 #endif
     }
 
@@ -199,7 +199,7 @@ void win_make_decorations(drv_video_window_t *w)
         w->w_title = w3;
 
         // close button with id=1
-        w_add_button( w->w_title, 1, 5, 5, &close_bmp, 0 );
+        w_add_button( w->w_title, 1, 5, 5, &close_bmp, &close_pressed_bmp, 0 );
     }
 
     w->w_title->x = w->x-bordr_size;
