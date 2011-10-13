@@ -42,6 +42,25 @@
 #include <kernel/dpc.h>
 
 
+static ataio_t         ata_buf; // temp global
+ataio_t         *ata = &ata_buf;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #define IO_PANIC 0
 #define BLOCKED_IO 1
 
@@ -67,10 +86,28 @@ void setup_simple_ide()
 {
     hal_mutex_init( &ide_io, "IDE IO" );
 
+    ata->int_use_intr_flag = 0;    // use INT mode if != 0
+    ata->pio_base_addr1 = 0x1f0;
+    ata->pio_base_addr2 = 0x3f0;
+
+    ata->pio_bmide_base_addr = 0;
+    ata->pio_memory_access = 0; // do we access IDE through memory
+
+/*
+    ata->pio_memory_dt_opt = PIO_MEMORY_DT_OPT0;
+
+
+#if HAVE_WIDE_XFERS
+    ata->pio_xfer_width = 16;
+#else
+    ata->pio_xfer_width = 8;
+#endif
+*/
+
     int bm_base_reg = 0xC000;
 
     // tell ATADRVR how big the buffer is
-    reg_buffer_size = PAGE_SIZE; //BUFFER_SIZE;
+    ata->reg_buffer_size = PAGE_SIZE; //BUFFER_SIZE;
 
     SHOW_FLOW0( 1, "Init");
 
@@ -118,8 +155,8 @@ void setup_simple_ide()
     int numDev = reg_config();
     SHOW_INFO( 0, "Found %d devices, dev 0 is %s, dev 1 is %s.\n",
                numDev,
-               devTypeStr[ reg_config_info[0] ],
-               devTypeStr[ reg_config_info[1] ] );
+               devTypeStr[ ata->reg_config_info[0] ],
+               devTypeStr[ ata->reg_config_info[1] ] );
 
     //ide_reset( 0 );
     //ide_reset( 1 );

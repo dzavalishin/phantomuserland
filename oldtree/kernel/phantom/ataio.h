@@ -1,7 +1,10 @@
 #include <hal.h>
+#include <threads.h>
 #include <kernel/vm.h>
 
 
+
+#define ATA_YIELD() phantom_scheduler_yield()
 
 
 //********************************************************************
@@ -191,12 +194,13 @@
 
 #define CMD_SRST                          256   // fake command code for Soft Reset
 
+
 //**************************************************************
 //
 // Public functions in ATAIOISA.C
 //
 //**************************************************************
-
+/*
 extern int dma_isa_config( int chan );
 
 extern int dma_isa_chs( int dev, int cmd,
@@ -224,17 +228,7 @@ extern int dma_isa_packet( int dev,
                            long dpbc,
                            unsigned int dpseg, unsigned int dpoff,
                            unsigned long lba );
-
-//**************************************************************
-//
-// Public data in ATAIOINT.C
-//
-//**************************************************************
-
-// Interrupt mode flag (interrupts in use if != 0 )
-// This value is READ ONLY - do not change.
-
-extern int int_use_intr_flag;
+*/
 
 //**************************************************************
 //
@@ -275,14 +269,12 @@ extern void dma_pci_set_max_xfer( unsigned int seg, unsigned int off,
 extern int dma_pci_chs( int dev, int cmd,
                         unsigned int fr, unsigned int sc,
                         unsigned int cyl, unsigned int head, unsigned int sect,
-                        //unsigned int seg, unsigned int off,
                         void *physaddr,
                         long numSect );
 */
 extern int dma_pci_lba28( int dev, int cmd,
                           unsigned int fr, unsigned int sc,
                           unsigned long lba,
-                          //unsigned int seg, unsigned int off,
                           physaddr_t physaddr,
                           long numSect );
 
@@ -290,43 +282,16 @@ extern int dma_pci_lba48( int dev, int cmd,
                           unsigned int fr, unsigned int sc,
                           unsigned long lbahi, unsigned long lbalo,
                           physaddr_t physAddr,
-                          //unsigned int seg, unsigned int off,
                           long numSect );
 
 extern int dma_pci_packet( int dev,
                            unsigned int cpbc,
-                           //unsigned int cpseg, unsigned int cpoff,
                            unsigned char * cpAddr,
                            int dir,
                            long dpbc,
                            physaddr_t dp_physAddr,
-//                           unsigned int dpseg, unsigned int dpoff,
                            unsigned long lba );
 
-//**************************************************************
-//
-// Public data in ATAIOPIO.C
-//
-//**************************************************************
-
-extern unsigned int pio_base_addr1;
-extern unsigned int pio_base_addr2;
-
-//extern unsigned int pio_memory_seg;
-extern int pio_memory_dt_opt;
-#define PIO_MEMORY_DT_OPT0 0  // use Data reg at offset 0H
-#define PIO_MEMORY_DT_OPT8 1  // use Data reg at offset 8H
-#define PIO_MEMORY_DT_OPTB 2  // use Data reg at offsets 400-7ffH
-#define PIO_MEMORY_DT_OPTR 3  // randomly select these options
-
-extern unsigned int pio_bmide_base_addr;
-
-extern void * pio_reg_addrs[10];
-
-extern unsigned char pio_last_write[10];
-extern unsigned char pio_last_read[10];
-
-extern int pio_xfer_width;
 
 //**************************************************************
 //
@@ -397,29 +362,6 @@ extern void pio_rep_outdword( unsigned int addrDataReg,
 //
 //**************************************************************
 
-// last ATAPI command packet size and data
-
-extern int reg_atapi_cp_size;
-extern unsigned char reg_atapi_cp_data[16];
-
-// flag to control the ~110ms delay for ATAPI devices,
-// no delay if the flag is zero.
-
-extern int reg_atapi_delay_flag;
-
-// the values in these variables are placed into the Feature,
-// Sector Count, Sector Number and Device/Head register by
-// reg_packet() before the A0H command is issued.  reg_packet()
-// sets these variables to zero before returning.  These variables
-// are initialized to zero.  Only bits 3,2,1,0 of reg_atapi_reg_dh
-// are used.
-
-extern unsigned char reg_atapi_reg_fr;
-extern unsigned char reg_atapi_reg_sc;
-extern unsigned char reg_atapi_reg_sn;
-extern unsigned char reg_atapi_reg_dh;
-
-extern long reg_buffer_size;
 
 // Extended error information returned by
 // reg_reset(), reg_non_data_*(), reg_pio_data_in_*(),
@@ -488,12 +430,12 @@ struct REG_CMD_INFO
    unsigned long lbaHigh2;    // upper 32-bits of LBA after
 } ;
 
-extern struct REG_CMD_INFO reg_cmd_info;
+//extern struct REG_CMD_INFO reg_cmd_info;
 
 // Configuration data for device 0 and 1
 // returned by the reg_config() function.
 
-extern int reg_config_info[2];
+//extern int reg_config_info[2];
 
 #define REG_CONFIG_TYPE_NONE  0
 #define REG_CONFIG_TYPE_UNKN  1
@@ -504,11 +446,11 @@ extern int reg_config_info[2];
 // 0 = no slow data transfer
 // !0= slow data transfer before this DRQ packet
 
-extern long reg_slow_xfer_flag;
+//extern long reg_slow_xfer_flag;
 
 // flag bits for 'incompatible' controllers and devices
 
-extern int reg_incompat_flags;   // see #defines...
+//extern int reg_incompat_flags;   // see #defines...
 
 #define REG_INCOMPAT_DMA_DELAY   0x0001   // set to 1 for delay before
                                           // and after stopping the
@@ -549,7 +491,7 @@ extern int reg_non_data_lba48( int dev, int cmd,
 
 // PIO Data In/Out data transfer call back function
 
-extern void ( * reg_drq_block_call_back ) ( struct REG_CMD_INFO * );
+//extern void ( * reg_drq_block_call_back ) ( struct REG_CMD_INFO * );
 
 // ATA PIO Data In command functions (for CHS, LBA28 and LBA48)
 
@@ -606,25 +548,6 @@ extern int reg_packet( int dev,
                        //unsigned int dpseg, unsigned int dpoff,
                        unsigned long lba );
 
-//**************************************************************
-//
-// Public data in ATAIOTMR.C
-//
-//**************************************************************
-
-//extern long tmr_time_out;           // command time out in seconds
-/*
-extern long tmr_cmd_start_time;     // command start time
-
-extern long tmr_1s_count;           // number of I/O port reads required
-                                    //    for a 1s delay
-extern long tmr_1ms_count;          // number of I/O port reads required
-                                    //    for a 1ms delay
-extern long tmr_1us_count;          // number of I/O port reads required
-                                    //    for a 1us delay
-extern long tmr_500ns_count;        // number of I/O port reads required
-                                    //    for a 500ns delay
-*/
 //**************************************************************
 //
 // Public functions in ATAIOTMR.C
@@ -737,27 +660,27 @@ extern const char * trc_llt_dump2( void );
 
 // Interrupt counter (incremented each time there is an interrupt)
 
-extern volatile int int_intr_cntr;
+//extern volatile int int_intr_cntr;
 
 // Interrupt flag (!= 0 if there was an interrupt)
 
-extern volatile int int_intr_flag;
+//extern volatile int int_intr_flag;
 
 // BMIDE Status register I/O address
 
-extern unsigned int int_bmide_addr;
+//extern unsigned int int_bmide_addr;
 
 // BMIDE Status register at time of last interrupt
 
-extern volatile unsigned char int_bm_status;
+//extern volatile unsigned char int_bm_status;
 
 // ATA Status register I/O address
 
-extern unsigned int int_ata_addr;
+//extern unsigned int int_ata_addr;
 
 // ATA Status register at time of last interrupt
 
-extern volatile unsigned char int_ata_status;
+//extern volatile unsigned char int_ata_status;
 
 //**************************************************************
 //
@@ -861,10 +784,123 @@ extern void trc_llt( unsigned char addr,
 
 #else
 
-#define trc_cht( _none ) 
-#define trc_llt( addr, data, type ) 
+#define trc_cht( _none )
+#define trc_llt( addr, data, type )
 
 
 #endif
+
+// -------------------------------------------------------------
+// ATA driver state struct - move globals here to be able to
+// start more than one copy of ata driver (2nd-... controllers)
+// -------------------------------------------------------------
+
+typedef struct {
+
+    // ATAIOINT.C
+
+    // Interrupt mode flag (interrupts in use if != 0 )
+    // This value is READ ONLY - do not change.
+
+    volatile int	int_use_intr_flag;
+
+
+    // ATAIOPIO.C
+
+    unsigned int 	pio_base_addr1;
+    unsigned int 	pio_base_addr2;
+
+    //int 		pio_memory_dt_opt;
+#define PIO_MEMORY_DT_OPT0 0  // use Data reg at offset 0H
+#define PIO_MEMORY_DT_OPT8 1  // use Data reg at offset 8H
+#define PIO_MEMORY_DT_OPTB 2  // use Data reg at offsets 400-7ffH
+#define PIO_MEMORY_DT_OPTR 3  // randomly select these options
+
+    unsigned int 	pio_bmide_base_addr;
+
+    void * 		pio_reg_addrs[10];
+
+    unsigned char 	pio_last_write[10];
+    unsigned char 	pio_last_read[10];
+    bool		pio_memory_access; // do we access IDE through memory
+
+    //int 		pio_xfer_width;
+
+    // last ATAPI command packet size and data
+
+    int 		reg_atapi_cp_size;
+    unsigned char 	reg_atapi_cp_data[16];
+
+    // flag to control the ~110ms delay for ATAPI devices,
+    // no delay if the flag is zero.
+
+    int reg_atapi_delay_flag;
+
+    // the values in these variables are placed into the Feature,
+    // Sector Count, Sector Number and Device/Head register by
+    // reg_packet() before the A0H command is issued.  reg_packet()
+    // sets these variables to zero before returning.  These variables
+    // are initialized to zero.  Only bits 3,2,1,0 of reg_atapi_reg_dh
+    // are used.
+
+    unsigned char 	reg_atapi_reg_fr;
+    unsigned char 	reg_atapi_reg_sc;
+    unsigned char 	reg_atapi_reg_sn;
+    unsigned char 	reg_atapi_reg_dh;
+
+    long 		reg_buffer_size;
+
+    struct REG_CMD_INFO reg_cmd_info;
+
+    // Configuration data for device 0 and 1
+    // returned by the reg_config() function.
+
+    int 		reg_config_info[2];
+
+    // flag to control the slow data transfer option:
+    // 0 = no slow data transfer
+    // !0= slow data transfer before this DRQ packet
+
+    long 		reg_slow_xfer_flag;
+
+    // flag bits for 'incompatible' controllers and devices
+
+    int 		reg_incompat_flags;   // see #defines...
+
+    // PIO Data In/Out data transfer call back function
+    void ( * reg_drq_block_call_back ) ( struct REG_CMD_INFO * );
+
+
+    // Interrupt counter (incremented each time there is an interrupt)
+
+    volatile int 	int_intr_cntr;
+
+    // Interrupt flag (!= 0 if there was an interrupt)
+
+    volatile int 	int_intr_flag;
+
+    // BMIDE Status register I/O address
+
+    unsigned int 	int_bmide_addr;
+
+    // BMIDE Status register at time of last interrupt
+
+    volatile unsigned char int_bm_status;
+
+    // ATA Status register I/O address
+
+    unsigned int 	int_ata_addr;
+
+    // ATA Status register at time of last interrupt
+
+    volatile unsigned char int_ata_status;
+
+    int 		int_irq_number;
+
+} ataio_t;
+
+
+extern ataio_t         *ata; // temp global
+
 
 // end ataio.h
