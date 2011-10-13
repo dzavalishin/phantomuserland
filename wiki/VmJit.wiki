@@ -1,12 +1,5 @@
 #summary JIT implementation details
 
-= General setup on ia32 =
+= General =
 
-== Registers ==
-
-  * ESI contains global page address - used to reach kernel code, etc
-  * EBX is data pointer of this
-  * EAX + EDX usually contain current data/iface ptr or used in computations
-  * ECX is scratch
-
-*TODO* use EDI for iface of this? Summon this may be frequent op
+Planning to use libjit - the only problem is to implement dynamic linking out of libjit. Possible.
