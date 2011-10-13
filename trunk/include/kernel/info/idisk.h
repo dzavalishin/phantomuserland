@@ -26,7 +26,7 @@
 #define I_DISK_HAS_REMOV  (1<<7)
 
 typedef enum {
-    unknown, ata, atapi, cf
+    idt_unknown, idt_ata, idt_atapi, idt_cf
 } i_disk_type_t;
 
 typedef struct {

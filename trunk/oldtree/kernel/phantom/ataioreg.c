@@ -42,7 +42,7 @@
 // incompatible flags.
 //
 //*************************************************************
-
+/*
 unsigned char reg_atapi_cp_data[16];
 int reg_atapi_cp_size;
 
@@ -64,7 +64,7 @@ void ( * reg_drq_block_call_back ) ( struct REG_CMD_INFO * );
 long reg_slow_xfer_flag;
 
 int reg_incompat_flags;
-
+*/
 //*************************************************************
 //
 // reg_wait_poll() - wait for interrupt or poll for BSY=0
@@ -80,27 +80,28 @@ static void reg_wait_poll( int we, int pe )
 
    // Wait for interrupt -or- wait for not BUSY -or- wait for time out.
 
-   if ( we && int_use_intr_flag )
+   if ( we && ata->int_use_intr_flag )
    {
       trc_llt( 0, 0, TRC_LLT_WINT );
 //printf("wait 4 intr... ");
       while ( 1 )
       {
-         if ( int_intr_flag )                // interrupt ?
+         if ( ata->int_intr_flag )                // interrupt ?
          {
-
+#warning sema
              // slows alot on QEMU
              // TODO on real hardware - reenable?
              //sched_yield(); // driver is threaded, so just yeld
+             ATA_YIELD();
 
             trc_llt( 0, 0, TRC_LLT_INTRQ );  // yes
-            if ( int_bmide_addr )
+            if ( ata->int_bmide_addr )
             {
-               trc_llt( 0, int_bm_status, TRC_LLT_R_BM_SR );
+               trc_llt( 0, ata->int_bm_status, TRC_LLT_R_BM_SR );
             }
-            status = int_ata_status;         // get status
+            status = ata->int_ata_status;         // get status
             trc_llt( CB_STAT, status, TRC_LLT_INB );
-            if ( int_bmide_addr )
+            if ( ata->int_bmide_addr )
             {
                trc_llt( 0, 0x04, TRC_LLT_W_BM_SR );
             }
@@ -109,9 +110,9 @@ static void reg_wait_poll( int we, int pe )
          if ( tmr_chk_timeout() )            // time out ?
          {
             trc_llt( 0, 0, TRC_LLT_TOUT );   // yes
-            reg_cmd_info.to = 1;
-            reg_cmd_info.ec = we;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.to = 1;
+            ata->reg_cmd_info.ec = we;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;
          }
       }
@@ -128,23 +129,23 @@ static void reg_wait_poll( int we, int pe )
          if ( tmr_chk_timeout() )               // time out yet ?
          {
             trc_llt( 0, 0, TRC_LLT_TOUT );
-            reg_cmd_info.to = 1;
-            reg_cmd_info.ec = pe;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.to = 1;
+            ata->reg_cmd_info.ec = pe;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;
          }
       }
    }
 //printf("end poll... ");
    #if DEBUG_REG & 0x01
-      trc_llt( 0, int_intr_cntr, TRC_LLT_DEBUG );  // for debugging
+      trc_llt( 0, ata->int_intr_cntr, TRC_LLT_DEBUG );  // for debugging
    #endif
 
    // Reset the interrupt flag.
 
-   if ( int_intr_flag > 1 )      // extra interrupt(s) ?
-      reg_cmd_info.failbits |= FAILBIT15;
-   int_intr_flag = 0;
+   if ( ata->int_intr_flag > 1 )      // extra interrupt(s) ?
+      ata->reg_cmd_info.failbits |= FAILBIT15;
+   ata->int_intr_flag = 0;
 }
 
 //*************************************************************
@@ -179,12 +180,12 @@ int reg_config( void )
    // determine value of Device (Drive/Head) register bits 7 and 5
 
    dev75 = 0;                    // normal value
-   if ( reg_incompat_flags & REG_INCOMPAT_DEVREG )
+   if ( ata->reg_incompat_flags & REG_INCOMPAT_DEVREG )
       dev75 = CB_DH_OBSOLETE;    // obsolete value
 
    // setup register values
 
-   devCtrl = CB_DC_HD15 | ( int_use_intr_flag ? 0 : CB_DC_NIEN );
+   devCtrl = CB_DC_HD15 | ( ata->int_use_intr_flag ? 0 : CB_DC_NIEN );
 
    // mark start of config in low level trace
 
@@ -196,8 +197,8 @@ int reg_config( void )
 
    // assume there are no devices
 
-   reg_config_info[0] = REG_CONFIG_TYPE_NONE;
-   reg_config_info[1] = REG_CONFIG_TYPE_NONE;
+   ata->reg_config_info[0] = REG_CONFIG_TYPE_NONE;
+   ata->reg_config_info[1] = REG_CONFIG_TYPE_NONE;
 
    // set up Device Control register
 
@@ -216,7 +217,7 @@ int reg_config( void )
    sc = pio_inbyte( CB_SC );
    sn = pio_inbyte( CB_SN );
    if ( ( sc == 0x55 ) && ( sn == 0xaa ) )
-      reg_config_info[0] = REG_CONFIG_TYPE_UNKN;
+      ata->reg_config_info[0] = REG_CONFIG_TYPE_UNKN;
 
    // lets see if there is a device 1
 
@@ -231,13 +232,13 @@ int reg_config( void )
    sc = pio_inbyte( CB_SC );
    sn = pio_inbyte( CB_SN );
    if ( ( sc == 0x55 ) && ( sn == 0xaa ) )
-      reg_config_info[1] = REG_CONFIG_TYPE_UNKN;
+      ata->reg_config_info[1] = REG_CONFIG_TYPE_UNKN;
 
    // quit if no devices found
 
-   if ( ( reg_config_info[0] == REG_CONFIG_TYPE_NONE )
+   if ( ( ata->reg_config_info[0] == REG_CONFIG_TYPE_NONE )
         &&
-        ( reg_config_info[1] == REG_CONFIG_TYPE_NONE )
+        ( ata->reg_config_info[1] == REG_CONFIG_TYPE_NONE )
       )
    {
       trc_llt( 0, 0, TRC_LLT_E_CFG );
@@ -261,7 +262,7 @@ int reg_config( void )
    st = pio_inbyte( CB_STAT );
    if ( st == 0x7f )
    {
-      reg_config_info[0] = REG_CONFIG_TYPE_NONE;
+      ata->reg_config_info[0] = REG_CONFIG_TYPE_NONE;
    }
    else
    if ( ( sc == 0x01 ) && ( sn == 0x01 ) )
@@ -275,7 +276,7 @@ int reg_config( void )
            ( ( cl == 0x69 ) && ( ch == 0x96 ) )       // SATAPI
          )
       {
-         reg_config_info[0] = REG_CONFIG_TYPE_ATAPI;
+         ata->reg_config_info[0] = REG_CONFIG_TYPE_ATAPI;
       }
       else
       if ( ( ( cl == 0x00 ) && ( ch == 0x00 ) )     // PATA
@@ -283,7 +284,7 @@ int reg_config( void )
            ( ( cl == 0x3c ) && ( ch == 0xc3 ) )     // SATA
          )
       {
-         reg_config_info[0] = REG_CONFIG_TYPE_ATA;
+         ata->reg_config_info[0] = REG_CONFIG_TYPE_ATA;
       }
    }
 
@@ -297,7 +298,7 @@ int reg_config( void )
    st = pio_inbyte( CB_STAT );
    if ( st == 0x7f )
    {
-      reg_config_info[1] = REG_CONFIG_TYPE_NONE;
+      ata->reg_config_info[1] = REG_CONFIG_TYPE_NONE;
    }
    else
    if ( ( sc == 0x01 ) && ( sn == 0x01 ) )
@@ -311,7 +312,7 @@ int reg_config( void )
            ( ( cl == 0x69 ) && ( ch == 0x96 ) )       // SATAPI
          )
       {
-         reg_config_info[1] = REG_CONFIG_TYPE_ATAPI;
+         ata->reg_config_info[1] = REG_CONFIG_TYPE_ATAPI;
       }
       else
       if ( ( ( cl == 0x00 ) && ( ch == 0x00 ) )     // PATA
@@ -319,18 +320,18 @@ int reg_config( void )
            ( ( cl == 0x3c ) && ( ch == 0xc3 ) )     // SATA
          )
       {
-         reg_config_info[1] = REG_CONFIG_TYPE_ATA;
+         ata->reg_config_info[1] = REG_CONFIG_TYPE_ATA;
       }
    }
 
    // If possible, select a device that exists
 
-   if ( reg_config_info[1] != REG_CONFIG_TYPE_NONE )
+   if ( ata->reg_config_info[1] != REG_CONFIG_TYPE_NONE )
    {
       pio_outbyte( CB_DH, CB_DH_DEV1 | dev75 );
       ATA_DELAY();
    }
-   if ( reg_config_info[0] != REG_CONFIG_TYPE_NONE )
+   if ( ata->reg_config_info[0] != REG_CONFIG_TYPE_NONE )
    {
       pio_outbyte( CB_DH, CB_DH_DEV0 | dev75 );
       ATA_DELAY();
@@ -340,8 +341,8 @@ int reg_config( void )
 
    if ( sub_readBusMstrStatus() & BM_SR_MASK_ERR )
    {
-      reg_cmd_info.ec = 78;                  // yes
-      trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+      ata->reg_cmd_info.ec = 78;                  // yes
+      trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
    }
 
    // mark end of config in low level trace
@@ -373,12 +374,12 @@ int reg_reset( int skipFlag, int devRtrn )
    // determine value of Device (Drive/Head) register bits 7 and 5
 
    dev75 = 0;                    // normal value
-   if ( reg_incompat_flags & REG_INCOMPAT_DEVREG )
+   if ( ata->reg_incompat_flags & REG_INCOMPAT_DEVREG )
       dev75 = CB_DH_OBSOLETE;    // obsolete value
 
    // setup register values
 
-   devCtrl = CB_DC_HD15 | ( int_use_intr_flag ? 0 : CB_DC_NIEN );
+   devCtrl = CB_DC_HD15 | ( ata->int_use_intr_flag ? 0 : CB_DC_NIEN );
 
    // mark start of reset in low level trace
 
@@ -391,8 +392,8 @@ int reg_reset( int skipFlag, int devRtrn )
    // Reset error return data.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_SRST;
-   reg_cmd_info.ct  = TRC_TYPE_ASR;
+   ata->reg_cmd_info.flg = TRC_FLAG_SRST;
+   ata->reg_cmd_info.ct  = TRC_TYPE_ASR;
 
    // initialize the command timeout counter
 
@@ -417,7 +418,7 @@ int reg_reset( int skipFlag, int devRtrn )
 
    // If there is a device 0, wait for device 0 to set BSY=0.
 
-   if ( reg_config_info[0] != REG_CONFIG_TYPE_NONE )
+   if ( ata->reg_config_info[0] != REG_CONFIG_TYPE_NONE )
    {
       trc_llt( 0, 0, TRC_LLT_PNBSY );
       while ( 1 )
@@ -428,9 +429,9 @@ int reg_reset( int skipFlag, int devRtrn )
          if ( tmr_chk_timeout() )
          {
             trc_llt( 0, 0, TRC_LLT_TOUT );
-            reg_cmd_info.to = 1;
-            reg_cmd_info.ec = 1;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.to = 1;
+            ata->reg_cmd_info.ec = 1;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;
          }
       }
@@ -438,20 +439,20 @@ int reg_reset( int skipFlag, int devRtrn )
 
    // Check that drive 0 has valid BSY=0 status
 
-   if ( reg_cmd_info.ec == 0 )
+   if ( ata->reg_cmd_info.ec == 0 )
    {
       status = pio_inbyte( CB_STAT );
       if ( ( status == 0x7f ) || ( status & CB_STAT_BSY ) )
       {
-         reg_cmd_info.ec = 1;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 1;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
       }
    }
 
    // If there is a device 1, wait until device 1 allows
    // register access.
 
-   if ( reg_config_info[1] != REG_CONFIG_TYPE_NONE )
+   if ( ata->reg_config_info[1] != REG_CONFIG_TYPE_NONE )
    {
       trc_llt( 0, 0, TRC_LLT_PNBSY );
       while ( 1 )
@@ -465,22 +466,22 @@ int reg_reset( int skipFlag, int devRtrn )
          if ( tmr_chk_timeout() )
          {
             trc_llt( 0, 0, TRC_LLT_TOUT );
-            reg_cmd_info.to = 1;
-            reg_cmd_info.ec = 2;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.to = 1;
+            ata->reg_cmd_info.ec = 2;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;
          }
       }
 
       // Check if drive 1 has valid BSY=0 status
 
-      if ( reg_cmd_info.ec == 0 )
+      if ( ata->reg_cmd_info.ec == 0 )
       {
          status = pio_inbyte( CB_STAT );
          if ( ( status == 0x7f ) || ( status & CB_STAT_BSY ) )
          {
-            reg_cmd_info.ec = 3;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 3;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          }
       }
    }
@@ -489,7 +490,7 @@ int reg_reset( int skipFlag, int devRtrn )
 
    // We are done but now we must select the device the caller
    // requested before we trace the command.  This will cause
-   // the correct data to be returned in reg_cmd_info.
+   // the correct data to be returned in ata->reg_cmd_info.
 
    pio_outbyte( CB_DH, ( devRtrn ? CB_DH_DEV1 : CB_DH_DEV0 ) | dev75 );
    ATA_DELAY();
@@ -497,12 +498,12 @@ int reg_reset( int skipFlag, int devRtrn )
 
    // If possible, select a device that exists
 
-   if ( reg_config_info[1] != REG_CONFIG_TYPE_NONE )
+   if ( ata->reg_config_info[1] != REG_CONFIG_TYPE_NONE )
    {
       pio_outbyte( CB_DH, CB_DH_DEV1 | dev75 );
       ATA_DELAY();
    }
-   if ( reg_config_info[0] != REG_CONFIG_TYPE_NONE )
+   if ( ata->reg_config_info[0] != REG_CONFIG_TYPE_NONE )
    {
       pio_outbyte( CB_DH, CB_DH_DEV0 | dev75 );
       ATA_DELAY();
@@ -512,8 +513,8 @@ int reg_reset( int skipFlag, int devRtrn )
 
    if ( sub_readBusMstrStatus() & BM_SR_MASK_ERR )
    {
-      reg_cmd_info.ec = 78;                  // yes
-      trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+      ata->reg_cmd_info.ec = 78;                  // yes
+      trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
    }
 
    // mark end of reset in low level trace
@@ -523,7 +524,7 @@ int reg_reset( int skipFlag, int devRtrn )
    // All done.  The return values of this function are described in
    // ATAIO.H.
 
-   if ( reg_cmd_info.ec )
+   if ( ata->reg_cmd_info.ec )
       return 1;
    return 0;
 }
@@ -554,7 +555,7 @@ static int exec_non_data_cmd( int dev )
    // determine value of Device (Drive/Head) register bits 7 and 5
 
    dev75 = 0;                    // normal value
-   if ( reg_incompat_flags & REG_INCOMPAT_DEVREG )
+   if ( ata->reg_incompat_flags & REG_INCOMPAT_DEVREG )
       dev75 = CB_DH_OBSOLETE;    // obsolete value
 
    // mark start of ND cmd in low level trace
@@ -578,7 +579,7 @@ static int exec_non_data_cmd( int dev )
    // all devices support this command (even some ATAPI devices
    // don't support the command.
 
-   if ( reg_cmd_info.cmd != CMD_DEVICE_RESET )
+   if ( ata->reg_cmd_info.cmd != CMD_DEVICE_RESET )
    {
       // Select the drive - call the sub_select function.
       // Quit now if this fails.
@@ -602,7 +603,7 @@ static int exec_non_data_cmd( int dev )
    // Start the command by setting the Command register.  The drive
    // should immediately set BUSY status.
 
-   pio_outbyte( CB_CMD, reg_cmd_info.cmd );
+   pio_outbyte( CB_CMD, ata->reg_cmd_info.cmd );
 
    // Waste some time by reading the alternate status a few times.
    // This gives the drive time to set BUSY in the status register on
@@ -631,9 +632,9 @@ static int exec_non_data_cmd( int dev )
    //    Do the normal wait for interrupt or polling for
    //    completion.
 
-   if ( ( reg_cmd_info.cmd == CMD_EXECUTE_DEVICE_DIAGNOSTIC )
+   if ( ( ata->reg_cmd_info.cmd == CMD_EXECUTE_DEVICE_DIAGNOSTIC )
         &&
-        ( reg_config_info[0] == REG_CONFIG_TYPE_NONE )
+        ( ata->reg_config_info[0] == REG_CONFIG_TYPE_NONE )
       )
    {
       polled = 1;
@@ -649,16 +650,16 @@ static int exec_non_data_cmd( int dev )
          if ( tmr_chk_timeout() )
          {
             trc_llt( 0, 0, TRC_LLT_TOUT );
-            reg_cmd_info.to = 1;
-            reg_cmd_info.ec = 24;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.to = 1;
+            ata->reg_cmd_info.ec = 24;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;
          }
       }
    }
    else
    {
-      if ( reg_cmd_info.cmd == CMD_DEVICE_RESET )
+      if ( ata->reg_cmd_info.cmd == CMD_DEVICE_RESET )
       {
          // Wait for not BUSY -or- wait for time out.
 //printf("ata wait busy (reset)... ");
@@ -671,7 +672,7 @@ static int exec_non_data_cmd( int dev )
          // Wait for interrupt -or- wait for not BUSY -or- wait for time out.
 
 //printf("ata wait... ");
-         if ( ! int_use_intr_flag )
+         if ( ! ata->int_use_intr_flag )
             polled = 1;
          reg_wait_poll( 22, 23 );
       }
@@ -680,19 +681,19 @@ static int exec_non_data_cmd( int dev )
    // If status was polled or if any error read the status register,
    // otherwise get the status that was read by the interrupt handler.
 //printf("ata read status... ");
-   if ( ( polled ) || ( reg_cmd_info.ec ) )
+   if ( ( polled ) || ( ata->reg_cmd_info.ec ) )
       status = pio_inbyte( CB_STAT );
    else
-      status = int_ata_status;
+      status = ata->int_ata_status;
 
    // Error if BUSY, DEVICE FAULT, DRQ or ERROR status now.
 
-   if ( reg_cmd_info.ec == 0 )
+   if ( ata->reg_cmd_info.ec == 0 )
    {
       if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_DRQ | CB_STAT_ERR ) )
       {
-         reg_cmd_info.ec = 21;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 21;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
       }
    }
 
@@ -704,8 +705,8 @@ static int exec_non_data_cmd( int dev )
 
    if ( sub_readBusMstrStatus() & BM_SR_MASK_ERR )
    {
-      reg_cmd_info.ec = 78;                  // yes
-      trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+      ata->reg_cmd_info.ec = 78;                  // yes
+      trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
    }
 
    // NON_DATA_DONE:
@@ -720,8 +721,8 @@ static int exec_non_data_cmd( int dev )
 
    // All done.  The return values of this function are described in
    // ATAIO.H.
-//printf("ata return, ec = %d... ", reg_cmd_info.ec);
-   if ( reg_cmd_info.ec )
+//printf("ata return, ec = %d... ", ata->reg_cmd_info.ec);
+   if ( ata->reg_cmd_info.ec )
       return 1;
    return 0;
 }
@@ -747,18 +748,18 @@ int reg_non_data_chs( int dev, int cmd,
    // Setup command parameters.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_AND;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.sn1 = sect;
-   reg_cmd_info.cl1 = cyl & 0x00ff;
-   reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
-   reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.ns  = sc;
-   reg_cmd_info.lbaSize = LBACHS;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_AND;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.sn1 = sect;
+   ata->reg_cmd_info.cl1 = cyl & 0x00ff;
+   ata->reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
+   ata->reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.ns  = sc;
+   ata->reg_cmd_info.lbaSize = LBACHS;
 
    // Execute the command.
 
@@ -781,17 +782,17 @@ int reg_non_data_lba28( int dev, int cmd,
    // Setup current command information.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_AND;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.ns  = sc;
-   reg_cmd_info.lbaSize = LBA28;
-   reg_cmd_info.lbaHigh1 = 0L;
-   reg_cmd_info.lbaLow1 = lba;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_AND;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.ns  = sc;
+   ata->reg_cmd_info.lbaSize = LBA28;
+   ata->reg_cmd_info.lbaHigh1 = 0L;
+   ata->reg_cmd_info.lbaLow1 = lba;
 
    // Execute the command.
 
@@ -814,17 +815,17 @@ int reg_non_data_lba48( int dev, int cmd,
    // Setup current command infomation.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_AND;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.ns  = sc;
-   reg_cmd_info.lbaSize = LBA48;
-   reg_cmd_info.lbaHigh1 = lbahi;
-   reg_cmd_info.lbaLow1 = lbalo;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_AND;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.ns  = sc;
+   ata->reg_cmd_info.lbaSize = LBA48;
+   ata->reg_cmd_info.lbaHigh1 = lbahi;
+   ata->reg_cmd_info.lbaLow1 = lbalo;
 
    // Execute the command.
 
@@ -871,7 +872,7 @@ static int exec_pio_data_in_cmd( int dev,
    {
       sub_trace_command();
       trc_llt( 0, 0, TRC_LLT_E_PDI );
-      reg_drq_block_call_back = (void *) 0;
+      ata->reg_drq_block_call_back = (void *) 0;
       return 1;
    }
 
@@ -886,7 +887,7 @@ static int exec_pio_data_in_cmd( int dev,
    // Start the command by setting the Command register.  The drive
    // should immediately set BUSY status.
 
-   pio_outbyte( CB_CMD, reg_cmd_info.cmd );
+   pio_outbyte( CB_CMD, ata->reg_cmd_info.cmd );
 
    // Waste some time by reading the alternate status a few times.
    // This gives the drive time to set BUSY in the status register on
@@ -925,14 +926,14 @@ static int exec_pio_data_in_cmd( int dev,
       // If polling or error read the status, otherwise
       // get the status that was read by the interrupt handler.
 
-      if ( ( ! int_use_intr_flag ) || ( reg_cmd_info.ec ) )
+      if ( ( ! ata->int_use_intr_flag ) || ( ata->reg_cmd_info.ec ) )
          status = pio_inbyte( CB_STAT );
       else
-         status = int_ata_status;
+         status = ata->int_ata_status;
 
       // If there was a time out error, go to READ_DONE.
 
-      if ( reg_cmd_info.ec )
+      if ( ata->reg_cmd_info.ec )
          break;   // go to READ_DONE
 
       // If BSY=0 and DRQ=1, transfer the data,
@@ -942,18 +943,18 @@ static int exec_pio_data_in_cmd( int dev,
       {
          // do the slow data transfer thing
 
-         if ( reg_slow_xfer_flag )
+         if ( ata->reg_slow_xfer_flag )
          {
-            if ( numSect <= reg_slow_xfer_flag )
+            if ( numSect <= ata->reg_slow_xfer_flag )
             {
                tmr_delay_xfer();
-               reg_slow_xfer_flag = 0;
+               ata->reg_slow_xfer_flag = 0;
             }
          }
 
          // increment number of DRQ packets
 
-         reg_cmd_info.drqPackets ++ ;
+         ata->reg_cmd_info.drqPackets ++ ;
 
          // determine the number of sectors to transfer
 
@@ -965,12 +966,12 @@ static int exec_pio_data_in_cmd( int dev,
          // Quit if buffer overrun.
          // Adjust buffer address when DRQ block call back in use.
 
-         if ( reg_drq_block_call_back )
+         if ( ata->reg_drq_block_call_back )
          {
-            if ( ( wordCnt << 1 ) > reg_buffer_size )
+            if ( ( wordCnt << 1 ) > ata->reg_buffer_size )
             {
-               reg_cmd_info.ec = 61;
-               trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+               ata->reg_cmd_info.ec = 61;
+               trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
                break;   // go to READ_DONE
             }
             //seg = saveSeg;
@@ -979,18 +980,18 @@ static int exec_pio_data_in_cmd( int dev,
          }
          else
          {
-            if ( ( reg_cmd_info.totalBytesXfer + ( wordCnt << 1 ) )
-                 > reg_buffer_size )
+            if ( ( ata->reg_cmd_info.totalBytesXfer + ( wordCnt << 1 ) )
+                 > ata->reg_buffer_size )
             {
-               reg_cmd_info.ec = 61;
-               trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+               ata->reg_cmd_info.ec = 61;
+               trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
                break;   // go to READ_DONE
             }
          }
 
          // Do the REP INSW to read the data for one DRQ block.
 
-         reg_cmd_info.totalBytesXfer += ( wordCnt << 1 );
+         ata->reg_cmd_info.totalBytesXfer += ( wordCnt << 1 );
          pio_drq_block_in( CB_DATA, addr, wordCnt );
 
          ATA_DELAY();   // delay so device can get the status updated
@@ -1000,10 +1001,10 @@ static int exec_pio_data_in_cmd( int dev,
          // there is an error).
 
          // Call DRQ block call back function.
-         if ( reg_drq_block_call_back )
+         if ( ata->reg_drq_block_call_back )
          {
-            reg_cmd_info.drqPacketSize = ( wordCnt << 1 );
-            (* reg_drq_block_call_back) ( & reg_cmd_info );
+            ata->reg_cmd_info.drqPacketSize = ( wordCnt << 1 );
+            (* ata->reg_drq_block_call_back) ( & ata->reg_cmd_info );
          }
 
          // Decrement the count of sectors to be transferred
@@ -1018,8 +1019,8 @@ static int exec_pio_data_in_cmd( int dev,
 
       if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_ERR ) )
       {
-         reg_cmd_info.ec = 31;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 31;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          break;   // go to READ_DONE
       }
 
@@ -1027,8 +1028,8 @@ static int exec_pio_data_in_cmd( int dev,
 
       if ( ( status & CB_STAT_DRQ ) == 0 )
       {
-         reg_cmd_info.ec = 32;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 32;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          break;   // go to READ_DONE
       }
 
@@ -1046,8 +1047,8 @@ static int exec_pio_data_in_cmd( int dev,
          if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_DRQ | CB_STAT_ERR ) )
          //if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_ERR ) )
          {
-            reg_cmd_info.ec = 33;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 33;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;   // go to READ_DONE
          }
 
@@ -1070,8 +1071,8 @@ static int exec_pio_data_in_cmd( int dev,
 
    if ( sub_readBusMstrStatus() & BM_SR_MASK_ERR )
    {
-      reg_cmd_info.ec = 78;                  // yes
-      trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+      ata->reg_cmd_info.ec = 78;                  // yes
+      trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
    }
 
    // READ_DONE:
@@ -1084,14 +1085,14 @@ static int exec_pio_data_in_cmd( int dev,
 
    trc_llt( 0, 0, TRC_LLT_E_PDI );
 
-   // reset reg_drq_block_call_back to NULL (0)
+   // reset ata->reg_drq_block_call_back to NULL (0)
 
-   reg_drq_block_call_back = (void *) 0;
+   ata->reg_drq_block_call_back = (void *) 0;
 
    // All done.  The return values of this function are described in
    // ATAIO.H.
 
-   if ( reg_cmd_info.ec )
+   if ( ata->reg_cmd_info.ec )
       return 1;
    return 0;
 }
@@ -1117,17 +1118,17 @@ int reg_pio_data_in_chs( int dev, int cmd,
    // Reset error return data.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_APDI;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.sn1 = sect;
-   reg_cmd_info.cl1 = cyl & 0x00ff;
-   reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
-   reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.lbaSize = LBACHS;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_APDI;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.sn1 = sect;
+   ata->reg_cmd_info.cl1 = cyl & 0x00ff;
+   ata->reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
+   ata->reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.lbaSize = LBACHS;
 
    // these commands transfer only 1 sector
    if (    ( cmd == CMD_IDENTIFY_DEVICE )
@@ -1150,8 +1151,8 @@ int reg_pio_data_in_chs( int dev, int cmd,
          multiCnt = 1;
    }
 
-   reg_cmd_info.ns  = numSect;
-   reg_cmd_info.mc  = multiCnt;
+   ata->reg_cmd_info.ns  = numSect;
+   ata->reg_cmd_info.mc  = multiCnt;
 
    return exec_pio_data_in_cmd( dev, seg, off, numSect, multiCnt );
 }
@@ -1175,16 +1176,16 @@ int reg_pio_data_in_lba28( int dev, int cmd,
    // Reset error return data.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_APDI;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.lbaSize = LBA28;
-   reg_cmd_info.lbaHigh1 = 0L;
-   reg_cmd_info.lbaLow1 = lba;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_APDI;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.lbaSize = LBA28;
+   ata->reg_cmd_info.lbaHigh1 = 0L;
+   ata->reg_cmd_info.lbaLow1 = lba;
 
    // these commands transfer only 1 sector
    if (    ( cmd == CMD_IDENTIFY_DEVICE )
@@ -1207,8 +1208,8 @@ int reg_pio_data_in_lba28( int dev, int cmd,
          multiCnt = 1;
    }
 
-   reg_cmd_info.ns  = numSect;
-   reg_cmd_info.mc  = multiCnt;
+   ata->reg_cmd_info.ns  = numSect;
+   ata->reg_cmd_info.mc  = multiCnt;
 
    return exec_pio_data_in_cmd( dev, addr, numSect, multiCnt );
 }
@@ -1231,16 +1232,16 @@ int reg_pio_data_in_lba48( int dev, int cmd,
    // Reset error return data.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_APDI;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.lbaSize = LBA48;
-   reg_cmd_info.lbaHigh1 = lbahi;
-   reg_cmd_info.lbaLow1 = lbalo;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_APDI;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.lbaSize = LBA48;
+   ata->reg_cmd_info.lbaHigh1 = lbahi;
+   ata->reg_cmd_info.lbaLow1 = lbalo;
 
    // adjust multiple count
    if ( multiCnt & 0x0800 )
@@ -1257,8 +1258,8 @@ int reg_pio_data_in_lba48( int dev, int cmd,
          multiCnt = 1;
    }
 
-   reg_cmd_info.ns  = numSect;
-   reg_cmd_info.mc  = multiCnt;
+   ata->reg_cmd_info.ns  = numSect;
+   ata->reg_cmd_info.mc  = multiCnt;
 
    return exec_pio_data_in_cmd( dev, addr, numSect, multiCnt );
 }
@@ -1304,7 +1305,7 @@ static int exec_pio_data_out_cmd( int dev,
    {
       sub_trace_command();
       trc_llt( 0, 0, TRC_LLT_E_PDO );
-      reg_drq_block_call_back = (void *) 0;
+      ata->reg_drq_block_call_back = (void *) 0;
       return 1;
    }
 
@@ -1319,7 +1320,7 @@ static int exec_pio_data_out_cmd( int dev,
    // Start the command by setting the Command register.  The drive
    // should immediately set BUSY status.
 
-   pio_outbyte( CB_CMD, reg_cmd_info.cmd );
+   pio_outbyte( CB_CMD, ata->reg_cmd_info.cmd );
 
    // Waste some time by reading the alternate status a few times.
    // This gives the drive time to set BUSY in the status register on
@@ -1346,9 +1347,9 @@ static int exec_pio_data_out_cmd( int dev,
       if ( tmr_chk_timeout() )
       {
          trc_llt( 0, 0, TRC_LLT_TOUT );
-         reg_cmd_info.to = 1;
-         reg_cmd_info.ec = 47;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.to = 1;
+         ata->reg_cmd_info.ec = 47;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          loopFlag = 0;
          break;
       }
@@ -1357,10 +1358,10 @@ static int exec_pio_data_out_cmd( int dev,
    // If we are using interrupts and we just got an interrupt, this is
    // wrong.  The drive must not generate an interrupt at this time.
 
-   if ( loopFlag && int_use_intr_flag && int_intr_flag )
+   if ( loopFlag && ata->int_use_intr_flag && ata->int_intr_flag )
    {
-      reg_cmd_info.ec = 46;
-      trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+      ata->reg_cmd_info.ec = 46;
+      trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
       loopFlag = 0;
    }
 
@@ -1391,18 +1392,18 @@ static int exec_pio_data_out_cmd( int dev,
       {
          // do the slow data transfer thing
 
-         if ( reg_slow_xfer_flag )
+         if ( ata->reg_slow_xfer_flag )
          {
-            if ( numSect <= reg_slow_xfer_flag )
+            if ( numSect <= ata->reg_slow_xfer_flag )
             {
                tmr_delay_xfer();
-               reg_slow_xfer_flag = 0;
+               ata->reg_slow_xfer_flag = 0;
             }
          }
 
          // increment number of DRQ packets
 
-         reg_cmd_info.drqPackets ++ ;
+         ata->reg_cmd_info.drqPackets ++ ;
 
          // determine the number of sectors to transfer
 
@@ -1416,34 +1417,34 @@ static int exec_pio_data_out_cmd( int dev,
          // a) Call DRQ block call back function.
          // b) Adjust buffer address.
 
-         if ( reg_drq_block_call_back )
+         if ( ata->reg_drq_block_call_back )
          {
-            if ( ( wordCnt << 1 ) > reg_buffer_size )
+            if ( ( wordCnt << 1 ) > ata->reg_buffer_size )
             {
-               reg_cmd_info.ec = 61;
-               trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+               ata->reg_cmd_info.ec = 61;
+               trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
                break;   // go to READ_DONE
             }
-            reg_cmd_info.drqPacketSize = ( wordCnt << 1 );
-            (* reg_drq_block_call_back) ( & reg_cmd_info );
+            ata->reg_cmd_info.drqPacketSize = ( wordCnt << 1 );
+            (* ata->reg_drq_block_call_back) ( & ata->reg_cmd_info );
             //seg = saveSeg;
             //off = saveOff;
             addr = saveAddr;
          }
          else
          {
-            if ( ( reg_cmd_info.totalBytesXfer + ( wordCnt << 1 ) )
-                > reg_buffer_size )
+            if ( ( ata->reg_cmd_info.totalBytesXfer + ( wordCnt << 1 ) )
+                > ata->reg_buffer_size )
             {
-               reg_cmd_info.ec = 61;
-               trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+               ata->reg_cmd_info.ec = 61;
+               trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
                break;   // go to READ_DONE
             }
          }
 
          // Do the REP OUTSW to write the data for one DRQ block.
 
-         reg_cmd_info.totalBytesXfer += ( wordCnt << 1 );
+         ata->reg_cmd_info.totalBytesXfer += ( wordCnt << 1 );
          pio_drq_block_out( CB_DATA, addr, wordCnt );
 
          ATA_DELAY();   // delay so device can get the status updated
@@ -1463,8 +1464,8 @@ static int exec_pio_data_out_cmd( int dev,
 
       if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_ERR ) )
       {
-         reg_cmd_info.ec = 41;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 41;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          break;   // go to WRITE_DONE
       }
 
@@ -1472,8 +1473,8 @@ static int exec_pio_data_out_cmd( int dev,
 
       if ( ( status & CB_STAT_DRQ ) == 0 )
       {
-         reg_cmd_info.ec = 42;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 42;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          break;   // go to WRITE_DONE
       }
 
@@ -1485,14 +1486,14 @@ static int exec_pio_data_out_cmd( int dev,
       // If polling or error read the status, otherwise
       // get the status that was read by the interrupt handler.
 
-      if ( ( ! int_use_intr_flag ) || ( reg_cmd_info.ec ) )
+      if ( ( ! ata->int_use_intr_flag ) || ( ata->reg_cmd_info.ec ) )
          status = pio_inbyte( CB_STAT );
       else
-         status = int_ata_status;
+         status = ata->int_ata_status;
 
       // If there was a time out error, go to WRITE_DONE.
 
-      if ( reg_cmd_info.ec )
+      if ( ata->reg_cmd_info.ec )
          break;   // go to WRITE_DONE
 
       // If all of the requested sectors have been transferred, make a
@@ -1506,8 +1507,8 @@ static int exec_pio_data_out_cmd( int dev,
 
          if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_DRQ | CB_STAT_ERR ) )
          {
-            reg_cmd_info.ec = 43;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 43;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;   // go to WRITE_DONE
          }
 
@@ -1531,8 +1532,8 @@ static int exec_pio_data_out_cmd( int dev,
 
    if ( sub_readBusMstrStatus() & BM_SR_MASK_ERR )
    {
-      reg_cmd_info.ec = 78;                  // yes
-      trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+      ata->reg_cmd_info.ec = 78;                  // yes
+      trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
    }
 
    // WRITE_DONE:
@@ -1545,14 +1546,14 @@ static int exec_pio_data_out_cmd( int dev,
 
    trc_llt( 0, 0, TRC_LLT_E_PDO );
 
-   // reset reg_drq_block_call_back to NULL (0)
+   // reset ata->reg_drq_block_call_back to NULL (0)
 
-   reg_drq_block_call_back = (void *) 0;
+   ata->reg_drq_block_call_back = (void *) 0;
 
    // All done.  The return values of this function are described in
    // ATAIO.H.
 
-   if ( reg_cmd_info.ec )
+   if ( ata->reg_cmd_info.ec )
       return 1;
    return 0;
 }
@@ -1578,17 +1579,17 @@ int reg_pio_data_out_chs( int dev, int cmd,
    // Reset error return data.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_APDO;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.sn1 = sect;
-   reg_cmd_info.cl1 = cyl & 0x00ff;
-   reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
-   reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.lbaSize = LBACHS;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_APDO;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.sn1 = sect;
+   ata->reg_cmd_info.cl1 = cyl & 0x00ff;
+   ata->reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
+   ata->reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.lbaSize = LBACHS;
 
    // adjust multiple count
    if ( multiCnt & 0x0800 )
@@ -1607,8 +1608,8 @@ int reg_pio_data_out_chs( int dev, int cmd,
          multiCnt = 1;
    }
 
-   reg_cmd_info.ns  = numSect;
-   reg_cmd_info.mc  = multiCnt;
+   ata->reg_cmd_info.ns  = numSect;
+   ata->reg_cmd_info.mc  = multiCnt;
 
    return exec_pio_data_out_cmd( dev, seg, off, numSect, multiCnt );
 }
@@ -1633,16 +1634,16 @@ int reg_pio_data_out_lba28( int dev, int cmd,
    // Reset error return data.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_APDO;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.lbaSize = LBA28;
-   reg_cmd_info.lbaHigh1 = 0;
-   reg_cmd_info.lbaLow1 = lba;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_APDO;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.lbaSize = LBA28;
+   ata->reg_cmd_info.lbaHigh1 = 0;
+   ata->reg_cmd_info.lbaLow1 = lba;
 
    // adjust multiple count
    if ( multiCnt & 0x0800 )
@@ -1661,8 +1662,8 @@ int reg_pio_data_out_lba28( int dev, int cmd,
          multiCnt = 1;
    }
 
-   reg_cmd_info.ns  = numSect;
-   reg_cmd_info.mc  = multiCnt;
+   ata->reg_cmd_info.ns  = numSect;
+   ata->reg_cmd_info.mc  = multiCnt;
 
    return exec_pio_data_out_cmd( dev, addr, numSect, multiCnt );
 }
@@ -1687,16 +1688,16 @@ int reg_pio_data_out_lba48( int dev, int cmd,
    // Reset error return data.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATA;
-   reg_cmd_info.ct  = TRC_TYPE_APDO;
-   reg_cmd_info.cmd = cmd;
-   reg_cmd_info.fr1 = fr;
-   reg_cmd_info.sc1 = sc;
-   reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.lbaSize = LBA48;
-   reg_cmd_info.lbaHigh1 = lbahi;
-   reg_cmd_info.lbaLow1 = lbalo;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+   ata->reg_cmd_info.ct  = TRC_TYPE_APDO;
+   ata->reg_cmd_info.cmd = cmd;
+   ata->reg_cmd_info.fr1 = fr;
+   ata->reg_cmd_info.sc1 = sc;
+   ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.lbaSize = LBA48;
+   ata->reg_cmd_info.lbaHigh1 = lbahi;
+   ata->reg_cmd_info.lbaLow1 = lbalo;
 
    // adjust multiple count
    if ( multiCnt & 0x0800 )
@@ -1715,8 +1716,8 @@ int reg_pio_data_out_lba48( int dev, int cmd,
          multiCnt = 1;
    }
 
-   reg_cmd_info.ns  = numSect;
-   reg_cmd_info.mc  = multiCnt;
+   ata->reg_cmd_info.ns  = numSect;
+   ata->reg_cmd_info.mc  = multiCnt;
 
    return exec_pio_data_out_cmd( dev, addr, numSect, multiCnt );
 }
@@ -1770,34 +1771,34 @@ int reg_packet( int dev,
    // Setup current command information.
 
    sub_zero_return_data();
-   reg_cmd_info.flg = TRC_FLAG_ATAPI;
-   reg_cmd_info.ct  = dir ? TRC_TYPE_PPDO : TRC_TYPE_PPDI;
-   reg_cmd_info.cmd = CMD_PACKET;
-   reg_cmd_info.fr1 = reg_atapi_reg_fr;
-   reg_cmd_info.sc1 = reg_atapi_reg_sc;
-   reg_cmd_info.sn1 = reg_atapi_reg_sn;
-   reg_cmd_info.cl1 = (unsigned char) ( dpbc & 0x00ff );
-   reg_cmd_info.ch1 = ( unsigned char) ( ( dpbc & 0xff00 ) >> 8 );
-   reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 )
-                      | ( reg_atapi_reg_dh & 0x0f );
-   reg_cmd_info.dc1 = int_use_intr_flag ? 0 : CB_DC_NIEN;
-   reg_cmd_info.lbaSize = LBA32;
-   reg_cmd_info.lbaLow1 = lba;
-   reg_cmd_info.lbaHigh1 = 0L;
-   reg_atapi_cp_size = cpbc;
+   ata->reg_cmd_info.flg = TRC_FLAG_ATAPI;
+   ata->reg_cmd_info.ct  = dir ? TRC_TYPE_PPDO : TRC_TYPE_PPDI;
+   ata->reg_cmd_info.cmd = CMD_PACKET;
+   ata->reg_cmd_info.fr1 = ata->reg_atapi_reg_fr;
+   ata->reg_cmd_info.sc1 = ata->reg_atapi_reg_sc;
+   ata->reg_cmd_info.sn1 = ata->reg_atapi_reg_sn;
+   ata->reg_cmd_info.cl1 = (unsigned char) ( dpbc & 0x00ff );
+   ata->reg_cmd_info.ch1 = ( unsigned char) ( ( dpbc & 0xff00 ) >> 8 );
+   ata->reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 )
+                      | ( ata->reg_atapi_reg_dh & 0x0f );
+   ata->reg_cmd_info.dc1 = ata->int_use_intr_flag ? 0 : CB_DC_NIEN;
+   ata->reg_cmd_info.lbaSize = LBA32;
+   ata->reg_cmd_info.lbaLow1 = lba;
+   ata->reg_cmd_info.lbaHigh1 = 0L;
+   ata->reg_atapi_cp_size = cpbc;
    cfp = cpAddr;
    for ( ndx = 0; ndx < cpbc; ndx ++ )
    {
-      reg_atapi_cp_data[ndx] = * cfp;
+      ata->reg_atapi_cp_data[ndx] = * cfp;
       cfp ++ ;
    }
 
    // Zero the alternate ATAPI register data.
 
-   reg_atapi_reg_fr = 0;
-   reg_atapi_reg_sc = 0;
-   reg_atapi_reg_sn = 0;
-   reg_atapi_reg_dh = 0;
+   ata->reg_atapi_reg_fr = 0;
+   ata->reg_atapi_reg_sc = 0;
+   ata->reg_atapi_reg_sn = 0;
+   ata->reg_atapi_reg_dh = 0;
 
    // Set command time out.
 
@@ -1810,7 +1811,7 @@ int reg_packet( int dev,
    {
       sub_trace_command();
       trc_llt( 0, 0, TRC_LLT_E_PI );
-      reg_drq_block_call_back = (void *) 0;
+      ata->reg_drq_block_call_back = (void *) 0;
       return 1;
    }
 
@@ -1856,7 +1857,7 @@ int reg_packet( int dev,
       }
       else
       {
-         reg_cmd_info.failbits |= FAILBIT0;  // not OK
+         ata->reg_cmd_info.failbits |= FAILBIT0;  // not OK
       }
    }
 
@@ -1872,9 +1873,9 @@ int reg_packet( int dev,
       if ( tmr_chk_timeout() )               // time out yet ?
       {
          trc_llt( 0, 0, TRC_LLT_TOUT );      // yes
-         reg_cmd_info.to = 1;
-         reg_cmd_info.ec = 51;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.to = 1;
+         ata->reg_cmd_info.ec = 51;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          dir = -1;   // command done
          break;
       }
@@ -1884,14 +1885,14 @@ int reg_packet( int dev,
    // Check for protocol failures... no interrupt here please!
    // Clear any interrupt the command packet transfer may have caused.
 
-   if ( int_intr_flag )       // extra interrupt(s) ?
-      reg_cmd_info.failbits |= FAILBIT1;
-   int_intr_flag = 0;
+   if ( ata->int_intr_flag )       // extra interrupt(s) ?
+      ata->reg_cmd_info.failbits |= FAILBIT1;
+   ata->int_intr_flag = 0;
 
    // Command packet transfer...
    // If no error, transfer the command packet.
 
-   if ( reg_cmd_info.ec == 0 )
+   if ( ata->reg_cmd_info.ec == 0 )
    {
 
       // Command packet transfer...
@@ -1909,8 +1910,8 @@ int reg_packet( int dev,
            != CB_STAT_DRQ
          )
       {
-         reg_cmd_info.ec = 52;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 52;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          dir = -1;   // command done
       }
       else
@@ -1922,10 +1923,10 @@ int reg_packet( int dev,
          if ( ( reason &  ( CB_SC_P_TAG | CB_SC_P_REL | CB_SC_P_IO ) )
               || ( ! ( reason &  CB_SC_P_CD ) )
             )
-            reg_cmd_info.failbits |= FAILBIT2;
-         if (    ( lowCyl != reg_cmd_info.cl1 )
-              || ( highCyl != reg_cmd_info.ch1 ) )
-            reg_cmd_info.failbits |= FAILBIT3;
+            ata->reg_cmd_info.failbits |= FAILBIT2;
+         if (    ( lowCyl != ata->reg_cmd_info.cl1 )
+              || ( highCyl != ata->reg_cmd_info.ch1 ) )
+            ata->reg_cmd_info.failbits |= FAILBIT3;
 
          // Command packet transfer...
          // trace cdb byte 0,
@@ -1948,7 +1949,7 @@ int reg_packet( int dev,
    //dpaddr = dpaddr + dpoff;
    savedpaddr = dpAddr;
 
-   while ( reg_cmd_info.ec == 0 )
+   while ( ata->reg_cmd_info.ec == 0 )
    {
       // Data transfer loop...
       // Wait for interrupt -or- wait for not BUSY -or- wait for time out.
@@ -1959,7 +1960,7 @@ int reg_packet( int dev,
       // Data transfer loop...
       // If there was a time out error, exit the data transfer loop.
 
-      if ( reg_cmd_info.ec )
+      if ( ata->reg_cmd_info.ec )
       {
          dir = -1;   // command done
          break;
@@ -1969,8 +1970,8 @@ int reg_packet( int dev,
       // If using interrupts get the status read by the interrupt
       // handler, otherwise read the status register.
 
-      if ( int_use_intr_flag )
-         status = int_ata_status;
+      if ( ata->int_use_intr_flag )
+         status = ata->int_ata_status;
       else
          status = pio_inbyte( CB_STAT );
       reason = pio_inbyte( CB_SC );
@@ -1993,8 +1994,8 @@ int reg_packet( int dev,
 
       if ( ( status & ( CB_STAT_BSY | CB_STAT_DRQ ) ) != CB_STAT_DRQ )
       {
-         reg_cmd_info.ec = 55;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 55;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          dir = -1;   // command done
          break;
       }
@@ -2007,20 +2008,20 @@ int reg_packet( int dev,
          if ( ( reason &  ( CB_SC_P_TAG | CB_SC_P_REL ) )
               || ( reason &  CB_SC_P_CD )
             )
-            reg_cmd_info.failbits |= FAILBIT4;
+            ata->reg_cmd_info.failbits |= FAILBIT4;
          if ( ( reason & CB_SC_P_IO ) && dir )
-            reg_cmd_info.failbits |= FAILBIT5;
+            ata->reg_cmd_info.failbits |= FAILBIT5;
       }
 
       // do the slow data transfer thing
 
-      if ( reg_slow_xfer_flag )
+      if ( ata->reg_slow_xfer_flag )
       {
          slowXferCntr ++ ;
-         if ( slowXferCntr <= reg_slow_xfer_flag )
+         if ( slowXferCntr <= ata->reg_slow_xfer_flag )
          {
             tmr_delay_xfer();
-            reg_slow_xfer_flag = 0;
+            ata->reg_slow_xfer_flag = 0;
          }
       }
 
@@ -2030,8 +2031,8 @@ int reg_packet( int dev,
       byteCnt = ( highCyl << 8 ) | lowCyl;
       if ( byteCnt < 1 )
       {
-         reg_cmd_info.ec = 59;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 59;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
          dir = -1;   // command done
          break;
       }
@@ -2040,8 +2041,8 @@ int reg_packet( int dev,
       // and check protocol failures...
 
       if ( ((long)byteCnt) > dpbc )
-         reg_cmd_info.failbits |= FAILBIT6;
-      reg_cmd_info.failbits |= prevFailBit7;
+         ata->reg_cmd_info.failbits |= FAILBIT6;
+      ata->reg_cmd_info.failbits |= prevFailBit7;
       prevFailBit7 = 0;
       if ( byteCnt & 0x0001 )
          prevFailBit7 = FAILBIT7;
@@ -2050,24 +2051,24 @@ int reg_packet( int dev,
       // Quit if buffer overrun.
       // If DRQ call back in use adjust buffer address.
 
-      if ( reg_drq_block_call_back )
+      if ( ata->reg_drq_block_call_back )
       {
-         if ( ((long)byteCnt) > reg_buffer_size )
+         if ( ((long)byteCnt) > ata->reg_buffer_size )
          {
-            reg_cmd_info.ec = 61;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 61;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             dir = -1;   // command done
             break;
          }
-         reg_cmd_info.drqPacketSize = byteCnt;
+         ata->reg_cmd_info.drqPacketSize = byteCnt;
          dpAddr = savedpaddr;
       }
       else
       {
-         if ( ((long)( reg_cmd_info.totalBytesXfer + byteCnt )) > reg_buffer_size )
+         if ( ((long)( ata->reg_cmd_info.totalBytesXfer + byteCnt )) > ata->reg_buffer_size )
          {
-            reg_cmd_info.ec = 61;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 61;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             dir = -1;   // command done
             break;
          }
@@ -2075,27 +2076,27 @@ int reg_packet( int dev,
 
       // increment number of DRQ packets
 
-      reg_cmd_info.drqPackets ++ ;
+      ata->reg_cmd_info.drqPackets ++ ;
 
       // Data transfer loop...
       // transfer the data and update the i/o buffer address
       // and the number of bytes transfered.
 
       wordCnt = ( byteCnt >> 1 ) + ( byteCnt & 0x0001 );
-      reg_cmd_info.totalBytesXfer += ( wordCnt << 1 );
+      ata->reg_cmd_info.totalBytesXfer += ( wordCnt << 1 );
       //dpseg = (unsigned int) ( dpaddr >> 4 );
       //dpoff = (unsigned int) ( dpaddr & 0x0000000fL );
       if ( dir )
       {
-         if ( reg_drq_block_call_back )
-            (* reg_drq_block_call_back) ( & reg_cmd_info );
+         if ( ata->reg_drq_block_call_back )
+            (* ata->reg_drq_block_call_back) ( & ata->reg_cmd_info );
          pio_drq_block_out( CB_DATA, dpAddr, wordCnt );
       }
       else
       {
          pio_drq_block_in( CB_DATA, dpAddr, wordCnt );
-         if ( reg_drq_block_call_back )
-            (* reg_drq_block_call_back) ( & reg_cmd_info );
+         if ( ata->reg_drq_block_call_back )
+            (* ata->reg_drq_block_call_back) ( & ata->reg_cmd_info );
       }
       dpAddr += byteCnt;
 
@@ -2107,7 +2108,7 @@ int reg_packet( int dev,
    // but don't do this if there was any error or if this
    // was a commmand that did not transfer data.
 
-   if ( ( reg_cmd_info.ec == 0 ) && ( dir >= 0 ) )
+   if ( ( ata->reg_cmd_info.ec == 0 ) && ( dir >= 0 ) )
    {
       ATAPI_DELAY( dev );
       reg_wait_poll( 56, 57 );
@@ -2115,14 +2116,14 @@ int reg_packet( int dev,
 
    // Final status check, only if no previous error.
 
-   if ( reg_cmd_info.ec == 0 )
+   if ( ata->reg_cmd_info.ec == 0 )
    {
       // Final status check...
       // If using interrupts get the status read by the interrupt
       // handler, otherwise read the status register.
 
-      if ( int_use_intr_flag )
-         status = int_ata_status;
+      if ( ata->int_use_intr_flag )
+         status = ata->int_ata_status;
       else
          status = pio_inbyte( CB_STAT );
       reason = pio_inbyte( CB_SC );
@@ -2134,8 +2135,8 @@ int reg_packet( int dev,
 
       if ( status & ( CB_STAT_BSY | CB_STAT_DRQ | CB_STAT_ERR ) )
       {
-         reg_cmd_info.ec = 58;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.ec = 58;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
       }
    }
 
@@ -2147,13 +2148,13 @@ int reg_packet( int dev,
         || ( ! ( reason & CB_SC_P_IO ) )
         || ( ! ( reason & CB_SC_P_CD ) )
       )
-      reg_cmd_info.failbits |= FAILBIT8;
+      ata->reg_cmd_info.failbits |= FAILBIT8;
 
    // Done...
    // Read the output registers and trace the command.
 
-   if ( ! reg_cmd_info.totalBytesXfer )
-      reg_cmd_info.ct = TRC_TYPE_PND;
+   if ( ! ata->reg_cmd_info.totalBytesXfer )
+      ata->reg_cmd_info.ct = TRC_TYPE_PND;
    sub_trace_command();
 
    // Final status check
@@ -2161,8 +2162,8 @@ int reg_packet( int dev,
 
    if ( sub_readBusMstrStatus() & BM_SR_MASK_ERR )
    {
-      reg_cmd_info.ec = 78;                  // yes
-      trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+      ata->reg_cmd_info.ec = 78;                  // yes
+      trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
    }
 
    // For interrupt mode, remove interrupt handler.
@@ -2173,14 +2174,14 @@ int reg_packet( int dev,
 
    trc_llt( 0, 0, TRC_LLT_E_PI );
 
-   // reset reg_drq_block_call_back to NULL (0)
+   // reset ata->reg_drq_block_call_back to NULL (0)
 
-   reg_drq_block_call_back = (void *) 0;
+   ata->reg_drq_block_call_back = (void *) 0;
 
    // All done.  The return values of this function are described in
    // ATAIO.H.
 
-   if ( reg_cmd_info.ec )
+   if ( ata->reg_cmd_info.ec )
       return 1;
    return 0;
 }

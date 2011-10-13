@@ -37,7 +37,7 @@
 // Host adapter base addresses.
 //
 //*************************************************************
-
+/*
 unsigned int pio_base_addr1 = 0x1f0;
 unsigned int pio_base_addr2 = 0x3f0;
 
@@ -57,7 +57,7 @@ int pio_xfer_width = 16;
 #else
 int pio_xfer_width = 8;
 #endif
-
+*/
 //*************************************************************
 //
 // Set the host adapter i/o base addresses.
@@ -70,20 +70,20 @@ void pio_set_iobase_addr( unsigned int base1,
 
 {
 
-    pio_base_addr1 = base1;
-    pio_base_addr2 = base2;
-    pio_bmide_base_addr = base3;
-    pio_memory_access = 0;
-    pio_reg_addrs[ CB_DATA ] = (void *)pio_base_addr1 + 0;  // 0
-    pio_reg_addrs[ CB_FR   ] = (void *)pio_base_addr1 + 1;  // 1
-    pio_reg_addrs[ CB_SC   ] = (void *)pio_base_addr1 + 2;  // 2
-    pio_reg_addrs[ CB_SN   ] = (void *)pio_base_addr1 + 3;  // 3
-    pio_reg_addrs[ CB_CL   ] = (void *)pio_base_addr1 + 4;  // 4
-    pio_reg_addrs[ CB_CH   ] = (void *)pio_base_addr1 + 5;  // 5
-    pio_reg_addrs[ CB_DH   ] = (void *)pio_base_addr1 + 6;  // 6
-    pio_reg_addrs[ CB_CMD  ] = (void *)pio_base_addr1 + 7;  // 7
-    pio_reg_addrs[ CB_DC   ] = (void *)pio_base_addr2 + 6;  // 8
-    pio_reg_addrs[ CB_DA   ] = (void *)pio_base_addr2 + 7;  // 9
+    ata->pio_base_addr1 = base1;
+    ata->pio_base_addr2 = base2;
+    ata->pio_bmide_base_addr = base3;
+    ata->pio_memory_access = 0;
+    ata->pio_reg_addrs[ CB_DATA ] = (void *)ata->pio_base_addr1 + 0;  // 0
+    ata->pio_reg_addrs[ CB_FR   ] = (void *)ata->pio_base_addr1 + 1;  // 1
+    ata->pio_reg_addrs[ CB_SC   ] = (void *)ata->pio_base_addr1 + 2;  // 2
+    ata->pio_reg_addrs[ CB_SN   ] = (void *)ata->pio_base_addr1 + 3;  // 3
+    ata->pio_reg_addrs[ CB_CL   ] = (void *)ata->pio_base_addr1 + 4;  // 4
+    ata->pio_reg_addrs[ CB_CH   ] = (void *)ata->pio_base_addr1 + 5;  // 5
+    ata->pio_reg_addrs[ CB_DH   ] = (void *)ata->pio_base_addr1 + 6;  // 6
+    ata->pio_reg_addrs[ CB_CMD  ] = (void *)ata->pio_base_addr1 + 7;  // 7
+    ata->pio_reg_addrs[ CB_DC   ] = (void *)ata->pio_base_addr2 + 6;  // 8
+    ata->pio_reg_addrs[ CB_DA   ] = (void *)ata->pio_base_addr2 + 7;  // 9
 }
 
 //*************************************************************
@@ -96,22 +96,21 @@ void pio_set_memory_addr( void * base )
 
 {
 
-    pio_base_addr1 = (void *)base + 0;
-    pio_base_addr2 = (void *)base + 8;
-    pio_bmide_base_addr = 0;
-    //pio_memory_seg = seg;
-    pio_memory_access = 1;
-    pio_memory_dt_opt = PIO_MEMORY_DT_OPT0;
-    pio_reg_addrs[ CB_DATA ] = (void *)pio_base_addr1 + 0;  // 0
-    pio_reg_addrs[ CB_FR   ] = (void *)pio_base_addr1 + 1;  // 1
-    pio_reg_addrs[ CB_SC   ] = (void *)pio_base_addr1 + 2;  // 2
-    pio_reg_addrs[ CB_SN   ] = (void *)pio_base_addr1 + 3;  // 3
-    pio_reg_addrs[ CB_CL   ] = (void *)pio_base_addr1 + 4;  // 4
-    pio_reg_addrs[ CB_CH   ] = (void *)pio_base_addr1 + 5;  // 5
-    pio_reg_addrs[ CB_DH   ] = (void *)pio_base_addr1 + 6;  // 6
-    pio_reg_addrs[ CB_CMD  ] = (void *)pio_base_addr1 + 7;  // 7
-    pio_reg_addrs[ CB_DC   ] = (void *)pio_base_addr2 + 6;  // 8
-    pio_reg_addrs[ CB_DA   ] = (void *)pio_base_addr2 + 7;  // 9
+    ata->pio_base_addr1 = (void *)base + 0;
+    ata->pio_base_addr2 = (void *)base + 8;
+    ata->pio_bmide_base_addr = 0;
+    ata->pio_memory_access = 1;
+    ata->pio_memory_dt_opt = PIO_MEMORY_DT_OPT0;
+    ata->pio_reg_addrs[ CB_DATA ] = (void *)ata->pio_base_addr1 + 0;  // 0
+    ata->pio_reg_addrs[ CB_FR   ] = (void *)ata->pio_base_addr1 + 1;  // 1
+    ata->pio_reg_addrs[ CB_SC   ] = (void *)ata->pio_base_addr1 + 2;  // 2
+    ata->pio_reg_addrs[ CB_SN   ] = (void *)ata->pio_base_addr1 + 3;  // 3
+    ata->pio_reg_addrs[ CB_CL   ] = (void *)ata->pio_base_addr1 + 4;  // 4
+    ata->pio_reg_addrs[ CB_CH   ] = (void *)ata->pio_base_addr1 + 5;  // 5
+    ata->pio_reg_addrs[ CB_DH   ] = (void *)ata->pio_base_addr1 + 6;  // 6
+    ata->pio_reg_addrs[ CB_CMD  ] = (void *)ata->pio_base_addr1 + 7;  // 7
+    ata->pio_reg_addrs[ CB_DC   ] = (void *)ata->pio_base_addr2 + 6;  // 8
+    ata->pio_reg_addrs[ CB_DA   ] = (void *)ata->pio_base_addr2 + 7;  // 9
 }
 #endif
 //*************************************************************
@@ -131,7 +130,7 @@ unsigned char pio_inbyte( unsigned int addr )
     unsigned int regAddr;
     unsigned char uc;
 
-    regAddr = (int)pio_reg_addrs[ addr ];
+    regAddr = (int)ata->pio_reg_addrs[ addr ];
 #if 0
     if ( pio_memory_seg )
     {
@@ -144,7 +143,7 @@ unsigned char pio_inbyte( unsigned int addr )
     {
         uc = (unsigned char) inb( regAddr );
     }
-    pio_last_read[ addr ] = uc;
+    ata->pio_last_read[ addr ] = uc;
     trc_llt( addr, uc, TRC_LLT_INB );
     return uc;
 }
@@ -160,15 +159,15 @@ void pio_outbyte( unsigned int addr, unsigned char data )
     {
         //unsigned int regAddr;
         unsigned char * ucp;
-        ucp = pio_reg_addrs[ addr ];
+        ucp = ata->pio_reg_addrs[ addr ];
         * ucp = data;
     }
     else
 #endif
     {
-        outb( (int)pio_reg_addrs[ addr ], data );
+        outb( (int)ata->pio_reg_addrs[ addr ], data );
     }
-    pio_last_write[ addr ] = data;
+    ata->pio_last_write[ addr ] = data;
     trc_llt( addr, data, TRC_LLT_OUTB );
 }
 
@@ -180,7 +179,7 @@ unsigned int pio_inword( unsigned int addr )
     unsigned int regAddr;
     unsigned int ui;
 
-    regAddr = (int)pio_reg_addrs[ addr ];
+    regAddr = (int)ata->pio_reg_addrs[ addr ];
 #if 0
     if ( pio_memory_access )
     {
@@ -205,7 +204,7 @@ void pio_outword( unsigned int addr, unsigned int data )
     unsigned int regAddr;
     unsigned int * uip;
 
-    regAddr = (int)pio_reg_addrs[ addr ];
+    regAddr = (int)ata->pio_reg_addrs[ addr ];
 
     if( pio_memory_access )
     {
@@ -215,7 +214,7 @@ void pio_outword( unsigned int addr, unsigned int data )
     else
 #endif
     {
-        outw( (int)pio_reg_addrs[ addr ], data );
+        outw( (int)ata->pio_reg_addrs[ addr ], data );
     }
     trc_llt( addr, 0, TRC_LLT_OUTW );
 }
@@ -555,7 +554,7 @@ void pio_rep_inbyte( unsigned int addrDataReg,
                      void *addr,
                      long byteCnt )
 {
-    insb((int)pio_reg_addrs[ addrDataReg ], addr, byteCnt );
+    insb((int)ata->pio_reg_addrs[ addrDataReg ], addr, byteCnt );
     trc_llt( addrDataReg, 0, TRC_LLT_INSB );
 }
 
@@ -566,7 +565,7 @@ void pio_rep_outbyte( unsigned int addrDataReg,
                       long byteCnt )
 
 {
-    outsb((int)pio_reg_addrs[ addrDataReg ], addr, byteCnt);
+    outsb((int)ata->pio_reg_addrs[ addrDataReg ], addr, byteCnt);
     trc_llt( addrDataReg, 0, TRC_LLT_OUTSB );
 }
 
@@ -576,44 +575,9 @@ void pio_rep_outbyte( unsigned int addrDataReg,
 void pio_rep_inword( unsigned int addrDataReg,
                      void *addr,
                      long wordCnt )
-
 {
-    insw((int)pio_reg_addrs[ addrDataReg ], addr, (int)wordCnt );
-#if 0
-    unsigned int dataRegAddr = pio_reg_addrs[ addrDataReg ];
-    unsigned int wCnt = (unsigned int) wordCnt;
-
-    // Warning: Avoid calling this function with
-    // wordCnt > 16384 (transfers 32768 bytes).
-    // bufSeg and bufOff should be normalized such
-    // that bufOff is a value between 0 and 15 (0xf).
-
-    asm   .386
-
-        asm   push  ax
-        asm   push  cx
-        asm   push  dx
-        asm   push  di
-        asm   push  es
-
-        asm   mov   ax,bufSeg
-    asm   mov   es,ax
-    asm   mov   di,bufOff
-
-    asm   mov   cx,wCnt
-    asm   mov   dx,dataRegAddr
-
-    asm   cld
-
-        asm   rep   insw
-
-        asm   pop   es
-        asm   pop   di
-        asm   pop   dx
-        asm   pop   cx
-        asm   pop   ax
-#endif
-        trc_llt( addrDataReg, 0, TRC_LLT_INSW );
+    insw((int)ata->pio_reg_addrs[ addrDataReg ], addr, (int)wordCnt );
+    trc_llt( addrDataReg, 0, TRC_LLT_INSW );
 }
 
 
@@ -622,45 +586,9 @@ void pio_rep_inword( unsigned int addrDataReg,
 void pio_rep_outword( unsigned int addrDataReg,
                       void *addr,
                       long wordCnt )
-
 {
-    outsw((int)pio_reg_addrs[ addrDataReg ], addr, (int)wordCnt );
-
-#if 0
-    unsigned int dataRegAddr = pio_reg_addrs[ addrDataReg ];
-    unsigned int wCnt = (unsigned int) wordCnt;
-
-    // Warning: Avoid calling this function with
-    // wordCnt > 16384 (transfers 32768 bytes).
-    // bufSeg and bufOff should be normalized such
-    // that bufOff is a value between 0 and 15 (0xf).
-
-    asm   .386
-
-        asm   push  ax
-        asm   push  cx
-        asm   push  dx
-        asm   push  si
-        asm   push  ds
-
-        asm   mov   ax,bufSeg
-    asm   mov   ds,ax
-    asm   mov   si,bufOff
-
-    asm   mov   cx,wCnt
-    asm   mov   dx,dataRegAddr
-
-    asm   cld
-
-        asm   rep   outsw
-
-        asm   pop   ds
-        asm   pop   si
-        asm   pop   dx
-        asm   pop   cx
-        asm   pop   ax
-#endif
-        trc_llt( addrDataReg, 0, TRC_LLT_OUTSW );
+    outsw((int)ata->pio_reg_addrs[ addrDataReg ], addr, (int)wordCnt );
+    trc_llt( addrDataReg, 0, TRC_LLT_OUTSW );
 }
 
 #if HAVE_WIDE_XFERS
@@ -672,7 +600,7 @@ void pio_rep_indword( unsigned int addrDataReg,
                       long dwordCnt )
 
 {
-    unsigned int dataRegAddr = pio_reg_addrs[ addrDataReg ];
+    unsigned int dataRegAddr = ata->pio_reg_addrs[ addrDataReg ];
     unsigned int dwCnt = (unsigned int) dwordCnt;
 
     // Warning: Avoid calling this function with
@@ -715,7 +643,7 @@ void pio_rep_outdword( unsigned int addrDataReg,
                        long dwordCnt )
 
 {
-    unsigned int dataRegAddr = pio_reg_addrs[ addrDataReg ];
+    unsigned int dataRegAddr = ata->pio_reg_addrs[ addrDataReg ];
     unsigned int dwCnt = (unsigned int) dwordCnt;
 
     // Warning: Avoid calling this function with

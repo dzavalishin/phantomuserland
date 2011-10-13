@@ -40,8 +40,8 @@ void sub_zero_return_data( void )
 {
    unsigned int ndx;
 
-   for ( ndx = 0; ndx < sizeof( reg_cmd_info ); ndx ++ )
-      ( (unsigned char *) & reg_cmd_info )[ndx] = 0;
+   for ( ndx = 0; ndx < sizeof( ata->reg_cmd_info ); ndx ++ )
+      ( (unsigned char *) & ata->reg_cmd_info )[ndx] = 0;
 }
 
 //*************************************************************
@@ -62,7 +62,7 @@ void sub_setup_command( void )
    // determine value of Device (Drive/Head) register bits 7 and 5
 
    dev75 = 0;                    // normal value
-   if ( reg_incompat_flags & REG_INCOMPAT_DEVREG )
+   if ( ata->reg_incompat_flags & REG_INCOMPAT_DEVREG )
       dev75 = CB_DH_OBSOLETE;    // obsolete value
 
    // WARNING: THIS CODE IS DESIGNED FOR A STUPID PROCESSOR
@@ -70,31 +70,31 @@ void sub_setup_command( void )
    // PROCESSOR THAT STORES DATA IN MEMORY IN THE WRONG
    // BYTE ORDER !!!
 
-   * (u_int16_t *) fr48 = reg_cmd_info.fr1;
-   * (u_int16_t *) sc48 = reg_cmd_info.sc1;
-   * (u_int32_t *) ( lba48 + 4 ) = reg_cmd_info.lbaHigh1;
-   * (u_int32_t *) ( lba48 + 0 ) = reg_cmd_info.lbaLow1;
+   * (u_int16_t *) fr48 = ata->reg_cmd_info.fr1;
+   * (u_int16_t *) sc48 = ata->reg_cmd_info.sc1;
+   * (u_int32_t *) ( lba48 + 4 ) = ata->reg_cmd_info.lbaHigh1;
+   * (u_int32_t *) ( lba48 + 0 ) = ata->reg_cmd_info.lbaLow1;
 
-   pio_outbyte( CB_DC, reg_cmd_info.dc1 );
+   pio_outbyte( CB_DC, ata->reg_cmd_info.dc1 );
 
-   if ( reg_cmd_info.lbaSize == LBA28 )
+   if ( ata->reg_cmd_info.lbaSize == LBA28 )
    {
       // in ATA LBA28 mode
-      reg_cmd_info.fr1 = fr48[0];
+      ata->reg_cmd_info.fr1 = fr48[0];
       pio_outbyte( CB_FR, fr48[0] );
-      reg_cmd_info.sc1 = sc48[0];
+      ata->reg_cmd_info.sc1 = sc48[0];
       pio_outbyte( CB_SC, sc48[0] );
-      reg_cmd_info.sn1 = lba48[0];
+      ata->reg_cmd_info.sn1 = lba48[0];
       pio_outbyte( CB_SN, lba48[0] );
-      reg_cmd_info.cl1 = lba48[1];
+      ata->reg_cmd_info.cl1 = lba48[1];
       pio_outbyte( CB_CL, lba48[1] );
-      reg_cmd_info.ch1 = lba48[2];
+      ata->reg_cmd_info.ch1 = lba48[2];
       pio_outbyte( CB_CH, lba48[2] );
-      reg_cmd_info.dh1 = ( reg_cmd_info.dh1 & 0xf0 ) | ( lba48[3] & 0x0f );
-      pio_outbyte( CB_DH, reg_cmd_info.dh1 | dev75 );
+      ata->reg_cmd_info.dh1 = ( ata->reg_cmd_info.dh1 & 0xf0 ) | ( lba48[3] & 0x0f );
+      pio_outbyte( CB_DH, ata->reg_cmd_info.dh1 | dev75 );
    }
    else
-   if ( reg_cmd_info.lbaSize == LBA48 )
+   if ( ata->reg_cmd_info.lbaSize == LBA48 )
    {
       // in ATA LBA48 mode
       pio_outbyte( CB_FR, fr48[1] );
@@ -102,27 +102,27 @@ void sub_setup_command( void )
       pio_outbyte( CB_SN, lba48[3] );
       pio_outbyte( CB_CL, lba48[4] );
       pio_outbyte( CB_CH, lba48[5] );
-      reg_cmd_info.fr1 = fr48[0];
+      ata->reg_cmd_info.fr1 = fr48[0];
       pio_outbyte( CB_FR, fr48[0] );
-      reg_cmd_info.sc1 = sc48[0];
+      ata->reg_cmd_info.sc1 = sc48[0];
       pio_outbyte( CB_SC, sc48[0] );
-      reg_cmd_info.sn1 = lba48[0];
+      ata->reg_cmd_info.sn1 = lba48[0];
       pio_outbyte( CB_SN, lba48[0] );
-      reg_cmd_info.cl1 = lba48[1];
+      ata->reg_cmd_info.cl1 = lba48[1];
       pio_outbyte( CB_CL, lba48[1] );
-      reg_cmd_info.ch1 = lba48[2];
+      ata->reg_cmd_info.ch1 = lba48[2];
       pio_outbyte( CB_CH, lba48[2] );
-      pio_outbyte( CB_DH, reg_cmd_info.dh1 | dev75 );
+      pio_outbyte( CB_DH, ata->reg_cmd_info.dh1 | dev75 );
    }
    else
    {
       // in ATA CHS or ATAPI LBA32 mode
-      pio_outbyte( CB_FR, reg_cmd_info.fr1  );
-      pio_outbyte( CB_SC, reg_cmd_info.sc1  );
-      pio_outbyte( CB_SN, reg_cmd_info.sn1  );
-      pio_outbyte( CB_CL, reg_cmd_info.cl1  );
-      pio_outbyte( CB_CH, reg_cmd_info.ch1  );
-      pio_outbyte( CB_DH, reg_cmd_info.dh1 | dev75 );
+      pio_outbyte( CB_FR, ata->reg_cmd_info.fr1  );
+      pio_outbyte( CB_SC, ata->reg_cmd_info.sc1  );
+      pio_outbyte( CB_SN, ata->reg_cmd_info.sn1  );
+      pio_outbyte( CB_CL, ata->reg_cmd_info.cl1  );
+      pio_outbyte( CB_CH, ata->reg_cmd_info.ch1  );
+      pio_outbyte( CB_DH, ata->reg_cmd_info.dh1 | dev75 );
    }
 }
 
@@ -139,10 +139,10 @@ void sub_trace_command( void )
    unsigned char sc48[2];
    unsigned char lba48[8];
 
-   reg_cmd_info.st2 = pio_inbyte( CB_STAT );
-   reg_cmd_info.as2 = pio_inbyte( CB_ASTAT );
-   reg_cmd_info.er2 = pio_inbyte( CB_ERR );
-   if ( reg_cmd_info.lbaSize == LBA48 )
+   ata->reg_cmd_info.st2 = pio_inbyte( CB_STAT );
+   ata->reg_cmd_info.as2 = pio_inbyte( CB_ASTAT );
+   ata->reg_cmd_info.er2 = pio_inbyte( CB_ERR );
+   if ( ata->reg_cmd_info.lbaSize == LBA48 )
    {
       // read back ATA LBA48...
       sc48[0]  = pio_inbyte( CB_SC );
@@ -152,38 +152,38 @@ void sub_trace_command( void )
       pio_outbyte( CB_DC, CB_DC_HOB );
       sc48[1]  = pio_inbyte( CB_SC );
       lba48[3] = pio_inbyte( CB_SN );
-      reg_cmd_info.sn2 = lba48[3];
+      ata->reg_cmd_info.sn2 = lba48[3];
       lba48[4] = pio_inbyte( CB_CL );
-      reg_cmd_info.cl2 = lba48[4];
+      ata->reg_cmd_info.cl2 = lba48[4];
       lba48[5] = pio_inbyte( CB_CH );
-      reg_cmd_info.ch2 = lba48[5];
+      ata->reg_cmd_info.ch2 = lba48[5];
       lba48[6] = 0;
       lba48[7] = 0;
-      reg_cmd_info.sc2 = * (u_int16_t *) sc48;
-      reg_cmd_info.lbaHigh2 = * (u_int32_t *) ( lba48 + 4 );
-      reg_cmd_info.lbaLow2  = * (u_int32_t *) ( lba48 + 0 );
-      reg_cmd_info.dh2 = pio_inbyte( CB_DH );
+      ata->reg_cmd_info.sc2 = * (u_int16_t *) sc48;
+      ata->reg_cmd_info.lbaHigh2 = * (u_int32_t *) ( lba48 + 4 );
+      ata->reg_cmd_info.lbaLow2  = * (u_int32_t *) ( lba48 + 0 );
+      ata->reg_cmd_info.dh2 = pio_inbyte( CB_DH );
    }
    else
    {
       // read back ATA CHS, ATA LBA28 or ATAPI LBA32
-      reg_cmd_info.sc2 = pio_inbyte( CB_SC );
-      reg_cmd_info.sn2 = pio_inbyte( CB_SN );
-      reg_cmd_info.cl2 = pio_inbyte( CB_CL );
-      reg_cmd_info.ch2 = pio_inbyte( CB_CH );
-      reg_cmd_info.dh2 = pio_inbyte( CB_DH );
-      reg_cmd_info.lbaHigh2 = 0;
-      reg_cmd_info.lbaLow2 = 0;
-      if ( reg_cmd_info.lbaSize == LBA28 )
+      ata->reg_cmd_info.sc2 = pio_inbyte( CB_SC );
+      ata->reg_cmd_info.sn2 = pio_inbyte( CB_SN );
+      ata->reg_cmd_info.cl2 = pio_inbyte( CB_CL );
+      ata->reg_cmd_info.ch2 = pio_inbyte( CB_CH );
+      ata->reg_cmd_info.dh2 = pio_inbyte( CB_DH );
+      ata->reg_cmd_info.lbaHigh2 = 0;
+      ata->reg_cmd_info.lbaLow2 = 0;
+      if ( ata->reg_cmd_info.lbaSize == LBA28 )
       {
-         lba = reg_cmd_info.dh2 & 0x0f;
+         lba = ata->reg_cmd_info.dh2 & 0x0f;
          lba = lba << 8;
-         lba = lba | reg_cmd_info.ch2;
+         lba = lba | ata->reg_cmd_info.ch2;
          lba = lba << 8;
-         lba = lba | reg_cmd_info.cl2;
+         lba = lba | ata->reg_cmd_info.cl2;
          lba = lba << 8;
-         lba = lba | reg_cmd_info.sn2;
-         reg_cmd_info.lbaLow2 = lba;
+         lba = lba | ata->reg_cmd_info.sn2;
+         ata->reg_cmd_info.lbaLow2 = lba;
       }
    }
    trc_cht();
@@ -207,7 +207,7 @@ int sub_select( int dev )
    // determine value of Device (Drive/Head) register bits 7 and 5
 
    dev75 = 0;                    // normal value
-   if ( reg_incompat_flags & REG_INCOMPAT_DEVREG )
+   if ( ata->reg_incompat_flags & REG_INCOMPAT_DEVREG )
       dev75 = CB_DH_OBSOLETE;    // obsolete value
 
    // PAY ATTENTION HERE
@@ -216,7 +216,7 @@ int sub_select( int dev )
    // just select that device, skip all status checking and return.
    // We assume the caller knows what they are doing!
 
-   if ( reg_config_info[ dev ] < REG_CONFIG_TYPE_ATA )
+   if ( ata->reg_config_info[ dev ] < REG_CONFIG_TYPE_ATA )
    {
       // select the device and return
 
@@ -241,17 +241,17 @@ int sub_select( int dev )
       if ( tmr_chk_timeout() )
       {
          trc_llt( 0, 0, TRC_LLT_TOUT );
-         reg_cmd_info.to = 1;
-         reg_cmd_info.ec = 11;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
-         reg_cmd_info.st2 = status;
-         reg_cmd_info.as2 = pio_inbyte( CB_ASTAT );
-         reg_cmd_info.er2 = pio_inbyte( CB_ERR );
-         reg_cmd_info.sc2 = pio_inbyte( CB_SC );
-         reg_cmd_info.sn2 = pio_inbyte( CB_SN );
-         reg_cmd_info.cl2 = pio_inbyte( CB_CL );
-         reg_cmd_info.ch2 = pio_inbyte( CB_CH );
-         reg_cmd_info.dh2 = pio_inbyte( CB_DH );
+         ata->reg_cmd_info.to = 1;
+         ata->reg_cmd_info.ec = 11;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.st2 = status;
+         ata->reg_cmd_info.as2 = pio_inbyte( CB_ASTAT );
+         ata->reg_cmd_info.er2 = pio_inbyte( CB_ERR );
+         ata->reg_cmd_info.sc2 = pio_inbyte( CB_SC );
+         ata->reg_cmd_info.sn2 = pio_inbyte( CB_SN );
+         ata->reg_cmd_info.cl2 = pio_inbyte( CB_CL );
+         ata->reg_cmd_info.ch2 = pio_inbyte( CB_CH );
+         ata->reg_cmd_info.dh2 = pio_inbyte( CB_DH );
          return 1;
       }
    }
@@ -276,17 +276,17 @@ int sub_select( int dev )
       if ( tmr_chk_timeout() )
       {
          trc_llt( 0, 0, TRC_LLT_TOUT );
-         reg_cmd_info.to = 1;
-         reg_cmd_info.ec = 12;
-         trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
-         reg_cmd_info.st2 = status;
-         reg_cmd_info.as2 = pio_inbyte( CB_ASTAT );
-         reg_cmd_info.er2 = pio_inbyte( CB_ERR );
-         reg_cmd_info.sc2 = pio_inbyte( CB_SC );
-         reg_cmd_info.sn2 = pio_inbyte( CB_SN );
-         reg_cmd_info.cl2 = pio_inbyte( CB_CL );
-         reg_cmd_info.ch2 = pio_inbyte( CB_CH );
-         reg_cmd_info.dh2 = pio_inbyte( CB_DH );
+         ata->reg_cmd_info.to = 1;
+         ata->reg_cmd_info.ec = 12;
+         trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
+         ata->reg_cmd_info.st2 = status;
+         ata->reg_cmd_info.as2 = pio_inbyte( CB_ASTAT );
+         ata->reg_cmd_info.er2 = pio_inbyte( CB_ERR );
+         ata->reg_cmd_info.sc2 = pio_inbyte( CB_SC );
+         ata->reg_cmd_info.sn2 = pio_inbyte( CB_SN );
+         ata->reg_cmd_info.cl2 = pio_inbyte( CB_CL );
+         ata->reg_cmd_info.ch2 = pio_inbyte( CB_CH );
+         ata->reg_cmd_info.dh2 = pio_inbyte( CB_DH );
          return 1;
       }
    }
@@ -294,7 +294,7 @@ int sub_select( int dev )
    // All done.  The return values of this function are described in
    // ATAIO.H.
 
-   if ( reg_cmd_info.ec )
+   if ( ata->reg_cmd_info.ec )
       return 1;
    return 0;
 }
@@ -310,9 +310,9 @@ unsigned char sub_readBusMstrCmd( void )
 {
    unsigned char x;
 
-   if ( pio_bmide_base_addr < 0x0100 )
+   if ( ata->pio_bmide_base_addr < 0x0100 )
       return 0;
-   x = inb(pio_bmide_base_addr + BM_COMMAND_REG );
+   x = inb(ata->pio_bmide_base_addr + BM_COMMAND_REG );
    trc_llt( 0, x, TRC_LLT_R_BM_CR );
    return x;
 }
@@ -323,9 +323,9 @@ unsigned char sub_readBusMstrStatus( void )
 {
    unsigned char x;
 
-   if ( pio_bmide_base_addr < 0x0100 )
+   if ( ata->pio_bmide_base_addr < 0x0100 )
       return 0;
-   x = inb( pio_bmide_base_addr + BM_STATUS_REG );
+   x = inb( ata->pio_bmide_base_addr + BM_STATUS_REG );
    trc_llt( 0, x, TRC_LLT_R_BM_SR );
    return x;
 }
@@ -334,10 +334,10 @@ unsigned char sub_readBusMstrStatus( void )
 void sub_writeBusMstrCmd( unsigned char x )
 {
 
-   if ( pio_bmide_base_addr < 0x0100 )
+   if ( ata->pio_bmide_base_addr < 0x0100 )
       return;
    trc_llt( 0, x, TRC_LLT_W_BM_CR );
-   outb( pio_bmide_base_addr + BM_COMMAND_REG, x );
+   outb( ata->pio_bmide_base_addr + BM_COMMAND_REG, x );
 }
 
 
@@ -345,10 +345,10 @@ void sub_writeBusMstrStatus( unsigned char x )
 
 {
 
-   if ( pio_bmide_base_addr < 0x0100 )
+   if ( ata->pio_bmide_base_addr < 0x0100 )
       return;
    trc_llt( 0, x, TRC_LLT_W_BM_SR );
-   outb( pio_bmide_base_addr + BM_STATUS_REG, x );
+   outb( ata->pio_bmide_base_addr + BM_STATUS_REG, x );
 }
 
 // end ataiosub.c

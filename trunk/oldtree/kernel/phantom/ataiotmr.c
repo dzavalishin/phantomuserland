@@ -250,9 +250,9 @@ void tmr_delay_atapi( int dev )
 
 {
 
-   if ( reg_config_info[dev] == REG_CONFIG_TYPE_ATA )
+   if ( ata->reg_config_info[dev] == REG_CONFIG_TYPE_ATA )
       return;
-   if ( ! reg_atapi_delay_flag )
+   if ( ! ata->reg_atapi_delay_flag )
       return;
    trc_llt( 0, 0, TRC_LLT_DELAY1 );
    tmr_delay_1ms( 80L );

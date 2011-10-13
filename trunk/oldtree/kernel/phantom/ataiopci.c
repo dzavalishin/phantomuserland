@@ -284,17 +284,16 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
 
     //dma_pci_num_prd = numPrd;
 #if ATA_32_PIO
-    outl( pio_bmide_base_addr + BM_PRD_ADDR_LOW, dma_pci_prd_pa );
+    outl( ata->pio_bmide_base_addr + BM_PRD_ADDR_LOW, dma_pci_prd_pa );
 #else
     // This works in QEMU and on real hw, dies on BOCHS
-    outw( pio_bmide_base_addr + BM_PRD_ADDR_LOW,  (unsigned int) ( dma_pci_prd_pa & 0x0000ffffL ) );
-    outw( pio_bmide_base_addr + BM_PRD_ADDR_HIGH, (unsigned int) (( dma_pci_prd_pa >> 16 ) & 0x0000ffffL ) );
+    outw( ata->pio_bmide_base_addr + BM_PRD_ADDR_LOW,  (unsigned int) ( dma_pci_prd_pa & 0x0000ffffL ) );
+    outw( ata->pio_bmide_base_addr + BM_PRD_ADDR_HIGH, (unsigned int) (( dma_pci_prd_pa >> 16 ) & 0x0000ffffL ) );
 #endif
 
 #if 0 || DEBUG_PCI & 0x02
     {
         int ndx;
-#warning long here meant 32 bit?
         //unsigned long * lfp;
         u_int32_t * lfp;
 
@@ -347,7 +346,7 @@ int dma_pci_config( unsigned int regAddr )
 
     // save the base i/o address of the bus master (BMIDE) regs
 
-    pio_bmide_base_addr = regAddr;
+    ata->pio_bmide_base_addr = regAddr;
 
     // disable if reg address is zero
 
@@ -424,7 +423,7 @@ void dma_pci_set_max_xfer( unsigned int seg, unsigned int off,
     u_int32_t pmaEnd;         // end of 64K area within buffer
 
     // save buffer size
-    reg_buffer_size = bufSize;
+    ata->reg_buffer_size = bufSize;
 
     // large DMA xfers not supported
     dma_pci_largePrdBufPtr = (void *) 0;
@@ -493,14 +492,7 @@ void dma_pci_set_max_xfer( unsigned int seg, unsigned int off,
 //
 //***********************************************************
 
-static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
-                             //                             unsigned int seg, unsigned int off,
-                             long numSect );
-
-static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
-                             //                             unsigned int seg, unsigned int off,
-                             long numSect )
-
+static int exec_pci_ata_cmd( int dev, physaddr_t physAddr, long numSect )
 {
     unsigned int cntr;
     unsigned char status;
@@ -513,10 +505,10 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
     // Quit now if no dma channel set up
     // or interrupts are not enabled.
 
-    if ( ( ! pio_bmide_base_addr ) || ( ! int_use_intr_flag ) )
+    if ( ( ! ata->pio_bmide_base_addr ) || ( ! ata->int_use_intr_flag ) )
     {
-        reg_cmd_info.ec = 70;
-        trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+        ata->reg_cmd_info.ec = 70;
+        trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         sub_trace_command();
         trc_llt( 0, 0, TRC_LLT_E_RWD );
         return 1;
@@ -527,15 +519,15 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
 
     lw = numSect * 512L;
     if ( (    ( dma_pci_prd_type != PRD_TYPE_LARGE )
-              && ( ( lw > MAX_TRANSFER_SIZE ) || ( lw > reg_buffer_size ) ) )
+              && ( ( lw > MAX_TRANSFER_SIZE ) || ( lw > ata->reg_buffer_size ) ) )
          ||
          (    ( dma_pci_prd_type == PRD_TYPE_LARGE )
               //&& ( lw > dma_pci_largeMaxB )
          )
        )
     {
-        reg_cmd_info.ec = 61;
-        trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+        ata->reg_cmd_info.ec = 61;
+        trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         sub_trace_command();
         trc_llt( 0, 0, TRC_LLT_E_PID );
         return 1;
@@ -543,13 +535,13 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
 
     // Set up the dma transfer
 
-    if ( set_up_xfer(    ( reg_cmd_info.cmd == CMD_WRITE_DMA )
-                         || ( reg_cmd_info.cmd == CMD_WRITE_DMA_EXT )
-                         || ( reg_cmd_info.cmd == CMD_WRITE_DMA_FUA_EXT ),
+    if ( set_up_xfer(    ( ata->reg_cmd_info.cmd == CMD_WRITE_DMA )
+                         || ( ata->reg_cmd_info.cmd == CMD_WRITE_DMA_EXT )
+                         || ( ata->reg_cmd_info.cmd == CMD_WRITE_DMA_FUA_EXT ),
                          numSect * 512L, physAddr ) )
     {
-        reg_cmd_info.ec = 61;
-        trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+        ata->reg_cmd_info.ec = 61;
+        trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         sub_trace_command();
         trc_llt( 0, 0, TRC_LLT_E_PID );
         return 1;
@@ -580,7 +572,7 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
     // Start the command by setting the Command register.  The drive
     // should immediately set BUSY status.
 
-    pio_outbyte( CB_CMD, reg_cmd_info.cmd );
+    pio_outbyte( CB_CMD, ata->reg_cmd_info.cmd );
 
     // The drive should start executing the command including any
     // data transfer.
@@ -609,10 +601,12 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
         if ( ! ( cntr & 0x1fff ) )
         {
             sub_readBusMstrStatus();         // read BM status (for trace)
-            if ( ! ( reg_incompat_flags & REG_INCOMPAT_DMA_POLL ) )
+            if ( ! ( ata->reg_incompat_flags & REG_INCOMPAT_DMA_POLL ) )
                 pio_inbyte( CB_ASTAT );       // poll Alt Status
         }
-        if ( int_intr_flag )                // interrupt ?
+#warning sema
+        ATA_YIELD();
+        if ( ata->int_intr_flag )                // interrupt ?
         {
             trc_llt( 0, 0, TRC_LLT_INTRQ );  // yes
             trc_llt( 0, int_bm_status, TRC_LLT_R_BM_SR );
@@ -623,14 +617,14 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
         if ( tmr_chk_timeout() )            // time out ?
         {
             trc_llt( 0, 0, TRC_LLT_TOUT );   // yes
-            reg_cmd_info.to = 1;
-            reg_cmd_info.ec = 73;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.to = 1;
+            ata->reg_cmd_info.ec = 73;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;
         }
     }
 
-    if ( reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
+    if ( ata->reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
     {
         tmr_delay_1ms( 1L );    // delay for buggy controllers
     }
@@ -638,36 +632,36 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
     // End of command...
     // disable/stop the dma channel
 
-    status = int_bm_status;                // read BM status
+    status = ata->int_bm_status;                // read BM status
     status &= ~ BM_SR_MASK_ACT;            // ignore Active bit
     sub_writeBusMstrCmd( BM_CR_MASK_STOP );    // shutdown DMA
     sub_readBusMstrCmd();                      // read BM cmd (just for trace)
     status |= sub_readBusMstrStatus();         // read BM status again
 
-    if ( reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
+    if ( ata->reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
     {
         tmr_delay_1ms( 1L );    // delay for buggy controlers
     }
 
-    if ( reg_cmd_info.ec == 0 )
+    if ( ata->reg_cmd_info.ec == 0 )
     {
         if ( status & BM_SR_MASK_ERR )            // bus master error?
         {
-            reg_cmd_info.ec = 78;                  // yes
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 78;                  // yes
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         }
     }
-    if ( reg_cmd_info.ec == 0 )
+    if ( ata->reg_cmd_info.ec == 0 )
     {
         if ( status & BM_SR_MASK_ACT )            // end of PRD list?
         {
-            reg_cmd_info.ec = 71;                  // no
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 71;                  // no
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         }
     }
 
 #if DEBUG_PCI & 0x01
-    trc_llt( 0, int_intr_cntr, TRC_LLT_DEBUG );  // for debugging
+    trc_llt( 0, ata->int_intr_cntr, TRC_LLT_DEBUG );  // for debugging
 #endif
 
     // End of command...
@@ -676,31 +670,31 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
     // read the Status register because it may not have been
     // read by the interrupt handler.
 
-    if ( reg_cmd_info.ec )
+    if ( ata->reg_cmd_info.ec )
         status = pio_inbyte( CB_STAT );
     else
-        status = int_ata_status;
+        status = ata->int_ata_status;
 
     // Final status check...
     // if no error, check final status...
     // Error if BUSY, DEVICE FAULT, DRQ or ERROR status now.
 
-    if ( reg_cmd_info.ec == 0 )
+    if ( ata->reg_cmd_info.ec == 0 )
     {
         if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_DRQ | CB_STAT_ERR ) )
         {
-            reg_cmd_info.ec = 74;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 74;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         }
     }
 
     // Final status check...
     // if any error, update total bytes transferred.
 
-    if ( reg_cmd_info.ec == 0 )
-        reg_cmd_info.totalBytesXfer = numSect * 512L;
+    if ( ata->reg_cmd_info.ec == 0 )
+        ata->reg_cmd_info.totalBytesXfer = numSect * 512L;
     else
-        reg_cmd_info.totalBytesXfer = 0L;
+        ata->reg_cmd_info.totalBytesXfer = 0L;
 
     // Done...
     // Read the output registers and trace the command.
@@ -720,7 +714,7 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr,
     // All done.  The return values of this function are described in
     // ATAIO.H.
 
-    if ( reg_cmd_info.ec )
+    if ( ata->reg_cmd_info.ec )
         return 1;
     return 0;
 }
@@ -742,23 +736,23 @@ int dma_pci_chs( int dev, int cmd,
     // Setup current command information.
 
     sub_zero_return_data();
-    reg_cmd_info.flg = TRC_FLAG_ATA;
-    reg_cmd_info.ct  = TRC_TYPE_ADMAI;
+    ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+    ata->reg_cmd_info.ct  = TRC_TYPE_ADMAI;
     if (    ( cmd == CMD_WRITE_DMA )
             || ( cmd == CMD_WRITE_DMA_EXT )
             || ( cmd == CMD_WRITE_DMA_FUA_EXT )
        )
-        reg_cmd_info.ct  = TRC_TYPE_ADMAO;
-    reg_cmd_info.cmd = cmd;
-    reg_cmd_info.fr1 = fr;
-    reg_cmd_info.sc1 = sc;
-    reg_cmd_info.sn1 = sect;
-    reg_cmd_info.cl1 = cyl & 0x00ff;
-    reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
-    reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
-    reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
-    reg_cmd_info.ns  = numSect;
-    reg_cmd_info.lbaSize = LBACHS;
+        ata->reg_cmd_info.ct  = TRC_TYPE_ADMAO;
+    ata->reg_cmd_info.cmd = cmd;
+    ata->reg_cmd_info.fr1 = fr;
+    ata->reg_cmd_info.sc1 = sc;
+    ata->reg_cmd_info.sn1 = sect;
+    ata->reg_cmd_info.cl1 = cyl & 0x00ff;
+    ata->reg_cmd_info.ch1 = ( cyl & 0xff00 ) >> 8;
+    ata->reg_cmd_info.dh1 = ( dev ? CB_DH_DEV1 : CB_DH_DEV0 ) | ( head & 0x0f );
+    ata->reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
+    ata->reg_cmd_info.ns  = numSect;
+    ata->reg_cmd_info.lbaSize = LBACHS;
 
     // Execute the command.
 
@@ -784,22 +778,22 @@ int dma_pci_lba28( int dev, int cmd,
     // Setup current command information.
 
     sub_zero_return_data();
-    reg_cmd_info.flg = TRC_FLAG_ATA;
-    reg_cmd_info.ct  = TRC_TYPE_ADMAI;
+    ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+    ata->reg_cmd_info.ct  = TRC_TYPE_ADMAI;
     if (    ( cmd == CMD_WRITE_DMA )
             || ( cmd == CMD_WRITE_DMA_EXT )
             || ( cmd == CMD_WRITE_DMA_FUA_EXT )
        )
-        reg_cmd_info.ct  = TRC_TYPE_ADMAO;
-    reg_cmd_info.cmd = cmd;
-    reg_cmd_info.fr1 = fr;
-    reg_cmd_info.sc1 = sc;
-    reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-    reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
-    reg_cmd_info.ns  = numSect;
-    reg_cmd_info.lbaSize = LBA28;
-    reg_cmd_info.lbaHigh1 = 0L;
-    reg_cmd_info.lbaLow1 = lba;
+        ata->reg_cmd_info.ct  = TRC_TYPE_ADMAO;
+    ata->reg_cmd_info.cmd = cmd;
+    ata->reg_cmd_info.fr1 = fr;
+    ata->reg_cmd_info.sc1 = sc;
+    ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+    ata->reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
+    ata->reg_cmd_info.ns  = numSect;
+    ata->reg_cmd_info.lbaSize = LBA28;
+    ata->reg_cmd_info.lbaHigh1 = 0L;
+    ata->reg_cmd_info.lbaLow1 = lba;
 
     // Execute the command.
 
@@ -825,22 +819,22 @@ int dma_pci_lba48( int dev, int cmd,
     // Setup current command information.
 
     sub_zero_return_data();
-    reg_cmd_info.flg = TRC_FLAG_ATA;
-    reg_cmd_info.ct  = TRC_TYPE_ADMAI;
+    ata->reg_cmd_info.flg = TRC_FLAG_ATA;
+    ata->reg_cmd_info.ct  = TRC_TYPE_ADMAI;
     if (    ( cmd == CMD_WRITE_DMA )
             || ( cmd == CMD_WRITE_DMA_EXT )
             || ( cmd == CMD_WRITE_DMA_FUA_EXT )
        )
-        reg_cmd_info.ct  = TRC_TYPE_ADMAO;
-    reg_cmd_info.cmd = cmd;
-    reg_cmd_info.fr1 = fr;
-    reg_cmd_info.sc1 = sc;
-    reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
-    reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
-    reg_cmd_info.ns  = numSect;
-    reg_cmd_info.lbaSize = LBA48;
-    reg_cmd_info.lbaHigh1 = lbahi;
-    reg_cmd_info.lbaLow1 = lbalo;
+        ata->reg_cmd_info.ct  = TRC_TYPE_ADMAO;
+    ata->reg_cmd_info.cmd = cmd;
+    ata->reg_cmd_info.fr1 = fr;
+    ata->reg_cmd_info.sc1 = sc;
+    ata->reg_cmd_info.dh1 = CB_DH_LBA | (dev ? CB_DH_DEV1 : CB_DH_DEV0 );
+    ata->reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
+    ata->reg_cmd_info.ns  = numSect;
+    ata->reg_cmd_info.lbaSize = LBA48;
+    ata->reg_cmd_info.lbaHigh1 = lbahi;
+    ata->reg_cmd_info.lbaLow1 = lbalo;
 
     // Execute the command.
 
@@ -885,40 +879,40 @@ int dma_pci_packet( int dev,
     // Setup current command information.
 
     sub_zero_return_data();
-    reg_cmd_info.flg = TRC_FLAG_ATAPI;
-    reg_cmd_info.ct  = dir ? TRC_TYPE_PDMAO : TRC_TYPE_PDMAI;
-    reg_cmd_info.cmd = CMD_PACKET;
-    reg_cmd_info.fr1 = reg_atapi_reg_fr | 0x01;  // packet DMA mode !
-    reg_cmd_info.sc1 = reg_atapi_reg_sc;
-    reg_cmd_info.sn1 = reg_atapi_reg_sn;
-    reg_cmd_info.cl1 = 0;         // no Byte Count Limit in DMA !
-    reg_cmd_info.ch1 = 0;         // no Byte Count Limit in DMA !
-    reg_cmd_info.dh1 = dev ? CB_DH_DEV1 : CB_DH_DEV0;
-    reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
-    reg_cmd_info.lbaSize = LBA32;
-    reg_cmd_info.lbaLow1 = lba;
-    reg_cmd_info.lbaHigh1 = 0L;
-    reg_atapi_cp_size = cpbc;
+    ata->reg_cmd_info.flg = TRC_FLAG_ATAPI;
+    ata->reg_cmd_info.ct  = dir ? TRC_TYPE_PDMAO : TRC_TYPE_PDMAI;
+    ata->reg_cmd_info.cmd = CMD_PACKET;
+    ata->reg_cmd_info.fr1 = ata->reg_atapi_reg_fr | 0x01;  // packet DMA mode !
+    ata->reg_cmd_info.sc1 = ata->reg_atapi_reg_sc;
+    ata->reg_cmd_info.sn1 = ata->reg_atapi_reg_sn;
+    ata->reg_cmd_info.cl1 = 0;         // no Byte Count Limit in DMA !
+    ata->reg_cmd_info.ch1 = 0;         // no Byte Count Limit in DMA !
+    ata->reg_cmd_info.dh1 = dev ? CB_DH_DEV1 : CB_DH_DEV0;
+    ata->reg_cmd_info.dc1 = 0x00;      // nIEN=0 required on PCI !
+    ata->reg_cmd_info.lbaSize = LBA32;
+    ata->reg_cmd_info.lbaLow1 = lba;
+    ata->reg_cmd_info.lbaHigh1 = 0L;
+    ata->reg_atapi_cp_size = cpbc;
     cfp = cpAddr;
     for ( ndx = 0; ndx < cpbc; ndx ++ )
     {
-        reg_atapi_cp_data[ndx] = * cfp;
+        ata->reg_atapi_cp_data[ndx] = * cfp;
         cfp ++ ;
     }
 
     // Zero the alternate ATAPI register data.
 
-    reg_atapi_reg_fr = 0;
-    reg_atapi_reg_sc = 0;
-    reg_atapi_reg_sn = 0;
-    reg_atapi_reg_dh = 0;
+    ata->reg_atapi_reg_fr = 0;
+    ata->reg_atapi_reg_sc = 0;
+    ata->reg_atapi_reg_sn = 0;
+    ata->reg_atapi_reg_dh = 0;
 
     // Quit now if no dma channel set up
 
-    if ( ! pio_bmide_base_addr )
+    if ( ! ata->pio_bmide_base_addr )
     {
-        reg_cmd_info.ec = 70;
-        trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+        ata->reg_cmd_info.ec = 70;
+        trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         sub_trace_command();
         trc_llt( 0, 0, TRC_LLT_E_PID );
         return 1;
@@ -936,15 +930,15 @@ int dma_pci_packet( int dev,
     // or 2) DMA can't handle the transfer size.
 
     if ( (    ( dma_pci_prd_type != PRD_TYPE_LARGE )
-              && ( ( dpbc > MAX_TRANSFER_SIZE ) || ( dpbc > reg_buffer_size ) ) )
+              && ( ( dpbc > MAX_TRANSFER_SIZE ) || ( dpbc > ata->reg_buffer_size ) ) )
          ||
          (    ( dma_pci_prd_type == PRD_TYPE_LARGE )
               //&& ( dpbc > dma_pci_largeMaxB )
          )
        )
     {
-        reg_cmd_info.ec = 61;
-        trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+        ata->reg_cmd_info.ec = 61;
+        trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         sub_trace_command();
         trc_llt( 0, 0, TRC_LLT_E_PID );
         return 1;
@@ -954,8 +948,8 @@ int dma_pci_packet( int dev,
 
     if ( set_up_xfer( dir, dpbc, dp_physAddr ) )
     {
-        reg_cmd_info.ec = 61;
-        trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+        ata->reg_cmd_info.ec = 61;
+        trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         sub_trace_command();
         trc_llt( 0, 0, TRC_LLT_E_PID );
         return 1;
@@ -1017,7 +1011,7 @@ int dma_pci_packet( int dev,
         }
         else
         {
-            reg_cmd_info.failbits |= FAILBIT0;  // not OK
+            ata->reg_cmd_info.failbits |= FAILBIT0;  // not OK
         }
     }
 
@@ -1033,9 +1027,9 @@ int dma_pci_packet( int dev,
         if ( tmr_chk_timeout() )               // time out yet ?
         {
             trc_llt( 0, 0, TRC_LLT_TOUT );      // yes
-            reg_cmd_info.to = 1;
-            reg_cmd_info.ec = 75;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.to = 1;
+            ata->reg_cmd_info.ec = 75;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
             break;
         }
     }
@@ -1044,14 +1038,14 @@ int dma_pci_packet( int dev,
     // Check for protocol failures... no interrupt here please!
     // Clear any interrupt the command packet transfer may have caused.
 
-    if ( int_intr_flag )    // extra interrupt(s) ?
-        reg_cmd_info.failbits |= FAILBIT1;
-    int_intr_flag = 0;
+    if ( ata->int_intr_flag )    // extra interrupt(s) ?
+        ata->reg_cmd_info.failbits |= FAILBIT1;
+    ata->int_intr_flag = 0;
 
     // Command packet transfer...
     // If no error, transfer the command packet.
 
-    if ( reg_cmd_info.ec == 0 )
+    if ( ata->reg_cmd_info.ec == 0 )
     {
 
         // Command packet transfer...
@@ -1069,8 +1063,8 @@ int dma_pci_packet( int dev,
                 != CB_STAT_DRQ
            )
         {
-            reg_cmd_info.ec = 76;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 76;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         }
         else
         {
@@ -1081,10 +1075,10 @@ int dma_pci_packet( int dev,
             if ( ( reason &  ( CB_SC_P_TAG | CB_SC_P_REL | CB_SC_P_IO ) )
                  || ( ! ( reason &  CB_SC_P_CD ) )
                )
-                reg_cmd_info.failbits |= FAILBIT2;
-            if (    ( lowCyl != reg_cmd_info.cl1 )
-                    || ( highCyl != reg_cmd_info.ch1 ) )
-                reg_cmd_info.failbits |= FAILBIT3;
+                ata->reg_cmd_info.failbits |= FAILBIT2;
+            if (    ( lowCyl != ata->reg_cmd_info.cl1 )
+                    || ( highCyl != ata->reg_cmd_info.ch1 ) )
+                ata->reg_cmd_info.failbits |= FAILBIT3;
 
             // Command packet transfer...
             // trace cdb byte 0,
@@ -1102,7 +1096,7 @@ int dma_pci_packet( int dev,
     // If no error, set up and start the DMA,
     // and wait for the DMA to complete.
 
-    if ( reg_cmd_info.ec == 0 )
+    if ( ata->reg_cmd_info.ec == 0 )
     {
 
         // Data transfer...
@@ -1129,10 +1123,12 @@ int dma_pci_packet( int dev,
             if ( ! ( cntr & 0x1fff) )
             {
                 sub_readBusMstrStatus();         // read BM status (for trace)
-                if ( ! ( reg_incompat_flags & REG_INCOMPAT_DMA_POLL ) )
+                if ( ! ( ata->reg_incompat_flags & REG_INCOMPAT_DMA_POLL ) )
                     pio_inbyte( CB_ASTAT );       // poll Alt Status
             }
-            if ( int_intr_flag )                // interrupt ?
+#warning sema
+            ATA_YIELD();
+            if ( ata->int_intr_flag )                // interrupt ?
             {
                 trc_llt( 0, 0, TRC_LLT_INTRQ );  // yes
                 trc_llt( 0, int_bm_status, TRC_LLT_R_BM_SR );
@@ -1143,14 +1139,14 @@ int dma_pci_packet( int dev,
             if ( tmr_chk_timeout() )            // time out ?
             {
                 trc_llt( 0, 0, TRC_LLT_TOUT );   // yes
-                reg_cmd_info.to = 1;
-                reg_cmd_info.ec = 73;
-                trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+                ata->reg_cmd_info.to = 1;
+                ata->reg_cmd_info.ec = 73;
+                trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
                 break;
             }
         }
 
-        if ( reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
+        if ( ata->reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
         {
             tmr_delay_1ms( 1L);     // delay for buggy controllers
         }
@@ -1158,34 +1154,34 @@ int dma_pci_packet( int dev,
         // End of command...
         // disable/stop the dma channel
 
-        status = int_bm_status;                // read BM status
+        status = ata->int_bm_status;                // read BM status
         status &= ~ BM_SR_MASK_ACT;            // ignore Active bit
         sub_writeBusMstrCmd( BM_CR_MASK_STOP );    // shutdown DMA
         sub_readBusMstrCmd();                      // read BM cmd (just for trace)
         status |= sub_readBusMstrStatus();         // read BM statu again
 
-        if ( reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
+        if ( ata->reg_incompat_flags & REG_INCOMPAT_DMA_DELAY )
         {
             tmr_delay_1ms( 1L );    // delay for buggy controllers
         }
     }
 
-    if ( reg_cmd_info.ec == 0 )
+    if ( ata->reg_cmd_info.ec == 0 )
     {
         if ( status & ( BM_SR_MASK_ERR ) )        // bus master error?
         {
-            reg_cmd_info.ec = 78;                  // yes
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 78;                  // yes
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         }
         if ( ( status & BM_SR_MASK_ACT ) )        // end of PRD list?
         {
-            reg_cmd_info.ec = 71;                  // no
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 71;                  // no
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         }
     }
 
 #if DEBUG_PCI & 0x01
-    trc_llt( 0, int_intr_cntr, TRC_LLT_DEBUG );  // for debugging
+    trc_llt( 0, ata->int_intr_cntr, TRC_LLT_DEBUG );  // for debugging
 #endif
 
     // End of command...
@@ -1194,21 +1190,21 @@ int dma_pci_packet( int dev,
     // read the Status register because it may not have been
     // read by the interrupt handler.
 
-    if ( reg_cmd_info.ec )
+    if ( ata->reg_cmd_info.ec )
         status = pio_inbyte( CB_STAT );
     else
-        status = int_ata_status;
+        status = ata->int_ata_status;
 
     // Final status check...
     // if no error, check final status...
     // Error if BUSY, DRQ or ERROR status now.
 
-    if ( reg_cmd_info.ec == 0 )
+    if ( ata->reg_cmd_info.ec == 0 )
     {
         if ( status & ( CB_STAT_BSY | CB_STAT_DRQ | CB_STAT_ERR ) )
         {
-            reg_cmd_info.ec = 74;
-            trc_llt( 0, reg_cmd_info.ec, TRC_LLT_ERROR );
+            ata->reg_cmd_info.ec = 74;
+            trc_llt( 0, ata->reg_cmd_info.ec, TRC_LLT_ERROR );
         }
     }
 
@@ -1221,15 +1217,15 @@ int dma_pci_packet( int dev,
          || ( ! ( reason & CB_SC_P_IO ) )
          || ( ! ( reason & CB_SC_P_CD ) )
        )
-        reg_cmd_info.failbits |= FAILBIT8;
+        ata->reg_cmd_info.failbits |= FAILBIT8;
 
     // Final status check...
     // if any error, update total bytes transferred.
 
-    if ( reg_cmd_info.ec == 0 )
-        reg_cmd_info.totalBytesXfer = dpbc;
+    if ( ata->reg_cmd_info.ec == 0 )
+        ata->reg_cmd_info.totalBytesXfer = dpbc;
     else
-        reg_cmd_info.totalBytesXfer = 0L;
+        ata->reg_cmd_info.totalBytesXfer = 0L;
 
     // Done...
     // Read the output registers and trace the command.
@@ -1249,7 +1245,7 @@ int dma_pci_packet( int dev,
     // All done.  The return values of this function are described in
     // ATAIO.H.
 
-    if ( reg_cmd_info.ec )
+    if ( ata->reg_cmd_info.ec )
         return 1;
     return 0;
 }

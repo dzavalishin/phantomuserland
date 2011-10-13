@@ -93,7 +93,7 @@ void setup_simple_ide()
     int bm_base_reg = 0xC000;
 
     // tell ATADRVR how big the buffer is
-    reg_buffer_size = PAGE_SIZE; //BUFFER_SIZE;
+    ata->reg_buffer_size = PAGE_SIZE; //BUFFER_SIZE;
 
     SHOW_FLOW0( 1, "Init");
 
@@ -131,8 +131,8 @@ void setup_simple_ide()
     int numDev = reg_config();
     SHOW_INFO( 0, "Found %d devices, dev 0 is %s, dev 1 is %s.\n",
                numDev,
-               devTypeStr[ reg_config_info[0] ],
-               devTypeStr[ reg_config_info[1] ] );
+               devTypeStr[ ata->reg_config_info[0] ],
+               devTypeStr[ ata->reg_config_info[1] ] );
 
     int dev = 1;
 
@@ -594,8 +594,8 @@ static void test_ide_io(void)
 
        printf("IDE DMA wr test, phys 0x%lX, va2 = '%s'\n", physaddr, va2 );
 
-       //reg_incompat_flags |= REG_INCOMPAT_DMA_POLL | REG_INCOMPAT_DMA_DELAY;
-       reg_incompat_flags |= REG_INCOMPAT_DMA_DELAY;
+       //ata->reg_incompat_flags |= REG_INCOMPAT_DMA_POLL | REG_INCOMPAT_DMA_DELAY;
+       //ata->reg_incompat_flags |= REG_INCOMPAT_DMA_DELAY;
 
        ClearTrace();
        printf( "Test IO DMA LBA28...\n" );

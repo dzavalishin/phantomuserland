@@ -19,10 +19,10 @@ void dump_i_disk( i_disk_t *info )
     char *type_s = "?";
     switch(info->type)
     {
-    case unknown:    type_s = "unknown";	break;
-    case ata:        type_s = "ata"; 	break;
-    case atapi:      type_s = "atapi"; 	break;
-    case cf:         type_s = "cf"; 		break;
+    case idt_unknown:    type_s = "unknown";    break;
+    case idt_ata:        type_s = "ata";        break;
+    case idt_atapi:      type_s = "atapi";      break;
+    case idt_cf:         type_s = "cf"; 	break;
     }
 
     printf("Disk type %s size %u Mb, sect %d b, multisect %d\n",
@@ -67,7 +67,7 @@ void parse_i_disk_ata( i_disk_t *info, u_int16_t p[256] )
 
     info->sectorSize = 512; // Right?
 
-    if( p[47] & 0x8000 )
+    if( (p[47] & 0x8000) && ((p[47] & 0xFF) != 0 ) )
     {
         info->maxMultSectors = p[47] & ~0x8000;
         info->has |= I_DISK_HAS_MULT;
@@ -94,8 +94,8 @@ void parse_i_disk_ata( i_disk_t *info, u_int16_t p[256] )
     if( p[0] & 0x80 )
         info->has |= I_DISK_HAS_REMOV;
 
-    if( p[0] & 0x8000 )
-        info->type = ata;
+    if( !(p[0] & 0x8000) )
+        info->type = idt_ata;
 
     //printf("msect %d\n", p[59] & ~0x100 );
 

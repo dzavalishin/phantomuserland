@@ -428,56 +428,56 @@ void trc_err_dump1( void )
 const char * trc_err_dump2( void )
 {
 
-   if ( reg_cmd_info.flg == TRC_FLAG_EMPTY )
+   if ( ata->reg_cmd_info.flg == TRC_FLAG_EMPTY )
       return NULL;
    if ( errDmpLine == 1 )
    {
       errDmpLine = 2;
-      if ( reg_cmd_info.flg == TRC_FLAG_SRST )
+      if ( ata->reg_cmd_info.flg == TRC_FLAG_SRST )
          snprintf( trcDmpBuf, TDB_SIZE, "ATA Reset: SR = %s (%s)",
                              trc_get_cmd_name( CMD_SRST ),
-                             trc_get_type_name( reg_cmd_info.ct ) );
+                             trc_get_type_name( ata->reg_cmd_info.ct ) );
       else
-      if ( reg_cmd_info.flg == TRC_FLAG_ATAPI )
+      if ( ata->reg_cmd_info.flg == TRC_FLAG_ATAPI )
          snprintf( trcDmpBuf, TDB_SIZE, "PACKET Command: %02X = %s (%s)",
-                             reg_cmd_info.cmd,
-                             trc_get_cmd_name( reg_cmd_info.cmd ),
-                             trc_get_type_name( reg_cmd_info.ct ) );
+                             ata->reg_cmd_info.cmd,
+                             trc_get_cmd_name( ata->reg_cmd_info.cmd ),
+                             trc_get_type_name( ata->reg_cmd_info.ct ) );
       else
          snprintf( trcDmpBuf, TDB_SIZE, "ATA Command: %02X = %s (%s)",
-                             reg_cmd_info.cmd,
-                             trc_get_cmd_name( reg_cmd_info.cmd ),
-                             trc_get_type_name( reg_cmd_info.ct ) );
+                             ata->reg_cmd_info.cmd,
+                             trc_get_cmd_name( ata->reg_cmd_info.cmd ),
+                             trc_get_type_name( ata->reg_cmd_info.ct ) );
 
       return trcDmpBuf;
    }
    if ( errDmpLine == 2 )
    {
       errDmpLine = 3;
-      if ( reg_cmd_info.flg == TRC_FLAG_ATA )
+      if ( ata->reg_cmd_info.flg == TRC_FLAG_ATA )
       {
-         if ( reg_cmd_info.lbaSize == LBA48 )
+         if ( ata->reg_cmd_info.lbaSize == LBA48 )
          {
             // LBA48 before and after
             snprintf( trcDmpBuf, TDB_SIZE, "LBA48 SC %ld %lXH, "
                                 "before %lu.%lu %lX.%lXH, "
                                 "after %lu.%lu %lX.%lXH",
-                                 reg_cmd_info.ns, reg_cmd_info.ns,
-                                 reg_cmd_info.lbaHigh1, reg_cmd_info.lbaLow1,
-                                 reg_cmd_info.lbaHigh1, reg_cmd_info.lbaLow1,
-                                 reg_cmd_info.lbaHigh2, reg_cmd_info.lbaLow2,
-                                 reg_cmd_info.lbaHigh2, reg_cmd_info.lbaLow2 );
+                                 ata->reg_cmd_info.ns, ata->reg_cmd_info.ns,
+                                 ata->reg_cmd_info.lbaHigh1, ata->reg_cmd_info.lbaLow1,
+                                 ata->reg_cmd_info.lbaHigh1, ata->reg_cmd_info.lbaLow1,
+                                 ata->reg_cmd_info.lbaHigh2, ata->reg_cmd_info.lbaLow2,
+                                 ata->reg_cmd_info.lbaHigh2, ata->reg_cmd_info.lbaLow2 );
          }
          else
-         if ( reg_cmd_info.lbaSize == LBA28 )
+         if ( ata->reg_cmd_info.lbaSize == LBA28 )
          {
             // LBA28 before and after
             snprintf( trcDmpBuf, TDB_SIZE, "LBA28 SC %ld %lXH, "
                                 "before %lu %lXH, "
                                 "after %lu %lXH",
-                                 reg_cmd_info.ns, reg_cmd_info.ns,
-                                 reg_cmd_info.lbaLow1, reg_cmd_info.lbaLow1,
-                                 reg_cmd_info.lbaLow2, reg_cmd_info.lbaLow2 );
+                                 ata->reg_cmd_info.ns, ata->reg_cmd_info.ns,
+                                 ata->reg_cmd_info.lbaLow1, ata->reg_cmd_info.lbaLow1,
+                                 ata->reg_cmd_info.lbaLow2, ata->reg_cmd_info.lbaLow2 );
          }
          else
          {
@@ -485,34 +485,34 @@ const char * trc_err_dump2( void )
             unsigned int cyl1, head1, sect1;
             unsigned int cyl2, head2, sect2;
 
-            cyl1  = (unsigned int) ( reg_cmd_info.ch1 << 8 ) | reg_cmd_info.cl1;
-            head1 = (unsigned int) reg_cmd_info.dh1 & 0x0f;
-            sect1 = (unsigned int) reg_cmd_info.sn1;
-            cyl2  = (unsigned int) ( reg_cmd_info.ch2 << 8 ) | reg_cmd_info.cl2;
-            head2 = (unsigned int) reg_cmd_info.dh2 & 0x0f;
-            sect2 = (unsigned int) reg_cmd_info.sn2;
+            cyl1  = (unsigned int) ( ata->reg_cmd_info.ch1 << 8 ) | ata->reg_cmd_info.cl1;
+            head1 = (unsigned int) ata->reg_cmd_info.dh1 & 0x0f;
+            sect1 = (unsigned int) ata->reg_cmd_info.sn1;
+            cyl2  = (unsigned int) ( ata->reg_cmd_info.ch2 << 8 ) | ata->reg_cmd_info.cl2;
+            head2 = (unsigned int) ata->reg_cmd_info.dh2 & 0x0f;
+            sect2 = (unsigned int) ata->reg_cmd_info.sn2;
             snprintf( trcDmpBuf, TDB_SIZE, "CHS SC %ld %lXH, "
                                 "before %u.%u.%u %X.%X.%XH, "
                                 "after %u.%u.%u %X.%X.%XH ",
-                                 reg_cmd_info.ns, reg_cmd_info.ns,
+                                 ata->reg_cmd_info.ns, ata->reg_cmd_info.ns,
                                  cyl1, head1, sect1, cyl1, head1, sect1,
                                  cyl2, head2, sect2, cyl2, head2, sect2 );
          }
          return trcDmpBuf;
       }
-      if ( reg_cmd_info.flg == TRC_FLAG_ATAPI )
+      if ( ata->reg_cmd_info.flg == TRC_FLAG_ATAPI )
       {
-         if ( reg_atapi_cp_size == 12 )
+         if ( ata->reg_atapi_cp_size == 12 )
          {
             snprintf( trcDmpBuf, TDB_SIZE, "CDB %02X %02X %02X %02X  "
                                     "%02X %02X %02X %02X  "
                                     "%02X %02X %02X %02X ",
-                     reg_atapi_cp_data[0], reg_atapi_cp_data[1],
-                     reg_atapi_cp_data[2], reg_atapi_cp_data[3],
-                     reg_atapi_cp_data[4], reg_atapi_cp_data[5],
-                     reg_atapi_cp_data[6], reg_atapi_cp_data[7],
-                     reg_atapi_cp_data[8], reg_atapi_cp_data[9],
-                     reg_atapi_cp_data[10], reg_atapi_cp_data[11] );
+                     ata->reg_atapi_cp_data[0], ata->reg_atapi_cp_data[1],
+                     ata->reg_atapi_cp_data[2], ata->reg_atapi_cp_data[3],
+                     ata->reg_atapi_cp_data[4], ata->reg_atapi_cp_data[5],
+                     ata->reg_atapi_cp_data[6], ata->reg_atapi_cp_data[7],
+                     ata->reg_atapi_cp_data[8], ata->reg_atapi_cp_data[9],
+                     ata->reg_atapi_cp_data[10], ata->reg_atapi_cp_data[11] );
          }
          else
          {
@@ -520,14 +520,14 @@ const char * trc_err_dump2( void )
                                     "%02X %02X %02X %02X  "
                                     "%02X %02X %02X %02X  "
                                     "%02X %02X %02X %02X ",
-                     reg_atapi_cp_data[0], reg_atapi_cp_data[1],
-                     reg_atapi_cp_data[2], reg_atapi_cp_data[3],
-                     reg_atapi_cp_data[4], reg_atapi_cp_data[5],
-                     reg_atapi_cp_data[6], reg_atapi_cp_data[7],
-                     reg_atapi_cp_data[8], reg_atapi_cp_data[9],
-                     reg_atapi_cp_data[10], reg_atapi_cp_data[11],
-                     reg_atapi_cp_data[12], reg_atapi_cp_data[13],
-                     reg_atapi_cp_data[14], reg_atapi_cp_data[15] );
+                     ata->reg_atapi_cp_data[0], ata->reg_atapi_cp_data[1],
+                     ata->reg_atapi_cp_data[2], ata->reg_atapi_cp_data[3],
+                     ata->reg_atapi_cp_data[4], ata->reg_atapi_cp_data[5],
+                     ata->reg_atapi_cp_data[6], ata->reg_atapi_cp_data[7],
+                     ata->reg_atapi_cp_data[8], ata->reg_atapi_cp_data[9],
+                     ata->reg_atapi_cp_data[10], ata->reg_atapi_cp_data[11],
+                     ata->reg_atapi_cp_data[12], ata->reg_atapi_cp_data[13],
+                     ata->reg_atapi_cp_data[14], ata->reg_atapi_cp_data[15] );
          }
          return trcDmpBuf;
       }
@@ -536,13 +536,13 @@ const char * trc_err_dump2( void )
    {
       errDmpLine = 4;
       snprintf( trcDmpBuf, TDB_SIZE, "Driver ErrCode: %d %s ",
-                          reg_cmd_info.ec, trc_get_err_name( reg_cmd_info.ec ) );
+                          ata->reg_cmd_info.ec, trc_get_err_name( ata->reg_cmd_info.ec ) );
       return trcDmpBuf;
    }
    if ( errDmpLine == 4 )
    {
       errDmpLine = 5;
-      if ( reg_cmd_info.to )
+      if ( ata->reg_cmd_info.to )
       {
          snprintf( trcDmpBuf, TDB_SIZE, "                   "
                              "Driver timed out (see low level trace for details) !" );
@@ -553,22 +553,22 @@ const char * trc_err_dump2( void )
    {
       errDmpLine = 6;
       snprintf( trcDmpBuf, TDB_SIZE, "Bytes transferred: %ld (%lXH); DRQ blocks: %ld (%lXH) ",
-                        reg_cmd_info.totalBytesXfer, reg_cmd_info.totalBytesXfer,
-                        reg_cmd_info.drqPackets, reg_cmd_info.drqPackets );
+                        ata->reg_cmd_info.totalBytesXfer, ata->reg_cmd_info.totalBytesXfer,
+                        ata->reg_cmd_info.drqPackets, ata->reg_cmd_info.drqPackets );
       return trcDmpBuf;
    }
    if ( errDmpLine == 6 )
    {
       errDmpLine = 7;
-      snprintf( trcDmpBuf, TDB_SIZE, "Device Status: %02X = %s ", reg_cmd_info.st2,
-                        trc_get_st_bit_name( reg_cmd_info.st2 ) );
+      snprintf( trcDmpBuf, TDB_SIZE, "Device Status: %02X = %s ", ata->reg_cmd_info.st2,
+                        trc_get_st_bit_name( ata->reg_cmd_info.st2 ) );
       return trcDmpBuf;
    }
    if ( errDmpLine == 7 )
    {
       errDmpLine = 8;
-      snprintf( trcDmpBuf, TDB_SIZE, "Device  Error: %02X = %s ", reg_cmd_info.er2,
-                         trc_get_er_bit_name( reg_cmd_info.er2 ) );
+      snprintf( trcDmpBuf, TDB_SIZE, "Device  Error: %02X = %s ", ata->reg_cmd_info.er2,
+                         trc_get_er_bit_name( ata->reg_cmd_info.er2 ) );
       return trcDmpBuf;
    }
    if ( errDmpLine == 8 )
@@ -580,7 +580,7 @@ const char * trc_err_dump2( void )
    if ( errDmpLine == 9 )
    {
       errDmpLine = 10;
-      if ( reg_cmd_info.flg == TRC_FLAG_SRST )
+      if ( ata->reg_cmd_info.flg == TRC_FLAG_SRST )
          snprintf( trcDmpBuf, TDB_SIZE, "   Cmd Params: "
                   // fr  er  sc  sn  cl  ch  dh  cm  st  as  dc
                     "--  --  --  --  --  --  --  --  --  --  04 " );
@@ -588,11 +588,11 @@ const char * trc_err_dump2( void )
          snprintf( trcDmpBuf, TDB_SIZE, "   Cmd Params: "
                   //  fr   er   sc    sn    cl    ch    dh    cm   st  as   dc
                     "%02X  --  %02X  %02X  %02X  %02X  %02X  %02X  --  --  %02X ",
-                     reg_cmd_info.fr1 & 0x00ff,
-                     reg_cmd_info.sc1 & 0x00ff,
-                     reg_cmd_info.sn1,
-                     reg_cmd_info.cl1, reg_cmd_info.ch1, reg_cmd_info.dh1,
-                     reg_cmd_info.cmd, reg_cmd_info.dc1 );
+                     ata->reg_cmd_info.fr1 & 0x00ff,
+                     ata->reg_cmd_info.sc1 & 0x00ff,
+                     ata->reg_cmd_info.sn1,
+                     ata->reg_cmd_info.cl1, ata->reg_cmd_info.ch1, ata->reg_cmd_info.dh1,
+                     ata->reg_cmd_info.cmd, ata->reg_cmd_info.dc1 );
       return trcDmpBuf;
    }
    if ( errDmpLine == 10 )
@@ -601,24 +601,24 @@ const char * trc_err_dump2( void )
       snprintf( trcDmpBuf, TDB_SIZE, "    After Cmd: "
                   // fr   er    sc    sn    cl    ch    dh   cm   st    as   dc
                     "--  %02X  %02X  %02X  %02X  %02X  %02X  --  %02X  %02X  -- ",
-                     reg_cmd_info.er2, reg_cmd_info.sc2 & 0x00ff,
-                     reg_cmd_info.sn2, reg_cmd_info.cl2, reg_cmd_info.ch2,
-                     reg_cmd_info.dh2, reg_cmd_info.st2, reg_cmd_info.as2 );
+                     ata->reg_cmd_info.er2, ata->reg_cmd_info.sc2 & 0x00ff,
+                     ata->reg_cmd_info.sn2, ata->reg_cmd_info.cl2, ata->reg_cmd_info.ch2,
+                     ata->reg_cmd_info.dh2, ata->reg_cmd_info.st2, ata->reg_cmd_info.as2 );
       return trcDmpBuf;
    }
-   if ( ( errDmpLine == 11 ) &&  reg_cmd_info.failbits )
+   if ( ( errDmpLine == 11 ) &&  ata->reg_cmd_info.failbits )
    {
       errDmpLine = 12;
       errDmpLine2 = 0;
       snprintf( trcDmpBuf, TDB_SIZE, "  ATA/ATAPI protocol errors bits (%04XH):",
-                          reg_cmd_info.failbits );
+                          ata->reg_cmd_info.failbits );
       return trcDmpBuf;
    }
    if ( errDmpLine == 12 )
    {
       while ( ( errDmpLine2 < 16 )
               &&
-              ( ! ( reg_cmd_info.failbits & pErrNames[errDmpLine2].pErrCode ) )
+              ( ! ( ata->reg_cmd_info.failbits & pErrNames[errDmpLine2].pErrCode ) )
             )
          errDmpLine2 ++ ;
       if ( errDmpLine2 < 16 )
@@ -709,31 +709,31 @@ void trc_cht( void )
 {
    int ndx;
 
-   if ( ! ( ( 0x0001 << reg_cmd_info.ct ) & chtTypes ) )
+   if ( ! ( ( 0x0001 << ata->reg_cmd_info.ct ) & chtTypes ) )
       return;
    // entry type, entry flag, command code, etc
-   chtBuf[chtCur].flg = reg_cmd_info.flg;
-   chtBuf[chtCur].ct  = reg_cmd_info.ct ;
-   chtBuf[chtCur].cmd = reg_cmd_info.cmd;
-   chtBuf[chtCur].ns = reg_cmd_info.ns;
-   chtBuf[chtCur].mc = reg_cmd_info.mc;
-   chtBuf[chtCur].fr1 = reg_cmd_info.fr1;
-   chtBuf[chtCur].dh1 = reg_cmd_info.dh1;
+   chtBuf[chtCur].flg = ata->reg_cmd_info.flg;
+   chtBuf[chtCur].ct  = ata->reg_cmd_info.ct ;
+   chtBuf[chtCur].cmd = ata->reg_cmd_info.cmd;
+   chtBuf[chtCur].ns = ata->reg_cmd_info.ns;
+   chtBuf[chtCur].mc = ata->reg_cmd_info.mc;
+   chtBuf[chtCur].fr1 = ata->reg_cmd_info.fr1;
+   chtBuf[chtCur].dh1 = ata->reg_cmd_info.dh1;
    // starting CHS/LBA
-   chtBuf[chtCur].lbaSize = reg_cmd_info.lbaSize;
-   chtBuf[chtCur].cyl  = ( reg_cmd_info.ch1 << 8 ) | reg_cmd_info.cl1;
-   chtBuf[chtCur].head = reg_cmd_info.dh1 & 0x0f;
-   chtBuf[chtCur].sect = reg_cmd_info.sn1;
-   chtBuf[chtCur].lbaLow1 = reg_cmd_info.lbaLow1;
+   chtBuf[chtCur].lbaSize = ata->reg_cmd_info.lbaSize;
+   chtBuf[chtCur].cyl  = ( ata->reg_cmd_info.ch1 << 8 ) | ata->reg_cmd_info.cl1;
+   chtBuf[chtCur].head = ata->reg_cmd_info.dh1 & 0x0f;
+   chtBuf[chtCur].sect = ata->reg_cmd_info.sn1;
+   chtBuf[chtCur].lbaLow1 = ata->reg_cmd_info.lbaLow1;
    // ending status and driver error codes
-   chtBuf[chtCur].st2 = reg_cmd_info.st2;
-   chtBuf[chtCur].er2 = reg_cmd_info.er2;
-   chtBuf[chtCur].ec  = reg_cmd_info.ec ;
-   chtBuf[chtCur].to  = reg_cmd_info.to ;
+   chtBuf[chtCur].st2 = ata->reg_cmd_info.st2;
+   chtBuf[chtCur].er2 = ata->reg_cmd_info.er2;
+   chtBuf[chtCur].ec  = ata->reg_cmd_info.ec ;
+   chtBuf[chtCur].to  = ata->reg_cmd_info.to ;
    // ATAPI CDB size and CDB data
-   chtBuf[chtCur].cdbSize = reg_atapi_cp_size;
-   for ( ndx = 0; ndx < reg_atapi_cp_size; ndx ++ )
-      chtBuf[chtCur].cdbBuf[ndx] = reg_atapi_cp_data[ndx];
+   chtBuf[chtCur].cdbSize = ata->reg_atapi_cp_size;
+   for ( ndx = 0; ndx < ata->reg_atapi_cp_size; ndx ++ )
+      chtBuf[chtCur].cdbBuf[ndx] = ata->reg_atapi_cp_data[ndx];
    // move to next entry
    chtCur ++ ;
    if ( chtCur >= MAX_CHT )
