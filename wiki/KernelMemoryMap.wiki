@@ -15,6 +15,14 @@ kernel end - 0x40000000 = kernel heap, mapped as is (will be mapped not as is la
 
 0x80000000 - 0xC0000000 = foreground, objects space
 
+== MIPS32 Memory Map ==
+
+MIPS unpaged mem access address space is upper half of address space, so kernel runs in 0x80000000 and above.
+
+Virtual machine (persistent block) is at 0x01000
+
+Allocable address space is at 0xC0000000
+
 == IA64 Memory Map ==
 
 TODO. Supposedly:
@@ -31,7 +39,7 @@ min neg - 0 = kernel
 
 == Memory TODO ==
 
- * Current phys mem allocator works with mapped memory directly. Divide in physical allocator and heap (which can sbrk using phys allocator).
+
  * [KernelVM86] is implemented and does some low mem access. Document it!
  * Page 0 - unmap to catch null ptr accesses.
  * POSIX code - CS/DS segments mapped to binary objects
@@ -44,7 +52,7 @@ Interpreter code in a special segment?
 
 This is how it should be, not how it is. We're implementing now what is described here.
 
-1. Low level phys RAM allocator. Has two parts on ia32 - one is used to allocate blow 1mb memory and used in a very special situations like in [KernelVM86] support code. Main one allocates RAM which is not statically assigned to kernel image (everything above it). Allocation is in page size increments.
+1. Low level phys RAM allocator. Has two parts on ia32 - one is used to allocate low 1mb memory and used in a very special situations like in [KernelVM86] support code. Main one allocates RAM which is not statically assigned to kernel image (everything above it). Allocation is in page size increments.
 
 This allocator is used by kernel heap allocator to replentish heap, and directly by users which need page-aligned RAM (for phys-level access, usually).
 
@@ -57,14 +65,4 @@ TODO: run vm interpreter/jit code in user mode with access to lower kernel mem r
 
 4. Addres space allocator. 0x40000000 - 0x80000000 zone is pure address space (unmapped at kernel start) and is used to map memory-accessed devices (namely, APIC), video RAM (NB! - we have a problem here noww, and VRAM is mapped directly, which means it leaves in object mem space now), temp buffers, etc. Usually memory allocated from low-level page allocator is mapped here by owner. 
 
-NB! How to map device memory:
-
-
-    int pte = create_pte(dev_physical_address,
-                         INTEL_PTE_VALID|INTEL_PTE_WRITE|
-                         INTEL_PTE_WTHRU|INTEL_PTE_NCACHE
-                        );
-    phantom_map_page( (linaddr_t)virtual_address, pte );
-
-
-Note: INTEL_PTE_WTHRU|INTEL_PTE_NCACHE - cache disable, and absence of INTEL_PTE_USER
+NB! How to map device memory: use page_map_io parameter, see hal.h
