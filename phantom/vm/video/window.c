@@ -294,6 +294,7 @@ void repaint_win_part( drv_video_window_t *w, rect_t *wtodo, rect_t *todo  )
     u_int32_t flags;
     win2blt_flags( &flags, w );
 
+    // TODO wrong - use video driver's func pointer
     drv_video_bitblt_part(
                           w->pixel,
                           w->xsize, w->ysize,
@@ -312,6 +313,7 @@ void repaint_all_for_square( rect_t *todo )
     drv_video_window_t *w;
 
     w_lock();
+    mouse_disable_p(video_drv, todo->x, todo->y, todo->xsize, todo->ysize );
 
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     //queue_iterate_back(&allwindows, w, drv_video_window_t *, chain)
@@ -332,6 +334,7 @@ void repaint_all_for_square( rect_t *todo )
         }
     }
 
+    mouse_enable_p(video_drv, todo->x, todo->y, todo->xsize, todo->ysize );
     w_unlock();
 }
 

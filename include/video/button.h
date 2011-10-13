@@ -27,12 +27,14 @@ typedef struct
 
     u_int32_t   flags;
 
-    u_int32_t   mouse_in_bits;
+    u_int32_t   mouse_in_bits;  // Rightmost bit is latest state. shifts left.
+    u_int32_t   pressed_bits;   // Same
 
     //int         npixels;
     //rgba_t      *pixels;
 
     drv_video_bitmap_t *bmp;
+    drv_video_bitmap_t *bmp_pressed; // can be 0
 
 } button_t;
 
@@ -40,11 +42,12 @@ typedef struct
 pool_t *create_buttons_pool(void);
 void destroy_buttons_pool(pool_t *buttons);
 
-void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, int flags );
+void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags );
 void w_delete_button( window_handle_t w, int id );
 
 void w_paint_changed_buttons(window_handle_t w);
 void w_repaint_buttons(window_handle_t w);
+void w_reset_buttons(window_handle_t w); // focus lost, mouse off window - make sure all buttons are off
 void w_check_button( window_handle_t w, ui_event_t *e );
 
 
