@@ -198,8 +198,12 @@ void win_make_decorations(drv_video_window_t *w)
         w3->w_owner = w;
         w->w_title = w3;
 
+        int bwidth = close_bmp.xsize;
+        int bxp = w->w_title->xsize - bwidth - 5;
         // close button with id=1
-        w_add_button( w->w_title, 1, 5, 5, &close_bmp, &close_pressed_bmp, 0 );
+        w_add_button( w->w_title, 1, bxp, 5, &close_bmp, &close_pressed_bmp, 0 );
+        bxp -= bwidth + 2;
+        w_add_button( w->w_title, 1, bxp, 5, &rollup_bmp, &rollup_pressed_bmp, 0 );
     }
 
     w->w_title->x = w->x-bordr_size;
@@ -211,16 +215,21 @@ void win_make_decorations(drv_video_window_t *w)
 
     w->w_title->bg = focused ? title_back_color_focus : title_back_color_nofocus;
 
-    drv_video_window_fill( w->w_title, w->w_title->bg );
+    //drv_video_window_fill( w->w_title, w->w_title->bg );
+
+    //drv_video_bitmap_t *tbmp = focused ?  &title_brown_bmp : &title_green_bmp;
+    drv_video_bitmap_t *tbmp = focused ?  &title_violet_bmp : &title_green_bmp;
+    replicate2window_hor( w->w_title, 3, 3, w->w_title->xsize, tbmp->pixel, tbmp->ysize );
+
     window_basic_border( w->w_title, brdr, bordr_size );
 
     // BUG! It must be +3, not -1 on Y coord!
     drv_video_font_draw_string( w->w_title, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
-                                bordr_size+3 +20, bordr_size-1 );
+                                bordr_size+3, bordr_size-1 );
 
-    drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
-    drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
+    //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
+    //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
 
     _drv_video_winblt_locked(w->w_title);
     //drv_video_window_free(w3);
@@ -239,6 +248,7 @@ void win_make_decorations(drv_video_window_t *w)
     r.ysize = title_size;
 
     drv_video_window_fill_rect( w->w_decor, bg, r );
+
 
     int bmp_y = w->ysize + bordr_size*2 + 2;
 

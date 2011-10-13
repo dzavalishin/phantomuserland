@@ -2,7 +2,9 @@ BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
 TARGET	= libphantom_vm.a
 
-SRCDIRS += $(BUILD_ROOT)/vm $(BUILD_ROOT)/vm/resources $(BUILD_ROOT)/vm/video $(BUILD_ROOT)/vm/cont
+SRCDIRS += $(BUILD_ROOT)/vm $(BUILD_ROOT)/vm/video $(BUILD_ROOT)/vm/cont
+#SRCDIRS += $(PHANTOM_HOME)/plib/resources/buttons
+SRCDIRS += $(BUILD_ROOT)/vm/resources
 
 INCDIRS += /usr/include/w32api/
 

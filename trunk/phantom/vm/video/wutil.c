@@ -201,6 +201,7 @@ int rect_sub( rect_t *out1, rect_t *out2, rect_t *old, rect_t *new )
 int rect_dump( rect_t *a )
 {
     printf("rect @ %d/%d, sz %d x %d\n", a->x, a->y, a->xsize, a->ysize );
+    return 0;
 }
 
 
