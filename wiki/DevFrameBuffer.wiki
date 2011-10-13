@@ -3,7 +3,7 @@
 
 = Introduction =
 
-Currently hives access to one global window. Later will create window per open.
+Currently provides access to one global window. Later will create window per open.
 
 = Details =
 
