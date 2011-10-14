@@ -399,7 +399,6 @@ err:
 
 static int destroy_tcp_socket(tcp_socket *s)
 {
-    // TODO TCP s->state == STATE_CLOSED fails, fix?
     //ASSERT(s->state == STATE_CLOSED);
     if(s->state != STATE_CLOSED)
         printf("!!! destroy_tcp_socket: state (%d) != STATE_CLOSED !!!\n", s->state);

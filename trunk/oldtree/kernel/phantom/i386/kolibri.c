@@ -810,6 +810,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             GET_POS_SIZE();
 
+            // Kolibri quirk - window size is one pixel bigger
             xsize++;
             ysize++;
 
@@ -824,28 +825,54 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             color_t fill = i2color(st->edx);
 
+            u_int32_t wstyle = st->edx >> 24;
+
+            u_int32_t _x = st->edx >> 28;
+            bool have_title 		= _x & 0x01;
+            bool ref_client_area 	= _x & 0x02; // All coords are relative to client area
+            bool no_fill 		= _x & 0x04;
+            bool gradient_fill 		= _x & 0x08;
+
+            if( wstyle == 1 ) no_fill = 1; // right?
+
             SHOW_FLOW( 2, "make app win %dx%d @ %d/%d", xsize, ysize, xpos, ypos );
+
+            if(gradient_fill)
+                SHOW_ERROR0( 2, "unimpl gradient fill" );
 
             // TOOD clip
             if( xsize > 2000 ) xsize = 2000;
             if( ysize > 2000 ) ysize = 2000;
 
-            if( ks->win )
-                break;
+            if( !ks->win )
+            {
+                // TODO edx/edi/esi - colors, flags
 
-            // TODO edx/edi/esi - colors, flags
+                ks->win = drv_video_window_create(
+                                                  xsize, ysize,
+                                                  xpos, ypos, fill, "Kolibri" );
 
-            ks->win = drv_video_window_create(
-                                              xsize, ysize,
-                                              xpos, ypos, fill, "Kolibri" );
+                if(!ks->win)
+                    break;
 
-            ks->win->eventDeliverSema = &ks->event;
+                ks->win->eventDeliverSema = &ks->event;
 
-            ks->defaultEventProcess = ks->win->inKernelEventProcess;
-            ks->win->inKernelEventProcess = 0;
+                ks->defaultEventProcess = ks->win->inKernelEventProcess;
+                ks->win->inKernelEventProcess = 0;
+            }
 
-            drv_video_window_update( ks->win );
+
+            if(!no_fill) drv_video_window_fill( ks->win, fill );
+
+            if(have_title && ((wstyle == 3) || (wstyle == 4)))
+            {
+                const char *title = u_ptr(st->edi,0);
+                drv_video_window_set_title( ks->win, title );
+            }
+
+            //drv_video_window_update( ks->win );
             kolibri_send_event( get_current_tid(), EV_REDRAW );
+            request_update_timer( ks, 50 );
         }
         break;
 

@@ -51,10 +51,6 @@ static void profiler_init(void)
 INIT_ME(0,0,profiler_init)
 
 
-// TODO per CPU in_idle flag set by corresponding idle thread,
-// 2 counters - in_idle_count, not_in_idle_count - once a second
-// calc CPU load
-
 void profiler_register_interrupt_hit( addr_t ip )
 {
 #if 1

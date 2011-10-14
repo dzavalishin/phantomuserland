@@ -98,7 +98,6 @@ static disk_page_no_t           sb_default_page_numbers[] = DISK_STRUCT_SB_OFFSE
 
 
 // called when io is done on page device
-/* TODO: must be called in DPC context! */
 static void page_device_io_final_callback()
 {
     pager_io_done();

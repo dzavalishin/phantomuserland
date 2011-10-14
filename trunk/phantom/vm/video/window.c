@@ -670,7 +670,8 @@ drv_video_window_get_bounds( drv_video_window_t *w, rect_t *out )
 
 void drv_video_window_set_title( drv_video_window_t *w, const char *title )
 {
-    w->title = title;
+    // todo static buf or strdup/free
+    w->title = strdup(title);
     //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
     event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
 }
