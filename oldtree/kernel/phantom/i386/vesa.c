@@ -266,7 +266,7 @@ void phantom_init_vesa(void)
 
     if( set_rc )
     {
-        // TODO reset VGA text mode here!
+        video_drv_basic_vga_set_text_mode();
         SHOW_ERROR( 0, "Failed to set VESA video mode %d, VESA is assumed to be dead", best_mode );
         return;
     }

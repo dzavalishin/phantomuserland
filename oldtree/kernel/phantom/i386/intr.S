@@ -14,8 +14,6 @@
 
 #include <kernel/interrupts.h>
 
-// TODO EBX is not really used
-
 #define INTERRUPT(irq,line, label)				\
     .data	2				;\
     .long	0f				;\
@@ -25,7 +23,7 @@
     pushl	$(irq)	                  /* err code */	;\
     pushl	$PIC_VECTBASE+(irq)	  /* trap num */	;\
     pusha                                       ;\
-    movl	$(irq),%ebx		  /* vector */      ;\
+    /*movl	$(irq),%ebx		  / * vector */      ;\
     movb	$1 << line,%dl		  /* mask */      ;\
     jmp	label
 

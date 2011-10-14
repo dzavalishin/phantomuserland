@@ -124,7 +124,6 @@ static char cpu_intr_stack[MAX_CPUS][IS_SIZE];
 
 void phantom_init_descriptors(void)
 {
-    // TODO need stacks alloc/free for intrs?
     main_tss.ss0 = KERNEL_DS;
 
     //main_tss.esp0 = get_esp(); // why?
@@ -325,7 +324,6 @@ static void init_ldt_alloc(void)
     phantom_phys_free_region( &ldt_map, LDT_RESERVED, LDTSZ-LDT_RESERVED-1 ); // -1 = error in phantom_phys_free_region?
     ldt_map.allocable_size = LDTSZ-LDT_RESERVED-1;
     ldt_map.n_used_pages = 0;
-    // TODO stats?
 }
 
 INIT_ME(init_ldt_alloc, 0, 0)

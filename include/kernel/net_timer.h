@@ -6,10 +6,7 @@
 #define _NEWOS_KERNEL_NET_NET_TIMER_H
 
 #include <phantom_libc.h>
-
 #include <hal.h>
-//#include "newos.h"
-//#include <compat/newos.h>
 
 typedef void (*net_timer_callback)(void *);
 

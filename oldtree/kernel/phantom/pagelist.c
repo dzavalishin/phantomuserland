@@ -47,7 +47,8 @@ disk_page_io_wait(disk_page_io *me)
         hal_sleep( &req );
 #else
     // BUG! polling!
-    //hal_sleep_msec( 1 ); // XXX BUG TODO turn on and kernel will crash - why?
+    hal_sleep_msec( 1 ); 
+    //phantom_scheduler_yield();
     while( me->req.flag_pagein || me->req.flag_pageout )
         hal_sleep_msec( 10 );
 #endif

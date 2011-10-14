@@ -89,9 +89,7 @@ static void reg_wait_poll( int we, int pe )
          if ( ata->int_intr_flag )                // interrupt ?
          {
 #warning sema
-             // slows alot on QEMU
-             // TODO on real hardware - reenable?
-             //sched_yield(); // driver is threaded, so just yeld
+             // driver is threaded, so just yeld
              ATA_YIELD();
 
             trc_llt( 0, 0, TRC_LLT_INTRQ );  // yes

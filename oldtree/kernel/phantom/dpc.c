@@ -16,6 +16,9 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#define MULTIPLE_DPC_THREADS 1
+#define DPC_WAKE_TIMER 1
+
 //---------------------------------------------------------------------------
 
 #include <phantom_libc.h>
@@ -24,9 +27,12 @@
 
 #include <kernel/dpc.h>
 
+#if DPC_WAKE_TIMER
+#include <kernel/net_timer.h>
+#endif
+
 //---------------------------------------------------------------------------
 
-#define MULTIPLE_DPC_THREADS 1
 
 
 hal_spinlock_t          dpc_request_lock;
@@ -131,7 +137,23 @@ static void dpc_thread(void)
 
 }
 
-// TODO use regular timedcall
+
+static void dpc_timed(void)
+{
+#if MULTIPLE_DPC_THREADS
+    if( idle_dpc_threads < MIN_DPC_IDLE_THREADS )
+    {
+        SHOW_FLOW( 1, "Starting extra %d DPC thread...", dpc_threads);
+        hal_start_kernel_thread(dpc_thread);
+    }
+#endif
+
+
+    //hal_cond_broadcast( &dpc_thread_sleep_stone );
+    hal_cond_signal( &dpc_thread_sleep_stone ); // Wake one thread
+}
+
+#if !DPC_WAKE_TIMER
 static void dpc_timed_waker_thread(void)
 {
     hal_set_thread_name("DPC Waker");
@@ -142,22 +164,25 @@ static void dpc_timed_waker_thread(void)
         if(dpc_stop_request)
             hal_exit_kernel_thread();
 
-#if MULTIPLE_DPC_THREADS
-        if( idle_dpc_threads < MIN_DPC_IDLE_THREADS )
-        {
-            SHOW_FLOW( 1, "Starting extra %d DPC thread...", dpc_threads);
-            hal_start_kernel_thread(dpc_thread);
-        }
-#endif
-
-
-        //hal_cond_broadcast( &dpc_thread_sleep_stone );
-        hal_cond_signal( &dpc_thread_sleep_stone ); // Wake one thread
+        dpc_timed();
     }
 }
 
-//static void * dpc_thread_object;
-//static void * dpc_timed_waker_thread_object;
+#else // DPC_WAKE_TIMER
+
+static void dpc_timer_wake( void *arg );
+
+static net_timer_event dpc_nte;
+
+static void dpc_timer_wake( void *arg )
+{
+    (void) arg;
+
+    set_net_timer( &dpc_nte, 1000, dpc_timer_wake, 0, 0 );
+    dpc_timed();
+}
+
+#endif
 
 void dpc_init()
 {
@@ -171,9 +196,13 @@ void dpc_init()
     //dpc_thread_object =
     hal_start_kernel_thread(dpc_thread);
 
+#if !DPC_WAKE_TIMER
     SHOW_FLOW0( 1, " starting DPC waker thread...");
     //dpc_timed_waker_thread_object =
     hal_start_kernel_thread(dpc_timed_waker_thread);
+#else
+    dpc_timer_wake(0);
+#endif
 
     while(!dpc_init_ok)
     {
