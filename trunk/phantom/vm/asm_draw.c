@@ -15,6 +15,7 @@
 #include <sys/types.h>
 
 
+#ifndef ARCH_ia32
 
 void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 {
@@ -84,6 +85,8 @@ void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb
     }
 }
 
+
+#endif // ARCH_ia32
 
 
 
