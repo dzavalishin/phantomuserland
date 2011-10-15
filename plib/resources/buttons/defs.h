@@ -8,3 +8,6 @@ extern drv_video_bitmap_t		title_green_bmp;
 extern drv_video_bitmap_t		title_violet_bmp;
 extern drv_video_bitmap_t		power_button_pressed_sm_bmp;
 extern drv_video_bitmap_t		power_button_sm_bmp;
+extern drv_video_bitmap_t		task_button_bmp;
+extern drv_video_bitmap_t		power_button_pressed_sm_bmp;
+extern drv_video_bitmap_t		power_button_sm_bmp;
