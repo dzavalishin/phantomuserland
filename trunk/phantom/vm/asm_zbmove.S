@@ -3,7 +3,7 @@
 // void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 
 .globl _rgba2rgba_zbmove
-	.def	_rgba2rgba_zbmove;	.scl	2;	.type	32;	.endef
+//	.def	_rgba2rgba_zbmove;	.scl	2;	.type	32;	.endef
 _rgba2rgba_zbmove:
         pushl	%ebp
         movl	%esp, %ebp
