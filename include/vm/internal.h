@@ -28,6 +28,7 @@ struct internal_class
     const char *                name;
     int                         root_index; 		// index into the root object, where class is stored
     syscall_func_t *            syscalls_table;         // syscalls implementations
+//    int                         syscalls_table_size;    // n of syscalls
     init_func_t                 init;                   // constructor
     gc_iterator_func_t          iter;                   // Call func for all the object pointer contained in this internal object
     gc_finalizer_func_t         finalizer;
@@ -56,6 +57,8 @@ struct pvm_object pvm_lookup_internal_class(struct pvm_object name);
     extern void pvm_gc_iter_##cn( gc_iterator_call_t func, struct pvm_object_storage * os, void *arg ); \
     extern void pvm_gc_finalizer_##cn( struct pvm_object_storage * os ); \
     extern void pvm_restart_##cn( pvm_object_t o );
+
+//    const int n_syscall_table_4_##cn = (sizeof syscall_table_4_##cn) / sizeof(syscall_func_t); 
 
 DEF_I(void);
 DEF_I(class)

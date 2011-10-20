@@ -53,8 +53,10 @@ static errno_t 	elf_load_seg(Elf32_Phdr *ph, void *src, void *dst);
 static void 	kernel_protected_module_starter( void * _u );
 
 static errno_t 	load_elf( struct exe_module **emo, void *_elf, size_t elf_size );
-static errno_t 	load_kolibri( struct exe_module **emo, void *_elf, size_t elf_size );
 
+#if HAVE_KOLIBRI
+static errno_t 	load_kolibri( struct exe_module **emo, void *_elf, size_t elf_size );
+#endif
 
 
 
@@ -63,10 +65,12 @@ errno_t uu_run_binary( int pid, void *_elf, size_t elf_size )
     struct exe_module *em;
     errno_t e;
 
-    if( is_not_kolibri_exe( _elf ) )
-        e = load_elf( &em, _elf, elf_size );
-    else
+#if HAVE_KOLIBRI
+    if( !is_not_kolibri_exe( _elf ) )
         e = load_kolibri( &em, _elf, elf_size );
+    else
+#endif
+        e = load_elf( &em, _elf, elf_size );
 
     if( e ) return e;
 
@@ -102,8 +106,9 @@ errno_t uu_run_file( int pid, const char *fname )
     return ke;
 }
 
-#ifdef ARCH_ia32
+#if def ARCH_ia32
 
+#if HAVE_KOLIBRI
 
 errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
 {
@@ -253,6 +258,9 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
     return 0;
 
 }
+
+#endif // HAVE_KOLIBRI
+
 
 // Loads final relocated executable
 errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
@@ -515,6 +523,7 @@ static void kernel_protected_module_starter( void * _pid )
 
     int ava, enva, tmp;
 
+#if HAVE_KOLIBRI
     if( em->flags & EM_FLAG_KOLIBRI )
     {
         if(em->kolibri_cmdline_size)
@@ -530,6 +539,8 @@ static void kernel_protected_module_starter( void * _pid )
                 strlcat( dest, *avp, em->kolibri_cmdline_size );
         }
     }
+#endif // HAVE_KOLIBRI
+
 
 #if 1
     // todo check success
@@ -611,6 +622,7 @@ static errno_t elf_load_seg(Elf32_Phdr *seg, void *src, void *dst)
     return 0;
 }
 
+#if HAVE_KOLIBRI
 // Untested
 void kolibri_thread_starter( void * arg )
 {
@@ -643,6 +655,7 @@ void kolibri_thread_starter( void * arg )
     switch_to_user_mode_cs_ds( em->cs_seg, em->ds_seg, eip, esp );
 
 }
+#endif // HAVE_KOLIBRI
 
 
 

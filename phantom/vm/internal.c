@@ -16,6 +16,18 @@
 
 #include <phantom_libc.h>
 
+#define IINIT(__cn) \
+        syscall_table_4_##__cn, \
+        pvm_internal_init_##__cn, \
+        pvm_gc_iter_##__cn
+
+/*
+#define IINIT(__cn) \
+        syscall_table_4_##__cn, n_syscall_table_4_##__cn, \
+        pvm_internal_init_##__cn, \
+        pvm_gc_iter_##__cn
+*/
+
 
 // NB!  GC optimization: if PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE flag is present, the pvm_gc_iter_##something  function will not be used!
 
@@ -24,7 +36,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.void",
         PVM_ROOT_OBJECT_NULL_CLASS,
-        syscall_table_4_void,
+        syscall_table_4_void, // n_syscall_table_4_void,
         pvm_internal_init_void,
         0 /*pvm_gc_iter_void*/,
         0, // no finalizer
@@ -36,9 +48,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.class",
         PVM_ROOT_OBJECT_CLASS_CLASS,
-        syscall_table_4_class,
-        pvm_internal_init_class,
-        pvm_gc_iter_class,
+        IINIT(class),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_class),
@@ -48,9 +58,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.interface",
         PVM_ROOT_OBJECT_INTERFACE_CLASS,
-        syscall_table_4_interface,
-        pvm_internal_init_interface,
-        pvm_gc_iter_interface,
+        IINIT(interface),
         0, // no finalizer
         0, // no restart func
         0, // Dynamic
@@ -60,7 +68,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.code",
         PVM_ROOT_OBJECT_CODE_CLASS,
-        syscall_table_4_code,
+        syscall_table_4_code, // n_syscall_table_4_code,
         pvm_internal_init_code,
         0 /*pvm_gc_iter_code*/,
         0, // no finalizer
@@ -72,7 +80,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.int",
         PVM_ROOT_OBJECT_INT_CLASS,
-        syscall_table_4_int,
+        syscall_table_4_int, // n_syscall_table_4_int,
         pvm_internal_init_int,
         0 /*pvm_gc_iter_int*/,
         0, // no finalizer
@@ -84,7 +92,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.string",
         PVM_ROOT_OBJECT_STRING_CLASS,
-        syscall_table_4_string,
+        syscall_table_4_string, // n_syscall_table_4_string,
         pvm_internal_init_string,
         0 /*pvm_gc_iter_string*/,
         0, // no finalizer
@@ -96,9 +104,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.container.array",
         PVM_ROOT_OBJECT_ARRAY_CLASS,
-        syscall_table_4_array,
-        pvm_internal_init_array,
-        pvm_gc_iter_array,
+        IINIT(array),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_array),
@@ -108,9 +114,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.container.page",
         PVM_ROOT_OBJECT_PAGE_CLASS,
-        syscall_table_4_page,
-        pvm_internal_init_page,
-        pvm_gc_iter_page,
+        IINIT(page),
         0, // no finalizer
         0, // no restart func
         0, // Dynamic
@@ -120,9 +124,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.thread",
         PVM_ROOT_OBJECT_THREAD_CLASS,
-        syscall_table_4_thread,
-        pvm_internal_init_thread,
-        pvm_gc_iter_thread,
+        IINIT(thread),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_thread),
@@ -132,9 +134,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.call_frame",
         PVM_ROOT_OBJECT_CALL_FRAME_CLASS,
-        syscall_table_4_call_frame,
-        pvm_internal_init_call_frame,
-        pvm_gc_iter_call_frame,
+        IINIT(call_frame),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_call_frame),
@@ -144,9 +144,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.istack",
         PVM_ROOT_OBJECT_ISTACK_CLASS,
-        syscall_table_4_istack,
-        pvm_internal_init_istack,
-        pvm_gc_iter_istack,
+        IINIT(istack),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_integer_stack),
@@ -156,9 +154,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.ostack",
         PVM_ROOT_OBJECT_OSTACK_CLASS,
-        syscall_table_4_ostack,
-        pvm_internal_init_ostack,
-        pvm_gc_iter_ostack,
+        IINIT(ostack),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_object_stack),
@@ -168,9 +164,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.estack",
         PVM_ROOT_OBJECT_ESTACK_CLASS,
-        syscall_table_4_estack,
-        pvm_internal_init_estack,
-        pvm_gc_iter_estack,
+        IINIT(estack),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_exception_stack),
@@ -180,7 +174,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.boot",
         PVM_ROOT_OBJECT_BOOT_CLASS,
-        syscall_table_4_boot,
+        syscall_table_4_boot, // n_syscall_table_4_boot,
         pvm_internal_init_boot,
         0 /*pvm_gc_iter_boot*/,
         0, // no finalizer
@@ -192,7 +186,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.io.tty",
         PVM_ROOT_OBJECT_TTY_CLASS,
-        syscall_table_4_tty,
+        syscall_table_4_tty, // n_syscall_table_4_tty,
         pvm_internal_init_tty,
         0 /*pvm_gc_iter_tty*/,
         pvm_gc_finalizer_tty, // no finalizer
@@ -204,7 +198,7 @@ struct internal_class pvm_internal_classes[] =
 /*    {
         ".internal.io.driver",
         PVM_ROOT_OBJECT_DRIVER_CLASS,
-        syscall_table_4_driver,
+        syscall_table_4_driver, // n_syscall_table_4_driver,
         pvm_internal_init_driver,
         pvm_gc_iter_driver,
         0, // no finalizer
@@ -217,7 +211,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.mutex",
         PVM_ROOT_OBJECT_MUTEX_CLASS,
-        syscall_table_4_mutex,
+        syscall_table_4_mutex, // n_syscall_table_4_mutex,
         pvm_internal_init_mutex,
         0 /*pvm_gc_iter_mutex*/,
         0, // no finalizer
@@ -230,7 +224,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.cond",
         PVM_ROOT_OBJECT_COND_CLASS,
-        syscall_table_4_cond,
+        syscall_table_4_cond, // n_syscall_table_4_cond,
         pvm_internal_init_cond,
         0 /*pvm_gc_iter_cond*/,
         0, // no finalizer
@@ -243,7 +237,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.sema",
         PVM_ROOT_OBJECT_SEMA_CLASS,
-        syscall_table_4_sema,
+        syscall_table_4_sema, // n_syscall_table_4_sema,
         pvm_internal_init_sema,
         0 /*pvm_gc_iter_sema*/,
         0, // no finalizer
@@ -256,7 +250,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.binary",
         PVM_ROOT_OBJECT_BINARY_CLASS,
-        syscall_table_4_binary,
+        syscall_table_4_binary, // n_syscall_table_4_binary,
         pvm_internal_init_binary,
         0 /*pvm_gc_iter_binary*/,
         0, // no finalizer
@@ -269,9 +263,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.bitmap",
         PVM_ROOT_OBJECT_BITMAP_CLASS,
-        syscall_table_4_bitmap,
-        pvm_internal_init_bitmap,
-        pvm_gc_iter_bitmap,
+        IINIT(bitmap),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_bitmap),
@@ -282,9 +274,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.closure",
         PVM_ROOT_OBJECT_CLOSURE_CLASS,
-        syscall_table_4_closure,
-        pvm_internal_init_closure,
-        pvm_gc_iter_closure,
+        IINIT(closure),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_closure),
@@ -296,9 +286,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.weakref",
         PVM_ROOT_OBJECT_WEAKREF_CLASS,
-        syscall_table_4_weakref,
-        pvm_internal_init_weakref,
-        pvm_gc_iter_weakref,
+        IINIT(weakref),
         0, // no finalizer
         0, // no restart func
         sizeof(struct data_area_4_weakref),
@@ -309,7 +297,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.world",
         PVM_ROOT_OBJECT_WORLD_CLASS,
-        syscall_table_4_world,
+        syscall_table_4_world, // n_syscall_table_4_world,
         pvm_internal_init_world,
         0 /*pvm_gc_iter_world*/,
         0, // no finalizer
@@ -323,7 +311,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.udp",
         PVM_ROOT_OBJECT_UDP_CLASS,
-        syscall_table_4_udp,
+        syscall_table_4_udp, // n_syscall_table_4_udp,
         pvm_internal_init_udp,
         0 /*pvm_gc_iter_udp*/,
         pvm_..._udp,
@@ -340,9 +328,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.window",
         PVM_ROOT_OBJECT_WINDOW_CLASS,
-        syscall_table_4_window,
-        pvm_internal_init_window,
-        pvm_gc_iter_window,
+        IINIT(window),
         pvm_gc_finalizer_window,
         pvm_restart_window, // no restart func
         sizeof(struct data_area_4_window),
@@ -353,9 +339,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.directory",
         PVM_ROOT_OBJECT_DIRECTORY_CLASS,
-        syscall_table_4_directory,
-        pvm_internal_init_directory,
-        pvm_gc_iter_directory,
+        IINIT(directory),
         pvm_gc_finalizer_directory,
         pvm_restart_directory, // no restart func
         sizeof(struct data_area_4_directory),
@@ -366,9 +350,7 @@ struct internal_class pvm_internal_classes[] =
     {
         ".internal.connection",
         PVM_ROOT_OBJECT_CONNECTION_CLASS,
-        syscall_table_4_connection,
-        pvm_internal_init_connection,
-        pvm_gc_iter_connection,
+        IINIT(connection),
         pvm_gc_finalizer_connection,
         pvm_restart_connection,
         sizeof(struct data_area_4_connection),

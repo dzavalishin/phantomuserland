@@ -8,6 +8,8 @@
  *
 **/
 
+#if HAVE_UNIX
+
 #define DEBUG_MSG_PREFIX "syscall"
 #include <debug_ext.h>
 #define debug_level_flow 0
@@ -1072,3 +1074,4 @@ errno_t user_args_load( int mina, int maxa, char **oav, int omax,  const char **
     return 0;
 }
 
+#endif // HAVE_UNIX

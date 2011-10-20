@@ -8,6 +8,8 @@
  *
 **/
 
+#if HAVE_KOLIBRI
+
 #define DEBUG_MSG_PREFIX "Kolibri"
 #include <debug_ext.h>
 #define debug_level_flow 8
@@ -2046,5 +2048,4 @@ static void kolibri_reload_window_alpha(struct kolibri_process_state *ks)
 
 
 
-
-
+#endif // HAVE_KOLIBRI

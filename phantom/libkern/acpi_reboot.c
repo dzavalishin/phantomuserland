@@ -9,6 +9,7 @@
  *
 **/
 
+#ifdef ARCH_ia32
 
 #define DEBUG_MSG_PREFIX "acpi"
 #include <debug_ext.h>
@@ -61,3 +62,5 @@ acpi_reboot(void)
     SHOW_ERROR0( 0, "Reset failed, timeout" );
     return ENXIO;
 }
+
+#endif // ARCH_ia32

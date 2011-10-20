@@ -15,6 +15,7 @@ all: install
 install: classes classes.ar
 	cp classes $(TFTP_PATH)
 	cp classes $(BOOT_PATH)
+	cp classes ../bin
 	cp classes.ar $(BOOT_PATH)
 
 

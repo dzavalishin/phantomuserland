@@ -492,6 +492,7 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
     debug_catch_object("new", data);
 
     // TODO remove it here - memory must be cleaned some other, more effective way
+    // ! clean on object deletion (can be done at idle time)
     memset( data->da, 0, data_area_size );
 
     //stat

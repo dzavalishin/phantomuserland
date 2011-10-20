@@ -267,8 +267,9 @@ int main(int argc, char **argv, char **envp)
 
     //vesa3_bootstrap();
 
+#ifdef ARCH_ia32
     SHOW_FLOW( 0, "ACPI: %d" , InitializeFullAcpi() );
-
+#endif
 
 #ifdef ARCH_ia32
 #if HAVE_VESA
@@ -499,10 +500,10 @@ void phantom_shutdown(int flags)
         dpc_finish();
     }
 
+#ifdef ARCH_ia32
     if(flags & SHUTDOWN_FLAG_REBOOT)
         acpi_reboot();
     else
-#ifdef ARCH_ia32
     {
         acpi_powerdown();
         ia32_intel_poweroff(); // if failed - try hack

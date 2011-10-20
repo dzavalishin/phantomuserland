@@ -15,6 +15,7 @@
 #define debug_level_info 10
 
 #include <kernel/init.h>
+#include <device.h>
 
 static u_int32_t		isa_read32(u_int32_t addr)                      { return *((u_int32_t*)(addr)); }
 static void			isa_write32(u_int32_t addr, u_int32_t value)    { *((u_int32_t*)(addr)) = value; }
@@ -44,4 +45,19 @@ void arch_init_early(void)
 
 void arch_threads_init()
 {
+}
+
+
+//! Stop interrupts, timer, seconary CPUs...
+void board_panic_stop_world(void)
+{
+    board_interrupts_disable_all();
+}
+
+
+
+//! Wait for a key press on default console - don't use interrupts, assume interrupts disabled
+void board_panic_wait_keypress(void)
+{
+    debug_console_getc();
 }
