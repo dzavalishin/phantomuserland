@@ -326,10 +326,12 @@ void    pvm_win_window_thread()
     drv_video_win32.bitblt = &drv_video_bitblt_forw;
     drv_video_win32.winblt = &drv_video_win_winblt;
     drv_video_win32.readblt = &drv_video_readblt_forw;
+    drv_video_win32.bitblt_part = &drv_video_bitblt_part_forw;
 #else
     drv_video_win32.bitblt = &drv_video_bitblt_rev;
     drv_video_win32.winblt = &drv_video_win_winblt_rev;
     drv_video_win32.readblt = &drv_video_readblt_rev;
+    drv_video_win32.bitblt_part = &drv_video_bitblt_part_rev;
 #endif
 
     drv_video_win32.redraw_mouse_cursor = &drv_video_draw_mouse_deflt;

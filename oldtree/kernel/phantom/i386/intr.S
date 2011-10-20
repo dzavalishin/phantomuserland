@@ -182,7 +182,7 @@ call_handler:
 
 
 
-#if HAVE_KOLIBRI
+#if 1 //HAVE_KOLIBRI
 
 	.data	2
 DATA(kolibri_entry_table)

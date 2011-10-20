@@ -294,14 +294,23 @@ void repaint_win_part( drv_video_window_t *w, rect_t *wtodo, rect_t *todo  )
     u_int32_t flags;
     win2blt_flags( &flags, w );
 
+    //assert(video_drv->bitblt_part);
+#warning assert(video_drv->bitblt_part)
+    if(0 == video_drv->bitblt_part)
+        video_drv->bitblt_part = drv_video_bitblt_part_rev;
+
+    mouse_disable_p(video_drv, todo->x, todo->y, todo->xsize, todo->ysize);
+
     // TODO wrong - use video driver's func pointer
-    drv_video_bitblt_part(
+    video_drv->bitblt_part(
                           w->pixel,
                           w->xsize, w->ysize,
                           wtodo->x, wtodo->y,
                           dst_xpos, dst_ypos,
                           wtodo->xsize, wtodo->ysize,
-                          1, w->z, flags);
+                          w->z, flags);
+
+    mouse_enable_p(video_drv, todo->x, todo->y, todo->xsize, todo->ysize);
 
 }
 

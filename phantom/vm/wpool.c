@@ -134,7 +134,7 @@ static void do_w_resize( window_t *w, int xsize, int ysize )
 
 static void do_w_blt( window_t *w )
 {
-    drv_video_bitblt( w->pixel, w->x, w->y, w->xsize, w->ysize, w->z);
+    drv_video_bitblt( w->pixel, w->x, w->y, w->xsize, w->ysize, w->z, 0 );
 }
 
 

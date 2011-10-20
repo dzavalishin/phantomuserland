@@ -28,6 +28,7 @@
 // void DumpVgaMode(void)
 #include "misc.h"
 
+#warning bitblt_part fix needed
 
 struct basic_VGA_Vmode basic_VGA_Mode;
 

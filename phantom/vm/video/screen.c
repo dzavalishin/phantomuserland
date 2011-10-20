@@ -17,6 +17,15 @@
 void drv_video_null() {}
 
 
+void drv_video_bitblt_part_forw(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags )
+{
+    drv_video_bitblt_part(from, src_xsize, src_ysize, src_xpos, src_ypos, dst_xpos, dst_ypos, xsize, ysize, 0, zpos, flags );
+}
+
+void drv_video_bitblt_part_rev(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags )
+{
+    drv_video_bitblt_part(from, src_xsize, src_ysize, src_xpos, src_ypos, dst_xpos, dst_ypos, xsize, ysize, 1, zpos, flags );
+}
 
 
 
