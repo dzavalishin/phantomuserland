@@ -23,8 +23,10 @@
 #  define HAVE_NET 1
 #  define HAVE_UNIX 1
 #  define HAVE_VESA 1
-#define HAVE_FLOPPY 1
-#define HAVE_AHCI 0
+
+#  define HAVE_FLOPPY 1
+#  define HAVE_AHCI 0
+#  define HAVE_KOLIBRI 1
 #else
 #  define HAVE_SMP 0
 #  define HAVE_NET 0
@@ -33,6 +35,7 @@
 
 #  define HAVE_FLOPPY 0
 #  define HAVE_AHCI 0
+#  define HAVE_KOLIBRI 0
 #endif
 
 #define MEM_RECLAIM 0

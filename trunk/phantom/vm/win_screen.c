@@ -47,6 +47,7 @@ struct drv_video_screen_t        drv_video_win32 =
 
 probe: (void *)drv_video_null,
 start: (void *)drv_video_null,
+accel: (void *)drv_video_null,
 stop:  (void *)drv_video_null,
 
     (void*)drv_video_null,

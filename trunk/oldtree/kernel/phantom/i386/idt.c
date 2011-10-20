@@ -73,8 +73,10 @@ extern u_int32_t int_entry_table[];
 /* defined in apic_idt.S */
 extern u_int32_t apic_entry_table[];
 
+#if HAVE_KOLIBRI
 /* defined in intr.S */
 extern u_int32_t kolibri_entry_table[];
+#endif // HAVE_KOLIBRI
 
 
 
@@ -109,10 +111,12 @@ void phantom_fill_idt(void)
     }
 
 
+#if HAVE_KOLIBRI
     fill_idt_gate( KOLIBRI_INT,
                    kolibri_entry_table[0], KERNEL_CS,
                    ACC_PL_U|ACC_INTR_GATE, 0);
                    //ACC_PL_K|ACC_INTR_GATE, 0);
+#endif // HAVE_KOLIBRI
 
 }
 

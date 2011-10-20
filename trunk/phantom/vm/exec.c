@@ -1039,7 +1039,7 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
     struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
 
     // TODO fix this back
-    //if( syscall_index >= da->class_sys_table_size )                        pvm_exec_panic("find_syscall: syscall_index no out of table size" );
+    //if( syscall_index >= pvm_internal_classes[da->sys_table_id].syscalls_table_size ) pvm_exec_panic("find_syscall: syscall_index no out of table size" );
 
     syscall_func_t *tab = pvm_internal_classes[da->sys_table_id].syscalls_table;
     return tab[syscall_index];
@@ -1053,12 +1053,12 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
 
 struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned int method_index )
 {
-	if( o.data == 0 )
-	{
-		pvm_exec_panic( "pvm_exec_find_method: null object!" );
-	}
+    if( o.data == 0 )
+    {
+        pvm_exec_panic( "pvm_exec_find_method: null object!" );
+    }
 
-	struct pvm_object_storage *iface = o.interface;
+    struct pvm_object_storage *iface = o.interface;
     if( iface == 0 )
     {
     	if( o.data->_class.data == 0 )

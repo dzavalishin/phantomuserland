@@ -8,6 +8,8 @@
  *
  **/
 
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "vmware"
 #include <debug_ext.h>
 #define debug_level_flow 8
@@ -1478,4 +1480,4 @@ void vmware_mouse_on_bp2(void)
     //SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_RESTORE_TO_FB);
 }
 
-
+#endif // ARCH_ia32

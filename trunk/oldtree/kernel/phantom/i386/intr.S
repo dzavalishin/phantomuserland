@@ -180,15 +180,14 @@ call_handler:
 
     //jmp	EXT(label)
 
+
+
+#if HAVE_KOLIBRI
+
 	.data	2
 DATA(kolibri_entry_table)
 	.text
 INTR_SYSCALL_ENTRY(kolibri_syscall_entry)
-
-
-
-
-
 
 
 
@@ -224,6 +223,7 @@ kolibri_syscall_entry:
     addl	$4*2,%esp	/* Pop trap number and error code */
     iret
 
+#endif // HAVE_KOLIBRI
 
 
 

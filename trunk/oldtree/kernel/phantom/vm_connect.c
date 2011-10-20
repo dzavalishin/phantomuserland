@@ -524,6 +524,8 @@ static errno_t run_cb( struct data_area_4_connection *da, pvm_object_t o )
         return ENOMEM;
     }
 
+    // TODO must add o to kernel referenced objects list?
+
     p->da = da;
     p->arg = o;
 

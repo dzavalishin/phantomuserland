@@ -8,6 +8,8 @@
  *
 **/
 
+#if HAVE_UNIX
+
 #define DEBUG_MSG_PREFIX "sig"
 #include <debug_ext.h>
 #define debug_level_flow 10
@@ -205,3 +207,4 @@ sighandler_t usys_signal( int *err, uuprocess_t *u, int signum, sighandler_t han
     return ret;
 }
 
+#endif // HAVE_UNIX

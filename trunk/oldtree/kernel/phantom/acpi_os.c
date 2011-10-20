@@ -9,6 +9,8 @@
  *
 **/
 
+#ifdef ARCH_ia32
+
 #define DEBUG_MSG_PREFIX "acpi"
 #include <debug_ext.h>
 #define debug_level_flow 8
@@ -1221,3 +1223,5 @@ AcpiOsExecute (
 }
 
 #endif /* ACPI_SINGLE_THREADED */
+
+#endif // ARCH_ia32
