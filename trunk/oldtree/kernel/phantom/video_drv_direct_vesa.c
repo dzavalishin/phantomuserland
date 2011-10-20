@@ -69,6 +69,7 @@ update:	drv_video_null,
 bitblt: (void *)drv_video_null,
 winblt: (void *)drv_video_null,
 readblt: (void *)drv_video_null,
+bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:  drv_video_null,
 redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,

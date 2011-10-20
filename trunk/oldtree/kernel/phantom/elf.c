@@ -106,7 +106,7 @@ errno_t uu_run_file( int pid, const char *fname )
     return ke;
 }
 
-#if def ARCH_ia32
+#ifdef ARCH_ia32
 
 #if HAVE_KOLIBRI
 

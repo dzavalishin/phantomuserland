@@ -117,6 +117,14 @@ static void phantom_select_video_driver()
         SHOW_FLOW( 1, "The best is %s video driver", selected_drv->name);
         video_drv = selected_drv;
     }
+
+    // fill in defaults
+
+    if( 0 == video_drv->update)  video_drv->update = (void *)drv_video_null;
+    if( 0 == video_drv->bitblt)  video_drv->bitblt = drv_video_bitblt_rev;
+    if( 0 == video_drv->winblt)  video_drv->winblt = drv_video_win_winblt_rev;
+    if( 0 == video_drv->readblt)	video_drv->readblt = drv_video_readblt_rev;
+    if( 0 == video_drv->bitblt_part)  video_drv->bitblt_part = drv_video_bitblt_part_rev;
 }
 
 static void select_accel_driver(void)

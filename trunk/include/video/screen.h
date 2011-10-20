@@ -61,7 +61,8 @@ struct drv_video_screen_t
 
     void 	(*update) (void);
 
-    void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos);
+    void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags);
+
 #if NEW_WINDOWS
     void 	(*winblt) ( window_handle_t from, rect_t src, int src_stride, int dest_xpos, int dest_ypos, zbuf_t zpos);
 #else
@@ -88,7 +89,7 @@ struct drv_video_screen_t
     // Screen rect clear
     void 	(*clear) (int xpos, int ypos, int xsize, int ysize );
 
-    void 	(*bitblt_part) (const rgba_t *from, int src_stride, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos);
+    void 	(*bitblt_part) (const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
 
 };
 
@@ -115,6 +116,10 @@ extern void drv_video_null(void);
 
 extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
 extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+
+void drv_video_bitblt_part_forw(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+void drv_video_bitblt_part_rev(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+
 
 #if !NEW_WINDOWS
 extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
@@ -178,16 +183,16 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 #define drv_video_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
 
 
-#define drv_video_bitblt(___from, xpos, ypos, xsize, ysize, zpos)  ( \
+#define drv_video_bitblt(___from, xpos, ypos, xsize, ysize, zpos, flg)  ( \
     mouse_disable_p(video_drv, xpos, ypos, xsize, ysize), \
-    video_drv->bitblt((___from), xpos, ypos, xsize, ysize, zpos), \
+    video_drv->bitblt((___from), xpos, ypos, xsize, ysize, zpos, flg), \
     mouse_enable_p(video_drv, xpos, ypos, xsize, ysize ) )
 
 
 
 // These are special for mouse pointer code - they're not try to disable mouse
 #define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
-#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, ZBUF_TOP)
+#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, ZBUF_TOP, 0)
 
 
 

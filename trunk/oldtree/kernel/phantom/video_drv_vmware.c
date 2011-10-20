@@ -90,6 +90,7 @@ update: 		vmware_video_update,
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
 readblt: 		drv_video_readblt_rev,
+bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:    		drv_video_null,
 

@@ -327,6 +327,8 @@ void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int
             else         	bit_zbmover_to_screen( (void *)s_start, w_start, zb, xsize, zpos );
         }
     }
+
+    drv_video_update();
 }
 
 
