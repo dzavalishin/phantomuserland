@@ -46,6 +46,8 @@
 
 #include "../svn_version.h"
 
+#define REPAINT_TIMEOUT_MS 5
+
 
 static void kolibri_reload_window_alpha(struct kolibri_process_state *ks);
 
@@ -852,7 +854,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
                 ks->win = drv_video_window_create(
                                                   xsize, ysize,
-                                                  xpos, ypos, fill, "Kolibri" );
+                                                  xpos, ypos, fill, "Kolibri", WFLAG_WIN_DECORATED );
 
                 if(!ks->win)
                     break;
@@ -888,7 +890,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             color_t c = i2color(st->edx); // TODO inverse
 
             drv_video_window_pixel( ks->win, x, y, c );
-            request_update_timer( ks, 50 );
+            request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
 
@@ -969,7 +971,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             }
 
             drv_video_font_draw_string( ks->win, font, str, textc, bgc, xpos, ypos );
-            request_update_timer( ks, 50 );
+            request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
 
@@ -1075,7 +1077,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                           ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
                           src, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
 #endif
-            request_update_timer( ks, 50 );
+            request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
 
@@ -1147,7 +1149,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             }
 
             pool_release_el( ks->buttons, bh );
-            request_update_timer( ks, 50 );
+            request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
 
@@ -1255,7 +1257,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             color_t c = i2color( st->edx );
 
             drv_video_window_draw_box( ks->win, xpos, ypos, xsize, ysize, c );
-            request_update_timer( ks, 50 );
+            request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
 
@@ -1428,7 +1430,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             color_t c = i2color( st->edx );
 
             drv_video_window_draw_line( ks->win, xpos, ypos, xend, yend, c );
-            request_update_timer( ks, 50 );
+            request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
 
@@ -1524,7 +1526,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             // TODO clear bg
             drv_video_font_draw_string( ks->win, font, p, fg, bg, xpos, ypos );
-            request_update_timer( ks, 50 );
+            request_update_timer( ks, REPAINT_TIMEOUT_MS );
 
         }
         break;

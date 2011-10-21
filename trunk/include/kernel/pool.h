@@ -47,6 +47,8 @@
 #include <errno.h>
 #include <phantom_types.h>
 
+#define INVALID_POOL_HANDLE -1
+
 /**
  * \ingroup Containers
  * @{

@@ -152,6 +152,10 @@ void event_q_put_e( ui_event_t *in );
 //void event_q_put_global( int x, int y, int info );
 void event_q_put_global( ui_event_t *e );
 
+//! Put any type of event onto the main e q - BE CAREFUL
+//! NB - not forget to set focus!
+void event_q_put_any( ui_event_t *ie );
+
 
 
 //! Get next event for this window

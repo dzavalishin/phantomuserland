@@ -211,6 +211,9 @@ int rect_dump( rect_t *a )
 
 void _drv_video_winblt_locked( drv_video_window_t *from )
 {
+    if( (from->state & WSTATE_WIN_ROLLEDUP) || !(from->state & WSTATE_WIN_VISIBLE) )
+        return;
+
     mouse_disable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
     video_drv->winblt(from, from->x, from->y, from->z);
     mouse_enable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
@@ -226,9 +229,11 @@ void _drv_video_winblt( drv_video_window_t *from )
 
 void drv_video_winblt_locked( drv_video_window_t *from )
 {
-    mouse_disable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
-    video_drv->winblt(from, from->x, from->y, from->z);
-    mouse_enable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
+    _drv_video_winblt_locked( from );
+
+    //mouse_disable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
+    //video_drv->winblt(from, from->x, from->y, from->z);
+    //mouse_enable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
 }
 
 void drv_video_winblt( drv_video_window_t *from )

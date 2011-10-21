@@ -25,7 +25,7 @@
 #include <video/window.h>
 #include <video/bitmap.h>
 #include <video/button.h>
-//#include <video/vops.h>
+#include <video/font.h>
 
 // negative magic produces negative handles
 //#define BUTTONS_POOL_MAGIC ('b' << 24 | 0xFFEEAA)
@@ -62,6 +62,15 @@ static void paint_button(window_handle_t win, button_t *cb )
     {
         if( cb->mouse_in_bits & 1 )
             drv_video_window_draw_rect( win, COLOR_WHITE, cb->r );
+    }
+
+    if(cb->text)
+    {
+        int t_height = 16;
+        int t_ypos = (cb->r.ysize - t_height) / 2;
+
+        drv_video_font_draw_string( win, &drv_video_8x16san_font, cb->text, cb->text_color,
+                                           COLOR_TRANSPARENT, cb->r.x+t_ypos+2, cb->r.y+t_ypos ); // +2?
     }
 
     //drv_video_window_update( win );
@@ -172,8 +181,9 @@ static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, voi
             e.type = UI_EVENT_TYPE_WIN;
             e.w.info = UI_EVENT_WIN_BUTTON;
             e.extra = cb->id;
+            e.focus = env->w;
 
-            event_q_put_win( e.rel_x, e.rel_y, UI_EVENT_WIN_BUTTON, env->w );
+            event_q_put_any( &e );
         }
     }
 
@@ -275,7 +285,7 @@ void w_check_button( window_handle_t w, ui_event_t *e )
 }
 
 
-void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags )
+pool_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags )
 {
     // TODO take some mutex
     if(w->buttons == 0)
@@ -285,7 +295,7 @@ void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *
     if( bh < 0 )
     {
         //SHOW_ERROR0( 0, "out of buttons" );
-        return;
+        return INVALID_POOL_HANDLE;
     }
 
     button_t *cb = pool_get_el( w->buttons, bh );
@@ -293,7 +303,7 @@ void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *
     if( !cb )
     {
         //SHOW_ERROR0( 0, "can't get just created button??" );
-        return;
+        return INVALID_POOL_HANDLE;
     }
 
     cb->id = id;
@@ -313,6 +323,8 @@ void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *
     paint_button( w, cb );
 
     pool_release_el( w->buttons, bh );
+
+    return bh;
 }
 
 void w_delete_button( window_handle_t w, int id )
@@ -326,6 +338,29 @@ void w_delete_button( window_handle_t w, int id )
 }
 
 
+
+
+void w_button_set_text( window_handle_t w, pool_handle_t bh, const char *text, color_t text_color )
+{
+    if(w->buttons == 0)        return;
+    assert( w->buttons->magic == BUTTONS_POOL_MAGIC );
+    button_t *cb = pool_get_el( w->buttons, bh );
+
+    if( !cb )
+    {
+        SHOW_ERROR0( 0, "can't get just button" );
+        return;
+    }
+
+    const char *old = cb->text;
+    cb->text = strdup(text);
+    if( old ) free(old);
+
+    cb->text_color = text_color;
+    paint_button( w, cb );
+
+    pool_release_el( w->buttons, bh );
+}
 
 
 

@@ -473,6 +473,8 @@ void phantom_shutdown(int flags)
             hal_sleep_msec(1000);
     }
 
+    SHOW_FLOW0( 0, "shutdown now" );
+
     t_migrate_to_boot_CPU(); // Make sure other CPUs are stopped
 
     phantom_finish_all_threads();

@@ -178,7 +178,7 @@ static void fb_init_window()
     w = 0;
 
     w = drv_video_window_create( wbox.xsize, wbox.ysize,
-                        wbox.x, wbox.y, COLOR_BLACK, "FrameBuf" );
+                        wbox.x, wbox.y, COLOR_BLACK, "FrameBuf", WFLAG_WIN_DECORATED );
 
     if( 0 == w )
         return;

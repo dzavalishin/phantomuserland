@@ -118,7 +118,8 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
 static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
-	//printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
+    //drv_video_window_t *mainw = w->w_owner ? drv_video_window_t *w : w;
+    //printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
     switch(e->w.info)
     {
     case UI_EVENT_WIN_GOT_FOCUS:
@@ -147,8 +148,8 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         }
         break;
 
-    case UI_EVENT_WIN_BUTTON: printf("button %d\n", e->extra );
-        break;
+    case UI_EVENT_WIN_BUTTON: printf("main w button %x\n", e->extra );
+    break;
 
     default:
         return 0;

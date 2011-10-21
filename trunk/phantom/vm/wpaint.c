@@ -23,16 +23,17 @@ static void paint_thread(void *arg);
 static void start_paint_thread(void);
 
 // max 0.2 sec without paint
-#define MAX_NO_PAINT 1900
+//#define MAX_NO_PAINT 1900
+#define MAX_NO_PAINT 200
 
 static int paint_tid = -1;
 
-static int paint_request = 0;
-static int paint_all = 0;
+static volatile int paint_request = 0;
+static volatile int paint_all = 0;
 static hal_sem_t paint_sem;
 
-static int prev_paint_request = 0;
-static int no_paint_msec = 0;
+static volatile int prev_paint_request = 0;
+static volatile int no_paint_msec = 0;
 static rect_t total;
 
 #define CHECK_START() ({ if(paint_tid < 0) start_paint_thread(); })
@@ -109,12 +110,14 @@ static void paint_thread(void *arg)
 
         if( prev_paint_request < paint_request )
         {
+#if 0
             if( no_paint_msec < MAX_NO_PAINT )
             {
                 prev_paint_request = paint_request;
                 no_paint_msec += 10;
                 continue;
             }
+#endif
         }
 
         prev_paint_request = paint_request = 0;

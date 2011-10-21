@@ -323,7 +323,7 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
     tty->fg = COLOR_BLACK;
     tty->bg = COLOR_WHITE;
 
-    drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE );
+    drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE, WFLAG_WIN_DECORATED );
     strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
     tty->w.title = tty->title;
 

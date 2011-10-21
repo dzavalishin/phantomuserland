@@ -148,6 +148,7 @@ drv_video_window_t *private_drv_video_window_create(int xsize, int ysize)
         return 0;
 
     common_window_init( w, xsize, ysize );
+    w->flags |= WFLAG_WIN_DECORATED;
     return w;
 }
 
@@ -157,11 +158,12 @@ drv_video_window_t *
 drv_video_window_create(
                         int xsize, int ysize,
                         int x, int y,
-                        rgba_t bg, const char *title )
+                        rgba_t bg, const char *title, int flags )
 {
     drv_video_window_t *w = private_drv_video_window_create(xsize, ysize);
-    drv_video_window_init( w, xsize, ysize, x, y, bg );
-    w->title = title;
+    drv_video_window_init( w, xsize, ysize, x, y, bg, flags );
+    //w->flags = flags;
+    w->title = title; // TODO pass title to _init
     // Repaint title
     event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
     return w;
@@ -174,11 +176,13 @@ void
 drv_video_window_init( drv_video_window_t *w,
                         int xsize, int ysize,
                         int x, int y,
-                        rgba_t bg )
+                        rgba_t bg, int flags )
 {
+    bzero(w, sizeof(*w));
     common_window_init( w, xsize, ysize );
 
-    w->flags = WFLAG_WIN_DECORATED;
+    //w->flags |= WFLAG_WIN_DECORATED;
+    w->flags = flags;
 
     w->x = x;
     w->y = y;
@@ -226,6 +230,9 @@ void drv_video_window_destroy(drv_video_window_t *w)
     if(w->buttons)
         destroy_buttons_pool(w->buttons);
 
+#if 1
+    request_repaint_all_for_win( w );
+#else
     {
     video_zbuf_reset_win( w );
     rect_t wsize;
@@ -238,7 +245,7 @@ void drv_video_window_destroy(drv_video_window_t *w)
 
     event_q_put_global( &e );
     }
-
+#endif
 
     // drain event queue
     if( w->events_count > 0 )
@@ -288,6 +295,9 @@ void drv_video_window_repaint_all(void)
 // todo in screen coordinates, wtodo in win
 void repaint_win_part( drv_video_window_t *w, rect_t *wtodo, rect_t *todo  )
 {
+    if( (w->state & WSTATE_WIN_ROLLEDUP) || (!(w->state & WSTATE_WIN_VISIBLE)) )
+        return;
+
     int dst_xpos = wtodo->x + w->x; // todo->x
     int dst_ypos = wtodo->y + w->y; // todo->y
 
@@ -347,6 +357,26 @@ void repaint_all_for_square( rect_t *todo )
     w_unlock();
 }
 
+void request_repaint_all_for_square( rect_t *todo )
+{
+    ui_event_t e;
+
+    e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
+    e.w.rect = *todo;
+
+    event_q_put_global( &e );
+}
+
+
+void request_repaint_all_for_win( drv_video_window_t *w )
+{
+    video_zbuf_reset_win( w );
+
+    rect_t wsize;
+
+    drv_video_window_get_bounds( w, &wsize );
+    request_repaint_all_for_square( &wsize );
+}
 
 
 
@@ -599,13 +629,17 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
     //int ox = w->x;
     //int oy = w->x;
 
-    video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
 #if !VIDEO_T_IN_D
     if( w->w_title )
         video_zbuf_reset_square( w->w_title->x, w->w_title->y, w->w_title->xsize, w->w_title->ysize );
 #endif
-    if( w->w_decor )
-        video_zbuf_reset_square( w->w_decor->x, w->w_decor->y, w->w_decor->xsize, w->w_decor->ysize );
+    if( !(w->state & WSTATE_WIN_ROLLEDUP) )
+    {
+        video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+
+        if( w->w_decor )
+            video_zbuf_reset_square( w->w_decor->x, w->w_decor->y, w->w_decor->xsize, w->w_decor->ysize );
+    }
 
     w->x = x;
     w->y = y;
@@ -616,15 +650,18 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
 
 
 
-    event_q_put_global( &e1 );
-
 #if !VIDEO_T_IN_D
     if( w->w_title )
         event_q_put_global( &e2 );
 #endif
 
-    if( w->w_decor )
-        event_q_put_global( &e3 );
+    if( !(w->state & WSTATE_WIN_ROLLEDUP) )
+    {
+        event_q_put_global( &e1 );
+
+        if( w->w_decor )
+            event_q_put_global( &e3 );
+    }
 
 #else
     drv_video_window_repaint_all();
@@ -748,7 +785,34 @@ void drv_video_window_to_top(drv_video_window_t *w)
     w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
 
     queue_remove(&allwindows, w, drv_video_window_t *, chain);
+#if 0
     queue_enter(&allwindows, w, drv_video_window_t *, chain);
+#else
+    if( (w->flags & WFLAG_WIN_ONTOP) || (queue_empty(&allwindows)) )
+    {
+        // Trivial case - our window has 'ontop' flag too and can be topmost, or queue is empty
+        queue_enter(&allwindows, w, drv_video_window_t *, chain);
+    }
+    else
+    {
+        // Our window has no 'ontop' flag and must go under topmost ones and queue is not empty
+        drv_video_window_t *iw;
+        queue_iterate_back(&allwindows, iw, drv_video_window_t *, chain)
+        {
+            if( ! (iw->flags & WFLAG_WIN_ONTOP) )
+            {
+                // Found window with no WFLAG_WIN_ONTOP flag - come on top of it
+                queue_enter_after(&allwindows, iw, w, drv_video_window_t *, chain);
+                goto inserted;
+            }
+        }
+
+        // must go to most bottom pos?? near to unreal...
+        SHOW_ERROR0( 0, "insert at bottom");
+        queue_enter_first(&allwindows, w, drv_video_window_t *, chain);
+    }
+inserted:
+#endif
     drv_video_window_rezorder_all();
 
     w_unlock();
@@ -769,8 +833,8 @@ void phantom_dump_windows_buf(char *bp, int len)
         int pn = snprintf( bp, len, "%s%3dx%3d @%3dx%3d z %2d fl%b st%b %s%.10s\x1b[37m\n",
                            (w->state & WSTATE_WIN_FOCUSED) ? "\x1b[32m" : "",
                            w->xsize, w->ysize, w->x, w->y, w->z,
-                           w->flags, "\020\1Decor\2NotInAll\3NoFocus\4NoPixels",
-                           w->state, "\020\1Focused\2Dragged\3Visible",
+                           w->flags, "\020\01Decor\02!InAll\03NoFocus\04!Pixels\05!Opaq\06OnTop",
+                           w->state, "\020\01Focused\02Dragged\03Visible\04Rolled\010Uncov\011InFB",
                            (w->stall ? "STALL " : ""),
                            //w->events_count, w->owner,
                            (w->title ? w->title : "??")

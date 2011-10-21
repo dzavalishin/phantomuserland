@@ -31,6 +31,9 @@ void 	drv_video_window_repaint_all(void);
 void    repaint_all_for_square( rect_t *todo );
 void    w_request_async_repaint( rect_t *r );
 
+void    request_repaint_all_for_square( rect_t *todo );
+void    request_repaint_all_for_win( struct drv_video_window *w );
+
 
 // -----------------------------------------------------------------------
 // Default mouse implementation to be used by video drivers if no
