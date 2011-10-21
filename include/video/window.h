@@ -40,15 +40,24 @@ typedef struct drv_video_window * window_handle_t;
 #define WFLAG_WIN_NOPIXELS              (1<<3)
 // Can not treat all pixels alpha as 0xFF
 #define WFLAG_WIN_NOTOPAQUE             (1<<4)
+// Must be on top of all others
+#define WFLAG_WIN_ONTOP                 (1<<5)
 
 
 #define WSTATE_WIN_FOCUSED              (1<<0)
 #define WSTATE_WIN_DRAGGED              (1<<1)
 #define WSTATE_WIN_VISIBLE              (1<<2)
+#define WSTATE_WIN_ROLLEDUP             (1<<3)
+
 // No one is above
-#define WSTATE_WIN_UNCOVERED            (1<<3)
+#define WSTATE_WIN_UNCOVERED            (1<<8)
 // Pixels live in graphics device's framebuf - can use hw blitter
-#define WSTATE_WIN_INFB                 (1<<4)
+#define WSTATE_WIN_INFB                 (1<<9)
+
+#define WBUTTON_SYS(id) (0xFFFF|((id)<<16))
+
+#define WBUTTON_SYS_ROLLUP 				WBUTTON_SYS(0)
+#define WBUTTON_SYS_CLOSE 				WBUTTON_SYS(1)
 
 // -----------------------------------------------------------------------
 // New windows (in work)
@@ -190,12 +199,12 @@ static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (s
 
 
 // dynamic allocation
-drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg, const char* title );
+drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, rgba_t bg, const char* title, int flags );
 // free dynamically allocated window
 void 	drv_video_window_free(drv_video_window_t *w);
 
 // init for statically allocated ones
-void 	drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg );
+void 	drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg, int flags );
 // destroy for statically allocated ones
 void 	drv_video_window_destroy(drv_video_window_t *w);
 

@@ -307,6 +307,14 @@ static bool pool_el_exist( pool_t *pool, pool_handle_t handle )
     return a->refc[ne] > 0;
 }
 
+static errno_t do_dec_refcnt( pool_t *pool, pool_arena_t *a, int ne )
+{
+    a->refc[ne]--;
+    if( (pool->flag_autodestroy) && (a->refc[ne] == 0) )
+        return do_destroy_el( pool, a, ne );
+    return 0;
+}
+
 
 errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
 {
@@ -331,9 +339,13 @@ errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
             goto finish;
         }
 
+    ret = do_dec_refcnt( pool, a, ne );
+
+    /*
     a->refc[ne]--;
     if( (pool->flag_autodestroy) && (a->refc[ne] == 0) )
         ret = do_destroy_el( pool, a, ne );
+    */
 
 finish:
     hal_mutex_unlock( &pool->mutex );
@@ -513,9 +525,15 @@ static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *
         {
             if( (as[i].ptrs[j] != 0) && (as[i].refc[j] != 0) )
             {
+                // inc refcnt as long as we give out pointer
+                // TODO need unit test
+                as[i].refc[j]++;
                 hal_mutex_unlock( &pool->mutex );
                 ret = ff( pool, as[i].ptrs[j], MK_HANDLE(pool,i,j), arg );
                 hal_mutex_lock( &pool->mutex );
+                //as[i].refc[j]--;
+                // dec and, possibly, delete object
+                ret = do_dec_refcnt( pool, as+i, j );
 
                 if( ret )
                     return ret;

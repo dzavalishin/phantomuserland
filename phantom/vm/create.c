@@ -776,7 +776,7 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
     da->x = 0;
     da->y = 0;
 
-    drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg );
+    drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED );
 
 
     {

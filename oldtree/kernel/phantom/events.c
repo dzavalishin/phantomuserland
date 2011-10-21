@@ -59,7 +59,7 @@ static void push_event( struct ui_event *e );
 //static int phantom_window_getc(void);
 
 
-static int                      event_engine_active = 0;
+static int                     event_engine_active = 0;
 
 static hal_mutex_t             main_q_mutex;
 static hal_mutex_t             unused_q_mutex;
@@ -451,6 +451,19 @@ void event_q_put_global( ui_event_t *ie )
     put_event(e);
 }
 
+
+
+void event_q_put_any( ui_event_t *ie )
+{
+    if(!event_engine_active) return; // Just ignore
+
+    struct ui_event *e = get_unused();
+
+    *e = *ie;
+    e->time = fast_time();
+
+    put_event(e);
+}
 
 
 

@@ -13,7 +13,7 @@
 void videotest(void)
 {
 
-    drv_video_window_t *w = drv_video_window_create( WXS, WYS, 400, 400, COLOR_BLACK, "Test Window" );
+    drv_video_window_t *w = drv_video_window_create( WXS, WYS, 400, 400, COLOR_BLACK, "Test Window", WFLAG_WIN_DECORATED );
 
     _drv_video_winblt( w );
     drv_win_screen_update();

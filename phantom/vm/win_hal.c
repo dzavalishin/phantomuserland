@@ -324,6 +324,8 @@ return;
 
 void event_q_put_global( ui_event_t *e ) {}
 
+void event_q_put_any( ui_event_t *e ) {}
+
 
 void event_q_put_win( int x, int y, int info, struct drv_video_window *   focus )
 {

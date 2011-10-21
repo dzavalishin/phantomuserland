@@ -36,14 +36,20 @@ typedef struct
     drv_video_bitmap_t *bmp;
     drv_video_bitmap_t *bmp_pressed; // can be 0
 
+    const char *text;
+    color_t     text_color;
+
 } button_t;
 
 
 pool_t *create_buttons_pool(void);
 void destroy_buttons_pool(pool_t *buttons);
 
-void w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags );
+pool_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags );
 void w_delete_button( window_handle_t w, int id );
+
+void w_button_set_text( window_handle_t w, pool_handle_t bh, const char *text, color_t text_color );
+
 
 void w_paint_changed_buttons(window_handle_t w);
 void w_repaint_buttons(window_handle_t w);

@@ -146,6 +146,8 @@ static int titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e 
 
 void win_make_decorations(drv_video_window_t *w)
 {
+    if(!(w->flags & WFLAG_WIN_DECORATED) ) return;
+
     w_assert_lock();
 
     int zless = (w->z == 0) ? 0 : (w->z - 1);
@@ -201,9 +203,10 @@ void win_make_decorations(drv_video_window_t *w)
         int bwidth = close_bmp.xsize;
         int bxp = w->w_title->xsize - bwidth - 5;
         // close button with id=1
-        w_add_button( w->w_title, 1, bxp, 5, &close_bmp, &close_pressed_bmp, 0 );
+        w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 5, &close_bmp, &close_pressed_bmp, 0 );
         bxp -= bwidth + 2;
-        w_add_button( w->w_title, 1, bxp, 5, &rollup_bmp, &rollup_pressed_bmp, 0 );
+        // roll up button
+        w_add_button( w->w_title, WBUTTON_SYS_ROLLUP, bxp, 5, &rollup_bmp, &rollup_pressed_bmp, 0 );
     }
 
     w->w_title->x = w->x-bordr_size;
@@ -231,7 +234,8 @@ void win_make_decorations(drv_video_window_t *w)
     //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
     //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
 
-    _drv_video_winblt_locked(w->w_title);
+    if( w->state & WSTATE_WIN_VISIBLE )
+        _drv_video_winblt_locked(w->w_title);
     //drv_video_window_free(w3);
 #else
     w->w_decor->inKernelEventProcess = titleWindowEventProcessor;
@@ -273,17 +277,13 @@ void win_make_decorations(drv_video_window_t *w)
 
 
     window_basic_border( w->w_decor, brdr, bordr_size );
-    _drv_video_winblt_locked(w->w_decor);
 
-
-
-
+    if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
+        _drv_video_winblt_locked(w->w_decor);
 
 
     // replace setting pos here with
     //win_move_decorations(w);
-
-
 
 }
 
@@ -291,11 +291,15 @@ void win_make_decorations(drv_video_window_t *w)
 
 void win_draw_decorations(drv_video_window_t *w)
 {
+    if(!(w->flags & WFLAG_WIN_DECORATED) ) return;
+
     w_assert_lock();
 #if !VIDEO_T_IN_D
-    _drv_video_winblt_locked(w->w_title);
+    if( w->state & WSTATE_WIN_VISIBLE )
+        _drv_video_winblt_locked(w->w_title);
 #endif
-    _drv_video_winblt_locked(w->w_decor);
+    if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
+        _drv_video_winblt_locked(w->w_decor);
 }
 
 
@@ -303,6 +307,8 @@ void win_draw_decorations(drv_video_window_t *w)
 
 void win_move_decorations(drv_video_window_t *w)
 {
+    if(!(w->flags & WFLAG_WIN_DECORATED) ) return;
+
     w_assert_lock();
 
     int zless = (w->z == 0) ? 0 : (w->z - 1);
@@ -333,6 +339,7 @@ void win_move_decorations(drv_video_window_t *w)
 static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
     assert(w->w_owner);
+    drv_video_window_t *mainw = w->w_owner;
 
     //printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
 
@@ -367,6 +374,31 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
             w_unlock();
         }
         break;
+
+    case UI_EVENT_WIN_BUTTON: printf("title button %x\n", e->extra );
+    {
+        switch(e->extra)
+        {
+        case WBUTTON_SYS_ROLLUP:
+            if( mainw->state & WSTATE_WIN_ROLLEDUP )
+            {
+                printf("roll down\n" );
+                mainw->state &= ~WSTATE_WIN_ROLLEDUP;
+                goto redecorate;
+            }
+            else
+            {
+                printf("roll up\n" );
+                mainw->state |= WSTATE_WIN_ROLLEDUP;
+                if( mainw->w_decor )
+                    request_repaint_all_for_win( mainw->w_decor );
+                else
+                    request_repaint_all_for_win( mainw );
+            }
+            break;
+        }
+    }
+    break;
 
     default:
         return 0;

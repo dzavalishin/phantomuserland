@@ -995,7 +995,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
 
     if(back_win == 0)
-    	back_win = drv_video_window_create( get_screen_xsize(), get_screen_ysize(), 0, 0, COLOR_BLACK, "Background" );
+    	back_win = drv_video_window_create( get_screen_xsize(), get_screen_ysize(), 0, 0, COLOR_BLACK, "Background", WFLAG_WIN_DECORATED );
 
     back_win->flags &= ~WFLAG_WIN_DECORATED;
     back_win->flags |= WFLAG_WIN_NOFOCUS;

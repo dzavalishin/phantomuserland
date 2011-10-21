@@ -31,6 +31,7 @@
 #include <video/window.h>
 #include <video/font.h>
 #include <video/screen.h>
+#include <video/button.h>
 
 #include "console.h"
 #include "misc.h"
@@ -40,6 +41,7 @@
 #include <kernel/debug.h>
 #include <kernel/stats.h>
 #include <kernel/profile.h>
+#include <kernel/init.h>
 
 #if NET_TIMED_FLUSH
 #include <kernel/net_timer.h>
@@ -61,6 +63,10 @@ window_handle_t phantom_debug_window = 0;
 drv_video_window_t *phantom_console_window = 0;
 drv_video_window_t *phantom_debug_window = 0;
 #endif
+
+static window_handle_t phantom_launcher_window = 0;
+static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e);
+
 
 static rgba_t console_fg;
 static rgba_t console_bg;
@@ -237,8 +243,14 @@ static struct console_ops win_ops =
 #define DEBWIN_XS 400
 #define DEBWIN_YS 500
 
+//#define MAX_LAUNCH_BUTTONS 64
+#define MAX_LAUNCH_BUTTONS 6
+
+static pool_handle_t taskbuttons[MAX_LAUNCH_BUTTONS];
 
 static void phantom_debug_window_loop();
+//static void phantom_launcher_window_loop();
+
 
 void phantom_init_console_window()
 {
@@ -256,7 +268,7 @@ void phantom_init_console_window()
 
     drv_video_window_t *w = drv_video_window_create(
                         xsize, ysize,
-                        cw_x, cw_y, console_bg, "Console" );
+                        cw_x, cw_y, console_bg, "Console", WFLAG_WIN_DECORATED );
 
     phantom_console_window = w;
 
@@ -268,13 +280,62 @@ void phantom_init_console_window()
 
     phantom_debug_window = drv_video_window_create(
                         DEBWIN_XS, DEBWIN_YS,
-                        DEBWIN_X, DEBWIN_Y, console_bg, "Threads" );
+                        DEBWIN_X, DEBWIN_Y, console_bg, "Threads", WFLAG_WIN_DECORATED );
 
     phantom_debug_window_puts("Phantom debug window\n\nt - threads\nw - windows\ns - stats\n");
     drv_video_window_update( phantom_debug_window );
     //hal_sleep_msec(4000);
 
     hal_start_kernel_thread(phantom_debug_window_loop);
+
+
+    // -------------------------------------------------------------------
+    // Launcher window
+    // -------------------------------------------------------------------
+
+    color_t la_bg = { 0x19, 0x19, 0x19, 0xFF };
+    color_t la_b1 = { 68, 66, 62, 0xFF  };
+    color_t la_b2 = { 88, 84, 79, 0xFF  };
+
+    color_t la_txt = { 0x11, 0xd5, 0xff, 0xFF };
+//#define BTEXT_COLOR COLOR_YELLOW
+#define BTEXT_COLOR la_txt
+
+    phantom_launcher_window = drv_video_window_create( get_screen_xsize(), 32,
+                                                       0, 0, console_bg, "Launcher", WFLAG_WIN_ONTOP );
+
+    phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
+    drv_video_window_fill( phantom_launcher_window, la_bg );
+
+    int lb_x = get_screen_xsize();
+
+    lb_x -= power_button_sm_bmp.xsize + 5;
+    w_add_button( phantom_launcher_window, -1, lb_x, 2, &power_button_sm_bmp, &power_button_pressed_sm_bmp, BUTTON_FLAG_NOBORDER );
+
+    pool_handle_t bh;
+
+
+    lb_x = 5;
+
+    int nwin = 0;
+    for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )
+    {
+        bh = w_add_button( phantom_launcher_window, nwin, lb_x, 5, &task_button_bmp, &task_button_bmp, BUTTON_FLAG_NOBORDER );
+        w_button_set_text( phantom_launcher_window, bh, "win1", BTEXT_COLOR );
+        lb_x += 5+task_button_bmp.xsize;
+
+        taskbuttons[nwin] = bh;
+    }
+
+
+
+    drv_video_window_draw_line( phantom_launcher_window, 0, 31, get_screen_xsize(), 31, la_b1 );
+    drv_video_window_draw_line( phantom_launcher_window, 0, 30, get_screen_xsize(), 30, la_b2 );
+
+
+    drv_video_window_update( phantom_launcher_window );
+
+    //hal_start_kernel_thread(phantom_launcher_window_loop);
 }
 
 
@@ -421,5 +482,51 @@ static void phantom_debug_window_loop()
 
     }
 }
+
+/*
+static void phantom_launcher_window_loop()
+{
+    hal_set_thread_name("Debug Win");
+    // Which thread will receive typein for this window
+    phantom_launcher_window->owner = get_current_tid();
+
+    // Need separate ctty
+    t_set_ctty( get_current_tid(), wtty_init() );
+
+    phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
+
+
+}
+*/
+
+
+static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
+{
+
+    switch(e->w.info)
+    {
+    default:
+        return defaultWindowEventProcessor( w, e );
+
+    case UI_EVENT_WIN_BUTTON:
+        printf("launcher button %x\n", e->extra );
+        {
+            switch(e->extra)
+            {
+            case -1:
+                phantom_shutdown(0);
+                break;
+            }
+        }
+    break;
+
+
+    }
+
+    return 1;
+}
+
+
+
 
 
