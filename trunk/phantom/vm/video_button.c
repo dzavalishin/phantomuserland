@@ -354,7 +354,7 @@ void w_button_set_text( window_handle_t w, pool_handle_t bh, const char *text, c
 
     const char *old = cb->text;
     cb->text = strdup(text);
-    if( old ) free(old);
+    if( old ) free((void *)old);
 
     cb->text_color = text_color;
     paint_button( w, cb );

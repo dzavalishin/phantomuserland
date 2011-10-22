@@ -63,7 +63,7 @@ static pci_table_t cir_devices[] =
 };
 
 static pci_table_t *cir_device = 0;
-static int memsize = 0;
+static unsigned int memsize = 0;
 
 
 /*
@@ -357,7 +357,7 @@ static void cirrus_dump_cursol_palette(void)
 
 static void cirrus_set_mouse_cursor( drv_video_bitmap_t *cursor )
 {
-    u_int8_t *src = video_drv->screen + memsize - 16 * 1024;
+    u_int8_t *src = (unsigned)video_drv->screen + memsize - 16 * 1024;
     SHOW_FLOW( 0, "vram %p, src %p", video_drv->screen, src );
 
     // optimal value is 48, it takes exact 4Kb from vram
