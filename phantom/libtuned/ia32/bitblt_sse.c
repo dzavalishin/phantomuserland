@@ -18,6 +18,7 @@
 #include <video/color.h>
 #include <video/zbuf.h>
 #include <video/screen.h>
+#include <video/vops.h>
 
 
 typedef int32_t int32x2 __attribute__((vector_size(8)));

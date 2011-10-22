@@ -26,5 +26,6 @@ void sig_exec( struct uuprocess *u, signal_handling_t *sh, struct trap_state *st
 //! Translate signals to user
 void execute_signals( struct uuprocess *u, struct trap_state *st);
 
+void sig_send_to_current(int signal);
 
 #endif // UUSIGNAL_H

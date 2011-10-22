@@ -371,7 +371,7 @@ static errno_t	   dev_listproperties( struct uufile *f, int nProperty, char *buf
     return dev->dops.listproperties( dev, nProperty, buf, buflen );
 }
 
-static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *buf, size_t buflen )
+static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *pValue, size_t vlen )
 {
     if(f->flags & UU_FILE_FLAG_DIR)
         return ENOSYS;
@@ -379,8 +379,8 @@ static errno_t	   dev_getproperty( struct uufile *f, const char *pName, char *bu
     phantom_device_t* dev = f->impl;
     if(dev == 0) return ENOTTY;
     if(dev->dops.getproperty == 0) 
-        return gen_dev_getproperty( dev, pName, buf, buflen );
-    return dev->dops.getproperty( dev, pName, buf, buflen );
+        return gen_dev_getproperty( dev, pName, pValue, vlen );
+    return dev->dops.getproperty( dev, pName, pValue, vlen );
 }
 
 

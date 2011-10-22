@@ -139,6 +139,7 @@ errno_t uu_run_binary( int pid, void *_elf, size_t elf_size );
 
 uuprocess_t * 	proc_by_pid(int pid);
 
+void destroy_kolibri_state(uuprocess_t *u);
 
 #endif // UUPROCESS_H
 
