@@ -104,7 +104,7 @@ int trap2signo( struct trap_state *ts )
 
 int handle_swi(struct trap_state *ts)
 {
-    printf("r0=%d, r1=%d, r2=%d, R3=%d, r12=%d\n", ts->r0, ts->r1, ts->r2, ts->r3, ts->r12 );
+    //printf("r0=%d, r1=%d, r2=%d, R3=%d, r12=%d\n", ts->r0, ts->r1, ts->r2, ts->r3, ts->r12 );
 
     int swino = ts->intno & 0xFFFFFF;
 
@@ -119,13 +119,15 @@ int handle_swi(struct trap_state *ts)
 
     // TODO magic number! define! used to request scheduler softint
     if( swino == 0xFFF )
-        phantom_scheduler_schedule_soft_irq();
-
+    {
+        phantom_scheduler_soft_interrupt();
+        //phantom_scheduler_schedule_soft_irq();
+    }
     return 0;
 }
 
-void test_swi()
+void arm_init_swi()
 {
     phantom_trap_handlers[T_SOFT_INT] = handle_swi;
-    asm volatile("mov r0, #10; mov r1, #11; mov r2, #12; mov r3, #13; mov r12, #22; swi 0x34");
+    //asm volatile("mov r0, #10; mov r1, #11; mov r2, #12; mov r3, #13; mov r12, #22; swi 0x34");
 }

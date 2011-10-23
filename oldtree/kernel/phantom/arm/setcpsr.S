@@ -59,13 +59,13 @@ __FBSDID("$FreeBSD: src/sys/arm/arm/setcpsr.S,v 1.3.18.1 2008/11/25 02:59:29 ken
 
 ENTRY_NP(SetCPSR)
         mrs     r3, cpsr		/* Set the CPSR */
-	bic	r2, r3, r0
+        bic     r2, r3, r0
         eor     r2, r2, r1
         msr     cpsr_all, r2
 
         mov	r0, r3			/* Return the old CPSR */
 
-	RET
+        RET
 
 
 /* Gets the CPSR register
@@ -76,5 +76,5 @@ ENTRY_NP(SetCPSR)
 ENTRY_NP(GetCPSR)
         mrs     r0, cpsr		/* Get the CPSR */
 
-	RET
+        RET
 
