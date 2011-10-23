@@ -39,7 +39,7 @@ void arch_init_early(void)
     isa_bus.read8   	= isa_read8;
     isa_bus.write8      = isa_write8;
 
-
+    arm_init_swi();
 }
 
 

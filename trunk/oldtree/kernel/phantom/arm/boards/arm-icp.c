@@ -127,6 +127,7 @@ static int icp_irq_dispatch(struct trap_state *ts)
     u_int32_t   irqs;
 
     while( (irqs = R32(ICP_PRI_INTERRUPT_IRQ_STATUS)) != 0 )
+    //if( (irqs = R32(ICP_PRI_INTERRUPT_IRQ_STATUS)) != 0 )
     {
         int nirq = 0;
         while( irqs )
@@ -188,7 +189,13 @@ void board_sched_cause_soft_irq(void)
 
 void board_sched_cause_soft_irq(void)
 {
-    phantom_scheduler_soft_interrupt();
+    int ie = hal_save_cli();
+
+    asm volatile("swi 0xFFF");
+
+    //phantom_scheduler_soft_interrupt();
+
+    if(ie) hal_sti();
 }
 
 
@@ -221,12 +228,13 @@ static isa_probe_t board_drivers[] =
 {
 
 //    { "UART0", 		driver_pl011_uart_probe, 	1, 0x16000000, 1 },
+/*
     { "UART1", 		driver_pl011_uart_probe, 	1, 0x17000000, 2 },
 
     { "RTC", 		driver_pl031_rtc_probe, 	0, 0x15000000, 8 },
 
     { "MMC",		driver_pl181_mmc_probe,   	1, 0x1C000000, 23 }, // And 24 - how do we give 2 irqs?
-
+*/
     { "PL050.kb",      	driver_pl050_keyb_probe,   	1, 0x18000000, 3 },
     { "PL050.ms",      	driver_pl050_mouse_probe,   	1, 0x19000000, 4 },
 
@@ -256,6 +264,15 @@ void board_make_driver_map(void)
 
     if( (id >> 24) != 0x41 )
         SHOW_ERROR( 0, "Board manufacturer is %d, not %d", (id >> 24), 0x41 );
+
+    int flash = R32(ICP_FLASHPROG);
+    SHOW_INFO( 0, "ICP Flash: %d mbit, %d devs", (flash&4) ? 128 : 64, (flash&8) ? 4 : 2 );
+
+    int decode = R32(ICP_DECODE);
+    if( (decode & 0x1F) != 0x11 )
+        SHOW_ERROR( 0, "Decode [4:0] is %x, not %x", (decode & 0x1F), 0x11 );
+
+    SHOW_INFO( 0, "ICP modules %x", decode >> 5 );
 
     phantom_register_drivers(board_drivers);
 }

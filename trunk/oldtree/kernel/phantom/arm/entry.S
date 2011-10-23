@@ -57,7 +57,7 @@ _trap_e_reset:
     STMLTIA     r1!, {r3}
     BLT         1b
 
-    // Set stacks
+    // Set stacks - in fact, not needed here 'cause we reload sp on mode entry below
 
     MSR         CPSR_c, #(PSR_FIQ32_MODE | I_BIT | F_BIT)
     LDR         sp, = __fiq_stack_top__
@@ -93,8 +93,7 @@ _trap_e_reset:
     BX          r12
 
     // No return supposed, die somehow
-    // Cause exception - TODO call some kind of hard reboot
-    //SWI         0xFFFFFF
+    // TODO call some kind of hard reboot
     adr		r0, .Lmainreturned
     mov         lr, pc // attempt to return will bring here
     b		_C_LABEL(panic)
@@ -111,7 +110,9 @@ _trap_e_reset:
     .align 12 // TODO use page size define
 
 //#include "stack.h"
-#define PHANTOM_START_STACK_SIZE (16*1024)
+//#define PHANTOM_START_STACK_SIZE (16*1024)
+#define PHANTOM_START_STACK_SIZE (128*1024)
+
     .space	PHANTOM_START_STACK_SIZE
 __irq_stack_top__:
 
@@ -139,7 +140,7 @@ __cmain_stack_top__:
  *
  * General idea is:
  *
- * - save R0-R6 to whatever stack we got
+P:\projects\userland\trunk\oldtree\kernel\phantom\arm\entry.S * - save R0-R6 to whatever stack we got
  *
  * - put specific data to R3 (swi code, for example)
  * - put trap number (index in trap array) to R4
@@ -170,14 +171,15 @@ __cmain_stack_top__:
 //.code 32
 
 
-
 _trap_e_undef:
+    LDR         sp, = __und_stack_top__
     push        {r0-r6}
     mov         r4, #1
     mov         r2, lr
     b           alltraps
 
 _trap_e_syscall:
+    LDR         sp, = __svc_stack_top__
     push        {r0-r6}
 
     // read SWI instruction to R3
@@ -187,31 +189,36 @@ _trap_e_syscall:
     mov         r2, lr
     b           alltraps
 
-_trap_e_prefetch_abort:
+_trap_e_prefetch_abort: // TODO correct stack?
+    LDR         sp, = __abt_stack_top__
     push        {r0-r6}
     mov         r4, #3
     sub         r2, lr, #4 // ret one instr back
     b           alltraps
 
-_trap_e_data_abort:
+_trap_e_data_abort: // TODO correct stack?
+    LDR         sp, = __abt_stack_top__
     push        {r0-r6}
     mov         r4, #4
     sub         r2, lr, #8 // ret 2 instr back
     b           alltraps
 
-_trap_e_addrexc:
+_trap_e_addrexc: // TODO correct stack?
+    LDR         sp, = __abt_stack_top__
     push        {r0-r6}
     mov         r4, #5
     mov         r2, lr // TODO fix lr?
     b           alltraps
 
 _trap_e_irq:
+    LDR         sp, = __irq_stack_top__
     push        {r0-r6}
     mov         r4, #6
     sub         r2, lr, #4 // ret one instr back
     b           alltraps
 
 _trap_e_fiq:
+    LDR         sp, = __fiq_stack_top__
     push        {r0-r6}
     mov         r4, #7
     sub         r2, lr, #4 // ret one instr back
@@ -222,7 +229,7 @@ _trap_e_fiq:
 
 alltraps:
 
-    mrs		r0, spsr_all		// Save spsr
+    mrs         r0, spsr_all		// Save spsr
     mov         r1, sp
 
     // switch to SYS mode
@@ -232,11 +239,11 @@ alltraps:
     orr     	r5, r5, #(PSR_SYS32_MODE|I_BIT|F_BIT)
     msr     	cpsr_all, r5	   
 
-    mov         r6, sp
+    mov         r6, sp                  // sys32 mode sp
 
     and         r5, r0, #(PSR_MODE)     // Extract mode bits
     subs        r5, r5, #(PSR_USR32_MODE)
-    bne         not_user
+    bne         trap_not_user
 
     // TODO here we have to load cur thread's kernel stack top to SP
 
@@ -245,18 +252,16 @@ alltraps:
     LDR         r5, = EXT(curr_thread_k0_stack_top)
     ldr         SP, [r5]
 
-not_user:
+trap_not_user:
 
     // We're on a steady stack now.
-
-    // Lets build exception return frame first - ? No.
 
     // Build trap_state
 
     push        {r0}          // SPSR
     push        {r2}          // LR = his PC
 
-    push        {r3}          // Specific info - fro swi it's swi instruction itself
+    push        {r3}          // Specific info - for swi it's swi instruction itself
     push        {r4}          // trapno
 
     push        {lr}  	    // user mode lr
@@ -297,7 +302,7 @@ not_user:
 
     // Now we can use just R0-6
 
-    ldmia	sp!, {r1-r6} // Get special stuff: R6=spsr, R5=lr, R4=intno (ignore), R3=trapno (ignore), R2=usr_lr, R1=usr_sp
+    ldmia	sp!, {r1-r6} // Get special stuff: R6=spsr, R5=lr (his pc on intr), R4=intno (ignore), R3=trapno (ignore), R2=usr_lr, R1=usr_sp
 
     // That's all , now old SP is unused and will be overwritten below
 
@@ -309,6 +314,7 @@ not_user:
     msr     	spsr, r6
     mov         lr, r5
 
+    LDR         sp, = __svc_stack_top__ + (6*4)
     pop         {r0-r6}
 
     // move lr to pc and spsr to cpsr

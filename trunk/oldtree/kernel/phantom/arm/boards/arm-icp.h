@@ -1,6 +1,8 @@
 
 #define ICP_IDFIELD                             0xCB000000
-
+#define ICP_FLASHPROG                           0xCB000004
+#define ICP_INTREG                              0xCB000008
+#define ICP_DECODE                              0xCB00000C
 
 #define ICP_PRI_INTERRUPT_IRQ_STATUS            0x14000000
 #define ICP_PRI_INTERRUPT_IRQ_RAW_STATUS        0x14000004
