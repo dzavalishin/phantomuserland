@@ -8,7 +8,7 @@
  *
 **/
 
-#if 0
+#if defined(ARCH_arm) && HAVE_NET
 
 #define DEBUG_MSG_PREFIX "Lance111"
 #include <debug_ext.h>
@@ -26,7 +26,8 @@
 #include <newos/err.h>
 
 #include <kernel/ethernet_defs.h>
-#include <net.h>
+#include <kernel/net.h>
+#include <kernel/net/ethernet.h>
 
 #include "lanc111.h"
 
@@ -56,7 +57,7 @@ static hal_cond_t maq;
  *
  * \return Contents of the PHY interface rgister.
  */
-static uint8_t NicPhyRegSelect(uint8_t reg, uint8_t we)
+static uint8_t NicPhyRegSelect(phantom_device_t * dev, uint8_t reg, uint8_t we)
 {
     uint8_t rs;
     uint8_t msk;
@@ -120,14 +121,14 @@ static uint8_t NicPhyRegSelect(uint8_t reg, uint8_t we)
  *
  * \return Contents of the specified register.
  */
-static uint16_t NicPhyRead(uint8_t reg)
+static u_int16_t NicPhyRead(phantom_device_t * dev, uint8_t reg)
 {
-    uint16_t rc = 0;
+    u_int16_t rc = 0;
     uint8_t rs;
     uint8_t i;
 
     /* Select register for reading. */
-    rs = NicPhyRegSelect(reg, 0);
+    rs = NicPhyRegSelect(dev, reg, 0);
 
     /* Switch data direction. */
     rs &= ~MGMT_MDOE;
@@ -156,13 +157,13 @@ static uint16_t NicPhyRead(uint8_t reg)
  * \param reg PHY register number.
  * \param val Value to write.
  */
-static void NicPhyWrite(uint8_t reg, uint16_t val)
+static void NicPhyWrite(phantom_device_t * dev, uint8_t reg, u_int16_t val)
 {
-    uint16_t msk;
+    u_int16_t msk;
     uint8_t rs;
 
     /* Select register for writing. */
-    rs = NicPhyRegSelect(reg, 1);
+    rs = NicPhyRegSelect(dev, reg, 1);
 
     /* Switch data direction dummy. */
     nic_outlb(NIC_MGMT, rs | MGMT_MDO);
@@ -190,12 +191,12 @@ static void NicPhyWrite(uint8_t reg, uint16_t val)
  *
  * Reset the PHY and initiate auto-negotiation.
  */
-static int NicPhyConfig(void)
+static int NicPhyConfig(phantom_device_t * dev)
 {
-    uint16_t phy_sor;
-    uint16_t phy_sr;
-    uint16_t phy_to;
-    uint16_t mode;
+    u_int16_t phy_sor;
+    u_int16_t phy_sr;
+    u_int16_t phy_to;
+    u_int16_t mode;
 
     /* 
      * Reset the PHY and wait until this self clearing bit
@@ -203,10 +204,10 @@ static int NicPhyConfig(void)
      * give up after 3 retries. 
      */
     //printf("Reset PHY..");
-    NicPhyWrite(NIC_PHYCR, PHYCR_RST);
+    NicPhyWrite(dev, NIC_PHYCR, PHYCR_RST);
     for (phy_to = 0;; phy_to++) {
         NutSleep(63);
-        if ((NicPhyRead(NIC_PHYCR) & PHYCR_RST) == 0)
+        if ((NicPhyRead(dev, NIC_PHYCR) & PHYCR_RST) == 0)
             break;
         if (phy_to > 3)
             return -1;
@@ -214,10 +215,10 @@ static int NicPhyConfig(void)
     //printf("OK\n");
 
     /* Store PHY status output. */
-    phy_sor = NicPhyRead(NIC_PHYSOR);
+    phy_sor = NicPhyRead(dev, NIC_PHYSOR);
 
     /* Enable PHY interrupts. */
-    NicPhyWrite(NIC_PHYMSK, PHYMSK_MLOSSSYN | PHYMSK_MCWRD | PHYMSK_MSSD |
+    NicPhyWrite(dev, NIC_PHYMSK, PHYMSK_MLOSSSYN | PHYMSK_MCWRD | PHYMSK_MSSD |
                 PHYMSK_MESD | PHYMSK_MRPOL | PHYMSK_MJAB | PHYMSK_MSPDDT | PHYMSK_MDPLDT);
 
     /* Set RPC register. */
@@ -247,7 +248,7 @@ static int NicPhyConfig(void)
      * and wait until this has been completed.
      */
     //printf("Negotiate..");
-    NicPhyWrite(NIC_PHYANAD, PHYANAD_TX_FDX | PHYANAD_TX_HDX | PHYANAD_10FDX | PHYANAD_10_HDX | PHYANAD_CSMA);
+    NicPhyWrite(dev, NIC_PHYANAD, PHYANAD_TX_FDX | PHYANAD_TX_HDX | PHYANAD_10FDX | PHYANAD_10_HDX | PHYANAD_CSMA);
     NutSleep(63);
     for (phy_to = 0, phy_sr = 0;; phy_to++) {
         /* Give up after 10 seconds. */
@@ -255,12 +256,12 @@ static int NicPhyConfig(void)
             return -1;
         /* Restart auto negotiation every 4 seconds or on failures. */
         if ((phy_to & 127) == 0 /* || (phy_sr & PHYSR_REM_FLT) != 0 */ ) {
-            NicPhyWrite(NIC_PHYCR, PHYCR_ANEG_EN | PHYCR_ANEG_RST);
+            NicPhyWrite(dev, NIC_PHYCR, PHYCR_ANEG_EN | PHYCR_ANEG_RST);
             //printf("Restart..");
             NutSleep(63);
         }
         /* Check if we are done. */
-        phy_sr = NicPhyRead(NIC_PHYSR);
+        phy_sr = NicPhyRead(dev, NIC_PHYSR);
         //printf("[SR %04X]", phy_sr);
         if (phy_sr & PHYSR_ANEG_ACK)
             break;
@@ -282,7 +283,7 @@ static int NicPhyConfig(void)
  *
  * \return 0 on success or -1 on timeout.
  */
-static INLINE int NicMmuWait(uint16_t tmo)
+static INLINE int NicMmuWait(phantom_device_t * dev, u_int16_t tmo)
 {
     while (tmo--) {
         if ((nic_inlb(NIC_MMUCR) & MMUCR_BUSY) == 0)
@@ -297,7 +298,7 @@ static INLINE int NicMmuWait(uint16_t tmo)
  *
  * \return 0 on success, -1 otherwise.
  */
-static int NicReset(void)
+static int NicReset(phantom_device_t * dev)
 {
 #ifdef LANC111_RESET_BIT
     sbi(LANC111_RESET_DDR, LANC111_RESET_BIT);
@@ -333,7 +334,7 @@ static int NicReset(void)
     /* Reset MMU. */
     nic_bs(2);
     nic_outlb(NIC_MMUCR, MMU_RST);
-    if (NicMmuWait(1000))
+    if (NicMmuWait(dev,1000))
         return -1;
 
     return 0;
@@ -346,11 +347,11 @@ static int NicReset(void)
  *
  * \param mac Six byte unique MAC address.
  */
-static int NicStart(CONST uint8_t * mac)
+static int NicStart(phantom_device_t * dev, CONST uint8_t * mac)
 {
     uint8_t i;
 
-    if (NicReset())
+    if (NicReset(dev))
         return -1;
 
     /* Enable receiver. */
@@ -363,7 +364,7 @@ static int NicStart(CONST uint8_t * mac)
     nic_outw(NIC_TCR, TCR_PAD_EN | TCR_TXENA);
 
     /* Configure the PHY. */
-    if (NicPhyConfig())
+    if (NicPhyConfig(dev))
         return -1;
 
     /* Set MAC address. */
@@ -385,6 +386,8 @@ static int NicStart(CONST uint8_t * mac)
  */
 static void NicInterrupt(void *arg)
 {
+    phantom_device_t * dev = arg;
+
     uint8_t isr;
     uint8_t imr;
     lanc111_nic_t *ni = (lanc111_nic_t *) ((NUTDEVICE *) arg)->dev_dcb;
@@ -453,10 +456,10 @@ static void NicInterrupt(void *arg)
 /*
  * Write data block to the NIC.
  */
-static void NicWrite(uint8_t * buf, uint16_t len)
+static void NicWrite(phantom_device_t * dev, uint8_t * buf, u_int16_t len)
 {
-    register uint16_t l = len - 1;
-    register uint8_t ih = (uint16_t) l >> 8;
+    register u_int16_t l = len - 1;
+    register uint8_t ih = (u_int16_t) l >> 8;
     register uint8_t il = (uint8_t) l;
 
     if (!len)
@@ -472,10 +475,10 @@ static void NicWrite(uint8_t * buf, uint16_t len)
 /*
  * Read data block from the NIC.
  */
-static void NicRead(uint8_t * buf, uint16_t len)
+static void NicRead(phantom_device_t * dev, uint8_t * buf, u_int16_t len)
 {
-    register uint16_t l = len - 1;
-    register uint8_t ih = (uint16_t) l >> 8;
+    register u_int16_t l = len - 1;
+    register uint8_t ih = (u_int16_t) l >> 8;
     register uint8_t il = (uint8_t) l;
 
     if (!len)
@@ -494,12 +497,12 @@ static void NicRead(uint8_t * buf, uint16_t len)
  * Nic interrupts must be disabled when calling this funtion.
  *
  */
-static int NicGetPacket( struct phantom_device *dev, void *buf, int len)
+static int NicGetPacket( struct phantom_device *dev, void *buf, int len )
 {
-    NETBUF *nb = 0;
+    //NETBUF *nb = 0;
     //uint8_t *buf;
-    uint16_t f_status_word;
-    uint16_t fbytecount;
+    u_int16_t f_status_word;
+    u_int16_t fbytecount;
 
     /* Check the fifo empty bit. If it is set, then there is 
        nothing in the receiver fifo. */
@@ -543,11 +546,11 @@ static int NicGetPacket( struct phantom_device *dev, void *buf, int len)
          */
         fbytecount -= 3;
 
-        if( len < fbytecont )
+        if( len < fbytecount )
             ret = ERR_VFS_INSUFFICIENT_BUF;
         else
         {
-            NicRead( buf, fbytecount);
+            NicRead( dev, buf, fbytecount);
             ret = fbytecount;
         }
     }
@@ -558,6 +561,7 @@ static int NicGetPacket( struct phantom_device *dev, void *buf, int len)
     return ret;
 }
 
+#if 0
 /*!
  * \brief Load a packet into the nic's transmit ring buffer.
  *
@@ -574,7 +578,7 @@ static int NicGetPacket( struct phantom_device *dev, void *buf, int len)
  */
 static int NicPutPacket(NETBUF * nb)
 {
-    uint16_t sz;
+    u_int16_t sz;
     uint8_t odd = 0;
     uint8_t imsk;
 
@@ -662,8 +666,9 @@ static int NicPutPacket(NETBUF * nb)
 
     return 0;
 }
+#endif
 
-
+#if 0
 /*! \fn NicRxLanc(void *arg)
  * \brief NIC receiver thread.
  *
@@ -732,7 +737,9 @@ THREAD(NicRxLanc, arg)
         nic_outlb(NIC_MSK, imsk | INT_RCV | INT_ERCV);
     }
 }
+#endif
 
+#if 0
 /*!
  * \brief Send Ethernet packet.
  *
@@ -774,6 +781,8 @@ int LancOutput(NUTDEVICE * dev, NETBUF * nb)
     }
     return rc;
 }
+#endif
+
 
 /*!
  * \brief Initialize Ethernet hardware.
@@ -792,31 +801,12 @@ int LancOutput(NUTDEVICE * dev, NETBUF * nb)
  *
  * \param dev Identifies the device to initialize.
  */
-static int LancInit(phantom_device_t * dev)
+static int LancInit(lanc111_nic_t *nic)
 {
-    lanc111_nic_t *nic = dev->drv_private;
-    /* Disable NIC interrupt and clear lanc111_nic_t structure. */
-    //cbi(EIMSK, LANC111_SIGNAL_IRQ);
-    //memset(dev->dev_dcb, 0, sizeof(lanc111_nic_t));
-
-
     assert( 0 == hal_cond_init( &nic->ni_rx_rdy, DEBUG_MSG_PREFIX ) );
 
     assert( 0 == hal_cond_init( &maq, DEBUG_MSG_PREFIX ".MAQ" ) );
     assert( 0 == hal_cond_init( &nic->ni_tx_rdy, DEBUG_MSG_PREFIX ) );
-
-
-    /* Register interrupt handler and enable interrupts. */
-    //if (NutRegisterIrqHandler(&LANC111_SIGNAL, NicInterrupt, dev))        return -1;
-
-    /*
-     * Start the receiver thread.
-     *
-     * avr-gcc size optimized code used 76 bytes.
-     */
-    NutThreadCreate("rxi5", NicRxLanc, dev, (NUT_THREAD_LANCRXSTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
-
-    //NutSleep(500);
 
     return 0;
 }
@@ -866,17 +856,17 @@ phantom_device_t * driver_lanc111_probe( int port, int irq, int stage )
 
 
 
-    //pcnet32_stop(nic);
     hal_sleep_msec(10);
 
-    if(lanc111_init(nic) < 0)
+    if(LancInit(nic) < 0)
     {
-        //if(DEBUG)
         SHOW_ERROR0( 0, "init failed");
         goto free1;
     }
 
-    //pcnet32_start(nic);
+    // Disable NIC interrupt.
+    //cbi(EIMSK, LANC111_SIGNAL_IRQ);
+
 
 
     phantom_device_t * dev = calloc(1, sizeof(phantom_device_t));
@@ -904,6 +894,15 @@ phantom_device_t * driver_lanc111_probe( int port, int irq, int stage )
         goto free2;
     }
 
+    static CONST uint8_t mac[6] = { 0x52, 0x54, 0x00, 0x12, 0x34, 0x86 }; // QEMU's range
+
+    if( NicStart(dev, mac) ) goto free2;
+
+    /*
+     * Start the receiver thread.
+     *
+     */
+    //NutThreadCreate("rxi5", NicRxLanc, dev, (NUT_THREAD_LANCRXSTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
 
     ifnet *interface;
     if( if_register_interface( IF_TYPE_ETHERNET, &interface, dev) )
