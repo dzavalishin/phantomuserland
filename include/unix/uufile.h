@@ -40,7 +40,7 @@ struct uufileops
     errno_t     (*unlink)( struct uufile *f );
 
     //! rich man's ioctl - get property
-    errno_t	(*getproperty)( struct uufile *f, const char *pName, char *pValue, int vlen );
+    errno_t	(*getproperty)( struct uufile *f, const char *pName, char *pValue, size_t vlen );
     //! rich man's ioctl - set property
     errno_t	(*setproperty)( struct uufile *f, const char *pName, const char *pValue );
     //! rich man's ioctl - list properties
