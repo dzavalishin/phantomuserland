@@ -115,7 +115,7 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(pool);
 
-#ifndef ARCH_ia32
+#ifdef ARCH_mips
 //    TEST(sem);
     TEST(01_threads);
 #endif
@@ -149,6 +149,10 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(absname);
 
+#ifndef ARCH_ia32
+//    TEST(sem);
+    TEST(01_threads);
+#endif
 
 
     //TEST(userland);

@@ -4,71 +4,17 @@
  * Determine ports, which had not been explicitely configured.
  */
 #ifndef LANC111_BASE_ADDR
-#define LANC111_BASE_ADDR   0xC000
+#define LANC111_BASE_ADDR   (dev->iobase)
 #endif
 
 #ifndef LANC111_SIGNAL_IRQ
-#define LANC111_SIGNAL_IRQ  INT5
+#define LANC111_SIGNAL_IRQ  (dev->irq)
 #endif
 
-#ifdef LANC111_RESET_BIT
 
-#if (LANC111_RESET_AVRPORT == AVRPORTB)
-#define LANC111_RESET_PORT   PORTB
-#define LANC111_RESET_DDR    DDRB
+//#define LANC111_SIGNAL          sig_INTERRUPT0
+//#define LANC111_SIGNAL_MODE()   sbi(EICRA, ISC00); sbi(EICRA, ISC01)
 
-#elif (LANC111_RESET_AVRPORT == AVRPORTD)
-#define LANC111_RESET_PORT   PORTD
-#define LANC111_RESET_DDR    DDRD
-
-#elif (LANC111_RESET_AVRPORT == AVRPORTE)
-#define LANC111_RESET_PORT   PORTE
-#define LANC111_RESET_DDR    DDRE
-
-#elif (LANC111_RESET_AVRPORT == AVRPORTF)
-#define LANC111_RESET_PORT   PORTF
-#define LANC111_RESET_DDR    DDRF
-
-#endif /* LANC111_RESET_AVRPORT */
-
-#endif /* LANC111_RESET_BIT */
-
-/*
- * Determine interrupt settings.
- */
-#if (LANC111_SIGNAL_IRQ == INT0)
-#define LANC111_SIGNAL          sig_INTERRUPT0
-#define LANC111_SIGNAL_MODE()   sbi(EICRA, ISC00); sbi(EICRA, ISC01)
-
-#elif (LANC111_SIGNAL_IRQ == INT1)
-#define LANC111_SIGNAL          sig_INTERRUPT1
-#define LANC111_SIGNAL_MODE()   sbi(EICRA, ISC10); sbi(EICRA, ISC11)
-
-#elif (LANC111_SIGNAL_IRQ == INT2)
-#define LANC111_SIGNAL          sig_INTERRUPT2
-#define LANC111_SIGNAL_MODE()   sbi(EICRA, ISC20); sbi(EICRA, ISC21)
-
-#elif (LANC111_SIGNAL_IRQ == INT3)
-#define LANC111_SIGNAL          sig_INTERRUPT3
-#define LANC111_SIGNAL_MODE()   sbi(EICRA, ISC30); sbi(EICRA, ISC31)
-
-#elif (LANC111_SIGNAL_IRQ == INT4)
-#define LANC111_SIGNAL          sig_INTERRUPT4
-#define LANC111_SIGNAL_MODE()   sbi(EICR, ISC40); sbi(EICR, ISC41)
-
-#elif (LANC111_SIGNAL_IRQ == INT6)
-#define LANC111_SIGNAL          sig_INTERRUPT6
-#define LANC111_SIGNAL_MODE()   sbi(EICR, ISC60); sbi(EICR, ISC61)
-
-#elif (LANC111_SIGNAL_IRQ == INT7)
-#define LANC111_SIGNAL          sig_INTERRUPT7
-#define LANC111_SIGNAL_MODE()   sbi(EICR, ISC70); sbi(EICR, ISC71)
-
-#else
-#define LANC111_SIGNAL          sig_INTERRUPT5
-#define LANC111_SIGNAL_MODE()   sbi(EICR, ISC50); sbi(EICR, ISC51)
-
-#endif
 
 
 /*! 
