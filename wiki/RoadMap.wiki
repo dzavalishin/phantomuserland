@@ -13,20 +13,24 @@ Quite crirtical tasks.
 ||*Java bytecode compiler*. Have skeleton, need complete one. At least to the level where ciontainers and UI code is converted.||*Really urgent.*||
 ||*Hosted test env. multithreading*. Port existing threads lib to work in unix userland/cygwin.||Must be easy.||
 ||*Hosted test env. TCP access*.||Ditto.||
-||Windowing env Z-buffer||*Done*.||
 ||Windowing events, input, event thread pools. Need userland iface. Need code cleanup.||*In progress*.||
 ||*VM and compiler support for floats/doubles/64 bit ints*. Should be really easy.||-||
 ||*More of Phantom language implementation in compiler*. Closures, direct containers support.||-||
 ||*VmWeakRef* - stuck with synchronization!||*In progress*||
 ||*Border objects and restart exceptions*. Especially for TCP interfaces. Depends on weakrefs!||*Nearly done*||
-||*Kernel Tasks* || ||
+||Windowing env Z-buffer||*Done*.||
+
+== Kernel Tasks ==
+
 ||*VirtIO drivers*. Have incomplete disk driver, net driver in progress.||Finish!||
 ||*IDE driver cleanup*. Existing driver is very strange.||*started*||
-||*Partition lookup code*. Partially implemented.||*need tests*||
 ||*IP stack tests and userland interface*.||-|| 
-||*ARM port*. Have most of arch dependent parts separated from main code.||Started||
-||*Disk selection*. Right now Phantom looks for its disk in hardcoded places. Partitioning system reckognizes Phantom partitions and disks. Has to be connected to pager.||In progress.||
-||*Far Goals*|| ||
+||*ARM port*. Machdep code and some drivers are done.||In progress||
+||*Partition lookup code*. ||PC partitions implemented. EFI?||
+||*Disk selection*. Right now Phantom looks for its disk in hardcoded places. Partitioning system reckognizes Phantom partitions and disks. Has to be connected to pager.||Done.||
+
+== Far Goals ==
+
 ||*Graphical shell*. Something to start with.||Nope.||
 ||*Posix support*. Map two binary objects to DS/CS, run native thread, support syscall mapping.||*Partially working.*||
 ||*LLVM fast code*. In addition to posix subsystem it would be nice to have a specific LLVM subsystem which can offer programmers hispeed, but portable (to Phantom on other arch) programming framework. The same CS/DS binary objects, but executable code is LLVM-level and passed through LLVM backend before being run for the first time.||Nope.||
