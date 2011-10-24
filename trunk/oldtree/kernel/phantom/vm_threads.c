@@ -133,13 +133,27 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 
     if(tda->sleep_flag)
     {
-        timedcall_t *e = &(tda->timer);
+        //timedcall_t *e = &(tda->timer);
+        net_timer_event *e = &(tda->timer);
+
         int didit = 0;
 
-        if(e->msecMore > 0 && e->msecLater > 0 )
+        if( e->pending )
         {
-            // Thread is sleeping on timer, reactivate wakeup
-            phantom_wakeup_after_msec( e->msecMore, tda );
+            bigtime_t msecMore = e->sched_time - hal_system_time();
+
+            msecMore /= 1000;
+
+            if( msecMore > 0 )
+            {
+                // Thread is sleeping on timer, reactivate wakeup
+                phantom_wakeup_after_msec( msecMore, tda );
+            }
+            else
+            {
+                // Sleep time is passed, just wake
+                SYSCALL_WAKE_THREAD_UP(tda);
+            }
             didit = 1;
         }
 

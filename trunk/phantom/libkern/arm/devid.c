@@ -41,7 +41,7 @@ errno_t arm_id_shift( addr_t base, int shift, u_int32_t part_num, u_int32_t cell
     id |= (R32(base+shift+2) << 16) & 0xFF;
     id |= (R32(base+shift+3) << 24) & 0xFF;
 
-    SHOW_INFO( level, "@%x+%x: Part no %x, designer %x, rev. %d, conf %x", base, shift,
+    SHOW_INFO( level, "@%x+%x: Part no %x, designer %x, rev. %d, conf %x", (unsigned int)base, shift,
                (id & 0xFFF),
                (id>>12) & 0xFF,
                (id>>20) & 0x0F,

@@ -217,6 +217,10 @@ _trap_e_irq:
     sub         r2, lr, #4 // ret one instr back
     b           alltraps
 
+// NB!! NB!! NB!!
+// Current implementation can't handle FIQ at all -
+// interrupt/trap entry code is not reentrant! FIQs
+// are disabled in hal_sti.
 _trap_e_fiq:
     LDR         sp, = __fiq_stack_top__
     push        {r0-r6}

@@ -75,6 +75,8 @@ void hal_cli()
     while (!(__get_cpsr() & IRQ_MASK));
 }
 
+// NB! interrupt/trap entry code is not reentrant! FIQs are disabled here!
+
 void hal_sti()
 {
     unsigned _cpsr;
@@ -82,8 +84,8 @@ void hal_sti()
     _cpsr = __get_cpsr();
 
     do
-        __set_cpsr(_cpsr & ~INTs_MASK);
-    while ((__get_cpsr() ^ ~INTs_MASK) & INTs_MASK);
+        __set_cpsr(_cpsr & ~IRQ_MASK);
+    while ((__get_cpsr() ^ ~IRQ_MASK) & IRQ_MASK);
 
 }
 

@@ -19,6 +19,7 @@
 #define debug_level_info 10
 
 #include <unix/uufile.h>
+#include <unix/uusignal.h>
 #include <sys/libkern.h>
 #include <dirent.h>
 #include <malloc.h>

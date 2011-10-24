@@ -160,8 +160,10 @@ static void uu_proc_death(uuprocess_t *p)
     free_ldt_selector(em->ds_seg);
 #endif
 
+#if HAVE_KOLIBRI
     if( p->kolibri_state )
         destroy_kolibri_state( p );
+#endif
 
     uu_unlink_exe_module(em);
 }

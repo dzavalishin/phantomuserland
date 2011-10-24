@@ -202,6 +202,7 @@ int main(int argc, char **argv, char **envp)
     board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
+
     hal_init((void *)PHANTOM_AMAP_START_VM_POOL, N_OBJMEM_PAGES*4096L);
 
     // Threads startup
@@ -249,6 +250,12 @@ int main(int argc, char **argv, char **envp)
     printf("\nPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\n\n", svn_version(), phantom_uname.machine );
     phantom_process_boot_options();
 
+#if defined(ARCH_arm) && 0
+    SHOW_FLOW0( 0, "test intr reg overflow" );
+    arm_test_interrupts_integrity();
+    SHOW_FLOW0( 0, "intr reg overflow test PASSED" );
+#endif
+
     dbg_init(); // Kernel command line debugger
 
     // Used to refill list used to allocate physmem in interrupts
@@ -289,6 +296,7 @@ int main(int argc, char **argv, char **envp)
 
     //pressEnter("will look for drv stage 2");
     phantom_find_drivers( 2 );
+
 
 #if HAVE_UNIX
     // Before boot modules init Unix-like environment
