@@ -13,7 +13,7 @@
  *****************************************************************************/
 
 #include <hal.h>
-
+#include <arm/proc_reg.h>
 
 #define IRQ_MASK  0x00000080
 #define FIQ_MASK  0x00000040

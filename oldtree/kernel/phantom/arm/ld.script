@@ -2,7 +2,7 @@
 
      SECTIONS
      {
-       . = 0;
+       . = 0x0;
        .text : 
 		{ 
 		PROVIDE (_start = .);

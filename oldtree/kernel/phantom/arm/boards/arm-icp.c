@@ -224,7 +224,7 @@ phantom_device_t * driver_pl050_mouse_probe( int port, int irq, int stage );
 
 
 // NB! No network drivers on stage 0!
-static isa_probe_t board_drivers[] =
+static isa_probe_t icp_board_drivers[] =
 {
 
 //    { "UART0", 		driver_pl011_uart_probe, 	1, 0x16000000, 1 },
@@ -260,10 +260,12 @@ static isa_probe_t board_drivers[] =
 
 void board_make_driver_map(void)
 {
+
     int id = R32(ICP_IDFIELD);
 
     if( (id >> 24) != 0x41 )
         SHOW_ERROR( 0, "Board manufacturer is %d, not %d", (id >> 24), 0x41 );
+
 
     int flash = R32(ICP_FLASHPROG);
     SHOW_INFO( 0, "ICP Flash: %d mbit, %d devs", (flash&4) ? 128 : 64, (flash&8) ? 4 : 2 );
@@ -274,7 +276,7 @@ void board_make_driver_map(void)
 
     SHOW_INFO( 0, "ICP modules %x", decode >> 5 );
 
-    phantom_register_drivers(board_drivers);
+    phantom_register_drivers(icp_board_drivers);
 }
 
 

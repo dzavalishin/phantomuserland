@@ -18,7 +18,7 @@
 #include <phantom_libc.h>
 #include <cpu_state.h>
 #include <arm/psr.h>
-
+#include <arm/proc_reg.h>
 
 // asm code
 void phantom_thread_trampoline(void);
@@ -108,7 +108,7 @@ void phantom_thread_state_init(phantom_thread_t *t)
 
 // Or else we'll die in exception before threads are init.
 static char k0_emergncy_stack[1024];
-addr_t  curr_thread_k0_stack_top = k0_emergncy_stack + sizeof(k0_emergncy_stack) - 4;
+addr_t  curr_thread_k0_stack_top = (addr_t)(k0_emergncy_stack + sizeof(k0_emergncy_stack) - 4);
 
 void arch_adjust_after_thread_switch(phantom_thread_t *t)
 {

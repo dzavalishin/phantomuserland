@@ -30,7 +30,7 @@ void panic(const char *fmt, ...)
     if(panic_reenter)
         _exit(33);
 
-	board_panic_stop_world();
+    board_panic_stop_world();
 
     hal_cli();
     panic_reenter++;
