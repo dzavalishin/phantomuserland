@@ -170,6 +170,8 @@ phantom_device_t * driver_pl181_mmc_probe( int port, int irq, int stage )
         goto free2;
     }
 
+    SHOW_INFO( 0, "Take IRQ %d and %d", irq, irq+1 );
+
 
     W32( port + MMCIMASK0, MCI_IRQENABLE);
     W32( port + MMCIMASK1, MCI_TXFIFOHALFEMPTYMASK|MCI_RXFIFOHALFFULLMASK);

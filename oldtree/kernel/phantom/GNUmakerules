@@ -72,7 +72,7 @@ START_O_FILE=entry.o
 phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	acpi_main.o acpi_os.o video_drv_vmware.o \
 	$(USB_O) floppy.o ide_io.o vm_connect.o \
-	disk_cache.o properties.o \
+	disk_cache.o properties.o mem_disk.o \
 	pci_ahci.o driver_pci_rtl8169.o intrdisp.o mem_pl181_mmc.o \
 	video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \
 	paging_mem.o user_trap.o mem_lanc111.o video_drv_icp_vga.o \
