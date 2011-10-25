@@ -17,6 +17,7 @@
 #define debug_level_info 10
 
 #include <arm/memio.h>
+#include <arm/private.h>
 
 #include <sys/libkern.h>
 #include <phantom_libc.h>

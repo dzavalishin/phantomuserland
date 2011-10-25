@@ -18,6 +18,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <arm/memio.h>
+#include <arm/private.h>
+
+#include <dev/mem_disk.h>
+
 #include "arm-icp.h"
 
 #define DEBUG_MSG_PREFIX "board"
@@ -28,11 +32,11 @@
 
 char board_name[] = "Integrator/CP";
 
-static char * symtab_getname( void *addr );
+//static char * symtab_getname( void *addr );
 
 
 static int icp_irq_dispatch(struct trap_state *ts);
-static void sched_soft_int( void *a );
+//static void sched_soft_int( void *a );
 
 void board_init_early(void)
 {
@@ -222,6 +226,7 @@ phantom_device_t * driver_pl181_mmc_probe( int port, int irq, int stage );
 phantom_device_t * driver_pl050_keyb_probe( int port, int irq, int stage );
 phantom_device_t * driver_pl050_mouse_probe( int port, int irq, int stage );
 
+phantom_device_t * driver_icp_memdisk_probe( int port, int irq, int stage );
 
 // NB! No network drivers on stage 0!
 static isa_probe_t icp_board_drivers[] =
@@ -233,10 +238,13 @@ static isa_probe_t icp_board_drivers[] =
 
     { "RTC", 		driver_pl031_rtc_probe, 	0, 0x15000000, 8 },
 
-    { "MMC",		driver_pl181_mmc_probe,   	1, 0x1C000000, 23 }, // And 24 - how do we give 2 irqs?
 */
+    { "MMC",		driver_pl181_mmc_probe,   	1, 0x1C000000, 23 }, // And 24 - how do we give 2 irqs?
     { "PL050.kb",      	driver_pl050_keyb_probe,   	1, 0x18000000, 3 },
     { "PL050.ms",      	driver_pl050_mouse_probe,   	1, 0x19000000, 4 },
+
+// icp has flash mapped here
+//    { "memdisk",      	driver_icp_memdisk_probe,   	3, 0x20000000, -1 },
 
 /*
     { "GPIO", 		driver_mem_icp_gpio_probe, 	0, 0xC9000000, 0 },
@@ -256,6 +264,7 @@ static isa_probe_t icp_board_drivers[] =
     { 0, 0, 0, 0, 0 },
 };
 
+static int flash_mbytes = 0;
 
 
 void board_make_driver_map(void)
@@ -268,7 +277,12 @@ void board_make_driver_map(void)
 
 
     int flash = R32(ICP_FLASHPROG);
-    SHOW_INFO( 0, "ICP Flash: %d mbit, %d devs", (flash&4) ? 128 : 64, (flash&8) ? 4 : 2 );
+	int mbits = (flash&4) ? 128 : 64;
+    int ndevs = (flash&8) ? 4 : 2;
+
+    flash_mbytes = (mbits/8) * ndevs;
+
+    SHOW_INFO( 0, "ICP Flash: %d mbit, %d devs, %d Mbytes", mbits, ndevs, flash_mbytes );
 
     int decode = R32(ICP_DECODE);
     if( (decode & 0x1F) != 0x11 )
@@ -276,7 +290,22 @@ void board_make_driver_map(void)
 
     SHOW_INFO( 0, "ICP modules %x", decode >> 5 );
 
+    //driver_memdisk_init( 0x20000000, flash_mbytes * 1024 * 1024, 0 );
+
     phantom_register_drivers(icp_board_drivers);
+}
+
+
+phantom_device_t * driver_icp_memdisk_probe( int port, int irq, int stage )
+{
+    (void) port;
+    (void) irq;
+    (void) stage;
+
+    if(flash_mbytes)
+        driver_memdisk_init( 0x20000000, flash_mbytes * 1024 * 1024, 0 );
+
+    return 0;
 }
 
 
@@ -284,6 +313,7 @@ void board_make_driver_map(void)
 // stubs
 // -----------------------------------------------------------------------
 
+/*
 #warning stubs!
 void  paging_device_start_read_rq( void *pdev, void *pager_current_request, void *page_device_io_final_callback )
 {
@@ -302,6 +332,7 @@ void  paging_device_start_write_rq( void *pdev, void *pager_current_request, voi
 void init_paging_device(void)
 {
 }
+*/
 
 int phantom_dev_keyboard_getc(void)
 {
