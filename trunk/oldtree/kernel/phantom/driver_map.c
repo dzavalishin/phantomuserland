@@ -117,7 +117,7 @@ static pci_probe_t pci_drivers[] =
 
 
 
-static isa_probe_t *board_drivers = 0;
+static isa_probe_t *isa_board_drivers = 0;
 
 // NB! No network drivers on stage 0!
 static isa_probe_t isa_drivers[] =
@@ -460,10 +460,10 @@ int phantom_find_drivers( int stage )
     probe_isa( stage, isa_drivers );
     SHOW_FLOW( 2, "Finished looking for ISA devices, stage %d", stage );
 
-    if(board_drivers)
+    if(isa_board_drivers)
     {
         SHOW_FLOW( 2, "Start looking for board devices, stage %d", stage );
-        probe_isa( stage, board_drivers );
+        probe_isa( stage, isa_board_drivers );
         SHOW_FLOW( 2, "Finished looking for board devices, stage %d", stage );
     }
     //getchar();
@@ -475,9 +475,9 @@ int phantom_find_drivers( int stage )
 
 
 
-void phantom_register_drivers(isa_probe_t *drivers )
+void phantom_register_drivers( isa_probe_t *drivers )
 {
-     board_drivers = drivers;
+     isa_board_drivers = drivers;
 }
 
 

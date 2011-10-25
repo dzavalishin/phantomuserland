@@ -15,6 +15,8 @@
 #define debug_level_info 10
 
 #include <kernel/init.h>
+#include <kernel/board.h>
+#include <kernel/debug.h>
 #include <device.h>
 
 static u_int32_t		isa_read32(u_int32_t addr)                      { return *((u_int32_t*)(addr)); }
