@@ -1155,11 +1155,11 @@ ssize_t tcp_recvfrom(void *prot_data, void *buf, ssize_t len, sockaddr *saddr, i
         else
             err = hal_sem_acquire_etc(&s->read_sem, 1, SEM_FLAG_INTERRUPTABLE, 0 );
         mutex_lock(&s->lock);
-        if(err < 0) {
-            if(s->last_error < 0)
+        if(err) {
+            if(s->last_error)
                 bytes_read = s->last_error;
             else
-                bytes_read = err;
+                bytes_read = -err;
             goto out;
         }
     }

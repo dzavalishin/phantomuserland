@@ -180,7 +180,8 @@ int do_test_tcp_connect(const char *test_parm)
     void *prot_data;
 
     if(test_parm == 0 || *test_parm == 0)
-        test_parm = "87.250.250.3:80";
+        //test_parm = "87.250.250.3:80";
+        test_parm = "93.158.134.3:80";
 
     int ip0, ip1, ip2, ip3, port;
 
@@ -225,6 +226,7 @@ int do_test_tcp_connect(const char *test_parm)
 
     memset( buf, 0, sizeof(buf) );
     int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*10 );
+    //int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*10 );
     buf[sizeof(buf)-1] = 0;
 
     SHOW_FLOW( 0, "TCP - read = %d (%s)", nread, buf);
@@ -232,7 +234,7 @@ int do_test_tcp_connect(const char *test_parm)
     tcp_close(prot_data);
 
 #endif
-    return 0;
+    return nread > 0 ? 0 : -nread;
 }
 
 
