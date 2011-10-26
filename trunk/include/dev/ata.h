@@ -20,10 +20,26 @@
 #define ATA_CMD_WR_DMA	0xCA	/* Write DMA (with retries)	*/
 #define ATA_CMD_WR_DMAN	0xCB	/* Write DMA ( no  retires)	*/
 
+#define ATA_CMD_READ_DMA	0xC8	/* Read DMA (with retries)	*/
+#define ATA_CMD_READ_DMA_ONCE	0xC9	/* Read DMS ( no  retries)	*/
+#define ATA_CMD_WRITE_DMA	0xCA	/* Write DMA (with retries)	*/
+#define ATA_CMD_WRITE_DMA_ONCE	0xCB	/* Write DMA ( no  retires)	*/
+
+
 #define ATA_CMD_READ_DMA_EXT                 0x25
 #define ATA_CMD_WRITE_DMA_EXT                0x35
 
+#define ATA_CMD_READ_FPDMA_QUEUED            0x60
+#define ATA_CMD_WRITE_FPDMA_QUEUED           0x61
 
+
+// Data set management
+#define ATA_CMD_DSM                          0x06
+
+/* feature values for Data Set Management */
+#define DSM_TRIM                        0x01
+
+#if 0
 /*
  * structure returned by ATA_CMD_IDENT, as per ANSI ATA2 rev.2f spec
  */
@@ -119,7 +135,7 @@ typedef struct hd_driveid {
     unsigned short	cf_advanced_caps;
     unsigned short	words164_255[92];/* reserved words 164-255 */
 } hd_driveid_t;
-
+#endif
 
 
 #endif // ATA_H

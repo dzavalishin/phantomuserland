@@ -13,13 +13,15 @@ design desicions are final, so it is of no use to finalize all the
 implementation desisions now as well.
 
 Code is known to compile successfully with cygwin/linux gcc 4.3.4.
-Only ia32 target is ok, arm/mips/amd64 port are not finished.
+Only ia32 target is most complete and stable, arm port is in active development
+but very instable, mips port is just started - compiles and can breath for a
+second :), amd64 port is incomplete and does not compile at all.
 
 
 
 BUILD
 
-  make all in trunk
+  "make all" in trunk
 
 RUN
 
@@ -30,7 +32,7 @@ DEBUG
 
   Run QEMU (see above) and then - gdb in trunk/oldtree/kernel/phantom
 
-  Kernel console is saved to trunk/run/serial0.log 
+  Kernel console is logged to trunk/run/serial0.log 
 
   Kernel is able to send logging info to syslogd by UDP.
   Currently syslogd address is hardcoded in net_misc.c.

@@ -35,6 +35,8 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 #include <kernel/atomic.h>
 #include <kernel/libkern.h>
 
+#include <kernel/info/idisk.h>
+
 #include <ia32/pio.h>
 #include <errno.h>
 #include <assert.h>
@@ -108,7 +110,7 @@ static void ahci_process_finished_cmd(phantom_device_t *dev, int nport);
 static errno_t ahci_do_inquiry(phantom_device_t *dev, int nport, void *data, size_t data_len );
 
 
-static void dump_ataid(hd_driveid_t *ataid);
+//static void dump_ataid(hd_driveid_t *ataid);
 //static void ahci_dump_port_info(phantom_device_t *dev, int nport );
 
 static void ahci_connect_port( ahci_port_t *p );
@@ -325,7 +327,9 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
     //ahci_dump_port_info( dev, nport );
 
     {
-        hd_driveid_t id;
+        // TODO kill, replace with int buf[256], kill dump_ataid, move hd_driveid_t knowledge to parse_i_disk_ata
+        //hd_driveid_t id;
+        u_int16_t id[256];
 
         errno_t rc = ahci_do_inquiry( dev, nport, &id, sizeof(id) );
         if(rc)
@@ -334,9 +338,15 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
             return rc;
         }
 
-        p->nSect = id.lba_capacity;
+        //p->nSect = id.lba_capacity;
+        //dump_ataid( &id );
 
-        dump_ataid( &id );
+        i_disk_t info;
+        parse_i_disk_ata( &info, (void *)&id );
+
+        p->nSect = info.nSectors;
+
+        dump_i_disk( &info );
 
         ahci_connect_port( p );
     }
@@ -620,15 +630,20 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     /* Construct the FIS */
     fis[0] = 0x27;		/* Host to device FIS. */
     fis[1] = 1 << 7;	        /* Command FIS. */
-    fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA_EXT : ATA_CMD_READ_DMA_EXT;	/* Command byte. */
+
+    //fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA_EXT : ATA_CMD_READ_DMA_EXT;	/* Command byte. LBA48 */
+    fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA : ATA_CMD_READ_DMA;	/* Command byte. LBA28 */
 
     u_int32_t lba = req->blockNo;
+    SHOW_FLOW( 1, "lba %d", lba );
 
     /* LBA48 address */
     fis[4] = lba;
     fis[5] = lba >> 8;
     fis[6] = lba >> 16;
     fis[7] = 1 << 6; // LBA48
+
+    //fis[7] |= 0xF & (lba >> 24); // LBA28
 
     fis[8] = lba >> 24;
     fis[9] = 0; // use for upper LBA bytes later
@@ -647,7 +662,9 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
 
-    //hexdump( cmd->cfis, sizeof(fis), 0, 0 );
+    SHOW_FLOW( 1, "cfis nsect %d", cmd->cfis[12] + (cmd->cfis[13] << 8) );
+
+    hexdump( cmd->cfis, sizeof(fis), 0, 0 );
     //hexdump( cp, sizeof(*cp), 0, 0 );
 
     unsigned fl = sizeof(fis_reg_h2d_t);
@@ -657,6 +674,85 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     return pFreeSlot;
 }
 
+#if 0
+// returns cmd index
+static int ahci_build_ncq_cmd(phantom_device_t *dev, int nport, pager_io_request *req )
+{
+    ahci_t *a = dev->drv_private;
+
+    int pFreeSlot = ahci_find_free_cmd( dev, nport );
+
+    assert(pFreeSlot<AHCI_CL_SIZE);
+
+    struct ahci_cmd_tab *       cmd = a->port[nport].cmds+pFreeSlot;
+    struct ahci_cmd_list*	cp = a->port[nport].clb+pFreeSlot;
+
+    a->port[nport].reqs[pFreeSlot] = req;
+
+    SHOW_FLOW( 6, "rq sect %d", req->blockNo );
+
+    // TODO move prd fill to separate func, use here and in ahci_build_req_cmd
+
+    cp->prd_length = 1;
+    cp->cmd_flags = ( (req->flag_pageout) ? AHCI_CMD_WRITE : 0);
+    cp->bytecount = 0;
+
+    // TODO assert req->nSect * 512 < max size per prd
+
+    cmd->prd_tab[0].dba = req->phys_page;
+    cmd->prd_tab[0].dbc = (req->nSect * 512) - 1; // dbc of 0 means 1 byte!!!!
+
+    // This is wrong interrupt cause?
+    cmd->prd_tab[0].dbc |= AHCI_PRD_IPC; // Req interrupt!
+
+    u_int8_t fis[20];
+
+    bzero( fis, sizeof(fis) );
+
+    /* Construct the FIS */
+    fis[0] = 0x27;		/* Host to device FIS. */
+    fis[1] = 1 << 7;	        /* Command FIS. */
+
+    fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_FPDMA_QUEUED : ATA_CMD_READ_FPDMA_QUEUED;	/* Command byte */
+
+    u_int32_t lba = req->blockNo;
+    SHOW_FLOW( 1, "lba %d", lba );
+
+    /* LBA48 address */
+    fis[4] = lba;
+    fis[5] = lba >> 8;
+    fis[6] = lba >> 16;
+
+    //fis[7] = 1 << 6; // LBA48
+    //fis[7] |= 0xF & (lba >> 24); // LBA28
+
+    fis[8] = lba >> 24;
+    fis[9] = 0; // use for upper LBA bytes later
+    fis[10] = 0;
+
+    u_int32_t nSect = req->nSect;
+
+    assert(nSect <= 16); // One PRD can't process more
+    assert( 0 == (nSect & 0xFFFF0000) );
+
+    /* Sector Count */
+    fis[3] = nSect;
+    fis[11] = nSect >> 8;
+
+    fis[12] = pFreeSlot << 3; // Tag
+
+    memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
+
+    hexdump( cmd->cfis, sizeof(fis), 0, 0 );
+    //hexdump( cp, sizeof(*cp), 0, 0 );
+
+    unsigned fl = sizeof(fis_reg_h2d_t);
+    //unsigned fl = 16;
+    cp->cmd_flags |= fl>>2;
+
+    return pFreeSlot;
+}
+#endif
 
 // returns cmd index
 static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_t fis_len, physaddr_t data, size_t data_len, int isWrite )
@@ -841,7 +937,7 @@ static int ahci_write(phantom_device_t *dev, const void *buf, int len)
 
 
 
-
+/*
 static void dump_ataid(hd_driveid_t *ataid)
 {
     SHOW_INFO( 0, "lba_capacity = %d Kb", ataid->lba_capacity/2 );
@@ -862,7 +958,7 @@ static void dump_ataid(hd_driveid_t *ataid)
     SHOW_INFO( 0, "(88) dma_ultra 	= 0x%x", ataid->dma_ultra);
     SHOW_INFO( 0, "(93) hw_config 	= 0x%x", ataid->hw_config);
 }
-
+*/
 
 //---------------------------------------------------------------------------
 // Disk io interface

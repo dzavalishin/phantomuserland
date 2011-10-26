@@ -192,6 +192,8 @@
 #define CMD_WRITE_SECTORS_EXT            0x34
 #define CMD_WRITE_VERIFY                 0x3C
 
+
+
 #define CMD_SRST                          256   // fake command code for Soft Reset
 
 
