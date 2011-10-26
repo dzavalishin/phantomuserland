@@ -1,16 +1,14 @@
-NB! Kernel is not available now, so QEMU part can be skipped.
+0. You will need cygwin + QEMU on Windows. On Linux/MacOS just QEMU is needed.
 
-0. You will need cygwin on Windows. Everything here was not tested
-   on Unix, but generally is very Unix-friendly.
-
-1. set PHANTOM_HOME env var to point to this directory.
+1. Set PHANTOM_HOME env var to point to this directory.
 
 2. Edit config.mk
 
 3. make install
 
-4. type "pvm_test.exe" and press Enter. Phantom Windows test environment 
-   must start and show some fancy background and some shit over it.
+4. cd run; phantom.cmd/phantom.sh.
+
+See doc/RUNNING for more details.
 
 For Windows-based Phantom code test and debug the path is:
 

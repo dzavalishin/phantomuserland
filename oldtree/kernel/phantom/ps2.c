@@ -23,6 +23,7 @@
 #include <kernel/device.h>
 #include <kernel/drivers.h>
 #include <hal.h>
+#include <errno.h>
 
 //#include <drv_video_screen.h>
 #include <video/screen.h>
@@ -294,8 +295,20 @@ void phantom_dev_ps2_send_aux(unsigned char aux)
 
 }
 
+// check for ACK
+static errno_t ps2_aux_wait_ack()
+{
+    if(phantom_dev_ps2_get_data() != PS2_RES_ACK)
+        return ENXIO;
+
+    return 0;
+}
+
+
 static int phantom_dev_ps2_do_init( void )
 {
+
+
     int tries = 10000;
     // Purge buffer
     while( tries-- > 0 && inb( PS2_CTRL_ADDR ) & 0x01 )
@@ -304,17 +317,19 @@ static int phantom_dev_ps2_do_init( void )
     if( tries <= 0 ) goto notfound;
 
     phantom_dev_ps2_send_cmd(PS2_CMD_DEV_INIT);
-    phantom_dev_ps2_send_aux(PS2_CMD_ENABLE_MOUSE);
 
-    // Now check for ACK
-    if(phantom_dev_ps2_get_data() != PS2_RES_ACK)
-    {
-    notfound:
-        SHOW_ERROR0( 1, "PS/2 mouse not found\n" );
-        return 1;
-    }
+    // hangs
+    //phantom_dev_ps2_send_aux(PS2_CMD_RESET_MOUSE);    ps2_aux_wait_ack(); // ignore result
+
+    phantom_dev_ps2_send_aux(PS2_CMD_ENABLE_MOUSE);
+    if( ps2_aux_wait_ack() ) goto notfound;
 
     return 0;
+
+notfound:
+    SHOW_ERROR0( 1, "PS/2 mouse not found\n" );
+    return ENXIO;
+
 }
 
 static int seq_number = 0;

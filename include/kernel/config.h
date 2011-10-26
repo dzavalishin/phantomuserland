@@ -25,7 +25,7 @@
 #  define HAVE_VESA 1
 
 #  define HAVE_FLOPPY 1
-#  define HAVE_AHCI 0
+#  define HAVE_AHCI 1
 #  define HAVE_KOLIBRI 1
 #else
 #  define HAVE_SMP 0

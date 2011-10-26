@@ -41,6 +41,8 @@
 #include "ataio.h"
 #include <kernel/dpc.h>
 
+#include <dev/ata.h>
+
 
 static ataio_t         ata_buf; // temp global
 ataio_t         *ata = &ata_buf;
@@ -59,10 +61,12 @@ ataio_t         *ata = &ata_buf;
 
 
 
-
+// TODO pager does not check for io errors!
 
 #define IO_PANIC 0
 #define BLOCKED_IO 1
+#define IDE_TRIM 0
+
 
 static errno_t simple_ide_idenify_device(int dev);
 static errno_t ide_reset( int ndev );
@@ -195,17 +199,22 @@ static errno_t ide_flush( int ndev )
     return rc ? EIO : 0;
 }
 
-#if 0
+#if IDE_TRIM
 static errno_t ide_trim( int ndev, long secno, size_t nsect )
 {
+    if( ndev > 3 ) return ENXIO;
+
+    if( !(disk_info[ndev].has & I_DISK_HAS_TRIM) )
+        return ENXIO;
+
     hal_mutex_lock( &ide_io );
     while( nsect > 0 )
     {
         size_t count = limit_nsect( ndev, nsect );
 
         SHOW_FLOW( 12, "start trim sect %d + %d", secno, count );
-        int rc = reg_non_data_lba28( ndev, CMD_??,
-                                     0, count, // feature reg, sect count
+        int rc = reg_non_data_lba28( ndev, ATA_CMD_DSM,
+                                     DSM_TRIM, count, // feature reg, sect count
                                      secno );
         SHOW_FLOW( 12, "end   trim sect %d", secno );
 
@@ -500,6 +509,9 @@ static void make_unit_part( int unit, void *aio )
     p->dequeue = ideDequeue;
     p->raise = ideRaise;
     p->fence = ideFence;
+#if IDE_TRIM
+    p->trim = ideTrim;
+#endif
     snprintf( p->name, sizeof(p->name), "Ide%d", unit );
     errno_t err = phantom_register_disk_drive(p);
     if(err)

@@ -37,7 +37,7 @@ Running Phantom on ARM/MIPS
 ---------------------------
 
 ARM and MIPS ports are not finished yet. Enable corresponding ARCH in
-local-config.mk, make clean all. See run/run_arm.cmd and run/run_mips.cmd 
+local-config.mk, "make clean all". See run/run_arm.cmd and run/run_mips.cmd 
 to run on QEMU. Both kernels will die sooner or later. You're welcome to
 help with these ports.
 
