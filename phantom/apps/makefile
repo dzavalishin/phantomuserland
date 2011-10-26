@@ -1,7 +1,7 @@
 #default:: all
 
 # amp mpeg ping 
-SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), cat cp dmesg echo grep kill ln ls mkdir mode more rm sh sntp stats tcptest tetris top wavplay wc)
+SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), cat cp dmesg echo grep kill ln ls mkdir mode more pwd rm sh sntp stats tcptest tetris top touch wavplay wc)
 
 
 %.MAKE:
