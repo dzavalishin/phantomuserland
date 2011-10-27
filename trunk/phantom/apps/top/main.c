@@ -194,8 +194,8 @@ int main(int argc, char **argv)
     (void) argv;
 
     // TODO bring in good malloc/free and implement sbrk()!
-    static char arena[1024*1024];
-    init_malloc( arena, sizeof(arena) );
+    //static char arena[1024*1024];
+    //init_malloc( arena, sizeof(arena) );
 
     int err;
 

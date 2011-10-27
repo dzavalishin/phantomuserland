@@ -33,9 +33,11 @@
 #define StringNumCompare strncmp
 #define StringCompare strcmp
 #define StringCopy strcpy
+#define StringNumCopy strncmp
 
 #define MemorySet memset
 #define MemoryCopy memcpy
+#define MemoryCompare memcmp
 
 #define CountAllocation calloc
 

@@ -1,4 +1,4 @@
-PHANTOM_CFLAGS += -ffreestanding -W -Wall
+PHANTOM_CFLAGS += -ffreestanding -W -Wall -DNO_STRAY_CHECK -UKERNEL
 
 CLEAN_FILES += test/*.o crt/*.o pmod_test
 
