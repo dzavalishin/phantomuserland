@@ -533,10 +533,10 @@ static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *
                 hal_mutex_lock( &pool->mutex );
                 //as[i].refc[j]--;
                 // dec and, possibly, delete object
-                ret = do_dec_refcnt( pool, as+i, j );
+                errno_t ret2 = do_dec_refcnt( pool, as+i, j );
 
-                if( ret )
-                    return ret;
+                if( ret ) return ret;
+                if( ret2 ) return ret2;
             }
 
             if( as[i].nused == 0 )
