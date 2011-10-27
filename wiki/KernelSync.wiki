@@ -1,4 +1,5 @@
 #summary Kernel synchronization tools
+#labels Component-Kernel,Phase-Design
 
 = List =
 
@@ -60,6 +61,10 @@ It's more or less OK to disable preemption for some 50 msec, for example.
 
 == Mutex ==
 
+{{{
+#include <kernel/mutex.h>
+}}}
+
 Mutex is a high-level sync primitive. An attempt to take mutex which is locked by another thread will put current thread in a blocked state. Thread will continue when mutex is released by previous owner. Mutex is OK to take for a long time (seconds, days, years). Mutex protects against same or other CPU. Generally mutex must be used where possible.
 
 Mutex can't be used:
@@ -67,6 +72,10 @@ Mutex can't be used:
   * In places which do a lot of brief locking: mutex lock is a relatively long process.
 
 == Cond ==
+
+{{{
+#include <kernel/cond.h>
+}}}
 
 Cond is similar to mutex in terms of usage, but does a different thing. Cond is used to signal other thread that it can continue running. Cond is used with mutex - nearly allways!
 
@@ -83,7 +92,7 @@ char getchar()
 void interrupt_handler()
 {
     char c = read_char_from_device();
-    buffer_put( buf, char );                  // C
+    buffer_put( buf, c );                  // C
     hal_cond_signal( buffer_related_cond );   // D
 }
 }}}
@@ -108,10 +117,74 @@ void interrupt_handler()
     char c = read_char_from_device();
 
     hal_mutex_lock( buffer_related_mutex );
-    buffer_put( buf, char );                  // C
+    buffer_put( buf, c );                     // C
     hal_cond_signal( buffer_related_cond );   // D
     hal_mutex_unlock( buffer_related_mutex );
 }
 }}}
 
 Note that hal_cond_wait() unlocks given mutex *AFTER* blocking the thread and starting to wait for signal. It makes sure that data modification and cond signalling can't occure between lines A and B.
+
+== Semaphore ==
+
+{{{
+#include <kernel/sem.h>
+}}}
+
+Semaphore can be used as mutex or cond. 
+
+Classical use pattern:
+
+{{{
+hal_sem_t sem;
+
+void init()
+{
+    assert(!hal_sem_init( &sem, "some name for debug" );
+}
+
+char getchar()
+{   
+    while( buffer_is_empty(buf) )
+        hal_sem_acquire( &sem );
+
+    return buffer_get( buf );                 
+}
+
+void interrupt_handler()
+{
+    char c = read_char_from_device();
+
+    buffer_put( buf, c );
+    hal_sem_release( &sem );
+}
+}}}
+
+Semaphore keeps acquire/release count and each {{{sem_release}}} will let just one {{{sem_acquire}}} to pass through. That's why semaphore needs no additional protection with mutex.
+
+Bulk consumer use pattern:
+
+{{{
+
+void consumer_thread()
+{   
+    while(1)
+    {
+        // Wait for something to come
+        hal_sem_acquire( &sem );
+        // If we missed some releases, we'll process 'em all below
+        hal_sem_zero( &sem );
+
+        while( !buffer_is_empty(buf) )
+            do_smthng( buffer_get( buf ) );
+    }
+}
+
+void interrupt_handler()
+{
+    char c = read_char_from_device();
+
+    buffer_put( buf, c );
+    hal_sem_release( &sem );
+}
+}}}
