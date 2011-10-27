@@ -27,8 +27,8 @@ int main(int argc, char *argv[], char *envp[])
     (void) envp;
 
     // TODO bring in good malloc/free and implement sbrk()!
-    static char arena[1024*1024];
-    init_malloc( arena, sizeof(arena) );
+    //static char arena[1024*1024];
+    //init_malloc( arena, sizeof(arena) );
 
     printf("Phantom Simple Unix Box Shell is running, pid %d\n", getpid());
 
@@ -52,6 +52,8 @@ int main(int argc, char *argv[], char *envp[])
         run_script(af_script_file_name);
         if(af_exit_after_script) exit(0);
     }
+
+    setvbuf( stdin, 0, _IONBF, 0 );
 
     char buf[1024];
 
@@ -77,11 +79,13 @@ static void getline( char *buf, int size )
 
     while( nread < size-1 )
     {
-        read( 0, bp, 1 );
+        //read( 0, bp, 1 );
+        *bp = getchar();
 
         //printf("!-%c", *bp);
         //printf("%c", *bp);
-        write( 1, bp, 1 );
+        //write( 1, bp, 1 );
+        putchar(*bp);
 
         if( *bp == '\n' )
             break;

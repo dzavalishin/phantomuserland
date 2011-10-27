@@ -68,8 +68,8 @@ char *argv[];
   int ret, code;
 
   // 4mb
-  static char heap[1024*1024*4];
-  init_malloc( heap, sizeof(heap) );
+  //static char heap[1024*1024*4];
+  //init_malloc( heap, sizeof(heap) );
 
   Clear_Options();
 

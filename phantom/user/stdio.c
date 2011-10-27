@@ -1,26 +1,11 @@
 #include <user/sys_fio.h>
 #include <string.h>
+#include <stdio.h>
 
-// min stdio helpers for libc printf to work
+#include "stdio_private.h"
 
-int putchar( int c )
-{
-    char cc = c;
-    write(1, &cc, 1);
-    return cc;
-}
+errno_t errno;
 
-int getchar()
-{
-    char cc;
-    read(0, &cc, 1);
-    return cc;
-}
-
-int puts(const char *s)
-{
-	int len = strlen(s);
-    write(1, s, len);
-	putchar( '\n' );
-	return len;
-}
+FILE *stdin;
+FILE *stdout;
+FILE *stderr;

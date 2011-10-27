@@ -8,7 +8,7 @@
 
 sint32 touch( char *pName ) {
     sint32 nHandle;
-
+#warning doesnt update atime
     nHandle = Open( pName, O_RDONLY );
     if ( nHandle > 0 ) {
         Print( "file already exists\n" );

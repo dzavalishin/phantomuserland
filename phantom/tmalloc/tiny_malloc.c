@@ -108,7 +108,7 @@ void *malloc( size_t size )
     return (void *)( (addr_t)p + sizeof(UNIT) );
 }
 
-void init_malloc( void *heap, unsigned len )
+void __init_malloc( void *heap, unsigned len )
 {
     len  += 3;
     len >>= 2;
