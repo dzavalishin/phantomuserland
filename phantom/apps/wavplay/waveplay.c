@@ -42,7 +42,7 @@
 
 //#define DEFAULT_DSP	"/dev/sb16"
 //#define DEFAULT_DSP	"/dev/sound/sb/dsp"
-#define DEFAULT_DSP	"/dev/pci/es13700"
+#define DEFAULT_DSP	"/dev/pci/es1370.0"
 //#define DEFAULT_DSP	"/dev/null"
 #define DEFAULT_BUFFERSIZE (2048*8)
 //#define perror	//
