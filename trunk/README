@@ -37,7 +37,14 @@ DEBUG
   Kernel is able to send logging info to syslogd by UDP.
   Currently syslogd address is hardcoded in net_misc.c.
 
+DIRECTORIES
 
+trunk/oldtree/kernel/phantom - kernel 
+trunk/phantom                - libs and unix userland (user/apps)
+trunk/plib/sys/src           - native phantom userland code
+
+trunk/run                    - QEMU run/test environment
+trunk/plc                    - phantom language compiler / java bytecode translator
 
 Best regards, Dmitry Zavalishin,
 Phantom project... how to say... inventor? :)

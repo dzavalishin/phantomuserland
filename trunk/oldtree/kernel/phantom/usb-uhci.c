@@ -15,12 +15,15 @@
 #include "usb-uhci.h" // USBLEGSUP
 #include "usb.h" // struct usb_s
 
+
 struct usb_uhci_s {
     struct usb_s usb;
     u16 iobase;
     struct uhci_qh *control_qh, *bulk_qh;
     struct uhci_framelist *framelist;
 };
+
+static void uhci_dump(struct usb_uhci_s *cntl);
 
 
 /****************************************************************
@@ -131,13 +134,17 @@ configure_uhci(void *data)
     SHOW_FLOW( 8, "framelist %p", fl );
 
     // Allocate ram for schedule storage
-    struct uhci_td *term_td = malloc_high(sizeof(*term_td));
-    struct uhci_qh *intr_qh = malloc_high(sizeof(*intr_qh));
-    struct uhci_qh *term_qh = malloc_high(sizeof(*term_qh));
-    if (!term_td || !fl || !intr_qh || !term_qh) {
+    addr_t term_td_raw = (addr_t)malloc_high(0x10+sizeof(struct uhci_td));
+    addr_t intr_qh_raw = (addr_t)malloc_high(0x10+sizeof(struct uhci_td));
+    addr_t term_qh_raw = (addr_t)malloc_high(0x10+sizeof(struct uhci_td));
+    if (!term_td_raw || !fl_b || !intr_qh_raw || !term_qh_raw) {
         warn_noalloc();
         goto fail;
     }
+
+    struct uhci_td *term_td = (void*)((0x10+term_td_raw) & ~0xF);
+    struct uhci_qh *intr_qh = (void*)((0x10+intr_qh_raw) & ~0xF);
+    struct uhci_qh *term_qh = (void*)((0x10+term_qh_raw) & ~0xF);
 
     // Work around for PIIX errata
     memset(term_td, 0, sizeof(*term_td));
@@ -181,10 +188,10 @@ configure_uhci(void *data)
     // No devices found - shutdown and free controller.
     outw(cntl->iobase + USBCMD, 0);
 fail:
-    free(term_td);
+    free((void *)term_td_raw);
     free(fl_b);
-    free(intr_qh);
-    free(term_qh);
+    free((void *)intr_qh_raw);
+    free((void *)term_qh_raw);
     free(cntl);
 }
 
@@ -218,13 +225,15 @@ uhci_init(u16 bdf, int busid)
  ****************************************************************/
 
 static int
-wait_qh(struct usb_uhci_s *cntl, struct uhci_qh *qh)
+wait_qh(struct usb_uhci_s *cntl, volatile struct uhci_qh *qh)
 {
     //SHOW_FLOW( 5, "count = %d", count );
     // XXX - 500ms just a guess
     //u64 end = calc_future_tsc(500);
     u64 end = calc_future_tsc(5000);
+    uhci_dump(cntl);
     for (;;) {
+        //printf("!%x ", qh->element);
         if (qh->element & UHCI_PTR_TERM)
             return 0;
         if (check_tsc(end)) {
@@ -234,6 +243,7 @@ wait_qh(struct usb_uhci_s *cntl, struct uhci_qh *qh)
                     , qh, td, td->status
                     , inw(cntl->iobase + USBCMD)
                     , inw(cntl->iobase + USBSTS));
+            uhci_dump(cntl);
             return -1;
         }
         yield();
@@ -242,21 +252,30 @@ wait_qh(struct usb_uhci_s *cntl, struct uhci_qh *qh)
 
 // Wait for next USB frame to start - for ensuring safe memory release.
 static void
-uhci_waittick(u16 iobase)
+uhci_waittick(struct usb_uhci_s *cntl)
 {
+    u16 iobase = cntl->iobase;
+
     SHOW_FLOW0( 6, "enter" );
+    uhci_dump(cntl);
+
     barrier();
     u16 startframe = inw(iobase + USBFRNUM);
     u64 end = calc_future_tsc(1000 * 5);
     for (;;) {
-        if (inw(iobase + USBFRNUM) != startframe)
+        u16 nowframe = inw(iobase + USBFRNUM);
+        if(nowframe != startframe)
             break;
         if (check_tsc(end)) {
             warn_timeout();
+
+            uhci_dump(cntl);
+
             return;
         }
         yield();
     }
+    SHOW_FLOW0( 6, "leave ok" );
 }
 
 struct uhci_pipe {
@@ -292,7 +311,7 @@ uhci_free_pipe(struct usb_pipe *p)
                 cntl->control_qh = pos;
             if (cntl->bulk_qh == next)
                 cntl->bulk_qh = pos;
-            uhci_waittick(cntl->iobase);
+            uhci_waittick(cntl);
             free(pipe);
             return;
         }
@@ -307,7 +326,7 @@ uhci_alloc_control_pipe(struct usb_pipe *dummy)
         return NULL;
     struct usb_uhci_s *cntl = container_of(
         dummy->cntl, struct usb_uhci_s, usb);
-    dprintf(7, "uhci_alloc_control_pipe %p", &cntl->usb);
+    dprintf(7, "uhci_alloc_control_pipe usb %p", &cntl->usb);
 
     // Allocate a queue head.
     struct uhci_pipe *pipe = malloc_tmphigh(sizeof(*pipe));
@@ -315,6 +334,9 @@ uhci_alloc_control_pipe(struct usb_pipe *dummy)
         warn_noalloc();
         return NULL;
     }
+
+    dprintf(7, "uhci_alloc_control_pipe pipe %p", pipe);
+
     memset(pipe, 0, sizeof(*pipe));
     memcpy(&pipe->pipe, dummy, sizeof(pipe->pipe));
     pipe->qh.element = UHCI_PTR_TERM;
@@ -348,11 +370,15 @@ uhci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
 
     // Setup transfer descriptors
     int count = 2 + DIV_ROUND_UP(datasize, maxpacket);
-    struct uhci_td *tds = malloc_tmphigh(sizeof(*tds) * count);
-    if (!tds) {
+
+    // Poor man's memalign
+    addr_t tds_raw = (addr_t)malloc_tmphigh(0x10 + sizeof(struct uhci_td) * count);
+    if (!tds_raw) {
         warn_noalloc();
         return -1;
     }
+
+    struct uhci_td *tds = (void *)((0x10+tds_raw) & ~0xF);
 
     SHOW_FLOW( 5, "count = %d, datasize = %d, maxpacket = %d", count, datasize, maxpacket );
 
@@ -389,9 +415,9 @@ uhci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
     int ret = wait_qh(cntl, &pipe->qh);
     if (ret) {
         pipe->qh.element = UHCI_PTR_TERM;
-        uhci_waittick(pipe->iobase);
+        uhci_waittick(cntl);
     }
-    free(tds);
+    free((void *)tds_raw);
     return ret;
 }
 
@@ -510,7 +536,9 @@ uhci_send_bulk(struct usb_pipe *p, int dir, void *data, int datasize)
 fail:
     SHOW_FLOW0(1, "uhci_send_bulk failed");
     SET_FLATPTR(pipe->qh.element, UHCI_PTR_TERM);
-    uhci_waittick(GET_FLATPTR(pipe->iobase));
+    struct usb_uhci_s *cntl = container_of(
+        p->cntl, struct usb_uhci_s, usb);
+    uhci_waittick(GET_FLATPTR(cntl));
     return -1;
 }
 
@@ -621,5 +649,45 @@ uhci_poll_intr(struct usb_pipe *p, void *data)
 
     return 0;
 }
+
+static void uhci_dump(struct usb_uhci_s *cntl)
+{
+    u32 membase = inl(cntl->iobase + USBFLBASEADD);
+    u16 startframe = inw(cntl->iobase + USBFRNUM);
+    u8 sof = inb(cntl->iobase + USBSOF);
+    SHOW_INFO( 1, "iobase %x, membase %x, frame %d, SOF %d", cntl->iobase, membase, startframe, sof );
+
+    {
+    u16 cmd = inw(cntl->iobase + USBCMD);
+    SHOW_INFO( 1, "cmd %b", cmd, "\020\1Run\2Reset\3GReset\4GSuspend\5FrcGResume\6SWDebug\7Conf\10MaxPkt64" );
+    }
+    {
+    u16 sts = inw(cntl->iobase + USBSTS);
+    SHOW_INFO( 1, "sts %b", sts, "\020\1IntrIOC\2IntrErr\3ResumeDetect\4PciErr\5SchedErr\6Halt" );
+    }
+    {
+    u16 intr = inw(cntl->iobase + USBINTR);
+    SHOW_INFO( 1, "irq %b", intr, "\020\1Timeout\2Resume\3IOComplete\4ShortPkt" );
+    }
+
+    //uhci_framelist *fl = cntl->framelist;
+
+
+    struct uhci_qh *pos = (void*)(cntl->framelist->links[0] & ~UHCI_PTR_BITS);
+    for (;;)
+    {
+        SHOW_INFO( 1, "td %x link %x elem %x", pos, pos->link, pos->element );
+        u32 link = pos->link;
+
+        if (link == UHCI_PTR_TERM)
+            break;
+
+        struct uhci_qh *next = (void*)(link & ~UHCI_PTR_BITS);
+        pos = next;
+    }
+
+}
+
+
 
 #endif // HAVE_USB
