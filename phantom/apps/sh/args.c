@@ -38,7 +38,8 @@ void init_arguments(int argc,char **argv){
         cnt++;
     }
 
-    if(cnt < argc){
+    if(cnt < argc)
+    {
 
         af_script_file_name = argv[cnt];
         cnt++;
@@ -55,5 +56,10 @@ void init_arguments(int argc,char **argv){
 
     }
 
-
+    if( af_script_file_name == 0 )        
+    {
+        af_script_file_name = "/amnt0/etc/.profile";
+        //af_script_file_name = "/amnt0/etc/rc";
+        af_exit_after_script = 0;
+    }
 }

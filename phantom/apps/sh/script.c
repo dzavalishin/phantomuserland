@@ -66,7 +66,11 @@ int  read_text_file(const char *filename,text_file *data)
 
     }
 
+//printf("fn '%s'\n", realfilename);
+
     size = read_file_in_buffer(realfilename,&(data->buffer));
+
+//printf("data '%s'\n", data->buffer );
 
     if(size < 0) return size;
 

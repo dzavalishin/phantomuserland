@@ -20,7 +20,7 @@ break pvm_exec_panic
 
 break main
 
-source -v .gdb-local
+source -v ./.gdb-local
 
 #watch usec_per_tick
 

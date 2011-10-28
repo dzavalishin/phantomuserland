@@ -135,6 +135,8 @@ int parse_line(const char *buf, char *argv[], int max_args, char *redirect_in, c
     redirect_in[0] = 0;
     redirect_out[0] = 0;
 
+//printf("parse '%s'", buf );
+
     while(1){
 
         while((*scan != 0) && (isspace(*scan))) scan++;

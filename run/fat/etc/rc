@@ -1,1 +1,1 @@
-echo "executing /etc/rc"
+echo "executing /etc/rc - DEPRECATED"

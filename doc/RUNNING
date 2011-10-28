@@ -2,7 +2,17 @@ Running Phantom on QEMU
 -----------------------
 
 > cd ../run
-> phantom-clean
+> phantom_clean
+
+
+Debugging on all platforms
+--------------------------
+
+- run kernel in qemu as said above
+- cd trunk/oldtree/kernel/phantom
+- run gdb (arm-elf-gdb/mips-elf-gdb)
+- it will execute .gdbinit and connect to running kernel
+- if you need to setup gdb to your needs, create/modify .gdb-local (doesn't work on arm for some reason)
 
 
 Running Phantom on Intel 32
@@ -47,3 +57,4 @@ Running Phantom on Intel 64
 
 This port is not producing bootable code yet. Again, don't hesitate to 
 take part.
+
