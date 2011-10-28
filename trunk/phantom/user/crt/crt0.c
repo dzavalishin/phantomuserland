@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <user/tmalloc.h>
 
 //#include "../stdio_private.h"
 

@@ -1,1 +1,1 @@
-void init_malloc( void *heap, unsigned len );
+void __init_malloc( void *heap, unsigned len );
