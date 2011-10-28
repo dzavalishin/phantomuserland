@@ -595,6 +595,13 @@ static int elf_check(struct Elf32_Ehdr *elf_header)
 
 static errno_t elf_load_seg(Elf32_Phdr *seg, void *src, void *dst)
 {
+    SHOW_INFO( 5, "Elf32_Phdr type %d offset %d vaddr %d filesz %d memsz %d flags %x",
+               seg->p_type,
+               seg->p_offset, seg->p_vaddr,
+               seg->p_filesz, seg->p_memsz,
+               seg->p_flags
+             );
+
     // Check if we need to load this segment
     if(seg->p_type != PT_LOAD)
         return 0; // Not loadable
@@ -606,8 +613,16 @@ static errno_t elf_load_seg(Elf32_Phdr *seg, void *src, void *dst)
     void *dest_base = dst + seg->p_vaddr;
     //size_t size = ((u32int) dest_base + seg->p_memsz + 0x1000) & ~0xFFF;
 
+    // Loadable image less than mem - clear
+    if(seg->p_filesz < seg->p_memsz)
+        bzero( dest_base, seg->p_memsz );
+
+    if(seg->p_filesz > seg->p_memsz)
+    SHOW_ERROR( 1, "Elf32_Phdr filesz %d > memsz %d", seg->p_filesz, seg->p_memsz );
+
     // Load!
-    memcpy(dest_base, src_base, seg->p_memsz);
+    //memcpy(dest_base, src_base, seg->p_memsz);
+    memcpy(dest_base, src_base, seg->p_filesz);
 
 #if 0
     // Set proper flags (i.e. remove write flag if needed)
