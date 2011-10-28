@@ -3526,7 +3526,7 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
     if(1)
     {
         int pid = uu_create_process(-1);
-        const char* av[] = { "sh", 0 };
+        const char* av[] = { "sh", "-s", "phantom.rc", 0 };
         uu_proc_setargs( pid, av, 0 );
 
         if( uu_run_file( pid, "/amnt0/bin/sh" ) )

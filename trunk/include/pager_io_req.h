@@ -98,6 +98,11 @@ pager_io_request_init( pager_io_request *me )
 }
 
 
+static inline bool io_request_is_complete(pager_io_request *rq)
+{
+    return (rq->flag_pageout == 0) && (rq->flag_pagein == 0);
+}
+
 void pager_io_request_done( pager_io_request *me );
 
 

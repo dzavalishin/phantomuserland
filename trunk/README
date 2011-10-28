@@ -23,6 +23,9 @@ BUILD
 
   "make all" in trunk
 
+  In Windows you will need Cygwin to do that. http://www.cygwin.com
+  Select, at least: gcc4, subversion, binutils, make, gdb
+
 RUN
 
   Run phantom.cmd/phantom.sh in trunk/run
@@ -50,3 +53,7 @@ Best regards, Dmitry Zavalishin,
 Phantom project... how to say... inventor? :)
 http://dz.ru/en
 
+DOX
+
+  doc/*
+  http://code.google.com/p/phantomuserland/w/list

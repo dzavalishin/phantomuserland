@@ -179,11 +179,16 @@ static errno_t queueDequeue( struct phantom_disk_partition *p, pager_io_request 
         ret = EBUSY;
     else
     {
-        assert(!queue_empty(&(q->requests)));
-        // TODO assert that block is really in q
-        queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
-        rq->flag_pageout = 0;
-        rq->flag_pagein = 0;
+        if(!io_request_is_complete(rq))
+        {
+            assert(!queue_empty(&(q->requests)));
+            // TODO assert that block is really in q
+            queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
+            rq->flag_pageout = 0;
+            rq->flag_pagein = 0;
+        }
+        else
+            ret = ESRCH;
     }
 
     UNLOCK();
@@ -209,10 +214,15 @@ static errno_t queueRaisePrio( struct phantom_disk_partition *p, pager_io_reques
         ret = EBUSY;
     else
     {
-        assert(!queue_empty(&(q->requests)));
-        // TODO assert that block is really in q
-        queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
-        queue_enter_first( &(q->requests), rq, pager_io_request *, disk_chain);
+        if(!io_request_is_complete(rq))
+        {
+            assert(!queue_empty(&(q->requests)));
+            // TODO assert that block is really in q
+            queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
+            queue_enter_first( &(q->requests), rq, pager_io_request *, disk_chain);
+        }
+        else
+            ret = ESRCH;
     }
 
     UNLOCK();
