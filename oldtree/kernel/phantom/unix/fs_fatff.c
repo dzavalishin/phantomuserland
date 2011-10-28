@@ -226,8 +226,14 @@ static size_t      fatff_getpath( struct uufile *f, void *dest, size_t bytes)
 // returns -1 for non-files
 static ssize_t      fatff_getsize( struct uufile *f)
 {
-    (void) f;
-    return -1;
+    if( !(f->flags & UU_FILE_FLAG_OPEN) )
+        return -1;
+
+    FIL *fp = f->impl;
+    if( fp == 0 )
+        return -1;
+
+    return fp->fsize;
 }
 
 

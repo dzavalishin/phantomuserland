@@ -156,7 +156,7 @@ FILE *fopen(const char *filename, const char *mode)
     int flags;
     int fd;
 
-    if(_set_open_flags(mode, &sys_flags, &flags) || (fd = open(filename, sys_flags)) < 0)
+    if(_set_open_flags(mode, &sys_flags, &flags) || ((fd = open(filename, sys_flags)) < 0) )
     {
         return (FILE*)0;
     }
