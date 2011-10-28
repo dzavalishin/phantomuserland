@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+static __inline int abs(int a) { return (a < 0 ? -a : a); }
+
+
 #define	STEPSIZE	18
 
 /*
@@ -318,7 +321,7 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 	}
 
 // try other directions
-	if ( ((rand()&3) & 1) ||  abs(deltay)>abs(deltax))
+	if ( ((random()&3) & 1) ||  abs(deltay)>abs(deltax))
 	{
 		tdir=d[1];
 		d[1]=d[2];
@@ -338,7 +341,7 @@ void SV_NewChaseDir (edict_t *actor, edict_t *enemy, float dist)
 	if (olddir!=DI_NODIR && SV_StepDirection(actor, olddir, dist))
 			return;
 
-	if (rand()&1) 	/*randomly determine direction of search*/
+	if (random()&1) 	/*randomly determine direction of search*/
 	{
 		for (tdir=0 ; tdir<=315 ; tdir += 45)
 			if (tdir!=turnaround && SV_StepDirection(actor, tdir, dist) )
@@ -418,7 +421,7 @@ void SV_MoveToGoal (void)
 		return;
 
 // bump around...
-	if ( (rand()&3)==1 ||
+	if ( (random()&3)==1 ||
 	!SV_StepDirection (ent, ent->v.ideal_yaw, dist))
 	{
 		SV_NewChaseDir (ent, goal, dist);

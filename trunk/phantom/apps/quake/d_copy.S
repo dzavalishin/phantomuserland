@@ -1,3 +1,4 @@
+#if 0
 //
 // d_copy.s
 // x86 assembly-language screen copying code.
@@ -147,3 +148,4 @@ LLRowLoop:
 
 	ret
 
+#endif
