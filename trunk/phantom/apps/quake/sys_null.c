@@ -1,3 +1,4 @@
+#if 0
 /*
 Copyright (C) 1996-1997 Id Software, Inc.
 
@@ -232,3 +233,4 @@ void main (int argc, char **argv)
 }
 
 
+#endif

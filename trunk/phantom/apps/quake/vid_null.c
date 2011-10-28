@@ -1,3 +1,4 @@
+#if 0
 /*
 Copyright (C) 1996-1997 Id Software, Inc.
 
@@ -84,4 +85,6 @@ void D_EndDirectRect (int x, int y, int width, int height)
 {
 }
 
+
+#endif
 
