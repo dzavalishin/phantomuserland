@@ -295,8 +295,8 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
             ret = usys_write(&err, u, uarg[0], addr, count );
             break;
         }
-    case SYS_lseek:             ret = usys_lseek(&err, u, uarg[0], uarg[1], uarg[2] ); break;
-    case SYS_creat:		ret = usys_creat(&err, u, adjustin( uarg[0], st ), uarg[1] ); break;
+    case SYS_lseek: ret = usys_lseek(&err, u, uarg[0], uarg[1], uarg[2] ); break;
+    case SYS_creat: ret = usys_creat(&err, u, adjustin( uarg[0], st ), uarg[1] ); break;
     case SYS_chdir:
         {
             AARG(const char *, path, 0, 0);

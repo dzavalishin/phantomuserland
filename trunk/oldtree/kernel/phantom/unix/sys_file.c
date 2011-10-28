@@ -134,21 +134,24 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
-    ssize_t size = f->ops->getsize( f );
-
-    if(size < 0)
-    {
-        *err = ESPIPE;
-        return -1;
-    }
-
     off_t pos = offset;
 
     switch(whence)
     {
     case SEEK_SET: break;
     case SEEK_CUR: pos += f->pos;
-    case SEEK_END: pos += size;
+    case SEEK_END:
+        {
+            ssize_t size = f->ops->getsize( f );
+
+            if(size < 0)
+            {
+                *err = ESPIPE;
+                return -1;
+            }
+
+            pos += size;
+        }
     }
 
     if(pos < 0)
