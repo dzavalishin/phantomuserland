@@ -1,0 +1,506 @@
+# $Id: mmakefile.src 23573 2005-08-31 22:12:31Z weissms $
+include $(TOP)/config/make.cfg
+
+INSTDIR  := $(CONTRIBDIR)/Games/Quake
+BUILDDIR := $(GENDIR)/$(CURDIR)
+STARTUP := $(LIBDIR)/startup.o
+LIBS	:= -L$(LIBDIR) -larosc -larosm -lamiga -larossupport -lautoinit
+DEPLIBS := $(STARTUP) $(LIBDIR)/libarosc.a $(LIBDIR)/libarosm.a	\
+		$(LIBDIR)/libamiga.a $(LIBDIR)/libarossupport.a
+
+EXE := $(INSTDIR)/quake
+
+#MM- contrib-games : Quake-$(AROS_TARGET_CPU)
+#MM Quake-i386 : linklibs includes
+Quake-i386 : make-dirs $(EXE)
+
+make-dirs :
+	%mkdirs_q $(INSTDIR) $(BUILDDIR)
+
+BASEVERSION=1.09
+VERSION=$(BASEVERSION)$(GLIBC)
+
+ifneq (,$(findstring libc6,$(shell if [ -e /lib/libc.so.6 ];then echo libc6;fi)))
+GLIBC=-glibc
+else
+GLIBC=
+endif
+
+ifneq (,$(findstring alpha,$(shell uname -m)))
+ARCH=axp
+else
+ARCH=i386
+endif
+NOARCH=noarch
+
+MOUNT_DIR=.
+MASTER_DIR=/grog/Projects/QuakeMaster
+MESA_DIR=/usr/local/src/Mesa-2.6
+TDFXGL_DIR = /home/zoid/3dfxgl
+
+BUILD_DEBUG_DIR=debug$(ARCH)$(GLIBC)
+BUILD_RELEASE_DIR=release$(ARCH)$(GLIBC)
+
+CC=$(AROS_CC)
+
+BASE_CFLAGS=-Dstricmp=strcasecmp
+
+DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+
+AROSCFLAGS=-DAROS $(RELEASE_CFLAGS)
+AROSLDFLAGS=-L$(LIBDIR) -larosc -larosm -lamiga -lautoinit
+
+DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
+DO_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -o $@ -c $<
+DO_GL_CC=$(CC) $(CFLAGS) $(GLCFLAGS) -o $@ -c $<
+DO_GL_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(GLCFLAGS) -o $@ -c $<
+
+DO_AROS_CC=$(CC) $(CFLAGS) $(AROSCFLAGS) -o $@ -c $<
+DO_AROS_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(AROSCFLAGS) -o $@ -c $<
+
+DO_O_CC=$(CC) -O $(CFLAGS) -o $@ -c $<
+DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
+DO_GL_AS=$(CC) $(CFLAGS) $(GLCFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
+
+#############################################################################
+# SETUP AND BUILD
+#############################################################################
+
+
+
+
+
+#############################################################################
+# AROS Quake
+#############################################################################
+
+AROS_OBJS = \
+	$(BUILDDIR)/cl_demo.o \
+	$(BUILDDIR)/cl_input.o \
+	$(BUILDDIR)/cl_main.o \
+	$(BUILDDIR)/cl_parse.o \
+	$(BUILDDIR)/cl_tent.o \
+	$(BUILDDIR)/chase.o \
+	$(BUILDDIR)/cmd.o \
+	$(BUILDDIR)/common.o \
+	$(BUILDDIR)/console.o \
+	$(BUILDDIR)/crc.o \
+	$(BUILDDIR)/cvar.o \
+	$(BUILDDIR)/draw.o \
+	$(BUILDDIR)/d_edge.o \
+	$(BUILDDIR)/d_fill.o \
+	$(BUILDDIR)/d_init.o \
+	$(BUILDDIR)/d_modech.o \
+	$(BUILDDIR)/d_part.o \
+	$(BUILDDIR)/d_polyse.o \
+	$(BUILDDIR)/d_scan.o \
+	$(BUILDDIR)/d_sky.o \
+	$(BUILDDIR)/d_sprite.o \
+	$(BUILDDIR)/d_surf.o \
+	$(BUILDDIR)/d_vars.o \
+	$(BUILDDIR)/d_zpoint.o \
+	$(BUILDDIR)/host.o \
+	$(BUILDDIR)/host_cmd.o \
+	$(BUILDDIR)/keys.o \
+	$(BUILDDIR)/menu.o \
+	$(BUILDDIR)/mathlib.o \
+	$(BUILDDIR)/model.o \
+	$(BUILDDIR)/net_loop.o \
+	$(BUILDDIR)/net_main.o \
+	$(BUILDDIR)/net_vcr.o \
+	$(BUILDDIR)/nonintel.o \
+	$(BUILDDIR)/pr_cmds.o \
+	$(BUILDDIR)/pr_edict.o \
+	$(BUILDDIR)/pr_exec.o \
+	$(BUILDDIR)/r_aclip.o \
+	$(BUILDDIR)/r_alias.o \
+	$(BUILDDIR)/r_bsp.o \
+	$(BUILDDIR)/r_light.o \
+	$(BUILDDIR)/r_draw.o \
+	$(BUILDDIR)/r_efrag.o \
+	$(BUILDDIR)/r_edge.o \
+	$(BUILDDIR)/r_misc.o \
+	$(BUILDDIR)/r_main.o \
+	$(BUILDDIR)/r_sky.o \
+	$(BUILDDIR)/r_sprite.o \
+	$(BUILDDIR)/r_surf.o \
+	$(BUILDDIR)/r_part.o \
+	$(BUILDDIR)/r_vars.o \
+	$(BUILDDIR)/screen.o \
+	$(BUILDDIR)/sbar.o \
+	$(BUILDDIR)/sv_main.o \
+	$(BUILDDIR)/sv_phys.o \
+	$(BUILDDIR)/sv_move.o \
+	$(BUILDDIR)/sv_user.o \
+	$(BUILDDIR)/zone.o	\
+	$(BUILDDIR)/view.o	\
+	$(BUILDDIR)/wad.o \
+	$(BUILDDIR)/world.o \
+	\
+	$(BUILDDIR)/d_draw.o \
+	$(BUILDDIR)/d_draw16.o \
+	$(BUILDDIR)/d_parta.o \
+	$(BUILDDIR)/d_polysa.o \
+	$(BUILDDIR)/d_scana.o \
+	$(BUILDDIR)/d_spr8.o \
+	$(BUILDDIR)/d_varsa.o \
+	$(BUILDDIR)/math.o \
+	$(BUILDDIR)/r_aliasa.o \
+	$(BUILDDIR)/r_drawa.o \
+	$(BUILDDIR)/r_edgea.o \
+	$(BUILDDIR)/r_varsa.o \
+	$(BUILDDIR)/surf16.o \
+	$(BUILDDIR)/surf8.o \
+	$(BUILDDIR)/worlda.o \
+	$(BUILDDIR)/r_aclipa.o \
+	$(BUILDDIR)/sys_dosa.o \
+	$(BUILDDIR)/sys_aros.o \
+	$(BUILDDIR)/cd_null.o \
+	$(BUILDDIR)/snd_null.o \
+	$(BUILDDIR)/net_none.o \
+	$(BUILDDIR)/vid_aros.o \
+	$(BUILDDIR)/in_null.o
+
+
+# added objects below sys_aros.o
+
+# Removed objects
+
+#	$(BUILDDIR)/net_dgrm.o \
+#	$(BUILDDIR)/net_udp.o \
+#	$(BUILDDIR)/net_bsd.o \
+
+#	$(BUILDDIR)/cd_linux.o \
+#	$(BUILDDIR)/sys_linux.o \
+#	$(BUILDDIR)/vid_x.o \
+#	$(BUILDDIR)/snd_linux.o \
+#	$(BUILDDIR)/snd_dma.o \
+#	$(BUILDDIR)/snd_mem.o \
+#	$(BUILDDIR)/snd_mix.o \
+#	$(BUILDDIR)/snd_mixa.o \
+
+# $(INSTDIR)/quake : $(AROS_OBJS)
+#	$(CC) $(CFLAGS) -o $@ $(AROS_OBJS) $(AROSLDFLAGS) $(LDFLAGS)
+
+$(EXE) : $(AROS_OBJS) $(DEPLIBS)
+	%link_q opt="$(TARGET_LDFLAGS) $(AROSLDFLAGS)" from="$(AROS_OBJS)"
+
+####
+
+$(BUILDDIR)/cl_demo.o :  $(MOUNT_DIR)/cl_demo.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/cl_input.o : $(MOUNT_DIR)/cl_input.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/cl_main.o :  $(MOUNT_DIR)/cl_main.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/cl_parse.o : $(MOUNT_DIR)/cl_parse.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/cl_tent.o :  $(MOUNT_DIR)/cl_tent.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/chase.o :    $(MOUNT_DIR)/chase.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/cmd.o :      $(MOUNT_DIR)/cmd.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/common.o :   $(MOUNT_DIR)/common.c
+	$(DO_AROS_DEBUG_CC)
+
+$(BUILDDIR)/console.o :  $(MOUNT_DIR)/console.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/crc.o :      $(MOUNT_DIR)/crc.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/cvar.o :     $(MOUNT_DIR)/cvar.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/draw.o :     $(MOUNT_DIR)/draw.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_edge.o :   $(MOUNT_DIR)/d_edge.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_fill.o :   $(MOUNT_DIR)/d_fill.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_init.o :   $(MOUNT_DIR)/d_init.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_modech.o : $(MOUNT_DIR)/d_modech.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_part.o :   $(MOUNT_DIR)/d_part.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_polyse.o : $(MOUNT_DIR)/d_polyse.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_scan.o :   $(MOUNT_DIR)/d_scan.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_sky.o :    $(MOUNT_DIR)/d_sky.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_sprite.o : $(MOUNT_DIR)/d_sprite.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_surf.o :   $(MOUNT_DIR)/d_surf.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_vars.o :   $(MOUNT_DIR)/d_vars.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/d_zpoint.o : $(MOUNT_DIR)/d_zpoint.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/host.o :     $(MOUNT_DIR)/host.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/host_cmd.o : $(MOUNT_DIR)/host_cmd.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/keys.o :     $(MOUNT_DIR)/keys.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/menu.o :     $(MOUNT_DIR)/menu.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/mathlib.o :  $(MOUNT_DIR)/mathlib.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/model.o :    $(MOUNT_DIR)/model.c
+	$(DO_AROS_CC)
+
+# $(BUILDDIR)/net_dgrm.o : $(MOUNT_DIR)/net_dgrm.c
+#	$(DO_AROS_CC)
+
+$(BUILDDIR)/net_loop.o : $(MOUNT_DIR)/net_loop.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/net_main.o : $(MOUNT_DIR)/net_main.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/net_vcr.o :  $(MOUNT_DIR)/net_vcr.c
+	$(DO_AROS_CC)
+
+# $(BUILDDIR)/net_udp.o :  $(MOUNT_DIR)/net_udp.c
+#	$(DO_AROS_CC)
+
+# $(BUILDDIR)/net_bsd.o :  $(MOUNT_DIR)/net_bsd.c
+#	$(DO_AROS_CC)
+
+$(BUILDDIR)/nonintel.o : $(MOUNT_DIR)/nonintel.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/pr_cmds.o :  $(MOUNT_DIR)/pr_cmds.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/pr_edict.o : $(MOUNT_DIR)/pr_edict.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/pr_exec.o :  $(MOUNT_DIR)/pr_exec.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_aclip.o :  $(MOUNT_DIR)/r_aclip.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_alias.o :  $(MOUNT_DIR)/r_alias.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_bsp.o :    $(MOUNT_DIR)/r_bsp.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_light.o :  $(MOUNT_DIR)/r_light.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_draw.o :   $(MOUNT_DIR)/r_draw.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_efrag.o :  $(MOUNT_DIR)/r_efrag.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_edge.o :   $(MOUNT_DIR)/r_edge.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_misc.o :   $(MOUNT_DIR)/r_misc.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_main.o :   $(MOUNT_DIR)/r_main.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_sky.o :    $(MOUNT_DIR)/r_sky.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_sprite.o : $(MOUNT_DIR)/r_sprite.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_surf.o :   $(MOUNT_DIR)/r_surf.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_part.o :   $(MOUNT_DIR)/r_part.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/r_vars.o :   $(MOUNT_DIR)/r_vars.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/screen.o :   $(MOUNT_DIR)/screen.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/sbar.o :     $(MOUNT_DIR)/sbar.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/sv_main.o :  $(MOUNT_DIR)/sv_main.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/sv_phys.o :  $(MOUNT_DIR)/sv_phys.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/sv_move.o :  $(MOUNT_DIR)/sv_move.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/sv_user.o :  $(MOUNT_DIR)/sv_user.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/zone.o	:   $(MOUNT_DIR)/zone.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/view.o	:   $(MOUNT_DIR)/view.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/wad.o :      $(MOUNT_DIR)/wad.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/world.o :    $(MOUNT_DIR)/world.c
+	$(DO_AROS_CC)
+
+# $(BUILDDIR)/cd_linux.o : $(MOUNT_DIR)/cd_linux.c
+#	$(DO_AROS_CC)
+
+# $(BUILDDIR)/sys_linux.o :$(MOUNT_DIR)/sys_linux.c
+#	$(DO_AROS_CC)
+
+# $(BUILDDIR)/vid_x.o: $(MOUNT_DIR)/vid_x.c
+#	$(DO_O_CC)
+
+# $(BUILDDIR)/snd_dma.o :  $(MOUNT_DIR)/snd_dma.c
+#	$(DO_AROS_CC)
+
+# $(BUILDDIR)/snd_mem.o :  $(MOUNT_DIR)/snd_mem.c
+#	$(DO_AROS_CC)
+
+# $(BUILDDIR)/snd_mix.o :  $(MOUNT_DIR)/snd_mix.c
+# 	$(DO_AROS_CC)
+
+# $(BUILDDIR)/snd_linux.o :$(MOUNT_DIR)/snd_linux.c
+#	$(DO_AROS_CC)
+
+#####
+
+$(BUILDDIR)/d_copy.o :   $(MOUNT_DIR)/d_copy.s
+	$(DO_AS)
+
+$(BUILDDIR)/d_draw.o :   $(MOUNT_DIR)/d_draw.s
+	$(DO_AS)
+
+$(BUILDDIR)/d_draw16.o : $(MOUNT_DIR)/d_draw16.s
+	$(DO_AS)
+
+$(BUILDDIR)/d_parta.o :  $(MOUNT_DIR)/d_parta.s
+	$(DO_AS)
+
+$(BUILDDIR)/d_polysa.o : $(MOUNT_DIR)/d_polysa.s
+	$(DO_AS)
+
+$(BUILDDIR)/d_scana.o :  $(MOUNT_DIR)/d_scana.s
+	$(DO_AS)
+
+$(BUILDDIR)/d_spr8.o :   $(MOUNT_DIR)/d_spr8.s
+	$(DO_AS)
+
+$(BUILDDIR)/d_varsa.o :  $(MOUNT_DIR)/d_varsa.s
+	$(DO_AS)
+
+$(BUILDDIR)/math.o :     $(MOUNT_DIR)/math.s
+	$(DO_AS)
+
+$(BUILDDIR)/r_aliasa.o : $(MOUNT_DIR)/r_aliasa.s
+	$(DO_AS)
+
+$(BUILDDIR)/r_drawa.o :  $(MOUNT_DIR)/r_drawa.s
+	$(DO_AS)
+
+$(BUILDDIR)/r_edgea.o :  $(MOUNT_DIR)/r_edgea.s
+	$(DO_AS)
+
+$(BUILDDIR)/r_varsa.o :  $(MOUNT_DIR)/r_varsa.s
+	$(DO_AS)
+
+$(BUILDDIR)/surf16.o :   $(MOUNT_DIR)/surf16.s
+	$(DO_AS)
+
+$(BUILDDIR)/surf8.o :    $(MOUNT_DIR)/surf8.s
+	$(DO_AS)
+
+$(BUILDDIR)/worlda.o :   $(MOUNT_DIR)/worlda.s
+	$(DO_AS)
+
+$(BUILDDIR)/r_aclipa.o : $(MOUNT_DIR)/r_aclipa.s
+	$(DO_AS)
+
+# $(BUILDDIR)/snd_mixa.o : $(MOUNT_DIR)/snd_mixa.s
+#	$(DO_AS)
+
+$(BUILDDIR)/sys_dosa.o : $(MOUNT_DIR)/sys_dosa.s
+	$(DO_AS)
+
+
+###############
+# AROS SPECIFIC FILE HERE
+
+$(BUILDDIR)/sys_aros.o :$(MOUNT_DIR)/sys_aros.c
+	$(DO_AROS_CC) 2>sys_aros.err
+
+$(BUILDDIR)/cd_null.o :$(MOUNT_DIR)/cd_null.c
+	$(DO_AROS_CC) 2>cd_null.err
+
+$(BUILDDIR)/snd_null.o :$(MOUNT_DIR)/snd_null.c
+	$(DO_AROS_CC)
+
+$(BUILDDIR)/net_none.o :$(MOUNT_DIR)/net_none.c
+	$(DO_AROS_CC) 2>net_none.err
+
+$(BUILDDIR)/vid_aros.o :$(MOUNT_DIR)/vid_aros.c
+	$(DO_AROS_CC) 2>vid_aros.err
+
+$(BUILDDIR)/in_null.o :$(MOUNT_DIR)/in_null.c
+	$(DO_AROS_CC) 2>in_null.err
+
+
+#############################################################################
+# MISC
+#############################################################################
+
+#MM
+Quake-clean : 
+	rm -rf $(BUILDDIR)
+	rm -f $(EXE)
+
+# clean: clean-debug clean-release
+#	rm -f squake.spec glquake.spec quake.x11.spec
+
+# clean-debug:
+#	$(MAKE) clean2 BUILDDIR=$(BUILD_DEBUG_DIR) CFLAGS="$(DEBUG_CFLAGS)"
+
+# clean-release:
+#	$(MAKE) clean2 BUILDDIR=$(BUILD_RELEASE_DIR) CFLAGS="$(DEBUG_CFLAGS)"
+
+# clean2:
+#	-rm -f $(SQUAKE_OBJS) $(AROS_OBJS) $(GLQUAKE_OBJS) $(GLSVGA_OBJS) \
+#		$(GLX_OBJS)
+

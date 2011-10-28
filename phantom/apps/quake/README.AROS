@@ -1,0 +1,50 @@
+You need the game files for Quake first. You can download the
+shareware version of Quake from the ID Software web site:
+
+    http://www.idsoftware.com/quake/index.html
+
+
+This is a *very* quick and dirty port of quake,
+and is only tested with the shareware demo version
+of the data files.
+
+To make it run on AROS you have to do
+a few minor changes:
+
+memory: Quake needs at least 8 megs of contigous memory.
+So you have to change the amount of memory allocated
+at startup. This can be done in the UNIX version using
+the -m parameter of the "aros" command. For example:
+
+    ./aros -m 12
+
+stack: Quake needs lots of stack !
+In workbench/c/shell.c you can change the
+second parameter of the RunCommand() call from
+100000 to for example 500000.
+
+speed:
+To increase the speed of quake you can enable
+the XShm support in the gfx hidd (if you have the
+XShm extensions installed). The configure script
+will automatically detect and activate XShm.
+
+Because of optimizations for 16 bit X displays
+in the gfx hidd, quake will run fastest at this depth.
+Optimizations for other depths will come.
+
+There are two new AROS-specific options:
+
+-ownscreen
+which will run quake on its own screen (default is on WB screen)
+and
+-cgfx
+
+This will use cybergraphics.library emulation
+for rendering. The upside is that the screen palette
+won't get messed up. Downside is that it is a
+little slower, but it should hardly be noticable
+on modern HW.
+
+The AROS specific files are sys_aros.c and vid_aros.c
+
