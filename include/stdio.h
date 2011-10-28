@@ -115,6 +115,8 @@ int sscanf(char const *str, char const *format, ...);
 //int vscanf(char const *format, va_list ap);
 int vsscanf(char const *str, char const *format, va_list ap);
 int vfscanf(FILE *stream, char const *format, va_list ap);
+int vfprintf(FILE *stream, char const *format, va_list ap);
+
 
 int _v_printf(int (*_write)(void*, const void *, ssize_t ), void* arg, const char *fmt, va_list args);
 

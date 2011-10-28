@@ -109,7 +109,7 @@ static char * number(char * str, long long num, unsigned base, int size, int pre
 	if (num == 0)
 		tmp[i++]='0';
 	else while (num != 0)
-		tmp[i++] = digits[do_div(&num,base)];
+		tmp[i++] = digits[do_div((unsigned long long *)&num,base)];
 	if (i > precision)
 		precision = i;
 	size -= precision;
