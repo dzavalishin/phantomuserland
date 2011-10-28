@@ -151,11 +151,11 @@ void CL_ParseTEnt (void)
 #else
 		R_RunParticleEffect (pos, vec3_origin, 0, 10);
 #endif
-		if ( rand() % 5 )
+		if ( random() % 5 )
 			S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 		else
 		{
-			rnd = rand() & 3;
+			rnd = random() & 3;
 			if (rnd == 1)
 				S_StartSound (-1, 0, cl_sfx_ric1, pos, 1, 1);
 			else if (rnd == 2)
@@ -170,11 +170,11 @@ void CL_ParseTEnt (void)
 		pos[2] = MSG_ReadCoord ();
 		R_RunParticleEffect (pos, vec3_origin, 0, 20);
 
-		if ( rand() % 5 )
+		if ( random() % 5 )
 			S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 		else
 		{
-			rnd = rand() & 3;
+			rnd = random() & 3;
 			if (rnd == 1)
 				S_StartSound (-1, 0, cl_sfx_ric1, pos, 1, 1);
 			else if (rnd == 2)
@@ -381,7 +381,7 @@ void CL_UpdateTEnts (void)
 			ent->model = b->model;
 			ent->angles[0] = pitch;
 			ent->angles[1] = yaw;
-			ent->angles[2] = rand()%360;
+			ent->angles[2] = random()%360;
 
 			for (i=0 ; i<3 ; i++)
 				org[i] += dist[i]*30;
