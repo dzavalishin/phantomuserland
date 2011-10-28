@@ -1,3 +1,4 @@
+#if 0
 /*
 Copyright (C) 1996-1997 Id Software, Inc.
 
@@ -36,4 +37,6 @@ void IN_Commands (void)
 void IN_Move (usercmd_t *cmd)
 {
 }
+
+#endif
 
