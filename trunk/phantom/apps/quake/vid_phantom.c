@@ -33,6 +33,9 @@ viddef_t	vid;				// global video state
 #define	BASEWIDTH	320
 #define	BASEHEIGHT	200
 
+rgba_t	cpy_buffer[BASEWIDTH*BASEHEIGHT];
+
+
 byte	vid_buffer[BASEWIDTH*BASEHEIGHT];
 short	zbuffer[BASEWIDTH*BASEHEIGHT];
 byte	surfcache[256*1024];
@@ -40,8 +43,19 @@ byte	surfcache[256*1024];
 unsigned short	d_8to16table[256];
 unsigned	d_8to24table[256];
 
+rgba_t          p_8to24table[256];
+
 void	VID_SetPalette (unsigned char *palette)
 {
+    int i;
+    for( i = 0; i < 256; i++ )
+    {
+        unsigned char *rgb = palette + i*3;
+        p_8to24table[i].a = 0xFF;
+        p_8to24table[i].r = rgb[0];
+        p_8to24table[i].g = rgb[1];
+        p_8to24table[i].b = rgb[2];
+    }
 }
 
 void	VID_ShiftPalette (unsigned char *palette)
@@ -50,6 +64,8 @@ void	VID_ShiftPalette (unsigned char *palette)
 
 void	VID_Init (unsigned char *palette)
 {
+    VID_SetPalette(palette);
+
     vid.maxwarpwidth = vid.width = vid.conwidth = BASEWIDTH;
     vid.maxwarpheight = vid.height = vid.conheight = BASEHEIGHT;
     vid.aspect = 1.0;
@@ -70,10 +86,6 @@ void	VID_Init (unsigned char *palette)
         exit(1);
     }
 
-    char a[2000];
-    memset( a, 0x6F, sizeof(a) );
-    write( fb, a, sizeof(a) );
-
     rect_t r;
     r.xsize = BASEWIDTH;
     r.ysize = BASEHEIGHT;
@@ -82,15 +94,65 @@ void	VID_Init (unsigned char *palette)
 
     ioctl( fb, IOCTL_FB_SETBOUNDS, &r, sizeof(r) );
 
+    char a[2000];
+    memset( a, 0xAF, sizeof(a) );
+    write( fb, a, sizeof(a) );
 
+
+    /*
+    FB_SET_COLOR(fb,COLOR_RED);
+
+    r.xsize = 20;
+    r.ysize = 20;
+    r.x = 50;
+    r.y = 50;
+    FB_DRAW_BOX(fb,r);
+    */
+
+    //hexdump( d_8to24table, 256*4, 0, 0 );
 }
 
 void	VID_Shutdown (void)
 {
 }
 
+void int323_to_rgba_move( struct rgba_t *dest, const unsigned char *src, int nelem )
+{
+    while(nelem-- > 0)
+    {
+#if 1
+        *dest++ = p_8to24table[*src++];
+#else
+        dest->a = 0xFF;
+
+        dest->r = ((*src >>5) & 0x2) << 6;
+        dest->g = ((*src >>2)  & 0x7) << 5;
+        dest->b = (*src & 0x2) << 6;
+
+        dest++;
+        src++;
+#endif
+    }
+
+}
+
+
 void	VID_Update (vrect_t *rects)
 {
+    int y;
+
+    for( y = 0; y < BASEHEIGHT; y++ )
+    {
+        int rev_y = BASEHEIGHT - y - 1;
+
+        unsigned char *src = vid_buffer + (rev_y*BASEWIDTH);
+        rgba_t *dst = cpy_buffer + y*BASEWIDTH;
+
+        int323_to_rgba_move( dst, src, BASEWIDTH );
+    }
+
+    write( fb, cpy_buffer, sizeof(rgba_t)*BASEWIDTH*BASEHEIGHT );
+
 }
 
 /*

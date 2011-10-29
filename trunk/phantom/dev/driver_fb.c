@@ -110,7 +110,12 @@ static int fb_write(struct phantom_device *dev, const void *buf, int len)
     int max = w->xsize * w->ysize * sizeof(rgba_t);
     if( len > max ) len = max;
 
+    len &= ~3; // clear 2 bits - align to 4 bytes - complete pixels
+
     memcpy( w->pixel, buf, len );
+
+    SHOW_FLOW( 8, "write %d", len );
+    //hexdump( buf, len, 0, 0 );
 
     drv_video_window_update( w );
 
