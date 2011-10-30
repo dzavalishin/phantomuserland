@@ -116,7 +116,7 @@ int usys_write(int *err, uuprocess_t *u, int fd, const void *addr, int count )
 int usys_close(int *err, uuprocess_t *u, int fd )
 {
     CHECK_FD(fd);
-    struct uufile *f = GETF(fd);
+    uufile_t *f = GETF(fd);
 
     uufs_t *fs = f->fs;
     assert(fs->close != 0);
@@ -705,6 +705,20 @@ int uu_find_fd( uuprocess_t *u, uufile_t *f  )
     }
 
     return -1;
+}
+
+void uu_close_all( uuprocess_t *u  )
+{
+    int i;
+    for( i = 0; i < MAX_UU_FD; i++ )
+    {
+        if( u->fd[i] )
+        {
+            int err;
+            if( usys_close( &err, u, i ) || err )
+                SHOW_ERROR( 0, "Unable to close fd %d on proc death: %d", i, err );
+        }
+    }
 }
 
 

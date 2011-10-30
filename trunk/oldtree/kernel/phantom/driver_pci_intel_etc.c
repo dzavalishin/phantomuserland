@@ -23,7 +23,7 @@
 #include <device.h>
 #include <kernel/drivers.h>
 
-#include "intel_piix4_regs.h"
+#include <dev/pci/intel_piix4_regs.h>
 
 
 

@@ -152,6 +152,7 @@ static void uu_proc_death(uuprocess_t *p)
     SHOW_FLOW( 1, "Process %d dies", p->pid );
 
     // TODO cleanup!
+    uu_close_all( p );
 
     struct exe_module * em = p->em;
 

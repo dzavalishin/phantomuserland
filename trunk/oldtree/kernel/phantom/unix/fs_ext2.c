@@ -555,13 +555,12 @@ void e2fs_dump_i(struct i_node *ino)
 {
     int i;
 
-    SHOW_FLOW( 0, "\n\rtipo inode: %X", ino->i_mode & MODE_MASK);
-    SHOW_FLOW( 0, "user id associato al file: %u", ino->i_uid);
-    SHOW_FLOW( 0, "file size (byte): %u", ino->i_size);
-    SHOW_FLOW( 0, "numero blocchi riservati al file: %u", ino->i_blocks);
+    SHOW_FLOW( 0, "inode type: %X", ino->i_mode & MODE_MASK);
+    SHOW_FLOW( 0, "uid       : %u", ino->i_uid);
+    SHOW_FLOW( 0, "file size : %u", ino->i_size);
+    SHOW_FLOW( 0, "blocks    : %u", ino->i_blocks);
     for( i=0; i < 15; i++ )
         SHOW_FLOW( 0, "block[%u]: %u", i, ino->i_block[i] );
-    //kgetchar();
 }
 
 
@@ -964,7 +963,7 @@ static bool Open_File( e2impl_t *impl, struct i_node* ino, word tipo_file )
         u_int32_t i;
         for (i=39;i<(ino->i_size+39);i++)
             printf("%c",fsl[i]);
-        printf("\n\n\r");
+        printf("\n\n");
 
         free(fsl);
         return FALSE;
@@ -997,7 +996,6 @@ void ____ext2_unused()
 	(void) isFile;
 	(void) isFastSymbolicLink;
 	(void) Open_File;
-
 }
 
 // -----------------------------------------------------------------------
