@@ -1,0 +1,3 @@
+http://www.cs.sunysb.edu/documentation/freetype-2.1.9/docs/tutorial/step1.html
+http://www.cs.sunysb.edu/documentation/freetype-2.1.9/docs/tutorial/step2.html
+http://www.cs.sunysb.edu/documentation/freetype-2.1.9/docs/tutorial/example1.c
