@@ -40,6 +40,11 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 // driver serves 2 units
 #define NFLOPPY 2
 
+//#define DEF_FLOPPY_SIZE (1440*2)
+// CD via fd!
+#define DEF_FLOPPY_SIZE (1024*2*800)
+
+
 /*
 #include "types.h" // u8
 #include "disk.h" // DISK_RET_SUCCESS
@@ -969,7 +974,7 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
             return 0;
         }
 #if FLOPPY_Q
-        int size = 1440*2; // TODO set actual from driver?
+        int size = DEF_FLOPPY_SIZE; // TODO set actual from driver?
         both = phantom_create_disk_partition_struct( size, 0, 0, startIo );
 
 #endif
@@ -998,8 +1003,9 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
     {
         seq_number++;
 
+
+        int size = DEF_FLOPPY_SIZE ; // TODO set actual from driver?
 #if FLOPPY_Q
-        int size = 1440*2; // TODO set actual from driver?
         phantom_disk_partition_t *p = phantom_create_partition_struct( both, 0, size );
         p->flags |= PART_FLAG_IS_WHOLE_DISK;
         p->specific = (void *)-1; // disk supposed to have that
@@ -1017,7 +1023,6 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         snprintf( p->name, sizeof(p->name), "Floppy%d", seq_number-1  );
 
 #else
-        int size = 1440*2; // TODO set actual from driver?
         phantom_disk_partition_t *p = phantom_create_floppy_partition_struct( size, seq_number );
 #endif // Q
 
