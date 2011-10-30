@@ -105,7 +105,8 @@ typedef unsigned char byte;
 
 #define DIM_SUPER_BLOCK 1024
 #define START_SUPER_BLOCK 1024
-struct super_block{
+struct super_block
+{
     dword s_inodes_count; //numero totale inode liberi e utilizzati
     dword s_blocks_count; //numero totale di blocchi liberi e utilizzati
     dword s_r_blocks_count; //numero totale di blocchi riservati al super user

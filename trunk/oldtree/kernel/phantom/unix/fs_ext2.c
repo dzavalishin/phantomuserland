@@ -24,8 +24,12 @@
 #include <string.h>
 #include <phantom_libc.h>
 #include <sys/libkern.h>
+#include <disk.h>
+#include <kernel/page.h>
 
 #include "unix/fs_ext2.h"
+
+
 
 
 //typedef u_int32_t	ino_t;
@@ -42,14 +46,16 @@ struct i_node_tab
 
 struct e2impl
 {
-    int				mount_ext2; // Nonzero if impl is active
+    phantom_disk_partition_t *  partition;
 
+    int				mount_ext2; // Nonzero if impl is active
+/*
     int (*ReadSectorsLba)  	(
                                  u_int64_t  	Lba,
                                  int  	  	NumSect,
                                  void *  	Buffer
                                 );
-
+*/
     struct super_block *	super;
 
     u_int32_t 			dim_inode_table;
@@ -76,10 +82,19 @@ typedef struct e2impl e2impl_t;
 
 
 // -----------------------------------------------------------------------
+// Local funcs
+// -----------------------------------------------------------------------
+
+static errno_t init_ext2(e2impl_t *impl);
+
+static errno_t ext2_ReadSectorsLba( e2impl_t *impl,  off_t lba, unsigned nsect, void *data );
+
+static struct i_node *ext2_get_inode(e2impl_t *impl, ino_t i_node_number);
+
+// -----------------------------------------------------------------------
 // Generic impl
 // -----------------------------------------------------------------------
 
-static bool        init_ext2(e2impl_t *impl);
 
 
 static size_t      ext2_read(    struct uufile *f, void *dest, size_t bytes);
@@ -133,7 +148,7 @@ struct uufs ext2_fs =
     .impl       = 0,
 };
 
-
+/*
 static struct uufile ext2_root =
 {
     .ops 	= &ext2_fops,
@@ -142,6 +157,20 @@ static struct uufile ext2_root =
     .impl       = "/",
     .flags      = UU_FILE_FLAG_NODESTROY
 };
+*/
+
+static uufs_t *ext2_create_fs( e2impl_t *impl )
+{
+    uufs_t *ret = calloc( 1, sizeof( uufs_t ) );
+    assert(ret);
+
+    memcpy( ret, &ext2_fs, sizeof( uufs_t ) );
+
+    ret->impl = impl;
+
+    return ret;
+}
+
 
 
 
@@ -155,12 +184,18 @@ static errno_t     ext2_open(struct uufile *f, int create, int write)
     (void) f;
     (void) create;
     (void) write;
+
+    //e2impl_t *impl = f->impl;
+
     return 0;
 }
 
 static errno_t     ext2_close(struct uufile *f)
 {
     (void) f;
+
+    //e2impl_t *impl = f->impl;
+
     return 0;
 }
 
@@ -178,6 +213,8 @@ static uufile_t *  ext2_namei(uufs_t *fs, const char *filename)
     ret->impl = calloc( 1, sizeof(e2impl_t) );
     ret->flags |= UU_FILE_FLAG_FREEIMPL;
 
+    //e2impl_t *impl = f->impl;
+
     return ret;
 }
 
@@ -185,8 +222,26 @@ static uufile_t *  ext2_namei(uufs_t *fs, const char *filename)
 static uufile_t *  ext2_getRoot(uufs_t *fs)
 {
     (void) fs;
-    // TODO impl
-    return &ext2_root;
+
+    e2impl_t *impl = fs->impl;
+
+    struct i_node *ino = ext2_get_inode(impl, EXT2_ROOT_INO);
+    if( 0 == ino )
+        return 0;
+
+    uufile_t *ret = create_uufile();
+    assert(ret);
+
+    ret->ops = &ext2_fops;
+    ret->pos = 0;
+    ret->fs = fs;
+    ret->impl = ino;
+    //ret->flags |= UU_FILE_FLAG_FREEIMPL;
+    //ret->flags |= UU_FILE_FLAG_OPEN; // TODO this is wrong and must be gone - open in open!
+
+    set_uufile_name( ret, "/" );
+
+    return ret;
 }
 
 
@@ -332,7 +387,7 @@ static bool ReadInode(e2impl_t *impl, ino_t ino, struct i_node* data)
     int err;
 
     // TODO : si deve leggere in data_block il blocco del disco che contiene l'inode
-    if ( (err = impl->ReadSectorsLba((int64_t)blkno_to_LBA(impl,ino_block), impl->spb, (word *)data_block)) )
+    if ( (err = ext2_ReadSectorsLba( impl, blkno_to_LBA(impl,ino_block), impl->spb, (word *)data_block)) )
     {
         // errore nella lettura del blocco relativo all'inode
         SHOW_ERROR( 1, "error reading inode block %d", ino );
@@ -368,7 +423,7 @@ static int inode_LRU(e2impl_t *impl)
 //--------------- Cerca inode e restituisce la posizione -------------------//
 
 // ERROR inode is not locked and can be deleted!
-static struct i_node *get_inode(e2impl_t *impl, ino_t i_node_number)
+static struct i_node *ext2_get_inode(e2impl_t *impl, ino_t i_node_number)
 {
     unsigned int i;
     int pos_inode = -1;
@@ -533,7 +588,7 @@ bool init_group_desc_table(e2impl_t *impl)
     memset(data_block,0,impl->dim_block);
 
     int err;
-    if( (err = impl->ReadSectorsLba( (int64_t)blkno_to_LBA(impl, impl->sbpos), impl->spb, data_block)) )
+    if( (err = ext2_ReadSectorsLba( impl, blkno_to_LBA(impl, impl->sbpos), impl->spb, data_block)) )
     {
         // si stampa l'errore relativo al fallimento lettura disco
         SHOW_ERROR0( 2, "error reading group descriptor block" );
@@ -569,8 +624,17 @@ void ext2_dump_gd(struct group_descriptor *bg){
 }
 
 
+// -----------------------------------------------------------------------
+// IO
+// -----------------------------------------------------------------------
 
+static errno_t ext2_ReadSectorsLba( e2impl_t *impl,  off_t lba, unsigned nsect, void *data )
+{
+    phantom_disk_partition_t *p = impl->partition;
+    if( !p ) return ENXIO;
 
+    return phantom_sync_read_sector( p, data, lba, nsect );
+}
 
 
 
@@ -583,11 +647,8 @@ void ext2_dump_gd(struct group_descriptor *bg){
 
 
 //--------------- Disk read Ext2 ---------------//
-static bool read_ext2(e2impl_t *impl)
+static errno_t read_ext2(e2impl_t *impl)
 {
-
-    int sec; // ??
-
     SHOW_FLOW0( 1, "Initializing");
 
     /*
@@ -595,64 +656,54 @@ static bool read_ext2(e2impl_t *impl)
      is always in the first block of the partition and occupies exactly 1024 bytes
      */
 
-    void *data_block = malloc(DIM_SUPER_BLOCK);
+    char data_block[DIM_SUPER_BLOCK];
     memset(data_block,0,DIM_SUPER_BLOCK);
 
-    sec = 0;
+    errno_t err = ext2_ReadSectorsLba( impl, 2, 2, data_block );
 
-    int err;
+    if( err ) return err;
 
-    if ( (err = impl->ReadSectorsLba((int64_t) blkno_to_LBA(impl,0)+sec,2,(word *) data_block)) )
-    {
-        // si stampa l'errore relativo al fallimento lettura disco
-        //ShowIdeErrorMessage(err,TRUE);
-        free(data_block);
-        return FALSE;
-    }
-    else
-    {
-        // si copia il settore nella variabile super
-        // *** Andrea Righi ****************************//
-        //! super must be allocated first...
-        impl->super = malloc(sizeof(struct super_block));
-        // *********************************************//
-        memcpy(impl->super,data_block,sizeof(struct super_block));
-        free(data_block);
-        return TRUE;
-    }
-
+    memcpy(impl->super,data_block,sizeof(struct super_block));
+    return 0;
 }
 
 
 //------------- Controllo validita` Ext2 ---------------//
-static bool check_ext2(e2impl_t *impl)
+static errno_t check_ext2(e2impl_t *impl)
 {
     if ((impl->super->s_magic != N_EXT2_NUMERO_MAGICO)&&(impl->super->s_magic != P_EXT2_NUMERO_MAGICO))
     {
         SHOW_ERROR( 1, "Wrong magic %X", impl->super->s_magic );
-        return FALSE;
+        return EINVAL;
     }
-    return TRUE;
+    return 0;
 }
 
 
-static bool init_ext2(e2impl_t *impl)
+static errno_t init_ext2(e2impl_t *impl )
 {
+    errno_t err = 0;
     //path_ext2[0] = '\0'; //inizializzazione della path
 
     hal_mutex_init(&(impl->inode_lock), "Ext2Inode" );
     hal_mutex_init(&(impl->group_lock), "Ext2Group" );
 
-    if (!read_ext2(impl))
+    impl->super = malloc(sizeof(struct super_block));
+    if( 0 == impl->super )
+        return ENOMEM;
+
+    err = read_ext2(impl);
+    if(err)
     {
-        //SHOW_FLOW( 2, "Disk I/O error. Unable to read the super block!!!\n\r");
-        return(FALSE);
+        SHOW_FLOW0( 2, "Disk I/O error. Unable to read the super block." );
+        goto fail;
     }
     // inizializzazione ext2 a buon fine
 
-    if (!check_ext2(impl))
+    err = check_ext2(impl);
+    if(err)
     {
-        return(FALSE);
+        goto fail;
     }
     // ext2 e' valido
 
@@ -660,24 +711,15 @@ static bool init_ext2(e2impl_t *impl)
     // calcolo parametri della versione corrente file system
 
     impl->dim_block = 1024 << impl->super->s_log_block_size; //dimensione dei blocchi
-
-    impl->dim_frag = 1024 << impl->super->s_log_frag_size; // dimensione dei frammenti
-
-    impl->spb = impl->dim_block / SIZE_SEC; //settori per blocco
-
-    impl->sbpos = impl->super->s_first_data_block + 1; // posizione del superblocco
-
-    impl->bpg = impl->super->s_blocks_per_group; //blocchi per gruppo
-
-    impl->gdpb = impl->dim_block / sizeof(struct group_descriptor); // desc di gruppo per blocco
-
-    impl->ipb = impl->dim_block / impl->super->s_inode_size; // inodes per blocco dim inode 128 bit
-
+    impl->dim_frag  = 1024 << impl->super->s_log_frag_size; // dimensione dei frammenti
+    impl->spb       = impl->dim_block / SIZE_SEC; //settori per blocco
+    impl->sbpos     = impl->super->s_first_data_block + 1; // posizione del superblocco
+    impl->bpg       = impl->super->s_blocks_per_group; //blocchi per gruppo
+    impl->gdpb      = impl->dim_block / sizeof(struct group_descriptor); // desc di gruppo per blocco
+    impl->ipb       = impl->dim_block / impl->super->s_inode_size; // inodes per blocco dim inode 128 bit
     impl->number_of_groups = impl->super->s_inodes_count / impl->super->s_inodes_per_group; // numero gruppi
-
     impl->dir_entries_per_block = impl->dim_block / sizeof(struct dir_ff); //directory per blocco
-
-    impl->dim_ptr = impl->dim_block >> 2; // dim del blocco in parole da 32 bit
+    impl->dim_ptr   = impl->dim_block >> 2; // dim del blocco in parole da 32 bit
 
     // informazioni di carattere generale sulla ext2 corrente
     SHOW_FLOW0( 2, "Ext2 parameters");
@@ -698,21 +740,24 @@ static bool init_ext2(e2impl_t *impl)
     // inizializzazione tabella dei descrittori di gruppo
     if( !init_group_desc_table(impl) )
     {
-        return FALSE;
+        err = EINVAL;
+        goto fail;
     }
 
     // inizializzazione tabella degli inode
     if( !init_inode_table(impl) )
     {
-        return FALSE;
+        err = EINVAL;
+        goto fail;
     }
 
     // dobbiamo leggere l'inode relativo alla directory radice "inode 2 sempre"
 #if 0
-    if( !Open_Dir(get_inode(impl,EXT2_ROOT_INO)) )
+    if( !Open_Dir(ext2_get_inode(impl,EXT2_ROOT_INO)) )
     {
         // SHOW_FLOW( 2, "Not able to open the root directory\n\r");
-        return FALSE;
+        err = EINVAL;
+        goto fail;
     }
 #endif
     //ino_current_dir = EXT2_ROOT_INO;
@@ -721,7 +766,16 @@ static bool init_ext2(e2impl_t *impl)
 
     //level = 0; // livello nell'albero delle directory, root = 0
 
-    return TRUE;
+    return 0;
+fail:
+    free(impl->super);
+    impl->super = 0;
+    // TODO free all
+
+    hal_mutex_destroy(&(impl->inode_lock) );
+    hal_mutex_destroy(&(impl->group_lock) );
+
+    return err;
 }
 
 
@@ -762,7 +816,7 @@ static bool ReadIndirect1( e2impl_t *impl, int* dst, int* cnt, int blk)
     // si deve leggere il blocco dati puntato indirettamente
 
     int err;
-    if ( (err = impl->ReadSectorsLba((int64_t)blkno_to_LBA(impl,blk),impl->spb,(word *)r1)) )
+    if ( (err = ext2_ReadSectorsLba( impl, (int64_t)blkno_to_LBA(impl,blk),impl->spb,(word *)r1)) )
     {
         SHOW_ERROR0( 2, "error reading indirect addressing");
         //ShowIdeErrorMessage(err,TRUE);
@@ -793,7 +847,7 @@ bool ReadIndirect2( e2impl_t *impl, int* dst, int* cnt, int blk)
     int * r2 = malloc(impl->dim_ptr * sizeof(int));
 
     int err;
-    if ( (err = impl->ReadSectorsLba((int64_t)blkno_to_LBA(impl,blk),impl->spb,(word *)r2)) )
+    if ( (err = ext2_ReadSectorsLba( impl, (int64_t)blkno_to_LBA(impl,blk),impl->spb,(word *)r2)) )
     {
         SHOW_ERROR0( 2, "error reading second level indirect addressing");
         //ShowIdeErrorMessage(err,TRUE);
@@ -851,7 +905,7 @@ static bool read_file_blocklist( e2impl_t *impl, struct i_node* ino, int ptr_dir
         dword* r3 = (dword *)malloc(impl->dim_ptr * sizeof(dword));
         int err;
         // TODO : lettura indirizzamento triplo
-        if( (err = impl->ReadSectorsLba(blkno_to_LBA(impl,ino->i_block[14]),impl->spb,(word *)r3)) )
+        if( (err = ext2_ReadSectorsLba( impl, blkno_to_LBA(impl,ino->i_block[14]),impl->spb,(word *)r3)) )
         {
             SHOW_ERROR0( 2, "error reading third level indirect addressing" );
             //ShowIdeErrorMessage(err,TRUE);
@@ -939,14 +993,84 @@ static bool Open_File( e2impl_t *impl, struct i_node* ino, word tipo_file )
 
 void ____ext2_unused()
 {
-	(void) get_inode;
 	(void) isDir;
 	(void) isFile;
 	(void) isFastSymbolicLink;
 	(void) Open_File;
-	(void) init_ext2;
 
 }
+
+// -----------------------------------------------------------------------
+// FS Probe
+// -----------------------------------------------------------------------
+
+errno_t fs_probe_ext2(phantom_disk_partition_t *p)
+{
+    unsigned char buf[PAGE_SIZE];
+
+    if( phantom_sync_read_sector( p, buf, 2, 2 ) )
+    {
+        SHOW_ERROR( 0, "%s can't read sector 0", p->name );
+        return EINVAL;
+    }
+
+    struct super_block *super = (void *) buf;
+
+    SHOW_INFO( 1, "ext2 magic = %x", super->s_magic );
+
+    if((super->s_magic != N_EXT2_NUMERO_MAGICO) && (super->s_magic != P_EXT2_NUMERO_MAGICO))
+    {
+        SHOW_ERROR( 0, "wrong ext2 magic = %x", super->s_magic );
+        return EINVAL;
+    }
+
+    if( super->s_magic == P_EXT2_NUMERO_MAGICO )
+        SHOW_INFO( 0, "Old ext2 magic %x", super->s_magic );
+
+    return 0;
+}
+
+
+// -----------------------------------------------------------------------
+// We're connected here
+// -----------------------------------------------------------------------
+
+errno_t fs_start_ext2(phantom_disk_partition_t *p)
+{
+    e2impl_t *impl = calloc(1, sizeof(e2impl_t) );
+    if( !impl ) return ENOMEM;
+
+    impl->partition = p;
+
+    errno_t err = init_ext2( impl );
+
+    if( !err )
+    {
+#if HAVE_UNIX
+        char pname[FS_MAX_MOUNT_PATH];
+        partGetName( p, pname, FS_MAX_MOUNT_PATH );
+
+        uufs_t *ufs = ext2_create_fs( impl );
+        if( !ufs )
+        {
+            SHOW_ERROR( 0, "can't create uufs for %s", pname );
+        }
+
+        if( ufs && auto_mount( pname, ufs ) )
+        {
+            SHOW_ERROR( 0, "can't automount %s", pname );
+        }
+#endif
+    }
+
+    if( err )
+    {
+        free( impl );
+    }
+
+    return err;
+}
+
 
 
 #endif // HAVE_UNIX

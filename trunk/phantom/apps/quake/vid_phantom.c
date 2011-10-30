@@ -30,8 +30,11 @@ static int fb;
 
 viddef_t	vid;				// global video state
 
-#define	BASEWIDTH	320
-#define	BASEHEIGHT	200
+//#define	BASEWIDTH	320
+//#define	BASEHEIGHT	200
+
+#define	BASEWIDTH	640
+#define	BASEHEIGHT	480
 
 rgba_t	cpy_buffer[BASEWIDTH*BASEHEIGHT];
 

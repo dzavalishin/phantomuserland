@@ -403,11 +403,32 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
 }
 
 
+//! Get full name for partition (incl subparts)
+static errno_t doPartGetName( phantom_disk_partition_t *p, char *buf, size_t bufsz )
+{
+	if( p->base )
+        partGetName( p->base, buf, bufsz );
+    if( strlcat( buf, "/", bufsz ) >= bufsz ) return ENOMEM;
+    if( strlcat( buf, p->name, bufsz ) >= bufsz ) return ENOMEM;
+    return 0;
+}
+
+//! Get full name for partition (incl subparts)
+errno_t partGetName( phantom_disk_partition_t *p, char *buf, size_t bufsz )
+{
+	*buf = 0;
+    if( p == 0 )
+        if( strlcat( buf, "/", bufsz ) >= bufsz ) return ENOMEM;
+    return doPartGetName( p, buf, bufsz );
+}
 
 
 void dump_partition(phantom_disk_partition_t *p)
 {
-    printf("Disk Partition %s (%s)\n", p->name, p->label );
+    char pname[128];
+    partGetName( p, pname, sizeof(pname) );
+
+    printf("Disk Partition %s (%s)\n", pname, p->label );
 
     printf(" - type %d%s\n", p->type, p->type == PHANTOM_PARTITION_TYPE_ID ? " (phantom)" : "" );
     printf(" - flags %b\n", p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );

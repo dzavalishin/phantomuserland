@@ -101,8 +101,6 @@ static isa_probe_t board_drivers[] =
     { "PS2 Keyboard", 	driver_isa_ps2k_probe, 	1, -1, 1 },
     { "PS2 Mouse", 	driver_isa_ps2m_probe, 	1, -1, 12 },
 
-    { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
-
 #if HAVE_NET && 0
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x300, 11 },
@@ -123,6 +121,8 @@ static isa_probe_t board_drivers[] =
 
     { "floppy",        driver_isa_floppy_probe,  3, 0, 0 }, // hardcoded in driver
     { "floppy",        driver_isa_floppy_probe,  3, 0, 0 }, // two of them!
+
+    { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
 
     // End of list marker
     { 0, 0, 0, 0, 0 },

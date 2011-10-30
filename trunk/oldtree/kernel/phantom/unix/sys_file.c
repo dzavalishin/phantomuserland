@@ -161,6 +161,13 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
     }
 
     f->pos = pos;
+
+    if(f->ops->seek)
+    {
+        *err = f->ops->seek(f);
+        if(*err) return -1;
+    }
+
     return f->pos;
 }
 

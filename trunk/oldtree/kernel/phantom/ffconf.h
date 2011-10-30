@@ -48,7 +48,7 @@
 /* To enable f_forward function, set _USE_FORWARD to 1 and set _FS_TINY to 1. */
 
 
-#define	_USE_FASTSEEK	0	/* 0:Disable or 1:Enable */
+#define	_USE_FASTSEEK	1	/* 0:Disable or 1:Enable */
 /* To enable fast seek feature, set _USE_FASTSEEK to 1. */
 
 
@@ -151,7 +151,7 @@
 /*---------------------------------------------------------------------------/
 / System Configurations
 /----------------------------------------------------------------------------*/
-
+// TODO enable and connect TRIM
 #define _WORD_ACCESS	0	/* 0 or 1 */
 /* Set 0 first and it is always compatible with all platforms. The _WORD_ACCESS
 /  option defines which access method is used to the word data on the FAT volume.

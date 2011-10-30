@@ -13,6 +13,7 @@
 #define KUNIX_H
 
 #include <errno.h>
+#include <sys/stat.h>
 
 void kernel_unix_init(void);
 
