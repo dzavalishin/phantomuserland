@@ -42,6 +42,7 @@ static size_t      fatff_write(   struct uufile *f, const void *src, size_t byte
 static errno_t     fatff_stat( struct uufile *f, struct stat *dest );
 static size_t      fatff_getpath( struct uufile *f, void *dest, size_t bytes);
 static ssize_t     fatff_getsize( struct uufile *f);
+static errno_t     fatff_seek(    struct uufile *f );
 
 //static void *      fatff_copyimpl( void *impl );
 
@@ -51,6 +52,8 @@ static struct uufileops fatff_fops =
 {
     .read 	= fatff_read,
     .write 	= fatff_write,
+
+    .seek       = fatff_seek,
 
     .getpath 	= fatff_getpath,
     .getsize 	= fatff_getsize,
@@ -131,7 +134,7 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     FIL *fp = calloc( 1, sizeof(FIL) );
 
     FRESULT r = f_open ( ffs, fp, filename,
-                         // TODO wrong. need real open's request here to handle create/open existing fail
+                         // TODO wrong. need real open's request here to handle create/open existing file
                          FA_READ|FA_WRITE
                        );
 
@@ -177,19 +180,24 @@ static errno_t  fatff_dismiss(uufs_t *fs)
 // Generic impl
 // -----------------------------------------------------------------------
 
-static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes)
+static errno_t       fatff_seek(    struct uufile *f )
 {
     FIL *fp = f->impl;
+    assert(fp);
+    FRESULT r = f_lseek (fp,f->pos);
+    return r ? EINVAL : 0;
+}
 
-    FRESULT r = f_lseek (
-                         fp,		/* Pointer to the file object */
-                         f->pos		/* File pointer from top of file */
-                        );
 
-    if( r )
-        return 0;
-
+static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes)
+{
+    FRESULT r;
     unsigned int res;
+
+    FIL *fp = f->impl;
+
+    //r = f_lseek (fp,f->pos);
+    //if( r )        return 0;
 
     r = f_read (
                 fp, 		/* Pointer to the file object */
@@ -207,10 +215,18 @@ static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes)
 
 static size_t      fatff_write(   struct uufile *f, const void *dest, size_t bytes)
 {
-    (void) f;
-    (void) dest;
-    (void) bytes;
-    return -1;
+    FRESULT r;
+    unsigned int res;
+
+    FIL *fp = f->impl;
+
+    r = f_write(fp, dest, bytes, &res );
+
+    if( r || res <= 0 )
+        return 0;
+
+    f->pos += res;
+    return res;
 }
 
 

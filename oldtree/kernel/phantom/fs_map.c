@@ -34,6 +34,11 @@ typedef struct
 
 
 #if HAVE_UNIX
+
+errno_t fs_probe_ext2(phantom_disk_partition_t *p);
+errno_t fs_start_ext2(phantom_disk_partition_t *p);
+
+
 //static errno_t fs_start_fat( phantom_disk_partition_t * );
 
 errno_t fs_start_ff( phantom_disk_partition_t * );
@@ -46,14 +51,11 @@ errno_t fs_use_phantom(phantom_disk_partition_t *p);
 static fs_probe_t fs_drivers[] =
 {
 
-    { "Phantom", 	fs_probe_phantom,	fs_use_phantom 	 	},
+    { "Phantom", 	fs_probe_phantom,	fs_use_phantom 	            },
 #if HAVE_UNIX
-    //{ "FAT32", 		fs_probe_fat, 	 	fs_start_fat		},
-    //{ "FAT16", 		fs_probe_fat, 	 	fs_start_tiny_fat		},
+    { "FAT", 		fs_probe_fat, 	 	fs_start_ff	            },
 
-    { "FAT", 		fs_probe_fat, 	 	fs_start_ff		},
-
-    //{ "Ext2",  		fs_probe_ext2, 	       0	 	},
+    { "Ext2",  		fs_probe_ext2, 	        fs_start_ext2               },
     { "CD",  		fs_probe_cd, 	 	0		},
 #endif // HAVE_UNIX
 
@@ -63,18 +65,21 @@ static fs_probe_t fs_drivers[] =
 
 errno_t lookup_fs(phantom_disk_partition_t *p)
 {
-    SHOW_INFO( 0, "Look for filesystems on partition %s", p->name );
+    char pname[128];
+    partGetName( p, pname, sizeof(pname) );
+
+    SHOW_INFO( 0, "Look for filesystems on partition %s", pname );
     unsigned int i;
     for( i = 0; i < sizeof(fs_drivers)/sizeof(fs_probe_t); i++ )
     {
         fs_probe_t *fp = &fs_drivers[i];
 
-        SHOW_INFO( 0, "probe %s fs on %s", fp->name, p->name );
+        SHOW_INFO( 0, "probe %s fs on %s", fp->name, pname );
 
         errno_t ret = fp->probe_f( p );
         if( ret ) continue;
 
-        SHOW_INFO( 0, "%s file sysem found on partition %s", fp->name, p->name );
+        SHOW_INFO( 0, "%s file sysem found on partition %s", fp->name, pname );
 
         if(!fp->use_f)
         {
@@ -85,11 +90,11 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
         ret = fp->use_f( p );
         if( ret )
         {
-            SHOW_ERROR( 0, "%s file sysem driver rejecter partition %s", fp->name, p->name );
+            SHOW_ERROR( 0, "%s file sysem driver rejected partition %s", fp->name, pname );
             continue;
         }
 
-        SHOW_INFO( 0, "%s file sysem driver occupies partition %s", fp->name, p->name );
+        SHOW_INFO( 0, "%s file sysem driver occupies partition %s", fp->name, pname );
         return 0;
     }
 
@@ -130,6 +135,9 @@ errno_t fs_use_phantom(phantom_disk_partition_t *p)
 {
     assert( p->flags | PART_FLAG_IS_PHANTOM_FSSB );
 
+    char pname[128];
+    partGetName( p, pname, sizeof(pname) );
+
     if(n_phantom_fs_partitions < MAX_PFS_PARTS)
     {
         phantom_fs_partitions[n_phantom_fs_partitions++] = p;
@@ -137,7 +145,7 @@ errno_t fs_use_phantom(phantom_disk_partition_t *p)
     }
     else
     {
-        SHOW_ERROR( 0, "Too many Phantom disks, skip %s", p->name);
+        SHOW_ERROR( 0, "Too many Phantom disks, skip %s", pname);
         return EMFILE;
     }
 }
@@ -151,7 +159,11 @@ phantom_disk_partition_t *select_phantom_partition(void)
     if(n_phantom_fs_partitions == 1)
     {
         assert( phantom_fs_partitions[0] );
-        SHOW_FLOW( 0, "Just one Phantom disks found (%s)", phantom_fs_partitions[0]->name);
+
+        char pname[128];
+        partGetName( phantom_fs_partitions[0], pname, sizeof(pname) );
+
+        SHOW_FLOW( 0, "Just one Phantom disks found (%s)", pname);
         return phantom_fs_partitions[0];
     }
 
@@ -161,7 +173,12 @@ phantom_disk_partition_t *select_phantom_partition(void)
     {
         phantom_disk_partition_t *p = phantom_fs_partitions[i];
         if(p)
-            printf("%2d: %s\n", i, p->name );
+        {
+            char pname[128];
+            partGetName( p, pname, sizeof(pname) );
+
+            printf("%2d: %s\n", i, pname );
+        }
     }
 
     do {
@@ -315,63 +332,6 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
 
 
 
-/*
-
-#include "unix/fat32/define.h"
-#include "unix/fat32/FAT32_Access.h"
-
-
-static int f32r(struct f32 *impl, int sector, void *buf)
-{
-    phantom_disk_partition_t *p = (void*)impl->dev;
-
-    if( phantom_sync_read_sector( p, buf, sector, 1 ) )
-    {
-        SHOW_ERROR( 0, "%s can't read sector %d", p->name, sector );
-        return 0;
-    }
-
-    return 1;
-}
-
-static int f32w(struct f32 *impl, int sector, void *buf)
-{
-    (void) buf;
-    phantom_disk_partition_t *p = (void*)impl->dev;
-
-    //if( phantom_sync_write_sector( p, buf, sector, 1 ) )
-    {
-        SHOW_ERROR( 0, "%s can't write sector %d", p->name, sector );
-        return 0;
-    }
-
-    //return 1;
-}
-
-
-static errno_t fs_start_fat( phantom_disk_partition_t *p )
-{
-    SHOW_FLOW( 0, "trying to activate FAT on %s", p->name );
-
-    f32_t *f32 = calloc( 1, sizeof(f32_t) );
-    assert(f32);
-
-    // we do it wrong
-    f32->dev = (void *)p;
-    f32->FAT_WriteSector = f32w;
-    f32->FAT_ReadSector  = f32r;
-
-    if(!FAT32_InitFAT(f32,1))
-    {
-        SHOW_ERROR( 0, "FAT32 driver refused %s", p->name );
-        return EFTYPE;
-    }
-
-    FAT32_ShowFATDetails( f32 );
-
-    return 0;
-}
-*/
 
 
 

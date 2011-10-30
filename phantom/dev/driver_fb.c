@@ -17,7 +17,8 @@
 
 static int              have_w = 0;
 static window_handle_t  w = 0;
-static color_t			color;
+static color_t          color;
+static hal_mutex_t      m; // lock start/stop only - suppose that no one can call us with io/ioctl before start or after stop
 
 static rect_t wbox =
 {
@@ -46,6 +47,16 @@ static int fb_start(phantom_device_t *dev)
 static int fb_stop(phantom_device_t *dev)
 {
     (void) dev;
+
+    hal_mutex_lock( &m );
+    if(have_w)
+    {
+        have_w = 0;
+        drv_video_window_free(w);
+        w = 0;
+    }
+    hal_mutex_unlock( &m );
+
     return 0;
 }
 
@@ -149,6 +160,8 @@ phantom_device_t * driver_framebuf_probe( const char *name, int stage )
 
     dev->dops.ioctl = fb_ioctl;
 
+    hal_mutex_init( &m, "framebuf" );
+
     return dev;
 }
 
@@ -177,6 +190,10 @@ phantom_device_t * driver_framebuf_probe( const char *name, int stage )
 
 static void fb_init_window()
 {
+    hal_mutex_lock( &m );
+
+    if( have_w ) goto done;
+
     if( 0 != w )
         drv_video_window_free(w);
 
@@ -186,7 +203,7 @@ static void fb_init_window()
                         wbox.x, wbox.y, COLOR_BLACK, "FrameBuf", WFLAG_WIN_DECORATED );
 
     if( 0 == w )
-        return;
+        goto done;
 
     //w->owner = GET_CURRENT_THREAD();
     color = COLOR_WHITE;
@@ -194,6 +211,9 @@ static void fb_init_window()
     w->inKernelEventProcess = 0;
 
     have_w = 1;
+done:
+    hal_mutex_unlock( &m );
+
 }
 
 

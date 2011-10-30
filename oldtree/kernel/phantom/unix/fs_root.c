@@ -442,6 +442,8 @@ errno_t auto_mount( const char *name, uufs_t *fs )
     static char mpath[32];
     snprintf( mpath, sizeof(mpath), "/amnt%d", am_index ++ );
 
+    SHOW_INFO( 0, "Partition %s mounted @ %s", name, mpath );
+
     return add_mount( mpath, name, fs );
 }
 

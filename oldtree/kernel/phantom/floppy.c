@@ -9,7 +9,7 @@
 //
 
 #undef HAVE_FLOPPY
-#define HAVE_FLOPPY 0
+#define HAVE_FLOPPY 1
 
 #if !HAVE_FLOPPY
 #include <device.h>
@@ -32,6 +32,7 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 #include <device.h>
 #include <kernel/ia32/rtc.h>
 #include <compat/seabios.h>
+#include <kernel/timedcall.h>
 
 // use disk queue
 #define FLOPPY_Q 1
@@ -788,7 +789,7 @@ static void dpc_func(void *a)
     fdq->ioDone( fdq, rc ? EIO : 0 );
 }
 
-errno_t u0AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+static errno_t u0AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
 {
     //assert(p->base);
     //assert(p->base->block_size == p->block_size);
@@ -800,7 +801,7 @@ errno_t u0AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
     return both->asyncIo( both, rq );
 }
 
-errno_t u1AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
+static errno_t u1AsyncIo( struct phantom_disk_partition *p, pager_io_request *rq )
 {
     //assert(p->base);
     //assert(p->base->block_size == p->block_size);
@@ -822,7 +823,7 @@ static errno_t floppyDequeue( struct phantom_disk_partition *p, pager_io_request
     SHOW_FLOW( 11, "dequeue rq %p", rq );
 
     return both->dequeue( both, rq );
-
+}
 
 #else
 
@@ -937,6 +938,8 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
     if (! CONFIG_FLOPPY)
         return 0;
 
+    SHOW_FLOW( 3, "probe floppy %d", seq_number );
+
     if( seq_number == 0 )
     {
         SHOW_FLOW0( 3, "init floppy controller" );
@@ -1033,13 +1036,14 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
             }
         }
 
-        floppy_test(p);
+        //floppy_test(p);
 
     }
 
     return ret;
 }
 
+#if 0
 // -----------------------------------------------------------------------
 // Test code
 // -----------------------------------------------------------------------
@@ -1093,7 +1097,7 @@ static void floppy_test( phantom_disk_partition_t *p )
         SHOW_INFO( 0, "floppy io test PASSED, requseted %d, got %d", TEST_RQ_COUNT, callbacks );
 
 }
-
+#endif
 
 
 #endif // HAVE_FLOPPY

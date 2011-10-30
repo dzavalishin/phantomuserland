@@ -190,6 +190,9 @@ void dump_partition(phantom_disk_partition_t *p);
 extern errno_t partAsyncIo( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 extern errno_t partTrim( struct phantom_disk_partition *p, pager_io_request *rq ); // disk_pool.c
 
+//! Get full name for partition (incl subparts)
+errno_t partGetName( phantom_disk_partition_t *p, char *buf, size_t bufsz );
+
 /** @} */
 
 #endif// DISK_H
