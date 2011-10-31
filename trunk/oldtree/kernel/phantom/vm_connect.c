@@ -432,7 +432,7 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
 
         }
         else
-            da->v_kernel_state = 0;
+            da->p_kernel_state = 0;
 
         errno_t ret;
 
@@ -455,6 +455,24 @@ fail:
     SHOW_ERROR( 0, "object connection to unknown dest '%s' requested", name );
     return ENOMEM; 
 }
+
+errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int connect_type, pvm_object_t host_object, void *arg)
+{
+    assert(0==connect_type);
+
+    (void) host_object;
+    (void) arg;
+
+    // Nothing. We are used just as callback dispatcher.
+    da->kernel = 0;
+    da->p_kernel_state_size = 0;
+    da->v_kernel_state_size = 0;
+    da->v_kernel_state = 0;
+    da->p_kernel_state = 0;
+
+    return 0;
+}
+
 
 errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) 
 {

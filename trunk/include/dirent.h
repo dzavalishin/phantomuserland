@@ -21,16 +21,25 @@
 
 #define FILENAME_MAX 512
 
-/* All the headers include this file. */
-//#include <_mingw.h>
-
-//#include <io.h>
-
-#ifndef RC_INVOKED
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+#define d_fileno d_ino			/* BSD compatible definition */
+
+/*
+
+struct linux_dirent64 {
+	u64		d_ino;
+	s64		d_off;
+	unsigned short	d_reclen;
+	unsigned char	d_type;
+	char		d_name[0];
+};
+
+*/
+
 
 struct dirent
 {
@@ -39,6 +48,9 @@ struct dirent
     unsigned short	d_namlen;	/* Length of name in d_name. */
     char		d_name[FILENAME_MAX]; /* File name. */
 };
+
+
+int readdir( int fd, struct dirent *e );
 
 
 #if 0
@@ -135,6 +147,5 @@ void __cdecl __MINGW_NOTHROW _wseekdir (_WDIR*, long);
 
 #endif	// 0
 
-#endif	/* Not RC_INVOKED */
 
 #endif	/* Not _DIRENT_H_ */

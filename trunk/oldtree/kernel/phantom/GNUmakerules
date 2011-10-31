@@ -98,10 +98,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	elf.o unix/dir.o unix/kernel_file.o unix/fs_pipe.o unix/sys_time.o \
 	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
 	unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
-	unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fatff.o unix/fs_fat32.o \
-	unix/fat32/FAT32_Base.o unix/fat32/FAT32_Access.o \
-	unix/fat32/FAT32_Misc.o unix/fat32/FAT32_Table.o \
-	unix/fat32/FAT32_Write.o unix/fat32/FAT32_FileString.o \
+	unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fatff.o unix/fs_cd.o \
 	unix/signal.o unix/sys_sw.o vm_cn_timer.o \
 	fs_map.o resolve.o main.o keyboard.o syslog.o \
 	arch_name.o arch_init.o \

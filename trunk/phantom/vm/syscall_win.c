@@ -361,7 +361,14 @@ static int win_setHandler_32(struct pvm_object me, struct data_area_4_thread *tc
 
     // TODO check class!
 
-    da->event_handler = handler;
+//    da->event_handler = handler;
+
+    {
+    struct data_area_4_connection  *cda = (struct data_area_4_connection *)da->connector.data->da;
+    // No sync - assume caller does it before getting real callbacks
+    cda->callback = handler;
+    cda->callback_method = 8; // TODO BUG FIXME
+    }
 
     //SYS_FREE_O(_img);
 

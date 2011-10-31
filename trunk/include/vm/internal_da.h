@@ -433,10 +433,12 @@ struct data_area_4_window
     rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
 #endif
 
+    struct pvm_object   		connector;      // Used for callbacks - events
+
     int                                 x, y; // in pixels
     rgba_t                              fg, bg; // colors
 
-    struct pvm_object                   event_handler; // connection!
+    //struct pvm_object                   event_handler; // connection!
     char                                title[PVM_MAX_TTY_TITLE+1];
 };
 
@@ -542,6 +544,9 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
 errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc);
 
 
+// Internal connect - when connection is used by other object (host_object)
+//int pvm_connect_object_internal(struct data_area_4_connection *da, int connect_type, pvm_object_t host_object, void *arg);
+errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int connect_type, pvm_object_t host_object, void *arg);
 
 
 

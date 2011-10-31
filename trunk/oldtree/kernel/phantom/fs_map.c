@@ -13,7 +13,7 @@
 #include "debug_ext.h"
 #define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 1
 
 #include <phantom_libc.h>
 #include <string.h>
@@ -308,9 +308,6 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
 // -----------------------------------------------------------------------
 
 
-#define CD_SECT_SIZE 2048
-
-#define CD_BYTES_TO_SECTORS(__b) (((__b)+CD_SECT_SIZE-1)/CD_SECT_SIZE)
 
 
 
@@ -334,7 +331,7 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
         if( strncmp( buf, cd_marker, 7 ) || (buf[7] != 0) )
             return EINVAL;
 
-        SHOW_INFO( 0, "CDFS marker found @ sector %d", cd_sector );
+        SHOW_FLOW( 3, "CDFS marker found @ sector %d", cd_sector );
         return 0;
     }
 
@@ -343,17 +340,16 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
 }
 
 #include <dev/cd_fs.h>
+#include <unix/uufile.h>
 
 static void cd_dump_dir( iso_dir_entry *e );
-static errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry );
 
-static errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf );
 
 
 
 static errno_t cd_read_sectors( phantom_disk_partition_t *p, void *buf, int cd_sector, size_t nsectors )
 {
-    SHOW_INFO( 6, "CDFS disk read @ sect %d, nsect %d", cd_sector * 4, nsectors * 4 );
+    SHOW_FLOW( 10, "CDFS disk read @ sect %d, nsect %d", cd_sector * 4, nsectors * 4 );
     return phantom_sync_read_sector( p, buf, cd_sector * 4, nsectors * 4 );
 }
 
@@ -379,12 +375,12 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
         break;
     }
 
-    SHOW_INFO( 0, "CDFS marker found @ sector %d", cd_sector );
+    SHOW_FLOW( 2, "CDFS marker found @ sector %d", cd_sector );
 
     cd_vol_t *vd = (void *)buf;
 
     size_t nsect = vd->numSectors[0];
-    SHOW_INFO( 0, "CDFS %d sectors %d path tbl sz @ %d, sect size %d", nsect, vd->pathTblSize[0], vd->lePathTbl1Sector, vd->sectorSize[0] );
+    SHOW_INFO( 2, "CDFS %d sectors %d path tbl sz @ %d, sect size %d", nsect, vd->pathTblSize[0], vd->lePathTbl1Sector, vd->sectorSize[0] );
 
     if( vd->sectorSize[0] != 2048 )
     {
@@ -394,10 +390,29 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
 
     iso_dir_entry *rootdir = (void *)&vd->rootDirEntry;
 
-    //int rootdir_start_sect = rootdir->dataStartSector[0];
+    cdfs_t  *impl = calloc(1, sizeof(cdfs_t));
+    if(impl==0)
+        return ENOMEM;
+
+    impl->p = p;
+    impl->volume_descr = *vd;
+    impl->root_dir = *rootdir;
+
+    uufs_t * fs = cdfs_create_fs( impl );
+    if( !fs )
+    {
+        SHOW_ERROR( 0, "can't create uufs for %s", p->name );
+    }
+
+    if( fs && auto_mount( p->name, fs ) )
+    {
+        SHOW_ERROR( 0, "can't automount %s", p->name );
+    }
+
 
     cd_dump_dir( rootdir );
 
+    if(0)
     {
         char *fn = "docs/install.txt";
         //char *fn = "a/b/c/d/autorun.inf";
@@ -427,7 +442,7 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
 
     }
 
-    return EINVAL;
+    return 0;
 }
 
 
@@ -438,8 +453,6 @@ static void cd_dump_dir( iso_dir_entry *e )
 
 }
 
-#define CD_ENTRY_FLAG_HIDDEN 	(1<<0)
-#define CD_ENTRY_FLAG_DIR 	(1<<1)
 
 static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, const char *name_to_find, const char *path_rest, iso_dir_entry *found_entry )
 {
@@ -469,7 +482,7 @@ static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, con
             break;
         }
 
-        SHOW_INFO( 0, "name '%16s' type %b sect %d",
+        SHOW_FLOW( 9, "name '%16s' type %b sect %d",
                    name,
                    e->flags, "\020\1Hidden\2Dir\3Assoc\4RecFormat\5Perm\10NotFinal",
                    e->dataStartSector[0]
@@ -477,7 +490,7 @@ static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, con
 
         if( stricmp( name_to_find, name ) == 0 )
         {
-            SHOW_FLOW( 3, "found '%s'", name_to_find );
+            SHOW_FLOW( 4, "found '%s'", name_to_find );
             if( path_rest == 0 )
             {
                 if(found_entry)
@@ -488,7 +501,7 @@ static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, con
             {
                 if( e->flags & CD_ENTRY_FLAG_DIR )
                 {
-                    SHOW_FLOW( 3, "descend, look for '%s'", path_rest );
+                    SHOW_FLOW( 5, "descend, look for '%s'", path_rest );
                     return cd_scan_dir( p, e, path_rest, found_entry );
                 }
                 else
@@ -504,9 +517,9 @@ static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, con
 }
 
 
-static errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry )
+errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry )
 {
-    SHOW_INFO( 0, "CDFS dir @ sect %d, sz %d, look for '%s'", e->dataStartSector[0], e->dataLength[0], path_to_find );
+    SHOW_FLOW( 7, "CDFS dir @ sect %d, sz %d, look for '%s'", e->dataStartSector[0], e->dataLength[0], path_to_find );
 
     int sect = e->dataStartSector[0];
     int left = e->dataLength[0];
@@ -536,7 +549,7 @@ static errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const
         path_rest = slash+1;
     }
 
-    SHOW_FLOW( 1, "name = '%s', rest = '%s'", name_to_find, path_rest );
+    SHOW_FLOW( 8, "name = '%s', rest = '%s'", name_to_find, path_rest );
 
     char buf[CD_SECT_SIZE];
 
@@ -557,9 +570,9 @@ static errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const
     return ENOENT;
 }
 
-static errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf )
+errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf )
 {
-    SHOW_INFO( 4, "CDFS file @ sect %d, sz %d", e->dataStartSector[0], e->dataLength[0] );
+    SHOW_FLOW( 4, "CDFS file @ sect %d, sz %d", e->dataStartSector[0], e->dataLength[0] );
 
     int file_start_sect = e->dataStartSector[0];
     size_t file_size = e->dataLength[0];
@@ -572,9 +585,12 @@ static errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_in
     if( nsect <= 0 )
         return EINVAL;
 
+    // Reasonable limit?
+    if( nsect > 1024 ) return EINVAL;
+
     int sect = file_start_sect+start_sector;
 
-    SHOW_INFO( 0, "CDFS file read @ sect %d, nsect %d", sect, nsect );
+    SHOW_FLOW( 9, "CDFS file read @ sect %d, nsect %d", sect, nsect );
 
     errno_t err = cd_read_sectors( p, buf, sect, nsect );
 

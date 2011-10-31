@@ -474,13 +474,31 @@ int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp )
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
-    if( f->flags & UU_FILE_FLAG_DIR )
+    if( !(f->flags & UU_FILE_FLAG_DIR) )
     {
         *err = ENOTDIR;
         return -1;
     }
 
-    if( (!f->ops) || ( !f->ops->read ) )
+    if( !f->ops )
+    {
+        *err = ENXIO; // or what?
+        return -1;
+    }
+
+    if( f->ops->readdir )
+    {
+        *err = f->ops->readdir( f, dirp );
+        if( *err == ENOENT )
+        {
+            *err = 0; // not err, just end of dir
+            return 0;
+        }
+        if( *err  ) return -1;
+        return 1;
+    }
+
+    if( !f->ops->read )
     {
         *err = ENXIO; // or what?
         return -1;

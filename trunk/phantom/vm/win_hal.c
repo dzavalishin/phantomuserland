@@ -384,6 +384,7 @@ void run_test( void )
 
 errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
 errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) { return ENOMEM; }
+errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int connect_type, pvm_object_t host_object, void *arg) { return 0; }
 
 
 // -----------------------------------------------------------------------
