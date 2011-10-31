@@ -778,11 +778,15 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
 
     drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED );
 
-
     {
     pvm_object_t o;
     o.data = os;
     o.interface = pvm_get_default_interface(os).data;
+
+    da->connector = pvm_create_connection_object();
+    struct data_area_4_connection *cda = (struct data_area_4_connection *)da->connector.data->da;
+
+    phantom_connect_object_internal(cda, 0, o, 0);
 
     // This object needs OS attention at restart
     // TODO do it by class flag in create fixed or earlier?
@@ -794,6 +798,9 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
 
 void pvm_gc_iter_window(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
+    struct data_area_4_window *da = (struct data_area_4_window *)os->da;
+
+    gc_fcall( func, arg, da->connector );
 }
 
 
@@ -803,8 +810,6 @@ struct pvm_object     pvm_create_window_object(struct pvm_object owned )
     struct data_area_4_window *da = (struct data_area_4_window *)ret.data->da;
 
     (void)da;
-
-
 
     return ret;
 }
@@ -885,18 +890,18 @@ void pvm_internal_init_directory(struct pvm_object_storage * os)
 
 void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
-	struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
+    struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
 
-	struct data_area_4_binary *bin = pvm_object_da( da->container, binary );
+    struct data_area_4_binary *bin = pvm_object_da( da->container, binary );
 
-	void *bp = bin->data;
-	int i;
-	for( i = 0; i < da->nEntries; i++, bp += da->elSize )
-	{
-            gc_fcall( func, arg, *((pvm_object_t*)bp) );
-	}
+    void *bp = bin->data;
+    int i;
+    for( i = 0; i < da->nEntries; i++, bp += da->elSize )
+    {
+        gc_fcall( func, arg, *((pvm_object_t*)bp) );
+    }
 
-	gc_fcall( func, arg, da->container );
+    gc_fcall( func, arg, da->container );
 }
 
 
@@ -950,7 +955,6 @@ void pvm_internal_init_connection(struct pvm_object_storage * os)
 struct pvm_object     pvm_create_connection_object(void)
 {
     pvm_object_t ret = pvm_object_create_fixed( pvm_get_connection_class() );
-
     return ret;
 }
 

@@ -82,7 +82,10 @@ ls(char *path)
         strcpy(buf, path);
         p = buf+strlen(buf);
         *p++ = '/';
-        while(read(fd, &de, sizeof(de)) == sizeof(de)){
+
+        //while(read(fd, &de, sizeof(de)) == sizeof(de)){
+        while(readdir(fd, &de) == 1)
+        {
             if(de.d_ino == 0)
                 continue;
             memmove(p, de.d_name, DIRSIZ);

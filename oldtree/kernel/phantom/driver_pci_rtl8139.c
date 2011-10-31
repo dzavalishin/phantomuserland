@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "RTL8139"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -696,7 +696,7 @@ static int rtl8139_txint(rtl8139 *rtl, u_int16_t int_status)
     int rc = 0; //INT_NO_RESCHEDULE;
 
     // transmit ok
-    printf("tx %d\n", int_status);
+    //printf("tx %d\n", int_status);
     if(int_status & RT_INT_TX_ERR) {
         printf("err tx int:\n");
         rtl8139_dumptxstate(rtl);

@@ -15,7 +15,7 @@
 #include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 12
-#define debug_level_info 12
+#define debug_level_info 1
 
 #include <errno.h>
 #include <disk.h>

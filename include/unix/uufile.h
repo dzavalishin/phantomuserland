@@ -5,6 +5,7 @@
 #include <hal.h>
 #include <errno.h>
 #include <queue.h>
+#include <dirent.h>
 #include <sys/stat.h>
 
 /**
@@ -24,6 +25,9 @@ struct uufileops
 {
     size_t      (*read)(    struct uufile *f, void *dest, size_t bytes);
     size_t      (*write)(   struct uufile *f, const void *src, size_t bytes);
+
+    // Return ENOENT if end of dir reached
+    errno_t     (*readdir)( struct uufile *f, struct dirent *dirp );
 
     // Notify fs driver that curr pos (uufile.pos) is changed, ask to validate
     // If returns nonzero, uufile.pos may be changed again

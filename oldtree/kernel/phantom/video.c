@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "video"
 #include <debug_ext.h>
-static int debug_level_flow = 3;
+static int debug_level_flow = 0;
 
 #include <phantom_libc.h>
 

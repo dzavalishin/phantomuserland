@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "driver"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -364,7 +364,7 @@ static int probe_isa( int stage, isa_probe_t *idrivers )
 
         if( dev != 0 )
         {
-            SHOW_INFO( 0, "Driver '%s' attached to ISA at 0x%X (IRQ %d)",
+            SHOW_INFO( 0, "Driver '%s' attached to ISA @ 0x%X, IRQ %d",
                        dp->name, dp->port, dp->irq );
             phantom_bus_add_dev( &isa_bus, dev );
             add_alldevs( dev );

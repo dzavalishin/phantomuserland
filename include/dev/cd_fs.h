@@ -86,6 +86,10 @@ typedef struct iso_dir_entry {
     char                name[32];               // Name + padding (nameLength [+1])
 } __packed iso_dir_entry;
 
+#define CD_ENTRY_FLAG_HIDDEN 	(1<<0)
+#define CD_ENTRY_FLAG_DIR 	(1<<1)
+
+
 typedef struct iso_path_entry {
     unsigned char       nameLength;             // Length of directory name
     unsigned char       extAttrSecCount;        // Number of sectors in extended attr record
@@ -94,6 +98,40 @@ typedef struct iso_path_entry {
     unsigned char       name[32];               // Name of this entry (nameLength bytes)
 } __packed iso_path_entry;
 
+
+// FS state
+
+#include <disk.h>
+#include <unix/uufile.h>
+
+errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry );
+errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf );
+
+
+typedef struct
+{
+    bool                init;
+    int                 joliet_level;
+
+    phantom_disk_partition_t *p;
+
+    cd_vol_t 		volume_descr;
+    iso_dir_entry 	root_dir; // TODO kill - is in vol descr!
+}
+cdfs_t;
+
+
+typedef struct
+{
+    iso_dir_entry 	e;
+}
+cdfs_file_t;
+
+uufs_t *cdfs_create_fs( cdfs_t *impl );
+
+
+#define CD_SECT_SIZE 2048
+#define CD_BYTES_TO_SECTORS(__b) (((__b)+CD_SECT_SIZE-1)/CD_SECT_SIZE)
 
 
 #endif // CD_FS_H

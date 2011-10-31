@@ -1,3 +1,4 @@
+#if 1
 /*-
  * Copyright (c) 1990 The Regents of the University of California.
  * All rights reserved.
@@ -105,4 +106,6 @@ END(memmove)
 #else
 END(bcopy)
 #endif
+#endif
+
 #endif
