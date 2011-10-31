@@ -431,11 +431,25 @@ int usys_umount(int *err, uuprocess_t *u, const char *target, int flags )
     return *err ? -1 : 0;
 }
 
+#include <threads.h>
+#include <kunix.h>
+
+static errno_t auto_run( const char *path );
+static void auto_run_thread( void *arg )
+{
+    if( arg == 0 )
+        return;
+
+    char tname[128];
+    snprintf( tname, sizeof(tname), "Autorun %s", arg );
+    hal_set_current_thread_name(tname);
+
+    auto_run( (const char *) arg );
+}
 
 
 
-
-errno_t auto_mount( const char *name, uufs_t *fs )
+errno_t auto_mount( const char *name, uufs_t *fs, char *out_mnt_path, size_t outsz, int flags )
 {
     static int am_index = 0;
 
@@ -444,9 +458,61 @@ errno_t auto_mount( const char *name, uufs_t *fs )
 
     SHOW_INFO( 0, "Partition %s mounted @ %s", name, mpath );
 
-    return add_mount( mpath, name, fs );
+    if( outsz && out_mnt_path )
+        strlcpy( out_mnt_path, mpath, outsz );
+
+    errno_t rc = add_mount( mpath, name, fs );
+
+    if( !rc && (flags & AUTO_MOUNT_FLAG_AUTORUN) )
+        hal_start_kernel_thread_arg( auto_run_thread, strdup(mpath) );
+
+    return rc;
 }
 
+// -----------------------------------------------------------------------
+// Autorun
+// -----------------------------------------------------------------------
+
+static errno_t auto_run( const char *mpath )
+{
+    errno_t err;
+
+    SHOW_INFO( 0, "Atthempt autorun @ %s", mpath );
+
+    int pid = uu_create_process(-1);
+    const char* av[] = { "sh", "-s", "phantom.rc", 0 };
+    uu_proc_setargs( pid, av, 0 );
+
+    char run_path[512];
+    snprintf( run_path, sizeof(run_path), "%s/bin/sh", mpath );
+    SHOW_FLOW( 4, "Attempt to run shell @ %s", run_path );
+    err = uu_run_file( pid, run_path );
+    if(!err) SHOW_INFO( 0, "Autorun shell @ %s", run_path );
+
+
+    snprintf( run_path, sizeof(run_path), "%s/autorun.inf", mpath );
+    SHOW_FLOW( 4, "Attempt to run autorun.inf @ %s err = %d", run_path, err );
+    void *arinf = 0;
+    size_t arinf_sz;
+    err = k_load_file( &arinf, &arinf_sz, run_path );
+    if( (!err) && arinf_sz && arinf )
+    {
+        SHOW_INFO( 0, "Autorun autorun.inf @ %s", run_path );
+        char *arun = arinf;
+        SHOW_INFO( 0, "Autorun text='%s'", arun );
+
+        if( strnicmp( arun, "[autorun]", 9 ) ) goto noarun;
+    }
+noarun:
+    if( arinf_sz && arinf )
+    {
+        arinf_sz = 0;
+        free(arinf);
+        arinf = 0;
+    }
+
+    return 0;
+}
 
 
 // -----------------------------------------------------------------------

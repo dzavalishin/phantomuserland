@@ -1054,7 +1054,7 @@ errno_t fs_start_ext2(phantom_disk_partition_t *p)
             SHOW_ERROR( 0, "can't create uufs for %s", pname );
         }
 
-        if( ufs && auto_mount( pname, ufs ) )
+        if( ufs && auto_mount( pname, ufs, 0, 0, AUTO_MOUNT_FLAG_AUTORUN ) )
         {
             SHOW_ERROR( 0, "can't automount %s", pname );
         }

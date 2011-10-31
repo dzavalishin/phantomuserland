@@ -62,7 +62,11 @@ static fs_probe_t fs_drivers[] =
 
 };
 
+#define FS_START_THREAD 1
 
+#if FS_START_THREAD
+#include <threads.h>
+#endif
 
 errno_t lookup_fs(phantom_disk_partition_t *p)
 {
@@ -88,6 +92,13 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
             continue;
         }
 
+#if FS_START_THREAD
+        // BUG HACK - activate phantom fs syncronously, or else we will die attempting to use it
+        if(fp->use_f == fs_use_phantom)
+            fp->use_f( p );
+        else
+            hal_start_kernel_thread_arg( (void (*)(void *))fp->use_f, p );
+#else
         ret = fp->use_f( p );
         if( ret )
         {
@@ -96,6 +107,7 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
         }
 
         SHOW_INFO( 0, "%s file sysem driver occupies partition %s", fp->name, pname );
+#endif
         return 0;
     }
 
@@ -342,13 +354,28 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
 #include <dev/cd_fs.h>
 #include <unix/uufile.h>
 
-static void cd_dump_dir( iso_dir_entry *e );
-
 
 
 
 static errno_t cd_read_sectors( phantom_disk_partition_t *p, void *buf, int cd_sector, size_t nsectors )
 {
+#if 0
+    if( fs->cache == 0 )
+        fs->cache = cache_init( CD_SECT_SIZE );
+
+    if( fs->cache )
+    {
+        if( 0 == cache_get_multiple( fs->cache, sector, nsect, buf ) )
+            return 0;
+    }
+
+    errno_t rc = phantom_sync_read_sector( p, buf, cd_sector * 4, nsectors * 4 );
+
+    if( fs->cache && !rc )
+        cache_put_multiple( fs->cache, sector, nsect, buf );
+
+#endif
+
     SHOW_FLOW( 10, "CDFS disk read @ sect %d, nsect %d", cd_sector * 4, nsectors * 4 );
     return phantom_sync_read_sector( p, buf, cd_sector * 4, nsectors * 4 );
 }
@@ -389,6 +416,7 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
     }
 
     iso_dir_entry *rootdir = (void *)&vd->rootDirEntry;
+    SHOW_FLOW( 7, "CDFS root dir @ sect %d, sz %d", rootdir->dataStartSector[0], rootdir->dataLength[0] );
 
     cdfs_t  *impl = calloc(1, sizeof(cdfs_t));
     if(impl==0)
@@ -404,13 +432,11 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
         SHOW_ERROR( 0, "can't create uufs for %s", p->name );
     }
 
-    if( fs && auto_mount( p->name, fs ) )
+    if( fs && auto_mount( p->name, fs, 0, 0, AUTO_MOUNT_FLAG_AUTORUN ) )
     {
         SHOW_ERROR( 0, "can't automount %s", p->name );
     }
 
-
-    cd_dump_dir( rootdir );
 
     if(0)
     {
@@ -446,12 +472,6 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
 }
 
 
-static void cd_dump_dir( iso_dir_entry *e )
-{
-    SHOW_INFO( 0, "CDFS dir @ sect %d, sz %d", e->dataStartSector[0], e->dataLength[0] );
-    //SHOW_INFO( 0, "CDFS dir unitSize %d, gapSize %d", e->unitSize, e->gapSize );
-
-}
 
 
 static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, const char *name_to_find, const char *path_rest, iso_dir_entry *found_entry )

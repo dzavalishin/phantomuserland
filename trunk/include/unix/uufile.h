@@ -208,8 +208,10 @@ struct uuprocess;
 //! (possibly relative) filaname and process (cwd)
 errno_t uu_normalize_path( char *buf, const char *filename, struct uuprocess *p );
 
+#define AUTO_MOUNT_FLAG_AUTORUN (1<<0)
+//#define AUTO_MOUNT_FLAG_AUTORUN (1<<0)
 
-errno_t auto_mount( const char *name, uufs_t *fs );
+errno_t auto_mount( const char *name, uufs_t *fs, char *out_mount_point, size_t out_mount_point_buf_size, int flags );
 
 
 
