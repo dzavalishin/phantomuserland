@@ -21,10 +21,12 @@
 #define debug_level_info 10
 
 #include "ff.h"			/* FatFs configurations and declarations */
+#include "fs_map.h"
 
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <kernel/page.h>
 
 #include <unix/uuprocess.h>
 
@@ -3449,7 +3451,7 @@ static DSTATUS disk_status (phantom_disk_partition_t *dev)
 #include <kunix.h>
 
 
-errno_t fs_start_ff( phantom_disk_partition_t *p )
+errno_t fs_start_fat( phantom_disk_partition_t *p )
 {
     FATFS *fs = calloc( sizeof(FATFS), 1);
 
@@ -3574,5 +3576,96 @@ int ff_rel_grant(_SYNC_t *m)
 {
     return hal_mutex_unlock(m);
 }
+
+
+
+errno_t fs_probe_fat(phantom_disk_partition_t *p )
+{
+    unsigned char buf[PAGE_SIZE];
+
+    SHOW_FLOW( 0, "%s look for FAT", p->name );
+
+    switch( p->type )
+    {
+    case 1: // FAT 12
+    case 4: // FAT 16 below 32M
+    case 6: // FAT 16 over 32M
+    case 7: // ExFAT 64
+        break;
+
+    case 0x0B: // FAT32 non-LBA?!
+        SHOW_FLOW( 0, "Warning: Part type is %d (non-LBA)", p->type );
+    case 0x0C: // FAT32 LBA
+    case 0x0E: // FAT16 LBA
+        break;
+
+    default:
+        if(p->flags & PART_FLAG_IS_WHOLE_DISK)
+            break;
+
+        SHOW_ERROR( 1, "Not a FAT partition type 0x%X", p->type );
+        return EINVAL;
+    }
+
+
+    if( phantom_sync_read_sector( p, buf, 0, 1 ) )
+    {
+        SHOW_ERROR( 0, "%s can't read sector 0", p->name );
+        return EINVAL;
+    }
+
+    //hexdump( buf, 512, 0, 0 );
+
+    if( (buf[0x1FE] != 0x55) || (buf[0x1FF] != 0xAA) )
+    {
+        SHOW_ERROR0( 1, "No magic" );
+        return EINVAL;
+    }
+
+    u_int16_t blksize = *((u_int16_t *)(buf+0xb));
+    if( 512 != blksize )
+    {
+        SHOW_ERROR( 1, "Blocksize is !512, %d", blksize );
+        return EINVAL;
+    }
+
+    u_int8_t signature = *((u_int8_t *)(buf+0x26));
+    SHOW_FLOW( 0, "signature is 0x%X", signature );
+    switch(signature)
+    {
+    case 0x28:
+    case 0x29: // DOS4
+        break;
+
+    default:
+        SHOW_ERROR0( 1, "Unknown signature" );
+        break;
+    }
+
+    u_int32_t serial = *((u_int32_t *)(buf+0x27));
+    SHOW_FLOW( 0, "serial num is 0x%X", serial );
+
+    // different FATs have it in different places.
+#if 0
+
+#define FAT_LABEL_LEN 12
+    char label[FAT_LABEL_LEN];
+    memset( label, FAT_LABEL_LEN, 0 );
+    memcpy( label, buf+0x2B, FAT_LABEL_LEN-1 );
+
+    SHOW_FLOW( 0, "label is %.*s", FAT_LABEL_LEN-1, label );
+
+#define FAT_FSTYPE_LEN 9
+    char fstype[FAT_FSTYPE_LEN];
+    memset( fstype, FAT_FSTYPE_LEN, 0 );
+    memcpy( fstype, buf+0x2B, FAT_FSTYPE_LEN-1 );
+
+    SHOW_FLOW( 0, "fstype is %.*s", FAT_FSTYPE_LEN-1, fstype );
+
+#endif
+
+    return 0;
+}
+
 
 
