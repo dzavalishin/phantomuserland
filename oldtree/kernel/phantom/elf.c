@@ -595,7 +595,7 @@ static int elf_check(struct Elf32_Ehdr *elf_header)
 
 static errno_t elf_load_seg(Elf32_Phdr *seg, void *src, void *dst)
 {
-    SHOW_INFO( 5, "Elf32_Phdr type %d offset %d vaddr %d filesz %d memsz %d flags %x",
+    SHOW_FLOW( 7, "Elf32_Phdr type %d offset %d vaddr %d filesz %d memsz %d flags %x",
                seg->p_type,
                seg->p_offset, seg->p_vaddr,
                seg->p_filesz, seg->p_memsz,
@@ -618,7 +618,7 @@ static errno_t elf_load_seg(Elf32_Phdr *seg, void *src, void *dst)
         bzero( dest_base, seg->p_memsz );
 
     if(seg->p_filesz > seg->p_memsz)
-    SHOW_ERROR( 1, "Elf32_Phdr filesz %d > memsz %d", seg->p_filesz, seg->p_memsz );
+        SHOW_ERROR( 1, "Elf32_Phdr filesz %d > memsz %d", seg->p_filesz, seg->p_memsz );
 
     // Load!
     //memcpy(dest_base, src_base, seg->p_memsz);

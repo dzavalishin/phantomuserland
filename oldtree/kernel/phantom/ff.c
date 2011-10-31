@@ -3500,7 +3500,11 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
         SHOW_ERROR( 0, "can't create uufs for %s", p->name );
     }
 
-    if( ufs && auto_mount( p->name, ufs ) )
+    char pname[FS_MAX_MOUNT_PATH];
+    partGetName( p, pname, FS_MAX_MOUNT_PATH );
+
+    char amnt_path[128];
+    if( ufs && auto_mount( pname, ufs, amnt_path, sizeof(amnt_path), AUTO_MOUNT_FLAG_AUTORUN ) )
     {
         SHOW_ERROR( 0, "can't automount %s", p->name );
     }
@@ -3523,15 +3527,20 @@ errno_t fs_start_ff( phantom_disk_partition_t *p )
 
     }
 
-    if(1)
+    if(0)
     {
         int pid = uu_create_process(-1);
         const char* av[] = { "sh", "-s", "phantom.rc", 0 };
         uu_proc_setargs( pid, av, 0 );
 
+        strlcat(amnt_path, "/bin/sh", sizeof(amnt_path));
+        uu_run_file( pid, amnt_path );
+
+        /*
         if( uu_run_file( pid, "/amnt0/bin/sh" ) )
             if( uu_run_file( pid, "/amnt1/bin/sh" ) )
-                uu_run_file( pid, "/amnt2/bin/sh" );
+            uu_run_file( pid, "/amnt2/bin/sh" );
+        */
     }
 
 #endif

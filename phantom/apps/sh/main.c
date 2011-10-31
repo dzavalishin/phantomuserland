@@ -32,7 +32,7 @@ int main(int argc, char *argv[], char *envp[])
 
     printf("Phantom Simple Unix Box Shell is running, pid %d\n", getpid());
 
-#if 1
+#if 0
     printf("ac = %d\n", argc );
     char **avp = argv;
     while( *avp )
