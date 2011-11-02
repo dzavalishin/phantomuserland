@@ -1,3 +1,4 @@
+#if ARCH_ia32
 // code to access floppy drives.
 //
 // Copyright (C) 2008,2009  Kevin O'Connor <kevin@koconnor.net>
@@ -1110,3 +1111,4 @@ static void floppy_test( phantom_disk_partition_t *p )
 
 
 
+#endif // ARCH_ia32

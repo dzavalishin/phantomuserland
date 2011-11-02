@@ -64,6 +64,8 @@ struct trap_state
         unsigned int spsr;
 };
 */
+
+
 #ifdef ASSEMBLER
 #define TRAP_STATE_TRAPNO	64
 #define TRAP_STATE_INTNO	68
@@ -110,6 +112,7 @@ struct trap_state
 
 
 
+#define TS_PROGRAM_COUNTER pc
 
 
 

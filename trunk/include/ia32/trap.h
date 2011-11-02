@@ -135,6 +135,8 @@ struct trap_state {
 	unsigned int	v86_gs;
 };
 
+#define TS_PROGRAM_COUNTER eip
+
 /* The actual trap_state frame pushed by the processor
    varies in size depending on where the trap came from.  */
 #define TR_KSIZE	((int)&((struct trap_state*)0)->esp)

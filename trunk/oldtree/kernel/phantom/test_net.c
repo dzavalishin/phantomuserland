@@ -233,8 +233,10 @@ int do_test_tcp_connect(const char *test_parm)
 
     tcp_close(prot_data);
 
-#endif
     return nread > 0 ? 0 : -nread;
+#else
+    return 0;
+#endif
 }
 
 

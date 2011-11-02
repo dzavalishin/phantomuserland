@@ -110,6 +110,7 @@ struct trap_state
 };
 
 
+#define TS_PROGRAM_COUNTER pc
 
 
 //! Called from exception handler on TLB refill events
