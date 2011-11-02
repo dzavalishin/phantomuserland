@@ -148,6 +148,8 @@ struct trap_state {
 
 };
 
+#define TS_PROGRAM_COUNTER hw_rip
+
 
 /* The actual trap_state frame pushed by the processor
    varies in size depending on where the trap came from.  */
