@@ -189,7 +189,7 @@ void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
         }
 
     case T_SYSCALL:
-        syscall_sw(ts);
+        //syscall_sw(ts);
         return;
 
     case T_TLB_LOAD:

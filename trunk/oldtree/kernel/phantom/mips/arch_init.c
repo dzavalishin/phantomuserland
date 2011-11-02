@@ -20,7 +20,8 @@
 #include <mips/interrupt.h>
 #include <device.h>
 #include <endian.h>
-
+#include <assert.h>
+#include <hal.h>
 
 
 static u_int32_t    isa_read32(u_int32_t addr)                      { return *((u_int32_t*)(BOARD_ISA_IO|addr)); }
@@ -212,7 +213,19 @@ void arch_threads_init()
 
 
 
+//! Stop interrupts, timer, seconary CPUs...
+void board_panic_stop_world(void)
+{
+    board_interrupts_disable_all();
+}
 
+
+
+//! Wait for a key press on default console - don't use interrupts, assume interrupts disabled
+void board_panic_wait_keypress(void)
+{
+    debug_console_getc();
+}
 
 
 
