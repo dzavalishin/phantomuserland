@@ -83,7 +83,8 @@ void arch_init_early(void)
 }
 
 static void timer_interrupt( void *a );
-static int timer_compare_delta = 1000; // Default value of 2000 instructions
+//static int timer_compare_delta = 1000; // Default value of 2000 instructions
+static int timer_compare_delta = 40000;
 static int timer_compare_value = 0;
 
 static int usec_per_tick = 100000; // 100 Hz = HZ*1000
@@ -98,6 +99,7 @@ void board_init_kernel_timer(void)
     // On-chip timer init
     assert(!hal_irq_alloc( timer_irq, timer_interrupt, 0, HAL_IRQ_SHAREABLE ));
 
+    timer_compare_value += timer_compare_delta;
     mips_write_cp0_compare( timer_compare_value );
     mips_write_cp0_count( 0 );
 #endif
@@ -110,6 +112,10 @@ static void timer_interrupt( void *a )
 
     timer_compare_value += timer_compare_delta;
     mips_write_cp0_compare( timer_compare_value );
+
+    // BUG Dumb mode - just reset both - time will slip this way!
+    mips_write_cp0_compare( timer_compare_delta );
+    mips_write_cp0_count( 0 );
 
     hal_time_tick(usec_per_tick);
 }
@@ -146,11 +152,13 @@ void board_sched_cause_soft_irq(void)
 {
     if( !took_zero_intr )
     {
-        board_interrupt_enable(0);
+        //board_interrupt_enable(0);
         assert(!hal_irq_alloc( 0, sched_soft_interrupt, 0, HAL_IRQ_SHAREABLE ));
         took_zero_intr = 1;
     }
 
+    // We need to reenable it for thread switch swaps mask too
+    board_interrupt_enable(0);
 
     int ie = hal_save_cli();
 
@@ -163,7 +171,7 @@ void board_sched_cause_soft_irq(void)
 
     hal_sti();
 
-    __asm__("wait"); // Now wait for IRQ
+    //__asm__("wait"); // Now wait for IRQ
 
     if(ie) hal_sti(); else hal_cli();
 }

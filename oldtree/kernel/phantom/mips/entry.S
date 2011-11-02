@@ -58,14 +58,23 @@ _reset:
     /* Disable interrupts */
     mtc0    zero, CP0_STATUS
 
+    //
+    li      t0, CP0_STATUS_DEFAULT
+    mtc0    t0, CP0_STATUS
+
     /* Disable watch exception. */
     mtc0    zero, CP0_WATCHLO
     mtc0    zero, CP0_WATCHHI
 
     /* disable kernel mode cache */
     mfc0    t0, CP0_CONFIG
-    and	t0, ~0x7
-    ori	t0, 0x2
+    and	    t0, ~0x7
+    ori     t0, 0x2
+
+    // reset some bits in config - master/checker
+    li      t1, ~(CONF_CM)
+    and	    t0, t0, t1
+
     mtc0    t0, CP0_CONFIG
 
     /* set up stack */
@@ -204,14 +213,18 @@ END(arch_get_frame_pointer)
 
     //int mips_read_cp0_status();
 LEAF(mips_read_cp0_status)
+    nop
     mfc0    v0, CP0_STATUS
+    nop
     jr.hb   ra
     nop // delay slot
 END(mips_read_cp0_status)
 
     //void mips_write_cp0_status( int data );
 LEAF(mips_write_cp0_status)
+    nop
     mtc0    a0, CP0_STATUS
+    nop
     jr.hb   ra
     nop // delay slot
 END(mips_write_cp0_status)
@@ -241,19 +254,37 @@ LEAF(mips_read_cp0_cpuid)
 END(mips_read_cp0_cpuid)
 
 
-    //void mips_write_cp0_compare( unsigned int data );
+//void mips_write_cp0_compare( unsigned int data );
 LEAF(mips_write_cp0_compare)
     mtc0    a0, CP0_COMPARE
     jr.hb   ra
     nop // delay slot
 END(mips_write_cp0_compare)
 
-    //void mips_write_cp0_count( unsigned int data );
+//int mips_read_cp0_compare();
+LEAF(mips_read_cp0_compare)
+    mfc0    v0, CP0_COMPARE
+    jr      ra
+    nop                  // delay slot
+END(mips_read_cp0_compare)
+
+
+
+
+//void mips_write_cp0_count( unsigned int data );
 LEAF(mips_write_cp0_count)
     mtc0    a0, CP0_COUNT
     jr.hb   ra
     nop // delay slot
 END(mips_write_cp0_count)
+
+//int mips_read_cp0_count();
+LEAF(mips_read_cp0_count)
+    mfc0    v0, CP0_COUNT
+    jr      ra
+    nop                  // delay slot
+END(mips_read_cp0_count)
+
 
 
 //int mips_read_cp0_config(void);
