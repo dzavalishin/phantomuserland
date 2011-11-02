@@ -26,8 +26,9 @@
 
 #ifdef ARCH_mips
 // NB! We must give out PHYSICAL addresses, and kernel is linked to 0x80000000,
-// so we strip high bit from kernel address.
-#  define phystokv(pa)	((void *)(0x8000000  & (addr_t)(pa)))
+// so we strip high bit from kernel address. On MIPS 0x80000000 to 0xc0000000-1 
+// maps directly to 0 in kernel mode
+#  define phystokv(pa)	((void *)(0x80000000 | (addr_t)(pa)))
 #  define kvtophys(va)	(0x7FFFFFFF & (physaddr_t)(va))
 #else
 #  define phystokv(pa)	((void *)(pa))

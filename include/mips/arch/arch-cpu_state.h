@@ -9,7 +9,7 @@ struct cpu_state_save
     u_int32_t           fp;
     u_int32_t           ra; // == pc
 
-    u_int32_t           status;
+    u_int32_t           status; // NB! Not really restored!
 
     u_int32_t           u0;
     u_int32_t           u1;
