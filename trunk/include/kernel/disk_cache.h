@@ -55,5 +55,8 @@ errno_t cache_flush_all( cache_t *c );
 
 errno_t cache_set_writeback( cache_t *c, writeback_f_t *func, void *opaque );
 
+//! Destroy cache
+errno_t cache_destroy( cache_t * );
+
 
 #endif // DISK_CACHE_H

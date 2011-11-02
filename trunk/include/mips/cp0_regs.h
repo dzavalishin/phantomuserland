@@ -77,6 +77,9 @@
 #define ST_CU2		0x40000000	/* разрешение сопроцессора 2 */
 #define ST_CU3		0x80000000	/* разрешение сопроцессора 3 */
 
+
+#define CP0_STATUS_DEFAULT (ST_CU0|ST_CU1)
+
 // Config register
 
 //! kseg0 coherency algorithm
@@ -151,18 +154,21 @@
 #ifndef ASSEMBLER
 
 unsigned int mips_read_cp0_status( void );
-void mips_write_cp0_status( unsigned int data );
+void         mips_write_cp0_status( unsigned int data );
 
 unsigned int mips_read_cp0_cause();
-void mips_write_cp0_cause( unsigned int data );
+void         mips_write_cp0_cause( unsigned int data );
 
 unsigned int mips_read_cp0_config(void);
 
 unsigned int mips_read_cp0_cpuid( void );
 
 // Timer
-void mips_write_cp0_count( unsigned int data );
-void mips_write_cp0_compare( unsigned int data );
+unsigned int mips_read_cp0_count(void);
+void         mips_write_cp0_count( unsigned int data );
+
+unsigned int mips_read_cp0_compare();
+void         mips_write_cp0_compare( unsigned int data );
 
 
 #endif // ASSEMBLER

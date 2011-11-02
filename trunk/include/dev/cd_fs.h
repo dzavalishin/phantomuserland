@@ -105,8 +105,6 @@ typedef struct iso_path_entry {
 #include <unix/uufile.h>
 #include <kernel/disk_cache.h>
 
-errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry );
-errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf );
 
 
 typedef struct
