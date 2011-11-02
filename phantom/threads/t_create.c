@@ -25,6 +25,10 @@
 #include <kernel/init.h>
 #include <thread_private.h>
 
+#if ARCH_mips
+#include <kernel/vm.h>
+#endif
+
 static int find_tid(phantom_thread_t *);
 static void common_thread_init(phantom_thread_t *t, int stacksize );
 
@@ -250,8 +254,18 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     hal_pv_alloc( &pa, &(t->kstack), stacksize+PAGE_SIZE );
     hal_page_control( pa, t->kstack, page_unmap, page_noaccess ); // poor man's guard page - TODO support in page fault
     t->kstack_pa = pa;
-
+#if ARCH_mips
+    // On mips we need unmapped kernel stack for mapping on MIPS is
+    // done with exceptions too and unmapped stack is fault forever.
+    // We achieve this by setting stack virtual address to its
+    // physical address | 0x8000000 - this virt mem area is direct
+    // mapped to physmem at 0
+    assert( (addr_t)phystokv(t->kstack_pa) > 0x80000000 );
+    assert( (addr_t)phystokv(t->kstack_pa) < 0xC0000000 );
+    t->kstack_top = phystokv(t->kstack_pa) +t->kstack_size-4; // Why -4?
+#else
     t->kstack_top = t->kstack+t->kstack_size-4; // Why -4?
+#endif
 
     //assert(t->kstack != 0);
 
