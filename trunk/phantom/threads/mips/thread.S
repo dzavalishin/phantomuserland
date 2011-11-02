@@ -13,7 +13,10 @@
 #include <mips/asm.h>
 #include <mips/cp0_regs.h>
 #include <cpu_state.h>
-            
+
+// No real reason to save status reg
+#define MIPS_SAVE_STATUS 0
+
 /*
  * void phantom_switch_context(
  *                           phantom_thread_t *from,
@@ -49,8 +52,9 @@ LEAF(phantom_switch_context)
     mflo t0
     sw          t0, 36(sp)
 
-    mfc0	t0, CP0_STATUS
-    sw          t0, CSTATE_STATUS(a0)
+    // NB! Save in t1 old status - will use below
+    mfc0	t1, CP0_STATUS
+    sw          t1, CSTATE_STATUS(a0)
 
     // Save SP
     sw          sp, CSTATE_SP(a0)
@@ -72,8 +76,19 @@ LEAF(phantom_switch_context)
     // Load RA
     lw          ra, CSTATE_RA(a1)
 
+    // Take interrupt mask from old status
+    andi        t1, t1, ST_IM
+
+#if MIPS_SAVE_STATUS
     lw          t0, CSTATE_STATUS(a1)
+    // Clear interrupt mask in new status
+    li          t2, ~ST_IM
+    and         t0, t0, t2
+
+    // Use new status with old int mask
+    or          t0, t0, t1
     mtc0	t0, CP0_STATUS
+#endif
 
     lw          t0, 32(sp)
     mthi t0
