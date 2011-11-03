@@ -118,6 +118,9 @@ END(phantom_switch_context)
 
 //* new thread starts here - no args
 LEAF(phantom_thread_trampoline)
+    // Called functions assume some stack above call frame
+    // is usable by called func - at least for 4 args
+    addi        sp, sp, -32
     j           _C_LABEL(phantom_thread_c_starter)
     nop // delay slot
     //hlt // not reached
