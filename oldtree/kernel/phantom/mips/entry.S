@@ -131,8 +131,10 @@ print_banner:
 eprint:	
 
     addiu k1, zero, 0 // Init for CPU 0 - means init L2 cache too
+    addi        sp, sp, -32
     jal sys_init_cache
     nop // delay slot
+    addi        sp, sp, 32
 
     // NB - see TLB_PAGEMASK define, use here?
     // pagemask (cp0 r5) = 0 -> 4Kb page
@@ -145,7 +147,9 @@ eprint:
     // TODO cp0 r16 config
 
     /* jump to main */
+    addi        sp, sp, -32
     jal	phantom_multiboot_main
+    addi        sp, sp, 32
     nop
 
 loop:
@@ -444,8 +448,15 @@ good_k1:
     //void hal_MIPS_exception_dispatcher(struct trap_state *ts, int cause)
     addiu       a0, sp, 0               // move a0 <- sp
     mfc0	a1, CP0_CAUSE           // Cause - incl interrupt num and exception type
+
+    // call overwrites top of stack?
+    addi        sp, sp, -TRAP_STATE_SIZE
+
     jal hal_MIPS_exception_dispatcher
     nop // delay
+
+    // call overwrites top of stack?
+    addi        sp, sp, TRAP_STATE_SIZE
 
     // dec exception entry count!
     la k0, curr_thread_k0_stack_top

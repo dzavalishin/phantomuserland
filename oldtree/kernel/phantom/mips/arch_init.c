@@ -84,7 +84,7 @@ void arch_init_early(void)
 
 static void timer_interrupt( void *a );
 //static int timer_compare_delta = 1000; // Default value of 2000 instructions
-static int timer_compare_delta = 40000;
+static int timer_compare_delta = 400000;
 static int timer_compare_value = 0;
 
 static int usec_per_tick = 100000; // 100 Hz = HZ*1000
