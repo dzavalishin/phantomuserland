@@ -55,7 +55,7 @@ ARCH_OBJS=angel.o lowlevel_test.o
 endif
 
 ifeq ($(ARCH),mips)
-ARCH_OBJS=cache_cpu.o driver_isa_mipsnet.o
+ARCH_OBJS=cache_cpu.o driver_isa_mipsnet.o lowlevel_test.o
 endif
 
 
