@@ -112,44 +112,109 @@ again:
     addiu        t1, zero, 0
 
     bne          zero, $1, fail
+    nop // delay slot
+
     bne          zero, $2, fail
+    nop // delay slot
+
     bne          zero, $3, fail
+    nop // delay slot
+
     bne          zero, $4, fail
+    nop // delay slot
+
     bne          zero, $5, fail
+    nop // delay slot
+
     bne          zero, $6, fail
+    nop // delay slot
+
     bne          zero, $7, fail
+    nop // delay slot
+
     bne          zero, $8, fail
+    nop // delay slot
+
     bne          zero, $9, fail
+    nop // delay slot
+
     bne          zero, $10, fail
+    nop // delay slot
+
     bne          zero, $11, fail
+    nop // delay slot
+
     bne          zero, $12, fail
+    nop // delay slot
+
     bne          zero, $13, fail
+    nop // delay slot
+
     bne          zero, $14, fail
+    nop // delay slot
+
     bne          zero, $15, fail
+    nop // delay slot
+
     bne          zero, $16, fail
+    nop // delay slot
+
     bne          zero, $17, fail
+    nop // delay slot
+
     bne          zero, $18, fail
+    nop // delay slot
+
     bne          zero, $19, fail
+    nop // delay slot
+
     bne          zero, $20, fail
+    nop // delay slot
+
     bne          zero, $21, fail
+    nop // delay slot
+
     bne          zero, $22, fail
+    nop // delay slot
+
     bne          zero, $23, fail
+    nop // delay slot
+
     bne          zero, $24, fail
+    nop // delay slot
+
     bne          zero, $25, fail
-    bne          zero, $26, fail
-    bne          zero, $27, fail
+    nop // delay slot
+
+    // k0/k1 are overwritten with traps
+    //bne          zero, $26, fail
+    //nop // delay slot
+
+    //bne          zero, $27, fail
+    //nop // delay slot
+
     bne          zero, $28, fail
+    nop // delay slot
+
     //bne          zero, $29, fail
+    nop // delay slot
+
     bne          zero, $30, fail
+    nop // delay slot
+
     //bne          zero, $31, fail
+    nop // delay slot
+
 
     la           t0, __mips_llt_sp
     lw           t1, (t0)
     bne          t1, $29, fail
+    nop // delay slot
 
     la           t0, __mips_llt_ra
     lw           t1, (t0)
     bne          t1, $31, fail
+    nop // delay slot
 
 
 
@@ -228,6 +293,8 @@ loop:
 fail:
     la	       a0, __panic_msg
     j          panic
+    nop // delay slot
+
 
 END(mips_test_interrupts_integrity)
 
