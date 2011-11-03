@@ -202,6 +202,11 @@ int main(int argc, char **argv, char **envp)
     board_init_kernel_timer();
     phantom_timed_call_init(); // Too late? Move up?
 
+#if defined(ARCH_mips) && 1
+    SHOW_FLOW0( 0, "test intr reg overflow" );
+    mips_test_interrupts_integrity();
+    SHOW_FLOW0( 0, "intr reg overflow test PASSED" );
+#endif
 
     hal_init((void *)PHANTOM_AMAP_START_VM_POOL, N_OBJMEM_PAGES*4096L);
 
@@ -255,6 +260,7 @@ int main(int argc, char **argv, char **envp)
     arm_test_interrupts_integrity();
     SHOW_FLOW0( 0, "intr reg overflow test PASSED" );
 #endif
+
 
     dbg_init(); // Kernel command line debugger
 

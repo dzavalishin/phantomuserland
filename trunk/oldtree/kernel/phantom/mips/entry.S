@@ -30,6 +30,10 @@ LEAF(__lowmem__)
     // Exception vectors
     //.org 0x80000000
     .org 0x000
+
+    // or else exc handler can overrite it!
+    .set noat
+
     //j _enter_exception_tlb_refill
     j _enter_exception_other
     nop // delay slot
@@ -66,10 +70,14 @@ _reset:
     mtc0    zero, CP0_WATCHLO
     mtc0    zero, CP0_WATCHHI
 
+    .set at
+
     /* disable kernel mode cache */
     mfc0    t0, CP0_CONFIG
     and	    t0, ~0x7
     ori     t0, 0x2
+
+    .set noat
 
     // reset some bits in config - master/checker
     li      t1, ~(CONF_CM)
@@ -636,7 +644,7 @@ END(mips_tlb_write_random)
 // -----------------------------------------------------------------------
 
 
-
+  .set at
 
 LEAF(mips_read_config_registers)
   li t2, 0x80000000 // top bit
@@ -671,6 +679,7 @@ no_more_ids:
 END(mips_read_config_registers)
 
 
+  .set noat
 
 
 
