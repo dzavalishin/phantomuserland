@@ -47,6 +47,8 @@ int usys_open( int *err, uuprocess_t *u, const char *name, int flags, int mode )
 
     mode &= ~u->umask;
 
+    hal_mutex_lock( &f->mutex );
+
     // TODO pass mode to open
     if( (f->fs == 0) || (f->fs->open == 0) )
         goto unlink;
@@ -65,9 +67,11 @@ int usys_open( int *err, uuprocess_t *u, const char *name, int flags, int mode )
         goto unlink;
     }
 
+    hal_mutex_unlock( &f->mutex );
     return fd;
 
 unlink:
+    hal_mutex_unlock( &f->mutex );
     unlink_uufile( f );
     return -1;
 }
@@ -89,8 +93,10 @@ int usys_read(int *err, uuprocess_t *u, int fd, void *addr, int count )
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     SHOW_FLOW(9, "do rd %d", count);
     int ret = f->ops->read( f, addr, count );
+    hal_mutex_unlock( &f->mutex );
 
     if( ret < 0 ) *err = EIO;
     return ret;
@@ -107,7 +113,9 @@ int usys_write(int *err, uuprocess_t *u, int fd, const void *addr, int count )
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     int ret = f->ops->write( f, addr, count );
+    hal_mutex_unlock( &f->mutex );
 
     if( ret < 0 ) *err = EIO;
     return ret;
@@ -118,6 +126,7 @@ int usys_close(int *err, uuprocess_t *u, int fd )
     CHECK_FD(fd);
     uufile_t *f = GETF(fd);
 
+    hal_mutex_lock( &f->mutex );
     uufs_t *fs = f->fs;
     assert(fs->close != 0);
     *err = fs->close( f );
@@ -125,6 +134,7 @@ int usys_close(int *err, uuprocess_t *u, int fd )
     //SHOW_FLOW( 8, "*err %d", *err );
 
     u->fd[fd] = 0;
+    hal_mutex_unlock( &f->mutex );
 
     return *err ? -1 : 0;
 }
@@ -133,6 +143,8 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
 {
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
+
+    hal_mutex_lock( &f->mutex );
 
     off_t pos = offset;
 
@@ -146,6 +158,7 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
 
             if(size < 0)
             {
+                hal_mutex_unlock( &f->mutex );
                 *err = ESPIPE;
                 return -1;
             }
@@ -156,6 +169,7 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
 
     if(pos < 0)
     {
+        hal_mutex_unlock( &f->mutex );
         *err = EINVAL;
         return -1;
     }
@@ -165,9 +179,11 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
     if(f->ops->seek)
     {
         *err = f->ops->seek(f);
+        hal_mutex_unlock( &f->mutex );
         if(*err) return -1;
     }
 
+    hal_mutex_unlock( &f->mutex );
     return f->pos;
 }
 
@@ -192,7 +208,9 @@ int usys_fchmod( int *err, uuprocess_t *u, int fd, int mode )
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->chmod( f, mode );
+    hal_mutex_unlock( &f->mutex );
 err:
     return *err ? -1 : 0;
 }
@@ -214,7 +232,9 @@ int usys_fchown( int *err, uuprocess_t *u, int fd, int user, int grp )
         goto err;
     }
 
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->chown( f, user, grp );
+    hal_mutex_unlock( &f->mutex );
 err:
     return *err ? -1 : 0;
 }
@@ -238,7 +258,11 @@ int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data, size_
         return -1;
     }
 
-    return f->ops->ioctl( f, err, request, data, len );
+    hal_mutex_lock( &f->mutex );
+    int rc = f->ops->ioctl( f, err, request, data, len );
+    hal_mutex_unlock( &f->mutex );
+
+    return rc;
 }
 
 
@@ -264,7 +288,9 @@ int usys_stat( int *err, uuprocess_t *u, const char *path, struct stat *data, in
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->stat( f, data );
+    hal_mutex_unlock( &f->mutex );
 
     SHOW_FLOW( 10, "stat aft stat '%s'", path );
 
@@ -287,7 +313,10 @@ int usys_fstat( int *err, uuprocess_t *u, int fd, struct stat *data, int statlin
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->stat( f, data );
+    hal_mutex_unlock( &f->mutex );
+
     return *err ? -1 : 0;
 }
 
@@ -309,7 +338,9 @@ int usys_truncate( int *err, uuprocess_t *u, const char *path, off_t length)
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->setsize( f, length );
+    hal_mutex_unlock( &f->mutex );
 
     unlink_uufile( f );
     return *err ? -1 : 0;
@@ -326,7 +357,10 @@ int usys_ftruncate(int *err, uuprocess_t *u, int fd, off_t length)
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->setsize( f, length );
+    hal_mutex_unlock( &f->mutex );
+
     return *err ? -1 : 0;
 }
 
@@ -368,7 +402,9 @@ int usys_chdir( int *err, uuprocess_t *u,  const char *in_path )
     }
 
     struct stat sb;
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->stat( f, &sb );
+    hal_mutex_unlock( &f->mutex );
     if( *err )
         goto err;
 
@@ -403,6 +439,7 @@ int usys_fchdir( int *err, uuprocess_t *u,  int fd )
         *err = ENOTDIR;
         goto err;
     }
+// todo     hal_mutex_unlock( &f->mutex );
 
 #if 0
     if( f->ops->stat == 0)
@@ -461,7 +498,9 @@ int usys_getcwd( int *err, uuprocess_t *u, char *buf, int bufsize )
     }
 
     //size_t ret =
+    hal_mutex_lock( &f->mutex );
     u->cwd->ops->getpath( u->cwd, buf, bufsize );
+    hal_mutex_unlock( &f->mutex );
 
     return 0;
 #endif
@@ -488,7 +527,9 @@ int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp )
 
     if( f->ops->readdir )
     {
+        hal_mutex_lock( &f->mutex );
         *err = f->ops->readdir( f, dirp );
+        hal_mutex_unlock( &f->mutex );
         if( *err == ENOENT )
         {
             *err = 0; // not err, just end of dir
@@ -504,7 +545,9 @@ int usys_readdir(int *err, uuprocess_t *u, int fd, struct dirent *dirp )
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     int len = f->ops->read( f, dirp, sizeof(struct dirent) );
+    hal_mutex_unlock( &f->mutex );
 
     if( len == 0 )
         return 0;
@@ -563,7 +606,10 @@ int usys_rm( int *err, uuprocess_t *u, const char *name )
         return -1;
     }
 
+    hal_mutex_lock( &f->mutex );
     *err = f->ops->unlink( f );
+    hal_mutex_unlock( &f->mutex );
+
     unlink_uufile( f );
 
     if( *err )
@@ -623,10 +669,13 @@ int usys_symlink(int *err, uuprocess_t *u, const char *src, const char *dst )
         return -1;
     }
 
+    //hal_mutex_lock( &f->mutex );
     if(fs->symlink == 0)
         *err = ENXIO;
     else
         *err = fs->symlink( fs, rest, dst );
+    //hal_mutex_unlock( &f->mutex );
+
     return *err ? -1 : 0;
 }
 
@@ -643,10 +692,13 @@ int usys_mkdir( int *err, uuprocess_t *u, const char *path )
         return -1;
     }
 
+    //hal_mutex_lock( &f->mutex );
     if(fs->mkdir == 0)
         *err = ENXIO;
     else
         *err = fs->mkdir( fs, rest );
+    //hal_mutex_unlock( &f->mutex );
+
     return *err ? -1 : 0;
 }
 
@@ -661,10 +713,12 @@ errno_t usys_setproperty( int *err, uuprocess_t *u, int fd, const char *pName, c
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
+    hal_mutex_lock( &f->mutex );
     if( 0 == f->ops->setproperty)
         *err = ENOTTY;
     else
         *err = f->ops->setproperty( f, pName, pValue );
+    hal_mutex_unlock( &f->mutex );
 
     //*err = ENOTTY;
 
@@ -676,10 +730,12 @@ errno_t usys_getproperty( int *err, uuprocess_t *u, int fd, const char *pName, c
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
+    hal_mutex_lock( &f->mutex );
     if( 0 == f->ops->getproperty)
         *err = ENOTTY;
     else
         *err = f->ops->getproperty( f, pName, pValue, vlen );
+    hal_mutex_unlock( &f->mutex );
 
     //*err = ENOTTY;
 
@@ -691,10 +747,12 @@ errno_t usys_listproperties( int *err, uuprocess_t *u, int fd, int nProperty, ch
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
+    hal_mutex_lock( &f->mutex );
     if( 0 == f->ops->listproperties)
         *err = ENOTTY;
     else
         *err = f->ops->listproperties( f, nProperty, buf, buflen );
+    hal_mutex_unlock( &f->mutex );
 
     //*err = ENOTTY;
 
