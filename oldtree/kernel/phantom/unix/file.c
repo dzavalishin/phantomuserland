@@ -72,7 +72,7 @@ static void destroy_uufile(uufile_t *f)
     if( f->name ) free((void *)f->name);
     f->name = 0;
 
-    //TODO assert mutex is not locked
+    assert(!hal_mutex_is_locked(&f->mutex));
 
     free(f);
 }
