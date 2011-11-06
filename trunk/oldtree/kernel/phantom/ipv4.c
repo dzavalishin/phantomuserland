@@ -755,7 +755,9 @@ int ipv4_input(cbuf *buf, ifnet *i)
             }
         }
         if(!iaddr) {
-            dprintf("ipv4 packet for someone else: %08x\n", dest );
+            dprintf("ipv4 packet for someone else: ");
+            dump_ipv4_addr(dest);
+            dprintf("\n");
             err = NO_ERROR;
             goto ditch_packet;
         }
