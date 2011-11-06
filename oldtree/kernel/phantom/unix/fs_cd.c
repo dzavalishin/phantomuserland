@@ -33,6 +33,8 @@
 
 
 
+static errno_t cd_scan_dir( cdfs_t *impl, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry );
+static errno_t cd_read_file( cdfs_t *impl, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf );
 
 
 // -----------------------------------------------------------------------
@@ -150,7 +152,7 @@ static uufile_t *  cdfs_namei(uufs_t *fs, const char *filename)
     }
     else
     {
-        errno_t err = cd_scan_dir( impl->p, &impl->root_dir, filename, &found_entry );
+        errno_t err = cd_scan_dir( impl, &impl->root_dir, filename, &found_entry );
         if( err )
         {
             SHOW_ERROR( 11, "scan dir err %d", err );
@@ -228,7 +230,7 @@ static size_t      cdfs_read(    struct uufile *f, void *dest, size_t bytes)
     // Have partial sector at start?
     if( shift )
     {
-        err = cd_read_file( impl->p, &fi->e, sect, 1, buf );
+        err = cd_read_file( impl, &fi->e, sect, 1, buf );
         if( err ) return -1;
 
         size_t part_len = bytes;
@@ -247,7 +249,7 @@ static size_t      cdfs_read(    struct uufile *f, void *dest, size_t bytes)
     size_t nsect = bytes/CD_SECT_SIZE;
     if( nsect > 0 )
     {
-        err = cd_read_file( impl->p, &fi->e, sect, nsect, dest );
+        err = cd_read_file( impl, &fi->e, sect, nsect, dest );
         if( err ) return res;
 
         bytes  -= nsect*CD_SECT_SIZE;
@@ -260,7 +262,7 @@ static size_t      cdfs_read(    struct uufile *f, void *dest, size_t bytes)
     // Have partial sector at end?
     if( bytes )
     {
-        err = cd_read_file( impl->p, &fi->e, sect, 1, buf );
+        err = cd_read_file( impl, &fi->e, sect, 1, buf );
         if( err ) return res;
 
         size_t part_len = bytes;
@@ -457,6 +459,7 @@ errno_t fs_probe_cd(phantom_disk_partition_t *p)
 #include <dev/cd_fs.h>
 #include <unix/uufile.h>
 
+#define CD_CACHE 1
 
 enum  so_vd_enum_s
 {
@@ -464,27 +467,28 @@ enum  so_vd_enum_s
   ISO_VD_END = 255
 };
 
-static errno_t cd_read_sectors( phantom_disk_partition_t *p, void *buf, int cd_sector, size_t nsectors )
+static errno_t cd_read_sectors( cdfs_t *impl, void *buf, int cd_sector, size_t nsectors )
 {
-#if 0
-    if( fs->cache == 0 )
-        fs->cache = cache_init( CD_SECT_SIZE );
+    phantom_disk_partition_t *p = impl->p;
 
-    if( fs->cache )
+    SHOW_FLOW( 10, "CDFS disk read @ sect %d, nsect %d", cd_sector * 4, nsectors * 4 );
+
+#if CD_CACHE
+    if( impl->cache )
     {
-        if( 0 == cache_get_multiple( fs->cache, sector, nsect, buf ) )
+        if( 0 == cache_get_multiple( impl->cache, cd_sector, nsectors, buf ) )
             return 0;
     }
 
     errno_t rc = phantom_sync_read_sector( p, buf, cd_sector * 4, nsectors * 4 );
 
-    if( fs->cache && !rc )
-        cache_put_multiple( fs->cache, sector, nsect, buf );
+    if( impl->cache && !rc )
+        cache_put_multiple( impl->cache, cd_sector, nsectors, buf );
 
-#endif
-
-    SHOW_FLOW( 10, "CDFS disk read @ sect %d, nsect %d", cd_sector * 4, nsectors * 4 );
+    return rc;
+#else
     return phantom_sync_read_sector( p, buf, cd_sector * 4, nsectors * 4 );
+#endif
 }
 
 
@@ -498,10 +502,20 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
     int joliet_level = 0;
     bool primary_vd_found = 0;
 
+    cdfs_t  *impl = calloc(1, sizeof(cdfs_t));
+    if(impl==0)
+        return ENOMEM;
+
+    impl->p = p;
+
+#if CD_CACHE
+    if( impl->cache == 0 )
+        impl->cache = cache_init( CD_SECT_SIZE );
+#endif
     // Have some limit
     for(cd_sector = 16; cd_sector < 64; cd_sector++)
     {
-        if( cd_read_sectors( p, buf, cd_sector, 1 ) )
+        if( cd_read_sectors( impl, buf, cd_sector, 1 ) )
             return EINVAL;
 
         // Not VD at all
@@ -546,6 +560,9 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
     if(!primary_vd_found)
     {
         SHOW_ERROR0( 0, "CDFS primary vol desc not found" );
+        if( impl->cache  )
+            cache_destroy( impl->cache );
+        free(impl);
         return EINVAL;
     }
 
@@ -561,11 +578,6 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
     iso_dir_entry *rootdir = (void *)&vd.rootDirEntry;
     SHOW_FLOW( 7, "CDFS root dir @ sect %d, sz %d", rootdir->dataStartSector[0], rootdir->dataLength[0] );
 
-    cdfs_t  *impl = calloc(1, sizeof(cdfs_t));
-    if(impl==0)
-        return ENOMEM;
-
-    impl->p = p;
     impl->volume_descr = vd;
     impl->root_dir = *rootdir;
 
@@ -587,7 +599,7 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
         //char *fn = "a/b/c/d/autorun.inf";
 
         iso_dir_entry ret;
-        errno_t err = cd_scan_dir( p, rootdir, fn, &ret );
+        errno_t err = cd_scan_dir( impl, rootdir, fn, &ret );
 
         size_t file_bytes = ret.dataLength[0];
 
@@ -599,7 +611,7 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
 
             char buf[file_sectors*CD_SECT_SIZE];
 
-            err = cd_read_file( p, &ret, 0, file_sectors, buf );
+            err = cd_read_file( impl, &ret, 0, file_sectors, buf );
 
             SHOW_INFO( 0, "cd_read_file( p, e, 0, %d sect, buf) = %d", file_sectors, err );
             if( 0 == err )
@@ -617,8 +629,10 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
 
 
 
-static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, const char *name_to_find, const char *path_rest, iso_dir_entry *found_entry )
+static errno_t cd_scan_dir_sect( cdfs_t *impl, void *entries, const char *name_to_find, const char *path_rest, iso_dir_entry *found_entry )
 {
+    //phantom_disk_partition_t *p = impl->p;
+
     int left = CD_SECT_SIZE;
     while( left > 0 )
     {
@@ -665,7 +679,7 @@ static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, con
                 if( e->flags & CD_ENTRY_FLAG_DIR )
                 {
                     SHOW_FLOW( 5, "descend, look for '%s'", path_rest );
-                    return cd_scan_dir( p, e, path_rest, found_entry );
+                    return cd_scan_dir( impl, e, path_rest, found_entry );
                 }
                 else
                 {
@@ -680,8 +694,10 @@ static errno_t cd_scan_dir_sect( phantom_disk_partition_t *p, void *entries, con
 }
 
 
-errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry )
+errno_t cd_scan_dir( cdfs_t *impl, iso_dir_entry *e, const char *path_to_find, iso_dir_entry *found_entry )
 {
+    //phantom_disk_partition_t *p = impl->p;
+
     SHOW_FLOW( 7, "CDFS dir @ sect %d, sz %d, look for '%s'", e->dataStartSector[0], e->dataLength[0], path_to_find );
 
     int sect = e->dataStartSector[0];
@@ -718,14 +734,14 @@ errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *
 
     while( left > 0 )
     {
-        errno_t err = cd_read_sectors( p, buf, sect++, 1 );
+        errno_t err = cd_read_sectors( impl, buf, sect++, 1 );
         left -= CD_SECT_SIZE;
 
         if( err )
             SHOW_ERROR( 0, "CDFS dir sect read err %d != 2048, not supported", err );
         else
         {
-            err = cd_scan_dir_sect( p, buf, name_to_find, path_rest, found_entry );
+            err = cd_scan_dir_sect( impl, buf, name_to_find, path_rest, found_entry );
             if( 0 == err ) return err;
         }
     }
@@ -733,8 +749,10 @@ errno_t cd_scan_dir( phantom_disk_partition_t *p, iso_dir_entry *e, const char *
     return ENOENT;
 }
 
-errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf )
+errno_t cd_read_file( cdfs_t *impl, iso_dir_entry *e, u_int32_t start_sector, size_t nsect, void *buf )
 {
+    //phantom_disk_partition_t *p = impl->p;
+
     SHOW_FLOW( 4, "CDFS file @ sect %d, sz %d", e->dataStartSector[0], e->dataLength[0] );
 
     int file_start_sect = e->dataStartSector[0];
@@ -755,7 +773,7 @@ errno_t cd_read_file( phantom_disk_partition_t *p, iso_dir_entry *e, u_int32_t s
 
     SHOW_FLOW( 9, "CDFS file read @ sect %d, nsect %d", sect, nsect );
 
-    errno_t err = cd_read_sectors( p, buf, sect, nsect );
+    errno_t err = cd_read_sectors( impl, buf, sect, nsect );
 
     if( err )
     {
