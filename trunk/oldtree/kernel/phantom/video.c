@@ -31,6 +31,11 @@ static int debug_level_flow = 0;
 extern struct drv_video_screen_t        video_driver_icp;
 #endif // ARCH_arm
 
+#ifdef ARCH_mips
+extern struct drv_video_screen_t        video_driver_null;
+#endif // ARCH_mips
+
+
 
 extern struct drv_video_screen_t        video_driver_vmware_svga;
 
@@ -70,6 +75,10 @@ struct drv_video_screen_t *video_drivers[] =
 #ifdef ARCH_arm
 	&video_driver_icp,
 #endif // ARCH_arm
+
+#ifdef ARCH_mips
+        &video_driver_null,
+#endif // ARCH_mips
 
 };
 
@@ -116,15 +125,16 @@ static void phantom_select_video_driver()
 
         SHOW_FLOW( 1, "The best is %s video driver", selected_drv->name);
         video_drv = selected_drv;
+
+        // fill in defaults
+
+        if( 0 == video_drv->update)  video_drv->update = (void *)drv_video_null;
+        if( 0 == video_drv->bitblt)  video_drv->bitblt = drv_video_bitblt_rev;
+        if( 0 == video_drv->winblt)  video_drv->winblt = drv_video_win_winblt_rev;
+        if( 0 == video_drv->readblt)	video_drv->readblt = drv_video_readblt_rev;
+        if( 0 == video_drv->bitblt_part)  video_drv->bitblt_part = drv_video_bitblt_part_rev;
     }
 
-    // fill in defaults
-
-    if( 0 == video_drv->update)  video_drv->update = (void *)drv_video_null;
-    if( 0 == video_drv->bitblt)  video_drv->bitblt = drv_video_bitblt_rev;
-    if( 0 == video_drv->winblt)  video_drv->winblt = drv_video_win_winblt_rev;
-    if( 0 == video_drv->readblt)	video_drv->readblt = drv_video_readblt_rev;
-    if( 0 == video_drv->bitblt_part)  video_drv->bitblt_part = drv_video_bitblt_part_rev;
 }
 
 static void select_accel_driver(void)
@@ -178,7 +188,7 @@ static void video_post_start()
 {
 
     video_zbuf_init();
-    drv_video_init_windows(); 
+    drv_video_init_windows();
 
     // Have VESA driver, add companion accelerator if possible
     if( was_enforced )
