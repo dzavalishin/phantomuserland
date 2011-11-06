@@ -101,6 +101,8 @@ phantom_device_t * driver_rtl_8169_probe( pci_cfg_t *pci, int stage )
     rtl8169 * nic = NULL;
     static int seq_number = 0;
 
+return 0; // on real hw beheaves strangely
+
     SHOW_FLOW0( 1, "probe" );
 
     //nic = rtl8169_new();
@@ -367,6 +369,9 @@ static int rtl8169_init(rtl8169 *r)
     int err = -1;
     //addr_t temp;
     //int i;
+
+    hal_mutex_init(&r->lock,DEBUG_MSG_PREFIX);
+
 
     SHOW_FLOW(2, "rtl8169_init: r %p\n", r);
 
