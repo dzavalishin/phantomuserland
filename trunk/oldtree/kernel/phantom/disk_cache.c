@@ -72,8 +72,10 @@ static errno_t cache_do_read( cache_t *c, long blk, void *data );
 static errno_t cache_do_write( cache_t *c, long blk, const void *data );
 
 static errno_t cache_do_init( cache_t *c, size_t page_size );
+static errno_t cache_do_destroy( cache_t *c );
 
 static void cache_do_create_els( cache_t *c, int n );
+static void cache_do_destroy_el(cache_el_t *el);
 
 
 // ------------------------------------------------------------
@@ -111,6 +113,21 @@ cache_t * cache_init( size_t page_size )
     }
 
     return c;
+}
+
+errno_t cache_destroy( cache_t *c )
+{
+    if( c == 0 )
+        return 0;
+
+    errno_t ret1 = cache_flush_all( c );
+    if( ret1 ) SHOW_ERROR( 0, "Cache flush error %d", ret1 );
+
+    errno_t ret2 = cache_do_destroy( c );
+
+    free(c);
+
+    return ret1 ? ret1 : ret2;
 }
 
 
@@ -210,6 +227,24 @@ static errno_t cache_do_init( cache_t *c, size_t page_size )
     return 0;
 }
 
+static errno_t cache_do_destroy( cache_t *c )
+{
+
+    hal_mutex_lock( &c->lock );
+    while(!queue_empty(&c->lru))
+    {
+        cache_el_t * el;
+        //queue_remove_last( &c->lru, el, cache_el_t *, lru );
+        queue_remove_first( &c->lru, el, cache_el_t *, lru );
+        cache_do_destroy_el(el);
+
+    }
+    hal_mutex_unlock( &c->lock );
+
+    hash_uninit(c->hash);
+    hal_mutex_destroy( &c->lock );
+    return 0;
+}
 
 static cache_el_t * cache_do_find( cache_t *c, long blk )
 {
@@ -236,6 +271,12 @@ static cache_el_t * cache_do_create_el( cache_t *c )
     el->dirty =0;
 
     return el;
+}
+
+static void cache_do_destroy_el(cache_el_t *el)
+{
+    free(el->data);
+    free(el);
 }
 
 /*
