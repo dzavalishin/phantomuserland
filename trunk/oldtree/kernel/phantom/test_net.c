@@ -174,6 +174,154 @@ int do_test_resolver(const char *test_parm)
 
 
 
+
+#include <netinet/tftp.h>
+
+
+
+static int run_tftp_test(void *prot_data)
+{
+    int rc;
+    char buf[1024];
+
+
+    sockaddr addr;
+    addr.port = 1069; // local port
+
+    addr.addr.len = 4;
+    addr.addr.type = ADDR_TYPE_IP;
+    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2);
+
+    if( 0 != (rc = udp_bind(prot_data, &addr)) )
+        return rc;
+
+    addr.port = 69; // TFTP
+
+
+#define RRQ "__tftp/menu.lst\0octet"
+
+    memcpy( buf, RRQ, sizeof(RRQ) );
+
+
+#if 0
+    printf("TFTP invalid RRQ...");
+    if( 0 != (rc = udp_sendto(prot_data, buf, sizeof(RRQ), &addr)) )
+        return rc;
+
+    hal_sleep_msec(500);
+#endif
+
+    ((struct tftp_t*)buf)->opcode = htons(1); // RRQ
+    SHOW_FLOW0( 1, "TFTP RRQ...");
+
+    if( 0 != (rc = udp_sendto(prot_data, buf, sizeof(RRQ), &addr)) )
+    {
+        if(rc == ERR_NET_NO_ROUTE)
+        {
+            SHOW_ERROR( 0, "UDP tftp - No route\n", rc);
+        }
+        else
+            SHOW_ERROR( 0, "UDP tftp - can't send, rc = %d\n", rc);
+
+        return rc;
+    }
+
+
+    while(1)
+    {
+
+        SHOW_FLOW0( 1, "TFTP recv...");
+        if( 0 >= (rc = udp_recvfrom(prot_data, buf, sizeof(buf), &addr, 0, 0)) )
+            return rc;
+        SHOW_FLOW( 1, "TFTP GOT PKT \"%s\"", ((struct tftp_t*)buf)->u.data.download );
+
+        if( rc < 4 )
+        {
+            SHOW_ERROR0( 0, "TFTP too short pkt received\n");
+            return -1;
+        }
+
+        int opcode, nblock;
+        opcode = ntohs( ((struct tftp_t*)buf)->opcode );
+        nblock = ntohs( ((struct tftp_t*)buf)->u.ack.block );
+
+
+        if( opcode != 3 )
+        {
+            if( opcode == 5 )
+            {
+                SHOW_ERROR( 0, "TFTP got error: %d (%s)...", nblock, buf+4);
+            }
+            else
+                SHOW_ERROR( 0, "TFTP error: got opcode %d...", opcode);
+            return -1;
+        }
+
+        SHOW_FLOW( 1, "TFTP blk %d...", nblock);
+
+        if( rc < 4+512 )
+        {
+            printf("TFTP finish...");
+            return 0;
+        }
+
+
+        ((struct tftp_t*)buf)->opcode = htons(4); // ACK
+        ((struct tftp_t*)buf)->u.ack.block = htons(nblock); //orig block
+
+       if( 0 != (rc = udp_sendto(prot_data, buf, 4, &addr)) )
+           return rc;
+    }
+
+}
+
+
+int do_test_tftp(const char *test_parm)
+{
+    (void) test_parm;
+
+    void *prot_data;
+
+    printf("\ntftp start... ");
+    if( udp_open(&prot_data) )
+    {
+        SHOW_ERROR0( 0, "UDP - can't prepare endpoint");
+        return EAGAIN;
+    }
+
+    int rc;
+    if( (rc = run_tftp_test(prot_data)) )
+        SHOW_ERROR( 0 , "\ntftp failed, rc = %d\n", rc);
+
+    udp_close(prot_data);
+
+    return rc;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int do_test_tcp_connect(const char *test_parm)
 {
 #if HAVE_NET
@@ -181,7 +329,9 @@ int do_test_tcp_connect(const char *test_parm)
 
     if(test_parm == 0 || *test_parm == 0)
         //test_parm = "87.250.250.3:80";
-        test_parm = "93.158.134.3:80";
+        //test_parm = "93.158.134.3:80";
+        //test_parm = "93.158.134.203:80";
+        test_parm = "173.194.32.16:80"; // google.com
 
     int ip0, ip1, ip2, ip3, port;
 
@@ -218,15 +368,13 @@ int do_test_tcp_connect(const char *test_parm)
 
 
     memset( buf, 0, sizeof(buf) );
-    //strlcpy( buf, "GET /\r\n", sizeof(buf) );
-    strlcpy( buf, "GET /\n", sizeof(buf) );
-    int nwrite = tcp_sendto( prot_data, buf, 6, &addr);
+    strlcpy( buf, "GET /\r\n", sizeof(buf) );
+    //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
+    int nwrite = tcp_sendto( prot_data, buf, strlen(buf), &addr);
     SHOW_FLOW( 0, "TCP - write = %d (%s)", nwrite, buf);
 
-
     memset( buf, 0, sizeof(buf) );
-    int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*10 );
-    //int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*10 );
+    int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*5 );
     buf[sizeof(buf)-1] = 0;
 
     SHOW_FLOW( 0, "TCP - read = %d (%s)", nread, buf);

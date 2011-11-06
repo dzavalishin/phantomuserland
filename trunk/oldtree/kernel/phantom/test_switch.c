@@ -133,6 +133,9 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(udp_syslog);
     TEST(resolver);
 
+    TEST(tftp);
+
+
     TEST(tcp_connect);
 
 
