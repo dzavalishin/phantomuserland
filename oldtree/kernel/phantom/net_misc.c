@@ -10,6 +10,7 @@
 
 #include <kernel/net.h>
 #include <kernel/net/udp.h>
+//#include <netinet/tftp.h>
 
 #include <phantom_libc.h>
 #include <endian.h>
@@ -26,169 +27,12 @@ int phantom_tcpip_active = 0;
 
 
 
-/*
-
-THE TFTP PROTOCOL (REVISION 2)
-http://spectral.mscs.mu.edu/RFC/rfc1350.html
-
-  TFTP supports five types of packets, all of which have been mentioned
-   above:
-
-          opcode  operation
-            1     Read request (RRQ)
-            2     Write request (WRQ)
-            3     Data (DATA)
-            4     Acknowledgment (ACK)
-            5     Error (ERROR)
-
-   The TFTP header of a packet contains the  opcode  associated  with
-   that packet.
-*/
 
 
-#define TFTP_MAX_PACKET 512
-
-struct tftp_t {
-	unsigned short opcode;
-        union {
-		struct {
-			unsigned short block;
-		} ack;
-                struct {
-			unsigned short block;
-			char download[TFTP_MAX_PACKET];
-		} data;
-
-                /*
-		char rrq[TFTP_DEFAULTSIZE_PACKET];
-		struct {
-			unsigned short errcode;
-			char errmsg[TFTP_DEFAULTSIZE_PACKET];
-		} err;
-		struct {
-			char data[TFTP_DEFAULTSIZE_PACKET+2];
-		} oack;
-*/
-        } u;
-};
 
 
 #if TFTP_TEST
 
-static int do_tftp_test(void *prot_data)
-{
-    int rc;
-    char buf[1024];
-
-
-    sockaddr addr;
-    addr.port = 1069; // local port
-
-    addr.addr.len = 4;
-    addr.addr.type = ADDR_TYPE_IP;
-    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2);
-
-    if( 0 != (rc = udp_bind(prot_data, &addr)) )
-        return rc;
-
-    addr.port = 69; // TFTP
-
-
-#define RRQ "__tftp/menu.lst\0octet\0"
-
-    memcpy( buf, RRQ, sizeof(RRQ) );
-
-
-#if 0
-    printf("TFTP invalid RRQ...");
-    if( 0 != (rc = udp_sendto(prot_data, buf, sizeof(RRQ), &addr)) )
-        return rc;
-
-    hal_sleep_msec(500);
-#endif
-
-    ((struct tftp_t*)buf)->opcode = htons(1); // RRQ
-    SHOW_FLOW0( 1, "TFTP RRQ...");
-
-    if( 0 != (rc = udp_sendto(prot_data, buf, sizeof(RRQ), &addr)) )
-    {
-        if(rc == ERR_NET_NO_ROUTE)
-        {
-            SHOW_ERROR( 0, "UDP tftp - No route\n", rc);
-        }
-        else
-            SHOW_ERROR( 0, "UDP tftp - can't send, rc = %d\n", rc);
-
-        return rc;
-    }
-
-
-    while(1)
-    {
-
-        SHOW_FLOW0( 1, "TFTP recv...");
-        if( 0 >= (rc = udp_recvfrom(prot_data, buf, sizeof(buf), &addr, 0, 0)) )
-            return rc;
-        SHOW_FLOW0( 1, "TFTP GOT PKT...");
-
-        if( rc < 4 )
-        {
-            SHOW_ERROR0( 0, "TFTP too short pkt received\n");
-            return -1;
-        }
-
-        int opcode, nblock;
-        opcode = ntohs( ((struct tftp_t*)buf)->opcode );
-        nblock = ntohs( ((struct tftp_t*)buf)->u.ack.block );
-
-
-        if( opcode != 3 )
-        {
-            if( opcode == 5 )
-            {
-                SHOW_ERROR( 0, "TFTP got error: %d (%s)...", nblock, buf+4);
-            }
-            else
-                SHOW_ERROR( 0, "TFTP error: got opcode %d...", opcode);
-            return -1;
-        }
-
-        SHOW_FLOW( 1, "TFTP blk %d...", nblock);
-
-        if( rc < 4+512 )
-        {
-            printf("TFTP finish...");
-            return 0;
-        }
-
-
-        ((struct tftp_t*)buf)->opcode = htons(4); // ACK
-        //((struct tftp_t*)buf)->u.ack.block = htons(nblock); //orig block
-
-       if( 0 != (rc = udp_sendto(prot_data, buf, 4, &addr)) )
-           return rc;
-    }
-
-}
-
-
-static void tftp_test(void)
-{
-    void *prot_data;
-
-    printf("\ntftp start... ");
-    if( udp_open(&prot_data) )
-    {
-        SHOW_ERROR0( 0, "UDP - can't prepare endpoint");
-        return;
-    }
-
-    int rc;
-    if( (rc = do_tftp_test(prot_data)) )
-        SHOW_ERROR( 0 , "\ntftp failed, rc = %d\n", rc);
-
-    udp_close(prot_data);
-}
 
 
 #endif

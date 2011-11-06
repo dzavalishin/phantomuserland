@@ -29,6 +29,8 @@ int do_test_udp_syslog(const char *test_parm);
 
 int do_test_resolver(const char *test_parm);
 
+int do_test_tftp(const char *test_parm);
+
 int do_test_tcp_connect(const char *test_parm);
 
 
