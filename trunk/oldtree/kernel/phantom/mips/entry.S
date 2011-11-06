@@ -30,8 +30,8 @@ LEAF(__lowmem__)
     // Exception vectors
     //.org 0x80000000
     .org 0x000
-
-    // or else exc handler can overrite it!
+__vectors_start:
+    // or else exc handler can overwrite at reg!
     .set noat
 
     //j _enter_exception_tlb_refill
@@ -46,6 +46,7 @@ LEAF(__lowmem__)
     //j _enter_exception_interrupt
     j _enter_exception_other
     nop // delay slot
+__vectors_end:
 
 banner:
     .string "Phantom OS, MIPS Kernel\r\n"
@@ -80,8 +81,8 @@ _reset:
     .set noat
 
     // reset some bits in config - master/checker
-    li      t1, ~(CONF_CM)
-    and	    t0, t0, t1
+    //li      t1, ~(CONF_CM)
+    //and	    t0, t0, t1
 
     mtc0    t0, CP0_CONFIG
 
@@ -93,32 +94,43 @@ _reset:
     la t1, __bss_end__
     addiu t3, zero, 0
 clear_bss_loop:
-    sb t3, 9(t0)
+    //sb t3, 9(t0)
+    sb t3, 0(t0)
     addiu t0, t0, 1
     bne t0, t1, clear_bss_loop
     nop // delay slot
 
+    // wrong - jumps are relative, can't copy - need relocation
+#if COPY_VECTORS_DOWN || 0
+    // Clear BSS
+    la t0, __vectors_start
+    la t1, __vectors_end
+    // dest phys addr
+    .set at
+    li t4, 0x80000000
+    .set noat
+
+    beq t0, t4, skip_copy_vector
+    nop // delay slot
+
+copy_vector_loop:
+    lb t3, 0(t4)
+    addiu t4, t4, 1
+    sb t3, 0(t0)
+    addiu t0, t0, 1
+    bne t0, t1, copy_vector_loop
+    nop // delay slot
+
+skip_copy_vector:
+#endif
+
+#ifdef BOARD_ISA_IO
     // print hello to com port - remove!
     //lui	v0,0xB400
     lui	v0, (BOARD_ISA_IO>>16)
     ori	v0,v0,0x3f8
-#if 0
- 	li	v1,104
- 	sb	v1,0(v0)
- 	li	v1,101
- 	sb	v1,0(v0)
- 	li	v1,108
- 	sb	v1,0(v0)
- 	sb	v1,0(v0)
- 	li	v1,111
- 	sb	v1,0(v0)
- 	li	v1,33
- 	sb	v1,0(v0)
- 	li	v1,10
- 	sb	v1,0(v0)
- 	li	v1,13
- 	sb	v1,0(v0)
-#endif
+
+
     la  t0, banner
 print_banner:
     lb  t1, 0(t0)
@@ -129,6 +141,7 @@ print_banner:
     j print_banner
     nop // delay slot
 eprint:	
+#endif
 
     addiu k1, zero, 0 // Init for CPU 0 - means init L2 cache too
     addi        sp, sp, -32
