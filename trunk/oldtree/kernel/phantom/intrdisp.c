@@ -283,19 +283,18 @@ void hal_softirq_dispatcher(struct trap_state *ts)
     while(softirq_requests)
     {
         int sirq;
-        for(sirq = 0; sirq < SOFT_IRQ_COUNT; sirq++)
+        for(sirq = SOFT_IRQ_COUNT-1; sirq >= 0 ; sirq--)
         {
             if( !(softirq_requests & (1 << sirq)) )
                 continue;
             softirq_requests &= ~(1 << sirq);
 
-            hal_sti();
+            //hal_sti(); // TODO ERROR we have to come to scheduler thread switch without turning interrupts on! We keep spinlock locked!
 
             softirqs[sirq].ihandler(softirqs[sirq].arg);
             STAT_INC_CNT(STAT_CNT_SOFTINT);
 
             hal_cli();
-
         }
     }
 

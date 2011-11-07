@@ -179,6 +179,7 @@ int do_test_resolver(const char *test_parm)
 
 
 
+#if HAVE_NET
 static int run_tftp_test(void *prot_data)
 {
     int rc;
@@ -297,7 +298,13 @@ int do_test_tftp(const char *test_parm)
 
     return rc;
 }
-
+#else
+int do_test_tftp(const char *test_parm)
+{
+    (void) test_parm;
+    return 0;
+}
+#endif // HAVE_NET
 
 
 
@@ -383,6 +390,7 @@ int do_test_tcp_connect(const char *test_parm)
 
     return nread > 0 ? 0 : -nread;
 #else
+    (void) test_parm;
     return 0;
 #endif
 }
