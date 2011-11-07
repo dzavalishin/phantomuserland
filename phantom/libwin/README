@@ -1,0 +1,10 @@
+Graphics and windows.
+
+Structre:
+
+Device layer
+------------
+
+Func name prefix: videv_
+
+
