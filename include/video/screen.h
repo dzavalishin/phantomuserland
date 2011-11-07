@@ -76,8 +76,8 @@ struct drv_video_screen_t
 
     // Mouse cursor
 
-    void        (*redraw_mouse_cursor)(void);
-    void        (*set_mouse_cursor)(drv_video_bitmap_t *cursor);
+    void        (*mouse_redraw_cursor)(void);
+    void        (*mouse_set_cursor)(drv_video_bitmap_t *cursor);
     void        (*mouse_disable)(void);
     void        (*mouse_enable)(void);
 
@@ -196,10 +196,10 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 
 
 
-#define drv_video_set_mouse_cursor(nc) 		video_drv->set_mouse_cursor(nc)
-#define drv_video_draw_mouse()            	video_drv->redraw_mouse_cursor()
-#define drv_video_mouse_off()             	video_drv->mouse_disable()
-#define drv_video_mouse_on()              	video_drv->mouse_enable()
+#define scr_mouse_set_cursor(nc)        video_drv->mouse_set_cursor(nc)
+#define scr_mouse_redraw()              video_drv->mouse_redraw_cursor()
+#define scr_mouse_off()                 video_drv->mouse_disable()
+#define scr_mouse_on()                  video_drv->mouse_enable()
 
 
 

@@ -1,0 +1,325 @@
+<html>
+
+<head>
+<title>Qemu tips</title>
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-align:left;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:Arial;}
+h1
+	{margin-top:18.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	font-size:10.0pt;
+	font-family:Arial;
+	text-transform:uppercase;
+	font-weight:bold;}
+h2
+	{margin-top:18.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	font-size:10.0pt;
+	font-family:Arial;
+	text-transform:uppercase;
+	font-weight:bold;}
+h3
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	line-height:15.65pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:bold;}
+h4
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:bold;}
+h5
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:bold;}
+h6
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:0cm;
+	text-align:justify;
+	text-indent:0cm;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+a:link
+	{color:#606420;
+	text-decoration:none;}
+a:visited
+	{color:#606420;
+	text-decoration:none;}
+a.release:link
+	{color:#ffa500;
+	text-decoration:none;}
+a.release:visited
+	{color:#ffa500;
+	text-decoration:none;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+ /* List Definitions */
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+
+</head>
+
+<body>
+
+<div style='margin-left:56.0pt;margin-right:56.0pt;'>
+
+	<h1 align="center">QEMU tips and tricks</h1>
+
+<p class=MsoNormal align=center style='text-align:center'><img border=0 width=550 height=19 alt="-----------------" src="bar.gif"></span></p>
+
+<h2>Starting Qemu with a bat file</h2>
+
+<p class=MsoNormal><span >Exemple:</span></p>
+
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 1.0pt 4.0pt'>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>@ECHO OFF</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM Start qemu on windows.</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>SET SDL_VIDEODRIVER=directx</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM QEMU_AUDIO_DRV=dsound or
+fmod or sdl or none can be used. See qemu -audio-help.</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>SET QEMU_AUDIO_DRV=dsound</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM SDL_AUDIODRIVER=waveout
+or dsound can be used. Only if QEMU_AUDIO_DRV=sdl.</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>SET SDL_AUDIODRIVER=dsound</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM
+QEMU_AUDIO_LOG_TO_MONITOR=1 displays log messages in QEMU monitor.</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>SET
+QEMU_AUDIO_LOG_TO_MONITOR=0</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM
+#########################################################</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM # Boot disk image + use
+eth0 + Video Display Device = std </span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM # remap 5555 to guest
+telnet and 5556 to guest ssh</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM
+#########################################################</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM </span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM Starting on the iso image
+for installing Fedora 10 can be done by adding:</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>REM    -boot d -cdrom
+Images/F10-i686.iso</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>qemu.exe -L Bios -m 1024
+-name Fedora10 -hda Images/fedora10.img -vga std -soundhw es1370 -localtime -M
+pc -net nic,model=e1000 -net user -redir tcp:5555::23 -redir tcp:5556::22</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+</div>
+
+<h2>Changing a CD-ROM image</h2>
+
+<p><span >To change a CD-ROM image, please use QEMU Monitor:</span></p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span 
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >To see the Monitor, press </span><span
+ style='font-family:"Courier New"'>Ctrl-Alt-2</span><span >
+keys together. </span></p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span 
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >To go back to the guest OS, press </span><span
+ style='font-family:"Courier New"'>Ctrl-Alt-1</span><span >
+keys. </span></p>
+
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 1.0pt 4.0pt'>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>(qemu) eject ide1-cd0<br>
+(qemu) change ide1-cd0 filename.iso</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+</div>
+
+<p><span >Note:</span></p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span 
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Please use slash instead of back slash in the QEMU
+Monitor window.</span></p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span 
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Path of the filenames is relative to the
+directory where qemu.exe lives. </span></p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span 
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >You have a complete command history by using the arrow keys and file completion with
+the [TAB] key!</span></p>
+
+<p style='margin-left:36.0pt;text-indent:-18.0pt'><span 
+style='font-family:Symbol'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >You can see the status of the block devices with:</span></p>
+
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 1.0pt 4.0pt'>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>(qemu) info bloc</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>ide0-hd0: type=hd removable=0
+files=Images/hd.img ro=0 drv=qcow2 encrypted=0<br>
+ide1-cd0: type=cdrom removable=1 locked=0 file=Images/os.iso ro=0 dvd=raw
+encrypted=0<br>
+../..</span></p>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>&nbsp;</span></p>
+
+</div>
+
+<p>&nbsp;
+<br/>
+<br/>
+</p>
+
+<p class=MsoNormal align=center style='text-align:center'><img border=0 width=550 height=19 alt="-----------------" src="bar.gif"></p>
+
+<p class=MsoNormal align=center style='text-align:center'><b><span >This
+program is provided as is and without any warranty.</span></b></p>
+
+</div>
+
+</body>
+
+</html>

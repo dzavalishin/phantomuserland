@@ -562,8 +562,8 @@ set_mouse_cursor:       drv_video_set_mouse_cursor_deflt,
 mouse_disable:          drv_video_mouse_off_deflt,
 mouse_enable:           drv_video_mouse_on_deflt,
 #else
-redraw_mouse_cursor:    drv_video_null,
-set_mouse_cursor:       (void *)drv_video_null,
+mouse_redraw_cursor:    drv_video_null,
+mouse_set_cursor:       (void *)drv_video_null,
 mouse_disable:          drv_video_null,
 mouse_enable:           drv_video_null,
 #endif

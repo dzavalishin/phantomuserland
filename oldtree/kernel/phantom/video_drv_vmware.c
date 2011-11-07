@@ -87,18 +87,22 @@ accel:                  vmware_accel_start,
 stop:   		vmware_video_stop,
 
 update: 		vmware_video_update,
+#if 0
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
 readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:    		drv_video_null,
+#endif
 
     // todo hw mouse!
-redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
-set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
+#if 0
+mouse_redraw_cursor: 	drv_video_draw_mouse_deflt,
+mouse_set_cursor: 	drv_video_set_mouse_cursor_deflt,
 mouse_disable:          drv_video_mouse_off_deflt,
 mouse_enable:          	drv_video_mouse_on_deflt,
+#endif
 
 };
 
@@ -180,8 +184,8 @@ static errno_t vmware_accel_start(void)
         if(cpb2)
         {
             // Take over mouse
-            video_drv->redraw_mouse_cursor = vmware_draw_mouse_bp2;
-            video_drv->set_mouse_cursor    = vmware_set_mouse_cursor_bp2;
+            video_drv->mouse_redraw_cursor = vmware_draw_mouse_bp2;
+            video_drv->mouse_set_cursor    = vmware_set_mouse_cursor_bp2;
             video_drv->mouse_disable       = vmware_mouse_off_bp2;
             video_drv->mouse_enable        = vmware_mouse_on_bp2;
         }
@@ -307,8 +311,8 @@ return 0;
 
             if(cpb2)
             {
-                video_driver_vmware_svga.redraw_mouse_cursor = vmware_draw_mouse_bp2;
-                video_driver_vmware_svga.set_mouse_cursor    = vmware_set_mouse_cursor_bp2;
+                video_driver_vmware_svga.mouse_redraw_cursor = vmware_draw_mouse_bp2;
+                video_driver_vmware_svga.mouse_set_cursor    = vmware_set_mouse_cursor_bp2;
                 video_driver_vmware_svga.mouse_disable       = vmware_mouse_off_bp2;
                 video_driver_vmware_svga.mouse_enable        = vmware_mouse_on_bp2;
             }

@@ -224,6 +224,7 @@ start: 			cirrus_start,
 accel: 			cirrus_accel_start,
 stop:  			cirrus_stop,
 
+#if 0
 update: 		drv_video_null,
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
@@ -231,9 +232,10 @@ readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:  		drv_video_null,
+#endif
 
-redraw_mouse_cursor: 	currus_set_cursor_pos,
-set_mouse_cursor:       cirrus_set_mouse_cursor,
+mouse_redraw_cursor: 	currus_set_cursor_pos,
+mouse_set_cursor:       cirrus_set_mouse_cursor,
 mouse_disable:          drv_video_null,
 mouse_enable:          	drv_video_null,
 };

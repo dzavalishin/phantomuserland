@@ -1,3 +1,4 @@
+#if 0 // in dev lib
 /**
  *
  * Phantom OS
@@ -83,10 +84,12 @@ bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:  		drv_video_null,
 
+#if 0
 redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
 set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
 mouse_disable:          drv_video_mouse_off_deflt,
 mouse_enable:          	drv_video_mouse_on_deflt,
+#endif
 };
 
 
@@ -159,3 +162,5 @@ static void map_video(int on_off)
 
 
 
+
+#endif

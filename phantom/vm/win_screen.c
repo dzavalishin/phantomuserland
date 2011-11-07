@@ -58,10 +58,10 @@ stop:  (void *)drv_video_null,
 
 mouse:    		(void*)drv_video_null,
 
-redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
-set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
-mouse_disable:          drv_video_mouse_off_deflt,
-mouse_enable:          	drv_video_mouse_on_deflt,
+mouse_redraw_cursor: 	vid_mouse_draw_deflt,
+mouse_set_cursor: 	vid_mouse_set_cursor_deflt,
+mouse_disable:          vid_mouse_off_deflt,
+mouse_enable:          	vid_mouse_on_deflt,
 
 };
 
@@ -334,10 +334,10 @@ void    pvm_win_window_thread()
     drv_video_win32.bitblt_part = &drv_video_bitblt_part_rev;
 #endif
 
-    drv_video_win32.redraw_mouse_cursor = &drv_video_draw_mouse_deflt;
-    drv_video_win32.set_mouse_cursor = &drv_video_set_mouse_cursor_deflt;
-    drv_video_win32.mouse_disable = &drv_video_mouse_off_deflt;
-    drv_video_win32.mouse_enable = &drv_video_mouse_on_deflt;
+    drv_video_win32.mouse_redraw_cursor = &vid_mouse_draw_deflt;
+    drv_video_win32.mouse_set_cursor = &vid_mouse_set_cursor_deflt;
+    drv_video_win32.mouse_disable = &vid_mouse_off_deflt;
+    drv_video_win32.mouse_enable = &vid_mouse_on_deflt;
 
     init_ok = 1;
 
