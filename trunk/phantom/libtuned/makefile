@@ -12,4 +12,4 @@ PHANTOM_CFLAGS  += -mmmx -msse -msse2
 
 
 include $(BUILD_ROOT)/makerules-lib
-include $(BUILD_ROOT)/libkern/makerules
+include $(BUILD_ROOT)/libtuned/makerules
