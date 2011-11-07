@@ -40,10 +40,10 @@ void    request_repaint_all_for_win( struct drv_video_window *w );
 // hardware impl exists
 // -----------------------------------------------------------------------
 
-void drv_video_set_mouse_cursor_deflt(drv_video_bitmap_t *nc);
-void drv_video_draw_mouse_deflt(void);
-void drv_video_mouse_off_deflt(void);
-void drv_video_mouse_on_deflt(void);
+void vid_mouse_set_cursor_deflt(drv_video_bitmap_t *nc);
+void vid_mouse_draw_deflt(void);
+void vid_mouse_off_deflt(void);
+void vid_mouse_on_deflt(void);
 
 
 

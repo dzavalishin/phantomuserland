@@ -161,8 +161,8 @@ static void push_event_thread(void *arg)
     {
         hal_sem_acquire( &mouse_sem );
 
-        if(video_drv->redraw_mouse_cursor != NULL)
-            video_drv->redraw_mouse_cursor();
+        if(video_drv->mouse_redraw_cursor != NULL)
+            video_drv->mouse_redraw_cursor();
 
         //hal_mutex_lock( &mouse_mutex );
 

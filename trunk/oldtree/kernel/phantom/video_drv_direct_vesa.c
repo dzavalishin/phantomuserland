@@ -65,6 +65,7 @@ probe: 	direct_vesa_probe,
 start: 	(void *)drv_video_null,
 stop:  	(void *)drv_video_null,
 
+#if 0
 update:	drv_video_null,
 bitblt: (void *)drv_video_null,
 winblt: (void *)drv_video_null,
@@ -72,10 +73,12 @@ readblt: (void *)drv_video_null,
 bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:  drv_video_null,
+
 redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
 set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
 mouse_disable:          drv_video_mouse_off_deflt,
 mouse_enable:          	drv_video_mouse_on_deflt,
+#endif
 };
 
 

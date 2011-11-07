@@ -55,6 +55,7 @@ probe: 			i810_video_probe,
 start: 			i810_video_start,
 stop:   		i810_video_stop,
 
+#if 0
 update: 		drv_video_null,
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
@@ -67,6 +68,7 @@ redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
 set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
 mouse_disable:          drv_video_mouse_off_deflt,
 mouse_enable:          	drv_video_mouse_on_deflt,
+#endif
 
 };
 

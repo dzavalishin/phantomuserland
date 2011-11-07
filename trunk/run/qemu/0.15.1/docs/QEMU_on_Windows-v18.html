@@ -1,0 +1,503 @@
+<html>
+
+<head>
+<title>Qemu On Windows</title>
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-align:left;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:Arial;}
+h1
+	{margin-top:18.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	font-size:10.0pt;
+	font-family:Arial;
+	text-transform:uppercase;
+	font-weight:bold;}
+h2
+	{margin-top:18.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	font-size:10.0pt;
+	font-family:Arial;
+	text-transform:uppercase;
+	font-weight:bold;}
+h3
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	line-height:15.65pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:bold;}
+h4
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:bold;}
+h5
+	{margin-top:6.0pt;
+	margin-right:0cm;
+	margin-bottom:5.5pt;
+	margin-left:0cm;
+	text-indent:0cm;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	font-weight:bold;}
+h6
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:0cm;
+	text-align:justify;
+	text-indent:0cm;
+	line-height:15.6pt;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+a:link
+	{color:#606420;
+	text-decoration:none;}
+a:visited
+	{color:#606420;
+	text-decoration:none;}
+a.release:link
+	{color:#ffa500;
+	text-decoration:none;}
+a.release:visited
+	{color:#ffa500;
+	text-decoration:none;}
+p
+	{margin-right:0cm;
+	margin-left:0cm;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+ /* List Definitions */
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+</head>
+
+<body>
+
+<div style='margin-left:56.0pt;margin-right:56.0pt;'>
+
+<h1 align="center">QEMU on Windows</h1>
+
+<p class=MsoNormal align=center style='text-align:center'><img border=0
+width=550 height=19 alt="-----------------" src="bar.gif"></p>
+
+<p class=MsoNormal align=left style='margin-bottom:12.0pt;text-align:left;
+line-height:normal'><span style='font-size:12.0pt;font-family:"Times New Roman"'><a
+href="http://wiki.qemu.org/Index.html"><span >QEMU</span></a></span><span
+ style='font-size:12.0pt;font-family:"Times New Roman"'> is an emulator for various CPUs. It works on Linux, Windows, FreeBSD and Mac OS X. Windows version is in an alpha stage. I hope I can provide useful information on development and usage of the software.</span></p>
+
+<h2>What's New!</h2>
+
+<ul style='margin-top:0cm' type=disc>
+<li class=MsoNormal style='text-align:left'><span>August 10, 2010: updated for Qemu-0.12.5 and Qemu-0.13.0-rc0</span></li>
+<li class=MsoNormal style='text-align:left'><span>October 11, 2010: updated for Qemu-0.13.0-rc1</span></li>
+<li class=MsoNormal style='text-align:left'><span>October, 2010: I discovered that this page is featured on the <a class="release" href="http://en.wikipedia.org/wiki/QEMU#External_links">english wikipedia page for Qemu</a> <b>since Revision as of 10:59, 21 June 2009!</b> <i>(my god, I'm famous :-&gt;)</i>.</span></li>
+<li class=MsoNormal style='text-align:left'><span>October 12, 2010: updated for Qemu-0.12.5 on ARM and PPC (<i>on request of Deon Bezuidenhout and Philippe Rio</i>)</span></li>
+<li class=MsoNormal style='text-align:left'><span>November 9, 2010: updated for Qemu-0.13.0 (x86, ARM, PPC and SPARC) and added mingw-libunicows-1.1.2-EL.tar.bz2</span></li>
+<li class=MsoNormal style='text-align:left'><span>January 3, 2011: added Qemu-0.13.0-windows-Bios.zip which overrides the vga bioses for the 0.13.0 version <i>(See the patch file <a class="release" href="release/vgabios-fix.diff">vgabios-fix.diff</a> and the corresponding debian <a href="http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=572991#15">bug report</a> - Instructions for generating the bioses on cygwin will be provided later)</i></span></li>
+<li class=MsoNormal style='text-align:left'><span>August 22, 2011: updated for Qemu-0.14.0 and Qemu-0.15.0</span></li>
+<li class=MsoNormal style='text-align:left'><span>September 07, 2011: corrected the Qemu-0.14.0 and Qemu-0.15.0 zip files  (<i>thanks to Rolando A. Lopez for pointing to the packaging error: all DLLs were missing!</i>)</span></li>
+<li class=MsoNormal style='text-align:left'><span>October 18, 2011: corrected the Qemu-0.14.0 and Qemu-0.15.0 zip files again (<i>thanks to Simon Eigeldinger for pointing to the packaging error still present!</i>) + updated for Qemu-0.15.1 + sha1sum available for my downloads (see below)</span></li>
+</ul>
+
+<h3 style='margin-left:0cm;text-indent:0cm'>Latest Windows binaries (includes preliminary USB support, FMOD support and SDL 1.2.14):</h3>
+<p><ul>
+<li><i>-Lite</i> packages means that only the i386 virtual machine is compiled and available.</li>
+<li><i>-Medium</i> contains also ARM, PPC and usually SPARC virtual machines.</li>
+</ul></p>
+
+<ul style='margin-top:0cm' type=disc>
+<li class=MsoNormal style='text-align:left'><span><a class="release" href="release/Qemu-0.15.0-windows-Medium.zip">Qemu-0.15.1-windows-Medium.zip</a> (5.98M)</span></li>
+<li class=MsoNormal style='text-align:left'><span><a class="release" href="release/Qemu-0.15.0-windows-Medium.zip">Qemu-0.15.0-windows-Medium.zip</a> (5.96M)</span></li>
+<li class=MsoNormal style='text-align:left'><span><a class="release" href="release/Qemu-0.14.0-windows-Medium.zip">Qemu-0.14.0-windows-Medium.zip</a> (5.48M)</span></li>
+<li class=MsoNormal style='text-align:left'><span><a class="release" href="release/Qemu-0.13.0-windows-Medium.zip">Qemu-0.13.0-windows-Medium.zip</a> (5.26M)</span></li>
+<li class=MsoNormal style='text-align:left'><span><a class="release" href="release/Qemu-0.13.0-windows-Bios.zip">Qemu-0.13.0-windows-Bios.zip</a> (32Ko)</span></li>
+</ul>
+</p>
+
+<h3 style='margin-left:0cm;text-indent:0cm'>sha1sum :</h3>
+<ul style='margin-top:0cm' type=disc>
+<li class=MsoNormal style='text-align:left'>Use the <b>.sha1</b> files from <span><a class="release" href="release/">the release directory</a>...</span></li>
+<li class=MsoNormal style='text-align:left'>See <a href="http://en.wikipedia.org/wiki/Sha1sum">here</a> for usage of sha1sum</li>
+</ul>
+</p>
+
+<h3 style='margin-left:0cm;text-indent:0cm'>Old Windows binaries :</h3>
+<ul style='margin-top:0cm' type=disc>
+<li class=MsoNormal style='text-align:left'><span><a class="release" href="release/">browse</a> the release directory...</span></li>
+</ul>
+</p>
+</p>
+
+<h3 style='margin-left:0cm;text-indent:0cm'>Links</h3>
+<p><span >QEMU:<br>
+</span><a href="http://www.qemu.org/"><span >http://www.qemu.org/</span></a><span
+> <br>
+SDL library:<br>
+</span><a href="http://www.libsdl.org/"><span >http://www.libsdl.org/</span></a>
+<span ><br>
+Cygwin:<br>
+<a href="http://www.cygwin.com/">http://www.cygwin.com/</a> </span></p>
+
+<h2 style='margin-left:0cm;text-indent:0cm'>How to build</h2>
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm;color:red'><span
+ style='font-size:9.0pt;font-family:"Courier New"'><b>WARNING</b>: build process is still using the "old" <i>1.5.25  cygwin legacy version</i> (see <a href="http://www.cygwin.com/win-9x.html">here</a> for informations).</span></p>
+
+<p class=MsoNormal><span >Main choice was to build everything from <a href="http://www.cygwin.com/">cygwin</a> by using the <a href="http://www.mingw.org/node/21">mingw</a> versions of gcc.<br>
+You need the following packages (downloadable with the cygwin <i>setup-legacy</i> program):</span></p>
+
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 1.0pt 4.0pt'>
+<!--
+gcc-mingw-core gcc-mingw-core-20050522-1.tar.bz2 0
+gcc-mingw-g++ gcc-mingw-g++-20050522-1.tar.bz2 0
+mingw-libbz2-devel mingw-libbz2-devel-1.0.5-3.tar.bz2 0
+mingw-libbz2_1 mingw-libbz2_1-1.0.5-3.tar.bz2 0
+mingw-runtime mingw-runtime-3.16-1.tar.bz2 0
+mingw-zlib-devel mingw-zlib-devel-1.2.3-3.tar.bz2 0
+mingw-zlib0 mingw-zlib0-1.2.3-3.tar.bz2 0
+w32api w32api-3.13-1.tar.bz2 0
+-->
+
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm'><span
+ style='font-size:9.0pt;font-family:"Courier New"'>gcc-mingw-core	gcc-mingw-core-20050522-1.tar.bz2 </span></p>
+
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm'><span
+ style='font-size:9.0pt;font-family:"Courier New"'>gcc-mingw-g++	gcc-mingw-g++-20050522-1.tar.bz2</span></p>
+
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm'><span
+ style='font-size:9.0pt;font-family:"Courier New"'>mingw-runtime	mingw-runtime-3.16-1.tar.bz2</span></p>
+
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm'><span
+ style='font-size:9.0pt;font-family:"Courier New"'>mingw-zlib-devel 	mingw-zlib-devel-1.2.3-3.tar.bz2</span></p>
+
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm'><span
+ style='font-size:9.0pt;font-family:"Courier New"'>mingw-libbz2-devel 	mingw-libbz2-devel-1.0.5-3.tar.bz2</span></p>
+
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm'><span
+ style='font-size:9.0pt;font-family:"Courier New"'>w32api	w32api-3.13-1.tar.bz2</span></p>
+
+</div>
+
+<p class=MsoNormal><b><u><span >SDL</span></u></b><span >&nbsp;:
+based on <a href="http://www.libsdl.org/extras/win32/cygwin/README.txt">http://www.libsdl.org/extras/win32/cygwin/README.txt</a></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt'><span
+>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Fetch the source code (SDL-1.2.14.tar.gz was used) and untar.</span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt'><span
+>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Fetch the DirectX development headers and libraries (new version rebuild with </span><span  style='font-family:
+"Courier New"'>gcc –mno-cygwin</span><span > and </span><span
+ style='font-family:"Courier New"'>–O4 –march=i686</span><span
+> available here: <a class="release" href="release/mingw-directx-5.0-EL.tar.bz2">mingw-directx-5.0-EL.tar.bz2</a>)
+: <a href="http://www.libsdl.org/extras/win32/cygwin/directx-devel.tar.gz">http://www.libsdl.org/extras/win32/cygwin/directx-devel.tar.gz</a>
+</span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt'><span
+>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Fetch yasm (<a
+href="http://www.tortall.net/projects/yasm/releases/yasm-0.8.0-cygwin.exe">http://www.tortall.net/projects/yasm/releases/yasm-0.8.0-cygwin.exe</a>
+or here: <a class="release" href="release/yasm.exe">yasm.exe</a>), put it in your path.</span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt'><span
+>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Fetch libunicows.a: <a
+href="http://libunicows.sourceforge.net/">http://libunicows.sourceforge.net/</a>
+(installable version build with </span><span  style='font-family:
+"Courier New"'>make -f makefile.mingw32 CC="gcc –mno-cygwin"</span><span > and </span><span
+ style='font-family:"Courier New"'>CFLAGS="–O4 –march=i686"</span><span
+> available here: <a class="release" href="release/mingw-libunicows-1.1.2-EL.tar.bz2">mingw-libunicows-1.1.2-EL.tar.bz2</a>)</span></p>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Compile SDL and install:</span></p>
+
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 1.0pt 4.0pt'>
+
+<p class=MsoNormal align=left style='text-align:left;border:none;padding:0cm'><span
+ style='font-size:9.0pt;font-family:"Courier New"'>CPPFLAGS=&quot;-I/usr/include/mingw
+&quot; CFLAGS=&quot;-O4 -march=i686 -fomit-frame-pointer -funroll-loops
+-I/include/w32api&quot; CC=&quot;gcc -mno-cygwin&quot;
+CXXFLAGS=&quot;-O4 -march=i686 -fomit-frame-pointer -funroll-loops -I/include/w32api&quot;
+CXX=&quot;g++ -mno-cygwin&quot; ./configure LDFLAGS=&quot;-mno-cygwin&quot; --prefix=/usr --libdir=/usr/lib/mingw --includedir=/usr/include/mingw<br>
+make<br>
+make install</span></p>
+
+</div>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >A complete package (reworked with mingw compatibility
+in mind) is available here: <a class="release" href="release/mingw-SDL-1.2.14-EL-2.tar.bz2">mingw-SDL-1.2.14-EL-2.tar.bz2</a>)</span></p>
+
+<p class=MsoNormal><b><u><span >Qemu:</span></u></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:-18.0pt'><span
+>-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Fetch the source code: <a
+href="http://wiki.qemu.org/download/qemu-0.15.1.tar.gz">http://wiki.qemu.org/download/qemu-0.15.1.tar.gz</a></span></p>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Optionally fetch the <a
+href="http://www.fmod.org/">fmod</a> library: <a
+href="http://www.fmod.org/index.php/release/version/fmodapi375win.zip">http://www.fmod.org/index.php/release/version/fmodapi375win.zip</a>
+(or here: <a class="release" href="release/fmodapi375win.zip">fmodapi375win.zip</a>)</span></p>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Fetch and install the patches: <a
+class="release" href="release/qemu-0.15.1-patch">qemu-0.15.1-patch</a>. This patch is
+based on the original patches found here: <a
+href="http://www.h7.dion.ne.jp/~qemu-win/download/qemu-0.9.0-patches.zip">http://www.h7.dion.ne.jp/~qemu-win/download/qemu-0.9.0-patches.zip</a>
+plus my additional work (<i>+ corrected for unmodified Ubuntu with the help of Dmitry Zhurikhin</i>).</span></p>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Fetch <a
+href="http://libusb-win32.sourceforge.net/">LibUsb-Win32</a>, currently <a
+href="http://downloads.sourceforge.net/libusb-win32/libusb-win32-device-bin-0.1.12.2.tar.gz">http://downloads.sourceforge.net/libusb-win32/libusb-win32-device-bin-0.1.12.2.tar.gz</a>,
+or here: <a class="release" href="release/libusb-win32-device-bin-0.1.12.2.tar.gz">libusb-win32-device-bin-0.1.12.2.tar.gz</a>
+and untar.</span></p>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span  style='font-size:9.0pt'>-<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Untar Qemu, apply the patch (</span><span
+ style='font-family:"Courier New"'>patch -p1 -i ../qemu-0.15.1-patch</span><span
+>) and configure:</span></p>
+<!-- To be updated for 0.15.0+ ... The use of glib is not clear for me (seems to be unused!!!)
+http://ltsp.mirrors.tds.net/pub/sourceware.org/cygwinports/release-2/MinGW/mingw-glib2.0/mingw-glib2.0-2.26.1-1.tar.bz2
+PKG_CONFIG_PATH=/usr/i686-pc-mingw32/sys-root/mingw/lib/pkgconfig => useless (only for guest-agent not generated) but mandatory
+
+-->
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 0cm 4.0pt'>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'>
+PATH=/home/lassauge/MyDocuments/Qemu/libusb-win32-device-bin-0.1.12.2/bin:$PATH
+CFLAGS=&quot;-O4 -march=i686&quot; \</br>
+./configure --target-list=&quot;i386-softmmu arm-softmmu sparc-softmmu ppc-softmmu&quot; \</br>
+--cc=&quot;gcc -mno-cygwin&quot; --host-cc=gcc --audio-drv-list=&quot;dsound sdl fmod&quot; --audio-card-list=&quot;ac97 es1370 sb16 cs4231a adlib gus&quot; \</br>
+--prefix=&quot;/home/lassauge/MyDocuments/Qemu-windows&quot; \</br>
+--fmod-lib=/home/lassauge/MyDocuments/Qemu/fmodapi375win/api/lib/libfmod.a \</br>
+--fmod-inc=/home/lassauge/MyDocuments/Qemu/fmodapi375win/api/inc
+</span></p>
+</div>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Special tweak (starting from version 0.9.1): I modify the </span><span
+ style='font-family:"Courier New"'>config-host.mak</span><span
+> file for CFLAGS. You should have something like this (check HOST_USB and CONFIG_FMOD) + removed libliberty and libglib-2.0:</span></p>
+
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 0cm 4.0pt'>
+
+<p class=MsoNormal align=left style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'><pre>
+all:
+prefix=/home/lassauge/MyDocuments/Qemu-windows
+bindir=${prefix}
+libdir=${prefix}/lib
+mandir=${prefix}
+datadir=${prefix}
+sysconfdir=${prefix}
+docdir=${prefix}
+confdir=${prefix}
+ARCH=i386
+STRIP=strip
+HOST_LONG_BITS=32
+CONFIG_WIN32=y
+CONFIG_FILEVERSION=0,15,1,0
+CONFIG_PRODUCTVERSION=0,15,1,0
+CONFIG_SLIRP=y
+CONFIG_SMBD_COMMAND="/usr/sbin/smbd"
+CONFIG_AC97=y
+CONFIG_ES1370=y
+CONFIG_SB16=y
+CONFIG_CS4231A=y
+CONFIG_ADLIB=y
+CONFIG_GUS=y
+CONFIG_AUDIO_DRIVERS=dsound sdl fmod
+CONFIG_DSOUND=y
+CONFIG_SDL=y
+CONFIG_FMOD=y
+FMOD_CFLAGS=-I/home/lassauge/MyDocuments/Qemu/fmodapi375win/api/inc
+CONFIG_AUDIO_WIN_INT=y
+CONFIG_BDRV_WHITELIST=
+CONFIG_VNC=y
+CONFIG_VNC_PNG=y
+VNC_PNG_CFLAGS=-I/usr/include/libpng12  
+VERSION=0.15.1
+PKGVERSION=
+SRC_PATH=/home/lassauge/Qemu/qemu-0.15.1
+TARGET_DIRS=i386-softmmu arm-softmmu sparc-softmmu ppc-softmmu
+BUILD_DOCS=yes
+CONFIG_SDL=y
+SDL_CFLAGS=-mno-cygwin -Dmain=SDL_main -I/usr/include/mingw/SDL -I/usr/include/mingw  
+GLIB_CFLAGS=-I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include  
+INSTALL_BLOBS=yes
+CONFIG_SMARTCARD=y
+CONFIG_UNAME_RELEASE=""
+CONFIG_ZERO_MALLOC=y
+<span style='color:#3366FF'>HOST_USB=libusb
+LIBUSB_LIBS=-L/home/lassauge/MyDocuments/Qemu/libusb-win32-device-bin-0.1.12.2/lib/gcc -lusb</span>
+TRACE_BACKEND=nop
+CONFIG_TRACE_FILE=trace
+TOOLS=qemu-img$(EXESUF) qemu-io$(EXESUF) 
+ROMS=optionrom
+MAKE=make
+INSTALL=install
+INSTALL_DIR=install -d -m 0755
+INSTALL_DATA=install -c -m 0644
+INSTALL_PROG=install -c -m 0755
+PYTHON=python
+CC=gcc -mno-cygwin
+CC_I386=$(CC) -m32
+HOST_CC=gcc
+AR=ar
+OBJCOPY=objcopy
+LD=ld
+WINDRES=windres
+LIBTOOL=libtool
+CFLAGS=<span style='color:#3366FF'>-O4 -march=i686</span>
+QEMU_CFLAGS=<span style='color:#3366FF'>-march=i686</span> -D__USE_MINGW_ANSI_STDIO=1 -DWIN32_LEAN_AND_MEAN -DWINVER=0x501 -D_FORTIFY_SOURCE=2 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -Wstrict-prototypes -Wredundant-decls -Wall -Wundef -Wwrite-strings -Wmissing-prototypes -fno-strict-aliasing  -Wendif-labels -Wnested-externs -Wformat-security -Wformat-y2k -Winit-self -Wold-style-definition -I/usr/include/libpng12  
+QEMU_INCLUDES=-I$(SRC_PATH)/slirp -I. -I$(SRC_PATH) <span style='color:#3366FF'>-I/home/lassauge/MyDocuments/Qemu/libusb-win32-device-bin-0.1.12.2/include</span>
+HELPER_CFLAGS=-fomit-frame-pointer
+LDFLAGS=-Wl,--warn-common -march=i686
+ARLIBS_BEGIN=
+ARLIBS_END=
+LIBS+=<span style='color:#3366FF'>-lwinmm -lws2_32 -liphlpapi  $(LIBUSB_LIBS)</span>
+LIBS_TOOLS+=<span style='color:#3366FF'>-lintl -liconv</span>  
+EXESUF=.exe
+subdir-i386-softmmu: subdir-libhw64
+subdir-arm-softmmu: subdir-libhw32
+subdir-sparc-softmmu: subdir-libhw64
+subdir-ppc-softmmu: subdir-libhw32
+</pre></span></p>
+
+</div>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >One important erroneous compilation warning:
+printf formats for int64 objects from mingw include files are not recognized by
+the compiler (bug?) but it works as expected. You can verify with the following
+<a class="release" href="release/checkI64.c">file</a> compiled on cygwin with and without </span><span
+ style='font-family:"Courier New"'>-mno-cygwin</span><span
+>:</span></p>
+
+<div style='border:solid windowtext 1.0pt;padding:1.0pt 4.0pt 0cm 4.0pt'>
+
+<p class='MsoNormal' align='left' style='margin-bottom:0cm;margin-bottom:.0001pt;
+text-align:left;line-height:normal;border:none;padding:0cm'><span 
+style='font-size:9.0pt;font-family:"Courier New"'><pre>
+#include &lt;stdio.h&gt;
+#include &lt;basetsd.h&gt;/* required typedef __int64 for gcc */
+
+typedef char TCHAR;
+
+#define TEXT(x) x
+unsigned __int64 atou64(const TCHAR *s) ;
+int main()
+{
+	unsigned __int64 value;
+	TCHAR *test = "1234567890123456789";
+	printf("in main(): test = &lt;%s&gt;\n", test);
+	printf("sizeof(__int64) = %d\n", sizeof(__int64));
+	value = atou64(test);
+	printf("value using I64d: %I64d\n", value); /* for Borland BCC or Microsoft VC++ */
+	printf("value using Ld:   %Ld\n", value); /* for Borland BCC */
+	printf("value using lld:  %lld\n", value); /* for gcc */
+	printf("value using I64x: %016I64x(hex)\n", value);/* for Borland BCC or Microsoft VC++ */
+	printf("value using Lx:   %016Lx(hex)\n", value);/* for Borland BCC */
+	printf("value using llx:  %016llx(hex)\n", value); /* for gcc */
+	return 0;
+}
+unsigned __int64 atou64(const TCHAR *s) 
+{ 
+	const unsigned __int64 max64 = (unsigned __int64)0-1; 
+	unsigned __int64 v = 0; 
+	int digit; 
+	while (*s&gt;=TEXT('0') && *s&lt;=TEXT('9')) 
+	{ 
+		digit = *s++ - TEXT('0'); 
+		if (v &gt; (max64-digit)/10) 
+			return 0; /* overflow */ 
+		v = 10*v + digit; 
+	} 
+	return v; 
+}
+</pre></span></p>
+
+</div>
+
+<p class='MsoNormal' align='left' style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Make: </span>
+If you want to see what is exactly compiled use
+<span style='font-family:"Courier New"'>V=1 make</span>
+<!-- Make when adding ARM and PPC fails ?
+Do 'make defconfig'
+And as 'make config-all-devices.mak' doesn't work, fake it manually: 
+cat i386-softmmu/config-devices.mak arm-softmmu/config-devices.mak ppc-softmmu/config-devices.mak | grep =y | sort -u > config-all-devices.mak
+-->
+</p>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Install: do not forget to add </span><span
+ style='font-family:"Courier New"'>fmod.dll, SDL.dll,</span><span
+> </span><span  style='font-family:"Courier New"'>mgwz.dll</span><span
+> and </span><span  style='font-family:"Courier New"'>libusb0.dll</span></p>
+
+<p class=MsoNormal align=left style='margin-left:36.0pt;text-align:left;
+text-indent:-18.0pt'><span >-<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span >Bugs: <br>
+<font color="red">Pathnames in the options when starting Qemu must use a single slash '/' instead of '\'.</font></span></p>
+
+
+<p class=MsoNormal align=center style='text-align:center'><img border=0
+width=550 height=19 alt="-----------------" src="bar.gif"></p>
+
+<p class=MsoNormal align=center style='text-align:center'><b><span >This
+program is provided as is and without any warranty.</span></b></p>
+
+</div>
+
+</body>
+
+</html>
+<!-- QUEMU_on_Windows-v18.html - October 18th, 2011 - (c) E. Lassauge -->

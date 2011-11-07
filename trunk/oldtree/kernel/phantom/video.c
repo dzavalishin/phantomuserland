@@ -17,7 +17,7 @@ static int debug_level_flow = 0;
 
 //#include <video.h>
 #include <video/screen.h>
-//#include <video/screen.h>
+#include <video/internal.h>
 #include <hal.h>
 #include <kernel/init.h>
 
@@ -85,6 +85,9 @@ struct drv_video_screen_t *video_drivers[] =
 
 struct drv_video_screen_t        *video_drv = 0;
 
+
+static void set_video_defaults(void);
+
 static void phantom_select_video_driver()
 {
     long selected_sq = 0;
@@ -125,14 +128,7 @@ static void phantom_select_video_driver()
 
         SHOW_FLOW( 1, "The best is %s video driver", selected_drv->name);
         video_drv = selected_drv;
-
-        // fill in defaults
-
-        if( 0 == video_drv->update)  video_drv->update = (void *)drv_video_null;
-        if( 0 == video_drv->bitblt)  video_drv->bitblt = drv_video_bitblt_rev;
-        if( 0 == video_drv->winblt)  video_drv->winblt = drv_video_win_winblt_rev;
-        if( 0 == video_drv->readblt)	video_drv->readblt = drv_video_readblt_rev;
-        if( 0 == video_drv->bitblt_part)  video_drv->bitblt_part = drv_video_bitblt_part_rev;
+        set_video_defaults();
     }
 
 }
@@ -198,7 +194,7 @@ static void video_post_start()
     phantom_init_console_window();
 
     SHOW_FLOW0( 3, "Video mouse cursor init" );
-    drv_video_set_mouse_cursor(drv_video_get_default_mouse_bmp());
+    scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
 }
 
 
@@ -242,6 +238,7 @@ void phantom_enforce_video_driver(struct drv_video_screen_t *vd)
         video_drv->stop();
 
     video_drv =  vd;
+    set_video_defaults();
 
     int res;
     if(video_drv) res = video_drv->start();
@@ -252,4 +249,27 @@ void phantom_enforce_video_driver(struct drv_video_screen_t *vd)
     was_enforced = 1;
     video_post_start();
 }
+
+
+static void set_video_defaults(void)
+{
+    // fill in defaults - r/w
+
+    if( 0 == video_drv->update)                     video_drv->update = (void *)drv_video_null;
+    if( 0 == video_drv->bitblt)                     video_drv->bitblt = drv_video_bitblt_rev;
+    if( 0 == video_drv->winblt)                     video_drv->winblt = drv_video_win_winblt_rev;
+    if( 0 == video_drv->readblt)                    video_drv->readblt = drv_video_readblt_rev;
+    if( 0 == video_drv->bitblt_part)                video_drv->bitblt_part = drv_video_bitblt_part_rev;
+
+    // fill in defaults - mouse cursor
+
+    if( 0 == video_drv->mouse_redraw_cursor)        video_drv->mouse_redraw_cursor = vid_mouse_draw_deflt;
+    if( 0 == video_drv->mouse_set_cursor)           video_drv->mouse_set_cursor    = vid_mouse_set_cursor_deflt;
+    if( 0 == video_drv->mouse_disable )             video_drv->mouse_disable       = vid_mouse_off_deflt;
+    if( 0 == video_drv->mouse_enable )              video_drv->mouse_enable        = vid_mouse_on_deflt;
+
+    if( 0 == video_drv->mouse)                      video_drv->mouse = (void*)drv_video_null;
+}
+
+
 

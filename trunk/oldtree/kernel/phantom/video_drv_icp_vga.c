@@ -91,6 +91,7 @@ probe: 			icp_video_probe,
 start: 			icp_video_start,
 stop:   		icp_video_stop,
 
+#if 0
 update: 		drv_video_null,
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
@@ -98,17 +99,13 @@ readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:    		drv_video_null,
+#endif
 
 #if 1
 redraw_mouse_cursor: 	(void *)drv_video_null,
 set_mouse_cursor: 	(void *)drv_video_null,
 mouse_disable:          (void *)drv_video_null,
 mouse_enable:          	(void *)drv_video_null,
-#else
-redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
-set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
-mouse_disable:          drv_video_mouse_off_deflt,
-mouse_enable:          	drv_video_mouse_on_deflt,
 #endif
 };
 

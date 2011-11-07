@@ -328,7 +328,7 @@ static void mouse_callback()
     //drv_video_bitblt(win, video_drv->mouse_x, video_drv->mouse_y, wxsize, wysize);
     //drv_video_update();
 
-    video_drv->redraw_mouse_cursor();
+    video_drv->mouse_redraw_cursor();
 }
 
 
@@ -352,7 +352,7 @@ int main(int argc, char* argv[])
     drv_video_init_windows();
     init_new_windows();
 
-    drv_video_set_mouse_cursor(drv_video_get_default_mouse_bmp());
+    scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
 
 
     mem = malloc(size+1024*10);
