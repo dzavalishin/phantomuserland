@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "threads"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 5
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -35,7 +35,8 @@ static void common_thread_init(phantom_thread_t *t, int stacksize );
 static hal_spinlock_t tid_lock; //init?
 
 
-#define DEF_STACK_SIZE 128*1024
+#define DEF_STACK_SIZE (128*1024)
+//#define DEF_STACK_SIZE (256*1024)
 
 
 
@@ -247,6 +248,8 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     hal_page_control( pa, t->stack, page_unmap, page_noaccess ); // poor man's guard page - TODO support in page fault
     t->stack_pa = pa;
 
+    SHOW_FLOW( 5, "main stk va %p pa %p", t->stack, (void *)pa );
+
     //assert(t->stack != 0);
 
     t->kstack_size = stacksize;
@@ -254,6 +257,7 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     hal_pv_alloc( &pa, &(t->kstack), stacksize+PAGE_SIZE );
     hal_page_control( pa, t->kstack, page_unmap, page_noaccess ); // poor man's guard page - TODO support in page fault
     t->kstack_pa = pa;
+    SHOW_FLOW( 5, "kern stk va %p pa %p", t->kstack, (void *)pa );
 #if ARCH_mips
     // On mips we need unmapped kernel stack for mapping on MIPS is
     // done with exceptions too and unmapped stack is fault forever.

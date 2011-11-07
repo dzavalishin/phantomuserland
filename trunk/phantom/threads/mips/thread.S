@@ -90,6 +90,7 @@ LEAF(phantom_switch_context)
     mtc0	t0, CP0_STATUS
 #endif
 
+    // page fault
     lw          t0, 32(sp)
     mthi t0
     lw          t0, 36(sp)
