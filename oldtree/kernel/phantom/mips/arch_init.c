@@ -172,6 +172,7 @@ void board_sched_cause_soft_irq(void)
     hal_sti();
 
     //__asm__("wait"); // Now wait for IRQ
+    // sw irq must happen right after sti, right?
 
     if(ie) hal_sti(); else hal_cli();
 }

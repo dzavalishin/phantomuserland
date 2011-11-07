@@ -40,8 +40,7 @@ LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
-PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a
-
+PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a  $(PLIBDIR)/libwin.a
 
 
 LD_ADDR=--script=$(ARCH)/ld.script
@@ -89,7 +88,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	paging_device.o paging.o dpc.o spinlock.o hal.o fsck.o \
 	console_win.o vm_threads.o snap_sync.o ps2.o \
 	video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_cirrus.o \
-	video_drv_basic_vga.o video_drv_basic_vga_tables.o video.o \
+	video_drv_basic_vga.o video_drv_basic_vga_tables.o video_drv_null.o video.o \
 	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
 	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
 	device.o driver_isa_ne2000.o \
