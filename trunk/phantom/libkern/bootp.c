@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "bootp"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -119,7 +119,11 @@ static	char vm_cmu[4] = VM_CMU;
 
 /* Local forwards */
 static	ssize_t bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t);
-static	ssize_t bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t);
+//static	ssize_t bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t);
+
+static errno_t bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t len, size_t *retlen);
+
+
 static	int vend_rfc1048(struct bootp_state *bstate, u_char *, u_int);
 #ifdef BOOTP_VEND_CMU
 static	void vend_cmu(struct bootp_state *bstate, u_char *);
@@ -221,6 +225,8 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
     NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
     */
 
+    errno_t rc;
+
     //if( 0 != udp_sendto(udp_sock, bp, sizeof(*bp), &dest_addr) )
     if( 0 != bootpsend(bstate, udp_sock, bp, sizeof(*bp)) )
     {
@@ -229,10 +235,11 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
     }
 
     //if( 0 >= udp_recvfrom(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l) )
-    if( 0 >= bootprecv(bstate, udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp)) )
+    rc = bootprecv(bstate, udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), 0 );
+    if(rc)
     {
-        SHOW_ERROR0( 0, "no reply");
-        return ETIMEDOUT;
+        SHOW_ERROR( 0, "no reply, rc = %d", rc);
+        return rc;
     }
 
 
@@ -280,7 +287,7 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
         }
 
         //if( 0 >= udp_recvfrom(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l) )
-        if( 0 >= bootprecv(bstate, udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp)) )
+        if( bootprecv(bstate, udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), 0) )
         {
             SHOW_ERROR0( 0, "no reply");
             return ETIMEDOUT;
@@ -372,8 +379,8 @@ bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
     return 0;
 }
 
-static ssize_t
-bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t len)
+static errno_t
+bootprecv( struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t len, size_t *retlen )
 {
     SHOW_FLOW0( 3, "bootp_recv");
 
@@ -386,12 +393,12 @@ bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
     //NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
     NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0, 0, 0, 0);
 
-    int n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 10000000l);
+    int n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 2000000l);
 
     if( 0 >= n )
     {
         SHOW_ERROR( 0, "UDP recv err = %d", n);
-        return -1;
+        return ETIMEDOUT; // TODO errno
     }
 
     if (n == -1 || n < (int)(sizeof(struct bootp) - BOOTP_VENDSIZE))
@@ -419,10 +426,12 @@ bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
     else
         SHOW_ERROR( 0, "bootprecv: unknown vendor 0x%lx", (long)bp->bp_vend);
 
-    return(n);
+    if(retlen) *retlen = n;
+
+    return 0;
 bad:
     //errno = 0;
-    return (-1);
+    return EINVAL;
 }
 
 static int
@@ -526,15 +535,22 @@ errno_t bootp(ifnet *iface)
     if( xid == 0 )
         xid = (int)time(0) ^ 0x1E0A4F; // Some strange number :)
 
-    if( udp_open(&udp_sock) )
-    {
-        SHOW_ERROR0( 0, "UDP - can't prepare endpoint");
-        return ENOTSOCK;
-    }
+    int tries = 3;
+    errno_t e;
 
-    errno_t e = do_bootp( bstate, udp_sock, 0);
+    do {
+        if( udp_open(&udp_sock) )
+        {
+            SHOW_ERROR0( 0, "UDP - can't prepare endpoint");
+            return ENOTSOCK;
+        }
 
-    udp_close(udp_sock);
+        e = do_bootp( bstate, udp_sock, 0);
+
+        udp_close(udp_sock);
+
+    } while( e && (tries-- > 0) );
+
 
     if(e)
         SHOW_ERROR( 0, "error %d", e);
