@@ -11,3 +11,4 @@ SYSCALL(phantom_strmethod)
 SYSCALL(name2ip)
 
 
+SYSCALL(phantom_runclass)
