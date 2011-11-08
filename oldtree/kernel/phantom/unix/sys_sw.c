@@ -856,6 +856,19 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
     case SYS_phantom_strmethod:
         goto unimpl;
 
+        // extern int phantom_runclass(const char *cname, int nmethod, int flags);
+    case SYS_phantom_runclass:
+        {
+            AARG(const char  *, cname, 0, 1);
+            unsigned flags = uarg[2];
+
+            if(flags)
+                SHOW_ERROR( 0, "SYS_phantom_runclass: unknown flags %x" , flags );
+
+            usys_phantom_runclass( &err, u, cname, uarg[1] );
+            ret = err;
+        }
+        break;
 
     case SYS_setproperty:
         {

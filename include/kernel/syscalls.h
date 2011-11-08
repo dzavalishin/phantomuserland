@@ -253,3 +253,5 @@
 #define SYS_phantom_strmethod   2053
 
 
+#define SYS_phantom_runclass    2096
+

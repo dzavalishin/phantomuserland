@@ -134,3 +134,7 @@ sighandler_t usys_signal( int *err, uuprocess_t *u, int signum, sighandler_t han
 
 
 
+void usys_phantom_runclass( errno_t *err, uuprocess_t *u, const char *cname, int nmethod );
+
+
+

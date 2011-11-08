@@ -49,11 +49,15 @@ trunk/plib/sys/src           - native phantom userland code
 trunk/run                    - QEMU run/test environment
 trunk/plc                    - phantom language compiler / java bytecode translator
 
-Best regards, Dmitry Zavalishin,
-Phantom project... how to say... inventor? :)
-http://dz.ru/en
-
 DOX
 
   doc/*
   http://code.google.com/p/phantomuserland/w/list
+
+
+
+
+
+Best regards, Dmitry Zavalishin,
+Phantom project... how to say... inventor? :)
+dz@dz.ru
