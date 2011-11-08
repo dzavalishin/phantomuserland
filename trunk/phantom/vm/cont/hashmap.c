@@ -20,6 +20,8 @@ And it's not thorougly tested yet.
 //#include <stdio.h>             /* for dump */
 #include <phantom_libc.h>
 
+
+
 static void resize_up(Hashmap *h_old);
 
 static unsigned int table_size[] = {
@@ -40,50 +42,6 @@ static unsigned int table_size[] = {
 typedef struct hashmap_entry Entry;
 #define KEY(x) ( ((void*)x) + sizeof(Entry) )
 
-/*--- HashPJW ---------------------------------------------------
- *  An adaptation of Peter Weinberger's (PJW) generic hashing
- *  algorithm based on Allen Holub's version. Accepts a pointer
- *  to a datum to be hashed and returns an unsigned integer.
- *     Modified by sandro to include datum_end
- *     Taken from http://www.ddj.com/articles/1996/9604/9604b/9604b.htm?topic=algorithms
- *-------------------------------------------------------------*/
-#include <limits.h>
-#define BITS_IN_int     ( sizeof(int) * CHAR_BIT )
-#define THREE_QUARTERS  ((int) ((BITS_IN_int * 3) / 4))
-#define ONE_EIGHTH      ((int) (BITS_IN_int / 8))
-#define HIGH_BITS       ( ~((unsigned int)(~0) >> ONE_EIGHTH ))
-static unsigned int hash(const char *datum, const char *datum_end)
-{
-    unsigned int hash_value, i;
-    if (datum_end) {
-        for ( hash_value = 0; datum<datum_end; ++datum )
-        {
-            hash_value = ( hash_value << ONE_EIGHTH ) + *datum;
-            if (( i = hash_value & HIGH_BITS ) != 0 )
-                hash_value =
-                    ( hash_value ^ ( i >> THREE_QUARTERS )) &
-                    ~HIGH_BITS;
-        }
-    } else {
-        for ( hash_value = 0; *datum; ++datum )
-        {
-            hash_value = ( hash_value << ONE_EIGHTH ) + *datum;
-            if (( i = hash_value & HIGH_BITS ) != 0 )
-                hash_value =
-                    ( hash_value ^ ( i >> THREE_QUARTERS )) &
-                    ~HIGH_BITS;
-        }
-        /* and the extra null value, so we match if working by length */
-        hash_value = ( hash_value << ONE_EIGHTH ) + *datum;
-        if (( i = hash_value & HIGH_BITS ) != 0 )
-            hash_value =
-                ( hash_value ^ ( i >> THREE_QUARTERS )) &
-                ~HIGH_BITS;
-    }
-
-    /* printf("Hash value of %s//%s is %d\n", datum, datum_end, hash_value); */
-    return ( hash_value );
-}
 
 void hashmap_open(Hashmap *h, unsigned int initial_size)
 {
@@ -134,7 +92,7 @@ void hashmap_dump(Hashmap *h)
 
 void* hashmap_get(Hashmap *h, void *key, void *key_end)
 {
-    unsigned int hashval = hash(key, key_end) % table_size[h->table_size_index];
+    unsigned int hashval = calc_hash(key, key_end) % table_size[h->table_size_index];
     Entry *e = h->table[hashval];
     size_t keysize = key_end ? (key_end - key) : strlen(key)+1;
     while (e)
@@ -158,10 +116,9 @@ void hashmap_put(Hashmap *h, void *key, void *key_end,
         resize_up(h);
 
     {
-        unsigned int hashval = hash(key, key_end) % table_size[h->table_size_index];
+        unsigned int hashval = calc_hash(key, key_end) % table_size[h->table_size_index];
 
-        int x=hash(key, key_end) % table_size[h->table_size_index];
-		(void)x; // TODO why unused?
+        // TODO mutex
 
         Entry *e = h->table[hashval];
         size_t keysize = key_end ? (key_end - key) : strlen(key)+1;
@@ -272,7 +229,7 @@ void resize_up(Hashmap *h_old)
         Entry *next_e;
         while (e)
         {
-            unsigned int hashval = hash(KEY(e), e->value)
+            unsigned int hashval = calc_hash(KEY(e), e->value)
                 % table_size[h.table_size_index];
             next_e = e->next_in_bucket;
             e->next_in_bucket = h.table[hashval];
