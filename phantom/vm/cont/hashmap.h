@@ -8,6 +8,9 @@
 
 #include "iter.h"
 
+unsigned int calc_hash(const char *datum, const char *datum_end);
+
+
 struct hashmap_entry {
     struct hashmap_entry *next_in_bucket;
     void *value;
