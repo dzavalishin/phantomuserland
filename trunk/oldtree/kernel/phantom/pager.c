@@ -734,9 +734,11 @@ pager_fix_incomplete_format()
     max++; // cover upper block itself. now max is one page above
 
     superblock.free_start = max;    // blocks, not covered by freelist start with this one
-    superblock.free_list = free;    // head of free list
+    superblock.free_list = 0;       // none yet - read by pager_format_empty_free_list_block
 
     pager_format_empty_free_list_block( free );
+
+    superblock.free_list = free;    // head of free list
 
     disk_page_no_t i;
     for( i = pager_superblock_ptr()->disk_start_page; i < max; i++ )
@@ -985,6 +987,7 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
     freelist.head.magic = DISK_STRUCT_MAGIC_FREEHEAD;
     freelist.head.used = 0;
     freelist.head.next = superblock.free_list;
+    freelist.head._reserved = 0;
 
 #if USE_SYNC_IO
     u.free_head = freelist;
