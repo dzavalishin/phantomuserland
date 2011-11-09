@@ -62,10 +62,11 @@
 #include <sys/socket.h>
 //#include <sys/sock_var.h>
 #include <sys/types.h>
-//#include <kernel/init.h>
+#include <unistd.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <errno.h>
+#include <arpa/inet.h>
 
 
 #define NETBIOS_UDP_PORT 137
@@ -204,6 +205,22 @@ static errno_t do_winsd_thread(char * name)
         return EIO;
     }
 
+    {
+        struct sockaddr_in si_me;
+
+        memset((char *) &si_me, 0, sizeof(si_me));
+
+        si_me.sin_family = AF_INET;
+        si_me.sin_port = htons(NETBIOS_UDP_PORT);
+        si_me.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        if( bind(sock, (const struct sockaddr *)&si_me, sizeof(si_me)) < 0 )
+        {
+            SHOW_ERROR0( 0, "UDP - can't bind");
+            return EIO;
+        }
+    }
+
     errno_t ret = do_wins( sock, encoded );
 
     close(sock);
@@ -216,10 +233,25 @@ static errno_t do_winsd_thread(char * name)
 
 
 
-int main()
+int main( int argc, char *argv[] )
 {
 #warning get my ip addr
-    wins_ipaddr = 0; // TODO get my ip?
+    if( argc != 2 )
+    {
+        printf("Usage: winsd my_ip_addr\n");
+        exit(1);
+    }
+
+
+    struct sockaddr_in si_other;
+
+    if (inet_aton(argv[1], &si_other.sin_addr)==0) {
+        fprintf(stderr, "inet_aton() failed\n");
+        exit(1);
+    }
+
+    wins_ipaddr = htonl(si_other.sin_addr.s_addr);
+
     if(0)
     {
         SHOW_ERROR0( 0 , "winsd is already running" );
@@ -228,3 +260,4 @@ int main()
 
     return do_winsd_thread("phantom");
 }
+
