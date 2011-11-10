@@ -16,9 +16,9 @@ import ru.dz.plc.util.PlcException;
 
 
 public 
-class OpReminderNode extends BiNode 
+class OpRemainderNode extends BiNode 
 {
-  public OpReminderNode(Node l, Node r) {    super(l,r);  }
+  public OpRemainderNode(Node l, Node r) {    super(l,r);  }
   public boolean is_on_int_stack() { return true; }
   public String toString()  {    return "%";  }
   protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException 

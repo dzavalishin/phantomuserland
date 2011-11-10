@@ -11,6 +11,7 @@ import ru.dz.plc.compiler.binode.NewNode;
 import ru.dz.plc.compiler.binode.OpAndNode;
 import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.OpDivideNode;
+import ru.dz.plc.compiler.binode.OpRemainderNode;
 import ru.dz.plc.compiler.binode.OpMinusNode;
 import ru.dz.plc.compiler.binode.OpMultiplyNode;
 import ru.dz.plc.compiler.binode.OpOrNode;
@@ -83,7 +84,7 @@ extends GrammarHelper {
 	private final int id_eq, id_neq, id_gt, id_lt, id_ge, id_le;
 
 	private final int id_ref_eq, id_ref_neq;
-	private final int id_plus, id_minus, id_slash, id_aster;
+	private final int id_plus, id_minus, id_slash, id_aster, id_percent;
 	private final int id_bar, id_caret, id_amper, id_tilde;
 	private final int id_2bar, id_2amper, id_exclam;
 	private final int id_lbracket, id_rbracket, id_lparen, id_rparen;
@@ -132,6 +133,7 @@ extends GrammarHelper {
 		id_minus       = l.create_keyword("-");
 		id_slash       = l.create_keyword("/");
 		id_aster       = l.create_keyword("*");
+		id_percent     = l.create_keyword("%");
 
 		id_2bar        = l.create_keyword("||");
 		id_2amper      = l.create_keyword("&&");
@@ -970,6 +972,7 @@ extends GrammarHelper {
 			int id = l.get().get_id();
 			if( id == id_slash )       out = new OpDivideNode( out, parseBit(false) ).setContext( l );
 			else if( id == id_aster )  out = new OpMultiplyNode( out, parseBit(false) ).setContext( l );
+            else if( id == id_percent )out = new OpRemainderNode( out, parseBit(false) ).setContext( l );
 			else                        { l.unget(); break; }
 		}
 		return out;
