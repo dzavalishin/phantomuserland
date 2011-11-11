@@ -67,7 +67,7 @@ static void run_class_thread(void *arg)
         }
         ref_dec_o(name);
 
-        pvm_object_t _this = pvm_create_object(cls);
+        _this = pvm_create_object(cls);
 
         if( pvm_is_null( _this ) )
         {

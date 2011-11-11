@@ -21,8 +21,7 @@
  *	print message on log file; output is intended for syslogd(8).
  */
 
-void
-    vsyslog(int pri, const char *fmt, va_list ap)
+void vsyslog(int pri, const char *fmt, va_list ap)
 {
     //int cnt;
     //char ch, *p;

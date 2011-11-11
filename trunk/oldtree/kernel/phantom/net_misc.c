@@ -22,25 +22,6 @@ int phantom_tcpip_active = 0;
 
 
 
-#define TFTP_TEST 0
-
-
-
-
-
-
-
-
-#if TFTP_TEST
-
-
-
-#endif
-
-
-
-
-
 
 
 

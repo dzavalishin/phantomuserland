@@ -242,39 +242,10 @@ void phantom_finish_all_threads(void)
 }
 
 
-/*
+
 // -----------------------------------------------------------------------
 // Put to separate src file
 // Connection object support
 // -----------------------------------------------------------------------
 
-
-errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc)
-{
-    const char *name = da->name;
-    da->owner = tc;
-
-    return ENOMEM; 
-}
-
-errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) 
-{
-    errno_t ret = 0;
-
-    if( da->kernel == 0 )
-    {
-        return ENXIO;
-    }
-
-    if( da->kernel->disconnect )
-    {
-        ret = da->kernel->disconnect(da,tc);
-    }
-
-    da->kernel = 0;
-
-    return ret;
-}
-
-*/
 
