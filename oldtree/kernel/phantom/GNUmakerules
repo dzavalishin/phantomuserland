@@ -75,7 +75,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	pci_ahci.o driver_pci_rtl8169.o intrdisp.o mem_pl181_mmc.o \
 	video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \
 	paging_mem.o user_trap.o mem_lanc111.o video_drv_icp_vga.o \
-	winsd.o sntp.o vm_load.o pci_es1370.o mem_pl011_uart.o \
+	vm_load.o pci_es1370.o mem_pl011_uart.o \
 	ff.o stray_check.o sbrk.o mem_pl050_ps2.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o test_userland.o test_pool.o events.o smp.o \
