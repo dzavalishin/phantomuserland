@@ -1,0 +1,48 @@
+Updated iso9660 CDROM driver
+
+November 1998 by Gertjan van Ratingen
+
+
+I had some CDROMS in my collection which were made with only
+Joliet extensions (these are extensions to the ISO9660 filesystem,
+just like RockRidge is; this enables e.g. longer filenames than the
+default 8 characters of ISO9660).
+
+Sadly the iso9660 driver of BeOS R3.2 didn't understand joliet extensions.
+Being a BeOS developer, and wanting that feature bad enough, I grabbed
+the iso9660.zip archive, along with the sources of mkhybrid-4.48a and
+several joliet patches for Linux (thanks to Marco Nelissen for these ;-)
+
+After some nice digging into the wonderful world of poorly documented
+software, I now have a driver which handles the Joliet extensions good
+enough for my use.
+
+
+Installation:
+- 'make' to compile the driver using the makefile;
+  (don't forget to copy/link
+   /boot/beos/system/kernel_mac to /boot/develop/lib/ppc/_KERNEL_
+   or /boot/beos/system/kernel_x86 to /boot/develop/lib/x86/_KERNEL_.LIB)
+- 'make install' to install the driver
+- insert your favorite CDROM and mount it...
+
+
+Some notes:
+- iso.h, iso.c and kernel_interface.c have changed;
+  search for "JOLIET" to find the changes.
+- the sources in this archive are for BeOS PPC R4;
+  a version for BeOS R3 PPC is available upon request.
+- if a disc has both Joliet and RockRidge extensions, the Joliet ones
+  will be used.
+
+
+Things to do:
+- decent Unicode16 -> UTF8 conversion
+  maybe use (from support/UTF8.h) convert_to_utf8(...)
+  (currently the driver assumes each 16bit Unicodechar has MSB 0, and LSB = ASCII-code)
+- Test, test, test.
+
+
+If you want to contact me:
+	home: <gertjan@iae.nl>
+	work: <gj@codim.nl>

@@ -1,0 +1,33 @@
+ARCH_FLAGS      = -msoft-float 
+#-mpoke-function-name
+
+
+BIN_PREFIX=arm-elf-
+#BIN_PREFIX=arm-none-eabi-
+
+export AS       = $(BIN_PREFIX)as
+export CC       = $(BIN_PREFIX)gcc
+export LD       = $(BIN_PREFIX)ld
+export STRIP    = $(BIN_PREFIX)strip
+export AR       = $(BIN_PREFIX)ar
+export RANLIB   = $(BIN_PREFIX)ranlib
+export OBJCOPY  = $(BIN_PREFIX)objcopy
+export NM       = $(BIN_PREFIX)nm
+
+AWK             = gawk
+YACC            = bison -y
+M4              = m4
+
+
+#USR_LD_ADDR=-Wl,-Ttext-segment,0 -Wl,-Ttext,0
+
+ifeq ($(OSTYPE),cygwin)
+  USR_LD_ADDR=-Wl,-Ttext,0
+else
+  USR_LD_ADDR=-Wl,-Ttext-segment,0
+endif
+
+
+TARGET_OBJECT_FORMAT=elf32-littlearm
+
+

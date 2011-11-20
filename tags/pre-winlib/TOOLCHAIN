@@ -1,0 +1,19 @@
+Linux:
+  gcc
+
+Windows:
+  X86 - Cygwin gcc (possibly, mingw will do, but nobody tried)
+
+  MIPS/ARM - http://opensource.zylin.com/gccbinary.html
+
+  MIPS little endian - http://code.google.com/p/uos-embedded/wiki/gcc_mipsel_ru
+
+    NB! Current MIPS kernel is big endian.
+
+Qemu
+
+  Windows - http://lassauge.free.fr/qemu/
+
+  MIPS info (russian) http://code.google.com/p/vak-opensource/wiki/qemu_mips_machines
+
+  OpenVPN for Win - http://openvpn.net/index.php/open-source/downloads.html

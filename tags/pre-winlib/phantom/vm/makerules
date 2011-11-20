@@ -1,0 +1,36 @@
+include ../../config.mk 
+
+
+#ifeq ($(OSTYPE),cygwin)
+#all: $(TARGET) pvm_test
+#else
+#all: $(TARGET)
+#endif
+
+all: $(TARGET)
+
+ifeq ($(OSTYPE),cygwin)
+ifeq ($(ARCH),ia32)
+all: $(TARGET) pvm_test
+endif
+endif
+
+
+W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
+
+
+nonstandalone.o: nonstandalone.c
+	gcc -m32 -c nonstandalone.c
+
+GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o 
+
+ifeq ($(OSTYPE),cygwin)
+OSLIB = -lgdi32 ../lib/libtuned.a ../lib/libphantom.a ../lib/libwin.a
+else
+OSLIB = ../lib/libtuned.a ../lib/libphantom_c.a ../lib/libphantom.a ../lib/libwin.a
+endif
+
+
+pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(EXCLUDED_OBJFILES)
+	gcc -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a 
+

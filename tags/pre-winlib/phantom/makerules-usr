@@ -1,0 +1,33 @@
+
+all: $(TARGET)
+
+prepare::
+
+CLEAN_FILES += $(TARGET) $(TARGET).dump $(TARGET).pe
+
+include $(BUILD_ROOT)/makerules
+
+# NB! Undef KERNEL for it is defined in main makefiles, and we make app
+PHANTOM_CFLAGS += -ffreestanding -W -Wall -DNO_STRAY_CHECK -UKERNEL
+
+LIBGCC := `$(CC) $(ARCH_FLAGS) --print-libgcc-file-name`
+
+LIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
+USR_LIBS=$(LIBDIR)/libtmalloc.a $(LIBDIR)/libphantom_c.a $(LIBDIR)/libphantom_user.a $(LIBDIR)/libphantom.a  
+
+INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/bin/$(TARGET)
+
+#libs twice to resolve cross links
+# install anyway
+$(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(USR_LIBS)
+	@echo --- Link $(TARGET)
+	@$(CC) -g $(ARCH_FLAGS) -nostdlib -static -ffreestanding $(USR_LD_ADDR) -o $@.pe $^ $(USR_LIBS) $(LIBGCC)
+	@$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
+	cp $(TARGET) $(INSTALL_DIR)
+	$(STRIP) $(INSTALL_DIR)
+
+#	objdump -x -d $@ >$@.dump
+
+
+install:: $(TARGET)
+	cp $(TARGET) $(INSTALL_DIR)

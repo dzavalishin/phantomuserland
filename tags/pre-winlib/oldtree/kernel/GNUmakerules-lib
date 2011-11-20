@@ -1,0 +1,50 @@
+ifndef _PHANTOM_makerules_lib_
+_PHANTOM_makerules_lib_ = yes
+
+# If the profiling option is set, then also build profiled versions.
+ifneq "$(filter profiling, $(PHANTOM_OPTIONS))" ""
+PTARGET = $(patsubst %.a, %_p.a, $(TARGET))
+_LIBS = $(TARGET) $(PTARGET)
+else
+_LIBS = $(TARGET)
+endif
+
+#LIBOUT=../old/kernel/lib
+LIBOUT=$(PHANTOM_SRCDIR)/../kernel/lib
+
+#all: $(_LIBS) $(addprefix $(LIBOUT)/, $(_LIBS))
+all: $(_LIBS)
+
+prepare::
+
+CLEAN_FILES += $(_LIBS)
+
+
+include $(PHANTOM_SRCDIR)/GNUmakerules
+
+
+$(TARGET): $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) )
+	$(PHANTOM_QUIET_MAKE_INFORM) "Creating library $@"
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+ifneq "$(filter profiling, $(PHANTOM_OPTIONS))" ""
+$(PTARGET): $(POBJFILES)
+	$(PHANTOM_QUIET_MAKE_INFORM) "Creating library $@"
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+endif
+
+
+#$(LIBOUT)/lib/%: %
+#	test -d $(LIBOUT)/lib || mkdir $(LIBOUT)/lib
+#	cp $< $@
+$(LIBOUT)/%: %
+	test -d $(LIBOUT) || mkdir $(LIBOUT)
+	cp $< $@
+
+
+install: $(addprefix $(INSTALL_LIBDIR)/,$(_LIBS))
+
+
+endif

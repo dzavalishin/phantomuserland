@@ -1,0 +1,24 @@
+ifndef _PHANTOM_makerules_x86_64_
+_PHANTOM_makerules_x86_64_ = yes
+
+
+PHANTOM_CFLAGS += $(ARCH_FLAGS)
+# Required compiler/assembler flags.
+PHANTOM_ASFLAGS	+= $(ARCH_FLAGS) $(PHANTOM_CPPFLAGS) -DASSEMBLER
+PHANTOM_LDFLAGS += -m elf_i386
+
+
+# Assembly language source files.
+SFILES = $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*.S))
+OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
+
+%.o: %.S 
+	$(PHANTOM_QUIET_MAKE_INFORM) "----- $<"
+	@$(CC) -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) -MD $<
+
+%.po: %.S 
+	$(PHANTOM_QUIET_MAKE_INFORM) "Assembling $<"
+	$(CC) -c -o $@ $(PHANTOM_ASFLAGS) -DGPROF -pg $(ASFLAGS) -MD $<
+
+
+endif

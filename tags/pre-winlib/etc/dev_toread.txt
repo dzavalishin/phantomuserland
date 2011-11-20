@@ -1,0 +1,7 @@
+VIA:
+ Xorg git://anongit.freedesktop.org/xorg/driv ... -video-via
+ http://phoronix.com/forums/forumdisplay.php?f=54
+ http://linux.via.com.tw 
+
+
+http://manuals.opensound.com/sources/drivers.html

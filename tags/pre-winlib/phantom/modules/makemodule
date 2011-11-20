@@ -1,0 +1,15 @@
+BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
+
+TARGET	= $(SHORT_NAME)
+
+SRCDIRS += $(BUILD_ROOT)/modules/$(SHORT_NAME)
+
+include $(BUILD_ROOT)/makerules-usr
+
+-include $(BUILD_ROOT)/modules/$(SHORT_NAME)/makerules
+
+analyse::
+	#
+
+#INSTALL_DIR=$(BOOT_PATH)/$(TARGET)
+INSTALL_DIR=$(realpath $(PHANTOM_HOME))/run/fat/boot/$(TARGET)

@@ -1,0 +1,190 @@
+ifndef _PHANTOM_makerules_
+_PHANTOM_makerules_ = yes
+
+include $(realpath $(PHANTOM_HOME))/config.mk
+
+# This is just here in case someone happens to include this before the
+# more specific GNUmakerules.  Otherwise the first (default) rule ends
+# up being the install rule. =(
+default: all
+
+# Include architecture-specific rules.
+include $(PHANTOM_SRCDIR)/GNUmakerules-$(HOST_ARCH)
+include $(PHANTOM_SRCDIR)/Makeconf-$(ARCH)
+
+
+# Where to get includes and libraries from.
+INCDIRS += $(OBJDIR) $(PHANTOM_SRCDIR) $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/include/$(ARCH)
+LIBDIRS += $(OBJDIR)/lib
+
+# Compilation flags.
+# We prefix these with PHANTOM_ rather than using the "normal" variables
+# so that you can override the normal variables on the make command line
+# in order to add options (e.g. 'make CFLAGS=-save-temps').
+# The -I- flag divides the -I line:
+#	-I flags before -I- are searched for #include "file" only, not <file>
+#	-I flags after -I- are searched for all include files.
+PHANTOM_CPPFLAGS	+= -W -Wall -MD $(DEFINES) -I. $(addprefix -iquote,$(SRCDIRS)) \
+		    $(addprefix -iquote,$(MOSTLY_SRCDIRS)) \
+		    $(addprefix -I,$(INCDIRS)) -nostdinc -DARCH_$(ARCH) -DBOARD=$(BOARD)
+PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -W -Wall $(PHANTOM_FFLAGS) -fno-stack-protector -pipe
+PHANTOM_LDFLAGS	+= $(addprefix -L,$(LIBDIRS))
+
+# Add a `-g' if the debug option is set.
+ifneq "$(filter debug, $(PHANTOM_OPTIONS))" ""
+PHANTOM_CFLAGS 	+= -O -g
+PHANTOM_ASFLAGS += -g
+else
+# -O2
+PHANTOM_CFLAGS 	+= -O0 -g
+PHANTOM_ASFLAGS += -g
+endif
+
+## If -s is passed to make, make things real quiet
+#ifeq (s,$(findstring s,$(MAKEFLAGS)))
+PHANTOM_QUIET_MAKE_INFORM=@echo
+#ARFLAGS=r  ## drop the v from the default
+#else
+#PHANTOM_QUIET_MAKE_INFORM=@true
+#endif
+
+
+# Where to find source files.
+# Using specific patterns instead of the catch-all VPATH variable
+# avoids hitting miscellaneous wrong targets in other directories
+# when configuring in the source directory.
+vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.S $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.l $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.y $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.in $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.sym $(SRCDIRS) $(MOSTLY_SRCDIRS)
+
+# First find a list of every file that might possibly be a source file,
+# so we only have to scan the source directories once.
+FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
+
+
+# C source files
+CFILES := $(filter %.c,$(FILES))
+CFILES += $(filter %.cpp,$(FILES))
+
+# This is to exclude files
+CFILES := $(filter-out $(PHANTOM_EXCLUDE),$(CFILES))
+
+# How to compile them.
+%.o: %.c
+	$(PHANTOM_QUIET_MAKE_INFORM) "---- $<"
+	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) $(CFLAGS) $<
+
+# How to build profiled object files.
+%.po: %.c
+	$(PHANTOM_QUIET_MAKE_INFORM) "Compiling $<"
+	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) -DGPROF -pg $(CFLAGS) $<
+
+
+%.o: %.cpp
+	$(PHANTOM_QUIET_MAKE_INFORM) "Compiling $<"
+	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) $(CFLAGS) $<
+
+# How to build profiled object files.
+%.po: %.cpp
+	$(PHANTOM_QUIET_MAKE_INFORM) "Compiling $<"
+	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) -DGPROF -pg $(CFLAGS) $<
+
+
+# How to generate symbol header files,
+# containing #define's for numeric constants
+# related to C structures on the target machine.
+# These are currently used in two ways:
+#
+# * When cross-compiling, MIG is compiled to be executed on the host,
+#   but it needs to know the sizes of certain types on the target machine.
+#   So a symbol header file is created with the cross-compiler,
+#   and then used in compiling MIG for the host machine.
+#
+# * Assemblers don't know about C structures,
+#   so machine-specific assembly language code
+#   can use symbol header files instead.
+%.symc: %.sym
+	$(PHANTOM_QUIET_MAKE_INFORM) "Generating $@ from $<"
+	@$(AWK) -f $(PHANTOM_SRCDIR)/gensym.awk $< >$*.symc
+
+%.symc.o: %.symc
+	$(PHANTOM_QUIET_MAKE_INFORM) "Assembling $<"
+	@$(CC) -S $(PHANTOM_CFLAGS) $(CFLAGS) -x c -o $@ $<
+
+%.h: %.symc.o
+	$(PHANTOM_QUIET_MAKE_INFORM) "Generating $@ from $<"
+	sed <$< -e 's/^[ \t]//g'  | sed -e 's/^[^*].*$$//' | \
+		sed -e 's/^[*]/#define/' -e 's/mAgIc[^-0-9]*//' >$@
+
+CLEAN_FILES += *.symc *.symc.o
+
+
+# How to install files into their final resting places.
+$(INSTALL_BINDIR)/%: %
+	$(PHANTOM_QUIET_MAKE_INFORM) "Installing $<"
+	-mkdir -p $(INSTALL_BINDIR)
+	$(INSTALL) $< $@
+$(INSTALL_LIBDIR)/%: %
+	$(PHANTOM_QUIET_MAKE_INFORM) "Installing $<"
+	-mkdir -p $(INSTALL_LIBDIR)
+	$(INSTALL) $< $@
+$(INSTALL_LIBDIR)/phantom/%: %
+	$(PHANTOM_QUIET_MAKE_INFORM) "Installing $<"
+	-mkdir -p $(INSTALL_LIBDIR)/phantom
+	$(INSTALL) $< $@
+
+# Always fully build everything before trying to install anything
+install: all
+
+
+# Get rid of a bunch of nasty built-in implicit rules,
+# to avoid bogus circular dependencies and make things go faster.
+# Use the `-r' command line option to make to get even better performance.
+.SUFFIXES:
+
+
+# The generated object files have the same prefix names as the source files,
+# except they live in the current (object) directory.
+OBJFILES += $(patsubst %.c,%.o,$(notdir $(CFILES)))
+OBJFILES := $(patsubst %.cpp,%.o,$(OBJFILES))
+
+# This is to eliminate duplicate files,
+# which might appear when files are being overridden.
+OBJFILES := $(sort $(OBJFILES))
+
+# If the profiling option is on, then build profiled versions of all
+# of the object files.
+ifneq "$(filter profiling, $(PHANTOM_OPTIONS))" ""
+POBJFILES = $(patsubst %.o, %.po, $(OBJFILES))
+endif
+
+# How to clean out the automatically built stuff in an object directory.
+clean:
+	rm -rf *.[doa] *.po *.bak tags TAGS depend $(CLEAN_FILES)
+
+distclean: clean
+
+# How to update the dependency file in an object directory.
+# This funny bit of magic (hopefully the most obscure thing here)
+# basically replaces the `md' program in ODE.
+# The `sed' line removes the dependencies being replaced,
+# the `for' line tacks the new dependencies to the end of the file,
+# and then the individual dependency files are deleted.
+#comma := ,
+#depend: $(wildcard *.d)
+#	@if test -f depend; then sed $(patsubst %.d,-e '/^%\.o/$(comma)/^#/d',$^) <depend >depend.new; fi; true
+#	@(for file in $^ /dev/null; do (cat $$file; echo '#'); done) >>depend.new
+#	@mv -f depend.new depend
+#	@if test "" != "$^"; then rm -f $^; fi; true
+
+
+# Include the dependency graph (if it exists).
+#-include depend
+-include *.d
+-include d/*.d
+-include $(ARCH)/boards/*.d
+endif

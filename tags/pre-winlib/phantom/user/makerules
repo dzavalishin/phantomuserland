@@ -1,0 +1,30 @@
+PHANTOM_CFLAGS += -ffreestanding -W -Wall -DNO_STRAY_CHECK -UKERNEL
+
+CLEAN_FILES += test/*.o crt/*.o pmod_test
+
+#W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
+
+LD_ADDR=-Ttext 0
+
+#LIBGCC := `$(CC) --print-libgcc-file-name`
+#LIBGCC := `gcc --print-libgcc-file-name`
+
+all: $(TARGET) ../lib/crt0.o 
+#pmod_test pmod_regress
+
+../lib/crt0.o: crt/crt0.o
+	cp crt/crt0.o ../lib/crt0.o
+
+MOD_LIBS=../lib/libphantom_c.a libphantom_user.a
+
+#pmod_test: crt/crt0.o test/testmain.o $(MOD_LIBS)
+#	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+#	objcopy -O elf32-i386 $@.pe $@
+#	objdump -x -d $@ >$@.dump
+
+#pmod_regress: crt/crt0.o regress/main.o $(MOD_LIBS)
+#	gcc -g -nostdlib -static -ffreestanding $(LD_ADDR) -o $@.pe $^ $(LIBGCC)
+#	objcopy -O elf32-i386 $@.pe $@
+#	objdump -x -d $@ >$@.dump
+
+

@@ -1,0 +1,180 @@
+#include "conv_header"
+
+id(opcode_nop,0x00)
+id(opcode_debug,0x01)
+id(opcode_skipz,0x02)  // not impl - and will not be...
+id(opcode_skipnz,0x03) // not impl - and will not be...
+id(opcode_djnz,0x04)
+id(opcode_jz,0x05)
+id(opcode_jmp,0x06)
+id(opcode_switch,0x07)
+id(opcode_ret,0x08)
+id(opcode_short_call_0,0x09) // 0 parameters shortcut calls
+id(opcode_short_call_1,0x0A)
+id(opcode_short_call_2,0x0B)
+id(opcode_short_call_3,0x0C)
+id(opcode_call_8bit,0x0D)
+id(opcode_call_32bit,0x0E)
+id(opcode_sys_8bit,0x0F)
+
+
+id(opcode_is_dup,0x10)
+id(opcode_is_drop,0x11)
+id(opcode_os_dup,0x12)
+id(opcode_os_drop,0x13)
+id(opcode_os_load8,0x14)	// load (push) this object's field on stack top
+id(opcode_os_save8,0x15)	// save (pop) stack top to this object's field
+id(opcode_os_load32,0x16)
+id(opcode_os_save32,0x17)
+id(opcode_new,0x18) // create new object, class must be on stack
+id(opcode_copy,0x19) // create new object, copy of stack top (just copy of data area as is)
+id(opcode_os_compose32,0x1A) // n objects from ostack combine into the object. topmost is a class
+id(opcode_os_decompose,0x1B) // decompose topmost object on stack
+
+// deprecated?
+id(opcode_os_pull32,0x1C) // copy opbject n steps down the ostack on top. pull 0 is dup;
+
+// deprecated and was not implemented
+//id(opcode_os_assign32,0x1D) // copy stack top opbject n steps down the ostack. pull 0 is nop;
+
+
+// this is for local vars
+id(opcode_os_get32,0x1E)	// get value from stack absolute-addressed slot, push on top
+id(opcode_os_set32,0x1F)	// pop stack top, set value in stack absolute-addressed slot
+
+
+id(opcode_push_catcher,0x2D) // jump address folows, top of o stack - class of objects to catch
+id(opcode_pop_catcher,0x2E) 
+id(opcode_throw,0x2F) // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
+
+
+id(opcode_iconst_0,0x20)
+id(opcode_iconst_1,0x21)
+id(opcode_iconst_8bit,0x22)
+id(opcode_iconst_32bit,0x23)
+id(opcode_sconst_bin,0x24)
+// for binconst 0x25
+
+// this is for integer local vars
+id(opcode_is_get32,0x26)	// get value from stack absolute-addressed slot, push on top
+id(opcode_is_set32,0x27)	// pop stack top, set value in stack absolute-addressed slot
+
+
+
+id(opcode_summon_thread,0x30)
+id(opcode_summon_this,0x31)
+
+id(opcode_summon_null,0x37) // null object
+
+id(opcode_summon_class_class,0x38)
+id(opcode_summon_int_class,0x39)
+id(opcode_summon_string_class,0x3A)
+id(opcode_summon_interface_class,0x3B)
+id(opcode_summon_code_class,0x3C)
+id(opcode_summon_array_class,0x3D)
+
+id(opcode_summon_by_name,0x3F) // string with class (or what?) name follows
+
+
+id(opcode_i2o,0x40)
+id(opcode_o2i,0x41)
+id(opcode_isum,0x42)
+id(opcode_imul,0x43)
+id(opcode_isubul,0x44)
+id(opcode_isublu,0x45)
+id(opcode_idivul,0x46)
+id(opcode_idivlu,0x47)
+id(opcode_ior,0x48)
+id(opcode_iand,0x49)
+id(opcode_ixor,0x4A)
+id(opcode_inot,0x4B)
+id(opcode_log_or,0x4C)
+id(opcode_log_and,0x4D)
+id(opcode_log_xor,0x4E)
+id(opcode_log_not,0x4F)
+
+
+// TODO: iload/isave
+id(opcode_is_load8,0x50)	// load (push) this object's field on stack top
+id(opcode_is_save8,0x51)	// save (pop) stack top to this object's field
+
+id(opcode_ige,0x52)	// >=
+id(opcode_ile,0x53)	// <=
+id(opcode_igt,0x54)	// >
+id(opcode_ilt,0x55)	// <
+
+
+
+// Compare two object pointers
+id(opcode_os_eq, 0x58)			// pointers are equal
+id(opcode_os_neq, 0x59)			// pointers are not equal
+id(opcode_os_isnull, 0x5A)		// pointer is null
+
+// BUG! Duplicate!
+id(opcode_os_push_null, 0x5B)	// push null on stack
+
+
+
+
+//id(opcode_lock_this, 0x60)		// semaphore in 'this' is locked, automatic unlock on return
+//id(opcode_unlock_this, 0x61)	// semaphore in 'this' is unlocked
+//id(opcode_general_lock, 0x62)	// semaphore is locked on stack top. Stack top must point to sema object
+//id(opcode_general_unlock, 0x63)	// 
+
+
+
+id(opcode_sys_0,0x80) // shortcut for syscall 0
+id(opcode_sys_1,0x81)
+id(opcode_sys_2,0x82)
+id(opcode_sys_3,0x83)
+id(opcode_sys_4,0x84)
+id(opcode_sys_5,0x85)
+id(opcode_sys_6,0x86)
+id(opcode_sys_7,0x87)
+id(opcode_sys_8,0x88)
+id(opcode_sys_9,0x89)
+id(opcode_sys_A,0x8A)
+id(opcode_sys_B,0x8B)
+id(opcode_sys_C,0x8C)
+id(opcode_sys_D,0x8D)
+id(opcode_sys_E,0x8E)
+id(opcode_sys_F,0x8F)
+
+
+id(opcode_call_00,0xA0) // shortcut for call 0
+id(opcode_call_01,0xA1)
+id(opcode_call_02,0xA2)
+id(opcode_call_03,0xA3)
+id(opcode_call_04,0xA4)
+id(opcode_call_05,0xA5)
+id(opcode_call_06,0xA6)
+id(opcode_call_07,0xA7)
+id(opcode_call_08,0xA8)
+id(opcode_call_09,0xA9)
+id(opcode_call_0A,0xAA)
+id(opcode_call_0B,0xAB)
+id(opcode_call_0C,0xAC)
+id(opcode_call_0D,0xAD)
+id(opcode_call_0E,0xAE)
+id(opcode_call_0F,0xAF)
+
+
+id(opcode_call_10,0xB0) // shortcut for call 16
+id(opcode_call_11,0xB1)
+id(opcode_call_12,0xB2)
+id(opcode_call_13,0xB3)
+id(opcode_call_14,0xB4)
+id(opcode_call_15,0xB5)
+id(opcode_call_16,0xB6)
+id(opcode_call_17,0xB7)
+id(opcode_call_18,0xB8)
+id(opcode_call_19,0xB9)
+id(opcode_call_1A,0xBA)
+id(opcode_call_1B,0xBB)
+id(opcode_call_1C,0xBC)
+id(opcode_call_1D,0xBD)
+id(opcode_call_1E,0xBE)
+id(opcode_call_1F,0xBF)
+
+
+#include "conv_footer"

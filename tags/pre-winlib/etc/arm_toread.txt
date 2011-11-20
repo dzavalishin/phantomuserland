@@ -1,0 +1,25 @@
+Boot N800
+http://talk.maemo.org/showthread.php?t=4053
+
+http://guug.org/nit/nitdroid/
+
+
+
+HW
+
+http://starterkit.ru/html/index.php?name=shop&op=view&id=49
+
+http://pandaboard.org/content/platform
+http://www.zii.com/Developer/HardwarePlatform.aspx?cid=9&mid=33#Zii%20Development%20Kit%20-%20Z5010
+
+vic
+http://infocenter.arm.com/help/topic/com.arm.doc.ddi0273a/DDI0273.pdf
+
+CP15
+http://www.heyrick.co.uk/assembler/coprocmnd.html
+
+FP
+http://www.heyrick.co.uk/assembler/fpops.html
+
+asm
+http://www.ethernut.de/en/documents/arm-inline-asm.html

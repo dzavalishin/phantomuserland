@@ -1,0 +1,12 @@
+
+PHANTOM_SRCDIR	= @top_srcdir@
+OBJDIR		= ../..
+
+prefix		= @prefix@
+exec_prefix	= @exec_prefix@
+
+include $(OBJDIR)/Makeconf
+
+##### End of configuration section #####
+
+include $(PHANTOM_SRCDIR)/examples/$(HOST_ARCH)/GNUmakerules

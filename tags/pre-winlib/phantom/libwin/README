@@ -1,0 +1,33 @@
+Graphics and windows.
+
+Structre:
+
+Device layer
+------------
+
+Operates on video device
+
+Func name prefix: vid_
+
+Available throught struct drv_video_screen_t func pointers.
+
+
+
+Screen layer
+------------
+
+Operates on screen
+
+Func name prefix: scr_
+
+
+
+
+Window layer
+------------
+
+Operates on window
+
+Func name prefix: w_
+
+

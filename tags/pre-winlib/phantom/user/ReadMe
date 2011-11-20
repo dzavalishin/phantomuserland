@@ -1,0 +1,5 @@
+This directory contains library which supports loadable
+C code execution. For now it is just kernel modules
+(extensions).
+
+To say simple, it's unix-like processes.

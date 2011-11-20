@@ -1,0 +1,5 @@
+package phantom.code;
+
+public class opcode_ids {
+
+#define id(parm_name,parm_val)  protected static final byte parm_name           = (byte)parm_val;

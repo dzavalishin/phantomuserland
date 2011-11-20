@@ -1,0 +1,63 @@
+
+sys     status  
+0       part
+1	ok
+2		debug	! key
+3	ok
+4	ok
+5	ok
+6	ok (can be done better)
+7	ok
+8		part
+9		part
+10	ok
+11	ok
+12		part	- remove all buttons here
+13	ok
+14	ok
+15		no		? desktop graphics
+16	skip
+17	debug		! onscreen button
+18		part
+20		fail	? midi
+21		no		! set sys parm
+22		fail	! set date/time
+23		part
+24		fail	? CD
+26		part	? hw services
+29	ok
+30	ok
+35		no
+36		no
+37		part	! mouse
+38		part
+39		no
+43	?
+47	ok
+48		part
+49	?
+50		no
+51	ok
+52		no
+53		no
+54	ok
+55		no
+57	?
+60		part	! ipc
+61		no
+62		no
+63	ok
+64		no		! sbrk
+65		no		! paint
+66		no		! keyb
+67		part	! win move + / resz -
+68		part
+69		no		! debug
+70		part	! fs
+71	ok
+72		no		! msg
+73		no		! blit
+
+
+
+

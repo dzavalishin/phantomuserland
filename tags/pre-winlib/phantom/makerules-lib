@@ -1,0 +1,27 @@
+
+all: $(TARGET)
+
+prepare::
+
+analyse::
+	@echo --- preprocessing for $(TARGET)_sources.E
+	$(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) $(filter-out $(NOT_ANALYSE), $(CFILES) ) > ../../$(TARGET)_sources.E
+
+#	$(CC) -E $(PHANTOM_ASFLAGS) $(ASFLAGS) *.S >SPREP
+
+
+CLEAN_FILES += $(TARGET)
+
+
+include $(BUILD_ROOT)/makerules
+
+#	$(RANLIB) $@
+
+ARFLAGS = crs
+
+$(TARGET): $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) )
+	$(AR) $(ARFLAGS)  $@ $?
+	cp $@ $(BUILD_ROOT)/lib
+	-@mkdir -p d
+	-@mv -t d *.d
+

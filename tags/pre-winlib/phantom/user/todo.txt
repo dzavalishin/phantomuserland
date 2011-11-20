@@ -1,0 +1,243 @@
+nanosleep -
+gettid    -
+getuid    -
+getuid32  -
+getpagesize -
+personality -- EINVAL for now
+
+open -
+write -
+creat -
+close -
+read -
+time -
+chdir -
+
+getpgid -
+getpgrp -
+getpid  -
+getppid -
+getegid -
+getegid32 -
+geteuid   -
+geteuid32 -
+getgid    -
+getgid32  -
+
+
+
+
+uname -
+link  -
+unlink -
+_llseek 
+chroot -
+clone 
+mkdir -
+dup   -
+dup2  -
+getcwd -
+lseek  -
+lstat   -
+lstat64 -
+reboot -
+rename  -
+rmdir   -
+
+gethostname -
+sethostname -
+
+
+connect -
+bind -
+brk -
+chmod  -
+chown  -
+chown32 -
+getresgid 
+getresgid32 
+getresuid 
+getresuid32 
+accept -
+
+
+nice -
+create_module 
+delete_module 
+init_module 
+
+
+_newselect 
+_sysctl 
+access - 
+acct 
+adjtimex 
+afs_syscall -- NO
+alarm 
+bdflush -- NO
+break -- NO
+cacheflush 
+capget -- NO?
+capset -- NO?
+execve 
+exit -
+fchdir -
+fchmod -
+fchown -
+fchown32 -
+fcntl    -
+fcntl64  -
+fdatasync -
+flock     -
+fork      -
+fstat     -
+fstat64   -
+fstatfs   -
+fsync     -
+ftime -- NO
+ftruncate  -
+ftruncate64- 
+get_kernel_syms 
+getdents 
+getdents64 
+getgroups 
+getgroups32 
+getitimer -
+getpeername -
+getpmsg -- NO
+getpriority 
+getrlimit -- NO
+getrusage 
+getsid 
+getsockname -
+getsockopt  -
+gettimeofday - 
+gtty -- NO
+idle -- NO
+ioctl -
+ioperm 
+iopl 
+ipc 
+kill -
+lchown -
+lchown32 -
+listen -
+lock -- NO
+madvise    -
+mincore    -
+mknod -
+mlock      -
+mlockall   -
+mmap       -
+modify_ldt 
+mount -
+mprotect   -
+mpx -- NO
+mremap     -
+msync      -
+munlock    -
+munlockall -
+munmap     -
+nfsservctl 
+oldfstat oldlstat oldolduname oldstat oldumount olduname -- NO
+pause 
+phys -- NO
+pipe -
+pivot_root 
+poll 
+prctl 
+pread -
+pwrite -
+query_module 
+quotactl 
+readahead 
+readdir -- NO
+readlink 
+readv -
+recv -
+recvfrom -
+recvmsg -
+rt_sigaction 
+rt_sigpending 
+rt_sigprocmask 
+rt_sigqueueinfo 
+rt_sigreturn rt_sigsuspend rt_sigtimedwait 
+sched_get_priority_max sched_get_priority_min sched_getparam 
+sched_getscheduler sched_rr_get_interval sched_setparam 
+sched_setscheduler sched_yield 
+sendfile -
+send -
+sendmsg -
+sendto -
+setdomainname 
+setfsgid 
+setfsgid32 
+setfsuid 
+setfsuid32 
+setgid    -
+setgid32  -
+setgroups -
+setgroups32 -
+setitimer -
+setpgid -
+setpriority 
+setregid    -
+setregid32  -
+setresgid   -
+setresgid32 -
+setresuid   -
+setresuid32 -
+setreuid   -
+setreuid32 -
+setrlimit setsid 
+setsockopt -
+settimeofday 
+setuid -
+setuid32 -
+setup 
+sgetmask 
+shutdown -
+sigaction 
+sigaltstack 
+signal sigpending sigprocmask sigreturn sigsuspend 
+socket -
+socketcall -
+socketpair -
+ssetmask 
+stat stat64 statfs 
+stime 
+stty - NO
+swapoff - ENOSYS
+swapon - ENOSYS
+symlink -
+sync -
+sysfs -
+sysinfo -
+syslog/klogctl - 
+times 
+truncate -
+truncate64 -
+umask -
+umount -
+uselib 
+ustat 
+utime -
+vfork -
+vhangup  -- NO
+wait4 
+waitpid 
+writev -
+
+
+
+
+
+prof -- NO
+profil -- NO
+ptrace 
+
+putpmsg - NO
+security -- NO
+select -- NO
+ulimit -- NO
+vm86 vm86old -- NO

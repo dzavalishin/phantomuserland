@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DA5A5D44-6A3D-4B2A-B425-EBE53F86600C}"
+	ProjectSection(SolutionItems) = preProject
+		ru.dz.phantom.tetris.figure.ph = ru.dz.phantom.tetris.figure.ph
+		ru.dz.phantom.tetris.imagesmanager.ph = ru.dz.phantom.tetris.imagesmanager.ph
+		ru.dz.phantom.tetris.io.ph = ru.dz.phantom.tetris.io.ph
+		ru.dz.phantom.tetris.mainmodule.ph = ru.dz.phantom.tetris.mainmodule.ph
+		ru.dz.phantom.tetris.playingfield.ph = ru.dz.phantom.tetris.playingfield.ph
+		ru.dz.phantom.tetris.utilites.ph = ru.dz.phantom.tetris.utilites.ph
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{0D6A758A-5B50-4B9E-ABEB-7381EF7B53AD}"
+	ProjectSection(SolutionItems) = preProject
+		images\box_blue.pbm = images\box_blue.pbm
+		images\box_gray.pbm = images\box_gray.pbm
+		images\box_green.pbm = images\box_green.pbm
+		images\box_orange.pbm = images\box_orange.pbm
+		images\box_red.pbm = images\box_red.pbm
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internals", "Internals", "{ED911C4D-EAC6-4EA0-A0E7-6A33A4C30E55}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\plib\src\build.cmd = ..\..\..\plib\src\build.cmd
+		..\..\..\plib\src\internal.binary.ph = ..\..\..\plib\src\internal.binary.ph
+		..\..\..\plib\src\internal.bitmap.ph = ..\..\..\plib\src\internal.bitmap.ph
+		..\..\..\plib\src\internal.class.ph = ..\..\..\plib\src\internal.class.ph
+		..\..\..\plib\src\internal.int.ph = ..\..\..\plib\src\internal.int.ph
+		..\..\..\plib\src\internal.io.tty.ph = ..\..\..\plib\src\internal.io.tty.ph
+		..\..\..\plib\src\internal.object.ph = ..\..\..\plib\src\internal.object.ph
+		..\..\..\plib\src\internal.string.ph = ..\..\..\plib\src\internal.string.ph
+		..\..\..\plib\src\internal.thread.ph = ..\..\..\plib\src\internal.thread.ph
+		..\..\..\plib\src\ru.dz.phantom.backgrounds.ph = ..\..\..\plib\src\ru.dz.phantom.backgrounds.ph
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bootloader", "Bootloader", "{B6073DED-B1EC-4B5E-9D50-8838B6A44D5B}"
+	ProjectSection(SolutionItems) = preProject
+		..\build.cmd = ..\build.cmd
+		..\compiler_regression_test.ph = ..\compiler_regression_test.ph
+		..\ru.dz.phantom.system.boot.ph = ..\ru.dz.phantom.system.boot.ph
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0D6A758A-5B50-4B9E-ABEB-7381EF7B53AD} = {DA5A5D44-6A3D-4B2A-B425-EBE53F86600C}
+		{ED911C4D-EAC6-4EA0-A0E7-6A33A4C30E55} = {DA5A5D44-6A3D-4B2A-B425-EBE53F86600C}
+		{B6073DED-B1EC-4B5E-9D50-8838B6A44D5B} = {DA5A5D44-6A3D-4B2A-B425-EBE53F86600C}
+	EndGlobalSection
+EndGlobal

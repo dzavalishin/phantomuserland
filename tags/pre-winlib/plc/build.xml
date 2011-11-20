@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     21.11.2008 23:38:09                                                        
+
+     Phantom Langugage Compiler Supplements    
+     This build file is used to support build of PLC.
+                   
+     dz                                                                
+     ====================================================================== -->
+<project name="Phantom Langugage Compiler Supplements" default="default">
+    <description>
+            This build file is used to support build of PLC.
+    </description>
+
+    <!-- ================================= 
+          target: default              
+         ================================= -->
+    <target name="default" depends="GenerateCompileDateFile" description="This build file is used to support build of PLC.">
+        
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: GenerateCompileDateFile                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="GenerateCompileDateFile">
+    	<exec executable="make"></exec>
+    	<eclipse.refreshLocal resource="/plc/src/ru/dz/plc/CompileDate.java"/>
+    </target>
+
+</project>

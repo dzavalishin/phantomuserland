@@ -1,0 +1,12 @@
+BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
+
+TARGET	= $(SHORT_NAME)
+
+SRCDIRS += $(BUILD_ROOT)/apps/$(SHORT_NAME)
+
+include $(BUILD_ROOT)/makerules-usr
+
+-include $(BUILD_ROOT)/apps/$(SHORT_NAME)/makerules
+
+analyse::
+	#

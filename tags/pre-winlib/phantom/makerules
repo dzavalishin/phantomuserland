@@ -1,0 +1,56 @@
+
+default:: all
+
+all: $(TARGET)
+
+include $(realpath $(PHANTOM_HOME))/config.mk
+include $(realpath $(PHANTOM_HOME))/phantom/Makeconf-$(ARCH)
+
+
+INCDIRS += $(realpath $(PHANTOM_HOME))/include $(realpath $(PHANTOM_HOME))/include/$(ARCH) \
+	$(PHANTOM_HOME)/include $(PHANTOM_HOME)/include/$(ARCH)
+
+
+# hint: http://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+WARN = -W -Wall -Wno-unused-parameter -Wno-sign-compare
+
+COMMON_FLAGS= $(WARN) $(ARCH_FLAGS) -O0 -g -MD $(DEFINES) $(addprefix -I,$(INCDIRS)) -nostdinc -std=gnu89 -DKERNEL -DARCH_$(ARCH) -DBOARD=$(BOARD) \
+  -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/arch-config.h \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/board-$(BOARD)-config.h 
+
+PHANTOM_CFLAGS  += $(COMMON_FLAGS) -fno-stack-protector
+PHANTOM_ASFLAGS += $(COMMON_FLAGS) -DASSEMBLER -D__ASSEMBLY__ -DKERNEL
+
+vpath %.c $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.S $(SRCDIRS) $(MOSTLY_SRCDIRS)
+vpath %.h $(SRCDIRS) $(MOSTLY_SRCDIRS)
+
+
+FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
+CFILES := $(filter %.c,$(FILES))
+SFILES := $(filter %.S,$(FILES))
+OBJFILES += $(patsubst %.c,%.o,$(notdir $(CFILES)))
+OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
+	
+
+%.o: %.c
+	@echo ---- cc $@
+	@$(CC) -c -o $@ $(PHANTOM_CFLAGS) $<
+
+%.o: %.S
+	@echo ---- cc $@
+	@$(CC) -c -o $@ $(PHANTOM_ASFLAGS) $(ASFLAGS) $<
+
+
+.SUFFIXES:
+
+
+
+clean:
+	-rm -rf *.[doa] *.bak depend $(CLEAN_FILES) d/*.d
+#	-rmdir d
+
+-include *.d
+-include d/*.d
+

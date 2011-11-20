@@ -1,0 +1,1 @@
+#define id(parm_name,parm_val)  const unsigned char parm_name = parm_val;

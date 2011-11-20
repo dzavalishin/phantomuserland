@@ -1,0 +1,132 @@
+ifndef _phantom_x86_makerules_
+_phantom_x86_makerules__ = yes
+
+TARGETS = phantom
+
+deafult: $(TARGETS)
+
+all:: $(TARGETS)
+
+prepare::
+
+
+
+SRCDIRS +=	$(PHANTOM_SRCDIR)/phantom/$(ARCH)
+INCDIRS +=	$(realpath $(PHANTOM_HOME))/include 
+
+CLEAN_FILES +=	$(TARGETS) *.gdb dev/*.o dev/*.d unix/*.o unix/*.d unix/fat32/*.o unix/fat32/*.d heap/*.o heap/*.d i386/*.o i386/*.d d/*.d $(ARCH)/boards/*.o $(ARCH)/boards/*.d
+PHANTOM_CFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -Wall -std=gnu89 -DKERNEL \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/arch-config.h \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/board-$(BOARD)-config.h 
+PHANTOM_ASFLAGS += -include $(realpath $(PHANTOM_HOME))/include/kernel/config.h -Wall -DKERNEL \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/arch-config.h \
+  -include $(realpath $(PHANTOM_HOME))/include/$(ARCH)/arch/board-$(BOARD)-config.h 
+
+CLIB   = $(PLIBDIR)/libphantom_c.a
+
+include $(PHANTOM_SRCDIR)/GNUmakerules
+
+
+
+analyse::
+		clang -emit-ast $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
+#		clang --analyse $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
+
+
+
+DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))
+
+LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
+
+PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
+
+PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a  $(PLIBDIR)/libwin.a
+
+
+LD_ADDR=--script=$(ARCH)/ld.script
+
+ifeq ($(ARCH),ia32)
+L386=i386/libi386.a
+endif
+
+ifeq ($(ARCH),arm)
+ARCH_OBJS=angel.o lowlevel_test.o
+endif
+
+ifeq ($(ARCH),mips)
+ARCH_OBJS=cache_cpu.o driver_isa_mipsnet.o lowlevel_test.o
+endif
+
+
+i386/libi386.a:
+	cd i386; make; cd ..
+
+USB_O=usb.o usb-hub.o usb-hid.o usb-msc.o usb-ehci.o usb-ohci.o usb-uhci.o
+
+entry.o: crtn.o
+
+START_O_FILE=entry.o
+
+#isa_sb16.o
+phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
+	acpi_main.o acpi_os.o video_drv_vmware.o \
+	$(USB_O) floppy.o ide_io.o vm_connect.o \
+	disk_cache.o properties.o mem_disk.o \
+	pci_ahci.o driver_pci_rtl8169.o intrdisp.o mem_pl181_mmc.o \
+	video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \
+	paging_mem.o user_trap.o mem_lanc111.o video_drv_icp_vga.o \
+	vm_load.o pci_es1370.o mem_pl011_uart.o \
+	ff.o stray_check.o sbrk.o mem_pl050_ps2.o \
+	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
+	test_amap.o test_port.o test_userland.o test_pool.o events.o smp.o \
+	heap.o heap_pool.o sys.o boot_cmd_line.o \
+	multiboot.o stack.o disk.o disk_q.o tcp.o \
+	traps.o hal_physmem.o physalloc.o sched.o \
+	arp.o icmp.o net_timer.o ethernet.o ipv4.o trfsc.o \
+	cbuf.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
+	time.o console.o timedcall.o driver_pci_rtl8139.o \
+	paging_device.o paging.o dpc.o spinlock.o hal.o fsck.o \
+	console_win.o vm_threads.o snap_sync.o ps2.o \
+	video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_cirrus.o \
+	video_drv_basic_vga.o video_drv_basic_vga_tables.o video_drv_null.o video.o \
+	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
+	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
+	device.o driver_isa_ne2000.o \
+	driver_pci_pcnet32.o driver_pci_intel82559.o \
+	driver_pci_intel_etc.o debug_console.o tlb.o \
+	elf.o unix/dir.o unix/kernel_file.o unix/fs_pipe.o unix/sys_time.o \
+	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
+	unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
+	unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fatff.o unix/fs_cd.o \
+	unix/signal.o unix/sys_sw.o vm_cn_timer.o unix/phantom.o \
+	fs_map.o resolve.o main.o keyboard.o syslog.o \
+	arch_name.o arch_init.o \
+	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
+	svn_version.o profile.o  $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
+
+	@echo "Linking $@ ---------------------------------------------"
+	@$(CC) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
+		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
+	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
+	cat < $@ > $(TFTP_PATH)/$@
+	cat < $@ > ../../../run/fat/boot/$@
+	cat < $@ > ../../../run/fat/boot/$@.$(ARCH)
+#	objdump -x $@.pe >$@.pe.sym
+#	gzip < $@ > $(TFTP_PATH)/$@.gz
+#	grep '(scl *2)' $@.pe.sym | grep -v '\.text' |sed 's/^.*(nx.*[0-9])//' | sort +0|less >$@.pe.csym
+	@echo --- kernel build finished
+	-mv -t d *.d
+	-mv -t d unix/*.d
+
+#	-mv -t d $(ARCH)/boards/*.d
+
+-include d/*.d
+-include *.d
+-include unix/*.d
+
+
+svn_version.c::
+	@echo "---- (creating svn_version.c)"
+	@echo 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
+
+endif

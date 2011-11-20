@@ -1,0 +1,60 @@
+Running Phantom on QEMU
+-----------------------
+
+> cd ../run
+> phantom_clean
+
+
+Debugging on all platforms
+--------------------------
+
+- run kernel in qemu as said above
+- cd trunk/oldtree/kernel/phantom
+- run gdb (arm-elf-gdb/mips-elf-gdb)
+- it will execute .gdbinit and connect to running kernel
+- if you need to setup gdb to your needs, create/modify .gdb-local (doesn't work on arm for some reason)
+
+
+Running Phantom on Intel 32
+---------------------------
+
+Phantom kernel on ia32 is a regular GRUB kernel. Any GRUB installation
+will do. See run/fat/boot/menu.lst for examples.
+
+Phantom will need two more things to run: own partition and initial VM classes.
+
+Partition can be created with Unix partitioning programs and must have 
+type 0xD3. See run/zero_ph_img.sh - it creates phantom.img file which
+you will need to dd to created partition to format it.
+
+Or just do:
+
+> dd conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=/dev/...
+
+Providing phantom with initial classes can be done in two ways:
+
+1. 'classes' boot module. See menu.lst above for example. classes bundle
+   is in run/fat/boot.
+
+2. /class directory on first FAT partition available. Copy plib/bin/*.pc
+   stuff to this directory.
+
+Note that in both cases classes are loaded just on the first start of 
+kernel - after snapshot all the loaded classes are frozen in snap. 
+
+
+Running Phantom on ARM/MIPS
+---------------------------
+
+ARM and MIPS ports are not finished yet. Enable corresponding ARCH in
+local-config.mk, "make clean all". See run/run_arm.cmd and run/run_mips.cmd 
+to run on QEMU. Both kernels will die sooner or later. You're welcome to
+help with these ports.
+
+
+Running Phantom on Intel 64
+---------------------------
+
+This port is not producing bootable code yet. Again, don't hesitate to 
+take part.
+

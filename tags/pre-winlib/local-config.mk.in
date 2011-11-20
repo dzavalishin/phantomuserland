@@ -1,0 +1,21 @@
+# --- Copy this to local-config.mk and tailor to your needs.
+# local-config.mk must not be checked in to svn, it's yours.
+
+# --- Where to put kernel to run it on real hardware
+HW_BOOT_DEST=/mnt/nfs/phantom-test-machine/boot
+
+# --- TODO what command to exec to start hw test
+#HW_BOOT_CMD=ssh ...
+
+# --- Architecture to build for. ia32 is default if nothing is choosen. And the only working.
+#     Arm port is in progress and amd64 supposed to be the next target.
+#ARCH=ia32
+#ARCH=arm
+#ARCH=mips
+#ARCH=amd64
+
+# --- TODO what hardware configuration we build for.
+#     Usual Intel PC
+#BOARD=pc_pci
+#     Arm Integrator/CP
+#BOARD=arm_icp

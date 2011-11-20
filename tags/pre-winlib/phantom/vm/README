@@ -1,0 +1,14 @@
+Original Code Source: Dmitry Zavalishion, dz@dz.ru
+
+Contributors:
+	Leonid Pauzner, lpauzner@yandex.ru - Refcount GC, object allocator
+
+Description:  
+	Phantom Virtual Machine
+	Bytecode interpreter and virtual machine services
+
+	NB! With the exception of Windows-based adapter sources,
+	this is Phantom KERNEL code. It is run in kernel environment,
+	and no usual Unix/Windows system calls are permitted, exept
+	for those existing in the Phantom kernel as well (printf is
+	a good example).

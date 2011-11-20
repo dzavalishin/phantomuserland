@@ -1,0 +1,2 @@
+#Q_VGA=-nographic
+#QBIN=qemu.exe
