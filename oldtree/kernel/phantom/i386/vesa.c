@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "vesa"
 #include "debug_ext.h"
-#define debug_level_flow 0
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -24,6 +24,10 @@
 
 // void DumpVgaMode(void)
 #include "../misc.h"
+
+#include <dev/edid.h>
+
+
 
 #define VBE_RET ( (tss_vm86.tss.eax & 0xFFFFu) != 0x004F ? 0 : (tss_vm86.tss.eax & 0xFFFFu) )
 
@@ -86,6 +90,55 @@ int setVesaMode( u_int16_t mode )
 }
 
 
+static errno_t getVesaEdid()
+{
+#if 1
+    SHOW_FLOW0( 2, "Looking for VESA EDID" );
+
+    RM_REGS regs;
+
+    bzero( &regs, sizeof(regs) );
+    regs.d.eax = 0x4F15;
+    regs.d.ebx = 0;
+    phantom_bios_int_10_args( &regs );
+
+    if( (regs.d.eax & 0xFF) != 0x4F )
+    {
+        SHOW_ERROR0( 2, "No VESA EDID support" );
+        return ENXIO;
+    }
+
+    if( (regs.d.ebx & 3) == 0 )
+    {
+        SHOW_ERROR( 2, "EDID ebx %d", regs.d.ebx );
+        return ENXIO;
+    }
+
+    bzero( &regs, sizeof(regs) );
+    regs.d.eax = 0x4F15;
+    regs.d.ebx = 1;
+    regs.x.es = ((int)vm86_setup.data) >> 4;
+    regs.d.edi = 0; // start of ds
+    phantom_bios_int_10_args( &regs );
+
+    if( (regs.d.eax & 0xFF) != 0x4F )
+        return ENXIO;
+
+    struct EDID edid = *(struct EDID*)vm86_setup.data;
+
+    SHOW_FLOW( 1, "VESA EDID ver %d.%d data:",
+               edid.EDIDVersionNumber,
+               edid.EDIDRevisionNumber
+             );
+
+    hexdump(vm86_setup.data, 1024, 0, 0);
+
+#endif
+    return 0;
+}
+
+
+
 #define PREFER_32BPP 1
 
 
@@ -132,6 +185,8 @@ void phantom_init_vesa(void)
     // get them out of VM86 mem
     memmove( modes_buf, farTo32(vi->video_ptr), sizeof(modes_buf) );
     u_int16_t *modes = modes_buf;
+
+    getVesaEdid();
 
 
     SHOW_FLOW0( 2, "Lookup VESA modes:");
