@@ -103,6 +103,8 @@ id(opcode_ile,0x53)	// <=
 id(opcode_igt,0x54)	// >
 id(opcode_ilt,0x55)	// <
 
+id(opcode_iremul,0x56) // %
+id(opcode_iremlu,0x57)
 
 
 // Compare two object pointers

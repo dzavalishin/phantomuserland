@@ -31,3 +31,12 @@ Operates on window
 Func name prefix: w_
 
 
+
+--------------------------------------------------------------------------
+ Bits
+--------------------------------------------------------------------------
+
+rect_	- rectangle ops
+rgba_   - pixel or pixel line ops
+bmp_    - bitmap (rgba square) ops
+ev_     - events handling

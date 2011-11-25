@@ -17,6 +17,12 @@ break main
 
 break panic
 
-break videotest
+break pvm_boot
+
+#break ev_get_unused
+#break ev_q_put_win
+#break ev_put_event
+
+#break init_main_event_q
 
 run

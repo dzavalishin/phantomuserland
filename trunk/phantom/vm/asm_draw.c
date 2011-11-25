@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -90,35 +91,7 @@ void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb
 
 
 
-void
-drv_video_window_fill( drv_video_window_t *win, rgba_t color )
-{
-    int i = (win->xsize * win->ysize) - 1;
-#if defined(ARCH_ia32) && 1
-    asm volatile(
-                 "\
-                 cld ; \
-                 movl %0,%%eax; \
-                 movl %1,%%ecx; \
-                 movl %2,%%edi; \
-                 rep stosl    ; \
-                 "
-                 : /* no outputs */
-                 : "g" (color), "g" (i), "g" (&(win->pixel))
-                 : "eax", "ecx", "edi"
-                );
-#else
-    for( ; i >= 4;  )
-    {
-        win->pixel[i--] = color;
-        win->pixel[i--] = color;
-        win->pixel[i--] = color;
-        win->pixel[i--] = color;
-    }
-    for( ; i >= 0; i-- )
-        win->pixel[i] = color;
+
+
 #endif
-}
-
-
 

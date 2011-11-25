@@ -1,3 +1,5 @@
+#if 1
+
 #include <video/color.h>
 #include <math.h>
 
@@ -47,3 +49,4 @@ struct rgba_t COLOR_LIGHTGRAY = { 0x80, 0x80, 0x80, 0xFF };
 struct rgba_t COLOR_YELLOW = { 0x00, 0xFF, 0xFF, 0xFF };
 
 
+#endif

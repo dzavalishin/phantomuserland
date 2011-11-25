@@ -1,5 +1,3 @@
-
-
 package phantom.code;
 
 public class opcode_ids {
@@ -105,6 +103,8 @@ protected static final byte opcode_ile = (byte)0x53; // <=
 protected static final byte opcode_igt = (byte)0x54; // >
 protected static final byte opcode_ilt = (byte)0x55; // <
 
+protected static final byte opcode_iremul = (byte)0x56; // %
+protected static final byte opcode_iremlu = (byte)0x57;
 
 
 // Compare two object pointers

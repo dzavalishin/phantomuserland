@@ -86,7 +86,7 @@ static int fb_read(struct phantom_device *dev, void *buf, int len)
     //SHOW_FLOW( 1, "do rd %d", len );
 
 again:
-    if( 0 == drv_video_window_get_event( w, &e, wait ) )
+    if( 0 == ev_w_get_event( w, &e, wait ) )
         return 0;
 
     if(e.type == UI_EVENT_TYPE_KEY)
@@ -259,7 +259,7 @@ static int fb_ioctl(struct phantom_device *dev, int type, void *buf, int len)
             r = *(rect_t *)buf;
 
             SHOW_FLOW( 9, "draw box %d/%d, size %d/%d", r.x, r.y, r.xsize, r.ysize );
-            drv_video_window_draw_box( w, r.x, r.y, r.xsize, r.ysize, color);
+            w_draw_box( w, r.x, r.y, r.xsize, r.ysize, color);
         }
         break;
 
@@ -271,7 +271,7 @@ static int fb_ioctl(struct phantom_device *dev, int type, void *buf, int len)
             r = *(rect_t *)buf;
 
             SHOW_FLOW( 9, "fill box %d/%d, size %d/%d", r.x, r.y, r.xsize, r.ysize );
-            drv_video_window_fill_box( w, r.x, r.y, r.xsize, r.ysize, color);
+            w_fill_box( w, r.x, r.y, r.xsize, r.ysize, color);
         }
         break;
 
@@ -286,7 +286,7 @@ static int fb_ioctl(struct phantom_device *dev, int type, void *buf, int len)
             r.ysize += r.y;
 
             SHOW_FLOW( 9, "draw line %d/%d, size %d/%d", r.x, r.y, r.xsize, r.ysize );
-            drv_video_window_draw_box( w, r.x, r.y, r.xsize, r.ysize, color);
+            w_draw_line( w, r.x, r.y, r.xsize, r.ysize, color );
         }
         break;
 
@@ -294,7 +294,7 @@ static int fb_ioctl(struct phantom_device *dev, int type, void *buf, int len)
         {
             CHECK_POINT();
             point_t p = *(point_t *)buf;
-            drv_video_window_pixel ( w, p.x, p.y, color );
+            w_draw_pixel( w, p.x, p.y, color );
         }
         break;
 

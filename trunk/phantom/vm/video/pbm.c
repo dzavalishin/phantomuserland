@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -10,7 +11,6 @@
  *
 **/
 
-//#include "drv_video_screen.h"
 #include <vm/internal_da.h>
 #include <vm/object.h>
 //#include <stdlib.h>
@@ -137,6 +137,7 @@ int drv_video_ppm_load( drv_video_bitmap_t **to, void *_from )
     return 0;
 }
 
+
 int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from )
 {
     unsigned char *from = _from;
@@ -159,3 +160,4 @@ int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from )
 }
 
 
+#endif

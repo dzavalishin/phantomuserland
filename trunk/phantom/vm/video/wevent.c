@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -29,7 +30,7 @@
 #include <threads.h>
 
 
-#include "win_local.h"
+//#include "win_local.h"
 
 
 #define KEY_EVENTS 1
@@ -41,7 +42,7 @@ static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e
     //printf("defaultMouseEventProcessor buttons %x, %d-%d\r", e->m.buttons, e->abs_x, e->abs_y);
 
     if( e->m.buttons )
-        drv_video_window_to_top(w->w_owner ? w->w_owner : w);
+        w_to_top(w->w_owner ? w->w_owner : w);
 
     return 0;
 }
@@ -176,3 +177,4 @@ int defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 }
 
 
+#endif

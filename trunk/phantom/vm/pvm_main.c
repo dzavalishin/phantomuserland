@@ -209,7 +209,7 @@ void videotest()
         fclose(f);
 
         struct drv_video_bitmap_t *bmp;
-        int result = drv_video_ppm_load( &bmp, data );
+        int result = bmp_ppm_load( &bmp, data );
 
         free(data);
 
@@ -350,6 +350,7 @@ int main(int argc, char* argv[])
 
     pvm_win_init();
     drv_video_init_windows();
+    init_main_event_q();
     init_new_windows();
 
     scr_mouse_set_cursor(drv_video_get_default_mouse_bmp());
@@ -366,7 +367,7 @@ int main(int argc, char* argv[])
 
 #if 0
     videotest();
-    getchar();
+    //getchar();
     exit(0);
 #endif
 
@@ -406,7 +407,9 @@ int main(int argc, char* argv[])
 #if 0
 //ui_loop( argc, argv, "test");
     printf("\nPhantom code finished\n" );
-    getchar();
+    //getchar();
+    //{ char c; read( 0, &c, 1 ); }
+	sleep(100);
 #else
     dbg_init();
     kernel_debugger();

@@ -30,7 +30,8 @@
 
 #include <vm/wrappers.h>
 
-//#include <video.h>
+#include <hashfunc.h>
+
 #include <video/screen.h>
 #include <video/vops.h>
 #include <video/internal.h>
@@ -182,9 +183,11 @@ int si_void_9_def_op_2(struct pvm_object o, struct data_area_4_thread *tc )
 int si_void_15_hashcode(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
-    SYSCALL_RETURN(pvm_create_int_object(
-       ((addr_t)me.data)^0x3685A634^((addr_t)&si_void_15_hashcode)
-                                                     ));
+    size_t os = me.data->_da_size;
+    void *oa = me.data->da;
+
+    //SYSCALL_RETURN(pvm_create_int_object( ((addr_t)me.data)^0x3685A634^((addr_t)&si_void_15_hashcode) ));
+    SYSCALL_RETURN(pvm_create_int_object( calc_hash( oa, oa+os) ));
 }
 
 
@@ -995,12 +998,12 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
 
     if(back_win == 0)
-    	back_win = drv_video_window_create( get_screen_xsize(), get_screen_ysize(), 0, 0, COLOR_BLACK, "Background", WFLAG_WIN_DECORATED );
+    	back_win = drv_video_window_create( scr_get_xsize(), scr_get_ysize(), 0, 0, COLOR_BLACK, "Background", WFLAG_WIN_DECORATED );
 
     back_win->flags &= ~WFLAG_WIN_DECORATED;
     back_win->flags |= WFLAG_WIN_NOFOCUS;
 
-    drv_video_window_to_bottom(back_win);
+    w_to_bottom(back_win);
 
     //drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize, (zbuf_t)zpos );
 
@@ -1011,8 +1014,8 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
                      bmp->xsize, bmp->ysize
                     );
 
-    //drv_video_winblt(back_win);
-    drv_video_window_repaint_all();
+    drv_video_winblt(back_win);
+    //scr_repaint_all();
 #endif
     // Remove it if will store bmp!
     SYS_FREE_O(_bmp);

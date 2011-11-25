@@ -41,6 +41,10 @@ static hal_spinlock_t tid_lock; //init?
 
 
 
+//#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
+
 phantom_thread_t *
 phantom_create_thread( void (*func)(void *), void *arg, int flags )
 {
@@ -83,6 +87,9 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
 
 }
 
+//#pragma GCC diagnostic pop
+
+
 int
 hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg)
 {
@@ -110,10 +117,11 @@ kernel_thread_starter(void *func)
 }
 
 
-void *
+void //*
 hal_start_kernel_thread(void (*thread)(void))
 {
-    return phantom_create_thread( kernel_thread_starter, thread, THREAD_FLAG_KERNEL );
+    //return 
+    phantom_create_thread( kernel_thread_starter, thread, THREAD_FLAG_KERNEL );
 }
 
 

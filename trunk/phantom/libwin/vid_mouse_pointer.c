@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Default (software) mouse pointer drawing code.
+ * Default (software) mouse pointer drawing code. Used by drivers which have no mouse acceleration.
  *
 **/
 
@@ -30,7 +30,7 @@ static void get_mouse()
 {
     if(!mouse_is_on_screen) return;
     interlock++;
-    drv_video_bitblt_ms(screencopy->pixel, last_mouse_x, last_mouse_y, mpointer->xsize, mpointer->ysize);
+    scr_bitblt_ms(screencopy->pixel, last_mouse_x, last_mouse_y, mpointer->xsize, mpointer->ysize);
     mouse_is_on_screen = 0;
     interlock--;
 }
@@ -45,8 +45,8 @@ static void put_mouse()
     int my = video_drv->mouse_y - ms_hot_shift_y;
 
     // TODO hardcoded mouse hot point
-    drv_video_readblt_ms(screencopy->pixel, mx, my, mpointer->xsize, mpointer->ysize);
-    drv_video_bitblt_ms(mpointer->pixel, mx, my, mpointer->xsize, mpointer->ysize);
+    scr_readblt_ms(screencopy->pixel, mx, my, mpointer->xsize, mpointer->ysize);
+    scr_bitblt_ms(mpointer->pixel, mx, my, mpointer->xsize, mpointer->ysize);
 
     last_mouse_x = mx;
     last_mouse_y = my;

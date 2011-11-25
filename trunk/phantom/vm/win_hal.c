@@ -79,11 +79,17 @@ tid_t hal_start_thread( void (*thread)(void *arg), void *arg, int flags )
 
     unsigned long tid;
     if( 0 == CreateThread( 0, 0, (void *)thread, arg, 0, &tid ) )
-        panic("can't start window thread");
+        panic("can't start thread");
 
     return tid;
 }
 
+void   hal_start_kernel_thread(void (*thread)(void))
+{
+    unsigned long tid;
+    if( 0 == CreateThread( 0, 0, (void *)thread, 0, 0, &tid ) )
+        panic("can't start kernel thread");
+}
 
 void hal_set_current_thread_name( const char *name)
 {
@@ -355,12 +361,13 @@ struct wtty *get_thread_ctty( struct phantom_thread *t )
     return 0;
 }
 
+/*
 errno_t wtty_putc_nowait( struct wtty *wt, int ch )
 {
     putchar(ch);
     return 0;
 }
-
+*/
 
 #if 0
 int dbg_add_command(void (*func)(int, char **), const char *name, const char *desc)
@@ -476,8 +483,10 @@ int hal_cond_init( hal_cond_t *c, const char *name )
 errno_t hal_cond_wait( hal_cond_t *c, hal_mutex_t *m )
 {
     assert(c->impl);
+hal_mutex_unlock(m);
     hal_sleep_msec(100);
     //SleepConditionVariableCS( &(c->impl.cv), &(m->impl->cs), 0 );
+hal_mutex_lock(m);
     return 0;
 }
 
@@ -553,3 +562,21 @@ void vm_map_page_mark_unused( addr_t page_start)
 
 
 
+
+
+time_t fast_time(void)
+{
+    return time(0);
+}
+
+
+#warning stub
+
+void phantom_dev_keyboard_get_key( struct _key_event *out )
+{
+    while(1) hal_sleep_msec(10000);
+}
+
+void 	phantom_set_console_getchar( int (*_getchar_impl)(void) )
+{
+}
