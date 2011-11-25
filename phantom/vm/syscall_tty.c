@@ -100,7 +100,7 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
     struct rgba_t fg = da->fg;
     struct rgba_t bg = da->bg;
 
-    drv_video_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
+    w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
     drv_video_window_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
@@ -169,7 +169,7 @@ static int clear_20(struct pvm_object me , struct data_area_4_thread *tc )
 
     da->x = da->y = 0;
 
-    drv_video_window_fill( &(da->w), da->bg );
+    w_fill( &(da->w), da->bg );
     drv_video_window_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
@@ -222,7 +222,7 @@ static int tty_setWinPos_24(struct pvm_object me, struct data_area_4_thread *tc 
     int y = POP_INT();
     int x = POP_INT();
 
-    drv_video_window_move( &(da->w), x, y );
+    w_move( &(da->w), x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -248,7 +248,7 @@ static int tty_setWinTitle_25(struct pvm_object me , struct data_area_4_thread *
 
     SYS_FREE_O(_text);
 
-    drv_video_window_set_title( &(da->w), da->w.title );
+    w_set_title( &(da->w), da->w.title );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -323,9 +323,10 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
     tty->fg = COLOR_BLACK;
     tty->bg = COLOR_WHITE;
 
-    drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE, WFLAG_WIN_DECORATED );
     strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
-    tty->w.title = tty->title;
+    //tty->w.title = tty->title;
+
+    drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, COLOR_WHITE, WFLAG_WIN_DECORATED, tty->title );
 
     {
     pvm_object_t o;

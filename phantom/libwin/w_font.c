@@ -4,13 +4,12 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
+ * Basic bitmap font output.
  *
  *
 **/
 
-//#include <drv_video_screen.h>
-//#include <video/window.h>
+#include <video/window.h>
 //#include <video/internal.h>
 #include <video/font.h>
 #include <kernel/libkern.h>
@@ -35,8 +34,8 @@ __inline__ const char *drv_video_font_get_char( const drv_video_font_t *font, ch
 
 
 // Returns -1 if can't draw, 0 if done
-__inline__ int drv_video_font_draw_char(
-                                         drv_video_window_t *win,
+__inline__ int w_font_draw_char(
+                                         window_handle_t win,
                                          const drv_video_font_t *font,
                                          char c, rgba_t color, rgba_t bg,
                                          int x, int y )
@@ -116,8 +115,8 @@ __inline__ int drv_video_font_draw_char(
 
 
 
-void drv_video_font_draw_string(
-                                           drv_video_window_t *win,
+void w_font_draw_string(
+                                           window_handle_t win,
                                            const drv_video_font_t *font,
                                            const char *s, const rgba_t color, const rgba_t bg,
                                            int x, int y )
@@ -128,7 +127,7 @@ void drv_video_font_draw_string(
 
     while(nc--)
     {
-        drv_video_font_draw_char( win, font, *s++, color, bg, x, y );
+        w_font_draw_char( win, font, *s++, color, bg, x, y );
         x += font->xsize;
     }
 }
@@ -137,11 +136,9 @@ void drv_video_font_draw_string(
 
 
 
-void 	drv_video_font_scroll_line(
-                                           drv_video_window_t *win,
-                                           const drv_video_font_t *font, rgba_t color )
+void w_font_scroll_line( window_handle_t win, const drv_video_font_t *font, rgba_t color )
 {
-    drv_video_font_scroll_pixels( win, font->ysize, color );
+    w_scroll_up( win, font->ysize, color );
 }
 
 
@@ -157,8 +154,8 @@ static color_t cmap[] =
     _C_COLOR_LIGHTGRAY //_C_COLOR_WHITE
 };
 
-__inline__ void drv_video_font_tty_string(
-                                          drv_video_window_t *win,
+void w_font_tty_string(
+                                          window_handle_t win,
                                           const drv_video_font_t *font,
                                           const char *s,
                                           const rgba_t _color,
@@ -175,7 +172,7 @@ __inline__ void drv_video_font_tty_string(
         {
             if( *y <= font->ysize )
             {
-                drv_video_font_scroll_line( win, font, back );
+                w_font_scroll_line( win, font, back );
             }
             else
                 *y -= font->ysize; // Step down a line
@@ -231,16 +228,16 @@ __inline__ void drv_video_font_tty_string(
 
 
         }
-        else if( drv_video_font_draw_char( win, font, *s, color, back, *x, *y ) )
+        else if( w_font_draw_char( win, font, *s, color, back, *x, *y ) )
         {
             if( *y <= font->ysize )
             {
-                drv_video_font_scroll_line( win, font, back );
+                w_font_scroll_line( win, font, back );
             }
             else
                 *y -= font->ysize; // Step down a line
             *x = 0;
-            drv_video_font_draw_char( win, font, *s, color, back, *x, *y );
+            w_font_draw_char( win, font, *s, color, back, *x, *y );
         }
         s++;
         *x += font->xsize;

@@ -44,7 +44,7 @@ static void paint_button(window_handle_t win, button_t *cb )
 {
     bool pressed = !! (cb->pressed_bits & 1);
 
-    drv_video_window_fill_rect( win, cb->color, cb->r );
+    w_fill_rect( win, cb->color, cb->r );
 
     if( cb->bmp && ! (cb->flags & BUTTON_FLAG_NOPAINT) )
     {
@@ -61,7 +61,7 @@ static void paint_button(window_handle_t win, button_t *cb )
     if(! (cb->flags & BUTTON_FLAG_NOBORDER))
     {
         if( cb->mouse_in_bits & 1 )
-            drv_video_window_draw_rect( win, COLOR_WHITE, cb->r );
+            w_draw_rect( win, COLOR_WHITE, cb->r );
     }
 
     if(cb->text)
@@ -69,12 +69,12 @@ static void paint_button(window_handle_t win, button_t *cb )
         int t_height = 16;
         int t_ypos = (cb->r.ysize - t_height) / 2;
 
-        drv_video_font_draw_string( win, &drv_video_8x16san_font, cb->text, cb->text_color,
+        w_font_draw_string( win, &drv_video_8x16san_font, cb->text, cb->text_color,
                                            COLOR_TRANSPARENT, cb->r.x+t_ypos+2, cb->r.y+t_ypos ); // +2?
     }
 
     //drv_video_window_update( win );
-    event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, win );
+    ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, win );
 }
 
 static void paint_changed_button(window_handle_t win, button_t *cb)
@@ -183,7 +183,7 @@ static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, voi
             e.extra = cb->id;
             e.focus = env->w;
 
-            event_q_put_any( &e );
+            ev_q_put_any( &e );
         }
     }
 

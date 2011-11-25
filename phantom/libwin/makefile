@@ -2,7 +2,7 @@ BUILD_ROOT = $(realpath $(PHANTOM_HOME))/phantom
 
 TARGET	= libwin.a
 
-SRCDIRS += $(BUILD_ROOT)/libwin $(BUILD_ROOT)/libwin/$(ARCH) $(BUILD_ROOT)/libwin/resources
+SRCDIRS += $(BUILD_ROOT)/libwin $(BUILD_ROOT)/libwin/$(ARCH) $(BUILD_ROOT)/libwin/resources $(BUILD_ROOT)/libwin/fonts $(BUILD_ROOT)/libwin/mice
 
 
 #ifeq ($(ARCH),ia32)

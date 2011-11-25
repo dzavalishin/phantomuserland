@@ -72,7 +72,7 @@ static int win_clear_20(struct pvm_object me , struct data_area_4_thread *tc )
 
     da->x = da->y = 0;
 
-    drv_video_window_fill( &(da->w), da->bg );
+    w_fill( &(da->w), da->bg );
     drv_video_window_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
@@ -98,7 +98,7 @@ static int win_fill_21(struct pvm_object me , struct data_area_4_thread *tc )
 
     INT32_TO_RGBA(c, color);
 
-    drv_video_window_fill( &(da->w), c );
+    w_fill( &(da->w), c );
 
     //SYSCALL_THROW_STRING( "not implemented" );
     SYSCALL_RETURN_NOTHING;
@@ -191,7 +191,7 @@ static int win_putString_24(struct pvm_object me , struct data_area_4_thread *tc
     struct rgba_t bg = da->bg;
 
     // TODO make a version of drv_video_font_tty_string that accepts non-zero terminated strings with len
-    drv_video_font_tty_string( &(da->w), tty_font, buf, fg, bg, &x, &y );
+    w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &x, &y );
     drv_video_window_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
@@ -245,7 +245,7 @@ static int win_setSize_26(struct pvm_object me, struct data_area_4_thread *tc )
     if(x*y > PVM_MAX_WIN_PIXELS)
         SYSCALL_THROW_STRING( "new win size > PVM_MAX_WIN_PIXELS" );
 
-    drv_video_window_resize( &(da->w), x, y );
+    w_resize( &(da->w), x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -261,7 +261,7 @@ static int win_setPos_27(struct pvm_object me, struct data_area_4_thread *tc )
     int y = POP_INT();
     int x = POP_INT();
 
-    drv_video_window_move( &(da->w), x, y );
+    w_move( &(da->w), x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -279,8 +279,7 @@ static int win_drawLine_28(struct pvm_object me, struct data_area_4_thread *tc )
     int y = POP_INT();
     int x = POP_INT();
 
-    drv_video_window_draw_line( &(da->w),
-                                 x, y, x+xs, y+ys, da->fg );
+    w_draw_line( &(da->w), x, y, x+xs, y+ys, da->fg );
 
 
     SYSCALL_RETURN_NOTHING;
@@ -301,7 +300,7 @@ static int win_drawBox_29(struct pvm_object me, struct data_area_4_thread *tc )
     int y = POP_INT();
     int x = POP_INT();
 
-    drv_video_window_draw_box( &(da->w), x, y, xs, ys, da->fg );
+    w_draw_box( &(da->w), x, y, xs, ys, da->fg );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -321,7 +320,7 @@ static int win_fillBox_30(struct pvm_object me, struct data_area_4_thread *tc )
     int y = POP_INT();
     int x = POP_INT();
 
-    drv_video_window_fill_box( &(da->w), x, y, xs, ys, da->fg );
+    w_fill_box( &(da->w), x, y, xs, ys, da->fg );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -342,7 +341,7 @@ static int win_fillEllipse_31(struct pvm_object me, struct data_area_4_thread *t
     int y = POP_INT();
     int x = POP_INT();
 
-    drv_video_window_fill_ellipse( &(da->w), x, y, xs, ys, da->fg );
+    w_fill_ellipse( &(da->w), x, y, xs, ys, da->fg );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -396,7 +395,7 @@ static int win_setTitle_33(struct pvm_object me , struct data_area_4_thread *tc 
 
     SYS_FREE_O(_text);
 
-    drv_video_window_set_title( &(da->w), da->w.title );
+    w_set_title( &(da->w), da->w.title );
 
     SYSCALL_RETURN_NOTHING;
 }

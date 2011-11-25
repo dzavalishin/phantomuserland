@@ -1,3 +1,5 @@
+#if 0
+
 /**
  *
  * Phantom OS
@@ -463,3 +465,4 @@ drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bit
 
 
 
+#endif

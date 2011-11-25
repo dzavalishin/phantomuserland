@@ -1,3 +1,5 @@
+
+
 #define opcode_nop   0x00 
 #define opcode_debug   0x01 
 #define opcode_skipz   0x02  // not impl - and will not be...
@@ -36,7 +38,7 @@
 //id(opcode_os_assign32,0x1D) // copy stack top opbject n steps down the ostack. pull 0 is nop 
 
 
-// TODO: this is for local vars
+// this is for local vars
 #define opcode_os_get32   0x1E  // get value from stack absolute-addressed slot, push on top
 #define opcode_os_set32   0x1F  // pop stack top, set value in stack absolute-addressed slot
 
@@ -51,9 +53,12 @@
 #define opcode_iconst_8bit   0x22 
 #define opcode_iconst_32bit   0x23 
 #define opcode_sconst_bin   0x24 
+// for binconst 0x25
 
-#define opcode_is_get32 0x26	// get value from stack absolute-addressed slot, push on top
-#define opcode_is_set32 0x27	// pop stack top, set value in stack absolute-addressed slot
+// this is for integer local vars
+#define opcode_is_get32   0x26  // get value from stack absolute-addressed slot, push on top
+#define opcode_is_set32   0x27  // pop stack top, set value in stack absolute-addressed slot
+
 
 
 #define opcode_summon_thread   0x30 
@@ -89,6 +94,7 @@
 #define opcode_log_not   0x4F 
 
 
+// TODO: iload/isave
 #define opcode_is_load8   0x50  // load (push) this object's field on stack top
 #define opcode_is_save8   0x51  // save (pop) stack top to this object's field
 
@@ -97,6 +103,8 @@
 #define opcode_igt   0x54  // >
 #define opcode_ilt   0x55  // <
 
+#define opcode_iremul   0x56  // %
+#define opcode_iremlu   0x57 
 
 
 // Compare two object pointers

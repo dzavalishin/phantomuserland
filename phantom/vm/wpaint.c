@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -59,7 +60,7 @@ void w_request_async_repaint( rect_t *r )
 }
 
 #if SCREEN_UPDATE_THREAD
-void drv_video_window_repaint_all(void)
+void scr_repaint_all(void)
 {
     CHECK_START();
     paint_all++;
@@ -84,8 +85,8 @@ static void do_paint_area()
     {
         paint_all = 0;
         todo.x = todo.y = 0;
-        todo.xsize = get_screen_xsize();
-        todo.ysize = get_screen_ysize();
+        todo.xsize = scr_get_xsize();
+        todo.ysize = scr_get_ysize();
     }
 
     repaint_all_for_square(&todo);
@@ -138,3 +139,4 @@ static void start_paint_thread(void)
 
 
 
+#endif

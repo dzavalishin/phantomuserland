@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Color conversion
+ *
+ *
+**/
+
 #include <video/color.h>
 #include <math.h>
 

@@ -11,6 +11,10 @@
 #include <kernel/info/idisk.h>
 #include <phantom_libc.h>
 
+//#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
+
 void dump_i_disk( i_disk_t *info )
 {
     u_int64_t dsize = info->sectorSize * info->nSectors;
@@ -34,6 +38,7 @@ void dump_i_disk( i_disk_t *info )
     printf(" * Serial '%s'\n", info->serial );
 
 }
+//#pragma GCC diagnostic pop
 
 static void intcpy( char *to, const char *from, int nwords )
 {

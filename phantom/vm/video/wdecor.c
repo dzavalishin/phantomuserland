@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -24,105 +25,31 @@
 
 
 
-void replicate2window_ver( drv_video_window_t *dest, int destX, int destY,
-                           int nSteps, const struct rgba_t *src, int srcSize
-                         )
-{
-    int srcShift = 0;
-    if( destX < 0 )
-    {
-        srcShift = -destX;
-        destX = 0;
-    }
-
-    if( destX+srcSize >= dest->xsize )
-        srcSize = dest->xsize-destX;
-
-    if( srcSize <= 0 ) return;
-
-    if( destY < 0 )
-    {
-        nSteps += destY;
-        destY = 0;
-    }
-
-    if( destY+nSteps >= dest->ysize )
-        nSteps = dest->ysize - destY;
-
-    src += srcShift;
-
-    int vcnt;
-    for(vcnt = destY; vcnt < destY+nSteps; vcnt++ )
-    {
-        struct rgba_t *dstPtr = dest->pixel + vcnt*dest->xsize + destX;
-        rgba2rgba_move( dstPtr, src, srcSize );
-    }
-}
-
-
-// nSteps is x size, srcSize is y size
-void replicate2window_hor( drv_video_window_t *dest, int destX, int destY,
-                           int nSteps, const struct rgba_t *src, int srcSize
-                         )
-{
-    int srcShift = 0;
-    if( destY < 0 )
-    {
-        srcShift = -destY;
-        destY = 0;
-    }
-
-    if( destY+srcSize >= dest->ysize )
-        srcSize = dest->ysize - destY;
-
-    if( srcSize <= 0 ) return;
-
-    if( destX < 0 )
-    {
-        nSteps += destX;
-        destX = 0;
-    }
-
-    if( destX+nSteps >= dest->xsize )
-        nSteps = dest->xsize-destX;
-
-    src += srcShift;
-
-    int vcnt;
-    for(vcnt = destY; vcnt < destY+srcSize; vcnt++ )
-    {
-        struct rgba_t *dstPtr = dest->pixel + vcnt*dest->xsize + destX;
-        rgba2rgba_replicate( dstPtr, src, nSteps );
-        src++;
-    }
-}
-
-
 
 void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, int srcSize )
 {
     int stepOff = srcSize;
-    replicate2window_ver( dest, 0, stepOff, dest->ysize-(2*stepOff), src, srcSize );
-    replicate2window_ver( dest, dest->xsize-srcSize, stepOff, dest->ysize-(2*stepOff), src, srcSize );
+    w_replicate_ver( dest, 0, stepOff, dest->ysize-(2*stepOff), src, srcSize );
+    w_replicate_ver( dest, dest->xsize-srcSize, stepOff, dest->ysize-(2*stepOff), src, srcSize );
 
-    replicate2window_hor( dest, stepOff, 0, dest->xsize-(2*stepOff), src, srcSize );
-    replicate2window_hor( dest, stepOff, dest->ysize-srcSize, dest->xsize-(2*stepOff), src, srcSize );
+    w_replicate_hor( dest, stepOff, 0, dest->xsize-(2*stepOff), src, srcSize );
+    w_replicate_hor( dest, stepOff, dest->ysize-srcSize, dest->xsize-(2*stepOff), src, srcSize );
 
     rect_t r;
     r.xsize = r.ysize = stepOff;
 
     r.x = r.y = 0;
-    drv_video_window_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, COLOR_DARKGRAY, r );
 
     r.x = 0; r.y = dest->ysize-(stepOff);
-    drv_video_window_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, COLOR_DARKGRAY, r );
 
     r.y = 0; r.x = dest->xsize-(stepOff);
-    drv_video_window_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, COLOR_DARKGRAY, r );
 
     r.x = dest->xsize-(stepOff);
     r.y = dest->ysize-(stepOff);
-    drv_video_window_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, COLOR_DARKGRAY, r );
 }
 
 
@@ -141,7 +68,7 @@ static const int bordr_size = sizeof(brdr)/sizeof(rgba_t);
 static const int title_size = 18;
 
 
-static int titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e );
+//static int titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e );
 
 
 void win_make_decorations(drv_video_window_t *w)
@@ -178,7 +105,7 @@ void win_make_decorations(drv_video_window_t *w)
 
     w->w_decor->bg = w->bg;
 
-    drv_video_window_fill( w->w_decor, w->w_decor->bg );
+    w_fill( w->w_decor, w->w_decor->bg );
 
 
 #if !VIDEO_T_IN_D
@@ -195,7 +122,7 @@ void win_make_decorations(drv_video_window_t *w)
         drv_video_window_enter_allwq(w3);
 
 
-        w3->inKernelEventProcess = titleWindowEventProcessor;
+        w3->inKernelEventProcess = w_titleWindowEventProcessor;
 
         w3->w_owner = w;
         w->w_title = w3;
@@ -218,16 +145,16 @@ void win_make_decorations(drv_video_window_t *w)
 
     w->w_title->bg = focused ? title_back_color_focus : title_back_color_nofocus;
 
-    //drv_video_window_fill( w->w_title, w->w_title->bg );
+    //w_fill( w->w_title, w->w_title->bg );
 
     //drv_video_bitmap_t *tbmp = focused ?  &title_brown_bmp : &title_green_bmp;
     drv_video_bitmap_t *tbmp = focused ?  &title_violet_bmp : &title_green_bmp;
-    replicate2window_hor( w->w_title, 3, 3, w->w_title->xsize, tbmp->pixel, tbmp->ysize );
+    w_replicate_hor( w->w_title, 3, 3, w->w_title->xsize, tbmp->pixel, tbmp->ysize );
 
     window_basic_border( w->w_title, brdr, bordr_size );
 
     // BUG! It must be +3, not -1 on Y coord!
-    drv_video_font_draw_string( w->w_title, &drv_video_8x16cou_font,
+    w_font_draw_string( w->w_title, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
                                 bordr_size+3, bordr_size-1 );
 
@@ -251,12 +178,12 @@ void win_make_decorations(drv_video_window_t *w)
     r.xsize = w->xsize;
     r.ysize = title_size;
 
-    drv_video_window_fill_rect( w->w_decor, bg, r );
+    w_fill_rect( w->w_decor, bg, r );
 
 
     int bmp_y = w->ysize + bordr_size*2 + 2;
 
-    drv_video_font_draw_string( w->w_decor, &drv_video_8x16cou_font,
+    w_font_draw_string( w->w_decor, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
                                 bordr_size+3, bmp_y-4 );
 
@@ -265,7 +192,7 @@ void win_make_decorations(drv_video_window_t *w)
 
 
     // nSteps is x size, srcSize is y size
-    replicate2window_hor( w->w_decor, 0, w->ysize + bordr_size,
+    w_replicate_hor( w->w_decor, 0, w->ysize + bordr_size,
                            w->w_decor->xsize, brdr, bordr_size );
 
 #endif
@@ -336,134 +263,5 @@ void win_move_decorations(drv_video_window_t *w)
 
 
 
-static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
-{
-    assert(w->w_owner);
-    drv_video_window_t *mainw = w->w_owner;
 
-    //printf("defaultWinEventProcessor e=%p, e.w=%p, w=%p", e, e->focus, w);
-
-    switch(e->w.info)
-    {
-    case UI_EVENT_WIN_GOT_FOCUS:
-        //w->w_owner->state |= WSTATE_WIN_FOCUSED;
-        w->state |= WSTATE_WIN_FOCUSED;
-        goto redecorate;
-
-    case UI_EVENT_WIN_LOST_FOCUS:
-        //w->w_owner->state &= ~WSTATE_WIN_FOCUSED;
-        w->state &= ~WSTATE_WIN_FOCUSED;
-        goto redecorate;
-
-    case UI_EVENT_WIN_DESTROYED:
-        break;
-
-    case UI_EVENT_WIN_REPAINT:
-        _drv_video_winblt( w );
-        break;
-
-    case UI_EVENT_WIN_REDECORATE:
-        break;
-
-    redecorate:
-        if(w->w_owner->flags & WFLAG_WIN_DECORATED)
-        {
-            w_lock();
-            win_make_decorations(w->w_owner);
-            _drv_video_winblt_locked( w->w_owner );
-            w_unlock();
-        }
-        break;
-
-    case UI_EVENT_WIN_BUTTON: printf("title button %x\n", e->extra );
-    {
-        switch(e->extra)
-        {
-        case WBUTTON_SYS_ROLLUP:
-            if( mainw->state & WSTATE_WIN_ROLLEDUP )
-            {
-                printf("roll down\n" );
-                mainw->state &= ~WSTATE_WIN_ROLLEDUP;
-                goto redecorate;
-            }
-            else
-            {
-                printf("roll up\n" );
-                mainw->state |= WSTATE_WIN_ROLLEDUP;
-                if( mainw->w_decor )
-                    request_repaint_all_for_win( mainw->w_decor );
-                else
-                    request_repaint_all_for_win( mainw );
-            }
-            break;
-        }
-    }
-    break;
-
-    default:
-        return 0;
-
-    }
-
-    return 1;
-}
-
-static int titleMouseEventProcessor( drv_video_window_t *w, struct ui_event *e )
-{
-    //printf("titleMouseEventProcessor buttons %x, %d-%d", e->m.buttons, e->abs_x, e->abs_y);
-
-    if( e->m.buttons == 0 )
-    {
-        w->state &= ~WSTATE_WIN_DRAGGED;
-        return 0;
-    }
-    else
-    {
-        // Not yet dragging?
-        if(! (w->state & WSTATE_WIN_DRAGGED) )
-        {
-            drv_video_window_to_top(w->w_owner);
-
-            // Set flag and remember position
-            w->state |= WSTATE_WIN_DRAGGED;
-            w->dx = w->w_owner->x - e->abs_x;
-            w->dy = w->w_owner->y - e->abs_y;
-            return 1;
-        }
-
-    }
-
-    if(w->state & WSTATE_WIN_DRAGGED)
-    {
-        int nx = e->abs_x + w->dx;
-        int ny = e->abs_y + w->dy;
-
-        drv_video_window_move( w->w_owner, nx, ny );
-        return 1;
-    }
-
-    return 0;
-}
-
-
-static int titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
-{
-    //printf("!! titleWindowEventProcessor e=%p, e.w=%p, w=%p\r", e, e->focus, w);
-
-    switch(e->type)
-    {
-    case UI_EVENT_TYPE_MOUSE: 	return titleMouseEventProcessor(w, e);
-#if KEY_EVENTS
-    //case UI_EVENT_TYPE_KEY:     return defaultKeyEventProcessor(w, e);
 #endif
-    case UI_EVENT_TYPE_WIN:     return titleWinEventProcessor(w, e);
-
-    default:
-        break;
-    }
-
-    return defaultWindowEventProcessor(w,e);
-}
-
-
-

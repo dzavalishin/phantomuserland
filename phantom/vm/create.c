@@ -770,13 +770,13 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
 
     strlcpy( da->title, "Window", sizeof(da->title) );
 
-    da->w.title = da->title;
+    //da->w.title = da->title;
     da->fg = COLOR_BLACK;
     da->bg = COLOR_WHITE;
     da->x = 0;
     da->y = 0;
 
-    drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED );
+    drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
 
     {
     pvm_object_t o;
@@ -837,7 +837,7 @@ void pvm_restart_window( pvm_object_t o )
     drv_video_window_enter_allwq( &da->w );
 
     //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, &da->w );
-    event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
+    ev_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
 }
 
 

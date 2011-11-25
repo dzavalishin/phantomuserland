@@ -38,32 +38,32 @@ static u_int32_t zbwidth = 0;
 
 static rect_t zbuf_rect;
 
-void video_zbuf_init()
+void scr_zbuf_init()
 {
     if(zbuf) free(zbuf);
 
-    zbsize = get_screen_xsize() * get_screen_ysize() * sizeof(zbuf_t);
-    zbwidth = get_screen_xsize();
+    zbsize = scr_get_xsize() * scr_get_ysize() * sizeof(zbuf_t);
+    zbwidth = scr_get_xsize();
 
     zbuf = malloc( zbsize );
 
     zbuf_rect.x = 0;
     zbuf_rect.y = 0;
-    zbuf_rect.xsize = get_screen_xsize();
-    zbuf_rect.ysize = get_screen_ysize();
+    zbuf_rect.xsize = scr_get_xsize();
+    zbuf_rect.ysize = scr_get_ysize();
 
-    video_zbuf_reset();
+    scr_zbuf_reset();
 }
 
 
 
-void video_zbuf_reset()
+void scr_zbuf_reset()
 {
     memset( zbuf, 0, zbsize );
 }
 
 
-void video_zbuf_reset_z(int z)
+void scr_zbuf_reset_z(int z)
 {
     //SHOW_FLOW( 1, "%d", z );
     memset( zbuf, z, zbsize );
@@ -76,11 +76,11 @@ void video_zbuf_reset_z(int z)
  *
 **/
 
-void video_zbuf_reset_win( window_handle_t w )
+void scr_zbuf_reset_win( window_handle_t w )
 {
     // TODO XXX HACK alert - hardcoded decorations size
     const int bw = 3;
-    video_zbuf_reset_square( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21 );
+    scr_zbuf_reset_square( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21 );
 }
 
 
@@ -90,11 +90,11 @@ void video_zbuf_reset_win( window_handle_t w )
  *
 **/
 
-void video_zbuf_set_win_z( window_handle_t w )
+void scr_zbuf_set_win_z( window_handle_t w )
 {
     // TODO XXX HACK alert - hardcoded decorations size
     const int bw = 3;
-    video_zbuf_reset_square_z( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21, w->z );
+    scr_zbuf_reset_square_z( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21, w->z );
 }
 
 
@@ -104,16 +104,16 @@ void video_zbuf_set_win_z( window_handle_t w )
  *
 **/
 
-void video_zbuf_reset_square(int x, int y, int xsize, int ysize )
+void scr_zbuf_reset_square(int x, int y, int xsize, int ysize )
 {
-    video_zbuf_reset_square_z( x, y, xsize, ysize, 0 );
+    scr_zbuf_reset_square_z( x, y, xsize, ysize, 0 );
 }
 
 static int zb_upside = 0;
-void video_zbuf_turn_upside(int v) { zb_upside = v; }
+void scr_zbuf_turn_upside(int v) { zb_upside = v; }
 
 
-void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
+void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
 {
     //SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
 
@@ -135,7 +135,7 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
         if( zb_upside )
             linpos = out.x + out.y * zbwidth;
         else
-            linpos = out.x + ( (get_screen_ysize()-1) - out.y) * zbwidth;
+            linpos = out.x + ( (scr_get_ysize()-1) - out.y) * zbwidth;
 
         out.y++;
 
@@ -158,7 +158,7 @@ void video_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
  * zpos is current window's z coordinate.
  *
 **/
-int video_zbuf_check( int linpos, zbuf_t zpos )
+int scr_zbuf_check( int linpos, zbuf_t zpos )
 {
     if( zbuf[linpos] > zpos ) return 0;
     if( zbuf[linpos] == zpos ) return 1;
@@ -171,11 +171,11 @@ int video_zbuf_check( int linpos, zbuf_t zpos )
 }
 
 
-void video_zbuf_dump()
+void scr_zbuf_dump()
 {
     int y;
-    int ysize = get_screen_ysize();
-    int xsize = get_screen_xsize();
+    int ysize = scr_get_ysize();
+    int xsize = scr_get_xsize();
 
     printf("zbuf dump %d*%d\n", xsize, ysize );
     for(y = 0; y < ysize; y++)
@@ -195,12 +195,12 @@ void video_zbuf_dump()
 
 #include <video/screen.h>
 
-void video_zbuf_paint()
+void scr_zbuf_paint()
 {
-    int np = get_screen_xsize() * get_screen_ysize();
+    int np = scr_get_xsize() * scr_get_ysize();
 
 #if 1
-    if(get_screen_bpp() == 24)
+    if(scr_get_bpp() == 24)
     {
         zbuf_t *zbp = zbuf;
         rgb_t *d = (void *)video_drv->screen;
@@ -210,7 +210,7 @@ void video_zbuf_paint()
             d++;
         }
     }
-    if(get_screen_bpp() == 32)
+    if(scr_get_bpp() == 32)
 #endif
     {
         zbuf_t *zbp = zbuf;

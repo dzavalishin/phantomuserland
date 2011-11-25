@@ -16,7 +16,7 @@
 
 #include <assert.h>
 #include <phantom_libc.h>
-#include <event.h>
+//#include <event.h>
 //#include <spinlock.h>
 
 #include <sys/libkern.h>
@@ -26,28 +26,15 @@
 
 
 void
-drv_video_window_clear( drv_video_window_t *win )
+w_clear( window_handle_t win )
 {
-    drv_video_window_fill( win, COLOR_BLACK );
+    w_fill( win, COLOR_BLACK );
 }
 
 
-void
-drv_video_window_fill_rect( drv_video_window_t *w, rgba_t color, rect_t r )
-{
-    if( rect_win_bounds( &r, w ) )
-        return;
-
-    int yp = r.y + r.ysize - 1;
-    for( ; yp >= r.y; yp-- )
-    {
-        rgba_t *dst = w->pixel + yp*w->xsize + r.x;
-        rgba2rgba_replicate( dst, &color, r.xsize );
-    }
-}
 
 void
-drv_video_window_pixel( drv_video_window_t *w, int x, int y, rgba_t color )
+w_pixel( window_handle_t w, int x, int y, rgba_t color )
 {
     rect_t r;
     r.x = x;
@@ -79,8 +66,7 @@ static inline int SGN(int v) { return v == 0 ? 0 : ( (v > 0) ? 1 : -1); }
 
 
 
-void drv_video_window_draw_line( drv_video_window_t *w,
-                                 int x1, int y1, int x2, int y2, rgba_t c)
+void w_draw_line( window_handle_t w, int x1, int y1, int x2, int y2, rgba_t c)
 {
     int a,x,y;
     int i;
@@ -116,7 +102,7 @@ void drv_video_window_draw_line( drv_video_window_t *w,
 
 
 
-void drv_video_window_fill_ellipse( drv_video_window_t *w,
+void w_fill_ellipse( window_handle_t w,
                                  int x,int y,int lx,int ly,
                                  rgba_t c)
 {
@@ -133,38 +119,9 @@ void drv_video_window_fill_ellipse( drv_video_window_t *w,
             a++;
 
         r = rx + ((cs[a]*rx)>>14);
-        drv_video_window_draw_line(w, x+r, y+i, x+lx-1-r, y+i, c);
-        drv_video_window_draw_line(w, x+r, y+ly-i-1, x+lx-1-r, y+ly-i-1, c);
+        w_draw_line(w, x+r, y+i, x+lx-1-r, y+i, c);
+        w_draw_line(w, x+r, y+ly-i-1, x+lx-1-r, y+ly-i-1, c);
     }
-}
-
-
-void drv_video_window_fill_box( drv_video_window_t *w,
-                                 int x,int y,int lx,int ly,
-                                 rgba_t c)
-{
-    int i;
-
-    for(i=y;i<y+ly;i++)
-        drv_video_window_draw_line(w, x,i,x+lx-1,i,c);
-}
-
-
-
-void drv_video_window_draw_box( drv_video_window_t *w,
-                                 int x,int y,int lx, int ly,
-                                 rgba_t c)
-{
-    drv_video_window_draw_line(w,x,y,x+lx-1,y,c);
-    drv_video_window_draw_line(w,x,y+ly-1,x+lx-1,y+ly-1,c);
-    drv_video_window_draw_line(w,x,y,x,y+ly-1,c);
-    drv_video_window_draw_line(w,x+lx-1,y,x+lx-1,y+ly-1,c);
-}
-
-
-void drv_video_window_draw_rect( drv_video_window_t *win, rgba_t color, rect_t r )
-{
-    drv_video_window_draw_box( win, r.x, r.y, r.xsize, r.ysize, color );
 }
 
 

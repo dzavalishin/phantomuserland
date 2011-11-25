@@ -263,6 +263,10 @@ void phantom_pci_enable( pci_cfg_t *pci, int onoff )
 
 }
 
+//#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
+
 void phantom_pci_dump( pci_cfg_t *pci )
 {
     u_int32_t command = phantom_pci_read( pci->bus, pci->dev, pci->func, PCI_CONFIG_COMMAND, 2 );
@@ -280,5 +284,6 @@ void phantom_pci_dump( pci_cfg_t *pci )
 
 }
 
+//#pragma GCC diagnostic pop
 
 

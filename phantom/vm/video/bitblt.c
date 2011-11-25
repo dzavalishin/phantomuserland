@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -450,3 +451,4 @@ void drv_video_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, i
 
 
 
+#endif

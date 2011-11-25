@@ -134,7 +134,7 @@ static void do_w_resize( window_t *w, int xsize, int ysize )
 
 static void do_w_blt( window_t *w )
 {
-    drv_video_bitblt( w->pixel, w->x, w->y, w->xsize, w->ysize, w->z, 0 );
+    scr_bitblt( w->pixel, w->x, w->y, w->xsize, w->ysize, w->z, 0 );
 }
 
 
@@ -165,13 +165,13 @@ static void 	do_w_repaint_all()
 // -----------------------------------------------------------------------
 // State/pos
 // -----------------------------------------------------------------------
-
+/*
 void w_resize(pool_handle_t h, int xsize, int ysize)
 {
     DOW(h, do_w_resize( w, xsize, ysize ); );
 }
 
-
+*/
 void w_set_visible( pool_handle_t h, int v )
 {
     window_t *w = pool_get_el(wp,h);
@@ -183,7 +183,7 @@ void w_set_visible( pool_handle_t h, int v )
     if( v ) do_w_blt( w );
     else
     {
-        video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+        scr_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
         do_w_repaint_all();
     }
 
@@ -201,8 +201,8 @@ void w_moveto( pool_handle_t h, int x, int y )
 
     if( v )
     {
-        video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
-        video_zbuf_reset_square( x, y, w->xsize, w->ysize );
+        scr_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+        scr_zbuf_reset_square( x, y, w->xsize, w->ysize );
     }
 
     w->x = x;
@@ -221,7 +221,7 @@ void w_set_z_order( pool_handle_t h, int zorder )
 
     int down = w->z > zorder;
     if( down )
-        video_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
+        scr_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
 
     w->z = zorder;
     if( down )
@@ -279,6 +279,7 @@ int point_in_w( int x, int y, window_t *w )
 // Output
 // -----------------------------------------------------------------------
 
+#if NEW_WINDOWS
 static void do_w_fill( window_t *w, rgba_t color )
 {
     int i = (w->xsize * w->ysize) - 1;
@@ -335,10 +336,11 @@ void w_pixel( pool_handle_t h, int x, int y, rgba_t color )
 {
     DOW(h, do_w_pixel( w, x, y, color ); );
 }
+#endif
 
 
 
-static void do_w_draw_h_line( window_t *w, rgba_t color, int x, int y, int len )
+static void do_w_draw_h_line( window_handle_t w, rgba_t color, int x, int y, int len )
 {
     rect_t r;
 
@@ -354,10 +356,17 @@ static void do_w_draw_h_line( window_t *w, rgba_t color, int x, int y, int len )
     rgba2rgba_replicate( dst, &color, r.xsize );
 }
 
-void w_draw_h_line( pool_handle_t h, rgba_t color, int x, int y, int len )
+#if NEW_WINDOWS
+void w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len )
 {
     DOW(h, do_w_draw_h_line( w, color, x, y, len ); do_w_blt( w ); );
 }
+#else
+void w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len )
+{
+    do_w_draw_h_line( h, color, x, y, len ); 
+}
+#endif
 
 static void do_w_draw_v_line( window_t *w, rgba_t color, int x, int y, int len )
 {
@@ -379,11 +388,12 @@ static void do_w_draw_v_line( window_t *w, rgba_t color, int x, int y, int len )
     }
 }
 
+#if NEW_WINDOWS
 void w_draw_v_line( pool_handle_t h, rgba_t color, int x, int y, int len )
 {
     DOW(h, do_w_draw_v_line( w, color, x, y, len ); do_w_blt( w ); );
 }
-
+#endif
 
 static void do_w_draw_rect( window_t *w, rgba_t c,
                                  int x,int y,int lx, int ly
@@ -400,12 +410,14 @@ static void do_w_draw_rect( window_t *w, rgba_t c,
     do_w_draw_v_line( w, c, x+lx-1, y,      ly );
 }
 
+#if NEW_WINDOWS
 void w_draw_rect( pool_handle_t h, rgba_t c,
                                  int x, int y, int lx, int ly
                                  )
 {
     DOW(h, do_w_draw_rect( w, c, x, y, lx, ly );  );
 }
+#endif
 
 // -----------------------------------------------------------------------
 // Line
@@ -466,40 +478,22 @@ static void do_w_draw_line( window_t *w, rgba_t c, int x1, int y1, int x2, int y
 }
 
 
+#if NEW_WINDOWS
 void w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 )
 {
     DOW(h, do_w_draw_line( w, color, x, y, x2, y2 ); do_w_blt( w ); );
 }
-
-
-// -----------------------------------------------------------------------
-// Scroll
-// -----------------------------------------------------------------------
-
-
-
-errno_t w_scroll_hor( pool_handle_t h, int x, int y, int xs, int ys, int s )
-{
-    errno_t ret = 0;
-    window_t *w = pool_get_el(wp,h);
-
-    if( x < 0 || y < 0 || x+xs > w->xsize || y+ys > w->ysize )
-        ret = EINVAL;
-    else
-        video_scroll_hor( w->pixel+x+(y*w->xsize), xs, ys, w->xsize, s, w->bg );
-
-    pool_release_el( wp, h );
-    return ret;
-}
+#endif
 
 
 // -----------------------------------------------------------------------
 // test
 // -----------------------------------------------------------------------
 
+#if NEW_WINDOWS
 void new_videotest()
 {
-    pool_handle_t wb = w_create( get_screen_xsize(), get_screen_ysize() );
+    pool_handle_t wb = w_create( scr_get_xsize(), scr_get_ysize() );
     w_clear( wb );
     w_set_z_order( wb, 0 );
 
@@ -518,7 +512,7 @@ void new_videotest()
     w_blt( w1 );
     w_blt( w2 );
 
-    //video_zbuf_reset_z(50);
+    //scr_zbuf_reset_z(50);
 
     w_moveto( w2, 50, 50 );
 
@@ -542,8 +536,6 @@ void new_videotest()
     w_blt( w1 );
     w_blt( w2 );
 
-    //video_zbuf_paint();
+    //scr_zbuf_paint();
 }
-
-
-
+#endif

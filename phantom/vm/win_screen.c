@@ -45,18 +45,18 @@ struct drv_video_screen_t        drv_video_win32 =
     // screen
     0,
 
-probe: (void *)drv_video_null,
-start: (void *)drv_video_null,
-accel: (void *)drv_video_null,
-stop:  (void *)drv_video_null,
+probe: (void *)vid_null,
+start: (void *)vid_null,
+accel: (void *)vid_null,
+stop:  (void *)vid_null,
 
-    (void*)drv_video_null,
-    (void*)drv_video_null,
-    (void*)drv_video_null,
+    (void*)vid_null,
+    (void*)vid_null,
+    (void*)vid_null,
 
-    (void*)drv_video_null,
+    (void*)vid_null,
 
-mouse:    		(void*)drv_video_null,
+mouse:    		(void*)vid_null,
 
 mouse_redraw_cursor: 	vid_mouse_draw_deflt,
 mouse_set_cursor: 	vid_mouse_set_cursor_deflt,
@@ -218,6 +218,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         break;
 #endif
 
+
+    //case WM_KEYDOWN:
+    //case WM_KEYUP:        TranslateMessage(  __in  const MSG *lpMsg );
+
+    case WM_CHAR:
+        {
+            printf("-%x-", (int)lParam );
+        }
+        break;
+
     case WM_MOUSEMOVE:
         {
             int xPos = (short)(0x0FFFF & lParam);//GET_X_LPARAM(lParam);
@@ -229,7 +239,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             drv_video_win32.mouse_y = yPos;
             drv_video_win32.mouse_flags = wParam;
             drv_video_win32.mouse();
+#if 1
+            struct ui_event e;
+            e.type = UI_EVENT_TYPE_MOUSE;
+            e.time = fast_time();
+            e.focus= 0;
 
+            e.m.buttons = wParam;
+            e.abs_x = xPos;
+            e.abs_y = VSCREEN_HEIGHT - yPos - 1;
+
+            ev_q_put_any( &e );
+            //printf("-ms-");            printf("%d,%d\n", xPos, yPos );
+#endif
         }
         break;
 
@@ -323,10 +345,10 @@ void    pvm_win_window_thread()
     drv_video_win32.ysize = VSCREEN_HEIGHT;
     drv_video_win32.update = &drv_win_screen_update;
 #if 1
-    drv_video_win32.bitblt = &drv_video_bitblt_forw;
-    drv_video_win32.winblt = &drv_video_win_winblt;
-    drv_video_win32.readblt = &drv_video_readblt_forw;
-    drv_video_win32.bitblt_part = &drv_video_bitblt_part_forw;
+    drv_video_win32.bitblt = &vid_bitblt_forw;
+    drv_video_win32.winblt = &vid_win_winblt;
+    drv_video_win32.readblt = &vid_readblt_forw;
+    drv_video_win32.bitblt_part = &vid_bitblt_part_forw;
 #else
     drv_video_win32.bitblt = &drv_video_bitblt_rev;
     drv_video_win32.winblt = &drv_video_win_winblt_rev;
@@ -384,8 +406,8 @@ int pvm_win_init()
         if( init_ok )
         {
 //#if VIDEO_ZBUF
-            video_zbuf_init();
-            video_zbuf_turn_upside(1);
+            scr_zbuf_init();
+            scr_zbuf_turn_upside(1);
 //#endif
             return 0;
         }
