@@ -17,11 +17,12 @@ import ru.dz.plc.util.PlcException;
 
 public class OpDivideNode extends BiNode 
 {
-	public OpDivideNode(Node l, Node r) {    super(l,r);  }
-	public String toString()  {    return "/";  }
-	public boolean is_on_int_stack() { return true; }
-	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
-		if(getType().is_int()) c.emitIDivLU();
-		else throw new PlcException("Codegen", "op / does not exist for this type");
-	}
+    public OpDivideNode(Node l, Node r) {    super(l,r);  }
+    public String toString()  {    return "/";  }
+    public boolean is_on_int_stack() { return true; }
+    protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
+    {
+        if(getType().is_int()) c.emitIDivLU();
+        else throw new PlcException("Codegen", "op / does not exist for this type");
+    }
 }
