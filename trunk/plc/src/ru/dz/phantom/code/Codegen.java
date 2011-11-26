@@ -377,6 +377,11 @@ public class Codegen extends opcode_ids {
 		list("idivlu");
 	}
 
+	public void emitIRemLU() throws IOException {
+		put_byte(opcode_iremlu);
+		list("iremlu");
+	}
+
 
 
 	public void emitDebug(byte type, String text) throws IOException {
