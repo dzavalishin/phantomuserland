@@ -37,27 +37,32 @@ extern struct drv_video_font_t         drv_video_8x16scr_font;
 extern struct drv_video_font_t         drv_video_kolibri1_font;
 extern struct drv_video_font_t         drv_video_kolibri2_font;
 
+extern struct drv_video_font_t         drv_video_gallant12x22_font;
+extern struct drv_video_font_t         drv_video_freebsd_font;
+
+
 
 // ------------------------------------------------------------------------
 // Output
 // ------------------------------------------------------------------------
 
 
-void 	drv_video_font_draw_string(
-                                           drv_video_window_t *win,
+void 	w_font_draw_string(
+                                           window_handle_t win,
                                            const drv_video_font_t *font,
                                            const char *s, 
                                            const rgba_t color,
                                            const rgba_t bg,
                                            int x, int y );
-void 	drv_video_font_scroll_line(
-                                           drv_video_window_t *win,
-                                           const struct drv_video_font_t *font, rgba_t color );
 
-void 	drv_video_font_scroll_pixels( drv_video_window_t *win, int npix, rgba_t color);
+void 	w_font_scroll_line(
+                                           window_handle_t win,
+                                           const drv_video_font_t *font, rgba_t color );
+
+//void 	drv_video_font_scroll_pixels( drv_video_window_t *win, int npix, rgba_t color);
 
 // returns new x position
-void 	drv_video_font_tty_string(
+void 	w_font_tty_string(
                                           drv_video_window_t *win,
                                           const struct drv_video_font_t *font,
                                           const char *s,

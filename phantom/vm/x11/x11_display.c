@@ -211,8 +211,8 @@ int main()
     XDrawLine(display, win, gc, 10, 10,190,190); //from-to
     XDrawLine(display, win, gc, 10,190,190, 10); //from-to
 
-    drawbmp( display, win, gc );
-    prepare( display, win, gc, 15, 10);
+    //drawbmp( display, win, gc );
+    prepare( display, win, gc, 150, 10);
 
     XEvent evt;
     long eventMask = ButtonPressMask|ButtonReleaseMask;

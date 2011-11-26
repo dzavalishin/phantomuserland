@@ -48,10 +48,15 @@
 #endif
 
 
-//#define CON_FONT drv_video_8x16san_font
-#define CON_FONT drv_video_8x16cou_font
+#define CON_FONT drv_video_8x16san_font
+//#define CON_FONT drv_video_8x16cou_font
+//#define CON_FONT drv_video_gallant12x22_font
+//#define CON_FONT drv_video_freebsd_font
 
-#define DEB_FONT drv_video_8x16san_font
+//#define DEB_FONT drv_video_8x16san_font
+//#define DEB_FONT drv_video_gallant12x22_font
+//#define DEB_FONT drv_video_freebsd_font
+#define DEB_FONT drv_video_8x16cou_font
 
 #define BUFS 128
 
@@ -82,7 +87,7 @@ static int phantom_console_window_puts(const char *s)
     if(phantom_console_window == 0)
         return 0;
 
-    drv_video_font_tty_string( phantom_console_window, &CON_FONT,
+    w_font_tty_string( phantom_console_window, &CON_FONT,
     	s, console_fg, console_bg, &ttx, &tty );
 
     drv_video_window_update( phantom_console_window );
@@ -195,7 +200,7 @@ int phantom_debug_window_puts(const char *s)
 {
     if(phantom_debug_window == 0)        return 0;
 
-    drv_video_font_tty_string( phantom_debug_window, &DEB_FONT,
+    w_font_tty_string( phantom_debug_window, &DEB_FONT,
     	s, console_fg, console_bg, &ttxd, &ttyd );
 
     //drv_video_winblt( phantom_debug_window );
@@ -261,13 +266,12 @@ void phantom_init_console_window()
 
     int xsize = 620, ysize = 300;
     int cw_x = 50, cw_y = 450;
-    if( get_screen_ysize() < 600 )
+    if( scr_get_ysize() < 600 )
     {
         cw_x = cw_y = 0;
     }
 
-    drv_video_window_t *w = drv_video_window_create(
-                        xsize, ysize,
+    drv_video_window_t *w = drv_video_window_create( xsize, ysize,
                         cw_x, cw_y, console_bg, "Console", WFLAG_WIN_DECORATED );
 
     phantom_console_window = w;
@@ -301,13 +305,13 @@ void phantom_init_console_window()
 //#define BTEXT_COLOR COLOR_YELLOW
 #define BTEXT_COLOR la_txt
 
-    phantom_launcher_window = drv_video_window_create( get_screen_xsize(), 32,
+    phantom_launcher_window = drv_video_window_create( scr_get_xsize(), 32,
                                                        0, 0, console_bg, "Launcher", WFLAG_WIN_ONTOP );
 
     phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
-    drv_video_window_fill( phantom_launcher_window, la_bg );
+    w_fill( phantom_launcher_window, la_bg );
 
-    int lb_x = get_screen_xsize();
+    int lb_x = scr_get_xsize();
 
     lb_x -= power_button_sm_bmp.xsize + 5;
     w_add_button( phantom_launcher_window, -1, lb_x, 2, &power_button_sm_bmp, &power_button_pressed_sm_bmp, BUTTON_FLAG_NOBORDER );
@@ -329,8 +333,8 @@ void phantom_init_console_window()
 
 
 
-    drv_video_window_draw_line( phantom_launcher_window, 0, 31, get_screen_xsize(), 31, la_b1 );
-    drv_video_window_draw_line( phantom_launcher_window, 0, 30, get_screen_xsize(), 30, la_b2 );
+    w_draw_line( phantom_launcher_window, 0, 31, scr_get_xsize(), 31, la_b1 );
+    w_draw_line( phantom_launcher_window, 0, 30, scr_get_xsize(), 30, la_b2 );
 
 
     drv_video_window_update( phantom_launcher_window );
@@ -363,10 +367,10 @@ static void put_progress()
     extern int vm_map_do_for_percentage;
 
     progress_rect.xsize = DEBWIN_XS;
-    drv_video_window_fill_rect( phantom_debug_window, COLOR_GREEN, progress_rect );
+    w_fill_rect( phantom_debug_window, COLOR_GREEN, progress_rect );
 
     progress_rect.xsize = (vm_map_do_for_percentage*DEBWIN_XS)/100;
-    drv_video_window_fill_rect( phantom_debug_window, COLOR_LIGHTGREEN, progress_rect );
+    w_fill_rect( phantom_debug_window, COLOR_LIGHTGREEN, progress_rect );
 }
 
 
@@ -409,17 +413,17 @@ static void phantom_debug_window_loop()
                       );
                 break;
             case 't':
-                drv_video_window_set_title( phantom_debug_window,  "Threads" );
+                w_set_title( phantom_debug_window,  "Threads" );
                 show = c;
                 break;
 
             case 'w':
-                drv_video_window_set_title( phantom_debug_window,  "Windows" );
+                w_set_title( phantom_debug_window,  "Windows" );
                 show = c;
                 break;
 
             case 's':
-                drv_video_window_set_title( phantom_debug_window,  "Stats" );
+                w_set_title( phantom_debug_window,  "Stats" );
                 show = c;
                 break;
             }
@@ -430,7 +434,7 @@ static void phantom_debug_window_loop()
         hal_sleep_msec(100);
 #if 1
 #if 1
-        drv_video_window_clear( phantom_debug_window );
+        w_clear( phantom_debug_window );
         ttyd = DEBWIN_YS-20;
         ttxd = 0;
 #endif
@@ -449,7 +453,7 @@ static void phantom_debug_window_loop()
 
         rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m, %d events\n Today is %04d/%02d/%02d %02d:%02d:%02d, CPU 0 %d%% idle\n",
                       step++, days, hr, min, (int)sec,
-                      get_n_events_in_q(),
+                      ev_get_n_events_in_q(),
                       mt.tm_year + 1900, mt.tm_mon, mt.tm_mday,
                       mt.tm_hour, mt.tm_min, mt.tm_sec, 100-percpu_cpu_load[0]
                      );
@@ -475,7 +479,7 @@ static void phantom_debug_window_loop()
         phantom_debug_window_puts(buf);
 
         if(wx == 600) wx = 620; else wx = 600;
-        //drv_video_window_move( phantom_debug_window, wx, 50 );
+        //w_move( phantom_debug_window, wx, 50 );
 #endif
         put_progress();
         drv_video_window_update( phantom_debug_window );

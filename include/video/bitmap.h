@@ -13,6 +13,7 @@
 #define BITMAP_H
 
 #include <video/color.h>
+#include <errno.h>
 
 typedef struct drv_video_bitmap
 {
@@ -28,6 +29,9 @@ typedef struct drv_video_cursor
 
     drv_video_bitmap_t bitmap;
 } drv_video_cursor_t;
+
+
+errno_t bmp_ppm_load( drv_video_bitmap_t **to, void *from );
 
 
 
@@ -46,7 +50,7 @@ extern drv_video_bitmap_t		power_button_sm_bmp;
 extern drv_video_bitmap_t		task_button_bmp;
 
 
-drv_video_bitmap_t *      drv_video_get_default_mouse_bmp(void);
+drv_video_bitmap_t *            drv_video_get_default_mouse_bmp(void);
 
 
 #endif //BITMAP_H

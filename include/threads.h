@@ -188,7 +188,8 @@ void phantom_scheduler_soft_interrupt(void);
 
 
 
-void*   hal_start_kernel_thread(void (*thread)(void));
+//void*   hal_start_kernel_thread(void (*thread)(void));
+void    hal_start_kernel_thread(void (*thread)(void));
 void    hal_exit_kernel_thread(void);
 
 

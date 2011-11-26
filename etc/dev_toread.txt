@@ -1,3 +1,11 @@
+
+CDFS:
+ http://www.gnu.org/s/libcdio/doxygen/iso9660_8h.html
+ http://alumnus.caltech.edu/~pje/cdmake.txt
+	
+FAT FS:
+ http://alumnus.caltech.edu/~pje/dosfiles.html
+
 VIA:
  Xorg git://anongit.freedesktop.org/xorg/driv ... -video-via
  http://phoronix.com/forums/forumdisplay.php?f=54

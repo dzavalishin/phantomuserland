@@ -27,7 +27,7 @@ void w_assert_lock(void);
 // Screen repaint
 // -----------------------------------------------------------------------
 
-void 	drv_video_window_repaint_all(void);
+void 	scr_repaint_all(void) __attribute__((deprecated));
 void    repaint_all_for_square( rect_t *todo );
 void    w_request_async_repaint( rect_t *r );
 
@@ -54,7 +54,6 @@ void vid_mouse_on_deflt(void);
 
 struct data_area_4_bitmap;
 
-int drv_video_ppm_load( drv_video_bitmap_t **to, void *from );
 int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from );
 
 

@@ -185,8 +185,8 @@ static errno_t cirrus_accel_start(void)
     video_drv->set_mouse_cursor = cirrus_set_mouse_cursor;
 
     // Turn off unused funcs
-    video_drv->mouse_disable = drv_video_null;
-    video_drv->mouse_enable = drv_video_null;
+    video_drv->mouse_disable = vid_null;
+    video_drv->mouse_enable = vid_null;
 #endif
 
     return 0;
@@ -225,19 +225,19 @@ accel: 			cirrus_accel_start,
 stop:  			cirrus_stop,
 
 #if 0
-update: 		drv_video_null,
+update: 		vid_null,
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
 readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 
-mouse:  		drv_video_null,
+mouse:  		vid_null,
 #endif
 
 mouse_redraw_cursor: 	currus_set_cursor_pos,
 mouse_set_cursor:       cirrus_set_mouse_cursor,
-mouse_disable:          drv_video_null,
-mouse_enable:          	drv_video_null,
+mouse_disable:          vid_null,
+mouse_enable:          	vid_null,
 };
 
 
@@ -312,7 +312,7 @@ static void currus_set_cursor_pos(void)
     write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
 
     unsigned x = video_drv->mouse_x;
-    unsigned y = get_screen_ysize() - video_drv->mouse_y;
+    unsigned y = scr_get_ysize() - video_drv->mouse_y;
 
     SHOW_FLOW( 10, "%d * %d", x, y );
 

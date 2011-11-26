@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: no
- * Preliminary: yes
+ * Kernel ready: no, this is not a kernel code.
  *
  * This source file implements Windows based wrapper for VM to
  * run in Windows-hosted environment.
@@ -386,8 +385,10 @@ void    pvm_win_window_thread()
 }
 
 
-int pvm_win_init()
+int pvm_video_init()
 {
+    video_drv = &drv_video_win32;
+
     drv_video_win32.screen = 0; // Not ready yet
 
     printf("Starting windows graphics 'driver'\n" );
@@ -405,10 +406,8 @@ int pvm_win_init()
         if( init_err ) break;
         if( init_ok )
         {
-//#if VIDEO_ZBUF
             scr_zbuf_init();
             scr_zbuf_turn_upside(1);
-//#endif
             return 0;
         }
 

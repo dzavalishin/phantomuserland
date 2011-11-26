@@ -42,7 +42,7 @@ extern struct drv_video_screen_t        video_driver_vmware_svga;
 // TODO: panic must switch to text mode!
 
 // Placeholder for absent drv methods
-//void drv_video_null() {}
+//void vid_null() {}
 
 
 #define JUST_VGA 0
@@ -144,7 +144,7 @@ static void select_accel_driver(void)
     {
         struct drv_video_screen_t *drv = video_drivers[i];
 
-        if( (drv->accel == 0) || (drv->accel == (void *)drv_video_null) )
+        if( (drv->accel == 0) || (drv->accel == (void *)vid_null) )
         {
             SHOW_FLOW( 2, "Video driver %s : Not accelerated", drv->name);
             continue;
@@ -183,7 +183,7 @@ static int was_enforced = 0;
 static void video_post_start()
 {
 
-    video_zbuf_init();
+    scr_zbuf_init();
     drv_video_init_windows();
 
     // Have VESA driver, add companion accelerator if possible
@@ -255,11 +255,11 @@ static void set_video_defaults(void)
 {
     // fill in defaults - r/w
 
-    if( 0 == video_drv->update)                     video_drv->update = (void *)drv_video_null;
-    if( 0 == video_drv->bitblt)                     video_drv->bitblt = drv_video_bitblt_rev;
-    if( 0 == video_drv->winblt)                     video_drv->winblt = drv_video_win_winblt_rev;
-    if( 0 == video_drv->readblt)                    video_drv->readblt = drv_video_readblt_rev;
-    if( 0 == video_drv->bitblt_part)                video_drv->bitblt_part = drv_video_bitblt_part_rev;
+    if( 0 == video_drv->update)                     video_drv->update      = (void *)vid_null;
+    if( 0 == video_drv->bitblt)                     video_drv->bitblt      = vid_bitblt_rev;
+    if( 0 == video_drv->winblt)                     video_drv->winblt      = vid_win_winblt_rev;
+    if( 0 == video_drv->readblt)                    video_drv->readblt     = vid_readblt_rev;
+    if( 0 == video_drv->bitblt_part)                video_drv->bitblt_part = vid_bitblt_part_rev;
 
     // fill in defaults - mouse cursor
 
@@ -268,7 +268,7 @@ static void set_video_defaults(void)
     if( 0 == video_drv->mouse_disable )             video_drv->mouse_disable       = vid_mouse_off_deflt;
     if( 0 == video_drv->mouse_enable )              video_drv->mouse_enable        = vid_mouse_on_deflt;
 
-    if( 0 == video_drv->mouse)                      video_drv->mouse = (void*)drv_video_null;
+    if( 0 == video_drv->mouse)                      video_drv->mouse = (void*)vid_null;
 }
 
 

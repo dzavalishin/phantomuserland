@@ -92,20 +92,20 @@ start: 			icp_video_start,
 stop:   		icp_video_stop,
 
 #if 0
-update: 		drv_video_null,
+update: 		vid_null,
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
 readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 
-mouse:    		drv_video_null,
+mouse:    		vid_null,
 #endif
 
 #if 1
-redraw_mouse_cursor: 	(void *)drv_video_null,
-set_mouse_cursor: 	(void *)drv_video_null,
-mouse_disable:          (void *)drv_video_null,
-mouse_enable:          	(void *)drv_video_null,
+redraw_mouse_cursor: 	(void *)vid_null,
+set_mouse_cursor: 	(void *)vid_null,
+mouse_disable:          (void *)vid_null,
+mouse_enable:          	(void *)vid_null,
 #endif
 };
 

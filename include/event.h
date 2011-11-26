@@ -135,37 +135,37 @@ typedef struct ui_event ui_event_t;
 
 
 //! Put mouse event onto the main e q
-void event_q_put_mouse( int x, int y, int buttons );
+void ev_q_put_mouse( int x, int y, int buttons );
 
 //! Put key event onto the main e q
-void event_q_put_key( int vkey, int ch, int modifiers );
+void ev_q_put_key( int vkey, int ch, int modifiers );
 
 //! Put window event onto the main e q
-void event_q_put_win( int x, int y, int info, struct drv_video_window *focus );
+void ev_q_put_win( int x, int y, int info, struct drv_video_window *focus );
 
 //! Put any event onto the main e q
-void event_q_put_e( ui_event_t *in );
+//void ev_q_put_e( ui_event_t *in );
 
 
 //! Put global event onto the main e q, supposed that event system
 //! will decide which windows have to receive this event.
 //void event_q_put_global( int x, int y, int info );
-void event_q_put_global( ui_event_t *e );
+void ev_q_put_global( ui_event_t *e );
 
 //! Put any type of event onto the main e q - BE CAREFUL
 //! NB - not forget to set focus!
-void event_q_put_any( ui_event_t *ie );
+void ev_q_put_any( ui_event_t *ie );
 
 
 
 //! Get next event for this window
-int drv_video_window_get_event( struct drv_video_window *w, struct ui_event *e, int wait );
+int ev_w_get_event( struct drv_video_window *w, struct ui_event *e, int wait );
 
 //! Returns nonzero if processed event
 int defaultWindowEventProcessor( struct drv_video_window *w, struct ui_event *e );
 
 //! Just for debug
-int get_n_events_in_q(void); 
+int ev_get_n_events_in_q(void); 
 
 #endif // KERNEL
 

@@ -305,7 +305,7 @@ static void handle_set1_keycode(unsigned char key)
         case KEY_PRTSCRN:
             //panic("Keyboard Requested Halt\n");
             printf("print scrn\n");
-            video_zbuf_paint();
+            scr_zbuf_paint();
             return;
         case KEY_F12:
             hal_cpu_reset_real();

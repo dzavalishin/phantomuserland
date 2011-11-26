@@ -129,6 +129,27 @@ int do_test_rectangles(const char *test_parm)
     test_check_eq(out2.xsize,10);
     test_check_eq(out2.ysize,1);
 
+    rect_t a, b;
+
+    a.x     = 10; a.y     = 10;
+    a.xsize = 10; a.ysize = 10;
+
+    b.x     = 15; b.y     = 15;
+    b.xsize = 10; b.ysize = 10;
+
+    test_check_false( rect_includes( &a, &b ) );
+    test_check_true( rect_intersects( &a, &b ) );
+
+    b.xsize = 2;  b.ysize = 2;
+
+    test_check_true( rect_includes( &a, &b ) );
+    test_check_true( rect_intersects( &a, &b ) );
+
+    b.x     = 35; b.y     = 35;
+
+    test_check_false( rect_includes( &a, &b ) );
+    test_check_false( rect_intersects( &a, &b ) );
+
     return 0;
 }
 

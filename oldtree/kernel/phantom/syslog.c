@@ -16,6 +16,8 @@
 #include <time.h>
 #include <kernel/net.h>
 
+#define	INTERNALLOG	LOG_ERR|LOG_CONS|LOG_PERROR|LOG_PID
+
 /*
  * syslog, vsyslog --
  *	print message on log file; output is intended for syslogd(8).
@@ -27,11 +29,10 @@ void vsyslog(int pri, const char *fmt, va_list ap)
     //char ch, *p;
     //char *stdp, tbuf[2048], fmt_cpy[1024], timbuf[26], errstr[64];
 
-#define	INTERNALLOG	LOG_ERR|LOG_CONS|LOG_PERROR|LOG_PID
     /* Check for invalid bits. */
-    if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) {
-        syslog(INTERNALLOG,
-               "syslog: unknown facility/priority: %x", pri);
+    if (pri & ~(LOG_PRIMASK|LOG_FACMASK)) 
+    {
+        syslog(INTERNALLOG, "syslog: unknown facility/priority: %x", pri);
         pri &= LOG_PRIMASK|LOG_FACMASK;
     }
 

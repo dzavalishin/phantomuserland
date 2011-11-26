@@ -168,7 +168,7 @@ static void push_event_thread(void *arg)
 
         struct ui_event e;
         while( get_buf(&e) )
-            event_q_put_e( &e );
+            ev_q_put_any( &e );
 
         //hal_mutex_unlock( &mouse_mutex );
     }

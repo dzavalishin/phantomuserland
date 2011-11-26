@@ -422,6 +422,9 @@ errno_t partGetName( phantom_disk_partition_t *p, char *buf, size_t bufsz )
     return doPartGetName( p, buf, bufsz );
 }
 
+//#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
 
 void dump_partition(phantom_disk_partition_t *p)
 {
@@ -436,4 +439,6 @@ void dump_partition(phantom_disk_partition_t *p)
     printf(" - %s base, %s specific\n", p->base ? "has" : "no", p->specific ? "has" : "no" );
 
 }
+
+//#pragma GCC diagnostic pop
 

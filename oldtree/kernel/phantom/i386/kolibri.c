@@ -666,7 +666,7 @@ struct checkb
 
 static void paint_button(window_handle_t win, struct kolibri_button *cb)
 {
-    drv_video_window_fill_rect( win, cb->color, cb->r );
+    w_fill_rect( win, cb->color, cb->r );
 
     if(!cb->flag_nopaint)
     {
@@ -678,7 +678,7 @@ static void paint_button(window_handle_t win, struct kolibri_button *cb)
     if(!cb->flag_noborder)
     {
         if( cb->mouse_in_bits & 1 )
-            drv_video_window_draw_rect( win, COLOR_BLACK, cb->r );
+            w_draw_rect( win, COLOR_BLACK, cb->r );
     }
 }
 
@@ -820,12 +820,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             // negative 16bit num
             if( xpos & 0x8000 )
-                xpos = get_screen_xsize() - (0xFFFF - (0xFFFF & xpos));
+                xpos = scr_get_xsize() - (0xFFFF - (0xFFFF & xpos));
 
             if( ypos & 0x8000 )
-                ypos = get_screen_ysize() - (0xFFFF - (0xFFFF & ypos));
+                ypos = scr_get_ysize() - (0xFFFF - (0xFFFF & ypos));
 
-            ypos = get_screen_ysize() - ypos - ysize;
+            ypos = scr_get_ysize() - ypos - ysize;
 
             color_t fill = i2color(st->edx);
 
@@ -833,7 +833,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             u_int32_t _x = st->edx >> 28;
             bool have_title 		= _x & 0x01;
-            bool ref_client_area 	= _x & 0x02; // All coords are relative to client area
+            //bool ref_client_area 	= _x & 0x02; // All coords are relative to client area
             bool no_fill 		= _x & 0x04;
             bool gradient_fill 		= _x & 0x08;
 
@@ -866,12 +866,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             }
 
 
-            if(!no_fill) drv_video_window_fill( ks->win, fill );
+            if(!no_fill) w_fill( ks->win, fill );
 
             if(have_title && ((wstyle == 3) || (wstyle == 4)))
             {
                 const char *title = u_ptr(st->edi,0);
-                drv_video_window_set_title( ks->win, title );
+                w_set_title( ks->win, title );
             }
 
             //drv_video_window_update( ks->win );
@@ -889,7 +889,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             int y = st->ecx;
             color_t c = i2color(st->edx); // TODO inverse
 
-            drv_video_window_pixel( ks->win, x, y, c );
+            w_draw_pixel( ks->win, x, y, c );
             request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
@@ -970,7 +970,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 str = buf;
             }
 
-            drv_video_font_draw_string( ks->win, font, str, textc, bgc, xpos, ypos );
+            w_font_draw_string( ks->win, font, str, textc, bgc, xpos, ypos );
             request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
@@ -1138,7 +1138,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             cb->pixels = calloc( sizeof(rgba_t), npixels );
             rgb2rgba_move( cb->pixels, src, npixels );
 
-            drv_video_window_fill_rect( ks->win, cb->color, r );
+            w_fill_rect( ks->win, cb->color, r );
 
             if(!cb->flag_nopaint)
             {
@@ -1256,15 +1256,15 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             color_t c = i2color( st->edx );
 
-            drv_video_window_draw_box( ks->win, xpos, ypos, xsize, ysize, c );
+            w_draw_box( ks->win, xpos, ypos, xsize, ysize, c );
             request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
 
     case 14: // get screen size
         {
-            u_int32_t xs = 0xFFFF & (get_screen_xsize() - 1);
-            u_int32_t ys = 0xFFFF & (get_screen_ysize() - 1);
+            u_int32_t xs = 0xFFFF & (scr_get_xsize() - 1);
+            u_int32_t ys = 0xFFFF & (scr_get_ysize() - 1);
             st->eax = (xs << 16) | ys;
         }
         break;
@@ -1376,13 +1376,13 @@ void kolibri_sys_dispatcher( struct trap_state *st )
         switch( st->ebx )
         {
         case 0:
-            st->eax = COORD_TO_REG(video_drv->mouse_x,get_screen_ysize() - video_drv->mouse_y);
+            st->eax = COORD_TO_REG(video_drv->mouse_x,scr_get_ysize() - video_drv->mouse_y);
             break;
 
         case 1:
             {
                 int x = video_drv->mouse_x;
-                int y = get_screen_ysize() - video_drv->mouse_y;
+                int y = scr_get_ysize() - video_drv->mouse_y;
                 if( ks->win )
                 {
                     x -= ks->win->x;
@@ -1429,7 +1429,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             // TODO inverse draw
             color_t c = i2color( st->edx );
 
-            drv_video_window_draw_line( ks->win, xpos, ypos, xend, yend, c );
+            w_draw_line( ks->win, xpos, ypos, xend, yend, c );
             request_update_timer( ks, REPAINT_TIMEOUT_MS );
         }
         break;
@@ -1525,7 +1525,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             //SHOW_FLOW( 0, "pnum '%s'", p );
 
             // TODO clear bg
-            drv_video_font_draw_string( ks->win, font, p, fg, bg, xpos, ypos );
+            w_font_draw_string( ks->win, font, p, fg, bg, xpos, ypos );
             request_update_timer( ks, REPAINT_TIMEOUT_MS );
 
         }
@@ -1762,12 +1762,12 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             int ys =st->esi;
 
             if( (x != -1) && (y != -1) )
-                drv_video_window_move( ks->win, x, y );
+                w_move( ks->win, x, y );
 
             if( (xs != -1) && (ys != -1) )
             {
                 // TODO resize - implement
-                //drv_video_window_resize( ks->win, xs, ys );
+                //w_resize( ks->win, xs, ys );
             }
 
         }
@@ -1790,7 +1790,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             if( st->ebx == 1 ) // set title
             {
                 const char *title = u_ptr( st->ecx, 0 );
-                drv_video_window_set_title( ks->win, title );
+                w_set_title( ks->win, title );
             }
         }
         break;
@@ -1835,7 +1835,7 @@ one_more:
     // and set corresp bits
     if( ks->win && (!ks->have_e) )
     {
-        ks->have_e = drv_video_window_get_event( ks->win, &ks->e, 0 );
+        ks->have_e = ev_w_get_event( ks->win, &ks->e, 0 );
         SHOW_ERROR( 10, "read event, %s", ks->have_e ? "got" : "none" );
     }
 
