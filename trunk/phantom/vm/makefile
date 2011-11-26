@@ -9,7 +9,7 @@ SRCDIRS += $(BUILD_ROOT)/vm/resources
 
 INCDIRS += /usr/include/w32api/
 
-EXCLUDED_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o
+EXCLUDED_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o x11_screen.o x11_display.o
 
 
 include $(BUILD_ROOT)/makerules-lib

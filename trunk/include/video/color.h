@@ -104,6 +104,10 @@ rgba_t Hsi2Rgb(double H, double S, double I );
 #define INT32_TO_RGBA(rgba,i) ( (rgba) = *((rgba_t*)&(i)) )
 #define RGBA_TO_INT32(i,rgba) ( (i) = (*(u_int32_t*)(&(rgba))) )
 
+void rgba_scroll_hor( rgba_t *pixels, int xs, int ys, int lstep, int s, rgba_t bg );
+void rgba_fill_line( rgba_t *pixels, int xs, rgba_t bg );
+
+
 
 #endif // COLOR_H
 

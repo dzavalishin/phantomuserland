@@ -93,7 +93,7 @@ winblt:			drv_video_win_winblt_rev,
 readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 
-mouse:    		drv_video_null,
+mouse:    		vid_null,
 #endif
 
     // todo hw mouse!
@@ -1328,7 +1328,7 @@ static void vmware_video_update(void)
 void vmware_draw_mouse_bp2(void)
 {
     SVGA_WriteReg(SVGA_REG_CURSOR_X, video_driver_vmware_svga.mouse_x );
-    SVGA_WriteReg(SVGA_REG_CURSOR_Y, get_screen_ysize() - video_driver_vmware_svga.mouse_y );
+    SVGA_WriteReg(SVGA_REG_CURSOR_Y, scr_get_ysize() - video_driver_vmware_svga.mouse_y );
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_SHOW);
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
 }

@@ -66,7 +66,7 @@ struct drv_video_screen_t
 #if NEW_WINDOWS
     void 	(*winblt) ( window_handle_t from, rect_t src, int src_stride, int dest_xpos, int dest_ypos, zbuf_t zpos);
 #else
-    void 	(*winblt) ( const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
+    void 	(*winblt) ( const window_handle_t from, int xpos, int ypos, zbuf_t zpos);
 #endif
     void 	(*readblt) ( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
@@ -100,12 +100,13 @@ struct drv_video_screen_t
 #define VIDEO_PROBE_ACCEL 2 
 
 
-//
+// emulator video drivers
 extern struct drv_video_screen_t        drv_video_win32;
+extern struct drv_video_screen_t        drv_video_x11;
 
 extern struct drv_video_screen_t        *video_drv;
 
-extern void drv_video_null(void);
+extern void vid_null(void);
 
 
 
@@ -114,33 +115,46 @@ extern void drv_video_null(void);
 // Blitter can ignore alpha byte
 #define BLT_FLAG_NOALPHA        (1<<1)
 
-extern void drv_video_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
-extern void drv_video_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
 
-void drv_video_bitblt_part_forw(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
-void drv_video_bitblt_part_rev(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+
+
+int scr_get_xsize(void);
+int scr_get_ysize(void);
+int scr_get_bpp(void);
+
+
+
+
+
+
+
+extern void vid_bitblt_forw(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+extern void vid_bitblt_rev(const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+
+void vid_bitblt_part_forw(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
+void vid_bitblt_part_rev(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags );
 
 
 #if !NEW_WINDOWS
-extern void drv_video_win_winblt(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
-extern void drv_video_win_winblt_rev(const drv_video_window_t *from, int xpos, int ypos, zbuf_t zpos);
+extern void vid_win_winblt(const window_handle_t from, int xpos, int ypos, zbuf_t zpos);
+extern void vid_win_winblt_rev(const window_handle_t from, int xpos, int ypos, zbuf_t zpos);
 #endif
 
-void drv_video_readblt_forw( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
-void drv_video_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
+void vid_readblt_forw( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
+void vid_readblt_rev( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
 
 // RGB videospace access workers
-void drv_video_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
-void drv_video_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags);
+void vid_bitblt_reader(rgba_t *to, int xpos, int ypos, int xsize, int ysize, int reverse);
+void vid_bitblt_worker(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags);
 
-//void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos);
-void drv_video_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags);
+//void vid_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos);
+void vid_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, int reverse, zbuf_t zpos, u_int32_t flags);
 
 
 
-void mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
-void mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
+void scr_mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
+void scr_mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize );
 
 
 // -----------------------------------------------------------------------
@@ -179,20 +193,20 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 // Macros
 // -----------------------------------------------------------------------
 
-#define drv_video_update() video_drv->update()
-#define drv_video_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
+#define scr_update() video_drv->update()
+#define scr_readblt(from, xpos, ypos, xsize,ysize) ( video_drv->mouse_disable(), video_drv->readblt(from, xpos, ypos, xsize,ysize), video_drv->mouse_enable() )
 
 
-#define drv_video_bitblt(___from, xpos, ypos, xsize, ysize, zpos, flg)  ( \
-    mouse_disable_p(video_drv, xpos, ypos, xsize, ysize), \
+#define scr_bitblt(___from, xpos, ypos, xsize, ysize, zpos, flg)  ( \
+    scr_mouse_disable_p(video_drv, xpos, ypos, xsize, ysize), \
     video_drv->bitblt((___from), xpos, ypos, xsize, ysize, zpos, flg), \
-    mouse_enable_p(video_drv, xpos, ypos, xsize, ysize ) )
+    scr_mouse_enable_p(video_drv, xpos, ypos, xsize, ysize ) )
 
 
 
 // These are special for mouse pointer code - they're not try to disable mouse
-#define drv_video_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
-#define drv_video_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, ZBUF_TOP, 0)
+#define scr_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
+#define scr_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, ZBUF_TOP, 0)
 
 
 
@@ -200,12 +214,6 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 #define scr_mouse_redraw()              video_drv->mouse_redraw_cursor()
 #define scr_mouse_off()                 video_drv->mouse_disable()
 #define scr_mouse_on()                  video_drv->mouse_enable()
-
-
-
-int get_screen_xsize(void);
-int get_screen_ysize(void);
-int get_screen_bpp(void);
 
 
 

@@ -153,6 +153,9 @@ phantom_device_t * driver_isa_mipsnet_probe( int port, int irq, int stage )
     return dev;
 }
 
+//#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
 
 static void mipsnet_interrupt( void *_dev )
 {
@@ -184,6 +187,8 @@ static void mipsnet_interrupt( void *_dev )
 
 
 }
+
+//#pragma GCC diagnostic pop
 
 
 /*

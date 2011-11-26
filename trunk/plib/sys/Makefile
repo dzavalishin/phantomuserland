@@ -38,10 +38,11 @@ roots: internal.thread.pc internal.bitmap.pc
 BOOTCLASSES=$(realpath $(PHANTOM_HOME))/run/fat/class
 
 %.pc: %.ph
-	@echo -:- $< - $@
+	@echo :-- $@
 	@$(PLC) $<
-	cp $(BINDIR)/$@ $(BOOTCLASSES)
+	@cp $(BINDIR)/$@ $(BOOTCLASSES)
 
+#	@echo -:- $< - $@
 
 clean::
 	-rm $(BINDIR)/*.pc

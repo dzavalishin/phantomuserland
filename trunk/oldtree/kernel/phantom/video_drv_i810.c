@@ -56,13 +56,13 @@ start: 			i810_video_start,
 stop:   		i810_video_stop,
 
 #if 0
-update: 		drv_video_null,
+update: 		vid_null,
 bitblt: 		drv_video_bitblt_rev,
 winblt:			drv_video_win_winblt_rev,
 readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 
-mouse:    		drv_video_null,
+mouse:    		vid_null,
 
 redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
 set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,

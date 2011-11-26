@@ -413,7 +413,7 @@ void 	basic_vga_bitblt(const struct rgba_t *from, int xpos, int ypos, int xsize,
         }
     }
 
-    drv_video_update();
+    scr_update();
 
 }
 
@@ -548,12 +548,12 @@ probe: 			basic_vga_probe,
 start: 			basic_vga_start,
 stop:   		basic_vga_stop,
 
-update:    		drv_video_null,
+update:    		vid_null,
 bitblt:    		(void *)basic_vga_bitblt,
 winblt: 		(void *)basic_vga_winblt,
 readblt: 		basic_vga_readblt,
 
-mouse:    		drv_video_null,
+mouse:    		vid_null,
 
     // mouse has to be implememnted separately for this card :(
 #if 0
@@ -562,10 +562,10 @@ set_mouse_cursor:       drv_video_set_mouse_cursor_deflt,
 mouse_disable:          drv_video_mouse_off_deflt,
 mouse_enable:           drv_video_mouse_on_deflt,
 #else
-mouse_redraw_cursor:    drv_video_null,
-mouse_set_cursor:       (void *)drv_video_null,
-mouse_disable:          drv_video_null,
-mouse_enable:           drv_video_null,
+mouse_redraw_cursor:    vid_null,
+mouse_set_cursor:       (void *)vid_null,
+mouse_disable:          vid_null,
+mouse_enable:           vid_null,
 #endif
 
 };

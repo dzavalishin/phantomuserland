@@ -321,7 +321,7 @@ static void *mem;
 
 struct drv_video_screen_t        *video_drv = 0;
 
-extern int pvm_win_init(); // We need it only here
+extern int pvm_video_init(); // We need it only here
 
 static void mouse_callback()
 {
@@ -341,14 +341,17 @@ int main(int argc, char* argv[])
 
     run_init_functions( INIT_LEVEL_PREPARE );
 
-    drv_video_win32.mouse = mouse_callback;
-    video_drv = &drv_video_win32;
+    //drv_video_win32.mouse = mouse_callback;
+    //video_drv = &drv_video_win32;
+    //video_drv = &drv_video_x11;
 
     args(argc,argv);
 
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 
-    pvm_win_init();
+    pvm_video_init();
+    video_drv->mouse = mouse_callback;
+
     drv_video_init_windows();
     init_main_event_q();
     init_new_windows();

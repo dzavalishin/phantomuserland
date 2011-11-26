@@ -155,6 +155,9 @@ int do_test_udp_syslog(const char *test_parm)
     return 0;
 }
 
+
+
+
 int do_test_resolver(const char *test_parm)
 {
     (void) test_parm;
@@ -171,6 +174,12 @@ int do_test_resolver(const char *test_parm)
 #endif
     return 0;
 }
+
+
+
+
+
+
 
 
 
@@ -338,7 +347,8 @@ int do_test_tcp_connect(const char *test_parm)
         //test_parm = "87.250.250.3:80";
         //test_parm = "93.158.134.3:80";
         //test_parm = "93.158.134.203:80";
-        test_parm = "173.194.32.16:80"; // google.com
+        //test_parm = "173.194.32.16:80"; // google.com
+        test_parm = "89.108.110.118:80"; // misc.dz.ru
 
     int ip0, ip1, ip2, ip3, port;
 
@@ -355,7 +365,7 @@ int do_test_tcp_connect(const char *test_parm)
     NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(ip0, ip2, ip2, ip3);
 
 
-    SHOW_FLOW0( 0, "TCP - create socket");
+    SHOW_FLOW( 0, "TCP - create socket to %d.%d.%d.%d port %d", ip0, ip2, ip2, ip3, port);
     if( tcp_open(&prot_data) )
     {
         SHOW_ERROR0(0, "can't prepare endpoint");
@@ -363,25 +373,25 @@ int do_test_tcp_connect(const char *test_parm)
         return EIO;
     }
 
-    SHOW_FLOW0( 0, "TCP - will connect to Yandex");
+    SHOW_FLOW0( 0, "TCP - will connect");
     if( tcp_connect( prot_data, &addr) )
     {
         SHOW_ERROR(0, "can't connect to %s", test_parm);
         goto fail;
     }
-    SHOW_FLOW0( 0, "TCP - connected to Yandex, read");
+    SHOW_FLOW0( 0, "TCP - connected, read");
 
     char buf[1024];
 
 
     memset( buf, 0, sizeof(buf) );
-    strlcpy( buf, "GET /\r\n", sizeof(buf) );
+    strlcpy( buf, "GET /\r\n\r\n", sizeof(buf) );
     //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int nwrite = tcp_sendto( prot_data, buf, strlen(buf), &addr);
     SHOW_FLOW( 0, "TCP - write = %d (%s)", nwrite, buf);
 
     memset( buf, 0, sizeof(buf) );
-    int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*5 );
+    int nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50 );
     buf[sizeof(buf)-1] = 0;
 
     SHOW_FLOW( 0, "TCP - read = %d (%s)", nread, buf);

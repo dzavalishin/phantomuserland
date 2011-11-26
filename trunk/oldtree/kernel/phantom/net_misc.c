@@ -25,13 +25,6 @@ int phantom_tcpip_active = 0;
 
 
 
-
-
-
-
-
-
-
 #define SYSLOGD_PORT 514
 
 static void *syslog_socket = 0;
@@ -129,12 +122,12 @@ void udp_syslog_send(const char *prefix, const char *message)
 {
     if(syslog_failed || !phantom_tcpip_active)
         return;
-    if(syslog_socket == 0)
-        if(connect_syslog())
-        {
-            syslog_failed = 1;
-            return;
-        }
+
+    if( (syslog_socket == 0) && connect_syslog() )
+    {
+        syslog_failed = 1;
+        return;
+    }
 
     char buf[1024];
     // kernel (0), debug(7)
@@ -162,25 +155,6 @@ void udp_syslog_send(const char *prefix, const char *message)
 
 
 
-
-
-
-
-
-
-
-
-
-
-void net_test(void)
-{
-    syslog(LOG_DEBUG|LOG_KERN,"Test of UDP syslog");
-#if TFTP_TEST
-    tftp_test();
-#endif
-    //getchar();
-
-}
 
 
 #endif // HAVE_NET

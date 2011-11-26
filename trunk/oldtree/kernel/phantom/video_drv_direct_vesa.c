@@ -62,17 +62,17 @@ struct drv_video_screen_t        video_driver_direct_vesa =
     0,
 
 probe: 	direct_vesa_probe,
-start: 	(void *)drv_video_null,
-stop:  	(void *)drv_video_null,
+start: 	(void *)vid_null,
+stop:  	(void *)vid_null,
 
 #if 0
-update:	drv_video_null,
-bitblt: (void *)drv_video_null,
-winblt: (void *)drv_video_null,
-readblt: (void *)drv_video_null,
+update:	vid_null,
+bitblt: (void *)vid_null,
+winblt: (void *)vid_null,
+readblt: (void *)vid_null,
 bitblt_part:            drv_video_bitblt_part_rev,
 
-mouse:  drv_video_null,
+mouse:  vid_null,
 
 redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
 set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,

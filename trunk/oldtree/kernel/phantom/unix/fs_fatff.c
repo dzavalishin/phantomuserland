@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "fat_ff_fs"
 #include "debug_ext.h"
-#define debug_level_flow 6
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -42,7 +42,9 @@ static size_t      fatff_write(   struct uufile *f, const void *src, size_t byte
 static errno_t     fatff_stat( struct uufile *f, struct stat *dest );
 static size_t      fatff_getpath( struct uufile *f, void *dest, size_t bytes);
 static ssize_t     fatff_getsize( struct uufile *f);
+static errno_t     fatff_setsize( struct uufile *f, size_t size);
 static errno_t     fatff_seek(    struct uufile *f );
+static errno_t     fatff_readdir( struct uufile *f, struct dirent *dirp );
 
 //static void *      fatff_copyimpl( void *impl );
 
@@ -53,10 +55,14 @@ static struct uufileops fatff_fops =
     .read 	= fatff_read,
     .write 	= fatff_write,
 
+    .readdir    = fatff_readdir,
+
     .seek       = fatff_seek,
 
     .getpath 	= fatff_getpath,
     .getsize 	= fatff_getsize,
+    .setsize    = fatff_setsize,
+
 
 //    .copyimpl   = fatff_copyimpl,
 
@@ -76,6 +82,7 @@ static errno_t     fatff_close(struct uufile *);
 static uufile_t *  fatff_namei(uufs_t *fs, const char *filename);
 static uufile_t *  fatff_getRoot(uufs_t *fs);
 static errno_t     fatff_dismiss(uufs_t *fs);
+static errno_t     fatff_mkdir(struct uufs *fs, const char *path);
 
 
 static struct uufs fatff_fs =
@@ -86,6 +93,7 @@ static struct uufs fatff_fs =
     .namei 	= fatff_namei,
     .root 	= fatff_getRoot,
     .dismiss    = fatff_dismiss,
+    .mkdir      = fatff_mkdir,
 
     .impl       = 0,
 };
@@ -130,8 +138,10 @@ static errno_t     fatff_close(struct uufile *f)
 
 static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
 {
+    //bool isdir = 0;
     FATFS *ffs = fs->impl;
     FIL *fp = calloc( 1, sizeof(FIL) );
+    DIR *dj;
 
     FRESULT r = f_open ( ffs, fp, filename,
                          // TODO wrong. need real open's request here to handle create/open existing file
@@ -142,7 +152,17 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     {
         SHOW_FLOW( 7, "f_open %s res = %d", filename, r );
         free(fp);
-        return 0;
+        fp = 0;
+
+        dj = calloc(1, sizeof(DIR));
+        r = f_opendir ( ffs, dj, *filename ? filename : "/" );
+
+        if( r )
+        {
+            free(dj);
+            dj = 0;
+            return 0;
+        }
     }
 
     uufile_t *ret = create_uufile();
@@ -150,7 +170,11 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     ret->ops = &fatff_fops;
     ret->pos = 0;
     ret->fs = fs;
-    ret->impl = fp;
+    ret->impl = fp ? (void *)fp : (void *)dj;
+
+    if(!fp)
+        ret->flags |= UU_FILE_FLAG_DIR;
+
     //ret->flags |= UU_FILE_FLAG_FREEIMPL;
     ret->flags |= UU_FILE_FLAG_OPEN; // TODO this is wrong and must be gone - open in open!
 
@@ -170,9 +194,18 @@ static uufile_t *  fatff_getRoot(uufs_t *fs)
 static errno_t  fatff_dismiss(uufs_t *fs)
 {
     (void) fs;
-    // free( fs->impl );
-    // TODO impl
+    SHOW_ERROR0( 0, "not impl" );
     return 0;
+}
+
+
+static errno_t fatff_mkdir(struct uufs *fs, const char *path)
+{
+    FATFS *ffs = fs->impl;
+
+    FRESULT r = f_mkdir( ffs, path );
+
+    return fresult2errno(r);
 }
 
 
@@ -191,6 +224,9 @@ static errno_t       fatff_seek(    struct uufile *f )
 
 static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes)
 {
+    if( f->flags & UU_FILE_FLAG_DIR )
+        return -1;
+
     FRESULT r;
     unsigned int res;
 
@@ -215,6 +251,9 @@ static size_t      fatff_read(    struct uufile *f, void *dest, size_t bytes)
 
 static size_t      fatff_write(   struct uufile *f, const void *dest, size_t bytes)
 {
+    if( f->flags & UU_FILE_FLAG_DIR )
+        return -1;
+
     FRESULT r;
     unsigned int res;
 
@@ -229,6 +268,34 @@ static size_t      fatff_write(   struct uufile *f, const void *dest, size_t byt
     return res;
 }
 
+static errno_t     fatff_readdir( struct uufile *f, struct dirent *dirp )
+{
+    if( !(f->flags & UU_FILE_FLAG_DIR) )
+        return ENOTDIR;
+
+    DIR *dj = f->impl;
+    FILINFO fi;
+    char lname[FS_MAX_PATH_LEN];
+    fi.lfname = lname;
+
+    FRESULT r = f_readdir ( dj,	&fi );
+
+    if( r == FR_NO_FILE)
+        return ENOENT; // End of dir
+
+    dirp->d_reclen = 0;
+    dirp->d_ino = dj->sclust ? dj->sclust : ~0u ; // zero inode means unused entry, and zero cluster is root dir - replace with -1
+
+    void *name = lname[0] ? lname : fi.fname;
+
+    size_t nlen = strlen(name) + 1;
+    if( nlen > sizeof(dirp->d_name) ) nlen = sizeof(dirp->d_name);
+
+    strlcpy( dirp->d_name, name, nlen );
+    dirp->d_namlen = nlen - 1;
+
+    return 0;
+}
 
 static size_t      fatff_getpath( struct uufile *f, void *dest, size_t bytes)
 {
@@ -252,6 +319,25 @@ static ssize_t      fatff_getsize( struct uufile *f)
     return fp->fsize;
 }
 
+static errno_t fatff_setsize( struct uufile *f, size_t size)
+{
+    if( !(f->flags & UU_FILE_FLAG_OPEN) )
+        return EINVAL;
+
+    if( f->flags & UU_FILE_FLAG_DIR )
+        return EISDIR;
+
+    FIL *fp = f->impl;
+    if( fp == 0 )
+        return EINVAL;
+
+    // mutex taken by caller
+    FRESULT r = f_lseek ( fp, size );
+    if( r ) return fresult2errno( r );
+
+    return fresult2errno(f_truncate ( fp ));
+}
+
 
 
 static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
@@ -263,8 +349,26 @@ static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
     char lname[FS_MAX_PATH_LEN];
     fi.lfname = lname;
 
-    SHOW_FLOW( 10, "stat '%s'", f->name );
-    FRESULT r = f_stat ( ffs, f->name, &fi );
+    const char *name = f->name;
+    if( *name == 0 )
+    {
+        // f_stat fails to stat rootdir... FIXME
+        memset( dest, 0, sizeof(struct stat) );
+
+        dest->st_nlink = 1;
+        dest->st_uid = -1;
+        dest->st_gid = -1;
+
+        dest->st_size = 1;
+
+        dest->st_mode = 0555; // r-xr-xr-x
+        dest->st_mode |= S_IFDIR;
+
+        return 0;
+    }
+
+    SHOW_FLOW( 10, "stat '%s'", name );
+    FRESULT r = f_stat ( ffs, name, &fi );
     SHOW_FLOW( 7, "stat lfname '%s' res = %d", lname, r );
 
     if(!r)
@@ -279,7 +383,7 @@ static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
 
         dest->st_mode = 0555; // r-xr-xr-x
 
-        if(fi.fattrib & AM_DIR)            dest->st_mode |= S_IFDIR; else dest->st_mode = _S_IFREG;
+        if(fi.fattrib & AM_DIR)            dest->st_mode |= S_IFDIR; else dest->st_mode |= _S_IFREG;
 
         if(!(fi.fattrib & AM_RDO))         dest->st_mode |= 0222;
 

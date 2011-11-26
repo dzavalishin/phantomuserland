@@ -47,6 +47,7 @@
 #include <kernel/timedcall.h>
 
 #include <sys/utsname.h>
+#include <sys/syslog.h>
 #include <stdlib.h>
 
 #include <threads.h>
@@ -371,7 +372,7 @@ int main(int argc, char **argv, char **envp)
 
 #if HAVE_NET
     phantom_tcpip_active = 1; // Tell them we finished initing network
-    net_test();
+    syslog(LOG_DEBUG|LOG_KERN, "Phantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting", svn_version(), phantom_uname.machine );
 #endif
 
 

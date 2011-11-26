@@ -336,14 +336,14 @@ typedef struct {
 /* Directory object structure (DIR) */
 
 typedef struct {
-    FATFS*	fs;				/* Pointer to the owner file system object */
-    WORD	id;				/* Owner file system mount ID */
+    FATFS*	fs;			/* Pointer to the owner file system object */
+    WORD	id;			/* Owner file system mount ID */
     WORD	index;			/* Current read/write index number */
     DWORD	sclust;			/* Table start cluster (0:Root dir) */
     DWORD	clust;			/* Current cluster */
     DWORD	sect;			/* Current sector */
     BYTE*	dir;			/* Pointer to the current SFN entry in the win[] */
-    BYTE*	fn;				/* Pointer to the SFN (in/out) {file[8],ext[3],status[1]} */
+    BYTE*	fn;			/* Pointer to the SFN (in/out) {file[8],ext[3],status[1]} */
 #if _USE_LFN
     WCHAR*	lfn;			/* Pointer to the LFN working buffer */
     WORD	lfn_idx;		/* Last matched LFN index number (0xFFFF:No LFN) */

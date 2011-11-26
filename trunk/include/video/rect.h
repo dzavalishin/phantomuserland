@@ -29,6 +29,12 @@ int rect_sub( rect_t *out1, rect_t *out2, rect_t *old, rect_t *new );
 int rect_eq( rect_t *a, rect_t *b );
 int rect_empty( rect_t *a );
 
+//! Returns true if a includes (or equal to) b
+int rect_includes( rect_t *a, rect_t *b );
+
+//! Returns true if a intersects with (or equal to) b
+int rect_intersects( rect_t *a, rect_t *b );
+
 
 int point_in_rect( int x, int y, rect_t *r );
 
