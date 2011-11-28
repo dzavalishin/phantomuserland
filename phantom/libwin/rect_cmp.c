@@ -237,6 +237,15 @@ int rect_intersects( rect_t *a, rect_t *b )
     int bx2 = b->x + b->xsize;
     int by2 = b->y + b->ysize;
 
+
+    if( (a->x > bx2) || (b->x > ax2) )
+        return 0;
+
+    if( (a->y > by2) || (b->y > ay2) )
+        return 0;
+
+    return 1;
+/* wrong
     if( (a->x >= b->x) && (a->x < bx2) )
         goto checky;
 
@@ -254,6 +263,7 @@ checky:
         return 1;
 
     return 0;
+*/
 }
 
 
