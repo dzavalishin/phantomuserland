@@ -221,10 +221,10 @@ void win_draw_decorations(drv_video_window_t *w)
 
     w_assert_lock();
 #if !VIDEO_T_IN_D
-    if( w->state & WSTATE_WIN_VISIBLE )
+    if( (w->state & WSTATE_WIN_VISIBLE) && w->w_title )
         _drv_video_winblt_locked(w->w_title);
 #endif
-    if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
+    if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) && w->w_decor )
         _drv_video_winblt_locked(w->w_decor);
 }
 
