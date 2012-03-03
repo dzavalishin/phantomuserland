@@ -556,7 +556,7 @@ static errno_t SB_ResetDSP(phantom_device_t *dev)
 #if 1
 
 
-#include "sb16_regs.h"
+#include <dev/isa/sb16_regs.h>
 
 
 static void

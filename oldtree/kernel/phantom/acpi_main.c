@@ -34,7 +34,7 @@ ACPI_MODULE_NAME    ("examples")
 ACPI_STATUS InstallHandlers (void);
 
 
-
+#if 0
 static ACPI_STATUS walkCallback ( ACPI_HANDLE Object, UINT32 NestingLevel, void *Context, void **ReturnValue)
 {
     (void) Context;
@@ -93,7 +93,7 @@ static ACPI_STATUS walkCallback ( ACPI_HANDLE Object, UINT32 NestingLevel, void 
 
     return AE_OK;
 }
-
+#endif
 
 /******************************************************************************
  *
