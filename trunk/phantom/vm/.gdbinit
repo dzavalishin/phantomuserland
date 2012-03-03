@@ -25,4 +25,6 @@ break pvm_boot
 
 #break init_main_event_q
 
+break pvm_create_interface_object
+
 run
