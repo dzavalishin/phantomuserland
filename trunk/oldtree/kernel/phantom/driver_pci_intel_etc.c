@@ -240,7 +240,7 @@ static errno_t check_piix4_isa_sanity(int port)
 void ia32_intel_poweroff(void)
 {
     u_int32_t ov = 0x3C; // 111100b
-    u_int32_t v;
+    //u_int32_t v;
     if( inw( 0x404 ) != 0xFFFF )
         outw( 0x404, ov );
     else if( inw( 0x4004 ) != 0xFFFF )
