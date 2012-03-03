@@ -331,7 +331,9 @@ struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_obj
 
     if(base_icount > n_methods)
     {
-        printf( " create interface: child has less methods than parent\n\n" );
+        // root classes have N_SYS_METHODS slots in interface, don't cry about that
+        if( n_methods > N_SYS_METHODS )
+            printf( " create interface: child has less methods (%d) than parent (%d)\n", n_methods, base_icount );
         base_icount = n_methods;
     }
 
