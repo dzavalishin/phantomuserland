@@ -35,9 +35,9 @@
 #define pvm_data_area( o, type ) ((struct data_area_4_##type *)&(o.data->da))
 
 /** Num of slots in normal (noninternal) object. */
-#define da_po_limit(o)	 (o->_da_size/sizeof(struct pvm_object))
+#define da_po_limit(o)	 (((o)->_da_size)/sizeof(struct pvm_object))
 /** Slots access for noninternal object. */
-#define da_po_ptr(da)  ((struct pvm_object *)&da)
+#define da_po_ptr(da)  ((struct pvm_object *)&(da))
 
 pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st);
 
