@@ -179,3 +179,22 @@ pvm_object_t pvm_get_field_name( pvm_object_t tclass, int ordinal )
     return name;
 }
 
+
+int pvm_get_field_name_count( pvm_object_t tclass )
+{
+    struct data_area_4_class *cda= pvm_object_da( tclass, class );
+    pvm_object_t fnames = cda->field_names;
+
+    if( pvm_is_null(fnames))
+        return 0;
+
+    return get_array_size( fnames.data );
+}
+
+pvm_object_t pvm_get_class( pvm_object_t o )
+{
+    if( pvm_is_null(o))
+        return o;
+
+    return o.data->_class;
+}
