@@ -34,10 +34,10 @@
 //__FBSDID("$FreeBSD: src/lib/libc/stdlib/atof.c,v 1.6.6.1 2008/11/25 02:59:29 kensmith Exp $");
 
 #include <stdlib.h>
+#include <string.h>
 
 double
-atof(ascii)
-	const char *ascii;
+atof(const char *ascii)
 {
 	return strtod(ascii, (char **)0);
 }

@@ -790,6 +790,8 @@ void uu_close_all( uuprocess_t *u  )
     {
         if( u->fd[i] )
         {
+            SHOW_FLOW( 8, "close fd %d on exit of pid %d", i, u->pid );
+
             int err;
             if( usys_close( &err, u, i ) || err )
                 SHOW_ERROR( 0, "Unable to close fd %d on proc death: %d", i, err );

@@ -4,6 +4,9 @@
  ** Distributed under the terms of the NewOS License.
  */
 
+#define USE_NVIDIA_HACK 0
+#define USE_ATI_HACK 0
+
 #include <newos/compat.h>
 
 
@@ -287,6 +290,7 @@ static uint16 vesa3_set_mode_CRTC_ATI( uint16 mode, vesa3_CRTC_infoblock *crtc )
     return regs.ax;
 }
 
+#if USE_NVIDIA_HACK
 static uint16 vesa3_set_mode_CRTC_nVidia( uint16 mode, vesa3_CRTC_infoblock *crtc )
 {
     struct s_regs regs;
@@ -299,10 +303,12 @@ static uint16 vesa3_set_mode_CRTC_nVidia( uint16 mode, vesa3_CRTC_infoblock *crt
 
     return regs.ax;
 }
+#endif
 
 static uint16 (*vesa3_set_mode_CRTC)(uint16, vesa3_CRTC_infoblock *) = vesa3_set_mode_CRTC_generic;
 
-static uint16 vesa3_set_mode( unsigned int xres, unsigned int yres, unsigned int bpp, unsigned int refresh_rate )
+//static
+uint16 vesa3_set_mode( unsigned int xres, unsigned int yres, unsigned int bpp, unsigned int refresh_rate )
 {
     uint16 err = 0xffff;
     uint16 *mode = (uint16 *)infoblock.video_mode_ptr;
@@ -333,6 +339,8 @@ static uint16 vesa3_set_mode( unsigned int xres, unsigned int yres, unsigned int
 
     return err;
 }
+
+#if 0
 
 //----------------------------------------------------------------------------
 /* For compatibility with the vesa (2.0) driver and demonstration purposes
@@ -424,7 +432,6 @@ static int vesa3_open( void )
     return NO_ERROR;
 }
 
-#if 0
 
 //----------------------------------------------------------------------------
 static int vesa3_close( dev_cookie cookie )
@@ -646,7 +653,7 @@ errno_t vesa3_bootstrap(void)
     // we start with the init function
     vesa3_retn = pm_info->init_offs;
 
-#if 0
+#if USE_NVIDIA_HACK
     // now analyze the bios to find out if it is a nVidia derived broken one
     if ( video_bios[vesa3_retn] == 0xe9 ) {  // jmp
         ptr = (unsigned char*)(video_bios+vesa3_retn+3) + *(uint16*)&(video_bios[vesa3_retn+1]);
@@ -896,7 +903,7 @@ errno_t vesa3_bootstrap(void)
         dprintf( "vesa3: OEM product name: %s\n", (char*)infoblock.oem_product_name_ptr );
 
     resolve_farptr( &infoblock.video_mode_ptr );
-#if 0  // broken ATI bios
+#if USE_ATI_HACK  // broken ATI bios
     {
         struct s_farcall farcall_bak = farcall;
         int retn_bak = vesa3_retn;

@@ -27,9 +27,27 @@ CLIB   = $(PLIBDIR)/libphantom_c.a
 include $(PHANTOM_SRCDIR)/GNUmakerules
 
 
+NOT_ANALYSE += isa_sb16.E
+# Frama-C dies on it
+NOT_ANALYSE += usb-uhci.E
 
-analyse::
-		clang -emit-ast $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
+vpath %.E ../anl
+
+EFILES = $(filter-out $(NOT_ANALYSE), $(patsubst %.c,%.E,$(notdir $(CFILES) $(wildcard *.c) )) )
+
+%.E: %.c
+	@echo --- preprocessing for $<
+	@$(CC) -E $(PHANTOM_CFLAGS) -o ../anl/$@ $<
+#	echo $(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) -o $@ $<
+
+
+analyse:: $(EFILES)
+	rm ../anl/*.d
+
+#	@echo --- preprocessing for $(TARGET)_sources.E
+#	$(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) $(filter-out $(NOT_ANALYSE), $(CFILES) ) > ../../$(TARGET)_sources.E
+
+#		clang -emit-ast $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
 #		clang --analyse $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
 
 
