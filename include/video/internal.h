@@ -9,6 +9,7 @@
 **/
 
 #include <video/bitmap.h>
+#include <video/window.h>
 
 void init_new_windows(void);
 
@@ -33,6 +34,8 @@ void    w_request_async_repaint( rect_t *r );
 
 void    request_repaint_all_for_square( rect_t *todo );
 void    request_repaint_all_for_win( struct drv_video_window *w );
+
+void    win_make_decorations(drv_video_window_t *w);
 
 
 // -----------------------------------------------------------------------

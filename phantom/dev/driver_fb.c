@@ -48,6 +48,8 @@ static int fb_stop(phantom_device_t *dev)
 {
     (void) dev;
 
+    SHOW_FLOW( 1, "stop %p", dev );
+
     hal_mutex_lock( &m );
     if(have_w)
     {
@@ -152,10 +154,10 @@ phantom_device_t * driver_framebuf_probe( const char *name, int stage )
     dev->name = "fb";
     dev->seq_number = seq_number++;
 
-    dev->dops.stop = fb_start;
-    dev->dops.stop = fb_stop;
+    dev->dops.start = fb_start;
+    dev->dops.stop  = fb_stop;
 
-    dev->dops.read = fb_read;
+    dev->dops.read  = fb_read;
     dev->dops.write = fb_write;
 
     dev->dops.ioctl = fb_ioctl;

@@ -61,6 +61,9 @@ long 	atol(const char *str);
 long 	strtol(const char *nptr, char **endptr, int base);
 unsigned long strtoul(const char * __restrict nptr, char ** __restrict endptr, int base);
 
+double strtod(const char *__restrict str, char **__restrict endptr  );
+long double strtold(const char *str, char **endptr );
+
 quad_t 	strtoq(const char *nptr, char **endptr, int base);
 u_quad_t strtouq(const char *nptr, char **endptr, int base);
 

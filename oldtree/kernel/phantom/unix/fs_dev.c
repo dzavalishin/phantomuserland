@@ -149,7 +149,7 @@ static errno_t     dev_open(struct uufile *f, int create, int write)
 
     SHOW_FLOW( 9, "Open dev uufile %p", f );
 
-    if(f->flags && UU_FILE_FLAG_DIR)
+    if(f->flags & UU_FILE_FLAG_DIR)
         return 0;
 
     phantom_device_t* dev = f->impl;
@@ -176,7 +176,7 @@ static errno_t     dev_close(struct uufile *f)
 {
     SHOW_FLOW( 9, "Close dev uufile %p", f );
 
-    if(f->flags && UU_FILE_FLAG_DIR)
+    if(f->flags & UU_FILE_FLAG_DIR)
         return 0;
 
     phantom_device_t* dev = f->impl;
@@ -289,7 +289,7 @@ static errno_t     dev_stat( struct uufile *f, struct stat *dest )
 
     dest->st_mode = 0555; // r-xr-xr-x
 
-    if(f->flags && UU_FILE_FLAG_DIR)
+    if(f->flags & UU_FILE_FLAG_DIR)
         dest->st_mode |= _S_IFDIR;
     else
         dest->st_mode |= _S_IFCHR;

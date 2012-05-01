@@ -547,8 +547,6 @@ int main()
     k_down = 0;
     k_up = 0;
 
-#warning process exit doesnt kill window
-
     fb = open("/dev/etc/fb.0", O_RDWR );
 
     if( fb < 0 )
