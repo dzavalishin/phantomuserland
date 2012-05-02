@@ -1,0 +1,2 @@
+All this test env is taken from article at http://habrahabr.ru/post/123344/#habracut
+Thanx to autor (a_dobkin)!
