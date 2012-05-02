@@ -41,7 +41,9 @@ size_t searchModulesInDir( char ***m_list, char *dir ) {
     }
     
     while( ( ent = readdir( modules_dir ) ) ) {
-        if( strncmp( ent->d_name, ".", 1 ) == 0 || strstr( ent->d_name, ".so" ) == NULL ) {
+        if( strncmp( ent->d_name, ".", 1 ) == 0 || 
+            ( (strstr( ent->d_name, ".so" ) == NULL) && (strstr( ent->d_name, ".dll" ) == NULL) )
+            ) {
             continue;
         }
     
