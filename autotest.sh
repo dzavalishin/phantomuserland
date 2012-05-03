@@ -4,6 +4,10 @@ export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
 
+# was oldtree/run_test
+TEST_DIR=run/test
+TFTP_PATH=../../run/tftp
+
 die ( ) {
 	[ -s make.log ] && tail make.log
 	[ "$1" ] && echo "$*"
@@ -46,7 +50,7 @@ preserve_log ( ) {
 
 	[ -e $SAVED_LOG ] && mv $SAVED_LOG $SAVED_LOG.0
 
-	cp oldtree/run_test/serial0.log $SAVED_LOG
+	cp $TEST_DIR/serial0.log $SAVED_LOG
 
 	echo "The serial0.log can be viewed at
 
@@ -60,7 +64,7 @@ Previous copies are kept (serial0.log.0 through .9)"
 RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 [ "$RUNNING" ] && {
 	(echo "$RUNNING" | grep -q defunct) || \
-	(tail -1 oldtree/run_test/serial0.log | grep ^Press) || {
+	(tail -1 $TEST_DIR/serial0.log | grep ^Press) || {
 		echo "Another copy is running: $RUNNING"
 		exit 0
 	}
@@ -79,8 +83,8 @@ make clean > /dev/null 2>&1
 
 # clean unexpected failures
 GRUB_MENU=tftp/tftp/menu.lst
-svn diff | grep -q "^--- oldtree/run_test/$GRUB_MENU" && \
-	rm oldtree/run_test/$GRUB_MENU
+svn diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
+	rm $TEST_DIR/$GRUB_MENU
 SVN_OUT=`svn update`
 [ $? -ne 0 -o `echo "$SVN_OUT" | grep -c '^At revision'` -ne 0 ] && {
 	[ "$FORCE" ] || die "$MSG"
@@ -104,8 +108,7 @@ echo "$SVN_OUT"
 	tail make.log
 }
 
-cd oldtree/run_test
-TFTP_PATH=../../run/tftp
+cd $TEST_DIR
 cp $TFTP_PATH/phantom tftp/
 
 for module in classes pmod_test pmod_tcpdemo
@@ -174,6 +177,7 @@ boot
 " > $GRUB_MENU
 
 # before running again
+# TODO call ../zero_ph_img.sh 
 cp ../run/phantom.img .
 #rm phantom.img
 #touch phantom.img
