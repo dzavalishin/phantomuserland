@@ -3,10 +3,14 @@ cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
+QEMU=`which qemu`
+
+# reasonable fallback
+[ "$QEMU" ] || QEMU=/usr/bin/qemu-i386
 
 # was oldtree/run_test
 TEST_DIR=run/test
-TFTP_PATH=../../run/tftp
+#TFTP_PATH=../../run/tftp
 
 die ( ) {
 	[ -s make.log ] && tail make.log
@@ -70,7 +74,7 @@ RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 	}
 
 	echo "Previous test run stalled. Killing qemu..."
-	pkill qemu
+	pkill $QEMU
 
 	preserve_log
 }
@@ -109,20 +113,20 @@ echo "$SVN_OUT"
 }
 
 cd $TEST_DIR
-cp $TFTP_PATH/phantom tftp/
+#cp $TFTP_PATH/phantom tftp/
 
-for module in classes pmod_test pmod_tcpdemo
-do
-	[ -s tftp/$module ] || {
-		cp $TFTP_PATH/$module tftp/
-		continue
-	}
+#for module in classes pmod_test pmod_tcpdemo
+#do
+#	[ -s tftp/$module ] || {
+#		cp $TFTP_PATH/$module tftp/
+#		continue
+#	}
 
-	[ tftp/$module -ot $TFTP_PATH/$module ] || continue
+#	[ tftp/$module -ot $TFTP_PATH/$module ] || continue
 
-	echo "$module is renewed"
-	cp $TFTP_PATH/$module tftp/
-done
+#	echo "$module is renewed"
+#	cp $TFTP_PATH/$module tftp/
+#done
 
 rm -f serial0.log
 
@@ -156,7 +160,7 @@ dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 
 
-qemu $QEMU_OPTS
+$QEMU $QEMU_OPTS
 
 grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
@@ -197,7 +201,7 @@ for pass in 1 2
 do
 	echo "
 ===> pass $pass"
-	qemu $QEMU_OPTS &
+	$QEMU $QEMU_OPTS &
 	QEMU_PID=$!
 
 	while [ 1 ]
