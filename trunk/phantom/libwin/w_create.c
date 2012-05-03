@@ -23,8 +23,9 @@
 //#include <kernel/init.h>
 //#include "win_local.h"
 #include <video/window.h>
-//#include <video/button.h>
+#include <video/button.h>
 #include <video/internal.h>
+#include <video/screen.h>
 
 //static void defaultEventProcessor();
 

@@ -1,4 +1,4 @@
-0. You will need cygwin + QEMU on Windows. On Linux/MacOS just QEMU is needed.
+0. You will need cygwin + QEMU on Windows (see etc/cygwin_get.cmd). On Linux/MacOS just QEMU is needed.
 
 1. Set PHANTOM_HOME env var to point to this directory.
 

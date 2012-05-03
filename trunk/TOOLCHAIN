@@ -2,7 +2,7 @@ Linux:
   gcc
 
 Windows:
-  X86 - Cygwin gcc (possibly, mingw will do, but nobody tried)
+  X86 - Cygwin gcc. Possibly, mingw will do, but nobody tried. (see etc/cygwin_get.cmd)
 
   MIPS/ARM - http://opensource.zylin.com/gccbinary.html
 
