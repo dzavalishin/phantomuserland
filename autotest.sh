@@ -152,6 +152,10 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 #boot 
 #" > $GRUB_MENU
 
+dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
+dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
+
+
 qemu $QEMU_OPTS
 
 grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
@@ -185,7 +189,7 @@ cp ../run/phantom.img .
 #dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img 2> /dev/null
 #echo ": instantating superblock..."
 #dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img 2> /dev/null
-#dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 > /dev/null
+dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 echo ": zeroing vio..."
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 

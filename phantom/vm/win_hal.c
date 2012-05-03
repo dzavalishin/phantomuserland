@@ -571,7 +571,7 @@ time_t fast_time(void)
 
 
 #warning stub
-
+struct _key_event;
 void phantom_dev_keyboard_get_key( struct _key_event *out )
 {
     while(1) hal_sleep_msec(10000);
