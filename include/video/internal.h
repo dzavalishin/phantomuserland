@@ -59,6 +59,11 @@ struct data_area_4_bitmap;
 
 int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from );
 
+// -----------------------------------------------------------------------
+// etc?
+// -----------------------------------------------------------------------
+
+drv_video_window_t *private_drv_video_window_create(int xsize, int ysize);
 
 
 

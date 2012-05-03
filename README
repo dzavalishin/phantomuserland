@@ -25,6 +25,7 @@ BUILD
 
   In Windows you will need Cygwin to do that. http://www.cygwin.com
   Select, at least: gcc4, subversion, binutils, make, gdb
+  (see etc/cygwin_get.cmd)
 
 RUN
 
