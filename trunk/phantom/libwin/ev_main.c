@@ -133,8 +133,9 @@ void ev_put_event(ui_event_t *e)
 
 static void ev_push_event( struct ui_event *e )
 {
-    SHOW_FLOW( 9, "type %d abs x %d t %d", e->type, e->abs_x, e->abs_y );
-    printf("%d,%d\n", e->abs_x, e->abs_y );
+    //SHOW_FLOW( 9, "type %d abs x %d t %d", e->type, e->abs_x, e->abs_y );
+    //printf("%d,%d\n", e->abs_x, e->abs_y );
+    ev_log( 9, e );
 
     if( e->type == UI_EVENT_TYPE_GLOBAL )
         w_explode_event(e);
