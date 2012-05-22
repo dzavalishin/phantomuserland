@@ -581,6 +581,10 @@ void 	phantom_set_console_getchar( int (*_getchar_impl)(void) )
 {
 }
 
+void debug_console_putc(int c)
+{
+    putchar(c);
+}
 
 
 
