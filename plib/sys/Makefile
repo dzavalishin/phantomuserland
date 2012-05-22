@@ -83,6 +83,10 @@ ru.dz.phantom.system.shell.pc: ru.dz.phantom.system.shell_callback.pc
 
 ru.dz.phantom.system.iterator.pc: ru.dz.phantom.system.iterable.pc
 
+ru.dz.phantom.tetris.mainmodule.pc: ru.dz.phantom.tetris.imagesmanager.pc
+ru.dz.phantom.tetris.mainmodule.pc: ru.dz.phantom.tetris.figure.pc
+ru.dz.phantom.tetris.mainmodule.pc: ru.dz.phantom.tetris.io.pc
+
 ru.dz.phantom.tetris.figure.pc: ru.dz.phantom.tetris.playingfield.pc
 ru.dz.phantom.tetris.io.pc: ru.dz.phantom.tetris.utilites.pc
 

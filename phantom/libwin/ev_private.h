@@ -41,5 +41,7 @@ void        w_explode_event(ui_event_t *e);
 void        w_event_deliver_thread(void);
 void        ev_keyboard_read_thread(void);
 
+void        ev_log( int level, ui_event_t *e );
+
 
 #endif // _EV_PRIVATE_H

@@ -27,5 +27,8 @@ int debug_console_getc(void);
 
 void phantom_dump_windows_buf(char *bp, int len);
 
+// Print to log file only
+void lprintf(char const *format, ...);
+
 
 #endif // KERNEL_DEBUG_H

@@ -580,3 +580,20 @@ void phantom_dev_keyboard_get_key( struct _key_event *out )
 void 	phantom_set_console_getchar( int (*_getchar_impl)(void) )
 {
 }
+
+
+
+
+
+#include <kernel/debug.h>
+
+
+// Print to log file only
+void lprintf(char const *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
+}
