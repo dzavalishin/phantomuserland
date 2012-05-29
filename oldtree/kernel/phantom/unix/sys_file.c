@@ -179,11 +179,10 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
     if(f->ops->seek)
     {
         *err = f->ops->seek(f);
-        hal_mutex_unlock( &f->mutex );
-        if(*err) return -1;
     }
 
     hal_mutex_unlock( &f->mutex );
+    if(*err) return -1;
     return f->pos;
 }
 
