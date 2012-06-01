@@ -241,7 +241,7 @@ void vid_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_x
     // ZBUF_TOP is a special value for mouse painting. XXX hack!
     int nozbuf = (flags & BLT_FLAG_NOZBUF) || (zpos == ZBUF_TOP);
 
-    if(nozbuf)
+    if(nozbuf && (zpos != ZBUF_TOP))
         scr_zbuf_reset_square_z( dst_xpos, dst_ypos, xsize, ysize, zpos );
 
     if(reverse)
