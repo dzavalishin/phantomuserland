@@ -14,6 +14,8 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <kernel/debug.h>
+
 #include <phantom_libc.h>
 
 #include <video/window.h>
@@ -96,6 +98,8 @@ void
 w_move( drv_video_window_t *w, int x, int y )
 {
     ui_event_t e1, e2, e3;
+
+    lprintf( "w move @ %d/%d, sz %d x %d, to %d/%d\n", w->x, w->y, w->xsize, w->ysize, x, y );
 
     w_lock();
 

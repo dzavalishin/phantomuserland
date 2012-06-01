@@ -31,15 +31,15 @@ void ev_log( int level, ui_event_t *e )
     {
     case UI_EVENT_TYPE_WIN:
     case UI_EVENT_TYPE_GLOBAL:
-        lprintf( "ev WIN abs %d:%d ", e->abs_x, e->abs_y, e->w.rect.xsize, e->w.rect.ysize );
+        lprintf( "ev WIN abs %d:%d\n", e->abs_x, e->abs_y, e->w.rect.xsize, e->w.rect.ysize );
         break;
 
     case UI_EVENT_TYPE_KEY:
-        lprintf( "ev KEY ch %c vk %x", e->k.ch, e->k.vk );
+        lprintf( "ev KEY ch %c vk %x\n", e->k.ch, e->k.vk );
         break;
 
     case UI_EVENT_TYPE_MOUSE:
-        lprintf( "ev MOU abs %d:%d bt %x", e->abs_x, e->abs_y, e->m.buttons );
+        lprintf( "ev MOU abs %d:%d bt %x\n", e->abs_x, e->abs_y, e->m.buttons );
     }
 
 }

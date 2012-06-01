@@ -16,6 +16,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <kernel/debug.h>
 
 //#include <drv_video_screen.h>
 #include <phantom_types.h>
@@ -116,6 +117,7 @@ void scr_zbuf_turn_upside(int v) { zb_upside = v; }
 void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
 {
     //SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
+    lprintf( "zb reset @ %d/%d, sz %d x %d, z %d\n", x, y, xsize, ysize, zpos );
 
     rect_t out;
     rect_t a;
