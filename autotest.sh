@@ -6,11 +6,11 @@ ME=${0##*/}
 QEMU=`which qemu`
 
 # reasonable fallback
-[ "$QEMU" ] || QEMU=/usr/bin/qemu-i386
+[ "$QEMU" ] || QEMU=/usr/bin/qemu-system-i386
 
 # was oldtree/run_test
 TEST_DIR=run/test
-#TFTP_PATH=../../run/tftp
+TFTP_PATH=../tftp
 
 die ( ) {
 	[ -s make.log ] && tail make.log
@@ -113,20 +113,20 @@ echo "$SVN_OUT"
 }
 
 cd $TEST_DIR
-#cp $TFTP_PATH/phantom tftp/
+cp $TFTP_PATH/phantom tftp/
 
-#for module in classes pmod_test pmod_tcpdemo
-#do
-#	[ -s tftp/$module ] || {
-#		cp $TFTP_PATH/$module tftp/
-#		continue
-#	}
+for module in classes pmod_test pmod_tcpdemo
+do
+	[ -s tftp/$module ] || {
+		cp $TFTP_PATH/$module tftp/
+		continue
+	}
 
-#	[ tftp/$module -ot $TFTP_PATH/$module ] || continue
+	[ tftp/$module -ot $TFTP_PATH/$module ] || continue
 
-#	echo "$module is renewed"
-#	cp $TFTP_PATH/$module tftp/
-#done
+	echo "$module is renewed"
+	cp $TFTP_PATH/$module tftp/
+done
 
 rm -f serial0.log
 
@@ -186,7 +186,7 @@ boot
 
 # before running again
 # TODO call ../zero_ph_img.sh 
-cp ../run/phantom.img .
+cp ../phantom.img .
 #rm phantom.img
 #touch phantom.img
 #echo ": zeroing virtual disk..."
