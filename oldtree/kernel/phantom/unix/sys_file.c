@@ -53,11 +53,16 @@ int usys_open( int *err, uuprocess_t *u, const char *name, int flags, int mode )
     if( (f->fs == 0) || (f->fs->open == 0) )
         goto unlink;
 
-    *err = f->fs->open( f, flags & O_CREAT, (flags & O_WRONLY) || (flags & O_RDWR) );
+    int wr = (flags & O_WRONLY) || (flags & O_RDWR);
+
+    *err = f->fs->open( f, flags & O_CREAT, wr );
     if( *err )
         goto unlink;
 
     f->flags |= UU_FILE_FLAG_OPEN;
+
+    if( !wr )
+        f->flags |= UU_FILE_FLAG_RDONLY;
 
     int fd = uu_find_fd( u, f );
 
@@ -106,6 +111,13 @@ int usys_write(int *err, uuprocess_t *u, int fd, const void *addr, int count )
 {
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
+
+    if(f->flags | UU_FILE_FLAG_RDONLY)
+    {
+        *err = EBADF;
+        return -1;
+    }
+
 
     if( (f->ops == 0) || (f->ops->write == 0) )
     {
@@ -259,6 +271,56 @@ int usys_ioctl( int *err, uuprocess_t *u, int fd, int request, void *data, size_
 
     hal_mutex_lock( &f->mutex );
     int rc = f->ops->ioctl( f, err, request, data, len );
+    hal_mutex_unlock( &f->mutex );
+
+    return rc;
+}
+
+
+int usys_fcntl( int *err, uuprocess_t *u, int fd, int cmd, int arg )
+{
+    (void) u;
+    SHOW_FLOW( 7, "fcntl %d", fd );
+
+    CHECK_FD(fd);
+    struct uufile *f = GETF(fd);
+
+    hal_mutex_lock( &f->mutex );
+    int rc = -1; // f->ops->ioctl( f, err, request, data, len );
+
+    switch(cmd)
+    {
+    case F_GETFD:        /* Get file descriptor flags.  */
+        rc = 0; // lower bit = noinherit, TODO
+        break;
+
+    case F_SETFD:        /* Set file descriptor flags.  */
+        if( arg == 0 )
+        {
+            rc = 0;
+            break;
+        }
+        goto ret_inval;
+
+    case F_GETFL:        /* Get file status flags.  */
+        //rc = 0; // TODO
+
+        if(f->flags | UU_FILE_FLAG_RDONLY)
+            rc = O_RDONLY;
+        else
+            rc = O_RDWR;
+
+        break;
+
+    case F_SETFL:        /* Set file status flags.  */
+        goto ret_inval;
+
+    default:
+    ret_inval:
+        *err = EINVAL;
+        rc = -1;
+    }
+
     hal_mutex_unlock( &f->mutex );
 
     return rc;
