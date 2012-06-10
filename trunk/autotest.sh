@@ -3,7 +3,8 @@ cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
-QEMU=`which qemu`
+QEMU=`which kvm`			# qemu 1.x and higher
+[ "$QEMU" ] || QEMU=`which qemu`	# qemu 0.x
 
 # reasonable fallback
 [ "$QEMU" ] || QEMU=/usr/bin/qemu-system-i386
