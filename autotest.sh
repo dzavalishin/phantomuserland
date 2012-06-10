@@ -3,10 +3,8 @@ cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
-QEMU=`which kvm || which qemu 2>/dev/null`
-
-# reasonable fallback
-[ "$QEMU" ] || QEMU=/usr/bin/qemu-system-i386
+QEMU=`which qemu`		# qemu 0.x
+[ "$QEMU" ] || QEMU=`which kvm`	# qemu 1.x and later
 
 # was oldtree/run_test
 TEST_DIR=run/test
@@ -84,7 +82,7 @@ DEAD=`ps xjf | grep $QEMU | grep -vw "grep\\|$$"`
 #touch $0.lock
 #trap "rm $0.lock" 0
 
-LISTENING=`netstat -pl --inet | grep :1234`
+LISTENING=`netstat -pl --inet 2>/dev/null | grep :1234`
 [ "$LISTENING" ] && {
 	echo "Somebody took my gdb port! $LISTENING"
 	exit 0
