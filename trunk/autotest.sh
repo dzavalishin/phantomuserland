@@ -66,6 +66,7 @@ Previous copies are kept (serial0.log.0 through .9)"
 # check if another copy is running
 
 RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
+DEAD=`ps xjf | grep $QEMU | grep -vw "grep\\|$$"`
 [ "$RUNNING" ] && {
 	(echo "$RUNNING" | grep -q defunct) || \
 	(tail -1 $TEST_DIR/serial0.log | grep ^Press) || {
@@ -74,7 +75,8 @@ RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
 	}
 
 	echo "Previous test run stalled. Killing qemu..."
-	pkill $QEMU
+	[ "$DEAD" ] && SIG=-KILL
+	pkill $SIG $QEMU
 
 	preserve_log
 }
