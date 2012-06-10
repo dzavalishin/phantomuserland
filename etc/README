@@ -1,5 +1,7 @@
+attic          -         old and unused code, to be removed.
+
+experiments    -         experimental code, not to be used in real builds
+
 fte-config.zip -         configuration file to (partially) support Phantom 
                          language in FTE highlighting editor. 
                          See http://fte.sourceforge.net/
-
-experiments    -         experimental code, not to be used in real builds
