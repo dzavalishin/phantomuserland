@@ -85,6 +85,12 @@ DEAD=`ps xjf | grep $QEMU | grep -vw "grep\\|$$"`
 #touch $0.lock
 #trap "rm $0.lock" 0
 
+LISTENING=`netstat -pl --inet | grep :1234`
+[ "$LISTENING" ] && {
+	echo "Somebody took my gdb port! $LISTENING"
+	exit 0
+}
+
 rm -f make.log
 make clean > /dev/null 2>&1
 
