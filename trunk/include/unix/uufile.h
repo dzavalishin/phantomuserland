@@ -81,6 +81,7 @@ typedef struct uufile uufile_t;
 #define UU_FILE_FLAG_UDP        (1<<3) // Dgram
 #define UU_FILE_FLAG_MNT        (1<<4) // Mount point - FS root
 #define UU_FILE_FLAG_PIPE       (1<<5) // Pipe
+#define UU_FILE_FLAG_RDONLY     (1<<6) // Write op forbidden
 
 
 //! Is open now, unlink/destroy_uufile will close first

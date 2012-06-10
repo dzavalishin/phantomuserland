@@ -425,6 +425,12 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
         break;
 
     case SYS_fcntl:
+        {
+            //AARG(void *, str, 2, sizeof(int)); // FIXME size of arg?
+            ret = usys_fcntl( &err, u, uarg[0], uarg[1], uarg[0] );
+        }
+        break;
+
     case SYS_fcntl64:
     case SYS_fdatasync:
     case SYS_flock:

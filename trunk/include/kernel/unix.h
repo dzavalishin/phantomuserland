@@ -52,6 +52,7 @@ int usys_dup(int *err, uuprocess_t *u, int src_fd );
 int usys_symlink(int *err, uuprocess_t *u, const char *src, const char *dst );
 int usys_mkdir( int *err, uuprocess_t *u, const char *path );
 
+int usys_fcntl( int *err, uuprocess_t *u, int fd, int cmd, int arg );
 
 
 int usys_rm( int *err, uuprocess_t *u, const char *name );
