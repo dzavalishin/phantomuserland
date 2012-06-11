@@ -533,6 +533,8 @@ struct data_area_4_connection
     pvm_object_t                        p_kernel_state_object;
     void *                              p_kernel_state;
 
+    pvm_object_t 			(*blocking_syscall_worker)( pvm_object_t this, struct data_area_4_thread *tc, int nmethod, pvm_object_t arg );
+
     // Volatile kernel state
     size_t                              v_kernel_state_size;
     void *                              v_kernel_state;

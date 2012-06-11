@@ -231,7 +231,7 @@ struct wtty *get_thread_ctty( struct phantom_thread *t )
     return t->ctty;
 }
 
-
+/*
 
 void *get_thread_owner( struct phantom_thread *t )
 {
@@ -245,6 +245,8 @@ int get_thread_flags( struct phantom_thread *t )
     assert(threads_inited);
 	return t->thread_flags;
 }
+
+*/
 
 #endif
 

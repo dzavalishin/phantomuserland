@@ -14,9 +14,9 @@
 #ifndef SYSCALL_TOOLS_H
 #define SYSCALL_TOOLS_H
 
-#include "vm/object.h"
-#include "vm/stacks.h"
-#include "vm/p2c.h"
+#include <vm/object.h>
+#include <vm/stacks.h>
+#include <vm/p2c.h>
 
 #include <sys/cdefs.h>
 

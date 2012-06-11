@@ -8,8 +8,12 @@
 #include <vm/connect.h>
 #include <vm/alloc.h>
 #include <vm/p2c.h>
+#include <vm/syscall.h>
+
+
 #include <kernel/timedcall.h>
 #include <kernel/net_timer.h>
+
 #include <time.h>
 
 #define CN_TM_NET 1
@@ -64,14 +68,53 @@ errno_t cn_timer_do_operation( int op_no, struct data_area_4_connection *c, stru
 #endif
 }
 
+//#include <vm/p2c.h>
+
+static pvm_object_t cn_timer_syscall_worker( pvm_object_t conn, struct data_area_4_thread *tc, int nmethod, pvm_object_t arg )
+{
+    (void) conn;
+    (void) tc;
+    (void) arg;
+/*
+    int n_param = POP_ISTACK;
+
+    if( n_param >= 1 )
+    {
+        struct pvm_object __ival = POP_ARG;
+
+        if( !IS_PHANTOM_INT(__ival) )
+        {
+            SHOW_ERROR0(1, "timer sleep not int parm");
+            pvm_object_dump(__ival);
+            SYS_FREE_O(__ival);
+            //SYSCALL_THROW_STRING("not an integer arg: " __FILE__ ":" __XSTRING(__LINE__)  );
+            return pvm_create_null_object();
+        }
+
+        int msec = pvm_get_int(__ival);
+        SYS_FREE_O(__ival);
+
+        SHOW_FLOW(1, "timer sleep % msec", msec );
+        hal_sleep_msec( msec );
+    }
+    else
+        SHOW_ERROR0(1, "timer sleep < 1 parm");
+*/
+    SHOW_FLOW(1, "timer sleep %d msec", nmethod );
+    hal_sleep_msec( nmethod );
+
+    return pvm_create_null_object();
+}
+
 
 // Init connection
 errno_t cn_timer_init( struct data_area_4_connection *c, struct data_area_4_thread *t )
 {
     (void) t;
-    (void) c;
+    //(void) c;
 
-    // nope
+    c->blocking_syscall_worker = cn_timer_syscall_worker;
+
     printf("Init timer");
     return 0;
 }

@@ -158,10 +158,11 @@ void hal_set_thread_name(const char *name);
 
 struct wtty *get_thread_ctty( struct phantom_thread *t )  __attribute__((deprecated));
 
-//! Returns 'owner' field, which is, for VM threads, is used to keep pointer to VM thread object
-void *get_thread_owner( struct phantom_thread *t )  __attribute__((deprecated));
 
-int get_thread_flags( struct phantom_thread *t ) __attribute__((deprecated));
+//! Returns 'owner' field, which is, for VM threads, is used to keep pointer to VM thread object
+//void *get_thread_owner( struct phantom_thread *t )  __attribute__((deprecated));
+
+//int get_thread_flags( struct phantom_thread *t ) __attribute__((deprecated));
 
 /**
  *

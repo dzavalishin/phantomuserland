@@ -40,7 +40,8 @@ void t_migrate_to_boot_CPU(void)
     while( 0 == GET_CPU_ID())
     {
         SHOW_ERROR( 0, "on CPU %d, not 0", GET_CPU_ID() );
-        hal_sleep_msec(300);
+        //hal_sleep_msec(300);
+        hal_sleep_msec(1);
     }
 
 }

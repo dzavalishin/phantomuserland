@@ -10,6 +10,11 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "vm.sysc"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <phantom_libc.h>
 #include <time.h>
@@ -1035,7 +1040,9 @@ static int si_bootstrap_21_sleep(struct pvm_object me, struct data_area_4_thread
 
     phantom_wakeup_after_msec(msec,tc);
 
-#warning to kill
+    //#warning to kill
+    SHOW_ERROR0( 0, "si_bootstrap_21_sleep used" );
+
     if(phantom_is_a_real_kernel())
         SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
 
@@ -1794,6 +1801,30 @@ static int si_connection_12_set_callback(struct pvm_object o, struct data_area_4
 }
 
 
+static int si_connection_13_blocking(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_connection *da = pvm_object_da( o, connection );
+
+    /*
+    int n_param = POP_ISTACK;
+    pvm_istack_push( tc->_istack, n_param-1 ); // we'll take one
+
+    if( n_param < 1 )
+        SYSCALL_THROW(pvm_create_string_object( "blocking: need at least 1 parameter" )); \
+
+    int nmethod = POP_INT();
+    */
+
+    pvm_object_t (*syscall_worker)( pvm_object_t , struct data_area_4_thread *, int nmethod, pvm_object_t arg ) = da->blocking_syscall_worker;
+
+    //SHOW_FLOW( 1, "blocking call to nmethod = %d", nmethod);
+    return vm_syscall_block( o, tc, syscall_worker );
+    // vm_syscall_block pushes retcode itself
+}
+
+
+
 syscall_func_t	syscall_table_4_connection[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
@@ -1803,7 +1834,7 @@ syscall_func_t	syscall_table_4_connection[16] =
     // 8
     &si_connection_8_connect, 	    &si_connection_9_disconnect,
     &si_connection_10_check, 	    &si_connection_11_do,
-    &si_connection_12_set_callback, &invalid_syscall,
+    &si_connection_12_set_callback, &si_connection_13_blocking,
     &invalid_syscall,               &si_void_15_hashcode,
 
 };

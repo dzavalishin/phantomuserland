@@ -105,3 +105,5 @@ internal.thread.pc: phantom.osimpl.pc
 internal.thread.pc: phantom.user.pc
 
 ru.dz.phantom.system.shell_callback.pc: ru.dz.phantom.system.runnable.pc
+
+phantom.util.hashmap.pc: phantom.util.hashpair.pc
