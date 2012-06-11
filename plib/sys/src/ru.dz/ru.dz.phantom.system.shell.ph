@@ -106,6 +106,8 @@ class shell //extends runnable
             console.putws(incr.toString());
             console.putws("  ");
 
+            conn.block(null,2000);
+
             mtx.unlock();
 
             incr = incr + 1;

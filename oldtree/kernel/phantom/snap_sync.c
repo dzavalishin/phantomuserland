@@ -241,6 +241,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 
 void phantom_thread_put_asleep( struct data_area_4_thread *thda, VM_SPIN_TYPE *unlock_spin )
 {
+    // FIXME can't sleep in spinlock!
     hal_mutex_lock( &interlock_mutex );
     // TODO atomic assign
     if( thda->spin_to_unlock )
@@ -277,4 +278,97 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 {
     SHOW_ERROR0( 0, "unimpl!");
 }
+
+
+
+/**
+ *
+ *   BLOCKING VM SYSCALLS IMPL
+ *
+ * - vm_spin_lock -> regular kernel mutex
+ * - keep mutex ptr in object, recreate mutex on restart
+ * 
+ * - blocking syscall - must not use vm mutex, must be unlocked on restart
+ * 
+ * blocking sys:
+ *    - call kernel (request op)
+ *    - push null (will be returned if we're snapped and restarted)
+ *    - sleep (snappable, don't use thda->sleep_flag!) - kernel wakes on data ready
+ *    - pop null, push ret val
+ * 
+ * possibly:
+ *    - save args, restart syscall on kern resrart
+ *
+**/
+
+#include <vm/exec.h>
+#include <vm/stacks.h>
+#include <vm/syscall.h>
+
+
+//#define MAX_SYS_ARG 16
+int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t , struct data_area_4_thread *, int nmethod, pvm_object_t arg ) )
+{
+
+    // NB args must be popped before we push retcode
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 2);
+
+    //if( n_param < 1 ) SYSCALL_THROW(pvm_create_string_object( "blocking: need at least 1 parameter" ));
+
+    int nmethod = POP_INT();
+    pvm_object_t arg = POP_ARG;
+
+    // push zero to obj stack
+
+    pvm_ostack_push( tc->_ostack, pvm_create_null_object() ); 
+
+    pvm_exec_save_fast_acc(tc); // Before snap
+
+    if(phantom_virtual_machine_stop_request)
+    {
+        SHOW_FLOW0( 5, "VM thread will die now");
+        hal_exit_kernel_thread();
+    }
+
+    SHOW_FLOW0( 5, "VM thread will sleep for blocking syscall");
+    hal_mutex_lock( &interlock_mutex );
+
+    phantom_virtual_machine_threads_stopped++;
+    hal_cond_broadcast( &phantom_snap_wait_4_vm_enter );
+
+    hal_mutex_unlock( &interlock_mutex );
+
+
+    // now do syscall - can block
+
+    pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
+
+    // BUG FIXME snapper won't continue until this thread is unblocked: end of snap waits for all stooped threads to awake
+
+    hal_mutex_lock( &interlock_mutex );
+    while(tc->sleep_flag)
+        hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
+
+    //SHOW_FLOW0( 5, "VM thread awaken, will report wakeup");
+    phantom_virtual_machine_threads_stopped--;
+
+    hal_mutex_unlock( &interlock_mutex );
+    SHOW_FLOW0( 5, "VM thread awaken after blocking syscall");
+
+    // pop zero from obj stack
+    // push ret val to obj stack
+
+    pvm_ostack_pop( tc->_ostack );
+    pvm_ostack_push( tc->_ostack, ret );
+
+    return 1; // not throw
+}
+
+
+
+
+
+
 

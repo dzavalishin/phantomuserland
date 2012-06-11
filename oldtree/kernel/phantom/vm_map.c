@@ -1352,8 +1352,10 @@ void do_snapshot()
 
     // TODO: we have top do more. such as stop oher CPUS, force VMs into the
     // special snap-friendly state, etc
-
+    //t_smp_enable(0); // make sure other CPUs don't mess here
+    t_migrate_to_boot_CPU();
     vm_map_for_all_locked( mark_for_snap );
+    t_smp_enable(1);
 
     syslog( 0, "snap: thank you ladies");
 

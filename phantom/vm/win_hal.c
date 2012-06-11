@@ -200,6 +200,16 @@ void phantom_snapper_reenable_threads()
     //
 }
 
+#include <vm/stacks.h>
+
+int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t this, struct data_area_4_thread *tc ) )
+{
+    // push zero to obj stack
+
+    pvm_ostack_push( tc->_ostack, pvm_create_string_object("no sync in hosted env") );
+    return 0; // throw!
+}
+
 int phantom_dev_keyboard_getc(void)
 {
     return getchar();
