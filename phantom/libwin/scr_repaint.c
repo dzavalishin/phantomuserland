@@ -12,6 +12,8 @@
 #include <video/screen.h>
 #include <video/internal.h>
 
+#if !VIDEO_NEW_PAINTER
+
 #include <assert.h>
 //#include <kernel/pool.h>
 #include <kernel/libkern.h>
@@ -136,5 +138,6 @@ static void start_paint_thread(void)
 }
 
 
+#endif // !VIDEO_NEW_PAINTER
 
 

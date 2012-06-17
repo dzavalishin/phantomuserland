@@ -13,7 +13,7 @@ SET STOP=-S
 rem -append "-d=20 -- -test all"
 
 rm -f serial0.log 
-%QDIR%\qemu-system-mips %Q_MACHINE% -s -L %QDIR%/bios -kernel fat/boot/phantom.mips -sd phantom.img %SER% %STOP% %Q_NET% 
+start /wait %QDIR%\qemu-system-mips %Q_MACHINE%  -gdb tcp::1234,nowait,nodelay,server,ipv4 -L %QDIR%/bios -kernel fat/boot/phantom.mips -sd phantom.img %SER% %STOP% %Q_NET% 
 rem -mtdblock vio.img 
 
 

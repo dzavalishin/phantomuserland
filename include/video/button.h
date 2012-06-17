@@ -12,6 +12,10 @@
 #ifndef VIDEO_BUTTONS_H
 #define VIDEO_BUTTONS_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <kernel/pool.h>
 #include <sys/types.h>
 

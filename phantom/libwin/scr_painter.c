@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Windowing system grand repaint - modofied painter alg.
+ * Windowing system grand repaint - modified painter alg.
  *
  * General idea:
  *
@@ -18,6 +18,8 @@
 #include <video/screen.h>
 #include <video/internal.h>
 
+#if VIDEO_NEW_PAINTER
+
 #include <assert.h>
 //#include <kernel/pool.h>
 #include <kernel/libkern.h>
@@ -27,7 +29,7 @@
 #include <phantom_libc.h>
 
 
-static tid_t            painter_tid;
+static tid_t            painter_tid = -1;
 static hal_sem_t        painter_sem;
 
 
@@ -44,13 +46,13 @@ pqel_t;
 static hal_mutex_t  rect_list_lock;
 static queue_head_t rect_list;
 
-void paint_q_init(void)
+static void paint_q_init(void)
 {
     hal_mutex_init( &rect_list_lock, "rectList" );
     queue_init(&rect_list);
 }
 
-bool paint_q_empty(void)
+static bool paint_q_empty(void)
 {
     return queue_empty(&rect_list);
 }
@@ -209,7 +211,9 @@ static void paint_square_updown(rect_t *r)
             break;
         }
 
-        w_repaint_screen_part( w, r );
+        rect_mul( &wr, &wr, r );
+
+        w_repaint_screen_part( w, &wr );
     }
 }
 
@@ -219,7 +223,7 @@ static void repaint_q(void)
 {
     pqel_t *pqel;
 
-    ASSERT_LOCKED_MUTEX( &rect_list_lock );
+    //ASSERT_LOCKED_MUTEX( &rect_list_lock );
 
     while(1)
     {
@@ -232,11 +236,11 @@ static void repaint_q(void)
 
         hal_mutex_unlock( &rect_list_lock );
 
-        rect_t *r = &pqel->r;
+        rect_t r = pqel->r;
         free(pqel);
 
-        scr_zbuf_reset_square( r->x, r->y, r->xsize, r->ysize );
-        paint_square_updown( r );
+        scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize );
+        paint_square_updown( &r );
     }
 
     hal_mutex_unlock( &rect_list_lock );
@@ -263,16 +267,39 @@ static void painter_thread(void *arg)
 
 void start_painter_thread(void)
 {
+    paint_q_init();
+
     hal_sem_init( &painter_sem, "painter" );
     painter_tid = hal_start_thread( painter_thread, 0, 0 );
 }
 
 
 
+#define CHECK_START() ({ if(painter_tid < 0) start_painter_thread(); })
 
 
+
+void w_request_async_repaint( rect_t *r )
+{
+    CHECK_START();
+
+    paint_q_add( r );
+    //hal_sem_release( &painter_sem );
+}
+
+void scr_repaint_all(void)
+{
+    CHECK_START();
+
+    rect_t r;
+
+    scr_get_rect( &r );
+    paint_q_add( &r );
+    //hal_sem_release( &painter_sem );
+}
 
 
 #endif
 
+#endif // VIDEO_NEW_PAINTER
 

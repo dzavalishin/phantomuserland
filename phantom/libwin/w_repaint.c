@@ -102,6 +102,7 @@ void w_repaint_screen_part( drv_video_window_t *w, rect_t *todo )
 }
 
 
+#if !VIDEO_NEW_PAINTER
 void repaint_all_for_square( rect_t *todo )
 {
     // redraw all here, or ask some thread to do that
@@ -132,6 +133,7 @@ void repaint_all_for_square( rect_t *todo )
     scr_mouse_enable_p(video_drv, todo->x, todo->y, todo->xsize, todo->ysize );
     w_unlock();
 }
+#endif
 
 void request_repaint_all_for_square( rect_t *todo )
 {

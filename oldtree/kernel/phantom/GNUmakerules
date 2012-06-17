@@ -96,7 +96,8 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	vm_load.o pci_es1370.o mem_pl011_uart.o \
 	ff.o stray_check.o sbrk.o mem_pl050_ps2.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
-	test_amap.o test_port.o test_userland.o test_pool.o events.o smp.o \
+	test_amap.o test_port.o test_userland.o test_pool.o test_video.o \
+        events.o smp.o \
 	heap.o heap_pool.o sys.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
 	traps.o hal_physmem.o physalloc.o sched.o \
