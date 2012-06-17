@@ -12,6 +12,10 @@
 #ifndef FONT_H
 #define FONT_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <video/window.h>
 
 #define FONT_FLAG_NONE                 0

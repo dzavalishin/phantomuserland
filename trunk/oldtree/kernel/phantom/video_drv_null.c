@@ -66,8 +66,8 @@ mouse:    		vid_null,
 #endif
 
 #if 1
-redraw_mouse_cursor: 	(void *)vid_null,
-set_mouse_cursor: 	(void *)vid_null,
+mouse_redraw_cursor: 	(void *)vid_null,
+mouse_set_cursor: 	(void *)vid_null,
 mouse_disable:          (void *)vid_null,
 mouse_enable:          	(void *)vid_null,
 #endif

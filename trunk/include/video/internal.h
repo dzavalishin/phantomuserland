@@ -8,6 +8,11 @@
  *
 **/
 
+
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <video/bitmap.h>
 #include <video/window.h>
 

@@ -11,6 +11,10 @@
 #ifndef VOPS_H
 #define VOPS_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <video/color.h>
 #include <video/zbuf.h>
 

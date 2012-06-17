@@ -12,6 +12,10 @@
 #ifndef BITMAP_H
 #define BITMAP_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <video/color.h>
 #include <errno.h>
 

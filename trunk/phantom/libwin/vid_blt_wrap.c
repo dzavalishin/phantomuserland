@@ -18,6 +18,8 @@ void vid_null() {}
 
 void win2blt_flags( u_int32_t *flags, const window_handle_t w )
 {
+    *flags = 0;
+
 #if VIDEO_NOZBUF_BLIT
     // If window is not covered, we can ignore z buffer when painting
     if( w->state & WSTATE_WIN_UNCOVERED )

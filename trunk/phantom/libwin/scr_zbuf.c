@@ -63,12 +63,13 @@ void scr_zbuf_reset()
     memset( zbuf, 0, zbsize );
 }
 
-
+/* wrong! not byte but zbuf_t!
 void scr_zbuf_reset_z(int z)
 {
     //SHOW_FLOW( 1, "%d", z );
     memset( zbuf, z, zbsize );
 }
+*/
 
 
 /**

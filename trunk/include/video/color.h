@@ -12,11 +12,13 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <sys/cdefs.h>
 #include <phantom_types.h>
 
-// Windows 'screen' driver works in BGR format :(
-#define BGR 1
 
 
 struct rgb_t

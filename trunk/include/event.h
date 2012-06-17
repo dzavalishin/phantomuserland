@@ -12,11 +12,13 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <queue.h>
 #include <video/rect.h>
 
-//! Max number of unprocessed events in window queue. Extra events will be thrown away.
-#define MAX_WINDOW_EVENTS 512
 
 struct ui_event
 {

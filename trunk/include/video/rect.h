@@ -18,7 +18,12 @@ typedef struct rect
     int xsize, ysize;
 } rect_t;
 
+#define rect_copy( out, in ) rect_add( out, in, in )
+
+
 void rect_add( rect_t *out, rect_t *a, rect_t *b );
+
+//! Returns true if intersection exists
 int rect_mul( rect_t *out, rect_t *a, rect_t *b );
 
 //! Calculates two rectangles which together cover space which is

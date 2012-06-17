@@ -11,8 +11,12 @@
  * \brief Simple print working directory program
  * \todo Replace 4096 with a define!
  */
-int main( int argc, char **argv ) {
+int main( int argc, char **argv ) 
+{
 	char anCwd[ PATH_MAX ];
+
+	(void) argc;
+	(void) argv;
 
 	GetCurrentWorkingDirectory( anCwd, PATH_MAX );
 	Print( "%s\n", anCwd );

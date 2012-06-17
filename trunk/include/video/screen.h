@@ -11,15 +11,10 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-// If 1, VESA will be used if found, even if other driver is found
-// If 0, VESA will fight for itself as usual driver
-// Now using 1, kernel traps if trying to do VM86 too late in boot process
-#define VESA_ENFORCE 1
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
 
-
-#define VIDEO_PARTIAL_WIN_BLIT 1
-
-#define VIDEO_NOZBUF_BLIT 0
 
 
 #include <errno.h>
@@ -123,7 +118,14 @@ int scr_get_ysize(void);
 int scr_get_bpp(void);
 
 
-
+static inline void scr_get_rect( rect_t *r )
+{
+    assert(r);
+    r->x = 0;
+    r->y = 0;
+    r->xsize = scr_get_xsize();
+    r->ysize = scr_get_ysize();
+}
 
 
 

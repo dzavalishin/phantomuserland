@@ -11,6 +11,10 @@
 #ifndef ZBUF_H
 #define ZBUF_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <video/window.h>
 
 // Special value of z coord which means that we draw anyway - used for mouse

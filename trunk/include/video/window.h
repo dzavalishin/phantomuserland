@@ -12,6 +12,10 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#ifndef VCONFIG_H
+#include <video/vconfig.h>
+#endif // VCONFIG_H
+
 #include <phantom_types.h>
 #include <queue.h>
 
@@ -22,7 +26,7 @@
 #include <kernel/pool.h>
 
 #define VIDEO_T_IN_D 0
-#define T_IN_D VIDEO_T_IN_D
+//#define T_IN_D VIDEO_T_IN_D
 
 #if NEW_WINDOWS
 typedef pool_handle_t window_handle_t;

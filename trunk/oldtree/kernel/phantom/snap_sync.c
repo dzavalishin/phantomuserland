@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
  *
  * VM threads sleep/wakeup/snap synchronization
  *
@@ -31,6 +31,7 @@ volatile int     phantom_virtual_machine_stop_request = 0;
 
 //static 
 volatile int     phantom_virtual_machine_threads_stopped = 0;
+//volatile int     phantom_virtual_machine_threads_got_stop_request = 0;
 
 static hal_cond_t   phantom_snap_wait_4_vm_enter;
 static hal_cond_t   phantom_snap_wait_4_vm_leave;
@@ -117,8 +118,8 @@ void phantom_snapper_wait_4_threads( void )
             hal_cond_wait( &phantom_snap_wait_4_vm_enter, &interlock_mutex );
             //hal_sleep_msec(2000);
             SHOW_FLOW( 5, "Woken up aft wait for %d threads, %d stopped", threads_4_wait, phantom_virtual_machine_threads_stopped);
-
         }
+
         SHOW_FLOW0( 5, "Finished waiting for threads");
         hal_mutex_unlock( &interlock_mutex );
 
@@ -133,6 +134,7 @@ void phantom_snapper_wait_4_threads( void )
             continue;
         }
 
+        // TODO FIXME what if someone makes a thread here?
         break;
     }
 
@@ -227,7 +229,10 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 
     //while(thda->sleep_flag)        hal_cond_wait( &(thda->wakeup_cond), &interlock_mutex );
     while(thda->sleep_flag)
+    {
+        SHOW_ERROR(0, "Warn: old vm sleep used, th (da %x)", thda);
         hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
+    }
 
 // TODO if snap is active someone still can wake us up - resleep for snap then!
 
@@ -348,11 +353,15 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
     // BUG FIXME snapper won't continue until this thread is unblocked: end of snap waits for all stooped threads to awake
 
     hal_mutex_lock( &interlock_mutex );
-    while(tc->sleep_flag)
-        hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
+
+    //while(tc->sleep_flag)         hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
+
+    if(phantom_virtual_machine_snap_request)
+        hal_cond_wait( &phantom_vm_wait_4_snap, &interlock_mutex );
 
     //SHOW_FLOW0( 5, "VM thread awaken, will report wakeup");
     phantom_virtual_machine_threads_stopped--;
+    hal_cond_broadcast( &phantom_snap_wait_4_vm_leave );
 
     hal_mutex_unlock( &interlock_mutex );
     SHOW_FLOW0( 5, "VM thread awaken after blocking syscall");
