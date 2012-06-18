@@ -404,10 +404,10 @@ static void ChangetoDnsNameFormat(unsigned char* dns, const unsigned char* _host
 
 static ipv4_addr servers[MAX_DNS_SERVERS] =
 {
-    IPV4_DOTADDR_TO_ADDR(192, 168, 1, 1),
-    IPV4_DOTADDR_TO_ADDR(192, 168, 0, 1),
+    IPV4_DOTADDR_TO_ADDR(1, 1, 168, 192),
+    IPV4_DOTADDR_TO_ADDR(1, 0, 168, 192),
     IPV4_DOTADDR_TO_ADDR(8, 8, 8, 8),
-    IPV4_DOTADDR_TO_ADDR(8, 8, 4, 4),
+    IPV4_DOTADDR_TO_ADDR(4, 4, 8, 8),
 };
 
 

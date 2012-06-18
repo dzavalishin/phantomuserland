@@ -362,10 +362,10 @@ int do_test_tcp_connect(const char *test_parm)
 
     addr.addr.len = 4;
     addr.addr.type = ADDR_TYPE_IP;
-    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(ip0, ip2, ip2, ip3);
+    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(ip0, ip1, ip2, ip3);
 
 
-    SHOW_FLOW( 0, "TCP - create socket to %d.%d.%d.%d port %d", ip0, ip2, ip2, ip3, port);
+    SHOW_FLOW( 0, "TCP - create socket to %d.%d.%d.%d port %d", ip0, ip1, ip2, ip3, port);
     if( tcp_open(&prot_data) )
     {
         SHOW_ERROR0(0, "can't prepare endpoint");
