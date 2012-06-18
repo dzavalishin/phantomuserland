@@ -3,6 +3,9 @@ cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
+GDB_PORT=1235			# get rid of stalled instance
+GDB_OPTS="-gdb tcp::$GDB_PORT"
+#GDB_OPTS="-s"
 QEMU=`which qemu`		# qemu 0.x
 [ "$QEMU" ] || QEMU=`which kvm`	# qemu 1.x and later
 
@@ -140,7 +143,7 @@ rm -f serial0.log
 #GRAPH=-nographic
 
 QEMU_OPTS="-L /usr/share/qemu $GRAPH \
-	-M pc -smp 4 -s -boot a -no-reboot \
+	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user
 	-parallel file:lpt_01.log \
 	-serial file:serial0.log \
