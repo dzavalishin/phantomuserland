@@ -123,7 +123,7 @@ void PhantomSwapBuffers( window_handle_t drawable )
 
     //GrArea(drawable, ctx->gc, 0, 0, ctx->xsize, ctx->ysize, ctx->gl_context->zb->pbuf, ctx->pixtype);
 
-    int565_to_rgba_move( ctx->w->pixel, (void *)ctx->gl_context->zb->pbuf, ctx->w->xsize*ctx->w->ysize );
+    int565_to_rgba_move( ctx->w->w_pixel, (void *)ctx->gl_context->zb->pbuf, ctx->w->xsize*ctx->w->ysize );
 //printf("blit ");
     drv_video_winblt( ctx->w );
 }

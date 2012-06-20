@@ -272,7 +272,7 @@ void phantom_init_console_window()
     }
 
     drv_video_window_t *w = drv_video_window_create( xsize, ysize,
-                        cw_x, cw_y, console_bg, "Console", WFLAG_WIN_DECORATED );
+                        cw_x, cw_y, console_bg, "Console", WFLAG_WIN_DECORATED|WFLAG_WIN_DOUBLEBUF );
 
     phantom_console_window = w;
 
@@ -284,7 +284,10 @@ void phantom_init_console_window()
 
     phantom_debug_window = drv_video_window_create(
                         DEBWIN_XS, DEBWIN_YS,
-                        DEBWIN_X, DEBWIN_Y, console_bg, "Threads", WFLAG_WIN_DECORATED );
+                        DEBWIN_X, DEBWIN_Y, console_bg, "Threads", WFLAG_WIN_DECORATED|WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT );
+
+    //phantom_debug_window->flags |= WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT;
+    //drv_video_window_update( phantom_debug_window ); // For dbl buf flags to start working ok
 
     phantom_debug_window_puts("Phantom debug window\n\nt - threads\nw - windows\ns - stats\n");
     drv_video_window_update( phantom_debug_window );

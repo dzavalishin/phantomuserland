@@ -31,11 +31,11 @@ void w_scroll_up( window_handle_t win, int npix, rgba_t color)
         return;
     }
 
-    struct rgba_t *dst = win->pixel + (win->xsize * npix);
+    struct rgba_t *dst = win->w_pixel + (win->xsize * npix);
     int len = win->xsize * (win->ysize - npix);
-    memmove( dst, win->pixel, len*sizeof(struct rgba_t) );
+    memmove( dst, win->w_pixel, len*sizeof(struct rgba_t) );
     int clrlen = win->xsize * npix;
-    dst = win->pixel;
+    dst = win->w_pixel;
     while( clrlen-- )
     {
         *dst++ = color;
@@ -77,7 +77,7 @@ errno_t w_scroll_hor( window_handle_t h, int x, int y, int xs, int ys, int s )
     if( x < 0 || y < 0 || x+xs > w->xsize || y+ys > w->ysize )
         ret = EINVAL;
     else
-        rgba_scroll_hor( w->pixel+x+(y*w->xsize), xs, ys, w->xsize, s, w->bg );
+        rgba_scroll_hor( w->w_pixel+x+(y*w->xsize), xs, ys, w->xsize, s, w->bg );
 
 #if NEW_WINDOWS
     pool_release_el( wp, h );

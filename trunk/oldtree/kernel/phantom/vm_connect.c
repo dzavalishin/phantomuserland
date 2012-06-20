@@ -376,7 +376,9 @@ static int ctt_size = sizeof(connection_types_table)/sizeof(struct conntab);
 errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc )
 {
     const char *name = da->name;
-    da->owner = tc;
+
+    if( tc ) da->owner = tc;  // on restart we get zero tc
+    assert( da->owner );
 
     // 4-byte prefix ("udp:") selects serving backend
 
@@ -438,7 +440,7 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
 
         // call init
         if( da->kernel->init )
-            ret = da->kernel->init(da,tc);
+            ret = da->kernel->init(da,da->owner);
 
         // don't kill all?
 

@@ -103,12 +103,21 @@ struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name);
 
 /**
  *
+ * Is equal
+ *
+**/
+
+#define pvm_is_eq( o1, o2 ) ((o1).data = (o2).data )
+
+
+/**
+ *
  * Is null
  *
 **/
 
-#define pvm_is_null( o ) (o.data == 0 || (o.data == pvm_create_null_object().data))
-#define pvm_isnull( o ) (o.data == 0 || (o.data == pvm_create_null_object().data))
+#define pvm_is_null( o ) ((o).data == 0 || ((o).data == pvm_create_null_object().data))
+#define pvm_isnull( o ) ((o).data == 0 || ((o).data == pvm_create_null_object().data))
 
 /**
  *

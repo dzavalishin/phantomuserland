@@ -125,7 +125,7 @@ static int fb_write(struct phantom_device *dev, const void *buf, int len)
 
     len &= ~3; // clear 2 bits - align to 4 bytes - complete pixels
 
-    memcpy( w->pixel, buf, len );
+    memcpy( w->w_pixel, buf, len );
 
     SHOW_FLOW( 8, "write %d", len );
     //hexdump( buf, len, 0, 0 );

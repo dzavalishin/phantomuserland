@@ -1014,7 +1014,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 
 
     bitmap2bitmap(
-    		back_win->pixel, back_win->xsize, back_win->ysize, 0, 0,
+    		back_win->w_pixel, back_win->xsize, back_win->ysize, 0, 0,
                      (void *)bin->data, bmp->xsize, bmp->ysize, 0, 0,
                      bmp->xsize, bmp->ysize
                     );

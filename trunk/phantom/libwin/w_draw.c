@@ -44,7 +44,7 @@ w_pixel( window_handle_t w, int x, int y, rgba_t color )
     if( rect_win_bounds( &r, w ) )
         return;
 
-    rgba_t *dst = w->pixel + y*w->xsize + x;
+    rgba_t *dst = w->w_pixel + y*w->xsize + x;
     *dst = color;
 }
 
@@ -52,13 +52,13 @@ w_pixel( window_handle_t w, int x, int y, rgba_t color )
 
 #define _PLOT(w,x,y,c) do {\
     if((x) > 0 && (y) > 0 && (x) < (w)->xsize && (y) <= (w)->ysize)\
-    (w)->pixel[(x)+(y)*(w)->xsize] = c;\
+    (w)->w_pixel[(x)+(y)*(w)->xsize] = c;\
     } while(0)\
 
 // fast, but can DAMAGE MEMORY - check bounds before calling
 
 #define _UNCH_PLOT(w,x,y,c) do {\
-    (w)->pixel[(x)+(y)*(w)->xsize] = c;\
+    (w)->w_pixel[(x)+(y)*(w)->xsize] = c;\
     } while(0)\
 
 

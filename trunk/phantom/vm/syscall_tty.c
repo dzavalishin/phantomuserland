@@ -356,22 +356,21 @@ void pvm_gc_finalizer_tty( struct pvm_object_storage * os )
 
 void pvm_restart_tty( pvm_object_t o )
 {
+    pvm_add_object_to_restart_list( o ); // Again!
+
     struct data_area_4_tty *tty = pvm_object_da( o, tty );
 
     printf( "restart TTY %p\n", tty );
 
+    w_restart_init( &tty->w );
+
     tty->w.title = tty->title; // need? must be correct in snap
 
     // BUG! How do we fill owner? We must have object ref here
-    tty->w.inKernelEventProcess = 0;
-    tty->w.owner = -1;
+    //tty->w.owner = -1;
 
-    queue_init(&(tty->w.events));
-    tty->w.events_count = 0;
+    //tty->w.buttons = 0; // ? TODO how do we resetup 'em?
 
-    drv_video_window_enter_allwq( &tty->w );
-
-    //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, &tty->w );
-    //event_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &tty->w );
+    w_restart_attach( &tty->w );
 }
 

@@ -14,7 +14,7 @@
 
 #define DEBUG_MSG_PREFIX "devfs"
 #include "debug_ext.h"
-#define debug_level_flow 3
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 

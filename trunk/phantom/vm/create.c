@@ -827,12 +827,17 @@ void pvm_gc_finalizer_window( struct pvm_object_storage * os )
 
 void pvm_restart_window( pvm_object_t o )
 {
+    pvm_add_object_to_restart_list( o ); // Again!
+
     struct data_area_4_window *da = pvm_object_da( o, window );
 
     printf("restart WIN\n");
 
+    w_restart_init( &da->w );
+
     da->w.title = da->title; // must be correct in snap? don't reset?
 
+    /*
     queue_init(&(da->w.events));
     da->w.events_count = 0;
 
@@ -840,6 +845,8 @@ void pvm_restart_window( pvm_object_t o )
 
     //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, &da->w );
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
+    */
+    w_restart_attach( &da->w );
 }
 
 
@@ -987,7 +994,12 @@ void pvm_restart_connection( pvm_object_t o )
 printf("restarting connection");
     da->kernel = 0;
 
-#warning restart!
+    int ret = pvm_connect_object(o,0);
+
+    if( ret )
+        printf("reconnect failed %d\n", ret );
+
+//#warning restart!
 }
 
 

@@ -448,7 +448,7 @@ void
 drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
 {
     bitmap2bitmap(
-                  w->pixel, w->xsize, w->ysize, x, y,
+                  w->w_pixel, w->xsize, w->ysize, x, y,
                   bmp->pixel, bmp->xsize, bmp->ysize, 0, 0,
                   bmp->xsize, bmp->ysize
                  );

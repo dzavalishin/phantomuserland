@@ -21,7 +21,7 @@
 #if VIDEO_NEW_PAINTER
 
 #include <assert.h>
-//#include <kernel/pool.h>
+#include <kernel/init.h>
 #include <kernel/libkern.h>
 #include <kernel/sem.h>
 #include <threads.h>
@@ -265,7 +265,7 @@ static void painter_thread(void *arg)
 
 }
 
-void start_painter_thread(void)
+static void start_painter_thread(void)
 {
     paint_q_init();
 
@@ -274,8 +274,10 @@ void start_painter_thread(void)
 }
 
 
+INIT_ME(0,start_painter_thread,0)
+#define CHECK_START()
 
-#define CHECK_START() ({ if(painter_tid < 0) start_painter_thread(); })
+//#define CHECK_START() ({ if(painter_tid < 0) start_painter_thread(); })
 
 
 
