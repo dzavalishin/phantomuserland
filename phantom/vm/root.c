@@ -120,64 +120,38 @@ void pvm_root_init(void)
 
 // Must create and assign empty one and kill old one after executing
 // to clear refs and delete orphans
-#warning restart list replacement
+//#warning restart list replacement
+
+    pvm_object_t prev_restart_list = pvm_root.restart_list;
+    ref_inc_o( prev_restart_list ); // Below we set array slot, erasing ptr to prev_restart_list, which leads to ref dec to us
+
+    pvm_root.restart_list = pvm_create_object( pvm_get_array_class() );
+    pvm_set_field( root, PVM_ROOT_OBJECT_RESTART_LIST, pvm_root.restart_list );
+
+
 
     //cycle through restart objects here and call restart func
-#if COMPILE_EXPERIMENTAL
-#if COMPILE_WEAKREF
-    int items = get_array_size(pvm_root.restart_list.data);
+//#if COMPILE_EXPERIMENTAL
+    int items = get_array_size(prev_restart_list.data);
 
-    pvm_object_t wrc = pvm_get_weakref_class();
-
-    if( !pvm_is_null( pvm_root.restart_list ) )
+    if( !pvm_is_null( prev_restart_list ) )
     {
         printf("Processing restart list: %d items.\n", items);
         for( i = 0; i < items; i++ )
         {
-            pvm_object_t wr = pvm_get_array_ofield(pvm_root.restart_list.data, i);
-            pvm_object_t o;
-            if(!pvm_object_class_is( wr, wrc ))
-            {
-                //SHOW_ERROR("Not weakref in restart list!");
-                printf("Not weakref in restart list!\n");
-                //o = wr;
-                handle_object_at_restart(wr);
-            }
-            else
-            {
-                o = pvm_weakref_get_object( wr );
-
-                if(!pvm_is_null(o) )
-                {
-                    handle_object_at_restart(o);
-                    ref_dec_o(o);
-                }
-            }
-        }
-
-        printf("Done processing restart list.\n");
-    }
-#else
-    int items = get_array_size(pvm_root.restart_list.data);
-
-    if( !pvm_is_null( pvm_root.restart_list ) )
-    {
-        printf("Processing restart list: %d items.\n", items);
-        for( i = 0; i < items; i++ )
-        {
-            pvm_object_t o = pvm_get_array_ofield(pvm_root.restart_list.data, i);
+            pvm_object_t o = pvm_get_array_ofield(prev_restart_list.data, i);
 
             if(!pvm_is_null(o) )
                 handle_object_at_restart(o);
 
-            // TODO if has just one link - delete it. In fact, must do it in GC.
+            // Orphans will be killed below
         }
 
         printf("Done processing restart list.\n");
+        ref_dec_o(prev_restart_list); // now kill it and 1-link children
     }
 
-#endif
-#endif
+//#endif
 
 
 }
@@ -297,7 +271,7 @@ static void pvm_create_root_objects()
 
     ref_saturate_o(pvm_root.threads_list); //Need it?
     ref_saturate_o(pvm_root.kernel_environment); //Need it?
-    ref_saturate_o(pvm_root.restart_list); //Need it?
+    //ref_saturate_o(pvm_root.restart_list); //Need it? definitely no - this list is recreated each restart
     ref_saturate_o(pvm_root.users_list); //Need it?
 
 
@@ -400,7 +374,7 @@ static void pvm_boot()
     struct pvm_object user_boot_class;
 
     char boot_class[128];
-    if( !phantom_getenv("root.boot", boot_class, 128 ) )
+    if( !phantom_getenv("root.boot", boot_class, sizeof(boot_class) ) )
         strcpy( boot_class, ".ru.dz.phantom.system.boot" );
 
     if( pvm_load_class_from_module(boot_class, &user_boot_class))
@@ -552,6 +526,8 @@ static o_restart_func_t find_restart_f( struct pvm_object _class )
 
     struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
 
+    assert( da->sys_table_id < pvm_n_internal_classes );
+
     // TODO fix this back
     //if( syscall_index >= da->class_sys_table_size )                        pvm_exec_panic("find_syscall: syscall_index no out of table size" );
 
@@ -575,21 +551,42 @@ static void handle_object_at_restart( pvm_object_t o )
 //#endif
 }
 
-
+// TODO interlock add and delete?
+// TODO with interlock we can compact list too
 void pvm_add_object_to_restart_list( pvm_object_t o )
 {
-#if COMPILE_WEAKREF
-    pvm_object_t wr = pvm_create_weakref_object(o);
-    // TODO sync?
-    pvm_append_array( pvm_root.restart_list.data, wr );
-#else
+    // TODO must cleanup inc/dec convention
+    ref_inc_o( o );
     pvm_append_array( pvm_root.restart_list.data, o );
-#endif
 }
 
 void pvm_remove_object_from_restart_list( pvm_object_t o )
 {
-    printf("!! unimpl pvm_remove_object_from_restart_list called !!\n");
+    int i;
+    //printf("!! unimpl pvm_remove_object_from_restart_list called !!\n");
+
+    pvm_object_t curr_restart_list = pvm_root.restart_list;
+
+    //cycle through restart objects
+
+    int items = get_array_size(curr_restart_list.data);
+
+    if( !pvm_is_null( curr_restart_list ) )
+    {
+        //printf("Processing restart list: %d items.\n", items);
+        for( i = 0; i < items; i++ )
+        {
+            pvm_object_t o1 = pvm_get_array_ofield(curr_restart_list.data, i);
+
+            if( pvm_is_eq(o,o1) )
+            {
+                pvm_set_array_ofield(curr_restart_list.data, i, pvm_create_null_object() );
+                break;
+            }
+        }
+
+        //printf("Done processing restart list.\n");
+    }
 }
 
 

@@ -419,7 +419,7 @@ void 	basic_vga_bitblt(const struct rgba_t *from, int xpos, int ypos, int xsize,
 
 static void 	basic_vga_winblt(const window_handle_t from, int xpos, int ypos)
 {
-    basic_vga_bitblt( from->pixel, xpos, ypos, from->xsize, from->ysize );
+    basic_vga_bitblt( from->r_pixel, xpos, ypos, from->xsize, from->ysize );
 }
 
 

@@ -46,7 +46,7 @@ void w_fill_rect( window_handle_t w, rgba_t color, rect_t r )
     int yp = r.y + r.ysize - 1;
     for( ; yp >= r.y; yp-- )
     {
-        rgba_t *dst = w->pixel + yp*w->xsize + r.x;
+        rgba_t *dst = w->w_pixel + yp*w->xsize + r.x;
         rgba2rgba_replicate( dst, &color, r.xsize );
     }
 }
@@ -56,6 +56,8 @@ void
 w_fill( window_handle_t win, rgba_t color )
 {
     int i = (win->xsize * win->ysize) - 1;
+    rgba_t *dest = win->w_pixel;
+
 #if defined(ARCH_ia32) && 1
     asm volatile(
                  "\
@@ -66,7 +68,8 @@ w_fill( window_handle_t win, rgba_t color )
                  rep stosl    ; \
                  "
                  : /* no outputs */
-                 : "g" (color), "g" (i), "g" (&(win->pixel))
+//                 : "g" (color), "g" (i), "g" (&(win->w_pixel))
+                 : "g" (color), "g" (i), "g" (dest)
                  : "eax", "ecx", "edi"
                 );
 #else

@@ -29,9 +29,9 @@ x11_display.o: x11_display.c
 GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o 
 
 ifeq ($(OSTYPE),cygwin)
-OSLIB = -lgdi32 ../lib/libtuned.a ../lib/libphantom.a ../lib/libwin.a 
+OSLIB = -lgdi32 ../lib/libtuned.a ../lib/libphantom.a ../lib/libwin.a ../lib/libphantom.a 
 else
-OSLIB = ../lib/libtuned.a ../lib/libphantom_c.a ../lib/libphantom.a ../lib/libwin.a 
+OSLIB = ../lib/libtuned.a ../lib/libphantom_c.a ../lib/libphantom.a ../lib/libwin.a ../lib/libphantom.a 
 endif
 
 PVM_TEST_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o

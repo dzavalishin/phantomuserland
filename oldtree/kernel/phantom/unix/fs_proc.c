@@ -12,9 +12,9 @@
 #if HAVE_UNIX
 
 
-#define DEBUG_MSG_PREFIX "devfs"
+#define DEBUG_MSG_PREFIX "procfs"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 

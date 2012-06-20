@@ -34,6 +34,7 @@ typedef pool_handle_t window_handle_t;
 typedef struct drv_video_window * window_handle_t;
 #endif
 
+// Win flags supposed to stay the same
 
 #define WFLAG_WIN_DECORATED             (1<<0)
 // This is temp win, not included in allwindows list
@@ -46,9 +47,16 @@ typedef struct drv_video_window * window_handle_t;
 #define WFLAG_WIN_NOTOPAQUE             (1<<4)
 // Must be on top of all others
 #define WFLAG_WIN_ONTOP                 (1<<5)
+// Double buffered window
+#define WFLAG_WIN_DOUBLEBUF             (1<<6)
+// In double buffered mode window is supposed to completely
+// repaint itself each buffer swap. No buffer copy occures.
+#define WFLAG_WIN_FULLPAINT             (1<<7)
 
 
 #define WIN_HAS_FLAG(__w,__f) ((__w)->flags & (__f))
+
+// Win state can change frequently
 
 #define WSTATE_WIN_FOCUSED              (1<<0)
 #define WSTATE_WIN_DRAGGED              (1<<1)
@@ -59,6 +67,8 @@ typedef struct drv_video_window * window_handle_t;
 #define WSTATE_WIN_UNCOVERED            (1<<8)
 // Pixels live in graphics device's framebuf - can use hw blitter
 #define WSTATE_WIN_INFB                 (1<<9)
+
+
 
 #define WBUTTON_SYS(id) (0xFFFF|((id)<<16))
 
@@ -114,7 +124,7 @@ typedef struct _phantom_window
 pool_handle_t 	w_create( int xsize, int ysize );
 //void 		w_resize( pool_handle_t h, int xsize, int ysize );
 //void 		w_moveto( pool_handle_t h, int x, int y );
-void 		w_blt( pool_handle_t h );
+void        w_blt( pool_handle_t h );
 void		w_set_visible( pool_handle_t h, int v );
 
 //void 		w_to_top(pool_handle_t h);
@@ -126,12 +136,22 @@ void		w_set_visible( pool_handle_t h, int v );
 //void		w_pixel( pool_handle_t h, int x, int y, rgba_t color );
 //void    	w_draw_bitmap( pool_handle_t h, int x, int y, drv_video_bitmap_t *bmp );
 
-void 		w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len );
-void 		w_draw_v_line( window_handle_t h, rgba_t color, int x, int y, int len );
-//void 		w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 );
+void        w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len );
+void        w_draw_v_line( window_handle_t h, rgba_t color, int x, int y, int len );
+//void      w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 );
 
 errno_t     w_scroll_hor( window_handle_t w, int x, int y, int xs, int ys, int s );
 void        w_scroll_up( window_handle_t win, int npix, rgba_t color);
+
+//! Called from object restart code to reinit window struct
+//! contained in VM object. This func just clears pointers.
+//! After calling this func you must reset all the required
+//! fields and call w_restart_attach( w )
+//! to add window to in-kernel lists and repaint it.
+void        w_restart_init(window_handle_t w);
+
+// Called from vm restart code to reattach window to win system
+void w_restart_attach( window_handle_t w );
 
 
 
@@ -188,8 +208,18 @@ typedef struct drv_video_window
 
     pool_t              *buttons;
 
+    rgba_t       	*r_pixel; // read ptr - for blit to screen
+    rgba_t       	*w_pixel; // write ptr - for painting
+#if VIDEO_DOUBLE_BUF
+#else
+//#define r_pixel pixels
+//#define w_pixel pixels
+#endif
+    rgba_t       	*buf[2]; // 1st/2nd halves ptrs for dbl buf switch
+
+
     // bitmap itself
-    rgba_t       	pixel[];
+    rgba_t       	pixels[];
 } drv_video_window_t;
 
 // returns nonzero if rect is out of window
@@ -203,9 +233,9 @@ int    point_in_win( int x, int y, drv_video_window_t *w );
 // Window interface - old, to be killed
 // ------------------------------------------------------------------------
 
-// malloc value to create drv_video_window_t
-static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_window_t); }
-static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
+//! malloc value to create drv_video_window_t
+// * 2 is for double buffered mode
+static __inline__ int drv_video_window_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize * 2) + sizeof(drv_video_window_t); }
 
 
 // dynamic allocation
@@ -277,19 +307,13 @@ void win2blt_flags( u_int32_t *flags, const window_handle_t w );
 
 #if !NEW_WINDOWS
 
+void w_switch_buffers(drv_video_window_t *w);
+
+void drv_video_window_update( drv_video_window_t *w );
+
+
 #if !USE_ONLY_INDIRECT_PAINT
-
-	
 void drv_video_winblt( drv_video_window_t *from );
-static __inline__ void drv_video_window_update( drv_video_window_t *w ) { drv_video_winblt( w ); }
-
-#else
-
-static __inline__ void drv_video_window_update( drv_video_window_t *w ) 
-{
-    ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
-}
-
 #endif // USE_ONLY_INDIRECT_PAINT
 
 int w_titleWindowEventProcessor( window_handle_t w, struct ui_event *e );

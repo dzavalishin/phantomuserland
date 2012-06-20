@@ -50,10 +50,53 @@ void drv_video_window_free(drv_video_window_t *w)
 
 
 
+void w_switch_buffers(drv_video_window_t *w)
+{
+#if VIDEO_DOUBLE_BUF
+    // Not doublebuffer mode? Just set both ptrs to buf 0
+    if(!WIN_HAS_FLAG(w,WFLAG_WIN_DOUBLEBUF))
+    {
+        w->r_pixel = w->pixels;
+        w->w_pixel = w->pixels;
+        return;
+    }
+
+    if( w->r_pixel == w->buf[0] )
+    {
+        w->r_pixel = w->buf[1];
+        w->w_pixel = w->buf[0];
+    }
+    else
+    {
+        w->r_pixel = w->buf[0];
+        w->w_pixel = w->buf[1];
+    }
+
+    // If not full paint, copy current displayed buffer to paint buffer
+    if(!WIN_HAS_FLAG(w,WFLAG_WIN_FULLPAINT))
+        memmove( w->w_pixel, w->r_pixel, sizeof(rgba_t) * w->xsize * w->ysize );
+#else
+
+#ifndef r_pixel
+    w->r_pixel = w->pixels;
+#endif
+
+#ifndef w_pixel
+    w->w_pixel = w->pixels;
+#endif
+
+#endif
+}
+
 static void
 common_window_init( drv_video_window_t *w,
                         int xsize, int ysize )
 {
+    w->buf[0] = w->pixels;
+    w->buf[1] = w->pixels + xsize * ysize;
+    w_switch_buffers(w);
+
+
     w->state |= WSTATE_WIN_VISIBLE; // default state is visible
 
     w->xsize = xsize;
@@ -83,6 +126,44 @@ common_window_init( drv_video_window_t *w,
     w->w_owner = 0;
 }
 
+//! Called from object restart code to reinit window struct
+//! contained in VM object. This func just clears pointers.
+//! After calling this func you must reset all the required
+//! fields and call w_restart_attach( w )
+//! to add window to in-kernel lists and repaint it.
+void w_restart_init(drv_video_window_t *w)
+{
+    w->title = 0; 
+
+    w->inKernelEventProcess = 0;
+    // Cant without owner!
+    //w->inKernelEventProcess = defaultWindowEventProcessor;
+
+    // BUG! How do we fill owner? We must have object ref here
+    w->owner = -1;
+
+    w->eventDeliverSema = 0;
+    w->w_title = 0;
+    w->w_decor = 0;
+    w->w_owner = 0;
+
+    w->buttons = 0; // ? TODO how do we resetup 'em?
+
+    queue_init(&(w->events));
+    w->events_count = 0;
+
+    //w_restart_attach( w );
+
+}
+
+// Called from vm restart code with no w_lock taken
+void w_restart_attach( drv_video_window_t *w )
+{
+    w_lock();
+    drv_video_window_enter_allwq(w);
+    win_make_decorations(w);
+    w_unlock();
+}
 
 
 drv_video_window_t *private_drv_video_window_create(int xsize, int ysize)

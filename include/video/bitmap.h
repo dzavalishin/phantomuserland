@@ -34,6 +34,8 @@ typedef struct drv_video_cursor
     drv_video_bitmap_t bitmap;
 } drv_video_cursor_t;
 
+static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
+
 
 errno_t bmp_ppm_load( drv_video_bitmap_t **to, void *from );
 

@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "threads"
 #include <debug_ext.h>
-#define debug_level_flow 5
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 

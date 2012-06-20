@@ -75,7 +75,7 @@ __inline__ int w_font_draw_char(
     int fyc = p ? 1 : 0;
     for( ; yc < yafter; yc++, fyc++ )
     {
-        rgba_t *wp = win->pixel + x + (yc*win->xsize);
+        rgba_t *wp = win->w_pixel + x + (yc*win->xsize);
 
         const char *fp = fcp + ((font->ysize - fyc - 1) * bpcx );
         int bc = bpcx;

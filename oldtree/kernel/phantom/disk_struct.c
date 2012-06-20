@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Quite quick'n'dirty disk structures worker functions.
+ * Phantom disk structures worker functions.
  *
  * (C) 2005-2010 dz.
  *
@@ -30,27 +30,16 @@ static u_int32_t sb_chksum( unsigned char *sbp )
 int
 phantom_calc_sb_checksum( phantom_disk_superblock *sb )
 {
-	u_int32_t old_cs = sb->checksum;
+    u_int32_t old_cs = sb->checksum;
+    sb->checksum = 0; // Or else checksum will be wrong
 
-	sb->checksum = 0;
+    sb->checksum = sb_chksum( (unsigned char *)sb );
 
-#if 0
-	u_int32_t counter = 0;
-	unsigned char *sbp = (unsigned char *)sb;
-	for( int i = sizeof(*sb); i--; )
-		counter += *sbp++;
-
-	sb->checksum = counter;
-#else
-        sb->checksum = sb_chksum( (unsigned char *)sb );
-#endif
-
-
-	return 
-		sb->checksum == old_cs &&
-		sb->magic   == DISK_STRUCT_MAGIC_SUPERBLOCK &&
-		sb->magic2  == DISK_STRUCT_MAGIC_SUPER_2
-		;
+    return
+        sb->checksum == old_cs &&
+        sb->magic   == DISK_STRUCT_MAGIC_SUPERBLOCK &&
+        sb->magic2  == DISK_STRUCT_MAGIC_SUPER_2
+        ;
 }
 
 //
@@ -62,47 +51,47 @@ void
 phantom_disk_format( phantom_disk_superblock *sb, unsigned int n_pages, const char *sysname )
 {
 
-	memset( sb, 0, sizeof(*sb) );
+    memset( sb, 0, sizeof(*sb) );
 
-	sb->version = DISK_STRUCT_VERSION;
-	sb->magic   = DISK_STRUCT_MAGIC_SUPERBLOCK;
-	sb->magic2  = DISK_STRUCT_MAGIC_SUPER_2;
-	sb->blocksize = 4096;
+    sb->version = DISK_STRUCT_VERSION;
+    sb->magic   = DISK_STRUCT_MAGIC_SUPERBLOCK;
+    sb->magic2  = DISK_STRUCT_MAGIC_SUPER_2;
+    sb->blocksize = 4096;
 
-	sb->sb2_addr = sb->sb3_addr = 0; // No copies of superblock
+    sb->sb2_addr = sb->sb3_addr = 0; // No copies of superblock
 
-	sb->disk_start_page = PHANTOM_DEFAULT_DISK_START;
-	sb->disk_page_count = n_pages;
+    sb->disk_start_page = PHANTOM_DEFAULT_DISK_START;
+    sb->disk_page_count = n_pages;
 
-	sb->free_start = 1; // Next block after super is free.
-	sb->free_list = 0;  // No free list yet.
-	sb->fs_is_clean = 0xFF;
+    sb->free_start = 1; // Next block after super is free.
+    sb->free_list = 0;  // No free list yet.
+    sb->fs_is_clean = 0xFF;
 
-	strncpy( sb->sys_name, sysname, sizeof(sb->sys_name) ); 
+    strncpy( sb->sys_name, sysname, sizeof(sb->sys_name) );
 
-	phantom_calc_sb_checksum( sb );
+    phantom_calc_sb_checksum( sb );
 }
 
 #define cmpab(f) (a->f == b->f)
 
 int superblocks_are_equal(const phantom_disk_superblock *a, const phantom_disk_superblock *b)
 {
-	return
-		cmpab(magic) && cmpab(version) && cmpab(checksum) && cmpab(blocksize) &&
-		cmpab(sb2_addr) && cmpab(sb3_addr) && cmpab(disk_start_page) &&cmpab(disk_page_count) &&
-		cmpab(free_start) && cmpab(free_list) && cmpab(fs_is_clean) &&
-		cmpab(general_flags_1) && cmpab(general_flags_2) && cmpab(general_flags_3) && 
-		cmpab(last_snap) && cmpab(last_snap_time) && cmpab(last_snap_crc32) &&
-		cmpab(prev_snap) && cmpab(prev_snap_time) && cmpab(prev_snap_crc32) &&
-		cmpab(magic2) && 
-		cmpab(boot_list) && //cmpab(boot_module) &&
-		//cmpab(sys_name) &&
-		cmpab(last_boot_time) &&
-		/*cmpab(last_short_journal_blocks) && */ cmpab(last_long_journal_root) &&
-		cmpab(last_short_journal_flags) && cmpab(last_long_journal_flags) &&
-		/*cmpab(prev_short_journal_blocks) && */ cmpab(prev_long_journal_root) &&
-		cmpab(prev_short_journal_flags) && cmpab(prev_long_journal_flags) &&
-		1;
+    return
+        cmpab(magic) && cmpab(version) && cmpab(checksum) && cmpab(blocksize) &&
+        cmpab(sb2_addr) && cmpab(sb3_addr) && cmpab(disk_start_page) &&cmpab(disk_page_count) &&
+        cmpab(free_start) && cmpab(free_list) && cmpab(fs_is_clean) &&
+        cmpab(general_flags_1) && cmpab(general_flags_2) && cmpab(general_flags_3) &&
+        cmpab(last_snap) && cmpab(last_snap_time) && cmpab(last_snap_crc32) &&
+        cmpab(prev_snap) && cmpab(prev_snap_time) && cmpab(prev_snap_crc32) &&
+        cmpab(magic2) &&
+        cmpab(boot_list) && //cmpab(boot_module) &&
+        //cmpab(sys_name) &&
+        cmpab(last_boot_time) &&
+        /*cmpab(last_short_journal_blocks) && */ cmpab(last_long_journal_root) &&
+        cmpab(last_short_journal_flags) && cmpab(last_long_journal_flags) &&
+        /*cmpab(prev_short_journal_blocks) && */ cmpab(prev_long_journal_root) &&
+        cmpab(prev_short_journal_flags) && cmpab(prev_long_journal_flags) &&
+        1;
 }
 
 

@@ -1,3 +1,4 @@
+#if 1
 /**
  *
  * Phantom OS
@@ -21,6 +22,14 @@
 #include <kernel/pool.h>
 #include <kernel/libkern.h>
 #include <phantom_libc.h>
+
+#if !NEW_WINDOWS
+void init_new_windows(void)
+{
+}
+#endif
+
+#if NEW_WINDOWS
 
 #define DOW(__h,code) ({ window_t *w = pool_get_el(wp,__h); {code} pool_release_el( wp, __h ); })
 
@@ -161,7 +170,6 @@ static void 	do_w_repaint_all()
     pool_foreach( wp, wpaint, 0 );
     //rgba2rgba_zbreplicate( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 }
-
 // -----------------------------------------------------------------------
 // State/pos
 // -----------------------------------------------------------------------
@@ -189,10 +197,12 @@ void w_set_visible( pool_handle_t h, int v )
 
     pool_release_el( wp, h );
 }
+#endif
 
 
 
 
+#if NEW_WINDOWS
 void w_moveto( pool_handle_t h, int x, int y )
 {
     window_t *w = pool_get_el(wp,h);
@@ -231,13 +241,13 @@ void w_set_z_order( pool_handle_t h, int zorder )
 
     pool_release_el( wp, h );
 }
-
+#endif
 // -----------------------------------------------------------------------
 // Rect/point in win
 // -----------------------------------------------------------------------
 
 
-int rect_w_bounds( rect_t *r, window_t *w )
+int rect_w_bounds( rect_t *r, window_handle_t w )
 {
     if( r->x < 0 )
     {
@@ -352,7 +362,7 @@ static void do_w_draw_h_line( window_handle_t w, rgba_t color, int x, int y, int
     if( rect_w_bounds( &r, w ) )
         return;
 
-    rgba_t *dst = w->pixel + r.y*w->xsize + r.x;
+    rgba_t *dst = w->w_pixel + r.y*w->xsize + r.x;
     rgba2rgba_replicate( dst, &color, r.xsize );
 }
 
@@ -368,6 +378,7 @@ void w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len )
 }
 #endif
 
+#if NEW_WINDOWS
 static void do_w_draw_v_line( window_t *w, rgba_t color, int x, int y, int len )
 {
     rect_t r;
@@ -388,13 +399,13 @@ static void do_w_draw_v_line( window_t *w, rgba_t color, int x, int y, int len )
     }
 }
 
-#if NEW_WINDOWS
 void w_draw_v_line( pool_handle_t h, rgba_t color, int x, int y, int len )
 {
     DOW(h, do_w_draw_v_line( w, color, x, y, len ); do_w_blt( w ); );
 }
 #endif
 
+#if NEW_WINDOWS
 static void do_w_draw_rect( window_t *w, rgba_t c,
                                  int x,int y,int lx, int ly
                                  )
@@ -410,7 +421,6 @@ static void do_w_draw_rect( window_t *w, rgba_t c,
     do_w_draw_v_line( w, c, x+lx-1, y,      ly );
 }
 
-#if NEW_WINDOWS
 void w_draw_rect( pool_handle_t h, rgba_t c,
                                  int x, int y, int lx, int ly
                                  )
@@ -423,6 +433,7 @@ void w_draw_rect( pool_handle_t h, rgba_t c,
 // Line
 // -----------------------------------------------------------------------
 
+#if NEW_WINDOWS
 
 // SLOOOW! Checks bounds on each pixel
 
@@ -478,7 +489,7 @@ static void do_w_draw_line( window_t *w, rgba_t c, int x1, int y1, int x2, int y
 }
 
 
-#if NEW_WINDOWS
+//#if NEW_WINDOWS
 void w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 )
 {
     DOW(h, do_w_draw_line( w, color, x, y, x2, y2 ); do_w_blt( w ); );
@@ -538,4 +549,6 @@ void new_videotest()
 
     //scr_zbuf_paint();
 }
+#endif
+
 #endif

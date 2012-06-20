@@ -321,7 +321,7 @@ int main(int argc, char **argv, char **envp)
     usb_setup();
 #endif // HAVE_USB
 
-    pressEnter("will run phantom_timed_call_init2");
+    //pressEnter("will run phantom_timed_call_init2");
     //phantom_timed_call_init2();
 
     // -----------------------------------------------------------------------

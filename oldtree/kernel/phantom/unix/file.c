@@ -1,4 +1,22 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix subsystem file struct ops
+ *
+ *
+**/
+
 #if HAVE_UNIX
+
+
+#define DEBUG_MSG_PREFIX "ufile"
+#include "debug_ext.h"
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <unix/uufile.h>
 //#include <unix/uuprocess.h>

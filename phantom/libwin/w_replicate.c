@@ -45,7 +45,7 @@ void w_replicate_ver( window_handle_t dest, int destX, int destY,
     int vcnt;
     for(vcnt = destY; vcnt < destY+nSteps; vcnt++ )
     {
-        struct rgba_t *dstPtr = dest->pixel + vcnt*dest->xsize + destX;
+        struct rgba_t *dstPtr = dest->w_pixel + vcnt*dest->xsize + destX;
         rgba2rgba_move( dstPtr, src, srcSize );
     }
 }
@@ -82,7 +82,7 @@ void w_replicate_hor( window_handle_t dest, int destX, int destY,
     int vcnt;
     for(vcnt = destY; vcnt < destY+srcSize; vcnt++ )
     {
-        struct rgba_t *dstPtr = dest->pixel + vcnt*dest->xsize + destX;
+        struct rgba_t *dstPtr = dest->w_pixel + vcnt*dest->xsize + destX;
         rgba2rgba_replicate( dstPtr, src, nSteps );
         src++;
     }

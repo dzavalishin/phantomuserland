@@ -671,7 +671,7 @@ static void paint_button(window_handle_t win, struct kolibri_button *cb)
     if(!cb->flag_nopaint)
     {
         bitmap2bitmap_yflip(
-                            win->pixel, win->xsize, win->ysize, cb->r.x, cb->r.y,
+                            win->w_pixel, win->xsize, win->ysize, cb->r.x, cb->r.y,
                             cb->pixels, cb->r.xsize, cb->r.ysize, 0, 0, cb->r.xsize, cb->r.ysize );
     }
 
@@ -1069,7 +1069,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             rgb2rgba_move( pixels, src, npixels );
 
             bitmap2bitmap_yflip(
-                          ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
+                          ks->win->w_pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
                           pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
             free( pixels );
 #else
@@ -1144,7 +1144,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             {
 
                 bitmap2bitmap_yflip(
-                              ks->win->pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
+                              ks->win->w_pixel, ks->win->xsize, ks->win->ysize, r.x, r.y,
                               cb->pixels, r.xsize, r.ysize, 0, 0, r.xsize, r.ysize );
             }
 
@@ -1987,7 +1987,7 @@ static void kolibri_reload_window_alpha(struct kolibri_process_state *ks)
 {
     int sz = (ks->win->xsize >> ks->win_alpha_scale) * (ks->win->ysize >> ks->win_alpha_scale);
     int npixel = ks->win->xsize * ks->win->ysize;
-    rgba_t *pp = ks->win->pixel;
+    rgba_t *pp = ks->win->w_pixel;
 
     int scaled_sz = sz << ks->win_alpha_scale*2;
 
