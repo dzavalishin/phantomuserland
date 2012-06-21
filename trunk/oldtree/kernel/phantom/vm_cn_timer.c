@@ -94,13 +94,13 @@ static pvm_object_t cn_timer_syscall_worker( pvm_object_t conn, struct data_area
         int msec = pvm_get_int(__ival);
         SYS_FREE_O(__ival);
 
-        SHOW_FLOW(1, "timer sleep % msec", msec );
+        SHOW_FLOW(15, "timer sleep % msec", msec );
         hal_sleep_msec( msec );
     }
     else
         SHOW_ERROR0(1, "timer sleep < 1 parm");
 */
-    SHOW_FLOW(1, "timer sleep %d msec", nmethod );
+    SHOW_FLOW(15, "timer sleep %d msec", nmethod );
     hal_sleep_msec( nmethod );
 
     return pvm_create_null_object();

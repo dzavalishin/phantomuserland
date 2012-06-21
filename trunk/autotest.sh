@@ -3,7 +3,9 @@ cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
+PASSES=2
 GDB_PORT=1235			# get rid of stalled instance
+GDB_PORT_LIMIT=1250		# avoid spawning too many
 GDB_OPTS="-gdb tcp::$GDB_PORT"
 #GDB_OPTS="-s"
 QEMU=`which qemu`		# qemu 0.x
@@ -26,6 +28,10 @@ while [ $# -gt 0 ]
 do
 	case "$1" in
 	-f)	FORCE=1	;;
+	-p)
+		shift
+		[ "$1" -gt 0 ] && PASSES="$1"
+	;;
 	-w)	WARN=1
 		MSG="No updates for today"
 	;;
@@ -67,7 +73,7 @@ Previous copies are kept (serial0.log.0 through .9)"
 # check if another copy is running
 
 RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
-DEAD=`ps xjf | grep $QEMU | grep -vw "grep\\|$$"`
+DEAD=`ps xjf | grep $QEMU | grep -vw "grep"`
 [ "$RUNNING" ] && {
 	(echo "$RUNNING" | grep -q defunct) || \
 	(tail -1 $TEST_DIR/serial0.log | grep ^Press) || {
@@ -75,7 +81,9 @@ DEAD=`ps xjf | grep $QEMU | grep -vw "grep\\|$$"`
 		exit 0
 	}
 
-	echo "Previous test run stalled. Killing qemu..."
+	echo "$RUNNING
+$DEAD
+Previous test run stalled. Killing qemu..."
 	[ "$DEAD" ] && SIG=-KILL
 	pkill $SIG $QEMU
 
@@ -85,11 +93,15 @@ DEAD=`ps xjf | grep $QEMU | grep -vw "grep\\|$$"`
 #touch $0.lock
 #trap "rm $0.lock" 0
 
-LISTENING=`netstat -pl --inet 2>/dev/null | grep :1234`
-[ "$LISTENING" ] && {
-	echo "Somebody took my gdb port! $LISTENING"
-	exit 0
-}
+while [ "`netstat -pl --inet 2>/dev/null | grep :$GDB_PORT`" ]
+do
+	echo "Somebody took my gdb port! Taking next one..."
+	GDB_PORT=`expr $GDB_PORT + 1`
+	[ $GDB_PORT -gt $GDB_PORT_LIMIT ] && {
+		echo "Too many attempts. Aborted"
+		exit 0
+	}
+done
 
 rm -f make.log
 make clean > /dev/null 2>&1
@@ -206,7 +218,7 @@ dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 echo ": zeroing vio..."
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 
-for pass in 1 2
+for pass in `seq 1 $PASSES`
 do
 	echo "
 ===> pass $pass"

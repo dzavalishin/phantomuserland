@@ -337,7 +337,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
         hal_exit_kernel_thread();
     }
 
-    SHOW_FLOW0( 5, "VM thread will sleep for blocking syscall");
+    SHOW_FLOW0( 15, "VM thread will sleep for blocking syscall");
     hal_mutex_lock( &interlock_mutex );
 
     phantom_virtual_machine_threads_stopped++;
@@ -359,12 +359,12 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
     if(phantom_virtual_machine_snap_request)
         hal_cond_wait( &phantom_vm_wait_4_snap, &interlock_mutex );
 
-    //SHOW_FLOW0( 5, "VM thread awaken, will report wakeup");
+    //SHOW_FLOW0( 15, "VM thread awaken, will report wakeup");
     phantom_virtual_machine_threads_stopped--;
     hal_cond_broadcast( &phantom_snap_wait_4_vm_leave );
 
     hal_mutex_unlock( &interlock_mutex );
-    SHOW_FLOW0( 5, "VM thread awaken after blocking syscall");
+    SHOW_FLOW0( 15, "VM thread awaken after blocking syscall");
 
     // pop zero from obj stack
     // push ret val to obj stack
