@@ -78,6 +78,7 @@ DEAD=`ps xjf | grep $QEMU | grep -vw "grep"`
 	(echo "$RUNNING" | grep -q defunct) || \
 	(tail -1 $TEST_DIR/serial0.log | grep ^Press) || {
 		echo "Another copy is running: $RUNNING"
+		tail -10 $TEST_DIR/serial0.log
 		exit 0
 	}
 
