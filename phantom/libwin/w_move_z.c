@@ -36,7 +36,9 @@ void w_to_bottom(drv_video_window_t *w)
 
     w_unlock();
 
-    scr_repaint_all();
+    //scr_repaint_all();
+    scr_repaint_win( w );
+
 }
 
 void w_to_top(drv_video_window_t *w)
@@ -78,7 +80,8 @@ inserted:
 
     w_unlock();
 
-    scr_repaint_all();
+    //scr_repaint_all();
+    scr_repaint_win( w );
 }
 
 

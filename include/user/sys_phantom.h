@@ -7,7 +7,7 @@
 // Syscall will not return until process exit - ugly, but handy ;)
 #define P_RUN_WAIT  	        (1<<0)
 
-// Run in an new window
+// Run in a new window
 #define P_RUN_NEW_WINDOW    	(1<<1)
 
 // Process group (signal handling)

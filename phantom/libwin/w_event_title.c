@@ -45,7 +45,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         break;
 
     case UI_EVENT_WIN_REPAINT:
-        _drv_video_winblt( w );
+        iw_winblt( w );
         break;
 
     case UI_EVENT_WIN_REDECORATE:
@@ -56,7 +56,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         {
             w_lock();
             win_make_decorations(w->w_owner);
-            _drv_video_winblt_locked( w->w_owner );
+            iw_winblt_locked( w->w_owner );
             w_unlock();
         }
         break;

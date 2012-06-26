@@ -274,19 +274,50 @@ static errno_t     fatff_readdir( struct uufile *f, struct dirent *dirp )
         return ENOTDIR;
 
     DIR *dj = f->impl;
+
     FILINFO fi;
     char lname[FS_MAX_PATH_LEN];
-    fi.lfname = lname;
 
+    if( (f->pos++) == 0 )
+    {
+        // Make sure we start from start
+        if( FR_OK != f_readdir ( dj, 0 ) )
+            SHOW_ERROR( 0, "Can't rewind dir %p", f );
+    }
+
+    memset( &fi, 0, sizeof(fi) );
+    fi.lfname = lname;
+    fi.lfsize = sizeof(lname);
+    memset( fi.lfname, 0, fi.lfsize );
     FRESULT r = f_readdir ( dj,	&fi );
 
-    if( r == FR_NO_FILE)
+    if(
+       (fi.fsize == 0) &&
+       (fi.fattrib == 0) &&
+       (fi.lfname[0] == 0) &&
+       (fi.fname[0] == 0)
+      )
+        return EIO;
+
+    if( (r == FR_NO_FILE) || (dj->sect == 0) )
         return ENOENT; // End of dir
+
+    if( r != FR_OK)
+        return EIO; // Some other problem
 
     dirp->d_reclen = 0;
     dirp->d_ino = dj->sclust ? dj->sclust : ~0u ; // zero inode means unused entry, and zero cluster is root dir - replace with -1
 
-    void *name = lname[0] ? lname : fi.fname;
+    char *name = fi.lfname[0] ? fi.lfname : fi.fname;
+
+    if( fi.fattrib & AM_DIR )
+    {
+        if( *name == 0 )
+            name = ".";
+
+        if( (name[0] == 1) && (name[1] == 0) )
+            name = "..";
+    }
 
     size_t nlen = strlen(name) + 1;
     if( nlen > sizeof(dirp->d_name) ) nlen = sizeof(dirp->d_name);

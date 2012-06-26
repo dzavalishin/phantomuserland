@@ -73,7 +73,7 @@ static void paint_button(window_handle_t win, button_t *cb )
                                            COLOR_TRANSPARENT, cb->r.x+t_ypos+2, cb->r.y+t_ypos ); // +2?
     }
 
-    //drv_video_window_update( win );
+    //w_update( win );
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, win );
 }
 

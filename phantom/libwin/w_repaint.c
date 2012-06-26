@@ -41,7 +41,7 @@ void scr_repaint_all(void)
 
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
     {
-        _drv_video_winblt_locked( w );
+        iw_winblt_locked( w );
         if(w->flags & WFLAG_WIN_DECORATED)
             win_make_decorations(w);
     }
@@ -121,7 +121,7 @@ void repaint_all_for_square( rect_t *todo )
         if( !rect_win_bounds( &wtodo, w ) )
         {
             repaint_win_part( w, &wtodo, todo );
-            //_drv_video_winblt_locked( w );
+            //iw_winblt_locked( w );
             if(w->flags & WFLAG_WIN_DECORATED)
             {
                 //win_make_decorations(w);

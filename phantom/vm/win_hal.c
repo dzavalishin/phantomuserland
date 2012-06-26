@@ -573,8 +573,10 @@ void vm_map_page_mark_unused( addr_t page_start)
 
 
 
+time_t time(time_t *);
 
-time_t fast_time(void)
+//time_t fast_time(void)
+long fast_time(void)
 {
     return time(0);
 }
@@ -611,3 +613,18 @@ void lprintf(char const *fmt, ...)
     vprintf(fmt, ap);
     va_end(ap);
 }
+
+
+//int set_net_timer( void ) //&e, 10000, stat_update_persistent_storage, 0, 0 );
+int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback callback, void *args, int flags)
+{
+    (void) e;
+    (void) delay_ms;
+    (void) callback;
+    (void) args;
+    (void) flags;
+
+    panic("set_net_timer");
+}
+
+

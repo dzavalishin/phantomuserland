@@ -29,6 +29,7 @@
 
 #include <kernel/boot.h>
 #include <kernel/debug.h>
+#include <kernel/stats.h>
 
 //#include "vm/systable_id.h"
 
@@ -47,6 +48,9 @@ static void load_kernel_boot_env(void);
 static void handle_object_at_restart( pvm_object_t o );
 
 static void runclass(int, char **);
+
+static void process_generic_restarts(struct pvm_object_storage *root);
+static void process_specific_restarts(void);
 
 
 /**
@@ -118,9 +122,20 @@ void pvm_root_init(void)
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
     pvm_root.root_dir = pvm_get_field( root, PVM_ROOT_OBJECT_ROOT_DIR );
 
+    pvm_root.kernel_stats = pvm_get_field( root, PVM_ROOT_KERNEL_STATISTICS );
+
+
+    process_specific_restarts();
+    process_generic_restarts(root);
+
+}
+
+static void process_generic_restarts(struct pvm_object_storage *root)
+{
+    int i;
+
 // Must create and assign empty one and kill old one after executing
 // to clear refs and delete orphans
-//#warning restart list replacement
 
     pvm_object_t prev_restart_list = pvm_root.restart_list;
     ref_inc_o( prev_restart_list ); // Below we set array slot, erasing ptr to prev_restart_list, which leads to ref dec to us
@@ -152,6 +167,38 @@ void pvm_root_init(void)
     }
 
 //#endif
+}
+
+
+static void start_persistent_stats(void)
+{
+    struct data_area_4_binary *bda = pvm_data_area( pvm_root.kernel_stats, binary );
+
+    if( bda->data_size < STAT_CNT_PERSISTENT_DA_SIZE )
+    {
+        //SHOW_ERROR( 0, "persistent stats data < %d", STAT_CNT_PERSISTENT_DA_SIZE );
+        printf( "persistent stats data < %d\n", STAT_CNT_PERSISTENT_DA_SIZE );
+        // TODO resize object!
+    }
+    else
+    {
+        stat_set_persistent_storage( (struct persistent_kernel_stats *)bda->data );
+    }
+}
+
+static void process_specific_restarts(void)
+{
+    start_persistent_stats();
+    // One last snapshot for each run is never counted in stats,
+    // 'cause counter is incremented just after it was done. Fix it here.
+    {
+        struct data_area_4_binary *bda = pvm_data_area( pvm_root.kernel_stats, binary );
+        struct persistent_kernel_stats *ps = (struct persistent_kernel_stats *)bda->data;
+        ps[STAT_CNT_SNAPSHOT].total_prev_runs++;
+        // Count reboots too
+        //ps[STAT_CNT_OS_REBOOTS].total_prev_runs++;
+        STAT_INC_CNT( STAT_CNT_OS_REBOOTS );
+    }
 
 
 }
@@ -184,6 +231,8 @@ static void pvm_save_root_objects()
     pvm_set_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT, pvm_root.kernel_environment );
     pvm_set_field( root, PVM_ROOT_OBJECT_OS_ENTRY, pvm_root.os_entry );
     pvm_set_field( root, PVM_ROOT_OBJECT_ROOT_DIR, pvm_root.root_dir);
+
+    pvm_set_field( root, PVM_ROOT_KERNEL_STATISTICS, pvm_root.kernel_stats );
 
 }
 
@@ -263,17 +312,21 @@ static void pvm_create_root_objects()
 
     // -------------------------------------------------------------------
 
-    pvm_root.threads_list = pvm_create_object( pvm_get_array_class() );
+    pvm_root.threads_list  = pvm_create_object( pvm_get_array_class() );
     pvm_root.kernel_environment = pvm_create_object(pvm_get_array_class());
-    pvm_root.restart_list = pvm_create_object( pvm_get_array_class() );
-    pvm_root.users_list = pvm_create_object( pvm_get_array_class() );
-    pvm_root.root_dir = pvm_create_directory_object();
+    pvm_root.restart_list  = pvm_create_object( pvm_get_array_class() );
+    pvm_root.users_list    = pvm_create_object( pvm_get_array_class() );
+    pvm_root.root_dir      = pvm_create_directory_object();
+
+    pvm_root.kernel_stats  = pvm_create_binary_object( STAT_CNT_PERSISTENT_DA_SIZE, 0 );
 
     ref_saturate_o(pvm_root.threads_list); //Need it?
     ref_saturate_o(pvm_root.kernel_environment); //Need it?
     //ref_saturate_o(pvm_root.restart_list); //Need it? definitely no - this list is recreated each restart
     ref_saturate_o(pvm_root.users_list); //Need it?
 
+    ref_saturate_o(pvm_root.kernel_stats);
+    start_persistent_stats();
 
     //pvm_root.os_entry = pvm_get_null_object();
 }

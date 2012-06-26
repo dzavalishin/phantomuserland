@@ -153,6 +153,8 @@ void        w_restart_init(window_handle_t w);
 // Called from vm restart code to reattach window to win system
 void w_restart_attach( window_handle_t w );
 
+// Get most bottom (background) window. Used to set scrren background pic.
+window_handle_t w_get_bg_window(void);
 
 
 
@@ -309,7 +311,7 @@ void win2blt_flags( u_int32_t *flags, const window_handle_t w );
 
 void w_switch_buffers(drv_video_window_t *w);
 
-void drv_video_window_update( drv_video_window_t *w );
+void w_update( drv_video_window_t *w );
 
 
 #if !USE_ONLY_INDIRECT_PAINT

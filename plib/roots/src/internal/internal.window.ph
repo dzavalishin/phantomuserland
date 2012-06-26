@@ -37,6 +37,7 @@ class window
 	int	getX() [18] {}
 	int	getY() [19] {}
 
+	void    update() [34] {}
 
 	void 	clear() [20] {}
 	void 	fill(var fg : int) [21] {}
@@ -62,4 +63,6 @@ class window
 	void	setEventHandler( var handler : .ru.dz.phantom.handler ) [32] {}
 	void	setTitle( var title : string ) [33] {}
 
+        // errno
+	int	scrollHor( var x : int, var y : int, var xsize : int, var ysize : int, var steps : int ) [35] {}
 };

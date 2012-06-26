@@ -841,7 +841,7 @@ void pvm_restart_window( pvm_object_t o )
     queue_init(&(da->w.events));
     da->w.events_count = 0;
 
-    drv_video_window_enter_allwq( &da->w );
+    iw_enter_allwq( &da->w );
 
     //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, &da->w );
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );

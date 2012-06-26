@@ -972,7 +972,7 @@ static int si_bootstrap_19_create_binary(struct pvm_object me, struct data_area_
 
 #define BACK_WIN 1
 
-#if BACK_WIN
+#if BACK_WIN && !VIDEO_NEW_BG_WIN
 static window_handle_t back_win = 0;
 #endif
 
@@ -1002,6 +1002,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
     struct data_area_4_binary *bin = pvm_object_da( bmp->image, binary );
 
 
+#if !VIDEO_NEW_BG_WIN
     if(back_win == 0)
     	back_win = drv_video_window_create( scr_get_xsize(), scr_get_ysize(), 0, 0, COLOR_BLACK, "Background", WFLAG_WIN_DECORATED );
 
@@ -1011,7 +1012,9 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
     w_to_bottom(back_win);
 
     //drv_video_bitblt( (void *)bin->data, 0, 0, bmp->xsize, bmp->ysize, (zbuf_t)zpos );
-
+#else
+    window_handle_t back_win = w_get_bg_window();
+#endif
 
     bitmap2bitmap(
     		back_win->w_pixel, back_win->xsize, back_win->ysize, 0, 0,
@@ -1019,7 +1022,8 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
                      bmp->xsize, bmp->ysize
                     );
 
-    drv_video_winblt(back_win);
+    //drv_video_winblt(back_win);
+    w_update( back_win );
     //scr_repaint_all();
 #endif
     // Remove it if will store bmp!
@@ -1427,7 +1431,7 @@ static int si_bitmap_9_paintto(struct pvm_object me, struct data_area_4_thread *
     		da->xsize, da->ysize
     );
     //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
-    drv_video_window_update( &(tty->w) );
+    w_update( &(tty->w) );
 
     SYS_FREE_O(_tty);
 

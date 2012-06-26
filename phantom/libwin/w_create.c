@@ -29,7 +29,7 @@
 
 //static void defaultEventProcessor();
 
-void drv_video_window_enter_allwq( drv_video_window_t *w);
+//void iw_enter_allwq( drv_video_window_t *w);
 
 
 //static
@@ -160,7 +160,7 @@ void w_restart_init(drv_video_window_t *w)
 void w_restart_attach( drv_video_window_t *w )
 {
     w_lock();
-    drv_video_window_enter_allwq(w);
+    iw_enter_allwq(w);
     win_make_decorations(w);
     w_unlock();
 }
@@ -223,13 +223,13 @@ drv_video_window_init( drv_video_window_t *w,
     w_lock();
     //drv_video_winblt_locked( w->w_owner ); // need?
     //win_make_decorations(w);
-    drv_video_window_enter_allwq(w);
+    iw_enter_allwq(w);
     win_make_decorations(w);
     w_unlock();
 }
 
 
-void drv_video_window_enter_allwq( drv_video_window_t *w)
+void iw_enter_allwq( drv_video_window_t *w)
 {
     w_assert_lock();
     queue_enter(&allwindows, w, drv_video_window_t *, chain);

@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "vmconnect"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -369,6 +369,7 @@ struct conntab
 static struct conntab connection_types_table[] =
 {
     { "tmr:", sizeof(net_timer_event), sizeof(net_timer_event), CON_F_NAMES(timer) },
+    { "stt:", 0, 0, CON_F_NAMES(stats) },
 };
 
 static int ctt_size = sizeof(connection_types_table)/sizeof(struct conntab);

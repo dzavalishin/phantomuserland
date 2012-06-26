@@ -90,7 +90,7 @@ static int phantom_console_window_puts(const char *s)
     w_font_tty_string( phantom_console_window, &CON_FONT,
     	s, console_fg, console_bg, &ttx, &tty );
 
-    drv_video_window_update( phantom_console_window );
+    w_update( phantom_console_window );
     return 0;
 }
 
@@ -218,7 +218,8 @@ int phantom_debug_window_putc(int c)
     if( dbufpos >= BUFS || c == '\n' )
     {
         dbuf[dbufpos] = '\0';
-        phantom_console_window_puts(dbuf);
+        //phantom_console_window_puts(dbuf);
+        phantom_debug_window_puts(dbuf);
         dbufpos = 0;
     }
     return c;
@@ -243,10 +244,10 @@ static struct console_ops win_ops =
     .set_bg_color       = set_bg,
 };
 
-#define DEBWIN_X 600
-#define DEBWIN_Y 10
-#define DEBWIN_XS 400
-#define DEBWIN_YS 500
+#define DEBWIN_X 580
+#define DEBWIN_Y 32
+#define DEBWIN_XS 416
+#define DEBWIN_YS 600
 
 //#define MAX_LAUNCH_BUTTONS 64
 #define MAX_LAUNCH_BUTTONS 6
@@ -287,10 +288,10 @@ void phantom_init_console_window()
                         DEBWIN_X, DEBWIN_Y, console_bg, "Threads", WFLAG_WIN_DECORATED|WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT );
 
     //phantom_debug_window->flags |= WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT;
-    //drv_video_window_update( phantom_debug_window ); // For dbl buf flags to start working ok
+    //w_update( phantom_debug_window ); // For dbl buf flags to start working ok
 
     phantom_debug_window_puts("Phantom debug window\n\nt - threads\nw - windows\ns - stats\n");
-    drv_video_window_update( phantom_debug_window );
+    w_update( phantom_debug_window );
     //hal_sleep_msec(4000);
 
     hal_start_kernel_thread(phantom_debug_window_loop);
@@ -340,7 +341,7 @@ void phantom_init_console_window()
     w_draw_line( phantom_launcher_window, 0, 30, scr_get_xsize(), 30, la_b2 );
 
 
-    drv_video_window_update( phantom_launcher_window );
+    w_update( phantom_launcher_window );
 
     //hal_start_kernel_thread(phantom_launcher_window_loop);
 }
@@ -382,7 +383,7 @@ static void phantom_debug_window_loop()
     static char buf[DEBBS+1];
     int step = 0;
 
-    int show = 't';
+    int show = 's';
 
     hal_set_thread_name("Debug Win");
     // Which thread will receive typein for this window
@@ -454,7 +455,7 @@ static void phantom_debug_window_loop()
 
         struct tm mt = *current_time;
 
-        rc = snprintf(bp, len, " \x1b[32mStep %d, uptime %d days, %02d:%02d:%02d\x1b[37m, %d events\n Today is %04d/%02d/%02d %02d:%02d:%02d, CPU 0 %d%% idle\n",
+        rc = snprintf(bp, len, " Switch view: \x1b[32mt\x1b[37mhreads \x1b[32ms\x1b[37mtats \x1b[32mw\x1b[37mindows        \x1b[32m?\x1b[37m - help\n \x1b[32mStep %d, uptime %dd, %02d:%02d:%02d\x1b[37m, %d events\n Time %04d/%02d/%02d %02d:%02d:%02d GMT, CPU 0 %2d%% idle\n",
                       step++, days, hr, min, (int)sec,
                       ev_get_n_events_in_q(),
                       mt.tm_year + 1900, mt.tm_mon, mt.tm_mday,
@@ -485,7 +486,7 @@ static void phantom_debug_window_loop()
         //w_move( phantom_debug_window, wx, 50 );
 #endif
         put_progress();
-        drv_video_window_update( phantom_debug_window );
+        w_update( phantom_debug_window );
 
     }
 }

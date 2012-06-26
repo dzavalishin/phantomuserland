@@ -54,6 +54,7 @@ int main(int argc, char *argv[], char *envp[])
     }
 
     setvbuf( stdin, 0, _IONBF, 0 );
+    //setvbuf( stdout, 0, _IONBF, 0 );
 
     char buf[1024];
 

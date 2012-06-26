@@ -18,7 +18,7 @@ set logging on
 break panic
 break pvm_exec_panic
 
-break main
+#break main
 
 source -v ./.gdb-local
 

@@ -103,7 +103,7 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
     case THREAD_SLEEP_IO:       slp = "io"; scol = "\x1b[33m"; break;
     };
 
-    rc = snprintf(buf, len, " %2d %02d %s%-5.5s %d %-10.10s \x1b[37m",
+    rc = snprintf(buf, len, " %2d %02d %s%-5.5s %d %-11.11s \x1b[37m",
                   t->tid,
                   t->priority,
                   scol, slp,
@@ -117,8 +117,8 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 
     if(t->sleep_flags & THREAD_SLEEP_MUTEX)
     {
-        rc = snprintf(buf, len, "%8p %s",
-                      t->waitmutex, t->waitmutex->impl->name );
+        //rc = snprintf(buf, len, "%8p %s", t->waitmutex, t->waitmutex->impl->name );
+        rc = snprintf(buf, len, "\x1b[35m%s\x1b[37m", t->waitmutex->impl->name );
         len -= rc;
         ret += rc;
         buf += rc;
@@ -126,8 +126,8 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 
     if(t->sleep_flags & THREAD_SLEEP_COND)
     {
-        rc = snprintf(buf, len, "%8p %s",
-                      t->waitcond, t->waitcond->impl->name );
+        //rc = snprintf(buf, len, "%8p %s", t->waitcond, t->waitcond->impl->name );
+        rc = snprintf(buf, len, "%s", t->waitcond->impl->name );
         len -= rc;
         ret += rc;
         buf += rc;
@@ -136,8 +136,8 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 #if USE_NEW_SEMAS
     if(t->sleep_flags & THREAD_SLEEP_SEM)
     {
-        rc = snprintf(buf, len, "%8p %s",
-                      t->waitsem, t->waitsem->impl->name );
+        //rc = snprintf(buf, len, "%8p %s", t->waitsem, t->waitsem->impl->name );
+        rc = snprintf(buf, len, "%s", t->waitsem->impl->name );
         len -= rc;
         ret += rc;
         buf += rc;
@@ -157,7 +157,7 @@ static int dump_thread_info_buf(char *buf, int len, phantom_thread_t *t)
 void phantom_dump_threads_buf(char *buf, int len)
 {
     int rc;
-    rc = snprintf(buf, len, " Id Pr State CPU Name      Locked\n");
+    rc = snprintf(buf, len, "\x1b[35m Id Pr State CPU Name       Locked\x1b[37m\n");
     buf += rc;
     len -= rc;
 

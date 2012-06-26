@@ -73,7 +73,7 @@ static int win_clear_20(struct pvm_object me , struct data_area_4_thread *tc )
     da->x = da->y = 0;
 
     w_fill( &(da->w), da->bg );
-    drv_video_window_update( &(da->w) );
+    w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -192,7 +192,7 @@ static int win_putString_24(struct pvm_object me , struct data_area_4_thread *tc
 
     // TODO make a version of drv_video_font_tty_string that accepts non-zero terminated strings with len
     w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &x, &y );
-    drv_video_window_update( &(da->w) );
+    w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -223,7 +223,8 @@ static int win_putImage_25(struct pvm_object me, struct data_area_4_thread *tc )
     		_bmp->xsize, _bmp->ysize
     );
     //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
-    drv_video_window_update( &(da->w) );
+    // Sure?
+    w_update( &(da->w) );
 
     SYS_FREE_O(_img);
 
@@ -401,6 +402,45 @@ static int win_setTitle_33(struct pvm_object me , struct data_area_4_thread *tc 
 }
 
 
+static int win_update_34(struct pvm_object me , struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 0);
+
+
+    w_update( &(da->w) );
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+
+
+static int win_scrollHor_35(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 5);
+
+    int s = POP_INT();
+    int ys = POP_INT();
+    int xs = POP_INT();
+    int y = POP_INT();
+    int x = POP_INT();
+
+    errno_t err = w_scroll_hor( &(da->w), x, y, xs, ys, s );
+
+    //SYSCALL_RETURN_NOTHING;
+    SYSCALL_RETURN(pvm_create_int_object( err ));
+}
+
+
+
 syscall_func_t	syscall_table_4_window[32+8] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
@@ -424,7 +464,7 @@ syscall_func_t	syscall_table_4_window[32+8] =
     &win_fillBox_30,                &win_fillEllipse_31,
     // 32
     &win_setHandler_32,  	    &win_setTitle_33,
-    &invalid_syscall, 	    	    &invalid_syscall,
+    &win_update_34, 	    	    &win_scrollHor_35,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
 

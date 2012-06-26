@@ -101,7 +101,7 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
     struct rgba_t bg = da->bg;
 
     w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
-    drv_video_window_update( &(da->w) );
+    w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -170,7 +170,7 @@ static int clear_20(struct pvm_object me , struct data_area_4_thread *tc )
     da->x = da->y = 0;
 
     w_fill( &(da->w), da->bg );
-    drv_video_window_update( &(da->w) );
+    w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
