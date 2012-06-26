@@ -12,6 +12,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define COMPILE_PERSISTENT_STATS 1
+
+// TODO killme
 #define NEW_WINDOWS 0
 
 #define VM_UNMAP_UNUSED_OBJECTS 0
@@ -38,7 +41,7 @@
 #  define HAVE_KOLIBRI 0
 #endif
 
-#define MEM_RECLAIM 0
+#define MEM_RECLAIM 1
 // verify on-disk snapshot consistency after snapshot
 #define VERIFY_SNAP 1
 // verify VM consistency before snapshot

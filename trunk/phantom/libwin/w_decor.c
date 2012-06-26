@@ -118,7 +118,7 @@ void win_make_decorations(drv_video_window_t *w)
                                            );
 
         //w3->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
-        drv_video_window_enter_allwq(w3);
+        iw_enter_allwq(w3);
 
 
         w3->inKernelEventProcess = w_titleWindowEventProcessor;
@@ -161,7 +161,7 @@ void win_make_decorations(drv_video_window_t *w)
     //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
 
     if( w->state & WSTATE_WIN_VISIBLE )
-        _drv_video_winblt_locked(w->w_title);
+        iw_winblt_locked(w->w_title);
     //drv_video_window_free(w3);
 #else
     w->w_decor->inKernelEventProcess = titleWindowEventProcessor;
@@ -205,7 +205,7 @@ void win_make_decorations(drv_video_window_t *w)
     window_basic_border( w->w_decor, brdr, bordr_size );
 
     if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
-        _drv_video_winblt_locked(w->w_decor);
+        iw_winblt_locked(w->w_decor);
 
 
     // replace setting pos here with
@@ -222,10 +222,10 @@ void win_draw_decorations(drv_video_window_t *w)
     w_assert_lock();
 #if !VIDEO_T_IN_D
     if( (w->state & WSTATE_WIN_VISIBLE) && w->w_title )
-        _drv_video_winblt_locked(w->w_title);
+        iw_winblt_locked(w->w_title);
 #endif
     if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) && w->w_decor )
-        _drv_video_winblt_locked(w->w_decor);
+        iw_winblt_locked(w->w_decor);
 }
 
 

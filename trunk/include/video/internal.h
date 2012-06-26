@@ -30,17 +30,32 @@ void w_assert_lock(void);
 
 
 // -----------------------------------------------------------------------
+// Windows housekeeping
+// -----------------------------------------------------------------------
+
+// Init (create and clear) background window.
+void w_bg_win_init(void);
+
+void iw_enter_allwq(window_handle_t w);
+
+// -----------------------------------------------------------------------
 // Screen repaint
 // -----------------------------------------------------------------------
 
+void    iw_winblt_locked( window_handle_t from );
+void    iw_winblt( window_handle_t from );
+
+
 void 	scr_repaint_all(void) __attribute__((deprecated));
 void    repaint_all_for_square( rect_t *todo );
+void    scr_repaint_win( window_handle_t w );
+
 void    w_request_async_repaint( rect_t *r );
 
 void    request_repaint_all_for_square( rect_t *todo );
-void    request_repaint_all_for_win( struct drv_video_window *w );
+void    request_repaint_all_for_win( window_handle_t w );
 
-void    win_make_decorations(drv_video_window_t *w);
+void    win_make_decorations( window_handle_t w );
 
 
 // -----------------------------------------------------------------------

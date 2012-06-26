@@ -227,7 +227,7 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 // ------------------------------------------------------------------------
 
 // Used in window object restart func to re-enter window to OS all win q
-void drv_video_window_enter_allwq( drv_video_window_t *w );
+//void drv_video_window_enter_allwq( drv_video_window_t *w );
 
 
 // Redirect console output to this window. TODO: input?

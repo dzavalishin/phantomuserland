@@ -11,6 +11,9 @@
 #ifndef VCONFIG_H
 #define VCONFIG_H
 
+#define VIDEO_NEW_BG_WIN 1
+
+
 #define VIDEO_DOUBLE_BUF 1
 
 // Windows 'screen' driver works in BGR format :(

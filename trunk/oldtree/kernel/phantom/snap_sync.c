@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "vm.sync"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -309,6 +309,7 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 #include <vm/exec.h>
 #include <vm/stacks.h>
 #include <vm/syscall.h>
+#include <vm/alloc.h>
 
 
 //#define MAX_SYS_ARG 16
@@ -350,6 +351,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 
     pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
 
+    ref_dec_o( arg );
     // BUG FIXME snapper won't continue until this thread is unblocked: end of snap waits for all stooped threads to awake
 
     hal_mutex_lock( &interlock_mutex );

@@ -29,6 +29,7 @@ Window layer
 Operates on window
 
 Func name prefix: w_
+Func name prefix (internal impl): iw_
 
 
 

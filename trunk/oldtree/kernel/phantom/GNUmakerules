@@ -117,7 +117,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/uname.o unix/namei.o unix/file.o unix/fs_root.o unix/proc.o \
 	unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
 	unix/fs_udp.o unix/fs_tcp.o unix/fs_ext2.o unix/fs_fatff.o unix/fs_cd.o \
-	unix/signal.o unix/sys_sw.o vm_cn_timer.o unix/phantom.o \
+	unix/signal.o unix/sys_sw.o vm_cn_timer.o vm_cn_stats.o unix/phantom.o \
 	fs_map.o resolve.o main.o keyboard.o syslog.o \
 	arch_name.o arch_init.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \

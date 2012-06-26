@@ -27,7 +27,7 @@
 
 #if !USE_ONLY_INDIRECT_PAINT
 
-void _drv_video_winblt_locked( drv_video_window_t *from )
+void iw_winblt_locked( drv_video_window_t *from )
 {
     w_assert_lock();
 
@@ -39,10 +39,10 @@ void _drv_video_winblt_locked( drv_video_window_t *from )
     scr_mouse_enable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
 }
 
-void _drv_video_winblt( drv_video_window_t *from )
+void iw_winblt( drv_video_window_t *from )
 {
     w_lock();
-    _drv_video_winblt_locked(from);
+    iw_winblt_locked(from);
     w_unlock();
 }
 
@@ -50,13 +50,13 @@ void _drv_video_winblt( drv_video_window_t *from )
 #if 1
 void drv_video_winblt_locked( drv_video_window_t *from )
 {
-    _drv_video_winblt_locked( from );
+    iw_winblt_locked( from );
 }
 
 void drv_video_winblt( drv_video_window_t *from )
 {
     w_lock();
-    _drv_video_winblt_locked(from);
+    iw_winblt_locked(from);
     w_unlock();
 }
 #endif

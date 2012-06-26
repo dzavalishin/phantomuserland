@@ -199,7 +199,7 @@ static void win_timed_update( void *arg )
     upd_timer_set = 0;
 
     if(!ks->win_update_prevent)
-        drv_video_window_update( ks->win );
+        w_update( ks->win );
 }
 
 static void request_update_timer( struct kolibri_process_state *ks, int msec )
@@ -874,7 +874,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 w_set_title( ks->win, title );
             }
 
-            //drv_video_window_update( ks->win );
+            //w_update( ks->win );
             kolibri_send_event( get_current_tid(), EV_REDRAW );
             request_update_timer( ks, 50 );
         }
@@ -1241,7 +1241,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             {
                 ks->win_update_prevent = 0;
                 SHOW_FLOW0( 1, "Repaint" );
-                drv_video_window_update( ks->win );
+                w_update( ks->win );
             }
         }
         break;

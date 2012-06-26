@@ -482,7 +482,10 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
     data = pool_alloc(size, arena);
 
     if( data == 0 )
-        panic("out of mem looking for %d bytes", size);
+    {
+        // TODO VM throw
+        panic("out of persistent mem looking for %d bytes", size);
+    }
 
     data->_da_size = data_area_size;
     data->_flags = flags;

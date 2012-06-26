@@ -38,6 +38,7 @@
 
 static size_t      proc_read(    struct uufile *f, void *dest, size_t bytes);
 static size_t      proc_write(   struct uufile *f, const void *dest, size_t bytes);
+static errno_t     proc_stat(    struct uufile *f, struct stat *dest );
 static size_t      proc_getpath( struct uufile *f, void *dest, size_t bytes);
 static ssize_t     proc_getsize( struct uufile *f);
 static void *      proc_copyimpl( void *impl );
@@ -53,7 +54,7 @@ static struct uufileops proc_fops =
 
     .copyimpl   = proc_copyimpl,
 
-    //.stat       = proc_stat,
+    .stat       = proc_stat,
     //.ioctl      = proc_ioctl,
 };
 
@@ -245,6 +246,26 @@ static size_t      proc_write(   struct uufile *f, const void *dest, size_t byte
     (void) bytes;
 
     return -1;
+}
+
+static errno_t     proc_stat( struct uufile *f, struct stat *dest )
+{
+    memset( dest, 0, sizeof(struct stat) );
+
+    dest->st_nlink = 1;
+    dest->st_uid = -1;
+    dest->st_gid = -1;
+
+    dest->st_size = 0;
+
+    dest->st_mode = 0444; // r--r--r--
+
+    if(f->flags & UU_FILE_FLAG_DIR)
+        dest->st_mode |= _S_IFDIR;
+    else
+        dest->st_mode |= _S_IFCHR;
+
+    return 0;
 }
 
 

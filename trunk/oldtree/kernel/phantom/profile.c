@@ -106,6 +106,7 @@ void profiler_dump_map( void )
     printf("Profile (%d events total):\n", total_count );
 
     long map_corrupt = 0;
+    int total_percent = 0;
 
     int i = 0;
     for( i = 0; i < PROFILER_MAP_SIZE; i++ )
@@ -125,11 +126,17 @@ void profiler_dump_map( void )
 #if PROFILER_SKIP_0_PERCENT
         if(percentage == 0) continue;
 #endif
-
+        total_percent += percentage;
         if( (percentage < 0) || (percentage > 100) )
         {
             map_corrupt++;
             continue;
+        }
+
+        if(total_percent > 200)
+        {
+            printf("% > 200, drop\n");
+            break;
         }
 
         printf(

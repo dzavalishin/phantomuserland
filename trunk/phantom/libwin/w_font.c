@@ -144,13 +144,13 @@ void w_font_scroll_line( window_handle_t win, const drv_video_font_t *font, rgba
 
 static color_t cmap[] =
 {
-    _C_COLOR_BLACK,
+    _C_COLOR_BLACK,       // 0
     _C_COLOR_LIGHTRED,
-    _C_COLOR_LIGHTGREEN,
+    _C_COLOR_LIGHTGREEN,  // 2
     _C_COLOR_YELLOW,
-    _C_COLOR_LIGHTBLUE,
+    _C_COLOR_LIGHTBLUE,   // 4
     _C_COLOR_MAGENTA,
-    _C_COLOR_CYAN,
+    _C_COLOR_CYAN,        // 6
     _C_COLOR_LIGHTGRAY //_C_COLOR_WHITE
 };
 

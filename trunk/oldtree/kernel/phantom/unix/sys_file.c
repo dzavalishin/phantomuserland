@@ -112,7 +112,7 @@ int usys_write(int *err, uuprocess_t *u, int fd, const void *addr, int count )
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
-    if(f->flags | UU_FILE_FLAG_RDONLY)
+    if(f->flags & UU_FILE_FLAG_RDONLY)
     {
         *err = EBADF;
         return -1;

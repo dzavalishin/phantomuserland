@@ -28,6 +28,7 @@ errno_t cn_##__short##_disconnect( struct data_area_4_connection *c, struct data
 
 
 CON_F_PROTOS(timer)
+CON_F_PROTOS(stats)
 
 
 #endif // VM_CONNECT_H

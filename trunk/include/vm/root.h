@@ -78,8 +78,9 @@ struct pvm_root_t
     struct pvm_object           users_list;           	// Array? of users - NOT IMPLEMENTED
     struct pvm_object           kernel_environment;     // Array? of users - NOT IMPLEMENTED
     struct pvm_object           os_entry;               // Main OS services entry point
-    struct pvm_object           root_dir;               // Main OS services entry point
+    struct pvm_object           root_dir;               // Root object directory
 
+    struct pvm_object           kernel_stats;           // Persisent kernel statistics
 
 };
 
@@ -201,8 +202,9 @@ extern struct pvm_root_t pvm_root;
 // Root object directory
 #define PVM_ROOT_OBJECT_ROOT_DIR 71
 
+#define PVM_ROOT_KERNEL_STATISTICS 72
 
-#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_OBJECT_ROOT_DIR+32)
+#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_KERNEL_STATISTICS+31)
 
 
 

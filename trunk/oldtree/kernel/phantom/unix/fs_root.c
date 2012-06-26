@@ -248,6 +248,8 @@ static uufs_t * find_mount( const char* name, char *namerest )
     const char *m_path;
     const char *m_name;
 
+    if( *name == '/' ) name++;
+
     // lock modifications!
     hal_mutex_lock( &mm );
 
@@ -301,6 +303,8 @@ static uufs_t * find_mount( const char* name, char *namerest )
 static
 errno_t add_mount( const char* path, const char *name, uufs_t *fs )
 {
+    if( *path == '/' ) path++;
+
     // NB! path must finish with /
 
     if( strlen( path ) >= FS_MAX_MOUNT_PATH-1 )
@@ -346,6 +350,8 @@ found:
 static errno_t rm_mount( const char* name, int flags )
 {
     (void) flags;
+
+    if( *name == '/' ) name++;
 
     errno_t rc = unlink_dir_name( &root_root, name );
     if( rc )
@@ -488,6 +494,7 @@ static errno_t auto_run( const char *mpath )
     SHOW_FLOW( 4, "Attempt to run shell @ %s", run_path );
     err = uu_run_file( pid, run_path );
     if(!err) SHOW_INFO( 0, "Autorun shell @ %s", run_path );
+    // FIXME TODO ERR pid is not freed if no shell found
 
 
     snprintf( run_path, sizeof(run_path), "%s/autorun.inf", mpath );

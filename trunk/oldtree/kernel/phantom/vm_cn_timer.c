@@ -1,6 +1,6 @@
 #define DEBUG_MSG_PREFIX "vmcn.timer"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -70,7 +70,7 @@ errno_t cn_timer_do_operation( int op_no, struct data_area_4_connection *c, stru
 
 //#include <vm/p2c.h>
 
-static pvm_object_t cn_timer_syscall_worker( pvm_object_t conn, struct data_area_4_thread *tc, int nmethod, pvm_object_t arg )
+static pvm_object_t cn_timer_blocking_syscall_worker( pvm_object_t conn, struct data_area_4_thread *tc, int nmethod, pvm_object_t arg )
 {
     (void) conn;
     (void) tc;
@@ -113,7 +113,7 @@ errno_t cn_timer_init( struct data_area_4_connection *c, struct data_area_4_thre
     (void) t;
     //(void) c;
 
-    c->blocking_syscall_worker = cn_timer_syscall_worker;
+    c->blocking_syscall_worker = cn_timer_blocking_syscall_worker;
 
     printf("Init timer");
     return 0;

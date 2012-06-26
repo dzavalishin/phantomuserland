@@ -21,6 +21,8 @@
 #include <thread_private.h>
 #include <wtty.h>
 
+#include <video/internal.h>
+
 #include "ev_private.h"
 
 int                            ev_engine_active = 0;
@@ -248,6 +250,10 @@ void init_main_event_q()
 
 #if DELIVER2THREAD
     hal_start_kernel_thread( w_event_deliver_thread );
+#endif
+
+#if VIDEO_NEW_BG_WIN
+    w_bg_win_init();
 #endif
 
 }

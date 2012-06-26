@@ -27,9 +27,8 @@
 
 	
 void drv_video_winblt( drv_video_window_t *from );
-void drv_video_window_update( drv_video_window_t *w );
 
-void drv_video_window_update( drv_video_window_t *w ) 
+void w_update( drv_video_window_t *w ) 
 { 
 #if 0
     w_switch_buffers(w); 
@@ -42,8 +41,8 @@ void drv_video_window_update( drv_video_window_t *w )
 }
 
 #else
-
-void drv_video_window_update( drv_video_window_t *w ) 
+// TODO rename to w_update
+void w_update( drv_video_window_t *w ) 
 {
     w_switch_buffers(w); 
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );

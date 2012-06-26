@@ -300,6 +300,16 @@ void scr_repaint_all(void)
     //hal_sem_release( &painter_sem );
 }
 
+void scr_repaint_win( window_handle_t w )
+{
+    CHECK_START();
+
+    rect_t r;
+
+    w_get_bounds( w, &r );
+    paint_q_add( &r );
+}
+
 
 #endif
 

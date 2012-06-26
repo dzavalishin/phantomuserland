@@ -1,3 +1,10 @@
+ - set_net_timer - need reset timer if not one shot required
+
+ - unix shell does not get input after restart
+
+ - what if system rebooted before old snap is freed? Which snap will be loaded? 
+   Who frees old one?
+
  - check that restart list is killed and all contained in 1-link objects too.
 
  - win/tty restarts/reconnects incorrectly - window does not get focus
