@@ -4,8 +4,8 @@ export PHANTOM_HOME=`pwd`
 export LANG=C
 ME=${0##*/}
 PASSES=2
-GDB_PORT=1235			# get rid of stalled instance
-GDB_PORT_LIMIT=1250		# avoid spawning too many
+GDB_PORT=1235		# get rid of stalled instance by incrementing port no.
+GDB_PORT_LIMIT=1250	# avoid spawning too many stalled instances
 GDB_OPTS="-gdb tcp::$GDB_PORT"
 #GDB_OPTS="-s"
 QEMU=`which qemu`		# qemu 0.x
@@ -85,8 +85,7 @@ DEAD=`ps xjf | grep $QEMU | grep -vw "grep"`
 	echo "$RUNNING
 $DEAD
 Previous test run stalled. Killing qemu..."
-	[ "$DEAD" ] && SIG=-KILL
-	pkill $SIG $QEMU
+	pkill ${DEAD:+-9} $QEMU
 
 	preserve_log
 }
