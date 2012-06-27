@@ -10,6 +10,7 @@
 **/
 
 #include <vm/internal_da.h>
+#include <vm/alloc.h>
 
 
 void phantom_thread_wait_4_snap( void );
