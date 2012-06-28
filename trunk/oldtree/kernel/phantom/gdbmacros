@@ -29,6 +29,24 @@ define show_windows_back
 end
 
 
+define show_threads
+    set $i = 0
+
+    while ($i < sizeof(phantom_kernel_threads) / sizeof(*phantom_kernel_threads))
+        if (phantom_kernel_threads[$i])
+            set $thread = phantom_kernel_threads[$i]
+            printf "tid: %d, (phantom_thread_t*)0x%08x, (%.20s)\n", \
+                $i, $thread, ($thread && $thread->name) ? $thread->name : "(NULL)"
+        end
+        set $i = $i + 1
+    end
+end
+
+document show_threads
+Show a list of threads, their TIDs and names.
+end
+
+
 define _show_trace_entry
     set $entry = $arg0
     printf "%d: CPU %d, thread 0x%08x (%.10s): ", \
