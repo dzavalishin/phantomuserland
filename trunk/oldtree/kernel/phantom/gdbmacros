@@ -1,0 +1,29 @@
+define show_windows
+        set $w = allwindows.next
+
+        while ($w != &allwindows)
+            set $win = (drv_video_window_t *)$w
+            printf "(drv_video_window_t *)0x%08x, x = %4d, y = %4d, z = %4d, w = %4d, h = %4d, title = %s\n", \
+                 $win, $win->x, $win->y, $win->z, $win->xsize, $win->ysize, $win->title ? $win->title : "(NULL)"
+            if ($argc > 0)
+                output *$win
+                printf "\n"
+            end
+            set $w = $win->chain.next
+        end
+end
+
+define show_windows_back
+        set $w = allwindows.prev
+
+        while ($w != &allwindows)
+            set $win = (drv_video_window_t *)$w
+            printf "(drv_video_window_t *)0x%08x, x = %4d, y = %4d, z = %4d, w = %4d, h = %4d, title = %s\n", \
+                 $win, $win->x, $win->y, $win->z, $win->xsize, $win->ysize, $win->title ? $win->title : "(NULL)"
+            if ($argc > 0)
+                output *$win
+                printf "\n"
+            end
+            set $w = $win->chain.prev
+        end
+end
