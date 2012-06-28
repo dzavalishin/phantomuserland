@@ -25,7 +25,7 @@
 int	imps_probe(void);
 
 
-int GET_CPU_ID(void);
+int GET_CPU_ID(void) __attribute__((no_instrument_function));
 void phantom_import_cpu_thread(int ncpu);
 void phantom_load_cpu_tss(int ncpu);
 

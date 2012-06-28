@@ -9,6 +9,8 @@ SRCDIRS += $(BUILD_ROOT)/libwin $(BUILD_ROOT)/libwin/$(ARCH) $(BUILD_ROOT)/libwi
 #PHANTOM_CFLAGS  += -mmmx -msse -msse2 
 #endif
 
+# Uncomment to enable tracing
+#PHANTOM_CFLAGS  += -finstrument-functions
 
 
 include $(BUILD_ROOT)/makerules-lib
