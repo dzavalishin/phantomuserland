@@ -116,7 +116,7 @@ extern phantom_thread_t *   percpu_current_thread[];
 
 #define GET_CURRENT_THREAD() get_current_thread()
 
-phantom_thread_t * get_current_thread(void);
+phantom_thread_t * get_current_thread(void) __attribute__((no_instrument_function));
 phantom_thread_t * get_thread(int tid);
 
 
