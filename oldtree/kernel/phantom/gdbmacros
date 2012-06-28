@@ -27,3 +27,70 @@ define show_windows_back
             set $w = $win->chain.prev
         end
 end
+
+
+define _show_trace_entry
+    set $entry = $arg0
+    printf "%d: CPU %d, thread 0x%08x (%.10s): ", \
+        $entry.generation, $entry.cpu, $entry.thread, \
+        ($entry.thread && $entry.thread->name) ? $entry.thread->name : "(NULL)"
+    output/a $entry.src_pc
+    printf " -> "
+    output/a $entry.dst_pc
+    printf "\n"
+end
+
+define show_trace
+    set $sz = sizeof(trace_buf) / sizeof(*trace_buf)
+    set $i = trace_buf_wptr
+    set $n = $sz
+    if ($argc)
+        set $n = $arg0
+    end
+    while ($i >= 0 && $n > 0)
+        set $i = $i - 1
+        set $n = $n - 1
+        set $entry = trace_buf[$i & ($sz - 1)]
+        if ($entry.generation == $i)
+            _show_trace_entry $entry
+        else
+            printf "wrong generation, %x vs %x\n", $entry.generation, $i
+        end
+    end
+end
+
+document show_trace
+Show a tail of call trace.
+
+show_trace [number-of-lines-to-show]
+end
+
+define show_trace_thread
+    set $sz = sizeof(trace_buf) / sizeof(*trace_buf)
+    set $tid = $arg0
+    set $i = trace_buf_wptr
+    set $n = $sz
+    set $np = $n
+    if ($argc > 1)
+        set $np = $arg1
+    end
+    while ($i >= 0 && $n > 0 && $np > 0)
+        set $i = $i - 1
+        set $n = $n - 1
+        set $entry = trace_buf[$i & ($sz - 1)]
+        if ($entry.thread == $tid)
+            set $np = $np - 1
+            if ($entry.generation == $i)
+                _show_trace_entry $entry
+            else
+                printf "wrong generation, %x vs %x\n", $entry.generation, $i
+            end
+        end
+    end
+end
+
+document show_trace_thread
+Show a tail of call trace for the specified thread.
+
+show_trace_thread thread-ptr [number-of-lines-to-show]
+end
