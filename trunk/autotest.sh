@@ -71,40 +71,38 @@ Previous copies are kept (serial0.log.0 through .9)"
 }
 
 # check if another copy is running
+[ "$FORCE" ] || {
+	RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
+	DEAD=`ps xjf | grep $QEMU | grep -vw "grep"`
+	[ "$RUNNING" ] && {
+		(echo "$RUNNING" | grep -q defunct) || \
+		(tail -1 $TEST_DIR/serial0.log | grep ^Press) || {
+			echo "Another copy is running: $RUNNING"
+			tail -10 $TEST_DIR/serial0.log
+			exit 0
+		}
 
-RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
-DEAD=`ps xjf | grep $QEMU | grep -vw "grep"`
-[ "$RUNNING" ] && {
-	(echo "$RUNNING" | grep -q defunct) || \
-	(tail -1 $TEST_DIR/serial0.log | grep ^Press) || {
-		echo "Another copy is running: $RUNNING"
-		tail -10 $TEST_DIR/serial0.log
-		exit 0
-	}
-
-	echo "$RUNNING
+		echo "$RUNNING
 $DEAD
 Previous test run stalled. Killing qemu..."
-	pkill ${DEAD:+-9} $QEMU
+		pkill ${DEAD:+-9} $QEMU
 
-	preserve_log
-}
+		preserve_log
+	}
 #[ -s $0.lock ] && exit 0
 #touch $0.lock
 #trap "rm $0.lock" 0
 
-while [ "`netstat -pl --inet 2>/dev/null | grep :$GDB_PORT`" ]
-do
-	echo "Somebody took my gdb port! Taking next one..."
-	GDB_PORT=`expr $GDB_PORT + 1`
-	[ $GDB_PORT -gt $GDB_PORT_LIMIT ] && {
-		echo "Too many attempts. Aborted"
-		exit 0
-	}
-done
-
-rm -f make.log
-make clean > /dev/null 2>&1
+	while [ "`netstat -pl --inet 2>/dev/null | grep :$GDB_PORT`" ]
+	do
+		echo "Somebody took my gdb port! Taking next one..."
+		GDB_PORT=`expr $GDB_PORT + 1`
+		[ $GDB_PORT -gt $GDB_PORT_LIMIT ] && {
+			echo "Too many attempts. Aborted"
+			exit 0
+		}
+	done
+}
 
 # clean unexpected failures
 GRUB_MENU=tftp/tftp/menu.lst
@@ -118,6 +116,9 @@ SVN_OUT=`svn update`
 echo "$SVN_OUT"
 
 [ "$COMPILE" ] && {
+	rm -f make.log
+	make clean > /dev/null 2>&1
+
 	#./build.sh > make.log 2>&1 || die "Make failure"
 	#make -C phantom/vm	>> make.log 2>&1 || die "Make failure in vm"
 	#make all > make.log 2>&1 || die "Make failure"
@@ -131,6 +132,33 @@ echo "$SVN_OUT"
 	[ "$WARN" ] && grep : make.log
 
 	tail make.log
+}
+
+call_gdb ( ) {
+	echo "
+
+FATAL! Phantom stopped (panic)"
+	echo "
+set confirm off
+symbol-file oldtree/kernel/phantom/phantom.pe
+dir oldtree/kernel/phantom
+dir phantom/vm
+dir phantom/libc
+dir phantom/libc/ia32
+dir phantom/dev
+dir phantom/libphantom
+dir phantom/newos
+dir phantom/threads
+
+target remote localhost:$GDB_PORT
+
+bt full
+quit
+" > .gdbinit
+	gdb
+
+	[ "$1" ] && echo "$*"
+	exit 0
 }
 
 cd $TEST_DIR
@@ -180,8 +208,36 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 
+$QEMU $QEMU_OPTS &
+QEMU_PID=$!
 
-$QEMU $QEMU_OPTS
+while [ 1 ]
+do
+	sleep 2
+	kill -0 $QEMU_PID || {
+		echo "
+
+FATAL! Phantom crashed"
+		break
+	}
+	[ -s serial0.log ] || {
+		sleep 10
+		[ -s serial0.log ] || {
+			echo "
+
+FATAL! Phantom stalled (serial0.log is empty)"
+			kill $QEMU_PID
+			break
+		}
+	}
+
+	tail -1 serial0.log | grep -q '^Press any' && call_gdb "Test run failed"
+
+	grep -q '^\(\. \)\?Panic' serial0.log && {
+		sleep 10
+		break
+	}
+done
 
 grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
@@ -228,7 +284,7 @@ do
 	while [ 1 ]
 	do
 		sleep 2
-		ps -p $QEMU_PID >/dev/null || {
+		kill -0 $QEMU_PID || {
 			echo "
 
 FATAL! Phantom crashed"
@@ -251,12 +307,7 @@ FATAL! Phantom stalled (serial0.log is empty)"
 		}
 	done
 
-	tail -1 serial0.log | grep -q '^Press any' && {
-		echo "
-
-FATAL! Phantom stopped (panic)"
-		kill $QEMU_PID
-	}
+	tail -1 serial0.log | grep -q '^Press any' && call_gdb "Pass $pass panic" 
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log && {
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log
@@ -272,7 +323,7 @@ ERROR! No snapshot activity in log! Aborted"
 		break
 	}
 
-	ps -p $QEMU_PID >/dev/null || break
+	kill -0 $QEMU_PID >/dev/null || break
 
 	while (ps -p $QEMU_PID >/dev/null)
 	do
