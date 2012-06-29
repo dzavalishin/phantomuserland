@@ -70,6 +70,38 @@ http://misc.dz.ru/~`whoami`/serial0.log
 Previous copies are kept (serial0.log.0 through .9)"
 }
 
+call_gdb ( ) {
+	port="${1:-$GDB_PORT}"
+	shift
+	pid="$1"
+	shift
+	echo "
+
+FATAL! Phantom stopped (panic)"
+	echo "
+set confirm off
+symbol-file oldtree/kernel/phantom/phantom.pe
+dir oldtree/kernel/phantom
+dir phantom/vm
+dir phantom/libc
+dir phantom/libc/ia32
+dir phantom/dev
+dir phantom/libphantom
+dir phantom/newos
+dir phantom/threads
+
+target remote localhost:$port
+
+bt full
+quit
+" > .gdbinit
+	gdb
+
+	[ "$1" ] && echo "$*"
+	[ "$pid" ] && kill -9 $pid
+	exit 0
+}
+
 # check if another copy is running
 [ "$FORCE" ] || {
 	RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
@@ -84,8 +116,8 @@ Previous copies are kept (serial0.log.0 through .9)"
 
 		echo "$RUNNING
 $DEAD
-Previous test run stalled. Killing qemu..."
-		pkill ${DEAD:+-9} $QEMU
+Previous test run stalled. Trying gdb..."
+		gdb $GDB_PORT `echo "$DEAD" | awk '{ print $1 }'`
 
 		preserve_log
 	}
@@ -135,32 +167,6 @@ echo "$SVN_OUT"
 	tail make.log
 }
 
-call_gdb ( ) {
-	echo "
-
-FATAL! Phantom stopped (panic)"
-	echo "
-set confirm off
-symbol-file oldtree/kernel/phantom/phantom.pe
-dir oldtree/kernel/phantom
-dir phantom/vm
-dir phantom/libc
-dir phantom/libc/ia32
-dir phantom/dev
-dir phantom/libphantom
-dir phantom/newos
-dir phantom/threads
-
-target remote localhost:$GDB_PORT
-
-bt full
-quit
-" > .gdbinit
-	gdb
-
-	[ "$1" ] && echo "$*"
-	exit 0
-}
 
 cd $TEST_DIR
 cp $TFTP_PATH/phantom tftp/
@@ -232,7 +238,8 @@ FATAL! Phantom stalled (serial0.log is empty)"
 		}
 	}
 
-	tail -1 serial0.log | grep -q '^Press any' && call_gdb "Test run failed"
+	tail -1 serial0.log | grep -q '^Press any' && \
+		call_gdb $GDB_PORT $QEMU_PID "Test run failed"
 
 	grep -q '^\(\. \)\?Panic' serial0.log && {
 		sleep 10
@@ -308,7 +315,8 @@ FATAL! Phantom stalled (serial0.log is empty)"
 		}
 	done
 
-	tail -1 serial0.log | grep -q '^Press any' && call_gdb "Pass $pass panic" 
+	tail -1 serial0.log | grep -q '^Press any' && \
+		call_gdb $GDB_PORT $QEMU_PID "Pass $pass panic" 
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log && {
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log
