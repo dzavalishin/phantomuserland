@@ -104,6 +104,8 @@ Previous test run stalled. Killing qemu..."
 	done
 }
 
+[ "$COMPILE" ] && rm -f make.log
+
 # clean unexpected failures
 GRUB_MENU=tftp/tftp/menu.lst
 svn diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
@@ -116,7 +118,6 @@ SVN_OUT=`svn update`
 echo "$SVN_OUT"
 
 [ "$COMPILE" ] && {
-	rm -f make.log
 	make clean > /dev/null 2>&1
 
 	#./build.sh > make.log 2>&1 || die "Make failure"
