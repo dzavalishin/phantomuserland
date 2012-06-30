@@ -75,6 +75,7 @@ call_gdb ( ) {
 	shift
 	pid="$1"
 	shift
+	cd $PHANTOM_HOME
 	echo "
 
 FATAL! Phantom stopped (panic)"
