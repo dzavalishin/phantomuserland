@@ -56,6 +56,7 @@ void    request_repaint_all_for_square( rect_t *todo );
 void    request_repaint_all_for_win( window_handle_t w );
 
 void    win_make_decorations( window_handle_t w );
+void	win_move_decorations( drv_video_window_t *w );
 
 
 // -----------------------------------------------------------------------
