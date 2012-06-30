@@ -40,6 +40,7 @@ extern struct utsname phantom_uname;
 extern int debug_boot_pause;
 extern int bootflag_no_vesa;
 extern int bootflag_no_comcon;
+extern int bootflag_unattended;
 
 
 #endif // BOOT_H

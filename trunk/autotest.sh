@@ -24,10 +24,13 @@ die ( ) {
 COMPILE=1
 SNAPTEST=1
 
+[ $# -gt 0 ] || UNATTENDED=-unattended
+
 while [ $# -gt 0 ]
 do
 	case "$1" in
-	-f)	FORCE=1	;;
+	-f)	FORCE=1			;;
+	-u)	UNATTENDED=-unattended	;;
 	-p)
 		shift
 		[ "$1" -gt 0 ] && PASSES="$1"
@@ -81,6 +84,7 @@ call_gdb ( ) {
 FATAL! Phantom stopped (panic)"
 	echo "
 set confirm off
+set pagination off
 symbol-file oldtree/kernel/phantom/phantom.pe
 dir oldtree/kernel/phantom
 dir phantom/vm
@@ -204,14 +208,15 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 	-usb -soundhw sb16"
 #	-net nic,model=ne2k_isa -M isapc \
 
-#echo "timeout=1
+echo "color yellow/blue yellow/magenta
+timeout=3
 
-#title=phantom ALL TESTS
-#kernel=(nd)/phantom -d 20 -- -test all
-#module=(nd)/classes
-#module=(nd)/pmod_test
-#boot 
-#" > $GRUB_MENU
+title=phantom ALL TESTS
+kernel=(nd)/phantom -d 20 $UNATTENDED -- -test all
+module=(nd)/classes
+module=(nd)/pmod_test
+boot 
+" > $GRUB_MENU
 
 dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
@@ -256,16 +261,17 @@ grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
 [ "$SNAPTEST" ] || exit 0
 
 cp phantom.img phantom.img.orig
-cp $GRUB_MENU $GRUB_MENU.orig
 
-trap "mv $GRUB_MENU.orig GRUB_MENU; mv phantom.img.orig phantom.img" 0
+trap "mv phantom.img.orig phantom.img" 0
 
 echo "
  ============= Now probing snapshots ========================"
-echo "timeout=1
+echo "color yellow/blue yellow/magenta
+
+timeout=3
 
 title=phantom
-kernel=(nd)/phantom -d=10 -- 
+kernel=(nd)/phantom -d=10 $UNATTENDED -- 
 module=(nd)/classes
 boot 
 " > $GRUB_MENU

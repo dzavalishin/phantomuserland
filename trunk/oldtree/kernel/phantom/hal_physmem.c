@@ -28,6 +28,8 @@
 #include <kernel/stats.h>
 #include <kernel/page.h>
 
+#include "vm_map.h"
+
 // PHYSALLOC_MAXPAGES
 #ifdef ARCH_ia32
 #include <ia32/phantom_pmap.h>

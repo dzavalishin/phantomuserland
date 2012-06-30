@@ -20,6 +20,7 @@
 #include <phantom_libc.h>
 
 #include <kernel/board.h>
+#include <kernel/boot.h>
 
 
 int panic_reenter = 0;
@@ -39,9 +40,12 @@ void panic(const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     vprintf(fmt, ap);
-    printf("\nPress any key");
 
-    board_panic_wait_keypress();
+    if (!bootflag_unattended)
+    {
+	printf("\nPress any key");
+	board_panic_wait_keypress();
+    }
 
     printf("\r             \r");
 
@@ -49,8 +53,11 @@ void panic(const char *fmt, ...)
 
     dump_thread_stacks();
 
-    printf("\nPress any key to reboot");
-    board_panic_wait_keypress();
+    if (!bootflag_unattended)
+    {
+	printf("\nPress any key to reboot");
+	board_panic_wait_keypress();
+    }
 
     exit(33);
 }
