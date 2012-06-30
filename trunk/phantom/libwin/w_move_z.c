@@ -18,8 +18,7 @@
 
 #include <video/window.h>
 #include <video/internal.h>
-
-
+#include <video/zbuf.h>
 
 
 
