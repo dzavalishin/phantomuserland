@@ -44,7 +44,7 @@ const char **boot_argv = default_argv + 1; // Just 0
 
 /**
  *
- * Mut\ltiboot cmd line comes like:
+ * Multiboot cmd line comes like:
  *   kernel_name [<booting-options and foo=bar> --] <args to main>
  *
  * Result:
@@ -228,6 +228,7 @@ int debug_max_level_error = 255;
 int debug_boot_pause = 0;
 int bootflag_no_vesa = 0;
 int bootflag_no_comcon = 0;
+int bootflag_unattended = 0;
 
 char *syslog_dest_address_string = 0;
 
@@ -250,8 +251,8 @@ static int stringarg( const char *arg )
 
     ISARG("pause", debug_boot_pause );
     ISARG("novesa", bootflag_no_vesa );
-	ISARG("nocom", bootflag_no_comcon );
-
+    ISARG("nocom", bootflag_no_comcon );
+    ISARG("unattended", bootflag_unattended );
 
     return 0;
 }
