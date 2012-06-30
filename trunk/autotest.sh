@@ -122,7 +122,7 @@ quit
 		echo "$RUNNING
 $DEAD
 Previous test run stalled. Trying gdb..."
-		gdb $GDB_PORT `echo "$DEAD" | awk '{ print $1 }'`
+		call_gdb $GDB_PORT `echo "$DEAD" | awk '{ print $2 }'`
 
 		preserve_log
 	}
