@@ -22,6 +22,7 @@
 #include <video/internal.h>
 #include <video/zbuf.h>
 
+#include "win_local.h"
 
 // faster, but has artefacts at top when move down
 #if 0
