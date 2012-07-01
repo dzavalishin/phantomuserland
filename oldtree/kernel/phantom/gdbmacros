@@ -55,7 +55,8 @@ define _show_trace_entry
     output/a $entry.src_pc
     printf " -> "
     output/a $entry.dst_pc
-    printf "\n"
+    printf "(0x%08x, 0x%08x, 0x%08x, 0x%08x, ...)\n", \
+        $entry.stack[0], $entry.stack[1], $entry.stack[2], $entry.stack[3]
 end
 
 define show_trace
