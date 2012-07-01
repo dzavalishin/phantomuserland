@@ -11,6 +11,8 @@ INCDIRS += /usr/include/w32api/
 
 EXCLUDED_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o x11_screen.o x11_display.o
 
+# Uncomment to enable tracing
+# PHANTOM_CFLAGS += -finstrument-functions
 
 include $(BUILD_ROOT)/makerules-lib
 
