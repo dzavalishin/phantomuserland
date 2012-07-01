@@ -40,7 +40,7 @@ void __cyg_profile_func_enter(void *this_fn, void *call_site)
     entry->thread = get_current_thread();
     entry->generation = generation;
     if (frame) {
-        memcpy(entry->stack, frame, sizeof(entry->stack));
+        memcpy(entry->stack, frame + 2, sizeof(entry->stack));
     } else {
         memset(entry->stack, 0xdc, sizeof(entry->stack));
     }
