@@ -33,25 +33,10 @@ w_clear( window_handle_t win )
 
 
 
-void
-w_pixel( window_handle_t w, int x, int y, rgba_t color )
-{
-    rect_t r;
-    r.x = x;
-    r.y = y;
-    r.xsize = r.ysize = 1;
-
-    if( rect_win_bounds( &r, w ) )
-        return;
-
-    rgba_t *dst = w->w_pixel + y*w->xsize + x;
-    *dst = color;
-}
-
 // SLOOOW! Checks bounds on each pixel
 
 #define _PLOT(w,x,y,c) do {\
-    if((x) > 0 && (y) > 0 && (x) < (w)->xsize && (y) <= (w)->ysize)\
+    if((x) >= 0 && (y) >= 0 && (x) < (w)->xsize && (y) < (w)->ysize)\
     (w)->w_pixel[(x)+(y)*(w)->xsize] = c;\
     } while(0)\
 
@@ -61,6 +46,12 @@ w_pixel( window_handle_t w, int x, int y, rgba_t color )
     (w)->w_pixel[(x)+(y)*(w)->xsize] = c;\
     } while(0)\
 
+
+void
+w_pixel( window_handle_t w, int x, int y, rgba_t color )
+{
+    _PLOT(w, x, y, color);
+}
 
 static inline int SGN(int v) { return v == 0 ? 0 : ( (v > 0) ? 1 : -1); }
 
