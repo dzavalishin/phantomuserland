@@ -75,12 +75,12 @@ w_fill( window_handle_t win, rgba_t color )
 #else
     for( ; i >= 4;  )
     {
-        win->pixel[i--] = color;
-        win->pixel[i--] = color;
-        win->pixel[i--] = color;
-        win->pixel[i--] = color;
+        win->w_pixel[i--] = color;
+        win->w_pixel[i--] = color;
+        win->w_pixel[i--] = color;
+        win->w_pixel[i--] = color;
     }
     for( ; i >= 0; i-- )
-        win->pixel[i] = color;
+        win->w_pixel[i] = color;
 #endif
 }
