@@ -32,11 +32,11 @@ end
 define show_threads
     set $i = 0
 
-    while ($i < sizeof(phantom_kernel_threads) / sizeof(*phantom_kernel_threads))
-        if (phantom_kernel_threads[$i])
-            set $thread = phantom_kernel_threads[$i]
-            printf "tid: %d, (phantom_thread_t*)0x%08x, (%.20s)\n", \
-                $i, $thread, ($thread && $thread->name) ? $thread->name : "(NULL)"
+    while ($i < 1024)
+        set $thread = phantom_kernel_threads[$i]
+        if ($thread)
+            printf "tid: %d, (phantom_thread_t*)0x%08x, (%.20s), start: 0x%08x\n", \
+                $i, $thread, $thread->name, $thread->start_func
         end
         set $i = $i + 1
     end
@@ -51,7 +51,7 @@ define _show_trace_entry
     set $entry = $arg0
     printf "%d: CPU %d, thread 0x%08x (%.10s): ", \
         $entry.generation, $entry.cpu, $entry.thread, \
-        ($entry.thread && $entry.thread->name) ? $entry.thread->name : "(NULL)"
+        $entry.thread->name
     output/a $entry.src_pc
     printf " -> "
     output/a $entry.dst_pc
