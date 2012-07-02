@@ -31,7 +31,7 @@ class basetest
 	int basemethod(var a: int) {
 		var avar : int;
 		avar = a + 10;
-		avar = avar + 10;
+		avar = avar + 0x10;
 		return avar;
 	}
 };
@@ -41,6 +41,7 @@ class childtest extends basetest
 {
 	void method()
 	{
+		v = 0xFFFFFFFF;
 		basemethod(v);
 	}
 };

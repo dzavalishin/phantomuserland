@@ -49,6 +49,9 @@ class shell //extends runnable
     var incr :  int;
     var stat_val :  int;
     var stat_pos :  int;
+    var stat_next_pos :  int;
+
+    var white : int;
 
     var win : .internal.window;
     var conn : .internal.connection;
@@ -76,7 +79,7 @@ class shell //extends runnable
         win = new .internal.window();
         win.setWinPosition(50,310);
         win.setTitle("Disk io stats");
-        win.setFg(0); // black
+        win.setFg(0xFF000000); // black
         //win.setBg(0xFFFFFFFF); // white
         win.clear();
         //win.drawBox( 10, 10, 20, 20 );
@@ -84,6 +87,7 @@ class shell //extends runnable
         win.update();
         stat_pos = 0;
 
+        white = 0xFFFFFFFF;
 
         console = new .internal.io.tty();
         incr = 1;
@@ -123,12 +127,23 @@ class shell //extends runnable
             console.putws(stat_val.toString());
             console.putws("\n");
 
+            stat_next_pos = stat_pos + 1;
+            if( stat_next_pos >= win.getXSize() )
+                stat_next_pos = 0;
+
+            // Bar
+            win.setFg( 0xFF00FF00 ); // Green
+            win.drawLine( stat_next_pos, 5, 0, 300 );
+
+            // Clear
+            win.setFg( white ); // white
+            win.drawLine( stat_pos, 5, 0, 300 );
+
+            win.setFg(0xFF000000); // black
             win.drawLine( stat_pos, 5, 0, 0+stat_val );
 
             
-            stat_pos = stat_pos + 1;
-            if( stat_pos >= win.getXSize() )
-                stat_pos = 0;
+            stat_pos = stat_next_pos;
             
             /*
             if( stat_pos >= win.getXSize()-1 )
