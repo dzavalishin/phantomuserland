@@ -82,7 +82,7 @@ void copyf( FILE *outfp, FILE *infp, int lencheck )
 
 int main( int ac, char **av )
 {
-    if( ac < 3 || av[0][0] == '-' )
+    if( (ac < 3) || (av[0][0] == '-') )
     {
         printf(
                "mkbulk: combine Phantom class files to a special\n"
@@ -99,8 +99,12 @@ int main( int ac, char **av )
     ac--;
     av++;
 
+    //printf("                       ----  Writing bulk\n");
+    //printf("                       ----  Writing bulk to %s: ", outfn);
+    //printf("                       ----  Writing bulk to %p: ", outfn);
 
-    outf = fopen( outfn, "wb" );
+    //outf = fopen( outfn, "wb" );
+    outf = fopen( outfn, "w" );
     if( outf == NULL )
     {
         printf("Can't open %s for write\n", outfn);

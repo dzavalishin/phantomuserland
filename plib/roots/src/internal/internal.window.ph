@@ -42,8 +42,8 @@ class window
 	void 	clear() [20] {}
 	void 	fill(var fg : int) [21] {}
 
-	void	setBg( var bg : int ) [22] {}
-	void	setFg( var fg : int ) [23] {}
+	void	setBg( var bg : int ) [23] {}
+	void	setFg( var fg : int ) [22] {}
 
 	// todo will need font parameter
 	void	drawString( var x : int, var y : int, var s : string ) [24] {}
