@@ -234,7 +234,7 @@ FATAL! Phantom crashed"
 		break
 	}
 	[ -s serial0.log ] || {
-		sleep 10
+		sleep 15
 		[ -s serial0.log ] || {
 			echo "
 
@@ -248,7 +248,7 @@ FATAL! Phantom stalled (serial0.log is empty)"
 		call_gdb $GDB_PORT $QEMU_PID "Test run failed"
 
 	grep -q '^\(\. \)\?Panic' serial0.log && {
-		sleep 10
+		sleep 15
 		break
 	}
 done
@@ -306,7 +306,7 @@ FATAL! Phantom crashed"
 			break
 		}
 		[ -s serial0.log ] || {
-			sleep 10
+			sleep 15
 			[ -s serial0.log ] || {
 				echo "
 
@@ -317,7 +317,7 @@ FATAL! Phantom stalled (serial0.log is empty)"
 		}
 		grep -iq 'snapshot done' serial0.log && break
 		grep -q '^\(\. \)\?Panic' serial0.log && {
-			sleep 10
+			sleep 15
 			break
 		}
 	done
