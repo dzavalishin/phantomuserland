@@ -18,6 +18,7 @@
 #include <string.h>
 #include <phantom_libc.h>
 
+//! Bytes per char
 static __inline__ int _bpc(const drv_video_font_t *font)
 {
     return font->ysize * (1 + ((font->xsize-1) / 8));
@@ -41,8 +42,10 @@ __inline__ int w_font_draw_char(
                                          int x, int y )
 {
     bool p = FONT_FLAG_PROPORTIONAL & font->flags;
+    // font char ptr
     const char *fcp  = drv_video_font_get_char( font, c );
 
+    // char width
     int cwidth = font->xsize;
     if(p)
     {
@@ -58,27 +61,30 @@ __inline__ int w_font_draw_char(
     // One char is used for width
     //if( p ) yafter--;
 
-    int bpcx = 1 + ((font->xsize-1) / 8);
+    int bpcx = 1 + ((font->xsize-1) / 8); // Pytes per Character for X coord (for example, 2 bytes for 16 pixels wide)
 
     if( xafter <= 0 || yafter <= 0
         || x >= win->xsize || y >= win->ysize )
         return -1; // Totally clipped off
 
     if( x < 0 || y < 0
-        || xafter > win->xsize || yafter > win->ysize )
+        || xafter >= win->xsize || yafter >= win->ysize )
         return -1; // Partially clipped off - skip for now
 
     // Completely visible
 
-    int yc = y;
+    int yc = y; // (screen) Y Coord
     // One char is used for width
-    int fyc = p ? 1 : 0;
+    int fyc = p ? 1 : 0; // Font Y Coord
     for( ; yc < yafter; yc++, fyc++ )
     {
+        // Write pointer
         rgba_t *wp = win->w_pixel + x + (yc*win->xsize);
 
+        // Font pointer
         const char *fp = fcp + ((font->ysize - fyc - 1) * bpcx );
-        int bc = bpcx;
+
+        int bc = bpcx; // Byte Count (bytes to put per line)
         if( font->xsize < 8 ) bc--; // hack!! colibri fonts
         for(; bc >= 0; bc-- )
         {
@@ -93,7 +99,7 @@ __inline__ int w_font_draw_char(
             fp++;
 #else
             int xe = (bc == 0) ? (font->xsize % 8) : 8; // bc==1 because we decrement it later, and we need last pass
-            char fb = *fp++;
+            char fb = *fp++; // Font Byte
             //fb <<= (8-xe);
             while(xe--)
             {
