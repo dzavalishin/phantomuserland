@@ -64,7 +64,11 @@ static void start_io(struct disk_q *q)
         return;
     }
 
+    pager_io_request *rq = (pager_io_request *)queue_first(&q->requests);
+    hal_spin_lock(&rq->chain_lock);
+    rq->flag_chained = 0;
     queue_remove_first(&(q->requests), q->current, pager_io_request *, disk_chain);
+    hal_spin_unlock(&rq->chain_lock);
 
     UNLOCK();
 
@@ -146,6 +150,9 @@ static errno_t queueAsyncIo( struct phantom_disk_partition *p, pager_io_request 
     dump_q(q);
 
     LOCK();
+    hal_spin_lock(&rq->chain_lock);
+
+    rq->flag_chained = 1;
 
     if(rq->flag_urgent)
     {
@@ -156,6 +163,7 @@ static errno_t queueAsyncIo( struct phantom_disk_partition *p, pager_io_request 
         queue_enter(&(q->requests), rq, pager_io_request *, disk_chain);
     }
 
+    hal_spin_unlock(&rq->chain_lock);
     UNLOCK();
 
     start_io(q);
@@ -179,16 +187,19 @@ static errno_t queueDequeue( struct phantom_disk_partition *p, pager_io_request 
         ret = EBUSY;
     else
     {
-        if(!io_request_is_complete(rq))
+        hal_spin_lock(&rq->chain_lock);
+        if(rq->flag_chained)
         {
             assert(!queue_empty(&(q->requests)));
             // TODO assert that block is really in q
             queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
+            rq->flag_chained = 0;
             rq->flag_pageout = 0;
             rq->flag_pagein = 0;
         }
         else
             ret = ESRCH;
+        hal_spin_unlock(&rq->chain_lock);
     }
 
     UNLOCK();
@@ -214,7 +225,8 @@ static errno_t queueRaisePrio( struct phantom_disk_partition *p, pager_io_reques
         ret = EBUSY;
     else
     {
-        if(!io_request_is_complete(rq))
+        hal_spin_lock(&rq->chain_lock);
+        if(rq->flag_chained)
         {
             assert(!queue_empty(&(q->requests)));
             // TODO assert that block is really in q
@@ -223,6 +235,7 @@ static errno_t queueRaisePrio( struct phantom_disk_partition *p, pager_io_reques
         }
         else
             ret = ESRCH;
+        hal_spin_unlock(&rq->chain_lock);
     }
 
     UNLOCK();
