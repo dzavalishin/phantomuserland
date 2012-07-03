@@ -227,12 +227,8 @@ QEMU_PID=$!
 while [ 1 ]
 do
 	sleep 2
-	kill -0 $QEMU_PID || {
-		echo "
+	kill -0 $QEMU_PID || break
 
-FATAL! Phantom crashed"
-		break
-	}
 	[ -s serial0.log ] || {
 		sleep 15
 		[ -s serial0.log ] || {
