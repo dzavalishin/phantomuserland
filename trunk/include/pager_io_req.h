@@ -24,6 +24,7 @@
 #include <phantom_types.h>
 #include <queue.h>
 #include <errno.h>
+#include <string.h>
 #include <kernel/pool.h>
 
 #include <spinlock.h>
@@ -58,6 +59,9 @@ typedef struct pager_io_request
 
     void                (*pager_callback)( struct pager_io_request *req, int write );
 
+    hal_spinlock_t      chain_lock;             // disk io chaining lock
+    /* The following two are modified under the chain_lock */
+    unsigned char       flag_chained;           // This request is in disk io queue
     queue_chain_t       disk_chain;             // Disk io q chain
 
     errno_t             rc;                     // Driver return code
@@ -74,6 +78,7 @@ typedef struct pager_io_request
 static __inline__ void
 pager_io_request_init( pager_io_request *me )
 { 
+    memset(me, 0, sizeof(*me));
     me->flag_pagein     = 0;
     me->flag_pageout    = 0;
     me->flag_ioerror    = 0;
@@ -90,6 +95,9 @@ pager_io_request_init( pager_io_request *me )
     me->sleep_tid       = 0;
 
     hal_spin_init( &(me->lock));
+
+    hal_spin_init(&me->chain_lock);
+    me->flag_chained    = 0;
 
     me->phandle         = -1;
     //me->q               = 0;
