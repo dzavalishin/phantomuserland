@@ -41,10 +41,10 @@ int 	phantom_scan_console_getc(void);
 
 void    console_set_fg_color( struct rgba_t );
 
-void    console_set_message_color(void);
-void    console_set_error_color(void);
-void    console_set_warning_color(void);
-void    console_set_normal_color(void);
+void    console_set_message_color(void) __attribute__((deprecated));
+void    console_set_error_color(void) __attribute__((deprecated));
+void    console_set_warning_color(void) __attribute__((deprecated));
+void    console_set_normal_color(void) __attribute__((deprecated));
 
 // TODO remove it from here, it is used temp. in syscalls!
 int phantom_dev_keyboard_getc(void);

@@ -96,13 +96,18 @@ void win_make_decorations(drv_video_window_t *w)
         // close button with id=1
         w_add_button( w->w_decor, 1, 5, bmp_y, &close_bmp, &close_pressed_bmp, 0 );
 #endif
+
+        // hangs?
+        w->w_decor->flags &= ~WFLAG_WIN_DECORATED;
+        iw_enter_allwq(w->w_decor);
     }
 
     w->w_decor->x = w->x-bordr_size;
     w->w_decor->y = w->y-bordr_size;
     w->w_decor->z = zless;
 
-    w->w_decor->bg = w->bg;
+    //w->w_decor->bg = w->bg;
+    w->w_decor->bg = COLOR_TRANSPARENT; // transparent!
 
     w_fill( w->w_decor, w->w_decor->bg );
 
@@ -203,6 +208,7 @@ void win_make_decorations(drv_video_window_t *w)
 
 
     window_basic_border( w->w_decor, brdr, bordr_size );
+
 
     if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
         iw_winblt_locked(w->w_decor);

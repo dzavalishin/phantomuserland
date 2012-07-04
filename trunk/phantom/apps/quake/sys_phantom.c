@@ -320,7 +320,7 @@ void main (int argc, char **argv)
 
     parms.memsize = MEMSZ;
     parms.membase = mem;
-    parms.basedir = "/amnt0";
+    parms.basedir = "/amnt1";
 
     if(0 == parms.membase)
     {

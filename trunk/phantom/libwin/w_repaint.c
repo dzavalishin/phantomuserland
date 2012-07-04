@@ -57,6 +57,15 @@ static void repaint_win_part( drv_video_window_t *w, rect_t *wtodo, rect_t *todo
 
     if( (w->state & WSTATE_WIN_ROLLEDUP) || (!(w->state & WSTATE_WIN_VISIBLE)) )
         return;
+
+    // Owner is not visible?
+    if( (w->w_owner) && !(w->w_owner->state & WSTATE_WIN_VISIBLE) )
+        return;
+
+    // Owner is rolled and we're decoration?
+    if( (w->w_owner) && (w->w_owner->w_decor == w) && (w->w_owner->state & WSTATE_WIN_ROLLEDUP) )
+        return;
+
 /*
     lprintf( "repaint_win_part w @ %d/%d, sz %d*%d, part @ %d/%d, sz %d*%d\n",
         w->x, w->y, w->xsize, w->ysize, 
