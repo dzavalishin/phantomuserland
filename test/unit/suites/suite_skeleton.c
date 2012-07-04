@@ -5,9 +5,9 @@
 #include "utils.h"
 
 TEST_FUNCT(foo) {
-    printf("test case 1 - must fail\n");
+    printf("test case 1\n");
      /* Фейковый код */
-    CU_ASSERT_EQUAL(0, 1);
+    CU_ASSERT_EQUAL(0, 0);
 }
 TEST_FUNCT(foo2) {
    printf("test case 2\n");

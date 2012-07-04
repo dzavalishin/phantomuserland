@@ -239,7 +239,7 @@ static void repaint_q(void)
         rect_t r = pqel->r;
         free(pqel);
 
-        scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize );
+        scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize ); // ?? BUG? Need it?
         paint_square_updown( &r );
     }
 

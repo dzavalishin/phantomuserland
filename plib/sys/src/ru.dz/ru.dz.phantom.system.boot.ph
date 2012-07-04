@@ -146,6 +146,15 @@ class boot
         print("\n");
 
 
+        console.putws("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
+        console.putws("Env root.shell=");
+        console.putws(shell_name);
+        console.putws("\n");
+        console.putws("Env root.init=");
+        console.putws(oi.getKernelEnvironmentValue("root.init"));
+        console.putws("\n");
+
         console.putws("Creating root window...\n");
 
         windows = new .ru.dz.windows.root();

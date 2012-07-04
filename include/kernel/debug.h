@@ -27,7 +27,7 @@ int debug_console_getc(void);
 
 void phantom_dump_windows_buf(char *bp, int len);
 
-// Print to log file only
+// Print to log file only, doubles in debug_ext.h
 void lprintf(char const *format, ...);
 
 
