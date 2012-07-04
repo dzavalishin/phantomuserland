@@ -25,7 +25,22 @@
 
 
 
+
 #if !USE_ONLY_INDIRECT_PAINT
+
+
+#if 1
+void iw_winblt_locked( drv_video_window_t *from )
+{
+    w_assert_lock();
+/*
+    if( (from->state & WSTATE_WIN_ROLLEDUP) || !(from->state & WSTATE_WIN_VISIBLE) )
+        return;
+*/
+    scr_repaint_win( from );
+}
+
+#else
 
 void iw_winblt_locked( drv_video_window_t *from )
 {
@@ -38,6 +53,8 @@ void iw_winblt_locked( drv_video_window_t *from )
     video_drv->winblt(from, from->x, from->y, from->z);
     scr_mouse_enable_p(video_drv, from->x, from->y, from->xsize, from->ysize );
 }
+
+#endif
 
 void iw_winblt( drv_video_window_t *from )
 {
@@ -62,5 +79,6 @@ void drv_video_winblt( drv_video_window_t *from )
 #endif
 
 #endif // USE_ONLY_INDIRECT_PAINT
+
 
 #endif
