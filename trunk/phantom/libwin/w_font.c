@@ -408,6 +408,8 @@ Cursor Controls:
     ESC[K Clear to end of line
 
 
+    ESC[ ... 38;2;<r>;<g>;<b> ... m Select RGB foreground color
+    ESC[ ... 48;2;<r>;<g>;<b> ... m Select RGB background color
 
 */
 

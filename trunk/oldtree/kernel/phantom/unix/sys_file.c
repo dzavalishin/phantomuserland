@@ -22,6 +22,7 @@
 #include <unix/uufile.h>
 #include <unix/uuprocess.h>
 #include <kernel/unix.h>
+#include <kernel/init.h>
 #include <sys/unistd.h>
 #include <sys/fcntl.h>
 #include <dirent.h>
@@ -828,19 +829,32 @@ errno_t usys_listproperties( int *err, uuprocess_t *u, int fd, int nProperty, ch
 // Helpers
 // -----------------------------------------------------------------------
 
-// BUG - mutex!
+static hal_mutex_t fd_find_mutex;
+
+static void init_fd_find_mutex(void)
+{
+    hal_mutex_init( &fd_find_mutex, "fd_find_mutex" );
+}
+
+INIT_ME( 0, init_fd_find_mutex, 0)
+
+
 int uu_find_fd( uuprocess_t *u, uufile_t *f  )
 {
+    hal_mutex_lock( &fd_find_mutex );
+
     int i;
     for( i = 0; i < MAX_UU_FD; i++ )
     {
         if( u->fd[i] == 0 )
         {
             u->fd[i] = f;
+            hal_mutex_unlock( &fd_find_mutex );
             return i;
         }
     }
 
+    hal_mutex_unlock( &fd_find_mutex );
     return -1;
 }
 
