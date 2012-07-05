@@ -251,7 +251,7 @@ void vid_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_x
         for( ; sline < dst_yafter; sline++, wline++ )
         {
             // Screen start pos in line
-            char *s_start = DRV_VIDEO_REVERSE_LINESTART(sline) + dst_xpos*bit_mover_byte_step;
+            char *s_start = DRV_VIDEO_REVERSE_LINESTART(sline) + (bit_mover_byte_step  ? (dst_xpos*bit_mover_byte_step) : (dst_xpos/4));
             // Window start pos in line
             const struct rgba_t *w_start = from + ((wline*src_xsize) + src_xpos);
 

@@ -693,11 +693,11 @@ static int basic_vga_start()
     //extern void (*bit_mover_to_screen)( void *dest, const struct rgba_t *src, int nelem );
     //extern void (*bit_mover_to_screen_noalpha)( void *dest, const struct rgba_t *src, int nelem );
 
-    bit_zbmover_to_screen       = (void *)basic_vga_unchained_rgba2palette_zbmove_alpha;
-    bit_mover_to_screen         = (void *)basic_vga_unchained_rgba2palette_move_alpha;
-    bit_mover_to_screen_noalpha = (void*) basic_vga_unchained_rgba2palette_move;
+    bit_zbmover_to_screen       = basic_vga_unchained_rgba2palette_zbmove_alpha;
+    bit_mover_to_screen         = basic_vga_unchained_rgba2palette_move_alpha;
+    bit_mover_to_screen_noalpha = basic_vga_unchained_rgba2palette_move;
 
-    bit_mover_byte_step         = 1;
+    bit_mover_byte_step         = 0;
 
     clrscr();
 
