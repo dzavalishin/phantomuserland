@@ -50,7 +50,7 @@ cd $PHANTOM_HOME
 preserve_log ( ) {
 	[ -d ../public_html/. ] || return
 
-	SAVED_LOG=../public_html/serial0.log
+	SAVED_LOG=../public_html/$1
 
 	C=9
 
@@ -64,13 +64,13 @@ preserve_log ( ) {
 
 	[ -e $SAVED_LOG ] && mv $SAVED_LOG $SAVED_LOG.0
 
-	cp $TEST_DIR/serial0.log $SAVED_LOG
+	cp $TEST_DIR/$1 $SAVED_LOG
 
-	echo "The serial0.log can be viewed at
+	echo "The $1 can be viewed at
 
-http://misc.dz.ru/~`whoami`/serial0.log
+http://misc.dz.ru/~`whoami`/$1
 
-Previous copies are kept (serial0.log.0 through .9)"
+Previous copies are kept ($1.0 through .9)"
 }
 
 call_gdb ( ) {
@@ -124,7 +124,7 @@ $DEAD
 Previous test run stalled. Trying gdb..."
 		call_gdb $GDB_PORT `echo "$DEAD" | awk '{ print $2 }'`
 
-		preserve_log
+		preserve_log serial0.log
 	}
 #[ -s $0.lock ] && exit 0
 #touch $0.lock
@@ -253,6 +253,10 @@ grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "P
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
 grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' serial0.log
 grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
+grep -q 'TEST FAILED' && {
+	cp serial0.log test.log
+	preserve_log test.log
+}
 
 [ "$SNAPTEST" ] || exit 0
 
@@ -323,7 +327,7 @@ FATAL! Phantom stalled (serial0.log is empty)"
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log && {
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log
-		preserve_log
+		preserve_log serial0.log
 		break
 	}
 
@@ -331,7 +335,7 @@ FATAL! Phantom stalled (serial0.log is empty)"
 		echo "
 ERROR! No snapshot activity in log! Aborted"
 		tail -10 serial0.log
-		preserve_log
+		preserve_log serial0.log
 		break
 	}
 
