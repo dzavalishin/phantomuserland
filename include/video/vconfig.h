@@ -40,5 +40,6 @@
 
 #define VIDEO_NEW_PAINTER 1
 
+#define VIDEO_DRV_WINBLT 0
 
 #endif // VCONFIG_H

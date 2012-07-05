@@ -62,7 +62,7 @@ boot
 
 title=phantom (no VESA)
 kernel=(hd0,0)/boot/phantom -d=20 -novesa -- -novesa
-#module=(hd0,0)/boot/classes
+module=(hd0,0)/boot/classes
 #module=(hd0,0)/boot/pmod_tcpdemo 
 #module=(hd0,0)/boot/pmod_test
 #module=(hd0,0)/boot/pmod_regress 

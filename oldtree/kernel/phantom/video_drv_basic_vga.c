@@ -249,8 +249,9 @@ static inline unsigned char rgba2palette( const struct rgba_t src )
 #define DBG_BLT 0
 
 // nelem supposed to have 2 lower bits zeroed
-void basic_vga_unchained_rgba2palette_move( char *dest, const struct rgba_t *src, int nelem )
+void basic_vga_unchained_rgba2palette_move( void *dest, const struct rgba_t *src, int nelem )
 {
+    nelem &= ~0x3; // reset 2 lower bits - enforce divisibility by 4
     nelem /= 4;
 
 #if DBG_BLT
@@ -283,6 +284,73 @@ void basic_vga_unchained_rgba2palette_move( char *dest, const struct rgba_t *src
 #if DBG_BLT
     printf("total = %d\n", total );
 #endif
+}
+
+
+void basic_vga_unchained_rgba2palette_move_alpha( void *dest, const struct rgba_t *src, int nelem )
+{
+    nelem &= ~0x3; // reset 2 lower bits - enforce divisibility by 4
+    nelem /= 4;
+
+    int plane;
+    for( plane = 0; plane < 4; plane++ )
+    {
+        setPlane( plane );
+
+        int pos;
+        char *out = dest;
+        const struct rgba_t *in = src+plane;
+
+        for( pos = 0; pos < nelem; pos++)
+        {
+            if( in->a )
+                *out = rgba2palette( *in );
+            out++;
+            in += 4;
+        }
+    }
+}
+
+void basic_vga_unchained_rgba2palette_zbmove_alpha( void *dest, const struct rgba_t *src, zbuf_t *zb, int inelem, zbuf_t zpos )
+{
+    int pos;
+
+    inelem &= ~0x3; // reset 2 lower bits - enforce divisibility by 4
+
+    int nelem = inelem / 4;
+
+    int plane;
+    for( plane = 0; plane < 4; plane++ )
+    {
+        setPlane( plane );
+
+        char *out = dest;
+        const struct rgba_t *in = src+plane;
+        zbuf_t *zbp = zb+plane;
+
+        for( pos = 0; pos < nelem; pos++)
+        {
+            if( in->a && *zbp <= zpos )
+                *out = rgba2palette( *in );
+            out++;
+            in += 4;
+            zbp += 4;
+        }
+    }
+
+    // now update zbuf
+    const struct rgba_t *in = src;
+    zbuf_t *zbp = zb;
+    for( pos = 0; pos < inelem; pos++)
+    {
+        if( in->a && (*zbp <= zpos) )
+            *zbp = zpos;;
+        //out++;
+        in ++;
+        zbp ++;
+    }
+
+
 }
 
 
@@ -417,11 +485,12 @@ void 	basic_vga_bitblt(const struct rgba_t *from, int xpos, int ypos, int xsize,
 
 }
 
+#if VIDEO_DRV_WINBLT
 static void 	basic_vga_winblt(const window_handle_t from, int xpos, int ypos)
 {
     basic_vga_bitblt( from->r_pixel, xpos, ypos, from->xsize, from->ysize );
 }
-
+#endif
 
 static void basic_vga_readblt( rgba_t *to, int xpos, int ypos, int xsize, int ysize)
 {
@@ -549,8 +618,10 @@ start: 			basic_vga_start,
 stop:   		basic_vga_stop,
 
 update:    		vid_null,
-bitblt:    		(void *)basic_vga_bitblt,
-winblt: 		(void *)basic_vga_winblt,
+//bitblt:    		(void *)basic_vga_bitblt,
+#if VIDEO_DRV_WINBLT
+//winblt: 		(void *)basic_vga_winblt,
+#endif
 readblt: 		basic_vga_readblt,
 
 mouse:    		vid_null,
@@ -618,7 +689,18 @@ static int basic_vga_start()
 
     set_rgb332_palette();
 
+    //extern void (*bit_zbmover_to_screen)( void *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
+    //extern void (*bit_mover_to_screen)( void *dest, const struct rgba_t *src, int nelem );
+    //extern void (*bit_mover_to_screen_noalpha)( void *dest, const struct rgba_t *src, int nelem );
+
+    bit_zbmover_to_screen       = (void *)basic_vga_unchained_rgba2palette_zbmove_alpha;
+    bit_mover_to_screen         = (void *)basic_vga_unchained_rgba2palette_move_alpha;
+    bit_mover_to_screen_noalpha = (void*) basic_vga_unchained_rgba2palette_move;
+
+    bit_mover_byte_step         = 1;
+
     clrscr();
+
 
     //test_vga_drv();
 
