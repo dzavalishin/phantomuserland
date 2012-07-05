@@ -225,9 +225,10 @@ void w_font_tty_string(
             {
             case 'm':
                 v -= 30;
-                if( v > 7 )
-                    continue;
-                color = cmap[v];
+                if( (v < 0) || (v > 7) )
+                    color = COLOR_LIGHTGRAY;
+                else
+                    color = cmap[v];
             default:
                 continue;
             }
