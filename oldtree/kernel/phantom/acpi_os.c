@@ -720,12 +720,19 @@ AcpiOsSignalSemaphore (
  *
  *****************************************************************************/
 
+#include <spinlock.h>
+
 ACPI_STATUS
 AcpiOsCreateLock (
     ACPI_SPINLOCK           *OutHandle)
 {
 
-    return (AcpiOsCreateSemaphore (1, 1, OutHandle));
+    //return (AcpiOsCreateSemaphore (1, 1, OutHandle));
+    hal_spinlock_t *sl = calloc( sizeof(hal_spinlock_t), 1);
+    assert(sl);
+    hal_spin_init( sl );
+    *OutHandle = sl;
+    return (AE_OK);
 }
 
 
@@ -733,7 +740,10 @@ void
 AcpiOsDeleteLock (
     ACPI_SPINLOCK           Handle)
 {
-    AcpiOsDeleteSemaphore (Handle);
+    //AcpiOsDeleteSemaphore (Handle);
+
+    hal_spinlock_t *sl = (void *)Handle;
+    free(sl);
 }
 
 
@@ -741,7 +751,9 @@ ACPI_CPU_FLAGS
 AcpiOsAcquireLock (
     ACPI_HANDLE             Handle)
 {
-    AcpiOsWaitSemaphore (Handle, 1, 0xFFFF);
+    //AcpiOsWaitSemaphore (Handle, 1, 0xFFFF);
+    hal_spinlock_t *sl = (void *)Handle;
+    hal_spin_lock( sl );
     return (0);
 }
 
@@ -752,7 +764,9 @@ AcpiOsReleaseLock (
     ACPI_CPU_FLAGS          Flags)
 {
     (void) Flags;
-    AcpiOsSignalSemaphore (Handle, 1);
+    //AcpiOsSignalSemaphore (Handle, 1);
+    hal_spinlock_t *sl = (void *)Handle;
+    hal_spin_unlock( sl );
 }
 
 
