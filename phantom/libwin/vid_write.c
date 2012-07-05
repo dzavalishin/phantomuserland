@@ -178,15 +178,15 @@ void vid_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_x
     if( dst_xpos < 0 )
     {
         xsize -= (-dst_xpos);
-        dst_xpos = 0;
         src_xpos += (-dst_xpos);
+        dst_xpos = 0;
     }
 
     if( dst_ypos < 0 )
     {
         ysize -= (-dst_ypos);
-        dst_ypos = 0;
         src_ypos += (-dst_ypos);
+        dst_ypos = 0;
     }
 
 
