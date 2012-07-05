@@ -36,6 +36,8 @@ typedef struct dpc_request
 
 } dpc_request;
 
+typedef struct dpc_request dpc_request_t;
+
 extern hal_spinlock_t         dpc_request_lock;
 
 extern struct dpc_request *    dpc_request_first;

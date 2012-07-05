@@ -169,6 +169,8 @@ InitializeFullAcpi(void)
     AcpiWalkNamespace ( ACPI_TYPE_ANY, ACPI_ROOT_OBJECT, 16, walkCallback, 0, 0, 0 );
 #endif
 
+    acpi_video_init();
+    acpi_buttons_init();
 
     return 0;
 }

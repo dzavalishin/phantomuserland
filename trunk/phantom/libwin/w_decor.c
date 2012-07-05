@@ -87,7 +87,7 @@ void win_make_decorations(drv_video_window_t *w)
 #endif
         drv_video_window_t *w2 = private_drv_video_window_create(w->xsize+bordr_size*2, dysize );
 
-        w2->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+        //w2->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
         w2->w_owner = w;
         w->w_decor = w2;
 
