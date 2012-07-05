@@ -28,8 +28,8 @@
 
 //! If 1, VESA will be used if found, even if other driver is found
 //! If 0, VESA will fight for itself as usual driver
-//! Now using 1, kernel traps if trying to do VM86 too late in boot process
-#define VESA_ENFORCE 1
+//! Now using 0, which is normal. (was: 1 for kernel was trapping if trying to do VM86 too late in boot process)
+#define VESA_ENFORCE 0
 
 
 #define VIDEO_PARTIAL_WIN_BLIT 1
