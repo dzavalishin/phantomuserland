@@ -253,7 +253,7 @@ int main(int argc, char **argv, char **envp)
 
 
 
-    printf("\nPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\n\n", svn_version(), phantom_uname.machine );
+    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s starting\x1b[0m\n\n", svn_version(), phantom_uname.machine );
     phantom_process_boot_options();
 
 #if defined(ARCH_arm) && 0
@@ -401,6 +401,7 @@ int main(int argc, char **argv, char **envp)
 
     //init_wins(u_int32_t ip_addr);
 
+    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
     /*

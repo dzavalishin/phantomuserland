@@ -1,7 +1,3 @@
- - set_net_timer - need reset timer if not one shot required
-
- - unix shell does not get input after restart
-
  - what if system rebooted before old snap is freed? Which snap will be loaded? 
    Who frees old one?
 
@@ -18,3 +14,7 @@
  - BUG - need to reimplement snap sync code or else blocking syscalls
    will prevent snap from being done.
   
+ + set_net_timer - need reset timer if not one shot required
+
+ + unix shell does not get input after restart
+

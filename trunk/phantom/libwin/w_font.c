@@ -160,16 +160,77 @@ static color_t cmap[] =
     _C_COLOR_LIGHTGRAY //_C_COLOR_WHITE
 };
 
+static void set_ansi_color( int v, int *bright, rgba_t *fg, rgba_t *bg, rgba_t def_fg, rgba_t def_bg )
+{
+    // Special cases
+    switch( v )
+    {
+    case 0: // defaults
+        *fg = def_fg;
+        *bg = def_bg;
+        return;
+
+    case 7: // reverse video
+        *fg = def_bg;
+        *bg = def_fg;
+        return;
+
+    case 1: // bold/bright
+    case 3: // standout
+        *bright = 1;
+        return;
+
+    }
+
+    // FG
+    if( (v >= 30) && (v <= 39) )
+    {
+        v -= 30;
+
+        if( v > 7 )
+        {
+            *fg = def_fg;
+            return;
+        }
+        else
+        {
+            *fg = cmap[v];
+            return;
+        }
+    }
+
+    // BG
+    if( (v >= 40) && (v <= 49) )
+    {
+        v -= 40;
+
+        if( v > 7 )
+        {
+            *bg = def_bg;
+            return;
+        }
+        else
+        {
+            *bg = cmap[v];
+            return;
+        }
+    }
+}
+
+
+
 void w_font_tty_string(
                                           window_handle_t win,
                                           const drv_video_font_t *font,
                                           const char *s,
                                           const rgba_t _color,
-                                          const rgba_t back,
+                                          const rgba_t _back,
                                           int *x, int *y )
 {
     rgba_t color = _color;
+    rgba_t back  = _back;
     int nc = strlen(s);
+    int bright = 0;
     //int startx = *x;
 
     while(nc--)
@@ -224,11 +285,15 @@ void w_font_tty_string(
             switch(*s++)
             {
             case 'm':
+#if 1
+                set_ansi_color( v, &bright, &color, &back, _color, _back );
+#else
                 v -= 30;
                 if( (v < 0) || (v > 7) )
                     color = COLOR_LIGHTGRAY;
                 else
                     color = cmap[v];
+#endif
             default:
                 continue;
             }
@@ -280,6 +345,69 @@ static void font_reverse_x(drv_video_font_t *font)
         *fc++ = oc;
     }
 }
+
+*/
+
+
+/* TODO
+
+Set Attribute Mode	<ESC>[{attr1};...;{attrn}m
+
+    Sets multiple display attribute settings. The following lists standard attributes:
+
+    0	Reset all attributes
+    1	Bright
+    2	Dim
+    4	Underscore	
+    5	Blink
+    7	Reverse
+    8	Hidden
+
+    22 normal
+    23 no-standout
+    24 no-underline
+    25 no-blink
+    27 no-reverse
+
+    	Foreground Colours
+    30	Black
+    31	Red
+    32	Green
+    33	Yellow
+    34	Blue
+    35	Magenta
+    36	Cyan
+    37	White
+
+    39 default foreground
+
+    	Background Colours
+    40	Black
+    41	Red
+    42	Green
+    43	Yellow
+    44	Blue
+    45	Magenta
+    46	Cyan
+    47	White
+
+    49 default background
+
+Cursor Controls:
+    ESC[#;#H or ESC[#;#f Moves cusor to line #, column #
+    ESC[#A Moves cursor up # lines
+    ESC[#B Moves cursor down # lines
+    ESC[#C Moves cursor forward # spaces
+    ESC[#D Moves cursor back # spaces
+    ESC[#;#R Reports current cursor line & column
+    ESC[s Saves cursor position for recall later
+    ESC[u Return to saved cursor position
+
+
+    ESC[2J Clear screen and home cursor
+    ESC[K Clear to end of line
+
+
 
 */
 
