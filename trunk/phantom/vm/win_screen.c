@@ -345,7 +345,9 @@ void    pvm_win_window_thread()
     drv_video_win32.update = &drv_win_screen_update;
 #if 1
     drv_video_win32.bitblt = &vid_bitblt_forw;
+#if VIDEO_DRV_WINBLT
     drv_video_win32.winblt = &vid_win_winblt;
+#endif
     drv_video_win32.readblt = &vid_readblt_forw;
     drv_video_win32.bitblt_part = &vid_bitblt_part_forw;
 #else

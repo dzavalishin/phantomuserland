@@ -58,11 +58,14 @@ struct drv_video_screen_t
 
     void 	(*bitblt) (const rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags);
 
+#if VIDEO_DRV_WINBLT
 #if NEW_WINDOWS
     void 	(*winblt) ( window_handle_t from, rect_t src, int src_stride, int dest_xpos, int dest_ypos, zbuf_t zpos);
 #else
     void 	(*winblt) ( const window_handle_t from, int xpos, int ypos, zbuf_t zpos);
 #endif
+#endif
+
     void 	(*readblt) ( rgba_t *to, int xpos, int ypos, int xsize, int ysize);
 
     // Callbacks - to be filled by OS before driver init - BUG - kill!

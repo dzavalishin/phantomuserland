@@ -61,6 +61,7 @@ void vid_bitblt_rev(const struct rgba_t *from, int xpos, int ypos, int xsize, in
 
 
 
+#if VIDEO_DRV_WINBLT
 void 	vid_win_winblt(const window_handle_t from, int xpos, int ypos, zbuf_t zpos )
 {
     u_int32_t flags = 0;
@@ -74,7 +75,7 @@ void 	vid_win_winblt_rev(const window_handle_t from, int xpos, int ypos, zbuf_t 
     win2blt_flags( &flags, from );
     vid_bitblt_worker( from->r_pixel, xpos, ypos, from->xsize, from->ysize, 1, zpos, flags );
 }
-
+#endif
 
 
 

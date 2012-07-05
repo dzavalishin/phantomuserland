@@ -2,16 +2,15 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
  *
- * Video drier search and probe code. Practically turned off
- * if VESA is found. That's wrong.
+ * Video drier search and probe code. 
  *
 **/
 
 #define DEBUG_MSG_PREFIX "video"
 #include <debug_ext.h>
-static int debug_level_flow = 0;
+static int debug_level_flow = 1;
 
 #include <phantom_libc.h>
 
@@ -257,7 +256,9 @@ static void set_video_defaults(void)
 
     if( 0 == video_drv->update)                     video_drv->update      = (void *)vid_null;
     if( 0 == video_drv->bitblt)                     video_drv->bitblt      = vid_bitblt_rev;
+#if VIDEO_DRV_WINBLT
     if( 0 == video_drv->winblt)                     video_drv->winblt      = vid_win_winblt_rev;
+#endif
     if( 0 == video_drv->readblt)                    video_drv->readblt     = vid_readblt_rev;
     if( 0 == video_drv->bitblt_part)                video_drv->bitblt_part = vid_bitblt_part_rev;
 

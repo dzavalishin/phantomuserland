@@ -9,6 +9,7 @@
 **/
 
 #include <video/vops.h>
+#include <video/internal.h>
 #include <video/screen.h>
 #include <assert.h>
 #include <sys/types.h>

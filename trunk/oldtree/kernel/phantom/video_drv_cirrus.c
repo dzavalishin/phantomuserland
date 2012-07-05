@@ -227,7 +227,9 @@ stop:  			cirrus_stop,
 #if 0
 update: 		vid_null,
 bitblt: 		drv_video_bitblt_rev,
+#if VIDEO_DRV_WINBLT
 winblt:			drv_video_win_winblt_rev,
+#endif
 readblt: 		drv_video_readblt_rev,
 bitblt_part:            drv_video_bitblt_part_rev,
 

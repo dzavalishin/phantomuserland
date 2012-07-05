@@ -34,6 +34,7 @@ rem SET Q_NET= -net nic,model=pcnet  -net user -tftp ./tftp
 
 
 SET Q_MACHINE=-m 256
+#SET Q_MACHINE=-m 120
 
 SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img 
 rem -fdb kolibri.iso
