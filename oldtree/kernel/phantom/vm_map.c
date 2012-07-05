@@ -1756,6 +1756,8 @@ static void vm_verify_vm(void)
 
 #if VERIFY_SNAP
 
+#define USE_SYNC_IO 1
+
 static void vm_verify_snap(disk_page_no_t head)
 {
     int progress = 0;
@@ -1763,17 +1765,18 @@ static void vm_verify_snap(disk_page_no_t head)
     pagelist loader;
     size_t current = 0;
 
-    //disk_page_io page_io = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, { 0, 0 }, 0, { 0, 0 }, 0, 0, 0 }, 0, 0 };
-    disk_page_io page_io;
-
 
     if (!head)
         return;
 
     if (SNAP_STEPS_DEBUG) syslog( 0, "snap: verification started...");
 
+#if !USE_SYNC_IO
+    disk_page_io page_io;
+
     disk_page_io_init(&page_io);
     disk_page_io_allocate(&page_io);
+#endif
 
     pagelist_init(&loader, head, 0, DISK_STRUCT_MAGIC_SNAP_LIST);
 
@@ -1803,15 +1806,32 @@ static void vm_verify_snap(disk_page_no_t head)
 
         if (current < page_offset || current - page_offset < PAGE_SIZE)
         {
+#if USE_SYNC_IO
+            extern phantom_disk_partition_t *pp; // BUG
+
+            char buf[DISK_STRUCT_BS];
+
+            errno_t rc = phantom_sync_read_block( pp, buf, block, 1 );
+            if( rc )
+            {
+                syslog( 0, "snap: verification read err %d", rc );
+                return;
+            }
+
+            current = vm_verify_page(buf, page_offset, current, hal.object_vsize);
+#else
             page_io.req.disk_page = block;
             disk_page_io_load_me_async(&page_io);
             disk_page_io_wait(&page_io);
             current = vm_verify_page(page_io.mem, page_offset, current, hal.object_vsize);
+#endif
         }
     }
 
     pagelist_finish( &loader );
+#if !USE_SYNC_IO
     disk_page_io_release(&page_io);
+#endif
     if (SNAP_STEPS_DEBUG)
     {
 	hal_printf("\n");

@@ -136,7 +136,8 @@ pager_superblock_ptr()
 
 #if PAGING_PARTITION
 
-static phantom_disk_partition_t *pp;
+// static
+phantom_disk_partition_t *pp;
 
 void partition_pager_init(phantom_disk_partition_t *p)
 {

@@ -596,7 +596,7 @@ void phantom_init_vm86(void)
     SHOW_INFO( 7, "VM86 region address is 0x%X, R0 stack is 0x%X", exe, r0stack );
 
     {
-    // TODO BUG -sizeof(int) needed?
+    // TODO -sizeof(int) needed?
     void *r0_s_end = r0stack+VM86_R0_STACK_SIZE-sizeof(int);
 
     tss_vm86.tss.ss0 = KERNEL_DS;
