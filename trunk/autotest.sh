@@ -253,7 +253,7 @@ grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "P
 grep 'SVN' serial0.log || die "Phantom test run crashed!"
 grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' serial0.log
 grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
-grep -q 'TEST FAILED' && {
+grep -q 'TEST FAILED' serial0.log && {
 	cp serial0.log test.log
 	preserve_log test.log
 }
