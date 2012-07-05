@@ -1,4 +1,3 @@
-#if 0
 /**
  *
  * Phantom OS
@@ -155,5 +154,3 @@ phantom_dump_superblock(phantom_disk_superblock *sb)
  * Revision 1.6  2005/01/06 19:17:00  dz
  * blocksize
  */
-
-#endif
