@@ -5,7 +5,16 @@
 
 // Zeroth line will have index of (scr y size - 1), right?
 
-#define DRV_VIDEO_REVERSE_LINESTART(ypos) ( (video_drv->xsize * ((video_drv->ysize -1) - ypos) ) * bit_mover_byte_step + video_drv->screen)
+//#define DRV_VIDEO_REVERSE_LINESTART(ypos) ( (video_drv->xsize * ((video_drv->ysize -1) - ypos) ) * bit_mover_byte_step + video_drv->screen)
+//#define DRV_VIDEO_FORWARD_LINESTART(ypos) ( (video_drv->xsize * ypos) * bit_mover_byte_step + video_drv->screen)
+
+
+#define DRV_VIDEO_REVERSE_LINESTART(ypos) \
+    ( bit_mover_byte_step ? \
+      ( (video_drv->xsize * ((video_drv->ysize-1) - ypos) ) * bit_mover_byte_step + video_drv->screen ) \
+      : \
+      ( (video_drv->xsize * ((video_drv->ysize-1) - ypos) ) / 4 + video_drv->screen ) \
+    )
 #define DRV_VIDEO_FORWARD_LINESTART(ypos) ( (video_drv->xsize * ypos) * bit_mover_byte_step + video_drv->screen)
 
 /*
