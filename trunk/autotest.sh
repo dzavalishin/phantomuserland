@@ -24,7 +24,16 @@ die ( ) {
 COMPILE=1
 SNAPTEST=1
 
-[ $# -gt 0 ] || UNATTENDED=-unattended
+send_report ( ) {
+	RESULT=`grep 'test run\|snapshot test' $ME.log | tr '\n' ';'`
+	mail -s "${RESULT:-test ok}" $MAILTO < $ME.log
+}
+
+[ $# -gt 0 ] || {
+	UNATTENDED=-unattended
+	exec 1>$ME.log 2>&1
+	trap "[ -s $ME.log ] && send_report" 0 2
+}
 
 while [ $# -gt 0 ]
 do
@@ -41,6 +50,18 @@ do
 	-nc)	unset COMPILE	;;
 	-ng)	unset DISPLAY	;;
 	-ns)	unset SNAPTEST	;;
+	*)
+		echo "Usage: $0 [-f] [-u] [-p N] [-w] [-nc] [-ng] [-ns]
+	-f	- force test (ignore no updates from SVN)
+	-u	- run unattended (don't stop on panic for gdb)
+	-p N	- make N passes of snapshot test (default: N=2)
+	-w	- show make warnings
+	-nc	- do not compile (run previously compiled version)
+	-ns	- do not run snapshot test (shortcut for -p 0)
+	-ng	- do not show qemu/kvm window
+"
+		exit 0
+	;;
 	esac
 	shift
 done
@@ -302,7 +323,7 @@ do
 		kill -0 $QEMU_PID || {
 			echo "
 
-FATAL! Phantom crashed"
+FATAL! Phantom snapshot test crashed"
 			break
 		}
 		[ -s serial0.log ] || {
@@ -310,7 +331,7 @@ FATAL! Phantom crashed"
 			[ -s serial0.log ] || {
 				echo "
 
-FATAL! Phantom stalled (serial0.log is empty)"
+FATAL! Phantom snapshot test stalled (serial0.log is empty)"
 				kill $QEMU_PID
 				break
 			}
@@ -333,7 +354,7 @@ FATAL! Phantom stalled (serial0.log is empty)"
 
 	grep 'snap:\|Snapshot done' serial0.log || {
 		echo "
-ERROR! No snapshot activity in log! Aborted"
+ERROR! No snapshot activity in log! Phantom snapshot test failed"
 		tail -10 serial0.log
 		preserve_log serial0.log
 		break
