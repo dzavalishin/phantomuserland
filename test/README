@@ -1,0 +1,14 @@
+Tests dir. This is a new place for tests, some old tests are
+in other dirs. 
+
+Subdirs:
+
+	unit		- new unit test framework, in progress
+	external	- external tests (connect to running kernel by tcpip)
+
+See also (old test code):
+
+	oldtree/kernel/phantom/test*	- in-kernel runtime test
+	phantom/modules/test		- bootable module with tests
+	phantom/apps/tcptest
+	plib/sys/src/ru.dz/ru.dz.phantom.system.regression_tests.ph 
