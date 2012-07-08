@@ -746,11 +746,14 @@ int ipv4_input(cbuf *buf, ifnet *i)
 
         for(iaddr = i->addr_list; iaddr; iaddr = iaddr->next) {
             if(iaddr->addr.type == ADDR_TYPE_IP) {
-                // see if it matches one of this interface's ip addresses
-                if(dest == NETADDR_TO_IPV4(iaddr->addr))
+                ipv4_addr idest = NETADDR_TO_IPV4(iaddr->addr);
+                ipv4_addr bdest = NETADDR_TO_IPV4(iaddr->broadcast);
+
+                    // see if it matches one of this interface's ip addresses
+                if(dest == idest)
                     break;
                 // see if it matches the broadcast address
-                if(dest == NETADDR_TO_IPV4(iaddr->broadcast))
+                if(dest == bdest)
                     break;
             }
         }

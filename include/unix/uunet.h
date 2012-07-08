@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix subsystem socket machinery.
+ *
+ *
+**/
+
 
 /**
  * \ingroup Unix
@@ -17,7 +28,7 @@ struct uusocket
     //! Bits, see setsockopt
     unsigned 	options;        
 
-    sockaddr 	addr;
+    i4sockaddr 	addr;
     void *	prot_data;  	// kern udp_open(&prot_data)/udp_close(prot_data)
     //char *	dest; 		// host:port or addr:port
 

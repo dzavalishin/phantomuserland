@@ -201,7 +201,7 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
 #endif
 
 
-    sockaddr src_addr;
+    i4sockaddr src_addr;
     src_addr.port = IPPORT_BOOTPC; // local port
 
     src_addr.addr.len = 4;
@@ -361,7 +361,7 @@ bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
 
     SHOW_FLOW0( 3, "bootpsend: calling sendudp" );
 
-    sockaddr dest_addr;
+    i4sockaddr dest_addr;
     dest_addr.port = IPPORT_BOOTPS; // dest port
 
     dest_addr.addr.len = 4;
@@ -384,7 +384,7 @@ bootprecv( struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t 
 {
     SHOW_FLOW0( 3, "bootp_recv");
 
-    sockaddr dest_addr;
+    i4sockaddr dest_addr;
     dest_addr.port = IPPORT_BOOTPS; // dest port
 
     dest_addr.addr.len = 4;
@@ -568,6 +568,7 @@ errno_t bootp(ifnet *iface)
         SHOW_FLOW( 2, "bootfile:     '%s'", bstate->bootfile );
 
         // Now apply it to interface
+        // TODO use if_simple_setup instead!
 
         ifaddr *address;
 
@@ -576,17 +577,17 @@ errno_t bootp(ifnet *iface)
 
         address->addr.len = 4;
         address->addr.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->addr) = bstate->myip.s_addr;
+        NETADDR_TO_IPV4(address->addr) = htonl(bstate->myip.s_addr);
 
         address->netmask.len = 4;
         address->netmask.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->netmask) = bstate->smask;
+        NETADDR_TO_IPV4(address->netmask) = htonl(bstate->smask);
 
         u_int32_t bcast = (bstate->myip.s_addr) | bstate->smask;
 
         address->broadcast.len = 4;
         address->broadcast.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->broadcast) = bcast;
+        NETADDR_TO_IPV4(address->broadcast) = htonl(bcast);
 
         if_bind_address(iface, address);
 

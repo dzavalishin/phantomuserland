@@ -161,7 +161,7 @@ static uufile_t *  tcpfs_namei(uufs_t *fs, const char *filename)
     }
 #endif
 
-    sockaddr addr;
+    i4sockaddr addr;
     addr.port = port;
 
     addr.addr.len = 4;

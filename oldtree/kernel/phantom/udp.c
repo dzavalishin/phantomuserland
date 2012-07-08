@@ -12,6 +12,8 @@
 #include <kernel/stats.h>
 #include <kernel/atomic.h>
 
+#include <errno.h>
+
 #if HAVE_NET
 /*
  ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
@@ -268,7 +270,7 @@ int udp_open(void **prot_data)
     return 0;
 }
 
-int udp_bind(void *prot_data, sockaddr *addr)
+int udp_bind(void *prot_data, i4sockaddr *addr)
 {
     udp_endpoint *e = prot_data;
     int err;
@@ -276,7 +278,7 @@ int udp_bind(void *prot_data, sockaddr *addr)
     mutex_lock(&e->lock);
 
     if(e->port == 0) {
-        // XXX search to make sure this port isn't used already
+        // BUG TODO XXX search to make sure this port isn't used already
         if(addr->port != e->port) {
             // remove it from the hashtable
             mutex_lock(&endpoints_lock);
@@ -295,28 +297,28 @@ int udp_bind(void *prot_data, sockaddr *addr)
     return err;
 }
 
-int udp_connect(void *prot_data, sockaddr *addr)
+errno_t udp_connect(void *prot_data, i4sockaddr *addr)
 {
     (void) prot_data;
     (void) addr;
-    return ERR_NOT_ALLOWED;
+    return ENOSYS;
 }
 
-int udp_listen(void *prot_data)
+errno_t udp_listen(void *prot_data)
 {
     (void) prot_data;
-    return ERR_NOT_ALLOWED;
+    return ENOSYS;
 }
 
-int udp_accept(void *prot_data, sockaddr *addr, void **new_socket)
+errno_t udp_accept(void *prot_data, i4sockaddr *addr, void **new_socket)
 {
     (void) prot_data;
     (void) addr;
     (void) new_socket;
-    return ERR_NOT_ALLOWED;
+    return ENOSYS;
 }
 
-int udp_close(void *prot_data)
+errno_t udp_close(void *prot_data)
 {
     udp_endpoint *e = prot_data;
 
@@ -332,7 +334,7 @@ int udp_close(void *prot_data)
 ssize_t udp_recvfrom(
                      void *prot_data,
                      void *buf, ssize_t len,
-                     sockaddr *saddr,
+                     i4sockaddr *saddr,
                      int flags, bigtime_t timeout)
 {
     udp_endpoint *e = prot_data;
@@ -391,7 +393,7 @@ out:
     return ret;
 }
 
-ssize_t udp_sendto(void *prot_data, const void *inbuf, ssize_t len, sockaddr *toaddr)
+ssize_t udp_sendto(void *prot_data, const void *inbuf, ssize_t len, i4sockaddr *toaddr)
 {
     udp_endpoint *e = prot_data;
     udp_header *header;
@@ -458,14 +460,17 @@ ssize_t udp_sendto(void *prot_data, const void *inbuf, ssize_t len, sockaddr *to
     return err;
 }
 
-int udp_init(void)
+errno_t udp_init(void)
 {
     hal_mutex_init(&endpoints_lock, "udp_endpoints");
 
     endpoints = hash_init(256, offsetof(udp_endpoint, next),
                           &udp_endpoint_compare_func, &udp_endpoint_hash_func);
+
+    assert(endpoints);
+
     if(!endpoints)
-        return ERR_NO_MEMORY;
+        return ENOMEM;
 
     return 0;
 }

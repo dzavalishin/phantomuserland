@@ -30,7 +30,7 @@ int phantom_tcpip_active = 0;
 static void *syslog_socket = 0;
 static int syslog_failed = 0;
 static char syslog_src_addr[64] = "(unknown)";
-static sockaddr syslog_addr;
+static i4sockaddr syslog_addr;
 
 // Set in boot_cmd_line
 extern char *syslog_dest_address_string;

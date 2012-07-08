@@ -780,6 +780,7 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
 
     drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
 
+
     {
     pvm_object_t o;
     o.data = os;
@@ -984,8 +985,13 @@ void pvm_gc_iter_connection(gc_iterator_call_t func, struct pvm_object_storage *
 void pvm_gc_finalizer_connection( struct pvm_object_storage * os )
 {
     // is it called?
-    //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
-#warning disconnect!
+    struct data_area_4_connection *da = (struct data_area_4_connection *)os->da;
+    //#warning disconnect!
+    errno_t ret = phantom_disconnect_object( da );
+    if( ret )
+        printf("automatic disconnect failed - %d\n", ret );
+
+
 }
 
 void pvm_restart_connection( pvm_object_t o )

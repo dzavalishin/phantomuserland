@@ -97,7 +97,7 @@ int do_test_udp_send(const char *test_parm)
 
     char buf[] = "UDP request";
 
-    sockaddr addr;
+    i4sockaddr addr;
     addr.port = 69; // TFTP
 
     addr.addr.len = 4;
@@ -195,7 +195,7 @@ static int run_tftp_test(void *prot_data)
     char buf[1024];
 
 
-    sockaddr addr;
+    i4sockaddr addr;
     addr.port = 1069; // local port
 
     addr.addr.len = 4;
@@ -357,7 +357,7 @@ int do_test_tcp_connect(const char *test_parm)
         return 0;
     }
 
-    sockaddr addr;
+    i4sockaddr addr;
     addr.port = port;
 
     addr.addr.len = 4;

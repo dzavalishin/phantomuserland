@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix subsystem file machinery.
+ *
+ *
+**/
+
 #ifndef UUFILE_H
 #define UUFILE_H
 

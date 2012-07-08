@@ -17,16 +17,16 @@
 
 int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_address);
 int tcp_open(void **prot_data);
-int tcp_bind(void *prot_data, sockaddr *addr);
-int tcp_connect(void *prot_data, sockaddr *addr);
+int tcp_bind(void *prot_data, i4sockaddr *addr);
+int tcp_connect(void *prot_data, i4sockaddr *addr);
 int tcp_listen(void *prot_data);
-int tcp_accept(void *prot_data, sockaddr *addr, void **new_socket);
+int tcp_accept(void *prot_data, i4sockaddr *addr, void **new_socket);
 int tcp_close(void *prot_data);
-ssize_t tcp_recvfrom(void *prot_data, void *buf, ssize_t len, sockaddr *saddr, int flags, bigtime_t timeout);
-ssize_t tcp_sendto(void *prot_data, const void *buf, ssize_t len, sockaddr *addr);
+ssize_t tcp_recvfrom(void *prot_data, void *buf, ssize_t len, i4sockaddr *saddr, int flags, bigtime_t timeout);
+ssize_t tcp_sendto(void *prot_data, const void *buf, ssize_t len, i4sockaddr *addr);
 int tcp_init(void);
 
-int tcp_getpeername(void *prot_data, sockaddr *addr);
+int tcp_getpeername(void *prot_data, i4sockaddr *addr);
 
 #endif
 

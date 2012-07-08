@@ -125,12 +125,12 @@ int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol)
 
     uufile_t *f = create_uufile();
 
-    f->ops = &tcpfs_fops;
+    f->ops = isTCP ? &tcpfs_fops : &udpfs_fops;
 
     f->pos = 0;
     f->fs = isTCP ? &tcp_fs : &udp_fs;
     f->impl = us;
-    f->flags = UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP;
+    f->flags = UU_FILE_FLAG_NET| (isTCP ? UU_FILE_FLAG_TCP : UU_FILE_FLAG_UDP);
 
 
     int fd = uu_find_fd( u, f );
@@ -145,10 +145,8 @@ int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol)
     return fd;
 }
 
-int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, socklen_t addrlen)
+int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *addr, socklen_t addrlen)
 {
-    (void)addrlen;
-    (void)my_addr;
 
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
@@ -161,7 +159,24 @@ int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *my_addr, 
         return -1;
     }
 
+    /*
+    if(
+       (addrlen < my_addr->sa_len) ||
+       (addrlen < (int)sizeof(struct sockaddr_in))
+      )
+    {
+        *err = EINVAL;
+        return -1;
+    }
+    */
     //us->addr = *my_addr;
+
+    errno_t rc = sockaddr_unix2int( &us->addr, addr, addrlen );
+    if( rc )
+    {
+        *err = rc;
+        return -1;
+    }
 
     int pe;
 
@@ -201,21 +216,29 @@ int usys_connect(int *err, uuprocess_t *u, int fd, const struct sockaddr *_ia, s
 
     struct uusocket *us = f->impl;
 
-    if( (u == 0) || ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)))
+    //if( (u == 0) || ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)))
+    if( (u == 0) || (! (f->flags & UU_FILE_FLAG_NET)) || (! (f->flags & UU_FILE_FLAG_TCP))  )
     {
         *err = ENOTSOCK;
         return -1;
     }
 
-    struct sockaddr_in *ia = (void *)_ia;
+    //struct sockaddr_in *ia = (void *)_ia;
 
-    sockaddr tmp_addr;
-
+    i4sockaddr tmp_addr;
+    errno_t rc = sockaddr_unix2int( &tmp_addr, _ia, addrlen );
+    if( rc )
+    {
+        *err = rc;
+        return -1;
+    }
+    /*
     tmp_addr.port = ia->sin_port;
     NETADDR_TO_IPV4(tmp_addr.addr) = ia->sin_addr.s_addr;
 
     if( ia->sin_family != PF_INET )
         SHOW_ERROR0( 0, "not inet addr?");
+    */
 
     int tret = tcp_connect( us->prot_data, &tmp_addr );
 
@@ -245,12 +268,13 @@ int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, soc
     //us->addr = my_addr;
 
     void *new_socket = NULL;
-    sockaddr tmp_addr;
+    i4sockaddr tmp_addr;
 
     int pe = tcp_accept(us->prot_data, &tmp_addr, new_socket);
 
     if( *addrlen >= (int)sizeof(struct sockaddr_in) )
     {
+        /*
         struct sockaddr_in ia;
 
         ia.sin_len = sizeof(struct sockaddr_in);
@@ -260,6 +284,9 @@ int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, soc
 
         *((struct sockaddr_in *)acc_addr) = ia;
         *addrlen = sizeof(struct sockaddr_in);
+        */
+        if( sockaddr_int2unix( acc_addr, addrlen, &tmp_addr ) )
+            *addrlen = 0;
     }
     else
         *addrlen = 0;
@@ -434,14 +461,9 @@ int usys_getsockname(int *err, uuprocess_t *u, int fd, struct sockaddr *name, so
         return -1;
     }
 
-    if( (unsigned)(*namelen) < sizeof(us->addr) )
-    {
-        *err = EINVAL;
-        return -1;
-    }
-
-    *namelen = sizeof(us->addr);
-    *name = us->addr;
+    sockaddr_int2unix( name, namelen, &us->addr );
+    //*namelen = sizeof(us->addr);
+    //*name = us->addr;
     return 0;
 }
 
@@ -464,6 +486,7 @@ int usys_getpeername(int *err, uuprocess_t *u, int fd, struct sockaddr *name, so
         return -1;
     }
 
+    /*
     if( (unsigned)(*namelen) < sizeof(struct sockaddr) )
     {
         *err = EINVAL;
@@ -471,14 +494,16 @@ int usys_getpeername(int *err, uuprocess_t *u, int fd, struct sockaddr *name, so
     }
 
     *namelen = sizeof(struct sockaddr);
+    */
 
-    if( tcp_getpeername(us->prot_data, name) )
+    i4sockaddr tmp_addr;
+    if( tcp_getpeername(us->prot_data, &tmp_addr) )
     {
         *err = ENOTCONN;
         return -1;
     }
 
-    return 0;
+    return sockaddr_int2unix( name, namelen, &tmp_addr );
 }
 
 
@@ -518,8 +543,8 @@ ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen
     if( flags )
         SHOW_ERROR( 0, "I don't know this flag %d", flags );
 
-    sockaddr tmp_addr;
-    struct sockaddr_in *sfrom = (struct sockaddr_in *)from;
+    i4sockaddr tmp_addr;
+    //struct sockaddr_in *sfrom = (struct sockaddr_in *)from;
 
     // FIXME TODO ERR allways times out in 5 sec
     int len = udp_recvfrom( us->prot_data, buf, buflen, &tmp_addr, SOCK_FLAG_TIMEOUT, 5000000L );
@@ -531,6 +556,7 @@ ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen
     }
 
     SHOW_FLOW( 8, "flags %x", flags );
+    /*
     SHOW_FLOW( 7, "port %d, ip %s", tmp_addr.port, inet_itoa(htonl(NETADDR_TO_IPV4(tmp_addr.addr))) );
 
     sfrom->sin_port = htons(tmp_addr.port);
@@ -539,6 +565,11 @@ ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen
     sfrom->sin_len = sizeof(struct sockaddr_in);
 
     *fromlen = sfrom->sin_len;
+    */
+    errno_t rc = sockaddr_int2unix( from, fromlen, &tmp_addr );
+    if( rc )
+        *fromlen = 0;
+
 ret:
     return *err ? -1 : len;
 }
@@ -604,20 +635,26 @@ ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t bu
     if( flags )
         SHOW_ERROR( 0, "I don't know this flag %d", flags );
 
+    /*
     struct sockaddr_in *sto = (struct sockaddr_in *)to;
 
     if( sto->sin_family != PF_INET )
         SHOW_ERROR0( 0, "not inet addr?");
+    */
 
+    i4sockaddr tmp_addr;
+    errno_t rc = sockaddr_unix2int( &tmp_addr, to, tolen );
+    if( rc )
+    {
+        *err = rc;
+        return -1;
+    }
 
-    sockaddr tmp_addr;
-
-    tmp_addr.port = ntohs(sto->sin_port);
-    NETADDR_TO_IPV4(tmp_addr.addr) = ntohl(sto->sin_addr.s_addr);
-
+    //tmp_addr.port = ntohs(sto->sin_port);
+    //NETADDR_TO_IPV4(tmp_addr.addr) = ntohl(sto->sin_addr.s_addr);
 
     SHOW_FLOW( 8, "flags %x", flags );
-    SHOW_FLOW( 7, "port %d, ip %s", tmp_addr.port, inet_itoa(htonl(NETADDR_TO_IPV4(tmp_addr.addr))) );
+    //SHOW_FLOW( 7, "port %d, ip %s", tmp_addr.port, inet_itoa(htonl(NETADDR_TO_IPV4(tmp_addr.addr))) );
     int ret = udp_sendto( us->prot_data, buf, buflen, &tmp_addr);
     if( ret < 0 )
         *err = -ret;
@@ -678,6 +715,60 @@ int usys_socketpair( int *err, uuprocess_t *u, int domain, int type, int protoco
     return -1;
 
 }
+
+
+
+errno_t sockaddr_int2unix( struct sockaddr *name, socklen_t *namelen, const i4sockaddr *internal )
+{
+    struct sockaddr_in *iname = (struct sockaddr_in *)name;
+
+    SHOW_FLOW( 8, "port %d, ip %s", internal->port, inet_itoa(htonl(NETADDR_TO_IPV4(internal->addr))) );
+
+    if( (unsigned)(*namelen) < sizeof(struct sockaddr_in) )
+        return EINVAL;
+
+    if( iname->sin_len < sizeof(struct sockaddr_in) )
+    {
+        SHOW_ERROR( 1, "warn: sin_len < %d", iname->sin_len );
+    }
+
+    iname->sin_port = htons(internal->port);
+    iname->sin_addr.s_addr = htonl(NETADDR_TO_IPV4(internal->addr));
+    iname->sin_family = PF_INET;
+    iname->sin_len = sizeof(struct sockaddr_in);
+
+    return 0;
+}
+
+errno_t sockaddr_unix2int( i4sockaddr *internal, const struct sockaddr *name, socklen_t namelen )
+{
+    struct sockaddr_in *iname = (struct sockaddr_in *)name;
+
+    if( namelen < (int)sizeof(struct sockaddr_in) )
+    {
+        SHOW_ERROR( 1, "namelen < %d", namelen );
+        return EINVAL;
+    }
+
+    if( iname->sin_len < sizeof(struct sockaddr_in) )
+    {
+        SHOW_ERROR( 1, "sin_len < %d", iname->sin_len );
+        return EINVAL;
+    }
+
+    if( iname->sin_family != PF_INET )
+    {
+        SHOW_ERROR( 1, "not inet addr, pf = %d", iname->sin_family );
+        return EINVAL;
+    }
+
+    internal->port                  = ntohs(iname->sin_port);
+    NETADDR_TO_IPV4(internal->addr) = ntohl(iname->sin_addr.s_addr);
+
+    SHOW_FLOW( 8, "port %d, ip %s", internal->port, inet_itoa(htonl(NETADDR_TO_IPV4(internal->addr))) );
+    return 0;
+}
+
 
 
 

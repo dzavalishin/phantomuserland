@@ -140,7 +140,7 @@ static uufile_t *  httpfs_namei(uufs_t *fs, const char *filename)
         return 0;
     }
 
-    sockaddr addr;
+    i4sockaddr addr;
     addr.port = port;
 
     addr.addr.len = 4;

@@ -370,6 +370,7 @@ static struct conntab connection_types_table[] =
 {
     { "tmr:", sizeof(net_timer_event), sizeof(net_timer_event), CON_F_NAMES(timer) },
     { "stt:", 0, 0, CON_F_NAMES(stats) },
+    { "udp:", sizeof(struct cn_udp_persistent), sizeof(struct cn_udp_volatile), CON_F_NAMES(udp) },
 };
 
 static int ctt_size = sizeof(connection_types_table)/sizeof(struct conntab);
@@ -439,9 +440,12 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
 
         errno_t ret;
 
+        const char *suffix = strchr( name, ':' );
+        if( suffix ) suffix++; // Skip ':' itself
+
         // call init
         if( da->kernel->init )
-            ret = da->kernel->init(da,da->owner);
+            ret = da->kernel->init( da, da->owner, suffix );
 
         // don't kill all?
 
@@ -477,9 +481,11 @@ errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int c
 }
 
 
-errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc) 
+//errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc)
+errno_t phantom_disconnect_object( struct data_area_4_connection *da )
 {
     errno_t ret = 0;
+    // tc is really 0
 
     if( da->kernel == 0 )
     {
@@ -488,7 +494,8 @@ errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct dat
 
     if( da->kernel->disconnect )
     {
-        ret = da->kernel->disconnect(da,tc);
+        //ret = da->kernel->disconnect(da,tc);
+        ret = da->kernel->disconnect(da);
     }
 
     da->kernel = 0;
