@@ -1,0 +1,3 @@
+External tests (connect to running kernel by tcpip)
+Implemented as junit test cases
+
