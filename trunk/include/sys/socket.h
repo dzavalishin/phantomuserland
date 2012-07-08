@@ -10,6 +10,18 @@ typedef	int	socklen_t;
 #endif
 
 
+#ifndef _SA_FAMILY_T_DECLARED
+// TODO move to types.h
+typedef	u_int8_t	__sa_family_t;
+
+typedef	__sa_family_t		sa_family_t;
+#define	_SA_FAMILY_T_DECLARED
+#endif
+
+
+
+
+
 
 
 /*
@@ -196,7 +208,56 @@ int     socket(int domain, int type, int protocol);
 int     socketpair(int domain, int type, int protocol,
              int socket_vector[2]);
 
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * Structure used by kernel to store most
+ * addresses.
+ */
+struct sockaddr {
+	u_int8_t	sa_len;		/* total length */
+	sa_family_t	sa_family;	/* address family */
+	char		sa_data[14];	/* actually longer; address value */
+};
+
+
+
+#if defined(KERNEL)
+//struct i4sockaddr;
+#include <kernel/net.h>
+
+errno_t sockaddr_int2unix( struct sockaddr *name, socklen_t *namelen, const i4sockaddr *internal );
+errno_t sockaddr_unix2int( i4sockaddr *internal, const struct sockaddr *name, socklen_t namelen );
+#endif //defined(KERNEL)
+
+
+
 #endif // SOCKET_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Protions of this file are:
 
@@ -278,15 +339,6 @@ int     socketpair(int domain, int type, int protocol,
  */
 #include <sys/ansi.h>
 
-#ifndef sa_family_t
-typedef __sa_family_t	sa_family_t;
-#define sa_family_t	__sa_family_t
-#endif
-
-#ifndef socklen_t
-typedef __socklen_t	socklen_t;
-#define socklen_t	__socklen_t
-#endif
 
 #include <machine/ansi.h>
 
@@ -355,15 +407,6 @@ typedef	_BSD_SSIZE_T_	ssize_t;
 
 #define	AF_MAX		33
 
-/*
- * Structure used by kernel to store most
- * addresses.
- */
-struct sockaddr {
-	__uint8_t	sa_len;		/* total length */
-	sa_family_t	sa_family;	/* address family */
-	char		sa_data[14];	/* actually longer; address value */
-};
 
 #if defined(_KERNEL)
 /*

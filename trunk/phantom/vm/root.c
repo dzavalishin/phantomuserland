@@ -708,7 +708,8 @@ int pvm_disconnect_object(pvm_object_t o, struct data_area_4_thread *tc)
 
     pvm_remove_object_from_restart_list( o );
 
-    return phantom_disconnect_object( da, tc);
+    //return phantom_disconnect_object( da, tc);
+    return phantom_disconnect_object( da );
 }
 
 

@@ -20,8 +20,8 @@ errno_t phantom_connection_callback_int( struct data_area_4_connection *da, int 
 
 #define CON_F_PROTOS(__short) \
 errno_t cn_##__short##_do_operation( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc, pvm_object_t o ); \
-errno_t cn_##__short##_init( struct data_area_4_connection *c, struct data_area_4_thread *tc ); \
-errno_t cn_##__short##_disconnect( struct data_area_4_connection *c, struct data_area_4_thread *tc );
+errno_t cn_##__short##_init( struct data_area_4_connection *c, struct data_area_4_thread *tc, const char *suffix ); \
+errno_t cn_##__short##_disconnect( struct data_area_4_connection *c );
 
 #define CON_F_NAMES(__short) \
  { cn_##__short##_do_operation, cn_##__short##_init, cn_##__short##_disconnect }
@@ -29,6 +29,28 @@ errno_t cn_##__short##_disconnect( struct data_area_4_connection *c, struct data
 
 CON_F_PROTOS(timer)
 CON_F_PROTOS(stats)
+CON_F_PROTOS(udp)
+
+
+// Well known connection operation numbers. Not all types of conns use these numbers.
+
+#define CONN_OP_READ		0
+#define CONN_OP_WRITE		1
+
+
+#define CONN_OP_BIND		16
+
+
+struct cn_udp_persistent
+{
+    int fill;
+};
+
+struct cn_udp_volatile
+{
+    void *udp_endpoint;
+    //int fill;
+};
 
 
 #endif // VM_CONNECT_H

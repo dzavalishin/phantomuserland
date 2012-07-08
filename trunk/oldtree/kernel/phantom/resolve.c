@@ -82,7 +82,7 @@ errno_t dns_request(const unsigned char *host, ipv4_addr server, ipv4_addr *resu
     //SHOW_FLOW0( 2, "got sock");
 
 #ifdef KERNEL
-    sockaddr addr;
+    i4sockaddr addr;
     addr.port = 53;
     addr.addr.len = 4;
     addr.addr.type = ADDR_TYPE_IP;

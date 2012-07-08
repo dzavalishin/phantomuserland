@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix subsystem signal processing. Not impl yet.
+ *
+ *
+**/
+
 #ifndef UUSIGNAL_H
 #define UUSIGNAL_H
 

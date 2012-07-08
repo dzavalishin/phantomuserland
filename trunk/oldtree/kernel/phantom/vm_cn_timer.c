@@ -108,10 +108,10 @@ static pvm_object_t cn_timer_blocking_syscall_worker( pvm_object_t conn, struct 
 
 
 // Init connection
-errno_t cn_timer_init( struct data_area_4_connection *c, struct data_area_4_thread *t )
+errno_t cn_timer_init( struct data_area_4_connection *c, struct data_area_4_thread *t, const char *suffix )
 {
     (void) t;
-    //(void) c;
+    (void) suffix;
 
     c->blocking_syscall_worker = cn_timer_blocking_syscall_worker;
 
@@ -121,10 +121,8 @@ errno_t cn_timer_init( struct data_area_4_connection *c, struct data_area_4_thre
 
 
 // Finish connection
-errno_t cn_timer_disconnect( struct data_area_4_connection *c, struct data_area_4_thread *t )
+errno_t cn_timer_disconnect( struct data_area_4_connection *c )
 {
-    (void) t;
-
     c->kernel = 0;
 
     SHOW_FLOW0( 1, "timer disconnected" );

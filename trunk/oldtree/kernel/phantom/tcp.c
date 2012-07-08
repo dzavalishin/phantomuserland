@@ -857,7 +857,7 @@ int tcp_open(void **prot_data)
     return NO_ERROR;
 }
 
-int tcp_bind(void *prot_data, sockaddr *addr)
+int tcp_bind(void *prot_data, i4sockaddr *addr)
 {
     tcp_socket *s = prot_data;
     int err = 0;
@@ -887,7 +887,7 @@ out:
     return err;
 }
 
-int tcp_getpeername(void *prot_data, sockaddr *addr)
+int tcp_getpeername(void *prot_data, i4sockaddr *addr)
 {
     tcp_socket *s = prot_data;
     int err = 0;
@@ -914,7 +914,7 @@ out:
 }
 
 
-int tcp_connect(void *prot_data, sockaddr *addr)
+int tcp_connect(void *prot_data, i4sockaddr *addr)
 {
     tcp_socket *s = prot_data;
     int err;
@@ -1012,7 +1012,7 @@ out:
     return err;
 }
 
-int tcp_accept(void *prot_data, sockaddr *saddr, void **_new_socket)
+int tcp_accept(void *prot_data, i4sockaddr *saddr, void **_new_socket)
 {
     tcp_socket *s = prot_data;
     tcp_socket *new_socket;
@@ -1128,7 +1128,7 @@ out:
     return err;
 }
 
-ssize_t tcp_recvfrom(void *prot_data, void *buf, ssize_t len, sockaddr *saddr, int flags, bigtime_t timeout)
+ssize_t tcp_recvfrom(void *prot_data, void *buf, ssize_t len, i4sockaddr *saddr, int flags, bigtime_t timeout)
 {
     (void) saddr;
 
@@ -1199,7 +1199,7 @@ out:
     return bytes_read;
 }
 
-ssize_t tcp_sendto(void *prot_data, const void *_inbuf, ssize_t len, sockaddr *toaddr)
+ssize_t tcp_sendto(void *prot_data, const void *_inbuf, ssize_t len, i4sockaddr *toaddr)
 {
     (void) toaddr;
 

@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix subsystem capabilities list.
+ *
+ *
+**/
+
 #ifndef UUCAPAS_H
 #define UUCAPAS_H
 

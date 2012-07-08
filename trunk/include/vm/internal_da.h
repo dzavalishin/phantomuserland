@@ -510,10 +510,11 @@ struct pvm_connection_ops
     errno_t     (*do_operation)( int op_no, struct data_area_4_connection *c, struct data_area_4_thread *tc, pvm_object_t o );
 
     // Init connection
-    errno_t     (*init)( struct data_area_4_connection *c, struct data_area_4_thread *tc );
+    errno_t     (*init)( struct data_area_4_connection *c, struct data_area_4_thread *tc, const char *suffix );
 
     // Finish connection
-    errno_t     (*disconnect)( struct data_area_4_connection *c, struct data_area_4_thread *tc );
+    //errno_t     (*disconnect)( struct data_area_4_connection *c, struct data_area_4_thread *tc );
+    errno_t     (*disconnect)( struct data_area_4_connection *c );
 };
 
 
@@ -543,7 +544,8 @@ struct data_area_4_connection
 };
 
 errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc);
-errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc);
+//errno_t phantom_disconnect_object( struct data_area_4_connection *da, struct data_area_4_thread *tc);
+errno_t phantom_disconnect_object( struct data_area_4_connection *da );
 
 
 // Internal connect - when connection is used by other object (host_object)

@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Unix subsystem process definitions.
+ *
+ *
+**/
+
 #ifndef UUPROCESS_H
 #define UUPROCESS_H
 

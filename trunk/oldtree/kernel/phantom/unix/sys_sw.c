@@ -579,8 +579,13 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
     case SYS_accept:
         {
             AARG( socklen_t *, len, 2, sizeof(socklen_t));
-            AARG( struct sockaddr *, acc_addr, 1, *len );
-            ret = usys_accept( &err, u, uarg[0], acc_addr, len );
+            if( len  && uarg[0] && uarg[1] )
+            {
+                AARG( struct sockaddr *, acc_addr, 1, *len );
+                ret = usys_accept( &err, u, uarg[0], acc_addr, len );
+            }
+            else
+                ret = usys_accept( &err, u, uarg[0], 0, 0 );
             break;
         }
 

@@ -47,10 +47,10 @@ enum {
 
 #define SOCK_FLAG_TIMEOUT 1
 
-typedef struct sockaddr {
+typedef struct i4sockaddr {
 	netaddr addr;
 	int port;
-} sockaddr;
+} i4sockaddr;
 
 enum {
 	IP_PROT_ICMP = 1,
@@ -209,7 +209,7 @@ int loopback_init(void);
 int cbuf_init(void);
 int ethernet_init(void);
 int arp_init(void);
-int udp_init(void);
+errno_t udp_init(void);
 int tcp_init(void);
 
 int ipv4_init(void);
@@ -225,6 +225,8 @@ errno_t bootp(ifnet *iface);
 
 
 void udp_syslog_send(const char *prefix, const char *message);
+
+
 
 
 #endif

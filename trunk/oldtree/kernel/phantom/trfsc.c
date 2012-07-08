@@ -47,7 +47,7 @@ static int		trfs_inited = 0;
 
 static void *		trfs_socket = 0;
 static int 		trfs_failed = 0;
-static sockaddr		trfs_addr;
+static i4sockaddr	trfs_addr;
 
 static u_int64_t        sessionId = 0;
 
