@@ -28,7 +28,26 @@ void hal_wired_spin_unlock(hal_spinlock_t *l)
     hal_spin_unlock(l);
     hal_enable_preemption();
     unwire_page_for_addr( l, sizeof( hal_spinlock_t ) );
-    if( l->ei ) hal_sti();
+    if( l && (l->ei) ) hal_sti();
 }
 
+
+
+void hal_spin_lock_cli(hal_spinlock_t *sl)
+{
+    if(sl) // Scheduler sometimes calls us will sl == 0
+    {
+        sl->ei = hal_save_cli();
+        hal_spin_lock(sl);
+    }
+}
+
+void hal_spin_unlock_sti(hal_spinlock_t *sl)
+{
+    if(sl) // Scheduler sometimes calls us will sl == 0
+    {
+        hal_spin_unlock(sl);
+        if( sl->ei ) hal_sti();
+    }
+}
 

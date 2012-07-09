@@ -83,6 +83,8 @@ void hal_spin_unlock(hal_spinlock_t *sl)
 }
 
 
+
+
 void check_global_lock_entry_count()
 {
 #if SPIN_DEBUG && 1 && !HAVE_SMP
