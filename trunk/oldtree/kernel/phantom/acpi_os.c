@@ -753,7 +753,7 @@ AcpiOsAcquireLock (
 {
     //AcpiOsWaitSemaphore (Handle, 1, 0xFFFF);
     hal_spinlock_t *sl = (void *)Handle;
-    hal_spin_lock( sl );
+    hal_spin_lock_cli( sl );
     return (0);
 }
 
@@ -766,7 +766,7 @@ AcpiOsReleaseLock (
     (void) Flags;
     //AcpiOsSignalSemaphore (Handle, 1);
     hal_spinlock_t *sl = (void *)Handle;
-    hal_spin_unlock( sl );
+    hal_spin_unlock_sti( sl );
 }
 
 

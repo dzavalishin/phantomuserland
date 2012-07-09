@@ -23,6 +23,12 @@ public class TcpEchoTest {
 
 	private static final int REDIR_ECHO_PORT = 8007;
 
+	public TcpEchoTest() 
+	{
+		System.err.format("tcp_echo must run in Phantom\n");
+
+	}
+	
 	/**
 	 * Test method for TCP echo protocol
 	 * @throws IOException 
@@ -31,7 +37,7 @@ public class TcpEchoTest {
 	@Test
 	public void testTcpEcho() throws UnknownHostException, IOException {
 		
-		if(true) return;
+		//if(true) return;
 		
 		Socket s = new Socket(InetAddress.getLocalHost(), REDIR_ECHO_PORT);
 

@@ -29,13 +29,16 @@ struct hal_spinlock {
 typedef struct hal_spinlock hal_spinlock_t;
 
 void	hal_spin_init(hal_spinlock_t *sl);
-void	hal_spin_lock(hal_spinlock_t *sl);
-void	hal_spin_unlock(hal_spinlock_t *sl);
+void	hal_spin_lock(hal_spinlock_t *sl) __attribute__((deprecated));
+void	hal_spin_unlock(hal_spinlock_t *sl) __attribute__((deprecated));
 
 static __inline__ int hal_spin_locked(hal_spinlock_t *sl) { return sl->lock; }
 
-void hal_wired_spin_lock(hal_spinlock_t *l);
-void hal_wired_spin_unlock(hal_spinlock_t *l);
+void    hal_wired_spin_lock(hal_spinlock_t *l);
+void    hal_wired_spin_unlock(hal_spinlock_t *l);
+
+void    hal_spin_lock_cli(hal_spinlock_t *sl);
+void    hal_spin_unlock_sti(hal_spinlock_t *sl);
 
 
 #if SPIN_DEBUG && !HAVE_SMP
