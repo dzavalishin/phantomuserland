@@ -68,7 +68,7 @@ static void acpi_power_off(void *arg)
     as = AcpiEnterSleepStatePrep(OFF_STATE);
     if (!ACPI_SUCCESS(as)) {
         printf("AcpiEnterSleepStatePrep failed\n");
-        return 0;
+        return;
     }
 
     as = AcpiEnterSleepState(OFF_STATE);
