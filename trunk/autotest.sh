@@ -25,14 +25,14 @@ COMPILE=1
 SNAPTEST=1
 
 send_report ( ) {
-	RESULT=`grep 'test run\|snapshot test' $ME.log | tr '\n' ';'`
-	mail -s "${RESULT:-test ok}" $MAILTO < $ME.log
+	RESULT=`grep 'test run\|snapshot test' $0.log | tr '\n' ';'`
+	mail -s "${RESULT:-test ok}" $MAILTO < $0.log
 }
 
 [ $# -gt 0 ] || {
 	UNATTENDED=-unattended
-	exec 1>$ME.log 2>&1
-	trap "grep -qv svn $ME.log && send_report" 0 2
+	exec 1>$0.log 2>&1
+	trap "grep -qv svn $0.log && send_report" 0 2
 }
 
 while [ $# -gt 0 ]
