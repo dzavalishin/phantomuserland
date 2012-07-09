@@ -32,7 +32,7 @@ send_report ( ) {
 [ $# -gt 0 ] || {
 	UNATTENDED=-unattended
 	exec 1>$0.log 2>&1
-	trap "grep -qv svn $0.log && send_report" 0 2
+	trap "grep -qv svn $0.log >/dev/null && send_report" 0 2
 }
 
 while [ $# -gt 0 ]
