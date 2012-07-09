@@ -176,6 +176,8 @@ ACPI_STATUS
 AcpiTerminate (
     void);
 
+void acpi_video_init(void);
+void acpi_buttons_init(void);
 
 /*
  * Miscellaneous global interfaces
