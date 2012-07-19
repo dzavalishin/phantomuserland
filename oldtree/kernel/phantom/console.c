@@ -178,8 +178,8 @@ INIT_ME( dmesg_init, 0, 0 );
 
 int dmesg_read_buf( char *out, size_t olen, off_t start )
 {
-    int ie = hal_save_cli();
-    hal_spin_lock( &dm_spin );
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli( &dm_spin );
 
     if( start == 0 )
     {
@@ -211,8 +211,8 @@ int dmesg_read_buf( char *out, size_t olen, off_t start )
     dm_rlen -= len;
     dm_gp   += len;
 
-    hal_spin_unlock( &dm_spin );
-    if( ie ) hal_sti();
+    hal_spin_unlock_sti( &dm_spin );
+    //if( ie ) hal_sti();
 
     return len;
 }
@@ -227,18 +227,18 @@ static void dmesg_wrap_pp(void)
 
 static void dmesg_putchar(int c)
 {
-    int ie = hal_save_cli();
-    hal_spin_lock( &dm_spin );
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli( &dm_spin );
     dmesg_wrap_pp();
     *dm_pp++ = c;
-    hal_spin_unlock( &dm_spin );
-    if( ie ) hal_sti();
+    hal_spin_unlock_sti( &dm_spin );
+    //if( ie ) hal_sti();
 }
 
 static void dmesg_puts(const char *s)
 {
-    int ie = hal_save_cli();
-    hal_spin_lock( &dm_spin );
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli( &dm_spin );
 
     int maxput = DMESG_BS/2;
 
@@ -248,8 +248,8 @@ static void dmesg_puts(const char *s)
         *dm_pp++ = *s++;
     }
 
-    hal_spin_unlock( &dm_spin );
-    if( ie ) hal_sti();
+    hal_spin_unlock_sti( &dm_spin );
+    //if( ie ) hal_sti();
 }
 
 
