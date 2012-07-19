@@ -109,8 +109,8 @@ static void *_cbuf_alloc(size_t *size)
 
     //int_disable_interrupts();
     //acquire_spinlock(&cbuf_lowlevel_spinlock);
-    int s = hal_save_cli();
-    hal_spin_lock(&cbuf_lowlevel_spinlock);
+    //int s = hal_save_cli();
+    hal_spin_lock_cli(&cbuf_lowlevel_spinlock);
 
     // scan through the allocation bitmap, looking for the first free block
     // XXX not optimal
@@ -146,8 +146,8 @@ static void *_cbuf_alloc(size_t *size)
         *size = len_found;
     }
 
-    hal_spin_unlock(&cbuf_lowlevel_spinlock);
-    if( s ) hal_sti();
+    hal_spin_unlock_sti(&cbuf_lowlevel_spinlock);
+    //if( s ) hal_sti();
     //int_restore_interrupts();
 
     return buf;
