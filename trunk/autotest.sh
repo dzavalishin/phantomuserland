@@ -26,7 +26,7 @@ SNAPTEST=1
 
 send_report ( ) {
 	RESULT=`grep 'test run\|snapshot test' $0.log | tr '\n' ';'`
-	mail -s "${RESULT:-test ok}" $MAILTO < $0.log
+	mail -s "${RESULT:-test ok}" ${MAILTO:-`whoami`} < $0.log
 }
 
 [ $# -gt 0 ] || {
