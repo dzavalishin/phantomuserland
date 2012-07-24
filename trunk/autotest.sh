@@ -11,9 +11,9 @@ GDB_OPTS="-gdb tcp::$GDB_PORT"
 QEMU=`which qemu`		# qemu 0.x
 [ "$QEMU" ] || QEMU=`which kvm`	# qemu 1.x and later
 
-# was oldtree/run_test
-TEST_DIR=run/test
+TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../tftp
+DISK_IMG=phantom.img
 
 die ( ) {
 	[ -s make.log ] && tail make.log
@@ -24,15 +24,19 @@ die ( ) {
 COMPILE=1
 SNAPTEST=1
 
-send_report ( ) {
-	RESULT=`grep 'test run\|snapshot test' $0.log | tr '\n' ';'`
-	mail -s "${RESULT:-test ok}" ${MAILTO:-`whoami`} < $0.log
+at_exit ( ) {
+	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
+	[ "$UNATTENDED" ] && grep -qv svn $0.log >/dev/null && {
+		RESULT=`grep 'test run\|snapshot test' $0.log | tr '\n' ';'`
+		mail -s "${RESULT:-test ok}" ${MAILTO:-`whoami`} < $0.log
+	}
 }
+
+trap at_exit 0 2
 
 [ $# -gt 0 ] || {
 	UNATTENDED=-unattended
 	exec 1>$0.log 2>&1
-	trap "grep -qv svn $0.log >/dev/null && send_report" 0 2
 }
 
 while [ $# -gt 0 ]
@@ -149,7 +153,6 @@ Previous test run stalled. Trying gdb..."
 	}
 #[ -s $0.lock ] && exit 0
 #touch $0.lock
-#trap "rm $0.lock" 0
 
 	while [ "`netstat -pl --inet 2>/dev/null | grep :$GDB_PORT`" ]
 	do
@@ -224,7 +227,7 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 	-no-fd-bootchk \
 	-fda img/grubfloppy.img \
 	-hda snapcopy.img \
-	-hdb phantom.img \
+	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
 	-usb -soundhw sb16"
 #	-net nic,model=ne2k_isa -M isapc \
@@ -281,9 +284,9 @@ grep -q 'TEST FAILED' serial0.log && {
 
 [ "$SNAPTEST" ] || exit 0
 
-cp phantom.img phantom.img.orig
+cp $DISK_IMG $DISK_IMG.orig
 
-trap "mv phantom.img.orig phantom.img" 0
+RESTORE_IMG=yes
 
 echo "
  ============= Now probing snapshots ========================"
@@ -299,13 +302,13 @@ boot
 
 # before running again
 # TODO call ../zero_ph_img.sh 
-cp ../phantom.img .
-#rm phantom.img
-#touch phantom.img
+cp ../$DISK_IMG .
+#rm $DISK_IMG
+#touch $DISK_IMG
 #echo ": zeroing virtual disk..."
-#dd bs=4096 seek=0 count=20480 if=/dev/zero of=phantom.img 2> /dev/null
+#dd bs=4096 seek=0 count=20480 if=/dev/zero of=$DISK_IMG 2> /dev/null
 #echo ": instantating superblock..."
-#dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=phantom.img 2> /dev/null
+#dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=$DISK_IMG 2> /dev/null
 dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 echo ": zeroing vio..."
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
@@ -369,6 +372,6 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 	done
 done
 
-#mv phantom.img.orig phantom.img
+#mv $DISK_IMG.orig $DISK_IMG
 #mv $GRUB_MENU.orig $GRUB_MENU
-#rm phantom.img $GRUB_MENU
+##rm $DISK_IMG $GRUB_MENU
