@@ -48,10 +48,10 @@
  * \endverbatim
  */
 
-#include <stdint.h>
+//#include <stdint.h>
 #include <string.h>
 
-#include <gorp/xtea.h>
+#include <kernel/crypt/xtea.h>
 
 #define XTDELTA  0x9e3779b9
 #define XTSUM    0xC6EF3720
@@ -64,13 +64,13 @@
  * \para v  Source pointer of 2x32 bit plain text block.
  * \para k  Pointer to 128 bit (4*32bit) key block.
  */
-void XTeaCrypt(uint32_t *w,  CONST uint32_t *v, CONST XTeaKeyBlock_t k)
+void XTeaCrypt(u_int32_t *w,  const u_int32_t *v, const XTeaKeyBlock_t k)
 {
-    register uint32_t y=v[0];
-    register uint32_t z=v[1];
-    register uint32_t sum=0;
-    register uint32_t delta=XTDELTA;
-    uint_fast8_t n=ROUNDS;
+    register u_int32_t y=v[0];
+    register u_int32_t z=v[1];
+    register u_int32_t sum=0;
+    register u_int32_t delta=XTDELTA;
+    u_int8_t n=ROUNDS;
 
     while (n-- > 0) {
         y += (((z << 4) ^ (z >> 5)) + z) ^ (sum + k[sum&3]);
@@ -88,13 +88,13 @@ void XTeaCrypt(uint32_t *w,  CONST uint32_t *v, CONST XTeaKeyBlock_t k)
  * \para v  Source pointer of 2x32 bit encrypted block.
  * \para k  Pointer to 128 bit (4*32bit) key block.
  */
-void XTeaDecrypt(uint32_t *w, CONST uint32_t *v, CONST XTeaKeyBlock_t k)
+void XTeaDecrypt(u_int32_t *w, const u_int32_t *v, const XTeaKeyBlock_t k)
 {
-    register uint32_t y=v[0];
-    register uint32_t z=v[1];
-    register uint32_t sum=XTSUM;
-    register uint32_t delta=XTDELTA;
-    uint_fast8_t n=32;
+    register u_int32_t y=v[0];
+    register u_int32_t z=v[1];
+    register u_int32_t sum=XTSUM;
+    register u_int32_t delta=XTDELTA;
+    u_int8_t n=32;
 
     while (n-- > 0) {
         z -= (((y << 4) ^ (y >> 5)) + y) ^ (sum + k[sum>>11 & 3]);
@@ -117,10 +117,10 @@ void XTeaDecrypt(uint32_t *w, CONST uint32_t *v, CONST XTeaKeyBlock_t k)
  * \para len  Length of the string to encrypt.
  * \para pass Buffer of 64 bytes used as passphrase.
  */
-void XTeaCryptStr( char *dst, CONST char *src, uint16_t len, CONST char *pass)
+void XTeaCryptStr( char *dst, const char *src, size_t len, const char *pass)
 {
-    uint16_t l;
-    uint16_t i;
+    size_t l;
+    size_t i;
     XTeaKeyBlock_t K = { 0,0,0,0};
 
     /* Prepare pass as XTEA Key Block */
@@ -132,7 +132,7 @@ void XTeaCryptStr( char *dst, CONST char *src, uint16_t len, CONST char *pass)
     i = 0; l = strlen( src);
 
     while (i<len) {
-        XTeaCrypt( (uint32_t*)dst, (CONST uint32_t*)src, K);
+        XTeaCrypt( (u_int32_t*)dst, (const u_int32_t*)src, K);
         src+=8; dst+=8; i+=8;
     }
 }
@@ -149,10 +149,10 @@ void XTeaCryptStr( char *dst, CONST char *src, uint16_t len, CONST char *pass)
  * \para len  Length of the string to decrypt.
  * \para pass Buffer of 64 bytes used as passphrase.
  */
-void XTeaDecryptStr( char * dst, CONST char *src, uint16_t len, CONST char *pass)
+void XTeaDecryptStr( char * dst, const char *src, size_t len, const char *pass)
 {
-    uint16_t l;
-    uint16_t i;
+    size_t l;
+    size_t i;
     XTeaKeyBlock_t K = { 0,0,0,0};
 
     /* Prepare pass as XTEA Key Block */
@@ -164,7 +164,7 @@ void XTeaDecryptStr( char * dst, CONST char *src, uint16_t len, CONST char *pass
     i = 0; l = strlen( src);
 
     while (i<len) {
-        XTeaDecrypt( (uint32_t*)dst, (uint32_t CONST*)src, K);
+        XTeaDecrypt( (u_int32_t*)dst, (u_int32_t const*)src, K);
         src+=8; dst+=8; i+=8;
     }
 }

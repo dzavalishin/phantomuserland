@@ -53,9 +53,9 @@
  * \endverbatim
  */
 
-#include <stdint.h>
+//#include <stdint.h>
 #include <string.h>
-#include <gorp/md5.h>
+#include <kernel/crypt/md5.h>
 
 /*!
  * \addtogroup xgHashes
@@ -70,10 +70,10 @@
  */
 static void byteReverse(uint8_t *buf, size_t longs)
 {
-    uint32_t t;
+    u_int32_t t;
     do {
-        t = (uint32_t) ((unsigned) buf[3] << 8 | buf[2]) << 16 | ((unsigned) buf[1] << 8 | buf[0]);
-        *(uint32_t *) buf = t;
+        t = (u_int32_t) ((unsigned) buf[3] << 8 | buf[2]) << 16 | ((unsigned) buf[1] << 8 | buf[0]);
+        *(u_int32_t *) buf = t;
         buf += 4;
     } while (--longs);
 }
@@ -96,9 +96,9 @@ static void byteReverse(uint8_t *buf, size_t longs)
  * reflect the addition of 16 longwords of new data.  MD5Update blocks
  * the data and converts bytes into longwords for this routine.
  */
-static void NutMD5Transform(uint32_t buf[4], uint32_t CONST in[16])
+static void NutMD5Transform(u_int32_t buf[4], u_int32_t const in[16])
 {
-    register uint32_t a, b, c, d;
+    register u_int32_t a, b, c, d;
 
     a = buf[0];
     b = buf[1];
@@ -210,14 +210,14 @@ void NutMD5Init(MD5CONTEXT *context)
  * \param len     Length of the data buffer
  */
 
-void NutMD5Update(MD5CONTEXT *context, uint8_t CONST *buf, uint32_t len)
+void NutMD5Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len)
 {
-    uint32_t t;
+    u_int32_t t;
 
     /* Update bitcount */
 
     t = context->bits[0];
-    if ((context->bits[0] = t + ((uint32_t) len << 3)) < t) {
+    if ((context->bits[0] = t + ((u_int32_t) len << 3)) < t) {
         context->bits[1]++;         /* Carry from low to high */
     }
     
@@ -228,7 +228,7 @@ void NutMD5Update(MD5CONTEXT *context, uint8_t CONST *buf, uint32_t len)
     /* Handle any leading odd-sized chunks */
 
     if (t) {
-        uint8_t *p = (uint8_t *) context->in + t;
+        u_int8_t *p = (u_int8_t *) context->in + t;
 
         t = 64 - t;
         if (len < t) {
@@ -237,7 +237,7 @@ void NutMD5Update(MD5CONTEXT *context, uint8_t CONST *buf, uint32_t len)
         }
         memcpy(p, buf, t);
         byteReverse(context->in, 16);
-        NutMD5Transform(context->buf, (uint32_t *) context->in);
+        NutMD5Transform(context->buf, (u_int32_t *) context->in);
         buf += t;
         len -= t;
     }
@@ -247,7 +247,7 @@ void NutMD5Update(MD5CONTEXT *context, uint8_t CONST *buf, uint32_t len)
     while (len >= 64) {
         memcpy(context->in, buf, 64);
         byteReverse(context->in, 16);
-        NutMD5Transform(context->buf, (uint32_t *) context->in);
+        NutMD5Transform(context->buf, (u_int32_t *) context->in);
         buf += 64;
         len -= 64;
     }
@@ -272,10 +272,10 @@ void NutMD5Update(MD5CONTEXT *context, uint8_t CONST *buf, uint32_t len)
  * \param digest  Points to the digest buffer, which must be 16 bytes long
  */
 
-void NutMD5Final(MD5CONTEXT *context, uint8_t digest[16])
+void NutMD5Final(MD5CONTEXT *context, u_int8_t digest[16])
 {
     unsigned int count;
-    uint8_t *p;
+    u_int8_t *p;
 
     /* Compute number of bytes mod 64 */
     count = (context->bits[0] >> 3) & 0x3F;
@@ -293,7 +293,7 @@ void NutMD5Final(MD5CONTEXT *context, uint8_t digest[16])
         /* Two lots of padding:  Pad the first block to 64 bytes */
         memset(p, 0, count);
         byteReverse(context->in, 16);
-        NutMD5Transform(context->buf, (uint32_t *) context->in);
+        NutMD5Transform(context->buf, (u_int32_t *) context->in);
 
         /* Now fill the next block with 56 bytes */
         memset(context->in, 0, 56);
@@ -304,10 +304,10 @@ void NutMD5Final(MD5CONTEXT *context, uint8_t digest[16])
     byteReverse(context->in, 14);
 
     /* Append length in bits and transform */
-    ((uint32_t *) context->in)[14] = context->bits[0];
-    ((uint32_t *) context->in)[15] = context->bits[1];
+    ((u_int32_t *) context->in)[14] = context->bits[0];
+    ((u_int32_t *) context->in)[15] = context->bits[1];
 
-    NutMD5Transform(context->buf, (uint32_t *) context->in);
+    NutMD5Transform(context->buf, (u_int32_t *) context->in);
     byteReverse((unsigned char *) context->buf, 4);
     memcpy(digest, context->buf, 16);
     memset(context, 0, sizeof(MD5CONTEXT));        /* In case it's sensitive */

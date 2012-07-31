@@ -50,17 +50,22 @@
  * \endverbatim
  */
 
-#include <stdint.h>
+#define PRG_RDB(x) (*(x))
+
+//#include <stdint.h>
 #include <string.h>
 
-#include <sys/heap.h>
+#include <malloc.h>
 #include <sys/types.h>
+
+#include <kernel/crypt/base64.h>
+
 /*!
  * \addtogroup xgBase64
  */
 /*@{*/
 
-static prog_char base64etab[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static char base64etab[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /*!
  * \brief Do base-64 encoding on a string. 
@@ -74,7 +79,7 @@ static prog_char base64etab[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
  * \return Newly allocated string containing the encoded data. Must be freed later
  */
 
-char *NutEncodeBase64(CONST char* str)
+char *NutEncodeBase64(const char* str)
 {
     char    *encoded;
     size_t  length;
@@ -100,9 +105,9 @@ char *NutEncodeBase64(CONST char* str)
     /* Now add the space for the inserted <cr><lf> characters and add one byte for the end of string NUL character*/
     encoded_length += (encoded_length / 72) * 2 + 3;
     /* Allocate the memory. */;
-    encoded = NutHeapAlloc(encoded_length);
+    encoded = calloc(1,encoded_length);
     
-    if (encoded == NULL) return NULL;
+    if (encoded == 0) return 0;
     
     enc_pos = 0;
     char_count = 0;
