@@ -96,7 +96,7 @@ static void byteReverse(uint8_t *buf, size_t longs)
  * reflect the addition of 16 longwords of new data.  MD5Update blocks
  * the data and converts bytes into longwords for this routine.
  */
-static void NutMD5Transform(u_int32_t buf[4], u_int32_t const in[16])
+static void MD5_transform(u_int32_t buf[4], u_int32_t const in[16])
 {
     register u_int32_t a, b, c, d;
 
@@ -189,7 +189,7 @@ static void NutMD5Transform(u_int32_t buf[4], u_int32_t const in[16])
  * \param context Points to the md5 context buffer.
  */
 
-void NutMD5Init(MD5CONTEXT *context)
+void MD5_Init(MD5CONTEXT *context)
 {
     context->buf[0] = 0x67452301;
     context->buf[1] = 0xefcdab89;
@@ -210,7 +210,7 @@ void NutMD5Init(MD5CONTEXT *context)
  * \param len     Length of the data buffer
  */
 
-void NutMD5Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len)
+void MD5_Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len)
 {
     u_int32_t t;
 
@@ -237,7 +237,7 @@ void NutMD5Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len)
         }
         memcpy(p, buf, t);
         byteReverse(context->in, 16);
-        NutMD5Transform(context->buf, (u_int32_t *) context->in);
+        MD5_transform(context->buf, (u_int32_t *) context->in);
         buf += t;
         len -= t;
     }
@@ -247,7 +247,7 @@ void NutMD5Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len)
     while (len >= 64) {
         memcpy(context->in, buf, 64);
         byteReverse(context->in, 16);
-        NutMD5Transform(context->buf, (u_int32_t *) context->in);
+        MD5_transform(context->buf, (u_int32_t *) context->in);
         buf += 64;
         len -= 64;
     }
@@ -272,7 +272,7 @@ void NutMD5Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len)
  * \param digest  Points to the digest buffer, which must be 16 bytes long
  */
 
-void NutMD5Final(MD5CONTEXT *context, u_int8_t digest[16])
+void MD5_Final(MD5CONTEXT *context, u_int8_t digest[16])
 {
     unsigned int count;
     u_int8_t *p;
@@ -293,7 +293,7 @@ void NutMD5Final(MD5CONTEXT *context, u_int8_t digest[16])
         /* Two lots of padding:  Pad the first block to 64 bytes */
         memset(p, 0, count);
         byteReverse(context->in, 16);
-        NutMD5Transform(context->buf, (u_int32_t *) context->in);
+        MD5_transform(context->buf, (u_int32_t *) context->in);
 
         /* Now fill the next block with 56 bytes */
         memset(context->in, 0, 56);
@@ -307,7 +307,7 @@ void NutMD5Final(MD5CONTEXT *context, u_int8_t digest[16])
     ((u_int32_t *) context->in)[14] = context->bits[0];
     ((u_int32_t *) context->in)[15] = context->bits[1];
 
-    NutMD5Transform(context->buf, (u_int32_t *) context->in);
+    MD5_transform(context->buf, (u_int32_t *) context->in);
     byteReverse((unsigned char *) context->buf, 4);
     memcpy(digest, context->buf, 16);
     memset(context, 0, sizeof(MD5CONTEXT));        /* In case it's sensitive */

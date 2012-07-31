@@ -2,7 +2,9 @@
 rem http://dietpc.org/windows/qemu/
 rem SET QDIR=qemu\0.13.0
 SET QDIR=qemu\0.15.1
+SET QCMD=qemu.exe
 rem SET QDIR=qemu\1.0.1
+rem SET QCMD=qemu-system-i386.exe
 
 set QEMU_AUDIO_DRV=dsound
 set QEMU_AUDIO_DRV=sdl
@@ -53,7 +55,7 @@ rem -virtioconsole 4
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-start /wait %QDIR%\qemu.exe -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
+start /wait %QDIR%\%QCMD% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
 
 grep KERNEL.TEST serial0.log
 grep USERMODE.TEST serial0.log

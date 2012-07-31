@@ -56,6 +56,9 @@
 #include <sys/types.h> 
 #include <kernel/crypt/base64.h>
 
+#define PRG_RDB(x) (*(x))
+
+
 /*!
  * \addtogroup xgBase64
  */
@@ -113,7 +116,7 @@ static char base64dtab[96] = {
 /*
  * Do base-64 decoding on a string. 
  */
-char *NutDecodeBase64(char * str)
+char *decode_base64(char * str)
 {
     /* bug fix from Damian Slee. */
     char code;
