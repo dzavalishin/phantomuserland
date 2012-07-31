@@ -54,7 +54,7 @@
  */
 
 #include <sys/types.h> 
-#include <stdint.h>
+#include <kernel/crypt/base64.h>
 
 /*!
  * \addtogroup xgBase64
@@ -76,7 +76,7 @@
  * we need just the first 128 bytes. Furthermore there is no char
  * below 32, so we can save 32 additional bytes of flash.
  */
-static prog_char base64dtab[96] = {
+static char base64dtab[96] = {
 /*
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
