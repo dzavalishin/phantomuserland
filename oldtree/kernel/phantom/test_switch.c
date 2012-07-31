@@ -152,6 +152,7 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(threads);
 
     TEST(absname);
+    TEST(crypt);
 
 #ifndef ARCH_ia32
 //    TEST(sem);

@@ -63,9 +63,9 @@ typedef struct _MD5CONTEXT {
 
 /* Function prototypes. */
 
-void NutMD5Init(MD5CONTEXT *context);
-void NutMD5Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len);
-void NutMD5Final(MD5CONTEXT *context, u_int8_t digest[16]);
+void MD5_Init(MD5CONTEXT *context);
+void MD5_Update(MD5CONTEXT *context, u_int8_t const *buf, u_int32_t len);
+void MD5_Final(MD5CONTEXT *context, u_int8_t digest[16]);
 
 //__END_DECLS
 

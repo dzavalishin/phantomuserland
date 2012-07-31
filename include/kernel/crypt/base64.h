@@ -43,8 +43,8 @@
 /* Function prototypes. */
 //__BEGIN_DECLS
 
-extern char *NutEncodeBase64(const char *str);
-extern char *NutDecodeBase64(char *str);
+extern char *encode_base64(const char *str);
+extern char *decode_base64(char *str);
 
 //__END_DECLS
 

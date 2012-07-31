@@ -79,7 +79,7 @@ static char base64etab[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwx
  * \return Newly allocated string containing the encoded data. Must be freed later
  */
 
-char *NutEncodeBase64(const char* str)
+char *encode_base64(const char* str)
 {
     char    *encoded;
     size_t  length;
