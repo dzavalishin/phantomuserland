@@ -417,19 +417,42 @@ static void phantom_debug_window_loop()
                       );
                 break;
             case 't':
-                w_set_title( phantom_debug_window,  "Threads" );
-                show = c;
-                break;
+                //w_set_title( phantom_debug_window,  "Threads" );
+                //show = c;
+                //break;
 
             case 'w':
-                w_set_title( phantom_debug_window,  "Windows" );
-                show = c;
-                break;
+                //w_set_title( phantom_debug_window,  "Windows" );
+                //show = c;
+                //break;
 
             case 's':
-                w_set_title( phantom_debug_window,  "Stats" );
+                //w_set_title( phantom_debug_window,  "Stats" );
                 show = c;
                 break;
+            }
+        }
+
+
+        {
+            static char old_show = 0;
+            if( old_show != show )
+            {
+                old_show = show;
+                switch(show)
+                {
+                case 't':
+                    w_set_title( phantom_debug_window,  "Threads" );
+                    break;
+
+                case 'w':
+                    w_set_title( phantom_debug_window,  "Windows" );
+                    break;
+
+                case 's':
+                    w_set_title( phantom_debug_window,  "Stats" );
+                    break;
+                }
             }
         }
 
