@@ -27,8 +27,8 @@ SNAPTEST=1
 at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
 	[ "$UNATTENDED" ] && grep -qv svn $0.log >/dev/null && {
-		RESULT=`grep 'test run\|snapshot test' $0.log | tr '\n' ';'`
-		mail -s "${RESULT:-test ok}" ${MAILTO:-`whoami`} < $0.log
+		RESULT=`grep 'test run\|FAIL\|snapshot test' $0.log | tr '\n' ';'`
+		mail -s "${RESULT:-Phantom test ok}" ${MAILTO:-`whoami`} < $0.log
 	}
 }
 
