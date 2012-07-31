@@ -25,7 +25,11 @@ int get_current_tid(void)
 static phantom_thread_t * get_n_thread(int tid)
 {
     assert(threads_inited);
-    assert(tid >=0 && tid <= MAX_THREADS);
+    //assert(tid >=0 && tid <= MAX_THREADS);
+
+    if( (tid <= 0) || (tid >= MAX_THREADS) )
+        return 0;
+
     //assert(phantom_kernel_threads[tid] != 0);
     return phantom_kernel_threads[tid];
 }

@@ -3,8 +3,6 @@
 
  - check that restart list is killed and all contained in 1-link objects too.
 
- - win/tty restarts/reconnects incorrectly - window does not get focus
-
  - win reconnect - must take z order in account - insert in list at the
    right place.
 
@@ -14,6 +12,8 @@
  - BUG - need to reimplement snap sync code or else blocking syscalls
    will prevent snap from being done.
   
+ + win/tty restarts/reconnects incorrectly - window does not get focus
+
  + set_net_timer - need reset timer if not one shot required
 
  + unix shell does not get input after restart
