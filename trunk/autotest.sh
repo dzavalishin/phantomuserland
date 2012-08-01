@@ -28,7 +28,7 @@ at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
 	[ "$UNATTENDED" ] && grep -qv svn $0.log >/dev/null && {
 		VERSION=`grep SVN $0.log | sed s/starting//`
-		RESULT=`grep 'test run\|FAIL\|snapshot test' $0.log | tr '\n' ';'`
+		RESULT=`grep 'FAIL\|Panic\|snapshot test' $0.log | tr '\n' ';'`
 		mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`} < $0.log
 	}
 }
