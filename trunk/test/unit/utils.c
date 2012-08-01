@@ -14,7 +14,8 @@ void CUnitUInitialize(void)
 void CUnitInitialize(void)
 {
     if (CU_initialize_registry() != CUE_SUCCESS) {
-        fprintf(stderr, "Failed to initialize the CUnit registry: %d\n", CU_get_error());
+        //fprintf(stderr, "Failed to initialize the CUnit registry: %d\n", CU_get_error());
+        printf( "Failed to initialize the CUnit registry: %d\n", CU_get_error() );
         exit(1);
     }
 }
