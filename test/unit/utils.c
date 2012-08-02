@@ -39,3 +39,14 @@ CU_pSuite CUnitCreateSuite(const char* title)
 
     return suite;
 }
+
+
+//void test_fail(int rc); // Call from any test to return to test runner and signal failure
+//void test_fail_msg(int rc, const char *msg); // Call from any test to return to test runner and signal failure
+
+int hal_mutex_init( void *a, const char *b ) { (void) a; (void) b; }
+int hal_mutex_lock( void *a ) { (void) a; }
+int hal_mutex_unlock( void *a ) { (void) a; }
+int hal_mutex_is_locked( void *a ) { (void) a; return 1; }
+
+int debug_max_level_error = 10;
