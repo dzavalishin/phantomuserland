@@ -106,6 +106,8 @@ typedef struct phantom_thread phantom_thread_t;
 #define THREAD_FLAG_UNDEAD      0x0200 // This thread can't be killed for some reason. Usually it's some special one like CPU idle thread.
 #define THREAD_FLAG_NOSCHEDULE  0x0400 // Must not be selected by scheduler in usual way - per CPU 'parking' (idlest) thread
 
+#define THREAD_FLAG_SNAPPER     0x1000 // I am is a snapper thread
+//#define THREAD_FLAG_SNAP_OK     0x2000 // I am paused so snapper can set pages writeonly
 
 
 #define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)

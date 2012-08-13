@@ -91,6 +91,8 @@ phantom_threads_init()
 
     threads_inited = 1; // phantom_import_main_thread needs it...
 
+    phantom_thread_init_snapper_interlock();
+
     // Create thread entry for this control flow
     phantom_import_main_thread();
 
@@ -114,5 +116,6 @@ phantom_threads_init()
     //while( !have_idlest )        hal_sleep_msec(10);
 
     hal_start_kernel_thread(kill_thread_thread);
+
 }
 

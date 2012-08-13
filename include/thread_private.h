@@ -46,8 +46,11 @@ extern int threads_inited;
 
 // Thread struct/array access lock - to prevent accessing killed thread
 // TODO - take in kill!
-#define TA_LOCK() int ___sie = hal_save_cli(); hal_spin_lock( &schedlock )
-#define TA_UNLOCK() hal_spin_unlock( &schedlock ); if(___sie) hal_sti()
+//#define TA_LOCK() int ___sie = hal_save_cli(); hal_spin_lock( &schedlock )
+//#define TA_UNLOCK() hal_spin_unlock( &schedlock ); if(___sie) hal_sti()
+
+#define TA_LOCK()   hal_spin_lock_cli( &schedlock )
+#define TA_UNLOCK() hal_spin_unlock_sti( &schedlock );
 
 #define MAX_THREAD_NAME_LEN 32
 
@@ -116,10 +119,11 @@ struct phantom_thread
     //* Used to wake with timer, see hal_sleep_msec
     timedcall_t                 sleep_event; 
 
+    int                         snap_lock; // nonzero = can't begin a snapshot
 
     int                         preemption_disabled;
 
-    int                         child_tid; // used by fork code
+    //int                         child_tid; // used by fork code
 
 
     //! void (*handler)( phantom_thread_t * )
@@ -154,6 +158,7 @@ struct phantom_thread
 #endif
 };
 
+//extern volatile int             all_threads_snap_lock; // nonzero = can't begin a snapshot
 
 
 
@@ -286,6 +291,8 @@ void phantom_thread_init_mutexes(void);
 void phantom_thread_init_sems(void);
 
 void phantom_thread_init_killer(void);
+void phantom_thread_init_snapper_interlock(void);
+
 
 //! Used in thread kill
 void hal_mutex_unlock_if_owner(void);
