@@ -29,7 +29,7 @@ extern volatile int     phantom_virtual_machine_stop_request; // Is one (with th
 void phantom_finish_all_threads(void);
 void activate_all_threads(void);
 
-
+// supposed to be unused now?
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda );
 // Can be called from SYS code only
 void phantom_thread_put_asleep( struct data_area_4_thread *thda, VM_SPIN_TYPE *spin_to_unlock );
@@ -42,3 +42,7 @@ typedef struct userland_sleep
     // mutex to interlock sema on/off/check
 } userland_sleep_t;
 
+
+extern volatile int * snap_catch_va;
+// NB! Calling this means you're ready to snap
+static inline void touch_snap_catch(void) { *snap_catch_va = 1; }

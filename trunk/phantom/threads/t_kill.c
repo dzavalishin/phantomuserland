@@ -167,6 +167,9 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     // If any timed call is scheduled - kill it
     phantom_undo_timed_call( &t->sleep_event );
 
+#if NEW_SNAP_SYNC
+    t_release_snap_locks();
+#endif
 
     if(t->ownmutex)
         hal_mutex_unlock_if_owner();
@@ -203,7 +206,7 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     if( t->name )
         free((char *)t->name);
 
-    // Free threead struct
+    // Free thread struct
     free( t );
     return 0;
 }

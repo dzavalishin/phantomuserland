@@ -51,6 +51,11 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
     assert(threads_inited);
     assert( ! (flags & ~CREATION_POSSIBLE_FLAGS) );
 
+#if NEW_SNAP_SYNC
+    // No thread starts in snap, sorry
+    snap_lock();
+#endif
+
     SHOW_FLOW( 7, "flags = %b", flags, "\020\1USER\2VM\3JIT\4NATIVE\5KERNEL\6?PF\7?PA\10?CH\11TIMEOUT\12UNDEAD\13NOSCHED" );
     phantom_thread_t *t = calloc(1, sizeof(phantom_thread_t));
     //phantom_thread_t *t = calloc_aligned(1, sizeof(phantom_thread_t),16); // align at 16 bytes for ia32 fxsave
@@ -82,6 +87,10 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
 
     t_enqueue_runq(t);
     SHOW_FLOW0( 7, "on run q" );
+
+#if NEW_SNAP_SYNC
+    snap_unlock();
+#endif
 
     return t;
 
