@@ -47,35 +47,22 @@ static int      keyb_init = 0;
 
 
 
-#define KEYB_USE_SEMA 1
-
-#define USE_SOFTIRQ 0
-
-#if USE_SOFTIRQ
-static int softirq = -1;
-#endif
 
 
 
 
-static int  leds;
+static int  		leds;
 
-#if KEYB_USE_SEMA
 static hal_sem_t        keyboard_sem;
-#else
-static hal_cond_t keyboard_sem;
-static hal_mutex_t  keyboard_read_mutex;
-#endif
 
 #define BUF_LEN 256
-const unsigned int keyboard_buf_len = BUF_LEN;
-static _key_event keyboard_buf[BUF_LEN];
-static unsigned int head, tail;
-//static isa_bus_manager *isa;
+const unsigned int 	keyboard_buf_len = BUF_LEN;
+static _key_event 	keyboard_buf[BUF_LEN];
+static unsigned int 	head, tail;
 
 
 
-const u_int16_t pc_keymap_set1[128] = {
+const u_int16_t pc_keymap_reg[128] = {
     /* 0x00 */ 0, KEY_ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', KEY_BACKSPACE, KEY_TAB,
     /* 0x10 */ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', KEY_RETURN, KEY_LCTRL, 'a', 's',
     /* 0x20 */ 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', KEY_LSHIFT, '\\', 'z', 'x', 'c', 'v',
@@ -84,7 +71,7 @@ const u_int16_t pc_keymap_set1[128] = {
     /* 0x50 */ KEY_PAD_2, KEY_PAD_3, KEY_PAD_0, KEY_PAD_PERIOD, 0, 0, 0, KEY_F11, KEY_F12, 0, 0, 0, 0, 0, 0, 0,
 };
 
-const u_int16_t pc_keymap_set1_e0[128] = {
+const u_int16_t pc_keymap_e0[128] = {
     /* 0x00 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* 0x10 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, KEY_PAD_ENTER, KEY_RCTRL, 0, 0,
     /* 0x20 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -96,7 +83,7 @@ const u_int16_t pc_keymap_set1_e0[128] = {
 
 // 0 - alnum, 1 - func, 2 - shift
 
-const u_int16_t pc_keymap_isfunc_set1[128] = {
+const u_int16_t pc_keymap_isfunc_reg[128] = {
     /* 0x00 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* 0x10 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0,
     /* 0x20 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0,
@@ -105,7 +92,7 @@ const u_int16_t pc_keymap_isfunc_set1[128] = {
     /* 0x50 */ 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
 };
 
-static const int pc_keymap_isfunc_set1_e0[128] = {
+static const int pc_keymap_isfunc_e0[128] = {
     /* 0x00 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* 0x10 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0,
     /* 0x20 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -150,21 +137,10 @@ static int _keyboard_read(_key_event *buf, u_int32_t len)
     len = umin(len, keyboard_buf_len - 1);
 
 retry:
-#if KEYB_USE_SEMA
     hal_sem_acquire(&keyboard_sem);
-#else
-    // critical section
-    hal_mutex_lock(&keyboard_read_mutex);
-
-    // block here until data is ready
-    hal_cond_wait( &keyboard_sem, &keyboard_read_mutex );
-#endif
 
     saved_tail = tail;
     if(head == saved_tail) {
-#if !KEYB_USE_SEMA
-        hal_mutex_unlock(&keyboard_read_mutex);
-#endif
         goto retry;
     } else {
         // copy out of the buffer
@@ -184,16 +160,6 @@ retry:
             head = copy_len;
         }
     }
-    if(head != saved_tail) {
-#if !KEYB_USE_SEMA
-        // we did not empty the keyboard queue
-        hal_cond_broadcast( &keyboard_sem );
-#endif
-    }
-
-#if !KEYB_USE_SEMA
-    hal_mutex_unlock(&keyboard_read_mutex);
-#endif
 
     return copied_events;
 }
@@ -222,144 +188,143 @@ static void insert_in_buf(_key_event *event)
     keyboard_buf[tail].keychar = event->keychar;
     tail = temp_tail;
 
-#if USE_SOFTIRQ
-    hal_request_softirq( softirq );
-#else
-
-#if KEYB_USE_SEMA
     hal_sem_release( &keyboard_sem );
-#else
-    hal_cond_broadcast( &keyboard_sem );
-#endif
-
-#endif
-
 }
 
-static void handle_set1_keycode(unsigned char key)
+
+
+
+
+static void handle_keycode(unsigned char key)
 {
     //int retval = INT_NO_RESCHEDULE;
     _key_event event;
-    char queue_event = 1; // we will by default queue the key
+
     static char seen_e0 = 0;
     static char seen_e1 = 0;
+    static char kbreak = 0;
+    //static char e1_byte1;
+
     int has_char = 0;
 
     event.modifiers = 0;
+    event.keycode   = 0;
 
     // look for special keys first
-    if(key == 0xe0) {
+    if(key == 0xf0) {
+        kbreak = 1;
+    }
+    else if(key == 0xe0)
+    {
         seen_e0 = 1;
-        //		dprintf("handle_set1_keycode: e0 prefix\n");
-        queue_event = 0;
-    } else if(key == 0xe1) {
-        seen_e1 = 1;
-        //		dprintf("handle_set1_keycode: e1 prefix\n");
-        queue_event = 0;
-    } else if(seen_e0) {
-        // this is the character after e0
-        if(key & 0x80) {
-            event.modifiers |= KEY_MODIFIER_UP;
-            key &= 0x7f; // mask out the top bit
-        } else {
-            event.modifiers |= KEY_MODIFIER_DOWN;
-        }
-
-        // do the keycode lookup
-        event.keycode = pc_keymap_set1_e0[key];
-        has_char = pc_keymap_isfunc_set1_e0[key];
-
-        if(event.keycode == 0) {
-            queue_event = 0;
-        }
+    }
+    else if(key == 0xe1)
+    {
+        seen_e1 = 2; // e1 set has 2 bytes per key
+    }
+    else if(seen_e0)
+    {
+        // this is the character after e0, do the keycode lookup
+        event.keycode = pc_keymap_e0[key & 0x7f];
+        has_char = pc_keymap_isfunc_e0[key & 0x7f];
         seen_e0 = 0;
-    } else if(seen_e1) {
-        seen_e1 = 0;
-    } else {
-        // it was a regular key
-        if(key & 0x80) {
-            event.modifiers |= KEY_MODIFIER_UP;
-            key &= 0x7f; // mask out the top bit
-        } else {
-            event.modifiers |= KEY_MODIFIER_DOWN;
-        }
+        goto get_key;
 
-        // do the keycode lookup
-        event.keycode = pc_keymap_set1[key];
-        has_char = pc_keymap_isfunc_set1[key];
-
-        // by default we're gonna queue this thing
-
-        if(event.keycode == 0) {
-            // some invalid key
-            //			dprintf("handle_set1_keycode: got invalid raw key 0x%x\n", key);
-            queue_event = 0;
-        }
+    }
+    else if(seen_e1)
+    {
+        // if( seen_e1 == 2 ) e1_byte1 = key;
+        // if( seen_e1 == 1 ) key |= (e1_byte1 << 8); // compose 16-bit keycode
+        seen_e1--;
+    }
+    else
+    {
+        // it was a regular key, do the keycode lookup
+        event.keycode = pc_keymap_reg[key & 0x7f];
+        has_char = pc_keymap_isfunc_reg[key & 0x7f];
+        goto get_key;
     }
 
-    if(queue_event) {
-        // do some special checks here
-        switch(event.keycode) {
-            // special stuff
-        case KEY_F10:
-        case KEY_PRTSCRN:
-            //panic("Keyboard Requested Halt\n");
-            printf("print scrn\n");
-            scr_zbuf_paint();
-            return;
-        case KEY_F12:
-            hal_cpu_reset_real();
-            break;
+    // It was prefix byte
+    return;
 
-        case KEY_F11:
-            phantom_shutdown(0);
-            break;
+get_key:
+    if(kbreak || (key & 0x80))
+    {
+        event.modifiers |= KEY_MODIFIER_UP;
+        key &= 0x7f; // mask out the top bit
+    }
+    else
+    {
+        event.modifiers |= KEY_MODIFIER_DOWN;
+    }
+    kbreak = 0;
 
-        case KEY_PAD_MINUS:
-            panic("Keyboard panic request - RWIN key");
-            break;
+    // Got no key code? Nothing to process
+    if(event.keycode == 0)
+        return;
 
-        case KEY_SCRLOCK:
-            if(event.modifiers & KEY_MODIFIER_DOWN)
-            {
-                ;
-                //dbg_set_serial_debug(dbg_get_serial_debug()?0:1);
-            }
-            break;
-        }
 
-        event.keychar = (has_char < 2) ? event.keycode : 0;
+    // do some special checks here
+    switch(event.keycode)
+    {
+        // special stuff
+    case KEY_F10:
+    case KEY_PRTSCRN:
+        //panic("Keyboard Requested Halt\n");
+        //printf("print scrn\n");
+        scr_zbuf_paint();
+        return;
 
-        switch( event.keycode )
+    case KEY_F12:
+        hal_cpu_reset_real();
+        break;
+
+    case KEY_F11:
+        phantom_shutdown(0);
+        break;
+
+    case KEY_PAD_MINUS:
+        panic("Keyboard panic request - RWIN key");
+        break;
+
+    case KEY_SCRLOCK:
+        if(event.modifiers & KEY_MODIFIER_DOWN)
         {
-        case KEY_RETURN:        event.keychar = '\n'; break;
-        case KEY_ESC:        	event.keychar = 0x1B; break;
-        case KEY_TAB:        	event.keychar = '\t'; break;
-        //case KEY_BACKSPACE:     event.keychar = '\n'; break;
-
-        case KEY_PAD_DIVIDE:    event.keychar = '/'; break;
-        case KEY_PAD_MULTIPLY:  event.keychar = '*'; break;
-        case KEY_PAD_MINUS:	event.keychar = '-'; break;
-        case KEY_PAD_PLUS:      event.keychar = '+'; break;
-        case KEY_PAD_ENTER:     event.keychar = '\n'; break;
-        case KEY_PAD_PERIOD:    event.keychar = '.'; break;
-        case KEY_PAD_0:         event.keychar = '0'; break;
-        case KEY_PAD_1:         event.keychar = '1'; break;
-        case KEY_PAD_2:         event.keychar = '2'; break;
-        case KEY_PAD_3:         event.keychar = '3'; break;
-        case KEY_PAD_4:         event.keychar = '4'; break;
-        case KEY_PAD_5:         event.keychar = '5'; break;
-        case KEY_PAD_6:         event.keychar = '6'; break;
-        case KEY_PAD_7:         event.keychar = '7'; break;
-        case KEY_PAD_8:         event.keychar = '8'; break;
-        case KEY_PAD_9:         event.keychar = '9'; break;
+            ;
+            //dbg_set_serial_debug(dbg_get_serial_debug()?0:1);
         }
-
-        insert_in_buf(&event);
-        //retval = INT_RESCHEDULE;
+        break;
     }
 
-    //return 0;
+    event.keychar = (has_char < 2) ? event.keycode : 0;
+
+    switch( event.keycode )
+    {
+    case KEY_RETURN:        event.keychar = '\n'; break;
+    case KEY_ESC:           event.keychar = 0x1B; break;
+    case KEY_TAB:           event.keychar = '\t'; break;
+    //case KEY_BACKSPACE:     event.keychar = '\n'; break;
+
+    case KEY_PAD_DIVIDE:    event.keychar = '/'; break;
+    case KEY_PAD_MULTIPLY:  event.keychar = '*'; break;
+    case KEY_PAD_MINUS:	event.keychar = '-'; break;
+    case KEY_PAD_PLUS:      event.keychar = '+'; break;
+    case KEY_PAD_ENTER:     event.keychar = '\n'; break;
+    case KEY_PAD_PERIOD:    event.keychar = '.'; break;
+    case KEY_PAD_0:         event.keychar = '0'; break;
+    case KEY_PAD_1:         event.keychar = '1'; break;
+    case KEY_PAD_2:         event.keychar = '2'; break;
+    case KEY_PAD_3:         event.keychar = '3'; break;
+    case KEY_PAD_4:         event.keychar = '4'; break;
+    case KEY_PAD_5:         event.keychar = '5'; break;
+    case KEY_PAD_6:         event.keychar = '6'; break;
+    case KEY_PAD_7:         event.keychar = '7'; break;
+    case KEY_PAD_8:         event.keychar = '8'; break;
+    case KEY_PAD_9:         event.keychar = '9'; break;
+    }
+
+    insert_in_buf(&event);
 }
 
 static void handle_keyboard_interrupt(void)
@@ -368,9 +333,9 @@ static void handle_keyboard_interrupt(void)
 
     key = inb(0x60);
 
-    SHOW_FLOW( 11, "key = 0x%x", key);
+    //SHOW_FLOW( 11, "key = 0x%x", key);
 
-    handle_set1_keycode(key);
+    handle_keycode(key);
 }
 
 
@@ -404,18 +369,6 @@ static void handle_keyboard_interrupt(void)
 
 
 
-
-#if USE_SOFTIRQ
-void softirq_handler( void *_arg )
-{
-    (void) _arg;
-#if KEYB_USE_SEMA
-    hal_sem_release( &keyboard_sem );
-#else
-    hal_cond_broadcast( &keyboard_sem );
-#endif
-}
-#endif
 
 
 
@@ -423,47 +376,31 @@ void softirq_handler( void *_arg )
 
 int phantom_dev_keyboard_getc(void);
 
-//int direct_trygetchar_hook_active;
-
+/*
 static int maininited = 0;
 
 static void maininit()
 {
     if(maininited) return;
 
-#if USE_SOFTIRQ
-    softirq = hal_alloc_softirq();
-    if( softirq < 0 )
-        panic( "Unable to get softirq" );
-
-    hal_set_softirq_handler( softirq, &softirq_handler, 0 );
-#endif
-
-#if KEYB_USE_SEMA
     if( hal_sem_init(&keyboard_sem, "KBD") )
         panic("could not create keyboard sem!\n");
-#else
-    if( hal_cond_init(&keyboard_sem, "KBD") )
-        panic("could not create keyboard cond!\n");
-
-    if( hal_mutex_init(&keyboard_read_mutex, "KBD") )
-        panic("could not create keyboard read mutex!\n");
-#endif
     maininited = 1;
 }
-
+*/
 
 static int phantom_dev_keyboard_init(int irq)
 {
-    maininit();
+    //maininit();
+    if( hal_sem_init(&keyboard_sem, "KBD") )
+        panic("could not create keyboard sem!");
+
     leds = 0;
     set_leds();
 
     head = tail = 0;
 
     hal_irq_alloc( irq, (void *)handle_keyboard_interrupt, 0, HAL_IRQ_SHAREABLE );
-
-    //direct_trygetchar_hook_active = 1;
 
     SHOW_INFO0( 0, "interrupt driven keyboard driver is ready" );
 
