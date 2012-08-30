@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
  *
  * Quick and dirty PS2 mouse driver.
  *
@@ -59,7 +59,6 @@
 
 #define MAX_EVENTS      64
 
-//dpc_request     mouse_dpc;
 
 static struct ui_event  ebuf[MAX_EVENTS];
 static int put_pos = 0;
@@ -70,8 +69,8 @@ static hal_sem_t 	mouse_sem;
 
 static void put_buf(struct ui_event *e)
 {
-    int ie = hal_save_cli();
-    hal_spin_lock( &elock );
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli( &elock );
 
     // Overflow - just loose it
     if(
@@ -86,16 +85,16 @@ static void put_buf(struct ui_event *e)
         put_pos = 0;
 
 ret:
-    hal_spin_unlock( &elock );
-    if(ie) hal_sti();
+    hal_spin_unlock_sti( &elock );
+    //if(ie) hal_sti();
 }
 
 static int get_buf(struct ui_event *e)
 {
     int ret = 1;
 
-    int ie = hal_save_cli();
-    hal_spin_lock( &elock );
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli( &elock );
 
     if( get_pos == put_pos )
     {
@@ -109,8 +108,30 @@ static int get_buf(struct ui_event *e)
         get_pos = 0;
 
 fin:
-    hal_spin_unlock( &elock );
-    if(ie) hal_sti();
+    hal_spin_unlock_sti( &elock );
+    //if(ie) hal_sti();
+
+    return ret;
+}
+
+static int peek_buf(struct ui_event *e)
+{
+    int ret = 1;
+
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli( &elock );
+
+    if( get_pos == put_pos )
+    {
+        ret = 0;
+        goto fin;
+    }
+    *e = ebuf[get_pos];
+    ret = 1;
+
+fin:
+    hal_spin_unlock_sti( &elock );
+    //if(ie) hal_sti();
 
     return ret;
 }
@@ -120,42 +141,23 @@ fin:
 
 
 
-void phantom_dev_ps2_int_handler( void * arg );
-static int phantom_dev_ps2_do_init( void );
-
-// PS2 simplistic driver
-// Returns not null if failed
-/*
- int phantom_dev_ps2_init()
- {
- if( phantom_dev_ps2_do_init() )
- return 1;
- #define PS2_INTERRUPT   12
-
- hal_irq_alloc( PS2_INTERRUPT, phantom_dev_ps2_int_handler, 0, HAL_IRQ_SHAREABLE );
-
- printf("PS/2 mouse microdriver installed\n");
-
- return 0;
- }
- */
-
-int phantom_dev_ps2_stat_interrupts = 0;
-unsigned char phantom_dev_ps2_state_buttons = 0;
-int phantom_dev_ps2_state_xpos = 0;
-int phantom_dev_ps2_state_ypos = 0;
-static int xsign, ysign, xval, yval;
-
-//static hal_mutex_t	mouse_mutex;
-//static hal_cond_t 	mouse_cond;
+static void ps2ms_int_handler( void * arg );
+static int ps2ms_do_init( void );
 
 
-static void push_event_thread(void *arg)
+static unsigned char 	ps2ms_state_buttons = 0;
+static int 		ps2ms_state_xpos = 0;
+static int 		ps2ms_state_ypos = 0;
+static int		xsign, ysign, xval, yval;
+
+
+
+static void mouse_push_event_thread(void *arg)
 {
     (void) arg;
 
     hal_set_thread_name("MouEvents");
-	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {
@@ -166,9 +168,19 @@ static void push_event_thread(void *arg)
 
         //hal_mutex_lock( &mouse_mutex );
 
-        struct ui_event e;
+        struct ui_event e, e1;
         while( get_buf(&e) )
+        {
+            if( peek_buf( &e1 ) )
+            {
+                // We already have one more event and buttons state is the same?
+                // Throw away current event, use next one.
+                if( e1.m.buttons == e.m.buttons )
+                    continue;
+            }
+
             ev_q_put_any( &e );
+        }
 
         //hal_mutex_unlock( &mouse_mutex );
     }
@@ -177,9 +189,28 @@ static void push_event_thread(void *arg)
 
 
 
-// TODO mouse 9th bit
+static int insert_bit9( int val, int sign )
+{
+#if 0
+    return val;
+#else
+    val &= 0xFFu;
 
-void phantom_dev_ps2_int_handler( void *arg )
+    if( sign )
+    {
+        // set top bits
+        val = ~val;
+        val &= 0xFFu; 
+        val = ~val;
+    }
+
+    return val;
+#endif
+}
+
+
+
+static void ps2ms_int_handler( void *arg )
 {
     (void) arg;
 
@@ -196,11 +227,11 @@ void phantom_dev_ps2_int_handler( void *arg )
         // first byte has one in this pos
         if(1 && ! (0x8 & mousedata) )
         {
-            inbytepos = -1;
-            break;
+            //inbytepos = -1; break;
+            inbytepos = 0; return;
         }
 
-        phantom_dev_ps2_state_buttons = 0x7 & mousedata;
+        ps2ms_state_buttons = 0x7 & mousedata;
         xsign = 0x10 & mousedata;
         ysign = 0x20 & mousedata;
         break;
@@ -215,55 +246,46 @@ void phantom_dev_ps2_int_handler( void *arg )
     inbytepos %= 3;
     //inbytepos %= 4;
 
-    if(inbytepos == 0)
+    if(inbytepos != 0)
+        return;
+
+    xval = insert_bit9( xval, xsign );
+    yval = insert_bit9( yval, ysign );
+
+    ps2ms_state_xpos += xval;
+    ps2ms_state_ypos += yval;
+
+    if( ps2ms_state_xpos < 0 ) ps2ms_state_xpos = 0;
+    if( ps2ms_state_ypos < 0 ) ps2ms_state_ypos = 0;
+
+    if( ps2ms_state_xpos > video_drv->xsize ) ps2ms_state_xpos = video_drv->xsize;
+    if( ps2ms_state_ypos > video_drv->ysize ) ps2ms_state_ypos = video_drv->ysize;
+
+
+    //printf("ms %d %d %x\n", ps2ms_state_xpos, ps2ms_state_ypos, ps2ms_state_buttons );
+
+    if(NULL != video_drv)
     {
-        phantom_dev_ps2_state_xpos += xval;
-        phantom_dev_ps2_state_ypos += yval;
+        video_drv->mouse_x = ps2ms_state_xpos;
+        video_drv->mouse_y = ps2ms_state_ypos;
 
-        if( phantom_dev_ps2_state_xpos < 0 ) phantom_dev_ps2_state_xpos = 0;
-        if( phantom_dev_ps2_state_ypos < 0 ) phantom_dev_ps2_state_ypos = 0;
+        struct ui_event e;
+        e.type = UI_EVENT_TYPE_MOUSE;
+        e.time = fast_time();
+        e.focus= 0;
 
-        if( phantom_dev_ps2_state_xpos > video_drv->xsize ) phantom_dev_ps2_state_xpos = video_drv->xsize;
-        if( phantom_dev_ps2_state_ypos > video_drv->ysize ) phantom_dev_ps2_state_ypos = video_drv->ysize;
+        e.m.buttons = ps2ms_state_buttons;
+        e.abs_x = ps2ms_state_xpos;
+        e.abs_y = ps2ms_state_ypos;
 
-
-        //printf("ms %d %d %x\n", phantom_dev_ps2_state_xpos, phantom_dev_ps2_state_ypos, phantom_dev_ps2_state_buttons );
-
-        if(NULL != video_drv)
-        {
-            video_drv->mouse_x = phantom_dev_ps2_state_xpos;
-            video_drv->mouse_y = phantom_dev_ps2_state_ypos;
-
-            //if(video_drv->redraw_mouse_cursor != NULL)                video_drv->redraw_mouse_cursor();
-
-            /*
-            event_q_put_mouse(
-                              phantom_dev_ps2_state_xpos,
-                              phantom_dev_ps2_state_ypos,
-                              phantom_dev_ps2_state_buttons
-                             );
-                             */
-
-            struct ui_event e;
-            e.type = UI_EVENT_TYPE_MOUSE;
-            e.time = fast_time();
-            e.focus= 0;
-
-            e.m.buttons = phantom_dev_ps2_state_buttons;
-            e.abs_x = phantom_dev_ps2_state_xpos;
-            e.abs_y = phantom_dev_ps2_state_ypos;
-
-            put_buf(&e);
-            //dpc_request_trigger( &mouse_dpc, 0 );
-            hal_sem_release( &mouse_sem );
-        }
+        put_buf(&e);
+        hal_sem_release( &mouse_sem );
     }
 
-    // wakeup everyone who waits fpr data
 }
 
 
-unsigned char phantom_dev_ps2_get_data()
+static unsigned char ps2ms_get_data()
 {
     while((inb(PS2_CTRL_ADDR) & 0x1) == 0)
         ;
@@ -281,31 +303,30 @@ static void wait_write_ctrl()
 }
 
 
-void phantom_dev_ps2_send_cmd(unsigned char cmd)
+static void ps2ms_send_cmd(unsigned char cmd)
 {
     wait_write_ctrl();    	outb(PS2_CTRL_ADDR, PS2_CTRL_WRITE_CMD);
     wait_write_data();    	outb(PS2_DATA_ADDR, cmd);
 }
 
 
-void phantom_dev_ps2_send_aux(unsigned char aux)
+static void ps2ms_send_aux(unsigned char aux)
 {
     wait_write_ctrl();   	outb(PS2_CTRL_ADDR, PS2_CTRL_WRITE_AUX);
     wait_write_data();   	outb(PS2_DATA_ADDR, aux);
-
 }
 
 // check for ACK
-static errno_t ps2_aux_wait_ack()
+static errno_t ps2ms_aux_wait_ack()
 {
-    if(phantom_dev_ps2_get_data() != PS2_RES_ACK)
+    if(ps2ms_get_data() != PS2_RES_ACK)
         return ENXIO;
 
     return 0;
 }
 
 
-static int phantom_dev_ps2_do_init( void )
+static int ps2ms_do_init( void )
 {
 
 
@@ -316,13 +337,13 @@ static int phantom_dev_ps2_do_init( void )
 
     if( tries <= 0 ) goto notfound;
 
-    phantom_dev_ps2_send_cmd(PS2_CMD_DEV_INIT);
+    ps2ms_send_cmd(PS2_CMD_DEV_INIT);
 
     // hangs
-    //phantom_dev_ps2_send_aux(PS2_CMD_RESET_MOUSE);    ps2_aux_wait_ack(); // ignore result
+    //ps2ms_send_aux(PS2_CMD_RESET_MOUSE);    ps2ms_aux_wait_ack(); // ignore result
 
-    phantom_dev_ps2_send_aux(PS2_CMD_ENABLE_MOUSE);
-    if( ps2_aux_wait_ack() ) goto notfound;
+    ps2ms_send_aux(PS2_CMD_ENABLE_MOUSE);
+    if( ps2ms_aux_wait_ack() ) goto notfound;
 
     return 0;
 
@@ -345,16 +366,16 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
     hal_sem_init( &mouse_sem, "MouseDrv" );
     hal_spin_init( &elock );
 
-    if( seq_number || phantom_dev_ps2_do_init())
+    if( seq_number || ps2ms_do_init())
         return 0;
 
-    hal_irq_alloc( irq, phantom_dev_ps2_int_handler, 0, HAL_IRQ_SHAREABLE );
+    hal_irq_alloc( irq, ps2ms_int_handler, 0, HAL_IRQ_SHAREABLE );
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = "ps2-mouse";
     dev->seq_number = seq_number++;
 
-    hal_start_kernel_thread((void*)push_event_thread);
+    hal_start_kernel_thread((void*)mouse_push_event_thread);
 
     return dev;
 }
@@ -377,7 +398,7 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
 
 
 
-#if 0 /*fold00*/
+#if 0 /*FOLD00*/
 //Mouse.inc by SANiK
 //License: Use as you wish, except to cause damage
 byte mouse_cycle=0;     //unsigned char
@@ -492,82 +513,82 @@ Date: Fri, 29 Apr 1994 13:28:37 +0200 (EET DST)
 
 
 T{ss{ hiirien speksit englanniksi. Ei nyt ihan t{ydelliset, mutta kyll{
-aika kattavat. 
+aika kattavat.
 
- 
+
         Serial mouse
- 
+
 Voltage levels:
 Mouse takes standard RS-232C output signals (+-12V) as its input signals.
 Those outputs are in +12V when mouse is operated. Mouse takes some current
 >from each of the RS-232C port output lines it is connected (about 10mA).
-Mouse send data to computer in levels that RS-232C receiver chip in the 
+Mouse send data to computer in levels that RS-232C receiver chip in the
 computer can uderstand as RS-232C input levels. Mouse outputs are normally
 something like +-5V, 0..5V or sometimes +-12V. Mouse electronics
 normally use +5V voltage.
- 
- 
+
+
         Microsoft serial mouse
- 
+
 Pins used:
 TD, RTS and DTR are used only as power source for the mouse.
 RD is used to receive data from mouse.
- 
+
 Serial data parameters: 1200bps, 7 databits, 1 stop-bit
- 
-Data packet format: 
+
+Data packet format:
 Data packet is 3 byte packet. It is send to the computer every time
 mouse state changes (mouse moves or keys are pressed/released).
- 
+
         D7      D6      D5      D4      D3      D2      D1      D0
- 
+
 1.      X       1       LB      RB      Y7      Y6      X7      X6
-2.      X       0       X5      X4      X3      X2      X1      X0      
+2.      X       0       X5      X4      X3      X2      X1      X0
 3.      X       0       Y5      Y4      Y3      Y2      Y1      Y0
- 
+
 The byte marked with 1. is send first, then the others. The bit D6
 in the first byte is used for syncronizing the software to mouse
 packets if it goes out of sync.
- 
+
 LB is the state of the left button (0 means pressed down)
 RB is the state of the right button (0 means pressed down)
 X7-X0 movement in X direction since last packet (signed byte)
 Y7-Y0 movement in Y direction since last packet (signed byte)
- 
- 
-        Mouse systems mouse            
- 
+
+
+        Mouse systems mouse
+
 Serial data parameters: 1200bps, 8 databits, 1 stop-bit
- 
+
 The data is sent in 5 byte packets in following format:
- 
+
         D7      D6      D5      D4      D3      D2      D1      D0
- 
+
 1.      1       0       0       0       0       LB      CB      RB
 2.      X7      X6      X5      X4      X3      X2      X1      X0
 3.      Y7      Y6      Y5      Y4      Y3      Y4      Y1      Y0
-4.      
+4.
 5.
- 
+
 LB is left button state (0=pressed, 1=released)
 CB is center button state (0=pressed, 1=released)
 RB is right button state (0=pressed, 1=released)
-X7-X0 movement in X direction since last packet in signed byte 
+X7-X0 movement in X direction since last packet in signed byte
       format (-128..+127), positive direction right
-Y7-Y0 movement in Y direction since last packet in signed byte 
+Y7-Y0 movement in Y direction since last packet in signed byte
       format (-128..+127), positive direction up
- 
+
 The last two bytes in the packet (bytes 4 and 5) contains
 information about movement data send in last packet. I have not
 found exact information about those bytes. I have not also found
-any use for such a information (maybe it is for syncronization 
+any use for such a information (maybe it is for syncronization
 or something like that).
- 
- 
- 
 
 
--- 
+
+
+
+--
 Tomi.Engdahl@hut.fi                        Helsinki University of Technology
 G=Tomi S=Engdahl O=hut ADMD=fumail C=fi    Department of Computer Science
 # This text is provided "as is" without any express or implied warranty #
