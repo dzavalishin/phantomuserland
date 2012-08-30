@@ -29,7 +29,7 @@ at_exit ( ) {
 	[ "$UNATTENDED" ] && grep -qv svn $0.log >/dev/null && {
 		VERSION=`grep SVN $0.log | sed s/starting//`
 		RESULT=`grep 'FAIL\|Panic\|snapshot test' $0.log | tr '\n' ';'`
-		mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`} < $0.log
+		sed 's/[^m]*m//g' $0.log | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
 	}
 }
 
@@ -255,7 +255,7 @@ do
 	kill -0 $QEMU_PID || break
 
 	[ -s serial0.log ] || {
-		sleep 15
+		sleep 30
 		[ -s serial0.log ] || {
 			echo "
 
