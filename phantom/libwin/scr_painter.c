@@ -227,6 +227,10 @@ static void repaint_q(void)
 
     while(1)
     {
+#if USE_ZBUF_SHADOW
+        scr_zbuf_apply_shadow();
+#endif
+
         hal_mutex_lock( &rect_list_lock );
 
         if(paint_q_empty())
@@ -239,7 +243,9 @@ static void repaint_q(void)
         rect_t r = pqel->r;
         free(pqel);
 
+#if !USE_ZBUF_SHADOW
         scr_zbuf_reset_square( r.x, r.y, r.xsize, r.ysize ); // ?? BUG? Need it?
+#endif
         paint_square_updown( &r );
     }
 

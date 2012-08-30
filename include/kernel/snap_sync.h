@@ -42,7 +42,9 @@ typedef struct userland_sleep
     // mutex to interlock sema on/off/check
 } userland_sleep_t;
 
-
+#if NEW_SNAP_SYNC
 extern volatile int * snap_catch_va;
 // NB! Calling this means you're ready to snap
 static inline void touch_snap_catch(void) { *snap_catch_va = 1; }
+#endif
+

@@ -34,6 +34,13 @@
 
 zbuf_t *zbuf = 0;
 
+#if USE_ZBUF_SHADOW
+// z buffer shadow, gets applied just before paint
+static zbuf_t *zbuf_shadow = 0;
+
+static void scr_zbuf_reset_shadow(void);
+#endif
+
 static u_int32_t zbsize = 0;
 static u_int32_t zbwidth = 0;
 
@@ -54,6 +61,11 @@ void scr_zbuf_init()
     zbuf_rect.ysize = scr_get_ysize();
 
     scr_zbuf_reset();
+
+#if USE_ZBUF_SHADOW
+    zbuf_shadow = malloc( zbsize );
+    scr_zbuf_reset_shadow();
+#endif
 }
 
 
@@ -118,7 +130,7 @@ void scr_zbuf_reset_square(int x, int y, int xsize, int ysize )
 static int zb_upside = 0;
 void scr_zbuf_turn_upside(int v) { zb_upside = v; }
 
-
+#if !USE_ZBUF_SHADOW
 void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
 {
     //SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
@@ -155,7 +167,88 @@ void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
         memset( p, zpos, len );
     }
 }
+#else
 
+static void do_scr_zbuf_reset_square_z(zbuf_t *target, int x, int y, int xsize, int ysize, zbuf_t zpos )
+{
+    //SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
+    //lprintf( "zb reset @ %d/%d, sz %d x %d, z %d\n", x, y, xsize, ysize, zpos );
+
+    rect_t out;
+    rect_t a;
+
+    a.x = x;
+    a.y = y;
+    a.xsize = xsize;
+    a.ysize = ysize;
+
+    if(!rect_mul( &out, &a, &zbuf_rect ))
+        return;
+
+    int ys;
+    for(ys = 0; ys < out.ysize; ys++)
+    {
+        int linpos;
+        if( zb_upside )
+            linpos = out.x + out.y * zbwidth;
+        else
+            linpos = out.x + ( (scr_get_ysize()-1) - out.y) * zbwidth;
+
+        out.y++;
+
+        void *p = target+linpos;
+        size_t len = out.xsize * sizeof(zbuf_t);
+
+        assert( p >= (void*)target );
+        assert( p+len <= ((void*)target)+zbsize );
+
+        memset( p, zpos, len );
+    }
+}
+
+void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
+{
+    do_scr_zbuf_reset_square_z( zbuf, x, y, xsize, ysize, zpos );
+}
+
+
+void scr_zbuf_request_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
+{
+    do_scr_zbuf_reset_square_z( zbuf_shadow, x, y, xsize, ysize, zpos );
+}
+
+void scr_zbuf_request_reset_square(int x, int y, int xsize, int ysize )
+{
+    scr_zbuf_request_reset_square_z( x, y, xsize, ysize, 0 );
+}
+
+static void scr_zbuf_reset_shadow(void)
+{
+    // in shadow -1 means not active (== ZBUF_TOP) - not copied to zbuf no application
+    //scr_zbuf_request_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
+    memset( zbuf_shadow, 0xFF, zbsize );
+}
+
+void scr_zbuf_apply_shadow(void)
+{
+    int n = scr_get_xsize() * scr_get_ysize();
+
+    zbuf_t *src = zbuf_shadow;
+    zbuf_t *dst = zbuf;
+
+    while( n-- )
+    {
+        if( *src != ZBUF_TOP )
+            *dst = *src;
+
+        *src = ZBUF_TOP;
+
+        src++;
+        dst++;
+    }
+}
+
+#endif
 
 /**
  *

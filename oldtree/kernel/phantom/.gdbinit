@@ -8,6 +8,7 @@ dir ../../../phantom/dev
 dir ../../../phantom/libphantom 
 dir ../../../phantom/newos
 dir ../../../phantom/threads
+dir ../../../phantom/libwin 
 
 target remote localhost:1234
 

@@ -12,7 +12,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define NEW_SNAP_SYNC 1
+#define NEW_SNAP_SYNC 0
 
 
 #define COMPILE_PERSISTENT_STATS 1

@@ -284,12 +284,15 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
         addr_t ip = ts->pc;
         int is_write = ts->trapno == T_TLB_STORE;
 #endif
+
+#if NEW_SNAP_SYNC
         if( fa == snap_catch_va )
         {
             // This is a snap trap fired, let it go
             snap_trap();
             return; // trap supposed to be open now
         }
+#endif
 
         {
             unsigned long addr = fa;

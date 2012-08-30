@@ -17,6 +17,10 @@
 
 #include <video/window.h>
 
+#define USE_ZBUF_SHADOW 0
+
+
+
 // Special value of z coord which means that we draw anyway - used for mouse
 #define ZBUF_TOP 0xFFFFFFFF
 
@@ -44,5 +48,14 @@ void drv_video_window_rezorder_all(void);
 
 // Debug - paint zbuf onscreen
 void scr_zbuf_paint(void);
+
+
+#if USE_ZBUF_SHADOW
+void scr_zbuf_request_reset_square(int x, int y, int xsize, int ysize );
+void scr_zbuf_request_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos );
+void scr_zbuf_apply_shadow(void);
+
+#endif
+
 
 #endif // ZBUF_H
