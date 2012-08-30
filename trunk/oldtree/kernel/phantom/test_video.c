@@ -68,9 +68,15 @@ int do_test_video(const char *test_parm)
 
     for( i = 0; i < 300; i++ )
     {
+#if USE_ZBUF_SHADOW
+        scr_zbuf_request_reset_square( e1.w.rect.x, e1.w.rect.y, e1.w.rect.xsize, e1.w.rect.ysize );
+#else
         scr_zbuf_reset_square( e1.w.rect.x, e1.w.rect.y, e1.w.rect.xsize, e1.w.rect.ysize );
+#endif
         ev_q_put_global( &e1 );
-        hal_sleep_msec( 15 ); // or else painter combines requests
+        //hal_sleep_msec( 15 ); // or else painter combines requests
+        hal_sleep_msec( 105 ); // or else painter combines requests
+        //hal_sleep_msec( 1005 ); // or else painter combines requests
     }
 
     w_set_title( wb, "Move Test"  );

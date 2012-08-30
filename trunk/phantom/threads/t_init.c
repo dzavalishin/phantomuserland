@@ -91,7 +91,9 @@ phantom_threads_init()
 
     threads_inited = 1; // phantom_import_main_thread needs it...
 
+#if NEW_SNAP_SYNC
     phantom_thread_init_snapper_interlock();
+#endif
 
     // Create thread entry for this control flow
     phantom_import_main_thread();

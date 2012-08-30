@@ -97,47 +97,54 @@ int point_in_rect( int x, int y, rect_t *r )
 
 
 
-void rect_add( rect_t *out, rect_t *a, rect_t *b )
+void rect_add( rect_t *real_out, rect_t *a, rect_t *b )
 {
-    assert(out);
+    assert(real_out);
+    rect_t out;
 
     if( (a == 0) || (a->xsize == 0) || (a->ysize == 0) )
     {
         assert(b);
-        *out = *b;
+        out = *b;
     }
 
     if( (b == 0) || (b->xsize == 0) || (b->ysize == 0) )
     {
         assert(a);
-        *out = *a;
+        out = *a;
     }
 
-    out->x = imin( a->x, b->x );
-    out->y = imin( a->y, b->y );
+    out.x = imin( a->x, b->x );
+    out.y = imin( a->y, b->y );
 
     unsigned xr = imax( a->x + a->xsize, b->x + b->xsize );
     unsigned yr = imax( a->y + a->ysize, b->y + b->ysize );
 
-    out->xsize = xr - out->x;
-    out->ysize = yr - out->y;
+    out.xsize = xr - out.x;
+    out.ysize = yr - out.y;
+
+    *real_out = out;
 }
 
 //! Returns true if intersection exists
-int rect_mul( rect_t *out, rect_t *a, rect_t *b )
+int rect_mul( rect_t *real_out, rect_t *a, rect_t *b )
 {
-    assert(out);
+    //assert(real_out);
+    rect_t out;
 
-    out->x = imax( a->x, b->x );
-    out->y = imax( a->y, b->y );
+    out.x = imax( a->x, b->x );
+    out.y = imax( a->y, b->y );
 
     unsigned xr = imin( a->x + a->xsize, b->x + b->xsize );
     unsigned yr = imin( a->y + a->ysize, b->y + b->ysize );
 
-    out->xsize = xr - out->x;
-    out->ysize = yr - out->y;
+    out.xsize = xr - out.x;
+    out.ysize = yr - out.y;
 
-    return (out->xsize > 0) && (out->ysize > 0);
+    if( real_out )
+        *real_out = out;
+
+    return (out.xsize > 0) && (out.ysize > 0);
 }
 
 
