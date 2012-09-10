@@ -12,6 +12,8 @@
 #ifndef KERNEL_PROFILER_H
 #define KERNEL_PROFILER_H
 
+#define PROFILER_REGULAR_DUMP_TO_LOG 0
+
 #include <sys/types.h>
 #include <kernel/smp.h>
 

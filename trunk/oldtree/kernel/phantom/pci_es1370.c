@@ -596,7 +596,7 @@ static size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
 #else
 // generate itself
 
-#if 1
+#if 0
 static const char  intro[] = {
 #include "intro.ci"
 };

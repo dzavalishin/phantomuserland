@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Arm PL031 RTC driver.
+ * Arm PL181 MMC driver. Unfinished.
  *
 **/
 
