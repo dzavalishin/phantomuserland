@@ -5,7 +5,7 @@
 #include "utils.h"
 
 
-#if 0
+#if 1
 
 #define test_one( b, a, expect ) \
 {                                                                        \
@@ -136,7 +136,7 @@ void runSuite(void) {
     CU_pSuite suite = CUnitCreateSuite("Functions");
     if (suite)
     {
-        //ADD_SUITE_TEST(suite, filename)
+        ADD_SUITE_TEST(suite, filename)
         ADD_SUITE_TEST(suite, rectangles)
     }
 }
