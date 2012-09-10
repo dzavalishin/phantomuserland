@@ -11,14 +11,22 @@
 #include <vm/syscall.h>
 
 #include <kernel/stats.h>
+#include <kernel/profile.h>
 
+//! Get current stat values
 #define CN_STS_OP_GET_CURR	0
+//! Get average stat values
 #define CN_STS_OP_GET_AVG       1
+//! Get this run stat values
 #define CN_STS_OP_GET_THIS      2
+//! Get prev run stat values
 #define CN_STS_OP_GET_PREV      3
+//! Get all runs stat values
 #define CN_STS_OP_GET_ALLR      4
+//! Get cpu idle percentage
+#define CN_STS_OP_GET_CPU_IDLE  5
 
-#define CN_STS_OP_LAST          5
+#define CN_STS_OP_LAST          6
 
 
 
@@ -58,6 +66,16 @@ static pvm_object_t cn_stats_blocking_syscall_worker( pvm_object_t conn, struct 
     {
         SHOW_ERROR( 1, "counter num %d > max", n_stat_counter );
         return pvm_create_int_object(-1);
+    }
+
+    if( nmethod == CN_STS_OP_GET_CPU_IDLE )
+    {
+        //int ret = 0;
+
+        // CPU0 - use n_stat_counter to select other
+        int ret = 100-percpu_cpu_load[0];
+
+        return pvm_create_int_object(ret);
     }
 
     struct kernel_stats out;
