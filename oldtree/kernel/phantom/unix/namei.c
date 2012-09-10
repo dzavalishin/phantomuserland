@@ -42,6 +42,8 @@ uufile_t *uu_namei(const char *filename, uuprocess_t *p)
 
 #endif // HAVE_UNIX
 
+#if 0 // moved to lib
+
 //! Makes sure that buf contains correct abs fn for given
 //! (possibly relative) filaname and process (cwd)
 errno_t uu_normalize_path( char *buf, const char *filename, uuprocess_t *p )
@@ -219,4 +221,5 @@ int uu_break_path( const char *in, int maxpart, const char *oname[], int olen[] 
 }
 
 
+#endif
 
