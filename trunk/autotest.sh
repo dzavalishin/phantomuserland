@@ -14,6 +14,7 @@ QEMU=`which qemu`		# qemu 0.x
 TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../tftp
 DISK_IMG=phantom.img
+PHANTOM_LOG=$PHANTOM_HOME/$TEST_DIR/serial0.log
 
 die ( ) {
 	[ -s make.log ] && tail make.log
@@ -27,8 +28,8 @@ SNAPTEST=1
 at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
 	[ "$UNATTENDED" ] && grep -qv svn $0.log >/dev/null && {
-		VERSION=`grep SVN $0.log | sed s/starting//`
-		RESULT=`grep 'FAIL\|Panic\|snapshot test' $0.log | tr '\n' ';'`
+		VERSION=`grep SVN $PHANTOM_LOG | sed 's/[^m]*m//g;s/starting//'`
+		RESULT=`grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';'`
 		sed 's/[^m]*m//g' $0.log | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
 	}
 }
@@ -139,9 +140,9 @@ quit
 	DEAD=`ps xjf | grep $QEMU | grep -vw "grep"`
 	[ "$RUNNING" ] && {
 		(echo "$RUNNING" | grep -q defunct) || \
-		(tail -1 $TEST_DIR/serial0.log | grep ^Press) || {
+		(tail -1 $PHANTOM_LOG | grep ^Press) || {
 			echo "Another copy is running: $RUNNING"
-			tail -10 $TEST_DIR/serial0.log
+			tail -10 $PHANTOM_LOG
 			exit 0
 		}
 
