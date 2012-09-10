@@ -512,5 +512,11 @@ int if_init(void)
     return NO_ERROR;
 }
 
+
+int if_get_count(void)
+{
+    return next_id;
+}
+
 #endif // HAVE_NET
 
