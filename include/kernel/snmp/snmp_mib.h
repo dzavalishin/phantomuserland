@@ -74,6 +74,7 @@ extern uint8_t *SnmpMibFind(OID *, size_t *, uint8_t *, size_t *, uint16_t *, in
 
 // TODO must be in separate header?
 int MibRegisterOSVars(void);
+int MibRegisterIfVars(void);
 
 
 #endif

@@ -169,6 +169,8 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev);
 void if_simple_setup( ifnet *interface, int addr, int netmask, int bcast, int net, int router, int def_router );
 
 
+// for SNMP
+int if_get_count(void);
 
 
 
