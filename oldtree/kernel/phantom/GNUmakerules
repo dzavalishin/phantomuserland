@@ -121,7 +121,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/signal.o unix/sys_sw.o unix/phantom.o \
         vm_cn_udp.o vm_cn_timer.o vm_cn_stats.o  \
 	fs_map.o resolve.o main.o keyboard.o syslog.o \
-        asn1.o snmp.o snmp_agent.o snmp_mib.o snmp_auth.o snmp_session.o snmp_api.o snmp_config.o snmpd.o snmp_mib2os.o \
+        asn1.o snmp.o snmp_agent.o snmp_mib.o snmp_auth.o snmp_session.o snmp_api.o snmp_config.o snmpd.o snmp_mib2os.o snmp_mib2if.o \
 	arch_name.o arch_init.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
 	svn_version.o profile.o trace.o $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)

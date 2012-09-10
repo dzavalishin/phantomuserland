@@ -84,6 +84,7 @@ int do_test_video(const char *test_parm)
 
     for( i = 0; i < 100; i++ )
     {
+        w_move( w, 110, 110 );
         w_move( w, 101, 101 );
         w_move( w, 99, 99 );
     }
