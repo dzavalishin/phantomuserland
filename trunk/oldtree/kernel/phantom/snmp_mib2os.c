@@ -27,8 +27,13 @@
 
 
 #define MAG_SYS_DESCR	    1
-#define MAG_SYS_UPTIME      2
-#define MAG_SYS_NAME        3
+#define MAG_SYS_OID	    2
+#define MAG_SYS_UPTIME      3
+#define MAG_SYS_CONTACT	    4
+#define MAG_SYS_NAME	    5
+#define MAG_SYS_LOCATION    6
+#define MAG_SYS_SERVICES    7
+
 
 static uint8_t *MibVarsSysGet(CONST SNMPVAR *, OID *, size_t *, int, size_t *, WMETHOD **);
 
@@ -39,9 +44,15 @@ static size_t base_oidlen = sizeof(base_oid) / sizeof(OID);
 static SNMPVAR mib_variables[] = {
 
     {MAG_SYS_DESCR,  ASN_OCTET_STR, ACL_RONLY, MibVarsSysGet, 1, {1}},
-    {MAG_SYS_UPTIME, ASN_TIMETICKS, ACL_RONLY, MibVarsSysGet, 1, {2}},
-    {MAG_SYS_NAME,   ASN_OCTET_STR, ACL_RONLY, MibVarsSysGet, 1, {3}},
-//    {MAG_SYS_NAME,   ASN_OCTET_STR, ACL_RWRITE, MibVarsSysGet, 1, {3}},
+    {MAG_SYS_OID,    ASN_OBJECT_ID, ACL_RONLY, MibVarsSysGet, 1, {2}},
+    {MAG_SYS_UPTIME, ASN_TIMETICKS, ACL_RONLY, MibVarsSysGet, 1, {3}},
+//    {MAG_SYS_CONTACT,ASN_OCTET_STR, ACL_RWRITE, MibVarsSysGet, 1, {4}},
+    {MAG_SYS_CONTACT,ASN_OCTET_STR, ACL_RONLY, MibVarsSysGet, 1, {4}},
+    {MAG_SYS_NAME,   ASN_OCTET_STR, ACL_RONLY, MibVarsSysGet, 1, {5}},
+//    {MAG_SYS_NAME,   ASN_OCTET_STR, ACL_RWRITE, MibVarsSysGet, 1, {5}},
+//    {MAG_SYS_LOCATION, ASN_OCTET_STR, ACL_RWRITE, MibVarsSysGet, 1, {6}},
+    {MAG_SYS_LOCATION, ASN_OCTET_STR, ACL_RONLY, MibVarsSysGet, 1, {6}},
+    {MAG_SYS_SERVICES, ASN_INTEGER,   ACL_RONLY, MibVarsSysGet, 1, {7}}
 
 };
 
@@ -106,10 +117,10 @@ static uint8_t *MibVarsSysGet(CONST SNMPVAR * vp, OID * name, size_t * namelen, 
 #define MAXSD (_UTSNAME_LENGTH*5)
             static char sys_descr[MAXSD];
 
-            snprintf( sys_descr, MAXSD-1, "Phantom OS %s %s %s %s",
+            snprintf( sys_descr, MAXSD-1, "%s ver. %s svn %s for %s",
                       phantom_uname.sysname,
-                      phantom_uname.release,
                       phantom_uname.version,
+                      phantom_uname.release,
                       phantom_uname.machine
                     );
 
@@ -137,6 +148,19 @@ static uint8_t *MibVarsSysGet(CONST SNMPVAR * vp, OID * name, size_t * namelen, 
         }
         *varlen = 0;
         return empty;
+
+        // The physical location of this node (e.g., `telephone closet, 3rd floor'). If the location is unknown, the value is the zero-length string.
+    case MAG_SYS_LOCATION:
+        *varlen = 0;
+        return empty;
+
+        // TODO store somehow? Object?
+    case MAG_SYS_CONTACT:
+        {
+            const char *cc = "dz@dz.ru :)";
+            *varlen = strlen(cc);
+            return (uint8_t *) cc;
+        }
 
     }
     return NULL;
