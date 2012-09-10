@@ -67,6 +67,9 @@ void pvm_backtrace_current_thread(void)
         return;
     }
 
+    pvm_backtrace(tda);
+    return;
+
     nope:
         printf("Unable to print backtrace, e=%d\n", e);
 }
@@ -84,6 +87,7 @@ void pvm_backtrace(struct data_area_4_thread *tda)
 
     printf("pvm_backtrace thread this:\n");
     pvm_object_dump(tda->_this_object);
+    printf("\n\n");
 
     pvm_object_t sframe = tda->call_frame;
 
@@ -95,19 +99,26 @@ void pvm_backtrace(struct data_area_4_thread *tda)
 
         printf("pvm_backtrace frame:\n");
         pvm_object_dump(sframe);
+        printf("\n");
+
         printf("pvm_backtrace frame this:\n");
         pvm_object_t thiso = fda->this_object;
         pvm_object_dump(thiso);
+        printf("\n");
+
         printf("pvm_backtrace frame IP: %d\n", fda->IP);
 
         pvm_object_t tclass = thiso.data->_class;
         int ord = fda->ordinal;
 
         int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
-        pvm_object_t mname = pvm_get_method_name( tclass, ord );
+        if( lineno >= 0 )
+        {
+            pvm_object_t mname = pvm_get_method_name( tclass, ord );
 
-        pvm_object_print(mname);
-        printf(":%d\n", lineno);
+            pvm_object_print(mname);
+            printf(":%d\n", lineno);
+        }
 
         printf("\n\n");
         sframe = fda->prev;
@@ -121,7 +132,7 @@ int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
     if(!pvm_object_class_is( tclass, pvm_get_class_class() ))
     {
         printf("pvm_ip_to_linenum: not a class\n");
-        return 0;
+        return -1;
     }
 
     struct data_area_4_class *cda= pvm_object_da( tclass, class );
@@ -145,13 +156,13 @@ int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
         if( sp[i].ip >= ip )
         {
             if( i == 0 )
-                return 0;
+                return -1;
 
             return sp[i-1].line;
         }
     }
 
-    return 0;
+    return -1;
 }
 
 
