@@ -7,6 +7,7 @@
 
 #include <kernel/pool.h>
 
+static int verbose = 0;
 
 
 static pool_t *pool;
@@ -35,13 +36,13 @@ static int _empty() { return hsp == 0; }
 
 static void _show_free()
 {
-    printf( "%d free, %d used in pool\n", pool_get_free( pool ), pool_get_used( pool ) );
+    if(verbose) printf( "%d free, %d used in pool\n", pool_get_free( pool ), pool_get_used( pool ) );
 }
 
 
 static void _create_free( int i )
 {
-    printf( "create/free %d\n", i );
+    if(verbose) printf( "create/free %d\n", i );
 
     while(i-- > 0)
     {
@@ -59,7 +60,7 @@ static void _create_free( int i )
 
 static void _create( int i )
 {
-    printf( "create %d\n", i );
+    if(verbose) printf( "create %d\n", i );
 
     while(i-- > 0)
     {
@@ -73,7 +74,7 @@ static void _create( int i )
 
 static void _release( int i)
 {
-    printf( "release %d\n", i );
+    if(verbose) printf( "release %d\n", i );
 
     while(i-- > 0)
         test_check_false(pool_release_el( pool, _pop() ));
@@ -82,7 +83,7 @@ static void _release( int i)
 
 static void _release_all()
 {
-    SHOW_INFO0( 0, "release all" );
+    if(verbose) { SHOW_INFO0( 0, "release all" ); }
 
     while(!_empty())
         test_check_false(pool_release_el( pool, _pop() ));
@@ -123,7 +124,7 @@ TEST_FUNCT(pool) {
 
     pool_handle_t  h;
 
-    SHOW_FLOW0( 0, "check make/kill" );
+    if(verbose) SHOW_FLOW0( 0, "check make/kill" );
 
     void *el0 = "aaa";
     h = pool_create_el( pool, el0 );
@@ -134,6 +135,8 @@ TEST_FUNCT(pool) {
     void *el = pool_get_el( pool, h );
     test_check_eq( el0, el );
     test_check_true( 2 == pool_get_used( pool ) );
+
+    printf("pool_get_used() = %d\n", pool_get_used( pool ) );
 
     test_check_false(pool_release_el( pool, h ));
     test_check_true( 1 == pool_get_used( pool ) );
@@ -162,22 +165,22 @@ TEST_FUNCT(pool) {
 
     test_check_true( 0 == pool_get_used( pool ) );
 
-    SHOW_FLOW0( 0, "check mass make/kill" );
+    if(verbose) SHOW_FLOW0( 0, "check mass make/kill" );
     _create_free( 500 );
 
-    SHOW_FLOW0( 0, "check create + mass make/kill" );
+    if(verbose) SHOW_FLOW0( 0, "check create + mass make/kill" );
     _create(20);
     _create_free( 500 );
 
-    SHOW_FLOW0( 0, "check kill/make/kill" );
+    if(verbose) SHOW_FLOW0( 0, "check kill/make/kill" );
     _release(10);
     _create(20);
     _release(10);
 
-    SHOW_FLOW0( 0, "check mass make/kill" );
+    if(verbose) SHOW_FLOW0( 0, "check mass make/kill" );
     _create_free( 500 );
 
-    SHOW_FLOW0( 0, "check release all" );
+    if(verbose) SHOW_FLOW0( 0, "check release all" );
     _release_all();
     test_check_true( 0 == pool_get_used( pool ) );
 
@@ -185,7 +188,7 @@ TEST_FUNCT(pool) {
 
     // Now test autodelete
 
-    SHOW_FLOW0( 0, "check autodelete" );
+    if(verbose) SHOW_FLOW0( 0, "check autodelete" );
     pool = create_pool();
     pool->flag_nofail = 0; // return errors, don't panic
     pool->flag_autoclean = 1;
@@ -196,10 +199,11 @@ TEST_FUNCT(pool) {
 
 }
 
-TEST_FUNCT(foo2) {
-   printf("test case 2\n");
+TEST_FUNCT(foo2)
+{
+    //printf("test case 2\n");
     /* Фейковый код */
-    CU_ASSERT_EQUAL(1, 1);
+    //CU_ASSERT_EQUAL(1, 1);
 }
 
 void runSuite(void) {
