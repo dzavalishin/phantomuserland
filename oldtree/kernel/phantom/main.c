@@ -462,6 +462,8 @@ static void net_stack_init()
 
     phantom_trfs_init();
 
+    start_tcp_echo_server();
+
 #endif // HAVE_NET
 }
 

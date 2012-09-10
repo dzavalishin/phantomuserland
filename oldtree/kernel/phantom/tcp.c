@@ -2,13 +2,18 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
  *
  * TCP.
  *
+ * Based on NeOS code:
+ * Copyright 2001-2004, Travis Geiselbrecht. All rights reserved.
+ * Distributed under the terms of the NewOS License.
+ *
+ *
 **/
 
-#define NET_CHATTY 0
+#define NET_CHATTY 1
 
 #include <kernel/config.h>
 #include <kernel/stats.h>
@@ -17,28 +22,7 @@
 #if HAVE_NET
 
 
-/*
- ** Copyright 2001-2004, Travis Geiselbrecht. All rights reserved.
- ** Distributed under the terms of the NewOS License.
- */
-
 #include <kernel/debug.h>
-/*
- #include <kernel/kernel.h>
- #include <kernel/cbuf.h>
- #include <kernel/lock.h>
- #include <kernel/heap.h>
- #include <kernel/khash.h>
- #include <kernel/sem.h>
- #include <kernel/time.h>
- #include <kernel/arch/cpu.h>
- #include <kernel/net/tcp.h>
- #include <kernel/net/ipv4.h>
- #include <kernel/net/misc.h>
- #include <kernel/net/net_timer.h>
- #include <string.h>
- #include <stdlib.h>
- */
 #include <phantom_libc.h>
 #include <time.h>
 
@@ -51,7 +35,6 @@
 
 #include <newos/nqueue.h>
 
-//#include "cbuf.h"
 #include <kernel/net/tcp.h>
 #include <kernel/net_timer.h>
 
@@ -245,9 +228,20 @@ static unsigned int tcp_socket_hash_func(void *_s, const void *_key, unsigned in
 
     if(s) {
         hash = *(uint32 *)&s->local_addr ^ *(uint32 *)&s->remote_addr ^ s->local_port ^ s->remote_port;
+#if NET_CHATTY
+        dprintf("hash 4 sck: local port %d, rem port %d, local addr %x, rem addr %x\n",
+                s->local_port, s->remote_port, *(uint32 *)&s->local_addr, *(uint32 *)&s->remote_addr
+               );
+#endif
     } else {
         hash = *(uint32 *)&key->local_addr ^ *(uint32 *)&key->remote_addr ^ key->local_port ^ key->remote_port;
+#if NET_CHATTY
+        dprintf("hash 4 key: local port %d, rem port %d, local addr %x, rem addr %x\n",
+                key->local_port, key->remote_port, *(uint32 *)&key->local_addr, *(uint32 *)&key->remote_addr
+               );
+#endif
     }
+
 
     return hash % range;
 }
@@ -452,7 +446,7 @@ static void dump_socket_info(int argc, char **argv)
 }
 
 
-static void list_sockets(int argc, char **argv)
+static void list_tcp_sockets(int argc, char **argv)
 {
     (void) argc;
     (void) argv;
@@ -516,8 +510,12 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     header_len = ((ntohs(header->length_flags) >> 12) & 0x0f) * 4;
 
 #if NET_CHATTY
-    dprintf("tcp_input: src port %d, dest port %d, buf len %d, checksum 0x%x, flags 0x%b\n",
-            ntohs(header->source_port), ntohs(header->dest_port), (int)cbuf_get_len(buf), ntohs(header->checksum),
+    //dprintf("tcp_input: src port %d, dest port %d, buf len %d, checksum 0x%x, flags 0x%b\n",
+    //        ntohs(header->source_port), ntohs(header->dest_port), (int)cbuf_get_len(buf), ntohs(header->checksum),
+    //        ntohs(header->length_flags) & 0x3f, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG");
+
+    dprintf("tcp_input: src port %d, dest port %d, buf len %d, flags 0x%b\n",
+            ntohs(header->source_port), ntohs(header->dest_port), (int)cbuf_get_len(buf),
             ntohs(header->length_flags) & 0x3f, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG");
 #endif
 
@@ -567,6 +565,9 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     // see if it matches a socket we have
     s = lookup_socket(source_address, target_address, header->source_port, header->dest_port);
     if(!s) {
+#if NET_CHATTY
+        dprintf("socket not found\n");
+#endif
         // send a RST packet
         goto send_reset;
     }
@@ -758,7 +759,9 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
 
         // put it in the right state
         accept_socket->state = STATE_SYN_RCVD;
-
+#if NET_CHATTY
+        dprintf("insert accepted socket\n");
+#endif
         // add it to the hash table
         mutex_lock(&socket_table_lock);
         hash_insert(socket_table, accept_socket);
@@ -1688,6 +1691,12 @@ static void tcp_send(ipv4_addr dest_addr, uint16 dest_port, ipv4_addr src_addr, 
 
     STAT_INC_CNT(STAT_CNT_TCP_TX);
 
+#if NET_CHATTY
+    dprintf("tcp_send: src port %d, dest port %d, buf len %d, flags 0x%b\n",
+            source_port, dest_port, (int)cbuf_get_len(buf),
+            flags, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG");
+#endif
+
     // grab a buf large enough to hold the header + options
     header_buf = cbuf_get_chain(sizeof(tcp_header) + options_length);
     if(!header_buf)
@@ -1734,8 +1743,7 @@ static void tcp_socket_send(tcp_socket *s, cbuf *data, tcp_flags flags, const vo
     rx_win_high = s->rx_win_low + s->rx_win_size - cbuf_get_len(s->read_buffer) - 1;
 
 #if NET_CHATTY
-    dprintf("** s->rx_win_low %u s->rx_win_size %ud read_buf_len %d, new win high %ud\n",
-            s->rx_win_low, s->rx_win_size, cbuf_get_len(s->read_buffer), rx_win_high);
+    //dprintf("** s->rx_win_low %u s->rx_win_size %ud read_buf_len %d, new win high %ud\n", s->rx_win_low, s->rx_win_size, cbuf_get_len(s->read_buffer), rx_win_high);
 #endif
     if(SEQUENCE_GTE(rx_win_high, s->rx_win_high)) {
         s->rx_win_high = rx_win_high;
@@ -1793,7 +1801,7 @@ int tcp_init(void)
     next_ephemeral_port = random() % 32000 + 1024;
 
     dbg_add_command(&dump_socket_info, "tcp_socket", "dump info about socket at address");
-    dbg_add_command(&list_sockets, "tcp_sockets", "list all active tcp sockets");
+    dbg_add_command(&list_tcp_sockets, "tcp_sockets", "list all active tcp sockets");
 
     return 0;
 }

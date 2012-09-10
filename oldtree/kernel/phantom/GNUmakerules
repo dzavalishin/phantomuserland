@@ -111,7 +111,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	video_drv_basic_vga.o video_drv_basic_vga_tables.o video_drv_null.o video.o \
 	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
 	timer.o driver_map.o driver_virtio_disk.o driver_virtio_net.o driver_virtio_random.o driver_virtio_baloon.o virtio.o \
-	device.o driver_isa_ne2000.o \
+	device.o driver_isa_ne2000.o mmcard.o \
 	driver_pci_pcnet32.o driver_pci_intel82559.o \
 	driver_pci_intel_etc.o debug_console.o tlb.o \
 	elf.o unix/dir.o unix/kernel_file.o unix/fs_pipe.o unix/sys_time.o \
@@ -121,6 +121,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/signal.o unix/sys_sw.o unix/phantom.o \
         vm_cn_udp.o vm_cn_timer.o vm_cn_stats.o  \
 	fs_map.o resolve.o main.o keyboard.o syslog.o \
+        asn1.o snmp.o snmp_agent.o snmp_mib.o snmp_auth.o snmp_session.o snmp_api.o snmp_config.o snmpd.o snmp_mib2os.o \
 	arch_name.o arch_init.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o disk_struct.o vm_test.o \
 	svn_version.o profile.o trace.o $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)

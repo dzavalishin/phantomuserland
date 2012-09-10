@@ -94,9 +94,10 @@ void profiler_register_interrupt_hit( addr_t ip )
     map[ip]++;
     total_count++;
 
+#if PROFILER_REGULAR_DUMP_TO_LOG
     if( (total_count % 10000) == 0 )
         profiler_dump_map();
-
+#endif
 }
 
 // TODO must sum counts for map entries which correspond to one func
