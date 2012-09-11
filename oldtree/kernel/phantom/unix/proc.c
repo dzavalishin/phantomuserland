@@ -298,7 +298,7 @@ errno_t uu_proc_add_thread( int pid, int tid )
     }
 
     //t->u = p;
-    hal_set_thread_death_handler(uu_proc_thread_kill);
+    t_current_set_death_handler(uu_proc_thread_kill);
 
     if(!done) panic("out of thread slots for proc");
 

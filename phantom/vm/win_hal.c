@@ -91,9 +91,15 @@ void   hal_start_kernel_thread(void (*thread)(void))
         panic("can't start kernel thread");
 }
 
-void hal_set_current_thread_name( const char *name)
+void hal_set_current_thread_name( const char *name )
 {
     (void) name;
+}
+
+errno_t t_current_set_name( const char *name )
+{
+    (void) name;
+    return EINVAL;
 }
 
 errno_t hal_set_current_thread_priority(int p)
@@ -102,6 +108,11 @@ errno_t hal_set_current_thread_priority(int p)
     return EINVAL;
 }
 
+errno_t t_current_set_priority(int p)
+{
+    (void) p;
+    return EINVAL;
+}
 
 void    hal_halt()
 {
@@ -220,6 +231,7 @@ int phantom_dev_keyboard_getc(void)
 
 
 
+#if OLD_VM_SLEEP
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 {
     /*if(phantom_virtual_machine_stop_request)
@@ -231,9 +243,13 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 
     //phantom_virtual_machine_threads_stopped++;
 
+#if OLD_VM_SLEEP
     while(thda->sleep_flag)
         sleep(1);
-
+#else
+#warning sleep?
+    sleep(1);
+#endif
     //phantom_virtual_machine_threads_stopped--;
 
 }
@@ -252,7 +268,7 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
 {
     thda->sleep_flag--;
 }
-
+#endif
 
 
 void phantom_wakeup_after_msec(long msec)
@@ -627,4 +643,7 @@ int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback 
     panic("set_net_timer");
 }
 
+static int dummy_snap_catch;
+
+volatile int * snap_catch_va = &dummy_snap_catch;
 

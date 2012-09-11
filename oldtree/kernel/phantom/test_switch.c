@@ -103,6 +103,7 @@ void report( int rc, const char *test_name )
 void run_test( const char *test_name, const char *test_parm )
 {
     int all = 0 == strcmp(test_name, "all" );
+    int i;
 
 #ifndef ARCH_ia32
     printf("sleeping 20 sec");
@@ -126,8 +127,10 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(malloc);
     TEST(amap);
 
-
-    TEST(sem);
+    for( i = 200; i; i-- )
+    {
+        TEST(sem);
+    }
 
     TEST(cbuf);
     TEST(udp_send);

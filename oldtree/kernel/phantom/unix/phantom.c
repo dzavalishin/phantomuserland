@@ -44,7 +44,7 @@ static void run_class_thread(void *arg)
 
         char tn[32];
         snprintf( tn, sizeof(tn), "=%s", p->class_name ? p->class_name : "??" );
-        hal_set_thread_name(tn);
+        t_current_set_name(tn);
 
         nmethod = p->method_ordinal;
 

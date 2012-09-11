@@ -209,7 +209,7 @@ extern struct uufs proc_fs;
 errno_t uu_make_absname( char *out_path, const char *base, const char *add );
 
 //! Break path into the pieces
-int uu_break_path( const char *in, int maxpart, const char *oname[], int olen[] );
+int uu_break_path( const char *in, int maxpart, const char *oname[], size_t olen[] );
 
 //! True if fn is absolute
 int uu_is_absname( const char *fn );

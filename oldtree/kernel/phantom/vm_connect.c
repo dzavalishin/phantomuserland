@@ -517,7 +517,7 @@ struct cb_parm
 
 static void run_cb_thread(void *arg)
 {
-    hal_set_thread_name("conn cb");
+    t_current_set_name("conn cb");
 
     struct cb_parm *p = arg;
 

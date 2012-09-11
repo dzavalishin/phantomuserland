@@ -1323,15 +1323,16 @@ void do_snapshot()
     // TODO try to find some heuristic to pageout just pages modified long ago?
 
     // Do it in lowest prio (but not IDLE) or else massive IO will kill world
-    int prio = hal_get_current_thread_priority();
-    hal_set_current_thread_priority( THREAD_PRIO_LOWEST );
+    int prio;
+    t_current_get_priority(&prio);
+    t_current_set_priority( THREAD_PRIO_LOWEST );
 
 
     vm_map_for_all( kick_pageout ); // Try to pageout all of them - NOT IN LOCK!
     if(SNAP_STEPS_DEBUG) syslog( 0, "snap: wait 4 pgout to settle");
 
     // Back to orig prio
-    hal_set_current_thread_priority( prio );
+    t_current_set_priority( prio );
 
     // commented out to stress the pager
     //hal_sleep_msec(30000); // sleep for 10 sec - why 10?
@@ -1564,7 +1565,7 @@ static inline void balance_clean_dirty(void)
 static void vm_map_lazy_pageout_thread(void)
 {
     SHOW_FLOW0( 1, "Ready");
-    hal_set_thread_name("LazyPageout");
+    t_current_set_name("LazyPageout");
 
     while(1)
     {
@@ -1580,7 +1581,8 @@ static void vm_map_lazy_pageout_thread(void)
 
 static void vm_map_snapshot_thread(void)
 {
-    hal_set_thread_name("SnapShot");
+    t_current_set_name("SnapShot");
+    t_set_snapper_flag(); // Tell 'em IM THE SNAPPER, don't you ever try to stop me :)
 
     while(1)
     {
@@ -1608,7 +1610,7 @@ static void vm_map_deferred_disk_alloc_thread(void)
 {
     SHOW_FLOW0( 1, "Ready");
 
-    hal_set_thread_name("DeferAlloc");
+    t_current_set_name("DeferAlloc");
 
     while(1)
     {

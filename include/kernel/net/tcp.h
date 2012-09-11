@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
+ *
+ * TCP in kernel interface.
+ *
+**/
+
 /*
 ** Copyright 2001-2002, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.

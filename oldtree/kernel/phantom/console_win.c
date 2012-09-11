@@ -385,7 +385,7 @@ static void phantom_debug_window_loop()
 
     int show = 's';
 
-    hal_set_thread_name("Debug Win");
+    t_current_set_name("Debug Win");
     // Which thread will receive typein for this window
     phantom_debug_window->owner = get_current_tid();
 
@@ -517,7 +517,7 @@ static void phantom_debug_window_loop()
 /*
 static void phantom_launcher_window_loop()
 {
-    hal_set_thread_name("Debug Win");
+    t_current_set_name("Debug Win");
     // Which thread will receive typein for this window
     phantom_launcher_window->owner = get_current_tid();
 

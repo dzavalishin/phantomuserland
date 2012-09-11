@@ -386,20 +386,27 @@ void pvm_exec(pvm_object_t current_thread)
 
     pvm_exec_load_fast_acc(da); // For any case
 
+#if OLD_VM_SLEEP
     // Thread was snapped sleeping - resleep it
     if(da->sleep_flag)
         phantom_thread_sleep_worker( da );
+#else
+#warning resleep?
+#endif
 
     while(1)
     {
 
+#if NEW_SNAP_SYNC
+        touch_snap_catch();
+#else
         if(phantom_virtual_machine_snap_request)
         {
             pvm_exec_save_fast_acc(da); // Before snap
             phantom_thread_wait_4_snap();
             //pvm_exec_load_fast_acc(da); // We don't need this, if we die, we will enter again from above :)
         }
-
+#endif
 
 #if 0 // GC_ENABLED  // GC can be enabled here for test purposes only.
         static int gcc = 0;
@@ -995,6 +1002,7 @@ void pvm_exec(pvm_object_t current_thread)
             {
                 pvm_exec_sys(da,instruction & 0x0F);
     sys_sleep:
+#if OLD_VM_SLEEP
                 // Only sys can put thread asleep
                 // If we are snapped here we, possibly, will continue from
                 // the entry to this func. So save fast acc and recheck
@@ -1004,6 +1012,7 @@ void pvm_exec(pvm_object_t current_thread)
                     pvm_exec_save_fast_acc(da); // Before snap
                     phantom_thread_sleep_worker( da );
                 }
+#endif
                 break;
             }
 

@@ -515,7 +515,7 @@ static void kernel_protected_module_starter( void * _pid )
 
     SHOW_FLOW( 3, "Module %s thread started", name );
 
-    hal_set_thread_name(name);
+    t_current_set_name(name);
 
     uu_proc_add_thread( pid, get_current_tid() );
 
@@ -663,7 +663,7 @@ void kolibri_thread_starter( void * arg )
 
     SHOW_FLOW( 3, "Kolibri %s thread started", name );
 
-    hal_set_thread_name(name);
+    t_current_set_name(name);
 
     uu_proc_add_thread( pid, tid );
 

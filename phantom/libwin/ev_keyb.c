@@ -138,8 +138,8 @@ static void ev_send_key_event_to_q(_key_event *event)
 
 void ev_keyboard_read_thread(void)
 {
-    hal_set_thread_name("KeyEvents");
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    t_current_set_name("KeyEvents");
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {

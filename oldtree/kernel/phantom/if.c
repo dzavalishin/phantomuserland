@@ -368,7 +368,7 @@ static void if_tx_thread(void *args)
     cbuf *buf;
     ssize_t len;
 
-    hal_set_thread_name("IF Xmit");
+    t_current_set_name("IF Xmit");
 
 #if IF_PRIO
     thread_set_priority(i->tx_thread, THREAD_MAX_RT_PRIORITY - 2);
@@ -416,7 +416,7 @@ static void if_rx_thread(void *args)
     ifnet *i = args;
     cbuf *b;
 
-    hal_set_thread_name("IF Recv");
+    t_current_set_name("IF Recv");
 #if IF_PRIO
     thread_set_priority(i->rx_thread, THREAD_MAX_RT_PRIORITY - 2);
 #endif

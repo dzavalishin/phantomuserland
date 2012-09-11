@@ -96,8 +96,8 @@ static int dpc_threads = 0;
 
 static void dpc_thread(void)
 {
-    hal_set_thread_name("DPC Work");
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    t_current_set_name("DPC Work");
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 
     dpc_init_ok = 1;
 
@@ -156,7 +156,7 @@ static void dpc_timed(void)
 #if !DPC_WAKE_TIMER
 static void dpc_timed_waker_thread(void)
 {
-    hal_set_thread_name("DPC Waker");
+    t_current_set_name("DPC Waker");
 
     while(1)
     {

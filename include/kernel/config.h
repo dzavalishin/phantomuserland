@@ -12,6 +12,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define OLD_VM_SLEEP 0
 #define NEW_SNAP_SYNC 0
 
 

@@ -22,12 +22,13 @@
 #include <kernel/snap_sync.h>
 #include <hal.h>
 
-//#define DEBUG 0
-
 /* This is set from snap code to ask us to hold our breath */
 
-volatile int     phantom_virtual_machine_snap_request = 0;
 volatile int     phantom_virtual_machine_stop_request = 0;
+
+#if !NEW_SNAP_SYNC
+
+volatile int     phantom_virtual_machine_snap_request = 0;
 
 //static 
 volatile int     phantom_virtual_machine_threads_stopped = 0;
@@ -41,10 +42,11 @@ static hal_cond_t   phantom_vm_wait_4_snap;
 // and wakes all threads for most of them to go sleep again
 static hal_mutex_t  interlock_mutex;
 static hal_cond_t   vm_thread_wakeup_cond;
-
+#endif
 
 void phantom_snap_threads_interlock_init( void )
 {
+#if !NEW_SNAP_SYNC
     if(
        hal_cond_init( &phantom_snap_wait_4_vm_enter, "Snap W4E" ) ||
        hal_cond_init( &phantom_snap_wait_4_vm_leave, "Snap W4L" ) ||
@@ -54,8 +56,11 @@ void phantom_snap_threads_interlock_init( void )
        hal_cond_init( &vm_thread_wakeup_cond, "VmSleep")
       )
         panic("Can't init thread/snap interlocks");
+#endif
 }
 
+
+#if !NEW_SNAP_SYNC
 
 /*
  *
@@ -180,14 +185,14 @@ void phantom_snapper_reenable_threads( void )
     SHOW_FLOW0( 5, "Snapper done waiting for awake");
 
 }
+#endif
 
 
 
 
 
 
-
-
+#if OLD_VM_SLEEP
 // ----------------------------------------------------------------
 // userland sleep/wakeup code
 // ----------------------------------------------------------------
@@ -278,6 +283,8 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
     hal_mutex_unlock( &interlock_mutex );
 }
 
+#endif // OLD_VM_SLEEP
+
 
 void phantom_check_threads_pass_bytecode_instr_boundary( void )
 {
@@ -338,6 +345,9 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
         hal_exit_kernel_thread();
     }
 
+#if NEW_SNAP_SYNC
+    snap_unlock();
+#else
     SHOW_FLOW0( 15, "VM thread will sleep for blocking syscall");
     hal_mutex_lock( &interlock_mutex );
 
@@ -345,6 +355,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
     hal_cond_broadcast( &phantom_snap_wait_4_vm_enter );
 
     hal_mutex_unlock( &interlock_mutex );
+#endif // NEW_SNAP_SYNC
 
 
     // now do syscall - can block
@@ -354,6 +365,9 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
     ref_dec_o( arg );
     // BUG FIXME snapper won't continue until this thread is unblocked: end of snap waits for all stooped threads to awake
 
+#if NEW_SNAP_SYNC
+    snap_lock();
+#else
     hal_mutex_lock( &interlock_mutex );
 
     //while(tc->sleep_flag)         hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
@@ -367,6 +381,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 
     hal_mutex_unlock( &interlock_mutex );
     SHOW_FLOW0( 15, "VM thread awaken after blocking syscall");
+#endif // NEW_SNAP_SYNC
 
     // pop zero from obj stack
     // push ret val to obj stack

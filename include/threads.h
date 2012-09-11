@@ -22,7 +22,17 @@
 
 #define NO_PID 0
 
+// -----------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------
+
+struct phantom_thread;
+typedef struct phantom_thread phantom_thread_t;
+
+// -----------------------------------------------------------------------
 // Good clean tid based threads interface
+// -----------------------------------------------------------------------
+
 
 tid_t           get_current_tid(void);
 errno_t         t_kill_thread( tid_t tid );
@@ -37,6 +47,25 @@ errno_t         t_get_ctty( tid_t tid, struct wtty ** );
 errno_t         t_set_pid( tid_t tid, pid_t pid );
 errno_t         t_get_pid( tid_t tid, pid_t *pid );
 
+errno_t         t_set_priority( tid_t tid, int prio );
+errno_t         t_get_priority( tid_t tid, int *prio );
+
+
+// -----------------------------------------------------------------------
+// Current thread only
+// -----------------------------------------------------------------------
+
+errno_t         t_current_set_priority( int prio );
+errno_t         t_current_get_priority( int *prio);
+
+errno_t         t_current_set_name(const char *name);
+
+
+errno_t         t_current_set_death_handler(void (*handler)( phantom_thread_t * ));
+
+// -----------------------------------------------------------------------
+// Misc
+// -----------------------------------------------------------------------
 
 // Switch on/off CPUs other than boot
 void            t_smp_enable(int yn);
@@ -45,36 +74,12 @@ void            t_smp_enable(int yn);
 // Make sure we return executing on boot CPU
 void            t_migrate_to_boot_CPU(void);
 
+errno_t         t_set_snapper_flag(void); // mark myself as snapper thread
 
 
-// returns thread id, does not check for thread death
-tid_t           hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
-tid_t           hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
-
-
-errno_t         hal_set_current_thread_priority( int prio );
-int             hal_get_current_thread_priority();
-#define hal_set_current_thread_name hal_set_thread_name
-void            hal_set_thread_name(const char *name);
-
-
-void            hal_disable_preemption(void);
-void            hal_enable_preemption(void);
-
-
-
-
-
-// TODO remove it from here when everything is moved in.
-#include <hal.h>
-
-#include <kernel/smp.h>
-
-
-struct phantom_thread;
-typedef struct phantom_thread phantom_thread_t;
-
-
+// -----------------------------------------------------------------------
+// Priorities
+// -----------------------------------------------------------------------
 
 
 #define THREAD_PRIO_NORM        0x7
@@ -90,6 +95,10 @@ typedef struct phantom_thread phantom_thread_t;
 
 
 
+
+// -----------------------------------------------------------------------
+// Flags
+// -----------------------------------------------------------------------
 
 
 #define THREAD_FLAG_USER        0x0001 // runs in user mode - not imlp
@@ -111,6 +120,63 @@ typedef struct phantom_thread phantom_thread_t;
 
 
 #define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -----------------------------------------------------------------------
+// Outdated
+// -----------------------------------------------------------------------
+
+
+// returns thread id, does not check for thread death
+tid_t           hal_start_kernel_thread_arg(void (*thread)(void *arg), void *arg);
+tid_t           hal_start_thread(void (*thread)(void *arg), void *arg, int flags);
+
+
+//errno_t         hal_set_current_thread_priority( int prio );
+//int             hal_get_current_thread_priority();
+
+#define hal_set_current_thread_name hal_set_thread_name
+void            hal_set_thread_name(const char *name);
+
+
+void            hal_disable_preemption(void);
+void            hal_enable_preemption(void);
+
+
+
+
+
+// TODO remove it from here when everything is moved in.
+#include <hal.h>
+
+#include <kernel/smp.h>
+
+
+
+
+
+
+
+
+
+
+
 
 
 

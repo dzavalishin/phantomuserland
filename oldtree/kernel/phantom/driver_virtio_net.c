@@ -328,7 +328,7 @@ static void provide_buffers(virtio_device_t *vd)
 
 static void vnet_thread(void *_dev)
 {
-    hal_set_thread_name("VirtIOdrv");
+    t_current_set_name("VirtIOdrv");
 
     phantom_device_t * 	dev = _dev;
     virtio_device_t  *	vdev = dev->drv_private;

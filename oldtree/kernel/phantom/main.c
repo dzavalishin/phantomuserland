@@ -505,14 +505,14 @@ void phantom_shutdown(int flags)
         phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
 #endif
 
+        //pressEnter("finishing vm");
+        vm_map_finish(); // Actually does snapshot
+        vm_map_wait_for_finish();
+
         //pressEnter("will do a snap");
         run_stop_functions( STOP_LEVEL_PREPARE );
         run_stop_functions( STOP_LEVEL_STOP );
 
-
-        //pressEnter("finishing vm");
-        vm_map_finish();
-        vm_map_wait_for_finish();
 
         //pressEnter("finishing pager");
         pager_finish();

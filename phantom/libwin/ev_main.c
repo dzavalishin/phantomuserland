@@ -149,9 +149,9 @@ static void ev_push_event( struct ui_event *e )
 //! This thread delivers events from main Q to windows
 static void ev_push_thread()
 {
-    hal_set_thread_name("UIEventQ");
+    t_current_set_name("UIEventQ");
     // +1 so that it is a bit higher than regular sys threads
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO+1);
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
 #if EVENTS_ENABLED && 1
     while(1)

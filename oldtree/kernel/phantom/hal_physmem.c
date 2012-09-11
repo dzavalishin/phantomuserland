@@ -608,7 +608,7 @@ static void physReplentishReserve()
 
 static void replentishThread(void *arg)
 {
-    hal_set_thread_name("PhysResrv");
+    t_current_set_name("PhysResrv");
     hal_cond_init(&run, "PhysReserve");
     hal_mutex_init(&runm, "PhysReserve");
     hal_spin_init(&pr_lock);
