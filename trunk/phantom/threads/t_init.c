@@ -30,9 +30,9 @@ static void haltme( void *a )
 
 
     // Hack - this thread can't call malloc (it has sema and we can't wait), so set name manually
-    //hal_set_thread_name("<Halt_Me>");
+    //t_current_set_name("<Halt_Me>");
     GET_CURRENT_THREAD()->name = "<Halt_Me>";
-    // BUG - next call to hal_set_thread_name will crash due to attempt to free static string
+    // BUG - next call to t_current_set_name will crash due to attempt to free static string
 
     have_idlest = 1;
     //int cpu = GET_CPU_ID();
@@ -51,9 +51,9 @@ static void kill_thread_thread( void )
 {
     //(void) a;
     //hal_set_current_thread_priority( THREAD_PRIO_IDLE );
-    hal_set_current_thread_priority( THREAD_PRIO_LOW );
-
-    hal_set_thread_name("Init");
+    //hal_set_current_thread_priority( THREAD_PRIO_LOW );
+    t_current_set_priority( THREAD_PRIO_LOW );
+    t_current_set_name("Init");
 
     while(1)
     {

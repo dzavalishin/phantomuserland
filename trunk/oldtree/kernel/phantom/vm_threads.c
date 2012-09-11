@@ -99,13 +99,13 @@ static volatile int args_used = 0;
 
 static void thread_run_func( void *arg )
 {
-    hal_set_thread_name("VM");
+    t_current_set_name("VM");
 
     struct pvm_object current_thread = *((struct pvm_object *)arg);
 
     args_used--;
 
-    hal_set_thread_death_handler( (void *) thread_death_handler );
+    t_current_set_death_handler( (void *) thread_death_handler );
 
     n_vm_threads++;
     pvm_exec( current_thread );
@@ -131,6 +131,7 @@ static void start_new_vm_thread(struct pvm_object new_thread)
     while(args_used > 0)
         hal_sleep_msec(1);
 
+#if OLD_VM_SLEEP
     if(tda->sleep_flag)
     {
         //timedcall_t *e = &(tda->timer);
@@ -163,6 +164,7 @@ static void start_new_vm_thread(struct pvm_object new_thread)
         }
 
     }
+#endif // OLD_VM_SLEEP
 }
 
 
@@ -229,8 +231,8 @@ void activate_all_threads()
 void phantom_finish_all_threads(void)
 {
     phantom_virtual_machine_stop_request = 1;
+#if !NEW_SNAP_SYNC
     phantom_virtual_machine_snap_request = 1;
-
     SHOW_FLOW( 2, "Finishing %d threads", n_vm_threads);
     while(n_vm_threads > 0)
     {
@@ -239,6 +241,7 @@ void phantom_finish_all_threads(void)
         // For snapper may, possibly, decrement it till then
         phantom_virtual_machine_snap_request = 1;
     }
+#endif
 }
 
 

@@ -189,7 +189,7 @@ phantom_import_main_thread()
     //GET_CURRENT_THREAD() = t;
     SET_CURRENT_THREAD(t);
 
-    hal_set_thread_name("Main");
+    t_current_set_name("Main");
 
 }
 
@@ -228,7 +228,7 @@ phantom_import_cpu_thread(int ncpu)
     char *name = calloc(1, 20);
     snprintf( name, 20, "CPU %d idle", ncpu );
 
-    hal_set_thread_name(name);
+    t_current_set_name(name);
     t->priority = THREAD_PRIO_IDLE;
 
     GET_IDLEST_THREAD() = t;

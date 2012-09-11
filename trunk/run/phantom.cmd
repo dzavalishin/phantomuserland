@@ -1,10 +1,13 @@
 @echo off
 rem http://dietpc.org/windows/qemu/
-rem SET QDIR=qemu\0.13.0
+rem http://lassauge.free.fr/qemu/
+
 SET QDIR=qemu\0.15.1
 SET QCMD=qemu.exe
+rem SET QDIR=qemu\1.1.0
 rem SET QDIR=qemu\1.0.1
 rem SET QCMD=qemu-system-i386.exe
+rem SET QCMD=qemu-system-x86_64w.exe 
 
 set QEMU_AUDIO_DRV=dsound
 set QEMU_AUDIO_DRV=sdl
@@ -39,7 +42,10 @@ rem SET Q_NET= -net nic,model=pcnet  -net user -tftp ./tftp
 SET Q_MACHINE=-m 256
 #SET Q_MACHINE=-m 120
 
-SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img 
+rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img
+SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb openwrt-x86-ext2.image.kernel -hda fat:fat -hdb phantom.img
+SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -hdb phantom.img
+
 rem -fdb kolibri.iso
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb e2.img -hda fat:fat -hdb phantom.img 
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img 
@@ -57,6 +63,7 @@ del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
 start /wait %QDIR%\%QCMD% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
+
 
 grep KERNEL.TEST serial0.log
 grep USERMODE.TEST serial0.log

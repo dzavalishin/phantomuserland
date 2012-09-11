@@ -156,8 +156,8 @@ static void mouse_push_event_thread(void *arg)
 {
     (void) arg;
 
-    hal_set_thread_name("MouEvents");
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    t_current_set_name("MouEvents");
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 
     while(1)
     {

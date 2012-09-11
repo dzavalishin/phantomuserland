@@ -4,6 +4,7 @@
 
 #include <phantom_libc.h>
 
+#if OLD_VM_SLEEP
 #warning i am obsolete
 
 #define CN_TM_NET 1
@@ -47,4 +48,6 @@ void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc)
     phantom_request_timed_call( e, 0 );
 #endif
 }
+
+#endif
 

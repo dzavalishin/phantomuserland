@@ -408,7 +408,7 @@ static void arp_retransmit_thread(void)
     bigtime_t now;
     bool empty_queue;
 
-    hal_set_thread_name("ARP Xmit");
+    t_current_set_name("ARP Xmit");
 
     for(;;) {
         sem_acquire(arp_wait_sem);
@@ -475,7 +475,7 @@ static void arp_cleanup_thread(void)
     arp_cache_entry *free_list;
     bigtime_t now;
 
-    hal_set_thread_name("ARP Clean");
+    t_current_set_name("ARP Clean");
 
     for(;;) {
         // 1 min

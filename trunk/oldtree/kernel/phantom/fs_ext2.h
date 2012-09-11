@@ -268,11 +268,12 @@ struct ext2_group_desc
 /*
  * Macro-instructions used to manage group descriptors
  */
-#ifdef __KERNEL__
-# define EXT2_BLOCKS_PER_GROUP(s)	((s)->u.ext2_sb.s_blocks_per_group)
-# define EXT2_DESC_PER_BLOCK(s)		((s)->u.ext2_sb.s_desc_per_block)
-# define EXT2_INODES_PER_GROUP(s)	((s)->u.ext2_sb.s_inodes_per_group)
-# define EXT2_DESC_PER_BLOCK_BITS(s)	((s)->u.ext2_sb.s_desc_per_block_bits)
+#ifdef KERNEL
+# define EXT2_BLOCKS_PER_GROUP(s)	((s)->s_blocks_per_group)
+//# define EXT2_DESC_PER_BLOCK(s)		((s)->s_desc_per_block)
+# define EXT2_DESC_PER_BLOCK(s)		(EXT2_BLOCK_SIZE(s) / sizeof (struct ext2_group_desc))
+# define EXT2_INODES_PER_GROUP(s)	((s)->s_inodes_per_group)
+# define EXT2_DESC_PER_BLOCK_BITS(s)	((s)->s_desc_per_block_bits)
 #else
 # define EXT2_BLOCKS_PER_GROUP(s)	((s)->s_blocks_per_group)
 # define EXT2_DESC_PER_BLOCK(s)		(EXT2_BLOCK_SIZE(s) / sizeof (struct ext2_group_desc))
@@ -517,21 +518,22 @@ struct file_direct
 
 
 
-#define EXT2_INODES_PER_BLOCK(fs) \
-	(EXT2_INODES_PER_GROUP(fs) / EXT2_BLOCKS_PER_GROUP(fs))
+#define EXT2_INODES_PER_BLOCK(fs) 	(EXT2_INODES_PER_GROUP(fs) / EXT2_BLOCKS_PER_GROUP(fs))
 
 
 
 static inline int
 ino2blk (struct ext2_super_block *fs, struct ext2_group_desc *gd, int ino)
 {
-    int group;
-    int blk;
+    int ipg = EXT2_INODES_PER_GROUP(fs);
+    int ipb = EXT2_INODES_PER_BLOCK(fs);
 
-    group = (ino - 1) / EXT2_INODES_PER_GROUP(fs);
-    blk = gd[group].bg_inode_table +
-        (((ino - 1) % EXT2_INODES_PER_GROUP(fs)) /
-         EXT2_INODES_PER_BLOCK(fs));
+    int group = (ino - 1) / ipg;
+    //SHOW_FLOW( 9,"ino2blk grp = %d", group );
+
+    int shift = (((ino - 1) % ipg) / ipb);
+
+    int blk = gd[group].bg_inode_table + shift;
 
     return blk;
 }

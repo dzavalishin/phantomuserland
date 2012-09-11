@@ -194,7 +194,7 @@ static void mipsnet_interrupt( void *_dev )
 /*
 static void mipsnet_thread(void *_dev)
 {
-    hal_set_thread_name("MipsNetDrv");
+    t_current_set_name("MipsNetDrv");
 
     phantom_device_t * dev = _dev;
     struct mipsnet *pvt = dev->drv_private;

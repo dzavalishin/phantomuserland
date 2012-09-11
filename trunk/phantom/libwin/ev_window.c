@@ -79,8 +79,8 @@ void w_event_deliver_thread(void)
     hal_sem_init( &we_sem, "wevent" );
     we_inited = 1;
 
-    hal_set_thread_name("WEvent");
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO+1);
+    t_current_set_name("WEvent");
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
     while(1)
     {

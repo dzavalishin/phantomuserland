@@ -101,7 +101,7 @@ static void paint_thread(void *arg)
 
     hal_set_current_thread_name("paint");
     // +1 so that it is a bit higher than regular sys threads
-    hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO+1);
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
     while(1)
     {

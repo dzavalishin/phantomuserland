@@ -416,7 +416,7 @@ static void trfs_recv_thread(void *arg)
 
     u_int8_t    buf[TRFS_MAX_PKT];
 
-    hal_set_thread_name("TRFS Recv");
+    t_current_set_name("TRFS Recv");
 
     while(connect_trfs())
     {
@@ -472,7 +472,7 @@ static void trfs_resend_thread(void *arg)
 {
     (void) arg;
 
-    hal_set_thread_name("TRFS Resend");
+    t_current_set_name("TRFS Resend");
 
     while(1)
     {

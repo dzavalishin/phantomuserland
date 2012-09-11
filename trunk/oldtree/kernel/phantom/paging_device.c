@@ -331,8 +331,8 @@ paging_device_io_thread( void *arg )
 {
     paging_device *me = (paging_device *)arg;
 
-    hal_set_thread_name("Pager Dev");
-	hal_set_current_thread_priority(PHANTOM_SYS_THREAD_PRIO);
+    t_current_set_name("Pager Dev");
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 
     SHOW_FLOW(9, "paging_device_io_thread started, me = %lx\n", me);
 

@@ -339,7 +339,7 @@ static void ne_interrupt( void *_dev )
 
 static void ne2000_thread(void *_dev)
 {
-    hal_set_thread_name("Ne2kDrv");
+    t_current_set_name("Ne2kDrv");
 
     phantom_device_t * dev = _dev;
     struct ne *pvt = dev->drv_private;

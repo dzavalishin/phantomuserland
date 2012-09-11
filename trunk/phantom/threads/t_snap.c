@@ -17,6 +17,7 @@
 #include <hal.h>
 #include <phantom_libc.h>
 #include <kernel/page.h>
+#include <kernel/snap_sync.h>
 
 #include <thread_private.h>
 
@@ -72,8 +73,16 @@ void snap_lock(void)
     TA_LOCK();
 
     phantom_thread_t *t = get_current_thread();
+    int tf = t->thread_flags;
 
-    if(t->thread_flags & THREAD_FLAG_SNAPPER)
+    if(phantom_virtual_machine_stop_request && (tf & (THREAD_FLAG_VM|THREAD_FLAG_JIT)) )
+    {
+        TA_UNLOCK();
+        hal_mutex_unlock( &threads_snapper_interlock );
+        hal_exit_kernel_thread();
+    }
+
+    if(tf & THREAD_FLAG_SNAPPER)
     {
     }
     else
@@ -85,6 +94,7 @@ void snap_lock(void)
     TA_UNLOCK();
 
     hal_mutex_unlock( &threads_snapper_interlock );
+
 }
 
 
@@ -94,8 +104,9 @@ void snap_unlock(void)
     TA_LOCK();
 
     phantom_thread_t *t = get_current_thread();
+    int tf = t->thread_flags;
 
-    if(t->thread_flags & THREAD_FLAG_SNAPPER)
+    if(tf & THREAD_FLAG_SNAPPER)
     {
     }
     else
@@ -111,6 +122,8 @@ void snap_unlock(void)
         hal_cond_broadcast( &snapper_sleep_cond );
     hal_mutex_unlock( &threads_snapper_interlock );
 
+    if(phantom_virtual_machine_stop_request && (tf & (THREAD_FLAG_VM|THREAD_FLAG_JIT)) )
+        hal_exit_kernel_thread();
 }
 
 void t_release_snap_locks(void)
@@ -203,6 +216,27 @@ void phantom_thread_init_snapper_interlock(void)
 
     interlock_inited = 1;
 }
+
+// ------------------------------------------------------------------
+// Old func names
+// ------------------------------------------------------------------
+
+void phantom_thread_wait_4_snap( void )
+{
+    snap_unlock();
+    snap_lock();
+}
+
+void phantom_snapper_wait_4_threads( void )
+{
+    snapper_lock();
+}
+
+void phantom_snapper_reenable_threads( void )
+{
+    snapper_unlock();
+}
+
 
 #endif // NEW_SNAP_SYNC
 

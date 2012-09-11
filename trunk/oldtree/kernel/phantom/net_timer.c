@@ -124,7 +124,7 @@ static void net_timer_runner(void *arg)
     net_timer_event *e;
     bigtime_t now;
 
-    hal_set_thread_name("Net Timer");
+    t_current_set_name("Net Timer");
 
     for(;;) {
         //sem_acquire_etc(net_q.wait_sem, 1, SEM_FLAG_TIMEOUT, NET_TIMER_INTERVAL, NULL);

@@ -63,7 +63,7 @@ struct e2fs_impl
     /* pointer to group descriptors */
     struct ext2_group_desc*	ext2_gd;
 
-            /* size of group descriptors */
+    /* size of group descriptors */
     size_t			ext2_gd_size;
 };
 
@@ -74,7 +74,7 @@ typedef struct e2fs_impl e2fs_impl_t;
 
 static errno_t init_ext2( e2fs_impl_t *impl );
 static errno_t read_inode(ino_t inumber, struct ext2_inode *ip, e2fs_impl_t *fi);
-static errno_t ext2_name_2_inode(const char *name, e2fs_impl_t *fsi, ino_t *inumber_p);
+static errno_t ext2_name_2_inode(const char *name, e2fs_impl_t *fsi, uufile_t *f, ino_t *inumber_p);
 
 
 
@@ -237,6 +237,15 @@ static errno_t     ext2_close(struct uufile *f)
     return 0;
 }
 
+static void ext2_dump_f(uufile_t *f)
+{
+    e2impl_t *fi = f->impl;
+    printf("f inode       %d\n",fi->inode_num);
+    printf("size          %d\n",fi->inode.i_size);
+    printf("blks          %d\n",fi->inode.i_blocks);
+    printf("mode          %o\n",fi->inode.i_mode);
+    printf("              %s\n", (fi->inode.i_mode & IFDIR) ? "dir" : "" );
+}
 
 
 static uufile_t *mkf(ino_t inumber, e2fs_impl_t *fsi)
@@ -259,6 +268,15 @@ static uufile_t *mkf(ino_t inumber, e2fs_impl_t *fsi)
         unlink_uufile( ret );
         return 0;
     }
+    else
+    {
+        if(fi->inode.i_mode & IFDIR)
+        {
+            ret->flags |= UU_FILE_FLAG_DIR;
+        }
+
+        ext2_dump_f(ret);
+    }
 
     return ret;
 }
@@ -268,12 +286,35 @@ static uufile_t *  ext2_namei(uufs_t *fs, const char *filename)
 {
     e2fs_impl_t *fsi = fs->impl;
 
-    ino_t inumber;
-    errno_t rc = ext2_name_2_inode(filename, fsi, &inumber);
-    if( rc )
-        return 0;
+    // TODO unlink below
+    uufile_t *root =  ext2_getRoot(fs);
 
-    return mkf( inumber, fsi);
+#define MPEL 64
+    const char *oname[MPEL];
+    size_t olen[MPEL];
+    int npathel = uu_break_path( filename, MPEL, oname, olen );
+
+    uufile_t *f = root;
+    ino_t inumber;
+    int i;
+    for( i = 0; i < npathel; i++ )
+    {
+        if( olen[i] >= FS_MAX_PATH_LEN )
+            return 0;
+
+        char name[FS_MAX_PATH_LEN];
+        strncpy( name, oname[i], olen[i] );
+        name[ olen[i] ] = 0;
+
+        SHOW_FLOW( 5, "name '%s'\n", name);
+        errno_t rc = ext2_name_2_inode(name, fsi, f, &inumber);
+        if( rc )
+            return 0;
+
+        f = mkf( inumber, fsi );
+    }
+
+    return f;
 }
 
 // Return a file struct for fs root
@@ -326,6 +367,7 @@ errno_t fs_start_ext2(phantom_disk_partition_t *p)
         if( !ufs )
         {
             SHOW_ERROR( 0, "can't create uufs for %s", pname );
+            err = ENOMEM;
         }
 
         if( ufs && auto_mount( pname, ufs, 0, 0, AUTO_MOUNT_FLAG_AUTORUN ) )
@@ -445,7 +487,36 @@ static errno_t read_fs(phantom_disk_partition_t *p, struct ext2_super_block *fs,
 }
 
 
+static void dump_ext2( e2fs_impl_t *impl )
+{
+    ext2_super_block_t *fs = &impl->fs;
 
+    printf("\next2:\n");
+    printf("inodes        %d\n", fs->s_inodes_count);
+    printf("blocks        %d\n", fs->s_blocks_count);
+    printf("OS            %d\n", fs->s_creator_os);
+    printf("rev           %d\n", fs->s_rev_level);
+    printf("ino per grp   %d\n", fs->s_inodes_per_group);
+    printf("blk per grp   %d\n", fs->s_blocks_per_group);
+
+    int level;
+    for (level = 0; level < NIADDR; level++)
+        printf("nindir %d =   %d\n", level, impl->ext2_nindir[level] );
+
+    struct ext2_group_desc*	gd = impl->ext2_gd;
+    size_t			gd_size = impl->ext2_gd_size;
+
+    void *gde = ((void *)gd) + gd_size;
+
+    for( ; (void *)gd < gde; gd++ )
+    {
+        printf("\ngd:\n");
+        printf("\tblk map:    %d\n", gd->bg_block_bitmap);
+        printf("\tino map:    %d\n", gd->bg_inode_bitmap);
+        printf("\tfree blks   %d\n", gd->bg_free_blocks_count );
+    }
+
+}
 
 static errno_t init_ext2( e2fs_impl_t *impl )
 {
@@ -466,6 +537,8 @@ static errno_t init_ext2( e2fs_impl_t *impl )
         mult *= NINDIR(fs);
         impl->ext2_nindir[level] = mult;
     }
+
+    dump_ext2( impl );
 
     return 0;
 }
@@ -529,13 +602,16 @@ static errno_t read_inode(ino_t inumber, struct ext2_inode *ip, e2fs_impl_t *fi)
     return (0);
 }
 
-
+static errno_t ext2_name_2_inode(const char *name, e2fs_impl_t *fsi, uufile_t *f, ino_t *inumber_p)
+{
+    return EINVAL;
+}
 
 #if 0
 /*
  * Search a directory for a name and return its i_number.
  */
-static errno_t ext2_name_2_inode(const char *name, e2fs_impl_t *fsi, ino_t *inumber_p)
+static errno_t ext2_name_2_inode(const char *name, e2fs_impl_t *fsi, uufile_t *f, ino_t *inumber_p)
 {
     vm_offset_t buf;
     vm_size_t buf_size;
@@ -544,6 +620,10 @@ static errno_t ext2_name_2_inode(const char *name, e2fs_impl_t *fsi, ino_t *inum
     int length;
     kern_return_t rc;
     char tmp_name[256];
+
+    if( !(f->flags & UU_FILE_FLAG_DIR) )
+        return ENOTDIR;
+
     length = strlen(name);
     offset = 0;
     while (offset < fp->i_ic.i_size) {

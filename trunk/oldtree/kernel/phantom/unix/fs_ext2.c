@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -1072,4 +1073,6 @@ errno_t fs_start_ext2(phantom_disk_partition_t *p)
 
 
 #endif // HAVE_UNIX
+
+#endif
 

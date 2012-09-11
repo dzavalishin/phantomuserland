@@ -45,6 +45,7 @@ static int debug_print = 0;
 
 void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 {
+#if OLD_VM_SLEEP
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
 
     VM_SPIN_LOCK(da->poor_mans_pagefault_compatible_spinlock);
@@ -71,10 +72,14 @@ void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 
 done:
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
+#else
+    SYSCALL_THROW_STRING("Not this way");
+#endif
 }
 
 errno_t vm_mutex_unlock( pvm_object_t me, struct data_area_4_thread *tc )
 {
+#if OLD_VM_SLEEP
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
 
     int ret = 0;
@@ -107,6 +112,9 @@ errno_t vm_mutex_unlock( pvm_object_t me, struct data_area_4_thread *tc )
 done:
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
     return ret;
+#else
+    SYSCALL_THROW_STRING("Not this way");
+#endif
 }
 
 
@@ -281,6 +289,7 @@ static int si_sema_5_tostring(struct pvm_object o, struct data_area_4_thread *tc
 
 static int si_sema_8_acquire(struct pvm_object me, struct data_area_4_thread *tc )
 {
+#if OLD_VM_SLEEP
     DEBUG_INFO;
     struct data_area_4_sema *da = pvm_object_da( me, sema );
     VM_SPIN_LOCK(da->poor_mans_pagefault_compatible_spinlock);
@@ -306,6 +315,9 @@ static int si_sema_8_acquire(struct pvm_object me, struct data_area_4_thread *tc
 
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
     SYSCALL_RETURN_NOTHING;
+#else
+    SYSCALL_THROW_STRING("Not this way");
+#endif
 }
 
 static int si_sema_9_tacquire(struct pvm_object me, struct data_area_4_thread *tc )
@@ -335,6 +347,7 @@ static int si_sema_10_zero(struct pvm_object me, struct data_area_4_thread *tc )
 
 static int si_sema_11_release(struct pvm_object me, struct data_area_4_thread *tc )
 {
+#if OLD_VM_SLEEP
     DEBUG_INFO;
     struct data_area_4_sema *da = pvm_object_da( me, sema );
     VM_SPIN_LOCK(da->poor_mans_pagefault_compatible_spinlock);
@@ -356,6 +369,9 @@ static int si_sema_11_release(struct pvm_object me, struct data_area_4_thread *t
 
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
     SYSCALL_RETURN_NOTHING;
+#else
+    SYSCALL_THROW_STRING("Not this way");
+#endif
 }
 
 

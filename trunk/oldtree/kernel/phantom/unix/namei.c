@@ -188,7 +188,7 @@ errno_t uu_make_absname( char *opath, const char *base, const char *_add )
 }
 
 
-int uu_break_path( const char *in, int maxpart, const char *oname[], int olen[] )
+int uu_break_path( const char *in, int maxpart, const char *oname[], size_t olen[] )
 {
     int npart = 0;
 

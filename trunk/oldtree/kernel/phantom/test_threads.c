@@ -121,7 +121,7 @@ static void t_empty(void *a)
 
 static void t_wait(void *a)
 {
-    hal_set_current_thread_priority( THREAD_PRIO_HIGH );
+    t_current_set_priority( THREAD_PRIO_HIGH );
 
     char *name = a;
     while(!thread_stop_request)
@@ -533,7 +533,8 @@ static void sem_etc(void *a)
 static void sem_softirq(void *a)
 {
     (void) a;
-    printf("sema softirq\n");
+    // can't print from irq
+    //printf("sema softirq\n");
     //hal_sleep_msec( 10 );
     sem_released = 1;
     hal_sem_release( &test_sem_0 );
@@ -545,15 +546,17 @@ int do_test_sem(const char *test_parm)
     (void) test_parm;
     printf("Testing semaphores\n");
 
-    hal_sem_init(&test_sem_0, "semTest");
+    hal_sem_init( &test_sem_0, "semTest");
 
-
-
-    softirq = hal_alloc_softirq();
     if( softirq < 0 )
-        test_fail_msg( 1, "Unable to get softirq" );
+    {
+        // Do it once
+        softirq = hal_alloc_softirq();
+        if( softirq < 0 )
+            test_fail_msg( 1, "Unable to get softirq" );
 
-    hal_set_softirq_handler( softirq, sem_softirq, 0 );
+        hal_set_softirq_handler( softirq, sem_softirq, 0 );
+    }
 
     //int tid =
     hal_start_kernel_thread_arg( sem_rel, 0 );
@@ -590,6 +593,8 @@ int do_test_sem(const char *test_parm)
 
 
     stop_sem_test = 1;
+
+    hal_sem_destroy( &test_sem_0 );
 
     printf("Done testing semaphores\n");
     return 0;

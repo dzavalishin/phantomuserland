@@ -25,13 +25,16 @@ int load_class_from_file(const char *cn, struct pvm_object *out)
 
     if(*cn == '.') cn++;
 
-
+    // TODO check all automounts?
     char *path[] =
     {
         ".", // Reserved for getenv search
 
 //        ".",
         "/amnt0/class",
+        "/amnt1/class",
+        "/amnt2/class",
+        "/amnt3/class",
         "../../plib/bin",
 //        "../compiler",
 //        "./pcode",

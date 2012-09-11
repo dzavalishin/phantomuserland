@@ -85,7 +85,7 @@ void stray(void)
 
 static void stray_catch_thread(void)
 {
-    hal_set_thread_name("StrayCheck");
+    t_current_set_name("StrayCheck");
     printf("Stray checker running, %d windows\n", ncr);
 
     while(1)

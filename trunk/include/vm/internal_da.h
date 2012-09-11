@@ -179,7 +179,9 @@ struct data_area_4_thread
 
     hal_spinlock_t                      spin;           // used on manipulations with sleep_flag
 
+#if OLD_VM_SLEEP
     volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
+#endif
     //timedcall_t                         timer;          // Who will wake us
     net_timer_event                     timer;          // Who will wake us
     pvm_object_t                        sleep_chain;    // More threads sleeping on the same event, meaningless for running thread

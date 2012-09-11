@@ -448,7 +448,7 @@ static void auto_run_thread( void *arg )
 
     char tname[128];
     snprintf( tname, sizeof(tname), "Autorun %s", arg );
-    hal_set_current_thread_name(tname);
+    t_current_set_name(tname);
 
     auto_run( (const char *) arg );
 }

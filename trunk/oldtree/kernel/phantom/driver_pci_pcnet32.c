@@ -811,7 +811,7 @@ static int pcnet32_rxint(pcnet32 *nic)
 
 static void pcnet32_thread(void *data)
 {
-    hal_set_thread_name("PCNet32Drv");
+    t_current_set_name("PCNet32Drv");
 
     //volatile
     pcnet32 *nic = (pcnet32 *)data;
