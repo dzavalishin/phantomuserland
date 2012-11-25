@@ -39,7 +39,9 @@ public class PlcMain {
 			return;
 		}
 		
-		try { go(args); }
+		try { 
+			Boolean err = go(args); 
+			}
 		catch( PlcException e ) {
 			System.out.println("Failed: " + e.toString());
 		}
@@ -52,7 +54,7 @@ public class PlcMain {
 
 	}
 
-	static void go(String[] args) throws FileNotFoundException,
+	public static Boolean go(String[] args) throws FileNotFoundException,
 	IOException, FileNotFoundException, PlcException
 	{
 		for (int i = 0; i < args.length; i++) {
@@ -66,8 +68,11 @@ public class PlcMain {
 			
 			//System.out.println("Compiling " + arg);
 
-			compile(arg);
+			if( compile(arg) )
+				return true;
 		}
+		
+		return false;
 	}
 
 
@@ -100,7 +105,7 @@ public class PlcMain {
 
 	
 	
-	static void compile( String fn ) throws FileNotFoundException, PlcException,
+	static boolean compile( String fn ) throws FileNotFoundException, PlcException,
 	IOException {
 		FileInputStream  fis = new FileInputStream ( fn );
 
@@ -130,8 +135,11 @@ public class PlcMain {
 		{
 			System.out.println("Compile failed: "+e.toString());
 			// TODO in fact we should try to compile as many classes as possible instead 
-			System.exit(1);		
+			//System.exit(1);
+			return true;
 		}
+		
+		return g.get_error_count() > 0;
 	}
 
 

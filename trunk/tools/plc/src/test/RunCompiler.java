@@ -41,16 +41,6 @@ public class RunCompiler {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
-	public void test() {
-		
-		compile("test/plc/test_extends_implemens.ph");
-		
-		//fail("Not yet implemented");
-		
-	}
-
-	
 	void compile(String src)
 	{
 		String[] args = new String[3];
@@ -59,13 +49,31 @@ public class RunCompiler {
 		args[1] = "-otest/pc";
 		args[2] = src;
 		
-		PlcMain.main(args);
-		/*
-		try { PlcMain.main(args); }
+		try {
+			
+		
+		if( PlcMain.go(args) )
+			fail("Compile failed");
+		}
 		catch( Throwable o )
 		{
 			fail("Compile failed: "+o.toString());
-		}*/
+		}
 	}
+
+	
+	
+	@Test
+	public void testExtendsImplements() {		compile("test/plc/test_extends_implemens.ph");	}
+
+	@Test
+	public void testMisc() 				{		compile("test/plc/test_misc.ph");	}
+
+	@Test
+	public void testImport() 			{		compile("test/plc/test_import.ph");	}
+
+	
+	
+	
 	
 }
