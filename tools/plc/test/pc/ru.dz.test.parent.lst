@@ -1,0 +1,8 @@
+Class .ru.dz.test.parent
+  Field i
+  Method void test( i: int ):
+    void  : void
+      = : int
+        ident avar : int
+        ident i : int
+
