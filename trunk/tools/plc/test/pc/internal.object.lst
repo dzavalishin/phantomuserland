@@ -1,0 +1,23 @@
+Class .internal.object
+  Method .internal.class getClass(  ):
+  -- No code!
+
+  Method void clone(  ):
+  -- No code!
+
+  Method unknown equals( object: unknown ):
+  -- No code!
+
+  Method void construct_me(  ):
+  -- No code!
+
+  Method unknown hashCode(  ):
+    return : void const
+      int const "0" : unknown const
+
+  Method void destruct_me(  ):
+  -- No code!
+
+  Method string toString(  ):
+  -- No code!
+

@@ -1,0 +1,9 @@
+Class version 20121025032309027
+
+method newClass ordinal 8
+--
+  ret
+//  @1
+--
+method end
+

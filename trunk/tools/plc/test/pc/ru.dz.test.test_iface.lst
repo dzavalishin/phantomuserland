@@ -1,0 +1,4 @@
+Class .ru.dz.test.test_iface
+  Method void interface_m( v: string ):
+  -- No code!
+

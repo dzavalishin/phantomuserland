@@ -1,0 +1,8 @@
+Class .ru.dz.test.child
+  Field j
+  Method void test( i: int ):
+  -- No code!
+
+  Method void interface_m( v: string ):
+  -- No code!
+

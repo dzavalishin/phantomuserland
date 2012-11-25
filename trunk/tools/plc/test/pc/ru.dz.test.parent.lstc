@@ -1,0 +1,37 @@
+Class version 20121025032309079
+
+method test ordinal 16
+--
+  const 1
+//  @5
+  isublu
+//  @6
+  jz _label_0
+//  @11
+  const "arg count: test in .ru.dz.test.parent"
+//  @53
+  throw
+//  @53
+_label_0:
+//  @54
+  push null
+//  @55
+  cons 0
+//  @56
+  ; Line 30
+//  @56
+  load fld=0
+//  @56
+  o2i
+//  @59
+  is dup
+//  @60
+  set i stk pos=0
+//  @65
+  is drop
+//  @66
+  ret
+//  @67
+--
+method end
+

@@ -1,0 +1,19 @@
+Class .internal.thread
+  Method void pause(  ):
+  -- No code!
+
+  Method .internal.object getEnvironment(  ):
+  -- No code!
+
+  Method .internal.object getUser(  ):
+  -- No code!
+
+  Method void unpause(  ):
+  -- No code!
+
+  Method .internal.object getOsInterface(  ):
+  -- No code!
+
+  Method .internal.object toString(  ):
+  -- No code!
+
