@@ -5,15 +5,15 @@ Class .internal.object
   Method void clone(  ):
   -- No code!
 
-  Method unknown equals( object: unknown ):
+  Method int equals( object: unknown ):
   -- No code!
 
   Method void construct_me(  ):
   -- No code!
 
-  Method unknown hashCode(  ):
+  Method int hashCode(  ):
     return : void const
-      int const "0" : unknown const
+      int const "0" : int const
 
   Method void destruct_me(  ):
   -- No code!

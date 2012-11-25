@@ -1,19 +1,19 @@
 Class .internal.string
-  Method unknown strstr( s: string ):
+  Method int strstr( s: string ):
   -- No code!
 
-  Method unknown equals( object: unknown ):
+  Method int equals( object: unknown ):
   -- No code!
 
-  Method string substring( index: unknown, length: unknown ):
+  Method string substring( index: int, length: int ):
   -- No code!
 
-  Method unknown length(  ):
+  Method int length(  ):
   -- No code!
 
   Method string concat( s: string ):
   -- No code!
 
-  Method unknown charAt( index: unknown ):
+  Method int charAt( index: int ):
   -- No code!
 
