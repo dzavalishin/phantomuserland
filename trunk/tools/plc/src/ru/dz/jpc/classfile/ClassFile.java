@@ -96,7 +96,8 @@ public class ClassFile extends DataInputStream {
 		
 		if (null != classPath) {
 			try {
-				f = findInPath (classPath, classname, "/classes");
+				//f = findInPath (classPath, classname, "/classes");
+				f = findInPath (classPath, classname, "");
 			} catch (ClassNotFoundException e) {
 				/* do nothing; keep f null */
 			}

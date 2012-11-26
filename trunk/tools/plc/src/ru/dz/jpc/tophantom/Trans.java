@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class Trans {
+public class Trans {
 
 	static final Logger log = Logger.getLogger("ru.dz.jpc");
 	static { log.setLevel(Level.INFO); }
@@ -310,6 +310,7 @@ class Trans {
 				}
 			}
 
+			
 			PrintWriter hstream = oopen(k, ".h", hBufferSize);
 			HFile.write(hstream, k);		// write .h file
 			hstream.close();
@@ -319,8 +320,8 @@ class Trans {
 				Constant.dump(cstream, k.constants);
 			}
 			CFile.write(cstream, k, classes);		// write .c file
-			cstream.close();
-
+			//cstream.close();
+			
 			
 			classes.print();
 			classes.codegen();
