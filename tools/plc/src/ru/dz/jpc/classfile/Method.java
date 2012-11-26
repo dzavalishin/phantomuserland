@@ -184,7 +184,7 @@ public class Method {
 		}
 
 		// construct instruction list
-		Vector insvec = new Vector();
+		Vector<Instr> insvec = new Vector<Instr>();
 		pcmap = new short[code.length];
 
 		for (int pc = 0; pc < code.length; pc += ins.length) {

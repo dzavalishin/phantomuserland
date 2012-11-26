@@ -1,11 +1,8 @@
 package ru.dz.plc.compiler;
 
-import ru.dz.plc.parser.ParserContext;
-import ru.dz.plc.util.PlcException;
-
 import java.io.IOException;
 
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Class map. Integrates classes we did now and those we imported.</p>

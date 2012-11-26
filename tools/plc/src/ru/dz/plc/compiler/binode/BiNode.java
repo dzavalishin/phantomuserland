@@ -1,15 +1,15 @@
 package ru.dz.plc.compiler.binode;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 
-import ru.dz.phantom.code.*;
+import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
-import ru.dz.plc.compiler.PhantomStackVar;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
-import ru.dz.plc.util.*;
+import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Title: Two children abstract base node.</p>

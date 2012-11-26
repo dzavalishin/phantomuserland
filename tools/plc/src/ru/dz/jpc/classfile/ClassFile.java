@@ -5,7 +5,6 @@
 package ru.dz.jpc.classfile;
 
 import java.io.*;
-import java.util.*;
 //import sun.tools.zip.*;
 import java.util.zip.*;
 

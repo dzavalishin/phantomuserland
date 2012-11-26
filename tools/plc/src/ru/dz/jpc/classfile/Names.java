@@ -296,7 +296,7 @@ static private boolean idchar(char c)
 //  This list must reflect all macro and names included or defined by
 //  the generated code, as well as all C reserved words.
 
-static private Hashtable nametable;
+static private Hashtable<String, String> nametable;
 static private String[] namelist = {
     "setjmp", "longjmp", "jmp_buf",
     "sigsetjmp", "siglongjmp", "sigjmp_buf",
@@ -314,7 +314,7 @@ static private String[] namelist = {
     "TMIT_interpreter", "TMIT_uninstalled_jit", "TMIT_abstract",
 };
 static {
-    nametable = new Hashtable();
+    nametable = new Hashtable<String, String>();
     for (int i = 0; i < namelist.length; i++)
 	nametable.put(namelist[i], "");
 }

@@ -10,6 +10,7 @@
 package ru.dz.jpc;
 
 import ru.dz.jpc.classfile.*;
+
 import java.io.*;
 
 class Dump {
@@ -45,9 +46,9 @@ private static void doname(String name)
 
     int len = name.length();
     if (len > 6 && name.substring(len - 6).equals(".class"))
-	d = new ClassFile(name);	// loading by file name
+    	d = new ClassFile(name);	// loading by file name
     else
-	d = ClassFile.find(name);	// loading by class name
+    	d = ClassFile.find(name);	// loading by class name
 
     System.out.println("  file " + d.file);
     System.out.println("    dir " + d.dir);
@@ -55,7 +56,8 @@ private static void doname(String name)
     	", modified " + d.file.lastModified());
 
     k = ClassData.forStream(d);		// load the class
-
+    //d.close();
+    
     printclass(k);			// print class header info
 
     for (int i = 0; i < k.methods.length; i++) {
@@ -154,10 +156,10 @@ private static void printvars(Method m)
     System.out.print("  vars:");
     for (i = 0; i < Method.JVM_TYPES.length(); i++) {
         c = Method.JVM_TYPES.charAt(i);
-	if (m.maxvar[c] >= 0) {
+	if (Method.maxvar[c] >= 0) {
 	    System.out.print(" " + c);
-	    for (j = 0; j <= m.maxvar[c] && j < 36; j++) 
-	    	if (m.varused[c].get(j))
+	    for (j = 0; j <= Method.maxvar[c] && j < 36; j++) 
+	    	if (Method.varused[c].get(j))
 		    System.out.print(
 		    	"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(j));
 	}

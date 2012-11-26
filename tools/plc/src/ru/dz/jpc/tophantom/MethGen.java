@@ -2,17 +2,24 @@
 
 package ru.dz.jpc.tophantom;
 
-import ru.dz.jpc.classfile.*;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
+
+import ru.dz.jpc.classfile.ClassData;
+import ru.dz.jpc.classfile.Field;
+import ru.dz.jpc.classfile.Handler;
+import ru.dz.jpc.classfile.Instr;
+import ru.dz.jpc.classfile.Method;
+import ru.dz.jpc.classfile.Names;
+import ru.dz.jpc.classfile.Opcode;
 import ru.dz.plc.compiler.ClassMap;
-import ru.dz.plc.compiler.ClassTable;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
-
-import java.io.*;
-import java.util.*;
 
 
 

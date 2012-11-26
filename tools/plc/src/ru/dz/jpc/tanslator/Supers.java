@@ -4,7 +4,6 @@ package ru.dz.jpc.tanslator;
 
 import ru.dz.jpc.classfile.*;
 import java.io.*;
-import java.util.*;
 
 @Deprecated
 public class Supers {

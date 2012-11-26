@@ -83,7 +83,7 @@ private static int[] hashlist(ClassLoader loader,
         }
     }
 
-    Vector v = new Vector();
+    Vector<Integer> v = new Vector<Integer>();
 
     for (int i = 0; i < c.interfaces.length; i++) {	// recursive implements
 	int[] hh = hashlist(loader, c.interfaces[i]);
@@ -112,7 +112,7 @@ private static int[] hashlist(ClassLoader loader,
 
 public IHash(ClassData c) {
 
-    Vector mlist = impls(c);
+    Vector<Field> mlist = impls(c);
 
     // determine hashtable length and mask
     int len = 1;
@@ -124,7 +124,7 @@ public IHash(ClassData c) {
     mask = len - 1;
 
     // fill hash vector
-    Vector v = new Vector(len);
+    Vector<Field> v = new Vector<Field>(len);
     for (int i = 0; i < len; i++)
     	v.addElement(null);
     for (int i = 0; i < mlist.size(); i++) {
@@ -166,9 +166,9 @@ public IHash(ClassData c) {
 
 //  impls(c) -- build vector of interface methods implemented by class c
 
-private static Vector impls(ClassData c)
+private static Vector<Field> impls(ClassData c)
 {
-    Vector v = new Vector();
+    Vector<Field> v = new Vector<Field>();
     for (int i = 0; i < c.imtable.length; i++) {
 	if ((c.imtable[i].access & ClassData.FLG_INTERFACE) != 0) {
 	    v.addElement(c.imtable[i]);
@@ -181,7 +181,7 @@ private static Vector impls(ClassData c)
 
 //  collisions(mlist, n) -- count collisions for table of size n (a power of 2)
 
-private static int collisions(Vector mlist, int n)
+private static int collisions(Vector<Field> mlist, int n)
 {
     BitSet hit = new BitSet(n);
     int mask = n - 1;

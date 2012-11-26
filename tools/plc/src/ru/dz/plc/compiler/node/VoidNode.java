@@ -6,8 +6,6 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
-import ru.dz.plc.compiler.PhantomClass;
-import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
  /**

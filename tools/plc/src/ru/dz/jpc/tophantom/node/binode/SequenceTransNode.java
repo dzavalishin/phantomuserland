@@ -1,15 +1,12 @@
 package ru.dz.jpc.tophantom.node.binode;
 
+import java.io.IOException;
+
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
-import ru.dz.plc.compiler.ParseState;
-import ru.dz.plc.compiler.binode.BiNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
-
-import java.io.PrintStream;
-import java.io.IOException;
 
 /**
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>

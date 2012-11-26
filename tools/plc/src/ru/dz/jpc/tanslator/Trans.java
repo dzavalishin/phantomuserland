@@ -11,11 +11,25 @@
 
 package ru.dz.jpc.tanslator;
 
-import ru.dz.jpc.classfile.*;
-import java.io.*;
-import java.util.*;
-import java.util.logging.Level;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Hashtable;
+import java.util.Stack;
 import java.util.logging.Logger;
+
+import ru.dz.jpc.classfile.ClassData;
+import ru.dz.jpc.classfile.ClassFile;
+import ru.dz.jpc.classfile.ClassRef;
+import ru.dz.jpc.classfile.Constant;
+import ru.dz.jpc.classfile.Field;
+import ru.dz.jpc.classfile.IHash;
+import ru.dz.jpc.classfile.Names;
 @Deprecated
 class Trans {
 
@@ -54,8 +68,8 @@ private static String mainclass;	// name of main class
 private static String packagedir;	// destination package directory 
 
 private static boolean needmain = true;	// need to generate main
-private static Hashtable genlist;	// list of classes we generated
-private static Stack classWorkList;     // list of classes we still need to visit
+private static Hashtable<String, String> genlist;	// list of classes we generated
+private static Stack<String> classWorkList;     // list of classes we still need to visit
 private static String tobapath;		// toba.class.path property value
 
 private static boolean retobaapi = false; // re-translate stuff we found in an API
@@ -77,8 +91,8 @@ public static void main(String args[])
     options(args);			// process options
 
     tobapath = System.getProperty("toba.class.path");
-    genlist = new Hashtable();
-    classWorkList = new Stack ();
+    genlist = new Hashtable<String, String>();
+    classWorkList = new Stack<String> ();
 
     // Set things so we look up interfaces in the right place.
     IHash.setInTranslator (true);
@@ -203,7 +217,7 @@ private static void doname(String name)
 
     while (! classWorkList.empty ()) {
 
-        name = (String) classWorkList.pop ();
+        name = classWorkList.pop ();
 
 
         

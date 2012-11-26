@@ -40,6 +40,7 @@ public class Main {
 		if(image == null)
 		{
 			System.out.println("Can't read image data for "+inFn);
+			fw.close();
 			return;
 		}
 		int w = image.getWidth();

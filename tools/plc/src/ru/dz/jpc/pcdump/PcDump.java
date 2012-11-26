@@ -1,14 +1,12 @@
 package ru.dz.jpc.pcdump;
 
-import ru.dz.plc.util.PlcException;
-import ru.dz.plc.compiler.ClassMap;
-import ru.dz.jpc.classfile.*;
-//import ru.dz.jpc.tophantom.Supers;
-//import ru.dz.jpc.tophantom.ClassInstall;
-import ru.dz.phantom.code.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
-import java.util.logging.Logger;
-import java.io.*;
+import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>

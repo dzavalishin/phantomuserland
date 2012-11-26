@@ -1,9 +1,5 @@
 package ru.dz.plc.parser;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import ru.dz.plc.compiler.PhantomClass;
 
 /**
  * <p>Title: Phantom Language Compiler</p>

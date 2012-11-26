@@ -11,7 +11,7 @@ class CFile {
 
 
 
-static private Hashtable declared;	// set of class structs declared
+static private Hashtable<String, String> declared;	// set of class structs declared
 
 static private StringBuffer strpool;	// string character pool
 static private int strnums[];		// indices of used strings
@@ -28,7 +28,7 @@ static private int nothers;		// number of "other" classes referenced
 
 static void write(PrintWriter d, ClassData c)
 {
-    declared = new Hashtable();		// clear list of classes
+    declared = new Hashtable<String, String>();		// clear list of classes
 
     // include general definitions, present class, ancestors, their interfaces
     d.println();
@@ -54,7 +54,7 @@ static void write(PrintWriter d, ClassData c)
 	}
     }
 
-    declared = new Hashtable();		// reset list of classes
+    declared = new Hashtable<String, String>();		// reset list of classes
     supers(d, c);			// generate superclass list
     inters(d, c);			// generate interfaces list
     others(d, c);			// generate others list
