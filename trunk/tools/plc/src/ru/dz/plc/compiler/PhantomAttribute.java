@@ -41,7 +41,7 @@ public abstract class PhantomAttribute
     if( !compatible_with( him ) )
       throw new PlcException("PhantomAttribute combine_with","incompatible attributes",toString()+" and "+him.toString());
 
-    // Same attrs? Just the same resilt.
+    // Same attrs? Just the same result.
     if( him != null && equals(him) )
       return this;
 

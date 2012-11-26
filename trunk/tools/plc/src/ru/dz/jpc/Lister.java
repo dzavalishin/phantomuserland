@@ -5,7 +5,7 @@
 package ru.dz.jpc;
 
 import ru.dz.jpc.classfile.*;
-import ru.dz.jpc.tanslator.*;
+//import ru.dz.jpc.tanslator.*;
 
 import java.io.*;
 import java.util.*;
@@ -67,7 +67,7 @@ public static void listSystemClasses() {
 		}
 
 		// we found a system class, this is the one we want
-		Enumeration files = zf.entries();
+		Enumeration<? extends ZipEntry> files = zf.entries();
 		while (files.hasMoreElements()) {
 		    zfe = (ZipEntry)files.nextElement();
 		    String name = zfe.getName();
@@ -107,13 +107,13 @@ public static void
 closeClassList (String cnames [],
                 int cnind)
 {
-    Hashtable genlist; // list of classes we generated
-    Stack worklist;  // list of classes we need to generate
+    Hashtable<String, String> genlist; // list of classes we generated
+    Stack<String> worklist;  // list of classes we need to generate
 
     ru.dz.jpc.classfile.IHash.setInTranslator (true);
 
-    genlist = new Hashtable ();
-    worklist = new Stack ();
+    genlist = new Hashtable<String, String> ();
+    worklist = new Stack<String> ();
     if (cnind < cnames.length) {
         while (cnind < cnames.length) {
             worklist.push (cnames [cnind]);
@@ -137,7 +137,7 @@ closeClassList (String cnames [],
     }
 
     while (! worklist.empty ()) {
-        String name = (String) worklist.pop ();
+        String name = worklist.pop ();
 
         // stop if we've already done this one
         // XXX can we do this here?  can differences between name and
@@ -198,9 +198,9 @@ closeClassList (String cnames [],
         }
     }
 
-    Enumeration elt = genlist.elements ();
+    Enumeration<String> elt = genlist.elements ();
     while (elt.hasMoreElements ()) {
-        String sn = (String) elt.nextElement ();
+        String sn = elt.nextElement ();
         System.out.println (sn);
     }
 }

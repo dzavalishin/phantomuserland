@@ -1,17 +1,15 @@
 package ru.dz.plc.compiler.trinode;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 
-import ru.dz.phantom.code.*;
+import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
-import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhTypeVoid;
-import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.BiNode;
-import ru.dz.plc.compiler.node.MethodNode;
 import ru.dz.plc.compiler.node.Node;
-import ru.dz.plc.util.*;
+import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Three children abstract node.</p>

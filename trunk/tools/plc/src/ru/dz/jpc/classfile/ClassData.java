@@ -14,7 +14,7 @@ public class ClassData {
 	 * re-read. Note that the fact that we can't use null as a hash key means we
 	 * need to swap in something else to represent the system class loader.
 	 */
-	private static Hashtable name2cdata;
+	private static Hashtable<String, Hashtable<Object, ClassData>> name2cdata;
 	private static Object pseudoSystemClassLoader = new Object();
 
 	/**
@@ -23,7 +23,7 @@ public class ClassData {
 	 * null if there is none.
 	 */
 	private static ClassData getByNameLoader(String nm, ClassLoader cld) {
-		Hashtable cdh;
+		Hashtable<Object, ClassData> cdh;
 		Object ocld;
 
 		/* Key is the class loader, or its valid substitute */
@@ -32,9 +32,9 @@ public class ClassData {
 			ocld = pseudoSystemClassLoader;
 		}
 		/* Get the hash from loaders to data structures. */
-		cdh = (Hashtable) name2cdata.get(nm);
+		cdh = name2cdata.get(nm);
 		if (null != cdh) {
-			return (ClassData) cdh.get(ocld);
+			return cdh.get(ocld);
 		}
 		return null;
 	}
@@ -45,7 +45,7 @@ public class ClassData {
 	 * class information.
 	 */
 	private static void addByNameLoader(String nm, ClassLoader cld, ClassData cd) {
-		Hashtable cdh;
+		Hashtable<Object, ClassData> cdh;
 		Object ocld;
 
 		ocld = cld;
@@ -53,9 +53,9 @@ public class ClassData {
 			ocld = pseudoSystemClassLoader;
 		}
 
-		cdh = (Hashtable) name2cdata.get(nm);
+		cdh = name2cdata.get(nm);
 		if (null == cdh) {
-			cdh = new Hashtable();
+			cdh = new Hashtable<Object, ClassData>();
 			name2cdata.put(nm, cdh);
 		}
 		cdh.put(ocld, cd);
@@ -64,7 +64,7 @@ public class ClassData {
 
 	static private Runtime rts;
 	static {
-		name2cdata = new Hashtable();
+		name2cdata = new Hashtable<String, Hashtable<Object, ClassData>>();
 		rts = Runtime.getRuntime();
 	}
 
@@ -83,7 +83,7 @@ public class ClassData {
 	public ClassRef[] interfaces; // interfaces implemented
 	public Field[] fields; // fields
 	public Field[] methods; // methods
-	public Hashtable symtab; // symbol table (fields & methods)
+	public Hashtable<String, Field> symtab; // symbol table (fields & methods)
 	public Attribute[] attributes; // class attributes
 
 	// built after superclass has been loaded by client
@@ -96,7 +96,7 @@ public class ClassData {
 	/** class variable table */
 	public Field[] cvtable; 
 
-	public Hashtable visiblevars; // Hashtable of visible instance
+	public Hashtable<String, Field> visiblevars; // Hashtable of visible instance
 	// fields
 
 	// Not set by constructor Client must set.
@@ -105,7 +105,7 @@ public class ClassData {
 
 	// Not set by constructor Client must set.
 	// (e.g. toba.runtime.CodeGen)
-	public Class javaClass; // The java runtime counterpart
+	public Class<?> javaClass; // The java runtime counterpart
 	// of this class
 
 	public ClassRef myRef; // A ClassRef for this class
@@ -156,7 +156,7 @@ public class ClassData {
 	 *            Java Class which gets us access to native Class structure.
 	 *            Toba hash code: _CC_a8RIy
 	 */
-	private static native void ClassDataInternal(ClassData cld, Class cl);
+	private static native void ClassDataInternal(ClassData cld, Class<?> cl);
 
 	/**
 	 * Add an array of fields to the symbol table.
@@ -170,7 +170,7 @@ public class ClassData {
 
 		for (i = 0; i < farr.length; i++) {
 			f = farr[i];
-			f.next = (Field) symtab.get(f.name);
+			f.next = symtab.get(f.name);
 			symtab.put(f.name, f);
 		}
 		return;
@@ -181,7 +181,7 @@ public class ClassData {
 	 * ensure uniqueness. This one reconstructs the data from an existing Class
 	 * object.
 	 */
-	private ClassData(Class cl) {
+	private ClassData(Class<?> cl) {
 		int i;
 
 		// Use the native function to fill in what we can from the C structure
@@ -201,7 +201,7 @@ public class ClassData {
 		cdsrc = ClassData.CDSRC_tobaclass;
 
 		/* Put fields and methods into symbol table */
-		symtab = new Hashtable();
+		symtab = new Hashtable<String, Field>();
 		for (i = 0; i < fields.length; i++) {
 			Field f = fields[i];
 			f.cname = Names.hashvar(f.name);
@@ -224,7 +224,7 @@ public class ClassData {
 
 	/* This one sets up ClassData based on data in a class file. */
 	private ClassData(DataInputStream d) throws ClassFormatError, IOException {
-		symtab = new Hashtable();
+		symtab = new Hashtable<String, Field>();
 
 		// read header
 		if (d.readInt() != 0xCafeBabe)
@@ -338,7 +338,7 @@ public class ClassData {
 	 * Get a ClassData structure corresponding to the given Class, which must
 	 * have been resolved.
 	 */
-	public static ClassData forClass(Class cl) {
+	public static ClassData forClass(Class<?> cl) {
 		ClassData cd;
 
 		/* If it's in the hash table, we're OK */
@@ -391,7 +391,7 @@ public class ClassData {
 	 */
 	public Field getmethod(String name, boolean climb) {
 		for (ClassData k = this; k != null; k = k.superclass) {
-			for (Field m = (Field) k.symtab.get(name); m != null; m = m.next) {
+			for (Field m = k.symtab.get(name); m != null; m = m.next) {
 				if (m.signature.equals("()V")) {
 					return m;
 				}
@@ -441,7 +441,7 @@ public class ClassData {
 				int gen = 0;
 				for (ClassData c = superclass; c != null; c = c.superclass) {
 					gen++;
-					for (Field a = (Field) c.symtab.get(name); a != null; a = a.next) {
+					for (Field a = c.symtab.get(name); a != null; a = a.next) {
 						if ((a.access & ClassData.ACC_PRIVATE) != 0)
 							continue;
 						if (f.signature.equals(a.signature)) {
@@ -519,10 +519,10 @@ public class ClassData {
 		 * so start with superclass values if present.
 		 */
 		if (superclass != null) {
-			visiblevars = (Hashtable) superclass.visiblevars.clone();
+			visiblevars = (Hashtable<String, Field>) superclass.visiblevars.clone();
 			ivtsize = superclass.ivtable.length;
 		} else {
-			visiblevars = new Hashtable();
+			visiblevars = new Hashtable<String, Field>();
 			ivtsize = 0;
 		}
 

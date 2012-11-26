@@ -4,7 +4,6 @@ package ru.dz.jpc.tophantom;
 
 import ru.dz.jpc.classfile.*;
 import java.io.*;
-import java.util.*;
 
 
 public class Supers {

@@ -2,8 +2,6 @@
 
 package ru.dz.jpc.classfile;
 
-import java.io.*;
-
 
 public class Opcode {
 

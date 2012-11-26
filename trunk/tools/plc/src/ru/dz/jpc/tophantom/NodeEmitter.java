@@ -4,9 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import ru.dz.plc.compiler.binode.SequenceNode;
-import ru.dz.plc.compiler.node.*;
 import ru.dz.jpc.tophantom.node.binode.SequenceTransNode;
+import ru.dz.plc.compiler.node.EmptyNode;
+import ru.dz.plc.compiler.node.Node;
 
 public class NodeEmitter {
 	Logger log = Logger.getLogger(NodeEmitter.class.getName());

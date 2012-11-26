@@ -5,7 +5,7 @@ import java.io.*;
 
 import ru.dz.phantom.code.*;
 import ru.dz.plc.PlcMain;
-import ru.dz.plc.parser.ParserContext;
+//import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.*;
 
 /**
@@ -66,7 +66,7 @@ public class ClassTable {
 			{
 				String classfns = c.getName()+".pc";
 				String lstfns = c.getName()+".lstc";
-				String verfns = c.getName()+".ver";
+				//String verfns = c.getName()+".ver";
 				
 				// skip leading point
 				File classfn = new File( PlcMain.getOutputPath(), classfns.substring(1));
@@ -209,6 +209,9 @@ public class ClassTable {
 			name = name.substring( 0, name.length()-2 );
 		}
 
+		if(starred)
+			throw new PlcException("class import", "* in import is not implemented", name );
+		
 		if( name.indexOf(".") == 0 ) name = name.substring(1); // remove leading '.'
 
 		return tryImport(name);

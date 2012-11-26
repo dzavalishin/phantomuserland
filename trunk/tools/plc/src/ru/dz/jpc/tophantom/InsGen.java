@@ -2,19 +2,64 @@
 
 package ru.dz.jpc.tophantom;
 
-import ru.dz.jpc.classfile.*;
+import java.io.PrintWriter;
+
+import ru.dz.jpc.classfile.ClassData;
+import ru.dz.jpc.classfile.ClassRef;
+import ru.dz.jpc.classfile.Constant;
+import ru.dz.jpc.classfile.FieldRef;
+import ru.dz.jpc.classfile.Instr;
 import ru.dz.jpc.classfile.Method;
-import ru.dz.jpc.tophantom.node.binode.*;
+import ru.dz.jpc.classfile.MethodRef;
+import ru.dz.jpc.classfile.Names;
+import ru.dz.jpc.classfile.Opcode;
 import ru.dz.jpc.tophantom.node.IdentTransNode;
-import ru.dz.plc.compiler.*;
+import ru.dz.jpc.tophantom.node.binode.OpAssignTransNode;
+import ru.dz.jpc.tophantom.node.binode.OpPlusTransNode;
+import ru.dz.jpc.tophantom.node.binode.ValEqTransNode;
+import ru.dz.jpc.tophantom.node.binode.ValGeTransNode;
+import ru.dz.jpc.tophantom.node.binode.ValGtTransNode;
+import ru.dz.jpc.tophantom.node.binode.ValLeTransNode;
+import ru.dz.jpc.tophantom.node.binode.ValLtTransNode;
+import ru.dz.jpc.tophantom.node.binode.ValNeqTransNode;
+import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhTypeInt;
+import ru.dz.plc.compiler.PhTypeObject;
+import ru.dz.plc.compiler.PhTypeString;
+import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.compiler.PhantomStackVar;
+import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.PhantomVariable;
+import ru.dz.plc.compiler.binode.CallArgNode;
+import ru.dz.plc.compiler.binode.NewNode;
+import ru.dz.plc.compiler.binode.OpAndNode;
+import ru.dz.plc.compiler.binode.OpAssignNode;
+import ru.dz.plc.compiler.binode.OpDivideNode;
+import ru.dz.plc.compiler.binode.OpMinusNode;
+import ru.dz.plc.compiler.binode.OpMultiplyNode;
+import ru.dz.plc.compiler.binode.OpOrNode;
+import ru.dz.plc.compiler.binode.OpSubscriptNode;
+import ru.dz.plc.compiler.binode.SequenceNode;
+import ru.dz.plc.compiler.node.DupDestNode;
+import ru.dz.plc.compiler.node.DupSourceNode;
+import ru.dz.plc.compiler.node.EmptyNode;
+import ru.dz.plc.compiler.node.IntConstNode;
+import ru.dz.plc.compiler.node.JumpNode;
+import ru.dz.plc.compiler.node.JumpTargetNode;
+import ru.dz.plc.compiler.node.JzNode;
+import ru.dz.plc.compiler.node.MethodNode;
+import ru.dz.plc.compiler.node.Node;
+import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.ReturnNode;
+import ru.dz.plc.compiler.node.StringConstNode;
+import ru.dz.plc.compiler.node.ThisNode;
+import ru.dz.plc.compiler.node.ThrowNode;
+import ru.dz.plc.compiler.node.VoidNode;
 import ru.dz.plc.compiler.trinode.OpMethodCallNode;
-import ru.dz.plc.compiler.binode.*;
-import ru.dz.plc.compiler.node.*;
 import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.PlcException;
-
-import java.io.*;
-import java.util.List;
 
 
 class InsGen extends Opcode {

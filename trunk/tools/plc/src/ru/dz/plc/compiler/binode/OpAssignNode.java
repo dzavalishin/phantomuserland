@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
-import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomStackVar;
 import ru.dz.plc.compiler.PhantomType;

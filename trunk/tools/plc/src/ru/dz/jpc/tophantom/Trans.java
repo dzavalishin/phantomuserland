@@ -60,8 +60,8 @@ public class Trans {
 	private static String packagedir;	// destination package directory 
 
 	private static boolean needmain = true;	// need to generate main
-	private static Hashtable genlist;	// list of classes we generated
-	private static Stack classWorkList;     // list of classes we still need to visit
+	private static Hashtable<String, String> genlist;	// list of classes we generated
+	private static Stack<String> classWorkList;     // list of classes we still need to visit
 	private static String tobapath;		// toba.class.path property value
 
 	private static boolean retobaapi = false; // re-translate stuff we found in an API
@@ -82,8 +82,8 @@ public class Trans {
 		options(args);			// process options
 
 		tobapath = System.getProperty("toba.class.path");
-		genlist = new Hashtable();
-		classWorkList = new Stack ();
+		genlist = new Hashtable<String, String>();
+		classWorkList = new Stack<String> ();
 
 		// Set things so we look up interfaces in the right place.
 		IHash.setInTranslator (true);
@@ -217,7 +217,7 @@ public class Trans {
 
 		while (! classWorkList.empty ()) {
 
-			name = (String) classWorkList.pop ();
+			name = classWorkList.pop ();
 			
 	        log.info("Processing "+name);
 

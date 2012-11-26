@@ -13,13 +13,13 @@ public class ClassRef {
     public String name;
 
     // the referred-to class as loaded by the system class loader
-    private Class refClass = null;
+    private Class<?> refClass = null;
     // The referred-to class as loaded by other class loaders
-    private Hashtable loadedRefdClasses = null;
-    private static Hashtable rccache;
+    private Hashtable<ClassLoader, Class<?>> loadedRefdClasses = null;
+    private static Hashtable<Object,ClassRef> rccache;
 
     static {
-        rccache = new Hashtable ();
+        rccache = new Hashtable<Object,ClassRef> ();
         rccache.put (Void.TYPE, new ClassRef (Void.TYPE));
         rccache.put (Boolean.TYPE, new ClassRef (Boolean.TYPE));
         rccache.put (Byte.TYPE, new ClassRef (Byte.TYPE));
@@ -51,7 +51,7 @@ public class ClassRef {
         ClassRef cr;
 
         s = s.intern ();
-        cr = (ClassRef) rccache.get (s);
+        cr = rccache.get (s);
         if (null == cr) {
             cr = new ClassRef (s);
             rccache.put (s, cr);
@@ -70,28 +70,28 @@ public class ClassRef {
         cr = null;
         switch (s.charAt (0)) {
             case 'Z':
-                cr = (ClassRef) rccache.get (Boolean.TYPE);
+                cr = rccache.get (Boolean.TYPE);
                 break;
             case 'B':
-                cr = (ClassRef) rccache.get (Byte.TYPE);
+                cr = rccache.get (Byte.TYPE);
                 break;
             case 'C':
-                cr = (ClassRef) rccache.get (Character.TYPE);
+                cr = rccache.get (Character.TYPE);
                 break;
             case 'S':
-                cr = (ClassRef) rccache.get (Short.TYPE);
+                cr = rccache.get (Short.TYPE);
                 break;
             case 'I':
-                cr = (ClassRef) rccache.get (Integer.TYPE);
+                cr = rccache.get (Integer.TYPE);
                 break;
             case 'J':
-                cr = (ClassRef) rccache.get (Long.TYPE);
+                cr = rccache.get (Long.TYPE);
                 break;
             case 'F':
-                cr = (ClassRef) rccache.get (Float.TYPE);
+                cr = rccache.get (Float.TYPE);
                 break;
             case 'D':
-                cr = (ClassRef) rccache.get (Double.TYPE);
+                cr = rccache.get (Double.TYPE);
                 break;
             case 'L':
                 cr = byName (s.substring (1, s.length() - 1));
@@ -108,21 +108,21 @@ public class ClassRef {
     }
     
     // The constructor called for installing primitive class refs
-    private ClassRef(Class cl) {
+    private ClassRef(Class<?> cl) {
 	name = "<" + cl.getName () + ">";
 	refClass = cl;
     }
 
     /* Return the appropriate Class structure for this reference, given
      * the loader we're to use. */
-    private Class
+    private Class<?>
     findRefdClass (ClassLoader loader)
     {
         if (null == loader) {
             return refClass;
         }
         if (null != loadedRefdClasses) {
-            return (Class) loadedRefdClasses.get (loader);
+            return loadedRefdClasses.get (loader);
         }
         return null;
     }
@@ -131,21 +131,21 @@ public class ClassRef {
 	return (null != findRefdClass (loader));
     }
 
-    public void resolveTo(Class cl,
+    public void resolveTo(Class<?> cl,
                           ClassLoader cld)
     {
         if (null == cld) {
             refClass = cl;
         } else {
             if (null == loadedRefdClasses) {
-                loadedRefdClasses = new Hashtable ();
+                loadedRefdClasses = new Hashtable<ClassLoader, Class<?>> ();
             }
             loadedRefdClasses.put (cld, cl);
         }
     }
 
-    public Class getRefClass(ClassLoader loader) {
-        Class rc;
+    public Class<?> getRefClass(ClassLoader loader) {
+        Class<?> rc;
 
         rc = findRefdClass (loader);
 	if (null == rc) {
