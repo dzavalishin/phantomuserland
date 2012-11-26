@@ -154,10 +154,15 @@ public class ClassTable {
 				ps.format("%s: ", c.getName().substring(1)+".pc" );
 				ps.format("%s", c.getName().substring(1)+".ph" );
 				
-				for( PhantomClass ref : c.getReferencedClasses() )
+				Set<PhantomClass> referencedClasses = c.getReferencedClasses();
+				if( referencedClasses != null )
 				{
-					ps.format("\t%s", ref.getName().substring(1)+".pc" );
+					for( PhantomClass ref : referencedClasses )
+					{
+						ps.format("\t%s", ref.getName().substring(1)+".pc" );
+					}
 				}
+				
 				ps.format("\n");
 				
 				os.close();

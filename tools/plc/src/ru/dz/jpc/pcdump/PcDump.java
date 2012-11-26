@@ -56,7 +56,7 @@ public class PcDump {
         RandomAccessFile is = findFile(name);
         if (is == null) throw new PlcException("dump", "File not found", name);
 
-        ClassMap classes = new ClassMap();
+        ClassMap classes = ClassMap.get_map();
         classes.do_import(".internal.object");
         classes.do_import(".internal.int");
 

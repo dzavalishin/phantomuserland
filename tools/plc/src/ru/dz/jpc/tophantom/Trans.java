@@ -12,6 +12,7 @@
 package ru.dz.jpc.tophantom;
 
 import ru.dz.jpc.classfile.*;
+import ru.dz.plc.PlcMain;
 import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.util.PlcException;
 
@@ -160,6 +161,8 @@ public class Trans {
                     abort(usagestring);
                 classPath = args[i];
                 args[i] = null;
+                PlcMain.addClassFileSearchParh( new File(classPath) );
+                PlcMain.setOutputPath(classPath);
                 break;
 			default:
 				abort("Unrecognized option " + s + "\n" + usagestring);
@@ -219,7 +222,8 @@ public class Trans {
 	        log.info("Processing "+name);
 
 			
-			ClassMap classes = new ClassMap();
+			//ClassMap classes = new ClassMap();
+	        ClassMap classes = ClassMap.get_map();
 
 			classes.do_import(".internal.object");			
 			classes.do_import(".internal.int");
@@ -235,6 +239,7 @@ public class Trans {
                             String fileName = file.getName();
                             if (file.exists() && file.isFile() && fileName.endsWith(".pc")) {
                                 String className = "." + fileName.substring(0, fileName.length()-3);
+                                log.log(Level.INFO,"Import "+className);
                                 classes.do_import(className);			
                             }
                         }
@@ -310,11 +315,12 @@ public class Trans {
 				}
 			}
 
-			
+			/*
 			PrintWriter hstream = oopen(k, ".h", hBufferSize);
 			HFile.write(hstream, k);		// write .h file
 			hstream.close();
-
+			*/
+			
 			PrintWriter cstream = oopen(k, ".c", cBufferSize);
 			if (debugging(dbgConstants)) {
 				Constant.dump(cstream, k.constants);

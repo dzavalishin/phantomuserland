@@ -1,4 +1,4 @@
-package translation.java.test;
+//package translation.java.test;
 
 class a {
     int returnInt() {
