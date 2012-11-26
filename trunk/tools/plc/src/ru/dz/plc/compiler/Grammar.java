@@ -66,7 +66,7 @@ import ru.dz.plc.util.*;
 public class Grammar
 extends GrammarHelper {
 
-	private ClassMap				classes = new ClassMap();
+	private ClassMap				classes = ClassMap.get_map();
 
 	private String					package_name = null;
 

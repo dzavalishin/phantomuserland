@@ -21,7 +21,7 @@ public class PpcMain {
 	 * @throws PlcException 
 	 */
 	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException, ConnvertException, PlcException {
-		ClassMap cm = new ClassMap();
+		ClassMap cm = ClassMap.get_map();
 
 		PythonFrontendXML pfx = new PythonFrontendXML();
 		

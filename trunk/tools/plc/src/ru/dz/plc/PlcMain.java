@@ -1,6 +1,7 @@
 package ru.dz.plc;
 
 import java.util.LinkedList;
+import java.io.File;
 import java.io.IOException;
 import ru.dz.plc.compiler.Grammar;
 import ru.dz.plc.parser.*;
@@ -101,7 +102,10 @@ public class PlcMain {
 	}
 
 	public static LinkedList<File> getClassFileSearchPath() {		return classFileSearchPath;	}
+	public static void addClassFileSearchParh(File path) { classFileSearchPath.add( path ); }
+	
 	public static String getOutputPath() {		return outputPath;	}
+	public static void setOutputPath(String path) { outputPath = path; }
 
 	
 	
@@ -141,6 +145,7 @@ public class PlcMain {
 		
 		return g.get_error_count() > 0;
 	}
+
 
 
 }

@@ -18,9 +18,9 @@ public class ClassMap {
 	ClassTable       classes = new ClassTable();
 	ClassTable       imported_classes = new ClassTable();
 
-	static ClassMap  static_hack;
-	public static ClassMap  get_map() { return static_hack; }
-	public ClassMap() { static_hack = this; }
+	private static ClassMap  static_hack;
+	public static ClassMap  get_map() { if(null==static_hack) static_hack = new ClassMap(); return static_hack; }
+	private ClassMap() { static_hack = this; }
 
 
 
