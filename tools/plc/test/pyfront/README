@@ -1,0 +1,6 @@
+Very preliminary Python frontend for Phantom. It is supposed that
+this stage will convert pyton source to intermediate representation
+which will be picked up by plc backend and compiled to Phantom bytecode
+in a usual way.
+
+Requires cygwin (or, possibly, any other) python (tested with 2.5.2-1).

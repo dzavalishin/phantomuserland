@@ -7,8 +7,10 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runners.Suite.SuiteClasses;
 
 import ru.dz.plc.util.PlcException;
+
 
 public class RunJava2PhantomTest {
 
@@ -20,6 +22,8 @@ public class RunJava2PhantomTest {
 	public void setUp() throws Exception {
 		
 		System.setProperty("toba.class.path","test/class");
+
+		TestCommons.compileIjternalPhantomClasses();
 		
 	}
 

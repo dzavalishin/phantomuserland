@@ -73,7 +73,7 @@ class MethGen extends Opcode {
 	{
 		ClassData cls = m.cl;
 		Field f = m.fl;
-		int n;
+		//int n;
 
 		//NodeStack nodeStack = new NodeStack(); // Used to conver Java stack ops to Phantom tree
 
@@ -244,7 +244,7 @@ class MethGen extends Opcode {
 		String t;
 
 		StringBuffer b = new StringBuffer();	// parm list being built
-		int lv = 0;					// local variable count
+		//int lv = 0;					// local variable count
 
 		if ((m.fl.access & ClassData.ACC_STATIC) == 0) {  // instance function?
 			b.append("Object p0, ");		// "self" parameter
@@ -299,7 +299,7 @@ class MethGen extends Opcode {
 
 	static private void dclstack(PrintWriter d, Method m, char jtype)
 	{
-		if (!m.stktypes.get((int)jtype))
+		if (!Method.stktypes.get((int)jtype))
 			return;
 
 		d.print(Repr.ctype(jtype) + " ");
@@ -317,11 +317,11 @@ class MethGen extends Opcode {
 
 	static private void dclvars(PrintWriter d, Method m, char jtype, boolean vol)
 	{
-		int max = m.maxvar[(int)jtype];
+		int max = Method.maxvar[(int)jtype];
 		if (max < 0)
 			return;
 
-		BitSet bs = m.varused[(int)jtype];
+		BitSet bs = Method.varused[(int)jtype];
 		String s;
 		int n = 0;
 
@@ -344,7 +344,7 @@ class MethGen extends Opcode {
 	}
 
 
-
+/*
 	//  lvinits(d, m) -- generate local variable initializations for method m
 
 	static private void lvinits(PrintWriter d, Method m, PhantomClass pc, ru.dz.plc.compiler.Method pm ) throws PlcException
@@ -378,7 +378,7 @@ class MethGen extends Opcode {
 			/*
 			pc.setField( phantomOrdinal, varName, null);
 			System.out.println("set parm field "+varName);
-			 */
+			 * /
 
 			if(i == 0 )
 			{
@@ -396,16 +396,16 @@ class MethGen extends Opcode {
 		}
 
 	}
-
+*/
     
     static private void setMethodArgsType(Method m, ru.dz.plc.compiler.Method pm ) throws PlcException
 	{
 		String s = m.astack;				// entry "stack"
-		int pnum = 0;					// parameter number
+		//int pnum = 0;					// parameter number
 		int vnum = 0;					// variable number
 
-		if ((m.fl.access & ClassData.ACC_STATIC) != 0)	// if static function
-			pnum++;						//    no "this" param
+		//if ((m.fl.access & ClassData.ACC_STATIC) != 0)	// if static function
+		//	pnum++;						//    no "this" param
 
 		//int phantomOrdinal = 0;
 

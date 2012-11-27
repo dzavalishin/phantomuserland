@@ -390,10 +390,11 @@ public class Method {
 
 	//  target(pc) -- return label corresponding to jump target given in pc terms
 
+	/*
 	private int target(int pc)
 	{
 		return instrs[pcmap[pc]].label;
-	}
+	}*/
 
 	public String
 	toString ()

@@ -2,9 +2,8 @@
 
 package ru.dz.jpc.classfile;
 
-import java.io.*;
 import java.util.*;
-import java.util.zip.*;
+//import java.util.zip.*;
 
 public class Names {
 
@@ -359,7 +358,7 @@ public static String baseclass(String s)
       * Handling the file/ziparchive variations of this and all the exceptions
       * is too hard in C.  It's very much like t.c.ClassFile.open, but
       * that's got too many dependencies in it to abstract away for code
-      * reuse, and I'm not going to redesign the interface now. */
+      * reuse, and I'm not going to redesign the interface now. * /
     private static InputStream
     toba_getSRAS (String name)
     {
@@ -413,5 +412,5 @@ public static String baseclass(String s)
         }
         return null;
     }
-
+	*/
 } // class Names

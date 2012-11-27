@@ -23,14 +23,7 @@ public class RunCompiler {
 	@Before
 	public void setUp() throws Exception {
 		
-		compile("test/ph/internal/stub.object.ph");
-		compile("test/ph/internal/stub.class.ph");
-		compile("test/ph/internal/stub.thread.ph");
-		
-		compile("test/ph/internal/internal.string.ph");
-		compile("test/ph/internal/internal.class.ph");
-		compile("test/ph/internal/internal.object.ph");
-		compile("test/ph/internal/internal.int.ph");
+		TestCommons.compileIjternalPhantomClasses();
 
 	}
 
@@ -43,22 +36,7 @@ public class RunCompiler {
 
 	void compile(String src)
 	{
-		String[] args = new String[3];
-		
-		args[0] = "-Itest/pc";
-		args[1] = "-otest/pc";
-		args[2] = src;
-		
-		try {
-			
-		
-		if( PlcMain.go(args) )
-			fail("Compile failed");
-		}
-		catch( Throwable o )
-		{
-			fail("Compile failed: "+o.toString());
-		}
+		TestCommons.compile(src);
 	}
 
 	

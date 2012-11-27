@@ -25,6 +25,7 @@ public class FieldTable {
 
 	public FieldTable() { table = new HashMap<String, PhantomField>(); }
 
+	/*
 	private boolean have_ord( int ord )
 	{
 		for( Iterator<PhantomField> i = table.values().iterator(); i.hasNext(); )
@@ -34,6 +35,7 @@ public class FieldTable {
 		}
 		return false;
 	}
+	*/
 
 	void add( String name, PhantomType type )
 	{

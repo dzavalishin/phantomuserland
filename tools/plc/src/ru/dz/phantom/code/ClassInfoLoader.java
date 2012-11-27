@@ -29,7 +29,8 @@ public class ClassInfoLoader {
   public String get_class_name() { return class_name; }
   public PhantomClass get_class() { return my_class; }
 
-  public boolean load_class_file() throws IOException, PlcException {
+  @SuppressWarnings("unused")
+public boolean load_class_file() throws IOException, PlcException {
 
     long fsize = is.length();
     //printf("fsize %d\n", fsize );

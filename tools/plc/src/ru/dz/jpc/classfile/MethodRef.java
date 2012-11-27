@@ -8,7 +8,7 @@ public class MethodRef extends FieldRef {
     // Locate the method that this reference refers
     // to in the given ClassData
     protected Field findMethod(ClassData cdata) {
-        Field rm;
+        //Field rm;
         Field [] mt;
         int i;
 
