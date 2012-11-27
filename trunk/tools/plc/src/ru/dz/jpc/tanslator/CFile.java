@@ -603,7 +603,7 @@ static private void methodsigs(PrintWriter d, ClassData c)
 	if ((m.access & ClassData.ACC_ABSTRACT) != 0)
 	    d.print("\t{TMIT_abstract, 0");
 	else {
-	    String s = String.valueOf(m.hashcode);
+	    //String s = String.valueOf(m.hashcode);
 	    d.print("\t{TMIT_native_code, " + m.cname);
 	}
 

@@ -82,7 +82,7 @@ class InsGen extends Opcode {
 		if (!ins.isReached)
 			return;
 
-		ParserContext pcontext = new ParserContext("", ins.pc);
+		ParserContext pcontext = new ParserContext("", ins.pc );
 
 		Opcode o = ins.opcode;
 
@@ -1018,7 +1018,7 @@ class InsGen extends Opcode {
                 }
                 return ptype;
             case '[':
-                String arrayType = signature.substring(1);
+                //String arrayType = signature.substring(1);
                 System.out.println("unimplemented type [");
             case 'V':
                 break;

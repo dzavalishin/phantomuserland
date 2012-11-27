@@ -2,10 +2,13 @@ package ru.dz.jpc.python;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,10 +20,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.NewNode;
 import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.OpPlusNode;
+import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.binode.ValEqNode;
 import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
@@ -31,6 +38,12 @@ import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.util.PlcException;
 
 public class PythonFrontendXML {
+	static final Logger log = Logger.getLogger("ru.dz.jpc.python");
+
+	private int errorCount = 0;
+	private PhantomClass pc = null;
+
+
 	private static final boolean really = false;
 	DocumentBuilderFactory docBuilderFactory;
 	DocumentBuilder docBuilder;
@@ -42,7 +55,7 @@ public class PythonFrontendXML {
 	private int currentLineNo = -1;
 	/** Current line text */
 	private String currentLineText = "";
-	private String funcName;
+	//private String funcName;
 	
 	public PythonFrontendXML() throws ParserConfigurationException {	
         docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -116,6 +129,7 @@ public class PythonFrontendXML {
 			{
 				PythonLabel lbl = new PythonLabel(cn);
 				//System.out.println("Top level label: "+lbl);
+				log.log(Level.INFO, "Top level label: "+lbl );
 			}
 			else if(nname.equals("pythoncode"))
 			{
@@ -170,6 +184,8 @@ public class PythonFrontendXML {
 		// These two are saved in DefFunc and used in PythonCode
 		int funcOutReg = -1;
 		int funcCodeLen = -1;
+		String funcName = null;
+		
 		
 		NodeList childNodes = n.getChildNodes();
 		for( int i = 0; i < childNodes.getLength(); i++  )
@@ -196,6 +212,34 @@ public class PythonFrontendXML {
 				
 				currentLineNo = Integer.parseInt(line);
 				currentLineText = text;
+				log.log(Level.INFO,"pos "+currentLineNo+" ("+currentLineText+")");
+				
+				// TODO hack - we reparse python src, generate class name XML node instead!
+				
+				text = text.trim();
+				if( text.toLowerCase().startsWith("class") )
+				{
+					String cname = text.substring(5).trim();
+					if( cname.endsWith(":") )
+					{
+						cname = cname.substring(0, cname.length()-1);
+						log.info("class def: \""+cname+"\" at "+currentLineNo);
+						
+						ClassMap cm = ClassMap.get_map();
+						
+						// Sometimes class def string duplicates!
+						if(cm.get(cname, true, null) == null)
+						{
+							pc = new PhantomClass(cname);
+							cm.add(pc);
+						}
+					}
+					else
+					{
+						log.severe("Unparsable class def: "+currentLineText+" at "+currentLineNo);
+					}
+				}
+				
 			}			
 			else if(nname.equals("file"))
 			{
@@ -203,6 +247,7 @@ public class PythonFrontendXML {
 				String name = cn.getAttributes().getNamedItem("name").getNodeValue();
 				fileName = name;
 				//System.out.println("File \""+name+"\"");
+				log.log(Level.INFO, "File \""+fileName+"\"" );
 				} catch( Throwable e )
 				{ /* Ignore */ }
 			}			
@@ -210,11 +255,12 @@ public class PythonFrontendXML {
 			{
 				String name = cn.getAttributes().getNamedItem("name").getNodeValue();
 				funcName = name;
-				//System.out.println("Func \""+name+"\"");
+				log.log(Level.INFO,"Func \""+funcName+"\"");
 			}			
 			else if(nname.equals("regs"))
 			{
 				String num = cn.getAttributes().getNamedItem("num").getNodeValue();
+				log.log(Level.INFO,"regs "+num);
 				//System.out.println("Func \""+name+"\"");
 			}			
 			else if(nname.equals("string"))
@@ -232,15 +278,25 @@ public class PythonFrontendXML {
 			}
 			else if(nname.equals("dict"))
 			{
+				if( cn.getAttributes().getNamedItem("reg") != null )
+				{
+					int outReg = getInt(cn,"reg");
+					setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false,null)), null, null) );
+				}
+				else
+				{
 				int outReg = getInt(cn,"out");
 				int inStartReg = getInt(cn,"inStart");
 				int inRegsNum = getInt(cn,"inNum");
 
+				log.log(Level.INFO,"dict inStart "+inStartReg);
+				
 				setRegister(outReg, new NewNode(new PhantomType(ClassMap.get_map().get(".internal.container.array",false,null)), null, null) );
 				// TODO use some map style container for dictionary
 				// TODO here we must fill a new dictionary - compose?
 				if(inRegsNum != 0)
 					throw new ConnvertException("No dictionary compose code yet");
+				}
 			}
 			else if(nname.equals("gget"))
 			{
@@ -258,9 +314,25 @@ public class PythonFrontendXML {
 			}
 			else if(nname.equals("get"))
 			{
-				int toReg = getInt(cn,"toreg");
-				int objectReg = getInt(cn,"class");
-				int nameregReg = getInt(cn,"fieldName");
+				int toReg = -1;
+				int objectReg = -1;
+				int nameregReg = -1;
+				
+				if( cn.getAttributes().getNamedItem("toreg") != null )
+				{
+					toReg = getInt(cn,"toreg");
+					objectReg = getInt(cn,"class");
+					nameregReg = getInt(cn,"fieldName");
+				}
+				else
+				{
+					toReg = getInt(cn,"out");				
+					objectReg = getInt(cn,"left");
+					nameregReg = getInt(cn,"right");
+				}
+				
+				log.log(Level.INFO,"get to "+toReg+" class "+objectReg+" field "+nameregReg );
+				
 				// TODO implement
 				setRegister(toReg, new EmptyNode() );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
@@ -269,7 +341,11 @@ public class PythonFrontendXML {
 			{
 				int fromReg = getInt(cn,"fromreg");
 				int objectReg = getInt(cn,"class");
-				int nameregReg = getInt(cn,"fieldName");
+				//int nameregReg = getInt(cn,"fieldName");
+				String fieldName = getString(cn, "fieldName");
+				
+				log.log(Level.INFO,"set from "+fromReg+" class "+objectReg+" field "+fieldName );
+				
 				// TODO implement
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
@@ -322,7 +398,38 @@ public class PythonFrontendXML {
 				System.out.println("Unknown node: "+nname);
 			}
 			
-		}		
+		}
+		
+		// Finished processing <pythoncode>...</pythoncode>, now create method
+		if(null==funcName)
+		{
+			log.log(Level.SEVERE,"No function name at the end of code");
+			return;
+		}
+
+		if(null==pc)
+		{
+			log.log(Level.SEVERE,"No class at the end of code");
+			return;
+		}
+		
+		
+		Method m = new Method(funcName, PhantomType.t_string);
+		pc.addMethod(m);
+		
+		//m.code = useRegister(funcOutReg);
+		
+		ru.dz.plc.compiler.node.Node last = new NullNode();
+		
+		for( ru.dz.plc.compiler.node.Node ln : out )
+		{
+			last = new SequenceNode(last, ln);			
+		}
+		
+		last.print(new PrintStream(System.out));
+		
+		m.code = last;
+		
 	}
 
 
@@ -345,7 +452,10 @@ public class PythonFrontendXML {
 	private double getDouble(Node cn, String name) {
 		return Double.parseDouble(cn.getAttributes().getNamedItem(name).getNodeValue());		
 	}
+
 	
+	public int getErrorCount() { 		return errorCount;	}
+
 }
 
 

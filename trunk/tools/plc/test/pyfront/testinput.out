@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PythonFrontend>
+<Label name="EOF" />   
+<PythonCode>   
+<REGS num="5" />   
+<pos line="1" text="class myclass:" />   
+<file name="testinput.py" />   
+<Function name="?" />   
+<DICT out="0" inStart="0" inNum="0" />   
+<GSET gVarName="myclass" fromreg="0" />   
+<DefFunc outreg="1" len="26" />   
+<PythonCode>   
+<REGS num="4" />   
+<pos line="2" text="  def load(fname):" />   
+<file name="testinput.py" />   
+<Function name="load" />   
+<NONE reg="2" /><!-- set reg 2 to null -->   
+<GET toreg="1" class="0" fieldName="2" />   
+<pos line="3" text="    if fname == 'ok':" />   
+<Label name="1:1:0" />   
+<STRING reg="3" content="ok" len="2"  />
+<EQ out="2" left="1" right="3" />   
+<IF reg="2" />   
+<JUMP label="1:1:1" />   
+<pos line="4" text="        r = 2 + fname" />   
+<NUMBER reg="3" val="2.0"  /> 
+<ADD out="3" left="3" right="1" />   
+<MOVE to="2" from="3" />   
+<JUMP label="1:1:end" />   
+<Label name="1:1:1" />   
+<pos line="6" text="        r = 3 + fname" />   
+<NUMBER reg="3" val="3.0"  /> 
+<ADD out="3" left="3" right="1" />   
+<MOVE to="2" from="3" />   
+<JUMP label="1:1:end" />   
+<Label name="1:1:2" />   
+<Label name="1:1:end" />   
+<pos line="7" text="    return r" />   
+<RETURN reg="2" />   
+<EOF />   
+</PythonCode>   
+<Label name="0:0:end" />   
+<STRING reg="2" content="load" len="4"  />
+<SET class="0" fieldName="2" fromreg="1" />   
+<DefFunc outreg="2" len="19" />   
+<PythonCode>   
+<REGS num="8" />   
+<pos line="9" text="  def system(cmd):" />   
+<file name="testinput.py" />   
+<Function name="system" />   
+<NONE reg="2" /><!-- set reg 2 to null -->   
+<GET toreg="1" class="0" fieldName="2" />   
+<pos line="11" text="    import os" />   
+<GGET to="3" gVarName="import" />   
+<STRING reg="4" content="os" len="2"  />
+<PARAMS out="2" inStart="4" inNum="1" />   
+<CALL ret="2" func="3" params="2" />   
+<MOVE to="3" from="2" />   
+<pos line="12" text="    return os.system(cmd, 'hi', 'there')" />   
+<STRING reg="5" content="system" len="6"  />
+<GET out="4" left="3" right="5" />   
+<MOVE to="5" from="1" />   
+<STRING reg="6" content="hi" len="2"  />
+<STRING reg="7" content="there" len="5"  />
+<PARAMS out="2" inStart="5" inNum="3" />   
+<CALL ret="2" func="4" params="2" />   
+<RETURN reg="2" />   
+<EOF />   
+</PythonCode>   
+<Label name="0:2:end" />   
+<STRING reg="3" content="system" len="6"  />
+<SET class="0" fieldName="3" fromreg="2" />   
+<DefFunc outreg="3" len="23" />   
+<PythonCode>   
+<REGS num="7" />   
+<pos line="1" text="class myclass:" />   
+<file name="testinput.py" />   
+<Function name="__new__" />   
+<NONE reg="2" /><!-- set reg 2 to null -->   
+<GET toreg="1" class="0" fieldName="2" />   
+<pos line="2" text="  def load(fname):" />   
+<GGET to="3" gVarName="bind" />   
+<GGET to="4" gVarName="myclass" />   
+<STRING reg="6" content="load" len="4"  />
+<GET out="4" left="4" right="6" />   
+<MOVE to="5" from="1" />   
+<PARAMS out="2" inStart="4" inNum="2" />   
+<CALL ret="2" func="3" params="2" />   
+<STRING reg="3" content="load" len="4"  />
+<SET class="1" fieldName="3" fromreg="2" />   
+<pos line="9" text="  def system(cmd):" />   
+<GGET to="3" gVarName="bind" />   
+<GGET to="4" gVarName="myclass" />   
+<STRING reg="6" content="system" len="6"  />
+<GET out="4" left="4" right="6" />   
+<MOVE to="5" from="1" />   
+<PARAMS out="2" inStart="4" inNum="2" />   
+<CALL ret="2" func="3" params="2" />   
+<STRING reg="3" content="system" len="6"  />
+<SET class="1" fieldName="3" fromreg="2" />   
+<EOF />   
+</PythonCode>   
+<Label name="0:3:end" />   
+<STRING reg="4" content="__new__" len="7"  />
+<SET class="0" fieldName="4" fromreg="3" />   
+<DefFunc outreg="4" len="8" />   
+<PythonCode>   
+<REGS num="5" />   
+<!-- self  -->
+<DICT reg="1" />   
+<pos line="1" text="class myclass:" />   
+<GGET to="3" gVarName="myclass" />   
+<STRING reg="4" content="__new__" len="7"  />
+<GET out="3" left="3" right="4" />   
+<MOVE to="4" from="1" />   
+<PARAMS out="2" inStart="4" inNum="1" />   
+<CALL ret="2" func="3" params="2" />   
+<!-- return self  -->
+<RETURN reg="1" />   
+<EOF />   
+</PythonCode>   
+<Label name="0:4:end" />   
+<SET class="0" fieldName="__call__" fromreg="4" />   
+<EOF />   
+</PythonCode>   
+</PythonFrontend>

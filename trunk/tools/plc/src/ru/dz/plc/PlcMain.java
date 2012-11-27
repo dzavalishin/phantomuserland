@@ -41,7 +41,8 @@ public class PlcMain {
 		}
 		
 		try { 
-			Boolean err = go(args); 
+			Boolean err = go(args);
+			if(err) System.exit(1);
 			}
 		catch( PlcException e ) {
 			System.out.println("Failed: " + e.toString());

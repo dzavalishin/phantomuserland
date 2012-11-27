@@ -1,7 +1,7 @@
 //  ClassInstall.java -- for copying class files into a package directory
 
 package ru.dz.jpc.tanslator;
-
+/*
 import ru.dz.jpc.classfile.ClassFile;
 import java.io.*;
 
@@ -44,7 +44,7 @@ public static void copy(DataInputStream src, String destname)
          * rt.jar seems to throw the following exception _during_the_write_
          * of the uncompressed class file.  Checking one or two of the
          * classes indicates that the write actually does complete, so
-         * we'll ignore that exception. */
+         * we'll ignore that exception. * /
         if (! (okToIgnoreEOFE &&
                e.toString().equals ("java.io.EOFException: Unexpected end of ZLIB input stream"))) {
             throw e;
@@ -84,3 +84,4 @@ public static void install(String findname, String classname, String target)
 
 
 } // class ClassInstall
+*/

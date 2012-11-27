@@ -14,12 +14,12 @@ import ru.dz.plc.util.PlcException;
  */
 public class FieldFileInfo extends FileInfo {
 
-	private final FileWriter lst;
+	//private final FileWriter lst;
 	private PhantomField f;
 
 	public FieldFileInfo(RandomAccessFile os, FileWriter lst, PhantomField f) {
 		super( os, (byte)'f' );
-		this.lst = lst;
+		//this.lst = lst;
 		this.f = f;
 	}
 

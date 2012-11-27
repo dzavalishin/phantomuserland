@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Hashtable;
 import java.util.Stack;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import ru.dz.jpc.classfile.ClassData;
@@ -65,7 +66,7 @@ private static boolean dbgflag[] = new boolean[256];
 
 private static boolean autodep;		// pull in all dependencies
 private static String mainclass;	// name of main class
-private static String packagedir;	// destination package directory 
+//private static String packagedir;	// destination package directory 
 
 private static boolean needmain = true;	// need to generate main
 private static Hashtable<String, String> genlist;	// list of classes we generated
@@ -74,7 +75,7 @@ private static String tobapath;		// toba.class.path property value
 
 private static boolean retobaapi = false; // re-translate stuff we found in an API
 
-private static boolean okToInstallPkgClasses = true; // install class files when building packages?
+//private static boolean okToInstallPkgClasses = true; // install class files when building packages?
 
 //static final Logger log = Logger.getLogger("ru.dz.jpc.Trans");
 //static { log.setLevel(Level.INFO); }
@@ -146,6 +147,7 @@ private static void options(String args[])
                 i++;
                 needmain = false;
                 break;
+/*                
 	    case 'P':           // name package directory
                 i++;
                 if (i >= args.length)
@@ -157,6 +159,7 @@ private static void options(String args[])
             case 'p':
                 okToInstallPkgClasses = false;
                 break;
+*/                
             case 'r':           // track down dependences
                 autodep = true;
                 echo_names = true;
@@ -219,7 +222,7 @@ private static void doname(String name)
 
         name = classWorkList.pop ();
 
-
+        log.log(Level.INFO,"Processing "+name);
         
         // stop if we've already done this one
         // XXX can we do this here?  can differences between name and
@@ -277,7 +280,7 @@ private static void doname(String name)
 
         /* If we're building a package and we're supposed to do the classfile
          * installation, do it.  Classes go in the "classes" subdirectory
-         * of the package directory. */
+         * of the package directory. * /
         if ((packagedir != null) && okToInstallPkgClasses) {
             try {
                 ClassInstall.install(name, k.name, packagedir + File.separatorChar + "classes");
@@ -286,7 +289,7 @@ private static void doname(String name)
             } catch(ClassNotFoundException e) {
                 abort(name + " disappeared!");
             }
-        }
+        }*/
 
         PrintWriter hstream = oopen(k, ".h", hBufferSize);
         HFile.write(hstream, k);		// write .h file

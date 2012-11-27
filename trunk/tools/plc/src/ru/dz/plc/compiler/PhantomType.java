@@ -232,6 +232,12 @@ public class PhantomType {
     public void set_is_container(boolean is_container) {
         this._is_container = is_container;
     }
+    
+    
+    
+    public static final PhantomType t_string = new PhTypeString();
+    //public static final PhantomType t_int = new PhTypeInt();
+    public static final PhantomType t_void = new PhTypeVoid();
 }
 
 

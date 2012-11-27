@@ -3,6 +3,7 @@
 package ru.dz.jpc.tanslator;
 
 import ru.dz.jpc.classfile.*;
+
 import java.io.*;
 import java.util.*;
 
@@ -58,7 +59,7 @@ static void mgen(PrintWriter d, Method m)
 {
     ClassData cls = m.cl;
     Field f = m.fl;
-    int n;
+    //int n;
 
     // dump the code as C comments, if requested
     if (Trans.debugging(Trans.dbgCode))
@@ -205,7 +206,7 @@ private static String parmdecls(Method m)
     String t;
 
     StringBuffer b = new StringBuffer();	// parm list being built
-    int lv = 0;					// local variable count
+    //int lv = 0;					// local variable count
 
     if ((m.fl.access & ClassData.ACC_STATIC) == 0) {  // instance function?
 	b.append("Object p0, ");		// "self" parameter
@@ -260,7 +261,7 @@ loop:
 
 static private void dclstack(PrintWriter d, Method m, char jtype)
 {
-    if (!m.stktypes.get((int)jtype))
+    if (!Method.stktypes.get((int)jtype))
 	return;
 
     d.print(Repr.ctype(jtype) + " ");
@@ -278,11 +279,11 @@ static private void dclstack(PrintWriter d, Method m, char jtype)
 
 static private void dclvars(PrintWriter d, Method m, char jtype, boolean vol)
 {
-    int max = m.maxvar[(int)jtype];
+    int max = Method.maxvar[(int)jtype];
     if (max < 0)
 	return;
 
-    BitSet bs = m.varused[(int)jtype];
+    BitSet bs = Method.varused[(int)jtype];
     String s;
     int n = 0;
 

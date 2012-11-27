@@ -7,6 +7,7 @@
  */
  
 package ru.dz.jpc;
+/*
 import java.io.*;
 import ru.dz.jpc.tanslator.ClassInstall;
 
@@ -61,3 +62,4 @@ InstallClassFile
         }
     }
 }
+*/

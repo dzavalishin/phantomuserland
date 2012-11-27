@@ -506,6 +506,7 @@ public class ClassData {
 	// buildVariableTables(k) - Build table of instance and static variables.
 	// Compute a hash table of
 	// visible instance fields, also.
+	@SuppressWarnings("unchecked")
 	private void buildVariableTables(boolean setSlots) {
 		int ivtsize;
 		int svtsize = 0; // static variables are not inherited.
