@@ -65,9 +65,6 @@ import ru.dz.plc.util.PlcException;
 class InsGen extends Opcode {
 
 
-	
-	
-
 	//  igen(d, m, ins) -- generate code for one instruction
 
 	static void igen(PrintWriter d, NodeEmitter ns, Method m, Instr ins, PhantomClass myClass, ParseState ps) throws PlcException
@@ -88,9 +85,9 @@ class InsGen extends Opcode {
 
 		if(ins.label != 0)
 		{
-            ns.push( new JumpTargetNode(ins.label) );
+			ns.push( new JumpTargetNode(ins.label) );
 		}
-		
+
 		String ident = o.name.substring(0, 1) + "v" + (ins.val + o.var);
 		switch (o.kind) {
 
@@ -109,8 +106,8 @@ class InsGen extends Opcode {
 			d.println(assign(ins) + (ins.val + o.var) + ";");
 
 			{
-                ns.push(new IntConstNode( ins.val + o.var ));
-//				ns.push(new IntConstNode( ins.val ));
+				ns.push(new IntConstNode( ins.val + o.var ));
+				//				ns.push(new IntConstNode( ins.val ));
 				return;
 
 				/*
@@ -133,41 +130,41 @@ class InsGen extends Opcode {
 
 		case LDC:			// ldc, ldc_2, ldc2_w
 			d.println(assign(ins) + Repr.con(m, ins.con) + ";");
-            {
-                switch (ins.con.tag) {
-                    case Constant.STRING :
-                        ns.push(new StringConstNode( (String)ins.con.value ));
-                        return;
-                    case Constant.INTEGER :
-                        break;                       // not supported yet
+			{
+				switch (ins.con.tag) {
+				case Constant.STRING :
+					ns.push(new StringConstNode( (String)ins.con.value ));
+					return;
+				case Constant.INTEGER :
+					break;                       // not supported yet
 
-                    case Constant.CLASS :
-                    case Constant.FIELD :
-                    case Constant.METHOD :
-                    case Constant.INTERFACE :
-                    case Constant.FLOAT :
-                    case Constant.LONG :
-                    case Constant.DOUBLE :
-                    case Constant.NAMETYPE :
-                    case Constant.UTF8 :
-                    case Constant.UNICODE :
-                    default:
-                        break;                       // not supported yet
-                }
-            }
+				case Constant.CLASS :
+				case Constant.FIELD :
+				case Constant.METHOD :
+				case Constant.INTERFACE :
+				case Constant.FLOAT :
+				case Constant.LONG :
+				case Constant.DOUBLE :
+				case Constant.NAMETYPE :
+				case Constant.UTF8 :
+				case Constant.UNICODE :
+				default:
+					break;                       // not supported yet
+				}
+			}
 			break;
 
 		case LOAD:			// iload, aload_<n>, fload, ...
 			d.println(assign(ins) + ident + ";");
 			{
-                ensureAutoVariable(ps, ident);
+				ensureAutoVariable(ps, ident);
 
 				if(o.name.equals("aload_0"))
 					ns.push(new ThisNode(myClass));
 				else
 					ns.push(new IdentTransNode(ident));
 			}
-			
+
 			return;
 
 		case STORE:			// istore, fstore_<n>, astore, ...
@@ -175,7 +172,7 @@ class InsGen extends Opcode {
 			d.println("\t" + s.substring(0, 1) + "v" + (ins.val + o.var) +
 					" = " + s + ";");
 
-            ensureAutoVariable(ps, ident);
+			ensureAutoVariable(ps, ident);
 
 			ns.push( new OpAssignTransNode( new IdentTransNode(ident), ns.pop()) );
 
@@ -206,10 +203,10 @@ class InsGen extends Opcode {
 					"((struct in_" + Names.hashclass(r.cl.name) + "*)" +
 					stacktop(ins) + ")->" + Names.hashvar(r.name) + ";");
 
-            ns.push(new IdentTransNode(r.name));
-//            {
-//                myClass.addField(r.name, getFieldType(r.signature));
-//            }
+			ns.push(new IdentTransNode(r.name));
+			//            {
+			//                myClass.addField(r.name, getFieldType(r.signature));
+			//            }
 			return;
 
 		case PUTF:			// putfield
@@ -219,8 +216,8 @@ class InsGen extends Opcode {
 					stack2nd(ins) + ")->" + Names.hashvar(r.name) + " = " +
 					stacktop(ins) + ";");
 
-//			ns.push( new OpAssignNode( new IdentTransNode(r.name), ns.pop()) );
-            ns.push( new OpAssignTransNode( new IdentTransNode(r.name), ns.pop()) );
+			//			ns.push( new OpAssignNode( new IdentTransNode(r.name), ns.pop()) );
+			ns.push( new OpAssignTransNode( new IdentTransNode(r.name), ns.pop()) );
 
 			return;
 
@@ -254,72 +251,72 @@ class InsGen extends Opcode {
 			break;
 
 		case NEWA:			// [newarray]
-// toba [
-//			switch (ins.val) {
-//			case T_BOOLEAN:	s = "boolean";	break;
-//			case T_CHAR:	s = "char";	break;
-//			case T_FLOAT:	s = "float";	break;
-//			case T_DOUBLE:	s = "double";	break;
-//			case T_BYTE:	s = "byte";	break;
-//			case T_SHORT:	s = "short";	break;
-//			case T_INT:	s = "int";	break;
-//			case T_LONG:	s = "long";	break;
-//			default:	throw new VerifyError
-//			("newarray(" + ins.val + ") at pc=" + ins.pc);
-//			}
-//			d.println(assign(ins) +
-//					"anewarray(&cl_" + s + "," + stacktop(ins) + ");");
-// toba ]
-            {
-//                switch (ins.val) {
-//                case T_BOOLEAN:	s = "boolean";	break;
-//                case T_CHAR:	s = "char";	break;
-//                case T_FLOAT:	s = "float";	break;
-//                case T_DOUBLE:	s = "double";	break;
-//                case T_BYTE:	s = "byte";	break;
-//                case T_SHORT:	s = "short";	break;
-//                case T_INT:	s = "int";	break;
-//                case T_LONG:	s = "long";	break;
-//                default:	throw new VerifyError("newarray(" + ins.val + ") at pc=" + ins.pc);
-//                }
-//                PhantomType type = getPhantomType(s);
-                PhantomType arrayType = getVoidArrayType();
+			// toba [
+			//			switch (ins.val) {
+			//			case T_BOOLEAN:	s = "boolean";	break;
+			//			case T_CHAR:	s = "char";	break;
+			//			case T_FLOAT:	s = "float";	break;
+			//			case T_DOUBLE:	s = "double";	break;
+			//			case T_BYTE:	s = "byte";	break;
+			//			case T_SHORT:	s = "short";	break;
+			//			case T_INT:	s = "int";	break;
+			//			case T_LONG:	s = "long";	break;
+			//			default:	throw new VerifyError
+			//			("newarray(" + ins.val + ") at pc=" + ins.pc);
+			//			}
+			//			d.println(assign(ins) +
+			//					"anewarray(&cl_" + s + "," + stacktop(ins) + ");");
+			// toba ]
+		{
+			//                switch (ins.val) {
+			//                case T_BOOLEAN:	s = "boolean";	break;
+			//                case T_CHAR:	s = "char";	break;
+			//                case T_FLOAT:	s = "float";	break;
+			//                case T_DOUBLE:	s = "double";	break;
+			//                case T_BYTE:	s = "byte";	break;
+			//                case T_SHORT:	s = "short";	break;
+			//                case T_INT:	s = "int";	break;
+			//                case T_LONG:	s = "long";	break;
+			//                default:	throw new VerifyError("newarray(" + ins.val + ") at pc=" + ins.pc);
+			//                }
+			//                PhantomType type = getPhantomType(s);
+			PhantomType arrayType = getVoidArrayType();
 
-                ensureAutoVariable(ps, ident);
+			ensureAutoVariable(ps, ident);
 
-                ns.pop(); // remove array size
-                NewNode newNode = new NewNode(arrayType, null, null);
-                ns.push(newNode);
-            }
-            return;
+			ns.pop(); // remove array size
+			NewNode newNode = new NewNode(arrayType, null, null);
+			ns.push(newNode);
+		}
+		return;
 
 		case ANEWA:			// [anewarray]
-// toba [
-//			c = (ClassRef)ins.con.value;			// result class
-//			s = c.name;
-//			for (n = 0; s.charAt(n) == '['; n++)
-//				;					// n = class dimensions
-//			if (n == 0) {
-//				d.println(assign(ins) + "anewarray(&cl_" +
-//						Names.hashclass(s) + ".C," + stacktop(ins) + ");");
-//			} else {
-//				d.println(assign(ins) + "vmnewarray(&" +
-//						Names.classref(s.substring(n)) + "," +
-//						(n + 1) + ",1," + stacktop(ins) + ");");
-//			}
-// toba ]
+			// toba [
+			//			c = (ClassRef)ins.con.value;			// result class
+			//			s = c.name;
+			//			for (n = 0; s.charAt(n) == '['; n++)
+			//				;					// n = class dimensions
+			//			if (n == 0) {
+			//				d.println(assign(ins) + "anewarray(&cl_" +
+			//						Names.hashclass(s) + ".C," + stacktop(ins) + ");");
+			//			} else {
+			//				d.println(assign(ins) + "vmnewarray(&" +
+			//						Names.classref(s.substring(n)) + "," +
+			//						(n + 1) + ",1," + stacktop(ins) + ");");
+			//			}
+			// toba ]
 
-            {
-//                PhantomType type = getPhantomType(c.name);
-                PhantomType arrayType = getVoidArrayType();
+		{
+			//                PhantomType type = getPhantomType(c.name);
+			PhantomType arrayType = getVoidArrayType();
 
-                ensureAutoVariable(ps, ident);
+			ensureAutoVariable(ps, ident);
 
-                ns.pop(); // remove array size
-                NewNode newNode = new NewNode(arrayType, null, null);
-                ns.push(newNode);
-            }
-            return;
+			ns.pop(); // remove array size
+			NewNode newNode = new NewNode(arrayType, null, null);
+			ns.push(newNode);
+		}
+		return;
 		case MNEWA:			// multianewarray
 			c = (ClassRef)ins.con.value;		// result class
 			s = c.name;
@@ -340,68 +337,68 @@ class InsGen extends Opcode {
 			break;
 
 		case ARRAYLOAD:			// iaload, faload, aaload,...
-// toba [
-//			checkref(d, ins, -2);
-//			s = o.name.substring(0,1);	// i,f,a,...
-//			d.println("\tif ((unsigned)" + stacktop(ins) +
-//					" >= ((struct " + s + "array*)" + stack2nd(ins) +
-//					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" +
-//					stack2nd(ins) + "," + stacktop(ins) + ");");
-//			d.println(assign(ins) + "((struct " + s + "array*)" +
-//					stack2nd(ins) + ")->data[" + stacktop(ins) + "];");
-// toba ]
+			// toba [
+			//			checkref(d, ins, -2);
+			//			s = o.name.substring(0,1);	// i,f,a,...
+			//			d.println("\tif ((unsigned)" + stacktop(ins) +
+			//					" >= ((struct " + s + "array*)" + stack2nd(ins) +
+			//					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" +
+			//					stack2nd(ins) + "," + stacktop(ins) + ");");
+			//			d.println(assign(ins) + "((struct " + s + "array*)" +
+			//					stack2nd(ins) + ")->data[" + stacktop(ins) + "];");
+			// toba ]
 
-            {
-//                ensureAutoVariable(ps, ident);
-                Node arrayIndex = ns.pop();
-                IdentTransNode identVar = (IdentTransNode)ns.pop();
+		{
+			//                ensureAutoVariable(ps, ident);
+			Node arrayIndex = ns.pop();
+			IdentTransNode identVar = (IdentTransNode)ns.pop();
 
-//                PhantomType arrayType = getArrayType(o.name);
-                PhantomType arrayType = getVoidArrayType();
+			//                PhantomType arrayType = getArrayType(o.name);
+			PhantomType arrayType = getVoidArrayType();
 
-                identVar.setType(arrayType);
-                updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
-                
-                OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
-                ns.push(array);
-            }
-            return;
+			identVar.setType(arrayType);
+			updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
+
+			OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
+			ns.push(array);
+		}
+		return;
 
 		case ARRAYSTORE:	       	// iastore, fastore, aastore,...
-// toba [
-//			checkref(d, ins, -3);
-//			s = o.name.substring(0,1);	// i,f,a,...
-//			d.println("\tif ((unsigned)" + stack2nd(ins) +
-//					" >= ((struct " + s + "array*)" + stackvar(ins,-3) +
-//					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" +
-//					stackvar(ins,-3) + "," + stack2nd(ins) + ");");
-//			if ((o.flags & INST) != 0) {	// aastore must check type
-//				d.println("\tif (" + stacktop(ins) + " && !instanceof(" +
-//						stacktop(ins) + ",((struct aarray*)" + stackAt(ins, -3) +
-//				")->class->elemclass,0))");
-//				d.println("\t\tthrowArrayStoreException(0);");
-//			}
-//			d.println("\t((struct " + s + "array*)" + stackvar(ins,-3) +
-//					")->data[" + stack2nd(ins) + "] = " + stacktop(ins) + ";");
-// toba ]
+			// toba [
+			//			checkref(d, ins, -3);
+			//			s = o.name.substring(0,1);	// i,f,a,...
+			//			d.println("\tif ((unsigned)" + stack2nd(ins) +
+			//					" >= ((struct " + s + "array*)" + stackvar(ins,-3) +
+			//					")->length)\n\t\tthrowArrayIndexOutOfBoundsException(" +
+			//					stackvar(ins,-3) + "," + stack2nd(ins) + ");");
+			//			if ((o.flags & INST) != 0) {	// aastore must check type
+			//				d.println("\tif (" + stacktop(ins) + " && !instanceof(" +
+			//						stacktop(ins) + ",((struct aarray*)" + stackAt(ins, -3) +
+			//				")->class->elemclass,0))");
+			//				d.println("\t\tthrowArrayStoreException(0);");
+			//			}
+			//			d.println("\t((struct " + s + "array*)" + stackvar(ins,-3) +
+			//					")->data[" + stack2nd(ins) + "] = " + stacktop(ins) + ";");
+			// toba ]
 
-            {
-//                ensureAutoVariable(ps, ident);
-                Node value = ns.pop();
-                Node arrayIndex = ns.pop();
-                IdentTransNode identVar = (IdentTransNode)ns.pop();
+		{
+			//                ensureAutoVariable(ps, ident);
+			Node value = ns.pop();
+			Node arrayIndex = ns.pop();
+			IdentTransNode identVar = (IdentTransNode)ns.pop();
 
-//                PhantomType arrayType = getArrayType(o.name);
-                PhantomType arrayType = getVoidArrayType();
+			//                PhantomType arrayType = getArrayType(o.name);
+			PhantomType arrayType = getVoidArrayType();
 
-                identVar.setType(arrayType);
-                updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
+			identVar.setType(arrayType);
+			updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
 
-                OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
-                OpAssignNode assign = new OpAssignTransNode(array, value);
-                ns.push(assign);
-            }
-            return;
+			OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
+			OpAssignNode assign = new OpAssignTransNode(array, value);
+			ns.push(assign);
+		}
+		return;
 		case DUP:			// dup
 			d.println(assign(ins) + stacktop(ins) + ";");
 
@@ -463,7 +460,7 @@ class InsGen extends Opcode {
 			d.println("\t"+stackAt(ins.succ,-5)+" = "+stackAt(ins.succ,-1)+";");
 			if (ins.before.charAt(ins.before.length() - 2) != 'x')
 				d.println("\t"+stackAt(ins.succ,-6)+" = "+stackAt(ins.succ,-2)+
-				";");
+						";");
 			break;
 
 		case SWAP:			// swap
@@ -497,24 +494,24 @@ class InsGen extends Opcode {
 
 		case DIVOP:			// {i,l}{div,rem}, but not {f,d}
 			d.println("\tif (!" + stacktop(ins) +
-			") throwDivisionByZeroException();"); 
+					") throwDivisionByZeroException();"); 
 			// no break
 		case BINOP:			// [iadd, isub, imul, idiv]
 			d.println(assign(ins) + stack2nd(ins) +o.opr+ stacktop(ins) + ";");
 
 			{
-                Node operand2 = ns.pop();
-                Node operand1 = ns.pop();
+				Node operand2 = ns.pop();
+				Node operand1 = ns.pop();
 
 				Node op = null;
 
 				if(o.name.equals("iadd")) op = new OpPlusTransNode(operand1,operand2);
-//				if(o.name.equals("iadd")) op = new OpPlusNode(stackTopNode,stack2ndNode);
-                else if(o.name.equals("isub")) op = new OpMinusNode(operand1,operand2);
-                else if(o.name.equals("imul")) op = new OpMultiplyNode(operand1,operand2);
-                else if(o.name.equals("idiv")) op = new OpDivideNode(operand1,operand2);
-                else if(o.name.equals("iand")) op = new OpAndNode(operand1,operand2);
-                else if(o.name.equals("ior")) op = new OpOrNode(operand1,operand2);
+				//				if(o.name.equals("iadd")) op = new OpPlusNode(stackTopNode,stack2ndNode);
+				else if(o.name.equals("isub")) op = new OpMinusNode(operand1,operand2);
+				else if(o.name.equals("imul")) op = new OpMultiplyNode(operand1,operand2);
+				else if(o.name.equals("idiv")) op = new OpDivideNode(operand1,operand2);
+				else if(o.name.equals("iand")) op = new OpAndNode(operand1,operand2);
+				else if(o.name.equals("ior")) op = new OpOrNode(operand1,operand2);
 				else
 				{
 					System.out.println("binop: "+o.name);
@@ -561,9 +558,9 @@ class InsGen extends Opcode {
 			d.print("\tif (" + stacktop(ins) + o.opr + "0)\n\t\t");
 			gengoto(d, m, ins, ins.val);
 
-            {
-                Node p1 = ns.pop();
-                Node p2 = (o.name.equals("ifnonnull") || o.name.equals("ifnull")) ? new NullNode() : new IntConstNode(0);
+			{
+				Node p1 = ns.pop();
+				Node p2 = (o.name.equals("ifnonnull") || o.name.equals("ifnull")) ? new NullNode() : new IntConstNode(0);
 
 				String cmpop = o.opr.trim();
 
@@ -572,8 +569,8 @@ class InsGen extends Opcode {
 				else if(cmpop.equals("<"))  ns.push(new ValGeTransNode(p1,p2));
 				else if(cmpop.equals(">=")) ns.push(new ValLtTransNode(p1,p2));
 				else if(cmpop.equals(">"))  ns.push(new ValLeTransNode(p1,p2));
-                else if(cmpop.equals("==")) ns.push(new ValNeqTransNode(p1,p2));
-                else if(cmpop.equals("!=")) ns.push(new ValEqTransNode(p1,p2));
+				else if(cmpop.equals("==")) ns.push(new ValNeqTransNode(p1,p2));
+				else if(cmpop.equals("!=")) ns.push(new ValEqTransNode(p1,p2));
 				else
 				{
 					System.out.print("Unknown if '"+cmpop+"' ");
@@ -581,16 +578,16 @@ class InsGen extends Opcode {
 				}
 				ns.push(new JzNode(target(m, ins.val)));
 
-//                if (o.name.equals("ifle")) {
-//                    String labelNo = c.getLabel();
-//                    ValGtNode gtNode = new ValGtNode(ns.pop(), new IntConstNode(0));
-//                    IfTransNode ifNode = new IfTransNode(gtNode, labelNo);
-//                    int target = ins.val;
-//                }
-//                else if (o.name.equals("ifge")) {
-//                    break;  // not supported yet
-//                }
-            }
+				//                if (o.name.equals("ifle")) {
+				//                    String labelNo = c.getLabel();
+				//                    ValGtNode gtNode = new ValGtNode(ns.pop(), new IntConstNode(0));
+				//                    IfTransNode ifNode = new IfTransNode(gtNode, labelNo);
+				//                    int target = ins.val;
+				//                }
+				//                else if (o.name.equals("ifge")) {
+				//                    break;  // not supported yet
+				//                }
+			}
 			return;
 
 		case IFCMP:			// if_icmplt, if_acmpne, ...
@@ -600,11 +597,11 @@ class InsGen extends Opcode {
 			{
 				//Node go = new JumpNode(target(m, ins.val));
 
-                Node p2 = ns.pop();
-                Node p1 = ns.pop();
+				Node p2 = ns.pop();
+				Node p1 = ns.pop();
 
-//				Node p1 = ns.pop();
-//				Node p2 = ns.pop();
+				//				Node p1 = ns.pop();
+				//				Node p2 = ns.pop();
 
 				String cmpop = o.opr.trim();
 
@@ -613,77 +610,77 @@ class InsGen extends Opcode {
 				else if(cmpop.equals("<"))		ns.push(new ValGeTransNode(p1,p2));
 				else if(cmpop.equals(">="))		ns.push(new ValLtTransNode(p1,p2));
 				else if(cmpop.equals(">"))		ns.push(new ValLeTransNode(p1,p2));
-                else if(cmpop.equals("=="))		ns.push(new ValNeqTransNode(p1,p2));
-                else if(cmpop.equals("!="))		ns.push(new ValEqTransNode(p1,p2));
+				else if(cmpop.equals("=="))		ns.push(new ValNeqTransNode(p1,p2));
+				else if(cmpop.equals("!="))		ns.push(new ValEqTransNode(p1,p2));
 				else
 				{
 					System.out.print("Unknown if '"+cmpop+"' ");
 					break;
 				}
-                ns.push(new JzNode(target(m, ins.val)));
+				ns.push(new JzNode(target(m, ins.val)));
 
 			}
 			return;
 
 		case TBLSW:			// [tableswitch]
-// toba [
-//			n = ins.more[1] - 3;		// correction factor
-//			d.println("\tswitch (" + stacktop(ins) + ") {");
-//			for (int i = 3; i < ins.more.length; i++) {
-//				d.print("\t\tcase " + (i + n) + ": \t");
-//				gengoto(d, m, ins, ins.more[i]);
-//			}
-//			d.print("\t\tdefault:\t");
-//			gengoto(d, m, ins, ins.more[0]);
-//			d.println("\t}");
-// toba ]
+			// toba [
+			//			n = ins.more[1] - 3;		// correction factor
+			//			d.println("\tswitch (" + stacktop(ins) + ") {");
+			//			for (int i = 3; i < ins.more.length; i++) {
+			//				d.print("\t\tcase " + (i + n) + ": \t");
+			//				gengoto(d, m, ins, ins.more[i]);
+			//			}
+			//			d.print("\t\tdefault:\t");
+			//			gengoto(d, m, ins, ins.more[0]);
+			//			d.println("\t}");
+			// toba ]
 
-            {
-                Node p1 = ns.pop();
-                n = ins.more[1] - 3;		// correction factor
-                for (int i = 3; i < ins.more.length; i++) {
-                    Node p2 = new IntConstNode(i + n);
+		{
+			Node p1 = ns.pop();
+			n = ins.more[1] - 3;		// correction factor
+			for (int i = 3; i < ins.more.length; i++) {
+				Node p2 = new IntConstNode(i + n);
 
-                    ns.push(new ValNeqTransNode(p1,p2));
-                    ns.push(new JzNode(target(m, ins.more[i])));
-                }
-                // default
-                ns.push(new JumpNode(target(m, ins.more[0])));
+				ns.push(new ValNeqTransNode(p1,p2));
+				ns.push(new JzNode(target(m, ins.more[i])));
+			}
+			// default
+			ns.push(new JumpNode(target(m, ins.more[0])));
 
-                return;
-            }
+			return;
+		}
 
 		case LKPSW:			// [lookupswitch]
-// toba [
-//			d.println("\tswitch (" + stacktop(ins) + ") {");
-//			for (int i = 2; i < ins.more.length; i += 2) {
-//				d.print("\t\tcase " + ins.more[i] + ": \t");
-//				gengoto(d, m, ins, ins.more[i + 1]);
-//			}
-//			d.print("\t\tdefault:\t");
-//			gengoto(d, m, ins, ins.more[0]);
-//			d.println("\t}");
-// toba ]
+			// toba [
+			//			d.println("\tswitch (" + stacktop(ins) + ") {");
+			//			for (int i = 2; i < ins.more.length; i += 2) {
+			//				d.print("\t\tcase " + ins.more[i] + ": \t");
+			//				gengoto(d, m, ins, ins.more[i + 1]);
+			//			}
+			//			d.print("\t\tdefault:\t");
+			//			gengoto(d, m, ins, ins.more[0]);
+			//			d.println("\t}");
+			// toba ]
 
-            {
-                Node p1 = ns.pop();
-                for (int i = 2; i < ins.more.length; i += 2) {
-                    Node p2 = new IntConstNode(ins.more[i]);
+		{
+			Node p1 = ns.pop();
+			for (int i = 2; i < ins.more.length; i += 2) {
+				Node p2 = new IntConstNode(ins.more[i]);
 
-                    ns.push(new ValNeqTransNode(p1,p2));
-                    ns.push(new JzNode(target(m, ins.more[i + 1])));
-                }
-                // default
-                ns.push(new JumpNode(target(m, ins.more[0])));
+				ns.push(new ValNeqTransNode(p1,p2));
+				ns.push(new JzNode(target(m, ins.more[i + 1])));
+			}
+			// default
+			ns.push(new JumpNode(target(m, ins.more[0])));
 
-                return;
-            }
+			return;
+		}
 		case GOTO:			// goto
 			d.print("\t");
 			gengoto(d, m, ins, ins.val);
-			
+
 			ns.push(new JumpNode(target(m, ins.val)));
-			
+
 			return;
 
 		case JSR:			// jsr
@@ -704,98 +701,98 @@ class InsGen extends Opcode {
 			n = argindex(ins, r.signature);
 			checkref(d, ins, n + 1);
 			s = "((struct in_" +
-			Names.hashclass(r.cl.name) + "*)" +
-			ins.before.charAt(n) + (n + 1) + ")->class->M.\n\t\t" + 
-			Names.hashmethod(r.name, r.cl.name, r.signature) + ".f";
+					Names.hashclass(r.cl.name) + "*)" +
+					ins.before.charAt(n) + (n + 1) + ")->class->M.\n\t\t" + 
+					Names.hashmethod(r.name, r.cl.name, r.signature) + ".f";
 			invoke(d, ins, (MethodRef)r, s);
 
-            { // method call
-                MethodNode methNode = new MethodNode(r.name);
+			{ // method call
+				MethodNode methNode = new MethodNode(r.name);
 
-                CallArgNode firstArgNode = null, nextArgNode = null;
-                int argCount = getMethodArgCount(r.signature);
-                for (int i=0; i<argCount; i++) {
-                    Node arg = ns.pop();
-                    if (firstArgNode == null) {
-                        firstArgNode = new CallArgNode(arg, null);
-                    } else {
-                        firstArgNode = new CallArgNode(arg, nextArgNode);
-                    }
-                    nextArgNode = firstArgNode;
-                }
+				CallArgNode firstArgNode = null, nextArgNode = null;
+				int argCount = getMethodArgCount(r.signature);
+				for (int i=0; i<argCount; i++) {
+					Node arg = ns.pop();
+					if (firstArgNode == null) {
+						firstArgNode = new CallArgNode(arg, null);
+					} else {
+						firstArgNode = new CallArgNode(arg, nextArgNode);
+					}
+					nextArgNode = firstArgNode;
+				}
 
-//                CallArgNode firstArgNode = null, nextArgNode = null;
-//                int argCount = getMethodArgCount(r.signature);
-//                for (int i=0; i<argCount; i++) {
-//                    Node arg = ns.pop();
-//                    if (firstArgNode == null) {
-//                        firstArgNode = new CallArgNode(arg, null);
-//                        nextArgNode = firstArgNode;
-//                    } else {
-//                        CallArgNode argNode = new CallArgNode(arg, null);
-//                        nextArgNode.setRight(argNode);
-//                        nextArgNode = argNode;
-//                    }
-//                }
-                IdentTransNode obj = (IdentTransNode)ns.pop();
-//                if (ins.con.value instanceof MethodRef) {
-                    String type = ((MethodRef)ins.con.value).cl.name;
-                    type = "."+type;
-                    PhantomType phantomType = new PhantomType(ClassMap.get_map().get(type, false, null));
-                    obj.setType(phantomType);
+				//                CallArgNode firstArgNode = null, nextArgNode = null;
+				//                int argCount = getMethodArgCount(r.signature);
+				//                for (int i=0; i<argCount; i++) {
+				//                    Node arg = ns.pop();
+				//                    if (firstArgNode == null) {
+				//                        firstArgNode = new CallArgNode(arg, null);
+				//                        nextArgNode = firstArgNode;
+				//                    } else {
+				//                        CallArgNode argNode = new CallArgNode(arg, null);
+				//                        nextArgNode.setRight(argNode);
+				//                        nextArgNode = argNode;
+				//                    }
+				//                }
+				IdentTransNode obj = (IdentTransNode)ns.pop();
+				//                if (ins.con.value instanceof MethodRef) {
+				String type = ((MethodRef)ins.con.value).cl.name;
+				type = "."+type;
+				PhantomType phantomType = new PhantomType(ClassMap.get_map().get(type, false, null));
+				obj.setType(phantomType);
 
-                    PhantomStackVar pStackVar = ps.get_method().svars.get_var(obj.get_name());
-                    pStackVar.setType(phantomType);
-//                }
-                OpMethodCallNode callNode = new OpMethodCallNode(obj, methNode, firstArgNode);
-                ns.push(callNode);
+				PhantomStackVar pStackVar = ps.get_method().svars.get_var(obj.get_name());
+				pStackVar.setType(phantomType);
+				//                }
+				OpMethodCallNode callNode = new OpMethodCallNode(obj, methNode, firstArgNode);
+				ns.push(callNode);
 
-                // change return type
-                int index = m.fl.signature.indexOf(')');
-                switch (m.fl.signature.charAt(index+1)) {
-                    case 'I':
-                        // todo setType
-//                        methNode.setType(new PhantomType(ClassMap.get_map().get(".internal.int",false)));
-                        break;
-                    case 'Z':
-                    case 'B':
-                    case 'S':
-                    case 'C':
-                    case 'J':
-                    case 'F':
-                    case 'D':
-                    case 'L':
-                    case '[':
-                    case 'V':
-                    default:
-                        break;
-                }
-                return;
-            }
+				// change return type
+				int index = m.fl.signature.indexOf(')');
+				switch (m.fl.signature.charAt(index+1)) {
+				case 'I':
+					// todo setType
+					//                        methNode.setType(new PhantomType(ClassMap.get_map().get(".internal.int",false)));
+					break;
+				case 'Z':
+				case 'B':
+				case 'S':
+				case 'C':
+				case 'J':
+				case 'F':
+				case 'D':
+				case 'L':
+				case '[':
+				case 'V':
+				default:
+					break;
+				}
+				return;
+			}
 
 		case INONV:			// invokenonvirtual
 			r = (FieldRef)ins.con.value;
 			checkref(d, ins, argindex(ins, r.signature) + 1);
 			invoke(d, ins, (MethodRef)r, 
 					Names.hashmethod(r.name,r.cl.name,r.signature));
-            { // constructor not supported yet (now insert drop opcode)
-                Node dupSrc = ns.pop();
-                Node dupDest = ns.pop();
-                ns.push(new SequenceNode(dupSrc, new VoidNode(new EmptyNode())));
-//                ns.push(dupSrc.getLeft());
-                return;
-//                if (ins.con.value instanceof MethodRef) {
-//                    String type = ((MethodRef)ins.con.value).cl.name;
-//                    type = "."+type;
-//                    setTypeAutoVariable(ps, type);
-//                    c = (ClassRef)ins.con.value;
-//                    PhantomClass pc = ClassMap.get_map().get(c.name,false);
-//                    PhantomType type = new PhantomType(pc);
+			{ // constructor not supported yet (now insert drop opcode)
+				Node dupSrc = ns.pop();
+				Node dupDest = ns.pop();
+				ns.push(new SequenceNode(dupSrc, new VoidNode(new EmptyNode())));
+				//                ns.push(dupSrc.getLeft());
+				return;
+				//                if (ins.con.value instanceof MethodRef) {
+				//                    String type = ((MethodRef)ins.con.value).cl.name;
+				//                    type = "."+type;
+				//                    setTypeAutoVariable(ps, type);
+				//                    c = (ClassRef)ins.con.value;
+				//                    PhantomClass pc = ClassMap.get_map().get(c.name,false);
+				//                    PhantomType type = new PhantomType(pc);
 
-//                    IdentNode node = new IdentNode();
-//                    node. (IdentNode) ns.pop();
-//                }
-            }
+				//                    IdentNode node = new IdentNode();
+				//                    node. (IdentNode) ns.pop();
+				//                }
+			}
 
 		case ISTAT:			// invokestatic
 			r = (FieldRef)ins.con.value;
@@ -809,7 +806,7 @@ class InsGen extends Opcode {
 			checkref(d, ins, n + 1);
 			t1 = Repr.ctype(r.signature.charAt(r.signature.indexOf(')') + 1));
 			s = "(*(" + t1 + "(*)())findinterface(a" + (n + 1) + "," +
-			Names.hashinterface(r.name, r.signature) + ")->f)";
+					Names.hashinterface(r.name, r.signature) + ")->f)";
 			invoke(d, ins, (MethodRef)r, s);
 			break;
 
@@ -820,29 +817,29 @@ class InsGen extends Opcode {
 			} else
 				d.println("\treturn " + stacktop(ins) + ";");
 
-            ns.push(new ReturnNode(ns.pop()));
+			ns.push(new ReturnNode(ns.pop()));
 
-            {   // update method return type
-                switch (ident.charAt(0)) {
-                    case 'i':
-                        ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.int",false, null));
-                        break;
-                    case 'l':
-                    case 'f':
-                    case 'd':
-                    case 'a':
-                        if (m.fl.signature.endsWith(")Ljava/lang/String;")){
-                            ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.string",false, null));
-                        } else {
-                            PhantomType returnType = getReturnType(m.fl.signature);
-                            if (returnType != null) ps.getMethod().type = returnType;
-                        }
-                        break;
-                    case 'r':
-                    default:
-                        break;
-                }
-            }
+			{   // update method return type
+				switch (ident.charAt(0)) {
+				case 'i':
+					ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.int",false, null));
+					break;
+				case 'l':
+				case 'f':
+				case 'd':
+				case 'a':
+					if (m.fl.signature.endsWith(")Ljava/lang/String;")){
+						ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.string",false, null));
+					} else {
+						PhantomType returnType = getReturnType(m.fl.signature);
+						if (returnType != null) ps.getMethod().type = returnType;
+					}
+					break;
+				case 'r':
+				default:
+					break;
+				}
+			}
 
 			return;
 
@@ -888,178 +885,178 @@ class InsGen extends Opcode {
 
 	private static void ensureAutoVariable(ParseState ps, String ident) throws PlcException {
 		if(ps.get_method().svars.get_var(ident) == null) {
-//			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false,null))));
-            ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhTypeObject()));
-        }
-    }
+			//			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhantomType(ClassMap.get_map().get(".internal.object",false,null))));
+			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, new PhTypeObject()));
+		}
+	}
 
-//    private static void setTypeStackVariable(ParseState ps, String ident, PhantomType type) throws PlcException {
-//        if (type instanceof PhTypeInt && ps.get_method().isvars.get_var(ident) == null) {
-//            ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, type));
-//        }
-//        else if (ps.get_method().svars.get_var(ident) == null){
-//            ps.get_method().svars.add_stack_var(new PhantomVariable(ident, type));
-//        }
-//    }
-    private static void updateArrayTypeStackVariable(ParseState ps, String ident, PhantomType type) throws PlcException {
-        PhantomStackVar stackVar = ps.get_method().svars.get_var(ident);
-        if (stackVar != null){
-            stackVar.setType(type);
-        }
-    }
+	//    private static void setTypeStackVariable(ParseState ps, String ident, PhantomType type) throws PlcException {
+	//        if (type instanceof PhTypeInt && ps.get_method().isvars.get_var(ident) == null) {
+	//            ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, type));
+	//        }
+	//        else if (ps.get_method().svars.get_var(ident) == null){
+	//            ps.get_method().svars.add_stack_var(new PhantomVariable(ident, type));
+	//        }
+	//    }
+	private static void updateArrayTypeStackVariable(ParseState ps, String ident, PhantomType type) throws PlcException {
+		PhantomStackVar stackVar = ps.get_method().svars.get_var(ident);
+		if (stackVar != null){
+			stackVar.setType(type);
+		}
+	}
 
-//    private static void setTypeAutoVariable(ParseState ps, String type) throws PlcException {
-//        PhantomStackVar stackVar = ps.get_method().svars.getLastVariable();
-//        if(stackVar != null) {
-//            (stackVar).setType(new PhantomType(ClassMap.get_map().get(type, false)));
-//        }
-//    }
+	//    private static void setTypeAutoVariable(ParseState ps, String type) throws PlcException {
+	//        PhantomStackVar stackVar = ps.get_method().svars.getLastVariable();
+	//        if(stackVar != null) {
+	//            (stackVar).setType(new PhantomType(ClassMap.get_map().get(type, false)));
+	//        }
+	//    }
 
-    private static int getMethodArgCount(String signature) {
-        int beginIndex = signature.indexOf('(');
-        int endIndex = signature.indexOf(')');
-        StringBuffer args = new StringBuffer(signature.substring(beginIndex+1, endIndex));
+	private static int getMethodArgCount(String signature) {
+		int beginIndex = signature.indexOf('(');
+		int endIndex = signature.indexOf(')');
+		StringBuffer args = new StringBuffer(signature.substring(beginIndex+1, endIndex));
 
-        int argCount = 0;
-        if (args.length()==0) return 0;
-        for (;args.length()>0;) {
-            switch (args.charAt(0)) {
-                case 'Z':
-                case 'B':
-                case 'S':
-                case 'C':
-                case 'I':
-                case 'J':
-                case 'F':
-                case 'D':
-                    argCount++;
-                    args.delete(0,1);
-                    break;
-                case 'L':
-                    argCount++;
-                    int end = args.indexOf(";");
-                    args.delete(0,end+1);
-                    break;
-                case '[':
-                    args.delete(0,1);
-                    break;
-//                case 'V':
-//                default:
-//                    break;
-            }
-        }
-        return argCount;
-    }
+		int argCount = 0;
+		if (args.length()==0) return 0;
+		for (;args.length()>0;) {
+			switch (args.charAt(0)) {
+			case 'Z':
+			case 'B':
+			case 'S':
+			case 'C':
+			case 'I':
+			case 'J':
+			case 'F':
+			case 'D':
+				argCount++;
+				args.delete(0,1);
+				break;
+			case 'L':
+				argCount++;
+				int end = args.indexOf(";");
+				args.delete(0,end+1);
+				break;
+			case '[':
+				args.delete(0,1);
+				break;
+				//                case 'V':
+				//                default:
+				//                    break;
+			}
+		}
+		return argCount;
+	}
 
-    private static PhantomType getReturnType(String signature) throws PlcException{
-        int index = signature.indexOf(")");
-        String retType = signature.substring(index+1);
-        return getFieldType(retType);
+	private static PhantomType getReturnType(String signature) throws PlcException{
+		int index = signature.indexOf(")");
+		String retType = signature.substring(index+1);
+		return getFieldType(retType);
 
-//        switch (retType.charAt(0)) {
-//            case 'I':
-//                return new PhantomType(ClassMap.get_map().get(".internal.int",false));
-////                break;
-//            case 'Z':
-//            case 'B':
-//            case 'S':
-//            case 'C':
-//            case 'J':
-//            case 'F':
-//            case 'D':
-//                System.out.println("unimplemented return type " + retType.charAt(0));
-//                return new PhantomType(ClassMap.get_map().get(".internal.object",false));
-////                break;
-//            case 'L':
-////                int end = retType.indexOf(";");
-//                String type = retType;
-//
-//                if (type.equals("Ljava/lang/String;")){
-//                    return new PhantomType(ClassMap.get_map().get(".internal.string",false));
-//                } else {
-//                    type = "." + type.substring(1, type.length()-1).replace("/", ".");
-//                    return new PhantomType(ClassMap.get_map().get(type, false));
-//                }
-////                break;
-//            case '[':
-//                retType = retType.substring(1);
-//                System.out.println("unimplemented return type [");
-//            case 'V':
-//                break;
-//
-////                default:
-////                    break;
-//        }
-//        return null;
-    }
+		//        switch (retType.charAt(0)) {
+		//            case 'I':
+		//                return new PhantomType(ClassMap.get_map().get(".internal.int",false));
+		////                break;
+		//            case 'Z':
+		//            case 'B':
+		//            case 'S':
+		//            case 'C':
+		//            case 'J':
+		//            case 'F':
+		//            case 'D':
+		//                System.out.println("unimplemented return type " + retType.charAt(0));
+		//                return new PhantomType(ClassMap.get_map().get(".internal.object",false));
+		////                break;
+		//            case 'L':
+		////                int end = retType.indexOf(";");
+		//                String type = retType;
+		//
+		//                if (type.equals("Ljava/lang/String;")){
+		//                    return new PhantomType(ClassMap.get_map().get(".internal.string",false));
+		//                } else {
+		//                    type = "." + type.substring(1, type.length()-1).replace("/", ".");
+		//                    return new PhantomType(ClassMap.get_map().get(type, false));
+		//                }
+		////                break;
+		//            case '[':
+		//                retType = retType.substring(1);
+		//                System.out.println("unimplemented return type [");
+		//            case 'V':
+		//                break;
+		//
+		////                default:
+		////                    break;
+		//        }
+		//        return null;
+	}
 
-    public static PhantomType getFieldType(String signature) throws PlcException {
-        switch (signature.charAt(0)) {
-            case 'I':
-                return new PhantomType(ClassMap.get_map().get(".internal.int",false, null));
-            case 'Z':
-            case 'B':
-            case 'S':
-            case 'C':
-            case 'J':
-            case 'F':
-            case 'D':
-                System.out.println("unimplemented type " + signature.charAt(0));
-                return new PhantomType(ClassMap.get_map().get(".internal.object",false, null));
-            case 'L':
-                String type = signature;
+	public static PhantomType getFieldType(String signature) throws PlcException {
+		switch (signature.charAt(0)) {
+		case 'I':
+			return new PhantomType(ClassMap.get_map().get(".internal.int",false, null));
+		case 'Z':
+		case 'B':
+		case 'S':
+		case 'C':
+		case 'J':
+		case 'F':
+		case 'D':
+			System.out.println("unimplemented type " + signature.charAt(0));
+			return new PhantomType(ClassMap.get_map().get(".internal.object",false, null));
+		case 'L':
+			String type = signature;
 
-                PhantomType ptype = null;
-                if (type.equals("Ljava/lang/String;")){
-                    ptype = new PhantomType(ClassMap.get_map().get(".internal.string",false, null));
-                } else {
-                    type = "." + type.substring(1, type.length()-1).replace("/", ".");
-                    ptype = new PhantomType(ClassMap.get_map().get(type, false, null));
-                }
-                return ptype;
-            case '[':
-                //String arrayType = signature.substring(1);
-                System.out.println("unimplemented type [");
-            case 'V':
-                break;
-            default:
-                System.out.println("unknown type "+signature);
-                break;
-        }
-        return null;
-    }
+			PhantomType ptype = null;
+			if (type.equals("Ljava/lang/String;")){
+				ptype = new PhantomType(ClassMap.get_map().get(".internal.string",false, null));
+			} else {
+				type = "." + type.substring(1, type.length()-1).replace("/", ".");
+				ptype = new PhantomType(ClassMap.get_map().get(type, false, null));
+			}
+			return ptype;
+		case '[':
+			//String arrayType = signature.substring(1);
+			System.out.println("unimplemented type [");
+		case 'V':
+			break;
+		default:
+			System.out.println("unknown type "+signature);
+			break;
+		}
+		return null;
+	}
 
-    public static PhantomType getVoidArrayType() {
-//                PhantomType arrayType = new PhantomType(ClassMap.get_map().get(".internal.void",false, null), true);
-        PhantomType arrayType = new PhTypeVoid();
-        arrayType.set_is_container(true);
-        return arrayType;
-    }
+	public static PhantomType getVoidArrayType() {
+		//                PhantomType arrayType = new PhantomType(ClassMap.get_map().get(".internal.void",false, null), true);
+		PhantomType arrayType = new PhTypeVoid();
+		arrayType.set_is_container(true);
+		return arrayType;
+	}
 
-    public static PhantomType getArrayType(String operationName) throws PlcException {
-        switch (operationName.charAt(0)) {
-            case 'i':
-                return new PhantomType(ClassMap.get_map().get(".internal.int",false, null), true);
-            case 'a':
-                return new PhantomType(ClassMap.get_map().get(".internal.object",false, null), true);
-            case 'b': // byte or boolean
-            case 'c': // char
-            case 'd': // double
-            case 'f': // float
-            case 'l': // long
-            case 's': // short
-            default:
-                System.out.println("unknown array type "+operationName);
-                break;
-        }
-        return null;
-    }
+	public static PhantomType getArrayType(String operationName) throws PlcException {
+		switch (operationName.charAt(0)) {
+		case 'i':
+			return new PhantomType(ClassMap.get_map().get(".internal.int",false, null), true);
+		case 'a':
+			return new PhantomType(ClassMap.get_map().get(".internal.object",false, null), true);
+		case 'b': // byte or boolean
+		case 'c': // char
+		case 'd': // double
+		case 'f': // float
+		case 'l': // long
+		case 's': // short
+		default:
+			System.out.println("unknown array type "+operationName);
+			break;
+		}
+		return null;
+	}
 
-    public static PhantomType getPhantomType(String javaType) throws PlcException {
-        if ("java.lang.String".equals(javaType)) return new PhTypeString();
-        else if ("int".equals(javaType)) return new PhTypeInt();
-        else return new PhTypeObject();
-    }
+	public static PhantomType getPhantomType(String javaType) throws PlcException {
+		if ("java.lang.String".equals(javaType)) return new PhTypeString();
+		else if ("int".equals(javaType)) return new PhTypeInt();
+		else return new PhTypeObject();
+	}
 
 	//  ancestor(cl, h) -- is the hashed classname h our class or a superclass? 
 
@@ -1166,7 +1163,7 @@ class InsGen extends Opcode {
 		for (n = 0; classname.charAt(n) == '['; n++)
 			;					// n = class dimensions
 		return "instanceof(" + stacktop(ins) +
-		",&" + Names.classref(classname.substring(n)) + "," + n + ")";
+				",&" + Names.classref(classname.substring(n)) + "," + n + ")";
 	}
 
 
@@ -1222,7 +1219,7 @@ class InsGen extends Opcode {
 	static final String assign(Instr ins)
 	{
 		return "\t" + ins.after.substring(ins.after.length() - 1)
-		+ ins.after.length() + " = ";
+				+ ins.after.length() + " = ";
 	}
 
 

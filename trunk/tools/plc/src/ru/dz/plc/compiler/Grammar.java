@@ -1212,9 +1212,12 @@ extends GrammarHelper {
 
 	private void parse_attribute(boolean definition) throws PlcException, IOException
 	{
-		boolean is_additive = false, is_multiplicative = false;
-		boolean is_required = false, is_negation = false;
-		boolean is_src_req = false, is_dst_req = false;
+		boolean is_additive = false; 
+		boolean is_multiplicative = false;
+		boolean is_required = false; 
+		boolean is_negation = false;
+		boolean is_src_req = false; 
+		boolean is_dst_req = false;
 
 		if( testAndEat( id_tilde ) ) is_negation = true;
 
@@ -1248,6 +1251,9 @@ extends GrammarHelper {
 				syntax_error("Attribute "+aname+" has partial requirements (!-> or ->!) not in definition");
 		}
 
+		if( is_required )
+			syntax_warning("required attribute -- ignored?");
+		
 	}
 
 }

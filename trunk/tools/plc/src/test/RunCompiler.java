@@ -9,7 +9,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ru.dz.plc.PlcMain;
 
 /**
  * @author dz

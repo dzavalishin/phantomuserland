@@ -4,6 +4,8 @@
 
 package ru.dz.jpc;
 
+/*
+
 import ru.dz.jpc.classfile.*;
 //import ru.dz.jpc.tanslator.*;
 
@@ -100,9 +102,9 @@ abort (String s) {
     System.exit (-1);
 }
 
-/** Given an array of class names, determine the transitive closure of
-  * all classes they depend on.  Write the complete dependency list to
-  * stdout. */
+// * Given an array of class names, determine the transitive closure of
+//  * all classes they depend on.  Write the complete dependency list to
+//  * stdout. 
 public static void
 closeClassList (String cnames [],
                 int cnind)
@@ -150,10 +152,10 @@ closeClassList (String cnames [],
         ClassData k = null;
 
         try {				// load class
-            /* Force a find of this by its name; we may not want a version we
-             * would get by Class.forName.  Use a null ClassLoader, to pretend
-             * we're using the system one.  Don't remember the ClassData
-             * structure: during bootstrapping, that consumes too much memory. */
+            // * Force a find of this by its name; we may not want a version we
+            // * would get by Class.forName.  Use a null ClassLoader, to pretend
+            // * we're using the system one.  Don't remember the ClassData
+            // * structure: during bootstrapping, that consumes too much memory. * /
             cf = ClassFile.find(name);
             k = ClassData.forStream (null, cf, false);
 //            Supers.load(k);			// load superclasses and method tables
@@ -223,3 +225,5 @@ public static void main(String[] args) {
 
 
 } // class Lister
+
+*/
