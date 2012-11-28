@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Suite.SuiteClasses;
 
 import ru.dz.plc.util.PlcException;
 

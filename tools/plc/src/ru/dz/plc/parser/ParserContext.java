@@ -5,7 +5,7 @@ package ru.dz.plc.parser;
  * <p>Title: Phantom Language Compiler</p>
  * <p>Description: </p>
  * <p>Copyright: Copyright (c) 2005</p>
- * <p>Company: </p>
+ * <p>Company: Digital Zone</p>
  * @author dz
  * @version 1.0
  */
@@ -28,13 +28,13 @@ public class ParserContext
 		this.fname = fname;
 		line_no = line;	
 	}
-	
+
 	public String get_position() { return fname+":"+Integer.toString(line_no)+": "; }
 	public String get_context() { return excerpt; }
 
 	public int getLineNumber() { return line_no;	}
 
-	
 
-	
+
+
 }
