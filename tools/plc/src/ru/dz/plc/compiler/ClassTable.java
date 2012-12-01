@@ -25,7 +25,8 @@ public class ClassTable {
 
 	void add( PhantomClass pc ) throws PlcException {
 		String name = pc.getName();
-		if( have( name ) && !(name.equals(".internal.object")) ) throw new PlcException( "class table add", "duplicate class name", name ) ;
+		if( have( name ) && !(name.equals(".internal.object")) ) 
+			throw new PlcException( "class table add", "duplicate class name", name ) ;
 		table.put(name, pc );
 	}
 

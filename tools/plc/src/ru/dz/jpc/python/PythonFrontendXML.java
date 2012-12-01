@@ -42,6 +42,13 @@ public class PythonFrontendXML {
 	private int errorCount = 0;
 	private PhantomClass pc = null;
 
+	void incErrors(String msg) 
+	{
+		errorCount++;
+		log.severe(msg);
+	}
+	
+	
 
 	private static final boolean really = false;
 	DocumentBuilderFactory docBuilderFactory;
@@ -144,6 +151,8 @@ public class PythonFrontendXML {
 
 
 	private Map<Integer,RegisterNodeWrapper> registers = new HashMap<Integer, RegisterNodeWrapper>();
+
+	private int nregs;
 	
 	private void setRegister(int reg, ru.dz.plc.compiler.node.Node n )
 	{
@@ -260,7 +269,13 @@ public class PythonFrontendXML {
 			{
 				String num = cn.getAttributes().getNamedItem("num").getNodeValue();
 				log.log(Level.INFO,"regs "+num);
-				//System.out.println("Func \""+name+"\"");
+				
+				try { nregs = Integer.parseInt(num); }
+				catch( NumberFormatException e )
+				{
+					nregs = 0;
+					incErrors("regs arg not parsable: "+num);
+				}
 			}			
 			else if(nname.equals("string"))
 			{
@@ -428,6 +443,7 @@ public class PythonFrontendXML {
 		last.print(new PrintStream(System.out));
 		
 		m.code = last;
+		
 		
 	}
 
