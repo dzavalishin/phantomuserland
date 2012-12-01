@@ -11,11 +11,21 @@
 
 #ifdef ARCH_ia32
 // None on x86 PC
+#define mem_barrier()
 
 #define mem_write_barrier()
-#define mem_barrier()
+#define mem_read_barrier() mem_barrier()
+
 #endif
 
+#ifdef ARCH_arm
+
+#define mem_barrier() arm_mem_barrier()
+
+#define mem_write_barrier() arm_mem_write_barrier()
+#define mem_read_barrier()  arm_mem_read_barrier()
+
+#endif
 
 
 

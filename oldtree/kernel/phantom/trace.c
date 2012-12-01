@@ -23,6 +23,8 @@ void __cyg_profile_func_exit(void *this_fn, void *call_site) __attribute__((no_i
 
 void __cyg_profile_func_enter(void *this_fn, void *call_site)
 {
+// No __sync_fetch_and_add on arm?
+#if !ARCH_arm
 #if 0
     unsigned int generation = 1;
     asm volatile (
@@ -44,6 +46,7 @@ void __cyg_profile_func_enter(void *this_fn, void *call_site)
     } else {
         memset(entry->stack, 0xdc, sizeof(entry->stack));
     }
+#endif // !ARCH_arm
 }
 
 void __cyg_profile_func_exit(void *this_fn, void *call_site)

@@ -1,3 +1,4 @@
+#if HAVE_NET
 /*
  * Copyright 1998-2007 by egnite Software GmbH
  * Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -181,3 +182,4 @@ int SnmpCommunityCreate(CONST char *name, int readView, int writeView)
 }
 
 /*@}*/
+#endif // HAVE_NET

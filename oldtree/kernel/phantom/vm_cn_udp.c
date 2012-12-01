@@ -59,10 +59,13 @@ static pvm_object_t cn_udp_blocking_syscall_worker( pvm_object_t conn, struct da
 
     switch( nmethod )
     {
+    default:
     case CONN_OP_READ:
     case CONN_OP_WRITE:
         e = ENOSYS;
         break;
+
+#if HAVE_NET
 
     case CONN_OP_BIND:
         {
@@ -81,6 +84,8 @@ static pvm_object_t cn_udp_blocking_syscall_worker( pvm_object_t conn, struct da
                 e = EISCONN;
             break;
         }
+#endif // HAVE_NET
+
     }
 
 
@@ -107,8 +112,10 @@ errno_t cn_udp_init( struct data_area_4_connection *c, struct data_area_4_thread
 
     struct cn_udp_volatile *vp = c->v_kernel_state;
 
+#if HAVE_NET
     int rc = udp_open( &vp->udp_endpoint );
     if( rc )
+#endif // HAVE_NET
         return ENOMEM;
 
 
@@ -130,8 +137,10 @@ errno_t cn_udp_disconnect( struct data_area_4_connection *c )
     if( !(vp->udp_endpoint) )
         return 0;
 
+#if HAVE_NET
     int rc = udp_close( vp->udp_endpoint );
     if( rc )
+#endif // HAVE_NET
         return EINVAL;
 
     return 0;

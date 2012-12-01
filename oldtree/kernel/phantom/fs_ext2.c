@@ -1,3 +1,4 @@
+#if HAVE_UNIX
 /**
  *
  * Phantom OS
@@ -1380,3 +1381,5 @@ struct file_direct *fdp;
  * any improvements or extensions that they make and grant Carnegie Mellon
  * the rights to redistribute these changes.
  */
+
+#endif // HAVE_UNIX

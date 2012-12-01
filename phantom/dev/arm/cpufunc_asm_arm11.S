@@ -34,9 +34,10 @@
  * architecture or physically tagged cache.
  */
  
-#include <machine/asm.h>
+#include <arm/asm.h>
 __FBSDID("$FreeBSD: src/sys/arm/arm/cpufunc_asm_arm11.S,v 1.1.2.1.2.1 2008/11/25 02:59:29 kensmith Exp $");
 
+#if 0
 /*
  * Functions to set the MMU Translation Table Base register
  *
@@ -53,6 +54,7 @@ ENTRY(arm11_setttb)
 	mcr	p15, 0, r0, c8, c7, 0	/* invalidate I+D TLBs */
 	mcr	p15, 0, r0, c7, c10, 4	/* drain write buffer */
 	RET
+#endif
 
 /*
  * TLB functions

@@ -1,3 +1,4 @@
+#if HAVE_NET
 #if 0
 /*
  * Copyright 2009 by egnite GmbH
@@ -301,3 +302,4 @@ int SnmpSessionSendPdu(SNMP_SESSION * session, SNMP_PDU * pdu)
 /*@}*/
 
 #endif
+#endif // HAVE_NET

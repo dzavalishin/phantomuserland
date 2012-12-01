@@ -30,7 +30,8 @@
 #endif
 
 #ifdef ARCH_arm
-#define         MAX_IRQ_COUNT 32
+// Raspberry has 64+32
+#define         MAX_IRQ_COUNT 128
 #endif
 
 #ifdef ARCH_mips
