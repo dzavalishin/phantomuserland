@@ -51,6 +51,9 @@ class shell //extends runnable
     var stat_pos :  int;
     var stat_next_pos :  int;
 
+    var cpu_idle : int;
+    var old_idle : int;
+
     var white : int;
 
     var win : .internal.window;
@@ -124,7 +127,10 @@ class shell //extends runnable
 
             stat_val = stat_conn.block( 26, 0 ); // blk io per sec
             console.putws("blk io =. ");
-            console.putws(stat_val.toString());
+
+            cpu_idle = stat_conn.block( 0, 5 ); // cpu 0 idle
+            console.putws("cpu idle = ");
+            console.putws(cpu_idle.toString());
             console.putws("\n");
 
             stat_next_pos = stat_pos + 1;
@@ -142,7 +148,11 @@ class shell //extends runnable
             win.setFg(0xFF000000); // black
             win.drawLine( stat_pos, 5, 0, 0+stat_val );
 
-            
+            // Idle
+            win.setFg( 0xFF0000FF ); // Blue
+            win.drawLine( stat_pos-1, old_idle, cpu_idle-old_idle, 1 );
+
+            old_idle = cpu_idle;            
             stat_pos = stat_next_pos;
             
             /*
