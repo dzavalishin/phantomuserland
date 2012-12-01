@@ -345,7 +345,6 @@ static void list_tcp_sockets(int argc, char **argv)
     }
 }
 
-
 static int bind_local_address(tcp_socket *s, netaddr *remote_addr)
 {
     int err = 0;
@@ -655,6 +654,10 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
         // record their sequence
         accept_socket->rx_win_low = header->seq_num + 1;
         accept_socket->rx_win_high = accept_socket->rx_win_low + accept_socket->rx_win_size - 1;
+
+        // [dz] fix accept bug
+        accept_socket->tx_win_low = header->seq_num + 1;
+        accept_socket->tx_win_high = accept_socket->tx_win_low;
 
         // figure out what the mss will be
         err = ipv4_get_mss_for_dest(accept_socket->remote_addr, &s->mss);
@@ -1572,9 +1575,11 @@ static void tcp_send(ipv4_addr dest_addr, uint16 dest_port, ipv4_addr src_addr, 
     STAT_INC_CNT(STAT_CNT_TCP_TX);
 
 #if NET_CHATTY
-    dprintf("tcp_send: src port %d, dest port %d, buf len %d, flags 0x%b\n",
+    dprintf("tcp_send: src port %d, dest port %d, buf len %d, flags 0x%b seq %d\n",
             source_port, dest_port, (int)cbuf_get_len(buf),
-            flags, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG");
+            flags, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG",
+            sequence
+           );
 #endif
 
     // grab a buf large enough to hold the header + options

@@ -63,3 +63,29 @@ void board_panic_wait_keypress(void)
 {
     debug_console_getc();
 }
+
+
+// http://www.raspberrypi.org/phpBB3/viewtopic.php?f=72&t=13959
+
+void arm_mem_barrier(void)
+{
+    //__asm__ __volatile__("": : :"memory")
+    arm11_mem_barrier();
+}
+
+void arm_mem_write_barrier(void)
+{
+    //__asm__ __volatile__("": : :"memory");
+    arm11_drain_writebuf();
+}
+
+
+void arm_mem_read_barrier(void)
+{
+    arm11_mem_barrier();
+}
+
+
+
+
+

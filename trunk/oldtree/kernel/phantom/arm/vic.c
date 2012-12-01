@@ -127,7 +127,7 @@ static void pl192_begin_interrupt(phantom_device_t *dev)
 {
     u_int32_t isr_addr = R32( dev->iobase + VIC_REG_VECTOR_ADDR );
     // ignored, this read is required to ack to hw that interrupt
-    // is being services
+    // is being serviced
     (void) isr_addr;
 }
 

@@ -1,3 +1,4 @@
+#if HAVE_NET
 /**
  *
  * Phantom OS
@@ -244,13 +245,14 @@ static uint8_t *MibVarsIfGet(CONST SNMPVAR * vp, OID * name, size_t * namelen, i
             if( (iface->dev == 0) || (iface->dev->dops.get_address == 0) )
             {
                 bzero( mac, sizeof(mac) );
-                return mac;
             }
+            else
+            {
+                errno_t err = iface->dev->dops.get_address(iface->dev, mac, sizeof(mac));
 
-            errno_t err = iface->dev->dops.get_address(iface->dev, mac, sizeof(mac));
-
-            if(err)
-                return 0;
+                if(err)
+                    bzero( mac, sizeof(mac) );
+            }
 
             *varlen = sizeof(mac);
             return mac;
@@ -283,3 +285,4 @@ static uint8_t *MibVarsIfGet(CONST SNMPVAR * vp, OID * name, size_t * namelen, i
     }
     return NULL;
 }
+#endif // HAVE_NET

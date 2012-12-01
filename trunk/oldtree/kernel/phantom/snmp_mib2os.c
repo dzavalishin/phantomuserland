@@ -1,3 +1,4 @@
+#if HAVE_NET
 /**
  *
  * Phantom OS
@@ -166,3 +167,4 @@ static uint8_t *MibVarsSysGet(CONST SNMPVAR * vp, OID * name, size_t * namelen, 
     return NULL;
 }
 
+#endif // HAVE_NET

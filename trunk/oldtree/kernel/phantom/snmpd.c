@@ -1,3 +1,4 @@
+#if HAVE_NET
 /*
  * Copyright 2007 by egnite Software GmbH
  *
@@ -143,3 +144,4 @@ fail:
 
 INIT_ME( 0, 0, snmp_daemon_thread );
 
+#endif // HAVE_NET

@@ -90,6 +90,7 @@ void icp_timer0_init(int freq)
         return;
     }
 
+#warning must be 1000000/freq?
     usec_per_tick = freq*1000;
 
     icp_tmr_count = 1000000/freq; // 1 MHz/freq

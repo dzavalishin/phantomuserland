@@ -1,3 +1,4 @@
+#if HAVE_NET
 /*
  * Copyright 1998-2007 by egnite Software GmbH
  * Copyright 1988, 1989, 1991, 1992 by Carnegie Mellon University
@@ -98,3 +99,4 @@ uint8_t *SnmpAuthBuild(SNMP_SESSION * session, uint8_t * data, size_t * length, 
 }
 
 /*@}*/
+#endif // HAVE_NET
