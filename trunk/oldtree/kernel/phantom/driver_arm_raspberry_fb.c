@@ -20,6 +20,7 @@
 
 #include <arm/memio.h>
 
+#include <kernel/page.h>
 #include <kernel/debug.h>
 #include <kernel/barriers.h>
 
@@ -27,10 +28,40 @@
 
 #include <phantom_assert.h>
 #include <errno.h>
+#include <stdio.h>
+
+#include <video/screen.h>
+#include <video/internal.h>
+
 
 #include "driver_arm_raspberry_fb.h"
 
+#define FB_DEFAULT_W 800
+#define FB_DEFAULT_H 600
+#define FB_DEFAULT_BPP 24
+
 #define PERIPHERAL_BASE 0x20000000 /* Base address for all (ARM?) peripherals */
+
+static physaddr_t       video_fb_pa = 0;
+static void *           video_fb_va = 0;
+static size_t           video_fb_bytes = 0;
+
+
+
+static u_int32_t ArmToVc(void *p)
+{
+	//Some things (e.g: the GPU) expect bus addresses, not ARM physical
+	//addresses
+	return ((u_int32_t)p) + 0xC0000000;
+}
+
+/*
+static void *VcToArm(u_int32_t p)
+{
+	//Go the other way to ArmToVc
+	return (void *)(p - 0xC0000000);
+}
+*/
 
 
 static u_int32_t mbox_read()
@@ -72,12 +103,12 @@ static errno_t try_init_fb(void)
     volatile struct Bcm2835FrameBuffer *fb = &fb_buf;
     assert( ( ((addr_t)fb) & 0xF) == 0 );
 
-    fb->width = 640;
-    fb->height = 480;
+    fb->width = FB_DEFAULT_W;
+    fb->height = FB_DEFAULT_H;
     fb->vwidth = fb->width;
     fb->vheight = fb->height;
     fb->pitch = 0;
-    fb->depth = 24;
+    fb->depth = FB_DEFAULT_BPP;
     fb->x = 0;
     fb->y = 0;
     fb->pointer = 0;
@@ -103,6 +134,9 @@ static errno_t try_init_fb(void)
         return ENOMEM;
     }
 
+    video_fb_pa = fb->pointer;
+    video_fb_bytes = fb->width * fb->height * (fb->depth / 8);
+
     return 0;
 }
 
@@ -119,6 +153,116 @@ void arm_raspberry_video_init(void)
 
 
 }
+
+
+
+
+static int raspberry_pi_video_probe();
+static int raspberry_pi_video_start();
+static int raspberry_pi_video_stop();
+
+
+
+struct drv_video_screen_t        video_driver_raspberry_pi =
+{
+    "Raspberry PI",
+
+    FB_DEFAULT_W, FB_DEFAULT_H, FB_DEFAULT_BPP,
+    // mouse x y flags
+    0, 0, 0,
+
+    // screen
+screen:			0,
+
+probe: 			raspberry_pi_video_probe,
+start: 			raspberry_pi_video_start,
+stop:   		raspberry_pi_video_stop,
+
+mouse_redraw_cursor: 	(void *)vid_null,
+mouse_set_cursor: 	(void *)vid_null,
+mouse_disable:          (void *)vid_null,
+mouse_enable:          	(void *)vid_null,
+
+};
+
+
+
+static int raspberry_pi_video_probe()
+{
+    if( video_fb_pa == 0 )
+        return VIDEO_PROBE_FAIL;
+
+    if(video_fb_va == 0)
+    {
+        //hal_pv_alloc( &video_fb_pa, &video_fb_va, VRAM_SIZE );
+        errno_t rc = hal_alloc_vaddress( &video_fb_va, BYTES_TO_PAGES(video_fb_bytes) );
+        if( rc )
+        {
+            SHOW_ERROR( 0, "VA alloc failed (%d)", rc );
+            return VIDEO_PROBE_FAIL;
+        }
+    }
+
+    // TODO switch to virtual on paging start?
+    video_driver_raspberry_pi.screen = video_fb_va;
+
+    SHOW_FLOW( 7, "vmem va 0x%X pa 0x%X", video_driver_raspberry_pi.screen, video_fb_pa);
+    SHOW_INFO( 0, "Raspberry PI video %d*%d found",  video_driver_raspberry_pi.xsize, video_driver_raspberry_pi.ysize );
+    return VIDEO_PROBE_SUCCESS;
+}
+
+
+
+
+
+
+static void raspberry_pi_map_video(int on_off)
+{
+    (void) on_off;
+
+    assert( video_driver_raspberry_pi.screen != 0 );
+
+    // TODO uncached?
+    hal_pages_control_etc( video_fb_pa, video_driver_raspberry_pi.screen,
+                           BYTES_TO_PAGES(video_fb_bytes),
+                           on_off ? page_map_io : page_unmap, page_rw, 0 );
+
+}
+
+
+
+static int raspberry_pi_video_start()
+{
+    switch_screen_bitblt_to_32bpp(1);
+    raspberry_pi_map_video( 1 );
+    return 0;
+}
+
+static int raspberry_pi_video_stop()
+{
+    raspberry_pi_map_video(0);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
