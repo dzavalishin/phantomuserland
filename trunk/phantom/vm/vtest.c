@@ -17,9 +17,10 @@ void videotest(void)
     drv_video_window_t *w = drv_video_window_create( WXS, WYS, 300, 300, COLOR_BLACK, "Test Window", WFLAG_WIN_DECORATED );
 
     drv_video_winblt( w );
-    drv_win_screen_update();
+    win_scr_screen_update();
     getchar();
 
+    drv_video_winblt( w1 );
 
 
     w_draw_line( w, 0, 0, WXS, WYS, COLOR_RED );
@@ -31,7 +32,7 @@ void videotest(void)
 
 
     drv_video_winblt( w );
-    drv_win_screen_update();
+    win_scr_screen_update();
     getchar();
 
 }

@@ -19,9 +19,14 @@ endif
 
 W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
-
 nonstandalone.o: nonstandalone.c
 	gcc -m32 -c nonstandalone.c
+
+win_screen_win.o: win_screen_win.c
+	gcc -m32 -c win_screen_win.c
+
+win_hal_win.o: win_hal_win.c
+	gcc -m32 -c win_hal_win.c
 
 x11_display.o: x11_display.c
 	gcc -m32 -c x11_display.c
@@ -34,13 +39,15 @@ else
 OSLIB = ../lib/libtuned.a ../lib/libphantom_c.a ../lib/libphantom.a ../lib/libwin.a ../lib/libphantom.a 
 endif
 
-PVM_TEST_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o
+PVM_TEST_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o 
 X11_TEST_OBJFILES=pvm_main.o x11_screen.o x11_display.o win_hal.o win_bulk.o nonstandalone.o
 
 
-pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(PVM_TEST_OBJFILES)
+pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(PVM_TEST_OBJFILES) 
 	gcc -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a 
 
 pvm_x11: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(X11_TEST_OBJFILES)
 	gcc -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lX11
 
+
+#win_screen_win.o win_hal_win.o

@@ -6,8 +6,8 @@
  *
  * Kernel ready: no, this is not a kernel code.
  *
- * This source file implements Windows based wrapper for VM to
- * run in Windows-hosted environment.
+ * WinAPI specific part.
+ * Must use compiler's includes!
  *
  * TODO: GBR -> RGB!!
  *
@@ -15,119 +15,27 @@
 
 #ifndef __linux__
 
-#include <phantom_libc.h>
-
-//#include <windows.h>
-#include <string.h>
-#include <assert.h>
-
-//#include <drv_video_screen.h>
-#include <video/screen.h>
-#include <video/internal.h>
-
-#include "gcc_replacements.h"
-
+#include <windows.h>
 #include "winhal.h"
 
+static const char *CLASSNAME = "Phantom", *WINNAME = "Phantom test environment";
 
-
-struct drv_video_screen_t        drv_video_win32 =
-{
-    "Windows",
-    // size
-    0, 0, 24,
-    // mouse x y flags
-    0, 0, 0,
-
-    // screen
-    0,
-
-probe: (void *)vid_null,
-start: (void *)vid_null,
-accel: (void *)vid_null,
-stop:  (void *)vid_null,
-
-    (void*)vid_null,
-    (void*)vid_null,
-    (void*)vid_null,
-
-//    (void*)vid_null,
-
-mouse:    		(void*)vid_null,
-
-mouse_redraw_cursor: 	vid_mouse_draw_deflt,
-mouse_set_cursor: 	vid_mouse_set_cursor_deflt,
-mouse_disable:          vid_mouse_off_deflt,
-mouse_enable:          	vid_mouse_on_deflt,
-
-};
-
-
-
-/*
-const char *CLASSNAME = "Phantom", *WINNAME = "Phantom test environment";
-
-LRESULT CALLBACK WndProc(HWND hWnd, unsigned int iMessage, WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK WndProc(HWND hWnd, unsigned int iMessage, WPARAM wParam, LPARAM lParam);
 
 static HWND hWnd;
 
-TRACKMOUSEEVENT eventTrack;
+static TRACKMOUSEEVENT eventTrack;
 
 
-static char * win_src_screen_image;
 static HBITMAP screenBitmap;
 
-HDC hBitmapDC;
-*/
+static HDC hBitmapDC;
+
+//static int eline = 0;
+
+char * win_src_screen_image;
 
 
-static int init_ok = 0;
-static int init_err = 0;
-
-
-#if 0
-
-//  ---------------- cursor -----------------
-
-
-int cysize = 60;
-int cxsize = 80;
-char cwin[ysize*xsize*3];
-
-
-void pvm_win_init_cursor()
-{
-    int i;
-
-    for( i = 0; i < 10; i++ )
-    {
-        // fill
-        int c;
-        for( c = 0; c < xsize*ysize*3; c++ )
-            cwin[c] = (i+2)*10;
-
-        drv_video_bitblt(win, 0, i*10, cxsize, cysize);
-        //win_scr_screen_update();
-        drv_video_update();
-    }
-}
-
-
-void pvm_win_draw_cursor(int x, int y)
-{
-}
-
-
-
-
-//  -----------------------------------------
-
-#endif
-
-
-#if 0
-
-//static
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
@@ -224,22 +132,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
             //	printf("%d,%d\n", xPos, yPos );
 
-            drv_video_win32.mouse_x = xPos;
-            drv_video_win32.mouse_y = yPos;
-            drv_video_win32.mouse_flags = wParam;
-            drv_video_win32.mouse();
 #if 1
-            struct ui_event e;
-            e.type = UI_EVENT_TYPE_MOUSE;
-            e.time = fast_time();
-            e.focus= 0;
-
-            e.m.buttons = wParam;
-            e.abs_x = xPos;
-            e.abs_y = VSCREEN_HEIGHT - yPos - 1;
-
-            ev_q_put_any( &e );
-            //printf("-ms-");            printf("%d,%d\n", xPos, yPos );
+            win_scr_mk_mouse_event( wParam, xPos, yPos );
 #endif
         }
         break;
@@ -250,7 +144,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-static int pvm_win_setup_window()
+
+
+
+
+
+int win_scr_setup_window(void)
 {
 
     HINSTANCE hInstance = 0;
@@ -278,25 +177,10 @@ static int pvm_win_setup_window()
     ShowWindow(hWnd, SW_SHOWNORMAL); //SW_MAXIMIZE ); //nCmdShow);
     return 0;
 }
-#endif
 
 
-
-//int WINAPI
-void    pvm_win_window_thread()
+void win_scr_init_window(void)
 {
-    //MSG Message;
-
-    if(win_scr_setup_window())
-    {
-        init_err = 1;
-        printf("pvm_win_setup_window failed\n");
-        return;
-    }
-
-    win_scr_init_window();
-
-    /*
     // Allocate enough memory for the BITMAPINFOHEADER and 256 RGBQUAD palette entries
     LPBITMAPINFO lpbi;
     lpbi = (LPBITMAPINFO) malloc(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
@@ -324,113 +208,37 @@ void    pvm_win_window_thread()
 
     ReleaseDC(NULL,hScreenDC);
     free(lpbi);
-    */
-
-    int i;
-    for( i = 0; i < VSCREEN_WIDTH * VSCREEN_HEIGHT * 3; i++)
-    {
-        win_src_screen_image[i] = 34;
-    }
-
-    drv_video_win32.screen = win_src_screen_image;
-    drv_video_win32.xsize = VSCREEN_WIDTH;
-    drv_video_win32.ysize = VSCREEN_HEIGHT;
-    drv_video_win32.update = &win_scr_screen_update;
-#if 1
-    drv_video_win32.bitblt = &vid_bitblt_forw;
-#if VIDEO_DRV_WINBLT
-    drv_video_win32.winblt = &vid_win_winblt;
-#endif
-    drv_video_win32.readblt = &vid_readblt_forw;
-    drv_video_win32.bitblt_part = &vid_bitblt_part_forw;
-#else
-    drv_video_win32.bitblt = &drv_video_bitblt_rev;
-    drv_video_win32.winblt = &drv_video_win_winblt_rev;
-    drv_video_win32.readblt = &drv_video_readblt_rev;
-    drv_video_win32.bitblt_part = &drv_video_bitblt_part_rev;
-#endif
-
-    drv_video_win32.mouse_redraw_cursor = &vid_mouse_draw_deflt;
-    drv_video_win32.mouse_set_cursor = &vid_mouse_set_cursor_deflt;
-    drv_video_win32.mouse_disable = &vid_mouse_off_deflt;
-    drv_video_win32.mouse_enable = &vid_mouse_on_deflt;
-
-    init_ok = 1;
-
-#if HOVER
-    {
-        eventTrack.cbSize = sizeof(eventTrack);
-        eventTrack.dwFlags = TME_HOVER;
-        eventTrack.hwndTrack = hWnd;
-        eventTrack.dwHoverTime = 5;
-
-        if(0 == TrackMouseEvent(&eventTrack))
-            printf("Track error\n");
-    }
-#endif
-
-    win_scr_event_loop();
-    //return Message.wParam;
-    //printf("Message loop end\n");
-
 }
 
 
-void win_scr_mk_mouse_event(int wParam, int xPos, int yPos )
+
+void win_scr_event_loop(void)
 {
-    drv_video_win32.mouse_x = xPos;
-    drv_video_win32.mouse_y = yPos;
-    drv_video_win32.mouse_flags = wParam;
-    drv_video_win32.mouse();
+    MSG Message;
 
-    struct ui_event e;
-    e.type = UI_EVENT_TYPE_MOUSE;
-    e.time = fast_time();
-    e.focus= 0;
-
-    e.m.buttons = wParam;
-    e.abs_x = xPos;
-    e.abs_y = VSCREEN_HEIGHT - yPos - 1;
-
-    ev_q_put_any( &e );
-    //printf("-ms-");            printf("%d,%d\n", xPos, yPos );
-}
-
-
-int pvm_video_init()
-{
-    video_drv = &drv_video_win32;
-
-    drv_video_win32.screen = 0; // Not ready yet
-
-    printf("Starting windows graphics 'driver'\n" );
-
-
-    if( win_src_make_thread((void *)&pvm_win_window_thread) )
-        panic("can't start window thread");
-
-
-    int repeat = 10000;
-    while(repeat-- > 0)
+    while(GetMessage(&Message, hWnd, 0, 0))
     {
-        //Sleep(20);
-        hal_sleep_msec( 20 );
-        if( init_err ) break;
-        if( init_ok )
-        {
-            scr_zbuf_init();
-            scr_zbuf_turn_upside(1);
-            return 0;
-        }
-
+        TranslateMessage(&Message);
+        DispatchMessage(&Message);
     }
-
-
-    return -1;
 }
 
 
+void win_scr_screen_update(void)
+{
+    GdiFlush();
 
-#endif // __linux__
+    //eline = 1;
+    RedrawWindow( hWnd, 0, 0, RDW_INVALIDATE/*|RDW_NOERASE*/ );
 
+}
+
+int win_src_make_thread( void *tfunc )
+{
+    static unsigned long tid;
+    return (0 == CreateThread( 0, 0, tfunc, (void*)0, 0, &tid ) );
+}
+
+
+#endif
 
