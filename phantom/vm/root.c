@@ -177,7 +177,7 @@ static void start_persistent_stats(void)
     if( bda->data_size < STAT_CNT_PERSISTENT_DA_SIZE )
     {
         //SHOW_ERROR( 0, "persistent stats data < %d", STAT_CNT_PERSISTENT_DA_SIZE );
-        printf( "persistent stats data < %d\n", STAT_CNT_PERSISTENT_DA_SIZE );
+        printf( "persistent stats data < %ld\n", (long)STAT_CNT_PERSISTENT_DA_SIZE );
         // TODO resize object!
     }
     else

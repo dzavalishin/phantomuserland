@@ -31,7 +31,7 @@
        
 #include "winhal.h"
 
-#include <windows.h>
+//#include <windows.h>
 
 
 struct hardware_abstraction_level    	hal;
@@ -39,13 +39,14 @@ struct hardware_abstraction_level    	hal;
 int phantom_is_a_real_kernel() { return 0; }
 
 
-static CRITICAL_SECTION default_critical;
 
 void hal_init( vmem_ptr_t va, long vs )
 {
     printf("Win32 HAL init @%p\n", va);
 
-    InitializeCriticalSection(&default_critical);
+    //InitializeCriticalSection(&default_critical);
+
+    win_hal_init();
 
     hal.object_vspace = va;
     hal.object_vsize = vs;
@@ -54,41 +55,48 @@ void hal_init( vmem_ptr_t va, long vs )
 
 
     //int rc =
-    CreateThread( 0, 0, (void *) &winhal_debug_srv_thread, 0, 0, 0);
+    //CreateThread( 0, 0, (void *) &winhal_debug_srv_thread, 0, 0, 0);
     //if( rc) printf("Win32 can't run debugger thread\n");
+
+    hal_start_kernel_thread( (void*)&winhal_debug_srv_thread );
 }
 
 void hal_disable_preemption()
 {
-    EnterCriticalSection(&default_critical);
+    win_hal_disable_preemption();
 }
 
 void hal_enable_preemption()
 {
-    LeaveCriticalSection(&default_critical);
+    win_hal_enable_preemption();
 }
+
 
 
 
 vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 
-// TODO tid_t
+
 tid_t hal_start_thread( void (*thread)(void *arg), void *arg, int flags )
 {
     assert(!flags);
 
-    unsigned long tid;
-    if( 0 == CreateThread( 0, 0, (void *)thread, arg, 0, &tid ) )
+    unsigned long tid = win_hal_start_thread( thread, arg );
+
+    if( 0 == tid )
         panic("can't start thread");
 
     return tid;
 }
 
+
+
 void   hal_start_kernel_thread(void (*thread)(void))
 {
-    unsigned long tid;
-    if( 0 == CreateThread( 0, 0, (void *)thread, 0, 0, &tid ) )
-        panic("can't start kernel thread");
+    unsigned long tid = win_hal_start_thread( (void *)thread, 0 );
+
+    if( 0 == tid )
+        panic("can't start thread");
 }
 
 void hal_set_current_thread_name( const char *name )
@@ -126,7 +134,9 @@ extern int sleep(int);
 void        hal_sleep_msec( int miliseconds )
 {
 	//usleep(1000*miliseconds);
-	sleep( ((miliseconds-1)/1000)+1 );
+    //sleep( ((miliseconds-1)/1000)+1 );
+    //Sleep(miliseconds);
+    win_hal_sleep_msec( miliseconds );
 }
 
 
@@ -449,12 +459,6 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 // TODO - implement mutex/sema code for win sim environment
 
 
-struct phantom_mutex_impl
-{
-    CRITICAL_SECTION cs;
-    const char *name;
-    int lock;
-};
 
 struct phantom_cond_impl
 {
@@ -465,35 +469,28 @@ struct phantom_cond_impl
 
 int hal_mutex_init(hal_mutex_t *m, const char *name)
 {
-    m->impl = calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
-
-    InitializeCriticalSection( &(m->impl->cs) );
-
-    m->impl->name = name;
+    m->impl = win_hal_mutex_init(name);
+    assert( m->impl );
     return 0;
 }
 
 int hal_mutex_lock(hal_mutex_t *m)
 {
     assert(m->impl);
-    m->impl->lock++;
-    EnterCriticalSection( &(m->impl->cs) );
-    return 0;
+    return win_hal_mutex_lock(m->impl);
 }
 
 int hal_mutex_unlock(hal_mutex_t *m)
 {
     assert(m->impl);
-    LeaveCriticalSection( &(m->impl->cs) );
-    m->impl->lock--;
-    return 0;
+    return win_hal_mutex_unlock(m->impl);
 }
 
 
 int hal_mutex_is_locked(hal_mutex_t *m)
 {
     assert(m->impl);
-    return m->impl->lock;
+    return win_hal_mutex_is_locked(m->impl);
 }
 
 

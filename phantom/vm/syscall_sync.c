@@ -73,7 +73,8 @@ void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 done:
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
 #else
-    SYSCALL_THROW_STRING("Not this way");
+    //SYSCALL_THROW_STRING("Not this way");
+    printf("unimplemented vm_mutex_lock used");
 #endif
 }
 
