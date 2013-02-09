@@ -28,8 +28,14 @@ SNAPTEST=1
 at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
 	[ "$UNATTENDED" ] && grep -qv svn $0.log >/dev/null && {
-		VERSION=`grep SVN $PHANTOM_LOG | sed 's/[^m]*m//g;s/starting//'`
-		RESULT=`grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';'`
+		if [ make.log -nt $PHANTOM_LOG ]
+		then
+			VERSION=`grep revision $0.log`
+			RESULT=`grep Error make.log | head -1`
+		else
+			VERSION=`grep SVN $PHANTOM_LOG | sed 's/[^m]*m//g;s/starting//'`
+			RESULT=`grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';'`
+		fi
 		sed 's/[^m]*m//g' $0.log | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
 	}
 }
