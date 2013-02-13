@@ -51,7 +51,7 @@ typedef struct pager_io_request
     unsigned char       flag_urgent;  		// BUG - not used yet
 
 //#if IO_RQ_SLEEP
-    // I true - calling thread will be put onsleep until IO is done 
+    // If true - calling thread will be put onsleep until IO is done 
     unsigned char       flag_sleep;             // BUG - not used yet
     int                 sleep_tid; 		// Thread which was put asleep due to flag_sleep - filled by io code
     hal_spinlock_t      lock;
@@ -71,6 +71,8 @@ typedef struct pager_io_request
     //struct disk_q	q;			// Disk q itself, used to start next req
 
     int                 unit;                   // Used on devices that have one q but multiple units that can't work at once
+
+    int                 parts;                  // n physical reqs per this rq (used in driver code only, see virtio disk)
 
 } pager_io_request;
 
