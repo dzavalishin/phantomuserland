@@ -131,7 +131,7 @@ phantom_dump_superblock(phantom_disk_superblock *sb)
     printf("--------------\n");
 
     printf("sys_name          %*s\n", DISK_STRUCT_SB_SYSNAME_SIZE, sb->sys_name );
-    printf("obj spc address   0x%lx\n", sb->object_space_address );
+    printf("obj spc address   0x%lx\n", (unsigned long)sb->object_space_address );
 
 
 

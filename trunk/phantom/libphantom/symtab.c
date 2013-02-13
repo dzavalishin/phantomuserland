@@ -8,6 +8,7 @@
 #define DEBUG 0
 
 
+#ifdef ARCH_ia32
 
 typedef struct {
     void 	*address;
@@ -100,6 +101,7 @@ static void load_elf_symtab(
 
 
 
+//#ifdef ARCH_ia32
 static void load_elf_hdr(Elf32_Shdr *header, int h_elements)
 {
     int text_section_header_index = 0;
@@ -158,6 +160,7 @@ static void load_elf_hdr(Elf32_Shdr *header, int h_elements)
     if(DEBUG > 0) getchar();
 
 }
+#endif
 
 
 static struct multiboot_info *symtabBootParameters;

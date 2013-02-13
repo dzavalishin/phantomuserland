@@ -3,6 +3,7 @@
 #include <kernel/vm.h>
 
 #include <kernel/drivers.h>
+#include <kernel/board.h>
 
 #include <ia32/pio.h>
 #include <phantom_libc.h>
@@ -132,7 +133,8 @@ phantom_device_t * driver_isa_vga_probe( int port, int irq, int stage )
 }
 
 
-int driver_isa_vga_putc(int c)
+//int driver_isa_vga_putc(int c)
+int board_boot_console_putc(int c)
 {
     if(vga_port == 0)
     {
@@ -245,23 +247,6 @@ static void doputc(int c)
 
     }
 }
-/*
-static void doputs(char *s)
-{
-    while( *s )
-        doputc(*s++);
-}
-*/
-// ---------------------------------
-// Connect old stuff here to our driver
 
-#if 0
-int
-direct_cons_putchar(int c)
-{
-    driver_isa_vga_putc(c);
-    return 0;
-}
-#endif
 
 #endif // ARCH_ia32

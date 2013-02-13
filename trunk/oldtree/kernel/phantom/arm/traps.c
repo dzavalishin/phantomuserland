@@ -3,6 +3,9 @@
 #include <phantom_assert.h>
 #include <stdio.h>
 #include <signal.h>
+#include <threads.h>
+
+#include <arm/private.h>
 
 /*
 
@@ -126,7 +129,7 @@ int handle_swi(struct trap_state *ts)
     return 0;
 }
 
-void arm_init_swi()
+void arm_init_swi(void)
 {
     phantom_trap_handlers[T_SOFT_INT] = handle_swi;
     //asm volatile("mov r0, #10; mov r1, #11; mov r2, #12; mov r3, #13; mov r12, #22; swi 0x34");

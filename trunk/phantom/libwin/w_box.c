@@ -56,9 +56,9 @@ void
 w_fill( window_handle_t win, rgba_t color )
 {
     int i = (win->xsize * win->ysize) - 1;
-    rgba_t *dest = win->w_pixel;
 
 #if defined(ARCH_ia32) && 1
+    rgba_t *dest = win->w_pixel;
     asm volatile(
                  "\
                  cld ; \

@@ -33,11 +33,10 @@ void 	phantom_set_console_getchar( int (*_getchar_impl)(void) );
 void 	phantom_set_console_putchar( int (*putchar_impl)(int) );
 void 	phantom_set_console_puts( int (*puts_impl)(const char *) );
 
-// TODO machdep
-int 	driver_isa_vga_putc(int c);
+//int 	driver_isa_vga_putc(int c);
 
-// non-interrupt keyb
-int 	phantom_scan_console_getc(void);
+// non-interrupt keyb - see board_boot_console_getc in board
+//int 	phantom_scan_console_getc(void);
 
 void    console_set_fg_color( struct rgba_t );
 

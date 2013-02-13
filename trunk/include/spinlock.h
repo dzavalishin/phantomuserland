@@ -48,5 +48,7 @@ void    hal_spin_unlock_sti(hal_spinlock_t *sl);
 extern int global_lock_entry_count[];
 #endif
 
+void check_global_lock_entry_count();
+
 
 #endif

@@ -82,7 +82,7 @@ int do_test_absname(const char *test_parm)
 #define NPART 10
 
     const char *oname[NPART];
-    int olen[NPART];
+    size_t olen[NPART];
 
     nb = uu_break_path( "/aa/bb/ccc", NPART, oname, olen );
 

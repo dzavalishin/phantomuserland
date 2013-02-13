@@ -26,3 +26,4 @@ extern void (*bit_mover_to_screen_noalpha)( void *dest, const struct rgba_t *src
 extern void (*bit_mover_from_screen)( struct rgba_t *dest, void *src, int nelem );
 extern int      bit_mover_byte_step;
 */
+

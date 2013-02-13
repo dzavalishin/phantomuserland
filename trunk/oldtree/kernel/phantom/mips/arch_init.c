@@ -130,7 +130,8 @@ int phantom_dev_keyboard_getc(void)
     return debug_console_getc();
 }
 
-int phantom_scan_console_getc(void)
+//int phantom_scan_console_getc(void)
+int board_boot_console_getc(void)
 {
     return debug_console_getc();
 }

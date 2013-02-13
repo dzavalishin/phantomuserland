@@ -26,7 +26,7 @@ LIBDIRS += $(OBJDIR)/lib
 #	-I flags after -I- are searched for all include files.
 PHANTOM_CPPFLAGS	+= -W -Wall -MD $(DEFINES) -I. $(addprefix -iquote,$(SRCDIRS)) \
 		    $(addprefix -iquote,$(MOSTLY_SRCDIRS)) \
-		    $(addprefix -I,$(INCDIRS)) -nostdinc -DARCH_$(ARCH) -DBOARD=$(BOARD)
+		    $(addprefix -I,$(INCDIRS)) -nostdinc -DARCH_$(ARCH)=1 -DBOARD_$(BOARD)=1 -DBOARD=$(BOARD)
 PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -W -Wall $(PHANTOM_FFLAGS) -fno-stack-protector -pipe
 PHANTOM_LDFLAGS	+= $(addprefix -L,$(LIBDIRS))
 
