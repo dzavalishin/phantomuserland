@@ -47,7 +47,8 @@ static long tmr_500ns_count;         // number of I/O port reads required
 
 
 
-static long tmr_time_out = 20L;      // max command execution time in seconds
+//static long tmr_time_out = 20L;      // max command execution time in seconds
+static long tmr_time_out = 1L;      // max command execution time in seconds
 
 static long tmr_cmd_start_time;      // command start time - see the
                               // tmr_set_timeout() and

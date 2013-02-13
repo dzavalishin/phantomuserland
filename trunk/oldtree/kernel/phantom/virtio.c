@@ -32,6 +32,8 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num );
 static void virtio_release_descriptor_index(virtio_ring_t *r, int toRelease);
 static int virtio_get_free_descriptor_index(virtio_ring_t *r);
 
+static void virtio_wait_for_free_descriptors(virtio_device_t *vd, int qindex, virtio_ring_t *r, int nDesc);
+
 static void virtio_notify( virtio_device_t *vd, int index );
 
 void virto_ring_dump(virtio_ring_t *r);
@@ -306,7 +308,7 @@ void virto_ring_dump(virtio_ring_t *r)
     {
 #if 0
         printf("%d@%p->%d/%x, \t",
-               r->vr.desc[i].len, r->vr.desc[i].addr, 
+               r->vr.desc[i].len, r->vr.desc[i].addr,
                (unsigned)(r->vr.desc[i].next), (unsigned)(r->vr.desc[i].flags)
               );
 #else
@@ -360,17 +362,7 @@ int virtio_attach_buffer(virtio_device_t *vd, int qindex,
     assert(buf);
 
     VIRTIO_LOCK(r);
-    // TODO Errno? Sleep waiting for interrupt, retry
-    //if(r->nFreeDescriptors == 0)
-    // TODO dumb impl with sleep
-    while(r->nFreeDescriptors <= 0 )
-    {
-        virtio_notify( vd, qindex ); // Try to kick host
-        VIRTIO_UNLOCK(r);
-        //return -1; // ENOSPC
-        hal_sleep_msec(10);
-        VIRTIO_LOCK(r);
-    }
+    virtio_wait_for_free_descriptors(vd, qindex, r, 1);
 
     int descrIndex = virtio_get_free_descriptor_index(r);
 
@@ -492,17 +484,7 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
 
 #endif
     VIRTIO_LOCK(r);
-    // TODO Errno? Sleep waiting for interrupt, retry
-    // if(r->nFreeDescriptors < nDesc )
-    // TODO dumb impl with sleep
-    while(r->nFreeDescriptors < nDesc )
-    {
-        virtio_notify( vd, qindex ); // Try to kick host
-        VIRTIO_UNLOCK(r);
-        //return -1; // ENOSPC
-        hal_sleep_msec(10);
-        VIRTIO_LOCK(r);
-    }
+    virtio_wait_for_free_descriptors(vd, qindex, r, nDesc);
 
     int descrIndex = -1;
     //int elem;
@@ -551,6 +533,7 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
 
 static int virtio_have_used(const virtio_ring_t *r)
 {
+    ASSERT_VIRTIO_LOCKED(r);
     return (r->lastUsedIdx % r->vr.num) != (r->vr.used->idx % r->vr.num);
 }
 
@@ -591,6 +574,8 @@ int virtio_detach_buffer( virtio_device_t *vd, int qindex,
     assert(! (r->vr.desc[bufIndex].flags & VRING_DESC_F_NEXT) );
 
     r->lastUsedIdx++;
+// ?
+    //r->lastUsedIdx %= r->vr.num;
 
     virtio_release_descriptor_index(r, bufIndex);
 
@@ -616,12 +601,15 @@ int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
 
     int pos = r->lastUsedIdx % r->vr.num;
     r->lastUsedIdx++;
+// ?
+    //r->lastUsedIdx %= r->vr.num;
 
     unsigned int bufIndex = r->vr.used->ring[pos].id;
 
     if(bufIndex >= r->vr.num)
     {
         VIRTIO_UNLOCK(r);
+        SHOW_ERROR(0, "bufIndex >= r->vr.num (%d)", bufIndex);
         return -1;
     }
 
@@ -673,8 +661,12 @@ void virtio_kick(virtio_device_t *vd, int qindex)
     mem_write_barrier();
 
     int add = r->nAdded;
-    r->vr.avail->idx += add;
+    //r->vr.avail->idx += add;
+    int tmp = r->vr.avail->idx + add;
     r->nAdded -= add;
+
+    //r->vr.avail->idx = tmp % r->vr.num; // QEMU dies with "Guest moved used index from 127 to 0"
+    r->vr.avail->idx = tmp % 0xFFFF;
 
     mem_barrier();
 
@@ -699,8 +691,12 @@ void virtio_kick(virtio_device_t *vd, int qindex)
 // must be called in lock
 static int virtio_get_free_descriptor_index(virtio_ring_t *r)
 {
-    // TODO assert spin locked
+    ASSERT_VIRTIO_LOCKED(r);
     assert(r->freeHead >= 0);
+    assert(r->freeHead < 0xFFFF );
+    assert(r->nFreeDescriptors > 0);
+
+    r->nFreeDescriptors--;
 
     int ret = r->freeHead;
 
@@ -708,6 +704,8 @@ static int virtio_get_free_descriptor_index(virtio_ring_t *r)
     //virto_ring_dump(r);
 
     r->freeHead = r->vr.desc[r->freeHead].next;
+    assert(r->freeHead >= 0);
+    assert(r->freeHead < 0xFFFF );
 
     return ret;
 }
@@ -715,8 +713,9 @@ static int virtio_get_free_descriptor_index(virtio_ring_t *r)
 // must be called in lock
 static void virtio_release_descriptor_index(virtio_ring_t *r, int toRelease)
 {
-    // TODO assert spin locked
-    if(r->freeHead < 0)
+    ASSERT_VIRTIO_LOCKED(r);
+
+    if( (r->freeHead < 0) || (r->freeHead >= 0xFFFF) )
         r->vr.desc[toRelease].flags = 0;
     else
         r->vr.desc[toRelease].flags = VRING_DESC_F_NEXT;
@@ -724,7 +723,28 @@ static void virtio_release_descriptor_index(virtio_ring_t *r, int toRelease)
     r->vr.desc[toRelease].addr = NULL;
     r->vr.desc[toRelease].next = r->freeHead;
     r->freeHead = toRelease;
+
+    r->nFreeDescriptors++;
 }
+
+
+
+// Sleep waiting for interrupt, retry
+static void virtio_wait_for_free_descriptors(virtio_device_t *vd, int qindex, virtio_ring_t *r, int nDesc)
+{
+    ASSERT_VIRTIO_LOCKED(r);
+
+    // TODO dumb impl with sleep
+    while(r->nFreeDescriptors < nDesc )
+    {
+        virtio_notify( vd, qindex ); // Try to kick host
+        VIRTIO_UNLOCK(r);
+        //return -1; // ENOSPC
+        hal_sleep_msec(10);
+        VIRTIO_LOCK(r);
+    }
+}
+
 
 
 
@@ -733,25 +753,25 @@ void dump_phys( physaddr_t a, size_t len )
 {
     printf( "dump physaddr %p\n, ", a );
 
-	char buf[PAGE_SIZE];
-	while(len > 0)
-	{
-		int ml = len;
-		if(ml > PAGE_SIZE) ml = PAGE_SIZE;
+    char buf[PAGE_SIZE];
+    while(len > 0)
+    {
+        int ml = len;
+        if(ml > PAGE_SIZE) ml = PAGE_SIZE;
 
-		len -= ml;
+        len -= ml;
 
-		memcpy_p2v(buf, a, ml);
+        memcpy_p2v(buf, a, ml);
 
-		a += ml;
+        a += ml;
 
-		hexdump( buf, ml, "", 0);
-	}
+        hexdump( buf, ml, "", 0);
+    }
 }
 
 void virtio_dump_phys(virtio_ring_t *r)
 {
-	dump_phys(r->phys, r->mem_bytes);
+    dump_phys(r->phys, r->mem_bytes);
 }
 
 
