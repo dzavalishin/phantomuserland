@@ -40,16 +40,17 @@ EFILES = $(filter-out $(NOT_ANALYSE), $(patsubst %.c,%.E,$(notdir $(CFILES) $(wi
 	@$(CC) -E $(PHANTOM_CFLAGS) -o ../anl/$@ $<
 #	echo $(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) -o $@ $<
 
+ANL_DEST=$(realpath $(PHANTOM_HOME))/etc/clang-analyzer/
 
-analyse:: $(EFILES)
-	rm ../anl/*.d
+# $(EFILES)
+#	rm ../anl/*.d
 
 #	@echo --- preprocessing for $(TARGET)_sources.E
 #	$(CC) -E $(PHANTOM_CFLAGS) $(CFLAGS) $(filter-out $(NOT_ANALYSE), $(CFILES) ) > ../../$(TARGET)_sources.E
 
 #		clang -emit-ast $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
-#		clang --analyse $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
-
+analyse::
+	sh -c scan-build -o $(ANL_DEST) $(CC) $(PHANTOM_CFLAGS) $(CFLAGS) $(CFILES)
 
 
 DEPENDLIBS = $(filter %.a, $(foreach DIR,$(LIBDIRS),$(wildcard $(DIR)/*)))

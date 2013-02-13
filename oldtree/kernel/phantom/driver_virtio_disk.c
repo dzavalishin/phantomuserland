@@ -174,13 +174,14 @@ struct vioBlockReq
 
 
 //#define PCMD(c) printf("  %4d @%8p (%b)\n", (c)->len, (c)->addr, (c)->flags, "\020\1NEXT\2WRITE" )
-#define PCMD(c) printf("  %4d @%8p (%x)\n", (c)->len, (c)->addr, (c)->flags )
+//#define PCMD(c) lprintf("  %4d @%8p (%x)\n", (c)->len, (c)->addr, (c)->flags )
+#define PCMD(c) lprintf("  %4d @%8p\n", (c)->len, (c)->addr )
 
 static void dump_3cmd(char *pref, struct vring_desc *cmd)
 {
-    if( debug_level_flow < 7 ) return;
+//    if( debug_level_flow < 7 ) return;
 
-    printf("%s\n", pref);
+    lprintf("%s\n", pref);
     PCMD(cmd+0);
     PCMD(cmd+1);
     PCMD(cmd+2);
@@ -191,7 +192,7 @@ static void dump_3cmd(char *pref, struct vring_desc *cmd)
 
     pager_io_request            *rq = req->rq;
 
-    printf("req @%p, rq @%p\n", req, rq );
+    lprintf("req @%p, rq @%p\n", req, rq );
 }
 
 
@@ -387,7 +388,7 @@ static void vio_intr_dpc_func(void *a)
         if(nRead != 3)
             SHOW_ERROR( 0, "nRead = %d", nRead );
 
-        dump_3cmd("intr", cmd);
+        //dump_3cmd("intr", cmd);
 
         if(cmd[0].len != sizeof(struct virtio_blk_outhdr))
         {
