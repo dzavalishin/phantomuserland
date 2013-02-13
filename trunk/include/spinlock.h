@@ -35,13 +35,14 @@ void	hal_spin_unlock(hal_spinlock_t *sl);
 //void	hal_spin_lock(hal_spinlock_t *sl) __attribute__((deprecated));
 //void	hal_spin_unlock(hal_spinlock_t *sl) __attribute__((deprecated));
 
-static __inline__ int hal_spin_locked(hal_spinlock_t *sl) { return sl->lock; }
-
 void    hal_wired_spin_lock(hal_spinlock_t *l);
 void    hal_wired_spin_unlock(hal_spinlock_t *l);
 
 void    hal_spin_lock_cli(hal_spinlock_t *sl);
 void    hal_spin_unlock_sti(hal_spinlock_t *sl);
+
+static __inline__ int hal_spin_locked(hal_spinlock_t *sl) { return sl->lock; }
+static __inline__ int hal_spin_is_locked(hal_spinlock_t *sl) { return sl->lock; }
 
 
 #if SPIN_DEBUG && !HAVE_SMP
@@ -49,6 +50,8 @@ extern int global_lock_entry_count[];
 #endif
 
 void check_global_lock_entry_count();
+
+#define ASSERT_LOCKED_SPIN(sl) assert(hal_spin_is_locked(sl))
 
 
 #endif

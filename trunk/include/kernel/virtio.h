@@ -25,7 +25,7 @@ typedef struct virtio_ring
 
 #define VIRTIO_LOCK(r)   hal_spin_lock_cli(&r->lock)
 #define VIRTIO_UNLOCK(r) hal_spin_unlock_sti(&r->lock)
-
+#define ASSERT_VIRTIO_LOCKED(r) ASSERT_LOCKED_SPIN( &r->lock )
 
 #define VIRTIO_MAX_RINGS 4
 
