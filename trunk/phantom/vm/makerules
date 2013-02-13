@@ -39,7 +39,7 @@ else
 OSLIB = ../lib/libtuned.a ../lib/libphantom_c.a ../lib/libphantom.a ../lib/libwin.a ../lib/libphantom.a 
 endif
 
-PVM_TEST_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o 
+PVM_TEST_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o win_screen_win.o win_hal_win.o
 X11_TEST_OBJFILES=pvm_main.o x11_screen.o x11_display.o win_hal.o win_bulk.o nonstandalone.o
 
 
