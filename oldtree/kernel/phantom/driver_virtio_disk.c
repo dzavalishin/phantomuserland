@@ -360,9 +360,85 @@ int driver_virtio_disk_rq(virtio_device_t *vd, pager_io_request *rq)
 */
 
 
-static void dpc_func(void *a)
+static void vio_intr_dpc_func(void *a)
 {
-    (void) a;
+    //(void) a;
+
+    virtio_device_t *vd = &vdev;
+
+    struct vring_desc cmd[10];
+    int dlen;
+    int nRead;
+
+
+    while( (nRead = virtio_detach_buffers_list( vd, 0, 10, cmd, &dlen )) > 0 )
+    {
+        //if( nRead <= 0 )        return;
+
+
+#if 0
+        SHOW_FLOW( 5, "have %d used descriptors, will get 'em (dlen = %d)", nRead, dlen );
+
+        int i;
+        for( i = 0; i < nRead; i++ )
+            SHOW_FLOW( 6, "desc %2d len %4d   next %6d flags %b", i, cmd[i].len, cmd[i].next, cmd[i].flags, "\020\1NEXT\2WRITE" );
+#endif
+
+        if(nRead != 3)
+            SHOW_ERROR( 0, "nRead = %d", nRead );
+
+        dump_3cmd("intr", cmd);
+
+        if(cmd[0].len != sizeof(struct virtio_blk_outhdr))
+        {
+            SHOW_ERROR( 0, "cmd[0].len = %d, expected %d", cmd[0].len, sizeof(struct virtio_blk_outhdr) );
+            return;
+        }
+
+        // FIXME 64 bit error
+        // p = v
+        //struct vioBlockReq *req = (void*) ( ((int)cmd[0].addr) - __offsetof(struct vioBlockReq, ohdr) );
+
+        physaddr_t pa = cmd[0].addr;
+        pa -= __offsetof(struct vioBlockReq, ohdr);
+        struct vioBlockReq *req = phystokv( pa );
+
+
+        assert( req->magic == REQ_MAGIC );
+
+        pager_io_request            *rq = req->rq;
+
+        if(rq)
+        {
+            rq->flag_ioerror |= req->ihdr.status ? (~0) : 0;
+
+            switch(req->ihdr.status)
+            {
+            case 0:            rq->rc = 0; break;
+
+            case VIRTIO_BLK_S_UNSUPP:
+                rq->rc = EINVAL;
+                break;
+
+            case VIRTIO_BLK_S_IOERR:
+            default:           rq->rc = EIO; break;
+            }
+
+            rq->parts--;
+
+            assert(rq->parts >= 0);
+
+            if( rq->parts == 0 )
+                pager_io_request_done( rq );
+        }
+
+        putReq(req);
+
+        //SHOW_FLOW( 5, "disk result va2 = %d", *va2);
+    }
+
+    // TODO enable intrs on device!
+
 }
 
 
@@ -374,6 +450,13 @@ static void driver_virtio_disk_interrupt(virtio_device_t *vd, int isr )
 
     //SHOW_FLOW0( 5, "got virtio DISK interrupt" );
 
+    // TODO disable virtio interrupt on device!
+    //dpc_request_trigger( &vio_intr_dpc, vd );
+
+    // TODO pass vdev? How?
+    dpc_request_trigger( &vio_intr_dpc, 0 );
+
+/*
     struct vring_desc cmd[10];
     int dlen;
     int nRead;
@@ -443,6 +526,7 @@ static void driver_virtio_disk_interrupt(virtio_device_t *vd, int isr )
 
         //SHOW_FLOW( 5, "disk result va2 = %d", *va2);
     }
+*/
 }
 
 
