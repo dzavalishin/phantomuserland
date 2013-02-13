@@ -1,3 +1,4 @@
+# add 'set auto-load safe-path .' to ~/.gdbinit
 set confirm off
 symbol-file phantom.pe
 dir .

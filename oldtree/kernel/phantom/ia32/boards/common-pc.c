@@ -147,5 +147,13 @@ void board_panic_stop_world(void)
 //! Wait for a key press on default console - don't use interrupts, assume interrupts disabled
 void board_panic_wait_keypress(void)
 {
-    phantom_scan_console_getc();
+    //phantom_scan_console_getc();
+    board_boot_console_getc();
 }
+
+/*
+int board_boot_console_getc(void)
+{
+    return debug_console_getc();
+}
+*/

@@ -8,4 +8,4 @@
  *
 **/
 
-#include "ia32-pc.c"
+#include "ia32_pc.c"

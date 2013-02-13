@@ -400,6 +400,8 @@ static void vio_intr_dpc_func(void *a)
         //struct vioBlockReq *req = (void*) ( ((int)cmd[0].addr) - __offsetof(struct vioBlockReq, ohdr) );
 
         physaddr_t pa = cmd[0].addr;
+        assert(pa);
+
         pa -= __offsetof(struct vioBlockReq, ohdr);
         struct vioBlockReq *req = phystokv( pa );
 

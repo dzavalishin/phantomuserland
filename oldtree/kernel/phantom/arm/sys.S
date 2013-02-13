@@ -12,8 +12,8 @@ ENTRY(syscall)
 
 
 
-
-/* ia32 code for ref
+#if 0
+    // ia32 code for ref
     pushl	$0                      // 0 -> err
     pushl       %eax                    // syscall no ->trapno
 
@@ -41,6 +41,6 @@ ENTRY(syscall)
     addl	$8,%esp			// discard trap number and error code
 
     lret
-*/    
+#endif
 
 #endif

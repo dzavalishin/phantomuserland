@@ -21,6 +21,7 @@
 #include <kernel/libkern.h>
 #include <kernel/debug.h>
 #include <kernel/interrupts.h>
+#include <kernel/board.h>
 
 #include <video/window.h>
 
@@ -42,8 +43,8 @@ int 	null_set_color(struct rgba_t c) {     (void) c; return 0; 	}
 
 static struct console_ops default_ops =
 {
-    .getchar 		= phantom_scan_console_getc,
-    .putchar 		= driver_isa_vga_putc,
+    .getchar 		= board_boot_console_getc, // phantom_scan_console_getc,
+    .putchar 		= board_boot_console_putc, // driver_isa_vga_putc,
     .puts       	= 0,
     .set_fg_color       = null_set_color,
     .set_bg_color       = null_set_color,

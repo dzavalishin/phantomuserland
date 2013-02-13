@@ -521,7 +521,10 @@ int phantom_scan_console_getc(void)
 }
 #endif
 
-
+int board_boot_console_getc(void) 
+{
+    return phantom_scan_console_getc();
+}
 
 
 #endif // ARCH_ia32

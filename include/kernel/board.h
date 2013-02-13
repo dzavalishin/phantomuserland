@@ -109,6 +109,13 @@ void board_fill_memory_map( amap_t *ram_map );
 //! Get character from debug console
 //int debug_console_getc(void);
 
+//! Print character on boot console
+int board_boot_console_putc(int c);
+
+//! Get character from boot console
+int board_boot_console_getc( void );
+
+
 //! Stop interrupts, timer, seconary CPUs...
 void board_panic_stop_world(void);
 

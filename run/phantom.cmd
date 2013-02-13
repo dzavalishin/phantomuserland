@@ -5,8 +5,8 @@ rem http://lassauge.free.fr/qemu/
 SET QDIR=qemu\0.15.1
 SET QCMD=qemu.exe
 rem SET QDIR=qemu\1.1.0
-rem SET QDIR=qemu\1.0.1
-rem SET QCMD=qemu-system-i386.exe
+SET QDIR=qemu\1.3.1
+SET QCMD=qemu-system-i386w.exe
 rem SET QCMD=qemu-system-x86_64w.exe 
 
 set QEMU_AUDIO_DRV=dsound
@@ -22,7 +22,7 @@ rem SET USB=-usb -usbdevice serial::tcp:ya.ru:80
 rem SET USB=-usb -usbdevice keyboard
 
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
-rem SET VIO=-drive file=vio.img,if=virtio,format=raw
+SET VIO=-drive file=vio.img,if=virtio,format=raw
 rem SET VIO=-net nic,model=virtio
 
 rem 161 = snmp

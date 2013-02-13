@@ -47,7 +47,7 @@ static void pl181_init( int port )
 void pl181_cmd_interrupt( void *arg )
 {
     phantom_device_t * dev = arg;
-    pl181 *mmc = (pl181 *)dev->drv_private;
+    //pl181 *mmc = (pl181 *)dev->drv_private;
 
     u_int32_t status  = R32( dev->iobase + MMCISTATUS );
     SHOW_INFO( 0, "cmd IRQ Status = 0x%X", status );

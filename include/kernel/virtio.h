@@ -23,8 +23,8 @@ typedef struct virtio_ring
 } virtio_ring_t;
 
 
-#define VIRTIO_LOCK(r) int ___ie = hal_save_cli(); hal_spin_lock(&r->lock)
-#define VIRTIO_UNLOCK(r) hal_spin_unlock(&r->lock); if(___ie) hal_sti();
+#define VIRTIO_LOCK(r)   hal_spin_lock_cli(&r->lock)
+#define VIRTIO_UNLOCK(r) hal_spin_unlock_sti(&r->lock)
 
 
 #define VIRTIO_MAX_RINGS 4

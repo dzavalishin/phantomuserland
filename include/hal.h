@@ -137,8 +137,8 @@ void        				hal_free_phys_page(physaddr_t  page); // alloc and not map - WIL
 errno_t        				hal_alloc_phys_pages(physaddr_t  *result, int npages); // alloc and not map
 void        				hal_free_phys_pages(physaddr_t  page, int npages); // alloc and not map - WILL PANIC if page is mapped!
 
-errno_t                     hal_alloc_vaddress(void **result, int num); // alloc address of a page, but not memory
-void        				hal_free_vaddress(void *addr, int num);
+errno_t                     hal_alloc_vaddress(void **result, int n_pages); // alloc address of a page, but not memory
+void        				hal_free_vaddress(void *addr, int n_pages);
 
 // Allocate physmem, address space for it, and map. Panics if out of anything.
 void 					hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes );

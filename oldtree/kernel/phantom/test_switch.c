@@ -23,6 +23,7 @@
 #include <setjmp.h>
 
 #include <kernel/init.h>
+#include <hal.h>
 
 #include "misc.h"
 #include "test.h"

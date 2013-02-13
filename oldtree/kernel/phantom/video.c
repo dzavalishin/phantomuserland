@@ -28,6 +28,11 @@ static int debug_level_flow = 1;
 
 #ifdef ARCH_arm
 extern struct drv_video_screen_t        video_driver_icp;
+
+#ifdef BOARD_arm_raspberry
+extern struct drv_video_screen_t        video_driver_raspberry_pi;
+#endif
+
 #endif // ARCH_arm
 
 #ifdef ARCH_mips
@@ -72,11 +77,20 @@ struct drv_video_screen_t *video_drivers[] =
 #endif //ia32
 
 #ifdef ARCH_arm
-	&video_driver_icp,
+
+#  ifdef BOARD_arm_icp
+    &video_driver_icp,
+#  endif
+
+#  ifdef BOARD_arm_raspberry
+    &video_driver_raspberry_pi,
+#  endif
+
 #endif // ARCH_arm
 
+
 #ifdef ARCH_mips
-        &video_driver_null,
+    &video_driver_null,
 #endif // ARCH_mips
 
 };

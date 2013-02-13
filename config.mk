@@ -34,7 +34,7 @@ ARCH=ia32
 endif
 
 ifndef BOARD
-BOARD=$(ARCH)-default
+BOARD=$(ARCH)_default
 endif
 
 

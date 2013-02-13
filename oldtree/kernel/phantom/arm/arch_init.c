@@ -19,6 +19,8 @@
 #include <kernel/debug.h>
 #include <device.h>
 
+#include <arm/private.h>
+
 static u_int32_t		isa_read32(u_int32_t addr)                      { return *((u_int32_t*)(addr)); }
 static void			isa_write32(u_int32_t addr, u_int32_t value)    { *((u_int32_t*)(addr)) = value; }
 

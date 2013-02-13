@@ -60,7 +60,8 @@ int main(int ac, char **av, char **env)
 
             if( nr > 0 )
             {
-                ssize_t nw = sendto( lsock, buf, nr, 0, &ra, alen );
+                //ssize_t nw = 
+                sendto( lsock, buf, nr, 0, &ra, alen );
                 //if( (nw != nr) || (nw <= 0) )                    printf("write = %d\n", nr );
             }
         }

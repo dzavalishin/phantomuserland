@@ -164,7 +164,8 @@ int phantom_dev_keyboard_get_key()
 }
 
 
-int driver_isa_vga_putc(int c )
+//int driver_isa_vga_putc(int c )
+int board_boot_console_putc( int c )
 {
     //debug_console_putc(c);
     return c;

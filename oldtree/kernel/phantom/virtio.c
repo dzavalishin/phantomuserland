@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "VirtIo"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -357,13 +357,19 @@ int virtio_attach_buffer(virtio_device_t *vd, int qindex,
 {
     virtio_ring_t *r = vd->rings[qindex];
 
+    assert(buf);
+
     VIRTIO_LOCK(r);
     // TODO Errno? Sleep waiting for interrupt, retry
-    if(r->nFreeDescriptors == 0)
+    //if(r->nFreeDescriptors == 0)
+    // TODO dumb impl with sleep
+    while(r->nFreeDescriptors <= 0 )
     {
         virtio_notify( vd, qindex ); // Try to kick host
         VIRTIO_UNLOCK(r);
-        return -1; // ENOSPC
+        //return -1; // ENOSPC
+        hal_sleep_msec(10);
+        VIRTIO_LOCK(r);
     }
 
     int descrIndex = virtio_get_free_descriptor_index(r);
@@ -487,11 +493,15 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
 #endif
     VIRTIO_LOCK(r);
     // TODO Errno? Sleep waiting for interrupt, retry
-    if(r->nFreeDescriptors < nDesc )
+    // if(r->nFreeDescriptors < nDesc )
+    // TODO dumb impl with sleep
+    while(r->nFreeDescriptors < nDesc )
     {
         virtio_notify( vd, qindex ); // Try to kick host
         VIRTIO_UNLOCK(r);
-        return -1; // ENOSPC
+        //return -1; // ENOSPC
+        hal_sleep_msec(10);
+        VIRTIO_LOCK(r);
     }
 
     int descrIndex = -1;
@@ -504,6 +514,9 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
     //elem = 0;
     while(nDesc-- > 0)
     {
+        assert(desc[nDesc].addr);
+
+
         last = descrIndex;
         descrIndex = virtio_get_free_descriptor_index(r);
         r->vr.desc[descrIndex] = desc[nDesc];
@@ -538,7 +551,7 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
 
 static int virtio_have_used(const virtio_ring_t *r)
 {
-	return r->lastUsedIdx != r->vr.used->idx;
+    return (r->lastUsedIdx % r->vr.num) != (r->vr.used->idx % r->vr.num);
 }
 
 
@@ -600,6 +613,7 @@ int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
         return -1;
     }
     assert(nDesc > 0);
+
     int pos = r->lastUsedIdx % r->vr.num;
     r->lastUsedIdx++;
 
@@ -617,7 +631,11 @@ again:
 
 
     desc[nout] = r->vr.desc[bufIndex];
+    assert(desc[nout].addr);     // to catch buggy detach
     nout++;
+
+    // debug only - to catch buggy detach
+    assert(nout < 4);
 
     int flagsCopy = r->vr.desc[bufIndex].flags;
     int nextCopy = r->vr.desc[bufIndex].next;
