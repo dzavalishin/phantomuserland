@@ -9,7 +9,7 @@ SRCDIRS += $(BUILD_ROOT)/vm/resources
 
 INCDIRS += /usr/include/w32api/
 
-EXCLUDED_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o x11_screen.o x11_display.o
+EXCLUDED_OBJFILES=pvm_main.o win_screen.o win_hal.o win_bulk.o nonstandalone.o x11_screen.o x11_display.o win_hal_win.o win_screen_win.o 
 
 # Uncomment to enable tracing
 # PHANTOM_CFLAGS += -finstrument-functions
