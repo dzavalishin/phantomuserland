@@ -24,6 +24,7 @@ die ( ) {
 
 COMPILE=1
 SNAPTEST=1
+TESTRUN=1
 
 at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
@@ -32,11 +33,13 @@ at_exit ( ) {
 		then
 			VERSION=`grep revision $0.log`
 			RESULT=`grep Error make.log | head -1`
+			SEND_LOG=make.log
 		else
 			VERSION=`grep SVN $PHANTOM_LOG | sed 's/[^m]*m//g;s/starting//'`
 			RESULT=`grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';'`
+			SEND_LOG=$0.log
 		fi
-		sed 's/[^m]*m//g' $0.log | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
+		sed 's/[^m]*m//g' $SEND_LOG | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
 	}
 }
 
@@ -62,6 +65,8 @@ do
 	-nc)	unset COMPILE	;;
 	-ng)	unset DISPLAY	;;
 	-ns)	unset SNAPTEST	;;
+	-nt)	unset TESTRUN	;;
+	-v)	VIRTIO=1	;;
 	*)
 		echo "Usage: $0 [-f] [-u] [-p N] [-w] [-nc] [-ng] [-ns]
 	-f	- force test (ignore no updates from SVN)
@@ -69,8 +74,10 @@ do
 	-p N	- make N passes of snapshot test (default: N=2)
 	-w	- show make warnings
 	-nc	- do not compile (run previously compiled version)
+	-nt	- do not run test suite
 	-ns	- do not run snapshot test (shortcut for -p 0)
 	-ng	- do not show qemu/kvm window
+	-v	- use virtio for snaps
 "
 		exit 0
 	;;
@@ -240,7 +247,9 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 	-usb -soundhw sb16"
 #	-net nic,model=ne2k_isa -M isapc \
 
-echo "color yellow/blue yellow/magenta
+# isolate test suite to a separate function
+test_run ( ) {
+	echo "color yellow/blue yellow/magenta
 timeout=3
 
 title=phantom ALL TESTS
@@ -250,45 +259,48 @@ module=(nd)/pmod_test
 boot 
 " > $GRUB_MENU
 
-dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
-dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
+	dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
+	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 
-$QEMU $QEMU_OPTS &
-QEMU_PID=$!
+	$QEMU $QEMU_OPTS &
+	QEMU_PID=$!
 
-while [ 1 ]
-do
-	sleep 2
-	kill -0 $QEMU_PID || break
+	while [ 1 ]
+	do
+		sleep 2
+		kill -0 $QEMU_PID || break
 
-	[ -s serial0.log ] || {
-		sleep 30
 		[ -s serial0.log ] || {
-			echo "
+			sleep 30
+			[ -s serial0.log ] || {
+				echo "
 
 FATAL! Phantom stalled (serial0.log is empty)"
-			kill $QEMU_PID
+				kill $QEMU_PID
+				break
+			}
+		}
+
+		tail -1 serial0.log | grep -q '^Press any' && \
+			call_gdb $GDB_PORT $QEMU_PID "Test run failed"
+
+		grep -q '^\(\. \)\?Panic' serial0.log && {
+			sleep 15
 			break
 		}
+	done
+
+	grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
+	grep 'SVN' serial0.log || die "Phantom test run crashed!"
+	grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' serial0.log
+	grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
+	grep -q 'TEST FAILED' serial0.log && {
+		cp serial0.log test.log
+		preserve_log test.log
 	}
-
-	tail -1 serial0.log | grep -q '^Press any' && \
-		call_gdb $GDB_PORT $QEMU_PID "Test run failed"
-
-	grep -q '^\(\. \)\?Panic' serial0.log && {
-		sleep 15
-		break
-	}
-done
-
-grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
-grep 'SVN' serial0.log || die "Phantom test run crashed!"
-grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' serial0.log
-grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
-grep -q 'TEST FAILED' serial0.log && {
-	cp serial0.log test.log
-	preserve_log test.log
 }
+# test suite done
+[ "$TESTRUN" ] && test_run
 
 [ "$SNAPTEST" ] || exit 0
 
@@ -310,7 +322,6 @@ boot
 
 # before running again
 # TODO call ../zero_ph_img.sh 
-cp ../$DISK_IMG .
 #rm $DISK_IMG
 #touch $DISK_IMG
 #echo ": zeroing virtual disk..."
@@ -318,8 +329,17 @@ cp ../$DISK_IMG .
 #echo ": instantating superblock..."
 #dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=$DISK_IMG 2> /dev/null
 dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
-echo ": zeroing vio..."
-dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
+
+if [ "$VIRTIO" ]
+then
+	cp ../$DISK_IMG vio.img
+	echo ": zeroing phantom drive ..."
+	dd if=/dev/zero of=phantom.img bs=4096 skip=1 count=1024 2> /dev/null
+else
+	cp ../$DISK_IMG .
+	echo ": zeroing vio..."
+	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
+fi
 
 for pass in `seq 1 $PASSES`
 do
