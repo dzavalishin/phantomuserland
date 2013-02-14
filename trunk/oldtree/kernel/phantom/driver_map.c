@@ -67,7 +67,9 @@ static pci_probe_t pci_drivers[] =
 #if 1
     { "VirtIO Baloon", 	driver_virtio_baloon_probe, 	2, VIRTIO_VENDOR, 0, 5 },
     //{ "VirtIO Random",  driver_virtio_random_probe, 	2, VIRTIO_VENDOR, 0, 1 }, // TODO dev/dclass?
+#if 1 && HAVE_NET
     { "VirtIO Net",  	driver_virtio_net_probe, 	2, VIRTIO_VENDOR, 0x1000, 0 }, // TODO dev/dclass?
+#endif
 #endif
 
 #if 1 && HAVE_NET

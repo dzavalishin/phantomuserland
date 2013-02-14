@@ -24,7 +24,8 @@ rem SET USB=-usb -device pci-ohci -usbdevice mouse
 rem SET USB=-usb -usbdevice serial::tcp:ya.ru:80
 rem SET USB=-usb -usbdevice keyboard
 
-SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio -net user -tftp ./tftp
+rem  -virtioconsole vioc,chardev=vioc -chardev vc,id=vioc 
+SET VIO= -drive file=vio.img,if=virtio,format=raw -net nic,model=virtio -net user -tftp ./tftp
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw 
 rem SET VIO=-net nic,model=virtio
 rem SET VIO= -device virtio-rng-pci
@@ -61,7 +62,7 @@ rem SET Q_VGA=-vga std
 rem SET Q_VGA=-vga cirrus
 SET Q_VGA=-vga vmware
 rem SET Q_VGA=-device cirrus-vga
-rem -virtioconsole 4
+rem -virtioconsole 1
 
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
