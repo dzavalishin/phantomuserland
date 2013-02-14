@@ -43,7 +43,7 @@ void panic(const char *fmt, ...)
 
     if (!bootflag_unattended)
     {
-	printf("\nPress any key");
+	printf("\nPress any key ...\n");
 	board_panic_wait_keypress();
     }
 
@@ -55,7 +55,7 @@ void panic(const char *fmt, ...)
 
     if (!bootflag_unattended)
     {
-	printf("\nPress any key to reboot");
+	printf("\nPress any key to reboot ...\n");
 	board_panic_wait_keypress();
     }
 
