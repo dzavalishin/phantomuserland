@@ -34,6 +34,8 @@
 #include <kernel/net.h>
 
 
+#define DEBUG_NO_INTR 0
+
 // FIXME some races prevent this driver from starting at stage 1
 
 
@@ -52,6 +54,7 @@
 
 // At least this many buffers driver must have in recv queue
 #define MIN_RECV_BUF    8
+#define MAX_SEND_BUF    16
 
 
 typedef struct vionet
@@ -64,6 +67,7 @@ typedef struct vionet
     int                 active;
 
     int                 recv_buffers_in_driver;      // How many recv buffers driver has on its side
+    int                 send_buffers_in_driver;
 
     hal_mutex_t         recv_mutex; // Stops more than one thread to come in read
     hal_cond_t          recv_cond;  // Recv done, read_buf filled
@@ -111,17 +115,18 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     vdev.interrupt = driver_virtio_net_interrupt;
     vdev.name = "Net";
 
-    //vdev.guest_features = VIRTIO_NET_F_MAC; // Does not work on QEMU
     vdev.guest_features = 0;
+    vdev.guest_features |= (1<<VIRTIO_NET_F_MAC); // Does not work on QEMU
 
     if( virtio_probe( &vdev, pci ) )
         return 0;
 
-    u_int8_t status = virtio_get_status( &vdev ); //inb(basereg+VIRTIO_PCI_STATUS);
+    u_int8_t status = virtio_get_status( &vdev );
     SHOW_INFO( 11, "Status is: 0x%X", status );
 
     /* driver is ready */
-    virtio_set_status( &vdev, VIRTIO_CONFIG_S_ACKNOWLEDGE );
+    //virtio_set_status( &vdev, VIRTIO_CONFIG_S_ACKNOWLEDGE );
+    virtio_set_status( &vdev, VIRTIO_CONFIG_S_DRIVER );
 
     SHOW_INFO( 11, "Status is: 0x%X", virtio_get_status( &vdev ) );
 
@@ -137,6 +142,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
 
     /* driver is ready */
     //virtio_set_status( &vdev, VIRTIO_CONFIG_S_ACKNOWLEDGE );
+    virtio_set_status( &vdev, VIRTIO_CONFIG_S_DRIVER|VIRTIO_CONFIG_S_DRIVER_OK );
 
 
     vionet_t *vnet = calloc( sizeof(vionet_t), 1 );
@@ -174,7 +180,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     vdev.guest_features  = vdev.host_features & (1 << VIRTIO_NET_F_MAC);
     virtio_set_features( &vdev, vdev.guest_features );
 
-
+/*
     // driver is ready
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER );
     SHOW_INFO( 0, "Status is: 0x%X", virtio_get_status( &vdev ) );
@@ -182,7 +188,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
 
 
     /* driver is ready */
-    virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK);
+//    virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK);
     //virtio_set_status( &vdev,  VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK );
     SHOW_INFO( 11, "Status is: 0x%X", virtio_get_status( &vdev ) );
 
@@ -223,14 +229,59 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     return dev;
 }
 
+
+static void cleanup_xmit_buffers(virtio_device_t *vdev)
+{
+    vionet_t *		vnet = vdev->pvt;
+    struct vring_desc 	rd[2];
+    unsigned int 	dlen;
+    int 		nRead;
+
+    // xmit q
+    while( (nRead = virtio_detach_buffers_list( vdev, VIRTIO_NET_Q_XMIT, 2, rd, (int *)&dlen )) > 0 )
+    {
+        physaddr_t	pa = rd[0].addr;
+        // Send finished, got buffer back
+        SHOW_FLOW( 1, "Got back xmit buffer %p", pa );
+
+        if( nRead != 2 )
+            SHOW_ERROR( 1, "Got back xmit chain of wrong length %d", nRead );
+
+        if( dlen > PAGE_SIZE || dlen < sizeof(struct virtio_net_hdr) )
+            SHOW_ERROR( 1, "Got back xmit dlen %d", dlen );
+
+        if( rd[0].len != sizeof(struct virtio_net_hdr) )
+            SHOW_ERROR( 1, "hdr size not %d", sizeof(struct virtio_net_hdr) );
+
+        hal_free_phys_page(pa);
+        vnet->send_buffers_in_driver--;
+    }
+}
+
+
+
 int driver_virtio_net_write(virtio_device_t *vd, const void *idata, size_t len)
 {
+    vionet_t *		vnet = vd->pvt;
     struct vring_desc wr[2];
+
+    cleanup_xmit_buffers(vd);
+
+    // TODO dumb! just sleep!
+    if( vnet->send_buffers_in_driver > MAX_SEND_BUF )
+        SHOW_ERROR( 0, "Send stall with %d bufs in driver", vnet->send_buffers_in_driver );
+
+    while( vnet->send_buffers_in_driver > MAX_SEND_BUF )
+    {
+        hal_sleep_msec(100);
+        cleanup_xmit_buffers(vd);
+    }
+
 #if 1
     physaddr_t	pa;
-    assert( 0 == hal_alloc_phys_page(&pa));
+    assert( 0 == hal_alloc_phys_page(&pa) );
 
-    SHOW_FLOW( 9, "xmit pa = %p", pa );
+    SHOW_FLOW( 9, "xmit pa = %p len = %d", pa, len );
 
 
     char buf[PAGE_SIZE];
@@ -257,8 +308,13 @@ int driver_virtio_net_write(virtio_device_t *vd, const void *idata, size_t len)
     memcpy_v2p( pa, buf, PAGE_SIZE );
 
     wr[0].addr = pa;
-    wr[0].len  = sizeof(struct virtio_net_hdr) + len;
+    //wr[0].len  = sizeof(struct virtio_net_hdr) + len;
+    wr[0].len  = sizeof(struct virtio_net_hdr);
     wr[0].flags = 0;
+
+    wr[1].addr = pa+sizeof(struct virtio_net_hdr);
+    wr[1].len  = len;
+    wr[1].flags = 0;
 
 #else
 
@@ -287,8 +343,11 @@ int driver_virtio_net_write(virtio_device_t *vd, const void *idata, size_t len)
     wr[1].flags = 0;
 
 #endif
-    virtio_attach_buffers_list( vd, 0, 2, wr );
-    virtio_kick( vd, 0);
+
+    vnet->send_buffers_in_driver++;
+
+    virtio_attach_buffers_list( vd, VIRTIO_NET_Q_XMIT, 2, wr );
+    virtio_kick( vd, VIRTIO_NET_Q_XMIT );
 
     return len;
 }
@@ -298,7 +357,7 @@ static void provide_buffers(virtio_device_t *vd)
     struct vring_desc rd[2];
 
     physaddr_t	pa;
-    assert( 0 == hal_alloc_phys_page(&pa));
+    assert( 0 == hal_alloc_phys_page(&pa) );
 
     SHOW_FLOW( 9, "recv pa = %p", pa );
 
@@ -307,7 +366,7 @@ static void provide_buffers(virtio_device_t *vd)
     rd[0].len  = PAGE_SIZE;
     rd[0].flags = VRING_DESC_F_WRITE;
 
-    virtio_attach_buffers_list( vd, 1, 1, rd );
+    virtio_attach_buffers_list( vd, VIRTIO_NET_Q_RECV, 1, rd );
 #else
 
     rd[0].addr = pa;
@@ -318,9 +377,9 @@ static void provide_buffers(virtio_device_t *vd)
     rd[1].len  = PAGE_SIZE - sizeof(struct virtio_net_hdr);
     rd[1].flags = VRING_DESC_F_WRITE;
 
-    virtio_attach_buffers_list( vd, 1, 2, rd );
+    virtio_attach_buffers_list( vd, VIRTIO_NET_Q_RECV, 2, rd );
 #endif
-    virtio_kick( vd, 0);
+    virtio_kick( vd, VIRTIO_NET_Q_RECV );
 
 }
 
@@ -341,12 +400,7 @@ static void vnet_thread(void *_dev)
         while( !vnet->active )
             hal_sleep_msec(1000);
 
-        SHOW_FLOW0( 1, "Thread ready, wait 4 sema" );
-
-        hal_sem_acquire( &(vnet->sem) );
-
-        SHOW_FLOW0( 1, "Thread sema activated" );
-
+        // Provide recv buffers before going to sleep
 #if 1
         while( vnet->recv_buffers_in_driver < MIN_RECV_BUF )
         {
@@ -356,12 +410,23 @@ static void vnet_thread(void *_dev)
         }
 #endif
 
+        SHOW_FLOW0( 1, "Thread ready, wait 4 sema" );
+
+#if DEBUG_NO_INTR
+        hal_sleep_msec(1000);
+#else
+        hal_sem_acquire( &(vnet->sem) );
+#endif
+
+        SHOW_FLOW0( 1, "Thread sema activated" );
+
+
 
         struct vring_desc rd[2];
         unsigned int dlen;
 
         // recv q
-        int nRead = virtio_detach_buffers_list( vdev, 1, 2, rd, (int *)&dlen );
+        int nRead = virtio_detach_buffers_list( vdev, VIRTIO_NET_Q_RECV, 2, rd, (int *)&dlen );
         if( nRead > 0 )
         {
             // Some reception occured
@@ -372,6 +437,8 @@ static void vnet_thread(void *_dev)
 
             if( dlen > PAGE_SIZE || dlen < sizeof(struct virtio_net_hdr))
                 SHOW_ERROR( 1, "Got recv dlen %d", dlen );
+
+            vnet->recv_buffers_in_driver--;
 
             physaddr_t	pa = rd[0].addr;
 
@@ -412,23 +479,7 @@ static void vnet_thread(void *_dev)
             hal_free_phys_page(pa);
         }
 
-
-        // xmit q
-        nRead = virtio_detach_buffers_list( vdev, 0, 2, rd, (int *)&dlen );
-        if( nRead > 0 )
-        {
-            physaddr_t	pa = rd[0].addr;
-            // Some reception occured
-            SHOW_FLOW( 1, "Got back xmit buffer %p", pa );
-
-            if( nRead != 1)
-                SHOW_ERROR( 1, "Got back xmit chain %d", nRead );
-
-            if( dlen > PAGE_SIZE || dlen < sizeof(struct virtio_net_hdr))
-                SHOW_ERROR( 1, "Got back xmit dlen %d", dlen );
-
-            hal_free_phys_page(pa);
-        }
+        cleanup_xmit_buffers(vdev);
 
     }
 
@@ -438,12 +489,12 @@ static void vnet_thread(void *_dev)
 static void driver_virtio_net_interrupt(virtio_device_t *vdev, int isr )
 {
     (void) isr;
-
     vionet_t *		vnet = vdev->pvt;
 
-    (void) vnet;
-
-    SHOW_FLOW0( 4, "got virtio net interrupt");
+#if DEBUG_NO_INTR
+    //SHOW_FLOW0( 4, "got virtio net interrupt");
+    lprintf("!!! got virtio net interrupt !!!");
+#endif
 
     // Just try to do everything
     hal_sem_release( &(vnet->sem) );
