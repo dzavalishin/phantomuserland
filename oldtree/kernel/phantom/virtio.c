@@ -27,16 +27,16 @@
 #include <kernel/page.h>
 
 static u_int32_t virtio_get_q_size( virtio_device_t *vd, int index );
-static void virtio_ring_init(virtio_device_t *vd, int index, int num );
+static void 	virtio_ring_init(virtio_device_t *vd, int index, int num );
 
-static void virtio_release_descriptor_index(virtio_ring_t *r, int toRelease);
-static int virtio_get_free_descriptor_index(virtio_ring_t *r);
+static void 	virtio_release_descriptor_index(virtio_ring_t *r, int toRelease);
+static int 	virtio_get_free_descriptor_index(virtio_ring_t *r);
 
-static void virtio_wait_for_free_descriptors(virtio_device_t *vd, int qindex, virtio_ring_t *r, int nDesc);
+static void 	virtio_wait_for_free_descriptors(virtio_device_t *vd, int qindex, virtio_ring_t *r, int nDesc);
 
-static void virtio_notify( virtio_device_t *vd, int index );
+static void 	virtio_notify( virtio_device_t *vd, int index );
 
-void virto_ring_dump(virtio_ring_t *r);
+void 		virto_ring_dump(virtio_ring_t *r);
 
 
 
@@ -49,7 +49,6 @@ static void vio_irq_handler( void *arg )
     if(isr == 0)
         return; // Not ours
 
-    //SHOW_FLOW( 1, " !_INT_! %s ! -> %p", vd->name, vd->interrupt );
     //SHOW_FLOW( 1, " !_INT_! %s !", vd->name );
 
     // TODO VIRTIO_PCI_ISR_CONFIG
@@ -65,7 +64,7 @@ int virtio_probe( virtio_device_t *vd, pci_cfg_t *pci )
 {
     SHOW_INFO( 0, "probe got dev 0x%X class 0x%X subclass 0x%X",
            pci->device_id, pci->base_class, pci->sub_class );
-//getchar();
+
     if( pci->device_id < 0x1000 || pci->device_id > 0x103f )
     {
         SHOW_ERROR0( 0, "Dev ID is out of virtio range");
@@ -84,7 +83,7 @@ int virtio_probe( virtio_device_t *vd, pci_cfg_t *pci )
 
     virtio_set_status( vd, VIRTIO_CONFIG_S_ACKNOWLEDGE );
 
-    vd->host_features = virtio_get_features( vd );//inl(basereg+VIRTIO_PCI_HOST_FEATURES);
+    vd->host_features = virtio_get_features( vd );
 
     if( (~(vd->host_features)) & vd->guest_features )
     {
@@ -96,18 +95,13 @@ int virtio_probe( virtio_device_t *vd, pci_cfg_t *pci )
         return -1;
     }
 
-    //outl(basereg+VIRTIO_PCI_GUEST_FEATURES,  );
     virtio_set_features( vd, vd->guest_features );
-
-    //moved up
-    //virtio_set_status( vd, VIRTIO_CONFIG_S_ACKNOWLEDGE );
 
     if( hal_irq_alloc( pci->interrupt, vio_irq_handler, vd, HAL_IRQ_SHAREABLE ) )
     {
         SHOW_ERROR( 0, "IRQ %d is busy", pci->interrupt );
         return -1;
     }
-
 
     int qindex;
     for(qindex = 0; qindex < VIRTIO_MAX_RINGS; qindex++ )
@@ -120,13 +114,14 @@ int virtio_probe( virtio_device_t *vd, pci_cfg_t *pci )
         virtio_ring_init( vd, qindex, qsize );
     }
 
-    // TODO use the subsystem vendor/device id as the virtio vendor/device id.
-
-
     return 0;
 }
 
 
+
+// -----------------------------------------------------------------------
+// VirtIO PCI IO
+// -----------------------------------------------------------------------
 
 
 
@@ -256,12 +251,9 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     r->lastUsedIdx = 0;
     r->totalSize = num;
 
-    //virto_ring_dump(r);
-
     SHOW_FLOW0(8, "will vring_init");
     vring_init( &(r->vr), num, buffer, VIRTIO_PCI_VRING_ALIGN );
 
-#if 1
     int i;
     for( i = 0; i < num-1; i++ )
     {
@@ -270,32 +262,17 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     }
     r->vr.desc[num-1].flags = 0;
     r->vr.desc[num-1].next = -1;
-#else
-    r->freeHead = num-1;
-    int i;
-    for( i = num-1; i > 0; i-- )
-    {
-        r->vr.desc[i].flags = VRING_DESC_F_NEXT;
-        r->vr.desc[i].next = i-1;
-    }
-    r->vr.desc[0].flags = 0;
-    r->vr.desc[0].next = -1;
-#endif
-
-    //virto_ring_dump(r);
 
     vd->rings[index] = r;
     SHOW_FLOW0(8, "will virtio_set_q_physaddr");
     virtio_set_q_physaddr( vd, index, result );
-
-    //virto_ring_dump(r);
 }
 
 
 
 void virto_ring_dump(virtio_ring_t *r)
 {
-    //if( debug_level_flow < 10 ) return;
+    if( debug_level_flow < 10 ) return;
 
     printf("VRing @%p totalSize=%d, index=%d, phys=%p, nFreeDesc=%d, freeHead=%d, lastUsedIdx=%d \n",
            r,
@@ -341,6 +318,11 @@ void virto_ring_dump(virtio_ring_t *r)
 #endif
 }
 
+
+
+// -----------------------------------------------------------------------
+// VirtIO Ring - attach.detach buffers
+// -----------------------------------------------------------------------
 
 
 /**
@@ -395,76 +377,6 @@ int virtio_attach_buffer(virtio_device_t *vd, int qindex,
  *
  * Caller must call virtio_kick() after some of attaches.
  *
- * /
-int virtio_attach_buffers(virtio_device_t *vd, int qindex,
-                          int nWrite, struct vring_desc *writeData,
-                          int nRead, struct vring_desc *readData
-                          )
-{
-    assert( (nRead > 0) || (nWrite > 0) );
-
-    virtio_ring_t *r = vd->rings[qindex];
-
-    VIRTIO_LOCK(r);
-    // TODO Errno? Sleep waiting for interrupt, retry
-    if(r->nFreeDescriptors < nWrite+nRead )
-    {
-        virtio_notify( vd, qindex ); // Try to kick host
-        VIRTIO_UNLOCK(r);
-        return -1; // ENOSPC
-    }
-
-    int descrIndex = -1;
-    int elem;
-    int last;
-
-    elem = 0;
-    while(nRead-- > 0)
-    {
-        last = descrIndex;
-        descrIndex = virtio_get_free_descriptor_index(r);
-        r->vr.desc[descrIndex] = readData[elem++];
-        r->vr.desc[descrIndex].flags = (last < 0) ? 0 : VRING_DESC_F_NEXT;
-        r->vr.desc[descrIndex].next = last;
-    }
-
-    printf("descrIndex %d\n", descrIndex);
-
-    elem = 0;
-    while(nWrite-- > 0)
-    {
-        last = descrIndex;
-        descrIndex = virtio_get_free_descriptor_index(r);
-        r->vr.desc[descrIndex] = writeData[elem++];
-        r->vr.desc[descrIndex].flags = VRING_DESC_F_WRITE | ((last < 0) ? 0 : VRING_DESC_F_NEXT);
-        r->vr.desc[descrIndex].next = last;
-    }
-
-    int availPos = r->vr.avail->idx;
-    availPos %= r->vr.num;
-    r->vr.avail->ring[availPos] = descrIndex;
-    r->nAdded++;
-
-    VIRTIO_UNLOCK(r);
-
-    virto_ring_dump(r);
-
-    return 0;
-}
-*/
-
-
-
-/**
- *
- * Attach scatter/gather lists to the queue.
- *
- * qindex - queue (ring) index.
- *
- * returns: zero on success
- *
- * Caller must call virtio_kick() after some of attaches.
- *
  */
 int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
                           int nDesc, struct vring_desc *desc
@@ -473,31 +385,19 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
     assert( nDesc > 0 );
 
     virtio_ring_t *r = vd->rings[qindex];
-#if 0
-    // impossible for dump_phys can do only aligned addresses
-    int i;
-    for( i = 0; i<nDesc; i++ )
-    {
-    	printf("dump desc %d: %d @ %p\n", i, desc[i].len, desc[i].addr );
-    	dump_phys(desc[i].addr, desc[i].len);
-    }
 
-#endif
     VIRTIO_LOCK(r);
     virtio_wait_for_free_descriptors(vd, qindex, r, nDesc);
 
     int descrIndex = -1;
-    //int elem;
     int last;
 
     // We put im in reverse order, but we read them in reverse order as well
     // So order is intact finally
 
-    //elem = 0;
     while(nDesc-- > 0)
     {
         assert(desc[nDesc].addr);
-
 
         last = descrIndex;
         descrIndex = virtio_get_free_descriptor_index(r);
@@ -516,8 +416,6 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
     r->nAdded++;
 
     VIRTIO_UNLOCK(r);
-
-    //virto_ring_dump(r);
 
     return 0;
 }
@@ -583,7 +481,7 @@ int virtio_detach_buffer( virtio_device_t *vd, int qindex,
     return 0;
 }
 
-// Wrong...
+
 int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
                           int nDesc, struct vring_desc *desc, int *dataLen
                           )
@@ -670,19 +568,16 @@ void virtio_kick(virtio_device_t *vd, int qindex)
 
     mem_barrier();
 
-    //virtio_dump_phys(r);
-
-    //outw( vd->basereg+VIRTIO_PCI_QUEUE_SEL, qindex );
-    //printf( "physaddr is %x\n, ", inl( vd->basereg+VIRTIO_PCI_QUEUE_PFN ) );
-
-
-#if 0 // temp notify allways
+//#if 0 // temp notify allways
     if( !(r->vr.used->flags & VRING_USED_F_NO_NOTIFY) )
-#endif
+//#endif
         virtio_notify( vd, qindex );
 }
 
 
+// -----------------------------------------------------------------------
+// VirtIO descriptors alloc/free
+// -----------------------------------------------------------------------
 
 
 
@@ -699,9 +594,6 @@ static int virtio_get_free_descriptor_index(virtio_ring_t *r)
     r->nFreeDescriptors--;
 
     int ret = r->freeHead;
-
-    //SHOW_FLOW( 5, "r->freeHead=%d", r->freeHead );
-    //virto_ring_dump(r);
 
     r->freeHead = r->vr.desc[r->freeHead].next;
     assert(r->freeHead >= 0);
@@ -746,6 +638,9 @@ static void virtio_wait_for_free_descriptors(virtio_device_t *vd, int qindex, vi
 }
 
 
+// -----------------------------------------------------------------------
+// VirtIO Debug
+// -----------------------------------------------------------------------
 
 
 
