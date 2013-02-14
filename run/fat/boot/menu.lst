@@ -2,7 +2,7 @@ color yellow/blue yellow/magenta
 
 timeout=3
 title=phantom FAST
-kernel=(hd0,0)/boot/phantom -d=10 -- 
+kernel=(hd0,0)/boot/phantom -d=10 -unattended -- 
 module=(hd0,0)/boot/classes
 #module=(hd0,0)/boot/pmod_tcpdemo 
 #module=(hd0,0)/boot/pmod_test

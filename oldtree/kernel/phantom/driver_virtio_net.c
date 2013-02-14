@@ -6,16 +6,16 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * VirtIo Net driver. Doesnt work yet.
+ * VirtIo Net driver. Seems to be working.
  *
  *
 **/
 
 #define DEBUG_MSG_PREFIX "VirtIo.Net"
 #include <debug_ext.h>
-#define debug_level_flow 11
+#define debug_level_flow 0
 #define debug_level_error 11
-#define debug_level_info 11
+#define debug_level_info 1
 
 #include <phantom_libc.h>
 
@@ -185,7 +185,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER );
     SHOW_INFO( 0, "Status is: 0x%X", virtio_get_status( &vdev ) );
     hal_sleep_msec(10);
-
+*/
 
     /* driver is ready */
 //    virtio_set_status( &vdev,  VIRTIO_CONFIG_S_ACKNOWLEDGE | VIRTIO_CONFIG_S_DRIVER | VIRTIO_CONFIG_S_DRIVER_OK);
@@ -359,9 +359,11 @@ static void provide_buffers(virtio_device_t *vd)
     physaddr_t	pa;
     assert( 0 == hal_alloc_phys_page(&pa) );
 
+    memzero_page_v2p( pa ); // TODO pre-zero pages! alloc_zero_phys_page!
+
     SHOW_FLOW( 9, "recv pa = %p", pa );
 
-#if 1
+#if 0
     rd[0].addr = pa;
     rd[0].len  = PAGE_SIZE;
     rd[0].flags = VRING_DESC_F_WRITE;
@@ -372,6 +374,7 @@ static void provide_buffers(virtio_device_t *vd)
     rd[0].addr = pa;
     rd[0].len  = sizeof(struct virtio_net_hdr);
     rd[0].flags = 0;
+    rd[0].flags = VRING_DESC_F_WRITE;
 
     rd[1].addr = pa + sizeof(struct virtio_net_hdr);
     rd[1].len  = PAGE_SIZE - sizeof(struct virtio_net_hdr);
