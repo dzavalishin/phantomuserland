@@ -25,6 +25,11 @@
 /* The ID for virtio_net */
 #define VIRTIO_ID_NET	1
 
+
+#define VIRTIO_NET_Q_RECV 0
+#define VIRTIO_NET_Q_XMIT 1
+#define VIRTIO_NET_Q_CTRL 2
+
 /* The feature bitmap for virtio net */
 #define VIRTIO_NET_F_CSUM	0	/* Host handles pkts w/ partial csum */
 #define VIRTIO_NET_F_GUEST_CSUM	1	/* Guest handles pkts w/ partial csum */

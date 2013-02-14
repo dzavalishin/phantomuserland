@@ -121,6 +121,8 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
 
     virtio_set_status( &vdev, VIRTIO_CONFIG_S_DRIVER|VIRTIO_CONFIG_S_DRIVER_OK );
 
+    SHOW_FLOW( 1, "Status is: 0x%x", virtio_get_status( &vdev ) );
+
 #if 0
     printf("Will write to disk\n");
 //getchar();

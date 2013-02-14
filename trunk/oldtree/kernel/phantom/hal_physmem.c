@@ -530,6 +530,19 @@ hal_copy_page_v2p( physaddr_t to, void *from )
     hal_free_vaddress(addr, 1);
 }
 
+void
+memzero_page_v2p( physaddr_t to )
+{
+    void *addr;
+    if(hal_alloc_vaddress( &addr, 1))
+        panic("out of vaddresses");
+    hal_page_control( to, addr, page_map, page_rw );
+
+    bzero( addr, hal_mem_pagesize() );
+
+    hal_page_control( to, addr, page_unmap, page_noaccess );
+    hal_free_vaddress(addr, 1);
+}
 
 
 

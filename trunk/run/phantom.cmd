@@ -24,9 +24,10 @@ rem SET USB=-usb -device pci-ohci -usbdevice mouse
 rem SET USB=-usb -usbdevice serial::tcp:ya.ru:80
 rem SET USB=-usb -usbdevice keyboard
 
-rem SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio
-SET VIO=-drive file=vio.img,if=virtio,format=raw
+SET VIO=-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio -net user -tftp ./tftp
+rem SET VIO=-drive file=vio.img,if=virtio,format=raw 
 rem SET VIO=-net nic,model=virtio
+rem SET VIO= -device virtio-rng-pci
 
 rem 161 = snmp
 rem SET Q_REDIR=-redir udp:123::123
@@ -38,12 +39,12 @@ SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide
 
 rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
 rem SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp
-SET Q_NET= -net nic,model=rtl8139  -net user,tftp=./tftp -tftp ./tftp
+rem SET Q_NET= -net nic,model=rtl8139  -net user,tftp=./tftp -tftp ./tftp
 rem SET Q_NET= -net nic,model=pcnet  -net user -tftp ./tftp
 
 
 SET Q_MACHINE=-m 256
-#SET Q_MACHINE=-m 120
+rem SET Q_MACHINE=-m 120
 
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img
 SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb openwrt-x86-ext2.image.kernel -hda fat:fat -hdb phantom.img

@@ -154,6 +154,7 @@ void                                    hal_free_phys_pages_low(physaddr_t  padd
 void					hal_copy_page_v2p( physaddr_t to, void *from );
 void					memcpy_p2v( void *to, physaddr_t from, size_t size );
 void					memcpy_v2p( physaddr_t to, void *from, size_t size );
+void                                    memzero_page_v2p( physaddr_t to );
 
 
 size_t                                  pahantom_total_phys_mem_kb(void);
