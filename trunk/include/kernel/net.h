@@ -227,7 +227,7 @@ errno_t bootp(ifnet *iface);
 
 
 void udp_syslog_send(const char *prefix, const char *message);
-
+void start_tcp_echo_server(void);
 
 
 
