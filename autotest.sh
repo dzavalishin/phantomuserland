@@ -43,8 +43,6 @@ at_exit ( ) {
 	}
 }
 
-trap at_exit 0 2
-
 [ $# -gt 0 ] || {
 	UNATTENDED=-unattended
 	exec 1>$0.log 2>&1
@@ -114,6 +112,10 @@ Previous copies are kept ($1.0 through .9)"
 }
 
 call_gdb ( ) {
+	[ "$UNATTENDED" ] || {
+		echo "GAME OVER. Press Enter to start GDB..."
+		read n
+	}
 	port="${1:-$GDB_PORT}"
 	shift
 	pid="$1"
@@ -192,6 +194,9 @@ SVN_OUT=`svn update`
 }
 
 echo "$SVN_OUT"
+
+# now it is safe to alter behaviour on exit
+trap at_exit 0 2
 
 [ "$COMPILE" ] && {
 	make clean > /dev/null 2>&1
