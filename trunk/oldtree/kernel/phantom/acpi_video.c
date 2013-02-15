@@ -62,6 +62,10 @@ static ACPI_STATUS walk_video_device(ACPI_HANDLE handle, UINT32 level,
     char namebuf[128];
     ACPI_BUFFER namebufobj = {.Length = sizeof(namebuf), .Pointer = namebuf};
 
+    (void) level;
+    (void) context;
+    (void) dummy;
+
     /* get the node's name */
     as = AcpiGetName(handle, ACPI_FULL_PATHNAME, &namebufobj);
     if (ACPI_FAILURE(as)) {

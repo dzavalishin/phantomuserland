@@ -1,3 +1,11 @@
+ - test and set as main new snap sync
+
+ - deferred zbuf clean - debug
+
+ - debug new snap sync
+
+ - tcp accept - wrong seq, wrong reply address (ipv4_lookup_srcaddr_for_dest gets first alias available?)
+
  - what if system rebooted before old snap is freed? Which snap will be loaded? 
    Who frees old one?
 

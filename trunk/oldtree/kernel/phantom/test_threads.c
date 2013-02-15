@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Tests - network
+ * Tests - threads, sync
  *
  *
 **/
@@ -708,6 +708,56 @@ int do_test_01_threads(const char *test_parm)
 
     if(zo_fail)
         test_fail_msg( -1, "data corruption" );
+
+    return 0;
+}
+
+
+// -----------------------------------------------------------------------
+// Running a lot of threads
+// -----------------------------------------------------------------------
+
+
+static int still_have_threads = 0;
+
+// TODO crashes strangely on 1000
+//#define TMANY_HOW_MUCH 1000
+#define TMANY_HOW_MUCH 200
+
+static void simple_thread(void *a)
+{
+    (void) a;
+
+    static int tc = 0;
+    tc++;
+    char tn[100];
+    snprintf( tn, sizeof(tn), "test t %d", tc );
+    t_current_set_name(tn);
+
+    hal_sleep_msec( (random() % 100) + 2000 );
+    still_have_threads--;
+}
+
+int do_test_many_threads(const char *test_parm)
+{
+    (void) test_parm;
+
+    int tostart = TMANY_HOW_MUCH;
+
+    while( tostart-- > 0 )
+    {
+        still_have_threads++;
+        hal_start_kernel_thread_arg( simple_thread, 0 );
+        printf("Have %d threads run\n",still_have_threads);
+    }
+
+    printf("Wait for threads to finish\n");
+
+    while(still_have_threads > 0)
+    {
+        hal_sleep_msec(1000);
+        printf("Still have %d threads run\n",still_have_threads);
+    }
 
     return 0;
 }

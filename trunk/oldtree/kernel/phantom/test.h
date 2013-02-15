@@ -65,8 +65,13 @@ int do_test_dpc(const char *test_parm);
 
 int do_test_sem(const char *test_parm);
 
+int do_test_many_threads(const char *test_parm);
+
 
 int do_test_timed_call(const char *test_parm);
+
+
+
 
 
 int do_test_amap(const char *test_parm);

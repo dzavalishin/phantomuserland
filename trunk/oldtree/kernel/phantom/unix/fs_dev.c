@@ -229,7 +229,7 @@ static uufile_t *  dev_namei(uufs_t *fs, const char *filename)
 #define NPART 10
 
         const char *oname[NPART];
-        int olen[NPART];
+        size_t olen[NPART];
 
         int nb = uu_break_path( filename, NPART, oname, olen );
 
