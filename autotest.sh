@@ -149,6 +149,20 @@ quit
 	exit 0
 }
 
+# clean unexpected failures
+[ "$COMPILE" ] && rm -f make.log
+
+# update data BEFORE checking for stalled copies
+GRUB_MENU=tftp/tftp/menu.lst
+svn diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
+	rm $TEST_DIR/$GRUB_MENU
+SVN_OUT=`svn update`
+[ $? -ne 0 -o `echo "$SVN_OUT" | grep -c '^At revision'` -ne 0 ] && {
+	[ "$FORCE" ] || die "$MSG"
+}
+
+echo "$SVN_OUT"
+
 # check if another copy is running
 [ "$FORCE" ] || {
 	RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
@@ -181,19 +195,6 @@ Previous test run stalled. Trying gdb..."
 		}
 	done
 }
-
-[ "$COMPILE" ] && rm -f make.log
-
-# clean unexpected failures
-GRUB_MENU=tftp/tftp/menu.lst
-svn diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
-	rm $TEST_DIR/$GRUB_MENU
-SVN_OUT=`svn update`
-[ $? -ne 0 -o `echo "$SVN_OUT" | grep -c '^At revision'` -ne 0 ] && {
-	[ "$FORCE" ] || die "$MSG"
-}
-
-echo "$SVN_OUT"
 
 # now it is safe to alter behaviour on exit
 trap at_exit 0 2
