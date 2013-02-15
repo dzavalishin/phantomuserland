@@ -37,8 +37,9 @@ static int debug_print = 0;
 
 // --------- mutex -------------------------------------------------------
 
-#warning paging can switch us off with "spin" locked, use kern mutex
-
+#if OLD_VM_SLEEP
+#  warning paging can switch us off with "spin" locked, use kern mutex
+#endif
 // NB - persistent mutexes!
 // TODO have a mark - can this mutex be locked at snapshot
 

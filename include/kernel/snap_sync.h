@@ -46,5 +46,11 @@ typedef struct userland_sleep
 extern volatile int * snap_catch_va;
 // NB! Calling this means you're ready to snap
 static inline void touch_snap_catch(void) { *snap_catch_va = 1; }
+
+void snap_lock(void);
+void snap_unlock(void);
+
+void snap_trap(void);
+
 #endif
 

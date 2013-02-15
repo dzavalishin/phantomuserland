@@ -29,6 +29,7 @@
 #include <kernel/dpc.h>
 #include <kernel/snap_sync.h>
 #include <kernel/physalloc.h>
+#include <kernel/init.h>
 
 #include <threads.h>
 
@@ -101,12 +102,12 @@ static hal_cond_t      deferred_alloc_thread_sleep;
  * first lock vm_page, second -- *_q_mutex.
  */
 // clean physical pages queue (to reclaim from the end)
-static hal_mutex_t 	    clean_q_mutex;
-static hal_cond_t 	    clean_q_nonempty;
+static hal_mutex_t      clean_q_mutex;
+static hal_cond_t       clean_q_nonempty;
 static queue_head_t     clean_q;
 static size_t           clean_q_size;
 // dirty physical pages queue (to pageout from the end)
-static hal_mutex_t 	    dirty_q_mutex;
+static hal_mutex_t      dirty_q_mutex;
 static queue_head_t     dirty_q;
 static size_t           dirty_q_size;
 
@@ -286,11 +287,11 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
 #endif
 
 #if NEW_SNAP_SYNC
-        if( fa == snap_catch_va )
+        if( ((addr_t)fa) == ((addr_t)snap_catch_va) )
         {
             // This is a snap trap fired, let it go
             snap_trap();
-            return; // trap supposed to be open now
+            return 0; // trap supposed to be open now
         }
 #endif
 
@@ -324,25 +325,26 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
 
 
 
+// vm_map_init is not called for tests, so we leave there just real vm_map init code
+// and general init is here
 
-
-
-
-
-
-
-
-
-void
-vm_page_init( vm_page *me, void *my_vaddr)
+static void vm_map_pre_init(void)
 {
-    memset( me, 0, sizeof(vm_page) );
-    me->virt_addr = my_vaddr;
-    hal_cond_init(&me->done, "VM PG");
-    hal_mutex_init(&me->lock, "VM PG" );
-    page_touch_history(me);
-    pager_io_request_init( &me->pager_io );
+    page_clear_engine_init();
+
+    queue_init(&clean_q);
+    hal_mutex_init(&clean_q_mutex, "CleanQueue");
+    hal_cond_init(&clean_q_nonempty, "CleanQueueNonempty");
+    queue_init(&dirty_q);
+    hal_mutex_init(&dirty_q_mutex, "DirtyQueue");
+    hal_mutex_init(&vm_map_mutex, "VM Map");
+    hal_mutex_lock(&vm_map_mutex);
+
+    hal_cond_init(&deferred_alloc_thread_sleep, "Deferred");
+    hal_mutex_unlock(&vm_map_mutex);
 }
+
+INIT_ME(0,vm_map_pre_init,0)
 
 
 
@@ -350,7 +352,7 @@ vm_page_init( vm_page *me, void *my_vaddr)
 void
 vm_map_init(unsigned long page_count)
 {
-    page_clear_engine_init();
+    //page_clear_engine_init();
 
     vm_map_vm_page_count = page_count;
 
@@ -363,16 +365,15 @@ vm_map_init(unsigned long page_count)
 
     vm_map_start_of_virtual_address_space = (void *)hal_object_space_address();
 
+    /*
     queue_init(&clean_q);
     hal_mutex_init(&clean_q_mutex, "CleanQueue");
     hal_cond_init(&clean_q_nonempty, "CleanQueueNonempty");
     queue_init(&dirty_q);
     hal_mutex_init(&dirty_q_mutex, "DirtyQueue");
-
     hal_mutex_init(&vm_map_mutex, "VM Map");
-
     hal_mutex_lock(&vm_map_mutex);
-
+    */
 
     unsigned int np;
     for( np = 0; np < page_count; np++ )
@@ -413,9 +414,8 @@ vm_map_init(unsigned long page_count)
 
     hal_init_object_vmem(vm_map_start_of_virtual_address_space);
 
-    hal_cond_init(&deferred_alloc_thread_sleep, "Deferred");
-
-    hal_mutex_unlock(&vm_map_mutex);
+    //hal_cond_init(&deferred_alloc_thread_sleep, "Deferred");
+    //hal_mutex_unlock(&vm_map_mutex);
 
 #if 1
     hal_start_kernel_thread(vm_map_deferred_disk_alloc_thread);
@@ -426,11 +426,15 @@ vm_map_init(unsigned long page_count)
     // Ok, everything is ready now. Turn on pagefaults handling
 #ifdef ARCH_ia32
     phantom_trap_handlers[T_PAGE_FAULT] = vm_map_page_fault_trap_handler;
-#endif
-#ifdef ARCH_arm
-#  warning no page fault trap handler set
+#  define HAVE_PGFAULT_HANDLER
 #endif
 
+#ifdef ARCH_arm
+#endif
+
+#ifndef HAVE_PGFAULT_HANDLER
+#  warning no page fault trap handler set
+#endif
 
 
 }
@@ -445,6 +449,24 @@ void vm_map_finish(void)
     // stop_deferred_disk_alloc_thread is asserted in lazy pageout thread
     // after the last snapshot
 }
+
+
+
+void
+vm_page_init( vm_page *me, void *my_vaddr)
+{
+    memset( me, 0, sizeof(vm_page) );
+    me->virt_addr = my_vaddr;
+    hal_cond_init(&me->done, "VM PG");
+    hal_mutex_init(&me->lock, "VM PG" );
+    page_touch_history(me);
+    pager_io_request_init( &me->pager_io );
+}
+
+
+
+
+
 
 
 // memory reclaiming helpers

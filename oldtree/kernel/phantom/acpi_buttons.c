@@ -61,6 +61,7 @@ static dpc_request_t poweroff_dpc;
 static void acpi_power_off(void *arg)
 {
     ACPI_STATUS as;
+    (void) arg;
 
     // TODO shutdown supposed here
 
@@ -82,6 +83,8 @@ static void acpi_power_off(void *arg)
 // This one is called in interrupt!
 static u_int32_t power_button_handler(void *arg)
 {
+    (void) arg;
+
     printf("Power button pressed, switching off...\n");
     dpc_request_trigger( &poweroff_dpc, 0 );
 
@@ -91,6 +94,8 @@ static u_int32_t power_button_handler(void *arg)
 static void power_button_notify_handler(ACPI_HANDLE handle, u_int32_t value,
                                         void *context)
 {
+    (void) handle;
+
     //printf("Power button notify 0x%"PRIx32"\n", value);
     printf("Power button notify 0x%d", value);
     if (value == 0x80) { // switch off!
@@ -101,6 +106,10 @@ static void power_button_notify_handler(ACPI_HANDLE handle, u_int32_t value,
 static ACPI_STATUS power_button_probe(ACPI_HANDLE handle, u_int32_t nestlevel,
                                       void *context, void **retval)
 {
+    (void) nestlevel;
+    (void) context;
+    (void) retval;
+
     // install handler
     printf("Installing notify handler for power/sleep button\n");
     return AcpiInstallNotifyHandler(handle, ACPI_DEVICE_NOTIFY,

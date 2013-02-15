@@ -139,8 +139,6 @@ void deferred_refdec(pvm_object_storage_t *os)
 
 static void deferred_refdec_thread(void *a)
 {
-    //hal_set_thread_name("refdec");
-    //hal_set_current_thread_priority( THREAD_PRIO_HIGH );
     t_current_set_name("RefDec");
     t_current_set_priority( THREAD_PRIO_HIGH );
 

@@ -5,11 +5,12 @@ rem http://lassauge.free.fr/qemu/
 SET QDIR=qemu\0.15.1
 SET QCMD=qemu.exe
 
+rem SET QDIR=qemu\1.2.0
 rem SET QDIR=qemu\1.0.1
-rem SET QCMD=qemu-system-i386.exe
-
 rem SET QDIR=qemu\1.3.1
+
 rem SET QCMD=qemu-system-i386w.exe
+rem SET QCMD=qemu-system-i386.exe
 rem SET QCMD=qemu-system-x86_64w.exe 
 
 set QEMU_AUDIO_DRV=dsound

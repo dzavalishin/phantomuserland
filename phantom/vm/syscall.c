@@ -1058,6 +1058,7 @@ static int si_bootstrap_21_sleep(struct pvm_object me, struct data_area_4_thread
     if(phantom_is_a_real_kernel())
         SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
 #else
+    (void) msec;
     SHOW_ERROR0( 0, "si_bootstrap_21_sleep used" );
 #endif
     SYSCALL_RETURN_NOTHING;

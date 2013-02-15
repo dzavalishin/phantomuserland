@@ -192,6 +192,9 @@ errno_t vesa3_bootstrap(void);
 
 errno_t InitializeFullAcpi(void);
 
+void start_tcp_echo_server(void);
+
+
 // -----------------------------------------------------------------------
 // Finita
 // -----------------------------------------------------------------------

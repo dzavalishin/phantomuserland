@@ -47,11 +47,11 @@ start: (void *)vid_null,
 accel: (void *)vid_null,
 stop:  (void *)vid_null,
 
-    (void*)vid_null,
-    (void*)vid_null,
-    (void*)vid_null,
+update:(void*)vid_null,
+bitblt:(void*)vid_null,
+//(void*)vid_null, // was winblt
 
-//    (void*)vid_null,
+.readblt = (void*)vid_null,
 
 mouse:    		(void*)vid_null,
 
