@@ -28,7 +28,7 @@ TESTRUN=1
 
 at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
-	[ "$UNATTENDED" ] && grep -qv svn $0.log >/dev/null && {
+	[ "$CRONMODE" ] && grep -qv svn $0.log >/dev/null && {
 		if [ make.log -nt $PHANTOM_LOG ]
 		then
 			VERSION=`grep revision $0.log`
@@ -44,6 +44,7 @@ at_exit ( ) {
 }
 
 [ $# -gt 0 ] || {
+	CRONMODE=1
 	UNATTENDED=-unattended
 	exec 1>$0.log 2>&1
 }
