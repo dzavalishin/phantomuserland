@@ -379,7 +379,9 @@ void set_debug_traps(void)
     while((c = getDebugChar()) != '$');
     while((c = getDebugChar()) != '#');
     c = getDebugChar(); /* eat first csum byte */
+    (void) c;
     c = getDebugChar(); /* eat second csum byte */
+    (void) c;
     putDebugChar('+'); /* ack it */
 
     gdb_stub_initialised = 1;

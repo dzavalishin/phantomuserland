@@ -281,7 +281,7 @@ void scr_zbuf_dump()
     for(y = 0; y < ysize; y++)
     {
         int x;
-        int xsize = xsize;
+        //int xsize = xsize;
 
         for( x = 0; x < xsize; x++ )
         {

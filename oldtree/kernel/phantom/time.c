@@ -81,11 +81,12 @@ int hal_time_init()
 
 static long msecDivider = 0;
 static long secDivider = 0;
-
+static int saved_tick_rate = 1;
 
 //! Called from timer interrupt, tick_rate is in uSec
 void hal_time_tick(int tick_rate)
 {
+    saved_tick_rate = tick_rate;
     // We correct time by updating real_time_delta slowly
 //putchar('#');
     // Time correction logic
@@ -137,8 +138,8 @@ bigtime_t (*arch_get_time_delta)(void);
 bigtime_t hal_system_time(void)
 {
     bigtime_t val;
-    bigtime_t d;
-    int tick_rate;
+    bigtime_t d = 0;
+    int tick_rate = saved_tick_rate;
 
     if (arch_get_tick_rate && arch_get_time_delta)
     {

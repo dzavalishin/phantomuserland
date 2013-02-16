@@ -157,7 +157,7 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
     int maxPrd;                      // max number of PRD allowed
     unsigned long temp;
     //unsigned long phyAddr;           // physical memory address
-    unsigned long savePhyAddr;       // physical memory address
+    //unsigned long savePhyAddr;       // physical memory address
     unsigned long bigCnt;            // complex big count
     unsigned long smallCnt;          // complex small count
 
@@ -218,7 +218,7 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
         //phyAddr = phyAddr + (unsigned long) off;
         //phyAddr = phyAddr & 0xfffffffeL;
     }
-    savePhyAddr = phyAddr;
+    //savePhyAddr = phyAddr;
 
 #if DEBUG_PCI & 0x02
     printf( "z=>[prd] set_up_xfer()...\n" );

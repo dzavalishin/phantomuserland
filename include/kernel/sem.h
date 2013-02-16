@@ -11,6 +11,8 @@
 #ifndef SEM_H
 #define SEM_H
 
+#include <errno.h>
+
 struct phantom_sem_impl;
 
 struct hal_sem

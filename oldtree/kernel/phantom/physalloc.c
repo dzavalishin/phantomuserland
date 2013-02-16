@@ -63,8 +63,8 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 {
     assert(arena->inited);
 
-    int ie = hal_save_cli();
-    hal_spin_lock(&(arena->lock));
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli(&(arena->lock));
     unsigned int prev_alloc_last_pos = arena->alloc_last_pos;
 
     assert(arena->alloc_last_pos < arena->total_size / BITS_PER_ELEM);
@@ -91,8 +91,8 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 
             *ret = page_no;
             arena->n_used_pages++;
-            hal_spin_unlock(&(arena->lock));
-            if(ie) hal_sti();
+            hal_spin_unlock_sti(&(arena->lock));
+            //if(ie) hal_sti();
             return 0;
         }
         arena->alloc_last_pos++;
@@ -102,8 +102,8 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
     } while( arena->alloc_last_pos != prev_alloc_last_pos );
 
     // not found
-    hal_spin_unlock(&(arena->lock));
-    if(ie) hal_sti();
+    hal_spin_unlock_sti(&(arena->lock));
+    //if(ie) hal_sti();
     return ENOMEM;
 }
 
@@ -116,7 +116,7 @@ void phantom_phys_free_page( physalloc_t *arena, physalloc_item_t free )
     int elem_no = free/BITS_PER_ELEM;
     int elem_pos = free%BITS_PER_ELEM;
 
-    u_int32_t mask = 0x01 << elem_pos;
+    map_elem_t mask = 0x01 << elem_pos;
 
     assert( (arena->map[elem_no] & mask) != 0);
 
@@ -153,7 +153,7 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
             continue;
         }
 
-        u_int32_t mask = 0x01 << elem_pos;
+        map_elem_t mask = 0x01 << elem_pos;
         assert( (arena->map[elem_no] & mask) != 0);
         arena->map[elem_no] &= ~mask;
 
@@ -170,8 +170,8 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
 {
     assert(arena->inited);
 
-    int ie = hal_save_cli();
-    hal_spin_lock(&(arena->lock));
+    //int ie = hal_save_cli();
+    hal_spin_lock_cli(&(arena->lock));
 
     //ATTN: share alloc_last_pos with phantom_phys_alloc_page()...
     unsigned int prev_alloc_last_pos = arena->alloc_last_pos;
@@ -197,8 +197,8 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
 
     if (i != N)
     {
-        hal_spin_unlock(&(arena->lock));
-        if(ie) hal_sti();
+        hal_spin_unlock_sti(&(arena->lock));
+        //if(ie) hal_sti();
         return ENOMEM;  // not found
     }
 
@@ -218,10 +218,59 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
     int page_no = (arena->alloc_last_pos - N)*BITS_PER_ELEM;
     *ret = page_no;
 
-    hal_spin_unlock(&(arena->lock));
-    if(ie) hal_sti();
+    hal_spin_unlock_sti(&(arena->lock));
+    //if(ie) hal_sti();
     return 0;
 }
+
+
+#include <sys/libkern.h>
+#include <stdio.h>
+
+void phantom_phys_stat_arena( physalloc_t *arena )
+{
+    assert(arena->inited);
+
+    long used_bits = 0;
+    long longest_free = 0;
+    long curr_free = 0;
+
+    int i;
+    int last = arena->total_size / BITS_PER_ELEM;
+
+    for( i = 0; i < last; i++ )
+    {
+        map_elem_t e = arena->map[i];
+
+        if( e )
+        {
+            longest_free = umax( longest_free, curr_free );
+            curr_free = 0;
+        }
+        else
+            curr_free++;
+
+        if( e == ~0u )
+            used_bits += sizeof(map_elem_t);
+        else if( e )
+        {
+            unsigned j;
+            map_elem_t mask = 0x01;
+            for ( j = 0; j < sizeof(map_elem_t); j++ )
+            {
+                if( e & mask )
+                    used_bits++;
+                mask <<= 1;
+            }
+        }
+    }
+
+    printf("used %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
+
+
+}
+
+
 
 
 

@@ -30,11 +30,12 @@ int do_test_ports(const char *test_parm)
         return EIO;
 
     rc = write_port(id, 0xAA, &buf, BSIZE);
+    (void) rc;
 
     //TEST(usermode);
 
     rc = write_port(id, 0x55, &buf, BSIZE);
-
+    (void) rc;
 
     if( close_port( id ) )
     {

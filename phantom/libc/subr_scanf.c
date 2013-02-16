@@ -118,7 +118,7 @@ vsscanf(const char *inp, char const *fmt0, va_list ap)
 	nconversions = 0;
 	nread = 0;
 	base = 0;		/* just to keep gcc happy */
-	ccfn = NULL;		/* just to keep gcc happy */
+	ccfn = (ccfntype)strtoq;/* just to keep gcc happy */
 	for (;;) {
 		c = *fmt++;
 		if (c == 0)
@@ -277,7 +277,7 @@ literal:
 				for (;;) {
 					if ((n = inr) < (int)width) {
 						sum += n;
-						width -= n;
+						width -= n; (void) width;
 						inp += n;
 						if (sum == 0)
 							goto input_failure;

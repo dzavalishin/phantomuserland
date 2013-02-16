@@ -10,9 +10,9 @@
 
 #define DEBUG_MSG_PREFIX "boot"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
+#define debug_level_info 0
 #define debug_level_error 10
-#define debug_level_info 10
 
 #include <phantom_types.h>
 #include <phantom_libc.h>
@@ -131,11 +131,12 @@ phantom_multiboot_main()
 
 
 #ifdef ARCH_ia32
+    /*
     printf("mb1 %s video: mode %d\n",
            ((bootParameters.flags & MULTIBOOT_VIDEO_INFO) ? "have" : "no"),
            bootParameters.vbe_mode
           );
-
+    */
     if( bootParameters.flags & MULTIBOOT_CMDLINE )
         phantom_parse_cmd_line((const char*)phystokv(bootParameters.cmdline));
 #endif    
@@ -207,6 +208,9 @@ static void process_mem_region( amap_elem_addr_t from, amap_elem_size_t n_elem, 
 
     const char *name = nameTab[flags];
 
+    (void) kms;
+    (void) kmb;
+    (void) name;
     SHOW_FLOW( 11,
            "[0x%09qX - 0x%09qX[ (%4d %s) - %s",
            from, from+n_elem,

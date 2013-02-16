@@ -336,6 +336,7 @@ boot_cpu(imps_processor *proc)
     /* clear the APIC error register */
     IMPS_LAPIC_WRITE(LAPIC_ESR, 0);
     accept_status = IMPS_LAPIC_READ(LAPIC_ESR);
+    SHOW_INFO( 1, "accept status %x", accept_status );
 
     /* clean up BIOS reset vector */
     CMOS_WRITE_BYTE(CMOS_RESET_CODE, 0);

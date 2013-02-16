@@ -167,15 +167,13 @@ smbios_identify()
 {
     u_int32_t addr;
     int length;
-    int rid;
-
+    //int rid = 0;
 
     addr = bios_sigsearch(SMBIOS_START, (unsigned char *)SMBIOS_SIG, SMBIOS_LEN,
                           SMBIOS_STEP, SMBIOS_OFF);
     if (addr == 0)
         return 0;
 
-    rid = 0;
 
     struct smbios_eps *ep = ADDR2EPS(addr);
 
@@ -195,6 +193,7 @@ smbios_identify()
             return 0;
     }
 
+    (void) length;
     /*
      child = BUS_ADD_CHILD(parent, 5, "smbios", -1);
      device_set_driver(child, driver);

@@ -13,9 +13,9 @@
 
 #define DEBUG_MSG_PREFIX "video"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_info 0
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
 
 #include <hal.h>
 //#include <video.h>
@@ -169,7 +169,7 @@ static int direct_vesa_probe()
 #if !PBUF
     hal_pages_control( ROM_pa, ROM_va, ROM_pages, page_unmap, page_ro );
 #endif
-pressEnter("PM VESA done");
+    //pressEnter("PM VESA done");
 
     // Experimental code
     return VIDEO_PROBE_FAIL;

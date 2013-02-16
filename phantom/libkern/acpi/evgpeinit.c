@@ -274,6 +274,7 @@ AcpiEvGpeInitialize (
         ACPI_DEBUG_PRINT ((ACPI_DB_INIT,
             "There are no GPE blocks defined in the FADT\n"));
         Status = AE_OK;
+        (void) Status; // clang warns
         goto Cleanup;
     }
 
@@ -285,6 +286,7 @@ AcpiEvGpeInitialize (
             "Maximum GPE number from FADT is too large: 0x%X",
             GpeNumberMax));
         Status = AE_BAD_VALUE;
+        (void) Status; // clang warns
         goto Cleanup;
     }
 

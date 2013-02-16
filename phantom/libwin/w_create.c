@@ -52,6 +52,7 @@ void drv_video_window_free(drv_video_window_t *w)
 
 void w_switch_buffers(drv_video_window_t *w)
 {
+    assert(w);
 #if VIDEO_DOUBLE_BUF
     // Not doublebuffer mode? Just set both ptrs to buf 0
     if(!WIN_HAS_FLAG(w,WFLAG_WIN_DOUBLEBUF))

@@ -686,6 +686,8 @@ static void rtl8169_int(void* data)
 done:
     release_spinlock(&r->reg_spinlock);
 
+    // TODO req reschedule if needed?
+    (void) rc;
     //return rc;
 }
 

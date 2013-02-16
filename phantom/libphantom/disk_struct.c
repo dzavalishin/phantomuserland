@@ -133,7 +133,6 @@ phantom_dump_superblock(phantom_disk_superblock *sb)
     printf("obj spc address   0x%lx\n", (unsigned long int)sb->object_space_address );
 
 
-
 }
 
 

@@ -399,6 +399,8 @@ int _v_scanf( int (*_read)(void*), void (*_push)(void*, unsigned char),	 void* a
                 break;
             case '*':
                 suppressAssignment = 1;
+                //assert(!suppressAssignment); // not implemented
+                if(suppressAssignment) exit(131); // TODO BUG fix assert
                 goto keeplooking;
             case '0':
             case '1':

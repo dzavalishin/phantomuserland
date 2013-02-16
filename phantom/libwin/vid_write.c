@@ -229,10 +229,10 @@ void vid_bitblt_part(const rgba_t *from, int src_xsize, int src_ysize, int src_x
 
 
     // we possibly changed xsize - recalc both
-    dst_xafter = dst_xpos+xsize;
+    dst_xafter = dst_xpos+xsize; (void) dst_xafter;
     dst_yafter = dst_ypos+ysize;
-    src_xafter = src_xpos+xsize;
-    src_yafter = src_ypos+ysize;
+    src_xafter = src_xpos+xsize; (void) src_xafter;
+    src_yafter = src_ypos+ysize; (void) src_yafter;
 
 
     int wline = 0; // we skipped ypos lines already

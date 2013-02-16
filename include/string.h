@@ -32,7 +32,10 @@ char *	strcat(char *s, const char *add);
 char *	strcpy(char *to, const char *from);
 //int 	strlen(const char *string);
 size_t 	strlen(const char *string);
+
 char *	strncpy(char *to, const char *from, ssize_t count);
+// size_t is correct, but kernel dies!
+//char *	strncpy(char *to, const char *from, size_t count);
 
 char *	strchr(const char *p, int ch);
 char *	index(const char *p, int ch);

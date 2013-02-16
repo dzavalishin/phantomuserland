@@ -17,6 +17,7 @@ set QEMU_AUDIO_DRV=dsound
 set QEMU_AUDIO_DRV=sdl
 rem set QEMU_AUDIO_DRV=fmod
 rem set SOUND=-soundhw sb16,es1370 -device intel-hda -device hda-duplex
+set SOUND=-soundhw sb16,es1370
 
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=ohci.0
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=/i440FX-pcihost/pci.0/ohci/ohci.0
@@ -26,7 +27,7 @@ rem SET USB=-usb -usbdevice serial::tcp:ya.ru:80
 rem SET USB=-usb -usbdevice keyboard
 
 rem  -virtioconsole vioc,chardev=vioc -chardev vc,id=vioc 
-SET VIO= -drive file=vio.img,if=virtio,format=raw -net nic,model=virtio -net user -tftp ./tftp
+rem SET VIO= -drive file=vio.img,if=virtio,format=raw -net nic,model=virtio -net user -tftp ./tftp
 rem SET VIO=-drive file=vio.img,if=virtio,format=raw 
 rem SET VIO=-net nic,model=virtio
 rem SET VIO= -device virtio-rng-pci

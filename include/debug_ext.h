@@ -78,7 +78,9 @@ extern int debug_max_level_error;
 #endif
 
 #ifndef DEBUG_MSG_PREFIX
-#error you need to define DEBUG_MSG_PREFIX with the module name
+//#error you need to define DEBUG_MSG_PREFIX with the module name
+#warning you need to define DEBUG_MSG_PREFIX with the module name
+#define DEBUG_MSG_PREFIX __FILE__
 #endif
 
 #define FUNC_NAME DEBUG_MSG_PREFIX, __FUNCTION__, ": "

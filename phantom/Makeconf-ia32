@@ -1,5 +1,7 @@
 ARCH_FLAGS      = -m32
 
+#export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 
+#export CC	= clang -Wno-gnu
 export CC	= gcc
 export LD	= ld
 export STRIP	= strip

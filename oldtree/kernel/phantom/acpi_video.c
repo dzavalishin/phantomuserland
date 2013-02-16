@@ -56,6 +56,10 @@ ACPI_STATUS acpi_eval_integer(ACPI_HANDLE handle, char *name, ACPI_INTEGER *ret)
 static ACPI_STATUS walk_video_device(ACPI_HANDLE handle, UINT32 level,
                                      void *context, void **dummy)
 {
+    (void) dummy;
+    (void) level;
+    (void) context;
+
     ACPI_OBJECT_LIST ArgList;
     ACPI_OBJECT Arg;
     ACPI_STATUS as;

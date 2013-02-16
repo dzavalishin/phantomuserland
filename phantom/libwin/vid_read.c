@@ -50,7 +50,10 @@ void vid_bitblt_reader(struct rgba_t *to, int xpos, int ypos, int xsize, int ysi
 
         //printf("yshift = %d\n", yshift );
         to += xsize*yshift; // Just skip some lines;
-        ysize -= yshift; // Less lines to go
+
+        // this is correct, but ysize is unused..?
+        //ysize -= yshift; // Less lines to go
+
         ypos += yshift;
         assert(ypos == 0);
         yshift = 0;

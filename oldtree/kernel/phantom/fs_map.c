@@ -9,7 +9,7 @@
 **/
 
 
-#define DEBUG_MSG_PREFIX "fsmap"
+#define DEBUG_MSG_PREFIX "fs_map"
 #include "debug_ext.h"
 #define debug_level_flow 0
 #define debug_level_error 10
@@ -60,18 +60,18 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
     char pname[128];
     partGetName( p, pname, sizeof(pname) );
 
-    SHOW_INFO( 0, "Look for filesystems on partition %s", pname );
+    SHOW_INFO( 2, "Look for filesystems on partition %s", pname );
     unsigned int i;
     for( i = 0; i < sizeof(fs_drivers)/sizeof(fs_probe_t); i++ )
     {
         fs_probe_t *fp = &fs_drivers[i];
 
-        SHOW_INFO( 0, "probe %s fs on %s", fp->name, pname );
+        SHOW_INFO( 3, "probe %s fs on %s", fp->name, pname );
 
         errno_t ret = fp->probe_f( p );
         if( ret ) continue;
 
-        SHOW_INFO( 0, "%s file sysem found on partition %s", fp->name, pname );
+        SHOW_INFO( 2, "%s file sysem found on partition %s", fp->name, pname );
 
         if(!fp->use_f)
         {
@@ -93,7 +93,7 @@ errno_t lookup_fs(phantom_disk_partition_t *p)
             continue;
         }
 
-        SHOW_INFO( 0, "%s file sysem driver occupies partition %s", fp->name, pname );
+        SHOW_INFO( 1, "%s file sysem driver took partition %s", fp->name, pname );
 #endif
         return 0;
     }
@@ -163,10 +163,11 @@ phantom_disk_partition_t *select_phantom_partition(void)
         char pname[128];
         partGetName( phantom_fs_partitions[0], pname, sizeof(pname) );
 
-        SHOW_FLOW( 0, "Just one Phantom disks found (%s)", pname);
+        SHOW_INFO( 1, "Just one Phantom disks found (%s)", pname);
         return phantom_fs_partitions[0];
     }
 
+    // TODO auto-select by last snap date
     printf("Select Phantom disk to boot:\n");
     int i;
     for( i = 0; i < n_phantom_fs_partitions; i++ )

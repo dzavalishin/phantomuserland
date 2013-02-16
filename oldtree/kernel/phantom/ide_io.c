@@ -157,7 +157,7 @@ void setup_simple_ide()
     // resets and commands without first knowing what is out there.
     // Even if you don't care the driver does care.
     int numDev = reg_config();
-    SHOW_INFO( 0, "Found %d devices, dev 0 is %s, dev 1 is %s.\n",
+    SHOW_INFO( 0, "Found %d devices, dev 0 is %s, dev 1 is %s.",
                numDev,
                devTypeStr[ ata->reg_config_info[0] ],
                devTypeStr[ ata->reg_config_info[1] ] );

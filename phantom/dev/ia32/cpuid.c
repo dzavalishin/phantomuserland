@@ -724,17 +724,18 @@ identify_shortcpu(void)
 
     /* Try CPU Brand string first */
     if ((leafmax = check_leaf(0x80000000)) && leafmax >= 0x80000005) {
-        r = cpuid(0x80000002, 0);
+        r = cpuid(0x80000002, 0); (void) r;
         //		memcpy(&brand_buf[0], &r, 16);
-        r = cpuid(0x80000003, 0);
+        r = cpuid(0x80000003, 0); (void) r;
         //		memcpy(&brand_buf[16], &r, 16);
-        r = cpuid(0x80000004, 0);
+        r = cpuid(0x80000004, 0); (void) r;
         //		memcpy(&brand_buf[32], &r, 16);
         //		brand_buf[48] = '\0';
         //		munge_brandstr(brand_buf, brand_str);
     } else {
         /* Try BrandID if we have it */
         leafmax = check_leaf(0x00000000);
+        (void) leafmax;
     }
 
     /* Base CPUID support */
@@ -750,7 +751,7 @@ void
 identify_cpu(void)
 {
     struct cpuid_regs nregs;
-    u_int32_t num_base, num_ext, FMS, brandid;
+    u_int32_t num_base, num_ext, FMS, brandid = 0;
     char type_buf[13], brand_buf[49] = "";
     char brand_str[49] = "(Unknown CPU Brand String)";
 
@@ -1010,7 +1011,7 @@ identify_cpu(void)
              */
         } else {
             /* XXX - Unknown CPU */
-            p = "Really bad JUJU happened here!";
+            //p = "Really bad JUJU happened here!";
         }
     }
 

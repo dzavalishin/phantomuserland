@@ -98,6 +98,7 @@ static void reg_wait_poll( int we, int pe )
                trc_llt( 0, ata->int_bm_status, TRC_LLT_R_BM_SR );
             }
             status = ata->int_ata_status;         // get status
+            (void) status; // what for?
             trc_llt( CB_STAT, status, TRC_LLT_INB );
             if ( ata->int_bmide_addr )
             {
@@ -2125,8 +2126,8 @@ int reg_packet( int dev,
       else
          status = pio_inbyte( CB_STAT );
       reason = pio_inbyte( CB_SC );
-      lowCyl = pio_inbyte( CB_CL );
-      highCyl = pio_inbyte( CB_CH );
+      lowCyl = pio_inbyte( CB_CL );  (void) lowCyl;
+      highCyl = pio_inbyte( CB_CH ); (void) highCyl;
 
       // Final status check...
       // check for any error.

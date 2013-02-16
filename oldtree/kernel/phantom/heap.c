@@ -4,7 +4,7 @@
 
 #include <hal.h>
 
-#include "../misc.h"
+#include "misc.h"
 
 #include <kernel/debug.h>
 #include <kernel/page.h>

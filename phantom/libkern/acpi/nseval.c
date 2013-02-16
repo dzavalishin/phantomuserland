@@ -522,6 +522,7 @@ AcpiNsExecModuleCode (
     /* Execute the parent node as a control method */
 
     Status = AcpiNsEvaluate (Info);
+    (void) Status; // clang warns
 
     ACPI_DEBUG_PRINT ((ACPI_DB_INIT, "Executed module-level code at %p\n",
         MethodObj->Method.AmlStart));
@@ -542,6 +543,7 @@ AcpiNsExecModuleCode (
     if (ParentObj)
     {
         Status = AcpiNsAttachObject (ParentNode, ParentObj, Type);
+        (void) Status;
     }
     else
     {

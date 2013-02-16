@@ -17,8 +17,8 @@
 #define DEBUG_MSG_PREFIX "ff"
 #include "debug_ext.h"
 #define debug_level_flow 0
-#define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_error 0
+#define debug_level_info 1
 
 #include "ff.h"			/* FatFs configurations and declarations */
 #include "fs_map.h"
@@ -1832,8 +1832,9 @@ FRESULT f_open (
     res = chk_mounted( dj.fs, 0);
 #endif
     INIT_BUF(dj);
-    if (res == FR_OK)
-        res = follow_path(&dj, path);	/* Follow the file path */
+    if (res != FR_OK) return res;
+
+    res = follow_path(&dj, path);	/* Follow the file path */
     dir = dj.dir;
 
 #if !_FS_READONLY	/* R/W configuration */
@@ -3377,7 +3378,7 @@ static DRESULT disk_ioctl( FATFS *fs, BYTE cmd, void* data)
         {
             WORD *dp = data;
             *dp = fs->dev->block_size;
-            SHOW_INFO( 0, "%s: sect size %d", fs->dev->name, *dp );
+            SHOW_FLOW( 2, "%s: sect size %d", fs->dev->name, *dp );
             break;
         }
 
@@ -3385,7 +3386,7 @@ static DRESULT disk_ioctl( FATFS *fs, BYTE cmd, void* data)
         {
             WORD *dp = data;
             *dp = fs->dev->size;
-            SHOW_INFO( 0, "%s: sect count %d", fs->dev->name, *dp );
+            SHOW_FLOW( 2, "%s: sect count %d", fs->dev->name, *dp );
             break;
         }
 
@@ -3394,7 +3395,7 @@ static DRESULT disk_ioctl( FATFS *fs, BYTE cmd, void* data)
         {
             WORD *dp = data;
             *dp = 4096;
-            SHOW_INFO( 0, "%s: blk size %d", fs->dev->name, *dp );
+            SHOW_FLOW( 2, "%s: blk size %d", fs->dev->name, *dp );
             break;
         }
 
@@ -3405,7 +3406,7 @@ static DRESULT disk_ioctl( FATFS *fs, BYTE cmd, void* data)
             {
                 errno_t rc = cache_flush_all( fs->cache );
                 if(rc)
-                    return FR_DISK_ERR;
+                    return RES_ERROR;
             }
 #endif // FAT_CACHE
         }
@@ -3583,7 +3584,7 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
 {
     unsigned char buf[PAGE_SIZE];
 
-    SHOW_FLOW( 0, "%s look for FAT", p->name );
+    SHOW_FLOW( 1, "%s look for FAT", p->name );
 
     switch( p->type )
     {

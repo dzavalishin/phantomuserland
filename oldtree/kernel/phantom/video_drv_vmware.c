@@ -79,24 +79,16 @@ struct drv_video_screen_t        video_driver_vmware_svga =
     0, 0, 0,
 
     // screen
-screen:			0,
+.screen		=	0,
 
-probe: 			vmware_video_probe,
-start: 			vmware_video_start,
-accel:                  vmware_accel_start,
-stop:   		vmware_video_stop,
+.probe	        =	vmware_video_probe,
+.start		= 	vmware_video_start,
+.accel		=	vmware_accel_start,
+.stop		=	vmware_video_stop,
 
-update: 		vmware_video_update,
-#if 0
-bitblt: 		drv_video_bitblt_rev,
-winblt:			drv_video_win_winblt_rev,
-readblt: 		drv_video_readblt_rev,
-bitblt_part:            drv_video_bitblt_part_rev,
+.update		=	vmware_video_update,
 
-mouse:    		vid_null,
-#endif
-
-    // todo hw mouse!
+// todo hw mouse!
 #if 0
 mouse_redraw_cursor: 	drv_video_draw_mouse_deflt,
 mouse_set_cursor: 	drv_video_set_mouse_cursor_deflt,

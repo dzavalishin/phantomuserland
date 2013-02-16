@@ -25,9 +25,9 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 #else // HAVE_FLOPPY
 
 #define DEBUG_MSG_PREFIX "floppy"
-#define debug_level_flow 8
+#define debug_level_flow 0
+#define debug_level_info 0
 #define debug_level_error 10
-#define debug_level_info 10
 
 #include <ia32/pio.h>
 #include <device.h>
@@ -181,7 +181,7 @@ struct floppyinfo_s FloppyInfo[] VAR16VISIBLE = {
 struct drive_s *
 init_floppy(int floppyid, unsigned int ftype)
 {
-    SHOW_FLOW( 0, "Init floppy %d, type %d", floppyid, ftype );
+    SHOW_INFO( 0, "Init floppy %d, type %d", floppyid, ftype );
     if (ftype <= 0 || ftype >= ARRAY_SIZE(FloppyInfo)) {
         dprintf(1, "Bad floppy type %d\n", ftype);
         return NULL;

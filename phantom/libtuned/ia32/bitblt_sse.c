@@ -10,6 +10,9 @@
  *
 **/
 
+// Does not compile with CLANG!?
+#ifndef __clang__
+
 #include <assert.h>
 #include <string.h>
 
@@ -124,3 +127,4 @@ void auto_rgba2rgba_zbmove(struct rgba_t *dest, const struct rgba_t *src, zbuf_t
     }
 }
 
+#endif // __clang__

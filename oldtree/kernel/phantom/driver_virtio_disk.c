@@ -12,8 +12,8 @@
 
 #define DEBUG_MSG_PREFIX "VioDisk"
 #include <debug_ext.h>
-#define debug_level_info 10
-#define debug_level_flow 2
+#define debug_level_info 0
+#define debug_level_flow 0
 #define debug_level_error 10
 
 #include <phantom_libc.h>
@@ -181,7 +181,7 @@ struct vioBlockReq
 
 static void dump_3cmd(char *pref, struct vring_desc *cmd)
 {
-//    if( debug_level_flow < 7 ) return;
+    if( debug_level_flow < 7 ) return;
 
     lprintf("%s\n", pref);
     PCMD(cmd+0);

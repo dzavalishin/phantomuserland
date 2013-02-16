@@ -113,6 +113,7 @@ static int debug_read_line(char *buf, int max_len)
             break;
         case 27: // escape sequence
             c = arch_dbg_con_read(); // should be '['
+            (void) c;
             c = arch_dbg_con_read();
             switch(c) {
             case 67: // right arrow acts like space
@@ -188,7 +189,7 @@ static int debug_read_line(char *buf, int max_len)
         if(ptr >= max_len - 2) {
             buf[ptr++] = '\0';
             dbg_puts("\n");
-            done = 1;
+            done = 1; (void) done;
             break;
         }
     }

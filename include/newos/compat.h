@@ -93,7 +93,7 @@ typedef int thread_id;
 // TODO BUG! Hardcode!
 #define THREAD_MAX_RT_PRIORITY 31
 
-#define thread_kill_thread_nowait(tid) panic("thread_kill_thread_nowait at %s:%d",__FILE__,__LINE__)
+//#define thread_kill_thread_nowait(tid) panic("thread_kill_thread_nowait at %s:%d",__FILE__,__LINE__)
 
 #define thread_snooze(nsec) hal_sleep_msec((nsec)/1000)
 

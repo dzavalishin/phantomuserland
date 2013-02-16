@@ -292,7 +292,7 @@ static size_t      pipe_read(    struct uufile *f, void *dest, size_t bytes)
 
         memcpy( dest, pb->buf + pb->getpos, part );
         ret += part;
-        dest += part;
+        //dest += part;
         bytes -= part;
         pb->getpos += part;
         pb->contains -= part;
@@ -354,8 +354,8 @@ static size_t      pipe_write(   struct uufile *f, const void *src, size_t bytes
 
         memcpy( pb->buf + pb->putpos, src, part );
         ret += part;
-        src += part;
-        bytes -= part;
+        //src += part;
+        //bytes -= part;
         pb->putpos += part;
         pb->contains += part;
     }

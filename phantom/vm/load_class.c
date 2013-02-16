@@ -118,16 +118,16 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
     int record_size = 0;
 
     struct pvm_object class_name;
-    struct pvm_object base_class = pvm_get_null_class();
+    //struct pvm_object base_class = pvm_get_null_class();
 
     int n_object_slots = 0; // for a new class
     int n_method_slots = 0;
 
 
-    struct pvm_object iface;
-    struct pvm_object ip2line_maps;
-    struct pvm_object method_names;
-    struct pvm_object field_names;
+    struct pvm_object iface        = { 0, 0 };
+    struct pvm_object ip2line_maps = { 0, 0 };
+    struct pvm_object method_names = { 0, 0 };
+    struct pvm_object field_names  = { 0, 0 };
 
     int got_class_header = 0;
 
@@ -195,6 +195,8 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 #if 0
 #warning base class ignored
 #else
+                struct pvm_object base_class;
+
                 if( EQ_STRING_P2C(base_name,".internal.object") )
                     base_class = pvm_get_null_class();
                 else

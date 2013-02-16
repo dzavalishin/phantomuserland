@@ -140,10 +140,6 @@ static uufile_t *  cdfs_namei(uufs_t *fs, const char *filename)
 {
     cdfs_t *impl = fs->impl;
 
-    cdfs_file_t *fi = calloc(1, sizeof(cdfs_file_t));
-    if( fi == 0 )
-        return 0;
-
     iso_dir_entry found_entry;
 
     if( (*filename == 0) || 0 == strcmp( filename, "/" ) )
@@ -160,6 +156,11 @@ static uufile_t *  cdfs_namei(uufs_t *fs, const char *filename)
             return 0;
         }
     }
+
+    cdfs_file_t *fi = calloc(1, sizeof(cdfs_file_t));
+    if( fi == 0 )
+        // TODO add *errno parameter
+        return 0;
 
     fi->e = found_entry;
 
@@ -271,7 +272,7 @@ static size_t      cdfs_read(    struct uufile *f, void *dest, size_t bytes)
         memcpy( dest, buf, part_len );
 
         bytes  -= part_len;
-        dest   += part_len;
+        dest   += part_len; (void) dest;
         f->pos += part_len;
         res    += part_len;
         sect++;
@@ -516,7 +517,10 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
     for(cd_sector = 16; cd_sector < 64; cd_sector++)
     {
         if( cd_read_sectors( impl, buf, cd_sector, 1 ) )
+        {
+            free( impl );
             return EINVAL;
+        }
 
         // Not VD at all
         if( strncmp( buf+1, cd_marker+1, 5 ) )
@@ -560,6 +564,7 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
     if(!primary_vd_found)
     {
         SHOW_ERROR0( 0, "CDFS primary vol desc not found" );
+    retinval:
         if( impl->cache  )
             cache_destroy( impl->cache );
         free(impl);
@@ -572,7 +577,8 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
     if( vd.sectorSize[0] != 2048 )
     {
         SHOW_ERROR( 0, "CDFS sect size %d != 2048, not supported", vd.sectorSize[0] );
-        return EINVAL;
+        //return EINVAL;
+        goto retinval;
     }
 
     iso_dir_entry *rootdir = (void *)&vd.rootDirEntry;

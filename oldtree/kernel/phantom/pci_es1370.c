@@ -128,6 +128,12 @@ phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
     dpc_request_init( &es->w_dpc, w_dpc_func );
 #endif
 
+#if ES1370_WTTY
+    dpc_request_init( &es->w_dpc, w_dpc_func );
+    es->rdq = wtty_init();
+    es->wrq = wtty_init();
+#endif
+
     dev->drv_private = es;
 
     if( init_es1370(dev) )
@@ -469,8 +475,8 @@ static size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
         if( nc > 0 )
         {
             assert(! cbuf_memcpy_from_chain(ptr, es->w_cbuf, es->w_read_pos, nc) );
-            len -= nc;
-            ptr += nc;
+            len -= nc; (void) len;
+            ptr += nc; (void) ptr;
             res += nc;
             es->w_read_pos += nc;
             hal_sem_release( &es->w_sem );
@@ -563,6 +569,21 @@ static size_t write_play_stream(phantom_device_t *dev, const void *ptr, int len 
     SHOW_FLOW( 1, "done %d", ret );
 
     return ret;
+}
+
+#elif ES1370_WTTY
+
+
+static size_t write_play_stream(phantom_device_t *dev, const void *ptr, int len )
+{
+    es1370_t *es = dev->drv_private;
+    return wtty_write( es->wrq, ptr, len, 0 );
+}
+
+static size_t read_play_stream(phantom_device_t *dev, void *ptr, int len )
+{
+    es1370_t *es = dev->drv_private;
+    return wtty_read( es->wrq, ptr, len, 1 ); // nowait
 }
 
 #else // ES1370_CBUF
@@ -721,7 +742,7 @@ static void readSamplesFromRecordBuffer(phantom_device_t *dev)
 
 
 
-#if ES1370_CBUF
+#if ES1370_CBUF || ES1370_WTTY
 static void w_dpc_func(void *arg)
 {
     phantom_device_t *dev = arg;
@@ -761,7 +782,7 @@ static void es1370_interrupt(void *arg)
         outl(dev->iobase + ES1370_SERIAL_CONTROL, control);
         if(es->dac_active)
         {
-#if ES1370_CBUF
+#if ES1370_CBUF || ES1370_WTTY
             dpc_request_trigger( &es->w_dpc, dev);
 
 #else
@@ -991,7 +1012,7 @@ static int es1370_read(phantom_device_t *dev, void *buf, int len)
 
 static int es1370_write(phantom_device_t *dev, const void *buf, int len)
 {
-#if ES1370_CBUF
+#if ES1370_CBUF || ES1370_WTTY
     int ret = 0;
 
     while( len > 0 )

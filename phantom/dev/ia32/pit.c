@@ -8,6 +8,12 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "pit8254"
+#include "debug_ext.h"
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 0
+
 
 #include <ia32/pio.h>
 #include <phantom_libc.h>
@@ -93,7 +99,7 @@ static void findspeed()
     /* we arrange calculation so that it doesn't overflow */
     delaycount = ((COUNT/1000) * CLKNUM) / (0xffff-leftover);
 
-    printf("findspeed: delaycount=%d (tics=%d)\n", delaycount, (0xffff-leftover));
+    SHOW_FLOW( 1, "findspeed: delaycount=%d (tics=%d)", delaycount, (0xffff-leftover));
     
     if(s) hal_sti();                    // restore interrupt state
 }
@@ -270,7 +276,7 @@ phantom_timer_pit_init(int freq, void (*timer_intr)())
 
 
     usec_per_tick = 1000000/hz;
-    printf("main timer usec_per_tick = %d\n", usec_per_tick);
+    SHOW_FLOW( 1, "main timer usec_per_tick = %d", usec_per_tick );
 
     phantom_timer0_start();
 

@@ -1637,7 +1637,7 @@ PCI_DEVTABLE	PciDevTable [] =
 	{ 0x121A, 0x0005, "Voodoo3", "All Voodoo3 chips, 3000" } ,
 	{ 0x121A, 0x0007, "Voodoo4", "" } ,
 	{ 0x121A, 0x0009, "Voodoo5", "" } ,
-	{ 0x121A, 0x0010, "Rampage", "Rev.A AGPx4, 0.25ç, 200/2x200 core/RAM" } ,
+	{ 0x121A, 0x0010, "Rampage", "Rev.A AGPx4, 0.25?, 200/2x200 core/RAM" } ,
 	{ 0x121A, 0x0057, "Voodoo 3/3000", "Avenger" } ,
 	{ 0x1220, 0x1220, "9622qac", "AMCC 5933 TMS320C80 DSP/Imaging Board" } ,
 	{ 0x1223, 0x0001, "KatanaQp", "Real-Time Processing Blade in a standard single-slot AdvancedTCAR formfactor" } ,

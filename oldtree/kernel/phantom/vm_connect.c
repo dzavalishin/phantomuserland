@@ -438,7 +438,7 @@ errno_t phantom_connect_object( struct data_area_4_connection *da, struct data_a
         else
             da->p_kernel_state = 0;
 
-        errno_t ret;
+        errno_t ret = 0;
 
         const char *suffix = strchr( name, ':' );
         if( suffix ) suffix++; // Skip ':' itself

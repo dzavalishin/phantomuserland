@@ -541,6 +541,7 @@ AcpiEnterSleepStateS4bios (
 
     Status = AcpiHwWritePort (AcpiGbl_FADT.SmiCommand,
                 (UINT32) AcpiGbl_FADT.S4BiosRequest, 8);
+    (void) Status; // clang warns
 
     do {
         AcpiOsStall(1000);

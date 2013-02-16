@@ -105,13 +105,15 @@ void rect_add( rect_t *real_out, rect_t *a, rect_t *b )
     if( (a == 0) || (a->xsize == 0) || (a->ysize == 0) )
     {
         assert(b);
-        out = *b;
+        *real_out = *b;
+        return;
     }
 
     if( (b == 0) || (b->xsize == 0) || (b->ysize == 0) )
     {
         assert(a);
-        out = *a;
+        *real_out = *a;
+        return;
     }
 
     out.x = imin( a->x, b->x );
