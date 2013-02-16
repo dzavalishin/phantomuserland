@@ -783,7 +783,8 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
     case SYS_get_port_info:
         {
             AARG(struct port_info *, info, 1, sizeof(struct port_info));
-            ret = port_get_info( uarg[0], info);
+            ret = port_get_info( uarg[0], info );
+            break;
         }
     case SYS_get_port_bufsize:
         ret = port_buffer_size( uarg[0] );

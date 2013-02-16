@@ -552,6 +552,7 @@ AcpiHwDisableAllGpes (
 
 
     Status = AcpiEvWalkGpeList (AcpiHwDisableGpeBlock, NULL);
+    (void) Status; // clang warns
     Status = AcpiEvWalkGpeList (AcpiHwClearGpeBlock, NULL);
     return_ACPI_STATUS (Status);
 }

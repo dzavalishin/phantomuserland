@@ -162,6 +162,7 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
         hdr = unp;
         exe_size = dest_len;
 
+        SHOW_INFO( 0, "unpacked Kolibri exe size %d", exe_size );
         //SHOW_ERROR0( 0, "Packed (PKCK) Kolibri exe not impl" );
         //return ENXIO;
     }
@@ -557,6 +558,7 @@ static void kernel_protected_module_starter( void * _pid )
     tmp = ~0; // __start retaddr - make it invalid
     user_push( em, 0, &tmp, sizeof(tmp) );
 
+    (void) prev_esp;
     SHOW_FLOW( 4, "pushed %d bytes", prev_esp - em->esp );
 
     // This sets

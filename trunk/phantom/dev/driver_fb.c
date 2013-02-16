@@ -117,7 +117,7 @@ static int fb_write(struct phantom_device *dev, const void *buf, int len)
     if(!have_w)
         fb_start(dev);
 
-    if(!have_w)
+    if( (!have_w) || (w==0) )
         return -1;
 
     int max = w->xsize * w->ysize * sizeof(rgba_t);

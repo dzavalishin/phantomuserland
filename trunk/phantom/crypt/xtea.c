@@ -121,7 +121,9 @@ void XTeaCryptStr( char *dst, const char *src, size_t len, const char *pass)
 {
     size_t l;
     size_t i;
-    XTeaKeyBlock_t K = { 0,0,0,0};
+    XTeaKeyBlock_t K = { 0,0,0,0 };
+
+    len &= ~0x7; // mask off 3 bits - must be multiple of 8, strip extra
 
     /* Prepare pass as XTEA Key Block */
     l = strlen(pass);
@@ -129,7 +131,8 @@ void XTeaCryptStr( char *dst, const char *src, size_t len, const char *pass)
         l = sizeof( XTeaKeyBlock_t);
     memcpy( K, pass, l);
 
-    i = 0; l = strlen( src);
+    i = 0;
+    //l = strlen( src);
 
     while (i<len) {
         XTeaCrypt( (u_int32_t*)dst, (const u_int32_t*)src, K);
@@ -153,7 +156,9 @@ void XTeaDecryptStr( char * dst, const char *src, size_t len, const char *pass)
 {
     size_t l;
     size_t i;
-    XTeaKeyBlock_t K = { 0,0,0,0};
+    XTeaKeyBlock_t K = { 0,0,0,0 };
+
+    len &= ~0x7; // mask off 3 bits - must be multiple of 8, strip extra
 
     /* Prepare pass as XTEA Key Block */
     l = strlen(pass);
@@ -161,7 +166,8 @@ void XTeaDecryptStr( char * dst, const char *src, size_t len, const char *pass)
         l = sizeof( XTeaKeyBlock_t);
     memcpy( K, pass, l);
 
-    i = 0; l = strlen( src);
+    i = 0;
+    //l = strlen( src );
 
     while (i<len) {
         XTeaDecrypt( (u_int32_t*)dst, (u_int32_t const*)src, K);

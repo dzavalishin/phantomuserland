@@ -196,6 +196,7 @@ AcpiDsCreateBufferField (
     {
         Node = WalkState->DeferredNode;
         Status = AE_OK;
+        (void) Status; // clang warns
     }
     else
     {
@@ -605,6 +606,7 @@ AcpiDsInitFieldObjects (
                 /* Name already exists, just ignore this error */
 
                 Status = AE_OK;
+                (void) Status; // clang warns
             }
 
             Arg->Common.Node = Node;

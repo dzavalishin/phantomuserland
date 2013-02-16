@@ -4,9 +4,9 @@
 
 #define DEBUG_MSG_PREFIX "if"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_info 0
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
 
 
 /*
@@ -143,6 +143,9 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
         i->mtu = 65535;
         break;
     case IF_TYPE_ETHERNET:
+
+        assert(dev);
+
         i->link_input = &ethernet_input;
         i->link_output = &ethernet_output;
         i->mtu = ETHERNET_MAX_SIZE - ETHERNET_HEADER_SIZE;
@@ -154,12 +157,14 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
 
         if( dev->dops.get_address == 0 )
         {
+            err = ERR_NET_GENERAL;
             kfree(address);
             goto err2;
         }
 
         err = dev->dops.get_address(dev, &address->addr.addr[0], 6);
         if(err < 0) {
+            err = ERR_NET_GENERAL;
             kfree(address);
             goto err2;
         }
@@ -294,18 +299,18 @@ void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net
     }
     else
     {
-        SHOW_INFO0( 1, "Adding route - ok");
+        SHOW_INFO0( 2, "Adding route - ok");
     }
 
 
-    SHOW_INFO0( 1, "Adding default route...");
+    SHOW_INFO0( 2, "Adding default route...");
     if( (rc = ipv4_route_add_default( router, interface->id, def_router ) ) )
     {
         SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
     }
     else
     {
-        SHOW_INFO0( 1, "Adding route - ok");
+        SHOW_INFO0( 2, "Adding route - ok");
     }
 
 #if 0
@@ -491,7 +496,8 @@ int if_boot_interface(ifnet *i)
     return NO_ERROR;
 
 err2:
-    thread_kill_thread_nowait(i->rx_thread);
+    //thread_kill_thread_nowait(i->rx_thread);
+    t_kill_thread(i->rx_thread);
 err1:
     return err;
 }

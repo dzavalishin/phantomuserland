@@ -27,9 +27,9 @@
 
 #define DEBUG_MSG_PREFIX "disk"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_info 0
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
 
 #include <hal.h>
 
@@ -124,7 +124,7 @@ int int_enable_irq( int shared, int irqNum,
    ata->int_bmide_addr  = bmAddr;
    ata->int_ata_addr   = ataAddr;
 
-   SHOW_INFO( 0, "IDE Set IRQ %d\n", irqNum );
+   SHOW_INFO( 1, "IDE Set IRQ %d", irqNum );
 
    if( hal_irq_alloc( irqNum, int_handler, 0, HAL_IRQ_SHAREABLE ) )
        return 2;

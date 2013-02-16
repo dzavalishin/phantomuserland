@@ -439,7 +439,8 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     // get some data from the packet
     packet_flags = header->length_flags & 0x3f;
     data_len = cbuf_get_len(buf) - header_len;
-    highest_sequence = header->seq_num + (data_len > 0) ? (data_len - 1) : 0;
+    //was: highest_sequence = header->seq_num + (data_len > 0) ? (data_len - 1) : 0;
+    highest_sequence = header->seq_num + ((data_len > 0) ? (data_len - 1) : 0);
 
     // see if it matches a socket we have
     s = lookup_socket(source_address, target_address, header->source_port, header->dest_port);

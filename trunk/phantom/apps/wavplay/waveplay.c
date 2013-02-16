@@ -51,7 +51,7 @@
 #define IOCTL 0
 
 
-/* ؿץȥ */
+
 int readWaveFile(int fd, PWAVEFORMAT pwavefmt, u_int *datasize);
 int openDSP(const char* devname, PWAVEFORMAT pwf);
 int CloseDSP(int fd);
@@ -59,7 +59,7 @@ int playWave(int data_fd, int dsp_fd, u_int datasize);
 int playRaw(int data_fd, int dsp_fd);
 int play(const char* filename);
 
-/* ���Хѿ */
+
 static int vflag = 1;
 static int cflag = 0;
 static int rflag = 0;
@@ -81,7 +81,9 @@ int main( int argc, char **argv )
     if ( argc == 1 ) {
         //printf( "Usage: wavplay [WAVE-File]\n" );
         //return -1;
-        return play( "/amnt0/siren.wav" );
+        play( "/amnt0/siren.wav" );
+        play( "/amnt1/siren.wav" );
+        return 0;
 
     }
     return play( argv[ 1 ] );
@@ -107,6 +109,11 @@ int play(const char* filename)
             return in_fd;
         }
     }
+
+    // reasonable defaults
+    wf.nSamplesPerSec = 44100;
+    wf.wBitsPerSample = 16;
+    wf.nChannels = 2;
 
     /*   if (rflag)
      {
@@ -169,6 +176,8 @@ int play(const char* filename)
         printf("Error: Can't alloc memory.");
         return -1;
     }
+
+    printf( "playing %s on %s\n", filename, pnTmp );
 
     if (rflag)
         rc = playRaw(in_fd, out_fd);
@@ -248,7 +257,7 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
 {
     int fd;
     //int status;
-    int arg;
+    //int arg;
     /*
     char anName[ 256 ];
 
@@ -260,13 +269,13 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
     if ((fd = open( devname, O_WRONLY)) < 0)
         return fd;
 
-    /* ͥ(STEREO or MONAURAL) */
+    /* ͥ(STEREO or MONAURAL) * /
     if ( (int)(pwf->nChannels) == 1 ) {
         arg = 0;
     } else {
         arg = 1;
     }
-
+    */
     if (fd < 0)
     {
         perror("openDSP");
@@ -366,9 +375,9 @@ int playWave(int data_fd, int dsp_fd, u_int datasize)
     register int i, nr, nw, off;
     int tr, rd;
 
-#ifdef DEBUG
+//#ifdef DEBUG
     printf("datasize = %d, bsize =  %d\n", datasize, bsize);
-#endif
+//#endif
     tr = datasize / bsize;
     rd = datasize % bsize;
 

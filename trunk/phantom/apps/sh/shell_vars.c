@@ -280,15 +280,17 @@ static int shell_var_add(const char *var_name,shell_value *value)
     shell_var *current;
 
     current = shell_var_init_value(var_name,value);
+    if( 0 == current)
+        return SHE_NO_MEMORY;
 
     current->next = var_list;
     var_list = current;
 
     return SHE_NO_ERROR;
 
-    free(current->name);
-    free(current);
-    return SHE_NO_MEMORY;
+    //free(current->name);
+    //free(current);
+    //return SHE_NO_MEMORY;
 }
 
 

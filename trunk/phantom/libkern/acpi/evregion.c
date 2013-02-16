@@ -1403,10 +1403,12 @@ AcpiEvOrphanEcRegMethod (
     Objects[1].Integer.Value = ACPI_REG_CONNECT;
 
     Status = AcpiEvaluateObject (RegMethod, NULL, &Args, NULL);
+    (void) Status; // clang warns
 
 Exit:
     /* We ignore all errors from above, don't care */
 
     Status = AcpiUtAcquireMutex (ACPI_MTX_NAMESPACE);
+    (void) Status; // clang warns
     return_VOID;
 }

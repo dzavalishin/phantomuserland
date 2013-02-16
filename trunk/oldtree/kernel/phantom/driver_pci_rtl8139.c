@@ -798,6 +798,8 @@ static void rtl8139_int(void* data)
 
     hal_spin_unlock(&rtl->reg_spinlock);
 
+    (void) rc;
+    // TODO request reschedule?
     //return rc;
 }
 

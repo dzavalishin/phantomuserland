@@ -121,8 +121,7 @@ phantom_device_t *driver_virtio_net_probe( pci_cfg_t *pci, int stage )
     if( virtio_probe( &vdev, pci ) )
         return 0;
 
-    u_int8_t status = virtio_get_status( &vdev );
-    SHOW_INFO( 11, "Status is: 0x%X", status );
+    SHOW_INFO( 11, "Status is: 0x%X", virtio_get_status( &vdev ) );
 
     /* driver is ready */
     //virtio_set_status( &vdev, VIRTIO_CONFIG_S_ACKNOWLEDGE );

@@ -393,6 +393,7 @@ AcpiRsCreatePciRoutingTable (
                 PathBuffer.Pointer = UserPrt->Source;
 
                 Status = AcpiNsHandleToPathname ((ACPI_HANDLE) Node, &PathBuffer);
+                (void) Status; // clang warns
 
                 /* +1 to include null terminator */
 

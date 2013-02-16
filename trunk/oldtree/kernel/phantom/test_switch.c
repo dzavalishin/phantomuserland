@@ -30,6 +30,14 @@
 
 #include "svn_version.h"
 
+static void (*fhandler_f)( void *arg);
+static void *fhandler_arg;
+
+void on_fail_call( void (*f)( void *arg), void *arg ) // Call f on failure
+{
+    fhandler_f = f;
+    fhandler_arg = arg;
+}
 
 static jmp_buf jb;
 static int nFailed = 0;
@@ -62,6 +70,7 @@ void test_fail_msg(errno_t rc, const char *msg)
 
 #define TEST(name) \
     ({                                  		\
+    fhandler_f = 0;                                     \
     int rc;                                             \
     if( ( rc = setjmp( jb )) )				\
     {                                                   \
@@ -88,6 +97,12 @@ void report( int rc, const char *test_name )
 
     nFailed++;
     printf("!!! KERNEL TEST FAILED: %s -> %d (%s)\n", test_name, rc, rcs );
+
+    if( fhandler_f )
+    {
+        printf("Post mortem:\n");
+        fhandler_f( fhandler_arg );
+    }
 }
 
 
@@ -113,10 +128,15 @@ void run_test( const char *test_name, const char *test_parm )
 
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
-    TEST(many_threads);
+    // TODO mem leak! out of mem for 200!
+    for( i = 20; i; i-- )
+    {
+        TEST(sem);
+    }
 
-    TEST(rectangles);
-    TEST(video);
+    TEST(wtty);
+
+    TEST(many_threads);
 
     TEST(pool);
 
@@ -129,11 +149,6 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(physalloc_gen);
     TEST(malloc);
     TEST(amap);
-
-    for( i = 200; i; i-- )
-    {
-        TEST(sem);
-    }
 
     TEST(cbuf);
     TEST(udp_send);
@@ -164,6 +179,10 @@ void run_test( const char *test_name, const char *test_parm )
 //    TEST(sem);
     TEST(01_threads);
 #endif
+
+    TEST(rectangles);
+    TEST(video);
+
 
     //TEST(video);
 

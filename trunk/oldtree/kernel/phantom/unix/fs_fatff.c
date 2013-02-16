@@ -141,7 +141,7 @@ static uufile_t *  fatff_namei(uufs_t *fs, const char *filename)
     //bool isdir = 0;
     FATFS *ffs = fs->impl;
     FIL *fp = calloc( 1, sizeof(FIL) );
-    DIR *dj;
+    DIR *dj = 0;
 
     FRESULT r = f_open ( ffs, fp, filename,
                          // TODO wrong. need real open's request here to handle create/open existing file

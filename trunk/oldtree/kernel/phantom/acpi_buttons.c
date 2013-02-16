@@ -60,6 +60,8 @@ static dpc_request_t poweroff_dpc;
 
 static void acpi_power_off(void *arg)
 {
+    (void) arg;
+
     ACPI_STATUS as;
     (void) arg;
 
@@ -106,8 +108,8 @@ static void power_button_notify_handler(ACPI_HANDLE handle, u_int32_t value,
 static ACPI_STATUS power_button_probe(ACPI_HANDLE handle, u_int32_t nestlevel,
                                       void *context, void **retval)
 {
-    (void) nestlevel;
     (void) context;
+    (void) nestlevel;
     (void) retval;
 
     // install handler

@@ -541,12 +541,20 @@ static void sem_softirq(void *a)
 }
 
 
+// Cleanup after failed test
+static void sem_test_fail( void *arg )
+{
+    (void) arg;
+    hal_sem_destroy( &test_sem_0 );
+}
+
 int do_test_sem(const char *test_parm)
 {
     (void) test_parm;
     printf("Testing semaphores\n");
 
     hal_sem_init( &test_sem_0, "semTest");
+    on_fail_call( sem_test_fail, 0 );
 
     if( softirq < 0 )
     {
@@ -588,17 +596,18 @@ int do_test_sem(const char *test_parm)
     hal_sleep_msec( 100 );
     test_check_eq(sem_released,0);
     hal_sleep_msec( 120 );
+    if( !sem_released ) // give extra time
+        hal_sleep_msec( 150 );
     test_check_eq(sem_released,1);
     test_check_eq( rc, ETIMEDOUT);
 
 
     stop_sem_test = 1;
 
-    hal_sem_destroy( &test_sem_0 );
-
     printf("Done testing semaphores\n");
-    return 0;
 
+    hal_sem_destroy( &test_sem_0 );
+    return 0;
 }
 
 

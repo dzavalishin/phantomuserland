@@ -8,6 +8,8 @@ HOST_ARCH	= x86
 unix_host	= NONE
 
 export CC	= gcc
+#export CC	= clang -Wno-gnu
+#export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 
 export LD	= ld
 export STRIP	= strip
 export AR	= ar

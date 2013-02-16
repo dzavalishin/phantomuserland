@@ -467,6 +467,8 @@ int SnmpAgentProcessRequest(SNMP_SESSION * sess, CONST uint8_t * in_data, size_t
     out_data = SnmpAuthBuild(sess, out_auth, out_len, packet_end - out_header);
     *out_len = packet_end - out_auth;
 
+    (void) out_data;
+
     return 0;
 }
 

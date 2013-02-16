@@ -12,9 +12,9 @@
 
 #define DEBUG_MSG_PREFIX "bootp"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
+#define debug_level_info 1
 #define debug_level_error 10
-#define debug_level_info 10
 
 #include <kernel/net/udp.h>
 #include <time.h>
@@ -556,16 +556,16 @@ errno_t bootp(ifnet *iface)
         SHOW_ERROR( 0, "error %d", e);
     else
     {
-        SHOW_FLOW( 1, "DHCP netmask: 0x%08X", bstate->smask);
+        SHOW_INFO( 1, "DHCP netmask: 0x%08X", bstate->smask);
 
-        SHOW_FLOW( 1, "DHCP ip:      %s", inet_ntoa(bstate->myip) );
-        SHOW_FLOW( 2, "gateway ip:   %s", inet_ntoa(bstate->gateip) );
-        SHOW_FLOW( 2, "root ip:      %s", inet_ntoa(bstate->rootip) );
-        SHOW_FLOW( 2, "server ip:    %s", inet_ntoa(bstate->servip) );
+        SHOW_INFO( 1, "DHCP ip:      %s", inet_ntoa(bstate->myip) );
+        SHOW_INFO( 1, "gateway ip:   %s", inet_ntoa(bstate->gateip) );
+        SHOW_INFO( 2, "root ip:      %s", inet_ntoa(bstate->rootip) );
+        SHOW_INFO( 2, "server ip:    %s", inet_ntoa(bstate->servip) );
 
-        SHOW_FLOW( 2, "rootpath:     '%s'", bstate->rootpath );
-        SHOW_FLOW( 2, "hostname:     '%s'", bstate->hostname );
-        SHOW_FLOW( 2, "bootfile:     '%s'", bstate->bootfile );
+        SHOW_INFO( 2, "rootpath:     '%s'", bstate->rootpath );
+        SHOW_INFO( 1, "hostname:     '%s'", bstate->hostname );
+        SHOW_INFO( 2, "bootfile:     '%s'", bstate->bootfile );
 
         // Now apply it to interface
         // TODO use if_simple_setup instead!
@@ -601,7 +601,7 @@ errno_t bootp(ifnet *iface)
         }
         else
         {
-            SHOW_INFO0( 1, "Adding route - ok");
+            SHOW_INFO0( 2, "Adding route - ok");
         }
 
         if( (rc = ipv4_route_add_default( bstate->myip.s_addr, iface->id, bstate->gateip.s_addr ) ) )
@@ -610,7 +610,7 @@ errno_t bootp(ifnet *iface)
         }
         else
         {
-            SHOW_INFO0( 1, "Adding default route - ok");
+            SHOW_INFO0( 2, "Adding default route - ok");
         }
 
         // At least one char!

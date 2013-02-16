@@ -1,4 +1,4 @@
-#if 0 // moved
+
 
 #define DEBUG_MSG_PREFIX "wtty"
 #include <debug_ext.h>
@@ -77,16 +77,21 @@ int wtty_getc(wtty_t *w)
 
     hal_mutex_lock(&w->mutex);
 
+    if(!w->started) { ret = 0; goto exit; }
+
     while(w->getpos == w->putpos)
+    {
         hal_cond_wait( &w->rcond, &w->mutex );
+        if(!w->started) { ret = 0; goto exit; }
+    }
 
     wtty_wrap(w);
 
     ret = w->buf[w->getpos++];
     hal_cond_broadcast( &w->wcond ); // signal writers to continue
 
+exit:
     hal_mutex_unlock(&w->mutex);
-
     return ret;
 }
 
@@ -98,16 +103,20 @@ int wtty_read(wtty_t *w, char *data, int cnt, bool nowait)
     hal_mutex_lock(&w->mutex);
 
     SHOW_FLOW( 11, "wtty rd %p", w );
+    if(!w->started) { done = -EPIPE; goto exit; }
 
     while( cnt > 0 )
     {
         if( nowait && _wtty_is_empty(w) )
             break;
 
+        if(!w->started) goto exit;
+
         while( _wtty_is_empty(w) )
         {
             hal_cond_broadcast( &w->wcond );
             hal_cond_wait( &w->rcond, &w->mutex );
+            if(!w->started) goto exit;
         }
 
         *data++ = w->buf[w->getpos++];
@@ -117,6 +126,7 @@ int wtty_read(wtty_t *w, char *data, int cnt, bool nowait)
     }
 
     hal_cond_broadcast( &w->wcond );
+exit:
     hal_mutex_unlock(&w->mutex);
     return done;
 }
@@ -137,20 +147,27 @@ int wtty_read(wtty_t *w, char *data, int cnt, bool nowait)
 
 
 
-void wtty_putc(wtty_t *w, int c)
+errno_t wtty_putc(wtty_t *w, int c)
 {
+    errno_t ret = 0;
     assert(w);
 
     hal_mutex_lock(&w->mutex);
     wtty_wrap(w);
 
     SHOW_FLOW( 11, "wtty putc %p", w );
+    if(!w->started) { ret = EPIPE; goto exit; }
 
     while( _wtty_is_full(w) )
+    {
         hal_cond_wait( &w->wcond, &w->mutex );
+        if(!w->started) { ret = EPIPE; goto exit; }
+    }
 
     wtty_doputc(w, c);
+exit:
     hal_mutex_unlock(&w->mutex);
+    return ret;
 }
 
 
@@ -159,6 +176,7 @@ errno_t wtty_putc_nowait(wtty_t *w, int c)
     int ret = 0;
 
     assert(w);
+    if(!w->started) return EPIPE;
 
     hal_mutex_lock(&w->mutex);
     wtty_wrap(w);
@@ -173,8 +191,6 @@ errno_t wtty_putc_nowait(wtty_t *w, int c)
     else
     {
         wtty_doputc(w, c);
-        //w->buf[w->putpos++] = c;
-        //hal_cond_signal( &w->cond );
     }
 
     hal_mutex_unlock(&w->mutex);
@@ -186,6 +202,7 @@ int wtty_write(wtty_t *w, const char *data, int cnt, bool nowait)
     int done = 0;
 
     assert(w);
+    if(!w->started) return -EPIPE;
 
     hal_mutex_lock(&w->mutex);
     wtty_wrap(w);
@@ -201,6 +218,7 @@ int wtty_write(wtty_t *w, const char *data, int cnt, bool nowait)
         {
             hal_cond_broadcast( &w->rcond );
             hal_cond_wait( &w->wcond, &w->mutex );
+            if(!w->started) goto exit;
         }
 
         w->buf[w->putpos++] = *data++;
@@ -210,6 +228,7 @@ int wtty_write(wtty_t *w, const char *data, int cnt, bool nowait)
     }
 
     hal_cond_broadcast( &w->rcond );
+exit:
     hal_mutex_unlock(&w->mutex);
     return done;
 }
@@ -262,17 +281,38 @@ wtty_t * wtty_init(void)
     hal_cond_init( &w->rcond, "wtty.r" );
     hal_cond_init( &w->wcond, "wtty.w" );
 
+    w->started = 1;
+
     return w;
+}
+
+// all blocked calls return
+void wtty_stop(wtty_t * w)
+{
+    w->started = 0;
+    hal_cond_broadcast( &w->rcond );
+    hal_cond_broadcast( &w->wcond );
+}
+
+void wtty_start(wtty_t * w)
+{
+    w->started = 1;
+}
+
+int wtty_is_started(wtty_t *w)
+{
+    return w->started;
 }
 
 
 void wtty_destroy(wtty_t * w)
 {
+    //wtty_stop(w); // not really good idea
+    // Check unstopped
+    if( w->started ) SHOW_ERROR0( 0, "unstopped" );
     hal_mutex_destroy( &w->mutex );
     hal_cond_destroy( &w->rcond );
     hal_cond_destroy( &w->wcond );
     free(w);
 }
 
-
-#endif

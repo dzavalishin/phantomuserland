@@ -42,10 +42,10 @@ struct drv_video_screen_t        drv_video_win32 =
     // screen
     0,
 
-probe: (void *)vid_null,
-start: (void *)vid_null,
-accel: (void *)vid_null,
-stop:  (void *)vid_null,
+.probe  = (void *)vid_null,
+.start  = (void *)vid_null,
+.accel  = (void *)vid_null,
+.stop   = (void *)vid_null,
 
 update:(void*)vid_null,
 bitblt:(void*)vid_null,
@@ -53,12 +53,12 @@ bitblt:(void*)vid_null,
 
 .readblt = (void*)vid_null,
 
-mouse:    		(void*)vid_null,
+.mouse               =  (void*)vid_null,
 
-mouse_redraw_cursor: 	vid_mouse_draw_deflt,
-mouse_set_cursor: 	vid_mouse_set_cursor_deflt,
-mouse_disable:          vid_mouse_off_deflt,
-mouse_enable:          	vid_mouse_on_deflt,
+.mouse_redraw_cursor =  vid_mouse_draw_deflt,
+.mouse_set_cursor    =  vid_mouse_set_cursor_deflt,
+.mouse_disable       =  vid_mouse_off_deflt,
+.mouse_enable        =  vid_mouse_on_deflt,
 
 };
 

@@ -131,7 +131,7 @@ int parse_line(const char *buf, char *argv[], int max_args, char *redirect_in, c
     int arg_cnt = 0;
     int len = 0;
     int replace;
-    int param;
+    //int param;
     redirect_in[0] = 0;
     redirect_out[0] = 0;
 
@@ -146,7 +146,7 @@ int parse_line(const char *buf, char *argv[], int max_args, char *redirect_in, c
         replace = 1;
         type_char = scan;
         start = scan;
-        param = 1;
+        //param = 1;
 
         switch(*type_char){
         case '\'':
@@ -541,6 +541,8 @@ static int launch(int (*cmd)(int, char **), int argc, char **argv, char *r_in, c
     close(new_out);
 #endif
     retval= cmd(argc, argv);
+    if( retval )
+        printf("exit code %d", retval);
 #if REDIR
     dup2(saved_in, 0);
     dup2(saved_out, 1);

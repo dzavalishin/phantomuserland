@@ -336,6 +336,7 @@ AcpiEvPciConfigRegionSetup (
                          * for the new PCI_Config operation region, however.
                          */
                         Status = AE_OK;
+                        (void) Status; // clang warns
                     }
                     else
                     {
@@ -754,6 +755,7 @@ AcpiEvInitializeRegion (
 
                     Status = AcpiEvAttachRegion (HandlerObj, RegionObj,
                                 AcpiNsLocked);
+                    (void) Status; // clang warns
 
                     /*
                      * Tell all users that this region is usable by
@@ -769,6 +771,7 @@ AcpiEvInitializeRegion (
                     }
 
                     Status = AcpiEvExecuteRegMethod (RegionObj, ACPI_REG_CONNECT);
+                    (void) Status; // clang warns
 
                     if (AcpiNsLocked)
                     {

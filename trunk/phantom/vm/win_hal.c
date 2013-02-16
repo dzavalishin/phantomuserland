@@ -328,12 +328,11 @@ void setDiffMem( void *mem, void *copy, int size )
 
 void checkDiffMem()
 {
+#if 0
     char *mem = dm_mem;
     char *copy = dm_copy;
     char *start = dm_mem;
     int prevdiff = 0;
-
-return;
 
     int i = dm_size;
     while( i-- )
@@ -361,6 +360,7 @@ return;
 
     printf(" Press Enter...");
     getchar();
+#endif
 }
 
 
@@ -494,6 +494,23 @@ int hal_mutex_is_locked(hal_mutex_t *m)
 }
 
 
+errno_t hal_mutex_destroy(hal_mutex_t *m)
+{
+    struct phantom_mutex_impl *mi = m->impl;
+
+    //if(mi->owner != 0)        panic("locked mutex killed");
+    free(mi);
+
+    m->impl = 0;
+
+    return 0;
+}
+
+
+
+
+
+
 int hal_cond_init( hal_cond_t *c, const char *name )
 {
     c->impl = calloc(1, sizeof(struct phantom_cond_impl)+16); // to prevent corruption if kernel hal mutex func will be called
@@ -536,6 +553,15 @@ errno_t hal_cond_broadcast( hal_cond_t *c )
     return 0;
 }
 
+errno_t hal_cond_destroy(hal_cond_t *c)
+{
+
+    //if(m->impl.owner != 0)        panic("locked mutex killed");
+    free(c->impl);
+    c->impl=0;
+
+    return 0;
+}
 
 
 

@@ -75,7 +75,7 @@ done:
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
 #else
     //SYSCALL_THROW_STRING("Not this way");
-    printf("unimplemented vm_mutex_lock used");
+    lprintf("unimplemented vm_mutex_lock used\r");
 #endif
 }
 

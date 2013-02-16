@@ -270,7 +270,8 @@ static void register_partition(phantom_disk_partition_t *p)
     }
 
     partitions[nPartitions] = *p;
-    dump_partition(p);
+    //dump_partition(p);
+    print_partition(p);
     find_subpartitions(p);
 }
 
@@ -428,8 +429,18 @@ errno_t partGetName( phantom_disk_partition_t *p, char *buf, size_t bufsz )
 
 void dump_partition(phantom_disk_partition_t *p)
 {
+    if( p == 0 )
+    {
+        printf("attempt to dump null Disk Partition\n");
+        return;
+    }
+
     char pname[128];
-    partGetName( p, pname, sizeof(pname) );
+    if( partGetName( p, pname, sizeof(pname) ) )
+    {
+        printf("Disk Partition ?? (%s)\n", p->label );
+        return;
+    }
 
     printf("Disk Partition %s (%s)\n", pname, p->label );
 
@@ -439,6 +450,31 @@ void dump_partition(phantom_disk_partition_t *p)
     printf(" - %s base, %s specific\n", p->base ? "has" : "no", p->specific ? "has" : "no" );
 
 }
+
+void print_partition(phantom_disk_partition_t *p)
+{
+    if( p == 0 )
+    {
+        printf("attempt to print null Disk Partition\n");
+        return;
+    }
+
+    char pname[128];
+    if( partGetName( p, pname, sizeof(pname) ) )
+    {
+        printf("Disk Partition ?? (%s)\n", p->label );
+        return;
+    }
+
+    long sz = p->block_size; sz *= p->size; sz /= 1024;
+    char *un = "Kb";
+
+    if( sz > 1024*10 ) { un = "Mb"; sz /= 1024; }
+    if( sz > 1024*10 ) { un = "Gb"; sz /= 1024; }
+
+    printf("Disk Partition %s (%s), %ld %d, flags %b\n", pname, p->label, sz, un, p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
+}
+
 
 //#pragma GCC diagnostic pop
 

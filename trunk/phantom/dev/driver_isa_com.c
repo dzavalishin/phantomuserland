@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * PC serial port driver.
+ * PC serial port driver. Untested.
  *
  *
 **/
@@ -19,6 +19,8 @@
 #define debug_level_info 10
 
 #include <kernel/drivers.h>
+#include <wtty.h>
+#include <threads.h>
 
 #include <ia32/pio.h>
 #include <phantom_libc.h>
@@ -53,6 +55,12 @@ typedef struct
     int 	dataBits;
     int 	stopBits;
     int 	parity;
+
+    hal_sem_t   rsem;
+    hal_sem_t   wsem;
+
+    wtty_t      *rdq;
+    wtty_t      *wrq;
 } com_port_t;
 
 static void com_setbaud(struct phantom_device *dev, int speed);
@@ -134,6 +142,8 @@ static int com_write(struct phantom_device *dev, const void *buf, int len);
 
 
 static void com_interrupt( void *_dev );
+static void com_rd_thread( void *_dev );
+static void com_wr_thread( void *_dev );
 
 // TODO this is to be moved to driver_map.c and be kept in driver tables
 static int seq_number = 0;
@@ -171,6 +181,13 @@ phantom_device_t * driver_isa_com_probe( int port, int irq, int stage )
     com_port_t *cp = calloc( sizeof(com_port_t), 1 );
     dev->drv_private = cp;
 
+    hal_sem_init( &(cp->rsem), "serialRd" );
+    hal_sem_init( &(cp->wsem), "serialWr" );
+
+    cp->rdq = wtty_init(); assert(cp->rdq);
+    cp->wrq = wtty_init(); assert(cp->wrq);
+
+
     cp->baudRate = 9600;
     cp->stopBits = 1;
     cp->dataBits = 8;
@@ -178,9 +195,70 @@ phantom_device_t * driver_isa_com_probe( int port, int irq, int stage )
 
     com_setbaud(dev, cp->baudRate);
 
+    hal_start_kernel_thread_arg( com_rd_thread, dev );
+    hal_start_kernel_thread_arg( com_wr_thread, dev );
+
     return dev;
 }
 
+
+
+static void com_rd_thread( void *_dev )
+{
+    phantom_device_t * dev = _dev;
+
+    int unit = dev->seq_number;
+    int addr = dev->iobase;
+
+    com_port_t *cp = dev->drv_private;
+
+    while(1)
+    {
+        hal_sem_acquire( &(cp->rsem) );
+        hal_sem_zero( &(cp->rsem) ); // we will process all the requsets at once
+
+        (void) unit;
+        SHOW_FLOW( 9, "com port %d io", unit );
+
+
+        // try input
+        u_int8_t line;
+        while ((line = inb(LINE_STAT(addr))) & iDR)
+        {
+            int c = inb(TXRX(addr));
+            wtty_putc_nowait( cp->rdq, c );
+        }
+
+    }
+}
+
+static void com_wr_thread( void *_dev )
+{
+    phantom_device_t * dev = _dev;
+
+    int unit = dev->seq_number;
+    int addr = dev->iobase;
+
+    com_port_t *cp = dev->drv_private;
+
+    while(1)
+    {
+        hal_sem_acquire( &(cp->wsem) );
+        //hal_sem_zero( &(cp->wsem) ); // we will process all the requsets at once
+
+        (void) unit;
+        SHOW_FLOW( 9, "com port %d wr", unit );
+
+	/* if have data and transmitter is empty */
+        while( (!wtty_is_empty(cp->wrq)) && (inb(LINE_STAT(addr)) & iTHRE) )
+        {
+            /* send the char */
+            outb(addr, wtty_getc(cp->wrq) );
+        }
+
+
+    }
+}
 
 
 
@@ -191,11 +269,15 @@ static void com_interrupt( void *_dev )
     int unit = dev->seq_number;
     int addr = dev->iobase;
 
+    com_port_t *cp = dev->drv_private;
+
+    (void) unit;
     SHOW_FLOW( 9, "com port %d interrupt", unit );
 
     //register struct tty	*tp = &com_tty[unit];
     //static char 		comoverrun = 0;
-    char			c, line, intr_id;
+    //char			c, line, intr_id;
+    char			intr_id;
     //int			modem_stat;
     int				line_stat;
 
@@ -210,6 +292,7 @@ static void com_interrupt( void *_dev )
             break;
 
         case TRAi:
+            hal_sem_release( &(cp->wsem) );
             //comtimer_state[unit] = 0;
             //tp->t_state &= ~(TS_BUSY|TS_FLUSH);
             //tt_write_wakeup(tp);
@@ -218,21 +301,12 @@ static void com_interrupt( void *_dev )
 
         case RECi:
         case CTIi:         /* Character timeout indication */
-            //if (tp->t_state&TS_ISOPEN)
-            {
-                while ((line = inb(LINE_STAT(addr))) & iDR)
-                {
-                    c = inb(TXRX(addr));
-                    //ttyinput(c, tp);
-                }
-            } //else
-            {
-                //tt_open_wakeup(tp);
-            }
+            hal_sem_release( &(cp->rsem) );
             break;
 
         case LINi:
             line_stat = inb(LINE_STAT(addr));
+            (void) line_stat;
 #if 0
             if ((line_stat & iPE) &&
                 ((tp->t_flags&(EVENP|ODDP)) == EVENP ||
@@ -295,18 +369,14 @@ static int com_stop(phantom_device_t *dev)
 
 static int com_read(struct phantom_device *dev, void *buf, int len)
 {
-    (void) dev;
-    (void) buf;
-    (void) len;
-    return -EIO;
+    com_port_t *cp = dev->drv_private;
+    return wtty_read( cp->rdq, buf, len, 0 );
 }
 
 static int com_write(struct phantom_device *dev, const void *buf, int len)
 {
-    (void) dev;
-    (void) buf;
-    (void) len;
-    return -EIO;
+    com_port_t *cp = dev->drv_private;
+    return wtty_write( cp->wrq, buf, len, 0 );
 }
 
 
@@ -332,7 +402,8 @@ static void com_setbaud(struct phantom_device *dev, int speed)
     case 2400:		divisor = 0x30; break;
     }
 
-	// for some reason kills debugging com output in qemu
+    (void) divisor;
+    // for some reason kills debugging com output in qemu
 
 #if 0
     outb(LINE_CTL(addr), iDLAB);
@@ -415,14 +486,14 @@ io_return_t comopen(
 		if (tp->t_ispeed == 0) {
 #else
 			tp->t_state |= TS_HUPCLS;
-#endif	PORTSELECTOR
+#endif	// PORTSELECTOR
 			tp->t_ispeed = ISPEED;
 			tp->t_ospeed = ISPEED;
 			tp->t_flags = IFLAGS;
 			tp->t_state &= ~TS_BUSY;
 #ifndef	PORTSELECTOR
 		}
-#endif	PORTSELECTOR
+#endif	// PORTSELECTOR
 	}
 /*rvb	tp->t_state |= TS_WOPEN; */
 	if ((tp->t_state & TS_ISOPEN) == 0)

@@ -88,5 +88,7 @@ int do_test_rectangles(const char *test_parm);
 int do_test_crypt(const char *test_parm);
 
 
+int do_test_wtty(const char *test_parm);
+
 #endif // TEST_H
 

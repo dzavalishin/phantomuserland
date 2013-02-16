@@ -160,14 +160,14 @@ errno_t k_load_file( void **odata, size_t *osize, const char *fname )
         return ENOMEM;
     }
 
-    void *data = calloc( 1, size );
-
     e = k_open( &fd, fname, O_RDONLY, 0 );
     if( e )
     {
         SHOW_ERROR( 1, "can't open %s", fname );
         return e;
     }
+
+    void *data = calloc( 1, size );
 
     errno_t re;
 

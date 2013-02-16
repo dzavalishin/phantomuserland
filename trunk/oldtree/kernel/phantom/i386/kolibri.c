@@ -526,7 +526,7 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
             // TODO usys_...!
             SHOW_FLOW( 5, "read %d @ %d", fi->count, fi->offset );
             e = k_open( &fd, fn, O_RDONLY, 0 );
-            ret_on_err(e);
+            if(e) ret_on_err(e);
             e = k_seek( 0, fd, fi->offset, 0 /* seek set */ );
             if( e )
             {
@@ -548,7 +548,7 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
             mode |= O_RDWR;
             // TODO usys_...!
             e = k_open( &fd, fn, mode, 0666 );
-            ret_on_err(e);
+            if(e) ret_on_err(e);
             e = k_write( &nbyte, fd, data, fi->count );
             k_close( fd );
             st->ebx = nbyte;
@@ -558,18 +558,22 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
 
     case 4: // Set file size
         rc = usys_truncate( &e, u, fn, fi->offset );
+        if( rc ) SHOW_ERROR( 0, "truncate %s failed", fn );
         break;
 
     case 7: // Run program
         rc = usys_run( &e, u, fn, 0, 0, 0 );
+        if( rc ) SHOW_ERROR( 0, "run %s failed", fn );
         break;
 
     case 8: // Remove file
         rc = usys_rm( &e, u, fn );
+        if( rc ) SHOW_ERROR( 0, "rm %s failed", fn );
         break;
 
     case 9: // Create dir
         rc = usys_mkdir( &e, u, fn );
+        if( rc ) SHOW_ERROR( 0, "mkdir %s failed", fn );
         break;
 
     case 5: // Get file info
@@ -584,7 +588,7 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
             if( rc )
             {
                 SHOW_ERROR( 0, "Can't stat %s", fn );
-                ret_on_err(e);
+                ret_on_err(rc);
                 break;
             }
 
@@ -1035,6 +1039,8 @@ void kolibri_sys_dispatcher( struct trap_state *st )
                 after_end_pos = osize;
             }
 
+            (void) after_end_pos;
+
             if( nbytes <= 0 )
             {
                 st->eax = -1;
@@ -1135,6 +1141,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             // st->ebx - BGR bitmap ptr
             const struct rgb_t *src = u_ptr( st->ebx, npixels*3 );
 
+            assert(npixels);
             cb->pixels = calloc( sizeof(rgba_t), npixels );
             rgb2rgba_move( cb->pixels, src, npixels );
 
@@ -1356,6 +1363,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             {
                 const char *path = u_ptr( st->ecx, 0 );
                 ret = usys_chdir( &err, u, path );
+                if( ret ) SHOW_ERROR( 0, "chdir to %s failed", path );
             }
             break;
         case 2: // getcwd
@@ -1843,7 +1851,9 @@ one_more:
     {
         ks->have_e = 0;
 
-        SHOW_FLOW( 2, "got event type %d, ikep %p", ks->e.type, ks->win->inKernelEventProcess );
+        void *ikep =  (ks->win) ? (ks->win->inKernelEventProcess) : 0;
+        SHOW_FLOW( 2, "got event type %d, ikep %p", ks->e.type, ikep );
+
         switch( ks->e.type )
         {
         case UI_EVENT_TYPE_MOUSE:

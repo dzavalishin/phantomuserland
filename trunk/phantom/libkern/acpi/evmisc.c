@@ -408,6 +408,7 @@ AcpiEvTerminate (
         /* Disable all GPEs in all GPE blocks */
 
         Status = AcpiEvWalkGpeList (AcpiHwDisableGpeBlock, NULL);
+        (void) Status; // clang warns
 
         /* Remove SCI handler */
 
@@ -429,6 +430,7 @@ AcpiEvTerminate (
     /* Deallocate all handler objects installed within GPE info structs */
 
     Status = AcpiEvWalkGpeList (AcpiEvDeleteGpeHandlers, NULL);
+    (void) Status; // clang warns
 
     /* Return to original mode if necessary */
 

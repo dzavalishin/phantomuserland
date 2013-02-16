@@ -73,9 +73,9 @@ struct drv_video_screen_t        video_driver_bios_vesa =
     // screen
     0,
 
-probe: 			bios_vesa_probe,
-start: 			bios_vesa_start,
-stop:  			bios_vesa_stop,
+.probe    =             bios_vesa_probe,
+.start    =             bios_vesa_start,
+.stop     =             bios_vesa_stop,
 
 #if 0
 update: 		drv_video_null,

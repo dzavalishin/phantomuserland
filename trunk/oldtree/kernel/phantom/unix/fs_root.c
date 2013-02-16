@@ -290,6 +290,8 @@ static uufs_t * find_mount( const char* name, char *namerest )
         // part of name after the mount point
         strlcpy( namerest, name+maxlen, FS_MAX_PATH_LEN );
 
+        (void) m_path;
+        (void) m_name;
         SHOW_FLOW( 7, "got '%s' (%s) for '%s', rest = '%s'",
                    m_path, m_name,
                    name, namerest

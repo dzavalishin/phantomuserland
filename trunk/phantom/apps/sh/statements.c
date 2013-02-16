@@ -178,6 +178,8 @@ static int parse_cast(scan_info * info,shell_value **out)
         text = shell_value_to_char(*out);
 
         err = shell_value_set_text(*out,text);
+        if( err )
+            printf("(exit code = %d)\n", err);
 
         free(text);
 
@@ -634,6 +636,8 @@ static int scan_until_label(scan_info *info,char *label_name)
     while(info->current != NULL){
 
         err = is_label_with_name(info,label_name,&is_label);
+        if( err != SHE_NO_ERROR )
+            return SHE_LABEL_NOT_FOUND;
 
         if(is_label) return SHE_NO_ERROR;
 

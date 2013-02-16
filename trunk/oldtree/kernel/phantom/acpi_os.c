@@ -299,6 +299,7 @@ AcpiOsVprintf (
     {
         Count = vprintf(Fmt, Args);
     }
+    (void) Count;
 }
 
 
@@ -835,7 +836,7 @@ AcpiOsRemoveInterruptHandler (
 void
 AcpiOsStall ( UINT32 microseconds )
 {
-    if(microseconds > 0)
+    while(microseconds > 0)
     {
         microseconds -= 10;
         tenmicrosec();

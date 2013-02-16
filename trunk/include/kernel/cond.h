@@ -23,12 +23,12 @@ struct hal_cond
 typedef struct hal_cond hal_cond_t;
 
 
-errno_t 				hal_cond_init( hal_cond_t *c, const char *name );
-errno_t					hal_cond_wait( hal_cond_t *c, hal_mutex_t *m );
-errno_t 				hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout );
-errno_t					hal_cond_signal( hal_cond_t *c );
-errno_t					hal_cond_broadcast( hal_cond_t *c );
-errno_t					hal_cond_destroy( hal_cond_t *c );
+errno_t		hal_cond_init( hal_cond_t *c, const char *name );
+errno_t		hal_cond_wait( hal_cond_t *c, hal_mutex_t *m );
+errno_t 	hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout );
+errno_t		hal_cond_signal( hal_cond_t *c );
+errno_t		hal_cond_broadcast( hal_cond_t *c );
+errno_t		hal_cond_destroy( hal_cond_t *c );
 
 
 

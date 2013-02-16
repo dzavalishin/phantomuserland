@@ -1,3 +1,13 @@
+ - wtty buf size return to 128 or make dynamic
+
+ - MEM LEAK!
+
+ - virtio disk paging dies
+
+ - !! check longjmp to not to switch thread!!
+
+ - userland scanf does not support * (suppress assign) - use kernel one?
+
  - test and set as main new snap sync
 
  - deferred zbuf clean - debug

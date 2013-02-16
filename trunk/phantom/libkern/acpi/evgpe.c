@@ -614,6 +614,7 @@ AcpiEvAsynchExecuteGpeMethod (
     if (!AcpiEvValidGpeEvent (GpeEventInfo))
     {
         Status = AcpiUtReleaseMutex (ACPI_MTX_EVENTS);
+        (void) Status; // clang warns
         return_VOID;
     }
 
@@ -647,6 +648,7 @@ AcpiEvAsynchExecuteGpeMethod (
         Status = AcpiEvQueueNotifyRequest (
                     LocalGpeEventInfo->Dispatch.DeviceNode,
                     ACPI_NOTIFY_DEVICE_WAKE);
+        (void) Status;
         break;
 
     case ACPI_GPE_DISPATCH_METHOD:

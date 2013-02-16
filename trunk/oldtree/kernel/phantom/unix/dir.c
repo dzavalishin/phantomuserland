@@ -248,9 +248,9 @@ static void *      dir_copyimpl( void *impl )
 
 static errno_t     dir_stat( struct uufile *f, struct stat *dest )
 {
-    const char *name = f->name;
+    //const char *name = f->name;
 
-    SHOW_FLOW( 7, "stat %s", name );
+    SHOW_FLOW( 7, "stat %s", f->name );
 
     memset( dest, 0, sizeof(struct stat) );
 

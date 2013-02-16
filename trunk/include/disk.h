@@ -92,6 +92,8 @@ struct phantom_disk_partition
     int         flags;
     int         type;           // 0-0xFF is PC part types
 
+    time_t      last_snap;      // 0 or time of last snapshot to this partition (for autoselecting swap part)
+
     //! my handle - to release it on async io done
     partition_handle_t self; 
 
@@ -183,7 +185,8 @@ errno_t disk_fence( struct phantom_disk_partition *p );
 //! Return partition for paging (Phantom "FS")
 phantom_disk_partition_t *select_phantom_partition(void);
 
-void dump_partition(phantom_disk_partition_t *p);
+void dump_partition(phantom_disk_partition_t *p); // Full info
+void print_partition(phantom_disk_partition_t *p); // One-line summary
 
 
 // must be static, but used in disk.c and defined in disk_pool.c

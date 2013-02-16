@@ -861,6 +861,7 @@ AcpiPsCompleteOp (
 
             Status = WalkState->AscendingCallback (WalkState);
             Status = AcpiPsNextParseState (WalkState, *Op, Status);
+            (void) Status; // clang warns
 
             Status2 = AcpiPsCompleteThisOp (WalkState, *Op);
             if (ACPI_FAILURE (Status2))
@@ -870,6 +871,7 @@ AcpiPsCompleteOp (
         }
 
         Status = AE_OK;
+        (void) Status; // clang warns
         break;
 
 
@@ -892,6 +894,7 @@ AcpiPsCompleteOp (
 
         Status = WalkState->AscendingCallback (WalkState);
         Status = AcpiPsNextParseState (WalkState, *Op, Status);
+        (void) Status; // clang warns
 
         Status2 = AcpiPsCompleteThisOp (WalkState, *Op);
         if (ACPI_FAILURE (Status2))
@@ -900,6 +903,7 @@ AcpiPsCompleteOp (
         }
 
         Status = AE_OK;
+        (void) Status; // clang warns
         break;
 
 

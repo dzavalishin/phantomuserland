@@ -54,7 +54,7 @@ void  free_text_file(text_file *data)
 int  read_text_file(const char *filename,text_file *data)
 {
     char *scan;
-    char *old;
+    //char *old;
     int err;
     int size;
     char realfilename[256];
@@ -83,7 +83,7 @@ int  read_text_file(const char *filename,text_file *data)
         err = add_string_to_list(data, scan);
         if(err <0) goto err;
 
-        old = scan;
+        //old = scan;
 
         while((size > 0) && (*scan != 10)) {
             scan++;

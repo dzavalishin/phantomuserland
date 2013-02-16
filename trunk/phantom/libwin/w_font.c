@@ -45,6 +45,7 @@ __inline__ int w_font_draw_char(
     // font char ptr
     const char *fcp  = drv_video_font_get_char( font, c );
 
+#if 0
     // char width
     int cwidth = font->xsize;
     if(p)
@@ -52,7 +53,7 @@ __inline__ int w_font_draw_char(
         int pw = *fcp++;
         cwidth = umin(ffs(pw),font->xsize);
     }
-
+#endif
     //if(font->xsize < 0)        font_reverse_x((drv_video_font_t *)font);
 
     int xafter = x+font->xsize;

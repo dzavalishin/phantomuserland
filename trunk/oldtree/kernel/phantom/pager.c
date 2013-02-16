@@ -807,21 +807,21 @@ pager_get_superblock()
     SHOW_FLOW( 0, "root sb sys name = '%.*s', checksum %s\n",
                DISK_STRUCT_SB_SYSNAME_SIZE, root_sb.sys_name,
                root_sb_cs_ok ? "ok" : "wrong"
-              );
+             );
 
 
     sb_found_page_numbers[0] = root_sb.sb2_addr;
-    
+
     sb_found_page_numbers[1] = root_sb.sb3_addr;
-    
+
 
     disk_page_no_t     found_sb1;
     disk_page_no_t     found_sb2;
 
     SHOW_FLOW0( 2, "Find sb1");
-    
+
     sb1_ok = find_superblock( &sb1, sb_found_page_numbers, 2, 0, &found_sb1 );
-    
+
     //if(_DEBUG) hal_printf(" ...DONE\n");
 
     if( sb1_ok )
@@ -837,15 +837,15 @@ pager_get_superblock()
                root_sb.sb2_addr, root_sb.sb3_addr,
                root_sb.free_start, root_sb.free_list,
                root_sb.fs_is_clean
-              );
+             );
 
     if(
-        root_sb_cs_ok && (!sb1_ok) && !(sb2_ok) &&
-        root_sb.sb2_addr == 0 && root_sb.sb3_addr == 0 &&
-        root_sb.free_start != 0 && root_sb.free_list == 0 &&
-        root_sb.fs_is_clean
+       root_sb_cs_ok && (!sb1_ok) && !(sb2_ok) &&
+       root_sb.sb2_addr == 0 && root_sb.sb3_addr == 0 &&
+       root_sb.free_start != 0 && root_sb.free_list == 0 &&
+       root_sb.fs_is_clean
       )
-        {
+    {
         SHOW_FLOW0( 0, "incomplete filesystem found, fixing...");
         superblock = root_sb;
         pager_fix_incomplete_format();
@@ -854,11 +854,11 @@ pager_get_superblock()
         phantom_fsck( 0 );
 
         return;
-        }
+    }
 
 
     if(
-        root_sb_cs_ok && sb1_ok && sb2_ok &&
+       root_sb_cs_ok && sb1_ok && sb2_ok &&
        superblocks_are_equal(&root_sb, &sb1) &&
        superblocks_are_equal(&root_sb, &sb2)
       )
@@ -902,18 +902,20 @@ pager_get_superblock()
 #if 1
     if( !sb1_ok )
         sb1_ok = find_superblock( &sb1, sb_default_page_numbers,
-                                    n_sb_default_page_numbers, 0, &found_sb1 );
+                                  n_sb_default_page_numbers, 0, &found_sb1 );
 
     if( sb1_ok )
-        {
+    {
         sb_found_page_numbers[2] = sb1.sb2_addr;
         sb_found_page_numbers[3] = sb1.sb3_addr;
 
         sb2_ok = find_superblock( &sb2, sb_found_page_numbers, 4, found_sb1, &found_sb2  );
         if( !sb2_ok )
             sb2_ok = find_superblock( &sb2, sb_default_page_numbers,
-                                    n_sb_default_page_numbers, found_sb1, &found_sb2  );
-        }
+                                      n_sb_default_page_numbers, found_sb1, &found_sb2  );
+    }
+
+    (void) sb2_ok;
 #endif
     panic("I don't have any fsck yet. I must die.\n");
 }
