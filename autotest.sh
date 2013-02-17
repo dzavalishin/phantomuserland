@@ -39,7 +39,7 @@ at_exit ( ) {
 			RESULT=`grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';'`
 			SEND_LOG=$0.log
 		fi
-		sed 's/[^m]*m//g' $SEND_LOG | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
+		sed 's/[^m]*m//g;s///g' $SEND_LOG | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
 	}
 }
 
