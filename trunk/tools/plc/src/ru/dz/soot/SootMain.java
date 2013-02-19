@@ -76,7 +76,7 @@ public class SootMain {
 		System.exit(33);
 	}
 
-	private static void say(String string) {
+	static void say(String string) {
 		System.err.println(string);
 	}
 
