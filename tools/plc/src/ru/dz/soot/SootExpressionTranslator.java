@@ -12,6 +12,7 @@ import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.internal.AbstractBinopExpr;
 import soot.jimple.internal.JAddExpr;
+import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JSubExpr;
 import soot.jimple.internal.JimpleLocal;
 
@@ -44,8 +45,11 @@ public class SootExpressionTranslator {
 		if( v instanceof IntConstant )
 			return new PhantomCodeWrapper( new IntConstNode(((IntConstant)v).value));
 		
-		say(" ?? "+v.getClass().getName());
-		say("    "+v.toString());
+		if( v instanceof JArrayRef )
+			return doArrayRef((JArrayRef)v);
+		
+		say("e ?? "+v.getClass().getName());
+		say("e    "+v.toString());
 
 		return PhantomCodeWrapper.getNullNode();
 	}
@@ -64,6 +68,11 @@ public class SootExpressionTranslator {
 	}
     */
 	
+
+	private PhantomCodeWrapper doArrayRef(JArrayRef v) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	private PhantomCodeWrapper doAdd(JAddExpr v) {
 		Type t = v.getType();

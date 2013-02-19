@@ -37,13 +37,11 @@ public class PhantomCodeWrapper {
 
 
 	public static PhantomCodeWrapper getExpression(Value v) {
-		String vClass = v.getClass().toString();
-		System.err.print(" ?? expr class = "+vClass);
+		//String vClass = v.getClass().toString();
+		//System.err.print(" ?? expr class = "+vClass);
 		
-		//new SootExpressionTranslator( )
-		
-		// TODO implement me
-		return new PhantomCodeWrapper( new NullNode() );
+		SootExpressionTranslator et = new SootExpressionTranslator( v );
+		return et.process();
 	}
 
 

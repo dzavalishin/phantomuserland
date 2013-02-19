@@ -50,6 +50,7 @@ public class SootMain {
 				File.pathSeparator+
 				"lib/rt_6.jar";
 		//System.setProperty("soot.class.path", cp);
+		say(cp);
 		
 		Scene.v().setSootClassPath(cp);
 		
