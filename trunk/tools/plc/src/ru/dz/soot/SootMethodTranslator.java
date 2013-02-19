@@ -1,5 +1,6 @@
 package ru.dz.soot;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import soot.Body;
@@ -26,6 +27,8 @@ public class SootMethodTranslator {
 	private SootLabelMap lmap = new SootLabelMap();
 	private SootMethod m;
 
+	private List<PhantomCodeWrapper> statements = new LinkedList<PhantomCodeWrapper>();
+	
 	public SootMethodTranslator(SootMethod m) {
 		this.m = m;
 	}
@@ -49,6 +52,12 @@ public class SootMethodTranslator {
 		}
 	}
 
+	
+	public void codegen()
+	{
+		// TODO write codegen
+	}
+	
 	//static private JimpleToBafContext context = new JimpleToBafContext(0);
 
 	private void doUnit(Unit u) {
@@ -69,7 +78,8 @@ public class SootMethodTranslator {
 		if( u instanceof AbstractStmt )
 		{
 			 AbstractStmt as = (AbstractStmt)u;
-			 doStatement(as);
+			 PhantomCodeWrapper statement = doStatement(as);
+			 statements.add(statement);
 		}
 		
 		List<Tag> tags = u.getTags();
@@ -111,8 +121,9 @@ public class SootMethodTranslator {
 		if( as instanceof JIfStmt )
 			return doIf( (JIfStmt)as );
 		
-		say(" ?? "+as.getClass().getName());
-		say("    "+as.toString());
+		
+		say("s ?? "+as.getClass().getName());
+		say("s    "+as.toString());
 
 		return PhantomCodeWrapper.getNullNode();
 	}
