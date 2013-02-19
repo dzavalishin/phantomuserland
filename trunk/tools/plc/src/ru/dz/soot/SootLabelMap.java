@@ -6,7 +6,7 @@ import java.util.Map;
 import soot.UnitBox;
 
 /**
- * Label map - makes labels;
+ * Label map - makes labels, mapped to Soot UnitBox'es
  * @author dz
  *
  */
