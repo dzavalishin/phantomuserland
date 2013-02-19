@@ -1,5 +1,6 @@
 package ru.dz.soot;
 
+import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
@@ -9,7 +10,9 @@ public class PhantomCodeWrapper {
 	
 	private ru.dz.plc.compiler.node.Node n;
 
-	private PhantomCodeWrapper(ru.dz.plc.compiler.node.Node node) {
+	public Node getNode() { return n; }
+	
+	public PhantomCodeWrapper(ru.dz.plc.compiler.node.Node node) {
 		n = node;
 	}
 
@@ -60,6 +63,13 @@ public class PhantomCodeWrapper {
 		// TODO implement
 		Node dest = null;
 		return new PhantomCodeWrapper(new ru.dz.plc.compiler.binode.OpAssignNode(dest, expression.n));
+	}
+
+
+
+
+	public static PhantomCodeWrapper getReadLocal(String varName) {
+		return new PhantomCodeWrapper(new IdentNode(varName));
 	}
 
 	

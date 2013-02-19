@@ -3,6 +3,7 @@
  */
 package ru.dz.soot;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -41,13 +42,18 @@ public class SootMain {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		String cp = "bin;../bin;lib/rt_6.jar";
-		
+		//String cp = "bin;../bin;lib/rt_6.jar";
+		String cp = 
+				"bin"+
+				File.pathSeparator+
+				"../bin"+
+				File.pathSeparator+
+				"lib/rt_6.jar";
 		//System.setProperty("soot.class.path", cp);
 		
 		Scene.v().setSootClassPath(cp);
 		
-		SootClass c = Scene.v().loadClassAndSupport("test.SootTestClass");
+		SootClass c = Scene.v().loadClassAndSupport("test.toPhantom.SootTestClass");
 		if( c.isPhantom() )
 		{
 			die("Not loaded");
