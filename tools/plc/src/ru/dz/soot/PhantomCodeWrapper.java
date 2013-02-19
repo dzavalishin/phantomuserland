@@ -1,10 +1,12 @@
 package ru.dz.soot;
 
+import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import soot.Value;
+import soot.jimple.internal.JimpleLocal;
 
 public class PhantomCodeWrapper {
 	
@@ -55,12 +57,30 @@ public class PhantomCodeWrapper {
 	public static PhantomCodeWrapper getAssign(Value assignTo,
 			PhantomCodeWrapper expression) {
 		
-		String vClass = assignTo.getClass().toString();
-		System.err.print(" ?? assignable class = "+vClass);
+		if( expression == null )
+		{
+			SootMain.say("null expr!");
+			expression = new PhantomCodeWrapper(new NullNode());
+		}
 		
 		// TODO implement
 		Node dest = null;
-		return new PhantomCodeWrapper(new ru.dz.plc.compiler.binode.OpAssignNode(dest, expression.n));
+		
+		if(assignTo instanceof JimpleLocal)
+		{
+			JimpleLocal jl = (JimpleLocal)assignTo;
+			dest = new IdentNode(jl.getName());
+		}
+
+		if(dest == null)
+		{
+			dest = new NullNode();
+			String vClass = assignTo.getClass().toString();
+			System.err.print(" ?? assignable class = "+vClass);			
+		}
+		
+		OpAssignNode node = new OpAssignNode(dest, expression.n);
+		return new PhantomCodeWrapper(node);
 	}
 
 

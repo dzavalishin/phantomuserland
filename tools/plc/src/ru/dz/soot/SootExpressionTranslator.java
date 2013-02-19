@@ -1,19 +1,20 @@
 package ru.dz.soot;
 
-import ru.dz.plc.compiler.binode.BiNode;
 import ru.dz.plc.compiler.binode.OpMinusNode;
 import ru.dz.plc.compiler.binode.OpPlusNode;
-import ru.dz.plc.compiler.node.BinaryConstNode;
-import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.IntConstNode;
 import ru.dz.plc.compiler.node.Node;
+import ru.dz.plc.compiler.node.NullNode;
+import soot.SootMethodRef;
 import soot.Type;
 import soot.Value;
 import soot.jimple.IntConstant;
 import soot.jimple.internal.AbstractBinopExpr;
 import soot.jimple.internal.JAddExpr;
 import soot.jimple.internal.JArrayRef;
+import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.internal.JSubExpr;
+import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.jimple.internal.JimpleLocal;
 
 public class SootExpressionTranslator {
@@ -48,6 +49,13 @@ public class SootExpressionTranslator {
 		if( v instanceof JArrayRef )
 			return doArrayRef((JArrayRef)v);
 		
+
+		if( v instanceof JVirtualInvokeExpr )
+			return doVirtualInvoke((JVirtualInvokeExpr)v);
+		
+		if( v instanceof JStaticInvokeExpr )
+			return doStaticInvoke((JStaticInvokeExpr)v);
+		
 		say("e ?? "+v.getClass().getName());
 		say("e    "+v.toString());
 
@@ -69,9 +77,26 @@ public class SootExpressionTranslator {
     */
 	
 
-	private PhantomCodeWrapper doArrayRef(JArrayRef v) {
+	private PhantomCodeWrapper doStaticInvoke(JStaticInvokeExpr v) {
+		SootMethodRef mr = v.getMethodRef();
+		String mName = mr.name();
+		mr.declaringClass();
+		say("Static call "+mName);
 		// TODO Auto-generated method stub
-		return null;
+		return new PhantomCodeWrapper(new NullNode());
+	}
+
+	private PhantomCodeWrapper doVirtualInvoke(JVirtualInvokeExpr v) {
+		SootMethodRef mr = v.getMethodRef();
+		String mName = mr.name();
+		say("Virtual call "+mName);
+		// TODO Auto-generated method stub
+		return new PhantomCodeWrapper(new NullNode());
+	}
+
+	private PhantomCodeWrapper doArrayRef(JArrayRef v) {
+		// TODO impl
+		return new PhantomCodeWrapper(new NullNode());
 	}
 
 	private PhantomCodeWrapper doAdd(JAddExpr v) {
