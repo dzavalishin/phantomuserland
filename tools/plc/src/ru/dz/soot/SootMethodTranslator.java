@@ -159,7 +159,9 @@ public class SootMethodTranslator {
 		
 		say("      Assign '"+ls+"' = '"+rs+"'");
 
-		return null;
+		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( rightBox.getValue() );
+		
+		return PhantomCodeWrapper.getAssign( leftBox.getValue(), expression );
 	}
 
 

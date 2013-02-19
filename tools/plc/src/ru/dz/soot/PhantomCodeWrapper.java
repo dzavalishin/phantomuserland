@@ -1,6 +1,7 @@
 package ru.dz.soot;
 
 import ru.dz.plc.compiler.node.JumpNode;
+import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import soot.Value;
 
@@ -36,6 +37,8 @@ public class PhantomCodeWrapper {
 		String vClass = v.getClass().toString();
 		System.err.print(" ?? expr class = "+vClass);
 		
+		//new SootExpressionTranslator( )
+		
 		// TODO implement me
 		return new PhantomCodeWrapper( new NullNode() );
 	}
@@ -43,6 +46,20 @@ public class PhantomCodeWrapper {
 
 	public static PhantomCodeWrapper getReturnValueNode(PhantomCodeWrapper v) {
 		return new PhantomCodeWrapper(new ru.dz.plc.compiler.node.ReturnNode(v.n));
+	}
+
+
+
+
+	public static PhantomCodeWrapper getAssign(Value assignTo,
+			PhantomCodeWrapper expression) {
+		
+		String vClass = assignTo.getClass().toString();
+		System.err.print(" ?? assignable class = "+vClass);
+		
+		// TODO implement
+		Node dest = null;
+		return new PhantomCodeWrapper(new ru.dz.plc.compiler.binode.OpAssignNode(dest, expression.n));
 	}
 
 	
