@@ -4,30 +4,17 @@
 package ru.dz.soot;
 
 import java.io.File;
-import java.util.LinkedList;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import soot.Body;
-import soot.PatchingChain;
+import ru.dz.plc.PlcMain;
+import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.util.PlcException;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
-import soot.SootMethodRef;
-import soot.Unit;
-import soot.UnitBox;
-import soot.ValueBox;
-import soot.jimple.ArrayRef;
-import soot.jimple.FieldRef;
-import soot.jimple.InvokeExpr;
-import soot.jimple.JimpleToBafContext;
-import soot.jimple.internal.AbstractStmt;
-import soot.jimple.internal.JAssignStmt;
-import soot.jimple.internal.JGotoStmt;
-import soot.jimple.internal.JIdentityStmt;
-import soot.jimple.internal.JInvokeStmt;
-import soot.jimple.internal.JReturnVoidStmt;
-import soot.tagkit.Tag;
 
 /**
  * @author dz
@@ -38,10 +25,22 @@ public class SootMain {
 
 	/**
 	 * @param args
+	 * @throws PlcException 
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	public static void main(String[] args) throws PlcException, IOException {
+		String phantomClassPath = "test/pc";
+		
+		PlcMain.addClassFileSearchParh(new File(phantomClassPath));
+		PlcMain.setOutputPath(phantomClassPath);
+		
+        ClassMap classes = ClassMap.get_map();
 
+		classes.do_import(".internal.object");			
+		classes.do_import(".internal.int");
+
+		try { classes.do_import(".internal.string"); } finally {}
+		
 		//String cp = "bin;../bin;lib/rt_6.jar";
 		String cp = 
 				"bin"+
@@ -50,7 +49,7 @@ public class SootMain {
 				File.pathSeparator+
 				"lib/rt_6.jar";
 		//System.setProperty("soot.class.path", cp);
-		say(cp);
+		//say(cp);
 		
 		Scene.v().setSootClassPath(cp);
 		
@@ -60,15 +59,27 @@ public class SootMain {
 			die("Not loaded");
 		}
 
+		PhantomClass pc = new PhantomClass(convertClassName(c.getName()));
+		
 		List<SootMethod> mlist = c.getMethods();
 		
 		for( SootMethod m : mlist )
 		{
-			SootMethodTranslator mt = new SootMethodTranslator(m);
+			SootMethodTranslator mt = new SootMethodTranslator(m,pc);
 			//doMethod(m);
 			mt.process();
 		}
 		
+		classes.add(pc);
+
+		say("Generate Phantom code for "+pc.getName());
+		classes.codegen();
+	}
+
+	private static String convertClassName(String name) {
+		name = "."+name;
+		say("Class "+name);
+		return name;
 	}
 
 	private static void die(String string) {

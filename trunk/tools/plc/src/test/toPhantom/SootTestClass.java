@@ -31,5 +31,20 @@ public class SootTestClass {
 	
 		return sa[1];
 	}
+
+	String stringMethod()
+	{
+		int i = 10;
+		float j = 0;
+		while(i-- > 0)
+			j += 3.3;
+		return "aaa";
+	}
+	
+	void voidMethod()
+	{
+		System.out.print("TestPrint");
+		System.out.print(stringMethod());
+	}
 	
 }

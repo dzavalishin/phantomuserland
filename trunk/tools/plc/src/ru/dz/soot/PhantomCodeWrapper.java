@@ -1,10 +1,16 @@
 package ru.dz.soot;
 
+import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.PhTypeInt;
+import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.PhantomVariable;
 import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.util.PlcException;
+import soot.Type;
 import soot.Value;
 import soot.jimple.internal.JimpleLocal;
 
@@ -38,11 +44,11 @@ public class PhantomCodeWrapper {
 
 
 
-	public static PhantomCodeWrapper getExpression(Value v) {
+	public static PhantomCodeWrapper getExpression(Value v, Method m) {
 		//String vClass = v.getClass().toString();
 		//System.err.print(" ?? expr class = "+vClass);
 		
-		SootExpressionTranslator et = new SootExpressionTranslator( v );
+		SootExpressionTranslator et = new SootExpressionTranslator( v, m );
 		return et.process();
 	}
 
@@ -55,7 +61,7 @@ public class PhantomCodeWrapper {
 
 
 	public static PhantomCodeWrapper getAssign(Value assignTo,
-			PhantomCodeWrapper expression) {
+			PhantomCodeWrapper expression, Method m) {
 		
 		if( expression == null )
 		{
@@ -70,6 +76,19 @@ public class PhantomCodeWrapper {
 		{
 			JimpleLocal jl = (JimpleLocal)assignTo;
 			dest = new IdentNode(jl.getName());
+			
+			Type type = jl.getType();
+			
+			PhantomType ptype;
+			try {
+				ptype = new PhTypeInt();
+			} catch (PlcException e) {
+				// TODO Auto-generated catch block
+				ptype = PhantomType.t_void;
+			}
+			
+			m.svars.add_stack_var(new PhantomVariable(jl.getName(), ptype));
+
 		}
 
 		if(dest == null)
@@ -85,10 +104,10 @@ public class PhantomCodeWrapper {
 
 
 
-
+	/*
 	public static PhantomCodeWrapper getReadLocal(String varName) {
 		return new PhantomCodeWrapper(new IdentNode(varName));
 	}
-
+	*/
 	
 }

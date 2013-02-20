@@ -678,9 +678,7 @@ public class Codegen extends opcode_ids {
 			IpToLine.put(ip, lineNumber);
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			
+			e.printStackTrace();			
 		}
 		
 	}

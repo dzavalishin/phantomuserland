@@ -33,7 +33,6 @@ public class IdentNode extends Node {
 
 	/*@Override
 	public boolean args_on_int_stack() {
-		// TODO Auto-generated method stub
 		return s.istack_vars().get_var(ident) != null;
 	}*/
 	
@@ -45,7 +44,6 @@ public class IdentNode extends Node {
 	}
 	
 	public void preprocess_me( ParseState s ) throws PlcException {
-		//PhantomField f = s.get_class().ft.get(ident);
 		PhantomField f = s.get_class().find_field(ident);
 		
 		
@@ -94,12 +92,12 @@ public class IdentNode extends Node {
 		}
 		else
 		{
-		svar = s.stack_vars().get_var(ident);
-		if( svar == null )
-			throw new PlcException( "ident Node", "no field", ident );
+			svar = s.stack_vars().get_var(ident);
+			if( svar == null )
+				throw new PlcException( "ident Node", "no field", ident );
 
-		//if (type == null || type.is_unknown()) type = svar.get_type();
-		c.emitGet(svar.get_abs_stack_pos()); // get stack variable
+			//if (type == null || type.is_unknown()) type = svar.get_type();
+			c.emitGet(svar.get_abs_stack_pos()); // get stack variable
 		}
 		
 	}

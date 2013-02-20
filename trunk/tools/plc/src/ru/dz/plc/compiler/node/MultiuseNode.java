@@ -23,7 +23,6 @@ public class MultiuseNode extends Node {
 
 	public MultiuseNode(Node l, RegisterNodeWrapper myWrapper) {
 		super(l);
-		// TODO Auto-generated constructor stub
 		this.myWrapper = myWrapper;
 	}
 

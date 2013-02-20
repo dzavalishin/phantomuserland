@@ -27,7 +27,6 @@ public class OpMethodCallNode extends TriNode {
 
 	@Override
 	public boolean args_on_int_stack() {
-		// TODO Auto-generated method stub
 		return super.args_on_int_stack();
 	}
 
