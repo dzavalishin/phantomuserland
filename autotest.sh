@@ -37,7 +37,7 @@ at_exit ( ) {
 		else
 			VERSION=`grep SVN $PHANTOM_LOG | sed 's/[^m]*m//g;s/starting//'`
 			RESULT=`grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';'`
-			SEND_LOG=$0.log
+			SEND_LOG="$0.log $PHANTOM_LOG"
 		fi
 		sed 's/[^m]*m//g;s///g' $SEND_LOG | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
 	}
