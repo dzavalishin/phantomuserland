@@ -238,6 +238,7 @@ public class PhantomType {
     public static final PhantomType t_string = new PhTypeString();
     //public static final PhantomType t_int = new PhTypeInt();
     public static final PhantomType t_void = new PhTypeVoid();
+	//public static final PhantomType t_int = null;
 }
 
 

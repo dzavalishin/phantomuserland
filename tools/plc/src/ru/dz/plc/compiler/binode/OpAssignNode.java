@@ -107,7 +107,7 @@ public class OpAssignNode extends BiNode {
 
 			// put value to assign
 			if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
-			else System.out.println("OpAssignNode.generate_my_code() _r is null!");
+			else System.out.println("OpAssignNode.generate_my_code() _r is null!"); // TODO die here
 
 			// put subscript
 			subscr.generate_code(c,s);
