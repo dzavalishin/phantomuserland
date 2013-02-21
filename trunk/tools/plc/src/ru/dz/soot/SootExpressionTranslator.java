@@ -142,8 +142,6 @@ public class SootExpressionTranslator {
 		return convertType(t.toString());
 	}
 	
-	class ww { public PhantomCodeWrapper w; }
-	
 	private PhantomCodeWrapper doValue(final Value vv) throws PlcException 
 	{
 		final ww ret = new ww();
@@ -500,32 +498,15 @@ public class SootExpressionTranslator {
 		
 		if( v instanceof JStaticInvokeExpr )
 			return doStaticInvoke((JStaticInvokeExpr)v);
-		
-		say("e ?? "+v.getClass().getName());
-		say("e    "+v.toString());
 */
+		
+		say("e ?? "+vv.getClass().getName());
+		say("e    "+vv.toString());
 		return PhantomCodeWrapper.getNullNode();
 	}
 
-	/*
-	private <T extends BiNode> PhantomCodeWrapper doBinOp(AbstractBinopExpr v, Class<T> c) throws PlcException {
-		Type t = v.getType();
-		// TODO type?
-		Value e1 = v.getOp1();
-		Value e2 = v.getOp2();
-		
-		Node e1n = doValue(e1).getNode();
-		Node e2n = doValue(e2).getNode();
-		
-		c.
-		
-		//return new PhantomCodeWrapper( new T(e1n,e2n) );
-		
-		
-		return null;
-		
-	}
-	*/
+
+	
 
 	private PhantomCodeWrapper doStringConst(StringConstant v) {
 		return new PhantomCodeWrapper(new StringConstNode(v.value));

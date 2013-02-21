@@ -45,8 +45,8 @@ public class SootTestClass {
 	
 	void voidMethod()
 	{
-		System.out.print("TestPrint");
-		System.out.print(stringMethod());
+//		System.out.print("TestPrint");
+//		System.out.print(stringMethod());
 	}
 	
 }

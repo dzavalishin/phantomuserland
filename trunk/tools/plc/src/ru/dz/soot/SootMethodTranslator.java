@@ -10,9 +10,15 @@ import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
 import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
+import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
+import ru.dz.plc.compiler.node.JumpNode;
+import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.ThisNode;
+import ru.dz.plc.compiler.node.ThrowNode;
+import ru.dz.plc.compiler.node.VoidNode;
+import ru.dz.plc.compiler.trinode.IfNode;
 import ru.dz.plc.util.PlcException;
 import soot.Body;
 import soot.PatchingChain;
@@ -23,7 +29,23 @@ import soot.Unit;
 import soot.UnitBox;
 import soot.Value;
 import soot.ValueBox;
+import soot.jimple.AssignStmt;
+import soot.jimple.BreakpointStmt;
+import soot.jimple.EnterMonitorStmt;
+import soot.jimple.ExitMonitorStmt;
+import soot.jimple.GotoStmt;
+import soot.jimple.IdentityStmt;
+import soot.jimple.IfStmt;
 import soot.jimple.InvokeExpr;
+import soot.jimple.InvokeStmt;
+import soot.jimple.LookupSwitchStmt;
+import soot.jimple.NopStmt;
+import soot.jimple.RetStmt;
+import soot.jimple.ReturnStmt;
+import soot.jimple.ReturnVoidStmt;
+import soot.jimple.StmtSwitch;
+import soot.jimple.TableSwitchStmt;
+import soot.jimple.ThrowStmt;
 import soot.jimple.internal.AbstractStmt;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JGotoStmt;
@@ -34,6 +56,7 @@ import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 import soot.tagkit.Tag;
 import soot.util.Switch;
+import sun.security.action.GetLongAction;
 
 public class SootMethodTranslator {
 
@@ -89,10 +112,10 @@ public class SootMethodTranslator {
 	}
 
 	
-	public void codegen()
+	/*public void codegen()
 	{
-		// TODO write codegen
-	}
+		// TO DO write codegen
+	}*/
 	
 	//static private JimpleToBafContext context = new JimpleToBafContext(0);
 
@@ -148,27 +171,134 @@ public class SootMethodTranslator {
 	}
 
 	private PhantomCodeWrapper doStatement(AbstractStmt as) throws PlcException {
-	
-		if( as instanceof JIdentityStmt )
-			return doIdentity( (JIdentityStmt)as );
-	
-		if( as instanceof JReturnVoidStmt )
-			return doRetVoid( (JReturnVoidStmt)as );
+		final ww ret = new ww();
+		ret.w = null;
+
+		as.apply(new StmtSwitch() {
+
+			@Override
+			public void caseAssignStmt(AssignStmt as ) {
+				try {
+					ret.w = doAssign( as );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
+			}
+
+			@Override
+			public void caseBreakpointStmt(BreakpointStmt arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseEnterMonitorStmt(EnterMonitorStmt arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseExitMonitorStmt(ExitMonitorStmt arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseGotoStmt(GotoStmt as ) {
+				ret.w = doGoto( as );
+				}
+
+			@Override
+			public void caseIdentityStmt(IdentityStmt as ) {
+				try {
+					ret.w = doIdentity( as );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
+			}
+
+			@Override
+			public void caseIfStmt(IfStmt as) {
+				try {
+					ret.w = doIf( as );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
+			}
+
+			@Override
+			public void caseInvokeStmt(InvokeStmt as ) {
+				ret.w = doInvoke( as );
+			}
+
+			@Override
+			public void caseNopStmt(NopStmt arg0) {
+				ret.w = new PhantomCodeWrapper(new EmptyNode());				
+			}
+
+			@Override
+			public void caseRetStmt(RetStmt arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseReturnStmt(ReturnStmt as ) {
+				try {
+					ret.w = doReturn( as );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
+			}
+
+			@Override
+			public void caseReturnVoidStmt(ReturnVoidStmt as ) {
+				ret.w = doRetVoid( as );				
+			}
+
+			
+			@Override
+			public void caseTableSwitchStmt(TableSwitchStmt arg0) {
+				// TODO make switch statement
+				
+			}
+			
+			@Override
+			public void caseLookupSwitchStmt(LookupSwitchStmt arg0) {
+				// TODO make switch statement
+				
+			}
+
+
+			
+			
+			@Override
+			public void caseThrowStmt(ThrowStmt as) {
+				try {
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc );
+					ret.w = new PhantomCodeWrapper(new ThrowNode(expression.getNode()));				
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}		
+				
+			}
+
+			@Override
+			public void defaultCase(Object arg0) {
+				// Intentionally left blank
+			}
+			
+		});
 		
-		if( as instanceof JReturnStmt )
-			return doReturn( (JReturnStmt)as );
+		if( ret.w != null ) return ret.w;
 		
-		if( as instanceof JInvokeStmt )
-			return doInvoke( (JInvokeStmt)as );
-		
-		if( as instanceof JGotoStmt )
-			return doGoto( (JGotoStmt)as );
-		
-		if( as instanceof JAssignStmt )
-			return doAssign( (JAssignStmt)as );
-		
-		if( as instanceof JIfStmt )
-			return doIf( (JIfStmt)as );
+		//if( as instanceof JIdentityStmt )			return doIdentity( (JIdentityStmt)as );
+		//if( as instanceof JReturnVoidStmt )			return doRetVoid( (JReturnVoidStmt)as );		
+		//if( as instanceof JReturnStmt )			return doReturn( (JReturnStmt)as );		
+		//if( as instanceof JInvokeStmt )			return doInvoke( (JInvokeStmt)as );		
+		//if( as instanceof JGotoStmt )			return doGoto( (JGotoStmt)as );
+		//if( as instanceof JAssignStmt )			return doAssign( (JAssignStmt)as );
+		//if( as instanceof JIfStmt ) 			return doIf( (JIfStmt)as );
 		
 		
 		SootMain.say("s ?? "+as.getClass().getName()+" ("+as.toString()+")");
@@ -183,11 +313,11 @@ public class SootMethodTranslator {
 	
 
 
-	private PhantomCodeWrapper doGoto(JGotoStmt as) {
+	private PhantomCodeWrapper doGoto(GotoStmt as) {
 		UnitBox targetBox = as.getTargetBox();
 		String label = lmap.getLabelFor(targetBox);
 		
-		say("      go to "+targetBox.toString()+" ("+label+")");
+		//say("      go to "+targetBox.toString()+" ("+label+")");
 		//Unit target = as.getTarget();
 		//say("      if "+target.toString());
 
@@ -195,21 +325,24 @@ public class SootMethodTranslator {
 	}
 	
 	
-	private PhantomCodeWrapper doIf(JIfStmt as) {
+	private PhantomCodeWrapper doIf(IfStmt as) throws PlcException {
 		UnitBox targetBox = as.getTargetBox();
 		String label = lmap.getLabelFor(targetBox);
 
-		say("      go to "+targetBox.toString()+" ("+label+")");
-		Unit target = as.getTarget();
-		say("      if "+target.toString());
+		//say("      go to "+targetBox.toString()+" ("+label+")");
+		//Unit target = as.getTarget();
+		//say("      if "+target.toString());
 		
-		return null;
+		
+		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getCondition(), phantomMethod, pc );		
+		return new PhantomCodeWrapper(new IfNode(expression.getNode(),new JumpNode(label), new EmptyNode()));
 	}
 
 
 
 
-	private PhantomCodeWrapper doAssign(JAssignStmt as) throws PlcException {
+	private PhantomCodeWrapper doAssign(AssignStmt as) throws PlcException {
+		/*
 		ValueBox leftBox = as.leftBox;
 		ValueBox rightBox = as.rightBox;
 		
@@ -217,32 +350,32 @@ public class SootMethodTranslator {
 		String rs = rightBox.toString();
 		
 		say("      Assign '"+ls+"' = '"+rs+"'");
-
-		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( rightBox.getValue(), phantomMethod, pc );
-		
-		return PhantomCodeWrapper.getAssign( leftBox.getValue(), expression, phantomMethod );
+		*/
+		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getRightOp(), phantomMethod, pc );		
+		return PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod );
 	}
 
 
-	private PhantomCodeWrapper doInvoke(JInvokeStmt as) {
+	private PhantomCodeWrapper doInvoke(InvokeStmt as) {
 		InvokeExpr expr = as.getInvokeExpr();
 		say("      Invoke "+expr.toString());
 		SootMethodRef methodRef = expr.getMethodRef();
 		say("      ."+methodRef.name());
+		// TODO make invoke
 		return null;
 	}
 
 	
 	
-	private PhantomCodeWrapper doRetVoid(JReturnVoidStmt as) {
-		say("      Return void ");
+	private PhantomCodeWrapper doRetVoid(ReturnVoidStmt as) {
+		//say("      Return void ");
 		return PhantomCodeWrapper.getReturnNode();
 	}
 
-	private PhantomCodeWrapper doReturn(JReturnStmt as) throws PlcException {
+	private PhantomCodeWrapper doReturn(ReturnStmt as) throws PlcException {
 		Value op = as.getOp();
 		PhantomCodeWrapper v = PhantomCodeWrapper.getExpression( op, phantomMethod, pc );
-		say("      Return "+op.toString());
+		//say("      Return "+op.toString());
 		return PhantomCodeWrapper.getReturnValueNode(v);
 	}
 
@@ -255,10 +388,13 @@ public class SootMethodTranslator {
 	 * @return generated code tree
 	 * @throws PlcException
 	 */
-	private PhantomCodeWrapper doIdentity(JIdentityStmt as) throws PlcException {
-		Value lv = as.leftBox.getValue();
-		Value rv = as.rightBox.getValue();
+	private PhantomCodeWrapper doIdentity(IdentityStmt as) throws PlcException {
+		//Value lv = as.leftBox.getValue();
+		//Value rv = as.rightBox.getValue();
 
+		Value lv = as.getLeftOp();
+		Value rv = as.getRightOp();
+		
 		// Arg: we just create var def and stick it to fixed object stack position, which is
 		// a correct way to do it.
 		if(
@@ -305,12 +441,12 @@ public class SootMethodTranslator {
 		}
 		
 		
-		String ls = as.leftBox.toString();
-		String rs = as.rightBox.toString();
+		//String ls = as.leftBox.toString();
+		//String rs = as.rightBox.toString();
 		
-		say(" ??   Identity '"+ls+"' <- '"+rs+"'");
+		//say(" ??   Identity '"+ls+"' <- '"+rs+"'");
 		
-		say("      Identity '"+lv+"' <- '"+rv+"'");
+		say(" ??   Identity '"+lv+"' <- '"+rv+"'");
 		say("      Identity '"+lv.getClass()+"' <- '"+rv.getClass()+"'");
 		
 		
