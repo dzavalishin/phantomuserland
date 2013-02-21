@@ -13,6 +13,9 @@ import ru.dz.plc.compiler.binode.OpMultiplyNode;
 import ru.dz.plc.compiler.binode.OpOrNode;
 import ru.dz.plc.compiler.binode.OpPlusNode;
 import ru.dz.plc.compiler.binode.OpRemainderNode;
+import ru.dz.plc.compiler.binode.OpShiftLeftNode;
+import ru.dz.plc.compiler.binode.OpShiftRightNode;
+import ru.dz.plc.compiler.binode.OpShiftRightUnsignedNode;
 import ru.dz.plc.compiler.binode.OpSubscriptNode;
 import ru.dz.plc.compiler.binode.RefEqNode;
 import ru.dz.plc.compiler.binode.RefNeqNode;
@@ -21,13 +24,17 @@ import ru.dz.plc.compiler.binode.ValGtNode;
 import ru.dz.plc.compiler.binode.ValLeNode;
 import ru.dz.plc.compiler.binode.ValLtNode;
 import ru.dz.plc.compiler.node.IdentNode;
+import ru.dz.plc.compiler.node.IntConst64Node;
 import ru.dz.plc.compiler.node.IntConstNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.OpArrayLength;
+import ru.dz.plc.compiler.node.StaticLoadNode;
 import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.util.PlcException;
 import soot.Local;
+import soot.SootClass;
+import soot.SootFieldRef;
 import soot.SootMethodRef;
 import soot.Type;
 import soot.Value;
@@ -106,10 +113,8 @@ public class SootExpressionTranslator {
 		return ret;
 	}
 
-	public static PhantomType convertType( Type t ) throws PlcException
+	public static PhantomType convertType( String tn ) throws PlcException
 	{
-		String tn = t.toString();
-		
 		if( tn.equals(" java.lang.Object")) tn = ".internal.object";
 		if( tn.equals("int")) tn = ".internal.int";
 		
@@ -132,6 +137,10 @@ public class SootExpressionTranslator {
 		return pt;
 	}
 	
+	public static PhantomType convertType( Type t ) throws PlcException
+	{
+		return convertType(t.toString());
+	}
 	
 	class ww { public PhantomCodeWrapper w; }
 	
@@ -156,14 +165,13 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseDoubleConstant(DoubleConstant arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseDoubleConstant(DoubleConstant v) {
+				ret.w = new PhantomCodeWrapper(new IntConst64Node(Double.doubleToRawLongBits(v.value)));				
 			}
 
 			@Override
-			public void caseFloatConstant(FloatConstant arg0) {
-				// TODO Auto-generated method stub
+			public void caseFloatConstant(FloatConstant v) {				
+				ret.w = new PhantomCodeWrapper(new IntConstNode(Float.floatToIntBits(v.value)));
 				
 			}
 
@@ -173,9 +181,8 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseLongConstant(LongConstant arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseLongConstant(LongConstant v) {
+				ret.w = new PhantomCodeWrapper(new IntConst64Node(v.value));				
 			}
 
 			@Override
@@ -340,15 +347,17 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseShlExpr(ShlExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseShlExpr(ShlExpr v) {
+				// TODO implement in VM
+				ret.w = new BinOpWrapper<OpShiftLeftNode>() {@Override
+					OpShiftLeftNode create(Node l, Node r) { return new OpShiftLeftNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
-			public void caseShrExpr(ShrExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseShrExpr(ShrExpr v) {
+				// TODO implement in VM
+				ret.w = new BinOpWrapper<OpShiftRightNode>() {@Override
+					OpShiftRightNode create(Node l, Node r) { return new OpShiftRightNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
@@ -369,9 +378,10 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseUshrExpr(UshrExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseUshrExpr(UshrExpr v) { 
+				// TODO implement in VM
+				ret.w = new BinOpWrapper<OpShiftRightUnsignedNode>() {@Override
+					OpShiftRightUnsignedNode create(Node l, Node r) { return new OpShiftRightUnsignedNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
@@ -386,8 +396,12 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseArrayRef(ArrayRef arg0) {
-				// TODO Auto-generated method stub
+			public void caseArrayRef(ArrayRef v) {
+				try {
+					ret.w = doArrayRef(v);
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
 				
 			}
 
@@ -398,21 +412,41 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseInstanceFieldRef(InstanceFieldRef arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseInstanceFieldRef(InstanceFieldRef v) {
+				String varName = v.getField().getName();
+				IdentNode node = new IdentNode( varName ); // IdentNode automatically looks for for field or stack var by name
+				ret.w = new PhantomCodeWrapper( node );				
 			}
 
 			@Override
-			public void caseParameterRef(ParameterRef arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseParameterRef(ParameterRef v) {
+				/*
+				int parameterIndex = v.getIndex();
+				String varName = v.getField().getName();
+				IdentNode node = new IdentNode( varName ); // IdentNode automatically looks for for field or stack var by name
+				ret.w = new PhantomCodeWrapper( node );
+				*/
+				// TODO make me
 			}
 
 			@Override
-			public void caseStaticFieldRef(StaticFieldRef arg0) {
-				// TODO Auto-generated method stub
+			public void caseStaticFieldRef(StaticFieldRef v) {
+				SootFieldRef ref = v.getFieldRef();
+				String varName = ref.name();
 				
+				SootClass declaringClass = ref.declaringClass();
+				String className = declaringClass.getName();
+				
+				say("ref to static field '"+varName+"' from "+className);
+				
+				try {
+					PhantomType phantomType = convertType(className);					
+					Node n = new StaticLoadNode(phantomType.get_class(),varName);
+					ret.w = new PhantomCodeWrapper( n );
+				} catch (PlcException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
 			@Override
@@ -422,8 +456,7 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseLocal(Local v) {
-				ret.w = doReadLocal(v);
-				
+				ret.w = doReadLocal(v);				
 			}
 			
 		});
@@ -521,7 +554,7 @@ public class SootExpressionTranslator {
 		return new PhantomCodeWrapper(new NullNode());
 	}
 
-	private PhantomCodeWrapper doArrayRef(JArrayRef v) throws PlcException {
+	private PhantomCodeWrapper doArrayRef(ArrayRef v) throws PlcException {
 		Value base = v.getBase();
 		Value index = v.getIndex();
 		

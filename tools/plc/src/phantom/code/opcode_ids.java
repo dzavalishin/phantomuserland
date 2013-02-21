@@ -50,7 +50,7 @@ protected static final byte opcode_iconst_1 = (byte)0x21;
 protected static final byte opcode_iconst_8bit = (byte)0x22;
 protected static final byte opcode_iconst_32bit = (byte)0x23;
 protected static final byte opcode_sconst_bin = (byte)0x24;
-// for binconst 0x25
+protected static final byte opcode_iconst_64bit = (byte)0x25;
 
 // this is for integer local vars
 protected static final byte opcode_is_get32 = (byte)0x26; // get value from stack absolute-addressed slot, push on top
@@ -129,6 +129,10 @@ protected static final byte opcode_prefix_double = (byte)0x5E; // next operation
 //id(opcode_unlock_this, 0x61)	// semaphore in 'this' is unlocked
 //id(opcode_general_lock, 0x62)	// semaphore is locked on stack top. Stack top must point to sema object
 //id(opcode_general_unlock, 0x63)	// 
+
+protected static final byte opcode_ishl = (byte)0x70; // shift left
+protected static final byte opcode_ishr = (byte)0x71; // shift right signed
+protected static final byte opcode_ushr = (byte)0x72; // shift right unsigned
 
 
 

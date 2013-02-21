@@ -50,7 +50,7 @@ id(opcode_iconst_1,0x21)
 id(opcode_iconst_8bit,0x22)
 id(opcode_iconst_32bit,0x23)
 id(opcode_sconst_bin,0x24)
-// for binconst 0x25
+id(opcode_iconst_64bit,0x25)
 
 // this is for integer local vars
 id(opcode_is_get32,0x26)	// get value from stack absolute-addressed slot, push on top
@@ -129,6 +129,10 @@ id(opcode_prefix_double, 0x5E)	// next operation works on doubles (uses 2x slots
 //id(opcode_unlock_this, 0x61)	// semaphore in 'this' is unlocked
 //id(opcode_general_lock, 0x62)	// semaphore is locked on stack top. Stack top must point to sema object
 //id(opcode_general_unlock, 0x63)	// 
+
+id(opcode_ishl,0x70)  // shift left
+id(opcode_ishr,0x71)  // shift right signed
+id(opcode_ushr,0x72)  // shift right unsigned
 
 
 

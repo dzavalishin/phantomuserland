@@ -87,6 +87,7 @@ public class Codegen extends opcode_ids {
 	
 	public void put_byte( byte v ) throws IOException { Fileops.put_byte( os, v ); }
 	public void put_int32( int v ) throws IOException { Fileops.put_int32(os, v ); }
+	public void put_int64( long v ) throws IOException { Fileops.put_int64(os, v ); }
 	public void put_string_bin( String v ) throws IOException { Fileops.put_string_bin(os, v); }
 	public void put_string_bin( byte [] v ) throws IOException { Fileops.put_string_bin(os, v); }	
 
@@ -296,6 +297,13 @@ public class Codegen extends opcode_ids {
 		list("const "+val);
 	}
 
+	public void emitIConst_64bit(long val) throws IOException {
+		put_byte(opcode_iconst_64bit);
+		put_int64(val);
+
+		list("const64 "+val);
+	}
+	
 	/**
 	 * emit_string
 	 *
@@ -385,6 +393,26 @@ public class Codegen extends opcode_ids {
 	}
 
 
+	public void emitIShiftLeft() throws IOException {
+		put_byte(opcode_ishl);
+		list("ishl");
+	}
+
+	/** Signed shift right 
+	 * @throws IOException */
+	public void emitIShiftRight() throws IOException {
+		put_byte(opcode_ishr);
+		list("ishr");
+	}
+
+	/** Unsigned shift right 
+	 * @throws IOException */
+	public void emitUShiftRight() throws IOException {
+		put_byte(opcode_ushr);
+		list("ushr");
+	}
+
+	
 
 	public void emitDebug(byte type, String text) throws IOException {
 		put_byte(opcode_debug);
@@ -687,5 +715,7 @@ public class Codegen extends opcode_ids {
 	public Map<Long, Integer> getIpToLine() {
 		return IpToLine;
 	}
+
+
 
 }

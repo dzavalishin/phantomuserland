@@ -50,7 +50,7 @@
 #define opcode_iconst_8bit   0x22 
 #define opcode_iconst_32bit   0x23 
 #define opcode_sconst_bin   0x24 
-// for binconst 0x25
+#define opcode_iconst_64bit   0x25 
 
 // this is for integer local vars
 #define opcode_is_get32   0x26  // get value from stack absolute-addressed slot, push on top
@@ -129,6 +129,10 @@
 //id(opcode_unlock_this, 0x61)	// semaphore in 'this' is unlocked
 //id(opcode_general_lock, 0x62)	// semaphore is locked on stack top. Stack top must point to sema object
 //id(opcode_general_unlock, 0x63)	// 
+
+#define opcode_ishl   0x70  // shift left
+#define opcode_ishr   0x71  // shift right signed
+#define opcode_ushr   0x72  // shift right unsigned
 
 
 

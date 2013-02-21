@@ -110,4 +110,9 @@ public class SootMain {
 		errors ++;
 	}
 
+
+	public static void error(Throwable e) {
+		error("Exception "+e);		
+	}
+
 }
