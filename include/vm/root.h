@@ -40,6 +40,9 @@ struct pvm_root_t
     struct pvm_object           code_class;
 
     struct pvm_object           int_class;
+    struct pvm_object           long_class;
+    struct pvm_object           float_class;
+    struct pvm_object           double_class;
     struct pvm_object           string_class;
 
     struct pvm_object           array_class;
@@ -138,6 +141,14 @@ extern struct pvm_root_t pvm_root;
 // Pointer to estack class
 #define PVM_ROOT_OBJECT_ESTACK_CLASS 12
 
+// Pointer to long (64 bit) class
+#define PVM_ROOT_OBJECT_LONG_CLASS 13
+
+// Pointer to float class
+#define PVM_ROOT_OBJECT_FLOAT_CLASS 14
+
+// Pointer to double (64 bit) class
+#define PVM_ROOT_OBJECT_DOUBLE_CLASS 15
 
 
 // Special classes

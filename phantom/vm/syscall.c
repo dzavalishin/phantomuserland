@@ -282,6 +282,78 @@ DECLARE_SIZE(int);
 
 
 
+
+
+// --------- long ------------------------------------------------------------
+
+static int si_long_3_clone(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_long_object( pvm_get_long(me) ));
+}
+
+static int si_long_4_equals(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    struct pvm_object him = POP_ARG;
+
+    int same_class = me.data->_class.data == him.data->_class.data;
+    int same_value = pvm_get_long(me) == pvm_get_long(him);
+
+    SYS_FREE_O(him);
+
+    SYSCALL_RETURN(pvm_create_int_object( same_class && same_value));
+}
+
+static int si_long_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    char buf[100];
+    snprintf( buf, sizeof(buf), "%Ld", pvm_get_long(me) ); // TODO right size?
+    SYSCALL_RETURN(pvm_create_string_object( buf ));
+}
+
+static int si_long_6_toXML(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    char buf[100];
+    snprintf( buf, sizeof(buf), "%Ld", pvm_get_long(me) );
+	//SYSCALL_RETURN(pvm_create_string_object( "<void>" ));
+    SYSCALL_THROW_STRING( "int toXML called" );
+}
+
+
+syscall_func_t	syscall_table_4_long[16] =
+{
+    &si_void_0_construct,           	&si_void_1_destruct,
+    &si_void_2_class,               	&si_long_3_clone,
+    &si_long_4_equals,     		&si_long_5_tostring,
+    &si_long_6_toXML,      		&si_void_7_fromXML,
+    // 8
+    &si_void_8_def_op_1,            	&si_void_9_def_op_2,
+    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,               	&si_void_15_hashcode
+};
+DECLARE_SIZE(long);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // --------- string ---------------------------------------------------------
 
 static int si_string_3_clone(struct pvm_object me, struct data_area_4_thread *tc )
@@ -702,6 +774,38 @@ static int si_class_class_8_new_class(struct pvm_object me, struct data_area_4_t
     SYSCALL_RETURN( new_class );
 }
 
+static int si_class_10_set_static(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    struct data_area_4_class *meda = pvm_object_da( me, class );
+
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 2);
+
+    struct pvm_object static_val = POP_ARG;
+    int n_slot = POP_INT();
+
+    pvm_set_ofield( meda->static_vars, n_slot, static_val );
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+static int si_class_11_get_static(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    struct data_area_4_class *meda = pvm_object_da( me, class );
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 2);
+
+    int n_slot = POP_INT();
+
+    pvm_object_t ret = pvm_get_ofield( meda->static_vars, n_slot );
+    ref_inc_o( ret );
+    SYSCALL_RETURN( ret );
+}
+
 syscall_func_t	syscall_table_4_class[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
@@ -710,7 +814,7 @@ syscall_func_t	syscall_table_4_class[16] =
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
     &si_class_class_8_new_class,    &si_void_9_def_op_2,
-    &invalid_syscall,               &invalid_syscall,
+    &si_class_10_set_static,        &si_class_11_get_static,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
 };

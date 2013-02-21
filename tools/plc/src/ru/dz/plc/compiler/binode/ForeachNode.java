@@ -25,7 +25,7 @@ public class ForeachNode extends BiNode {
 		this.ident = ident;
 	}
 	public String toString()  {    return "foreach " + ident;  }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); }
+	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); checkPresetType(); }
 	public boolean is_const() { return false; }
 
 

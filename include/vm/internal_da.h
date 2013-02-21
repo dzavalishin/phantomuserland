@@ -124,6 +124,14 @@ struct data_area_4_int
 // TODO: make sure it is not an lvalue for security reasons!
 #define pvm_get_int( o )  ( (int) (((struct data_area_4_int *)&(o.data->da))->value))
 
+struct data_area_4_long
+{
+    int64_t			value;
+};
+
+// TODO: make sure it is not an lvalue for security reasons!
+#define pvm_get_long( o )  ( (int64_t) (((struct data_area_4_long *)&(o.data->da))->value))
+
 
 
 struct data_area_4_string
@@ -148,6 +156,8 @@ struct data_area_4_class
 
     struct pvm_object		class_name;
     struct pvm_object		class_parent;
+
+    struct pvm_object		static_vars; // array of static variables
 
     struct pvm_object		ip2line_maps; // array of maps: ip->line number
     struct pvm_object		method_names; // array of method names

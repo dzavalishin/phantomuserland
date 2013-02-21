@@ -12,6 +12,7 @@ import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.IntConstNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.OpArrayLength;
 import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.util.PlcException;
 import soot.SootMethodRef;
@@ -127,9 +128,10 @@ public class SootExpressionTranslator {
 		return new PhantomCodeWrapper(new StringConstNode(v.value));
 	}
 
-	private PhantomCodeWrapper doLength(JLengthExpr v) {
-		// TODO array len op
-		return new PhantomCodeWrapper(new NullNode());
+	private PhantomCodeWrapper doLength(JLengthExpr v) throws PlcException {
+		Value array = v.getOp();
+		
+		return new PhantomCodeWrapper(new OpArrayLength(PhantomCodeWrapper.getExpression(array, m).getNode()));
 	}
 
 	private PhantomCodeWrapper doStaticInvoke(JStaticInvokeExpr v) {
@@ -150,8 +152,6 @@ public class SootExpressionTranslator {
 	}
 
 	private PhantomCodeWrapper doArrayRef(JArrayRef v) throws PlcException {
-		// TODO impl
-		
 		Value base = v.getBase();
 		Value index = v.getIndex();
 		
@@ -160,13 +160,10 @@ public class SootExpressionTranslator {
 		
 		OpSubscriptNode subscriptNode = new OpSubscriptNode(array,subscr);
 		return new PhantomCodeWrapper(subscriptNode);
-		//return new PhantomCodeWrapper(new NullNode());
 	}
 
 	private PhantomCodeWrapper doAdd(JAddExpr v) throws PlcException {
 		Type t = v.getType();
-		PhantomType convertType = convertType(t);
-		// TODO type?
 		assertInt(t);
 
 		Value e1 = v.getOp1();
@@ -175,12 +172,14 @@ public class SootExpressionTranslator {
 		Node e1n = doValue(e1).getNode();
 		Node e2n = doValue(e2).getNode();
 		
-		return new PhantomCodeWrapper( new OpPlusNode(e1n,e2n) );
+		OpPlusNode node = new OpPlusNode(e1n,e2n);
+		node.setType(convertType(t));
+		
+		return new PhantomCodeWrapper( node );
 	}
 	
 	private PhantomCodeWrapper doSub(JSubExpr v) throws PlcException {
 		Type t = v.getType();
-		// TODO type?
 		assertInt(t);
 		
 		Value e1 = v.getOp1();
@@ -189,7 +188,9 @@ public class SootExpressionTranslator {
 		Node e1n = doValue(e1).getNode();
 		Node e2n = doValue(e2).getNode();
 		
-		return new PhantomCodeWrapper( new OpMinusNode(e1n,e2n));
+		OpMinusNode node = new OpMinusNode(e1n,e2n);
+		node.setType(convertType(t));
+		return new PhantomCodeWrapper( node);
 	}
 
 	private void assertInt(Type t) {

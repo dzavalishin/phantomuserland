@@ -230,7 +230,7 @@ void phantom_dump_stats_buf(char *buf, int len)
 {
     int rc;
 #if COMPILE_PERSISTENT_STATS
-    rc = snprintf(buf, len, "\x1b[35m Statistics    curr/sec t/sec      total       life\x1b[37m");
+    rc = snprintf(buf, len, "\x1b[35m Statistics    curr/sec t/sec      this run    life\x1b[37m");
 #else
     rc = snprintf(buf, len, " Statistics       \tper sec\ttotal/sec\t     total");
 #endif

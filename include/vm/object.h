@@ -166,6 +166,7 @@ struct pvm_object     pvm_get_class_class(void);
 struct pvm_object     pvm_get_interface_class(void);
 struct pvm_object     pvm_get_code_class(void);
 struct pvm_object     pvm_get_int_class(void);
+struct pvm_object     pvm_get_long_class(void);
 struct pvm_object     pvm_get_string_class(void);
 struct pvm_object     pvm_get_array_class(void);
 struct pvm_object     pvm_get_page_class(void);
@@ -192,7 +193,10 @@ struct pvm_object     pvm_create_class_object(struct pvm_object name, struct pvm
 struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_object parent_class );
 //struct pvm_object     pvm_create_interface_object(void);
 struct pvm_object     pvm_create_code_object(int size, void *code);
+
 struct pvm_object     pvm_create_int_object(int value);
+struct pvm_object     pvm_create_long_object(int64_t value);
+
 struct pvm_object     pvm_create_string_object(const char *value);
 struct pvm_object     pvm_create_string_object_binary(const char *value, int length);
 struct pvm_object     pvm_create_string_object_binary_cat(

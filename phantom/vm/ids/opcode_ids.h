@@ -43,9 +43,6 @@
 #define opcode_os_set32   0x1F  // pop stack top, set value in stack absolute-addressed slot
 
 
-#define opcode_push_catcher   0x2D  // jump address folows, top of o stack - class of objects to catch
-#define opcode_pop_catcher   0x2E 
-#define opcode_throw   0x2F  // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
 
 
 #define opcode_iconst_0   0x20 
@@ -58,6 +55,12 @@
 // this is for integer local vars
 #define opcode_is_get32   0x26  // get value from stack absolute-addressed slot, push on top
 #define opcode_is_set32   0x27  // pop stack top, set value in stack absolute-addressed slot
+
+
+#define opcode_push_catcher   0x2D  // jump address folows, top of o stack - class of objects to catch
+#define opcode_pop_catcher   0x2E 
+#define opcode_throw   0x2F  // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
+
 
 
 
@@ -115,6 +118,10 @@
 // BUG! Duplicate!
 #define opcode_os_push_null   0x5B  // push null on stack
 
+// Prefixes - modify next op operands type
+#define opcode_prefix_long   0x5C  // next operation works on longs (uses 2x slots on int stack)
+#define opcode_prefix_float   0x5D  // next operation works on floats (uses 1x slots on int stack)
+#define opcode_prefix_double   0x5E  // next operation works on doubles (uses 2x slots on int stack)
 
 
 

@@ -1,4 +1,4 @@
-package ru.dz.plc.compiler.binode;
+package ru.dz.plc.compiler.node;
 
 import java.io.IOException;
 
@@ -10,16 +10,18 @@ import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
 /**
- * <p>Array subscription node.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * <p>Array length node.</p>
+ * <p>Copyright: Copyright (c) 2004-2012 Dmitry Zavalishin</p>
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * @author dz
  */
 
 
-public class OpSubscriptNode extends BiNode {
-	public OpSubscriptNode(Node atom, Node subscr) {    super(atom,subscr);  }
-	public String toString()  {    return "[]";  }
+public class OpArrayLength extends Node {
+	
+	public OpArrayLength(Node array) {    super(array);  }
+	
+	public String toString()  {    return ".length";  }
 
 	public void find_out_my_type() throws PlcException
 	{
@@ -30,29 +32,18 @@ public class OpSubscriptNode extends BiNode {
 		if( a_type == null || a_type.is_unknown() )
 		{
 			type = new PhTypeUnknown();
-			checkPresetType();
 			return;
 		}
 
 		if( !a_type.is_container() )
-			throw new PlcException( "[] Node", "not a container subscripted" );
+			throw new PlcException( ".length Node", "not a container subscripted" );
 
-		/*if( a_type._class == null )
-	    {
-	      type = new PhTypeUnknown();
-	      return;
-	    }
-
-	    type = new PhantomType( a_type._class );
-		 */
 		type = new PhantomType( a_type.get_class() );
-		checkPresetType();
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		Node atom = _l;
-		Node subscr = _r;
 
 		log.fine("Node "+this+" codegen");
 
@@ -60,10 +51,7 @@ public class OpSubscriptNode extends BiNode {
 		atom.generate_code(c,s);
 		move_between_stacks(c, atom.is_on_int_stack());
 
-		// put subscript
-		subscr.generate_code(c,s);
-		move_between_stacks(c, subscr.is_on_int_stack());
 
-		c.emitCall(10,1); // Method number 10, 1 parameter - get
+		c.emitCall(12,0); // Method number 12, 0 parameters - size
 	}
 }
