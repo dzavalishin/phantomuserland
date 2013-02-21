@@ -1,20 +1,24 @@
 package ru.dz.soot;
 
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhTypeInt;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
 import ru.dz.plc.compiler.binode.OpMinusNode;
 import ru.dz.plc.compiler.binode.OpPlusNode;
+import ru.dz.plc.compiler.binode.OpSubscriptNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.IntConstNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.util.PlcException;
 import soot.SootMethodRef;
 import soot.Type;
 import soot.Value;
 import soot.jimple.IntConstant;
+import soot.jimple.StringConstant;
 import soot.jimple.internal.AbstractBinopExpr;
 import soot.jimple.internal.JAddExpr;
 import soot.jimple.internal.JArrayRef;
@@ -23,6 +27,7 @@ import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.internal.JSubExpr;
 import soot.jimple.internal.JVirtualInvokeExpr;
 import soot.jimple.internal.JimpleLocal;
+import soot.util.Switch;
 
 public class SootExpressionTranslator {
 
@@ -34,14 +39,42 @@ public class SootExpressionTranslator {
 		this.m = m;
 	}
 
-	public PhantomCodeWrapper process()
+	public PhantomCodeWrapper process() throws PlcException
 	{
 		PhantomCodeWrapper ret = doValue(root);
 		return ret;
 	}
 
-	private PhantomCodeWrapper doValue(Value v) 
+	public static PhantomType convertType( Type t ) throws PlcException
 	{
+		String tn = t.toString();
+		
+		if( tn.equals(" java.lang.Object")) tn = ".internal.object";
+		if( tn.equals("int")) tn = ".internal.int";
+		
+		boolean err = false;
+		
+		if( tn.equals("long")) { tn = ".internal.long"; err = true; }
+		if( tn.equals("float")) { tn = ".internal.float"; err = true; }
+		if( tn.equals("double")) { tn = ".internal.double"; err = true; }
+		
+		if( err ) SootMain.error("no type"+tn);
+		
+		PhantomClass pc = new PhantomClass(tn);
+		/*if(pc == null)
+		{
+			SootMain.error("type not found"+tn);
+			return null;
+		}*/
+		
+		PhantomType pt = new PhantomType(pc);
+		return pt;
+	}
+	
+	private PhantomCodeWrapper doValue(Value v) throws PlcException 
+	{
+		if( v instanceof StringConstant )
+			return doStringConst((StringConstant)v);
 
 		if( v instanceof JimpleLocal )
 			return doReadLocal((JimpleLocal)v);
@@ -90,6 +123,10 @@ public class SootExpressionTranslator {
     */
 	
 
+	private PhantomCodeWrapper doStringConst(StringConstant v) {
+		return new PhantomCodeWrapper(new StringConstNode(v.value));
+	}
+
 	private PhantomCodeWrapper doLength(JLengthExpr v) {
 		// TODO array len op
 		return new PhantomCodeWrapper(new NullNode());
@@ -112,13 +149,23 @@ public class SootExpressionTranslator {
 		return new PhantomCodeWrapper(new NullNode());
 	}
 
-	private PhantomCodeWrapper doArrayRef(JArrayRef v) {
+	private PhantomCodeWrapper doArrayRef(JArrayRef v) throws PlcException {
 		// TODO impl
-		return new PhantomCodeWrapper(new NullNode());
+		
+		Value base = v.getBase();
+		Value index = v.getIndex();
+		
+		Node array = doValue(base).getNode();
+		Node subscr = doValue(index).getNode();
+		
+		OpSubscriptNode subscriptNode = new OpSubscriptNode(array,subscr);
+		return new PhantomCodeWrapper(subscriptNode);
+		//return new PhantomCodeWrapper(new NullNode());
 	}
 
-	private PhantomCodeWrapper doAdd(JAddExpr v) {
+	private PhantomCodeWrapper doAdd(JAddExpr v) throws PlcException {
 		Type t = v.getType();
+		PhantomType convertType = convertType(t);
 		// TODO type?
 		assertInt(t);
 
@@ -128,10 +175,10 @@ public class SootExpressionTranslator {
 		Node e1n = doValue(e1).getNode();
 		Node e2n = doValue(e2).getNode();
 		
-		return new PhantomCodeWrapper( new OpPlusNode(e1n,e2n));
+		return new PhantomCodeWrapper( new OpPlusNode(e1n,e2n) );
 	}
 	
-	private PhantomCodeWrapper doSub(JSubExpr v) {
+	private PhantomCodeWrapper doSub(JSubExpr v) throws PlcException {
 		Type t = v.getType();
 		// TODO type?
 		assertInt(t);

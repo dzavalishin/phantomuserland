@@ -23,6 +23,27 @@ public class PhantomStack
 		return sv;
 	}
 
+	/**
+	 *  Reserve a parameter on stack, setting its name and type
+	 * @param parameterPosition object stack slot position for parameter
+	 * @param name var name
+	 * @param type var type
+	 * @return stack var def (supposed to be unused, though)
+	 */
+	public PhantomStackVar setParameter( int parameterPosition, String name, PhantomType type )
+	{
+		if( used_slots <= parameterPosition )
+			used_slots = parameterPosition+1;
+		
+		PhantomVariable v = new PhantomVariable(name, type);
+		
+		PhantomStackVar sv = new PhantomStackVar( v, parameterPosition );
+		vars.put(v.getName(),sv);
+		return sv;
+	}
+
+	
+	
 	public boolean have( String name )
 	{
 		return vars.containsKey(name);

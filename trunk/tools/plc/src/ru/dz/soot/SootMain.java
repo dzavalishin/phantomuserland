@@ -21,7 +21,11 @@ import soot.SootMethod;
  *
  */
 public class SootMain {
-	Logger log = Logger.getLogger(SootMain.class.getName());
+	private static int errors = 0;
+	
+	static Logger log = Logger.getLogger(SootMain.class.getName());
+    static ClassMap classes = ClassMap.get_map();
+
 
 	/**
 	 * @param args
@@ -34,8 +38,6 @@ public class SootMain {
 		PlcMain.addClassFileSearchParh(new File(phantomClassPath));
 		PlcMain.setOutputPath(phantomClassPath);
 		
-        ClassMap classes = ClassMap.get_map();
-
 		classes.do_import(".internal.object");			
 		classes.do_import(".internal.int");
 
@@ -52,8 +54,20 @@ public class SootMain {
 		//say(cp);
 		
 		Scene.v().setSootClassPath(cp);
-		
-		SootClass c = Scene.v().loadClassAndSupport("test.toPhantom.SootTestClass");
+	
+		doClass("test.toPhantom.SootTestClass");
+	
+		if(errors > 0)
+		{
+			say("Compile errors, stopped");
+			return;
+		}
+	}
+
+	
+	private static void doClass(String cn) throws PlcException, IOException
+	{
+		SootClass c = Scene.v().loadClassAndSupport(cn);
 		if( c.isPhantom() )
 		{
 			die("Not loaded");
@@ -75,7 +89,7 @@ public class SootMain {
 		say("Generate Phantom code for "+pc.getName());
 		classes.codegen();
 	}
-
+	
 	private static String convertClassName(String name) {
 		name = "."+name;
 		say("Class "+name);
@@ -89,6 +103,11 @@ public class SootMain {
 
 	static void say(String string) {
 		System.err.println(string);
+	}
+
+	public static void error(String string) {
+		say("Error: "+string);
+		errors ++;
 	}
 
 }

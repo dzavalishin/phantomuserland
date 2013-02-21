@@ -34,10 +34,12 @@ public class SootTestClass {
 
 	String stringMethod()
 	{
+/* floats not impl		
 		int i = 10;
 		float j = 0;
 		while(i-- > 0)
 			j += 3.3;
+*/
 		return "aaa";
 	}
 	
