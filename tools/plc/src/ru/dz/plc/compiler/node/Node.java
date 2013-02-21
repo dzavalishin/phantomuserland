@@ -164,7 +164,7 @@ abstract public class Node {
 	// TODO abstract?
 	public void preprocess_me( ParseState s ) throws PlcException
 	{
-		System.out.println("Not-overriden preprocess called: "+toString());
+		System.out.println("Not-overriden preprocess_me called: "+toString());
 	}
 
 

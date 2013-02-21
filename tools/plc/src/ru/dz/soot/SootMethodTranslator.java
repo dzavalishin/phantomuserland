@@ -218,7 +218,7 @@ public class SootMethodTranslator {
 		
 		say("      Assign '"+ls+"' = '"+rs+"'");
 
-		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( rightBox.getValue(), phantomMethod );
+		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( rightBox.getValue(), phantomMethod, pc );
 		
 		return PhantomCodeWrapper.getAssign( leftBox.getValue(), expression, phantomMethod );
 	}
@@ -241,7 +241,7 @@ public class SootMethodTranslator {
 
 	private PhantomCodeWrapper doReturn(JReturnStmt as) throws PlcException {
 		Value op = as.getOp();
-		PhantomCodeWrapper v = PhantomCodeWrapper.getExpression( op, phantomMethod );
+		PhantomCodeWrapper v = PhantomCodeWrapper.getExpression( op, phantomMethod, pc );
 		say("      Return "+op.toString());
 		return PhantomCodeWrapper.getReturnValueNode(v);
 	}

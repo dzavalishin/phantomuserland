@@ -2,6 +2,7 @@ package ru.dz.soot;
 
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhTypeInt;
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
 import ru.dz.plc.compiler.binode.OpAssignNode;
@@ -44,11 +45,11 @@ public class PhantomCodeWrapper {
 
 
 
-	public static PhantomCodeWrapper getExpression(Value v, Method m) throws PlcException {
+	public static PhantomCodeWrapper getExpression(Value v, Method m, PhantomClass c) throws PlcException {
 		//String vClass = v.getClass().toString();
 		//System.err.print(" ?? expr class = "+vClass);
 		
-		SootExpressionTranslator et = new SootExpressionTranslator( v, m );
+		SootExpressionTranslator et = new SootExpressionTranslator( v, m, c );
 		return et.process();
 	}
 
