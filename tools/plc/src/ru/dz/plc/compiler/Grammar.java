@@ -500,11 +500,11 @@ extends GrammarHelper {
 		{
 			if( testAndEat( id_rbracket ) )
 			{
-				main_type._is_container = true;
+				main_type.set_is_container(true);
 			}
 			else
 			{
-				main_type._is_container = true;
+				main_type.set_is_container(true);
 
 				if( testAndEat( id_aster ) )
 					main_type._container_class_expression = parseExpression(false);

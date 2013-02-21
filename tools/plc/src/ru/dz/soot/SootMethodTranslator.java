@@ -7,7 +7,12 @@ import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.PhantomVariable;
+import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
+import ru.dz.plc.compiler.node.IdentNode;
+import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.util.PlcException;
 import soot.Body;
 import soot.PatchingChain;
@@ -28,6 +33,7 @@ import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
 import soot.tagkit.Tag;
+import soot.util.Switch;
 
 public class SootMethodTranslator {
 
@@ -49,15 +55,16 @@ public class SootMethodTranslator {
 		
 		Type returnType = m.getReturnType();
 		
-		PhantomType type = PhantomType.t_void; // TODO set type!
+		PhantomType type = SootExpressionTranslator.convertType(returnType);
 		phantomMethod = new Method(mName, type); 
 		pc.addMethod(phantomMethod);
 	
 		for( int i = 0; i < m.getParameterCount(); i++ )
 		{
 			Type parameterType = m.getParameterType(i);
+			PhantomType pptype = SootExpressionTranslator.convertType(parameterType);
 			String parName = String.format("parm%d", i);
-			phantomMethod.addArg(parName, PhantomType.t_string); // TODO set parm typr
+			phantomMethod.addArg(parName, pptype);
 		}
 
 	}
@@ -140,7 +147,7 @@ public class SootMethodTranslator {
 		*/
 	}
 
-	private PhantomCodeWrapper doStatement(AbstractStmt as) {
+	private PhantomCodeWrapper doStatement(AbstractStmt as) throws PlcException {
 	
 		if( as instanceof JIdentityStmt )
 			return doIdentity( (JIdentityStmt)as );
@@ -202,7 +209,7 @@ public class SootMethodTranslator {
 
 
 
-	private PhantomCodeWrapper doAssign(JAssignStmt as) {
+	private PhantomCodeWrapper doAssign(JAssignStmt as) throws PlcException {
 		ValueBox leftBox = as.leftBox;
 		ValueBox rightBox = as.rightBox;
 		
@@ -232,7 +239,7 @@ public class SootMethodTranslator {
 		return PhantomCodeWrapper.getReturnNode();
 	}
 
-	private PhantomCodeWrapper doReturn(JReturnStmt as) {
+	private PhantomCodeWrapper doReturn(JReturnStmt as) throws PlcException {
 		Value op = as.getOp();
 		PhantomCodeWrapper v = PhantomCodeWrapper.getExpression( op, phantomMethod );
 		say("      Return "+op.toString());
@@ -242,12 +249,70 @@ public class SootMethodTranslator {
 
 
 	
-	
-	private PhantomCodeWrapper doIdentity(JIdentityStmt as) {
+	/**
+	 * Identity - make ident to refer to some stuff, like arg or this.
+	 * @param as statement
+	 * @return generated code tree
+	 * @throws PlcException
+	 */
+	private PhantomCodeWrapper doIdentity(JIdentityStmt as) throws PlcException {
+		Value lv = as.leftBox.getValue();
+		Value rv = as.rightBox.getValue();
+
+		// Arg: we just create var def and stick it to fixed object stack position, which is
+		// a correct way to do it.
+		if(
+				(lv.getClass() == soot.jimple.internal.JimpleLocal.class) &&
+				(rv.getClass() == soot.jimple.ParameterRef.class)
+				)
+		{
+			soot.jimple.internal.JimpleLocal jLocal = (soot.jimple.internal.JimpleLocal)lv;
+			soot.jimple.ParameterRef parmRef = (soot.jimple.ParameterRef)rv;
+			
+			String localName = jLocal.getName();
+			Type type = jLocal.getType();
+
+			// TODO make sure that parameter position is correct, or else we need here (numPar - parameterPosition - 1)
+			int parameterPosition = parmRef.getIndex();
+			
+			phantomMethod.svars.setParameter(parameterPosition, localName, SootExpressionTranslator.convertType(type));
+			return new PhantomCodeWrapper(new NullNode());
+		}
+
+		// This: we really should set up a virtual variable that codegens 'summon this',
+		// but for simplicity we generate code to load this to some var
+		if(
+				(lv.getClass() == soot.jimple.internal.JimpleLocal.class) &&
+				(rv.getClass() == soot.jimple.ThisRef.class)
+				)
+		{
+			// Create stack var ans load it with 'this'
+			
+			soot.jimple.internal.JimpleLocal jLocal = (soot.jimple.internal.JimpleLocal)lv;
+			//soot.jimple.ThisRef thisRef = (soot.jimple.ThisRef)rv;
+			
+			//thisRef.
+			
+			String localName = jLocal.getName();
+			Type type = jLocal.getType();
+
+			PhantomVariable v = new PhantomVariable(localName, SootExpressionTranslator.convertType(type));			
+			phantomMethod.svars.add_stack_var(v);
+			
+			OpAssignNode node = new OpAssignNode(new IdentNode(localName) , new ThisNode(pc));
+			
+			return new PhantomCodeWrapper(node);
+		}
+		
+		
 		String ls = as.leftBox.toString();
 		String rs = as.rightBox.toString();
 		
-		say("      Identity '"+ls+"' <- '"+rs+"'");
+		say(" ??   Identity '"+ls+"' <- '"+rs+"'");
+		
+		say("      Identity '"+lv+"' <- '"+rv+"'");
+		say("      Identity '"+lv.getClass()+"' <- '"+rv.getClass()+"'");
+		
 		
 		return null;
 	}

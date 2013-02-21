@@ -14,13 +14,18 @@ import java.io.*;
  */
 
 public class PhantomType {
-	protected PhantomClass  _class;
-	protected PhantomClass  _container_class;
-	boolean             _is_void;
-	boolean             _is_container;
-	boolean             _is_known;
-	boolean             _is_int;
-	boolean             _is_string;
+	protected PhantomClass        _class;
+	protected PhantomClass        _container_class;
+	protected boolean             _is_void;
+	protected boolean             _is_container;
+	protected boolean             _is_known;
+
+	protected boolean             _is_int;
+	protected boolean             _is_long;
+	protected boolean             _is_float;
+	protected boolean             _is_double;
+	
+	protected boolean             _is_string;
 
 	Node                _class_expression;
 	Node                _container_class_expression;
@@ -40,12 +45,14 @@ public class PhantomType {
 			return _class == null ? "" : _class.getName();
 		return "";
 	}
-	//public PhantomType() {_void = true; _is_container = false; _class = null; } // void
 	protected PhantomType()
 	{
 		_is_void = false;
 		_is_string = false;
 		_is_int = false;
+		_is_long = false;
+		_is_float = false;
+		_is_double = false;
 		_is_container = false;
 		_is_known = true;
 		_class = null;
@@ -59,6 +66,9 @@ public class PhantomType {
 		_is_void = false;
 		_is_string = false;
 		_is_int = false;
+		_is_long = false;
+		_is_float = false;
+		_is_double = false;
 		_is_container = false;
 		_is_known = (_c != null);
 		_class = _c;
@@ -75,6 +85,9 @@ public class PhantomType {
 		_is_void = false;
 		_is_string = false;
 		_is_int = false;
+		_is_long = false;
+		_is_float = false;
+		_is_double = false;
 		_is_known = true;
 		_is_container = is_container;
 		_class = _c;
@@ -83,10 +96,19 @@ public class PhantomType {
 
 	public boolean is_void() { return _is_void; }
 	public boolean is_int() { return _is_int; }
+	public boolean is_long() { return _is_long; }
+	public boolean is_float() { return _is_float; }
+	public boolean is_double() { return _is_double; }
 	public boolean is_string() { return _is_string; }
 	public boolean is_container() { return _is_container; }
 	public boolean is_unknown() { return !_is_known; }
 
+    public void set_is_container(boolean is_container) {
+        this._is_container = is_container;
+    }
+	
+	public boolean is_on_int_stack() { return _is_int||_is_long||_is_float||_is_double; }
+	
 	public boolean equals( Object o )
 	{
 		if( o == null || ! (o instanceof PhantomType ) ) return false;
@@ -98,9 +120,20 @@ public class PhantomType {
 		if( _is_void && _t._is_void ) return true;
 		if( _is_void || _t._is_void ) return false;
 
+		
 		if( _is_int && _t._is_int ) return true;
 		if( _is_int || _t._is_int ) return false;
 
+		if( _is_long && _t._is_long ) return true;
+		if( _is_long || _t._is_long ) return false;
+
+		if( _is_float && _t._is_float ) return true;
+		if( _is_float || _t._is_float ) return false;
+
+		if( _is_double && _t._is_double ) return true;
+		if( _is_double || _t._is_double ) return false;
+
+				
 		if( _is_string && _t._is_string ) return true;
 		if( _is_string || _t._is_string ) return false;
 
@@ -118,6 +151,9 @@ public class PhantomType {
 			if (_is_void)             type = "void";
 			else if (_is_string)      type = "string";
 			else if (_is_int)         type = "int";
+			else if (_is_long)        type = "long";
+			else if (_is_float)       type = "float";
+			else if (_is_double)      type = "double";
 			else if( _class != null ) type = _class.toString();
 		}
 
@@ -132,6 +168,9 @@ public class PhantomType {
 		if(is_void() && !is_container())        //c.emit_summon_null();
 			throw new PlcException("PhantomType","asked to emit void class object"); // Why not, btw?
 		else if(is_int())    c.emitSummonByName(".internal.int");
+		else if(is_long())   c.emitSummonByName(".internal.long");
+		else if(is_float())  c.emitSummonByName(".internal.float");
+		else if(is_double()) c.emitSummonByName(".internal.double");
 		else if(is_string()) c.emitSummonByName(".internal.string");
 		else if(is_container())
 		{
@@ -162,7 +201,7 @@ public class PhantomType {
 	public PhantomType(RandomAccessFile is) throws IOException, PlcException {
 		_class_expression = _container_class_expression = null;
 		_class = _container_class = null;
-		_is_void = _is_known = _is_int = _is_string = false;
+		_is_void = _is_known = _is_int = _is_string = _is_long = _is_float = _is_double = false;
 
 		boolean _is_container = Fileops.get_int32(is) != 0;
 		String main_class_name = Fileops.get_string(is);
@@ -193,6 +232,9 @@ public class PhantomType {
 
 		_is_void   = main_class_name.equals(".internal.void");
 		_is_int    = main_class_name.equals(".internal.int");
+		_is_long   = main_class_name.equals(".internal.long");
+		_is_float  = main_class_name.equals(".internal.float");
+		_is_double = main_class_name.equals(".internal.double");
 		_is_string = main_class_name.equals(".internal.string");
 	}
 
@@ -204,6 +246,9 @@ public class PhantomType {
 	{
 		if( _class != null ) return _class;
 		if( _is_int ) _class = ClassMap.get_map().get(".internal.int",false, null);
+		if( _is_long ) _class = ClassMap.get_map().get(".internal.long",false, null);
+		if( _is_float ) _class = ClassMap.get_map().get(".internal.float",false, null);
+		if( _is_double ) _class = ClassMap.get_map().get(".internal.double",false, null);
 		if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
 
 		return _class;
@@ -224,14 +269,14 @@ public class PhantomType {
 
 		if( _is_container != src._is_container ) return false;
 
+		if( is_on_int_stack() && src.is_on_int_stack() )
+			return true;
+		
 		if(get_class() == null) return true;
 		
 		return get_class().can_be_assigned_from( src.get_class() );
 	}
 
-    public void set_is_container(boolean is_container) {
-        this._is_container = is_container;
-    }
     
     
     
@@ -239,6 +284,16 @@ public class PhantomType {
     //public static final PhantomType t_int = new PhTypeInt();
     public static final PhantomType t_void = new PhTypeVoid();
 	//public static final PhantomType t_int = null;
+    
+    private static PhantomType t_int = null;
+    public static PhantomType getInt() throws PlcException { 
+        if( t_int == null ) t_int = new PhTypeInt();
+        return t_int;
+    }
+
+    public static PhantomType getVoid()  { return t_void; } 
+    public static PhantomType getString()  { return t_string; } 
+
 }
 
 

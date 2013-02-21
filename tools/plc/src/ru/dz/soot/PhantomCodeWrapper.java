@@ -44,7 +44,7 @@ public class PhantomCodeWrapper {
 
 
 
-	public static PhantomCodeWrapper getExpression(Value v, Method m) {
+	public static PhantomCodeWrapper getExpression(Value v, Method m) throws PlcException {
 		//String vClass = v.getClass().toString();
 		//System.err.print(" ?? expr class = "+vClass);
 		
