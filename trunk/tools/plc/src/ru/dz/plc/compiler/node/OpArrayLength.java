@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
@@ -23,6 +24,11 @@ public class OpArrayLength extends Node {
 	
 	public String toString()  {    return ".length";  }
 
+	@Override
+	public void preprocess_me(ParseState s) throws PlcException {
+		super.preprocess_me(s);
+	}
+	
 	public void find_out_my_type() throws PlcException
 	{
 		Node atom = _l;

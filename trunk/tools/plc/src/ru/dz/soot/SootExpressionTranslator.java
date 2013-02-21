@@ -5,9 +5,21 @@ import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhTypeInt;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
+import ru.dz.plc.compiler.binode.BiNode;
+import ru.dz.plc.compiler.binode.OpAndNode;
+import ru.dz.plc.compiler.binode.OpDivideNode;
 import ru.dz.plc.compiler.binode.OpMinusNode;
+import ru.dz.plc.compiler.binode.OpMultiplyNode;
+import ru.dz.plc.compiler.binode.OpOrNode;
 import ru.dz.plc.compiler.binode.OpPlusNode;
+import ru.dz.plc.compiler.binode.OpRemainderNode;
 import ru.dz.plc.compiler.binode.OpSubscriptNode;
+import ru.dz.plc.compiler.binode.RefEqNode;
+import ru.dz.plc.compiler.binode.RefNeqNode;
+import ru.dz.plc.compiler.binode.ValGeNode;
+import ru.dz.plc.compiler.binode.ValGtNode;
+import ru.dz.plc.compiler.binode.ValLeNode;
+import ru.dz.plc.compiler.binode.ValLtNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.IntConstNode;
 import ru.dz.plc.compiler.node.Node;
@@ -15,15 +27,61 @@ import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.OpArrayLength;
 import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.util.PlcException;
+import soot.Local;
 import soot.SootMethodRef;
 import soot.Type;
 import soot.Value;
+import soot.jimple.AddExpr;
+import soot.jimple.AndExpr;
+import soot.jimple.ArrayRef;
+import soot.jimple.CastExpr;
+import soot.jimple.CaughtExceptionRef;
+import soot.jimple.ClassConstant;
+import soot.jimple.CmpExpr;
+import soot.jimple.CmpgExpr;
+import soot.jimple.CmplExpr;
+import soot.jimple.DivExpr;
+import soot.jimple.DoubleConstant;
+import soot.jimple.DynamicInvokeExpr;
+import soot.jimple.EqExpr;
+import soot.jimple.FloatConstant;
+import soot.jimple.GeExpr;
+import soot.jimple.GtExpr;
+import soot.jimple.InstanceFieldRef;
+import soot.jimple.InstanceOfExpr;
 import soot.jimple.IntConstant;
+import soot.jimple.InterfaceInvokeExpr;
+import soot.jimple.JimpleValueSwitch;
+import soot.jimple.LeExpr;
+import soot.jimple.LengthExpr;
+import soot.jimple.LongConstant;
+import soot.jimple.LtExpr;
+import soot.jimple.MulExpr;
+import soot.jimple.NeExpr;
+import soot.jimple.NegExpr;
+import soot.jimple.NewArrayExpr;
+import soot.jimple.NewExpr;
+import soot.jimple.NewMultiArrayExpr;
+import soot.jimple.NullConstant;
+import soot.jimple.OrExpr;
+import soot.jimple.ParameterRef;
+import soot.jimple.RemExpr;
+import soot.jimple.ShlExpr;
+import soot.jimple.ShrExpr;
+import soot.jimple.SpecialInvokeExpr;
+import soot.jimple.StaticFieldRef;
+import soot.jimple.StaticInvokeExpr;
 import soot.jimple.StringConstant;
+import soot.jimple.SubExpr;
+import soot.jimple.ThisRef;
+import soot.jimple.UshrExpr;
+import soot.jimple.VirtualInvokeExpr;
+import soot.jimple.XorExpr;
 import soot.jimple.internal.AbstractBinopExpr;
 import soot.jimple.internal.JAddExpr;
 import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JLengthExpr;
+import soot.jimple.internal.JMulExpr;
 import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.internal.JSubExpr;
 import soot.jimple.internal.JVirtualInvokeExpr;
@@ -34,10 +92,12 @@ public class SootExpressionTranslator {
 
 	private Value root;
 	private Method m;
+	private PhantomClass phantomClass;
 
-	public SootExpressionTranslator(Value v, Method m) {
+	public SootExpressionTranslator(Value v, Method m, PhantomClass c) {
 		this.root = v;
 		this.m = m;
+		phantomClass = c;
 	}
 
 	public PhantomCodeWrapper process() throws PlcException
@@ -72,8 +132,307 @@ public class SootExpressionTranslator {
 		return pt;
 	}
 	
-	private PhantomCodeWrapper doValue(Value v) throws PlcException 
+	
+	class ww { public PhantomCodeWrapper w; }
+	
+	private PhantomCodeWrapper doValue(final Value vv) throws PlcException 
 	{
+		final ww ret = new ww();
+		ret.w = null;
+		
+		vv.apply(new JimpleValueSwitch() {
+
+			@Override
+			public void defaultCase(Object arg0) {
+				say("e ?? "+vv.getClass().getName());
+				say("e    "+vv.toString());
+			}
+
+
+			@Override
+			public void caseClassConstant(ClassConstant arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseDoubleConstant(DoubleConstant arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseFloatConstant(FloatConstant arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseIntConstant(IntConstant v) {
+				ret.w = new PhantomCodeWrapper(new IntConstNode(v.value));
+			}
+
+			@Override
+			public void caseLongConstant(LongConstant arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseNullConstant(NullConstant arg0) {
+				ret.w = new PhantomCodeWrapper(new NullNode());
+			}
+
+			@Override
+			public void caseStringConstant(StringConstant v) {
+				ret.w = doStringConst(v);				
+			}
+
+			@Override
+			public void caseAddExpr(AddExpr v) {
+				ret.w = new BinOpWrapper<OpPlusNode>() {@Override
+					OpPlusNode create(Node l, Node r) { return new OpPlusNode(l,r); }} .doBinOp(v);
+			}
+
+			// TODO logical?
+			@Override
+			public void caseAndExpr(AndExpr v) {
+				ret.w = new BinOpWrapper<OpAndNode>() {@Override
+					OpAndNode create(Node l, Node r) {				
+						return new OpAndNode(l,r);
+					}} .doBinOp(v);
+			}
+
+			@Override
+			public void caseCastExpr(CastExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseCmpExpr(CmpExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseCmpgExpr(CmpgExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseCmplExpr(CmplExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseDivExpr(DivExpr v) {
+				ret.w = new BinOpWrapper<OpDivideNode>() {@Override
+					OpDivideNode create(Node l, Node r) { return new OpDivideNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseDynamicInvokeExpr(DynamicInvokeExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseEqExpr(EqExpr v) {
+				ret.w = new BinOpWrapper<RefEqNode>() {@Override
+					RefEqNode create(Node l, Node r) { return new RefEqNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseGeExpr(GeExpr v) {
+				ret.w = new BinOpWrapper<ValGeNode>() {@Override
+					ValGeNode create(Node l, Node r) { return new ValGeNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseGtExpr(GtExpr v) {
+				ret.w = new BinOpWrapper<ValGtNode>() {@Override
+					ValGtNode create(Node l, Node r) { return new ValGtNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseInstanceOfExpr(InstanceOfExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseInterfaceInvokeExpr(InterfaceInvokeExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseLeExpr(LeExpr v) {
+				ret.w = new BinOpWrapper<ValLeNode>() {@Override
+					ValLeNode create(Node l, Node r) { return new ValLeNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseLengthExpr(LengthExpr v) {
+				try {
+					ret.w = doLength(v);
+				} catch (PlcException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void caseLtExpr(LtExpr v) {
+				ret.w = new BinOpWrapper<ValLtNode>() {@Override
+					ValLtNode create(Node l, Node r) { return new ValLtNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseMulExpr(MulExpr v) {
+				ret.w = new BinOpWrapper<OpMultiplyNode>() {@Override
+					OpMultiplyNode create(Node l, Node r) { return new OpMultiplyNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseNeExpr(NeExpr v) {
+				ret.w = new BinOpWrapper<RefNeqNode>() {@Override
+					RefNeqNode create(Node l, Node r) { return new RefNeqNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseNegExpr(NegExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseNewArrayExpr(NewArrayExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseNewExpr(NewExpr v) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseNewMultiArrayExpr(NewMultiArrayExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseOrExpr(OrExpr v) {
+				ret.w = new BinOpWrapper<OpOrNode>() {@Override
+					OpOrNode create(Node l, Node r) { return new OpOrNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseRemExpr(RemExpr v) {
+				ret.w = new BinOpWrapper<OpRemainderNode>() {@Override
+					OpRemainderNode create(Node l, Node r) { return new OpRemainderNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseShlExpr(ShlExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseShrExpr(ShrExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseSpecialInvokeExpr(SpecialInvokeExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseStaticInvokeExpr(StaticInvokeExpr v) {
+				ret.w = doStaticInvoke(v);
+				}
+
+			@Override
+			public void caseSubExpr(SubExpr v) {
+				ret.w = new BinOpWrapper<OpMinusNode>() {@Override
+					OpMinusNode create(Node l, Node r) { return new OpMinusNode(l,r); }} .doBinOp(v);
+			}
+
+			@Override
+			public void caseUshrExpr(UshrExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseVirtualInvokeExpr(VirtualInvokeExpr v) {
+				ret.w = doVirtualInvoke(v);
+			}
+
+			@Override
+			public void caseXorExpr(XorExpr arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseArrayRef(ArrayRef arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseCaughtExceptionRef(CaughtExceptionRef arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseInstanceFieldRef(InstanceFieldRef arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseParameterRef(ParameterRef arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseStaticFieldRef(StaticFieldRef arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void caseThisRef(ThisRef arg0) {
+				ret.w = new PhantomCodeWrapper(new ru.dz.plc.compiler.node.ThisNode(phantomClass));
+			}
+
+			@Override
+			public void caseLocal(Local v) {
+				ret.w = doReadLocal(v);
+				
+			}
+			
+		});
+		
+		if(ret.w != null)
+			return ret.w;
+/*		
+		SootMain.say("type unimpl "+v.getClass());
+		
 		if( v instanceof StringConstant )
 			return doStringConst((StringConstant)v);
 
@@ -85,6 +444,12 @@ public class SootExpressionTranslator {
 		
 		if( v instanceof JSubExpr )
 			return doSub((JSubExpr)v);
+		
+		if( v instanceof JMulExpr )
+			return new BinOpWrapper<OpMultiplyNode>() {@Override
+			OpMultiplyNode create(Node l, Node r) {				
+				return new OpMultiplyNode(l,r);
+			}} .doBinOp(v);
 		
 		if( v instanceof IntConstant )
 			return new PhantomCodeWrapper( new IntConstNode(((IntConstant)v).value));
@@ -105,12 +470,12 @@ public class SootExpressionTranslator {
 		
 		say("e ?? "+v.getClass().getName());
 		say("e    "+v.toString());
-
+*/
 		return PhantomCodeWrapper.getNullNode();
 	}
 
 	/*
-	private <T extends BiNode> PhantomCodeWrapper doBinOp(AbstractBinopExpr v) {
+	private <T extends BiNode> PhantomCodeWrapper doBinOp(AbstractBinopExpr v, Class<T> c) throws PlcException {
 		Type t = v.getType();
 		// TODO type?
 		Value e1 = v.getOp1();
@@ -119,22 +484,27 @@ public class SootExpressionTranslator {
 		Node e1n = doValue(e1).getNode();
 		Node e2n = doValue(e2).getNode();
 		
+		c.
+		
 		//return new PhantomCodeWrapper( new T(e1n,e2n) );
+		
+		
+		return null;
+		
 	}
-    */
-	
+	*/
 
 	private PhantomCodeWrapper doStringConst(StringConstant v) {
 		return new PhantomCodeWrapper(new StringConstNode(v.value));
 	}
 
-	private PhantomCodeWrapper doLength(JLengthExpr v) throws PlcException {
+	private PhantomCodeWrapper doLength(LengthExpr v) throws PlcException {
 		Value array = v.getOp();
 		
-		return new PhantomCodeWrapper(new OpArrayLength(PhantomCodeWrapper.getExpression(array, m).getNode()));
+		return new PhantomCodeWrapper(new OpArrayLength(PhantomCodeWrapper.getExpression(array, m, phantomClass).getNode()));
 	}
 
-	private PhantomCodeWrapper doStaticInvoke(JStaticInvokeExpr v) {
+	private PhantomCodeWrapper doStaticInvoke(StaticInvokeExpr v) {
 		SootMethodRef mr = v.getMethodRef();
 		String mName = mr.name();
 		mr.declaringClass();
@@ -143,7 +513,7 @@ public class SootExpressionTranslator {
 		return new PhantomCodeWrapper(new NullNode());
 	}
 
-	private PhantomCodeWrapper doVirtualInvoke(JVirtualInvokeExpr v) {
+	private PhantomCodeWrapper doVirtualInvoke(VirtualInvokeExpr v) {
 		SootMethodRef mr = v.getMethodRef();
 		String mName = mr.name();
 		say("Virtual call "+mName);
@@ -202,7 +572,7 @@ public class SootExpressionTranslator {
 		throw new RuntimeException("Unknown type "+t);
 	}
 
-	private PhantomCodeWrapper doReadLocal(JimpleLocal v) {
+	private PhantomCodeWrapper doReadLocal(Local v) {
 		String varName = v.getName();
 		/*
 		Type type = v.getType();
@@ -224,5 +594,38 @@ public class SootExpressionTranslator {
 	private void say(String string) {
 		System.err.println(string);
 	}
+
+	
+	
+	abstract class BinOpWrapper<T extends BiNode>
+	{
+		
+		abstract T create( Node l, Node r );
+		
+		PhantomCodeWrapper doBinOp(Value _v) {
+			AbstractBinopExpr v = (AbstractBinopExpr) _v;
+			Type t = v.getType();
+
+			Value e1 = v.getOp1();
+			Value e2 = v.getOp2();
+			
+			try {
+				Node e1n = doValue(e1).getNode();
+				Node e2n = doValue(e2).getNode();
+
+				Node n = create(e1n,e2n);
+				n.setType(SootExpressionTranslator.convertType(t));
+				return new PhantomCodeWrapper( n );
+			} catch (PlcException e) {
+				SootMain.error("Exception "+e);
+				return new PhantomCodeWrapper( new NullNode() );
+			}
+			
+			
+		}		
+		
+	}
 	
 }
+
+
