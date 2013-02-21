@@ -43,9 +43,6 @@ id(opcode_os_get32,0x1E)	// get value from stack absolute-addressed slot, push o
 id(opcode_os_set32,0x1F)	// pop stack top, set value in stack absolute-addressed slot
 
 
-id(opcode_push_catcher,0x2D) // jump address folows, top of o stack - class of objects to catch
-id(opcode_pop_catcher,0x2E) 
-id(opcode_throw,0x2F) // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
 
 
 id(opcode_iconst_0,0x20)
@@ -58,6 +55,12 @@ id(opcode_sconst_bin,0x24)
 // this is for integer local vars
 id(opcode_is_get32,0x26)	// get value from stack absolute-addressed slot, push on top
 id(opcode_is_set32,0x27)	// pop stack top, set value in stack absolute-addressed slot
+
+
+id(opcode_push_catcher,0x2D) // jump address folows, top of o stack - class of objects to catch
+id(opcode_pop_catcher,0x2E) 
+id(opcode_throw,0x2F) // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
+
 
 
 
@@ -115,6 +118,10 @@ id(opcode_os_isnull, 0x5A)		// pointer is null
 // BUG! Duplicate!
 id(opcode_os_push_null, 0x5B)	// push null on stack
 
+// Prefixes - modify next op operands type
+id(opcode_prefix_long, 0x5C)	// next operation works on longs (uses 2x slots on int stack)
+id(opcode_prefix_float, 0x5D)	// next operation works on floats (uses 1x slots on int stack)
+id(opcode_prefix_double, 0x5E)	// next operation works on doubles (uses 2x slots on int stack)
 
 
 
@@ -177,6 +184,12 @@ id(opcode_call_1C,0xBC)
 id(opcode_call_1D,0xBD)
 id(opcode_call_1E,0xBE)
 id(opcode_call_1F,0xBF)
+
+
+
+
+
+
 
 
 #include "conv_footer"

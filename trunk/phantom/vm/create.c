@@ -135,6 +135,29 @@ void pvm_gc_iter_int(gc_iterator_call_t func, struct pvm_object_storage * os, vo
 }
 
 
+
+struct pvm_object     pvm_create_long_object(int64_t _value)
+{
+	struct pvm_object	out = pvm_object_create_fixed( pvm_get_long_class() );
+	((struct data_area_4_long*)&(out.data->da))->value = _value;
+	return out;
+}
+
+void pvm_internal_init_long(struct pvm_object_storage * os)
+{
+    (void)os;
+}
+
+void pvm_gc_iter_long(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+    (void)os;
+    (void)arg;
+    (void)func;
+    // Empty
+}
+
+
+
 struct pvm_object     pvm_create_string_object_binary(const char *value, int n_bytes)
 {
 	int das = sizeof(struct data_area_4_string)+n_bytes;
@@ -400,7 +423,9 @@ void pvm_internal_init_class(struct pvm_object_storage * os)
 	da->sys_table_id             	= -1;
 
 	da->class_name 			= pvm_get_null_object();
-	da->class_parent		= pvm_get_null_class();
+        da->class_parent		= pvm_get_null_class();
+
+        da->static_vars                 = pvm_create_object( pvm_get_array_class() );
 }
 
 
@@ -410,6 +435,12 @@ void pvm_gc_iter_class(gc_iterator_call_t func, struct pvm_object_storage * os, 
 	gc_fcall( func, arg, da->object_default_interface );
 	gc_fcall( func, arg, da->class_name );
 	gc_fcall( func, arg, da->class_parent );
+
+        gc_fcall( func, arg, da->static_vars );
+
+        gc_fcall( func, arg, da->ip2line_maps );
+        gc_fcall( func, arg, da->method_names );
+        gc_fcall( func, arg, da->field_names );
 }
 
 

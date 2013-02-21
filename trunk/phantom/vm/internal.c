@@ -90,6 +90,18 @@ struct internal_class pvm_internal_classes[] =
         {0,0}
     },
     {
+        ".internal.long",
+        PVM_ROOT_OBJECT_LONG_CLASS, 
+        syscall_table_4_long, // n_syscall_table_4_int,
+        pvm_internal_init_long,
+        0 /*pvm_gc_iter_int*/,
+        0, // no finalizer
+        0, // no restart func
+        sizeof(struct data_area_4_long),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
+        {0,0}
+    },
+    {
         ".internal.string",
         PVM_ROOT_OBJECT_STRING_CLASS,
         syscall_table_4_string, // n_syscall_table_4_string,

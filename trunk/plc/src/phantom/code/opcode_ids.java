@@ -43,9 +43,6 @@ protected static final byte opcode_os_get32 = (byte)0x1E; // get value from stac
 protected static final byte opcode_os_set32 = (byte)0x1F; // pop stack top, set value in stack absolute-addressed slot
 
 
-protected static final byte opcode_push_catcher = (byte)0x2D; // jump address folows, top of o stack - class of objects to catch
-protected static final byte opcode_pop_catcher = (byte)0x2E;
-protected static final byte opcode_throw = (byte)0x2F; // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
 
 
 protected static final byte opcode_iconst_0 = (byte)0x20;
@@ -58,6 +55,12 @@ protected static final byte opcode_sconst_bin = (byte)0x24;
 // this is for integer local vars
 protected static final byte opcode_is_get32 = (byte)0x26; // get value from stack absolute-addressed slot, push on top
 protected static final byte opcode_is_set32 = (byte)0x27; // pop stack top, set value in stack absolute-addressed slot
+
+
+protected static final byte opcode_push_catcher = (byte)0x2D; // jump address folows, top of o stack - class of objects to catch
+protected static final byte opcode_pop_catcher = (byte)0x2E;
+protected static final byte opcode_throw = (byte)0x2F; // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
+
 
 
 
@@ -115,6 +118,10 @@ protected static final byte opcode_os_isnull = (byte)0x5A; // pointer is null
 // BUG! Duplicate!
 protected static final byte opcode_os_push_null = (byte)0x5B; // push null on stack
 
+// Prefixes - modify next op operands type
+protected static final byte opcode_prefix_long = (byte)0x5C; // next operation works on longs (uses 2x slots on int stack)
+protected static final byte opcode_prefix_float = (byte)0x5D; // next operation works on floats (uses 1x slots on int stack)
+protected static final byte opcode_prefix_double = (byte)0x5E; // next operation works on doubles (uses 2x slots on int stack)
 
 
 

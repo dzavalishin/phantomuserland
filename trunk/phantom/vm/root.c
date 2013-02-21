@@ -343,6 +343,7 @@ static void set_root_from_table()
     SET_ROOT_CLASS(interface,INTERFACE);
     SET_ROOT_CLASS(code,CODE);
     SET_ROOT_CLASS(int,INT);
+    SET_ROOT_CLASS(long,LONG);
     SET_ROOT_CLASS(string,STRING);
     SET_ROOT_CLASS(array,ARRAY);
     SET_ROOT_CLASS(page,PAGE);
@@ -384,6 +385,7 @@ GCINLINE struct pvm_object     pvm_get_class_class() { return pvm_root.class_cla
 GCINLINE struct pvm_object     pvm_get_interface_class() { return pvm_root.interface_class; }
 GCINLINE struct pvm_object     pvm_get_code_class() { return pvm_root.code_class; }
 GCINLINE struct pvm_object     pvm_get_int_class() { return pvm_root.int_class; }
+GCINLINE struct pvm_object     pvm_get_long_class() { return pvm_root.long_class; }
 GCINLINE struct pvm_object     pvm_get_string_class() { return pvm_root.string_class; }
 GCINLINE struct pvm_object     pvm_get_array_class() { return pvm_root.array_class; }
 GCINLINE struct pvm_object     pvm_get_page_class() { return pvm_root.page_class; }

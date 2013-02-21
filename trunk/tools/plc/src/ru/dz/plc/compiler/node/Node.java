@@ -65,11 +65,34 @@ abstract public class Node {
 		return type;
 	}
 
+	private PhantomType presetType = null;
+	
+	protected void checkPresetType()
+	{
+		if( (presetType == null) || (type == null) )
+			return;
+
+		if( type.is_unknown() )
+			type = presetType;
+		
+		if( type.equals(presetType))
+			return;
+		
+		print_warning("Preset type is "+presetType+", inferred type is "+type);
+	}
+	
+	public void setType(PhantomType t) throws PlcException
+	{
+		presetType = t;
+		checkPresetType();
+	}
+
 	// TODO make abstract? Override!
 	public void find_out_my_type() throws PlcException
 	{
 		if( type != null ) return;
 		if( _l != null ) type = _l.getType();
+		checkPresetType();
 	}
 
 

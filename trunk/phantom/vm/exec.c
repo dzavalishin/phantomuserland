@@ -2,12 +2,9 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
  *
  * Bytecode interpreter.
- *
- * Kernel ready: yes
- * Preliminary: no
  *
  *
 **/
@@ -15,18 +12,18 @@
 
 #include <phantom_assert.h>
 
-#include "vm/root.h"
-#include "vm/internal_da.h"
-#include "vm/internal.h"
-#include "vm/object_flags.h"
-#include "vm/exception.h"
-#include "vm/alloc.h"
+#include <vm/root.h>
+#include <vm/internal_da.h>
+#include <vm/internal.h>
+#include <vm/object_flags.h>
+#include <vm/exception.h>
+#include <vm/alloc.h>
 
-#include "vm/exec.h"
-#include "vm/code.h"
+#include <vm/exec.h>
+#include <vm/code.h>
 
-#include "vm/stacks.h"
-#include "vm/syscall.h"
+#include <vm/stacks.h>
+#include <vm/syscall.h>
 
 #include "ids/opcode_ids.h"
 
@@ -69,6 +66,12 @@ int debug_print_instr = 0;
 #define is_pop() 	pvm_istack_pop( da->_istack )
 #define is_top() 	pvm_istack_top( da->_istack )
 #define is_empty() 	pvm_istack_empty( da->_istack )
+
+#define ls_push( i ) 	pvm_lstack_push( da->_istack, i )
+#define ls_pop() 	pvm_lstack_pop( da->_istack )
+#define ls_top() 	pvm_lstack_top( da->_istack )
+#define ls_empty() 	pvm_lstack_empty( da->_istack )
+
 
 #define es_push( i ) 	pvm_estack_push( da->_estack, i )
 #define es_pop() 	pvm_estack_pop( da->_estack )
@@ -379,6 +382,13 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
 
 void pvm_exec(pvm_object_t current_thread)
 {
+    int prefix_long = 0;
+    int prefix_float = 0;
+    int prefix_double = 0;
+
+#define DO_TWICE  (prefix_long || prefix_double)
+#define DO_FPOINT (prefix_float || prefix_double)
+
     if( !pvm_object_class_is( current_thread, pvm_get_thread_class() ))
         panic("attempt to run not a thread");
 
@@ -421,6 +431,169 @@ void pvm_exec(pvm_object_t current_thread)
         unsigned char instruction = pvm_code_get_byte(&(da->code));
         //printf("instr 0x%02X ", instruction);
 
+        if( prefix_long )
+            switch(instruction)
+            {
+            case opcode_isum:
+                if( debug_print_instr ) printf("l-isum; ");
+                {
+                    int64_t add = ls_pop();
+                    ls_push( ls_pop() + add );
+                }
+                break;
+
+            case opcode_imul:
+                if( debug_print_instr ) printf("l-imul; ");
+                {
+                    int64_t mul = ls_pop();
+                    ls_push( ls_pop() * mul );
+                }
+                break;
+
+            case opcode_isubul:
+                if( debug_print_instr ) printf("l-isubul; ");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    ls_push(u-l);
+                }
+                break;
+
+            case opcode_isublu:
+                if( debug_print_instr ) printf("l-isublu; ");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    ls_push(l-u);
+                }
+                break;
+
+            case opcode_idivul:
+                if( debug_print_instr ) printf("l-idivul; ");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    ls_push(u/l);
+                }
+                break;
+
+            case opcode_idivlu:
+                if( debug_print_instr ) printf("l-idivlu; ");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    ls_push(l/u);
+                }
+                break;
+
+            case opcode_ior:
+                if( debug_print_instr ) printf("l-ior; ");
+                { int64_t operand = ls_pop();	ls_push( ls_pop() | operand ); }
+                break;
+
+            case opcode_iand:
+                if( debug_print_instr ) printf("l-iand; ");
+                { int64_t operand = ls_pop();	ls_push( ls_pop() & operand ); }
+                break;
+
+            case opcode_ixor:
+                if( debug_print_instr ) printf("l-ixor; ");
+                { int64_t operand = ls_pop();	ls_push( ls_pop() ^ operand ); }
+                break;
+
+            case opcode_inot:
+                if( debug_print_instr ) printf("l-inot; ");
+                { int64_t operand = ls_pop();	ls_push( ~operand ); }
+                break;
+
+
+
+            case opcode_log_or:
+                if( debug_print_instr ) printf("l-lor; ");
+                {
+                    int64_t o1 = ls_pop();
+                    int64_t o2 = ls_pop();
+                    ls_push( o1 || o2 );
+                }
+                break;
+
+            case opcode_log_and:
+                if( debug_print_instr ) printf("l-land; ");
+                {
+                    int64_t o1 = ls_pop();
+                    int64_t o2 = ls_pop();
+                    ls_push( o1 && o2 );
+                }
+                break;
+
+            case opcode_log_xor:
+                if( debug_print_instr ) printf("l-lxor; ");
+                {
+                    int64_t o1 = ls_pop() ? 1 : 0;
+                    int64_t o2 = ls_pop() ? 1 : 0;
+                    ls_push( o1 ^ o2 );
+                }
+                break;
+
+            case opcode_log_not:
+                if( debug_print_instr ) printf("l-lnot; ");
+                {
+                    int64_t operand = ls_pop();
+                    ls_push( !operand );
+                }
+                break;
+
+                // NB! Returns int!
+            case opcode_ige:	// >=
+                if( debug_print_instr ) printf("l-ige; ");
+                { int64_t operand = ls_pop();	is_push( ls_pop() >= operand ); }
+                break;
+            case opcode_ile:	// <=
+                if( debug_print_instr ) printf("l-ile; ");
+                { int64_t operand = ls_pop();	is_push( ls_pop() <= operand ); }
+                break;
+            case opcode_igt:	// >
+                if( debug_print_instr ) printf("l-igt; ");
+                { int64_t operand = ls_pop();	is_push( ls_pop() > operand ); }
+                break;
+            case opcode_ilt:	// <
+                if( debug_print_instr ) printf("l-ilt; ");
+                { int64_t operand = ls_pop();	is_push( ls_pop() < operand ); }
+                break;
+
+
+
+            case opcode_i2o:
+                if( debug_print_instr ) printf("l-i2o; ");
+                os_push(pvm_create_long_object(ls_pop()));
+                break;
+
+            case opcode_o2i:
+                if( debug_print_instr ) printf("l-o2i; ");
+                {
+                    struct pvm_object o = os_pop();
+                    if( o.data == 0 ) pvm_exec_panic("l-o2i(null)");
+                    ls_push( pvm_get_long( o ) );
+                    ref_dec_o(o);
+                }
+                break;
+            }
+        // End of long ops
+
+        if( prefix_float )
+            switch(instruction)
+            {
+            }
+        // End of float ops
+
+        if( prefix_double )
+            switch(instruction)
+            {
+            }
+        // End of double ops
+
+
+
 
         switch(instruction)
         {
@@ -460,35 +633,49 @@ void pvm_exec(pvm_object_t current_thread)
             }
             break;
 
+            // type switch prefixes --------------------------------
+
+        case opcode_prefix_long:   prefix_long   = 1; break;
+        case opcode_prefix_float:  prefix_float  = 1; break;
+        case opcode_prefix_double: prefix_double = 1; break;
 
             // int stack ops ---------------------------------------
 
         case opcode_is_dup:
             if( debug_print_instr ) printf("is dup; ");
             {
-                is_push(is_top());
+                if(DO_TWICE)
+                {
+                    int i1 = is_pop();
+                    int i2 = is_pop();
+                    is_push(i1); is_push(i2);
+                    is_push(i1); is_push(i2);
+                }
+                else
+                    is_push(is_top());
             }
             break;
 
         case opcode_is_drop:
             if( debug_print_instr ) printf("is drop; ");
-            is_pop();
+            is_pop(); if(DO_TWICE) is_pop();
             break;
 
         case opcode_iconst_0:
             if( debug_print_instr ) printf("iconst 0; ");
-            is_push(0);
+            is_push(0); if(DO_TWICE) is_push(0);
             break;
 
         case opcode_iconst_1:
             if( debug_print_instr ) printf("iconst 1; ");
-            is_push(1);
+            is_push(1); if(DO_TWICE) is_push(1);
             break;
 
         case opcode_iconst_8bit:
             {
                 int v = pvm_code_get_byte(&(da->code));
-                is_push(v);
+                if(DO_TWICE) ls_push(v);
+                else is_push(v);
                 if( debug_print_instr ) printf("iconst8 = %d; ", v);
                 break;
             }
@@ -496,7 +683,8 @@ void pvm_exec(pvm_object_t current_thread)
         case opcode_iconst_32bit:
             {
                 int v = pvm_code_get_int32(&(da->code));
-                is_push(v);
+                if(DO_TWICE) ls_push(v);
+                else is_push(v);
                 if( debug_print_instr ) printf("iconst32 = %d; ", v);
                 break;
             }
@@ -1034,6 +1222,14 @@ void pvm_exec(pvm_object_t current_thread)
             pvm_exec_panic( "thread exec: unknown opcode" ); //, instruction );
             //exit(33);
         }
+
+        if( prefix_long || prefix_float || prefix_double )
+            printf("Unused type prefix on op code 0x%X\n", instruction );
+
+        prefix_long   = 0;
+        prefix_float  = 0;
+        prefix_double = 0;
+
     }
 }
 

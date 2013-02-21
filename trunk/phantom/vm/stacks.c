@@ -232,6 +232,127 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 
 
 
+
+/**
+ *
+ * Long stack goes - it's integer stack, but 64 bit access
+ *
+**/
+
+// NB! We don't redefine - re-use int stack defs above!
+
+//#undef make
+//#undef set_next_prev
+//#define make()  pvm_create_istack_object()
+//#define set_next_prev()  { pvm_object_da(s->common.next, integer_stack)->common.prev = rootda->common.curr; pvm_object_da(s->common.next, integer_stack)->common.root = rootda->common.root; }
+
+#define   	lpage_push(v) 		do { ((int64_t*)s->stack)[s->common.free_cell_ptr++] = v; } while(0)
+#define 	lpage_pop() 		((int64_t*)s->stack)[--(s->common.free_cell_ptr)]
+#define		lpage_top() 		((int64_t*)s->stack)[(s->common.free_cell_ptr)-1]
+
+#define 	lpage_is_empty()		(s->common.free_cell_ptr < 2)
+// -1 for one more element
+#define 	lpage_is_full() 		(s->common.free_cell_ptr >= (s->common.__sSize-1))
+
+
+#define lcheck_underflow()     \
+    do {                      \
+        if( lpage_is_empty() ) \
+        {                     \
+            if( no_prev() ) pvm_exec_panic( "stack underflow" ); \
+            set_me( s->common.prev ); \
+        }                             \
+    } while(0);
+
+#define lcheck_overflow()                             \
+    do {                                             \
+        if( lpage_is_full() )                         \
+        {                                            \
+            if( no_next() )                          \
+                {                                    \
+                s->common.next = make();             \
+                set_next_prev();     \
+                }                                    \
+            set_me( s->common.next );                \
+        }                                            \
+    } while(0);
+
+
+void pvm_lstack_push( struct data_area_4_integer_stack* rootda, int64_t o )
+{
+    struct data_area_4_integer_stack* s = rootda->curr_da;
+    lcheck_overflow();
+    lpage_push(o);
+}
+
+int64_t pvm_lstack_pop( struct data_area_4_integer_stack* rootda )
+{
+    struct data_area_4_integer_stack* s = rootda->curr_da;
+    lcheck_underflow();
+    return lpage_pop();
+}
+
+int pvm_lstack_top( struct data_area_4_integer_stack* rootda )
+{
+    struct data_area_4_integer_stack* s = rootda->curr_da;
+    lcheck_underflow();
+    return lpage_top();
+}
+/*
+int pvm_istack_empty( struct data_area_4_integer_stack* rootda )
+{
+    struct data_area_4_integer_stack* s = rootda->curr_da;
+    return page_is_empty() && no_prev();
+}
+*/
+
+
+/*
+void pvm_lstack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, int val )
+{
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
+
+    while( abs_pos >= pagesize )
+    {
+        c = pvm_object_da(c,integer_stack)->common.next;
+        if( pvm_is_null(c) ) pvm_exec_panic( "i abs_set: out of stack" );
+        abs_pos -= pagesize;
+    }
+
+    pvm_object_da(c,integer_stack)->stack[abs_pos] = val;
+}
+
+int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
+{
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
+
+    while( abs_pos >= pagesize )
+    {
+        c = pvm_object_da(c,integer_stack)->common.next;
+        if( pvm_is_null(c) ) pvm_exec_panic( "i abs_get: out of stack" );
+        abs_pos -= pagesize;
+    }
+
+    return pvm_object_da(c,integer_stack)->stack[abs_pos];
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  *
  * Exceptions stack goes
@@ -303,6 +424,37 @@ int pvm_estack_foreach(
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
