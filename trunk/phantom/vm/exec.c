@@ -684,8 +684,16 @@ void pvm_exec(pvm_object_t current_thread)
             {
                 int v = pvm_code_get_int32(&(da->code));
                 if(DO_TWICE) ls_push(v);
-                else is_push(v);
+                else         is_push(v);
                 if( debug_print_instr ) printf("iconst32 = %d; ", v);
+                break;
+            }
+
+        case opcode_iconst_64bit:
+            {
+                int64_t v = pvm_code_get_int64(&(da->code));
+                ls_push(v);
+                if( debug_print_instr ) printf("iconst64 = %Ld; ", v);
                 break;
             }
 

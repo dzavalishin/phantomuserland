@@ -95,7 +95,7 @@ int pvm_code_get_int32(struct pvm_code_handler *code)
     return ret;
 }
 
-unsigned long long pvm_code_get_int64(struct pvm_code_handler *code)
+int64_t pvm_code_get_int64(struct pvm_code_handler *code)
 {
     pvm_code_check_bounds( code, code->IP+long_size()-1, "get_int64" );
     unsigned long long ret = pvm_code_do_get_int64( code->code+code->IP );

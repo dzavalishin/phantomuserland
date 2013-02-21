@@ -18,8 +18,9 @@ public class PhantomClass {
 
 //	private String version; // Current class version, must increment each compile
 	
-	private MethodTable mt; // TODO accessed directly, must be public
-	private FieldTable ft; // TODO accessed directly, must be public
+	private MethodTable mt;
+	private FieldTable ft; 
+	private FieldTable staticFieldsTable; 
 
 	private LinkedList<PhantomClass> interfaces = new LinkedList<PhantomClass>();
 	private String parent = ".internal.object";
@@ -33,6 +34,7 @@ public class PhantomClass {
 		this.name = name;
 		mt = new MethodTable();
 		ft = new FieldTable();
+		staticFieldsTable = new FieldTable();
 
 		if (!name.equals(".internal.object")) {
 			parent_class = ClassMap.get_map().get(parent,false,null);
@@ -189,6 +191,30 @@ public class PhantomClass {
 			Method m = i.next();
 			check_base_for_method(m);
 		}
+	}
+
+	
+	
+	// ------------------------------------------------------------------------
+	// Static Fields
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Add a static field to a class.
+	 * @param name Name of field.
+	 * @param type Type of field.
+	 * @throws PlcException
+	 */
+	public void addStaticField(String name, PhantomType type) throws PlcException {
+		staticFieldsTable.add(name, type);
+	}
+
+	public PhantomField findStaticField(String name) {
+		return staticFieldsTable.get(name);
+		//PhantomField f = staticFieldsTable.get(name);
+		//if (f != null)return f;
+		//if (!have_nonvoid_parent)return null;
+		//return parent_class.find_field(name);
 	}
 
 	// ------------------------------------------------------------------------
