@@ -23,8 +23,9 @@ opcode_ids.h: opcode_ids.definitions  inc_txt2c/*
 	$(CPP) -Iinc_txt2c opcode_ids.definitions $@.1 
 	sed 's/const unsigned char/#define/' $@.1 > $@.2
 	sed 's/=/ /' $@.2 | sed 's/;/ /' > $@
-#	sed 's!\/\/.*$!!' $@.3 > $@
+	-rm $@.1 $@.2
 
+#	sed 's!\/\/.*$!!' $@.3 > $@
 #	rm opcode_ids.h
 #	mv opcode_ids.i opcode_ids.h
 
