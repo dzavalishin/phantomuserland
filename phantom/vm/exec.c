@@ -434,6 +434,31 @@ void pvm_exec(pvm_object_t current_thread)
         if( prefix_long )
             switch(instruction)
             {
+            case opcode_ishl:
+                if( debug_print_instr ) printf("l-ishl; ");
+                {
+                    int64_t val = ls_pop();
+                    ls_push( val << is_pop() );
+                }
+                break;
+
+            case opcode_ishr:
+                if( debug_print_instr ) printf("l-ishr; ");
+                {
+                    int64_t val = ls_pop();
+                    ls_push( val >> is_pop() );
+                }
+                break;
+
+            case opcode_ushr:
+                if( debug_print_instr ) printf("l-ushr; ");
+                {
+                    u_int64_t val = ls_pop();
+                    ls_push( val >> is_pop() );
+                }
+                break;
+
+
             case opcode_isum:
                 if( debug_print_instr ) printf("l-isum; ");
                 {
@@ -696,6 +721,30 @@ void pvm_exec(pvm_object_t current_thread)
                 if( debug_print_instr ) printf("iconst64 = %Ld; ", v);
                 break;
             }
+
+        case opcode_ishl:
+            if( debug_print_instr ) printf("ishl; ");
+            {
+                int val = is_pop();
+                is_push( val << is_pop() );
+            }
+            break;
+
+        case opcode_ishr:
+            if( debug_print_instr ) printf("ishr; ");
+            {
+                int val = is_pop();
+                is_push( val >> is_pop() );
+            }
+            break;
+
+        case opcode_ushr:
+            if( debug_print_instr ) printf("ushr; ");
+            {
+                unsigned val = is_pop();
+                is_push( val >> is_pop() );
+            }
+            break;
 
 
         case opcode_isum:
