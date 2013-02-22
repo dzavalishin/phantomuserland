@@ -10,6 +10,7 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.binode.NewNode;
 import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.*;
@@ -31,8 +32,8 @@ abstract public class Node {
 	protected ParserContext context = null;
 
 	public Node(Node l) {
-		if( (l == null) && (getClass() != EmptyNode.class) ) 
-			throw new RuntimeException("null left"); 
+		//if( (l == null) && (getClass() != EmptyNode.class) && (getClass() != NewNode.class) ) 
+		//	throw new RuntimeException("null left"); 
 		this._l = l;
 		type = null;
 	}
@@ -72,9 +73,15 @@ abstract public class Node {
 	
 	protected void checkPresetType()
 	{
-		if( (presetType == null) || (type == null) )
+		if( presetType == null )
 			return;
 
+		if( type == null ) 
+			{
+			type = presetType;
+			return;
+			}
+		
 		if( type.is_unknown() )
 			type = presetType;
 		

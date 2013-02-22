@@ -42,7 +42,7 @@ public class OpArrayLength extends Node {
 		}
 
 		if( !a_type.is_container() )
-			throw new PlcException( ".length Node", "not a container subscripted" );
+			throw new PlcException( ".length Node", "not a container type subscripted", a_type.toString() );
 
 		type = new PhantomType( a_type.get_class() );
 	}

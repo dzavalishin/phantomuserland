@@ -3,6 +3,7 @@ package ru.dz.soot;
 import java.util.HashMap;
 import java.util.Map;
 
+import soot.Unit;
 import soot.UnitBox;
 
 /**
@@ -17,20 +18,27 @@ public class SootLabelMap {
 	
 	static private String getNewLabel()
 	{
-		return String.format("SootL%d", nextl++);
+		return String.format("LL%d", nextl++);
 	}
 	
-	private Map<UnitBox,String> labels = new HashMap<UnitBox,String>();
+	private Map<UnitBox,String> labelsUb = new HashMap<UnitBox,String>();
+	private Map<Unit,String> labelsU = new HashMap<Unit,String>();
 
 	
 	public String getLabelFor(UnitBox o)
 	{
-		String s = labels.get(o);
+		String s = labelsUb.get(o);
+
+		if( s == null )
+			s = labelsU.get(o.getUnit());
+		
 		if( s == null )
 		{
 			s = getNewLabel();
-			labels.put(o, s);
+			labelsUb.put(o, s);
+			labelsU.put(o.getUnit(), s);
 		}
+		
 		return s;
 	}
 	

@@ -11,6 +11,7 @@ import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
+import ru.dz.plc.compiler.node.JumpTargetNode;
 import ru.dz.plc.compiler.node.MonitorNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
@@ -121,6 +122,7 @@ public class SootMethodTranslator {
 			{
 				String labelFor = lmap.getLabelFor(ub);
 				say(""+labelFor+":");
+				nodes.addNode(new JumpTargetNode(labelFor));
 			}
 		}
 		
@@ -408,7 +410,7 @@ public class SootMethodTranslator {
 		say("      Assign '"+ls+"' = '"+rs+"'");
 		*/
 		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getRightOp(), phantomMethod, pc );		
-		return PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod );
+		return PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod, pc );
 	}
 
 
@@ -513,7 +515,7 @@ public class SootMethodTranslator {
 
 
 	private void say(String string) {
-		System.err.println(string);
+		SootMain.say(string);
 	}
 	
 	

@@ -23,7 +23,7 @@ public class IdentNode extends Node {
 	public String get_name() { return ident; }
 
 	public IdentNode( /*PhantomClass c,*/ String ident ) {
-		super(new EmptyNode());
+		super(null);
 		this.ident = ident;
 		//my_class = c;
 	}

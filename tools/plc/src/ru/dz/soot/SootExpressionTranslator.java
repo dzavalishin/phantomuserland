@@ -31,6 +31,7 @@ import ru.dz.plc.compiler.node.OpArrayLength;
 import ru.dz.plc.compiler.node.StaticLoadNode;
 import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.util.PlcException;
+import soot.ArrayType;
 import soot.Local;
 import soot.SootClass;
 import soot.SootFieldRef;
@@ -106,6 +107,7 @@ public class SootExpressionTranslator {
 	public static PhantomType convertType( String tn ) throws PlcException
 	{
 		if( tn.equals(" java.lang.Object")) tn = ".internal.object";
+		if( tn.equals(" java.lang.String")) tn = ".internal.string";
 		if( tn.equals("int")) tn = ".internal.int";
 		
 		boolean err = false;
@@ -129,7 +131,25 @@ public class SootExpressionTranslator {
 	
 	public static PhantomType convertType( Type t ) throws PlcException
 	{
-		return convertType(t.toString());
+		//SootMain.say(" ----------------- "+t+" tt "+t.getClass()+" n "+t.getNumber());
+
+		PhantomType type = null;
+		
+		if (t instanceof soot.ArrayType) {
+			soot.ArrayType at = (soot.ArrayType) t;
+			
+			if( at.numDimensions != 1)
+				SootMain.error("multidim type "+at);
+			
+			type = convertType(at.baseType.toString());			
+			type.set_is_container(true);
+		}
+		else
+		{
+			type = convertType(t.toString());
+		}
+		
+		return type;
 	}
 	
 	private PhantomCodeWrapper doValue(final Value vv) throws PlcException 
