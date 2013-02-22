@@ -25,7 +25,7 @@ abstract public class Node {
 	//{		log.setLevel(Level.SEVERE);	}
 	
 	protected Node           _l;
-	protected PhantomType        type;
+	protected PhantomType   type;
 	protected AttributeSet  attributes;
 	protected ParserContext context = null;
 
@@ -114,7 +114,8 @@ abstract public class Node {
 	// -------------------------------- general --------------------------------
 
 	public abstract String toString();
-	public void print(PrintStream ps) throws PlcException { print(ps,0,0); }
+	
+	public void print( PrintStream ps ) throws PlcException { print(ps,0,0); }
 
 	public void print( PrintStream ps, int level, int start_level ) throws PlcException
 	{
@@ -136,10 +137,7 @@ abstract public class Node {
 	public void print_offset( PrintStream ps, int level, int start_level )
 	{
 		while( level-- > 0 )
-		{
-			/*if( level > start_level )        System.out.print("| ");
-      else*/        ps.print("  ");
-		}
+			ps.print("  ");
 	}
 
 	// ------------------------------ preprocessing ----------------------------

@@ -15,7 +15,7 @@ import soot.UnitBox;
 public class SootLabelMap {
 	static int nextl = 0;
 	
-	static String getNewLabel()
+	static private String getNewLabel()
 	{
 		return String.format("SootL%d", nextl++);
 	}
