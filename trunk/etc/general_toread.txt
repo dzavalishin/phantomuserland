@@ -1,3 +1,12 @@
+JVM/bytecode/exec
+
+Soot/Jimple
+
+http://www.brics.dk/SootGuide/sootsurvivorsguide.pdf
+http://www.sable.mcgill.ca/publications/thesis/phd-gagnon/sable-thesis-2002-phd-gagnon.pdf
+http://www.sable.mcgill.ca/~dbelan2/research/thesis/thesis.pdf
+http://www.cs.washington.edu/education/courses/cse501/01wi/project/sable-thesis.pdf
+http://sablecc.sourceforge.net/downloads/thesis.pdf
 
 AHCI, drivers
 http://www.koders.com/c/fid38869AA8E32832BBA219DF1716C6D7266FE22806.aspx?s=mpc8560

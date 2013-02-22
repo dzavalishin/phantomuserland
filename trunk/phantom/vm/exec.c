@@ -29,7 +29,6 @@
 
 #include <kernel/snap_sync.h>
 
-//#define printf printf
 
 
 /*
@@ -43,6 +42,10 @@
 
 //static int debug_print_instr = 1;
 int debug_print_instr = 0;
+
+#define LISTI(iName) do { if( debug_print_instr ) printf("%s; ",(iName)); } while(0)
+#define LISTIA(fmt,a) do { if( debug_print_instr ) printf(fmt "; ", a); } while(0)
+
 
 
 /**
@@ -120,55 +123,55 @@ void pvm_exec_save_fast_acc(struct data_area_4_thread *da)
 
 static void pvm_exec_load( struct data_area_4_thread *da, unsigned slot )
 {
-    if( debug_print_instr ) printf("os load %d; ", slot);
+    LISTIA("os load %d", slot);
     struct pvm_object o = pvm_get_ofield( this_object(), slot);
     os_push( ref_inc_o (o) );
 }
 
 static void pvm_exec_save( struct data_area_4_thread *da, unsigned slot )
 {
-    if( debug_print_instr ) printf("os save %d; ", slot);
+    LISTIA("os save %d", slot);
     pvm_set_ofield( this_object(), slot, os_pop() );
 }
 
 
 static void pvm_exec_iload( struct data_area_4_thread *da, unsigned slot )
 {
-    if( debug_print_instr ) printf("is load %d; ", slot);
+    LISTIA("is load %d", slot);
     int v = pvm_get_int( pvm_get_ofield( this_object(), slot) );
     is_push( v );
 }
 
 static void pvm_exec_isave( struct data_area_4_thread *da, unsigned slot )
 {
-    if( debug_print_instr ) printf("is save %d; ", slot);
+    LISTIA("is save %d", slot);
     pvm_set_ofield( this_object(), slot, pvm_create_int_object(is_pop()) );
 }
 
 
 static void pvm_exec_get( struct data_area_4_thread *da, unsigned abs_stack_pos )
 {
-    if( debug_print_instr ) printf("os stack get %d; ", abs_stack_pos);
+    LISTIA("os stack get %d", abs_stack_pos);
     pvm_object_t o = pvm_ostack_abs_get(da->_ostack, abs_stack_pos);
     os_push( ref_inc_o(o) );
 }
 
 static void pvm_exec_set( struct data_area_4_thread *da, unsigned abs_stack_pos )
 {
-    if( debug_print_instr ) printf("os stack set %d; ", abs_stack_pos);
+    LISTIA("os stack set %d", abs_stack_pos);
     pvm_ostack_abs_set( da->_ostack, abs_stack_pos, os_pop() );
 }
 
 
 static void pvm_exec_iget( struct data_area_4_thread *da, unsigned abs_stack_pos )
 {
-    if( debug_print_instr ) printf("is stack get %d; ", abs_stack_pos);
+    LISTIA("is stack get %d", abs_stack_pos);
     is_push( pvm_istack_abs_get(da->_istack, abs_stack_pos) );
 }
 
 static void pvm_exec_iset( struct data_area_4_thread *da, unsigned abs_stack_pos )
 {
-    if( debug_print_instr ) printf("is stack set %d; ", abs_stack_pos);
+    LISTIA("is stack set %d", abs_stack_pos);
     pvm_istack_abs_set( da->_istack, abs_stack_pos, is_pop() );
 }
 
@@ -212,7 +215,7 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
     while( !(pvm_exec_find_catch( da->_estack, &jump_to, thrown_obj )) )
     {
         // like ret here
-        if( debug_print_instr ) printf("except does unwind, ");
+        LISTI("except does unwind, ");
         struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
 
         if( pvm_is_null( ret ) )
@@ -229,7 +232,7 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
         da->call_frame = ret;
         pvm_exec_load_fast_acc(da);
     }
-    if( debug_print_instr ) printf("except jump to %d; ", jump_to);
+    LISTIA("except jump to %d", jump_to);
     da->code.IP = jump_to;
     os_push(thrown_obj);
 }
@@ -241,7 +244,7 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
 // syscalss numbers are specific to object class
 static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
 {
-    if( debug_print_instr ) printf("sys %d start; ", syscall_index );
+    LISTIA("sys %d start", syscall_index );
 
     //n_args = is_top();
 
@@ -252,7 +255,7 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
 
     if( func == 0 )
     {
-        if( debug_print_instr ) printf("sys %d invalid! ", syscall_index );
+        LISTIA("sys %d invalid! ", syscall_index );
     }
     else
     {
@@ -263,7 +266,7 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
             pvm_exec_do_throw(da); // exception reported
     }
 
-    if( debug_print_instr ) printf("sys %d end; ", syscall_index );
+    LISTIA("sys %d end", syscall_index );
 }
 
 
@@ -435,7 +438,7 @@ void pvm_exec(pvm_object_t current_thread)
             switch(instruction)
             {
             case opcode_ishl:
-                if( debug_print_instr ) printf("l-ishl; ");
+                LISTI("l-ishl");
                 {
                     int64_t val = ls_pop();
                     ls_push( val << is_pop() );
@@ -443,7 +446,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_ishr:
-                if( debug_print_instr ) printf("l-ishr; ");
+                LISTI("l-ishr");
                 {
                     int64_t val = ls_pop();
                     ls_push( val >> is_pop() );
@@ -451,7 +454,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_ushr:
-                if( debug_print_instr ) printf("l-ushr; ");
+                LISTI("l-ushr");
                 {
                     u_int64_t val = ls_pop();
                     ls_push( val >> is_pop() );
@@ -460,7 +463,7 @@ void pvm_exec(pvm_object_t current_thread)
 
 
             case opcode_isum:
-                if( debug_print_instr ) printf("l-isum; ");
+                LISTI("l-isum");
                 {
                     int64_t add = ls_pop();
                     ls_push( ls_pop() + add );
@@ -468,7 +471,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_imul:
-                if( debug_print_instr ) printf("l-imul; ");
+                LISTI("l-imul");
                 {
                     int64_t mul = ls_pop();
                     ls_push( ls_pop() * mul );
@@ -476,7 +479,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_isubul:
-                if( debug_print_instr ) printf("l-isubul; ");
+                LISTI("l-isubul");
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
@@ -485,7 +488,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_isublu:
-                if( debug_print_instr ) printf("l-isublu; ");
+                LISTI("l-isublu");
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
@@ -494,7 +497,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_idivul:
-                if( debug_print_instr ) printf("l-idivul; ");
+                LISTI("l-idivul");
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
@@ -503,7 +506,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_idivlu:
-                if( debug_print_instr ) printf("l-idivlu; ");
+                LISTI("l-idivlu");
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
@@ -512,29 +515,29 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_ior:
-                if( debug_print_instr ) printf("l-ior; ");
+                LISTI("l-ior");
                 { int64_t operand = ls_pop();	ls_push( ls_pop() | operand ); }
                 break;
 
             case opcode_iand:
-                if( debug_print_instr ) printf("l-iand; ");
+                LISTI("l-iand");
                 { int64_t operand = ls_pop();	ls_push( ls_pop() & operand ); }
                 break;
 
             case opcode_ixor:
-                if( debug_print_instr ) printf("l-ixor; ");
+                LISTI("l-ixor");
                 { int64_t operand = ls_pop();	ls_push( ls_pop() ^ operand ); }
                 break;
 
             case opcode_inot:
-                if( debug_print_instr ) printf("l-inot; ");
+                LISTI("l-inot");
                 { int64_t operand = ls_pop();	ls_push( ~operand ); }
                 break;
 
 
 
             case opcode_log_or:
-                if( debug_print_instr ) printf("l-lor; ");
+                LISTI("l-lor");
                 {
                     int64_t o1 = ls_pop();
                     int64_t o2 = ls_pop();
@@ -543,7 +546,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_log_and:
-                if( debug_print_instr ) printf("l-land; ");
+                LISTI("l-land");
                 {
                     int64_t o1 = ls_pop();
                     int64_t o2 = ls_pop();
@@ -552,7 +555,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_log_xor:
-                if( debug_print_instr ) printf("l-lxor; ");
+                LISTI("l-lxor");
                 {
                     int64_t o1 = ls_pop() ? 1 : 0;
                     int64_t o2 = ls_pop() ? 1 : 0;
@@ -561,7 +564,7 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
             case opcode_log_not:
-                if( debug_print_instr ) printf("l-lnot; ");
+                LISTI("l-lnot");
                 {
                     int64_t operand = ls_pop();
                     ls_push( !operand );
@@ -570,31 +573,31 @@ void pvm_exec(pvm_object_t current_thread)
 
                 // NB! Returns int!
             case opcode_ige:	// >=
-                if( debug_print_instr ) printf("l-ige; ");
+                LISTI("l-ige");
                 { int64_t operand = ls_pop();	is_push( ls_pop() >= operand ); }
                 break;
             case opcode_ile:	// <=
-                if( debug_print_instr ) printf("l-ile; ");
+                LISTI("l-ile");
                 { int64_t operand = ls_pop();	is_push( ls_pop() <= operand ); }
                 break;
             case opcode_igt:	// >
-                if( debug_print_instr ) printf("l-igt; ");
+                LISTI("l-igt");
                 { int64_t operand = ls_pop();	is_push( ls_pop() > operand ); }
                 break;
             case opcode_ilt:	// <
-                if( debug_print_instr ) printf("l-ilt; ");
+                LISTI("l-ilt");
                 { int64_t operand = ls_pop();	is_push( ls_pop() < operand ); }
                 break;
 
 
 
             case opcode_i2o:
-                if( debug_print_instr ) printf("l-i2o; ");
+                LISTI("l-i2o");
                 os_push(pvm_create_long_object(ls_pop()));
                 break;
 
             case opcode_o2i:
-                if( debug_print_instr ) printf("l-o2i; ");
+                LISTI("l-o2i");
                 {
                     struct pvm_object o = os_pop();
                     if( o.data == 0 ) pvm_exec_panic("l-o2i(null)");
@@ -623,7 +626,7 @@ void pvm_exec(pvm_object_t current_thread)
         switch(instruction)
         {
         case opcode_nop:
-            if( debug_print_instr ) printf("nop; ");
+            LISTI("nop");
             break;
 
         case opcode_debug:
@@ -664,10 +667,30 @@ void pvm_exec(pvm_object_t current_thread)
         case opcode_prefix_float:  prefix_float  = 1; break;
         case opcode_prefix_double: prefix_double = 1; break;
 
+            // sync ops ---------------------------------------
+
+        case opcode_general_lock:
+            LISTI("lock");
+            {
+                // This is java monitor, arbitrary object
+                struct pvm_object lock_obj = os_pop();
+                // TODO impl me
+            }
+            break;
+
+        case opcode_general_unlock:
+            LISTI("unlock");
+            {
+                // This is java monitor, arbitrary object
+                struct pvm_object lock_obj = os_pop();
+                // TODO impl me
+            }
+            break;
+
             // int stack ops ---------------------------------------
 
         case opcode_is_dup:
-            if( debug_print_instr ) printf("is dup; ");
+            LISTI("is dup");
             {
                 if(DO_TWICE)
                 {
@@ -682,17 +705,17 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_is_drop:
-            if( debug_print_instr ) printf("is drop; ");
+            LISTI("is drop");
             is_pop(); if(DO_TWICE) is_pop();
             break;
 
         case opcode_iconst_0:
-            if( debug_print_instr ) printf("iconst 0; ");
+            LISTI("iconst 0");
             is_push(0); if(DO_TWICE) is_push(0);
             break;
 
         case opcode_iconst_1:
-            if( debug_print_instr ) printf("iconst 1; ");
+            LISTI("iconst 1");
             is_push(1); if(DO_TWICE) is_push(1);
             break;
 
@@ -701,7 +724,7 @@ void pvm_exec(pvm_object_t current_thread)
                 int v = pvm_code_get_byte(&(da->code));
                 if(DO_TWICE) ls_push(v);
                 else is_push(v);
-                if( debug_print_instr ) printf("iconst8 = %d; ", v);
+                LISTIA("iconst8 = %d", v);
                 break;
             }
 
@@ -710,7 +733,7 @@ void pvm_exec(pvm_object_t current_thread)
                 int v = pvm_code_get_int32(&(da->code));
                 if(DO_TWICE) ls_push(v);
                 else         is_push(v);
-                if( debug_print_instr ) printf("iconst32 = %d; ", v);
+                LISTIA("iconst32 = %d", v);
                 break;
             }
 
@@ -718,12 +741,12 @@ void pvm_exec(pvm_object_t current_thread)
             {
                 int64_t v = pvm_code_get_int64(&(da->code));
                 ls_push(v);
-                if( debug_print_instr ) printf("iconst64 = %Ld; ", v);
+                LISTIA("iconst64 = %Ld", v);
                 break;
             }
 
         case opcode_ishl:
-            if( debug_print_instr ) printf("ishl; ");
+            LISTI("ishl");
             {
                 int val = is_pop();
                 is_push( val << is_pop() );
@@ -731,7 +754,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_ishr:
-            if( debug_print_instr ) printf("ishr; ");
+            LISTI("ishr");
             {
                 int val = is_pop();
                 is_push( val >> is_pop() );
@@ -739,7 +762,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_ushr:
-            if( debug_print_instr ) printf("ushr; ");
+            LISTI("ushr");
             {
                 unsigned val = is_pop();
                 is_push( val >> is_pop() );
@@ -748,7 +771,7 @@ void pvm_exec(pvm_object_t current_thread)
 
 
         case opcode_isum:
-            if( debug_print_instr ) printf("isum; ");
+            LISTI("isum");
             {
                 int add = is_pop();
                 //is_top() += add;
@@ -757,7 +780,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_imul:
-            if( debug_print_instr ) printf("imul; ");
+            LISTI("imul");
             {
                 int mul = is_pop();
                 //is_top() *= mul;
@@ -766,7 +789,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_isubul:
-            if( debug_print_instr ) printf("isubul; ");
+            LISTI("isubul");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -775,7 +798,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_isublu:
-            if( debug_print_instr ) printf("isublu; ");
+            LISTI("isublu");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -784,7 +807,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_idivul:
-            if( debug_print_instr ) printf("idivul; ");
+            LISTI("idivul");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -793,7 +816,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_idivlu:
-            if( debug_print_instr ) printf("idivlu; ");
+            LISTI("idivlu");
             {
                 int u = is_pop();
                 int l = is_pop();
@@ -802,29 +825,29 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_ior:
-            if( debug_print_instr ) printf("ior; ");
+            LISTI("ior");
             { int operand = is_pop();	is_push( is_pop() | operand ); }
             break;
 
         case opcode_iand:
-            if( debug_print_instr ) printf("iand; ");
+            LISTI("iand");
             { int operand = is_pop();	is_push( is_pop() & operand ); }
             break;
 
         case opcode_ixor:
-            if( debug_print_instr ) printf("ixor; ");
+            LISTI("ixor");
             { int operand = is_pop();	is_push( is_pop() ^ operand ); }
             break;
 
         case opcode_inot:
-            if( debug_print_instr ) printf("inot; ");
+            LISTI("inot");
             { int operand = is_pop();	is_push( ~operand ); }
             break;
 
 
 
         case opcode_log_or:
-            if( debug_print_instr ) printf("lor; ");
+            LISTI("lor");
             {
                 int o1 = is_pop();
                 int o2 = is_pop();
@@ -833,7 +856,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_log_and:
-            if( debug_print_instr ) printf("land; ");
+            LISTI("land");
             {
                 int o1 = is_pop();
                 int o2 = is_pop();
@@ -842,7 +865,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_log_xor:
-            if( debug_print_instr ) printf("lxor; ");
+            LISTI("lxor");
             {
                 int o1 = is_pop() ? 1 : 0;
                 int o2 = is_pop() ? 1 : 0;
@@ -851,7 +874,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_log_not:
-            if( debug_print_instr ) printf("lnot; ");
+            LISTI("lnot");
             {
                 int operand = is_pop();
                 is_push( !operand );
@@ -860,31 +883,31 @@ void pvm_exec(pvm_object_t current_thread)
 
 
         case opcode_ige:	// >=
-            if( debug_print_instr ) printf("ige; ");
+            LISTI("ige");
             { int operand = is_pop();	is_push( is_pop() >= operand ); }
             break;
         case opcode_ile:	// <=
-            if( debug_print_instr ) printf("ile; ");
+            LISTI("ile");
             { int operand = is_pop();	is_push( is_pop() <= operand ); }
             break;
         case opcode_igt:	// >
-            if( debug_print_instr ) printf("igt; ");
+            LISTI("igt");
             { int operand = is_pop();	is_push( is_pop() > operand ); }
             break;
         case opcode_ilt:	// <
-            if( debug_print_instr ) printf("ilt; ");
+            LISTI("ilt");
             { int operand = is_pop();	is_push( is_pop() < operand ); }
             break;
 
 
 
         case opcode_i2o:
-            if( debug_print_instr ) printf("i2o; ");
+            LISTI("i2o");
             os_push(pvm_create_int_object(is_pop()));
             break;
 
         case opcode_o2i:
-            if( debug_print_instr ) printf("o2i; ");
+            LISTI("o2i");
             {
                 struct pvm_object o = os_pop();
                 if( o.data == 0 ) pvm_exec_panic("o2i(null)");
@@ -895,7 +918,7 @@ void pvm_exec(pvm_object_t current_thread)
 
 
         case opcode_os_eq:
-            if( debug_print_instr ) printf("os eq; ");
+            LISTI("os eq");
             {
                 struct pvm_object o1 = os_pop();
                 struct pvm_object o2 = os_pop();
@@ -906,7 +929,7 @@ void pvm_exec(pvm_object_t current_thread)
             }
 
         case opcode_os_neq:
-            if( debug_print_instr ) printf("os neq; ");
+            LISTI("os neq");
             {
                 struct pvm_object o1 = os_pop();
                 struct pvm_object o2 = os_pop();
@@ -917,79 +940,79 @@ void pvm_exec(pvm_object_t current_thread)
             }
 
         case opcode_os_isnull:
-            if( debug_print_instr ) printf("isnull; ");
+            LISTI("isnull");
             {
                 struct pvm_object o1 = os_pop();
                 is_push( pvm_is_null( o1 ) );
                 ref_dec_o(o1);
                 break;
             }
-
+/*
         case opcode_os_push_null:
-            if( debug_print_instr ) printf("push null; ");
+            LISTI("push null");
             {
                 os_push( pvm_get_null_object() );
                 break;
             }
-
+*/
 
             // summoning, special ----------------------------------------------------
 
         case opcode_summon_null:
-            if( debug_print_instr ) printf("push null; ");
+            LISTI("push null");
             os_push( pvm_get_null_object() ); // so what opcode_os_push_null is for then?
             break;
 
         case opcode_summon_thread:
-            if( debug_print_instr ) printf("summon thread; ");
+            LISTI("summon thread");
             os_push( ref_inc_o( current_thread ) );
-            //printf("ERROR: summon thread; ");
+            //printf("ERROR: summon thread");
             break;
 
         case opcode_summon_this:
-            if( debug_print_instr ) printf("summon this; ");
+            LISTI("summon this");
             os_push( ref_inc_o( this_object() ) );
             break;
 
         case opcode_summon_class_class:
-            if( debug_print_instr ) printf("summon class class; ");
+            LISTI("summon class class");
             // it has locked refcount
             os_push( pvm_get_class_class() );
             break;
 
         case opcode_summon_interface_class:
-            if( debug_print_instr ) printf("summon interface class; ");
+            LISTI("summon interface class");
             // locked refcnt
             os_push( pvm_get_interface_class() );
             break;
 
         case opcode_summon_code_class:
-            if( debug_print_instr ) printf("summon code class; ");
+            LISTI("summon code class");
         	// locked refcnt
             os_push( pvm_get_code_class() );
             break;
 
         case opcode_summon_int_class:
-            if( debug_print_instr ) printf("summon int class; ");
+            LISTI("summon int class");
         	// locked refcnt
             os_push( pvm_get_int_class() );
             break;
 
         case opcode_summon_string_class:
-            if( debug_print_instr ) printf("summon string class; ");
+            LISTI("summon string class");
         	// locked refcnt
             os_push( pvm_get_string_class() );
             break;
 
         case opcode_summon_array_class:
-            if( debug_print_instr ) printf("summon array class; ");
+            LISTI("summon array class");
         	// locked refcnt
             os_push( pvm_get_array_class() );
             break;
 
         case opcode_summon_by_name:
             {
-                if( debug_print_instr ) printf("summon by name; ");
+                LISTI("summon by name");
                 struct pvm_object name = pvm_code_get_string(&(da->code));
                 struct pvm_object cl = pvm_exec_lookup_class_by_name( name );
                 ref_dec_o(name);
@@ -1015,7 +1038,7 @@ void pvm_exec(pvm_object_t current_thread)
 
 
         case opcode_new:
-            if( debug_print_instr ) printf("new; ");
+            LISTI("new");
             {
                 pvm_object_t cl = os_pop();
                 os_push( pvm_create_object( cl ) );
@@ -1024,7 +1047,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_copy:
-            if( debug_print_instr ) printf("copy; ");
+            LISTI("copy");
             {
                 pvm_object_t o = os_pop();
                 os_push( pvm_copy_object( o ) );
@@ -1037,7 +1060,7 @@ void pvm_exec(pvm_object_t current_thread)
             // compose/decompose
 #if 0
         case opcode_os_compose32:
-            if( debug_print_instr ) printf(" compose32; ");
+            LISTI(" compose32");
             {
                 int num = pvm_code_get_int32(&(da->code));
                 struct pvm_object in_class = os_pop();
@@ -1046,7 +1069,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_os_decompose:
-            if( debug_print_instr ) printf(" decompose; ");
+            LISTI(" decompose");
             {
                 struct pvm_object to_decomp = os_pop();
                 int num = da_po_limit(to_decomp.data);
@@ -1064,7 +1087,7 @@ void pvm_exec(pvm_object_t current_thread)
             // string ----------------------------------------------------------------
 
         case opcode_sconst_bin:
-            if( debug_print_instr ) printf("sconst bin; ");
+            LISTI("sconst bin");
             os_push(pvm_code_get_string(&(da->code)));
             break;
 
@@ -1072,62 +1095,63 @@ void pvm_exec(pvm_object_t current_thread)
             // flow ------------------------------------------------------------------
 
         case opcode_jmp:
-            if( debug_print_instr ) printf("jmp %d; ", da->code.IP);
+            LISTIA("jmp %d", da->code.IP);
             da->code.IP = pvm_code_get_rel_IP_as_abs(&(da->code));
             break;
 
 
         case opcode_djnz:
             {
-                if( debug_print_instr ) printf("djnz " );
                 int new_IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 //is_top()--;
                 is_push( is_pop() - 1 );
                 if( is_top() ) da->code.IP = new_IP;
 
-                if( debug_print_instr ) printf("(%d) -> %d; ", is_top() , new_IP );
+                LISTIA("djnz (%d)", is_top() );
+                LISTIA("djnz -> %d", new_IP );
             }
             break;
 
         case opcode_jz:
             {
-                if( debug_print_instr ) printf("jz " );
                 int new_IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 int test = is_pop();
                 if( !test ) da->code.IP = new_IP;
 
-                if( debug_print_instr ) printf("(%d) -> %d; ", test , new_IP );
+                LISTIA("jz (%d)", test );
+                LISTIA("jz -> %d",  new_IP );
             }
             break;
 
 
         case opcode_switch:
             {
-                if( debug_print_instr ) printf("switch ");
                 unsigned int tabsize    = pvm_code_get_int32(&(da->code));
                 int shift               = pvm_code_get_int32(&(da->code));
                 unsigned int divisor    = pvm_code_get_int32(&(da->code));
                 int stack_top = is_pop();
 
-                if( debug_print_instr ) printf("(%d+%d)/%d, ", stack_top, shift, divisor );
+                //LISTIA("switch (%d+%d)/%d, ", stack_top, shift, divisor );
+                LISTIA("switch (%d)", stack_top );
 
 
                 unsigned int start_table_IP = da->code.IP;
                 unsigned int displ = (stack_top+shift)/divisor;
                 unsigned int new_IP = start_table_IP+(tabsize*4); // default
 
-                if( debug_print_instr ) printf("displ %d, etab addr %d ", displ, new_IP );
+                //LISTIA("displ %d, etab addr %d ", displ, new_IP );
 
 
                 if( displ < tabsize )
                 {
                     da->code.IP = start_table_IP+(displ*4); // TODO BUG! 4!
-                    if( debug_print_instr ) printf("load from %d, ", da->code.IP );
+                    LISTIA("load from %d, ", da->code.IP );
                     new_IP = pvm_code_get_rel_IP_as_abs(&(da->code));
                 }
                 da->code.IP = new_IP;
 
-                if( debug_print_instr ) printf("switch(%d) ->%d; ", displ, new_IP );
+                //LISTIA("switch(%d) ->%d", displ, new_IP );
+                LISTIA("switch ->%d", new_IP );
             }
             break;
 
@@ -1143,7 +1167,7 @@ void pvm_exec(pvm_object_t current_thread)
                     return;  // exit thread
                 }
                 pvm_exec_do_return(da);
-                if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
+                if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
             }
             break;
 
@@ -1152,13 +1176,13 @@ void pvm_exec(pvm_object_t current_thread)
         case opcode_throw:
             if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
             pvm_exec_do_throw(da);
-            if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
+            if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
             break;
 
         case opcode_push_catcher:
             {
                 unsigned addr = pvm_code_get_rel_IP_as_abs(&(da->code));
-                if( debug_print_instr ) printf("push catcher %u; ", addr );
+                LISTIA("push catcher %u", addr );
                 //cf->push_catcher( addr, os_pop() );
                 //call_frame.estack().push(exception_handler(os_pop(),addr));
 
@@ -1174,7 +1198,7 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_pop_catcher:
-            if( debug_print_instr ) printf("pop catcher; ");
+            LISTI("pop catcher");
             //cf->pop_catcher();
             //call_frame.estack().pop();
             ref_dec_o( es_pop().object );
@@ -1207,7 +1231,7 @@ void pvm_exec(pvm_object_t current_thread)
             // object stack --------------------------------------------------------------
 
         case opcode_os_dup:
-            if( debug_print_instr ) printf("os dup; ");
+            LISTI("os dup");
             {
                 pvm_object_t o = os_top();
                 os_push( ref_inc_o( o ) );
@@ -1215,12 +1239,12 @@ void pvm_exec(pvm_object_t current_thread)
             break;
 
         case opcode_os_drop:
-            if( debug_print_instr ) printf("os drop; ");
+            LISTI("os drop");
             ref_dec_o( os_pop() );
             break;
 
         case opcode_os_pull32:
-            if( debug_print_instr ) printf("os pull; ");
+            LISTI("os pull");
             {
                 pvm_object_t o = os_pull(pvm_code_get_int32(&(da->code)));
                 os_push( ref_inc_o( o ) );

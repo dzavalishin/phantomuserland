@@ -9,6 +9,7 @@
 **/
 
 #include <string.h>
+#include <stdio.h>
 #include <phantom_assert.h>
 #include <malloc.h>
 
@@ -19,6 +20,23 @@
 // TODO if we change memory allocation seriously, change kvtophys()
 // and phystokv() as well
 
+#define TRACE_USED 1
+
+
+long phantom_phys_stat_arena( physalloc_t *arena );
+
+#if TRACE_USED
+void physalloc_check_diff( physalloc_t *arena, long prev, int tochange )
+{
+    long now = phantom_phys_stat_arena( arena );
+    if( (now - prev) != tochange )
+        lprintf("phys diff old %ld new %ld diff %ld, expect diff %d\n",
+               prev, now,
+               now - prev,
+               tochange
+              );
+}
+#endif
 
 
 static void do_phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_units, int n_map_elems, void *mapbuf)
@@ -62,6 +80,9 @@ void phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_units)
 errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 {
     assert(arena->inited);
+#if TRACE_USED
+    long prev_used = phantom_phys_stat_arena( arena );
+#endif
 
     //int ie = hal_save_cli();
     hal_spin_lock_cli(&(arena->lock));
@@ -93,6 +114,9 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
             arena->n_used_pages++;
             hal_spin_unlock_sti(&(arena->lock));
             //if(ie) hal_sti();
+#if TRACE_USED
+            physalloc_check_diff( arena, prev_used, 1 );
+#endif
             return 0;
         }
         arena->alloc_last_pos++;
@@ -110,6 +134,10 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 void phantom_phys_free_page( physalloc_t *arena, physalloc_item_t free )
 {
     assert(arena->inited);
+#if TRACE_USED
+    hal_spin_lock_cli(&(arena->lock));
+    long prev_used = phantom_phys_stat_arena( arena );
+#endif
     //assert(free >= 0 && free < arena->total_size);
     assert(free < arena->total_size);
 
@@ -122,11 +150,16 @@ void phantom_phys_free_page( physalloc_t *arena, physalloc_item_t free )
 
     arena->map[elem_no] &= ~mask;
     arena->n_used_pages--;
+#if TRACE_USED
+    physalloc_check_diff( arena, prev_used, -1 );
+    hal_spin_unlock_sti(&(arena->lock));
+#endif
 }
 
 
-void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_t n_pages )
+void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_t _n_pages )
 {
+    size_t n_pages = _n_pages;
     assert(arena->inited);
     //assert(start >= 0 &&
     /*assert( start < arena->total_size &&
@@ -136,6 +169,11 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
     assert( start < arena->total_size );
     assert( n_pages < arena->total_size );
     assert( start + n_pages < arena->total_size ); // TODO bug? <= ?
+
+#if TRACE_USED
+    hal_spin_lock_cli(&(arena->lock));
+    long prev_used = phantom_phys_stat_arena( arena );
+#endif
 
     while(n_pages)
     {
@@ -163,12 +201,20 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
     }
     //arena->n_used_pages -= n_pages;
     assert(n_pages == 0);
+
+#if TRACE_USED
+    physalloc_check_diff( arena, prev_used, -_n_pages );
+    hal_spin_unlock_sti(&(arena->lock));
+#endif
 }
 
 
 errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, size_t npages )
 {
     assert(arena->inited);
+#if TRACE_USED
+    long prev_used = phantom_phys_stat_arena( arena );
+#endif
 
     //int ie = hal_save_cli();
     hal_spin_lock_cli(&(arena->lock));
@@ -218,6 +264,10 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
     int page_no = (arena->alloc_last_pos - N)*BITS_PER_ELEM;
     *ret = page_no;
 
+#if TRACE_USED
+    physalloc_check_diff( arena, prev_used, npages );
+#endif
+
     hal_spin_unlock_sti(&(arena->lock));
     //if(ie) hal_sti();
     return 0;
@@ -227,7 +277,7 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
 #include <sys/libkern.h>
 #include <stdio.h>
 
-void phantom_phys_stat_arena( physalloc_t *arena )
+long phantom_phys_stat_arena( physalloc_t *arena )
 {
     assert(arena->inited);
 
@@ -251,12 +301,12 @@ void phantom_phys_stat_arena( physalloc_t *arena )
             curr_free++;
 
         if( e == ~0u )
-            used_bits += sizeof(map_elem_t);
+            used_bits += BITS_PER_ELEM;
         else if( e )
         {
             unsigned j;
             map_elem_t mask = 0x01;
-            for ( j = 0; j < sizeof(map_elem_t); j++ )
+            for ( j = 0; j < BITS_PER_ELEM; j++ )
             {
                 if( e & mask )
                     used_bits++;
@@ -265,9 +315,9 @@ void phantom_phys_stat_arena( physalloc_t *arena )
         }
     }
 
-    printf("used %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
+    lprintf("used %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
 
-
+    return used_bits;
 }
 
 

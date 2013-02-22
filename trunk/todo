@@ -1,3 +1,5 @@
+ - dynamic (by-name) method calls. use for interface method calls!
+
  - wtty buf size return to 128 or make dynamic
 
  - MEM LEAK!

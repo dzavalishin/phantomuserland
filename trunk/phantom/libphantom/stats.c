@@ -243,10 +243,21 @@ void phantom_dump_stats_buf(char *buf, int len)
     {
         if(*stat_counter_name[i] == 0)
             continue;
+#if COMPILE_PERSISTENT_STATS
+        struct persistent_kernel_stats *ps = pdata ? pdata + i : &dumb_pst;
 
+        // Out of space - skip zero lines
+        if(
+           (0 == stat_total_counters[i]) &&
+           (0 == (long)ps->total_prev_and_this_runs)
+          )
+            continue;
+#else
         // Out of space - skip zero lines
         if(stat_total_counters[i] == 0)
             continue;
+#endif
+
 
         if(stat_counter_name[i] == 0)
             break;
@@ -257,8 +268,6 @@ void phantom_dump_stats_buf(char *buf, int len)
             scol = "\x1b[33m";
 
 #if COMPILE_PERSISTENT_STATS
-        struct persistent_kernel_stats *ps = pdata ? pdata + i : &dumb_pst;
-
         rc = snprintf(buf, len, "\n %s%-17s%5d %5ld %10ld %10ld",
                       scol,
                       stat_counter_name[i],

@@ -682,8 +682,10 @@ public class Codegen extends opcode_ids {
 
 	public void emitPushNull() throws IOException
 	{
-		put_byte(opcode_os_push_null);
-		list("push null");
+		//put_byte(opcode_os_push_null);
+		//list("push null");
+		put_byte(opcode_summon_null);
+		list("summon null");
 	}
 
 	public void emitIsNull() throws IOException
@@ -692,6 +694,27 @@ public class Codegen extends opcode_ids {
 		list("isnull");
 	}
 
+	public void emitLock() throws IOException {
+		put_byte(opcode_general_lock);
+		list("lock");
+	}
+
+
+	public void emitUnLock() throws IOException {
+		put_byte(opcode_general_unlock);
+		list("unlock");
+	}
+
+
+	public void emitDynamicCall() throws IOException {
+		put_byte(opcode_dynamic_invoke);
+		list("dynamic invoke");
+	}
+
+
+
+	
+	
 
 	public void emitComment(String string) throws IOException {
 		list("; "+string);		
@@ -715,6 +738,7 @@ public class Codegen extends opcode_ids {
 	public Map<Long, Integer> getIpToLine() {
 		return IpToLine;
 	}
+
 
 
 
