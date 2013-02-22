@@ -12,6 +12,7 @@ import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.MonitorNode;
+import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.ThisNode;
@@ -55,6 +56,9 @@ public class SootMethodTranslator {
 	private PhantomClass pc;
 	private ParseState s;
 	
+	private StatementsNode nodes = new StatementsNode();
+	
+	
 	public SootMethodTranslator(SootMethod m, PhantomClass pc) throws PlcException {
 		this.m = m;
 		this.pc = pc;
@@ -67,6 +71,7 @@ public class SootMethodTranslator {
 		PhantomType type = SootExpressionTranslator.convertType(returnType);
 		phantomMethod = new Method(mName, type); 
 		pc.addMethod(phantomMethod);
+		phantomMethod.code = nodes;
 	
 		for( int i = 0; i < m.getParameterCount(); i++ )
 		{
@@ -119,9 +124,6 @@ public class SootMethodTranslator {
 			}
 		}
 		
-		StatementsNode nodes = new StatementsNode();
-		//phantomMethod.code = new SequenceNode(null, null);
-		phantomMethod.code = nodes;
 		
 		if( u instanceof AbstractStmt )
 		{
@@ -129,7 +131,10 @@ public class SootMethodTranslator {
 			 PhantomCodeWrapper statement = doStatement(as);
 			 if( statement != null)
 			 {
-				 nodes.addNode(statement.getNode());
+				 Node n = statement.getNode();
+				 if( n == null ) n = new EmptyNode();
+				 nodes.addNode(n);
+				 say(" ... add node "+n);
 				 /*
 				 statements.add(statement);
 				 phantomMethod.code  =
@@ -145,13 +150,15 @@ public class SootMethodTranslator {
 		s.set_method(phantomMethod);
 		phantomMethod.code.preprocess(s);
 		
+		/*
 		List<Tag> tags = u.getTags();
 		for( Tag t : tags )
 		{
 			String ts = t.toString();
-			say("     "+ts);
+			say("tag     "+ts);
 		}
-
+		*/
+		
 		/*
 		List<UnitBox> boxes = u.getUnitBoxes();
 		for( UnitBox b : boxes )

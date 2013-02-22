@@ -17,7 +17,7 @@ public class ThisNode extends Node {
 	PhantomClass my_class;
 
 	public ThisNode( PhantomClass c ) {
-		super(null);
+		super(new EmptyNode());
 		my_class = c;
 	}
 	
