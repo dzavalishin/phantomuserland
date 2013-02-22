@@ -1,7 +1,7 @@
 package ru.dz.soot;
 
-import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.BiNode;
 import ru.dz.plc.compiler.binode.NewNode;
@@ -31,11 +31,9 @@ import ru.dz.plc.compiler.node.OpArrayLength;
 import ru.dz.plc.compiler.node.StaticLoadNode;
 import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.util.PlcException;
-import soot.ArrayType;
 import soot.Local;
 import soot.SootClass;
 import soot.SootFieldRef;
-import soot.SootMethodRef;
 import soot.Type;
 import soot.Value;
 import soot.jimple.AddExpr;
@@ -161,8 +159,8 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void defaultCase(Object arg0) {
-				say("e ?? "+vv.getClass().getName());
-				say("e    "+vv.toString());
+				SootMain.error("e ?? "+vv.getClass().getName());
+				SootMain.error("e    "+vv.toString());
 			}
 
 
@@ -219,27 +217,27 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseCastExpr(CastExpr arg0) {
+			public void caseCastExpr(CastExpr v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error(v.toString());				
 			}
 
 			@Override
-			public void caseCmpExpr(CmpExpr arg0) {
+			public void caseCmpExpr(CmpExpr v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error(v.toString());				
 			}
 
 			@Override
-			public void caseCmpgExpr(CmpgExpr arg0) {
+			public void caseCmpgExpr(CmpgExpr v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error(v.toString());				
 			}
 
 			@Override
-			public void caseCmplExpr(CmplExpr arg0) {
+			public void caseCmplExpr(CmplExpr v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error(v.toString());
 			}
 
 			@Override
@@ -249,9 +247,12 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseDynamicInvokeExpr(DynamicInvokeExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseDynamicInvokeExpr(DynamicInvokeExpr v) {
+				try {
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
 			}
 
 			@Override
@@ -273,15 +274,18 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseInstanceOfExpr(InstanceOfExpr arg0) {
+			public void caseInstanceOfExpr(InstanceOfExpr v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error(v.toString());
 			}
 
 			@Override
-			public void caseInterfaceInvokeExpr(InterfaceInvokeExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseInterfaceInvokeExpr(InterfaceInvokeExpr v) {
+				try {
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
 			}
 
 			@Override
@@ -318,9 +322,9 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseNegExpr(NegExpr arg0) {
+			public void caseNegExpr(NegExpr v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error(v.toString());
 			}
 
 			@Override
@@ -342,7 +346,7 @@ public class SootExpressionTranslator {
 				for(int dim = 0; dim < dimensions; dim++)
 				{
 					Value size = v.getSize(dim); // Array dimension?
-					say("  dim = "+v );
+					say("  dim = "+size );
 				}
 			}
 
@@ -381,15 +385,22 @@ public class SootExpressionTranslator {
 			
 			
 			@Override
-			public void caseSpecialInvokeExpr(SpecialInvokeExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseSpecialInvokeExpr(SpecialInvokeExpr v) {
+				try {
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
 			}
 
 			@Override
 			public void caseStaticInvokeExpr(StaticInvokeExpr v) {
-				ret.w = doStaticInvoke(v);
+				try {
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+				} catch (PlcException e) {
+					SootMain.error(e);
 				}
+			}
 
 			@Override
 			public void caseSubExpr(SubExpr v) {
@@ -399,13 +410,17 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseVirtualInvokeExpr(VirtualInvokeExpr v) {
-				ret.w = doVirtualInvoke(v);
+				try {
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
 			}
 
 			@Override
-			public void caseXorExpr(XorExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseXorExpr(XorExpr v) {
+				// TODO xor
+				SootMain.error(v.toString());
 			}
 
 			@Override
@@ -419,9 +434,9 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseCaughtExceptionRef(CaughtExceptionRef arg0) {
+			public void caseCaughtExceptionRef(CaughtExceptionRef v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error(v.toString());				
 			}
 
 			@Override
@@ -440,6 +455,7 @@ public class SootExpressionTranslator {
 				ret.w = new PhantomCodeWrapper( node );
 				*/
 				// TODO make me
+				SootMain.error(v.toString());
 			}
 
 			@Override
@@ -532,23 +548,28 @@ public class SootExpressionTranslator {
 		return new PhantomCodeWrapper(new OpArrayLength(PhantomCodeWrapper.getExpression(array, m, phantomClass).getNode()));
 	}
 
+	/*
 	private PhantomCodeWrapper doStaticInvoke(StaticInvokeExpr v) {
 		SootMethodRef mr = v.getMethodRef();
 		String mName = mr.name();
 		mr.declaringClass();
 		say("Static call "+mName);
-		// TODO static call
+		// TO DO static call
 		return new PhantomCodeWrapper(new NullNode());
 	}
 
-	private PhantomCodeWrapper doVirtualInvoke(VirtualInvokeExpr v) {
-		SootMethodRef mr = v.getMethodRef();
-		String mName = mr.name();
-		say("Virtual call "+mName);
-		// TODO virt call
-		return new PhantomCodeWrapper(new NullNode());
-	}
+	private PhantomCodeWrapper doVirtualInvoke(VirtualInvokeExpr v) throws PlcException {
+		//SootMethodRef mr = v.getMethodRef();
+		//String mName = mr.name();
+		//say("Virtual call "+mName);
+		// TO DO virt call
+		//return new PhantomCodeWrapper(new NullNode());
+		
+		return PhantomCodeWrapper.getInvoke(v, m, phantomClass );
 
+	}
+	*/
+	
 	private PhantomCodeWrapper doArrayRef(ArrayRef v) throws PlcException {
 		Value base = v.getBase();
 		Value index = v.getIndex();
@@ -593,6 +614,7 @@ public class SootExpressionTranslator {
 	}
 	*/
 	
+	/*
 	private void assertInt(Type t) {
 		if( t.toString().equals("int"))
 			return;
@@ -601,7 +623,8 @@ public class SootExpressionTranslator {
 		//say("t1 "+machineType);
 		throw new RuntimeException("Unknown type "+t);
 	}
-
+	*/
+	
 	private PhantomCodeWrapper doReadLocal(Local v) {
 		String varName = v.getName();
 		IdentNode node = new IdentNode( varName );
