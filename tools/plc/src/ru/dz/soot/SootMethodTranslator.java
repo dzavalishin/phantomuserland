@@ -1,6 +1,5 @@
 package ru.dz.soot;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import ru.dz.plc.compiler.Method;
@@ -9,27 +8,23 @@ import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
 import ru.dz.plc.compiler.binode.OpAssignNode;
-import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.MonitorNode;
-import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
+import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.compiler.node.ThrowNode;
-import ru.dz.plc.compiler.node.VoidNode;
 import ru.dz.plc.compiler.trinode.IfNode;
 import ru.dz.plc.util.PlcException;
 import soot.Body;
 import soot.PatchingChain;
 import soot.SootMethod;
-import soot.SootMethodRef;
 import soot.Type;
 import soot.Unit;
 import soot.UnitBox;
 import soot.Value;
-import soot.ValueBox;
 import soot.jimple.AssignStmt;
 import soot.jimple.BreakpointStmt;
 import soot.jimple.EnterMonitorStmt;
@@ -37,7 +32,6 @@ import soot.jimple.ExitMonitorStmt;
 import soot.jimple.GotoStmt;
 import soot.jimple.IdentityStmt;
 import soot.jimple.IfStmt;
-import soot.jimple.InvokeExpr;
 import soot.jimple.InvokeStmt;
 import soot.jimple.LookupSwitchStmt;
 import soot.jimple.NopStmt;
@@ -48,23 +42,14 @@ import soot.jimple.StmtSwitch;
 import soot.jimple.TableSwitchStmt;
 import soot.jimple.ThrowStmt;
 import soot.jimple.internal.AbstractStmt;
-import soot.jimple.internal.JAssignStmt;
-import soot.jimple.internal.JGotoStmt;
-import soot.jimple.internal.JIdentityStmt;
-import soot.jimple.internal.JIfStmt;
-import soot.jimple.internal.JInvokeStmt;
-import soot.jimple.internal.JReturnStmt;
-import soot.jimple.internal.JReturnVoidStmt;
 import soot.tagkit.Tag;
-import soot.util.Switch;
-import sun.security.action.GetLongAction;
 
 public class SootMethodTranslator {
 
 	private SootLabelMap lmap = new SootLabelMap();
 	private SootMethod m;
 
-	private List<PhantomCodeWrapper> statements = new LinkedList<PhantomCodeWrapper>();
+	//private List<PhantomCodeWrapper> statements = new LinkedList<PhantomCodeWrapper>();
 	private String mName;
 	private Method phantomMethod;
 	private PhantomClass pc;
@@ -97,7 +82,7 @@ public class SootMethodTranslator {
 	
 	
 	public void process() throws PlcException {
-		say("Method "+mName);
+		say("\n\n-------------------\nMethod "+mName);
 
 		m.retrieveActiveBody();
 		
@@ -134,7 +119,9 @@ public class SootMethodTranslator {
 			}
 		}
 		
-		phantomMethod.code = new SequenceNode(null, null);
+		StatementsNode nodes = new StatementsNode();
+		//phantomMethod.code = new SequenceNode(null, null);
+		phantomMethod.code = nodes;
 		
 		if( u instanceof AbstractStmt )
 		{
@@ -142,11 +129,14 @@ public class SootMethodTranslator {
 			 PhantomCodeWrapper statement = doStatement(as);
 			 if( statement != null)
 			 {
-			 statements.add(statement);
-			 phantomMethod.code  =
-					 new SequenceNode(
-							 phantomMethod.code, 
-							 statement.getNode());
+				 nodes.addNode(statement.getNode());
+				 /*
+				 statements.add(statement);
+				 phantomMethod.code  =
+						 new SequenceNode(
+								 phantomMethod.code, 
+								 statement.getNode());
+				 */
 			 }
 			 else
 				 SootMain.say("null statement");
@@ -187,9 +177,8 @@ public class SootMethodTranslator {
 			}
 
 			@Override
-			public void caseBreakpointStmt(BreakpointStmt arg0) {
-				// TODO implement break
-				
+			public void caseBreakpointStmt(BreakpointStmt as) {
+				SootMain.error("RetStmt! "+as);				
 			}
 
 			@Override
@@ -250,9 +239,8 @@ public class SootMethodTranslator {
 			}
 
 			@Override
-			public void caseRetStmt(RetStmt arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseRetStmt(RetStmt as) {
+				SootMain.error("RetStmt! "+as);
 			}
 
 			@Override
@@ -271,14 +259,62 @@ public class SootMethodTranslator {
 
 			
 			@Override
-			public void caseTableSwitchStmt(TableSwitchStmt arg0) {
+			public void caseTableSwitchStmt(TableSwitchStmt ss) {
 				// TODO make switch statement
+
+				// Expression to switch on?
+				Value key = ss.getKey();
+				SootMain.say("table sw key "+key);
+
+				UnitBox defaultTargetBox = ss.getDefaultTargetBox();
+				String defaultLabel = lmap.getLabelFor(defaultTargetBox);
+				SootMain.say("def label = "+defaultLabel);
+				
+				int lowIndex = ss.getLowIndex();
+				int highIndex = ss.getHighIndex();
+				
+				for( int lookupValue = lowIndex; lookupValue < highIndex; lookupValue++ )
+				{
+					UnitBox targetBox = ss.getTargetBox(lookupValue);
+					String targetLabel = lmap.getLabelFor(targetBox);
+					
+					SootMain.say("  sw lookup value = "+lookupValue);
+					SootMain.say("  sw label = "+targetLabel);
+					SootMain.say("  target = "+targetBox.getUnit());
+				}
+
+				SootMain.say("def target = "+defaultTargetBox.getUnit());
 				
 			}
 			
 			@Override
-			public void caseLookupSwitchStmt(LookupSwitchStmt arg0) {
+			public void caseLookupSwitchStmt(LookupSwitchStmt ss) {
 				// TODO make switch statement
+				
+				// Expression to switch on?
+				Value key = ss.getKey();
+				SootMain.say("lookup sw key "+key);
+				
+				//Unit defaultTarget = ss.getDefaultTarget();
+				UnitBox defaultTargetBox = ss.getDefaultTargetBox();
+				String defaultLabel = lmap.getLabelFor(defaultTargetBox);
+				SootMain.say("def label = "+defaultLabel);
+				
+				int cases = ss.getTargetCount();
+				for( int i = 0; i < cases; i++ )
+				{
+					UnitBox targetBox = ss.getTargetBox(i);
+					String targetLabel = lmap.getLabelFor(targetBox);
+					
+					int lookupValue = ss.getLookupValue(i);
+					SootMain.say("  sw lookup value = "+lookupValue);
+					SootMain.say("  sw label = "+targetLabel);
+					SootMain.say("  sw target = "+targetBox.getUnit());
+				}
+				
+				SootMain.say("def target = "+defaultTargetBox.getUnit());
+				
+				
 				
 			}
 
@@ -375,7 +411,7 @@ public class SootMethodTranslator {
 		say("      Invoke "+expr.toString());
 		SootMethodRef methodRef = expr.getMethodRef();
 		say("      ."+methodRef.name());
-		// TODO make invoke
+		// TO DO make invoke
 		
 		return PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc);
 	}
@@ -461,8 +497,8 @@ public class SootMethodTranslator {
 		
 		//say(" ??   Identity '"+ls+"' <- '"+rs+"'");
 		
-		say(" ??   Identity '"+lv+"' <- '"+rv+"'");
-		say("      Identity '"+lv.getClass()+"' <- '"+rv.getClass()+"'");
+		SootMain.error(" ??   Identity '"+lv+"' <- '"+rv+"'");
+		SootMain.error("      Identity '"+lv.getClass()+"' <- '"+rv.getClass()+"'");
 		
 		
 		return null;
