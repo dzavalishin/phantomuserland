@@ -26,7 +26,7 @@ public class OpArrayLength extends Node {
 
 	@Override
 	public void preprocess_me(ParseState s) throws PlcException {
-		super.preprocess_me(s);
+		//super.preprocess_me(s);
 	}
 	
 	public void find_out_my_type() throws PlcException

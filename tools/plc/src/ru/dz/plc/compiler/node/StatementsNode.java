@@ -20,13 +20,15 @@ import ru.dz.plc.util.PlcException;
 
 
 public class StatementsNode extends Node {
-	List<Node> nodes = new LinkedList<Node>();
+	private List<Node> nodes = new LinkedList<Node>();
 	
-	public void addNode(Node n) { nodes.add(n); }
+	public void addNode(Node n) { 
+		//print_warning("add "+n);
+		//print_warning("sz "+nodes.size());
+		nodes.add(n); 
+		}
 	
-	public StatementsNode() {
-		super(null);
-	}
+	public StatementsNode() {		super(new EmptyNode());	}
 	public boolean args_on_int_stack() { return false; }
 	public String toString()  {    return "...";  }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
@@ -40,8 +42,12 @@ public class StatementsNode extends Node {
 	public void generate_code(Codegen c, CodeGeneratorState s)
 			throws IOException, PlcException {
 
+		//print_warning("sz "+nodes.size());
 		for( Node n : nodes )
+		{
+			print_warning("codegen "+n);
 			n.generate_code(c, s);
+		}
 
 	}
 	

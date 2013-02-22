@@ -42,8 +42,6 @@ public class NewNode extends BiNode {
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
-		//if( _l != null ) { _l.generate_code(c,s); move_between_stacks(c, _l.is_on_int_stack()); }
-		//if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
 		generate_my_code(c,s);
 	}
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException,

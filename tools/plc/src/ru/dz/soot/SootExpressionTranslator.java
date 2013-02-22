@@ -4,6 +4,7 @@ import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.BiNode;
+import ru.dz.plc.compiler.binode.NewNode;
 import ru.dz.plc.compiler.binode.OpAndNode;
 import ru.dz.plc.compiler.binode.OpDivideNode;
 import ru.dz.plc.compiler.binode.OpMinusNode;
@@ -146,9 +147,9 @@ public class SootExpressionTranslator {
 
 
 			@Override
-			public void caseClassConstant(ClassConstant arg0) {
+			public void caseClassConstant(ClassConstant v) {
 				// TODO Auto-generated method stub
-				
+				SootMain.error("class const "+v.value);
 			}
 
 			@Override
@@ -303,21 +304,26 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
-			public void caseNewArrayExpr(NewArrayExpr arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseNewArrayExpr(NewArrayExpr v) {
+				doNew(ret, v.getType()); // Right?
 			}
 
 			@Override
 			public void caseNewExpr(NewExpr v) {
-				// TODO Auto-generated method stub
-				
+				doNew(ret, v.getType());
 			}
 
 			@Override
-			public void caseNewMultiArrayExpr(NewMultiArrayExpr arg0) {
+			public void caseNewMultiArrayExpr(NewMultiArrayExpr v) {
 				// TODO Auto-generated method stub
+				SootMain.error(v.toString()); 
 				
+				int dimensions = v.getSizeCount();
+				for(int dim = 0; dim < dimensions; dim++)
+				{
+					Value size = v.getSize(dim); // Array dimension?
+					say("  dim = "+v );
+				}
 			}
 
 			@Override
@@ -588,6 +594,17 @@ public class SootExpressionTranslator {
 
 	
 	
+	private void doNew(final ww ret, Type type) {
+		try {
+			PhantomType phantomType = convertType(type);
+			ret.w = new PhantomCodeWrapper( new NewNode(phantomType, null, null ) );				
+		} catch (PlcException e) {
+			SootMain.error(e);
+		}
+	}
+
+
+
 	abstract class BinOpWrapper<T extends BiNode>
 	{
 		

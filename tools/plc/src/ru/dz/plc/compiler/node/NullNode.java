@@ -11,7 +11,7 @@ import ru.dz.plc.util.PlcException;
 /** Just does nothing. */
 public class NullNode extends Node {
 
-	public NullNode() {    super(null);  }
+	public NullNode() {    super(new EmptyNode());  }
 	public String toString()  {    return "null"; /*+ident;*/  }
 	public void find_out_my_type() throws PlcException { if( type == null ) type = new PhTypeObject(); }
 	public boolean is_const() { return true; }
