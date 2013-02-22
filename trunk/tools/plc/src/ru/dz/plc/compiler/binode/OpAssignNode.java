@@ -26,7 +26,10 @@ public class OpAssignNode extends BiNode {
 	 * @param var_or_array where to assign
 	 * @param expr expression to assign 
 	 */
-	public OpAssignNode(Node var_or_array, Node expr) {    super(var_or_array,expr);  }
+	public OpAssignNode(Node var_or_array, Node expr) {    
+		super(var_or_array,expr);  
+		}
+	
 	public String toString()  {    return "=";  }
 
 	public boolean args_on_int_stack() {

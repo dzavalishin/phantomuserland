@@ -28,7 +28,7 @@ public class StatementsNode extends Node {
 		nodes.add(n); 
 		}
 	
-	public StatementsNode() {		super(new EmptyNode());	}
+	public StatementsNode() {		super(null);	}
 	public boolean args_on_int_stack() { return false; }
 	public String toString()  {    return "...";  }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }

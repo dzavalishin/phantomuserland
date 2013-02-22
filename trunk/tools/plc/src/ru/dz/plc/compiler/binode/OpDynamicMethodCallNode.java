@@ -1,6 +1,7 @@
 package ru.dz.plc.compiler.binode;
 
 import java.io.IOException;
+import java.io.PrintStream;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
@@ -25,7 +26,7 @@ public class OpDynamicMethodCallNode extends BiNode {
 
 	public OpDynamicMethodCallNode(Node object, String methodName, Node args) { super(object, args);
 	this.methodName = methodName; }
-	public String toString()  {    return ".dynamic.";  }
+	public String toString()  {    return ".dynamic_call."+methodName;  }
 
 	@Override
 	public boolean args_on_int_stack() {
@@ -42,6 +43,7 @@ public class OpDynamicMethodCallNode extends BiNode {
 	}
 
 	public void find_out_my_type() throws PlcException {
+		checkPresetType();
 		if( type == null ) throw new PlcException("Method call Node","return type is not set");
 		//type = new ph_type_unknown(); // BUG! Wrong!
 	}
@@ -65,4 +67,16 @@ public class OpDynamicMethodCallNode extends BiNode {
 		c.emitDynamicCall();
 	}
 
+	/*
+	@Override
+	protected void print_me(PrintStream ps) throws PlcException {
+		ps.print(toString());
+		if( type == null ) find_out_my_type();
+		if( type != null ) ps.print(" : " + type.toString()+"");
+		if( is_const()   ) ps.print(" const");
+		if( attributes != null ) ps.print( " @"+attributes.toString() );
+		ps.println();
+	
+	}
+	*/
 }

@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
 import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.OpDynamicMethodCallNode;
+import ru.dz.plc.compiler.binode.OpSubscriptNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
@@ -24,6 +25,7 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.SpecialInvokeExpr;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.VirtualInvokeExpr;
+import soot.jimple.internal.JArrayRef;
 import soot.jimple.internal.JimpleLocal;
 
 public class PhantomCodeWrapper {
@@ -73,7 +75,7 @@ public class PhantomCodeWrapper {
 
 
 	public static PhantomCodeWrapper getAssign(Value assignTo,
-			PhantomCodeWrapper expression, Method m) {
+			PhantomCodeWrapper expression, Method m, PhantomClass pc) throws PlcException {
 		
 		if( expression == null )
 		{
@@ -102,11 +104,20 @@ public class PhantomCodeWrapper {
 
 		}
 
+		if (assignTo instanceof JArrayRef) {
+			JArrayRef ar = (JArrayRef) assignTo;
+			
+			Node base   = getExpression(ar.getBase(),  m, pc).getNode();			
+			Node subscr = getExpression(ar.getIndex(), m, pc).getNode();
+
+			dest = new OpSubscriptNode(base, subscr);			
+		}
+		
 		if(dest == null)
 		{
 			dest = new NullNode();
 			String vClass = assignTo.getClass().toString();
-			System.err.print(" ?? assignable class = "+vClass);			
+			SootMain.error(" ?? assignable class = "+vClass);			
 		}
 		
 		OpAssignNode node = new OpAssignNode(dest, expression.n);

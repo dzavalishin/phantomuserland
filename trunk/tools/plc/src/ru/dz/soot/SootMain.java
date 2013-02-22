@@ -102,11 +102,11 @@ public class SootMain {
 	}
 
 	static void say(String string) {
-		System.err.println(string);
+		System.out.println(string);
 	}
 
 	public static void error(String string) {
-		say("Error: "+string);
+		System.err.println("Error: "+string);
 		errors ++;
 	}
 

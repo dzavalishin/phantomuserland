@@ -19,7 +19,7 @@ import ru.dz.plc.util.PlcException;
 public class IntConstNode extends Node {
 	private int val;
 	public IntConstNode(int val) {
-		super(new EmptyNode());
+		super(null);
 		this.val = val;
 	}
 	public String toString()  {    return "int const \""+Integer.toString(val)+"\"";  }
