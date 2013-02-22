@@ -18,6 +18,7 @@ import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.compiler.node.ThrowNode;
+import ru.dz.plc.compiler.node.VoidNode;
 import ru.dz.plc.compiler.trinode.IfNode;
 import ru.dz.plc.util.PlcException;
 import soot.Body;
@@ -104,12 +105,7 @@ public class SootMethodTranslator {
 	}
 
 	
-	/*public void codegen()
-	{
-		// TO DO write codegen
-	}*/
 	
-	//static private JimpleToBafContext context = new JimpleToBafContext(0);
 
 	private void doUnit(Unit u) throws PlcException {
 		String dump = u.toString(); say("\n  "+dump);
@@ -148,6 +144,8 @@ public class SootMethodTranslator {
 			 else
 				 SootMain.say("null statement");
 		}
+		else
+			SootMain.error("Unknown unit"+u);
 		
 		s.set_method(phantomMethod);
 		phantomMethod.code.preprocess(s);
@@ -236,7 +234,8 @@ public class SootMethodTranslator {
 			@Override
 			public void caseInvokeStmt(InvokeStmt as ) {
 				try {
-					ret.w = PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc);
+					Node node = PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc).getNode();
+					ret.w = new PhantomCodeWrapper(new VoidNode(node));
 				} catch (PlcException e) {
 					SootMain.error(e);
 				}
@@ -349,17 +348,8 @@ public class SootMethodTranslator {
 		});
 		
 		if( ret.w != null ) return ret.w;
-		
-		//if( as instanceof JIdentityStmt )			return doIdentity( (JIdentityStmt)as );
-		//if( as instanceof JReturnVoidStmt )			return doRetVoid( (JReturnVoidStmt)as );		
-		//if( as instanceof JReturnStmt )			return doReturn( (JReturnStmt)as );		
-		//if( as instanceof JInvokeStmt )			return doInvoke( (JInvokeStmt)as );		
-		//if( as instanceof JGotoStmt )			return doGoto( (JGotoStmt)as );
-		//if( as instanceof JAssignStmt )			return doAssign( (JAssignStmt)as );
-		//if( as instanceof JIfStmt ) 			return doIf( (JIfStmt)as );
-		
-		
-		SootMain.say("s ?? "+as.getClass().getName()+" ("+as.toString()+")");
+				
+		SootMain.error("s ?? "+as.getClass().getName()+" ("+as.toString()+")");
 
 		return PhantomCodeWrapper.getNullNode();
 	}
@@ -409,8 +399,9 @@ public class SootMethodTranslator {
 		
 		say("      Assign '"+ls+"' = '"+rs+"'");
 		*/
-		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getRightOp(), phantomMethod, pc );		
-		return PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod, pc );
+		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getRightOp(), phantomMethod, pc );
+		Node node = PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod, pc ).getNode();
+		return new PhantomCodeWrapper(new VoidNode(node));
 	}
 
 
@@ -497,7 +488,7 @@ public class SootMethodTranslator {
 			
 			OpAssignNode node = new OpAssignNode(new IdentNode(localName) , new ThisNode(pc));
 			
-			return new PhantomCodeWrapper(node);
+			return new PhantomCodeWrapper(new VoidNode(node));
 		}
 		
 		
