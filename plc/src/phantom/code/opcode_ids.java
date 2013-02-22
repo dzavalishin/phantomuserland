@@ -3,8 +3,8 @@ package phantom.code;
 public class opcode_ids {
 protected static final byte opcode_nop = (byte)0x00;
 protected static final byte opcode_debug = (byte)0x01;
-protected static final byte opcode_skipz = (byte)0x02; // not impl - and will not be...
-protected static final byte opcode_skipnz = (byte)0x03; // not impl - and will not be...
+//id(opcode_skipz,0x02)  // not impl - and will not be...
+//id(opcode_skipnz,0x03) // not impl - and will not be...
 protected static final byte opcode_djnz = (byte)0x04;
 protected static final byte opcode_jz = (byte)0x05;
 protected static final byte opcode_jmp = (byte)0x06;
@@ -67,6 +67,8 @@ protected static final byte opcode_throw = (byte)0x2F; // thow top of stack, if 
 protected static final byte opcode_summon_thread = (byte)0x30;
 protected static final byte opcode_summon_this = (byte)0x31;
 
+// 32-36
+
 protected static final byte opcode_summon_null = (byte)0x37; // null object
 
 protected static final byte opcode_summon_class_class = (byte)0x38;
@@ -116,7 +118,7 @@ protected static final byte opcode_os_neq = (byte)0x59; // pointers are not equa
 protected static final byte opcode_os_isnull = (byte)0x5A; // pointer is null
 
 // BUG! Duplicate!
-protected static final byte opcode_os_push_null = (byte)0x5B; // push null on stack
+//id(opcode_os_push_null, 0x5B)	// push null on stack
 
 // Prefixes - modify next op operands type
 protected static final byte opcode_prefix_long = (byte)0x5C; // next operation works on longs (uses 2x slots on int stack)
@@ -125,17 +127,23 @@ protected static final byte opcode_prefix_double = (byte)0x5E; // next operation
 
 
 
-//id(opcode_lock_this, 0x60)		// semaphore in 'this' is locked, automatic unlock on return
-//id(opcode_unlock_this, 0x61)	// semaphore in 'this' is unlocked
-//id(opcode_general_lock, 0x62)	// semaphore is locked on stack top. Stack top must point to sema object
-//id(opcode_general_unlock, 0x63)	// 
+//id(opcode_lock_this, 0x60)		// mutex in 'this' is locked, automatic unlock on return
+//id(opcode_unlock_this, 0x61)	// mutex in 'this' is unlocked
+protected static final byte opcode_general_lock = (byte)0x62; // mutex is locked on stack top. 
+protected static final byte opcode_general_unlock = (byte)0x63; // mutex is unlocked on stack top. 
+
+// 64-6e
+
+protected static final byte opcode_dynamic_invoke = (byte)0x6F; // no args. stack: string method name, this (or null for static), args
+
 
 protected static final byte opcode_ishl = (byte)0x70; // shift left
 protected static final byte opcode_ishr = (byte)0x71; // shift right signed
 protected static final byte opcode_ushr = (byte)0x72; // shift right unsigned
 
+// 73-7f
 
-
+// TODO kill shortcuts for we will have JIT anyway and bytecode size does not matter
 protected static final byte opcode_sys_0 = (byte)0x80; // shortcut for syscall 0
 protected static final byte opcode_sys_1 = (byte)0x81;
 protected static final byte opcode_sys_2 = (byte)0x82;
@@ -188,4 +196,10 @@ protected static final byte opcode_call_1C = (byte)0xBC;
 protected static final byte opcode_call_1D = (byte)0xBD;
 protected static final byte opcode_call_1E = (byte)0xBE;
 protected static final byte opcode_call_1F = (byte)0xBF;
+
+
+// c0-cf
+// d0-df
+// e0-ef
+// f0-ff
 }

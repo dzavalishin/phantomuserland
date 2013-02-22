@@ -13,6 +13,7 @@ import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
+import ru.dz.plc.compiler.node.MonitorNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.ThisNode;
@@ -187,20 +188,28 @@ public class SootMethodTranslator {
 
 			@Override
 			public void caseBreakpointStmt(BreakpointStmt arg0) {
-				// TODO Auto-generated method stub
+				// TODO implement break
 				
 			}
 
 			@Override
-			public void caseEnterMonitorStmt(EnterMonitorStmt arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseEnterMonitorStmt(EnterMonitorStmt as) {
+				try {
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc );
+					ret.w = new PhantomCodeWrapper( new MonitorNode(expression.getNode(),true) );				
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}		
 			}
 
 			@Override
-			public void caseExitMonitorStmt(ExitMonitorStmt arg0) {
-				// TODO Auto-generated method stub
-				
+			public void caseExitMonitorStmt(ExitMonitorStmt as) {
+				try {
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc );
+					ret.w = new PhantomCodeWrapper( new MonitorNode(expression.getNode(),false) );				
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}		
 			}
 
 			@Override
@@ -228,7 +237,11 @@ public class SootMethodTranslator {
 
 			@Override
 			public void caseInvokeStmt(InvokeStmt as ) {
-				ret.w = doInvoke( as );
+				try {
+					ret.w = PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc);
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
 			}
 
 			@Override
@@ -356,15 +369,17 @@ public class SootMethodTranslator {
 	}
 
 
-	private PhantomCodeWrapper doInvoke(InvokeStmt as) {
+	/*
+	private PhantomCodeWrapper doInvoke(InvokeStmt as) throws PlcException {
 		InvokeExpr expr = as.getInvokeExpr();
 		say("      Invoke "+expr.toString());
 		SootMethodRef methodRef = expr.getMethodRef();
 		say("      ."+methodRef.name());
 		// TODO make invoke
-		return null;
+		
+		return PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc);
 	}
-
+	*/
 	
 	
 	private PhantomCodeWrapper doRetVoid(ReturnVoidStmt as) {

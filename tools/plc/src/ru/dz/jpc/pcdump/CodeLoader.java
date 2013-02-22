@@ -108,7 +108,7 @@ public class CodeLoader extends opcode_ids {
         opcodeNames[opcode_os_eq] = "os_eq";
         opcodeNames[opcode_os_neq] = "os_neq";
         opcodeNames[opcode_os_isnull] = "os_isnull";
-        opcodeNames[opcode_os_push_null] = "os_push_null";
+        //opcodeNames[opcode_os_push_null] = "os_push_null";
 
 
         opcodeNames[opcode_call_00 & 0xff] = "call_00";
@@ -215,7 +215,7 @@ public class CodeLoader extends opcode_ids {
                 case opcode_pop_catcher :
                 case opcode_os_eq :
                 case opcode_os_neq :
-                case opcode_os_push_null :
+                //case opcode_os_push_null :
                 case opcode_os_isnull :
                 case opcode_short_call_0 :
                 case opcode_short_call_1 :

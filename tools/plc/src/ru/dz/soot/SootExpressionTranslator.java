@@ -2,9 +2,7 @@ package ru.dz.soot;
 
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.Method;
-import ru.dz.plc.compiler.PhTypeInt;
 import ru.dz.plc.compiler.PhantomType;
-import ru.dz.plc.compiler.PhantomVariable;
 import ru.dz.plc.compiler.binode.BiNode;
 import ru.dz.plc.compiler.binode.OpAndNode;
 import ru.dz.plc.compiler.binode.OpDivideNode;
@@ -85,15 +83,6 @@ import soot.jimple.UshrExpr;
 import soot.jimple.VirtualInvokeExpr;
 import soot.jimple.XorExpr;
 import soot.jimple.internal.AbstractBinopExpr;
-import soot.jimple.internal.JAddExpr;
-import soot.jimple.internal.JArrayRef;
-import soot.jimple.internal.JLengthExpr;
-import soot.jimple.internal.JMulExpr;
-import soot.jimple.internal.JStaticInvokeExpr;
-import soot.jimple.internal.JSubExpr;
-import soot.jimple.internal.JVirtualInvokeExpr;
-import soot.jimple.internal.JimpleLocal;
-import soot.util.Switch;
 
 public class SootExpressionTranslator {
 
@@ -285,8 +274,7 @@ public class SootExpressionTranslator {
 				try {
 					ret.w = doLength(v);
 				} catch (PlcException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					SootMain.error(e);
 				}
 			}
 
@@ -344,20 +332,28 @@ public class SootExpressionTranslator {
 					OpRemainderNode create(Node l, Node r) { return new OpRemainderNode(l,r); }} .doBinOp(v);
 			}
 
+			
+			
 			@Override
 			public void caseShlExpr(ShlExpr v) {
-				// TODO implement in VM
 				ret.w = new BinOpWrapper<OpShiftLeftNode>() {@Override
 					OpShiftLeftNode create(Node l, Node r) { return new OpShiftLeftNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
 			public void caseShrExpr(ShrExpr v) {
-				// TODO implement in VM
 				ret.w = new BinOpWrapper<OpShiftRightNode>() {@Override
 					OpShiftRightNode create(Node l, Node r) { return new OpShiftRightNode(l,r); }} .doBinOp(v);
 			}
 
+			@Override
+			public void caseUshrExpr(UshrExpr v) { 
+				ret.w = new BinOpWrapper<OpShiftRightUnsignedNode>() {@Override
+					OpShiftRightUnsignedNode create(Node l, Node r) { return new OpShiftRightUnsignedNode(l,r); }} .doBinOp(v);
+			}
+
+			
+			
 			@Override
 			public void caseSpecialInvokeExpr(SpecialInvokeExpr arg0) {
 				// TODO Auto-generated method stub
@@ -373,13 +369,6 @@ public class SootExpressionTranslator {
 			public void caseSubExpr(SubExpr v) {
 				ret.w = new BinOpWrapper<OpMinusNode>() {@Override
 					OpMinusNode create(Node l, Node r) { return new OpMinusNode(l,r); }} .doBinOp(v);
-			}
-
-			@Override
-			public void caseUshrExpr(UshrExpr v) { 
-				// TODO implement in VM
-				ret.w = new BinOpWrapper<OpShiftRightUnsignedNode>() {@Override
-					OpShiftRightUnsignedNode create(Node l, Node r) { return new OpShiftRightUnsignedNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
@@ -442,8 +431,7 @@ public class SootExpressionTranslator {
 					Node n = new StaticLoadNode(phantomType.get_class(),varName);
 					ret.w = new PhantomCodeWrapper( n );
 				} catch (PlcException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					SootMain.error(e);
 				}
 			}
 
@@ -546,6 +534,7 @@ public class SootExpressionTranslator {
 		return new PhantomCodeWrapper(subscriptNode);
 	}
 
+	/*
 	private PhantomCodeWrapper doAdd(JAddExpr v) throws PlcException {
 		Type t = v.getType();
 		assertInt(t);
@@ -576,7 +565,8 @@ public class SootExpressionTranslator {
 		node.setType(convertType(t));
 		return new PhantomCodeWrapper( node);
 	}
-
+	*/
+	
 	private void assertInt(Type t) {
 		if( t.toString().equals("int"))
 			return;
@@ -588,19 +578,6 @@ public class SootExpressionTranslator {
 
 	private PhantomCodeWrapper doReadLocal(Local v) {
 		String varName = v.getName();
-		/*
-		Type type = v.getType();
-		
-		PhantomType ptype;
-		try {
-			ptype = new PhTypeInt();
-		} catch (PlcException e) {
-			// TODO Auto-generated catch block
-			ptype = PhantomType.t_void;
-		}
-		
-		m.svars.add_stack_var(new PhantomVariable(varName, ptype));
-		*/
 		IdentNode node = new IdentNode( varName );
 		return new PhantomCodeWrapper( node );
 	}

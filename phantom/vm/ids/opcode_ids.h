@@ -2,8 +2,8 @@
 
 #define opcode_nop   0x00 
 #define opcode_debug   0x01 
-#define opcode_skipz   0x02  // not impl - and will not be...
-#define opcode_skipnz   0x03  // not impl - and will not be...
+//id(opcode_skipz,0x02)  // not impl - and will not be...
+//id(opcode_skipnz,0x03) // not impl - and will not be...
 #define opcode_djnz   0x04 
 #define opcode_jz   0x05 
 #define opcode_jmp   0x06 
@@ -67,6 +67,8 @@
 #define opcode_summon_thread   0x30 
 #define opcode_summon_this   0x31 
 
+// 32-36
+
 #define opcode_summon_null   0x37  // null object
 
 #define opcode_summon_class_class   0x38 
@@ -116,7 +118,7 @@
 #define opcode_os_isnull   0x5A  // pointer is null
 
 // BUG! Duplicate!
-#define opcode_os_push_null   0x5B  // push null on stack
+//id(opcode_os_push_null, 0x5B)	// push null on stack
 
 // Prefixes - modify next op operands type
 #define opcode_prefix_long   0x5C  // next operation works on longs (uses 2x slots on int stack)
@@ -125,17 +127,23 @@
 
 
 
-//id(opcode_lock_this, 0x60)		// semaphore in 'this' is locked, automatic unlock on return
-//id(opcode_unlock_this, 0x61)	// semaphore in 'this' is unlocked
-//id(opcode_general_lock, 0x62)	// semaphore is locked on stack top. Stack top must point to sema object
-//id(opcode_general_unlock, 0x63)	// 
+//id(opcode_lock_this, 0x60)		// mutex in 'this' is locked, automatic unlock on return
+//id(opcode_unlock_this, 0x61)	// mutex in 'this' is unlocked
+#define opcode_general_lock   0x62  // mutex is locked on stack top. 
+#define opcode_general_unlock   0x63  // mutex is unlocked on stack top. 
+
+// 64-6e
+
+#define opcode_dynamic_invoke   0x6F  // no args. stack: string method name, this (or null for static), args
+
 
 #define opcode_ishl   0x70  // shift left
 #define opcode_ishr   0x71  // shift right signed
 #define opcode_ushr   0x72  // shift right unsigned
 
+// 73-7f
 
-
+// TODO kill shortcuts for we will have JIT anyway and bytecode size does not matter
 #define opcode_sys_0   0x80  // shortcut for syscall 0
 #define opcode_sys_1   0x81 
 #define opcode_sys_2   0x82 
@@ -188,3 +196,9 @@
 #define opcode_call_1D   0xBD 
 #define opcode_call_1E   0xBE 
 #define opcode_call_1F   0xBF 
+
+
+// c0-cf
+// d0-df
+// e0-ef
+// f0-ff
