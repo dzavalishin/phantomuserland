@@ -216,7 +216,12 @@ abstract public class Node {
 
 	// -------------------------------- type checks -----------------------------
 
-	public void check_assignment_types(String name, PhantomType dest, PhantomType src) throws PlcException {
+	public void check_assignment_types(String name, PhantomType dest, PhantomType src) throws PlcException 
+	{
+		// Don't print warning if src and dest both untyped
+		if( (src != null) && (dest != null) && src.is_unknown() && dest.is_unknown() )
+			return;
+		
 		if( src == null || src.is_unknown() )
 			print_warning("Assignment to "+name+": source type is unknown");
 		if( dest == null || dest.is_unknown() )

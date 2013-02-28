@@ -16,6 +16,7 @@ import ru.dz.plc.compiler.binode.OpShiftLeftNode;
 import ru.dz.plc.compiler.binode.OpShiftRightNode;
 import ru.dz.plc.compiler.binode.OpShiftRightUnsignedNode;
 import ru.dz.plc.compiler.binode.OpSubscriptNode;
+import ru.dz.plc.compiler.binode.OpXorNode;
 import ru.dz.plc.compiler.binode.RefEqNode;
 import ru.dz.plc.compiler.binode.RefNeqNode;
 import ru.dz.plc.compiler.binode.ValGeNode;
@@ -23,6 +24,7 @@ import ru.dz.plc.compiler.binode.ValGtNode;
 import ru.dz.plc.compiler.binode.ValLeNode;
 import ru.dz.plc.compiler.binode.ValLtNode;
 import ru.dz.plc.compiler.node.IdentNode;
+import ru.dz.plc.compiler.node.InstanceOfNode;
 import ru.dz.plc.compiler.node.IntConst64Node;
 import ru.dz.plc.compiler.node.IntConstNode;
 import ru.dz.plc.compiler.node.Node;
@@ -30,6 +32,7 @@ import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.OpArrayLength;
 import ru.dz.plc.compiler.node.StaticLoadNode;
 import ru.dz.plc.compiler.node.StringConstNode;
+import ru.dz.plc.compiler.node.SummonClassNode;
 import ru.dz.plc.util.PlcException;
 import soot.Local;
 import soot.SootClass;
@@ -166,8 +169,13 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseClassConstant(ClassConstant v) {
-				// TODO Auto-generated method stub
-				SootMain.error("class const "+v.value);
+				SootMain.say("class const "+v.value);
+				
+				try {
+					ret.w = new PhantomCodeWrapper(new SummonClassNode(convertType(v.value)));
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
 			}
 
 			@Override
@@ -275,8 +283,15 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseInstanceOfExpr(InstanceOfExpr v) {
-				// TODO Auto-generated method stub
-				SootMain.error(v.toString());
+				try {
+					PhantomType phantomType = convertType(v.getCheckType());
+					Node expr = PhantomCodeWrapper.getExpression(v.getOp(), m, phantomClass).getNode();
+					InstanceOfNode node = new InstanceOfNode(expr,phantomType);
+					ret.w = new PhantomCodeWrapper(node);
+				} catch (PlcException e) {
+					SootMain.error(e);
+				}
+				
 			}
 
 			@Override
@@ -339,7 +354,6 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseNewMultiArrayExpr(NewMultiArrayExpr v) {
-				// TODO Auto-generated method stub
 				SootMain.error(v.toString()); 
 				
 				int dimensions = v.getSizeCount();
@@ -348,6 +362,9 @@ public class SootExpressionTranslator {
 					Value size = v.getSize(dim); // Array dimension?
 					say("  dim = "+size );
 				}
+
+				// TODO New multi-array - try and check how Soot calcs array displacement. possibly its ok to make just a plain array 
+				doNew(ret, v.getType()); // Right?
 			}
 
 			@Override
@@ -409,18 +426,20 @@ public class SootExpressionTranslator {
 			}
 
 			@Override
+			public void caseXorExpr(XorExpr v) {
+				ret.w = new BinOpWrapper<OpXorNode>() {@Override
+					OpXorNode create(Node l, Node r) { return new OpXorNode(l,r); }} .doBinOp(v);
+			}
+
+
+			
+			@Override
 			public void caseVirtualInvokeExpr(VirtualInvokeExpr v) {
 				try {
 					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
 				} catch (PlcException e) {
 					SootMain.error(e);
 				}
-			}
-
-			@Override
-			public void caseXorExpr(XorExpr v) {
-				// TODO xor
-				SootMain.error(v.toString());
 			}
 
 			@Override
@@ -454,7 +473,7 @@ public class SootExpressionTranslator {
 				IdentNode node = new IdentNode( varName ); // IdentNode automatically looks for for field or stack var by name
 				ret.w = new PhantomCodeWrapper( node );
 				*/
-				// TODO make me
+				// TODO make caseParameterRef
 				SootMain.error(v.toString());
 			}
 

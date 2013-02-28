@@ -1,3 +1,7 @@
+ - instanceof checks for class or parents! Must check for class or children!
+
+ - arm? https://www.miniand.com/products/Cubieboard%20Developer%20Board
+
  - stack acc: use bound on intel
 
  - dynamic (by-name) method calls. use for interface method calls!

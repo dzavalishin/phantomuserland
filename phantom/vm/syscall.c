@@ -806,6 +806,26 @@ static int si_class_11_get_static(struct pvm_object me, struct data_area_4_threa
     SYSCALL_RETURN( ret );
 }
 
+
+// Check if given object is instance of this class
+static int si_class_14_instanceof(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    struct data_area_4_class *meda = pvm_object_da( me, class );
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    struct pvm_object instance = POP_ARG;
+
+    int is = pvm_object_class_is( instance, me );
+
+    SYS_FREE_O(instance);
+
+    SYSCALL_RETURN(pvm_create_int_object( is ));
+}
+
+
 syscall_func_t	syscall_table_4_class[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
@@ -816,7 +836,7 @@ syscall_func_t	syscall_table_4_class[16] =
     &si_class_class_8_new_class,    &si_void_9_def_op_2,
     &si_class_10_set_static,        &si_class_11_get_static,
     &invalid_syscall,               &invalid_syscall,
-    &invalid_syscall,               &si_void_15_hashcode
+    &si_class_14_instanceof,        &si_void_15_hashcode
 };
 
 DECLARE_SIZE(class);

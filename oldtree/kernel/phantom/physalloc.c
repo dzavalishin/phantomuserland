@@ -315,7 +315,7 @@ long phantom_phys_stat_arena( physalloc_t *arena )
         }
     }
 
-    lprintf("used %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
+    //lprintf("used %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
 
     return used_bits;
 }

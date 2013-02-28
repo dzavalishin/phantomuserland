@@ -281,9 +281,10 @@ public class PhantomType {
     
     
     public static final PhantomType t_string = new PhTypeString();
-    //public static final PhantomType t_int = new PhTypeInt();
     public static final PhantomType t_void = new PhTypeVoid();
-	//public static final PhantomType t_int = null;
+
+    public static PhantomType getVoid()  { return t_void; } 
+    public static PhantomType getString()  { return t_string; }
     
     private static PhantomType t_int = null;
     public static PhantomType getInt() throws PlcException { 
@@ -291,8 +292,12 @@ public class PhantomType {
         return t_int;
     }
 
-    public static PhantomType getVoid()  { return t_void; } 
-    public static PhantomType getString()  { return t_string; } 
+
+    private static PhantomType t_long = null;
+	public static PhantomType getLong() throws PlcException {
+        if( t_long == null ) t_long = new PhTypeLong();
+        return t_long;
+	} 
 
 }
 

@@ -85,6 +85,8 @@ void pvm_backtrace(struct data_area_4_thread *tda)
         return;
     }
 
+    printf("pvm_backtrace thread IP %d\n", code->IP);
+
     printf("pvm_backtrace thread this:\n");
     pvm_object_dump(tda->_this_object);
     printf("\n\n");

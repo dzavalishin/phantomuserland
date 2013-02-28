@@ -43,6 +43,9 @@ public class ClassMap {
 
 	public void imported_add_hack( PhantomClass c ) throws PlcException { imported_classes.add(c); }
 
+	/** Need this in unit tests - must clean class map after compiling root class stubs */
+	public void clear() { imported_classes.clear(); classes.clear(); }
+	
 	/**
 	 * 
 	 * @param cln Class name

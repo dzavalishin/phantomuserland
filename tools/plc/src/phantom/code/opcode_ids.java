@@ -134,7 +134,7 @@ protected static final byte opcode_general_unlock = (byte)0x63; // mutex is unlo
 
 // 64-6e
 
-protected static final byte opcode_dynamic_invoke = (byte)0x6F; // no args. stack: string method name, this (or null for static), args
+protected static final byte opcode_dynamic_invoke = (byte)0x6F; // no args. stack (from top): string method name, this (or null for static), n_args, args
 
 
 protected static final byte opcode_ishl = (byte)0x70; // shift left

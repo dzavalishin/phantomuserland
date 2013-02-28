@@ -3,11 +3,11 @@
  */
 package test;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import ru.dz.plc.compiler.ClassMap;
 
 
 /**
@@ -31,6 +31,7 @@ public class RunCompiler {
 	 */
 	@After
 	public void tearDown() throws Exception {
+		ClassMap.get_map().clear();
 	}
 
 	void compile(String src)
@@ -49,6 +50,8 @@ public class RunCompiler {
 	@Test
 	public void testImport() 			{		compile("test/plc/test_import.ph");	}
 
+	@Test
+	public void testShell() 			{		compile("test/ph/ru.dz/ru.dz.phantom.system.shell.ph" ); }
 	
 	
 	

@@ -10,7 +10,7 @@ public class SootTestClass {
 
         int i = args.length;
         int len = 0;
-
+/*
         switch(i)
         {
         case 0:         len = 0; break;
@@ -28,7 +28,7 @@ public class SootTestClass {
         case 50: v2 = 100; break;
         default: v2 = 0; break;
         }
-
+*/
 
     }
 

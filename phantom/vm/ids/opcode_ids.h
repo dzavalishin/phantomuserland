@@ -134,7 +134,7 @@
 
 // 64-6e
 
-#define opcode_dynamic_invoke   0x6F  // no args. stack: string method name, this (or null for static), args
+#define opcode_dynamic_invoke   0x6F  // no args. stack (from top): string method name, this (or null for static), n_args, args
 
 
 #define opcode_ishl   0x70  // shift left
