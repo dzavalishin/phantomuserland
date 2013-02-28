@@ -45,7 +45,7 @@ public class StatementsNode extends Node {
 		//print_warning("sz "+nodes.size());
 		for( Node n : nodes )
 		{
-			print_warning("codegen "+n);
+			//print_warning("codegen "+n);
 			n.generate_code(c, s);
 		}
 

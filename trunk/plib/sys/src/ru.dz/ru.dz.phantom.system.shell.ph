@@ -65,6 +65,7 @@ class shell //extends runnable
 
     var mtx : .internal.mutex;
 
+
     void init()
     {
         mtx = new .internal.mutex();
@@ -89,6 +90,7 @@ class shell //extends runnable
         //win.drawString( 22, 22, "Say Hello to Win!" );
         win.update();
         stat_pos = 0;
+        old_idle = 0;
 
         white = 0xFFFFFFFF;
 
@@ -133,6 +135,8 @@ class shell //extends runnable
             console.putws(cpu_idle.toString());
             console.putws("\n");
 
+            cpu_idle = 100 - cpu_idle;
+
             stat_next_pos = stat_pos + 1;
             if( stat_next_pos >= win.getXSize() )
                 stat_next_pos = 0;
@@ -150,7 +154,7 @@ class shell //extends runnable
 
             // Idle
             win.setFg( 0xFF0000FF ); // Blue
-            win.drawLine( stat_pos-1, old_idle, cpu_idle-old_idle, 1 );
+            win.drawLine( stat_pos-1, old_idle, 1, cpu_idle-old_idle );
 
             old_idle = cpu_idle;            
             stat_pos = stat_next_pos;

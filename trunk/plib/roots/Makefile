@@ -21,6 +21,7 @@ roots:
 	@$(PLC) src/internal/internal.object.ph
 	@$(PLC) src/internal/internal.string.ph
 	@$(PLC) src/internal/internal.int.ph
+	@$(PLC) src/internal/internal.long.ph
 	@$(PLC) src/internal/internal.class.ph
 
 

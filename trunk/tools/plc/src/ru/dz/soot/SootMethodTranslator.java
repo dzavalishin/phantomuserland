@@ -16,6 +16,8 @@ import ru.dz.plc.compiler.node.MonitorNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.StatementsNode;
+import ru.dz.plc.compiler.node.SwitchListNode;
+import ru.dz.plc.compiler.node.SwitchNode;
 import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.compiler.node.ThrowNode;
 import ru.dz.plc.compiler.node.VoidNode;
@@ -278,6 +280,18 @@ public class SootMethodTranslator {
 				String defaultLabel = lmap.getLabelFor(defaultTargetBox);
 				SootMain.say("def label = "+defaultLabel);
 				
+				SwitchListNode switchListNode;
+				try {
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( key, phantomMethod, pc );
+					switchListNode = new SwitchListNode(expression.getNode());
+					switchListNode.addDefault(defaultLabel);				
+					SootMain.say("def target = "+defaultTargetBox.getUnit());
+				} catch (PlcException e) {
+					SootMain.error(e);
+					return;
+				}				
+				
+				
 				int lowIndex = ss.getLowIndex();
 				int highIndex = ss.getHighIndex();
 				
@@ -289,16 +303,16 @@ public class SootMethodTranslator {
 					SootMain.say("  sw lookup value = "+lookupValue);
 					SootMain.say("  sw label = "+targetLabel);
 					SootMain.say("  target = "+targetBox.getUnit());
+					switchListNode.addCase(targetLabel, lookupValue); // TODO this can be implemented with Phantom bytecode switch op
 				}
 
 				SootMain.say("def target = "+defaultTargetBox.getUnit());
+				ret.w = new PhantomCodeWrapper(switchListNode);				
 				
 			}
 			
 			@Override
 			public void caseLookupSwitchStmt(LookupSwitchStmt ss) {
-				// TODO make switch statement
-				
 				// Expression to switch on?
 				Value key = ss.getKey();
 				SootMain.say("lookup sw key "+key);
@@ -307,6 +321,17 @@ public class SootMethodTranslator {
 				UnitBox defaultTargetBox = ss.getDefaultTargetBox();
 				String defaultLabel = lmap.getLabelFor(defaultTargetBox);
 				SootMain.say("def label = "+defaultLabel);
+
+				SwitchListNode switchListNode;
+				try {
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( key, phantomMethod, pc );
+					switchListNode = new SwitchListNode(expression.getNode());
+					switchListNode.addDefault(defaultLabel);				
+					SootMain.say("def target = "+defaultTargetBox.getUnit());
+				} catch (PlcException e) {
+					SootMain.error(e);
+					return;
+				}				
 				
 				int cases = ss.getTargetCount();
 				for( int i = 0; i < cases; i++ )
@@ -318,12 +343,11 @@ public class SootMethodTranslator {
 					SootMain.say("  sw lookup value = "+lookupValue);
 					SootMain.say("  sw label = "+targetLabel);
 					SootMain.say("  sw target = "+targetBox.getUnit());
+					
+					switchListNode.addCase(targetLabel, lookupValue);
 				}
 				
-				SootMain.say("def target = "+defaultTargetBox.getUnit());
-				
-				
-				
+				ret.w = new PhantomCodeWrapper(switchListNode);				
 			}
 
 

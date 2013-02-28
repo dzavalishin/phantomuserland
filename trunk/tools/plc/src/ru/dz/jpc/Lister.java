@@ -142,7 +142,7 @@ closeClassList (String cnames [],
         String name = worklist.pop ();
 
         // stop if we've already done this one
-        // XXX can we do this here?  can differences between name and
+        // XX X can we do this here?  can differences between name and
         // k.name give us headaches?
         if (genlist.get(name) != null) {
             continue;

@@ -83,7 +83,6 @@ public class PhantomCodeWrapper {
 			expression = new PhantomCodeWrapper(new NullNode());
 		}
 		
-		// TODO implement
 		Node dest = null;
 		
 		if(assignTo instanceof JimpleLocal)
@@ -130,7 +129,7 @@ public class PhantomCodeWrapper {
 		SootMethodRef methodRef = expr.getMethodRef();
 		String name = methodRef.name();
 		SootMain.say("      ."+name);
-		// TODO make invoke
+		// TODO make invoke dynamic in VM!
 
 		Node object = null;
 		//Node method = null;

@@ -244,5 +244,9 @@ public class ClassTable {
 		return true;
 	}
 
+	public void clear() {
+		table.clear();
+	}
+
 }
 

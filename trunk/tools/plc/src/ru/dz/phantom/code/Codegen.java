@@ -74,14 +74,14 @@ public class Codegen extends opcode_ids {
 		if(lst == null ) return;
 		lst.write("  ");
 		lst.write(s); 
-		lst.write("\n//  @"+getIP());
+		lst.write("\t//  @"+getIP());
 		lst.write('\n');
 	}
 	private void listlbl(String s) throws IOException 
 	{
 		if(lst == null ) return;
 		lst.write(s); 
-		lst.write("\n//  @"+getIP());
+		lst.write("\t//  @"+getIP());
 		lst.write('\n');
 	}
 	
@@ -100,7 +100,6 @@ public class Codegen extends opcode_ids {
 	 * corresponding addresses into. Note that address is written relative to
 	 * itself, NOT relative to its instruction!!
 	 * <p>
-	 * TODO constant 4 must be defined or derived
 	 *
 	 * @param name String - name of label which reference should look to.
 	 * @param f RandomAccessFile
@@ -117,9 +116,10 @@ public class Codegen extends opcode_ids {
 		{
 			Long pos = i.next();
 			f.seek(pos.longValue());
-			// TODO Loss of precision?
-			//put_int32( (int)(address_to_point_to - pos.longValue() - 4) ); // BUG! 4!
-			put_int32( (int)(address_to_point_to - pos.longValue()) );
+			long diff = address_to_point_to - pos.longValue();
+			if( (diff > Integer.MAX_VALUE) || (diff < Integer.MIN_VALUE))
+				throw new RuntimeException("Out of int size in relative address");
+			put_int32( (int)diff );
 		}
 	}
 
@@ -174,19 +174,19 @@ public class Codegen extends opcode_ids {
 	// ------------- operations code generators
 
 	public void emitNop() throws IOException {
-		put_byte(opcode_nop);
 		list("nop");
+		put_byte(opcode_nop);
 	}
 
 	public void emitJmp(String label) throws IOException {
+		list("jmp "+label);
 		put_byte(opcode_jmp);
 		putNamedInt32Reference(label);
-		list("jmp "+label);
 	}
 
 	public void emitRet() throws IOException {
-		put_byte(opcode_ret);
 		list("ret");
+		put_byte(opcode_ret);
 	}
 
 
@@ -197,9 +197,9 @@ public class Codegen extends opcode_ids {
 	 * @throws IOException
 	 */
 	public void emitDjnz(String label) throws IOException {
+		list("djnz "+label);
 		put_byte(opcode_djnz);
 		putNamedInt32Reference(label);
-		list("djnz "+label);
 	}
 
 	/**
@@ -208,9 +208,9 @@ public class Codegen extends opcode_ids {
 	 * @throws IOException
 	 */
 	public void emitJz(String label) throws IOException {
+		list("jz "+label);
 		put_byte(opcode_jz);
 		putNamedInt32Reference(label);
-		list("jz "+label);
 	}
 
 	//  public void emit_skipz() throws IOException {    put_byte(opcode_skipz);  }
@@ -221,11 +221,12 @@ public class Codegen extends opcode_ids {
 	public void emitSwitch(Collection<String> table, int shift, int divisor )
 	throws IOException
 	{
+		list("switch -"+shift+" /"+divisor);
 		put_byte(opcode_switch);
 		put_int32(table.size());
 		put_int32(shift);
 		put_int32(divisor);
-		list("switch -"+shift+" /"+divisor);
+
 		for( Iterator<String> i = table.iterator(); i.hasNext(); )
 		{
 			String lbl = i.next();
@@ -238,39 +239,40 @@ public class Codegen extends opcode_ids {
 	 * drop and dup
 	 */
 	public void emitIsDup() throws IOException {
-		put_byte(opcode_is_dup);
 		list("is dup");
+		put_byte(opcode_is_dup);
 	}
 
 	public void emitIsDrop() throws IOException {
-		put_byte(opcode_is_drop);
 		list("is drop");
+		put_byte(opcode_is_drop);
 	}
 
 	public void emitOsDup() throws IOException {
-		put_byte(opcode_os_dup);
 		list("os dup");
+		put_byte(opcode_os_dup);
 	}
 
 	public void emitOsDrop() throws IOException {
-		put_byte(opcode_os_drop);
 		list("os drop");
+		put_byte(opcode_os_drop);
 	}
 
 
 	// constants
 
 	public void emitIConst_0() throws IOException {
-		put_byte(opcode_iconst_0);
 		list("cons 0");
+		put_byte(opcode_iconst_0);
 	}
 
 	public void emitIConst_1() throws IOException {
-		put_byte(opcode_iconst_1);
 		list("const 1");
+		put_byte(opcode_iconst_1);
 	}
 
 	public void emitIConst_8bit(byte val) throws IOException {
+		list("const "+val);
 		/*
 		if(val == 0)
 			put_byte(opcode_iconst_0);
@@ -281,10 +283,10 @@ public class Codegen extends opcode_ids {
 			put_byte(opcode_iconst_8bit);
 			put_byte(val);
 		}
-		list("const "+val);
 	}
 
 	public void emitIConst_32bit(int val) throws IOException {
+		list("const "+val);
 		/*if(val == 0)
 			put_byte(opcode_iconst_0);
 		else if(val == 1)
@@ -294,14 +296,13 @@ public class Codegen extends opcode_ids {
 			put_byte(opcode_iconst_32bit);
 			put_int32(val);
 		}
-		list("const "+val);
 	}
 
 	public void emitIConst_64bit(long val) throws IOException {
+		list("const64 "+val);
+
 		put_byte(opcode_iconst_64bit);
 		put_int64(val);
-
-		list("const64 "+val);
 	}
 	
 	/**
@@ -310,9 +311,9 @@ public class Codegen extends opcode_ids {
 	 * @param string String
 	 */
 	public void emitString(String string) throws IOException {
+		list("const \""+string+"\"");
 		put_byte(opcode_sconst_bin);
 		put_string_bin( string );
-		list("const \""+string+"\"");
 	}
 
 	/**
@@ -321,106 +322,107 @@ public class Codegen extends opcode_ids {
 	 * @param data array of bytes to put out
 	 */
 	public void emitBinary(byte data[]) throws IOException {
+		list("const <bindata>");
 		put_byte(opcode_sconst_bin);
 		put_string_bin( data );
-		list("const <bindata>");
 	}
 	
 	/**
 	 * summon
 	 */
 	public void emitSummonThread() throws IOException {
-		put_byte(opcode_summon_thread);
 		list("summon thread");
+		put_byte(opcode_summon_thread);
 	}
 
 	public void emitSummonThis() throws IOException {
-		put_byte(opcode_summon_this);
 		list("summon this");
+		put_byte(opcode_summon_this);
 	}
 
 	public void emitSummonNull() throws IOException {
-		put_byte(opcode_summon_null);
 		list("summon null");
+		put_byte(opcode_summon_null);
 	}
 
 	public void emit_i2o() throws IOException {
-		put_byte(opcode_i2o);
 		list("i2o");
+		put_byte(opcode_i2o);
 	}
 
 	public void emit_o2i() throws IOException {
-		put_byte(opcode_o2i);
 		list("o2i");
+		put_byte(opcode_o2i);
 	}
 
 
 	public void emitISum() throws IOException {
-		put_byte(opcode_isum);
 		list("isum");
+		put_byte(opcode_isum);
 	}
 
 	public void emitIMul() throws IOException {
-		put_byte(opcode_imul);
 		list("imul");
+		put_byte(opcode_imul);
 	}
 
 	/** Integer subtract upper from lower. */
 	public void emitISubUL() throws IOException {
-		put_byte(opcode_isubul);
 		list("isubul");
+		put_byte(opcode_isubul);
 	}
 
 	/** Integer subtract lower from upper. */
 	public void emitISubLU() throws IOException {
-		put_byte(opcode_isublu);
 		list("isublu");
+		put_byte(opcode_isublu);
 	}
 
 	public void emitIDivUL() throws IOException {
-		put_byte(opcode_idivul);
 		list("idivul");
+		put_byte(opcode_idivul);
 	}
 
 	public void emitIDivLU() throws IOException {
-		put_byte(opcode_idivlu);
 		list("idivlu");
+		put_byte(opcode_idivlu);
 	}
 
 	public void emitIRemLU() throws IOException {
-		put_byte(opcode_iremlu);
 		list("iremlu");
+		put_byte(opcode_iremlu);
 	}
 
 
 	public void emitIShiftLeft() throws IOException {
-		put_byte(opcode_ishl);
 		list("ishl");
+		put_byte(opcode_ishl);
 	}
 
 	/** Signed shift right 
 	 * @throws IOException */
 	public void emitIShiftRight() throws IOException {
-		put_byte(opcode_ishr);
 		list("ishr");
+		put_byte(opcode_ishr);
 	}
 
 	/** Unsigned shift right 
 	 * @throws IOException */
 	public void emitUShiftRight() throws IOException {
-		put_byte(opcode_ushr);
 		list("ushr");
+		put_byte(opcode_ushr);
 	}
 
 	
 
 	public void emitDebug(byte type, String text) throws IOException {
+		list("debug");
+
 		put_byte(opcode_debug);
 		type &= 0x7F;
 		if( text != null ) type |= 0x80;
 		put_byte(type);
 		if( text != null ) put_string_bin( text );
-		list("debug");
 	}
 
 	/**
@@ -506,25 +508,25 @@ public class Codegen extends opcode_ids {
 	/**
 	 * Create an object of class defined by a top-of-stack object. Will throw at runtime if not a class.
 	 */
-	public void emitNew() throws IOException {  put_byte(opcode_new); list("new"); }
+	public void emitNew() throws IOException 	{  list("new"); put_byte(opcode_new); }
 
-	public void emitCopy() throws IOException {  put_byte(opcode_copy); list("copy"); }
+	public void emitCopy() throws IOException 	{  list("copy"); put_byte(opcode_copy); }
 
 
-	public void emit_ior()  throws IOException {  put_byte(opcode_ior); list("ior"); }
-	public void emit_iand() throws IOException {  put_byte(opcode_iand); list("iand"); }
-	public void emit_ixor() throws IOException {  put_byte(opcode_ixor); list("ixor"); }
-	public void emit_inot() throws IOException {  put_byte(opcode_inot); list("inot"); }
+	public void emit_ior()  throws IOException	{  list("ior"); put_byte(opcode_ior); }
+	public void emit_iand() throws IOException	{  list("iand"); put_byte(opcode_iand); }
+	public void emit_ixor() throws IOException	{  list("ixor"); put_byte(opcode_ixor); }
+	public void emit_inot() throws IOException	{  list("inot"); put_byte(opcode_inot); }
 
-	public void emitLogOr()  throws IOException {  put_byte(opcode_log_or);  list("logor ||"); }
-	public void emitLogAnd() throws IOException {  put_byte(opcode_log_and); list("logand &&"); }
-	public void emitLogXor() throws IOException {  put_byte(opcode_log_xor); list("logxor"); }
-	public void emitLogNot() throws IOException {  put_byte(opcode_log_not); list("lognot"); }
+	public void emitLogOr()  throws IOException {  list("logor ||"); put_byte(opcode_log_or); }
+	public void emitLogAnd() throws IOException {  list("logand &&"); put_byte(opcode_log_and); }
+	public void emitLogXor() throws IOException {  list("logxor"); put_byte(opcode_log_xor); }
+	public void emitLogNot() throws IOException {  list("lognot"); put_byte(opcode_log_not); }
 
-	public void emit_igt() throws IOException {  put_byte(opcode_igt); list("igt >"); }
-	public void emit_ilt() throws IOException {  put_byte(opcode_ilt); list("ilt <"); }
-	public void emit_ige() throws IOException {  put_byte(opcode_ige); list("ige >="); }
-	public void emit_ile() throws IOException {  put_byte(opcode_ile); list("ile <="); }
+	public void emit_igt() throws IOException	{  list("igt >"); put_byte(opcode_igt);}
+	public void emit_ilt() throws IOException	{  list("ilt <"); put_byte(opcode_ilt); }
+	public void emit_ige() throws IOException	{  list("ige >="); put_byte(opcode_ige); }
+	public void emit_ile() throws IOException	{  list("ile <="); put_byte(opcode_ile); }
 
 	/**
 	 * Class object for given name pushed on stack.
@@ -609,9 +611,9 @@ public class Codegen extends opcode_ids {
 	@Deprecated
 	public void emit_pull( int depth ) throws IOException
 	{
+		list("?? pull depth="+depth);
 		put_byte( opcode_os_pull32 );
 		put_int32(depth);
-		list("?? pull depth="+depth);
 	}
 
 	/**
@@ -622,9 +624,9 @@ public class Codegen extends opcode_ids {
 	 */
 	public void emitGet( int pos ) throws IOException
 	{
+		list("get o stk pos="+pos);
 		put_byte( opcode_os_get32 );
 		put_int32(pos);
-		list("get o stk pos="+pos);
 	}
 
 	/**
@@ -635,9 +637,9 @@ public class Codegen extends opcode_ids {
 	 */
 	public void emitSet( int pos ) throws IOException
 	{
+		list("set o stk pos="+pos);
 		put_byte( opcode_os_set32 );
 		put_int32(pos);
-		list("set o stk pos="+pos);
 	}
 
 	/**
@@ -648,9 +650,9 @@ public class Codegen extends opcode_ids {
 	 */
 	public void emitIGet( int pos ) throws IOException
 	{
+		list("get i stk pos="+pos);
 		put_byte( opcode_is_get32 );
 		put_int32(pos);
-		list("get i stk pos="+pos);
 	}
 
 	/**
@@ -661,54 +663,54 @@ public class Codegen extends opcode_ids {
 	 */
 	public void emitISet( int pos ) throws IOException
 	{
+		list("set i stk pos="+pos);
 		put_byte( opcode_is_set32 );
 		put_int32(pos);
-		list("set i stk pos="+pos);
 	}
 
 	
 	
 	public void emit_ptr_eq() throws IOException
 	{
-		put_byte(opcode_os_eq);
 		list("ptr eq");
+		put_byte(opcode_os_eq);
 	}
 
 	public void emit_ptr_neq() throws IOException
 	{
-		put_byte(opcode_os_neq);
 		list("ptr neq");
+		put_byte(opcode_os_neq);
 	}
 
 	public void emitPushNull() throws IOException
 	{
+		list("summon null");
 		//put_byte(opcode_os_push_null);
 		//list("push null");
 		put_byte(opcode_summon_null);
-		list("summon null");
 	}
 
 	public void emitIsNull() throws IOException
 	{
-		put_byte(opcode_os_isnull);
 		list("isnull");
+		put_byte(opcode_os_isnull);
 	}
 
 	public void emitLock() throws IOException {
-		put_byte(opcode_general_lock);
 		list("lock");
+		put_byte(opcode_general_lock);
 	}
 
 
 	public void emitUnLock() throws IOException {
-		put_byte(opcode_general_unlock);
 		list("unlock");
+		put_byte(opcode_general_unlock);
 	}
 
 
 	public void emitDynamicCall() throws IOException {
-		put_byte(opcode_dynamic_invoke);
 		list("dynamic invoke");
+		put_byte(opcode_dynamic_invoke);
 	}
 
 

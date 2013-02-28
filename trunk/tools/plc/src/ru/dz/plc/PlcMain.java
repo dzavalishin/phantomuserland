@@ -35,6 +35,7 @@ public class PlcMain {
 					"Flags:\n"+
 					"\t-Ipath\t- path to the directory to look for .pc class files of imported classes\n"+
 					"\t-opath\t- path to put created .pc class files to\n"+
+					"\t--version\t- print version/revision"+
 					""
 					);
 			return;
@@ -79,6 +80,20 @@ public class PlcMain {
 
 
 	private static void processFlag(String arg) {
+		
+		if( arg.equalsIgnoreCase("--version"))
+		{
+			String rev = Version.SVN_REVISION;
+			
+			rev = rev.trim();
+			rev = rev.replaceAll("\\$", "");
+			rev = rev.replaceAll("Revision:", "");
+			rev = rev.trim();
+			
+			System.err.println(Version.NAME+" version "+Version.VERSION+" rev "+rev);
+			return;
+		}
+		
 		if(arg.length() < 2)
 		{
 			System.err.println("Won't compile stdin");
