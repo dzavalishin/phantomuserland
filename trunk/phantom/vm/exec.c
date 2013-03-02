@@ -21,6 +21,7 @@
 
 #include <vm/exec.h>
 #include <vm/code.h>
+#include <vm/reflect.h>
 
 #include <vm/stacks.h>
 #include <vm/syscall.h>
@@ -29,6 +30,8 @@
 
 #include <kernel/snap_sync.h>
 
+
+static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 
 
 /*
@@ -271,9 +274,9 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
 
 
 
-static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned int method_index, unsigned int n_param )
+static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned int method_index, unsigned int n_param, pvm_object_t new_this )
 {
-	cfda->ordinal = method_index;
+    cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
 
     // allocate places on stack
@@ -297,16 +300,17 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
     // pass him real number of parameters
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), n_param);
 
-    struct pvm_object o = os_pop();
+    if( pvm_is_null(new_this) )
+        new_this = os_pop();
 
-    struct pvm_object_storage *code = pvm_exec_find_method( o, method_index );
+    struct pvm_object_storage *code = pvm_exec_find_method( new_this, method_index );
     assert(code != 0);
     pvm_exec_set_cs( cfda, code );
-    cfda->this_object = o;
+    cfda->this_object = new_this;
 }
 
 
-static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_index, unsigned int n_param, int do_optimize_ret )
+static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_index, unsigned int n_param, int do_optimize_ret, pvm_object_t new_this )
 {
     if( DEB_CALLRET || debug_print_instr ) printf( "\ncall %d (stack_depth %d -> ", method_index, da->stack_depth );
 
@@ -337,7 +341,7 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
     struct pvm_object new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
-    init_cfda(da, cfda, method_index, n_param);
+    init_cfda(da, cfda, method_index, n_param, new_this);
 
     if (!optimize_stack)
         cfda->prev = da->call_frame;  // link
@@ -1207,26 +1211,41 @@ void pvm_exec(pvm_object_t current_thread)
             // ok, now method calls ------------------------------------------------------
 
             // these 4 are parameter-less calls!
-        case opcode_short_call_0:           pvm_exec_call(da,0,0,1);   break;
-        case opcode_short_call_1:           pvm_exec_call(da,1,0,1);   break;
-        case opcode_short_call_2:           pvm_exec_call(da,2,0,1);   break;
-        case opcode_short_call_3:           pvm_exec_call(da,3,0,1);   break;
+        case opcode_short_call_0:           pvm_exec_call(da,0,0,1,pvm_get_null_object());   break;
+        case opcode_short_call_1:           pvm_exec_call(da,1,0,1,pvm_get_null_object());   break;
+        case opcode_short_call_2:           pvm_exec_call(da,2,0,1,pvm_get_null_object());   break;
+        case opcode_short_call_3:           pvm_exec_call(da,3,0,1,pvm_get_null_object());   break;
 
         case opcode_call_8bit:
             {
                 unsigned int method_index = pvm_code_get_byte(&(da->code));
                 unsigned int n_param = pvm_code_get_int32(&(da->code));
-                pvm_exec_call(da,method_index,n_param,1);
+                pvm_exec_call(da,method_index,n_param,1,pvm_get_null_object());
             }
             break;
         case opcode_call_32bit:
             {
                 unsigned int method_index = pvm_code_get_int32(&(da->code));
                 unsigned int n_param = pvm_code_get_int32(&(da->code));
-                pvm_exec_call(da,method_index,n_param,1);
+                pvm_exec_call(da,method_index,n_param,1,pvm_get_null_object());
             }
             break;
 
+
+        case opcode_dynamic_invoke:
+            {
+                dynamic_method_info_t mi;
+
+                mi.method_name = os_pop();
+                mi.new_this = os_pop();
+                mi.n_param = pvm_get_int( os_pop() );
+
+                if( find_dynamic_method( &mi ) )
+                    pvm_exec_panic("dynamic invoke failed");
+                    
+                pvm_exec_call(da,mi.method_ordinal,mi.n_param,1,mi.new_this);
+            }
+            break;
 
             // object stack --------------------------------------------------------------
 
@@ -1295,7 +1314,7 @@ void pvm_exec(pvm_object_t current_thread)
             if( (instruction & 0xE0 ) == opcode_call_00 )
             {
                 unsigned n_param = pvm_code_get_byte(&(da->code));
-                pvm_exec_call(da,instruction & 0x1F,n_param,0); //no optimization for soon return
+                pvm_exec_call(da,instruction & 0x1F,n_param,0,pvm_get_null_object()); //no optimization for soon return
                 break;
             }
 
@@ -1536,4 +1555,36 @@ pvm_exec_run_method(
 
     return ret;
 }
+
+// Find a method for a dynamic invoke
+static errno_t find_dynamic_method( dynamic_method_info_t *mi )
+{
+    int is_global = 0;
+    if( pvm_is_null( mi->new_this ) )
+    {
+        is_global = 0;
+        mi->target_class = pvm_null;
+    }
+    else
+        mi->target_class = pvm_get_class( mi->new_this );
+
+    // no public classless funcs
+    if( pvm_is_null( mi->target_class ) )
+        return ENOENT;
+
+
+    int ord = pvm_get_method_ordinal( mi->target_class, mi->method_name );
+    if( ord < 0 )
+    {
+        printf("dyn method not found '");
+        pvm_object_print(mi->method_name);
+        printf("'\n");
+        return ENOENT;
+    }
+
+    mi->method_ordinal = ord;
+    return 0;
+}
+
+
 

@@ -14,7 +14,7 @@
 #define PVM_EXEC_H
 
 
-#include "vm/internal_da.h"
+#include <vm/internal_da.h>
 
 
 void pvm_exec(struct pvm_object current_thread);
@@ -42,6 +42,17 @@ pvm_exec_run_method(
 
 
 void create_and_run_object(const char *class_name, int method );
+
+
+typedef struct dynamic_method_info
+{
+    pvm_object_t        new_this;
+    pvm_object_t        target_class;
+    pvm_object_t        method_name;
+
+    int                 method_ordinal;
+    int                 n_param;
+} dynamic_method_info_t;
 
 #endif // PVM_EXEC_H
 

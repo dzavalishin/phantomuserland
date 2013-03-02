@@ -95,11 +95,16 @@ struct pvm_object     	pvm_object_create_dynamic( struct pvm_object object_class
 
 
 struct data_area_4_thread;
+
+
+pvm_object_t    pvm_get_class( pvm_object_t o );
+
+
 /**
  * Lookup class. TODO reimplement! Can block!
  */
 
-struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name);
+struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name );
 
 /**
  *
@@ -225,6 +230,8 @@ void     pvm_release_thread_object( struct pvm_object thread );
 
 //static __inline__ struct pvm_object     pvm_get_null_object() { return pvm_create_null_object(); }
 #define pvm_get_null_object pvm_create_null_object
+#define pvm_get_null pvm_create_null_object
+#define pvm_null pvm_create_null_object()
 
 /**
  *
