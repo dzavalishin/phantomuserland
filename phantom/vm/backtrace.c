@@ -168,6 +168,11 @@ int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
 }
 
 
+
+
+
+
+
 pvm_object_t pvm_get_method_name( pvm_object_t tclass, int method_ordinal )
 {
     struct data_area_4_class *cda= pvm_object_da( tclass, class );
@@ -179,6 +184,54 @@ pvm_object_t pvm_get_method_name( pvm_object_t tclass, int method_ordinal )
     pvm_object_t name = pvm_get_ofield( mnames, method_ordinal );
     return name;
 }
+
+int pvm_get_method_name_count( pvm_object_t tclass )
+{
+    struct data_area_4_class *cda= pvm_object_da( tclass, class );
+    pvm_object_t mnames = cda->method_names;
+
+    if( pvm_is_null(mnames))
+        return 0;
+
+    return get_array_size( mnames.data );
+}
+
+// returns ord or -1
+int pvm_get_method_ordinal( pvm_object_t tclass, pvm_object_t mname )
+{
+    struct data_area_4_class *cda= pvm_object_da( tclass, class );
+    pvm_object_t mnames = cda->method_names;
+
+    if( pvm_is_null(mnames) )
+        return -1;
+
+    if( pvm_is_null(mname) )
+        return -1;
+
+    if( !pvm_object_class_is( mname, pvm_get_string_class() ) )
+        return -1;
+
+
+    int nitems = get_array_size( mnames.data );
+    int i;
+
+    for( i = 0; i < nitems; i++ )
+    {
+        pvm_object_t curr_mname = pvm_get_ofield( mnames, i );
+
+        int diff = pvm_strcmp( curr_mname, mname);
+        if( diff == 0 )
+            return i;
+    }
+
+    return -1;
+}
+
+
+
+
+
+
 
 pvm_object_t pvm_get_field_name( pvm_object_t tclass, int ordinal )
 {
@@ -203,6 +256,14 @@ int pvm_get_field_name_count( pvm_object_t tclass )
 
     return get_array_size( fnames.data );
 }
+
+
+
+
+
+
+
+
 
 pvm_object_t pvm_get_class( pvm_object_t o )
 {

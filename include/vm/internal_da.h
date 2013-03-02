@@ -143,6 +143,7 @@ struct data_area_4_string
 #define pvm_get_str_len( o )  ( (int) (((struct data_area_4_string *)&(o.data->da))->length))
 #define pvm_get_str_data( o )  ( (char *) (((struct data_area_4_string *)&(o.data->da))->data))
 
+int pvm_strcmp(pvm_object_t s1, pvm_object_t s2);
 
 
 // NB! See JIT assembly hardcode for object structure offsets

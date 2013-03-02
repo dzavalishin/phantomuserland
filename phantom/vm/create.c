@@ -227,6 +227,32 @@ void pvm_gc_iter_string(gc_iterator_call_t func, struct pvm_object_storage * os,
 }
 
 
+
+
+int pvm_strcmp(pvm_object_t s1, pvm_object_t s2)
+{
+    int l1 = pvm_get_str_len( s1 );
+    int l2 = pvm_get_str_len( s2 );
+
+    char *d1 = pvm_get_str_data( s1 );
+    char *d2 = pvm_get_str_data( s2 );
+
+    if( l1 > l2 ) return 1;
+    if( l2 > l1 ) return -1;
+
+    return strncmp( d1, d2, l1 );
+}
+
+
+
+
+
+
+
+
+
+
+
 //struct pvm_object     pvm_create_array_object();
 
 struct pvm_object
