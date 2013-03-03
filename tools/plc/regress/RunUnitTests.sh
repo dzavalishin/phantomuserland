@@ -14,8 +14,13 @@ function java_to_phantom() {
     fileName=$1;
     className=${fileName/.java/};
 
+
     echo '     ---- Make Phantom class files';
-    echo java -jar $PHANTOM_HOME/build/jar/plc.jar -o$PHANTOM_HOME/plib/bin -I$PHANTOM_HOME/plib/bin $className
+
+    set -vx
+#    java -cp $PHANTOM_HOME/tools/plc/lib/soot-2.5.0.jar -jar $PHANTOM_HOME/build/jar/jpc.jar -o$PHANTOM_HOME/plib/bin -I$PHANTOM_HOME/plib/bin $className
+    java -cp $PHANTOM_HOME/tools/plc/lib/soot-2.5.0.jar -jar $PHANTOM_HOME/build/jar/jpc.jar $className
+    set +vx
 }
 
 function mytest() {
@@ -65,6 +70,9 @@ function _mytest(){
 }
 
 echo 'starting regression tests';
+
+cp ../../../plib/bin/*.pc test/pc
+
 for i in *.java;
 do
     mytest $i ;
