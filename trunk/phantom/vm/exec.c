@@ -46,8 +46,8 @@ static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 //static int debug_print_instr = 1;
 int debug_print_instr = 0;
 
-#define LISTI(iName) do { if( debug_print_instr ) printf("%s; ",(iName)); } while(0)
-#define LISTIA(fmt,a) do { if( debug_print_instr ) printf(fmt "; ", a); } while(0)
+#define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
+#define LISTIA(fmt,a) do { if( debug_print_instr ) lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } while(0)
 
 
 
