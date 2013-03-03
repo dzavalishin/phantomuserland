@@ -40,6 +40,7 @@ abstract public class Node {
 	
 	/** Remember where this node was parsed in source file to be able to print error/warning later. */
 	public Node setContext( ParserContext context ) { this.context = context; return this; }
+	
 	/** Remember where this node was parsed in source file to be able to print error/warning later. */
 	public Node setContext( ru.dz.plc.parser.Lex l ) { this.context = new ParserContext(l); return this; }
 
@@ -49,16 +50,21 @@ abstract public class Node {
 	
 	// -------------------------------- messages -------------------------------
 
-	protected void print_warning( String w )
+	private void printContext()
 	{
 		if( context != null ) System.out.print( context.get_position() );
-		System.out.println("warning: "+w);
+	}
+	
+	protected void print_warning( String w )
+	{
+		printContext();
+		System.out.println("Warning: "+w);
 	}
 
 	protected void print_error( String w )
 	{
-		if( context != null ) System.out.print( context.get_position() );
-		System.out.println("error: "+w);
+		printContext();
+		System.out.println("Error: "+w);
 	}
 
 	// -------------------------------- types ----------------------------------
@@ -227,7 +233,7 @@ abstract public class Node {
 		if( dest == null || dest.is_unknown() )
 			print_warning("Assignment to "+name+": destination type is unknown");
 		else if( !dest.can_be_assigned_from(src) )
-			print_warning("Assignment to "+name+": incompatible source type");
+			print_warning("Assignment to "+name+": incompatible source type "+src+" for dest type "+dest);
 	}
 
 

@@ -107,9 +107,12 @@ public class SootExpressionTranslator {
 
 	public static PhantomType convertType( String tn ) throws PlcException
 	{
-		if( tn.equals(" java.lang.Object")) tn = ".internal.object";
-		if( tn.equals(" java.lang.String")) tn = ".internal.string";
+		if( tn.equals("java.lang.Object")) tn = ".internal.object";
+		if( tn.equals("java.lang.String")) tn = ".internal.string";
+		if( tn.equals("java.lang.Integer")) tn = ".internal.int";
+		
 		if( tn.equals("int")) tn = ".internal.int";
+		if( tn.equals("boolean")) tn = ".internal.int";
 		
 		boolean err = false;
 		
@@ -118,14 +121,11 @@ public class SootExpressionTranslator {
 		if( tn.equals("double")) { tn = ".internal.double"; err = true; }
 		
 		if( err ) SootMain.error("no type"+tn);
+
+		if( tn.charAt(0) != '.' )
+			tn = "."+tn;
 		
 		PhantomClass pc = new PhantomClass(tn);
-		/*if(pc == null)
-		{
-			SootMain.error("type not found"+tn);
-			return null;
-		}*/
-		
 		PhantomType pt = new PhantomType(pc);
 		return pt;
 	}

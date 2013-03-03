@@ -1,7 +1,9 @@
 package test.toPhantom;
 
-public class SootTestClass {
 
+public class SootTestClass {
+	int classIntField = 0;
+	
     /**
      * @param args
      */
@@ -10,6 +12,7 @@ public class SootTestClass {
 
         int i = args.length;
         int len = 0;
+        
 /*
         switch(i)
         {
@@ -32,13 +35,12 @@ public class SootTestClass {
 
     }
 
-
+    // seems to be compiled ok
     static int strLen(String s)
     {
         int i = s.length()-1;
         return i+1;
     }
-
 
     String retString()
     {
@@ -51,10 +53,12 @@ public class SootTestClass {
         }
 
         int i = strLen(sa[0]);
+        classIntField = i;
 
         return sa[1];
     }
 
+    // seems to be compiled ok
     String stringMethod()
     {
         /* floats not impl
@@ -66,8 +70,10 @@ public class SootTestClass {
         return "aaa";
     }
 
+    @Deprecated
     void voidMethod()
     {
+        classIntField = 0;
         //		System.out.print("TestPrint");
         //		System.out.print(stringMethod());
     }

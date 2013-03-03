@@ -29,7 +29,7 @@ public class MethodFileInfo extends FileInfo {
     protected void do_write_specific() throws IOException, PlcException,
       EmptyPlcException {
       Fileops.put_string_bin( os, m.name );
-      Fileops.put_int32( os, m.ordinal );
+      Fileops.put_int32( os, m.getOrdinal() );
 
       m.get_cg().set_os(os, lst);
 

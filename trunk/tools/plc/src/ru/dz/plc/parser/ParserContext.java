@@ -31,10 +31,6 @@ public class ParserContext
 
 	public String get_position() { return fname+":"+Integer.toString(line_no)+": "; }
 	public String get_context() { return excerpt; }
-
 	public int getLineNumber() { return line_no;	}
-
-
-
 
 }

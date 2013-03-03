@@ -25,6 +25,8 @@ public class ReturnNode extends Node {
 	public String toString()  {    return "return";  }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
+		if( s.get_method().getDebugMethod() )
+			c.emitDebug((byte)0x2,"Disabled debug");
 		c.emitRet();
 	}
 	public void find_out_my_type()  {    type = new PhTypeVoid();  }

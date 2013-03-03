@@ -17,11 +17,11 @@ import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.SwitchListNode;
-import ru.dz.plc.compiler.node.SwitchNode;
 import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.compiler.node.ThrowNode;
 import ru.dz.plc.compiler.node.VoidNode;
 import ru.dz.plc.compiler.trinode.IfNode;
+import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.PlcException;
 import soot.Body;
 import soot.PatchingChain;
@@ -47,6 +47,8 @@ import soot.jimple.StmtSwitch;
 import soot.jimple.TableSwitchStmt;
 import soot.jimple.ThrowStmt;
 import soot.jimple.internal.AbstractStmt;
+import soot.tagkit.LineNumberTag;
+import soot.tagkit.SourceLnPosTag;
 import soot.tagkit.Tag;
 
 public class SootMethodTranslator {
@@ -68,6 +70,10 @@ public class SootMethodTranslator {
 		this.pc = pc;
 		mName = m.getName();
 
+		say("\n\n-------------------\nMethod "+mName);
+		
+		//String declaration = m.getDeclaration();		say("method "+mName+" decl "+declaration );
+		
 		s = new ParseState(pc);
 		
 		Type returnType = m.getReturnType();
@@ -85,13 +91,28 @@ public class SootMethodTranslator {
 			phantomMethod.addArg(parName, pptype);
 		}
 
+		List<Tag> tags = m.getTags();
+		for( Tag tag : tags )
+		{
+			//say("method "+mName+" tag <<<"+tag+">>>");
+			String tagName = tag.getName();
+			
+			//say("method "+mName+" tag <<<"+tagName+">>>");
+			
+			if( tagName.equals("DeprecatedTag") )
+			{
+				SootMain.warning("method "+mName+" is deprecated -- USING TO TURN ON DEBUG");
+				phantomMethod.setDebugMethod(true);
+			}
+		}
+		
 	}
 
 	
 	
 	
 	public void process() throws PlcException {
-		say("\n\n-------------------\nMethod "+mName);
+		//say("\n\n-------------------\nMethod "+mName);
 
 		m.retrieveActiveBody();
 		
@@ -110,7 +131,7 @@ public class SootMethodTranslator {
 	
 
 	private void doUnit(Unit u) throws PlcException {
-		String dump = u.toString(); say("\n  "+dump);
+		//String dump = u.toString(); say("\n  "+dump);
 		//say("  "+u.getClass().getName());
 
 		List<UnitBox> boxes = u.getBoxesPointingToThis();
@@ -119,11 +140,10 @@ public class SootMethodTranslator {
 			if( ub.isBranchTarget() )
 			{
 				String labelFor = lmap.getLabelFor(ub);
-				say(""+labelFor+":");
+				//say(""+labelFor+":");
 				nodes.addNode(new JumpTargetNode(labelFor));
 			}
 		}
-		
 		
 		if( u instanceof AbstractStmt )
 		{
@@ -134,7 +154,7 @@ public class SootMethodTranslator {
 				 Node n = statement.getNode();
 				 if( n == null ) n = new EmptyNode();
 				 nodes.addNode(n);
-				 say(" ... add node "+n);
+				 //say(" ... add node "+n);
 				 /*
 				 statements.add(statement);
 				 phantomMethod.code  =
@@ -142,6 +162,22 @@ public class SootMethodTranslator {
 								 phantomMethod.code, 
 								 statement.getNode());
 				 */
+				 
+				 //SourceLnPosTag  lnum = (SourceLnPosTag)as.getTag("LineNumberTag");
+				 LineNumberTag lnum = (LineNumberTag)as.getTag("LineNumberTag");
+				 if( lnum != null)				 
+					 n.setContext(new ParserContext( lnum.getName(), lnum.getLineNumber() ));
+				 /*
+				 List<Tag> tags = as.getTags();
+				 for( Tag tag : tags )
+				 {
+					 String tagName = tag.getName();
+					 say("stmt tag <<<"+tag+">>>");
+					 say("     tag <<<"+tagName+">>>");
+
+				 }
+				 */
+				 
 			 }
 			 else
 				 SootMain.say("null statement");
@@ -425,21 +461,14 @@ public class SootMethodTranslator {
 		*/
 		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getRightOp(), phantomMethod, pc );
 		Node node = PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod, pc ).getNode();
+
+		// TODO find src line info
+		//node.setContext(new ParserContext(fname, line));
+		
 		return new PhantomCodeWrapper(new VoidNode(node));
 	}
 
 
-	/*
-	private PhantomCodeWrapper doInvoke(InvokeStmt as) throws PlcException {
-		InvokeExpr expr = as.getInvokeExpr();
-		say("      Invoke "+expr.toString());
-		SootMethodRef methodRef = expr.getMethodRef();
-		say("      ."+methodRef.name());
-		// TO DO make invoke
-		
-		return PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc);
-	}
-	*/
 	
 	
 	private PhantomCodeWrapper doRetVoid(ReturnVoidStmt as) {

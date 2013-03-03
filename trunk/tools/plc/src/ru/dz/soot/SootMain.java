@@ -15,6 +15,7 @@ import ru.dz.plc.util.PlcException;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
+import soot.options.Options;
 
 /**
  * @author dz
@@ -22,9 +23,11 @@ import soot.SootMethod;
  */
 public class SootMain {
 	private static int errors = 0;
+	private static int warnings = 0;
 	
 	static Logger log = Logger.getLogger(SootMain.class.getName());
     static ClassMap classes = ClassMap.get_map();
+
 
 
 	/**
@@ -45,23 +48,36 @@ public class SootMain {
 		
 		//String cp = "bin;../bin;lib/rt_6.jar";
 		String cp = 
-				"bin"+
-				File.pathSeparator+
-				"../bin"+
-				File.pathSeparator+
-				"lib/rt_6.jar";
+				"."+
+				File.pathSeparator+				"bin"+
+				File.pathSeparator+				"../bin"+
+				File.pathSeparator+				"lib/rt_6.jar"+
+				File.pathSeparator+				"../lib/rt_6.jar";
 		//System.setProperty("soot.class.path", cp);
 		//say(cp);
 		
 		Scene.v().setSootClassPath(cp);
+		Options.v().set_keep_line_number(true);
 	
-		doClass("test.toPhantom.SootTestClass");
+		if(args.length == 0)
+			doClass("test.toPhantom.SootTestClass");
+		else
+		{
+			for( String a : args )
+				doClass(a);
+		}
 	
 		if(errors > 0)
 		{
 			say("Compile errors, stopped");
 			return;
 		}
+		
+		if( warnings > 0 )
+			say(String.format("%d warnings\n", warnings ));
+
+		say("Generate Phantom code");
+		classes.codegen();
 	}
 
 	
@@ -86,8 +102,8 @@ public class SootMain {
 		
 		classes.add(pc);
 
-		say("Generate Phantom code for "+pc.getName());
-		classes.codegen();
+		//say("Generate Phantom code for "+pc.getName());
+		//classes.codegen();
 	}
 	
 	private static String convertClassName(String name) {
@@ -113,6 +129,12 @@ public class SootMain {
 
 	public static void error(Throwable e) {
 		error("Exception "+e);		
+	}
+
+
+	public static void warning(String string) {
+		System.err.println("Warning: "+string);
+		warnings ++;
 	}
 
 }

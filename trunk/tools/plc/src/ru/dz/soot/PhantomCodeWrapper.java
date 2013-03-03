@@ -73,7 +73,7 @@ public class PhantomCodeWrapper {
 
 
 
-
+// source type
 	public static PhantomCodeWrapper getAssign(Value assignTo,
 			PhantomCodeWrapper expression, Method m, PhantomClass pc) throws PlcException {
 		
@@ -94,6 +94,7 @@ public class PhantomCodeWrapper {
 			
 			try {
 				PhantomType ptype = SootExpressionTranslator.convertType(type);
+				//SootMain.say("var "+jl.getName()+" type "+ptype);
 				m.svars.add_stack_var(new PhantomVariable(jl.getName(), ptype));
 			} catch (PlcException e) {
 				dest = null;
@@ -126,9 +127,12 @@ public class PhantomCodeWrapper {
 
 	public static PhantomCodeWrapper getInvoke(InvokeExpr expr, Method m, PhantomClass phantomClass ) throws PlcException
 	{
+		boolean dumpMe = false;
+		
 		SootMethodRef methodRef = expr.getMethodRef();
 		String name = methodRef.name();
-		SootMain.say("      ."+name);
+		
+		if(dumpMe) SootMain.say("      ."+name);
 		// TODO make invoke dynamic in VM!
 
 		Node object = null;
@@ -142,7 +146,7 @@ public class PhantomCodeWrapper {
 		if (expr instanceof VirtualInvokeExpr) {
 			VirtualInvokeExpr ie = (VirtualInvokeExpr) expr;
 
-			SootMain.say("      invoke virt "+ie);
+			if(dumpMe) SootMain.say("      invoke virt "+ie);
 			
 			
 			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass).getNode();
@@ -152,7 +156,7 @@ public class PhantomCodeWrapper {
 		if (expr instanceof StaticInvokeExpr) {
 			StaticInvokeExpr ie = (StaticInvokeExpr) expr;
 
-			SootMain.say("      invoke static "+ie);
+			if(dumpMe) SootMain.say("      invoke static "+ie);
 			object = new NullNode();
 			
 			done = true;
@@ -161,7 +165,7 @@ public class PhantomCodeWrapper {
 		if (expr instanceof SpecialInvokeExpr) {
 			SpecialInvokeExpr ie = (SpecialInvokeExpr) expr;
 			
-			SootMain.say("      invoke special "+ie);
+			if(dumpMe) SootMain.say("      invoke special "+ie);
 			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass).getNode();
 			done = true;
 		}
@@ -170,7 +174,7 @@ public class PhantomCodeWrapper {
 		if (expr instanceof InterfaceInvokeExpr) {
 			InterfaceInvokeExpr ie = (InterfaceInvokeExpr) expr;
 			
-			SootMain.say("      invoke iface "+ie);
+			if(dumpMe) SootMain.say("      invoke iface "+ie);
 			// Do it like dynamic
 			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass).getNode();
 			done = true;
@@ -179,7 +183,7 @@ public class PhantomCodeWrapper {
 		if (expr instanceof DynamicInvokeExpr) {
 			DynamicInvokeExpr ie = (DynamicInvokeExpr) expr;
 			
-			SootMain.say("      invoke dynamic "+ie);
+			if(dumpMe) SootMain.say("      invoke dynamic "+ie);
 			object = new NullNode();
 			done = true;
 		}

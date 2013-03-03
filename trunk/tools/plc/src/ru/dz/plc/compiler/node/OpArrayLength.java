@@ -19,37 +19,27 @@ import ru.dz.plc.util.PlcException;
 
 
 public class OpArrayLength extends Node {
-	
+
 	public OpArrayLength(Node array) {    super(array);  }
-	
+
 	public String toString()  {    return ".length";  }
 
 	@Override
 	public void preprocess_me(ParseState s) throws PlcException {
 		//super.preprocess_me(s);
 	}
-	
+
 	public void find_out_my_type() throws PlcException
 	{
-		Node atom = _l;
-
-		PhantomType a_type = atom.getType();
-
-		if( a_type == null || a_type.is_unknown() )
-		{
-			type = new PhTypeUnknown();
-			return;
-		}
-
-		if( !a_type.is_container() )
-			throw new PlcException( ".length Node", "not a container type subscripted", a_type.toString() );
-
-		type = new PhantomType( a_type.get_class() );
+		type = PhantomType.getInt();
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		Node atom = _l;
+
+		if( !atom.getType().is_container() )
+			throw new PlcException( toString(), "not a container" );
 
 		log.fine("Node "+this+" codegen");
 

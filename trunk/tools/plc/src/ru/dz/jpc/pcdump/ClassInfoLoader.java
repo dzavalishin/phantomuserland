@@ -276,7 +276,7 @@ class method_signature_loader_handler extends loader_handler
 		PhantomType my_return_type = new PhantomType(is);
 
 		me = new Method( my_name, my_return_type );
-		me.ordinal = my_ordinal;
+		me.setOrdinal(my_ordinal);
 
 		//      if(debug_print) System.out.print("Method is: " + my_name + ", ret type is '"+my_return_type.toString()+"', arg count = " );
 		if(debug_print) System.out.println("    Return type: "+my_return_type.toString());
