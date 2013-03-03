@@ -15,9 +15,6 @@ import ru.dz.plc.util.*;
 
 public class MethodTable {
 	private Map<String, Method> table;
-	//static int nextord = 0;
-	//static int nextord = 16; // BUG! Hack. In normal situation we will start from Method no, which is first not used number in parent. For now we start from 16 just to make sure user Method will not get 'internal' (reserved) number by mistake
-	//int nextord = 0;
 	ordinals_generator ordinals = new ordinals_generator();
 
 	public MethodTable() { table = new HashMap<String, Method>(); }
@@ -29,7 +26,7 @@ public class MethodTable {
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
-			if( m.ordinal == ord ) return true;
+			if( m.getOrdinal() == ord ) return true;
 		}
 		return false;
 	}
@@ -44,7 +41,7 @@ public class MethodTable {
 	public void set_ordinal( Method m, int ord ) throws PlcException {
 		if( !mine( m ) ) throw new PlcException("set_ordinal","not my Method");
 		if( ord != -1 && have_ord( ord ) ) throw new PlcException("set_ordinal","duplicate");
-		m.ordinal = ord;
+		m.setOrdinal( ord );
 	}
 
 	Method add( String name, PhantomType type )
@@ -60,23 +57,8 @@ public class MethodTable {
 		return m;
 	}
 
-	/*Method add( String name, PhantomType type, Node args, Node code )
-  {
-    Method m = new Method( name, type, args, nextord++ ,code);
-    table.put(name, m);
-    return m;
-  }
-
-  void add( String name, PhantomType type, Node args, Node code, int ordinal  ) throws PlcException {
-    if( have_ord(ordinal) )
-      throw new PlcException( "Method table add", "ordinal is already used", Integer.toString(ordinal) );
-    table.put(name,new Method( name, type, args, ordinal ,code));
-    nextord = ordinal+1;
-  }*/
-
 	boolean have( String name ) { return table.containsKey(name); }
 	Method get( String name ) { return (Method)table.get(name); }
-	//Node get_code( String name ) { return ((Method)table.get(name)).code; }
 
 	void print(PrintStream ps) throws PlcException
 	{
@@ -95,14 +77,14 @@ public class MethodTable {
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
-			if( m.ordinal < 0 )
+			if( m.getOrdinal() < 0 )
 			{
 				while( true )
 				{
 					int ord = ordinals.getNext();
 					if( !have_ord( ord ) )
 					{
-						m.ordinal = ord;
+						m.setOrdinal(ord);
 						break;
 					}
 				}
@@ -119,8 +101,8 @@ public class MethodTable {
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
-			if( m.ordinal > max )
-				max = m.ordinal;
+			if( m.getOrdinal() > max )
+				max = m.getOrdinal();
 		}
 
 		return max+1;
@@ -146,14 +128,14 @@ public class MethodTable {
 			Method m = i.next();
 			s.set_method( m );
 
-			lst.write("method "+m.name+" ordinal "+m.ordinal+"\n--\n");
+			lst.write("method "+m.name+" ordinal "+m.getOrdinal()+"\n--\n");
 
 			MethodFileInfo mf = new MethodFileInfo(os, lst, m, s);
 			mf.write();
 
 			MethodSignatureFileInfo ms = new MethodSignatureFileInfo(os, m, s);
 			ms.write();
-			
+
 			MethodLineNumbersFileInfo ml = new MethodLineNumbersFileInfo(os,m);
 			ml.write();
 

@@ -164,7 +164,7 @@ public class PhantomClass {
 		}
 		
 		// Here we do it
-		m.ordinal = bm.ordinal;
+		m.setOrdinal(bm.getOrdinal());
 	}
 
 	public Method addMethod(String name, PhantomType type) throws PlcException {

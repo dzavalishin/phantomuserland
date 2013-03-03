@@ -30,7 +30,7 @@ public class MethodSignatureFileInfo extends FileInfo {
   protected void do_write_specific() throws IOException, PlcException,
       EmptyPlcException {
     Fileops.put_string_bin( os, m.name );
-    Fileops.put_int32( os, m.ordinal );
+    Fileops.put_int32( os, m.getOrdinal() );
     Fileops.put_int32( os, m.args_def.size() );
 
     m.type.save_to_file(os);

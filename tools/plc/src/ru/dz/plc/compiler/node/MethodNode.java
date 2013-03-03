@@ -30,15 +30,13 @@ public class MethodNode extends Node {
 		if( pc == null )
 			throw new PlcException("MethodNode", "class is null", ident);
 
-		//Method m = pc.mt.get(ident);
 		Method m = pc.findMethod(ident);
 
-		//pc.mt.set_ordinals();
 		pc.set_ordinals();
 
-		if(m.ordinal < 0)      throw new PlcException("MethodNode","don't know Method number for class "+pc.toString(), ident);
+		if(m.getOrdinal() < 0)      throw new PlcException("MethodNode","don't know Method number for class "+pc.toString(), ident);
 
-		return m.ordinal;
+		return m.getOrdinal();
 	}
 
 	public PhantomType get_return_type(PhantomType obj_type) throws PlcException {
