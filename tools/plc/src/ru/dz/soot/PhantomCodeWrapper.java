@@ -26,6 +26,7 @@ import soot.jimple.SpecialInvokeExpr;
 import soot.jimple.StaticInvokeExpr;
 import soot.jimple.VirtualInvokeExpr;
 import soot.jimple.internal.JArrayRef;
+import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JimpleLocal;
 
 public class PhantomCodeWrapper {
@@ -111,6 +112,23 @@ public class PhantomCodeWrapper {
 			Node subscr = getExpression(ar.getIndex(), m, pc).getNode();
 
 			dest = new OpSubscriptNode(base, subscr);			
+		}
+		
+		if (assignTo instanceof JInstanceFieldRef) {
+			JInstanceFieldRef fr = (JInstanceFieldRef) assignTo;
+			
+			String name = fr.getField().getName();
+			dest = new IdentNode( name ); 
+			
+			try {
+				PhantomType ptype = SootExpressionTranslator.convertType(fr.getType());
+				pc.addField(name, ptype);
+			} catch (PlcException e) {
+				dest = null;
+				SootMain.error(e);
+			}
+			
+			
 		}
 		
 		if(dest == null)
