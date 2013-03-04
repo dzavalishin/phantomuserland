@@ -73,9 +73,23 @@ echo 'starting regression tests';
 
 cp ../../../plib/bin/*.pc test/pc
 
+listf=RunJpcUnitTests.tmp
+listj=RunJpcUnitTests.java
+#listj=${listf/.tmp/.java/};
+echo 'public class RunJpcUnitTests {  public void run() { String [] args  = new String [0]();  ' > $listf
+rm $listj
+
+
+
 for i in *.java;
 do
+    fileName=$i;
+    className=${fileName/.java/};
     mytest $i ;
+    echo $className'.main(args);' >> $listf 
 done
 
+echo '}}' >> $listf 
+mv $listf $listj
+java_to_phantom $listj ;
 
