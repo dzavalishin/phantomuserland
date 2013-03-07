@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import ru.dz.phantom.code.*;
 import ru.dz.plc.compiler.AttributeSet;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.compiler.PhantomType;
@@ -220,6 +221,56 @@ abstract public class Node {
 		System.out.println("Not-overriden generate_my_code called: "+toString());
 	}
 
+	// ---------------------------- LLVM code generation ----------------------------
+	
+	protected String llvmTempName; 
+	
+	public void generateLlvmCode(LlvmCodegen llc) throws PlcException {
+		llvmTempName = llc.getPhantomMethod().getLlvmTempName(this.getClass().getSimpleName());
+		if( _l != null ) {
+			_l.generateLlvmCode(llc);
+			//move_between_stacks(c, _l.is_on_int_stack());
+		}
+		if(context != null)
+		{
+			llc.emitComment("Line "+context.getLineNumber());
+			llc.recordLineNumberToIPMapping(context.getLineNumber());
+		}
+		log.fine("Node "+this+" llvm codegen");
+		generateMyLlvmCode(llc);
+	}
+	
+	public String getLlvmTempName() { return llvmTempName; }
+
+	
+	//protected abstract void generateMyLlvmCode(LlvmCodegen llc) throws PlcException;
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException
+	{
+		System.err.println("llvm cg failed for "+toString());
+		llc.putln("; llvm cg failed for "+toString());
+	}
+
+	public String getLlvmType() {
+		try {
+			return getType().toLlvmType();
+		} catch (PlcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "void";
+		}
+	}
+
+	/** True if type is float or double */
+    public boolean isFloat() {
+		try {
+			PhantomType t = getType();
+			return t.is_float() || t.is_double();
+		} catch (PlcException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	
 	// -------------------------------- type checks -----------------------------
 
 	public void check_assignment_types(String name, PhantomType dest, PhantomType src) throws PlcException 
@@ -235,6 +286,8 @@ abstract public class Node {
 		else if( !dest.can_be_assigned_from(src) )
 			print_warning("Assignment to "+name+": incompatible source type "+src+" for dest type "+dest);
 	}
+
+
 
 
 }

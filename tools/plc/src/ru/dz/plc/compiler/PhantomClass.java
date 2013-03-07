@@ -320,11 +320,14 @@ public class PhantomClass {
 		mt.print(ps);
 	}
 
-	public void codegen(RandomAccessFile os, FileWriter lst, String version) throws IOException, PlcException
+	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, String version) throws IOException, PlcException
 	{
+		llvmFile.write("; class "+getName()+"\n\n");
+		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
+		
 		CodeGeneratorState s = new CodeGeneratorState(this);
-		mt.codegen(os, lst, s, version);
-		ft.codegen(os, lst, s, version);
+		mt.codegen(os, lst, llvmFile, s, version);
+		ft.codegen(os, lst, llvmFile, s, version);
 	}
 
 	public void preprocess(ParseState ps) throws PlcException

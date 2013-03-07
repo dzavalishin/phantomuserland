@@ -10,11 +10,17 @@ import ru.dz.plc.util.PlcException;
 
 
 public 
-class OpShiftRightNode extends BiNode 
+class OpShiftRightNode extends BinaryOpNode 
 {
 	public OpShiftRightNode(Node l, Node r) {    super(l,r);  }
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return ">>s";  }
+	
+	 
+    @Override
+    String getLlvmOpName() { return "ashr"; }
+    
+	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException 
 	{
 		if(getType().is_int()) c.emitIShiftRight();

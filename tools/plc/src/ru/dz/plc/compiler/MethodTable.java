@@ -119,7 +119,7 @@ public class MethodTable {
 		}
 	}
 
-	public void codegen(RandomAccessFile os, FileWriter lst, CodeGeneratorState s, String version) throws IOException, PlcException {
+	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, CodeGeneratorState s, String version) throws IOException, PlcException {
 		set_ordinals();
 		lst.write("Class version "+version+"\n\n");
 
@@ -129,6 +129,7 @@ public class MethodTable {
 			s.set_method( m );
 
 			lst.write("method "+m.name+" ordinal "+m.getOrdinal()+"\n--\n");
+			llvmFile.write("\n\n; method "+m.name+" ordinal "+m.getOrdinal()+"\n; --\n");
 
 			MethodFileInfo mf = new MethodFileInfo(os, lst, m, s);
 			mf.write();
@@ -139,6 +140,8 @@ public class MethodTable {
 			MethodLineNumbersFileInfo ml = new MethodLineNumbersFileInfo(os,m);
 			ml.write();
 
+			m.generateLlvmCode(s, llvmFile);
+			
 			s.set_method( null );
 			lst.write("--\nmethod end\n\n");
 		}

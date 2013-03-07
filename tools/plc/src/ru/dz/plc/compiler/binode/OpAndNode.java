@@ -14,11 +14,17 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  */
 
-public class OpAndNode extends BiNode 
+public class OpAndNode extends BinaryOpNode 
 {
 	public OpAndNode(Node l, Node r) {    super(l,r);  }
 	public String toString()  {    return "&";  }
 	public boolean is_on_int_stack() { return true; }
+	
+	 
+    @Override
+    String getLlvmOpName() { return "and"; }
+    
+	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		if(getType().is_int()) c.emit_iand();
 		else throw new PlcException("Codegen", "op & does not exist for this type");

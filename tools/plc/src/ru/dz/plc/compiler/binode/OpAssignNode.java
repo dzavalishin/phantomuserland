@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomStackVar;
 import ru.dz.plc.compiler.PhantomType;
@@ -131,4 +132,93 @@ public class OpAssignNode extends BiNode {
 
 	}
 
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		if( _l.getClass() == IdentNode.class )
+		{
+			if( _r == null )				throw new PlcException("null expr");
+			
+			//_r.generateLlvmCode(llc);
+
+			IdentNode dest = (IdentNode) _l;
+			String dest_name = dest.get_name();
+
+			// Field?
+			PhantomField f = llc.getPhantomClass().find_field(dest_name);
+			if (f != null) {
+				//if (type == null || type.is_unknown()) type = f.getType();
+				//check_assignment_types(f.getName(), type,_r.getType());
+				//c.emitOsDup(); // return a copy
+				//c.emitSave(f.getOrdinal());
+				//if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
+				// TODO llvm
+				llc.putln(String.format( "; @this.%s = %s", f.getName(), _r.getLlvmTempName() ));
+				return;
+			}
+
+			// Stack var?
+			PhantomStackVar svar = llc.getIstackVars().get_var(dest_name);
+			if (svar != null)
+			{
+				//if (type == null || type.is_unknown()) type = svar.getType();
+				//check_assignment_types(svar.getName(), type,_r.getType());
+				//c.emitIsDup(); // return a copy
+				//c.emitISet(svar.get_abs_stack_pos()); // set stack variable
+				//if(!is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on obj??!");
+				// TODO llvm
+				llc.putln(String.format( "; @%s = %s", svar.getName(), _r.getLlvmTempName() ));
+			}
+			else
+			{
+				svar = llc.GetOstackVars().get_var(dest_name);
+				if (svar == null)
+					throw new PlcException(toString(), "nowhere to assign", dest_name);
+
+				//if (type == null || type.is_unknown()) type = svar.getType();
+				//check_assignment_types(svar.getName(), type,_r.getType());
+				//c.emitOsDup(); // return a copy
+				//c.emitSet(svar.get_abs_stack_pos()); // set stack variable
+				//if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
+				// TODO llvm
+				llc.putln(String.format( "; @%s = %s", svar.getName(), _r.getLlvmTempName() ));
+			}
+		}
+		else if( _l.getClass() == OpSubscriptNode.class )
+		{
+			// this is assignment to array element
+			OpSubscriptNode dest = (OpSubscriptNode)_l;
+
+			Node atom = dest.getLeft();
+			Node subscr = dest._r;
+
+
+			// array object to assign to
+			//atom.generateLlvmCode(llc);
+			//move_between_stacks(c, atom.is_on_int_stack());
+
+			// put value to assign
+			if( _r == null ) throw new PlcException("nothing to assign");
+
+			//_r.generateLlvmCode(llc);
+			
+			// put subscript
+			//subscr.generateLlvmCode(llc);
+			//move_between_stacks(c, subscr.is_on_int_stack());
+
+			//c.emitCall(11,2); // Method number 11, 2 parameters
+			// NB! Must return copy of assigned stuff! NB! Must increment refcount!
+			// (currently does, make sure it will)
+			//if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
+
+			PhantomType destType = new PhantomType( atom.getType().get_class() );
+
+			//check_assignment_types("container element", type, _r.getType());
+			check_assignment_types("container element", destType, _r.getType());
+
+			llc.putln(String.format( "; %s[%s]  = %s", atom.getLlvmTempName(), subscr.getLlvmTempName(), _r.getLlvmTempName() ));
+		}
+		else
+			throw new PlcException("= Node", "unknown left Node", _l.toString() );
+	}
+	
 }

@@ -297,6 +297,26 @@ public class PhantomType {
 	public static PhantomType getLong() throws PlcException {
         if( t_long == null ) t_long = new PhTypeLong();
         return t_long;
+	}
+
+	// ---------------------------- LLVM code generation ----------------------------
+	
+	public String toLlvmType() {
+		if( _class != null ) return LlvmCodegen.getObjectType();  
+
+		if( _is_int )     return "i32";
+		if( _is_long )    return "i64";
+		if( _is_float )   return "float";
+		if( _is_double )  return "double";
+		//if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
+		
+		return "void";
+	}
+
+	// This is used to generate function name with encoded arg type info
+	public String toProxyName() {
+		if( _class != null ) return "o";
+		return toLlvmType();
 	} 
 
 }

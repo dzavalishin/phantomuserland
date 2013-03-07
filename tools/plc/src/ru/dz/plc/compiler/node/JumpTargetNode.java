@@ -4,11 +4,12 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.util.PlcException;
 
- /**
+/**
  * Jump target Node. Generates label.
  */
 
@@ -28,7 +29,7 @@ public class JumpTargetNode extends Node {
 		this.labelString = labelString;
 		labelNo = -1;
 	}
-	
+
 	public String toString()  {    return "label "+ ((labelNo < 0) ? labelString : ""+labelNo );  }
 	public void find_out_my_type() throws PlcException { if(type == null) type = new PhTypeUnknown(); }
 	public boolean is_const() { return true; }
@@ -42,6 +43,14 @@ public class JumpTargetNode extends Node {
 			c.markLabel(labelString);
 		else
 			c.markLabel("javaLabel"+labelNo);
+	}
+
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		if(labelString!=null)
+			llc.putln(labelString+":");
+		else
+			llc.putln("javaLabel"+labelNo);
 	}
 
 }

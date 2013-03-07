@@ -15,12 +15,14 @@ package ru.dz.plc.compiler;
  */
 
 public class CodeGeneratorState extends GeneralState {
-  public String continue_label = null;
-  public String break_label = null;
+	public String continue_label = null;
+	public String break_label = null;
 
-  public CodeGeneratorState(PhantomClass c)
-  {
-    super(c);
-  }
+	public CodeGeneratorState(PhantomClass c)
+	{
+		super(c);
+	}
+	
+	
 }
 

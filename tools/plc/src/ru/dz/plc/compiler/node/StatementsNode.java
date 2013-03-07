@@ -7,6 +7,7 @@ import java.util.List;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.util.PlcException;
@@ -49,6 +50,12 @@ public class StatementsNode extends Node {
 			n.generate_code(c, s);
 		}
 
+	}
+	
+	@Override
+	public void generateLlvmCode(LlvmCodegen llc) throws PlcException {
+		for( Node n : nodes )
+			n.generateLlvmCode(llc);
 	}
 	
 	@Override

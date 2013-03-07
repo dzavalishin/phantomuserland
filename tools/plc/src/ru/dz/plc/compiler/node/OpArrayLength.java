@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
@@ -49,5 +50,22 @@ public class OpArrayLength extends Node {
 
 
 		c.emitCall(12,0); // Method number 12, 0 parameters - size
+	}
+	
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		Node atom = _l;
+
+		if( !atom.getType().is_container() )
+			throw new PlcException( toString(), "not a container" );
+
+		log.fine("Node "+this+" codegen");
+
+		// put array object to load from
+		atom.generateLlvmCode(llc);
+		//move_between_stacks(c, atom.is_on_int_stack());
+
+		//c.emitCall(12,0); // Method number 12, 0 parameters - size
+		llc.putln(llvmTempName+ " = i32 call @PhantomVm_array_length ( "+atom.getLlvmTempName()+") ;");
 	}
 }

@@ -1,5 +1,6 @@
 package ru.dz.plc.compiler;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -84,13 +85,15 @@ public class FieldTable {
 	}
 
 	public void codegen(RandomAccessFile os, FileWriter lst,
-			CodeGeneratorState s, String version) throws PlcException 
+			BufferedWriter llvmFile, CodeGeneratorState s, String version) throws PlcException 
 	{
+		//llvmFile.write("; fields: \n");
 		for( PhantomField f : table.values())
 		{
 			FieldFileInfo info = new FieldFileInfo(os, lst, f);
 			try {
 				info.write();
+				llvmFile.write("; - field "+f.getName()+"\n");
 			} catch (IOException e) {
 				throw new PlcException("Writing field "+f.getName(), e.toString());
 			}

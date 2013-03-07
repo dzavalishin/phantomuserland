@@ -14,10 +14,16 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  */
 
-public class OpMultiplyNode extends BiNode {
+public class OpMultiplyNode extends BinaryOpNode {
 	public OpMultiplyNode(Node l, Node r) {    super(l,r);  }
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return "*";  }
+
+
+	@Override
+	String getLlvmOpName() { return isFloat() ? "fmul" : "mul"; }
+
+
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		if(getType().is_int()) c.emitIMul();
 		else throw new PlcException("Codegen", "op * does not exist for this type");
