@@ -6,6 +6,8 @@ import ru.dz.phantom.code.*;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -101,7 +103,7 @@ public class Method
 		// check number of args
 		int n_args = args_def.size();
 		String good_args_label = c.getLabel();
-		
+
 		c.emitIConst_32bit(n_args);
 		c.emitISubLU();
 		c.emitJz(good_args_label);
@@ -109,7 +111,7 @@ public class Method
 		// wrong count - throw string
 		// BUG! Need less consuming way of reporting this. Maybe by
 		// calling class object Method? Or by summoning something?
-		c.emitString("arg count: "+name + " in " + s.my_class.getName());
+		c.emitString("arg count: "+name + " in " + s.get_class().getName());
 		c.emitThrow();
 
 		c.markLabel(good_args_label);
@@ -146,6 +148,125 @@ public class Method
 		// ------------------------------------------
 
 	}
+
+
+	// ------------------------------------------
+	// LLVM codegen support
+	// ------------------------------------------
+
+	private static int llvmTempNum = 0;
+
+	public String getLlvmTempName(String nodeName ) 
+	{
+		if( null == nodeName )
+			return String.format("%%tmp_%d", llvmTempNum++ );
+		return String.format("%%tmp_%d_%s", llvmTempNum++, nodeName ); 
+	}
+
+
+
+	public void generateLlvmCode( CodeGeneratorState s, BufferedWriter llvmFile ) throws PlcException, IOException {
+		
+		LlvmCodegen llc = new LlvmCodegen(s.get_class(),this,llvmFile);
+		
+		StringBuilder argdef = new StringBuilder();
+
+		boolean firstParm = true;
+		for( ArgDefinition a : args_def )
+		{
+			if(!firstParm)
+				argdef.append(", ");
+
+			firstParm= false;
+
+			argdef.append("i64 %"+a.getName());
+		}
+
+		String llvmMethodName = name;
+		name = name.replaceAll("<init>", "_\\$_Constructor");
+		
+		llc.putln(String.format("define %s @%s(%s) {", llc.getObjectType(), name, argdef )); // function 
+
+		if(code != null)
+		{
+
+			// ------------------------------------------
+			// traverse tree to allocate automatic vars?
+			// ------------------------------------------
+			//int n_auto_vars = svars.getUsedSlots();
+			//int n_int_auto_vars = isvars.getUsedSlots();
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate prologue code here
+			// ------------------------------------------
+
+			/*
+		// check number of args
+		int n_args = args_def.size();
+		String good_args_label = c.getLabel();
+
+		c.emitIConst_32bit(n_args);
+		c.emitISubLU();
+		c.emitJz(good_args_label);
+
+		// wrong count - throw string
+		// BUG! Need less consuming way of reporting this. Maybe by
+		// calling class object Method? Or by summoning something?
+		c.emitString("arg count: "+name + " in " + s.get_class().getName());
+		c.emitThrow();
+
+		c.markLabel(good_args_label);
+			 */
+
+			if(requestDebug) llc.emitDebug((byte) 0x1);
+			//if(requestDebug) llc.emitDebug((byte)0x1,"Enabled debug");
+
+			// push nulls to reserve stack space for autovars
+			// BUG! We can execute vars initialization code here, can we?
+			// We can if code does not depend on auto vars itself, or depends only on
+			// previous ones.
+			// 		for( int i = n_auto_vars; i > 0; i-- ) 			c.emitPushNull();
+
+			// Reserve integer stack place for int vars 		for( int i = n_int_auto_vars; i > 0; i-- )			c.emitIConst_0();
+
+			// ------------------------------------------
+
+
+			// ------------------------------------------
+			// generate main code by descending the tree
+			// ------------------------------------------
+			code.generateLlvmCode( llc );
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate epilogue code here
+			// ------------------------------------------
+
+			//if(requestDebug) c.emitDebug((byte)0x2,"Disabled debug");
+			if(requestDebug) llc.emitDebug((byte) 0x2);
+
+		}
+		
+		// catch the fall-out
+		llc.putln("ret "+llc.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
+		llc.putln("}"); // end of function 
+
+		// ------------------------------------------
+		// Part of code is generated to the buffer to 
+		// be emitted after the method code. Flush it
+		// now.
+		// ------------------------------------------
+
+		llc.flushPostponedCode();
+		
+	}
+
+
+	// ------------------------------------------
+	// Getters/setters
+	// ------------------------------------------
+
 
 	public int getOrdinal() {
 		//if(ordinal < 0)			System.out.println("Method.getOrdinal(): ordinal < 0");

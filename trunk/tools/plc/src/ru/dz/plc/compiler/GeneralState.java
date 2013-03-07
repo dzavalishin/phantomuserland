@@ -3,10 +3,12 @@ package ru.dz.plc.compiler;
 import ru.dz.plc.util.*;
 
 public class GeneralState {
+	
 	public GeneralState() {
 	}
-	PhantomClass my_class;
-	Method   my_method;
+	
+	protected PhantomClass my_class;
+	private Method       my_method;
 
 	public GeneralState(PhantomClass c)
 	{

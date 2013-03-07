@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
@@ -46,4 +47,10 @@ public class MonitorNode extends Node {
 		else     c.emitUnLock();
 	}
 
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		String op = lock ? "MonitorLock" : "MonitorUnlock";
+		llc.putln(llvmTempName+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_"+op +"( "+LlvmCodegen.getObjectType()+" "+_l.getLlvmTempName()+" ); ");
+	}
+	
 }

@@ -15,12 +15,17 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  */
 
-public class OpRemainderNode extends BiNode
+public class OpRemainderNode extends BinaryOpNode
 {
     public OpRemainderNode(Node l, Node r) {    super(l,r);  }
     public String toString()  {    return "%";  }
     public boolean is_on_int_stack() { return true; }
-    protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
+    
+    @Override
+    String getLlvmOpName() { return isFloat() ? "frem" : "srem"; }
+    
+    
+	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
     {
         if(getType().is_int()) c.emitIRemLU();
         else throw new PlcException("Codegen", "op % does not exist for this type");

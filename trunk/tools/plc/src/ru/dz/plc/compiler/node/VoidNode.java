@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.util.PlcException;
@@ -40,4 +41,9 @@ public class VoidNode extends Node {
 			c.emitOsDrop();
 	}
 
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		// Just empty
+	}
+	
 }

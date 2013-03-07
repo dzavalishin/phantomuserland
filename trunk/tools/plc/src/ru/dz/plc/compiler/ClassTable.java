@@ -67,11 +67,12 @@ public class ClassTable {
 			{
 				String classfns = c.getName()+".pc";
 				String lstfns = c.getName()+".lstc";
-				//String verfns = c.getName()+".ver";
+				String llvmfns = c.getName()+".ll";
 				
 				// skip leading point
 				File classfn = new File( PlcMain.getOutputPath(), classfns.substring(1));
 				File lstfn = new File( PlcMain.getOutputPath(), lstfns.substring(1));
+				File llvmfn = new File( PlcMain.getOutputPath(), llvmfns.substring(1));
 
 				classfn.delete();
 				RandomAccessFile of = new RandomAccessFile( classfn, "rw" );
@@ -79,6 +80,9 @@ public class ClassTable {
 				lstfn.delete();
 				FileWriter lst = new FileWriter(lstfn);
 
+				llvmfn.delete();
+				BufferedWriter llvmFile = new BufferedWriter( new FileWriter(llvmfn) );
+				
 				{
 					/*
 					File verfn = new File( PlcMain.getOutputPath(), verfns.substring(1));
@@ -116,11 +120,12 @@ public class ClassTable {
 					);
 
 				cf.write();
-				c.codegen(of, lst, verstr);
+				c.codegen(of, lst, llvmFile, verstr);
 				//cf.reWrite();
 
 				of.close();
 				lst.close();
+				llvmFile.close();
 			}
 
 			{
@@ -247,6 +252,7 @@ public class ClassTable {
 	public void clear() {
 		table.clear();
 	}
+
 
 }
 

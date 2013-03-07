@@ -15,11 +15,16 @@ import ru.dz.plc.util.PlcException;
  */
 
 public 
-class OpOrNode extends BiNode 
+class OpOrNode extends BinaryOpNode 
 {
 	public OpOrNode(Node l, Node r) {    super(l,r);  }
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return "|";  }
+	 
+    @Override
+    String getLlvmOpName() { return "or"; }
+    
+	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException 
 	{
 		if(getType().is_int()) c.emit_ior();

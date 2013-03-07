@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.util.PlcException;
@@ -46,4 +47,12 @@ public class JumpNode extends Node {
 			c.emitJmp("javaLabel"+labelNo);
 	}
 
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		if(label != null )
+			llc.putln("br label %"+label+" ;");
+		else
+			llc.putln("br label %javaLabel"+labelNo+" ;");
+	}
+	
 }

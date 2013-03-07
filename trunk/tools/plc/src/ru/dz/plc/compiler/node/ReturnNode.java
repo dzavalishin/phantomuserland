@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.util.PlcException;
@@ -24,11 +25,25 @@ public class ReturnNode extends Node {
 	public boolean args_on_int_stack() { return false; }
 	public String toString()  {    return "return";  }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
+	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		if( s.get_method().getDebugMethod() )
 			c.emitDebug((byte)0x2,"Disabled debug");
 		c.emitRet();
 	}
+	
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		if( _l == null )
+		{
+			llc.putln("ret void;");			
+			return;
+		}
+		
+		//_l.generateLlvmCode(llc);
+		llc.putln("ret "+llc.getObjectType()+" "+_l.getLlvmTempName()+" ;");
+	}
+	
 	public void find_out_my_type()  {    type = new PhTypeVoid();  }
 
 }

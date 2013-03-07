@@ -23,6 +23,7 @@ public class ClassMap {
 
 	public void print() throws PlcException { classes.print(); }
 	public void codegen() throws PlcException, IOException { classes.codegen(); }
+	//public void llvmCodegen() throws PlcException, IOException { classes.llvmCodegen(); }
 
 	/**
 	 * do_import - import class

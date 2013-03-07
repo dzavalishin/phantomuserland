@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
@@ -35,4 +36,9 @@ public class ThisNode extends Node {
 		c.emitSummonThis();
 	}
 
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		llc.putln( getLlvmTempName()+" = call "+llc.getObjectType()+" @PhantomVm_getThis();" );
+	}
+	
 }

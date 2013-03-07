@@ -66,4 +66,25 @@ public class OpSubscriptNode extends BiNode {
 
 		c.emitCall(10,1); // Method number 10, 1 parameter - get
 	}
+
+	protected void generateMyLlvmCode(ru.dz.plc.compiler.LlvmCodegen llc) throws PlcException 
+	{
+		Node atom = _l;
+		Node subscr = _r;
+
+		log.fine("Node "+this+" codegen");
+
+		// put array object to load from
+		atom.generateLlvmCode(llc);	
+		//move_between_stacks(c, atom.is_on_int_stack());
+
+		// put subscript
+		subscr.generateLlvmCode(llc);
+		//move_between_stacks(c, subscr.is_on_int_stack());
+
+		//c.emitCall(10,1); // Method number 10, 1 parameter - get
+		llc.putln(getLlvmTempName()+" = call "+llc.getObjectType()+" @PhantomVm_ArrayLoad( "+llc.getObjectType()+" "+_l.getLlvmTempName()+", i32 "+_r.getLlvmTempName()+ ") ;");
+	}
+	
+
 }

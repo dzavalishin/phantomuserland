@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
@@ -100,6 +101,36 @@ public class IdentNode extends Node {
 			c.emitGet(svar.get_abs_stack_pos()); // get stack variable
 		}
 		
+	}
+	
+	@Override
+	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		PhantomField f = llc.getPhantomClass().find_field(ident);
+		if( f != null )
+		{
+			// TODO llvm field load
+			//c.emitLoad(f.getOrdinal());
+			return;
+		}
+
+		PhantomStackVar svar = llc.getIstackVars().get_var(ident);
+		if( svar != null )
+		{
+			//c.emitIGet(svar.get_abs_stack_pos()); // get stack variable
+			// TODO llvm
+			llc.putln("; %"+llvmTempName+ " = alias "+getType().toLlvmType()+" @"+svar.getName());
+		}
+		else
+		{
+			svar = llc.GetOstackVars().get_var(ident);
+			if( svar == null )
+				throw new PlcException( toString(), "no field", ident );
+
+			//if (type == null || type.is_unknown()) type = svar.get_type();
+			//c.emitGet(svar.get_abs_stack_pos()); // get stack variable
+			// TODO llvm
+			llc.putln("; %"+llvmTempName+ "= alias "+getType().toLlvmType()+" @"+svar.getName());
+		}
 	}
 
 }

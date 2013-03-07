@@ -76,7 +76,12 @@ cp ../../../plib/bin/*.pc test/pc
 listf=RunJpcUnitTests.tmp
 listj=RunJpcUnitTests.java
 #listj=${listf/.tmp/.java/};
-echo 'public class RunJpcUnitTests {  public void run() { String [] args  = new String [0]();  ' > $listf
+echo 'public class RunJpcUnitTests {   ' > $listf
+#echo '	public void say( String s ) { System.out.println(s); } ' >> $listf
+echo '	public void say( String s ) {  } ' >> $listf
+echo '' >> $listf
+echo '	public void run() { String [] args  = new String [0]();  ' >> $listf
+echo '' >> $listf
 rm $listj
 
 
@@ -86,7 +91,7 @@ do
     fileName=$i;
     className=${fileName/.java/};
     mytest $i ;
-    echo $className'.main(args);' >> $listf 
+    echo '	say("--- DO REGRESS ---' $className '");' $className'.main(args);' >> $listf 
 done
 
 echo '}}' >> $listf 

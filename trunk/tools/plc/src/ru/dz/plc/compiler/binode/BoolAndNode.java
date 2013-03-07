@@ -15,11 +15,17 @@ import ru.dz.plc.util.PlcException;
  */
 
 
-public class BoolAndNode extends BiNode 
+public class BoolAndNode extends BinaryOpNode 
 {
 	public BoolAndNode( Node l, Node r) {    super(l,r);  }
 	public String toString()  {    return "bool and";  }
 	public boolean is_on_int_stack() { return true; }
+
+
+	@Override
+	String getLlvmOpName() { return "mul"; }
+
+
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		if(getType().is_int()) c.emitLogAnd();
 		else throw new PlcException("Codegen", "op && does not exist for this type");

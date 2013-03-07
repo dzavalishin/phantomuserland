@@ -9,11 +9,16 @@ import ru.dz.plc.util.PlcException;
 
 
 public 
-class OpShiftRightUnsignedNode extends BiNode 
+class OpShiftRightUnsignedNode extends BinaryOpNode 
 {
 	public OpShiftRightUnsignedNode(Node l, Node r) {    super(l,r);  }
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return ">>u";  }
+	 
+    @Override
+    String getLlvmOpName() { return "lshr"; }
+    
+	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException 
 	{
 		if(getType().is_int()) c.emitUShiftRight();
