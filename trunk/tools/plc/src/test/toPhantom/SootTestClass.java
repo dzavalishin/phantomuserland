@@ -78,4 +78,11 @@ public class SootTestClass {
         //		System.out.print(stringMethod());
     }
 
+    public class Inner {
+        public void run(){
+        	int j = classIntField;
+        	System.out.println(j);
+        }
+    }
+    
 }
