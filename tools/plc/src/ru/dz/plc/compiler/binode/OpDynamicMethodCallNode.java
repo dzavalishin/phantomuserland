@@ -70,6 +70,12 @@ public class OpDynamicMethodCallNode extends BiNode {
 		c.emitDynamicCall();
 	}
 
+	/**
+	 * The idea is to call special dynlink proxy func, which will set up
+	 * data for dynlinker and will be replaced then with call to real method.
+	 * Finally dynlinker will reset stack to previous frame's state and jump 
+	 * (return) to real method.
+	 */
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
 		String proxyArgdef = "";
@@ -96,12 +102,17 @@ public class OpDynamicMethodCallNode extends BiNode {
 		llc.postponeCode(ls_method.getDef()+";\n");
 		llc.postponeCode(ls_type.getDef()+";\n");
 
-		llc.postponeCode(String.format("define %s @%s(%s) {\n", LlvmCodegen.getObjectType(), proxyName, proxyArgdef )); // proxy to be called
+		// We need to do strange things with frame, so don't think about inlining!
+		llc.postponeCode(String.format("define %s @%s(%s) noinline {\n", LlvmCodegen.getObjectType(), proxyName, proxyArgdef )); // proxy to be called
 
 		llc.postponeCode(ls_method.getCast()+";\n");
 		llc.postponeCode(ls_type.getCast()+";\n");
+		
+		llc.postponeCode("%stackPos  = call i8* @llvm.stacksave(); @llvm.stackrestore(i8* %ptr)\n");
+		//llc.postponeCode("%frameAddr = call i8* @llvm.frameaddress( i32 0 );\n");
+		
 		//llc.postponeCode("call void @PhantomVM_DynamicLinker( i8* "+castTmp+" );\n");
-		llc.postponeCode("call void @PhantomVM_DynamicLinker( i8* "+ls_method.getReference()+", "+ls_type.getReference()+" );\n");
+		llc.postponeCode("call void @PhantomVM_DynamicLinker( i8* "+ls_method.getReference()+", i8* "+ls_type.getReference()+", i8* %stackPos );\n");
 		
 		llc.postponeCode("ret %OPTR <{ i8* null, i8* null }> ;\n");
 		llc.postponeCode("}\n");

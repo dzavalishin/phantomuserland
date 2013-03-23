@@ -5,7 +5,9 @@ package ru.dz.soot;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import ru.dz.plc.PlcMain;
@@ -16,6 +18,8 @@ import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.options.Options;
+import soot.tagkit.InnerClassTag;
+import soot.tagkit.Tag;
 
 /**
  * @author dz
@@ -27,6 +31,7 @@ public class SootMain {
 	
 	static Logger log = Logger.getLogger(SootMain.class.getName());
     static ClassMap classes = ClassMap.get_map();
+	private static Set<String> classesToDo = new HashSet<String>();
 
 
 
@@ -66,7 +71,13 @@ public class SootMain {
 			for( String a : args )
 				doClass(a);
 		}
-	
+
+		for( String iClass : classesToDo )
+		{
+			say("Now process inner class "+iClass);
+			doClass(iClass);
+		}
+		
 		if(errors > 0)
 		{
 			say("Compile errors, stopped");
@@ -86,9 +97,20 @@ public class SootMain {
 		SootClass c = Scene.v().loadClassAndSupport(cn);
 		if( c.isPhantom() )
 		{
-			die("Not loaded");
+			die("Not loaded "+c.getName());
 		}
 
+		for( Tag t : c.getTags() )
+		{
+			say("class tag '"+t+"' tag "+t.getClass()+" name "+t.getName());
+			
+			if (t instanceof InnerClassTag) {
+				InnerClassTag iClass = (InnerClassTag) t;
+				classesToDo .add( iClass.getInnerClass() );
+			}
+			
+		}
+		
 		PhantomClass pc = new PhantomClass(convertClassName(c.getName()));
 		
 		List<SootMethod> mlist = c.getMethods();
