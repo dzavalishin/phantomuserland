@@ -1,4 +1,6 @@
-default:: all
+default::
+	-mkdir lib
+	@$(MAKE) all
 
 # subdir offsets - turned off for seems to be bad idea :(
 
