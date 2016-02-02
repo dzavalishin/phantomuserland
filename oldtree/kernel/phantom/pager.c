@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "pager"
 #include "debug_ext.h"
-#define debug_level_flow 1
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -42,7 +42,7 @@ static phantom_disk_superblock  superblock;
 
 
 #if !PAGING_PARTITION
-static int _DEBUG = 0;
+static int _DEBUG = 1;
 
 
 static hal_mutex_t              pager_mutex;
