@@ -13,13 +13,16 @@ import java.util.logging.Logger;
 import ru.dz.plc.PlcMain;
 import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 import soot.Scene;
 import soot.SootClass;
+import soot.SootField;
 import soot.SootMethod;
 import soot.options.Options;
 import soot.tagkit.InnerClassTag;
 import soot.tagkit.Tag;
+import soot.util.Chain;
 
 /**
  * @author dz
@@ -74,8 +77,9 @@ public class SootMain {
 
 		for( String iClass : classesToDo )
 		{
-			say("Now process inner class "+iClass);
-			doClass(iClass);
+			String cName = iClass.replace('/', '.');
+			say("Now process inner class "+cName);
+			doClass(cName);
 		}
 		
 		if(errors > 0)
@@ -112,6 +116,14 @@ public class SootMain {
 		}
 		
 		PhantomClass pc = new PhantomClass(convertClassName(c.getName()));
+		
+		Chain<SootField> fields = c.getFields();
+		for( SootField f : fields )
+		{
+			PhantomType type = SootExpressionTranslator.convertType(f.getType());
+			say("add field '"+f.getName()+"' type '"+type+"' to "+pc.getName());
+			pc.addField(f.getName(), type);
+		}
 		
 		List<SootMethod> mlist = c.getMethods();
 		

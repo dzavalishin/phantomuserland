@@ -13,7 +13,7 @@ public class SootTestClass {
         int i = args.length;
         int len = 0;
         
-/*
+
         switch(i)
         {
         case 0:         len = 0; break;
@@ -31,7 +31,7 @@ public class SootTestClass {
         case 50: v2 = 100; break;
         default: v2 = 0; break;
         }
-*/
+
 
     }
 
@@ -74,15 +74,18 @@ public class SootTestClass {
     void voidMethod()
     {
         classIntField = 0;
+        
+        //Inner i = new Inner();
         //		System.out.print("TestPrint");
         //		System.out.print(stringMethod());
     }
 
+    /* do not support inner classes yet
     public class Inner {
         public void run(){
         	int j = classIntField;
         	System.out.println(j);
         }
     }
-    
+    */
 }

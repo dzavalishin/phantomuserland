@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.logging.Logger;
 
+import ru.dz.jpc.Config;
 import ru.dz.phantom.code.*;
 import ru.dz.plc.compiler.AttributeSet;
 import ru.dz.plc.compiler.CodeGeneratorState;
@@ -246,7 +247,7 @@ abstract public class Node {
 	//protected abstract void generateMyLlvmCode(LlvmCodegen llc) throws PlcException;
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException
 	{
-		System.err.println("llvm cg failed for "+toString());
+		if(Config.llvmDebug) System.err.println("llvm cg failed for "+toString());
 		llc.putln("; llvm cg failed for "+toString());
 	}
 
@@ -284,7 +285,7 @@ abstract public class Node {
 		if( dest == null || dest.is_unknown() )
 			print_warning("Assignment to "+name+": destination type is unknown");
 		else if( !dest.can_be_assigned_from(src) )
-			print_warning("Assignment to "+name+": incompatible source type "+src+" for dest type "+dest);
+			print_warning("Assignment to "+name+": incompatible source type '"+src+"' for dest type "+dest);
 	}
 
 

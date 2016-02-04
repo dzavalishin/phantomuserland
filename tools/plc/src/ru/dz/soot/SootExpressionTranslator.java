@@ -113,6 +113,10 @@ public class SootExpressionTranslator {
 		
 		if( tn.equals("int")) tn = ".internal.int";
 		if( tn.equals("boolean")) tn = ".internal.int";
+
+		if( tn.equals(".byte")) tn = ".internal.int";
+		if( tn.equals(".short")) tn = ".internal.int";
+		if( tn.equals(".long")) tn = ".internal.long";
 		
 		boolean err = false;
 		
