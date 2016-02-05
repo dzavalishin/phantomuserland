@@ -266,7 +266,7 @@ public class ClassTable {
 		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomClass c = i.next();
-			c.listMethods();
+			//c.listMethods();
 			c.preprocess( new ParseState(c) );
 		}
 

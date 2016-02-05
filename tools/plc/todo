@@ -1,2 +1,6 @@
 
-non-public classes, more than one class in src file, compile used class before one that uses it
+- non-public classes, more than one class in src file, compile used class before one that uses it
+- seems like we have code for "new int" instead of "new int[]" - see test.toPhantom.ArraySimple1.lstc 
+- java constructors and <init> - replace <init> with call to root constructor?
+- generate <init>? at fixed ordinal?
+- not converted to Phantom types ".byte" and ".short" types exist

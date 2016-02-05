@@ -403,7 +403,7 @@ public class PhantomClass {
 
 	public void generateGettersSetters() throws PlcException {
 		ft.generateGettersSetters(this);		
-		SootMain.say("class "+this);		mt.dump();
+		//SootMain.say("class "+this);		mt.dump();
 	}
 
 	public void listMethods() {
