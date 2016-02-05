@@ -60,7 +60,7 @@ public class OpAssignNode extends BiNode {
 			if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
 
 			IdentNode dest = (IdentNode) _l;
-			String dest_name = dest.get_name();
+			String dest_name = dest.getName();
 
 			// Field?
 			//PhantomField f = s.get_class().ft.get(dest_name);
@@ -141,7 +141,7 @@ public class OpAssignNode extends BiNode {
 			//_r.generateLlvmCode(llc);
 
 			IdentNode dest = (IdentNode) _l;
-			String dest_name = dest.get_name();
+			String dest_name = dest.getName();
 
 			// Field?
 			PhantomField f = llc.getPhantomClass().find_field(dest_name);

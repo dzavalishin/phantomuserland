@@ -1,6 +1,8 @@
 package ru.dz.plc.compiler;
 
+import ru.dz.plc.PlcMain;
 import ru.dz.plc.util.PlcException;
+import ru.dz.soot.SootMain;
 
 import java.io.*;
 import java.util.*;
@@ -174,6 +176,7 @@ public class PhantomClass {
 	}
 
 	public Method addMethod(Method m) throws PlcException {
+		//SootMain.say("adding method "+m);
 		mt.add(m);
 		//check_base_for_method(m);
 		return m;
@@ -246,11 +249,13 @@ public class PhantomClass {
 	 * Add a field to a class.
 	 * @param name Name of field.
 	 * @param type Type of field.
+	 * @return 
 	 * @throws PlcException
 	 */
-	public void addField(String name, PhantomType type) throws PlcException {
+	public PhantomField addField(String name, PhantomType type) throws PlcException {
+		//SootMain.say("add var '"+name+"' type "+type);
 		check_base_for_field(name, type);
-		ft.add(name, type);
+		return ft.add(name, type);
 	}
 
 	/** 
@@ -326,12 +331,14 @@ public class PhantomClass {
 		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
 		
 		CodeGeneratorState s = new CodeGeneratorState(this);
+		//ft.generateGettersSetters(this);
 		mt.codegen(os, lst, llvmFile, s, version);
 		ft.codegen(os, lst, llvmFile, s, version);
 	}
 
 	public void preprocess(ParseState ps) throws PlcException
 	{
+		//ft.generateGettersSetters(this);
 		check_methods();
 		check_interfaces_compliance();
 		ps.set_class(this);
@@ -378,6 +385,32 @@ public class PhantomClass {
 	public Set<PhantomClass> getReferencedClasses() {
 		return referencedClasses;
 	}
+
+	/** Get getter for given field name */
+	public Method getGetter(String ident) {
+		//SootMain.say("in get method "+ident+" class "+this);		mt.dump();
+		String gName = FieldTable.makeGetterName(ident);
+		//SootMain.say("look for getter "+gName);
+		return mt.get(gName);
+	}
+
+	/** Get setter for given field name */
+	public Method getSetter(String ident) {
+
+		String gName = FieldTable.makeSetterName(ident);
+		return mt.get(gName);
+	}
+
+	public void generateGettersSetters() throws PlcException {
+		ft.generateGettersSetters(this);		
+		SootMain.say("class "+this);		mt.dump();
+	}
+
+	public void listMethods() {
+		SootMain.say("class "+this);		
+		mt.dump();
+	}
+
 
 
 

@@ -11,25 +11,35 @@ package ru.dz.plc.compiler;
 
 public class PhantomVariable
 {
-  String   name;
-  PhantomType  type;
+	private String   name;
+	private PhantomType  type;
+	private boolean _public = false;
 
-  public PhantomVariable( PhantomVariable v )
-  {
-    this.name = v.name;
-    this.type = v.type;
-  }
+	public PhantomVariable( PhantomVariable v )
+	{
+		this.name = v.name;
+		this.type = v.type;
+	}
 
-  public PhantomVariable( String name, PhantomType type)
-  {
-    this.name = name;
-    this.type = type;
-  }
+	public PhantomVariable( String name, PhantomType type)
+	{
+		this.name = name;
+		this.type = type;
+	}
 
-  public String getName() { return name; }
-  public PhantomType  getType() { return type; }
+	public String getName() { return name; }
+	public PhantomType  getType() { return type; }
 
-    public void setType(PhantomType type) {
-        this.type = type;
-    }
+	public void setType(PhantomType type) {
+		this.type = type;
+	}
+
+	/** generate getter and setter. Java's class-visible is public in Phantom! */
+	public boolean isPublic() {
+		return _public;
+	}
+
+	public void setPublic(boolean _public) {
+		this._public = _public;
+	}
 };

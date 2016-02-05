@@ -24,6 +24,7 @@ public class ClassMap {
 	public void print() throws PlcException { classes.print(); }
 	public void codegen() throws PlcException, IOException { classes.codegen(); }
 	//public void llvmCodegen() throws PlcException, IOException { classes.llvmCodegen(); }
+	public void preprocess() throws PlcException {		classes.preprocess();	}
 
 	/**
 	 * do_import - import class
@@ -61,6 +62,11 @@ public class ClassMap {
 			c = imported_classes.get(cln,justTry, ps);
 		return c;
 	}
+	
+	public void listMethods() {
+		classes.listMethods();		
+	}
+	
 
 
 }

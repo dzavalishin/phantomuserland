@@ -1,1 +1,11 @@
 Refactoring of old Phantom compiler and Java to Phantom convertor
+
+
+Java to Phantom convertor
+-------------------------
+
+based on Soot framework as .class file parser and Phantom language compiler's
+codegen as output. Mostly - mapping from soot output to phantom code 
+internal representation (tree).
+
+NB. Direct access to class field in java is not supported in Phantom. Generate getters?

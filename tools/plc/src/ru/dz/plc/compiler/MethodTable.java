@@ -148,5 +148,16 @@ public class MethodTable {
 	}
 
 
+	void dump()
+	{
+		System.out.println("Methods:");
+		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		{
+			Method m = i.next();
+			System.out.println("  Method "+m.toString()+":");
+		}
+	}
+	
+	
 }
 

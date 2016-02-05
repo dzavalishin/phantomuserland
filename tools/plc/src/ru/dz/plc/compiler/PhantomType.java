@@ -45,6 +45,7 @@ public class PhantomType {
 			return _class == null ? "" : _class.getName();
 		return "";
 	}
+	
 	protected PhantomType()
 	{
 		_is_void = false;

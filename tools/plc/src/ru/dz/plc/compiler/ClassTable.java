@@ -7,6 +7,7 @@ import ru.dz.phantom.code.*;
 import ru.dz.plc.PlcMain;
 //import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.*;
+import ru.dz.soot.SootMain;
 
 /**
  * <p>Used to look for classes.</p>
@@ -62,8 +63,8 @@ public class ClassTable {
 	public void codegen() throws IOException, PlcException {
 		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
 		{
-
 			PhantomClass c = i.next();
+			//SootMain.say("gen class "+c);
 			{
 				String classfns = c.getName()+".pc";
 				String lstfns = c.getName()+".lstc";
@@ -251,6 +252,24 @@ public class ClassTable {
 
 	public void clear() {
 		table.clear();
+	}
+
+	public void listMethods() {
+		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
+		{
+			PhantomClass c = i.next();
+			c.listMethods();
+		}
+	}
+
+	public void preprocess() throws PlcException {
+		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
+		{
+			PhantomClass c = i.next();
+			c.listMethods();
+			c.preprocess( new ParseState(c) );
+		}
+
 	}
 
 

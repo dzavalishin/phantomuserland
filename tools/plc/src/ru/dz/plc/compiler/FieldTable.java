@@ -8,6 +8,9 @@ import java.io.RandomAccessFile;
 import java.util.*;
 
 import ru.dz.phantom.code.FieldFileInfo;
+import ru.dz.plc.compiler.node.IdentNode;
+import ru.dz.plc.compiler.node.ReturnNode;
+import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.util.*;
 
 /**
@@ -38,9 +41,11 @@ public class FieldTable {
 	}
 	*/
 
-	void add( String name, PhantomType type )
+	PhantomField add( String name, PhantomType type )
 	{
-		table.put(name, new PhantomField( name, type, ordinals.getNext() ));
+		PhantomField f = new PhantomField( name, type, ordinals.getNext() );
+		table.put(name, f);
+		return f;
 	}
 
 	void set( int ordinal, String name, PhantomType type ) throws PlcException
@@ -67,7 +72,7 @@ public class FieldTable {
 		for( Iterator<PhantomField> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomField f = i.next();
-			ps.println("  Field "+f.name+"");
+			ps.println("  Field "+f.getName()+"");
 		}
 	}
 
@@ -84,6 +89,57 @@ public class FieldTable {
 		return max+1;
 	}
 
+	
+	private static String capitalizeFirst(String name)
+	{
+		char ch = name.charAt(0);
+		char uch = Character.toUpperCase(ch);
+		return new String("")+uch+name.substring(1);
+	}
+	
+	public static String makeGetterName(String fld)
+	{
+		return "get"+capitalizeFirst(fld);
+	}
+	
+	public static String makeSetterName(String fld)
+	{
+		return "set"+capitalizeFirst(fld);
+	}
+	
+	public void generateGettersSetters(PhantomClass pc) throws PlcException
+	{
+		for( PhantomField f : table.values())
+		{
+			generategetterSetter(pc,f);
+		}
+	}
+	
+	private void generategetterSetter(PhantomClass pc, PhantomField f) throws PlcException
+	{
+		if(!f.isPublic())
+			return;
+		
+		Method get = new Method(makeGetterName(f.getName()), f.getType());
+		pc.addMethod(get);
+		
+		StatementsNode getNodes = new StatementsNode();
+		get.code = getNodes;			
+		getNodes.addNode(new ReturnNode(new IdentNode(f.getName())));
+		
+		
+		// TODO write setter!
+		/*
+		Method set = new Method(makeSetterName(f.getName()), f.getType());
+		pc.addMethod(set);
+		
+		StatementsNode setNodes = new StatementsNode();
+		set.code = setNodes;			
+		setNodes.addNode(new ReturnNode(new IdentNode(f.getName()))); 
+		*/
+		
+	}
+	
 	public void codegen(RandomAccessFile os, FileWriter lst,
 			BufferedWriter llvmFile, CodeGeneratorState s, String version) throws PlcException 
 	{

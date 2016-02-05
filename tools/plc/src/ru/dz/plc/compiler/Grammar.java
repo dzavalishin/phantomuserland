@@ -1095,7 +1095,7 @@ extends GrammarHelper {
 				Node args = parse_call_args();
 
 				IdentNode ident = (IdentNode)atom;
-				Node method = new MethodNode( ident.get_name() ).setContext( l );
+				Node method = new MethodNode( ident.getName() ).setContext( l );
 				out = new OpMethodCallNode(object, method, args).setContext( l );
 				//out = new op_method_call_node(object, atom, args);
 			}

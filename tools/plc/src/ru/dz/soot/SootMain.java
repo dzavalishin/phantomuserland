@@ -12,7 +12,9 @@ import java.util.logging.Logger;
 
 import ru.dz.plc.PlcMain;
 import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 import soot.Scene;
@@ -31,9 +33,9 @@ import soot.util.Chain;
 public class SootMain {
 	private static int errors = 0;
 	private static int warnings = 0;
-	
+
 	static Logger log = Logger.getLogger(SootMain.class.getName());
-    static ClassMap classes = ClassMap.get_map();
+	static ClassMap classes = ClassMap.get_map();
 	private static Set<String> classesToDo = new HashSet<String>();
 
 
@@ -45,30 +47,35 @@ public class SootMain {
 	 */
 	public static void main(String[] args) throws PlcException, IOException {
 		String phantomClassPath = "test/pc";
-		
+
 		PlcMain.addClassFileSearchParh(new File(phantomClassPath));
 		PlcMain.setOutputPath(phantomClassPath);
-		
+
 		classes.do_import(".internal.object");			
 		classes.do_import(".internal.int");
 
 		try { classes.do_import(".internal.string"); } finally {}
-		
+
 		//String cp = "bin;../bin;lib/rt_6.jar";
 		String cp = 
 				"."+
-				File.pathSeparator+				"bin"+
-				File.pathSeparator+				"../bin"+
-				File.pathSeparator+				"lib/rt_6.jar"+
-				File.pathSeparator+				"../lib/rt_6.jar";
+						File.pathSeparator+				"bin"+
+						File.pathSeparator+				"../bin"+
+						File.pathSeparator+				"lib/rt_6.jar"+
+						File.pathSeparator+				"../lib/rt_6.jar";
 		//System.setProperty("soot.class.path", cp);
 		//say(cp);
-		
+
 		Scene.v().setSootClassPath(cp);
 		Options.v().set_keep_line_number(true);
-	
+
 		if(args.length == 0)
+		{
 			doClass("test.toPhantom.SootTestClass");
+			doClass("test.toPhantom.ArrayAccess");
+			doClass("test.toPhantom.D"); // TODO must be compiled before class that uses it
+			doClass("test.toPhantom.ArrayAssigns");
+		}
 		else
 		{
 			for( String a : args )
@@ -81,65 +88,77 @@ public class SootMain {
 			say("Now process inner class "+cName);
 			doClass(cName);
 		}
-		
+
 		if(errors > 0)
 		{
 			say("Compile errors, stopped");
 			return;
 		}
-		
+
 		if( warnings > 0 )
 			say(String.format("%d warnings\n", warnings ));
 
 		say("Generate Phantom code");
+		classes.preprocess();
 		classes.codegen();
 	}
 
-	
+
 	private static void doClass(String cn) throws PlcException, IOException
 	{
-		SootClass c = Scene.v().loadClassAndSupport(cn);
-		if( c.isPhantom() )
-		{
-			die("Not loaded "+c.getName());
-		}
+		try {
 
-		for( Tag t : c.getTags() )
-		{
-			say("class tag '"+t+"' tag "+t.getClass()+" name "+t.getName());
-			
-			if (t instanceof InnerClassTag) {
-				InnerClassTag iClass = (InnerClassTag) t;
-				classesToDo .add( iClass.getInnerClass() );
+			SootClass c = Scene.v().loadClassAndSupport(cn);
+			if( c.isPhantom() )
+			{
+				die("Not loaded "+c.getName());
 			}
-			
-		}
-		
-		PhantomClass pc = new PhantomClass(convertClassName(c.getName()));
-		
-		Chain<SootField> fields = c.getFields();
-		for( SootField f : fields )
-		{
-			PhantomType type = SootExpressionTranslator.convertType(f.getType());
-			say("add field '"+f.getName()+"' type '"+type+"' to "+pc.getName());
-			pc.addField(f.getName(), type);
-		}
-		
-		List<SootMethod> mlist = c.getMethods();
-		
-		for( SootMethod m : mlist )
-		{
-			SootMethodTranslator mt = new SootMethodTranslator(m,pc);
-			//doMethod(m);
-			mt.process();
-		}
-		
-		classes.add(pc);
 
-		//say("Generate Phantom code for "+pc.getName());
-		//classes.codegen();
+			for( Tag t : c.getTags() )
+			{
+				say("class tag '"+t+"' tag "+t.getClass()+" name "+t.getName());
+
+				if (t instanceof InnerClassTag) {
+					InnerClassTag iClass = (InnerClassTag) t;
+					classesToDo .add( iClass.getInnerClass() );
+				}
+
+			}
+
+			PhantomClass pc = new PhantomClass(convertClassName(c.getName()));
+
+			Chain<SootField> fields = c.getFields();
+			for( SootField f : fields )
+			{
+				PhantomType type = SootExpressionTranslator.convertType(f.getType());		
+				say("add field '"+f.getName()+"' type '"+type+"' to "+pc.getName());
+				PhantomField pf = pc.addField(f.getName(), type);
+				pf.setPublic(!f.isPrivate());
+			}
+
+			pc.generateGettersSetters();
+
+			List<SootMethod> mlist = c.getMethods();
+
+			for( SootMethod m : mlist )
+			{
+				SootMethodTranslator mt = new SootMethodTranslator(m,pc);
+				//doMethod(m);
+				mt.process();
+			}
+
+			//{				pc.preprocess( new ParseState(pc) );			}
+			classes.add(pc);
+
+			//classes.listMethods();
+			//say("Generate Phantom code for "+pc.getName());
+			//classes.codegen();
+		} catch(PlcException e)
+		{
+			say("Failed to compile "+cn+": "+e);
+		}
 	}
-	
+
 	private static String convertClassName(String name) {
 		name = "."+name;
 		say("Class "+name);
@@ -151,7 +170,7 @@ public class SootMain {
 		System.exit(33);
 	}
 
-	static void say(String string) {
+	public static void say(String string) {
 		System.out.println(string);
 	}
 

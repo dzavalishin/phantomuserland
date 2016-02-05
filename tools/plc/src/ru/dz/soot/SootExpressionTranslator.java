@@ -1,5 +1,7 @@
 package ru.dz.soot;
 
+import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.ClassTable;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
@@ -129,7 +131,12 @@ public class SootExpressionTranslator {
 		if( tn.charAt(0) != '.' )
 			tn = "."+tn;
 		
-		PhantomClass pc = new PhantomClass(tn);
+		PhantomClass pc = ClassMap.get_map().get(tn, false, null);
+		
+		//PhantomClass pc = new PhantomClass(tn);
+		if( pc == null )
+			pc = new PhantomClass(tn);
+		
 		PhantomType pt = new PhantomType(pc);
 		return pt;
 	}
@@ -161,6 +168,8 @@ public class SootExpressionTranslator {
 	{
 		final ww ret = new ww();
 		ret.w = null;
+
+		//SootMain.say("e    "+vv.toString());
 		
 		vv.apply(new JimpleValueSwitch() {
 
@@ -465,7 +474,21 @@ public class SootExpressionTranslator {
 			@Override
 			public void caseInstanceFieldRef(InstanceFieldRef v) {
 				String varName = v.getField().getName();
-				IdentNode node = new IdentNode( varName ); // IdentNode automatically looks for for field or stack var by name
+				Value base = v.getBase();
+				//SootMain.say("field "+varName+" base = "+base);
+
+				PhantomCodeWrapper b;
+				try {
+					b = doValue(base);
+					//SootMain.say("code "+b+" node = "+b.getNode());
+				} catch (PlcException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					b = null;
+				}				
+				IdentNode node = new IdentNode( b.getNode(), varName ); // IdentNode automatically looks for for field or stack var by name
+				
+				//IdentNode node = new IdentNode( varName ); // IdentNode automatically looks for for field or stack var by name
 				ret.w = new PhantomCodeWrapper( node );				
 			}
 
@@ -650,6 +673,7 @@ public class SootExpressionTranslator {
 	
 	private PhantomCodeWrapper doReadLocal(Local v) {
 		String varName = v.getName();
+		//SootMain.say("read local '"+varName+"'");
 		IdentNode node = new IdentNode( varName );
 		return new PhantomCodeWrapper( node );
 	}

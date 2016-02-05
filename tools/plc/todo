@@ -1,1 +1,2 @@
 
+non-public classes, more than one class in src file, compile used class before one that uses it

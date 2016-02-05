@@ -357,7 +357,7 @@ class InsGen extends Opcode {
 			PhantomType arrayType = getVoidArrayType();
 
 			identVar.setType(arrayType);
-			updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
+			updateArrayTypeStackVariable(ps, identVar.getName(), arrayType);
 
 			OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
 			ns.push(array);
@@ -392,7 +392,7 @@ class InsGen extends Opcode {
 			PhantomType arrayType = getVoidArrayType();
 
 			identVar.setType(arrayType);
-			updateArrayTypeStackVariable(ps, identVar.get_name(), arrayType);
+			updateArrayTypeStackVariable(ps, identVar.getName(), arrayType);
 
 			OpSubscriptNode array = new OpSubscriptNode(identVar, arrayIndex);
 			OpAssignNode assign = new OpAssignTransNode(array, value);
@@ -741,7 +741,7 @@ class InsGen extends Opcode {
 				PhantomType phantomType = new PhantomType(ClassMap.get_map().get(type, false, null));
 				obj.setType(phantomType);
 
-				PhantomStackVar pStackVar = ps.get_method().svars.get_var(obj.get_name());
+				PhantomStackVar pStackVar = ps.get_method().svars.get_var(obj.getName());
 				pStackVar.setType(phantomType);
 				//                }
 				OpMethodCallNode callNode = new OpMethodCallNode(obj, methNode, firstArgNode);

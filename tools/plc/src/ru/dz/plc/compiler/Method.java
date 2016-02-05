@@ -286,6 +286,14 @@ public class Method
 		return requestDebug;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public PhantomType getType() {
+		return type;
+	}
+
 };
 
 
