@@ -1,6 +1,6 @@
 PHANTOM_CFLAGS += -ffreestanding -W -Wall -DNO_STRAY_CHECK -UKERNEL
 
-CLEAN_FILES += test/*.o crt/*.o pmod_test
+CLEAN_FILES += test/*.o crt/*.o crt/*.d pmod_test
 
 #W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 

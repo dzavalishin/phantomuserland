@@ -1832,7 +1832,8 @@ static int si_connection_8_connect(struct pvm_object o, struct data_area_4_threa
         SYSCALL_THROW_STRING( "string arg too long" );
     }
 
-    strncpy( da->name, pvm_get_str_data(_s), slen + 1 );
+    //strncpy( da->name, pvm_get_str_data(_s), slen + 1 );
+    strncpy( da->name, pvm_get_str_data(_s), slen );
     SYS_FREE_O(_s);
 
     printf(".internal.connection: Connect to '%s'\n", da->name );
