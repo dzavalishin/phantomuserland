@@ -74,8 +74,15 @@ public class SootMain {
 			doClass("test.toPhantom.SootTestClass");
 			doClass("test.toPhantom.ArrayAccess");
 			doClass("test.toPhantom.D"); // TODO must be compiled before class that uses it
+			
+			doClass("test.toPhantom.AllRun");
+			
 			doClass("test.toPhantom.ArrayAssigns");
 			doClass("test.toPhantom.ArraySimple1");
+			doClass("test.toPhantom.Assigns");
+			doClass("test.toPhantom.Arrays");
+			doClass("test.toPhantom.Strings");
+			doClass("test.toPhantom.Loops");
 		}
 		else
 		{

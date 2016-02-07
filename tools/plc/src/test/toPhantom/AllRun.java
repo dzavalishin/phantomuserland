@@ -1,9 +1,9 @@
 package test.toPhantom;
 
 public class AllRun {
-	static int nErr = 0;
+	int nErr = 0;
 	
-	public static void runAll()
+	public void runAll()
 	{
 		
 		runOne(new ArrayAccess(), "ArrayAccess" );
@@ -18,7 +18,7 @@ public class AllRun {
 		
 	}
 	
-	public static void runOne(Testable t, String name)
+	public void runOne(Testable t, String name)
 	{
 		int err = t.runTest();
 		if( err != 0 )
@@ -32,7 +32,8 @@ public class AllRun {
 
 	public static void main(String[] args) 
 	{
-		runAll();
+		AllRun ar = new AllRun();
+		ar.runAll();
 	}
 
 

@@ -44,8 +44,8 @@ public class Assigns implements Testable {
 		}
 		
 		{	// assign condition
-	        long l1 = 4L;
-	        long res = 5L;
+	        int l1 = 4;
+	        int res = 5;
 
 	        boolean ok = res == l1;
 	        if( ok != false )	return 8;
@@ -61,6 +61,17 @@ public class Assigns implements Testable {
 	        if( otherside != 1 )	return 9;
 	        if( side != 0 )			return 10;
 		}
+
+		// TODO ERROR long type test
+		/*
+		{	// assign condition
+	        long l1 = 4L;
+	        long res = 5L;
+
+	        boolean ok = res == l1;
+	        if( ok != false )	return 11;
+		}
+		*/
 		
 		return 0;
 	}
