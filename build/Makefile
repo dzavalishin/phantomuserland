@@ -30,3 +30,6 @@ $(INST_BIN)/mkbulk.exe: bin/mkbulk.exe
 
 $(INST_BIN)/plc.cmd: bin/plc.cmd
 	cp $^ $@
+
+$(INST_BIN)/plc.cmd: bin/jpc.cmd
+	cp $^ $@
