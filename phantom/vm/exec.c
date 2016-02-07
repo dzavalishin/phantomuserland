@@ -29,7 +29,6 @@
 #include "ids/opcode_ids.h"
 
 #include <kernel/snap_sync.h>
-#include <kernel/debug.h>
 
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
@@ -48,7 +47,7 @@ static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 int debug_print_instr = 0;
 
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
-#define LISTIA(fmt,a) do { if( debug_print_instr ) { lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } } while(0)
+#define LISTIA(fmt,a) do { if( debug_print_instr ) lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } while(0)
 
 
 
@@ -1560,10 +1559,10 @@ pvm_exec_run_method(
 // Find a method for a dynamic invoke
 static errno_t find_dynamic_method( dynamic_method_info_t *mi )
 {
-    //int is_global = 0;
+    int is_global = 0;
     if( pvm_is_null( mi->new_this ) )
     {
-        //is_global = 1;
+        is_global = 0;
         mi->target_class = pvm_null;
     }
     else
