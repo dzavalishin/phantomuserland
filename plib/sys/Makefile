@@ -1,6 +1,6 @@
 include ../../config.mk
 
-SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), src/phantom src/ru.dz src/tetris ../roots/src/internal )
+SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), src/phantom src/ru.dz src/tetris src/test ../roots/src/internal )
 BINDIR=../bin
 TARGET = classes
 
@@ -22,10 +22,10 @@ install: classes classes.ar
 vpath %.ph $(SRCDIRS)
 vpath %.pc $(BINDIR)
 
-
+# for some unknown reason mkbulk fails if run from make, but is ok when run from shell - win7
 $(TARGET): $(filter-out $(EXCLUDED_PCFILES), $(PCFILES) )
 	@echo --- make classes bulk ---
-	@$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)
+	@sh -c "$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)"
 
 classes.ar: $(filter-out $(EXCLUDED_PCFILES), $(PCFILES) )
 	@echo --- make classes ar ---
@@ -48,6 +48,7 @@ clean::
 	-rm $(BINDIR)/*.pc
 	-rm $(BINDIR)/*.lst
 	-rm $(BINDIR)/*.lstc
+	-rm $(BINDIR)/*.ll
 #	-rm *.ph~
 
 # auto deps
@@ -80,6 +81,7 @@ ru.dz.phantom.system.boot.pc: ru.dz.phantom.system.shell.pc
 
 ru.dz.phantom.system.shell.pc: ru.dz.phantom.system.runnable.pc
 ru.dz.phantom.system.shell.pc: ru.dz.phantom.system.shell_callback.pc
+ru.dz.phantom.system.shell.pc: test.toPhantom.PhantomPrinter.pc
 
 ru.dz.phantom.system.iterator.pc: ru.dz.phantom.system.iterable.pc
 
