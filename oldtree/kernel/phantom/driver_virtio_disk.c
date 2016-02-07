@@ -365,7 +365,7 @@ int driver_virtio_disk_rq(virtio_device_t *vd, pager_io_request *rq)
 
 static void vio_intr_dpc_func(void *a)
 {
-    //(void) a;
+    (void) a;
 
     virtio_device_t *vd = &vdev;
 

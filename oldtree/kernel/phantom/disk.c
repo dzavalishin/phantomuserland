@@ -407,7 +407,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
 //! Get full name for partition (incl subparts)
 static errno_t doPartGetName( phantom_disk_partition_t *p, char *buf, size_t bufsz )
 {
-	if( p->base )
+    if( p->base )
         partGetName( p->base, buf, bufsz );
     if( strlcat( buf, "/", bufsz ) >= bufsz ) return ENOMEM;
     if( strlcat( buf, p->name, bufsz ) >= bufsz ) return ENOMEM;

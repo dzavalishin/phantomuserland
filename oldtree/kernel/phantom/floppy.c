@@ -12,6 +12,9 @@
 #undef HAVE_FLOPPY
 #define HAVE_FLOPPY 1
 
+#define TEST_CODE 0
+
+
 #if !HAVE_FLOPPY
 #include <device.h>
 phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
@@ -44,21 +47,6 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 //#define DEF_FLOPPY_SIZE (1440*2)
 // CD via fd!
 #define DEF_FLOPPY_SIZE (1024*2*800)
-
-
-/*
-#include "types.h" // u8
-#include "disk.h" // DISK_RET_SUCCESS
-#include "config.h" // CONFIG_FLOPPY
-#include "biosvar.h" // SET_BDA
-#include "util.h" // wait_irq
-#include "cmos.h" // inb_cmos
-#include "pic.h" // eoi_pic1
-#include "bregs.h" // struct bregs
-#include "boot.h" // boot_add_floppy
-#include "pci.h" // pci_to_bdf
-#include "pci_ids.h" // PCI_CLASS_BRIDGE_ISA
-*/
 
 #define CMOS_FLOPPY_DRIVE_TYPE   0x10
 
@@ -745,8 +733,9 @@ init_dma(void)
 #include <errno.h>
 #include <kernel/dpc.h>
 
+#if TEST_CODE
 static void floppy_test( phantom_disk_partition_t *p );
-
+#endif
 
 #define LOWBUF_SZ (64*1024)
 static physaddr_t lowbuf_p;
@@ -1042,14 +1031,16 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
             }
         }
 
-        //floppy_test(p);
+#if TEST_CODE
+        floppy_test(p);
+#endif // TEST_CODE
 
     }
 
     return ret;
 }
 
-#if 0
+#if TEST_CODE
 // -----------------------------------------------------------------------
 // Test code
 // -----------------------------------------------------------------------

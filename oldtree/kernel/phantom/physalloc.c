@@ -14,6 +14,7 @@
 #include <malloc.h>
 
 #include <kernel/physalloc.h>
+#include <kernel/debug.h>
 
 // Physical memory allocator, page by page
 

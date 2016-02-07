@@ -371,6 +371,7 @@ static struct conntab connection_types_table[] =
     { "tmr:", sizeof(net_timer_event), sizeof(net_timer_event), CON_F_NAMES(timer) },
     { "stt:", 0, 0, CON_F_NAMES(stats) },
     { "udp:", sizeof(struct cn_udp_persistent), sizeof(struct cn_udp_volatile), CON_F_NAMES(udp) },
+    { "fio:", sizeof(struct cn_fio_persistent), sizeof(struct cn_fio_volatile), CON_F_NAMES(fio) },
 };
 
 static int ctt_size = sizeof(connection_types_table)/sizeof(struct conntab);
