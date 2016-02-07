@@ -30,6 +30,7 @@ errno_t cn_##__short##_disconnect( struct data_area_4_connection *c );
 CON_F_PROTOS(timer)
 CON_F_PROTOS(stats)
 CON_F_PROTOS(udp)
+CON_F_PROTOS(fio)       // File IO
 
 
 // Well known connection operation numbers. Not all types of conns use these numbers.
@@ -51,6 +52,21 @@ struct cn_udp_volatile
     void *udp_endpoint;
     //int fill;
 };
+
+#include <unix/uufile.h>
+
+struct cn_fio_persistent
+{
+    char filename[FS_MAX_PATH_LEN];
+};
+
+struct cn_fio_volatile
+{
+    //void *udp_endpoint;
+    int fd;
+};
+
+
 
 
 #endif // VM_CONNECT_H
