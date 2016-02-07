@@ -2,6 +2,7 @@ package test.toPhantom;
 
 public class AllRun {
 	int nErr = 0;
+	private IPhantomPrinter p;
 	
 	public void runAll()
 	{
@@ -14,7 +15,7 @@ public class AllRun {
 		runOne(new Strings(), "Strings" );
 		runOne(new Loops(), "Loops" );
 
-		System.out.println("Done tests, "+nErr+" errors");
+		p.print("Done tests, "+nErr+" errors");
 		
 	}
 	
@@ -23,17 +24,24 @@ public class AllRun {
 		int err = t.runTest();
 		if( err != 0 )
 		{
-			System.out.println("Err "+err+" in "+name);
+			//System.out.println("Err "+err+" in "+name);
+			p.print("Err "+err+" in "+name);
 			nErr++;
 		}
 		else
-			System.out.println("Finished test "+name);
+			p.print("Finished test "+name);
 	}
 
+	/*
 	public static void main(String[] args) 
 	{
 		AllRun ar = new AllRun();
 		ar.runAll();
+	}
+	*/
+	
+	public void setPrinter(IPhantomPrinter p) {
+		this.p = p;
 	}
 
 

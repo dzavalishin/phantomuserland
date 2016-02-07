@@ -116,9 +116,9 @@ public class SootExpressionTranslator {
 		if( tn.equals("int")) tn = ".internal.int";
 		if( tn.equals("boolean")) tn = ".internal.int";
 
-		if( tn.equals(".byte")) tn = ".internal.int";
-		if( tn.equals(".short")) tn = ".internal.int";
-		if( tn.equals(".long")) tn = ".internal.long";
+		if( tn.equals("byte")) tn = ".internal.int";
+		if( tn.equals("short")) tn = ".internal.int";
+		if( tn.equals("long")) tn = ".internal.long";
 		
 		boolean err = false;
 		
@@ -145,6 +145,8 @@ public class SootExpressionTranslator {
 	{
 		//SootMain.say(" ----------------- "+t+" tt "+t.getClass()+" n "+t.getNumber());
 
+		//SootMain.say("conv type "+t.toString());
+		
 		PhantomType type = null;
 		
 		if (t instanceof soot.ArrayType) {
