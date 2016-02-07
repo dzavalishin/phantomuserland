@@ -43,6 +43,25 @@ public class Assigns implements Testable {
 	        if( b2 != -10)	return 7;
 		}
 		
+		{	// assign condition
+	        long l1 = 4L;
+	        long res = 5L;
+
+	        boolean ok = res == l1;
+	        if( ok != false )	return 8;
+		}
+		
+		{
+	        int side;
+	        int otherside;
+	        int plycnt = 7;
+	        
+	        side = (otherside = plycnt & 1) ^ 1;   
+			
+	        if( otherside != 1 )	return 9;
+	        if( side != 0 )			return 10;
+		}
+		
 		return 0;
 	}
 
