@@ -116,7 +116,7 @@ typedef int (*syscall_func_t)(struct pvm_object o, struct data_area_4_thread *tc
 */
 
 // --------------------------------------------------------------------------
-// Default syscall implementations for lower calls
+// Default syscall implementations for lower methods
 // --------------------------------------------------------------------------
 
 int invalid_syscall(struct pvm_object o, struct data_area_4_thread *tc );

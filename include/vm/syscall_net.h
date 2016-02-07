@@ -1,3 +1,7 @@
+#if 0
+
+// redo with connections
+
 /**
  *
  * Phantom OS
@@ -21,3 +25,5 @@
 int si_tcp_ready_to_send(struct data_area_4_tcp *da);
 int si_tcp_ready_to_recv(struct data_area_4_tcp *da);
 
+
+#endif
