@@ -167,14 +167,10 @@ public class PhantomType {
 				: "");
 	}
 
-	public void emit_get_class_object( Codegen c, CodeGeneratorState s ) throws PlcException, IOException {
+	public void emit_get_class_object( Codegen c, CodeGeneratorState s ) throws PlcException, IOException 
+	{
 		if(is_void() && !is_container())        //c.emit_summon_null();
-			throw new PlcException("PhantomType","asked to emit void class object"); // Why not, btw?
-		else if(is_int())    c.emitSummonByName(".internal.int");
-		else if(is_long())   c.emitSummonByName(".internal.long");
-		else if(is_float())  c.emitSummonByName(".internal.float");
-		else if(is_double()) c.emitSummonByName(".internal.double");
-		else if(is_string()) c.emitSummonByName(".internal.string");
+			throw new PlcException("PhantomType","asked to emit void class object"); // Why not, btw?		
 		else if(is_container())
 		{
 			if( _container_class != null )
@@ -182,8 +178,13 @@ public class PhantomType {
 			else if(_container_class_expression != null)
 				_container_class_expression.generate_code(c,s);
 			else
-				c.emitSummonByName(".internal.container.array");
+				c.emitSummonByName(".internal.container.array"); // TODO use class summon shortcuts!
 		}
+		else if(is_int())    c.emitSummonByName(".internal.int"); // TODO use class summon shortcuts!
+		else if(is_long())   c.emitSummonByName(".internal.long");
+		else if(is_float())  c.emitSummonByName(".internal.float");
+		else if(is_double()) c.emitSummonByName(".internal.double");
+		else if(is_string()) c.emitSummonByName(".internal.string");
 		else if(_class != null) c.emitSummonByName(_class.getName());
 		else if(_class_expression != null) _class_expression.generate_code(c,s);
 		else

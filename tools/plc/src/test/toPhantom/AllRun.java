@@ -6,6 +6,8 @@ public class AllRun {
 	
 	public void runAll()
 	{
+		nErr = 0; // we're called from phantom code, no c'tor call yet
+		
 		runOne(new Assigns(), "Assigns" );
 		runOne(new Loops(), "Loops" );
 		
@@ -16,7 +18,7 @@ public class AllRun {
 		runOne(new Strings(), "Strings" );
 
 		//p.print("Done tests, "+nErr+" errors");
-		p.print("Done tests");
+		p.print("Done tests\n");
 	}
 	
 	public void runOne(Testable t, String name)
@@ -25,15 +27,18 @@ public class AllRun {
 		if( err != 0 )
 		{
 			//System.out.println("Err "+err+" in "+name);
-			p.print("Error");
-			//p.print(err.toString());
+			p.print("Error ");
+			p.printInt(err);
+			p.print(" in ");
 			p.print(name);
+			p.print("\n");
 			nErr++;
 		}
 		else
 		{
 			p.print("Finished test ");
 			p.print(name);
+			p.print("\n");
 		}
 	}
 

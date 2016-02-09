@@ -5,7 +5,7 @@ public class ArrayAccess implements Testable {
 	public int runTest()
 	{
         int [] arr = new int [] {3, 4, 2, 1};
-        if( arr[3] != 1 ) return 1;
+        if( arr[3] != 1 ) return 1; // err
 
 		int [] a = new int[7];
 		a[0] = 0;

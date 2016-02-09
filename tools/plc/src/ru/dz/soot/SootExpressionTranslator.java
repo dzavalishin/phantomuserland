@@ -163,6 +163,8 @@ public class SootExpressionTranslator {
 			type = convertType(t.toString());
 		}
 		
+		//SootMain.say("conv type "+t.toString()+" to "+type);
+		
 		return type;
 	}
 	
@@ -312,6 +314,7 @@ public class SootExpressionTranslator {
 			@Override
 			public void caseInterfaceInvokeExpr(InterfaceInvokeExpr v) {
 				try {
+					// TODO right?
 					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
 				} catch (PlcException e) {
 					SootMain.error(e);
@@ -359,7 +362,11 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseNewArrayExpr(NewArrayExpr v) {
-				doNew(ret, v.getType()); // Right?
+				// TODO calc size expr?
+				//v.getSize();
+				Type type = v.getType();
+				SootMain.say("array type "+type);
+				doNew(ret, type); // Right?
 			}
 
 			@Override

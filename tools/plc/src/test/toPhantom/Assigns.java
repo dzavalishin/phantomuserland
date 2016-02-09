@@ -17,7 +17,7 @@ public class Assigns implements Testable {
 	        z += y;
 	        z -= x;
 			
-	        if( z != 1 )	return 1;		
+	        if( z != 1 )	return 1; // err		
 	        if( x != 9 )	return 2;		
 	        if( y != 10 )	return 3;		
 		}
