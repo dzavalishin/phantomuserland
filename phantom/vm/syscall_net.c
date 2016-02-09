@@ -12,8 +12,8 @@
 
 
 #include <phantom_libc.h>
-#include "vm/syscall_net.h"
-#include "vm/alloc.h"
+#include <vm/syscall_net.h>
+#include <vm/alloc.h>
 
 
 
