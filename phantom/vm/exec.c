@@ -29,6 +29,7 @@
 #include "ids/opcode_ids.h"
 
 #include <kernel/snap_sync.h>
+#include <kernel/debug.h>
 
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
@@ -41,13 +42,14 @@ static errno_t find_dynamic_method( dynamic_method_info_t *mi );
  */
 
 
-#define DEB_CALLRET 0
+#define DEB_CALLRET 1
+#define DEB_DYNCALL 1
 
 //static int debug_print_instr = 1;
 int debug_print_instr = 0;
 
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
-#define LISTIA(fmt,a) do { if( debug_print_instr ) lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } while(0)
+#define LISTIA(fmt,a) do { if( debug_print_instr ) { lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } } while(0)
 
 
 
@@ -279,6 +281,14 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
     cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
 
+#if 1
+    // TODO warn? print call info?
+    if( n_param > (1024*16) )
+    {
+        lprintf("n_param too big: %d\n", n_param );
+        //n_param = 1024*16; // no - stack underflow will follow
+    }
+#endif
     // allocate places on stack
     {
         unsigned int i;
@@ -1238,7 +1248,30 @@ void pvm_exec(pvm_object_t current_thread)
 
                 mi.method_name = os_pop();
                 mi.new_this = os_pop();
-                mi.n_param = pvm_get_int( os_pop() );
+                /*
+                pvm_object_t np = os_pop();
+                if( !IS_PHANTOM_INT(np) )
+                {
+                    printf("dyn call n_param not int: " );
+                    pvm_object_dump( np );
+                    mi.n_param = 0;
+                }
+                else
+                    mi.n_param = pvm_get_int( np );
+                ref_dec_o( np );
+                */
+                mi.n_param = is_pop();
+#if DEB_DYNCALL
+                printf("dyn call %d param, name = '", mi.n_param );
+                //pvm_object_dump( mi.method_name );
+                pvm_puts( mi.method_name );
+                printf("', this class = " );
+                //pvm_object_dump( mi.new_this );
+                pvm_object_t cn = pvm_get_class_name( mi.new_this );
+                pvm_puts( cn );
+                ref_dec_o( cn );
+                printf("\n" );
+#endif // DEB_DYNCALL
 
                 if( find_dynamic_method( &mi ) )
                     pvm_exec_panic("dynamic invoke failed");
@@ -1559,10 +1592,10 @@ pvm_exec_run_method(
 // Find a method for a dynamic invoke
 static errno_t find_dynamic_method( dynamic_method_info_t *mi )
 {
-    int is_global = 0;
+    //int is_global = 0;
     if( pvm_is_null( mi->new_this ) )
     {
-        is_global = 0;
+        //is_global = 0;
         mi->target_class = pvm_null;
     }
     else

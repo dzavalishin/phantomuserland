@@ -293,7 +293,7 @@ int pvm_object_class_is( struct pvm_object object, struct pvm_object tclass )
 struct pvm_object
 pvm_copy_object( struct pvm_object in_object )
 {
-    // TODO ERR throw!
+    // TODO ERROR throw!
     if(in_object.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL)
         panic("internal object copy?!");
 
@@ -312,7 +312,6 @@ pvm_copy_object( struct pvm_object in_object )
 
     memcpy( out.data->da, in_object.data->da, da_size );
     // TODO: check for special cases - copy c'tor?
-    // BUG: will do harm if called for some internal ones!
 
     return out;
 }
@@ -337,7 +336,7 @@ pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st)
  *
 **/
 
-static void pvm_puts(struct pvm_object o )
+void pvm_puts(struct pvm_object o )
 {
     if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
@@ -431,6 +430,21 @@ void pvm_object_dump(struct pvm_object o )
 {
 	dumpo((addr_t)o.data);
 }
+
+struct pvm_object
+pvm_get_class_name( struct pvm_object o )
+{
+    struct pvm_object c = o.data->_class;
+    if(c.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
+    {
+        struct data_area_4_class *da = (struct data_area_4_class *)&(c.data->da);
+        ref_inc_o( da->class_name );
+        return da->class_name;
+    }
+    else
+        return pvm_create_string_object("(class corrupt?)");
+}
+
 
 void pvm_check_is_thread( struct pvm_object new_thread )
 {

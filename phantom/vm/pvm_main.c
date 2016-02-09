@@ -313,7 +313,7 @@ void videotest()
 
 
 
-static int size = 40*1024*1024;
+static int size = 220*1024*1024;
 static void *mem;
 
 
@@ -340,6 +340,7 @@ int main(int argc, char* argv[])
 
 
     run_init_functions( INIT_LEVEL_PREPARE );
+    run_init_functions( INIT_LEVEL_INIT ); // before video
 
     //drv_video_win32.mouse = mouse_callback;
     //video_drv = &drv_video_win32;
@@ -365,10 +366,9 @@ int main(int argc, char* argv[])
     hal_init( mem, size );
     //pvm_alloc_threaded_init(); // no threads yet - no lock
 
-    run_init_functions( INIT_LEVEL_INIT );
     run_init_functions( INIT_LEVEL_LATE );
 
-#if 1
+#if 0
     videotest();
     //getchar();
     exit(0);

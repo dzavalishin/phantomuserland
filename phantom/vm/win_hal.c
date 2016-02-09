@@ -663,7 +663,10 @@ int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback 
     (void) args;
     (void) flags;
 
-    panic("set_net_timer");
+    //panic("set_net_timer");
+    lprintf("set_net_timer called, \"gdb bt\" me");
+
+    return -1; // ERR_GENERAL - todo - errno_t
 }
 
 static int dummy_snap_catch;

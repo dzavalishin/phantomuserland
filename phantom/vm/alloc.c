@@ -55,9 +55,11 @@ static void * curr_a[ARENAS];
 static const char* name_a[ARENAS] = { "root, static", "stack", "int", "small", "large" };
 // Partition
 #if debug_allocation
-static int percent_a[ARENAS] = { 15, 15, 2, 54, 14 };  // play with numbers
+//static int percent_a[ARENAS] = { 15, 15, 2, 54, 14 };  // play with numbers
+static int percent_a[ARENAS] = { 15, 15, 20, 25, 25 };  // play with numbers
 #else
-static int percent_a[ARENAS] = { 15, 15, 2, 28, 40 };
+static int percent_a[ARENAS] = { 15, 45, 10, 15, 15 };  // play with numbers
+//static int percent_a[ARENAS] = { 15, 15, 2, 28, 40 };
 #endif
 
 
@@ -557,6 +559,18 @@ int pvm_memcheck()
     return 0;
 }
 
+static void printmemsize( unsigned long sz, char *name )
+{
+    if( sz > 1024*1024 )
+        printf("%ldM ", sz / (1024*1024));
+    sz %= 1024*1024;
+
+    if( sz > 1024 )
+        printf("%ldK ", sz / (1024));
+    sz %= 1024;
+
+    printf("%ld %s", sz, name );
+}
 
 static int memcheck_one(unsigned int i, void * start, void * end)
 {
@@ -611,7 +625,12 @@ static int memcheck_one(unsigned int i, void * start, void * end)
     }
 
     //printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
-    printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest\n", objects, used, free, largest );
+    //printf("Memcheck: %ld objects, memory: %ld used, %ld free, %ld largest ", objects, used, free, largest );
+    printf("Memcheck: %ld objects, memory:  ", objects );
+    printmemsize( used, "used, " );
+    printmemsize( free, "free, " );
+    printmemsize( largest, "largest" );
+    printf("\n");
 
     if((void *)curr == end)
     {
