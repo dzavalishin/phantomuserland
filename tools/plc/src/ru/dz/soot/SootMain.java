@@ -49,6 +49,7 @@ public class SootMain {
 		String phantomClassPath = "test/pc";
 
 		PlcMain.addClassFileSearchParh(new File(phantomClassPath));
+		PlcMain.addClassFileSearchParh(new File("../../plib/bin"));
 		PlcMain.setOutputPath(phantomClassPath);
 
 		classes.do_import(".internal.object");			

@@ -708,9 +708,11 @@ public class Codegen extends opcode_ids {
 	}
 
 
+	//public void emitDynamicCall(int n_param) throws IOException {
 	public void emitDynamicCall() throws IOException {
 		list("dynamic invoke");
 		put_byte(opcode_dynamic_invoke);
+		//put_int32(n_param);
 	}
 
 

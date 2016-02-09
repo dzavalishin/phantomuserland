@@ -16,6 +16,8 @@ import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.trinode.OpMethodCallNode;
 import ru.dz.plc.util.PlcException;
+import soot.SootClass;
+import soot.SootMethod;
 import soot.SootMethodRef;
 import soot.Type;
 import soot.Value;
@@ -145,13 +147,15 @@ public class PhantomCodeWrapper {
 
 	public static PhantomCodeWrapper getInvoke(InvokeExpr expr, Method m, PhantomClass phantomClass ) throws PlcException
 	{
-		boolean dumpMe = false;
+		boolean dumpMe = true;
 		
 		SootMethodRef methodRef = expr.getMethodRef();
 		String name = methodRef.name();
 		
 		if(dumpMe) SootMain.say("      ."+name);
-		// TODO make invoke dynamic in VM!
+		// TODO find out static cases, replace
+		// TODO how do we know if class is dynamically loaded in
+		// runtime and static call becomes dynamic again?
 
 		Node object = null;
 		//Node method = null;
@@ -176,14 +180,37 @@ public class PhantomCodeWrapper {
 
 			if(dumpMe) SootMain.say("      invoke static "+ie);
 			object = new NullNode();
-			
+			// TODO is it right?
 			done = true;
 		}
 
 		if (expr instanceof SpecialInvokeExpr) {
 			SpecialInvokeExpr ie = (SpecialInvokeExpr) expr;
+			// TODO is it right?
 			
-			if(dumpMe) SootMain.say("      invoke special "+ie);
+			if(dumpMe)
+			{
+				SootMain.say("      invoke special "+ie);
+				SootMain.say("      invoke special type="+ie.getType());
+				SootMain.say("      invoke special name='"+name+"'");
+				//SootMain.say("      invoke special signature="+methodRef.getSignature());
+				SootMethod method = ie.getMethod();
+				SootClass declaringClass = method.getDeclaringClass();
+				SootMain.say("      invoke special decl class="+declaringClass);
+				PhantomType convertType = SootExpressionTranslator.convertType(declaringClass.getName());
+				SootMain.say("      invoke special phantom type ="+convertType);
+
+				if( (convertType.is_void() ||  convertType.get_main_class_name().equals(".internal.object")) && name.equals("<init>"))
+				{
+					// TODO hack skip calling init for void - or else we're in a loop of inits
+					// TODO make real static invoke for constructors!
+					// TODO call c'tor for void?
+					// TODO remove fixed constructor method slot in VM?
+					SootMain.warning("skip <init> for void in "+ie);
+					return new PhantomCodeWrapper(new NullNode());
+				}
+	
+			}
 			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass).getNode();
 			done = true;
 		}
@@ -212,25 +239,39 @@ public class PhantomCodeWrapper {
 			SootMain.error("Unknown invoke "+expr+" class "+expr.getClass());
 			return new PhantomCodeWrapper(new NullNode());
 		}
-
+		/*
+		// TODO hack!
+		if( name.equals("<init>") )
+		{
+			// if we call init for class
+			
+		}
+		*/
+		
 		OpDynamicMethodCallNode node = new OpDynamicMethodCallNode(object, name, args); 	
 		node.setType(SootExpressionTranslator.convertType(expr.getType()));
 		return new PhantomCodeWrapper(node);
 	}
 
 	private static Node makeArgs(InvokeExpr expr, Method m, PhantomClass pc) throws PlcException {
-		int argCount = expr.getArgCount();		
-		return makeArg( expr, argCount, m, pc );
+		//int argCount = expr.getArgCount();		
+		//return makeArg( expr, argCount, m, pc );	
+		return makeArg( expr, 0, m, pc );
 	}
 
 	private static Node makeArg(InvokeExpr expr, int argNo, Method m, PhantomClass phantomClass) throws PlcException {
-		argNo--;
+		//argNo--;
 		
-		if( argNo < 0 ) return null; // codegen stops on null
+		int argCount = expr.getArgCount();
+		if( argNo >= argCount ) return null; // codegen stops on null
 		
-		Node node = PhantomCodeWrapper.getExpression(expr.getArg(argNo), m, phantomClass).getNode();;
+		Node node = PhantomCodeWrapper.getExpression(expr.getArg(argNo), m, phantomClass).getNode();
+
 		
-		return new SequenceNode(node, makeArg(expr, argNo, m, phantomClass));
+		// wrong order?
+		return new SequenceNode(node, makeArg(expr, argNo+1, m, phantomClass));
+		// try reverse - fails!
+		//return new SequenceNode( makeArg(expr, argNo+1, m, phantomClass), node );
 	}
 
 	

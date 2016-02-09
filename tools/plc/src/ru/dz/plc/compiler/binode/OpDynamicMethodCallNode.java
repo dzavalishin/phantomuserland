@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.PlcMain;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -14,6 +15,7 @@ import ru.dz.plc.compiler.node.MethodNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.trinode.TriNode;
 import ru.dz.plc.util.PlcException;
+import ru.dz.soot.SootMain;
 
 /**
  * <p>Method call node.</p>
@@ -59,6 +61,9 @@ public class OpDynamicMethodCallNode extends BiNode {
 		for( Node i = _r; i != null; i = ((BiNode)i).getRight() )      
 			n_param++;
 
+		if(n_param > 1024)
+			SootMain.warning("too many params in dyncall: "+n_param);
+		
 		if( _r != null ) _r.generate_code(c,s); // calc args
 		c.emitIConst_32bit(n_param); // n args
 		

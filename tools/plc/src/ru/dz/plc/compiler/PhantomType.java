@@ -78,6 +78,8 @@ public class PhantomType {
 		if( _c != null && _c.getName().equals(".internal.int") ) _is_int = true;
 		if( _c != null && _c.getName().equals(".internal.string") ) _is_string = true;
 		if( _c != null && _c.getName().equals(".internal.void") ) _is_void = true;
+		
+		// TODO why not true? .object is void?
 		//if( _c != null && _c.get_name().equals(".internal.object") ) _is_void = true;
 	}
 
