@@ -4,8 +4,8 @@ import java.io.*;
 import java.util.*;
 
 import phantom.code.opcode_ids;
-
 import ru.dz.plc.util.*;
+import ru.dz.soot.SootMain;
 
 /**
  * <p>Title: Codegen</p>
@@ -73,8 +73,16 @@ public class Codegen extends opcode_ids {
 	{
 		if(lst == null ) return;
 		lst.write("  ");
-		lst.write(s); 
-		lst.write("\t//  @"+getIP());
+		lst.write(s);
+		
+		int l = s.length();
+		int ntab = 4;
+		ntab -= l/8;
+		if( ntab < 1 ) ntab = 1;
+		while( ntab-- > 0 )
+			lst.write("\t");
+		
+		lst.write("//  @"+getIP());
 		lst.write('\n');
 	}
 	private void listlbl(String s) throws IOException 
@@ -434,6 +442,12 @@ public class Codegen extends opcode_ids {
 	 */
 	public void emitCall(int method_index, int n_param ) throws IOException {
 
+		if( method_index < 0 )
+		{
+			//SootMain.say("negative method index");
+			throw new IOException("negative method index"); // TODO not IO exc?
+		}
+		
 		list("call m="+method_index+" nparm="+n_param);
 		
 		if( n_param == 0 )

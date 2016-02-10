@@ -17,7 +17,7 @@ public class Assigns implements Testable {
 	        z += y;
 	        z -= x;
 			
-	        if( z != 1 )	return 1; // err		
+	        if( z != 1 )	return 1; // ok		
 	        if( x != 9 )	return 2;		
 	        if( y != 10 )	return 3;		
 		}
@@ -30,7 +30,6 @@ public class Assigns implements Testable {
 			if( y1 != 16 ) return 5; 			
 		}
 
-		// TODO move to conditionals tests
 		{
 		    
 	        int x = 9;

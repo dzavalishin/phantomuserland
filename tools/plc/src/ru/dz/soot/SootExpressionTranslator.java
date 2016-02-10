@@ -1,7 +1,6 @@
 package ru.dz.soot;
 
 import ru.dz.plc.compiler.ClassMap;
-import ru.dz.plc.compiler.ClassTable;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
@@ -19,12 +18,12 @@ import ru.dz.plc.compiler.binode.OpShiftRightNode;
 import ru.dz.plc.compiler.binode.OpShiftRightUnsignedNode;
 import ru.dz.plc.compiler.binode.OpSubscriptNode;
 import ru.dz.plc.compiler.binode.OpXorNode;
-import ru.dz.plc.compiler.binode.RefEqNode;
-import ru.dz.plc.compiler.binode.RefNeqNode;
+import ru.dz.plc.compiler.binode.ValEqNode;
 import ru.dz.plc.compiler.binode.ValGeNode;
 import ru.dz.plc.compiler.binode.ValGtNode;
 import ru.dz.plc.compiler.binode.ValLeNode;
 import ru.dz.plc.compiler.binode.ValLtNode;
+import ru.dz.plc.compiler.binode.ValNeqNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.InstanceOfNode;
 import ru.dz.plc.compiler.node.IntConst64Node;
@@ -282,8 +281,13 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseEqExpr(EqExpr v) {
-				ret.w = new BinOpWrapper<RefEqNode>() {@Override
-					RefEqNode create(Node l, Node r) { return new RefEqNode(l,r); }} .doBinOp(v);
+				//v.getType()
+				
+				ret.w = new BinOpWrapper<ValEqNode>() {@Override
+					ValEqNode create(Node l, Node r) { return new ValEqNode(l,r); }} .doBinOp(v);
+				
+				//ret.w = new BinOpWrapper<RefEqNode>() {@Override
+				//	RefEqNode create(Node l, Node r) { return new RefEqNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
@@ -350,13 +354,22 @@ public class SootExpressionTranslator {
 
 			@Override
 			public void caseNeExpr(NeExpr v) {
-				ret.w = new BinOpWrapper<RefNeqNode>() {@Override
-					RefNeqNode create(Node l, Node r) { return new RefNeqNode(l,r); }} .doBinOp(v);
+				//ret.w = new BinOpWrapper<RefNeqNode>() {@Override
+				//	RefNeqNode create(Node l, Node r) { return new RefNeqNode(l,r); }} .doBinOp(v);
+				ret.w = new BinOpWrapper<ValNeqNode>() {@Override
+					ValNeqNode create(Node l, Node r) { return new ValNeqNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
 			public void caseNegExpr(NegExpr v) {
 				// TODO Auto-generated method stub
+
+
+				//Node expr = PhantomCodeWrapper.getExpression(v.getOp(), m, phantomClass).getNode();
+				//InstanceOfNode node = new ?Node(expr,phantomType);
+				//ret.w = new PhantomCodeWrapper(node);
+				
+				
 				SootMain.error(v.toString());
 			}
 

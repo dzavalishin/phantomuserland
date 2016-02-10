@@ -189,6 +189,7 @@ public class PhantomClass {
      { mt.add(name, type, args, code, ordinal ); } */
 
 	protected void check_methods() throws PlcException {
+		mt.set_ordinals(); // TODO double call?
 		Iterator<Method> i = mt.iterator();
 		while (i.hasNext()) {
 			Method m = i.next();

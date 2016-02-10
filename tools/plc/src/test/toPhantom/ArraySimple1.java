@@ -15,7 +15,7 @@ public class ArraySimple1 implements Testable {
         for (int i = 0; i < ia.length; i++)
             sum += ia[i];
         
-		return (sum == 5050) ? 0 : 1;
+		return (sum == 5050) ? 0 : sum;
 	}
 
 }
