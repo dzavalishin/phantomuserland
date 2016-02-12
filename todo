@@ -4,15 +4,10 @@
 
  - stack acc: use bound on intel
 
- - dynamic (by-name) method calls. use for interface method calls!
-
- - wtty buf size return to 128 or make dynamic
+ + dynamic (by-name) method calls. 
+ - use for interface method calls!
 
  - MEM LEAK!
-
- - virtio disk paging dies
-
- - !! check longjmp to not to switch thread!!
 
  - userland scanf does not support * (suppress assign) - use kernel one?
 
@@ -21,11 +16,6 @@
  - deferred zbuf clean - debug
 
  - debug new snap sync
-
- - tcp accept - wrong seq, wrong reply address (ipv4_lookup_srcaddr_for_dest gets first alias available?)
-
- - what if system rebooted before old snap is freed? Which snap will be loaded? 
-   Who frees old one?
 
  - check that restart list is killed and all contained in 1-link objects too.
 
