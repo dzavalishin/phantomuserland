@@ -1,0 +1,358 @@
+Class .ru.dz.phantom.tetris.playingfield
+  Field _width
+  Field _matrix
+  Field _height
+  Method void init( width: int, height: int ):
+    ,  : unknown
+      ,  : unknown
+        ,  : unknown
+          ,  : unknown
+            ,  : unknown
+              if : unknown
+                bool or : int
+                  bool or : int
+                    < : int
+                      ident width : int
+                      int const "0" : int const
+                    < : int
+                      ident height : int
+                      int const "0" : int const
+                  > : int
+                    ident width : int
+                    int const "30" : int const
+                throw  : void const
+                  string const "ArgumentException : width and height cannot be below than zero. Width must be <= 50." : string const
+              void  : void
+                = : int
+                  ident _width : int
+                  ident width : int
+            void  : void
+              = : int
+                ident _height : int
+                ident height : int
+          void  : void
+            = : void[]
+              ident _matrix : void[]
+              new void[] : void[]
+        void  : void
+          = : int
+            ident y : int
+            int const "0" : int const
+      do-while : unknown
+        < : int
+          ident y : int
+          ident height : int
+        ,  : void
+          ,  : void
+            void  : void
+              = : string
+                ident row : string
+                string const "000000000000000000000000000000" : string const
+            void  : void
+              = : unknown
+                [] : unknown
+                  ident _matrix : void[]
+                  ident y : int
+                ident row : string
+          void  : void
+            = : int
+              ident y : int
+              + : int
+                ident y : int
+                int const "1" : int const
+
+  Method int getHeight(  ):
+    return : void
+      ident _height : int
+
+  Method void validateCoords( x: int, y: int ):
+    ,  : unknown
+      if : unknown
+        bool or : int
+          < : int
+            ident x : int
+            int const "0" : int const
+          >= : int
+            ident x : int
+            ident _width : int
+        ,  : void
+          void  : void
+            = : string
+              ident exceptionString : string
+              string const "ArgumentException in validateCoords X = " : string const
+          throw  : void const
+            . : string
+              ident exceptionString : string
+              Method concat : unknown
+              arg  : unknown
+                . : string
+                  ident x : int
+                  Method toString : unknown
+      if : unknown
+        bool or : int
+          < : int
+            ident y : int
+            int const "0" : int const
+          >= : int
+            ident y : int
+            ident _height : int
+        ,  : void
+          void  : void
+            = : string
+              ident exceptionString : string
+              string const "ArgumentException in validateCoords Y = " : string const
+          throw  : void const
+            . : string
+              ident exceptionString : string
+              Method concat : unknown
+              arg  : unknown
+                . : string
+                  ident y : int
+                  Method toString : unknown
+
+  Method void setBoxAt( x: int, y: int, box: int ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  void  : void
+                    . : void
+                      this  : .ru.dz.phantom.tetris.playingfield
+                      Method validateCoords : unknown
+                      arg  : int
+                        ident x : int
+                      arg  : unknown
+                        ident y : int
+                  if : unknown
+                    bool or : int
+                      < : int
+                        ident box : int
+                        int const "0" : int const
+                      > : int
+                        ident box : int
+                        int const "4" : int const
+                    throw  : void const
+                      string const "ArgumentException : box" : string const
+                void  : void
+                  = : string
+                    ident row : string
+                    [] : unknown
+                      ident _matrix : void[]
+                      ident y : int
+              void  : void
+                = : string
+                  ident strFirstPart : string
+                  . : string
+                    ident row : string
+                    Method substring : unknown
+                    arg  : int
+                      int const "0" : int const
+                    arg  : unknown
+                      ident x : int
+            switch  : void const
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      case  : void
+                                        int const "0" : int const
+                                      ,  : void
+                                        void  : void
+                                          = : string
+                                            ident boxString : string
+                                            string const "0" : string const
+                                        break : void
+                                    case  : void
+                                      int const "1" : int const
+                                  ,  : void
+                                    void  : void
+                                      = : string
+                                        ident boxString : string
+                                        string const "1" : string const
+                                    break : void
+                                case  : void
+                                  int const "2" : int const
+                              ,  : void
+                                void  : void
+                                  = : string
+                                    ident boxString : string
+                                    string const "2" : string const
+                                break : void
+                            case  : void
+                              int const "3" : int const
+                          ,  : void
+                            void  : void
+                              = : string
+                                ident boxString : string
+                                string const "3" : string const
+                            break : void
+                        case  : void
+                          int const "4" : int const
+                      ,  : void
+                        void  : void
+                          = : string
+                            ident boxString : string
+                            string const "4" : string const
+                        break : void
+                    default  : void
+                  throw  : void const
+                    string const "InvalidOperation : box value is out of range." : string const
+                break : void
+          void  : void
+            = : string
+              ident rowToReplace : string
+              . : string
+                ident strFirstPart : string
+                Method concat : unknown
+                arg  : unknown
+                  ident boxString : string
+        if : unknown
+          < : int
+            + : int
+              ident x : int
+              int const "1" : int const
+            . : int
+              ident row : string
+              Method length : unknown
+          ,  : void
+            void  : void
+              = : string
+                ident strLastPart : string
+                . : string
+                  ident row : string
+                  Method substring : unknown
+                  arg  : int
+                    + : int
+                      ident x : int
+                      int const "1" : int const
+                  arg  : unknown
+                    - : int
+                      - : int
+                        . : int
+                          ident row : string
+                          Method length : unknown
+                        int const "1" : int const
+                      ident x : int
+            void  : void
+              = : string
+                ident rowToReplace : string
+                . : string
+                  ident rowToReplace : string
+                  Method concat : unknown
+                  arg  : unknown
+                    ident strLastPart : string
+      void  : void
+        = : unknown
+          [] : unknown
+            ident _matrix : void[]
+            ident y : int
+          ident rowToReplace : string
+
+  Method int getWidth(  ):
+    return : void
+      ident _width : int
+
+  Method void clean(  ):
+    ,  : void
+      void  : void
+        = : int
+          ident y : int
+          int const "0" : int const
+      do-while : unknown
+        < : int
+          ident y : int
+          ident _height : int
+        ,  : void
+          ,  : void
+            void  : void
+              = : string
+                ident row : string
+                string const "000000000000000000000000000000" : string const
+            void  : void
+              = : unknown
+                [] : unknown
+                  ident _matrix : void[]
+                  ident y : int
+                ident row : string
+          void  : void
+            = : int
+              ident y : int
+              + : int
+                ident y : int
+                int const "1" : int const
+
+  Method int getBoxAt( x: int, y: int ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            . : void
+              this  : .ru.dz.phantom.tetris.playingfield
+              Method validateCoords : unknown
+              arg  : int
+                ident x : int
+              arg  : unknown
+                ident y : int
+          void  : void
+            = : string
+              ident row : string
+              [] : unknown
+                ident _matrix : void[]
+                ident y : int
+        void  : void
+          = : int
+            ident character : int
+            . : int
+              ident row : string
+              Method charAt : unknown
+              arg  : unknown
+                ident x : int
+      switch  : void const
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                case  : void
+                                  int const "48" : int const
+                                return : void const
+                                  int const "0" : int const
+                              case  : void
+                                int const "49" : int const
+                            return : void const
+                              int const "1" : int const
+                          case  : void
+                            int const "50" : int const
+                        return : void const
+                          int const "2" : int const
+                      case  : void
+                        int const "51" : int const
+                    return : void const
+                      int const "3" : int const
+                  case  : void
+                    int const "52" : int const
+                return : void const
+                  int const "4" : int const
+              default  : void
+            throw  : void const
+              string const "InvalidOperationException" : string const
+          break : void
+

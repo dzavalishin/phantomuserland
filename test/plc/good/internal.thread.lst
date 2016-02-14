@@ -1,0 +1,19 @@
+Class .internal.thread
+  Method .phantom.user getUser(  ):
+  -- No code!
+
+  Method string toString(  ):
+  -- No code!
+
+  Method .phantom.osimpl getOsInterface(  ):
+  -- No code!
+
+  Method .phantom.environment getEnvironment(  ):
+  -- No code!
+
+  Method void unpause(  ):
+  -- No code!
+
+  Method void pause(  ):
+  -- No code!
+

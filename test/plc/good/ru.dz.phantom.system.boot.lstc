@@ -1,0 +1,698 @@
+Class version 20160109071812614
+
+method sleep ordinal 16
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: sleep in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @62
+_label_0:	//  @63
+  ; Line 263	//  @63
+  load fld=1	//  @63
+  ; Line 263	//  @65
+  const 1000	//  @65
+  i2o	//  @70
+  ; Line 263	//  @71
+  call m=21 nparm=1	//  @71
+  os drop	//  @73
+  ret	//  @74
+--
+method end
+
+method print ordinal 17
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: print in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @62
+_label_0:	//  @63
+  summon null	//  @63
+  ; Line 247	//  @64
+  load fld=1	//  @64
+  ; Line 247	//  @66
+  get o stk pos=0	//  @66
+  ; Line 247	//  @71
+  call m=16 nparm=1	//  @71
+  os drop	//  @73
+  ret	//  @74
+--
+method end
+
+method setScreenBackgroud ordinal 18
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: setScreenBackgroud in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @75
+_label_0:	//  @76
+  summon null	//  @76
+  summon null	//  @77
+  summon null	//  @78
+  summon class ru.dz.phantom.backgrounds	//  @79
+  new	//  @110
+  os dup	//  @111
+  set o stk pos=1	//  @112
+  os drop	//  @117
+  summon class internal.bitmap	//  @118
+  new	//  @139
+  os dup	//  @140
+  set o stk pos=0	//  @141
+  os drop	//  @146
+  ; Line 210	//  @147
+  ; Line 212	//  @147
+  summon this	//  @147
+  ; Line 212	//  @148
+  const "----------------------
+will load bitmap...
+"	//  @148
+  ; Line 212	//  @196
+  call m=17 nparm=1	//  @196
+  os drop	//  @198
+  ; Line 212	//  @199
+  ; Line 214	//  @199
+  get o stk pos=1	//  @199
+  call m=16 nparm=0	//  @204
+  os dup	//  @206
+  set o stk pos=2	//  @207
+  os drop	//  @212
+  ; Line 214	//  @213
+  ; Line 215	//  @213
+  get o stk pos=0	//  @213
+  ; Line 215	//  @218
+  get o stk pos=2	//  @218
+  ; Line 215	//  @223
+  call m=8 nparm=1	//  @223
+  os drop	//  @225
+  ; Line 215	//  @226
+  ; Line 216	//  @226
+  summon this	//  @226
+  ; Line 216	//  @227
+  const "have bitmap...
+"	//  @227
+  ; Line 216	//  @247
+  call m=17 nparm=1	//  @247
+  os drop	//  @249
+  ; Line 216	//  @250
+  ; Line 219	//  @250
+  load fld=1	//  @250
+  ; Line 219	//  @252
+  get o stk pos=0	//  @252
+  ; Line 219	//  @257
+  call m=20 nparm=1	//  @257
+  os drop	//  @259
+  ; Line 219	//  @260
+  ret	//  @260
+--
+method end
+
+method load_class ordinal 19
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: load_class in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  summon null	//  @68
+  ; Line 252	//  @69
+  load fld=1	//  @69
+  ; Line 252	//  @71
+  get o stk pos=0	//  @71
+  ; Line 252	//  @76
+  call m=8 nparm=1	//  @76
+  ; Line 252	//  @78
+  ret	//  @78
+  ret	//  @79
+--
+method end
+
+method startup ordinal 8
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: startup in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @64
+_label_0:	//  @65
+  summon null	//  @65
+  summon null	//  @66
+  summon class internal.string	//  @67
+  push catcher _label_2	//  @68
+  ; Line 87	//  @73
+  summon this	//  @73
+  ; Line 87	//  @74
+  get o stk pos=0	//  @74
+  ; Line 87	//  @79
+  call m=21 nparm=1	//  @79
+  os drop	//  @81
+  pop catcher	//  @82
+  jmp _label_1	//  @83
+_label_2:	//  @88
+  set o stk pos=1	//  @88
+  ; Line 91	//  @93
+  summon this	//  @93
+  ; Line 91	//  @94
+  const "
+Exception: '"	//  @94
+  ; Line 91	//  @113
+  call m=17 nparm=1	//  @113
+  os drop	//  @115
+  ; Line 91	//  @116
+  summon this	//  @116
+  ; Line 91	//  @117
+  get o stk pos=1	//  @117
+  ; Line 91	//  @122
+  call m=17 nparm=1	//  @122
+  os drop	//  @124
+  ; Line 91	//  @125
+  ; Line 91	//  @125
+  summon this	//  @125
+  ; Line 91	//  @126
+  const "'"	//  @126
+  ; Line 91	//  @132
+  call m=17 nparm=1	//  @132
+  os drop	//  @134
+  ; Line 91	//  @135
+_label_1:	//  @135
+  ret	//  @135
+--
+method end
+
+method get_os_interface_object ordinal 20
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: get_os_interface_object in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @80
+_label_0:	//  @81
+  summon null	//  @81
+  summon class phantom.osimpl	//  @82
+  new	//  @102
+  os dup	//  @103
+  set o stk pos=0	//  @104
+  os drop	//  @109
+  ; Line 236	//  @110
+  get o stk pos=0	//  @110
+  ; Line 236	//  @115
+  load fld=1	//  @115
+  ; Line 236	//  @117
+  call m=17 nparm=1	//  @117
+  os drop	//  @119
+  ; Line 236	//  @120
+  ; Line 238	//  @120
+  get o stk pos=0	//  @120
+  ; Line 238	//  @125
+  ret	//  @125
+  ; Line 238	//  @126
+  ret	//  @126
+--
+method end
+
+method do_startup ordinal 21
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: do_startup in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  summon null	//  @68
+  summon null	//  @69
+  summon null	//  @70
+  summon null	//  @71
+  ; Line 101	//  @72
+  const 1	//  @72
+  i2o	//  @77
+  os dup	//  @78
+  save fld=0	//  @79
+  os drop	//  @81
+  ; Line 103	//  @82
+  get o stk pos=0	//  @82
+  os dup	//  @87
+  save fld=1	//  @88
+  os drop	//  @90
+  ; Line 103	//  @91
+  ; Line 105	//  @91
+  summon this	//  @91
+  ; Line 105	//  @92
+  const "Phantom System Envirinment Setup is running
+"	//  @92
+  ; Line 105	//  @141
+  call m=17 nparm=1	//  @141
+  os drop	//  @143
+  ; Line 105	//  @144
+  ; Line 111	//  @144
+  ; Line 110	//  @144
+  load fld=0	//  @144
+  o2i	//  @146
+  jz _label_1	//  @147
+  ; Line 110	//  @152
+  summon this	//  @152
+  ; Line 110	//  @153
+  const "loading loader class
+"	//  @153
+  ; Line 110	//  @179
+  call m=17 nparm=1	//  @179
+  os drop	//  @181
+_label_1:	//  @182
+  ; Line 111	//  @182
+  ; Line 111	//  @182
+  summon this	//  @182
+  ; Line 111	//  @183
+  const ".ru.dz.phantom.system.class_loader"	//  @183
+  ; Line 111	//  @222
+  call m=19 nparm=1	//  @222
+  os dup	//  @224
+  save fld=2	//  @225
+  os drop	//  @227
+  ; Line 111	//  @228
+  ; Line 114	//  @228
+  ; Line 113	//  @228
+  load fld=0	//  @228
+  o2i	//  @230
+  jz _label_3	//  @231
+  ; Line 113	//  @236
+  summon this	//  @236
+  ; Line 113	//  @237
+  const "creating loader object
+"	//  @237
+  ; Line 113	//  @265
+  call m=17 nparm=1	//  @265
+  os drop	//  @267
+_label_3:	//  @268
+  ; Line 114	//  @268
+  ; Line 114	//  @268
+  load fld=2	//  @268
+  new	//  @270
+  os dup	//  @271
+  save fld=3	//  @272
+  os drop	//  @274
+  ; Line 114	//  @275
+  ; Line 117	//  @275
+  ; Line 116	//  @275
+  load fld=0	//  @275
+  o2i	//  @277
+  jz _label_5	//  @278
+  ; Line 116	//  @283
+  summon this	//  @283
+  ; Line 116	//  @284
+  const "initializing loader
+"	//  @284
+  ; Line 116	//  @309
+  call m=17 nparm=1	//  @309
+  os drop	//  @311
+_label_5:	//  @312
+  ; Line 117	//  @312
+  ; Line 117	//  @312
+  load fld=3	//  @312
+  ; Line 117	//  @314
+  load fld=1	//  @314
+  ; Line 117	//  @316
+  call m=16 nparm=1	//  @316
+  os drop	//  @318
+  ; Line 117	//  @319
+  ; Line 120	//  @319
+  ; Line 119	//  @319
+  load fld=0	//  @319
+  o2i	//  @321
+  jz _label_7	//  @322
+  ; Line 119	//  @327
+  summon this	//  @327
+  ; Line 119	//  @328
+  const "registering loader
+"	//  @328
+  ; Line 119	//  @352
+  call m=17 nparm=1	//  @352
+  os drop	//  @354
+_label_7:	//  @355
+  ; Line 120	//  @355
+  ; Line 120	//  @355
+  load fld=1	//  @355
+  ; Line 120	//  @357
+  load fld=3	//  @357
+  ; Line 120	//  @359
+  call m=17 nparm=1	//  @359
+  os drop	//  @361
+  ; Line 120	//  @362
+  summon class ru.dz.phantom.system.regression_tests	//  @362
+  new	//  @405
+  os dup	//  @406
+  save fld=5	//  @407
+  os drop	//  @409
+  ; Line 124	//  @410
+  ; Line 125	//  @410
+  summon this	//  @410
+  ; Line 125	//  @411
+  const "Starting compiler regression tests
+"	//  @411
+  ; Line 125	//  @451
+  call m=17 nparm=1	//  @451
+  os drop	//  @453
+  ; Line 125	//  @454
+  ; Line 126	//  @454
+  load fld=5	//  @454
+  ; Line 126	//  @456
+  load fld=1	//  @456
+  ; Line 126	//  @458
+  call m=19 nparm=1	//  @458
+  os drop	//  @460
+  ; Line 126	//  @461
+  ; Line 127	//  @461
+  summon this	//  @461
+  ; Line 127	//  @462
+  const "Finished compiler regression tests
+"	//  @462
+  ; Line 127	//  @502
+  call m=17 nparm=1	//  @502
+  os drop	//  @504
+  ; Line 127	//  @505
+  summon class internal.io.tty	//  @505
+  new	//  @526
+  os dup	//  @527
+  save fld=6	//  @528
+  os drop	//  @530
+  ; Line 136	//  @531
+  ; Line 140	//  @531
+  summon this	//  @531
+  call m=20 nparm=0	//  @532
+  os dup	//  @534
+  set o stk pos=3	//  @535
+  os drop	//  @540
+  ; Line 140	//  @541
+  ; Line 142	//  @541
+  load fld=1	//  @541
+  ; Line 142	//  @543
+  get o stk pos=3	//  @543
+  ; Line 142	//  @548
+  call m=22 nparm=1	//  @548
+  os drop	//  @550
+  ; Line 142	//  @551
+  ; Line 144	//  @551
+  get o stk pos=3	//  @551
+  ; Line 144	//  @556
+  const "root.shell"	//  @556
+  ; Line 144	//  @571
+  call m=18 nparm=1	//  @571
+  os dup	//  @573
+  save fld=9	//  @574
+  os drop	//  @576
+  ; Line 144	//  @577
+  ; Line 146	//  @577
+  summon this	//  @577
+  ; Line 146	//  @578
+  const "Env root.shell="	//  @578
+  ; Line 146	//  @598
+  call m=17 nparm=1	//  @598
+  os drop	//  @600
+  ; Line 146	//  @601
+  ; Line 147	//  @601
+  summon this	//  @601
+  ; Line 147	//  @602
+  load fld=9	//  @602
+  ; Line 147	//  @604
+  call m=17 nparm=1	//  @604
+  os drop	//  @606
+  ; Line 147	//  @607
+  ; Line 148	//  @607
+  summon this	//  @607
+  ; Line 148	//  @608
+  const "
+"	//  @608
+  ; Line 148	//  @614
+  call m=17 nparm=1	//  @614
+  os drop	//  @616
+  ; Line 148	//  @617
+  ; Line 149	//  @617
+  summon this	//  @617
+  ; Line 149	//  @618
+  const "Env root.init="	//  @618
+  ; Line 149	//  @637
+  call m=17 nparm=1	//  @637
+  os drop	//  @639
+  ; Line 149	//  @640
+  ; Line 150	//  @640
+  summon this	//  @640
+  ; Line 150	//  @641
+  get o stk pos=3	//  @641
+  ; Line 150	//  @646
+  const "root.init"	//  @646
+  ; Line 150	//  @660
+  call m=18 nparm=1	//  @660
+  ; Line 150	//  @662
+  call m=17 nparm=1	//  @662
+  os drop	//  @664
+  ; Line 150	//  @665
+  ; Line 151	//  @665
+  summon this	//  @665
+  ; Line 151	//  @666
+  const "
+"	//  @666
+  ; Line 151	//  @672
+  call m=17 nparm=1	//  @672
+  os drop	//  @674
+  ; Line 151	//  @675
+  ; Line 154	//  @675
+  load fld=6	//  @675
+  ; Line 154	//  @677
+  const "
+
+
+
+
+
+
+
+
+
+
+
+
+
+"	//  @677
+  ; Line 154	//  @696
+  call m=17 nparm=1	//  @696
+  os drop	//  @698
+  ; Line 154	//  @699
+  ; Line 156	//  @699
+  load fld=6	//  @699
+  ; Line 156	//  @701
+  const "Env root.shell="	//  @701
+  ; Line 156	//  @721
+  call m=17 nparm=1	//  @721
+  os drop	//  @723
+  ; Line 156	//  @724
+  ; Line 157	//  @724
+  load fld=6	//  @724
+  ; Line 157	//  @726
+  load fld=9	//  @726
+  ; Line 157	//  @728
+  call m=17 nparm=1	//  @728
+  os drop	//  @730
+  ; Line 157	//  @731
+  ; Line 158	//  @731
+  load fld=6	//  @731
+  ; Line 158	//  @733
+  const "
+"	//  @733
+  ; Line 158	//  @739
+  call m=17 nparm=1	//  @739
+  os drop	//  @741
+  ; Line 158	//  @742
+  ; Line 159	//  @742
+  load fld=6	//  @742
+  ; Line 159	//  @744
+  const "Env root.init="	//  @744
+  ; Line 159	//  @763
+  call m=17 nparm=1	//  @763
+  os drop	//  @765
+  ; Line 159	//  @766
+  ; Line 160	//  @766
+  load fld=6	//  @766
+  ; Line 160	//  @768
+  get o stk pos=3	//  @768
+  ; Line 160	//  @773
+  const "root.init"	//  @773
+  ; Line 160	//  @787
+  call m=18 nparm=1	//  @787
+  ; Line 160	//  @789
+  call m=17 nparm=1	//  @789
+  os drop	//  @791
+  ; Line 160	//  @792
+  ; Line 161	//  @792
+  load fld=6	//  @792
+  ; Line 161	//  @794
+  const "
+"	//  @794
+  ; Line 161	//  @800
+  call m=17 nparm=1	//  @800
+  os drop	//  @802
+  ; Line 161	//  @803
+  ; Line 163	//  @803
+  load fld=6	//  @803
+  ; Line 163	//  @805
+  const "Creating root window...
+"	//  @805
+  ; Line 163	//  @834
+  call m=17 nparm=1	//  @834
+  os drop	//  @836
+  ; Line 163	//  @837
+  summon class ru.dz.windows.root	//  @837
+  new	//  @861
+  os dup	//  @862
+  save fld=7	//  @863
+  os drop	//  @865
+  ; Line 165	//  @866
+  ; Line 166	//  @866
+  load fld=6	//  @866
+  ; Line 166	//  @868
+  const " initing root window...
+"	//  @868
+  ; Line 166	//  @897
+  call m=17 nparm=1	//  @897
+  os drop	//  @899
+  ; Line 166	//  @900
+  ; Line 167	//  @900
+  load fld=7	//  @900
+  ; Line 167	//  @902
+  load fld=6	//  @902
+  ; Line 167	//  @904
+  load fld=1	//  @904
+  ; Line 167	//  @906
+  ; Line 167	//  @906
+  call m=16 nparm=2	//  @906
+  os drop	//  @908
+  ; Line 167	//  @909
+  ; Line 169	//  @909
+  load fld=6	//  @909
+  ; Line 169	//  @911
+  const " starting windows test...
+"	//  @911
+  ; Line 169	//  @942
+  call m=17 nparm=1	//  @942
+  os drop	//  @944
+  ; Line 169	//  @945
+  ; Line 170	//  @945
+  load fld=7	//  @945
+  call m=18 nparm=0	//  @947
+  os drop	//  @949
+  ; Line 170	//  @950
+  ; Line 172	//  @950
+  summon this	//  @950
+  ; Line 172	//  @951
+  const "Finished windows tests
+"	//  @951
+  ; Line 172	//  @979
+  call m=17 nparm=1	//  @979
+  os drop	//  @981
+  ; Line 172	//  @982
+  ; Line 175	//  @982
+  summon this	//  @982
+  ; Line 175	//  @983
+  const "Run Java tests
+"	//  @983
+  ; Line 175	//  @1003
+  call m=17 nparm=1	//  @1003
+  os drop	//  @1005
+  ; Line 175	//  @1006
+  summon class test.tophantom.phantomprinter	//  @1006
+  new	//  @1041
+  os dup	//  @1042
+  set o stk pos=1	//  @1043
+  os drop	//  @1048
+  ; Line 176	//  @1049
+  ; Line 177	//  @1049
+  get o stk pos=1	//  @1049
+  ; Line 177	//  @1054
+  load fld=6	//  @1054
+  ; Line 177	//  @1056
+  call m=16 nparm=1	//  @1056
+  os drop	//  @1058
+  ; Line 177	//  @1059
+  summon class test.tophantom.allrun	//  @1059
+  new	//  @1086
+  os dup	//  @1087
+  set o stk pos=2	//  @1088
+  os drop	//  @1093
+  ; Line 179	//  @1094
+  ; Line 181	//  @1094
+  get o stk pos=2	//  @1094
+  ; Line 181	//  @1099
+  get o stk pos=1	//  @1099
+  ; Line 181	//  @1104
+  call m=18 nparm=1	//  @1104
+  os drop	//  @1106
+  ; Line 181	//  @1107
+  ; Line 182	//  @1107
+  get o stk pos=2	//  @1107
+  call m=17 nparm=0	//  @1112
+  os drop	//  @1114
+  ; Line 182	//  @1115
+  ; Line 187	//  @1115
+  summon this	//  @1115
+  ; Line 187	//  @1116
+  load fld=9	//  @1116
+  ; Line 187	//  @1118
+  call m=19 nparm=1	//  @1118
+  os dup	//  @1120
+  save fld=10	//  @1121
+  os drop	//  @1123
+  ; Line 187	//  @1124
+  ; Line 188	//  @1124
+  load fld=10	//  @1124
+  new	//  @1126
+  os dup	//  @1127
+  save fld=8	//  @1128
+  os drop	//  @1130
+  ; Line 188	//  @1131
+  ; Line 190	//  @1131
+  load fld=8	//  @1131
+  call m=16 nparm=0	//  @1133
+  os drop	//  @1135
+  ; Line 190	//  @1136
+  ; Line 192	//  @1136
+  load fld=1	//  @1136
+  ; Line 192	//  @1138
+  load fld=8	//  @1138
+  ; Line 192	//  @1140
+  call m=18 nparm=1	//  @1140
+  os drop	//  @1142
+  ; Line 192	//  @1143
+  ; Line 194	//  @1143
+  load fld=8	//  @1143
+  call m=17 nparm=0	//  @1145
+  os drop	//  @1147
+  ; Line 194	//  @1148
+  ; Line 199	//  @1148
+  summon this	//  @1148
+  call m=18 nparm=0	//  @1149
+  os drop	//  @1151
+  ; Line 199	//  @1152
+  ret	//  @1152
+--
+method end
+
+method newBinary ordinal 22
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: newBinary in .ru.dz.phantom.system.boot"	//  @11
+  throw	//  @66
+_label_0:	//  @67
+  summon null	//  @67
+  ; Line 257	//  @68
+  load fld=1	//  @68
+  ; Line 257	//  @70
+  get o stk pos=0	//  @70
+  ; Line 257	//  @75
+  call m=19 nparm=1	//  @75
+  ; Line 257	//  @77
+  ret	//  @77
+  ret	//  @78
+--
+method end
+

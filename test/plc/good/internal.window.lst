@@ -1,0 +1,61 @@
+Class .internal.window
+  Method void drawBox( x: int, y: int, xsize: int, ysize: int ):
+  -- No code!
+
+  Method void fillEllipse( x: int, y: int, xsize: int, ysize: int ):
+  -- No code!
+
+  Method void setBg( bg: int ):
+  -- No code!
+
+  Method void fillBox( x: int, y: int, xsize: int, ysize: int ):
+  -- No code!
+
+  Method void setFg( fg: int ):
+  -- No code!
+
+  Method void clear(  ):
+  -- No code!
+
+  Method void update(  ):
+  -- No code!
+
+  Method void setTitle( title: string ):
+  -- No code!
+
+  Method int getYSize(  ):
+  -- No code!
+
+  Method void drawLine( x: int, y: int, xsize: int, ysize: int ):
+  -- No code!
+
+  Method void fill( fg: int ):
+  -- No code!
+
+  Method void drawString( x: int, y: int, s: string ):
+  -- No code!
+
+  Method void drawImage( x: int, y: int, img: string ):
+  -- No code!
+
+  Method int getX(  ):
+  -- No code!
+
+  Method int getY(  ):
+  -- No code!
+
+  Method int scrollHor( x: int, y: int, xsize: int, ysize: int, steps: int ):
+  -- No code!
+
+  Method void setEventHandler( handler: .ru.dz.phantom.handler ):
+  -- No code!
+
+  Method int getXSize(  ):
+  -- No code!
+
+  Method void setWinSize( xsize: int, ysize: int ):
+  -- No code!
+
+  Method void setWinPosition( x: int, y: int ):
+  -- No code!
+

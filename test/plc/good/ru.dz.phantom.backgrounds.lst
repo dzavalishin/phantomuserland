@@ -1,0 +1,5 @@
+Class .ru.dz.phantom.backgrounds
+  Method string getBackgroundImage(  ):
+    return : void const
+      binary const, "2359351" bytes : string const
+

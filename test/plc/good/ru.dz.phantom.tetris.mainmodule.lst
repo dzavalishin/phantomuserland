@@ -1,0 +1,981 @@
+Class .ru.dz.phantom.tetris.mainmodule
+  Field _io
+  Field _utilites
+  Field _imageGreen
+  Field _playingFieldHeight
+  Field _field
+  Field _figurePartiallyShown
+  Field _bootObject
+  Field _playingFieldWidth
+  Field _imageOrange
+  Field _figure
+  Field _imageBlue
+  Field _imageGray
+  Field _imageRed
+  Field _console
+  Method void runGame(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : .ru.dz.phantom.tetris.figure
+              ident _figure : .ru.dz.phantom.tetris.figure
+              new .ru.dz.phantom.tetris.figure : .ru.dz.phantom.tetris.figure
+          void  : void
+            . : void
+              ident _figure : .ru.dz.phantom.tetris.figure
+              Method init : unknown
+              arg  : .ru.dz.phantom.tetris.playingfield
+                ident _field : .ru.dz.phantom.tetris.playingfield
+              arg  : unknown
+                int const "1" : int const
+        void  : void
+          = : int
+            ident _figurePartiallyShown : int
+            int const "1" : int const
+      do-while : unknown
+        bool and : int
+          bool not : int
+            . : int
+              this  : .ru.dz.phantom.tetris.mainmodule
+              Method isExitCommandReceived : unknown
+          bool not : int
+            . : int
+              this  : .ru.dz.phantom.tetris.mainmodule
+              Method isGameOver : unknown
+        ,  : unknown
+          ,  : unknown
+            ,  : unknown
+              ,  : unknown
+                ,  : unknown
+                  if : unknown
+                    . : int
+                      ident _io : .ru.dz.phantom.tetris.io
+                      Method isAnyKeyPressed : unknown
+                    ,  : void
+                      void  : void
+                        = : int
+                          ident c : int
+                          . : int
+                            ident _io : .ru.dz.phantom.tetris.io
+                            Method getLastPressedKey : unknown
+                      if : unknown
+                        == : int
+                          ident c : int
+                          int const "1" : int const
+                        void  : void
+                          . : void
+                            this  : .ru.dz.phantom.tetris.mainmodule
+                            Method dispatchCommand : unknown
+                            arg  : unknown
+                              ident c : int
+                  void  : void
+                    . : void
+                      this  : .ru.dz.phantom.tetris.mainmodule
+                      Method dispatchCommand : unknown
+                      arg  : unknown
+                        int const "2" : int const
+                if : void
+                  == : int
+                    . : int
+                      ident _figure : .ru.dz.phantom.tetris.figure
+                      Method canMoveDown : unknown
+                      arg  : unknown
+                        ident _field : .ru.dz.phantom.tetris.playingfield
+                    int const "0" : int const
+                  if : void
+                    . : int
+                      ident _figure : .ru.dz.phantom.tetris.figure
+                      Method isFullyVisibleAtPlayground : unknown
+                      arg  : unknown
+                        ident _field : .ru.dz.phantom.tetris.playingfield
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            void  : void
+                              . : void
+                                this  : .ru.dz.phantom.tetris.mainmodule
+                                Method print : unknown
+                                arg  : unknown
+                                  string const "Figure is at the Earth.
+" : string const
+                            void  : void
+                              . : void
+                                ident _figure : .ru.dz.phantom.tetris.figure
+                                Method finishMovement : unknown
+                                arg  : unknown
+                                  ident _field : .ru.dz.phantom.tetris.playingfield
+                          void  : void
+                            = : .ru.dz.phantom.tetris.figure
+                              ident _figure : .ru.dz.phantom.tetris.figure
+                              new .ru.dz.phantom.tetris.figure : .ru.dz.phantom.tetris.figure
+                        void  : void
+                          . : void
+                            ident _figure : .ru.dz.phantom.tetris.figure
+                            Method init : unknown
+                            arg  : .ru.dz.phantom.tetris.playingfield
+                              ident _field : .ru.dz.phantom.tetris.playingfield
+                            arg  : unknown
+                              int const "3" : int const
+                      void  : void
+                        = : int
+                          ident _figurePartiallyShown : int
+                          int const "1" : int const
+                    ,  : void
+                      void  : void
+                        . : void
+                          this  : .ru.dz.phantom.tetris.mainmodule
+                          Method print : unknown
+                          arg  : unknown
+                            string const "Game over." : string const
+                      throw  : void const
+                        string const "GameOver" : string const
+                  void  : void
+                    . : void
+                      ident _figure : .ru.dz.phantom.tetris.figure
+                      Method moveDown : unknown
+                      arg  : unknown
+                        ident _field : .ru.dz.phantom.tetris.playingfield
+              void  : void
+                . : void
+                  this  : .ru.dz.phantom.tetris.mainmodule
+                  Method deleteFilledRows : unknown
+            void  : void
+              . : void
+                this  : .ru.dz.phantom.tetris.mainmodule
+                Method repaintPlayground : unknown
+          void  : void
+            . : void
+              ident _utilites : .ru.dz.phantom.tetris.utilites
+              Method sleep : unknown
+              arg  : unknown
+                int const "1" : int const
+
+  Method void init( bootObject: unknown, console: .internal.io.tty, playingFieldWidth: int, playingFieldHeight: int ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      ,  : void
+                                        ,  : void
+                                          ,  : void
+                                            void  : void
+                                              = : unknown
+                                                ident _bootObject : unknown
+                                                ident bootObject : unknown
+                                            void  : void
+                                              = : .internal.io.tty
+                                                ident _console : .internal.io.tty
+                                                ident console : .internal.io.tty
+                                          void  : void
+                                            = : int
+                                              ident _playingFieldWidth : int
+                                              ident playingFieldWidth : int
+                                        void  : void
+                                          = : int
+                                            ident _playingFieldHeight : int
+                                            ident playingFieldHeight : int
+                                      void  : void
+                                        = : .ru.dz.phantom.tetris.utilites
+                                          ident _utilites : .ru.dz.phantom.tetris.utilites
+                                          new .ru.dz.phantom.tetris.utilites : .ru.dz.phantom.tetris.utilites
+                                    void  : void
+                                      . : void
+                                        ident _utilites : .ru.dz.phantom.tetris.utilites
+                                        Method init : unknown
+                                        arg  : unknown
+                                          ident _bootObject : unknown
+                                  void  : void
+                                    = : .ru.dz.phantom.tetris.io
+                                      ident _io : .ru.dz.phantom.tetris.io
+                                      new .ru.dz.phantom.tetris.io : .ru.dz.phantom.tetris.io
+                                void  : void
+                                  . : void
+                                    ident _io : .ru.dz.phantom.tetris.io
+                                    Method init : unknown
+                                    arg  : unknown
+                                      ident _utilites : .ru.dz.phantom.tetris.utilites
+                              void  : void
+                                = : .ru.dz.phantom.tetris.playingfield
+                                  ident _field : .ru.dz.phantom.tetris.playingfield
+                                  new .ru.dz.phantom.tetris.playingfield : .ru.dz.phantom.tetris.playingfield
+                            void  : void
+                              . : void
+                                ident _field : .ru.dz.phantom.tetris.playingfield
+                                Method init : unknown
+                                arg  : int
+                                  ident _playingFieldWidth : int
+                                arg  : unknown
+                                  ident _playingFieldHeight : int
+                          void  : void
+                            = : .ru.dz.phantom.tetris.imagesmanager
+                              ident imagesManager : .ru.dz.phantom.tetris.imagesmanager
+                              new .ru.dz.phantom.tetris.imagesmanager : .ru.dz.phantom.tetris.imagesmanager
+                        void  : void
+                          = : .internal.bitmap
+                            ident _imageRed : .internal.bitmap
+                            new .internal.bitmap : .internal.bitmap
+                      void  : void
+                        = : .internal.bitmap
+                          ident _imageGreen : .internal.bitmap
+                          new .internal.bitmap : .internal.bitmap
+                    void  : void
+                      = : .internal.bitmap
+                        ident _imageGray : .internal.bitmap
+                        new .internal.bitmap : .internal.bitmap
+                  void  : void
+                    = : .internal.bitmap
+                      ident _imageBlue : .internal.bitmap
+                      new .internal.bitmap : .internal.bitmap
+                void  : void
+                  = : .internal.bitmap
+                    ident _imageOrange : .internal.bitmap
+                    new .internal.bitmap : .internal.bitmap
+              void  : void
+                . : void
+                  ident _imageRed : .internal.bitmap
+                  Method loadFromString : unknown
+                  arg  : unknown
+                    . : string
+                      ident imagesManager : .ru.dz.phantom.tetris.imagesmanager
+                      Method getImageRed : unknown
+            void  : void
+              . : void
+                ident _imageGreen : .internal.bitmap
+                Method loadFromString : unknown
+                arg  : unknown
+                  . : string
+                    ident imagesManager : .ru.dz.phantom.tetris.imagesmanager
+                    Method getImageGreen : unknown
+          void  : void
+            . : void
+              ident _imageGray : .internal.bitmap
+              Method loadFromString : unknown
+              arg  : unknown
+                . : string
+                  ident imagesManager : .ru.dz.phantom.tetris.imagesmanager
+                  Method getImageGray : unknown
+        void  : void
+          . : void
+            ident _imageBlue : .internal.bitmap
+            Method loadFromString : unknown
+            arg  : unknown
+              . : string
+                ident imagesManager : .ru.dz.phantom.tetris.imagesmanager
+                Method getImageBlue : unknown
+      void  : void
+        . : void
+          ident _imageOrange : .internal.bitmap
+          Method loadFromString : unknown
+          arg  : unknown
+            . : string
+              ident imagesManager : .ru.dz.phantom.tetris.imagesmanager
+              Method getImageOrange : unknown
+
+  Method void repaintField(  ):
+    ,  : void
+      void  : void
+        = : int
+          ident y : int
+          int const "0" : int const
+      do-while : unknown
+        < : int
+          ident y : int
+          . : int
+            ident _field : .ru.dz.phantom.tetris.playingfield
+            Method getHeight : unknown
+        ,  : void
+          ,  : void
+            void  : void
+              = : int
+                ident x : int
+                int const "0" : int const
+            do-while : unknown
+              < : int
+                ident x : int
+                . : int
+                  ident _field : .ru.dz.phantom.tetris.playingfield
+                  Method getWidth : unknown
+              ,  : void
+                ,  : void
+                  void  : void
+                    = : int
+                      ident box : int
+                      . : int
+                        ident _field : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                  switch  : void const
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      ,  : void
+                                        ,  : void
+                                          ,  : void
+                                            case  : void
+                                              int const "0" : int const
+                                            ,  : void
+                                              void  : void
+                                                . : void
+                                                  ident _imageGray : .internal.bitmap
+                                                  Method paintTo : unknown
+                                                  arg  : unknown
+                                                    ident _console : .internal.io.tty
+                                                  arg  : int
+                                                    * : int
+                                                      ident x : int
+                                                      int const "20" : int const
+                                                  arg  : unknown
+                                                    * : int
+                                                      ident y : int
+                                                      int const "20" : int const
+                                              break : void
+                                          case  : void
+                                            int const "1" : int const
+                                        ,  : void
+                                          void  : void
+                                            . : void
+                                              ident _imageRed : .internal.bitmap
+                                              Method paintTo : unknown
+                                              arg  : unknown
+                                                ident _console : .internal.io.tty
+                                              arg  : int
+                                                * : int
+                                                  ident x : int
+                                                  int const "20" : int const
+                                              arg  : unknown
+                                                * : int
+                                                  ident y : int
+                                                  int const "20" : int const
+                                          break : void
+                                      case  : void
+                                        int const "2" : int const
+                                    ,  : void
+                                      void  : void
+                                        . : void
+                                          ident _imageOrange : .internal.bitmap
+                                          Method paintTo : unknown
+                                          arg  : unknown
+                                            ident _console : .internal.io.tty
+                                          arg  : int
+                                            * : int
+                                              ident x : int
+                                              int const "20" : int const
+                                          arg  : unknown
+                                            * : int
+                                              ident y : int
+                                              int const "20" : int const
+                                      break : void
+                                  case  : void
+                                    int const "3" : int const
+                                ,  : void
+                                  void  : void
+                                    . : void
+                                      ident _imageGreen : .internal.bitmap
+                                      Method paintTo : unknown
+                                      arg  : unknown
+                                        ident _console : .internal.io.tty
+                                      arg  : int
+                                        * : int
+                                          ident x : int
+                                          int const "20" : int const
+                                      arg  : unknown
+                                        * : int
+                                          ident y : int
+                                          int const "20" : int const
+                                  break : void
+                              case  : void
+                                int const "4" : int const
+                            ,  : void
+                              void  : void
+                                . : void
+                                  ident _imageBlue : .internal.bitmap
+                                  Method paintTo : unknown
+                                  arg  : unknown
+                                    ident _console : .internal.io.tty
+                                  arg  : int
+                                    * : int
+                                      ident x : int
+                                      int const "20" : int const
+                                  arg  : unknown
+                                    * : int
+                                      ident y : int
+                                      int const "20" : int const
+                              break : void
+                          default  : void
+                        throw  : void const
+                          string const "InvalidOperation : unknown box code retrieved during repainting." : string const
+                      break : void
+                void  : void
+                  = : int
+                    ident x : int
+                    + : int
+                      ident x : int
+                      int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              + : int
+                ident y : int
+                int const "1" : int const
+
+  Method void repaintPlayground(  ):
+    ,  : void
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.tetris.mainmodule
+          Method repaintField : unknown
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.tetris.mainmodule
+          Method repaintFigure : unknown
+
+  Method void deleteFilledRows(  ):
+    do-while : unknown
+      . : int
+        this  : .ru.dz.phantom.tetris.mainmodule
+        Method isLowerRowFilled : unknown
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.tetris.mainmodule
+          Method deleteLowerRow : unknown
+
+  Method void deleteLowerRow(  ):
+    ,  : void
+      void  : void
+        = : int
+          ident y : int
+          int const "0" : int const
+      do-while : unknown
+        < : int
+          ident y : int
+          - : int
+            . : int
+              ident _field : .ru.dz.phantom.tetris.playingfield
+              Method getHeight : unknown
+            int const "1" : int const
+        ,  : void
+          ,  : void
+            void  : void
+              = : int
+                ident x : int
+                int const "0" : int const
+            do-while : unknown
+              < : int
+                ident x : int
+                . : int
+                  ident _field : .ru.dz.phantom.tetris.playingfield
+                  Method getWidth : unknown
+              ,  : void
+                void  : void
+                  . : void
+                    ident _field : .ru.dz.phantom.tetris.playingfield
+                    Method setBoxAt : unknown
+                    arg  : int
+                      ident x : int
+                    arg  : int
+                      ident y : int
+                    arg  : unknown
+                      . : int
+                        ident _field : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          + : int
+                            ident y : int
+                            int const "1" : int const
+                void  : void
+                  = : int
+                    ident x : int
+                    + : int
+                      ident x : int
+                      int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              + : int
+                ident y : int
+                int const "1" : int const
+
+  Method void repaintFigure(  ):
+    ,  : void
+      void  : void
+        = : int
+          ident y : int
+          int const "0" : int const
+      do-while : unknown
+        < : int
+          ident y : int
+          . : int
+            ident _figure : .ru.dz.phantom.tetris.figure
+            Method getMaskSize : unknown
+        ,  : void
+          ,  : void
+            void  : void
+              = : int
+                ident x : int
+                int const "0" : int const
+            do-while : unknown
+              < : int
+                ident x : int
+                . : int
+                  ident _figure : .ru.dz.phantom.tetris.figure
+                  Method getMaskSize : unknown
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      void  : void
+                        = : int
+                          ident box : int
+                          . : int
+                            ident _figure : .ru.dz.phantom.tetris.figure
+                            Method getBoxAt : unknown
+                            arg  : int
+                              ident x : int
+                            arg  : unknown
+                              ident y : int
+                      void  : void
+                        = : int
+                          ident realX : int
+                          . : int
+                            ident _figure : .ru.dz.phantom.tetris.figure
+                            Method getRealX : unknown
+                            arg  : unknown
+                              ident x : int
+                    void  : void
+                      = : int
+                        ident realY : int
+                        . : int
+                          ident _figure : .ru.dz.phantom.tetris.figure
+                          Method getRealY : unknown
+                          arg  : unknown
+                            ident y : int
+                  if : unknown
+                    bool and : int
+                      bool and : int
+                        bool and : int
+                          >= : int
+                            ident realX : int
+                            int const "0" : int const
+                          < : int
+                            ident realX : int
+                            . : int
+                              ident _field : .ru.dz.phantom.tetris.playingfield
+                              Method getWidth : unknown
+                        >= : int
+                          ident realY : int
+                          int const "0" : int const
+                      < : int
+                        ident realY : int
+                        . : int
+                          ident _field : .ru.dz.phantom.tetris.playingfield
+                          Method getHeight : unknown
+                    if : unknown
+                      == : int
+                        ident box : int
+                        int const "1" : int const
+                      ,  : void
+                        void  : void
+                          = : int
+                            ident color : int
+                            . : int
+                              ident _figure : .ru.dz.phantom.tetris.figure
+                              Method getColor : unknown
+                        switch  : void const
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      ,  : void
+                                        ,  : void
+                                          ,  : void
+                                            ,  : void
+                                              ,  : void
+                                                ,  : void
+                                                  case  : void
+                                                    int const "0" : int const
+                                                  ,  : void
+                                                    void  : void
+                                                      . : void
+                                                        ident _imageGray : .internal.bitmap
+                                                        Method paintTo : unknown
+                                                        arg  : unknown
+                                                          ident _console : .internal.io.tty
+                                                        arg  : int
+                                                          * : int
+                                                            ident realX : int
+                                                            int const "20" : int const
+                                                        arg  : unknown
+                                                          * : int
+                                                            ident realY : int
+                                                            int const "20" : int const
+                                                    break : void
+                                                case  : void
+                                                  int const "1" : int const
+                                              ,  : void
+                                                void  : void
+                                                  . : void
+                                                    ident _imageRed : .internal.bitmap
+                                                    Method paintTo : unknown
+                                                    arg  : unknown
+                                                      ident _console : .internal.io.tty
+                                                    arg  : int
+                                                      * : int
+                                                        ident realX : int
+                                                        int const "20" : int const
+                                                    arg  : unknown
+                                                      * : int
+                                                        ident realY : int
+                                                        int const "20" : int const
+                                                break : void
+                                            case  : void
+                                              int const "2" : int const
+                                          ,  : void
+                                            void  : void
+                                              . : void
+                                                ident _imageOrange : .internal.bitmap
+                                                Method paintTo : unknown
+                                                arg  : unknown
+                                                  ident _console : .internal.io.tty
+                                                arg  : int
+                                                  * : int
+                                                    ident realX : int
+                                                    int const "20" : int const
+                                                arg  : unknown
+                                                  * : int
+                                                    ident realY : int
+                                                    int const "20" : int const
+                                            break : void
+                                        case  : void
+                                          int const "3" : int const
+                                      ,  : void
+                                        void  : void
+                                          . : void
+                                            ident _imageGreen : .internal.bitmap
+                                            Method paintTo : unknown
+                                            arg  : unknown
+                                              ident _console : .internal.io.tty
+                                            arg  : int
+                                              * : int
+                                                ident realX : int
+                                                int const "20" : int const
+                                            arg  : unknown
+                                              * : int
+                                                ident realY : int
+                                                int const "20" : int const
+                                        break : void
+                                    case  : void
+                                      int const "4" : int const
+                                  ,  : void
+                                    void  : void
+                                      . : void
+                                        ident _imageBlue : .internal.bitmap
+                                        Method paintTo : unknown
+                                        arg  : unknown
+                                          ident _console : .internal.io.tty
+                                        arg  : int
+                                          * : int
+                                            ident realX : int
+                                            int const "20" : int const
+                                        arg  : unknown
+                                          * : int
+                                            ident realY : int
+                                            int const "20" : int const
+                                    break : void
+                                default  : void
+                              throw  : void const
+                                string const "InvalidOperation : unknown box code retrieved during repainting." : string const
+                            break : void
+                void  : void
+                  = : int
+                    ident x : int
+                    + : int
+                      ident x : int
+                      int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              + : int
+                ident y : int
+                int const "1" : int const
+
+  Method void dispatchCommand( commandCode: int ):
+    ,  : void
+      switch  : void const
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      case  : void
+                                        int const "0" : int const
+                                      break : void
+                                    case  : void
+                                      int const "1" : int const
+                                  void  : void
+                                    . : void
+                                      this  : .ru.dz.phantom.tetris.mainmodule
+                                      Method print : unknown
+                                      arg  : unknown
+                                        string const "Trying to move left.
+" : string const
+                                if : unknown
+                                  . : int
+                                    ident _figure : .ru.dz.phantom.tetris.figure
+                                    Method canMoveLeft : unknown
+                                    arg  : unknown
+                                      ident _field : .ru.dz.phantom.tetris.playingfield
+                                  void  : void
+                                    . : void
+                                      ident _figure : .ru.dz.phantom.tetris.figure
+                                      Method moveLeft : unknown
+                                      arg  : unknown
+                                        ident _field : .ru.dz.phantom.tetris.playingfield
+                              void  : void
+                                . : void
+                                  this  : .ru.dz.phantom.tetris.mainmodule
+                                  Method print : unknown
+                                  arg  : unknown
+                                    string const "Moving left OK.
+" : string const
+                            break : void
+                          case  : void
+                            int const "2" : int const
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              void  : void
+                                . : void
+                                  this  : .ru.dz.phantom.tetris.mainmodule
+                                  Method print : unknown
+                                  arg  : unknown
+                                    string const "Trying to rotate left.
+" : string const
+                              if : unknown
+                                . : int
+                                  ident _figure : .ru.dz.phantom.tetris.figure
+                                  Method canRotateLeft : unknown
+                                  arg  : unknown
+                                    ident _field : .ru.dz.phantom.tetris.playingfield
+                                void  : void
+                                  . : void
+                                    ident _figure : .ru.dz.phantom.tetris.figure
+                                    Method rotateLeft : unknown
+                                    arg  : unknown
+                                      ident _field : .ru.dz.phantom.tetris.playingfield
+                            void  : void
+                              . : void
+                                this  : .ru.dz.phantom.tetris.mainmodule
+                                Method print : unknown
+                                arg  : unknown
+                                  string const "Rotating left OK.
+" : string const
+                          break : void
+                      case  : void
+                        int const "3" : int const
+                    ,  : unknown
+                      if : unknown
+                        . : int
+                          ident _figure : .ru.dz.phantom.tetris.figure
+                          Method canMoveRight : unknown
+                          arg  : unknown
+                            ident _field : .ru.dz.phantom.tetris.playingfield
+                        void  : void
+                          . : void
+                            ident _figure : .ru.dz.phantom.tetris.figure
+                            Method moveRight : unknown
+                            arg  : unknown
+                              ident _field : .ru.dz.phantom.tetris.playingfield
+                      break : void
+                  case  : void
+                    int const "4" : int const
+                throw  : void const
+                  string const "NotImplemented" : string const
+              default  : void
+            ,  : void
+              ,  : void
+                void  : void
+                  . : void
+                    this  : .ru.dz.phantom.tetris.mainmodule
+                    Method print : unknown
+                    arg  : unknown
+                      string const "Command received : UNKNOWN ( " : string const
+                void  : void
+                  . : void
+                    this  : .ru.dz.phantom.tetris.mainmodule
+                    Method print : unknown
+                    arg  : unknown
+                      . : string
+                        ident commandCode : int
+                        Method toString : unknown
+              void  : void
+                . : void
+                  this  : .ru.dz.phantom.tetris.mainmodule
+                  Method print : unknown
+                  arg  : unknown
+                    string const ")" : string const
+          break : void
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.tetris.mainmodule
+          Method print : unknown
+          arg  : unknown
+            string const "
+" : string const
+
+  Method void print( input: string ):
+    void  : void
+      . : unknown
+        ident _bootObject : unknown
+        Method (no. 16) : unknown
+        arg  : unknown
+          ident input : string
+
+  Method int isGameOver(  ):
+    return : void const
+      int const "0" : int const
+
+  Method int isLowerRowFilled(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : int
+              ident rowFilled : int
+              int const "1" : int const
+          void  : void
+            = : int
+              ident x : int
+              int const "0" : int const
+        do-while : unknown
+          bool and : int
+            < : int
+              ident x : int
+              . : int
+                ident _field : .ru.dz.phantom.tetris.playingfield
+                Method getWidth : unknown
+            ident rowFilled : int
+          ,  : unknown
+            if : unknown
+              == : int
+                . : int
+                  ident _field : .ru.dz.phantom.tetris.playingfield
+                  Method getBoxAt : unknown
+                  arg  : int
+                    ident x : int
+                  arg  : unknown
+                    int const "0" : int const
+                int const "0" : int const
+              void  : void
+                = : int
+                  ident rowFilled : int
+                  int const "0" : int const
+            void  : void
+              = : int
+                ident x : int
+                + : int
+                  ident x : int
+                  int const "1" : int const
+      return : void
+        ident rowFilled : int
+
+  Method void intro(  ):
+    ,  : void
+      void  : void
+        = : int
+          ident j : int
+          int const "0" : int const
+      do-while : unknown
+        < : int
+          ident j : int
+          int const "10" : int const
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  void  : void
+                    . : void
+                      ident _console : .internal.io.tty
+                      Method putws : unknown
+                      arg  : unknown
+                        string const "Loading.." : string const
+                  void  : void
+                    = : int
+                      ident rand : int
+                      . : int
+                        ident _utilites : .ru.dz.phantom.tetris.utilites
+                        Method generateRandom : unknown
+                        arg  : int
+                          int const "0" : int const
+                        arg  : unknown
+                          int const "1" : int const
+                void  : void
+                  . : void
+                    ident _console : .internal.io.tty
+                    Method putws : unknown
+                    arg  : unknown
+                      . : string
+                        ident rand : int
+                        Method toString : unknown
+              void  : void
+                . : void
+                  ident _console : .internal.io.tty
+                  Method putws : unknown
+                  arg  : unknown
+                    string const "
+" : string const
+            void  : void
+              = : int
+                ident j : int
+                + : int
+                  ident j : int
+                  int const "1" : int const
+          void  : void
+            . : void
+              ident _utilites : .ru.dz.phantom.tetris.utilites
+              Method sleep : unknown
+              arg  : unknown
+                int const "1" : int const
+
+  Method int isExitCommandReceived(  ):
+    return : void const
+      int const "0" : int const
+

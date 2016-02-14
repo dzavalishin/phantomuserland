@@ -1,0 +1,39 @@
+Class .ru.dz.windows.base
+  Field console
+  Field boot_object
+  Method void init( _console: .internal.io.tty, _booto: unknown ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : .internal.io.tty
+            ident console : .internal.io.tty
+            ident _console : .internal.io.tty
+        void  : void
+          = : unknown
+            ident boot_object : unknown
+            ident _booto : unknown
+      void  : void
+        . : void
+          ident console : .internal.io.tty
+          Method putws : unknown
+          arg  : unknown
+            string const " in root..." : string const
+
+  Method void gotoxy( x: int, y: int ):
+    void  : void
+      . : void
+        ident console : .internal.io.tty
+        Method gotoxy : unknown
+        arg  : int
+          ident x : int
+        arg  : unknown
+          ident y : int
+
+  Method void putws( s: string ):
+    void  : void
+      . : void
+        ident console : .internal.io.tty
+        Method putws : unknown
+        arg  : unknown
+          ident s : string
+

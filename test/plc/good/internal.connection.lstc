@@ -1,0 +1,38 @@
+Class version 20160114031914663
+
+method disconnect ordinal 9
+--
+  ret				//  @0
+--
+method end
+
+method equals ordinal 4
+--
+  ret				//  @0
+--
+method end
+
+method setCallback ordinal 12
+--
+  ret				//  @0
+--
+method end
+
+method invoke ordinal 11
+--
+  ret				//  @0
+--
+method end
+
+method block ordinal 13
+--
+  ret				//  @0
+--
+method end
+
+method connect ordinal 8
+--
+  ret				//  @0
+--
+method end
+

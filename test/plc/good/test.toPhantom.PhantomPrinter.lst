@@ -1,0 +1,26 @@
+Class .test.toPhantom.PhantomPrinter
+  Field console
+  Method void init( tt: .internal.io.tty ):
+    void  : void
+      = : .internal.io.tty
+        ident console : .internal.io.tty
+        ident tt : .internal.io.tty
+
+  Method void print( s: string ):
+    void  : void
+      . : void
+        ident console : .internal.io.tty
+        Method putws : unknown
+        arg  : unknown
+          ident s : string
+
+  Method void printInt( i: int ):
+    void  : void
+      . : void
+        ident console : .internal.io.tty
+        Method putws : unknown
+        arg  : unknown
+          . : string
+            ident i : int
+            Method toString : unknown
+

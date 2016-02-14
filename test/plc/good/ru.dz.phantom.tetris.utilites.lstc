@@ -1,0 +1,197 @@
+Class version 20160107083333916
+
+method sleep ordinal 16
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: sleep in .ru.dz.phantom.tetris.utilites"	//  @11
+  throw	//  @66
+_label_0:	//  @67
+  summon null	//  @67
+  ; Line 34	//  @68
+  summon this	//  @68
+  ; Line 34	//  @69
+  get o stk pos=0	//  @69
+  o2i	//  @74
+  ; Line 34	//  @75
+  const 1000	//  @75
+  ; Line 34	//  @80
+  imul	//  @80
+  i2o	//  @81
+  ; Line 34	//  @82
+  call m=18 nparm=1	//  @82
+  os drop	//  @84
+  ret	//  @85
+--
+method end
+
+method init ordinal 17
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: init in .ru.dz.phantom.tetris.utilites"	//  @11
+  throw	//  @65
+_label_0:	//  @66
+  summon null	//  @66
+  ; Line 9	//  @67
+  const 0	//  @67
+  i2o	//  @72
+  os dup	//  @73
+  save fld=0	//  @74
+  os drop	//  @76
+  ; Line 10	//  @77
+  get o stk pos=0	//  @77
+  os dup	//  @82
+  save fld=1	//  @83
+  os drop	//  @85
+  ; Line 10	//  @86
+  ret	//  @86
+--
+method end
+
+method sleepMilliseconds ordinal 18
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: sleepMilliseconds in .ru.dz.phantom.tetris.utilites"	//  @11
+  throw	//  @78
+_label_0:	//  @79
+  summon null	//  @79
+  ; Line 30	//  @80
+  load fld=1	//  @80
+  ; Line 30	//  @82
+  get o stk pos=0	//  @82
+  ; Line 30	//  @87
+  call m=21 nparm=1	//  @87
+  os drop	//  @89
+  ret	//  @90
+--
+method end
+
+method generateRandom ordinal 19
+--
+  const 2	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: generateRandom in .ru.dz.phantom.tetris.utilites"	//  @11
+  throw	//  @75
+_label_0:	//  @76
+  summon null	//  @76
+  summon null	//  @77
+  cons 0	//  @78
+  ; Line 18	//  @79
+  ; Line 14	//  @79
+  get o stk pos=1	//  @79
+  o2i	//  @84
+  ; Line 14	//  @85
+  get o stk pos=0	//  @85
+  o2i	//  @90
+  ; Line 14	//  @91
+  ile <=	//  @91
+  jz _label_1	//  @92
+  ; Line 15	//  @97
+  const "ArgumentException"	//  @97
+  ; Line 15	//  @119
+  throw	//  @119
+_label_1:	//  @120
+  ; Line 18	//  @120
+  load fld=0	//  @120
+  o2i	//  @122
+  ; Line 18	//  @123
+  const 11745	//  @123
+  ; Line 18	//  @128
+  isum	//  @128
+  ; Line 18	//  @129
+  load fld=0	//  @129
+  o2i	//  @131
+  ; Line 18	//  @132
+  const 5	//  @132
+  ; Line 18	//  @137
+  idivlu	//  @137
+  ; Line 18	//  @138
+  isublu	//  @138
+  i2o	//  @139
+  os dup	//  @140
+  save fld=0	//  @141
+  os drop	//  @143
+  ; Line 18	//  @144
+  ; Line 23	//  @144
+  ; Line 19	//  @144
+  load fld=0	//  @144
+  o2i	//  @146
+  ; Line 19	//  @147
+  const 60000	//  @147
+  ; Line 19	//  @152
+  igt >	//  @152
+  jz _label_3	//  @153
+  ; Line 20	//  @158
+  load fld=0	//  @158
+  o2i	//  @160
+  ; Line 20	//  @161
+  const 50000	//  @161
+  ; Line 20	//  @166
+  isublu	//  @166
+  i2o	//  @167
+  os dup	//  @168
+  save fld=0	//  @169
+  os drop	//  @171
+_label_3:	//  @172
+  ; Line 23	//  @172
+  ; Line 24	//  @172
+  load fld=0	//  @172
+  o2i	//  @174
+  ; Line 24	//  @175
+  get o stk pos=1	//  @175
+  o2i	//  @180
+  ; Line 24	//  @181
+  get o stk pos=0	//  @181
+  o2i	//  @186
+  ; Line 24	//  @187
+  isublu	//  @187
+  ; Line 24	//  @188
+  const 1	//  @188
+  ; Line 24	//  @193
+  isum	//  @193
+  ; Line 24	//  @194
+  idivlu	//  @194
+  is dup	//  @195
+  set i stk pos=0	//  @196
+  is drop	//  @201
+  ; Line 24	//  @202
+  ; Line 25	//  @202
+  get o stk pos=0	//  @202
+  o2i	//  @207
+  ; Line 25	//  @208
+  load fld=0	//  @208
+  o2i	//  @210
+  ; Line 25	//  @211
+  isum	//  @211
+  ; Line 25	//  @212
+  get i stk pos=0	//  @212
+  ; Line 25	//  @217
+  get o stk pos=1	//  @217
+  o2i	//  @222
+  ; Line 25	//  @223
+  get o stk pos=0	//  @223
+  o2i	//  @228
+  ; Line 25	//  @229
+  isublu	//  @229
+  ; Line 25	//  @230
+  const 1	//  @230
+  ; Line 25	//  @235
+  isum	//  @235
+  ; Line 25	//  @236
+  imul	//  @236
+  ; Line 25	//  @237
+  isublu	//  @237
+  i2o	//  @238
+  ; Line 25	//  @239
+  ret	//  @239
+  ; Line 25	//  @240
+  ret	//  @240
+--
+method end
+

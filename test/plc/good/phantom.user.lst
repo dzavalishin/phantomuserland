@@ -1,0 +1,5 @@
+Class .phantom.user
+  Method string getName(  ):
+    return : void const
+      string const "undefined.user" : string const
+

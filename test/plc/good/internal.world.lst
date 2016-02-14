@@ -1,0 +1,4 @@
+Class .internal.world
+  Method .internal.thread getMyThread(  ):
+  -- No code!
+

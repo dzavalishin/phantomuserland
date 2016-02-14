@@ -1,0 +1,8 @@
+Class version 20160114031912605
+
+method hasNext ordinal 16
+--
+  ret				//  @0
+--
+method end
+

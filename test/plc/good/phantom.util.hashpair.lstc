@@ -1,0 +1,104 @@
+Class version 20160114032154636
+
+method getKey ordinal 16
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getKey in .phantom.util.hashpair"	//  @11
+  throw				//  @59
+_label_0:	//  @60
+  ; Line 26			//  @60
+  load fld=0			//  @60
+  ; Line 26			//  @62
+  ret				//  @62
+  ret				//  @63
+--
+method end
+
+method getVal ordinal 17
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getVal in .phantom.util.hashpair"	//  @11
+  throw				//  @59
+_label_0:	//  @60
+  ; Line 36			//  @60
+  load fld=1			//  @60
+  ; Line 36			//  @62
+  ret				//  @62
+  ret				//  @63
+--
+method end
+
+method setNext ordinal 18
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: setNext in .phantom.util.hashpair"	//  @11
+  throw				//  @60
+_label_0:	//  @61
+  summon null			//  @61
+  ; Line 42			//  @62
+  get o stk pos=0			//  @62
+  os dup				//  @67
+  save fld=2			//  @68
+  os drop				//  @70
+  ret				//  @71
+--
+method end
+
+method getNext ordinal 19
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getNext in .phantom.util.hashpair"	//  @11
+  throw				//  @60
+_label_0:	//  @61
+  ; Line 47			//  @61
+  load fld=2			//  @61
+  ; Line 47			//  @63
+  ret				//  @63
+  ret				//  @64
+--
+method end
+
+method setVal ordinal 20
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: setVal in .phantom.util.hashpair"	//  @11
+  throw				//  @59
+_label_0:	//  @60
+  summon null			//  @60
+  ; Line 31			//  @61
+  get o stk pos=0			//  @61
+  os dup				//  @66
+  save fld=1			//  @67
+  os drop				//  @69
+  ret				//  @70
+--
+method end
+
+method setKey ordinal 21
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: setKey in .phantom.util.hashpair"	//  @11
+  throw				//  @59
+_label_0:	//  @60
+  summon null			//  @60
+  ; Line 21			//  @61
+  get o stk pos=0			//  @61
+  os dup				//  @66
+  save fld=0			//  @67
+  os drop				//  @69
+  ret				//  @70
+--
+method end
+

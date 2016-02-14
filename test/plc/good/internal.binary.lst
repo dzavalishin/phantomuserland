@@ -1,0 +1,10 @@
+Class .internal.binary
+  Method void setByte( index: int, value: int ):
+  -- No code!
+
+  Method int getByte( index: int ):
+  -- No code!
+
+  Method void setRange( from: .internal.binary, toPos: int, fromPos: int, ln: int ):
+  -- No code!
+

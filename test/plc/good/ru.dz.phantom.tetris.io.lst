@@ -1,0 +1,69 @@
+Class .ru.dz.phantom.tetris.io
+  Field maxLastKeyPressedCode
+  Field _utilites
+  Field minLastKeyPressedCode
+  Field lastKeyPressed
+  Method void init( utilites: .ru.dz.phantom.tetris.utilites ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : .ru.dz.phantom.tetris.utilites
+              ident _utilites : .ru.dz.phantom.tetris.utilites
+              ident utilites : .ru.dz.phantom.tetris.utilites
+          void  : void
+            = : int
+              ident lastKeyPressed : int
+              int const "0" : int const
+        void  : void
+          = : int
+            ident minLastKeyPressedCode : int
+            int const "0" : int const
+      void  : void
+        = : int
+          ident maxLastKeyPressedCode : int
+          int const "4" : int const
+
+  Method int isAnyKeyPressed(  ):
+    ,  : unknown
+      if : unknown
+        == : int
+          . : int
+            ident _utilites : .ru.dz.phantom.tetris.utilites
+            Method generateRandom : unknown
+            arg  : int
+              int const "0" : int const
+            arg  : unknown
+              int const "5" : int const
+          int const "0" : int const
+        ,  : void
+          ,  : void
+            void  : void
+              = : int
+                ident lastKeyPressed : int
+                . : int
+                  ident _utilites : .ru.dz.phantom.tetris.utilites
+                  Method generateRandom : unknown
+                  arg  : int
+                    ident minLastKeyPressedCode : int
+                  arg  : unknown
+                    ident maxLastKeyPressedCode : int
+            if : unknown
+              bool or : int
+                > : int
+                  ident lastKeyPressed : int
+                  ident maxLastKeyPressedCode : int
+                < : int
+                  ident lastKeyPressed : int
+                  ident minLastKeyPressedCode : int
+              throw  : void const
+                string const "InvalidOperation : lastKeyPressed has invalid value." : string const
+          return : void const
+            int const "1" : int const
+      return : void const
+        int const "0" : int const
+
+  Method int getLastPressedKey(  ):
+    return : void
+      ident lastKeyPressed : int
+

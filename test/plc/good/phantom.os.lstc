@@ -1,0 +1,92 @@
+Class version 20160114032155699
+
+method getTimeServer ordinal 16
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getTimeServer in .phantom.os"	//  @11
+  throw				//  @55
+_label_0:	//  @56
+  ; Line 45			//  @56
+  summon this			//  @56
+  call m=17 nparm=0		//  @57
+  os drop				//  @59
+  ; Line 45			//  @60
+  load fld=0			//  @60
+  call m=16 nparm=0		//  @62
+  ; Line 45			//  @64
+  ret				//  @64
+  ; Line 45			//  @65
+  ret				//  @65
+--
+method end
+
+method init ordinal 17
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: init in .phantom.os"	//  @11
+  throw				//  @46
+_label_0:	//  @47
+  summon null			//  @47
+  summon null			//  @48
+  ; Line 43			//  @49
+  ; Line 33			//  @49
+  load fld=0			//  @49
+  ; Line 33			//  @51
+  summon null			//  @51
+  ; Line 33			//  @52
+  ptr neq				//  @52
+  jz _label_1			//  @53
+  summon class internal.world	//  @58
+  new				//  @78
+  os dup				//  @79
+  set o stk pos=0			//  @80
+  os drop				//  @85
+  ; Line 39			//  @86
+  get o stk pos=0			//  @86
+  call m=8 nparm=0		//  @91
+  os dup				//  @93
+  set o stk pos=1			//  @94
+  os drop				//  @99
+  ; Line 39			//  @100
+  ; Line 41			//  @100
+  get o stk pos=1			//  @100
+  call m=14 nparm=0		//  @105
+  os dup				//  @107
+  save fld=0			//  @108
+  os drop				//  @110
+  ; Line 41			//  @111
+_label_1:	//  @111
+  ret				//  @111
+--
+method end
+
+method getKernelEnvironmentValue ordinal 18
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getKernelEnvironmentValue in .phantom.os"	//  @11
+  throw				//  @67
+_label_0:	//  @68
+  summon null			//  @68
+  ; Line 49			//  @69
+  summon this			//  @69
+  call m=17 nparm=0		//  @70
+  os drop				//  @72
+  ; Line 50			//  @73
+  load fld=0			//  @73
+  ; Line 50			//  @75
+  get o stk pos=0			//  @75
+  ; Line 50			//  @80
+  call m=18 nparm=1		//  @80
+  ; Line 50			//  @82
+  ret				//  @82
+  ; Line 50			//  @83
+  ret				//  @83
+--
+method end
+

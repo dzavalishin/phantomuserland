@@ -1,0 +1,40 @@
+Class .phantom.environment
+  Field env
+  Method void init(  ):
+    if : unknown
+      :== : unknown
+        ident env : .phantom.util.map
+        null : .internal.object const
+      void  : void
+        = : .phantom.util.map
+          ident env : .phantom.util.map
+          new .phantom.util.map : .phantom.util.map
+
+  Method int set( key: string, val: .internal.object ):
+    ,  : void
+      void  : void
+        . : void
+          this  : .phantom.environment
+          Method init : unknown
+      return : void
+        . : int
+          ident env : .phantom.util.map
+          Method put : unknown
+          arg  : string
+            ident key : string
+          arg  : unknown
+            ident val : .internal.object
+
+  Method .internal.object get( key: string ):
+    ,  : void
+      void  : void
+        . : void
+          this  : .phantom.environment
+          Method init : unknown
+      return : void
+        . : .internal.object
+          ident env : .phantom.util.map
+          Method get : unknown
+          arg  : unknown
+            ident key : string
+

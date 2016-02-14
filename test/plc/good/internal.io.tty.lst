@@ -1,0 +1,25 @@
+Class .internal.io.tty
+  Method void gotoxy( x: int, y: int ):
+  -- No code!
+
+  Method void debug( o: .internal.object ):
+  -- No code!
+
+  Method void moveWindow( x: int, y: int ):
+  -- No code!
+
+  Method void setcolor( color: int ):
+  -- No code!
+
+  Method void clear(  ):
+  -- No code!
+
+  Method string getwc(  ):
+  -- No code!
+
+  Method void setTitle( title: string ):
+  -- No code!
+
+  Method void putws( text: string ):
+  -- No code!
+

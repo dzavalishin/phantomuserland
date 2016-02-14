@@ -1,0 +1,2413 @@
+Class version 20160107083334348
+
+method isVisibleAtPlayground ordinal 16
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: isVisibleAtPlayground in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @80
+_label_0:	//  @81
+  summon null	//  @81
+  cons 0	//  @82
+  cons 0	//  @83
+  cons 0	//  @84
+  cons 0	//  @85
+  cons 0	//  @86
+  ; Line 82	//  @87
+  const 0	//  @87
+  is dup	//  @92
+  set i stk pos=2	//  @93
+  is drop	//  @98
+  ; Line 83	//  @99
+  const 0	//  @99
+  is dup	//  @104
+  set i stk pos=1	//  @105
+  is drop	//  @110
+  ; Line 83	//  @111
+  ; Line 100	//  @111
+_label_1:	//  @111
+  ; Line 84	//  @111
+  get i stk pos=1	//  @111
+  ; Line 84	//  @116
+  load fld=2	//  @116
+  o2i	//  @118
+  ; Line 84	//  @119
+  ilt <	//  @119
+  ; Line 84	//  @120
+  get i stk pos=2	//  @120
+  ; Line 84	//  @125
+  const 0	//  @125
+  isublu	//  @130
+  lognot	//  @131
+  ; Line 84	//  @132
+  logand &&	//  @132
+  jz _label_2	//  @133
+  ; Line 85	//  @138
+  const 0	//  @138
+  is dup	//  @143
+  set i stk pos=0	//  @144
+  is drop	//  @149
+  ; Line 98	//  @150
+_label_3:	//  @150
+  ; Line 86	//  @150
+  get i stk pos=0	//  @150
+  ; Line 86	//  @155
+  load fld=2	//  @155
+  o2i	//  @157
+  ; Line 86	//  @158
+  ilt <	//  @158
+  ; Line 86	//  @159
+  get i stk pos=2	//  @159
+  ; Line 86	//  @164
+  const 0	//  @164
+  isublu	//  @169
+  lognot	//  @170
+  ; Line 86	//  @171
+  logand &&	//  @171
+  jz _label_4	//  @172
+  ; Line 97	//  @177
+  ; Line 87	//  @177
+  load fld=0	//  @177
+  ; Line 87	//  @179
+  get i stk pos=0	//  @179
+  i2o	//  @184
+  ; Line 87	//  @185
+  get i stk pos=1	//  @185
+  i2o	//  @190
+  ; Line 87	//  @191
+  ; Line 87	//  @191
+  call m=22 nparm=2	//  @191
+  ; Line 87	//  @193
+  const 0	//  @193
+  i2o	//  @198
+  call m=4 nparm=1	//  @199
+  o2i	//  @201
+  lognot	//  @202
+  jz _label_5	//  @203
+  ; Line 90	//  @208
+  summon this	//  @208
+  ; Line 90	//  @209
+  get i stk pos=0	//  @209
+  i2o	//  @214
+  ; Line 90	//  @215
+  call m=25 nparm=1	//  @215
+  o2i	//  @217
+  is dup	//  @218
+  set i stk pos=3	//  @219
+  is drop	//  @224
+  ; Line 91	//  @225
+  summon this	//  @225
+  ; Line 91	//  @226
+  get i stk pos=1	//  @226
+  i2o	//  @231
+  ; Line 91	//  @232
+  call m=24 nparm=1	//  @232
+  o2i	//  @234
+  is dup	//  @235
+  set i stk pos=4	//  @236
+  is drop	//  @241
+  ; Line 91	//  @242
+  ; Line 96	//  @242
+  ; Line 93	//  @242
+  get i stk pos=3	//  @242
+  ; Line 93	//  @247
+  const 0	//  @247
+  ; Line 93	//  @252
+  ige >=	//  @252
+  ; Line 93	//  @253
+  get i stk pos=3	//  @253
+  ; Line 93	//  @258
+  get o stk pos=0	//  @258
+  call m=20 nparm=0	//  @263
+  o2i	//  @265
+  ; Line 93	//  @266
+  ilt <	//  @266
+  ; Line 93	//  @267
+  logand &&	//  @267
+  ; Line 93	//  @268
+  get i stk pos=4	//  @268
+  ; Line 93	//  @273
+  const 0	//  @273
+  ; Line 93	//  @278
+  ige >=	//  @278
+  ; Line 93	//  @279
+  logand &&	//  @279
+  ; Line 93	//  @280
+  get i stk pos=4	//  @280
+  ; Line 93	//  @285
+  get o stk pos=0	//  @285
+  call m=17 nparm=0	//  @290
+  o2i	//  @292
+  ; Line 93	//  @293
+  ilt <	//  @293
+  ; Line 93	//  @294
+  logand &&	//  @294
+  jz _label_7	//  @295
+  ; Line 94	//  @300
+  const 1	//  @300
+  is dup	//  @305
+  set i stk pos=2	//  @306
+  is drop	//  @311
+_label_7:	//  @312
+  ; Line 96	//  @312
+_label_5:	//  @312
+  ; Line 97	//  @312
+  get i stk pos=0	//  @312
+  ; Line 97	//  @317
+  const 1	//  @317
+  ; Line 97	//  @322
+  isum	//  @322
+  is dup	//  @323
+  set i stk pos=0	//  @324
+  is drop	//  @329
+  ; Line 97	//  @330
+  jmp _label_3	//  @330
+_label_4:	//  @335
+  ; Line 98	//  @335
+  ; Line 99	//  @335
+  get i stk pos=1	//  @335
+  ; Line 99	//  @340
+  const 1	//  @340
+  ; Line 99	//  @345
+  isum	//  @345
+  is dup	//  @346
+  set i stk pos=1	//  @347
+  is drop	//  @352
+  ; Line 99	//  @353
+  jmp _label_1	//  @353
+_label_2:	//  @358
+  ; Line 100	//  @358
+  ; Line 102	//  @358
+  get i stk pos=2	//  @358
+  i2o	//  @363
+  ; Line 102	//  @364
+  ret	//  @364
+  ; Line 102	//  @365
+  ret	//  @365
+--
+method end
+
+method convertToVirtualX ordinal 17
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: convertToVirtualX in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @76
+_label_0:	//  @77
+  summon null	//  @77
+  ; Line 250	//  @78
+  get o stk pos=0	//  @78
+  o2i	//  @83
+  ; Line 250	//  @84
+  load fld=2	//  @84
+  o2i	//  @86
+  ; Line 250	//  @87
+  const 2	//  @87
+  ; Line 250	//  @92
+  idivlu	//  @92
+  ; Line 250	//  @93
+  isublu	//  @93
+  i2o	//  @94
+  ; Line 250	//  @95
+  ret	//  @95
+  ret	//  @96
+--
+method end
+
+method rotate ordinal 18
+--
+  const 2	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: rotate in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @65
+_label_0:	//  @66
+  summon null	//  @66
+  summon null	//  @67
+  cons 0	//  @68
+  cons 0	//  @69
+  ; Line 334	//  @70
+  ; Line 330	//  @70
+  summon this	//  @70
+  ; Line 330	//  @71
+  get o stk pos=0	//  @71
+  ; Line 330	//  @76
+  get o stk pos=1	//  @76
+  ; Line 330	//  @81
+  ; Line 330	//  @81
+  call m=43 nparm=2	//  @81
+  o2i	//  @90
+  ; Line 330	//  @91
+  lognot	//  @91
+  jz _label_1	//  @92
+  ; Line 331	//  @97
+  const "InvalidOperation : cannot rotate a figure."	//  @97
+  ; Line 331	//  @144
+  throw	//  @144
+_label_1:	//  @145
+  ; Line 336	//  @145
+  const 0	//  @145
+  is dup	//  @150
+  set i stk pos=1	//  @151
+  is drop	//  @156
+  ; Line 336	//  @157
+  ; Line 344	//  @157
+_label_3:	//  @157
+  ; Line 337	//  @157
+  get i stk pos=1	//  @157
+  ; Line 337	//  @162
+  load fld=2	//  @162
+  o2i	//  @164
+  ; Line 337	//  @165
+  ilt <	//  @165
+  jz _label_4	//  @166
+  ; Line 338	//  @171
+  const 0	//  @171
+  is dup	//  @176
+  set i stk pos=0	//  @177
+  is drop	//  @182
+  ; Line 342	//  @183
+_label_5:	//  @183
+  ; Line 339	//  @183
+  get i stk pos=0	//  @183
+  ; Line 339	//  @188
+  load fld=2	//  @188
+  o2i	//  @190
+  ; Line 339	//  @191
+  ilt <	//  @191
+  jz _label_6	//  @192
+  ; Line 340	//  @197
+  load fld=0	//  @197
+  ; Line 340	//  @199
+  get i stk pos=0	//  @199
+  i2o	//  @204
+  ; Line 340	//  @205
+  get i stk pos=1	//  @205
+  i2o	//  @210
+  ; Line 340	//  @211
+  load fld=1	//  @211
+  ; Line 340	//  @213
+  get i stk pos=0	//  @213
+  i2o	//  @218
+  ; Line 340	//  @219
+  get i stk pos=1	//  @219
+  i2o	//  @224
+  ; Line 340	//  @225
+  ; Line 340	//  @225
+  call m=22 nparm=2	//  @225
+  ; Line 340	//  @227
+  ; Line 340	//  @227
+  ; Line 340	//  @227
+  call m=19 nparm=3	//  @227
+  os drop	//  @229
+  ; Line 341	//  @230
+  get i stk pos=0	//  @230
+  ; Line 341	//  @235
+  const 1	//  @235
+  ; Line 341	//  @240
+  isum	//  @240
+  is dup	//  @241
+  set i stk pos=0	//  @242
+  is drop	//  @247
+  ; Line 341	//  @248
+  jmp _label_5	//  @248
+_label_6:	//  @253
+  ; Line 342	//  @253
+  ; Line 343	//  @253
+  get i stk pos=1	//  @253
+  ; Line 343	//  @258
+  const 1	//  @258
+  ; Line 343	//  @263
+  isum	//  @263
+  is dup	//  @264
+  set i stk pos=1	//  @265
+  is drop	//  @270
+  ; Line 343	//  @271
+  jmp _label_3	//  @271
+_label_4:	//  @276
+  ; Line 344	//  @276
+  ret	//  @276
+--
+method end
+
+method isFullyVisibleAtPlayground ordinal 19
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: isFullyVisibleAtPlayground in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @85
+_label_0:	//  @86
+  summon null	//  @86
+  cons 0	//  @87
+  cons 0	//  @88
+  cons 0	//  @89
+  cons 0	//  @90
+  cons 0	//  @91
+  ; Line 109	//  @92
+  const 1	//  @92
+  is dup	//  @97
+  set i stk pos=2	//  @98
+  is drop	//  @103
+  ; Line 110	//  @104
+  const 0	//  @104
+  is dup	//  @109
+  set i stk pos=1	//  @110
+  is drop	//  @115
+  ; Line 110	//  @116
+  ; Line 127	//  @116
+_label_1:	//  @116
+  ; Line 111	//  @116
+  get i stk pos=1	//  @116
+  ; Line 111	//  @121
+  load fld=2	//  @121
+  o2i	//  @123
+  ; Line 111	//  @124
+  ilt <	//  @124
+  ; Line 111	//  @125
+  get i stk pos=2	//  @125
+  ; Line 111	//  @130
+  const 1	//  @130
+  isublu	//  @135
+  lognot	//  @136
+  ; Line 111	//  @137
+  logand &&	//  @137
+  jz _label_2	//  @138
+  ; Line 112	//  @143
+  const 0	//  @143
+  is dup	//  @148
+  set i stk pos=0	//  @149
+  is drop	//  @154
+  ; Line 125	//  @155
+_label_3:	//  @155
+  ; Line 113	//  @155
+  get i stk pos=0	//  @155
+  ; Line 113	//  @160
+  load fld=2	//  @160
+  o2i	//  @162
+  ; Line 113	//  @163
+  ilt <	//  @163
+  ; Line 113	//  @164
+  get i stk pos=2	//  @164
+  ; Line 113	//  @169
+  const 1	//  @169
+  isublu	//  @174
+  lognot	//  @175
+  ; Line 113	//  @176
+  logand &&	//  @176
+  jz _label_4	//  @177
+  ; Line 124	//  @182
+  ; Line 114	//  @182
+  load fld=0	//  @182
+  ; Line 114	//  @184
+  get i stk pos=0	//  @184
+  i2o	//  @189
+  ; Line 114	//  @190
+  get i stk pos=1	//  @190
+  i2o	//  @195
+  ; Line 114	//  @196
+  ; Line 114	//  @196
+  call m=22 nparm=2	//  @196
+  ; Line 114	//  @198
+  const 0	//  @198
+  i2o	//  @203
+  call m=4 nparm=1	//  @204
+  o2i	//  @206
+  lognot	//  @207
+  jz _label_5	//  @208
+  ; Line 117	//  @213
+  summon this	//  @213
+  ; Line 117	//  @214
+  get i stk pos=0	//  @214
+  i2o	//  @219
+  ; Line 117	//  @220
+  call m=25 nparm=1	//  @220
+  o2i	//  @222
+  is dup	//  @223
+  set i stk pos=3	//  @224
+  is drop	//  @229
+  ; Line 118	//  @230
+  summon this	//  @230
+  ; Line 118	//  @231
+  get i stk pos=1	//  @231
+  i2o	//  @236
+  ; Line 118	//  @237
+  call m=24 nparm=1	//  @237
+  o2i	//  @239
+  is dup	//  @240
+  set i stk pos=4	//  @241
+  is drop	//  @246
+  ; Line 118	//  @247
+  ; Line 123	//  @247
+  ; Line 120	//  @247
+  get i stk pos=3	//  @247
+  ; Line 120	//  @252
+  const 0	//  @252
+  ; Line 120	//  @257
+  ige >=	//  @257
+  ; Line 120	//  @258
+  get i stk pos=3	//  @258
+  ; Line 120	//  @263
+  get o stk pos=0	//  @263
+  call m=20 nparm=0	//  @268
+  o2i	//  @270
+  ; Line 120	//  @271
+  ilt <	//  @271
+  ; Line 120	//  @272
+  logand &&	//  @272
+  ; Line 120	//  @273
+  get i stk pos=4	//  @273
+  ; Line 120	//  @278
+  const 0	//  @278
+  ; Line 120	//  @283
+  ige >=	//  @283
+  ; Line 120	//  @284
+  logand &&	//  @284
+  ; Line 120	//  @285
+  get i stk pos=4	//  @285
+  ; Line 120	//  @290
+  get o stk pos=0	//  @290
+  call m=17 nparm=0	//  @295
+  o2i	//  @297
+  ; Line 120	//  @298
+  ilt <	//  @298
+  ; Line 120	//  @299
+  logand &&	//  @299
+  ; Line 120	//  @300
+  lognot	//  @300
+  jz _label_7	//  @301
+  ; Line 121	//  @306
+  const 0	//  @306
+  is dup	//  @311
+  set i stk pos=2	//  @312
+  is drop	//  @317
+_label_7:	//  @318
+  ; Line 123	//  @318
+_label_5:	//  @318
+  ; Line 124	//  @318
+  get i stk pos=0	//  @318
+  ; Line 124	//  @323
+  const 1	//  @323
+  ; Line 124	//  @328
+  isum	//  @328
+  is dup	//  @329
+  set i stk pos=0	//  @330
+  is drop	//  @335
+  ; Line 124	//  @336
+  jmp _label_3	//  @336
+_label_4:	//  @341
+  ; Line 125	//  @341
+  ; Line 126	//  @341
+  get i stk pos=1	//  @341
+  ; Line 126	//  @346
+  const 1	//  @346
+  ; Line 126	//  @351
+  isum	//  @351
+  is dup	//  @352
+  set i stk pos=1	//  @353
+  is drop	//  @358
+  ; Line 126	//  @359
+  jmp _label_1	//  @359
+_label_2:	//  @364
+  ; Line 127	//  @364
+  ; Line 129	//  @364
+  get i stk pos=2	//  @364
+  i2o	//  @369
+  ; Line 129	//  @370
+  ret	//  @370
+  ; Line 129	//  @371
+  ret	//  @371
+--
+method end
+
+method canMoveDown ordinal 20
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: canMoveDown in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @70
+_label_0:	//  @71
+  summon null	//  @71
+  cons 0	//  @72
+  cons 0	//  @73
+  cons 0	//  @74
+  cons 0	//  @75
+  cons 0	//  @76
+  ; Line 134	//  @77
+  const 1	//  @77
+  is dup	//  @82
+  set i stk pos=0	//  @83
+  is drop	//  @88
+  ; Line 137	//  @89
+  const 0	//  @89
+  is dup	//  @94
+  set i stk pos=2	//  @95
+  is drop	//  @100
+  ; Line 137	//  @101
+  ; Line 158	//  @101
+_label_1:	//  @101
+  ; Line 138	//  @101
+  get i stk pos=2	//  @101
+  ; Line 138	//  @106
+  load fld=2	//  @106
+  o2i	//  @108
+  ; Line 138	//  @109
+  ilt <	//  @109
+  ; Line 138	//  @110
+  get i stk pos=0	//  @110
+  ; Line 138	//  @115
+  const 1	//  @115
+  isublu	//  @120
+  lognot	//  @121
+  ; Line 138	//  @122
+  logand &&	//  @122
+  jz _label_2	//  @123
+  ; Line 139	//  @128
+  const 0	//  @128
+  is dup	//  @133
+  set i stk pos=1	//  @134
+  is drop	//  @139
+  ; Line 156	//  @140
+_label_3:	//  @140
+  ; Line 140	//  @140
+  get i stk pos=1	//  @140
+  ; Line 140	//  @145
+  load fld=2	//  @145
+  o2i	//  @147
+  ; Line 140	//  @148
+  ilt <	//  @148
+  ; Line 140	//  @149
+  get i stk pos=0	//  @149
+  ; Line 140	//  @154
+  const 1	//  @154
+  isublu	//  @159
+  lognot	//  @160
+  ; Line 140	//  @161
+  logand &&	//  @161
+  jz _label_4	//  @162
+  ; Line 155	//  @167
+  ; Line 141	//  @167
+  load fld=0	//  @167
+  ; Line 141	//  @169
+  get i stk pos=1	//  @169
+  i2o	//  @174
+  ; Line 141	//  @175
+  get i stk pos=2	//  @175
+  i2o	//  @180
+  ; Line 141	//  @181
+  ; Line 141	//  @181
+  call m=22 nparm=2	//  @181
+  ; Line 141	//  @183
+  const 0	//  @183
+  i2o	//  @188
+  call m=4 nparm=1	//  @189
+  o2i	//  @191
+  lognot	//  @192
+  jz _label_5	//  @193
+  ; Line 145	//  @198
+  get i stk pos=1	//  @198
+  is dup	//  @203
+  set i stk pos=3	//  @204
+  is drop	//  @209
+  ; Line 146	//  @210
+  get i stk pos=2	//  @210
+  ; Line 146	//  @215
+  const 1	//  @215
+  ; Line 146	//  @220
+  isublu	//  @220
+  is dup	//  @221
+  set i stk pos=4	//  @222
+  is drop	//  @227
+  ; Line 146	//  @228
+  ; Line 148	//  @228
+  summon this	//  @228
+  ; Line 148	//  @229
+  get i stk pos=3	//  @229
+  i2o	//  @234
+  ; Line 148	//  @235
+  call m=25 nparm=1	//  @235
+  o2i	//  @237
+  is dup	//  @238
+  set i stk pos=3	//  @239
+  is drop	//  @244
+  ; Line 148	//  @245
+  ; Line 149	//  @245
+  summon this	//  @245
+  ; Line 149	//  @246
+  get i stk pos=4	//  @246
+  i2o	//  @251
+  ; Line 149	//  @252
+  call m=24 nparm=1	//  @252
+  o2i	//  @254
+  is dup	//  @255
+  set i stk pos=4	//  @256
+  is drop	//  @261
+  ; Line 149	//  @262
+  ; Line 154	//  @262
+  ; Line 151	//  @262
+  summon this	//  @262
+  ; Line 151	//  @263
+  get o stk pos=0	//  @263
+  ; Line 151	//  @268
+  get i stk pos=3	//  @268
+  i2o	//  @273
+  ; Line 151	//  @274
+  get i stk pos=4	//  @274
+  i2o	//  @279
+  ; Line 151	//  @280
+  ; Line 151	//  @280
+  ; Line 151	//  @280
+  call m=27 nparm=3	//  @280
+  o2i	//  @282
+  ; Line 151	//  @283
+  lognot	//  @283
+  jz _label_7	//  @284
+  ; Line 152	//  @289
+  const 0	//  @289
+  is dup	//  @294
+  set i stk pos=0	//  @295
+  is drop	//  @300
+_label_7:	//  @301
+  ; Line 154	//  @301
+_label_5:	//  @301
+  ; Line 155	//  @301
+  const 1	//  @301
+  ; Line 155	//  @306
+  get i stk pos=1	//  @306
+  ; Line 155	//  @311
+  isum	//  @311
+  is dup	//  @312
+  set i stk pos=1	//  @313
+  is drop	//  @318
+  ; Line 155	//  @319
+  jmp _label_3	//  @319
+_label_4:	//  @324
+  ; Line 156	//  @324
+  ; Line 157	//  @324
+  get i stk pos=2	//  @324
+  ; Line 157	//  @329
+  const 1	//  @329
+  ; Line 157	//  @334
+  isum	//  @334
+  is dup	//  @335
+  set i stk pos=2	//  @336
+  is drop	//  @341
+  ; Line 157	//  @342
+  jmp _label_1	//  @342
+_label_2:	//  @347
+  ; Line 158	//  @347
+  ; Line 159	//  @347
+  get i stk pos=0	//  @347
+  i2o	//  @352
+  ; Line 159	//  @353
+  ret	//  @353
+  ; Line 159	//  @354
+  ret	//  @354
+--
+method end
+
+method convertToVirtualY ordinal 21
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: convertToVirtualY in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @76
+_label_0:	//  @77
+  summon null	//  @77
+  ; Line 260	//  @78
+  get o stk pos=0	//  @78
+  o2i	//  @83
+  ; Line 260	//  @84
+  load fld=2	//  @84
+  o2i	//  @86
+  ; Line 260	//  @87
+  const 2	//  @87
+  ; Line 260	//  @92
+  idivlu	//  @92
+  ; Line 260	//  @93
+  isublu	//  @93
+  i2o	//  @94
+  ; Line 260	//  @95
+  ret	//  @95
+  ret	//  @96
+--
+method end
+
+method rotateLeft ordinal 22
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: rotateLeft in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @69
+_label_0:	//  @70
+  summon null	//  @70
+  ; Line 348	//  @71
+  summon this	//  @71
+  ; Line 348	//  @72
+  get o stk pos=0	//  @72
+  ; Line 348	//  @77
+  const 1	//  @77
+  i2o	//  @82
+  ; Line 348	//  @83
+  ; Line 348	//  @83
+  call m=18 nparm=2	//  @83
+  os drop	//  @85
+  ret	//  @86
+--
+method end
+
+method canMoveRight ordinal 23
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: canMoveRight in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @71
+_label_0:	//  @72
+  summon null	//  @72
+  cons 0	//  @73
+  cons 0	//  @74
+  cons 0	//  @75
+  cons 0	//  @76
+  cons 0	//  @77
+  ; Line 210	//  @78
+  const 1	//  @78
+  is dup	//  @83
+  set i stk pos=0	//  @84
+  is drop	//  @89
+  ; Line 213	//  @90
+  const 0	//  @90
+  is dup	//  @95
+  set i stk pos=2	//  @96
+  is drop	//  @101
+  ; Line 213	//  @102
+  ; Line 234	//  @102
+_label_1:	//  @102
+  ; Line 214	//  @102
+  get i stk pos=2	//  @102
+  ; Line 214	//  @107
+  load fld=2	//  @107
+  o2i	//  @109
+  ; Line 214	//  @110
+  ilt <	//  @110
+  ; Line 214	//  @111
+  get i stk pos=0	//  @111
+  ; Line 214	//  @116
+  const 1	//  @116
+  isublu	//  @121
+  lognot	//  @122
+  ; Line 214	//  @123
+  logand &&	//  @123
+  jz _label_2	//  @124
+  ; Line 215	//  @129
+  const 0	//  @129
+  is dup	//  @134
+  set i stk pos=1	//  @135
+  is drop	//  @140
+  ; Line 232	//  @141
+_label_3:	//  @141
+  ; Line 216	//  @141
+  get i stk pos=1	//  @141
+  ; Line 216	//  @146
+  load fld=2	//  @146
+  o2i	//  @148
+  ; Line 216	//  @149
+  ilt <	//  @149
+  ; Line 216	//  @150
+  get i stk pos=0	//  @150
+  ; Line 216	//  @155
+  const 1	//  @155
+  isublu	//  @160
+  lognot	//  @161
+  ; Line 216	//  @162
+  logand &&	//  @162
+  jz _label_4	//  @163
+  ; Line 231	//  @168
+  ; Line 217	//  @168
+  load fld=0	//  @168
+  ; Line 217	//  @170
+  get i stk pos=1	//  @170
+  i2o	//  @175
+  ; Line 217	//  @176
+  get i stk pos=2	//  @176
+  i2o	//  @181
+  ; Line 217	//  @182
+  ; Line 217	//  @182
+  call m=22 nparm=2	//  @182
+  ; Line 217	//  @184
+  const 0	//  @184
+  i2o	//  @189
+  call m=4 nparm=1	//  @190
+  o2i	//  @192
+  lognot	//  @193
+  jz _label_5	//  @194
+  ; Line 221	//  @199
+  get i stk pos=1	//  @199
+  ; Line 221	//  @204
+  const 1	//  @204
+  ; Line 221	//  @209
+  isum	//  @209
+  is dup	//  @210
+  set i stk pos=3	//  @211
+  is drop	//  @216
+  ; Line 222	//  @217
+  get i stk pos=2	//  @217
+  is dup	//  @222
+  set i stk pos=4	//  @223
+  is drop	//  @228
+  ; Line 222	//  @229
+  ; Line 224	//  @229
+  summon this	//  @229
+  ; Line 224	//  @230
+  get i stk pos=3	//  @230
+  i2o	//  @235
+  ; Line 224	//  @236
+  call m=25 nparm=1	//  @236
+  o2i	//  @238
+  is dup	//  @239
+  set i stk pos=3	//  @240
+  is drop	//  @245
+  ; Line 224	//  @246
+  ; Line 225	//  @246
+  summon this	//  @246
+  ; Line 225	//  @247
+  get i stk pos=4	//  @247
+  i2o	//  @252
+  ; Line 225	//  @253
+  call m=24 nparm=1	//  @253
+  o2i	//  @255
+  is dup	//  @256
+  set i stk pos=4	//  @257
+  is drop	//  @262
+  ; Line 225	//  @263
+  ; Line 230	//  @263
+  ; Line 227	//  @263
+  summon this	//  @263
+  ; Line 227	//  @264
+  get o stk pos=0	//  @264
+  ; Line 227	//  @269
+  get i stk pos=3	//  @269
+  i2o	//  @274
+  ; Line 227	//  @275
+  get i stk pos=4	//  @275
+  i2o	//  @280
+  ; Line 227	//  @281
+  ; Line 227	//  @281
+  ; Line 227	//  @281
+  call m=27 nparm=3	//  @281
+  o2i	//  @283
+  ; Line 227	//  @284
+  lognot	//  @284
+  jz _label_7	//  @285
+  ; Line 228	//  @290
+  const 0	//  @290
+  is dup	//  @295
+  set i stk pos=0	//  @296
+  is drop	//  @301
+_label_7:	//  @302
+  ; Line 230	//  @302
+_label_5:	//  @302
+  ; Line 231	//  @302
+  const 1	//  @302
+  ; Line 231	//  @307
+  get i stk pos=1	//  @307
+  ; Line 231	//  @312
+  isum	//  @312
+  is dup	//  @313
+  set i stk pos=1	//  @314
+  is drop	//  @319
+  ; Line 231	//  @320
+  jmp _label_3	//  @320
+_label_4:	//  @325
+  ; Line 232	//  @325
+  ; Line 233	//  @325
+  get i stk pos=2	//  @325
+  ; Line 233	//  @330
+  const 1	//  @330
+  ; Line 233	//  @335
+  isum	//  @335
+  is dup	//  @336
+  set i stk pos=2	//  @337
+  is drop	//  @342
+  ; Line 233	//  @343
+  jmp _label_1	//  @343
+_label_2:	//  @348
+  ; Line 234	//  @348
+  ; Line 235	//  @348
+  get i stk pos=0	//  @348
+  i2o	//  @353
+  ; Line 235	//  @354
+  ret	//  @354
+  ; Line 235	//  @355
+  ret	//  @355
+--
+method end
+
+method getRealY ordinal 24
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getRealY in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  summon null	//  @68
+  ; Line 58	//  @69
+  get o stk pos=0	//  @69
+  o2i	//  @74
+  ; Line 58	//  @75
+  load fld=2	//  @75
+  o2i	//  @77
+  ; Line 58	//  @78
+  const 2	//  @78
+  ; Line 58	//  @83
+  idivlu	//  @83
+  ; Line 58	//  @84
+  isublu	//  @84
+  ; Line 58	//  @85
+  load fld=4	//  @85
+  o2i	//  @87
+  ; Line 58	//  @88
+  isum	//  @88
+  i2o	//  @89
+  ; Line 58	//  @90
+  ret	//  @90
+  ret	//  @91
+--
+method end
+
+method getRealX ordinal 25
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getRealX in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  summon null	//  @68
+  ; Line 53	//  @69
+  get o stk pos=0	//  @69
+  o2i	//  @74
+  ; Line 53	//  @75
+  load fld=2	//  @75
+  o2i	//  @77
+  ; Line 53	//  @78
+  const 2	//  @78
+  ; Line 53	//  @83
+  idivlu	//  @83
+  ; Line 53	//  @84
+  isublu	//  @84
+  ; Line 53	//  @85
+  load fld=3	//  @85
+  o2i	//  @87
+  ; Line 53	//  @88
+  isum	//  @88
+  i2o	//  @89
+  ; Line 53	//  @90
+  ret	//  @90
+  ret	//  @91
+--
+method end
+
+method finishMovement ordinal 26
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: finishMovement in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @73
+_label_0:	//  @74
+  summon null	//  @74
+  cons 0	//  @75
+  cons 0	//  @76
+  cons 0	//  @77
+  cons 0	//  @78
+  cons 0	//  @79
+  ; Line 363	//  @80
+  const 0	//  @80
+  is dup	//  @85
+  set i stk pos=0	//  @86
+  is drop	//  @91
+  ; Line 366	//  @92
+  const 0	//  @92
+  is dup	//  @97
+  set i stk pos=1	//  @98
+  is drop	//  @103
+  ; Line 366	//  @104
+  ; Line 398	//  @104
+_label_1:	//  @104
+  ; Line 367	//  @104
+  get i stk pos=1	//  @104
+  ; Line 367	//  @109
+  load fld=2	//  @109
+  o2i	//  @111
+  ; Line 367	//  @112
+  ilt <	//  @112
+  jz _label_2	//  @113
+  ; Line 369	//  @118
+  summon this	//  @118
+  ; Line 369	//  @119
+  get i stk pos=1	//  @119
+  i2o	//  @124
+  ; Line 369	//  @125
+  call m=25 nparm=1	//  @125
+  o2i	//  @127
+  is dup	//  @128
+  set i stk pos=3	//  @129
+  is drop	//  @134
+  ; Line 371	//  @135
+  const 0	//  @135
+  is dup	//  @140
+  set i stk pos=2	//  @141
+  is drop	//  @146
+  ; Line 371	//  @147
+  ; Line 396	//  @147
+_label_3:	//  @147
+  ; Line 372	//  @147
+  get i stk pos=2	//  @147
+  ; Line 372	//  @152
+  load fld=2	//  @152
+  o2i	//  @154
+  ; Line 372	//  @155
+  ilt <	//  @155
+  jz _label_4	//  @156
+  ; Line 395	//  @161
+  ; Line 373	//  @161
+  load fld=0	//  @161
+  ; Line 373	//  @163
+  get i stk pos=1	//  @163
+  i2o	//  @168
+  ; Line 373	//  @169
+  get i stk pos=2	//  @169
+  i2o	//  @174
+  ; Line 373	//  @175
+  ; Line 373	//  @175
+  call m=22 nparm=2	//  @175
+  ; Line 373	//  @177
+  const 0	//  @177
+  i2o	//  @182
+  call m=4 nparm=1	//  @183
+  o2i	//  @185
+  lognot	//  @186
+  jz _label_5	//  @187
+  ; Line 375	//  @192
+  summon this	//  @192
+  ; Line 375	//  @193
+  get i stk pos=2	//  @193
+  i2o	//  @198
+  ; Line 375	//  @199
+  call m=24 nparm=1	//  @199
+  o2i	//  @201
+  is dup	//  @202
+  set i stk pos=4	//  @203
+  is drop	//  @208
+  ; Line 393	//  @209
+  ; Line 376	//  @209
+  get i stk pos=3	//  @209
+  ; Line 376	//  @214
+  const 0	//  @214
+  ; Line 376	//  @219
+  ige >=	//  @219
+  ; Line 376	//  @220
+  get i stk pos=3	//  @220
+  ; Line 376	//  @225
+  get o stk pos=0	//  @225
+  call m=20 nparm=0	//  @230
+  o2i	//  @232
+  ; Line 376	//  @233
+  ilt <	//  @233
+  ; Line 376	//  @234
+  logand &&	//  @234
+  ; Line 376	//  @235
+  get i stk pos=4	//  @235
+  ; Line 376	//  @240
+  const 0	//  @240
+  ; Line 376	//  @245
+  ige >=	//  @245
+  ; Line 376	//  @246
+  logand &&	//  @246
+  ; Line 376	//  @247
+  get i stk pos=4	//  @247
+  ; Line 376	//  @252
+  get o stk pos=0	//  @252
+  call m=17 nparm=0	//  @257
+  o2i	//  @259
+  ; Line 376	//  @260
+  ilt <	//  @260
+  ; Line 376	//  @261
+  logand &&	//  @261
+  jz _label_7	//  @262
+  ; Line 381	//  @267
+  ; Line 377	//  @267
+  get o stk pos=0	//  @267
+  ; Line 377	//  @272
+  get i stk pos=3	//  @272
+  i2o	//  @277
+  ; Line 377	//  @278
+  get i stk pos=4	//  @278
+  i2o	//  @283
+  ; Line 377	//  @284
+  ; Line 377	//  @284
+  call m=22 nparm=2	//  @284
+  ; Line 377	//  @286
+  const 0	//  @286
+  i2o	//  @291
+  call m=4 nparm=1	//  @292
+  o2i	//  @294
+  lognot	//  @295
+  jz _label_9	//  @296
+  ; Line 378	//  @301
+  const "InvalidOperation : no white space for figure part."	//  @301
+  ; Line 378	//  @356
+  throw	//  @356
+_label_9:	//  @357
+  ; Line 390	//  @357
+  ; Line 381	//  @357
+  get i stk pos=0	//  @357
+  jz _label_11	//  @362
+  ; Line 384	//  @367
+_label_13:	//  @367
+  ; Line 382	//  @367
+  get i stk pos=4	//  @367
+  ; Line 382	//  @372
+  const 0	//  @372
+  ; Line 382	//  @377
+  igt >	//  @377
+  ; Line 382	//  @378
+  get o stk pos=0	//  @378
+  ; Line 382	//  @383
+  get i stk pos=3	//  @383
+  i2o	//  @388
+  ; Line 382	//  @389
+  get i stk pos=4	//  @389
+  i2o	//  @394
+  ; Line 382	//  @395
+  ; Line 382	//  @395
+  call m=22 nparm=2	//  @395
+  ; Line 382	//  @397
+  const 0	//  @397
+  i2o	//  @402
+  call m=4 nparm=1	//  @403
+  o2i	//  @405
+  ; Line 382	//  @406
+  logand &&	//  @406
+  jz _label_14	//  @407
+  ; Line 383	//  @412
+  get i stk pos=4	//  @412
+  ; Line 383	//  @417
+  const 1	//  @417
+  ; Line 383	//  @422
+  isublu	//  @422
+  is dup	//  @423
+  set i stk pos=4	//  @424
+  is drop	//  @429
+  jmp _label_13	//  @430
+_label_14:	//  @435
+  ; Line 389	//  @435
+  ; Line 386	//  @435
+  get o stk pos=0	//  @435
+  ; Line 386	//  @440
+  get i stk pos=3	//  @440
+  i2o	//  @445
+  ; Line 386	//  @446
+  get i stk pos=4	//  @446
+  i2o	//  @451
+  ; Line 386	//  @452
+  ; Line 386	//  @452
+  call m=22 nparm=2	//  @452
+  ; Line 386	//  @454
+  const 0	//  @454
+  i2o	//  @459
+  call m=4 nparm=1	//  @460
+  o2i	//  @462
+  lognot	//  @463
+  jz _label_15	//  @464
+  ; Line 387	//  @469
+  get i stk pos=4	//  @469
+  ; Line 387	//  @474
+  const 1	//  @474
+  ; Line 387	//  @479
+  isum	//  @479
+  is dup	//  @480
+  set i stk pos=4	//  @481
+  is drop	//  @486
+_label_15:	//  @487
+  ; Line 389	//  @487
+_label_11:	//  @487
+  ; Line 390	//  @487
+  ; Line 390	//  @487
+  get o stk pos=0	//  @487
+  ; Line 390	//  @492
+  get i stk pos=3	//  @492
+  i2o	//  @497
+  ; Line 390	//  @498
+  get i stk pos=4	//  @498
+  i2o	//  @503
+  ; Line 390	//  @504
+  load fld=5	//  @504
+  ; Line 390	//  @506
+  ; Line 390	//  @506
+  ; Line 390	//  @506
+  call m=19 nparm=3	//  @506
+  os drop	//  @508
+  ; Line 390	//  @509
+  jmp _label_8	//  @509
+_label_7:	//  @514
+  ; Line 392	//  @514
+  const "InvalidOperation : some part of figure is invisible in the persistence moment."	//  @514
+  ; Line 392	//  @597
+  throw	//  @597
+_label_8:	//  @598
+  ; Line 393	//  @598
+_label_5:	//  @598
+  ; Line 395	//  @598
+  get i stk pos=2	//  @598
+  ; Line 395	//  @603
+  const 1	//  @603
+  ; Line 395	//  @608
+  isum	//  @608
+  is dup	//  @609
+  set i stk pos=2	//  @610
+  is drop	//  @615
+  ; Line 395	//  @616
+  jmp _label_3	//  @616
+_label_4:	//  @621
+  ; Line 396	//  @621
+  ; Line 397	//  @621
+  get i stk pos=1	//  @621
+  ; Line 397	//  @626
+  const 1	//  @626
+  ; Line 397	//  @631
+  isum	//  @631
+  is dup	//  @632
+  set i stk pos=1	//  @633
+  is drop	//  @638
+  ; Line 397	//  @639
+  jmp _label_1	//  @639
+_label_2:	//  @644
+  ; Line 398	//  @644
+  ret	//  @644
+--
+method end
+
+method isMovingToPointAvailable ordinal 27
+--
+  const 3	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: isMovingToPointAvailable in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @83
+_label_0:	//  @84
+  summon null	//  @84
+  summon null	//  @85
+  summon null	//  @86
+  ; Line 75	//  @87
+  ; Line 63	//  @87
+  get o stk pos=2	//  @87
+  o2i	//  @92
+  ; Line 63	//  @93
+  get o stk pos=0	//  @93
+  call m=17 nparm=0	//  @98
+  o2i	//  @100
+  ; Line 63	//  @101
+  ige >=	//  @101
+  jz _label_1	//  @102
+  ; Line 67	//  @107
+  ; Line 64	//  @107
+  get o stk pos=1	//  @107
+  o2i	//  @112
+  ; Line 64	//  @113
+  const 0	//  @113
+  ; Line 64	//  @118
+  ilt <	//  @118
+  ; Line 64	//  @119
+  get o stk pos=1	//  @119
+  o2i	//  @124
+  ; Line 64	//  @125
+  get o stk pos=0	//  @125
+  call m=20 nparm=0	//  @130
+  o2i	//  @132
+  ; Line 64	//  @133
+  ige >=	//  @133
+  ; Line 64	//  @134
+  logor ||	//  @134
+  jz _label_3	//  @135
+  ; Line 65	//  @140
+  const 0	//  @140
+  i2o	//  @145
+  ; Line 65	//  @146
+  ret	//  @146
+_label_3:	//  @147
+  jmp _label_2	//  @147
+_label_1:	//  @152
+  ; Line 74	//  @152
+  ; Line 68	//  @152
+  get o stk pos=1	//  @152
+  o2i	//  @157
+  ; Line 68	//  @158
+  const 0	//  @158
+  ; Line 68	//  @163
+  ilt <	//  @163
+  ; Line 68	//  @164
+  get o stk pos=1	//  @164
+  o2i	//  @169
+  ; Line 68	//  @170
+  get o stk pos=0	//  @170
+  call m=20 nparm=0	//  @175
+  o2i	//  @177
+  ; Line 68	//  @178
+  ige >=	//  @178
+  ; Line 68	//  @179
+  logor ||	//  @179
+  ; Line 68	//  @180
+  get o stk pos=2	//  @180
+  o2i	//  @185
+  ; Line 68	//  @186
+  const 0	//  @186
+  ; Line 68	//  @191
+  ilt <	//  @191
+  ; Line 68	//  @192
+  logor ||	//  @192
+  jz _label_5	//  @193
+  ; Line 69	//  @198
+  const 0	//  @198
+  i2o	//  @203
+  ; Line 69	//  @204
+  ret	//  @204
+  jmp _label_6	//  @205
+_label_5:	//  @210
+  ; Line 74	//  @210
+  ; Line 71	//  @210
+  get o stk pos=0	//  @210
+  ; Line 71	//  @215
+  get o stk pos=1	//  @215
+  ; Line 71	//  @220
+  get o stk pos=2	//  @220
+  ; Line 71	//  @225
+  ; Line 71	//  @225
+  call m=22 nparm=2	//  @225
+  ; Line 71	//  @227
+  const 0	//  @227
+  i2o	//  @232
+  call m=4 nparm=1	//  @233
+  o2i	//  @235
+  lognot	//  @236
+  jz _label_7	//  @237
+  ; Line 72	//  @242
+  const 0	//  @242
+  i2o	//  @247
+  ; Line 72	//  @248
+  ret	//  @248
+_label_7:	//  @249
+_label_6:	//  @249
+_label_2:	//  @249
+  ret	//  @249
+--
+method end
+
+method getBoxAt ordinal 28
+--
+  const 2	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getBoxAt in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  summon null	//  @68
+  summon null	//  @69
+  ; Line 48	//  @70
+  load fld=0	//  @70
+  ; Line 48	//  @72
+  get o stk pos=0	//  @72
+  ; Line 48	//  @77
+  get o stk pos=1	//  @77
+  ; Line 48	//  @82
+  ; Line 48	//  @82
+  call m=22 nparm=2	//  @82
+  ; Line 48	//  @84
+  ret	//  @84
+  ret	//  @85
+--
+method end
+
+method canRotateRight ordinal 29
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: canRotateRight in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @73
+_label_0:	//  @74
+  summon null	//  @74
+  ; Line 325	//  @75
+  summon this	//  @75
+  ; Line 325	//  @76
+  get o stk pos=0	//  @76
+  ; Line 325	//  @81
+  const 0	//  @81
+  i2o	//  @86
+  ; Line 325	//  @87
+  ; Line 325	//  @87
+  call m=43 nparm=2	//  @87
+  ; Line 325	//  @96
+  ret	//  @96
+  ret	//  @97
+--
+method end
+
+method init ordinal 30
+--
+  const 2	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: init in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @63
+_label_0:	//  @64
+  summon null	//  @64
+  summon null	//  @65
+  ; Line 22	//  @66
+  const 5	//  @66
+  i2o	//  @71
+  os dup	//  @72
+  save fld=2	//  @73
+  os drop	//  @75
+  ; Line 24	//  @76
+  get o stk pos=0	//  @76
+  call m=20 nparm=0	//  @81
+  o2i	//  @83
+  ; Line 24	//  @84
+  const 2	//  @84
+  ; Line 24	//  @89
+  idivlu	//  @89
+  i2o	//  @90
+  os dup	//  @91
+  save fld=3	//  @92
+  os drop	//  @94
+  ; Line 24	//  @95
+  ; Line 25	//  @95
+  get o stk pos=0	//  @95
+  call m=17 nparm=0	//  @100
+  o2i	//  @102
+  ; Line 25	//  @103
+  const 1	//  @103
+  ; Line 25	//  @108
+  isublu	//  @108
+  ; Line 25	//  @109
+  const 3	//  @109
+  ; Line 25	//  @114
+  isum	//  @114
+  i2o	//  @115
+  os dup	//  @116
+  save fld=4	//  @117
+  os drop	//  @119
+  ; Line 25	//  @120
+  ; Line 26	//  @120
+  get o stk pos=1	//  @120
+  os dup	//  @125
+  save fld=5	//  @126
+  os drop	//  @128
+  ; Line 26	//  @129
+  summon class ru.dz.phantom.tetris.playingfield	//  @129
+  new	//  @168
+  os dup	//  @169
+  save fld=0	//  @170
+  os drop	//  @172
+  ; Line 28	//  @173
+  ; Line 29	//  @173
+  load fld=0	//  @173
+  ; Line 29	//  @175
+  load fld=2	//  @175
+  ; Line 29	//  @177
+  load fld=2	//  @177
+  ; Line 29	//  @179
+  ; Line 29	//  @179
+  call m=16 nparm=2	//  @179
+  os drop	//  @181
+  ; Line 29	//  @182
+  summon class ru.dz.phantom.tetris.playingfield	//  @182
+  new	//  @221
+  os dup	//  @222
+  save fld=1	//  @223
+  os drop	//  @225
+  ; Line 30	//  @226
+  ; Line 31	//  @226
+  load fld=1	//  @226
+  ; Line 31	//  @228
+  load fld=2	//  @228
+  ; Line 31	//  @230
+  load fld=2	//  @230
+  ; Line 31	//  @232
+  ; Line 31	//  @232
+  call m=16 nparm=2	//  @232
+  os drop	//  @234
+  ; Line 31	//  @235
+  ; Line 33	//  @235
+  load fld=0	//  @235
+  ; Line 33	//  @237
+  const 1	//  @237
+  i2o	//  @242
+  ; Line 33	//  @243
+  const 2	//  @243
+  i2o	//  @248
+  ; Line 33	//  @249
+  const 1	//  @249
+  i2o	//  @254
+  ; Line 33	//  @255
+  ; Line 33	//  @255
+  ; Line 33	//  @255
+  call m=19 nparm=3	//  @255
+  os drop	//  @257
+  ; Line 33	//  @258
+  ; Line 34	//  @258
+  load fld=0	//  @258
+  ; Line 34	//  @260
+  const 2	//  @260
+  i2o	//  @265
+  ; Line 34	//  @266
+  const 2	//  @266
+  i2o	//  @271
+  ; Line 34	//  @272
+  const 1	//  @272
+  i2o	//  @277
+  ; Line 34	//  @278
+  ; Line 34	//  @278
+  ; Line 34	//  @278
+  call m=19 nparm=3	//  @278
+  os drop	//  @280
+  ; Line 34	//  @281
+  ; Line 35	//  @281
+  load fld=0	//  @281
+  ; Line 35	//  @283
+  const 3	//  @283
+  i2o	//  @288
+  ; Line 35	//  @289
+  const 2	//  @289
+  i2o	//  @294
+  ; Line 35	//  @295
+  const 1	//  @295
+  i2o	//  @300
+  ; Line 35	//  @301
+  ; Line 35	//  @301
+  ; Line 35	//  @301
+  call m=19 nparm=3	//  @301
+  os drop	//  @303
+  ; Line 35	//  @304
+  ; Line 36	//  @304
+  load fld=0	//  @304
+  ; Line 36	//  @306
+  const 2	//  @306
+  i2o	//  @311
+  ; Line 36	//  @312
+  const 1	//  @312
+  i2o	//  @317
+  ; Line 36	//  @318
+  const 1	//  @318
+  i2o	//  @323
+  ; Line 36	//  @324
+  ; Line 36	//  @324
+  ; Line 36	//  @324
+  call m=19 nparm=3	//  @324
+  os drop	//  @326
+  ; Line 36	//  @327
+  ret	//  @327
+--
+method end
+
+method canMoveLeft ordinal 31
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: canMoveLeft in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @70
+_label_0:	//  @71
+  summon null	//  @71
+  cons 0	//  @72
+  cons 0	//  @73
+  cons 0	//  @74
+  cons 0	//  @75
+  cons 0	//  @76
+  ; Line 172	//  @77
+  const 1	//  @77
+  is dup	//  @82
+  set i stk pos=0	//  @83
+  is drop	//  @88
+  ; Line 175	//  @89
+  const 0	//  @89
+  is dup	//  @94
+  set i stk pos=2	//  @95
+  is drop	//  @100
+  ; Line 175	//  @101
+  ; Line 196	//  @101
+_label_1:	//  @101
+  ; Line 176	//  @101
+  get i stk pos=2	//  @101
+  ; Line 176	//  @106
+  load fld=2	//  @106
+  o2i	//  @108
+  ; Line 176	//  @109
+  ilt <	//  @109
+  ; Line 176	//  @110
+  get i stk pos=0	//  @110
+  ; Line 176	//  @115
+  const 1	//  @115
+  isublu	//  @120
+  lognot	//  @121
+  ; Line 176	//  @122
+  logand &&	//  @122
+  jz _label_2	//  @123
+  ; Line 177	//  @128
+  const 0	//  @128
+  is dup	//  @133
+  set i stk pos=1	//  @134
+  is drop	//  @139
+  ; Line 194	//  @140
+_label_3:	//  @140
+  ; Line 178	//  @140
+  get i stk pos=1	//  @140
+  ; Line 178	//  @145
+  load fld=2	//  @145
+  o2i	//  @147
+  ; Line 178	//  @148
+  ilt <	//  @148
+  ; Line 178	//  @149
+  get i stk pos=0	//  @149
+  ; Line 178	//  @154
+  const 1	//  @154
+  isublu	//  @159
+  lognot	//  @160
+  ; Line 178	//  @161
+  logand &&	//  @161
+  jz _label_4	//  @162
+  ; Line 193	//  @167
+  ; Line 179	//  @167
+  load fld=0	//  @167
+  ; Line 179	//  @169
+  get i stk pos=1	//  @169
+  i2o	//  @174
+  ; Line 179	//  @175
+  get i stk pos=2	//  @175
+  i2o	//  @180
+  ; Line 179	//  @181
+  ; Line 179	//  @181
+  call m=22 nparm=2	//  @181
+  ; Line 179	//  @183
+  const 0	//  @183
+  i2o	//  @188
+  call m=4 nparm=1	//  @189
+  o2i	//  @191
+  lognot	//  @192
+  jz _label_5	//  @193
+  ; Line 183	//  @198
+  get i stk pos=1	//  @198
+  ; Line 183	//  @203
+  const 1	//  @203
+  ; Line 183	//  @208
+  isublu	//  @208
+  is dup	//  @209
+  set i stk pos=3	//  @210
+  is drop	//  @215
+  ; Line 184	//  @216
+  get i stk pos=2	//  @216
+  is dup	//  @221
+  set i stk pos=4	//  @222
+  is drop	//  @227
+  ; Line 184	//  @228
+  ; Line 186	//  @228
+  summon this	//  @228
+  ; Line 186	//  @229
+  get i stk pos=3	//  @229
+  i2o	//  @234
+  ; Line 186	//  @235
+  call m=25 nparm=1	//  @235
+  o2i	//  @237
+  is dup	//  @238
+  set i stk pos=3	//  @239
+  is drop	//  @244
+  ; Line 186	//  @245
+  ; Line 187	//  @245
+  summon this	//  @245
+  ; Line 187	//  @246
+  get i stk pos=4	//  @246
+  i2o	//  @251
+  ; Line 187	//  @252
+  call m=24 nparm=1	//  @252
+  o2i	//  @254
+  is dup	//  @255
+  set i stk pos=4	//  @256
+  is drop	//  @261
+  ; Line 187	//  @262
+  ; Line 192	//  @262
+  ; Line 189	//  @262
+  summon this	//  @262
+  ; Line 189	//  @263
+  get o stk pos=0	//  @263
+  ; Line 189	//  @268
+  get i stk pos=3	//  @268
+  i2o	//  @273
+  ; Line 189	//  @274
+  get i stk pos=4	//  @274
+  i2o	//  @279
+  ; Line 189	//  @280
+  ; Line 189	//  @280
+  ; Line 189	//  @280
+  call m=27 nparm=3	//  @280
+  o2i	//  @282
+  ; Line 189	//  @283
+  lognot	//  @283
+  jz _label_7	//  @284
+  ; Line 190	//  @289
+  const 0	//  @289
+  is dup	//  @294
+  set i stk pos=0	//  @295
+  is drop	//  @300
+_label_7:	//  @301
+  ; Line 192	//  @301
+_label_5:	//  @301
+  ; Line 193	//  @301
+  const 1	//  @301
+  ; Line 193	//  @306
+  get i stk pos=1	//  @306
+  ; Line 193	//  @311
+  isum	//  @311
+  is dup	//  @312
+  set i stk pos=1	//  @313
+  is drop	//  @318
+  ; Line 193	//  @319
+  jmp _label_3	//  @319
+_label_4:	//  @324
+  ; Line 194	//  @324
+  ; Line 195	//  @324
+  get i stk pos=2	//  @324
+  ; Line 195	//  @329
+  const 1	//  @329
+  ; Line 195	//  @334
+  isum	//  @334
+  is dup	//  @335
+  set i stk pos=2	//  @336
+  is drop	//  @341
+  ; Line 195	//  @342
+  jmp _label_1	//  @342
+_label_2:	//  @347
+  ; Line 196	//  @347
+  ; Line 197	//  @347
+  get i stk pos=0	//  @347
+  i2o	//  @352
+  ; Line 197	//  @353
+  ret	//  @353
+  ; Line 197	//  @354
+  ret	//  @354
+--
+method end
+
+method rotateRight ordinal 32
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: rotateRight in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @70
+_label_0:	//  @71
+  summon null	//  @71
+  ; Line 352	//  @72
+  summon this	//  @72
+  ; Line 352	//  @73
+  get o stk pos=0	//  @73
+  ; Line 352	//  @78
+  const 0	//  @78
+  i2o	//  @83
+  ; Line 352	//  @84
+  ; Line 352	//  @84
+  call m=18 nparm=2	//  @84
+  os drop	//  @86
+  ret	//  @87
+--
+method end
+
+method convertFromVirtualY ordinal 33
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: convertFromVirtualY in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @78
+_label_0:	//  @79
+  summon null	//  @79
+  ; Line 265	//  @80
+  get o stk pos=0	//  @80
+  o2i	//  @85
+  ; Line 265	//  @86
+  load fld=2	//  @86
+  o2i	//  @88
+  ; Line 265	//  @89
+  const 2	//  @89
+  ; Line 265	//  @94
+  idivlu	//  @94
+  ; Line 265	//  @95
+  isum	//  @95
+  i2o	//  @96
+  ; Line 265	//  @97
+  ret	//  @97
+  ret	//  @98
+--
+method end
+
+method convertFromVirtualX ordinal 34
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: convertFromVirtualX in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @78
+_label_0:	//  @79
+  summon null	//  @79
+  ; Line 255	//  @80
+  get o stk pos=0	//  @80
+  o2i	//  @85
+  ; Line 255	//  @86
+  load fld=2	//  @86
+  o2i	//  @88
+  ; Line 255	//  @89
+  const 2	//  @89
+  ; Line 255	//  @94
+  idivlu	//  @94
+  ; Line 255	//  @95
+  isum	//  @95
+  i2o	//  @96
+  ; Line 255	//  @97
+  ret	//  @97
+  ret	//  @98
+--
+method end
+
+method getColor ordinal 35
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getColor in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  ; Line 40	//  @68
+  load fld=5	//  @68
+  ; Line 40	//  @70
+  ret	//  @70
+  ret	//  @71
+--
+method end
+
+method moveDown ordinal 36
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: moveDown in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  summon null	//  @68
+  ; Line 167	//  @69
+  ; Line 163	//  @69
+  summon this	//  @69
+  ; Line 163	//  @70
+  get o stk pos=0	//  @70
+  ; Line 163	//  @75
+  call m=20 nparm=1	//  @75
+  o2i	//  @77
+  ; Line 163	//  @78
+  lognot	//  @78
+  jz _label_1	//  @79
+  ; Line 164	//  @84
+  const "InvalidOperation : cannot move down a figure."	//  @84
+  ; Line 164	//  @134
+  throw	//  @134
+_label_1:	//  @135
+  ; Line 167	//  @135
+  load fld=4	//  @135
+  o2i	//  @137
+  ; Line 167	//  @138
+  const 1	//  @138
+  ; Line 167	//  @143
+  isublu	//  @143
+  i2o	//  @144
+  os dup	//  @145
+  save fld=4	//  @146
+  os drop	//  @148
+  ; Line 167	//  @149
+  ret	//  @149
+--
+method end
+
+method canRotateLeft ordinal 37
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: canRotateLeft in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @72
+_label_0:	//  @73
+  summon null	//  @73
+  ; Line 321	//  @74
+  summon this	//  @74
+  ; Line 321	//  @75
+  get o stk pos=0	//  @75
+  ; Line 321	//  @80
+  const 1	//  @80
+  i2o	//  @85
+  ; Line 321	//  @86
+  ; Line 321	//  @86
+  call m=43 nparm=2	//  @86
+  ; Line 321	//  @95
+  ret	//  @95
+  ret	//  @96
+--
+method end
+
+method getRotatedY ordinal 38
+--
+  const 3	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getRotatedY in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @70
+_label_0:	//  @71
+  summon null	//  @71
+  summon null	//  @72
+  summon null	//  @73
+  ; Line 283	//  @74
+  ; Line 279	//  @74
+  get o stk pos=2	//  @74
+  o2i	//  @79
+  jz _label_1	//  @80
+  ; Line 280	//  @85
+  summon this	//  @85
+  ; Line 280	//  @86
+  const 0	//  @86
+  ; Line 280	//  @91
+  summon this	//  @91
+  ; Line 280	//  @92
+  get o stk pos=0	//  @92
+  ; Line 280	//  @97
+  call m=17 nparm=1	//  @97
+  o2i	//  @99
+  ; Line 280	//  @100
+  isublu	//  @100
+  i2o	//  @101
+  ; Line 280	//  @102
+  call m=33 nparm=1	//  @102
+  ; Line 280	//  @111
+  ret	//  @111
+  jmp _label_2	//  @112
+_label_1:	//  @117
+  ; Line 282	//  @117
+  summon this	//  @117
+  ; Line 282	//  @118
+  summon this	//  @118
+  ; Line 282	//  @119
+  get o stk pos=0	//  @119
+  ; Line 282	//  @124
+  call m=17 nparm=1	//  @124
+  ; Line 282	//  @126
+  call m=33 nparm=1	//  @126
+  ; Line 282	//  @135
+  ret	//  @135
+_label_2:	//  @136
+  ret	//  @136
+--
+method end
+
+method getRotatedX ordinal 39
+--
+  const 3	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getRotatedX in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @70
+_label_0:	//  @71
+  summon null	//  @71
+  summon null	//  @72
+  summon null	//  @73
+  ; Line 274	//  @74
+  ; Line 270	//  @74
+  get o stk pos=2	//  @74
+  o2i	//  @79
+  jz _label_1	//  @80
+  ; Line 271	//  @85
+  summon this	//  @85
+  ; Line 271	//  @86
+  summon this	//  @86
+  ; Line 271	//  @87
+  get o stk pos=1	//  @87
+  ; Line 271	//  @92
+  call m=21 nparm=1	//  @92
+  ; Line 271	//  @94
+  call m=34 nparm=1	//  @94
+  ; Line 271	//  @103
+  ret	//  @103
+  jmp _label_2	//  @104
+_label_1:	//  @109
+  ; Line 273	//  @109
+  summon this	//  @109
+  ; Line 273	//  @110
+  const 0	//  @110
+  ; Line 273	//  @115
+  summon this	//  @115
+  ; Line 273	//  @116
+  get o stk pos=1	//  @116
+  ; Line 273	//  @121
+  call m=21 nparm=1	//  @121
+  o2i	//  @123
+  ; Line 273	//  @124
+  isublu	//  @124
+  i2o	//  @125
+  ; Line 273	//  @126
+  call m=34 nparm=1	//  @126
+  ; Line 273	//  @135
+  ret	//  @135
+_label_2:	//  @136
+  ret	//  @136
+--
+method end
+
+method moveRight ordinal 40
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: moveRight in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @68
+_label_0:	//  @69
+  summon null	//  @69
+  ; Line 243	//  @70
+  ; Line 239	//  @70
+  summon this	//  @70
+  ; Line 239	//  @71
+  get o stk pos=0	//  @71
+  ; Line 239	//  @76
+  call m=23 nparm=1	//  @76
+  o2i	//  @78
+  ; Line 239	//  @79
+  lognot	//  @79
+  jz _label_1	//  @80
+  ; Line 240	//  @85
+  const "InvalidOperation : cannot move right a figure."	//  @85
+  ; Line 240	//  @136
+  throw	//  @136
+_label_1:	//  @137
+  ; Line 243	//  @137
+  load fld=3	//  @137
+  o2i	//  @139
+  ; Line 243	//  @140
+  const 1	//  @140
+  ; Line 243	//  @145
+  isum	//  @145
+  i2o	//  @146
+  os dup	//  @147
+  save fld=3	//  @148
+  os drop	//  @150
+  ; Line 243	//  @151
+  ret	//  @151
+--
+method end
+
+method moveLeft ordinal 41
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: moveLeft in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @67
+_label_0:	//  @68
+  summon null	//  @68
+  ; Line 205	//  @69
+  ; Line 201	//  @69
+  summon this	//  @69
+  ; Line 201	//  @70
+  get o stk pos=0	//  @70
+  ; Line 201	//  @75
+  call m=31 nparm=1	//  @75
+  o2i	//  @77
+  ; Line 201	//  @78
+  lognot	//  @78
+  jz _label_1	//  @79
+  ; Line 202	//  @84
+  const "InvalidOperation : cannot move left a figure."	//  @84
+  ; Line 202	//  @134
+  throw	//  @134
+_label_1:	//  @135
+  ; Line 205	//  @135
+  load fld=3	//  @135
+  o2i	//  @137
+  ; Line 205	//  @138
+  const 1	//  @138
+  ; Line 205	//  @143
+  isublu	//  @143
+  i2o	//  @144
+  os dup	//  @145
+  save fld=3	//  @146
+  os drop	//  @148
+  ; Line 205	//  @149
+  ret	//  @149
+--
+method end
+
+method getMaskSize ordinal 42
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getMaskSize in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @70
+_label_0:	//  @71
+  ; Line 44	//  @71
+  load fld=2	//  @71
+  ; Line 44	//  @73
+  ret	//  @73
+  ret	//  @74
+--
+method end
+
+method canRotate ordinal 43
+--
+  const 2	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: canRotate in .ru.dz.phantom.tetris.figure"	//  @11
+  throw	//  @68
+_label_0:	//  @69
+  summon null	//  @69
+  summon null	//  @70
+  cons 0	//  @71
+  cons 0	//  @72
+  cons 0	//  @73
+  cons 0	//  @74
+  cons 0	//  @75
+  ; Line 288	//  @76
+  load fld=1	//  @76
+  call m=21 nparm=0	//  @78
+  os drop	//  @80
+  ; Line 291	//  @81
+  const 1	//  @81
+  is dup	//  @86
+  set i stk pos=0	//  @87
+  is drop	//  @92
+  ; Line 291	//  @93
+  ; Line 294	//  @93
+  const 0	//  @93
+  is dup	//  @98
+  set i stk pos=2	//  @99
+  is drop	//  @104
+  ; Line 294	//  @105
+  ; Line 316	//  @105
+_label_1:	//  @105
+  ; Line 295	//  @105
+  get i stk pos=2	//  @105
+  ; Line 295	//  @110
+  load fld=2	//  @110
+  o2i	//  @112
+  ; Line 295	//  @113
+  ilt <	//  @113
+  ; Line 295	//  @114
+  get i stk pos=0	//  @114
+  ; Line 295	//  @119
+  const 1	//  @119
+  isublu	//  @124
+  lognot	//  @125
+  ; Line 295	//  @126
+  logand &&	//  @126
+  jz _label_2	//  @127
+  ; Line 296	//  @132
+  const 0	//  @132
+  is dup	//  @137
+  set i stk pos=1	//  @138
+  is drop	//  @143
+  ; Line 314	//  @144
+_label_3:	//  @144
+  ; Line 297	//  @144
+  get i stk pos=1	//  @144
+  ; Line 297	//  @149
+  load fld=2	//  @149
+  o2i	//  @151
+  ; Line 297	//  @152
+  ilt <	//  @152
+  ; Line 297	//  @153
+  get i stk pos=0	//  @153
+  ; Line 297	//  @158
+  const 1	//  @158
+  isublu	//  @163
+  lognot	//  @164
+  ; Line 297	//  @165
+  logand &&	//  @165
+  jz _label_4	//  @166
+  ; Line 313	//  @171
+  ; Line 298	//  @171
+  load fld=0	//  @171
+  ; Line 298	//  @173
+  get i stk pos=1	//  @173
+  i2o	//  @178
+  ; Line 298	//  @179
+  get i stk pos=2	//  @179
+  i2o	//  @184
+  ; Line 298	//  @185
+  ; Line 298	//  @185
+  call m=22 nparm=2	//  @185
+  ; Line 298	//  @187
+  const 0	//  @187
+  i2o	//  @192
+  call m=4 nparm=1	//  @193
+  o2i	//  @195
+  lognot	//  @196
+  jz _label_5	//  @197
+  ; Line 302	//  @202
+  summon this	//  @202
+  ; Line 302	//  @203
+  get i stk pos=1	//  @203
+  i2o	//  @208
+  ; Line 302	//  @209
+  get i stk pos=2	//  @209
+  i2o	//  @214
+  ; Line 302	//  @215
+  get o stk pos=1	//  @215
+  ; Line 302	//  @220
+  ; Line 302	//  @220
+  ; Line 302	//  @220
+  call m=39 nparm=3	//  @220
+  o2i	//  @229
+  is dup	//  @230
+  set i stk pos=3	//  @231
+  is drop	//  @236
+  ; Line 303	//  @237
+  summon this	//  @237
+  ; Line 303	//  @238
+  get i stk pos=1	//  @238
+  i2o	//  @243
+  ; Line 303	//  @244
+  get i stk pos=2	//  @244
+  i2o	//  @249
+  ; Line 303	//  @250
+  get o stk pos=1	//  @250
+  ; Line 303	//  @255
+  ; Line 303	//  @255
+  ; Line 303	//  @255
+  call m=38 nparm=3	//  @255
+  o2i	//  @264
+  is dup	//  @265
+  set i stk pos=4	//  @266
+  is drop	//  @271
+  ; Line 303	//  @272
+  ; Line 304	//  @272
+  load fld=1	//  @272
+  ; Line 304	//  @274
+  get i stk pos=3	//  @274
+  i2o	//  @279
+  ; Line 304	//  @280
+  get i stk pos=4	//  @280
+  i2o	//  @285
+  ; Line 304	//  @286
+  load fld=0	//  @286
+  ; Line 304	//  @288
+  get i stk pos=1	//  @288
+  i2o	//  @293
+  ; Line 304	//  @294
+  get i stk pos=2	//  @294
+  i2o	//  @299
+  ; Line 304	//  @300
+  ; Line 304	//  @300
+  call m=22 nparm=2	//  @300
+  ; Line 304	//  @302
+  ; Line 304	//  @302
+  ; Line 304	//  @302
+  call m=19 nparm=3	//  @302
+  os drop	//  @304
+  ; Line 304	//  @305
+  ; Line 306	//  @305
+  summon this	//  @305
+  ; Line 306	//  @306
+  get i stk pos=3	//  @306
+  i2o	//  @311
+  ; Line 306	//  @312
+  call m=25 nparm=1	//  @312
+  o2i	//  @314
+  is dup	//  @315
+  set i stk pos=3	//  @316
+  is drop	//  @321
+  ; Line 306	//  @322
+  ; Line 307	//  @322
+  summon this	//  @322
+  ; Line 307	//  @323
+  get i stk pos=4	//  @323
+  i2o	//  @328
+  ; Line 307	//  @329
+  call m=24 nparm=1	//  @329
+  o2i	//  @331
+  is dup	//  @332
+  set i stk pos=4	//  @333
+  is drop	//  @338
+  ; Line 307	//  @339
+  ; Line 312	//  @339
+  ; Line 309	//  @339
+  summon this	//  @339
+  ; Line 309	//  @340
+  get o stk pos=0	//  @340
+  ; Line 309	//  @345
+  get i stk pos=3	//  @345
+  i2o	//  @350
+  ; Line 309	//  @351
+  get i stk pos=4	//  @351
+  i2o	//  @356
+  ; Line 309	//  @357
+  ; Line 309	//  @357
+  ; Line 309	//  @357
+  call m=27 nparm=3	//  @357
+  o2i	//  @359
+  ; Line 309	//  @360
+  lognot	//  @360
+  jz _label_7	//  @361
+  ; Line 310	//  @366
+  const 0	//  @366
+  is dup	//  @371
+  set i stk pos=0	//  @372
+  is drop	//  @377
+_label_7:	//  @378
+  ; Line 312	//  @378
+_label_5:	//  @378
+  ; Line 313	//  @378
+  const 1	//  @378
+  ; Line 313	//  @383
+  get i stk pos=1	//  @383
+  ; Line 313	//  @388
+  isum	//  @388
+  is dup	//  @389
+  set i stk pos=1	//  @390
+  is drop	//  @395
+  ; Line 313	//  @396
+  jmp _label_3	//  @396
+_label_4:	//  @401
+  ; Line 314	//  @401
+  ; Line 315	//  @401
+  get i stk pos=2	//  @401
+  ; Line 315	//  @406
+  const 1	//  @406
+  ; Line 315	//  @411
+  isum	//  @411
+  is dup	//  @412
+  set i stk pos=2	//  @413
+  is drop	//  @418
+  ; Line 315	//  @419
+  jmp _label_1	//  @419
+_label_2:	//  @424
+  ; Line 316	//  @424
+  ; Line 317	//  @424
+  get i stk pos=0	//  @424
+  i2o	//  @429
+  ; Line 317	//  @430
+  ret	//  @430
+  ; Line 317	//  @431
+  ret	//  @431
+--
+method end
+

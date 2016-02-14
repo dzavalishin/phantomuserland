@@ -1,0 +1,122 @@
+Class version 20160114031914415
+
+method drawBox ordinal 29
+--
+  ret				//  @0
+--
+method end
+
+method fillEllipse ordinal 31
+--
+  ret				//  @0
+--
+method end
+
+method setBg ordinal 23
+--
+  ret				//  @0
+--
+method end
+
+method fillBox ordinal 30
+--
+  ret				//  @0
+--
+method end
+
+method setFg ordinal 22
+--
+  ret				//  @0
+--
+method end
+
+method clear ordinal 20
+--
+  ret				//  @0
+--
+method end
+
+method update ordinal 34
+--
+  ret				//  @0
+--
+method end
+
+method setTitle ordinal 33
+--
+  ret				//  @0
+--
+method end
+
+method getYSize ordinal 17
+--
+  ret				//  @0
+--
+method end
+
+method drawLine ordinal 28
+--
+  ret				//  @0
+--
+method end
+
+method fill ordinal 21
+--
+  ret				//  @0
+--
+method end
+
+method drawString ordinal 24
+--
+  ret				//  @0
+--
+method end
+
+method drawImage ordinal 25
+--
+  ret				//  @0
+--
+method end
+
+method getX ordinal 18
+--
+  ret				//  @0
+--
+method end
+
+method getY ordinal 19
+--
+  ret				//  @0
+--
+method end
+
+method scrollHor ordinal 35
+--
+  ret				//  @0
+--
+method end
+
+method setEventHandler ordinal 32
+--
+  ret				//  @0
+--
+method end
+
+method getXSize ordinal 16
+--
+  ret				//  @0
+--
+method end
+
+method setWinSize ordinal 26
+--
+  ret				//  @0
+--
+method end
+
+method setWinPosition ordinal 27
+--
+  ret				//  @0
+--
+method end
+

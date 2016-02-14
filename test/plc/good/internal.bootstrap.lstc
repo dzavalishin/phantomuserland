@@ -1,0 +1,56 @@
+Class version 20160109081031728
+
+method sleep ordinal 21
+--
+  ret	//  @0
+--
+method end
+
+method getKernelEnvironment ordinal 23
+--
+  ret	//  @0
+--
+method end
+
+method consolePrint ordinal 16
+--
+  ret	//  @0
+--
+method end
+
+method loadClass ordinal 8
+--
+  ret	//  @0
+--
+method end
+
+method createBinary ordinal 19
+--
+  ret	//  @0
+--
+method end
+
+method setOsInterface ordinal 22
+--
+  ret	//  @0
+--
+method end
+
+method startThread ordinal 18
+--
+  ret	//  @0
+--
+method end
+
+method setScreenBackground ordinal 20
+--
+  ret	//  @0
+--
+method end
+
+method setClassLoader ordinal 17
+--
+  ret	//  @0
+--
+method end
+

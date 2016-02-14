@@ -1,0 +1,86 @@
+Class .ru.dz.phantom.tetris.utilites
+  Field _bootObject
+  Field _internal_counter
+  Method void sleep( seconds: int ):
+    void  : void
+      . : void
+        this  : .ru.dz.phantom.tetris.utilites
+        Method sleepMilliseconds : unknown
+        arg  : unknown
+          * : int
+            ident seconds : int
+            int const "1000" : int const
+
+  Method void init( bootObject: unknown ):
+    ,  : void
+      void  : void
+        = : int
+          ident _internal_counter : int
+          int const "0" : int const
+      void  : void
+        = : unknown
+          ident _bootObject : unknown
+          ident bootObject : unknown
+
+  Method void sleepMilliseconds( milliseconds: int ):
+    void  : void
+      . : unknown
+        ident _bootObject : unknown
+        Method (no. 21) : unknown
+        arg  : unknown
+          ident milliseconds : int
+
+  Method int generateRandom( minValue: int, maxValue: int ):
+    ,  : unknown
+      ,  : unknown
+        ,  : unknown
+          ,  : unknown
+            if : unknown
+              <= : int
+                ident maxValue : int
+                ident minValue : int
+              throw  : void const
+                string const "ArgumentException" : string const
+            void  : void
+              = : int
+                ident _internal_counter : int
+                - : int
+                  + : int
+                    ident _internal_counter : int
+                    int const "11745" : int const
+                  / : int
+                    ident _internal_counter : int
+                    int const "5" : int const
+          if : unknown
+            > : int
+              ident _internal_counter : int
+              int const "60000" : int const
+            void  : void
+              = : int
+                ident _internal_counter : int
+                - : int
+                  ident _internal_counter : int
+                  int const "50000" : int const
+        void  : void
+          = : int
+            ident divided : int
+            / : int
+              ident _internal_counter : int
+              + : int
+                - : int
+                  ident maxValue : int
+                  ident minValue : int
+                int const "1" : int const
+      return : void
+        - : int
+          + : int
+            ident minValue : int
+            ident _internal_counter : int
+          * : int
+            ident divided : int
+            + : int
+              - : int
+                ident maxValue : int
+                ident minValue : int
+              int const "1" : int const
+

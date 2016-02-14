@@ -1,0 +1,138 @@
+Class version 20160107083334679
+
+method init ordinal 16
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: init in .ru.dz.phantom.tetris.io"	//  @11
+  throw	//  @59
+_label_0:	//  @60
+  summon null	//  @60
+  ; Line 23	//  @61
+  get o stk pos=0	//  @61
+  os dup	//  @66
+  save fld=0	//  @67
+  os drop	//  @69
+  ; Line 24	//  @70
+  const 0	//  @70
+  i2o	//  @75
+  os dup	//  @76
+  save fld=1	//  @77
+  os drop	//  @79
+  ; Line 24	//  @80
+  ; Line 26	//  @80
+  const 0	//  @80
+  i2o	//  @85
+  os dup	//  @86
+  save fld=2	//  @87
+  os drop	//  @89
+  ; Line 26	//  @90
+  ; Line 27	//  @90
+  const 4	//  @90
+  i2o	//  @95
+  os dup	//  @96
+  save fld=3	//  @97
+  os drop	//  @99
+  ; Line 27	//  @100
+  ret	//  @100
+--
+method end
+
+method isAnyKeyPressed ordinal 17
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: isAnyKeyPressed in .ru.dz.phantom.tetris.io"	//  @11
+  throw	//  @70
+_label_0:	//  @71
+  ; Line 39	//  @71
+  ; Line 31	//  @71
+  load fld=0	//  @71
+  ; Line 31	//  @73
+  const 0	//  @73
+  i2o	//  @78
+  ; Line 31	//  @79
+  const 5	//  @79
+  i2o	//  @84
+  ; Line 31	//  @85
+  ; Line 31	//  @85
+  call m=19 nparm=2	//  @85
+  ; Line 31	//  @87
+  const 0	//  @87
+  i2o	//  @92
+  call m=4 nparm=1	//  @93
+  o2i	//  @95
+  jz _label_1	//  @96
+  ; Line 32	//  @101
+  load fld=0	//  @101
+  ; Line 32	//  @103
+  load fld=2	//  @103
+  ; Line 32	//  @105
+  load fld=3	//  @105
+  ; Line 32	//  @107
+  ; Line 32	//  @107
+  call m=19 nparm=2	//  @107
+  os dup	//  @109
+  save fld=1	//  @110
+  os drop	//  @112
+  ; Line 36	//  @113
+  ; Line 33	//  @113
+  load fld=1	//  @113
+  o2i	//  @115
+  ; Line 33	//  @116
+  load fld=3	//  @116
+  o2i	//  @118
+  ; Line 33	//  @119
+  igt >	//  @119
+  ; Line 33	//  @120
+  load fld=1	//  @120
+  o2i	//  @122
+  ; Line 33	//  @123
+  load fld=2	//  @123
+  o2i	//  @125
+  ; Line 33	//  @126
+  ilt <	//  @126
+  ; Line 33	//  @127
+  logor ||	//  @127
+  jz _label_3	//  @128
+  ; Line 34	//  @133
+  const "InvalidOperation : lastKeyPressed has invalid value."	//  @133
+  ; Line 34	//  @190
+  throw	//  @190
+_label_3:	//  @191
+  ; Line 36	//  @191
+  ; Line 36	//  @191
+  const 1	//  @191
+  i2o	//  @196
+  ; Line 36	//  @197
+  ret	//  @197
+  ; Line 36	//  @198
+_label_1:	//  @198
+  ; Line 39	//  @198
+  const 0	//  @198
+  i2o	//  @203
+  ; Line 39	//  @204
+  ret	//  @204
+  ; Line 39	//  @205
+  ret	//  @205
+--
+method end
+
+method getLastPressedKey ordinal 18
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getLastPressedKey in .ru.dz.phantom.tetris.io"	//  @11
+  throw	//  @72
+_label_0:	//  @73
+  ; Line 43	//  @73
+  load fld=1	//  @73
+  ; Line 43	//  @75
+  ret	//  @75
+  ret	//  @76
+--
+method end
+

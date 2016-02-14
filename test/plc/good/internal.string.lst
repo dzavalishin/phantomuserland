@@ -1,0 +1,19 @@
+Class .internal.string
+  Method int strstr( s: string ):
+  -- No code!
+
+  Method int equals( object: unknown ):
+  -- No code!
+
+  Method int length(  ):
+  -- No code!
+
+  Method string concat( s: string ):
+  -- No code!
+
+  Method string substring( index: int, length: int ):
+  -- No code!
+
+  Method int charAt( index: int ):
+  -- No code!
+

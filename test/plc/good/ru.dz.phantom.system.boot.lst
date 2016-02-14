@@ -1,0 +1,525 @@
+Class .ru.dz.phantom.system.boot
+  Field console
+  Field reg_test
+  Field debug
+  Field boot_object
+  Field loader_class
+  Field loader
+  Field reg_test_class
+  Field shell_name
+  Field run
+  Field windows
+  Field shell_class
+  Method void sleep(  ):
+    void  : void
+      . : unknown
+        ident boot_object : .internal.object
+        Method (no. 21) : unknown
+        arg  : unknown
+          int const "1000" : int const
+
+  Method void print( input: string ):
+    void  : void
+      . : unknown
+        ident boot_object : .internal.object
+        Method (no. 16) : unknown
+        arg  : unknown
+          ident input : string
+
+  Method void setScreenBackgroud(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                void  : void
+                  = : .ru.dz.phantom.backgrounds
+                    ident bkg : .ru.dz.phantom.backgrounds
+                    new .ru.dz.phantom.backgrounds : .ru.dz.phantom.backgrounds
+                void  : void
+                  = : .internal.bitmap
+                    ident bmp : .internal.bitmap
+                    new .internal.bitmap : .internal.bitmap
+              void  : void
+                . : void
+                  this  : .ru.dz.phantom.system.boot
+                  Method print : unknown
+                  arg  : unknown
+                    string const "----------------------
+will load bitmap...
+" : string const
+            void  : void
+              = : string
+                ident bmstring : string
+                . : string
+                  ident bkg : .ru.dz.phantom.backgrounds
+                  Method getBackgroundImage : unknown
+          void  : void
+            . : void
+              ident bmp : .internal.bitmap
+              Method loadFromString : unknown
+              arg  : unknown
+                ident bmstring : string
+        void  : void
+          . : void
+            this  : .ru.dz.phantom.system.boot
+            Method print : unknown
+            arg  : unknown
+              string const "have bitmap...
+" : string const
+      void  : void
+        . : unknown
+          ident boot_object : .internal.object
+          Method (no. 20) : unknown
+          arg  : unknown
+            ident bmp : .internal.bitmap
+
+  Method .internal.class load_class( name: string ):
+    return : void
+      . : unknown
+        ident boot_object : .internal.object
+        Method (no. 8) : unknown
+        arg  : unknown
+          ident name : string
+
+  Method void startup( _boot_object: unknown ):
+    catch : void
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.system.boot
+          Method do_startup : unknown
+          arg  : unknown
+            ident _boot_object : unknown
+      ,  : void
+        ,  : void
+          void  : void
+            . : void
+              this  : .ru.dz.phantom.system.boot
+              Method print : unknown
+              arg  : unknown
+                string const "
+Exception: '" : string const
+          void  : void
+            . : void
+              this  : .ru.dz.phantom.system.boot
+              Method print : unknown
+              arg  : unknown
+                ident e : string
+        void  : void
+          . : void
+            this  : .ru.dz.phantom.system.boot
+            Method print : unknown
+            arg  : unknown
+              string const "'" : string const
+
+  Method .phantom.osimpl get_os_interface_object(  ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : .phantom.osimpl
+            ident os : .phantom.osimpl
+            new .phantom.osimpl : .phantom.osimpl
+        void  : void
+          . : void
+            ident os : .phantom.osimpl
+            Method init : unknown
+            arg  : unknown
+              ident boot_object : .internal.object
+      return : void
+        ident os : .phantom.osimpl
+
+  Method void do_startup( _boot_object: .internal.object ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      ,  : void
+                                        ,  : void
+                                          ,  : void
+                                            ,  : void
+                                              ,  : void
+                                                ,  : void
+                                                  ,  : void
+                                                    ,  : void
+                                                      ,  : void
+                                                        ,  : void
+                                                          ,  : void
+                                                            ,  : void
+                                                              ,  : void
+                                                                ,  : void
+                                                                  ,  : void
+                                                                    ,  : void
+                                                                      ,  : void
+                                                                        ,  : void
+                                                                          ,  : void
+                                                                            ,  : void
+                                                                              ,  : void
+                                                                                ,  : void
+                                                                                  ,  : void
+                                                                                    ,  : void
+                                                                                      ,  : void
+                                                                                        ,  : void
+                                                                                          ,  : void
+                                                                                            ,  : void
+                                                                                              ,  : void
+                                                                                                ,  : void
+                                                                                                  ,  : void
+                                                                                                    ,  : void
+                                                                                                      ,  : void
+                                                                                                        void  : void
+                                                                                                          = : int
+                                                                                                            ident debug : int
+                                                                                                            int const "1" : int const
+                                                                                                        void  : void
+                                                                                                          = : .internal.object
+                                                                                                            ident boot_object : .internal.object
+                                                                                                            ident _boot_object : .internal.object
+                                                                                                      void  : void
+                                                                                                        . : void
+                                                                                                          this  : .ru.dz.phantom.system.boot
+                                                                                                          Method print : unknown
+                                                                                                          arg  : unknown
+                                                                                                            string const "Phantom System Envirinment Setup is running
+" : string const
+                                                                                                    if : unknown
+                                                                                                      ident debug : int
+                                                                                                      void  : void
+                                                                                                        . : void
+                                                                                                          this  : .ru.dz.phantom.system.boot
+                                                                                                          Method print : unknown
+                                                                                                          arg  : unknown
+                                                                                                            string const "loading loader class
+" : string const
+                                                                                                  void  : void
+                                                                                                    = : .internal.class
+                                                                                                      ident loader_class : .internal.class
+                                                                                                      . : .internal.class
+                                                                                                        this  : .ru.dz.phantom.system.boot
+                                                                                                        Method load_class : unknown
+                                                                                                        arg  : unknown
+                                                                                                          string const ".ru.dz.phantom.system.class_loader" : string const
+                                                                                                if : unknown
+                                                                                                  ident debug : int
+                                                                                                  void  : void
+                                                                                                    . : void
+                                                                                                      this  : .ru.dz.phantom.system.boot
+                                                                                                      Method print : unknown
+                                                                                                      arg  : unknown
+                                                                                                        string const "creating loader object
+" : string const
+                                                                                              void  : void
+                                                                                                = : .ru.dz.phantom.system.class_loader
+                                                                                                  ident loader : .ru.dz.phantom.system.class_loader
+                                                                                                  new (dynamic type) : unknown
+                                                                                                    ident loader_class : .internal.class
+                                                                                            if : unknown
+                                                                                              ident debug : int
+                                                                                              void  : void
+                                                                                                . : void
+                                                                                                  this  : .ru.dz.phantom.system.boot
+                                                                                                  Method print : unknown
+                                                                                                  arg  : unknown
+                                                                                                    string const "initializing loader
+" : string const
+                                                                                          void  : void
+                                                                                            . : void
+                                                                                              ident loader : .ru.dz.phantom.system.class_loader
+                                                                                              Method init : unknown
+                                                                                              arg  : unknown
+                                                                                                ident boot_object : .internal.object
+                                                                                        if : unknown
+                                                                                          ident debug : int
+                                                                                          void  : void
+                                                                                            . : void
+                                                                                              this  : .ru.dz.phantom.system.boot
+                                                                                              Method print : unknown
+                                                                                              arg  : unknown
+                                                                                                string const "registering loader
+" : string const
+                                                                                      void  : void
+                                                                                        . : unknown
+                                                                                          ident boot_object : .internal.object
+                                                                                          Method (no. 17) : unknown
+                                                                                          arg  : unknown
+                                                                                            ident loader : .ru.dz.phantom.system.class_loader
+                                                                                    void  : void
+                                                                                      = : .ru.dz.phantom.system.regression_tests
+                                                                                        ident reg_test : .ru.dz.phantom.system.regression_tests
+                                                                                        new .ru.dz.phantom.system.regression_tests : .ru.dz.phantom.system.regression_tests
+                                                                                  void  : void
+                                                                                    . : void
+                                                                                      this  : .ru.dz.phantom.system.boot
+                                                                                      Method print : unknown
+                                                                                      arg  : unknown
+                                                                                        string const "Starting compiler regression tests
+" : string const
+                                                                                void  : void
+                                                                                  . : void
+                                                                                    ident reg_test : .ru.dz.phantom.system.regression_tests
+                                                                                    Method run : unknown
+                                                                                    arg  : unknown
+                                                                                      ident boot_object : .internal.object
+                                                                              void  : void
+                                                                                . : void
+                                                                                  this  : .ru.dz.phantom.system.boot
+                                                                                  Method print : unknown
+                                                                                  arg  : unknown
+                                                                                    string const "Finished compiler regression tests
+" : string const
+                                                                            void  : void
+                                                                              = : .internal.io.tty
+                                                                                ident console : .internal.io.tty
+                                                                                new .internal.io.tty : .internal.io.tty
+                                                                          void  : void
+                                                                            = : .phantom.osimpl
+                                                                              ident oi : .phantom.osimpl
+                                                                              . : .phantom.osimpl
+                                                                                this  : .ru.dz.phantom.system.boot
+                                                                                Method get_os_interface_object : unknown
+                                                                        void  : void
+                                                                          . : unknown
+                                                                            ident boot_object : .internal.object
+                                                                            Method (no. 22) : unknown
+                                                                            arg  : unknown
+                                                                              ident oi : .phantom.osimpl
+                                                                      void  : void
+                                                                        = : string
+                                                                          ident shell_name : string
+                                                                          . : string
+                                                                            ident oi : .phantom.osimpl
+                                                                            Method getKernelEnvironmentValue : unknown
+                                                                            arg  : unknown
+                                                                              string const "root.shell" : string const
+                                                                    void  : void
+                                                                      . : void
+                                                                        this  : .ru.dz.phantom.system.boot
+                                                                        Method print : unknown
+                                                                        arg  : unknown
+                                                                          string const "Env root.shell=" : string const
+                                                                  void  : void
+                                                                    . : void
+                                                                      this  : .ru.dz.phantom.system.boot
+                                                                      Method print : unknown
+                                                                      arg  : unknown
+                                                                        ident shell_name : string
+                                                                void  : void
+                                                                  . : void
+                                                                    this  : .ru.dz.phantom.system.boot
+                                                                    Method print : unknown
+                                                                    arg  : unknown
+                                                                      string const "
+" : string const
+                                                              void  : void
+                                                                . : void
+                                                                  this  : .ru.dz.phantom.system.boot
+                                                                  Method print : unknown
+                                                                  arg  : unknown
+                                                                    string const "Env root.init=" : string const
+                                                            void  : void
+                                                              . : void
+                                                                this  : .ru.dz.phantom.system.boot
+                                                                Method print : unknown
+                                                                arg  : unknown
+                                                                  . : string
+                                                                    ident oi : .phantom.osimpl
+                                                                    Method getKernelEnvironmentValue : unknown
+                                                                    arg  : unknown
+                                                                      string const "root.init" : string const
+                                                          void  : void
+                                                            . : void
+                                                              this  : .ru.dz.phantom.system.boot
+                                                              Method print : unknown
+                                                              arg  : unknown
+                                                                string const "
+" : string const
+                                                        void  : void
+                                                          . : void
+                                                            ident console : .internal.io.tty
+                                                            Method putws : unknown
+                                                            arg  : unknown
+                                                              string const "
+
+
+
+
+
+
+
+
+
+
+
+
+
+" : string const
+                                                      void  : void
+                                                        . : void
+                                                          ident console : .internal.io.tty
+                                                          Method putws : unknown
+                                                          arg  : unknown
+                                                            string const "Env root.shell=" : string const
+                                                    void  : void
+                                                      . : void
+                                                        ident console : .internal.io.tty
+                                                        Method putws : unknown
+                                                        arg  : unknown
+                                                          ident shell_name : string
+                                                  void  : void
+                                                    . : void
+                                                      ident console : .internal.io.tty
+                                                      Method putws : unknown
+                                                      arg  : unknown
+                                                        string const "
+" : string const
+                                                void  : void
+                                                  . : void
+                                                    ident console : .internal.io.tty
+                                                    Method putws : unknown
+                                                    arg  : unknown
+                                                      string const "Env root.init=" : string const
+                                              void  : void
+                                                . : void
+                                                  ident console : .internal.io.tty
+                                                  Method putws : unknown
+                                                  arg  : unknown
+                                                    . : string
+                                                      ident oi : .phantom.osimpl
+                                                      Method getKernelEnvironmentValue : unknown
+                                                      arg  : unknown
+                                                        string const "root.init" : string const
+                                            void  : void
+                                              . : void
+                                                ident console : .internal.io.tty
+                                                Method putws : unknown
+                                                arg  : unknown
+                                                  string const "
+" : string const
+                                          void  : void
+                                            . : void
+                                              ident console : .internal.io.tty
+                                              Method putws : unknown
+                                              arg  : unknown
+                                                string const "Creating root window...
+" : string const
+                                        void  : void
+                                          = : .ru.dz.windows.root
+                                            ident windows : .ru.dz.windows.root
+                                            new .ru.dz.windows.root : .ru.dz.windows.root
+                                      void  : void
+                                        . : void
+                                          ident console : .internal.io.tty
+                                          Method putws : unknown
+                                          arg  : unknown
+                                            string const " initing root window...
+" : string const
+                                    void  : void
+                                      . : void
+                                        ident windows : .ru.dz.windows.root
+                                        Method init : unknown
+                                        arg  : .internal.io.tty
+                                          ident console : .internal.io.tty
+                                        arg  : unknown
+                                          ident boot_object : .internal.object
+                                  void  : void
+                                    . : void
+                                      ident console : .internal.io.tty
+                                      Method putws : unknown
+                                      arg  : unknown
+                                        string const " starting windows test...
+" : string const
+                                void  : void
+                                  . : void
+                                    ident windows : .ru.dz.windows.root
+                                    Method test : unknown
+                              void  : void
+                                . : void
+                                  this  : .ru.dz.phantom.system.boot
+                                  Method print : unknown
+                                  arg  : unknown
+                                    string const "Finished windows tests
+" : string const
+                            void  : void
+                              . : void
+                                this  : .ru.dz.phantom.system.boot
+                                Method print : unknown
+                                arg  : unknown
+                                  string const "Run Java tests
+" : string const
+                          void  : void
+                            = : .test.toPhantom.PhantomPrinter
+                              ident pp : .test.toPhantom.PhantomPrinter
+                              new .test.toPhantom.PhantomPrinter : .test.toPhantom.PhantomPrinter
+                        void  : void
+                          . : void
+                            ident pp : .test.toPhantom.PhantomPrinter
+                            Method init : unknown
+                            arg  : unknown
+                              ident console : .internal.io.tty
+                      void  : void
+                        = : .test.toPhantom.AllRun
+                          ident ar : .test.toPhantom.AllRun
+                          new .test.toPhantom.AllRun : .test.toPhantom.AllRun
+                    void  : void
+                      . : .void
+                        ident ar : .test.toPhantom.AllRun
+                        Method setPrinter : unknown
+                        arg  : unknown
+                          ident pp : .test.toPhantom.PhantomPrinter
+                  void  : void
+                    . : .void
+                      ident ar : .test.toPhantom.AllRun
+                      Method runAll : unknown
+                void  : void
+                  = : .internal.class
+                    ident shell_class : .internal.class
+                    . : .internal.class
+                      this  : .ru.dz.phantom.system.boot
+                      Method load_class : unknown
+                      arg  : unknown
+                        ident shell_name : string
+              void  : void
+                = : .ru.dz.phantom.system.shell
+                  ident run : .ru.dz.phantom.system.shell
+                  new (dynamic type) : unknown
+                    ident shell_class : .internal.class
+            void  : void
+              . : void
+                ident run : .ru.dz.phantom.system.shell
+                Method init : unknown
+          void  : void
+            . : unknown
+              ident boot_object : .internal.object
+              Method (no. 18) : unknown
+              arg  : unknown
+                ident run : .ru.dz.phantom.system.shell
+        void  : void
+          . : void
+            ident run : .ru.dz.phantom.system.shell
+            Method go : unknown
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.system.boot
+          Method setScreenBackgroud : unknown
+
+  Method .internal.binary newBinary( nbytes: int ):
+    return : void
+      . : unknown
+        ident boot_object : .internal.object
+        Method (no. 19) : unknown
+        arg  : unknown
+          ident nbytes : int
+

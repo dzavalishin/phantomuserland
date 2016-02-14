@@ -1,0 +1,38 @@
+Class version 20160114032155312
+
+method getUser ordinal 13
+--
+  ret				//  @0
+--
+method end
+
+method toString ordinal 5
+--
+  ret				//  @0
+--
+method end
+
+method getOsInterface ordinal 14
+--
+  ret				//  @0
+--
+method end
+
+method getEnvironment ordinal 12
+--
+  ret				//  @0
+--
+method end
+
+method unpause ordinal 11
+--
+  ret				//  @0
+--
+method end
+
+method pause ordinal 10
+--
+  ret				//  @0
+--
+method end
+

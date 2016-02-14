@@ -1,0 +1,84 @@
+Class version 20160109081030898
+
+method init ordinal 16
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: init in .ru.dz.windows.window"	//  @11
+  throw	//  @56
+_label_0:	//  @57
+  summon null	//  @57
+  ; Line 19	//  @58
+  get o stk pos=0	//  @58
+  os dup	//  @63
+  save fld=0	//  @64
+  os drop	//  @66
+  ret	//  @67
+--
+method end
+
+method gotoxy ordinal 17
+--
+  const 2	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: gotoxy in .ru.dz.windows.window"	//  @11
+  throw	//  @58
+_label_0:	//  @59
+  summon null	//  @59
+  summon null	//  @60
+  ; Line 32	//  @61
+  load fld=0	//  @61
+  ; Line 32	//  @63
+  get o stk pos=0	//  @63
+  o2i	//  @68
+  ; Line 32	//  @69
+  load fld=3	//  @69
+  o2i	//  @71
+  ; Line 32	//  @72
+  isum	//  @72
+  i2o	//  @73
+  ; Line 32	//  @74
+  get o stk pos=1	//  @74
+  o2i	//  @79
+  ; Line 32	//  @80
+  load fld=4	//  @80
+  o2i	//  @82
+  ; Line 32	//  @83
+  isum	//  @83
+  i2o	//  @84
+  ; Line 32	//  @85
+  ; Line 32	//  @85
+  call m=17 nparm=2	//  @85
+  os drop	//  @87
+  ret	//  @88
+--
+method end
+
+method display ordinal 18
+--
+  ret	//  @0
+--
+method end
+
+method putws ordinal 19
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: putws in .ru.dz.windows.window"	//  @11
+  throw	//  @57
+_label_0:	//  @58
+  summon null	//  @58
+  ; Line 37	//  @59
+  load fld=0	//  @59
+  ; Line 37	//  @61
+  get o stk pos=0	//  @61
+  ; Line 37	//  @66
+  call m=18 nparm=1	//  @66
+  os drop	//  @68
+  ret	//  @69
+--
+method end
+

@@ -1,0 +1,1249 @@
+Class .ru.dz.phantom.tetris.figure
+  Field _relativeX
+  Field _relativeY
+  Field _mask
+  Field _maskSize
+  Field _color
+  Field _tempMask
+  Method int isVisibleAtPlayground( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : int
+              ident visibleDetected : int
+              int const "0" : int const
+          void  : void
+            = : int
+              ident y : int
+              int const "0" : int const
+        do-while : unknown
+          bool and : int
+            < : int
+              ident y : int
+              ident _maskSize : int
+            == : int
+              ident visibleDetected : int
+              int const "0" : int const
+          ,  : void
+            ,  : void
+              void  : void
+                = : int
+                  ident x : int
+                  int const "0" : int const
+              do-while : unknown
+                bool and : int
+                  < : int
+                    ident x : int
+                    ident _maskSize : int
+                  == : int
+                    ident visibleDetected : int
+                    int const "0" : int const
+                ,  : unknown
+                  if : unknown
+                    != : int
+                      . : int
+                        ident _mask : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                      int const "0" : int const
+                    ,  : void
+                      ,  : void
+                        void  : void
+                          = : int
+                            ident realX : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealX : unknown
+                              arg  : unknown
+                                ident x : int
+                        void  : void
+                          = : int
+                            ident realY : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealY : unknown
+                              arg  : unknown
+                                ident y : int
+                      if : unknown
+                        bool and : int
+                          bool and : int
+                            bool and : int
+                              >= : int
+                                ident realX : int
+                                int const "0" : int const
+                              < : int
+                                ident realX : int
+                                . : int
+                                  ident field : .ru.dz.phantom.tetris.playingfield
+                                  Method getWidth : unknown
+                            >= : int
+                              ident realY : int
+                              int const "0" : int const
+                          < : int
+                            ident realY : int
+                            . : int
+                              ident field : .ru.dz.phantom.tetris.playingfield
+                              Method getHeight : unknown
+                        void  : void
+                          = : int
+                            ident visibleDetected : int
+                            int const "1" : int const
+                  void  : void
+                    = : int
+                      ident x : int
+                      + : int
+                        ident x : int
+                        int const "1" : int const
+            void  : void
+              = : int
+                ident y : int
+                + : int
+                  ident y : int
+                  int const "1" : int const
+      return : void
+        ident visibleDetected : int
+
+  Method int convertToVirtualX( x: int ):
+    return : void
+      - : int
+        ident x : int
+        / : int
+          ident _maskSize : int
+          int const "2" : int const
+
+  Method void rotate( field: int, isLeftRotating: int ):
+    ,  : unknown
+      ,  : unknown
+        if : unknown
+          bool not : int
+            . : int
+              this  : .ru.dz.phantom.tetris.figure
+              Method canRotate : unknown
+              arg  : int
+                ident field : int
+              arg  : unknown
+                ident isLeftRotating : int
+          throw  : void const
+            string const "InvalidOperation : cannot rotate a figure." : string const
+        void  : void
+          = : int
+            ident y : int
+            int const "0" : int const
+      do-while : unknown
+        < : int
+          ident y : int
+          ident _maskSize : int
+        ,  : void
+          ,  : void
+            void  : void
+              = : int
+                ident x : int
+                int const "0" : int const
+            do-while : unknown
+              < : int
+                ident x : int
+                ident _maskSize : int
+              ,  : void
+                void  : void
+                  . : void
+                    ident _mask : .ru.dz.phantom.tetris.playingfield
+                    Method setBoxAt : unknown
+                    arg  : int
+                      ident x : int
+                    arg  : int
+                      ident y : int
+                    arg  : unknown
+                      . : int
+                        ident _tempMask : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                void  : void
+                  = : int
+                    ident x : int
+                    + : int
+                      ident x : int
+                      int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              + : int
+                ident y : int
+                int const "1" : int const
+
+  Method int isFullyVisibleAtPlayground( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : int
+              ident fullyVisible : int
+              int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              int const "0" : int const
+        do-while : unknown
+          bool and : int
+            < : int
+              ident y : int
+              ident _maskSize : int
+            == : int
+              ident fullyVisible : int
+              int const "1" : int const
+          ,  : void
+            ,  : void
+              void  : void
+                = : int
+                  ident x : int
+                  int const "0" : int const
+              do-while : unknown
+                bool and : int
+                  < : int
+                    ident x : int
+                    ident _maskSize : int
+                  == : int
+                    ident fullyVisible : int
+                    int const "1" : int const
+                ,  : unknown
+                  if : unknown
+                    != : int
+                      . : int
+                        ident _mask : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                      int const "0" : int const
+                    ,  : void
+                      ,  : void
+                        void  : void
+                          = : int
+                            ident realX : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealX : unknown
+                              arg  : unknown
+                                ident x : int
+                        void  : void
+                          = : int
+                            ident realY : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealY : unknown
+                              arg  : unknown
+                                ident y : int
+                      if : unknown
+                        bool not : int
+                          bool and : int
+                            bool and : int
+                              bool and : int
+                                >= : int
+                                  ident realX : int
+                                  int const "0" : int const
+                                < : int
+                                  ident realX : int
+                                  . : int
+                                    ident field : .ru.dz.phantom.tetris.playingfield
+                                    Method getWidth : unknown
+                              >= : int
+                                ident realY : int
+                                int const "0" : int const
+                            < : int
+                              ident realY : int
+                              . : int
+                                ident field : .ru.dz.phantom.tetris.playingfield
+                                Method getHeight : unknown
+                        void  : void
+                          = : int
+                            ident fullyVisible : int
+                            int const "0" : int const
+                  void  : void
+                    = : int
+                      ident x : int
+                      + : int
+                        ident x : int
+                        int const "1" : int const
+            void  : void
+              = : int
+                ident y : int
+                + : int
+                  ident y : int
+                  int const "1" : int const
+      return : void
+        ident fullyVisible : int
+
+  Method int canMoveDown( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : int
+              ident moveIsAllowed : int
+              int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              int const "0" : int const
+        do-while : unknown
+          bool and : int
+            < : int
+              ident y : int
+              ident _maskSize : int
+            == : int
+              ident moveIsAllowed : int
+              int const "1" : int const
+          ,  : void
+            ,  : void
+              void  : void
+                = : int
+                  ident x : int
+                  int const "0" : int const
+              do-while : unknown
+                bool and : int
+                  < : int
+                    ident x : int
+                    ident _maskSize : int
+                  == : int
+                    ident moveIsAllowed : int
+                    int const "1" : int const
+                ,  : unknown
+                  if : unknown
+                    != : int
+                      . : int
+                        ident _mask : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                      int const "0" : int const
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            void  : void
+                              = : int
+                                ident movedX : int
+                                ident x : int
+                            void  : void
+                              = : int
+                                ident movedY : int
+                                - : int
+                                  ident y : int
+                                  int const "1" : int const
+                          void  : void
+                            = : int
+                              ident movedX : int
+                              . : int
+                                this  : .ru.dz.phantom.tetris.figure
+                                Method getRealX : unknown
+                                arg  : unknown
+                                  ident movedX : int
+                        void  : void
+                          = : int
+                            ident movedY : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealY : unknown
+                              arg  : unknown
+                                ident movedY : int
+                      if : unknown
+                        bool not : int
+                          . : int
+                            this  : .ru.dz.phantom.tetris.figure
+                            Method isMovingToPointAvailable : unknown
+                            arg  : unknown
+                              ident field : .ru.dz.phantom.tetris.playingfield
+                            arg  : int
+                              ident movedX : int
+                            arg  : unknown
+                              ident movedY : int
+                        void  : void
+                          = : int
+                            ident moveIsAllowed : int
+                            int const "0" : int const
+                  void  : void
+                    = : int
+                      ident x : int
+                      + : int
+                        int const "1" : int const
+                        ident x : int
+            void  : void
+              = : int
+                ident y : int
+                + : int
+                  ident y : int
+                  int const "1" : int const
+      return : void
+        ident moveIsAllowed : int
+
+  Method int convertToVirtualY( y: int ):
+    return : void
+      - : int
+        ident y : int
+        / : int
+          ident _maskSize : int
+          int const "2" : int const
+
+  Method void rotateLeft( field: .ru.dz.phantom.tetris.playingfield ):
+    void  : void
+      . : void
+        this  : .ru.dz.phantom.tetris.figure
+        Method rotate : unknown
+        arg  : .ru.dz.phantom.tetris.playingfield
+          ident field : .ru.dz.phantom.tetris.playingfield
+        arg  : unknown
+          int const "1" : int const
+
+  Method int canMoveRight( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : int
+              ident moveIsAllowed : int
+              int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              int const "0" : int const
+        do-while : unknown
+          bool and : int
+            < : int
+              ident y : int
+              ident _maskSize : int
+            == : int
+              ident moveIsAllowed : int
+              int const "1" : int const
+          ,  : void
+            ,  : void
+              void  : void
+                = : int
+                  ident x : int
+                  int const "0" : int const
+              do-while : unknown
+                bool and : int
+                  < : int
+                    ident x : int
+                    ident _maskSize : int
+                  == : int
+                    ident moveIsAllowed : int
+                    int const "1" : int const
+                ,  : unknown
+                  if : unknown
+                    != : int
+                      . : int
+                        ident _mask : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                      int const "0" : int const
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            void  : void
+                              = : int
+                                ident movedX : int
+                                + : int
+                                  ident x : int
+                                  int const "1" : int const
+                            void  : void
+                              = : int
+                                ident movedY : int
+                                ident y : int
+                          void  : void
+                            = : int
+                              ident movedX : int
+                              . : int
+                                this  : .ru.dz.phantom.tetris.figure
+                                Method getRealX : unknown
+                                arg  : unknown
+                                  ident movedX : int
+                        void  : void
+                          = : int
+                            ident movedY : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealY : unknown
+                              arg  : unknown
+                                ident movedY : int
+                      if : unknown
+                        bool not : int
+                          . : int
+                            this  : .ru.dz.phantom.tetris.figure
+                            Method isMovingToPointAvailable : unknown
+                            arg  : unknown
+                              ident field : .ru.dz.phantom.tetris.playingfield
+                            arg  : int
+                              ident movedX : int
+                            arg  : unknown
+                              ident movedY : int
+                        void  : void
+                          = : int
+                            ident moveIsAllowed : int
+                            int const "0" : int const
+                  void  : void
+                    = : int
+                      ident x : int
+                      + : int
+                        int const "1" : int const
+                        ident x : int
+            void  : void
+              = : int
+                ident y : int
+                + : int
+                  ident y : int
+                  int const "1" : int const
+      return : void
+        ident moveIsAllowed : int
+
+  Method int getRealY( y: int ):
+    return : void
+      + : int
+        - : int
+          ident y : int
+          / : int
+            ident _maskSize : int
+            int const "2" : int const
+        ident _relativeY : int
+
+  Method int getRealX( x: int ):
+    return : void
+      + : int
+        - : int
+          ident x : int
+          / : int
+            ident _maskSize : int
+            int const "2" : int const
+        ident _relativeX : int
+
+  Method void finishMovement( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : int
+            ident droppingBoxesDownMode : int
+            int const "0" : int const
+        void  : void
+          = : int
+            ident x : int
+            int const "0" : int const
+      do-while : unknown
+        < : int
+          ident x : int
+          ident _maskSize : int
+        ,  : void
+          ,  : void
+            ,  : void
+              void  : void
+                = : int
+                  ident realX : int
+                  . : int
+                    this  : .ru.dz.phantom.tetris.figure
+                    Method getRealX : unknown
+                    arg  : unknown
+                      ident x : int
+              void  : void
+                = : int
+                  ident y : int
+                  int const "0" : int const
+            do-while : unknown
+              < : int
+                ident y : int
+                ident _maskSize : int
+              ,  : unknown
+                if : unknown
+                  != : int
+                    . : int
+                      ident _mask : .ru.dz.phantom.tetris.playingfield
+                      Method getBoxAt : unknown
+                      arg  : int
+                        ident x : int
+                      arg  : unknown
+                        ident y : int
+                    int const "0" : int const
+                  ,  : void
+                    void  : void
+                      = : int
+                        ident realY : int
+                        . : int
+                          this  : .ru.dz.phantom.tetris.figure
+                          Method getRealY : unknown
+                          arg  : unknown
+                            ident y : int
+                    if : unknown
+                      bool and : int
+                        bool and : int
+                          bool and : int
+                            >= : int
+                              ident realX : int
+                              int const "0" : int const
+                            < : int
+                              ident realX : int
+                              . : int
+                                ident field : .ru.dz.phantom.tetris.playingfield
+                                Method getWidth : unknown
+                          >= : int
+                            ident realY : int
+                            int const "0" : int const
+                        < : int
+                          ident realY : int
+                          . : int
+                            ident field : .ru.dz.phantom.tetris.playingfield
+                            Method getHeight : unknown
+                      ,  : unknown
+                        ,  : unknown
+                          if : unknown
+                            != : int
+                              . : int
+                                ident field : .ru.dz.phantom.tetris.playingfield
+                                Method getBoxAt : unknown
+                                arg  : int
+                                  ident realX : int
+                                arg  : unknown
+                                  ident realY : int
+                              int const "0" : int const
+                            throw  : void const
+                              string const "InvalidOperation : no white space for figure part." : string const
+                          if : unknown
+                            ident droppingBoxesDownMode : int
+                            ,  : unknown
+                              do-while : unknown
+                                bool and : int
+                                  > : int
+                                    ident realY : int
+                                    int const "0" : int const
+                                  == : int
+                                    . : int
+                                      ident field : .ru.dz.phantom.tetris.playingfield
+                                      Method getBoxAt : unknown
+                                      arg  : int
+                                        ident realX : int
+                                      arg  : unknown
+                                        ident realY : int
+                                    int const "0" : int const
+                                void  : void
+                                  = : int
+                                    ident realY : int
+                                    - : int
+                                      ident realY : int
+                                      int const "1" : int const
+                              if : unknown
+                                != : int
+                                  . : int
+                                    ident field : .ru.dz.phantom.tetris.playingfield
+                                    Method getBoxAt : unknown
+                                    arg  : int
+                                      ident realX : int
+                                    arg  : unknown
+                                      ident realY : int
+                                  int const "0" : int const
+                                void  : void
+                                  = : int
+                                    ident realY : int
+                                    + : int
+                                      ident realY : int
+                                      int const "1" : int const
+                        void  : void
+                          . : void
+                            ident field : .ru.dz.phantom.tetris.playingfield
+                            Method setBoxAt : unknown
+                            arg  : int
+                              ident realX : int
+                            arg  : int
+                              ident realY : int
+                            arg  : unknown
+                              ident _color : int
+                      throw  : void const
+                        string const "InvalidOperation : some part of figure is invisible in the persistence moment." : string const
+                void  : void
+                  = : int
+                    ident y : int
+                    + : int
+                      ident y : int
+                      int const "1" : int const
+          void  : void
+            = : int
+              ident x : int
+              + : int
+                ident x : int
+                int const "1" : int const
+
+  Method int isMovingToPointAvailable( field: .ru.dz.phantom.tetris.playingfield, movedX: int, movedY: int ):
+    if : unknown
+      >= : int
+        ident movedY : int
+        . : int
+          ident field : .ru.dz.phantom.tetris.playingfield
+          Method getHeight : unknown
+      if : unknown
+        bool or : int
+          < : int
+            ident movedX : int
+            int const "0" : int const
+          >= : int
+            ident movedX : int
+            . : int
+              ident field : .ru.dz.phantom.tetris.playingfield
+              Method getWidth : unknown
+        return : void const
+          int const "0" : int const
+      if : unknown
+        bool or : int
+          bool or : int
+            < : int
+              ident movedX : int
+              int const "0" : int const
+            >= : int
+              ident movedX : int
+              . : int
+                ident field : .ru.dz.phantom.tetris.playingfield
+                Method getWidth : unknown
+          < : int
+            ident movedY : int
+            int const "0" : int const
+        return : void const
+          int const "0" : int const
+        if : unknown
+          != : int
+            . : int
+              ident field : .ru.dz.phantom.tetris.playingfield
+              Method getBoxAt : unknown
+              arg  : int
+                ident movedX : int
+              arg  : unknown
+                ident movedY : int
+            int const "0" : int const
+          return : void const
+            int const "0" : int const
+
+  Method int getBoxAt( x: int, y: int ):
+    return : void
+      . : int
+        ident _mask : .ru.dz.phantom.tetris.playingfield
+        Method getBoxAt : unknown
+        arg  : int
+          ident x : int
+        arg  : unknown
+          ident y : int
+
+  Method int canRotateRight( field: .ru.dz.phantom.tetris.playingfield ):
+    return : void
+      . : int
+        this  : .ru.dz.phantom.tetris.figure
+        Method canRotate : unknown
+        arg  : .ru.dz.phantom.tetris.playingfield
+          ident field : .ru.dz.phantom.tetris.playingfield
+        arg  : unknown
+          int const "0" : int const
+
+  Method void init( field: .ru.dz.phantom.tetris.playingfield, color: int ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          void  : void
+                            = : int
+                              ident _maskSize : int
+                              int const "5" : int const
+                          void  : void
+                            = : int
+                              ident _relativeX : int
+                              / : int
+                                . : int
+                                  ident field : .ru.dz.phantom.tetris.playingfield
+                                  Method getWidth : unknown
+                                int const "2" : int const
+                        void  : void
+                          = : int
+                            ident _relativeY : int
+                            + : int
+                              - : int
+                                . : int
+                                  ident field : .ru.dz.phantom.tetris.playingfield
+                                  Method getHeight : unknown
+                                int const "1" : int const
+                              int const "3" : int const
+                      void  : void
+                        = : int
+                          ident _color : int
+                          ident color : int
+                    void  : void
+                      = : .ru.dz.phantom.tetris.playingfield
+                        ident _mask : .ru.dz.phantom.tetris.playingfield
+                        new .ru.dz.phantom.tetris.playingfield : .ru.dz.phantom.tetris.playingfield
+                  void  : void
+                    . : void
+                      ident _mask : .ru.dz.phantom.tetris.playingfield
+                      Method init : unknown
+                      arg  : int
+                        ident _maskSize : int
+                      arg  : unknown
+                        ident _maskSize : int
+                void  : void
+                  = : .ru.dz.phantom.tetris.playingfield
+                    ident _tempMask : .ru.dz.phantom.tetris.playingfield
+                    new .ru.dz.phantom.tetris.playingfield : .ru.dz.phantom.tetris.playingfield
+              void  : void
+                . : void
+                  ident _tempMask : .ru.dz.phantom.tetris.playingfield
+                  Method init : unknown
+                  arg  : int
+                    ident _maskSize : int
+                  arg  : unknown
+                    ident _maskSize : int
+            void  : void
+              . : void
+                ident _mask : .ru.dz.phantom.tetris.playingfield
+                Method setBoxAt : unknown
+                arg  : int
+                  int const "1" : int const
+                arg  : int
+                  int const "2" : int const
+                arg  : unknown
+                  int const "1" : int const
+          void  : void
+            . : void
+              ident _mask : .ru.dz.phantom.tetris.playingfield
+              Method setBoxAt : unknown
+              arg  : int
+                int const "2" : int const
+              arg  : int
+                int const "2" : int const
+              arg  : unknown
+                int const "1" : int const
+        void  : void
+          . : void
+            ident _mask : .ru.dz.phantom.tetris.playingfield
+            Method setBoxAt : unknown
+            arg  : int
+              int const "3" : int const
+            arg  : int
+              int const "2" : int const
+            arg  : unknown
+              int const "1" : int const
+      void  : void
+        . : void
+          ident _mask : .ru.dz.phantom.tetris.playingfield
+          Method setBoxAt : unknown
+          arg  : int
+            int const "2" : int const
+          arg  : int
+            int const "1" : int const
+          arg  : unknown
+            int const "1" : int const
+
+  Method int canMoveLeft( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : int
+              ident moveIsAllowed : int
+              int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              int const "0" : int const
+        do-while : unknown
+          bool and : int
+            < : int
+              ident y : int
+              ident _maskSize : int
+            == : int
+              ident moveIsAllowed : int
+              int const "1" : int const
+          ,  : void
+            ,  : void
+              void  : void
+                = : int
+                  ident x : int
+                  int const "0" : int const
+              do-while : unknown
+                bool and : int
+                  < : int
+                    ident x : int
+                    ident _maskSize : int
+                  == : int
+                    ident moveIsAllowed : int
+                    int const "1" : int const
+                ,  : unknown
+                  if : unknown
+                    != : int
+                      . : int
+                        ident _mask : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                      int const "0" : int const
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            void  : void
+                              = : int
+                                ident movedX : int
+                                - : int
+                                  ident x : int
+                                  int const "1" : int const
+                            void  : void
+                              = : int
+                                ident movedY : int
+                                ident y : int
+                          void  : void
+                            = : int
+                              ident movedX : int
+                              . : int
+                                this  : .ru.dz.phantom.tetris.figure
+                                Method getRealX : unknown
+                                arg  : unknown
+                                  ident movedX : int
+                        void  : void
+                          = : int
+                            ident movedY : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealY : unknown
+                              arg  : unknown
+                                ident movedY : int
+                      if : unknown
+                        bool not : int
+                          . : int
+                            this  : .ru.dz.phantom.tetris.figure
+                            Method isMovingToPointAvailable : unknown
+                            arg  : unknown
+                              ident field : .ru.dz.phantom.tetris.playingfield
+                            arg  : int
+                              ident movedX : int
+                            arg  : unknown
+                              ident movedY : int
+                        void  : void
+                          = : int
+                            ident moveIsAllowed : int
+                            int const "0" : int const
+                  void  : void
+                    = : int
+                      ident x : int
+                      + : int
+                        int const "1" : int const
+                        ident x : int
+            void  : void
+              = : int
+                ident y : int
+                + : int
+                  ident y : int
+                  int const "1" : int const
+      return : void
+        ident moveIsAllowed : int
+
+  Method void rotateRight( field: .ru.dz.phantom.tetris.playingfield ):
+    void  : void
+      . : void
+        this  : .ru.dz.phantom.tetris.figure
+        Method rotate : unknown
+        arg  : .ru.dz.phantom.tetris.playingfield
+          ident field : .ru.dz.phantom.tetris.playingfield
+        arg  : unknown
+          int const "0" : int const
+
+  Method int convertFromVirtualY( virtualY: int ):
+    return : void
+      + : int
+        ident virtualY : int
+        / : int
+          ident _maskSize : int
+          int const "2" : int const
+
+  Method int convertFromVirtualX( virtualX: int ):
+    return : void
+      + : int
+        ident virtualX : int
+        / : int
+          ident _maskSize : int
+          int const "2" : int const
+
+  Method int getColor(  ):
+    return : void
+      ident _color : int
+
+  Method void moveDown( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : unknown
+      if : unknown
+        bool not : int
+          . : int
+            this  : .ru.dz.phantom.tetris.figure
+            Method canMoveDown : unknown
+            arg  : unknown
+              ident field : .ru.dz.phantom.tetris.playingfield
+        throw  : void const
+          string const "InvalidOperation : cannot move down a figure." : string const
+      void  : void
+        = : int
+          ident _relativeY : int
+          - : int
+            ident _relativeY : int
+            int const "1" : int const
+
+  Method int canRotateLeft( field: .ru.dz.phantom.tetris.playingfield ):
+    return : void
+      . : int
+        this  : .ru.dz.phantom.tetris.figure
+        Method canRotate : unknown
+        arg  : .ru.dz.phantom.tetris.playingfield
+          ident field : .ru.dz.phantom.tetris.playingfield
+        arg  : unknown
+          int const "1" : int const
+
+  Method int getRotatedY( x: int, y: int, isLeftRotating: int ):
+    if : void
+      ident isLeftRotating : int
+      return : void
+        . : int
+          this  : .ru.dz.phantom.tetris.figure
+          Method convertFromVirtualY : unknown
+          arg  : unknown
+            - : int
+              int const "0" : int const
+              . : int
+                this  : .ru.dz.phantom.tetris.figure
+                Method convertToVirtualX : unknown
+                arg  : unknown
+                  ident x : int
+      return : void
+        . : int
+          this  : .ru.dz.phantom.tetris.figure
+          Method convertFromVirtualY : unknown
+          arg  : unknown
+            . : int
+              this  : .ru.dz.phantom.tetris.figure
+              Method convertToVirtualX : unknown
+              arg  : unknown
+                ident x : int
+
+  Method int getRotatedX( x: int, y: int, isLeftRotating: int ):
+    if : void
+      ident isLeftRotating : int
+      return : void
+        . : int
+          this  : .ru.dz.phantom.tetris.figure
+          Method convertFromVirtualX : unknown
+          arg  : unknown
+            . : int
+              this  : .ru.dz.phantom.tetris.figure
+              Method convertToVirtualY : unknown
+              arg  : unknown
+                ident y : int
+      return : void
+        . : int
+          this  : .ru.dz.phantom.tetris.figure
+          Method convertFromVirtualX : unknown
+          arg  : unknown
+            - : int
+              int const "0" : int const
+              . : int
+                this  : .ru.dz.phantom.tetris.figure
+                Method convertToVirtualY : unknown
+                arg  : unknown
+                  ident y : int
+
+  Method void moveRight( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : unknown
+      if : unknown
+        bool not : int
+          . : int
+            this  : .ru.dz.phantom.tetris.figure
+            Method canMoveRight : unknown
+            arg  : unknown
+              ident field : .ru.dz.phantom.tetris.playingfield
+        throw  : void const
+          string const "InvalidOperation : cannot move right a figure." : string const
+      void  : void
+        = : int
+          ident _relativeX : int
+          + : int
+            ident _relativeX : int
+            int const "1" : int const
+
+  Method void moveLeft( field: .ru.dz.phantom.tetris.playingfield ):
+    ,  : unknown
+      if : unknown
+        bool not : int
+          . : int
+            this  : .ru.dz.phantom.tetris.figure
+            Method canMoveLeft : unknown
+            arg  : unknown
+              ident field : .ru.dz.phantom.tetris.playingfield
+        throw  : void const
+          string const "InvalidOperation : cannot move left a figure." : string const
+      void  : void
+        = : int
+          ident _relativeX : int
+          - : int
+            ident _relativeX : int
+            int const "1" : int const
+
+  Method int getMaskSize(  ):
+    return : void
+      ident _maskSize : int
+
+  Method int canRotate( field: .ru.dz.phantom.tetris.playingfield, isLeftRotating: int ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            void  : void
+              . : void
+                ident _tempMask : .ru.dz.phantom.tetris.playingfield
+                Method clean : unknown
+            void  : void
+              = : int
+                ident moveIsAllowed : int
+                int const "1" : int const
+          void  : void
+            = : int
+              ident y : int
+              int const "0" : int const
+        do-while : unknown
+          bool and : int
+            < : int
+              ident y : int
+              ident _maskSize : int
+            == : int
+              ident moveIsAllowed : int
+              int const "1" : int const
+          ,  : void
+            ,  : void
+              void  : void
+                = : int
+                  ident x : int
+                  int const "0" : int const
+              do-while : unknown
+                bool and : int
+                  < : int
+                    ident x : int
+                    ident _maskSize : int
+                  == : int
+                    ident moveIsAllowed : int
+                    int const "1" : int const
+                ,  : unknown
+                  if : unknown
+                    != : int
+                      . : int
+                        ident _mask : .ru.dz.phantom.tetris.playingfield
+                        Method getBoxAt : unknown
+                        arg  : int
+                          ident x : int
+                        arg  : unknown
+                          ident y : int
+                      int const "0" : int const
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              void  : void
+                                = : int
+                                  ident movedX : int
+                                  . : int
+                                    this  : .ru.dz.phantom.tetris.figure
+                                    Method getRotatedX : unknown
+                                    arg  : int
+                                      ident x : int
+                                    arg  : int
+                                      ident y : int
+                                    arg  : unknown
+                                      ident isLeftRotating : int
+                              void  : void
+                                = : int
+                                  ident movedY : int
+                                  . : int
+                                    this  : .ru.dz.phantom.tetris.figure
+                                    Method getRotatedY : unknown
+                                    arg  : int
+                                      ident x : int
+                                    arg  : int
+                                      ident y : int
+                                    arg  : unknown
+                                      ident isLeftRotating : int
+                            void  : void
+                              . : void
+                                ident _tempMask : .ru.dz.phantom.tetris.playingfield
+                                Method setBoxAt : unknown
+                                arg  : int
+                                  ident movedX : int
+                                arg  : int
+                                  ident movedY : int
+                                arg  : unknown
+                                  . : int
+                                    ident _mask : .ru.dz.phantom.tetris.playingfield
+                                    Method getBoxAt : unknown
+                                    arg  : int
+                                      ident x : int
+                                    arg  : unknown
+                                      ident y : int
+                          void  : void
+                            = : int
+                              ident movedX : int
+                              . : int
+                                this  : .ru.dz.phantom.tetris.figure
+                                Method getRealX : unknown
+                                arg  : unknown
+                                  ident movedX : int
+                        void  : void
+                          = : int
+                            ident movedY : int
+                            . : int
+                              this  : .ru.dz.phantom.tetris.figure
+                              Method getRealY : unknown
+                              arg  : unknown
+                                ident movedY : int
+                      if : unknown
+                        bool not : int
+                          . : int
+                            this  : .ru.dz.phantom.tetris.figure
+                            Method isMovingToPointAvailable : unknown
+                            arg  : unknown
+                              ident field : .ru.dz.phantom.tetris.playingfield
+                            arg  : int
+                              ident movedX : int
+                            arg  : unknown
+                              ident movedY : int
+                        void  : void
+                          = : int
+                            ident moveIsAllowed : int
+                            int const "0" : int const
+                  void  : void
+                    = : int
+                      ident x : int
+                      + : int
+                        int const "1" : int const
+                        ident x : int
+            void  : void
+              = : int
+                ident y : int
+                + : int
+                  ident y : int
+                  int const "1" : int const
+      return : void
+        ident moveIsAllowed : int
+

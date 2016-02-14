@@ -1,0 +1,21 @@
+Class .ru.dz.phantom.tetris.imagesmanager
+  Method string getImageGreen(  ):
+    return : void const
+      binary const, "1213" bytes : string const
+
+  Method string getImageRed(  ):
+    return : void const
+      binary const, "1213" bytes : string const
+
+  Method string getImageBlue(  ):
+    return : void const
+      binary const, "1213" bytes : string const
+
+  Method string getImageGray(  ):
+    return : void const
+      binary const, "1213" bytes : string const
+
+  Method string getImageOrange(  ):
+    return : void const
+      binary const, "1213" bytes : string const
+

@@ -1,0 +1,7 @@
+Class .internal.mutex
+  Method void unlock(  ):
+  -- No code!
+
+  Method void lock(  ):
+  -- No code!
+

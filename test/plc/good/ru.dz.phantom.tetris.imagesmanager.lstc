@@ -1,0 +1,82 @@
+Class version 20160109081031116
+
+method getImageGreen ordinal 16
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getImageGreen in .ru.dz.phantom.tetris.imagesmanager"	//  @11
+  throw	//  @79
+_label_0:	//  @80
+  ; Line 9	//  @80
+  const <bindata>	//  @80
+  ; Line 9	//  @1298
+  ret	//  @1298
+  ret	//  @1299
+--
+method end
+
+method getImageRed ordinal 17
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getImageRed in .ru.dz.phantom.tetris.imagesmanager"	//  @11
+  throw	//  @77
+_label_0:	//  @78
+  ; Line 5	//  @78
+  const <bindata>	//  @78
+  ; Line 5	//  @1296
+  ret	//  @1296
+  ret	//  @1297
+--
+method end
+
+method getImageBlue ordinal 18
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getImageBlue in .ru.dz.phantom.tetris.imagesmanager"	//  @11
+  throw	//  @78
+_label_0:	//  @79
+  ; Line 13	//  @79
+  const <bindata>	//  @79
+  ; Line 13	//  @1297
+  ret	//  @1297
+  ret	//  @1298
+--
+method end
+
+method getImageGray ordinal 19
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getImageGray in .ru.dz.phantom.tetris.imagesmanager"	//  @11
+  throw	//  @78
+_label_0:	//  @79
+  ; Line 21	//  @79
+  const <bindata>	//  @79
+  ; Line 21	//  @1297
+  ret	//  @1297
+  ret	//  @1298
+--
+method end
+
+method getImageOrange ordinal 20
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: getImageOrange in .ru.dz.phantom.tetris.imagesmanager"	//  @11
+  throw	//  @80
+_label_0:	//  @81
+  ; Line 17	//  @81
+  const <bindata>	//  @81
+  ; Line 17	//  @1299
+  ret	//  @1299
+  ret	//  @1300
+--
+method end
+

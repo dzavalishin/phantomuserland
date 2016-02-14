@@ -1,0 +1,36 @@
+Class .ru.dz.phantom.system.shell_callback
+  Field console
+  Method void init( tt: .internal.io.tty ):
+    void  : void
+      = : .internal.io.tty
+        ident console : .internal.io.tty
+        ident tt : .internal.io.tty
+
+  Method void run( time: int ):
+    ,  : void
+      ,  : void
+        void  : void
+          . : void
+            ident console : .internal.io.tty
+            Method putws : unknown
+            arg  : unknown
+              string const "
+
+Timer callback: " : string const
+        void  : void
+          . : void
+            ident console : .internal.io.tty
+            Method putws : unknown
+            arg  : unknown
+              . : string
+                ident time : int
+                Method toString : unknown
+      void  : void
+        . : void
+          ident console : .internal.io.tty
+          Method putws : unknown
+          arg  : unknown
+            string const " !!
+
+" : string const
+

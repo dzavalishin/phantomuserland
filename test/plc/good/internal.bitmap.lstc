@@ -1,0 +1,14 @@
+Class version 20160114032157000
+
+method paintTo ordinal 9
+--
+  ret				//  @0
+--
+method end
+
+method loadFromString ordinal 8
+--
+  ret				//  @0
+--
+method end
+

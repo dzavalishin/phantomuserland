@@ -1,0 +1,116 @@
+Class .ru.dz.phantom.system.class_loader
+  Field boot_object
+  Field classes
+  Field index
+  Field i
+  Field new_class
+  Method void init( _boot_object: unknown ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : unknown
+            ident boot_object : unknown
+            ident _boot_object : unknown
+        void  : void
+          = : int
+            ident index : int
+            int const "0" : int const
+      void  : void
+        = : void[]
+          ident classes : void[]
+          new void[] : void[]
+
+  Method void print( input: string ):
+    void  : void
+      . : unknown
+        ident boot_object : unknown
+        Method (no. 16) : unknown
+        arg  : unknown
+          ident input : string
+
+  Method .internal.object load_class( name: string ):
+    return : void
+      . : unknown
+        ident boot_object : unknown
+        Method (no. 8) : unknown
+        arg  : unknown
+          ident name : string
+
+  Method .internal.object load( name: string ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              void  : void
+                = : unknown
+                  ident new_class : unknown
+                  . : .internal.object
+                    this  : .ru.dz.phantom.system.class_loader
+                    Method load_class : unknown
+                    arg  : unknown
+                      ident name : string
+              void  : void
+                = : unknown
+                  [] : unknown
+                    ident classes : void[]
+                    ident index : int
+                  ident name : string
+            void  : void
+              = : int
+                ident index : int
+                + : int
+                  ident index : int
+                  int const "1" : int const
+          void  : void
+            = : unknown
+              [] : unknown
+                ident classes : void[]
+                ident index : int
+              ident new_class : unknown
+        void  : void
+          = : int
+            ident index : int
+            + : int
+              ident index : int
+              int const "1" : int const
+      return : void
+        ident new_class : unknown
+
+  Method .internal.object get_class( name: string ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : int
+            ident i : int
+            int const "0" : int const
+        do-while : unknown
+          < : int
+            ident i : int
+            ident index : int
+          ,  : unknown
+            if : unknown
+              == : unknown
+                ident name : string
+                [] : unknown
+                  ident classes : void[]
+                  ident i : int
+              return : void
+                [] : unknown
+                  ident classes : void[]
+                  + : int
+                    ident i : int
+                    int const "1" : int const
+            void  : void
+              = : int
+                ident i : int
+                + : int
+                  ident i : int
+                  int const "2" : int const
+      return : void
+        . : .internal.object
+          this  : .ru.dz.phantom.system.class_loader
+          Method load : unknown
+          arg  : unknown
+            ident name : string
+

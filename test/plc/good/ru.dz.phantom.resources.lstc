@@ -1,0 +1,18 @@
+Class version 20160114032156160
+
+method getCloseButton ordinal 16
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getCloseButton in .ru.dz.phantom.resources"	//  @11
+  throw				//  @69
+_label_0:	//  @70
+  ; Line 7			//  @70
+  const <bindata>			//  @70
+  ; Line 7			//  @718
+  ret				//  @718
+  ret				//  @719
+--
+method end
+

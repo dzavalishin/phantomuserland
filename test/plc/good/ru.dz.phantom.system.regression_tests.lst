@@ -1,0 +1,546 @@
+Class .ru.dz.phantom.system.regression_tests
+  Field boot_object
+  Field test_array
+  Field i
+  Field j
+  Field boot_success
+  Method void print( input: string ):
+    void  : void
+      . : unknown
+        ident boot_object : unknown
+        Method (no. 16) : unknown
+        arg  : unknown
+          ident input : string
+
+  Method void array_test(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                void  : void
+                                  . : void
+                                    this  : .ru.dz.phantom.system.regression_tests
+                                    Method print : unknown
+                                    arg  : unknown
+                                      string const "Checking arrays... " : string const
+                                void  : void
+                                  = : void[]
+                                    ident test_array : void[]
+                                    new void[] : void[]
+                              void  : void
+                                = : unknown
+                                  [] : unknown
+                                    ident test_array : void[]
+                                    int const "0" : int const
+                                  string const "zero" : string const
+                            void  : void
+                              = : unknown
+                                [] : unknown
+                                  ident test_array : void[]
+                                  int const "2" : int const
+                                string const "two" : string const
+                          void  : void
+                            = : unknown
+                              [] : unknown
+                                ident test_array : void[]
+                                int const "1" : int const
+                              string const "one" : string const
+                        void  : void
+                          . : void
+                            this  : .ru.dz.phantom.system.regression_tests
+                            Method print : unknown
+                            arg  : unknown
+                              string const "Beeping: " : string const
+                      void  : void
+                        = : int
+                          ident i : int
+                          int const "3" : int const
+                    do-while : unknown
+                      ident i : int
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            void  : void
+                              = : int
+                                ident i : int
+                                - : int
+                                  ident i : int
+                                  int const "1" : int const
+                            void  : void
+                              . : void
+                                this  : .ru.dz.phantom.system.regression_tests
+                                Method print : unknown
+                                arg  : unknown
+                                  string const "beep " : string const
+                          void  : void
+                            . : void
+                              this  : .ru.dz.phantom.system.regression_tests
+                              Method print : unknown
+                              arg  : unknown
+                                [] : unknown
+                                  ident test_array : void[]
+                                  ident i : int
+                        void  : void
+                          . : void
+                            this  : .ru.dz.phantom.system.regression_tests
+                            Method print : unknown
+                            arg  : unknown
+                              string const "! " : string const
+                  void  : void
+                    . : void
+                      this  : .ru.dz.phantom.system.regression_tests
+                      Method print : unknown
+                      arg  : unknown
+                        string const "
+" : string const
+                void  : void
+                  = : unknown
+                    [] : unknown
+                      ident test_array : void[]
+                      int const "0" : int const
+                    int const "0" : int const
+              void  : void
+                = : unknown
+                  [] : unknown
+                    ident test_array : void[]
+                    int const "2" : int const
+                  int const "2" : int const
+            void  : void
+              = : unknown
+                [] : unknown
+                  ident test_array : void[]
+                  int const "1" : int const
+                int const "1" : int const
+          void  : void
+            = : int
+              ident i : int
+              int const "3" : int const
+        do-while : unknown
+          ident i : int
+          ,  : void
+            void  : void
+              = : int
+                ident i : int
+                - : int
+                  ident i : int
+                  int const "1" : int const
+            if : unknown
+              != : unknown
+                [] : unknown
+                  ident test_array : void[]
+                  ident i : int
+                ident i : int
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      void  : void
+                        . : void
+                          this  : .ru.dz.phantom.system.regression_tests
+                          Method print : unknown
+                          arg  : unknown
+                            string const "array error: array[" : string const
+                      void  : void
+                        . : void
+                          this  : .ru.dz.phantom.system.regression_tests
+                          Method print : unknown
+                          arg  : unknown
+                            ident i : int
+                    void  : void
+                      . : void
+                        this  : .ru.dz.phantom.system.regression_tests
+                        Method print : unknown
+                        arg  : unknown
+                          string const "] == " : string const
+                  void  : void
+                    . : void
+                      this  : .ru.dz.phantom.system.regression_tests
+                      Method print : unknown
+                      arg  : unknown
+                        [] : unknown
+                          ident test_array : void[]
+                          ident i : int
+                throw  : void const
+                  string const "array error" : string const
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.system.regression_tests
+          Method print : unknown
+          arg  : unknown
+            string const "passed
+" : string const
+
+  Method void math_test(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            ,  : void
+                              ,  : void
+                                ,  : void
+                                  ,  : void
+                                    ,  : void
+                                      ,  : void
+                                        ,  : void
+                                          ,  : void
+                                            ,  : void
+                                              ,  : void
+                                                ,  : void
+                                                  ,  : void
+                                                    ,  : void
+                                                      ,  : void
+                                                        ,  : void
+                                                          void  : void
+                                                            . : void
+                                                              this  : .ru.dz.phantom.system.regression_tests
+                                                              Method print : unknown
+                                                              arg  : unknown
+                                                                string const "Checking int math... " : string const
+                                                          if : unknown
+                                                            != : int const
+                                                              + : int const
+                                                                int const "2" : int const
+                                                                int const "2" : int const
+                                                              int const "4" : int const
+                                                            throw  : void const
+                                                              string const "int + math error" : string const
+                                                        if : unknown
+                                                          != : int const
+                                                            - : int const
+                                                              int const "2" : int const
+                                                              int const "2" : int const
+                                                            int const "0" : int const
+                                                          throw  : void const
+                                                            string const "int - math error" : string const
+                                                      if : unknown
+                                                        != : int const
+                                                          / : int const
+                                                            int const "2" : int const
+                                                            int const "2" : int const
+                                                          int const "1" : int const
+                                                        throw  : void const
+                                                          string const "int / math error" : string const
+                                                    if : unknown
+                                                      != : int const
+                                                        * : int const
+                                                          int const "3" : int const
+                                                          int const "3" : int const
+                                                        int const "9" : int const
+                                                      throw  : void const
+                                                        string const "int * math error" : string const
+                                                  if : unknown
+                                                    < : int const
+                                                      int const "3" : int const
+                                                      int const "2" : int const
+                                                    throw  : void const
+                                                      string const "int < error" : string const
+                                                if : unknown
+                                                  > : int const
+                                                    int const "5" : int const
+                                                    int const "6" : int const
+                                                  throw  : void const
+                                                    string const "int > error" : string const
+                                              if : unknown
+                                                <= : int const
+                                                  int const "3" : int const
+                                                  int const "2" : int const
+                                                throw  : void const
+                                                  string const "int <= error" : string const
+                                            if : unknown
+                                              >= : int const
+                                                int const "5" : int const
+                                                int const "6" : int const
+                                              throw  : void const
+                                                string const "int >= error" : string const
+                                          if : unknown
+                                            bool not : int const
+                                              <= : int const
+                                                int const "3" : int const
+                                                int const "3" : int const
+                                            throw  : void const
+                                              string const "int <= error" : string const
+                                        if : unknown
+                                          bool not : int const
+                                            >= : int const
+                                              int const "5" : int const
+                                              int const "5" : int const
+                                          throw  : void const
+                                            string const "int >= error" : string const
+                                      if : unknown
+                                        bool or : int const
+                                          int const "0" : int const
+                                          int const "0" : int const
+                                        throw  : void const
+                                          string const "int || math error" : string const
+                                    if : unknown
+                                      bool or : int const
+                                        int const "1" : int const
+                                        int const "0" : int const
+                                      throw  : void const
+                                        string const "int || math error" : string const
+                                  if : unknown
+                                    bool or : int const
+                                      int const "0" : int const
+                                      int const "1" : int const
+                                    throw  : void const
+                                      string const "int || math error" : string const
+                                if : unknown
+                                  bool or : int const
+                                    int const "1" : int const
+                                    int const "1" : int const
+                                  throw  : void const
+                                    string const "int || math error" : string const
+                              if : unknown
+                                bool and : int const
+                                  int const "0" : int const
+                                  int const "0" : int const
+                                throw  : void const
+                                  string const "int && math error" : string const
+                            if : unknown
+                              bool and : int const
+                                int const "1" : int const
+                                int const "0" : int const
+                              throw  : void const
+                                string const "int && math error" : string const
+                          if : unknown
+                            bool and : int const
+                              int const "0" : int const
+                              int const "1" : int const
+                            throw  : void const
+                              string const "int && math error" : string const
+                        if : unknown
+                          bool and : int const
+                            int const "1" : int const
+                            int const "1" : int const
+                          throw  : void const
+                            string const "int && math error" : string const
+                      if : unknown
+                        | : int const
+                          int const "0" : int const
+                          int const "0" : int const
+                        throw  : void const
+                          string const "int | math error" : string const
+                    if : unknown
+                      | : int const
+                        int const "1" : int const
+                        int const "0" : int const
+                      throw  : void const
+                        string const "int | math error" : string const
+                  if : unknown
+                    | : int const
+                      int const "0" : int const
+                      int const "1" : int const
+                    throw  : void const
+                      string const "int | math error" : string const
+                if : unknown
+                  | : int const
+                    int const "1" : int const
+                    int const "1" : int const
+                  throw  : void const
+                    string const "int | math error" : string const
+              if : unknown
+                & : int const
+                  int const "0" : int const
+                  int const "0" : int const
+                throw  : void const
+                  string const "int & math error" : string const
+            if : unknown
+              & : int const
+                int const "1" : int const
+                int const "0" : int const
+              throw  : void const
+                string const "int & math error" : string const
+          if : unknown
+            & : int const
+              int const "0" : int const
+              int const "1" : int const
+            throw  : void const
+              string const "int & math error" : string const
+        if : unknown
+          & : int const
+            int const "1" : int const
+            int const "1" : int const
+          throw  : void const
+            string const "int & math error" : string const
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.system.regression_tests
+          Method print : unknown
+          arg  : unknown
+            string const "passed
+" : string const
+
+  Method void run( _boot_object: unknown ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              void  : void
+                = : unknown
+                  ident boot_object : unknown
+                  ident _boot_object : unknown
+              void  : void
+                = : int
+                  ident boot_success : int
+                  int const "0" : int const
+            void  : void
+              . : void
+                this  : .ru.dz.phantom.system.regression_tests
+                Method print : unknown
+                arg  : unknown
+                  string const "Phantom language regression tests are running
+" : string const
+          void  : void
+            . : void
+              this  : .ru.dz.phantom.system.regression_tests
+              Method flow_test : unknown
+        void  : void
+          . : void
+            this  : .ru.dz.phantom.system.regression_tests
+            Method math_test : unknown
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.system.regression_tests
+          Method array_test : unknown
+
+  Method void test_do_while(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            = : int
+              ident i : int
+              int const "3" : int const
+          void  : void
+            = : int
+              ident j : int
+              int const "0" : int const
+        do-while : unknown
+          void  : void
+            = : int
+              ident j : int
+              + : int
+                ident j : int
+                int const "1" : int const
+          ident i : int
+          void  : void
+            = : int
+              ident i : int
+              - : int
+                ident i : int
+                int const "1" : int const
+      if : unknown
+        != : int
+          ident j : int
+          int const "4" : int const
+        throw  : void const
+          string const "do/while error" : string const
+
+  Method void flow_test(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        void  : void
+                          . : void
+                            this  : .ru.dz.phantom.system.regression_tests
+                            Method print : unknown
+                            arg  : unknown
+                              string const "Checking flow control operators... " : string const
+                        if : unknown
+                          int const "0" : int const
+                          throw  : void const
+                            string const "if(0) error" : string const
+                      if : unknown
+                        == : int const
+                          int const "0" : int const
+                          int const "1" : int const
+                        throw  : void const
+                          string const "if or == error" : string const
+                    if : unknown
+                      != : int const
+                        int const "0" : int const
+                        int const "0" : int const
+                      throw  : void const
+                        string const "if or != error" : string const
+                  void  : void
+                    = : int
+                      ident j : int
+                      int const "0" : int const
+                if : unknown
+                  int const "1" : int const
+                  void  : void
+                    = : int
+                      ident j : int
+                      int const "1" : int const
+              if : unknown
+                == : int
+                  ident j : int
+                  int const "1" : int const
+                throw  : void const
+                  string const "if(1) error" : string const
+            void  : void
+              . : void
+                this  : .ru.dz.phantom.system.regression_tests
+                Method test_do_while : unknown
+          void  : void
+            = : int
+              ident i : int
+              int const "2" : int const
+        switch  : void const
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          case  : void
+                            int const "1" : int const
+                          throw  : void const
+                            string const "switch fall in error" : string const
+                        case  : void
+                          int const "2" : int const
+                      break : void
+                    case  : void
+                      int const "3" : int const
+                  throw  : void const
+                    string const "switch fall out error" : string const
+                default  : void
+              throw  : void const
+                string const "switch dafault error" : string const
+            break : void
+      void  : void
+        . : void
+          this  : .ru.dz.phantom.system.regression_tests
+          Method print : unknown
+          arg  : unknown
+            string const "passed
+" : string const
+

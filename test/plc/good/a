@@ -1,0 +1,980 @@
+
+method print ordinal 16
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: print in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw	//  @74
+_label_0:	//  @75
+  summon null	//  @75
+  ; Line 53	//  @76
+  load fld=0	//  @76
+  ; Line 53	//  @78
+  get o stk pos=0	//  @78
+  ; Line 53	//  @83
+  call m=16 nparm=1	//  @83
+  os drop	//  @85
+  ret	//  @86
+--
+method end
+
+method array_test ordinal 17
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: array_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw	//  @79
+_label_0:	//  @80
+  ; Line 63	//  @80
+  summon this	//  @80
+  ; Line 63	//  @81
+  const "Checking arrays... "	//  @81
+  ; Line 63	//  @105
+  call m=16 nparm=1	//  @105
+  os drop	//  @107
+  summon class internal.container.array	//  @108
+  new	//  @109
+  os dup	//  @110
+  save fld=4	//  @111
+  os drop	//  @113
+  ; Line 65	//  @114
+  ; Line 67	//  @114
+  load fld=4	//  @114
+  ; Line 67	//  @116
+  const "zero"	//  @116
+  ; Line 67	//  @125
+  const 0	//  @125
+  i2o	//  @130
+  call m=11 nparm=2	//  @131
+  os drop	//  @133
+  ; Line 67	//  @134
+  ; Line 68	//  @134
+  load fld=4	//  @134
+  ; Line 68	//  @136
+  const "two"	//  @136
+  ; Line 68	//  @144
+  const 2	//  @144
+  i2o	//  @149
+  call m=11 nparm=2	//  @150
+  os drop	//  @152
+  ; Line 68	//  @153
+  ; Line 69	//  @153
+  load fld=4	//  @153
+  ; Line 69	//  @155
+  const "one"	//  @155
+  ; Line 69	//  @163
+  const 1	//  @163
+  i2o	//  @168
+  call m=11 nparm=2	//  @169
+  os drop	//  @171
+  ; Line 69	//  @172
+  ; Line 71	//  @172
+  summon this	//  @172
+  ; Line 71	//  @173
+  const "Beeping: "	//  @173
+  ; Line 71	//  @187
+  call m=16 nparm=1	//  @187
+  os drop	//  @189
+  ; Line 71	//  @190
+  ; Line 72	//  @190
+  const 3	//  @190
+  i2o	//  @195
+  os dup	//  @196
+  save fld=2	//  @197
+  os drop	//  @199
+  ; Line 72	//  @200
+  ; Line 77	//  @200
+_label_1:	//  @200
+  ; Line 73	//  @200
+  load fld=2	//  @200
+  o2i	//  @202
+  jz _label_2	//  @203
+  ; Line 75	//  @208
+  load fld=2	//  @208
+  o2i	//  @210
+  ; Line 75	//  @211
+  const 1	//  @211
+  ; Line 75	//  @216
+  isublu	//  @216
+  i2o	//  @217
+  os dup	//  @218
+  save fld=2	//  @219
+  os drop	//  @221
+  ; Line 76	//  @222
+  summon this	//  @222
+  ; Line 76	//  @223
+  const "beep "	//  @223
+  ; Line 76	//  @233
+  call m=16 nparm=1	//  @233
+  os drop	//  @235
+  ; Line 76	//  @236
+  ; Line 76	//  @236
+  summon this	//  @236
+  ; Line 76	//  @237
+  load fld=4	//  @237
+  ; Line 76	//  @239
+  load fld=2	//  @239
+  call m=10 nparm=1	//  @241
+  ; Line 76	//  @243
+  call m=16 nparm=1	//  @243
+  os drop	//  @245
+  ; Line 76	//  @246
+  ; Line 76	//  @246
+  summon this	//  @246
+  ; Line 76	//  @247
+  const "! "	//  @247
+  ; Line 76	//  @254
+  call m=16 nparm=1	//  @254
+  os drop	//  @256
+  ; Line 76	//  @257
+  jmp _label_1	//  @257
+_label_2:	//  @262
+  ; Line 77	//  @262
+  ; Line 78	//  @262
+  summon this	//  @262
+  ; Line 78	//  @263
+  const "
+"	//  @263
+  ; Line 78	//  @269
+  call m=16 nparm=1	//  @269
+  os drop	//  @271
+  ; Line 78	//  @272
+  ; Line 81	//  @272
+  load fld=4	//  @272
+  ; Line 81	//  @274
+  const 0	//  @274
+  i2o	//  @279
+  ; Line 81	//  @280
+  const 0	//  @280
+  i2o	//  @285
+  call m=11 nparm=2	//  @286
+  os drop	//  @288
+  ; Line 81	//  @289
+  ; Line 82	//  @289
+  load fld=4	//  @289
+  ; Line 82	//  @291
+  const 2	//  @291
+  i2o	//  @296
+  ; Line 82	//  @297
+  const 2	//  @297
+  i2o	//  @302
+  call m=11 nparm=2	//  @303
+  os drop	//  @305
+  ; Line 82	//  @306
+  ; Line 83	//  @306
+  load fld=4	//  @306
+  ; Line 83	//  @308
+  const 1	//  @308
+  i2o	//  @313
+  ; Line 83	//  @314
+  const 1	//  @314
+  i2o	//  @319
+  call m=11 nparm=2	//  @320
+  os drop	//  @322
+  ; Line 83	//  @323
+  ; Line 85	//  @323
+  const 3	//  @323
+  i2o	//  @328
+  os dup	//  @329
+  save fld=2	//  @330
+  os drop	//  @332
+  ; Line 85	//  @333
+  ; Line 95	//  @333
+_label_3:	//  @333
+  ; Line 86	//  @333
+  load fld=2	//  @333
+  o2i	//  @335
+  jz _label_4	//  @336
+  ; Line 88	//  @341
+  load fld=2	//  @341
+  o2i	//  @343
+  ; Line 88	//  @344
+  const 1	//  @344
+  ; Line 88	//  @349
+  isublu	//  @349
+  i2o	//  @350
+  os dup	//  @351
+  save fld=2	//  @352
+  os drop	//  @354
+  ; Line 95	//  @355
+  ; Line 89	//  @355
+  load fld=4	//  @355
+  ; Line 89	//  @357
+  load fld=2	//  @357
+  call m=10 nparm=1	//  @359
+  ; Line 89	//  @361
+  load fld=2	//  @361
+  call m=4 nparm=1	//  @363
+  o2i	//  @365
+  lognot	//  @366
+  jz _label_5	//  @367
+  ; Line 91	//  @372
+  summon this	//  @372
+  ; Line 91	//  @373
+  const "array error: array["	//  @373
+  ; Line 91	//  @397
+  call m=16 nparm=1	//  @397
+  os drop	//  @399
+  ; Line 91	//  @400
+  summon this	//  @400
+  ; Line 91	//  @401
+  load fld=2	//  @401
+  ; Line 91	//  @403
+  call m=16 nparm=1	//  @403
+  os drop	//  @405
+  ; Line 91	//  @406
+  ; Line 92	//  @406
+  summon this	//  @406
+  ; Line 92	//  @407
+  const "] == "	//  @407
+  ; Line 92	//  @417
+  call m=16 nparm=1	//  @417
+  os drop	//  @419
+  ; Line 92	//  @420
+  ; Line 92	//  @420
+  summon this	//  @420
+  ; Line 92	//  @421
+  load fld=4	//  @421
+  ; Line 92	//  @423
+  load fld=2	//  @423
+  call m=10 nparm=1	//  @425
+  ; Line 92	//  @427
+  call m=16 nparm=1	//  @427
+  os drop	//  @429
+  ; Line 92	//  @430
+  ; Line 93	//  @430
+  const "array error"	//  @430
+  ; Line 93	//  @446
+  throw	//  @446
+  ; Line 93	//  @447
+_label_5:	//  @447
+  ; Line 95	//  @447
+  jmp _label_3	//  @447
+_label_4:	//  @452
+  ; Line 95	//  @452
+  ; Line 98	//  @452
+  summon this	//  @452
+  ; Line 98	//  @453
+  const "passed
+"	//  @453
+  ; Line 98	//  @465
+  call m=16 nparm=1	//  @465
+  os drop	//  @467
+  ; Line 98	//  @468
+  ret	//  @468
+--
+method end
+
+method math_test ordinal 18
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: math_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw	//  @78
+_label_0:	//  @79
+  ; Line 107	//  @79
+  summon this	//  @79
+  ; Line 107	//  @80
+  const "Checking int math... "	//  @80
+  ; Line 107	//  @106
+  call m=16 nparm=1	//  @106
+  os drop	//  @108
+  ; Line 110	//  @109
+  ; Line 109	//  @109
+  const 2	//  @109
+  ; Line 109	//  @114
+  const 2	//  @114
+  ; Line 109	//  @119
+  isum	//  @119
+  ; Line 109	//  @120
+  const 4	//  @120
+  isublu	//  @125
+  jz _label_1	//  @126
+  ; Line 109	//  @131
+  const "int + math error"	//  @131
+  ; Line 109	//  @152
+  throw	//  @152
+_label_1:	//  @153
+  ; Line 110	//  @153
+  ; Line 111	//  @153
+  ; Line 110	//  @153
+  const 2	//  @153
+  ; Line 110	//  @158
+  const 2	//  @158
+  ; Line 110	//  @163
+  isublu	//  @163
+  ; Line 110	//  @164
+  const 0	//  @164
+  isublu	//  @169
+  jz _label_3	//  @170
+  ; Line 110	//  @175
+  const "int - math error"	//  @175
+  ; Line 110	//  @196
+  throw	//  @196
+_label_3:	//  @197
+  ; Line 111	//  @197
+  ; Line 112	//  @197
+  ; Line 111	//  @197
+  const 2	//  @197
+  ; Line 111	//  @202
+  const 2	//  @202
+  ; Line 111	//  @207
+  idivlu	//  @207
+  ; Line 111	//  @208
+  const 1	//  @208
+  isublu	//  @213
+  jz _label_5	//  @214
+  ; Line 111	//  @219
+  const "int / math error"	//  @219
+  ; Line 111	//  @240
+  throw	//  @240
+_label_5:	//  @241
+  ; Line 112	//  @241
+  ; Line 114	//  @241
+  ; Line 112	//  @241
+  const 3	//  @241
+  ; Line 112	//  @246
+  const 3	//  @246
+  ; Line 112	//  @251
+  imul	//  @251
+  ; Line 112	//  @252
+  const 9	//  @252
+  isublu	//  @257
+  jz _label_7	//  @258
+  ; Line 112	//  @263
+  const "int * math error"	//  @263
+  ; Line 112	//  @284
+  throw	//  @284
+_label_7:	//  @285
+  ; Line 114	//  @285
+  ; Line 115	//  @285
+  ; Line 114	//  @285
+  const 3	//  @285
+  ; Line 114	//  @290
+  const 2	//  @290
+  ; Line 114	//  @295
+  ilt <	//  @295
+  jz _label_9	//  @296
+  ; Line 114	//  @301
+  const "int < error"	//  @301
+  ; Line 114	//  @317
+  throw	//  @317
+_label_9:	//  @318
+  ; Line 115	//  @318
+  ; Line 117	//  @318
+  ; Line 115	//  @318
+  const 5	//  @318
+  ; Line 115	//  @323
+  const 6	//  @323
+  ; Line 115	//  @328
+  igt >	//  @328
+  jz _label_11	//  @329
+  ; Line 115	//  @334
+  const "int > error"	//  @334
+  ; Line 115	//  @350
+  throw	//  @350
+_label_11:	//  @351
+  ; Line 117	//  @351
+  ; Line 118	//  @351
+  ; Line 117	//  @351
+  const 3	//  @351
+  ; Line 117	//  @356
+  const 2	//  @356
+  ; Line 117	//  @361
+  ile <=	//  @361
+  jz _label_13	//  @362
+  ; Line 117	//  @367
+  const "int <= error"	//  @367
+  ; Line 117	//  @384
+  throw	//  @384
+_label_13:	//  @385
+  ; Line 118	//  @385
+  ; Line 120	//  @385
+  ; Line 118	//  @385
+  const 5	//  @385
+  ; Line 118	//  @390
+  const 6	//  @390
+  ; Line 118	//  @395
+  ige >=	//  @395
+  jz _label_15	//  @396
+  ; Line 118	//  @401
+  const "int >= error"	//  @401
+  ; Line 118	//  @418
+  throw	//  @418
+_label_15:	//  @419
+  ; Line 120	//  @419
+  ; Line 121	//  @419
+  ; Line 120	//  @419
+  const 3	//  @419
+  ; Line 120	//  @424
+  const 3	//  @424
+  ; Line 120	//  @429
+  ile <=	//  @429
+  ; Line 120	//  @430
+  lognot	//  @430
+  jz _label_17	//  @431
+  ; Line 120	//  @436
+  const "int <= error"	//  @436
+  ; Line 120	//  @453
+  throw	//  @453
+_label_17:	//  @454
+  ; Line 121	//  @454
+  ; Line 123	//  @454
+  ; Line 121	//  @454
+  const 5	//  @454
+  ; Line 121	//  @459
+  const 5	//  @459
+  ; Line 121	//  @464
+  ige >=	//  @464
+  ; Line 121	//  @465
+  lognot	//  @465
+  jz _label_19	//  @466
+  ; Line 121	//  @471
+  const "int >= error"	//  @471
+  ; Line 121	//  @488
+  throw	//  @488
+_label_19:	//  @489
+  ; Line 123	//  @489
+  ; Line 124	//  @489
+  ; Line 123	//  @489
+  const 0	//  @489
+  ; Line 123	//  @494
+  const 0	//  @494
+  ; Line 123	//  @499
+  logor ||	//  @499
+  jz _label_21	//  @500
+  ; Line 123	//  @505
+  const "int || math error"	//  @505
+  ; Line 123	//  @527
+  throw	//  @527
+_label_21:	//  @528
+  ; Line 124	//  @528
+  ; Line 124	//  @528
+  ; Line 124	//  @528
+  const 1	//  @528
+  ; Line 124	//  @533
+  const 0	//  @533
+  ; Line 124	//  @538
+  logor ||	//  @538
+  jz _label_23	//  @539
+  jmp _label_24	//  @544
+_label_23:	//  @549
+  ; Line 124	//  @549
+  const "int || math error"	//  @549
+  ; Line 124	//  @571
+  throw	//  @571
+_label_24:	//  @572
+  ; Line 124	//  @572
+  ; Line 125	//  @572
+  ; Line 125	//  @572
+  const 0	//  @572
+  ; Line 125	//  @577
+  const 1	//  @577
+  ; Line 125	//  @582
+  logor ||	//  @582
+  jz _label_25	//  @583
+  jmp _label_26	//  @588
+_label_25:	//  @593
+  ; Line 125	//  @593
+  const "int || math error"	//  @593
+  ; Line 125	//  @615
+  throw	//  @615
+_label_26:	//  @616
+  ; Line 125	//  @616
+  ; Line 126	//  @616
+  ; Line 126	//  @616
+  const 1	//  @616
+  ; Line 126	//  @621
+  const 1	//  @621
+  ; Line 126	//  @626
+  logor ||	//  @626
+  jz _label_27	//  @627
+  jmp _label_28	//  @632
+_label_27:	//  @637
+  ; Line 126	//  @637
+  const "int || math error"	//  @637
+  ; Line 126	//  @659
+  throw	//  @659
+_label_28:	//  @660
+  ; Line 126	//  @660
+  ; Line 129	//  @660
+  ; Line 128	//  @660
+  const 0	//  @660
+  ; Line 128	//  @665
+  const 0	//  @665
+  ; Line 128	//  @670
+  logand &&	//  @670
+  jz _label_29	//  @671
+  ; Line 128	//  @676
+  const "int && math error"	//  @676
+  ; Line 128	//  @698
+  throw	//  @698
+_label_29:	//  @699
+  ; Line 129	//  @699
+  ; Line 130	//  @699
+  ; Line 129	//  @699
+  const 1	//  @699
+  ; Line 129	//  @704
+  const 0	//  @704
+  ; Line 129	//  @709
+  logand &&	//  @709
+  jz _label_31	//  @710
+  ; Line 129	//  @715
+  const "int && math error"	//  @715
+  ; Line 129	//  @737
+  throw	//  @737
+_label_31:	//  @738
+  ; Line 130	//  @738
+  ; Line 131	//  @738
+  ; Line 130	//  @738
+  const 0	//  @738
+  ; Line 130	//  @743
+  const 1	//  @743
+  ; Line 130	//  @748
+  logand &&	//  @748
+  jz _label_33	//  @749
+  ; Line 130	//  @754
+  const "int && math error"	//  @754
+  ; Line 130	//  @776
+  throw	//  @776
+_label_33:	//  @777
+  ; Line 131	//  @777
+  ; Line 131	//  @777
+  ; Line 131	//  @777
+  const 1	//  @777
+  ; Line 131	//  @782
+  const 1	//  @782
+  ; Line 131	//  @787
+  logand &&	//  @787
+  jz _label_35	//  @788
+  jmp _label_36	//  @793
+_label_35:	//  @798
+  ; Line 131	//  @798
+  const "int && math error"	//  @798
+  ; Line 131	//  @820
+  throw	//  @820
+_label_36:	//  @821
+  ; Line 131	//  @821
+  ; Line 134	//  @821
+  ; Line 133	//  @821
+  const 0	//  @821
+  ; Line 133	//  @826
+  const 0	//  @826
+  ; Line 133	//  @831
+  ior	//  @831
+  jz _label_37	//  @832
+  ; Line 133	//  @837
+  const "int | math error"	//  @837
+  ; Line 133	//  @858
+  throw	//  @858
+_label_37:	//  @859
+  ; Line 134	//  @859
+  ; Line 134	//  @859
+  ; Line 134	//  @859
+  const 1	//  @859
+  ; Line 134	//  @864
+  const 0	//  @864
+  ; Line 134	//  @869
+  ior	//  @869
+  jz _label_39	//  @870
+  jmp _label_40	//  @875
+_label_39:	//  @880
+  ; Line 134	//  @880
+  const "int | math error"	//  @880
+  ; Line 134	//  @901
+  throw	//  @901
+_label_40:	//  @902
+  ; Line 134	//  @902
+  ; Line 135	//  @902
+  ; Line 135	//  @902
+  const 0	//  @902
+  ; Line 135	//  @907
+  const 1	//  @907
+  ; Line 135	//  @912
+  ior	//  @912
+  jz _label_41	//  @913
+  jmp _label_42	//  @918
+_label_41:	//  @923
+  ; Line 135	//  @923
+  const "int | math error"	//  @923
+  ; Line 135	//  @944
+  throw	//  @944
+_label_42:	//  @945
+  ; Line 135	//  @945
+  ; Line 136	//  @945
+  ; Line 136	//  @945
+  const 1	//  @945
+  ; Line 136	//  @950
+  const 1	//  @950
+  ; Line 136	//  @955
+  ior	//  @955
+  jz _label_43	//  @956
+  jmp _label_44	//  @961
+_label_43:	//  @966
+  ; Line 136	//  @966
+  const "int | math error"	//  @966
+  ; Line 136	//  @987
+  throw	//  @987
+_label_44:	//  @988
+  ; Line 136	//  @988
+  ; Line 139	//  @988
+  ; Line 138	//  @988
+  const 0	//  @988
+  ; Line 138	//  @993
+  const 0	//  @993
+  ; Line 138	//  @998
+  iand	//  @998
+  jz _label_45	//  @999
+  ; Line 138	//  @1004
+  const "int & math error"	//  @1004
+  ; Line 138	//  @1025
+  throw	//  @1025
+_label_45:	//  @1026
+  ; Line 139	//  @1026
+  ; Line 140	//  @1026
+  ; Line 139	//  @1026
+  const 1	//  @1026
+  ; Line 139	//  @1031
+  const 0	//  @1031
+  ; Line 139	//  @1036
+  iand	//  @1036
+  jz _label_47	//  @1037
+  ; Line 139	//  @1042
+  const "int & math error"	//  @1042
+  ; Line 139	//  @1063
+  throw	//  @1063
+_label_47:	//  @1064
+  ; Line 140	//  @1064
+  ; Line 141	//  @1064
+  ; Line 140	//  @1064
+  const 0	//  @1064
+  ; Line 140	//  @1069
+  const 1	//  @1069
+  ; Line 140	//  @1074
+  iand	//  @1074
+  jz _label_49	//  @1075
+  ; Line 140	//  @1080
+  const "int & math error"	//  @1080
+  ; Line 140	//  @1101
+  throw	//  @1101
+_label_49:	//  @1102
+  ; Line 141	//  @1102
+  ; Line 141	//  @1102
+  ; Line 141	//  @1102
+  const 1	//  @1102
+  ; Line 141	//  @1107
+  const 1	//  @1107
+  ; Line 141	//  @1112
+  iand	//  @1112
+  jz _label_51	//  @1113
+  jmp _label_52	//  @1118
+_label_51:	//  @1123
+  ; Line 141	//  @1123
+  const "int & math error"	//  @1123
+  ; Line 141	//  @1144
+  throw	//  @1144
+_label_52:	//  @1145
+  ; Line 141	//  @1145
+  ; Line 143	//  @1145
+  summon this	//  @1145
+  ; Line 143	//  @1146
+  const "passed
+"	//  @1146
+  ; Line 143	//  @1158
+  call m=16 nparm=1	//  @1158
+  os drop	//  @1160
+  ; Line 143	//  @1161
+  ret	//  @1161
+--
+method end
+
+method run ordinal 19
+--
+  const 1	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: run in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw	//  @72
+_label_0:	//  @73
+  summon null	//  @73
+  ; Line 37	//  @74
+  get o stk pos=0	//  @74
+  os dup	//  @79
+  save fld=0	//  @80
+  os drop	//  @82
+  ; Line 38	//  @83
+  const 0	//  @83
+  i2o	//  @88
+  os dup	//  @89
+  save fld=1	//  @90
+  os drop	//  @92
+  ; Line 38	//  @93
+  ; Line 40	//  @93
+  summon this	//  @93
+  ; Line 40	//  @94
+  const "Phantom language regression tests are running
+"	//  @94
+  ; Line 40	//  @145
+  call m=16 nparm=1	//  @145
+  os drop	//  @147
+  ; Line 40	//  @148
+  ; Line 42	//  @148
+  summon this	//  @148
+  call m=21 nparm=0	//  @149
+  os drop	//  @151
+  ; Line 42	//  @152
+  ; Line 43	//  @152
+  summon this	//  @152
+  call m=18 nparm=0	//  @153
+  os drop	//  @155
+  ; Line 43	//  @156
+  ; Line 44	//  @156
+  summon this	//  @156
+  call m=17 nparm=0	//  @157
+  os drop	//  @159
+  ; Line 44	//  @160
+  ret	//  @160
+--
+method end
+
+method test_do_while ordinal 20
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_0	//  @6
+  const "arg count: test_do_while in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw	//  @82
+_label_0:	//  @83
+  ; Line 153	//  @83
+  const 3	//  @83
+  i2o	//  @88
+  os dup	//  @89
+  save fld=2	//  @90
+  os drop	//  @92
+  ; Line 154	//  @93
+  const 0	//  @93
+  i2o	//  @98
+  os dup	//  @99
+  save fld=3	//  @100
+  os drop	//  @102
+  ; Line 154	//  @103
+  ; Line 155	//  @103
+_label_1:	//  @103
+  ; Line 155	//  @103
+  load fld=3	//  @103
+  o2i	//  @105
+  ; Line 155	//  @106
+  const 1	//  @106
+  ; Line 155	//  @111
+  isum	//  @111
+  i2o	//  @112
+  os dup	//  @113
+  save fld=3	//  @114
+  os drop	//  @116
+  ; Line 155	//  @117
+  load fld=2	//  @117
+  o2i	//  @119
+  jz _label_2	//  @120
+  ; Line 155	//  @125
+  load fld=2	//  @125
+  o2i	//  @127
+  ; Line 155	//  @128
+  const 1	//  @128
+  ; Line 155	//  @133
+  isublu	//  @133
+  i2o	//  @134
+  os dup	//  @135
+  save fld=2	//  @136
+  os drop	//  @138
+  jmp _label_1	//  @139
+_label_2:	//  @144
+  ; Line 155	//  @144
+  ; Line 158	//  @144
+  ; Line 157	//  @144
+  load fld=3	//  @144
+  ; Line 157	//  @146
+  const 4	//  @146
+  i2o	//  @151
+  call m=4 nparm=1	//  @152
+  o2i	//  @154
+  lognot	//  @155
+  jz _label_3	//  @156
+  ; Line 157	//  @161
+  const "do/while error"	//  @161
+  ; Line 157	//  @180
+  throw	//  @180
+_label_3:	//  @181
+  ; Line 158	//  @181
+  ret	//  @181
+--
+method end
+
+method flow_test ordinal 21
+--
+  const 0	//  @0
+  isublu	//  @5
+  jz _label_4	//  @6
+  const "arg count: flow_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw	//  @78
+_label_4:	//  @79
+  ; Line 162	//  @79
+  summon this	//  @79
+  ; Line 162	//  @80
+  const "Checking flow control operators... "	//  @80
+  ; Line 162	//  @120
+  call m=16 nparm=1	//  @120
+  os drop	//  @122
+  ; Line 165	//  @123
+  ; Line 164	//  @123
+  const 0	//  @123
+  jz _label_5	//  @128
+  ; Line 164	//  @133
+  const "if(0) error"	//  @133
+  ; Line 164	//  @149
+  throw	//  @149
+_label_5:	//  @150
+  ; Line 165	//  @150
+  ; Line 166	//  @150
+  ; Line 165	//  @150
+  const 0	//  @150
+  ; Line 165	//  @155
+  const 1	//  @155
+  isublu	//  @160
+  lognot	//  @161
+  jz _label_7	//  @162
+  ; Line 165	//  @167
+  const "if or == error"	//  @167
+  ; Line 165	//  @186
+  throw	//  @186
+_label_7:	//  @187
+  ; Line 166	//  @187
+  ; Line 171	//  @187
+  ; Line 166	//  @187
+  const 0	//  @187
+  ; Line 166	//  @192
+  const 0	//  @192
+  isublu	//  @197
+  jz _label_9	//  @198
+  ; Line 166	//  @203
+  const "if or != error"	//  @203
+  ; Line 166	//  @222
+  throw	//  @222
+_label_9:	//  @223
+  ; Line 171	//  @223
+  ; Line 171	//  @223
+  const 0	//  @223
+  i2o	//  @228
+  os dup	//  @229
+  save fld=3	//  @230
+  os drop	//  @232
+  ; Line 171	//  @233
+  ; Line 173	//  @233
+  ; Line 172	//  @233
+  const 1	//  @233
+  jz _label_11	//  @238
+  ; Line 172	//  @243
+  const 1	//  @243
+  i2o	//  @248
+  os dup	//  @249
+  save fld=3	//  @250
+  os drop	//  @252
+_label_11:	//  @253
+  ; Line 173	//  @253
+  ; Line 175	//  @253
+  ; Line 173	//  @253
+  load fld=3	//  @253
+  ; Line 173	//  @255
+  const 1	//  @255
+  i2o	//  @260
+  call m=4 nparm=1	//  @261
+  o2i	//  @263
+  jz _label_13	//  @264
+  jmp _label_14	//  @269
+_label_13:	//  @274
+  ; Line 175	//  @274
+  const "if(1) error"	//  @274
+  ; Line 175	//  @290
+  throw	//  @290
+_label_14:	//  @291
+  ; Line 175	//  @291
+  ; Line 177	//  @291
+  summon this	//  @291
+  call m=20 nparm=0	//  @292
+  os drop	//  @294
+  ; Line 177	//  @295
+  ; Line 179	//  @295
+  const 2	//  @295
+  i2o	//  @300
+  os dup	//  @301
+  save fld=2	//  @302
+  os drop	//  @304
+  ; Line 179	//  @305
+  ; Line 180	//  @305
+  load fld=2	//  @305
+  o2i	//  @307
+  is dup	//  @308
+  ; Line 182	//  @309
+  const 1	//  @309
+  isublu	//  @314
+  jz _label_0	//  @315
+  is dup	//  @320
+  ; Line 183	//  @321
+  const 2	//  @321
+  isublu	//  @326
+  jz _label_1	//  @327
+  is dup	//  @332
+  ; Line 184	//  @333
+  const 3	//  @333
+  isublu	//  @338
+  jz _label_2	//  @339
+  jmp _label_3	//  @344
+_label_0:	//  @349
+  is drop	//  @349
+  ; Line 182	//  @350
+  const "switch fall in error"	//  @350
+  ; Line 182	//  @375
+  throw	//  @375
+  ; Line 182	//  @376
+_label_1:	//  @376
+  is drop	//  @376
+  ; Line 183	//  @377
+  ; Line 183	//  @377
+  jmp _label_15	//  @377
+  ; Line 183	//  @382
+_label_2:	//  @382
+  is drop	//  @382
+  ; Line 184	//  @383
+  ; Line 184	//  @383
+  const "switch fall out error"	//  @383
+  ; Line 184	//  @409
+  throw	//  @409
+  ; Line 184	//  @410
+_label_3:	//  @410
+  is drop	//  @410
+  ; Line 185	//  @411
+  ; Line 185	//  @411
+  const "switch dafault error"	//  @411
+  ; Line 185	//  @436
+  throw	//  @436
+  ; Line 185	//  @437
+  ; Line 186	//  @437
+  jmp _label_15	//  @437
+  ; Line 186	//  @442
+_label_15:	//  @442
+  ; Line 186	//  @442
+  ; Line 188	//  @442
+  summon this	//  @442
+  ; Line 188	//  @443
+  const "passed
+"	//  @443
+  ; Line 188	//  @455
+  call m=16 nparm=1	//  @455
+  os drop	//  @457
+  ; Line 188	//  @458
+  ret	//  @458
+--
+method end
+

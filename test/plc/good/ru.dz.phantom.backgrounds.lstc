@@ -1,0 +1,18 @@
+Class version 20160114032156371
+
+method getBackgroundImage ordinal 16
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getBackgroundImage in .ru.dz.phantom.backgrounds"	//  @11
+  throw				//  @75
+_label_0:	//  @76
+  ; Line 8			//  @76
+  const <bindata>			//  @76
+  ; Line 8			//  @2359432
+  ret				//  @2359432
+  ret				//  @2359433
+--
+method end
+

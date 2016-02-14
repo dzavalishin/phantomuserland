@@ -1,0 +1,87 @@
+Class .phantom.util.map
+  Field index
+  Field pairs
+  Method void init(  ):
+    ,  : void
+      void  : void
+        = : int
+          ident index : int
+          int const "0" : int const
+      void  : void
+        = : void[]
+          ident pairs : void[]
+          new void[] : void[]
+
+  Method .internal.object get( key: .internal.object ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : int
+            ident i : int
+            int const "0" : int const
+        do-while : unknown
+          < : int
+            ident i : int
+            ident index : int
+          ,  : unknown
+            if : unknown
+              . : int
+                ident key : .internal.object
+                Method equals : unknown
+                arg  : unknown
+                  [] : unknown
+                    ident pairs : void[]
+                    ident i : int
+              return : void
+                [] : unknown
+                  ident pairs : void[]
+                  + : int
+                    ident i : int
+                    int const "1" : int const
+            void  : void
+              = : int
+                ident i : int
+                + : int
+                  ident i : int
+                  int const "2" : int const
+      return : void const
+        null : .internal.object const
+
+  Method int put( key: .internal.object, value: .internal.object ):
+    ,  : unknown
+      ,  : unknown
+        ,  : unknown
+          ,  : unknown
+            if : unknown
+              :!= : .internal.object
+                . : .internal.object
+                  this  : .phantom.util.map
+                  Method get : unknown
+                  arg  : unknown
+                    ident key : .internal.object
+                null : .internal.object const
+              return : void const
+                int const "0" : int const
+            void  : void
+              = : unknown
+                [] : unknown
+                  ident pairs : void[]
+                  ident index : int
+                ident key : .internal.object
+          void  : void
+            = : unknown
+              [] : unknown
+                ident pairs : void[]
+                + : int
+                  ident index : int
+                  int const "1" : int const
+              ident value : .internal.object
+        void  : void
+          = : int
+            ident index : int
+            + : int
+              ident index : int
+              int const "2" : int const
+      return : void const
+        int const "1" : int const
+

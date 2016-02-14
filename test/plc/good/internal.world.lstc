@@ -1,0 +1,8 @@
+Class version 20160114032155498
+
+method getMyThread ordinal 8
+--
+  ret				//  @0
+--
+method end
+

@@ -1,0 +1,20 @@
+Class version 20160114031914019
+
+method setByte ordinal 9
+--
+  ret				//  @0
+--
+method end
+
+method getByte ordinal 8
+--
+  ret				//  @0
+--
+method end
+
+method setRange ordinal 10
+--
+  ret				//  @0
+--
+method end
+

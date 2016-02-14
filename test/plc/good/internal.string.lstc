@@ -1,0 +1,38 @@
+Class version 20160114032153430
+
+method strstr ordinal 12
+--
+  ret				//  @0
+--
+method end
+
+method equals ordinal 4
+--
+  ret				//  @0
+--
+method end
+
+method length ordinal 11
+--
+  ret				//  @0
+--
+method end
+
+method concat ordinal 10
+--
+  ret				//  @0
+--
+method end
+
+method substring ordinal 8
+--
+  ret				//  @0
+--
+method end
+
+method charAt ordinal 9
+--
+  ret				//  @0
+--
+method end
+

@@ -1,0 +1,28 @@
+Class .internal.bootstrap
+  Method void sleep( msec: int ):
+  -- No code!
+
+  Method string[] getKernelEnvironment(  ):
+  -- No code!
+
+  Method void consolePrint( s: string ):
+  -- No code!
+
+  Method .internal.class loadClass( name: string ):
+  -- No code!
+
+  Method .internal.binary createBinary( sizeBytes: int ):
+  -- No code!
+
+  Method void setOsInterface( oi: .phantom.osimpl ):
+  -- No code!
+
+  Method void startThread( o: .internal.object ):
+  -- No code!
+
+  Method void setScreenBackground( bg: .internal.bitmap ):
+  -- No code!
+
+  Method void setClassLoader( cl: .internal.object ):
+  -- No code!
+

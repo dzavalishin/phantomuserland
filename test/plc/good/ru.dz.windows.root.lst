@@ -1,0 +1,385 @@
+Class .ru.dz.windows.root
+  Field console
+  Field boot_object
+  Method void init( _console: .internal.io.tty, _booto: unknown ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : .internal.io.tty
+            ident console : .internal.io.tty
+            ident _console : .internal.io.tty
+        void  : void
+          = : unknown
+            ident boot_object : unknown
+            ident _booto : unknown
+      void  : void
+        . : void
+          ident console : .internal.io.tty
+          Method putws : unknown
+          arg  : unknown
+            string const " in root..." : string const
+
+  Method void gotoxy( x: int, y: int ):
+    void  : void
+      . : void
+        ident console : .internal.io.tty
+        Method gotoxy : unknown
+        arg  : int
+          ident x : int
+        arg  : unknown
+          ident y : int
+
+  Method void test(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                void  : void
+                  . : void
+                    ident console : .internal.io.tty
+                    Method gotoxy : unknown
+                    arg  : int
+                      int const "0" : int const
+                    arg  : unknown
+                      int const "3" : int const
+                void  : void
+                  . : void
+                    ident console : .internal.io.tty
+                    Method putws : unknown
+                    arg  : unknown
+                      string const "Hello on new console (root win)!" : string const
+              void  : void
+                . : void
+                  ident console : .internal.io.tty
+                  Method gotoxy : unknown
+                  arg  : int
+                    int const "10" : int const
+                  arg  : unknown
+                    int const "10" : int const
+            void  : void
+              . : void
+                ident console : .internal.io.tty
+                Method setcolor : unknown
+                arg  : unknown
+                  int const "14" : int const
+          void  : void
+            . : void
+              ident console : .internal.io.tty
+              Method putws : unknown
+              arg  : unknown
+                string const "Pos 10,10" : string const
+        void  : void
+          . : void
+            ident console : .internal.io.tty
+            Method gotoxy : unknown
+            arg  : int
+              int const "0" : int const
+            arg  : unknown
+              int const "0" : int const
+      void  : void
+        . : void
+          ident console : .internal.io.tty
+          Method putws : unknown
+          arg  : unknown
+            string const "
+" : string const
+
+  Method void shell(  ):
+    ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            . : void
+              ident console : .internal.io.tty
+              Method putws : unknown
+              arg  : unknown
+                string const "
+The very first Phantom command line shell
+" : string const
+          void  : void
+            = : string
+              ident str : string
+              string const "" : string const
+        do-while : unknown
+          int const "1" : int const
+          ,  : void
+            ,  : void
+              void  : void
+                = : string
+                  ident ch : string
+                  . : string
+                    ident console : .internal.io.tty
+                    Method getwc : unknown
+              if : unknown
+                . : int
+                  ident ch : string
+                  Method equals : unknown
+                  arg  : unknown
+                    string const "
+" : string const
+                ,  : unknown
+                  ,  : unknown
+                    ,  : unknown
+                      ,  : unknown
+                        if : unknown
+                          . : int
+                            ident str : string
+                            Method equals : unknown
+                            arg  : unknown
+                              string const "quit" : string const
+                          break : void
+                        void  : void
+                          . : void
+                            this  : .ru.dz.windows.root
+                            Method putws : unknown
+                            arg  : unknown
+                              string const "
+" : string const
+                      void  : void
+                        . : void
+                          this  : .ru.dz.windows.root
+                          Method shell_cmd : unknown
+                          arg  : unknown
+                            ident str : string
+                    void  : void
+                      = : string
+                        ident str : string
+                        string const "" : string const
+                  void  : void
+                    . : void
+                      ident console : .internal.io.tty
+                      Method putws : unknown
+                      arg  : unknown
+                        string const "
+phantom => 
+" : string const
+                void  : void
+                  = : string
+                    ident str : string
+                    . : string
+                      ident str : string
+                      Method concat : unknown
+                      arg  : unknown
+                        ident ch : string
+            void  : void
+              . : void
+                ident console : .internal.io.tty
+                Method putws : unknown
+                arg  : unknown
+                  ident ch : string
+      throw  : void const
+        string const "shell quit" : string const
+
+  Method void putws( s: string ):
+    void  : void
+      . : void
+        ident console : .internal.io.tty
+        Method putws : unknown
+        arg  : unknown
+          ident s : string
+
+  Method void shell_cmd( cmd: string ):
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
+            ,  : void
+              ,  : void
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
+                        ,  : void
+                          ,  : void
+                            void  : void
+                              = : int
+                                ident len : int
+                                . : int
+                                  ident cmd : string
+                                  Method length : unknown
+                            void  : void
+                              = : int
+                                ident i : int
+                                int const "0" : int const
+                          void  : void
+                            = : int
+                              ident spacePos : int
+                              int const "0" : int const
+                        do-while : unknown
+                          < : int
+                            ident i : int
+                            ident len : int
+                          ,  : void
+                            ,  : void
+                              void  : void
+                                = : int
+                                  ident c : int
+                                  . : int
+                                    ident cmd : string
+                                    Method charAt : unknown
+                                    arg  : unknown
+                                      ident i : int
+                              if : unknown
+                                == : int
+                                  ident c : int
+                                  int const "32" : int const
+                                ,  : void
+                                  void  : void
+                                    = : int
+                                      ident spacePos : int
+                                      ident i : int
+                                  break : void
+                            void  : void
+                              = : int
+                                ident i : int
+                                + : int
+                                  ident i : int
+                                  int const "1" : int const
+                      if : void
+                        >= : int
+                          ident i : int
+                          ident len : int
+                        ,  : void
+                          void  : void
+                            = : string
+                              ident verb : string
+                              ident cmd : string
+                          void  : void
+                            = : string
+                              ident parms : string
+                              string const "" : string const
+                        ,  : void
+                          void  : void
+                            = : string
+                              ident verb : string
+                              . : string
+                                ident cmd : string
+                                Method substring : unknown
+                                arg  : int
+                                  int const "0" : int const
+                                arg  : unknown
+                                  ident spacePos : int
+                          void  : void
+                            = : string
+                              ident parms : string
+                              . : string
+                                ident cmd : string
+                                Method substring : unknown
+                                arg  : int
+                                  + : int
+                                    ident spacePos : int
+                                    int const "1" : int const
+                                arg  : unknown
+                                  - : int
+                                    ident len : int
+                                    ident spacePos : int
+                    if : unknown
+                      . : int
+                        ident verb : string
+                        Method equals : unknown
+                        arg  : unknown
+                          string const "ls" : string const
+                      ,  : void
+                        void  : void
+                          . : void
+                            this  : .ru.dz.windows.root
+                            Method putws : unknown
+                            arg  : unknown
+                              string const "We're not in Linux anymore...
+" : string const
+                        return : void
+                  if : unknown
+                    . : int
+                      ident verb : string
+                      Method equals : unknown
+                      arg  : unknown
+                        string const "man" : string const
+                    ,  : void
+                      void  : void
+                        . : void
+                          this  : .ru.dz.windows.root
+                          Method putws : unknown
+                          arg  : unknown
+                            string const "Politically correct version of this command is 'person' now
+" : string const
+                      return : void
+                if : unknown
+                  . : int
+                    ident verb : string
+                    Method equals : unknown
+                    arg  : unknown
+                      string const "cd" : string const
+                  ,  : void
+                    void  : void
+                      . : void
+                        this  : .ru.dz.windows.root
+                        Method putws : unknown
+                        arg  : unknown
+                          string const "Nowhere to cd yet...
+" : string const
+                    return : void
+              if : unknown
+                . : int
+                  ident verb : string
+                  Method equals : unknown
+                  arg  : unknown
+                    string const "echo" : string const
+                ,  : void
+                  void  : void
+                    . : void
+                      this  : .ru.dz.windows.root
+                      Method putws : unknown
+                      arg  : unknown
+                        ident parms : string
+                  return : void
+            if : unknown
+              . : int
+                ident verb : string
+                Method equals : unknown
+                arg  : unknown
+                  string const "ps" : string const
+              ,  : void
+                void  : void
+                  . : void
+                    this  : .ru.dz.windows.root
+                    Method putws : unknown
+                    arg  : unknown
+                      ident parms : string
+                return : void
+          if : unknown
+            . : int
+              ident verb : string
+              Method equals : unknown
+              arg  : unknown
+                string const "exit" : string const
+            ,  : void
+              throw  : void const
+                ident parms : string
+              return : void
+        if : unknown
+          . : int
+            ident verb : string
+            Method equals : unknown
+            arg  : unknown
+              string const "help" : string const
+          ,  : void
+            void  : void
+              . : void
+                this  : .ru.dz.windows.root
+                Method putws : unknown
+                arg  : unknown
+                  string const "help, echo, exit - that's all I know yet..." : string const
+            return : void
+      void  : void
+        . : void
+          this  : .ru.dz.windows.root
+          Method putws : unknown
+          arg  : unknown
+            . : string
+              string const "Unknown command: " : string const
+              Method concat : unknown
+              arg  : unknown
+                ident verb : string
+

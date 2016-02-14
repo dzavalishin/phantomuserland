@@ -1,0 +1,7 @@
+Regress tests fro Phantom Language Compiler. 
+
+
+Compiles phantom sources and compares list files with reference copies in ./good.
+Does not compare binaries for file version is different each compile.
+In list files we delete version string with sed.
+

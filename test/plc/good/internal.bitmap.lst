@@ -1,0 +1,7 @@
+Class .internal.bitmap
+  Method void paintTo( window: .internal.io.tty, xpos: int, ypos: int ):
+  -- No code!
+
+  Method void loadFromString( src: string ):
+  -- No code!
+

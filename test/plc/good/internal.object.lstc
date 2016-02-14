@@ -1,0 +1,55 @@
+Class version 20160114032154196
+
+method getClass ordinal 2
+--
+  ret				//  @0
+--
+method end
+
+method hashCode ordinal 15
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: hashCode in .internal.object"	//  @11
+  throw				//  @55
+_label_0:	//  @56
+  ; Line 43			//  @56
+  const 0				//  @56
+  i2o				//  @61
+  ; Line 43			//  @62
+  ret				//  @62
+  ret				//  @63
+--
+method end
+
+method construct_me ordinal 0
+--
+  ret				//  @0
+--
+method end
+
+method equals ordinal 4
+--
+  ret				//  @0
+--
+method end
+
+method clone ordinal 3
+--
+  ret				//  @0
+--
+method end
+
+method toString ordinal 5
+--
+  ret				//  @0
+--
+method end
+
+method destruct_me ordinal 1
+--
+  ret				//  @0
+--
+method end
+

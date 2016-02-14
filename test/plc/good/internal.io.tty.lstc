@@ -1,0 +1,50 @@
+Class version 20160114032156812
+
+method gotoxy ordinal 19
+--
+  ret				//  @0
+--
+method end
+
+method debug ordinal 18
+--
+  ret				//  @0
+--
+method end
+
+method moveWindow ordinal 24
+--
+  ret				//  @0
+--
+method end
+
+method setcolor ordinal 21
+--
+  ret				//  @0
+--
+method end
+
+method clear ordinal 20
+--
+  ret				//  @0
+--
+method end
+
+method getwc ordinal 16
+--
+  ret				//  @0
+--
+method end
+
+method setTitle ordinal 25
+--
+  ret				//  @0
+--
+method end
+
+method putws ordinal 17
+--
+  ret				//  @0
+--
+method end
+
