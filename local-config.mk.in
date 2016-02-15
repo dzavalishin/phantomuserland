@@ -19,3 +19,7 @@ HW_BOOT_DEST=/mnt/nfs/phantom-test-machine/boot
 #BOARD=pc_pci
 #     Arm Integrator/CP
 #BOARD=arm_icp
+
+#If you use Java, place java lib source path here
+#PHANTOM_JDK_SRC=C:/tmp/open_jdk/openjdk/jdk/src/share/classes/
+
