@@ -9,3 +9,5 @@ codegen as output. Mostly - mapping from soot output to phantom code
 internal representation (tree).
 
 NB. Direct access to class field in java is not supported in Phantom. Generate getters?
+
+To run Java unit tests in Phantom uncomment calls in ru.dz.phantom.system.boot.ph - see .test.toPhantom.AllRun
