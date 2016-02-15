@@ -9,7 +9,10 @@
 # Directory where to put executables - supposed to be in PATH
 INST_BIN=$(realpath c:\bin\tools)
 
+ifndef TFTP_PATH
 TFTP_PATH=$(realpath $(PHANTOM_HOME))/run/tftp
+endif
+
 BOOT_PATH=$(realpath $(PHANTOM_HOME))/run/fat/boot
 
 ifndef OSTYPE
