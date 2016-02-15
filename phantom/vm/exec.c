@@ -42,8 +42,8 @@ static errno_t find_dynamic_method( dynamic_method_info_t *mi );
  */
 
 
-#define DEB_CALLRET 1
-#define DEB_DYNCALL 1
+#define DEB_CALLRET 0
+#define DEB_DYNCALL 0
 
 //static int debug_print_instr = 1;
 int debug_print_instr = 0;
