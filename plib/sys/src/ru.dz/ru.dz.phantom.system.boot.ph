@@ -49,6 +49,8 @@ import .internal."class";
 
 import .phantom.osimpl;
 
+import .test.toPhantom.PhantomPrinter;
+import .test.toPhantom.AllRun;
 
 
 
@@ -93,6 +95,11 @@ class boot
 
     void do_startup(var _boot_object : .internal.object @const )
     {
+// uncomment to run Java unit tests
+/*
+		var pp : .test.toPhantom.PhantomPrinter;
+		var ar : .test.toPhantom.AllRun;
+*/
         debug = 1;
 
         boot_object = _boot_object;
@@ -165,6 +172,17 @@ class boot
         windows.test();
 
         print("Finished windows tests\n");
+
+// uncomment to run Java unit tests
+/*
+        print("Run Java tests\n");
+		pp = new .test.toPhantom.PhantomPrinter();
+		pp.init( console );
+
+		ar = new .test.toPhantom.AllRun();
+		ar.setPrinter( pp );
+		ar.runAll();
+*/
 
         //run = new .ru.dz.phantom.system.thread_test();
         // TODO runtime class check!
