@@ -159,6 +159,8 @@ void			pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_t
 void                    pvm_object_print( struct pvm_object );
 void                    pvm_object_dump( struct pvm_object o );
 void                    dumpo( addr_t addr );
+void					pvm_puts(struct pvm_object o );
+struct pvm_object       pvm_get_class_name( struct pvm_object );
 
 /**
  *
