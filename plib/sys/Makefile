@@ -13,10 +13,10 @@ EXCLUDED_PCFILES = stub.class.pc stub.object.pc stub.thread.pc
 all: install
 
 install: classes classes.ar
-	cp classes $(TFTP_PATH)
-	cp classes $(BOOT_PATH)
 	cp classes ../bin
+	cp classes $(BOOT_PATH)
 	cp classes.ar $(BOOT_PATH)
+	cp classes $(TFTP_PATH)
 
 
 vpath %.ph $(SRCDIRS)

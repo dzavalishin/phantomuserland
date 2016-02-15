@@ -59,6 +59,8 @@ class shell //extends runnable
     var win : .internal.window;
     var conn : .internal.connection;
 
+    //var fio : .internal.connection;
+
     var stat_conn : .internal.connection;
 
     var cb : shell_callback;
@@ -100,6 +102,10 @@ class shell //extends runnable
         console.moveWindow(10,10);
         console.setTitle("VM Shell");
 
+		// test of fio connection
+		//fio = new .internal.connection();
+        //fio.connect("fio:/amnt1/fio_log.txt");
+		//fio.block("written from phantom code", 1);
 
         // test of connections
         conn = new .internal.connection();
@@ -110,7 +116,7 @@ class shell //extends runnable
 
         conn.setCallback( cb, 17 );
 
-        conn.invoke( 1000, 0 ); // op 0 - set timer, arg - msecs
+        conn.invoke( 20000, 0 ); // op 0 - set timer, arg - msecs (20 sec)
 
         stat_conn = new .internal.connection();
         stat_conn.connect("stt:");

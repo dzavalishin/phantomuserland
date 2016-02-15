@@ -24,12 +24,19 @@ attribute const * ->!;
 class shell_callback //extends runnable
 {
     var console : .internal.io.tty;
+	var fio : .internal.connection;
 
     void run(var time : int ) [17]
     {
         console.putws("\n\nTimer callback: ");
         console.putws(time.toString());
         console.putws(" !!\n\n");
+
+		// test of fio connection
+		fio = new .internal.connection();
+        fio.connect("fio:/amnt1/fio_log.txt");
+		fio.block("written from phantom code", 1);
+
     }
                       
     void init(var tt : .internal.io.tty ) 
