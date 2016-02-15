@@ -12,8 +12,11 @@ import java.io.IOException;
 
 /**
  * <p>Represents a method.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -21,9 +24,9 @@ public class Method
 {
 	private int         ordinal;
 	public Node         code;
-	public String       name;
-	public PhantomType  type;
-	public LinkedList<ArgDefinition>   args_def = new LinkedList<ArgDefinition>();
+	private String       name;
+	private PhantomType  type;
+	private LinkedList<ArgDefinition>   args_def = new LinkedList<ArgDefinition>();
 
 	private boolean requestDebug= false;
 
@@ -59,25 +62,6 @@ public class Method
 		svars.add_stack_var( new PhantomVariable(name, type ) );
 	}
 
-	public String toString()
-	{
-		StringBuffer sb = new StringBuffer();
-
-		sb.append( type.toString() );
-		sb.append( " " );
-		sb.append( name );
-		sb.append( "( " );
-		boolean first = true;
-		for( Iterator<ArgDefinition> i = args_def.iterator(); i.hasNext(); )
-		{
-			if( !first ) sb.append(", ");
-			first = false;
-			sb.append(i.next().toString());
-		}
-		sb.append( " )" );
-
-		return sb.toString();
-	}
 
 	public Codegen get_cg() { return c; }
 
@@ -108,6 +92,7 @@ public class Method
 		c.emitISubLU();
 		c.emitJz(good_args_label);
 
+		// TODO throw not string, but some meaningful class
 		// wrong count - throw string
 		// BUG! Need less consuming way of reporting this. Maybe by
 		// calling class object Method? Or by summoning something?
@@ -166,9 +151,9 @@ public class Method
 
 
 	public void generateLlvmCode( CodeGeneratorState s, BufferedWriter llvmFile ) throws PlcException, IOException {
-		
+
 		LlvmCodegen llc = new LlvmCodegen(s.get_class(),this,llvmFile);
-		
+
 		StringBuilder argdef = new StringBuilder();
 
 		boolean firstParm = true;
@@ -184,7 +169,7 @@ public class Method
 
 		String llvmMethodName = name;
 		name = name.replaceAll("<init>", "_\\$_Constructor");
-		
+
 		llc.putln(String.format("define %s @%s(%s) {", llc.getObjectType(), name, argdef )); // function 
 
 		if(code != null)
@@ -247,7 +232,7 @@ public class Method
 			if(requestDebug) llc.emitDebug((byte) 0x2);
 
 		}
-		
+
 		// catch the fall-out
 		llc.putln("ret "+llc.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
 		llc.putln("}"); // end of function 
@@ -259,7 +244,7 @@ public class Method
 		// ------------------------------------------
 
 		llc.flushPostponedCode();
-		
+
 	}
 
 
@@ -268,31 +253,62 @@ public class Method
 	// ------------------------------------------
 
 
-	public int getOrdinal() {
-		//if(ordinal < 0)			System.out.println("Method.getOrdinal(): ordinal < 0");
-		return ordinal; 
+	public int getOrdinal() { return ordinal; }
+	public void setOrdinal(int ord) { ordinal = ord; }
+
+	public void setDebugMethod(boolean requestDebug) { this.requestDebug = requestDebug; }
+	public boolean getDebugMethod() { return requestDebug; }
+
+	public String getName() { return name; }
+	public MethodSignature getSignature() { return new MethodSignature( getName(), getArgIterator() ); }
+
+	public PhantomType getType() { return type; }
+	public void setType(PhantomType phantomType) { type = phantomType; }
+
+	public int getArgCount() { return args_def.size(); }
+	public Iterator<ArgDefinition> getArgIterator() { return args_def.iterator(); }
+
+	// ------------------------------------------
+	// Dump/print
+	// ------------------------------------------
+
+	
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer();
+
+		sb.append( type.toString() );
+		sb.append( " " );
+		sb.append( name );
+		sb.append( "( " );
+		boolean first = true;
+		for( Iterator<ArgDefinition> i = args_def.iterator(); i.hasNext(); )
+		{
+			if( !first ) sb.append(", ");
+			first = false;
+			sb.append(i.next().toString());
+		}
+		sb.append( " )" );
+
+		return sb.toString();
+	}
+	
+	public String dumpArgs() 
+	{
+		StringBuilder s = new StringBuilder();
+		Iterator<ArgDefinition> i = getArgIterator();
+
+		while (i.hasNext()) {
+			ArgDefinition ad = i.next();
+
+			s.append(ad.toString());
+			s.append(" ");
+		}
+
+		return s.toString();
 	}
 
-	public void setOrdinal(int ord) {
-		ordinal = ord;		
-	}
 
-
-	public void setDebugMethod(boolean requestDebug) {
-		this.requestDebug = requestDebug;
-	}
-
-	public boolean getDebugMethod() {
-		return requestDebug;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public PhantomType getType() {
-		return type;
-	}
 
 };
 

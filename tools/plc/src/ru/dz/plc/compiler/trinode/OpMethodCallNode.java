@@ -13,8 +13,11 @@ import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Method call node.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 

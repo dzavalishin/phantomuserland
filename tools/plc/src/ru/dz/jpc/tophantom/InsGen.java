@@ -822,17 +822,17 @@ class InsGen extends Opcode {
 			{   // update method return type
 				switch (ident.charAt(0)) {
 				case 'i':
-					ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.int",false, null));
+					ps.getMethod().setType( new PhantomType(ClassMap.get_map().get(".internal.int",false, null)) );
 					break;
 				case 'l':
 				case 'f':
 				case 'd':
 				case 'a':
 					if (m.fl.signature.endsWith(")Ljava/lang/String;")){
-						ps.getMethod().type = new PhantomType(ClassMap.get_map().get(".internal.string",false, null));
+						ps.getMethod().setType( new PhantomType(ClassMap.get_map().get(".internal.string",false, null)) );
 					} else {
 						PhantomType returnType = getReturnType(m.fl.signature);
-						if (returnType != null) ps.getMethod().type = returnType;
+						if (returnType != null) ps.getMethod().setType( returnType );
 					}
 					break;
 				case 'r':

@@ -103,23 +103,34 @@ public class PhantomClass {
 	// Methods
 	// ------------------------------------------------------------------------
 
+	@Deprecated
 	protected Method findMethod(Method his_m) {
-		Method m = mt.get(his_m.name);
+		Method m = mt.get(his_m.getName());
 		if (m != null) return m;
 		if (!have_nonvoid_parent)return null;
 		return parent_class.findMethod(his_m);
 	}
 
+	@Deprecated
 	public Method findMethod(String name) {
 		Method m = mt.get(name);
 		if (m != null) return m;
 		if (!have_nonvoid_parent)return null;
 		return parent_class.findMethod(name);
 	}
+
+	public Method findMethod(MethodSignature signature) {
+		Method m = mt.get(signature);
+		//return null; // TODO why?
+		if (m != null) return m;
+		if (!have_nonvoid_parent)return null;
+		return parent_class.findMethod(signature);
+	}
+
 	
 	static boolean isSameArgs(Method m1, Method m2) {
-		Iterator<ArgDefinition> i1 = m1.args_def.iterator();
-		Iterator<ArgDefinition> i2 = m2.args_def.iterator();
+		Iterator<ArgDefinition> i1 = m1.getArgIterator();
+		Iterator<ArgDefinition> i2 = m2.getArgIterator();
 
 		while (i1.hasNext() && i2.hasNext()) {
 			ArgDefinition ad1 = i1.next();
@@ -135,21 +146,7 @@ public class PhantomClass {
 		return true;
 	}
 
-	static String dumpArgs(Method m)
-	{
-		StringBuilder s = new StringBuilder();
-
-		Iterator<ArgDefinition> i = m.args_def.iterator();
-
-		while (i.hasNext()) {
-			ArgDefinition ad = i.next();
-			
-			s.append(ad.toString());
-			s.append(" ");
-		}
-		
-		return s.toString();
-	}
+	static String dumpArgs(Method m) { return m.dumpArgs(); }
 	
 	protected void check_base_for_method(Method m) throws PlcException {
 		if (!have_nonvoid_parent)return;
@@ -162,13 +159,14 @@ public class PhantomClass {
 			String ma2 = dumpArgs(bm);
 		
 			throw new PlcException("Method definition", "incompatible args",
-					this.name + "::" + m.name + " required ("+ma2+"), have ("+ma1+")");
+					this.name + "::" + m.getName() + " required ("+ma2+"), have ("+ma1+")");
 		}
 		
 		// Here we do it
 		m.setOrdinal(bm.getOrdinal());
 	}
 
+	@Deprecated
 	public Method addMethod(String name, PhantomType type) throws PlcException {
 		Method m = mt.add(name, type);
 		//check_base_for_method(m);
@@ -210,10 +208,12 @@ public class PhantomClass {
 	 * @throws PlcException
 	 */
 	public void addStaticField(String name, PhantomType type) throws PlcException {
+		// TODO parent?
 		staticFieldsTable.add(name, type);
 	}
 
 	public PhantomField findStaticField(String name) {
+		// TODO parent?
 		return staticFieldsTable.get(name);
 		//PhantomField f = staticFieldsTable.get(name);
 		//if (f != null)return f;
@@ -229,12 +229,14 @@ public class PhantomClass {
 		PhantomField f = ft.get(name);
 		if (f != null)return f;
 		if (!have_nonvoid_parent)return null;
+		// TODO parent field visibility?
 		return parent_class.find_field(name);
 	}
 
 	protected void check_base_for_field(String name, PhantomType type) throws PlcException {
 		if (!have_nonvoid_parent)return;
 
+		// TODO parent field visibility?
 		//PhantomField f = ft.get(name);
 		PhantomField f = parent_class.find_field(name);
 		if (f == null)return;
@@ -281,14 +283,14 @@ public class PhantomClass {
 			Method im = i.next();
 
 			// find corresponding my Method
-			Method m = mt.get(im.name);
+			Method m = mt.get(im.getName());
 
 			if( m == null )
 				throw new PlcException("class "+this.name +" definition",
-						"Method "+im.name+" is required by interface "+iface.name);
+						"Method "+im.getName()+" is required by interface "+iface.name);
 
 			if (!isSameArgs(m, im))
-				throw new PlcException("Method "+m.name+" definition",
+				throw new PlcException("Method "+m.getName()+" definition",
 						"args are incompatible with interface "+iface.name);
 
 		}

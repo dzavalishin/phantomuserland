@@ -6,6 +6,7 @@ import ru.dz.plc.compiler.binode.BoolAndNode;
 import ru.dz.plc.compiler.binode.BoolOrNode;
 import ru.dz.plc.compiler.binode.CallArgNode;
 import ru.dz.plc.compiler.binode.CatchNode;
+import ru.dz.plc.compiler.binode.ConstructNode;
 import ru.dz.plc.compiler.binode.ForeachNode;
 import ru.dz.plc.compiler.binode.NewNode;
 import ru.dz.plc.compiler.binode.OpAndNode;
@@ -55,10 +56,14 @@ import ru.dz.plc.util.*;
 
 /**
  * <p>Title: Phantom language parser</p>
+ * 
  * <p>Description: Old and dirty recursive implementation.<br> Has to be 
  *    rewritten with some parser generator.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ *    
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -399,7 +404,8 @@ extends GrammarHelper {
 					continue;
 				}
 
-				Method m = me.addMethod( mname, type );
+				//Method m = me.addMethod( mname, type );
+				Method m = new Method( mname, type );
 
 				//Node args = 
 				parseDefinitionArglist(m);
@@ -423,6 +429,9 @@ extends GrammarHelper {
 					//out = sequence( out, code ); // temp!
 					//me.add_method( mname, type, args, code, required_method_index );
 				}
+				
+				me.addMethod( m );
+				
 				continue;
 			}
 
@@ -1080,8 +1089,13 @@ extends GrammarHelper {
 		while(true)
 		{
 			if (testAndEat( id_point )) {
-				Node method = parse_method_id();
+				MethodNode method = (MethodNode) parse_method_id();
+				//String methodIdent = parse_method_id();
 				Node args = parse_call_args();
+				
+				MethodSignature sig = new MethodSignature(method.getIdent(), args);
+				method.setSignature(sig);
+				//method.generateSignature(args);
 				//out = new op_method_call_node(atom, method, args).setContext( l );
 				out = new OpMethodCallNode(out, method, args).setContext( l );
 			}
@@ -1193,7 +1207,12 @@ extends GrammarHelper {
 
 		Node args = parse_call_args();
 
-		return new NewNode(type,type_expr,args).setContext( l );
+		//Node newNode = new NewNode(type,type_expr,args).setContext( l );
+		Node newNode = new NewNode(type,type_expr, null).setContext( l );
+		
+		ConstructNode cn = new ConstructNode( newNode, args ); 
+		
+		return cn;
 	}
 
 	// --------------------------------------------------------------------------

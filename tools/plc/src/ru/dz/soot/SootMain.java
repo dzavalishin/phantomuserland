@@ -86,11 +86,62 @@ public class SootMain {
 			doClass("test.toPhantom.Arrays");
 			doClass("test.toPhantom.Strings");
 			doClass("test.toPhantom.Loops");
+			
+			
+			//doClass("java.lang.");
+			
+			doClass("java.lang.UnsatisfiedLinkError");
+			doClass("java.lang.NoSuchMethodError");
+			doClass("java.lang.AbstractMethodError");
+			doClass("java.lang.NoSuchFieldError");
+			doClass("java.lang.VerifyError");
+			doClass("java.lang.NoClassDefFoundError");
+			doClass("java.lang.IllegalAccessError");
+			doClass("java.lang.ClassFormatError"); 
+			doClass("java.lang.ClassCircularityError"); 
+			doClass("java.lang.ThreadDeath"); 
+			doClass("java.lang.UnknownError"); 
+			doClass("java.lang.StackOverflowError"); 
+			doClass("java.lang.OutOfMemoryError"); 
+			doClass("java.lang.InternalError"); 
+			doClass("java.lang.InstantiationError"); 
+			doClass("java.lang.NegativeArraySizeException"); 
+			doClass("java.lang.ArrayIndexOutOfBoundsException"); 
+			doClass("java.lang.IllegalMonitorStateException"); 
+			doClass("java.lang.ClassCastException"); 
+			doClass("java.lang.ArrayStoreException");
+			doClass("java.lang.ArithmeticException");
+			
+			doClass("java.lang.AbstractStringBuilder");
+			doClass("java.lang.StringBuilder");
 		}
 		else
 		{
 			for( String a : args )
+			{
+				if(a.charAt(0) == '-')
+				{
+					if( a.charAt(1) == 'c' )
+					{
+						Scene.v().setSootClassPath(a.substring(2));
+						continue;
+					}
+					
+					if( a.charAt(1) == '?' )
+					{
+						System.out.println(
+								"-c<java-class-path-list>\n"+
+								"-o<phantom-class-out-dir>\n"+
+								"-I - ignored (plc compat)"
+								);
+						continue;
+					}
+					
+					PlcMain.processFlag(a);
+					continue;
+				}
 				doClass(a);
+			}
 		}
 
 		for( String iClass : classesToDo )
@@ -120,6 +171,8 @@ public class SootMain {
 		try {
 
 			SootClass c = Scene.v().loadClassAndSupport(cn);
+			//Scene.v().loadNecessaryClasses();
+			
 			if( c.isPhantom() )
 			{
 				die("Not loaded "+c.getName());

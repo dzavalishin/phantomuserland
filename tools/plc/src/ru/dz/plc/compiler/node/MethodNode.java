@@ -1,6 +1,7 @@
 package ru.dz.plc.compiler.node;
 
 import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.MethodSignature;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomClass;
@@ -15,13 +16,15 @@ import ru.dz.plc.util.PlcException;
  */
 
 
-public class MethodNode extends Node {
-	String ident;
-	int    num;
+public class MethodNode extends Node 
+{
+	private String ident;
+	private int    ordinal;
+	private MethodSignature signature;
 
 	public int get_ordinal(PhantomType obj_type) throws PlcException {
-		if( num >= 0 )
-			return num;
+		if( ordinal >= 0 )
+			return ordinal;
 
 		if( obj_type.is_unknown() )
 			throw new PlcException("MethodNode", "don't know class", ident);
@@ -30,7 +33,7 @@ public class MethodNode extends Node {
 		if( pc == null )
 			throw new PlcException("MethodNode", "class is null", ident);
 
-		Method m = pc.findMethod(ident);
+		Method m = findMethod(pc);
 
 		pc.set_ordinals();
 
@@ -40,32 +43,41 @@ public class MethodNode extends Node {
 	}
 
 	public PhantomType get_return_type(PhantomType obj_type) throws PlcException {
-		if( num >= 0 ) return new PhTypeUnknown();
+		if( ordinal >= 0 ) return new PhTypeUnknown();
 
 		if( obj_type.is_unknown() ) throw new PlcException("MethodNode", "don't know class", ident);
 
 		PhantomClass pc = obj_type.get_class();
 		if( pc == null )throw new PlcException("MethodNode", "class is null", ident );
 
-		//Method m = pc.mt.get(ident);
-		Method m = pc.findMethod(ident);
+		Method m = findMethod(pc);
+
+		return m.getType();
+	}
+
+	private Method findMethod(PhantomClass pc) throws PlcException {
+		Method m = null;
+		
+		if( signature != null ) m = pc.findMethod(signature);
+		if( m == null ) m = pc.findMethod(ident); // old way
+
 		if( m == null )
 			throw new PlcException("MethodNode", "Method of "+pc.toString()+" is null", ident );
-
-		return m.type;
+		
+		return m;
 	}
 
 
 	public MethodNode( String ident ) {
 		super(null);
 		this.ident = ident;
-		num = -1;
+		ordinal = -1;
 	}
 
 	public MethodNode( int meth_no ) {
 		super(null);
 		this.ident = null;
-		num = meth_no;
+		ordinal = meth_no;
 	}
 
 	// BUG?
@@ -74,6 +86,15 @@ public class MethodNode extends Node {
 
 	public String toString()
 	{
-		return "Method "+ ((ident == null) ? "(no. "+Integer.toString(num)+")" : ident );
+		return "Method "+ ((ident == null) ? "(no. "+Integer.toString(ordinal)+")" : ident );
+	}
+
+
+	public void setSignature(MethodSignature sig) {
+		this.signature = sig;
+	}
+
+	public String getIdent() {
+		return ident;
 	}
 }

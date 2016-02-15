@@ -29,13 +29,15 @@ public class MethodSignatureFileInfo extends FileInfo {
 
   protected void do_write_specific() throws IOException, PlcException,
       EmptyPlcException {
-    Fileops.put_string_bin( os, m.name );
+    Fileops.put_string_bin( os, m.getName() );
     Fileops.put_int32( os, m.getOrdinal() );
-    Fileops.put_int32( os, m.args_def.size() );
+    //Fileops.put_int32( os, m.args_def.size() );
+    Fileops.put_int32( os, m.getArgCount() );
 
-    m.type.save_to_file(os);
+    m.getType().save_to_file(os);
 
-    for( Iterator<ArgDefinition> i = m.args_def.iterator(); i.hasNext(); )
+    //for( Iterator<ArgDefinition> i = m.args_def.iterator(); i.hasNext(); )
+    for( Iterator<ArgDefinition> i = m.getArgIterator(); i.hasNext(); )
     {
       ArgDefinition ad = i.next();
 

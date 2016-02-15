@@ -13,14 +13,19 @@ import ru.dz.plc.util.PlcException;
 
 /**
  * <p>New (create object) node.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
-
-public class NewNode extends BiNode {
+// TODO remove args, c'tor call is generated elsewhere
+public class NewNode extends BiNode 
+{
 	PhantomType static_type = null;
+	
 	public NewNode(PhantomType static_type, Node dynamic_type, Node args)
 	{
 		super(dynamic_type,args);

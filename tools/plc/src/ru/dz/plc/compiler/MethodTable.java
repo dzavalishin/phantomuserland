@@ -8,16 +8,23 @@ import ru.dz.plc.util.*;
 
 /**
  * <p>Class methods table.</p>
+ * <p>Dumb implementation, does not support polymorphism.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
-public class MethodTable {
-	private Map<String, Method> table;
-	ordinals_generator ordinals = new ordinals_generator();
+public class MethodTable implements IMethodTable 
+{
+	private Map<String, Method> table = new HashMap<String, Method>();
+	private Map<MethodSignature, Method> mstable = new HashMap<MethodSignature, Method>();
+	
+	protected ordinals_generator ordinals = new ordinals_generator();
 
-	public MethodTable() { table = new HashMap<String, Method>(); }
+	//public MethodTable() { table = new HashMap<String, Method>(); }
 
 	public Iterator<Method> iterator() { return table.values().iterator(); }
 
@@ -38,29 +45,79 @@ public class MethodTable {
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.compiler.IMethodTable#set_ordinal(ru.dz.plc.compiler.Method, int)
+	 */
+	@Override
 	public void set_ordinal( Method m, int ord ) throws PlcException {
 		if( !mine( m ) ) throw new PlcException("set_ordinal","not my Method");
 		if( ord != -1 && have_ord( ord ) ) throw new PlcException("set_ordinal","duplicate");
 		m.setOrdinal( ord );
 	}
 
-	Method add( String name, PhantomType type )
+	@Override @Deprecated
+	public Method add( String name, PhantomType type )
 	{
 		Method m = new Method( name, type );
 		table.put(name, m);
 		return m;
 	}
 
-	Method add( Method m )
+	@Override
+	public Method add( Method m )
 	{
-		table.put(m.name, m);
+		mstable.put(m.getSignature(), m);
+		table.put(m.getName(), m);
 		return m;
 	}
 
-	boolean have( String name ) { return table.containsKey(name); }
-	Method get( String name ) { return (Method)table.get(name); }
+	@Override @Deprecated
+	public boolean have( String name ) { return table.containsKey(name); }
+	@Override @Deprecated
+	public Method get( String name ) { return (Method)table.get(name); }
 
-	void print(PrintStream ps) throws PlcException
+	/**
+	 * Get method by signature.
+	 * 
+	 * TODO incomplete, must check by name first and try signatures using possible 
+	 * superclasses, see MethodSignature.canBeCalledFor()
+	 * 
+	 * @param signature Caller's set of parameter types and method name.
+	 * @return Metod found or null.
+	 */
+	public Method get(MethodSignature signature) 
+	{ 
+		Method m =  mstable.get(signature);
+		if( m != null ) return m;
+		
+		return checkPossibleConversions(signature);
+	}
+	
+
+	private Method checkPossibleConversions(MethodSignature signature) {
+		List<Method> all = getAllForName(signature.getName());
+		
+		for( Method m: all)
+		{
+			if( m.getSignature().canBeCalledFor(signature) )
+				return m;
+		}
+		
+		return null;
+	}
+
+	private List<Method> getAllForName(String name) {
+		LinkedList<Method> out = new LinkedList<Method>();
+		
+		for( Method m : mstable.values() )
+			if(m.getName().equals(name))
+				out.add(m);
+		
+		return out;
+	}
+
+	@Override
+	public void print(PrintStream ps) throws PlcException
 	{
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
 		{
@@ -72,6 +129,10 @@ public class MethodTable {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.compiler.IMethodTable#set_ordinals()
+	 */
+	@Override
 	public void set_ordinals()
 	{
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
@@ -92,6 +153,10 @@ public class MethodTable {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.compiler.IMethodTable#slots_needed()
+	 */
+	@Override
 	public int slots_needed()
 	{
 		set_ordinals();
@@ -108,6 +173,10 @@ public class MethodTable {
 		return max+1;
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.compiler.IMethodTable#preprocess(ru.dz.plc.compiler.ParseState)
+	 */
+	@Override
 	public void preprocess( ParseState ps ) throws PlcException
 	{
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
@@ -119,6 +188,10 @@ public class MethodTable {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.compiler.IMethodTable#codegen(java.io.RandomAccessFile, java.io.FileWriter, java.io.BufferedWriter, ru.dz.plc.compiler.CodeGeneratorState, java.lang.String)
+	 */
+	@Override
 	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, CodeGeneratorState s, String version) throws IOException, PlcException {
 		set_ordinals();
 		lst.write("Class version "+version+"\n\n");
@@ -128,8 +201,8 @@ public class MethodTable {
 			Method m = i.next();
 			s.set_method( m );
 
-			lst.write("method "+m.name+" ordinal "+m.getOrdinal()+"\n--\n");
-			llvmFile.write("\n\n; method "+m.name+" ordinal "+m.getOrdinal()+"\n; --\n");
+			lst.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
+			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n");
 
 			MethodFileInfo mf = new MethodFileInfo(os, lst, m, s);
 			mf.write();
@@ -148,7 +221,8 @@ public class MethodTable {
 	}
 
 
-	void dump()
+	@Override
+	public void dump()
 	{
 		System.out.println("Methods:");
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
@@ -157,7 +231,7 @@ public class MethodTable {
 			System.out.println("  Method "+m.toString()+":");
 		}
 	}
-	
+
 	
 }
 

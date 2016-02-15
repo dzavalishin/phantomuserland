@@ -27,6 +27,7 @@ public class MethodSignature {
 
 	private String signature;
 	private List<PhantomType> args;
+	private String name;
 
 	public MethodSignature(String name, List<PhantomType> args) 
 	{
@@ -64,6 +65,7 @@ public class MethodSignature {
 	}
 
 	private void generateSignature(String Name, List<PhantomType> args) {
+		name = Name;
 		this.args = args;
 		// Generate signature string
 		StringBuilder sb = new StringBuilder(Name);
@@ -125,6 +127,8 @@ public class MethodSignature {
 		
 		return true;
 	}
+
+	public String getName() { return name; }
 	
 	
 }

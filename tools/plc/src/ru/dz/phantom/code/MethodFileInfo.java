@@ -8,8 +8,11 @@ import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Method accessor.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -26,9 +29,9 @@ public class MethodFileInfo extends FileInfo {
       this.s = s;
     }
 
-    protected void do_write_specific() throws IOException, PlcException,
-      EmptyPlcException {
-      Fileops.put_string_bin( os, m.name );
+    protected void do_write_specific() throws IOException, PlcException, EmptyPlcException 
+    {
+      Fileops.put_string_bin( os, m.getName() );
       Fileops.put_int32( os, m.getOrdinal() );
 
       m.get_cg().set_os(os, lst);

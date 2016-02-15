@@ -11,8 +11,11 @@ import ru.dz.plc.util.PlcException;
 
 /** 
  * <p>Just order of execution.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -28,14 +31,12 @@ public class SequenceNode extends BiNode {
 	
     
 
-	protected void print_children(PrintStream ps, int level, int start_level) throws PlcException {
+	protected void print_children(PrintStream ps, int level, int start_level) throws PlcException 
+	{
 		if( _l != null )     _l.print(ps, level+1, start_level+1 );
 		if( _r != null )     _r.print(ps, level+1, start_level+1 );
 	}
-	protected void print_me() {
-		/*System.out.print(toString());
-	    if( is_const()   ) System.out.print(" : const");
-	    System.out.println();*/
-	}
+	
+	protected void print_me() {}
 	public void preprocess_me(ParseState ps) throws PlcException {}
 }

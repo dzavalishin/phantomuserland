@@ -79,7 +79,7 @@ public class PlcMain {
 	}
 
 
-	private static void processFlag(String arg) {
+	public static void processFlag(String arg) {
 		
 		if( arg.equalsIgnoreCase("--version"))
 		{
@@ -110,8 +110,12 @@ public class PlcMain {
 			outputPath = argValue;
 			return;
 			
+		case '?':
+			System.err.println("-I<phantom-src-part-list>, -o<out-path>");
+			return;
+			
 		default:
-			System.err.println("Unknown flag: "+arg);
+			System.err.println("Unknown flag: "+arg+", -? for help");
 			return;
 		}
 		
