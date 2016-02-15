@@ -1,0 +1,7 @@
+# for cygwin64 
+export CC	= i686-pc-cygwin-gcc
+export LD	= i686-pc-cygwin-ld
+
+# Use Clang analyzer
+#export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 
+#export CC	= clang -Wno-gnu
