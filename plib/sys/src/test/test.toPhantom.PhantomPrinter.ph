@@ -27,10 +27,16 @@ class PhantomPrinter
     var console : .internal.io.tty;
 
 
-	void print(var s : .internal.string ) [8]
+	void print(var s : .internal.string )
 	{ 
         console.putws(s);
-        console.putws("\n");
+        //console.putws("\n");
+	}
+
+	void printInt(var i : .internal.int )
+	{ 
+        console.putws(i.toString());
+        //console.putws("\n");
 	}
 
                       
