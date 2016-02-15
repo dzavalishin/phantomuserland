@@ -1,7 +1,5 @@
 ARCH_FLAGS      = -m32
 
-#export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 
-#export CC	= clang -Wno-gnu
 export CC	= gcc
 export LD	= ld
 export STRIP	= strip
@@ -42,3 +40,6 @@ TARGET_OBJECT_FORMAT=elf32-i386
 #HOST_CPU	= i686
 #HOST_ARCH	= x86
 #unix_host	= NONE
+
+# Use local overrides, if any
+-include $(realpath $(PHANTOM_HOME))/local-config.ia32.mk
