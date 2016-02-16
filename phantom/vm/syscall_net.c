@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -10,6 +11,8 @@
  *
 **/
 
+#define DEBUG_MSG_PERFIX "sys_net"
+#include <debug_ext.h>
 
 #include <phantom_libc.h>
 #include <vm/syscall_net.h>
@@ -247,3 +250,4 @@ DECLARE_SIZE(udp);
 
 
 
+#endif

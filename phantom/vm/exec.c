@@ -406,7 +406,7 @@ void pvm_exec(pvm_object_t current_thread)
 #define DO_TWICE  (prefix_long || prefix_double)
 #define DO_FPOINT (prefix_float || prefix_double)
 
-    if( !pvm_object_class_is( current_thread, pvm_get_thread_class() ))
+    if( !pvm_object_class_exactly_is( current_thread, pvm_get_thread_class() ))
         panic("attempt to run not a thread");
 
     struct data_area_4_thread *da = (struct data_area_4_thread *)&(current_thread.data->da);
@@ -689,6 +689,7 @@ void pvm_exec(pvm_object_t current_thread)
                 // This is java monitor, arbitrary object
                 struct pvm_object lock_obj = os_pop();
                 // TODO impl me
+                ref_dec_o(lock_obj);
             }
             break;
 
@@ -698,6 +699,7 @@ void pvm_exec(pvm_object_t current_thread)
                 // This is java monitor, arbitrary object
                 struct pvm_object lock_obj = os_pop();
                 // TODO impl me
+                ref_dec_o(lock_obj);
             }
             break;
 
@@ -1426,7 +1428,7 @@ static int catch_comparator( void *backptr, struct pvm_exception_handler *test )
     struct pvm_exception_handler *thrown = (struct pvm_exception_handler *)backptr;
 
 //printf(" (exc cls cmp) ");
-    if( pvm_object_class_is( thrown->object, test->object) )
+    if( pvm_object_class_is_or_child( thrown->object, test->object) )
     {
         thrown->jump = test->jump;
         return 1;

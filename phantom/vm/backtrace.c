@@ -131,7 +131,7 @@ void pvm_backtrace(struct data_area_4_thread *tda)
 
 int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
 {
-    if(!pvm_object_class_is( tclass, pvm_get_class_class() ))
+    if(!pvm_object_class_exactly_is( tclass, pvm_get_class_class() ))
     {
         printf("pvm_ip_to_linenum: not a class\n");
         return -1;
@@ -208,7 +208,7 @@ int pvm_get_method_ordinal( pvm_object_t tclass, pvm_object_t mname )
     if( pvm_is_null(mname) )
         return -1;
 
-    if( !pvm_object_class_is( mname, pvm_get_string_class() ) )
+    if( !pvm_object_class_exactly_is( mname, pvm_get_string_class() ) )
         return -1;
 
 

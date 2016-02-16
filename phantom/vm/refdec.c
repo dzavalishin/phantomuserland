@@ -112,16 +112,18 @@ void deferred_refdec(pvm_object_storage_t *os)
         //hal_mutex_unlock( &deferred_refdec_mutex );
     }
 
+
+//long_way:
+    int pos = atomic_add( (int *)&refdec_put_ptr, 1 );
+
     // Overflow
-    if( (refdec_put_ptr >= REFDEC_BUFFER_SIZE) || (refdec_put_ptr == REFDEC_BUFFER_HALF) )
+    if( (pos >= REFDEC_BUFFER_SIZE) || (pos == REFDEC_BUFFER_HALF) )
     {
         STAT_INC_CNT(DEFERRED_REFDEC_LOST);
         // We just loose refdec - big GC will pick it up
         return;
     }
 
-//long_way:
-    int pos = atomic_add( (int *)&refdec_put_ptr, 1 );
     refdec_buffer[pos] = os;
 
 

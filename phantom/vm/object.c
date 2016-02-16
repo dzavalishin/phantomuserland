@@ -264,7 +264,7 @@ pvm_set_ofield( struct pvm_object op, unsigned int slot, struct pvm_object value
  * Class is: checks if object's class is tclass or it's parent.
  *
 **/
-
+/*
 int pvm_object_class_is( struct pvm_object object, struct pvm_object tclass )
 {
     struct pvm_object_storage *tested = object.data->_class.data;
@@ -279,6 +279,58 @@ int pvm_object_class_is( struct pvm_object object, struct pvm_object tclass )
             break;
 
         tclass = pvm_object_da( tclass, class )->class_parent;
+    }
+    return 0;
+}
+*/
+
+int pvm_object_class_exactly_is( struct pvm_object object, struct pvm_object tclass )
+{
+    struct pvm_object_storage *tested = object.data->_class.data;
+    //struct pvm_object_storage *nullc = pvm_get_null_class().data;
+
+    if( (!pvm_is_null( tclass )) && (tested == tclass.data) )
+        return 1;
+
+    return 0;
+}
+
+// Really need this?
+int pvm_object_class_is_or_parent( struct pvm_object object, struct pvm_object tclass )
+{
+    struct pvm_object_storage *tested = object.data->_class.data;
+    struct pvm_object_storage *nullc = pvm_get_null_class().data;
+
+    while( !pvm_is_null( tclass ) )
+    {
+        if( tested == tclass.data )
+            return 1;
+
+        if( tclass.data == nullc )
+            break;
+
+        tclass = pvm_object_da( tclass, class )->class_parent;
+    }
+    return 0;
+}
+
+int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tclass )
+{
+    struct pvm_object oclass = object.data->_class;
+    //struct pvm_object_storage *tested = object.data->_class.data;
+    struct pvm_object_storage *nullc = pvm_get_null_class().data;
+
+    if( pvm_is_null( tclass ) ) return 0;
+
+    while(1)
+    {
+        if( oclass.data == tclass.data )
+            return 1;
+
+        if( oclass.data == nullc )
+            break;
+
+        oclass = pvm_object_da( oclass, class )->class_parent;
     }
     return 0;
 }
@@ -453,7 +505,7 @@ void pvm_check_is_thread( struct pvm_object new_thread )
     if( d->_flags != (PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD) )
         panic("Thread object has no INTERNAL flag");
 
-    if( !pvm_object_class_is( new_thread, pvm_get_thread_class() ) )
+    if( !pvm_object_class_exactly_is( new_thread, pvm_get_thread_class() ) )
         panic("Thread object class is not .internal.thread");
 }
 

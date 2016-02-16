@@ -126,11 +126,17 @@ struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name );
 
 /**
  *
- * Class is
+ * 'object' class is:
+ *
+ *	- exactly tclass
+ *      - tclass or its parent
+ *      - tclass or its child
  *
 **/
 
-int pvm_object_class_is( struct pvm_object object, struct pvm_object tclass );
+int pvm_object_class_exactly_is( struct pvm_object object, struct pvm_object tclass );
+int pvm_object_class_is_or_parent( struct pvm_object object, struct pvm_object tclass );
+int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tclass );
 
 //#define pvm_class_check(__o,__c) if(!pvm_object_class_is( __o, __c )) pvm_panic("Wrong class");
 

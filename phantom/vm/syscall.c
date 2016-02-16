@@ -810,16 +810,18 @@ static int si_class_11_get_static(struct pvm_object me, struct data_area_4_threa
 // Check if given object is instance of this class
 static int si_class_14_instanceof(struct pvm_object me, struct data_area_4_thread *tc )
 {
-    struct data_area_4_class *meda = pvm_object_da( me, class );
+    //struct data_area_4_class *meda = pvm_object_da( me, class );
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
     struct pvm_object instance = POP_ARG;
-
-    int is = pvm_object_class_is( instance, me );
-
+#if VM_INSTOF_RECURSIVE
+    int is = pvm_object_class_is_or_child( instance, me );
+#else
+    int is = pvm_object_class_exactly_is( instance, me );
+#endif // VM_INSTOF_RECURSIVE
     SYS_FREE_O(instance);
 
     SYSCALL_RETURN(pvm_create_int_object( is ));
@@ -1127,7 +1129,7 @@ static int si_bootstrap_20_set_screen_background(struct pvm_object me, struct da
 #else
     // TODO black screen :(
 
-    if( !pvm_object_class_is( _bmp, pvm_get_bitmap_class() ) )
+    if( !pvm_object_class_exactly_is( _bmp, pvm_get_bitmap_class() ) )
     	SYSCALL_THROW_STRING( "not a bitmap" );
 
     struct data_area_4_bitmap *bmp = pvm_object_da( _bmp, bitmap );

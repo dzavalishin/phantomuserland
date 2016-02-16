@@ -17,6 +17,7 @@
 #include <kernel/snap_sync.h>
 #include <kernel/vm.h>
 #include <kernel/atomic.h>
+#include <kernel/debug.h>
 
 #include <vm/syscall.h>
 #include <vm/object.h>

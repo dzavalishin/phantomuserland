@@ -69,7 +69,7 @@ struct phantom_mutex_impl
 
 
 
-int win_hal_mutex_init(const char *name)
+void * win_hal_mutex_init(const char *name)
 {
     struct phantom_mutex_impl *impl;
     impl = calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
