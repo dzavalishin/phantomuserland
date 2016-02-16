@@ -428,8 +428,11 @@ void do_ref_dec_p(pvm_object_storage_t *p)
 
 void ref_dec_p(pvm_object_storage_t *p)
 {
+#if VM_DEFERRED_REFDEC
+    deferred_refdec(p);
+#else
     do_ref_dec_p(p);
-    //deferred_refdec(p);
+#endif
 }
 
 

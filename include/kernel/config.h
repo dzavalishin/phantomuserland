@@ -14,6 +14,7 @@
 
 // vm class instanceof checks for parents
 #define VM_INSTOF_RECURSIVE 1
+#define VM_DEFERRED_REFDEC 0
 
 #define OLD_VM_SLEEP 0
 #define NEW_SNAP_SYNC 0
