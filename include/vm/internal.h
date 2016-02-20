@@ -87,6 +87,7 @@ DEF_I(weakref)
 DEF_I(window)
 DEF_I(directory)
 DEF_I(connection)
+//DEF_I(hash)
 
 #undef DEF_I
 
