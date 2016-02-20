@@ -113,7 +113,7 @@ void deferred_refdec(pvm_object_storage_t *os)
     }
 
 
-//long_way:
+    //long_way:
     // TODO ERROR atomic_add returns not what we assume!
     //int pos = atomic_add( (int *)&refdec_put_ptr, 1 );
     int pos = ATOMIC_ADD_AND_FETCH( (int *)&refdec_put_ptr, 1 );

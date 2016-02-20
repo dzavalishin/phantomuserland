@@ -20,6 +20,7 @@
 #include <vm/object_flags.h>
 
 #include <kernel/stats.h>
+#include <kernel/atomic.h>
 
 
 #define debug_memory_leaks 0
