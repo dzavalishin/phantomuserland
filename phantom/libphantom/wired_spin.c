@@ -19,7 +19,7 @@ void hal_wired_spin_lock(hal_spinlock_t *l)
 {
     l->ei = hal_save_cli();
     wire_page_for_addr( l, sizeof( hal_spinlock_t ) );
-	hal_disable_preemption();
+    hal_disable_preemption();
     hal_spin_lock(l);
 }
 
