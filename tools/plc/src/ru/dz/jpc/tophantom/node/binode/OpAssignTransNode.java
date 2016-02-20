@@ -18,6 +18,8 @@ import java.io.IOException;
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * Date: 19.10.2009 22:03:57
  *
+ * (actually unused, made for old java 2 phantom compiler)
+ *
  * @author Irek
  */
 public class OpAssignTransNode extends OpAssignNode {
