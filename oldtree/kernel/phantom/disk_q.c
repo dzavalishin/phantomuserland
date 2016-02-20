@@ -127,7 +127,7 @@ static void interrupt(struct disk_q *q, errno_t rc)
     dump_q(q);
     if(rc)
     {
-        q->current->flag_ioerror = 1;
+        //q->current->flag_ioerror = 1;
         q->current->rc = rc;
     }
 

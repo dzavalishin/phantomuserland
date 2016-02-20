@@ -30,6 +30,7 @@
 #include <kernel/init.h>
 #include <kernel/properties.h>
 #include <kernel/drivers.h>
+#include <kernel/snap_sync.h> // request_snap
 
 #include <misc.h>
 #include <event.h>
@@ -268,6 +269,11 @@ get_key:
     // do some special checks here
     switch(event.keycode)
     {
+
+    case KEY_F9:
+        request_snap();
+        break;
+
         // special stuff
     case KEY_F10:
     case KEY_PRTSCRN:
@@ -276,16 +282,16 @@ get_key:
         scr_zbuf_paint();
         return;
 
-    case KEY_F12:
-        hal_cpu_reset_real();
-        break;
-
     case KEY_F11:
         phantom_shutdown(0);
         break;
 
+    case KEY_F12:
+        hal_cpu_reset_real();
+        break;
+
     case KEY_PAD_MINUS:
-        panic("Keyboard panic request - RWIN key");
+        panic("Keyboard panic request - KEY_PAD_MINUS key");
         break;
 
     case KEY_SCRLOCK:

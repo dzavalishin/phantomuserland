@@ -654,6 +654,8 @@ void pageout_callback( pager_io_request *req, int write )
 {
     assert(write);
 
+    if(req->rc) panic("pager write error, disk page %d", req->disk_page );
+
     vm_page *vmp = (vm_page *)req;
 
     hal_mutex_lock(&vmp->lock);
@@ -808,6 +810,8 @@ void snapper_COW_callback( pager_io_request *req, int  write )
 
     assert(write);
 
+    if(req->rc) panic("pager COW write error, disk page %d", req->disk_page );
+
     vm_page *vmp = (vm_page *)req;
     hal_mutex_lock(&vmp->lock);
     if(COW_DEBUG||SNAP_DEBUG) hal_printf("COW callback 0x%X\n", vmp->virt_addr );
@@ -835,6 +839,8 @@ static void
 pagein_callback( pager_io_request *p, int  pageout )
 {
     vm_page *vmp = (vm_page *)p;
+
+    if(p->rc) panic("pager read error, disk page %d", p->disk_page );
 
     hal_mutex_lock(&vmp->lock);
     if(PAGING_DEBUG) hal_printf("pagein callback 0x%X\n", vmp->virt_addr );
@@ -1330,7 +1336,7 @@ static void wait_commit_snap(vm_page *p)
 // TODO if we page out page, which is unchanged since THE SNAP and page fault comes (somebody wants to write to that
 // page) we need to do COW too!
 
-void do_snapshot()
+void do_snapshot(void)
 {
     int			  enabled; // interrupts
 
@@ -1599,7 +1605,7 @@ static void vm_map_lazy_pageout_thread(void)
         balance_clean_dirty();
     }
 }
-
+static int request_snap_flag = 0;
 
 static void vm_map_snapshot_thread(void)
 {
@@ -1619,12 +1625,24 @@ static void vm_map_snapshot_thread(void)
             hal_exit_kernel_thread();
         }
 
-        hal_sleep_msec( 100000 );
-        if( vm_regular_snaps_enabled )
+        //hal_sleep_msec( 100000 );
+        int i = 100; // secs between snaps
+        while( (!request_snap_flag) && (i-- > 0) )
+        {
+            hal_sleep_msec( 1000 );
+        }
+
+        if( vm_regular_snaps_enabled || request_snap_flag )
             do_snapshot();
 
+        request_snap_flag = 0;
 
     }
+}
+
+void request_snap(void)
+{
+    request_snap_flag++;
 }
 
 

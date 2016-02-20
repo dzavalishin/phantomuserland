@@ -492,10 +492,11 @@ SVGA_WriteReg(u_int32_t index, u_int32_t value)
 
 u_int32_t SVGA_ClearIRQ(void)
 {
-   //u_int32_t flags = 0;
-   //Atomic_Exchange(gSVGA.irq.pending, flags);
-   //return flags;
-   return atomic_set( (int *) &gSVGA.irq.pending, 0 );
+    //u_int32_t flags = 0;
+    //Atomic_Exchange(gSVGA.irq.pending, flags);
+    //return flags;
+    //return atomic_set( (int *) &gSVGA.irq.pending, 0 );
+    return ATOMIC_FETCH_AND_SET( (int *) &gSVGA.irq.pending, 0 );
 }
 
 

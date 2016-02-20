@@ -426,6 +426,34 @@ fail:
 }
 
 
+errno_t do_pool_forone( pool_t *pool, pool_handle_t handle, errno_t (*ff)(pool_t *pool, void *el, void *arg), void *arg )
+{
+    CHECK_MAGIC(pool,handle);
+
+    hal_mutex_lock( &pool->mutex );
+
+    int na = HANDLE_2_ARENA(handle);
+    int ne = HANDLE_2_ELEM(handle);
+    pool_arena_t *a = GET_ARENA(na);
+    CHECK_EL(a,ne);
+    CHECK_ZERO(a,ne);
+    CHECK_REF(a,ne);
+
+    a->refc[ne]++;
+    assert(a->refc[ne] > 0);
+
+    hal_mutex_unlock( &pool->mutex );
+
+    errno_t e = ff( pool, a->ptrs[ne], arg);
+
+    a->refc[ne]--;
+
+
+    return e;
+
+}
+
+
 
 // -----------------------------------------------------------------------
 // el workers

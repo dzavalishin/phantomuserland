@@ -37,7 +37,7 @@ disk_page_io_release(disk_page_io *me)
     me->mem_allocated = 0;
 }
 
-void
+errno_t
 disk_page_io_wait(disk_page_io *me)
 {
 
@@ -52,6 +52,7 @@ disk_page_io_wait(disk_page_io *me)
     while( me->req.flag_pagein || me->req.flag_pageout )
         hal_sleep_msec( 10 );
 #endif
+    return me->req.rc;
 }
 
 void disk_page_io_callback(disk_page_io *me)
@@ -94,6 +95,8 @@ hal_spinlock_t                pagelist_lock;
 
 void pagelist_init( pagelist *me, disk_page_no_t root_page, int  _init, int magic )
 {
+    errno_t rc;
+
     if(_DEBUG) hal_printf("pagelist init... ");
     me->root_page = root_page;
     me->magic = magic;
@@ -121,7 +124,8 @@ void pagelist_init( pagelist *me, disk_page_no_t root_page, int  _init, int magi
         head->head._reserved = 0;
 
         if(_DEBUG) hal_printf("pagelist saving head... ");
-        disk_page_io_save_sync(&head_p,root_page);
+        rc = disk_page_io_save_sync(&head_p,root_page);
+        if(rc) panic("IO error in pagelist_init");
         if(_DEBUG) hal_printf("pagelist releasing io... ");
         disk_page_io_release(&head_p);
         if(_DEBUG) hal_printf("pagelist create done... ");

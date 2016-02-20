@@ -15,19 +15,43 @@
 #include <malloc.h>
 #include <errno.h>
 
+#if CONF_NEW_SEMA_FUNC
+#  include <kernel/pool.h>
+#endif
+
 #include "thread_private.h"
 
+#if CONF_NEW_SEMA_FUNC
+static pool_t *sema_pool;
+#endif
 
 
 static hal_spinlock_t init_lock;
 
+// -----------------------------------------------------------------------
+//
+// Implementation
+//
+// -----------------------------------------------------------------------
+
+
+
+
 void phantom_thread_init_sems(void)
 {
     hal_spin_init(&init_lock);
+#if CONF_NEW_SEMA_FUNC
+    sema_pool = create_pool();
+    assert(sema_pool);
+    if(0==sema_pool) panic("out of mem for sema pool");
+
+    sema_pool->flag_autodestroy = 1; // If sema is unused - kill it
+#endif
 }
 
 
-errno_t hal_sem_init(hal_sem_t *c, const char *name )
+#if !CONF_NEW_SEMA_FUNC
+static errno_t do_hal_sem_init(hal_sem_t *c, const char *name )
 {
     assert(threads_inited);
     assert(c->impl == 0);
@@ -74,16 +98,14 @@ static void checkinit(hal_sem_t *c)
 }
 
 
-
+/*
 // TODO just call acquire_etc with default values
-errno_t hal_sem_acquire(hal_sem_t *c)
+static errno_t do_hal_sem_acquire(struct phantom_sem_impl *ci, hal_sem_t *s)
 {
     assert_not_interrupt();
 
     if(panic_reenter) return EFAULT;
-
-    if(c->impl == 0) checkinit(c);
-    struct phantom_sem_impl *ci = c->impl;
+    if(ci->flags & SEM_FLAG_INTERNAL_NOLOCK) return ENOENT; // Sema does not exist anymore
 
     // save & dis preemtion
     int ie = hal_save_cli();
@@ -101,7 +123,7 @@ errno_t hal_sem_acquire(hal_sem_t *c)
         hal_spin_lock(&t->waitlock);
         hal_spin_unlock(&(ci->lock));
 
-        t->waitsem   = c;
+        t->waitsem   = s;
 
         thread_block( THREAD_SLEEP_SEM, &t->waitlock ); //-V112
         hal_spin_lock(&(ci->lock));
@@ -115,6 +137,9 @@ errno_t hal_sem_acquire(hal_sem_t *c)
 
     return 0;
 }
+*/
+#endif // !CONF_NEW_SEMA_FUNC
+
 
 // Called from timer to wake thread on timeout
 static void wake_sem_thread( void *arg )
@@ -133,19 +158,17 @@ static void wake_sem_thread( void *arg )
 }
 
 
-
-errno_t
-hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
 //errno_t hal_sem_timedwait( hal_sem_t *c, hal_mutex_t *m, long msecTimeout )
+
+static errno_t
+do_hal_sem_acquire_etc( struct phantom_sem_impl *ci, int val, int flags, long uSec, hal_sem_t *s )
 {
     assert_not_interrupt();
 
     if(panic_reenter) return EFAULT;
+    if(ci->flags & SEM_FLAG_INTERNAL_NOLOCK) return ENOENT; // Sema does not exist anymore
 
     int retcode = 0;
-
-    if(s->impl == 0) checkinit(s);
-    struct phantom_sem_impl *ci = s->impl;
 
     long msec = ((uSec-1)/1000)+1;
     if( msec == 0 && uSec != 0 ) msec = 1; // at least 1
@@ -208,15 +231,12 @@ exit_on_timeout:
 
 
 
-errno_t
-hal_sem_zero( hal_sem_t *s )
+static errno_t
+do_hal_sem_zero( struct phantom_sem_impl *ci )
 {
     assert_not_interrupt();
 
     if(panic_reenter) return EFAULT;
-
-    if(s->impl == 0) checkinit(s);
-    struct phantom_sem_impl *ci = s->impl;
 
     // save & dis preemtion
     int ie = hal_save_cli();
@@ -239,12 +259,9 @@ hal_sem_zero( hal_sem_t *s )
 
 
 
-void hal_sem_release(hal_sem_t *c)
+static void do_hal_sem_release(struct phantom_sem_impl *ci)
 {
     if(panic_reenter) return;
-
-    if(c->impl == 0) checkinit(c);
-    struct phantom_sem_impl *ci = c->impl;
 
     // save & dis preemtion
     int ie = hal_save_cli();
@@ -317,14 +334,9 @@ ret:
 }
 */
 
-errno_t sem_get_count(hal_sem_t *s, int *count)
+// TODO replace with atomic read
+static errno_t do_sem_get_count(struct phantom_sem_impl *ci, int *count)
 {
-    if(s->impl == 0 || count == 0)
-        return EINVAL;
-
-    //errno_t ret = 0;
-    struct phantom_sem_impl *ci = s->impl;
-
     // save & dis preemtion
     int ie = hal_save_cli();
     hal_disable_preemption();
@@ -342,17 +354,222 @@ errno_t sem_get_count(hal_sem_t *s, int *count)
 }
 
 
+#if !CONF_NEW_SEMA_FUNC
+
+// BUG! Races! 
+static void do_hal_sem_destroy(hal_sem_t *c)
+{
+    assert(c);
+    assert(c->impl);
+    if(panic_reenter) return;
+    c->impl->flags |= SEM_FLAG_INTERNAL_NOLOCK;
+
+    assert_not_interrupt();
+/*
+    // save & dis preemtion
+    int ie = hal_save_cli();
+    hal_disable_preemption();
+    hal_spin_lock(&(c->impl->lock));
+*/
+    // TODO BUG! Must unlock and signal killed sema! newos code relies on that
+    //if(m->impl.owner != 0)        panic("locked mutex killed");
+    free(c->impl);
+    c->impl=0;
+/* can't - have no impl!
+    hal_spin_unlock(&(c->impl->lock));
+    hal_enable_preemption();
+    if(ie) hal_sti();
+*/
+}
+#endif
+
+// -----------------------------------------------------------------------
+//
+// Interface - traditional (pointer based)
+//
+// -----------------------------------------------------------------------
+
+#if !CONF_NEW_SEMA_FUNC
+
+errno_t hal_sem_init(hal_sem_t *c, const char *name ) {
+    return do_hal_sem_init(c, name );
+}
+// TODO just call acquire_etc with default values
+//errno_t hal_sem_acquire(hal_sem_t *c) { return do_hal_sem_acquire(c); }
+
+errno_t hal_sem_acquire(hal_sem_t *c)
+{
+    if(c->impl == 0) checkinit(c);
+    return do_hal_sem_acquire_etc( c->impl, 1, 0, 0, c );
+}
+
+errno_t hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
+{
+    if(s->impl == 0) checkinit(s);
+    return do_hal_sem_acquire_etc( s->impl, val, flags, uSec, s );
+}
+
+errno_t hal_sem_zero( hal_sem_t *s )
+{
+    if(s->impl == 0) checkinit(s);
+    return do_hal_sem_zero( s->impl );
+}
+
+void hal_sem_release(hal_sem_t *c)
+{
+    if(c->impl == 0) checkinit(c);
+    do_hal_sem_release(c->impl);
+}
+
+errno_t sem_get_count(hal_sem_t *s, int *count)
+{
+    if(s->impl == 0 || count == 0)
+        return EINVAL;
+
+    return do_sem_get_count(s->impl, count);
+}
 
 // BUG! Races! 
 void hal_sem_destroy(hal_sem_t *c)
 {
-    if(panic_reenter) return;
-
-    assert_not_interrupt();
-
-    // BUG! Must unlock and signal killed sema! newos code relies on that
-    //if(m->impl.owner != 0)        panic("locked mutex killed");
-    free(c->impl);
-    c->impl=0;
+    do_hal_sem_destroy(c);
 }
+
+
+#endif // !CONF_NEW_SEMA_FUNC
+
+
+// -----------------------------------------------------------------------
+//
+// Interface - pool handle based
+//
+// -----------------------------------------------------------------------
+
+
+#if CONF_NEW_SEMA_FUNC
+
+errno_t hal_sem_init(hal_sem_t *c, const char *name )
+{
+
+    assert(threads_inited);
+
+    assert(c->impl == 0);
+    assert(c->h == 0);
+
+    c->h = pool_create_el( sema_pool, 0 );
+    if( c->h < 0 ) return ENOMEM; // TODO grow pool?
+
+    struct phantom_sem_impl *impl = pool_get_el( sema_pool, c->h );
+    if( !impl ) panic("can't get new pool element");;
+
+    c->impl = impl;
+
+
+    impl->name = name;
+    hal_spin_init(&(impl->lock));
+    queue_init(&(impl->waiting_threads));
+    impl->value = 0;
+
+    if( pool_release_el( sema_pool, c->h ) ) panic("can't release new pool element");
+
+    return 0;
+}
+
+    // TODO just call acquire_etc with default values
+//errno_t hal_sem_acquire(hal_sem_t *c) { return do_hal_sem_acquire(c); }
+errno_t hal_sem_acquire(hal_sem_t *c)
+{
+    void *impl = pool_get_el( sema_pool, c->h );
+    if( !impl ) return ENOENT;
+    errno_t e = do_hal_sem_acquire_etc( impl, 1, 0, 0 );
+    if( pool_release_el( sema_pool, c->h ) ) panic("can't release pool element");
+
+    return e;
+}
+
+errno_t hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
+{
+    void *impl = pool_get_el( sema_pool, s->h );
+    if( !impl ) return ENOENT;
+    errno_t e = do_hal_sem_acquire_etc( impl, val, flags, uSec );
+    if( pool_release_el( sema_pool, s->h ) ) panic("can't release pool element");
+
+    return e;
+}
+
+errno_t hal_sem_zero( hal_sem_t *s )
+{
+    void *impl = pool_get_el( sema_pool, s->h );
+    if( !impl ) return ENOENT;
+    errno_t e = do_hal_sem_zero( impl );
+    if( pool_release_el( sema_pool, s->h ) ) panic("can't release pool element");
+
+    return e;
+}
+
+void hal_sem_release(hal_sem_t *s )
+{
+    void *impl = pool_get_el( sema_pool, s->h );
+    if( !impl ) return;
+    //errno_t e =
+    do_hal_sem_release( impl );
+    if( pool_release_el( sema_pool, s->h ) ) panic("can't release pool element");
+
+    //return e;
+}
+
+errno_t sem_get_count(hal_sem_t *s, int *count)
+{
+    void *impl = pool_get_el( sema_pool, s->h );
+    if( !impl ) return ENOENT;
+    errno_t e = do_sem_get_count(impl, count);
+    if( pool_release_el( sema_pool, s->h ) ) panic("can't release pool element");
+
+    return e;
+}
+
+// BUG! Races! 
+void hal_sem_destroy(hal_sem_t *c)
+{
+    errno_t e;
+
+    struct phantom_sem_impl *impl = pool_get_el( sema_pool, c->h );
+    if( !impl ) panic("destroy non-existing sema");
+
+    impl->flags |= SEM_FLAG_INTERNAL_NOLOCK;
+
+    while(1)
+    {
+        int count;
+        e = do_sem_get_count(impl, &count);
+        if(e) panic("can't get count in destroy sema");
+
+        if( count < 0 )
+            do_hal_sem_release( impl );
+        else
+            break;
+    }
+
+    while(1)
+    {
+        int cnt = pool_el_refcount( sema_pool, c->h );
+        if( cnt > 0 )
+            pool_release_el( sema_pool, c->h );
+        else
+            break;
+    }
+
+    e = pool_destroy_el( sema_pool, c->h );
+    panic("can't destroy sema, %d", e);
+}
+
+
+#endif // CONF_NEW_SEMA_FUNC
+
+
+
+
+
+
+
 

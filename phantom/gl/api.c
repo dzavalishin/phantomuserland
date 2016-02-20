@@ -618,7 +618,7 @@ void glLoadName(unsigned int name)
 
   gl_add_op(p);
 }
-
+/*
 void 
 glPolygonOffset(GLfloat factor, GLfloat units)
 {
@@ -627,7 +627,7 @@ glPolygonOffset(GLfloat factor, GLfloat units)
   p[1].f = factor;
   p[2].f = units;
 }
-
+*/
 /* Special Functions */
 
 void glCallList(unsigned int list)

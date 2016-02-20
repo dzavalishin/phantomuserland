@@ -46,7 +46,7 @@ typedef struct pager_io_request
     unsigned char       flag_pagein;            // Read
     unsigned char       flag_pageout;           // Write
 
-    unsigned char       flag_ioerror; 		// BUG - not used yet - TODO replace by rc below
+//    unsigned char       flag_ioerror; 		// BUG - not used yet - TODO replace by rc below
 
     unsigned char       flag_urgent;  		// BUG - not used yet
 
@@ -83,7 +83,7 @@ pager_io_request_init( pager_io_request *me )
     memset(me, 0, sizeof(*me));
     me->flag_pagein     = 0;
     me->flag_pageout    = 0;
-    me->flag_ioerror    = 0;
+    //me->flag_ioerror    = 0;
     me->flag_urgent     = 0;
 
     me->rc              = 0;

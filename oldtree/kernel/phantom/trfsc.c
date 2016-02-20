@@ -506,7 +506,7 @@ static void trfs_resend_thread(void *arg)
             if( elt->resend_count++ > MAX_RETRY )
             {
                 queue_remove( &requests, elt, trfs_queue_t *, chain );
-                elt->orig_request->flag_ioerror = 1;
+                //elt->orig_request->flag_ioerror = 1;
                 elt->orig_request->rc = ETIMEDOUT;
                 trfs_signal_done(elt);
             }

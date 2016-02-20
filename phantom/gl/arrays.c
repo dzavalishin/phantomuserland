@@ -173,7 +173,7 @@ glopNormalPointer(GLContext *c, GLParam *p)
   c->normal_array_stride = p[1].i;
   c->normal_array = p[2].p;  
 }
-
+/*
 void 
 glNormalPointer(GLenum type, GLsizei stride, 
                 const GLvoid *pointer)
@@ -184,7 +184,7 @@ glNormalPointer(GLenum type, GLsizei stride,
   p[1].i = stride;
   p[2].p = (void*)pointer;
 }
-
+*/
 void
 glopTexCoordPointer(GLContext *c, GLParam *p)
 {
@@ -192,7 +192,7 @@ glopTexCoordPointer(GLContext *c, GLParam *p)
   c->texcoord_array_stride = p[2].i;
   c->texcoord_array = p[3].p;
 }
-
+/*
 void 
 glTexCoordPointer(GLint size, GLenum type, GLsizei stride, 
                   const GLvoid *pointer)
@@ -204,3 +204,4 @@ glTexCoordPointer(GLint size, GLenum type, GLsizei stride,
   p[2].i = stride;
   p[3].p = (void*)pointer;
 }
+*/

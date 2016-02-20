@@ -6,6 +6,7 @@
 
 #include <phantom_disk.h>
 #include <string.h>
+#include <errno.h>
 
 #include <pager_io_req.h>
 #include <spinlock.h>
@@ -26,7 +27,7 @@ typedef struct disk_page_io
 } disk_page_io;
 
 
-void disk_page_io_wait(disk_page_io *me);
+errno_t disk_page_io_wait(disk_page_io *me);
 void disk_page_io_release(disk_page_io *me);
 
 void disk_page_io_allocate(disk_page_io *me);
@@ -57,8 +58,8 @@ static __inline__ void *disk_page_io_data(disk_page_io *me) { disk_page_io_alloc
 static __inline__ void disk_page_io_load_async(disk_page_io *me, disk_page_no_t dpage ) { disk_page_io_seek( me, dpage ); disk_page_io_load_me_async(me); }
 static __inline__ void disk_page_io_save_async(disk_page_io *me, disk_page_no_t dpage ) { disk_page_io_seek( me, dpage ); disk_page_io_save_me_async(me); }
 
-static __inline__ void disk_page_io_load_sync(disk_page_io *me, disk_page_no_t dpage )  { disk_page_io_load_async( me, dpage ); disk_page_io_wait(me); }
-static __inline__ void disk_page_io_save_sync(disk_page_io *me, disk_page_no_t dpage )  { disk_page_io_save_async( me, dpage ); disk_page_io_wait(me); }
+static __inline__ errno_t disk_page_io_load_sync(disk_page_io *me, disk_page_no_t dpage )  { disk_page_io_load_async( me, dpage ); return disk_page_io_wait(me); }
+static __inline__ errno_t disk_page_io_save_sync(disk_page_io *me, disk_page_no_t dpage )  { disk_page_io_save_async( me, dpage ); return disk_page_io_wait(me); }
 
 static __inline__ void disk_page_io_load_me_sync(disk_page_io *me) { disk_page_io_load_me_async(me); disk_page_io_wait(me); }
 static __inline__ void disk_page_io_save_me_sync(disk_page_io *me) { disk_page_io_save_me_async(me); disk_page_io_wait(me); }

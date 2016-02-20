@@ -137,7 +137,7 @@ void w_restart_init(drv_video_window_t *w)
     w->title = 0; 
 
     w->inKernelEventProcess = 0;
-    // Cant without owner!
+    // Can't without owner!
     w->inKernelEventProcess = defaultWindowEventProcessor;
 
     // BUG! How do we fill owner? We must have object ref here

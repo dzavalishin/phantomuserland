@@ -186,7 +186,7 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
         goto err1;
     }
 
-    i->id = atomic_add(&next_id, 1);
+    i->id = ATOMIC_ADD_AND_FETCH(&next_id, 1);
     //strlcpy(i->path, path, sizeof(i->path));
     i->type = type;
     i->rx_thread = -1;

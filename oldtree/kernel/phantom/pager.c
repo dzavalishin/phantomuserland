@@ -637,7 +637,8 @@ errno_t read_uncheck_superblock(phantom_disk_superblock *out, disk_page_no_t add
     disk_page_io sb;
 
     disk_page_io_init( &sb );
-    disk_page_io_load_sync(&sb, addr); // BUG! Must check for read error
+    errno_t rc = disk_page_io_load_sync(&sb, addr);
+    if( rc ) return rc;
 
     *out = * ((phantom_disk_superblock *)disk_page_io_data(&sb));
 
@@ -666,7 +667,8 @@ errno_t read_check_superblock(phantom_disk_superblock *out, disk_page_no_t addr 
     disk_page_io sb;
 
     disk_page_io_init( &sb );
-    disk_page_io_load_sync(&sb, addr); // BUG! Must check for read error
+    errno_t rc = disk_page_io_load_sync(&sb, addr);
+    if( rc ) return rc;
 
     if( phantom_calc_sb_checksum( (phantom_disk_superblock *)disk_page_io_data(&sb) ))
         {
@@ -794,7 +796,9 @@ pager_get_superblock()
         disk_page_io_init(&sb0);
 
         //if(_DEBUG) hal_printf(" Load root sb");
-        disk_page_io_load_sync(&sb0,sb_default_page_numbers[0]); // read block 0x10
+        // TODO check rc
+        errno_t rc = disk_page_io_load_sync(&sb0,sb_default_page_numbers[0]); // read block 0x10
+        if( rc ) SHOW_ERROR( 0, "sb read err @%d", sb_default_page_numbers[0]);
         //if(_DEBUG) hal_printf(" ...DONE\n");
 
         root_sb = * ((phantom_disk_superblock *) disk_page_io_data(&sb0));
@@ -926,6 +930,8 @@ pager_get_superblock()
 void
 pager_update_superblock()
 {
+    errno_t rc;
+
     SHOW_FLOW0( 0, " updating superblock...");
 
 #if !USE_SYNC_IO
@@ -935,10 +941,8 @@ pager_update_superblock()
     phantom_calc_sb_checksum( &superblock );
 
 #if USE_SYNC_IO
-    errno_t rc;
-
     rc = write_superblock( &superblock, sb_default_page_numbers[0] );
-    if( rc ) SHOW_ERROR0( 0, "Superblock 1 (main) write error!" ); // TODO rc
+    if( rc ) SHOW_ERROR0( 0, "Superblock 0 (main) write error!" ); // TODO rc
 
 
     if( need_fsck )
@@ -948,16 +952,17 @@ pager_update_superblock()
     else
     {
         rc = write_superblock( &superblock, superblock.sb2_addr );
-        if( rc ) SHOW_ERROR0( 0, "Superblock 2 write error!" ); // TODO rc
+        if( rc ) SHOW_ERROR0( 0, "Superblock 1 write error!" ); // TODO rc
 
         rc = write_superblock( &superblock, superblock.sb3_addr );
-        if( rc ) SHOW_ERROR0( 0, "Superblock 3 write error!" ); // TODO rc
+        if( rc ) SHOW_ERROR0( 0, "Superblock 1 write error!" ); // TODO rc
 
         SHOW_FLOW0( 0, "saved all 3");
     }
 #else
     *((phantom_disk_superblock *)disk_page_io_data(&superblock_io)) = superblock;
-    disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[0]); // save root copy
+    rc = disk_page_io_save_sync(&superblock_io, sb_default_page_numbers[0]); // save root copy
+    if( rc ) panic( "Superblock 0 write error!" );
 
     if( need_fsck )
     {
@@ -965,8 +970,10 @@ pager_update_superblock()
     }
     else
     {
-        disk_page_io_save_sync(&superblock_io, superblock.sb2_addr);
-        disk_page_io_save_sync(&superblock_io, superblock.sb3_addr);
+        rc = disk_page_io_save_sync(&superblock_io, superblock.sb2_addr);
+        if( rc ) panic( "Superblock 1 write error!" );
+        rc = disk_page_io_save_sync(&superblock_io, superblock.sb3_addr);
+        if( rc ) panic( "Superblock 2 write error!" );
         SHOW_FLOW0( 0, " saved all 3");
     }
 
@@ -1000,7 +1007,8 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
     write_freehead_sure( fp );
 #else
     *( (struct phantom_disk_blocklist *)disk_page_io_data(&freelist_head) ) = freelist;
-    disk_page_io_save_sync(&freelist_head,fp);
+    errno_t rc = disk_page_io_save_sync(&freelist_head,fp);
+    if( rc ) panic("pager_format_empty_free_list_block");
 #endif
 }
 
@@ -1013,7 +1021,8 @@ void pager_flush_free_list(void)
     //if( rc ) SHOW_ERROR0( 0, "empty freelist block write error!" ); // TODO rc
     write_freehead_sure( superblock.free_list );
 #else
-    disk_page_io_save_sync(&freelist_head,superblock.free_list);
+    errno_t rc = disk_page_io_save_sync(&freelist_head,superblock.free_list);
+    if( rc ) SHOW_ERROR0( 0, "freelist block write error!" ); // TODO rc
 #endif
     hal_mutex_unlock(&pager_freelist_mutex);
 }
@@ -1041,7 +1050,8 @@ pager_put_to_free_list( disk_page_no_t free_page )
             pager_format_empty_free_list_block( free_page );
             superblock.free_list = free_page;
 #if !USE_SYNC_IO // format_empty assigns free_head
-            disk_page_io_load_sync(&freelist_head,superblock.free_list);
+            errno_t rc = disk_page_io_load_sync(&freelist_head,superblock.free_list);
+            if( rc ) panic("Freelist IO error");
 #endif
             freelist_inited = 1;
 
@@ -1057,7 +1067,8 @@ pager_put_to_free_list( disk_page_no_t free_page )
             read_freehead_sure();
 
 #else
-            disk_page_io_load_sync(&freelist_head,superblock.free_list);
+            errno_t rc = disk_page_io_load_sync(&freelist_head,superblock.free_list);
+            if( rc ) panic("Freelist IO error");
             freelist_inited = 1;
 #endif
         }
@@ -1077,8 +1088,9 @@ pager_put_to_free_list( disk_page_no_t free_page )
             write_freehead_sure( superblock.free_list );
 
 #else
-            disk_page_io_save_sync(&freelist_head,superblock.free_list);
+            errno_t rc = disk_page_io_save_sync(&freelist_head,superblock.free_list);
             //write_freehead_sure( superblock.free_list );
+            if( rc ) panic("pager_put_to_free_list disk write error");
 
 #endif
             pager_format_empty_free_list_block( free_page );
@@ -1120,7 +1132,8 @@ pager_init_free_list()
     //if( rc ) panic( "empty freelist block read error!" );
     read_freehead_sure();
 #else
-    disk_page_io_load_sync(&freelist_head,superblock.free_list);
+    errno_t rc = disk_page_io_load_sync(&freelist_head,superblock.free_list);
+    if( rc ) panic("Freelist IO error");
 #endif
     freelist_inited = 1;
 
@@ -1178,7 +1191,8 @@ pager_refill_free_reserve()
             read_freehead_sure();
 
 #else
-            disk_page_io_load_sync(&freelist_head,superblock.free_list);
+            errno_t rc = disk_page_io_load_sync(&freelist_head,superblock.free_list);
+            if( rc ) panic("Freelist IO error");
 #endif
 
             if( list->head.magic != DISK_STRUCT_MAGIC_FREEHEAD ||

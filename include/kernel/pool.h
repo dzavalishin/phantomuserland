@@ -8,34 +8,34 @@
  * Pool of kernel structs accessed with handle.
  *
  * \todo TODO poosibly use for:
- *	timed calls,
- *	threads                 - already handle-based
- *	disks/partitions,
+ *      timed calls,
+ *      threads                 - already handle-based
+ *      disks/partitions,
  *      exe_modules,            - TODO unix/exec.c
- *	drivers,
- *	wttys,
- *	file descriptors,
+ *      drivers,
+ *      wttys,
+ *      file descriptors,
  *      siginfos,
- *	processes,              - already handle-based
- *	io requests,
- *	semas,
- *	fs instances,
+ *      processes,              - already handle-based
+ *      io requests,
+ *      semas,
+ *      fs instances,
  *      buses,
- *	udp/tcp endpoints,
- *	cpus,
- *	interrupt controllers,
+ *      udp/tcp endpoints,
+ *      cpus,
+ *      interrupt controllers,
  *      USB hcs and other structs,
- *	ports,
- *	uusockets,
- *	uufiles,
+ *      ports,
+ *      uusockets,
+ *      uufiles,
  *      uufses,
- *	virtio devices,
- *	trfs stuff,
+ *      virtio devices,
+ *      trfs stuff,
  *      paging_devices,
- *	sound ports
- *	fonts,
- *	bitmaps,
- *	windows                 - in progress
+ *      sound ports,
+ *      fonts,
+ *      bitmaps,
+ *      windows                 - in progress
  *      what else?
  *
 **/
@@ -112,6 +112,10 @@ int pool_el_refcount( pool_t *pool, pool_handle_t handle );
 //! Returns handle or -1 if unable to create element
 //! Arg is element itself (if pool->init == 0) or arg to init
 pool_handle_t pool_create_el( pool_t *pool, void *arg );
+
+//! Do an action with pool element, does not destroy pool el in any case
+errno_t do_pool_forone( pool_t *pool, pool_handle_t handle, errno_t (*ff)(pool_t *pool, void *el, void *arg), void *arg );
+
 
 #endif // POOL_H
 

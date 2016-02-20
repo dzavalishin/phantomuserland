@@ -160,7 +160,7 @@ static errno_t memdisk_AsyncIo( struct phantom_disk_partition *part, pager_io_re
     phantom_device_t *dev = part->specific;
     //memdisk_t *a = dev->drv_private;
 
-    rq->flag_ioerror = 0;
+    //rq->flag_ioerror = 0;
     rq->rc = 0;
 
     size_t size = rq->nSect * part->block_size;
@@ -168,7 +168,7 @@ static errno_t memdisk_AsyncIo( struct phantom_disk_partition *part, pager_io_re
 
     if( size+shift > dev->iomemsize )
     {
-        rq->flag_ioerror = 1;
+        //rq->flag_ioerror = 1;
         rq->rc = EIO;
         pager_io_request_done( rq );
         return EIO;
@@ -176,7 +176,7 @@ static errno_t memdisk_AsyncIo( struct phantom_disk_partition *part, pager_io_re
 
     if(rq->flag_pageout)
     {
-        rq->flag_ioerror = 1;
+        //rq->flag_ioerror = 1;
         rq->rc = EIO;
     }
     else

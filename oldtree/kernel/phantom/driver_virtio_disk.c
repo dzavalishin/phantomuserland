@@ -415,7 +415,7 @@ static void vio_intr_dpc_func(void *a)
 
         if(rq)
         {
-            rq->flag_ioerror |= req->ihdr.status ? (~0) : 0;
+            //rq->flag_ioerror |= req->ihdr.status ? (~0) : 0;
 
             switch(req->ihdr.status)
             {
@@ -452,6 +452,7 @@ static void vio_intr_dpc_func(void *a)
 static void driver_virtio_disk_interrupt(virtio_device_t *vd, int isr )
 {
     (void) isr;
+    (void) vd;
 
     //SHOW_FLOW0( 5, "got virtio DISK interrupt" );
 

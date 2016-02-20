@@ -12,6 +12,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// Use new partitioning functions (using handles) - UNFINISHED
+#define CONF_NEW_PART_FUNC 1
+
+// Use new semaphores functions (using handles) - UNFINISHED
+#define CONF_NEW_SEMA_FUNC 0
+
+
 // vm class instanceof checks for parents
 #define VM_INSTOF_RECURSIVE 1
 #define VM_DEFERRED_REFDEC 0

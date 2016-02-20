@@ -190,7 +190,8 @@ void disk_enqueue( phantom_disk_partition_t *p, pager_io_request *rq )
     rq->blockNo = rq->disk_page*m;
     rq->nSect = m;
 
-    assert( rq->flag_ioerror == 0 );
+    //assert( rq->flag_ioerror == 0 );
+    assert( rq->rc == 0 );
     assert( rq->flag_pagein != rq->flag_pageout );
 
     STAT_INC_CNT(STAT_CNT_BLOCK_IO);

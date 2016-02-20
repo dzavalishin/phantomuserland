@@ -204,7 +204,8 @@ void dpart_enqueue( partition_handle_t h, pager_io_request *rq )
 
     rq->phandle = h.h;
 
-    assert( rq->flag_ioerror == 0 );
+    //sert( rq->flag_ioerror == 0 );
+    assert( rq->rc = 0 );
     assert( rq->flag_pagein != rq->flag_pageout );
 
     p->asyncIo( p, rq );
@@ -220,7 +221,8 @@ void dpart_trim( partition_handle_t h, pager_io_request *rq )
     rq->blockNo = rq->disk_page*m;
     rq->nSect = m;
 
-    assert( rq->flag_ioerror == 0 );
+    //assert( rq->flag_ioerror == 0 );
+    assert( rq->rc == 0 );
     assert( rq->flag_pagein != rq->flag_pageout );
 
     // TODO following code (in the leaf function) must release partition

@@ -437,6 +437,7 @@ struct phantom_sem_impl
 {
     hal_spinlock_t      lock;
     int                 value;
+    int                 flags;
     const char*         name;
     queue_head_t	waiting_threads;
 };

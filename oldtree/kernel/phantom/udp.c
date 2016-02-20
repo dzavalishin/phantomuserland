@@ -130,7 +130,7 @@ static void udp_queue_push(udp_queue *q, udp_queue_elem *e)
 
 static void udp_endpoint_acquire_ref(udp_endpoint *e)
 {
-    atomic_add(&e->ref_count, 1);
+    ATOMIC_ADD_AND_FETCH(&e->ref_count, 1);
 }
 
 static void udp_endpoint_release_ref(udp_endpoint *e)

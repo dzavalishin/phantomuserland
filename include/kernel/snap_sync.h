@@ -12,6 +12,9 @@
 #include <vm/internal_da.h>
 #include <vm/alloc.h>
 
+// request snap right now
+void request_snap(void);
+
 
 void phantom_thread_wait_4_snap( void );
 void phantom_snapper_wait_4_threads( void );
