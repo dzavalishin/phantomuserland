@@ -35,6 +35,7 @@ void	hal_spin_unlock(hal_spinlock_t *sl);
 //void	hal_spin_lock(hal_spinlock_t *sl) __attribute__((deprecated));
 //void	hal_spin_unlock(hal_spinlock_t *sl) __attribute__((deprecated));
 
+// Turns off interrupts too
 void    hal_wired_spin_lock(hal_spinlock_t *l);
 void    hal_wired_spin_unlock(hal_spinlock_t *l);
 

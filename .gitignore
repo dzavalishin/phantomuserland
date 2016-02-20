@@ -1,0 +1,7 @@
+*.h~
+run/fat/boot/pmod_test
+phantom/vm/pvm_test.exe
+run/fat/boot/phantom
+run/tftp/phantom
+*.pe
+oldtree/kernel/phantom/svn_version.c

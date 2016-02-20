@@ -217,6 +217,7 @@ struct pvm_object     pvm_create_string_object_binary_cat(
         const char *value2, int n_bytes2 );
 
 //struct pvm_object     pvm_create_array_object(void);
+#define pvm_create_array_object() pvm_create_object( pvm_get_array_class() )
 struct pvm_object     pvm_create_page_object( int n_slots, struct pvm_object *init, int init_slots );
 struct pvm_object     pvm_create_thread_object( struct pvm_object start_call_frame );
 struct pvm_object     pvm_create_call_frame_object(void);
