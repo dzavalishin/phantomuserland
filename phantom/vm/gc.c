@@ -99,7 +99,7 @@ void run_gc()
     if (gc_flags_last_generation == 0)  gc_flags_last_generation++;  // != 0 'cause allocation reset gc_flags to zero
 
     //phantom_virtual_machine_threads_stopped++; // pretend we are stopped
-    //TODO: refine sinchronization
+    //TODO: refine synchronization
 
     if (debug_memory_leaks) pvm_memcheck();  // visualization
     if (debug_memory_leaks) printf("gc started...  ");

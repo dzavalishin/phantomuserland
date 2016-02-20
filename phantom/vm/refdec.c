@@ -64,13 +64,13 @@ static void deferred_refdec_init(void)
 
 }
 
-
+/*
 static void deferred_refdec_stop(void) //__attribute__((unused))
 {
     stop = 1;
     hal_cond_signal( &start_refdec_cond );
 }
-
+*/
 
 
 
@@ -114,7 +114,9 @@ void deferred_refdec(pvm_object_storage_t *os)
 
 
 //long_way:
-    int pos = atomic_add( (int *)&refdec_put_ptr, 1 );
+    // TODO ERROR atomic_add returns not what we assume!
+    //int pos = atomic_add( (int *)&refdec_put_ptr, 1 );
+    int pos = ATOMIC_ADD_AND_FETCH( (int *)&refdec_put_ptr, 1 );
 
     // Overflow
     if( (pos >= REFDEC_BUFFER_SIZE) || (pos == REFDEC_BUFFER_HALF) )
@@ -159,7 +161,8 @@ static void deferred_refdec_thread(void *a)
         if( refdec_put_ptr >= REFDEC_BUFFER_HALF )
             new_put_ptr = 0;
 
-        int last_pos = atomic_set( &refdec_put_ptr, new_put_ptr);
+        //int last_pos = atomic_set( &refdec_put_ptr, new_put_ptr);
+        int last_pos = ATOMIC_FETCH_AND_SET( &refdec_put_ptr, new_put_ptr);
         int start_pos = (last_pos >= REFDEC_BUFFER_HALF) ? REFDEC_BUFFER_HALF+1 : 0;
 
         // Check that all VM threads are either sleep or passed an bytecode instr boundary

@@ -90,7 +90,7 @@ static errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pv
 
     LOCK_DIR(dir);
 
-    int keypos = capacity % calc_hash( ikey, ikey+i_key_len );
+    int keypos = dir->capacity % calc_hash( ikey, ikey+i_key_len );
 
     pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
     if( pvm_is_null( okey ) )
@@ -154,7 +154,7 @@ static errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm
 
     LOCK_DIR(dir);
 
-    int keypos = capacity % calc_hash( ikey, ikey+i_key_len );
+    int keypos = dir->capacity % calc_hash( ikey, ikey+i_key_len );
 
     pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
     u_int8_t flags = dir->flags[keypos];
@@ -271,9 +271,20 @@ static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey )
     return 0;
 }
 
+#define DEFAULT_SIZE 256
+
 //! Return EEXIST if dup
 static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
 {
+    if( initial_size <= 10)
+        initial_size = DEFAULT_SIZE;
+
+    if( initial_size > 10000 )
+    {
+        SHOW_ERROR( 0, "hdir_init size %d", initial_size );
+        initial_size = DEFAULT_SIZE;
+    }
+
     hal_spin_init( &dir->lock );
 
     LOCK_DIR(dir);

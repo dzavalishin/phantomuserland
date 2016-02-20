@@ -55,11 +55,11 @@ static void * curr_a[ARENAS];
 static const char* name_a[ARENAS] = { "root, static", "stack", "int", "small", "large" };
 // Partition
 #if debug_allocation
-//static int percent_a[ARENAS] = { 15, 15, 2, 54, 14 };  // play with numbers
-static int percent_a[ARENAS] = { 15, 15, 20, 25, 25 };  // play with numbers
+static int percent_a[ARENAS] = { 15, 15, 2, 54, 14 };  // play with numbers
+//static int percent_a[ARENAS] = { 15, 15, 20, 25, 25 };  // play with numbers
 #else
-static int percent_a[ARENAS] = { 15, 45, 10, 15, 15 };  // play with numbers
-//static int percent_a[ARENAS] = { 15, 15, 2, 28, 40 };
+//static int percent_a[ARENAS] = { 15, 45, 10, 15, 15 };  // play with numbers
+static int percent_a[ARENAS] = { 15, 15, 2, 28, 40 };
 #endif
 
 
