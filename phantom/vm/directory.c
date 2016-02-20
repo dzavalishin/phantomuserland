@@ -44,9 +44,11 @@
 #include <video/internal.h>
 */
 
+// TODO very long spin lock
+
 #warning lock
-#define LOCK_DIR(__dir)
-#define UNLOCK_DIR(__dir)
+#define LOCK_DIR(__dir) hal_wired_spin_lock(&(__dir)->lock);
+#define UNLOCK_DIR(__dir) hal_wired_spin_unlock(&(__dir)->lock);
 
 
 /**
@@ -88,7 +90,7 @@ static errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pv
 
     LOCK_DIR(dir);
 
-    int keypos = calc_hash( ikey, ikey+i_key_len );
+    int keypos = capacity % calc_hash( ikey, ikey+i_key_len );
 
     pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
     if( pvm_is_null( okey ) )
@@ -152,7 +154,7 @@ static errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm
 
     LOCK_DIR(dir);
 
-    int keypos = calc_hash( ikey, ikey+i_key_len );
+    int keypos = capacity % calc_hash( ikey, ikey+i_key_len );
 
     pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
     u_int8_t flags = dir->flags[keypos];
@@ -209,9 +211,6 @@ static errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm
     }
 
     assert(flags);
-    assert(dir->capacity);
-    assert(dir->keys.data != 0);
-    assert(dir->values.data != 0);
 
     // Indirection. Scan and check for key to exist
 
@@ -270,6 +269,23 @@ static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey )
     }
 
     return 0;
+}
+
+//! Return EEXIST if dup
+static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
+{
+    hal_spin_init( &dir->lock );
+
+    LOCK_DIR(dir);
+
+    dir->nEntries = 0;
+    dir->capacity = initial_size;
+
+    dir->keys = pvm_create_array_object();
+    dir->values = pvm_create_array_object();
+    dir->flags = calloc( sizeof(u_int8_t), initial_size );
+
+    UNLOCK_DIR(dir);
 }
 
 
