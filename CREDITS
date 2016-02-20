@@ -7,6 +7,8 @@ optimizations for VM.
 
 Irek Akhtyamov - Parts of Java/Phantom bytecode convertor.
 
+Andrey Stelmakh - external Java FSCK tool
+
 Seva Glushchenko - daily regression test environment, QA.
 
 dz - the rest...

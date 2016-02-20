@@ -1,33 +1,14 @@
- - instanceof checks for class or parents! Must check for class or children!
-
- - arm? https://www.miniand.com/products/Cubieboard%20Developer%20Board
-
- - stack acc: use bound on intel
 
  + dynamic (by-name) method calls. 
  - use for interface method calls!
 
  - MEM LEAK!
 
- - userland scanf does not support * (suppress assign) - use kernel one?
+ - arm? https://www.miniand.com/products/Cubieboard%20Developer%20Board
 
- - test and set as main new snap sync
 
- - deferred zbuf clean - debug
 
- - debug new snap sync
-
- - check that restart list is killed and all contained in 1-link objects too.
-
- - win reconnect - must take z order in account - insert in list at the
-   right place.
-
- - phantom disk format utility must use same superblock checksum/format code 
-   as kernel.
-
- - BUG - need to reimplement snap sync code or else blocking syscalls
-   will prevent snap from being done.
-  
+ 
  + win/tty restarts/reconnects incorrectly - window does not get focus
 
  + set_net_timer - need reset timer if not one shot required

@@ -1,4 +1,6 @@
 *.h~
+*.c~
+*.o
 run/fat/boot/pmod_test
 phantom/vm/pvm_test.exe
 run/fat/boot/phantom
