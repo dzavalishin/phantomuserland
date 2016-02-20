@@ -49,9 +49,10 @@ import .internal."class";
 
 import .phantom.osimpl;
 
+/*
 import .test.toPhantom.PhantomPrinter;
 import .test.toPhantom.AllRun;
-
+*/
 
 
 // TODO: Compiler has to have some way of loading attributes
