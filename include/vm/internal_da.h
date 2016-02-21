@@ -460,15 +460,27 @@ struct data_area_4_window
 // Container entry has struct pvm_object at the beginning and the rest is 0-term name string
 struct data_area_4_directory
 {
+/* old, unused?
     u_int32_t                           elSize;         // size of one dir entry, bytes, defaults to 256
 
     u_int32_t                           capacity;       // size of binary container in entries
     u_int32_t                           nEntries;       // number of actual entries
 
     struct pvm_object   		container;      // Where we actually hold it
+*/
+
+    u_int32_t                           capacity;       // size of 1nd level arrays
+    u_int32_t                           nEntries;       // number of actual entries stored
+
+    struct pvm_object   		keys;      	// Where we actually hold keys
+    struct pvm_object   		values;      	// Where we actually hold values
+    u_int8_t 				*flags;      	// Is this keys/values slot pointing to 2nd level array
+
+    hal_spinlock_t                      lock;
+
 };
 
-
+typedef struct data_area_4_directory hashdir_t;
 
 
 

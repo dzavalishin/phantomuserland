@@ -1741,7 +1741,19 @@ DECLARE_SIZE(weakref);
 
 // --------- directory -------------------------------------------------------
 
-// TODO dir mutex!
+// directory.c
+errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t add );
+errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out );
+
+
+static int si_directory_4_equals(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    (void)o;
+    DEBUG_INFO;
+    SYSCALL_THROW_STRING( "dir.equals: not implemented" );
+    //SYSCALL_RETURN(pvm_create_string_object( "(directory)" ));
+}
+
 
 static int si_directory_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
 {
@@ -1750,47 +1762,81 @@ static int si_directory_5_tostring(struct pvm_object o, struct data_area_4_threa
     SYSCALL_RETURN(pvm_create_string_object( "(directory)" ));
 }
 
-errno_t directory_put( struct pvm_object dir, const char *name, struct pvm_object o )
+static int si_directory_8_put(struct pvm_object o, struct data_area_4_thread *tc )
 {
-    struct data_area_4_directory *da = pvm_object_da( dir, directory );
-    (void)da;
-    return ENOMEM;
+    struct data_area_4_directory *da = pvm_object_da( o, directory );
+    DEBUG_INFO;
+
+    struct pvm_object val = POP_ARG;
+    struct pvm_object key = POP_ARG;
+    ASSERT_STRING(key);
+
+    errno_t rc = hdir_add( da, pvm_get_str_data(key), pvm_get_str_len(key), val );
+
+    SYS_FREE_O(key); // dir code creates it's own binary object
+    if( rc ) SYS_FREE_O( val ); // we didn't put it there
+
+    SYSCALL_RETURN(pvm_create_int_object( rc ));
 }
 
-pvm_object_t directory_get( struct pvm_object dir, const char *name )
+static int si_directory_9_get(struct pvm_object o, struct data_area_4_thread *tc )
 {
-    struct data_area_4_directory *da = pvm_object_da( dir, directory );
-    (void)da;
-    return pvm_create_null_object();
+    struct data_area_4_directory *da = pvm_object_da( o, directory );
+    DEBUG_INFO;
+
+    struct pvm_object key = POP_ARG;
+    ASSERT_STRING(key);
+
+    pvm_object_t out;
+    errno_t rc = hdir_find( da, pvm_get_str_data(key), pvm_get_str_len(key), &out );
+    if( rc )
+        SYSCALL_RETURN_NOTHING;
+    else
+        SYSCALL_RETURN(out);
 }
 
-errno_t directory_remove( struct pvm_object dir, const char *name )
+
+static int si_directory_10_remove(struct pvm_object o, struct data_area_4_thread *tc )
 {
-    struct data_area_4_directory *da = pvm_object_da( dir, directory );
-    (void)da;
-    return ENOMEM;
+    (void)o;
+    //struct data_area_4_directory *da = pvm_object_da( o, directory );
+    DEBUG_INFO;
+    SYSCALL_THROW_STRING( "dir.remove: not implemented" );
+    //SYSCALL_RETURN(pvm_create_string_object( "(directory)" ));
+}
+
+static int si_directory_11_size(struct pvm_object o, struct data_area_4_thread *tc )
+{
+    struct data_area_4_directory *da = pvm_object_da( o, directory );
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_int_object( da->nEntries ));
 }
 
 // Returns iterator
-pvm_object_t directory_iterate( struct pvm_object dir )
+static int si_directory_12_iterate(struct pvm_object o, struct data_area_4_thread *tc )
 {
-    struct data_area_4_directory *da = pvm_object_da( dir, directory );
-    (void)da;
+    (void)o;
+    DEBUG_INFO;
     // TODO implement dir iterator
-    return pvm_create_null_object();
+
+    SYSCALL_THROW_STRING( "dir.iterate: not implemented" );
+    SYSCALL_RETURN_NOTHING;
+    //return pvm_create_null_object();
 }
+
+
 
 
 syscall_func_t	syscall_table_4_directory[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
-    &si_void_4_equals,              &si_directory_5_tostring,
+    &si_directory_4_equals,         &si_directory_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &invalid_syscall, 	    	    &invalid_syscall,
-    &invalid_syscall, 	    	    &invalid_syscall,
-    &invalid_syscall,               &invalid_syscall,
+    &si_directory_8_put, 	    	&si_directory_9_get,
+    &si_directory_10_remove,        &si_directory_11_size,
+    &si_directory_12_iterate,       &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode,
 
 };

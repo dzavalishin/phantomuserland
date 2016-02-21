@@ -91,6 +91,30 @@ int debug_print_instr = 0;
 
 /**
  *
+ * bit representation saving type conv
+ *
+**/
+
+// v must be lvalue
+#define TO_DOUBLE( __v ) (*((double *)&(__v)))
+#define TO_LONG( __v ) (*((u_int64_t *)&(__v)))
+
+#define AS_DOUBLE( __a1, __a2, __op ) (TO_DOUBLE(__a1) __op TO_DOUBLE(__a2))
+
+
+
+#define DOUBLE_STACK_OP( ___op ) \
+do { \
+	int64_t a1 = ls_pop(); \
+        int64_t a2 = ls_pop(); \
+        double r = AS_DOUBLE( a1, a2, ___op ); \
+        ls_push( TO_LONG(r) ); \
+} while(0)
+
+
+
+/**
+ *
  * Helpers
  *
 **/
@@ -631,6 +655,133 @@ void pvm_exec(pvm_object_t current_thread)
         if( prefix_double )
             switch(instruction)
             {
+            case opcode_ishl: // Not defined for double, throw exception
+            case opcode_ishr:
+            case opcode_ushr:
+            case opcode_ior:
+            case opcode_iand:
+            case opcode_ixor:
+            case opcode_inot:
+            case opcode_log_or:
+            case opcode_log_and:
+            case opcode_log_xor:
+            case opcode_log_not:
+                pvm_exec_panic("invalid double op");
+                break;
+
+
+            case opcode_isum:
+                LISTI("d-isum");
+                DOUBLE_STACK_OP( + );
+                break;
+
+            case opcode_imul:
+                LISTI("d-imul");
+                DOUBLE_STACK_OP( * );
+
+//                {                    int64_t mul = ls_pop();                    ls_push( ls_pop() * mul );                }
+                break;
+
+            case opcode_isubul:
+                LISTI("d-isubul");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    double r = AS_DOUBLE( u, l, - );
+                    ls_push( TO_LONG(r) );
+                }
+                break;
+
+            case opcode_isublu:
+                LISTI("d-isublu");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    double r = AS_DOUBLE( l, u, - );
+                    ls_push( TO_LONG(r) );
+                }
+                break;
+
+            case opcode_idivul:
+                LISTI("d-idivul");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    double r = AS_DOUBLE( u, l, / );
+                    ls_push( TO_LONG(r) );
+                }
+                break;
+
+            case opcode_idivlu:
+                LISTI("d-idivlu");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    double r = AS_DOUBLE( l, u, / );
+                    ls_push( TO_LONG(r) );
+                }
+                break;
+
+
+
+
+
+                // NB! Returns int!
+            case opcode_ige:
+                LISTI("d-ige");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    int r = AS_DOUBLE( l, u, >= );
+                    is_push( r );
+                }
+                break;
+            case opcode_ile:
+                LISTI("d-ile");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    int r = AS_DOUBLE( l, u, <= );
+                    is_push( r );
+                }
+                break;
+            case opcode_igt:
+                LISTI("d-igt");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    int r = AS_DOUBLE( l, u, > );
+                    is_push( r );
+                }
+                break;
+            case opcode_ilt:
+                LISTI("d-ilt");
+                {
+                    int64_t u = ls_pop();
+                    int64_t l = ls_pop();
+                    int r = AS_DOUBLE( l, u, < );
+                    is_push( r );
+                }
+                break;
+
+
+
+            case opcode_i2o: // ERROR IMPLEMENT ME
+                LISTI("d-i2o");
+                pvm_exec_panic("unimpl double i2o");
+                //os_push(pvm_create_long_object(ls_pop()));
+                break;
+
+            case opcode_o2i: // ERROR IMPLEMENT ME
+                LISTI("d-o2i");
+                pvm_exec_panic("unimpl double o2i");
+                /*{
+                    struct pvm_object o = os_pop();
+                    if( o.data == 0 ) pvm_exec_panic("d-o2i(null)");
+                    ls_push( pvm_get_long( o ) );
+                    ref_dec_o(o);
+                }*/
+                break;
             }
         // End of double ops
 

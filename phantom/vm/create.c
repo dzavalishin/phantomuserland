@@ -944,7 +944,7 @@ void pvm_restart_window( pvm_object_t o )
 
 
 
-
+/* moved to directory.c
 void pvm_internal_init_directory(struct pvm_object_storage * os)
 {
     struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
@@ -974,12 +974,6 @@ void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * 
 }
 
 
-struct pvm_object     pvm_create_directory_object(void)
-{
-    pvm_object_t ret = pvm_object_create_fixed( pvm_get_directory_class() );
-
-    return ret;
-}
 
 // Unused, not supposed to be called
 void pvm_gc_finalizer_directory( struct pvm_object_storage * os )
@@ -995,10 +989,22 @@ void pvm_restart_directory( pvm_object_t o )
     //struct data_area_4_directory *da = pvm_object_da( o, directory );
 
 }
+*/
 
 
+struct pvm_object     pvm_create_directory_object(void)
+{
+    pvm_object_t ret = pvm_object_create_fixed( pvm_get_directory_class() );
+    return ret;
+}
 
+void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+    struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
 
+    gc_fcall( func, arg, da->keys );
+    gc_fcall( func, arg, da->values );
+}
 
 
 
