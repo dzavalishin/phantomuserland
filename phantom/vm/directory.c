@@ -50,6 +50,9 @@
 #define LOCK_DIR(__dir) hal_wired_spin_lock(&(__dir)->lock);
 #define UNLOCK_DIR(__dir) hal_wired_spin_unlock(&(__dir)->lock);
 
+#warning SYS_FREE_O() for removed values
+#warning ref_inc for returned copies in get
+
 
 /**
  *
@@ -64,7 +67,7 @@
  * In 2nd level arrays key and value positions are correspond too. Null in key slot menas that slot is unused.
  *
 **/
-
+/*
 typedef struct hashdir {
     u_int32_t                           capacity;       // size of 1nd level arrays
     u_int32_t                           nEntries;       // number of actual entries stored
@@ -76,10 +79,12 @@ typedef struct hashdir {
     hal_spinlock_t                      lock;
 
 } hashdir_t;
-
+*/
 static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey );
 
-static errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out )
+
+// TODO add parameter for find and remove mode
+errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out )
 {
     if( dir->nEntries == 0 ) return ENOENT;
 
@@ -145,7 +150,7 @@ static errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pv
 
 
 //! Return EEXIST if dup
-static errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t add )
+errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t add )
 {
     assert(dir->capacity);
     assert(dir->keys.data != 0);
@@ -297,6 +302,7 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
     dir->flags = calloc( sizeof(u_int8_t), initial_size );
 
     UNLOCK_DIR(dir);
+    return 0;
 }
 
 
@@ -311,9 +317,62 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
 
 
 
+// -----------------------------------------------------------------------
+//
+// Internal class table entry points
+//
+// (From create.c)
+//
+// -----------------------------------------------------------------------
 
 
 
 
+
+
+void pvm_internal_init_directory(struct pvm_object_storage * os)
+{
+    struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
+
+    //da->elSize = 256;
+    //da->capacity = 16;
+    //da->nEntries = 0;
+
+    //da->container = pvm_create_binary_object( da->elSize * da->capacity , 0 );
+
+    errno_t rc = hdir_init( da, 0 );
+    if( rc ) panic("can't create directory"); // TODO do not panic? must return errno?
+}
+
+
+// left in create.c
+/*
+void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+    struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
+
+    gc_fcall( func, arg, da->keys );
+    gc_fcall( func, arg, da->values );
+}
+
+struct pvm_object     pvm_create_directory_object(void)
+{
+    pvm_object_t ret = pvm_object_create_fixed( pvm_get_directory_class() );
+    return ret;
+} */
+
+// Unused, not supposed to be called
+void pvm_gc_finalizer_directory( struct pvm_object_storage * os )
+{
+    //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
+    assert(0);
+}
+
+// Unused, not supposed to be called
+void pvm_restart_directory( pvm_object_t o )
+{
+    //struct data_area_4_directory *da = pvm_object_da( o, directory );
+    assert(0);
+}
 
 
