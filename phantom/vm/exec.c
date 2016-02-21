@@ -98,8 +98,11 @@ int debug_print_instr = 0;
 // v must be lvalue
 #define TO_DOUBLE( __v ) (*((double *)&(__v)))
 #define TO_LONG( __v ) (*((u_int64_t *)&(__v)))
+#define TO_FLOAT( __v ) (*((float *)&(__v)))
+#define TO_INT( __v ) (*((u_int32_t *)&(__v)))
 
 #define AS_DOUBLE( __a1, __a2, __op ) (TO_DOUBLE(__a1) __op TO_DOUBLE(__a2))
+
 
 
 
@@ -627,6 +630,34 @@ void pvm_exec(pvm_object_t current_thread)
                 { int64_t operand = ls_pop();	is_push( ls_pop() < operand ); }
                 break;
 
+            case opcode_froml:
+                LISTI("l-froml (nop)");
+                break;
+
+            case opcode_fromi:
+                LISTI("l-fromi");
+                {
+                    ls_push( is_pop() );
+                }
+                break;
+
+            case opcode_fromd:
+                LISTI("l-fromd");
+                {
+                    long l = ls_pop();
+                    double d = TO_DOUBLE( l );
+                    ls_push( (long) d );
+                }
+                break;
+
+            case opcode_fromf:
+                LISTI("l-fromf");
+                {
+                    int i = is_pop();
+                    float f = TO_FLOAT( i );
+                    ls_push( (long) f );
+                }
+                break;
 
 
             case opcode_i2o:
@@ -765,6 +796,34 @@ void pvm_exec(pvm_object_t current_thread)
                 break;
 
 
+            case opcode_fromd:
+                LISTI("d-fromd (nop)");
+                break;
+
+            case opcode_fromi:
+                LISTI("d-fromi");
+                {
+                    double i = is_pop();
+                    ls_push( TO_LONG( i ) );
+                }
+                break;
+
+            case opcode_froml:
+                LISTI("d-froml");
+                {
+                    double l = ls_pop();
+                    ls_push( TO_LONG( l ) );
+                }
+                break;
+
+            case opcode_fromf:
+                LISTI("d-fromf");
+                {
+                    int i = is_pop();
+                    double f = TO_FLOAT( i );
+                    ls_push( TO_LONG( f ) );
+                }
+                break;
 
             case opcode_i2o: // ERROR IMPLEMENT ME
                 LISTI("d-i2o");
@@ -1065,6 +1124,36 @@ void pvm_exec(pvm_object_t current_thread)
             LISTI("ilt");
             { int operand = is_pop();	is_push( is_pop() < operand ); }
             break;
+
+
+            case opcode_fromi:
+                LISTI("i-fromi (nop)");
+                break;
+
+            case opcode_froml:
+                LISTI("i-froml");
+                {
+                    is_push( (int) ls_pop() );
+                }
+                break;
+
+            case opcode_fromd:
+                LISTI("i-fromd");
+                {
+                    long l = ls_pop();
+                    double d = TO_DOUBLE( l );
+                    is_push( (int) d );
+                }
+                break;
+
+            case opcode_fromf:
+                LISTI("i-fromf");
+                {
+                    int i = is_pop();
+                    float f = TO_FLOAT( i );
+                    is_push( (int) f );
+                }
+                break;
 
 
 

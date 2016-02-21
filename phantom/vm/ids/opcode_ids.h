@@ -1,5 +1,3 @@
-
-
 #define opcode_nop   0x00 
 #define opcode_debug   0x01 
 //id(opcode_skipz,0x02)  // not impl - and will not be...
@@ -16,8 +14,6 @@
 #define opcode_call_8bit   0x0D 
 #define opcode_call_32bit   0x0E 
 #define opcode_sys_8bit   0x0F 
-
-
 #define opcode_is_dup   0x10 
 #define opcode_is_drop   0x11 
 #define opcode_os_dup   0x12 
@@ -30,57 +26,36 @@
 #define opcode_copy   0x19  // create new object, copy of stack top (just copy of data area as is)
 #define opcode_os_compose32   0x1A  // n objects from ostack combine into the object. topmost is a class
 #define opcode_os_decompose   0x1B  // decompose topmost object on stack
-
 // deprecated?
 #define opcode_os_pull32   0x1C  // copy opbject n steps down the ostack on top. pull 0 is dup;
-
 // deprecated and was not implemented
 //id(opcode_os_assign32,0x1D) // copy stack top opbject n steps down the ostack. pull 0 is nop 
-
-
 // this is for local vars
 #define opcode_os_get32   0x1E  // get value from stack absolute-addressed slot, push on top
 #define opcode_os_set32   0x1F  // pop stack top, set value in stack absolute-addressed slot
-
-
-
-
 #define opcode_iconst_0   0x20 
 #define opcode_iconst_1   0x21 
 #define opcode_iconst_8bit   0x22 
 #define opcode_iconst_32bit   0x23 
 #define opcode_sconst_bin   0x24 
 #define opcode_iconst_64bit   0x25 
-
 // this is for integer local vars
 #define opcode_is_get32   0x26  // get value from stack absolute-addressed slot, push on top
 #define opcode_is_set32   0x27  // pop stack top, set value in stack absolute-addressed slot
-
-
 #define opcode_push_catcher   0x2D  // jump address folows, top of o stack - class of objects to catch
 #define opcode_pop_catcher   0x2E 
 #define opcode_throw   0x2F  // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way
-
-
-
-
 #define opcode_summon_thread   0x30 
 #define opcode_summon_this   0x31 
-
 // 32-36
-
 #define opcode_summon_null   0x37  // null object
-
 #define opcode_summon_class_class   0x38 
 #define opcode_summon_int_class   0x39 
 #define opcode_summon_string_class   0x3A 
 #define opcode_summon_interface_class   0x3B 
 #define opcode_summon_code_class   0x3C 
 #define opcode_summon_array_class   0x3D 
-
 #define opcode_summon_by_name   0x3F  // string with class (or what?) name follows
-
-
 #define opcode_i2o   0x40 
 #define opcode_o2i   0x41 
 #define opcode_isum   0x42 
@@ -97,52 +72,40 @@
 #define opcode_log_and   0x4D 
 #define opcode_log_xor   0x4E 
 #define opcode_log_not   0x4F 
-
-
 // TODO: iload/isave
 #define opcode_is_load8   0x50  // load (push) this object's field on stack top
 #define opcode_is_save8   0x51  // save (pop) stack top to this object's field
-
 #define opcode_ige   0x52  // >=
 #define opcode_ile   0x53  // <=
 #define opcode_igt   0x54  // >
 #define opcode_ilt   0x55  // <
-
 #define opcode_iremul   0x56  // %
 #define opcode_iremlu   0x57 
-
-
 // Compare two object pointers
 #define opcode_os_eq   0x58  // pointers are equal
 #define opcode_os_neq   0x59  // pointers are not equal
 #define opcode_os_isnull   0x5A  // pointer is null
-
 // BUG! Duplicate!
 //id(opcode_os_push_null, 0x5B)	// push null on stack
-
 // Prefixes - modify next op operands type
 #define opcode_prefix_long   0x5C  // next operation works on longs (uses 2x slots on int stack)
 #define opcode_prefix_float   0x5D  // next operation works on floats (uses 1x slots on int stack)
 #define opcode_prefix_double   0x5E  // next operation works on doubles (uses 2x slots on int stack)
-
-
-
 //id(opcode_lock_this, 0x60)		// mutex in 'this' is locked, automatic unlock on return
 //id(opcode_unlock_this, 0x61)	// mutex in 'this' is unlocked
 #define opcode_general_lock   0x62  // mutex is locked on stack top. 
 #define opcode_general_unlock   0x63  // mutex is unlocked on stack top. 
-
 // 64-6e
-
 #define opcode_dynamic_invoke   0x6F  // no args. stack (from top): string method name, this (or null for static), n_args, args
-
-
 #define opcode_ishl   0x70  // shift left
 #define opcode_ishr   0x71  // shift right signed
 #define opcode_ushr   0x72  // shift right unsigned
-
+// no 73 yet
+#define opcode_fromi   0x74  // cast int from int stack to current (as defined by prefix) type on int stack
+#define opcode_froml   0x75  // cast from long
+#define opcode_fromf   0x76  // cast from float
+#define opcode_fromd   0x77  // cast from double
 // 73-7f
-
 // TODO kill shortcuts for we will have JIT anyway and bytecode size does not matter
 #define opcode_sys_0   0x80  // shortcut for syscall 0
 #define opcode_sys_1   0x81 
@@ -160,8 +123,6 @@
 #define opcode_sys_D   0x8D 
 #define opcode_sys_E   0x8E 
 #define opcode_sys_F   0x8F 
-
-
 #define opcode_call_00   0xA0  // shortcut for call 0
 #define opcode_call_01   0xA1 
 #define opcode_call_02   0xA2 
@@ -178,8 +139,6 @@
 #define opcode_call_0D   0xAD 
 #define opcode_call_0E   0xAE 
 #define opcode_call_0F   0xAF 
-
-
 #define opcode_call_10   0xB0  // shortcut for call 16
 #define opcode_call_11   0xB1 
 #define opcode_call_12   0xB2 
@@ -196,8 +155,6 @@
 #define opcode_call_1D   0xBD 
 #define opcode_call_1E   0xBE 
 #define opcode_call_1F   0xBF 
-
-
 // c0-cf
 // d0-df
 // e0-ef
