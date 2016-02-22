@@ -997,6 +997,11 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         int size = DEF_FLOPPY_SIZE ; // TODO set actual from driver?
 #if FLOPPY_Q
         phantom_disk_partition_t *p = phantom_create_partition_struct( both, 0, size );
+        if(p == 0)
+        {
+            SHOW_ERROR0( 0, "Failed to create floppy disk partition" );
+            return 0;
+        }
         p->flags |= PART_FLAG_IS_WHOLE_DISK;
         p->specific = (void *)-1; // disk supposed to have that
         p->base = 0; // and don't have this
@@ -1019,7 +1024,7 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         if(p == 0)
         {
             SHOW_ERROR0( 0, "Failed to create floppy disk partition" );
-            //return 0;
+            return 0;
         }
         else
         {

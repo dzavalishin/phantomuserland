@@ -58,3 +58,7 @@ run:: all
 
 boot:: #all
 	cp oldtree/run/tftp/* $(HW_BOOT_DEST)
+
+test::
+	cd test
+	$(MAKE)

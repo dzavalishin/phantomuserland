@@ -50,7 +50,7 @@ void phantom_io_apic_init( physaddr_t pa )
     int max_redirect_entry = (ver >> 16) & 0xFF;
 
     printf("IO APIC ver. 0x%X, unit id 0x%X, %d inputs\n",
-           0xFF && ver, id, max_redirect_entry+1
+           0xFF & ver, id, max_redirect_entry+1
           );
 
     have_io_apic = 1;

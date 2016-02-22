@@ -85,7 +85,7 @@ void profiler_register_interrupt_hit( addr_t ip )
         if(!warn_over)
         {
             warn_over = 1;
-            SHOW_ERROR( 0, "profiler ip overflow %p", ip*PROFILER_MAP_DIVIDER );
+            SHOW_ERROR( 0, "profiler ip overflow %p", (void*)(ip*PROFILER_MAP_DIVIDER) );
         }
 
         return;

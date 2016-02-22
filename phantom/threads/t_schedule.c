@@ -107,7 +107,7 @@ static volatile int phantom_scheduler_soft_interrupt_reenter = 0;
 
 void phantom_scheduler_soft_interrupt(void)
 {
-    if(panic_reenter) 
+    if(panic_reenter)
     {
     // Stop all CPUs except for main one - TODO is it right?
     if(GET_CPU_ID() != 0)
@@ -357,23 +357,25 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
 idle_again:
     // Have idle one?
     ret = (phantom_thread_t *)queue_first(&runq_idle);
-#if CHECK_SLEEP_FLAGS
-    // hack? BUG - sleeping thread on run q!
-    if( ret->sleep_flags )
-        goto idle_retry;
-#endif
-
-    if( ret->thread_flags & THREAD_FLAG_NOSCHEDULE )
-        goto idle_retry;
-
     if( ret )
     {
+#if CHECK_SLEEP_FLAGS
+        // hack? BUG - sleeping thread on run q!
+        if( ret->sleep_flags )
+            goto idle_retry;
+#endif
+
+        if( ret->thread_flags & THREAD_FLAG_NOSCHEDULE )
+            goto idle_retry;
+
         // Just take first. Switched off thread will become
         // last on runq, so all idle threads will run in cycle
         ret->ticks_left = NORM_TICKS;
         assert(t_is_runnable(ret));
         return ret;
     }
+    else
+        goto idle_no;
 
 idle_retry:
     if( ret != last_idle )

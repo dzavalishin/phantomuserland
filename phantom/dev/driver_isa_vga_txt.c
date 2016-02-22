@@ -169,8 +169,9 @@ static void clr(u_int16_t start, u_int16_t cnt)
 
 static void scroll()
 {
-	memcpy( mem, mem + COLS, COLS*ROWS*2);
-	clr((ROWS - 1) * COLS, COLS);
+    //memcpy( mem, mem + COLS, COLS*ROWS*2);
+    memmove( mem, mem + COLS, COLS*ROWS*2);
+    clr((ROWS - 1) * COLS, COLS);
 }
 
 

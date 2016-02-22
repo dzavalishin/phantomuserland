@@ -406,7 +406,8 @@ static int phantom_dev_keyboard_init(int irq)
 
     head = tail = 0;
 
-    hal_irq_alloc( irq, (void *)handle_keyboard_interrupt, 0, HAL_IRQ_SHAREABLE );
+    errno_t rc = hal_irq_alloc( irq, (void *)handle_keyboard_interrupt, 0, HAL_IRQ_SHAREABLE );
+    if( rc ) panic("could not get IRC for keyboard drv: %d", rc);
 
     SHOW_INFO0( 0, "interrupt driven keyboard driver is ready" );
 

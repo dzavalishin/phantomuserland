@@ -206,7 +206,7 @@ unsigned int c_el_hash_func(void *a, const void *key, unsigned int range)
 
 static errno_t cache_do_init( cache_t *c, size_t page_size )
 {
-    memset( c, sizeof(cache_t), 0 );
+    memset( c, 0, sizeof(cache_t) );
 
     hal_mutex_init( &c->lock, "DiskCache" );
     hal_mutex_lock( &c->lock );

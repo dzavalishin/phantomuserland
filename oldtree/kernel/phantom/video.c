@@ -253,7 +253,7 @@ void phantom_enforce_video_driver(struct drv_video_screen_t *vd)
     video_drv =  vd;
     set_video_defaults();
 
-    int res;
+    int res = 1; // by default - fail?
     if(video_drv) res = video_drv->start();
 
     if( res )

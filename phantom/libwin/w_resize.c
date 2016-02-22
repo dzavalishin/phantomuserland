@@ -50,6 +50,7 @@ w_resize( drv_video_window_t *w, int xsize, int ysize )
     {
     ui_event_t e;
     //struct ui_event e;
+    e.type = UI_EVENT_TYPE_GLOBAL;
     e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e.w.rect = maxsize;
 

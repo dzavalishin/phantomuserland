@@ -34,6 +34,8 @@ drv_video_window_move( drv_video_window_t *w, int x, int y )
 
     //w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
 
+    e1.type = UI_EVENT_TYPE_GLOBAL;
+    e2.type = UI_EVENT_TYPE_GLOBAL;
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e2.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
 
@@ -103,6 +105,9 @@ w_move( drv_video_window_t *w, int x, int y )
     w_lock();
 
     //w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
+    e1.type = UI_EVENT_TYPE_GLOBAL;
+    e2.type = UI_EVENT_TYPE_GLOBAL;
+    e3.type = UI_EVENT_TYPE_GLOBAL;
 
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e2.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;

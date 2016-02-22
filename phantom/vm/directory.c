@@ -95,7 +95,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
 
     LOCK_DIR(dir);
 
-    int keypos = dir->capacity % calc_hash( ikey, ikey+i_key_len );
+    int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
     pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
     if( pvm_is_null( okey ) )
@@ -159,7 +159,7 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 
     LOCK_DIR(dir);
 
-    int keypos = dir->capacity % calc_hash( ikey, ikey+i_key_len );
+    int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
     pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
     u_int8_t flags = dir->flags[keypos];
@@ -302,6 +302,7 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
     dir->flags = calloc( sizeof(u_int8_t), initial_size );
 
     UNLOCK_DIR(dir);
+
     return 0;
 }
 

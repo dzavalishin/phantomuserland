@@ -242,7 +242,7 @@ void hal_set_softirq_handler( int sirq, void (*func)(void *), void *_arg )
 
 void hal_request_softirq( int sirq )
 {
-    if( sirq < 0 && sirq >= SOFT_IRQ_COUNT )
+    if( (sirq < 0) && (sirq >= SOFT_IRQ_COUNT) )
         panic("soft IRQ %d > max %d", sirq, SOFT_IRQ_COUNT-1 );
 
     softirq_requests |= (1 << sirq);

@@ -46,8 +46,8 @@ void rgba_scroll_hor( rgba_t *pixels, int xs, int ys, int lstep, int s, rgba_t b
     {
         if(sabs > xs)
         {
-            continue;
             rgba_fill_line( pixels, xs, bg );
+            continue;
         }
 
         if( s > 0 ) // right

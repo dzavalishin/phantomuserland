@@ -278,13 +278,13 @@ phantom_process_boot_options(void)
     while(c--)
     {
         const char *arg = *args++;
-        int alen = strlen( arg );
-
         if( arg == 0 )
         {
             SHOW_ERROR0( 0, "Warning: boot option is NULL!");
             continue;
         }
+
+        int alen = strlen( arg );
 
         SHOW_INFO( 0, "arg = %s", arg );
 

@@ -106,6 +106,7 @@ static void ev_send_key_event_to_q(_key_event *event)
             else
                 shifts |= UI_MODIFIER_CAPSLOCK;
         }
+        break;
 
     case KEY_SCRLOCK:
         if(dn)
@@ -115,6 +116,7 @@ static void ev_send_key_event_to_q(_key_event *event)
             else
                 shifts |= UI_MODIFIER_SCRLOCK;
         }
+        break;
 
     case KEY_PAD_NUMLOCK:
         if(dn)
@@ -124,6 +126,7 @@ static void ev_send_key_event_to_q(_key_event *event)
             else
                 shifts |= UI_MODIFIER_NUMLOCK;
         }
+        break;
 
     }
 

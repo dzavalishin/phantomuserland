@@ -500,7 +500,6 @@ void ClearTrace( void )
 
 
 void ShowAll( void )
-
 {
    int lc = 0;
    unsigned const char * cp;
@@ -517,7 +516,7 @@ void ShowAll( void )
       printf( "* %s\n", cp );
    }
    //pause();
-getchar();
+//getchar();
    // display the command history
    trc_cht_dump1();           // start
    while ( 1 )
@@ -679,8 +678,8 @@ void phantom_check_disk_save_virtmem( void *start, int npages )
     printf("WILL WRITE VMEM TO DISK 0, PRESS Y\n");
     if( 'Y' != getchar() )
     {
-        printf("Skipped\n");
-        getchar();
+        printf("Skipped, press any key\n");
+        (void)getchar();
         return;
     }
     printf("Writing mem... ");

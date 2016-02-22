@@ -369,6 +369,7 @@ static int rtl8169_init(rtl8169 *r)
     int err = -1;
     //addr_t temp;
     //int i;
+    errno_t rc;
 
     hal_mutex_init(&r->lock,DEBUG_MSG_PREFIX);
 
@@ -385,7 +386,11 @@ static int rtl8169_init(rtl8169 *r)
 
     size_t n_pages = BYTES_TO_PAGES(r->phys_size);
 
-    hal_alloc_vaddress( (void **)&r->virt_base, n_pages); // alloc address of a page, but not memory
+    if( 0 != (rc = hal_alloc_vaddress( (void **)&r->virt_base, n_pages)) ) // alloc address of a page, but not memory
+    {
+        SHOW_ERROR(0, "rtl8169 not mapped VA space, errno %d\n", rc );
+        return -1;
+    }
     hal_pages_control_etc( r->phys_base, (void *)r->virt_base, n_pages, page_map_io, page_rw, 0 );
 
     SHOW_INFO(2, "rtl8169 mapped at address 0x%lx\n", r->virt_base);

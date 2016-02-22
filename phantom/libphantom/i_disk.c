@@ -17,7 +17,7 @@
 
 void dump_i_disk( i_disk_t *info )
 {
-    u_int64_t dsize = info->sectorSize * info->nSectors;
+    u_int64_t dsize = info->sectorSize * ((u_int64_t)info->nSectors);
     dsize /= 1024*1024;
 
     char *type_s = "?";

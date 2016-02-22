@@ -140,7 +140,7 @@ errno_t fs_probe_phantom(phantom_disk_partition_t *p)
 
 errno_t fs_use_phantom(phantom_disk_partition_t *p)
 {
-    assert( p->flags | PART_FLAG_IS_PHANTOM_FSSB );
+    assert( p->flags & PART_FLAG_IS_PHANTOM_FSSB );
 
     char pname[128];
     partGetName( p, pname, sizeof(pname) );
@@ -192,7 +192,7 @@ phantom_disk_partition_t *select_phantom_partition(void)
     do {
 
         printf("Press digit (0-%d): \n", n_phantom_fs_partitions-1 );
-        char c = getchar();
+        char c = (char)getchar();
 
         if( c < '0' || c > '9' )
             continue;

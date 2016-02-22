@@ -74,7 +74,8 @@ static int _fputc(int ch, FILE *stream)
 {
     if( stream->buf_mode == _IONBF )
     {
-        int err = write(stream->fd, &ch, 1);
+        char c = (char) ch;
+        int err = write(stream->fd, &c, 1);
         if(err <= 0)
         {
             errno = EIO;

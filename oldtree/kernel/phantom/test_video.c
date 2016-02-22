@@ -57,7 +57,7 @@ int do_test_video(const char *test_parm)
 
     w_set_title( wb, "Paint Test"  );
 
-
+    e1.type = UI_EVENT_TYPE_GLOBAL;
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
 
     e1.w.rect.x = 0;

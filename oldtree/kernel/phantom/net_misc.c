@@ -145,7 +145,7 @@ void udp_syslog_send(const char *prefix, const char *message)
     {
         if(rc == ERR_NET_NO_ROUTE)
         {
-            SHOW_ERROR( 1, "UDP syslog - No route\n", rc);
+            SHOW_ERROR0( 1, "UDP syslog - No route\n");
         }
         else
             SHOW_ERROR( 1, "UDP syslog - can't send, rc = %d\n", rc);

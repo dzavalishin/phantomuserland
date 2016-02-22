@@ -1022,8 +1022,7 @@ void pvm_internal_init_connection(struct pvm_object_storage * os)
     struct data_area_4_connection      *da = (struct data_area_4_connection *)os->da;
 
     da->kernel = 0;
-    memset( da->name, sizeof(da->name), 0 );
-
+    memset( da->name, 0, sizeof(da->name) );
 }
 
 

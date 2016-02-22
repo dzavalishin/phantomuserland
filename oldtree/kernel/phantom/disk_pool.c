@@ -205,7 +205,7 @@ void dpart_enqueue( partition_handle_t h, pager_io_request *rq )
     rq->phandle = h.h;
 
     //sert( rq->flag_ioerror == 0 );
-    assert( rq->rc = 0 );
+    assert( rq->rc == 0 );
     assert( rq->flag_pagein != rq->flag_pageout );
 
     p->asyncIo( p, rq );

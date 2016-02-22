@@ -203,7 +203,7 @@ phantom_import_cpu_thread(int ncpu)
     physaddr_t pa; // unused
     phantom_thread_t *t; // = calloc(1, sizeof(phantom_thread_t));
     hal_pv_alloc( &pa, (void **)&t, sizeof(phantom_thread_t) );
-    memset( t, sizeof(phantom_thread_t), 0 );
+    memset( t, 0, sizeof(phantom_thread_t) );
 
     // Can't be run yet
     t->sleep_flags = THREAD_SLEEP_LOCKED; 
@@ -227,8 +227,9 @@ phantom_import_cpu_thread(int ncpu)
 
     char *name = calloc(1, 20);
     snprintf( name, 20, "CPU %d idle", ncpu );
-
     t_current_set_name(name);
+    free(name);
+
     t->priority = THREAD_PRIO_IDLE;
 
     GET_IDLEST_THREAD() = t;

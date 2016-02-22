@@ -324,7 +324,7 @@ int pci_find_any_in_table( pci_cfg_t *cfg,  pci_table_t *tab )
     int i;
 
     SHOW_FLOW0( 2, "Look for PCI devices" );
-    for(i = 0; i <= MAXPCI; i++ )
+    for(i = 0; i < MAXPCI; i++ )
     {
         if( (!allpci[i].filled) || allpci[i].used )
             continue;

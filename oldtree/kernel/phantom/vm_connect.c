@@ -323,8 +323,8 @@ errno_t ko_map_method( int *out_ord, ko_handle_t *ko_this, const char *method_na
     pvm_object_t tclass = _this.data->_class;
 
     // TODO XXX VERY ineffective!
-    int ord = 0;
-    while( ord < 256 )
+    int ord;
+    for( ord = 0; ord < 256; ord++ )
     {
         pvm_object_t mn = pvm_get_method_name( tclass, ord );
         if( pvm_is_null(mn) )

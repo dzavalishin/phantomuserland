@@ -71,7 +71,7 @@ ui_event_t * ev_get_unused()
 void ev_return_unused(ui_event_t *e)
 {
     assert(ev_engine_active);
-    memset( e, sizeof(struct ui_event), 0 );
+    memset( e, 0, sizeof(struct ui_event) );
     hal_mutex_lock( &ev_unused_q_mutex );
     queue_enter(&ev_unused_events, e, struct ui_event *, echain);
     hal_mutex_unlock( &ev_unused_q_mutex );

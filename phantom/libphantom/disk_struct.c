@@ -67,7 +67,7 @@ phantom_disk_format( phantom_disk_superblock *sb, unsigned int n_pages, const ch
     sb->free_list = 0;  // No free list yet.
     sb->fs_is_clean = 0xFF;
 
-    strncpy( sb->sys_name, sysname, sizeof(sb->sys_name) );
+    strlcpy( sb->sys_name, sysname, sizeof(sb->sys_name) );
 
     phantom_calc_sb_checksum( sb );
 }

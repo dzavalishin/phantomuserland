@@ -30,7 +30,7 @@ void dbg_puts(const char *s);
 char dbg_putch(char c);
 
 
-static char arch_dbg_con_read(void) { return getchar(); }
+static char arch_dbg_con_read(void) { return (char)getchar(); }
 
 
 struct debugger_command
@@ -200,7 +200,7 @@ static int debug_parse_line(char *buf, char **argv, int *argc, int max_args)
 {
     int pos = 0;
 
-    strcpy(parse_line, buf);
+    strlcpy(parse_line, buf, LINE_BUF_SIZE);
 
     //hexdump(buf, strlen(buf), "", 0 );
 
@@ -365,7 +365,7 @@ char dbg_putch(char c)
         release_spinlock(&dbg_spinlock);
         int_restore_interrupts();
     } else { */
-        ret = putchar(c);
+        ret = (char)putchar(c);
 //    }
 
     return ret;

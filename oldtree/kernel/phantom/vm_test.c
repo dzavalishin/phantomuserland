@@ -64,8 +64,8 @@ void vm_test()
         if( addr >= obj_space+vm_bytes )
             break;
     }
-    printf("\n\nintegrity check done, %d errors\n\n", readErrCount);
-    getchar();
+    printf("\n\nintegrity check done, %d errors\n, press key\n", readErrCount);
+    (void) getchar();
 #endif
 
 #if 1

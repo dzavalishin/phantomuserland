@@ -93,7 +93,7 @@ static int __delete_FILE_struct(int fd)
     /* free the FILE space/semaphore*/
     close(fNode->fd);
     free(fNode->buf);
-    free(fNode);
+    //free(fNode);
 
 #if STDIO_SEM
     /* Do we need to release before we delete? */

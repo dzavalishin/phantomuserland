@@ -277,6 +277,7 @@ static void ps2ms_int_handler( void *arg )
         e.m.buttons = ps2ms_state_buttons;
         e.abs_x = ps2ms_state_xpos;
         e.abs_y = ps2ms_state_ypos;
+        e.extra = 0;
 
         put_buf(&e);
         hal_sem_release( &mouse_sem );
@@ -369,7 +370,8 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
     if( seq_number || ps2ms_do_init())
         return 0;
 
-    hal_irq_alloc( irq, ps2ms_int_handler, 0, HAL_IRQ_SHAREABLE );
+    if( hal_irq_alloc( irq, ps2ms_int_handler, 0, HAL_IRQ_SHAREABLE ) )
+        return 0;
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = "ps2-mouse";

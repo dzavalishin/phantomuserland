@@ -445,7 +445,7 @@ void dump_partition(phantom_disk_partition_t *p)
 
     printf("Disk Partition %s (%s)\n", pname, p->label );
 
-    printf(" - type %d%s\n", p->type, p->type == PHANTOM_PARTITION_TYPE_ID ? " (phantom)" : "" );
+    printf(" - type %d%s\n", p->type, (p->type == PHANTOM_PARTITION_TYPE_ID) ? " (phantom)" : "" );
     printf(" - flags %b\n", p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
     printf(" - blksz %d, start %ld, size %ld\n", p->block_size, p->shift, p->size );
     printf(" - %s base, %s specific\n", p->base ? "has" : "no", p->specific ? "has" : "no" );
@@ -473,7 +473,7 @@ void print_partition(phantom_disk_partition_t *p)
     if( sz > 1024*10 ) { un = "Mb"; sz /= 1024; }
     if( sz > 1024*10 ) { un = "Gb"; sz /= 1024; }
 
-    printf("Disk Partition %s (%s), %ld %d, flags %b\n", pname, p->label, sz, un, p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
+    printf("Disk Partition %s (%s), %ld %s, flags %b\n", pname, p->label, sz, un, p->flags, "\020\1PhantomPartType\2PhantomFS\5Bootable\6Divided\7IsDisk" );
 }
 
 

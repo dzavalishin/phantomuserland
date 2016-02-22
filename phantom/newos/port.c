@@ -276,8 +276,8 @@ port_create(int32 queue_length, const char *name)
     }
     // not enough ports...
     RELEASE_PORT_LIST_LOCK();
-    kfree(q);
-    kfree(temp_name);
+    //kfree(q);
+    //kfree(temp_name);
     retval = -ENOMEM;
     dprintf("port_create(): ERR_PORT_OUT_OF_SLOTS\n");
 

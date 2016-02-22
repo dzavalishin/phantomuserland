@@ -56,7 +56,7 @@ static int seq_number = 0;
 errno_t driver_memdisk_init( physaddr_t disk_data, size_t disk_data_size, int flags )
 {
 
-    SHOW_FLOW( 1, "Start " DEV_NAME " @ %p size %d", disk_data, disk_data_size );
+    SHOW_FLOW( 1, "Start " DEV_NAME " @ %p size %d", (void *)disk_data, disk_data_size );
 
     phantom_device_t * dev = calloc(sizeof(phantom_device_t),1);
 
