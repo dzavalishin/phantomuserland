@@ -21,6 +21,10 @@ package .ru.dz.phantom.system;
 
 attribute const * ->!;
 
+import .internal.directory;
+import .internal.double;
+import .internal.float;
+import .internal.long;
 
 class regression_tests
 {
@@ -43,6 +47,11 @@ class regression_tests
         math_test();
         array_test();
         hashmap_directory_test();
+/*
+        long_test();
+        float_test();
+        double_test();
+*/
     }
 
     // ---------------------------------------------------------------------
@@ -194,8 +203,8 @@ class regression_tests
     {
         print("Checking .internal.directory class operators... ");
 
-        var dir : new .internal.directory;
-        var val;
+        var dir : .internal.directory;
+        var val : .internal.object;
 
         dir = new .internal.directory();
 
@@ -203,18 +212,85 @@ class regression_tests
         dir.put( "Privet", "mir" );
         dir.put( "Hola", "mundo" );
 
-        var = dir.get( "Privet" );
-        if( !var.equals("mir") ) throw "dir error 1";
+        val = dir.get( "Privet" );
+        if( !val.equals("mir") ) throw "dir error 1";
 
-        var = dir.get( "Hola" );
-        if( !var.equals("mundo") ) throw "dir error 2";
+        val = dir.get( "Hola" );
+        if( !val.equals("mundo") ) throw "dir error 2";
 
-        var = dir.get( "Hello" );
-        if( !var.equals("world") ) throw "dir error 3";
+        val = dir.get( "Hello" );
+        if( !val.equals("world") ) throw "dir error 3";
 
 
         print("passed\n");
     }
+
+/*
+    void long_test()
+    {
+        var a : .internal.long;
+        var b : .internal.long;
+        var c : .internal.long;
+
+        a = 12;
+        b = 2;
+        c = -3;
+
+        if( (a/b) != 6 ) 	throw "long error 1";
+        if( (b-c) != -1 ) 	throw "long error 2";
+        if( (b*c) != -6 ) 	throw "long error 3";
+        if( (a+c) != 9 ) 	throw "long error 4";
+
+        if( b<c ) 		throw "long error 5";
+        if( b>a ) 		throw "long error 6";
+        if( b<=c ) 		throw "long error 7";
+        if( b>=a ) 		throw "long error 8";
+    }
+
+
+    void float_test()
+    {
+        var a : .internal.float;
+        var b : .internal.float;
+        var c : .internal.float;
+
+        a = 12;
+        b = 2;
+        c = -3;
+
+        if( (a/b) != 6 ) 	throw "float error 1";
+        if( (b-c) != -1 ) 	throw "float error 2";
+        if( (b*c) != -6 ) 	throw "float error 3";
+        if( (a+c) != 9 ) 	throw "float error 4";
+
+        if( b<c ) 		throw "float error 5";
+        if( b>a ) 		throw "float error 6";
+        if( b<=c ) 		throw "float error 7";
+        if( b>=a ) 		throw "float error 8";
+    }
+
+
+    void double_test()
+    {
+        var a : .internal.double;
+        var b : .internal.double;
+        var c : .internal.double;
+
+        a = 12;
+        b = 2;
+        c = -3;
+
+        if( (a/b) != 6 ) 	throw "double error 1";
+        if( (b-c) != -1 ) 	throw "double error 2";
+        if( (b*c) != -6 ) 	throw "double error 3";
+        if( (a+c) != 9 ) 	throw "double error 4";
+
+        if( b<c ) 		throw "double error 5";
+        if( b>a ) 		throw "double error 6";
+        if( b<=c ) 		throw "double error 7";
+        if( b>=a ) 		throw "double error 8";
+    }
+*/
 
 };
 
