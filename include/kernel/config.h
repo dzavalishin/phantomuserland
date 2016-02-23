@@ -122,6 +122,13 @@
 #define SIMPLE_IDE_YIELD 1
 
 
+// ------------------------------------------------------------------
+// E4C exceptions defs
+// ------------------------------------------------------------------
+
+#define CONF_USE_E4C 1
+
+#define E4C_THREADSAFE
 
 
 #ifndef ASSEMBLER
