@@ -290,7 +290,7 @@ const char * trc_get_er_bit_name( unsigned char er )
    for ( ndx = 0; ndx < 8; ndx ++ )
    {
       if ( er & ataErrorNames[ndx].bitPos )
-         strcat( ataErrorNameBuf, ataErrorNames[ndx].bitName );
+         strlcat( ataErrorNameBuf, ataErrorNames[ndx].bitName, sizeof(ataErrorNameBuf) );
    }
    return ataErrorNameBuf;
 }
@@ -1131,7 +1131,7 @@ const char * trc_llt_dump2( void )
    {
                         //0        1         2         3         4
                         //12345678901234567890123456789012345678901
-      strcpy( trcDmpBuf, "<rep> <opr> <--register---> <data - note>" );
+      strlcpy( trcDmpBuf, "<rep> <opr> <--register---> <data - note>", sizeof(trcDmpBuf) );
       return trcDmpBuf;
    }
 
@@ -1152,7 +1152,7 @@ const char * trc_llt_dump2( void )
       strcpy( prtBuf, ">=255 " );
    else
       snprintf( prtBuf, sizeof(prtBuf)-1, "%5u ", lltBuf[lltDmpNdx].rep );
-   strcpy( trcDmpBuf, prtBuf );
+   strlcpy( trcDmpBuf, prtBuf, sizeof(trcDmpBuf) );
 
    // lookup trace entry type, put into buffer
    ndx = 0;
@@ -1162,18 +1162,18 @@ const char * trc_llt_dump2( void )
          break;
       ndx ++ ;
    }
-   strcat( trcDmpBuf, type_nm[ ndx ].typeNm );
+   strlcat( trcDmpBuf, type_nm[ ndx ].typeNm, sizeof(trcDmpBuf) );
 
    // register write/read or something else
    if ( lltBuf[lltDmpNdx].type < TRC_LLT_S_CFG )
    {
       // reg name and value
-      strcat( trcDmpBuf, reg_nm[ lltBuf[lltDmpNdx].addr ] );
+      strlcat( trcDmpBuf, reg_nm[ lltBuf[lltDmpNdx].addr ], sizeof(trcDmpBuf) );
       if ( lltBuf[lltDmpNdx].addr == CB_DATA )
          strcpy( prtBuf, "-- " );
       else
          snprintf( prtBuf, sizeof(prtBuf)-1, "%02X ", lltBuf[lltDmpNdx].data );
-      strcat( trcDmpBuf, prtBuf );
+      strlcat( trcDmpBuf, prtBuf, sizeof(trcDmpBuf) );
       // write to Dev Ctrl
       if (    ( lltBuf[lltDmpNdx].addr == CB_DC )
            && ( lltBuf[lltDmpNdx].type == TRC_LLT_OUTB )
@@ -1181,34 +1181,34 @@ const char * trc_llt_dump2( void )
       {
          if ( lltBuf[lltDmpNdx].data & CB_DC_SRST )
          {
-            strcat( trcDmpBuf, "START: " );
-            strcat( trcDmpBuf, trc_get_cmd_name( CMD_SRST ) );
-            strcat( trcDmpBuf, ", " );
+            strlcat( trcDmpBuf, "START: ", sizeof(trcDmpBuf) );
+            strlcat( trcDmpBuf, trc_get_cmd_name( CMD_SRST ), sizeof(trcDmpBuf) );
+            strlcat( trcDmpBuf, ", ", sizeof(trcDmpBuf) );
          }
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & CB_DC_HOB )
-                       ? "HOB=1" : "HOB=0" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & CB_DC_SRST )
-                       ? " SRST=1" : " SRST=0" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & CB_DC_NIEN )
-                       ? " nIEN=1" : " nIEN=0" );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & CB_DC_HOB )
+                       ? "HOB=1" : "HOB=0", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & CB_DC_SRST )
+                       ? " SRST=1" : " SRST=0", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & CB_DC_NIEN )
+                       ? " nIEN=1" : " nIEN=0", sizeof(trcDmpBuf) );
       }
       // write to Command reg
       if (    ( lltBuf[lltDmpNdx].addr == CB_CMD )
            && ( lltBuf[lltDmpNdx].type == TRC_LLT_OUTB )
          )
       {
-         strcat( trcDmpBuf, "START: " );
-         strcat( trcDmpBuf, trc_get_cmd_name( lltBuf[lltDmpNdx].data ) );
+         strlcat( trcDmpBuf, "START: ", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, trc_get_cmd_name( lltBuf[lltDmpNdx].data ), sizeof(trcDmpBuf) );
       }
       // write to Device/Head
       if (    ( lltBuf[lltDmpNdx].addr == CB_DH )
            && ( lltBuf[lltDmpNdx].type == TRC_LLT_OUTB )
          )
       {
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x10 )
-                       ? "DEV=1" : "DEV=0" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x40 )
-                       ? " LBA=1" : " LBA=0" );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x10 )
+                       ? "DEV=1" : "DEV=0", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x40 )
+                       ? " LBA=1" : " LBA=0", sizeof(trcDmpBuf) );
       }
       // read of Status or Alt Status
       if (    (    ( lltBuf[lltDmpNdx].addr == CB_STAT )
@@ -1216,44 +1216,44 @@ const char * trc_llt_dump2( void )
               )
            && ( lltBuf[lltDmpNdx].type == TRC_LLT_INB )
          )
-         strcat( trcDmpBuf, trc_get_st_bit_name( lltBuf[lltDmpNdx].data ) );
+         strlcat( trcDmpBuf, trc_get_st_bit_name( lltBuf[lltDmpNdx].data ), sizeof(trcDmpBuf) );
       // read of Error
       if (    ( lltBuf[lltDmpNdx].addr == CB_ERR )
            && ( lltBuf[lltDmpNdx].type == TRC_LLT_INB )
          )
-         strcat( trcDmpBuf, trc_get_er_bit_name( lltBuf[lltDmpNdx].data ) );
+         strlcat( trcDmpBuf, trc_get_er_bit_name( lltBuf[lltDmpNdx].data ), sizeof(trcDmpBuf) );
    }
    else
    // start/end/debug/etc entry or something else
    if ( lltBuf[lltDmpNdx].type >= TRC_LLT_DEBUG )
    {
       snprintf( prtBuf, sizeof(prtBuf)-1, "%02X ", lltBuf[lltDmpNdx].data );
-      strcat( trcDmpBuf, prtBuf );
+      strlcat( trcDmpBuf, prtBuf, sizeof(trcDmpBuf) );
       // write/read of BMIDE Command reg
       if (    ( lltBuf[lltDmpNdx].type == TRC_LLT_R_BM_CR )
            || ( lltBuf[lltDmpNdx].type == TRC_LLT_W_BM_CR )
          )
       {
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x08 )
-                       ? " Dir=1(MemWr)" : " Dir=0(MemRd)" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x01 )
-                       ? " Go=1(Start)" : " Go=0(Stop)" );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x08 )
+                       ? " Dir=1(MemWr)" : " Dir=0(MemRd)", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x01 )
+                       ? " Go=1(Start)" : " Go=0(Stop)", sizeof(trcDmpBuf) );
       }
       // write/read of BMIDE Status reg
       if (    ( lltBuf[lltDmpNdx].type == TRC_LLT_R_BM_SR )
            || ( lltBuf[lltDmpNdx].type == TRC_LLT_W_BM_SR )
          )
       {
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x40 )
-                       ? " D1=1" : " D1=0" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x20 )
-                       ? " D0=1" : " D0=0" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x04 )
-                       ? " Int=1" : " Int=0" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x02 )
-                       ? " Err=1" : " Err=0" );
-         strcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x01 )
-                       ? " Act=1" : " Act=0" );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x40 )
+                       ? " D1=1" : " D1=0", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x20 )
+                       ? " D0=1" : " D0=0", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x04 )
+                       ? " Int=1" : " Int=0", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x02 )
+                       ? " Err=1" : " Err=0", sizeof(trcDmpBuf) );
+         strlcat( trcDmpBuf, ( lltBuf[lltDmpNdx].data & 0x01 )
+                       ? " Act=1" : " Act=0", sizeof(trcDmpBuf) );
       }
    }
    else
@@ -1261,8 +1261,8 @@ const char * trc_llt_dump2( void )
    if ( lltBuf[lltDmpNdx].type == TRC_LLT_ERROR )
    {
       snprintf( prtBuf, sizeof(prtBuf)-1, "%02X ", lltBuf[lltDmpNdx].data );
-      strcat( trcDmpBuf, prtBuf );
-      strcat( trcDmpBuf, trc_get_err_name( lltBuf[lltDmpNdx].data ) );
+      strlcat( trcDmpBuf, prtBuf, sizeof(trcDmpBuf) );
+      strlcat( trcDmpBuf, trc_get_err_name( lltBuf[lltDmpNdx].data ), sizeof(trcDmpBuf) );
    }
 
    // increment to next trace entry

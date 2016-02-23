@@ -33,6 +33,8 @@
 #ifndef _MACHINE__LIMITS_H_
 #define	_MACHINE__LIMITS_H_
 
+#error used hardcoded limits, something is wrong
+#if 0
 /*
  * According to ANSI (section 2.2.4.2), the values below must be usable by
  * #if preprocessing directives.  Additionally, the expression must have the
@@ -99,5 +101,7 @@
  * for i386 is 408 bytes large.
  */
 #define	__MINSIGSTKSZ	(512 * 4)
+
+#endif // 0
 
 #endif /* !_MACHINE__LIMITS_H_ */

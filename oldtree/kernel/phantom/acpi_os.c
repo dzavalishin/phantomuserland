@@ -334,7 +334,7 @@ AcpiOsGetLine (
             return (AE_BUFFER_OVERFLOW);
         }
 
-        Temp = getchar();
+        Temp = (char)getchar();
         if (!Temp || Temp == '\n')
         {
             break;
@@ -374,7 +374,7 @@ void *AcpiOsMapMemory(
     ACPI_PHYSICAL_ADDRESS   where,
     ACPI_SIZE               length)
 {
-    SHOW_FLOW( 9, "%p, %d bytes" , where, length );
+    SHOW_FLOW( 9, "%p, %d bytes" , (void *)where, length );
 
     int offset = where - PREV_PAGE_ALIGN(where);
 

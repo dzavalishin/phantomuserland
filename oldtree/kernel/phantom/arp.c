@@ -215,7 +215,7 @@ int arp_input(cbuf *buf, ifnet *i)
             // the chain gets deleted in the output, so we can return here
             return 0;
         }
-        break;
+        //break;
     }
 #if NET_CHATTY
     default:

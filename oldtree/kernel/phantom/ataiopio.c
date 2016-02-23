@@ -482,17 +482,21 @@ void pio_drq_block_out( unsigned int addrDataReg,
     else
 #endif
     {
+#if HAVE_WIDE_XFERS
+        int pxw = 32; // TODO check me, am I right?
+#else
         int pxw = 16;
+#endif
         long wc;
 
         // adjust pio_xfer_width - don't use DWORD if wordCnt is odd.
 
 #if HAVE_WIDE_XFERS
         pxw = pio_xfer_width;
-        if ( ( pxw == 32 ) && ( wordCnt & 0x00000001L ) )
+        if ( ( pxw > 16 ) && ( wordCnt & 0x00000001L ) )
             pxw = 16;
 #else
-        if(pxw > 16) pxw = 16;
+        //if(pxw > 16) pxw = 16;
 #endif
         // Data transfer using OUTS instruction.
         // Break the transfer into chunks of 32768 or fewer bytes.

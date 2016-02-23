@@ -33,8 +33,9 @@
 #define	_SYS_LIMITS_H_
 
 #include <sys/cdefs.h>
-#include <machine/_limits.h>
-
+//#include <machine/_limits.h>
+#include <arch/arch-limits.h>
+#if 0
 #define	CHAR_BIT	__CHAR_BIT	/* number of bits in a char */
 
 #define	SCHAR_MAX	__SCHAR_MAX	/* max value for a signed char */
@@ -95,6 +96,8 @@
 
 #if __POSIX_VISIBLE
 #define	MQ_PRIO_MAX	64
+#endif
+
 #endif
 
 #endif /* !_SYS_LIMITS_H_ */

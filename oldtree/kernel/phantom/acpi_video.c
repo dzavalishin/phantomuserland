@@ -109,7 +109,7 @@ static ACPI_STATUS walk_video_device(ACPI_HANDLE handle, UINT32 level,
         return AE_OK; // skip the rest
     }
 
-    ACPI_DEBUG("%s: current video state is 0x%lx\n", namebuf, retval);
+    ACPI_DEBUG("%s: current video state is 0x%lx\n", namebuf, (long)retval);
 
     /* if connector exists and is ready to switch, enable it! */
     if ((strstr(namebuf, "CRT0") || strstr(namebuf, "LCD0"))
@@ -135,7 +135,7 @@ void acpi_video_init(void)
     ACPI_STATUS as;
 
     /* find all devices with a _DOS method and call it */
-    ACPI_DEBUG("Walking for video devices\n",0);
+    ACPI_DEBUG("Walking for video devices %d\n",0); // dz added %d to make coverity.com happy
     //as = AcpiGetDevices(NULL, walk_video_device, NULL, NULL);
     //as = AcpiWalkNamespace(ACPI_TYPE_DEVICE, ACPI_ROOT_OBJECT, ACPI_UINT32_MAX, walk_video_device, NULL, NULL);
     as = AcpiWalkNamespace(ACPI_TYPE_DEVICE, ACPI_ROOT_OBJECT, ACPI_UINT32_MAX, walk_video_device, NULL, NULL, NULL);

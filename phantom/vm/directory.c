@@ -50,7 +50,7 @@
 #define LOCK_DIR(__dir) hal_wired_spin_lock(&(__dir)->lock);
 #define UNLOCK_DIR(__dir) hal_wired_spin_unlock(&(__dir)->lock);
 
-#warning SYS_FREE_O() for removed values
+//#warning SYS_FREE_O() for removed values - array access funcs do it
 #warning ref_inc for returned copies in get
 
 
@@ -84,7 +84,7 @@ static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey )
 
 
 // TODO add parameter for find and remove mode
-errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out )
+errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out, int delete_found )
 {
     if( dir->nEntries == 0 ) return ENOENT;
 
@@ -112,6 +112,12 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
         if( 0 == hdir_cmp_keys( ikey, i_key_len, okey ) )
         {
             *out = pvm_get_array_ofield( dir->values.data, keypos );
+            if( delete_found )
+            {
+                pvm_set_array_ofield( dir->values.data, keypos, pvm_create_null_object() );
+                pvm_set_array_ofield( dir->keys.data, keypos, pvm_create_null_object() );
+                dir->nEntries--;
+            }
             UNLOCK_DIR(dir);
             return 0;
         }
@@ -120,6 +126,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     // Indirect, find by linear search in 2nd level array
     // okey is arrray
 
+    pvm_object_t keyarray = pvm_get_array_ofield( dir->keys.data, keypos );
     pvm_object_t valarray = pvm_get_array_ofield( dir->values.data, keypos );
     if( pvm_is_null( valarray ) )
     {
@@ -128,16 +135,22 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
         return ENOENT;
     }
 
-    size_t indir_size = get_array_size( dir->keys.data );
+    size_t indir_size = get_array_size( keyarray.data );
 
     int i;
     for( i = 0; i < indir_size; i++ )
     {
-        pvm_object_t indir_key = pvm_get_array_ofield( dir->keys.data, i );
+        pvm_object_t indir_key = pvm_get_array_ofield( keyarray.data, i );
 
         if( 0 == hdir_cmp_keys( ikey, i_key_len, indir_key ) )
         {
             *out = pvm_get_array_ofield( valarray.data, i );
+            if( delete_found )
+            {
+                pvm_set_array_ofield( valarray.data, i, pvm_create_null_object() );
+                pvm_set_array_ofield( keyarray.data, i, pvm_create_null_object() );
+                dir->nEntries--;
+            }
             UNLOCK_DIR(dir);
             return 0;
         }

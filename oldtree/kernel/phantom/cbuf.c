@@ -944,8 +944,9 @@ int cbuf_extend_tail(cbuf *head, size_t extend_bytes)
     validate_cbuf(head);
 
     // walk to the end of this buffer
-    for(temp = head; temp->next != NULL; temp = temp->next)
+    for(temp = head; (temp != NULL) && (temp->next != NULL); temp = temp->next)
         ;
+
     if(!temp)
         return ERR_INVALID_ARGS;
 

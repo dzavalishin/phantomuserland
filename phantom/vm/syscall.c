@@ -329,17 +329,141 @@ static int si_long_6_toXML(struct pvm_object me, struct data_area_4_thread *tc )
 
 syscall_func_t	syscall_table_4_long[16] =
 {
-    &si_void_0_construct,           	&si_void_1_destruct,
-    &si_void_2_class,               	&si_long_3_clone,
-    &si_long_4_equals,     		&si_long_5_tostring,
-    &si_long_6_toXML,      		&si_void_7_fromXML,
+    &si_void_0_construct,       &si_void_1_destruct,
+    &si_void_2_class,           &si_long_3_clone,
+    &si_long_4_equals,     	    &si_long_5_tostring,
+    &si_long_6_toXML,      	    &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            	&si_void_9_def_op_2,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&si_void_15_hashcode
+    &si_void_8_def_op_1,        &si_void_9_def_op_2,
+    &invalid_syscall,           &invalid_syscall,
+    &invalid_syscall,           &invalid_syscall,
+    &invalid_syscall,           &si_void_15_hashcode
 };
 DECLARE_SIZE(long);
+
+
+
+
+// --------- float ------------------------------------------------------------
+
+static int si_float_3_clone(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_float_object( pvm_get_float(me) ));
+}
+
+static int si_float_4_equals(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    struct pvm_object him = POP_ARG;
+
+    int same_class = me.data->_class.data == him.data->_class.data;
+    int same_value = pvm_get_float(me) == pvm_get_float(him);
+
+    SYS_FREE_O(him);
+
+    SYSCALL_RETURN(pvm_create_int_object( same_class && same_value));
+}
+
+static int si_float_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    char buf[100];
+    snprintf( buf, sizeof(buf), "%f", pvm_get_float(me) ); // TODO right size?
+    SYSCALL_RETURN(pvm_create_string_object( buf ));
+}
+
+static int si_float_6_toXML(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    char buf[100];
+    snprintf( buf, sizeof(buf), "<float>%f</float>", pvm_get_float(me) );
+	SYSCALL_RETURN(pvm_create_string_object( buf ));
+    //SYSCALL_THROW_STRING( "int toXML called" );
+}
+
+
+syscall_func_t	syscall_table_4_float[16] =
+{
+    &si_void_0_construct,       &si_void_1_destruct,
+    &si_void_2_class,           &si_float_3_clone,
+    &si_float_4_equals,         &si_float_5_tostring,
+    &si_float_6_toXML,          &si_void_7_fromXML,
+    // 8
+    &si_void_8_def_op_1,        &si_void_9_def_op_2,
+    &invalid_syscall,           &invalid_syscall,
+    &invalid_syscall,           &invalid_syscall,
+    &invalid_syscall,           &si_void_15_hashcode
+};
+DECLARE_SIZE(float);
+
+
+
+
+
+// --------- double ------------------------------------------------------------
+
+static int si_double_3_clone(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_double_object( pvm_get_double(me) ));
+}
+
+static int si_double_4_equals(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 1);
+
+    struct pvm_object him = POP_ARG;
+
+    int same_class = me.data->_class.data == him.data->_class.data;
+    int same_value = pvm_get_double(me) == pvm_get_double(him);
+
+    SYS_FREE_O(him);
+
+    SYSCALL_RETURN(pvm_create_int_object( same_class && same_value));
+}
+
+static int si_double_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    char buf[100];
+    snprintf( buf, sizeof(buf), "%f", pvm_get_double(me) ); // TODO right size?
+    SYSCALL_RETURN(pvm_create_string_object( buf ));
+}
+
+static int si_double_6_toXML(struct pvm_object me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    char buf[100];
+    snprintf( buf, sizeof(buf), "<double>%f</double>", pvm_get_double(me) );
+	SYSCALL_RETURN(pvm_create_string_object( buf ));
+    //SYSCALL_THROW_STRING( "int toXML called" );
+}
+
+
+syscall_func_t	syscall_table_4_double[16] =
+{
+    &si_void_0_construct,       &si_void_1_destruct,
+    &si_void_2_class,           &si_double_3_clone,
+    &si_double_4_equals,         &si_double_5_tostring,
+    &si_double_6_toXML,          &si_void_7_fromXML,
+    // 8
+    &si_void_8_def_op_1,        &si_void_9_def_op_2,
+    &invalid_syscall,           &invalid_syscall,
+    &invalid_syscall,           &invalid_syscall,
+    &invalid_syscall,           &si_void_15_hashcode
+};
+DECLARE_SIZE(double);
+
+
+
 
 
 
@@ -1741,9 +1865,6 @@ DECLARE_SIZE(weakref);
 
 // --------- directory -------------------------------------------------------
 
-// directory.c
-errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t add );
-errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out );
 
 
 static int si_directory_4_equals(struct pvm_object o, struct data_area_4_thread *tc )
@@ -1788,7 +1909,7 @@ static int si_directory_9_get(struct pvm_object o, struct data_area_4_thread *tc
     ASSERT_STRING(key);
 
     pvm_object_t out;
-    errno_t rc = hdir_find( da, pvm_get_str_data(key), pvm_get_str_len(key), &out );
+    errno_t rc = hdir_find( da, pvm_get_str_data(key), pvm_get_str_len(key), &out, 0 );
     if( rc )
         SYSCALL_RETURN_NOTHING;
     else
@@ -1798,11 +1919,15 @@ static int si_directory_9_get(struct pvm_object o, struct data_area_4_thread *tc
 
 static int si_directory_10_remove(struct pvm_object o, struct data_area_4_thread *tc )
 {
-    (void)o;
-    //struct data_area_4_directory *da = pvm_object_da( o, directory );
+    struct data_area_4_directory *da = pvm_object_da( o, directory );
     DEBUG_INFO;
-    SYSCALL_THROW_STRING( "dir.remove: not implemented" );
-    //SYSCALL_RETURN(pvm_create_string_object( "(directory)" ));
+
+    struct pvm_object key = POP_ARG;
+    ASSERT_STRING(key);
+
+    pvm_object_t out; // unused
+    errno_t rc = hdir_find( da, pvm_get_str_data(key), pvm_get_str_len(key), &out, 1 );
+    SYSCALL_RETURN(pvm_create_int_object( rc ));
 }
 
 static int si_directory_11_size(struct pvm_object o, struct data_area_4_thread *tc )

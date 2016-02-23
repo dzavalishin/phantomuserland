@@ -25,16 +25,26 @@
 
 // TODO redo with void phantom_spinwait(int millis)
 
+#define DEBUG_MSG_PREFIX "ata.tmr"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 
 #include <time.h>
 #include <threads.h>
 #include <kernel/config.h>
 
+
 #include "ataio.h"
+
+#define USE_PHANTOM_TIMERS 1
 
 //**************************************************************
 
 
+#if !USE_PHANTOM_TIMERS
 
 static long tmr_1s_count;            // number of I/O port reads required
                               //    for a 1s delay
@@ -45,6 +55,7 @@ static long tmr_1us_count;           // number of I/O port reads required
 static long tmr_500ns_count;         // number of I/O port reads required
                               //    for a 500ns delay
 
+#endif // !USE_PHANTOM_TIMERS
 
 
 static long tmr_time_out = 2L;      // max command execution time in seconds
@@ -107,6 +118,34 @@ int tmr_chk_timeout( void )
 //**************************************************************
 
 // our 'waste time' function (do some 32-bit multiply/divide)
+#if USE_PHANTOM_TIMERS
+void tmr_get_delay_counts( void ) {}
+
+void tmr_delay_1ms( long count )
+{
+    if( count < 0 ) return;
+
+    phantom_spinwait( (int) count );
+
+    if( count > INT_MAX )
+        SHOW_ERROR( 0, "long time %ld", count );
+}
+
+
+void tmr_delay_1us( long count )
+{
+    do tenmicrosec(); while( count -=10, count > 10 );
+}
+
+//! 500ns
+void tmr_delay_ata( void )
+{
+    //int c;    for( c = 50; c > 0; c-- )
+    tenmicrosec(); // way too long
+}
+
+
+#else
 
 static long tmr_waste_time( long p );
 
@@ -150,7 +189,7 @@ void tmr_get_delay_counts( void )
       while ( 1 )
       {
          for ( loop = 0; loop < 100; loop ++ )
-            tmr_waste_time( 7 );
+            (void)tmr_waste_time( 7 );
          count += 100 ;
          // check timer
          curTime = fast_time();//tmr_read_bios_timer();
@@ -198,7 +237,7 @@ void tmr_delay_1ms( long count )
 
    while ( loopcnt > 0 )
    {
-      tmr_waste_time( 7 );
+      (void)tmr_waste_time( 7 );
       loopcnt -- ;
    }
 }
@@ -216,7 +255,7 @@ void tmr_delay_1us( long count )
 
    while ( loopcnt > 0 )
    {
-      tmr_waste_time( 7 );
+      (void)tmr_waste_time( 7 );
       loopcnt -- ;
    }
 }
@@ -234,10 +273,12 @@ void tmr_delay_ata( void )
 
    while ( loopcnt > 0 )
    {
-      tmr_waste_time( 7 );
+      (void)tmr_waste_time( 7 );
       loopcnt -- ;
    }
 }
+
+#endif // USE_PHANTOM_TIMERS
 
 //**************************************************************
 //

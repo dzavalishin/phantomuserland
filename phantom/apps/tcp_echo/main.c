@@ -45,6 +45,11 @@ int main(int ac, char **av, char **env)
         sa.sin_port = htons(ECHO_PORT); // TODO check if we have to convert it here
         sa.sin_addr.s_addr = INADDR_ANY;
         rc = bind( lsock, (const struct sockaddr *)&sa, sizeof(sa) );
+        if( rc )
+        {
+            printf("bind = %d %d\n", rc, errno );
+            goto closel;
+        }
 
         int lrc = listen( lsock, 1 );
         if( lrc )
