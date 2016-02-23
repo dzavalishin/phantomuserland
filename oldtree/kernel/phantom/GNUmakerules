@@ -130,7 +130,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	svn_version.o profile.o trace.o $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 
 	@echo "Linking $@ ---------------------------------------------"
-	@$(CC) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
+	$(CC) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > $(TFTP_PATH)/$@

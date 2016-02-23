@@ -118,7 +118,7 @@ struct data_area_4_code
 
 struct data_area_4_int
 {
-    int				value;
+    int             value;
 };
 
 // TODO: make sure it is not an lvalue for security reasons!
@@ -126,11 +126,28 @@ struct data_area_4_int
 
 struct data_area_4_long
 {
-    int64_t			value;
+    int64_t         value;
 };
 
 // TODO: make sure it is not an lvalue for security reasons!
 #define pvm_get_long( o )  ( (int64_t) (((struct data_area_4_long *)&(o.data->da))->value))
+
+
+struct data_area_4_float
+{
+    float           value;
+};
+
+// TODO: make sure it is not an lvalue for security reasons!
+#define pvm_get_float( o )  ( (float) (((struct data_area_4_float *)&(o.data->da))->value))
+
+struct data_area_4_double
+{
+    double          value;
+};
+
+// TODO: make sure it is not an lvalue for security reasons!
+#define pvm_get_double( o )  ( (double) (((struct data_area_4_double *)&(o.data->da))->value))
 
 
 

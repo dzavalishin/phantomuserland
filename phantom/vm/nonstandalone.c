@@ -81,6 +81,11 @@ void winhal_debug_srv_thread(int *arg)
 
     int ls = socket( PF_INET, SOCK_STREAM, 0);
     //int ls = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if( ls < 0 )
+    {
+        printf("! Debug server socket error\n");
+        return;
+    }
 
     winhal_setport( ls, 1256 );
 
@@ -101,6 +106,7 @@ void winhal_debug_srv_thread(int *arg)
         if (cfd == -1)
         {
             perror("! Debug server accept error\n");
+			close(ls);
             return;
         }
         printf("Debug server accepted from %s\n", inet_ntoa(client_addr.sin_addr) );

@@ -102,6 +102,7 @@ int debug_print_instr = 0;
 #define TO_INT( __v ) (*((u_int32_t *)&(__v)))
 
 #define AS_DOUBLE( __a1, __a2, __op ) (TO_DOUBLE(__a1) __op TO_DOUBLE(__a2))
+#define AS_FLOAT( __a1, __a2, __op )  (TO_FLOAT(__a1)  __op TO_FLOAT(__a2))
 
 
 
@@ -112,6 +113,15 @@ do { \
         int64_t a2 = ls_pop(); \
         double r = AS_DOUBLE( a1, a2, ___op ); \
         ls_push( TO_LONG(r) ); \
+} while(0)
+
+
+#define FLOAT_STACK_OP( ___op ) \
+do { \
+	int32_t a1 = is_pop(); \
+        int32_t a2 = is_pop(); \
+        float r = AS_FLOAT( a1, a2, ___op ); \
+        is_push( TO_INT(r) ); \
 } while(0)
 
 
@@ -680,12 +690,160 @@ void pvm_exec(pvm_object_t current_thread)
         if( prefix_float )
             switch(instruction)
             {
+            default: // Not defined for double, throw exception
+                pvm_exec_panic("invalid double op");
+                break;
+
+            case opcode_isum:
+                LISTI("f-isum");
+                FLOAT_STACK_OP( + );
+                break;
+
+            case opcode_imul:
+                LISTI("f-imul");
+                FLOAT_STACK_OP( * );
+                break;
+
+            case opcode_isubul:
+                LISTI("f-isubul");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    float r = AS_FLOAT( u, l, - );
+                    is_push( TO_INT(r) );
+                }
+                break;
+
+            case opcode_isublu:
+                LISTI("f-isublu");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    float r = AS_FLOAT( l, u, - );
+                    is_push( TO_INT(r) );
+                }
+                break;
+
+            case opcode_idivul:
+                LISTI("f-idivul");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    float r = AS_FLOAT( u, l, / );
+                    is_push( TO_INT(r) );
+                }
+                break;
+
+            case opcode_idivlu:
+                LISTI("f-idivlu");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    float r = AS_FLOAT( l, u, / );
+                    is_push( TO_INT(r) );
+                }
+                break;
+
+
+
+
+
+                // NB! Returns int!
+            case opcode_ige:
+                LISTI("f-ige");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    int r = AS_FLOAT( l, u, >= );
+                    is_push( r );
+                }
+                break;
+            case opcode_ile:
+                LISTI("f-ile");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    int r = AS_FLOAT( l, u, <= );
+                    is_push( r );
+                }
+                break;
+            case opcode_igt:
+                LISTI("f-igt");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    int r = AS_FLOAT( l, u, > );
+                    is_push( r );
+                }
+                break;
+            case opcode_ilt:
+                LISTI("f-ilt");
+                {
+                    int32_t u = is_pop();
+                    int32_t l = is_pop();
+                    int r = AS_FLOAT( l, u, < );
+                    is_push( r );
+                }
+                break;
+
+
+            case opcode_fromf:
+                LISTI("f-fromf (nop)");
+                break;
+
+            case opcode_fromi:
+                LISTI("f-fromi");
+                {
+                    float i = is_pop();
+                    is_push( TO_INT( i ) );
+                }
+                break;
+
+            case opcode_froml:
+                LISTI("f-froml");
+                {
+                    float l = ls_pop();
+                    is_push( TO_INT( l ) );
+                }
+                break;
+
+            case opcode_fromd:
+                LISTI("f-fromd");
+                {
+                    int64_t l = ls_pop();
+                    float f = (float) TO_DOUBLE( l );
+                    is_push( TO_INT( f ) );
+                }
+                break;
+
+            case opcode_i2o:
+                LISTI("f-i2o");
+                {
+                    //pvm_exec_panic("unimpl float i2o");
+                    int32_t d = is_pop();
+                    os_push( pvm_create_float_object( TO_FLOAT(d) ) );
+                }
+                break;
+
+            case opcode_o2i:
+                LISTI("f-o2i");
+                //pvm_exec_panic("unimpl float o2i");
+                {
+                    struct pvm_object o = os_pop();
+                    if( o.data == 0 ) pvm_exec_panic("f-o2i(null)");
+                    float d = pvm_get_float( o );
+                    is_push( TO_INT( d ) );
+                    ref_dec_o(o);
+                }
+                break;
+
             }
         // End of float ops
 
         if( prefix_double )
             switch(instruction)
             {
+            default:
             case opcode_ishl: // Not defined for double, throw exception
             case opcode_ishr:
             case opcode_ushr:
@@ -827,19 +985,23 @@ void pvm_exec(pvm_object_t current_thread)
 
             case opcode_i2o: // ERROR IMPLEMENT ME
                 LISTI("d-i2o");
-                pvm_exec_panic("unimpl double i2o");
-                //os_push(pvm_create_long_object(ls_pop()));
+                {
+                    //pvm_exec_panic("unimpl double i2o");
+                    int64_t d = ls_pop();
+                    os_push( pvm_create_double_object( TO_DOUBLE(d) ) );
+                }
                 break;
 
             case opcode_o2i: // ERROR IMPLEMENT ME
                 LISTI("d-o2i");
-                pvm_exec_panic("unimpl double o2i");
-                /*{
+                //pvm_exec_panic("unimpl double o2i");
+                {
                     struct pvm_object o = os_pop();
                     if( o.data == 0 ) pvm_exec_panic("d-o2i(null)");
-                    ls_push( pvm_get_long( o ) );
+                    double d = pvm_get_double( o );
+                    ls_push( TO_LONG( d ) );
                     ref_dec_o(o);
-                }*/
+                }
                 break;
             }
         // End of double ops

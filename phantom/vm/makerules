@@ -10,9 +10,11 @@ include ../../config.mk
 all: $(TARGET) 
 #pvm_x11
 
+ifneq ($(PHANTOM_NO_PVM_TEST),true)
 ifeq ($(OSTYPE),cygwin)
 ifeq ($(ARCH),ia32)
 all: $(TARGET) pvm_test 
+endif
 endif
 endif
 

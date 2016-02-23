@@ -14,7 +14,7 @@ import ru.dz.plc.compiler.trinode.OpMethodCallNode;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
 
- /**
+/**
  * Identifier Node. If this Node is executed - it is a variable load.
  */
 
@@ -23,10 +23,10 @@ public class IdentNode extends Node {
 	//private PhantomClass my_class;
 	private boolean onIntStack = false;
 	private boolean onObjStack = false;
-	
+
 	private Method getterMethod = null;
 	//private Node target = null; // if we access field of another object, need code to get it here
-	
+
 	public String getName() { return ident; }
 
 	public IdentNode( /*PhantomClass c,*/ String ident ) {
@@ -39,26 +39,32 @@ public class IdentNode extends Node {
 		super(target);
 		this.ident = ident;
 	}
-	
-	
+
+
 	public String toString()  {    return "ident "+ident;  }
-	public void find_out_my_type() throws PlcException { if( type == null ) throw new PlcException( "ident Node", "no type known", ident ); }
+	
+	public void find_out_my_type() throws PlcException 
+	{ 
+		if( type == null ) 
+			throw new PlcException( "ident Node", "no type known", ident ); 
+	}
+	
 	public boolean is_const() { return false; }
 
 	/*@Override
 	public boolean args_on_int_stack() {
 		return s.istack_vars().get_var(ident) != null;
 	}*/
-	
+
 	@Override
 	public boolean is_on_int_stack() {
 		if( onIntStack )			return true;
 		if( onObjStack )			return false;
 		throw new RuntimeException("Call to is_on_int_stack() before preprocess");
 	}
-	
+
 	public void preprocess_me( ParseState s ) throws PlcException {
-		
+
 		PhantomField f = s.get_class().find_field(ident);
 		if( f != null )
 		{
@@ -78,7 +84,7 @@ public class IdentNode extends Node {
 		}
 
 		svar = s.stack_vars().get_var(ident);
-		
+
 		if( (svar == null) && (_l != null) )
 		{
 			PhantomClass tc = _l.getType().get_class();
@@ -86,14 +92,14 @@ public class IdentNode extends Node {
 
 			// ERROR TODO wrong - must use target class, not our class
 			//getterMethod = s.get_class().getGetter(ident);
-			
+
 			getterMethod = tc.getGetter(ident);
-			
+
 			/*
 			Node methodName = new MethodNode(getterMethod.getName()).setContext( context );
 
 			callNode = new OpMethodCallNode(out, methodName, args).setContext( context );
-			*/
+			 */
 
 			if( getterMethod == null )
 				throw new PlcException( "ident Node", "no such field in class and no getter", ident );
@@ -113,7 +119,7 @@ public class IdentNode extends Node {
 	// load variable
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException,
 	PlcException {
-		
+
 		if( getterMethod != null )
 		{
 			// if we are here, we have _l - object to call getter in, and it's code is generated
@@ -121,7 +127,7 @@ public class IdentNode extends Node {
 			c.emitCall(getterMethod.getOrdinal(),0);
 			return;
 		}
-		
+
 		//PhantomField f = s.get_class().ft.get(ident);
 		PhantomField f = s.get_class().find_field(ident);
 
@@ -146,12 +152,12 @@ public class IdentNode extends Node {
 			//if (type == null || type.is_unknown()) type = svar.get_type();
 			c.emitGet(svar.get_abs_stack_pos()); // get stack variable
 		}
-		
+
 	}
-	
+
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
-		
+
 		if( getterMethod != null )
 		{
 			// if we are here, we have _l - object to call getter in, and it's code is generated
@@ -161,7 +167,7 @@ public class IdentNode extends Node {
 			return;
 		}
 
-		
+
 		PhantomField f = llc.getPhantomClass().find_field(ident);
 		if( f != null )
 		{

@@ -157,6 +157,61 @@ void pvm_gc_iter_long(gc_iterator_call_t func, struct pvm_object_storage * os, v
 }
 
 
+struct pvm_object     pvm_create_float_object(float _value)
+{
+	struct pvm_object	out = pvm_object_create_fixed( pvm_get_float_class() );
+	((struct data_area_4_float*)&(out.data->da))->value = _value;
+	return out;
+}
+
+void pvm_internal_init_float(struct pvm_object_storage * os)
+{
+    (void)os;
+}
+
+void pvm_gc_iter_float(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+    (void)os;
+    (void)arg;
+    (void)func;
+    // Empty
+}
+
+
+
+
+struct pvm_object     pvm_create_double_object(double _value)
+{
+	struct pvm_object	out = pvm_object_create_fixed( pvm_get_double_class() );
+	((struct data_area_4_double*)&(out.data->da))->value = _value;
+	return out;
+}
+
+void pvm_internal_init_double(struct pvm_object_storage * os)
+{
+    (void)os;
+}
+
+void pvm_gc_iter_double(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+{
+    (void)os;
+    (void)arg;
+    (void)func;
+    // Empty
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 struct pvm_object     pvm_create_string_object_binary(const char *value, int n_bytes)
 {
