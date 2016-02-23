@@ -22,8 +22,10 @@ roots:
 	@$(PLC) src/internal/internal.string.ph
 	@$(PLC) src/internal/internal.int.ph
 	@$(PLC) src/internal/internal.long.ph
+	@$(PLC) src/internal/internal.float.ph
+	@$(PLC) src/internal/internal.double.ph
 	@$(PLC) src/internal/internal.class.ph
-
+	@$(PLC) src/internal/internal.directory.ph
 
 %.pc: %.ph
 	@echo -:- $< - $@

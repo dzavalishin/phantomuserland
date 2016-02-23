@@ -12,6 +12,7 @@
 
 package .internal;
 
+
 /**
  *
  * This class has internal implementation (as everything in
@@ -23,24 +24,19 @@ package .internal;
 
 /**
  *
- * Directory. Actually an hashmap with string (or arbitrary binary) as key.
+ * Float.
+ *
+ * TODO: fix toString
  *
 **/
 
-class .internal.directory
+class .internal.float
 {
-	int equals(var object) [4] { }
 
+//	.internal."class" getClass () [2] {  }
 
-// TODO key can be of any type, modify syscall code and remove type here
-	int put( var key : .internal.string, var value )	[8] {}
-	.internal.object get( var key ) 			[9] {}
+	.internal.string toString() [5] {  }
 
-	int remove( var key : .internal.string  ) 	        [10] {}
-
-	int size() 						[11] {}
-
-        // iterator iterate() [12] {}
 };
 
 
