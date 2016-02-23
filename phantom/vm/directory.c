@@ -51,7 +51,7 @@
 #define UNLOCK_DIR(__dir) hal_wired_spin_unlock(&(__dir)->lock);
 
 //#warning SYS_FREE_O() for removed values - array access funcs do it
-#warning ref_inc for returned copies in get
+#warning do we need ref_inc for both saved objects and returned copies in get?
 
 
 /**
@@ -97,9 +97,15 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
 
     int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
+    // Can't access array slot out of array's real size
+    int kasize = get_array_size( dir->keys.data );
+    if( keypos >= kasize )
+        goto not_found;
+
     pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
     if( pvm_is_null( okey ) )
     {
+    not_found:
         UNLOCK_DIR(dir);
         return ENOENT;
     }
@@ -112,6 +118,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
         if( 0 == hdir_cmp_keys( ikey, i_key_len, okey ) )
         {
             *out = pvm_get_array_ofield( dir->values.data, keypos );
+            ref_inc_o( *out );
             if( delete_found )
             {
                 pvm_set_array_ofield( dir->values.data, keypos, pvm_create_null_object() );
@@ -145,6 +152,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
         if( 0 == hdir_cmp_keys( ikey, i_key_len, indir_key ) )
         {
             *out = pvm_get_array_ofield( valarray.data, i );
+            ref_inc_o( *out );
             if( delete_found )
             {
                 pvm_set_array_ofield( valarray.data, i, pvm_create_null_object() );
@@ -165,6 +173,8 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
 //! Return EEXIST if dup
 errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t add )
 {
+    pvm_object_t okey;
+
     assert(dir->capacity);
     assert(dir->keys.data != 0);
     assert(dir->values.data != 0);
@@ -174,7 +184,12 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 
     int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
-    pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
+    // Can't access array slot out of array's real size
+    int kasize = get_array_size( dir->keys.data );
+    if( keypos >= kasize )
+        okey = pvm_create_null_object();
+    else
+        okey = pvm_get_array_ofield( dir->keys.data, keypos );
     u_int8_t flags = dir->flags[keypos];
 
     // No indirection and key is equal
@@ -194,6 +209,7 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 
         pvm_set_array_ofield( dir->keys.data, keypos, pvm_create_string_object_binary( ikey, i_key_len ) );
         pvm_set_array_ofield( dir->values.data, keypos, add );
+        ref_inc_o( add );
         dir->nEntries++;
 
         UNLOCK_DIR(dir);
@@ -218,6 +234,7 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
         // put new key/val
         pvm_append_array( keya.data, pvm_create_string_object_binary( ikey, i_key_len ) );
         pvm_append_array( vala.data, add );
+        ref_inc_o( add );
         dir->nEntries++;
 
         pvm_set_array_ofield( dir->keys.data, keypos, keya );

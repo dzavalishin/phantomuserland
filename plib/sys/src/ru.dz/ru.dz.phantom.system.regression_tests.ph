@@ -201,26 +201,43 @@ class regression_tests
 
     void hashmap_directory_test()
     {
-        print("Checking .internal.directory class operators... ");
+        print("Checking .internal.directory class operations... ");
 
         var dir : .internal.directory;
         var val : .internal.object;
 
+        print("new\n");
         dir = new .internal.directory();
 
+        //print("put 1\n");
         dir.put( "Hello", "world" );
+        //print("put 2\n");
         dir.put( "Privet", "mir" );
+        //print("put 3\n");
         dir.put( "Hola", "mundo" );
 
+        //print("get 2\n");
         val = dir.get( "Privet" );
         if( !val.equals("mir") ) throw "dir error 1";
 
+        //print("get 3\n");
         val = dir.get( "Hola" );
         if( !val.equals("mundo") ) throw "dir error 2";
 
+        //print("get 1\n");
         val = dir.get( "Hello" );
         if( !val.equals("world") ) throw "dir error 3";
 
+// put double
+// check size
+// delete
+// check size
+// check not exist
+// put 4000 random ones, save copies
+// check get
+// delete some 2000
+// put new 4000 random ones, save copies
+// check get
 
         print("passed\n");
     }

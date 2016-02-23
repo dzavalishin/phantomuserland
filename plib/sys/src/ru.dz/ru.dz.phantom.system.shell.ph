@@ -15,7 +15,7 @@ package .ru.dz.phantom.system;
 import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
-import .internal.mutex;
+//import .internal.mutex;
 import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 import .ru.dz.phantom.system.shell_callback;
@@ -65,18 +65,18 @@ class shell //extends runnable
 
     var cb : shell_callback;
 
-    var mtx : .internal.mutex;
+    //var mtx : .internal.mutex;
 
 
     void init()
     {
-        mtx = new .internal.mutex();
-        mtx.lock();
+        //mtx = new .internal.mutex();
+        //mtx.lock();
     }
 
     void go()
     {
-        mtx.unlock();
+        //mtx.unlock();
     }
 
     void run(var parent_object @const ) [8]
@@ -123,7 +123,7 @@ class shell //extends runnable
 
         while(1)
         {
-            mtx.lock();
+            //mtx.lock();
 
             console.putws("I am connected shell!\n");
             console.putws("--------------------------------------------------\n");
@@ -174,7 +174,7 @@ class shell //extends runnable
 
             win.update();
 
-            mtx.unlock();
+            //mtx.unlock();
 
             incr = incr + 1;
         }
