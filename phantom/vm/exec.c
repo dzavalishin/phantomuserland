@@ -31,6 +31,8 @@
 #include <kernel/snap_sync.h>
 #include <kernel/debug.h>
 
+#include <exceptions.h>
+
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 
@@ -434,7 +436,7 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
  *
 **/
 
-void pvm_exec(pvm_object_t current_thread)
+static void do_pvm_exec(pvm_object_t current_thread)
 {
     int prefix_long = 0;
     int prefix_float = 0;
@@ -1769,6 +1771,29 @@ void pvm_exec(pvm_object_t current_thread)
 
     }
 }
+
+void pvm_exec(pvm_object_t current_thread)
+{
+#if CONF_USE_E4C
+    e4c_context_begin( 0 );
+
+    E4C_TRY {
+#endif // CONF_USE_E4C
+
+    do_pvm_exec(current_thread);
+
+#if CONF_USE_E4C
+    } E4C_CATCH(PvmException) {
+        const e4c_exception *e = e4c_get_exception();
+        e4c_print_exception(e);
+    } E4C_FINALLY {
+    }
+
+    e4c_context_end();
+#endif // CONF_USE_E4C
+}
+
+
 
 
 

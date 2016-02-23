@@ -498,6 +498,8 @@ E4C_DEFINE_EXCEPTION(NotEnoughMemoryException,			"Not enough memory.",				Runtim
 E4C_DEFINE_EXCEPTION(InputOutputException,				"Input/output exception.",			RuntimeException);
 E4C_DEFINE_EXCEPTION(IllegalArgumentException,			"Illegal argument.",				RuntimeException);
 
+E4C_DEFINE_EXCEPTION(NullPointerException,				"Null pointer.",					RuntimeException);
+
 #if 0
 E4C_DEFINE_EXCEPTION(SignalException,					"Signal received.",					RuntimeException);
 E4C_DEFINE_EXCEPTION(SignalAlarmException,				"Alarm clock signal received.",		SignalException);
@@ -508,7 +510,6 @@ E4C_DEFINE_EXCEPTION(IllegalInstructionException,		"Illegal instruction.",				Er
 E4C_DEFINE_EXCEPTION(ArithmeticException,				"Erroneous arithmetic operation.",	ErrorSignalException);
 E4C_DEFINE_EXCEPTION(BrokenPipeException,				"Broken pipe.",						ErrorSignalException);
 E4C_DEFINE_EXCEPTION(BadPointerException,				"Segmentation violation.",			ErrorSignalException);
-E4C_DEFINE_EXCEPTION(NullPointerException,				"Null pointer.",					BadPointerException);
 E4C_DEFINE_EXCEPTION(ControlSignalException,			"Control signal received.",			SignalException);
 E4C_DEFINE_EXCEPTION(StopException,						"Stop signal received.",			ControlSignalException);
 E4C_DEFINE_EXCEPTION(KillException,						"Kill signal received.",			ControlSignalException);
@@ -2507,7 +2508,13 @@ static void pdeath_handler( phantom_thread_t *tp )
 }
 
 static void _e4c_library_initialize(void){
+#warning init mutex is fake here
 
+    if(!is_initialized)
+    {
+        hal_mutex_init( &is_initialized_mutex, "e4c_init" );
+        hal_mutex_init( &environment_collection_mutex, "e4c_env" );
+    }
 	MUTEX_LOCK(is_initialized_mutex, "_e4c_library_initialize")
 
 		if(!is_initialized){

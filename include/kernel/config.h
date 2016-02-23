@@ -126,10 +126,10 @@
 // E4C exceptions defs
 // ------------------------------------------------------------------
 
-#define CONF_USE_E4C 1
+#define CONF_USE_E4C 0
 
 #define E4C_THREADSAFE
-
+#define E4C_NOKEYWORDS
 
 #ifndef ASSEMBLER
 

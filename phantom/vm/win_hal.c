@@ -673,3 +673,34 @@ static int dummy_snap_catch;
 
 volatile int * snap_catch_va = &dummy_snap_catch;
 
+#include <exceptions.h>
+
+errno_t t_kill_thread(tid_t tid)
+{
+#if CONF_USE_E4C
+    const e4c_exception *e = e4c_get_exception();
+    e4c_print_exception(e);
+#endif // CONF_USE_E4C
+    panic("t_kill_thread(%d) called", tid);
+}
+
+errno_t t_current_set_death_handler( void (*handler)(phantom_thread_t *tp) )
+{
+#warning ignored?
+}
+
+#if CONF_USE_E4C
+
+#warning move exceptions deinitions elsewhere
+
+E4C_DEFINE_EXCEPTION(PvmException, "Virtual machine error.", RuntimeException);
+E4C_DEFINE_EXCEPTION(PvmCodeException, "Virtual machine bytecode error.", PvmException);
+E4C_DEFINE_EXCEPTION(PvmDataException, "Virtual machine data error.", PvmException);
+
+
+
+E4C_DEFINE_EXCEPTION(UnixException, "Unix subsystem error.", RuntimeException);
+E4C_DEFINE_EXCEPTION(UnixSendSignalException, "Unix subsystem error.", UnixException);
+
+#endif // e4c
+
