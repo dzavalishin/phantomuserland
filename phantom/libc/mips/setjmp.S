@@ -2,15 +2,15 @@
 
 .text
 .align 2
-setjmp:
-.global __setjmp
-.ent	__setjmp
-__setjmp:
+setjmp_machdep:
+.global __setjmp_machdep
+.ent	__setjmp_machdep
+__setjmp_machdep:
 	li	$5, 0		/* don't save sigmask */
-.end	__setjmp
-.global __sigsetjmp
-.ent	__sigsetjmp
-__sigsetjmp:
+.end	__setjmp_machdep
+.global __sigsetjmp_machdep
+.ent	__sigsetjmp_machdep
+__sigsetjmp_machdep:
 	/* where to jump later */
 	//la	$25, __sigjmp_save
 	/* callee save floating point save registers (double) */
@@ -41,5 +41,5 @@ __sigsetjmp:
     addiu $2, $0, 0
 
 	jr	$31 // return
-.end	__sigsetjmp
-.weak	setjmp
+.end	__sigsetjmp_machdep
+.weak	setjmp_machdep

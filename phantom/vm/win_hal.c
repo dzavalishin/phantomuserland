@@ -292,7 +292,7 @@ phantom_thread_t * get_current_thread() { return 0; }
 
 void *get_thread_owner( phantom_thread_t *t ) { return 0; }
 
-int get_current_tid() { return -1; }
+//int get_current_tid() { return -1; }
 errno_t t_get_owner( int tid, void ** owner ) { return ENOENT; }
 
 errno_t t_get_ctty( tid_t tid, struct wtty **ct ) { return ENOENT; }
@@ -687,20 +687,12 @@ errno_t t_kill_thread(tid_t tid)
 errno_t t_current_set_death_handler( void (*handler)(phantom_thread_t *tp) )
 {
 #warning ignored?
+    return 0;
 }
 
-#if CONF_USE_E4C
 
-#warning move exceptions deinitions elsewhere
-
-E4C_DEFINE_EXCEPTION(PvmException, "Virtual machine error.", RuntimeException);
-E4C_DEFINE_EXCEPTION(PvmCodeException, "Virtual machine bytecode error.", PvmException);
-E4C_DEFINE_EXCEPTION(PvmDataException, "Virtual machine data error.", PvmException);
+void check_global_lock_entry_count(void) {}
 
 
 
-E4C_DEFINE_EXCEPTION(UnixException, "Unix subsystem error.", RuntimeException);
-E4C_DEFINE_EXCEPTION(UnixSendSignalException, "Unix subsystem error.", UnixException);
-
-#endif // e4c
 

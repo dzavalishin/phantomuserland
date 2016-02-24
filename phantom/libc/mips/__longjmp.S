@@ -1,14 +1,14 @@
 .text
 .align 2
 
-.global longjmp
-.ent	longjmp
-longjmp:
-.end	longjmp
+.global longjmp_machdep
+.ent	longjmp_machdep
+longjmp_machdep:
+.end	longjmp_machdep
 
-.global __longjmp
-.ent	__longjmp
-__longjmp:
+.global __longjmp_machdep
+.ent	__longjmp_machdep
+__longjmp_machdep:
 	/* load coprocessor status */
 	lw	 $2, 48($4)
 	/* restore callee save floating point registers (double) */
@@ -38,4 +38,4 @@ __longjmp:
 	bne	 $5, $0,1f
 	li	 $2, 1
 1:	j	$25
-.end	__longjmp
+.end	__longjmp_machdep

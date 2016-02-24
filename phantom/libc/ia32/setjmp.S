@@ -37,8 +37,8 @@
 
 #include <ia32/asm.h>
 
-ENTRY(setjmp)
-ENTRY(_setjmp)
+ENTRY(setjmp_machdep)
+ENTRY(_setjmp_machdep)
 	movl	4(%esp),%ecx		/* fetch buffer */
 	movl	%ebx,0(%ecx)
 	movl	%esi,4(%ecx)
@@ -50,8 +50,8 @@ ENTRY(_setjmp)
 	xorl	%eax,%eax
         jmp     *%edx
 
-ENTRY(longjmp)
-ENTRY(_longjmp)
+ENTRY(longjmp_machdep)
+ENTRY(_longjmp_machdep)
 	movl	8(%esp),%eax		/* return(v) */
 	movl	4(%esp),%ecx		/* fetch buffer */
 	movl	0(%ecx),%ebx

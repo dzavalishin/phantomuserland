@@ -12,6 +12,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <pthread.h>
+
+
 #include "winhal.h"
 
 
@@ -127,3 +130,8 @@ void winhal_debug_srv_thread(int *arg)
 
 
 
+int get_current_tid()
+{
+    return (int)pthread_self();
+    //return -1;
+}

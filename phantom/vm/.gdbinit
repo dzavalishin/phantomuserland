@@ -17,14 +17,15 @@ break main
 
 break panic
 
-break pvm_boot
+#break pvm_boot
 
-#break ev_get_unused
-#break ev_q_put_win
-#break ev_put_event
+#break pvm_create_interface_object
 
-#break init_main_event_q
+#break _e4c_library_initialize
+#break e4c_context_begin
+break _e4c_library_fatal_error
+break e4c_print_exception
 
-break pvm_create_interface_object
+break e4c_exception_throw_verbatim_
 
 run

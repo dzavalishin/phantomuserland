@@ -55,10 +55,47 @@
 typedef int jmp_buf[_JBLEN];
 
 
+//extern int setjmp (jmp_buf) __attribute__((returns_twice));
+//extern void longjmp (jmp_buf, int);
+//extern int _setjmp (jmp_buf) __attribute__((returns_twice));
+//extern void _longjmp (jmp_buf, int);
+
+
+// Wrapper
 extern int setjmp (jmp_buf) __attribute__((returns_twice));
 extern void longjmp (jmp_buf, int);
-extern int _setjmp (jmp_buf) __attribute__((returns_twice));
-extern void _longjmp (jmp_buf, int);
+//extern int _setjmp (jmp_buf) __attribute__((returns_twice));
+//extern void _longjmp (jmp_buf, int);
+
+// Machine dependent implementation
+extern int setjmp_machdep (jmp_buf) __attribute__((returns_twice));
+extern void longjmp_machdep (jmp_buf, int);
+//extern int _setjmp_machdep (jmp_buf) __attribute__((returns_twice));
+//extern void _longjmp_machdep (jmp_buf, int);
+
+
+#ifdef KERNEL
+
+#define setjmp(___j) \
+({ \
+    int tid = get_current_tid(); \
+    int rv = setjmp_machdep(___j); \
+\
+    int new_tid = get_current_tid(); \
+    if( tid != new_tid ) \
+        panic("Cross-thread longjmp, saved state in tid %d, jump from tid %d", tid, new_tid ); \
+\
+    rv; \
+})
+#else
+#define setjmp(___j) setjmp_machdep(___j)
+#endif
+
+
+#define longjmp(___j, ___v) longjmp_machdep(___j,___v)
+
+
+
 
 #endif /* _MACH_SETJMP_H_PROCESSED_ */
 

@@ -67,9 +67,12 @@ void register_init_record( struct init_record *ir );
 #define INIT_NEED_OBJECTS       (1<< 6)
 */
 
+// PREPARE - no threads are running yet, don't call others
 // After prepare all public interfaces must be callable
 #define INIT_LEVEL_PREPARE      1
+// INIT - threads are running, most of other stuff is callable
 #define INIT_LEVEL_INIT         2
+// LATE - all stuff is running: all drivers, video, persistent memory, virtual machine
 #define INIT_LEVEL_LATE         3
 
 // ?

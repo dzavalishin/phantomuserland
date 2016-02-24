@@ -4,7 +4,7 @@
 /* setjump, longjump                                                         */
 /*****************************************************************************/
 
-ENTRY(setjmp)
+ENTRY(setjmp_machdep)
 	movq	%rbx,0(%rdi)			/* save rbx */
 	movq	%rsp,8(%rdi)			/* save rsp */
 	movq	%rbp,16(%rdi)			/* save rbp */
@@ -16,9 +16,9 @@ ENTRY(setjmp)
 	movq	%rdx,56(%rdi)			/* save rip */
 	xorl	%eax,%eax			/* return(0); */
 	ret
-//END(setjmp)
+//END(setjmp_machdep)
 
-ENTRY(longjmp)
+ENTRY(longjmp_machdep)
 	movq	0(%rdi),%rbx			/* restore rbx */
 	movq	8(%rdi),%rsp			/* restore rsp */
 	movq	16(%rdi),%rbp			/* restore rbp */
@@ -31,5 +31,5 @@ ENTRY(longjmp)
 	xorl	%eax,%eax			/* return(1); */
 	incl	%eax
 	ret
-//END(longjmp)
+//END(longjmp_machdep)
 

@@ -683,6 +683,7 @@ void phantom_v86_run(void *code, size_t size)
 #endif
 
 
+    //if(setjmp_machdep(jb))
     if(setjmp(jb))
     {
         // Returned via longjmp - reset main TSS
@@ -718,6 +719,7 @@ void phantom_ret_from_vm86()
 #if TSS_VM86_RETURN
     asm("ljmp %0, $0" : : "i" (MAIN_TSS));
 #else
+    //longjmp_machdep(jb,1);
     longjmp(jb,1);
 #endif
 }

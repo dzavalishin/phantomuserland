@@ -1775,7 +1775,10 @@ static void do_pvm_exec(pvm_object_t current_thread)
 void pvm_exec(pvm_object_t current_thread)
 {
 #if CONF_USE_E4C
-    e4c_context_begin( 0 );
+    volatile int status = 0;
+    //e4c_context_begin( 0 );
+    e4c_reusing_context(status, -1)
+    {
 
     E4C_TRY {
 #endif // CONF_USE_E4C
@@ -1784,12 +1787,16 @@ void pvm_exec(pvm_object_t current_thread)
 
 #if CONF_USE_E4C
     } E4C_CATCH(PvmException) {
+        printf("got exception: ");
         const e4c_exception *e = e4c_get_exception();
         e4c_print_exception(e);
     } E4C_FINALLY {
     }
 
-    e4c_context_end();
+    } // reusing context
+    ///e4c_context_end();
+
+    (void) status;
 #endif // CONF_USE_E4C
 }
 

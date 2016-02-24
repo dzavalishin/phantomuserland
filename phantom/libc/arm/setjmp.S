@@ -6,7 +6,7 @@
 /*
  * setjump + longjmp
  */
-ENTRY(setjmp)
+ENTRY(setjmp_machdep)
 	/* Store fp registers * /
 	sfm	f4, 4, [r0], #48
 	// Store fpsr 
@@ -18,7 +18,7 @@ ENTRY(setjmp)
 	mov	r0, #0x00000000
 	RET
 
-ENTRY(longjmp)
+ENTRY(longjmp_machdep)
 	/* Restore fp registers * /
 	lfm	f4, 4, [r0], #48
 	// Restore fpsr 

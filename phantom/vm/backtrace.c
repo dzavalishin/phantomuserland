@@ -15,6 +15,7 @@
 #include <vm/reflect.h>
 
 #include <threads.h>
+#include <exceptions.h>
 #include <thread_private.h>
 
 //static void pvm_backtrace(void);
@@ -22,6 +23,20 @@
 //pvm_object_t pvm_get_method_name( pvm_object_t tclass, int method_ordinal );
 //int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip);
 
+#if CONF_USE_E4C
+
+
+
+E4C_DEFINE_EXCEPTION(PvmException, "Virtual machine error.", RuntimeException);
+E4C_DEFINE_EXCEPTION(PvmCodeException, "Virtual machine bytecode error.", PvmException);
+E4C_DEFINE_EXCEPTION(PvmDataException, "Virtual machine data error.", PvmException);
+
+
+
+E4C_DEFINE_EXCEPTION(UnixException, "Unix subsystem error.", RuntimeException);
+E4C_DEFINE_EXCEPTION(UnixSendSignalException, "Unix subsystem error.", UnixException);
+
+#endif // e4c
 
 
 /* Poor man's exceptions */
@@ -30,11 +45,16 @@ void pvm_exec_panic( const char *reason )
     // TO DO: longjmp?
     //panic("pvm_exec_throw: %s", reason );
     //syslog()
-    printf("pvm_exec_panic: %s", reason );
+    printf("pvm_exec_panic: %s\n", reason );
     pvm_backtrace_current_thread();
 
     pvm_memcheck();
+#if CONF_USE_E4C
+    printf("pvm_exec_panic: throwing\n", reason );
+    E4C_THROW( PvmException, reason );
+#else // CONF_USE_E4C
     hal_exit_kernel_thread();
+#endif // CONF_USE_E4C
 }
 
 

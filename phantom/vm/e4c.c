@@ -2666,6 +2666,8 @@ static E4C_INLINE void _e4c_library_fatal_error(const e4c_exception_type * excep
 	/* records critical error so that MSG_AT_EXIT_ERROR will be printed too */
 	fatal_error_flag = E4C_TRUE;
 
+        SHOW_ERROR( 0, "Fatal error: %s", message );
+
 	/*@-noeffectuncon@*/
 	STOP_EXECUTION;
 	/*@=noeffectuncon@*/
@@ -2804,6 +2806,8 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
 	/* assert: exception != NULL */
 	/* assert: context != NULL */
 	/* assert: context->current_frame != NULL */
+
+    	check_global_lock_entry_count();
 
 	e4c_frame * frame;
 
@@ -3821,6 +3825,23 @@ void e4c_print_exception(const e4c_exception * exception){
 
 	_e4c_print_exception(exception);
 }
+
+
+
+
+
+#include <kernel/init.h>
+
+
+//static void early_init(void) {}
+
+
+//INIT_ME( early_init, 0, 0 );
+
+INIT_ME( 0, _e4c_library_initialize, 0 );
+
+// STOP_ME( early_init, 0, 0 ); // need stop?
+
 
 
 #endif // CONF_USE_E4C

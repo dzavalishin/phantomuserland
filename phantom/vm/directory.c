@@ -186,9 +186,11 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 
     // Can't access array slot out of array's real size
     int kasize = get_array_size( dir->keys.data );
+#if 1 // turn off to generate pvm_panic and, if E4C enabled, exception
     if( keypos >= kasize )
         okey = pvm_create_null_object();
     else
+#endif
         okey = pvm_get_array_ofield( dir->keys.data, keypos );
     u_int8_t flags = dir->flags[keypos];
 
