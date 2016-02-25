@@ -68,7 +68,7 @@ do
 	-v)	VIRTIO=1	;;
 	*)
 		echo "Usage: $0 [-f] [-u] [-p N] [-w] [-nc] [-ng] [-ns]
-	-f	- force test (ignore no updates from SVN)
+	-f	- force test (ignore no updates from repository)
 	-u	- run unattended (don't stop on panic for gdb)
 	-p N	- make N passes of snapshot test (default: N=2)
 	-w	- show make warnings
@@ -155,14 +155,14 @@ quit
 
 # update data BEFORE checking for stalled copies
 GRUB_MENU=tftp/tftp/menu.lst
-svn diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
+git diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
 	rm $TEST_DIR/$GRUB_MENU
-SVN_OUT=`svn update`
-[ $? -ne 0 -o `echo "$SVN_OUT" | grep -c '^At revision'` -ne 0 ] && {
+GIT_OUT=`git pull`
+[ $? -ne 0 -o `echo "$GIT_OUT" | grep -c '^At revision'` -ne 0 ] && {
 	[ "$FORCE" ] || die "$MSG"
 }
 
-echo "$SVN_OUT"
+echo "$GIT_OUT"
 
 # check if another copy is running
 [ "$FORCE" ] || {
