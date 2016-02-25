@@ -59,6 +59,9 @@ SCREENSHOTS
 
   https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots
 
+<a href="https://scan.coverity.com/projects/dzavalishin-phantomuserland">
+  <img alt="Coverity Scan Build Status" src="https://scan.coverity.com/projects/8024/badge.svg"/>
+</a>
 
 Best regards, Dmitry Zavalishin,
 Phantom project... how to say... inventor? :)
