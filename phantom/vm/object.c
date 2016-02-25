@@ -85,6 +85,10 @@ void pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struc
       )
         pvm_exec_panic( "attempt to do an array op to non-array" );
 
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (o->_flags) )
+        pvm_exec_panic( "attempt to set_array_ofield for immutable" );
+
+
     struct data_area_4_array *da = (struct data_area_4_array *)&(o->da);
 
     // need resize?
@@ -132,6 +136,16 @@ int get_array_size(struct pvm_object_storage *array)
 void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop )
 {
     struct data_area_4_array *da = (struct data_area_4_array *)&(array->da);
+
+    verify_p(array);
+    if(
+       !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (array->_flags) ) ||
+       !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (array->_flags) )
+      )
+        pvm_exec_panic( "attempt to do an array op to non-array" );
+
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (array->_flags) )
+        pvm_exec_panic( "attempt to pop_array for immutable" );
 
     //swap with last and decrement used_slots
     struct pvm_object *p = da_po_ptr((da->page.data)->da);
@@ -224,6 +238,9 @@ pvm_set_field( struct pvm_object_storage *o, unsigned int slot, struct pvm_objec
         pvm_exec_panic( "attempt to save to internal" );
     }
 
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (o->_flags) )
+        pvm_exec_panic( "attempt to set_field for immutable" );
+
     if( slot >= da_po_limit(o) )
     {
         pvm_exec_panic( "load: slot index out of bounds" );
@@ -247,6 +264,10 @@ pvm_set_ofield( struct pvm_object op, unsigned int slot, struct pvm_object value
         }
         pvm_exec_panic( "attempt to save to internal" );
     }
+
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (op.data->_flags) )
+        pvm_exec_panic( "attempt to set_ofield for immutable" );
+
 
     if( slot >= da_po_limit(op.data) )
     {
