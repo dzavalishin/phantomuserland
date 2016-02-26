@@ -158,7 +158,7 @@ GRUB_MENU=tftp/tftp/menu.lst
 git diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
 	rm $TEST_DIR/$GRUB_MENU
 GIT_OUT=`git pull`
-[ $? -ne 0 -o `echo "$GIT_OUT" | grep -c '^At revision'` -ne 0 ] && {
+[ $? -ne 0 -o `echo "$GIT_OUT" | grep -c '^Already up-to-date'` -ne 0 ] && {
 	[ "$FORCE" ] || die "$MSG"
 }
 
