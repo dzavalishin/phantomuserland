@@ -314,10 +314,13 @@ public class Codegen extends opcode_ids {
 	}
 	
 	/**
-	 * emit_string
+	 * <p>Emit string.</p>
+	 * 
+	 * <p>Use constant pool instead!</p>
 	 *
 	 * @param string String
 	 */
+	@Deprecated
 	public void emitString(String string) throws IOException {
 		list("const \""+string+"\"");
 		put_byte(opcode_sconst_bin);
@@ -325,7 +328,9 @@ public class Codegen extends opcode_ids {
 	}
 
 	/**
-	 * emit binary data as string
+	 * <p>Emit binary data as string.</p>
+	 *
+	 * <p>Use constant pool instead!</p>
 	 *
 	 * @param data array of bytes to put out
 	 */
@@ -334,6 +339,31 @@ public class Codegen extends opcode_ids {
 		put_byte(opcode_sconst_bin);
 		put_string_bin( data );
 	}
+	
+	/**
+	 * <p>Emit constant pool reference.</p>
+	 *
+	 * <p>VM will pull object from corresponding constant pool slot.</p>
+	 * 
+	 * @param id Number of constant pool slot.
+	 */
+	public void emitConstantPool(int id) throws IOException {
+		list("const_pool <"+id+">");
+		put_byte(opcode_const_pool);
+		put_int32(id);
+	}
+
+	/**
+	 * <p>Emit cast.</p>
+	 *
+	 * <p>VM will pop target class and object to cast, then push cast result or throw.</p>
+	 * 
+	 */
+	public void emitCast() throws IOException {
+		list("cast");
+		put_byte(opcode_cast);
+	}
+	
 	
 	/**
 	 * summon
