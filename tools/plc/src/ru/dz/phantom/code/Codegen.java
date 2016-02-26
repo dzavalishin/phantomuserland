@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import phantom.code.opcode_ids;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.*;
 import ru.dz.soot.SootMain;
 
@@ -760,7 +761,32 @@ public class Codegen extends opcode_ids {
 	}
 
 
+	public void emitNumericCast(PhantomType from, PhantomType to) throws PlcException, IOException
+	{
+		if( !to.can_be_assigned_from(from) )
+			throw new PlcException("can't cast from "+from+" to "+to);
+		
+		if( !from.is_on_int_stack() )
+			throw new PlcException("not on int stack "+from);
+		
+		if( !to.is_on_int_stack() )
+			throw new PlcException("not on int stack "+to);
+	
+		// generate destination type prefix
+		
+		if( to.is_double() )			put_byte(opcode_prefix_double);
+		else if( to.is_float() )		put_byte(opcode_prefix_float);
+		else if( to.is_long() )			put_byte(opcode_prefix_long);
+		else if( !to.is_int())
+			throw new PlcException("unknown type of "+to);
 
+		if( to.is_double() )			put_byte(opcode_fromd);
+		else if( to.is_float() )		put_byte(opcode_fromf);
+		else if( to.is_long() )			put_byte(opcode_froml);
+		else if( to.is_int())			put_byte(opcode_fromi);
+		else
+			throw new PlcException("unknown type of "+to);
+	}
 	
 	
 

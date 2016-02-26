@@ -7,8 +7,10 @@ import ru.dz.plc.util.*;
 import java.io.*;
 
 /**
- * <p>Type. Class + possible container attributes.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * <p>Phantom VM Type. Class + possible container attributes.</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * @author dz
  */
@@ -76,6 +78,9 @@ public class PhantomType {
 		_container_class = null;
 
 		if( _c != null && _c.getName().equals(".internal.int") ) _is_int = true;
+		if( _c != null && _c.getName().equals(".internal.long") ) _is_long = true;
+		if( _c != null && _c.getName().equals(".internal.float") ) _is_float = true;
+		if( _c != null && _c.getName().equals(".internal.double") ) _is_double = true;
 		if( _c != null && _c.getName().equals(".internal.string") ) _is_string = true;
 		if( _c != null && _c.getName().equals(".internal.void") ) _is_void = true;
 		
