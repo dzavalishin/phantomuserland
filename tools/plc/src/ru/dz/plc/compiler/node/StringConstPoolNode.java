@@ -7,37 +7,42 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeString;
-import ru.dz.plc.compiler.llvm.LlvmStringConstant;
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.util.PlcException;
 
 /**
- * Replace with StringConstPoolNode
+ * Generate string const in constant pool. 
+ *
  * @author dz
  *
  */
-public class StringConstNode extends Node {
-	private String val;
-	
-	public StringConstNode(String val) {
+
+public class StringConstPoolNode extends Node {
+
+	private int id;
+
+	public StringConstPoolNode(String val, PhantomClass c) {
 		super(null);
-		this.val = val;
+		id = c.addStringConst(val);
 	}
-	
-	public String toString()  {    return "string const \""+val+"\"";  }
+
+	public String toString()  {    return "string pool const id=\""+id+"\"";  }
 	public void find_out_my_type() { type = new PhTypeString(); }
 	public boolean is_const() { return true; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
-	
+
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException {
-		c.emitString(val);
+		c.emitConstantPool(id);
 	}
-	
+
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
-		LlvmStringConstant ls = new LlvmStringConstant(llc, val);
-		llc.postponeCode(ls.getDef()+";\n");
-		llc.putln(ls.getCast());
+		//LlvmStringConstant ls = new LlvmStringConstant(llc, val);
+		//llc.postponeCode(ls.getDef()+";\n");
+		//llc.putln(ls.getCast());
 		//llvmTempName = ls.getReference();
-		llc.putln(llvmTempName+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_createStringObjefct( i8* "+ls.getReference()+" );");
+		llc.putln(llvmTempName+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_loadObjectFromPool( i4* "+id+" );");
 	}
 }
+
+

@@ -23,6 +23,7 @@ public class PhantomClass {
 	private MethodTable mt;
 	private FieldTable ft; 
 	private FieldTable staticFieldsTable; 
+	private ConstantPool constantPool = new ConstantPool();
 
 	private LinkedList<PhantomClass> interfaces = new LinkedList<PhantomClass>();
 	private String parent = ".internal.object";
@@ -99,6 +100,15 @@ public class PhantomClass {
 		return parent_class != null;
 	}
 
+	// ------------------------------------------------------------------------
+	// Constant pool
+	// ------------------------------------------------------------------------
+
+	public int addStringConst(String constant)
+	{
+		return constantPool.add(constant);
+	}
+	
 	// ------------------------------------------------------------------------
 	// Methods
 	// ------------------------------------------------------------------------

@@ -6,19 +6,22 @@ import ru.dz.plc.util.*;
 
 /**
  * <p>Title: ru.dz.plc.compiler</p>
+ * 
  * <p>Description: This class is used to write a class file header record.
  * Each record has a tag (type). records with lowercase tags can be ignored
  * by loader, and capital letter tags have to be understood. </p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009</p>
+ * 
  * <p>Company: Digital Zone </p>
  * @author dz
  */
 
 public abstract class FileInfo {
-	RandomAccessFile os;
-	byte tag;
-	boolean written;
-	long pos, end;
+	protected RandomAccessFile os;
+	private byte tag;
+	private boolean written;
+	private long pos, end;
 
 
 	protected FileInfo( RandomAccessFile os, byte tag ) {

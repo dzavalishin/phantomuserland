@@ -15,7 +15,9 @@ import ru.dz.plc.util.*;
 
 /**
  * <p>Fields of a class.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * @author dz
  */
@@ -23,7 +25,6 @@ import ru.dz.plc.util.*;
 public class FieldTable {
 	private Map<String, PhantomField> table;
 	private ordinals_generator ordinals = new ordinals_generator();
-	//int nextord = 0;
 
 	void setBase(int base) throws PlcException { ordinals.setBase(base); }
 

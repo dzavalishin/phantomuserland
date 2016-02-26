@@ -68,12 +68,14 @@ void pvm_code_check_bounds( struct pvm_code_handler *code, unsigned int ip, char
         throw_bounds( ip, code->IP_max, where );
 }
 
+// TODO FIXME will crash if used at end of file
 unsigned char pvm_code_get_byte_speculative(struct pvm_code_handler *code)
 {
     pvm_code_check_bounds( code, code->IP, "get_byte" );
     return (unsigned char)code->code[code->IP];  // do not increment IP !
 }
 
+// TODO FIXME will crash if used at end of file
 unsigned char pvm_code_get_byte_speculative2(struct pvm_code_handler *code)
 {
     pvm_code_check_bounds( code, code->IP, "get_byte" );
