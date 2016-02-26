@@ -1135,6 +1135,31 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 break;
             }
 
+        case opcode_const_pool:
+            {
+                pvm_object_t oc = pvm_get_class( this_object() );
+                struct data_area_4_class *cda = pvm_object_da( oc, class );
+
+                int32_t id = pvm_code_get_int32(&(da->code));
+                pvm_object_t co = pvm_get_ofield( cda->const_pool, id );
+                os_push(co);
+                LISTIA("const_pool id %d", id);
+            }
+            break;
+
+        case opcode_cast:
+            {
+                pvm_object_t target_class = os_pop();
+                pvm_object_t o = os_pop();
+
+                // TODO cast here!
+
+                os_push( o );
+                LISTIA("cast %s", "unimplemented!");
+            }
+            break;
+
+
         case opcode_ishl:
             LISTI("ishl");
             {

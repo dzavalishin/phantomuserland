@@ -128,6 +128,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
     struct pvm_object ip2line_maps = { 0, 0 };
     struct pvm_object method_names = { 0, 0 };
     struct pvm_object field_names  = { 0, 0 };
+    pvm_object_t const_pool  = { 0, 0 };
 
     int got_class_header = 0;
 
@@ -147,7 +148,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
         char record_type = *ptr++;
         //record_size = htonl( *((long *)ptr)++ );
-        record_size = htonl( *((long *)ptr) );
+        record_size = htonl( *((long *)ptr) ); // TODO meant to be ntohl?
         ptr += sizeof(long);
 
         if(debug_print) printf("type '%c', size %4d: ", record_type, record_size );
@@ -218,6 +219,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 ip2line_maps = pvm_create_object( pvm_get_array_class() );
                 method_names = pvm_create_object( pvm_get_array_class() );
                 field_names = pvm_create_object( pvm_get_array_class() );
+                const_pool = pvm_create_array_object();
 
             }
             break;
@@ -310,6 +312,35 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
             }
             break;
 
+        case 'c': // constant for const pool
+            {
+                int c_ordinal = pvm_code_get_int32(&h); // const pool position
+
+                struct type_loader_handler th;
+                pvm_load_type( &h , &th );
+
+                pvm_object_t c_value = { 0, 0 };
+
+                // No const containers (yet?)
+                if( th.is_container ) goto unk_const;
+
+                if( EQ_STRING_P2C(class_name,".internal.string") )
+                {
+                    c_value = pvm_create_string_object_binary( (void *)(h.code+h.IP), h.IP_max-h.IP);
+                }
+
+            unk_const:
+                if( c_value.data )
+                    pvm_set_ofield( const_pool, c_ordinal, c_value );
+                else
+                    //if(debug_print)
+                {
+                    printf("unknown const (id %d) type: ", c_ordinal );
+                    pvm_dump_type( &th );
+                    printf("\n" );
+                }
+            }
+            break;
 
         case 'f': // field names
             {

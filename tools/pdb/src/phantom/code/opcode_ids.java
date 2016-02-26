@@ -44,6 +44,8 @@ protected static final byte opcode_iconst_64bit = (byte)0x25;
 // this is for integer local vars
 protected static final byte opcode_is_get32 = (byte)0x26; // get value from stack absolute-addressed slot, push on top
 protected static final byte opcode_is_set32 = (byte)0x27; // pop stack top, set value in stack absolute-addressed slot
+protected static final byte opcode_const_pool = (byte)0x28; // int32 follows - get constant with corresponding index from object constant pool of this class
+protected static final byte opcode_cast = (byte)0x2B; // pop class, pop object, cast, push object
 protected static final byte opcode_push_catcher = (byte)0x2D; // jump address folows, top of o stack - class of objects to catch
 protected static final byte opcode_pop_catcher = (byte)0x2E;
 protected static final byte opcode_throw = (byte)0x2F; // thow top of stack, if stack is empty - will throw special system-wide object, if on top of call stack - will kill thread in a bad way

@@ -56,6 +56,10 @@ id(opcode_iconst_64bit,0x25)
 id(opcode_is_get32,0x26)	// get value from stack absolute-addressed slot, push on top
 id(opcode_is_set32,0x27)	// pop stack top, set value in stack absolute-addressed slot
 
+id(opcode_const_pool,0x28)  // int32 follows - get constant with corresponding index from object constant pool of this class
+
+
+id(opcode_cast,0x2B) // pop class, pop object, cast, push object
 
 id(opcode_push_catcher,0x2D) // jump address folows, top of o stack - class of objects to catch
 id(opcode_pop_catcher,0x2E) 
