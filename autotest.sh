@@ -12,7 +12,7 @@ QEMU=`which qemu`		# qemu 0.x
 [ "$QEMU" ] || QEMU=`which kvm`	# qemu 1.x and later
 
 TEST_DIR=run/test	# was oldtree/run_test
-TFTP_PATH=../tftp
+TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
 PHANTOM_LOG=$PHANTOM_HOME/$TEST_DIR/serial0.log
 
