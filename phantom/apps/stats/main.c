@@ -26,6 +26,8 @@ static int gather_info(void)
     for(;;)
     {
         struct kernel_stats ti;
+        memset( &ti, 0, sizeof(ti) );
+
         int rc = read( fd, &ti, sz );
         if( sz != rc )
             break;

@@ -10,7 +10,7 @@
 
 char* fmtname(char *path)
 {
-    static char buf[DIRSIZ+1];
+    static char buf[DIRSIZ*3+1];
     char *p;
 
     // Find first character after last slash.
@@ -88,8 +88,9 @@ ls(char *path)
         {
             if(de.d_ino == 0)
                 continue;
-            memmove(p, de.d_name, DIRSIZ);
-            p[DIRSIZ] = 0;
+            //memmove(p, de.d_name, DIRSIZ);
+            //p[DIRSIZ] = 0;
+            strlcpy( p, de.d_name, DIRSIZ );
             if(stat(buf, &st) < 0){
                 printf( "ls: cannot stat %s\n", buf);
                 continue;

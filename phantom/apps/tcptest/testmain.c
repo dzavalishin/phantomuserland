@@ -41,7 +41,10 @@ int main(int ac, char **av, char **env)
         //sleepmsec(4000);
         //sleepmsec(100);  // hangs if turn on - why?
         memset( buf, 0, sizeof(buf) );
-        read(tcpfd, buf, 512);
+
+        int rc = read(tcpfd, buf, 512);
+        if( rc < 0 ) printf("read rc = %d\n", rc);
+
         buf[512] = 0;
         printf("ya.ru: '%s'\n", buf );
         close(tcpfd);

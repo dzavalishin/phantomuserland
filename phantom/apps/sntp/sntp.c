@@ -145,7 +145,7 @@ void SNTP_resync(u_int32_t server_addr, u_int32_t interval)
             } else              /* ... else wait 5 secs for next retry */
                 sleepmsec(500);
         } else {                /* no error */
-            printf( "got time %ld\n", t );
+            printf( "got time %ld\n", (long)t );
             //printf( "got time %ld, %s", t, dumpt(t) );
 
             //set_time(t);          /* so set the time */
@@ -157,16 +157,16 @@ void SNTP_resync(u_int32_t server_addr, u_int32_t interval)
 
 static errno_t SNTPGetTime(u_int32_t * server_adr, time_t * t)
 {
-    /*first check the pointers */
-    //u_int32_t rec_addr;
     int sock;     /* the udp socket */
-    sntpframe data;            /* we're using the heap to save stack space */
-    //u_int16_t port;               /* source port from incoming packet */
+    sntpframe data;
     int len;
     errno_t result = EIO;
 
-    /* Set UDP input buffer to 256 bytes */
-    //u_int16_t bufsize = 256;
+    if (t == NULL)
+        return -1;
+
+    if (server_adr == NULL)
+        return -1;
 
     struct sockaddr_in addr, raddr;
 
@@ -175,12 +175,6 @@ static errno_t SNTPGetTime(u_int32_t * server_adr, time_t * t)
     addr.sin_family = PF_INET;
     addr.sin_addr.s_addr = htonl(*server_adr);
 
-
-    if (t == NULL)
-        return -1;
-
-    if (server_adr == NULL)
-        return -1;
 
     sock = socket( PF_INET, SOCK_DGRAM, 0 );
     if( sock < 0 )
@@ -191,6 +185,7 @@ static errno_t SNTPGetTime(u_int32_t * server_adr, time_t * t)
 
     //setsockopt(sock, SO_RCVBUF, &bufsize, sizeof(bufsize));
 
+    memset( &data, 0, sizeof(data) );
     data.mode = 0x1B;          /* LI, VN and Mode bit fields (all in u_char mode); */
 
 

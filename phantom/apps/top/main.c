@@ -133,7 +133,10 @@ static int gather_info(void)
             // create a new one
             tt = malloc(sizeof(thread_time));
             if(!tt)
+            {
+                close(fd);
                 return ERR_NO_MEMORY;
+            }
 
             memset(&tt->info, 0, sizeof(struct phantom_thread));
 

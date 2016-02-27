@@ -293,6 +293,7 @@ static int handle_exit(scan_info *info)
 
         err = parse_expression(info,&expr);
         if(err != SHE_NO_ERROR) return err;
+        if( 0 == expr ) return SHE_SCAN_ERROR;
 
         if(!(expr->isnumber)){
             err = SHE_INVALID_TYPE;
@@ -353,6 +354,7 @@ static int handle_if(scan_info *info)
 
     err = parse_rvl_expr(info,&expr);
     if(err != SHE_NO_ERROR) return err;
+    if( 0 == expr ) return SHE_SCAN_ERROR;
 
     if(!expr->isnumber){
 
@@ -393,6 +395,7 @@ static int handle_exec(scan_info *info,shell_value **out)
 
     err = parse_rvl_expr(info,&state);
     if(err != SHE_NO_ERROR) return err;
+    if( 0 == state ) return SHE_SCAN_ERROR;
 
     err = shell_value_get_text(state,&statement);
     if(err != SHE_NO_ERROR) return err;
@@ -430,6 +433,9 @@ static int handle_load(scan_info *info)
     err = parse_expression(info,&value);
     if(err != SHE_NO_ERROR) return err;
 
+    if( 0 == value )
+        return SHE_SCAN_ERROR;
+
     set_shell_var_with_value(var_name,value);
 
     shell_value_free(value);
@@ -453,6 +459,7 @@ static int handle_echo(scan_info *info)
         err = parse_expression(info,&value);
 
         if(err != SHE_NO_ERROR) return err;
+        if( 0 == value ) return SHE_SCAN_ERROR;
 
         text = shell_value_to_char(value);
         printf("%s",text);

@@ -261,7 +261,7 @@ static shell_var *shell_var_init_value(const char *name,shell_value *value)
 
     return current;
 
-    free(current->name);
+    //free(current->name);
 err2:
     free(current);
 err:

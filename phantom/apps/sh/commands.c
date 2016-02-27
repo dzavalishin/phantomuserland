@@ -130,7 +130,7 @@ int cmd_mkdir(int argc, char *argv[])
     //rc = _kern_mkdir(argv[1]);
     rc = mkdir(argv[1]);
     if (rc < 0) {
-        printf("_kern_mkdir() returned error: %s\n", strerror(rc));
+        printf("_kern_mkdir() returned error: %s\n", strerror(-rc));
     } else {
         printf("%s successfully created.\n", argv[1]);
     }
@@ -151,7 +151,7 @@ int cmd_cat(int argc, char *argv[])
 
     fd = open(argv[1], 0);
     if(fd < 0) {
-        printf("cat: open() returned error: %s!\n", strerror(fd));
+        printf("cat: open() returned error: %s!\n", strerror(-fd));
         goto done_cat;
     }
 
@@ -179,7 +179,7 @@ int cmd_cd(int argc, char *argv[])
 
     rc = chdir(argv[1]);
     if (rc < 0) {
-        printf("cd: chdir() returned error: %s!\n", strerror(rc));
+        printf("cd: chdir() returned error: %s!\n", strerror(-rc));
     }
 
     return 0;

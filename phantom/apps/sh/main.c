@@ -81,7 +81,7 @@ static void getline( char *buf, int size )
     while( nread < size-1 )
     {
         //read( 0, bp, 1 );
-        *bp = getchar();
+        *bp = (char) getchar();
 
         //printf("!-%c", *bp);
         //printf("%c", *bp);

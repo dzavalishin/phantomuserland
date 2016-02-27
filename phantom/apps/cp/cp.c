@@ -20,12 +20,12 @@ void copy( char *pSrc, char *pDst ) {
 	}
 	nFile2 = Open( pSrc, O_RDONLY );
 	if ( nFile2 < 0 ) {
-		Print( "could not open %s (%s)\n", pSrc, StringError( nFile2 ) );
+		Print( "could not open %s (%s)\n", pSrc, StringError( -nFile2 ) );
 		return;
 	}
 	nFile1 = Open( pDst, O_WRONLY | O_CREAT );
 	if ( nFile1 < 0 ) {
-		Print( "could not open %s (%s)\n", pDst, StringError( nFile1 ) );
+		Print( "could not open %s (%s)\n", pDst, StringError( -nFile1 ) );
 		Close( nFile2 );
 		return;
 	}
@@ -34,14 +34,14 @@ void copy( char *pSrc, char *pDst ) {
 		//Print( "Writing %d bytes to %s\n", nLen, pDst );
 		nLen = Write( nFile1, aBuffer, nLen );
 		if ( nLen < 0 ) {
-			Print( "write failed (%s)\n", StringError( nLen ) );
+			Print( "write failed (%s)\n", StringError( -nLen ) );
 			Close( nFile1 );
 			Close( nFile2 );
 			return;
 		}
 	}
 	if ( nLen < 0 ) {
-		Print( "read failed (%s)\n", StringError( nLen ) );
+		Print( "read failed (%s)\n", StringError( -nLen ) );
 	}
 	Close( nFile1 );
 	Close( nFile2 );

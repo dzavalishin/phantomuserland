@@ -278,7 +278,7 @@ int expect(scan_info *info,int check)
 {
     if(info->sym_code == check){
 
-        scan(info);
+        (void)scan(info);
         return 0;
 
     } else {
@@ -332,7 +332,7 @@ int set_scan_info_line(scan_info *info)
 
     if(info->current == NULL) return 1;
 
-    strcpy(info->input_line,info->current->text);
+    strlcpy(info->input_line,info->current->text, sizeof(info->input_line));
     info->scanner = (info->input_line);
     return scan(info);
 
@@ -354,7 +354,7 @@ void init_scan_info(const char*in,scan_info *info){
     info->current = NULL;
     info->line_no = 1;
 
-    scan(info);
+    (void)scan(info);
 
 }
 
