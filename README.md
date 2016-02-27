@@ -8,11 +8,8 @@ de-facto it contains kernel sources as well, though.
 ## What Phantom OS is ##
 
 * [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
-* [Big article in russian](http://www.osp.ru/os/2011/03/13008200/)
-
-
-Code, contained here, is not all we have for Phantom - we upload only
-those parts of code which are more or less ready to be co-developed.
+* [Short article in English - TheRegister](http://www.theregister.co.uk/2009/02/03/phantom_russian_os/)
+* [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/)
 
 Basically, most of code we (the original team) upload is very straighforward
 and, sometimes, dumb. That, to some extent, is on purpose. We want to have
@@ -25,7 +22,7 @@ Only ia32 target is most complete and stable, arm port is in active development
 but very instable, mips port is just started - compiles and can breath for a
 second :), amd64 port is incomplete and does not compile at all.
 
-
+[How to take part](https://github.com/dzavalishin/phantomuserland/wiki/HowToTakePart)
 
 ## Build ##
 
@@ -34,6 +31,8 @@ second :), amd64 port is incomplete and does not compile at all.
   In Windows you will need Cygwin to do that. http://www.cygwin.com
   Select, at least: gcc4, subversion, binutils, make, gdb
   (see etc/cygwin_get.cmd)
+  
+  See also [TOOLCHAIN](https://github.com/dzavalishin/phantomuserland/blob/master/TOOLCHAIN)
 
 ## Run ##
 
