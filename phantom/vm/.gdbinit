@@ -28,4 +28,6 @@ break e4c_print_exception
 
 break e4c_exception_throw_verbatim_
 
+break pvm_exec_sys
+
 run

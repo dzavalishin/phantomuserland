@@ -42,7 +42,8 @@ struct internal_class pvm_internal_classes[] =
         0, // no finalizer
         0, // no restart func
         0,
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE,
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL, // must be internal for sycall func lookup goes up the class hierarchy to find some internal one
         {0,0}
     },
     {
@@ -74,7 +75,8 @@ struct internal_class pvm_internal_classes[] =
         0, // no finalizer
         0, // no restart func
         0, // Dynamic
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
         {0,0}
     },
     {

@@ -82,7 +82,7 @@ POSF(IS_CODE,0x01)
 
 // These are set on creation by class
 
-// object must not be modified at all - NOT IMPLEMENTED
+// object must not be modified at all - IMPLEMENTED PARTIALLY
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE 0x2000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER 0x1000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE 0x800

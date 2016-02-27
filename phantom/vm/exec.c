@@ -1835,7 +1835,36 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
     if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
         pvm_exec_panic( "pvm_exec_find_syscall: not a class object" );
 
-    struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
+    struct data_area_4_class *da = 0;
+
+    // TODO make sure compiler does not generate such calls and return panic
+#if 0
+        if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
+            pvm_exec_panic("find_syscall: not internal class in SYS" );
+#else
+    // Find parent which is internal. This can happen if class got a method from
+    // internal parent, such as .internal.object. Happens often with constructor.
+    int i = 1024; // max parent levels
+    while( i-- > 0 )
+    {
+        da = (struct data_area_4_class *)&(_class.data->da);
+
+        if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
+            break;
+
+        if( pvm_is_null( da->class_parent ) )
+            pvm_exec_panic("find_syscall: not internal class and no internal parent" );
+
+            _class = da->class_parent;
+    }
+
+    if( pvm_is_null( da->class_parent ) )
+            pvm_exec_panic("find_syscall: not internal class and no internal parent" );
+#endif
+
+    if( da->sys_table_id >= pvm_n_internal_classes )
+        pvm_exec_panic("find_syscall: internal class index out of table" );
+    //pvm_exec_panic("find_syscall: internal class index (%d) out of table (%d)", da->sys_table_id, pvm_n_internal_classes );
 
     // TODO fix this back
     //if( syscall_index >= pvm_internal_classes[da->sys_table_id].syscalls_table_size ) pvm_exec_panic("find_syscall: syscall_index no out of table size" );
