@@ -6,9 +6,9 @@
 
 #include <stddef.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
+//#ifdef _WIN32
+//#include <windows.h>
+//#endif
 
 #ifndef EXTERN_C_BEGIN
 #ifdef __cplusplus
@@ -42,11 +42,11 @@ EXTERN_C_BEGIN
 
 typedef int SRes;
 
-#ifdef _WIN32
-typedef DWORD WRes;
-#else
+//#ifdef _WIN32
+//typedef DWORD WRes;
+//#else
 typedef int WRes;
-#endif
+//#endif
 
 #ifndef RINOK
 #define RINOK(x) { int __result__ = (x); if (__result__ != 0) return __result__; }
