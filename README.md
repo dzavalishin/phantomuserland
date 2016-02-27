@@ -26,7 +26,8 @@ second :), amd64 port is incomplete and does not compile at all.
 
 ## Build ##
 
-  "make all" in trunk
+  set PHANTOM_HOME environment variable to the path to Phantom repository root directory
+  "make all" in repository root
 
   In Windows you will need Cygwin to do that. http://www.cygwin.com
   Select, at least: gcc4, subversion, binutils, make, gdb
