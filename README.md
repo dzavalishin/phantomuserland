@@ -1,7 +1,15 @@
+# Welcome to Phantom OS #
+
 Hello there.
 
 It is a repository for Phantom OS userland code and cross-development tools.
 de-facto it contains kernel sources as well, though.
+
+## What Phantom OS is ##
+
+* [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
+* [Big article in russian](http://www.osp.ru/os/2011/03/13008200/)
+
 
 Code, contained here, is not all we have for Phantom - we upload only
 those parts of code which are more or less ready to be co-developed.
@@ -19,7 +27,7 @@ second :), amd64 port is incomplete and does not compile at all.
 
 
 
-BUILD
+## Build ##
 
   "make all" in trunk
 
@@ -27,12 +35,12 @@ BUILD
   Select, at least: gcc4, subversion, binutils, make, gdb
   (see etc/cygwin_get.cmd)
 
-RUN
+## Run ##
 
   Run phantom.cmd/phantom.sh in trunk/run
   See doc/RUNNING for more details
 
-DEBUG
+## Debug ##
 
   Run QEMU (see above) and then - gdb in trunk/oldtree/kernel/phantom
 
@@ -41,21 +49,21 @@ DEBUG
   Kernel is able to send logging info to syslogd by UDP.
   Currently syslogd address is hardcoded in net_misc.c.
 
-DIRECTORIES
+## Directories ##
 
 trunk/oldtree/kernel/phantom - kernel 
 trunk/phantom                - libs and unix userland (user/apps)
 trunk/plib/sys/src           - native phantom userland code
 
 trunk/run                    - QEMU run/test environment
-trunk/plc                    - phantom language compiler / java bytecode translator
+trunk/tools/plc              - phantom language compiler / java bytecode translator
 
-DOX
+## Dox ##
 
   https://github.com/dzavalishin/phantomuserland/wiki
   doc/*
 
-SCREENSHOTS
+## Screenshots ##
 
   https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots
 
