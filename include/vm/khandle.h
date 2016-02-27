@@ -14,8 +14,8 @@
 
 typedef int ko_handle_t;
 
-errno_t  object_assign_handle( ko_handle_t *h, pvm_object_t o );
-errno_t  object_revoke_handle( ko_handle_t h, pvm_object_t o );
+//errno_t  object_assign_handle( ko_handle_t *h, pvm_object_t o );
+//errno_t  object_revoke_handle( ko_handle_t h, pvm_object_t o );
 
 
 // These two work after handle is assigned
