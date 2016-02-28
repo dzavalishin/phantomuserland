@@ -147,13 +147,19 @@ int usys_socket(int *err, uuprocess_t *u, int domain, int type, int protocol)
 
 int usys_bind(int *err, uuprocess_t *u, int fd, const struct sockaddr *addr, socklen_t addrlen)
 {
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
 
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET) )
     {
         *err = ENOTSOCK;
         return -1;
@@ -211,13 +217,20 @@ int usys_connect(int *err, uuprocess_t *u, int fd, const struct sockaddr *_ia, s
         return -1;
     }
 
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
 
     //if( (u == 0) || ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)))
-    if( (u == 0) || (! (f->flags & UU_FILE_FLAG_NET)) || (! (f->flags & UU_FILE_FLAG_TCP))  )
+    if( (! (f->flags & UU_FILE_FLAG_NET)) || (! (f->flags & UU_FILE_FLAG_TCP))  )
     {
         *err = ENOTSOCK;
         return -1;
@@ -253,13 +266,19 @@ int usys_connect(int *err, uuprocess_t *u, int fd, const struct sockaddr *_ia, s
 #if 1
 int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, socklen_t *addrlen)
 {
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
 
     // todo require UU_FILE_FLAG_ACCEPTABLE
-    if( (u == 0) || ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)))
+    if( ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)) )
     {
         *err = ENOTSOCK;
         return -1;
@@ -270,7 +289,7 @@ int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, soc
     void *new_socket = NULL;
     i4sockaddr tmp_addr;
 
-    int pe = tcp_accept(us->prot_data, &tmp_addr, new_socket);
+    int pe = tcp_accept(us->prot_data, &tmp_addr, &new_socket);
 
     if( *addrlen >= (int)sizeof(struct sockaddr_in) )
     {
@@ -342,14 +361,20 @@ int usys_accept(int *err, uuprocess_t *u, int fd, struct sockaddr *acc_addr, soc
 
 int usys_listen(int *err, uuprocess_t *u, int fd, int backlog)
 {
-	(void)backlog;
+    (void)backlog;
+
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
 
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
 
-    if( (u == 0) || ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)))
+    if( ! (f->flags & (UU_FILE_FLAG_NET|UU_FILE_FLAG_TCP)))
     {
         *err = ENOTSOCK;
         return -1;
@@ -367,9 +392,15 @@ int usys_listen(int *err, uuprocess_t *u, int fd, int backlog)
 
 int usys_getsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, void *optval, socklen_t *optlen)
 {
-	(void) optname;
-	(void) optlen;
-	(void) optval;
+    (void) optname;
+    (void) optlen;
+    (void) optval;
+
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
 
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
@@ -377,8 +408,7 @@ int usys_getsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, vo
     struct uusocket *us = f->impl;
 	(void) us;
 
-
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET))
     {
         *err = ENOTSOCK;
         return -1;
@@ -397,12 +427,18 @@ int usys_getsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, vo
 
 int usys_setsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, const void *optval, socklen_t optlen)
 {
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET) )
     {
         *err = ENOTSOCK;
         return -1;
@@ -450,12 +486,18 @@ int usys_setsockopt(int *err, uuprocess_t *u, int fd, int level, int optname, co
 
 int usys_getsockname(int *err, uuprocess_t *u, int fd, struct sockaddr *name, socklen_t *namelen)
 {
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET))
     {
         *err = ENOTSOCK;
         return -1;
@@ -469,12 +511,18 @@ int usys_getsockname(int *err, uuprocess_t *u, int fd, struct sockaddr *name, so
 
 int usys_getpeername(int *err, uuprocess_t *u, int fd, struct sockaddr *name, socklen_t *namelen)
 {
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
     struct uusocket *us = f->impl;
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET))
     {
         *err = ENOTSOCK;
         return -1;
@@ -523,6 +571,12 @@ ssize_t usys_recv(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen, in
 ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen, int flags,
                       struct sockaddr *from, socklen_t *fromlen)
 {
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
@@ -534,7 +588,7 @@ ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen
         return -1;
     }
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET))
     {
         *err = ENOTSOCK;
         return -1;
@@ -578,15 +632,22 @@ ssize_t usys_recvmsg(int *err, uuprocess_t *u, int fd, struct msghdr *msg, int f
 {
     (void) msg;
 
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
     int len = 0;
 
     struct uusocket *us = f->impl;
-	(void) us;
+    (void) us;
 
+    // TODO implement me
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET))
     {
         *err = ENOTSOCK;
         return -1;
@@ -614,6 +675,12 @@ ssize_t usys_send(int *err, uuprocess_t *u, int fd, const void *buf, size_t len,
 
 ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t buflen, int flags, const struct sockaddr *to, socklen_t tolen)
 {
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
@@ -626,7 +693,7 @@ ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t bu
         return -1;
     }
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET))
     {
         *err = ENOTSOCK;
         return -1;
@@ -664,17 +731,24 @@ ssize_t usys_sendto(int *err, uuprocess_t *u, int fd, const void *buf, size_t bu
 
 ssize_t usys_sendmsg(int *err, uuprocess_t *u, int fd, const struct msghdr *msg, int flags)
 {
-	(void) msg;
+    (void) msg;
 
-	CHECK_FD(fd);
+    if( u == 0 )
+    {
+        *err = ENOTSOCK; // TODO correct?
+        return -1;
+    }
+
+    CHECK_FD(fd);
     struct uufile *f = GETF(fd);
     int len = 0;
 
     struct uusocket *us = f->impl;
-	(void) us;
+    (void) us;
 
+    // TODO implement me
 
-    if( (u == 0) || ! (f->flags & UU_FILE_FLAG_NET))
+    if( ! (f->flags & UU_FILE_FLAG_NET))
     {
         *err = ENOTSOCK;
         return -1;

@@ -143,7 +143,8 @@ static uint8_t *MibVarsSysGet(CONST SNMPVAR * vp, OID * name, size_t * namelen, 
 
     case MAG_SYS_NAME:
         //*wmethod = MibVarsSysSet;
-        if (phantom_uname.nodename) {
+        if(phantom_uname.nodename[0])
+        {
             *varlen = strlen(phantom_uname.nodename);
             return (uint8_t *) phantom_uname.nodename;
         }

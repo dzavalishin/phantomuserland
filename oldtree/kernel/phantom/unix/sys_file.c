@@ -164,7 +164,7 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
     switch(whence)
     {
     case SEEK_SET: break;
-    case SEEK_CUR: pos += f->pos;
+    case SEEK_CUR: pos += f->pos; break;
     case SEEK_END:
         {
             ssize_t size = f->ops->getsize( f );
@@ -178,6 +178,7 @@ int usys_lseek( int *err, uuprocess_t *u, int fd, int offset, int whence )
 
             pos += size;
         }
+        break;
     }
 
     if(pos < 0)
@@ -208,16 +209,16 @@ int usys_fchmod( int *err, uuprocess_t *u, int fd, int mode )
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
 
+    if( f->ops == 0 )
+    {
+        *err = ENXIO;
+        return -1;
+    }
+
     if( f->ops->chmod == 0)
     {
         *err = ENOSYS;
         goto err;
-    }
-
-    if( (f->ops == 0) || (f->ops->chmod == 0) )
-    {
-        *err = ENXIO;
-        return -1;
     }
 
     hal_mutex_lock( &f->mutex );
@@ -306,7 +307,7 @@ int usys_fcntl( int *err, uuprocess_t *u, int fd, int cmd, int arg )
     case F_GETFL:        /* Get file status flags.  */
         //rc = 0; // TODO
 
-        if(f->flags | UU_FILE_FLAG_RDONLY)
+        if(f->flags & UU_FILE_FLAG_RDONLY)
             rc = O_RDONLY;
         else
             rc = O_RDWR;

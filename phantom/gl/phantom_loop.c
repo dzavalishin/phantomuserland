@@ -41,7 +41,7 @@ ui_loop(int argc,char **argv, const char *name)
 	//GR_EVENT	event;		/* current event */
 	//GR_IMAGE_ID	id = 0;
         //NGLXContext cx;
-        int width, height, k;
+        int width, height;
 
         /*
 	if (GrOpen() < 0) {
@@ -66,11 +66,15 @@ ui_loop(int argc,char **argv, const char *name)
 
             // if no char
             //                idle();
-idle();
-continue;
+            idle();
+#if 0
+            int k;
+
+            continue;
             int c = getchar();
-printf("ph_loop ");
-            switch(c) {
+            printf("ph_loop ");
+            switch(c)
+            {
             case 0x1B:
                 exit(0);
 
@@ -83,6 +87,7 @@ printf("ph_loop ");
                 break;
             }
             key(k, 0);
+#endif
         }
 	return 0;
 }

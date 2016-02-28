@@ -117,7 +117,7 @@ phantom_device_t *driver_virtio_disk_probe( pci_cfg_t *pci, int stage )
     struct virtio_blk_config cfg;
     virtio_get_config_struct( &vdev, &cfg, sizeof(cfg) );
 
-    SHOW_FLOW( 1, "VIRTIO disk size is %d Mb", cfg.capacity/2048 );
+    SHOW_FLOW( 1, "VIRTIO disk size is %ld Mb", (long)(cfg.capacity/2048) );
 
     virtio_set_status( &vdev, VIRTIO_CONFIG_S_DRIVER|VIRTIO_CONFIG_S_DRIVER_OK );
 

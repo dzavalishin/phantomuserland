@@ -233,9 +233,9 @@ static void virtio_ring_init(virtio_device_t *vd, int index, int num )
     hal_pv_alloc( &result, &buffer, npages*PAGE_SIZE );
 #endif
 
-    memset( buffer, size, 0 );
+    memset( buffer, 0, size );
 
-    SHOW_FLOW( 3, "phys mem @%p-%p ", result, result+size );
+    SHOW_FLOW( 3, "phys mem @%p-%p ", (void *)result, (void *)result+size );
 
 
     virtio_ring_t *r = (virtio_ring_t *)calloc( 1, sizeof(virtio_ring_t) );
@@ -276,7 +276,7 @@ void virto_ring_dump(virtio_ring_t *r)
 
     printf("VRing @%p totalSize=%d, index=%d, phys=%p, nFreeDesc=%d, freeHead=%d, lastUsedIdx=%d \n",
            r,
-           r->totalSize, r->index, r->phys, r->nFreeDescriptors, r->freeHead, r->lastUsedIdx);
+           r->totalSize, r->index, (void *)(r->phys), r->nFreeDescriptors, r->freeHead, r->lastUsedIdx);
 
     int i;
 
@@ -289,7 +289,7 @@ void virto_ring_dump(virtio_ring_t *r)
                (unsigned)(r->vr.desc[i].next), (unsigned)(r->vr.desc[i].flags)
               );
 #else
-        printf("%d@%lp->", r->vr.desc[i].len, r->vr.desc[i].addr );
+        printf("%d@%lp->", r->vr.desc[i].len, (void *)(r->vr.desc[i].addr ));
         printf("%d/", r->vr.desc[i].next );
         printf("%x, \t", r->vr.desc[i].flags );
 #endif
@@ -646,7 +646,7 @@ static void virtio_wait_for_free_descriptors(virtio_device_t *vd, int qindex, vi
 
 void dump_phys( physaddr_t a, size_t len )
 {
-    printf( "dump physaddr %p\n, ", a );
+    printf( "dump physaddr %p\n, ", (void *)a );
 
     char buf[PAGE_SIZE];
     while(len > 0)

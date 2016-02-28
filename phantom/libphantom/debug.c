@@ -184,7 +184,7 @@ static int debug_read_line(char *buf, int max_len)
             }
         default:
             buf[ptr++] = c;
-            dbg_putch(c);
+            dbg_putch(c & 0xFFu);
         }
         if(ptr >= max_len - 2) {
             buf[ptr++] = '\0';

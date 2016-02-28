@@ -145,7 +145,8 @@ void win_make_decorations(drv_video_window_t *w)
     w->w_title->z = zless;
 
     int focused = w->state & WSTATE_WIN_FOCUSED;
-    if( w->w_title && w->w_title->state & WSTATE_WIN_FOCUSED) focused = 1;
+    //if( w->w_title && w->w_title->state & WSTATE_WIN_FOCUSED) focused = 1;
+    if( w->w_title->state & WSTATE_WIN_FOCUSED) focused = 1; // w_title can't be null here
 
     w->w_title->bg = focused ? title_back_color_focus : title_back_color_nofocus;
 

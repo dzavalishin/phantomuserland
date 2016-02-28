@@ -120,7 +120,7 @@ static void snmp_daemon_thread(void)
         SHOW_ERROR0( 0, "Failed to register MibIf");
 
     /* Create views. */
-    if ((view_idx = SnmpViewCreate("all", view_all, sizeof(view_all), SNMP_VIEW_INCLUDED)) <= 0) {
+    if ((view_idx = SnmpViewCreate("all", view_all, sizeof(view_all)/sizeof(view_all[0]), SNMP_VIEW_INCLUDED)) <= 0) {
         SHOW_ERROR0( 0, "Failed to create view");
         goto cfail;
     }

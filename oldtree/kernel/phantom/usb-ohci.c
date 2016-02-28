@@ -581,9 +581,9 @@ static void dump_ohci_ed( struct ohci_ed *ed )
 {
     SHOW_INFO(1, "OHCI ed hwInfo %x tail=%p head=%p nextEd=%p",
                ed->hwINFO,
-               ed->hwTailP,
-               ed->hwHeadP,
-               ed->hwNextED );
+               (void *)ed->hwTailP,
+               (void *)ed->hwHeadP,
+               (void *)ed->hwNextED );
 }
 
 

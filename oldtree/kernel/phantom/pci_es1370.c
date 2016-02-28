@@ -72,7 +72,7 @@ phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
 
     SHOW_FLOW( 1, "Probe for " DEV_NAME " stage %d", stage );
 
-    phantom_device_t * dev = malloc(sizeof(phantom_device_t));
+    phantom_device_t * dev = calloc(sizeof(phantom_device_t),1);
 
     int i;
     for (i = 0; i < 6; i++)

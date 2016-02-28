@@ -24,7 +24,7 @@ static void cn_timer_timedcall_func( void *a )
     struct data_area_4_connection *c = a;
     time_t t = fast_time();
 
-    SHOW_FLOW( 1, "timer callback %ld", t );
+    SHOW_FLOW( 1, "timer callback %ld", (long)t );
     phantom_connection_callback_int( c, t );
 }
 

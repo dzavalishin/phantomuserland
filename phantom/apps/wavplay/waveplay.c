@@ -61,7 +61,7 @@ int play(const char* filename);
 
 
 static int vflag = 1;
-static int cflag = 0;
+//static int cflag = 0;
 static int rflag = 0;
 //static int sampling_rate = 44100;
 //static int channels = 2;
@@ -81,8 +81,8 @@ int main( int argc, char **argv )
     if ( argc == 1 ) {
         //printf( "Usage: wavplay [WAVE-File]\n" );
         //return -1;
-        play( "/amnt0/siren.wav" );
-        play( "/amnt1/siren.wav" );
+        if( play( "/amnt0/siren.wav" ) ) return 1;
+        if( play( "/amnt1/siren.wav" ) ) return 1;
         return 0;
 
     }
@@ -174,6 +174,7 @@ int play(const char* filename)
     if (sbuf == NULL)
     {
         printf("Error: Can't alloc memory.");
+        close(in_fd);
         return -1;
     }
 
@@ -185,8 +186,8 @@ int play(const char* filename)
         rc = playWave(in_fd, out_fd, datasize);
 
     close(in_fd);
-    if (!cflag)
-        CloseDSP(out_fd);
+    //if (!cflag)
+    CloseDSP(out_fd);
 
     free(sbuf);
     return rc;
@@ -216,7 +217,8 @@ int readWaveFile(int fd, PWAVEFORMAT pwavefmt, u_int *datasize)
 
     while(read(fd, (char *)&header, sizeof(int)) == sizeof(int))
     {
-        read(fd, (char *)&size, sizeof(int));
+        if( sizeof(int) != read(fd, (char *)&size, sizeof(int)))
+            break;
 
         if (header == H_FMT)
         {
@@ -232,7 +234,7 @@ int readWaveFile(int fd, PWAVEFORMAT pwavefmt, u_int *datasize)
             if (pwavefmt->wFormatTag != 1)
             {
                 printf("Error: Unsupported format(0x%x).\n",
-                      pwavefmt->wFormatTag);
+                       pwavefmt->wFormatTag);
                 return 4;
             }
         }
@@ -259,27 +261,26 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
     //int status;
     //int arg;
     /*
-    char anName[ 256 ];
+     char anName[ 256 ];
 
-    if ( GetStandardOutput( anName ) ) {
-        return -1;
-    }
-    */
+     if ( GetStandardOutput( anName ) ) {
+     return -1;
+     }
+     */
 
-    if ((fd = open( devname, O_WRONLY)) < 0)
-        return fd;
+    fd = open( devname, O_WRONLY);
 
     /* ͥ(STEREO or MONAURAL) * /
-    if ( (int)(pwf->nChannels) == 1 ) {
-        arg = 0;
-    } else {
-        arg = 1;
-    }
-    */
-    if (fd < 0)
+     if ( (int)(pwf->nChannels) == 1 ) {
+     arg = 0;
+     } else {
+     arg = 1;
+     }
+     */
+    if(fd < 0)
     {
         perror("openDSP");
-        close(fd);
+        //close(fd);
         return -1;
     }
 
@@ -313,7 +314,7 @@ int openDSP(const char* devname, PWAVEFORMAT pwf)
     if (vflag && (arg != (int)pwf->nSamplesPerSec))
     {
         printf("Warning: Can't set sampling rate %d Hz.\n",
-              (int)pwf->nSamplesPerSec);
+               (int)pwf->nSamplesPerSec);
         printf("Using %d Hz instead.\n", arg);
     }
 #ifdef DEBUG
@@ -375,9 +376,9 @@ int playWave(int data_fd, int dsp_fd, u_int datasize)
     register int i, nr, nw, off;
     int tr, rd;
 
-//#ifdef DEBUG
+    //#ifdef DEBUG
     printf("datasize = %d, bsize =  %d\n", datasize, bsize);
-//#endif
+    //#endif
     tr = datasize / bsize;
     rd = datasize % bsize;
 

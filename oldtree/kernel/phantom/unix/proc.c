@@ -396,7 +396,7 @@ errno_t uu_proc_set_exec( int pid, struct exe_module *em)
         if( p->argv[0] )
             name = p->argv[0];
 
-        strncpy( em->name, name, MAX_UU_CMD );
+        strlcpy( em->name, name, MAX_UU_CMD );
 
     }
     else

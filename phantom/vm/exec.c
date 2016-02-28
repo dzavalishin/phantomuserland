@@ -489,10 +489,11 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
         if( prefix_long )
         {
-            prefix_long  = 0;
+            prefix_long = 0;
             switch(instruction)
             {
             default:
+                prefix_long = 1;  // attempt nonprefix impl of inctruction, maybe it checks for a modifier
                 goto noprefix;
 
             case opcode_ishl:
@@ -698,10 +699,11 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
         if( prefix_float )
         {
-            prefix_float   = 0;
+            prefix_float = 0;
             switch(instruction)
             {
-            default: // Not defined for double, throw exception
+            default: // Try classic implementation of that op
+                prefix_float = 1; // attempt nonprefix impl of inctruction, maybe it checks for a modifier
                 goto noprefix;
                 //pvm_exec_panic("invalid double op");
                 //break;
@@ -875,6 +877,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             switch(instruction)
             {
             default:
+                prefix_double = 1;  // attempt nonprefix impl of inctruction, maybe it checks for a modifier
                 goto noprefix;
 
             case opcode_ishl: // Not defined for double, throw exception
@@ -1823,6 +1826,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
         if( prefix_long || prefix_float || prefix_double )
             printf("Unused type prefix on op code 0x%X\n", instruction );
 
+        prefix_long = prefix_float = prefix_double = 0;
 
     }
 }

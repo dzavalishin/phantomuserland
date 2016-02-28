@@ -248,7 +248,7 @@ errno_t load_kolibri( struct exe_module **emo, void *_exe, size_t exe_size )
                       ) )
     {
         SHOW_ERROR0( 0, "Can't allocate CS/DS in LDT" );
-        // TODO free mem?
+        free( em );
         return ENOMEM;
     }
 
@@ -355,7 +355,7 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
     struct exe_module *em = calloc( sizeof(struct exe_module), 1 );
     em->refcount++;
 
-    // TODO Need some table of running modules?
+    // TODO Need some table of running modules? use handle?
 
     em->mem_start = va;
     em->mem_end = va+memsize;
@@ -380,7 +380,7 @@ errno_t load_elf( struct exe_module **emo, void *_elf, size_t elf_size )
                       ) )
     {
         SHOW_ERROR0( 0, "Can't allocate CS/DS in LDT" );
-        // TODO free mem?
+        free( em );
         return ENOMEM;
     }
 

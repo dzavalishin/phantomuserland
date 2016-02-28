@@ -308,7 +308,11 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
     bstate->myip = rbuf.rbootp.bp_yiaddr;
     bstate->servip = rbuf.rbootp.bp_siaddr;
     //if(rootip.s_addr == INADDR_ANY) rootip = servip;
-    bcopy(rbuf.rbootp.bp_file, bstate->bootfile, sizeof(bstate->bootfile));
+
+    // coverity.com doesn't understand bcopy
+    //bcopy(rbuf.rbootp.bp_file, bstate->bootfile, sizeof(bstate->bootfile));
+    memcpy( bstate->bootfile, rbuf.rbootp.bp_file, sizeof(bstate->bootfile));
+
     bstate->bootfile[sizeof(bstate->bootfile) - 1] = '\0';
 
     /*

@@ -100,7 +100,7 @@ static void _fscanf_push(void *p, unsigned char c)
         return;
     }
     val->count--;
-    stream->flags &= !_STDIO_EOF;
+    stream->flags &= ~_STDIO_EOF;
     stream->flags |= _STDIO_UNGET;
     stream->unget = c;
 }

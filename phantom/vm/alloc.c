@@ -423,7 +423,7 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
 
 
 
-
+#define PVM_GC_ENABLE 0
 
 
 static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
@@ -436,15 +436,13 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
     do {
         data = pvm_find(size, arena);
 
+#if PVM_GC_ENABLE
         if(data)
             break;
-
-        break; //skip GC, until we bring context to the allocator
 
         if(ngc-- <= 0)
             break;
 
-#if 0
         printf("\n out of mem looking for %d bytes, arena %d. Run GC... \n", size, arena);
 
         /*
@@ -455,6 +453,8 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
         if(vm_alloc_mutex) hal_mutex_unlock( vm_alloc_mutex );
         run_gc();
         if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );
+#else
+        break; //skip GC, until we bring context to the allocator
 #endif
     } while(1);
 

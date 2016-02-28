@@ -601,7 +601,9 @@ usb_setup(void)
     SHOW_FLOW0(3, "init usb");
 
     // Look for USB controllers
+#if CONFIG_USB_EHCI
     int ehcibdf = -1;
+#endif
     int count = 0;
     int bdf, max;
     foreachpci(bdf, max) {
@@ -610,6 +612,7 @@ usb_setup(void)
         if (code >> 8 != PCI_CLASS_SERIAL_USB)
             continue;
 
+#if CONFIG_USB_EHCI
         if (bdf > ehcibdf) {
             // Check to see if this device has an ehci controller
             ehcibdf = bdf;
@@ -618,10 +621,9 @@ usb_setup(void)
             for (;;) {
                 if (ehcicode == PCI_CLASS_SERIAL_USB_EHCI) {
                     // Found an ehci controller.
-#if CONFIG_USB_EHCI
+
                     int ret = ehci_init(ehcibdf, count++, bdf);
                     if (ret)
-#endif
                         // Error
                         break;
                     count += found;
@@ -639,7 +641,7 @@ usb_setup(void)
                 ehcicode = pci_config_readl(ehcibdf, PCI_CLASS_REVISION) >> 8;
             }
         }
-
+#endif
         if (code == PCI_CLASS_SERIAL_USB_UHCI)
             uhci_init(bdf, count++);
         else if (code == PCI_CLASS_SERIAL_USB_OHCI)

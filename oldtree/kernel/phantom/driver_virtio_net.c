@@ -241,7 +241,7 @@ static void cleanup_xmit_buffers(virtio_device_t *vdev)
     {
         physaddr_t	pa = rd[0].addr;
         // Send finished, got buffer back
-        SHOW_FLOW( 1, "Got back xmit buffer %p", pa );
+        SHOW_FLOW( 1, "Got back xmit buffer %p", (void *)pa );
 
         if( nRead != 2 )
             SHOW_ERROR( 1, "Got back xmit chain of wrong length %d", nRead );
@@ -280,7 +280,7 @@ int driver_virtio_net_write(virtio_device_t *vd, const void *idata, size_t len)
     physaddr_t	pa;
     assert( 0 == hal_alloc_phys_page(&pa) );
 
-    SHOW_FLOW( 9, "xmit pa = %p len = %d", pa, len );
+    SHOW_FLOW( 9, "xmit pa = %p len = %d", (void *)pa, len );
 
 
     char buf[PAGE_SIZE];
@@ -360,7 +360,7 @@ static void provide_buffers(virtio_device_t *vd)
 
     memzero_page_v2p( pa ); // TODO pre-zero pages! alloc_zero_phys_page!
 
-    SHOW_FLOW( 9, "recv pa = %p", pa );
+    SHOW_FLOW( 9, "recv pa = %p", (void *)pa );
 
 #if 0
     rd[0].addr = pa;
@@ -372,12 +372,14 @@ static void provide_buffers(virtio_device_t *vd)
 
     rd[0].addr = pa;
     rd[0].len  = sizeof(struct virtio_net_hdr);
-    rd[0].flags = 0;
+    //rd[0].flags = 0;
     rd[0].flags = VRING_DESC_F_WRITE;
+    rd[0].next = -1;
 
     rd[1].addr = pa + sizeof(struct virtio_net_hdr);
     rd[1].len  = PAGE_SIZE - sizeof(struct virtio_net_hdr);
     rd[1].flags = VRING_DESC_F_WRITE;
+    rd[1].next = -1;
 
     virtio_attach_buffers_list( vd, VIRTIO_NET_Q_RECV, 2, rd );
 #endif

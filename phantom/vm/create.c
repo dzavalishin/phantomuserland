@@ -483,13 +483,13 @@ struct pvm_object pvm_create_class_object(struct pvm_object name, struct pvm_obj
 
 	struct data_area_4_class *      da = (struct data_area_4_class *)_data.data->da;
 
-	da->object_data_area_size   	= da_size;
-	da->object_flags     		= 0;
-	da->object_default_interface 	= iface;
-	da->sys_table_id             	= -1;
+	da->object_data_area_size       = da_size;
+	da->object_flags                = 0;
+	da->object_default_interface    = iface;
+	da->sys_table_id                = -1;
 
-	da->class_name 			= name;
-	da->class_parent 		= pvm_get_null_class();
+	da->class_name                  = name;
+	da->class_parent                = pvm_get_null_class();
 
 	return _data;
 }

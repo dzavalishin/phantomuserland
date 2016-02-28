@@ -42,6 +42,12 @@ static void run_class_thread(void *arg)
     {
         struct cb_parm *p = arg;
 
+        if(!p->class_name)
+        {
+            SHOW_ERROR0( 0, "class name is 0?" );
+            return;
+        }
+
         char tn[32];
         snprintf( tn, sizeof(tn), "=%s", p->class_name ? p->class_name : "??" );
         t_current_set_name(tn);

@@ -189,7 +189,7 @@ sighandler_t usys_signal( int *err, uuprocess_t *u, int signum, sighandler_t han
 {
 //#warning impl
     signal_handling_t *sh = &u->signals;
-    if( signum < 0 || signum > _SIG_MAXSIG )
+    if( (signum < 0) || (signum >= _SIG_MAXSIG) )
     {
         *err = EINVAL;
         return (void *)SIG_ERR;

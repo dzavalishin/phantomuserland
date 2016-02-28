@@ -535,7 +535,8 @@ AcpiUtUpdateRefCount (
         NewCount = 0;
         Object->Common.ReferenceCount = NewCount;
         AcpiUtDeleteInternalObj (Object);
-        break;
+        //break;
+        return; // ref count check below
 
     default:
 

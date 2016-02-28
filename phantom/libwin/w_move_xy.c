@@ -104,12 +104,14 @@ w_move( drv_video_window_t *w, int x, int y )
 
     w_lock();
 
+    memset( &e1, 0, sizeof(e1) );
+    memset( &e2, 0, sizeof(e2) );
+    memset( &e3, 0, sizeof(e3) );
+
     //w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
     e1.type = UI_EVENT_TYPE_GLOBAL;
     e2.type = UI_EVENT_TYPE_GLOBAL;
     e3.type = UI_EVENT_TYPE_GLOBAL;
-
-    e1.extra = e2.extra = e3.extra = 0;
 
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e2.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;

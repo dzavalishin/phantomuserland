@@ -31,10 +31,10 @@ static int mouse_intersects(struct drv_video_screen_t *video_drv, int xpos, int 
 
     rect_t m;
 
-    r.x = video_drv->mouse_x;
-    r.y = video_drv->mouse_y;
-    r.xsize = 16; // BUG mouse size hardcode
-    r.ysize = 16;
+    m.x = video_drv->mouse_x;
+    m.y = video_drv->mouse_y;
+    m.xsize = 16; // BUG mouse size hardcode
+    m.ysize = 16;
 
     rect_t o;
 

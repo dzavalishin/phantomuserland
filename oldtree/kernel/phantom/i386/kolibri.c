@@ -267,7 +267,7 @@ static void kolibri_sys_internal( uuprocess_t *u, struct kolibri_process_state *
     case 13: // TODO free
         {
             addr_t mem = st->ecx;
-            SHOW_FLOW( 2, "free @ 0x%p", mem );
+            SHOW_FLOW( 2, "free @ 0x%p", (void *)mem );
             st->eax = 0; // fail
         }
         break;
@@ -541,11 +541,11 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
             break;
         }
 
+    case 2: // Create file
+        mode |= O_CREAT;
+    case 3: // Write file
+        mode |= O_RDWR;
         {
-        case 2: // Create file
-            mode |= O_CREAT;
-        case 3: // Write file
-            mode |= O_RDWR;
             // TODO usys_...!
             e = k_open( &fd, fn, mode, 0666 );
             if(e) ret_on_err(e);
@@ -796,6 +796,11 @@ void kolibri_sys_dispatcher( struct trap_state *st )
     pid_t pid;
     assert( !t_get_pid( tid, &pid ));
     uuprocess_t *u = proc_by_pid(pid);
+    if( 0 == u )
+    {
+        SHOW_ERROR0( 0, "no u" );
+        goto die;
+    }
 
     struct kolibri_process_state * ks = get_kolibri_state(u);
 
@@ -806,6 +811,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
     if( ((int)st->eax) == -1 )
     {
         SHOW_FLOW( 2, "exit %d", 0 );
+    die:
         hal_exit_kernel_thread();
         panic("no exit?");
     }
@@ -1194,7 +1200,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
 
             bzero( ti, sizeof(struct kolibri_thread_info) );
 
-            strncpy( ti->name, tinfo.name, 11 );
+            strlcpy( ti->name, tinfo.name, 11 );
             ti->tid = qtid;
 
             if( tinfo.sleep_flags & THREAD_SLEEP_ZOMBIE )
@@ -1546,7 +1552,7 @@ void kolibri_sys_dispatcher( struct trap_state *st )
             case 3: // Get defaults
                 {
                     size_t sz = st->edx;
-                    if( sz > sizeof(color_defaults) ) sz =- sizeof(color_defaults);
+                    if( sz > sizeof(color_defaults) ) sz = sizeof(color_defaults);
                     void *buf = u_ptr( st->ecx, sz );
                     memcpy( buf, &color_defaults, sz );
                 }
