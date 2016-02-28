@@ -5,8 +5,11 @@ import java.io.IOException;
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
+import ru.dz.soot.SootMain;
 
 /**
  * <p>Constructor call node.</p>
@@ -78,11 +81,18 @@ public class ConstructNode extends BiNode {
 		if( n_param > 0 )
 			throw new PlcException(context.get_context(), "can generate just argless c'tors, sorry" );
 		
-		Method cm = _l.getType().get_class().findMethod("<init>");
 		
 		int method_ordinal = 0; // .internal.object constructor
 		
-		if( cm != null ) method_ordinal = cm.getOrdinal();
+		PhantomClass pclass = _l.getType().get_class();
+		if( pclass != null )
+		{
+			Method cm = pclass.findMethod("<init>");
+			if( cm != null ) method_ordinal = cm.getOrdinal();
+		}
+		else
+			SootMain.warning("Can't call c'tor for "+_l.getType());
+		
 		
 		c.emitCall(method_ordinal,n_param);
 		c.emitOsDrop(); // c'tor is void

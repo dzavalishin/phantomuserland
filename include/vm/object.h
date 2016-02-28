@@ -112,7 +112,7 @@ struct pvm_object pvm_exec_lookup_class_by_name( struct pvm_object name );
  *
 **/
 
-#define pvm_is_eq( o1, o2 ) ((o1).data = (o2).data )
+#define pvm_is_eq( o1, o2 ) ((o1).data == (o2).data )
 
 
 /**

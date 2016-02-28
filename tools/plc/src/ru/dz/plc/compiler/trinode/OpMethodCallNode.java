@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.MethodSignature;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.BiNode;
@@ -25,7 +26,11 @@ import ru.dz.plc.util.PlcException;
 public class OpMethodCallNode extends TriNode {
 	PhantomType obj_type = null; // type of object, which is used as 'this' in call
 
-	public OpMethodCallNode(Node object, Node method, Node args) { super(object, method, args); }
+	public OpMethodCallNode(Node object, Node method, Node args) 
+	{ 
+		super(object, method, args); 
+	}
+	
 	public String toString()  {    return ".";  }
 
 	@Override
@@ -39,6 +44,9 @@ public class OpMethodCallNode extends TriNode {
 
 		MethodNode method = (MethodNode)_m;
 		type = method.get_return_type(obj_type);
+
+		MethodSignature sig = new MethodSignature(method.getIdent(), _r);
+		method.setSignature(sig);
 
 	}
 

@@ -108,7 +108,7 @@ static errno_t trfs_send(void *pkt, int pktsize)
 
     if(rc == ERR_NET_NO_ROUTE)
     {
-        SHOW_ERROR( 0, "No route", rc);
+        SHOW_ERROR0( 0, "No route" );
         return EHOSTUNREACH;
     }
     else

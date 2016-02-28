@@ -19,7 +19,8 @@ void videotest(void)
 
     drv_video_winblt( w );
     win_scr_screen_update();
-    getchar();
+
+    (void) getchar();
 
     drv_video_winblt( w1 );
 
@@ -34,7 +35,8 @@ void videotest(void)
 
     drv_video_winblt( w );
     win_scr_screen_update();
-    getchar();
+
+    (void) getchar();
 
 }
 

@@ -175,7 +175,7 @@ errno_t  handle_release_object( ko_handle_t *h )
     return rc;
 }
 
-// These two work after handle is assigned
+// TODO mutex? keep longer?
 errno_t  object2handle( ko_handle_t *h, pvm_object_t o )
 {
     assert(ko_pool);

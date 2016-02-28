@@ -488,8 +488,13 @@ static void do_pvm_exec(pvm_object_t current_thread)
         //printf("instr 0x%02X ", instruction);
 
         if( prefix_long )
+        {
+            prefix_long  = 0;
             switch(instruction)
             {
+            default:
+                goto noprefix;
+
             case opcode_ishl:
                 LISTI("l-ishl");
                 {
@@ -687,13 +692,32 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 }
                 break;
             }
-        // End of long ops
+            // End of long ops
+            goto noops;
+    	}
 
         if( prefix_float )
+        {
+            prefix_float   = 0;
             switch(instruction)
             {
             default: // Not defined for double, throw exception
-                pvm_exec_panic("invalid double op");
+                goto noprefix;
+                //pvm_exec_panic("invalid double op");
+                //break;
+
+            case opcode_ishl: // Not defined for float, throw exception
+            case opcode_ishr:
+            case opcode_ushr:
+            case opcode_ior:
+            case opcode_iand:
+            case opcode_ixor:
+            case opcode_inot:
+            case opcode_log_or:
+            case opcode_log_and:
+            case opcode_log_xor:
+            case opcode_log_not:
+                pvm_exec_panic("invalid float op");
                 break;
 
             case opcode_isum:
@@ -840,12 +864,19 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 break;
 
             }
-        // End of float ops
+            // End of float ops
+            goto noops;
+    	}
 
         if( prefix_double )
+        {
+            prefix_double = 0;
+
             switch(instruction)
             {
             default:
+                goto noprefix;
+
             case opcode_ishl: // Not defined for double, throw exception
             case opcode_ishr:
             case opcode_ushr:
@@ -1006,11 +1037,12 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 }
                 break;
             }
-        // End of double ops
+            // End of double ops
+            goto noops;
+        }
 
 
-
-
+    noprefix:
         switch(instruction)
         {
         case opcode_nop:
@@ -1786,13 +1818,11 @@ static void do_pvm_exec(pvm_object_t current_thread)
             pvm_exec_panic( "thread exec: unknown opcode" ); //, instruction );
             //exit(33);
         }
-
+    noops:
+// TODO can't happen
         if( prefix_long || prefix_float || prefix_double )
             printf("Unused type prefix on op code 0x%X\n", instruction );
 
-        prefix_long   = 0;
-        prefix_float  = 0;
-        prefix_double = 0;
 
     }
 }

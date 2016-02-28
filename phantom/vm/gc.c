@@ -338,6 +338,7 @@ static void ref_dec_proccess_zero(pvm_object_storage_t *p)
 
 void debug_catch_object(const char *msg, pvm_object_storage_t *p )
 {
+#if 0
     // Can be used to trace some specific object's access
     //if( p != (void *)0x7acbe56c )
     //if( p != (void *)0x7acbd0e8 )
@@ -350,6 +351,7 @@ void debug_catch_object(const char *msg, pvm_object_storage_t *p )
     //dumpo(p);
     //getchar();
     printf("\n"); // for GDB to break here
+#endif
 }
 
 static void gc_clear_weakrefs(pvm_object_storage_t *p);

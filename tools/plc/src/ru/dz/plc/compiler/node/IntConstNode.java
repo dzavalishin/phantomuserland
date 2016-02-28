@@ -10,8 +10,10 @@ import ru.dz.plc.compiler.PhTypeInt;
 import ru.dz.plc.util.PlcException;
 
 /**
- * <p>Integer constant node.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * <p>Integer constant node. Also float constant.</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * @author dz
  */
@@ -23,6 +25,11 @@ public class IntConstNode extends Node {
 	public IntConstNode(int val) {
 		super(null);
 		this.val = val;
+	}
+	
+	public IntConstNode(float val) {
+		super(null);
+		this.val = Float.floatToIntBits(val);
 	}
 	
 	public String toString()  {    return "int const \""+Integer.toString(val)+"\"";  }

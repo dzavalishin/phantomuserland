@@ -22,10 +22,10 @@ import java.io.IOException;
 
 public class Method
 {
-	private int         ordinal;
+	private int			ordinal;
 	public Node         code;
-	private String       name;
-	private PhantomType  type;
+	private String      name;
+	private PhantomType type;
 	private LinkedList<ArgDefinition>   args_def = new LinkedList<ArgDefinition>();
 
 	private boolean requestDebug= false;

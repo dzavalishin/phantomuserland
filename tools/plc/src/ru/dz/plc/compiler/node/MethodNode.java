@@ -27,7 +27,7 @@ public class MethodNode extends Node
 			return ordinal;
 
 		if( obj_type.is_unknown() )
-			throw new PlcException("MethodNode", "don't know class", ident);
+			throw new PlcException("MethodNode get ordinal", "don't know class", ident);
 
 		PhantomClass pc = obj_type.get_class();
 		if( pc == null )
@@ -45,8 +45,12 @@ public class MethodNode extends Node
 	public PhantomType get_return_type(PhantomType obj_type) throws PlcException {
 		if( ordinal >= 0 ) return new PhTypeUnknown();
 
-		if( obj_type.is_unknown() ) throw new PlcException("MethodNode", "don't know class", ident);
-
+		if( obj_type.is_unknown() ) 
+		{
+			throw new PlcException("MethodNode get return type", "don't know class", ident);
+			//obj_type = PhantomType.getObject();
+		}
+		
 		PhantomClass pc = obj_type.get_class();
 		if( pc == null )throw new PlcException("MethodNode", "class is null", ident );
 

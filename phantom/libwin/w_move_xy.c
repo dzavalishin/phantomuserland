@@ -109,6 +109,8 @@ w_move( drv_video_window_t *w, int x, int y )
     e2.type = UI_EVENT_TYPE_GLOBAL;
     e3.type = UI_EVENT_TYPE_GLOBAL;
 
+    e1.extra = e2.extra = e3.extra = 0;
+
     e1.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e2.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e3.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;

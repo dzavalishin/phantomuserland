@@ -7,10 +7,16 @@ HOST_CPU	= i686
 HOST_ARCH	= x86
 unix_host	= NONE
 
-export CC	= gcc
 #export CC	= clang -Wno-gnu
 #export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 
-export LD	= ld
+
+#export CC	= gcc
+#export LD	= ld
+
+#export CC	= i686-pc-mingw32-gcc
+#export LD	= i686-pc-mingw32-ld
+
+
 export STRIP	= strip
 export AR	= ar
 export RANLIB	= ranlib
@@ -36,3 +42,6 @@ PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inli
 
 # Uncomment to enable tracing
 # PHANTOM_FFLAGS += -finstrument-functions
+
+# Use local overrides, if any
+-include $(realpath $(PHANTOM_HOME))/local-config.ia32.mk

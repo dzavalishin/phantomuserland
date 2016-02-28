@@ -43,6 +43,7 @@
 
 #ifndef __PANIC_DEFINED
 #define __PANIC_DEFINED
+// coverity[+kill]
 void panic(const char *__format, ...) __dead2;
 #endif // __PANIC_DEFINED
 

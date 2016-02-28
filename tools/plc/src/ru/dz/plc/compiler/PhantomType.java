@@ -326,6 +326,13 @@ public class PhantomType {
 	public String toProxyName() {
 		if( _class != null ) return "o";
 		return toLlvmType();
+	}
+
+	private static PhantomType t_object = null;
+	public static PhantomType getObject() throws PlcException {
+		if( t_object  == null )
+			t_object = new PhantomType( ClassMap.get_map().get(".internal.object",false, null) );
+		return t_object;
 	} 
 
 }

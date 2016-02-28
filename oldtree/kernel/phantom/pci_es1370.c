@@ -1082,7 +1082,7 @@ static int es1370_ioctl(struct phantom_device *dev, int type, void *buf, int len
             int shift = 32 - (es->nbits-1);
 
             es->silence = tmp & (mask >> shift);
-            SHOW_FLOW(0, "%d bits silence = 0x%x", es->silence );
+            SHOW_FLOW(0, "%d bits silence = 0x%x", es->nbits, es->silence );
         }
         break;
 

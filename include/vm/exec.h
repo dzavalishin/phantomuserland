@@ -13,13 +13,14 @@
 #ifndef PVM_EXEC_H
 #define PVM_EXEC_H
 
-
+// __dead2
+#include <sys/cdefs.h>
 #include <vm/internal_da.h>
 
 
 void pvm_exec(struct pvm_object current_thread);
 
-void pvm_exec_panic( const char *reason );
+void pvm_exec_panic( const char *reason ) __dead2;
 
 //! Load current thread data to fast access copy fields in thread object data area
 void pvm_exec_load_fast_acc(struct data_area_4_thread *da);

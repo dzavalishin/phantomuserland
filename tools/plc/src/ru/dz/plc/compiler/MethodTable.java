@@ -49,23 +49,32 @@ public class MethodTable implements IMethodTable
 	 * @see ru.dz.plc.compiler.IMethodTable#set_ordinal(ru.dz.plc.compiler.Method, int)
 	 */
 	@Override
-	public void set_ordinal( Method m, int ord ) throws PlcException {
-		if( !mine( m ) ) throw new PlcException("set_ordinal","not my Method");
-		if( ord != -1 && have_ord( ord ) ) throw new PlcException("set_ordinal","duplicate");
+	public void set_ordinal( Method m, int ord ) throws PlcException 
+	{
+		if( !mine( m ) ) 
+			throw new PlcException("set_ordinal","not my Method");
+		if( ord != -1 && have_ord( ord ) ) 
+			throw new PlcException("set_ordinal","duplicate");
 		m.setOrdinal( ord );
 	}
 
 	@Override @Deprecated
-	public Method add( String name, PhantomType type )
+	public Method add( String name, PhantomType type ) throws PlcException
 	{
+		//assert(name != null);
+		if(name == null)
+			throw new PlcException("Null method name", name);
 		Method m = new Method( name, type );
 		table.put(name, m);
 		return m;
 	}
 
 	@Override
-	public Method add( Method m )
+	public Method add( Method m ) throws PlcException
 	{
+		//assert(m.getName() != null);
+		if(m.getName() == null)
+			throw new PlcException("Null method name", m.toString());
 		mstable.put(m.getSignature(), m);
 		table.put(m.getName(), m);
 		return m;

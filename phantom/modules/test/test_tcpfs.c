@@ -21,10 +21,17 @@ static void http_request( const char *host )
     test_check_ge(tcpfd,0);
 
     printf("tcp fd (%s) = %d\n", host, tcpfd);
+    if( tcpfd < 0 )
+        exit(33);
 
     write(tcpfd, GET, sizeof(GET));
     sleepmsec(4000);
-    read(tcpfd, buf, 512);
+
+    int rc = read(tcpfd, buf, 512);
+    if( rc <= 0 )
+        printf("read rc = %d\n", rc );
+
+
     buf[512] = 0;
     printf("%s: '%s'\n", host, buf );
     close(tcpfd);

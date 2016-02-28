@@ -50,7 +50,7 @@ void dump_ss(struct trap_state *st)
 
     int from_user = (st->cs & 3) || (st->eflags & EFL_VM);
 
-    printf("Dump of i386 state:\n", st);
+    printf("Dump of i386 state:\n");
     printf("EAX %08x EBX %08x ECX %08x EDX %08x\n",
            st->eax, st->ebx, st->ecx, st->edx);
     printf("ESI %08x EDI %08x EBP %08x ESP %08x\n",

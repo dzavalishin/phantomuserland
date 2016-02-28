@@ -1,5 +1,9 @@
 // This one is compiled with compiler's headers
 
+#if (defined(__MINGW64__) || defined(__MINGW32__))
+#  define NO_NETWORK
+#endif
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -9,8 +13,11 @@
 #include <errno.h>
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+
+#ifndef NO_NETWORK
+#  include <sys/socket.h>
+#  include <netinet/in.h>
+#endif
 
 #include <pthread.h>
 
@@ -36,6 +43,7 @@ int hal_printf(const char *fmt, ...)
 
 static void winhal_setport( int sock, int port )
 {
+#ifndef NO_NETWORK
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
@@ -45,6 +53,7 @@ static void winhal_setport( int sock, int port )
     int rc = bind( sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in) );
     if( rc )
         perror("! bind");
+#endif
 }
 
 static int cfd = -1;
@@ -81,6 +90,7 @@ void winhal_debug_srv_thread(int *arg)
 {
     (void) arg;
     //printf("Debug server running\n");
+#ifndef NO_NETWORK
 
     int ls = socket( PF_INET, SOCK_STREAM, 0);
     //int ls = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -125,13 +135,17 @@ void winhal_debug_srv_thread(int *arg)
         close(cfd);
 
     }
-
+#endif
 }
 
 
 
 int get_current_tid()
 {
+#if (defined(__MINGW64__) || defined(__MINGW32__))
+    return (int)(pthread_self().p);
+#else
     return (int)pthread_self();
     //return -1;
+#endif
 }

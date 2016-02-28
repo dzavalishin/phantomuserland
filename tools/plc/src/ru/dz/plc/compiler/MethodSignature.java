@@ -65,6 +65,9 @@ public class MethodSignature {
 	}
 
 	private void generateSignature(String Name, List<PhantomType> args) {
+		if( Name == null )
+			Name = "(null)";
+		
 		name = Name;
 		this.args = args;
 		// Generate signature string

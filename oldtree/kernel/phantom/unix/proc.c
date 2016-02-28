@@ -544,19 +544,19 @@ int usys_kill(int *err, uuprocess_t *u, int pid, int sig)
 
     if(!p)
     {
+        hal_mutex_unlock(&proc_lock);
         *err = ESRCH;
         return -1;
     }
 
-    int ret = 0;
+    //int ret = 0;
     sig_send( &p->signals, sig );
 
     hal_mutex_unlock(&proc_lock);
 
-    if(ret)
-        *err = EINVAL;
-
-    return ret;
+    //if(ret)        *err = EINVAL;
+    //return ret;
+    return 0;
 }
 
 

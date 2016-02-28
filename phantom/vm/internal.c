@@ -505,8 +505,8 @@ struct pvm_object pvm_lookup_internal_class(struct pvm_object name)
             return pvm_internal_classes[i].class_object;
     }
 
-    struct pvm_object retNull;
-    retNull.data = 0;
+    struct pvm_object retNull = { 0, 0 };
+    //retNull.data = 0;
     return retNull;
 }
 

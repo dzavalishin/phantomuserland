@@ -25,7 +25,7 @@
 
 int panic_reenter = 0;
 
-
+// coverity[+kill]
 void panic(const char *fmt, ...)
 {
     if(panic_reenter)

@@ -14,6 +14,6 @@ die ( ) {
 #[ -L phantom/kernel ] || ln -s ../oldtree/kernel/phantom phantom/kernel
 make -C phantom "$@" || die "Make libs failure"
 make -C oldtree/kernel/phantom "$@" || die "Make kernel failure"
-cd test
-make unit || die "Make unit failure"
-make plc || die "Make PLC failure"
+#cd test
+#make unit || die "Make unit failure"
+#make plc || die "Make PLC failure"

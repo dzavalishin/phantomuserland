@@ -11,8 +11,10 @@ import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
- * <p>Integer constant node - 64 bits.</p>
- * <p>Copyright: Copyright (c) 2004-2013 Dmitry Zavalishin</p>
+ * <p>Integer constant node - 64 bits. Also double constant.</p>
+ * 
+ * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * @author dz
  */
@@ -25,6 +27,12 @@ public class IntConst64Node extends Node {
 		super(null);
 		this.val = val;
 	}
+	
+	public IntConst64Node(double val) {
+		super(null);
+		this.val = Double.doubleToLongBits( val );
+	}
+	
 	public String toString()  {    return "int64 const \""+Long.toString(val)+"\"";  }
 	public void find_out_my_type() throws PlcException { type = PhantomType.getLong(); }
 	public boolean is_on_int_stack() { return true; }

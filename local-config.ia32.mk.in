@@ -1,6 +1,10 @@
 # for cygwin64 
-export CC	= i686-pc-cygwin-gcc
-export LD	= i686-pc-cygwin-ld
+export CC	= i686-pc-mingw32-gcc
+export LD	= i686-pc-mingw32-ld
+
+## for cygwin64 - does not help really
+#export CC	= i686-pc-cygwin-gcc
+#export LD	= i686-pc-cygwin-ld
 
 # Use Clang analyzer
 #export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 

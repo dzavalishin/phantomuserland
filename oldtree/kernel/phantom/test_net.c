@@ -228,7 +228,7 @@ static int run_tftp_test(void *prot_data)
     {
         if(rc == ERR_NET_NO_ROUTE)
         {
-            SHOW_ERROR( 0, "UDP tftp - No route\n", rc);
+            SHOW_ERROR0( 0, "UDP tftp - No route\n" );
         }
         else
             SHOW_ERROR( 0, "UDP tftp - can't send, rc = %d\n", rc);

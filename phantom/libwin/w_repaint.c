@@ -149,6 +149,7 @@ void request_repaint_all_for_square( rect_t *todo )
     ui_event_t e;
 
     e.type = UI_EVENT_TYPE_GLOBAL;
+    e.extra = 0;
     e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
     e.w.rect = *todo;
 

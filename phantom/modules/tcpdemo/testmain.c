@@ -7,32 +7,42 @@ extern void exit(int);
 
 #define GET "GET /\n"
 
-int
-main(int ac, char **av, char **env)
+int main(int ac, char **av, char **env)
 {
-	(void) ac;
-	(void) av;
-	(void) env;
+    (void) ac;
+    (void) av;
+    (void) env;
 
-	int pid = getpid();
-	int tid = gettid();
+    int rc;
 
-	printf("printf: tcpdemo module runs with pid %d tid %d\n", pid, tid );
+    int pid = getpid();
+    int tid = gettid();
 
-	char buf[1024];
-	snprintf(buf, sizeof(buf), "syslog: test module runs with pid %d tid %d", pid, tid );
+    printf("printf: tcpdemo module runs with pid %d tid %d\n", pid, tid );
+
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "syslog: test module runs with pid %d tid %d", pid, tid );
     ssyslog( 0, buf );
 
-	int tcpfd = open("tcp://87.250.250.3:80", 0, 0 );
+    int tcpfd = open("tcp://87.250.250.3:80", 0, 0 );
+    if( tcpfd < 0 )
+    {
+        printf("open error = %d\n", tcpfd );
+        exit(33);
+    }
 
-	printf("tcp fd = %d\n", tcpfd);
+    printf("tcp fd = %d\n", tcpfd);
 
-	write(tcpfd, GET, sizeof(GET));
+    write(tcpfd, GET, sizeof(GET));
     sleepmsec(4000);
-	read(tcpfd, buf, 512);
-	buf[512] = 0;
-	printf("ya.ru: '%s'\n", buf );
-	close(tcpfd);
+
+    rc = read(tcpfd, buf, 512);
+    if( rc < 0 )
+        printf("read error = %d\n", rc );
+
+    buf[512] = 0;
+    printf("ya.ru: '%s'\n", buf );
+    close(tcpfd);
 
 
     while(1)

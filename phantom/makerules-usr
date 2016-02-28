@@ -23,11 +23,13 @@ $(TARGET): $(LIBDIR)/crt0.o $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) ) $(U
 	@echo --- Link $(TARGET)
 	@$(CC) -g $(ARCH_FLAGS) -nostdlib -static -ffreestanding $(USR_LD_ADDR) -o $@.pe $^ $(USR_LIBS) $(LIBGCC)
 	@$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
-	cp $(TARGET) $(INSTALL_DIR)
-	$(STRIP) $(INSTALL_DIR)
+	@cp $(TARGET) $(INSTALL_DIR)
+	@$(STRIP) $(INSTALL_DIR)
 
 #	objdump -x -d $@ >$@.dump
 
 
 install:: $(TARGET)
 	cp $(TARGET) $(INSTALL_DIR)
+
+# MAKEFLAGS += --no-print-directory

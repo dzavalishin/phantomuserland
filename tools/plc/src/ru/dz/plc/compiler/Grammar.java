@@ -406,13 +406,14 @@ extends GrammarHelper {
 
 				//Method m = me.addMethod( mname, type );
 				Method m = new Method( mname, type );
+				int required_method_index = -1;
 
 				//Node args = 
 				parseDefinitionArglist(m);
 				if( testAndEat(id_lbracket) )
 				{
-					int required_method_index = getInt();					
-					me.setMethodOrdinal(m,required_method_index);
+					required_method_index = getInt();					
+					//me.setMethodOrdinal(m,required_method_index);
 					expect(id_rbracket);
 				}
 				parse_attributes( false );
@@ -431,7 +432,8 @@ extends GrammarHelper {
 				}
 				
 				me.addMethod( m );
-				
+				if( required_method_index >= 0 )					
+					me.setMethodOrdinal(m,required_method_index);
 				continue;
 			}
 
@@ -1093,10 +1095,10 @@ extends GrammarHelper {
 				//String methodIdent = parse_method_id();
 				Node args = parse_call_args();
 				
-				MethodSignature sig = new MethodSignature(method.getIdent(), args);
-				method.setSignature(sig);
-				//method.generateSignature(args);
-				//out = new op_method_call_node(atom, method, args).setContext( l );
+				// No arg type info know, can't make sig here
+				//MethodSignature sig = new MethodSignature(method.getIdent(), args);
+				//method.setSignature(sig);
+
 				out = new OpMethodCallNode(out, method, args).setContext( l );
 			}
 			else if (peek( id_lparen )) {
