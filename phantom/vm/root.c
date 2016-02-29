@@ -242,7 +242,7 @@ static void pvm_create_root_objects()
 {
     int root_da_size = PVM_ROOT_OBJECTS_COUNT * sizeof(struct pvm_object);
     unsigned int flags = 0; // usual plain vanilla array
-	// make sure refcount is disabled for all objects created here: 3-rd argument of pvm_object_alloc is true (obsolete: ref_saturate_p)
+    // make sure refcount is disabled for all objects created here: 3-rd argument of pvm_object_alloc is true (obsolete: ref_saturate_p)
 
     // Allocate the very first object
     struct pvm_object_storage *root = get_root_object_storage();
