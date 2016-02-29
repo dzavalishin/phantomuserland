@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "mouse"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 11
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -192,7 +192,10 @@ static void mouse_push_event_thread(void *arg)
 static int insert_bit9( int val, int sign )
 {
 #if 0
-    return val;
+    //return val;
+
+    return sign ? (val - 0x100) : val;
+
 #else
     val &= 0xFFu;
 
@@ -326,26 +329,89 @@ static errno_t ps2ms_aux_wait_ack()
     return 0;
 }
 
+static errno_t ps2ms_purge_buffer(int msec)
+{
+    errno_t rc = ENODEV;
+
+    //int tries = 10000;
+    //bigtime_t start = hal_system_time() / 1000;
+
+    // Purge buffer
+    while( msec-- > 0 )
+    {
+        if( inb( PS2_CTRL_ADDR ) & 0x01 )
+        {
+            int b = inb( PS2_DATA_ADDR ) & 0xFFu;
+            (void) b;
+            SHOW_FLOW( 10 ,"purge 0x%2X ", b );
+            rc = 0;
+        }
+
+        //bigtime_t now = hal_system_time() / 1000;
+        //if( now+msec > start )            break;
+        phantom_spinwait(1);
+    }
+
+    return rc;
+}
+
 
 static int ps2ms_do_init( void )
 {
 
-
+    ps2ms_purge_buffer(2);
+/*
     int tries = 10000;
     // Purge buffer
     while( tries-- > 0 && inb( PS2_CTRL_ADDR ) & 0x01 )
         inb( PS2_DATA_ADDR );
 
     if( tries <= 0 ) goto notfound;
+*/
 
     ps2ms_send_cmd(PS2_CMD_DEV_INIT);
 
     // hangs
     //ps2ms_send_aux(PS2_CMD_RESET_MOUSE);    ps2ms_aux_wait_ack(); // ignore result
+#if 0
 
     ps2ms_send_aux(PS2_CMD_ENABLE_MOUSE);
     if( ps2ms_aux_wait_ack() ) goto notfound;
 
+    // allright, we have some mouse
+#else
+
+    SHOW_FLOW0( 2, "PS/2 mouse reset\n" );
+    ps2ms_send_aux( PS2_CMD_RESET_MOUSE );
+    ps2ms_purge_buffer(10);
+
+    SHOW_FLOW0( 2, "PS/2 mouse set sample rate\n" );
+    ps2ms_send_aux( 0xF3 ); // set sample rate
+    ps2ms_purge_buffer(10);
+    //ps2ms_send_aux( 0x0A );
+    ps2ms_send_aux( 200 );
+    ps2ms_purge_buffer(10);
+
+    ps2ms_send_aux( 0xE6 ); // set scale 2:1
+    ps2ms_purge_buffer(10);
+
+    ps2ms_send_aux( 0xE8 ); // set resolution
+    ps2ms_purge_buffer(10);
+    ps2ms_send_aux( 1 );    // lowest resolution
+    ps2ms_purge_buffer(10);
+
+    SHOW_FLOW0( 2, "PS/2 mouse ask ID\n" );
+    ps2ms_send_aux( 0xF2 ); // Ask for ID
+    ps2ms_aux_wait_ack();
+    unsigned char ps2id = ps2ms_get_data();
+    SHOW_FLOW( 0, "PS/2 mouse ID=0x%2X\n", ps2id );
+
+    ps2ms_purge_buffer(10); // todo make func to wait for ACK for n msec
+    ps2ms_send_aux(PS2_CMD_ENABLE_MOUSE);
+    if( ps2ms_aux_wait_ack() ) goto notfound;
+    //ps2ms_purge_buffer(10); // todo make func to wait for ACK for n msec
+
+#endif
     return 0;
 
 notfound:

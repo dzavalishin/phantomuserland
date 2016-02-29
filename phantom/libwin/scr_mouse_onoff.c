@@ -53,7 +53,7 @@ void scr_mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypo
 
 void scr_mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )
 {
-    //if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
+    if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
         video_drv->mouse_enable();
 }
 
