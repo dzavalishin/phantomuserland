@@ -75,6 +75,7 @@ https://scan.coverity.com/projects/dzavalishin-phantomuserland
 [COVERAGE_BADGE]:
 https://scan.coverity.com/projects/8024/badge.svg
 
+[![Build Status](https://snap-ci.com/dzavalishin/phantomuserland/branch/master/build_image)](https://snap-ci.com/dzavalishin/phantomuserland/branch/master)
 
 Best regards, Dmitry Zavalishin,
 Phantom project... how to say... inventor? :)
