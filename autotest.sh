@@ -53,6 +53,7 @@ while [ $# -gt 0 ]
 do
 	case "$1" in
 	-f)	FORCE=1			;;
+	-r)	CHECK_GIT=1		;;
 	-u)	UNATTENDED=-unattended	;;
 	-p)
 		shift
@@ -67,8 +68,9 @@ do
 	-nt)	unset TESTRUN	;;
 	-v)	VIRTIO=1	;;
 	*)
-		echo "Usage: $0 [-f] [-u] [-p N] [-w] [-nc] [-ng] [-ns]
-	-f	- force test (ignore no updates from repository)
+		echo "Usage: $0 [-f] [-r] [-u] [-p N] [-w] [-nc] [-ng] [-ns] [-nt] [-v]
+	-f	- force run (even if there is another copy stalled)
+	-r	- force repository check (and quit if no updates)
 	-u	- run unattended (don't stop on panic for gdb)
 	-p N	- make N passes of snapshot test (default: N=2)
 	-w	- show make warnings
@@ -155,14 +157,16 @@ quit
 
 # update data BEFORE checking for stalled copies
 GRUB_MENU=tftp/tftp/menu.lst
-git diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
-	rm $TEST_DIR/$GRUB_MENU
-GIT_OUT=`git pull`
-[ $? -ne 0 -o `echo "$GIT_OUT" | grep -c '^Already up-to-date'` -ne 0 ] && {
-	[ "$FORCE" ] || die "$MSG"
+[ "$CHECK_GIT" ] && {
+	git diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
+		rm $TEST_DIR/$GRUB_MENU
+	GIT_OUT=`git pull`
+	[ $? -ne 0 -o `echo "$GIT_OUT" | grep -c '^Already up-to-date'` -ne 0 ] && \
+		die "$MSG"
+
+	echo "$GIT_OUT"
 }
 
-echo "$GIT_OUT"
 
 # check if another copy is running
 [ "$FORCE" ] || {
@@ -365,7 +369,7 @@ FATAL! Phantom snapshot test crashed"
 			break
 		}
 		[ -s serial0.log ] || {
-			sleep 15
+			sleep 30
 			[ -s serial0.log ] || {
 				echo "
 
