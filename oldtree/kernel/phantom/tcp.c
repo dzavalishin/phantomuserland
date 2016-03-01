@@ -393,9 +393,11 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     //        ntohs(header->source_port), ntohs(header->dest_port), (int)cbuf_get_len(buf), ntohs(header->checksum),
     //        ntohs(header->length_flags) & 0x3f, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG");
 
-    dprintf("tcp_input: src port %d, dest port %d, buf len %d, flags 0x%b\n",
+    dprintf("tcp_input: src port %d, dest port %d, buf len %d, flags 0x%b seq %d ack %d\n",
             ntohs(header->source_port), ntohs(header->dest_port), (int)cbuf_get_len(buf),
-            ntohs(header->length_flags) & 0x3f, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG");
+            ntohs(header->length_flags) & 0x3f, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG",
+            ntohl(header->seq_num), ntohl(header->ack_num)
+           );
 #endif
 
     // check to see if the length looks correct
@@ -469,6 +471,7 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
            || (SEQUENCE_GT(header->seq_num, s->rx_win_high)
                && (!((data_len == 0) && (header->seq_num != s->rx_win_high + 1))))) {
             /* out of window, ack it */
+            dprintf("tcp_input: out of win ack, seq %d, win hi %d\n", header->seq_num, s->rx_win_high );
             send_ack(s);
             goto ditch_packet;
         }
@@ -498,6 +501,8 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
         // socket is closed, send RST packet
         goto send_reset;
     case STATE_SYN_SENT:
+        dprintf("tcp_input: in STATE_SYN_SENT s->tx_win_low=%d\n", s->tx_win_low );
+
         s->tx_win_low++;
         s->retransmit_tx_seq = s->tx_win_low;
         s->tx_win_high = s->tx_win_low + header->win_size;
@@ -657,7 +662,8 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
         accept_socket->rx_win_high = accept_socket->rx_win_low + accept_socket->rx_win_size - 1;
 
         // [dz] fix accept bug
-        accept_socket->tx_win_low = header->seq_num + 1;
+        //accept_socket->tx_win_low = header->seq_num + 1;
+        accept_socket->tx_win_low = header->seq_num;
         accept_socket->tx_win_high = accept_socket->tx_win_low;
 
         // figure out what the mss will be
@@ -1576,10 +1582,10 @@ static void tcp_send(ipv4_addr dest_addr, uint16 dest_port, ipv4_addr src_addr, 
     STAT_INC_CNT(STAT_CNT_TCP_TX);
 
 #if NET_CHATTY
-    dprintf("tcp_send: src port %d, dest port %d, buf len %d, flags 0x%b seq %d\n",
+    dprintf("tcp_send: src port %d, dest port %d, buf len %d, flags 0x%b seq %d ack %d\n",
             source_port, dest_port, (int)cbuf_get_len(buf),
             flags, "\020\1FIN\2SYN\3RST\4PSH\5ACK\6URG",
-            sequence
+            sequence, ack
            );
 #endif
 

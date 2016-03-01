@@ -8,8 +8,13 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <kernel/libkern.h>
+
+#include <netinet/resolv.h>
+
 #include <kernel/net.h>
 #include <kernel/net/udp.h>
+#include <kernel/net/tcp.h>
 //#include <netinet/tftp.h>
 
 #include <phantom_libc.h>
@@ -196,6 +201,16 @@ static void tcp_echo_thread(void *arg)
     (void) arg;
     void *prot_data;
 
+    hal_sleep_msec( 1000*10 );
+
+#if 1 // test curl
+    {
+        char buf[1024];
+        errno_t rc = net_curl( "http://ya.ru/", buf, sizeof( buf ) );
+        SHOW_FLOW( 0, "curl rc = %d, data = '%s'\n", rc, buf );
+    }
+#endif
+
     if( tcp_open(&prot_data) )
     {
         SHOW_ERROR0( 0, "can't prepare TCP endpoint" );
@@ -259,10 +274,109 @@ void start_tcp_echo_server(void)
     if( te < 0 )
         SHOW_ERROR( 1, "Can't start tcp echo thread (%d)", te );
 
+
 }
 
-//INIT_ME( 0, 0, tcp_echo_server );
+INIT_ME( 0, 0, start_tcp_echo_server );
 
+
+#define CURL_MAXBUF 512
+
+errno_t net_curl( const char *url, char *obuf, size_t obufsize )
+{
+    int nread = 0;
+
+    errno_t rc;
+    void *prot_data;
+    char host[CURL_MAXBUF+1];
+    char path[CURL_MAXBUF+1];
+
+    if( strlen(url) > CURL_MAXBUF )
+        return EINVAL;
+
+#if 0
+    int cnt = sscanf( url, "http://%[^/]/%s", host, path );
+    if( cnt != 2 )
+        return EINVAL;
+#else
+    if( strncmp( url, "http://", 7 ) )
+        return EINVAL;
+
+    url += 7;
+
+    char *pos = strchr( url, '/' );
+    if( pos == 0 )
+        return EINVAL;
+
+    strlcpy( host, url, pos-url+1 );
+    strcpy( path, pos+1 );
+#endif
+
+    SHOW_FLOW( 1, "curl host '%s' path '%s'", host, path );
+
+    in_addr_t out;
+
+    rc = name2ip( &out, host, 0 );
+    if( rc )
+    {
+        SHOW_ERROR( 0, "can't resolve '%s', %d", host, rc );
+        return rc;
+    }
+
+    if( tcp_open(&prot_data) )
+    {
+        SHOW_ERROR0( 0, "can't prepare TCP endpoint" );
+        return ENOMEM;
+    }
+
+    i4sockaddr addr;
+    addr.port = 80;
+
+    addr.addr.len = 4;
+    addr.addr.type = ADDR_TYPE_IP;
+    NETADDR_TO_IPV4(addr.addr) = out; //IPV4_DOTADDR_TO_ADDR(ip0, ip1, ip2, ip3);
+
+    //SHOW_FLOW( 0, "TCP - create socket to %d.%d.%d.%d port %d", ip0, ip1, ip2, ip3, port);
+
+    SHOW_FLOW0( 0, "TCP - will connect");
+    if( tcp_connect( prot_data, &addr) )
+    {
+        SHOW_ERROR(0, "can't connect to %s", host);
+        goto err;
+    }
+    SHOW_FLOW0( 0, "TCP - connected, read");
+
+    char buf[1024];
+
+
+    memset( buf, 0, sizeof(buf) );
+    strlcpy( buf, "GET /", sizeof(buf) );
+    strlcat( buf, path, sizeof(buf) );
+    strlcat( buf, "\r\n\r\n", sizeof(buf) );
+
+    //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
+    int len = strlen(buf);
+    int nwrite = tcp_sendto( prot_data, buf, len, &addr);
+    SHOW_FLOW( 0, "TCP - write = %d (%s)", nwrite, buf);
+    if( nwrite != len ) goto err;
+
+    memset( buf, 0, sizeof(buf) );
+    nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50 );
+    buf[sizeof(buf)-1] = 0;
+
+    SHOW_FLOW( 0, "TCP - read = %d (%s)", nread, buf);
+err:
+    tcp_close(prot_data);
+
+    if( nread <= 0 )
+        return EIO;
+
+    memset( obuf, 0, obufsize );
+    len = umin( obufsize-1, nread );
+    strncpy( obuf, buf, len );
+
+    return 0;
+}
 
 
 
