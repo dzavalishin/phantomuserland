@@ -31,6 +31,7 @@ CON_F_PROTOS(timer)
 CON_F_PROTOS(stats)
 CON_F_PROTOS(udp)
 CON_F_PROTOS(fio)       // File IO
+CON_F_PROTOS(url)       // curl style HTTP
 
 
 // Well known connection operation numbers. Not all types of conns use these numbers.
@@ -66,6 +67,20 @@ struct cn_fio_volatile
     int fd;
 };
 
+
+
+
+
+struct cn_url_persistent
+{
+    char url[FS_MAX_PATH_LEN];
+};
+
+struct cn_url_volatile
+{
+    errno_t status;
+    //void *tcp_endpoint;
+};
 
 
 
