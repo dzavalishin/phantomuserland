@@ -236,6 +236,24 @@ void if_bind_link_address(ifnet *i, ifaddr *addr)
     i->link_addr = addr;
 }
 
+//! Clear all existing interface addresses and set new one
+void if_replace_address(ifnet *i, ifaddr *addr)
+{
+    ifaddr *old;
+
+    addr->if_owner = i;
+    addr->next = 0;
+    old = i->addr_list;
+    i->addr_list = addr;
+
+    while( old )
+    {
+        ifaddr * next = old->next;
+        free(old);
+        old = next;
+    }
+}
+
 
 
 /*
@@ -291,8 +309,8 @@ void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net
 #endif
 
     // set up an initial routing table
-
     int rc;
+
     if( (rc = ipv4_route_add( net, netmask, router, interface->id) ) )
     {
         SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);

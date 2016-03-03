@@ -29,6 +29,7 @@ int phantom_tcpip_active = 0;
 
 
 
+#define ECHO_PORT 7
 
 
 #define SYSLOGD_PORT 514
@@ -188,18 +189,19 @@ static void tcp_echo( void *echo_socket )
 
     }
 
-    SHOW_FLOW0( 0, "close data socket" );
+    SHOW_FLOW0( 1, "close data socket" );
 
     tcp_close( echo_socket );
 }
 
 
-#define ECHO_PORT 7
 
 static void tcp_echo_thread(void *arg)
 {
     (void) arg;
     void *prot_data;
+
+    t_current_set_name("TCP echo");
 
     hal_sleep_msec( 1000*10 );
 
@@ -207,7 +209,7 @@ static void tcp_echo_thread(void *arg)
     {
         char buf[1024];
         errno_t rc = net_curl( "http://ya.ru/", buf, sizeof( buf ) );
-        SHOW_FLOW( 0, "curl rc = %d, data = '%s'\n", rc, buf );
+        SHOW_FLOW( 1, "curl rc = %d, data = '%s'\n", rc, buf );
     }
 #endif
 
@@ -217,7 +219,7 @@ static void tcp_echo_thread(void *arg)
         return;
     }
 
-    SHOW_FLOW0( 0, "got accept socket" );
+    SHOW_FLOW0( 1, "got accept socket" );
 
     i4sockaddr addr;
 
@@ -225,7 +227,6 @@ static void tcp_echo_thread(void *arg)
 
     addr.addr.len = 4;
     addr.addr.type = ADDR_TYPE_IP;
-    //NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
     NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(0, 0, 0, 0);
 
     int rc = tcp_bind( prot_data, &addr );
@@ -235,11 +236,11 @@ static void tcp_echo_thread(void *arg)
         goto fail;
     }
 
-    SHOW_FLOW0( 0, "bound" );
+    SHOW_FLOW0( 1, "bound" );
 
     tcp_listen(prot_data);
 
-    SHOW_FLOW0( 0, "listen" );
+    SHOW_FLOW0( 1, "listen" );
 
     while(1)
     {
@@ -253,7 +254,7 @@ static void tcp_echo_thread(void *arg)
             goto fail;
         }
 
-        SHOW_FLOW( 0, "accepted - %x", NETADDR_TO_IPV4(acc_addr.addr) );
+        SHOW_FLOW( 1, "accepted - %x", NETADDR_TO_IPV4(acc_addr.addr) );
 
 
         hal_start_thread( tcp_echo, echo_socket, 0 );
@@ -266,18 +267,86 @@ fail:
 
 }
 
+
+
+static void udp_echo_thread(void *arg)
+{
+    (void) arg;
+    void *prot_data;
+
+    t_current_set_name("UDP echo");
+
+    if( udp_open(&prot_data) )
+    {
+        SHOW_ERROR0( 0, "can't prepare UDP endpoint" );
+        return;
+    }
+
+    i4sockaddr addr;
+
+    addr.port = ECHO_PORT;
+
+    addr.addr.len = 4;
+    addr.addr.type = ADDR_TYPE_IP;
+
+    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(0, 0, 0, 0);
+
+    int rc = udp_bind( prot_data, &addr );
+    if( rc )
+    {
+        SHOW_ERROR( 0, "can't bind UDP - %d", rc );
+        goto fail;
+    }
+
+    SHOW_FLOW0( 1, "bound" );
+
+    while(1)
+    {
+        char buf[512];
+        i4sockaddr peer_addr;
+
+        ssize_t rsize = udp_recvfrom( prot_data, buf, sizeof(buf), &peer_addr, 0, 0 );
+        if( rsize < 0 )
+        {
+            SHOW_ERROR( 0, "UDP recv error %d", rsize );
+            continue;
+        }
+
+        //SHOW_FLOW( 0, "UDP echo rx %d bytes from %s", rsize, net_itoa(ntohl(peer_addr.addr)) );
+        SHOW_FLOW( 0, "UDP echo rx %d bytes", rsize );
+
+        ssize_t ssize = udp_sendto( prot_data, buf, rsize, &peer_addr);
+        if( rsize != ssize )
+        {
+            SHOW_ERROR( 0, "UDP send error %d, atempted to send %d bytes", ssize, rsize );
+            continue;
+        }
+    }
+
+fail:
+    if( tcp_close(prot_data) )
+        SHOW_ERROR0( 0, "can't close UDP endpoint" );
+
+}
+
+
 void start_tcp_echo_server(void)
 {
     SHOW_FLOW0( 0, "start TCP echo server" );
 
     tid_t te = hal_start_thread( tcp_echo_thread, 0, 0 );
     if( te < 0 )
-        SHOW_ERROR( 1, "Can't start tcp echo thread (%d)", te );
+        SHOW_ERROR( 0, "Can't start tcp echo thread (%d)", te );
 
+    SHOW_FLOW0( 0, "start UDP echo server" );
 
+    te = hal_start_thread( udp_echo_thread, 0, 0 );
+    if( te < 0 )
+        SHOW_ERROR( 0, "Can't start tcp echo thread (%d)", te );
 }
 
-INIT_ME( 0, 0, start_tcp_echo_server );
+// started from net startup - redo?
+//INIT_ME( 0, 0, start_tcp_echo_server );
 
 
 #define CURL_MAXBUF 512

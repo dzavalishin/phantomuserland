@@ -38,6 +38,8 @@ __FBSDID("$FreeBSD: src/sys/libkern/inet_ntoa.c,v 1.6.18.1 2008/11/25 02:59:29 k
 
 #include <phantom_libc.h>
 
+#define REVERSE_BYTES 0
+
 char *
 __inet_ntoa(struct in_addr ina)
 {
@@ -59,10 +61,17 @@ __inet_itoa(u_int32_t ia)
 	unsigned char *ucp = (unsigned char *)&ia;
 
 	snprintf(buf, sizeof(buf), "%d.%d.%d.%d",
+#if REVERSE_BYTES
+		ucp[3] & 0xff,
+		ucp[2] & 0xff,
+		ucp[1] & 0xff,
+		ucp[0] & 0xff);
+#else
 		ucp[0] & 0xff,
 		ucp[1] & 0xff,
 		ucp[2] & 0xff,
 		ucp[3] & 0xff);
+#endif
 	return buf;
 }
 

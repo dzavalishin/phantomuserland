@@ -60,6 +60,7 @@
 
 #include <kernel/init.h>
 #include <kernel/net/udp.h>
+#include <threads.h>
 
 #include <stdio.h>
 //#include <io.h>
@@ -75,13 +76,15 @@
 static char *version = "0.2.0";
 
 
-
-static void snmp_daemon_thread(void)
+static void snmp_daemon_thread(void *arg)
 {
+    (void) arg;
+
     OID view_all[] = { SNMP_OID_INTERNET };
     int view_idx;
     int rc = 0;
 
+    t_current_set_name("SNMP");
 
     /*
      * Print banner.
@@ -142,6 +145,18 @@ fail:
     return;
 }
 
-INIT_ME( 0, 0, snmp_daemon_thread );
+
+void start_snmp_daemon_thread(void)
+{
+    SHOW_FLOW0( 0, "start SNMP server" );
+
+    tid_t te = hal_start_thread( snmp_daemon_thread, 0, 0 );
+    if( te < 0 )
+        SHOW_ERROR( 0, "Can't start SNMP server thread (%d)", te );
+
+}
+
+
+INIT_ME( 0, 0, start_snmp_daemon_thread );
 
 #endif // HAVE_NET

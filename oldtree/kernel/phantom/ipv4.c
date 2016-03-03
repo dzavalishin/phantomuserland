@@ -29,6 +29,8 @@
 #include "misc.h"
 
 
+//#include <arpa/inet.h>
+
 
 typedef struct ipv4_header {
     uint8 version_length;
@@ -251,6 +253,57 @@ int ipv4_route_add_default(ipv4_addr if_addr, if_id interface_num, ipv4_addr gw_
     ipv4_addr network_addr = 0;
     ipv4_addr netmask = 0;
     return ipv4_route_add_gateway(network_addr, netmask, if_addr, interface_num, gw_addr);
+}
+
+//! Remove all routes for given interface
+errno_t ipv4_route_remove_iface(if_id interface_num)
+{
+    //ipv4_routing_entry *e;
+    ipv4_routing_entry *temp;
+    ipv4_routing_entry *last;
+
+    mutex_lock(&route_table_mutex);
+
+    // Process list head
+    while( route_table && (route_table->interface_id == interface_num) )
+    {
+        temp = route_table->next;
+        free( route_table );
+        route_table = temp;
+    }
+
+    // Now in the middle?
+    last = NULL;
+    for(temp = route_table; temp; temp = temp->next) {
+
+        if( temp->next && (temp->next->interface_id == interface_num) )
+        {
+            last = temp->next;
+            temp->next = last->next;
+            free(last);
+        }
+    }
+
+    mutex_unlock(&route_table_mutex);
+
+    return 0;
+}
+
+//! Dump all routes
+void ipv4_route_dump(void)
+{
+    ipv4_routing_entry *temp;
+
+    mutex_lock(&route_table_mutex);
+
+    for(temp = route_table; temp; temp = temp->next)
+    {
+        printf("Route if %d flags %x\n", temp->interface_id, temp->flags );
+        printf("\tif_addr %s, gw_addr %s\n",  __inet_itoa(htonl(temp->if_addr)), __inet_itoa(htonl(temp->gw_addr)) );
+        printf("\tnet_addr %s, netmask %08X\n\n",  __inet_itoa(htonl(temp->network_addr)), temp->netmask );
+    }
+
+    mutex_unlock(&route_table_mutex);
 }
 
 
