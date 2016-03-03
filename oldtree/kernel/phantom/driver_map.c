@@ -432,7 +432,7 @@ int phantom_find_drivers( int stage )
     int i;
 
     SHOW_FLOW( 0, "Look for PCI devices, stage %d", stage );
-    for(i = 0; i <= MAXPCI; i++ )
+    for(i = 0; i < MAXPCI; i++ )
     {
         if( (!allpci[i].filled) || allpci[i].used )
             continue;
@@ -445,7 +445,7 @@ int phantom_find_drivers( int stage )
 
 #if SPECIAL_VIRTIO_MAP
     printf("Look for VirtIO PCI devices, stage %d\n", stage );
-    for(i = 0; i <= MAXPCI; i++ )
+    for(i = 0; i < MAXPCI; i++ )
     {
         if( !(virtio_pci[i].filled) || virtio_pci[i].used )
             continue;

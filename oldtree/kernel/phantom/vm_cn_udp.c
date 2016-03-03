@@ -82,7 +82,8 @@ static pvm_object_t cn_udp_blocking_syscall_worker( pvm_object_t conn, struct da
 
             if( udp_bind(vp->udp_endpoint, &a) )
                 e = EISCONN;
-            e = 0;
+            else
+                e = 0;
             break;
         }
 #endif // HAVE_NET

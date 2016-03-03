@@ -3469,6 +3469,9 @@ errno_t fs_start_fat( phantom_disk_partition_t *p )
     if( f_getfree( fs, &freecl) )
     {
         SHOW_ERROR( 0, "%s can't get fs free space", p->name );
+    umofree:
+        f_umount ( fs );
+        free( fs );
         return ENXIO;
     }
 
@@ -3480,7 +3483,8 @@ errno_t fs_start_fat( phantom_disk_partition_t *p )
     if( f_open ( fs, &f, "ReadMe.txt", FA_READ) )
     {
         SHOW_ERROR( 0, "%s can't open ReadMe.txt", p->name );
-        return ENXIO;
+        //return ENXIO;
+        goto umofree;
     }
 
     char buf[1024];
@@ -3501,6 +3505,7 @@ errno_t fs_start_fat( phantom_disk_partition_t *p )
     if( !ufs )
     {
         SHOW_ERROR( 0, "can't create uufs for %s", p->name );
+        goto umofree;
     }
 
     char pname[FS_MAX_MOUNT_PATH];
@@ -3522,7 +3527,7 @@ errno_t fs_start_fat( phantom_disk_partition_t *p )
         errno_t ke = k_load_file( &odata, &osize, fname );
         if( !ke )
         {
-            printf("%s = '%s'\n", fname, odata );
+            printf("%s = '%s'\n", fname, (char *)odata );
             free( odata );
         }
         else

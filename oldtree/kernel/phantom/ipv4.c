@@ -640,7 +640,7 @@ static int ipv4_process_frag(cbuf *inbuf, ifnet *i, cbuf **outbuf)
             }
         }
 
-    done_frag_spot_search:
+    done_frag_spot_search: // dz We come here with (bad_frag==true) || (temp==null) only! All cases below which require (temp!=0) fail!
         if(bad_frag) {
             dprintf("ipv4_process_frag: received fragment is bad\n");
             cbuf_free_chain(inbuf);
@@ -876,7 +876,7 @@ int ipv4_input(cbuf *buf, ifnet *i)
         err = ERR_NET_BAD_PACKET;
         goto ditch_packet;
     }
-
+    /* unreachable */
     err = NO_ERROR;
 
 ditch_packet:

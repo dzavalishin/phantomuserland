@@ -232,7 +232,7 @@ errno_t get_uldt_cs_ds(
                        linaddr_t ds_base, u_int16_t *ods, size_t ds_limit
                       )
 {
-    SHOW_FLOW( 3, "User CS %p 0x%x bytes, DS %p 0x%x bytes", cs_base, cs_limit, ds_base, ds_limit );
+    SHOW_FLOW( 3, "User CS %p 0x%x bytes, DS %p 0x%x bytes", (void *)cs_base, cs_limit, (void *)ds_base, ds_limit );
 
 #if 0
     if( (segsToUse >> 3) + 1 >= LDTSZ )

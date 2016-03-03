@@ -273,6 +273,8 @@ static void ps2ms_int_handler( void *arg )
         video_drv->mouse_y = ps2ms_state_ypos;
 
         struct ui_event e;
+        memset( &e, 0, sizeof(e) );
+
         e.type = UI_EVENT_TYPE_MOUSE;
         e.time = fast_time();
         e.focus= 0;

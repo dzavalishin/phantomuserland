@@ -59,7 +59,7 @@ void hal_halt()
 {
     //fflush(stderr);
     printf("\n\nhal halt called, exiting.\n");
-    getchar();
+    (void)getchar();
     exit(1);
 }
 

@@ -77,7 +77,7 @@ void phantom_init_apic(void)
     phantom_map_page( (linaddr_t)apic_local_unit, pte );
 
     printf("APIC ver. 0x%X, unit id 0x%X\n",
-           0xFF && apic_local_unit->version.r,
+           0xFF & apic_local_unit->version.r,
            apic_local_unit->unit_id.r
           );
 

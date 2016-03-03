@@ -203,8 +203,10 @@ static errno_t vmware_accel_start(void)
 phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
-
-return 0;
+    // TODO why?
+#if 1
+    return 0;
+#else
     SHOW_FLOW0( 0, "Init" );
 
     /*
@@ -223,7 +225,7 @@ return 0;
     gSVGA.fbMem =   pci->base[1];
     gSVGA.fifoPhys = pci->base[2];
 
-    SHOW_FLOW( 1, "io %p, framebuf %p, fifo %p", gSVGA.ioBase, gSVGA.fbMem, gSVGA.fifoPhys );
+    SHOW_FLOW( 1, "io %p, framebuf %p, fifo %p", (void *)gSVGA.ioBase, (void *)gSVGA.fbMem, (void *)gSVGA.fifoPhys );
 
 
 
@@ -358,6 +360,7 @@ return 0;
     dev->seq_number = 0;
 
     return dev;
+#endif
 }
 
 

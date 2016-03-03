@@ -109,8 +109,8 @@ errno_t driver_memdisk_init( physaddr_t disk_data, size_t disk_data_size, int fl
     //free(es);
 
 //free:
-    free(dev);
-    return ENXIO;
+    //free(dev);
+    //return ENXIO;
 }
 
 

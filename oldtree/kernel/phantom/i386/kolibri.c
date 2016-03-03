@@ -379,9 +379,11 @@ static void kolibri_sys_info( uuprocess_t *u, struct kolibri_process_state * ks,
                 SHOW_FLOW( 1, "Report SVN ver %d to Kolibri", vs.svn_rev );
             }
 
-            int movsz = umin( sizeof(struct kolibri_kernel_version), 16 );
-            void *dest = u_ptr(st->ecx, 16);
-            memmove( dest, &vs, movsz );
+            //int movsz = umin( sizeof(struct kolibri_kernel_version), 16 );
+            //void *dest = u_ptr(st->ecx, 16);
+
+            void *dest = u_ptr(st->ecx, sizeof(struct kolibri_kernel_version));
+            memmove( dest, &vs, sizeof(struct kolibri_kernel_version) );
 
             if( st->esi == *(u_int32_t *)&phan[0] && st->edi == *(u_int32_t *)&tom[0])
             {
@@ -543,6 +545,7 @@ static int kolibri_sys_file( uuprocess_t *u, struct kolibri_process_state * ks, 
 
     case 2: // Create file
         mode |= O_CREAT;
+        /* fall throgh */ /* make coverity.com happy? */
     case 3: // Write file
         mode |= O_RDWR;
         {
