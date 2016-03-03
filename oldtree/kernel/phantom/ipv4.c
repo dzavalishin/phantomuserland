@@ -299,8 +299,8 @@ void ipv4_route_dump(void)
     for(temp = route_table; temp; temp = temp->next)
     {
         printf("Route if %d flags %x\n", temp->interface_id, temp->flags );
-        printf("\tif_addr %s, gw_addr %s\n",  __inet_itoa(temp->if_addr), __inet_itoa(temp->gw_addr) );
-        printf("\tnet_addr %s, netmask %08X\n\n",  __inet_itoa(temp->network_addr), temp->netmask );
+        printf("\tif_addr %s, gw_addr %s\n",  __inet_itoa(htonl(temp->if_addr)), __inet_itoa(htonl(temp->gw_addr)) );
+        printf("\tnet_addr %s, netmask %08X\n\n",  __inet_itoa(htonl(temp->network_addr)), temp->netmask );
     }
 
     mutex_unlock(&route_table_mutex);
