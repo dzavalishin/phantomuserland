@@ -17,6 +17,7 @@
 #define debug_level_error 10
 
 #include <kernel/net/udp.h>
+#include <kernel/libkern.h>
 #include <time.h>
 #include <errno.h>
 
@@ -311,7 +312,7 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
 
     // coverity.com doesn't understand bcopy
     //bcopy(rbuf.rbootp.bp_file, bstate->bootfile, sizeof(bstate->bootfile));
-    memcpy( bstate->bootfile, rbuf.rbootp.bp_file, sizeof(bstate->bootfile));
+    memcpy( bstate->bootfile, rbuf.rbootp.bp_file, umin( sizeof(bstate->bootfile), sizeof(rbuf.rbootp.bp_file) ) );
 
     bstate->bootfile[sizeof(bstate->bootfile) - 1] = '\0';
 
