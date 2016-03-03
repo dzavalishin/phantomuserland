@@ -136,7 +136,7 @@ typedef struct ifnet {
 	thread_id rx_thread;
 	thread_id tx_thread;
 	ifaddr *addr_list;
-	ifaddr *link_addr;
+        ifaddr *link_addr;
 	size_t mtu;
 	int (*link_input)(cbuf *buf, struct ifnet *i);
 	int (*link_output)(cbuf *buf, struct ifnet *i, netaddr *target, int protocol_type);
@@ -158,10 +158,14 @@ int cmp_netaddr(netaddr *addr1, netaddr *addr2);
 ifnet *if_id_to_ifnet(if_id id);
 ifnet *if_path_to_ifnet(const char *path);
 //int if_register_interface(const char *path, ifnet **i);
-void if_bind_address(ifnet *i, ifaddr *addr);
-void if_bind_link_address(ifnet *i, ifaddr *addr);
 int if_boot_interface(ifnet *i);
 int if_output(cbuf *b, ifnet *i);
+
+void if_bind_address(ifnet *i, ifaddr *addr);
+void if_bind_link_address(ifnet *i, ifaddr *addr);
+//! Clear all existing interface addresses and set new one
+void if_replace_address(ifnet *i, ifaddr *addr);
+
 
 int if_register_interface(int type, ifnet **_i, phantom_device_t *dev);
 
@@ -180,6 +184,10 @@ int ipv4_route_add_gateway(ipv4_addr network_addr, ipv4_addr netmask, ipv4_addr 
 
 // dz - is it correct?
 int ipv4_route_add_default(ipv4_addr if_addr, if_id interface_num, ipv4_addr gw_addr);
+
+//! Remove all routes for given interface
+errno_t ipv4_route_remove_iface(if_id interface_num);
+void ipv4_route_dump(void);
 
 
 int ipv4_lookup_srcaddr_for_dest(ipv4_addr dest_addr, ipv4_addr *src_addr);

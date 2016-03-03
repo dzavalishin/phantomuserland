@@ -593,10 +593,17 @@ errno_t bootp(ifnet *iface)
         address->broadcast.type = ADDR_TYPE_IP;
         NETADDR_TO_IPV4(address->broadcast) = htonl(bcast);
 
-        if_bind_address(iface, address);
+        ipv4_route_dump();
+
+
+        //if_bind_address(iface, address);
+        if_replace_address(iface, address); // kill al prev addresses and use new one
 
         u_int32_t net = (bstate->myip.s_addr) & ~(bstate->smask);
 
+
+        errno_t e = ipv4_route_remove_iface(iface->id);
+        SHOW_ERROR( 1, "Removilg routes to iface - failed, rc = %d", e );
 
         int rc;
         if( (rc = ipv4_route_add( net, ~(bstate->smask), bstate->myip.s_addr, iface->id) ) )
@@ -616,6 +623,8 @@ errno_t bootp(ifnet *iface)
         {
             SHOW_INFO0( 2, "Adding default route - ok");
         }
+
+        ipv4_route_dump();
 
         // At least one char!
         if(*bstate->hostname)
