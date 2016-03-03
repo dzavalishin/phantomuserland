@@ -16,7 +16,9 @@
 #include <errno.h>
 #include <sys/cdefs.h>
 
+// coverity[+kill]
 void test_fail(errno_t rc); // Call from any test to return to test runner and signal failure
+// coverity[+kill]
 void test_fail_msg(errno_t rc, const char *msg); // Call from any test to return to test runner and signal failure
 
 void on_fail_call( void (*f)( void *arg), void *arg ); // Call f on failure
