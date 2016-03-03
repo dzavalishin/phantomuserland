@@ -593,7 +593,7 @@ errno_t bootp(ifnet *iface)
         address->broadcast.type = ADDR_TYPE_IP;
         NETADDR_TO_IPV4(address->broadcast) = htonl(bcast);
 
-        ipv4_route_dump();
+        //ipv4_route_dump();
 
 
         //if_bind_address(iface, address);
@@ -601,6 +601,7 @@ errno_t bootp(ifnet *iface)
 
         u_int32_t net = (bstate->myip.s_addr) & ~(bstate->smask);
 
+        // TODO why the hell htonl here? Must ne ntohl instead?
 
         errno_t e = ipv4_route_remove_iface(iface->id);
         SHOW_ERROR( 1, "Removilg routes to iface - failed, rc = %d", e );
@@ -624,7 +625,7 @@ errno_t bootp(ifnet *iface)
             SHOW_INFO0( 2, "Adding default route - ok");
         }
 
-        ipv4_route_dump();
+        //ipv4_route_dump();
 
         // At least one char!
         if(*bstate->hostname)

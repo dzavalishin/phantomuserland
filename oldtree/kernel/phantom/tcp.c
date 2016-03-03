@@ -13,7 +13,7 @@
  *
 **/
 
-#define NET_CHATTY 1
+#define NET_CHATTY 0
 
 #include <kernel/config.h>
 #include <kernel/stats.h>
@@ -501,7 +501,9 @@ int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
         // socket is closed, send RST packet
         goto send_reset;
     case STATE_SYN_SENT:
+#if NET_CHATTY
         dprintf("tcp_input: in STATE_SYN_SENT s->tx_win_low=%d\n", s->tx_win_low );
+#endif
 
         s->tx_win_low++;
         s->retransmit_tx_seq = s->tx_win_low;
