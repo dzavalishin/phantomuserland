@@ -606,7 +606,7 @@ errno_t bootp(ifnet *iface)
         SHOW_ERROR( 1, "Removilg routes to iface - failed, rc = %d", e );
 
         int rc;
-        if( (rc = ipv4_route_add( net, ~(bstate->smask), htonl(bstate->myip.s_addr), iface->id) ) )
+        if( (rc = ipv4_route_add( htonl(net), htonl(~(bstate->smask)), htonl(bstate->myip.s_addr), iface->id) ) )
         {
             SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
         }
@@ -615,7 +615,7 @@ errno_t bootp(ifnet *iface)
             SHOW_INFO0( 2, "Adding route - ok");
         }
 
-        if( (rc = ipv4_route_add_default( htonl(bstate->myip.s_addr), iface->id, bstate->gateip.s_addr ) ) )
+        if( (rc = ipv4_route_add_default( htonl(bstate->myip.s_addr), iface->id, htonl(bstate->gateip.s_addr) ) ) )
         {
             SHOW_ERROR( 1, "Adding default route - failed, rc = %d", rc);
         }
