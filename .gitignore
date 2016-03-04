@@ -1,3 +1,4 @@
+*.d
 *.h~
 *.c~
 *.o
@@ -7,3 +8,5 @@ run/fat/boot/phantom
 run/tftp/phantom
 *.pe
 oldtree/kernel/phantom/svn_version.c
+*.a
+run/fat/bin/*

@@ -3,6 +3,7 @@
 
 #include <errno.h>
 #include <netinet/in.h>
+#include <kernel/net.h>
 
 // Give random (not allways first) address - not impl
 #define RESOLVER_FLAG_RANDOM    (1<<0)
@@ -21,5 +22,9 @@
 
 
 errno_t name2ip( in_addr_t *out, const char *name, int flags );
+
+errno_t dns_server_add( ipv4_addr a );
+errno_t dns_server_remove( ipv4_addr a );
+
 
 #endif // RESOLV_H

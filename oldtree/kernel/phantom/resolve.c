@@ -410,6 +410,43 @@ static ipv4_addr servers[MAX_DNS_SERVERS] =
     IPV4_DOTADDR_TO_ADDR(4, 4, 8, 8),
 };
 
+static int max_dns_servers = sizeof(servers) / sizeof(servers[0]);
+//static int dns_servers_count = 4; // How many we have statically defined
+
+
+errno_t dns_server_add( ipv4_addr a )
+{
+    int i;
+
+    for( i = 0; i < max_dns_servers; i++ )
+    {
+        if( servers[i] == 0 )
+        {
+            servers[i] = a;
+            return 0;
+        }
+    }
+
+    return ENOSPC;
+}
+
+
+errno_t dns_server_remove( ipv4_addr a )
+{
+    int i;
+
+    for( i = 0; i < max_dns_servers; i++ )
+    {
+        if( servers[i] == a )
+        {
+            servers[i] = 0;
+            return 0;
+        }
+    }
+
+    return ENOENT;
+}
+
 
 ipv4_addr ngethostbyname(unsigned char *host)
 {
