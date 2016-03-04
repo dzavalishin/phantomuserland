@@ -19,6 +19,7 @@
 #include <phantom_libc.h>
 #include <kernel/smp.h>
 #include <kernel/atomic.h>
+#include <kernel/barriers.h>
 
 #if HAVE_SMP
 #error no SMP on arm yet
@@ -77,6 +78,9 @@ void hal_spin_lock(hal_spinlock_t *sl)
     global_lock_entry_count[GET_CPU_ID()]++;
     sl->ebp = (addr_t)arch_get_frame_pointer();
 #endif
+
+	smp_mem_barrier(); // sure caller supposes to see what other CPUs did
+
 }
 
 void hal_spin_unlock(hal_spinlock_t *sl)
@@ -94,6 +98,8 @@ void hal_spin_unlock(hal_spinlock_t *sl)
 
     if(hal_is_sti())
         printf("\n!spinunlock STI!\n");
+
+	smp_mem_barrier(); // sure caller supposes to publish changed data
 }
 
 

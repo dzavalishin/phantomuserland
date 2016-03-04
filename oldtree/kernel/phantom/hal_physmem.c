@@ -372,7 +372,7 @@ void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
 void
 hal_physmem_add_low( physaddr_t start, size_t npages )
 {
-    SHOW_INFO( 1, "add low mem: %p, %d pages, %d kb", start, npages, npages*4 );
+    SHOW_INFO( 1, "add low mem: %p, %d pages, %d kb", (void *)start, npages, npages*4 );
     phantom_phys_free_region( &low_map, start/PAGE_SIZE, npages );
 
     low_map.allocable_size += npages;

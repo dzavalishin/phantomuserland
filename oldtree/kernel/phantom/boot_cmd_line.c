@@ -317,6 +317,7 @@ phantom_process_boot_options(void)
 
         case 's':
             if(alen < 4 || arg[2] != '=') goto error;
+            if( syslog_dest_address_string ) free(syslog_dest_address_string);
             syslog_dest_address_string = strdup( arg+3 );
             break;
 

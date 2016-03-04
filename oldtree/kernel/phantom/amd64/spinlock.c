@@ -63,6 +63,8 @@ void hal_spin_lock(hal_spinlock_t *sl)
     global_lock_entry_count[GET_CPU_ID()]++;
     sl->ebp = (addr_t)arch_get_frame_pointer();
 #endif
+
+	smp_mem_barrier();
 }
 
 void hal_spin_unlock(hal_spinlock_t *sl)
@@ -78,6 +80,8 @@ void hal_spin_unlock(hal_spinlock_t *sl)
 	}
     if(hal_is_sti())
         printf("\n!spinunlock STI!\n");
+
+	smp_mem_barrier();
 }
 
 

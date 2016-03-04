@@ -455,8 +455,8 @@ int rtl8139_init(rtl8139 *rtl)
 
 #if !INTERRUPT_SEM
 err2:
-#endif
     hal_irq_free( rtl->irq, &rtl8139_int, rtl );
+#endif
 
 err1:
     //vm_delete_region(vm_get_kernel_aspace_id(), rtl->region);

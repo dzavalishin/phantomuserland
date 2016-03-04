@@ -76,7 +76,7 @@ void dump_ss(struct trap_state *st)
 
     if(phantom_symtab_getname)
     {
-        printf("EIP %6p: %s\n", st->eip, phantom_symtab_getname((void *)st->eip) ); // TODO 64 bit machdep
+        printf("EIP %6p: %s\n", (void *)st->eip, phantom_symtab_getname((void *)st->eip) ); // TODO 64 bit machdep
     }
 
 

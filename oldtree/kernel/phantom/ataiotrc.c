@@ -254,7 +254,7 @@ const char * trc_get_st_bit_name( unsigned char st )
    for ( ndx = 0; ndx < 8; ndx ++ )
    {
       if ( st & ataStatusNames[ndx].bitPos )
-         strcat( ataStatusNameBuf, ataStatusNames[ndx].bitName );
+         strlcat( ataStatusNameBuf, ataStatusNames[ndx].bitName, sizeof(ataStatusNameBuf) );
    }
    return ataStatusNameBuf;
 }

@@ -142,7 +142,7 @@ void profiler_dump_map( void )
 
         printf(
                "%6p: %6d (%2d%%) - %s\n",
-               ip, count, percentage,
+               (void *)ip, count, percentage,
                name
               );
 

@@ -994,6 +994,8 @@ pager_format_empty_free_list_block( disk_page_no_t fp )
 {
     struct phantom_disk_blocklist freelist;
 
+    memset( &freelist, 0, sizeof( freelist ) );
+
     freelist.head.magic = DISK_STRUCT_MAGIC_FREEHEAD;
     freelist.head.used = 0;
     freelist.head.next = superblock.free_list;

@@ -405,7 +405,7 @@ static volatile int called = 0;
 static void echo(  void *_a )
 {
     called++;
-    printf("Echo: '%s'\n", _a);
+    printf("Echo: '%s'\n", (char *)_a);
 }
 
 

@@ -284,7 +284,7 @@ int _v_printf(int (*_write)(void*, const void *, ssize_t ), void* arg, const cha
             {
                 WRITE( *s++ );
             }
-            free(str);
+            free(str); str = 0;
             continue;
 
             /* From GNU documentation:
@@ -358,7 +358,7 @@ int _v_printf(int (*_write)(void*, const void *, ssize_t ), void* arg, const cha
         {
             WRITE( *s++ );
         }
-        free(str);
+        free(str); str = 0;
     }
     out_len += pos;
     err = _write(arg, buf, pos);

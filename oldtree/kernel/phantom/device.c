@@ -58,7 +58,7 @@ static void dump_dev(phantom_device_t *dev )
     printf("\tDev: %s%d @ %s, io 0x%x irq %d mem %p/%d\n",
            dev->name, dev->seq_number, bname,
            dev->iobase, dev->irq,
-           dev->iomem, dev->iomemsize
+           (void *)dev->iomem, dev->iomemsize
           );
 
     dump_dev( dev->next );

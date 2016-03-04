@@ -291,7 +291,7 @@ static pcnet32 *pcnet32_new(u_int32_t initmode, u_int16_t rxbuffer_size, u_int16
     return nic;
 
 //err_after_interrupt_sem:
-    hal_sem_destroy( &(nic->interrupt_sem) );
+    //hal_sem_destroy( &(nic->interrupt_sem) );
 
 err_after_buffers_region:
     //vm_delete_region(vm_get_kernel_aspace_id(), nic->buffers_region);

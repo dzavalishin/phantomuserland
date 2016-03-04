@@ -90,9 +90,9 @@ phantom_check_user_trap( struct trap_state *ts )
 
 #ifdef ARCH_ia32
         if(ts->trapno == T_PAGE_FAULT)
-            printf("Page fault addr %p\n", arch_get_fault_address() );
+            printf("Page fault addr %p\n", (void *)arch_get_fault_address() );
 #endif
-        printf("Usermode thread %d killed due to unexpected trap %d, eip %p\n", tid, ts->trapno, ts->TS_PROGRAM_COUNTER );
+        printf("Usermode thread %d killed due to unexpected trap %d, eip %p\n", tid, ts->trapno, (void *)(ts->TS_PROGRAM_COUNTER) );
         t_kill_thread( tid );
         // Will panic below if returned
         printf("Usermode trap panic in thread %d\n", tid);

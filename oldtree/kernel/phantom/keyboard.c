@@ -141,26 +141,30 @@ retry:
     hal_sem_acquire(&keyboard_sem);
 
     saved_tail = tail;
-    if(head == saved_tail) {
+    if(head == saved_tail)
         goto retry;
-    } else {
-        // copy out of the buffer
-        if(head < saved_tail)
-            copy_len = umin(len, saved_tail - head);
-        else
-            copy_len = umin(len, keyboard_buf_len - head);
-        memcpy(buf, &keyboard_buf[head], copy_len * sizeof(_key_event));
-        copied_events = copy_len;
-        head = (head + copy_len) % keyboard_buf_len;
-        if(head == 0 && saved_tail > 0 && copied_events < len) {
-            // we wrapped around and have more bytes to read
-            // copy the first part of the buffer
-            copy_len = umin(saved_tail, len - copied_events);
-            memcpy(&buf[copied_events], &keyboard_buf[0], copy_len * sizeof(_key_event));
-            copied_events += copy_len;
-            head = copy_len;
-        }
+
+    // copy out of the buffer
+    if(head < saved_tail)
+        copy_len = umin(len, saved_tail - head);
+    else
+        copy_len = umin(len, keyboard_buf_len - head);
+
+    memcpy(buf, &keyboard_buf[head], copy_len * sizeof(_key_event));
+
+    copied_events = copy_len;
+    head = (head + copy_len) % keyboard_buf_len;
+/* coverity.com whines about this and we need no more that 1 event for a call, so just turn off for now
+    if(head == 0 && saved_tail > 0 && copied_events < len)
+    {
+        // we wrapped around and have more bytes to read
+        // copy the first part of the buffer
+        copy_len = umin(saved_tail, len - copied_events);
+        memcpy(&buf[copied_events], &keyboard_buf[0], copy_len * sizeof(_key_event));
+        copied_events += copy_len;
+        head = copy_len;
     }
+*/
 
     return copied_events;
 }
@@ -528,7 +532,7 @@ int phantom_scan_console_getc(void)
 }
 #endif
 
-int board_boot_console_getc(void) 
+int board_boot_console_getc(void)
 {
     return phantom_scan_console_getc();
 }

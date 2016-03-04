@@ -42,7 +42,7 @@ static int console_read(struct phantom_device *dev, void *buf, int len)
 
     while(nw--)
     {
-        *cp++ = getchar();
+        *cp++ = (char) getchar();
         nread++;
 
         if( *cp == '\n' )

@@ -101,8 +101,9 @@ phantom_device_t * driver_rtl_8169_probe( pci_cfg_t *pci, int stage )
     rtl8169 * nic = NULL;
     static int seq_number = 0;
 
-return 0; // on real hw beheaves strangely
-
+#if 1
+    return 0; // on real hw beheaves strangely
+#else
     SHOW_FLOW0( 1, "probe" );
 
     //nic = rtl8169_new();
@@ -164,7 +165,7 @@ return 0; // on real hw beheaves strangely
     }
 
     return dev;
-
+#endif
 }
 
 

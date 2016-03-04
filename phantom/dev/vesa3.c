@@ -943,7 +943,7 @@ errno_t vesa3_bootstrap(void)
 
 
 //no_vesa3:
-    kfree( bios_stack );
+    //kfree( bios_stack );
 no_vesa2:
     kfree( bios_data );
 no_vesa1:
