@@ -25,6 +25,7 @@ die ( ) {
 COMPILE=1
 SNAPTEST=1
 TESTRUN=1
+PANIC_AFTER=180		# abort test after 3 minutes (consider stalled)
 
 at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
@@ -246,7 +247,7 @@ rm -f serial0.log
 
 QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
-	-net nic,model=ne2k_pci -net user
+	-net nic,model=ne2k_pci -net user \
 	-parallel file:lpt_01.log \
 	-serial file:serial0.log \
 	-tftp tftp \
@@ -256,6 +257,7 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
 	-usb -soundhw sb16"
+#	-net dump,file=net.dmp \
 #	-net nic,model=ne2k_isa -M isapc \
 
 # isolate test suite to a separate function
@@ -275,14 +277,16 @@ boot
 
 	$QEMU $QEMU_OPTS &
 	QEMU_PID=$!
+	ELAPSED=0
 
-	while [ 1 ]
+	while [ $ELAPSED -lt $PANIC_AFTER ]
 	do
 		sleep 2
 		kill -0 $QEMU_PID || break
+		ELAPSED=`expr $ELAPSED + 2`
 
 		[ -s serial0.log ] || {
-			sleep 30
+			sleep 35
 			[ -s serial0.log ] || {
 				echo "
 
@@ -290,6 +294,7 @@ FATAL! Phantom stalled (serial0.log is empty)"
 				kill $QEMU_PID
 				break
 			}
+			ELAPSED=`expr $ELAPSED + 35`
 		}
 
 		tail -1 serial0.log | grep -q '^Press any' && \
