@@ -23,6 +23,7 @@
 
 // extern struct utsname phantom_uname;
 #include <kernel/boot.h>
+#include <netinet/resolv.h>
 
 
 /*	$NetBSD: bootp.c,v 1.14 1998/02/16 11:10:54 drochner Exp $	*/
@@ -88,6 +89,8 @@ struct bootp_state
     struct in_addr 	gateip;
     struct in_addr 	rootip;
     struct in_addr 	myip;
+
+    struct in_addr 	dns;
 
     char 		rootpath[1024];
     char 		hostname[1024];
@@ -459,6 +462,26 @@ vend_rfc1048(struct bootp_state *bstate, u_char *cp, u_int len)
         if (tag == TAG_END)
             break;
 
+        SHOW_FLOW( 4, "vend_rfc1048 tag = %d", tag );
+
+        switch(tag)
+        {
+        case TAG_DOMAIN_SERVER:
+            bcopy(cp, &bstate->dns.s_addr, sizeof(bstate->dns.s_addr));
+            break;
+
+            // TODO
+        case TAG_TIME_SERVER:
+            break;
+
+        case TAG_LOG_SERVER:
+            break;
+
+        default:
+            //SHOW_ERROR( 0, "unknown vend_rfc1048 tag = %d", tag );
+            break;
+        }
+
         if (tag == TAG_SUBNET_MASK) {
             bcopy(cp, &bstate->smask, sizeof(bstate->smask));
         }
@@ -568,6 +591,8 @@ errno_t bootp(ifnet *iface)
         SHOW_INFO( 2, "root ip:      %s", inet_ntoa(bstate->rootip) );
         SHOW_INFO( 2, "server ip:    %s", inet_ntoa(bstate->servip) );
 
+        SHOW_INFO( 2, "DNS ip:       %s", inet_ntoa(bstate->dns) );
+
         SHOW_INFO( 2, "rootpath:     '%s'", bstate->rootpath );
         SHOW_INFO( 1, "hostname:     '%s'", bstate->hostname );
         SHOW_INFO( 2, "bootfile:     '%s'", bstate->bootfile );
@@ -632,6 +657,11 @@ errno_t bootp(ifnet *iface)
         if(*bstate->hostname)
             strlcpy( phantom_uname.nodename, bstate->hostname, _UTSNAME_NODENAME_LENGTH );
 
+        if( bstate->dns.s_addr )
+        {
+            e = dns_server_add( htonl(bstate->dns.s_addr) );
+            SHOW_ERROR( 1, "Adding DNS server failed, rc = %d", e );
+        }
     }
 
 
