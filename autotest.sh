@@ -44,32 +44,30 @@ at_exit ( ) {
 	}
 }
 
-[ $# -gt 0 ] || {
-	CRONMODE=1
-	UNATTENDED=-unattended
-	exec 1>$0.log 2>&1
-}
+if [ $# -gt 0 ]
+then
+	FOREGROUND=1
 
-while [ $# -gt 0 ]
-do
-	case "$1" in
-	-f)	FORCE=1			;;
-	-r)	CHECK_GIT=1		;;
-	-u)	UNATTENDED=-unattended	;;
-	-p)
-		shift
-		[ "$1" -gt 0 ] && PASSES="$1"
-	;;
-	-w)	WARN=1
-		MSG="No updates for today"
-	;;
-	-nc)	unset COMPILE	;;
-	-ng)	unset DISPLAY	;;
-	-ns)	unset SNAPTEST	;;
-	-nt)	unset TESTRUN	;;
-	-v)	VIRTIO=1	;;
-	*)
-		echo "Usage: $0 [-f] [-r] [-u] [-p N] [-w] [-nc] [-ng] [-ns] [-nt] [-v]
+	while [ $# -gt 0 ]
+	do
+		case "$1" in
+		-f)	FORCE=1			;;
+		-r)	CHECK_GIT=1		;;
+		-u*)	UNATTENDED=-unattended	;;
+		-p)
+			shift
+			[ "$1" -gt 0 ] && PASSES="$1"
+		;;
+		-w)	WARN=1
+			MSG="No updates for today"
+		;;
+		-nc)	unset COMPILE	;;
+		-ng)	TEXTONLY=1	;;
+		-ns)	unset SNAPTEST	;;
+		-nt)	unset TESTRUN	;;
+		-v)	VIRTIO=1	;;
+		*)
+			echo "Usage: $0 [-f] [-r] [-u] [-p N] [-w] [-nc] [-ng] [-ns] [-nt] [-v]
 	-f	- force run (even if there is another copy stalled)
 	-r	- force repository check (and quit if no updates)
 	-u	- run unattended (don't stop on panic for gdb)
@@ -81,11 +79,16 @@ do
 	-ng	- do not show qemu/kvm window
 	-v	- use virtio for snaps
 "
-		exit 0
-	;;
-	esac
-	shift
-done
+			exit 0
+		;;
+		esac
+		shift
+	done
+else
+	CRONMODE=1
+	UNATTENDED=-unattended
+	exec 1>$0.log 2>&1
+fi
 
 cd $PHANTOM_HOME
 
@@ -153,9 +156,6 @@ quit
 	exit 0
 }
 
-# clean unexpected failures
-[ "$COMPILE" ] && rm -f make.log
-
 # update data BEFORE checking for stalled copies
 GRUB_MENU=tftp/tftp/menu.lst
 [ "$CHECK_GIT" ] && {
@@ -205,217 +205,6 @@ Previous test run stalled. Trying gdb..."
 # now it is safe to alter behaviour on exit
 trap at_exit 0 2
 
-[ "$COMPILE" ] && {
-	make clean > /dev/null 2>&1
-
-	#./build.sh > make.log 2>&1 || die "Make failure"
-	#make -C phantom/vm	>> make.log 2>&1 || die "Make failure in vm"
-	#make all > make.log 2>&1 || die "Make failure"
-	#make -C phantom/dev	>> make.log 2>&1 || die "Make failure in dev"
-	#make -C phantom/newos	>> make.log 2>&1 || die "Make failure in newos"
-	#make -C phantom/threads	>> make.log 2>&1 || die "Make failure in threads"
-	make all >> make.log 2>&1 || die "Make failure"
-	grep -B1 'error:\|] Error' make.log && {
-		grep -q '^--- kernel build finished' make.log || die "Make failure"
-	}
-	[ "$WARN" ] && grep : make.log
-
-	tail make.log
-}
-
-
-cd $TEST_DIR
-cp $TFTP_PATH/phantom tftp/
-
-for module in classes pmod_test pmod_tcpdemo
-do
-	[ -s tftp/$module ] || {
-		cp $TFTP_PATH/$module tftp/
-		continue
-	}
-
-	[ tftp/$module -ot $TFTP_PATH/$module ] || continue
-
-	echo "$module is renewed"
-	cp $TFTP_PATH/$module tftp/
-done
-
-rm -f serial0.log
-
-[ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH=-nographic
-#GRAPH=-nographic
-
-QEMU_OPTS="-L /usr/share/qemu $GRAPH \
-	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
-	-net nic,model=ne2k_pci -net user \
-	-parallel file:lpt_01.log \
-	-serial file:serial0.log \
-	-tftp tftp \
-	-no-fd-bootchk \
-	-fda img/grubfloppy.img \
-	-hda snapcopy.img \
-	-hdb $DISK_IMG \
-	-drive file=vio.img,if=virtio,format=raw \
-	-usb -soundhw sb16"
-#	-net dump,file=net.dmp \
-#	-net nic,model=ne2k_isa -M isapc \
-
-# isolate test suite to a separate function
-test_run ( ) {
-	echo "color yellow/blue yellow/magenta
-timeout=3
-
-title=phantom ALL TESTS
-kernel=(nd)/phantom -d 20 $UNATTENDED -- -test all
-module=(nd)/classes
-module=(nd)/pmod_test
-boot 
-" > $GRUB_MENU
-
-	dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
-	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
-
-	$QEMU $QEMU_OPTS &
-	QEMU_PID=$!
-	ELAPSED=0
-
-	while [ $ELAPSED -lt $PANIC_AFTER ]
-	do
-		sleep 2
-		kill -0 $QEMU_PID || break
-		ELAPSED=`expr $ELAPSED + 2`
-
-		[ -s serial0.log ] || {
-			sleep 35
-			[ -s serial0.log ] || {
-				echo "
-
-FATAL! Phantom stalled (serial0.log is empty)"
-				kill $QEMU_PID
-				break
-			}
-			ELAPSED=`expr $ELAPSED + 35`
-		}
-
-		tail -1 serial0.log | grep -q '^Press any' && \
-			call_gdb $GDB_PORT $QEMU_PID "Test run failed"
-
-		grep -q '^\(\. \)\?Panic' serial0.log && {
-			sleep 15
-			break
-		}
-	done
-
-	grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' serial0.log && die "Phantom test run failed!"
-	grep 'SVN' serial0.log || die "Phantom test run crashed!"
-	grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' serial0.log
-	grep 'FINISHED\|done, reboot' serial0.log || die "Phantom test run error!"
-	grep -q 'TEST FAILED' serial0.log && {
-		cp serial0.log test.log
-		preserve_log test.log
-	}
-}
-# test suite done
-[ "$TESTRUN" ] && test_run
-
-[ "$SNAPTEST" ] || exit 0
-
-cp $DISK_IMG $DISK_IMG.orig
-
-RESTORE_IMG=yes
-
-echo "
- ============= Now probing snapshots ========================"
-echo "color yellow/blue yellow/magenta
-
-timeout=3
-
-title=phantom
-kernel=(nd)/phantom -d=10 $UNATTENDED -- 
-module=(nd)/classes
-boot 
-" > $GRUB_MENU
-
-# before running again
-# TODO call ../zero_ph_img.sh 
-#rm $DISK_IMG
-#touch $DISK_IMG
-#echo ": zeroing virtual disk..."
-#dd bs=4096 seek=0 count=20480 if=/dev/zero of=$DISK_IMG 2> /dev/null
-#echo ": instantating superblock..."
-#dd conv=nocreat conv=notrunc bs=4096 count=1 seek=16 if=img/phantom.superblock of=$DISK_IMG 2> /dev/null
-dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
-
-if [ "$VIRTIO" ]
-then
-	cp ../$DISK_IMG vio.img
-	echo ": zeroing phantom drive ..."
-	dd if=/dev/zero of=phantom.img bs=4096 skip=1 count=1024 2> /dev/null
-else
-	cp ../$DISK_IMG .
-	echo ": zeroing vio..."
-	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
-fi
-
-for pass in `seq 1 $PASSES`
-do
-	echo "
-===> pass $pass"
-	$QEMU $QEMU_OPTS &
-	QEMU_PID=$!
-
-	while [ 1 ]
-	do
-		sleep 2
-		kill -0 $QEMU_PID || {
-			echo "
-
-FATAL! Phantom snapshot test crashed"
-			break
-		}
-		[ -s serial0.log ] || {
-			sleep 30
-			[ -s serial0.log ] || {
-				echo "
-
-FATAL! Phantom snapshot test stalled (serial0.log is empty)"
-				kill $QEMU_PID
-				break
-			}
-		}
-		grep -iq 'snapshot done' serial0.log && break
-		grep -q '^\(\. \)\?Panic' serial0.log && {
-			sleep 15
-			break
-		}
-	done
-
-	tail -1 serial0.log | grep -q '^Press any' && \
-		call_gdb $GDB_PORT $QEMU_PID "Pass $pass panic" 
-
-	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log && {
-		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' serial0.log
-		preserve_log serial0.log
-		break
-	}
-
-	grep 'snap:\|Snapshot done' serial0.log || {
-		echo "
-ERROR! No snapshot activity in log! Phantom snapshot test failed"
-		tail -10 serial0.log
-		preserve_log serial0.log
-		break
-	}
-
-	kill -0 $QEMU_PID >/dev/null || break
-
-	while (ps -p $QEMU_PID >/dev/null)
-	do
-		sleep 2
-		kill $QEMU_PID
-	done
-done
-
-#mv $DISK_IMG.orig $DISK_IMG
-#mv $GRUB_MENU.orig $GRUB_MENU
-##rm $DISK_IMG $GRUB_MENU
+[ "$COMPILE" ] && . ./ci-build.sh ${FOREGROUND:+-f} $UNATTENDED ${WARN:+-w}
+[ "$TESTRUN" ] && . ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
+[ "$SNAPTEST" ] && . ./ci-snaptest.sh ${FOREGROUND:+-f} $UNATTENDED ${VIRTIO:+-v} ${TEXTONLY:+-ng} ${PASSES:+-p $PASSES}
