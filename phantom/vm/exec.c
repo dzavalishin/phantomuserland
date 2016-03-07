@@ -464,7 +464,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
     {
 
 #if NEW_SNAP_SYNC
-        touch_snap_catch();
+        touch_snap_catch(); // touch special memory page, if snap is scheduled, page will be write-protected and we'll gen page fault
 #else
         if(phantom_virtual_machine_snap_request)
         {
@@ -695,7 +695,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             }
             // End of long ops
             goto noops;
-    	}
+    	} // if(prefix_long)
 
         if( prefix_float )
         {
@@ -868,7 +868,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             }
             // End of float ops
             goto noops;
-    	}
+    	} // if(prefix_float)
 
         if( prefix_double )
         {
@@ -1042,12 +1042,23 @@ static void do_pvm_exec(pvm_object_t current_thread)
             }
             // End of double ops
             goto noops;
-        }
+        } // if(prefix_double)
 
 
     noprefix:
         switch(instruction)
         {
+
+        // type switch prefixes --------------------------------
+
+        // NB! Not break, continue, or else code after the main switch will reset prefix and print warning
+
+        case opcode_prefix_long:   prefix_long   = 1; continue;
+        case opcode_prefix_float:  prefix_float  = 1; continue;
+        case opcode_prefix_double: prefix_double = 1; continue;
+
+        // special opcodes -------------------------------------
+
         case opcode_nop:
             LISTI("nop");
             break;
@@ -1084,11 +1095,6 @@ static void do_pvm_exec(pvm_object_t current_thread)
             }
             break;
 
-            // type switch prefixes --------------------------------
-
-        case opcode_prefix_long:   prefix_long   = 1; break;
-        case opcode_prefix_float:  prefix_float  = 1; break;
-        case opcode_prefix_double: prefix_double = 1; break;
 
             // sync ops ---------------------------------------
 
@@ -1741,7 +1747,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
                 if( find_dynamic_method( &mi ) )
                     pvm_exec_panic("dynamic invoke failed");
-                    
+
                 pvm_exec_call(da,mi.method_ordinal,mi.n_param,1,mi.new_this);
             }
             break;
@@ -1819,16 +1825,20 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
             printf("Unknown op code 0x%X\n", instruction );
             pvm_exec_panic( "thread exec: unknown opcode" ); //, instruction );
-            //exit(33);
-        }
+
+        } // outer switch(instruction)
+
+        // NB! We have continue after instructions that set prefix (long/float/double) so that
+        // control does not reach here and we do not reset prefix and do not print warning
+
     noops:
-// TODO can't happen
+        // TODO can't happen
         if( prefix_long || prefix_float || prefix_double )
             printf("Unused type prefix on op code 0x%X\n", instruction );
 
         prefix_long = prefix_float = prefix_double = 0;
 
-    }
+    } // while(1)
 }
 
 void pvm_exec(pvm_object_t current_thread)
