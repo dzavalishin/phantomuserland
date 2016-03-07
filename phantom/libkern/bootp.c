@@ -630,7 +630,7 @@ errno_t bootp(ifnet *iface)
         // TODO why the hell htonl here? Must ne ntohl instead?
 
         errno_t e = ipv4_route_remove_iface(iface->id);
-        SHOW_ERROR( 1, "Removilg routes to iface - failed, rc = %d", e );
+        SHOW_ERROR( 1, "Removing routes to iface - failed, rc = %d", e );
 
         int rc;
         if( (rc = ipv4_route_add( htonl(net), htonl(~(bstate->smask)), htonl(bstate->myip.s_addr), iface->id) ) )
