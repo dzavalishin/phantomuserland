@@ -136,6 +136,7 @@ int do_test_udp_send(const char *test_parm)
 
 #else
     (void) test_parm;
+    // CI: this message is being watched by CI scripts (ci-runtest.sh)
     SHOW_INFO0( 0, "Warning - no network in kernel, test SKIPPED");
     return 0;
 #endif
@@ -150,6 +151,7 @@ int do_test_udp_syslog(const char *test_parm)
     syslog(LOG_DEBUG|LOG_KERN, "Test of UDP syslog: '%s'", test_parm );
 #else
     (void) test_parm;
+    // CI: this message is being watched by CI scripts (ci-runtest.sh)
     SHOW_INFO0( 0, "Warning - no network in kernel, test SKIPPED");
 #endif
     return 0;
