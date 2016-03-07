@@ -21,6 +21,7 @@
 #include <phantom_libc.h>
 #include <errno.h>
 #include <setjmp.h>
+#include <threads.h>
 
 #include <kernel/init.h>
 #include <hal.h>
