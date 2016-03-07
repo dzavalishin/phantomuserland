@@ -44,6 +44,7 @@ void panic(const char *fmt, ...)
 
     if (!bootflag_unattended)
     {
+	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
 	printf("\nPress any key ...\n");
 	board_panic_wait_keypress();
     }
@@ -56,6 +57,7 @@ void panic(const char *fmt, ...)
 
     if (!bootflag_unattended)
     {
+	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
 	printf("\nPress any key to reboot ...\n");
 	board_panic_wait_keypress();
     }

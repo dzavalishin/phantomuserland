@@ -310,6 +310,7 @@ void panic(const char *fmt, ...)
 
         //save_mem(mem, size);
 	getchar();
+	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
 	printf("\nPress Enter from memcheck...");
 	pvm_memcheck();
 	//printf("\nPress Enter...");	getchar();
