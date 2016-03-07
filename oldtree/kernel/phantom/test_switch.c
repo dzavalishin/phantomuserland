@@ -196,6 +196,7 @@ void run_test( const char *test_name, const char *test_parm )
     else
         printf("all tests PASSED\n" );
 
+    // CI: this message is being watched by CI scripts (ci-runtest.sh)
     printf( "-----\nPhantom test suite FINISHED\n-----\n" );
 
 }
