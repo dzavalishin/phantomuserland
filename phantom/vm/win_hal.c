@@ -302,6 +302,7 @@ void panic(const char *fmt, ...)
 {
 	va_list vl;
 
+	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
 	printf("\nPanic: ");
 	va_start(vl, fmt);
 	vprintf(fmt, vl);

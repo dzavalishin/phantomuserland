@@ -36,6 +36,7 @@ void panic(const char *fmt, ...)
     hal_cli();
     panic_reenter++;
 
+    // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
     printf("Panic: ");
     va_list ap;
     va_start(ap, fmt);
