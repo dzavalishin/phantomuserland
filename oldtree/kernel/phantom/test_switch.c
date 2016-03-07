@@ -88,6 +88,7 @@ void report( int rc, const char *test_name )
 {
     if( !rc )
     {
+	// CI: this message is being watched by CI scirpts (ci-runtest.sh)
         printf("KERNEL TEST PASSED: %s\n", test_name );
         return;
     }
@@ -96,6 +97,7 @@ void report( int rc, const char *test_name )
     strerror_r(rc, rcs, sizeof(rcs));
 
     nFailed++;
+    // CI: this message is being watched by CI scirpts (ci-runtest.sh)
     printf("!!! KERNEL TEST FAILED: %s -> %d (%s)\n", test_name, rc, rcs );
 
     if( fhandler_f )

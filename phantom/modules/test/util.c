@@ -78,6 +78,7 @@ void report( int rc, const char *test_name )
 
     if( !rc )
     {
+	// CI: this message is being watched by CI scirpts (ci-runtest.sh)
         snprintf(buf, sizeof(buf), "USERMODE TEST PASSED: %s\n", test_name );
         printf( "%s", buf );
         ssyslog( 0, buf );
@@ -86,6 +87,7 @@ void report( int rc, const char *test_name )
 
     // todo strerror(rc)
 
+    // CI: this message is being watched by CI scirpts (ci-runtest.sh)
     snprintf(buf, sizeof(buf), "!!! USERMODE TEST FAILED: %s -> %d\n", test_name, rc );
     printf( "%s", buf );
     ssyslog( 0, buf );
