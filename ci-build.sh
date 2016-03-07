@@ -6,6 +6,7 @@ WARN=1
 LOGFILE=make.log
 
 cd `dirname $0`
+export PHANTOM_HOME=`pwd`
 export LANG=C
 
 die ( ) {
