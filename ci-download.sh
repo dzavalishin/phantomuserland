@@ -9,3 +9,4 @@ tar xf ../../qemu-1.0.1.tar.gz
 cd qemu-1.0.1
 sh ./configure
 make
+cd ../..
