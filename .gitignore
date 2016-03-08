@@ -10,3 +10,6 @@ run/tftp/phantom
 oldtree/kernel/phantom/svn_version.c
 *.a
 run/fat/bin/*
+local-config.mk 
+local-config.ia32.mk
+phantom-cov.tgz
