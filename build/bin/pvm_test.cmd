@@ -1,0 +1,1 @@
+sh pvm_test %*
