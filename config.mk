@@ -7,7 +7,9 @@
 
 
 # Directory where to put executables - supposed to be in PATH
+ifndef INST_BIN
 INST_BIN=$(realpath c:\bin\tools)
+endif
 
 ifndef TFTP_PATH
 TFTP_PATH=$(realpath $(PHANTOM_HOME))/run/tftp

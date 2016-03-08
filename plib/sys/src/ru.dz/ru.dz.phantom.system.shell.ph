@@ -20,28 +20,10 @@ import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 import .ru.dz.phantom.system.shell_callback;
 
+import .ru.dz.demo.start;
+
 attribute const * ->!;
 
-/*
-class shell_callback //extends runnable
-{
-    var console : .internal.io.tty;
-
-    void run(var time : int ) [17]
-    {
-        console.putws("\n\nTimer callback: ");
-        console.putws(time.toString());
-        console.putws(" !!\n\n");
-    }
-                      
-    void init(var tt : .internal.io.tty ) 
-    {
-        console = tt;
-    }
-
-
-};
-*/
 
 class shell //extends runnable
 {
@@ -66,6 +48,8 @@ class shell //extends runnable
     var cb : shell_callback;
 
     //var mtx : .internal.mutex;
+
+	var demo : .ru.dz.demo.start;
 
 
     void init()
@@ -120,6 +104,9 @@ class shell //extends runnable
 
         stat_conn = new .internal.connection();
         stat_conn.connect("stt:");
+
+		demo = new .ru.dz.demo.start();
+		demo.run(console);
 
         while(1)
         {

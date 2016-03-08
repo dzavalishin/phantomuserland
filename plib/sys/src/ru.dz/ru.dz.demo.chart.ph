@@ -4,24 +4,23 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Simple weater widget
+ * Simple chart
  *
  *
 **/
 
-package .ru.dz.phantom.system;
+package .ru.dz.demo;
 
 import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
-import .internal.bitmap;
 import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 
 attribute const * ->!;
 
 
-class weather //extends runnable
+class chart //extends runnable
 {
     var stat_val :  int;
     var stat_pos :  int;
@@ -56,20 +55,14 @@ class weather //extends runnable
 
     void run(var parent_object @const ) [8]
     {
-        var bmp : .internal.bitmap;
-
-        bmp = new .internal.bitmap();
-        bmp.loadFromString(getBackgroundImage());
 
         win = new .internal.window();
 
-        win.setWinPosition(50,510);
-        win.setTitle("Weather");
+        win.setWinPosition(50,310);
+        win.setTitle("Disk io stats");
         win.setFg(0xFF000000); // black
 
         win.clear();
-		win.drawImage( 0, 0, getBackgroundImage() );
-		//bmp.paintTo( win, 0, 0 );
         win.update();
 
         stat_pos = 0;
@@ -136,12 +129,5 @@ class weather //extends runnable
 
 
     }
-
-
-    .internal.string getBackgroundImage()
-    {
-        return import "../resources/backgrounds/snow_weather.ppm" ;
-    }
-	
 };
 

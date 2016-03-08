@@ -4,23 +4,24 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Simple chart
+ * Simple weater widget
  *
  *
 **/
 
-package .ru.dz.phantom.system;
+package .ru.dz.demo;
 
 import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
+import .internal.bitmap;
 import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 
 attribute const * ->!;
 
 
-class chart //extends runnable
+class weather //extends runnable
 {
     var stat_val :  int;
     var stat_pos :  int;
@@ -53,18 +54,29 @@ class chart //extends runnable
         //mtx.unlock();
     }
 
-    void run(var parent_object @const ) [8]
+    void run(var console : .internal.io.tty)
     {
+        var bmp : .internal.bitmap;
+
+		console.putws("Weather win: init\n");
+
+        bmp = new .internal.bitmap();
+        bmp.loadFromString(getBackgroundImage());
 
         win = new .internal.window();
 
-        win.setWinPosition(50,310);
-        win.setTitle("Disk io stats");
+        win.setWinPosition(50,100);
+        win.setTitle("Weather");
         win.setFg(0xFF000000); // black
 
         win.clear();
+		win.drawImage( 0, 0, getBackgroundImage() );
+		//bmp.paintTo( win, 0, 0 );
         win.update();
 
+		console.putws("Weather win: done init\n");
+
+/*
         stat_pos = 0;
         old_idle = 0;
 
@@ -115,19 +127,26 @@ class chart //extends runnable
             old_idle = cpu_idle;            
             stat_pos = stat_next_pos;
             
-            /*
-            if( stat_pos >= win.getXSize()-1 )
-	        win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
-            else
-                stat_pos = stat_pos + 1;
-            */
+            
+            //if( stat_pos >= win.getXSize()-1 )
+	        //win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
+            //else
+            //    stat_pos = stat_pos + 1;
+            
 
             win.update();
 
 
         }
-
+*/
 
     }
+
+
+    .internal.string getBackgroundImage()
+    {
+        return import "../resources/backgrounds/snow_weather.ppm" ;
+    }
+	
 };
 

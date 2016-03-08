@@ -109,3 +109,8 @@ internal.thread.pc: phantom.user.pc
 ru.dz.phantom.system.shell_callback.pc: ru.dz.phantom.system.runnable.pc
 
 phantom.util.hashmap.pc: phantom.util.hashpair.pc
+
+
+ru.dz.demo.start.pc: ru.dz.demo.weather.pc ru.dz.demo.chart.pc
+ru.dz.phantom.system.shell.pc: ru.dz.demo.start.pc
+

@@ -1,6 +1,9 @@
 # --- Copy this to local-config.mk and tailor to your needs.
 # local-config.mk must not be checked in to svn, it's yours.
 
+# Directory where to put executables - supposed to be in PATH
+#INST_BIN=$(realpath /usr/bin)
+
 # --- Where to put kernel to run it on real hardware
 HW_BOOT_DEST=/mnt/nfs/phantom-test-machine/boot
 
