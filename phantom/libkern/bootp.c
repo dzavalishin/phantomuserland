@@ -591,7 +591,7 @@ errno_t bootp(ifnet *iface)
         SHOW_INFO( 2, "root ip:      %s", inet_ntoa(bstate->rootip) );
         SHOW_INFO( 2, "server ip:    %s", inet_ntoa(bstate->servip) );
 
-        SHOW_INFO( 2, "DNS ip:       %s", inet_ntoa(bstate->dns) );
+        SHOW_INFO( 1, "DNS ip:       %s", inet_ntoa(bstate->dns) );
 
         SHOW_INFO( 2, "rootpath:     '%s'", bstate->rootpath );
         SHOW_INFO( 1, "hostname:     '%s'", bstate->hostname );
@@ -630,12 +630,14 @@ errno_t bootp(ifnet *iface)
         // TODO why the hell htonl here? Must ne ntohl instead?
 
         errno_t e = ipv4_route_remove_iface(iface->id);
-        SHOW_ERROR( 1, "Removing routes to iface - failed, rc = %d", e );
+        if(e) SHOW_ERROR( 1, "Removilg routes to iface - failed, rc = %d", e );
+
+        u_int32_t net_mask = htonl(~(bstate->smask));
 
         int rc;
-        if( (rc = ipv4_route_add( htonl(net), htonl(~(bstate->smask)), htonl(bstate->myip.s_addr), iface->id) ) )
+        if( (rc = ipv4_route_add( htonl(net), net_mask, htonl(bstate->myip.s_addr), iface->id) ) )
         {
-            SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
+            SHOW_ERROR( 1, "Adding route mask %08x - failed, rc = %d", net_mask, rc);
         }
         else
         {
@@ -660,7 +662,7 @@ errno_t bootp(ifnet *iface)
         if( bstate->dns.s_addr )
         {
             e = dns_server_add( htonl(bstate->dns.s_addr) );
-            SHOW_ERROR( 1, "Adding DNS server failed, rc = %d", e );
+            if( e ) SHOW_ERROR( 1, "Adding DNS server %s failed, rc = %d", inet_ntoa(bstate->dns), e );
         }
     }
 
