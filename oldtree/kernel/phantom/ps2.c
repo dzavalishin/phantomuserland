@@ -668,5 +668,19 @@ G=Tomi S=Engdahl O=hut ADMD=fumail C=fi    Department of Computer Science
 
 **/
 
+/*
+
+references
+
+http://wiki.osdev.org/PS/2_Mouse
+http://www.computer-engineering.org/ps2mouse/
+http://www.win.tue.nl/~aeb/linux/kbd/scancodes-13.html
+http://lxr.free-electrons.com/source/drivers/input/mouse/psmouse-base.c
+
+
+*/
+
+
+
 #endif // ARCH_ia32
 
