@@ -6,8 +6,9 @@ boot: classes menu.lst #phantom
 	cp $^ $(TFTP_PATH)
 
 tools: $(INST_BIN)/pfsextract.exe $(INST_BIN)/pfsformat.exe \
-       $(INST_BIN)/plc.cmd $(INST_BIN)/mkbulk.exe $(INST_BIN)/pvm_test.exe \
-       $(INST_BIN)/pbitmap.cmd 
+       $(INST_BIN)/plc.cmd $(INST_BIN)/pvm_test.exe \
+       $(INST_BIN)/pbitmap.cmd \
+		$(INST_BIN)/mkbulk.cmd $(INST_BIN)/mkbulk.sh
 # $(INST_BIN)/bin2hex.cmd 
 
 $(INST_BIN)/pbitmap.cmd: bin/pbitmap.cmd
@@ -25,11 +26,18 @@ $(INST_BIN)/pfsformat.exe: bin/pfsformat.exe
 $(INST_BIN)/pvm_test.exe: bin/pvm_test.exe
 	cp $^ $@
 
-$(INST_BIN)/mkbulk.exe: bin/mkbulk.exe
-	cp $^ $@
-
 $(INST_BIN)/plc.cmd: bin/plc.cmd
 	cp $^ $@
 
-$(INST_BIN)/plc.cmd: bin/jpc.cmd
+$(INST_BIN)/jpc.cmd: bin/jpc.cmd
 	cp $^ $@
+
+$(INST_BIN)/mkbulk.cmd: bin/mkbulk.cmd
+	cp $^ $@
+
+$(INST_BIN)/mkbulk: bin/mkbulk
+	cp $^ $@
+
+#$(INST_BIN)/mkbulk.exe: bin/mkbulk.exe
+#	cp $^ $@
+
