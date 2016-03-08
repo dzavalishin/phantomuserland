@@ -208,7 +208,8 @@ static void tcp_echo_thread(void *arg)
 #if 1 // test curl
     {
         char buf[1024];
-        errno_t rc = net_curl( "http://ya.ru/", buf, sizeof( buf ) );
+        //errno_t rc = net_curl( "http://ya.ru/", buf, sizeof( buf ) );
+        errno_t rc = net_curl( "http://httpbin.org/ip", buf, sizeof( buf ) );
         SHOW_FLOW( 1, "curl rc = %d, data = '%s'\n", rc, buf );
     }
 #endif
@@ -413,20 +414,22 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
         SHOW_ERROR(0, "can't connect to %s", host);
         goto err;
     }
-    SHOW_FLOW0( 0, "TCP - connected, read");
+    SHOW_FLOW0( 0, "TCP - connected");
 
     char buf[1024];
-
 
     memset( buf, 0, sizeof(buf) );
     strlcpy( buf, "GET /", sizeof(buf) );
     strlcat( buf, path, sizeof(buf) );
-    strlcat( buf, "\r\n\r\n", sizeof(buf) );
+    //rlcat( buf, "\r\n\r\n", sizeof(buf) );
+    strlcat( buf, " HTTP/1.1\r\nHost: ", sizeof(buf) );
+    strlcat( buf, host, sizeof(buf) );
+    strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n", sizeof(buf) );
 
     //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int len = strlen(buf);
     int nwrite = tcp_sendto( prot_data, buf, len, &addr);
-    SHOW_FLOW( 0, "TCP - write = %d (%s)", nwrite, buf);
+    SHOW_FLOW( 0, "TCP - write = %d, requested %d (%s)", nwrite, len, buf);
     if( nwrite != len ) goto err;
 
     memset( buf, 0, sizeof(buf) );
