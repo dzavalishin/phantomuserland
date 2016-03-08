@@ -6,12 +6,12 @@ SET QDIR=qemu\0.15.1
 SET QCMD=qemu.exe
 
 rem SET QDIR=qemu\1.2.0
-rem SET QDIR=qemu\1.0.1
+SET QDIR=qemu\1.0.1
 
 rem SET QDIR=qemu\2.4.1
 rem SET QCMD=qemu-system-i386w.exe
 
-rem SET QCMD=qemu-system-i386.exe
+SET QCMD=qemu-system-i386.exe
 rem SET QCMD=qemu-system-x86_64w.exe 
 
 set QEMU_AUDIO_DRV=dsound
