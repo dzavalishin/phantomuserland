@@ -80,7 +80,7 @@ public class MethodSignature {
 		}
 		
 		signature = sb.toString();
-		SootMain.say(signature); 
+		//SootMain.say(signature); 
 	}
 
 	
