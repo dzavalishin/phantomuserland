@@ -1,3 +1,5 @@
+all:: jar
+
 jar:: mkbulk.jar
 
 install:: mkbulk.jar

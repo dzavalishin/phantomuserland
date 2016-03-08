@@ -1,6 +1,8 @@
 OUTPUT=mkpfs.jar
 CLASS=ru.dz.phantom.pfsformat.Main
 
+all:: jar
+
 jar:: $(OUTPUT)
 
 install:: $(OUTPUT)
