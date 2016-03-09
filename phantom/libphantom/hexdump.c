@@ -1,3 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Hex dump. :)
+ *
+ *
+**/
+
+
 #include <phantom_libc.h>
 
 

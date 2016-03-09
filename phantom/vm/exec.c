@@ -1896,6 +1896,10 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
         if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
             break;
 
+        // we do that only for 0 = construct, that's a hack, must be gone too )
+        if( syscall_index != 0 )
+            pvm_exec_panic("find_syscall: not internal class in SYS > 0" );
+
         if( pvm_is_null( da->class_parent ) )
             pvm_exec_panic("find_syscall: not internal class and no internal parent" );
 

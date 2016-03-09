@@ -1,3 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Console colors definitions.
+ *
+ * (C) 2005-2016 dz.
+ *
+**/
+
+
+
 #include <console.h>
 
 void    console_set_message_color()     { console_set_fg_color( COLOR_LIGHTGREEN ); }

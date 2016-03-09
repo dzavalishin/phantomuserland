@@ -1,3 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Kernel symbol table access.
+ *
+ *
+**/
+
+
 #include <phantom_libc.h>
 #include <multiboot.h>
 #include <elf.h>

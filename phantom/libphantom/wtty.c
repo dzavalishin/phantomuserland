@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Character buffer implementation.
+ *
+ * (C) 2005-2016 dz.
+ *
+**/
+
 
 
 #define DEBUG_MSG_PREFIX "wtty"
