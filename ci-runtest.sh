@@ -8,6 +8,7 @@ export PHANTOM_HOME=`pwd`
 GDB_PORT=1235		# get rid of stalled instance by incrementing port no.
 GDB_OPTS="-gdb tcp::$GDB_PORT"
 #GDB_OPTS="-s"
+rpm -q -l qemu-kvm
 QEMU=`which qemu || which kvm`
 QEMU_SHARE=/usr/share/qemu
 TEST_DIR=run/test	# was oldtree/run_test
