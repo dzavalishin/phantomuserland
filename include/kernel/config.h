@@ -131,13 +131,29 @@
 #define E4C_THREADSAFE
 #define E4C_NOKEYWORDS
 
-#ifndef ASSEMBLER
 
+// ------------------------------------------------------------------
+// JSMN JSON parser lib defs
+// ------------------------------------------------------------------
+
+
+#define JSMN_PARENT_LINKS
+
+
+
+
+
+
+
+
+
+
+
+
+#ifndef ASSEMBLER
 #if HAVE_STRAY
 #include <kernel/stray.h>
 #endif
-
-
 #endif // ASSEMBLER
 
 

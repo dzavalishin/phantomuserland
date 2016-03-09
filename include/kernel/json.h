@@ -5,6 +5,7 @@
 
 #include <stddef.h>
 #include <errno.h>
+#include <jsmn.h>
 
 
 struct json_output;
@@ -88,8 +89,13 @@ void json_dump_threads( json_output *jo );
 
 
 
+// --------------------------------------------------------------
+// Parser
+// --------------------------------------------------------------
 
 
+//! tokens allocated, must be freed by caller
+errno_t json_parse(const char *js, jsmntok_t **tokens );
 
 
 
