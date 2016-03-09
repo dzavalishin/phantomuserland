@@ -90,6 +90,10 @@ void json_encode_int( json_output *jo, long v)
 
 void json_put_name( json_output *jo, const char *name )
 {
+    int d = jo->depth + 1;
+
+    while( d-- )     jo->putc( '\t' );
+
     json_encode_string( jo, name );
     jo->putc( ':' );
     jo->putc( ' ' );
@@ -124,6 +128,12 @@ void json_out_open_struct( json_output *jo, const char *name )
 {
     jo->depth++;
     json_put_name( jo, name );
+    jo->putc( '{' );
+    jo->putc( '\n' );
+}
+void json_out_open_anon_struct( json_output *jo )
+{
+    jo->depth++;
     jo->putc( '{' );
     jo->putc( '\n' );
 }
@@ -167,6 +177,12 @@ void json_stop( json_output *jo )
     jo->putc( '\n' );
 }
 
+void json_out_delimiter( json_output *jo )
+{
+    jo->putc( ',' );
+    jo->putc( '\n' );
+}
+
 
 int main( int ac, char **av )
 {
@@ -174,8 +190,31 @@ int main( int ac, char **av )
 
     //jenc("hello \"world\"");
 
-    json_out_string( &jo, "name", "DPC Runner" );
+    json_out_open_array( &jo, "threads" );
+
+    //json_out_open_struct( &jo, "thread" );
+    json_out_open_anon_struct( &jo );
+
+    json_out_string( &jo, "name", "Init" );
+    json_out_delimiter( &jo );
     json_out_int( &jo, "tid", 1 );
+
+    json_out_close_struct( &jo );
+
+    json_out_delimiter( &jo );
+
+    //json_out_open_struct( &jo, "thread" );
+    json_out_open_anon_struct( &jo );
+
+    json_out_string( &jo, "name", "DPC Runner" );
+    json_out_delimiter( &jo );
+    json_out_int( &jo, "tid", 2 );
+
+    json_out_close_struct( &jo );
+
+
+
+    json_out_close_array( &jo );
 
     json_stop( &jo );
 

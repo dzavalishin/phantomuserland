@@ -27,4 +27,5 @@ void json_out_close_struct( json_output *jo  );
 void json_out_open_array( json_output *jo, const char *name );
 void json_out_close_array( json_output *jo );
 
+void json_out_delimiter( json_output *jo );
 
