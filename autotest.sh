@@ -205,6 +205,6 @@ Previous test run stalled. Trying gdb..."
 # now it is safe to alter behaviour on exit
 trap at_exit 0 2
 
-[ "$COMPILE" ] && . ./ci-build.sh ${FOREGROUND:+-f} $UNATTENDED ${WARN:+-w}
-[ "$TESTRUN" ] && . ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
-[ "$SNAPTEST" ] && . ./ci-snaptest.sh ${FOREGROUND:+-f} $UNATTENDED ${VIRTIO:+-v} ${TEXTONLY:+-ng} ${PASSES:+-p $PASSES}
+[ "$COMPILE" ] && ./ci-build.sh ${FOREGROUND:+-f} $UNATTENDED ${WARN:+-w}
+[ "$TESTRUN" ] && ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
+[ "$SNAPTEST" ] && ./ci-snaptest.sh ${FOREGROUND:+-f} $UNATTENDED ${VIRTIO:+-v} ${TEXTONLY:+-ng} ${PASSES:+-p $PASSES}
