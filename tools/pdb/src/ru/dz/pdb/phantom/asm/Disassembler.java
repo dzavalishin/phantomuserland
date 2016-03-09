@@ -48,8 +48,8 @@ public class Disassembler extends opcode_ids {
 			return intarg("debug "+s, type );
 		}
 		
-		case opcode_skipz: 				return simple("skipz?");
-		case opcode_skipnz:				return simple("skipnz?");
+		//case opcode_skipz: 				return simple("skipz?");
+		//case opcode_skipnz:				return simple("skipnz?");
 		case opcode_djnz:				{ int ip = getIp(); return intarg("djnz", ip+getInt()); }
 		case opcode_jz:					{ int ip = getIp(); return intarg("jz", ip+getInt()); }
 		case opcode_jmp:				{ int ip = getIp(); return intarg("jmp", ip+getInt()); }
@@ -149,7 +149,7 @@ public class Disassembler extends opcode_ids {
 		case opcode_os_isnull:			return simple("os_isnull");
 		                                                                
 		                                                                
-		case opcode_os_push_null:		return simple("os_push_null");		                                                                
+		//case opcode_os_push_null:		return simple("os_push_null");		                                                                
 		                                                                
 		case opcode_sys_0:				return intarg("sys", 0x0);
 		case opcode_sys_1:				return intarg("sys", 0x1);
