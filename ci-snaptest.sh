@@ -12,6 +12,7 @@ GDB_PORT_LIMIT=1250	# avoid spawning too many stalled instances
 GDB_OPTS="-gdb tcp::$GDB_PORT"
 #GDB_OPTS="-s"
 QEMU=`which qemu || which kvm`
+QEMU_SHARE=/usr/share/qemu
 TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
@@ -24,6 +25,23 @@ die ( ) {
 	[ "$1" ] && echo "$*"
 	exit 1
 }
+
+[ "$QEMU" ] || {
+	# try to find custom qemu
+	PKG_MGR=`which rpm || which dpkg`
+	case $PKG_MGR in
+	*rpm)	QEMU=`rpm -q -l qemu-kvm` ;;
+	*dpkg)	QEMU=`dpkg -L qemu-kvm`	;;
+	*)	die "Couldn't locate package manager at `uname -a`"	;;
+	esac
+
+	QEMU=`echo "$QEMU" | grep 'bin/\(qemu\|kvm\)$'`
+
+	[ "$QEMU" ] || die "Couldn't locate qemu/kvm in $QEMU"
+
+	QEMU_SHARE=`echo "$QEMU" | sed 's#bin/.*#share#'`
+}
+
 
 if [ $# -gt 0 ]
 then
@@ -121,7 +139,7 @@ rm -f $LOGFILE
 [ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH=-nographic
 #GRAPH=-nographic
 
-QEMU_OPTS="-L /usr/share/qemu $GRAPH \
+QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user \
 	-parallel file:lpt_01.log \
@@ -130,9 +148,15 @@ QEMU_OPTS="-L /usr/share/qemu $GRAPH \
 	-no-fd-bootchk \
 	-fda img/grubfloppy.img \
 	-hda snapcopy.img \
-	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
-	-usb -soundhw sb16"
+	-usb -usbdevice mouse \
+	-soundhw sb16"
+# -usbdevice disk:format=raw:$DISK_IMG \
+#	-usbdevice host:0930:1319 \
+#	-usbdevice host:08ff:168b \
+#	-usbdevice host:1bcf:288e \
+#	-usbdevice host:8087:07da \
+#	-hdb $DISK_IMG \
 #	-net dump,file=net.dmp \
 #	-net nic,model=ne2k_isa -M isapc \
 
@@ -187,7 +211,7 @@ FATAL! Phantom snapshot test crashed"
 			break
 		}
 		[ -s $LOGFILE ] || {
-			sleep 30
+			sleep 40
 			[ -s $LOGFILE ] || {
 				echo "
 
