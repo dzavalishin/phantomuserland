@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+<title>Qemu On Windows</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+
+    <meta name="description" content="Qemu On Windows" />
+    <meta name="MSSmartTagsPreventParsing" content="TRUE" />
+    <meta name="Author" content="E. Lassauge" />
+    <meta name="robots" content="ALL" />
+    <meta name="robots" content="index,follow" />
+    <meta name="Revisit-After" content="30 days" />
+
+<style type="text/css" >
+<!--
+ /* Style Definitions */
+p.normal, li.normal, div.normal {
+	margin-top : 0;
+	margin-right : 0;
+	margin-bottom : 5.5pt;
+	margin-left : 1cm;
+	text-align : left;
+	line-height : 15.6pt;
+	font-size : 10pt;
+	font-family : Arial;
+}
+p.texte, li.texte, div.texte {
+	margin-top : 0;
+	margin-right : 0;
+	margin-bottom : 12pt;
+	margin-left : 1cm;
+	text-align : left;
+	line-height : normal;
+	font-size : 12pt;
+	font-family : "Times New Roman";
+}
+p.code, li.code, div.code {
+	margin-top : 0;
+	margin-right : 0;
+	margin-bottom : 0;
+	margin-left : 0;
+	line-height : normal;
+	text-align : left;
+	border : none;
+	padding : 0;
+	font-size : 9pt;
+	font-family : "Courier New";
+}
+span.u {
+	text-decoration : underline;
+}
+div.cadre {
+	padding : 1pt;
+	border : 1pt solid WindowText;
+	margin : 0.25cm 1cm 0.25cm 1cm;
+}
+h1 {
+	margin-top : 18pt;
+	margin-right : 0;
+	margin-bottom : 6pt;
+	margin-left : 1cm;
+	text-indent : 0;
+	font-size : 10pt;
+	font-family : Arial;
+	text-transform : uppercase;
+	font-weight : bold;
+}
+h2 {
+	margin-top : 18pt;
+	margin-right : 1cm;
+	margin-bottom : 6pt;
+	margin-left : 1cm;
+	text-indent : 0;
+	font-size : 10pt;
+	font-family : Arial;
+	text-transform : uppercase;
+	font-weight : bold;
+}
+h3 {
+	margin-top : 6pt;
+	margin-right : 0;
+	margin-bottom : 5.5pt;
+	margin-left : 2cm;
+	text-indent : 0;
+	line-height : 15.65pt;
+	font-size : 10pt;
+	font-family : Arial;
+	font-weight : bold;
+}
+h4 {
+	margin-top : 6pt;
+	margin-right : 0;
+	margin-bottom : 5.5pt;
+	margin-left : 3cm;
+	text-indent : 0;
+	line-height : 15.6pt;
+	font-size : 10pt;
+	font-family : Arial;
+	font-weight : bold;
+}
+a:link {
+	color : #606420;
+	text-decoration : none;
+}
+a:visited {
+	color : #606420;
+	text-decoration : none;
+}
+a.release:link {
+	color : #ffa500;
+	text-decoration : none;
+}
+a.release:visited {
+	color : #ffa500;
+	text-decoration : none;
+}
+p {
+	margin-right : 0;
+	margin-left : 0;
+	font-size : 12pt;
+	font-family : "Times New Roman";
+}
+ol {
+	margin-bottom : 0;
+}
+ul {
+	list-style: circle url("dot.gif");
+	margin-top : 0;
+	margin-bottom : 0;
+}
+-->
+</style>
+</head>
+
+<body>
+
+<h1 style='text-align:center'>QEMU on Windows</h1>
+
+<p style='text-align:center'><img style="border:0px none;width:550px;height:19px" alt="-----------------" src='bar.gif' /></p>
+
+<p class="texte"><a href="http://wiki.qemu.org/Index.html">QEMU</a> is an emulator for various CPUs. It works on Linux, Windows, FreeBSD and Mac OS X. Windows version is in an alpha stage. I hope I can provide useful information on development and usage of the software.</p>
+
+<h2>What's New!</h2>
+
+<ul>
+<li class="normal">January 3, 2011: added Qemu-0.13.0-windows-Bios.zip which overrides the vga bioses for the 0.13.0 version
+   <i>(See the patch file <a class="release" href="release/vgabios-fix.diff">vgabios-fix.diff</a> 
+   and the corresponding debian <a href="http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=572991#15">bug report</a>
+   - Instructions for generating the bioses on cygwin will be provided later)</i></li>
+<li class="normal">August 22, 2011: updated for Qemu-0.14.0 and Qemu-0.15.0</li>
+<li class="normal">September 07, 2011: corrected the Qemu-0.14.0 and Qemu-0.15.0 zip files
+  (<i>thanks to Rolando A. Lopez for pointing to the packaging error: all DLLs were missing!</i>)</li>
+<li class="normal">October 18, 2011: corrected the Qemu-0.14.0 and Qemu-0.15.0 zip files again
+  (<i>thanks to Simon Eigeldinger for pointing to the packaging error still present!</i>)
+  + updated for Qemu-0.15.1 + sha1sum available for my downloads (see below)</li>
+<li class="normal">November 1, 2011: corrected the Qemu-0.15.1 zip file
+  (<i>thanks to Scott LaBombard and John Taylor for reporting the compilation/link error!</i>)</li>
+<li class="normal">February 13, 2012: updated for Qemu-1.0 :
+   contains qemu-system-arm.exe, qemu-system-i386.exe, qemu-system-ppc.exe, qemu-system-sparc.exe, qemu-system-x86_64.exe and the linux-0.2.img image.
+   libusb is now removed as it is not working correctly.</li>
+<li class="normal">February 29, 2012: updated for Qemu-1.0.1 - Still a "to be tested" version. See bug report <a href="https://bugs.launchpad.net/qemu/+bug/932487">win32: git rev 59f971d crashes when accessing disk (coroutine issue)</a>. In my version a workaround was to compile <code>coroutine-win32.c</code> without optimisation (<code>-O0</code>):
+   contains qemu-system-arm.exe, qemu-system-i386.exe, qemu-system-ppc.exe, qemu-system-sparc.exe, qemu-system-x86_64.exe and the linux-0.2.img image</li>
+</ul>
+
+<h2>Latest Windows binaries (includes FMOD support and SDL 1.2.15)&nbsp;:</h2>
+<ul>
+<li><i>-Lite</i> packages means that only the i386 virtual machine is compiled and available.</li>
+<li><i>-Medium</i> contains also ARM, PPC and usually SPARC virtual machines.</li>
+</ul>
+
+<ul>
+<li class="normal"><a class="release" href="release/Qemu-1.0-windows.zip">Qemu-1.0.1-windows.zip</a> (18.0M) <b>(NEW)</b> </li>
+<li class="normal"><a class="release" href="release/Qemu-1.0-windows.zip">Qemu-1.0-windows.zip</a> (17.7M) </li>
+<li class="normal"><a class="release" href="release/Qemu-0.15.1-windows-Medium.zip">Qemu-0.15.1-windows-Medium.zip</a> (5.97M) </li>
+</ul>
+
+
+<h3>sha1sum&nbsp;:</h3>
+<ul>
+<li class="normal" style='text-align:left'>Use the <b>.sha1</b> files from <a class="release" href="release/">the release directory</a>...</li>
+<li class="normal" style='text-align:left'>See <a href="http://en.wikipedia.org/wiki/Sha1sum">here</a> for usage of <code>sha1sum</code>.</li>
+</ul>
+
+<h3>Old Windows binaries&nbsp;:</h3>
+<ul>
+<li class="normal"><a class="release" href="release/">browse</a> the release directory...</li>
+</ul>
+
+<h3>Links&nbsp;:</h3>
+<ul>
+<li class="normal" style='text-align:left'><b>QEMU</b>&nbsp;: <a href="http://www.qemu.org/">http://www.qemu.org/</a></li>
+<li class="normal" style='text-align:left'><b>SDL</b>&nbsp;: <a href="http://www.libsdl.org/">http://www.libsdl.org/</a></li>
+<li class="normal" style='text-align:left'><b>MinGW</b>&nbsp;: <a href="http://www.mingw.org/">http://www.mingw.org/</a></li>
+<li class="normal" style='text-align:left'><b>Cygwin:</b>&nbsp;: <a href="http://www.cygwin.com/">http://www.cygwin.com/</a></li>
+<li class="normal" style='text-align:left'><b>Qemu on windows&nbsp;:</b>: <a href="QEMU_on_Windows-v19.html">Old Qemu on windows page</a>, <a href="QEMU_tips.html">Tips</a></li>
+</ul>
+
+<h2>How to build</h2>
+<p class="normal"> <span style='color:red;'><b>NEW build done with MinGW</b> (as it doesn't compile anymore with cygwin)</span>
+The main difference is now that the build is done with <a href="http://www.mingw.org/">MinGW</a> by using the latest version of gcc.<br/>
+You need the following packages (downloadable with the MinGW <a href="http://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/">installer</a> program)&nbsp;:</p>
+
+<div class="cadre">
+<p class="code">http://prdownloads.sourceforge.net/mingw/mingw-get-0.4-mingw32-alpha-1-bin.tar.xz?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/mingw-get-0.4-mingw32-alpha-1-lic.tar.xz?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/pkginfo-0.4-mingw32-alpha-1-bin.tar.xz?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libiconv-1.14-2-mingw32-dll-2.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libgmp-5.0.1-1-mingw32-dll-10.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libmpfr-2.4.1-1-mingw32-dll-1.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libpthreadgc-2.9.0-mingw32-pre-20110507-2-dll-2.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/pthreads-w32-2.9.0-mingw32-pre-20110507-2-dev.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libquadmath-4.6.1-2-mingw32-dll-0.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libgomp-4.6.1-2-mingw32-dll-1.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libmpc-0.8.1-1-mingw32-dll-2.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libssp-4.6.1-2-mingw32-dll-0.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libgcc-4.6.1-2-mingw32-dll-1.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libintl-0.18.1.1-2-mingw32-dll-8.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/mingwrt-3.20-mingw32-dll.tar.gz?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/w32api-3.17-2-mingw32-dev.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/mingwrt-3.20-mingw32-dev.tar.gz?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/binutils-2.21.53-1-mingw32-bin.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libexpat-2.0.1-1-mingw32-dll-1.tar.gz?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/gdb-7.3.1-1-mingw32-bin.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/make-3.82-5-mingw32-bin.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/gcc-4.6.1-2-mingw32-lic.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/libstdc++-4.6.1-2-mingw32-dll-6.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/gcc-core-4.6.1-2-mingw32-bin.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/gcc-4.6.1-2-mingw32-doc.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/gcc-4.6.1-2-mingw32-lang.tar.lzma?download</p>
+<p class="code">http://prdownloads.sourceforge.net/mingw/gcc-c++-4.6.1-2-mingw32-bin.tar.lzma?download</p>
+</div>
+
+<p class="normal"><span class="u">GLIB</span> for MinGW&nbsp;:<br/>
+Fetched <a href="http://www.gtk.org/download/win32.php">GTK+ Bundle for mingw</a><br/>
+You need the following package <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.8-20111122_win32.zip">http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/gtk+-bundle_2.24.8-20111122_win32.zip</a></p>
+
+<p class="normal"><span class="u">ZLIB</span> for MinGW&nbsp;:<br/>
+You need the following packages <br/><a href="http://sourceforge.net/projects/mingw/files/MinGW/Extension/zlib/zlib-1.2.5-4/libz-1.2.5-4-mingw32-dll-1.tar.lzma/download">http://sourceforge.net/projects/mingw/files/MinGW/Extension/zlib/zlib-1.2.5-4/libz-1.2.5-4-mingw32-dll-1.tar.lzma/download</a> and <br/><a href="http://sourceforge.net/projects/mingw/files/MinGW/Extension/zlib/zlib-1.2.5-4/libz-1.2.5-4-mingw32-dev.tar.lzma/download">http://sourceforge.net/projects/mingw/files/MinGW/Extension/zlib/zlib-1.2.5-4/libz-1.2.5-4-mingw32-dev.tar.lzma/download</a></p>
+
+<p class="normal">Note: everything is installed for me in <code>D:\MinGW</code>.Those tar files can be extracted with the -J option of cygwin's tar if needed as the cygwin's shell is still used by me (and not the MSYS version).</p>
+
+<p class="normal"><span class="u">SDL</span> for MinGW&nbsp;:<br/>
+Fetched <a href="release/SDL-devel-1.2.15-mingw32.tar.gz">SDL-devel-1.2.15-mingw32.tar.gz</a> from SDL site.</p>
+
+<p class="normal"><a href="http://mingwdx.sourceforge.net/"><span class="u">DirectX</span></a>:<br/>
+Fetched <a href="http://sourceforge.net/projects/mingwdx/files/latest/download?source=files">http://sourceforge.net/projects/mingwdx/files/latest/download?source=files</a><br/>
+and files from <a href="http://www.filehat.com/folders.php?fid=134">http://www.filehat.com/folders.php?fid=134</a></p>
+
+<p class="normal"><b><span class="u"><span >Qemu:</span></span></b></p>
+<ul>
+<li class="normal">
+Fetch the source code: 
+<a href="http://wiki.qemu.org/download/qemu-1.0.1.tar.gz">http://wiki.qemu.org/download/qemu-1.0.1.tar.gz</a> (or here: <a class="release" href="release/qemu-1.0.1.tar.gz">qemu-1.0.1.tar.gz</a>)</li>
+
+<li class="normal">Optionally fetch the
+ <a href="http://www.fmod.org/">fmod</a> library: 
+ <a href="http://www.fmod.org/index.php/release/version/fmodapi375win.zip">http://www.fmod.org/index.php/release/version/fmodapi375win.zip</a>
+(or here: <a class="release" href="release/fmodapi375win.zip">fmodapi375win.zip</a>)</li>
+
+<li class="normal">Fetch and install the patches:
+ <a class="release" href="release/qemu-1.0.1-patch">qemu-1.0.1-patch</a>. 
+<br/>This patch is based on the original patches found here: 
+<a href="http://www.h7.dion.ne.jp/~qemu-win/download/qemu-0.9.0-patches.zip">http://www.h7.dion.ne.jp/~qemu-win/download/qemu-0.9.0-patches.zip</a>
+plus my additional work</li>
+
+<li class="normal">Prepare the Cygwin/MinGW environement:<br/>
+Created some links in a bin directory to ease the calls to the MinGW tools:
+<div class="cadre">
+<pre>
+export PATH=/cygdrive/d/MinGW/bin:/home/lassauge/MyDocuments/Qemu/libusb-win32-device-bin-0.1.12.2/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:/usr/X11R6/bin
+cd $HOME/bin
+ln -s /cygdrive/d/MinGW/bin/dlltool.exe i586-mingw32-dlltool
+ln -s /cygdrive/d/MinGW/bin/ld.exe i586-mingw32-ld
+ln -s /cygdrive/d/MinGW/bin/windres.exe i586-mingw32-windres
+</pre>
+</div>
+</li>
+
+
+<li class="normal">Created a gcc wrapper to trap some of the POSIX file names to Windows file name: rename it to <i>i586-mingw32-gcc</i><br/>
+Fetch the source code: 
+<a href="release/gcc-wrapper.sh">gcc-wrapper.sh</a>
+<div class="cadre">
+<pre>
+#!/bin/bash
+# ##############################################################################
+# (c) Eric Lassauge - January 2012
+# &lt;lassauge {AT} users {DOT} sourceforge {DOT} net &gt;
+#
+# ##############################################################################
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;
+# ##############################################################################
+# Complete script for MinGW gcc wrapper from cygwin: change POSIX path to windows path
+# Needs: cygpath
+
+#Configure to where you installed MinGW
+mingwbase=/cygdrive/d/MinGW
+mingwroot=`cygpath -w ${mingwbase}`
+
+dollarstar=""
+# Parse the gcc flags to change all file pathes
+while [ $# -ne 0 ]; do
+	case "$1" in
+	-o) 
+		param=`cygpath -w $2`
+		dollarstar="${dollarstar} -o ${param}"
+		shift
+		;;
+	-I)
+		param=`cygpath -w $2`
+		dollarstar="${dollarstar} -I ${param}"
+		shift
+		;;
+	-I*)
+		parami=`echo $1 | sed -e 's/-I//'`
+		first=`echo ${parami} | sed -e 's/^\(.\).*/\1/'`
+		case $first in
+		'/' | '.')
+			param=`cygpath -w ${parami}`
+			dollarstar="${dollarstar} -I${param}"
+			;;
+		*)
+			dollarstar="${dollarstar} ${1}"
+			;;
+		esac
+		;;
+	-B)
+		param=`cygpath -w $2`
+		dollarstar="${dollarstar} -B ${param}"
+		shift
+		;;
+	-L)
+		param=`cygpath -w $2`
+		dollarstar="${dollarstar} -L ${param}"
+		shift
+		;;
+	-L*) 
+		paraml=`echo $1 | sed -e 's/-L//'`
+		first=`echo ${paraml} | sed -e 's/^\(.\).*/\1/'`
+		case $first in
+		'/' | '.')
+			param=`cygpath -w ${paraml}`
+			dollarstar="${dollarstar} -L${param}"
+			;;
+		*)
+			dollarstar="${dollarstar} ${1}"
+			;;
+		esac
+		;;
+	*)
+		if [ -f "$1" ]
+		then
+			param=`cygpath -w $1`
+			dollarstar="${dollarstar} ${param}"
+		else
+			dollarstar="${dollarstar} $1"
+		fi
+		;;
+	esac
+	shift
+done
+
+# remove spurious ^M
+dollarstar=`echo "${dollarstar}" | sed -e 's/
+//g'`
+# echo "# Calling MinGW compiler: gcc ${dollarstar}"
+# Add the path to mingw tools
+export PATH=${mingwbase}/bin:$PATH
+${mingwbase}/bin/gcc -Wl,-mi386pe --sysroot="${mingwroot}" ${dollarstar}
+</pre>
+</div>
+</li>
+
+<li class="normal">
+Configure:<br/>
+
+<div class="cadre"><pre>
+./configure --target-list=&quot;i386-softmmu arm-softmmu sparc-softmmu ppc-softmmu x86_64-softmmu&quot;\
+ --cc=i586-mingw32-gcc --host-cc=/usr/bin/gcc --audio-drv-list=&quot;dsound sdl fmod&quot;\
+ --audio-card-list=&quot;ac97 es1370 sb16 cs4231a adlib gus&quot;\
+ --prefix=/home/lassauge/MyDocuments/Qemu-windows \
+ --fmod-lib=/home/lassauge/Qemu/fmodapi375win/api/lib/libfmod.a \
+ --fmod-inc=/home/lassauge/Qemu/fmodapi375win/api/inc \
+ --enable-pie --disable-vnc-jpeg --disable-strip
+</pre>
+</div>
+</li>
+
+<li class="normal">Modify the generated Makefile for calling windres from MinGW:
+<div class="cadre">
+<pre>
+125c125
+&lt;       $(call quiet-command,$(WINDRES) -I. -o $@ $&lt;,"  RC    $(TARGET_DIR)$@")
+---
+&gt;      $(call quiet-command,$(WINDRES) -I. -o $@ '$(shell cygpath -w $&lt;)',"  RC    $(TARGET_DIR)$@")
+</pre>
+</div>
+</li>
+
+
+
+<li class="normal">Make:
+If you want to see what is exactly compiled use
+<code>V=1 make</code>
+</li>
+
+<li class="normal">Install: do not forget to add:
+<div class="cadre"><pre>
+SDL.dll, 
+fmod.dll, 
+intl.dll, 
+libgcc_s_dw2-1.dll, 
+libglib-2.0-0.dll, 
+libgthread-2.0-0.dll, 
+libpng14-14.dll, 
+libssp-0.dll, 
+zlib1.dll
+</pre></div></li>
+
+</ul>
+
+<p style='text-align:center'><img style="border:0px none;width:550px;height:19px" alt="-----------------" src='bar.gif' /></p>
+
+<p class="texte" style='text-align:center'><b>This program is provided as is and without any warranty.</b></p>
+
+<p style='text-align:center'>
+<br/>
+    <!-- validator.w3c.org -->
+    <a href="http://validator.w3.org/check?uri=referer" title="Check this page at w3.org"><img style="border:0;width:88px;height:31px;vertical-align:middle"
+	src="http://www.w3.org/Icons/valid-xhtml10"
+        alt="Valid XHTML 1.0 Strict" /></a>
+    <a href="http://jigsaw.w3.org/css-validator/check/referer" title="Check this css at w3.org"><img style="border:0;width:88px;height:31px;vertical-align:middle"
+       src="http://jigsaw.w3.org/css-validator/images/vcss"
+       alt="Valid CSS!" /></a>
+    <!-- /validator.w3c.org -->
+</p>
+
+</body>
+
+</html>
+<!-- QUEMU_on_Windows-v21.html - February 28th, 2012 - (c) E. Lassauge -->
