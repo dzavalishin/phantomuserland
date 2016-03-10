@@ -16,41 +16,27 @@ import .internal.io.tty;
 import .internal.window;
 import .internal.connection;
 import .ru.dz.phantom.system.runnable;
+//import .internal.thread;
 
 attribute const * ->!;
 
 
-class chart //extends runnable
+class chart // extends runnable
 {
+	//var t : .internal.thread;
+
+    var old_idle :  int;
     var stat_val :  int;
     var stat_pos :  int;
     var stat_next_pos :  int;
 
-    var cpu_idle : int;
-    var old_idle : int;
-
-    var white : int;
-
     var win : .internal.window;
     var timer : .internal.connection;
 
-    //var fio : .internal.connection;
 
-    var stat_conn : .internal.connection;
-
-
-    //var mtx : .internal.mutex;
-
-
-    void init()
+    void start()
     {
-        //mtx = new .internal.mutex();
-        //mtx.lock();
-    }
-
-    void go()
-    {
-        //mtx.unlock();
+		//t = new .internal.thread();
     }
 
     void run(var parent_object @const ) [8]
@@ -59,7 +45,7 @@ class chart //extends runnable
         win = new .internal.window();
 
         win.setWinPosition(50,310);
-        win.setTitle("Disk io stats");
+        win.setTitle("Children room temperature");
         win.setFg(0xFF000000); // black
 
         win.clear();
@@ -68,30 +54,22 @@ class chart //extends runnable
         stat_pos = 0;
         old_idle = 0;
 
-        white = 0xFFFFFFFF;
+        //white = 0xFFFFFFFF;
 
-
-		// test of fio connection
-		//fio = new .internal.connection();
-        //fio.connect("fio:/amnt1/fio_log.txt");
-		//fio.block("written from phantom code", 1);
 
         // test of connections
         timer = new .internal.connection();
         timer.connect("tmr:");
 
 
-        stat_conn = new .internal.connection();
-        stat_conn.connect("stt:");
-
         while(1)
         {
 
             timer.block(null, 500);
-            stat_val = stat_conn.block( 26, 0 ); // blk io per sec
-            cpu_idle = stat_conn.block( 0, 5 ); // cpu 0 idle
+            //stat_val = stat_conn.block( 26, 0 ); // blk io per sec
+            //cpu_idle = stat_conn.block( 0, 5 ); // cpu 0 idle
 
-            cpu_idle = 100 - cpu_idle;
+            //cpu_idle = 100 - cpu_idle;
 
             stat_next_pos = stat_pos + 1;
             if( stat_next_pos >= win.getXSize() )
@@ -102,7 +80,7 @@ class chart //extends runnable
             win.drawLine( stat_next_pos, 5, 0, 300 );
 
             // Clear
-            win.setFg( white ); // white
+            win.setFg( 0xFFFFFFFF ); // white
             win.drawLine( stat_pos, 5, 0, 300 );
 
             win.setFg(0xFF000000); // black
@@ -110,9 +88,9 @@ class chart //extends runnable
 
             // Idle
             win.setFg( 0xFF0000FF ); // Blue
-            win.drawLine( stat_pos-1, old_idle, 1, cpu_idle-old_idle );
+            //win.drawLine( stat_pos-1, old_idle, 1, cpu_idle-old_idle );
 
-            old_idle = cpu_idle;            
+            //old_idle = cpu_idle;            
             stat_pos = stat_next_pos;
             
             /*

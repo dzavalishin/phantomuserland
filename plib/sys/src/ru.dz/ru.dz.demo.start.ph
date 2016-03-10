@@ -13,10 +13,6 @@ package .ru.dz.demo;
 
 import .phantom.os;
 import .internal.io.tty;
-//import .internal.window;
-//import .internal.bitmap;
-//import .internal.connection;
-//import .ru.dz.phantom.system.runnable;
 
 import .ru.dz.demo.weather;
 import .ru.dz.demo.chart;
@@ -31,14 +27,13 @@ class start
 
     void run(var console : .internal.io.tty)
     {
+		//cv = new .ru.dz.demo.chart();
+		//cv.start(console);
+
 		wv = new  .ru.dz.demo.weather();
 		wv.run(console);
 
-		//cv = new .ru.dz.demo.chart();
-
     }
-
-
 	
 };
 
