@@ -28,6 +28,9 @@ class weather
 
     var win : .internal.window;
     var sleep : .internal.connection;
+    var curl : .internal.connection;
+
+	var temperature : .internal.string;
 
     //var fio : .internal.connection;
 
@@ -53,12 +56,48 @@ class weather
         win.clear();
 		//win.drawImage( 0, 0, getBackgroundImage() ); // crashes kernel!
 		win.drawImage( 0, 0, bmp );
-		win.drawString( 250, 250, "T -25 C" );
+		//win.drawString( 250, 250, "T -25 C" );
+		win.drawString( 250, 250, "T =" );
 
 		//bmp.paintTo( win, 0, 0 );
         win.update();
 
 		console.putws("Weather win: done init\n");
+
+		sleep = new .internal.connection();
+        sleep.connect("tmr:");
+
+		curl = new .internal.connection();
+		curl.connect("url:http://smart.:8080/rest/items/Current_Outdoor_Air_Temp/state");
+
+		temperature = curl.block(null, 0);
+		console.putws("Weather win: curl = ");
+		console.putws(temperature);
+		console.putws("\n");
+		win.drawString( 250, 280, temperature );
+
+
+        while(1)
+        {
+			temperature = curl.block(null, 0);
+			console.putws("Weather win: curl = ");
+			console.putws(temperature);
+			console.putws("\n");
+
+			win.drawImage( 0, 0, bmp );
+			win.drawString( 250, 280, temperature );
+			win.drawString( 250, 250, "T =" );
+
+			console.putws("Weather win: sleep\n");
+
+            sleep.block(null, 10000);
+
+			console.putws("Weather win: repaint\n");
+
+		}
+
+
+
 /* kills phantom with "Panic: Thread object has no INTERNAL flag" on snap load
 		loadImages();
 
@@ -93,6 +132,14 @@ class weather
 */
 
     }
+
+	.internal.string getTemperature()
+	{
+		//var url : .internal.string;
+
+		//url = "http://smart.:8080/rest/items/Current_Outdoor_Air_Temp/state";
+
+	}
 
 
     .internal.string getBackgroundImage()

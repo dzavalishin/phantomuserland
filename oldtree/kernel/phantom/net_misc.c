@@ -16,7 +16,7 @@
 
 #define DEBUG_MSG_PREFIX "net.misc"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -217,7 +217,7 @@ static void tcp_echo_thread(void *arg)
 
     hal_sleep_msec( 1000*10 );
 
-#if 1 // test curl
+#if 0 // test curl
     {
         char buf[1024];
         //errno_t rc = net_curl( "http://ya.ru/", buf, sizeof( buf ) );
@@ -366,6 +366,12 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
 {
     int nread = 0;
 
+    i4sockaddr addr;
+    addr.port = 80; // HTTP
+
+    addr.addr.len = 4;
+    addr.addr.type = ADDR_TYPE_IP;
+
     errno_t rc;
     void *prot_data;
     char host[CURL_MAXBUF+1];
@@ -392,6 +398,15 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
     strcpy( path, pos+1 );
 #endif
 
+    pos = strchr( host, ':' );
+    if( pos != 0 )
+    {
+        *pos = '\0';
+        int port = atoi( pos+1 );
+        if( port )
+            addr.port = port;
+    }
+
     SHOW_FLOW( 1, "curl host '%s' path '%s'", host, path );
 
     in_addr_t out;
@@ -409,11 +424,6 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
         return ENOMEM;
     }
 
-    i4sockaddr addr;
-    addr.port = 80;
-
-    addr.addr.len = 4;
-    addr.addr.type = ADDR_TYPE_IP;
     NETADDR_TO_IPV4(addr.addr) = ntohl(out);
 
     //SHOW_FLOW( 0, "TCP - create socket to %d.%d.%d.%d port %d", ip0, ip1, ip2, ip3, port);
@@ -434,7 +444,7 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
     //rlcat( buf, "\r\n\r\n", sizeof(buf) );
     strlcat( buf, " HTTP/1.1\r\nHost: ", sizeof(buf) );
     strlcat( buf, host, sizeof(buf) );
-    strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n", sizeof(buf) );
+    strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html,text/plain\r\nConnection: close\r\n\r\n", sizeof(buf) );
 
     //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int len = strlen(buf);

@@ -43,7 +43,7 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
 
     struct data_area_4_connection *c = pvm_object_da( conn, connection );
 
-    struct cn_url_volatile   *vp = c->v_kernel_state;
+    //struct cn_url_volatile   *vp = c->v_kernel_state;
     struct cn_url_persistent *pp = c->p_kernel_state;
 
     char buf[4096];
@@ -62,40 +62,41 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
     case CONN_OP_BIND:
         e = ENOSYS;
         break;
-/*
-#if HAVE_NET
-
-        {
-            if(!IS_PHANTOM_INT(arg))
-            {
-                SHOW_ERROR0( 1, "bind arg not int" );
-                e = EINVAL;
-                break;
-            }
-
-            i4sockaddr a;
-
-            a.port = pvm_get_int(arg);
-
-            if( url_bind(vp->url_endpoint, &a) )
-                e = EISCONN;
-            e = 0;
-            break;
-        }
-#endif // HAVE_NET
-*/
     }
 
 
-ret:
+//ret:
     if( e )
     {
         SHOW_ERROR( 1, "err %d", e );
+        // err_ret:
         return pvm_create_string_object("");
     }
 
+    char *bp = buf;
 
-    return pvm_create_string_object(buf);
+    // Skip HTTP headers
+
+    for( ; *bp ; bp++ )
+    {
+        if( (bp[0] == '\r') && (bp[1] == '\n') && (bp[2] == '\r') && (bp[3] == '\n') )
+        {
+            bp += 4;
+            goto done;
+        }
+
+        if( (bp[0] == '\n') && (bp[1] == '\n') )
+        {
+            bp += 2;
+            goto done;
+        }
+    }
+    // fall through if no headers, ignore?
+    SHOW_ERROR( 1, "no headers in '%s'", buf );
+    // goto err_ret;
+
+done:
+    return pvm_create_string_object(bp);
 }
 
 

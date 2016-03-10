@@ -27,7 +27,9 @@ vpath %.pc $(BINDIR)
 
 $(TARGET): $(filter-out $(EXCLUDED_PCFILES), $(PCFILES) )
 	@echo --- make classes bulk ---
-	sh -c "$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)"
+	$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)
+
+#	sh -c "$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)"
 
 classes.ar: $(filter-out $(EXCLUDED_PCFILES), $(PCFILES) )
 	@echo --- make classes ar ---

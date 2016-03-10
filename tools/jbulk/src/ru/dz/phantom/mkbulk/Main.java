@@ -23,17 +23,18 @@ class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
-		System.out.println("mkbulk: combine Phantom class files to a special");
-		System.out.println("bulk file to bundle with kernel (classes boot module)");
+
 		if (args.length < 2) {
-			System.out.println("\nUsage: mkbulk outfile infile [...]");
-			System.out.println("\n       OR");
-			System.out.println("\n       mkbulk -l listfile");
+			System.out.print("mkbulk: combine Phantom class files to a special");
+			System.out.println("bulk file to bundle with kernel (classes boot module)");
+
+			System.out.println("Usage: mkbulk outfile infile [...]");
+			System.out.println("       OR");
+			System.out.println("       mkbulk -l listfile");
 			return;
 		}
 
-		System.out.println("processing...");
+		//System.out.println("processing...");
 		
 		// Prepare command line arguments
 		if (args[0].equals("-l")) {
@@ -67,30 +68,20 @@ class Main {
 			
 			if( (fn.length() > 11) && fn.substring(0,10).equals("/cygdrive/") )
 				fn = fn.substring(10, 11) + ":" + fn.substring(11); 
-			
-			System.out.println("Process <" + fn + ">");
-			
+
 			if (IsNotPCExtensionOf(fn)) continue;
-			// Open next input file
-			DataInputStream in = new DataInputStream(
-					new BufferedInputStream(new FileInputStream(fn)));
-			// Calculate file length
-			int av = in.available();
-			// System.out.println("mkbulk: length of <" + cl_arguments[i] + "> = " + av);
-			// Load the file into buffer
-			byte[] buffer = new byte[av]; 
-			int n = in.read(buffer);
-			// System.out.println("mkbulk: " + n + " bytes was read");
-			in.close();
 			
-			// Test Phantom class file signature
-			if (PCFileSignatureIsWrong(buffer, fn)) continue;
-			
-			// Prepare and write header of the class
-			writeHeader(out, buffer, av);
-			
-			// Write Phantom class to the bulk
-			out.write(buffer);
+			try { process(fn, out); }
+			catch(IOException e)
+			{
+				out.close();
+				
+				File of = new File(cl_arguments[0]);
+				of.delete();
+				
+				System.err.println(e);
+				System.exit(1);
+			}
 		}
 		
 		out.flush();
@@ -98,6 +89,37 @@ class Main {
 		System.out.println("Ok. The bulk file <" + cl_arguments[0] + "> created.");
 	}
 	
+	private static void process(String fn, DataOutputStream out) throws IOException {
+
+		//System.out.println("Process <" + fn + ">");
+		
+		// Open next input file
+		DataInputStream in = new DataInputStream(
+				new BufferedInputStream(new FileInputStream(fn)));
+		// Calculate file length
+		int av = in.available();
+		// System.out.println("mkbulk: length of <" + cl_arguments[i] + "> = " + av);
+		// Load the file into buffer
+		byte[] buffer = new byte[av]; 
+		int n = in.read(buffer);
+		// System.out.println("mkbulk: " + n + " bytes was read");
+		in.close();
+		
+		// Test Phantom class file signature
+		if (PCFileSignatureIsWrong(buffer, fn)) 
+		{
+			//System.err.println("Wrong signature: "+fn);
+			//System.exit(2);
+			throw new IOException("Wrong signature: "+fn);
+		}
+		
+		// Prepare and write header of the class
+		writeHeader(out, buffer, av);
+		
+		// Write Phantom class to the bulk
+		out.write(buffer);
+	}
+
 	static void writeHeader(DataOutputStream os, byte[] buf, int len) throws IOException {
 		try {
 			byte[] header = new byte[header_size];
@@ -145,17 +167,11 @@ class Main {
 	static boolean PCFileSignatureIsWrong(byte[] buf, String fn) {
 		boolean fl = false;
 		
-//		System.out.println(buf[0]);
 		if (buf[0] != 'p') fl = true;
-//		System.out.println(buf[1]);
 		if (buf[1] != 'h') fl = true;
-//		System.out.println(buf[2]);
 		if (buf[2] != 'f') fl = true;
-//		System.out.println(buf[3]);
 		if (buf[3] != 'r') fl = true;
-//		System.out.println(buf[4]);
 		if (buf[4] != ':') fl = true;
-//		System.out.println(buf[5]);
 		if (buf[5] != 'C') fl = true;
 		
 		if (fl) System.err.println("mkbulk: File <" + fn + "> is not Phantom class file. Skip.");
