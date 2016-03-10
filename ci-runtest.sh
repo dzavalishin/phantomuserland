@@ -2,6 +2,7 @@
 #
 # This script only executes test mode
 #
+set -x	# debug
 cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 
@@ -23,30 +24,23 @@ else
 	QEMU_SHARE=/usr/share/qemu
 fi
 
-if [ $# -gt 0 ]
-then
-	while [ $# -gt 0 ]
-	do
-		case "$1" in
-		-f)	FOREGROUND=1		;;
-		-u)	UNATTENDED=-unattended	;;
-		-ng)	unset DISPLAY	;;
-		*)
-			echo "Usage: $0 [-u|-f] [-ng]
+while [ $# -gt 0 ]
+do
+	case "$1" in
+	-f)	FOREGROUND=1		;;
+	-u)	UNATTENDED=-unattended	;;
+	-ng)	unset DISPLAY		;;
+	*)
+		echo "Usage: $0 [-u|-f] [-ng]
 	-f	- run in foreground
 	-u	- run unattended (don't stop on panic for gdb)
 	-ng	- do not show qemu/kvm window
 "
-			exit 0
-		;;
-		esac
-		shift
-	done
-else
-	CRONMODE=1
-	UNATTENDED=-unattended
-	exec 1>$0.log 2>&1
-fi
+		exit 0
+	;;
+	esac
+	shift
+done
 
 
 die ( ) {
@@ -131,7 +125,7 @@ done
 
 rm -f $LOGFILE
 
-[ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH=-nographic
+[ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH="-display none"
 
 QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
