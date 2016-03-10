@@ -23,10 +23,11 @@ else
 	QEMU_SHARE=/usr/share/qemu
 fi
 
+[ $# -gt 0 ] || CRONMODE=1
+
 while [ $# -gt 0 ]
 do
 	case "$1" in
-	-f)	FOREGROUND=1		;;
 	-u)	UNATTENDED=-unattended	;;
 	-ng)	unset DISPLAY		;;
 	*)
@@ -125,9 +126,9 @@ done
 
 rm -f $LOGFILE
 
-[ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH="-display none"
+[ "$CRONMODE" ] && NO_GRAPH="-display none"
 
-QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
+QEMU_OPTS="-L $QEMU_SHARE -vga cirrus $NO_GRAPH \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user \
 	-parallel file:lpt_01.log \
@@ -154,6 +155,9 @@ boot
 
 dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
+
+# take working copy of the Phantom disk
+[ -s $DISK_IMG ] || cp ../../oldtree/run_test/$DISK_IMG .
 
 $QEMU $QEMU_OPTS &
 QEMU_PID=$!
