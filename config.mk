@@ -49,7 +49,7 @@ MKBULK=$(realpath $(PHANTOM_HOME))/build/bin/mkbulk
 ifeq ($(OSTYPE),cygwin)
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
 else
-PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.sh
+PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc
 endif
 
 %.pc: %.ph
