@@ -23,7 +23,7 @@ else
 	QEMU_SHARE=/usr/share/qemu
 fi
 
-[ $# -gt 0 ] || CRONMODE=1
+[ $# -gt 0 ] || unset DISPLAY
 
 while [ $# -gt 0 ]
 do
@@ -126,9 +126,9 @@ done
 
 rm -f $LOGFILE
 
-[ "$CRONMODE" ] && NO_GRAPH="-display none"
+[ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH=-nographic
 
-QEMU_OPTS="-L $QEMU_SHARE -vga cirrus $NO_GRAPH \
+QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user \
 	-parallel file:lpt_01.log \
