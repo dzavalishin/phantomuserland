@@ -21,38 +21,18 @@ import .ru.dz.phantom.system.runnable;
 attribute const * ->!;
 
 
-class weather //extends runnable
+class weather
 {
-    var stat_val :  int;
-    var stat_pos :  int;
-    var stat_next_pos :  int;
-
-    var cpu_idle : int;
-    var old_idle : int;
-
-    var white : int;
+    var i : int;
+    var wbmp : .internal.bitmap[];
 
     var win : .internal.window;
-    var timer : .internal.connection;
+    var sleep : .internal.connection;
 
     //var fio : .internal.connection;
 
-    var stat_conn : .internal.connection;
+    //var stat_conn : .internal.connection;
 
-
-    //var mtx : .internal.mutex;
-
-
-    void init()
-    {
-        //mtx = new .internal.mutex();
-        //mtx.lock();
-    }
-
-    void go()
-    {
-        //mtx.unlock();
-    }
 
     void run(var console : .internal.io.tty)
     {
@@ -65,77 +45,49 @@ class weather //extends runnable
 
         win = new .internal.window();
 
-        win.setWinPosition(50,100);
+        win.setWinPosition(650,500);
         win.setTitle("Weather");
         win.setFg(0xFF000000); // black
+		win.setBg(0xFFcce6ff); // light cyan
 
         win.clear();
-		win.drawImage( 0, 0, getBackgroundImage() );
+		//win.drawImage( 0, 0, getBackgroundImage() ); // crashes kernel!
+		win.drawImage( 0, 0, bmp );
+		win.drawString( 250, 250, "T -25 C" );
+
 		//bmp.paintTo( win, 0, 0 );
         win.update();
 
 		console.putws("Weather win: done init\n");
+/* kills phantom with "Panic: Thread object has no INTERNAL flag" on snap load
+		loadImages();
 
-/*
-        stat_pos = 0;
-        old_idle = 0;
+		console.putws("Weather win: got images\n");
 
-        white = 0xFFFFFFFF;
+        i = 0;
 
+        sleep = new .internal.connection();
+        sleep.connect("tmr:");
 
-		// test of fio connection
-		//fio = new .internal.connection();
-        //fio.connect("fio:/amnt1/fio_log.txt");
-		//fio.block("written from phantom code", 1);
-
-        // test of connections
-        timer = new .internal.connection();
-        timer.connect("tmr:");
-
-
-        stat_conn = new .internal.connection();
-        stat_conn.connect("stt:");
+        //stat_conn = new .internal.connection();
+        //stat_conn.connect("stt:");
 
         while(1)
         {
+			console.putws("Weather win: sleep\n");
 
-            timer.block(null, 500);
-            stat_val = stat_conn.block( 26, 0 ); // blk io per sec
-            cpu_idle = stat_conn.block( 0, 5 ); // cpu 0 idle
+            sleep.block(null, 500);
 
-            cpu_idle = 100 - cpu_idle;
-
-            stat_next_pos = stat_pos + 1;
-            if( stat_next_pos >= win.getXSize() )
-                stat_next_pos = 0;
-
-            // Bar
-            win.setFg( 0xFF00FF00 ); // Green
-            win.drawLine( stat_next_pos, 5, 0, 300 );
-
-            // Clear
-            win.setFg( white ); // white
-            win.drawLine( stat_pos, 5, 0, 300 );
-
-            win.setFg(0xFF000000); // black
-            win.drawLine( stat_pos, 5, 0, 0+stat_val );
-
-            // Idle
-            win.setFg( 0xFF0000FF ); // Blue
-            win.drawLine( stat_pos-1, old_idle, 1, cpu_idle-old_idle );
-
-            old_idle = cpu_idle;            
-            stat_pos = stat_next_pos;
+			console.putws("Weather win: repaint\n");
             
-            
-            //if( stat_pos >= win.getXSize()-1 )
-	        //win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
-            //else
-            //    stat_pos = stat_pos + 1;
-            
+			win.drawImage( 0, 0, wbmp[i] );            
+			win.drawString( 250, 250, "T -26 C" );
 
             win.update();
 
+			i = i + 1;
+//			if( i >= 8 ) i = 0;
+			if( i >= 3 ) i = 0;
 
         }
 */
@@ -147,6 +99,40 @@ class weather //extends runnable
     {
         return import "../resources/backgrounds/snow_weather.ppm" ;
     }
+
+
+	.internal.bitmap loadImages()
+	{
+
+        wbmp[0] = new .internal.bitmap();
+        wbmp[0].loadFromString(import "../resources/backgrounds/weather_clouds.ppm");
+
+        wbmp[1] = new .internal.bitmap();
+        wbmp[1].loadFromString(import "../resources/backgrounds/weather_grad.ppm");
+
+        wbmp[2] = new .internal.bitmap();
+        wbmp[2].loadFromString(import "../resources/backgrounds/weather_ice.ppm");
+/*
+        wbmp[3] = new .internal.bitmap();
+        wbmp[3].loadFromString(import "../resources/backgrounds/weather_lightning.ppm");
+
+        wbmp[4] = new .internal.bitmap();
+        wbmp[4].loadFromString(import "../resources/backgrounds/weather_moon.ppm");
+
+        wbmp[5] = new .internal.bitmap();
+        wbmp[5].loadFromString(import "../resources/backgrounds/weather_rain.ppm");
+
+        wbmp[6] = new .internal.bitmap();
+        wbmp[6].loadFromString(import "../resources/backgrounds/weather_snow.ppm");
+
+        wbmp[7] = new .internal.bitmap();
+        wbmp[7].loadFromString(import "../resources/backgrounds/weather_sun.ppm");
+
+        wbmp[8] = new .internal.bitmap();
+        wbmp[8].loadFromString(import "../resources/backgrounds/weather_wind.ppm");
+*/
+
+	}
 	
 };
 

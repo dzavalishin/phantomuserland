@@ -32,12 +32,12 @@ PHANTOM_LDFLAGS	+= $(addprefix -L,$(LIBDIRS))
 
 # Add a `-g' if the debug option is set.
 ifneq "$(filter debug, $(PHANTOM_OPTIONS))" ""
-PHANTOM_CFLAGS 	+= -O -g
-PHANTOM_ASFLAGS += -g
+PHANTOM_CFLAGS 	+= -O -gstabs+
+PHANTOM_ASFLAGS += -gstabs+
 else
 # -O2
-PHANTOM_CFLAGS 	+= -O0 -g
-PHANTOM_ASFLAGS += -g
+PHANTOM_CFLAGS 	+= -O0 -gstabs+
+PHANTOM_ASFLAGS += -gstabs+
 endif
 
 ## If -s is passed to make, make things real quiet

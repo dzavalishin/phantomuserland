@@ -1,2 +1,1 @@
-sh mkbulk %*
-
+@sh mkbulk %*

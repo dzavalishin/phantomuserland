@@ -22,10 +22,12 @@ install: classes classes.ar
 vpath %.ph $(SRCDIRS)
 vpath %.pc $(BINDIR)
 
+#@sh -c "$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)"
 # for some unknown reason mkbulk fails if run from make, but is ok when run from shell - win7
+
 $(TARGET): $(filter-out $(EXCLUDED_PCFILES), $(PCFILES) )
 	@echo --- make classes bulk ---
-	@sh -c "$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)"
+	sh -c "$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)"
 
 classes.ar: $(filter-out $(EXCLUDED_PCFILES), $(PCFILES) )
 	@echo --- make classes ar ---

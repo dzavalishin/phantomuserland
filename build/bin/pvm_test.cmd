@@ -1,1 +1,1 @@
-sh pvm_test %*
+@sh pvm_test %*

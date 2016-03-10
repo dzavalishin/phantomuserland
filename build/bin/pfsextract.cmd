@@ -1,1 +1,1 @@
-sh pfsextract %*
+@sh pfsextract %*

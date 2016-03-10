@@ -137,8 +137,9 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	cat < $@ > ../../../run/fat/boot/$@
 	cat < $@ > ../../../run/fat/boot/$@.$(ARCH)
 	@echo --- kernel build finished
-	-mv -t d *.d
-	-mv -t d unix/*.d
+	-@mv -t d *.d
+	-@mv -t d unix/*.d
+	-@mv -t d $(ARCH)/boards/*.d
 
 #	objdump -x $@.pe >$@.pe.sym
 #	gzip < $@ > $(TFTP_PATH)/$@.gz
@@ -148,7 +149,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 -include d/*.d
 -include *.d
 -include unix/*.d
-
+-include $(ARCH)/boards/*.d
 
 svn_version.c::
 	@echo "---- (creating svn_version.c)"
