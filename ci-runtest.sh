@@ -12,7 +12,7 @@ TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
 LOGFILE=serial0.log
-PANIC_AFTER=180		# abort test after 3 minutes (consider stalled)
+PANIC_AFTER=900		# abort test after 15 minutes (consider stalled)
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
 then
@@ -28,6 +28,7 @@ fi
 while [ $# -gt 0 ]
 do
 	case "$1" in
+	-f)	FOREGROUND=1		;;
 	-u)	UNATTENDED=-unattended	;;
 	-ng)	unset DISPLAY		;;
 	*)
@@ -139,7 +140,8 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-hda snapcopy.img \
 	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
-	-usb -soundhw all"
+	-usb -usbdevice mouse \
+	-soundhw all"
 #	-net dump,file=net.dmp \
 #	-net nic,model=ne2k_isa -M isapc \
 
