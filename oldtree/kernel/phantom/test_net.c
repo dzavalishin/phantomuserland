@@ -343,6 +343,16 @@ int do_test_tftp(const char *test_parm)
 int do_test_tcp_connect(const char *test_parm)
 {
 #if HAVE_NET
+
+#if 1
+    (void) test_parm;
+
+    char buf[1024];
+    errno_t e = net_curl( "http://ya.ru/", buf, sizeof(buf) );
+    SHOW_FLOW( 0, "TCP - read = (%s)", buf);
+
+    return e;
+#else
     void *prot_data;
 
     if(test_parm == 0 || *test_parm == 0)
@@ -350,7 +360,8 @@ int do_test_tcp_connect(const char *test_parm)
         //test_parm = "93.158.134.3:80";
         //test_parm = "93.158.134.203:80";
         //test_parm = "173.194.32.16:80"; // google.com
-        test_parm = "89.108.110.118:80"; // misc.dz.ru
+        //test_parm = "89.108.110.118:80"; // misc.dz.ru
+        test_parm = "213.180.204.3:80"; // ya.ru
 
     int ip0, ip1, ip2, ip3, port;
 
@@ -401,6 +412,7 @@ int do_test_tcp_connect(const char *test_parm)
     tcp_close(prot_data);
 
     return nread > 0 ? 0 : -nread;
+#endif // 1
 #else
     (void) test_parm;
     return 0;
