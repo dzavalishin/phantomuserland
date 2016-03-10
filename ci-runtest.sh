@@ -2,7 +2,6 @@
 #
 # This script only executes test mode
 #
-set -x	# debug
 cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 
@@ -139,7 +138,7 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-hda snapcopy.img \
 	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
-	-usb -soundhw sb16"
+	-usb -soundhw all"
 #	-net dump,file=net.dmp \
 #	-net nic,model=ne2k_isa -M isapc \
 
