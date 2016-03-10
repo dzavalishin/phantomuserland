@@ -35,7 +35,7 @@ rem SET VIO= -device virtio-rng-pci
 
 rem 161 = snmp
 rem SET Q_REDIR=-redir udp:123::123
-SET Q_REDIR=-redir udp:8023::23 -redir udp:8007::7 -redir tcp:8007::7 -redir udp:161::161 -redir udp:162::162
+SET Q_REDIR=-redir udp:8023::23 -redir udp:8007::7 -redir tcp:8007::7 -redir udp:161::161 -redir udp:162::162 -redir tcp:1256::1256
 
 SET Q_PORTS= -serial file:serial0.log
 
