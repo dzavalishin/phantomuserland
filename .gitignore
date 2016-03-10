@@ -46,6 +46,5 @@ plib/bin/*.ll
 oldtree/kernel/phantom/phantom
 run/fat/class/*.pc
 run/*.img
-run/fat/boot/*
 run/serial0.log*
 tools/jbulk/bin/*
