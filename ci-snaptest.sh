@@ -11,13 +11,20 @@ GDB_PORT=1235		# get rid of stalled instance by incrementing port no.
 GDB_PORT_LIMIT=1250	# avoid spawning too many stalled instances
 GDB_OPTS="-gdb tcp::$GDB_PORT"
 #GDB_OPTS="-s"
-QEMU=`which qemu || which kvm`
-QEMU_SHARE=/usr/share/qemu
 TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
 LOGFILE=serial0.log
 GRUB_MENU=tftp/tftp/menu.lst
+
+if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
+then
+	QEMU=/usr/libexec/qemu-kvm
+	QEMU_SHARE=/usr/share/qemu-kvm
+else
+	QEMU=`which qemu || which kvm`
+	QEMU_SHARE=/usr/share/qemu
+fi
 
 
 die ( ) {
@@ -30,14 +37,14 @@ die ( ) {
 	# try to find custom qemu
 	PKG_MGR=`which rpm || which dpkg`
 	case $PKG_MGR in
-	*rpm)	QEMU=`rpm -q -l qemu-kvm` ;;
-	*dpkg)	QEMU=`dpkg -L qemu-kvm`	;;
+	*rpm)	QEMU_PKG=`rpm -q -l qemu-kvm` ;;
+	*dpkg)	QEMU_PKG=`dpkg -L qemu-kvm`	;;
 	*)	die "Couldn't locate package manager at `uname -a`"	;;
 	esac
 
-	QEMU=`echo "$QEMU" | grep 'bin/\(qemu\|kvm\)$'`
+	QEMU=`echo "$QEMU_PKG" | grep 'bin/\(qemu\|kvm\|qemu-kvm\)$'`
 
-	[ "$QEMU" ] || die "Couldn't locate qemu/kvm in $QEMU"
+	[ "$QEMU" ] || die "$QEMU_PKG - cannot find qemu/kvm executable"
 
 	QEMU_SHARE=`echo "$QEMU" | sed 's#bin/.*#share#'`
 }
