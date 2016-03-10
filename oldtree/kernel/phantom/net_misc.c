@@ -1,3 +1,15 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Network tools of different kinds. TCP/UDP echo server, curl-like kernel http worker, 
+ * object debugger TCP interface, etc.
+ *
+**/
+
+
 #include <kernel/config.h>
 
 #if HAVE_NET
@@ -346,8 +358,6 @@ void start_tcp_echo_server(void)
         SHOW_ERROR( 0, "Can't start tcp echo thread (%d)", te );
 }
 
-// started from net startup - redo?
-//INIT_ME( 0, 0, start_tcp_echo_server );
 
 
 #define CURL_MAXBUF 512
@@ -404,17 +414,17 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
 
     addr.addr.len = 4;
     addr.addr.type = ADDR_TYPE_IP;
-    NETADDR_TO_IPV4(addr.addr) = out; //IPV4_DOTADDR_TO_ADDR(ip0, ip1, ip2, ip3);
+    NETADDR_TO_IPV4(addr.addr) = ntohl(out);
 
     //SHOW_FLOW( 0, "TCP - create socket to %d.%d.%d.%d port %d", ip0, ip1, ip2, ip3, port);
 
-    SHOW_FLOW0( 0, "TCP - will connect");
+    SHOW_FLOW0( 2, "TCP - will connect");
     if( tcp_connect( prot_data, &addr) )
     {
         SHOW_ERROR(0, "can't connect to %s", host);
         goto err;
     }
-    SHOW_FLOW0( 0, "TCP - connected");
+    SHOW_FLOW0( 2, "TCP - connected");
 
     char buf[1024];
 
@@ -429,14 +439,14 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
     //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int len = strlen(buf);
     int nwrite = tcp_sendto( prot_data, buf, len, &addr);
-    SHOW_FLOW( 0, "TCP - write = %d, requested %d (%s)", nwrite, len, buf);
+    SHOW_FLOW( 3, "TCP - write = %d, requested %d (%s)", nwrite, len, buf);
     if( nwrite != len ) goto err;
 
     memset( buf, 0, sizeof(buf) );
     nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50 );
     buf[sizeof(buf)-1] = 0;
 
-    SHOW_FLOW( 0, "TCP - read = %d (%s)", nread, buf);
+    SHOW_FLOW( 3, "TCP - read = %d (%s)", nread, buf);
 err:
     tcp_close(prot_data);
 
@@ -453,6 +463,145 @@ err:
 
 
 
+
+
+
+
+
+
+
+static void *pvm_debug_socket = 0;
+
+int putDebugChar(char c)    /* write a single character      */
+{
+    //putchar(c);
+    //int rc = write( pvm_debug_socket, &c, 1 );
+
+    i4sockaddr addr;
+    int rc = tcp_sendto( pvm_debug_socket, &c, 1, &addr);
+    //if( nwrite != nread )            SHOW_ERROR( 0, "nw %d != nr %d", nwrite, nread );
+
+    return rc;
+
+}
+
+extern char getDebugChar(void)     /* read and return a single char */
+{
+    char c;
+    //int rc = read( pvm_debug_socket, &c, 1 );
+
+    i4sockaddr addr;
+    int rc = tcp_recvfrom( pvm_debug_socket, &c, 1, &addr, 0, 1000L*1000*50 );
+
+    //SHOW_FLOW0( 5, "echo" );
+
+
+/*
+    //if( rc > 0 ) putchar(c);
+
+    if( rc < 0 ) 
+        perror("gdb sock read");
+
+    if( rc < 0 )
+    {
+        longjmp(finish_gdb_socket, 1);
+    }
+*/
+    return (rc < 1) ? -1 : c;
+}
+
+void gdb_stub_handle_cmds(void *da, int signal);
+
+
+#define PVM_DEBUG_PORT 1256
+
+void pvm_debug_srv_thread(void *arg)
+{
+    (void) arg;
+    //printf("Debug server running\n");
+#ifndef NO_NETWORK
+
+    void *prot_data;
+
+    t_current_set_name("PVM NetDebug");
+
+    if( tcp_open(&prot_data) )
+    {
+        SHOW_ERROR0( 0, "can't prepare debugger TCP endpoint" );
+        return;
+    }
+
+    SHOW_FLOW0( 1, "Debug server got accept socket" );
+
+    i4sockaddr addr;
+
+    addr.port = PVM_DEBUG_PORT;
+
+    addr.addr.len = 4;
+    addr.addr.type = ADDR_TYPE_IP;
+    NETADDR_TO_IPV4(addr.addr) = IPV4_DOTADDR_TO_ADDR(0, 0, 0, 0);
+
+    int rc = tcp_bind( prot_data, &addr );
+    if( rc )
+    {
+        SHOW_ERROR( 0, "Debug server can't bind - %d", rc );
+        goto fail;
+    }
+
+    tcp_listen(prot_data);
+
+    SHOW_FLOW0( 1, "Debug server listen" );
+
+
+    while(1)
+    {
+        i4sockaddr acc_addr;
+
+        int arc = tcp_accept( prot_data, &acc_addr, &pvm_debug_socket );
+        if( arc )
+        {
+            SHOW_ERROR( 0, "Debug server can't accept - %d", arc );
+            //goto fail;
+            continue;
+        }
+
+        SHOW_FLOW( 1, "Debug server accepted - %x", NETADDR_TO_IPV4(acc_addr.addr) );
+
+
+        //hal_start_thread( tcp_echo, echo_socket, 0 );
+        gdb_stub_handle_cmds(0, 0);
+
+        if( tcp_close(pvm_debug_socket) )
+        SHOW_ERROR0( 0, "Debug server can't close worker TCP endpoint" );
+
+    }
+
+fail:
+    if( tcp_close(prot_data) )
+        SHOW_ERROR0( 0, "Debug server can't close listen TCP endpoint" );
+
+
+
+#endif
+}
+
+
+
+static void start_pvm_gdb_server(void)
+{
+    SHOW_FLOW0( 0, "start virtual machine debug server" );
+
+    tid_t te = hal_start_thread( pvm_debug_srv_thread, 0, 0 );
+    if( te < 0 )
+        SHOW_ERROR( 0, "Can't start virtual machine debug server (%d)", te );
+}
+
+
+
+// started from net startup - redo?
+//INIT_ME( 0, 0, start_tcp_echo_server );
+
+INIT_ME( 0, 0, start_pvm_gdb_server );
 
 #endif // HAVE_NET
 

@@ -43,6 +43,8 @@
 #include <kernel/profile.h>
 #include <kernel/init.h>
 
+#include <kernel/json.h>
+
 #if NET_TIMED_FLUSH
 #include <kernel/net_timer.h>
 #endif
@@ -413,7 +415,8 @@ static void phantom_debug_window_loop()
                        "---------\n"
                        "w\t- show windows list\n"
                        "t\t- show threads list\n"
-                       "t\t- show stats\n"
+                       "s\t- show stats\n"
+                       "d\t- dump threads to JSON\n"
                       );
                 break;
             case 't':
@@ -429,6 +432,17 @@ static void phantom_debug_window_loop()
             case 's':
                 //w_set_title( phantom_debug_window,  "Stats" );
                 show = c;
+                break;
+
+            case 'd':
+                {
+                    json_output jo = { 0 };
+
+                    json_start( &jo );
+                    json_dump_threads( &jo );
+                    json_stop( &jo );
+
+                }
                 break;
             }
         }
