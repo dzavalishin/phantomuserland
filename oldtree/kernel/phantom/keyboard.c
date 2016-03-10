@@ -501,6 +501,11 @@ int phantom_scan_console_getc(void)
     // TODO PIECE OF JUNK!
     // just waits for some key - REDO!
 
+	// [dz] erra reports that this code does not wait. Added attempt to read from both
+	// registers to clear possible existing byte
+	inb(0x64); inb(0x60);
+
+
     do {
 
         while((inb(0x64) & K_OBUF_FUL) == 0)
