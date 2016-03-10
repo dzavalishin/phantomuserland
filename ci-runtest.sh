@@ -107,6 +107,7 @@ quit
 # update data BEFORE checking for stalled copies
 GRUB_MENU=tftp/tftp/menu.lst
 
+make all || die "Build failure"
 cd $TEST_DIR
 cp $TFTP_PATH/phantom tftp/
 
@@ -159,10 +160,10 @@ $QEMU $QEMU_OPTS &
 QEMU_PID=$!
 
 # wait for Phantom to start
-sleep 40
+sleep 50
 if [ -s $LOGFILE ]
 then
-	ELAPSED=40
+	ELAPSED=50
 else
 	ELAPSED=$PANIC_AFTER
 fi
