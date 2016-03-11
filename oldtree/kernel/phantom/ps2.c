@@ -383,11 +383,11 @@ static int ps2ms_do_init( void )
     // allright, we have some mouse
 #else
 
-    SHOW_FLOW0( 2, "PS/2 mouse reset\n" );
+    SHOW_FLOW0( 2, "PS/2 mouse reset" );
     ps2ms_send_aux( PS2_CMD_RESET_MOUSE );
     ps2ms_purge_buffer(10);
 
-    SHOW_FLOW0( 2, "PS/2 mouse set sample rate\n" );
+    SHOW_FLOW0( 2, "PS/2 mouse set sample rate" );
     ps2ms_send_aux( 0xF3 ); // set sample rate
     ps2ms_purge_buffer(10);
     //ps2ms_send_aux( 0x0A );
@@ -402,11 +402,11 @@ static int ps2ms_do_init( void )
     ps2ms_send_aux( 1 );    // lowest resolution
     ps2ms_purge_buffer(10);
 
-    SHOW_FLOW0( 2, "PS/2 mouse ask ID\n" );
+    SHOW_FLOW0( 2, "PS/2 mouse ask ID" );
     ps2ms_send_aux( 0xF2 ); // Ask for ID
     ps2ms_aux_wait_ack();
     unsigned char ps2id = ps2ms_get_data();
-    SHOW_FLOW( 0, "PS/2 mouse ID=0x%2X\n", ps2id );
+    SHOW_FLOW( 0, "PS/2 mouse ID=0x%2X", ps2id );
 
     ps2ms_purge_buffer(10); // todo make func to wait for ACK for n msec
     ps2ms_send_aux(PS2_CMD_ENABLE_MOUSE);
@@ -417,7 +417,7 @@ static int ps2ms_do_init( void )
     return 0;
 
 notfound:
-    SHOW_ERROR0( 1, "PS/2 mouse not found\n" );
+    SHOW_ERROR0( 1, "PS/2 mouse not found" );
     return ENXIO;
 
 }
