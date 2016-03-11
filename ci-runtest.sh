@@ -51,7 +51,8 @@ fi
 
 die ( ) {
 	[ -s $LOGFILE ] && {
-		[ "$CRONMODE" ] && cat $LOGFILE || tail $LOGFILE
+		# submit all details in CI, show pre-failure condition interactively
+		[ "$CRONMODE" ] && sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE || tail $LOGFILE
 	}
 	[ "$1" ] && echo "$*"
 	exit 1
@@ -212,7 +213,7 @@ grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
 if [ "$CRONMODE" ]
 then
-	cat $LOGFILE	# submit all details into the CI log
+	sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE	# submit all details into the CI log, cutting of ESC-codes
 else
 	grep -q 'TEST FAILED' $LOGFILE && {
 		cp $LOGFILE test.log
