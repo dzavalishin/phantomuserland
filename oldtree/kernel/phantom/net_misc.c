@@ -355,7 +355,7 @@ void start_tcp_echo_server(void)
 
     te = hal_start_thread( udp_echo_thread, 0, 0 );
     if( te < 0 )
-        SHOW_ERROR( 0, "Can't start tcp echo thread (%d)", te );
+        SHOW_ERROR( 0, "Can't start udp echo thread (%d)", te );
 }
 
 
