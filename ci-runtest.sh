@@ -12,7 +12,7 @@ TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
 LOGFILE=serial0.log
-PANIC_AFTER=900		# abort test after 15 minutes (consider stalled)
+PANIC_AFTER=600		# abort test after 10 minutes (consider stalled)
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
 then
@@ -23,7 +23,8 @@ else
 	QEMU_SHARE=/usr/share/qemu
 fi
 
-[ $# -gt 0 ] || unset DISPLAY
+if [ $# -gt 0 ]
+then
 
 while [ $# -gt 0 ]
 do
@@ -42,10 +43,16 @@ do
 	esac
 	shift
 done
+else
+	CRONMODE=1
+	unset DISPLAY
+fi
 
 
 die ( ) {
-	[ -s $LOGFILE ] && tail $LOGFILE
+	[ -s $LOGFILE ] && {
+		[ "$CRONMODE" ] && cat $LOGFILE || tail $LOGFILE
+	}
 	[ "$1" ] && echo "$*"
 	exit 1
 }
@@ -203,7 +210,12 @@ grep 'SVN' $LOGFILE || die "Phantom test run crashed!"
 grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
 grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
-grep -q 'TEST FAILED' $LOGFILE && {
-	cp $LOGFILE test.log
-	#preserve_log test.log
-}
+if [ "$CRONMODE" ]
+then
+	cat $LOGFILE	# submit all details into the CI log
+else
+	grep -q 'TEST FAILED' $LOGFILE && {
+		cp $LOGFILE test.log
+		#preserve_log test.log
+	}
+fi
