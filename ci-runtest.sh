@@ -183,7 +183,7 @@ echo "color yellow/blue yellow/magenta
 timeout=3
 
 title=phantom ALL TESTS
-kernel=(nd)/phantom -d 20 $UNATTENDED -- -test all
+kernel=(nd)/phantom -d=20 $UNATTENDED -- -test all
 module=(nd)/classes
 module=(nd)/pmod_test
 boot 
