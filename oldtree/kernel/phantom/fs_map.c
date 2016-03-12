@@ -198,10 +198,10 @@ phantom_disk_partition_t *select_phantom_partition(void)
             continue;
 
         int n = c-'0';
-
+#if MAX_PFS_PARTS < 10
         if( (n > MAX_PFS_PARTS) || (n < 0) )
             continue;
-
+#endif
         phantom_disk_partition_t *p = phantom_fs_partitions[n];
 
         if( !p )

@@ -395,7 +395,7 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
         return EINVAL;
 
     strlcpy( host, url, pos-url+1 );
-    strcpy( path, pos+1 );
+    strlcpy( path, pos+1, CURL_MAXBUF );
 #endif
 
     pos = strchr( host, ':' );

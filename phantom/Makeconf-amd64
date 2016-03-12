@@ -37,3 +37,6 @@ TARGET_OBJECT_FORMAT=elf64-i386
 #HOST_CPU	= i686
 #HOST_ARCH	= x86
 #unix_host	= NONE
+
+# Use local overrides, if any
+-include $(realpath $(PHANTOM_HOME))/local-config.$(ARCH).mk

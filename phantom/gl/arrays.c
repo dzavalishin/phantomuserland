@@ -15,7 +15,7 @@ glopArrayElement(GLContext *c, GLParam *param)
   int idx = param[1].i;
     
   if (states & COLOR_ARRAY) {
-    GLParam p[5];
+    GLParam p[8];
     int size = c->color_array_size; 
     i = idx * (size + c->color_array_stride);
     p[1].f = c->color_array[i];

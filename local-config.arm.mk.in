@@ -1,0 +1,9 @@
+#TOOLS_PREFIX=C:/yagarto-20121222/bin/arm-none-eabi
+#export AS       = $(TOOLS_PREFIX)-as
+#export CC       = $(TOOLS_PREFIX)-gcc
+#export LD       = $(TOOLS_PREFIX)-ld
+#export STRIP	= $(TOOLS_PREFIX)-strip
+#export AR       = $(TOOLS_PREFIX)-ar
+#export RANLIB   = $(TOOLS_PREFIX)-ranlib
+#export OBJCOPY  = $(TOOLS_PREFIX)-objcopy
+#export NM       = $(TOOLS_PREFIX)-nm

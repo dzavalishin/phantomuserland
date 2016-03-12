@@ -44,4 +44,5 @@ PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inli
 # PHANTOM_FFLAGS += -finstrument-functions
 
 # Use local overrides, if any
--include $(realpath $(PHANTOM_HOME))/local-config.ia32.mk
+#-include $(realpath $(PHANTOM_HOME))/local-config.ia32.mk
+-include $(realpath $(PHANTOM_HOME))/local-config.$(ARCH).mk

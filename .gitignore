@@ -12,6 +12,9 @@ oldtree/kernel/phantom/svn_version.c
 run/fat/bin/*
 local-config.mk 
 local-config.ia32.mk
+local-config.arm.mk
+local-config.amd64.mk
+local-config.mips.mk 
 phantom-cov.tgz
 phantom/apps/cat/cat
 phantom/apps/cp/cp
@@ -48,3 +51,4 @@ run/fat/class/*.pc
 run/*.img
 run/serial0.log*
 tools/jbulk/bin/*
+cov-int

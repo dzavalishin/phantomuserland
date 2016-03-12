@@ -8,17 +8,17 @@
 
 sint32 touch( char *pName )
 {
-    sint32 nHandle;
-
-#warning doesnt update atime
+    int nHandle;
 
     nHandle = Open( pName, O_RDONLY );
 
     if( nHandle >= 0 )
     {
+        Close( nHandle );
         Print( "file already exists\n" );
         return -EFAIL;
     }
+    Close( nHandle );
 
     nHandle = Create( pName, 0666 );
     if ( nHandle > 0 )
@@ -31,8 +31,9 @@ sint32 touch( char *pName )
     return -EFAIL;
 }
 
-int main( int argc, char **argv ) {
-    sint32 nIndex;
+int main( int argc, char **argv )
+{
+    int nIndex;
 
     if ( argc == 1 ) {
         Print( "Syntax: touch [FILE] ...\n" );

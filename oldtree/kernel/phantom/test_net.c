@@ -69,6 +69,7 @@ int do_test_cbuf(const char *test_parm)
 
     for(i=0; i < sizeof(temp); i++)
         temp[i] = i;
+
     for(i=0; i<7*1024*1024 / sizeof(temp); i++) {
         //if(i % 128 == 0) dprintf("%Lud\n", (long long)(i*sizeof(temp)));
         cbuf_memcpy_to_chain(buf, i*sizeof(temp), temp, sizeof(temp));
@@ -146,9 +147,10 @@ int do_test_udp_send(const char *test_parm)
 int do_test_udp_syslog(const char *test_parm)
 {
 #if HAVE_NET
-    if(test_parm == 0 || *test_parm == 0)
-        test_parm = "Hello world";
-    syslog(LOG_DEBUG|LOG_KERN, "Test of UDP syslog: '%s'", test_parm );
+    //if(test_parm == 0 || *test_parm == 0)        test_parm = "Hello world";
+    //syslog(LOG_DEBUG|LOG_KERN, "Test of UDP syslog: '%s'", test_parm );
+
+    syslog(LOG_DEBUG|LOG_KERN, "Test of UDP syslog: '%s'", "Hello World!" );
 #else
     (void) test_parm;
     // CI: this message is being watched by CI scripts (ci-runtest.sh)

@@ -31,3 +31,5 @@ endif
 TARGET_OBJECT_FORMAT=elf32-littlearm
 
 
+# Use local overrides, if any
+-include $(realpath $(PHANTOM_HOME))/local-config.$(ARCH).mk

@@ -562,8 +562,8 @@ int do_test_sem(const char *test_parm)
         softirq = hal_alloc_softirq();
         if( softirq < 0 )
             test_fail_msg( 1, "Unable to get softirq" );
-
-        hal_set_softirq_handler( softirq, sem_softirq, 0 );
+        else
+            hal_set_softirq_handler( softirq, sem_softirq, 0 );
     }
 
     //int tid =

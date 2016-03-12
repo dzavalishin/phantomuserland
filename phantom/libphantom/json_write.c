@@ -73,8 +73,8 @@ void json_encode_string( json_output *jo, const char *in)
             {
                 jo->putc( jo, '\\' );
                 jo->putc( jo, 'u' );
-                hex_nibble( 0x0F & (c>>4) );
-                hex_nibble( 0x0F & c );
+                jo->putc( jo, hex_nibble( 0x0F & (c>>4) ) );
+                jo->putc( jo, hex_nibble( 0x0F & c ) );
             }
             else
             {

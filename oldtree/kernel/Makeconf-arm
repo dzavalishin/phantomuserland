@@ -31,3 +31,6 @@ INSTALL_BINDIR	= $(exec_prefix)/bin
 INSTALL_LIBDIR	= $(exec_prefix)/lib
 
 PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inline-functions
+
+# Use local overrides, if any
+-include $(realpath $(PHANTOM_HOME))/local-config.$(ARCH).mk

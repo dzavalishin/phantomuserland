@@ -35,6 +35,8 @@ static int gather_info(void)
         if(ti.name[0] == 0)
             continue;
 
+        ti.name[sizeof(ti.name)-1] = '\0';
+
         printf("%32s  %6d %6d %6d\n",
                ti.name,
                ti.current_per_second,

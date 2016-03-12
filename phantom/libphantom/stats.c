@@ -216,7 +216,7 @@ void stat_dump_all( int av, char **ac )
         printf(" %-20s\t%7d\t%10ld\t%10ld\n",
                stat_counter_name[i],
                stat_per_sec_counters[i],
-               stat_total_counters[i]/stat_total_seconds
+               stat_total_counters[i]/stat_total_seconds,
                stat_total_counters[i],
               );
 #endif

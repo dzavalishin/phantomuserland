@@ -175,6 +175,7 @@ int play(const char* filename)
     {
         printf("Error: Can't alloc memory.");
         close(in_fd);
+        CloseDSP(out_fd);
         return -1;
     }
 

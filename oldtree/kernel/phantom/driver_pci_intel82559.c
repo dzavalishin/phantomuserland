@@ -127,7 +127,7 @@ WW();
     if (intel82559_init(nic, seq_number) < 0)
     {
         printf( DEV_NAME "pcnet_init failed\n");
-
+        free(nic);
         //intel82559_delete(nic);
         return 0;
     }
@@ -217,8 +217,7 @@ WW();
 static intel82559 *intel82559_new(void)
 {
     intel82559 *ret = calloc(1,sizeof(intel82559));
-    if(ret == 0)
-        panic("oom in intel82559");
+    //if(ret == 0)          panic("oom in intel82559");
 
     return ret;
 }

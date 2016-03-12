@@ -28,7 +28,9 @@ errno_t json_parse(const char *js, jsmntok_t **tokens )
 
 	int jslen = strlen(js);
 
-	int count = jsmn_parse( &parser, js, jslen, 0, 0 );
+        int count = jsmn_parse( &parser, js, jslen, 0, 0 );
+        if( count < 0 )
+            return EINVAL;
 
 	*tokens = calloc( count, sizeof(jsmntok_t) );
 	if( !*tokens )

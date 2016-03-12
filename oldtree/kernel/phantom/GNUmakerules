@@ -153,6 +153,8 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 
 svn_version.c::
 	@echo "---- (creating svn_version.c)"
-	@echo 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
+	@echo 'const char* SVN_Version = "' `git show --pretty=%h -s` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
+
+#	@echo 'const char* SVN_Version = "' `svnversion -n .` '"; const char* svn_version(void) { return SVN_Version; }' > svn_version.c
 
 endif
