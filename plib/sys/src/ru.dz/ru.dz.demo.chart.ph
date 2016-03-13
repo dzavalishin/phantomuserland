@@ -15,7 +15,7 @@ import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
 import .internal.connection;
-import .ru.dz.phantom.system.runnable;
+//import .ru.dz.phantom.system.runnable;
 //import .internal.thread;
 
 attribute const * ->!;
