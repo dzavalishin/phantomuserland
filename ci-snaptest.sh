@@ -155,15 +155,15 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-no-fd-bootchk \
 	-fda img/grubfloppy.img \
 	-hda snapcopy.img \
+	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
 	-usb -usbdevice mouse \
 	-soundhw sb16"
-# -usbdevice disk:format=raw:$DISK_IMG \
+#	 -usbdevice disk:format=raw:$DISK_IMG \
 #	-usbdevice host:0930:1319 \
 #	-usbdevice host:08ff:168b \
 #	-usbdevice host:1bcf:288e \
 #	-usbdevice host:8087:07da \
-#	-hdb $DISK_IMG \
 #	-net dump,file=net.dmp \
 #	-net nic,model=ne2k_isa -M isapc \
 
@@ -218,7 +218,7 @@ FATAL! Phantom snapshot test crashed"
 			break
 		}
 		[ -s $LOGFILE ] || {
-			sleep 40
+			sleep 50
 			[ -s $LOGFILE ] || {
 				echo "
 

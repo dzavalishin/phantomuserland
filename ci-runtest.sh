@@ -11,8 +11,9 @@ GDB_OPTS="-gdb tcp::$GDB_PORT"
 TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
-LOGFILE=serial0.log
-PANIC_AFTER=180		# abort test after 3 minutes (consider stalled)
+WARN=1
+LOGFILE=make.log	# start with build log
+PANIC_AFTER=600		# abort test after 10 minutes (consider stalled)
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
 then
@@ -23,34 +24,67 @@ else
 	QEMU_SHARE=/usr/share/qemu
 fi
 
-[ $# -gt 0 ] || unset DISPLAY
-
-while [ $# -gt 0 ]
-do
-	case "$1" in
-	-u)	UNATTENDED=-unattended	;;
-	-ng)	unset DISPLAY		;;
-	*)
-		echo "Usage: $0 [-u|-f] [-ng]
+if [ $# -gt 0 ]
+then
+	while [ $# -gt 0 ]
+	do
+		case "$1" in
+		-f)	FOREGROUND=1		;;
+		-s)	unset WARN		;;
+		-u)	UNATTENDED=-unattended	;;
+		-ng)	unset DISPLAY		;;
+		*)
+			echo "Usage: $0 [-u|-f] [-s] [-ng]
 	-f	- run in foreground
 	-u	- run unattended (don't stop on panic for gdb)
+	-s	- suppress build warnings
 	-ng	- do not show qemu/kvm window
 "
-		exit 0
-	;;
-	esac
-	shift
-done
+			exit 0
+		;;
+		esac
+		shift
+	done
+else
+	CRONMODE=1
+	unset DISPLAY
+fi
 
 
 die ( ) {
-	[ -s $LOGFILE ] && tail $LOGFILE
+	[ -s $LOGFILE ] && {
+		# submit all details in CI, show pre-failure condition interactively
+		[ "$CRONMODE" ] && sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE || tail $LOGFILE
+	}
 	[ "$1" ] && echo "$*"
 	exit 1
 }
 
+make all > $LOGFILE 2>&1 || die "Build failure"
+grep -B1 'error:\|] Error' $LOGFILE && {
+	grep '^--- kernel build finished' $LOGFILE || die "Build failure"
+}
+
+[ "$WARN" ] && {
+	echo Warnings:
+	grep : $LOGFILE
+}
+
+# now test building of Phantom library
+if (make -C plib > $LOGFILE 2>&1)
+then
+	[ "$WARN" ] && {
+		echo Successfully built Phantom library
+		grep Warning: $LOGFILE
+	}
+else
+	echo "Phantom library build failure:"
+	tail -20 $LOGFILE
+fi
+
+
+# try to find custom qemu if not installed in usual place
 [ "$QEMU" ] || {
-	# try to find custom qemu
 	PKG_MGR=`which rpm || which dpkg`
 	case $PKG_MGR in
 	*rpm)	QEMU_PKG=`rpm -q -l qemu-kvm` ;;
@@ -107,7 +141,8 @@ quit
 # update data BEFORE checking for stalled copies
 GRUB_MENU=tftp/tftp/menu.lst
 
-make all || die "Build failure"
+# now proceed to test run
+LOGFILE=serial0.log
 cd $TEST_DIR
 cp $TFTP_PATH/phantom tftp/
 
@@ -139,7 +174,8 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-hda snapcopy.img \
 	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
-	-usb -soundhw all"
+	-usb -usbdevice mouse \
+	-soundhw all"
 #	-net dump,file=net.dmp \
 #	-net nic,model=ne2k_isa -M isapc \
 
@@ -147,7 +183,7 @@ echo "color yellow/blue yellow/magenta
 timeout=3
 
 title=phantom ALL TESTS
-kernel=(nd)/phantom -d 20 $UNATTENDED -- -test all
+kernel=(nd)/phantom -d=20 $UNATTENDED -- -test all
 module=(nd)/classes
 module=(nd)/pmod_test
 boot 
@@ -201,7 +237,12 @@ grep 'SVN' $LOGFILE || die "Phantom test run crashed!"
 grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
 grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
-grep -q 'TEST FAILED' $LOGFILE && {
-	cp $LOGFILE test.log
-	#preserve_log test.log
-}
+if [ "$CRONMODE" ]
+then
+	sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE	# submit all details into the CI log, cutting of ESC-codes
+else
+	grep -q 'TEST FAILED' $LOGFILE && {
+		cp $LOGFILE test.log
+		#preserve_log test.log
+	}
+fi
