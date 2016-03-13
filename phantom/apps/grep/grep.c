@@ -7,16 +7,15 @@
 char buf[1024];
 int match(char*, char*);
 
-void
-    grep(char *pattern, int fd)
+void grep(char *pattern, int fd)
 {
     int n, m;
     char *p, *q;
 
     m = 0;
-    while((n = read(fd, buf+m, sizeof(buf)-m-1)) > 0)
+    while((n = read(fd, buf+m, sizeof(buf)-m-2)) > 0)
     {
-        *(buf+m+n-1) = '\0';
+        buf[m+n] = '\0';
 
         m += n;
         p = buf;

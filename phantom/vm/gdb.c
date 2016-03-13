@@ -468,7 +468,7 @@ static void repl( char *name, char from, char to )
 
 static void report_tid_extra_info(char *sbuf, int bufmax, int tid)
 {
-    int t_run = 0;
+    //int t_run = 0;
 
     char name[BUFMAX];
 
@@ -477,7 +477,8 @@ static void report_tid_extra_info(char *sbuf, int bufmax, int tid)
 
     snprintf(
              sbuf, bufmax, "status=%s,name=%s,object=%x,",
-             (t_run ? "run" : "stop"),
+             //(t_run ? "run" : "stop"),
+             "run",
              name,
              0
             );

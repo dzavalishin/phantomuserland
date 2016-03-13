@@ -864,7 +864,7 @@ int tcp_connect(void *prot_data, i4sockaddr *addr)
             tcp_socket_send(s, NULL, PKT_SYN, &mss_option, sizeof(mss_option), s->tx_win_low);
         mutex_unlock(&s->lock);
         //hal_sem_acquire_etc(s->read_sem, 1, SEM_FLAG_TIMEOUT, SYN_RETRANSMIT_TIMEOUT, NULL);
-        hal_sem_acquire_etc(&s->read_sem, 1, SEM_FLAG_TIMEOUT, SYN_RETRANSMIT_TIMEOUT );
+        (void)hal_sem_acquire_etc(&s->read_sem, 1, SEM_FLAG_TIMEOUT, SYN_RETRANSMIT_TIMEOUT );
         mutex_lock(&s->lock);
     }
 

@@ -673,6 +673,7 @@ kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_lis
             padc = '0';
             goto reswitch;
         }
+        /* fall through */
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
         for (n = 0;; ++fmt) {

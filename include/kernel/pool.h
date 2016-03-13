@@ -102,7 +102,9 @@ int pool_get_used( pool_t *pool );
 errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg );
 
 
+//! Increase refcount
 void *pool_get_el( pool_t *pool, pool_handle_t handle );
+//! Decrease refcount
 errno_t pool_release_el( pool_t *pool, pool_handle_t handle );
 errno_t pool_destroy_el( pool_t *pool, pool_handle_t handle );
 

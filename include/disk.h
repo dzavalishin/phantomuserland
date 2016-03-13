@@ -145,7 +145,7 @@ typedef struct phantom_disk_partition phantom_disk_partition_t;
 #define PART_FLAG_IS_WHOLE_DISK		0x0040
 
 
-phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition_t *base, long shift, long size) __attribute__((deprecated));
+phantom_disk_partition_t *phantom_create_partition_struct(phantom_disk_partition_t *base, long shift, long size); // __attribute__((deprecated));
 
 errno_t phantom_register_disk_drive(phantom_disk_partition_t *p);
 

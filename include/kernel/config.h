@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
  *
  * Configuration. Turn on/off kernel parts.
  *
@@ -11,6 +11,9 @@
 
 #ifndef CONFIG_H
 #define CONFIG_H
+
+// use new (handle based) controlling ttys for threads
+#define CONF_NEW_CTTY 1
 
 // Use new partitioning functions (using handles) - UNFINISHED
 #define CONF_NEW_PART_FUNC 1

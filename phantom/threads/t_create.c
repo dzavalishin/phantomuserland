@@ -66,8 +66,12 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
     t->tid = find_tid(t);
     SHOW_FLOW( 7, "tid = %d", t->tid );
 
+#if CONF_NEW_CTTY
+    t_inherit_ctty( t );
+#else
     // inherit ctty
     t->ctty = GET_CURRENT_THREAD()->ctty;
+#endif
 
     common_thread_init(t, DEF_STACK_SIZE );
     //t->priority = THREAD_PRIO_NORM;
@@ -255,7 +259,11 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
 
     t->cpu_id = GET_CPU_ID();
 
+#if CONF_NEW_CTTY
+    t_make_ctty( t );
+#else
     if( 0 == t->ctty ) t->ctty = wtty_init();
+#endif
 
     // malloc uses mutex, so we have to use physalloc which is protected with spinlocks
     physaddr_t pa;

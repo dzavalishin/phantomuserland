@@ -151,6 +151,7 @@ int parse_line(const char *buf, char *argv[], int max_args, char *redirect_in, c
         switch(*type_char){
         case '\'':
             replace  = 0;
+            /* fall through to */
 
         case  '"':
             scan++;
@@ -159,6 +160,7 @@ int parse_line(const char *buf, char *argv[], int max_args, char *redirect_in, c
             break;
 
         case '>':
+            /* fall through to */
         case '<':
             start++;
             while((*start != 0) && (isspace(*start))) start++;

@@ -225,7 +225,11 @@ static void json_encode_thread( json_output *jo, void *el )
     json_out_delimiter( jo );
 
     //! "controlling" tty
+#if CONF_NEW_CTTY
+    json_out_int( jo, "ctty", (natural_t)tp->ctty_h );
+#else
     json_out_int( jo, "ctty", (natural_t)tp->ctty );
+#endif
     json_out_delimiter( jo );
 
 

@@ -346,7 +346,11 @@ static errno_t sendWriteRq( trfs_queue_t *qe )
     memcpy_p2v( &(rq->writeRq.data), qe->orig_request->phys_page, nDataBytes );
 
     SHOW_FLOW0( 1, "send wr rq" );
-    return trfs_send(rq, nPktBytes) ? EIO : 0;
+    errno_t rc = trfs_send(rq, nPktBytes) ? EIO : 0;
+
+    free(rq);
+
+    return rc;
 }
 
 

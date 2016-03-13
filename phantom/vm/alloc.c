@@ -432,7 +432,9 @@ static pvm_object_storage_t * pool_alloc(unsigned int size, int arena)
 
     if(vm_alloc_mutex) hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock
 
+#if PVM_GC_ENABLE
     int ngc = 1;
+#endif
     do {
         data = pvm_find(size, arena);
 

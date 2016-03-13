@@ -138,7 +138,7 @@ typedef struct {
 } gen_clone;
 
 static phantom_device_t * dev;
-static gen_clone * vcard = NULL;
+//static gen_clone * vcard = NULL;
 
 static int n_pages = 1024;
 
@@ -148,6 +148,7 @@ phantom_device_t * driver_video_gen_clone_pci_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
 #if 1
+    (void) pci;
     return 0; // off
 #else
     if( seq_number )

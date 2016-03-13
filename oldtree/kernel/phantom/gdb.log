@@ -1,0 +1,1520 @@
+
+error-begin
+Function "panic" not defined.
+
+error
+
+pre-prompt-for-continue
+
+post-prompt-for-continue
+
+error-begin
+Function "pvm_exec_panic" not defined.
+
+error
+warning: ./.gdb-local: No such file or directory
+
+post-prompt
+
+frame-begin 0 0x1a5d15
+#0  
+frame-address
+0x001a5d15
+frame-address-end
+ in 
+frame-function-name
+_hal_wait_for_interrupt
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 1 0x1a3a85
+#1  
+frame-address
+0x001a3a85
+frame-address-end
+ in 
+frame-function-name
+_haltme
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 2 0x1a0eca
+#2  
+frame-address
+0x001a0eca
+frame-address-end
+ in 
+frame-function-name
+_phantom_thread_c_starter
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 3 0x1a4008
+#3  
+frame-address
+0x001a4008
+frame-address-end
+ in 
+frame-function-name
+_phantom_thread_trampoline
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+post-prompt
+No breakpoints or watchpoints.
+
+breakpoints-table-end
+
+post-prompt
+Continuing.
+
+starting
+
+frames-invalid
+
+signal
+
+Program received signal 
+signal-name
+SIGINT
+signal-name-end
+, 
+signal-string
+Interrupt
+signal-string-end
+.
+
+frame-begin 0 0x1da5b7
+
+frame-address
+0x001da5b7
+frame-address-end
+ in 
+frame-function-name
+again
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+5	in vesa_subr.S
+
+frame-end
+
+stopped
+
+post-prompt
+
+frame-begin 0 0x1da5b7
+#0  
+frame-address
+0x001da5b7
+frame-address-end
+ in 
+frame-function-name
+again
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 1 0x4103fe20
+#1  
+frame-address
+0x4103fe20
+frame-address-end
+ in 
+frame-function-name
+??
+frame-args
+ ()
+
+frame-end
+
+frame-begin 2 0x1d7ea4
+#2  
+frame-address
+0x001d7ea4
+frame-address-end
+ in 
+frame-function-name
+_vid_bitblt_part
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 3 0x1d5bb6
+#3  
+frame-address
+0x001d5bb6
+frame-address-end
+ in 
+frame-function-name
+_vid_bitblt_part_rev
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 4 0x1d50aa
+#4  
+frame-address
+0x001d50aa
+frame-address-end
+ in 
+frame-function-name
+_repaint_win_part
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 5 0x1d5148
+#5  
+frame-address
+0x001d5148
+frame-address-end
+ in 
+frame-function-name
+_w_repaint_screen_part
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 6 0x1d48f9
+#6  
+frame-address
+0x001d48f9
+frame-address-end
+ in 
+frame-function-name
+_paint_square_updown
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 7 0x1d49cd
+#7  
+frame-address
+0x001d49cd
+frame-address-end
+ in 
+frame-function-name
+_repaint_q
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 8 0x1d4a13
+#8  
+frame-address
+0x001d4a13
+frame-address-end
+ in 
+frame-function-name
+_painter_thread
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 9 0x1a0eca
+#9  
+frame-address
+0x001a0eca
+frame-address-end
+ in 
+frame-function-name
+_phantom_thread_c_starter
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 10 0x1a4008
+#10 
+frame-address
+0x001a4008
+frame-address-end
+ in 
+frame-function-name
+_phantom_thread_trampoline
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+post-prompt
+No breakpoints or watchpoints.
+
+breakpoints-table-end
+
+post-prompt
+
+frames-invalid
+
+error-begin
+Function "panic" not defined.
+
+error
+
+error-begin
+Function "pvm_exec_panic" not defined.
+
+error
++break physmem_try_to_reclaim_page
+Breakpoint 1 at 0x170e12: file vm_map.c, line 1520.
+
+breakpoints-invalid
+
+post-prompt
+No line number information available.
+
+post-prompt
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+
+breakpoints-table-end
+
+post-prompt
+info breakpoints
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+
+breakpoints-table-end
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+
+breakpoints-table-end
+
+post-prompt
+Continuing.
+
+starting
+
+frames-invalid
+
+breakpoints-invalid
+
+breakpoint 1
+
+Breakpoint 1, 
+frame-begin 0 0x170e12
+
+frame-function-name
+physmem_try_to_reclaim_page
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vm_map.c
+frame-source-file-end
+:
+frame-source-line
+1520
+frame-source-end
+
+
+source /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c:1520:41874:beg:0x170e12
+
+frame-end
+
+stopped
+
+post-prompt
+Current source file is vm_map.c
+Compilation directory is /cygdrive/p/phantomuserland/oldtree/kernel/phantom/
+Located in /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c
+Contains 2013 lines.
+Source language is c.
+Producer is unknown.
+Compiled with stabs debugging format.
+Does not include preprocessor macro info.
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+	breakpoint already hit 1 time
+
+breakpoints-table-end
+
+post-prompt
+
+frame-begin 0 0x170e12
+#0  
+frame-function-name
+physmem_try_to_reclaim_page
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vm_map.c
+frame-source-file-end
+:
+frame-source-line
+1520
+frame-source-end
+
+
+frame-end
+
+frame-begin 1 0x12b3c1
+#1  
+frame-address
+0x0012b3c1
+frame-address-end
+ in 
+frame-function-name
+hal_alloc_phys_pages
+frame-args
+ (
+arg-begin
+result
+arg-name-end
+=
+arg-value *
+0x489cd6c
+arg-end
+, 
+arg-begin
+npages
+arg-name-end
+=
+arg-value -
+33
+arg-end
+)
+frame-source-begin
+ at 
+frame-source-file
+hal_physmem.c
+frame-source-file-end
+:
+frame-source-line
+209
+frame-source-end
+
+
+frame-end
+
+frame-begin 2 0x12b5cb
+#2  
+frame-address
+0x0012b5cb
+frame-address-end
+ in 
+frame-function-name
+hal_pv_alloc
+frame-args
+ (
+arg-begin
+pa
+arg-name-end
+=
+arg-value *
+0x489cd6c
+arg-end
+, 
+arg-begin
+va
+arg-name-end
+=
+arg-value *
+0x1401a34
+arg-end
+, 
+arg-begin
+size_bytes
+arg-name-end
+=
+arg-value -
+135168
+arg-end
+)
+frame-source-begin
+ at 
+frame-source-file
+hal_physmem.c
+frame-source-file-end
+:
+frame-source-line
+349
+frame-source-end
+
+
+frame-end
+
+frame-begin 3 0x1a0c28
+#3  
+frame-address
+0x001a0c28
+frame-address-end
+ in 
+frame-function-name
+_common_thread_init
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 4 0x1a07ae
+#4  
+frame-address
+0x001a07ae
+frame-address-end
+ in 
+frame-function-name
+_phantom_create_thread
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 5 0x1a082f
+#5  
+frame-address
+0x001a082f
+frame-address-end
+ in 
+frame-function-name
+_hal_start_kernel_thread_arg
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+
+frame-end
+
+frame-begin 6 0x11f408
+#6  
+frame-address
+0x0011f408
+frame-address-end
+ in 
+frame-function-name
+do_test_sem
+frame-args
+ (
+arg-begin
+test_parm
+arg-name-end
+=
+arg-value *
+0x0
+arg-end
+)
+frame-source-begin
+ at 
+frame-source-file
+test_threads.c
+frame-source-file-end
+:
+frame-source-line
+570
+frame-source-end
+
+
+frame-end
+
+frame-begin 7 0x11bd85
+#7  
+frame-address
+0x0011bd85
+frame-address-end
+ in 
+frame-function-name
+run_test
+frame-args
+ (
+arg-begin
+test_name
+arg-name-end
+=
+arg-value *
+0x6a4040 "all"
+arg-end
+, 
+arg-begin
+test_parm
+arg-name-end
+=
+arg-value *
+0x0
+arg-end
+)
+frame-source-begin
+ at 
+frame-source-file
+test_switch.c
+frame-source-file-end
+:
+frame-source-line
+137
+frame-source-end
+
+
+frame-end
+
+frame-begin 8 0x168381
+#8  
+frame-address
+0x00168381
+frame-address-end
+ in 
+frame-function-name
+main
+frame-args
+ (
+arg-begin
+argc
+arg-name-end
+=
+arg-value -
+3
+arg-end
+, 
+arg-begin
+argv
+arg-name-end
+=
+arg-value *
+0x6c600c
+arg-end
+, 
+arg-begin
+envp
+arg-name-end
+=
+arg-value *
+0x6c6008
+arg-end
+)
+frame-source-begin
+ at 
+frame-source-file
+main.c
+frame-source-file-end
+:
+frame-source-line
+336
+frame-source-end
+
+
+frame-end
+
+frame-begin 9 0x124507
+#9  
+frame-address
+0x00124507
+frame-address-end
+ in 
+frame-function-name
+phantom_multiboot_main
+frame-args
+ (
+arg-begin
+multibootboot_info_pa
+arg-name-end
+=
+arg-value -
+256672
+arg-end
+, 
+arg-begin
+cookie
+arg-name-end
+=
+arg-value -
+732803074
+arg-end
+)
+frame-source-begin
+ at 
+frame-source-file
+multiboot.c
+frame-source-file-end
+:
+frame-source-line
+151
+frame-source-end
+
+
+frame-end
+
+frame-begin 10 0x100085
+#10 
+frame-address
+0x00100085
+frame-address-end
+ in 
+frame-function-name
+boot_code
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+/cygdrive/p/phantomuserland/oldtree/kernel/phantom/ia32/entry.S
+frame-source-file-end
+:
+frame-source-line
+123
+frame-source-end
+
+
+frame-end
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+	breakpoint already hit 1 time
+
+breakpoints-table-end
+
+post-prompt
+
+error-begin
+Function "panic" not defined.
+
+error
+
+error-begin
+Function "pvm_exec_panic" not defined.
+
+error
++break physmem_try_to_reclaim_page
+Breakpoint 1 at 0x170e12: file vm_map.c, line 1520.
+
+breakpoints-invalid
+
+post-prompt
+No line number information available.
+
+post-prompt
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+
+breakpoints-table-end
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+
+breakpoints-table-end
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+
+breakpoints-table-end
+
+post-prompt
+Continuing.
+
+starting
+
+frames-invalid
+
+breakpoints-invalid
+
+breakpoint 1
+
+Breakpoint 1, 
+frame-begin 0 0x170e12
+
+frame-function-name
+physmem_try_to_reclaim_page
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vm_map.c
+frame-source-file-end
+:
+frame-source-line
+1520
+frame-source-end
+
+
+source /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c:1520:41874:beg:0x170e12
+
+frame-end
+
+stopped
+
+post-prompt
+Current source file is vm_map.c
+Compilation directory is /cygdrive/p/phantomuserland/oldtree/kernel/phantom/
+Located in /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c
+Contains 2013 lines.
+Source language is c.
+Producer is unknown.
+Compiled with stabs debugging format.
+Does not include preprocessor macro info.
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+	breakpoint already hit 1 time
+
+breakpoints-table-end
+
+post-prompt
+
+starting
+
+frames-invalid
+
+frames-invalid
+
+source /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c:1521:41877:beg:0x170e18
+
+frame-end
+
+stopped
+
+post-prompt
+Current source file is vm_map.c
+Compilation directory is /cygdrive/p/phantomuserland/oldtree/kernel/phantom/
+Located in /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c
+Contains 2013 lines.
+Source language is c.
+Producer is unknown.
+Compiled with stabs debugging format.
+Does not include preprocessor macro info.
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+	breakpoint already hit 1 time
+
+breakpoints-table-end
+
+post-prompt
+
+starting
+
+frames-invalid
+
+source /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c:1523:41903:beg:0x170e1f
+
+frame-end
+
+stopped
+
+post-prompt
+Current source file is vm_map.c
+Compilation directory is /cygdrive/p/phantomuserland/oldtree/kernel/phantom/
+Located in /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c
+Contains 2013 lines.
+Source language is c.
+Producer is unknown.
+Compiled with stabs debugging format.
+Does not include preprocessor macro info.
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+	breakpoint already hit 1 time
+
+breakpoints-table-end
+
+post-prompt
+
+starting
+
+frames-invalid
+
+frames-invalid
+
+source /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c:1524:41940:beg:0x170e2b
+
+frame-end
+
+stopped
+
+post-prompt
+Current source file is vm_map.c
+Compilation directory is /cygdrive/p/phantomuserland/oldtree/kernel/phantom/
+Located in /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c
+Contains 2013 lines.
+Source language is c.
+Producer is unknown.
+Compiled with stabs debugging format.
+Does not include preprocessor macro info.
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+	breakpoint already hit 1 time
+
+breakpoints-table-end
+
+post-prompt
+
+starting
+
+frames-invalid
+
+frames-invalid
+
+source /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c:1525:41967:beg:0x170e2d
+
+frame-end
+
+stopped
+
+post-prompt
+Current source file is vm_map.c
+Compilation directory is /cygdrive/p/phantomuserland/oldtree/kernel/phantom/
+Located in /cygdrive/p/phantomuserland/oldtree/kernel/phantom/vm_map.c
+Contains 2013 lines.
+Source language is c.
+Producer is unknown.
+Compiled with stabs debugging format.
+Does not include preprocessor macro info.
+
+post-prompt
+
+breakpoints-headers
+
+field 0
+Num     
+field 1
+Type           
+field 2
+Disp 
+field 3
+Enb 
+field 4
+Address    
+field 5
+What
+
+breakpoints-table
+
+record
+
+field 0
+1       
+field 1
+breakpoint     
+field 2
+keep 
+field 3
+y   
+field 4
+0x00170e12 
+field 5
+in physmem_try_to_reclaim_page at vm_map.c:1520
+	breakpoint already hit 1 time
+
+breakpoints-table-end
+
+post-prompt
+
+starting
+
+frames-invalid
+
+frames-invalid
+
+signal
+
+Program received signal 
+signal-name
+SIGINT
+signal-name-end
+, 
+signal-string
+Interrupt
+signal-string-end
+.
+
+frame-begin 0 0x1a5d15
+
+frame-address
+0x001a5d15
+frame-address-end
+ in 
+frame-function-name
+_hal_wait_for_interrupt
+frame-args
+ ()
+frame-source-begin
+ at 
+frame-source-file
+vesa_subr.S
+frame-source-file-end
+:
+frame-source-line
+5
+frame-source-end
+
+5	vesa_subr.S: No such file or directory.
+
+frame-end
+
+stopped
+
+post-prompt
+
+frames-invalid

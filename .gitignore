@@ -50,5 +50,10 @@ oldtree/kernel/phantom/phantom
 run/fat/class/*.pc
 run/*.img
 run/serial0.log*
+run/net.dmp
 tools/jbulk/bin/*
 cov-int
+run/qemu/0.15.1/stderr.txt
+build_log
+oldtree/kernel/phantom/.gdb-local
+tools/jbulk/mkbulk.jar

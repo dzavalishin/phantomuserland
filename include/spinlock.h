@@ -42,8 +42,8 @@ void    hal_wired_spin_unlock(hal_spinlock_t *l);
 void    hal_spin_lock_cli(hal_spinlock_t *sl);
 void    hal_spin_unlock_sti(hal_spinlock_t *sl);
 
-static __inline__ int hal_spin_locked(hal_spinlock_t *sl) { return sl->lock; }
-static __inline__ int hal_spin_is_locked(hal_spinlock_t *sl) { return sl->lock; }
+static __inline__ int hal_spin_locked(const hal_spinlock_t *sl) { return sl->lock; }
+static __inline__ int hal_spin_is_locked(const hal_spinlock_t *sl) { return sl->lock; }
 
 
 #if SPIN_DEBUG && !HAVE_SMP

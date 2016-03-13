@@ -25,6 +25,10 @@
 #include <wtty.h>
 #include <threads.h>
 
+#if CONF_NEW_CTTY
+#  include <kernel/pool.h>
+#endif
+
 /**
  * \ingroup Threads
  * \defgroup Threads Threads and syncronization
@@ -69,8 +73,14 @@ struct phantom_thread
     //! phantom thread ref, etc
     void *                      owner;
 
+#if CONF_NEW_CTTY
+    //! "controlling" tty
+    pool_handle_t               ctty_h;
+    wtty_t *                    ctty_w;
+#else
     //! "controlling" tty
     wtty_t *                    ctty; 
+#endif
 
     //! if this thread runs Unix simulation process - here is it
     //struct uuprocess *          u;
@@ -406,11 +416,6 @@ void dump_thread_stack(phantom_thread_t *t);
 void dump_thread_stacks(void);
 
 
-// ToDO move to more adequate header
-
-//void hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ));
-//void hal_set_thread_name(const char *name);
-
 
 // --------------------------------------------------------------
 // Cond/mutex impl
@@ -441,6 +446,28 @@ struct phantom_sem_impl
     const char*         name;
     queue_head_t	waiting_threads;
 };
+
+
+// --------------------------------------------------------------
+// Controlling tty
+// --------------------------------------------------------------
+
+#if CONF_NEW_CTTY
+
+
+typedef struct ctty
+{
+    wtty_t      *wtty;
+} ctty_t;
+
+void t_init_ctty_pool(void);
+
+errno_t t_inherit_ctty( phantom_thread_t *t );
+errno_t t_make_ctty( phantom_thread_t *t );
+errno_t t_kill_ctty( phantom_thread_t *t );
+
+
+#endif
 
 
 /** @} */

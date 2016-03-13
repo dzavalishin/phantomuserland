@@ -201,15 +201,19 @@ int readWaveFile(int fd, PWAVEFORMAT pwavefmt, u_int *datasize)
     char *buff;
 
     *datasize = 0;
-    read(fd, (char *)&header, sizeof(int));
+    if( read(fd, (char *)&header, sizeof(int)) != sizeof(int) )
+        goto eio;
+
     if (header != H_RIFF)
     {
         printf("Error: Not RIFF file.\n");
         return 1;
     }
 
-    read(fd, (char *)&size, sizeof(int));
-    read(fd, (char *)&header, sizeof(int));
+    if( read(fd, (char *)&size, sizeof(int)) != sizeof(int) )
+        goto eio;
+    if( read(fd, (char *)&header, sizeof(int))  != sizeof(int) )
+        goto eio;
     if (header != H_WAVE)
     {
         printf("Error: Not WAVE file.\n");
@@ -254,6 +258,11 @@ int readWaveFile(int fd, PWAVEFORMAT pwavefmt, u_int *datasize)
 
     printf("Error: data chunk not found.\n");
     return 10;
+
+eio:
+    printf("Error: can't read file.\n");
+    return 1;
+
 }
 
 int openDSP(const char* devname, PWAVEFORMAT pwf)

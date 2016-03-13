@@ -197,8 +197,11 @@ static int phantom_window_getc(void)
 {
     //SHOW_FLOW0( 11, "window getc" );
     //wtty_t *tty = &(GET_CURRENT_THREAD()->ctty);
+#if CONF_NEW_CTTY
+    wtty_t *tty = GET_CURRENT_THREAD()->ctty_w;
+#else
     wtty_t *tty = GET_CURRENT_THREAD()->ctty;
-
+#endif
     if(tty == 0)
     {
         SHOW_ERROR0( 0, "No wtty, phantom_window_getc loops forever" );

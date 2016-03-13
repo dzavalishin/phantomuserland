@@ -132,16 +132,24 @@ void run_test( const char *test_name, const char *test_parm )
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
     // TODO mem leak! out of mem for 200!
-    for( i = 20; i; i-- )
+    //for( i = 200; i; i-- )
     {
         TEST(sem);
     }
 
     TEST(wtty);
 
-    TEST(many_threads);
+    // check if starting many threads eats memory
+    for( i = 200; i; i-- )
+    {
+        TEST(many_threads);
+    }
 
-    TEST(pool);
+    // Had fail, test harder
+    for( i = 20; i; i-- )
+    {
+        TEST(pool);
+    }
 
 #ifdef ARCH_mips
 //    TEST(sem);

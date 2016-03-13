@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Window subsystem 'controlling terminal' data structures
+ * Window subsystem 'controlling terminal' data structures. Actually just a simple byte FIFO.
  *
  *
 **/

@@ -13,6 +13,8 @@
 #ifndef _MACH_SETJMP_H_PROCESSED_
 #define _MACH_SETJMP_H_PROCESSED_ 1
 
+#include <sys/cdefs.h>
+
 #ifdef ARCH_ia32
 /*
  * Setjmp/longjmp buffer for i386.
@@ -63,13 +65,13 @@ typedef int jmp_buf[_JBLEN];
 
 // Wrapper
 extern int setjmp (jmp_buf) __attribute__((returns_twice));
-extern void longjmp (jmp_buf, int);
+extern void longjmp (jmp_buf, int) __dead2;
 //extern int _setjmp (jmp_buf) __attribute__((returns_twice));
 //extern void _longjmp (jmp_buf, int);
 
 // Machine dependent implementation
 extern int setjmp_machdep (jmp_buf) __attribute__((returns_twice));
-extern void longjmp_machdep (jmp_buf, int);
+extern void longjmp_machdep (jmp_buf, int) __dead2;
 //extern int _setjmp_machdep (jmp_buf) __attribute__((returns_twice));
 //extern void _longjmp_machdep (jmp_buf, int);
 

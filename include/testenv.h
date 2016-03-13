@@ -17,21 +17,21 @@
 #include <sys/cdefs.h>
 
 /* coverity[+kill] */
-void test_fail(errno_t rc); // Call from any test to return to test runner and signal failure
+void test_fail(errno_t rc) __dead2; // Call from any test to return to test runner and signal failure
 
 /* coverity[+kill] */
-void test_fail_msg(errno_t rc, const char *msg); // Call from any test to return to test runner and signal failure
+void test_fail_msg(errno_t rc, const char *msg) __dead2; // Call from any test to return to test runner and signal failure
 
 void on_fail_call( void (*f)( void *arg), void *arg ); // Call f on failure
 
 
-#define test_check_true(expr) if( !expr ) test_fail_msg( -1, #expr " is not true at " __XSTRING( __LINE__ ) );
+#define test_check_true(expr) if( !(expr) ) test_fail_msg( -1, #expr " is not true at " __XSTRING( __LINE__ ) );
 #define test_check_false(expr) if( expr ) test_fail_msg( -1, #expr " is not false at " __XSTRING(  __LINE__ ) );
 
-#define test_check_eq(expr, val) if( expr != val ) test_fail_msg( -1, #expr " != " #val " at " __XSTRING(  __LINE__ ) );
-#define test_check_ne(expr, val) if( expr == val ) test_fail_msg( -1, #expr " == " #val " at " __XSTRING(  __LINE__ ) );
-#define test_check_gt(expr, val) if( expr <= val ) test_fail_msg( -1, #expr " <= " #val " at " __XSTRING(  __LINE__ ) );
-#define test_check_ge(expr, val) if( expr < val ) test_fail_msg( -1, #expr " < " #val " at " __XSTRING(  __LINE__ ) );
+#define test_check_eq(expr, val) if( (expr) != (val) ) test_fail_msg( -1, #expr " != " #val " at " __XSTRING(  __LINE__ ) );
+#define test_check_ne(expr, val) if( (expr) == (val) ) test_fail_msg( -1, #expr " == " #val " at " __XSTRING(  __LINE__ ) );
+#define test_check_gt(expr, val) if( (expr) <= (val) ) test_fail_msg( -1, #expr " <= " #val " at " __XSTRING(  __LINE__ ) );
+#define test_check_ge(expr, val) if( (expr) <  (val) ) test_fail_msg( -1, #expr " < " #val " at " __XSTRING(  __LINE__ ) );
 
 
 

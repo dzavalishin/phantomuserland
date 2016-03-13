@@ -2797,9 +2797,13 @@ FRESULT f_unlink (
             dir = dj.dir;
             if (!dir) {
                 res = FR_INVALID_NAME;		/* Cannot remove the start directory */
+                goto ret;
             } else {
                 if (dir[DIR_Attr] & AM_RDO)
+                {
                     res = FR_DENIED;		/* Cannot remove R/O object */
+                    goto ret;
+                }
             }
             dclst = LD_CLUST(dir);
             if (res == FR_OK && (dir[DIR_Attr] & AM_DIR)) {	/* Is it a sub-dir? */
@@ -2829,6 +2833,7 @@ FRESULT f_unlink (
                 }
             }
         }
+    ret:
         FREE_BUF();
     }
     LEAVE_FF(dj.fs, res);

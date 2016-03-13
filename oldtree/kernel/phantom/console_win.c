@@ -393,9 +393,13 @@ static void phantom_debug_window_loop()
 
     int wx = 600;
 
+#if CONF_NEW_CTTY
+	if( t_new_ctty( get_current_tid() ) )
+		panic("console t_new_ctty");
+#else
     // Need separate ctty
     t_set_ctty( get_current_tid(), wtty_init() );
-
+#endif
     // TODO HACK! Need ioctl to check num of bytes?
     wtty_t *tty;
     t_get_ctty( get_current_tid(), &tty );

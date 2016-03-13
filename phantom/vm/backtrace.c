@@ -40,7 +40,7 @@ E4C_DEFINE_EXCEPTION(UnixSendSignalException, "Unix subsystem error.", UnixExcep
 
 
 /* Poor man's exceptions */
-// coverity[+kill]
+/* coverity[+kill] */
 void pvm_exec_panic( const char *reason )
 {
     // TO DO: longjmp?

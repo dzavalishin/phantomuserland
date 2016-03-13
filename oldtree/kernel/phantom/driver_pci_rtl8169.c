@@ -98,12 +98,13 @@ static int rtl8169_get_address( struct phantom_device *dev, void *buf, int len)
 phantom_device_t * driver_rtl_8169_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
+#if 1
+    (void) pci;
+    return 0; // on real hw beheaves strangely
+#else
     rtl8169 * nic = NULL;
     static int seq_number = 0;
 
-#if 1
-    return 0; // on real hw beheaves strangely
-#else
     SHOW_FLOW0( 1, "probe" );
 
     //nic = rtl8169_new();

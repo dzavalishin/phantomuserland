@@ -90,6 +90,25 @@ errno_t t_get_owner( tid_t tid, void **owner )
 
 
 
+#if CONF_NEW_CTTY
+errno_t t_get_ctty( tid_t tid, struct wtty **ct )
+{
+    PRE_ANY()
+    *ct = t->ctty_w;
+    POST()
+}
+
+//! Detach from existing ctty, make new one
+errno_t t_new_ctty( tid_t tid )
+{
+    PRE_ANY()
+    ret = t_kill_ctty( t );
+    if( !ret )
+        ret = t_make_ctty( t );
+    POST()
+}
+
+#else
 errno_t t_set_ctty( tid_t tid, struct wtty *ct )
 {
     PRE_ANY()
@@ -103,7 +122,7 @@ errno_t t_get_ctty( tid_t tid, struct wtty **ct )
     *ct = t->ctty;
     POST()
 }
-
+#endif
 
 errno_t t_set_pid( tid_t tid, pid_t pid )
 {

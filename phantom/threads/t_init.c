@@ -91,6 +91,11 @@ phantom_threads_init()
 
     threads_inited = 1; // phantom_import_main_thread needs it...
 
+#if CONF_NEW_CTTY
+    t_init_ctty_pool();
+#endif
+
+
 #if NEW_SNAP_SYNC
     phantom_thread_init_snapper_interlock();
 #endif
