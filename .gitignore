@@ -57,3 +57,4 @@ run/qemu/0.15.1/stderr.txt
 build_log
 oldtree/kernel/phantom/.gdb-local
 tools/jbulk/mkbulk.jar
+oldtree/kernel/phantom/gdb.log

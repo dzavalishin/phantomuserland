@@ -131,6 +131,9 @@ int do_test_pool(const char *test_parm)
 {
     (void) test_parm;
 
+    hsp = 0;
+    memset( &hs, 0, sizeof(hs) );
+
     pool = create_pool();
     pool->flag_nofail = 0; // return errors, don't panic
 
@@ -145,10 +148,13 @@ int do_test_pool(const char *test_parm)
     test_check_false(h < 0);
     //_show_free();
     test_check_true( 1 == pool_get_used( pool ) );
+    test_check_true( 1 == pool_el_refcount( pool, h ) );
 
     void *el = pool_get_el( pool, h );
     test_check_eq( el0, el );
-    test_check_true( 2 == pool_get_used( pool ) );
+    // n of used els not changed
+    test_check_true( 1 == pool_get_used( pool ) );
+    test_check_true( 2 == pool_el_refcount( pool, h ) );
 
     test_check_false(pool_release_el( pool, h ));
     test_check_true( 1 == pool_get_used( pool ) );

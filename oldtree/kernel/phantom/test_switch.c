@@ -139,16 +139,12 @@ void run_test( const char *test_name, const char *test_parm )
 
     TEST(wtty);
 
+    TEST(pool);
+
     // check if starting many threads eats memory
-    for( i = 200; i; i-- )
+    //for( i = 200; i; i-- )
     {
         TEST(many_threads);
-    }
-
-    // Had fail, test harder
-    for( i = 20; i; i-- )
-    {
-        TEST(pool);
     }
 
 #ifdef ARCH_mips
