@@ -118,7 +118,7 @@ phantom.util.hashmap.pc: phantom.util.hashpair.pc
 ru.dz.demo.start.pc: ru.dz.demo.weather.pc ru.dz.demo.chart.pc
 ru.dz.phantom.system.shell.pc: ru.dz.demo.start.pc
 
-ru.dz.demo.chart.pc: phantom.os.pc internal.io.tty.pc internal.window.pc internal.connection.pc
+ru.dz.demo.chart.pc: phantom.os.pc internal.io.tty.pc internal.window.pc internal.connection.pc ru.dz.phantom.system.runnable.pc
 ru.dz.demo.weather.pc: ru.dz.demo.chart.pc internal.bitmap.pc
 
 
