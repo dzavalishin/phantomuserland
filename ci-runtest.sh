@@ -245,13 +245,6 @@ FATAL! Phantom stalled: ${LOG_MESSAGE:-no activity after $PANIC_AFTER seconds}"
 	kill $QEMU_PID
 }
 
-# perform final checks
-grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' $LOGFILE && die "Phantom test run failed!"
-grep 'SVN' $LOGFILE || die "Phantom test run crashed!"
-# show test summary in output
-grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
-grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
-
 if [ "$CRONMODE" ]
 then
 	cat $LOGFILE | sed 's/^[[^m]*m//g;s/^M//g' 	# submit all details into the CI log, cutting off ESC-codes
@@ -261,3 +254,10 @@ else
 		#preserve_log test.log
 	}
 fi
+
+# perform final checks
+grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' $LOGFILE && die "Phantom test run failed!"
+grep 'SVN' $LOGFILE || die "Phantom test run crashed!"
+# show test summary in output
+grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
+grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
