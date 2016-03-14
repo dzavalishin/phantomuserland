@@ -29,12 +29,14 @@ then
 	while [ $# -gt 0 ]
 	do
 		case "$1" in
+		-c)	DO_CLEANING=1		;;
 		-f)	FOREGROUND=1		;;
 		-s)	unset WARN		;;
 		-u)	UNATTENDED=-unattended	;;
 		-ng)	unset DISPLAY		;;
 		*)
-			echo "Usage: $0 [-u|-f] [-s] [-ng]
+			echo "Usage: $0 [-u|-f] [-c] [-s] [-ng]
+	-c	- run 'make clean' first
 	-f	- run in foreground
 	-u	- run unattended (don't stop on panic for gdb)
 	-s	- suppress build warnings
@@ -59,6 +61,8 @@ die ( ) {
 	[ "$1" ] && echo "$*"
 	exit 1
 }
+
+[ "$DO_CLEANING" ] && make clean
 
 make all > $LOGFILE 2>&1 || die "Build failure"
 grep -B1 'error:\|] Error' $LOGFILE && {
@@ -199,10 +203,10 @@ $QEMU $QEMU_OPTS &
 QEMU_PID=$!
 
 # wait for Phantom to start
-sleep 50
+sleep 60
 if [ -s $LOGFILE ]
 then
-	ELAPSED=50
+	ELAPSED=60
 else
 	ELAPSED=$PANIC_AFTER
 fi
@@ -239,7 +243,7 @@ grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
 if [ "$CRONMODE" ]
 then
-	sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE	# submit all details into the CI log, cutting of ESC-codes
+	sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE	# submit all details into the CI log, cutting off ESC-codes
 else
 	grep -q 'TEST FAILED' $LOGFILE && {
 		cp $LOGFILE test.log
