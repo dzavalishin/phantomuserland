@@ -13,6 +13,7 @@ TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
 WARN=1
 LOGFILE=make.log	# start with build log
+WAIT_LAUNCH=60		# consider Phantom stalled after 1 minute if no activity in the serial0.log
 PANIC_AFTER=600		# abort test after 10 minutes (consider stalled)
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
@@ -203,23 +204,25 @@ $QEMU $QEMU_OPTS &
 QEMU_PID=$!
 
 # wait for Phantom to start
-sleep 60
-if [ -s $LOGFILE ]
-then
-	ELAPSED=60
-else
-	ELAPSED=$PANIC_AFTER
-fi
+ELAPSED=2
+sleep 2
 
-while [ 1 ]
+while [ $ELAPSED -lt $WAIT_LAUNCH ]
 do
-	[ $ELAPSED -lt $PANIC_AFTER ] || {
-			echo "
+	[ -s $LOGFILE ] && break
 
-FATAL! Phantom stalled ($LOGFILE is empty)"
-			kill $QEMU_PID
-			break
-	}
+	sleep 2
+	kill -0 $QEMU_PID || break
+	ELAPSED=`expr $ELAPSED + 2`
+done
+
+[ -s $LOGFILE ] || {
+	ELAPSED=$PANIC_AFTER
+	LOG_MESSAGE="$LOGFILE is empty"
+}
+
+while [ $ELAPSED -lt $PANIC_AFTER ]
+do
 
 	sleep 2
 	kill -0 $QEMU_PID || break
@@ -229,10 +232,18 @@ FATAL! Phantom stalled ($LOGFILE is empty)"
 		call_gdb $GDB_PORT $QEMU_PID "Test run failed"
 
 	grep -q '^\(\. \)\?Panic' $LOGFILE && {
-		sleep 15
+		sleep 15	# allow panic to finish properly
 		break
 	}
 done
+
+# check if finished in time
+[ $ELAPSED -lt $PANIC_AFTER ] || {
+	echo "
+
+FATAL! Phantom stalled: ${LOG_MESSAGE:-no activity after $PANIC_AFTER seconds}"
+	kill $QEMU_PID
+}
 
 # perform final checks
 grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' $LOGFILE && die "Phantom test run failed!"
@@ -243,7 +254,7 @@ grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
 if [ "$CRONMODE" ]
 then
-	sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE	# submit all details into the CI log, cutting off ESC-codes
+	cat $LOGFILE | sed 's/^[[^m]*m//g;s/^M//g' 	# submit all details into the CI log, cutting off ESC-codes
 else
 	grep -q 'TEST FAILED' $LOGFILE && {
 		cp $LOGFILE test.log
