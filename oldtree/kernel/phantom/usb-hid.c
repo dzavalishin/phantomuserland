@@ -347,7 +347,8 @@ struct mouseevent {
 static void
 handle_mouse(struct mouseevent *data)
 {
-    dprintf(9, "Got mouse b=%x x=%x y=%x\n", data->buttons, data->x, data->y);
+    //dprintf(9, "Got mouse b=%x x=%x y=%x\n", data->buttons, data->x, data->y);
+    SHOW_INFO(0, "Got USB mouse b=%x x=%x y=%x", data->buttons, data->x, data->y );
 
 #if 0
     s8 x = data->x, y = -data->y;
