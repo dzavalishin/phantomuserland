@@ -261,7 +261,8 @@ ohci_init(u16 bdf, int busid)
     writel(&cntl->regs->intrdisable, ~0);
     writel(&cntl->regs->intrstatus, ~0);
 
-    run_thread(configure_ohci, cntl);
+    //run_thread(configure_ohci, cntl);
+    configure_ohci( cntl );
 }
 
 

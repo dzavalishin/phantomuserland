@@ -217,7 +217,8 @@ uhci_init(u16 bdf, int busid)
 
     reset_uhci(cntl, bdf);
 
-    run_thread(configure_uhci, cntl);
+    //n_thread(configure_uhci, cntl);
+    configure_uhci( cntl );
 }
 
 
