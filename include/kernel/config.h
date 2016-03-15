@@ -12,6 +12,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define CONF_USE_VM_SYS_SIZE 1
+
 // use new (handle based) controlling ttys for threads
 #define CONF_NEW_CTTY 1
 

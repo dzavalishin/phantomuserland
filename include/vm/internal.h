@@ -28,7 +28,9 @@ struct internal_class
     const char *                name;
     int                         root_index; 		// index into the root object, where class is stored
     syscall_func_t *            syscalls_table;         // syscalls implementations
-//    int                         syscalls_table_size;    // n of syscalls
+#if CONF_USE_VM_SYS_SIZE
+    int                         *syscalls_table_size_ptr;    // n of syscalls
+#endif
     init_func_t                 init;                   // constructor
     gc_iterator_func_t          iter;                   // Call func for all the object pointer contained in this internal object
     gc_finalizer_func_t         finalizer;
@@ -53,12 +55,14 @@ struct pvm_object pvm_lookup_internal_class(struct pvm_object name);
 
 #define DEF_I(cn) \
     extern syscall_func_t	syscall_table_4_##cn[]; \
+	extern int n_syscall_table_4_##cn; \
     extern void pvm_internal_init_##cn( struct pvm_object_storage * os ); \
     extern void pvm_gc_iter_##cn( gc_iterator_call_t func, struct pvm_object_storage * os, void *arg ); \
     extern void pvm_gc_finalizer_##cn( struct pvm_object_storage * os ); \
     extern void pvm_restart_##cn( pvm_object_t o );
 
-//    const int n_syscall_table_4_##cn = (sizeof syscall_table_4_##cn) / sizeof(syscall_func_t); 
+//#define DEF_SIZE(cn)    const int n_syscall_table_4_##cn = (sizeof syscall_table_4_##cn) / sizeof(syscall_func_t); 
+#define DECLARE_SIZE(__cn) int n_syscall_table_4_##__cn __attribute__((used)) =	(sizeof syscall_table_4_##__cn) / sizeof(syscall_func_t)
 
 DEF_I(void);
 DEF_I(class)

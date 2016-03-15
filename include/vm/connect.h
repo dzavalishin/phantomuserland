@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Kernel/VM connection definitions.
+ *
+ *
+**/
+
 #ifndef VM_CONNECT_H
 #define VM_CONNECT_H
 

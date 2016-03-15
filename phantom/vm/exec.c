@@ -1915,7 +1915,7 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
     //pvm_exec_panic("find_syscall: internal class index (%d) out of table (%d)", da->sys_table_id, pvm_n_internal_classes );
 
     // TODO fix this back
-    //if( syscall_index >= pvm_internal_classes[da->sys_table_id].syscalls_table_size ) pvm_exec_panic("find_syscall: syscall_index no out of table size" );
+    if( syscall_index >= *pvm_internal_classes[da->sys_table_id].syscalls_table_size_ptr ) pvm_exec_panic("find_syscall: syscall_index no out of table size" );
 
     syscall_func_t *tab = pvm_internal_classes[da->sys_table_id].syscalls_table;
     return tab[syscall_index];

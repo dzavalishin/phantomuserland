@@ -25,6 +25,7 @@
 #include <vm/exec.h>
 #include <vm/bulk.h>
 #include <vm/alloc.h>
+#include <vm/internal.h>
 
 #include <vm/p2c.h>
 
@@ -393,6 +394,4 @@ syscall_func_t	syscall_table_4_sema[16] =
 
 };
 DECLARE_SIZE(sema);
-
-
 

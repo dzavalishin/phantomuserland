@@ -30,6 +30,7 @@
 #include <vm/exec.h>
 #include <vm/bulk.h>
 #include <vm/alloc.h>
+#include <vm/internal.h>
 
 #include <vm/p2c.h>
 

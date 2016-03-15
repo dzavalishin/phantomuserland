@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: yes
+ * Bulk (class contaier, poor man's JAR) interface.
  *
 **/
 

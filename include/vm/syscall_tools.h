@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
+ * Helpers to write internal methods.
  *
  *
 **/
@@ -36,7 +35,7 @@
 #define POP_ARG ( pvm_ostack_pop( tc->_ostack ))
 #define POP_ISTACK ( pvm_istack_pop( tc->_istack ))
 
-#define DECLARE_SIZE(class) int n_syscall_table_4_##class =	(sizeof syscall_table_4_##class) / sizeof(syscall_func_t)
+//#define DECLARE_SIZE(class) int n_syscall_table_4_##class =	(sizeof syscall_table_4_##class) / sizeof(syscall_func_t)
 //#define DECLARE_SIZE(class)
 
 #define CHECK_PARAM_COUNT(n_param, must_have) \
