@@ -7,6 +7,10 @@
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
 #define DEBUG_MSG_PREFIX "usb"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <compat/seabios.h>
 
@@ -392,7 +396,10 @@ usb_set_address(struct usbhub_s *hub, int port, int speed)
 {
     ASSERT32FLAT();
     struct usb_s *cntl = hub->cntl;
-    dprintf(3, "cntl %p\n", cntl);
+
+    SHOW_FLOW( 3, "cntl %p", cntl);
+    
+
     if (cntl->maxaddr >= USB_MAXADDR)
         return NULL;
 
@@ -458,20 +465,30 @@ static int
 configure_usb_device(struct usb_pipe *pipe)
 {
     ASSERT32FLAT();
-    dprintf(3, "config_usb: %p\n", pipe);
+    SHOW_FLOW( 3, "config_usb: %p", pipe);
 
     // Set the max packet size for endpoint 0 of this device.
     struct usb_device_descriptor dinfo;
     int ret = get_device_info8(pipe, &dinfo);
     if (ret)
+    {
+        SHOW_ERROR( 1, "get_device_info8 rc = %d", ret );
         return 0;
-    dprintf(3, "device rev=%04x cls=%02x sub=%02x proto=%02x size=%02x\n"
+    }
+
+    SHOW_FLOW(3, "device rev=%04x cls=%02x sub=%02x proto=%02x size=%02x"
             , dinfo.bcdUSB, dinfo.bDeviceClass, dinfo.bDeviceSubClass
             , dinfo.bDeviceProtocol, dinfo.bMaxPacketSize0);
-    if (dinfo.bMaxPacketSize0 < 8 || dinfo.bMaxPacketSize0 > 64)
+
+    if(dinfo.bMaxPacketSize0 < 8 || dinfo.bMaxPacketSize0 > 64)
+    {
+        SHOW_ERROR( 1, "dinfo.bMaxPacketSize0 = %d", dinfo.bMaxPacketSize0 );
         return 0;
+    }
+
     pipe->maxpacket = dinfo.bMaxPacketSize0;
 
+    SHOW_FLOW( 3, "get_device_config: %p", pipe);
     // Get configuration
     struct usb_config_descriptor *config = get_device_config(pipe);
     if (!config)
@@ -483,9 +500,13 @@ configure_usb_device(struct usb_pipe *pipe)
     if (iface->bInterfaceClass != USB_CLASS_HID
         && iface->bInterfaceClass != USB_CLASS_MASS_STORAGE
         && iface->bInterfaceClass != USB_CLASS_HUB)
+    {
         // Not a supported device.
+        SHOW_ERROR( 1, "not supported iface->bInterfaceClass = %d", iface->bInterfaceClass );
         goto fail;
+    }
 
+    SHOW_FLOW( 3, "set_configuration: %d", config->bConfigurationValue );
     // Set the configuration.
     ret = set_configuration(pipe, config->bConfigurationValue);
     if (ret)

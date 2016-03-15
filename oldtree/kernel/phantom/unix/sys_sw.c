@@ -217,7 +217,20 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
     case SYS_getppid:           ret = u->ppid; break;
 
     case SYS_getpgid:
-        goto unimpl;
+        {
+            uuprocess_t * pp = proc_by_pid( uarg[0] );
+            if( pp == 0 )
+            {
+                err = EINVAL;
+                ret = -1;
+                break;
+            }
+
+            // Pretend that each process is in its own process group - TODO field om uuprocess, copy from father
+            ret = pp->pid;
+        }
+        break;
+        //goto unimpl;
 
     case SYS_time:
         {
@@ -254,6 +267,7 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
     case SYS_getitimer:
     case SYS_setitimer:
     case SYS_gettimeofday:
+        goto unimpl;
 
 
     case SYS_setuid:

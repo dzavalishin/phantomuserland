@@ -7,6 +7,10 @@
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
 #define DEBUG_MSG_PREFIX "ohci"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <compat/seabios.h>
 
@@ -242,7 +246,7 @@ ohci_init(u16 bdf, int busid)
 
     cntl->regs = mapped;
 
-    dprintf(1, "OHCI init on dev %02x:%02x.%x (regs=%p)\n"
+    SHOW_FLOW(1, "OHCI init on dev %02x:%02x.%x (regs=%p)"
             , pci_bdf_to_bus(bdf), pci_bdf_to_dev(bdf)
             , pci_bdf_to_fn(bdf), cntl->regs);
 
@@ -274,6 +278,9 @@ wait_ed(struct ohci_ed *ed)
         //if (ed->hwHeadP == ed->hwTailP) // QEMU increments it past tail
         if (ed->hwHeadP >= ed->hwTailP)
             return 0;
+
+        SHOW_FLOW0( 9, "again" );
+
         if (check_tsc(end)) {
             warn_timeout();
             return -1;
@@ -329,7 +336,7 @@ ohci_free_pipe(struct usb_pipe *p)
 {
     if (! CONFIG_USB_OHCI)
         return;
-    dprintf(7, "ohci_free_pipe %p\n", p);
+    SHOW_FLOW(7, "ohci_free_pipe %p", p);
     struct ohci_pipe *pipe = container_of(p, struct ohci_pipe, pipe);
     struct usb_ohci_s *cntl = container_of(
         pipe->pipe.cntl, struct usb_ohci_s, usb);
@@ -359,7 +366,7 @@ ohci_alloc_control_pipe(struct usb_pipe *dummy)
         return NULL;
     struct usb_ohci_s *cntl = container_of(
         dummy->cntl, struct usb_ohci_s, usb);
-    dprintf(7, "ohci_alloc_control_pipe %p\n", &cntl->usb);
+    SHOW_FLOW(7, "ohci_alloc_control_pipe %p", &cntl->usb);
 
     // Allocate a queue head.
     struct ohci_pipe *pipe = malloc_tmphigh(sizeof(*pipe));
@@ -384,10 +391,13 @@ ohci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
 {
     if (! CONFIG_USB_OHCI)
         return -1;
-    dprintf(5, "ohci_control pipe %p\n", p);
+
+    SHOW_FLOW(5, "ohci_control pipe %p", p);
+
     if (datasize > 4096) {
         // XXX - should support larger sizes.
         warn_noalloc();
+        SHOW_ERROR( 1, "datasize > 4096 %p", p);
         return -1;
     }
     struct ohci_pipe *pipe = container_of(p, struct ohci_pipe, pipe);
@@ -401,6 +411,7 @@ ohci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
     struct ohci_td *tds = malloc_tmphigh(sizeof(*tds) * 3);
     if (!tds) {
         warn_noalloc();
+        SHOW_ERROR( 1, "malloc tds fail %p", p);
         return -1;
     }
     struct ohci_td *td = tds;
@@ -435,6 +446,7 @@ ohci_control(struct usb_pipe *p, int dir, const void *cmd, int cmdsize
 
     SHOW_FLOW( 0, "will wait_ed, pipe %x, &ed = %x", pipe, &pipe->ed );
     int ret = wait_ed(&pipe->ed);
+    SHOW_ERROR( 1, "wait_ed = %d", ret );
 
     dump_ohci_ed( &pipe->ed );
 
@@ -472,7 +484,7 @@ ohci_alloc_intr_pipe(struct usb_pipe *dummy, int frameexp)
         return NULL;
     struct usb_ohci_s *cntl = container_of(
         dummy->cntl, struct usb_ohci_s, usb);
-    dprintf(7, "ohci_alloc_intr_pipe %p %d\n", &cntl->usb, frameexp);
+    SHOW_FLOW(7, "ohci_alloc_intr_pipe %p %d", &cntl->usb, frameexp);
 
     if (frameexp > 5)
         frameexp = 5;
