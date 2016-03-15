@@ -7,8 +7,14 @@
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
 #define DEBUG_MSG_PREFIX "usb-hid"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <compat/seabios.h>
+#include <event.h>
+#include <video/screen.h>
 
 //#include "util.h" // dprintf
 #include "usb-hid.h" // usb_keyboard_setup
@@ -79,7 +85,7 @@ usb_kbd_init(struct usb_pipe *pipe, struct usb_endpoint_descriptor *epdesc)
     if (!keyboard_pipe)
         return -1;
 
-    SHOW_FLOW0(1, "USB keyboard initialized\n");
+    SHOW_FLOW0(1, "USB keyboard initialized");
     return 0;
 }
 
@@ -104,7 +110,7 @@ usb_mouse_init(struct usb_pipe *pipe, struct usb_endpoint_descriptor *epdesc)
     if (!mouse_pipe)
         return -1;
 
-    SHOW_FLOW0(1, "USB mouse initialized\n");
+    SHOW_FLOW0(1, "USB mouse initialized");
     return 0;
 }
 
@@ -115,7 +121,8 @@ usb_hid_init(struct usb_pipe *pipe
 {
     if (! CONFIG_USB_KEYBOARD || ! CONFIG_USB_MOUSE)
         return -1;
-    dprintf(2, "usb_hid_init %p\n", pipe);
+
+    SHOW_INFO(2, "usb_hid_init %p", pipe);
 
     if (iface->bInterfaceSubClass != USB_INTERFACE_SUBCLASS_BOOT)
         // Doesn't support boot protocol.
@@ -125,7 +132,7 @@ usb_hid_init(struct usb_pipe *pipe
     struct usb_endpoint_descriptor *epdesc = findEndPointDesc(
         iface, imax, USB_ENDPOINT_XFER_INT, USB_DIR_IN);
     if (!epdesc) {
-        SHOW_FLOW0(1, "No usb hid intr in?\n");
+        SHOW_FLOW0(1, "No usb hid intr in?");
         return -1;
     }
 
@@ -224,7 +231,7 @@ procmodkey(u8 mods, u8 flags)
 static void noinline
 handle_key(struct keyevent *data)
 {
-    dprintf(9, "Got key %x %x\n", data->modifiers, data->keys[0]);
+    SHOW_INFO(9, "Got key %x %x", data->modifiers, data->keys[0]);
 
     // Load old keys.
     //u16 ebda_seg = get_ebda_seg();
@@ -319,7 +326,7 @@ usb_kbd_command(int command, u8 *param)
 {
     if (! CONFIG_USB_KEYBOARD)
         return -1;
-    dprintf(9, "usb keyboard cmd=%x\n", command);
+    SHOW_INFO(9, "usb keyboard cmd=%x", command);
     switch (command) {
     case ATKBD_CMD_GETID:
         // Return the id of a standard AT keyboard.
@@ -339,7 +346,7 @@ usb_kbd_command(int command, u8 *param)
 // Format of USB mouse event data
 struct mouseevent {
     u8 buttons;
-    u8 x, y;
+    signed char x, y;
     u8 reserved[5];
 };
 
@@ -348,7 +355,26 @@ static void
 handle_mouse(struct mouseevent *data)
 {
     //dprintf(9, "Got mouse b=%x x=%x y=%x\n", data->buttons, data->x, data->y);
-    SHOW_INFO(0, "Got USB mouse b=%x x=%x y=%x", data->buttons, data->x, data->y );
+    SHOW_INFO(11, "Got USB mouse b=%x x=%x y=%x", data->buttons, data->x, data->y );
+
+    //ps2_insert_mouse_event( data->x, -data->y, data->buttons );
+
+    static int x = 0;
+    static int y = 0;
+
+    x += data->x;
+    y -= data->y;
+
+    struct ui_event e;
+    ev_make_mouse_event( &e, x, y, data->buttons );
+
+    video_drv->mouse_x = x;
+    video_drv->mouse_y = y;
+
+    if(video_drv->mouse_redraw_cursor != NULL)
+        video_drv->mouse_redraw_cursor();
+
+    ev_q_put_any( &e );
 
 #if 0
     s8 x = data->x, y = -data->y;
@@ -394,7 +420,7 @@ usb_mouse_command(int command, u8 *param)
 {
     if (! CONFIG_USB_MOUSE)
         return -1;
-    dprintf(9, "usb mouse cmd=%x\n", command);
+    SHOW_INFO(9, "usb mouse cmd=%x", command);
     switch (command) {
     case PSMOUSE_CMD_ENABLE:
     case PSMOUSE_CMD_DISABLE:
@@ -423,12 +449,19 @@ usb_mouse_command(int command, u8 *param)
     }
 }
 
-// Check for USB events pending - called periodically from timer interrupt.
+// Check for USB events pending - runs in a thread
 void
 usb_check_event(void)
 {
-    usb_check_key();
-    usb_check_mouse();
+    t_current_set_name("Usb Hid");
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
+
+    while(1)
+    {
+        hal_sleep_msec(10);
+        usb_check_key();
+        usb_check_mouse();
+    }
 }
 
 #endif // HAVE_USB

@@ -1,3 +1,21 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Event queue keyboard support.
+ *
+ *
+**/
+
+
+
+#define DEBUG_MSG_PREFIX "events.keyb"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <threads.h>
 #include <dev/key_event.h>

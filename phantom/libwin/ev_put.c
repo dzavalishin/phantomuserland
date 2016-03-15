@@ -98,13 +98,15 @@ void ev_q_put_mouse( int x, int y, int buttons )
 
     ui_event_t *e = ev_get_unused();
 
-    e->type = UI_EVENT_TYPE_MOUSE;
-    e->time = fast_time();
-    e->focus= 0;
+	ev_make_mouse_event( e, x, y, buttons );
 
-    e->m.buttons = buttons;
-    e->abs_x = x;
-    e->abs_y = y;
+    //e->type = UI_EVENT_TYPE_MOUSE;
+    //e->time = fast_time();
+    //e->focus= 0;
+
+    //e->m.buttons = buttons;
+    //e->abs_x = x;
+    //e->abs_y = y;
 
     ev_put_event(e);
 }

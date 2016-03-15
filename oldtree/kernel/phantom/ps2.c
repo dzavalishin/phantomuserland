@@ -25,7 +25,6 @@
 #include <hal.h>
 #include <errno.h>
 
-//#include <drv_video_screen.h>
 #include <video/screen.h>
 
 #include <event.h>
@@ -213,6 +212,35 @@ static int insert_bit9( int val, int sign )
 
 
 
+void ps2_insert_mouse_event( int x, int y, int buttons )
+{
+    if(NULL == video_drv)
+        return;
+
+    video_drv->mouse_x = x;
+    video_drv->mouse_y = y;
+
+    struct ui_event e;
+    ev_make_mouse_event( &e, x, y, buttons );
+    /*
+    memset( &e, 0, sizeof(e) );
+
+    e.type = UI_EVENT_TYPE_MOUSE;
+    e.time = fast_time();
+    e.focus= 0;
+
+    e.m.buttons = buttons;
+    e.abs_x = x;
+    e.abs_y = y;
+    e.extra = 0;
+    */
+    put_buf(&e);
+    hal_sem_release( &mouse_sem );
+
+}
+
+
+
 static void ps2ms_int_handler( void *arg )
 {
     (void) arg;
@@ -267,26 +295,7 @@ static void ps2ms_int_handler( void *arg )
 
     //printf("ms %d %d %x\n", ps2ms_state_xpos, ps2ms_state_ypos, ps2ms_state_buttons );
 
-    if(NULL != video_drv)
-    {
-        video_drv->mouse_x = ps2ms_state_xpos;
-        video_drv->mouse_y = ps2ms_state_ypos;
-
-        struct ui_event e;
-        memset( &e, 0, sizeof(e) );
-
-        e.type = UI_EVENT_TYPE_MOUSE;
-        e.time = fast_time();
-        e.focus= 0;
-
-        e.m.buttons = ps2ms_state_buttons;
-        e.abs_x = ps2ms_state_xpos;
-        e.abs_y = ps2ms_state_ypos;
-        e.extra = 0;
-
-        put_buf(&e);
-        hal_sem_release( &mouse_sem );
-    }
+    ps2_insert_mouse_event( ps2ms_state_xpos, ps2ms_state_ypos, ps2ms_state_buttons );
 
 }
 
@@ -435,7 +444,7 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
     hal_sem_init( &mouse_sem, "MouseDrv" );
     hal_spin_init( &elock );
 
-    if( seq_number || ps2ms_do_init())
+    if( seq_number || ps2ms_do_init() )
         return 0;
 
     if( hal_irq_alloc( irq, ps2ms_int_handler, 0, HAL_IRQ_SHAREABLE ) )

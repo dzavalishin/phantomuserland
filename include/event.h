@@ -135,6 +135,8 @@ typedef struct ui_event ui_event_t;
 
 // TODO move to kern/event.h and rest to video/event.h
 
+//! Construct mouse event 
+void ev_make_mouse_event( struct ui_event *e, int x, int y, int buttons );
 
 //! Put mouse event onto the main e q
 void ev_q_put_mouse( int x, int y, int buttons );

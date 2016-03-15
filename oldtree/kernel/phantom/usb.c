@@ -668,6 +668,10 @@ usb_setup(void)
         else if (code == PCI_CLASS_SERIAL_USB_OHCI)
             ohci_init(bdf, count++);
     }
+
+
+    hal_start_kernel_thread( usb_check_event );
+
 }
 
 
