@@ -232,6 +232,7 @@ ohci_init(u16 bdf, int busid)
         return;
     struct usb_ohci_s *cntl = malloc_tmphigh(sizeof(*cntl));
     memset(cntl, 0, sizeof(*cntl));
+    usb_init_usb_s( &(cntl->usb) );
     cntl->usb.busid = busid;
     cntl->usb.bdf = bdf;
     cntl->usb.type = USB_TYPE_OHCI;

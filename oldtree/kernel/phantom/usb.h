@@ -29,6 +29,8 @@ struct usb_s {
     u8 			maxaddr;
 };
 
+void usb_init_usb_s( struct usb_s *cntl );
+
 // Information for enumerating USB hubs
 struct usbhub_s {
     struct usbhub_op_s *op;

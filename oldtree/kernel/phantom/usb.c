@@ -547,8 +547,8 @@ usb_init_hub_port(void *data)
         goto done;
     }
 
-    // TODO! Find BETTER place to do that! Might happen twice!
-    hal_mutex_init(&hub->cntl->resetlock, "hub_reset");
+    // TO DO! Find BETTER place to do that! Might happen twice!
+    //hal_mutex_init(&hub->cntl->resetlock, "hub_reset");
 
     // Reset port and determine device speed
     mutex_lock(&hub->cntl->resetlock);
@@ -669,5 +669,13 @@ usb_setup(void)
             ohci_init(bdf, count++);
     }
 }
+
+
+
+void usb_init_usb_s( struct usb_s *cntl )
+{
+    hal_mutex_init(&cntl->resetlock, "hub_reset");
+}
+
 
 #endif // HAVE_USB
