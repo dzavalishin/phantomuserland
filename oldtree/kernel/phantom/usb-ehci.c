@@ -9,6 +9,10 @@
 #if CONFIG_USB_EHCI
 
 #define DEBUG_MSG_PREFIX "ehci"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <compat/seabios.h>
 

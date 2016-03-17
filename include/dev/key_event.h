@@ -123,5 +123,8 @@ typedef struct _key_event {
 
 void phantom_dev_keyboard_get_key( _key_event *out);
 
+//! keyboard pipeline entry point - USB keyb driver pushes scancodes here
+void handle_keycode(unsigned char key);
+
 
 #endif

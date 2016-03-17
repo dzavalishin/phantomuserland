@@ -200,7 +200,8 @@ static void insert_in_buf(_key_event *event)
 
 
 
-static void handle_keycode(unsigned char key)
+//static void handle_keycode(unsigned char key)
+void handle_keycode(unsigned char key)
 {
     //int retval = INT_NO_RESCHEDULE;
     _key_event event;

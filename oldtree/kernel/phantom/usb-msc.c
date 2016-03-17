@@ -8,17 +8,15 @@
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
 #define DEBUG_MSG_PREFIX "usb-msc"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <compat/seabios.h>
 
-//#include "util.h" // dprintf
-//#include "config.h" // CONFIG_USB_MSC
 #include "usb-msc.h" // usb_msc_init
 #include "usb.h" // struct usb_s
-//#include "biosvar.h" // GET_GLOBAL
-//#include "blockcmd.h" // cdb_read
-//#include "disk.h" // DTYPE_USB
-//#include "boot.h" // boot_add_hd
 
 #include <endian.h>
 
