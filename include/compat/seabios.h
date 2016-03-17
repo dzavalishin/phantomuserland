@@ -42,7 +42,7 @@ unsigned int usb_intr_pipe_count(int ms);
 
 
 #define CONFIG_USB 1
-#define CONFIG_USB_EHCI 0
+#define CONFIG_USB_EHCI 1
 #define CONFIG_USB_OHCI 1
 #define CONFIG_USB_UHCI 1
 #define CONFIG_USB_MOUSE 1

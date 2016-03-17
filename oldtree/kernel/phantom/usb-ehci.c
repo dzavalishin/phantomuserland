@@ -6,7 +6,6 @@
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
-#if CONFIG_USB_EHCI
 
 #define DEBUG_MSG_PREFIX "ehci"
 #include <debug_ext.h>
@@ -16,10 +15,14 @@
 
 #include <compat/seabios.h>
 
+#if CONFIG_USB_EHCI
+
 #include "usb-ehci.h" // struct ehci_qh
 #include "usb.h" // struct usb_s
 #include "usb-uhci.h" // init_uhci
 #include "usb-ohci.h" // init_ohci
+
+
 
 struct companion_s {
     u16 bdf;
@@ -35,6 +38,18 @@ struct usb_ehci_s {
     int checkports;
     int legacycount;
 };
+
+#define FIXED_ALIGN 0xFFF
+
+#warning bogus memalign
+static void *memalign( size_t align, size_t size )
+{
+    //assert( align <= FIXED_ALIGN );
+
+    void *ret = malloc( FIXED_ALIGN + size );
+    if( ret == 0 ) return 0;
+    return (void *) ( ((addr_t)ret) & (~(FIXED_ALIGN)) );
+}
 
 
 /****************************************************************
@@ -239,13 +254,16 @@ configure_ehci(void *data)
     // Find devices
     int count = check_ehci_ports(cntl);
     free_pipe(cntl->usb.defaultpipe);
-    if (count)
+    //if (count)
         // Success
-        return;
+    SHOW_INFO(0, "EHCI %d devices found", count);
+
+    // [dz] dopn't shutdown controller in any case, we're not BIOS :)
+    return;
 
     // No devices found - shutdown and free controller.
-    writel(&cntl->regs->usbcmd, cmd & ~CMD_RUN);
-    msleep(4);  // 2ms to stop reading memory - XXX
+    //writel(&cntl->regs->usbcmd, cmd & ~CMD_RUN);
+    //msleep(4);  // 2ms to stop reading memory - XXX
 fail:
     free(fl);
     free(intr_qh);
@@ -260,12 +278,26 @@ ehci_init(u16 bdf, int busid, int compbdf)
         return -1;
 
     u32 baseaddr = pci_config_readl(bdf, PCI_BASE_ADDRESS_0);
-    struct ehci_caps *caps = (void*)(baseaddr & PCI_BASE_ADDRESS_MEM_MASK);
+
+    baseaddr &= PCI_BASE_ADDRESS_MEM_MASK;
+
+    void *mapped;
+    hal_alloc_vaddress( &mapped, 1);
+    hal_page_control( baseaddr, mapped, page_map_io, page_rw );
+
+    struct ehci_caps *caps = mapped; //(void*)(baseaddr & PCI_BASE_ADDRESS_MEM_MASK);
+
+    SHOW_FLOW(1, "EHCI @ %p (phys %p)", caps, (void *)baseaddr );
+    //SHOW_FLOW(1, "EHCI caps->hccparams @ %p", &caps->hccparams );
+
+    //u32 hcc_params = caps->hccparams; //readl(&caps->hccparams);
     u32 hcc_params = readl(&caps->hccparams);
     if (hcc_params & HCC_64BIT_ADDR) {
         SHOW_ERROR0(1, "No support for 64bit EHCI");
         return -1;
     }
+
+    SHOW_FLOW(1, "EHCI hccparams %x", hcc_params );
 
     struct usb_ehci_s *cntl = malloc_tmphigh(sizeof(*cntl));
     memset(cntl, 0, sizeof(*cntl));
