@@ -7,6 +7,10 @@
 // This file may be distributed under the terms of the GNU LGPLv3 license.
 
 #define DEBUG_MSG_PREFIX "usb-hub"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <compat/seabios.h>
 

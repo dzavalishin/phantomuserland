@@ -8,7 +8,7 @@
 
 #define DEBUG_MSG_PREFIX "usb-hid"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -22,6 +22,9 @@
 #include "usb.h" // usb_ctrlrequest
 //#include "biosvar.h" // GET_GLOBAL
 //#include "ps2port.h" // ATKBD_CMD_GETID
+
+#include <dev/key_event.h>
+
 
 struct usb_pipe *keyboard_pipe VAR16VISIBLE;
 struct usb_pipe *mouse_pipe VAR16VISIBLE;
@@ -183,7 +186,8 @@ struct keyevent {
 // Translate data from KeyToScanCode[] to calls to process_key().
 static void process_key(u32 key)
 {
-    SHOW_INFO(0, "Got USB keypress %x", key);
+    //SHOW_INFO(0, "Got USB keypress %x", key);
+    handle_keycode( (unsigned char)key);
 }
 
 static void
@@ -233,7 +237,7 @@ handle_key(struct keyevent *data)
 {
     if( data->modifiers || data->keys[0] || data->keys[1] || data->keys[2] || data->keys[3] || data->keys[4] || data->keys[5] )
 
-        SHOW_INFO(9, "Got key %02x %02x %02x %02x %02x %02x %02x", data->modifiers, data->keys[0], data->keys[1] , data->keys[2] , data->keys[3] , data->keys[4] , data->keys[5]);
+        SHOW_INFO(11, "Got key %02x %02x %02x %02x %02x %02x %02x", data->modifiers, data->keys[0], data->keys[1] , data->keys[2] , data->keys[3] , data->keys[4] , data->keys[5]);
 
     // Load old keys.
     //u16 ebda_seg = get_ebda_seg();
@@ -275,12 +279,15 @@ handle_key(struct keyevent *data)
             }
         }
     }
-    procmodkey(old.modifiers & ~data->modifiers, RELEASEBIT);
 
+    procmodkey(old.modifiers & ~data->modifiers, RELEASEBIT);
     // Process new keys
     procmodkey(data->modifiers & ~old.modifiers, 0);
     old.modifiers = data->modifiers;
-    for (i=0; i<ARRAY_SIZE(data->keys); i++) {
+
+
+    for (i=0; i<ARRAY_SIZE(data->keys); i++)
+    {
         u8 key = data->keys[i];
         if (!key)
             continue;
@@ -289,6 +296,7 @@ handle_key(struct keyevent *data)
         old.keys[addpos++] = key;
         old.repeatcount = KEYREPEATWAITMS / KEYREPEATMS + 1;
     }
+
     if (addpos < ARRAY_SIZE(old.keys))
         old.keys[addpos] = 0;
 

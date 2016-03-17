@@ -8,7 +8,7 @@
 
 #define DEBUG_MSG_PREFIX "usb"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -640,7 +640,7 @@ usb_setup(void)
     if (! CONFIG_USB)
         return;
 
-    SHOW_FLOW0(3, "init usb");
+    SHOW_FLOW0( 0, "init usb" );
 
 #if USB_GLOBAL_MUTEX
     hal_mutex_init(&global_usb_lock, "UsbGlobal" );
@@ -697,6 +697,8 @@ usb_setup(void)
 
 
     hal_start_kernel_thread( usb_check_event );
+
+    SHOW_FLOW0( 0, "init usb done" );
 
 }
 

@@ -28,14 +28,14 @@ install: classes classes.ar
 
 $(TARGET): $(addprefix $(BINDIR)/,$(filter-out $(EXCLUDED_PCFILES), $(PCFILES) ))
 	@echo --- make classes bulk ---
-	@java -jar ${PHANTOM_HOME}/build/jar/mkbulk.jar $(filter-out $(OFF) ,$^)
+	@java -jar ${PHANTOM_HOME}/build/jar/mkbulk.jar $@ $(filter-out $(OFF) ,$^)
 #	$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)
 
 #	sh -c "$(MKBULK) $(TARGET) $(filter-out $(OFF) ,$^)"
 
 classes.ar: $(addprefix $(BINDIR)/,$(filter-out $(EXCLUDED_PCFILES), $(PCFILES) ))
 	@echo --- make classes ar ---
-	@ar r classes.ar $(filter-out $(OFF) ,$^)
+	@ar r $@ $(filter-out $(OFF) ,$^)
 
 
 roots: internal.thread.pc internal.bitmap.pc

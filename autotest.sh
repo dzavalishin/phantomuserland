@@ -190,8 +190,9 @@ Previous test run stalled. Trying gdb..."
 	}
 #[ -s $0.lock ] && exit 0
 #touch $0.lock
+	IN_USE=`netstat -ntpl4 2>/dev/null`
 
-	while [ "`netstat -pl --inet 2>/dev/null | grep :$GDB_PORT`" ]
+	while [ `echo "$IN_USE" | grep :$GDB_PORT` ]
 	do
 		echo "Somebody took my gdb port! Taking next one..."
 		GDB_PORT=`expr $GDB_PORT + 1`
