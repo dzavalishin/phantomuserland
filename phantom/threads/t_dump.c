@@ -188,7 +188,7 @@ void phantom_dump_threads_buf(char *buf, int len)
 
 // -----------------------------------------------------------------------
 //
-// Dump thread list or on ethread state to JSON
+// Dump thread list or one thread state to JSON
 //
 // -----------------------------------------------------------------------
 
@@ -335,9 +335,7 @@ static void json_encode_thread( json_output *jo, void *el )
 
 void json_dump_threads( json_output *jo )
 {
-
     json_foreach( jo, "threads", phantom_kernel_threads, sizeof(phantom_thread_t *), MAX_THREADS, json_encode_thread );
-    
 }
 
 
