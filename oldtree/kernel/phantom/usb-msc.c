@@ -131,7 +131,7 @@ fail:
 /****************************************************************
  * Drive ops
  ****************************************************************/
-
+/*
 // 16bit command demuxer for ATAPI cdroms.
 int
 process_usb_op(struct disk_op_s *op)
@@ -171,7 +171,7 @@ setup_drive_cdrom(struct disk_op_s *op)
     //boot_add_cd(op->drive_g, desc, prio);
     return 0;
 }
-
+/*
 static int
 setup_drive_hd(struct disk_op_s *op)
 {
@@ -199,7 +199,7 @@ setup_drive_hd(struct disk_op_s *op)
 
     return 0;
 }
-
+*/
 // Configure a usb msc device.
 int
 usb_msc_init(struct usb_pipe *pipe
@@ -239,6 +239,10 @@ usb_msc_init(struct usb_pipe *pipe
     if (!udrive_g->bulkin || !udrive_g->bulkout)
         goto fail;
 
+    SHOW_FLOW( 1, "Connecting USB MSC device type %d", iface->bInterfaceSubClass );
+
+
+#if 0 // [dz] start conect to Phantom disk IO here
     // Validate drive and find block size and sector count.
     struct disk_op_s dop;
     memset(&dop, 0, sizeof(dop));
@@ -263,7 +267,7 @@ usb_msc_init(struct usb_pipe *pipe
     int removable = !!(data.removable & 0x80);
     dprintf(1, "USB MSC vendor='%s' product='%s' rev='%s' type=%d removable=%d\n" , vendor, product, rev, pdt, removable);
     udrive_g->drive.removable = removable;
-
+/* [dz] connect me
     if (pdt == USB_MSC_TYPE_CDROM) {
         //char *desc = znprintf(MAXDESCSIZE, "DVD/CD [USB Drive %s %s %s]"                              , vendor, product, rev);
         ret = setup_drive_cdrom(&dop); //, desc);
@@ -271,9 +275,10 @@ usb_msc_init(struct usb_pipe *pipe
         //char *desc = znprintf(MAXDESCSIZE, "USB Drive %s %s %s"                              , vendor, product, rev);
         ret = setup_drive_hd(&dop); //, desc);
     }
+*/
     if (ret)
         goto fail;
-
+#endif
     return 0;
 fail:
     SHOW_ERROR0(1, "Unable to configure USB MSC device.");
