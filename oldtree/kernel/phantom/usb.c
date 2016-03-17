@@ -551,7 +551,11 @@ usb_init_hub_port(void *data)
     //hal_mutex_init(&hub->cntl->resetlock, "hub_reset");
 
     // Reset port and determine device speed
+#if USB_GLOBAL_MUTEX
+    mutex_lock(&global_usb_lock);
+#else
     mutex_lock(&hub->cntl->resetlock);
+#endif
     ret = hub->op->reset(hub, port);
     if (ret < 0)
     {
@@ -567,7 +571,12 @@ usb_init_hub_port(void *data)
         SHOW_ERROR( 2, "Set address failed at port %d", port );
         goto resetfail;
     }
+#if USB_GLOBAL_MUTEX
+    mutex_unlock(&global_usb_lock);
+#else
     mutex_unlock(&hub->cntl->resetlock);
+#endif
+    //mutex_unlock(&hub->cntl->resetlock);
 
     // Configure the device
     int count = configure_usb_device(pipe);
@@ -580,7 +589,12 @@ done:
     return;
 
 resetfail:
+#if USB_GLOBAL_MUTEX
+    mutex_unlock(&global_usb_lock);
+#else
     mutex_unlock(&hub->cntl->resetlock);
+#endif
+//    mutex_unlock(&hub->cntl->resetlock);
     goto done;
 }
 
@@ -612,6 +626,13 @@ usb_enumerate(struct usbhub_s *hub)
 
 }
 
+
+#if USB_GLOBAL_MUTEX
+hal_mutex_t         global_usb_lock;
+hal_mutex_t         global_usb_hub_lock;
+#endif
+
+
 void
 usb_setup(void)
 {
@@ -620,6 +641,11 @@ usb_setup(void)
         return;
 
     SHOW_FLOW0(3, "init usb");
+
+#if USB_GLOBAL_MUTEX
+    hal_mutex_init(&global_usb_lock, "UsbGlobal" );
+    hal_mutex_init(&global_usb_hub_lock, "UsbHubGl" );
+#endif
 
     // Look for USB controllers
 #if CONFIG_USB_EHCI
@@ -675,10 +701,13 @@ usb_setup(void)
 }
 
 
-
 void usb_init_usb_s( struct usb_s *cntl )
 {
+#if !USB_GLOBAL_MUTEX
     hal_mutex_init(&cntl->resetlock, "hub_reset");
+#else
+    (void)cntl;
+#endif
 }
 
 

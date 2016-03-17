@@ -36,9 +36,17 @@ set_port_feature(struct usbhub_s *hub, int port, int feature)
     req.wValue = feature;
     req.wIndex = port + 1;
     req.wLength = 0;
+#if USB_GLOBAL_MUTEX
+    mutex_lock(&global_usb_hub_lock);
+#else
     mutex_lock(&hub->lock);
+#endif
     int ret = send_default_control(hub->pipe, &req, NULL);
+#if USB_GLOBAL_MUTEX
+    mutex_unlock(&global_usb_hub_lock);
+#else
     mutex_unlock(&hub->lock);
+#endif
     return ret;
 }
 
@@ -51,9 +59,17 @@ clear_port_feature(struct usbhub_s *hub, int port, int feature)
     req.wValue = feature;
     req.wIndex = port + 1;
     req.wLength = 0;
+#if USB_GLOBAL_MUTEX
+    mutex_lock(&global_usb_hub_lock);
+#else
     mutex_lock(&hub->lock);
+#endif
     int ret = send_default_control(hub->pipe, &req, NULL);
+#if USB_GLOBAL_MUTEX
+    mutex_unlock(&global_usb_hub_lock);
+#else
     mutex_unlock(&hub->lock);
+#endif
     return ret;
 }
 
@@ -66,9 +82,17 @@ get_port_status(struct usbhub_s *hub, int port, struct usb_port_status *sts)
     req.wValue = 0;
     req.wIndex = port + 1;
     req.wLength = sizeof(*sts);
+#if USB_GLOBAL_MUTEX
+    mutex_lock(&global_usb_hub_lock);
+#else
     mutex_lock(&hub->lock);
+#endif
     int ret = send_default_control(hub->pipe, &req, sts);
+#if USB_GLOBAL_MUTEX
+    mutex_unlock(&global_usb_hub_lock);
+#else
     mutex_unlock(&hub->lock);
+#endif
     return ret;
 }
 

@@ -183,7 +183,7 @@ struct keyevent {
 // Translate data from KeyToScanCode[] to calls to process_key().
 static void process_key(u32 key)
 {
-    SHOW_INFO(0, "Goy USB keypress %x", key);
+    SHOW_INFO(0, "Got USB keypress %x", key);
 }
 
 static void
@@ -231,23 +231,34 @@ procmodkey(u8 mods, u8 flags)
 static void noinline
 handle_key(struct keyevent *data)
 {
-    SHOW_INFO(9, "Got key %x %x", data->modifiers, data->keys[0]);
+    if( data->modifiers || data->keys[0] || data->keys[1] || data->keys[2] || data->keys[3] || data->keys[4] || data->keys[5] )
+
+        SHOW_INFO(9, "Got key %02x %02x %02x %02x %02x %02x %02x", data->modifiers, data->keys[0], data->keys[1] , data->keys[2] , data->keys[3] , data->keys[4] , data->keys[5]);
 
     // Load old keys.
     //u16 ebda_seg = get_ebda_seg();
-    struct usbkeyinfo old;
-    old.data = GET_EBDA2(ebda_seg, usbkey_last.data);
+    //struct usbkeyinfo old;
+    //old.data = GET_EBDA2(ebda_seg, usbkey_last.data);
+
+    static struct usbkeyinfo old;
+
 
     // Check for keys no longer pressed.
     unsigned int addpos = 0;
     unsigned int i;
-    for (i=0; i<ARRAY_SIZE(old.keys); i++) {
+
+    for( i=0; i<ARRAY_SIZE(old.keys); i++ )
+    {
         u8 key = old.keys[i];
+
         if (!key)
             break;
+
         unsigned int j;
-        for (j=0;; j++) {
-            if (j>=ARRAY_SIZE(data->keys)) {
+        for (j=0;; j++)
+        {
+            if (j>=ARRAY_SIZE(data->keys))
+            {
                 // Key released.
                 procscankey(key, RELEASEBIT);
                 if (i+1 >= ARRAY_SIZE(old.keys) || !old.keys[i+1])
@@ -255,7 +266,8 @@ handle_key(struct keyevent *data)
                     old.repeatcount = 0xff;
                 break;
             }
-            if (data->keys[j] == key) {
+            if (data->keys[j] == key)
+            {
                 // Key still pressed.
                 data->keys[j] = 0;
                 old.keys[addpos++] = key;
@@ -289,7 +301,7 @@ handle_key(struct keyevent *data)
     }
 
     // Update old keys
-    SET_EBDA2(ebda_seg, usbkey_last.data, old.data);
+    //SET_EBDA2(ebda_seg, usbkey_last.data, old.data);
 }
 
 // Check if a USB keyboard event is pending and process it if so.
@@ -302,7 +314,10 @@ usb_check_key(void)
     if (!pipe)
         return;
 
-    for (;;) {
+    // ret seems to be broken? do no more than 10 keys a call
+    int i;
+    for( i = 10; i > 0 ; i-- )
+    {
         struct keyevent data;
         int ret = usb_poll_intr(pipe, &data);
         if (ret)

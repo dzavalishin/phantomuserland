@@ -2,8 +2,18 @@
 #ifndef __USB_H
 #define __USB_H
 
+// had problems with mutex init in USB code, temp. replaces 'em all with big USB lock for now
+#define USB_GLOBAL_MUTEX 1
+
+
 #include <compat/seabios.h>
-//#include "util.h" // struct mutex_s
+
+
+#if USB_GLOBAL_MUTEX
+extern hal_mutex_t         global_usb_hub_lock;
+extern hal_mutex_t         global_usb_lock;
+#endif
+
 
 // Information on a USB end point.
 struct usb_pipe {
@@ -21,8 +31,10 @@ struct usb_pipe {
 // Common information for usb controllers.
 struct usb_s {
     struct usb_pipe *defaultpipe;
+#if !USB_GLOBAL_MUTEX
     //struct mutex_s resetlock;
     hal_mutex_t         resetlock;
+#endif
     int 		busid;
     u16 		bdf;
     u8 			type;
@@ -36,8 +48,10 @@ struct usbhub_s {
     struct usbhub_op_s *op;
     struct usb_pipe *pipe;
     struct usb_s *cntl;
+#if !USB_GLOBAL_MUTEX
     //struct mutex_s lock;
     hal_mutex_t         lock;
+#endif
     u32 powerwait;
     u32 port;
     u32 threads;
