@@ -2,6 +2,8 @@
 #
 # this script only runs snapshot test
 #
+set -x			# see what's going on
+
 cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
@@ -158,7 +160,7 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
 	-usb -usbdevice mouse \
-	-soundhw sb16"
+	-soundhw all"
 #	 -usbdevice disk:format=raw:$DISK_IMG \
 #	-usbdevice host:0930:1319 \
 #	-usbdevice host:08ff:168b \
