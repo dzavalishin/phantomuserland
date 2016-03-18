@@ -14,7 +14,10 @@ typedef unsigned int u32;
 typedef signed int s32;
 typedef unsigned long long u64;
 typedef signed long long s64;
+#ifndef _SIZE_T
+#define _SIZE_T
 typedef u32 size_t;
+#endif
 
 union u64_u32_u {
     struct { u32 lo, hi; };
