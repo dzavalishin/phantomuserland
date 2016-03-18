@@ -50,6 +50,7 @@ then
 	done
 else
 	CRONMODE=1
+	UNATTENDED=-unattended
 	unset DISPLAY
 fi
 
@@ -57,7 +58,12 @@ fi
 die ( ) {
 	[ -s $LOGFILE ] && {
 		# submit all details in CI, show pre-failure condition interactively
-		[ "$CRONMODE" ] && sed 's/^[[^m]*m//g;s/^M//g' $LOGFILE || tail $LOGFILE
+		if [ "$CRONMODE" ]
+		then
+			cat $LOGFILE | sed 's/^[[^m]*m//g;s/^M//g'
+		else
+			tail $LOGFILE
+		fi
 	}
 	[ "$1" ] && echo "$*"
 	exit 1

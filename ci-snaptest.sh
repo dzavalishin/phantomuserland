@@ -30,7 +30,15 @@ fi
 
 
 die ( ) {
-	[ -s $LOGFILE ] && tail $LOGFILE
+	[ -s $LOGFILE ] && {
+		# submit all details in CI, show pre-failure condition interactively
+		if [ "$CRONMODE" ]
+		then
+			cat $LOGFILE | sed 's/^[[^m]*m//g;s/^M//g'
+		else
+			tail $LOGFILE
+		fi
+	}
 	[ "$1" ] && echo "$*"
 	exit 1
 }
@@ -81,7 +89,7 @@ then
 else
 	CRONMODE=1
 	UNATTENDED=-unattended
-	exec 1>$0.log 2>&1
+	unset DISPLAY
 fi
 
 call_gdb ( ) {
