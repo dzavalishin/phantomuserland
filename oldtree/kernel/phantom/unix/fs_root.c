@@ -487,17 +487,23 @@ static errno_t auto_run( const char *mpath )
 
     SHOW_INFO( 0, "Atthempt autorun @ %s", mpath );
 
-    int pid = uu_create_process(-1);
-    const char* av[] = { "sh", "-s", "phantom.rc", 0 };
-    uu_proc_setargs( pid, av, 0 );
-
     char run_path[512];
     snprintf( run_path, sizeof(run_path), "%s/bin/sh", mpath );
+    const char* av[] = { "sh", "-s", "phantom.rc", 0 };
+
+    SHOW_FLOW( 4, "Attempt to run shell @ %s", run_path );
+#if 0
+    err = uu_spawnv( 0, -1, run_path, av );
+    if(err) SHOW_ERROR( 0, "Autorun shell @ %s err = %d", run_path, err );
+#else
+    int pid = uu_create_process(-1);
+    uu_proc_setargs( pid, av, 0 );
+
     SHOW_FLOW( 4, "Attempt to run shell @ %s", run_path );
     err = uu_run_file( pid, run_path );
     if(!err) SHOW_INFO( 0, "Autorun shell @ %s", run_path );
     // FIXME TODO ERR pid is not freed if no shell found
-
+#endif
 
     snprintf( run_path, sizeof(run_path), "%s/autorun.inf", mpath );
     SHOW_FLOW( 4, "Attempt to run autorun.inf @ %s err = %d", run_path, err );

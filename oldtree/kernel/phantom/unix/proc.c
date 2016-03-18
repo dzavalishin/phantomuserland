@@ -151,6 +151,8 @@ static void uu_proc_death(uuprocess_t *p)
 {
     SHOW_FLOW( 1, "Process %d dies", p->pid );
 
+    assert( p->ntids <= 0 );
+
     // TODO cleanup!
     uu_close_all( p );
 
@@ -622,6 +624,28 @@ int usys_run( int *err, uuprocess_t *u,  const char *fname, const char **uav, co
     return *err ? -1 : pid;
 }
 
+// In-kernel process start
+
+
+errno_t uu_spawnv( int *opid, int ppid, const char *path, const char **argv )
+{
+    SHOW_FLOW( 1, "Attempt to run '%s'", path );
+    int pid = uu_create_process( ppid );
+    uu_proc_setargs( pid, argv, 0 );
+    errno_t err = uu_run_file( pid, path );
+    if(!err) 
+    {
+        hal_mutex_lock(&proc_lock);
+        uuprocess_t * p = proc_by_pid(pid);
+        uu_proc_death(p);
+        hal_mutex_unlock(&proc_lock);
+
+        return err;
+    }
+
+    if( opid ) *opid = pid;
+    return 0;
+}
 
 
 
