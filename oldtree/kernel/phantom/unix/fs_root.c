@@ -501,17 +501,31 @@ static errno_t auto_run( const char *mpath )
 
     snprintf( run_path, sizeof(run_path), "%s/autorun.inf", mpath );
     SHOW_FLOW( 4, "Attempt to run autorun.inf @ %s err = %d", run_path, err );
+
     void *arinf = 0;
     size_t arinf_sz;
+
     err = k_load_file( &arinf, &arinf_sz, run_path );
+
     if( (!err) && arinf_sz && arinf )
     {
         SHOW_INFO( 0, "Autorun autorun.inf @ %s", run_path );
-        char *arun = arinf;
+        char *arun = calloc( arinf_sz+1, 1 );
+        if( arun == 0 )
+        {
+            SHOW_INFO( 0, "Autorun out of memory for %d bytes", arinf_sz+1 );
+            goto noarun;
+        }
+        strncpy( arun, arinf, arinf_sz );
         SHOW_INFO( 0, "Autorun text='%s'", arun );
 
         if( strnicmp( arun, "[autorun]", 9 ) ) goto noarun;
+
+        // todo autorunning
+
+        free( arun );
     }
+
 noarun:
     if( arinf_sz && arinf )
     {

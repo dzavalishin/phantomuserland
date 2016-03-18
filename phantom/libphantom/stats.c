@@ -367,3 +367,72 @@ static void stat_update_persistent_storage( void *ign )
 }
 
 
+
+
+
+
+// -----------------------------------------------------------------------
+//
+// Dump stats to JSON
+//
+// -----------------------------------------------------------------------
+
+#include <kernel/json.h>
+
+
+
+
+static void json_dump_stat_record( json_output *jo, int i )
+{
+#if COMPILE_PERSISTENT_STATS
+    struct persistent_kernel_stats *ps = pdata ? pdata + i : &dumb_pst;
+#endif
+
+    json_out_string( jo, "name", stat_counter_name[i] );
+    json_out_delimiter( jo );
+
+    json_out_int( jo, "per_sec", stat_per_sec_counters[i] );
+    json_out_delimiter( jo );
+
+    json_out_int( jo, "total_per_sec", stat_total_counters[i]/stat_total_seconds );
+    json_out_delimiter( jo );
+
+    json_out_int( jo, "total", stat_total_counters[i] );
+
+#if COMPILE_PERSISTENT_STATS
+    json_out_delimiter( jo );
+
+    json_out_int( jo, "all_runs", (long)ps->total_prev_and_this_runs );
+    //json_out_delimiter( jo );
+#endif
+
+}
+
+
+
+void json_dump_stats( json_output *jo )
+{
+    int i;
+    int count = 0;
+
+    json_out_open_array( jo, "stats" );
+
+    for( i = 0; i < MAX_STAT_COUNTERS; i++ )
+    {
+        if(stat_counter_name[i] == 0)
+            break;
+
+        if(*stat_counter_name[i] == 0)
+            continue;
+
+        if( count++ > 0 )
+            json_out_delimiter( jo );
+
+        json_out_open_anon_struct( jo );
+        json_dump_stat_record( jo, i );
+        json_out_close_struct( jo );
+    }
+
+    json_out_close_array( jo );
+}
+

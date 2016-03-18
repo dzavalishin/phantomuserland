@@ -138,6 +138,7 @@ void json_out_open_struct( json_output *jo, const char *name )
     jo->putc( jo, '{' );
     jo->putc( jo, '\n' );
 }
+
 void json_out_open_anon_struct( json_output *jo )
 {
     jo->depth++;

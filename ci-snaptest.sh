@@ -2,6 +2,8 @@
 #
 # this script only runs snapshot test
 #
+set -x			# see what's going on
+
 cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
@@ -28,7 +30,15 @@ fi
 
 
 die ( ) {
-	[ -s $LOGFILE ] && tail $LOGFILE
+	[ -s $LOGFILE ] && {
+		# submit all details in CI, show pre-failure condition interactively
+		if [ "$CRONMODE" ]
+		then
+			cat $LOGFILE | sed 's/^[[^m]*m//g;s/^M//g'
+		else
+			tail $LOGFILE
+		fi
+	}
 	[ "$1" ] && echo "$*"
 	exit 1
 }
@@ -79,7 +89,7 @@ then
 else
 	CRONMODE=1
 	UNATTENDED=-unattended
-	exec 1>$0.log 2>&1
+	unset DISPLAY
 fi
 
 call_gdb ( ) {
@@ -158,7 +168,7 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-hdb $DISK_IMG \
 	-drive file=vio.img,if=virtio,format=raw \
 	-usb -usbdevice mouse \
-	-soundhw sb16"
+	-soundhw all"
 #	 -usbdevice disk:format=raw:$DISK_IMG \
 #	-usbdevice host:0930:1319 \
 #	-usbdevice host:08ff:168b \
