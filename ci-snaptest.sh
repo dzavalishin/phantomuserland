@@ -2,8 +2,6 @@
 #
 # this script only runs snapshot test
 #
-set -x			# see what's going on
-
 cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
@@ -19,6 +17,7 @@ DISK_IMG=phantom.img
 DISK_IMG_ORIG=../../oldtree/run_test/$DISK_IMG
 LOGFILE=make.log	# start with build log
 GRUB_MENU=tftp/tftp/menu.lst
+EXIT_CODE=0
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
 then
@@ -61,61 +60,65 @@ die ( ) {
 }
 
 
-if [ "$SNAP_CI" ]
-then
+[ "$SNAP_CI" ] && {
 	UNATTENDED=-unattended
+	COMPILE=1
 	unset DISPLAY
-else
-	while [ $# -gt 0 ]
-	do
-		case "$1" in
-		-f)	FOREGROUND=1		;;
-		-u)	UNATTENDED=-unattended	;;
-		-p)
-			shift
-			[ "$1" -gt 0 ] && PASSES="$1"
-		;;
-		-ng)	unset DISPLAY	;;
-		-v)	VIRTIO=1	;;
-		*)
-			echo "Usage: $0 [-u|-f] [-c] [-p N] [-ng] [-v]
+}
+
+while [ $# -gt 0 ]
+do
+	case "$1" in
+	-c)	COMPILE=2		;;	# also make clean
+	-f)	FOREGROUND=1		;;
+	-u)	UNATTENDED=-unattended	;;
+	-p)
+		shift
+		[ "$1" -gt 0 ] && PASSES="$1"
+	;;
+	-ng)	unset DISPLAY	;;
+	-v)	VIRTIO=1	;;
+	*)
+		echo "Usage: $0 [-u|-f] [-c] [-p N] [-nc] [-ng] [-v]
 	-f	- run in foreground (no need to specify if other command line args presented)
 	-u	- run unattended (don't stop on panic for gdb)
-	-c	- run 'make clean' first
+	-c	- run 'make all' first (default in CI mode)
 	-p N	- make N passes of snapshot test (default: N=2)
-	-ng	- do not show qemu/kvm window
+	-ng	- do not show qemu/kvm window (default in CI mode)
 	-v	- use virtio for snaps
 "
-			exit 0
-		;;
-		esac
-		shift
-	done
-fi
+		exit 0
+	;;
+	esac
+	shift
+done
 
-[ "$DO_CLEANING" ] && make clean
-
-make all > $LOGFILE 2>&1 || die "Build failure"
-grep -B1 'error:\|] Error' $LOGFILE && {
-	grep '^--- kernel build finished' $LOGFILE || die "Build failure"
-}
-
-[ "$WARN" ] && {
-	echo Warnings:
-	grep : $LOGFILE
-}
-
-# now test building of Phantom library
-if (make -C plib > $LOGFILE 2>&1)
-then
-	[ "$WARN" ] && {
-		echo Successfully built Phantom library
-		grep Warning: $LOGFILE
+[ "$COMPILE" ] && {
+	[ "$COMPILE" = 2 ] && {
+		make clean > $LOGFILE 2>&1 || die "cleaning failure"
 	}
-else
-	echo "Phantom library build failure:"
-	tail -20 $LOGFILE
-fi
+	make all > $LOGFILE 2>&1 || die "Build failure"
+	grep -B1 'error:\|] Error' $LOGFILE && {
+		grep '^--- kernel build finished' $LOGFILE || die "Build failure"
+	}
+
+	[ "$WARN" ] && {
+		echo Warnings:
+		grep : $LOGFILE
+	}
+
+	# now test building of Phantom library
+	if (make -C plib > $LOGFILE 2>&1)
+	then
+		[ "$WARN" ] && {
+			echo Successfully built Phantom library
+			grep Warning: $LOGFILE
+		}
+	else
+		echo "Phantom library build failure:"
+		tail -20 $LOGFILE
+	fi
+}
 
 LOGFILE=serial0.log
 
@@ -130,8 +133,7 @@ call_gdb ( ) {
 	shift
 
 	# restore files
-	mv ${DISK_IMG}.orig $DISK_IMG
-	mv ${GRUB_MENU}.orig $GRUB_MENU
+	[ "$SNAP_CI" ] || mv ${GRUB_MENU}.orig $GRUB_MENU
 
 	cd $PHANTOM_HOME
 	echo "
@@ -206,7 +208,7 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 
 [ "$SNAP_CI" = true ] || cp $GRUB_MENU ${GRUB_MENU}.orig
 
-echo "color yellow/blue yellow/magenta
+echo "color white/green yellow/magenta
 
 timeout=3
 
@@ -260,12 +262,14 @@ FATAL! Phantom snapshot test crashed"
 
 FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
 				kill $QEMU_PID
+				EXIT_CODE=2
 				break
 			}
 		}
 		grep -iq 'snapshot done' $LOGFILE && break
 		grep -q '^\(\. \)\?Panic' $LOGFILE && {
 			sleep 15
+			EXIT_CODE=3
 			break
 		}
 	done
@@ -276,6 +280,7 @@ FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE && {
 		# show extract from the log here
 		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE
+		EXIT_CODE=3
 		#preserve_log serial0.log
 		break
 	}
@@ -284,6 +289,7 @@ FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
 		echo "
 ERROR! No snapshot activity in log! Phantom snapshot test failed"
 		tail -10 $LOGFILE
+		EXIT_CODE=4
 		#preserve_log $LOGFILE
 		break
 	}
@@ -298,3 +304,4 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 done
 
 [ "$SNAP_CI" = true ] || mv ${GRUB_MENU}.orig $GRUB_MENU
+exit $EXIT_CODE
