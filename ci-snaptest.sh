@@ -16,6 +16,7 @@ GDB_OPTS="-gdb tcp::$GDB_PORT"
 TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
+DISK_IMG_ORIG=../../oldtree/run_test/$DISK_IMG
 LOGFILE=make.log	# start with build log
 GRUB_MENU=tftp/tftp/menu.lst
 
@@ -32,7 +33,7 @@ fi
 die ( ) {
 	[ -s $LOGFILE ] && {
 		# submit all details in CI, show pre-failure condition interactively
-		if [ "$CRONMODE" ]
+		if [ "$SNAP_CI" ]
 		then
 			cat $LOGFILE | sed 's/^[[^m]*m//g;s/^M//g'
 		else
@@ -60,8 +61,11 @@ die ( ) {
 }
 
 
-if [ $# -gt 0 ]
+if [ "$SNAP_CI" ]
 then
+	UNATTENDED=-unattended
+	unset DISPLAY
+else
 	while [ $# -gt 0 ]
 	do
 		case "$1" in
@@ -87,10 +91,6 @@ then
 		esac
 		shift
 	done
-else
-	CRONMODE=1
-	UNATTENDED=-unattended
-	unset DISPLAY
 fi
 
 [ "$DO_CLEANING" ] && make clean
@@ -204,8 +204,7 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 #	-net dump,file=net.dmp \
 #	-net nic,model=ne2k_isa -M isapc \
 
-cp $DISK_IMG ${DISK_IMG}.orig
-cp $GRUB_MENU ${GRUB_MENU}.orig
+[ "$SNAP_CI" = true ] || cp $GRUB_MENU ${GRUB_MENU}.orig
 
 echo "color yellow/blue yellow/magenta
 
@@ -229,11 +228,11 @@ dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 
 if [ "$VIRTIO" ]
 then
-	cp ../$DISK_IMG vio.img
+	cp $DISK_IMG_ORIG vio.img
 	echo ": zeroing phantom drive ..."
 	dd if=/dev/zero of=phantom.img bs=4096 skip=1 count=1024 2> /dev/null
 else
-	cp ../$DISK_IMG .
+	cp $DISK_IMG_ORIG .
 	echo ": zeroing vio..."
 	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 fi
@@ -298,6 +297,4 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 	done
 done
 
-mv ${DISK_IMG}.orig $DISK_IMG
-mv ${GRUB_MENU}.orig $GRUB_MENU
-##rm $DISK_IMG $GRUB_MENU
+[ "$SNAP_CI" = true ] || mv ${GRUB_MENU}.orig $GRUB_MENU
