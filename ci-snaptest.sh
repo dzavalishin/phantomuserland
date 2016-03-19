@@ -2,6 +2,7 @@
 #
 # this script only runs snapshot test
 #
+set -x			# debug mode
 cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
