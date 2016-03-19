@@ -140,7 +140,7 @@ static void *port_pool_el_create(void *init)
 
 
     hal_spin_init(&(el->lock));
-    hal_spin_lock(&(el->lock));
+    hal_spin_lock_cli(&(el->lock));
 
     el->name = name;
 
@@ -196,7 +196,13 @@ int port_init(void)
     port_hash = hash_init( MAX_PORTS, offsetof(struct port_hash_entry, hash_next), &port_compare_func, &port_hash_func);
 
 #if CONF_NEW_PORTS
-    pool_t *port_pool = create_pool_ext( MAX_PORTS, 512 ); // hardcoded arena size
+    port_pool = create_pool_ext( MAX_PORTS, 512 ); // hardcoded arena size
+    if( !port_pool )
+    {
+        // TODO ERROR remove hash? Or just panic?
+        return ENOMEM;
+    }
+
     port_pool->destroy = port_pool_el_destroy;
     port_pool->init =    port_pool_el_create;
 #else

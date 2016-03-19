@@ -61,12 +61,12 @@ static void port_test_thread_func(void* arg)
     SHOW_INFO( 0, "port_read #1 code %d len %d buf %s", msg_code, n, buf);
     test_check_eq(n,5);
     test_check_eq( strcmp(buf, expected), 0 );
-#if 0
+
     SHOW_INFO0( 0, "porttest: testing delete p1 from other thread");
     n = port_delete(test_p1);
     SHOW_INFO0( 0, "porttest: end port_test_thread_func()");
     test_check_eq(n,0);
-#endif
+
 
     port_test_thread_func_finished = 1;
 }
