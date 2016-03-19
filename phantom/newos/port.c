@@ -3,23 +3,28 @@
  ** Distributed under the terms of the NewOS License.
  */
 
-//#include <kernel/kernel.h>
 #include <newos/compat.h>
 #include <newos/port.h>
 #include <newos/cbuf.h>
 
-//#include <kernel/sem.h>
-//#include <kernel/int.h>
 #include <kernel/debug.h>
-//#include <kernel/heap.h>
-//#include <kernel/vm.h>
-//#include <kernel/cbuf.h>
-//#include <newos/errors.h>
 
 #include <string.h>
 #include <stdlib.h>
 
 #include <hal.h>
+
+#if CONF_NEW_PORTS
+
+static pool_t *port_pool;
+
+#else
+
+static port_id next_port = 0;
+static struct port_entry *ports = NULL;
+
+#endif // CONF_NEW_PORTS
+
 
 struct port_msg {
     int				msg_code;
@@ -49,11 +54,7 @@ struct port_entry {
 #define MAX_QUEUE_LENGTH 4096
 #define PORT_MAX_MESSAGE_SIZE 65536
 
-static struct port_entry *ports = NULL;
-//static region_id port_region = 0;
 static bool ports_active = false;
-
-static port_id next_port = 0;
 
 static hal_spinlock_t port_spinlock;
 #define GRAB_PORT_LIST_LOCK() acquire_spinlock(&(port_spinlock))
@@ -69,6 +70,54 @@ static void dump_port_info(int argc, char **argv);
 
 
 
+#if CONF_NEW_PORTS
+static void port_pool_el_destroy(void *_el)
+{
+    struct port_entry *el = _el;
+    SHOW_FLOW0( 0, "port handle finalizer");
+
+    el->closed = true; // too late, but...
+
+    //struct port_msg*		msg_queue;
+
+    hal_sem_destroy( &el->sem_r );
+    hal_sem_destroy( &el->sem_w );
+
+    free( el->name ); // frees names of 2 semas too
+}
+
+static void *port_pool_el_create(void *init)
+{
+    // Name is allocated outside, reused as port name and name of 2 semas, and freed in port_pool_el_destroy
+    char *name = init;
+
+    struct port_entry *el = calloc(1, sizeof(struct port_entry));
+    SHOW_FLOW0( 0, "port handle init");
+
+
+    hal_spin_init(&(el->lock));
+
+    el->name = name;
+
+    if( hal_sem_init( &el->sem_r, name) ) {
+        // cleanup
+        free(el);
+        return 0;
+    }
+
+    if( hal_sem_init( &el->sem_w, name ) ) {
+        // cleanup
+        hal_sem_destroy( &el->sem_r );
+        free(el);
+        return 0;
+    }
+
+
+    return el;
+}
+#endif // CONF_NEW_PORTS
+
+
 
 int port_init(void)
 {
@@ -77,13 +126,18 @@ int port_init(void)
 
     hal_spin_init(&port_spinlock);
 
+#if CONF_NEW_PORTS
+    pool_t *port_pool = create_pool_ex( MAX_PORTS, 512 ); // hardcoded arena size
+    port_pool->destroy = port_pool_el_destroy;
+    port_pool->init =    port_pool_el_create;
+#else
     sz = sizeof(struct port_entry) * MAX_PORTS;
 
     ports = calloc(1, sz);
 
     for(i=0; i<MAX_PORTS; i++)
         ports[i].id = -1;
-
+#endif
     // add debugger commands
     dbg_add_command(&dump_port_list, "ports", "Dump a list of all active ports");
     dbg_add_command(&dump_port_info, "port", "Dump info about a particular port");
@@ -137,19 +191,19 @@ static void dump_port_info(int argc, char **argv)
         unsigned long num = (unsigned long)atol(argv[1]);
 
         /*
-        if(is_kernel_address(num)) {
-            // XXX semi-hack
-            // one can use either address or a port_id, since KERNEL_BASE > MAX_PORTS assumed
-            _dump_port_info((struct port_entry *)num);
+         if(is_kernel_address(num)) {
+         // XXX semi-hack
+         // one can use either address or a port_id, since KERNEL_BASE > MAX_PORTS assumed
+         _dump_port_info((struct port_entry *)num);
+         return;
+         } else {*/
+        unsigned slot = num % MAX_PORTS;
+        if(ports[slot].id != (int)num) {
+            dprintf("port 0x%lx doesn't exist!\n", num);
             return;
-        } else {*/
-            unsigned slot = num % MAX_PORTS;
-            if(ports[slot].id != (int)num) {
-                dprintf("port 0x%lx doesn't exist!\n", num);
-                return;
-            }
-            _dump_port_info(&ports[slot]);
-            return;
+        }
+        _dump_port_info(&ports[slot]);
+        return;
         //}
     }
 
@@ -227,7 +281,7 @@ port_create(int32 queue_length, const char *name)
         return -ENOMEM;
     }
 
-    // simulate hal_sem_init_etc by releasing sema 
+    // simulate hal_sem_init_etc by releasing sema
     {
         int c = queue_length;
         while(c--)
@@ -711,14 +765,14 @@ port_read_etc(port_id id,
     *msg_code = code;
     if (siz > 0) {
         /*
-        if (flags & PORT_FLAG_USE_USER_MEMCPY) {
-            if ((err = cbuf_user_memcpy_from_chain(msg_buffer, msg_store, 0, siz) < 0))	{
-                // leave the port intact, for other threads that might not crash
-                cbuf_free_chain(msg_store);
-                sem_release(cached_semid);
-                return err;
-            }
-        } else */
+         if (flags & PORT_FLAG_USE_USER_MEMCPY) {
+         if ((err = cbuf_user_memcpy_from_chain(msg_buffer, msg_store, 0, siz) < 0))	{
+         // leave the port intact, for other threads that might not crash
+         cbuf_free_chain(msg_store);
+         sem_release(cached_semid);
+         return err;
+         }
+         } else */
 
         cbuf_memcpy_from_chain(msg_buffer, msg_store, 0, siz);
     }
@@ -841,8 +895,8 @@ port_write_etc(port_id id,
     // 		slot is a thread-local variable
 
     if (res != 0) {
-		if(res != ETIMEDOUT)
-        	dprintf("write_port_etc: res unknown error %d\n", res);
+        if(res != ETIMEDOUT)
+            dprintf("write_port_etc: res unknown error %d\n", res);
         return -res; // negative errno
     }
 
@@ -851,12 +905,12 @@ port_write_etc(port_id id,
         if (msg_store == NULL)
             return -ENOMEM;
         /*
-        if (flags & PORT_FLAG_USE_USER_MEMCPY) {
-            // copy from user memory
-            if ((err = cbuf_user_memcpy_to_chain(msg_store, 0, msg_buffer, buffer_size)) < 0)
-                return err; // memory exception
-        } else
-        */
+         if (flags & PORT_FLAG_USE_USER_MEMCPY) {
+         // copy from user memory
+         if ((err = cbuf_user_memcpy_to_chain(msg_store, 0, msg_buffer, buffer_size)) < 0)
+         return err; // memory exception
+         } else
+         */
         // copy from kernel memory
         if ((err = cbuf_memcpy_to_chain(msg_store, 0, msg_buffer, buffer_size)) < 0)
             return err; // memory exception

@@ -12,6 +12,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// newos-style ports based on pool
+#define CONF_NEW_PORTS 1
+
 #define CONF_USE_VM_SYS_SIZE 1
 
 // use new (handle based) controlling ttys for threads
