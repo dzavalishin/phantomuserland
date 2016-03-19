@@ -41,13 +41,14 @@
 static pool_t *port_pool;
 static void   *port_hash; // name to pool handle
 
+/*
 struct port_hash_entry
 {
     struct port_entry	*hash_next;
     char                *name;
     pool_handle_t        h;
 };
-
+*/
 
 #else
 
@@ -64,6 +65,9 @@ struct port_msg {
 };
 
 struct port_entry {
+#if CONF_NEW_PORTS
+    struct port_entry		*hash_next;
+#endif // CONF_NEW_PORTS
     port_id 			id;
     proc_id 			owner;
     int32 			capacity;
@@ -109,6 +113,9 @@ static void port_pool_el_destroy(void *_el)
     SHOW_FLOW0( 0, "port handle finalizer");
 
     el->closed = true; // too late, but...
+
+    if( hash_remove( port_hash, el ) )
+        SHOW_ERROR( 0, "Hash remove fail for %s", el->name );
 
     //struct port_msg*		msg_queue;
 
@@ -157,6 +164,8 @@ static void *port_pool_el_create(void *init)
         return 0;
     }
 
+    if( hash_insert( port_hash, el ) )
+        SHOW_ERROR( 0, "Hash insert fail for %s", name );
 
     return el;
 }
@@ -166,7 +175,7 @@ static int port_compare_func(void *_hentry, const void *_name)
 {
     //ipv4_fragment *frag = _frag;
     //const ipv4_fragment_key *key = _key;
-    struct port_hash_entry *he = _hentry;
+    struct port_entry *he = _hentry;
     const char *name = _name;
 
     return strcmp( he->name, name );
@@ -175,7 +184,7 @@ static int port_compare_func(void *_hentry, const void *_name)
 // XXX lameo hash
 static unsigned int port_hash_func(void *_hentry, const void *_name, unsigned int range)
 {
-    struct port_hash_entry *he = _hentry;
+    struct port_entry *he = _hentry;
     const char *name = _name;
 
     if(he)
@@ -193,7 +202,7 @@ int port_init(void)
 {
     hal_spin_init(&port_spinlock);
 
-    port_hash = hash_init( MAX_PORTS, offsetof(struct port_hash_entry, hash_next), &port_compare_func, &port_hash_func);
+    port_hash = hash_init( MAX_PORTS, offsetof(struct port_entry, hash_next), &port_compare_func, &port_hash_func);
 
 #if CONF_NEW_PORTS
     port_pool = create_pool_ext( MAX_PORTS, 512 ); // hardcoded arena size
@@ -386,8 +395,8 @@ port_delete(port_id id)
         return -EINVAL;
     }
 
-#warning hash remove - check ret?
-    hash_remove(port_hash, port->name );
+    //#warning hash remove - check ret?
+    //hash_remove(port_hash, port->name );
 
 
     // We need to grab port lock to make sure every one is finished with it
@@ -453,12 +462,12 @@ port_find(const char *port_name)
     if(ports_active == false)   return -ENXIO;
     if(port_name == NULL)	return -EINVAL;
 
-
-    struct port_hash_entry* pe = hash_lookup(port_hash, port_name );
-    if( pe == 0 )
+    // if pe is just being created it can already be in hash but have no id field set
+    struct port_entry* pe = hash_lookup(port_hash, port_name );
+    if( (pe == 0) || (pe->id == 0) )
         return -ENOENT;
 
-    return pe->h;
+    return pe->id;
 }
 
 
