@@ -16,7 +16,7 @@ GDB_OPTS="-gdb tcp::$GDB_PORT"
 TEST_DIR=run/test	# was oldtree/run_test
 TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
-LOGFILE=serial0.log
+LOGFILE=make.log	# start with build log
 GRUB_MENU=tftp/tftp/menu.lst
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
@@ -74,9 +74,10 @@ then
 		-ng)	unset DISPLAY	;;
 		-v)	VIRTIO=1	;;
 		*)
-			echo "Usage: $0 [-u|-f] [-p N] [-ng] [-v]
+			echo "Usage: $0 [-u|-f] [-c] [-p N] [-ng] [-v]
 	-f	- run in foreground (no need to specify if other command line args presented)
 	-u	- run unattended (don't stop on panic for gdb)
+	-c	- run 'make clean' first
 	-p N	- make N passes of snapshot test (default: N=2)
 	-ng	- do not show qemu/kvm window
 	-v	- use virtio for snaps
@@ -91,6 +92,32 @@ else
 	UNATTENDED=-unattended
 	unset DISPLAY
 fi
+
+[ "$DO_CLEANING" ] && make clean
+
+make all > $LOGFILE 2>&1 || die "Build failure"
+grep -B1 'error:\|] Error' $LOGFILE && {
+	grep '^--- kernel build finished' $LOGFILE || die "Build failure"
+}
+
+[ "$WARN" ] && {
+	echo Warnings:
+	grep : $LOGFILE
+}
+
+# now test building of Phantom library
+if (make -C plib > $LOGFILE 2>&1)
+then
+	[ "$WARN" ] && {
+		echo Successfully built Phantom library
+		grep Warning: $LOGFILE
+	}
+else
+	echo "Phantom library build failure:"
+	tail -20 $LOGFILE
+fi
+
+LOGFILE=serial0.log
 
 call_gdb ( ) {
 	[ "$UNATTENDED" ] || {
