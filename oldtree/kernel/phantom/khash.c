@@ -11,9 +11,8 @@
 #include <phantom_libc.h>
 
 
-#include "hal.h"
-#include "khash.h"
-//#include "newos.h"
+#include <hal.h>
+#include <kernel/khash.h>
 
 
 #define VERIFY_TABLE 0
@@ -113,7 +112,7 @@ int hash_uninit(void *_hash_table)
 	struct hash_table *t = _hash_table;
 
 #if 0
-	if(t->num_elems > 0) {
+	if(t->num_elems > 0) { // TODO ERR FIXME panic? print err?
 		return -1;
 	}
 #endif

@@ -28,7 +28,7 @@
 
 #include <threads.h>
 
-#include "khash.h"
+#include <kernel/khash.h>
 
 // ------------------------------------------------------------
 // Internals

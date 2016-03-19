@@ -32,7 +32,7 @@
 #include <vm/khandle.h>
 #include <vm/connect.h>
 
-#include <khash.h>
+#include <kernel/khash.h>
 #include <threads.h>
 
 

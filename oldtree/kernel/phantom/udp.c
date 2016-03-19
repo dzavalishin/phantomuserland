@@ -20,7 +20,7 @@
  ** Distributed under the terms of the NewOS License.
  */
 
-#include "khash.h"
+#include <kernel/khash.h>
 
 #include "endian.h"
 #include <hal.h>

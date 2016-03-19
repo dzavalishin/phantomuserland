@@ -20,7 +20,7 @@
 #include <threads.h>
 
 #include <kernel/net/arp.h>
-#include "khash.h"
+#include <kernel/khash.h>
 #include <kernel/net.h>
 #include <kernel/net/ethernet.h>
 

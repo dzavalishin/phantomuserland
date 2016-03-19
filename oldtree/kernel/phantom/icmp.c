@@ -17,7 +17,7 @@
  ** Distributed under the terms of the NewOS License.
  */
 
-#include "khash.h"
+#include <kernel/khash.h>
 #include <kernel/net.h>
 #include <kernel/net/ethernet.h>
 

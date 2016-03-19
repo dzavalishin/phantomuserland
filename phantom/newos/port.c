@@ -1,22 +1,53 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Ports. Based on NewOS ports code.
+ *
+**/
+
 /*
  ** Copyright 2001-2004, Mark-Jan Bastian. All rights reserved.
  ** Distributed under the terms of the NewOS License.
  */
+
+#define DEBUG_MSG_PREFIX "port"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <newos/compat.h>
 #include <newos/port.h>
 #include <newos/cbuf.h>
 
 #include <kernel/debug.h>
+#include <kernel/sem.h>
 
 #include <string.h>
 #include <stdlib.h>
 
 #include <hal.h>
+#include <threads.h>
 
 #if CONF_NEW_PORTS
+#include <hashfunc.h>
+#include <kernel/khash.h>
+#include <kernel/pool.h>
+
 
 static pool_t *port_pool;
+static void   *port_hash; // name to pool handle
+
+struct port_hash_entry
+{
+    struct port_entry	*hash_next;
+    char                *name;
+    pool_handle_t        h;
+};
+
 
 #else
 
@@ -59,8 +90,9 @@ static bool ports_active = false;
 static hal_spinlock_t port_spinlock;
 #define GRAB_PORT_LIST_LOCK() acquire_spinlock(&(port_spinlock))
 #define RELEASE_PORT_LIST_LOCK() release_spinlock(&(port_spinlock))
-#define GRAB_PORT_LOCK(s) acquire_spinlock(&(s).lock)
-#define RELEASE_PORT_LOCK(s) release_spinlock(&(s).lock)
+
+#define GRAB_PORT_LOCK(s) hal_spin_lock_cli(&(s).lock)
+#define RELEASE_PORT_LOCK(s) hal_spin_unlock_sti(&(s).lock)
 
 
 // internal API
@@ -80,8 +112,20 @@ static void port_pool_el_destroy(void *_el)
 
     //struct port_msg*		msg_queue;
 
-    hal_sem_destroy( &el->sem_r );
-    hal_sem_destroy( &el->sem_w );
+    hal_sem_destroy( &el->read_sem );
+    hal_sem_destroy( &el->write_sem );
+
+    struct port_msg *q = el->msg_queue;
+
+    // delete the cbuf's that are left in the queue (if any)
+    int i;
+    for( i = 0; i < el->capacity; i++ )
+    {
+        if (q[i].data_cbuf != NULL)
+            cbuf_free_chain(q[i].data_cbuf);
+    }
+
+    free( q );
 
     free( el->name ); // frees names of 2 semas too
 }
@@ -96,18 +140,19 @@ static void *port_pool_el_create(void *init)
 
 
     hal_spin_init(&(el->lock));
+    hal_spin_lock(&(el->lock));
 
     el->name = name;
 
-    if( hal_sem_init( &el->sem_r, name) ) {
+    if( hal_sem_init( &el->read_sem, name) ) {
         // cleanup
         free(el);
         return 0;
     }
 
-    if( hal_sem_init( &el->sem_w, name ) ) {
+    if( hal_sem_init( &el->write_sem, name ) ) {
         // cleanup
-        hal_sem_destroy( &el->sem_r );
+        hal_sem_destroy( &el->read_sem );
         free(el);
         return 0;
     }
@@ -115,26 +160,52 @@ static void *port_pool_el_create(void *init)
 
     return el;
 }
+
+
+static int port_compare_func(void *_hentry, const void *_name)
+{
+    //ipv4_fragment *frag = _frag;
+    //const ipv4_fragment_key *key = _key;
+    struct port_hash_entry *he = _hentry;
+    const char *name = _name;
+
+    return strcmp( he->name, name );
+}
+
+// XXX lameo hash
+static unsigned int port_hash_func(void *_hentry, const void *_name, unsigned int range)
+{
+    struct port_hash_entry *he = _hentry;
+    const char *name = _name;
+
+    if(he)
+        return calc_hash( he->name, 0 ) % range;
+    else
+        return calc_hash( name, 0 ) % range;
+}
+
+
 #endif // CONF_NEW_PORTS
 
 
 
 int port_init(void)
 {
-    int i;
-    int sz;
-
     hal_spin_init(&port_spinlock);
 
+    port_hash = hash_init( MAX_PORTS, offsetof(struct port_hash_entry, hash_next), &port_compare_func, &port_hash_func);
+
 #if CONF_NEW_PORTS
-    pool_t *port_pool = create_pool_ex( MAX_PORTS, 512 ); // hardcoded arena size
+    pool_t *port_pool = create_pool_ext( MAX_PORTS, 512 ); // hardcoded arena size
     port_pool->destroy = port_pool_el_destroy;
     port_pool->init =    port_pool_el_create;
 #else
+    int sz;
     sz = sizeof(struct port_entry) * MAX_PORTS;
 
     ports = calloc(1, sz);
 
+    int i;
     for(i=0; i<MAX_PORTS; i++)
         ports[i].id = -1;
 #endif
@@ -147,16 +218,580 @@ int port_init(void)
     return 0;
 }
 
-void dump_port_list(int argc, char **argv)
-{
-    int i;
 
-    for(i=0; i<MAX_PORTS; i++) {
-        if(ports[i].id >= 0) {
-            dprintf("%p\tid: 0x%x\t\tname: '%s'\n", &ports[i], ports[i].id, ports[i].name);
-        }
+
+#if CONF_NEW_PORTS
+
+port_id
+port_create(int32 queue_length, const char *name)
+{
+    port_id 	retval;
+    char 	*temp_name;
+    int 	name_len;
+    void 	*q;
+    //proc_id	owner;
+    //int __newos_intstate;
+
+    if(ports_active == false)
+        return -ENXIO;
+
+
+    // Prepare name ------------------------------------------------------
+
+    if(name == NULL)
+        name = "unnamed port";
+
+    name_len = strlen(name) + 1;
+    name_len = min(name_len, SYS_MAX_OS_NAME_LEN);
+
+    temp_name = (char *)malloc(name_len);
+    if(temp_name == NULL)
+        return -ENOMEM;
+
+    strlcpy(temp_name, name, name_len);
+
+    // Make queue --------------------------------------------------------
+
+    // check queue length
+    if( queue_length < 1 || queue_length > MAX_QUEUE_LENGTH )
+    {
+        SHOW_ERROR( 1, "Port %s queue size wrong = %d, made %d", name, queue_length, MAX_QUEUE_LENGTH );
+        queue_length = MAX_QUEUE_LENGTH;
     }
+
+    // alloc a queue
+    q = malloc( queue_length * sizeof(struct port_msg) );
+    if(q == NULL)
+    {
+        free(temp_name); // dealloc name, too
+        SHOW_ERROR( 1, "Port %s queue out of mem, wanted %d bytes", name, queue_length * sizeof(struct port_msg) );
+        return -ENOMEM;
+    }
+
+
+    // Get pool el -------------------------------------------------------
+
+
+    pool_handle_t ph = pool_create_el( port_pool, temp_name );
+    if( ph < 0 )
+    {
+        SHOW_ERROR( 0, "Pool insert fail port %s", temp_name );
+        retval = -ENOMEM;
+        goto err;
+    }
+
+    struct port_entry *port = pool_get_el( port_pool, ph );
+    if( !port )
+    {
+        SHOW_ERROR( 0, "Integrity fail: not in pool after create!? %s", temp_name );
+        retval = -ENOENT;
+        goto err;
+    }
+
+    // wrong - pool el is available to others here, must be locked in the el creation code
+    // wrong - redo pool code with spinlocks!
+    port->owner = get_current_tid();
+
+    //GRAB_PORT_LIST_LOCK();
+
+    port->id = ph; // my id is my pool handle
+
+    // locked in pool el create func above
+    //GRAB_PORT_LOCK(port);
+    //RELEASE_PORT_LIST_LOCK();
+
+    port->capacity	= queue_length;
+
+    // simulate hal_sem_init_etc by releasing sema
+    {
+        int c = queue_length;
+        while(c--)
+            hal_sem_release( &port->write_sem );
+    }
+
+    port->msg_queue	= q;
+    port->head 		= 0;
+    port->tail 		= 0;
+    port->total_count= 0;
+
+    retval = port->id;
+    hal_spin_unlock( &port->lock ); // locked in pool port create code
+
+
+    return retval;
+
+//ierr:
+//    int_restore_interrupts();
+
+err:
+
+
+    if( temp_name ) free(temp_name);
+
+    return retval;
 }
+
+
+
+
+
+int
+port_close(port_id id)
+{
+    if(ports_active == false)   return -ENXIO;
+
+    struct port_entry *port = pool_get_el( port_pool, id );
+    if( port == 0 )
+    {
+        SHOW_ERROR( 0, "port 0x%x doesn't exist!", id );
+        return -EINVAL;
+    }
+
+    port->closed = true;
+
+    pool_release_el( port_pool, id );
+    return 0;
+}
+
+
+
+
+
+
+int
+port_delete(port_id id)
+{
+    //int slot;
+    //sem_id	r_sem, w_sem;
+    //int capacity;
+    //int i;
+    //int __newos_intstate;
+
+    //char *old_name;
+    //struct port_msg *q;
+
+    if(ports_active == false)   return -ENXIO;
+
+
+    struct port_entry *port = pool_get_el( port_pool, id );
+    if( port == 0 )
+    {
+        SHOW_ERROR( 0, "port 0x%x doesn't exist!", id );
+        return -EINVAL;
+    }
+
+#warning hash remove - check ret?
+    hash_remove(port_hash, port->name );
+
+
+    // We need to grab port lock to make sure every one is finished with it
+    //__newos_intstate = hal_save_cli();
+    GRAB_PORT_LOCK(*port);
+
+    port->closed = true;
+
+    RELEASE_PORT_LOCK(*port);
+    //int_restore_interrupts();
+
+    int count;
+
+    while( 1 )
+    {
+        if( sem_get_count( &port->read_sem, &count) )
+            break;
+
+        if( count <= 0 )
+            hal_sem_release( &port->read_sem );
+
+        hal_sleep_msec(1); // FIXME races?
+    }
+
+    while( 1 )
+    {
+        if( sem_get_count( &port->write_sem, &count) )
+            break;
+
+        if( count <= 0 )
+            hal_sem_release( &port->write_sem );
+
+        hal_sleep_msec(1); // FIXME races?
+    }
+
+#warning check port->closed after any sem_acquire
+    pool_release_el( port_pool, id ); // release my get_el ref count
+    pool_release_el( port_pool, id ); // release initial ref_count
+
+    hal_sleep_msec(1); // FIXME races? 
+
+    if( pool_get_el( port_pool, id ) )
+    {
+        SHOW_ERROR( 0, "port 0x%x still exist after delete!", id );
+        pool_release_el( port_pool, id ); // release initial ref_count
+    }
+
+
+    return 0;
+}
+
+
+
+
+
+
+
+#warning must return errno_t
+
+port_id
+port_find(const char *port_name)
+{
+    if(ports_active == false)   return -ENXIO;
+    if(port_name == NULL)	return -EINVAL;
+
+
+    struct port_hash_entry* pe = hash_lookup(port_hash, port_name );
+    if( pe == 0 )
+        return -ENOENT;
+
+    return pe->h;
+}
+
+
+
+
+
+
+
+int
+port_get_info(port_id id, struct port_info *info)
+{
+    //int __newos_intstate;
+
+    if(ports_active == false)	return -ENXIO;
+    if (info == NULL)        	return -EINVAL;
+
+
+    struct port_entry *port = pool_get_el( port_pool, id );
+    if( port == 0 )
+    {
+        SHOW_ERROR( 0, "port 0x%x doesn't exist!", id );
+        return -EINVAL;
+    }
+
+    //__newos_intstate = hal_save_cli();
+    GRAB_PORT_LOCK(*port);
+
+    // fill a port_info struct with info
+    info->id			= port->id;
+    info->owner 		= port->owner;
+    strncpy(info->name, port->name, min(strlen(port->name),SYS_MAX_OS_NAME_LEN-1));
+    info->capacity		= port->capacity;
+    sem_get_count( &(port->read_sem), &info->queue_count);
+    info->total_count		= port->total_count;
+
+    RELEASE_PORT_LOCK(*port);
+    //int_restore_interrupts();
+
+    pool_release_el( port_pool, id ); // release initial ref_count
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+ssize_t
+port_read(port_id port,
+          int32 *msg_code,
+          void *msg_buffer,
+          size_t buffer_size)
+{
+    return port_read_etc(port, msg_code, msg_buffer, buffer_size, 0, 0);
+}
+
+#warning check err signs, return errno_t
+
+ssize_t
+port_read_etc(port_id id,
+              int32	*msg_code,
+              void	*msg_buffer,
+              size_t	buffer_size,
+              uint32	flags,
+              bigtime_t	timeout)
+{
+    size_t 	siz;
+    int		res;
+    int		t;
+    cbuf*	msg_store;
+    int32	code;
+    //int		ei;
+
+    if(ports_active == false)        			return -ENXIO;
+    if(msg_code == NULL)        			return -EINVAL;
+    if((msg_buffer == NULL) && (buffer_size > 0))       return -EINVAL;
+    //if (timeout < 0)        				return -EINVAL;
+
+    flags &= (PORT_FLAG_USE_USER_MEMCPY | PORT_FLAG_INTERRUPTABLE | PORT_FLAG_TIMEOUT);
+
+
+    struct port_entry *port = pool_get_el( port_pool, id );
+    if( port == 0 )
+    {
+        SHOW_ERROR( 0, "port 0x%x doesn't exist!", id );
+        return -EINVAL;
+    }
+
+
+    // get 1 entry from the queue, block if needed
+    res = sem_acquire_etc(port->read_sem, 1, flags, timeout, NULL);
+
+    // port deletion code might wake us up here, check it
+    if( port->closed )
+        goto dead;
+
+    if (res != 0) {
+        if(res != ETIMEDOUT)
+            SHOW_ERROR( 0, "write_port_etc: res unknown error %d", res);
+        goto reterr;
+    }
+
+    //ei = hal_save_cli();
+    GRAB_PORT_LOCK(*port);
+
+    // port deletion code might wake us up here, check it
+    if( port->closed )
+    {
+        RELEASE_PORT_LOCK(*port);
+        //if(ei) hal_sti();
+        goto dead;
+    }
+
+    t = port->tail;
+    if (t < 0)        	    	panic("port %id: tail < 0", port->id );
+    if (t > port->capacity)     panic("port %id: tail > cap %d", port->id, port->capacity );
+
+    port->tail = (port->tail + 1) % port->capacity;
+
+    msg_store	= port->msg_queue[t].data_cbuf;
+    code 	= port->msg_queue[t].msg_code;
+
+    // mark queue entry unused
+    port->msg_queue[t].data_cbuf	= NULL;
+
+    // check output buffer size
+    siz	= min(buffer_size, port->msg_queue[t].data_len);
+
+    RELEASE_PORT_LOCK(*port);
+    //if(ei) hal_sti();
+
+    // copy message
+    *msg_code = code;
+    if (siz > 0)
+        cbuf_memcpy_from_chain(msg_buffer, msg_store, 0, siz);
+
+    // free the cbuf
+    cbuf_free_chain(msg_store);
+
+    // make one spot in queue available again for write
+    sem_release(port->write_sem);
+
+    pool_release_el( port_pool, id ); // release initial ref_count
+
+    return siz;
+
+reterr:
+    pool_release_el( port_pool, id ); // release initial ref_count
+    return -res; // sem_acquire_etc returns positive errno, and we're negative
+
+dead:
+    pool_release_el( port_pool, id ); // release initial ref_count
+    return -ENOENT;
+}
+
+
+
+
+
+
+
+
+
+errno_t
+port_write(port_id id,
+           int32 msg_code,
+           void *msg_buffer,
+           size_t buffer_size)
+{
+    return port_write_etc(id, msg_code, msg_buffer, buffer_size, 0, 0);
+}
+
+errno_t
+port_write_etc(port_id id,
+               int32 msg_code,
+               void *msg_buffer,
+               size_t buffer_size,
+               uint32 flags,
+               bigtime_t timeout)
+{
+    int res;
+    int h;
+    cbuf* msg_store;
+    //int c1, c2;
+    int err; //, ei;
+
+    if(ports_active == false)           return -ENXIO;
+    if(id < 0)        			return -EINVAL;
+
+    // mask irrelevant flags
+    flags &= PORT_FLAG_USE_USER_MEMCPY | PORT_FLAG_INTERRUPTABLE | PORT_FLAG_TIMEOUT;
+
+    // check buffer_size
+    if (buffer_size > PORT_MAX_MESSAGE_SIZE)
+        return -EINVAL;
+
+    struct port_entry *port = pool_get_el( port_pool, id );
+    if( port == 0 )
+    {
+        SHOW_ERROR( 0, "port 0x%x doesn't exist!", id );
+        return -EINVAL;
+    }
+
+    res = sem_acquire_etc( port->write_sem, 1, flags & (SEM_FLAG_TIMEOUT | SEM_FLAG_INTERRUPTABLE), timeout, NULL);
+
+    // port deletion code might wake us up here, check it
+    GRAB_PORT_LOCK(*port);
+    if( port->closed )
+    {
+        RELEASE_PORT_LOCK(*port);
+        goto dead;
+    }
+    RELEASE_PORT_LOCK(*port);
+
+
+    if (res != 0) {
+        if(res != ETIMEDOUT)
+            dprintf("write_port_etc: res unknown error %d\n", res);
+        return -res; // negative errno
+    }
+
+    if (buffer_size > 0) {
+        msg_store = cbuf_get_chain(buffer_size);
+        if (msg_store == NULL)
+            return -ENOMEM;
+        if ((err = cbuf_memcpy_to_chain(msg_store, 0, msg_buffer, buffer_size)) < 0)
+            return err; // memory exception
+    } else {
+        msg_store = NULL;
+    }
+
+    // attach copied message to queue
+    GRAB_PORT_LOCK(*port);
+
+    h = port->head;
+    if (h < 0)        		panic("port %id: head < 0", port->id);
+    if (h >= port->capacity)    panic("port %id: head > cap %d", port->id, port->capacity);
+
+    port->msg_queue[h].msg_code	= msg_code;
+    port->msg_queue[h].data_cbuf	= msg_store;
+    port->msg_queue[h].data_len	= buffer_size;
+    port->head = (port->head + 1) % port->capacity;
+    port->total_count++;
+
+
+    RELEASE_PORT_LOCK(*port);
+
+
+    //sem_get_count( &(port->read_sem), &c1);
+    //sem_get_count( &(port->write_sem), &c2);
+
+    // release sem, allowing read (might reschedule)
+    sem_release( port->read_sem );
+
+    pool_release_el( port_pool, id ); // release initial ref_count
+
+    return 0;
+
+dead:
+    pool_release_el( port_pool, id ); // release initial ref_count
+    return -ENOENT;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif // CONF_NEW_PORTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if 1
 
@@ -177,10 +812,19 @@ static void _dump_port_info(struct port_entry *port)
     dprintf("write_sem: %d\n", cnt);
 }
 
+errno_t pool_dump_port(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    struct port_entry *port = el;
+    (void) pool;
+    (void) handle;
+    (void) arg;
+
+    _dump_port_info(port);
+    return 0;
+}
+
 static void dump_port_info(int argc, char **argv)
 {
-    int i;
-
     if(argc < 2) {
         dprintf("port: not enough arguments\n");
         return;
@@ -190,22 +834,34 @@ static void dump_port_info(int argc, char **argv)
     if(strlen(argv[1]) > 2 && argv[1][0] == '0' && argv[1][1] == 'x') {
         unsigned long num = (unsigned long)atol(argv[1]);
 
-        /*
-         if(is_kernel_address(num)) {
-         // XXX semi-hack
-         // one can use either address or a port_id, since KERNEL_BASE > MAX_PORTS assumed
-         _dump_port_info((struct port_entry *)num);
-         return;
-         } else {*/
+#if CONF_NEW_PORTS
+        struct port_entry *port = pool_get_el( port_pool, num );
+        if( port == 0 )
+        {
+            SHOW_ERROR( 0, "port 0x%lx doesn't exist!", num);
+            return;
+        }
+        _dump_port_info(port);
+        pool_release_el( port_pool, num );
+
+#else
         unsigned slot = num % MAX_PORTS;
         if(ports[slot].id != (int)num) {
             dprintf("port 0x%lx doesn't exist!\n", num);
             return;
         }
         _dump_port_info(&ports[slot]);
+#endif
         return;
-        //}
+
     }
+
+#if CONF_NEW_PORTS
+
+    pool_foreach( port_pool, pool_dump_port, 0 );
+
+#else
+    int i;
 
     // walk through the ports list, trying to match name
     for(i=0; i<MAX_PORTS; i++) {
@@ -215,9 +871,13 @@ static void dump_port_info(int argc, char **argv)
                 return;
             }
     }
+#endif
+
 }
 #endif
 
+
+#if !CONF_NEW_PORTS
 port_id
 port_create(int32 queue_length, const char *name)
 {
@@ -228,7 +888,7 @@ port_create(int32 queue_length, const char *name)
     int 	name_len;
     void 	*q;
     proc_id	owner;
-    int __newos_intstate;
+    int __newos_intstate; // wee need it as spinlocks overlap
 
     memset( &sem_r, 0, sizeof(sem_r) );
     memset( &sem_w, 0, sizeof(sem_w) );
@@ -347,20 +1007,34 @@ out:
     return retval;
 }
 
+void dump_port_list(int argc, char **argv)
+{
+    int i;
+
+    for(i=0; i<MAX_PORTS; i++) {
+        if(ports[i].id >= 0) {
+            dprintf("%p\tid: 0x%x\t\tname: '%s'\n", &ports[i], ports[i].id, ports[i].name);
+        }
+    }
+}
+
+
+
+
+
 int
 port_close(port_id id)
 {
     int		slot;
-    int     __newos_intstate;
+    //int     __newos_intstate;
 
     if(ports_active == false)   return -ENXIO;
     if(id < 0)                  return -EINVAL;
-
     slot = id % MAX_PORTS;
 
     // walk through the sem list, trying to match name
     //int_disable_interrupts();
-    __newos_intstate = hal_save_cli();
+    //__newos_intstate = hal_save_cli();
 
     GRAB_PORT_LOCK(ports[slot]);
 
@@ -374,10 +1048,13 @@ port_close(port_id id)
     ports[slot].closed = true;
 
     RELEASE_PORT_LOCK(ports[slot]);
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     return 0;
 }
+
+
+
 
 #warning port delete kills OS
 int
@@ -387,7 +1064,7 @@ port_delete(port_id id)
     sem_id	r_sem, w_sem;
     int capacity;
     int i;
-    int __newos_intstate;
+    //int __newos_intstate;
 
     char *old_name;
     struct port_msg *q;
@@ -398,12 +1075,12 @@ port_delete(port_id id)
     slot = id % MAX_PORTS;
 
     //int_disable_interrupts();
-    __newos_intstate = hal_save_cli();
+    //__newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
-        int_restore_interrupts();
+        //int_restore_interrupts();
         dprintf("port_delete: invalid port_id %d\n", id);
         return -EINVAL;
     }
@@ -418,7 +1095,7 @@ port_delete(port_id id)
     ports[slot].name = NULL;
 
     RELEASE_PORT_LOCK(ports[slot]);
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     // delete the cbuf's that are left in the queue (if any)
     for (i=0; i<capacity; i++) {
@@ -438,19 +1115,24 @@ port_delete(port_id id)
     return 0;
 }
 
+
+
+
+
+
 port_id
 port_find(const char *port_name)
 {
     int i;
     int ret_val = -EINVAL;
-    int __newos_intstate;
+    //int __newos_intstate;
 
     if(ports_active == false)   return -ENXIO;
     if(port_name == NULL)	return -EINVAL;
 
     // lock list of ports
     //int_disable_interrupts();
-    __newos_intstate = hal_save_cli();
+    //__newos_intstate = hal_save_cli();
     GRAB_PORT_LIST_LOCK();
 
     // loop over list
@@ -466,16 +1148,18 @@ port_find(const char *port_name)
     }
 
     RELEASE_PORT_LIST_LOCK();
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     return ret_val;
 }
+
+
 
 int
 port_get_info(port_id id, struct port_info *info)
 {
     int slot;
-    int __newos_intstate;
+    //int __newos_intstate;
 
     if(ports_active == false)	return -ENXIO;
     if (info == NULL)        	return -EINVAL;
@@ -484,12 +1168,12 @@ port_get_info(port_id id, struct port_info *info)
     slot = id % MAX_PORTS;
 
     //int_disable_interrupts();
-    __newos_intstate = hal_save_cli();
+    //__newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
-        int_restore_interrupts();
+        //int_restore_interrupts();
         dprintf("port_get_info: invalid port_id %d\n", id);
         return -EINVAL;
     }
@@ -503,11 +1187,12 @@ port_get_info(port_id id, struct port_info *info)
     info->total_count	= ports[slot].total_count;
 
     RELEASE_PORT_LOCK(ports[slot]);
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     // from our port_entry
     return 0;
 }
+
 
 int
 port_get_next_port_info(proc_id proc,
@@ -515,7 +1200,7 @@ port_get_next_port_info(proc_id proc,
                         struct port_info *info)
 {
     int slot;
-    int __newos_intstate;
+    //int __newos_intstate;
 
     if(ports_active == false)	return -ENXIO;
     if (cookie == NULL)        	return -EINVAL;
@@ -531,7 +1216,7 @@ port_get_next_port_info(proc_id proc,
 
     // spinlock
     //int_disable_interrupts();
-    __newos_intstate = hal_save_cli();
+    //__newos_intstate = hal_save_cli();
     GRAB_PORT_LIST_LOCK();
 
     info->id = -1; // used as found flag
@@ -555,7 +1240,7 @@ port_get_next_port_info(proc_id proc,
         slot++;
     }
     RELEASE_PORT_LIST_LOCK();
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     if (info->id == -1)
         return -ENOENT;
@@ -578,7 +1263,7 @@ port_buffer_size_etc(port_id id,
     int res;
     int t;
     int len;
-    int __newos_intstate;
+    //int __newos_intstate;
 
     if(ports_active == false)	return -ENXIO;
     if(id < 0)                  return -EINVAL;
@@ -586,7 +1271,7 @@ port_buffer_size_etc(port_id id,
     slot = id % MAX_PORTS;
 
     //int_disable_interrupts();
-    __newos_intstate = hal_save_cli();
+    //__newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
@@ -596,7 +1281,7 @@ port_buffer_size_etc(port_id id,
         return -EINVAL;
     }
     RELEASE_PORT_LOCK(ports[slot]);
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     // block if no message,
     // if TIMEOUT flag set, block with timeout
@@ -638,7 +1323,7 @@ port_count(port_id id)
 {
     int slot;
     int count;
-    int __newos_intstate;
+    //int __newos_intstate;
 
     if(ports_active == false)   return -ENXIO;
     if(id < 0)                  return -EINVAL;
@@ -646,12 +1331,12 @@ port_count(port_id id)
     slot = id % MAX_PORTS;
 
     //int_disable_interrupts();
-    __newos_intstate = hal_save_cli();
+    //__newos_intstate = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
-        int_restore_interrupts();
+        //int_restore_interrupts();
         dprintf("port_count: invalid port_id %d\n", id);
         return -EINVAL;
     }
@@ -662,7 +1347,7 @@ port_count(port_id id)
         count = 0;
 
     RELEASE_PORT_LOCK(ports[slot]);
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     // return count of messages (sem_count)
     return count;
@@ -692,7 +1377,7 @@ port_read_etc(port_id id,
     int		t;
     cbuf*	msg_store;
     int32	code;
-    int		ei;
+    //int		ei;
 
     if(ports_active == false)        			return -ENXIO;
     if(id < 0)        					return -EINVAL;
@@ -704,12 +1389,12 @@ port_read_etc(port_id id,
 
     slot = id % MAX_PORTS;
 
-    ei = hal_save_cli();
+    //ei = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
-        if(ei) hal_sti();
+        //if(ei) hal_sti();
         dprintf("read_port_etc: invalid port_id %d\n", id);
         return -EINVAL;
     }
@@ -718,7 +1403,7 @@ port_read_etc(port_id id,
 
     // unlock port && enable ints/
     RELEASE_PORT_LOCK(ports[slot]);
-    if(ei) hal_sti();
+    //if(ei) hal_sti();
 
     // XXX -> possible race condition if port gets deleted (->sem deleted too), therefore
     // sem_id is cached in local variable up here
@@ -736,7 +1421,7 @@ port_read_etc(port_id id,
         goto reterr;
     }
 
-    ei = hal_save_cli();
+    //ei = hal_save_cli();
     GRAB_PORT_LOCK(ports[slot]);
 
     t = ports[slot].tail;
@@ -759,7 +1444,7 @@ port_read_etc(port_id id,
     cached_semid = ports[slot].write_sem;
 
     RELEASE_PORT_LOCK(ports[slot]);
-    if(ei) hal_sti();
+    //if(ei) hal_sti();
 
     // copy message
     *msg_code = code;
@@ -800,7 +1485,7 @@ port_set_owner(port_id id, proc_id proc)
 
     slot = id % MAX_PORTS;
 
-    int_disable_interrupts();
+    //int_disable_interrupts();
     GRAB_PORT_LOCK(ports[slot]);
 
     if(ports[slot].id != id) {
@@ -815,7 +1500,7 @@ port_set_owner(port_id id, proc_id proc)
 
     // unlock port
     RELEASE_PORT_LOCK(ports[slot]);
-    int_restore_interrupts();
+    //int_restore_interrupts();
 
     return 0;
 }
@@ -851,7 +1536,7 @@ port_write_etc(port_id id,
     if(id < 0)        			return -EINVAL;
 
     // mask irrelevant flags
-    flags = flags & (PORT_FLAG_USE_USER_MEMCPY | PORT_FLAG_INTERRUPTABLE | PORT_FLAG_TIMEOUT);
+    flags &= PORT_FLAG_USE_USER_MEMCPY | PORT_FLAG_INTERRUPTABLE | PORT_FLAG_TIMEOUT;
 
     slot = id % MAX_PORTS;
 
@@ -960,7 +1645,7 @@ int port_delete_owned_ports(proc_id owner)
     if(ports_active == false)
         return -ENXIO;
 
-    int ei = hal_save_cli();
+    //int ei = hal_save_cli();
     GRAB_PORT_LIST_LOCK();
 
     for(i=0; i<MAX_PORTS; i++) {
@@ -979,301 +1664,12 @@ int port_delete_owned_ports(proc_id owner)
     }
 
     RELEASE_PORT_LIST_LOCK();
-    if(ei) hal_sti();
+    //if(ei) hal_sti();
 
     return count;
 }
 #endif
 
-
-
-#if 0
-/*
- * testcode
- */
-
-port_id test_p1, test_p2, test_p3, test_p4;
-
-void port_test()
-{
-    char testdata[5];
-    thread_id t;
-    int res;
-    int32 dummy;
-    int32 dummy2;
-
-    strcpy(testdata, "abcd");
-
-    dprintf("porttest: port_create()\n");
-    test_p1 = port_create(1,    "test port #1");
-    test_p2 = port_create(10,   "test port #2");
-    test_p3 = port_create(1024, "test port #3");
-    test_p4 = port_create(1024, "test port #4");
-
-    dprintf("porttest: port_find()\n");
-    dprintf("'test port #1' has id %d (should be %d)\n", port_find("test port #1"), test_p1);
-
-    dprintf("porttest: port_write() on 1, 2 and 3\n");
-    port_write(test_p1, 1, &testdata, sizeof(testdata));
-    port_write(test_p2, 666, &testdata, sizeof(testdata));
-    port_write(test_p3, 999, &testdata, sizeof(testdata));
-    dprintf("porttest: port_count(test_p1) = %d\n", port_count(test_p1));
-
-    dprintf("porttest: port_write() on 1 with timeout of 1 sec (blocks 1 sec)\n");
-    port_write_etc(test_p1, 1, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
-    dprintf("porttest: port_write() on 2 with timeout of 1 sec (wont block)\n");
-    res = port_write_etc(test_p2, 777, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
-    dprintf("porttest: res=%d, %s\n", res, res == 0 ? "ok" : "BAD");
-
-    dprintf("porttest: port_read() on empty port 4 with timeout of 1 sec (blocks 1 sec)\n");
-    res = port_read_etc(test_p4, &dummy, &dummy2, sizeof(dummy2), PORT_FLAG_TIMEOUT, 1000000);
-    dprintf("porttest: res=%d, %s\n", res, res == ERR_PORT_TIMED_OUT ? "ok" : "BAD");
-
-    dprintf("porttest: spawning thread for port 1\n");
-    t = thread_create_kernel_thread("port_test", port_test_thread_func, NULL);
-    // resume thread
-    thread_resume_thread(t);
-
-    dprintf("porttest: write\n");
-    port_write(test_p1, 1, &testdata, sizeof(testdata));
-
-    // now we can write more (no blocking)
-    dprintf("porttest: write #2\n");
-    port_write(test_p1, 2, &testdata, sizeof(testdata));
-    dprintf("porttest: write #3\n");
-    port_write(test_p1, 3, &testdata, sizeof(testdata));
-
-    dprintf("porttest: waiting on spawned thread\n");
-    thread_wait_on_thread(t, NULL);
-
-    dprintf("porttest: close p1\n");
-    port_close(test_p2);
-    dprintf("porttest: attempt write p1 after close\n");
-    res = port_write(test_p2, 4, &testdata, sizeof(testdata));
-    dprintf("porttest: port_write ret %d\n", res);
-
-    dprintf("porttest: testing delete p2\n");
-    port_delete(test_p2);
-
-    dprintf("porttest: end test main thread\n");
-
-}
-
-int port_test_thread_func(void* arg)
-{
-    int msg_code;
-    int n;
-    char buf[6];
-    buf[5] = '\0';
-
-    dprintf("porttest: port_test_thread_func()\n");
-
-    n = port_read(test_p1, &msg_code, &buf, 3);
-    dprintf("port_read #1 code %d len %d buf %s\n", msg_code, n, buf);
-    n = port_read(test_p1, &msg_code, &buf, 4);
-    dprintf("port_read #1 code %d len %d buf %s\n", msg_code, n, buf);
-    buf[4] = 'X';
-    n = port_read(test_p1, &msg_code, &buf, 5);
-    dprintf("port_read #1 code %d len %d buf %s\n", msg_code, n, buf);
-
-    dprintf("porttest: testing delete p1 from other thread\n");
-    port_delete(test_p1);
-    dprintf("porttest: end port_test_thread_func()\n");
-
-    return 0;
-}
-
-
-#endif // test
-
-
-
-
-
-
-
-#if 0
-
-
-/*
- *	user level ports
- */
-
-port_id user_port_create(int32 queue_length, const char *uname)
-{
-    dprintf("user_port_create: queue_length %d\n", queue_length);
-    if(uname != NULL) {
-        char name[SYS_MAX_OS_NAME_LEN];
-        int rc;
-
-        if(is_kernel_address(uname))
-            return ERR_VM_BAD_USER_MEMORY;
-
-        rc = user_strncpy(name, uname, SYS_MAX_OS_NAME_LEN-1);
-        if(rc < 0)
-            return rc;
-        name[SYS_MAX_OS_NAME_LEN-1] = 0;
-
-        return port_create(queue_length, name);
-    } else {
-        return port_create(queue_length, NULL);
-    }
-}
-
-int	user_port_close(port_id id)
-{
-    return port_close(id);
-}
-
-int	user_port_delete(port_id id)
-{
-    return port_delete(id);
-}
-
-port_id	user_port_find(const char *port_name)
-{
-    if(port_name != NULL) {
-        char name[SYS_MAX_OS_NAME_LEN];
-        int rc;
-
-        if(is_kernel_address(port_name))
-            return ERR_VM_BAD_USER_MEMORY;
-
-        rc = user_strncpy(name, port_name, SYS_MAX_OS_NAME_LEN-1);
-        if(rc < 0)
-            return rc;
-        name[SYS_MAX_OS_NAME_LEN-1] = 0;
-
-        return port_find(name);
-    } else {
-        return -EINVAL;
-    }
-}
-
-int	user_port_get_info(port_id id, struct port_info *uinfo)
-{
-    int 				res;
-    struct port_info	info;
-    int					rc;
-
-    if (uinfo == NULL)
-        return -EINVAL;
-    if(is_kernel_address(uinfo))
-        return ERR_VM_BAD_USER_MEMORY;
-
-    res = port_get_info(id, &info);
-    // copy to userspace
-    rc = user_memcpy(uinfo, &info, sizeof(struct port_info));
-    if(rc < 0)
-        return rc;
-    return res;
-}
-
-int	user_port_get_next_port_info(proc_id uproc,
-                                     uint32 *ucookie,
-                                     struct port_info *uinfo)
-{
-    int 				res;
-    struct port_info	info;
-    uint32				cookie;
-    int					rc;
-
-    if (ucookie == NULL)
-        return -EINVAL;
-    if (uinfo == NULL)
-        return -EINVAL;
-    if(is_kernel_address(ucookie))
-        return ERR_VM_BAD_USER_MEMORY;
-    if(is_kernel_address(uinfo))
-        return ERR_VM_BAD_USER_MEMORY;
-
-    // copy from userspace
-    rc = user_memcpy(&cookie, ucookie, sizeof(uint32));
-    if(rc < 0)
-        return rc;
-
-    res = port_get_next_port_info(uproc, &cookie, &info);
-    // copy to userspace
-    rc = user_memcpy(ucookie, &info, sizeof(uint32));
-    if(rc < 0)
-        return rc;
-    rc = user_memcpy(uinfo,   &info, sizeof(struct port_info));
-    if(rc < 0)
-        return rc;
-    return res;
-}
-
-ssize_t user_port_buffer_size(port_id port)
-{
-    return port_buffer_size_etc(port, SEM_FLAG_INTERRUPTABLE, 0);
-}
-
-ssize_t	user_port_buffer_size_etc(port_id port, uint32 flags, bigtime_t timeout)
-{
-    return port_buffer_size_etc(port, flags | SEM_FLAG_INTERRUPTABLE, timeout);
-}
-
-int32 user_port_count(port_id port)
-{
-    return port_count(port);
-}
-
-ssize_t user_port_read(port_id uport, int32 *umsg_code, void *umsg_buffer,
-                       size_t ubuffer_size)
-{
-    return user_port_read_etc(uport, umsg_code, umsg_buffer, ubuffer_size, 0, 0);
-}
-
-ssize_t	user_port_read_etc(port_id uport, int32 *umsg_code, void *umsg_buffer,
-                           size_t ubuffer_size, uint32 uflags, bigtime_t utimeout)
-{
-    ssize_t	res;
-    int32	msg_code;
-    int		rc;
-
-    if (umsg_code == NULL)
-        return ERR_INVALID_ARGS;
-    if (umsg_buffer == NULL)
-        return ERR_INVALID_ARGS;
-
-    if(is_kernel_address(umsg_code))
-        return ERR_VM_BAD_USER_MEMORY;
-    if(is_kernel_address(umsg_buffer))
-        return ERR_VM_BAD_USER_MEMORY;
-
-    res = port_read_etc(uport, &msg_code, umsg_buffer, ubuffer_size,
-                        uflags | PORT_FLAG_USE_USER_MEMCPY | SEM_FLAG_INTERRUPTABLE, utimeout);
-
-    rc = user_memcpy(umsg_code, &msg_code, sizeof(int32));
-    if(rc < 0)
-        return rc;
-
-    return res;
-}
-
-int	user_port_set_owner(port_id port, proc_id proc)
-{
-    return port_set_owner(port, proc);
-}
-
-int	user_port_write(port_id uport, int32 umsg_code, void *umsg_buffer,
-                        size_t ubuffer_size)
-{
-    return user_port_write_etc(uport, umsg_code, umsg_buffer, ubuffer_size, 0, 0);
-}
-
-int	user_port_write_etc(port_id uport, int32 umsg_code, void *umsg_buffer,
-                            size_t ubuffer_size, uint32 uflags, bigtime_t utimeout)
-{
-    if (umsg_buffer == NULL)
-        return ERR_INVALID_ARGS;
-    if(is_kernel_address(umsg_buffer))
-        return ERR_VM_BAD_USER_MEMORY;
-    return port_write_etc(uport, umsg_code, umsg_buffer, ubuffer_size,
-                          uflags | PORT_FLAG_USE_USER_MEMCPY | SEM_FLAG_INTERRUPTABLE, utimeout);
-}
-
-#endif // user ports
-
+#endif // !CONF_NEW_PORTS
 
 

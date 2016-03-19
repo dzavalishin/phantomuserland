@@ -29,7 +29,7 @@
 
 #include <limits.h>
 
-#include "khash.h"
+#include <kernel/khash.h>
 
 #include <endian.h>
 #include <hal.h>
