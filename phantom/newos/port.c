@@ -426,7 +426,7 @@ port_delete(port_id id)
     if( pool_get_el( port_pool, id ) )
     {
         SHOW_ERROR( 0, "port 0x%x still exist after delete!", id );
-        pool_release_el( port_pool, id ); // release initial ref_count
+        pool_release_el( port_pool, id );
     }
 
 
@@ -491,7 +491,7 @@ port_get_info(port_id id, struct port_info *info)
     RELEASE_PORT_LOCK(*port);
     //int_restore_interrupts();
 
-    pool_release_el( port_pool, id ); // release initial ref_count
+    pool_release_el( port_pool, id ); 
 
     return 0;
 }
@@ -602,16 +602,16 @@ port_read_etc(port_id id,
     // make one spot in queue available again for write
     sem_release(port->write_sem);
 
-    pool_release_el( port_pool, id ); // release initial ref_count
+    pool_release_el( port_pool, id ); 
 
     return siz;
 
 reterr:
-    pool_release_el( port_pool, id ); // release initial ref_count
+    pool_release_el( port_pool, id ); 
     return -res; // sem_acquire_etc returns positive errno, and we're negative
 
 dead:
-    pool_release_el( port_pool, id ); // release initial ref_count
+    pool_release_el( port_pool, id ); 
     return -ENOENT;
 }
 
@@ -714,13 +714,141 @@ port_write_etc(port_id id,
     // release sem, allowing read (might reschedule)
     sem_release( port->read_sem );
 
-    pool_release_el( port_pool, id ); // release initial ref_count
+    pool_release_el( port_pool, id ); 
 
     return 0;
 
 dead:
-    pool_release_el( port_pool, id ); // release initial ref_count
+    pool_release_el( port_pool, id ); 
     return -ENOENT;
+}
+
+
+
+
+
+
+int32
+port_count(port_id id)
+{
+    int count;
+
+    if(ports_active == false)   return -ENXIO;
+
+    struct port_entry *port = pool_get_el( port_pool, id );
+    if( port == 0 )
+    {
+        SHOW_ERROR( 0, "port 0x%x doesn't exist!", id );
+        return -EINVAL;
+    }
+
+
+    GRAB_PORT_LOCK(*port);
+
+    sem_get_count( &port->read_sem, &count );
+    // do not return negative numbers
+    if (count < 0)
+        count = 0;
+
+    RELEASE_PORT_LOCK(*port);
+    pool_release_el( port_pool, id ); 
+
+    // return count of messages (sem_count)
+    return count;
+}
+
+
+
+
+
+ssize_t
+port_buffer_size(port_id id)
+{
+    return port_buffer_size_etc(id, 0, 0);
+}
+
+ssize_t
+port_buffer_size_etc(port_id id,
+                     uint32 flags,
+                     bigtime_t timeout)
+{
+    int res;
+    int t;
+    int len;
+
+    if(ports_active == false)	return -ENXIO;
+
+    struct port_entry *port = pool_get_el( port_pool, id );
+    if( port == 0 )
+    {
+        SHOW_ERROR( 0, "port 0x%x doesn't exist!", id );
+        return -EINVAL;
+    }
+
+    res = hal_sem_acquire_etc( &port->read_sem, 1, flags & (SEM_FLAG_TIMEOUT | SEM_FLAG_INTERRUPTABLE), timeout );
+
+    GRAB_PORT_LOCK(*port);
+    if (res) {
+        // somebody deleted the port ?
+        RELEASE_PORT_LOCK(*port);
+        pool_release_el( port_pool, id ); 
+        return -res; // sem_acquire_etc returns positive errno, and we're negative
+    }
+
+    // once message arrived, read data's length
+
+    // determine tail
+    // read data's head length
+    t = port->head;
+    if (t < 0)        			panic("port %id: tail < 0", port->id);
+    if (t > port->capacity)       panic("port %id: tail > cap %d", port->id, port->capacity);
+    len = port->msg_queue[t].data_len;
+
+    // restore readsem
+    hal_sem_release(&port->read_sem);
+
+    RELEASE_PORT_LOCK(*port);
+    pool_release_el( port_pool, id ); 
+
+    // return length of item at end of queue
+    return len;
+}
+
+
+
+
+
+
+
+
+
+
+static errno_t pool_list_port(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    struct port_entry *port = el;
+    (void) pool;
+    (void) handle;
+    (void) arg;
+
+    printf( "%p\tid: 0x%x\t\tname: '%s'\n", port, port->id, port->name );
+
+    return 0;
+}
+
+
+
+void dump_port_list(int argc, char **argv)
+{
+    pool_foreach( port_pool, pool_list_port, 0 );
+/*
+    int i;
+
+    for(i=0; i<MAX_PORTS; i++) {
+        if(ports[i].id >= 0) {
+            dprintf("%p\tid: 0x%x\t\tname: '%s'\n", &ports[i], ports[i].id, ports[i].name);
+        }
+    }
+*/
 }
 
 
@@ -737,24 +865,25 @@ dead:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #endif // CONF_NEW_PORTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
