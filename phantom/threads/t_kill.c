@@ -2,7 +2,7 @@
  *
  * Phantom OS multithreading library.
  *
- * Copyright (C) 2009-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2009-2016 Dmitry Zavalishin, dz@dz.ru
  *
  * Thread kill.
  *
@@ -25,6 +25,7 @@
 #include <malloc.h>
 #include <hal.h>
 #include <phantom_libc.h>
+#include <newos/port.h>
 
 
 
@@ -156,10 +157,14 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     assert( t->sleep_flags & THREAD_SLEEP_ZOMBIE );
     assert( t != GET_CURRENT_THREAD() );
 
+    tid_t tid = t->tid;
+
+    // TODO assert it is not running
+
     if(t->death_handler)
     {
         void (*handler)( phantom_thread_t * ) = t->death_handler;
-        handler(t);
+        handler(t); // TODO must run in DPC to prevent death of killing thread
     }
 
 
@@ -171,6 +176,11 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
 #if NEW_SNAP_SYNC
     t_release_snap_locks();
 #endif
+
+    errno_t rc = port_delete_owned_ports( tid, 0 );
+    if( rc )
+        SHOW_ERROR( 0, "Can't kill thread ports: %d", rc );
+
 
     if(t->ownmutex)
         hal_mutex_unlock_if_owner();
@@ -189,7 +199,7 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     */
 
 
-    if(t->tid == 1)
+    if(tid == 1)
     {
         SHOW_ERROR0( 0, "Thread number one exits??" );
     }
@@ -202,7 +212,7 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     }
 
     // Remove from thread array
-    phantom_kernel_threads[t->tid] = 0;
+    phantom_kernel_threads[tid] = 0;
 
     if( t->name )
         free((char *)t->name);

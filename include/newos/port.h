@@ -39,17 +39,29 @@ struct port_info {
 
 #include <newos/portinfo.h>
 
+#include <threads.h>
+#include <errno.h>
 
-//int port_init(kernel_args *ka);
-int port_init(void);
 
-// kernel API
-port_id		port_create(int32 queue_length, const char *name);
-int			port_close(port_id id);
-int			port_delete(port_id id);
-port_id		port_find(const char *port_name);
-int			port_get_info(port_id id, struct port_info *info);
-int		 	port_get_next_port_info(proc_id proc,
+
+int             port_init(void);
+
+// -----------------------------------------------------------------------
+//
+// Kernel API
+//
+// -----------------------------------------------------------------------
+
+//! Deletes ports owned by 'owner', 'count' can be 0
+errno_t 	port_delete_owned_ports(tid_t owner, int *count);
+
+
+port_id         port_create(int32 queue_length, const char *name);
+int             port_close(port_id id);
+int             port_delete(port_id id);
+port_id	        port_find(const char *port_name);
+int             port_get_info(port_id id, struct port_info *info);
+int             port_get_next_port_info(proc_id proc,
 				uint32 *cookie,
 				struct port_info *info);
 ssize_t		port_buffer_size(port_id port);
@@ -78,7 +90,7 @@ int		 	port_write_etc(port_id port,
 				size_t buffer_size,
 				uint32 flags,
 				bigtime_t timeout);
-int port_delete_owned_ports(proc_id owner);
+
 
 
 // temp: test

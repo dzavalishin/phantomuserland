@@ -415,10 +415,13 @@ port_delete(port_id id)
         if( sem_get_count( &port->read_sem, &count) )
             break;
 
+        hal_sleep_msec(1); // FIXME races?
+
         if( count <= 0 )
             hal_sem_release( &port->read_sem );
+        else
+            break;
 
-        hal_sleep_msec(1); // FIXME races?
     }
 
     while( 1 )
@@ -426,10 +429,12 @@ port_delete(port_id id)
         if( sem_get_count( &port->write_sem, &count) )
             break;
 
+        hal_sleep_msec(1); // FIXME races?
+
         if( count <= 0 )
             hal_sem_release( &port->write_sem );
-
-        hal_sleep_msec(1); // FIXME races?
+        else
+            break;
     }
 
 #warning check port->closed after any sem_acquire
@@ -864,6 +869,70 @@ void dump_port_list(int argc, char **argv)
         }
     }
 */
+}
+
+
+struct port_enum_rm
+{
+    tid_t               owner;
+    pool_handle_t 	h;
+    bool                found;
+};
+
+static errno_t pool_rm_port(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    struct port_entry *port = el;
+    struct port_enum_rm *rm = arg;
+    (void) pool;
+
+    if( port->owner == rm->owner )
+    {
+        rm->found = true;
+        rm->h = handle;
+        return EEXIST; // stop loop
+    }
+
+    return 0;
+}
+
+
+/* this function cycles through the ports, deleting all the ports that are owned by the passed thread */
+errno_t port_delete_owned_ports(tid_t owner, int *o_count)
+{
+    int count = 0;
+    errno_t rc;
+
+    if(!ports_active)
+        return ENXIO;
+
+    while(1)
+    {
+        struct port_enum_rm rm;
+
+        rm.owner = owner;
+        rm.found = false;
+
+        rc = pool_foreach( port_pool, pool_rm_port, &rm );
+
+        if( rc != EEXIST )
+            break; // not found
+
+        if( !rm.found )
+        {
+            SHOW_ERROR( 0, "foreach error, !rm.found for %d", rc );
+            if( rc == 0 ) rc = ESRCH;
+            break;
+        }
+
+        count++;
+        port_delete( rm.h );
+    }
+
+    if( rc && (rc != EEXIST) )
+        SHOW_ERROR( 0, "foreach error %d", rc );
+
+    SHOW_FLOW( 11, "foreach killed %d for tid %d", count, owner );
+    return (rc != EEXIST) ? rc : 0;
 }
 
 
