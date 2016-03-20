@@ -14,6 +14,8 @@ module=(nd)/classes
 boot 
 " > $GRUB_MENU
 
+PANIC_AFTER=1200	# wait 20 minutes for a snapshot
+
 # before running again
 # TODO call ../zero_ph_img.sh 
 #rm $DISK_IMG
@@ -41,10 +43,16 @@ do
 ===> pass $pass"
 	$QEMU $QEMU_OPTS &
 	QEMU_PID=$!
+	ELAPSED=0
 
-	while [ 1 ]
+	while [ $ELAPSED -lt $PANIC_AFTER ]
 	do
 		sleep 2
+		ELAPSED=`expr $ELAPSED + 2`
+		# tick every minute to keep CI going
+		[ "$SNAP_CI" ] && {
+			[ `expr $ELAPSED % 60` -eq 0 ] && echo "Running `expr $ELAPSED / 60` minute(s)..."
+		}
 		kill -0 $QEMU_PID || {
 			echo "
 
@@ -53,6 +61,7 @@ FATAL! Phantom snapshot test crashed"
 		}
 		[ -s $LOGFILE ] || {
 			sleep 50
+			ELAPSED=`expr $ELAPSED + 50`
 			[ -s $LOGFILE ] || {
 				echo "
 
@@ -99,5 +108,10 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 	done
 done
 
-[ "$SNAP_CI" = true ] || mv ${GRUB_MENU}.orig $GRUB_MENU
-exit $EXIT_CODE
+if [ "$SNAP_CI" = true ]
+then
+	[ $EXIT_CODE -gt 0 ] && exit $EXIT_CODE
+	[ "$VIRTIO" ] || . $0 -v	# re-instantiate with VIRTIO
+else
+	mv ${GRUB_MENU}.orig $GRUB_MENU
+fi
