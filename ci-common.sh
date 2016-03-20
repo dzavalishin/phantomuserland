@@ -2,7 +2,7 @@
 #
 # this script makes pre-requisites for ci-runtest.sh and ci-snaptest.sh
 #
-set -x			# debug mode until everything works fine
+#set -x			# debug mode until everything works fine
 cd `dirname $0`
 export PHANTOM_HOME=`pwd`
 export LANG=C
@@ -168,7 +168,8 @@ quit
 
 cd $TEST_DIR
 
-for module in phantom classes
+# TODO: implement this part in Makefile
+for module in phantom classes pmod_test
 do
 	[ -s tftp/$module ] || {
 		cp $TFTP_PATH/$module tftp/
