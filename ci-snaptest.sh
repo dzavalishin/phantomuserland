@@ -14,7 +14,7 @@ module=(nd)/classes
 boot 
 " > $GRUB_MENU
 
-PANIC_AFTER=1200	# wait 20 minutes for a snapshot
+PANIC_AFTER=1800	# wait 30 minutes for a snapshot
 
 # before running again
 # TODO call ../zero_ph_img.sh 
@@ -51,7 +51,13 @@ do
 		ELAPSED=`expr $ELAPSED + 2`
 		# tick every minute to keep CI going
 		[ "$SNAP_CI" ] && {
-			[ `expr $ELAPSED % 60` -eq 0 ] && echo "Running `expr $ELAPSED / 60` minute(s)..."
+			[ `expr $ELAPSED % 60` -eq 0 ] && {
+				M=`expr $ELAPSED / 60`
+				case $M in
+				1) echo "Running $M minute..."	;;
+				*) echo "Running $M minutes..."	;;
+			`	esac
+			}
 		}
 		kill -0 $QEMU_PID || {
 			echo "
