@@ -47,18 +47,23 @@ static void port_test_thread_func(void* arg)
     SHOW_INFO0( 0, "porttest: thread running");
 
     n = port_read(test_p1, &msg_code, &buf, 3);
+    SHOW_INFO( 0, "port_read #0 code %d len %d buf %s", msg_code, n, buf);
+    test_check_eq(n,3);
+    test_check_eq( strncmp(buf, expected, 3), 0 );
+
+    n = port_read(test_p1, &msg_code, &buf, 3);
     SHOW_INFO( 0, "port_read #1 code %d len %d buf %s", msg_code, n, buf);
     test_check_eq(n,3);
     test_check_eq( strncmp(buf, expected, 3), 0 );
 
     n = port_read(test_p1, &msg_code, &buf, 4);
-    SHOW_INFO( 0, "port_read #1 code %d len %d buf %s", msg_code, n, buf);
+    SHOW_INFO( 0, "port_read #2 code %d len %d buf %s", msg_code, n, buf);
     test_check_eq(n,4);
     test_check_eq( strncmp(buf, expected, 4), 0 );
 
     buf[4] = 'X';
     n = port_read(test_p1, &msg_code, &buf, 5);
-    SHOW_INFO( 0, "port_read #1 code %d len %d buf %s", msg_code, n, buf);
+    SHOW_INFO( 0, "port_read #3 code %d len %d buf %s", msg_code, n, buf);
     test_check_eq(n,5);
     test_check_eq( strcmp(buf, expected), 0 );
 
