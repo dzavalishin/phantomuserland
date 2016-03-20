@@ -56,13 +56,14 @@ do
 				case $M in
 				1) echo "Running $M minute..."	;;
 				*) echo "Running $M minutes..."	;;
-			`	esac
+				esac
 			}
 		}
 		kill -0 $QEMU_PID || {
 			echo "
 
 FATAL! Phantom snapshot test crashed"
+			EXIT_CODE=3
 			break
 		}
 		[ -s $LOGFILE ] || {
