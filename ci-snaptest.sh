@@ -118,7 +118,10 @@ done
 if [ "$SNAP_CI" = true ]
 then
 	[ $EXIT_CODE -gt 0 ] && exit $EXIT_CODE
-	[ "$VIRTIO" ] || . $0 -v	# re-instantiate with VIRTIO
+	[ "$VIRTIO" ] || {
+		cd $PHANTOM_HOME
+		. $0 -v	# re-instantiate with VIRTIO
+	}
 else
 	mv ${GRUB_MENU}.orig $GRUB_MENU
 fi
