@@ -138,8 +138,6 @@ call_gdb ( ) {
 
 	port="${1:-$GDB_PORT}"
 	shift
-	pid="$1"
-	shift
 
 	cd $PHANTOM_HOME
 	echo "
@@ -166,9 +164,6 @@ quit
 	gdb
 
 	[ "$1" ] && echo "$*"
-	[ "$pid" ] && kill -9 $pid
-
-	exit 1
 }
 
 cd $TEST_DIR

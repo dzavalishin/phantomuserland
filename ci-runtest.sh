@@ -52,7 +52,7 @@ do
 	ELAPSED=`expr $ELAPSED + 2`
 
 	tail -1 $LOGFILE | grep -q '^Press any' && \
-		call_gdb $GDB_PORT $QEMU_PID "Test run failed"
+		call_gdb $GDB_PORT "Test run panic"
 
 	grep -q '^\(\. \)\?Panic' $LOGFILE && {
 		sleep 15	# allow panic to finish properly

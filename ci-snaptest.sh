@@ -87,7 +87,7 @@ FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
 	done
 
 	tail -1 $LOGFILE | grep -q '^Press any' && \
-		call_gdb $GDB_PORT $QEMU_PID "Pass $pass panic" 
+		call_gdb $GDB_PORT "Pass $pass panic" 
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE && {
 		if [ "$SNAP_CI" = true ]
@@ -112,12 +112,10 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 		break
 	}
 
-	kill -0 $QEMU_PID >/dev/null || break
-
 	while (ps -p $QEMU_PID >/dev/null)
 	do
-		sleep 2
 		kill $QEMU_PID
+		sleep 2
 	done
 done
 
