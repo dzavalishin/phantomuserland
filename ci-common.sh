@@ -123,17 +123,23 @@ done
 LOGFILE=serial0.log
 
 call_gdb ( ) {
-	[ "$SNAP_CI$UNATTENDED" ] || {
-		echo "GAME OVER. Press Enter to start GDB..."
-		read n
-	}
+	if [ "$SNAP_CI" ]
+	then
+		echo "add-auto-load-safe-path $PHANTOM_HOME/.gdbinit" >> $SNAP_CACHE_DIR/.gdbinit
+	else
+		# restore files
+		mv ${GRUB_MENU}.orig $GRUB_MENU
+
+		[ "$UNATTENDED" ] || {
+			echo "GAME OVER. Press Enter to start GDB..."
+			read n
+		}
+	fi
+
 	port="${1:-$GDB_PORT}"
 	shift
 	pid="$1"
 	shift
-
-	# restore files
-	[ "$SNAP_CI" ] || mv ${GRUB_MENU}.orig $GRUB_MENU
 
 	cd $PHANTOM_HOME
 	echo "
