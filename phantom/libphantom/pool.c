@@ -21,6 +21,23 @@
 #include <string.h>
 #include <stdio.h>
 
+    
+
+    
+
+#if CONF_POOL_SPIN
+#  define POOL_LOCK_INIT(__p) hal_spin_init( &((__p)->lock) )
+#  define POOL_LOCK(__p) hal_spin_lock_cli( &((__p)->lock) )
+#  define POOL_UNLOCK(__p) hal_spin_unlock_sti( &((__p)->lock) )
+#  define POOL_ASSERT_LOCKED(__p) ASSERT_LOCKED_SPIN(&((__p)->lock))
+#else
+#  define POOL_LOCK_INIT(__p) hal_mutex_init( &((__p)->mutex), "arena" )
+#  define POOL_LOCK(__p) hal_mutex_lock( &((__p)->mutex) )
+#  define POOL_UNLOCK(__p) hal_mutex_unlock( &((__p)->mutex) )
+#  define POOL_ASSERT_LOCKED(__p) ASSERT_LOCKED_MUTEX(&((__p)->mutex))
+#endif
+
+
 
 static bool pool_el_exist( pool_t *pool, pool_handle_t handle );
 
@@ -55,9 +72,10 @@ pool_t *create_pool_ext( int inital_elems, int arena_size )
 
     p->magic = next_magic++;
 
-    hal_mutex_init( &p->mutex, "arena" );
-
-    hal_mutex_lock( &p->mutex );
+    //hal_mutex_init( &p->mutex, "arena" );
+    //hal_mutex_lock( &p->mutex );
+    POOL_LOCK_INIT(p);
+    //POOL_LOCK(p);
 
     p->narenas = 1+((inital_elems-1)/arena_size);
 
@@ -67,7 +85,8 @@ pool_t *create_pool_ext( int inital_elems, int arena_size )
 
     p->flag_autodestroy = 1;
 
-    hal_mutex_unlock( &p->mutex );
+    //hal_mutex_unlock( &p->mutex );
+    //POOL_UNLOCK(p);
     return p;
 }
 
@@ -90,7 +109,8 @@ errno_t destroy_pool(pool_t *p)
     SHOW_FLOW( 5, "destroy pool %p", p );
     errno_t rc = 0;
 
-    hal_mutex_lock( &p->mutex ); // do_pool_foreach needs it
+    //hal_mutex_lock( &p->mutex ); // do_pool_foreach needs it
+    POOL_LOCK(p);
 
     p->flag_nofail = 0; // don't panic!
 
@@ -115,7 +135,8 @@ errno_t destroy_pool(pool_t *p)
     // free arenas
     free_arenas( p->narenas, a );
 
-    hal_mutex_unlock( &p->mutex );
+    //hal_mutex_unlock( &p->mutex );
+    POOL_UNLOCK(p);
 
     free(p);
     return rc;
@@ -150,11 +171,13 @@ int pool_get_used( pool_t *pool )
 errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg )
 {
     errno_t ret = 0;
-    hal_mutex_lock( &pool->mutex );
+    //hal_mutex_lock( &pool->mutex );
+    POOL_LOCK(pool);
 
     ret = do_pool_foreach( pool, ff, arg );
 
-    hal_mutex_unlock( &pool->mutex );
+    //hal_mutex_unlock( &pool->mutex );
+    POOL_UNLOCK(pool);
     return ret;
 }
 
@@ -171,14 +194,16 @@ void resize_pool( pool_t *p, int narenas )
     assert(narenas > p->narenas); // Just grow
     assert( p );
 
-    hal_mutex_lock( &p->mutex );
+    //hal_mutex_lock( &p->mutex );
+    POOL_LOCK(p);
 
     pool_arena_t *na = alloc_arenas( p->arenas[0].arena_size, narenas, p );
     assert( na );
     free_arenas( p->narenas, p->arenas );
     p->arenas = na;
 
-    hal_mutex_unlock( &p->mutex );
+    //hal_mutex_unlock( &p->mutex );
+    POOL_UNLOCK(p);
 }
 
 
@@ -265,7 +290,8 @@ void *pool_get_el( pool_t *pool, pool_handle_t handle )
 {
     CHECK_MAGIC(pool,handle);
 
-    hal_mutex_lock( &pool->mutex );
+    //hal_mutex_lock( &pool->mutex );
+    POOL_LOCK(pool);
 
     int na = HANDLE_2_ARENA(handle);
     int ne = HANDLE_2_ELEM(handle);
@@ -275,13 +301,15 @@ void *pool_get_el( pool_t *pool, pool_handle_t handle )
     CHECK_REF(a,ne);
 
     a->refc[ne]++;
-    hal_mutex_unlock( &pool->mutex );
+    //hal_mutex_unlock( &pool->mutex );
+    POOL_UNLOCK(pool);
     return a->ptrs[ne];
 }
 
 int pool_el_refcount( pool_t *pool, pool_handle_t handle )
 {
     //hal_mutex_lock( &pool->mutex );
+    POOL_LOCK(pool);
 
     int na = HANDLE_2_ARENA(handle);
     int ne = HANDLE_2_ELEM(handle);
@@ -291,6 +319,7 @@ int pool_el_refcount( pool_t *pool, pool_handle_t handle )
     CHECK_REF(a,ne);
 
     //hal_mutex_unlock( &pool->mutex );
+    POOL_UNLOCK(pool);
     return a->refc[ne];
 }
 
@@ -321,7 +350,8 @@ errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
     CHECK_MAGIC(pool,handle);
 
     errno_t ret = 0;
-    hal_mutex_lock( &pool->mutex );
+    //hal_mutex_lock( &pool->mutex );
+    POOL_LOCK(pool);
 
     int na = HANDLE_2_ARENA(handle);
     int ne = HANDLE_2_ELEM(handle);
@@ -348,7 +378,8 @@ errno_t pool_release_el( pool_t *pool, pool_handle_t handle )
     */
 
 finish:
-    hal_mutex_unlock( &pool->mutex );
+    //hal_mutex_unlock( &pool->mutex );
+    POOL_UNLOCK(pool);
     return ret;
 }
 
@@ -358,7 +389,8 @@ errno_t pool_destroy_el( pool_t *pool, pool_handle_t handle )
     CHECK_MAGIC(pool,handle);
 
     errno_t ret = 0;
-    hal_mutex_lock( &pool->mutex );
+    //hal_mutex_lock( &pool->mutex );
+    POOL_LOCK(pool);
 
     int na = HANDLE_2_ARENA(handle);
     int ne = HANDLE_2_ELEM(handle);
@@ -382,14 +414,17 @@ errno_t pool_destroy_el( pool_t *pool, pool_handle_t handle )
         ret = ENOENT;
 
 finish:
-    hal_mutex_unlock( &pool->mutex );
+    //hal_mutex_unlock( &pool->mutex );
+    POOL_UNLOCK(pool);
+
     return ret;
 }
 
 
 pool_handle_t pool_create_el( pool_t *pool, void *arg )
 {
-    hal_mutex_lock( &pool->mutex );
+    //hal_mutex_lock( &pool->mutex );
+    POOL_LOCK(pool);
     pool_handle_t ret = -1;
 
     // TODO grow
@@ -417,7 +452,9 @@ pool_handle_t pool_create_el( pool_t *pool, void *arg )
     a->nused++;
 
 fail:
-    hal_mutex_unlock( &pool->mutex );
+    //hal_mutex_unlock( &pool->mutex );
+    POOL_UNLOCK(pool);
+
 
     if( (ret < 0) && pool->flag_nofail )
         panic("out of mem in pool");
@@ -430,7 +467,8 @@ errno_t do_pool_forone( pool_t *pool, pool_handle_t handle, errno_t (*ff)(pool_t
 {
     CHECK_MAGIC(pool,handle);
 
-    hal_mutex_lock( &pool->mutex );
+    //hal_mutex_lock( &pool->mutex );
+    POOL_LOCK(pool);
 
     int na = HANDLE_2_ARENA(handle);
     int ne = HANDLE_2_ELEM(handle);
@@ -442,7 +480,9 @@ errno_t do_pool_forone( pool_t *pool, pool_handle_t handle, errno_t (*ff)(pool_t
     a->refc[ne]++;
     assert(a->refc[ne] > 0);
 
-    hal_mutex_unlock( &pool->mutex );
+    //hal_mutex_unlock( &pool->mutex );
+    POOL_UNLOCK(pool);
+
 
     errno_t e = ff( pool, a->ptrs[ne], arg);
 
@@ -463,7 +503,8 @@ errno_t do_pool_forone( pool_t *pool, pool_handle_t handle, errno_t (*ff)(pool_t
 
 static errno_t do_destroy_el( pool_t *pool, pool_arena_t *a, int ne )
 {
-    ASSERT_LOCKED_MUTEX(&pool->mutex);
+    //ASSERT_LOCKED_MUTEX(&pool->mutex);
+    POOL_ASSERT_LOCKED(pool);
 
     if( pool->flag_nofail )
         assert(a->refc[ne] == 0);
@@ -486,7 +527,8 @@ static errno_t do_destroy_el( pool_t *pool, pool_arena_t *a, int ne )
 
 static pool_handle_t find_free_el( pool_t *pool )
 {
-    ASSERT_LOCKED_MUTEX(&pool->mutex);
+    //ASSERT_LOCKED_MUTEX(&pool->mutex);
+    POOL_ASSERT_LOCKED(pool);
 
     pool_handle_t h = pool->last_handle;
     pool_arena_t * as = pool->arenas;
@@ -538,7 +580,8 @@ rewrap:
 
 static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg )
 {
-    ASSERT_LOCKED_MUTEX(&pool->mutex);
+    //ASSERT_LOCKED_MUTEX(&pool->mutex);
+    POOL_ASSERT_LOCKED(pool);
 
     errno_t ret = 0;
     pool_arena_t *as = pool->arenas;
@@ -556,9 +599,11 @@ static errno_t do_pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *
                 // inc refcnt as long as we give out pointer
                 // TODO need unit test
                 as[i].refc[j]++;
-                hal_mutex_unlock( &pool->mutex );
+                //hal_mutex_unlock( &pool->mutex );
+                POOL_UNLOCK(pool);
                 ret = ff( pool, as[i].ptrs[j], MK_HANDLE(pool,i,j), arg );
-                hal_mutex_lock( &pool->mutex );
+                //hal_mutex_lock( &pool->mutex );
+                POOL_LOCK(pool);
                 //as[i].refc[j]--;
                 // dec and, possibly, delete object
                 errno_t ret2 = do_dec_refcnt( pool, as+i, j );

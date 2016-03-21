@@ -12,6 +12,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define UHCI_INTERRUPT 1
+
+// Use spinlocks for pool, not mutexes
+#define CONF_POOL_SPIN 0
+
 // newos-style ports based on pool
 #define CONF_NEW_PORTS 1
 
@@ -111,7 +116,7 @@
 
 
 #define COMPILE_OHCI 0
-#define COMPILE_UHCI 0
+#define COMPILE_UHCI 1
 
 
 #define COMPILE_WEAKREF 0

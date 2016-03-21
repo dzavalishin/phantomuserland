@@ -47,6 +47,11 @@
 #include <errno.h>
 #include <phantom_types.h>
 
+#if CONF_POOL_SPIN
+#  include <spinlock.h>
+#endif
+
+
 #define INVALID_POOL_HANDLE -1
 
 /**
@@ -75,7 +80,11 @@ typedef struct pool
     // This element must be created
     void *   	(*init)(void *arg);
 
+#if CONF_POOL_SPIN
+    hal_spinlock_t	lock;
+#else
     hal_mutex_t	mutex;
+#endif
 
     pool_arena_t *arenas;
     int         narenas;
