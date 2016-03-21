@@ -72,7 +72,7 @@ do
 	case "$1" in
 	-c)	COMPILE=2		;;	# also make clean
 	-f)	FOREGROUND=1		;;
-	-u)	UNATTENDED=-unattended	;;
+	-u*)	UNATTENDED=-unattended	;;
 	-p)
 		shift
 		[ "$1" -gt 0 ] && PASSES="$1"
