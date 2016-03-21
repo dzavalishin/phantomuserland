@@ -90,8 +90,14 @@ FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
 		call_gdb $GDB_PORT $QEMU_PID "Pass $pass panic" 
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE && {
-		# show extract from the log here
-		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE
+		if [ "$SNAP_CI" = true ]
+		then
+			# show complete log in CI
+			cat $LOGFILE | sed 's/[^m]*m//g;s///g'
+		else
+			# show extract from the log otherwise
+			grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE
+		fi
 		EXIT_CODE=3
 		#preserve_log serial0.log
 		break
