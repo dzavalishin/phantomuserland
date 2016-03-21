@@ -70,16 +70,13 @@ FATAL! Phantom stalled: ${LOG_MESSAGE:-no activity after $PANIC_AFTER seconds}"
 	EXIT_CODE=3
 }
 
-if [ "$SNAP_CI" ]
-then
-	cat $LOGFILE | sed 's/[^m]*m//g;s///g' 	# submit all details into the CI log, cutting off ESC-codes
-else
+[ "$SNAP_CI" ] || {
 	grep -q 'TEST FAILED' $LOGFILE && {
 		cp $LOGFILE test.log
 		#preserve_log test.log
 	}
 	mv ${GRUB_MENU}.orig $GRUB_MENU
-fi
+}
 
 # perform final checks
 grep -B 10 'Panic\|[^e]fault\|^EIP\|^- \|Stack:\|^T[0-9 ]' $LOGFILE && die "Phantom test run failed!"
@@ -87,4 +84,7 @@ grep 'SVN' $LOGFILE || die "Phantom test run crashed!"
 # show test summary in output
 grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
 grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
+
+# submit all details into the CI log, cutting off ESC-codes
+[ "$SNAP_CI" ] && cat $LOGFILE | sed 's/[^m]*m//g;s///g'
 exit $EXIT_CODE
