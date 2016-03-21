@@ -62,7 +62,6 @@ die ( ) {
 
 
 [ "$SNAP_CI" ] && {
-	UNATTENDED=-unattended
 	COMPILE=1
 	unset DISPLAY
 }
@@ -124,7 +123,7 @@ done
 LOGFILE=serial0.log
 
 call_gdb ( ) {
-	[ "$UNATTENDED" ] || {
+	[ "$SNAP_CI$UNATTENDED" ] || {
 		echo "GAME OVER. Press Enter to start GDB..."
 		read n
 	}
