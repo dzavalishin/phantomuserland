@@ -126,7 +126,10 @@ then
 	[ $EXIT_CODE -gt 0 ] && exit $EXIT_CODE
 	[ "$VIRTIO" ] || {
 		cd $PHANTOM_HOME
-		. $0 -v	# re-instantiate with VIRTIO
+		case "$0" in		# re-instantiate with VIRTIO
+		/*)	. $0 -v		;;
+		*)	. ./$0 -v	;;
+		esac
 	}
 else
 	mv ${GRUB_MENU}.orig $GRUB_MENU
