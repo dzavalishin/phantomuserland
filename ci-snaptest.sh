@@ -123,8 +123,8 @@ if [ "$SNAP_CI" = true ]
 then
 	[ $EXIT_CODE -gt 0 ] && exit $EXIT_CODE
 
-	echo Now re-run with virtio ...
 	[ "$VIRTIO" ] || {
+		echo Now re-run with virtio ...
 		cd $PHANTOM_HOME
 		case "$0" in		# re-instantiate with VIRTIO
 		/*)	. $0 -v		;;
