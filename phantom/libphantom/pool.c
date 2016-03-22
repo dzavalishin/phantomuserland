@@ -21,9 +21,21 @@
 #include <string.h>
 #include <stdio.h>
 
-    
 
-    
+// TODO switchable sync?
+typedef struct lock_ops
+{
+     void        (*init)( void *lock, const char *name );
+     void        (*destroy)( void *lock );
+
+     void        (*lock)( void *lock );
+     void        (*unlock)( void *lock );
+     void        (*locked)( void *lock );
+} lock_ops_t;
+
+
+
+
 
 #if CONF_POOL_SPIN
 #  define POOL_LOCK_INIT(__p) hal_spin_init( &((__p)->lock) )

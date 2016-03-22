@@ -12,7 +12,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define UHCI_INTERRUPT 1
+#define UHCI_INTERRUPT 0
+#define OHCI_INTERRUPT 1
+
+#define COMPILE_UHCI 1
+#define COMPILE_OHCI 1
 
 // Use spinlocks for pool, not mutexes
 #define CONF_POOL_SPIN 0
@@ -114,9 +118,6 @@
 #define NET_CHATTY 0
 #endif
 
-
-#define COMPILE_OHCI 0
-#define COMPILE_UHCI 1
 
 
 #define COMPILE_WEAKREF 0

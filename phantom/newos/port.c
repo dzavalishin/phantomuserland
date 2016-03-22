@@ -303,6 +303,8 @@ port_create(int32 queue_length, const char *name)
         goto err;
     }
 
+    // Make sure thread will kill ports on death
+    assert( 0 == t_add_flags( get_current_tid(), THREAD_FLAG_HAS_PORT ) );
     // wrong - pool el is available to others here, must be locked in the el creation code
     // wrong - redo pool code with spinlocks!
     port->owner = get_current_tid();
@@ -437,7 +439,7 @@ port_delete(port_id id)
             break;
     }
 
-#warning check port->closed after any sem_acquire
+//#warning check port->closed after any sem_acquire
     pool_release_el( port_pool, id ); // release my get_el ref count
     pool_release_el( port_pool, id ); // release initial ref_count
 
@@ -904,6 +906,12 @@ errno_t port_delete_owned_ports(tid_t owner, int *o_count)
 
     if(!ports_active)
         return ENXIO;
+
+    // owns no ports? skip.
+    u_int32_t flags;
+    assert( 0 == t_get_flags( owner, &flags ) );
+    if( !(flags & THREAD_FLAG_HAS_PORT) )
+        return 0;
 
     while(1)
     {

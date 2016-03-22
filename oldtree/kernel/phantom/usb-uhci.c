@@ -10,7 +10,7 @@
 #include <debug_ext.h>
 #define debug_level_flow 10
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 8
 
 #include <compat/seabios.h>
 #include <ia32/pio.h>
@@ -112,7 +112,7 @@ check_uhci_ports(struct usb_uhci_s *cntl)
  ****************************************************************/
 
 static int uhci_irq = -1;
-static hal_sem_t intr_sem;
+static hal_sem_t uhci_intr_sem;
 struct usb_uhci_s *static_cntl;
 
 static void uhci_int_enable( int on )
@@ -123,6 +123,12 @@ static void uhci_int_enable( int on )
         outw( static_cntl->iobase + USBINTR, 0);
 }
 
+static void uhci_wait_intr(void)
+{
+    hal_sem_zero( &uhci_intr_sem );
+    uhci_int_enable( 1 );
+    hal_sem_acquire_etc( &uhci_intr_sem, 1, SEM_FLAG_TIMEOUT, 5000 );
+}
 
 static void
 reset_uhci(struct usb_uhci_s *cntl, u16 bdf)
@@ -140,8 +146,6 @@ reset_uhci(struct usb_uhci_s *cntl, u16 bdf)
     // Disable interrupts and commands (just to be safe).
     outw(cntl->iobase + USBINTR, 0);
     outw(cntl->iobase + USBCMD, 0);
-#if UHCI_INTERRUPT
-#endif
 }
 
 static void
@@ -222,7 +226,7 @@ uhci_init(u16 bdf, int busid)
 {
     if (! CONFIG_USB_UHCI)        return;
 
-    assert( 0 == hal_sem_init( &intr_sem, "uhci intr" ) );
+    assert( 0 == hal_sem_init( &uhci_intr_sem, "uhci intr" ) );
 
     struct usb_uhci_s *cntl = malloc_tmphigh(sizeof(*cntl));
     memset(cntl, 0, sizeof(*cntl));
@@ -251,17 +255,21 @@ static void uhci_int(void *arg)
 {
     (void) arg;
     uhci_int_enable( 0 );
-    hal_sem_release( &intr_sem );
+    hal_sem_release( &uhci_intr_sem );
 }
 
 phantom_device_t * driver_uhci_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
 
+    if( (pci->sub_class != UHCI_SUB_CLASS) || (pci->interface != UHCI_INTERFACE) )
+        return 0;
+
+
     uhci_irq = pci->interrupt;
     SHOW_INFO( 2, "irq = %d", uhci_irq );
 
-    //assert( 0 == hal_sem_init( &intr_sem, "uhci intr" ) );
+    //assert( 0 == hal_sem_init( &uhci_intr_sem, "uhci intr" ) );
 
     if( hal_irq_alloc( uhci_irq, &uhci_int, 0, HAL_IRQ_SHAREABLE ) )
     {
@@ -302,7 +310,11 @@ wait_qh(struct usb_uhci_s *cntl, volatile struct uhci_qh *qh)
             uhci_dump(cntl);
             return -1;
         }
+#if UHCI_INTERRUPT
+        uhci_wait_intr();
+#else
         yield();
+#endif
     }
 }
 
@@ -329,7 +341,11 @@ uhci_waittick(struct usb_uhci_s *cntl)
 
             return;
         }
+#if 0 && UHCI_INTERRUPT
+        uhci_wait_intr();
+#else
         yield();
+#endif
     }
     SHOW_FLOW0( 6, "leave ok" );
 }
@@ -520,9 +536,7 @@ wait_td(struct uhci_td *td)
             return -1;
         }
 #if UHCI_INTERRUPT
-        hal_sem_zero( &intr_sem );
-        uhci_int_enable( 1 );
-        hal_sem_acquire_etc( &intr_sem, 1, SEM_FLAG_TIMEOUT, 5000 );
+        uhci_wait_intr();
 #else
         yield();
 #endif
@@ -719,19 +733,19 @@ static void uhci_dump(struct usb_uhci_s *cntl)
     u32 membase = inl(cntl->iobase + USBFLBASEADD);
     u16 startframe = inw(cntl->iobase + USBFRNUM);
     u8 sof = inb(cntl->iobase + USBSOF);
-    SHOW_INFO( 1, "iobase %x, membase %x, frame %d, SOF %d", cntl->iobase, membase, startframe, sof );
+    SHOW_INFO( 9, "iobase %x, membase %x, frame %d, SOF %d", cntl->iobase, membase, startframe, sof );
 
     {
     u16 cmd = inw(cntl->iobase + USBCMD);
-    SHOW_INFO( 1, "cmd %b", cmd, "\020\1Run\2Reset\3GReset\4GSuspend\5FrcGResume\6SWDebug\7Conf\10MaxPkt64" );
+    SHOW_INFO( 9, "cmd %b", cmd, "\020\1Run\2Reset\3GReset\4GSuspend\5FrcGResume\6SWDebug\7Conf\10MaxPkt64" );
     }
     {
     u16 sts = inw(cntl->iobase + USBSTS);
-    SHOW_INFO( 1, "sts %b", sts, "\020\1IntrIOC\2IntrErr\3ResumeDetect\4PciErr\5SchedErr\6Halt" );
+    SHOW_INFO( 9, "sts %b", sts, "\020\1IntrIOC\2IntrErr\3ResumeDetect\4PciErr\5SchedErr\6Halt" );
     }
     {
     u16 intr = inw(cntl->iobase + USBINTR);
-    SHOW_INFO( 1, "irq %b", intr, "\020\1Timeout\2Resume\3IOComplete\4ShortPkt" );
+    SHOW_INFO( 9, "irq %b", intr, "\020\1Timeout\2Resume\3IOComplete\4ShortPkt" );
     }
 
     //uhci_framelist *fl = cntl->framelist;
@@ -740,7 +754,7 @@ static void uhci_dump(struct usb_uhci_s *cntl)
     struct uhci_qh *pos = (void*)(cntl->framelist->links[0] & ~UHCI_PTR_BITS);
     for (;;)
     {
-        SHOW_INFO( 1, "td %x link %x elem %x", pos, pos->link, pos->element );
+        SHOW_INFO( 10, "td %x link %x elem %x", pos, pos->link, pos->element );
         u32 link = pos->link;
 
         if (link == UHCI_PTR_TERM)

@@ -35,6 +35,13 @@ phantom_device_t * driver_virtio_baloon_probe( pci_cfg_t *pci, int stage );
 #define UHCI_SUB_CLASS      0x03
 #define UHCI_INTERFACE      0x0
 
+#define EHCI_BASE_CLASS     0x0c
+#define EHCI_SUB_CLASS      0x03
+#define EHCI_INTERFACE      0x20
+
+
+
+
 phantom_device_t * driver_ohci_probe( pci_cfg_t *pci, int stage );
 phantom_device_t * driver_uhci_probe( pci_cfg_t *pci, int stage );
 

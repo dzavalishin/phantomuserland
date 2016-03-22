@@ -17,6 +17,9 @@
 #include "usb-ohci.h" // struct ohci_hcca
 #include "usb.h" // struct usb_s
 
+#include <kernel/drivers.h>
+
+
 #define FIT                     (1 << 31)
 
 struct usb_ohci_s {
@@ -25,6 +28,7 @@ struct usb_ohci_s {
 };
 
 static void dump_ohci_ed( struct ohci_ed *ed );
+static void ohci_wait_intr(void);
 
 
 /****************************************************************
@@ -74,7 +78,11 @@ ohci_hub_reset(struct usbhub_s *hub, u32 port)
             ohci_hub_disconnect(hub, port);
             return -1;
         }
+#if OHCI_INTERRUPT
+        ohci_wait_intr();
+#else
         yield();
+#endif
     }
 
     if ((sts & (RH_PS_CCS|RH_PS_PES)) != (RH_PS_CCS|RH_PS_PES))
@@ -119,6 +127,33 @@ check_ohci_ports(struct usb_ohci_s *cntl)
 /****************************************************************
  * Setup
  ****************************************************************/
+
+static int ohci_irq = -1;
+static hal_sem_t ohci_intr_sem;
+struct usb_ohci_s *static_cntl;
+
+static void ohci_int_enable( int on )
+{
+    if( on )
+    {
+        writel(&static_cntl->regs->intrenable, ~0);
+        //writel(&cntl->regs->intrstatus, ~0);
+    }
+    else
+    {
+        writel(&static_cntl->regs->intrdisable, ~0);
+        writel(&static_cntl->regs->intrstatus, ~0);
+    }
+}
+
+
+static void ohci_wait_intr(void)
+{
+    hal_sem_zero( &ohci_intr_sem );
+    ohci_int_enable( 1 );
+    hal_sem_acquire_etc( &ohci_intr_sem, 1, SEM_FLAG_TIMEOUT, 5000 );
+}
+
 
 static int
 start_ohci(struct usb_ohci_s *cntl, struct ohci_hcca *hcca)
@@ -261,8 +296,41 @@ ohci_init(u16 bdf, int busid)
     writel(&cntl->regs->intrdisable, ~0);
     writel(&cntl->regs->intrstatus, ~0);
 
+    static_cntl = cntl;
+    assert( 0 == hal_sem_init( &ohci_intr_sem, "ohci intr" ) );
+
     //run_thread(configure_ohci, cntl);
     configure_ohci( cntl );
+}
+
+static void ohci_int(void *arg)
+{
+    (void) arg;
+    ohci_int_enable( 0 );
+    hal_sem_release( &ohci_intr_sem );
+}
+
+phantom_device_t * driver_ohci_probe( pci_cfg_t *pci, int stage )
+{
+    (void) stage;
+
+    if( (pci->sub_class != OHCI_SUB_CLASS) || (pci->interface != OHCI_INTERFACE) )
+        return 0;
+
+    ohci_irq = pci->interrupt;
+    SHOW_INFO( 2, "irq = %d", ohci_irq );
+
+    //assert( 0 == hal_sem_init( &ohci_intr_sem, "ohci intr" ) );
+
+    if( hal_irq_alloc( ohci_irq, &ohci_int, 0, HAL_IRQ_SHAREABLE ) )
+    {
+
+        SHOW_ERROR( 0, "IRQ %d is busy", ohci_irq );
+
+        return 0;
+    }
+
+    return 0; // TODO BUG FIXME redo all the init process, create dev
 }
 
 
@@ -287,7 +355,11 @@ wait_ed(struct ohci_ed *ed)
             warn_timeout();
             return -1;
         }
+#if OHCI_INTERRUPT
+        ohci_wait_intr();
+#else
         yield();
+#endif
     }
 }
 
@@ -306,7 +378,11 @@ ohci_waittick(struct usb_ohci_s *cntl)
             warn_timeout();
             return;
         }
+#if OHCI_INTERRUPT
+        ohci_wait_intr();
+#else
         yield();
+#endif
     }
 }
 

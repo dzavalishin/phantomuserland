@@ -22,6 +22,7 @@
 #include "usb-uhci.h" // init_uhci
 #include "usb-ohci.h" // init_ohci
 
+#include <kernel/drivers.h>
 
 
 struct companion_s {
@@ -190,6 +191,32 @@ check_ehci_ports(struct usb_ehci_s *cntl)
  * Setup
  ****************************************************************/
 
+
+static int ehci_irq = -1;
+static hal_sem_t ehci_intr_sem;
+struct usb_ehci_s *static_cntl;
+
+static void ehci_int_enable( int on )
+{
+    if( on )
+    {
+        //outw( static_cntl->iobase + USBINTR, USBINTR_TIMEOUT|USBINTR_RESUME|USBINTR_IOC|USBINTR_SP );
+    }
+    else
+    {
+        //outw( static_cntl->iobase + USBINTR, 0);
+    }
+}
+
+
+static void wait_intr(void)
+{
+    hal_sem_zero( &ehci_intr_sem );
+    ehci_int_enable( 1 );
+    hal_sem_acquire_etc( &ehci_intr_sem, 1, SEM_FLAG_TIMEOUT, 5000 );
+}
+
+
 static void
 configure_ehci(void *data)
 {
@@ -218,7 +245,11 @@ configure_ehci(void *data)
             warn_timeout();
             goto fail;
         }
+#if EHCI_INTERRUPT
+        wait_intr();
+#else
         yield();
+#endif
     }
 
     // Disable interrupts (just to be safe).
@@ -337,10 +368,49 @@ ehci_init(u16 bdf, int busid, int compbdf)
         compbdf = pci_next(compbdf+1, &max);
     }
 #endif
+
+    assert( 0 == hal_sem_init( &ehci_intr_sem, "ehci intr" ) );
+
+    static_cntl = cntl;
+
     //run_thread(configure_ehci, cntl);
     configure_ehci( cntl );
     return 0;
 }
+
+static void ehci_intr(void *arg)
+{
+    (void) arg;
+    ehci_int_enable( 0 );
+    hal_sem_release( &ehci_intr_sem );
+}
+
+
+phantom_device_t * driver_ehci_probe( pci_cfg_t *pci, int stage )
+{
+    (void) stage;
+
+    if( (pci->sub_class != EHCI_SUB_CLASS) || (pci->interface != EHCI_INTERFACE) )
+        return 0;
+
+    ehci_irq = pci->interrupt;
+    SHOW_INFO( 2, "irq = %d", ehci_irq );
+
+    //assert( 0 == hal_sem_init( &ehci_intr_sem, "ehci intr" ) );
+
+    if( hal_irq_alloc( ehci_irq, &ehci_intr, 0, HAL_IRQ_SHAREABLE ) )
+    {
+
+        SHOW_ERROR( 0, "IRQ %d is busy", ehci_irq );
+
+        return 0;
+    }
+
+    return 0; // TODO BUG FIXME redo all the init process, create dev
+}
+
+
+
 
 
 /****************************************************************
@@ -361,7 +431,11 @@ ehci_wait_qh(struct usb_ehci_s *cntl, struct ehci_qh *qh)
             warn_timeout();
             return -1;
         }
+#if EHCI_INTERRUPT
+        wait_intr();
+#else
         yield();
+#endif
     }
 }
 
@@ -388,7 +462,11 @@ ehci_waittick(struct usb_ehci_s *cntl)
             warn_timeout();
             return;
         }
+#if EHCI_INTERRUPT
+        wait_intr();
+#else
         yield();
+#endif
     }
     // Ring "doorbell"
     writel(&cntl->regs->usbcmd, cmd | CMD_IAAD);
@@ -401,7 +479,11 @@ ehci_waittick(struct usb_ehci_s *cntl)
             warn_timeout();
             return;
         }
+#if EHCI_INTERRUPT
+        wait_intr();
+#else
         yield();
+#endif
     }
     // Ack completion
     writel(&cntl->regs->usbsts, STS_IAA);
@@ -613,7 +695,11 @@ ehci_wait_td(struct ehci_qtd *td)
             warn_timeout();
             return -1;
         }
+#if EHCI_INTERRUPT
+        wait_intr();
+#else
         yield();
+#endif
     }
     if (status & QTD_STS_HALT) {
         dprintf(1, "ehci_wait_td error - status=%x\n", status);
