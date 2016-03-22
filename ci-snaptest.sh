@@ -29,8 +29,10 @@ dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 if [ "$VIRTIO" ]
 then
 	cp $DISK_IMG_ORIG vio.img
-	echo ": zeroing phantom drive ..."
-	dd if=/dev/zero of=phantom.img bs=4096 skip=1 count=1024 2> /dev/null
+	[ "$VIRTIO" = 2 ] || {
+		echo ": zeroing phantom drive ..."
+		dd if=/dev/zero of=phantom.img bs=4096 skip=1 count=1024 2> /dev/null
+	}
 else
 	cp $DISK_IMG_ORIG .
 	echo ": zeroing vio..."

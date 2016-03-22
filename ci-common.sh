@@ -64,6 +64,7 @@ die ( ) {
 [ "$SNAP_CI" ] && {
 	COMPILE=1
 	unset DISPLAY
+	UNATTENDED=-unattended
 }
 
 while [ $# -gt 0 ]
@@ -78,6 +79,7 @@ do
 	;;
 	-ng)	unset DISPLAY	;;
 	-v)	VIRTIO=1	;;
+	-vv)	VIRTIO=2	;;		# virtio only
 	*)
 		echo "Usage: $0 [-u|-f] [-c] [-p N] [-nc] [-ng] [-v]
 	-f	- run in foreground (no need to specify if other command line args presented)
@@ -86,6 +88,7 @@ do
 	-p N	- make N passes of snapshot test (default: N=2)
 	-ng	- do not show qemu/kvm window (default in CI mode)
 	-v	- use virtio for snaps
+	-vv	- use only virtio (no IDE drives)
 "
 		exit 0
 	;;
@@ -164,6 +167,9 @@ quit
 	gdb
 
 	[ "$1" ] && echo "$*"
+
+	# move back to analyze our logs
+	cd $TEST_DIR
 }
 
 cd $TEST_DIR
@@ -187,6 +193,9 @@ rm -f $LOGFILE
 [ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH=-nographic
 #GRAPH=-nographic
 
+[ "$VIRTIO" = 2 ] || IDE_DISKS="	-hda snapcopy.img \
+	-hdb $DISK_IMG"
+
 QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user \
@@ -195,8 +204,7 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-tftp tftp \
 	-no-fd-bootchk \
 	-fda img/grubfloppy.img \
-	-hda snapcopy.img \
-	-hdb $DISK_IMG \
+	$IDE_DISKS \
 	-drive file=vio.img,if=virtio,format=raw \
 	-usb -usbdevice mouse \
 	-soundhw all"
