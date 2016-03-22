@@ -44,7 +44,7 @@ errno_t         t_get_owner( tid_t tid, void **owner );
 
 struct wtty;
 #if CONF_NEW_CTTY
-errno_t		t_new_ctty( tid_t tid )
+errno_t		t_new_ctty( tid_t tid );
 #else
 errno_t         t_set_ctty( tid_t tid, struct wtty * );
 #endif
