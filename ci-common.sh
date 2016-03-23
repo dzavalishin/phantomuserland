@@ -126,6 +126,9 @@ done
 LOGFILE=serial0.log
 
 call_gdb ( ) {
+	ps -p $1 || return	# no need to run if QEMU is dead already
+	shift
+
 	if [ "$SNAP_CI" ]
 	then
 		echo "add-auto-load-safe-path $PHANTOM_HOME/.gdbinit" >> $SNAP_CACHE_DIR/.gdbinit
@@ -142,7 +145,6 @@ call_gdb ( ) {
 	port="${1:-$GDB_PORT}"
 	shift
 
-	cd $PHANTOM_HOME
 	echo "
 
 FATAL! Phantom stopped (panic)"
@@ -162,14 +164,10 @@ dir phantom/threads
 target remote localhost:$port
 
 bt full
-quit
 " > .gdbinit
-	gdb
+	gdb -cd=$PHANTOM_HOME -batch
 
 	[ "$1" ] && echo "$*"
-
-	# move back to analyze our logs
-	cd $TEST_DIR
 }
 
 cd $TEST_DIR
