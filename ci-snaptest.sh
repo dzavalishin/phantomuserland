@@ -81,15 +81,15 @@ FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
 			}
 		}
 		grep -iq 'snapshot done' $LOGFILE && break
+
+		tail -1 $LOGFILE | grep -q '^Press any' && \
+			call_gdb $QEMU_PID $GDB_PORT "Pass $pass panic" 
+
 		grep -q '^\(\. \)\?Panic' $LOGFILE && {
-			sleep 15
-			EXIT_CODE=3
+			[ "$UNATTENDED" ] && sleep 15	# wait for stack dump
 			break
 		}
 	done
-
-	tail -1 $LOGFILE | grep -q '^Press any' && \
-		call_gdb $GDB_PORT "Pass $pass panic" 
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE && {
 		if [ "$SNAP_CI" = true ]

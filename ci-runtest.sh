@@ -52,10 +52,10 @@ do
 	ELAPSED=`expr $ELAPSED + 2`
 
 	tail -1 $LOGFILE | grep -q '^Press any' && \
-		call_gdb $GDB_PORT "Test run panic"
+		call_gdb $QEMU_PID $GDB_PORT "Test run panic"
 
 	grep -q '^\(\. \)\?Panic' $LOGFILE && {
-		sleep 15	# allow panic to finish properly
+		[ "$UNATTENDED" ] && sleep 15	# wait for stack dump
 		EXIT_CODE=2
 		break
 	}
@@ -65,7 +65,7 @@ done
 [ $ELAPSED -lt $PANIC_AFTER ] || {
 	echo "
 
-FATAL! Phantom stalled: ${LOG_MESSAGE:-no activity after $PANIC_AFTER seconds}"
+FATAL! Phantom test stalled: ${LOG_MESSAGE:-no activity after $PANIC_AFTER seconds}"
 	kill $QEMU_PID
 	EXIT_CODE=3
 }
