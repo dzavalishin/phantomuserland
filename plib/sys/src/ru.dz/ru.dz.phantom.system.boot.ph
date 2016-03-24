@@ -105,7 +105,7 @@ class boot
 
         boot_object = _boot_object;
 
-        print("Phantom System Envirinment Setup is running\n");
+        print("Phantom System Environment Setup is running\n");
 
 
         // Now setup class loader for the system
