@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
  *
  * Page-level bitmap based allocator.
  *
@@ -81,12 +81,13 @@ void phantom_phys_alloc_init(physalloc_t *arena, u_int32_t n_alloc_units)
 errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 {
     assert(arena->inited);
+
+    hal_spin_lock_cli(&(arena->lock));
+
 #if TRACE_USED
     long prev_used = phantom_phys_stat_arena( arena );
 #endif
 
-    //int ie = hal_save_cli();
-    hal_spin_lock_cli(&(arena->lock));
     unsigned int prev_alloc_last_pos = arena->alloc_last_pos;
 
     assert(arena->alloc_last_pos < arena->total_size / BITS_PER_ELEM);
@@ -113,11 +114,11 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 
             *ret = page_no;
             arena->n_used_pages++;
-            hal_spin_unlock_sti(&(arena->lock));
-            //if(ie) hal_sti();
 #if TRACE_USED
             physalloc_check_diff( arena, prev_used, 1 );
 #endif
+            hal_spin_unlock_sti(&(arena->lock));
+
             return 0;
         }
         arena->alloc_last_pos++;
@@ -128,7 +129,6 @@ errno_t phantom_phys_alloc_page( physalloc_t *arena, physalloc_item_t *ret )
 
     // not found
     hal_spin_unlock_sti(&(arena->lock));
-    //if(ie) hal_sti();
     return ENOMEM;
 }
 
@@ -213,12 +213,12 @@ void phantom_phys_free_region( physalloc_t *arena, physalloc_item_t start, size_
 errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, size_t npages )
 {
     assert(arena->inited);
+
+    hal_spin_lock_cli(&(arena->lock));
+
 #if TRACE_USED
     long prev_used = phantom_phys_stat_arena( arena );
 #endif
-
-    //int ie = hal_save_cli();
-    hal_spin_lock_cli(&(arena->lock));
 
     //ATTN: share alloc_last_pos with phantom_phys_alloc_page()...
     unsigned int prev_alloc_last_pos = arena->alloc_last_pos;
@@ -245,7 +245,6 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
     if (i != N)
     {
         hal_spin_unlock_sti(&(arena->lock));
-        //if(ie) hal_sti();
         return ENOMEM;  // not found
     }
 
@@ -270,7 +269,6 @@ errno_t phantom_phys_alloc_region( physalloc_t *arena, physalloc_item_t *ret, si
 #endif
 
     hal_spin_unlock_sti(&(arena->lock));
-    //if(ie) hal_sti();
     return 0;
 }
 
@@ -317,6 +315,9 @@ long phantom_phys_stat_arena( physalloc_t *arena )
     }
 
     //lprintf("used %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
+
+    if( used_bits != arena->n_used_pages )
+        lprintf("used diff: arena->n_used_pages %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
 
     return used_bits;
 }
