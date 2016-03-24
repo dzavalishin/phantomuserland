@@ -1,0 +1,6 @@
+{
+  "name": "Phantom OS",
+  "tagline": "Phantom Operating System",
+  "body": "# Hello and welcome to the Phantom OS project\r\n\r\n## What Phantom OS is\r\n\r\n* [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)\r\n* [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/) - if you don't read russian, you can try to read Google [translated version](https://translate.google.ru/translate?hl=ru&sl=auto&tl=en&u=http%3A%2F%2Fwww.osp.ru%2Fos%2F2011%2F03%2F13008200%2F).\r\n\r\n## We look for programmers to join us\r\n\r\nNamely, we need someone who will be working with:\r\n\r\n* Bytecode interpreter (and we need JIT too)\r\n* Graphics engine, font engine\r\n* Network stack\r\n* Drivers\r\n* ARM port\r\n* MIPS port\r\n* 64 bit verison (either Intel, ARm or MIPS)\r\n* Unit tests\r\n* Framebuffer video drivers\r\n* Java classlib\r\n* Unix compatibility subsystem\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
