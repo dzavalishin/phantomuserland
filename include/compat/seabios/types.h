@@ -3,8 +3,8 @@
 // Copyright (C) 2008-2010  Kevin O'Connor <kevin@koconnor.net>
 //
 // This file may be distributed under the terms of the GNU LGPLv3 license.
-#ifndef __TYPES_H
-#define __TYPES_H
+#ifndef __SEABIOS_TYPES_H
+#define __SEABIOS_TYPES_H
 
 typedef unsigned char u8;
 typedef signed char s8;
@@ -14,7 +14,12 @@ typedef unsigned int u32;
 typedef signed int s32;
 typedef unsigned long long u64;
 typedef signed long long s64;
-typedef u32 size_t;
+
+// No way - machdep definition
+//#ifndef _SIZE_T
+//#define _SIZE_T
+//typedef u32 size_t;
+//#endif
 
 union u64_u32_u {
     struct { u32 lo, hi; };
@@ -153,4 +158,5 @@ extern void __force_link_error__only_in_16bit(void) __noreturn;
 #define __stringify_1(x)        #x
 #define __stringify(x)          __stringify_1(x)
 
-#endif // types.h
+#endif // __SEABIOS_TYPES_H
+

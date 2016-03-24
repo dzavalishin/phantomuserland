@@ -43,7 +43,11 @@ errno_t         t_set_owner( tid_t tid, void *owner );
 errno_t         t_get_owner( tid_t tid, void **owner );
 
 struct wtty;
+#if CONF_NEW_CTTY
+errno_t		t_new_ctty( tid_t tid );
+#else
 errno_t         t_set_ctty( tid_t tid, struct wtty * );
+#endif
 errno_t         t_get_ctty( tid_t tid, struct wtty ** );
 
 errno_t         t_set_pid( tid_t tid, pid_t pid );
