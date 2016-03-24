@@ -11,7 +11,7 @@ Windows:
     NB! Current MIPS kernel is big endian.
 
 Qemu
-
+  Linux   - etc/qemu_0.15.0-2_amd64.deb
   Windows - http://lassauge.free.fr/qemu/
 
   MIPS info (russian) http://code.google.com/p/vak-opensource/wiki/qemu_mips_machines
