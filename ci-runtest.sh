@@ -23,7 +23,7 @@ dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 # take working copy of the Phantom disk
 cp ../../oldtree/run_test/$DISK_IMG .
 
-tail -f $CTLPIPE --pid=$$ | $QEMU $QEMU_OPTS &
+tail -f $CTLPIPE --pid=$$ | $QEMU $QEMU_OPTS > qemu.log &
 QEMU_PID=$!
 
 # wait for Phantom to start
@@ -89,5 +89,5 @@ grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
 grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
 # submit all details into the CI log, cutting off ESC-codes
-[ "$SNAP_CI" ] && cat $LOGFILE | sed 's/[^m]*m//g;s///g'
+[ "$SNAP_CI" ] && cat qemu.log $LOGFILE | sed 's/[^m]*m//g;s///g'
 exit $EXIT_CODE
