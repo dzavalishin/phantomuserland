@@ -64,7 +64,7 @@ die ( ) {
 [ "$SNAP_CI" ] && {
 	COMPILE=1
 	unset DISPLAY
-	UNATTENDED=-unattended
+	#UNATTENDED=-unattended		# not needed with control pipe
 }
 
 while [ $# -gt 0 ]
@@ -166,6 +166,7 @@ target remote localhost:$port
 bt full
 " > .gdbinit
 	gdb -cd=$PHANTOM_HOME -batch
+	echo 'sendkeys a' >&3	# make "Press any key"
 
 	[ "$1" ] && echo "$*"
 }
@@ -194,7 +195,7 @@ rm -f $LOGFILE
 [ "$VIRTIO" = 2 ] || IDE_DISKS="	-hda snapcopy.img \
 	-hdb $DISK_IMG"
 
-QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
+QEMU_OPTS="-L $QEMU_SHARE $GRAPH -monitor stdio \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user \
 	-parallel file:lpt_01.log \
@@ -215,3 +216,7 @@ QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 #	-net nic,model=ne2k_isa -M isapc \
 
 [ "$SNAP_CI" = true ] || cp $GRUB_MENU ${GRUB_MENU}.orig
+
+# now prepare control pipe for pseudo-interactive run of qemu
+CTLPIPE=`mktemp`
+exec 3> $CTLPIPE

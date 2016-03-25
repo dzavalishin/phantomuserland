@@ -23,12 +23,13 @@ dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 # take working copy of the Phantom disk
 cp ../../oldtree/run_test/$DISK_IMG .
 
-$QEMU $QEMU_OPTS &
+tail -f $CTLPIPE --pid=$$ | $QEMU $QEMU_OPTS &
 QEMU_PID=$!
 
 # wait for Phantom to start
 ELAPSED=2
 sleep 2
+rm $CTLPIPE	# it's opened already and will exist until the end
 
 while [ $ELAPSED -lt $WAIT_LAUNCH ]
 do
@@ -43,6 +44,8 @@ done
 	ELAPSED=$PANIC_AFTER
 	LOG_MESSAGE="$LOGFILE is empty"
 }
+
+echo 'info pci' >&3
 
 while [ $ELAPSED -lt $PANIC_AFTER ]
 do
@@ -66,7 +69,7 @@ done
 	echo "
 
 FATAL! Phantom test stalled: ${LOG_MESSAGE:-no activity after $PANIC_AFTER seconds}"
-	kill $QEMU_PID
+	(ps -p $QEMU_PID >/dev/null) && echo 'quit' >&3	# stop emulation
 	EXIT_CODE=3
 }
 
