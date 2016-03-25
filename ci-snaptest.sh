@@ -39,6 +39,8 @@ else
 	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 fi
 
+set -x	# debug
+
 for pass in `seq 1 $PASSES`
 do
 	echo "
