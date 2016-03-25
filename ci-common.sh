@@ -189,13 +189,13 @@ done
 
 rm -f $LOGFILE
 
-[ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH=-nographic
+[ "$DISPLAY" ] && GRAPH="-vga cirrus -monitor stdio" || GRAPH=-nographic
 #GRAPH=-nographic
 
 [ "$VIRTIO" = 2 ] || IDE_DISKS="	-hda snapcopy.img \
 	-hdb $DISK_IMG"
 
-QEMU_OPTS="-L $QEMU_SHARE $GRAPH -monitor stdio \
+QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user \
 	-parallel file:lpt_01.log \
