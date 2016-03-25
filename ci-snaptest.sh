@@ -43,7 +43,7 @@ for pass in `seq 1 $PASSES`
 do
 	echo "
 ===> pass $pass"
-	tail -f $CTLPIPE --pid=$$ | $QEMU $QEMU_OPTS &
+	tail -f $CTLPIPE --pid=$$ | $QEMU $QEMU_OPTS > qemu.log &
 	QEMU_PID=$!
 	ELAPSED=0
 
@@ -92,8 +92,6 @@ FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
 		}
 	done
 
-	rm $CTLPIPE
-
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE && {
 		if [ "$SNAP_CI" = true ]
 		then
@@ -118,7 +116,10 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 	}
 
 	(ps -p $QEMU_PID >/dev/null) && echo 'quit' >&3	# stop emulation
+	cat qemu.log
 done
+
+rm $CTLPIPE
 
 if [ "$SNAP_CI" = true ]
 then
