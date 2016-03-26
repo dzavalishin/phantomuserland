@@ -39,15 +39,13 @@ else
 	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 fi
 
-set -x	# debug
+#set -x	# debug
 
 for pass in `seq 1 $PASSES`
 do
 	echo "
 ===> pass $pass"
-	tail -f $CTLPIPE --pid=$$ | $QEMU $QEMU_OPTS > qemu.log &
-	QEMU_PID=$!
-	ELAPSED=0
+	launch_phantom
 
 	while [ $ELAPSED -lt $PANIC_AFTER ]
 	do
@@ -70,29 +68,27 @@ FATAL! Phantom snapshot test crashed"
 			EXIT_CODE=3
 			break
 		}
-		[ -s $LOGFILE ] || {
-			sleep 50
-			ELAPSED=`expr $ELAPSED + 50`
-			[ -s $LOGFILE ] || {
-				echo "
 
-FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
-				kill $QEMU_PID
-				EXIT_CODE=2
-				break
-			}
-			echo 'info pci' >&3
-		}
-		grep -iq 'snapshot done' $LOGFILE && break
-
-		tail -1 $LOGFILE | grep -q '^Press any' && \
-			call_gdb $QEMU_PID $GDB_PORT "Pass $pass panic" 
-
-		grep -q '^\(\. \)\?Panic' $LOGFILE && {
-			[ "$UNATTENDED" ] && sleep 15	# wait for stack dump
+		(tail -3 gdb.log | grep ^Breakpoint\ 1,) && {
+			call_gdb
+			EXIT_CODE=2
 			break
 		}
+
+		grep -iq 'snapshot done' $LOGFILE && break
 	done
+
+	rm $QEMUCTL $GDBCTL
+
+	(ps -p $QEMU_PID >/dev/null) && echo 'quit' >&3	# stop emulation
+	cat qemu.log
+
+	if [ "$EXIT_CODE" = 2 ]
+	then
+		break		# get outta here, gdb is dead already
+	else
+		echo 'quit' >&4	# terminate gdb and proceed further
+	fi
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE && {
 		if [ "$SNAP_CI" = true ]
@@ -116,12 +112,7 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 		#preserve_log $LOGFILE
 		break
 	}
-
-	(ps -p $QEMU_PID >/dev/null) && echo 'quit' >&3	# stop emulation
-	cat qemu.log
 done
-
-rm $CTLPIPE
 
 if [ "$SNAP_CI" = true ]
 then
