@@ -4,7 +4,6 @@
 #
 . ./ci-common.sh	# ci-runtest and ci-snaptest have much in common
 
-WAIT_LAUNCH=60		# wait before worrying about slow launch
 PANIC_AFTER=200		# kill test after 200 seconds of inactivity
 
 echo "color yellow/blue yellow/magenta
@@ -23,29 +22,8 @@ dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 # take working copy of the Phantom disk
 cp ../../oldtree/run_test/$DISK_IMG .
 
-tail -f $CTLPIPE --pid=$$ | $QEMU $QEMU_OPTS > qemu.log &
-QEMU_PID=$!
-
-# wait for Phantom to start
-ELAPSED=2
-sleep 2
-rm $CTLPIPE	# it's opened already and will exist until the end
-
-while [ $ELAPSED -lt $WAIT_LAUNCH ]
-do
-	[ -s $LOGFILE ] && break
-
-	sleep 2
-	kill -0 $QEMU_PID || break
-	ELAPSED=`expr $ELAPSED + 2`
-done
-
-[ -s $LOGFILE ] || {
-	ELAPSED=$PANIC_AFTER
-	LOG_MESSAGE="$LOGFILE is empty"
-}
-
-echo 'info pci' >&3
+launch_phantom
+#echo 'info pci' >&3
 
 while [ $ELAPSED -lt $PANIC_AFTER ]
 do
@@ -54,15 +32,15 @@ do
 	kill -0 $QEMU_PID || break
 	ELAPSED=`expr $ELAPSED + 2`
 
-	tail -1 $LOGFILE | grep -q '^Press any' && \
-		call_gdb $QEMU_PID $GDB_PORT "Test run panic"
-
-	grep -q '^\(\. \)\?Panic' $LOGFILE && {
-		[ "$UNATTENDED" ] && sleep 15	# wait for stack dump
+	(tail -3 gdb.log | grep ^Breakpoint\ 1,) && {
+		call_gdb
 		EXIT_CODE=2
 		break
 	}
 done
+
+[ "$EXIT_CODE" = 2 ] || echo 'quit' >&4		# terminate gdb
+rm $QEMUCTL $GDBCTL
 
 # check if finished in time
 [ $ELAPSED -lt $PANIC_AFTER ] || {
