@@ -142,6 +142,7 @@ launch_phantom ( ) {
 	# wait for Phantom to start
 	ELAPSED=2
 	sleep 2
+	echo 'info qtree' >&3	# show setup
 
 	while [ $ELAPSED -lt $WAIT_LAUNCH ]
 	do
