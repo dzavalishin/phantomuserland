@@ -107,7 +107,14 @@ FATAL! Phantom snapshot test crashed"
 	grep 'snap:\|Snapshot done' $LOGFILE || {
 		echo "
 ERROR! No snapshot activity in log! Phantom snapshot test failed"
-		tail -10 $LOGFILE
+		if [ "$SNAP_CI" = true ]
+		then
+			# show complete log in CI
+			cat $LOGFILE | sed 's/[^m]*m//g;s///g'
+		else
+			# show extract from the log otherwise
+			tail -10 $LOGFILE
+		fi
 		EXIT_CODE=4
 		#preserve_log $LOGFILE
 		break
