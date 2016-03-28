@@ -4,7 +4,7 @@
 #
 . ./ci-common.sh	# ci-runtest and ci-snaptest have much in common
 
-PANIC_AFTER=200		# kill test after 200 seconds of inactivity
+#PANIC_AFTER=200		# kill test after 200 seconds of inactivity
 
 echo "color yellow/blue yellow/magenta
 timeout=3

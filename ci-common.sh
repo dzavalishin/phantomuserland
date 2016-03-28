@@ -20,6 +20,7 @@ LOGFILE=make.log	# start with build log
 GRUB_MENU=tftp/tftp/menu.lst
 EXIT_CODE=0
 WAIT_LAUNCH=60		# seconds to start Phantom
+PANIC_AFTER=200		# seconds to wait for tests to finish or snapshot to be completed
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
 then
@@ -142,7 +143,7 @@ launch_phantom ( ) {
 	# wait for Phantom to start
 	ELAPSED=2
 	sleep 2
-	echo 'info qtree' >&3	# show setup
+	#echo 'info qtree' >&3	# show setup
 
 	while [ $ELAPSED -lt $WAIT_LAUNCH ]
 	do
