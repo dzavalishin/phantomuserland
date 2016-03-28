@@ -449,7 +449,7 @@ static void auto_run_thread( void *arg )
         return;
 
     char tname[128];
-    snprintf( tname, sizeof(tname), "Autorun %s", arg );
+    snprintf( tname, sizeof(tname) - 1, "Autorun %s", arg );
     t_current_set_name(tname);
 
     auto_run( (const char *) arg );
@@ -488,7 +488,7 @@ static errno_t auto_run( const char *mpath )
     SHOW_INFO( 0, "Atthempt autorun @ %s", mpath );
 
     char run_path[512];
-    snprintf( run_path, sizeof(run_path), "%s/bin/sh", mpath );
+    snprintf( run_path, sizeof(run_path) - 1, "%s/bin/sh", mpath );
     const char* av[] = { "sh", "-s", "phantom.rc", 0 };
 
     SHOW_FLOW( 4, "Attempt to run shell @ %s", run_path );
@@ -505,7 +505,7 @@ static errno_t auto_run( const char *mpath )
     // FIXME TODO ERR pid is not freed if no shell found
 #endif
 
-    snprintf( run_path, sizeof(run_path), "%s/autorun.inf", mpath );
+    snprintf( run_path, sizeof(run_path) - 1, "%s/autorun.inf", mpath );
     SHOW_FLOW( 4, "Attempt to run autorun.inf @ %s err = %d", run_path, err );
 
     void *arinf = 0;
