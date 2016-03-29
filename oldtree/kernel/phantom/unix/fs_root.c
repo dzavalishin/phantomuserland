@@ -485,7 +485,7 @@ static errno_t auto_run( const char *mpath )
 {
     errno_t err;
 
-    SHOW_INFO( 0, "Atthempt autorun @ %s", mpath );
+    SHOW_INFO( 0, "Trying autorun @ %s", mpath );
 
     char run_path[512];
     snprintf( run_path, sizeof(run_path) - 1, "%s/bin/sh", mpath );
