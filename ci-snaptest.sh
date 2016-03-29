@@ -14,7 +14,7 @@ module=(nd)/classes
 boot 
 " > $GRUB_MENU
 
-#PANIC_AFTER=1800	# wait 30 minutes for a snapshot
+PANIC_AFTER=300		# wait 5 minutes for a snapshot to be completed
 
 # before running again
 # TODO call ../zero_ph_img.sh 
@@ -104,7 +104,7 @@ FATAL! Phantom snapshot test crashed"
 		break
 	}
 
-	grep 'snap:\|Snapshot done' $LOGFILE || {
+	grep 'Snapshot done' $LOGFILE || {
 		echo "
 ERROR! No snapshot activity in log! Phantom snapshot test failed"
 		if [ "$SNAP_CI" = true ]
@@ -119,6 +119,7 @@ ERROR! No snapshot activity in log! Phantom snapshot test failed"
 		#preserve_log $LOGFILE
 		break
 	}
+	grep -i snap $LOGFILE	# show snapshot activity summary
 done
 
 if [ "$SNAP_CI" = true ]
