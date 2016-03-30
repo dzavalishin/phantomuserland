@@ -14,7 +14,7 @@ module=(nd)/classes
 boot 
 " > $GRUB_MENU
 
-PANIC_AFTER=300		# wait 5 minutes for a snapshot to be completed
+PANIC_AFTER=500		# wait 5 minutes for a snapshot to be completed
 
 # before running again
 # TODO call ../zero_ph_img.sh 
