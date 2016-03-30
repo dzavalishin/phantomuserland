@@ -81,7 +81,7 @@ FATAL! Phantom snapshot test crashed"
 	rm $QEMUCTL $GDBCTL
 
 	(ps -p $QEMU_PID >/dev/null) && echo 'quit' >&3	# stop emulation
-	cat qemu.log
+	[ "$SNAP_CI" ] && tail -n +3 qemu.log		# show monitor logs if any
 
 	if [ "$EXIT_CODE" = 2 ]
 	then
@@ -127,7 +127,9 @@ then
 	[ $EXIT_CODE -gt 0 ] && exit $EXIT_CODE
 
 	[ "$VIRTIO" ] || {
-		echo Now re-run with virtio ...
+		echo "
+
+Now re-run with virtio ..."
 		cd $PHANTOM_HOME
 		case "$0" in		# re-instantiate with VIRTIO
 		/*)	. $0 -v		;;
