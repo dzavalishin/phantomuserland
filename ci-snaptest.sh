@@ -107,6 +107,7 @@ FATAL! Phantom snapshot test crashed"
 	grep 'Snapshot done' $LOGFILE || {
 		echo "
 ERROR! No snapshot activity in log! Phantom snapshot test failed"
+		call_gdb			# just in case there's something interesting there
 		if [ "$SNAP_CI" = true ]
 		then
 			# show complete log in CI
