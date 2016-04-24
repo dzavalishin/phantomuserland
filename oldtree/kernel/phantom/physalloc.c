@@ -280,7 +280,7 @@ long phantom_phys_stat_arena( physalloc_t *arena )
 {
     assert(arena->inited);
 
-    long used_bits = 0;
+    unsigned long used_bits = 0;
     long longest_free = 0;
     long curr_free = 0;
 
@@ -316,8 +316,8 @@ long phantom_phys_stat_arena( physalloc_t *arena )
 
     //lprintf("used %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
 
-    if( used_bits != arena->n_used_pages )
-        lprintf("used diff: arena->n_used_pages %d, realy %d, longest free %d\n", arena->n_used_pages, used_bits, longest_free );
+    //if( used_bits != arena->n_used_pages ) // always differs, for part of map corresponding to non-existant memory is marked as used
+    //lprintf("used diff @%p: arena->n_used_pages %d, realy %d, diff %d, longest free %d\n", arena, arena->n_used_pages, used_bits, arena->n_used_pages - used_bits, longest_free );
 
     return used_bits;
 }
