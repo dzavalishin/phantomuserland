@@ -5,13 +5,15 @@ rem http://lassauge.free.fr/qemu/
 SET QDIR=qemu\0.15.1
 SET QCMD=qemu.exe
 
-rem SET QDIR=qemu\1.2.0
 rem SET QDIR=qemu\1.0.1
+rem SET QCMD=qemu-system-i386.exe
+
+
+rem SET QDIR=qemu\1.2.0
 
 rem SET QDIR=qemu\2.4.1
 rem SET QCMD=qemu-system-i386w.exe
 
-rem SET QCMD=qemu-system-i386.exe
 rem SET QCMD=qemu-system-x86_64w.exe 
 
 set QEMU_AUDIO_DRV=dsound
@@ -20,12 +22,14 @@ rem set QEMU_AUDIO_DRV=fmod
 rem set SOUND=-soundhw sb16,es1370 -device intel-hda -device hda-duplex
 set SOUND=-soundhw sb16,es1370
 
-rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=ohci.0
+rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=ohci.0 -device usb-kbd,bus=ohci.0
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=/i440FX-pcihost/pci.0/ohci/ohci.0
 rem SET USB=-device pci-ohci -usbdevice mouse
 rem SET USB=-usb -device pci-ohci -usbdevice mouse 
 rem SET USB=-usb -usbdevice serial::tcp:ya.ru:80
 rem SET USB=-usb -usbdevice keyboard
+rem SET USB=-usb -usbdevice mouse
+rem SET USB=-usb -usbdevice keyboard -usbdevice mouse
 
 rem  -virtioconsole vioc,chardev=vioc -chardev vc,id=vioc 
 rem SET VIO= -drive file=vio.img,if=virtio,format=raw -net nic,model=virtio -net user -tftp ./tftp
