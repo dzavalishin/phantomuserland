@@ -155,6 +155,23 @@ uuprocess_t * 	proc_by_pid(int pid);
 void destroy_kolibri_state(uuprocess_t *u);
 void uu_close_all( uuprocess_t *u  );
 
+// In-kernel process start
+
+errno_t uu_spawnv( int *pid, int ppid, const char *path, const char **argv );
+
+//int spawnl(   mode, path, arg0, arg1..., argn,               NULL );
+//int spawnle(  mode, path, arg0, arg1..., argn,               NULL, envp );
+//int spawnlp(  mode, file, arg0, arg1..., argn,               NULL );
+//int spawnlpe( mode, file, arg0, arg1..., argn,              NULL, envp );
+//int spawnv(   mode, path, argv );
+//int spawnve(  mode, path, argv, envp );
+//int spawnvp(  mode, file, argv );
+//int spawnvpe( mode, file, argv, envp );
+
+
+
+
+
 
 #endif // UUPROCESS_H
 

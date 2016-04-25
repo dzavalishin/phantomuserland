@@ -14,7 +14,7 @@ module=(nd)/classes
 boot 
 " > $GRUB_MENU
 
-PANIC_AFTER=1800	# wait 30 minutes for a snapshot
+PANIC_AFTER=500		# wait 5 minutes for a snapshot to be completed
 
 # before running again
 # TODO call ../zero_ph_img.sh 
@@ -29,21 +29,23 @@ dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 if [ "$VIRTIO" ]
 then
 	cp $DISK_IMG_ORIG vio.img
-	echo ": zeroing phantom drive ..."
-	dd if=/dev/zero of=phantom.img bs=4096 skip=1 count=1024 2> /dev/null
+	[ "$VIRTIO" = 2 ] || {
+		echo ": zeroing phantom drive ..."
+		dd if=/dev/zero of=phantom.img bs=4096 skip=1 count=1024 2> /dev/null
+	}
 else
 	cp $DISK_IMG_ORIG .
 	echo ": zeroing vio..."
 	dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 fi
 
+#set -x	# debug
+
 for pass in `seq 1 $PASSES`
 do
 	echo "
 ===> pass $pass"
-	$QEMU $QEMU_OPTS &
-	QEMU_PID=$!
-	ELAPSED=0
+	launch_phantom
 
 	while [ $ELAPSED -lt $PANIC_AFTER ]
 	do
@@ -66,59 +68,75 @@ FATAL! Phantom snapshot test crashed"
 			EXIT_CODE=3
 			break
 		}
-		[ -s $LOGFILE ] || {
-			sleep 50
-			ELAPSED=`expr $ELAPSED + 50`
-			[ -s $LOGFILE ] || {
-				echo "
 
-FATAL! Phantom snapshot test stalled ($LOGFILE is empty)"
-				kill $QEMU_PID
-				EXIT_CODE=2
-				break
-			}
-		}
-		grep -iq 'snapshot done' $LOGFILE && break
-		grep -q '^\(\. \)\?Panic' $LOGFILE && {
-			sleep 15
-			EXIT_CODE=3
+		(tail -3 gdb.log | grep ^Breakpoint\ 1,) && {
+			call_gdb
+			EXIT_CODE=2
 			break
 		}
+
+		grep -iq 'snapshot done' $LOGFILE && break
 	done
 
-	tail -1 $LOGFILE | grep -q '^Press any' && \
-		call_gdb $GDB_PORT $QEMU_PID "Pass $pass panic" 
+	rm $QEMUCTL $GDBCTL
+
+	(ps -p $QEMU_PID >/dev/null) && echo 'quit' >&3	# stop emulation
+	[ "$SNAP_CI" ] && tail -n +3 qemu.log		# show monitor logs if any
+
+	if [ "$EXIT_CODE" = 2 ]
+	then
+		break		# get outta here, gdb is dead already
+	else
+		echo 'quit' >&4	# terminate gdb and proceed further
+	fi
 
 	grep -q '^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE && {
-		# show extract from the log here
-		grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE
+		if [ "$SNAP_CI" = true ]
+		then
+			# show complete log in CI
+			cat $LOGFILE | sed 's/[^m]*m//g;s///g'
+		else
+			# show extract from the log otherwise
+			grep 'Phantom\|snapshot\|pagelist\|[^e]fault\|^EIP\|^- \|Stack\|^\(\. \)\?Panic\|^T[0-9 ]' $LOGFILE
+		fi
 		EXIT_CODE=3
 		#preserve_log serial0.log
 		break
 	}
 
-	grep 'snap:\|Snapshot done' $LOGFILE || {
+	grep 'Snapshot done' $LOGFILE || {
 		echo "
 ERROR! No snapshot activity in log! Phantom snapshot test failed"
-		tail -10 $LOGFILE
+		call_gdb			# just in case there's something interesting there
+		if [ "$SNAP_CI" = true ]
+		then
+			# show complete log in CI
+			cat $LOGFILE | sed 's/[^m]*m//g;s///g'
+		else
+			# show extract from the log otherwise
+			tail -10 $LOGFILE
+		fi
 		EXIT_CODE=4
 		#preserve_log $LOGFILE
 		break
 	}
-
-	kill -0 $QEMU_PID >/dev/null || break
-
-	while (ps -p $QEMU_PID >/dev/null)
-	do
-		sleep 2
-		kill $QEMU_PID
-	done
+	grep -i snap $LOGFILE	# show snapshot activity summary
 done
 
 if [ "$SNAP_CI" = true ]
 then
 	[ $EXIT_CODE -gt 0 ] && exit $EXIT_CODE
-	[ "$VIRTIO" ] || . $0 -v	# re-instantiate with VIRTIO
+
+	[ "$VIRTIO" ] || {
+		echo "
+
+Now re-run with virtio ..."
+		cd $PHANTOM_HOME
+		case "$0" in		# re-instantiate with VIRTIO
+		/*)	. $0 -v		;;
+		*)	. ./$0 -v	;;
+		esac
+	}
 else
 	mv ${GRUB_MENU}.orig $GRUB_MENU
 fi

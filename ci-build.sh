@@ -27,6 +27,7 @@ rm -f $LOGFILE			# sanitize against wrong links etc
 #make -C phantom/newos	>> make.log 2>&1 || die "Make failure in newos"
 #make -C phantom/threads	>> make.log 2>&1 || die "Make failure in threads"
 make all > $LOGFILE 2>&1 || die "Make failure"
+
 grep -B1 'error:\|] Error' $LOGFILE && {
 	grep -q '^--- kernel build finished' $LOGFILE || die "Make failure"
 }
@@ -37,3 +38,17 @@ grep -B1 'error:\|] Error' $LOGFILE && {
 }
 
 tail $LOGFILE
+
+# now test building of Phantom library
+if (make -C plib > $LOGFILE 2>&1)
+then
+	[ "$WARN" ] && {
+		echo Successfully built Phantom library
+		grep Warning: $LOGFILE
+	}
+else
+	echo "Phantom library build failure:"
+	tail -20 $LOGFILE
+	exit 2
+fi
+

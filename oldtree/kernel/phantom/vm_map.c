@@ -353,6 +353,7 @@ void
 vm_map_init(unsigned long page_count)
 {
     //page_clear_engine_init();
+    SHOW_FLOW0( 1, "Started");
 
     vm_map_vm_page_count = page_count;
 
@@ -1512,7 +1513,7 @@ void do_snapshot(void)
 
 static int vm_regular_snaps_enabled = 0;
 
-void vm_enable_regular_snaps() { vm_regular_snaps_enabled = 1; }
+void vm_enable_regular_snaps() { SHOW_FLOW0( 1, "Enabled"); vm_regular_snaps_enabled = 1; }
 
 #if MEM_RECLAIM
 
