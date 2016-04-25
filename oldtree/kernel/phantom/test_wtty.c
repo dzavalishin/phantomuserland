@@ -137,7 +137,12 @@ static void _wtty_test(wtty_t *w)
     rc = wtty_write(w, buf, MAXTB, 0);
     test_check_eq( rc, MAXTB );
 
-    hal_sleep_msec(100);
+    //hal_sleep_msec(100);
+
+    int i = 1000;
+    while( (i-- > 0) && wtty_r_thread_runs )
+        hal_sleep_msec(1);
+
     test_check_false(wtty_r_thread_runs);
 
 

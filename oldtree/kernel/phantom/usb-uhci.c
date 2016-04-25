@@ -8,16 +8,19 @@
 
 #define DEBUG_MSG_PREFIX "uhci"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
-#define debug_level_info 0
+#define debug_level_info 8
 
 #include <compat/seabios.h>
 #include <ia32/pio.h>
 #include <time.h>
+#include <kernel/sem.h>
 
 #include "usb-uhci.h" // USBLEGSUP
 #include "usb.h" // struct usb_s
+
+#include <kernel/drivers.h>
 
 
 struct usb_uhci_s {
@@ -107,6 +110,25 @@ check_uhci_ports(struct usb_uhci_s *cntl)
 /****************************************************************
  * Setup
  ****************************************************************/
+
+static int uhci_irq = -1;
+static hal_sem_t uhci_intr_sem;
+struct usb_uhci_s *static_cntl;
+
+static void uhci_int_enable( int on )
+{
+    if( on )
+        outw( static_cntl->iobase + USBINTR, USBINTR_TIMEOUT|USBINTR_RESUME|USBINTR_IOC|USBINTR_SP );
+    else
+        outw( static_cntl->iobase + USBINTR, 0);
+}
+
+static void uhci_wait_intr(void)
+{
+    hal_sem_zero( &uhci_intr_sem );
+    uhci_int_enable( 1 );
+    hal_sem_acquire_etc( &uhci_intr_sem, 1, SEM_FLAG_TIMEOUT, 5000 );
+}
 
 static void
 reset_uhci(struct usb_uhci_s *cntl, u16 bdf)
@@ -202,8 +224,10 @@ fail:
 void
 uhci_init(u16 bdf, int busid)
 {
-    if (! CONFIG_USB_UHCI)
-        return;
+    if (! CONFIG_USB_UHCI)        return;
+
+    assert( 0 == hal_sem_init( &uhci_intr_sem, "uhci intr" ) );
+
     struct usb_uhci_s *cntl = malloc_tmphigh(sizeof(*cntl));
     memset(cntl, 0, sizeof(*cntl));
     usb_init_usb_s( &(cntl->usb) );
@@ -213,7 +237,7 @@ uhci_init(u16 bdf, int busid)
     cntl->iobase = (pci_config_readl(bdf, PCI_BASE_ADDRESS_4)
                     & PCI_BASE_ADDRESS_IO_MASK);
 
-    dprintf(1, "UHCI init on dev %02x:%02x.%x (io=%x)"
+    SHOW_INFO(1, "UHCI init on dev %02x:%02x.%x (io=%x)"
             , pci_bdf_to_bus(bdf), pci_bdf_to_dev(bdf)
             , pci_bdf_to_fn(bdf), cntl->iobase);
 
@@ -223,7 +247,41 @@ uhci_init(u16 bdf, int busid)
 
     //n_thread(configure_uhci, cntl);
     configure_uhci( cntl );
+
+    static_cntl = cntl;
 }
+
+static void uhci_int(void *arg)
+{
+    (void) arg;
+    uhci_int_enable( 0 );
+    hal_sem_release( &uhci_intr_sem );
+}
+
+phantom_device_t * driver_uhci_probe( pci_cfg_t *pci, int stage )
+{
+    (void) stage;
+
+    if( (pci->sub_class != UHCI_SUB_CLASS) || (pci->interface != UHCI_INTERFACE) )
+        return 0;
+
+
+    uhci_irq = pci->interrupt;
+    SHOW_INFO( 2, "irq = %d", uhci_irq );
+
+    //assert( 0 == hal_sem_init( &uhci_intr_sem, "uhci intr" ) );
+
+    if( hal_irq_alloc( uhci_irq, &uhci_int, 0, HAL_IRQ_SHAREABLE ) )
+    {
+
+        SHOW_ERROR( 0, "IRQ %d is busy", uhci_irq );
+
+        return 0;
+    }
+
+    return 0; // TODO BUG FIXME redo all the init process, create dev
+}
+
 
 
 /****************************************************************
@@ -252,7 +310,11 @@ wait_qh(struct usb_uhci_s *cntl, volatile struct uhci_qh *qh)
             uhci_dump(cntl);
             return -1;
         }
+#if UHCI_INTERRUPT
+        uhci_wait_intr();
+#else
         yield();
+#endif
     }
 }
 
@@ -279,7 +341,11 @@ uhci_waittick(struct usb_uhci_s *cntl)
 
             return;
         }
+#if 0 && UHCI_INTERRUPT
+        uhci_wait_intr();
+#else
         yield();
+#endif
     }
     SHOW_FLOW0( 6, "leave ok" );
 }
@@ -469,12 +535,18 @@ wait_td(struct uhci_td *td)
             warn_timeout();
             return -1;
         }
+#if UHCI_INTERRUPT
+        uhci_wait_intr();
+#else
         yield();
+#endif
     }
+
     if (status & TD_CTRL_ANY_ERROR) {
         dprintf(1, "wait_td error - status=%x", status);
         return -2;
     }
+
     return 0;
 }
 
@@ -661,19 +733,19 @@ static void uhci_dump(struct usb_uhci_s *cntl)
     u32 membase = inl(cntl->iobase + USBFLBASEADD);
     u16 startframe = inw(cntl->iobase + USBFRNUM);
     u8 sof = inb(cntl->iobase + USBSOF);
-    SHOW_INFO( 1, "iobase %x, membase %x, frame %d, SOF %d", cntl->iobase, membase, startframe, sof );
+    SHOW_INFO( 9, "iobase %x, membase %x, frame %d, SOF %d", cntl->iobase, membase, startframe, sof );
 
     {
     u16 cmd = inw(cntl->iobase + USBCMD);
-    SHOW_INFO( 1, "cmd %b", cmd, "\020\1Run\2Reset\3GReset\4GSuspend\5FrcGResume\6SWDebug\7Conf\10MaxPkt64" );
+    SHOW_INFO( 9, "cmd %b", cmd, "\020\1Run\2Reset\3GReset\4GSuspend\5FrcGResume\6SWDebug\7Conf\10MaxPkt64" );
     }
     {
     u16 sts = inw(cntl->iobase + USBSTS);
-    SHOW_INFO( 1, "sts %b", sts, "\020\1IntrIOC\2IntrErr\3ResumeDetect\4PciErr\5SchedErr\6Halt" );
+    SHOW_INFO( 9, "sts %b", sts, "\020\1IntrIOC\2IntrErr\3ResumeDetect\4PciErr\5SchedErr\6Halt" );
     }
     {
     u16 intr = inw(cntl->iobase + USBINTR);
-    SHOW_INFO( 1, "irq %b", intr, "\020\1Timeout\2Resume\3IOComplete\4ShortPkt" );
+    SHOW_INFO( 9, "irq %b", intr, "\020\1Timeout\2Resume\3IOComplete\4ShortPkt" );
     }
 
     //uhci_framelist *fl = cntl->framelist;
@@ -682,7 +754,7 @@ static void uhci_dump(struct usb_uhci_s *cntl)
     struct uhci_qh *pos = (void*)(cntl->framelist->links[0] & ~UHCI_PTR_BITS);
     for (;;)
     {
-        SHOW_INFO( 1, "td %x link %x elem %x", pos, pos->link, pos->element );
+        SHOW_INFO( 10, "td %x link %x elem %x", pos, pos->link, pos->element );
         u32 link = pos->link;
 
         if (link == UHCI_PTR_TERM)

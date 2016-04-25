@@ -56,6 +56,11 @@ errno_t         t_get_pid( tid_t tid, pid_t *pid );
 errno_t         t_set_priority( tid_t tid, int prio );
 errno_t         t_get_priority( tid_t tid, int *prio );
 
+errno_t         t_add_flags( tid_t tid, u_int32_t set_flags );
+errno_t         t_remove_flags( tid_t tid, u_int32_t reset_flags );
+errno_t         t_get_flags( tid_t tid, u_int32_t *flags );
+
+
 
 // -----------------------------------------------------------------------
 // Current thread only
@@ -110,7 +115,7 @@ errno_t         t_set_snapper_flag(void); // mark myself as snapper thread
 #define THREAD_FLAG_USER        0x0001 // runs in user mode - not imlp
 #define THREAD_FLAG_VM          0x0002 // runs virtual machine thread, owner points to phantom thread object??? GC??!
 #define THREAD_FLAG_JIT         0x0004 // JITted VM tread - not imlp
-#define THREAD_FLAG_NATIVE      0x0008 // runs native code objetct - not imlp
+#define THREAD_FLAG_NATIVE      0x0008 // runs VM native code object - not imlp
 #define THREAD_FLAG_KERNEL      0x0010 // runs some kernel private stuff
 
 #define THREAD_FLAG_PREFORK     0x0020 // it to be forked
@@ -124,8 +129,13 @@ errno_t         t_set_snapper_flag(void); // mark myself as snapper thread
 #define THREAD_FLAG_SNAPPER     0x1000 // I am is a snapper thread
 //#define THREAD_FLAG_SNAP_OK     0x2000 // I am paused so snapper can set pages writeonly
 
+#define THREAD_FLAG_HAS_PORT   0x10000 // This thread (possibly) owns port (see newos/ports)
 
+// Can be passed to thread creation function
 #define CREATION_POSSIBLE_FLAGS (THREAD_FLAG_USER|THREAD_FLAG_VM|THREAD_FLAG_JIT|THREAD_FLAG_NATIVE|THREAD_FLAG_KERNEL)
+
+// Can be set with t_add_flags/t_remove_flags
+#define SET_POSSIBLE_FLAGS (THREAD_FLAG_HAS_PORT)
 
 
 
