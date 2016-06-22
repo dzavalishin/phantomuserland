@@ -8,6 +8,7 @@ Questions:
 - have atime, ctime, mtime?
 - time variable format/unit/0 time?
 
+- max num of concurrent io ops
 
 - open/create timing depends on max file count in dir
 

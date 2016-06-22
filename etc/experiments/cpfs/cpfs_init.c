@@ -9,6 +9,8 @@
  *
 **/
 
+#include "cpfs.h"
+#include "cpfs_local.h"
 
 
 errno_t 		cpfs_init(void)

@@ -9,13 +9,11 @@
  *
 **/
 
+#include "cpfs_types.h"
+#include "cpfs_defs.h"
 
-typedef uint_64_t cpfs_blkno_t; // disk block number
-typedef uint_64_t cpfs_ino_t;   // number of inode
-typedef uint_32_t cpfs_direntno_t; // number of a dir entry in a directory 'file'
-typedef uint_64_t cpfs_fpos_t;  // file position or size
-typedef uint_64_t cpfs_time_t;  // file c/m/a time - TODO units, 0 time?
-
+#include <errno.h>
+#include <string.h>
 
 
 struct cpfs_sb
@@ -89,7 +87,7 @@ void                    cpfs_unlock_ino( cpfs_ino_t ino ); // flushes inode to d
 
 
 cpfs_ino_t      	cpfs_alloc_inode( void );
-void            	cpfs_free_inode( cpfs_ino ino ); // deletes file
+void            	cpfs_free_inode( cpfs_ino_t ino ); // deletes file
 
 
 

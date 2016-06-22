@@ -1,4 +1,19 @@
+/**
+ *
+ * CPFS
+ *
+ * Copyright (C) 2016-2016 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Superblock ops.
+ *
+**/
 
+#include "cpfs.h"
+#include "cpfs_local.h"
+
+
+
+struct cpfs_sb fs_sb;
 
 
 static int sb_blk = 0;
@@ -9,7 +24,7 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
 
     struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
 
-    if( blk_data == 0 ) return EFAULT; // ? TODO
+    if( sb == 0 ) return EFAULT; // ? TODO
 
 
     sb->sb_magic_0 = CPFS_SB_MAGIC;
@@ -51,7 +66,7 @@ errno_t cpfs_init_sb(void)
 
     struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
 
-    if( blk_data == 0 ) return EFAULT; // ? TODO
+    if( sb == 0 ) return EFAULT; // ? TODO
 
 
     if( sb->sb_magic_0 != CPFS_SB_MAGIC )
@@ -72,7 +87,7 @@ errno_t cpfs_write_sb(void)
 {
     struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
 
-    if( blk_data == 0 ) return EFAULT; // ? TODO
+    if( sb == 0 ) return EFAULT; // ? TODO
 
 
     *sb = fs_sb;

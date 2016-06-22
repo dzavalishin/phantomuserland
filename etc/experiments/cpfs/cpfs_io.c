@@ -10,6 +10,10 @@
  *
 **/
 
+#include "cpfs.h"
+#include "cpfs_local.h"
+
+
 
 #define CPFS_FILE_POS_2_BLK( __pos ) (__pos/CPFS_BLKSIZE)
 #define CPFS_FILE_POS_2_OFF( __pos ) (__pos%CPFS_BLKSIZE)
@@ -97,10 +101,10 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
 
     if( blk_data == 0 ) return EINVAL;
 
-    cpfs_size_t off = CPFS_FILE_POS_2_OFF( pos );
+    off = CPFS_FILE_POS_2_OFF( pos );
     if( off ) return EFAULT; // assert? panic? we're fried?
 
-    cpfs_size_t part = CPFS_BLKSIZE;
+    part = CPFS_BLKSIZE;
     if( part > size ) part = size;
 
     memcpy( blk_data, data, part );
