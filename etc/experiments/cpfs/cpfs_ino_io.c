@@ -42,12 +42,29 @@ cpfs_lock_ino( cpfs_ino_t ino ) // makes sure that block is in memory
     used = 1;
 
     rc = cpfs_disk_read( 0, blk, data );
-
     if( rc ) cpfs_panic( "read inode blk" );
+
+    // Inode table growth
+
+    cpfs_sb_lock();
+
+    if( blk > fs_sb.itable_end ) cpfs_panic( "attempt to read inode after fs_sb.itable_end" );
+
+    if( blk == fs_sb.itable_end )
+    {
+        fs_sb.itable_end++;
+        //rc = cpfs_write_sb();
+        //if( rc ) panic("can't write sb");
+
+        memset( data, 0, CPFS_BLKSIZE );
+    }
+
+    rc = cpfs_sb_unlock_write();
+    if( rc ) cpfs_panic("can't write sb"); // TODO just log and refuse call?
 
     int ino_in_blk = ino % CPFS_INO_PER_BLK;
 
-    return data + (ino_in_blk * CPFS_INO_REC_SIZE);
+    return ((void *)data) + (ino_in_blk * CPFS_INO_REC_SIZE);
 }
 
 void

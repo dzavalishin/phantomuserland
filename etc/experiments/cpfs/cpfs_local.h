@@ -22,10 +22,10 @@ struct cpfs_sb
 
     uint32_t            ninode;                 // Number of inodes
     cpfs_blkno_t        itable_pos;             // Disk block where inode table starts? Need?
-    cpfs_blkno_t        itable_end;             // First unused block of inode table, this one and rest is not initialized. Used for fats mkfs.
+    cpfs_blkno_t        itable_end;             // First unused block of inode table, this one and rest is not initialized. Used for fast mkfs.
 
     cpfs_blkno_t        disk_size;
-    cpfs_blkno_t        first_unallocated; 	// Number of block at end of FS we didn't use at all. From this point up to the end all blocks are free. 0 if not used. Used for fats mkfs.
+    cpfs_blkno_t        first_unallocated; 	// Number of block at end of FS we didn't use at all. From this point up to the end all blocks are free. 0 if not used. Used for fast mkfs.
     cpfs_blkno_t        free_list;              // Head of free block list, or 0 if none
 
 };

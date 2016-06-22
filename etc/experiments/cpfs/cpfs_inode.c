@@ -42,8 +42,10 @@ cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys
 errno_t
 cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *oblk )
 {
+    if( ino >= fs_sb.ninode ) return E2BIG;
+
     cpfs_blkno_t blk =  fs_sb.itable_pos + (ino/CPFS_INO_PER_BLK);
-    if( blk >= fs_sb.itable_end ) return E2BIG;
+    //if( blk >= fs_sb.itable_end ) return E2BIG;
 
     *oblk = blk;
     return 0;
