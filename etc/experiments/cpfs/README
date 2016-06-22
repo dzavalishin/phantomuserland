@@ -1,0 +1,16 @@
+Experimental simple and reliable FS code, not so connected to Phantom OS
+
+
+Questions:
+
+- max disk size
+- max file size
+- have atime, ctime, mtime?
+- time variable format/unit/0 time?
+
+
+- open/create timing depends on max file count in dir
+
+TODO
+- mark each func with max disk r/w ops count and max execution time on target CPU
+
