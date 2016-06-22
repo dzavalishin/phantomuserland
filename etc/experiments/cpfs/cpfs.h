@@ -16,6 +16,7 @@
 errno_t 		cpfs_init(void);
 errno_t			cpfs_stop(void);
 
+errno_t 		cpfs_mkfs(cpfs_blkno_t disk_size);
 
 // entry points
 
@@ -24,7 +25,7 @@ errno_t         cpfs_file_open  ( int *file_id, const char *name, int flags, voi
 errno_t         cpfs_file_close ( int file_id );
 
 
-errno_t         cpfs_file_read  ( int file_id, cpfs_size_t pos, const void *data, cpfs_size_t size );
+errno_t         cpfs_file_read  ( int file_id, cpfs_size_t pos, void *data, cpfs_size_t size );
 errno_t         cpfs_file_write ( int file_id, cpfs_size_t pos, const void *data, cpfs_size_t size );
 
 
@@ -33,8 +34,9 @@ errno_t         cpfs_file_write ( int file_id, cpfs_size_t pos, const void *data
 
 // access to disk driver
 
-errno_t         cpfs_disk_read( int disk_id, cpfs_blkno_t block, const void *data );
-errno_t         cpfs_disk_write( int disk_id, cpfs_blkno_t block, void *data );
+errno_t         cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data );
+errno_t         cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data );
+
 errno_t         cpfs_disk_trim( int disk_id, cpfs_blkno_t block ); // Tell SSD we don't need this disk block anymore - TODO use me
 
 

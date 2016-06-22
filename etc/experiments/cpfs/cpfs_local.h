@@ -75,9 +75,9 @@ cpfs_blkno_t    	cpfs_alloc_disk_block( void );
 void            	cpfs_free_disk_block( cpfs_blkno_t blk );
 
 
-cpfs_blkno_t    	cpfs_block_4_inode( cpfs_ino_t ino );
-cpfs_blkno_t    	cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical ); // maps logical blocks to physical, block must be allocated
-cpfs_blkno_t    	cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical ); // allocates logical block, returns physical blk pos, block must NOT be allocated
+errno_t    		cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *blk );
+errno_t    		cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // maps logical blocks to physical, block must be allocated
+errno_t    		cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // allocates logical block, returns physical blk pos, block must NOT be allocated
 // no file trim?
 
 struct cpfs_inode *     cpfs_lock_ino( cpfs_ino_t ino ); // makes sure that inode is in memory and no one modifies it

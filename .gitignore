@@ -58,3 +58,5 @@ build_log
 oldtree/kernel/phantom/.gdb-local
 tools/jbulk/mkbulk.jar
 oldtree/kernel/phantom/gdb.log
+etc/experiments/cpfs/disk.img
+*.exe

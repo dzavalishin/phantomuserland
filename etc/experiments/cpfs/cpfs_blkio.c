@@ -18,7 +18,7 @@
 
 static char write = 0;
 static char used = 0;
-static cpfs_blkno_t blk = -1;
+static cpfs_blkno_t curr_blk = -1;
 
 static char data[CPFS_BLKSIZE];
 
@@ -30,16 +30,19 @@ cpfs_lock_blk( cpfs_blkno_t blk ) // makes sure that block is in memory
 
     write = 0;
     used = 1;
+    curr_blk = blk;
 
     errno_t rc = cpfs_disk_read( 0, blk, data );
 
     if( rc ) cpfs_panic( "read blk" );
 
+    return data;
 }
 
 void
 cpfs_touch_blk(  cpfs_blkno_t blk ) // marks block as dirty, will be saved to disk on unlock
 {
+    if( curr_blk != blk ) cpfs_panic( "wrong blk in touch" );
     write = 1;
 }
 
@@ -48,6 +51,7 @@ void
 cpfs_unlock_blk( cpfs_blkno_t blk ) // flushes block to disk before unlocking it, if touched
 {
     if( !used ) cpfs_panic( "double cpfs_unlock_blk" );
+    if( curr_blk != blk ) cpfs_panic( "wrong blk in unlock" );
 
     if( write )
     {
