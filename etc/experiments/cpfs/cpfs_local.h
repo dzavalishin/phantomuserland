@@ -44,6 +44,7 @@ struct cpfs_inode
 {
     cpfs_fpos_t         fsize;
     uint32_t            nlinks; // allways 0 or 1 in this verstion, made for future extensions, if 0 - inode record is free.
+	uint32_t            ftype; // nonzero = dir for now
 
     cpfs_time_t         ctime; // created
     cpfs_time_t         atime; // accessed
@@ -63,9 +64,12 @@ struct cpfs_inode
 
 
 errno_t 		cpfs_init_sb(void);
+
 void 			cpfs_sb_lock();
 errno_t			cpfs_sb_unlock_write(); // if returns error, sb is not written and IS NOT UNLOCKED
 void 			cpfs_sb_unlock();
+
+void    		fic_refill(void);
 
 
 // TODO multiple fs?
@@ -86,7 +90,8 @@ void                    cpfs_unlock_ino( cpfs_ino_t ino ); // flushes inode to d
 
 
 
-cpfs_ino_t      	cpfs_alloc_inode( void );
+//cpfs_ino_t      	cpfs_alloc_inode( void );
+errno_t                 cpfs_alloc_inode( cpfs_ino_t *inode );
 void            	cpfs_free_inode( cpfs_ino_t ino ); // deletes file
 
 
@@ -118,5 +123,7 @@ void                    cpfs_unlock_blk( cpfs_blkno_t blk ); // flushes block to
 
 errno_t         	cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
 errno_t         	cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
+
+void 			cpfs_inode_truncate( cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
 
 

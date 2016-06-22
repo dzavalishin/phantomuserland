@@ -45,7 +45,7 @@ errno_t         cpfs_disk_trim( int disk_id, cpfs_blkno_t block ); // Tell SSD w
 
 void            cpfs_log_error(char *fmt, ... );
 
-void 		cpfs_panic( const char *msg );
+void 		cpfs_panic( const char *fmt, ... );
 
 void            cpfs_spin_lock();
 void            cpfs_spin_unlock();

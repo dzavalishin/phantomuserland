@@ -6,9 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h> 
-#include <sys/stat.h> 
-#include <fcntl.h> 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <stdarg.h>
+
 
 void die_rc( const char *msg, int rc )
 {
@@ -59,11 +62,35 @@ int main( int ac, char**av )
 
 
 void
-cpfs_panic( const char *msg )
+cpfs_panic( const char *fmt, ... )
 {
-    printf( "Panic: %s, global errno = %s\n", msg, strerror(errno) );
+    printf( "Panic: " );
+
+    va_list ptr;
+    va_start(ptr, fmt);
+    vprintf(fmt, ptr);
+    va_end(ptr);
+
+    printf( "\nGlobal errno = %s\n", strerror(errno) );
+
     exit(33);
 }
+
+
+void
+cpfs_log_error(char *fmt, ... )
+{
+    printf( "Error: ");
+
+    va_list ptr;
+    va_start(ptr, fmt);
+    vprintf(fmt, ptr);
+    va_end(ptr);
+
+    printf( "\n");
+}
+
+
 
 
 errno_t

@@ -29,3 +29,6 @@
 // TODO implement me - disk io cache
 #define CPFS_MAX_CONCUR_IO      64
 
+// TODO use Unix binary value here
+#define CPFS_FTYPE_DIR          01000
+

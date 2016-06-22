@@ -20,6 +20,8 @@ errno_t 		cpfs_init(void)
     rc = cpfs_init_sb();
     if( rc ) return rc;
 
+
+    fic_refill(); // fill list of free inodes
 }
 
 
