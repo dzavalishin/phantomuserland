@@ -18,10 +18,14 @@
 
 #define CPFS_BLKSIZE            4096
 
+// Number of direct mapped file block numbers in inode
 #define CPFS_INO_DIR_BLOCKS     32
-#define CPFS_INO_REC_SIZE       512
 
+#define CPFS_INO_REC_SIZE       512
 #define CPFS_INO_PER_BLK        (CPFS_BLKSIZE/CPFS_INO_REC_SIZE)
+
+#define CPFS_DIR_REC_SIZE       512
+#define CPFS_DIR_PER_BLK        (CPFS_BLKSIZE/CPFS_DIR_REC_SIZE)
 
 
 #define CPFS_SB_MAGIC           0xBAD0BEEF

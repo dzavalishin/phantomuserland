@@ -125,5 +125,5 @@ errno_t         	cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const vo
 errno_t         	cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
 
 void 			cpfs_inode_truncate( cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
-
+errno_t                 cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size );
 

@@ -13,9 +13,12 @@
 #include "cpfs_local.h"
 
 
-errno_t 		cpfs_init(void)
+errno_t
+cpfs_init(void)
 {
     errno_t rc;
+
+    // TODO assert( sizeof(struct cpfs_dir_entry) < CPFS_DIR_REC_SIZE )
 
     rc = cpfs_init_sb();
     if( rc ) return rc;

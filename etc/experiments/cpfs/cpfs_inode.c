@@ -193,6 +193,23 @@ cpfs_inode_truncate( cpfs_ino_t ino ) // free all data blocks for inode, set siz
 
 
 
+errno_t
+cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size )
+{
+    // asser size
 
+    // read in inode to find out file len
+
+    //struct cpfs_inode inode;
+    struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
+
+    if( inode_p ) *size = inode_p->fsize;
+
+    cpfs_unlock_ino( ino );
+
+    if( inode_p == 0 ) return EIO;
+    return 0;
+
+}
 
 
