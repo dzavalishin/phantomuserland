@@ -23,7 +23,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 {
     errno_t rc;
 
-    struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
+    struct cpfs_sb      *sb = cpfs_lock_blk( fs, sb_blk );
 
     if( sb == 0 ) return EFAULT; // ? TODO
 
@@ -54,14 +54,14 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 
     if( sb->first_unallocated >= disk_size )
     {
-        cpfs_unlock_blk( sb_blk );
+        cpfs_unlock_blk( fs, sb_blk );
         return EINVAL;
     }
 
 
 
-    cpfs_touch_blk( sb_blk ); // marks block as dirty, will be saved to disk on unlock
-    cpfs_unlock_blk( sb_blk );
+    cpfs_touch_blk( fs, sb_blk ); // marks block as dirty, will be saved to disk on unlock
+    cpfs_unlock_blk( fs, sb_blk );
 
     // temp init global superblock copy for lock_ino to work
     fs_sb = *sb;
@@ -77,12 +77,12 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
         cpfs_panic("root dir not in inode 0 but %d", root_dir );
         */
 
-    struct cpfs_inode *rdi = cpfs_lock_ino( root_dir );
-    cpfs_touch_ino( root_dir );
+    struct cpfs_inode *rdi = cpfs_lock_ino( fs, root_dir );
+    cpfs_touch_ino( fs, root_dir );
 
     rdi->ftype = CPFS_FTYPE_DIR;
     rdi->nlinks = 1;
-    cpfs_unlock_ino( root_dir );
+    cpfs_unlock_ino( fs, root_dir );
 
     // de-init! TODO Actually we should have all global stuff in fs state struct
     memset( &fs_sb, 0, sizeof( fs_sb ) );
@@ -91,7 +91,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
     return 0;
 }
 
-errno_t cpfs_init_sb(void)
+errno_t cpfs_init_sb( cpfs_fs_t *fs )
 {
     cpfs_assert( sizeof(struct cpfs_inode) < CPFS_INO_REC_SIZE );
     cpfs_mutex_init( &sb_mutex );
@@ -99,42 +99,42 @@ errno_t cpfs_init_sb(void)
     return 0;
 }
 
-errno_t cpfs_mount_sb(void)
+errno_t cpfs_mount_sb( cpfs_fs_t *fs )
 {
-    struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
+    struct cpfs_sb      *sb = cpfs_lock_blk( fs, sb_blk );
     if( sb == 0 ) return EFAULT; // ? TODO
 
     if( sb->sb_magic_0 != CPFS_SB_MAGIC )
     {
         cpfs_log_error("can't mount disk, no FS magic");
-        cpfs_unlock_blk( sb_blk );
+        cpfs_unlock_blk( fs, sb_blk );
         return EINVAL;
     }
 
     if( sb->dirty )
     {
         cpfs_log_error("can't mound dirty disk, need FSCK"); // TODO run fsck from here? different return code?
-        cpfs_unlock_blk( sb_blk );
+        cpfs_unlock_blk( fs, sb_blk );
         return EINVAL;
     }
 
     fs_sb = *sb;
 
-    cpfs_unlock_blk( sb_blk );
+    cpfs_unlock_blk( fs, sb_blk );
 
     return 0;
 }
 
 
-errno_t cpfs_write_sb(void)
+errno_t cpfs_write_sb( cpfs_fs_t *fs )
 {
-    struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
+    struct cpfs_sb      *sb = cpfs_lock_blk( fs, sb_blk );
 
     if( sb == 0 ) return EFAULT; // ? TODO
 
     *sb = fs_sb;
 
-    cpfs_unlock_blk( sb_blk );
+    cpfs_unlock_blk( fs, sb_blk );
 
     return 0;
 }
@@ -142,27 +142,27 @@ errno_t cpfs_write_sb(void)
 
 
 void
-cpfs_sb_lock(void)
+cpfs_sb_lock( cpfs_fs_t *fs )
 {
     cpfs_mutex_lock( sb_mutex );
 }
 
 void
-cpfs_sb_unlock(void)
+cpfs_sb_unlock( cpfs_fs_t *fs )
 {
     cpfs_mutex_unlock( sb_mutex );
 }
 
 
 errno_t
-cpfs_sb_unlock_write() // if returns error, sb is not written and IS NOT UNLOCKED
+cpfs_sb_unlock_write( cpfs_fs_t *fs ) // if returns error, sb is not written and IS NOT UNLOCKED
 {
 
-    errno_t rc = cpfs_write_sb();
+    errno_t rc = cpfs_write_sb( fs );
     if( rc ) return rc;
 
 
-    cpfs_sb_unlock();
+    cpfs_sb_unlock( fs );
     return 0;
 }
 

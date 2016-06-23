@@ -36,7 +36,7 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *name, int flags, void *
     // TODO nested dirs! :)
 
     //rc = cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino ); // find name
-    rc = cpfs_namei( 0, name, &file_ino, 0 );
+    rc = cpfs_namei( fs, 0, name, &file_ino, 0 );
 
     if(rc && (flags & O_CREAT))
     {
@@ -44,13 +44,13 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *name, int flags, void *
         // Creating file
         //
 
-        if( cpfs_alloc_inode( &file_ino ) )
+        if( cpfs_alloc_inode( fs, &file_ino ) )
             return EMFILE;
 
 
-        rc = cpfs_alloc_dirent( 0, name, file_ino ); // allocate a new dir entry in a dir
+        rc = cpfs_alloc_dirent( fs, 0, name, file_ino ); // allocate a new dir entry in a dir
         if( rc )
-            cpfs_free_inode( file_ino );
+            cpfs_free_inode( fs, file_ino );
     }
 
     if(rc) return rc;
@@ -83,7 +83,7 @@ cpfs_file_read  ( int file_id, cpfs_size_t pos, void *data, cpfs_size_t size )
     struct fid *f = (struct fid *) file_id;
     cpfs_ino_t ino = f->inode;
 
-    return cpfs_ino_file_read( ino, pos, data, size );
+    return cpfs_ino_file_read( f->fs, ino, pos, data, size );
 }
 
 
@@ -94,7 +94,7 @@ cpfs_file_write( int file_id, cpfs_size_t pos, const void *data, cpfs_size_t siz
     struct fid *f = (struct fid *) file_id;
     cpfs_ino_t ino = f->inode;
 
-    return cpfs_ino_file_write( ino, pos, data, size );
+    return cpfs_ino_file_write( f->fs, ino, pos, data, size );
 }
 
 

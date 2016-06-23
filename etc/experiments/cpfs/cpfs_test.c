@@ -47,7 +47,7 @@ static void mass_blk_alloc(int cnt)
 {
     while(cnt-->0)
     {
-        cpfs_blkno_t blk = cpfs_alloc_disk_block();
+        cpfs_blkno_t blk = cpfs_alloc_disk_block( &fs );
         if( !blk ) cpfs_panic("can't allocate block");
         if(tda_q_pp >= QSZ) cpfs_panic("test out of q");
         tda_q[tda_q_pp++] = blk;
@@ -61,7 +61,7 @@ static void mass_blk_free(int cnt)
         cpfs_blkno_t blk = tda_q[tda_q_gp++];
         if( !blk ) cpfs_panic("mass_blk_free blk 0");
         if(tda_q_gp >= QSZ) cpfs_panic("mass_blk_free test out of q");
-        cpfs_free_disk_block( blk );
+        cpfs_free_disk_block( &fs, blk );
     }
 }
 
@@ -130,16 +130,16 @@ test_inode_blkmap(void) 	// test file block allocation with inode
 
     printf("Inode block map test: allocate inode\n");
 
-    rc = cpfs_alloc_inode( &ino );
+    rc = cpfs_alloc_inode( &fs, &ino );
     if( rc ) cpfs_panic( "can't alloc inode, %d", rc );
 
     printf("Inode block map test: inode %lld, allocate data block\n", (long long)ino);
 
 
-    rc = cpfs_alloc_block_4_file( ino, 0, &phys0 );
+    rc = cpfs_alloc_block_4_file( &fs, ino, 0, &phys0 );
     if( rc ) cpfs_panic( "cpfs_alloc_block_4_file rc=%d", rc );
 
-    rc = cpfs_find_block_4_file( ino, 0, &phys1 );
+    rc = cpfs_find_block_4_file( &fs, ino, 0, &phys1 );
     if( rc ) cpfs_panic( "cpfs_find_block_4_file rc=%d", rc );
 
     if( phys0 != phys1 )
@@ -151,7 +151,7 @@ test_inode_blkmap(void) 	// test file block allocation with inode
     printf("Inode block map test: allocated and found blk %lld\n", (long long)phys1);
 
     printf("Inode block map test: free inode\n");
-    cpfs_free_inode( ino );
+    cpfs_free_inode( &fs, ino );
 
     // todo test sparce allocation, far after the size of file
 
@@ -184,15 +184,15 @@ test_inode_io(void) 		// read/write directly with inode, no file name
 
     printf("Inode io test: allocate inode\n");
 
-    rc = cpfs_alloc_inode( &ino );
+    rc = cpfs_alloc_inode( &fs, &ino );
     if( rc ) cpfs_panic( "can't alloc inode, %d", rc );
 
     printf("Inode io test: inode %lld, write file data\n", (long long)ino);
 
-    rc = cpfs_ino_file_write( ino, 0, test_data, sizeof(test_data) );
+    rc = cpfs_ino_file_write( &fs, ino, 0, test_data, sizeof(test_data) );
     if( rc ) cpfs_panic( "can't write data, %d", rc );
 
-    rc = cpfs_ino_file_read( ino, 0, test_buf, sizeof(test_data) );
+    rc = cpfs_ino_file_read( &fs, ino, 0, test_buf, sizeof(test_data) );
     if( rc ) cpfs_panic( "can't read data, %d", rc );
 
     if( memcmp( test_data, test_buf, sizeof(test_data) ) )
@@ -228,7 +228,7 @@ test_inode_io(void) 		// read/write directly with inode, no file name
 static void mke( const char *name )
 {
     // Write inode num -1 to dir entry for it to be extremely wrong
-    errno_t rc = cpfs_alloc_dirent( 0, name, -1 );
+    errno_t rc = cpfs_alloc_dirent( &fs, 0, name, -1 );
     if( rc ) cpfs_panic( "mke %d", rc );
 }
 
@@ -236,21 +236,21 @@ static void rme( const char *name )
 {
     //errno_t rc = cpfs_free_dirent( 0, name );
     cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( 0, name, &ret, 1 );
+    errno_t rc = cpfs_namei( &fs, 0, name, &ret, 1 );
     if( rc ) cpfs_panic( "rme %d", rc );
 }
 
 static void ise( const char *name )
 {
     cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( 0, name, &ret, 0 );
+    errno_t rc = cpfs_namei( &fs, 0, name, &ret, 0 );
     if( rc ) cpfs_panic( "ise %d", rc );
 }
 
 static void noe( const char *name )
 {
     cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( 0, name, &ret, 0 );
+    errno_t rc = cpfs_namei( &fs, 0, name, &ret, 0 );
     if( rc != ENOENT ) cpfs_panic( "noe %d", rc );
 }
 

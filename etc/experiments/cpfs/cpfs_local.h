@@ -115,58 +115,58 @@ typedef struct cpfs_fs cpfs_fs_t;
 
 
 
-errno_t                 cpfs_init_sb(void);
-errno_t 		cpfs_mount_sb(void);
+errno_t                 cpfs_init_sb( cpfs_fs_t *fs );
+errno_t 		cpfs_mount_sb( cpfs_fs_t *fs );
 
-void                    cpfs_sb_lock();
-errno_t                 cpfs_sb_unlock_write(); // if returns error, sb is not written and IS NOT UNLOCKED
-void                    cpfs_sb_unlock();
+void                    cpfs_sb_lock( cpfs_fs_t *fs );
+errno_t                 cpfs_sb_unlock_write( cpfs_fs_t *fs ); // if returns error, sb is not written and IS NOT UNLOCKED
+void                    cpfs_sb_unlock( cpfs_fs_t *fs );
 
-errno_t                 cpfs_write_sb(void); // just for stop fs, don't use elsewhere
+errno_t                 cpfs_write_sb( cpfs_fs_t *fs ); // just for stop fs, don't use elsewhere
 
 
-void                    fic_refill(void);
+void                    fic_refill( cpfs_fs_t *fs );
 
 
 // TODO multiple fs?
 
 
-cpfs_blkno_t            cpfs_alloc_disk_block( void );
-void                    cpfs_free_disk_block( cpfs_blkno_t blk );
+cpfs_blkno_t            cpfs_alloc_disk_block( cpfs_fs_t *fs );
+void                    cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk );
 
 
-errno_t                 cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *blk );
-errno_t                 cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // maps logical blocks to physical, block must be allocated
+errno_t                 cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *blk );
+errno_t                 cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // maps logical blocks to physical, block must be allocated
 // allocates logical block, returns physical blk pos, block must NOT be allocated
 // actually if block is allocated returns EEXIST and blk num in phys
-errno_t                 cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
+errno_t                 cpfs_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
 // returns 0 in any case, either if block found or allocated
-errno_t                 cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
+errno_t                 cpfs_find_or_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
 
 
-struct cpfs_inode *     cpfs_lock_ino( cpfs_ino_t ino ); // makes sure that inode is in memory and no one modifies it
-void                    cpfs_touch_ino( cpfs_ino_t ino ); // marks inode as dirty, will be saved to disk on unlock
-void                    cpfs_unlock_ino( cpfs_ino_t ino ); // flushes inode to disk before unlocking it, if touched
+struct cpfs_inode *     cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // makes sure that inode is in memory and no one modifies it
+void                    cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // marks inode as dirty, will be saved to disk on unlock
+void                    cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // flushes inode to disk before unlocking it, if touched
 
 
 
 //cpfs_ino_t            cpfs_alloc_inode( void );
-errno_t                 cpfs_alloc_inode( cpfs_ino_t *inode );
-void                    cpfs_free_inode( cpfs_ino_t ino ); // deletes file
+errno_t                 cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode );
+void                    cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ); // deletes file
 
-void                    cpfs_inode_init_defautls( struct cpfs_inode *ii );
+void                    cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii );
 
 
 
 // TODO problem: linear scan can be very slow, need tree?
 
-errno_t                 cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ); // allocate a new dir entry in a dir
+errno_t                 cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ); // allocate a new dir entry in a dir
 //errno_t                       cpfs_free_dirent( cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
-errno_t                 cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
+errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
 
 
 // Finds/reads/creates/updates dir entry
-errno_t                 cpfs_dir_scan( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int flags );
+errno_t                 cpfs_dir_scan( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int flags );
 
 #define CPFS_DIR_SCAN_MUST_EXIST        (1<<1) // returns ENOENT if not exist
 #define CPFS_DIR_SCAN_WRITE             (1<<2) // writes given ino to dir entry, not reads
@@ -175,20 +175,20 @@ errno_t                 cpfs_dir_scan( cpfs_ino_t dir_ino, const char *fname, cp
 
 
 
-void *                  cpfs_lock_blk(   cpfs_blkno_t blk ); // makes sure that block is in memory 
-void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
-void                    cpfs_unlock_blk( cpfs_blkno_t blk ); // flushes block to disk before unlocking it, if touched
+void *                  cpfs_lock_blk(   cpfs_fs_t *fs, cpfs_blkno_t blk ); // makes sure that block is in memory 
+void                    cpfs_touch_blk(  cpfs_fs_t *fs, cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
+void                    cpfs_unlock_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ); // flushes block to disk before unlocking it, if touched
 
 
 
 // Internal read/wrire impl, used by user calls and internal directory io code
 
-errno_t                 cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size );
-errno_t                 cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
+errno_t                 cpfs_ino_file_read  ( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size );
+errno_t                 cpfs_ino_file_write ( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
 
-void                    cpfs_inode_truncate( cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
-errno_t                 cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size );
-errno_t                 cpfs_inode_update_fsize( cpfs_ino_t ino, cpfs_size_t size );
+void                    cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
+errno_t                 cpfs_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t *size );
+errno_t                 cpfs_inode_update_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t size );
 
 
 

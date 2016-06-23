@@ -20,7 +20,7 @@ cpfs_init( cpfs_fs_t *fs )
 
     cpfs_assert( sizeof(struct cpfs_dir_entry) < CPFS_DIR_REC_SIZE );
 
-    rc = cpfs_init_sb();
+    rc = cpfs_init_sb( fs );
     if( rc ) return rc;
 
     fs->inited = 1;
@@ -34,11 +34,11 @@ cpfs_mount( cpfs_fs_t *fs )
 {
     errno_t rc;
 
-    rc = cpfs_mount_sb();
+    rc = cpfs_mount_sb( fs );
     if( rc ) return rc;
 
     fs_sb.dirty = 0xFF; // Next write will update it on disk, we don't need to mark disk dirty if we never had a reason to write sb
-    fic_refill(); // fill list of free inodes
+    fic_refill( fs ); // fill list of free inodes
 
     return 0;
 }
@@ -51,7 +51,7 @@ cpfs_umount( cpfs_fs_t *fs )
     // TODO check locked rcords
     // TODO flush?
 
-    rc = cpfs_write_sb();
+    rc = cpfs_write_sb( fs );
 
     if( !rc )
     {

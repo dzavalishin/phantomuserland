@@ -17,7 +17,7 @@
 //#warning code is wrong, can't use cpfs_disk_read/write, must use cpfs_ino_file_read
 
 errno_t
-cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove )
+cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove )
 {
     errno_t rc;
     // TODO some speedup? In-mem hash?
@@ -38,7 +38,7 @@ cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int rem
     */
 
     cpfs_size_t fsize;
-    rc = cpfs_fsize( dir_ino, &fsize );
+    rc = cpfs_fsize( fs, dir_ino, &fsize );
     if( rc )
         return rc;
 
@@ -56,7 +56,7 @@ cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int rem
         char data[CPFS_BLKSIZE];
 
         //rc = cpfs_disk_read( 0, blkpos, data );
-        rc = cpfs_ino_file_read( dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
 
         if( rc )
         {
@@ -83,7 +83,7 @@ cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int rem
                     de->inode = 0;
 
                     //rc = cpfs_disk_write( 0, blkpos, data );
-                    rc = cpfs_ino_file_write( dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+                    rc = cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
                     if( rc )
                     {
                         cpfs_log_error("Can't write dir ino %d @ blk %d", dir_ino, blkpos );
@@ -112,7 +112,7 @@ cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int rem
 // allocate a new dir entry in a dir
 
 errno_t
-cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ) 
+cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ) 
 {
     errno_t rc;
     char data[CPFS_BLKSIZE];
@@ -134,7 +134,7 @@ cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino )
     */
 
     cpfs_size_t fsize;
-    if( cpfs_fsize( dir_ino, &fsize ) )
+    if( cpfs_fsize( fs, dir_ino, &fsize ) )
         return EIO;
 
     int nentry = fsize/CPFS_DIR_REC_SIZE;
@@ -149,7 +149,7 @@ cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino )
     while( nblk-- > 0 )
     {
         //rc = cpfs_disk_read( 0, blkpos, data );
-        rc = cpfs_ino_file_read( dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
         if( rc )
         {
             cpfs_log_error("Can't read dir ino %d @ blk %d", dir_ino, blkpos );
@@ -171,7 +171,7 @@ cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino )
                 de->inode = file_ino;
                 strlcpy( de->name, fname, sizeof(de->name) );
                 //return cpfs_disk_write( 0, blkpos, data );
-                return cpfs_ino_file_write( dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+                return cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
             }
 
         }
@@ -187,7 +187,7 @@ cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino )
     de->inode = file_ino;
     strlcpy( de->name, fname, sizeof(de->name) );
     //return cpfs_disk_write( 0, nblk, data );
-    return cpfs_ino_file_write( dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+    return cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
 
 }
 

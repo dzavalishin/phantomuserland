@@ -24,7 +24,7 @@ static char data[CPFS_BLKSIZE];
 
 
 void *
-cpfs_lock_blk( cpfs_blkno_t blk ) // makes sure that block is in memory
+cpfs_lock_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) // makes sure that block is in memory
 {
     if( used ) cpfs_panic( "out of disk buffers" );
 
@@ -32,7 +32,7 @@ cpfs_lock_blk( cpfs_blkno_t blk ) // makes sure that block is in memory
     used = 1;
     curr_blk = blk;
 
-    errno_t rc = cpfs_disk_read( 0, blk, data );
+    errno_t rc = cpfs_disk_read( fs->disk_id, blk, data );
 
     if( rc ) cpfs_panic( "read blk %lld", (long long)blk );
 
@@ -40,7 +40,7 @@ cpfs_lock_blk( cpfs_blkno_t blk ) // makes sure that block is in memory
 }
 
 void
-cpfs_touch_blk(  cpfs_blkno_t blk ) // marks block as dirty, will be saved to disk on unlock
+cpfs_touch_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) // marks block as dirty, will be saved to disk on unlock
 {
     if( curr_blk != blk ) cpfs_panic( "wrong blk in touch" );
     write = 1;
@@ -48,14 +48,14 @@ cpfs_touch_blk(  cpfs_blkno_t blk ) // marks block as dirty, will be saved to di
 
 
 void
-cpfs_unlock_blk( cpfs_blkno_t blk ) // flushes block to disk before unlocking it, if touched
+cpfs_unlock_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) // flushes block to disk before unlocking it, if touched
 {
     if( !used ) cpfs_panic( "double cpfs_unlock_blk" );
     if( curr_blk != blk ) cpfs_panic( "wrong blk in unlock" );
 
     if( write )
     {
-        errno_t rc = cpfs_disk_write( 0, blk, data );
+        errno_t rc = cpfs_disk_write( fs->disk_id, blk, data );
 
         if( rc ) cpfs_panic( "write blk %lld", (long long)blk );
     }

@@ -13,21 +13,21 @@
 #include "cpfs_local.h"
 
 
-static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created );
+static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created );
 
 
 
 // maps logical blocks to physical, block must be allocated
 errno_t
-cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
+cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
     cpfs_assert( phys != 0 );
 
     // Read inode first
     struct cpfs_inode inode;
-    struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
+    struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
     if( inode_p ) inode = *inode_p;
-    cpfs_unlock_ino( ino );
+    cpfs_unlock_ino( fs, ino );
     if( inode_p == 0 ) return EIO;
 
     if( logical*CPFS_BLKSIZE > inode.fsize ) return E2BIG; // TODO err?
@@ -47,15 +47,15 @@ cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys
 // allocates logical block, returns physical blk pos, block must NOT be allocated
 // actually if block is allocated returns eexist and blk num in phys
 errno_t
-cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
+cpfs_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
     cpfs_assert( phys != 0 );
 
     // Read inode first
-    struct cpfs_inode *ip = cpfs_lock_ino( ino );
+    struct cpfs_inode *ip = cpfs_lock_ino( fs, ino );
     if( ip == 0 )
     {
-        cpfs_unlock_ino( ino );
+        cpfs_unlock_ino( fs, ino );
         return EIO;
     }
 
@@ -64,33 +64,33 @@ cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phy
         if( ip->blocks0[logical] )
         {
             *phys = ip->blocks0[logical];
-            cpfs_unlock_ino( ino );
+            cpfs_unlock_ino( fs, ino );
             return EEXIST;
         }
 
-        cpfs_blkno_t new = cpfs_alloc_disk_block();
+        cpfs_blkno_t new = cpfs_alloc_disk_block( fs );
         if( !new )
         {
-            cpfs_unlock_ino( ino );
+            cpfs_unlock_ino( fs, ino );
             return ENOSPC;
         }
 
         *phys = ip->blocks0[logical] = new;
-        cpfs_touch_ino( ino );
-        cpfs_unlock_ino( ino );
+        cpfs_touch_ino( fs, ino );
+        cpfs_unlock_ino( fs, ino );
         return 0;
     }
 
-    cpfs_unlock_ino( ino );
+    cpfs_unlock_ino( fs, ino );
     // TODO write indirect blocks support!
     return E2BIG;
 
 }
 
 errno_t
-cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
+cpfs_find_or_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
-    errno_t rc = cpfs_alloc_block_4_file( ino, logical, phys );
+    errno_t rc = cpfs_alloc_block_4_file( fs, ino, logical, phys );
     if( rc == EEXIST ) rc = 0;
     return rc;
 }
@@ -106,7 +106,7 @@ cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkn
 // created set to nonzero if we did create *base
 //
 
-static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created )
+static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created )
 {
     int icreated = 0;
 
@@ -124,7 +124,7 @@ static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, 
     if( *base == 0 )
     {
         // Allocate indirect page
-        iblk = cpfs_alloc_disk_block();
+        iblk = cpfs_alloc_disk_block( fs );
         if( !iblk )
             return ENOSPC;
 
@@ -134,10 +134,10 @@ static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, 
     }
 
     // Now we have indirect page
-    struct cpfs_indir * ib = cpfs_lock_blk( iblk );
+    struct cpfs_indir * ib = cpfs_lock_blk( fs, iblk );
     if( ib == 0 )
     {
-        cpfs_unlock_blk( iblk );
+        cpfs_unlock_blk( fs, iblk );
         return EIO;
     }
 
@@ -145,7 +145,7 @@ static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, 
     {
         memset( ib, 0, sizeof( *ib ) );
         ib->ib_magic = CPFS_IB_MAGIC;
-        cpfs_touch_blk( iblk );
+        cpfs_touch_blk( fs, iblk );
     }
 
     if( indirection == 1 )
@@ -156,11 +156,11 @@ static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, 
         if( ib->child[displ] != 0 )
         {
             *phys = ib->child[displ];
-            cpfs_unlock_blk( iblk );
+            cpfs_unlock_blk( fs, iblk );
             return 0;
         }
 
-        cpfs_unlock_blk( iblk );
+        cpfs_unlock_blk( fs, iblk );
 
         if( !create )
         {
@@ -168,21 +168,21 @@ static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, 
         }
 
         // Allocate indirect page
-        fblk = cpfs_alloc_disk_block();
+        fblk = cpfs_alloc_disk_block( fs );
         if( !fblk )
             return ENOSPC;
 
-        ib = cpfs_lock_blk( iblk );
+        ib = cpfs_lock_blk( fs, iblk );
         if( ib == 0 )
         {
-            cpfs_unlock_blk( iblk );
-            cpfs_free_disk_block( fblk );
+            cpfs_unlock_blk( fs, iblk );
+            cpfs_free_disk_block( fs, fblk );
             return EIO;
         }
 
         ib->child[displ] = fblk;
-        cpfs_touch_blk( iblk );
-        cpfs_unlock_blk( iblk );
+        cpfs_touch_blk( fs, iblk );
+        cpfs_unlock_blk( fs, iblk );
         *phys = ib->child[displ];
         return 0;
     }
@@ -201,7 +201,7 @@ static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, 
 
 
 errno_t
-cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *oblk )
+cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
 {
     if( ino >= fs_sb.ninode )
     {
@@ -228,12 +228,12 @@ static int fic_used = 0;
 cpfs_mutex fic_mutex;
 
 errno_t
-cpfs_alloc_inode( cpfs_ino_t *inode )
+cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
 {
     cpfs_mutex_lock( fic_mutex );
 
     if( fic_used <= 0 )
-        fic_refill();
+        fic_refill( fs );
 
     if( fic_used <= 0 )
     {
@@ -248,11 +248,11 @@ cpfs_alloc_inode( cpfs_ino_t *inode )
 
 
 void
-cpfs_free_inode( cpfs_ino_t ino ) // deletes file
+cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 {
     // TODO check that inode is not used right now!
 
-    cpfs_inode_truncate( ino ); // free all data blocks for inode, set size to 0
+    cpfs_inode_truncate( fs, ino ); // free all data blocks for inode, set size to 0
 
     // TODO free inode!
     cpfs_log_error("free_inode: unimpl\n");
@@ -273,7 +273,7 @@ cpfs_free_inode( cpfs_ino_t ino ) // deletes file
 static cpfs_blkno_t last_ino_blk = -1;
 
 void
-fic_refill(void)
+fic_refill( cpfs_fs_t *fs )
 {
     int iblocks = fs_sb.ninode*CPFS_INO_PER_BLK;
     cpfs_blkno_t ilast = fs_sb.itable_pos + iblocks;
@@ -317,14 +317,14 @@ fic_refill(void)
 
 
 void
-cpfs_inode_truncate( cpfs_ino_t ino ) // free all data blocks for inode, set size to 0
+cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for inode, set size to 0
 {
     // Free all data blocks for inode
 
     struct cpfs_inode copy;
 
-    struct cpfs_inode *inode =  cpfs_lock_ino( ino );
-    cpfs_touch_ino( ino );
+    struct cpfs_inode *inode =  cpfs_lock_ino( fs, ino );
+    cpfs_touch_ino( fs, ino );
 
     copy = *inode;
 
@@ -338,7 +338,7 @@ cpfs_inode_truncate( cpfs_ino_t ino ) // free all data blocks for inode, set siz
     cpfs_blkno_t nblk = inode->fsize / CPFS_BLKSIZE;
     if( inode->fsize % CPFS_BLKSIZE ) nblk++;
 
-    cpfs_unlock_ino( ino );
+    cpfs_unlock_ino( fs, ino );
 
     // done with inode, now free disk blocks
 
@@ -348,7 +348,7 @@ cpfs_inode_truncate( cpfs_ino_t ino ) // free all data blocks for inode, set siz
     for( blk = 0; (blk < nblk) && (blk < CPFS_INO_DIR_BLOCKS); blk++ )
     {
         phys_blk = inode->blocks0[blk];
-        cpfs_free_disk_block( blk );
+        cpfs_free_disk_block( fs, blk );
     }
 
     // TODO free indirect blocks
@@ -359,18 +359,18 @@ cpfs_inode_truncate( cpfs_ino_t ino ) // free all data blocks for inode, set siz
 
 
 errno_t
-cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size )
+cpfs_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t *size )
 {
     // asser size
 
     // read in inode to find out file len
 
     //struct cpfs_inode inode;
-    struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
+    struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
 
     if( inode_p ) *size = inode_p->fsize;
 
-    cpfs_unlock_ino( ino );
+    cpfs_unlock_ino( fs, ino );
 
     if( inode_p == 0 ) return EIO;
     return 0;
@@ -378,23 +378,23 @@ cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size )
 
 
 errno_t
-cpfs_inode_update_fsize( cpfs_ino_t ino, cpfs_size_t size )
+cpfs_inode_update_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t size )
 {
-    struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
+    struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
 
     if( inode_p == 0 )
     {
-        cpfs_unlock_ino( ino ); // TODO check if we need to unlock anything if lock failed
+        cpfs_unlock_ino( fs, ino ); // TODO check if we need to unlock anything if lock failed
         return EIO;
     }
 
     if( size > inode_p->fsize )
     {
         inode_p->fsize = size;
-        cpfs_touch_ino( ino );
+        cpfs_touch_ino( fs, ino );
     }
 
-    cpfs_unlock_ino( ino );
+    cpfs_unlock_ino( fs, ino );
 
     return 0;
 
@@ -408,7 +408,7 @@ cpfs_inode_update_fsize( cpfs_ino_t ino, cpfs_size_t size )
  *
 **/
 void
-cpfs_inode_init_defautls( struct cpfs_inode *ii )
+cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii )
 {
     ii->fsize = 0;
     ii->nlinks = 1;
@@ -426,6 +426,5 @@ cpfs_inode_init_defautls( struct cpfs_inode *ii )
     ii->atime = ii->ctime;
     ii->mtime = ii->ctime;
     ii->vtime = 0;
-
 }
 

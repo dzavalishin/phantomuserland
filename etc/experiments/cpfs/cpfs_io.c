@@ -22,7 +22,7 @@
 // returns einval if read can be partially done (and is partially done)
 
 errno_t
-cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size )
+cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size )
 {
     errno_t rc;
 
@@ -33,10 +33,10 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
     cpfs_blkno_t logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
     cpfs_blkno_t phys_blk;
-    rc = cpfs_find_block_4_file( ino, logical_blk, &phys_blk );
+    rc = cpfs_find_block_4_file( fs, ino, logical_blk, &phys_blk );
     if( rc ) return rc;
 
-    const char *blk_data = cpfs_lock_blk( phys_blk );
+    const char *blk_data = cpfs_lock_blk( fs, phys_blk );
     //void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
 
     if( blk_data == 0 ) return EINVAL;
@@ -53,7 +53,7 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
     data += part;
     size -= part;
 
-    cpfs_unlock_blk( phys_blk );
+    cpfs_unlock_blk( fs, phys_blk );
 
 
     //
@@ -66,10 +66,10 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
 
         logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
-        rc = cpfs_find_block_4_file( ino, logical_blk, &phys_blk );
+        rc = cpfs_find_block_4_file( fs, ino, logical_blk, &phys_blk );
         if( rc ) return rc;
 
-        char *blk_data = cpfs_lock_blk( phys_blk );
+        char *blk_data = cpfs_lock_blk( fs, phys_blk );
         //void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
 
         if( blk_data == 0 ) return EINVAL;
@@ -86,7 +86,7 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
         data += part;
         size -= part;
 
-        cpfs_unlock_blk( phys_blk );
+        cpfs_unlock_blk( fs, phys_blk );
     }
 
     if( !size )
@@ -98,10 +98,10 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
 
     logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
-    rc = cpfs_find_block_4_file( ino, logical_blk, &phys_blk );
+    rc = cpfs_find_block_4_file( fs, ino, logical_blk, &phys_blk );
     if( rc ) return rc;
 
-    blk_data = cpfs_lock_blk( phys_blk );
+    blk_data = cpfs_lock_blk( fs, phys_blk );
     //void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
 
     if( blk_data == 0 ) return EINVAL;
@@ -118,7 +118,7 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
     data += part;
     size -= part;
 
-    cpfs_unlock_blk( phys_blk );
+    cpfs_unlock_blk( fs, phys_blk );
 
     cpfs_assert( size == 0 );
 
@@ -131,7 +131,7 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
 
 
 errno_t
-cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size )
+cpfs_ino_file_write( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size )
 {
     errno_t rc;
 
@@ -144,11 +144,11 @@ cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
     cpfs_blkno_t logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
     cpfs_blkno_t phys_blk;
-    rc = cpfs_find_or_alloc_block_4_file( ino, logical_blk, &phys_blk );
+    rc = cpfs_find_or_alloc_block_4_file( fs, ino, logical_blk, &phys_blk );
     if( rc ) return rc;
 
-    char *blk_data = cpfs_lock_blk( phys_blk );
-    cpfs_touch_blk( phys_blk );
+    char *blk_data = cpfs_lock_blk( fs, phys_blk );
+    cpfs_touch_blk( fs, phys_blk );
 
     if( blk_data == 0 ) return EINVAL;
 
@@ -164,8 +164,8 @@ cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
     data += part;
     size -= part;
 
-    cpfs_unlock_blk( phys_blk );
-    cpfs_inode_update_fsize( ino, pos );
+    cpfs_unlock_blk( fs, phys_blk );
+    cpfs_inode_update_fsize( fs, ino, pos );
 
     //
     // do full blocks
@@ -177,11 +177,11 @@ cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
 
         logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
-        rc = cpfs_find_or_alloc_block_4_file( ino, logical_blk, &phys_blk );
+        rc = cpfs_find_or_alloc_block_4_file( fs, ino, logical_blk, &phys_blk );
         if( rc ) return rc;
 
-        char *blk_data = cpfs_lock_blk( phys_blk );
-        cpfs_touch_blk( phys_blk );
+        char *blk_data = cpfs_lock_blk( fs, phys_blk );
+        cpfs_touch_blk( fs, phys_blk );
 
         if( blk_data == 0 ) return EINVAL;
 
@@ -197,8 +197,8 @@ cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
         data += part;
         size -= part;
 
-        cpfs_unlock_blk( phys_blk );
-        cpfs_inode_update_fsize( ino, pos );
+        cpfs_unlock_blk( fs, phys_blk );
+        cpfs_inode_update_fsize( fs, ino, pos );
     }
 
     if( !size )
@@ -211,11 +211,11 @@ cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
 
     logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
-    rc = cpfs_find_or_alloc_block_4_file( ino, logical_blk, &phys_blk );
+    rc = cpfs_find_or_alloc_block_4_file( fs, ino, logical_blk, &phys_blk );
     if( rc ) return rc;
 
-    blk_data = cpfs_lock_blk( phys_blk );
-    cpfs_touch_blk( phys_blk );
+    blk_data = cpfs_lock_blk( fs, phys_blk );
+    cpfs_touch_blk( fs, phys_blk );
     
 
     if( blk_data == 0 ) return EINVAL;
@@ -232,8 +232,8 @@ cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
     data += part;
     size -= part;
 
-    cpfs_unlock_blk( phys_blk );
-    cpfs_inode_update_fsize( ino, pos );
+    cpfs_unlock_blk( fs, phys_blk );
+    cpfs_inode_update_fsize( fs, ino, pos );
 
 
     cpfs_assert( size == 0 );

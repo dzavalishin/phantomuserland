@@ -25,14 +25,14 @@ static char data[CPFS_BLKSIZE];
 
 
 struct cpfs_inode *
-cpfs_lock_ino( cpfs_ino_t ino ) // makes sure that block is in memory
+cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in memory
 {
     errno_t rc;
 
     if( used ) cpfs_panic( "out of inode buffers" );
 
     cpfs_blkno_t blk;
-    rc = cpfs_block_4_inode( ino, &blk );
+    rc = cpfs_block_4_inode( fs, ino, &blk );
     if( rc ) cpfs_panic( "cpfs_block_4_inode" );
 
     curr_blk = blk;
@@ -41,12 +41,12 @@ cpfs_lock_ino( cpfs_ino_t ino ) // makes sure that block is in memory
     write = 0;
     used = 1;
 
-    rc = cpfs_disk_read( 0, blk, data );
+    rc = cpfs_disk_read( fs->disk_id, blk, data );
     if( rc ) cpfs_panic( "read inode blk" );
 
     // Inode table growth
 
-    cpfs_sb_lock();
+    cpfs_sb_lock( fs );
 
     if( blk > fs_sb.itable_end ) cpfs_panic( "attempt to read inode %lld after fs_sb.itable_end (%lld)", (long long) blk, (long long) fs_sb.itable_end );
 
@@ -59,7 +59,7 @@ cpfs_lock_ino( cpfs_ino_t ino ) // makes sure that block is in memory
         memset( data, 0, CPFS_BLKSIZE );
     }
 
-    rc = cpfs_sb_unlock_write();
+    rc = cpfs_sb_unlock_write( fs );
     if( rc ) cpfs_panic("can't write sb"); // TODO just log and refuse call?
 
     int ino_in_blk = ino % CPFS_INO_PER_BLK;
@@ -68,7 +68,7 @@ cpfs_lock_ino( cpfs_ino_t ino ) // makes sure that block is in memory
 }
 
 void
-cpfs_touch_ino(  cpfs_ino_t ino ) // marks block as dirty, will be saved to disk on unlock
+cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // marks block as dirty, will be saved to disk on unlock
 {
     if( curr_ino != ino ) cpfs_panic( "wrong ino in touch" );
     //if( curr_blk != blk ) cpfs_panic( "wrong blk in inode touch" );
@@ -77,7 +77,7 @@ cpfs_touch_ino(  cpfs_ino_t ino ) // marks block as dirty, will be saved to disk
 
 
 void
-cpfs_unlock_ino( cpfs_ino_t ino ) // flushes block to disk before unlocking it, if touched
+cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // flushes block to disk before unlocking it, if touched
 {
     if( !used ) cpfs_panic( "double cpfs_unlock_blk" );
     if( curr_ino != ino ) cpfs_panic( "wrong ino in unlock" );
@@ -85,7 +85,7 @@ cpfs_unlock_ino( cpfs_ino_t ino ) // flushes block to disk before unlocking it, 
 
     if( write )
     {
-        errno_t rc = cpfs_disk_write( 0, curr_blk, data );
+        errno_t rc = cpfs_disk_write( fs->disk_id, curr_blk, data );
 
         if( rc ) cpfs_panic( "write inode blk" );
     }
