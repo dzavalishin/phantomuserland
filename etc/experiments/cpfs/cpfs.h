@@ -53,3 +53,5 @@ void            cpfs_spin_unlock();
 void            cpfs_mutex_lock();
 void            cpfs_mutex_unlock();
 
+cpfs_time_t	cpfs_get_current_time(void);
+

@@ -44,7 +44,7 @@ struct cpfs_inode
 {
     cpfs_fpos_t         fsize;
     uint32_t            nlinks; // allways 0 or 1 in this verstion, made for future extensions, if 0 - inode record is free.
-	uint32_t            ftype; // nonzero = dir for now
+    uint32_t            ftype; // nonzero = dir for now
 
     cpfs_time_t         ctime; // created
     cpfs_time_t         atime; // accessed
@@ -93,6 +93,8 @@ void                    cpfs_unlock_ino( cpfs_ino_t ino ); // flushes inode to d
 //cpfs_ino_t      	cpfs_alloc_inode( void );
 errno_t                 cpfs_alloc_inode( cpfs_ino_t *inode );
 void            	cpfs_free_inode( cpfs_ino_t ino ); // deletes file
+
+void                    cpfs_inode_init_defautls( struct cpfs_inode *ii );
 
 
 

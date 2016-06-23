@@ -24,14 +24,16 @@
 errno_t
 cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size )
 {
+    errno_t rc;
+
     //
     // do first (partial) block
     //
 
     cpfs_blkno_t logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
-    cpfs_blkno_t phys_blk =  cpfs_find_block_4_file( ino, logical_blk );
-    if( phys_blk == 0 ) return EINVAL;
+    cpfs_blkno_t phys_blk;
+    if( cpfs_find_block_4_file( ino, logical_blk, &phys_blk ) ) return EINVAL;
 
     char *blk_data = cpfs_lock_blk( phys_blk );
     //void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
@@ -63,8 +65,8 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
 
         logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
-        phys_blk =  cpfs_find_block_4_file( ino, logical_blk );
-        if( phys_blk == 0 ) return EINVAL;
+        rc = cpfs_find_block_4_file( ino, logical_blk, &phys_blk );
+        if( rc ) return rc;
 
         char *blk_data = cpfs_lock_blk( phys_blk );
         //void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
@@ -93,8 +95,8 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
 
     logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
-    phys_blk =  cpfs_find_block_4_file( ino, logical_blk );
-    if( phys_blk == 0 ) return EINVAL;
+    rc = cpfs_find_block_4_file( ino, logical_blk, &phys_blk );
+    if( rc ) return rc;
 
     blk_data = cpfs_lock_blk( phys_blk );
     //void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock

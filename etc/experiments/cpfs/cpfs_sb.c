@@ -21,6 +21,7 @@ static int sb_blk = 0;
 
 errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
 {
+    errno_t rc;
 
     struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
 
@@ -55,13 +56,20 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
     cpfs_touch_blk( sb_blk ); // marks block as dirty, will be saved to disk on unlock
     cpfs_unlock_blk( sb_blk );
 
-    cpfs_ino_t root_dir = cpfs_alloc_inode();
+    cpfs_ino_t root_dir = 0;
+
+    /* can't be sure allocator starts with 0, just mark it as used
+    rc = cpfs_alloc_inode( &root_dir );
+    if( rc )
+        cpfs_panic("root dir cna't alloc inode, rc=%d", rc);
     if( root_dir != 0 )
-        cpfs_panic("root dir not in inode 0");
+        cpfs_panic("root dir not in inode 0 but %d", root_dir );
+        */
 
     struct cpfs_inode *rdi = cpfs_lock_ino( root_dir );
     cpfs_touch_ino( root_dir );
     rdi->ftype = CPFS_FTYPE_DIR;
+    rdi->nlinks = 1;
     cpfs_unlock_ino( root_dir );
 
     return 0;

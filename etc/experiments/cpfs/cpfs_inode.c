@@ -212,4 +212,30 @@ cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size )
 
 }
 
+/**
+ *
+ * Fill inode structure with reasonable default values. Assume it is created.
+ *
+**/
+void
+cpfs_inode_init_defautls( struct cpfs_inode *ii )
+{
+    ii->fsize = 0;
+    ii->nlinks = 1;
+    ii->ftype = 0;
+
+    ii->acl = 0; // unused now
+    ii->log = 0; // unused now
+
+    memset( ii->blocks0, 0, sizeof(ii->blocks0) );
+    ii->blocks1 = 0;
+    ii->blocks2 = 0;
+    ii->blocks3 = 0;
+
+    ii->ctime = cpfs_get_current_time();
+    ii->atime = ii->ctime;
+    ii->mtime = ii->ctime;
+    ii->vtime = 0;
+
+}
 

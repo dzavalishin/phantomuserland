@@ -22,6 +22,15 @@ void die_rc( const char *msg, int rc )
 
 void test(void)
 {
+    // TODO tests
+
+    // test_superblock();
+    // test_disk_alloc();
+    // test_directory();        // Create/lookup/destroy directory entries
+    // test_inode_alloc();
+    // test_file_create(); 	// create, open and destroy multiple files, try open deleted files
+    // test_file_data();        // Create, write, close, reopen, read and compare data, in a mixed way
+    // test_mutithreaded();     // Do mix of prev tests in 10 threads, starting tests in random order
 }
 
 
@@ -108,6 +117,13 @@ cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data )
     lseek( dfd, (int) (block*CPFS_BLKSIZE), SEEK_SET );
     int rc = write( dfd, data, CPFS_BLKSIZE );
     return (rc == CPFS_BLKSIZE) ? 0 : EIO;
+}
+
+// TODO time
+cpfs_time_t
+cpfs_get_current_time(void)
+{
+    return time(0);
 }
 
 

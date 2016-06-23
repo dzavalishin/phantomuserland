@@ -43,8 +43,7 @@ cpfs_file_open  ( int *file_id, const char *name, int flags, void * user_id_data
         // Creating file
         //
 
-        file_ino = cpfs_alloc_inode();
-        if( file_ino == 0 )
+        if( cpfs_alloc_inode( &file_ino ) )
             return EMFILE;
 
 
