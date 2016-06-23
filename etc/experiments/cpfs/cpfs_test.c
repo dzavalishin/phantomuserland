@@ -311,10 +311,10 @@ test_file_data()        	// Create, write, close, reopen, read and compare data,
     int fd1, fd2, fd3;
     errno_t rc;
 
-    rc = cpfs_file_open( &fd1, "test_file_1", O_CREAT, 0 );
+    rc = cpfs_file_open( &fs, &fd1, "test_file_1", O_CREAT, 0 );
     if( rc )  cpfs_panic( "create 1 %d", rc );
 
-    rc = cpfs_file_open( &fd2, "test_file_2", O_CREAT, 0 );
+    rc = cpfs_file_open( &fs, &fd2, "test_file_2", O_CREAT, 0 );
     if( rc )  cpfs_panic( "create 2  %d", rc );
 
 

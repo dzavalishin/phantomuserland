@@ -14,6 +14,10 @@
 
 #include <stdarg.h>
 
+cpfs_fs_t fs =
+{
+    .disk_id = 0
+};
 
 void die_rc( const char *msg, int rc )
 {
@@ -58,19 +62,25 @@ int main( int ac, char**av )
     dfd = open( "disk.img", O_RDWR|O_CREAT, 0666 );
     if( dfd < 0 ) die_rc( "open", dfd );
 
-    rc = cpfs_init();
+    rc = cpfs_init( &fs );
+    if( rc ) die_rc( "Init FS", rc );
+
+    rc = cpfs_mount( &fs );
     if( rc )
     {
-        rc = cpfs_mkfs( 10000 );
+        rc = cpfs_mkfs( &fs, 10000 );
         if( rc ) die_rc( "mkfs", rc );
 
-        rc = cpfs_init();
-        if( rc ) die_rc( "Init FS", rc );
+        rc = cpfs_mount( &fs );
+        if( rc ) die_rc( "Mount FS", rc );
     }
 
     test();
 
-    rc = cpfs_stop();
+    rc = cpfs_umount( &fs );
+    if( rc ) die_rc( "Umount FS", rc );
+
+    rc = cpfs_stop( &fs );
     if( rc ) die_rc( "Stop FS", rc );
 
 
@@ -95,7 +105,7 @@ cpfs_panic( const char *fmt, ... )
 
 
 void
-cpfs_log_error(char *fmt, ... )
+cpfs_log_error( const char *fmt, ... )
 {
     printf( "Error: ");
 
@@ -137,11 +147,20 @@ cpfs_get_current_time(void)
 
 void cpfs_mutex_lock( cpfs_mutex m)
 {
+    // TODO pthreads mutex?
 }
 
 
 void cpfs_mutex_unlock( cpfs_mutex m)
 {
+    // TODO pthreads mutex?
 }
+
+void cpfs_mutex_init( cpfs_mutex *m)
+{
+    *m = 0; // temp
+    // TODO pthreads mutex?
+}
+
 
 

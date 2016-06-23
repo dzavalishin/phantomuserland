@@ -92,7 +92,6 @@ no_freelist:
 void
 cpfs_free_disk_block( cpfs_blkno_t blk )
 {
-    // TODO implement me
     cpfs_mutex_lock( freelist_mutex );
 
     // Write current head of free list block number to block we're freeing
@@ -109,7 +108,6 @@ cpfs_free_disk_block( cpfs_blkno_t blk )
     fs_sb.free_count++;
 
     cpfs_mutex_unlock( freelist_mutex );
-
 }
 
 

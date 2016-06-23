@@ -1,5 +1,8 @@
 Experimental simple and reliable FS code, not so connected to Phantom OS
 
+Bugs
+
+- mutex init is missing now and there
 
 Questions:
 

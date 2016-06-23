@@ -9,19 +9,30 @@
  *
 **/
 
+#ifndef CPFS_H
+#define CPFS_H
+
+
 #include "cpfs_types.h"
 #include "cpfs_defs.h"
 
+#define cpfs_assert(__check)
 
-errno_t 		cpfs_init(void);
-errno_t			cpfs_stop(void);
+struct cpfs_fs;
 
-errno_t 		cpfs_mkfs(cpfs_blkno_t disk_size);
+errno_t 	cpfs_init( struct cpfs_fs *fs );
+errno_t		cpfs_stop( struct cpfs_fs *fs );
+
+errno_t 	cpfs_mount ( struct cpfs_fs *fs );
+errno_t		cpfs_umount( struct cpfs_fs *fs );
+
+errno_t 	cpfs_mkfs( struct cpfs_fs *fs, cpfs_blkno_t disk_size );
+errno_t 	cpfs_fsck( struct cpfs_fs *fs, int fix );
 
 // entry points
 
 
-errno_t         cpfs_file_open  ( int *file_id, const char *name, int flags, void * user_id_data );
+errno_t         cpfs_file_open  ( struct cpfs_fs *fs, int *file_id, const char *name, int flags, void * user_id_data );
 errno_t         cpfs_file_close ( int file_id );
 
 
@@ -43,7 +54,7 @@ errno_t         cpfs_disk_trim( int disk_id, cpfs_blkno_t block ); // Tell SSD w
 // kernel services
 
 
-void            cpfs_log_error(char *fmt, ... );
+void            cpfs_log_error( const char *fmt, ... );
 
 void 		cpfs_panic( const char *fmt, ... );
 
@@ -60,3 +71,5 @@ void            cpfs_mutex_unlock( cpfs_mutex m );
 
 cpfs_time_t	cpfs_get_current_time(void);
 
+
+#endif // CPFS_H

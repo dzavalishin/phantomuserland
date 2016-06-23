@@ -9,6 +9,14 @@
  *
 **/
 
+#ifndef CPFS_TEST_H
+#define CPFS_TEST_H
+
+#include "cpfs_local.h"
+
+extern cpfs_fs_t fs;
+
+
 
 void    test_superblock(void);
 
@@ -26,3 +34,4 @@ void    test_file_create(void); 	// create, open and destroy multiple files, try
 void    test_file_data(void);        // Create, write, close, reopen, read and compare data, in a mixed way
 void    test_mutithreaded(void);     // Do mix of prev tests in 10 threads, starting tests in random order
 
+#endif // CPFS_TEST_H

@@ -9,6 +9,10 @@
  *
 **/
 
+#ifndef CPFS_LOCAL_H
+#define CPFS_LOCAL_H
+
+
 #include "cpfs_types.h"
 #include "cpfs_defs.h"
 
@@ -16,6 +20,9 @@
 #include <string.h>
 
 
+
+
+// On-disk supreblock structure
 struct cpfs_sb
 {
     uint32_t            sb_magic_0;
@@ -25,18 +32,18 @@ struct cpfs_sb
     cpfs_blkno_t        itable_end;             // First unused block of inode table, this one and rest is not initialized. Used for fast mkfs.
 
     cpfs_blkno_t        disk_size;
-    cpfs_blkno_t        first_unallocated; 	// Number of block at end of FS we didn't use at all. From this point up to the end all blocks are free. 0 if not used. Used for fast mkfs.
+    cpfs_blkno_t        first_unallocated;      // Number of block at end of FS we didn't use at all. From this point up to the end all blocks are free. 0 if not used. Used for fast mkfs.
     cpfs_blkno_t        free_list;              // Head of free block list, or 0 if none
 
-    cpfs_blkno_t        free_count;             // Number of free blocks in FS - TODO not inited or updated yet
+    cpfs_blkno_t        free_count;             // Number of free blocks in FS
 
-    uint32_t            dirty;                  // TODO not yet implemented
-
+    uint32_t            dirty;                  // Not closed correctly
 };
 
 extern struct cpfs_sb fs_sb;
 
 
+// On-disk directory entry structure
 struct cpfs_dir_entry
 {
     cpfs_ino_t          inode;
@@ -44,6 +51,7 @@ struct cpfs_dir_entry
 };
 
 
+// On-disk i-node entry structure
 struct cpfs_inode
 {
     cpfs_fpos_t         fsize;
@@ -66,6 +74,7 @@ struct cpfs_inode
 
 // curr size of inode is 344 bytes, we'll allocate 512 for any case
 
+// On-disk free block list structure
 // Contents of a block in a free block list
 struct cpfs_freelist
 {
@@ -75,33 +84,64 @@ struct cpfs_freelist
     cpfs_blkno_t        next;
 };
 
+#define INDIR_CNT ((CPFS_BLKSIZE/sizeof(cpfs_blkno_t))-1)
 
-errno_t 		cpfs_init_sb(void);
+// On-disk indirect data pointers block structure
+// Contents of an indirect block
+struct cpfs_indir
+{
+    uint32_t            ib_magic; // TODO Use me
+    uint32_t            unused; // next fld is 64 bit, make sure it is aligned
 
-void 			cpfs_sb_lock();
-errno_t			cpfs_sb_unlock_write(); // if returns error, sb is not written and IS NOT UNLOCKED
-void 			cpfs_sb_unlock();
-
-errno_t 		cpfs_write_sb(void); // just for stop fs, don't use elsewhere
+    cpfs_blkno_t        child[INDIR_CNT];
+};
 
 
-void    		fic_refill(void);
+
+// In-memory filesystem state
+struct cpfs_fs
+{
+    int         	disk_id;                 // Number of disk in disk subsystem, paramerer for disk IO functions
+    struct cpfs_sb	fs_sb;
+
+    int                 inited;
+    int                 mounted;
+};
+
+typedef struct cpfs_fs cpfs_fs_t;
+
+
+
+
+
+
+errno_t                 cpfs_init_sb(void);
+errno_t 		cpfs_mount_sb(void);
+
+void                    cpfs_sb_lock();
+errno_t                 cpfs_sb_unlock_write(); // if returns error, sb is not written and IS NOT UNLOCKED
+void                    cpfs_sb_unlock();
+
+errno_t                 cpfs_write_sb(void); // just for stop fs, don't use elsewhere
+
+
+void                    fic_refill(void);
 
 
 // TODO multiple fs?
 
 
-cpfs_blkno_t    	cpfs_alloc_disk_block( void );
-void            	cpfs_free_disk_block( cpfs_blkno_t blk );
+cpfs_blkno_t            cpfs_alloc_disk_block( void );
+void                    cpfs_free_disk_block( cpfs_blkno_t blk );
 
 
-errno_t    		cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *blk );
-errno_t    		cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // maps logical blocks to physical, block must be allocated
+errno_t                 cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *blk );
+errno_t                 cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // maps logical blocks to physical, block must be allocated
 // allocates logical block, returns physical blk pos, block must NOT be allocated
 // actually if block is allocated returns EEXIST and blk num in phys
-errno_t    		cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
+errno_t                 cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
 // returns 0 in any case, either if block found or allocated
-errno_t			cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
+errno_t                 cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
 
 
 struct cpfs_inode *     cpfs_lock_ino( cpfs_ino_t ino ); // makes sure that inode is in memory and no one modifies it
@@ -110,9 +150,9 @@ void                    cpfs_unlock_ino( cpfs_ino_t ino ); // flushes inode to d
 
 
 
-//cpfs_ino_t      	cpfs_alloc_inode( void );
+//cpfs_ino_t            cpfs_alloc_inode( void );
 errno_t                 cpfs_alloc_inode( cpfs_ino_t *inode );
-void            	cpfs_free_inode( cpfs_ino_t ino ); // deletes file
+void                    cpfs_free_inode( cpfs_ino_t ino ); // deletes file
 
 void                    cpfs_inode_init_defautls( struct cpfs_inode *ii );
 
@@ -120,22 +160,22 @@ void                    cpfs_inode_init_defautls( struct cpfs_inode *ii );
 
 // TODO problem: linear scan can be very slow, need tree?
 
-errno_t			cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ); // allocate a new dir entry in a dir
-//errno_t			cpfs_free_dirent( cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
-errno_t			cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
+errno_t                 cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ); // allocate a new dir entry in a dir
+//errno_t                       cpfs_free_dirent( cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
+errno_t                 cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
 
 
 // Finds/reads/creates/updates dir entry
 errno_t                 cpfs_dir_scan( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int flags );
 
-#define CPFS_DIR_SCAN_MUST_EXIST 	(1<<1) // returns ENOENT if not exist
-#define CPFS_DIR_SCAN_WRITE 		(1<<2) // writes given ino to dir entry, not reads
+#define CPFS_DIR_SCAN_MUST_EXIST        (1<<1) // returns ENOENT if not exist
+#define CPFS_DIR_SCAN_WRITE             (1<<2) // writes given ino to dir entry, not reads
 
 // TODO dirent name cache - in memory hash? Not really as usual client software opens file once in its life?
 
 
 
-void *     		cpfs_lock_blk(   cpfs_blkno_t blk ); // makes sure that block is in memory 
+void *                  cpfs_lock_blk(   cpfs_blkno_t blk ); // makes sure that block is in memory 
 void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
 void                    cpfs_unlock_blk( cpfs_blkno_t blk ); // flushes block to disk before unlocking it, if touched
 
@@ -143,10 +183,13 @@ void                    cpfs_unlock_blk( cpfs_blkno_t blk ); // flushes block to
 
 // Internal read/wrire impl, used by user calls and internal directory io code
 
-errno_t         	cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size );
-errno_t         	cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
+errno_t                 cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size );
+errno_t                 cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
 
-void 			cpfs_inode_truncate( cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
+void                    cpfs_inode_truncate( cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
 errno_t                 cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size );
-errno_t             cpfs_inode_update_fsize( cpfs_ino_t ino, cpfs_size_t size );
+errno_t                 cpfs_inode_update_fsize( cpfs_ino_t ino, cpfs_size_t size );
 
+
+
+#endif // CPFS_LOCAL_H

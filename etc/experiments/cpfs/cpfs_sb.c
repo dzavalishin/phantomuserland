@@ -17,9 +17,9 @@ struct cpfs_sb fs_sb;
 
 
 static int sb_blk = 0;
+static cpfs_mutex sb_mutex;
 
-
-errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
+errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 {
     errno_t rc;
 
@@ -91,16 +91,18 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
     return 0;
 }
 
-
 errno_t cpfs_init_sb(void)
 {
+    cpfs_assert( sizeof(struct cpfs_inode) < CPFS_INO_REC_SIZE );
+    cpfs_mutex_init( &sb_mutex );
 
-    // TODO assert( sizeof(struct cpfs_inode) < CPFS_INO_REC_SIZE );
+    return 0;
+}
 
+errno_t cpfs_mount_sb(void)
+{
     struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
-
     if( sb == 0 ) return EFAULT; // ? TODO
-
 
     if( sb->sb_magic_0 != CPFS_SB_MAGIC )
     {
@@ -142,15 +144,13 @@ errno_t cpfs_write_sb(void)
 void
 cpfs_sb_lock(void)
 {
-    // TODO
-    // cpfs_mutex_lock( sb_mutex );
+    cpfs_mutex_lock( sb_mutex );
 }
 
 void
 cpfs_sb_unlock(void)
 {
-    // TODO
-    // cpfs_mutex_unlock( sb_mutex );
+    cpfs_mutex_unlock( sb_mutex );
 }
 
 

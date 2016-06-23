@@ -1,10 +1,21 @@
-/*
-typedef unsigned int uint32_t;
-typedef unsigned int u_int32_t;
+/**
+ *
+ * CPFS
+ *
+ * Copyright (C) 2016-2016 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Data types.
+ *
+ *
+**/
 
-typedef unsigned long uint64_t;
 
-*/
+
+
+#ifndef CPFS_TYPES_H
+#define CPFS_TYPES_H
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,4 +32,6 @@ typedef uint64_t cpfs_size_t;  // mem size
 
 typedef int errno_t;
 
+
+#endif // CPFS_TYPES_H
 

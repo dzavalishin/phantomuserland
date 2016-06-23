@@ -21,7 +21,8 @@ static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, 
 errno_t
 cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
-    // TODO assert( phys );
+    cpfs_assert( phys != 0 );
+
     // Read inode first
     struct cpfs_inode inode;
     struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
@@ -48,7 +49,8 @@ cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys
 errno_t
 cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
-    // TODO assert( phys );
+    cpfs_assert( phys != 0 );
+
     // Read inode first
     struct cpfs_inode *ip = cpfs_lock_ino( ino );
     if( ip == 0 )
@@ -106,7 +108,88 @@ cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkn
 
 static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created )
 {
-    // TODO assert base phys created
+    int icreated = 0;
+
+    cpfs_assert( base != 0 );
+    cpfs_assert( phys != 0 );
+    cpfs_assert( created != 0 );
+
+    // we're empty and can't create, fail
+    if( (*base == 0) && !create )
+        return ENOENT;
+
+    cpfs_blkno_t iblk = *base;
+    cpfs_blkno_t fblk;
+
+    if( *base == 0 )
+    {
+        // Allocate indirect page
+        iblk = cpfs_alloc_disk_block();
+        if( !iblk )
+            return ENOSPC;
+
+        *base = iblk;
+        *created = 1;
+        icreated = 1;
+    }
+
+    // Now we have indirect page
+    struct cpfs_indir * ib = cpfs_lock_blk( iblk );
+    if( ib == 0 )
+    {
+        cpfs_unlock_blk( iblk );
+        return EIO;
+    }
+
+    if( icreated )
+    {
+        memset( ib, 0, sizeof( *ib ) );
+        ib->ib_magic = CPFS_IB_MAGIC;
+        cpfs_touch_blk( iblk );
+    }
+
+    if( indirection == 1 )
+    {
+        // just process
+        cpfs_assert( displ < INDIR_CNT );
+
+        if( ib->child[displ] != 0 )
+        {
+            *phys = ib->child[displ];
+            cpfs_unlock_blk( iblk );
+            return 0;
+        }
+
+        cpfs_unlock_blk( iblk );
+
+        if( !create )
+        {
+            return ENOENT;
+        }
+
+        // Allocate indirect page
+        fblk = cpfs_alloc_disk_block();
+        if( !fblk )
+            return ENOSPC;
+
+        ib = cpfs_lock_blk( iblk );
+        if( ib == 0 )
+        {
+            cpfs_unlock_blk( iblk );
+            cpfs_free_disk_block( fblk );
+            return EIO;
+        }
+
+        ib->child[displ] = fblk;
+        cpfs_touch_blk( iblk );
+        cpfs_unlock_blk( iblk );
+        *phys = ib->child[displ];
+        return 0;
+    }
+
+
+
+
     return EINVAL;
 }
 
@@ -142,26 +225,24 @@ cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *oblk )
 #define FIC_SZ 256
 static cpfs_ino_t free_inodes_cache[FIC_SZ];
 static int fic_used = 0;
-
+cpfs_mutex fic_mutex;
 
 errno_t
 cpfs_alloc_inode( cpfs_ino_t *inode )
 {
-    // TODO
-    //cpfs_mutex_lock( fic_mutex );
+    cpfs_mutex_lock( fic_mutex );
 
     if( fic_used <= 0 )
         fic_refill();
 
     if( fic_used <= 0 )
     {
-        //cpfs_mutex_unlock( fic_mutex );
+        cpfs_mutex_unlock( fic_mutex );
         return EMFILE;
     }
 
     *inode = free_inodes_cache[--fic_used];
-    // TODO
-    //cpfs_mutex_unlock( fic_mutex );
+    cpfs_mutex_unlock( fic_mutex );
     return 0;
 }
 
@@ -176,21 +257,16 @@ cpfs_free_inode( cpfs_ino_t ino ) // deletes file
     // TODO free inode!
     cpfs_log_error("free_inode: unimpl\n");
 
-    // TODO
-    //cpfs_mutex_lock( fic_mutex );
+    cpfs_mutex_lock( fic_mutex );
 
     if( fic_used < FIC_SZ )
     {
         free_inodes_cache[fic_used++] = ino;
-        // TODO
-        //cpfs_mutex_unlock( fic_mutex );
+        cpfs_mutex_unlock( fic_mutex );
         return;
     }
 
-
-    // TODO
-    //cpfs_mutex_unlock( fic_mutex );
-
+    cpfs_mutex_unlock( fic_mutex );
 }
 
 
@@ -202,8 +278,7 @@ fic_refill(void)
     int iblocks = fs_sb.ninode*CPFS_INO_PER_BLK;
     cpfs_blkno_t ilast = fs_sb.itable_pos + iblocks;
 
-    // TODO
-    //cpfs_mutex_lock( fic_mutex );
+    cpfs_mutex_lock( fic_mutex );
 
     //
     // fast way - alloc from end of inode space
@@ -232,8 +307,7 @@ fic_refill(void)
         last_ino_blk++;
     }
 
-    // TODO
-    //cpfs_mutex_unlock( fic_mutex );
+    cpfs_mutex_unlock( fic_mutex );
 
     if( fic_used > 0 )
         return;

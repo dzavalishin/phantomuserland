@@ -9,6 +9,10 @@
  *
 **/
 
+#ifndef CPFS_DEFS_H
+#define CPFS_DEFS_H
+
+
 
 #define CPFS_MAX_PATH_LEN       2048
 #define CPFS_MAX_FNAME_LEN       500
@@ -30,12 +34,13 @@
 
 #define CPFS_SB_MAGIC           0xD0B0E0EF // superblock
 #define CPFS_FL_MAGIC           0xBAD0BEEF // free list
+#define CPFS_IB_MAGIC           0xBB00BB00 // indirect block list
 
 
 
 // TODO implement me - disk io cache
 #define CPFS_MAX_CONCUR_IO      64
 
-// TODO use Unix binary value here
-#define CPFS_FTYPE_DIR          01000
+#define CPFS_FTYPE_DIR          0040000
 
+#endif // CPFS_DEFS_H

@@ -22,8 +22,8 @@ cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int rem
     errno_t rc;
     // TODO some speedup? In-mem hash?
 
-    // TODO assert(file_ino)
-    // TODO assert(fname)
+    cpfs_assert( file_ino != 0 );
+    cpfs_assert( fname != 0 );
 
     // read in directory inode to find out dir file len
 
@@ -44,7 +44,7 @@ cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int rem
 
     int nentry = fsize/CPFS_DIR_REC_SIZE;
 
-    // TODO assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 )
+    cpfs_assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 );
 
     int nblk = nentry / CPFS_DIR_PER_BLK;
     int blkpos = 0;
@@ -119,7 +119,7 @@ cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino )
 
     // TODO some speedup? In-mem hash?
 
-    // TODO assert(fname)
+    cpfs_assert(fname);
 
     // read in directory inode to find out dir file len
 
@@ -139,7 +139,7 @@ cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino )
 
     int nentry = fsize/CPFS_DIR_REC_SIZE;
 
-    // TODO assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 )
+    cpfs_assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 );
 
     int nblk = nentry / CPFS_DIR_PER_BLK;
     int blkpos = 0;
