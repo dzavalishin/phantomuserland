@@ -8,13 +8,15 @@ clean::
 	-rm *.o
 
 image::
-	dd if=/dev/zero of=disk.img count=1000
+	dd if=/dev/zero of=disk.img count=100000
 
 
 test:
 	make clean
 	make
 	make image
+	@echo
+	@echo
 	./cpfs
 	@echo
 	@echo Finished tests of cpfs

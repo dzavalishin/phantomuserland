@@ -129,3 +129,13 @@ cpfs_get_current_time(void)
 }
 
 
+void cpfs_mutex_lock( cpfs_mutex m)
+{
+}
+
+
+void cpfs_mutex_unlock( cpfs_mutex m)
+{
+}
+
+

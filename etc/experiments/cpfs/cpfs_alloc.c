@@ -13,14 +13,22 @@
 #include "cpfs_local.h"
 
 
+static cpfs_mutex freelist_mutex;
 
 
 cpfs_blkno_t
 cpfs_alloc_disk_block( void )
 {
-    // TODO implement free list
 
     //cpfs_blkno_t        free_list;              // Head of free block list, or 0 if none
+    //
+    // Try free list first
+    //
+    cpfs_mutex_lock( freelist_mutex );
+
+    // TODO implement free list
+
+    cpfs_mutex_unlock( freelist_mutex );
 
     //
     // Nothing in free list, alloc from rest of FS block space, if possible
@@ -60,6 +68,23 @@ void
 cpfs_free_disk_block( cpfs_blkno_t blk )
 {
     // TODO implement me
+    cpfs_mutex_lock( freelist_mutex );
+
+    // Write current head of free list block number to block we're freeing
+
+    struct cpfs_freelist *fb = cpfs_lock_blk( blk );
+
+    fb->next = fs_sb.free_list;
+    fb->fl_magic = CPFS_FL_MAGIC;
+
+    cpfs_touch_blk( blk );
+    cpfs_unlock_blk( blk );
+
+    fs_sb.free_list = blk;
+    fs_sb.free_count++;
+
+    cpfs_mutex_unlock( freelist_mutex );
+
 }
 
 

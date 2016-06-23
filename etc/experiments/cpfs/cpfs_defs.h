@@ -28,7 +28,10 @@
 #define CPFS_DIR_PER_BLK        (CPFS_BLKSIZE/CPFS_DIR_REC_SIZE)
 
 
-#define CPFS_SB_MAGIC           0xBAD0BEEF
+#define CPFS_SB_MAGIC           0xD0B0E0EF // superblock
+#define CPFS_FL_MAGIC           0xBAD0BEEF // free list
+
+
 
 // TODO implement me - disk io cache
 #define CPFS_MAX_CONCUR_IO      64

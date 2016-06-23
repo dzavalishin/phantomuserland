@@ -50,7 +50,7 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
 
     // sanity check
     if( sb->free_count != disk_size - sb->first_unallocated )
-        cpfs_panic("sb->free_count (%ld) != disk_size (%ld) - sb->first_unallocated (%ld)", sb->free_count, disk_size, sb->first_unallocated);
+        cpfs_panic("sb->free_count (%lld) != disk_size (%lld) - sb->first_unallocated (%lld)", (long long)sb->free_count, (long long)disk_size, (long long)sb->first_unallocated);
 
     if( sb->first_unallocated >= disk_size )
     {
@@ -104,6 +104,14 @@ errno_t cpfs_init_sb(void)
 
     if( sb->sb_magic_0 != CPFS_SB_MAGIC )
     {
+        cpfs_log_error("can't mount disk, no FS magic");
+        cpfs_unlock_blk( sb_blk );
+        return EINVAL;
+    }
+
+    if( sb->dirty )
+    {
+        cpfs_log_error("can't mound dirty disk, need FSCK"); // TODO run fsck from here? different return code?
         cpfs_unlock_blk( sb_blk );
         return EINVAL;
     }
@@ -121,7 +129,6 @@ errno_t cpfs_write_sb(void)
     struct cpfs_sb      *sb = cpfs_lock_blk( sb_blk );
 
     if( sb == 0 ) return EFAULT; // ? TODO
-
 
     *sb = fs_sb;
 

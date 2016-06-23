@@ -66,12 +66,24 @@ struct cpfs_inode
 
 // curr size of inode is 344 bytes, we'll allocate 512 for any case
 
+// Contents of a block in a free block list
+struct cpfs_freelist
+{
+    uint32_t            fl_magic;
+    uint32_t            unused; // next fld is 64 bit, make sure it is aligned
+
+    cpfs_blkno_t        next;
+};
+
 
 errno_t 		cpfs_init_sb(void);
 
 void 			cpfs_sb_lock();
 errno_t			cpfs_sb_unlock_write(); // if returns error, sb is not written and IS NOT UNLOCKED
 void 			cpfs_sb_unlock();
+
+errno_t 		cpfs_write_sb(void); // just for stop fs, don't use elsewhere
+
 
 void    		fic_refill(void);
 

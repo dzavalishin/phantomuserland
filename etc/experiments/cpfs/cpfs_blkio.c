@@ -34,7 +34,7 @@ cpfs_lock_blk( cpfs_blkno_t blk ) // makes sure that block is in memory
 
     errno_t rc = cpfs_disk_read( 0, blk, data );
 
-    if( rc ) cpfs_panic( "read blk" );
+    if( rc ) cpfs_panic( "read blk %lld", (long long)blk );
 
     return data;
 }
@@ -57,7 +57,7 @@ cpfs_unlock_blk( cpfs_blkno_t blk ) // flushes block to disk before unlocking it
     {
         errno_t rc = cpfs_disk_write( 0, blk, data );
 
-        if( rc ) cpfs_panic( "write blk" );
+        if( rc ) cpfs_panic( "write blk %lld", (long long)blk );
     }
 
     used = 0;

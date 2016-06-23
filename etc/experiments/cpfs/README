@@ -15,3 +15,5 @@ Questions:
 TODO
 - mark each func with max disk r/w ops count and max execution time on target CPU
 
+- disk struct align - check field order and use GCC attributes?
+

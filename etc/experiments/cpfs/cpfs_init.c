@@ -23,6 +23,7 @@ cpfs_init(void)
     rc = cpfs_init_sb();
     if( rc ) return rc;
 
+    fs_sb.dirty = 0xFF; // Next write will update it on disk, we don't need to mark disk dirty if we never had a reason to write sb
 
     fic_refill(); // fill list of free inodes
     return 0;
@@ -34,6 +35,9 @@ errno_t cpfs_stop(void)
 
     // TODO check locked rcords
     // TODO flush?
-    return 0;
+
+    fs_sb.dirty = 0;
+
+    return cpfs_write_sb();
 }
 
