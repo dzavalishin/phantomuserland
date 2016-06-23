@@ -47,8 +47,10 @@ void            cpfs_log_error(char *fmt, ... );
 
 void 		cpfs_panic( const char *fmt, ... );
 
-void            cpfs_spin_lock();
-void            cpfs_spin_unlock();
+typedef void * cpfs_spinlock;
+
+void            cpfs_spin_lock(cpfs_spinlock l);
+void            cpfs_spin_unlock(cpfs_spinlock l);
 
 typedef void * cpfs_mutex;
 void            cpfs_mutex_init( cpfs_mutex * );

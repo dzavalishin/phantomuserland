@@ -28,8 +28,14 @@ void test(void)
 
     test_superblock();
     test_disk_alloc();
-    test_directory();        // Create/lookup/destroy directory entries
+
+    test_inode_blkmap(); 	// test file block allocation with inode
+
+    // test_inode_io(); // read/write directly with inode, no file name
+
     // test_inode_alloc();
+
+    test_directory();        // Create/lookup/destroy directory entries
     // test_file_create(); 	// create, open and destroy multiple files, try open deleted files
     // test_file_data();        // Create, write, close, reopen, read and compare data, in a mixed way
     // test_mutithreaded();     // Do mix of prev tests in 10 threads, starting tests in random order

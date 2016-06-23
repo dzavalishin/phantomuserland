@@ -215,7 +215,11 @@ fic_refill(void)
 
     // Each disk block has CPFS_INO_PER_BLK inodes. As long as we have place for CPFS_INO_PER_BLK inodes in
     // free_inodes_cache and there are unused blocks in inode space, refill free inode numbers list.
-    while( (last_ino_blk < ilast) && (fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
+
+    // NB! Inode table growth code assumes we eat inode space block by block
+
+    //while( (last_ino_blk < ilast) && (fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
+    if( (last_ino_blk < ilast) && (fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
     {
         int i;
         for( i = 0; i < CPFS_INO_PER_BLK; i++ )

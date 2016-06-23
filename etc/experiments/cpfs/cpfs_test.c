@@ -115,6 +115,76 @@ test_disk_alloc(void)
 
 
 
+
+
+
+
+void
+test_inode_blkmap(void) 	// test file block allocation with inode
+{
+    errno_t rc;
+    cpfs_ino_t ino;
+    cpfs_blkno_t phys0;
+    cpfs_blkno_t phys1;
+
+    printf("Inode block map test: allocate inode\n");
+
+    rc = cpfs_alloc_inode( &ino );
+    if( rc ) cpfs_panic( "can't alloc inode, %d", rc );
+
+    printf("Inode block map test: inode %lld, allocate data block\n", (long long)ino);
+
+
+    rc = cpfs_alloc_block_4_file( ino, 0, &phys0 );
+    if( rc ) cpfs_panic( "cpfs_alloc_block_4_file rc=%d", rc );
+
+    rc = cpfs_find_block_4_file( ino, 0, &phys1 );
+    if( rc ) cpfs_panic( "cpfs_find_block_4_file rc=%d", rc );
+
+    if( phys0 != phys1 )
+        cpfs_panic( "allocated and found blocks differ: %lld and %lld", (long long)phys0, (long long)phys1 );
+
+    if( phys0 == 0 )
+        cpfs_panic( "allocated block is zero", (long long)phys0 );
+
+    printf("Inode block map test: allocated and found blk %lld\n", (long long)phys1);
+
+    printf("Inode block map test: free inode\n");
+    cpfs_free_inode( ino );
+
+
+    printf("Inode block map test: DONE\n");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static void mke( const char *name )
 {
     errno_t rc = cpfs_alloc_dirent( 0, name, 0 );

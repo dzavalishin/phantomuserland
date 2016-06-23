@@ -48,7 +48,7 @@ cpfs_lock_ino( cpfs_ino_t ino ) // makes sure that block is in memory
 
     cpfs_sb_lock();
 
-    if( blk > fs_sb.itable_end ) cpfs_panic( "attempt to read inode after fs_sb.itable_end" );
+    if( blk > fs_sb.itable_end ) cpfs_panic( "attempt to read inode %lld after fs_sb.itable_end (%lld)", (long long) blk, (long long) fs_sb.itable_end );
 
     if( blk == fs_sb.itable_end )
     {
