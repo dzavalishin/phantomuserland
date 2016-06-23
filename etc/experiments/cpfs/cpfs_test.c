@@ -152,6 +152,7 @@ test_inode_blkmap(void) 	// test file block allocation with inode
     printf("Inode block map test: free inode\n");
     cpfs_free_inode( ino );
 
+    // todo test sparce allocation, far after the size of file
 
     printf("Inode block map test: DONE\n");
 

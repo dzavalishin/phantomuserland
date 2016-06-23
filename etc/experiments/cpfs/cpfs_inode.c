@@ -50,11 +50,8 @@ cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phy
 {
     // TODO assert( phys );
     // Read inode first
-    struct cpfs_inode inode;
-    struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
-    if( inode_p ) inode = *inode_p;
-
-    if( inode_p == 0 )
+    struct cpfs_inode *ip = cpfs_lock_ino( ino );
+    if( ip == 0 )
     {
         cpfs_unlock_ino( ino );
         return EIO;
@@ -62,9 +59,9 @@ cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phy
 
     if( logical < CPFS_INO_DIR_BLOCKS )
     {
-        if( inode.blocks0[logical] )
+        if( ip->blocks0[logical] )
         {
-            *phys = inode.blocks0[logical];
+            *phys = ip->blocks0[logical];
             cpfs_unlock_ino( ino );
             return EEXIST;
         }
@@ -76,7 +73,7 @@ cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phy
             return ENOSPC;
         }
 
-        *phys = inode.blocks0[logical] = new;
+        *phys = ip->blocks0[logical] = new;
         cpfs_touch_ino( ino );
         cpfs_unlock_ino( ino );
         return 0;
