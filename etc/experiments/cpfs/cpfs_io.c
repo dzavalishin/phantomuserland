@@ -22,7 +22,7 @@
 // returns einval if read can be partially done (and is partially done)
 
 errno_t
-cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size )
+cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size )
 {
     errno_t rc;
 
@@ -33,9 +33,10 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
     cpfs_blkno_t logical_blk = CPFS_FILE_POS_2_BLK( pos );
 
     cpfs_blkno_t phys_blk;
-    if( cpfs_find_block_4_file( ino, logical_blk, &phys_blk ) ) return EINVAL;
+    rc = cpfs_find_block_4_file( ino, logical_blk, &phys_blk );
+    if( rc ) return rc;
 
-    char *blk_data = cpfs_lock_blk( phys_blk );
+    const char *blk_data = cpfs_lock_blk( phys_blk );
     //void                    cpfs_touch_blk(  cpfs_blkno_t blk ); // marks block as dirty, will be saved to disk on unlock
 
     if( blk_data == 0 ) return EINVAL;
@@ -46,7 +47,7 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
 
     if( part > size ) part = size;
 
-    memcpy( blk_data+off, data, part );
+    memcpy( data, blk_data+off, part );
 
     pos += part;
     data += part;
@@ -79,7 +80,7 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
         part = CPFS_BLKSIZE;
         if( part > size ) return EFAULT; // can't be? assert? panic?
 
-        memcpy( blk_data, data, part );
+        memcpy( data, blk_data, part );
 
         pos += part;
         data += part;
@@ -109,7 +110,7 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
     part = CPFS_BLKSIZE;
     if( part > size ) part = size;
 
-    memcpy( blk_data, data, part );
+    memcpy( data, blk_data, part );
 
     pos += part;
     data += part;
@@ -131,6 +132,109 @@ cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
 errno_t
 cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size )
 {
+    errno_t rc;
+
+    //cpfs_size_t new_size = pos+size;
+
+    //
+    // do first (partial) block
+    //
+
+    cpfs_blkno_t logical_blk = CPFS_FILE_POS_2_BLK( pos );
+
+    cpfs_blkno_t phys_blk;
+    rc = cpfs_find_or_alloc_block_4_file( ino, logical_blk, &phys_blk );
+    if( rc ) return rc;
+
+    char *blk_data = cpfs_lock_blk( phys_blk );
+    cpfs_touch_blk( phys_blk );
+
+    if( blk_data == 0 ) return EINVAL;
+
+
+    cpfs_size_t off = CPFS_FILE_POS_2_OFF( pos );
+    cpfs_size_t part = CPFS_BLKSIZE-off;
+
+    if( part > size ) part = size;
+
+    memcpy( blk_data+off, data, part );
+
+    pos += part;
+    data += part;
+    size -= part;
+
+    cpfs_unlock_blk( phys_blk );
+    cpfs_inode_update_fsize( ino, pos );
+
+    //
+    // do full blocks
+    //
+
+
+    while( size > CPFS_BLKSIZE )
+    {
+
+        logical_blk = CPFS_FILE_POS_2_BLK( pos );
+
+        rc = cpfs_find_or_alloc_block_4_file( ino, logical_blk, &phys_blk );
+        if( rc ) return rc;
+
+        char *blk_data = cpfs_lock_blk( phys_blk );
+        cpfs_touch_blk( phys_blk );
+
+        if( blk_data == 0 ) return EINVAL;
+
+        off = CPFS_FILE_POS_2_OFF( pos );
+        if( off ) return EFAULT; // assert? panic? we're fried?
+
+        part = CPFS_BLKSIZE;
+        if( part > size ) return EFAULT; // can't be? assert? panic?
+
+        memcpy( blk_data, data, part );
+
+        pos += part;
+        data += part;
+        size -= part;
+
+        cpfs_unlock_blk( phys_blk );
+        cpfs_inode_update_fsize( ino, pos );
+    }
+
+
+    //
+    // do last (partial) block
+    //
+
+    logical_blk = CPFS_FILE_POS_2_BLK( pos );
+
+    rc = cpfs_find_or_alloc_block_4_file( ino, logical_blk, &phys_blk );
+    if( rc ) return rc;
+
+    blk_data = cpfs_lock_blk( phys_blk );
+    cpfs_touch_blk( phys_blk );
+    
+
+    if( blk_data == 0 ) return EINVAL;
+
+    off = CPFS_FILE_POS_2_OFF( pos );
+    if( off ) return EFAULT; // assert? panic? we're fried?
+
+    part = CPFS_BLKSIZE;
+    if( part > size ) part = size;
+
+    memcpy( blk_data, data, part );
+
+    pos += part;
+    data += part;
+    size -= part;
+
+    cpfs_unlock_blk( phys_blk );
+    cpfs_inode_update_fsize( ino, pos );
+
+
+    if( size ) return EFAULT; // assert? panic? we're fried?
+
+    return 0;
 }
 
 

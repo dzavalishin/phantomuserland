@@ -18,3 +18,9 @@ TODO
 - disk struct align - check field order and use GCC attributes?
 
 - sb lock to return ptr to sb, no global var
+
+- fsck
+- multiple fs (fs struct and param)
+- r/w errors, not panic
+
+- subdirs

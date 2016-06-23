@@ -35,7 +35,7 @@ cpfs_file_open  ( int *file_id, const char *name, int flags, void * user_id_data
     // TODO nested dirs! :)
 
     //rc = cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino ); // find name
-    rc = cpfs_namei( 0, name, &file_ino );
+    rc = cpfs_namei( 0, name, &file_ino, 0 );
 
     if(rc && (flags & O_CREAT))
     {

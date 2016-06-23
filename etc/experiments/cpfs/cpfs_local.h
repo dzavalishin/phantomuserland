@@ -97,8 +97,12 @@ void            	cpfs_free_disk_block( cpfs_blkno_t blk );
 
 errno_t    		cpfs_block_4_inode( cpfs_ino_t ino, cpfs_blkno_t *blk );
 errno_t    		cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // maps logical blocks to physical, block must be allocated
-errno_t    		cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // allocates logical block, returns physical blk pos, block must NOT be allocated
-// no file trim?
+// allocates logical block, returns physical blk pos, block must NOT be allocated
+// actually if block is allocated returns EEXIST and blk num in phys
+errno_t    		cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
+// returns 0 in any case, either if block found or allocated
+errno_t			cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
+
 
 struct cpfs_inode *     cpfs_lock_ino( cpfs_ino_t ino ); // makes sure that inode is in memory and no one modifies it
 void                    cpfs_touch_ino( cpfs_ino_t ino ); // marks inode as dirty, will be saved to disk on unlock
@@ -117,8 +121,8 @@ void                    cpfs_inode_init_defautls( struct cpfs_inode *ii );
 // TODO problem: linear scan can be very slow, need tree?
 
 errno_t			cpfs_alloc_dirent( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ); // allocate a new dir entry in a dir
-errno_t			cpfs_free_dirent( cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
-errno_t			cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino ); // find name
+//errno_t			cpfs_free_dirent( cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
+errno_t			cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
 
 
 // Finds/reads/creates/updates dir entry
@@ -139,9 +143,10 @@ void                    cpfs_unlock_blk( cpfs_blkno_t blk ); // flushes block to
 
 // Internal read/wrire impl, used by user calls and internal directory io code
 
-errno_t         	cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
+errno_t         	cpfs_ino_file_read  ( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size );
 errno_t         	cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
 
 void 			cpfs_inode_truncate( cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
 errno_t                 cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size );
+errno_t             cpfs_inode_update_fsize( cpfs_ino_t ino, cpfs_size_t size );
 

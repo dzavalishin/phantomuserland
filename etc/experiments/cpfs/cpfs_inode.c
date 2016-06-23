@@ -12,6 +12,11 @@
 #include "cpfs.h"
 #include "cpfs_local.h"
 
+
+static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created );
+
+
+
 // maps logical blocks to physical, block must be allocated
 errno_t
 cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
@@ -37,6 +42,82 @@ cpfs_find_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys
     return E2BIG;
 }
 
+
+// allocates logical block, returns physical blk pos, block must NOT be allocated
+// actually if block is allocated returns eexist and blk num in phys
+errno_t
+cpfs_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
+{
+    // TODO assert( phys );
+    // Read inode first
+    struct cpfs_inode inode;
+    struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
+    if( inode_p ) inode = *inode_p;
+
+    if( inode_p == 0 )
+    {
+        cpfs_unlock_ino( ino );
+        return EIO;
+    }
+
+    if( logical < CPFS_INO_DIR_BLOCKS )
+    {
+        if( inode.blocks0[logical] )
+        {
+            *phys = inode.blocks0[logical];
+            cpfs_unlock_ino( ino );
+            return EEXIST;
+        }
+
+        cpfs_blkno_t new = cpfs_alloc_disk_block();
+        if( !new )
+        {
+            cpfs_unlock_ino( ino );
+            return ENOSPC;
+        }
+
+        *phys = inode.blocks0[logical] = new;
+        cpfs_touch_ino( ino );
+        cpfs_unlock_ino( ino );
+        return 0;
+    }
+
+    cpfs_unlock_ino( ino );
+    // TODO write indirect blocks support!
+    return E2BIG;
+
+}
+
+errno_t
+cpfs_find_or_alloc_block_4_file( cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
+{
+    errno_t rc = cpfs_alloc_block_4_file( ino, logical, phys );
+    if( rc == EEXIST ) rc = 0;
+    return rc;
+}
+
+
+//
+// Indirect blocks support
+//
+// base contains 0 or block num of indirect block. If it is 0 and create is nonzero, block will be created.
+// displ contains logical block number relative to start of our part of map, ie from 0 to max size of our indirect part
+// indirection is level of indirection. If 1, we can't go any further, *base contains page with phys block numbers
+// create - instructs us to allocate block if unallocated
+// created set to nonzero if we did create *base
+//
+
+static errno_t find_or_create_indirect( cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created )
+{
+    // TODO assert base phys created
+    return EINVAL;
+}
+
+
+
+//
+// Disk blk num containing inode
+//
 
 
 errno_t
@@ -213,8 +294,33 @@ cpfs_fsize( cpfs_ino_t ino, cpfs_size_t *size )
 
     if( inode_p == 0 ) return EIO;
     return 0;
+}
+
+
+errno_t
+cpfs_inode_update_fsize( cpfs_ino_t ino, cpfs_size_t size )
+{
+    struct cpfs_inode *inode_p = cpfs_lock_ino( ino );
+
+    if( inode_p == 0 )
+    {
+        cpfs_unlock_ino( ino ); // TODO check if we need to unlock anything if lock failed
+        return EIO;
+    }
+
+    if( size > inode_p->fsize )
+    {
+        inode_p->fsize = size;
+        cpfs_touch_ino( ino );
+    }
+
+    cpfs_unlock_ino( ino );
+
+    return 0;
 
 }
+
+
 
 /**
  *

@@ -65,7 +65,8 @@ static void mass_blk_free(int cnt)
 }
 
 
-void	test_disk_alloc(void)
+void
+test_disk_alloc(void)
 {
     printf("Disk block allocation test: mixed alloc/free\n");
     //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
@@ -109,6 +110,76 @@ void	test_disk_alloc(void)
 
     printf("Disk block allocation test: DONE\n");
 }
+
+
+
+
+
+static void mke( const char *name )
+{
+    errno_t rc = cpfs_alloc_dirent( 0, name, 0 );
+    if( rc ) cpfs_panic( "mke %d", rc );
+}
+
+static void rme( const char *name )
+{
+    //errno_t rc = cpfs_free_dirent( 0, name );
+    cpfs_ino_t ret;
+    errno_t rc = cpfs_namei( 0, name, &ret, 1 );
+    if( rc ) cpfs_panic( "rme %d", rc );
+}
+
+static void ise( const char *name )
+{
+    cpfs_ino_t ret;
+    errno_t rc = cpfs_namei( 0, name, &ret, 0 );
+    if( rc ) cpfs_panic( "ise %d", rc );
+}
+
+static void noe( const char *name )
+{
+    cpfs_ino_t ret;
+    errno_t rc = cpfs_namei( 0, name, &ret, 0 );
+    if( rc != ENOENT ) cpfs_panic( "noe %d", rc );
+}
+
+
+void
+test_directory(void)
+{
+    printf("Directory entry allocation test: mixed alloc/free\n");
+
+    mke("f1");
+    ise("f1");
+    rme("f1");
+    noe("f1");
+
+    printf("Directory entry allocation test: DONE\n");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
