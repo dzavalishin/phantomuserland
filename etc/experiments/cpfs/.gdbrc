@@ -1,0 +1,2 @@
+break cpfs_panic
+break cpfs_log_error

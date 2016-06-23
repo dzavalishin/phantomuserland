@@ -27,10 +27,12 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
 
     if( sb == 0 ) return EFAULT; // ? TODO
 
+    memset( sb, 0, sizeof( *sb ) );
 
     sb->sb_magic_0 = CPFS_SB_MAGIC;
 
-    sb->ninode = 8192*8192; // todo magic?
+    //sb->ninode = 8192*8192; // todo magic?
+    sb->ninode = 1024; // todo magic?
 
     int ino_table_blkno = CPFS_INO_PER_BLK * sb->ninode;
 
@@ -45,7 +47,7 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
 
 
 
-    if( sb->first_unallocated <= disk_size )
+    if( sb->first_unallocated >= disk_size )
     {
         cpfs_unlock_blk( sb_blk );
         return EINVAL;
@@ -68,6 +70,7 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
 
     struct cpfs_inode *rdi = cpfs_lock_ino( root_dir );
     cpfs_touch_ino( root_dir );
+
     rdi->ftype = CPFS_FTYPE_DIR;
     rdi->nlinks = 1;
     cpfs_unlock_ino( root_dir );
