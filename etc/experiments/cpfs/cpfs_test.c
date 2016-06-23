@@ -16,6 +16,7 @@
 
 #include "cpfs_test.h"
 
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -164,6 +165,44 @@ test_inode_blkmap(void) 	// test file block allocation with inode
 
 
 
+
+
+
+
+
+
+
+static const char test_data[] = "big brown something jumps over a lazy programmer and runs regression tests, though quite in vain";
+static char test_buf[256];
+
+void
+test_inode_io(void) 		// read/write directly with inode, no file name
+{
+
+    errno_t rc;
+    cpfs_ino_t ino;
+
+    printf("Inode io test: allocate inode\n");
+
+    rc = cpfs_alloc_inode( &ino );
+    if( rc ) cpfs_panic( "can't alloc inode, %d", rc );
+
+    printf("Inode io test: inode %lld, write file data\n", (long long)ino);
+
+    rc = cpfs_ino_file_write( ino, 0, test_data, sizeof(test_data) );
+    if( rc ) cpfs_panic( "can't write data, %d", rc );
+
+    rc = cpfs_ino_file_read( ino, 0, test_buf, sizeof(test_data) );
+    if( rc ) cpfs_panic( "can't read data, %d", rc );
+
+    if( memcmp( test_data, test_buf, sizeof(test_data) ) )
+        cpfs_panic( "read data differs, '%s' and '%s'", test_data, test_buf );
+
+    // TODO test read out of allocated part of file
+
+    printf("Inode io test: DONE\n");
+
+}
 
 
 

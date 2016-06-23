@@ -173,6 +173,7 @@ cpfs_free_inode( cpfs_ino_t ino ) // deletes file
 
     cpfs_inode_truncate( ino ); // free all data blocks for inode, set size to 0
 
+    // TODO free inode!
     cpfs_log_error("free_inode: unimpl\n");
 
     // TODO
@@ -181,7 +182,11 @@ cpfs_free_inode( cpfs_ino_t ino ) // deletes file
     if( fic_used < FIC_SZ )
     {
         free_inodes_cache[fic_used++] = ino;
+        // TODO
+        //cpfs_mutex_unlock( fic_mutex );
+        return;
     }
+
 
     // TODO
     //cpfs_mutex_unlock( fic_mutex );

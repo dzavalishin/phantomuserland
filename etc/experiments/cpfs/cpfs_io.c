@@ -89,6 +89,8 @@ cpfs_ino_file_read( cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t siz
         cpfs_unlock_blk( phys_blk );
     }
 
+    if( !size )
+        return 0;
 
     //
     // do last (partial) block
@@ -199,6 +201,9 @@ cpfs_ino_file_write ( cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_si
         cpfs_unlock_blk( phys_blk );
         cpfs_inode_update_fsize( ino, pos );
     }
+
+    if( !size )
+        return 0;
 
 
     //

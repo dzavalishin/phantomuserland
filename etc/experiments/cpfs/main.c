@@ -31,7 +31,7 @@ void test(void)
 
     test_inode_blkmap(); 	// test file block allocation with inode
 
-    // test_inode_io(); // read/write directly with inode, no file name
+    test_inode_io(); 		// read/write directly with inode, no file name
 
     // test_inode_alloc();
 

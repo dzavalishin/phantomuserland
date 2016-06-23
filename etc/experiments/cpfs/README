@@ -24,3 +24,5 @@ TODO
 - r/w errors, not panic
 
 - subdirs
+
+- inode complete free/alloc code
