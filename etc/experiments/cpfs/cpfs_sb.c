@@ -44,8 +44,13 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
     sb->first_unallocated = ino_table_blkno+sb->itable_pos;
     sb->free_list = 0;
 
+    sb->free_count = disk_size;
+    sb->free_count -= 1; // sb
+    sb->free_count -= ino_table_blkno;
 
-
+    // sanity check
+    if( sb->free_count != disk_size - sb->first_unallocated )
+        cpfs_panic("sb->free_count (%ld) != disk_size (%ld) - sb->first_unallocated (%ld)", sb->free_count, disk_size, sb->first_unallocated);
 
     if( sb->first_unallocated >= disk_size )
     {
@@ -57,6 +62,10 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
 
     cpfs_touch_blk( sb_blk ); // marks block as dirty, will be saved to disk on unlock
     cpfs_unlock_blk( sb_blk );
+
+    // temp init global superblock copy for lock_ino to work
+    fs_sb = *sb;
+
 
     cpfs_ino_t root_dir = 0;
 
@@ -74,6 +83,10 @@ errno_t cpfs_mkfs(cpfs_blkno_t disk_size)
     rdi->ftype = CPFS_FTYPE_DIR;
     rdi->nlinks = 1;
     cpfs_unlock_ino( root_dir );
+
+    // de-init! TODO Actually we should have all global stuff in fs state struct
+    memset( &fs_sb, 0, sizeof( fs_sb ) );
+
 
     return 0;
 }

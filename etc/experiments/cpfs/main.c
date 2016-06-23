@@ -3,6 +3,8 @@
 #include "cpfs_local.h"
 #include "cpfs_defs.h"
 
+#include "cpfs_test.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,8 +26,8 @@ void test(void)
 {
     // TODO tests
 
-    // test_superblock();
-    // test_disk_alloc();
+    test_superblock();
+    test_disk_alloc();
     // test_directory();        // Create/lookup/destroy directory entries
     // test_inode_alloc();
     // test_file_create(); 	// create, open and destroy multiple files, try open deleted files
@@ -57,13 +59,13 @@ int main( int ac, char**av )
         if( rc ) die_rc( "mkfs", rc );
 
         rc = cpfs_init();
-        if( rc ) die_rc( "Init", rc );
+        if( rc ) die_rc( "Init FS", rc );
     }
 
     test();
 
     rc = cpfs_stop();
-    if( rc ) die_rc( "Stop", rc );
+    if( rc ) die_rc( "Stop FS", rc );
 
 
     return 0;

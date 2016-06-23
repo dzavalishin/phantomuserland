@@ -28,6 +28,10 @@ struct cpfs_sb
     cpfs_blkno_t        first_unallocated; 	// Number of block at end of FS we didn't use at all. From this point up to the end all blocks are free. 0 if not used. Used for fast mkfs.
     cpfs_blkno_t        free_list;              // Head of free block list, or 0 if none
 
+    cpfs_blkno_t        free_count;             // Number of free blocks in FS - TODO not inited or updated yet
+
+    uint32_t            dirty;                  // TODO not yet implemented
+
 };
 
 extern struct cpfs_sb fs_sb;

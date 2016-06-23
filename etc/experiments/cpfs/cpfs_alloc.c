@@ -35,12 +35,18 @@ cpfs_alloc_disk_block( void )
         return 0;
     }
 
+    fs_sb.free_count--;
     cpfs_blkno_t ret = fs_sb.first_unallocated++;
+
+    if( fs_sb.free_count <= 0 )
+        cpfs_panic("cpfs_alloc_disk_block disk state inconsistency: fs_sb.free_count <= 0");
+
 
     errno_t rc = cpfs_sb_unlock_write();
     if( rc )
     {
         fs_sb.first_unallocated--;
+        fs_sb.free_count++;
         cpfs_log_error("Can't write SB allocating from fs_sb.first_unallocated");
         cpfs_sb_unlock();
         return 0;

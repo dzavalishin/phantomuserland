@@ -25,6 +25,7 @@ cpfs_init(void)
 
 
     fic_refill(); // fill list of free inodes
+    return 0;
 }
 
 
@@ -33,5 +34,6 @@ errno_t cpfs_stop(void)
 
     // TODO check locked rcords
     // TODO flush?
+    return 0;
 }
 
