@@ -29,10 +29,18 @@ void    test_superblock(void)
 }
 
 
-#define QSZ 20148
+#define QSZ (2048*100)
+
 cpfs_blkno_t    tda_q[QSZ];
 int             tda_q_pp = 0;
 int             tda_q_gp = 0;
+
+static void reset_q(void)
+{
+    tda_q_pp = 0;
+    tda_q_gp = 0;
+}
+
 
 static void mass_blk_alloc(int cnt)
 {
@@ -59,7 +67,7 @@ static void mass_blk_free(int cnt)
 
 void	test_disk_alloc(void)
 {
-    printf("Disk block allocation test\n");
+    printf("Disk block allocation test: mixed alloc/free\n");
 
     cpfs_blkno_t initial_free = fs_sb.free_count;
 
@@ -79,7 +87,19 @@ void	test_disk_alloc(void)
         printf("FAIL: initial_free (%lld) != fs_sb.free_count (%lld)\n", (long long)initial_free, (long long)fs_sb.free_count );
     }
 
+    // Now do max possible run twice
 
+    printf("Disk block allocation test: big runs\n");
+    reset_q();
+    mass_blk_alloc(4000);
+    mass_blk_free(4000);
+    reset_q();
+    mass_blk_alloc(4000);
+    mass_blk_free(4000);
+
+    reset_q();
+
+    printf("Disk block allocation test: DONE\n");
 }
 
 

@@ -7,8 +7,9 @@ cpfs: main.o cpfs.o cpfs_test.o cpfs_io.o cpfs_init.o cpfs_sb.o cpfs_blkio.o cpf
 clean::
 	-rm *.o
 
+# is this size ok for size we use in mkfs?
 image::
-	dd if=/dev/zero of=disk.img count=100000
+	dd if=/dev/zero of=disk.img count=10000 bs=4096
 
 
 test:

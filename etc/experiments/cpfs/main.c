@@ -55,7 +55,7 @@ int main( int ac, char**av )
     rc = cpfs_init();
     if( rc )
     {
-        rc = cpfs_mkfs( 8192 * 1024 );
+        rc = cpfs_mkfs( 10000 );
         if( rc ) die_rc( "mkfs", rc );
 
         rc = cpfs_init();

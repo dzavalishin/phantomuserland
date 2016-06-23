@@ -19,16 +19,41 @@ static cpfs_mutex freelist_mutex;
 cpfs_blkno_t
 cpfs_alloc_disk_block( void )
 {
+    cpfs_blkno_t ret;
 
-    //cpfs_blkno_t        free_list;              // Head of free block list, or 0 if none
     //
     // Try free list first
     //
+
     cpfs_mutex_lock( freelist_mutex );
 
-    // TODO implement free list
+    if( !fs_sb.free_list )
+        goto no_freelist;
 
+    // read free list block
+
+    ret = fs_sb.free_list;
+    struct cpfs_freelist *fb = cpfs_lock_blk( ret );
+
+    if( fb->fl_magic != CPFS_FL_MAGIC )
+    {
+        fs_sb.free_list = 0; // freeing blocks will recreate free list, though part of disk is inavailable now
+        cpfs_log_error("Freelist corrupt (blk %lld), attempt to continue on unallocated space", (long long)fs_sb.free_list );
+        goto no_freelist;
+    }
+
+    fs_sb.free_list = fb->next;
+
+    //cpfs_touch_blk( blk );
+    cpfs_unlock_blk( ret );
+
+    fs_sb.free_count--;
+    return ret;
+
+no_freelist:
     cpfs_mutex_unlock( freelist_mutex );
+
+
 
     //
     // Nothing in free list, alloc from rest of FS block space, if possible
@@ -44,7 +69,7 @@ cpfs_alloc_disk_block( void )
     }
 
     fs_sb.free_count--;
-    cpfs_blkno_t ret = fs_sb.first_unallocated++;
+    ret = fs_sb.first_unallocated++;
 
     if( fs_sb.free_count <= 0 )
         cpfs_panic("cpfs_alloc_disk_block disk state inconsistency: fs_sb.free_count <= 0");
