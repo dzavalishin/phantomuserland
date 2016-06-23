@@ -13,11 +13,11 @@
 
 
 
-struct cpfs_sb fs_sb;
+//struct cpfs_sb fs_sb;
 
 
 static int sb_blk = 0;
-static cpfs_mutex sb_mutex;
+//static cpfs_mutex sb_mutex;
 
 errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 {
@@ -64,7 +64,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
     cpfs_unlock_blk( fs, sb_blk );
 
     // temp init global superblock copy for lock_ino to work
-    fs_sb = *sb;
+    fs->sb = *sb;
 
 
     cpfs_ino_t root_dir = 0;
@@ -85,7 +85,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
     cpfs_unlock_ino( fs, root_dir );
 
     // de-init! TODO Actually we should have all global stuff in fs state struct
-    memset( &fs_sb, 0, sizeof( fs_sb ) );
+    memset( &fs->sb, 0, sizeof( fs->sb ) );
 
 
     return 0;
@@ -94,7 +94,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 errno_t cpfs_init_sb( cpfs_fs_t *fs )
 {
     cpfs_assert( sizeof(struct cpfs_inode) < CPFS_INO_REC_SIZE );
-    cpfs_mutex_init( &sb_mutex );
+    cpfs_mutex_init( &(fs->sb_mutex) );
 
     return 0;
 }
@@ -118,7 +118,7 @@ errno_t cpfs_mount_sb( cpfs_fs_t *fs )
         return EINVAL;
     }
 
-    fs_sb = *sb;
+    fs->sb = *sb;
 
     cpfs_unlock_blk( fs, sb_blk );
 
@@ -132,7 +132,7 @@ errno_t cpfs_write_sb( cpfs_fs_t *fs )
 
     if( sb == 0 ) return EFAULT; // ? TODO
 
-    *sb = fs_sb;
+    *sb = fs->sb;
 
     cpfs_unlock_blk( fs, sb_blk );
 
@@ -144,13 +144,13 @@ errno_t cpfs_write_sb( cpfs_fs_t *fs )
 void
 cpfs_sb_lock( cpfs_fs_t *fs )
 {
-    cpfs_mutex_lock( sb_mutex );
+    cpfs_mutex_lock( fs->sb_mutex );
 }
 
 void
 cpfs_sb_unlock( cpfs_fs_t *fs )
 {
-    cpfs_mutex_unlock( sb_mutex );
+    cpfs_mutex_unlock( fs->sb_mutex );
 }
 
 

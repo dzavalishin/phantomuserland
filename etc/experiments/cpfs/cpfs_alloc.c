@@ -13,7 +13,6 @@
 #include "cpfs_local.h"
 
 
-static cpfs_mutex freelist_mutex;
 
 
 cpfs_blkno_t
@@ -25,33 +24,33 @@ cpfs_alloc_disk_block( cpfs_fs_t *fs )
     // Try free list first
     //
 #if 1
-    cpfs_mutex_lock( freelist_mutex );
+    cpfs_mutex_lock( fs->freelist_mutex );
 
-    if( !fs_sb.free_list )
+    if( !fs->sb.free_list )
         goto no_freelist;
 
     // read free list block
 
-    ret = fs_sb.free_list;
+    ret = fs->sb.free_list;
     struct cpfs_freelist *fb = cpfs_lock_blk( fs, ret );
 
     if( fb->fl_magic != CPFS_FL_MAGIC )
     {
-        fs_sb.free_list = 0; // freeing blocks will recreate free list, though part of disk is inavailable now
-        cpfs_log_error("Freelist corrupt (blk %lld), attempt to continue on unallocated space", (long long)fs_sb.free_list );
+        fs->sb.free_list = 0; // freeing blocks will recreate free list, though part of disk is inavailable now
+        cpfs_log_error("Freelist corrupt (blk %lld), attempt to continue on unallocated space", (long long)fs->sb.free_list );
         goto no_freelist;
     }
 
-    fs_sb.free_list = fb->next;
+    fs->sb.free_list = fb->next;
 
     //cpfs_touch_blk( blk );
     cpfs_unlock_blk( fs, ret );
 
-    fs_sb.free_count--;
+    fs->sb.free_count--;
     return ret;
 
 no_freelist:
-    cpfs_mutex_unlock( freelist_mutex );
+    cpfs_mutex_unlock( fs->freelist_mutex );
 #endif
 
 
@@ -62,25 +61,25 @@ no_freelist:
     cpfs_sb_lock( fs );
 
     // No space left on device
-    if( fs_sb.first_unallocated >= fs_sb.disk_size )
+    if( fs->sb.first_unallocated >= fs->sb.disk_size )
     {
         cpfs_sb_unlock( fs );
         return 0;
     }
 
-    fs_sb.free_count--;
-    ret = fs_sb.first_unallocated++;
+    fs->sb.free_count--;
+    ret = fs->sb.first_unallocated++;
 
-    if( fs_sb.free_count <= 0 )
-        cpfs_panic("cpfs_alloc_disk_block disk state inconsistency: fs_sb.free_count <= 0");
+    if( fs->sb.free_count <= 0 )
+        cpfs_panic("cpfs_alloc_disk_block disk state inconsistency: fs->sb.free_count <= 0");
 
 
     errno_t rc = cpfs_sb_unlock_write( fs );
     if( rc )
     {
-        fs_sb.first_unallocated--;
-        fs_sb.free_count++;
-        cpfs_log_error("Can't write SB allocating from fs_sb.first_unallocated");
+        fs->sb.first_unallocated--;
+        fs->sb.free_count++;
+        cpfs_log_error("Can't write SB allocating from fs->sb.first_unallocated");
         cpfs_sb_unlock( fs );
         return 0;
     }
@@ -92,22 +91,22 @@ no_freelist:
 void
 cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk )
 {
-    cpfs_mutex_lock( freelist_mutex );
+    cpfs_mutex_lock( fs->freelist_mutex );
 
     // Write current head of free list block number to block we're freeing
 
     struct cpfs_freelist *fb = cpfs_lock_blk( fs, blk );
 
-    fb->next = fs_sb.free_list;
+    fb->next = fs->sb.free_list;
     fb->fl_magic = CPFS_FL_MAGIC;
 
     cpfs_touch_blk( fs, blk );
     cpfs_unlock_blk( fs, blk );
 
-    fs_sb.free_list = blk;
-    fs_sb.free_count++;
+    fs->sb.free_list = blk;
+    fs->sb.free_count++;
 
-    cpfs_mutex_unlock( freelist_mutex );
+    cpfs_mutex_unlock( fs->freelist_mutex );
 }
 
 

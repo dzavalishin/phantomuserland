@@ -70,9 +70,9 @@ void
 test_disk_alloc(void)
 {
     printf("Disk block allocation test: mixed alloc/free\n");
-    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
 
-    cpfs_blkno_t initial_free = fs_sb.free_count;
+    cpfs_blkno_t initial_free = fs.sb.free_count;
 
     mass_blk_alloc(1);   // +
     mass_blk_alloc(120); // +
@@ -85,25 +85,25 @@ test_disk_alloc(void)
     mass_blk_free(80);   // -
     mass_blk_free(1);    // -
 
-    if( initial_free != fs_sb.free_count )
+    if( initial_free != fs.sb.free_count )
     {
-        printf("FAIL: initial_free (%lld) != fs_sb.free_count (%lld)\n", (long long)initial_free, (long long)fs_sb.free_count );
+        printf("FAIL: initial_free (%lld) != fs.sb.free_count (%lld)\n", (long long)initial_free, (long long)fs.sb.free_count );
     }
 
     // Now do max possible run twice
 
     printf("Disk block allocation test: big runs\n");
-    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
     reset_q();
     mass_blk_alloc(1700);
-    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
     mass_blk_free(1700);
-    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
     reset_q();
     mass_blk_alloc(1700);
-    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
     mass_blk_free(1700);
-    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
 
     reset_q();
 

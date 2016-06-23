@@ -203,14 +203,14 @@ static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_
 errno_t
 cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
 {
-    if( ino >= fs_sb.ninode )
+    if( ino >= fs->sb.ninode )
     {
-        cpfs_log_error("cpfs_block_4_inode: ino (%d) >= fs_sb.ninode (%d)", ino, fs_sb.ninode );
+        cpfs_log_error("cpfs_block_4_inode: ino (%d) >= fs->sb.ninode (%d)", ino, fs->sb.ninode );
         return E2BIG;
     }
 
-    cpfs_blkno_t blk =  fs_sb.itable_pos + (ino/CPFS_INO_PER_BLK);
-    //if( blk >= fs_sb.itable_end ) return E2BIG;
+    cpfs_blkno_t blk =  fs->sb.itable_pos + (ino/CPFS_INO_PER_BLK);
+    //if( blk >= fs->sb.itable_end ) return E2BIG;
 
     *oblk = blk;
     return 0;
@@ -222,27 +222,23 @@ cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
 // Alloc/free inode
 //
 
-#define FIC_SZ 256
-static cpfs_ino_t free_inodes_cache[FIC_SZ];
-static int fic_used = 0;
-cpfs_mutex fic_mutex;
 
 errno_t
 cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
 {
-    cpfs_mutex_lock( fic_mutex );
+    cpfs_mutex_lock( fs->fic_mutex );
 
-    if( fic_used <= 0 )
+    if( fs->fic_used <= 0 )
         fic_refill( fs );
 
-    if( fic_used <= 0 )
+    if( fs->fic_used <= 0 )
     {
-        cpfs_mutex_unlock( fic_mutex );
+        cpfs_mutex_unlock( fs->fic_mutex );
         return EMFILE;
     }
 
-    *inode = free_inodes_cache[--fic_used];
-    cpfs_mutex_unlock( fic_mutex );
+    *inode = fs->free_inodes_cache[--fs->fic_used];
+    cpfs_mutex_unlock( fs->fic_mutex );
     return 0;
 }
 
@@ -257,37 +253,37 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
     // TODO free inode!
     cpfs_log_error("free_inode: unimpl\n");
 
-    cpfs_mutex_lock( fic_mutex );
+    cpfs_mutex_lock( fs->fic_mutex );
 
-    if( fic_used < FIC_SZ )
+    if( fs->fic_used < FIC_SZ )
     {
-        free_inodes_cache[fic_used++] = ino;
-        cpfs_mutex_unlock( fic_mutex );
+        fs->free_inodes_cache[fs->fic_used++] = ino;
+        cpfs_mutex_unlock( fs->fic_mutex );
         return;
     }
 
-    cpfs_mutex_unlock( fic_mutex );
+    cpfs_mutex_unlock( fs->fic_mutex );
 }
 
 
-static cpfs_blkno_t last_ino_blk = -1;
+//static cpfs_blkno_t last_ino_blk = -1;
 
 void
 fic_refill( cpfs_fs_t *fs )
 {
-    int iblocks = fs_sb.ninode*CPFS_INO_PER_BLK;
-    cpfs_blkno_t ilast = fs_sb.itable_pos + iblocks;
+    int iblocks = fs->sb.ninode*CPFS_INO_PER_BLK;
+    cpfs_blkno_t ilast = fs->sb.itable_pos + iblocks;
 
-    cpfs_mutex_lock( fic_mutex );
+    cpfs_mutex_lock( fs->fic_mutex );
 
     //
     // fast way - alloc from end of inode space
     //
 
-    if( last_ino_blk == -1 )
+    if( fs->last_ino_blk == -1 )
     {
         //cpfs_sb_lock();
-        last_ino_blk = fs_sb.itable_end;
+        fs->last_ino_blk = fs->sb.itable_end;
     }
 
     // Each disk block has CPFS_INO_PER_BLK inodes. As long as we have place for CPFS_INO_PER_BLK inodes in
@@ -295,21 +291,21 @@ fic_refill( cpfs_fs_t *fs )
 
     // NB! Inode table growth code assumes we eat inode space block by block
 
-    //while( (last_ino_blk < ilast) && (fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
-    if( (last_ino_blk < ilast) && (fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
+    //while( (fs->last_ino_blk < ilast) && (fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
+    if( (fs->last_ino_blk < ilast) && (fs->fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
     {
         int i;
         for( i = 0; i < CPFS_INO_PER_BLK; i++ )
         {
-            free_inodes_cache[fic_used++] = (last_ino_blk-fs_sb.itable_pos) + i;
+            fs->free_inodes_cache[fs->fic_used++] = (fs->last_ino_blk-fs->sb.itable_pos) + i;
         }
 
-        last_ino_blk++;
+        fs->last_ino_blk++;
     }
 
-    cpfs_mutex_unlock( fic_mutex );
+    cpfs_mutex_unlock( fs->fic_mutex );
 
-    if( fic_used > 0 )
+    if( fs->fic_used > 0 )
         return;
 
     // TODO long way - scan through inodes? use map?

@@ -40,7 +40,7 @@ struct cpfs_sb
     uint32_t            dirty;                  // Not closed correctly
 };
 
-extern struct cpfs_sb fs_sb;
+//extern struct cpfs_sb fs_sb;
 
 
 // On-disk directory entry structure
@@ -97,15 +97,28 @@ struct cpfs_indir
 };
 
 
+// Free inodes cache size
+#define FIC_SZ 256
+
 
 // In-memory filesystem state
 struct cpfs_fs
 {
     int         	disk_id;                 // Number of disk in disk subsystem, paramerer for disk IO functions
-    struct cpfs_sb	fs_sb;
+
+    struct cpfs_sb	sb;
 
     int                 inited;
     int                 mounted;
+
+    cpfs_mutex 		sb_mutex;               // Taken when modify superblock
+    cpfs_mutex 		freelist_mutex;         // Taken when modify free list
+    cpfs_mutex 		fic_mutex;              // Free inodes cache
+
+    cpfs_ino_t 		free_inodes_cache[FIC_SZ];
+    int 		fic_used;
+
+    cpfs_blkno_t 	last_ino_blk;           // Last (used? free) block in inode section
 };
 
 typedef struct cpfs_fs cpfs_fs_t;

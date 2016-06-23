@@ -48,11 +48,11 @@ cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in me
 
     cpfs_sb_lock( fs );
 
-    if( blk > fs_sb.itable_end ) cpfs_panic( "attempt to read inode %lld after fs_sb.itable_end (%lld)", (long long) blk, (long long) fs_sb.itable_end );
+    if( blk > fs->sb.itable_end ) cpfs_panic( "attempt to read inode %lld after fs->sb.itable_end (%lld)", (long long) blk, (long long) fs->sb.itable_end );
 
-    if( blk == fs_sb.itable_end )
+    if( blk == fs->sb.itable_end )
     {
-        fs_sb.itable_end++;
+        fs->sb.itable_end++;
         //rc = cpfs_write_sb();
         //if( rc ) panic("can't write sb");
 

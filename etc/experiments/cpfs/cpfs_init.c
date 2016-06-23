@@ -24,6 +24,12 @@ cpfs_init( cpfs_fs_t *fs )
     if( rc ) return rc;
 
     fs->inited = 1;
+    fs->fic_used = 0;
+    fs->last_ino_blk = -1;
+
+    cpfs_mutex_init( &(fs->freelist_mutex) );
+    cpfs_mutex_init( &(fs->fic_mutex) );
+
 
     return 0;
 }
@@ -37,7 +43,7 @@ cpfs_mount( cpfs_fs_t *fs )
     rc = cpfs_mount_sb( fs );
     if( rc ) return rc;
 
-    fs_sb.dirty = 0xFF; // Next write will update it on disk, we don't need to mark disk dirty if we never had a reason to write sb
+    fs->sb.dirty = 0xFF; // Next write will update it on disk, we don't need to mark disk dirty if we never had a reason to write sb
     fic_refill( fs ); // fill list of free inodes
 
     return 0;
@@ -55,7 +61,7 @@ cpfs_umount( cpfs_fs_t *fs )
 
     if( !rc )
     {
-        fs_sb.dirty = 0;
+        fs->sb.dirty = 0;
         fs->mounted = 0;
     }
 

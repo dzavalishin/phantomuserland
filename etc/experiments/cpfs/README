@@ -29,3 +29,5 @@ TODO
 - subdirs
 
 - inode complete free/alloc code
+
+- init inode section in mkfs, remove auto-growth for inodes code
