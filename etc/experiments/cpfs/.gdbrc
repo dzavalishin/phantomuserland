@@ -1,4 +1,4 @@
 break cpfs_panic
 break cpfs_log_error
 
-break cpfs_ino_file_write
+break cpfs_namei

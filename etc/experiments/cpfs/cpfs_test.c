@@ -227,7 +227,8 @@ test_inode_io(void) 		// read/write directly with inode, no file name
 
 static void mke( const char *name )
 {
-    errno_t rc = cpfs_alloc_dirent( 0, name, 0 );
+    // Write inode num -1 to dir entry for it to be extremely wrong
+    errno_t rc = cpfs_alloc_dirent( 0, name, -1 );
     if( rc ) cpfs_panic( "mke %d", rc );
 }
 
@@ -257,12 +258,31 @@ static void noe( const char *name )
 void
 test_directory(void)
 {
-    printf("Directory entry allocation test: mixed alloc/free\n");
+    printf("Directory entry allocation test: simpe alloc/free\n");
 
     mke("f1");
     ise("f1");
     rme("f1");
     noe("f1");
+
+    printf("Directory entry allocation test: mixed alloc/free\n");
+
+    mke("f1");
+    mke("f2");
+    ise("f1");
+    ise("f2");
+
+    rme("f1");
+    mke("f3");
+    noe("f1");
+    ise("f3");
+
+    ise("f2");
+    rme("f2");
+    noe("f2");
+
+    rme("f3");
+    noe("f3");
 
     printf("Directory entry allocation test: DONE\n");
 

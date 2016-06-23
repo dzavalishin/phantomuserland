@@ -74,7 +74,7 @@ cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int rem
             struct cpfs_dir_entry *de = ((void *)data) + (i*CPFS_DIR_REC_SIZE);
 
 
-            if( 0 == strcmp( fname, de->name ) )
+            if( de->inode && (0 == strcmp( fname, de->name )) )
             {
                 *file_ino = de->inode;
 
