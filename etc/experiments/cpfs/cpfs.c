@@ -23,7 +23,7 @@ struct fid
 };
 
 errno_t
-cpfs_file_open  ( int *file_id, const char *name, int flags, void * user_id_data )
+cpfs_file_open( int *file_id, const char *name, int flags, void * user_id_data )
 {
     errno_t rc;
     cpfs_ino_t file_ino;
@@ -79,14 +79,20 @@ errno_t
 cpfs_file_read  ( int file_id, cpfs_size_t pos, void *data, cpfs_size_t size )
 {
     struct fid *f = (struct fid *) file_id;
+    cpfs_ino_t ino = f->inode;
+
+    return cpfs_ino_file_read( ino, pos, data, size );
 }
 
 
 
 errno_t
-cpfs_file_write ( int file_id, cpfs_size_t pos, const void *data, cpfs_size_t size )
+cpfs_file_write( int file_id, cpfs_size_t pos, const void *data, cpfs_size_t size )
 {
     struct fid *f = (struct fid *) file_id;
+    cpfs_ino_t ino = f->inode;
+
+    return cpfs_ino_file_write( ino, pos, data, size );
 }
 
 
