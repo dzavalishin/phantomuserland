@@ -24,7 +24,7 @@ cpfs_alloc_disk_block( void )
     //
     // Try free list first
     //
-
+#if 1
     cpfs_mutex_lock( freelist_mutex );
 
     if( !fs_sb.free_list )
@@ -52,7 +52,7 @@ cpfs_alloc_disk_block( void )
 
 no_freelist:
     cpfs_mutex_unlock( freelist_mutex );
-
+#endif
 
 
     //

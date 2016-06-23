@@ -68,6 +68,7 @@ static void mass_blk_free(int cnt)
 void	test_disk_alloc(void)
 {
     printf("Disk block allocation test: mixed alloc/free\n");
+    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
 
     cpfs_blkno_t initial_free = fs_sb.free_count;
 
@@ -90,14 +91,21 @@ void	test_disk_alloc(void)
     // Now do max possible run twice
 
     printf("Disk block allocation test: big runs\n");
+    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
     reset_q();
-    mass_blk_alloc(4000);
-    mass_blk_free(4000);
+    mass_blk_alloc(1700);
+    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    mass_blk_free(1700);
+    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
     reset_q();
-    mass_blk_alloc(4000);
-    mass_blk_free(4000);
+    mass_blk_alloc(1700);
+    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
+    mass_blk_free(1700);
+    //printf("fs_sb.free_count = %lld\n", (long long)fs_sb.free_count );
 
     reset_q();
+
+    // TODO attempt to allocate over the end of disk, check for graceful deny
 
     printf("Disk block allocation test: DONE\n");
 }

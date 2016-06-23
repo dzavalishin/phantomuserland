@@ -75,14 +75,14 @@ int main( int ac, char**av )
 void
 cpfs_panic( const char *fmt, ... )
 {
-    printf( "Panic: " );
+    printf( "\nPanic: " );
 
     va_list ptr;
     va_start(ptr, fmt);
     vprintf(fmt, ptr);
     va_end(ptr);
 
-    printf( "\nGlobal errno = %s\n", strerror(errno) );
+    printf( "\nGlobal errno = %s\n\n", strerror(errno) );
 
     exit(33);
 }
