@@ -36,7 +36,7 @@ cpfs_fdmap_init( void )
 
 
 errno_t
-cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd, cpfs_fid_t **fid )
+cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd )
 {
     cpfs_assert( fd != 0 );
     cpfs_assert( fid != 0 );
@@ -61,7 +61,7 @@ cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd, cpfs_fid_t **fid )
             fdmap[pos].lock = 0;
 
             *fd = pos;
-            *fid = fdmap+pos;
+            //*fid = fdmap+pos;
 
             cpfs_mutex_unlock( fdmap_mutex );
             return 0;
@@ -169,7 +169,7 @@ cpfs_fdmap_is_inode_used( cpfs_fs_t *fs, cpfs_ino_t ino )
     int i;
     for( i = 0; i < nfdmap; i++ )
     {
-        if( fdmap[i].inode == ino )
+        if( (fdmap[i].inode == ino) && (fdmap[i].fs == fs) )
             return 1;
     }
 
@@ -177,6 +177,29 @@ cpfs_fdmap_is_inode_used( cpfs_fs_t *fs, cpfs_ino_t ino )
     return 0;
 }
 
+
+errno_t
+cpfs_fdmap_get( int fd, cpfs_ino_t *ino, cpfs_fs_t **fs  )
+{
+    cpfs_assert( ino != 0 );
+
+    if( (fd < 0) || (fd >= nfdmap ) )
+        return EINVAL;
+
+    cpfs_mutex_lock( fdmap_mutex );
+
+    if( !fdmap[fd].used )
+    {
+        cpfs_mutex_unlock( fdmap_mutex );
+        return EINVAL;
+    }
+
+    *ino = fdmap[fd].inode;
+    *fs  = fdmap[fd].fs;
+
+    cpfs_mutex_unlock( fdmap_mutex );
+    return 0;
+}
 
 
 

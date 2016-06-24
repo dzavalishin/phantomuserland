@@ -69,13 +69,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 
     cpfs_ino_t root_dir = 0;
 
-    /* can't be sure allocator starts with 0, just mark it as used
-    rc = cpfs_alloc_inode( &root_dir );
-    if( rc )
-        cpfs_panic("root dir cna't alloc inode, rc=%d", rc);
-    if( root_dir != 0 )
-        cpfs_panic("root dir not in inode 0 but %d", root_dir );
-        */
+    // Init inode 0 as root dir
 
     struct cpfs_inode *rdi = cpfs_lock_ino( fs, root_dir );
     cpfs_touch_ino( fs, root_dir );

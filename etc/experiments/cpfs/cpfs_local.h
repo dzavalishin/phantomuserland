@@ -254,5 +254,20 @@ errno_t                 cpfs_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t *
 errno_t                 cpfs_inode_update_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t size );
 
 
+// File descriptor map
+
+errno_t                 cpfs_fdmap_init( void );
+
+errno_t                 cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd );
+errno_t                 cpfs_fdmap_free( int fd );
+
+errno_t                 cpfs_fdmap_lock( int fd, cpfs_fid_t **fid );
+errno_t                 cpfs_fdmap_unlock( int fd );
+
+errno_t                 cpfs_fdmap_get( int fd, cpfs_ino_t *ino, cpfs_fs_t **fs );
+int                     cpfs_fdmap_is_inode_used( cpfs_fs_t *fs, cpfs_ino_t ino );
+
+
+
 
 #endif // CPFS_LOCAL_H

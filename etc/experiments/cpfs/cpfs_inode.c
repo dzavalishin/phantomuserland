@@ -97,7 +97,7 @@ cpfs_find_or_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t log
 
 
 //
-// Indirect blocks support
+// Indirect blocks support TODO write me
 //
 // base contains 0 or block num of indirect block. If it is 0 and create is nonzero, block will be created.
 // displ contains logical block number relative to start of our part of map, ie from 0 to max size of our indirect part
@@ -238,6 +238,15 @@ cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
     }
 
     *inode = fs->free_inodes_cache[--fs->fic_used];
+
+    {
+        struct cpfs_inode *rdi = cpfs_lock_ino( fs, *inode );
+        cpfs_touch_ino( fs, *inode );
+        cpfs_inode_init_defautls( fs, rdi );
+        rdi->nlinks = 1;
+        cpfs_unlock_ino( fs, *inode );
+    }
+
     cpfs_mutex_unlock( fs->fic_mutex );
     return 0;
 }
@@ -247,7 +256,9 @@ errno_t
 cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 {
     errno_t rc;
-    // TODO check that inode is not used right now!
+    
+    int used = cpfs_fdmap_is_inode_used( fs, ino );
+    if( used ) return EWOULDBLOCK;
 
     rc = cpfs_inode_truncate( fs, ino ); // free all data blocks for inode, set size to 0
     if( rc ) return rc;
@@ -259,7 +270,7 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 
     if( inode_p->nlinks <= 0 )
     {
-        cpfs_log_error("free_inode: attempt to free inode with 0 links, %d", inode_p->nlinks );
+        cpfs_log_error("free_inode: attempt to free inode %d with zero links, %d", ino );
         cpfs_unlock_ino( fs, ino );
         return ENOENT;
     }
@@ -344,7 +355,7 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
 
     if( inode->nlinks <= 0 )
     {
-        cpfs_log_error("cpfs_inode_truncate: attempt to truncate inode with 0 links, %d", inode->nlinks );
+        cpfs_log_error("cpfs_inode_truncate: attempt to truncate inode %d with zero links", ino );
         return ENOENT;
     }
 

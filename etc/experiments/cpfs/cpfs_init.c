@@ -20,6 +20,10 @@ cpfs_init( cpfs_fs_t *fs )
 
     cpfs_assert( sizeof(struct cpfs_dir_entry) < CPFS_DIR_REC_SIZE );
 
+    // TODO deinit what is partially inited on fail
+
+    rc = cpfs_fdmap_init();
+    if( rc ) return rc;
 
     rc = cpfs_buf_init( fs );
     if( rc ) return rc;
