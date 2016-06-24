@@ -20,6 +20,10 @@ cpfs_init( cpfs_fs_t *fs )
 
     cpfs_assert( sizeof(struct cpfs_dir_entry) < CPFS_DIR_REC_SIZE );
 
+
+    rc = cpfs_buf_init( fs );
+    if( rc ) return rc;
+
     rc = cpfs_init_sb( fs );
     if( rc ) return rc;
 
@@ -54,7 +58,7 @@ cpfs_umount( cpfs_fs_t *fs )
 {
     errno_t rc;
 
-    // TODO check locked rcords
+    // TODO check locked records (inodes, unreleased buffers)
     // TODO flush?
 
     rc = cpfs_write_sb( fs );

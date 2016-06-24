@@ -243,26 +243,44 @@ cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
 }
 
 
-void
+errno_t
 cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 {
+    errno_t rc;
     // TODO check that inode is not used right now!
 
-    cpfs_inode_truncate( fs, ino ); // free all data blocks for inode, set size to 0
+    rc = cpfs_inode_truncate( fs, ino ); // free all data blocks for inode, set size to 0
+    if( rc ) return rc;
 
-    // TODO free inode!
-    cpfs_log_error("free_inode: unimpl\n");
+    struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
 
+    if( !inode_p )
+        return EIO;
+
+    if( inode_p->nlinks <= 0 )
+    {
+        cpfs_log_error("free_inode: attempt to free inode with 0 links, %d", inode_p->nlinks );
+        cpfs_unlock_ino( fs, ino );
+        return ENOENT;
+    }
+
+    inode_p->nlinks--;
+
+    cpfs_unlock_ino( fs, ino );
+
+
+    // Put inode num to in-memory inode free list
     cpfs_mutex_lock( fs->fic_mutex );
 
     if( fs->fic_used < FIC_SZ )
     {
         fs->free_inodes_cache[fs->fic_used++] = ino;
-        cpfs_mutex_unlock( fs->fic_mutex );
-        return;
+        //cpfs_mutex_unlock( fs->fic_mutex );
+        //return 0;
     }
 
     cpfs_mutex_unlock( fs->fic_mutex );
+    return 0;
 }
 
 
@@ -312,7 +330,7 @@ fic_refill( cpfs_fs_t *fs )
 }
 
 
-void
+errno_t
 cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for inode, set size to 0
 {
     // Free all data blocks for inode
@@ -324,7 +342,11 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
 
     copy = *inode;
 
-    //inode->nlinks = 0; // free it - NO, we're just truncating
+    if( inode->nlinks <= 0 )
+    {
+        cpfs_log_error("cpfs_inode_truncate: attempt to truncate inode with 0 links, %d", inode->nlinks );
+        return ENOENT;
+    }
 
     memset( inode->blocks0, 0, sizeof(inode->blocks0) );
     inode->blocks1 = 0;
@@ -349,7 +371,7 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
 
     // TODO free indirect blocks
 
-
+    return 0;
 }
 
 

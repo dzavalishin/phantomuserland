@@ -70,8 +70,11 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *name, int flags, void *
 errno_t
 cpfs_file_close ( int file_id )
 {
-    // struct fid *f = (struct fid *) file_id;
+    struct fid *f = (struct fid *) file_id;
     // TODO write me
+
+    // TODO mark inode as unused
+    free( f );
 
 }
 

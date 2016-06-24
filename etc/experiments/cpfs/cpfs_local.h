@@ -20,6 +20,8 @@
 #include <string.h>
 
 
+struct cpfs_fs;
+
 
 
 // On-disk supreblock structure
@@ -97,28 +99,70 @@ struct cpfs_indir
 };
 
 
+
+
+
 // Free inodes cache size
 #define FIC_SZ 256
+
+
+
+// In-memory disk io buffer
+struct cpfs_buf
+{
+    char                used; 			// allocated
+    char                write;                  // must be written on release
+    char                shared;                 // can be shared between users
+
+    cpfs_blkno_t        blk;
+    char                data[CPFS_BLKSIZE];
+};
+
+typedef struct cpfs_buf cpfs_buf_t;
+
+
+
+struct cpfs_fid
+{
+    char                used;
+    char                lock;
+
+    struct cpfs_fs *	fs;
+    cpfs_ino_t  	inode;
+};
+
+typedef struct cpfs_fid cpfs_fid_t;
+
 
 
 // In-memory filesystem state
 struct cpfs_fs
 {
-    int         	disk_id;                 // Number of disk in disk subsystem, paramerer for disk IO functions
+    int         	disk_id;                // Number of disk in disk subsystem, paramerer for disk IO functions
 
     struct cpfs_sb	sb;
 
     int                 inited;
     int                 mounted;
 
-    cpfs_mutex 		sb_mutex;               // Taken when modify superblock
-    cpfs_mutex 		freelist_mutex;         // Taken when modify free list
-    cpfs_mutex 		fic_mutex;              // Free inodes cache
+    cpfs_mutex          sb_mutex;               // Taken when modify superblock
+    cpfs_mutex          freelist_mutex;         // Taken when modify free list
+    cpfs_mutex          fic_mutex;              // Free inodes cache
+    cpfs_mutex          buf_mutex;              // Disk buffers
+    cpfs_mutex          fdmap_mutex;            // File descriptor map
 
     cpfs_ino_t 		free_inodes_cache[FIC_SZ];
     int 		fic_used;
 
     cpfs_blkno_t 	last_ino_blk;           // Last (used? free) block in inode section
+
+    cpfs_buf_t          *buf;                   // Disk buffers
+    int                 nbuf;
+
+    //cpfs_fid_t          fdmap;                  // map of file descriptors
+    //int                 nfdmap;
+    //int                 fdmap_alloc;            // Last postion of allocator search
+
 };
 
 typedef struct cpfs_fs cpfs_fs_t;
@@ -126,6 +170,12 @@ typedef struct cpfs_fs cpfs_fs_t;
 
 
 
+
+
+
+
+
+errno_t                 cpfs_buf_init( cpfs_fs_t *fs );
 
 
 errno_t                 cpfs_init_sb( cpfs_fs_t *fs );
@@ -165,7 +215,7 @@ void                    cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // flu
 
 //cpfs_ino_t            cpfs_alloc_inode( void );
 errno_t                 cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode );
-void                    cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ); // deletes file
+errno_t                 cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ); // deletes file
 
 void                    cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii );
 
@@ -199,7 +249,7 @@ void                    cpfs_unlock_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ); // f
 errno_t                 cpfs_ino_file_read  ( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size );
 errno_t                 cpfs_ino_file_write ( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
 
-void                    cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
+errno_t                 cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ); // free all data blocks for inode, set size to 0
 errno_t                 cpfs_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t *size );
 errno_t                 cpfs_inode_update_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t size );
 

@@ -14,7 +14,7 @@
 
 
 // TODO make some cache, at least for multiple clients to be able to work
-
+// TODO use buffers
 
 static char write = 0;
 static char used = 0;

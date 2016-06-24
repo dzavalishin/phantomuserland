@@ -15,8 +15,8 @@
 
 //struct cpfs_sb fs_sb;
 
-
-static int sb_blk = 0;
+#define sb_blk 0
+//static int sb_blk = 0;
 //static cpfs_mutex sb_mutex;
 
 errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
@@ -79,7 +79,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 
     struct cpfs_inode *rdi = cpfs_lock_ino( fs, root_dir );
     cpfs_touch_ino( fs, root_dir );
-
+    cpfs_inode_init_defautls( fs, rdi );
     rdi->ftype = CPFS_FTYPE_DIR;
     rdi->nlinks = 1;
     cpfs_unlock_ino( fs, root_dir );
