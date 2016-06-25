@@ -14,8 +14,6 @@
 
 #define USE_BUF 1
 
-// TODO make some cache, at least for multiple clients to be able to work
-// TODO use buffers
 
 #if !USE_BUF
 static char write = 0;

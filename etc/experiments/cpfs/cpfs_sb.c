@@ -78,7 +78,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
     rdi->nlinks = 1;
     cpfs_unlock_ino( fs, root_dir );
 
-    // de-init! TODO Actually we should have all global stuff in fs state struct
+    // de-init!
     memset( &fs->sb, 0, sizeof( fs->sb ) );
 
 

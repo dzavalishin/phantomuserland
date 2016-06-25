@@ -16,7 +16,8 @@
 
 cpfs_fs_t fs =
 {
-    .disk_id = 0
+    .disk_id = 0,
+    .disk_size = 10000,
 };
 
 void die_rc( const char *msg, int rc )
@@ -65,10 +66,13 @@ int main( int ac, char**av )
     rc = cpfs_init( &fs );
     if( rc ) die_rc( "Init FS", rc );
 
+    rc = cpfs_fsck( &fs, 0 );
+    if( rc ) cpfs_log_error( "fsck rc=%d", rc );
+
     rc = cpfs_mount( &fs );
     if( rc )
     {
-        rc = cpfs_mkfs( &fs, 10000 );
+        rc = cpfs_mkfs( &fs, fs.disk_size );
         if( rc ) die_rc( "mkfs", rc );
 
         rc = cpfs_mount( &fs );

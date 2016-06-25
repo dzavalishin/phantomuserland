@@ -13,8 +13,6 @@
 #include "cpfs_local.h"
 
 
-// TODO mark buf with actual data somehow, skip disk read if so
-// TODO only shared bufs?
 
 
 static void 	cpfs_clear_some_buf( cpfs_fs_t *fs );
@@ -70,7 +68,7 @@ cpfs_buf_alloc( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
     return ENOMEM;
 }
 
-// TODO check - we release buf even if write failed
+/*
 static errno_t
 cpfs_buf_free( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t *buf )
 {
@@ -94,7 +92,7 @@ cpfs_buf_free( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t *buf )
 
     return rc;
 }
-
+*/
 
 static errno_t
 cpfs_buf_find( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf ) // char shared

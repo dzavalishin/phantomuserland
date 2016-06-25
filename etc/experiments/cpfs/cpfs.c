@@ -18,7 +18,6 @@
 #define USE_FDMAP 1
 
 
-// TODO can unlink open file as for now! FIXME BUG
 
 
 errno_t

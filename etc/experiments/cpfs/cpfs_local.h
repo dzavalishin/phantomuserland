@@ -140,7 +140,12 @@ typedef struct cpfs_fid cpfs_fid_t;
 // In-memory filesystem state
 struct cpfs_fs
 {
+    // must be filled by caller
+
     int         	disk_id;                // Number of disk in disk subsystem, paramerer for disk IO functions
+    cpfs_blkno_t 	disk_size;
+
+    // private data
 
     struct cpfs_sb	sb;
 
