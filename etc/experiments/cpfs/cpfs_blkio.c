@@ -12,7 +12,7 @@
 #include "cpfs.h"
 #include "cpfs_local.h"
 
-#define USE_BUF 0
+#define USE_BUF 1
 
 // TODO make some cache, at least for multiple clients to be able to work
 // TODO use buffers

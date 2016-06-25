@@ -62,17 +62,20 @@ cpfs_umount( cpfs_fs_t *fs )
 {
     errno_t rc;
 
-    // TODO check locked records (inodes, unreleased buffers)
+    // TODO check locked inodes
 
     cpfs_clear_all_buf( fs );
 
+    fs->sb.dirty = 0;
     rc = cpfs_write_sb( fs );
 
     if( !rc )
     {
-        fs->sb.dirty = 0;
         fs->mounted = 0;
     }
+    else
+        fs->sb.dirty = 1; // failed to write superblock
+
 
     return rc;
 }

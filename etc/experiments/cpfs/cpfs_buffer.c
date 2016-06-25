@@ -250,7 +250,7 @@ cpfs_clear_all_buf( cpfs_fs_t *fs )
 
     for( i = 0; i < fs->nbuf; i++ )
     {
-        if( fs->buf[i].used && !(fs->buf[i].lock) )
+        if( fs->buf[i].used && fs->buf[i].lock )
             cpfs_panic("locked blk %lld in cpfs_clear_all_buf", (long long)fs->buf[i].blk);
 
         if( fs->buf[i].used && !(fs->buf[i].lock) )
