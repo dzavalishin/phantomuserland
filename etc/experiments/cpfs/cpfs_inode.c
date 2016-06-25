@@ -256,7 +256,8 @@ errno_t
 cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 {
     errno_t rc;
-    
+
+    // TODO test case for this
     int used = cpfs_fdmap_is_inode_used( fs, ino );
     if( used ) return EWOULDBLOCK;
 

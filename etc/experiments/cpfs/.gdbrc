@@ -1,4 +1,6 @@
 break cpfs_panic
 break cpfs_log_error
 
-break cpfs_namei
+break cpfs_buf_lock
+break cpfs_buf_unlock
+

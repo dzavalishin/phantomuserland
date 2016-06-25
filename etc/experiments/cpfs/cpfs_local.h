@@ -110,9 +110,11 @@ struct cpfs_indir
 // In-memory disk io buffer
 struct cpfs_buf
 {
-    char                used; 			// allocated
+    int                 lock;                   // used by some i/o right now, can't be freed
+
+    char                used; 			// allocated, contains correct data for corresponding disk block
     char                write;                  // must be written on release
-    char                shared;                 // can be shared between users
+    //char                shared;                 // can be shared between users
 
     cpfs_blkno_t        blk;
     char                data[CPFS_BLKSIZE];
@@ -176,6 +178,11 @@ typedef struct cpfs_fs cpfs_fs_t;
 
 
 errno_t                 cpfs_buf_init( cpfs_fs_t *fs );
+void                    cpfs_clear_all_buf( cpfs_fs_t *fs );
+
+errno_t                 cpfs_buf_lock( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf );
+errno_t                 cpfs_buf_unlock( cpfs_fs_t *fs, cpfs_blkno_t blk, char write );
+
 
 
 errno_t                 cpfs_init_sb( cpfs_fs_t *fs );

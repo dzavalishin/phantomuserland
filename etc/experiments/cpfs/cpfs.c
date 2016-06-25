@@ -62,7 +62,6 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *name, int flags, void *
 
     //cpfs_fdmap_unlock( *file_id );
 #else
-    // TODO inode usage count
     struct fid *f = calloc( sizeof( struct fid ), 1 );
     if( 0 == f ) return ENOMEM;
 
@@ -78,11 +77,7 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *name, int flags, void *
 errno_t
 cpfs_file_close( int file_id )
 {
-
     //struct fid *f = (struct fid *) file_id;
-    // TODO write me
-
-    // TODO mark inode as unused
     //free( f );
 
     //cpfs_ino_t ino;

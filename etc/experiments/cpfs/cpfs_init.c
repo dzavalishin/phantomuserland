@@ -63,7 +63,8 @@ cpfs_umount( cpfs_fs_t *fs )
     errno_t rc;
 
     // TODO check locked records (inodes, unreleased buffers)
-    // TODO flush?
+
+    cpfs_clear_all_buf( fs );
 
     rc = cpfs_write_sb( fs );
 
