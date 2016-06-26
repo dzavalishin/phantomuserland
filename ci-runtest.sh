@@ -32,7 +32,7 @@ do
 	kill -0 $QEMU_PID || break
 	ELAPSED=`expr $ELAPSED + 2`
 
-	(tail -3 gdb.log | grep ^Breakpoint\ 1,) && {
+	(tail -5 gdb.log | grep ^Breakpoint\ 1,) && {
 		call_gdb
 		EXIT_CODE=2
 		break
@@ -67,5 +67,6 @@ grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
 grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
 # submit all details into the CI log, cutting off ESC-codes
-[ "$SNAP_CI" ] && cat qemu.log $LOGFILE | sed 's/[^m]*m//g;s///g'
+[ "$SNAP_CI" ] && cat qemu.log $LOGFILE | sed 's/[^m]*m//g;s/
+//g'
 exit $EXIT_CODE
