@@ -37,7 +37,8 @@ die ( ) {
 		# submit all details in CI, show pre-failure condition interactively
 		if [ "$SNAP_CI" ]
 		then
-			cat $LOGFILE | sed 's/[^m]*m//g;s///g'
+			cat $LOGFILE | sed 's/[^m]*m//g;s/
+//g'
 		else
 			tail $LOGFILE
 		fi
@@ -82,12 +83,22 @@ do
 	-ng)	unset DISPLAY	;;
 	-v)	VIRTIO=1	;;
 	-vv)	VIRTIO=2	;;		# virtio only
+	-wl)
+		shift
+		[ "$1" -gt 0 ] && WAIT_LUNCH="$1"
+	;;
+	-wr)
+		shift
+		[ "$1" -gt 0 ] && PANIC_AFTER="$1"
+	;;
 	*)
-		echo "Usage: $0 [-u|-f] [-c] [-p N] [-nc] [-ng] [-v]
+		echo "Usage: $0 [-u|-f] [-c] [-p N] [-wl NN] [-wr MM] [-nc] [-ng] [-v]
 	-f	- run in foreground (no need to specify if other command line args presented)
 	-u	- run unattended (don't stop on panic for gdb)
 	-c	- run 'make all' first (default in CI mode)
 	-p N	- make N passes of snapshot test (default: N=2)
+	-wl NN	- wait NN seconds for successful launch (and kill test if the limit reached, default is $WAIT_LAUNCH)
+	-wr MM	- wait MM seconds for test results (and kill test if the limit reached, default is $PANIC_AFTER)
 	-ng	- do not show qemu/kvm window (default in CI mode)
 	-v	- use virtio for snaps
 	-vv	- use only virtio (no IDE drives)
