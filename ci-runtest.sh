@@ -32,7 +32,7 @@ do
 	kill -0 $QEMU_PID || break
 	ELAPSED=`expr $ELAPSED + 2`
 
-	(tail -5 gdb.log | grep ^Breakpoint\ 1,) && {
+	(tail -5 gdb.log | grep '^Breakpoint 1[, ]') && {
 		call_gdb
 		EXIT_CODE=2
 		break
