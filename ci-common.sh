@@ -85,7 +85,7 @@ do
 	-vv)	VIRTIO=2	;;		# virtio only
 	-wl)
 		shift
-		[ "$1" -gt 0 ] && WAIT_LUNCH="$1"
+		[ "$1" -gt 0 ] && WAIT_LAUNCH="$1"
 	;;
 	-wr)
 		shift
@@ -141,7 +141,7 @@ LOGFILE=serial0.log
 launch_phantom ( ) {
 	rm -f qemu.log gdb.log
 
-	# now prepare control pipe for pseudo-interactive run of qemu and gdb
+	# now prepare control pipes for pseudo-interactive run of qemu and gdb
 	QEMUCTL=`mktemp`
 	exec 3>> $QEMUCTL
 
@@ -150,6 +150,7 @@ launch_phantom ( ) {
 
 	tail -f $QEMUCTL --pid=$$ | $QEMU $QEMU_OPTS > qemu.log &
 	QEMU_PID=$!
+	echo QEMU control pipe is $QEMUCTL
 
 	# wait for Phantom to start
 	ELAPSED=2
@@ -158,20 +159,21 @@ launch_phantom ( ) {
 
 	while [ $ELAPSED -lt $WAIT_LAUNCH ]
 	do
-		[ -s $LOGFILE ] && {
-			tail -f $GDBCTL --pid=$$ | gdb -cd=$PHANTOM_HOME -q > gdb.log &
-			break
-		}
+		[ -s $LOGFILE ] && break
 
 		sleep 2
 		kill -0 $QEMU_PID || break
 		ELAPSED=`expr $ELAPSED + 2`
 	done
 
-	[ -s $LOGFILE ] || {
+	if [ -s $LOGFILE ]
+	then
+		tail -f $GDBCTL --pid=$$ | gdb -cd=$PHANTOM_HOME -q > gdb.log &
+		echo GDB control pipe is $GDBCTL
+	else
 		ELAPSED=$PANIC_AFTER
 		LOG_MESSAGE="$LOGFILE is empty"
-	}
+	fi
 }
 
 call_gdb ( ) {
