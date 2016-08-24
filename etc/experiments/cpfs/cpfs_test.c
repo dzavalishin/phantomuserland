@@ -367,6 +367,7 @@ test_path(void)
 
     const char *d1 = "dir1";
     const char *d2 = "dir1/dir2";
+    const char *f1 = "dir1/dir2/f1";
 
 
 
@@ -395,6 +396,27 @@ test_path(void)
 
 //    ret = cpfs_file_stat( &fs, d2, 0, &stat );
 //    test_int_eq( ret, 0 );
+
+
+    int fd1, fd2;
+
+    ret = cpfs_file_open( &fs, &fd1, f1, O_CREAT, 0 );
+    test_int_eq( ret, 0 );
+
+
+    ret = cpfs_file_close( fd1 );
+    test_int_eq( ret, 0 );
+
+    ret = cpfs_file_open( &fs, &fd1, f1, 0, 0 );
+    test_int_eq( ret, 0 );
+
+    ret = cpfs_file_close( fd1 );
+    test_int_eq( ret, 0 );
+
+    ret = cpfs_file_unlink( &fs, f1, 0 );
+    test_int_eq( ret, 0 );
+
+
 
     ret = cpfs_file_unlink( &fs, d2, 0 );
     test_int_eq( ret, 0 );

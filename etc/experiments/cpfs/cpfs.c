@@ -21,19 +21,24 @@
 
 
 errno_t
-cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *name, int flags, void * user_id_data )
+cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *full_name, int flags, void * user_id_data )
 {
     errno_t rc;
     cpfs_ino_t file_ino;
+    const char *last;
+    cpfs_ino_t last_dir_ino;
 
     //
     // Attempt top open existing one
     //
 
-    // TODO nested dirs! :)
+    // TODO test nested dirs! :)
+
+    rc = cpfs_descend_dir( fs, full_name, &last, &last_dir_ino );
+    if( rc ) return rc;
 
     //rc = cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino ); // find name
-    rc = cpfs_namei( fs, 0, name, &file_ino, 0 );
+    rc = cpfs_namei( fs, last_dir_ino, last, &file_ino, 0 );
 
     if(rc && (flags & O_CREAT))
     {
@@ -45,7 +50,7 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *name, int flags, void *
             return EMFILE;
 
 
-        rc = cpfs_alloc_dirent( fs, 0, name, file_ino ); // allocate a new dir entry in a dir
+        rc = cpfs_alloc_dirent( fs, last_dir_ino, last, file_ino ); // allocate a new dir entry in a dir
         if( rc )
             cpfs_free_inode( fs, file_ino );
     }

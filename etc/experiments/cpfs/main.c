@@ -152,22 +152,24 @@ cpfs_get_current_time(void)
 }
 
 
-//static cpfs_mutex _def_m;
+#define MUTEX_TEST_VAL ((void *)0x3443ABBA)
 
 void cpfs_mutex_lock( cpfs_mutex m)
 {
     // TODO pthreads mutex?
+    cpfs_assert( m == MUTEX_TEST_VAL );
 }
 
 
 void cpfs_mutex_unlock( cpfs_mutex m)
 {
     // TODO pthreads mutex?
+    cpfs_assert( m == MUTEX_TEST_VAL );
 }
 
 void cpfs_mutex_init( cpfs_mutex *m)
 {
-    *m = 0; // temp
+    *m = MUTEX_TEST_VAL; // temp
     // TODO pthreads mutex?
 }
 
