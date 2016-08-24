@@ -248,6 +248,10 @@ errno_t                 cpfs_dir_scan( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const 
 
 // TODO dirent name cache - in memory hash? Not really as usual client software opens file once in its life?
 
+// Parse path name and descend into the last directory, returning last part of path and inode of last directory
+errno_t                 cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t *last_dir_ino );
+
+
 
 
 void *                  cpfs_lock_blk(   cpfs_fs_t *fs, cpfs_blkno_t blk ); // makes sure that block is in memory 

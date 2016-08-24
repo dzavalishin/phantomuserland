@@ -31,6 +31,8 @@ void test(void)
 {
     // TODO tests
 
+    test_path();
+
     test_superblock();
     test_disk_alloc();
 
@@ -44,6 +46,7 @@ void test(void)
     // test_file_create(); 	// create, open and destroy multiple files, try open deleted files
     test_file_data();        	// Create, write, close, reopen, read and compare data, in a mixed way
     // test_mutithreaded();     // Do mix of prev tests in 10 threads, starting tests in random order
+
 }
 
 
@@ -65,10 +68,10 @@ int main( int ac, char**av )
 
     rc = cpfs_init( &fs );
     if( rc ) die_rc( "Init FS", rc );
-
+/*
     rc = cpfs_fsck( &fs, 0 );
     if( rc ) cpfs_log_error( "fsck rc=%d", rc );
-
+*/
     rc = cpfs_mount( &fs );
     if( rc )
     {

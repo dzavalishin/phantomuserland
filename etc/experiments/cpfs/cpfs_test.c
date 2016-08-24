@@ -348,6 +348,24 @@ test_file_data()        	// Create, write, close, reopen, read and compare data,
 
 
 
+void
+test_path(void)
+{
+    errno_t ret;
+    const char *last;
+    cpfs_ino_t last_dir_ino;
+
+    ret = cpfs_descend_dir( &fs, "/somefile.qq", &last, &last_dir_ino );
+    test_str_eq( last, "somefile.qq" );
+    test_int_eq( last_dir_ino, 0 );
+    if( ret != 0 ) cpfs_panic("cpfs_descend_dir must allways succeed for single file name");
+
+    ret = cpfs_descend_dir( &fs, "surely_nonexisting_dir/somefile.qq", &last, &last_dir_ino );
+    if( ret != ENOENT ) cpfs_panic("cpfs_descend_dir found nonexisting dir");
+
+
+    printf("Path test: DONE\n");
+}
 
 
 

@@ -32,6 +32,9 @@ typedef uint64_t cpfs_size_t;  // mem size
 
 typedef int errno_t;
 
+struct cpfs_fs;
+struct cpfs_stat;
+
 
 #endif // CPFS_TYPES_H
 
