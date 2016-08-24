@@ -167,5 +167,5 @@ Previous test run stalled. Trying gdb..."
 trap at_exit 0 2
 
 [ "$COMPILE" ] && ./ci-build.sh ${FOREGROUND:+-f} $UNATTENDED ${WARN:+-w}
-[ "$TESTRUN" ] && ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
+[ $? -eq 0 -a "$TESTRUN" ] && ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
 [ $? -eq 0 -a "$SNAPTEST" ] && ./ci-snaptest.sh ${FOREGROUND:+-f} $UNATTENDED ${VIRTIO:+-v} ${TEXTONLY:+-ng} ${PASSES:+-p $PASSES}
