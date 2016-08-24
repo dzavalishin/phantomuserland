@@ -33,7 +33,24 @@ typedef uint64_t cpfs_size_t;  // mem size
 typedef int errno_t;
 
 struct cpfs_fs;
-struct cpfs_stat;
+//struct cpfs_stat;
+
+
+struct cpfs_stat
+{
+    cpfs_fpos_t         fsize;
+    uint32_t            nlinks; // allways 0 or 1 in this verstion, made for future extensions, if 0 - inode record is free.
+    uint32_t            ftype; // nonzero = dir for now
+
+    cpfs_time_t         ctime; // created
+    cpfs_time_t         atime; // accessed
+    cpfs_time_t         mtime; // modified
+    //cpfs_time_t         vtime; // version of file forked (not used, will mark time when this backup version of file is forked from main version)
+
+    char _fill[256]; // let us expand later
+};
+
+typedef struct cpfs_stat cpfs_stat_t;
 
 
 #endif // CPFS_TYPES_H

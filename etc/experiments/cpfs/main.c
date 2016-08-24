@@ -152,6 +152,8 @@ cpfs_get_current_time(void)
 }
 
 
+//static cpfs_mutex _def_m;
+
 void cpfs_mutex_lock( cpfs_mutex m)
 {
     // TODO pthreads mutex?
@@ -168,6 +170,28 @@ void cpfs_mutex_init( cpfs_mutex *m)
     *m = 0; // temp
     // TODO pthreads mutex?
 }
+
+
+
+
+
+
+
+
+
+void cpfs_debug_fdump( const char *fn, void *p, unsigned size ) // dump some data to file
+{
+    int fd = open( fn, O_RDWR|O_CREAT, 0666 );
+    if( fd < 0 )
+        cpfs_panic("cpfs_debug_fdump: can't open '%d'", fn);
+
+    if( size != write( fd, p, size ) )
+        cpfs_panic("cpfs_debug_fdump: can't write to '%d'", fn);
+
+    close( fd );
+}
+
+
 
 
 

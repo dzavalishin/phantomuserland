@@ -141,6 +141,11 @@ fsck_sb( cpfs_fs_t *fs, int fix )
     memset( &fs->sb, 0, sizeof( fs->sb ) );
     */
 
+
+
+    // TODO scan all dirs, find all used inodes, check that actual inodes are used/unused correspondingly
+
+
     return 0;
 
 }

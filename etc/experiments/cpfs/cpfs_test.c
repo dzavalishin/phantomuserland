@@ -354,6 +354,7 @@ test_path(void)
     errno_t ret;
     const char *last;
     cpfs_ino_t last_dir_ino;
+    struct cpfs_stat stat;
 
     ret = cpfs_descend_dir( &fs, "/somefile.qq", &last, &last_dir_ino );
     test_str_eq( last, "somefile.qq" );
@@ -362,6 +363,45 @@ test_path(void)
 
     ret = cpfs_descend_dir( &fs, "surely_nonexisting_dir/somefile.qq", &last, &last_dir_ino );
     if( ret != ENOENT ) cpfs_panic("cpfs_descend_dir found nonexisting dir");
+
+
+    const char *d1 = "dir1";
+    const char *d2 = "dir1/dir2";
+
+
+
+    ret = cpfs_mkdir( &fs, d1, 0 );
+    test_int_eq( ret, 0 );
+
+    ret = cpfs_file_unlink( &fs, d1, 0 );
+    test_int_eq( ret, 0 );
+
+    ret = cpfs_file_unlink( &fs, d1, 0 );
+    test_int_eq( ret, ENOENT );
+
+
+
+
+    // 2nd level dir
+    ret = cpfs_mkdir( &fs, d1, 0 );
+    test_int_eq( ret, 0 );
+/*
+    //cpfs_dump_dir( &fs, 0 );
+    ret = cpfs_file_stat( &fs, d1, 0, &stat );
+    test_int_eq( ret, 0 );
+*/
+    ret = cpfs_mkdir( &fs, d2, 0 );
+    test_int_eq( ret, 0 );
+
+//    ret = cpfs_file_stat( &fs, d2, 0, &stat );
+//    test_int_eq( ret, 0 );
+
+    ret = cpfs_file_unlink( &fs, d2, 0 );
+    test_int_eq( ret, 0 );
+
+    ret = cpfs_file_unlink( &fs, d1, 0 );
+    test_int_eq( ret, 0 );
+
 
 
     printf("Path test: DONE\n");

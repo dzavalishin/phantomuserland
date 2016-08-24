@@ -458,3 +458,45 @@ cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii )
     ii->vtime = 0;
 }
 
+
+
+
+errno_t cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_data, struct cpfs_stat *stat )
+{
+    const char *last;
+    cpfs_ino_t last_dir_ino;
+    errno_t rc;
+
+    cpfs_assert( stat != 0 );
+
+    rc = cpfs_descend_dir( fs, name, &last, &last_dir_ino );
+    if( rc ) return rc;
+
+    cpfs_ino_t ret;
+    rc = cpfs_namei( fs, last_dir_ino, last, &ret, 0 );
+
+
+    struct cpfs_inode *ip = cpfs_lock_ino( fs, ret );
+
+    if( ip == 0 )
+    {
+        cpfs_unlock_ino( fs, ret );
+        return EIO;
+    }
+
+    stat->fsize         = ip->fsize;
+    stat->ftype         = ip->ftype;
+    stat->nlinks        = ip->nlinks;
+
+    stat->ctime         = ip->ctime;
+    stat->atime         = ip->atime;
+    stat->mtime         = ip->mtime;
+
+    cpfs_unlock_ino( fs, ret );
+
+    return 0;
+}
+
+
+
+

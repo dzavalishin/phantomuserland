@@ -41,7 +41,7 @@ cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t
     {
         if( ! *path ) return EINVAL; // ? can't happen? final stray '/'?
 
-        const char *next_slash = index( path, '/' );
+        const char *next_slash = index( cur_name_start, '/' );
 
         // No more path elements?
         if( next_slash == 0 )
@@ -63,7 +63,7 @@ cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t
         strncpy( name, cur_name_start, len );
 
         ret = cpfs_namei( fs, cur_dir_ino, name, &next_ino, 0 ); // find name
-        printf("namei( \"%s\" ) = %d\n", name, ret );
+        //printf("namei( \"%s\" ) = %d, ino = %lld\n", name, ret, next_ino );
         if( ret )
         {
             //printf("namei( %s ) = %d", name, ret );
@@ -79,7 +79,7 @@ cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t
 
 
 errno_t
-cpfs_mkdir( cpfs_fs_t *fs, const char *path )
+cpfs_mkdir( cpfs_fs_t *fs, const char *path, void * user_id_data )
 {
     const char *last;
     cpfs_ino_t last_dir_ino;
@@ -93,6 +93,7 @@ cpfs_mkdir( cpfs_fs_t *fs, const char *path )
     if( rc ) return rc;
 
 
+    //printf("mkdir: new dir inode = %d\n", new_dir_ino );
     // Init inode as dir
 
     // TODO check all rc's here!
@@ -110,15 +111,17 @@ cpfs_mkdir( cpfs_fs_t *fs, const char *path )
     rdi->nlinks = 1;
     cpfs_unlock_ino( fs, new_dir_ino );
 
+    //printf("mkdir: last dir inode = %d\n", last_dir_ino );
 
-    rc = cpfs_dir_scan( fs, last_dir_ino, last, &new_dir_ino, CPFS_DIR_SCAN_WRITE );
+    rc = cpfs_alloc_dirent( fs, last_dir_ino, last, new_dir_ino ); // allocate a new dir entry in a dir
+    //rc = cpfs_dir_scan( fs, last_dir_ino, last, &new_dir_ino, CPFS_DIR_SCAN_WRITE );
     if( rc ) goto free_inode;
 
     return 0;
 
 free_inode:
 
-    if( cpfs_free_inode( fs, new_dir_ino ) ) panic( "can't free inode %d", %d );
+    if( cpfs_free_inode( fs, new_dir_ino ) ) cpfs_panic( "can't free inode %d", new_dir_ino );
     return rc;
 }
 

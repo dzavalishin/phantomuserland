@@ -35,10 +35,18 @@ void    test_file_create(void); 	// create, open and destroy multiple files, try
 void    test_file_data(void);        // Create, write, close, reopen, read and compare data, in a mixed way
 void    test_mutithreaded(void);     // Do mix of prev tests in 10 threads, starting tests in random order
 
-#define __test_line_num(__L) #__L
+//#define __test_line_num(__L) #__L
+//#define __test_line_num(__L) #__LINE__
 
 //static inline void test_str_eq( const char *s1, const char *s2, );
-#define test_str_eq( __s1, __s2 ) if( strcmp( (__s1), (__s2) ) ) cpfs_panic( "test failed " __FILE__ " @ " __test_line_num(__LINE__) ": %s != %s\n", __s1, __s2 )
-#define test_int_eq( __s1, __s2 ) if( (__s1) != (__s2) ) cpfs_panic( "test failed " __FILE__ " @ " __test_line_num(__LINE__) ": %d != %d\n", __s1, __s2 )
+//#define test_str_eq( __s1, __s2 ) if( strcmp( (__s1), (__s2) ) ) cpfs_panic( "test failed " __FILE__ " @ " __test_line_num(__LINE__) ": %s != %s\n", __s1, __s2 )
+//#define test_int_eq( __s1, __s2 ) if( (__s1) != (__s2) ) cpfs_panic( "test failed " __FILE__ " @ " __test_line_num(__LINE__) ": %d != %d\n", __s1, __s2 )
+
+#define test_str_eq( __s1, __s2 ) if( strcmp( (__s1), (__s2) ) ) cpfs_panic( "test failed " __FILE__ " @ %d: %s != %s\n", __LINE__, __s1, __s2 )
+#define test_int_eq( __s1, __s2 ) if( (__s1) != (__s2) ) cpfs_panic( "test failed " __FILE__ " @ %d: %d != %d\n", __LINE__, __s1, __s2 )
+
+
+
+void cpfs_debug_fdump( const char *fn, void *p, unsigned size ); // dump some data to file
 
 #endif // CPFS_TEST_H

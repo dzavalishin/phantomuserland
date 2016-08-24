@@ -182,6 +182,23 @@ typedef struct cpfs_fs cpfs_fs_t;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 errno_t                 cpfs_buf_init( cpfs_fs_t *fs );
 void                    cpfs_clear_all_buf( cpfs_fs_t *fs );
 
@@ -239,9 +256,13 @@ errno_t                 cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, co
 //errno_t                       cpfs_free_dirent( cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
 errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
 
+errno_t                 cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno ); // Check if inode contains a directory
+
+errno_t			cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino );
+
 
 // Finds/reads/creates/updates dir entry
-errno_t                 cpfs_dir_scan( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int flags );
+//errno_t                 cpfs_dir_scan( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int flags );
 
 #define CPFS_DIR_SCAN_MUST_EXIST        (1<<1) // returns ENOENT if not exist
 #define CPFS_DIR_SCAN_WRITE             (1<<2) // writes given ino to dir entry, not reads
