@@ -77,3 +77,48 @@ cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t
     }
 }
 
+
+errno_t
+cpfs_mkdir( cpfs_fs_t *fs, const char *path )
+{
+    const char *last;
+    cpfs_ino_t last_dir_ino;
+    cpfs_ino_t new_dir_ino;
+    errno_t rc;
+
+    rc = cpfs_descend_dir( fs, path, &last, &last_dir_ino );
+    if( rc ) return rc;
+
+    rc = cpfs_alloc_inode( fs, &new_dir_ino );
+    if( rc ) return rc;
+
+
+    // Init inode as dir
+
+    // TODO check all rc's here!
+
+    struct cpfs_inode *rdi = cpfs_lock_ino( fs, new_dir_ino );
+    if( rdi == 0 )
+    {
+        rc = EIO;
+        goto free_inode;
+    }
+
+    cpfs_touch_ino( fs, new_dir_ino );
+    cpfs_inode_init_defautls( fs, rdi );
+    rdi->ftype = CPFS_FTYPE_DIR;
+    rdi->nlinks = 1;
+    cpfs_unlock_ino( fs, new_dir_ino );
+
+
+    rc = cpfs_dir_scan( fs, last_dir_ino, last, &new_dir_ino, CPFS_DIR_SCAN_WRITE );
+    if( rc ) goto free_inode;
+
+    return 0;
+
+free_inode:
+
+    if( cpfs_free_inode( fs, new_dir_ino ) ) panic( "can't free inode %d", %d );
+    return rc;
+}
+
