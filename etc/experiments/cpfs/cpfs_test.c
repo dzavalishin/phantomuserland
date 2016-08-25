@@ -371,15 +371,14 @@ test_path(void)
     const char *f1 = "dir1/dir2/f1";
 
 
+    // Create/remove dir
 
     ret = cpfs_mkdir( &fs, d1, 0 );
     test_int_eq( ret, 0 );
     //cpfs_dump_dir( &fs, 0 );
 
-#if 1
     ret = cpfs_mkdir( &fs, d1, 0 );
     test_int_eq( ret, EEXIST );
-#endif
 
     ret = cpfs_file_unlink( &fs, d1, 0 );
     test_int_eq( ret, 0 );
@@ -441,6 +440,9 @@ test_path(void)
     ret = cpfs_file_unlink( &fs, f1, 0 );
     test_int_eq( ret, 0 );
 
+    // Remove nonempty dir
+    ret = cpfs_file_unlink( &fs, d1, 0 );
+    test_int_eq( ret, ENOTEMPTY );
 
 
     ret = cpfs_file_unlink( &fs, d2, 0 );
