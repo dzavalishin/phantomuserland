@@ -14,6 +14,8 @@
 
 #include <stdarg.h>
 
+#include <pthread.h>
+
 cpfs_fs_t fs =
 {
     .disk_id = 0,
@@ -194,6 +196,26 @@ void cpfs_debug_fdump( const char *fn, void *p, unsigned size ) // dump some dat
 }
 
 
+
+
+errno_t
+cpfs_os_run_idle_thread( void* (*func_p)(void *arg), void *arg ) // Request OS to start thread
+{
+    int rc;
+
+    pthread_attr_t a;
+    pthread_t pt;
+
+    pthread_attr_init( &a );
+
+    // TODO idle prio!
+
+    rc = pthread_create( &pt, &a, func_p, arg);
+
+    pthread_attr_destroy( &a );
+
+    return (rc == 0) ? 0 : ENOMEM;
+}
 
 
 

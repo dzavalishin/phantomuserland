@@ -78,5 +78,6 @@ void            cpfs_mutex_unlock( cpfs_mutex m );
 
 cpfs_time_t	cpfs_get_current_time(void);
 
+errno_t 	cpfs_os_run_idle_thread( void* (*func_p)(void *arg), void *arg ); // Request OS to start thread
 
 #endif // CPFS_H
