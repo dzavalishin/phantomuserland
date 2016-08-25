@@ -249,6 +249,12 @@ errno_t                 cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ); // del
 void                    cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii );
 
 
+errno_t                 cpfs_update_ino_atime( cpfs_fs_t *fs, cpfs_ino_t ino );
+errno_t                 cpfs_update_ino_mtime( cpfs_fs_t *fs, cpfs_ino_t ino );
+
+
+
+
 
 // TODO problem: linear scan can be very slow, need tree?
 

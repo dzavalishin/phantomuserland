@@ -390,6 +390,19 @@ test_path(void)
     //cpfs_dump_dir( &fs, 0 );
     ret = cpfs_file_stat( &fs, d1, 0, &stat );
     test_int_eq( ret, 0 );
+
+    if( stat->ctime >= cpfs_get_current_time() )
+        cpfs_panic("ctime > now");
+
+    if( stat->ctime > stat->atime )
+        cpfs_panic("ctime > atime");
+
+    if( stat->ctime > stat->mtime )
+        cpfs_panic("ctime > mtime");
+
+    if( stat->mtime > stat->atime )
+        cpfs_panic("mtime > atime");
+
 */
     ret = cpfs_mkdir( &fs, d2, 0 );
     test_int_eq( ret, 0 );

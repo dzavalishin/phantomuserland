@@ -85,6 +85,14 @@ cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // flushes block to disk before
 
     if( write )
     {
+        /* No - sometimes we want to update atime only
+        int ino_in_blk = ino % CPFS_INO_PER_BLK;
+
+        struct cpfs_inode *ii = ((void *)data) + (ino_in_blk * CPFS_INO_REC_SIZE);
+
+        ii->mtime = cpfs_get_current_time();
+        ii->atime = ii->mtime;
+        */
         errno_t rc = cpfs_disk_write( fs->disk_id, curr_blk, data );
 
         if( rc ) cpfs_panic( "write inode blk" );
@@ -92,4 +100,47 @@ cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // flushes block to disk before
 
     used = 0;
 }
+
+
+errno_t
+cpfs_update_ino_mtime( cpfs_fs_t *fs, cpfs_ino_t ino )
+{
+    struct cpfs_inode *ii = cpfs_lock_ino( fs, ino );
+
+    if( 0 == ii ) return EIO;
+
+    ii->mtime = cpfs_get_current_time();
+    ii->atime = ii->mtime;
+
+    cpfs_touch_ino( fs, ino );
+
+    cpfs_unlock_ino( fs, ino );
+}
+
+
+
+errno_t
+cpfs_update_ino_atime( cpfs_fs_t *fs, cpfs_ino_t ino )
+{
+    struct cpfs_inode *ii = cpfs_lock_ino( fs, ino );
+
+    if( 0 == ii ) return EIO;
+
+    ii->atime = cpfs_get_current_time();
+
+    cpfs_touch_ino( fs, ino );
+
+    cpfs_unlock_ino( fs, ino );
+}
+
+
+
+
+
+
+
+
+
+
+
 

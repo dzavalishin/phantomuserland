@@ -54,6 +54,7 @@ cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, 
     size -= part;
 
     cpfs_unlock_blk( fs, phys_blk );
+    cpfs_update_ino_atime( fs, ino ); // TODO rc
 
 
     //
@@ -87,6 +88,7 @@ cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, 
         size -= part;
 
         cpfs_unlock_blk( fs, phys_blk );
+        cpfs_update_ino_atime( fs, ino ); // TODO rc
     }
 
     if( !size )
@@ -119,6 +121,7 @@ cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, 
     size -= part;
 
     cpfs_unlock_blk( fs, phys_blk );
+    cpfs_update_ino_atime( fs, ino ); // TODO rc
 
     cpfs_assert( size == 0 );
 
@@ -166,6 +169,7 @@ cpfs_ino_file_write( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, const void 
 
     cpfs_unlock_blk( fs, phys_blk );
     cpfs_inode_update_fsize( fs, ino, pos );
+    cpfs_update_ino_mtime( fs, ino ); // TODO rc
 
     //
     // do full blocks
@@ -199,11 +203,13 @@ cpfs_ino_file_write( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, const void 
 
         cpfs_unlock_blk( fs, phys_blk );
         cpfs_inode_update_fsize( fs, ino, pos );
+        cpfs_update_ino_mtime( fs, ino ); // TODO rc
     }
 
     if( !size )
+    {
         return 0;
-
+    }
 
     //
     // do last (partial) block
@@ -234,6 +240,7 @@ cpfs_ino_file_write( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, const void 
 
     cpfs_unlock_blk( fs, phys_blk );
     cpfs_inode_update_fsize( fs, ino, pos );
+    cpfs_update_ino_mtime( fs, ino ); // TODO rc
 
 
     cpfs_assert( size == 0 );

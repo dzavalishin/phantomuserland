@@ -57,6 +57,8 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *full_name, int flags, v
 
     if(rc) return rc;
 
+    cpfs_update_ino_atime( fs, file_ino ); // TODO rc
+
 #if USE_FDMAP
     rc = cpfs_fdmap_alloc( fs, file_ino, file_id );
     if( rc ) return rc; // TODO close file, or better do it before all
