@@ -7,6 +7,7 @@ break cpfs_log_error
 #break test_path
 #break cpfs_mkdir
 
-break cpfs_dump_dir
+break cpfs_mkdir
+break cpfs_file_stat
 
 

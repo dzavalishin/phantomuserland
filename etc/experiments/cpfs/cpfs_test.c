@@ -392,29 +392,38 @@ test_path(void)
     // 2nd level dir
     ret = cpfs_mkdir( &fs, d1, 0 );
     test_int_eq( ret, 0 );
-/*
+#if 1
     //cpfs_dump_dir( &fs, 0 );
+
     ret = cpfs_file_stat( &fs, d1, 0, &stat );
     test_int_eq( ret, 0 );
 
-    if( stat->ctime >= cpfs_get_current_time() )
-        cpfs_panic("ctime > now");
+    //cpfs_dump_dir( &fs, 0 );
 
-    if( stat->ctime > stat->atime )
+    cpfs_time_t now = cpfs_get_current_time();
+
+    if( stat.ctime > now )
+        cpfs_panic("ctime %lld > now %lld", stat.ctime, now);
+
+    if( stat.ctime > stat.atime )
         cpfs_panic("ctime > atime");
 
-    if( stat->ctime > stat->mtime )
+    if( stat.ctime > stat.mtime )
         cpfs_panic("ctime > mtime");
 
-    if( stat->mtime > stat->atime )
+    if( stat.mtime > stat.atime )
         cpfs_panic("mtime > atime");
+#endif
 
-*/
     ret = cpfs_mkdir( &fs, d2, 0 );
     test_int_eq( ret, 0 );
 
-//    ret = cpfs_file_stat( &fs, d2, 0, &stat );
-//    test_int_eq( ret, 0 );
+#if 1
+    //cpfs_dump_dir( &fs, 0 );
+    ret = cpfs_file_stat( &fs, d2, 0, &stat );
+    test_int_eq( ret, 0 );
+    //cpfs_dump_dir( &fs, 0 );
+#endif
 
 
     int fd1, fd2;
@@ -426,6 +435,38 @@ test_path(void)
     // Attempt to create one more with same name - must fail - TODO - doesn't fail
 //    ret = cpfs_file_open( &fs, &fd2, f1, O_CREAT, 0 );
 //    test_int_eq( ret, EEXIST );
+
+#if 1
+    ret = cpfs_file_stat( &fs, f1, 0, &stat );
+    test_int_eq( ret, 0 );
+
+    if( stat.ctime != stat.atime )
+        cpfs_panic("ctime != atime");
+
+    if( stat.ctime != stat.mtime )
+        cpfs_panic("ctime != mtime");
+
+    if( stat.mtime != stat.atime )
+        cpfs_panic("mtime != atime");
+#endif
+
+    ret = cpfs_file_write( fd1, 0, "hello", 6 );
+    test_int_eq( ret, 0 );
+
+
+    ret = cpfs_file_stat( &fs, f1, 0, &stat );
+    test_int_eq( ret, 0 );
+
+    if( stat.ctime > stat.atime )
+        cpfs_panic("file ctime > atime");
+
+    if( stat.ctime > stat.mtime )
+        cpfs_panic("file ctime > mtime");
+
+    if( stat.mtime > stat.atime )
+        cpfs_panic("file mtime > atime");
+
+
 
 
     ret = cpfs_file_close( fd1 );
