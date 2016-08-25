@@ -211,7 +211,7 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
 }
 
 
-
+/*
 // debug
 
 errno_t
@@ -278,6 +278,168 @@ cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 
     return 0;
 }
+
+*/
+
+
+
+
+
+
+
+
+
+/**
+ *
+ * General directory scan function
+ *
+**/
+
+
+
+typedef enum { dir_scan_continue, dir_scan_success, dir_scan_error } dir_scan_ret_t;
+
+typedef dir_scan_ret_t (*dir_scan_func_t)( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg );
+
+
+
+errno_t
+cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg )
+{
+    errno_t rc;
+    int isdir = 0;
+
+    cpfs_assert( file_ino != 0 );
+
+    rc = cpfs_is_dir( fs, dir_ino, &isdir );
+    if( rc ) return rc;
+
+    if( !isdir ) return ENOTDIR;
+
+    //printf("scan dir ino %d\n", dir_ino );
+
+    cpfs_size_t fsize;
+    rc = cpfs_fsize( fs, dir_ino, &fsize );
+    if( rc )
+        return rc;
+
+    int nentry = fsize/CPFS_DIR_REC_SIZE;
+
+    cpfs_assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 );
+
+    int nblk = nentry / CPFS_DIR_PER_BLK;
+    int blkpos = 0;
+
+    // Scan sequentially through the dir looking for name
+
+    while( nblk-- > 0 )
+    {
+        char data[CPFS_BLKSIZE];
+
+        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+
+        if( rc )
+        {
+            cpfs_log_error("Can't read dir ino %d @ blk %d", dir_ino, blkpos );
+            return rc;
+        }
+
+        int i;
+        for( i = 0; i < CPFS_DIR_PER_BLK; i++ )
+        {
+            if( nentry-- <= 0 )
+                return 0;
+
+            // NB! sizeof(struct cpfs_dir_entry) != CPFS_DIR_REC_SIZE
+            struct cpfs_dir_entry *de = ((void *)data) + (i*CPFS_DIR_REC_SIZE);
+
+            //if( de->inode ) printf("%03lld: '%s'\n", de->inode, de->name );
+
+            dir_scan_ret_t fret = f( fs, de, farg );
+
+            if( fret == dir_scan_success ) return 0;
+            if( fret == dir_scan_error ) return EMFILE;
+
+        }
+
+        blkpos++;
+
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+/**
+ *
+ * Use of general directory scan function: dump dir
+ *
+**/
+
+
+
+static dir_scan_ret_t dir_print( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg )
+{
+    (void) fs;
+    (void) farg;
+
+    if( de->inode ) printf("%03lld: '%s'\n", de->inode, de->name );
+
+    return dir_scan_continue;
+}
+
+
+
+errno_t
+cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
+{
+    return cpfs_scan_dir( fs, dir_ino, dir_print, 0 );
+}
+
+
+
+
+/**
+ *
+ * Use of general directory scan function: is dir empty
+ *
+**/
+
+
+
+static dir_scan_ret_t de_isempty( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg )
+{
+    (void) fs;
+    (void) farg;
+
+    if( de->inode ) return dir_scan_error;
+    return dir_scan_continue;
+}
+
+
+
+errno_t
+cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
+{
+    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_isempty, 0 );
+    if( rc == EMFILE )
+        return ENOTEMPTY;
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
 
 
 
