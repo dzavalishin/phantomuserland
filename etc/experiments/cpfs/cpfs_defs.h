@@ -13,12 +13,18 @@
 #define CPFS_DEFS_H
 
 
+// -----------------------------------------------------------------------------------------
+//
+// NON-Tunable parameters and definitions
+//
+// -----------------------------------------------------------------------------------------
 
-#define CPFS_MAX_PATH_LEN       2048
+
+#define CPFS_MAX_PATH_LEN       2048 // ? Seems to be tunable
 #define CPFS_MAX_FNAME_LEN       500
 
 
-#define CPFS_MAX_FILES_PER_DIR  8192 // open/create timing depends on it
+#define CPFS_MAX_FILES_PER_DIR  8192 // open/create timing depends on it - tunable?
 
 #define CPFS_BLKSIZE            4096
 
@@ -37,10 +43,29 @@
 #define CPFS_IB_MAGIC           0xBB00BB00 // indirect block list
 
 
+#define CPFS_FTYPE_DIR          0040000         // Actually can be redefined, but is stored on disk
 
-// TODO implement me - disk io cache
+// -----------------------------------------------------------------------------------------
+//
+// Tunable parameters
+//
+// -----------------------------------------------------------------------------------------
+
+
+// Controls disk io cache size
 #define CPFS_MAX_CONCUR_IO      64
 
-#define CPFS_FTYPE_DIR          0040000
+
+
+// -----------------------------------------------------------------------------------------
+//
+// Enable/disable parts of code
+//
+// -----------------------------------------------------------------------------------------
+
+
+#define CPFS_UPDATE_ATIME 1
+
+
 
 #endif // CPFS_DEFS_H

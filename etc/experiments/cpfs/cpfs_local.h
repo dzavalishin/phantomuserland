@@ -264,6 +264,7 @@ errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const cha
 
 errno_t                 cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno ); // Check if inode contains a directory
 errno_t			cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino );
+errno_t                 cpfs_dir_has_entry( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *name );
 
 errno_t			cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino );
 

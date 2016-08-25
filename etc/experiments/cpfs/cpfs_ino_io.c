@@ -122,6 +122,7 @@ cpfs_update_ino_mtime( cpfs_fs_t *fs, cpfs_ino_t ino )
 errno_t
 cpfs_update_ino_atime( cpfs_fs_t *fs, cpfs_ino_t ino )
 {
+#if CPFS_UPDATE_ATIME
     struct cpfs_inode *ii = cpfs_lock_ino( fs, ino );
 
     if( 0 == ii ) return EIO;
@@ -131,6 +132,12 @@ cpfs_update_ino_atime( cpfs_fs_t *fs, cpfs_ino_t ino )
     cpfs_touch_ino( fs, ino );
 
     cpfs_unlock_ino( fs, ino );
+#else // CPFS_UPDATE_ATIME
+    (void) fs;
+    (void) ino;
+#endif // CPFS_UPDATE_ATIME
+
+    return 0;
 }
 
 
