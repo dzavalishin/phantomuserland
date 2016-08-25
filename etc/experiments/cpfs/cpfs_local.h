@@ -264,6 +264,9 @@ errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const cha
 
 // was errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
 
+// General dir scan func
+errno_t                 cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg );
+
 
 errno_t                 cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno ); // Check if inode contains a directory
 errno_t			cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino );

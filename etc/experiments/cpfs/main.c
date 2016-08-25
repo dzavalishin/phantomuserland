@@ -16,11 +16,23 @@
 
 #include <pthread.h>
 
+static void mt_test(void);
+
 cpfs_fs_t fs =
 {
     .disk_id = 0,
     .disk_size = 10000,
 };
+
+cpfs_fs_t fs2 =
+{
+    .disk_id = 1,
+    .disk_size = 10000,
+};
+
+static int dfd[2];
+cpfs_fs_t *fsp[2] = { &fs, &fs2 };
+
 
 void die_rc( const char *msg, int rc )
 {
@@ -53,7 +65,6 @@ void test(void)
 
 
 
-static int dfd;
 
 int main( int ac, char**av )
 {
@@ -65,15 +76,18 @@ int main( int ac, char**av )
 
 
     //d = open( "disk.img", O_RDWR, 0666 );
-    dfd = open( "disk.img", O_RDWR|O_CREAT, 0666 );
-    if( dfd < 0 ) die_rc( "open", dfd );
+    dfd[0] = open( "disk.img", O_RDWR|O_CREAT, 0666 );
+    if( dfd[0] < 0 ) die_rc( "open", dfd[0] );
+
+    dfd[1] = open( "disk1.img", O_RDWR|O_CREAT, 0666 );
+    if( dfd[1] < 0 ) die_rc( "open", dfd[1] );
+
+
 
     rc = cpfs_init( &fs );
     if( rc ) die_rc( "Init FS", rc );
-/*
-    rc = cpfs_fsck( &fs, 0 );
-    if( rc ) cpfs_log_error( "fsck rc=%d", rc );
-*/
+
+
     rc = cpfs_mount( &fs );
     if( rc )
     {
@@ -89,8 +103,16 @@ int main( int ac, char**av )
     rc = cpfs_umount( &fs );
     if( rc ) die_rc( "Umount FS", rc );
 
+#if 1
+    printf("\n");
+    rc = cpfs_fsck( &fs, 0 );
+    if( rc ) cpfs_log_error( "fsck rc=%d", rc );
+#endif
+
     rc = cpfs_stop( &fs );
     if( rc ) die_rc( "Stop FS", rc );
+
+    mt_test();
 
 
     return 0;
@@ -132,8 +154,8 @@ cpfs_log_error( const char *fmt, ... )
 errno_t
 cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data )
 {
-    lseek( dfd, (int) (block*CPFS_BLKSIZE), SEEK_SET );
-    int rc = read( dfd, data, CPFS_BLKSIZE );
+    lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
+    int rc = read( dfd[disk_id], data, CPFS_BLKSIZE );
     return (rc == CPFS_BLKSIZE) ? 0 : EIO;
 }
 
@@ -141,8 +163,8 @@ cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data )
 errno_t
 cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data )
 {
-    lseek( dfd, (int) (block*CPFS_BLKSIZE), SEEK_SET );
-    int rc = write( dfd, data, CPFS_BLKSIZE );
+    lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
+    int rc = write( dfd[disk_id], data, CPFS_BLKSIZE );
     return (rc == CPFS_BLKSIZE) ? 0 : EIO;
 }
 
@@ -216,6 +238,83 @@ cpfs_os_run_idle_thread( void* (*func_p)(void *arg), void *arg ) // Request OS t
 
     return (rc == 0) ? 0 : ENOMEM;
 }
+
+
+
+
+
+
+
+
+
+
+void* mt_run(void *arg)
+{
+    errno_t 		rc;
+    cpfs_fs_t *fsp = arg;
+
+    printf("Thread for disk %d run\n", fsp->disk_id );
+
+    rc = cpfs_init( fsp );
+    if( rc ) die_rc( "Init FS", rc );
+
+
+    rc = cpfs_mount( fsp );
+    if( rc )
+    {
+        rc = cpfs_mkfs( fsp, fsp->disk_size );
+        if( rc ) die_rc( "mkfs", rc );
+
+        rc = cpfs_mount( fsp );
+        if( rc ) die_rc( "Mount FS", rc );
+    }
+
+    //test();
+
+    rc = cpfs_umount( fsp );
+    if( rc ) die_rc( "Umount FS", rc );
+
+#if 1
+    printf("\n");
+    rc = cpfs_fsck( fsp, 0 );
+    if( rc ) cpfs_log_error( "fsck rc=%d", rc );
+#endif
+
+    rc = cpfs_stop( fsp );
+    if( rc ) die_rc( "Stop FS", rc );
+
+
+}
+
+
+
+
+static void mt_test(void)
+{
+    int rc;
+    pthread_t pt0, pt1;
+    void *retval;
+
+    rc = pthread_create( &pt0, 0, mt_run, fsp[0] );
+    rc = pthread_create( &pt1, 0, mt_run, fsp[1] );
+
+    pthread_join( pt0, &retval);
+    pthread_join( pt1, &retval);
+
+    //sleep(10000);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

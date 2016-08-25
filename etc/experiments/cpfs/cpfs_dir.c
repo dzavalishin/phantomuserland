@@ -312,10 +312,6 @@ cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 **/
 
 
-// TODO dir_scan_remove, dir_scan_update
-typedef enum { dir_scan_continue, dir_scan_success, dir_scan_error } dir_scan_ret_t;
-
-typedef dir_scan_ret_t (*dir_scan_func_t)( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg );
 
 
 

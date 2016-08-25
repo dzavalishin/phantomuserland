@@ -25,6 +25,7 @@ typedef enum { msg, warn, err } severity_t;
 static void fslog( severity_t severity, const char *fmt, ... );
 
 static errno_t fsck_sb( cpfs_fs_t *fs, int fix );
+static void fsck_scan_dirs( cpfs_fs_t *fs );
 
 
 static int nWarn = 0;
@@ -41,6 +42,7 @@ cpfs_fsck( cpfs_fs_t *fs, int fix )
     rc = fsck_sb( fs, fix );
     if( rc ) goto error;
 
+    fsck_scan_dirs( fs );
 
     printf("FSCK done, %d warnings, %d errors\n", nWarn, nErr);
 
@@ -181,6 +183,63 @@ void fslog( severity_t severity, const char *fmt, ... )
 
     printf( "\n");
 }
+
+
+
+
+// -----------------------------------------------------------------------
+//
+// Scan dir tree
+//
+// -----------------------------------------------------------------------
+static errno_t fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, int depth );
+
+static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg )
+{
+    errno_t rc;
+    int depth = (int)farg;
+
+    if( de->inode == 0 )    return dir_scan_continue;
+
+    //if( 0 == strcmp( (const char*)farg, de->name ) )        return dir_scan_error;
+
+    int i;
+    for( i = depth; i; i-- ) printf("\t");
+    printf("%s", de->name);
+
+    int isdir = 0;
+    rc = cpfs_is_dir( fs, de->inode, &isdir );
+
+    if( isdir )
+    {
+        printf("/");
+        rc = fsck_scan_dir( fs, de->inode, depth+1 );
+        if( rc ) return dir_scan_error;
+    }
+    else
+    {
+    }
+    printf("\n");
+
+
+    return dir_scan_continue;
+}
+
+
+
+errno_t
+fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, int depth )
+{
+    printf("fsck scan dirs\n");
+    errno_t rc = cpfs_scan_dir( fs, dir, de_subscan, (void *)depth );
+    return rc;
+}
+
+static void fsck_scan_dirs( cpfs_fs_t *fs )
+{
+    fsck_scan_dir( fs, 0, 0 );
+}
+
 
 
 

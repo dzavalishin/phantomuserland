@@ -12,6 +12,7 @@ clean::
 # is this size ok for size we use in mkfs?
 image::
 	dd if=/dev/zero of=disk.img count=10000 bs=4096
+	dd if=/dev/zero of=disk1.img count=1000 bs=4096
 
 
 test:
