@@ -296,7 +296,7 @@ cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 **/
 
 
-
+// TODO dir_scan_remove, dir_scan_update
 typedef enum { dir_scan_continue, dir_scan_success, dir_scan_error } dir_scan_ret_t;
 
 typedef dir_scan_ret_t (*dir_scan_func_t)( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg );
@@ -433,6 +433,40 @@ cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 }
 
 
+
+
+/**
+ *
+ * Use of general directory scan function: dir has entry
+ *
+**/
+
+
+
+static dir_scan_ret_t de_hasentry( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg )
+{
+    (void) fs;
+    (void) farg;
+
+    if( de->inode == 0 )    return dir_scan_continue;
+
+    if( 0 == strcmp( (const char*)farg, de->name ) )
+        return dir_scan_error;
+
+    return dir_scan_continue;
+}
+
+
+
+errno_t
+cpfs_dir_has_entry( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *name )
+{
+    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_hasentry, (void *)name );
+    if( rc == EMFILE )
+        return EEXIST;
+
+    return 0;
+}
 
 
 
