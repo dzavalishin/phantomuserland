@@ -373,7 +373,7 @@ test_path(void)
 
     ret = cpfs_mkdir( &fs, d1, 0 );
     test_int_eq( ret, 0 );
-    cpfs_dump_dir( &fs, 0 );
+    //cpfs_dump_dir( &fs, 0 );
 
 
     ret = cpfs_file_unlink( &fs, d1, 0 );
