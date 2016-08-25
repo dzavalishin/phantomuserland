@@ -137,6 +137,9 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
 
     if( !isdir ) return ENOTDIR;
 
+    rc = cpfs_dir_has_entry( fs, dir_ino, fname );
+    if( rc ) return rc;
+
     // read in directory inode to find out dir file len
 
     cpfs_size_t fsize;
