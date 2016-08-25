@@ -473,7 +473,7 @@ errno_t cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_dat
     if( rc ) return rc;
 
     cpfs_ino_t ret;
-    rc = cpfs_namei( fs, last_dir_ino, last, &ret, 0 );
+    rc = cpfs_namei( fs, last_dir_ino, last, &ret );
 
 
     struct cpfs_inode *ip = cpfs_lock_ino( fs, ret );

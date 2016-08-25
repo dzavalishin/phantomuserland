@@ -235,22 +235,23 @@ static void mke( const char *name )
 static void rme( const char *name )
 {
     //errno_t rc = cpfs_free_dirent( 0, name );
-    cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( &fs, 0, name, &ret, 1 );
+    //cpfs_ino_t ret;
+    //errno_t rc = cpfs_namei( &fs, 0, name, &ret, 1 );
+    errno_t rc = cpfs_free_dirent( &fs, 0, name );
     if( rc ) cpfs_panic( "rme %d", rc );
 }
 
 static void ise( const char *name )
 {
     cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( &fs, 0, name, &ret, 0 );
+    errno_t rc = cpfs_namei( &fs, 0, name, &ret );
     if( rc ) cpfs_panic( "ise %d", rc );
 }
 
 static void noe( const char *name )
 {
     cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( &fs, 0, name, &ret, 0 );
+    errno_t rc = cpfs_namei( &fs, 0, name, &ret );
     if( rc != ENOENT ) cpfs_panic( "noe %d", rc );
 }
 
@@ -417,6 +418,11 @@ test_path(void)
 
     ret = cpfs_file_open( &fs, &fd1, f1, O_CREAT, 0 );
     test_int_eq( ret, 0 );
+
+    // WRONG TEST - open will open dup fn allways! impl O_EXCL?
+    // Attempt to create one more with same name - must fail - TODO - doesn't fail
+//    ret = cpfs_file_open( &fs, &fd2, f1, O_CREAT, 0 );
+//    test_int_eq( ret, EEXIST );
 
 
     ret = cpfs_file_close( fd1 );

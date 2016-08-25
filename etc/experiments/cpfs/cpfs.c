@@ -38,7 +38,7 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *full_name, int flags, v
     if( rc ) return rc;
 
     //rc = cpfs_namei( cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino ); // find name
-    rc = cpfs_namei( fs, last_dir_ino, last, &file_ino, 0 );
+    rc = cpfs_namei( fs, last_dir_ino, last, &file_ino );
 
     if(rc && (flags & O_CREAT))
     {

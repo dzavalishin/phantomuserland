@@ -20,7 +20,7 @@ cpfs_file_unlink( struct cpfs_fs *fs, const char *full_name, void * user_id_data
     const char *last;
     cpfs_ino_t last_dir_ino;
     errno_t rc;
-    cpfs_ino_t ret;
+    //cpfs_ino_t ret;
 
     rc = cpfs_descend_dir( fs, full_name, &last, &last_dir_ino );
     if( rc ) return rc;
@@ -28,7 +28,7 @@ cpfs_file_unlink( struct cpfs_fs *fs, const char *full_name, void * user_id_data
     // TODO check if it is a directory, check non-empty
 #if 1
     cpfs_ino_t possible_dir_ino;
-    rc = cpfs_namei( fs, last_dir_ino, last, &possible_dir_ino, 0 );
+    rc = cpfs_namei( fs, last_dir_ino, last, &possible_dir_ino );
     if( rc ) return rc;
 
     int isdir = 0;
@@ -41,7 +41,7 @@ cpfs_file_unlink( struct cpfs_fs *fs, const char *full_name, void * user_id_data
     }
 #endif
 
-    rc = cpfs_namei( fs, last_dir_ino, last, &ret, 1 );
+    rc = cpfs_free_dirent( fs, last_dir_ino, last );
 
     return rc;
 }

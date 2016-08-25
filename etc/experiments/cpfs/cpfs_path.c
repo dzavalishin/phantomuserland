@@ -62,7 +62,7 @@ cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t
 
         strncpy( name, cur_name_start, len );
 
-        ret = cpfs_namei( fs, cur_dir_ino, name, &next_ino, 0 ); // find name
+        ret = cpfs_namei( fs, cur_dir_ino, name, &next_ino ); // find name
         //printf("namei( \"%s\" ) = %d, ino = %lld\n", name, ret, next_ino );
         if( ret )
         {

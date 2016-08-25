@@ -16,8 +16,8 @@
 
 //#warning code is wrong, can't use cpfs_disk_read/write, must use cpfs_ino_file_read
 
-errno_t
-cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove )
+static errno_t
+cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove )
 {
     errno_t rc;
     int isdir = 0;
@@ -100,6 +100,19 @@ cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *fi
     return ENOENT;
 }
 
+
+errno_t
+cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino )
+{
+    return cpfs_namei_impl( fs, dir_ino, fname, file_ino, 0 );
+}
+
+errno_t
+cpfs_free_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname )
+{
+    cpfs_ino_t file_ino; // dummy
+    return cpfs_namei_impl( fs, dir_ino, fname, &file_ino, 1 );
+}
 
 
 

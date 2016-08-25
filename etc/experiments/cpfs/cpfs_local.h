@@ -259,8 +259,11 @@ errno_t                 cpfs_update_ino_mtime( cpfs_fs_t *fs, cpfs_ino_t ino );
 // TODO problem: linear scan can be very slow, need tree?
 
 errno_t                 cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t file_ino ); // allocate a new dir entry in a dir
-//errno_t                       cpfs_free_dirent( cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
-errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
+errno_t                 cpfs_free_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname ); // free dir entry (write 0 to inode field)
+errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino ); // find name
+
+// was errno_t                 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove ); // find name
+
 
 errno_t                 cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno ); // Check if inode contains a directory
 errno_t			cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino );
