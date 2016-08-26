@@ -18,7 +18,7 @@ cpfs_init( cpfs_fs_t *fs )
 {
     errno_t rc;
 
-    cpfs_assert( sizeof(struct cpfs_dir_entry) < CPFS_DIR_REC_SIZE );
+    cpfs_assert( sizeof(struct cpfs_dir_entry) <= CPFS_DIR_REC_SIZE );
 
     // TODO deinit what is partially inited on fail
 

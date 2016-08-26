@@ -58,7 +58,7 @@ error:
 static errno_t
 fsck_sb( cpfs_fs_t *fs, int fix )
 {
-    errno_t rc;
+    //errno_t rc;
 
     printf("FSCK - ckeck superblock\n");
 
@@ -145,7 +145,6 @@ fsck_sb( cpfs_fs_t *fs, int fix )
 
 
 
-    // TODO scan all dirs, find all used inodes, check that actual inodes are used/unused correspondingly
 
 
     return 0;

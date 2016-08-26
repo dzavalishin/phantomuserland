@@ -27,6 +27,7 @@
 
 void    test_superblock(cpfs_fs_t *fsp)
 {
+    (void) fsp;
     // TODO write me
 }
 
@@ -119,8 +120,6 @@ test_disk_alloc(cpfs_fs_t *fsp)
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
 
     reset_q(&q);
-
-    // TODO attempt to allocate over the end of disk, check for graceful deny
 
     printf("Disk block allocation test: DONE\n");
 }
@@ -318,7 +317,7 @@ test_directory(cpfs_fs_t *fsp)
 void
 test_file_data(cpfs_fs_t *fsp)        	// Create, write, close, reopen, read and compare data, in a mixed way
 {
-    int fd1, fd2, fd3;
+    int fd1, fd2; //, fd3;
     errno_t rc;
     char test_buf[256];
 
@@ -439,7 +438,7 @@ test_path(cpfs_fs_t *fsp)
 #endif
 
 
-    int fd1, fd2;
+    int fd1; //, fd2;
 
     ret = cpfs_file_open( fsp, &fd1, f1, O_CREAT, 0 );
     test_int_eq( ret, 0 );
@@ -544,10 +543,13 @@ static errno_t fill_file( cpfs_fs_t *fsp, int num, unsigned size )
         test_int_eq( ret, 0 );
 
         pos += part;
+        size -= part;
     }
         
     ret = cpfs_file_close( fd );
     test_int_eq( ret, 0 );
+
+    return 0;
 }
 
 static errno_t kill_file( cpfs_fs_t *fsp, int num )
@@ -577,7 +579,7 @@ void    test_out_of_space(cpfs_fs_t *fsp)
 
     for( num = 0; num < max; num++ )
     {
-        ret = fill_file( fsp, num, 3448*20 );
+        ret = fill_file( fsp, num, 3448*10 );
         test_int_eq( ret, ENOSPC );
     }
 

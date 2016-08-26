@@ -16,7 +16,7 @@
 #include "cpfs_types.h"
 #include "cpfs_defs.h"
 
-#define cpfs_assert(__check)
+#define cpfs_assert(__check) if(!(__check)) cpfs_panic("Assert failed in " __FILE__ " @ %d func %s\n\t" #__check "\n\n", __LINE__, __func__ );
 
 struct cpfs_fs;
 
@@ -52,7 +52,7 @@ errno_t 	cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_da
 errno_t         cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data );
 errno_t         cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data );
 
-errno_t         cpfs_disk_trim( int disk_id, cpfs_blkno_t block ); // Tell SSD we don't need this disk block anymore - TODO use me
+errno_t         cpfs_disk_trim( int disk_id, cpfs_blkno_t block ); // Tell SSD we don't need this disk block anymore
 
 
 // kernel services
@@ -79,5 +79,12 @@ void            cpfs_mutex_unlock( cpfs_mutex m );
 cpfs_time_t	cpfs_get_current_time(void);
 
 errno_t 	cpfs_os_run_idle_thread( void* (*func_p)(void *arg), void *arg ); // Request OS to start thread
+
+
+// called by fs to find out if user can do something
+
+typedef enum { cpfs_r_other, cpfs_r_read, cpfs_r_write, cpfs_r_stat, cpfs_r_mkdir, cpfs_r_unlink } cpfs_right_t;
+
+errno_t         cpfs_os_access_rights_check( struct cpfs_fs *fs, cpfs_right_t t, void *user_id_data, const char *fname );
 
 #endif // CPFS_H

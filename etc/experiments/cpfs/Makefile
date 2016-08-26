@@ -1,4 +1,4 @@
-CFLAGS +=-g
+CFLAGS +=-g -Wall -Wextra
 
 
 cpfs: main.o \

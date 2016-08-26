@@ -87,6 +87,9 @@ cpfs_mkdir( cpfs_fs_t *fs, const char *path, void * user_id_data )
     cpfs_ino_t new_dir_ino;
     errno_t rc;
 
+    rc = cpfs_os_access_rights_check( fs, cpfs_r_mkdir, user_id_data, path );
+    if( rc ) return rc;
+
     rc = cpfs_descend_dir( fs, path, &last, &last_dir_ino );
     if( rc ) return rc;
 

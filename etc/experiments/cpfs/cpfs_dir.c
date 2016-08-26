@@ -41,7 +41,7 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
 
     int nentry = fsize/CPFS_DIR_REC_SIZE;
 
-    cpfs_assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 );
+    cpfs_assert( (fsize%CPFS_DIR_REC_SIZE) == 0 );
 
     int nblk = nentry / CPFS_DIR_PER_BLK;
     int blkpos = 0;
@@ -154,7 +154,7 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
 
     int nentry = fsize/CPFS_DIR_REC_SIZE;
 
-    cpfs_assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 );
+    cpfs_assert( (fsize%CPFS_DIR_REC_SIZE) == 0 );
 
     int nblk = nentry / CPFS_DIR_PER_BLK;
     int blkpos = 0;
@@ -330,7 +330,7 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg 
     errno_t rc;
     int isdir = 0;
 
-    cpfs_assert( file_ino != 0 );
+    //cpfs_assert( file_ino != 0 );
 
     rc = cpfs_is_dir( fs, dir_ino, &isdir );
     if( rc ) return rc;
@@ -346,7 +346,7 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg 
 
     int nentry = fsize/CPFS_DIR_REC_SIZE;
 
-    cpfs_assert( (inode.fsize%CPFS_DIR_REC_SIZE) == 0 );
+    cpfs_assert( (fsize%CPFS_DIR_REC_SIZE) == 0 );
 
     int nblk = nentry / CPFS_DIR_PER_BLK;
     int blkpos = 0;

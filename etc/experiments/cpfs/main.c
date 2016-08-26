@@ -43,8 +43,6 @@ void die_rc( const char *msg, int rc )
 
 void test(cpfs_fs_t *fsp)
 {
-    // TODO tests
-
     test_out_of_space(fsp);
 
     test_path(fsp);
@@ -70,6 +68,8 @@ void test(cpfs_fs_t *fsp)
 
 int main( int ac, char**av )
 {
+    (void) ac;
+    (void) av;
 
     errno_t 		rc;
 
@@ -170,7 +170,7 @@ cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data )
     return (rc == CPFS_BLKSIZE) ? 0 : EIO;
 }
 
-// TODO time
+
 cpfs_time_t
 cpfs_get_current_time(void)
 {
@@ -183,14 +183,14 @@ cpfs_get_current_time(void)
 void cpfs_mutex_lock( cpfs_mutex m)
 {
     // TODO pthreads mutex?
-    cpfs_assert( m == MUTEX_TEST_VAL );
+//    cpfs_assert( m == MUTEX_TEST_VAL );
 }
 
 
 void cpfs_mutex_unlock( cpfs_mutex m)
 {
     // TODO pthreads mutex?
-    cpfs_assert( m == MUTEX_TEST_VAL );
+//    cpfs_assert( m == MUTEX_TEST_VAL );
 }
 
 void cpfs_mutex_init( cpfs_mutex *m)
@@ -213,7 +213,7 @@ void cpfs_debug_fdump( const char *fn, void *p, unsigned size ) // dump some dat
     if( fd < 0 )
         cpfs_panic("cpfs_debug_fdump: can't open '%d'", fn);
 
-    if( size != write( fd, p, size ) )
+    if( ((int)size) != write( fd, p, size ) )
         cpfs_panic("cpfs_debug_fdump: can't write to '%d'", fn);
 
     close( fd );
@@ -242,6 +242,16 @@ cpfs_os_run_idle_thread( void* (*func_p)(void *arg), void *arg ) // Request OS t
 }
 
 
+errno_t
+cpfs_os_access_rights_check( struct cpfs_fs *fs, cpfs_right_t t, void *user_id_data, const char *fname )
+{
+    (void) fs;
+    (void) t;
+    (void) user_id_data;
+    (void) fname;
+
+    return 0; // can do anything
+}
 
 
 
@@ -285,7 +295,7 @@ void* mt_run(void *arg)
     rc = cpfs_stop( fsp );
     if( rc ) die_rc( "Stop FS", rc );
 
-
+    return 0;
 }
 
 
@@ -298,7 +308,10 @@ static void mt_test(void)
     void *retval;
 
     rc = pthread_create( &pt0, 0, mt_run, fsp[0] );
+    if( rc ) die_rc( "thread 0", rc );
+
     rc = pthread_create( &pt1, 0, mt_run, fsp[1] );
+    if( rc ) die_rc( "thread 1", rc );
 
     pthread_join( pt0, &retval);
     pthread_join( pt1, &retval);

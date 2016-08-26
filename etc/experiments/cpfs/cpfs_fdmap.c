@@ -39,7 +39,7 @@ errno_t
 cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd )
 {
     cpfs_assert( fd != 0 );
-    cpfs_assert( fid != 0 );
+    cpfs_assert( fs != 0 );
 
     cpfs_mutex_lock( fdmap_mutex );
 
@@ -114,8 +114,7 @@ cpfs_fdmap_lock( int fd, cpfs_fid_t **fid )
         return EINVAL;
     }
 
-    // TODO document this limit
-    if( !fdmap[fd].lock > 126 ) // TODO max char macros
+    if( fdmap[fd].lock > 126 ) // TODO max char macros // TODO don't panic
     {
         cpfs_panic( "too many locks for fd %d", fd );
         //cpfs_mutex_unlock( fdmap_mutex );
@@ -145,7 +144,7 @@ cpfs_fdmap_unlock( int fd )
         //return EINVAL;
     }
 
-    if( !fdmap[fd].lock <= 0 )
+    if( fdmap[fd].lock <= 0 )
     {
         cpfs_panic( "unlock unlocked fd %d", fd );
         //cpfs_mutex_unlock( fdmap_mutex );

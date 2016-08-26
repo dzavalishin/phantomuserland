@@ -115,6 +115,8 @@ cpfs_update_ino_mtime( cpfs_fs_t *fs, cpfs_ino_t ino )
     cpfs_touch_ino( fs, ino );
 
     cpfs_unlock_ino( fs, ino );
+
+    return 0;
 }
 
 

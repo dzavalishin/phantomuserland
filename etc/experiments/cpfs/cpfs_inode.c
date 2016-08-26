@@ -372,13 +372,15 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
 
     // done with inode, now free disk blocks
 
+    // NB! Can't use inode below, just copy!
+
     cpfs_blkno_t blk;
     cpfs_blkno_t phys_blk;
 
     for( blk = 0; (blk < nblk) && (blk < CPFS_INO_DIR_BLOCKS); blk++ )
     {
-        phys_blk = inode->blocks0[blk];
-        cpfs_free_disk_block( fs, blk );
+        phys_blk = copy.blocks0[blk];
+        cpfs_free_disk_block( fs, phys_blk );
     }
 
     // TODO free indirect blocks
@@ -440,6 +442,8 @@ cpfs_inode_update_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t size )
 void
 cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii )
 {
+    (void) fs;
+
     ii->fsize = 0;
     ii->nlinks = 1;
     ii->ftype = 0;
@@ -466,6 +470,9 @@ errno_t cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_dat
     const char *last;
     cpfs_ino_t last_dir_ino;
     errno_t rc;
+
+    rc = cpfs_os_access_rights_check( fs, cpfs_r_stat, user_id_data, name );
+    if( rc ) return rc;
 
     cpfs_assert( stat != 0 );
 

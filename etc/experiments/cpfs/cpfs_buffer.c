@@ -180,7 +180,11 @@ cpfs_buf_unlock( cpfs_fs_t *fs, cpfs_blkno_t blk, char write )
         }
     }
 
+    cpfs_log_error( "unlock: buf for blk %lld is not found", (long long)blk );
+
     cpfs_mutex_unlock( fs->buf_mutex );
+
+    return 0;
 }
 
 

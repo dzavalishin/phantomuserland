@@ -28,11 +28,12 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *full_name, int flags, v
     const char *last;
     cpfs_ino_t last_dir_ino;
 
-    //
-    // Attempt top open existing one
-    //
+    rc = cpfs_os_access_rights_check( fs, (flags & (O_CREAT|O_WRONLY|O_RDWR)) ? cpfs_r_write : cpfs_r_read, user_id_data, full_name );
+    if( rc ) return rc;
 
-    // TODO test nested dirs! :)
+    //
+    // Attempt to open existing one
+    //
 
     rc = cpfs_descend_dir( fs, full_name, &last, &last_dir_ino );
     if( rc ) return rc;

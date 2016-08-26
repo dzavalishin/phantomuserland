@@ -21,7 +21,7 @@
 
 errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 {
-    errno_t rc;
+    //errno_t rc;
 
     struct cpfs_sb      *sb = cpfs_lock_blk( fs, sb_blk );
 
@@ -107,7 +107,7 @@ errno_t cpfs_mount_sb( cpfs_fs_t *fs )
 
     if( sb->dirty )
     {
-        cpfs_log_error("can't mound dirty disk, need FSCK"); // TODO run fsck from here? different return code?
+        cpfs_log_error("can't mound dirty disk, need FSCK"); // TODO run fsck from here? different return code? EFTYPE
         cpfs_unlock_blk( fs, sb_blk );
         return EINVAL;
     }

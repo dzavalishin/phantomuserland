@@ -220,7 +220,6 @@ errno_t                 cpfs_write_sb( cpfs_fs_t *fs ); // just for stop fs, don
 void                    fic_refill( cpfs_fs_t *fs );
 
 
-// TODO multiple fs?
 
 
 cpfs_blkno_t            cpfs_alloc_disk_block( cpfs_fs_t *fs );
