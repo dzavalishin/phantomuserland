@@ -25,87 +25,100 @@
 #include <fcntl.h>
 
 
-void    test_superblock(void)
+void    test_superblock(cpfs_fs_t *fsp)
 {
+    // TODO write me
 }
 
 
 #define QSZ (2048*100)
 
-cpfs_blkno_t    tda_q[QSZ];
-int             tda_q_pp = 0;
-int             tda_q_gp = 0;
+//cpfs_blkno_t    tda_q[QSZ];
+//int             tda_q_pp = 0;
+//int             tda_q_gp = 0;
 
-static void reset_q(void)
+struct tda_q {
+    cpfs_blkno_t    q[QSZ];
+    int             pp;
+    int             gp;
+};
+
+
+static void reset_q(struct tda_q *tda)
 {
-    tda_q_pp = 0;
-    tda_q_gp = 0;
+    tda->pp = 0;
+    tda->gp = 0;
 }
 
 
-static void mass_blk_alloc(int cnt)
+static void mass_blk_alloc(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 {
     while(cnt-->0)
     {
-        cpfs_blkno_t blk = cpfs_alloc_disk_block( &fs );
+        cpfs_blkno_t blk = cpfs_alloc_disk_block( fsp );
         if( !blk ) cpfs_panic("can't allocate block");
-        if(tda_q_pp >= QSZ) cpfs_panic("test out of q");
-        tda_q[tda_q_pp++] = blk;
+        if(tda_q->pp >= QSZ) cpfs_panic("test out of q");
+        tda_q->q[tda_q->pp++] = blk;
     }
 }
 
-static void mass_blk_free(int cnt)
+static void mass_blk_free(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 {
     while(cnt-->0)
     {
-        cpfs_blkno_t blk = tda_q[tda_q_gp++];
+        cpfs_blkno_t blk = tda_q->q[tda_q->gp++];
         if( !blk ) cpfs_panic("mass_blk_free blk 0");
-        if(tda_q_gp >= QSZ) cpfs_panic("mass_blk_free test out of q");
-        cpfs_free_disk_block( &fs, blk );
+        if(tda_q->gp >= QSZ) cpfs_panic("mass_blk_free test out of q");
+        cpfs_free_disk_block( fsp, blk );
     }
 }
 
 
 void
-test_disk_alloc(void)
+test_disk_alloc(cpfs_fs_t *fsp)
 {
+    struct tda_q q;
+    //struct tda_q *tda = &q;
+
+    reset_q(&q);
+
     printf("Disk block allocation test: mixed alloc/free\n");
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
 
-    cpfs_blkno_t initial_free = fs.sb.free_count;
+    cpfs_blkno_t initial_free = fsp->sb.free_count;
 
-    mass_blk_alloc(1);   // +
-    mass_blk_alloc(120); // +
-    mass_blk_free(34);   // -
-    mass_blk_alloc(40);  // +
-    mass_blk_free(120);  // -
-    mass_blk_alloc(80);  // +
-    mass_blk_free(40);   // -
-    mass_blk_alloc(34);  // +
-    mass_blk_free(80);   // -
-    mass_blk_free(1);    // -
+    mass_blk_alloc(fsp,&q,1);   // +
+    mass_blk_alloc(fsp,&q,120); // +
+    mass_blk_free(fsp,&q,34);   // -
+    mass_blk_alloc(fsp,&q,40);  // +
+    mass_blk_free(fsp,&q,120);  // -
+    mass_blk_alloc(fsp,&q,80);  // +
+    mass_blk_free(fsp,&q,40);   // -
+    mass_blk_alloc(fsp,&q,34);  // +
+    mass_blk_free(fsp,&q,80);   // -
+    mass_blk_free(fsp,&q,1);    // -
 
-    if( initial_free != fs.sb.free_count )
+    if( initial_free != fsp->sb.free_count )
     {
-        printf("FAIL: initial_free (%lld) != fs.sb.free_count (%lld)\n", (long long)initial_free, (long long)fs.sb.free_count );
+        printf("FAIL: initial_free (%lld) != fs.sb.free_count (%lld)\n", (long long)initial_free, (long long)fsp->sb.free_count );
     }
 
     // Now do max possible run twice
 
     printf("Disk block allocation test: big runs\n");
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
-    reset_q();
-    mass_blk_alloc(1700);
+    reset_q(&q);
+    mass_blk_alloc(fsp,&q,1700);
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
-    mass_blk_free(1700);
+    mass_blk_free(fsp,&q,1700);
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
-    reset_q();
-    mass_blk_alloc(1700);
+    reset_q(&q);
+    mass_blk_alloc(fsp,&q,1700);
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
-    mass_blk_free(1700);
+    mass_blk_free(fsp,&q,1700);
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
 
-    reset_q();
+    reset_q(&q);
 
     // TODO attempt to allocate over the end of disk, check for graceful deny
 
@@ -121,7 +134,7 @@ test_disk_alloc(void)
 
 
 void
-test_inode_blkmap(void) 	// test file block allocation with inode
+test_inode_blkmap(cpfs_fs_t *fsp) 	// test file block allocation with inode
 {
     errno_t rc;
     cpfs_ino_t ino;
@@ -130,16 +143,16 @@ test_inode_blkmap(void) 	// test file block allocation with inode
 
     printf("Inode block map test: allocate inode\n");
 
-    rc = cpfs_alloc_inode( &fs, &ino );
+    rc = cpfs_alloc_inode( fsp, &ino );
     if( rc ) cpfs_panic( "can't alloc inode, %d", rc );
 
     printf("Inode block map test: inode %lld, allocate data block\n", (long long)ino);
 
 
-    rc = cpfs_alloc_block_4_file( &fs, ino, 0, &phys0 );
+    rc = cpfs_alloc_block_4_file( fsp, ino, 0, &phys0 );
     if( rc ) cpfs_panic( "cpfs_alloc_block_4_file rc=%d", rc );
 
-    rc = cpfs_find_block_4_file( &fs, ino, 0, &phys1 );
+    rc = cpfs_find_block_4_file( fsp, ino, 0, &phys1 );
     if( rc ) cpfs_panic( "cpfs_find_block_4_file rc=%d", rc );
 
     if( phys0 != phys1 )
@@ -151,7 +164,7 @@ test_inode_blkmap(void) 	// test file block allocation with inode
     printf("Inode block map test: allocated and found blk %lld\n", (long long)phys1);
 
     printf("Inode block map test: free inode\n");
-    cpfs_free_inode( &fs, ino );
+    cpfs_free_inode( fsp, ino );
 
     // todo test sparce allocation, far after the size of file
 
@@ -173,26 +186,25 @@ test_inode_blkmap(void) 	// test file block allocation with inode
 
 
 static const char test_data[] = "big brown something jumps over a lazy programmer and runs regression tests, though quite in vain";
-static char test_buf[256];
 
 void
-test_inode_io(void) 		// read/write directly with inode, no file name
+test_inode_io(cpfs_fs_t *fsp) 		// read/write directly with inode, no file name
 {
-
     errno_t rc;
     cpfs_ino_t ino;
+    char test_buf[256];
 
     printf("Inode io test: allocate inode\n");
 
-    rc = cpfs_alloc_inode( &fs, &ino );
+    rc = cpfs_alloc_inode( fsp, &ino );
     if( rc ) cpfs_panic( "can't alloc inode, %d", rc );
 
     printf("Inode io test: inode %lld, write file data\n", (long long)ino);
 
-    rc = cpfs_ino_file_write( &fs, ino, 0, test_data, sizeof(test_data) );
+    rc = cpfs_ino_file_write( fsp, ino, 0, test_data, sizeof(test_data) );
     if( rc ) cpfs_panic( "can't write data, %d", rc );
 
-    rc = cpfs_ino_file_read( &fs, ino, 0, test_buf, sizeof(test_data) );
+    rc = cpfs_ino_file_read( fsp, ino, 0, test_buf, sizeof(test_data) );
     if( rc ) cpfs_panic( "can't read data, %d", rc );
 
     if( memcmp( test_data, test_buf, sizeof(test_data) ) )
@@ -225,65 +237,65 @@ test_inode_io(void) 		// read/write directly with inode, no file name
 
 
 
-static void mke( const char *name )
+static void mke( cpfs_fs_t *fsp, const char *name )
 {
     // Write inode num -1 to dir entry for it to be extremely wrong
-    errno_t rc = cpfs_alloc_dirent( &fs, 0, name, -1 );
+    errno_t rc = cpfs_alloc_dirent( fsp, 0, name, -1 );
     if( rc ) cpfs_panic( "mke %d", rc );
 }
 
-static void rme( const char *name )
+static void rme( cpfs_fs_t *fsp, const char *name )
 {
     //errno_t rc = cpfs_free_dirent( 0, name );
     //cpfs_ino_t ret;
-    //errno_t rc = cpfs_namei( &fs, 0, name, &ret, 1 );
-    errno_t rc = cpfs_free_dirent( &fs, 0, name );
+    //errno_t rc = cpfs_namei( fsp, 0, name, &ret, 1 );
+    errno_t rc = cpfs_free_dirent( fsp, 0, name );
     if( rc ) cpfs_panic( "rme %d", rc );
 }
 
-static void ise( const char *name )
+static void ise( cpfs_fs_t *fsp, const char *name )
 {
     cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( &fs, 0, name, &ret );
+    errno_t rc = cpfs_namei( fsp, 0, name, &ret );
     if( rc ) cpfs_panic( "ise %d", rc );
 }
 
-static void noe( const char *name )
+static void noe( cpfs_fs_t *fsp, const char *name )
 {
     cpfs_ino_t ret;
-    errno_t rc = cpfs_namei( &fs, 0, name, &ret );
+    errno_t rc = cpfs_namei( fsp, 0, name, &ret );
     if( rc != ENOENT ) cpfs_panic( "noe %d", rc );
 }
 
 
 void
-test_directory(void)
+test_directory(cpfs_fs_t *fsp)
 {
     printf("Directory entry allocation test: simpe alloc/free\n");
 
-    mke("f1");
-    ise("f1");
-    rme("f1");
-    noe("f1");
+    mke(fsp,"f1");
+    ise(fsp,"f1");
+    rme(fsp,"f1");
+    noe(fsp,"f1");
 
     printf("Directory entry allocation test: mixed alloc/free\n");
 
-    mke("f1");
-    mke("f2");
-    ise("f1");
-    ise("f2");
+    mke(fsp,"f1");
+    mke(fsp,"f2");
+    ise(fsp,"f1");
+    ise(fsp,"f2");
 
-    rme("f1");
-    mke("f3");
-    noe("f1");
-    ise("f3");
+    rme(fsp,"f1");
+    mke(fsp,"f3");
+    noe(fsp,"f1");
+    ise(fsp,"f3");
 
-    ise("f2");
-    rme("f2");
-    noe("f2");
+    ise(fsp,"f2");
+    rme(fsp,"f2");
+    noe(fsp,"f2");
 
-    rme("f3");
-    noe("f3");
+    rme(fsp,"f3");
+    noe(fsp,"f3");
 
     printf("Directory entry allocation test: DONE\n");
 
@@ -304,18 +316,19 @@ test_directory(void)
 
 
 void
-test_file_data()        	// Create, write, close, reopen, read and compare data, in a mixed way
+test_file_data(cpfs_fs_t *fsp)        	// Create, write, close, reopen, read and compare data, in a mixed way
 {
+    int fd1, fd2, fd3;
+    errno_t rc;
+    char test_buf[256];
+
 
     printf("File API data test: Create files\n");
 
-    int fd1, fd2, fd3;
-    errno_t rc;
-
-    rc = cpfs_file_open( &fs, &fd1, "test_file_1", O_CREAT, 0 );
+    rc = cpfs_file_open( fsp, &fd1, "test_file_1", O_CREAT, 0 );
     if( rc )  cpfs_panic( "create 1 %d", rc );
 
-    rc = cpfs_file_open( &fs, &fd2, "test_file_2", O_CREAT, 0 );
+    rc = cpfs_file_open( fsp, &fd2, "test_file_2", O_CREAT, 0 );
     if( rc )  cpfs_panic( "create 2  %d", rc );
 
 
@@ -350,19 +363,19 @@ test_file_data()        	// Create, write, close, reopen, read and compare data,
 
 
 void
-test_path(void)
+test_path(cpfs_fs_t *fsp)
 {
     errno_t ret;
     const char *last;
     cpfs_ino_t last_dir_ino;
     struct cpfs_stat stat;
 
-    ret = cpfs_descend_dir( &fs, "/somefile.qq", &last, &last_dir_ino );
+    ret = cpfs_descend_dir( fsp, "/somefile.qq", &last, &last_dir_ino );
     test_str_eq( last, "somefile.qq" );
     test_int_eq( last_dir_ino, 0 );
     if( ret != 0 ) cpfs_panic("cpfs_descend_dir must allways succeed for single file name");
 
-    ret = cpfs_descend_dir( &fs, "surely_nonexisting_dir/somefile.qq", &last, &last_dir_ino );
+    ret = cpfs_descend_dir( fsp, "surely_nonexisting_dir/somefile.qq", &last, &last_dir_ino );
     if( ret != ENOENT ) cpfs_panic("cpfs_descend_dir found nonexisting dir");
 
 
@@ -373,32 +386,32 @@ test_path(void)
 
     // Create/remove dir
 
-    ret = cpfs_mkdir( &fs, d1, 0 );
+    ret = cpfs_mkdir( fsp, d1, 0 );
     test_int_eq( ret, 0 );
-    //cpfs_dump_dir( &fs, 0 );
+    //cpfs_dump_dir( fsp, 0 );
 
-    ret = cpfs_mkdir( &fs, d1, 0 );
+    ret = cpfs_mkdir( fsp, d1, 0 );
     test_int_eq( ret, EEXIST );
 
-    ret = cpfs_file_unlink( &fs, d1, 0 );
+    ret = cpfs_file_unlink( fsp, d1, 0 );
     test_int_eq( ret, 0 );
 
-    ret = cpfs_file_unlink( &fs, d1, 0 );
+    ret = cpfs_file_unlink( fsp, d1, 0 );
     test_int_eq( ret, ENOENT );
 
 
 
 
     // 2nd level dir
-    ret = cpfs_mkdir( &fs, d1, 0 );
+    ret = cpfs_mkdir( fsp, d1, 0 );
     test_int_eq( ret, 0 );
 #if 1
-    //cpfs_dump_dir( &fs, 0 );
+    //cpfs_dump_dir( fsp, 0 );
 
-    ret = cpfs_file_stat( &fs, d1, 0, &stat );
+    ret = cpfs_file_stat( fsp, d1, 0, &stat );
     test_int_eq( ret, 0 );
 
-    //cpfs_dump_dir( &fs, 0 );
+    //cpfs_dump_dir( fsp, 0 );
 
     cpfs_time_t now = cpfs_get_current_time();
 
@@ -415,29 +428,29 @@ test_path(void)
         cpfs_panic("mtime > atime");
 #endif
 
-    ret = cpfs_mkdir( &fs, d2, 0 );
+    ret = cpfs_mkdir( fsp, d2, 0 );
     test_int_eq( ret, 0 );
 
 #if 1
-    //cpfs_dump_dir( &fs, 0 );
-    ret = cpfs_file_stat( &fs, d2, 0, &stat );
+    //cpfs_dump_dir( fsp, 0 );
+    ret = cpfs_file_stat( fsp, d2, 0, &stat );
     test_int_eq( ret, 0 );
-    //cpfs_dump_dir( &fs, 0 );
+    //cpfs_dump_dir( fsp, 0 );
 #endif
 
 
     int fd1, fd2;
 
-    ret = cpfs_file_open( &fs, &fd1, f1, O_CREAT, 0 );
+    ret = cpfs_file_open( fsp, &fd1, f1, O_CREAT, 0 );
     test_int_eq( ret, 0 );
 
     // WRONG TEST - open will open dup fn allways! impl O_EXCL?
     // Attempt to create one more with same name - must fail - TODO - doesn't fail
-//    ret = cpfs_file_open( &fs, &fd2, f1, O_CREAT, 0 );
+//    ret = cpfs_file_open( fsp, &fd2, f1, O_CREAT, 0 );
 //    test_int_eq( ret, EEXIST );
 
 #if 1
-    ret = cpfs_file_stat( &fs, f1, 0, &stat );
+    ret = cpfs_file_stat( fsp, f1, 0, &stat );
     test_int_eq( ret, 0 );
 
     if( stat.ctime != stat.atime )
@@ -454,7 +467,7 @@ test_path(void)
     test_int_eq( ret, 0 );
 
 
-    ret = cpfs_file_stat( &fs, f1, 0, &stat );
+    ret = cpfs_file_stat( fsp, f1, 0, &stat );
     test_int_eq( ret, 0 );
 
     if( stat.ctime > stat.atime )
@@ -472,24 +485,24 @@ test_path(void)
     ret = cpfs_file_close( fd1 );
     test_int_eq( ret, 0 );
 
-    ret = cpfs_file_open( &fs, &fd1, f1, 0, 0 );
+    ret = cpfs_file_open( fsp, &fd1, f1, 0, 0 );
     test_int_eq( ret, 0 );
 
     ret = cpfs_file_close( fd1 );
     test_int_eq( ret, 0 );
 
-    ret = cpfs_file_unlink( &fs, f1, 0 );
+    ret = cpfs_file_unlink( fsp, f1, 0 );
     test_int_eq( ret, 0 );
 
     // Remove nonempty dir
-    ret = cpfs_file_unlink( &fs, d1, 0 );
+    ret = cpfs_file_unlink( fsp, d1, 0 );
     test_int_eq( ret, ENOTEMPTY );
 
 
-    ret = cpfs_file_unlink( &fs, d2, 0 );
+    ret = cpfs_file_unlink( fsp, d2, 0 );
     test_int_eq( ret, 0 );
 
-    ret = cpfs_file_unlink( &fs, d1, 0 );
+    ret = cpfs_file_unlink( fsp, d1, 0 );
     test_int_eq( ret, 0 );
 
 

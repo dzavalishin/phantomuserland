@@ -18,20 +18,20 @@
 
 static void mt_test(void);
 
-cpfs_fs_t fs =
+cpfs_fs_t fs0 =
 {
     .disk_id = 0,
     .disk_size = 10000,
 };
 
-cpfs_fs_t fs2 =
+cpfs_fs_t fs1 =
 {
     .disk_id = 1,
     .disk_size = 10000,
 };
 
 static int dfd[2];
-cpfs_fs_t *fsp[2] = { &fs, &fs2 };
+cpfs_fs_t *fsp[2] = { &fs0, &fs1 };
 
 
 void die_rc( const char *msg, int rc )
@@ -41,25 +41,25 @@ void die_rc( const char *msg, int rc )
 }
 
 
-void test(void)
+void test(cpfs_fs_t *fsp)
 {
     // TODO tests
 
-    test_path();
+    test_path(fsp);
 
-    test_superblock();
-    test_disk_alloc();
+    test_superblock(fsp);
+    test_disk_alloc(fsp);
 
-    test_inode_blkmap(); 	// test file block allocation with inode
+    test_inode_blkmap(fsp); 	// test file block allocation with inode
 
-    test_inode_io(); 		// read/write directly with inode, no file name
+    test_inode_io(fsp); 		// read/write directly with inode, no file name
 
-    // test_inode_alloc();
+    // test_inode_alloc(fsp);
 
-    test_directory();        // Create/lookup/destroy directory entries
-    // test_file_create(); 	// create, open and destroy multiple files, try open deleted files
-    test_file_data();        	// Create, write, close, reopen, read and compare data, in a mixed way
-    // test_mutithreaded();     // Do mix of prev tests in 10 threads, starting tests in random order
+    test_directory(fsp);        // Create/lookup/destroy directory entries
+    // test_file_create(fsp); 	// create, open and destroy multiple files, try open deleted files
+    test_file_data(fsp);        	// Create, write, close, reopen, read and compare data, in a mixed way
+    // test_mutithreaded(fsp);     // Do mix of prev tests in 10 threads, starting tests in random order
 
 }
 
@@ -84,32 +84,32 @@ int main( int ac, char**av )
 
 
 
-    rc = cpfs_init( &fs );
+    rc = cpfs_init( &fs0 );
     if( rc ) die_rc( "Init FS", rc );
 
 
-    rc = cpfs_mount( &fs );
+    rc = cpfs_mount( &fs0 );
     if( rc )
     {
-        rc = cpfs_mkfs( &fs, fs.disk_size );
+        rc = cpfs_mkfs( &fs0, fs0.disk_size );
         if( rc ) die_rc( "mkfs", rc );
 
-        rc = cpfs_mount( &fs );
+        rc = cpfs_mount( &fs0 );
         if( rc ) die_rc( "Mount FS", rc );
     }
 
-    test();
+    test(&fs0);
 
-    rc = cpfs_umount( &fs );
+    rc = cpfs_umount( &fs0 );
     if( rc ) die_rc( "Umount FS", rc );
 
 #if 1
     printf("\n");
-    rc = cpfs_fsck( &fs, 0 );
+    rc = cpfs_fsck( &fs0, 0 );
     if( rc ) cpfs_log_error( "fsck rc=%d", rc );
 #endif
 
-    rc = cpfs_stop( &fs );
+    rc = cpfs_stop( &fs0 );
     if( rc ) die_rc( "Stop FS", rc );
 
     mt_test();
