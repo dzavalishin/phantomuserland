@@ -104,12 +104,18 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
 errno_t
 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino )
 {
+    errno_t rc = cpfs_update_ino_atime( fs, dir_ino ); // SLOOW
+    if( rc ) return rc;
+
     return cpfs_namei_impl( fs, dir_ino, fname, file_ino, 0 );
 }
 
 errno_t
 cpfs_free_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname )
 {
+    errno_t rc = cpfs_update_ino_mtime( fs, dir_ino );
+    if( rc ) return rc;
+
     cpfs_ino_t file_ino; // dummy
     return cpfs_namei_impl( fs, dir_ino, fname, &file_ino, 1 );
 }
@@ -153,6 +159,10 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
     int nblk = nentry / CPFS_DIR_PER_BLK;
     int blkpos = 0;
 
+    // a bit early, mtime will be updated in case of io error too
+    rc = cpfs_update_ino_mtime( fs, dir_ino );
+    if( rc ) return rc;
+
     // Scan sequentially through the dir looking for name
 
     while( nblk-- > 0 )
@@ -186,7 +196,6 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
                 }
 
                 //cpfs_debug_fdump( "alloc_dirent.data", data, CPFS_BLKSIZE );
-
                 return rc;
             }
 
