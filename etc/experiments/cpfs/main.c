@@ -45,6 +45,8 @@ void test(cpfs_fs_t *fsp)
 {
     // TODO tests
 
+    test_out_of_space(fsp);
+
     test_path(fsp);
 
     test_superblock(fsp);

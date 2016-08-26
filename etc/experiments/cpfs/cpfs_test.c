@@ -510,6 +510,105 @@ test_path(cpfs_fs_t *fsp)
     printf("Path test: DONE\n");
 }
 
+#define MAX_FILL_SZ 4096
+
+static errno_t fill_file( cpfs_fs_t *fsp, int num, unsigned size )
+{
+    errno_t ret;
+    char name[32];
+    int fd;
+    const char junk[MAX_FILL_SZ];
+
+    sprintf( name, "fill_file_%d", num );
+
+    ret = cpfs_file_open( fsp, &fd, name, O_CREAT, 0 );
+    if( ret == ENOSPC )
+        return ret;
+    test_int_eq( ret, 0 );
+
+    cpfs_size_t pos = 0;
+
+    while( size > 0 )
+    {
+        unsigned part = size;
+        if( part > MAX_FILL_SZ )
+            part = MAX_FILL_SZ;
+
+        ret = cpfs_file_write( fd, pos, junk, part );
+        if( ret == ENOSPC )
+        {
+            ret = cpfs_file_close( fd );
+            test_int_eq( ret, 0 );
+            return ret;
+        }
+        test_int_eq( ret, 0 );
+
+        pos += part;
+    }
+        
+    ret = cpfs_file_close( fd );
+    test_int_eq( ret, 0 );
+}
+
+static errno_t kill_file( cpfs_fs_t *fsp, int num )
+{
+    errno_t ret;
+    char name[32];
+
+    sprintf( name, "fill_file_%d", num );
+
+    ret = cpfs_file_unlink( fsp, name, 0 );
+    test_int_eq( ret, 0 );
+
+    return 0;
+}
+
+
+
+void    test_out_of_space(cpfs_fs_t *fsp)
+{
+    errno_t ret;
+    int num;
+    int max = 100000;
+#if 0 // TODO E2BIG
+    printf("Out of space test\n");
+
+    // Create big files, wait for ENOSPC to come (out of space)
+
+    for( num = 0; num < max; num++ )
+    {
+        ret = fill_file( fsp, num, 3448*20 );
+        test_int_eq( ret, ENOSPC );
+    }
+
+    max = num+1;
+
+    for( num = 0; num < max; num++ )
+    {
+        ret = kill_file( fsp, num );
+        test_int_eq( ret, 0 );
+    }
+
+    // Create smapp files, wait for ENOSPC to come (out of inodes)
+
+    for( num = 0; num < max; num++ )
+    {
+        ret = fill_file( fsp, num, 20 );
+        test_int_eq( ret, ENOSPC );
+    }
+
+    max = num+1;
+
+    for( num = 0; num < max; num++ )
+    {
+        ret = kill_file( fsp, num );
+        test_int_eq( ret, 0 );
+    }
+
+    printf("Out of space test: DONE\n");
+#endif
+
+}
 
 
 

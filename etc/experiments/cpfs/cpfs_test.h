@@ -16,7 +16,7 @@
 
 //extern cpfs_fs_t fs;
 
-
+void    test_out_of_space(cpfs_fs_t *fsp);
 
 void    test_superblock(cpfs_fs_t *fsp);
 
