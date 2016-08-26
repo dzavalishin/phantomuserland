@@ -19,6 +19,8 @@ DISK_IMG_ORIG=../../oldtree/run_test/$DISK_IMG
 LOGFILE=make.log	# start with build log
 GRUB_MENU=tftp/tftp/menu.lst
 EXIT_CODE=0
+WAIT_LAUNCH=60		# seconds to start Phantom
+PANIC_AFTER=200		# seconds to wait for tests to finish or snapshot to be completed
 
 if [ -x /usr/libexec/qemu-kvm ] 	# CentOS check
 then
@@ -35,7 +37,8 @@ die ( ) {
 		# submit all details in CI, show pre-failure condition interactively
 		if [ "$SNAP_CI" ]
 		then
-			cat $LOGFILE | sed 's/[^m]*m//g;s///g'
+			cat $LOGFILE | sed 's/[^m]*m//g;s/
+//g'
 		else
 			tail $LOGFILE
 		fi
@@ -64,7 +67,7 @@ die ( ) {
 [ "$SNAP_CI" ] && {
 	COMPILE=1
 	unset DISPLAY
-	UNATTENDED=-unattended
+	UNATTENDED=-unattended		# let Phantom output its stack in case of panic
 }
 
 while [ $# -gt 0 ]
@@ -72,7 +75,7 @@ do
 	case "$1" in
 	-c)	COMPILE=2		;;	# also make clean
 	-f)	FOREGROUND=1		;;
-	-u*)	UNATTENDED=-unattended	;;
+	-u*)	UNATTENDED=-unattended	;;	# force running in unattended mode
 	-p)
 		shift
 		[ "$1" -gt 0 ] && PASSES="$1"
@@ -80,12 +83,22 @@ do
 	-ng)	unset DISPLAY	;;
 	-v)	VIRTIO=1	;;
 	-vv)	VIRTIO=2	;;		# virtio only
+	-wl)
+		shift
+		[ "$1" -gt 0 ] && WAIT_LAUNCH="$1"
+	;;
+	-wr)
+		shift
+		[ "$1" -gt 0 ] && PANIC_AFTER="$1"
+	;;
 	*)
-		echo "Usage: $0 [-u|-f] [-c] [-p N] [-nc] [-ng] [-v]
+		echo "Usage: $0 [-u|-f] [-c] [-p N] [-wl NN] [-wr MM] [-nc] [-ng] [-v]
 	-f	- run in foreground (no need to specify if other command line args presented)
 	-u	- run unattended (don't stop on panic for gdb)
 	-c	- run 'make all' first (default in CI mode)
 	-p N	- make N passes of snapshot test (default: N=2)
+	-wl NN	- wait NN seconds for successful launch (and kill test if the limit reached, default is $WAIT_LAUNCH)
+	-wr MM	- wait MM seconds for test results (and kill test if the limit reached, default is $PANIC_AFTER)
 	-ng	- do not show qemu/kvm window (default in CI mode)
 	-v	- use virtio for snaps
 	-vv	- use only virtio (no IDE drives)
@@ -125,30 +138,77 @@ done
 
 LOGFILE=serial0.log
 
-call_gdb ( ) {
-	ps -p $1 || return	# no need to run if QEMU is dead already
-	shift
+launch_phantom ( ) {
+	rm -f qemu.log gdb.log
 
-	if [ "$SNAP_CI" ]
+	# now prepare control pipes for pseudo-interactive run of qemu and gdb
+	QEMUCTL=`mktemp`
+	exec 3>> $QEMUCTL
+
+	GDBCTL=`mktemp`
+	exec 4>> $GDBCTL
+
+	tail -f $QEMUCTL --pid=$$ | $QEMU $QEMU_OPTS > qemu.log &
+	QEMU_PID=$!
+	echo QEMU control pipe is $QEMUCTL
+
+	# wait for Phantom to start
+	ELAPSED=2
+	sleep 2
+	#echo 'info qtree' >&3	# show setup
+
+	while [ $ELAPSED -lt $WAIT_LAUNCH ]
+	do
+		[ -s $LOGFILE ] && break
+
+		sleep 2
+		kill -0 $QEMU_PID || break
+		ELAPSED=`expr $ELAPSED + 2`
+	done
+
+	if [ -s $LOGFILE ]
 	then
-		echo "add-auto-load-safe-path $PHANTOM_HOME/.gdbinit" >> $SNAP_CACHE_DIR/.gdbinit
+		tail -f $GDBCTL --pid=$$ | gdb -cd=$PHANTOM_HOME -q > gdb.log &
+		echo GDB control pipe is $GDBCTL
 	else
-		# restore files
-		mv ${GRUB_MENU}.orig $GRUB_MENU
-
-		[ "$UNATTENDED" ] || {
-			echo "GAME OVER. Press Enter to start GDB..."
-			read n
-		}
+		ELAPSED=$PANIC_AFTER
+		LOG_MESSAGE="$LOGFILE is empty"
 	fi
+}
 
-	port="${1:-$GDB_PORT}"
-	shift
-
+call_gdb ( ) {
 	echo "
 
 FATAL! Phantom stopped (panic)"
-	echo "
+	echo 'bt full' >&4
+
+	[ "$SNAP_CI" ] || {
+		# restore files
+		mv ${GRUB_MENU}.orig $GRUB_MENU
+
+		if [ "$UNATTENDED" ]
+		then
+			tail -n +5 gdb.log	# show gdb output
+		else
+			echo "Entering interactive gdb. Type 'q' to quit"
+			tail -n +5 -f gdb.log --pid=$$ &	# show gdb output
+			while :
+			do
+				read gdb_cmd
+
+				case "$gdb_cmd" in
+				q|quit)	break			;;
+				*)	echo "$gdb_cmd" >&4	;;
+				esac
+			done
+		fi
+	}
+
+	echo 'q' >&4
+}
+
+# setup GDB
+echo "
 set confirm off
 set pagination off
 symbol-file oldtree/kernel/phantom/phantom.pe
@@ -161,14 +221,12 @@ dir phantom/libphantom
 dir phantom/newos
 dir phantom/threads
 
-target remote localhost:$port
-
-bt full
+target remote localhost:$GDB_PORT
+b panic
+continue
 " > .gdbinit
-	gdb -cd=$PHANTOM_HOME -batch
 
-	[ "$1" ] && echo "$*"
-}
+[ "$SNAP_CI" ] && echo "add-auto-load-safe-path $PHANTOM_HOME/.gdbinit" >> $SNAP_CACHE_DIR/.gdbinit
 
 cd $TEST_DIR
 
@@ -188,13 +246,12 @@ done
 
 rm -f $LOGFILE
 
-[ "$DISPLAY" ] && GRAPH="-vga cirrus" || GRAPH=-nographic
-#GRAPH=-nographic
+[ "$DISPLAY" ] && GRAPH="-vga cirrus -monitor stdio" || GRAPH=-nographic
 
 [ "$VIRTIO" = 2 ] || IDE_DISKS="	-hda snapcopy.img \
 	-hdb $DISK_IMG"
 
-QEMU_OPTS="-L $QEMU_SHARE $GRAPH \
+QEMU_OPTS="-L $QEMU_SHARE $GRAPH -name Phantom \
 	-M pc -smp 4 $GDB_OPTS -boot a -no-reboot \
 	-net nic,model=ne2k_pci -net user \
 	-parallel file:lpt_01.log \

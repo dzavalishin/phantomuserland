@@ -10,6 +10,12 @@
  *
 **/
 
+#define DEBUG_MSG_PREFIX "threads.getset"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include "thread_private.h"
 #include <hal.h>
 #include <threads.h>
@@ -167,6 +173,46 @@ errno_t t_get_priority( tid_t tid, int *prio )
     *prio = t->priority;
     POST()
 }
+
+
+
+static void t_filter_set_flags( u_int32_t *set_flags )
+{
+    u_int32_t in_flags = *set_flags;
+
+    *set_flags &= SET_POSSIBLE_FLAGS;
+
+    if( in_flags != *set_flags )
+        SHOW_ERROR( 1, "Attempt to set/reset flags %x, possible are %x", in_flags, SET_POSSIBLE_FLAGS );
+}
+
+
+errno_t t_add_flags( tid_t tid, u_int32_t set_flags )
+{
+    PRE_ANY()
+    t_filter_set_flags( &set_flags );
+    t->thread_flags |= set_flags;
+    POST()
+}
+
+errno_t t_remove_flags( tid_t tid, u_int32_t reset_flags )
+{
+    PRE_ANY()
+    t_filter_set_flags( &reset_flags );
+    t->thread_flags &= ~reset_flags;
+    POST()
+}
+
+errno_t t_get_flags( tid_t tid, u_int32_t *flags )
+{
+    assert(flags);
+    PRE_ANY()
+    *flags = t->thread_flags;
+    POST()
+}
+
+
+
 
 // -----------------------------------------------------------
 // Process current thread only

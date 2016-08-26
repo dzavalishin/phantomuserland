@@ -391,6 +391,7 @@ int main(int argc, char **argv, char **envp)
     SHOW_FLOW0( 2, "Will run phantom threads... ");
     // Virtual machine will be run now in normal mode
     activate_all_threads();
+
     vm_enable_regular_snaps();
 
     //pressEnter("will look for drv stage 4");

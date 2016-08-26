@@ -1,0 +1,321 @@
+#if 0
+/*
+ * testcode
+ */
+
+port_id test_p1, test_p2, test_p3, test_p4;
+
+void port_test()
+{
+    char testdata[5];
+    thread_id t;
+    int res;
+    int32 dummy;
+    int32 dummy2;
+
+    strcpy(testdata, "abcd");
+
+    dprintf("porttest: port_create()\n");
+    test_p1 = port_create(1,    "test port #1");
+    test_p2 = port_create(10,   "test port #2");
+    test_p3 = port_create(1024, "test port #3");
+    test_p4 = port_create(1024, "test port #4");
+
+    dprintf("porttest: port_find()\n");
+    dprintf("'test port #1' has id %d (should be %d)\n", port_find("test port #1"), test_p1);
+
+    dprintf("porttest: port_write() on 1, 2 and 3\n");
+    port_write(test_p1, 1, &testdata, sizeof(testdata));
+    port_write(test_p2, 666, &testdata, sizeof(testdata));
+    port_write(test_p3, 999, &testdata, sizeof(testdata));
+    dprintf("porttest: port_count(test_p1) = %d\n", port_count(test_p1));
+
+    dprintf("porttest: port_write() on 1 with timeout of 1 sec (blocks 1 sec)\n");
+    port_write_etc(test_p1, 1, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    dprintf("porttest: port_write() on 2 with timeout of 1 sec (wont block)\n");
+    res = port_write_etc(test_p2, 777, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    dprintf("porttest: res=%d, %s\n", res, res == 0 ? "ok" : "BAD");
+
+    dprintf("porttest: port_read() on empty port 4 with timeout of 1 sec (blocks 1 sec)\n");
+    res = port_read_etc(test_p4, &dummy, &dummy2, sizeof(dummy2), PORT_FLAG_TIMEOUT, 1000000);
+    dprintf("porttest: res=%d, %s\n", res, res == ERR_PORT_TIMED_OUT ? "ok" : "BAD");
+
+    dprintf("porttest: spawning thread for port 1\n");
+    t = thread_create_kernel_thread("port_test", port_test_thread_func, NULL);
+    // resume thread
+    thread_resume_thread(t);
+
+    dprintf("porttest: write\n");
+    port_write(test_p1, 1, &testdata, sizeof(testdata));
+
+    // now we can write more (no blocking)
+    dprintf("porttest: write #2\n");
+    port_write(test_p1, 2, &testdata, sizeof(testdata));
+    dprintf("porttest: write #3\n");
+    port_write(test_p1, 3, &testdata, sizeof(testdata));
+
+    dprintf("porttest: waiting on spawned thread\n");
+    thread_wait_on_thread(t, NULL);
+
+    dprintf("porttest: close p1\n");
+    port_close(test_p2);
+    dprintf("porttest: attempt write p1 after close\n");
+    res = port_write(test_p2, 4, &testdata, sizeof(testdata));
+    dprintf("porttest: port_write ret %d\n", res);
+
+    dprintf("porttest: testing delete p2\n");
+    port_delete(test_p2);
+
+    dprintf("porttest: end test main thread\n");
+
+}
+
+int port_test_thread_func(void* arg)
+{
+    int msg_code;
+    int n;
+    char buf[6];
+    buf[5] = '\0';
+
+    dprintf("porttest: port_test_thread_func()\n");
+
+    n = port_read(test_p1, &msg_code, &buf, 3);
+    dprintf("port_read #1 code %d len %d buf %s\n", msg_code, n, buf);
+    n = port_read(test_p1, &msg_code, &buf, 4);
+    dprintf("port_read #1 code %d len %d buf %s\n", msg_code, n, buf);
+    buf[4] = 'X';
+    n = port_read(test_p1, &msg_code, &buf, 5);
+    dprintf("port_read #1 code %d len %d buf %s\n", msg_code, n, buf);
+
+    dprintf("porttest: testing delete p1 from other thread\n");
+    port_delete(test_p1);
+    dprintf("porttest: end port_test_thread_func()\n");
+
+    return 0;
+}
+
+
+#endif // test
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+
+
+/*
+ *	user level ports
+ */
+
+port_id user_port_create(int32 queue_length, const char *uname)
+{
+    dprintf("user_port_create: queue_length %d\n", queue_length);
+    if(uname != NULL) {
+        char name[SYS_MAX_OS_NAME_LEN];
+        int rc;
+
+        if(is_kernel_address(uname))
+            return ERR_VM_BAD_USER_MEMORY;
+
+        rc = user_strncpy(name, uname, SYS_MAX_OS_NAME_LEN-1);
+        if(rc < 0)
+            return rc;
+        name[SYS_MAX_OS_NAME_LEN-1] = 0;
+
+        return port_create(queue_length, name);
+    } else {
+        return port_create(queue_length, NULL);
+    }
+}
+
+int	user_port_close(port_id id)
+{
+    return port_close(id);
+}
+
+int	user_port_delete(port_id id)
+{
+    return port_delete(id);
+}
+
+port_id	user_port_find(const char *port_name)
+{
+    if(port_name != NULL) {
+        char name[SYS_MAX_OS_NAME_LEN];
+        int rc;
+
+        if(is_kernel_address(port_name))
+            return ERR_VM_BAD_USER_MEMORY;
+
+        rc = user_strncpy(name, port_name, SYS_MAX_OS_NAME_LEN-1);
+        if(rc < 0)
+            return rc;
+        name[SYS_MAX_OS_NAME_LEN-1] = 0;
+
+        return port_find(name);
+    } else {
+        return -EINVAL;
+    }
+}
+
+int	user_port_get_info(port_id id, struct port_info *uinfo)
+{
+    int 				res;
+    struct port_info	info;
+    int					rc;
+
+    if (uinfo == NULL)
+        return -EINVAL;
+    if(is_kernel_address(uinfo))
+        return ERR_VM_BAD_USER_MEMORY;
+
+    res = port_get_info(id, &info);
+    // copy to userspace
+    rc = user_memcpy(uinfo, &info, sizeof(struct port_info));
+    if(rc < 0)
+        return rc;
+    return res;
+}
+
+int	user_port_get_next_port_info(proc_id uproc,
+                                     uint32 *ucookie,
+                                     struct port_info *uinfo)
+{
+    int 				res;
+    struct port_info	info;
+    uint32				cookie;
+    int					rc;
+
+    if (ucookie == NULL)
+        return -EINVAL;
+    if (uinfo == NULL)
+        return -EINVAL;
+    if(is_kernel_address(ucookie))
+        return ERR_VM_BAD_USER_MEMORY;
+    if(is_kernel_address(uinfo))
+        return ERR_VM_BAD_USER_MEMORY;
+
+    // copy from userspace
+    rc = user_memcpy(&cookie, ucookie, sizeof(uint32));
+    if(rc < 0)
+        return rc;
+
+    res = port_get_next_port_info(uproc, &cookie, &info);
+    // copy to userspace
+    rc = user_memcpy(ucookie, &info, sizeof(uint32));
+    if(rc < 0)
+        return rc;
+    rc = user_memcpy(uinfo,   &info, sizeof(struct port_info));
+    if(rc < 0)
+        return rc;
+    return res;
+}
+
+ssize_t user_port_buffer_size(port_id port)
+{
+    return port_buffer_size_etc(port, SEM_FLAG_INTERRUPTABLE, 0);
+}
+
+ssize_t	user_port_buffer_size_etc(port_id port, uint32 flags, bigtime_t timeout)
+{
+    return port_buffer_size_etc(port, flags | SEM_FLAG_INTERRUPTABLE, timeout);
+}
+
+int32 user_port_count(port_id port)
+{
+    return port_count(port);
+}
+
+ssize_t user_port_read(port_id uport, int32 *umsg_code, void *umsg_buffer,
+                       size_t ubuffer_size)
+{
+    return user_port_read_etc(uport, umsg_code, umsg_buffer, ubuffer_size, 0, 0);
+}
+
+ssize_t	user_port_read_etc(port_id uport, int32 *umsg_code, void *umsg_buffer,
+                           size_t ubuffer_size, uint32 uflags, bigtime_t utimeout)
+{
+    ssize_t	res;
+    int32	msg_code;
+    int		rc;
+
+    if (umsg_code == NULL)
+        return ERR_INVALID_ARGS;
+    if (umsg_buffer == NULL)
+        return ERR_INVALID_ARGS;
+
+    if(is_kernel_address(umsg_code))
+        return ERR_VM_BAD_USER_MEMORY;
+    if(is_kernel_address(umsg_buffer))
+        return ERR_VM_BAD_USER_MEMORY;
+
+    res = port_read_etc(uport, &msg_code, umsg_buffer, ubuffer_size,
+                        uflags | PORT_FLAG_USE_USER_MEMCPY | SEM_FLAG_INTERRUPTABLE, utimeout);
+
+    rc = user_memcpy(umsg_code, &msg_code, sizeof(int32));
+    if(rc < 0)
+        return rc;
+
+    return res;
+}
+
+int	user_port_set_owner(port_id port, proc_id proc)
+{
+    return port_set_owner(port, proc);
+}
+
+int	user_port_write(port_id uport, int32 umsg_code, void *umsg_buffer,
+                        size_t ubuffer_size)
+{
+    return user_port_write_etc(uport, umsg_code, umsg_buffer, ubuffer_size, 0, 0);
+}
+
+int	user_port_write_etc(port_id uport, int32 umsg_code, void *umsg_buffer,
+                            size_t ubuffer_size, uint32 uflags, bigtime_t utimeout)
+{
+    if (umsg_buffer == NULL)
+        return ERR_INVALID_ARGS;
+    if(is_kernel_address(umsg_buffer))
+        return ERR_VM_BAD_USER_MEMORY;
+    return port_write_etc(uport, umsg_code, umsg_buffer, ubuffer_size,
+                          uflags | PORT_FLAG_USE_USER_MEMCPY | SEM_FLAG_INTERRUPTABLE, utimeout);
+}
+
+#endif // user ports
+
+
+
+
+
+

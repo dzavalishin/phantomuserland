@@ -22,7 +22,7 @@ public class Main {
 	public static final int PKT_T_FindReply = 12;
 	public static final int PKT_T_ReadRQ = 13;
 	public static final int PKT_T_ReadReply = 14;
-	public static final int PKT_T_WrireRQ = 15;
+	public static final int PKT_T_WriteRQ = 15;
 	public static final int PKT_T_WrireReply = 16;
 
 	//private static final int BUF_SIZE = 1024*1024*;

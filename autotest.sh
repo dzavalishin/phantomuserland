@@ -118,49 +118,9 @@ http://misc.dz.ru/~`whoami`/$1
 Previous copies are kept ($1.0 through .9)"
 }
 
-call_gdb ( ) {
-	[ "$UNATTENDED" ] || {
-		echo "GAME OVER. Press Enter to start GDB..."
-		read n
-	}
-	port="${1:-$GDB_PORT}"
-	shift
-	pid="$1"
-	shift
-	cd $PHANTOM_HOME
-	echo "
-
-FATAL! Phantom stopped (panic)"
-	echo "
-set confirm off
-set pagination off
-symbol-file oldtree/kernel/phantom/phantom.pe
-dir oldtree/kernel/phantom
-dir phantom/vm
-dir phantom/libc
-dir phantom/libc/ia32
-dir phantom/dev
-dir phantom/libphantom
-dir phantom/newos
-dir phantom/threads
-
-target remote localhost:$port
-
-bt full
-quit
-" > .gdbinit
-	gdb
-
-	[ "$1" ] && echo "$*"
-	[ "$pid" ] && kill -9 $pid
-	exit 0
-}
-
 # update data BEFORE checking for stalled copies
-GRUB_MENU=tftp/tftp/menu.lst
 [ "$CHECK_GIT" ] && {
-	git diff | grep -q "^--- $TEST_DIR/$GRUB_MENU" && \
-		rm $TEST_DIR/$GRUB_MENU
+	rm -f make.log
 	GIT_OUT=`git pull`
 	[ $? -ne 0 -o `echo "$GIT_OUT" | grep -c '^Already up-to-date'` -ne 0 ] && \
 		die "$MSG"
@@ -207,5 +167,5 @@ Previous test run stalled. Trying gdb..."
 trap at_exit 0 2
 
 [ "$COMPILE" ] && ./ci-build.sh ${FOREGROUND:+-f} $UNATTENDED ${WARN:+-w}
-[ "$TESTRUN" ] && ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
+[ $? -eq 0 -a "$TESTRUN" ] && ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
 [ $? -eq 0 -a "$SNAPTEST" ] && ./ci-snaptest.sh ${FOREGROUND:+-f} $UNATTENDED ${VIRTIO:+-v} ${TEXTONLY:+-ng} ${PASSES:+-p $PASSES}

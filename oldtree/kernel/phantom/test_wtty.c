@@ -110,14 +110,14 @@ static void _wtty_test(wtty_t *w)
 
     // wr thread
 
-    SHOW_FLOW0( 1, "start write thread\n" );
+    SHOW_FLOW0( 1, "start write thread" );
     hal_start_kernel_thread_arg( wtty_w_thread, w );
 
     while(!wtty_w_thread_runs) hal_sleep_msec(10);
     test_check_true(wtty_w_thread_runs);
     hal_sem_release( &thread_start );
 
-    SHOW_FLOW0( 1, "start read check\n" );
+    SHOW_FLOW0( 1, "start read check" );
     test_rd( w, MAXTB, 0 );
 
     hal_sleep_msec(100);
@@ -125,19 +125,24 @@ static void _wtty_test(wtty_t *w)
 
     // rd thread
 
-    SHOW_FLOW0( 1, "start read thread\n" );
+    SHOW_FLOW0( 1, "start read thread" );
     hal_start_kernel_thread_arg( wtty_r_thread, w );
 
     while(!wtty_r_thread_runs) hal_sleep_msec(10);
     test_check_true(wtty_r_thread_runs);
     hal_sem_release( &thread_start );
 
-    SHOW_FLOW0( 1, "start write check\n" );
+    SHOW_FLOW0( 1, "start write check" );
     
     rc = wtty_write(w, buf, MAXTB, 0);
     test_check_eq( rc, MAXTB );
 
-    hal_sleep_msec(100);
+    //hal_sleep_msec(100);
+
+    int i = 1000;
+    while( (i-- > 0) && wtty_r_thread_runs )
+        hal_sleep_msec(1);
+
     test_check_false(wtty_r_thread_runs);
 
 

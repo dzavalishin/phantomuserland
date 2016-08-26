@@ -1,0 +1,33 @@
+Experimental simple and reliable FS code, not so connected to Phantom OS
+
+Bugs
+
+- mutex init is missing now and there
+
+Questions:
+
+- max disk size
+- max file size
+- have atime, ctime, mtime?
+- time variable format/unit/0 time?
+
+- max num of concurrent io ops
+
+- open/create timing depends on max file count in dir
+
+TODO
+- mark each func with max disk r/w ops count and max execution time on target CPU
+
+- disk struct align - check field order and use GCC attributes?
+
+- sb lock to return ptr to sb, no global var
+
+- fsck
+- multiple fs (fs struct and param)
+- r/w errors, not panic
+
+- subdirs
+
+- inode complete free/alloc code
+
+- init inode section in mkfs, remove auto-growth for inodes code

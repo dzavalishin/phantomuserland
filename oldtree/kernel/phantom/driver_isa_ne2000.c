@@ -242,56 +242,6 @@ static phantom_device_t * common_ne2000_probe( int port, int irq, int stage )
     else
     {
         if_simple_setup(interface, WIRED_ADDRESS, WIRED_NETMASK, WIRED_BROADCAST, WIRED_NET, WIRED_ROUTER, DEF_ROUTE_ROUTER );
-/*
-        ifaddr *address;
-
-        // set the ip address for this net interface
-        address = malloc(sizeof(ifaddr));
-        address->addr.len = 4;
-        address->addr.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->addr) = WIRED_ADDRESS;
-
-        address->netmask.len = 4;
-        address->netmask.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->netmask) = WIRED_NETMASK; 
-
-        address->broadcast.len = 4;
-        address->broadcast.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->broadcast) = WIRED_BROADCAST;
-
-        if_bind_address(interface, address);
-
-        // set up an initial routing table
-
-        int rc;
-        if( (rc = ipv4_route_add(
-                                 WIRED_NET,
-                                 WIRED_NETMASK,
-                                 WIRED_ROUTER,
-                                 interface->id) ) )
-        {
-            SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
-        }
-        else
-        {
-            SHOW_INFO0( 1, "Adding route - ok");
-        }
-
-
-        SHOW_INFO0( 1, "Adding default route...");
-        if( (rc = ipv4_route_add_default(
-                                         WIRED_ROUTER,
-                                         interface->id,
-                                         DEF_ROUTE_ROUTER
-                                        ) ) )
-        {
-            SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
-        }
-        else
-        {
-            SHOW_INFO0( 1, "Adding route - ok");
-        }
-*/
     }
 
 

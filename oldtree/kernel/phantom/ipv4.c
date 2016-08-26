@@ -19,7 +19,7 @@
 
 #include <kernel/net.h>
 
-#include "khash.h"
+#include <kernel/khash.h>
 #include <kernel/net/ethernet.h>
 
 #include <kernel/atomic.h>

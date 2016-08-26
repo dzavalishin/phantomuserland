@@ -12,6 +12,19 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define UHCI_INTERRUPT 0
+#define OHCI_INTERRUPT 1
+
+#define COMPILE_UHCI 1
+#define COMPILE_OHCI 1
+
+// Use spinlocks for pool, not mutexes - does not work yet
+#define CONF_POOL_SPIN 0
+
+// newos-style ports based on pool
+#define CONF_NEW_PORTS 1
+
+// syscall count in VM sys - must be 1, cleanup ifdefs and delete
 #define CONF_USE_VM_SYS_SIZE 1
 
 // use new (handle based) controlling ttys for threads
@@ -106,9 +119,6 @@
 #define NET_CHATTY 0
 #endif
 
-
-#define COMPILE_OHCI 0
-#define COMPILE_UHCI 0
 
 
 #define COMPILE_WEAKREF 0
