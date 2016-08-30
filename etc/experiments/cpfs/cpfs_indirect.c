@@ -118,3 +118,45 @@ fill_array:
 
 
 
+
+
+
+
+
+
+
+
+errno_t
+cpfs_free_indirect( cpfs_fs_t *fs, cpfs_blkno_t indir_blk, int depth )
+{
+    //errno_t rc, rc1;
+    unsigned int i;
+
+    if( indir_blk == 0 ) return 0;
+
+    struct cpfs_indir *iblk = cpfs_lock_blk( fs, indir_blk );
+    cpfs_assert( iblk );
+
+    for( i = 0; i < CPFS_INDIRECT_PER_BLK; i++ )
+    {
+        cpfs_blkno_t child = iblk->child[i];
+
+        if( child == 0 ) continue;
+
+        if( depth == 1 )
+            cpfs_free_disk_block( fs, child );
+        else
+            cpfs_free_indirect( fs, child, depth-1 );
+    }
+
+    cpfs_unlock_blk( fs, indir_blk );
+    cpfs_free_disk_block( fs, indir_blk );
+    return 0;
+}
+
+
+
+
+
+
+

@@ -175,7 +175,15 @@ cpfs_find_or_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t log
 #if INDIR
 
 
-#if 1
+//
+// Indirect blocks support 
+//
+// base contains 0 or block num of indirect block. If it is 0 and create is nonzero, block will be created.
+// indexes contains logical block numbers for corresponding indirection
+// indirection is level of indirection. If 1, we can't go any further, *base contains page with phys block numbers - TODO right?
+// create - instructs us to allocate block if unallocated
+// created set to nonzero if we did create *base
+//
 
 static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t *indexes, int indirection, cpfs_blkno_t *phys, int create, int *created )
 {
@@ -280,106 +288,6 @@ static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_
 }
 
 
-#else
-
-//
-// Indirect blocks support TODO write me
-//
-// base contains 0 or block num of indirect block. If it is 0 and create is nonzero, block will be created.
-// displ contains logical block number relative to start of our part of map, ie from 0 to max size of our indirect part
-// indirection is level of indirection. If 1, we can't go any further, *base contains page with phys block numbers
-// create - instructs us to allocate block if unallocated
-// created set to nonzero if we did create *base
-//
-
-static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created )
-{
-    int icreated = 0;
-
-    cpfs_assert( base != 0 );
-    cpfs_assert( phys != 0 );
-    cpfs_assert( created != 0 );
-
-    // we're empty and can't create, fail
-    if( (*base == 0) && !create )
-        return ENOENT;
-
-    cpfs_blkno_t iblk = *base;
-    cpfs_blkno_t fblk;
-
-    if( *base == 0 )
-    {
-        // Allocate indirect page
-        iblk = cpfs_alloc_disk_block( fs );
-        if( !iblk )
-            return ENOSPC;
-
-        *base = iblk;
-        *created = 1;
-        icreated = 1;
-    }
-
-    // Now we have indirect page
-    struct cpfs_indir * ib = cpfs_lock_blk( fs, iblk );
-    if( ib == 0 )
-    {
-        cpfs_unlock_blk( fs, iblk );
-        return EIO;
-    }
-
-    if( icreated )
-    {
-        memset( ib, 0, sizeof( *ib ) );
-        ib->h.magic = CPFS_IB_MAGIC;
-        cpfs_touch_blk( fs, iblk );
-    }
-
-    if( indirection == 1 )
-    {
-        // just process
-        cpfs_assert( displ < CPFS_INDIRECT_PER_BLK );
-
-        if( ib->child[displ] != 0 )
-        {
-            *phys = ib->child[displ];
-            cpfs_unlock_blk( fs, iblk );
-            return 0;
-        }
-
-        cpfs_unlock_blk( fs, iblk );
-
-        if( !create )
-        {
-            return ENOENT;
-        }
-
-        // Allocate indirect page
-        fblk = cpfs_alloc_disk_block( fs );
-        if( !fblk )
-            return ENOSPC;
-
-        ib = cpfs_lock_blk( fs, iblk );
-        if( ib == 0 )
-        {
-            cpfs_unlock_blk( fs, iblk );
-            cpfs_free_disk_block( fs, fblk );
-            return EIO;
-        }
-
-        ib->child[displ] = fblk;
-        cpfs_touch_blk( fs, iblk );
-        cpfs_unlock_blk( fs, iblk );
-        *phys = ib->child[displ];
-        return 0;
-    }
-
-
-
-
-    return EINVAL;
-}
-#endif
-
 #endif // INDIR
 
 
@@ -447,6 +355,7 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 {
     errno_t rc;
 
+    cpfs_assert( ino != 0 );
     //printf("free inode %lld\n", ino);
 
     // TODO test case for this
@@ -586,14 +495,23 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
 
         if( phys_blk == 0 )
         {
-            //cpfs_log_error("cpfs_inode_truncate: attempt to free blk 0 (%lld block of file)", phys_blk, blk );
+            cpfs_log_error("cpfs_inode_truncate: attempt to free blk 0 (%lld block of file)", phys_blk, blk );
             continue;
         }
 
         cpfs_free_disk_block( fs, phys_blk );
     }
 
-    // TODO free indirect blocks
+
+    errno_t rc;
+    int ilev;
+
+    for( ilev = 0; ilev < CPFS_MAX_INDIR-1; ilev++ )
+    {
+        rc = cpfs_free_indirect( fs, copy.indir[ilev], ilev+1 );
+        if( rc )
+            cpfs_log_error("cpfs_inode_truncate: fail to free indirect blocks lev %d for ino %lld", ilev+1, ino );
+    }
 
     return 0;
 }

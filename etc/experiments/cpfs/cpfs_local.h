@@ -22,6 +22,8 @@
 
 struct cpfs_fs;
 
+// Standard block header, all blocks must have one
+
 typedef union cpfs_blk_header {
 
     struct
@@ -35,6 +37,7 @@ typedef union cpfs_blk_header {
     };
 
 } cpfs_blk_header_t;
+
 
 
 // On-disk supreblock structure
@@ -58,12 +61,18 @@ struct cpfs_sb
 //extern struct cpfs_sb fs_sb;
 
 
+
+
+
 // On-disk directory entry structure
 struct cpfs_dir_entry
 {
     cpfs_ino_t          inode;
     char                name[CPFS_MAX_FNAME_LEN];
 };
+
+
+
 
 #define CPFS_MAX_INDIR 4
 
@@ -95,13 +104,15 @@ struct cpfs_inode
 
 // curr size of inode is 344 bytes, we'll allocate 512 for any case
 
+
+
+
+
+
 // On-disk free block list structure
 // Contents of a block in a free block list
 struct cpfs_freelist
 {
-    //uint32_t            fl_magic;
-    //uint32_t            unused; // next fld is 64 bit, make sure it is aligned
-
     cpfs_blk_header_t   h;
 
     cpfs_blkno_t        next;
@@ -109,13 +120,13 @@ struct cpfs_freelist
 
 
 
+
+
+
 // On-disk indirect data pointers block structure
 // Contents of an indirect block
 struct cpfs_indir
 {
-    //uint32_t            ib_magic; // TODO Use me
-    //uint32_t            unused; // next fld is 64 bit, make sure it is aligned
-
     cpfs_blk_header_t   h;
 
     cpfs_blkno_t        child[CPFS_INDIRECT_PER_BLK];
@@ -127,6 +138,8 @@ struct cpfs_indir
 
 // Free inodes cache size
 #define FIC_SZ 256
+
+
 
 
 
@@ -147,6 +160,8 @@ typedef struct cpfs_buf cpfs_buf_t;
 
 
 
+
+// Dile id (descriptor) - must go to OS code?
 struct cpfs_fid
 {
     char                used;
@@ -158,6 +173,17 @@ struct cpfs_fid
 
 typedef struct cpfs_fid cpfs_fid_t;
 
+
+
+
+// unknown      - state of block is not known
+// allocated    - block is allocated to file or indirect page (distinct?)
+// freelist     - block is in free list or after sb.first_unallocated point
+// freemap      - block is in free map (map block or leaf)
+// inode        - block is in inode space
+// superblk     - it is
+
+typedef enum { bs_unknown, bs_allocated, bs_freelist, bs_freemap, bs_inode, bs_superblk } fsck_blkstate_t; // allocation state
 
 
 // In-memory filesystem state
@@ -193,6 +219,8 @@ struct cpfs_fs
     //int                 nfdmap;
     //int                 fdmap_alloc;            // Last postion of allocator search
 
+    fsck_blkstate_t 	*fsck_blk_state;        // Map of all blocks
+    int                 fsck_rebuild_free;  	// Freelist corrupt, need to rebuild
 };
 
 typedef struct cpfs_fs cpfs_fs_t;

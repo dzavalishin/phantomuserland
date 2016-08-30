@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include <unistd.h>
+#include <limits.h>
 #include <sys/types.h>
 
 #include <stdarg.h>
@@ -38,6 +38,13 @@ errno_t
 cpfs_fsck( cpfs_fs_t *fs, int fix )
 {
     errno_t rc;
+
+    cpfs_assert( fs->disk_size < INT_MAX ); // TODO document
+
+    fs->fsck_rebuild_free = 0;
+
+    fs->fsck_blk_state = calloc( sizeof( fsck_blkstate_t ), fs->disk_size );
+    if( 0 == fs->fsck_blk_state ) return ENOMEM;
 
     rc = fsck_sb( fs, fix );
     if( rc ) goto error;
@@ -191,6 +198,8 @@ void fslog( severity_t severity, const char *fmt, ... )
 // Scan dir tree
 //
 // -----------------------------------------------------------------------
+#define FSCK_VERBOSE 0
+
 static errno_t fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, int depth );
 
 static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg )
@@ -202,23 +211,26 @@ static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
 
     //if( 0 == strcmp( (const char*)farg, de->name ) )        return dir_scan_error;
 
-    int i;
-    for( i = depth; i; i-- ) printf("\t");
-    printf("%s", de->name);
+    if(FSCK_VERBOSE)
+    {
+        int i;
+        for( i = depth; i; i-- )
+            printf("\t");
+        printf("%s", de->name);
+    }
 
     int isdir = 0;
     rc = cpfs_is_dir( fs, de->inode, &isdir );
 
     if( isdir )
     {
-        printf("/");
-        printf("\n");
+        if(FSCK_VERBOSE) printf("/\n");
         rc = fsck_scan_dir( fs, de->inode, depth+1 );
         if( rc ) return dir_scan_error;
     }
     else
     {
-    printf("\n");
+        if(FSCK_VERBOSE) printf("\n");
     }
 
 
@@ -240,6 +252,47 @@ static void fsck_scan_dirs( cpfs_fs_t *fs )
     fsck_scan_dir( fs, 0, 0 );
 }
 
+
+
+// -----------------------------------------------------------------------
+//
+// Update/check block map
+//
+// -----------------------------------------------------------------------
+
+
+errno_t fsck_update_block_map( cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state )
+{
+    if( fs->fsck_blk_state[blk] != bs_unknown )
+    {
+        if( (state == bs_freelist) || (state == bs_freemap) )
+        {
+            fslog( err, "block %lld state was %d, attempt to set free\n", blk, fs->fsck_blk_state[blk] );
+
+            fs->fsck_blk_state[blk] = state;
+            fs->fsck_rebuild_free = 1;
+            return EBUSY;
+        }
+        else
+        if( (fs->fsck_blk_state[blk] == bs_freelist) || (fs->fsck_blk_state[blk] == bs_freemap) )
+        {
+            fslog( err, "block %lld state was free, attempt to set %d\n", blk, state );
+
+            fs->fsck_blk_state[blk] = state;
+            fs->fsck_rebuild_free = 1;
+            return EBUSY;
+        }
+        else
+        {
+            fslog( err, "block %lld state %d, attempt to set %d\n", blk, fs->fsck_blk_state[blk], state );
+            // TODO and what?
+            return EBUSY;
+        }
+    }
+
+    fs->fsck_blk_state[blk] = state;
+    return 0;
+}
 
 
 
