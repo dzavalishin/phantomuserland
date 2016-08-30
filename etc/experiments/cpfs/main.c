@@ -43,10 +43,6 @@ void die_rc( const char *msg, int rc )
 
 void test(cpfs_fs_t *fsp)
 {
-    test_out_of_space(fsp);
-
-    test_path(fsp);
-
     test_superblock(fsp);
     test_disk_alloc(fsp);
 
@@ -60,6 +56,10 @@ void test(cpfs_fs_t *fsp)
     // test_file_create(fsp); 	// create, open and destroy multiple files, try open deleted files
     test_file_data(fsp);        	// Create, write, close, reopen, read and compare data, in a mixed way
     // test_mutithreaded(fsp);     // Do mix of prev tests in 10 threads, starting tests in random order
+
+    test_path(fsp);
+
+    test_out_of_space(fsp);
 
 }
 
@@ -183,14 +183,14 @@ cpfs_get_current_time(void)
 void cpfs_mutex_lock( cpfs_mutex m)
 {
     // TODO pthreads mutex?
-//    cpfs_assert( m == MUTEX_TEST_VAL );
+    cpfs_assert( m == MUTEX_TEST_VAL );
 }
 
 
 void cpfs_mutex_unlock( cpfs_mutex m)
 {
     // TODO pthreads mutex?
-//    cpfs_assert( m == MUTEX_TEST_VAL );
+    cpfs_assert( m == MUTEX_TEST_VAL );
 }
 
 void cpfs_mutex_init( cpfs_mutex *m)

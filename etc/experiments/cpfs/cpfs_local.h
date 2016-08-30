@@ -22,6 +22,19 @@
 
 struct cpfs_fs;
 
+typedef union cpfs_blk_header {
+
+    struct
+    {
+        char fill[CPFF_BLK_HEADER_SIZE];
+    };
+
+    struct
+    {
+        uint32_t            magic;
+    };
+
+} cpfs_blk_header_t;
 
 
 // On-disk supreblock structure
@@ -52,6 +65,7 @@ struct cpfs_dir_entry
     char                name[CPFS_MAX_FNAME_LEN];
 };
 
+#define CPFS_MAX_INDIR 4
 
 // On-disk i-node entry structure
 struct cpfs_inode
@@ -69,9 +83,14 @@ struct cpfs_inode
     cpfs_blkno_t        log;    // disk block of audit log list, not used now, will contain log of all operations to support transactions
 
     cpfs_blkno_t        blocks0[CPFS_INO_DIR_BLOCKS];
+#if 0
     cpfs_blkno_t        blocks1; // Block no of list of 1-level indirect blocks list
     cpfs_blkno_t        blocks2; // Block no of list of 2-level indirect blocks list
     cpfs_blkno_t        blocks3; // Block no of list of 3-level indirect blocks list
+    cpfs_blkno_t        blocks4; // Block no of list of 4-level indirect blocks list
+#else
+    cpfs_blkno_t        indir[CPFS_MAX_INDIR]; // indirect blocks list with growing level of indirection
+#endif
 };
 
 // curr size of inode is 344 bytes, we'll allocate 512 for any case
@@ -80,22 +99,26 @@ struct cpfs_inode
 // Contents of a block in a free block list
 struct cpfs_freelist
 {
-    uint32_t            fl_magic;
-    uint32_t            unused; // next fld is 64 bit, make sure it is aligned
+    //uint32_t            fl_magic;
+    //uint32_t            unused; // next fld is 64 bit, make sure it is aligned
+
+    cpfs_blk_header_t   h;
 
     cpfs_blkno_t        next;
 };
 
-#define INDIR_CNT ((CPFS_BLKSIZE/sizeof(cpfs_blkno_t))-1)
+
 
 // On-disk indirect data pointers block structure
 // Contents of an indirect block
 struct cpfs_indir
 {
-    uint32_t            ib_magic; // TODO Use me
-    uint32_t            unused; // next fld is 64 bit, make sure it is aligned
+    //uint32_t            ib_magic; // TODO Use me
+    //uint32_t            unused; // next fld is 64 bit, make sure it is aligned
 
-    cpfs_blkno_t        child[INDIR_CNT];
+    cpfs_blk_header_t   h;
+
+    cpfs_blkno_t        child[CPFS_INDIRECT_PER_BLK];
 };
 
 
@@ -226,6 +249,8 @@ cpfs_blkno_t            cpfs_alloc_disk_block( cpfs_fs_t *fs );
 void                    cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk );
 
 
+
+
 errno_t                 cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *blk );
 errno_t                 cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys ); // maps logical blocks to physical, block must be allocated
 // allocates logical block, returns physical blk pos, block must NOT be allocated
@@ -233,6 +258,9 @@ errno_t                 cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, c
 errno_t                 cpfs_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
 // returns 0 in any case, either if block found or allocated
 errno_t                 cpfs_find_or_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys );
+
+// inode machinery indirect block addressing workers
+errno_t 		calc_indirect_positions( cpfs_fs_t *fs, cpfs_blkno_t indexes[CPFS_MAX_INDIR], int *start_index, cpfs_blkno_t logical );
 
 
 struct cpfs_inode *     cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // makes sure that inode is in memory and no one modifies it

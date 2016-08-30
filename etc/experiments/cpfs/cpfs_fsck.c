@@ -212,13 +212,14 @@ static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
     if( isdir )
     {
         printf("/");
+        printf("\n");
         rc = fsck_scan_dir( fs, de->inode, depth+1 );
         if( rc ) return dir_scan_error;
     }
     else
     {
-    }
     printf("\n");
+    }
 
 
     return dir_scan_continue;
@@ -229,13 +230,13 @@ static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
 errno_t
 fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, int depth )
 {
-    printf("fsck scan dirs\n");
     errno_t rc = cpfs_scan_dir( fs, dir, de_subscan, (void *)depth );
     return rc;
 }
 
 static void fsck_scan_dirs( cpfs_fs_t *fs )
 {
+    printf("fsck scan dirs\n");
     fsck_scan_dir( fs, 0, 0 );
 }
 

@@ -29,6 +29,9 @@ errno_t		cpfs_umount( struct cpfs_fs *fs );
 errno_t 	cpfs_mkfs( struct cpfs_fs *fs, cpfs_blkno_t disk_size );
 errno_t 	cpfs_fsck( struct cpfs_fs *fs, int fix );
 
+errno_t 	cpfs_fs_stat( struct cpfs_fs *fs, cpfs_blkno_t *disk_size, cpfs_blkno_t *disk_free );
+errno_t 	cpfs_fs_dump( struct cpfs_fs *fs );
+
 // entry points
 
 

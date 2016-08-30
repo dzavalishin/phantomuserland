@@ -37,6 +37,7 @@ cpfs_init( cpfs_fs_t *fs )
 
     cpfs_mutex_init( &(fs->freelist_mutex) );
     cpfs_mutex_init( &(fs->fic_mutex) );
+    cpfs_mutex_init( &(fs->buf_mutex) );
 
 
     return 0;

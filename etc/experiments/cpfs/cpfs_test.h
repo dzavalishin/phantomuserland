@@ -38,7 +38,7 @@ void    test_mutithreaded(cpfs_fs_t *fsp);     // Do mix of prev tests in 10 thr
 
 
 #define test_str_eq( __s1, __s2 ) if( strcmp( (__s1), (__s2) ) ) cpfs_panic( "test failed " __FILE__ " @ %d: %s != %s\n", __LINE__, __s1, __s2 )
-#define test_int_eq( __s1, __s2 ) if( (__s1) != (__s2) ) cpfs_panic( "test failed " __FILE__ " @ %d: %d != %d\n", __LINE__, __s1, __s2 )
+#define test_int_eq( __s1, __s2 ) if( (__s1) != (__s2) ) cpfs_panic( "test failed " __FILE__ " @ %d: %d (" #__s1 ") != %d(" #__s2 ")\n", __LINE__, __s1, __s2 )
 
 
 

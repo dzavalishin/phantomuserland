@@ -509,16 +509,62 @@ test_path(cpfs_fs_t *fsp)
     printf("Path test: DONE\n");
 }
 
+
+
+
+// -----------------------------------------------------------------------
+//
+// Out of data space and out of inodes test
+//
+// -----------------------------------------------------------------------
+
+
+#define MAX_TEMP_FN 80
+
+static errno_t mk_test_fn( cpfs_fs_t *fsp, char *out, int num )
+{
+#if 0 // if 1 will test indirection too (many files in directory, dir grows to size which needs indirection)
+    (void) fsp;
+    snprintf( out, MAX_TEMP_FN, "fill_file_%d", num );
+#else
+    errno_t rc;
+
+    snprintf( out, MAX_TEMP_FN, "tdir%d", num/256 );
+    rc = cpfs_mkdir( fsp, out, 0 );
+    if( rc && (rc != EEXIST) ) return rc;
+    //if( rc == ENOSPC ) return rc;
+    
+
+    snprintf( out, MAX_TEMP_FN, "tdir%d/tdir%d", num/256, num/16 );
+    rc = cpfs_mkdir( fsp, out, 0 );
+    if( rc && (rc != EEXIST) ) return rc;
+    //if( rc == ENOSPC ) return rc;
+
+
+    //snprintf( MAX_TEMP_FN, out, "tdir%d/tdir%d/fill_file_%d", num/4096, num/256, num );
+    snprintf( out, MAX_TEMP_FN, "tdir%d/tdir%d/fill_file_%d", num/256, num/16, num );
+
+    //printf( "%s\n", out );
+#endif
+    return 0;
+}
+
+
+
+
+
 #define MAX_FILL_SZ 4096
 
 static errno_t fill_file( cpfs_fs_t *fsp, int num, unsigned size )
 {
     errno_t ret;
-    char name[32];
+    char name[MAX_TEMP_FN];
     int fd;
     const char junk[MAX_FILL_SZ];
 
-    sprintf( name, "fill_file_%d", num );
+    //sprintf( name, "fill_file_%d", num );
+    ret = mk_test_fn( fsp, name, num );
+    if( ret ) return ret;
 
     ret = cpfs_file_open( fsp, &fd, name, O_CREAT, 0 );
     if( ret == ENOSPC )
@@ -555,14 +601,16 @@ static errno_t fill_file( cpfs_fs_t *fsp, int num, unsigned size )
 static errno_t kill_file( cpfs_fs_t *fsp, int num )
 {
     errno_t ret;
-    char name[32];
+    char name[MAX_TEMP_FN];
 
-    sprintf( name, "fill_file_%d", num );
+    //sprintf( name, "fill_file_%d", num );
+    ret = mk_test_fn( fsp, name, num );
+    if( ret ) return ret;
 
     ret = cpfs_file_unlink( fsp, name, 0 );
-    test_int_eq( ret, 0 );
+    //test_int_eq( ret, 0 );
 
-    return 0;
+    return ret;
 }
 
 
@@ -572,40 +620,104 @@ void    test_out_of_space(cpfs_fs_t *fsp)
     errno_t ret;
     int num;
     int max = 100000;
-#if 0 // TODO E2BIG
+    cpfs_blkno_t disk_size;
+    cpfs_blkno_t disk_free;
+
+
+    // test indirect block addrs func
+    {
+        errno_t 	rc;
+        cpfs_blkno_t 	indexes[CPFS_MAX_INDIR] = { 0, 0, 0, 0 };
+        int 		start_index = CPFS_MAX_INDIR;
+
+        rc = calc_indirect_positions( fsp, indexes, &start_index, 4096*10 );
+        cpfs_assert( !rc );
+        rc = calc_indirect_positions( fsp, indexes, &start_index, 4096*11 );
+        cpfs_assert( !rc );
+        rc = calc_indirect_positions( fsp, indexes, &start_index, 4096*4095 );
+        cpfs_assert( !rc );
+        rc = calc_indirect_positions( fsp, indexes, &start_index, 0 );
+        cpfs_assert( !rc );
+
+
+    }
+
+
+#if 1 // TODO E2BIG
     printf("Out of space test\n");
+    cpfs_fs_dump( fsp );
 
     // Create big files, wait for ENOSPC to come (out of space)
 
     for( num = 0; num < max; num++ )
     {
         ret = fill_file( fsp, num, 3448*10 );
-        test_int_eq( ret, ENOSPC );
+        //test_int_eq( ret, ENOSPC );
+        cpfs_assert( (ret == 0) || (ret == ENOSPC) );
+
+        if( ret == ENOSPC )
+            break;
     }
 
+    cpfs_assert( ret == ENOSPC ); // here we must make ENOSPC happen!
+
     max = num+1;
+    printf("Out of space test: created %d files\n", max );
+    cpfs_fs_dump( fsp );
+
 
     for( num = 0; num < max; num++ )
     {
         ret = kill_file( fsp, num );
+        if( ret && (num = (max-1)) ) break; // last one is possibly not created
         test_int_eq( ret, 0 );
     }
 
-    // Create smapp files, wait for ENOSPC to come (out of inodes)
+    printf("Out of space test: deleted %d files\n", max );
+    cpfs_fs_dump( fsp );
 
+    cpfs_fs_stat( fsp, &disk_size, &disk_free );
+    cpfs_assert( disk_size != 0 );
+    cpfs_assert( disk_free != 0 );
+
+
+
+
+    // Create small files, wait for ENOSPC to come (out of inodes)
+
+    max = 100000;
     for( num = 0; num < max; num++ )
     {
-        ret = fill_file( fsp, num, 20 );
-        test_int_eq( ret, ENOSPC );
+        ret = fill_file( fsp, num, 2000 );
+        //test_int_eq( ret, ENOSPC );
+        cpfs_assert( (ret == 0) || (ret == ENOSPC) );
+
+        if( ret == ENOSPC )
+            break;
     }
 
     max = num+1;
+    printf("Out of space test: created %d files\n", max );
+    cpfs_fs_dump( fsp );
+
 
     for( num = 0; num < max; num++ )
     {
         ret = kill_file( fsp, num );
+        if( ret && (num = (max-1)) ) break; // last one is possibly not created
         test_int_eq( ret, 0 );
     }
+
+    printf("Out of space test: deleted %d files\n", max );
+    cpfs_fs_dump( fsp );
+
+    cpfs_fs_stat( fsp, &disk_size, &disk_free );
+    cpfs_assert( disk_size != 0 );
+    cpfs_assert( disk_free != 0 );
+
+
+
+
 
     printf("Out of space test: DONE\n");
 #endif

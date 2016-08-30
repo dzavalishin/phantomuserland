@@ -12,6 +12,8 @@
 #ifndef CPFS_DEFS_H
 #define CPFS_DEFS_H
 
+#include "cpfs_types.h"
+
 
 // -----------------------------------------------------------------------------------------
 //
@@ -28,8 +30,13 @@
 
 #define CPFS_BLKSIZE            4096
 
+// TODO each block (incl data) must have header of this size
+#define CPFF_BLK_HEADER_SIZE	96
+
 // Number of direct mapped file block numbers in inode
 #define CPFS_INO_DIR_BLOCKS     32
+// How many block pointers there are in indirect block
+#define CPFS_INDIRECT_PER_BLK	((CPFS_BLKSIZE-CPFF_BLK_HEADER_SIZE)/(sizeof(cpfs_blkno_t)))
 
 #define CPFS_INO_REC_SIZE       512
 #define CPFS_INO_PER_BLK        (CPFS_BLKSIZE/CPFS_INO_REC_SIZE)

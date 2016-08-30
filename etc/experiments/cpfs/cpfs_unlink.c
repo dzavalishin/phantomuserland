@@ -44,6 +44,10 @@ cpfs_file_unlink( struct cpfs_fs *fs, const char *full_name, void * user_id_data
 
 
     rc = cpfs_free_dirent( fs, last_dir_ino, last );
+    if( rc ) return rc;
+
+    rc = cpfs_free_inode( fs, possible_dir_ino ); // deletes file
+
 
     return rc;
 }

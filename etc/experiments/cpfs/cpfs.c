@@ -91,7 +91,11 @@ cpfs_file_close( int file_id )
     //errno_t rc = cpfs_fdmap_get_inode( file_id, &ino );
     //if( rc ) return rc;
 
-    return cpfs_fdmap_free( file_id );
+    errno_t rc = cpfs_fdmap_free( file_id );
+
+    if( rc ) printf("can't close fd %d\n", file_id );
+
+    return rc;
 
 }
 

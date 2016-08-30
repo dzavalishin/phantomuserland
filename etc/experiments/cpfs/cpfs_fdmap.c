@@ -17,7 +17,7 @@
 
 static cpfs_fid_t       *fdmap;                 // Map of file descriptors - global for all FS instances!
 static int              nfdmap;
-static int		fdmap_alloc;            // Last postion of allocator search
+static int		fdmap_alloc;            // Last position of allocator search
 static cpfs_mutex_t     fdmap_mutex;
 
 
@@ -63,6 +63,8 @@ cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd )
             *fd = pos;
             //*fid = fdmap+pos;
 
+            //printf( "allock for ino %lld\n", ino );
+
             cpfs_mutex_unlock( fdmap_mutex );
             return 0;
         }
@@ -77,23 +79,30 @@ errno_t
 cpfs_fdmap_free( int fd )
 {
     if( (fd < 0) || (fd >= nfdmap ) )
+    {
+        printf("can't free fd %d: out of range\n", fd);
         return EINVAL;
+    }
 
     cpfs_mutex_lock( fdmap_mutex );
 
     if( !fdmap[fd].used )
     {
+        printf("can't free fd %d: unused\n", fd);
         cpfs_mutex_unlock( fdmap_mutex );
         return EINVAL;
     }
 
     if( fdmap[fd].lock )
     {
+        printf("can't free fd %d: locked\n", fd);
         cpfs_mutex_unlock( fdmap_mutex );
         return EWOULDBLOCK;
     }
 
     fdmap[fd].used--;
+
+    //printf( "free for ino %lld\n", fdmap[fd].inode );
 
     cpfs_mutex_unlock( fdmap_mutex );
     return 0;
@@ -124,6 +133,8 @@ cpfs_fdmap_lock( int fd, cpfs_fid_t **fid )
     fdmap[fd].lock++;
     *fid = fdmap+fd;
 
+    //printf( "lock for ino %lld\n", fdmap[fd].inode );
+
     cpfs_mutex_unlock( fdmap_mutex );
     return 0;
 }
@@ -151,6 +162,8 @@ cpfs_fdmap_unlock( int fd )
         //return EINVAL;
     }
 
+    //printf( "unlock for ino %lld\n", fdmap[fd].inode );
+
     fdmap[fd].lock--;
 
     cpfs_mutex_unlock( fdmap_mutex );
@@ -168,8 +181,11 @@ cpfs_fdmap_is_inode_used( cpfs_fs_t *fs, cpfs_ino_t ino )
     int i;
     for( i = 0; i < nfdmap; i++ )
     {
-        if( (fdmap[i].inode == ino) && (fdmap[i].fs == fs) )
+        if( (fdmap[i].inode == ino) && (fdmap[i].fs == fs) && (fdmap[i].used) )
+        {
+            cpfs_mutex_unlock( fdmap_mutex );
             return 1;
+        }
     }
 
     cpfs_mutex_unlock( fdmap_mutex );

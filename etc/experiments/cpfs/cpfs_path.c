@@ -119,13 +119,20 @@ cpfs_mkdir( cpfs_fs_t *fs, const char *path, void * user_id_data )
 
     rc = cpfs_alloc_dirent( fs, last_dir_ino, last, new_dir_ino ); // allocate a new dir entry in a dir
     //rc = cpfs_dir_scan( fs, last_dir_ino, last, &new_dir_ino, CPFS_DIR_SCAN_WRITE );
-    if( rc ) goto free_inode;
+    if( rc )
+    {
+        //printf("mkdir: can't alloc dirent '%s' for '%s', ino=%lld, rc=%d\n", last, path, new_dir_ino, rc );
+        goto free_inode;
+    }
 
     return 0;
 
 free_inode:
+    ;
+    errno_t rc1 = cpfs_free_inode( fs, new_dir_ino );
+    if( rc1 != 0 )
+        cpfs_panic( "can't free inode %lld, rc = %d", new_dir_ino, rc1 );
 
-    if( cpfs_free_inode( fs, new_dir_ino ) ) cpfs_panic( "can't free inode %d", new_dir_ino );
     return rc;
 }
 

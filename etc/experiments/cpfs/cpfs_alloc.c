@@ -13,6 +13,18 @@
 #include "cpfs_local.h"
 
 
+errno_t
+cpfs_fs_stat( struct cpfs_fs *fs, cpfs_blkno_t *disk_size, cpfs_blkno_t *disk_free )
+{
+    cpfs_assert( fs );
+    cpfs_assert( disk_size );
+    cpfs_assert( disk_free );
+
+    *disk_free = fs->sb.free_count;
+    *disk_size = fs->sb.disk_size;
+
+    return 0;
+}
 
 
 cpfs_blkno_t
@@ -34,7 +46,7 @@ cpfs_alloc_disk_block( cpfs_fs_t *fs )
     ret = fs->sb.free_list;
     struct cpfs_freelist *fb = cpfs_lock_blk( fs, ret );
 
-    if( fb->fl_magic != CPFS_FL_MAGIC )
+    if( fb->h.magic != CPFS_FL_MAGIC )
     {
         fs->sb.free_list = 0; // freeing blocks will recreate free list, though part of disk is inavailable now
         cpfs_log_error("Freelist corrupt (blk %lld), attempt to continue on unallocated space", (long long)fs->sb.free_list );
@@ -47,6 +59,8 @@ cpfs_alloc_disk_block( cpfs_fs_t *fs )
     cpfs_unlock_blk( fs, ret );
 
     fs->sb.free_count--;
+//printf(" freelist alloc ");
+    cpfs_mutex_unlock( fs->freelist_mutex );
     return ret;
 
 no_freelist:
@@ -67,11 +81,14 @@ no_freelist:
         return 0;
     }
 
+    if( fs->sb.free_count <= 0 )
+        cpfs_panic("cpfs_alloc_disk_block disk state inconsistency: fs->sb.free_count <= 0");
+
     fs->sb.free_count--;
     ret = fs->sb.first_unallocated++;
 
-    if( fs->sb.free_count <= 0 )
-        cpfs_panic("cpfs_alloc_disk_block disk state inconsistency: fs->sb.free_count <= 0");
+    //if( fs->sb.free_count <= 0 )
+    //    cpfs_panic("cpfs_alloc_disk_block disk state inconsistency: fs->sb.free_count <= 0");
 
 
     errno_t rc = cpfs_sb_unlock_write( fs );
@@ -84,6 +101,7 @@ no_freelist:
         return 0;
     }
 
+    //printf(" ++ alloc ");
     return ret;
 }
 
@@ -91,6 +109,9 @@ no_freelist:
 void
 cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk )
 {
+    cpfs_assert( blk !=0 );
+    cpfs_assert( fs != 0 );
+
     cpfs_mutex_lock( fs->freelist_mutex );
 
     // Write current head of free list block number to block we're freeing
@@ -98,15 +119,26 @@ cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk )
     struct cpfs_freelist *fb = cpfs_lock_blk( fs, blk );
 
     fb->next = fs->sb.free_list;
-    fb->fl_magic = CPFS_FL_MAGIC;
+    fb->h.magic = CPFS_FL_MAGIC;
 
     cpfs_touch_blk( fs, blk );
     cpfs_unlock_blk( fs, blk );
 
     fs->sb.free_list = blk;
     fs->sb.free_count++;
-
+//printf(" free head = %lld", fs->sb.free_list );
     cpfs_mutex_unlock( fs->freelist_mutex );
+}
+
+
+errno_t
+cpfs_fs_dump( struct cpfs_fs *fs )
+{
+    cpfs_assert( fs );
+
+    printf("fs size %lld, free %lld\n", fs->sb.disk_size, fs->sb.free_count );
+
+    return 0;
 }
 
 

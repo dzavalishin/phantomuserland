@@ -13,7 +13,11 @@
 #include "cpfs_local.h"
 
 
-static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created );
+#define INDIR 0
+
+
+static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t *indexes, int indirection, cpfs_blkno_t *phys, int create, int *created );
+//static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t displ, int indirection, cpfs_blkno_t *phys, int create, int *created );
 
 
 
@@ -21,6 +25,8 @@ static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_
 errno_t
 cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
+    errno_t rc;
+
     cpfs_assert( phys != 0 );
 
     // Read inode first
@@ -30,17 +36,52 @@ cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpf
     cpfs_unlock_ino( fs, ino );
     if( inode_p == 0 ) return EIO;
 
-    if( logical*CPFS_BLKSIZE > inode.fsize ) return E2BIG; // TODO err?
+    if( logical*CPFS_BLKSIZE > inode.fsize )
+    {
+        cpfs_log_error("cpfs_find_block_4_file: logical*CPFS_BLKSIZE (%d) >= inode.fsize (%d)", logical*CPFS_BLKSIZE, inode.fsize );
+        return E2BIG; // TODO err?
+    }
 
     if( logical < CPFS_INO_DIR_BLOCKS )
     {
         *phys = inode.blocks0[logical];
         return 0;
     }
+#if INDIR
+    else
+    {
+        errno_t 	rc;
+        cpfs_blkno_t 	indexes[CPFS_MAX_INDIR] = { 0, 0, 0, 0 };
+        int 		start_index = CPFS_MAX_INDIR;
 
+        rc = calc_indirect_positions( fs, indexes, &start_index, logical );
+        if( rc ) goto fail;
 
+        cpfs_assert( start_index != CPFS_MAX_INDIR );
+
+        int indirection = CPFS_MAX_INDIR - start_index;
+        //printf("cpfs_find_block_4_file calc_indir( %lld ) -> indirection=%d, start_index=%d, indexes = %lld, %lld, %lld, %lld\n", logical, indirection, start_index, indexes[0], indexes[1], indexes[2], indexes[3] );
+
+        int created = 0;
+
+        rc = find_or_create_indirect( fs, inode.indir+indirection-1, indexes+start_index, indirection, phys, 0, &created );
+        if( rc ) goto fail;
+
+        //if( created )
+        //    cpfs_touch_ino( fs, ino );
+        cpfs_assert( !created );
+        //cpfs_unlock_ino( fs, ino );
+        return 0;
+    }
+#endif // INDIR
+
+    rc = E2BIG;
+#if INDIR
+fail:
+#endif // INDIR
+    cpfs_log_error("cpfs_find_block_4_file: no indirect support");
     // TODO write indirect blocks support!
-    return E2BIG;
+    return rc;
 }
 
 
@@ -49,6 +90,8 @@ cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpf
 errno_t
 cpfs_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
+    errno_t 	rc;
+
     cpfs_assert( phys != 0 );
 
     // Read inode first
@@ -75,15 +118,49 @@ cpfs_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cp
             return ENOSPC;
         }
 
+        cpfs_assert( new != 0 );
+
         *phys = ip->blocks0[logical] = new;
         cpfs_touch_ino( fs, ino );
         cpfs_unlock_ino( fs, ino );
         return 0;
     }
+#if INDIR
+    else
+    {
+        cpfs_blkno_t 	indexes[CPFS_MAX_INDIR] = { 0, 0, 0, 0 };
+        int 		start_index = CPFS_MAX_INDIR;
 
+        rc = calc_indirect_positions( fs, indexes, &start_index, logical );
+        if( rc ) goto fail;
+
+        cpfs_assert( start_index != CPFS_MAX_INDIR );
+
+        //printf("cpfs_alloc_block_4_file calc_indir( %lld ) -> start_index=%d, indexes = %lld, %lld, %lld, %lld\n", logical, start_index, indexes[0], indexes[1], indexes[2], indexes[3] );
+        int indirection = CPFS_MAX_INDIR - start_index;
+        //printf("cpfs_find_block_4_file calc_indir( %lld ) -> indirection=%d, start_index=%d, indexes = %lld, %lld, %lld, %lld\n", logical, indirection, start_index, indexes[0], indexes[1], indexes[2], indexes[3] );
+
+        int created;
+
+        rc = find_or_create_indirect( fs, ip->indir+indirection-1, indexes+start_index, indirection, phys, 1, &created );
+        if( rc ) goto fail;
+
+        if( created )
+            cpfs_touch_ino( fs, ino );
+        cpfs_unlock_ino( fs, ino );
+        return 0;
+
+    }
+#endif // INDIR
+
+    rc = E2BIG;
+#if INDIR
+fail:
+#endif // INDIR
     cpfs_unlock_ino( fs, ino );
     // TODO write indirect blocks support!
-    return E2BIG;
+    cpfs_log_error("cpfs_alloc_block_4_file: no indirect support, logical = %lld", logical );
+    return rc;
 
 }
 
@@ -95,6 +172,115 @@ cpfs_find_or_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t log
     return rc;
 }
 
+#if INDIR
+
+
+#if 1
+
+static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t *indexes, int indirection, cpfs_blkno_t *phys, int create, int *created )
+{
+    errno_t rc;
+
+    int icreated = 0;
+
+    cpfs_assert( base != 0 );
+    cpfs_assert( indexes != 0 );
+    cpfs_assert( phys != 0 );
+    cpfs_assert( created != 0 );
+
+    // we're empty and can't create, fail
+    if( (*base == 0) && !create )
+        return ENOENT;
+
+    cpfs_blkno_t iblk = *base; // indirect block
+    cpfs_blkno_t fblk;
+
+    if( *base == 0 )
+    {
+        // Allocate indirect page
+        iblk = cpfs_alloc_disk_block( fs );
+        if( !iblk )
+            return ENOSPC;
+
+        *base = iblk;
+        *created = 1;
+        icreated = 1;
+    }
+
+    // Now we have indirect page
+    struct cpfs_indir * ib = cpfs_lock_blk( fs, iblk );
+    if( ib == 0 )
+    {
+        cpfs_unlock_blk( fs, iblk );
+        return EIO;
+    }
+
+    if( icreated )
+    {
+        memset( ib, 0, sizeof( *ib ) );
+        ib->h.magic = CPFS_IB_MAGIC;
+        cpfs_touch_blk( fs, iblk );
+    }
+
+
+
+
+
+    if( indirection == 1 )
+    {
+        // just process
+        cpfs_assert( *indexes < CPFS_INDIRECT_PER_BLK );
+
+        // Have?
+        if( ib->child[*indexes] != 0 )
+        {
+            *phys = ib->child[*indexes];
+            cpfs_unlock_blk( fs, iblk );
+            return 0;
+        }
+
+        cpfs_unlock_blk( fs, iblk );
+
+        if( !create )
+        {
+            return ENOENT;
+        }
+
+        // Allocate indirect page
+        fblk = cpfs_alloc_disk_block( fs );
+        if( !fblk )
+            return ENOSPC;
+
+        ib = cpfs_lock_blk( fs, iblk );
+        if( ib == 0 )
+        {
+            cpfs_unlock_blk( fs, iblk );
+            cpfs_free_disk_block( fs, fblk );
+            return EIO;
+        }
+
+        ib->child[*indexes] = fblk;
+        cpfs_touch_blk( fs, iblk );
+        cpfs_unlock_blk( fs, iblk );
+        *phys = ib->child[*indexes];
+
+        return 0;
+    }
+
+    // Call me recursively for the next level of indirection
+
+    rc = find_or_create_indirect( fs, &(ib->child[*indexes]), indexes + 1, indirection - 1, phys, create, created );
+
+    if( (!rc) && (*created) )
+        cpfs_touch_blk( fs, iblk );
+
+    cpfs_unlock_blk( fs, iblk );
+
+    return rc;
+}
+
+
+#else
 
 //
 // Indirect blocks support TODO write me
@@ -144,14 +330,14 @@ static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_
     if( icreated )
     {
         memset( ib, 0, sizeof( *ib ) );
-        ib->ib_magic = CPFS_IB_MAGIC;
+        ib->h.magic = CPFS_IB_MAGIC;
         cpfs_touch_blk( fs, iblk );
     }
 
     if( indirection == 1 )
     {
         // just process
-        cpfs_assert( displ < INDIR_CNT );
+        cpfs_assert( displ < CPFS_INDIRECT_PER_BLK );
 
         if( ib->child[displ] != 0 )
         {
@@ -192,7 +378,9 @@ static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_
 
     return EINVAL;
 }
+#endif
 
+#endif // INDIR
 
 
 //
@@ -205,7 +393,7 @@ cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
 {
     if( ino >= fs->sb.ninode )
     {
-        cpfs_log_error("cpfs_block_4_inode: ino (%d) >= fs->sb.ninode (%d)", ino, fs->sb.ninode );
+        cpfs_log_error("cpfs_block_4_inode: ino (%lld) >= fs->sb.ninode (%lld)", ino, fs->sb.ninode );
         return E2BIG;
     }
 
@@ -234,10 +422,12 @@ cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
     if( fs->fic_used <= 0 )
     {
         cpfs_mutex_unlock( fs->fic_mutex );
-        return EMFILE;
+        return ENOSPC; //EMFILE;
     }
 
     *inode = fs->free_inodes_cache[--fs->fic_used];
+
+    //printf("alloc inode %lld\n", *inode);
 
     {
         struct cpfs_inode *rdi = cpfs_lock_ino( fs, *inode );
@@ -257,9 +447,15 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 {
     errno_t rc;
 
+    //printf("free inode %lld\n", ino);
+
     // TODO test case for this
     int used = cpfs_fdmap_is_inode_used( fs, ino );
-    if( used ) return EWOULDBLOCK;
+    if( used )
+    {
+        cpfs_log_error("free_inode: attempt to free inode %d used in fdmap", ino );
+        return EWOULDBLOCK;
+    }
 
     rc = cpfs_inode_truncate( fs, ino ); // free all data blocks for inode, set size to 0
     if( rc ) return rc;
@@ -271,7 +467,7 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 
     if( inode_p->nlinks <= 0 )
     {
-        cpfs_log_error("free_inode: attempt to free inode %d with zero links, %d", ino );
+        cpfs_log_error("free_inode: attempt to free inode %d with zero links", ino );
         cpfs_unlock_ino( fs, ino );
         return ENOENT;
     }
@@ -296,13 +492,14 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 }
 
 
-//static cpfs_blkno_t last_ino_blk = -1;
+// TODO mutex!
 
 void
 fic_refill( cpfs_fs_t *fs )
 {
-    int iblocks = fs->sb.ninode*CPFS_INO_PER_BLK;
+    int iblocks = fs->sb.ninode / CPFS_INO_PER_BLK;
     cpfs_blkno_t ilast = fs->sb.itable_pos + iblocks;
+
 
     cpfs_mutex_lock( fs->fic_mutex );
 
@@ -310,7 +507,7 @@ fic_refill( cpfs_fs_t *fs )
     // fast way - alloc from end of inode space
     //
 
-    if( fs->last_ino_blk == -1 )
+    if( ((long long int)fs->last_ino_blk) == -1 )
     {
         //cpfs_sb_lock();
         fs->last_ino_blk = fs->sb.itable_end;
@@ -321,13 +518,18 @@ fic_refill( cpfs_fs_t *fs )
 
     // NB! Inode table growth code assumes we eat inode space block by block
 
-    //while( (fs->last_ino_blk < ilast) && (fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
     if( (fs->last_ino_blk < ilast) && (fs->fic_used < (FIC_SZ+CPFS_INO_PER_BLK))  )
     {
         int i;
         for( i = 0; i < CPFS_INO_PER_BLK; i++ )
         {
-            fs->free_inodes_cache[fs->fic_used++] = (fs->last_ino_blk-fs->sb.itable_pos) + i;
+            cpfs_ino_t ino = (fs->last_ino_blk - fs->sb.itable_pos) * CPFS_INO_PER_BLK + i;
+
+            cpfs_assert( ino < fs->sb.ninode );
+
+            //printf("refill inodes add %lld\n", ino);
+            //fs->free_inodes_cache[fs->fic_used++] = (fs->last_ino_blk-fs->sb.itable_pos) + i;
+            fs->free_inodes_cache[fs->fic_used++] = ino;
         }
 
         fs->last_ino_blk++;
@@ -361,9 +563,10 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
     }
 
     memset( inode->blocks0, 0, sizeof(inode->blocks0) );
-    inode->blocks1 = 0;
-    inode->blocks2 = 0;
-    inode->blocks3 = 0;
+    memset( inode->indir, 0, sizeof(inode->indir) );
+    //inode->blocks1 = 0;
+    //inode->blocks2 = 0;
+    //inode->blocks3 = 0;
 
     cpfs_blkno_t nblk = inode->fsize / CPFS_BLKSIZE;
     if( inode->fsize % CPFS_BLKSIZE ) nblk++;
@@ -380,6 +583,13 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
     for( blk = 0; (blk < nblk) && (blk < CPFS_INO_DIR_BLOCKS); blk++ )
     {
         phys_blk = copy.blocks0[blk];
+
+        if( phys_blk == 0 )
+        {
+            //cpfs_log_error("cpfs_inode_truncate: attempt to free blk 0 (%lld block of file)", phys_blk, blk );
+            continue;
+        }
+
         cpfs_free_disk_block( fs, phys_blk );
     }
 
@@ -452,9 +662,10 @@ cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii )
     ii->log = 0; // unused now
 
     memset( ii->blocks0, 0, sizeof(ii->blocks0) );
-    ii->blocks1 = 0;
-    ii->blocks2 = 0;
-    ii->blocks3 = 0;
+    memset( ii->indir, 0, sizeof(ii->indir) );
+    //ii->blocks1 = 0;
+    //ii->blocks2 = 0;
+    //ii->blocks3 = 0;
 
     ii->ctime = cpfs_get_current_time();
     ii->atime = ii->ctime;
