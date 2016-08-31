@@ -15,14 +15,20 @@
 
 // TODO make some cache, at least for multiple clients to be able to work
 
-
+#if 1
+#  define write 	fs->ino_lock_write
+#  define used 		fs->ino_lock_used
+#  define curr_blk	fs->ino_lock_curr_blk
+#  define curr_ino	fs->ino_lock_curr_ino
+#  define data          fs->ino_lock_data
+#else
 static char write = 0;
 static char used = 0;
 static cpfs_blkno_t curr_blk = -1;
 static cpfs_ino_t curr_ino = -1;
 
 static char data[CPFS_BLKSIZE];
-
+#endif
 
 struct cpfs_inode *
 cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in memory

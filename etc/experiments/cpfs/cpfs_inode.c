@@ -13,7 +13,7 @@
 #include "cpfs_local.h"
 
 
-#define INDIR 0
+#define INDIR 1
 
 
 static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_blkno_t *indexes, int indirection, cpfs_blkno_t *phys, int create, int *created );

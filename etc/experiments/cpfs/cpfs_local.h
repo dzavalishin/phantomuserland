@@ -189,17 +189,22 @@ typedef enum { bs_unknown, bs_allocated, bs_freelist, bs_freemap, bs_inode, bs_s
 // In-memory filesystem state
 struct cpfs_fs
 {
-    // must be filled by caller
+    // --------------------------------------------------------------------------------------------
+    // Must be filled by caller
 
     int         	disk_id;                // Number of disk in disk subsystem, paramerer for disk IO functions
-    cpfs_blkno_t 	disk_size;
+    cpfs_blkno_t 	disk_size;              // Disk size in blocks
 
-    // private data
+    // --------------------------------------------------------------------------------------------
+    // Private data follows
 
     struct cpfs_sb	sb;
 
     int                 inited;
     int                 mounted;
+
+    // --------------------------------------------------------------------------------------------
+    // Locks
 
     cpfs_mutex          sb_mutex;               // Taken when modify superblock
     cpfs_mutex          freelist_mutex;         // Taken when modify free list
@@ -207,10 +212,16 @@ struct cpfs_fs
     cpfs_mutex          buf_mutex;              // Disk buffers
     cpfs_mutex          fdmap_mutex;            // File descriptor map
 
+    // --------------------------------------------------------------------------------------------
+    // Inode allocation state
+
     cpfs_ino_t 		free_inodes_cache[FIC_SZ];
     int 		fic_used;
 
     cpfs_blkno_t 	last_ino_blk;           // Last (used? free) block in inode section
+
+    // --------------------------------------------------------------------------------------------
+    // Disk cache
 
     cpfs_buf_t          *buf;                   // Disk buffers
     int                 nbuf;
@@ -218,6 +229,20 @@ struct cpfs_fs
     //cpfs_fid_t          fdmap;                  // map of file descriptors
     //int                 nfdmap;
     //int                 fdmap_alloc;            // Last postion of allocator search
+
+    // --------------------------------------------------------------------------------------------
+    // Inode io - naive impl, one inode at time per FS
+
+    char 		ino_lock_write;
+    char 		ino_lock_used;
+    cpfs_blkno_t 	ino_lock_curr_blk;
+    cpfs_ino_t 		ino_lock_curr_ino;
+
+    char 		ino_lock_data[CPFS_BLKSIZE];
+
+    // --------------------------------------------------------------------------------------------
+    // FSCK state
+
 
     fsck_blkstate_t 	*fsck_blk_state;        // Map of all blocks
     int                 fsck_rebuild_free;  	// Freelist corrupt, need to rebuild

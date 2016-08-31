@@ -39,6 +39,11 @@ cpfs_init( cpfs_fs_t *fs )
     cpfs_mutex_init( &(fs->fic_mutex) );
     cpfs_mutex_init( &(fs->buf_mutex) );
 
+    fs->ino_lock_write = 0;
+    fs->ino_lock_used = 0;
+    fs->ino_lock_curr_blk = -1;
+    fs->ino_lock_curr_ino = -1;
+
 
     return 0;
 }
