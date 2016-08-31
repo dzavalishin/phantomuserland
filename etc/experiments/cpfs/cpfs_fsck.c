@@ -21,15 +21,10 @@
 
 typedef enum { msg, warn, err } severity_t;
 
-
 static void fslog( severity_t severity, const char *fmt, ... );
 
 static errno_t fsck_sb( cpfs_fs_t *fs, int fix );
 static void fsck_scan_dirs( cpfs_fs_t *fs );
-
-
-static int nWarn = 0;
-static int nErr = 0;
 
 
 
@@ -41,6 +36,8 @@ cpfs_fsck( cpfs_fs_t *fs, int fix )
 
     cpfs_assert( fs->disk_size < INT_MAX ); // TODO document
 
+    fs->fsck_nWarn = 0;
+    fs->fsck_nErr = 0;
     fs->fsck_rebuild_free = 0;
 
     fs->fsck_blk_state = calloc( sizeof( fsck_blkstate_t ), fs->disk_size );
@@ -51,9 +48,9 @@ cpfs_fsck( cpfs_fs_t *fs, int fix )
 
     fsck_scan_dirs( fs );
 
-    printf("FSCK done, %d warnings, %d errors\n", nWarn, nErr);
+    printf("FSCK done, %d warnings, %d errors\n", fs->fsck_nWarn, fs->fsck_nErr);
 
-    return (nErr > 0) ? EINVAL : 0;
+    return (fs->fsck_nErr > 0) ? EINVAL : 0;
 
 error:
     cpfs_log_error( "FSCK error: %d", rc );
@@ -173,12 +170,12 @@ void fslog( severity_t severity, const char *fmt, ... )
 
     case warn:
         printf( "FSCK Warn: ");
-        nWarn++;
+        fs->fsck_nWarn++;
         break;
 
     case err:
         printf( "FSCK Err:  ");
-        nErr++;
+        fs->fsck_nErr++;
         break;
     }
 

@@ -1,5 +1,5 @@
-CFLAGS +=-g -Wall -Wextra
-
+CFLAGS +=-g -Wall -Wextra -m32
+LDFLAGS += -lpthread -m32
 
 cpfs: main.o \
 	cpfs.o cpfs_test.o cpfs_io.o cpfs_init.o cpfs_sb.o cpfs_blkio.o cpfs_inode.o cpfs_ino_io.o \

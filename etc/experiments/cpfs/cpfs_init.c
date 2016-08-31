@@ -12,6 +12,7 @@
 #include "cpfs.h"
 #include "cpfs_local.h"
 
+
 // Just init - mutexes, memory, etc
 errno_t
 cpfs_init( cpfs_fs_t *fs )
@@ -48,6 +49,8 @@ cpfs_init( cpfs_fs_t *fs )
     return 0;
 }
 
+
+
 // Mount
 errno_t
 cpfs_mount( cpfs_fs_t *fs )
@@ -62,6 +65,8 @@ cpfs_mount( cpfs_fs_t *fs )
 
     return 0;
 }
+
+
 
 errno_t
 cpfs_umount( cpfs_fs_t *fs )

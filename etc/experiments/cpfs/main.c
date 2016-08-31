@@ -178,25 +178,49 @@ cpfs_get_current_time(void)
 }
 
 
-#define MUTEX_TEST_VAL ((void *)0x3443ABBA)
+#define USE_PTHREAD_MUTEX 0
+
+#if !USE_PTHREAD_MUTEX
+#  define MUTEX_TEST_VAL ((void *)0x3443ABBA)
+#endif
 
 void cpfs_mutex_lock( cpfs_mutex m)
 {
-    // TODO pthreads mutex?
+#if USE_PTHREAD_MUTEX
+    pthread_mutex_t *pm = (void *)m;
+
+    int rc = pthread_mutex_lock( pm );
+    cpfs_assert( rc == 0 );
+#else
     cpfs_assert( m == MUTEX_TEST_VAL );
+#endif
 }
 
 
 void cpfs_mutex_unlock( cpfs_mutex m)
 {
-    // TODO pthreads mutex?
+#if USE_PTHREAD_MUTEX
+    pthread_mutex_t *pm = (void *)m;
+
+    int rc = pthread_mutex_unlock( pm );
+    cpfs_assert( rc == 0 );
+#else
     cpfs_assert( m == MUTEX_TEST_VAL );
+#endif
 }
 
 void cpfs_mutex_init( cpfs_mutex *m)
 {
-    *m = MUTEX_TEST_VAL; // temp
-    // TODO pthreads mutex?
+#if USE_PTHREAD_MUTEX
+    pthread_mutex_t *pm = calloc( 1, sizeof( pthread_mutex_t ) );
+    cpfs_assert( pm != 0 );
+    //int rc = pthread_mutex_init( pm, 0 );
+    //cpfs_assert( rc == 0 );
+    *pm = PTHREAD_MUTEX_INITIALIZER;
+    *m = (void *)pm;
+#else
+    *m = MUTEX_TEST_VAL;
+#endif
 }
 
 
@@ -281,7 +305,7 @@ void* mt_run(void *arg)
         if( rc ) die_rc( "Mount FS", rc );
     }
 
-    //test();
+    test( fsp );
 
     rc = cpfs_umount( fsp );
     if( rc ) die_rc( "Umount FS", rc );
@@ -294,6 +318,8 @@ void* mt_run(void *arg)
 
     rc = cpfs_stop( fsp );
     if( rc ) die_rc( "Stop FS", rc );
+
+    printf("--- Thread for disk %d is DONE\n", fsp->disk_id );
 
     return 0;
 }
@@ -313,7 +339,9 @@ static void mt_test(void)
     rc = pthread_create( &pt1, 0, mt_run, fsp[1] );
     if( rc ) die_rc( "thread 1", rc );
 
+    printf("! Wait for thread 0\n" );
     pthread_join( pt0, &retval);
+    printf("! Wait for thread 1\n" );
     pthread_join( pt1, &retval);
 
     //sleep(10000);

@@ -268,7 +268,7 @@ cpfs_clear_all_buf( cpfs_fs_t *fs )
                     // we're quite fried, we even can't return error to caller
                     // add inode num to each buffer, mark inode as having IO error, return error on next IO? close?
                     cpfs_log_error( "cache write IO error, blk %lld", (long long)fs->buf[i].blk );
-                    cpfs_panic("io err in cache write blk %lld", (long long)fs->buf[i].blk);
+                    //cpfs_panic("io err in cache write blk %lld", (long long)fs->buf[i].blk); // panic does not help here
                     continue;
                 }
 
@@ -276,8 +276,8 @@ cpfs_clear_all_buf( cpfs_fs_t *fs )
                 fs->buf[i].used = 0;
             }
 
-            cpfs_mutex_unlock( fs->buf_mutex );
-            return;
+            //cpfs_mutex_unlock( fs->buf_mutex );
+            //return;
         }
     }
 

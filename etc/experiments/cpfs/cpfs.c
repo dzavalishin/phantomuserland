@@ -48,7 +48,7 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *full_name, int flags, v
         //
 
         if( cpfs_alloc_inode( fs, &file_ino ) )
-            return EMFILE;
+            return ENOSPC; //EMFILE;
 
 
         rc = cpfs_alloc_dirent( fs, last_dir_ino, last, file_ino ); // allocate a new dir entry in a dir

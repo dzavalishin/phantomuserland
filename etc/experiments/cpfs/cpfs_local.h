@@ -206,11 +206,11 @@ struct cpfs_fs
     // --------------------------------------------------------------------------------------------
     // Locks
 
-    cpfs_mutex          sb_mutex;               // Taken when modify superblock
+    cpfs_mutex          sb_mutex;               // Taken when modify superblock - init in sb code
     cpfs_mutex          freelist_mutex;         // Taken when modify free list
     cpfs_mutex          fic_mutex;              // Free inodes cache
     cpfs_mutex          buf_mutex;              // Disk buffers
-    cpfs_mutex          fdmap_mutex;            // File descriptor map
+    cpfs_mutex          fdmap_mutex;            // File descriptor map - init in fdmap code
 
     // --------------------------------------------------------------------------------------------
     // Inode allocation state
@@ -243,6 +243,8 @@ struct cpfs_fs
     // --------------------------------------------------------------------------------------------
     // FSCK state
 
+    int 		fsck_nWarn;
+    int			fsck_nErr;
 
     fsck_blkstate_t 	*fsck_blk_state;        // Map of all blocks
     int                 fsck_rebuild_free;  	// Freelist corrupt, need to rebuild
