@@ -562,6 +562,8 @@ static errno_t fill_file( cpfs_fs_t *fsp, int num, unsigned size )
     int fd;
     const char junk[MAX_FILL_SZ];
 
+    memset( (void *)junk, 0xAA, sizeof( junk ) ); // valgrind cries about using junk from stack
+
     //sprintf( name, "fill_file_%d", num );
     ret = mk_test_fn( fsp, name, num );
     if( ret ) return ret;
