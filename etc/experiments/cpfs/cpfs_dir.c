@@ -188,7 +188,8 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
             if( 0 == de->inode )
             {
                 de->inode = file_ino;
-                strlcpy( de->name, fname, sizeof(de->name) );
+                //strlcpy( de->name, fname, sizeof(de->name) );
+                strncpy( de->name, fname, sizeof(de->name)-1 );
                 rc = cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
                 if( rc )
                 {
@@ -210,7 +211,8 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
     struct cpfs_dir_entry *de = ((void *)data);
 
     de->inode = file_ino;
-    strlcpy( de->name, fname, sizeof(de->name) );
+    //strlcpy( de->name, fname, sizeof(de->name) );
+    strncpy( de->name, fname, sizeof(de->name)-1 );
     //return cpfs_disk_write( 0, nblk, data );
     return cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
 
