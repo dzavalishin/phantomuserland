@@ -50,15 +50,17 @@ struct cpfs_sb
     cpfs_blkno_t        itable_end;             // First unused block of inode table, this one and rest is not initialized. Used for fast mkfs.
 
     cpfs_blkno_t        disk_size;
+
     cpfs_blkno_t        first_unallocated;      // Number of block at end of FS we didn't use at all. From this point up to the end all blocks are free. 0 if not used. Used for fast mkfs.
     cpfs_blkno_t        free_list;              // Head of free block list, or 0 if none
+    cpfs_blkno_t        free_tree;              // Head of free block tree, or 0 if none
 
     cpfs_blkno_t        free_count;             // Number of free blocks in FS
 
     uint32_t            dirty;                  // Not closed correctly
 };
 
-//extern struct cpfs_sb fs_sb;
+
 
 
 
@@ -98,7 +100,7 @@ struct cpfs_inode
     cpfs_blkno_t        blocks3; // Block no of list of 3-level indirect blocks list
     cpfs_blkno_t        blocks4; // Block no of list of 4-level indirect blocks list
 #else
-    cpfs_blkno_t        indir[CPFS_MAX_INDIR]; // indirect blocks list with growing level of indirection
+    cpfs_blkno_t        indir[ CPFS_MAX_INDIR ]; // indirect blocks list with growing level of indirection
 #endif
 };
 
@@ -109,14 +111,28 @@ struct cpfs_inode
 
 
 
-// On-disk free block list structure
-// Contents of a block in a free block list
+// On-disk free block list structure.
+// Contents of a block in a free block list.
 struct cpfs_freelist
 {
     cpfs_blk_header_t   h;
 
     cpfs_blkno_t        next;
 };
+
+
+
+// On-disk free block tree structure.
+// Contents of a tree block.
+// NB! Leaf block must be filled with zeroes or 0xFF
+struct cpfs_freetree
+{
+    cpfs_blk_header_t   h;
+
+    cpfs_blkno_t        child[ CPFS_NODE_PTR_PER_BLK ]; 
+};
+
+
 
 
 
@@ -129,7 +145,7 @@ struct cpfs_indir
 {
     cpfs_blk_header_t   h;
 
-    cpfs_blkno_t        child[CPFS_INDIRECT_PER_BLK];
+    cpfs_blkno_t        child[ CPFS_INDIRECT_PER_BLK ];
 };
 
 

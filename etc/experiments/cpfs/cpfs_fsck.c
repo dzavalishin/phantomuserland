@@ -21,7 +21,7 @@
 
 typedef enum { msg, warn, err } severity_t;
 
-static void fslog( severity_t severity, const char *fmt, ... );
+static void fslog( cpfs_fs_t *fs, severity_t severity, const char *fmt, ... );
 
 static errno_t fsck_sb( cpfs_fs_t *fs, int fix );
 static void fsck_scan_dirs( cpfs_fs_t *fs );
@@ -73,35 +73,35 @@ fsck_sb( cpfs_fs_t *fs, int fix )
 
     if( sb->sb_magic_0 != CPFS_SB_MAGIC )
     {
-        fslog( err, "SB magic 0 wrong, %x", sb->sb_magic_0 );
+        fslog( fs, err, "SB magic 0 wrong, %x", sb->sb_magic_0 );
     }
 
 
     if( sb->ninode < 1024 )
     {
-        fslog( err, "SB ninode too small %d", sb->ninode );
+        fslog( fs, err, "SB ninode too small %d", sb->ninode );
     }
 
     if( sb->itable_pos != 1 )
     {
-        fslog( err, "SB itable_pos != 1, %lld", sb->itable_pos );
+        fslog( fs, err, "SB itable_pos != 1, %lld", sb->itable_pos );
     }
 
     if( sb->itable_end < sb->itable_pos )
     {
-        fslog( err, "SB itable_end < itable_pos, %lld", sb->itable_end );
+        fslog( fs, err, "SB itable_end < itable_pos, %lld", sb->itable_end );
     }
 
     int ino_table_blkno = CPFS_INO_PER_BLK * sb->ninode;
 
     if( sb->itable_end >= sb->itable_pos+ino_table_blkno )
     {
-        fslog( err, "SB sb->itable_end >= sb->itable_pos+ino_table_blkno, %lld", sb->itable_end );
+        fslog( fs, err, "SB sb->itable_end >= sb->itable_pos+ino_table_blkno, %lld", sb->itable_end );
     }
 
     if( sb->disk_size != fs->disk_size )
     {
-        fslog( err, "SB disk_size != fs->disk_size, %lld", sb->disk_size );
+        fslog( fs, err, "SB disk_size != fs->disk_size, %lld", sb->disk_size );
     }
 
 
@@ -160,7 +160,7 @@ fsck_sb( cpfs_fs_t *fs, int fix )
 
 
 
-void fslog( severity_t severity, const char *fmt, ... )
+void fslog( cpfs_fs_t *fs, severity_t severity, const char *fmt, ... )
 {
     switch( severity )
     {
@@ -264,7 +264,7 @@ errno_t fsck_update_block_map( cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t 
     {
         if( (state == bs_freelist) || (state == bs_freemap) )
         {
-            fslog( err, "block %lld state was %d, attempt to set free\n", blk, fs->fsck_blk_state[blk] );
+            fslog( fs, err, "block %lld state was %d, attempt to set free\n", blk, fs->fsck_blk_state[blk] );
 
             fs->fsck_blk_state[blk] = state;
             fs->fsck_rebuild_free = 1;
@@ -273,7 +273,7 @@ errno_t fsck_update_block_map( cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t 
         else
         if( (fs->fsck_blk_state[blk] == bs_freelist) || (fs->fsck_blk_state[blk] == bs_freemap) )
         {
-            fslog( err, "block %lld state was free, attempt to set %d\n", blk, state );
+            fslog( fs, err, "block %lld state was free, attempt to set %d\n", blk, state );
 
             fs->fsck_blk_state[blk] = state;
             fs->fsck_rebuild_free = 1;
@@ -281,7 +281,7 @@ errno_t fsck_update_block_map( cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t 
         }
         else
         {
-            fslog( err, "block %lld state %d, attempt to set %d\n", blk, fs->fsck_blk_state[blk], state );
+            fslog( fs, err, "block %lld state %d, attempt to set %d\n", blk, fs->fsck_blk_state[blk], state );
             // TODO and what?
             return EBUSY;
         }
