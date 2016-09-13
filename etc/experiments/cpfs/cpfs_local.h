@@ -43,7 +43,9 @@ typedef union cpfs_blk_header {
 // On-disk supreblock structure
 struct cpfs_sb
 {
-    uint32_t            sb_magic_0;
+//    uint32_t            sb_magic_0;
+    cpfs_blk_header_t   h;
+
 
     uint32_t            ninode;                 // Number of inodes
     cpfs_blkno_t        itable_pos;             // Disk block where inode table starts? Need?

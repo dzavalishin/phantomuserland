@@ -71,9 +71,9 @@ fsck_sb( cpfs_fs_t *fs, int fix )
 
 
 
-    if( sb->sb_magic_0 != CPFS_SB_MAGIC )
+    if( sb->h.magic != CPFS_SB_MAGIC )
     {
-        fslog( fs, err, "SB magic 0 wrong, %x", sb->sb_magic_0 );
+        fslog( fs, err, "SB magic 0 wrong, %x", sb->h.magic );
     }
 
 
@@ -260,6 +260,8 @@ static void fsck_scan_dirs( cpfs_fs_t *fs )
 
 errno_t fsck_update_block_map( cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state )
 {
+    cpfs_assert( blk < fs->disk_size ); // TODO or superblock disk size? Or shall we check sb before?
+
     if( fs->fsck_blk_state[blk] != bs_unknown )
     {
         if( (state == bs_freelist) || (state == bs_freemap) )
@@ -292,4 +294,39 @@ errno_t fsck_update_block_map( cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t 
 }
 
 
+/**
+ *
+ * Scan through map of disk block states, check that state is correct.
+ *
+**/
+
+errno_t fsck_check_block_map( cpfs_fs_t *fs )
+{
+    cpfs_blkno_t blk;
+
+    // no reason to check :)
+    //if( blk[0] ==
+
+    int iblocks = fs->sb.ninode / CPFS_INO_PER_BLK;
+    cpfs_blkno_t ilast = fs->sb.itable_pos + iblocks;
+
+    fsck_blkstate_t *bs = fs->fsck_blk_state;
+
+    for( blk = 1; blk < fs->disk_size; blk++ )
+    {
+        if( blk < ilast )
+        {
+            if( (bs[blk] != bs_inode) && (bs[blk] != bs_unknown) )
+                fslog( fs, err, "blk %lld is not inode (%d)", blk, bs[blk] );
+
+        }
+        else
+        {
+
+        }
+
+    }
+
+    return 0;
+}
 

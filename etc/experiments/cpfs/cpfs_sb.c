@@ -29,7 +29,7 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 
     memset( sb, 0, sizeof( *sb ) );
 
-    sb->sb_magic_0 = CPFS_SB_MAGIC;
+    sb->h.magic = CPFS_SB_MAGIC;
 
     //sb->ninode = 8192*8192; // todo magic?
     sb->ninode = 1024; // todo magic?
@@ -98,7 +98,7 @@ errno_t cpfs_mount_sb( cpfs_fs_t *fs )
     struct cpfs_sb      *sb = cpfs_lock_blk( fs, sb_blk );
     if( sb == 0 ) return EFAULT; // ? TODO
 
-    if( sb->sb_magic_0 != CPFS_SB_MAGIC )
+    if( sb->h.magic != CPFS_SB_MAGIC )
     {
         cpfs_log_error("can't mount disk, no FS magic");
         cpfs_unlock_blk( fs, sb_blk );
