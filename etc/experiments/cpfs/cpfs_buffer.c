@@ -150,6 +150,9 @@ cpfs_buf_lock( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
         // No free buffer, we need one more IO to push some buf out
         // RTFIX - unpredictable operation time, while(1)
         cpfs_clear_some_buf( fs );
+
+        // TODO sleep or wait for free
+
     }
 }
 
@@ -235,6 +238,8 @@ cpfs_clear_some_buf( cpfs_fs_t *fs )
             return;
         }
     }
+
+    cpfs_log_error( "cpfs_clear_some_buf failed" );
 
     cpfs_mutex_unlock( fs->buf_mutex );
 

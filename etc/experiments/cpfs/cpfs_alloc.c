@@ -117,6 +117,7 @@ cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk )
     // Write current head of free list block number to block we're freeing
 
     struct cpfs_freelist *fb = cpfs_lock_blk( fs, blk );
+    cpfs_assert( fb != 0 );
 
     fb->next = fs->sb.free_list;
     fb->h.magic = CPFS_FL_MAGIC;

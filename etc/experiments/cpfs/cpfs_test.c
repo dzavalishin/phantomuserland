@@ -34,10 +34,6 @@ void    test_superblock(cpfs_fs_t *fsp)
 
 #define QSZ (2048*100)
 
-//cpfs_blkno_t    tda_q[QSZ];
-//int             tda_q_pp = 0;
-//int             tda_q_gp = 0;
-
 struct tda_q {
     cpfs_blkno_t    q[QSZ];
     int             pp;
@@ -49,12 +45,13 @@ static void reset_q(struct tda_q *tda)
 {
     tda->pp = 0;
     tda->gp = 0;
+    memset( tda->q, 0, sizeof( tda->q ) );
 }
 
 
 static void mass_blk_alloc(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 {
-    while(cnt-->0)
+    while( cnt-- > 0)
     {
         cpfs_blkno_t blk = cpfs_alloc_disk_block( fsp );
         if( !blk ) cpfs_panic("can't allocate block");
@@ -65,11 +62,11 @@ static void mass_blk_alloc(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 
 static void mass_blk_free(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 {
-    while(cnt-->0)
+    while( cnt-- > 0)
     {
+        if(tda_q->gp >= QSZ) cpfs_panic("mass_blk_free test out of q");
         cpfs_blkno_t blk = tda_q->q[tda_q->gp++];
         if( !blk ) cpfs_panic("mass_blk_free blk 0");
-        if(tda_q->gp >= QSZ) cpfs_panic("mass_blk_free test out of q");
         cpfs_free_disk_block( fsp, blk );
     }
 }
@@ -90,6 +87,7 @@ test_disk_alloc(cpfs_fs_t *fsp)
 
     mass_blk_alloc(fsp,&q,1);   // +
     mass_blk_alloc(fsp,&q,120); // +
+#if 1
     mass_blk_free(fsp,&q,34);   // -
     mass_blk_alloc(fsp,&q,40);  // +
     mass_blk_free(fsp,&q,120);  // -
@@ -118,7 +116,7 @@ test_disk_alloc(cpfs_fs_t *fsp)
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
     mass_blk_free(fsp,&q,1700);
     //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
-
+#endif
     reset_q(&q);
 
     printf("Disk block allocation test: DONE\n");
@@ -141,7 +139,7 @@ test_inode_blkmap(cpfs_fs_t *fsp) 	// test file block allocation with inode
     cpfs_blkno_t phys1;
 
     printf("Inode block map test: allocate inode\n");
-
+//printf( "mutex %x\n", (int)fsp->fic_mutex );
     rc = cpfs_alloc_inode( fsp, &ino );
     if( rc ) cpfs_panic( "can't alloc inode, %d", rc );
 
