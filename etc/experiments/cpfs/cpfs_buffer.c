@@ -37,6 +37,7 @@ cpfs_buf_alloc( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
     errno_t rc;
     //char shared = 1; // just shared now
     cpfs_mutex_lock( fs->buf_mutex );
+    cpfs_assert( blk < fs->disk_size );
 
     int i;
     for( i = 0; i < fs->nbuf; i++ )
@@ -51,6 +52,7 @@ cpfs_buf_alloc( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
         if( rc )
         {
             cpfs_mutex_unlock( fs->buf_mutex );
+            cpfs_log_error( "cpfs_buf_alloc: read err for blk %lld, errno=%d", (long long)blk, rc );
             return EIO;
         }
 
@@ -61,6 +63,9 @@ cpfs_buf_alloc( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
 
         *buf = fs->buf+i;
         cpfs_mutex_unlock( fs->buf_mutex );
+
+        //if( i > 10 ) printf("cpfs_buf_alloc scanned %d\n", i );
+
         return 0;
     }
 
@@ -97,6 +102,8 @@ cpfs_buf_free( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t *buf )
 static errno_t
 cpfs_buf_find( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf ) // char shared
 {
+    //int nsearch = 0;
+
     cpfs_mutex_lock( fs->buf_mutex );
 
     int i;
@@ -108,8 +115,13 @@ cpfs_buf_find( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf ) // char share
             *buf = fs->buf+i;
             (*buf)->lock++;
             cpfs_mutex_unlock( fs->buf_mutex );
+
+            //if( nsearch > 30 ) printf("cpfs_buf_find scanned %d\n", nsearch );
+
             return 0;
         }
+
+        //nsearch++;
     }
 
     cpfs_mutex_unlock( fs->buf_mutex );
@@ -136,13 +148,15 @@ errno_t
 cpfs_buf_lock( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
 {
     errno_t rc;
+    int i;
 
     //cpfs_log_error( "lock blk %lld", (long long)blk );
 
     rc = cpfs_buf_find( fs, blk, buf );
     if(!rc) return rc; // Success
 
-    while(1)
+    //while(1)
+    for( i = 0; i < 3; i++ ) // TODO temp! Must try forever or be interlocked with mutex!
     {
         rc = cpfs_buf_alloc( fs, blk, buf );
         if(!rc) return rc; // Success
@@ -154,6 +168,8 @@ cpfs_buf_lock( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
         // TODO sleep or wait for free
 
     }
+
+    return ENOMEM;
 }
 
 
@@ -178,6 +194,7 @@ cpfs_buf_unlock( cpfs_fs_t *fs, cpfs_blkno_t blk, char write )
                 cpfs_panic( "unlock unlocked buf blk %lld", (long long)blk );
 
             fs->buf[i].lock--;
+            //if( fs->buf[i].lock == 0 ) printf("\nlock=0\n");
             cpfs_mutex_unlock( fs->buf_mutex );
             return 0;
         }
@@ -210,6 +227,8 @@ cpfs_clear_some_buf( cpfs_fs_t *fs )
 
     cpfs_mutex_lock( fs->buf_mutex );
 
+    //printf("\n\ncpfs_clear_some_buf\n");
+
     // TODO look for LRU or just do round robin lookup
     for( i = 0; i < fs->nbuf; i++ )
     {
@@ -233,6 +252,7 @@ cpfs_clear_some_buf( cpfs_fs_t *fs )
             }
 
             fs->buf[i].used = 0;
+            //printf("freed buf %d\n\n", i);
 
             cpfs_mutex_unlock( fs->buf_mutex );
             return;
@@ -246,7 +266,7 @@ cpfs_clear_some_buf( cpfs_fs_t *fs )
 }
 
 
-
+// TODO errno_t
 void
 cpfs_clear_all_buf( cpfs_fs_t *fs )
 {
@@ -262,15 +282,13 @@ cpfs_clear_all_buf( cpfs_fs_t *fs )
 
         if( fs->buf[i].used && !(fs->buf[i].lock) )
         {
-            //*buf = fs->buf+i;
-            //(*buf)->lock++;
 
             if( fs->buf[i].write )
             {
                 rc = cpfs_disk_write( fs->disk_id, fs->buf[i].blk, fs->buf[i].data );
                 if( rc )
                 {
-                    // we're quite fried, we even can't return error to caller
+                    // TODO we're quite fried, we even can't return error to caller
                     // add inode num to each buffer, mark inode as having IO error, return error on next IO? close?
                     cpfs_log_error( "cache write IO error, blk %lld", (long long)fs->buf[i].blk );
                     //cpfs_panic("io err in cache write blk %lld", (long long)fs->buf[i].blk); // panic does not help here
@@ -281,8 +299,6 @@ cpfs_clear_all_buf( cpfs_fs_t *fs )
                 fs->buf[i].used = 0;
             }
 
-            //cpfs_mutex_unlock( fs->buf_mutex );
-            //return;
         }
     }
 

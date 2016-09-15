@@ -27,11 +27,11 @@ cpfs_fs_t fs0 =
 cpfs_fs_t fs1 =
 {
     .disk_id = 1,
-    .disk_size = 10000,
+    .disk_size = 12000,
 };
 
 static int dfd[2];
-cpfs_fs_t *fsp[2] = { &fs0, &fs1 };
+cpfs_fs_t *fsp_array[2] = { &fs0, &fs1 };
 
 
 void die_rc( const char *msg, int rc )
@@ -41,9 +41,11 @@ void die_rc( const char *msg, int rc )
 }
 
 
-void test(cpfs_fs_t *fsp)
+static void test_all(cpfs_fs_t *fsp)
 {
+
     test_superblock(fsp);
+
     test_disk_alloc(fsp);
 
     test_inode_blkmap(fsp); 	// test file block allocation with inode
@@ -53,13 +55,48 @@ void test(cpfs_fs_t *fsp)
     // test_inode_alloc(fsp);
 
     test_directory(fsp);        // Create/lookup/destroy directory entries
+
     // test_file_create(fsp); 	// create, open and destroy multiple files, try open deleted files
+
     test_file_data(fsp);        	// Create, write, close, reopen, read and compare data, in a mixed way
+
     // test_mutithreaded(fsp);     // Do mix of prev tests in 10 threads, starting tests in random order
 
     test_path(fsp);
 
     test_out_of_space(fsp);
+
+}
+
+
+static void test_mt(cpfs_fs_t *fs)
+{
+    test_superblock(fs);
+
+//    printf( "mutex %x\n", (int)fs->fic_mutex );
+//    cpfs_mutex_lock( fs->fic_mutex );
+//    cpfs_mutex_unlock( fs->fic_mutex );
+
+
+    test_disk_alloc(fs);
+
+    test_inode_blkmap(fs); 	// test file block allocation with inode
+
+    test_inode_io(fs); 		// read/write directly with inode, no file name
+
+    // test_inode_alloc(fs);
+
+    test_directory(fs);        // Create/lookup/destroy directory entries
+
+    // test_file_create(fs); 	// create, open and destroy multiple files, try open deleted files
+
+    test_file_data(fs);        	// Create, write, close, reopen, read and compare data, in a mixed way
+
+    // test_mutithreaded(fs);     // Do mix of prev tests in 10 threads, starting tests in random order
+
+    test_path(fs);
+
+    test_out_of_space(fs);
 
 }
 
@@ -100,7 +137,7 @@ int main( int ac, char**av )
         if( rc ) die_rc( "Mount FS", rc );
     }
 
-    test(&fs0);
+    //test_all(&fs0);
 
     rc = cpfs_umount( &fs0 );
     if( rc ) die_rc( "Umount FS", rc );
@@ -287,45 +324,47 @@ cpfs_os_access_rights_check( struct cpfs_fs *fs, cpfs_right_t t, void *user_id_d
 void* mt_run(void *arg)
 {
     errno_t 		rc;
-    cpfs_fs_t *fsp = arg;
+    cpfs_fs_t *		fs = arg;
+    int                 i;
 
-    printf("Thread for disk %d run\n", fsp->disk_id );
+    printf("Thread for disk %d run\n", fs->disk_id );
 
-    rc = cpfs_init( fsp );
+    rc = cpfs_init( fs );
     if( rc ) die_rc( "Init FS", rc );
 
 
-    rc = cpfs_mount( fsp );
+    rc = cpfs_mount( fs );
     if( rc )
     {
-        rc = cpfs_mkfs( fsp, fsp->disk_size );
+        rc = cpfs_mkfs( fs, fs->disk_size );
         if( rc ) die_rc( "mkfs", rc );
 
-        rc = cpfs_mount( fsp );
+        rc = cpfs_mount( fs );
         if( rc ) die_rc( "Mount FS", rc );
     }
 
-    test( fsp );
+    //for( i = 0; i < 10; i++ )
+        test_mt( fs );
 
-    rc = cpfs_umount( fsp );
+    rc = cpfs_umount( fs );
     if( rc ) die_rc( "Umount FS", rc );
 
 #if 1
     printf("\n");
-    rc = cpfs_fsck( fsp, 0 );
+    rc = cpfs_fsck( fs, 0 );
     if( rc ) cpfs_log_error( "fsck rc=%d", rc );
 #endif
 
-    rc = cpfs_stop( fsp );
+    rc = cpfs_stop( fs );
     if( rc ) die_rc( "Stop FS", rc );
 
-    printf("--- Thread for disk %d is DONE\n", fsp->disk_id );
+    printf("--- Thread for disk %d is DONE\n", fs->disk_id );
 
     return 0;
 }
 
 
-
+#define TH1 1
 
 static void mt_test(void)
 {
@@ -333,16 +372,23 @@ static void mt_test(void)
     pthread_t pt0, pt1;
     void *retval;
 
-    rc = pthread_create( &pt0, 0, mt_run, fsp[0] );
+    printf( "\n\n--- MultiThreaded Test, different disks\n\n" );
+
+    rc = pthread_create( &pt0, 0, mt_run, fsp_array[0] );
     if( rc ) die_rc( "thread 0", rc );
 
-    rc = pthread_create( &pt1, 0, mt_run, fsp[1] );
+#if TH1
+    rc = pthread_create( &pt1, 0, mt_run, fsp_array[1] );
     if( rc ) die_rc( "thread 1", rc );
+#endif
 
     printf("! Wait for thread 0\n" );
     pthread_join( pt0, &retval);
+
+#if TH1
     printf("! Wait for thread 1\n" );
     pthread_join( pt1, &retval);
+#endif
 
     //sleep(10000);
 }

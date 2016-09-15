@@ -1,5 +1,6 @@
-CFLAGS +=-g -Wall -Wextra -m32
-LDFLAGS += -lpthread -m32
+ARCHFLAGS = -m32
+CFLAGS +=-g -Wall -Wextra $(ARCHFLAGS)
+LDFLAGS += -g -lpthread $(ARCHFLAGS)
 
 cpfs: main.o \
 	cpfs.o cpfs_test.o cpfs_io.o cpfs_init.o cpfs_sb.o cpfs_blkio.o cpfs_inode.o cpfs_ino_io.o \
@@ -13,7 +14,7 @@ clean::
 # is this size ok for size we use in mkfs?
 image::
 	dd if=/dev/zero of=disk.img count=10000 bs=4096
-	dd if=/dev/zero of=disk1.img count=1000 bs=4096
+	dd if=/dev/zero of=disk1.img count=12000 bs=4096
 
 
 test:

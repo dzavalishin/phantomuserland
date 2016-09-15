@@ -88,6 +88,8 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
                     }
                 }
 
+                cpfs_assert( (*file_ino) < fs->sb.ninode );
+
                 return 0;
             }
 
