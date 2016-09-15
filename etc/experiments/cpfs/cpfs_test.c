@@ -237,7 +237,7 @@ test_inode_io(cpfs_fs_t *fsp) 		// read/write directly with inode, no file name
 static void mke( cpfs_fs_t *fsp, const char *name )
 {
     // Write inode num -1 to dir entry for it to be extremely wrong
-    errno_t rc = cpfs_alloc_dirent( fsp, 0, name, -1 );
+    errno_t rc = cpfs_alloc_dirent( fsp, 0, name, 1 );
     if( rc ) cpfs_panic( "mke %d", rc );
 }
 

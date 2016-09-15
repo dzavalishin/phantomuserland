@@ -88,7 +88,12 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
                     }
                 }
 
-                cpfs_assert( (*file_ino) < fs->sb.ninode );
+                if( (*file_ino) >= fs->sb.ninode )
+                {
+                    cpfs_log_error("cpfs_namei_impl: dir ino %lld fname %s gives ino %lld", dir_ino, fname, file_ino );
+                    continue; // Don't match dir entries if inode value is insane - right?
+                }
+                //cpfs_assert( (*file_ino) < fs->sb.ninode );
 
                 return 0;
             }
@@ -139,6 +144,10 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
     // TODO some speedup? In-mem hash?
 
     cpfs_assert(fname);
+
+    if( file_ino >= fs->sb.ninode )
+        cpfs_log_error("cpfs_alloc_dirent: dir ino %lld fname %s gives ino %lld", dir_ino, fname, file_ino );
+    cpfs_assert( file_ino < fs->sb.ninode );
 
     rc = cpfs_is_dir( fs, dir_ino, &isdir );
     if( rc ) return rc;
