@@ -16,7 +16,8 @@
 
 #include <pthread.h>
 
-static void mt_test(void);
+static void mt_test(void); // multithreaded test - separate FS instances
+static void mp_test(void); // multithreaded test - one FS instance
 
 cpfs_fs_t fs0 =
 {
@@ -68,7 +69,7 @@ static void test_all(cpfs_fs_t *fsp)
 
 }
 
-
+// multithreaded test - separate FS instances
 static void test_mt(cpfs_fs_t *fs)
 {
     test_superblock(fs);
@@ -97,6 +98,15 @@ static void test_mt(cpfs_fs_t *fs)
     test_path(fs);
 
     test_out_of_space(fs);
+
+}
+
+// multithreaded test - one FS instance
+static void test_mp(cpfs_fs_t *fs) 
+{
+    // Can do only tests that can be run cuncurrently in any combination
+
+    test_disk_alloc(fs);
 
 }
 
@@ -151,7 +161,9 @@ int main( int ac, char**av )
     rc = cpfs_stop( &fs0 );
     if( rc ) die_rc( "Stop FS", rc );
 
+
     mt_test();
+    mp_test();
 
 
     return 0;
@@ -215,7 +227,7 @@ cpfs_get_current_time(void)
 }
 
 
-#define USE_PTHREAD_MUTEX 0
+#define USE_PTHREAD_MUTEX 1
 
 #if !USE_PTHREAD_MUTEX
 #  define MUTEX_TEST_VAL ((void *)0x3443ABBA)
@@ -400,6 +412,92 @@ static void mt_test(void)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+void* mp_run(void *arg)
+{
+    errno_t 		rc;
+    cpfs_fs_t *		fs = arg;
+    int                 i;
+
+    printf("Thread %d run (same disk)\n", fs->disk_id );
+
+
+    for( i = 0; i < 10; i++ )
+        test_mp( fs );
+
+    printf("--- Thread %d is DONE (same disk)\n", fs->disk_id );
+
+    return 0;
+}
+
+
+
+
+
+static void mp_test(void)
+{
+    int rc;
+    pthread_t pt0, pt1;
+    void *retval;
+
+    cpfs_fs_t *		fs = fsp_array[0];
+
+    printf( "\n\n--- MultiThreaded Test, same disk\n\n" );
+
+    rc = cpfs_init( fs );
+    if( rc ) die_rc( "Init FS", rc );
+
+    // Allways from clean disk
+    //rc = cpfs_mount( fs );
+    //if( rc )
+    {
+        rc = cpfs_mkfs( fs, fs->disk_size );
+        if( rc ) die_rc( "mkfs", rc );
+
+        rc = cpfs_mount( fs );
+        if( rc ) die_rc( "Mount FS", rc );
+    }
+
+    rc = pthread_create( &pt0, 0, mp_run, fs );
+    if( rc ) die_rc( "thread 0", rc );
+
+#if TH1
+    rc = pthread_create( &pt1, 0, mp_run, fs );
+    if( rc ) die_rc( "thread 1", rc );
+#endif
+
+    printf("! Wait for thread 0\n" );
+    pthread_join( pt0, &retval);
+
+#if TH1
+    printf("! Wait for thread 1\n" );
+    pthread_join( pt1, &retval);
+#endif
+
+    rc = cpfs_umount( fs );
+    if( rc ) die_rc( "Umount FS", rc );
+
+    printf("\n");
+    rc = cpfs_fsck( fs, 0 );
+    if( rc ) cpfs_log_error( "fsck rc=%d", rc );
+
+    rc = cpfs_stop( fs );
+    if( rc ) die_rc( "Stop FS", rc );
+
+    //sleep(10000);
+}
 
 
 
