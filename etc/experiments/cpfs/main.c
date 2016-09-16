@@ -49,11 +49,11 @@ static void test_all(cpfs_fs_t *fsp)
 
     test_disk_alloc(fsp);
 
+    test_inode_alloc(fsp);
+
     test_inode_blkmap(fsp); 	// test file block allocation with inode
 
     test_inode_io(fsp); 		// read/write directly with inode, no file name
-
-    // test_inode_alloc(fsp);
 
     test_directory(fsp);        // Create/lookup/destroy directory entries
 
@@ -148,7 +148,7 @@ int main( int ac, char**av )
         if( rc ) die_rc( "Mount FS", rc );
     }
 
-    //test_all(&fs0);
+    test_all(&fs0);
 
     rc = cpfs_umount( &fs0 );
     if( rc ) die_rc( "Umount FS", rc );
@@ -338,7 +338,7 @@ void* mt_run(void *arg)
 {
     errno_t 		rc;
     cpfs_fs_t *		fs = arg;
-    int                 i;
+    //int                 i;
 
     printf("Thread for disk %d run\n", fs->disk_id );
 
@@ -428,7 +428,7 @@ static void mt_test(void)
 
 void* mp_run(void *arg)
 {
-    errno_t 		rc;
+    //errno_t 		rc;
     cpfs_fs_t *		fs = arg;
     int                 i;
 

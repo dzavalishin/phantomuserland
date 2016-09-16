@@ -320,7 +320,8 @@ cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
 
 
 errno_t
-cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode ) {
+cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
+{
     int lock = 0;
     if (fs->fic_used <= 0) {
         fic_refill(fs);
@@ -358,6 +359,7 @@ errno_t
 cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 {
     errno_t rc;
+    struct cpfs_inode *inode_p;
 
     cpfs_assert( ino != 0 );
     //printf("free inode %lld\n", ino);
@@ -370,10 +372,32 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
         return EWOULDBLOCK;
     }
 
+    // Check if inode is active
+
+    inode_p = cpfs_lock_ino( fs, ino );
+
+    if( !inode_p )
+        return EIO;
+
+    if( inode_p->nlinks <= 0 )
+    {
+        cpfs_log_error("free_inode: attempt to free inode %d with zero links", ino );
+        cpfs_unlock_ino( fs, ino );
+        return ENOENT;
+    }
+
+    cpfs_unlock_ino( fs, ino );
+
+
+    // Free inode data
+
     rc = cpfs_inode_truncate( fs, ino ); // free all data blocks for inode, set size to 0
     if( rc ) return rc;
 
-    struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
+
+    // Free inode record
+
+    inode_p = cpfs_lock_ino( fs, ino );
 
     if( !inode_p )
         return EIO;
@@ -388,6 +412,9 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
     inode_p->nlinks--;
 
     cpfs_unlock_ino( fs, ino );
+
+
+
 
 
     // Put inode num to in-memory inode free list

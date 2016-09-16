@@ -222,6 +222,49 @@ test_inode_io(cpfs_fs_t *fsp) 		// read/write directly with inode, no file name
 
 
 
+void test_inode_alloc( cpfs_fs_t *fs )
+{
+    errno_t rc;
+    cpfs_ino_t i1, i2;
+
+    printf("Inode alloc test\n");
+
+
+
+    rc = cpfs_alloc_inode( fs, &i1 );
+    cpfs_assert( rc == 0 );
+
+    rc = cpfs_alloc_inode( fs, &i2 );
+    cpfs_assert( rc == 0 );
+
+
+
+    rc = cpfs_free_inode( fs, i2 );
+    cpfs_assert( rc == 0 );
+
+    rc = cpfs_free_inode( fs, i1 );
+    cpfs_assert( rc == 0 );
+
+
+
+    rc = cpfs_free_inode( fs, i2 );
+    cpfs_assert( rc != 0 );
+
+    rc = cpfs_free_inode( fs, i1 );
+    cpfs_assert( rc != 0 );
+
+
+
+    printf("Inode alloc test: DONE\n");
+
+}
+
+
+
+
+
+
+
 
 
 
