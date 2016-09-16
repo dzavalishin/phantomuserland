@@ -61,3 +61,4 @@ oldtree/kernel/phantom/gdb.log
 etc/experiments/cpfs/disk.img
 *.exe
 *.img
+etc/experiments/cpfs/Makefile~
