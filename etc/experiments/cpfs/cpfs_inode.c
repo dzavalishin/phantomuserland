@@ -320,23 +320,27 @@ cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
 
 
 errno_t
-cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
-{
-    cpfs_mutex_lock( fs->fic_mutex );
+cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode ) {
+    int lock = 0;
+    if (fs->fic_used <= 0) {
+        fic_refill(fs);
+        lock = 1;
+    }
 
-    if( fs->fic_used <= 0 )
-        fic_refill( fs );
-
-    if( fs->fic_used <= 0 )
-    {
-        cpfs_mutex_unlock( fs->fic_mutex );
+    if( fs->fic_used <= 0 ) {
+        cpfs_mutex_unlock(fs->fic_mutex);
+        lock = 0;
         return ENOSPC; //EMFILE;
     }
 
     *inode = fs->free_inodes_cache[--fs->fic_used];
 
     //printf("alloc inode %lld\n", *inode);
-
+    if (!lock) {
+        cpfs_mutex_lock(fs->fic_mutex);
+        lock = 1;
+    }
+    
     {
         struct cpfs_inode *rdi = cpfs_lock_ino( fs, *inode );
         cpfs_touch_ino( fs, *inode );
