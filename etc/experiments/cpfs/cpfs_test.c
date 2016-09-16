@@ -38,7 +38,7 @@ void    test_superblock(cpfs_fs_t *fsp)
 // ----------------------------------------------------------------------------
 
 
-
+/*
 #define QSZ (2048*100)
 
 struct tda_q {
@@ -46,9 +46,9 @@ struct tda_q {
     int             pp;
     int             gp;
 };
+*/
 
-
-static void reset_q(struct tda_q *tda)
+void reset_q(struct tda_q *tda)
 {
     tda->pp = 0;
     tda->gp = 0;
@@ -56,7 +56,7 @@ static void reset_q(struct tda_q *tda)
 }
 
 
-static void mass_blk_alloc(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
+void mass_blk_alloc(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 {
     while( cnt-- > 0)
     {
@@ -67,7 +67,7 @@ static void mass_blk_alloc(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
     }
 }
 
-static void mass_blk_free(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
+void mass_blk_free(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 {
     while( cnt-- > 0)
     {
@@ -272,6 +272,7 @@ void test_inode_alloc( cpfs_fs_t *fs )
     rc = cpfs_alloc_inode( fs, &i2 );
     cpfs_assert( rc == 0 );
 
+    printf("Inode alloc %lld %lld\n", i1, i2 );
 
 
     rc = cpfs_free_inode( fs, i2 );

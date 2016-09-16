@@ -120,10 +120,11 @@ static void test_mp(cpfs_fs_t *fs)
     // Can do only tests that can be run cuncurrently in any combination
 
     // can we?
-    // test_disk_alloc(fs);
+    test_mp_disk_alloc(fs);
 
+    test_inode_alloc( fs );
 
-    test_mp_files(fs);
+    //test_mp_files(fs);
 
 }
 
@@ -204,7 +205,8 @@ int main( int ac, char**av )
 void
 cpfs_panic( const char *fmt, ... )
 {
-    printf( "\nPanic: " );
+    sleep(1); // let other thread to finish or die
+    printf( "\n\nPanic: " );
 
     va_list ptr;
     va_start(ptr, fmt);
@@ -212,7 +214,9 @@ cpfs_panic( const char *fmt, ... )
     va_end(ptr);
 
     printf( "\nGlobal errno = %s\n\n", strerror(errno) );
-
+#ifdef __CYGWIN__
+    cygwin_stackdump();
+#endif
     exit(33);
 }
 
@@ -470,13 +474,13 @@ void* mp_run(void *arg)
     cpfs_fs_t *		fs = arg;
     int                 i;
 
-    printf("Thread %d run (same disk)\n", fs->disk_id );
+    printf("Thread for disk %d run (same disk)\n", fs->disk_id );
 
-
-    for( i = 0; i < 10; i++ )
+    // 10 runs is not enough
+    for( i = 0; i < 50; i++ )
         test_mp( fs );
 
-    printf("--- Thread %d is DONE (same disk)\n", fs->disk_id );
+    printf("--- Thread is DONE (same disk)\n" );
 
     return 0;
 }

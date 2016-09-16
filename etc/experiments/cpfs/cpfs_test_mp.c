@@ -54,11 +54,13 @@ test_mp_files(cpfs_fs_t *fs)
 
     printf("MP File API data test: Create files\n");
 
+
+
     rc = cpfs_file_open( fs, &fd1, fn1, O_CREAT, 0 );
-    if( rc )  cpfs_panic( "create 1 %d", rc );
+    if( rc )  cpfs_panic( "create 1 rc=%d", rc );
 
     rc = cpfs_file_open( fs, &fd2, fn2, O_CREAT, 0 );
-    if( rc )  cpfs_panic( "create 2  %d", rc );
+    if( rc )  cpfs_panic( "create 2 rc=%d", rc );
 
 
 
@@ -74,13 +76,22 @@ test_mp_files(cpfs_fs_t *fs)
 
 
     rc = cpfs_file_write( fd2, 100, test_data, sizeof(test_data) );
-    if( rc ) cpfs_panic( "can't write data2, %d", rc );
+    if( rc ) cpfs_panic( "can't write data2, rc=%d", rc );
 
     rc = cpfs_file_read( fd2, 100, test_buf, sizeof(test_data) );
-    if( rc ) cpfs_panic( "can't read data2, %d", rc );
+    if( rc ) cpfs_panic( "can't read data2, rc=%d", rc );
 
     if( memcmp( test_data, test_buf, sizeof(test_data) ) )
         cpfs_panic( "read data2 differs, '%s' and '%s'", test_data, test_buf );
+
+
+
+    rc = cpfs_file_close( fd1 );
+    cpfs_assert( rc == 0 );
+
+    rc = cpfs_file_close( fd2 );
+    cpfs_assert( rc == 0 );
+
 
 
     printf("MP File API data test: DONE\n");
@@ -91,5 +102,57 @@ test_mp_files(cpfs_fs_t *fs)
 
 
 
+
+
+
+
+void
+test_mp_disk_alloc(cpfs_fs_t *fsp)
+{
+    struct tda_q q;
+
+    reset_q(&q);
+
+    printf("MP Disk block allocation test: mixed alloc/free\n");
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
+
+    //cpfs_blkno_t initial_free = fsp->sb.free_count;
+
+    mass_blk_alloc(fsp,&q,1);   // +
+    mass_blk_alloc(fsp,&q,120); // +
+    mass_blk_free(fsp,&q,34);   // -
+    mass_blk_alloc(fsp,&q,40);  // +
+    mass_blk_free(fsp,&q,120);  // -
+    mass_blk_alloc(fsp,&q,80);  // +
+    mass_blk_free(fsp,&q,40);   // -
+    mass_blk_alloc(fsp,&q,34);  // +
+    mass_blk_free(fsp,&q,80);   // -
+    mass_blk_free(fsp,&q,1);    // -
+
+/*
+    if( initial_free != fsp->sb.free_count )
+    {
+        printf("FAIL: initial_free (%lld) != fs.sb.free_count (%lld)\n", (long long)initial_free, (long long)fsp->sb.free_count );
+    }
+*/
+    // Now do max possible run twice
+
+    printf("MP Disk block allocation test: big runs\n");
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
+    reset_q(&q);
+    mass_blk_alloc(fsp,&q,800);
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
+    mass_blk_free(fsp,&q,800);
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
+    reset_q(&q);
+    mass_blk_alloc(fsp,&q,800);
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
+    mass_blk_free(fsp,&q,800);
+    //printf("fs.sb.free_count = %lld\n", (long long)fs.sb.free_count );
+
+    reset_q(&q);
+
+    printf("MP Disk block allocation test: DONE\n");
+}
 
 

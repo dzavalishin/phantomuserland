@@ -14,7 +14,23 @@
 
 #include "cpfs_local.h"
 
-//extern cpfs_fs_t fs;
+
+#define QSZ (2048*100)
+
+struct tda_q
+{
+    cpfs_blkno_t    q[QSZ];
+    int             pp;
+    int             gp;
+};
+
+
+void reset_q(struct tda_q *tda);
+void mass_blk_alloc(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt);
+void mass_blk_free(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt);
+
+
+
 
 void    test_out_of_space(cpfs_fs_t *fsp);
 void    test_superblock(cpfs_fs_t *fsp);
@@ -31,6 +47,7 @@ void    test_mutithreaded(cpfs_fs_t *fsp);     	// Do mix of prev tests in 10 th
 
 
 void    test_mp_files(cpfs_fs_t *fs);
+void    test_mp_disk_alloc(cpfs_fs_t *fsp);
 
 
 

@@ -747,5 +747,28 @@ errno_t cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_dat
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Lock/unlock inode mutex - have exclusive access to inode state or data
+//
+// ----------------------------------------------------------------------------
+
+
+void cpfs_ino_mutex_lock( struct cpfs_fs *fs, struct cpfs_inode *ip )
+{
+    (void) fs;
+
+    cpfs_mutex_unlock( ip->mutex );
+}
+
+
+void cpfs_ino_mutex_unlock( struct cpfs_fs *fs, struct cpfs_inode *ip )
+{
+    (void) fs;
+
+    cpfs_mutex_unlock( ip->mutex );
+}
+
+
 
 

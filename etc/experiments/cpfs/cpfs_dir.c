@@ -20,6 +20,7 @@
 //
 // ----------------------------------------------------------------------------
 
+// TODO fs->dir_mutex can be replaced with per-disk-blk mutex
 
 
 static errno_t
@@ -58,11 +59,12 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
     {
         char data[CPFS_BLKSIZE];
 
-        //rc = cpfs_disk_read( 0, blkpos, data );
+        cpfs_mutex_lock( fs->dir_mutex ); // TODO need to use inode mutex here!
         rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
 
         if( rc )
         {
+            cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
             cpfs_log_error("Can't read dir ino %d @ blk %d", dir_ino, blkpos );
             return rc;
         }
@@ -89,10 +91,13 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
                     rc = cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
                     if( rc )
                     {
+                        cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
                         cpfs_log_error("Can't write dir ino %d @ blk %d", dir_ino, blkpos );
                         return rc;
                     }
                 }
+
+                cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
 
                 if( (*file_ino) >= fs->sb.ninode )
                 {
@@ -105,6 +110,7 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
             }
 
         }
+        cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
 
         blkpos++;
 
@@ -207,12 +213,14 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
 
     // Scan sequentially through the dir looking for name
 
+    cpfs_mutex_lock( fs->dir_mutex ); // TODO need to use inode mutex here!
     while( nblk-- > 0 )
     {
-        //rc = cpfs_disk_read( 0, blkpos, data );
+
         rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
         if( rc )
         {
+            cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
             cpfs_log_error("Can't read dir ino %d @ blk %d", dir_ino, blkpos );
             return EIO;
         }
@@ -238,6 +246,7 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
                     cpfs_log_error("Can't write dir ino %d @ blk %d", dir_ino, blkpos );
                 }
 
+                cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
                 //cpfs_debug_fdump( "alloc_dirent.data", data, CPFS_BLKSIZE );
                 return rc;
             }
@@ -255,8 +264,12 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
     de->inode = file_ino;
     //strlcpy( de->name, fname, sizeof(de->name) );
     strncpy( de->name, fname, sizeof(de->name)-1 );
-    //return cpfs_disk_write( 0, nblk, data );
-    return cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+
+    rc = cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+
+    cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
+
+    return rc;
 
 }
 

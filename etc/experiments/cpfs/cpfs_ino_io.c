@@ -83,7 +83,13 @@ cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in me
 
     int ino_in_blk = ino % CPFS_INO_PER_BLK;
 
-    return ((void *)data) + (ino_in_blk * CPFS_INO_REC_SIZE);
+    struct cpfs_inode *ip = ((void *)data) + (ino_in_blk * CPFS_INO_REC_SIZE);
+
+    // Init volatile part of inode
+
+    cpfs_mutex_init( &(ip->mutex) );
+
+    return ip;
 }
 
 

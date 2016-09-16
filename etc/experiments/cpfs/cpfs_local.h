@@ -96,14 +96,13 @@ struct cpfs_inode
     cpfs_blkno_t        log;    // disk block of audit log list, not used now, will contain log of all operations to support transactions
 
     cpfs_blkno_t        blocks0[CPFS_INO_DIR_BLOCKS];
-#if 0
-    cpfs_blkno_t        blocks1; // Block no of list of 1-level indirect blocks list
-    cpfs_blkno_t        blocks2; // Block no of list of 2-level indirect blocks list
-    cpfs_blkno_t        blocks3; // Block no of list of 3-level indirect blocks list
-    cpfs_blkno_t        blocks4; // Block no of list of 4-level indirect blocks list
-#else
     cpfs_blkno_t        indir[ CPFS_MAX_INDIR ]; // indirect blocks list with growing level of indirection
-#endif
+
+    // -------------------------------------------------------------------------------------
+    // NB - following is just in-memory state, ignore it on disk, will be inited on any load
+
+    cpfs_mutex          mutex;	// Inode/file/dir data access serialization
+
 };
 
 // curr size of inode is 344 bytes, we'll allocate 512 for any case
@@ -230,6 +229,7 @@ struct cpfs_fs
     cpfs_mutex          buf_mutex;              // Disk buffers
     cpfs_mutex          fdmap_mutex;            // File descriptor map - init in fdmap code
     cpfs_mutex          inode_mutex;            // Taken when work with any inode, TODO make inode buffers for concurrent inode io, use mutex to lock search
+    cpfs_mutex          dir_mutex;              // Directory update/access mutex TODO hack, very inefficient - need per-inode locks for this!
 
     // --------------------------------------------------------------------------------------------
     // Inode allocation state
@@ -341,6 +341,9 @@ struct cpfs_inode *     cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // makes
 void                    cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // marks inode as dirty, will be saved to disk on unlock
 void                    cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // flushes inode to disk before unlocking it, if touched
 
+// lock/unlock inode state/file data exclusive access mutex. used in directory update code mostly
+void 			cpfs_ino_mutex_lock( struct cpfs_fs *fs, struct cpfs_inode *ip );
+void 			cpfs_ino_mutex_unlock( struct cpfs_fs *fs, struct cpfs_inode *ip );
 
 
 //cpfs_ino_t            cpfs_alloc_inode( void );

@@ -2,7 +2,7 @@ break cpfs_panic
 break cpfs_log_error
 
 
-break test
+break main.c:327
 
 
 run
