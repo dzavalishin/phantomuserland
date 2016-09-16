@@ -31,6 +31,13 @@ void    test_superblock(cpfs_fs_t *fsp)
     // TODO write me
 }
 
+// ----------------------------------------------------------------------------
+//
+// Simple queue of block numbers used in allocation tests
+//
+// ----------------------------------------------------------------------------
+
+
 
 #define QSZ (2048*100)
 
@@ -72,11 +79,18 @@ static void mass_blk_free(cpfs_fs_t *fsp, struct tda_q *tda_q, int cnt)
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Test of disk block allocations and deallocations
+//
+// ----------------------------------------------------------------------------
+
+
+
 void
 test_disk_alloc(cpfs_fs_t *fsp)
 {
     struct tda_q q;
-    //struct tda_q *tda = &q;
 
     reset_q(&q);
 
@@ -125,6 +139,13 @@ test_disk_alloc(cpfs_fs_t *fsp)
 
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Test data blocks allocation for file (inode)
+//
+// ----------------------------------------------------------------------------
 
 
 
@@ -178,6 +199,13 @@ test_inode_blkmap(cpfs_fs_t *fsp) 	// test file block allocation with inode
 
 
 
+// ----------------------------------------------------------------------------
+//
+// Test file IO directly through inode, without using file names machinery
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 
@@ -216,6 +244,13 @@ test_inode_io(cpfs_fs_t *fsp) 		// read/write directly with inode, no file name
 
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Test inode alloc/free subsystem
+//
+// ----------------------------------------------------------------------------
 
 
 
@@ -271,6 +306,13 @@ void test_inode_alloc( cpfs_fs_t *fs )
 
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Test die entries creation/deletion
+//
+// ----------------------------------------------------------------------------
 
 
 
@@ -352,6 +394,13 @@ test_directory(cpfs_fs_t *fsp)
 
 
 
+// ----------------------------------------------------------------------------
+//
+// Test file data IO using full cycle (open/w/r/close)
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 
@@ -398,6 +447,15 @@ test_file_data(cpfs_fs_t *fsp)        	// Create, write, close, reopen, read and
 }
 
 
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Test path names (sbdirs) and stat/time
+//
+// ----------------------------------------------------------------------------
 
 
 

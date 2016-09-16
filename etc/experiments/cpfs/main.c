@@ -19,6 +19,12 @@
 static void mt_test(void); // multithreaded test - separate FS instances
 static void mp_test(void); // multithreaded test - one FS instance
 
+// ----------------------------------------------------------------------------
+//
+// Definitions of two different FS instances, used in tests
+//
+// ----------------------------------------------------------------------------
+
 cpfs_fs_t fs0 =
 {
     .disk_id = 0,
@@ -40,6 +46,12 @@ void die_rc( const char *msg, int rc )
     printf("%s, rc = %d (%s) global errno = %s\n", msg, rc, strerror(rc), strerror(errno) );
     exit( 0 );
 }
+
+// ----------------------------------------------------------------------------
+//
+// Groups of tests
+//
+// ----------------------------------------------------------------------------
 
 
 static void test_all(cpfs_fs_t *fsp)
@@ -85,7 +97,7 @@ static void test_mt(cpfs_fs_t *fs)
 
     test_inode_io(fs); 		// read/write directly with inode, no file name
 
-    // test_inode_alloc(fs);
+    test_inode_alloc(fs);
 
     test_directory(fs);        // Create/lookup/destroy directory entries
 
@@ -107,10 +119,20 @@ static void test_mp(cpfs_fs_t *fs)
 {
     // Can do only tests that can be run cuncurrently in any combination
 
+    // can we?
+    // test_disk_alloc(fs);
+
+
     test_mp_files(fs);
 
 }
 
+
+// ----------------------------------------------------------------------------
+//
+// Test main
+//
+// ----------------------------------------------------------------------------
 
 
 
@@ -169,6 +191,14 @@ int main( int ac, char**av )
 
     return 0;
 }
+
+
+// ----------------------------------------------------------------------------
+//
+// OS interface functions
+//
+// ----------------------------------------------------------------------------
+
 
 
 void
@@ -327,6 +357,14 @@ cpfs_os_access_rights_check( struct cpfs_fs *fs, cpfs_right_t t, void *user_id_d
     return 0; // can do anything
 }
 
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Multithreaded tests
+//
+// ----------------------------------------------------------------------------
 
 
 

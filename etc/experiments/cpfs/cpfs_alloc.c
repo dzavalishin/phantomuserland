@@ -13,6 +13,14 @@
 #include "cpfs_local.h"
 
 
+// ----------------------------------------------------------------------------
+//
+// Give out FS info.
+//
+// ----------------------------------------------------------------------------
+
+
+
 errno_t
 cpfs_fs_stat( struct cpfs_fs *fs, cpfs_blkno_t *disk_size, cpfs_blkno_t *disk_free )
 {
@@ -25,6 +33,15 @@ cpfs_fs_stat( struct cpfs_fs *fs, cpfs_blkno_t *disk_size, cpfs_blkno_t *disk_fr
 
     return 0;
 }
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Allocate disk block.
+//
+// ----------------------------------------------------------------------------
 
 
 cpfs_blkno_t
@@ -106,6 +123,13 @@ no_freelist:
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Free disk block.
+//
+// ----------------------------------------------------------------------------
+
+
 void
 cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk )
 {
@@ -130,6 +154,16 @@ cpfs_free_disk_block( cpfs_fs_t *fs, cpfs_blkno_t blk )
 //printf(" free head = %lld", fs->sb.free_list );
     cpfs_mutex_unlock( fs->freelist_mutex );
 }
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Print out general FS info.
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 errno_t

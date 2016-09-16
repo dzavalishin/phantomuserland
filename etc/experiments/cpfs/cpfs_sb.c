@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2016-2016 Dmitry Zavalishin, dz@dz.ru
  *
- * Superblock ops.
+ * Superblock ops, mkfs.
  *
 **/
 
@@ -12,12 +12,17 @@
 #include "cpfs_local.h"
 
 
-
-//struct cpfs_sb fs_sb;
-
+// TODO move to header
 #define sb_blk 0
-//static int sb_blk = 0;
-//static cpfs_mutex sb_mutex;
+
+
+// ----------------------------------------------------------------------------
+//
+// Make filesystem (format disk)
+//
+// ----------------------------------------------------------------------------
+
+
 
 errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 {
@@ -84,6 +89,19 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
 
     return 0;
 }
+
+
+// ----------------------------------------------------------------------------
+//
+// Superblock ops
+//
+// ----------------------------------------------------------------------------
+
+
+
+
+
+
 
 errno_t cpfs_init_sb( cpfs_fs_t *fs )
 {

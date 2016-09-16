@@ -14,7 +14,13 @@
 
 
 
-//#warning code is wrong, can't use cpfs_disk_read/write, must use cpfs_ino_file_read
+// ----------------------------------------------------------------------------
+//
+// Implementation of directory scan to find/delete directory entry
+//
+// ----------------------------------------------------------------------------
+
+
 
 static errno_t
 cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino, int remove )
@@ -108,6 +114,15 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
 }
 
 
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Find inode by name in a given directory
+//
+// ----------------------------------------------------------------------------
+
 errno_t
 cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *file_ino )
 {
@@ -116,6 +131,15 @@ cpfs_namei( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_t *fi
 
     return cpfs_namei_impl( fs, dir_ino, fname, file_ino, 0 );
 }
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Delete direcory entry
+//
+// ----------------------------------------------------------------------------
 
 errno_t
 cpfs_free_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname )
@@ -129,6 +153,13 @@ cpfs_free_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname )
 
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Create and fill directory enry
+//
+// ----------------------------------------------------------------------------
 
 
 
@@ -228,6 +259,16 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
     return cpfs_ino_file_write( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
 
 }
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Find out if inode contains a directory
+//
+// ----------------------------------------------------------------------------
+
 
 // TODO return dir size in entries too
 /* checks that given inode contains directory */
@@ -332,6 +373,13 @@ cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
  * General directory scan function
  *
 **/
+
+// ----------------------------------------------------------------------------
+//
+// 
+//
+// ----------------------------------------------------------------------------
+
 
 
 

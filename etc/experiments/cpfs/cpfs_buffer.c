@@ -19,6 +19,13 @@ static void 	cpfs_clear_some_buf( cpfs_fs_t *fs );
 
 
 
+// ----------------------------------------------------------------------------
+//
+// 
+//
+// ----------------------------------------------------------------------------
+
+
 // Just init - mutexes, memory, etc
 errno_t
 cpfs_buf_init( cpfs_fs_t *fs )
@@ -28,6 +35,17 @@ cpfs_buf_init( cpfs_fs_t *fs )
 
     return fs->buf ? 0 : ENOMEM;
 }
+
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// 
+//
+// ----------------------------------------------------------------------------
+
 
 // Find first free buf, read in data
 
@@ -99,6 +117,14 @@ cpfs_buf_free( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t *buf )
 }
 */
 
+
+// ----------------------------------------------------------------------------
+//
+// If some disk block is already in cache - find corresponding buffer
+//
+// ----------------------------------------------------------------------------
+
+
 static errno_t
 cpfs_buf_find( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf ) // char shared
 {
@@ -142,6 +168,13 @@ cpfs_buf_find( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf ) // char share
 // Get buffer. Find existing or allocate new. Read in disk data if needed.
 //
 //
+// ----------------------------------------------------------------------------
+//
+// 
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 errno_t
@@ -173,6 +206,15 @@ cpfs_buf_lock( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf )
 }
 
 
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Unlock disk block buffer, write if required
+//
+// ----------------------------------------------------------------------------
 
 
 errno_t
@@ -215,6 +257,13 @@ cpfs_buf_unlock( cpfs_fs_t *fs, cpfs_blkno_t blk, char write )
 
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Find some unused buffer, free it, writing out contents if required
+//
+// ----------------------------------------------------------------------------
 
 
 
@@ -264,6 +313,15 @@ cpfs_clear_some_buf( cpfs_fs_t *fs )
     cpfs_mutex_unlock( fs->buf_mutex );
 
 }
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Flush all cache
+//
+// ----------------------------------------------------------------------------
+
 
 
 // TODO errno_t

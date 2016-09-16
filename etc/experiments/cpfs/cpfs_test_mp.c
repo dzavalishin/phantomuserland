@@ -29,7 +29,7 @@
 static const char test_data[] = "MP test: big brown something jumps over a lazy programmer and runs regression tests concurrently, though quite in vain";
 
 
-// Unique id for file names
+// Unique id for file names - in these tests we need unique file names to make sure threads do not clash
 static int next_index(void)
 {
     static int index = 0;
@@ -38,7 +38,8 @@ static int next_index(void)
 }
 
 
-void    test_mp_files(cpfs_fs_t *fs)
+void
+test_mp_files(cpfs_fs_t *fs)
 {
 
     int fd1, fd2; //, fd3;

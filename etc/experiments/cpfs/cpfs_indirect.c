@@ -123,6 +123,13 @@ fill_array:
 
 
 
+// ----------------------------------------------------------------------------
+//
+// Free indirect blocks to given depth
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 
@@ -136,6 +143,8 @@ cpfs_free_indirect( cpfs_fs_t *fs, cpfs_blkno_t indir_blk, int depth )
 
     struct cpfs_indir *iblk = cpfs_lock_blk( fs, indir_blk );
     cpfs_assert( iblk );
+
+    // TODO check magic
 
     for( i = 0; i < CPFS_INDIRECT_PER_BLK; i++ )
     {

@@ -24,6 +24,16 @@ static char data[CPFS_BLKSIZE];
 #endif // USE_BUF
 
 
+// ----------------------------------------------------------------------------
+//
+// Lock disk buffer in memory, reading in if needed. If buffer is already in
+// memory - access same buffer.
+//
+// ----------------------------------------------------------------------------
+
+
+
+
 void *
 cpfs_lock_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) // makes sure that block is in memory
 {
@@ -50,6 +60,15 @@ cpfs_lock_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) // makes sure that block is in 
 #endif // USE_BUF
 }
 
+
+// ----------------------------------------------------------------------------
+//
+// Mark block as modified (written on unlock) - TODO just add parameter to unlock
+//
+// ----------------------------------------------------------------------------
+
+
+
 void
 cpfs_touch_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) // marks block as dirty, will be saved to disk on unlock
 {
@@ -67,6 +86,15 @@ cpfs_touch_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) // marks block as dirty, will 
     write = 1;
 #endif // USE_BUF
 }
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Unlock buffer, write out if required.
+//
+// ----------------------------------------------------------------------------
+
 
 
 void

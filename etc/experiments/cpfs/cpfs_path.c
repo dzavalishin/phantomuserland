@@ -79,6 +79,16 @@ cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t
 }
 
 
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Create directory
+//
+// ----------------------------------------------------------------------------
+
+
 errno_t
 cpfs_mkdir( cpfs_fs_t *fs, const char *path, void * user_id_data )
 {

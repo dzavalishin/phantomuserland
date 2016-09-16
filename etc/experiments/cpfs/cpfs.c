@@ -20,6 +20,13 @@
 
 
 
+
+// ----------------------------------------------------------------------------
+//
+// Entry point - open
+//
+// ----------------------------------------------------------------------------
+
 errno_t
 cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *full_name, int flags, void * user_id_data )
 {
@@ -81,16 +88,19 @@ cpfs_file_open( cpfs_fs_t *fs, int *file_id, const char *full_name, int flags, v
 }
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Entry point - close
+//
+// ----------------------------------------------------------------------------
+
+
+
 errno_t
 cpfs_file_close( int file_id )
 {
-    //struct fid *f = (struct fid *) file_id;
-    //free( f );
-
-    //cpfs_ino_t ino;
-    //errno_t rc = cpfs_fdmap_get_inode( file_id, &ino );
-    //if( rc ) return rc;
-
     errno_t rc = cpfs_fdmap_free( file_id );
 
     if( rc ) printf("can't close fd %d\n", file_id );
@@ -100,13 +110,17 @@ cpfs_file_close( int file_id )
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Entry point - read
+//
+// ----------------------------------------------------------------------------
+
+
 
 errno_t
 cpfs_file_read( int file_id, cpfs_size_t pos, void *data, cpfs_size_t size )
 {
-    //struct fid *f = (struct fid *) file_id;
-    //cpfs_ino_t ino = f->inode;
-
     cpfs_ino_t ino;
     cpfs_fs_t *fs;
     errno_t rc = cpfs_fdmap_get( file_id, &ino, &fs );
@@ -117,12 +131,16 @@ cpfs_file_read( int file_id, cpfs_size_t pos, void *data, cpfs_size_t size )
 
 
 
+// ----------------------------------------------------------------------------
+//
+// Entry point - write
+//
+// ----------------------------------------------------------------------------
+
+
 errno_t
 cpfs_file_write( int file_id, cpfs_size_t pos, const void *data, cpfs_size_t size )
 {
-    //struct fid *f = (struct fid *) file_id;
-    //cpfs_ino_t ino = f->inode;
-
     cpfs_ino_t ino;
     cpfs_fs_t *fs;
     errno_t rc = cpfs_fdmap_get( file_id, &ino, &fs );

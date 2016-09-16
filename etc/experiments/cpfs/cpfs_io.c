@@ -18,6 +18,17 @@
 #define CPFS_FILE_POS_2_BLK( __pos ) (__pos/CPFS_BLKSIZE)
 #define CPFS_FILE_POS_2_OFF( __pos ) (__pos%CPFS_BLKSIZE)
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Read file data
+//
+// ----------------------------------------------------------------------------
+
+
+
+
 // todo - caller must validate read size does not exceed file size
 // returns einval if read can be partially done (and is partially done)
 
@@ -129,6 +140,13 @@ cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, 
 }
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Write file data
+//
+// ----------------------------------------------------------------------------
 
 
 

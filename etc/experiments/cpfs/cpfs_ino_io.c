@@ -30,6 +30,17 @@ static cpfs_ino_t curr_ino = -1;
 static char data[CPFS_BLKSIZE];
 #endif
 
+
+// ----------------------------------------------------------------------------
+//
+// Lock inode structure in memory - read and make available exclusively to this
+// caller inode strudture for given inode.
+//
+// ----------------------------------------------------------------------------
+
+
+
+
 struct cpfs_inode *
 cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in memory
 {
@@ -75,6 +86,15 @@ cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in me
     return ((void *)data) + (ino_in_blk * CPFS_INO_REC_SIZE);
 }
 
+
+// ----------------------------------------------------------------------------
+//
+// Touch inode - make sure it will be written on unlock - TODO move to unlock
+//
+// ----------------------------------------------------------------------------
+
+
+
 void
 cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // marks block as dirty, will be saved to disk on unlock
 {
@@ -83,6 +103,12 @@ cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // marks block as dirty, will be
     write = 1;
 }
 
+
+// ----------------------------------------------------------------------------
+//
+// Unlock inode - finish access to in-memory inode structure, write it if required.
+//
+// ----------------------------------------------------------------------------
 
 void
 cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // flushes block to disk before unlocking it, if touched
@@ -110,6 +136,15 @@ cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // flushes block to disk before
 
     cpfs_mutex_unlock( fs->inode_mutex );
 }
+
+
+// ----------------------------------------------------------------------------
+//
+// Update inode time fields
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 errno_t

@@ -35,6 +35,14 @@ cpfs_fdmap_init( void )
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Allocate file descriptor - move to OS code?
+//
+// ----------------------------------------------------------------------------
+
+
+
 errno_t
 cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd )
 {
@@ -75,6 +83,16 @@ cpfs_fdmap_alloc( cpfs_fs_t *fs, cpfs_ino_t ino, int *fd )
     return EMFILE;
 }
 
+
+// ----------------------------------------------------------------------------
+//
+// Free file descriptor - TODO move to OS code?
+//
+// ----------------------------------------------------------------------------
+
+
+
+
 errno_t
 cpfs_fdmap_free( int fd )
 {
@@ -109,6 +127,17 @@ cpfs_fdmap_free( int fd )
 }
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// ? TODO describe me, use me
+//
+// ----------------------------------------------------------------------------
+
+
+
+
 errno_t
 cpfs_fdmap_lock( int fd, cpfs_fid_t **fid )
 {
@@ -138,6 +167,15 @@ cpfs_fdmap_lock( int fd, cpfs_fid_t **fid )
     cpfs_mutex_unlock( fdmap_mutex );
     return 0;
 }
+
+
+// ----------------------------------------------------------------------------
+//
+// ? TODO describe me
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 errno_t
@@ -171,6 +209,13 @@ cpfs_fdmap_unlock( int fd )
 }
 
 
+// ----------------------------------------------------------------------------
+//
+// Find out if inode is used by some open file
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 int
@@ -191,6 +236,15 @@ cpfs_fdmap_is_inode_used( cpfs_fs_t *fs, cpfs_ino_t ino )
     cpfs_mutex_unlock( fdmap_mutex );
     return 0;
 }
+
+
+// ----------------------------------------------------------------------------
+//
+// Find inode and FS instance by file descriptor
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 errno_t

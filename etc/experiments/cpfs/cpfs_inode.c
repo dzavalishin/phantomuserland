@@ -21,6 +21,15 @@ static errno_t find_or_create_indirect( cpfs_fs_t *fs, cpfs_blkno_t *base, cpfs_
 
 
 
+
+// ----------------------------------------------------------------------------
+//
+// Find physical (on-disk) block address for logical 9sequential) file block
+// number.
+//
+// ----------------------------------------------------------------------------
+
+
 // maps logical blocks to physical, block must be allocated
 errno_t
 cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
@@ -83,6 +92,15 @@ fail:
     // TODO write indirect blocks support!
     return rc;
 }
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Allocate data block for file.
+//
+// ----------------------------------------------------------------------------
 
 
 // allocates logical block, returns physical blk pos, block must NOT be allocated
@@ -318,6 +336,13 @@ cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
 // Alloc/free inode
 //
 
+// ----------------------------------------------------------------------------
+//
+// Allocate inode
+//
+// ----------------------------------------------------------------------------
+
+
 
 errno_t
 cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
@@ -355,8 +380,18 @@ cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode )
 }
 
 
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Free inode (actually delete file data)
+//
+// ----------------------------------------------------------------------------
+
 errno_t
-cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
+cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino )
 {
     errno_t rc;
     struct cpfs_inode *inode_p;
@@ -385,7 +420,7 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
         cpfs_unlock_ino( fs, ino );
         return ENOENT;
     }
-
+    //printf("inode %lld links %d\n", ino, inode_p->nlinks );
     cpfs_unlock_ino( fs, ino );
 
 
@@ -411,6 +446,7 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
 
     inode_p->nlinks--;
 
+    cpfs_touch_ino( fs, ino );
     cpfs_unlock_ino( fs, ino );
 
 
@@ -430,6 +466,15 @@ cpfs_free_inode( cpfs_fs_t *fs, cpfs_ino_t ino ) // deletes file
     cpfs_mutex_unlock( fs->fic_mutex );
     return 0;
 }
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Refill free inode cache structure - TODO incomplete, scan for free inodes
+//
+// ----------------------------------------------------------------------------
+
 
 
 // TODO mutex!
@@ -482,6 +527,17 @@ fic_refill( cpfs_fs_t *fs )
 
     // TODO long way - scan through inodes? use map?
 }
+
+
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Free all data blocks for inode (delete file data)
+//
+// ----------------------------------------------------------------------------
 
 
 errno_t
@@ -549,6 +605,15 @@ cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ) // free all data blocks for
 
 
 
+// ----------------------------------------------------------------------------
+//
+// Return file size
+//
+// ----------------------------------------------------------------------------
+
+
+
+
 errno_t
 cpfs_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t *size )
 {
@@ -566,6 +631,15 @@ cpfs_fsize( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t *size )
     if( inode_p == 0 ) return EIO;
     return 0;
 }
+
+
+// ----------------------------------------------------------------------------
+//
+// Update (grow) file size field in inode
+//
+// ----------------------------------------------------------------------------
+
+
 
 
 errno_t
@@ -621,6 +695,14 @@ cpfs_inode_init_defautls( cpfs_fs_t *fs, struct cpfs_inode *ii )
     ii->mtime = ii->ctime;
     ii->vtime = 0;
 }
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Return inode data (file info)
+//
+// ----------------------------------------------------------------------------
 
 
 
