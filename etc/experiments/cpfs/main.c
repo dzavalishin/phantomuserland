@@ -97,6 +97,7 @@ static void test_mt(cpfs_fs_t *fs)
 
     test_path(fs);
 
+// [dz] temp off to work win th mp tests
     test_out_of_space(fs);
 
 }
@@ -106,7 +107,7 @@ static void test_mp(cpfs_fs_t *fs)
 {
     // Can do only tests that can be run cuncurrently in any combination
 
-    test_disk_alloc(fs);
+    test_mp_files(fs);
 
 }
 

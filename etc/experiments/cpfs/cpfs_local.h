@@ -229,6 +229,7 @@ struct cpfs_fs
     cpfs_mutex          fic_mutex;              // Free inodes cache
     cpfs_mutex          buf_mutex;              // Disk buffers
     cpfs_mutex          fdmap_mutex;            // File descriptor map - init in fdmap code
+    cpfs_mutex          inode_mutex;            // Taken when work with any inode, TODO make inode buffers for concurrent inode io, use mutex to lock search
 
     // --------------------------------------------------------------------------------------------
     // Inode allocation state

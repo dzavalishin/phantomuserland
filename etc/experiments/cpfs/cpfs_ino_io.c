@@ -35,6 +35,8 @@ cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in me
 {
     errno_t rc;
 
+    cpfs_mutex_lock( fs->inode_mutex );
+
     if( used ) cpfs_panic( "out of inode buffers" );
 
     cpfs_blkno_t blk;
@@ -105,6 +107,8 @@ cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // flushes block to disk before
     }
 
     used = 0;
+
+    cpfs_mutex_unlock( fs->inode_mutex );
 }
 
 
