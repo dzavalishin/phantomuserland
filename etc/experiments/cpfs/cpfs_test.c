@@ -272,7 +272,7 @@ void test_inode_alloc( cpfs_fs_t *fs )
     rc = cpfs_alloc_inode( fs, &i2 );
     cpfs_assert( rc == 0 );
 
-    printf("Inode alloc %lld %lld\n", i1, i2 );
+    //printf("Inode alloc %lld %lld\n", i1, i2 );
 
 
     rc = cpfs_free_inode( fs, i2 );

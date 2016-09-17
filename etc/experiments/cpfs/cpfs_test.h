@@ -48,6 +48,7 @@ void    test_mutithreaded(cpfs_fs_t *fsp);     	// Do mix of prev tests in 10 th
 
 void    test_mp_files(cpfs_fs_t *fs);
 void    test_mp_disk_alloc(cpfs_fs_t *fsp);
+void 	test_mp_inode_alloc( cpfs_fs_t *fs );
 
 
 

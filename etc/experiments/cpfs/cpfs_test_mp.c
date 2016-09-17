@@ -156,3 +156,76 @@ test_mp_disk_alloc(cpfs_fs_t *fsp)
 }
 
 
+
+
+// ----------------------------------------------------------------------------
+//
+// Test inode alloc/free subsystem
+//
+// ----------------------------------------------------------------------------
+
+
+
+
+void test_mp_inode_alloc( cpfs_fs_t *fs )
+{
+    errno_t rc;
+    cpfs_ino_t i1, i2;
+
+    printf("MP Inode alloc test\n");
+
+
+
+    rc = cpfs_alloc_inode( fs, &i1 );
+    cpfs_assert( rc == 0 );
+
+    rc = cpfs_alloc_inode( fs, &i2 );
+    cpfs_assert( rc == 0 );
+
+    //printf("Inode alloc %lld %lld\n", i1, i2 );
+
+
+    rc = cpfs_free_inode( fs, i2 );
+    cpfs_assert( rc == 0 );
+
+    rc = cpfs_free_inode( fs, i1 );
+    cpfs_assert( rc == 0 );
+
+
+/* can't do double free test in multithread env - we free for second thread accidentally
+    rc = cpfs_free_inode( fs, i2 );
+    cpfs_assert( rc != 0 );
+
+    rc = cpfs_free_inode( fs, i1 );
+    cpfs_assert( rc != 0 );
+
+*/
+
+    printf("MP Inode alloc test: DONE\n");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

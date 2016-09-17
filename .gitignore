@@ -62,3 +62,4 @@ etc/experiments/cpfs/disk.img
 *.exe
 *.img
 etc/experiments/cpfs/Makefile~
+etc/experiments/cpfs/cpfs.exe.stackdump
