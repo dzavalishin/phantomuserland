@@ -111,6 +111,18 @@ errno_t cpfs_init_sb( cpfs_fs_t *fs )
     return 0;
 }
 
+
+
+
+errno_t cpfs_stop_sb( cpfs_fs_t *fs )
+{
+    return 0;
+}
+
+
+
+
+
 errno_t cpfs_mount_sb( cpfs_fs_t *fs )
 {
     struct cpfs_sb      *sb = cpfs_lock_blk( fs, sb_blk );

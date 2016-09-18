@@ -37,6 +37,12 @@ cpfs_buf_init( cpfs_fs_t *fs )
 }
 
 
+errno_t
+cpfs_buf_stop( cpfs_fs_t *fs )
+{
+    free( fs->buf );
+    return 0;
+}
 
 
 

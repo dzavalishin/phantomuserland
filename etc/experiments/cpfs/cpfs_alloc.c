@@ -53,6 +53,7 @@ cpfs_alloc_disk_block( cpfs_fs_t *fs )
     // Try free list first
     //
 
+    cpfs_sb_lock( fs ); // we modify sb.free_count which is protected
     cpfs_mutex_lock( fs->freelist_mutex );
 
     if( !fs->sb.free_list )
@@ -78,10 +79,13 @@ cpfs_alloc_disk_block( cpfs_fs_t *fs )
     fs->sb.free_count--;
 //printf(" freelist alloc ");
     cpfs_mutex_unlock( fs->freelist_mutex );
+    cpfs_sb_unlock( fs ); // we modify sb.free_count which is protected
+
     return ret;
 
 no_freelist:
     cpfs_mutex_unlock( fs->freelist_mutex );
+    //cpfs_sb_unlock( fs ); // we modify sb.free_count which is protected
 
 
 
@@ -89,7 +93,7 @@ no_freelist:
     // Nothing in free list, alloc from rest of FS block space, if possible
     //
 
-    cpfs_sb_lock( fs );
+    //cpfs_sb_lock( fs );
 
     // No space left on device
     if( fs->sb.first_unallocated >= fs->sb.disk_size )

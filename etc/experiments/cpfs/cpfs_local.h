@@ -297,6 +297,8 @@ typedef struct cpfs_fs cpfs_fs_t;
 
 
 errno_t                 cpfs_buf_init( cpfs_fs_t *fs );
+errno_t			cpfs_buf_stop( cpfs_fs_t *fs );
+
 void                    cpfs_clear_all_buf( cpfs_fs_t *fs );
 
 errno_t                 cpfs_buf_lock( cpfs_fs_t *fs, cpfs_blkno_t blk, cpfs_buf_t **buf );
@@ -305,6 +307,8 @@ errno_t                 cpfs_buf_unlock( cpfs_fs_t *fs, cpfs_blkno_t blk, char w
 
 
 errno_t                 cpfs_init_sb( cpfs_fs_t *fs );
+errno_t                 cpfs_stop_sb( cpfs_fs_t *fs );
+
 errno_t 		cpfs_mount_sb( cpfs_fs_t *fs );
 
 void                    cpfs_sb_lock( cpfs_fs_t *fs );

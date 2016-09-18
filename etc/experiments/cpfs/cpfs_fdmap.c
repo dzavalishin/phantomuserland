@@ -20,6 +20,14 @@ static int              nfdmap;
 static int		fdmap_alloc;            // Last position of allocator search
 static cpfs_mutex_t     fdmap_mutex;
 
+void            cpfs_fdmap_stop( void );
+
+
+// ----------------------------------------------------------------------------
+//
+// init/stop
+//
+// ----------------------------------------------------------------------------
 
 
 // Just init - mutexes, memory, etc
@@ -31,7 +39,17 @@ cpfs_fdmap_init( void )
 
     cpfs_mutex_init( &fdmap_mutex );
 
+    if( fdmap != 0 )
+        atexit( cpfs_fdmap_stop );
+
     return fdmap ? 0 : ENOMEM;
+}
+
+
+void
+cpfs_fdmap_stop( void )
+{
+    free( fdmap );
 }
 
 

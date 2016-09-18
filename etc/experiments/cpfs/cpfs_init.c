@@ -134,7 +134,14 @@ errno_t cpfs_stop( cpfs_fs_t *fs )
     }
 
     fs->inited = 0;
-    return 0;
+
+    rc = cpfs_buf_stop( fs );
+    if( rc ) return rc;
+
+    rc = cpfs_stop_sb( fs );
+    if( rc ) return rc;
+
+    return rc;
 }
 
 
