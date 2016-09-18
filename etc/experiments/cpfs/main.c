@@ -1,3 +1,13 @@
+/**
+ *
+ * CPFS
+ *
+ * Copyright (C) 2016-2016 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Test main. Runs FS tests in Unix/Cygwin user mode.
+ *
+ *
+**/
 
 #include "cpfs.h"
 #include "cpfs_local.h"
@@ -81,6 +91,45 @@ static void test_all(cpfs_fs_t *fsp)
 
 }
 
+static void
+single_test(void)
+{
+    errno_t 		rc;
+
+
+
+    rc = cpfs_init( &fs0 );
+    if( rc ) die_rc( "Init FS", rc );
+
+
+    rc = cpfs_mount( &fs0 );
+    if( rc )
+    {
+        rc = cpfs_mkfs( &fs0, fs0.disk_size );
+        if( rc ) die_rc( "mkfs", rc );
+
+        rc = cpfs_mount( &fs0 );
+        if( rc ) die_rc( "Mount FS", rc );
+    }
+
+    test_all(&fs0);
+
+    rc = cpfs_umount( &fs0 );
+    if( rc ) die_rc( "Umount FS", rc );
+
+#if 1
+    printf("\n");
+    rc = cpfs_fsck( &fs0, 0 );
+    if( rc ) cpfs_log_error( "fsck rc=%d", rc );
+#endif
+
+    rc = cpfs_stop( &fs0 );
+    if( rc ) die_rc( "Stop FS", rc );
+
+}
+
+
+
 // multithreaded test - separate FS instances
 static void test_mt(cpfs_fs_t *fs)
 {
@@ -115,7 +164,7 @@ static void test_mt(cpfs_fs_t *fs)
 }
 
 // multithreaded test - one FS instance
-static void test_mp(cpfs_fs_t *fs) 
+static void test_mp(cpfs_fs_t *fs)
 {
     // Can do only tests that can be run cuncurrently in any combination
 
@@ -143,8 +192,6 @@ int main( int ac, char**av )
     (void) ac;
     (void) av;
 
-    errno_t 		rc;
-
     if(sizeof(uint64_t) < 8)
         die_rc( "int64", sizeof(uint64_t) );
 
@@ -158,36 +205,13 @@ int main( int ac, char**av )
 
 
 
-    rc = cpfs_init( &fs0 );
-    if( rc ) die_rc( "Init FS", rc );
+    // One thread
+    single_test();
 
-
-    rc = cpfs_mount( &fs0 );
-    if( rc )
-    {
-        rc = cpfs_mkfs( &fs0, fs0.disk_size );
-        if( rc ) die_rc( "mkfs", rc );
-
-        rc = cpfs_mount( &fs0 );
-        if( rc ) die_rc( "Mount FS", rc );
-    }
-
-    test_all(&fs0);
-
-    rc = cpfs_umount( &fs0 );
-    if( rc ) die_rc( "Umount FS", rc );
-
-#if 1
-    printf("\n");
-    rc = cpfs_fsck( &fs0, 0 );
-    if( rc ) cpfs_log_error( "fsck rc=%d", rc );
-#endif
-
-    rc = cpfs_stop( &fs0 );
-    if( rc ) die_rc( "Stop FS", rc );
-
-
+    // 2 threads, 2 disks
     mt_test();
+
+    // 2 threads, 1 disk
     mp_test();
 
 
@@ -197,43 +221,11 @@ int main( int ac, char**av )
 
 // ----------------------------------------------------------------------------
 //
-// OS interface functions
+// OS interface functions (disk image IO)
 //
 // ----------------------------------------------------------------------------
 
 
-
-void
-cpfs_panic( const char *fmt, ... )
-{
-    sleep(1); // let other thread to finish or die
-    printf( "\n\nPanic: " );
-
-    va_list ptr;
-    va_start(ptr, fmt);
-    vprintf(fmt, ptr);
-    va_end(ptr);
-
-    printf( "\nGlobal errno = %s\n\n", strerror(errno) );
-#ifdef __CYGWIN__
-    cygwin_stackdump();
-#endif
-    exit(33);
-}
-
-
-void
-cpfs_log_error( const char *fmt, ... )
-{
-    printf( "Error: ");
-
-    va_list ptr;
-    va_start(ptr, fmt);
-    vprintf(fmt, ptr);
-    va_end(ptr);
-
-    printf( "\n");
-}
 
 
 
@@ -256,78 +248,6 @@ cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data )
 }
 
 
-cpfs_time_t
-cpfs_get_current_time(void)
-{
-    return time(0);
-}
-
-
-#define USE_PTHREAD_MUTEX 1
-
-#if !USE_PTHREAD_MUTEX
-#  define MUTEX_TEST_VAL ((void *)0x3443ABBA)
-#endif
-
-void cpfs_mutex_lock( cpfs_mutex m)
-{
-#if USE_PTHREAD_MUTEX
-    pthread_mutex_t *pm = (void *)m;
-
-    int rc = pthread_mutex_lock( pm );
-    cpfs_assert( rc == 0 );
-#else
-    cpfs_assert( m == MUTEX_TEST_VAL );
-#endif
-}
-
-
-void cpfs_mutex_unlock( cpfs_mutex m)
-{
-#if USE_PTHREAD_MUTEX
-    pthread_mutex_t *pm = (void *)m;
-
-    int rc = pthread_mutex_unlock( pm );
-    cpfs_assert( rc == 0 );
-#else
-    cpfs_assert( m == MUTEX_TEST_VAL );
-#endif
-}
-
-void cpfs_mutex_init( cpfs_mutex *m)
-{
-#if USE_PTHREAD_MUTEX
-    pthread_mutex_t *pm = calloc( 1, sizeof( pthread_mutex_t ) );
-    cpfs_assert( pm != 0 );
-    //int rc = pthread_mutex_init( pm, 0 );
-    //cpfs_assert( rc == 0 );
-    
-    pthread_mutex_t tmp = PTHREAD_MUTEX_INITIALIZER;
-    
-    *pm = tmp;
-    *m = (void *)pm;
-#else
-    *m = MUTEX_TEST_VAL;
-#endif
-}
-
-
-
-void
-cpfs_mutex_stop( cpfs_mutex m )
-{
-#if USE_PTHREAD_MUTEX
-    pthread_mutex_t *pm = (void *)m;
-
-    int rc = pthread_mutex_destroy ( pm );
-    cpfs_assert( rc == 0 );
-#else
-    cpfs_assert( m == MUTEX_TEST_VAL );
-#endif
-}
-
-
-
 
 
 
@@ -344,38 +264,6 @@ void cpfs_debug_fdump( const char *fn, void *p, unsigned size ) // dump some dat
 }
 
 
-
-
-errno_t
-cpfs_os_run_idle_thread( void* (*func_p)(void *arg), void *arg ) // Request OS to start thread
-{
-    int rc;
-
-    pthread_attr_t a;
-    pthread_t pt;
-
-    pthread_attr_init( &a );
-
-    // TODO idle prio!
-
-    rc = pthread_create( &pt, &a, func_p, arg);
-
-    pthread_attr_destroy( &a );
-
-    return (rc == 0) ? 0 : ENOMEM;
-}
-
-
-errno_t
-cpfs_os_access_rights_check( struct cpfs_fs *fs, cpfs_right_t t, void *user_id_data, const char *fname )
-{
-    (void) fs;
-    (void) t;
-    (void) user_id_data;
-    (void) fname;
-
-    return 0; // can do anything
-}
 
 
 
