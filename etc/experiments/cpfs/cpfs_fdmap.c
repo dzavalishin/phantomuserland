@@ -15,7 +15,7 @@
 
 
 
-static cpfs_fid_t       *fdmap;                 // Map of file descriptors - global for all FS instances!
+static cpfs_fid_t       *fdmap = 0;             // Map of file descriptors - global for all FS instances!
 static int              nfdmap;
 static int		fdmap_alloc;            // Last position of allocator search
 static cpfs_mutex_t     fdmap_mutex;
@@ -34,8 +34,11 @@ void            cpfs_fdmap_stop( void );
 errno_t
 cpfs_fdmap_init( void )
 {
+    if( fdmap ) return 0;
+
     nfdmap = CPFS_MAX_CONCUR_IO;
     fdmap = calloc( nfdmap, sizeof(cpfs_fid_t) );
+    if( fdmap == 0 ) return ENOMEM;
 
     cpfs_mutex_init( &fdmap_mutex );
 
@@ -49,7 +52,8 @@ cpfs_fdmap_init( void )
 void
 cpfs_fdmap_stop( void )
 {
-    free( fdmap );
+    if( fdmap ) free( fdmap );
+    fdmap = 0;
 }
 
 
