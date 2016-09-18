@@ -85,9 +85,9 @@ cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in me
 
     struct cpfs_inode *ip = ((void *)data) + (ino_in_blk * CPFS_INO_REC_SIZE);
 
-    // Init volatile part of inode
+    // Init volatile part of inode - TODO unused yet, need deinit, turn off now
 
-    cpfs_mutex_init( &(ip->mutex) );
+    //cpfs_mutex_init( &(ip->mutex) );
 
     return ip;
 }
