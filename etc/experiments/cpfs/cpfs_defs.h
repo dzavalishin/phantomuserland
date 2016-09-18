@@ -79,6 +79,9 @@
 
 #define CPFS_UPDATE_ATIME 1
 
+// temp, development
+#define CPFS_INODE_MUTEX 0
+
 
 
 #endif // CPFS_DEFS_H

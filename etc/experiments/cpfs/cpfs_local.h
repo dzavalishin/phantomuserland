@@ -100,9 +100,9 @@ struct cpfs_inode
 
     // -------------------------------------------------------------------------------------
     // NB - following is just in-memory state, ignore it on disk, will be inited on any load
-
+#if CPFS_INODE_MUTEX
     cpfs_mutex          mutex;	// Inode/file/dir data access serialization
-
+#endif
 };
 
 // curr size of inode is 344 bytes, we'll allocate 512 for any case
@@ -345,10 +345,11 @@ struct cpfs_inode *     cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // makes
 void                    cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // marks inode as dirty, will be saved to disk on unlock
 void                    cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // flushes inode to disk before unlocking it, if touched
 
+#if CPFS_INODE_MUTEX
 // lock/unlock inode state/file data exclusive access mutex. used in directory update code mostly
 void 			cpfs_ino_mutex_lock( struct cpfs_fs *fs, struct cpfs_inode *ip );
 void 			cpfs_ino_mutex_unlock( struct cpfs_fs *fs, struct cpfs_inode *ip );
-
+#endif // CPFS_INODE_MUTEX
 
 //cpfs_ino_t            cpfs_alloc_inode( void );
 errno_t                 cpfs_alloc_inode( cpfs_fs_t *fs, cpfs_ino_t *inode );

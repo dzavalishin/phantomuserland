@@ -763,6 +763,7 @@ errno_t cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_dat
 //
 // ----------------------------------------------------------------------------
 
+#if CPFS_INODE_MUTEX
 
 void cpfs_ino_mutex_lock( struct cpfs_fs *fs, struct cpfs_inode *ip )
 {
@@ -779,6 +780,6 @@ void cpfs_ino_mutex_unlock( struct cpfs_fs *fs, struct cpfs_inode *ip )
     cpfs_mutex_unlock( ip->mutex );
 }
 
-
+#endif // CPFS_INODE_MUTEX
 
 
