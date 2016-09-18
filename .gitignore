@@ -63,3 +63,4 @@ etc/experiments/cpfs/disk.img
 *.img
 etc/experiments/cpfs/Makefile~
 etc/experiments/cpfs/cpfs.exe.stackdump
+etc/experiments/cpfs/.gdbrc~
