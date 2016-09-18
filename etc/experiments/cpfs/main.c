@@ -300,7 +300,10 @@ void cpfs_mutex_init( cpfs_mutex *m)
     cpfs_assert( pm != 0 );
     //int rc = pthread_mutex_init( pm, 0 );
     //cpfs_assert( rc == 0 );
-    *pm = PTHREAD_MUTEX_INITIALIZER;
+    
+    pthread_mutex_t tmp = PTHREAD_MUTEX_INITIALIZER;
+    
+    *pm = tmp;
     *m = (void *)pm;
 #else
     *m = MUTEX_TEST_VAL;

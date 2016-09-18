@@ -1,4 +1,4 @@
-ARCHFLAGS = -m32
+#ARCHFLAGS = -m32
 CFLAGS +=-g -Wall -Wextra $(ARCHFLAGS)
 LDFLAGS += -g -lpthread $(ARCHFLAGS)
 
