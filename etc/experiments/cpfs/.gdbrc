@@ -1,6 +1,7 @@
 break cpfs_panic
 break cpfs_log_error
 
+break cpfs_alloc.c:69
 
 break main.c:327
 

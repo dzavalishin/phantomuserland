@@ -65,8 +65,8 @@ cpfs_alloc_disk_block( cpfs_fs_t *fs )
 
     if( fb->h.magic != CPFS_FL_MAGIC )
     {
-        fs->sb.free_list = 0; // freeing blocks will recreate free list, though part of disk is inavailable now
         cpfs_log_error("Freelist corrupt (blk %lld), attempt to continue on unallocated space", (long long)fs->sb.free_list );
+        fs->sb.free_list = 0; // freeing blocks will recreate free list, though part of disk is inavailable now
         goto no_freelist;
     }
 

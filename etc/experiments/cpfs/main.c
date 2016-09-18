@@ -120,6 +120,7 @@ static void test_mp(cpfs_fs_t *fs)
     // Can do only tests that can be run cuncurrently in any combination
 
     // can we?
+
     test_mp_disk_alloc( fs );
 
     test_mp_inode_alloc( fs );
