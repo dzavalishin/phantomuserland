@@ -11,6 +11,7 @@ cpfs: main.o os.o \
 
 clean::
 	-rm *.o
+	-rm *.img
 
 # is this size ok for size we use in mkfs?
 image::

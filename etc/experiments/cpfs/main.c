@@ -26,8 +26,15 @@
 
 #include <pthread.h>
 
+
+
+void die_rc( const char *msg, int rc );
+
+static void single_test(void);
 static void mt_test(void); // multithreaded test - separate FS instances
 static void mp_test(void); // multithreaded test - one FS instance
+
+
 
 // ----------------------------------------------------------------------------
 //
@@ -51,15 +58,83 @@ static int dfd[2];
 cpfs_fs_t *fsp_array[2] = { &fs0, &fs1 };
 
 
-void die_rc( const char *msg, int rc )
-{
-    printf("%s, rc = %d (%s) global errno = %s\n", msg, rc, strerror(rc), strerror(errno) );
-    exit( 0 );
-}
 
 // ----------------------------------------------------------------------------
 //
-// Groups of tests
+// Test main
+//
+// ----------------------------------------------------------------------------
+
+
+
+int main( int ac, char**av )
+{
+    (void) ac;
+    (void) av;
+
+    //if(sizeof(uint64_t) < 8)
+    //    die_rc( "int64", sizeof(uint64_t) );
+    cpfs_assert( sizeof(uint64_t) >= 8 );
+
+
+    //d = open( "disk.img", O_RDWR, 0666 );
+    dfd[0] = open( "disk.img", O_RDWR|O_CREAT, 0666 );
+    if( dfd[0] < 0 ) die_rc( "open", dfd[0] );
+
+    dfd[1] = open( "disk1.img", O_RDWR|O_CREAT, 0666 );
+    if( dfd[1] < 0 ) die_rc( "open", dfd[1] );
+
+
+
+    // One thread
+    single_test();
+
+    // 2 threads, 2 disks
+    mt_test();
+
+    // 2 threads, 1 disk
+    mp_test();
+
+
+    return 0;
+}
+
+
+// ----------------------------------------------------------------------------
+//
+// OS interface functions (disk image IO)
+//
+// ----------------------------------------------------------------------------
+
+
+
+
+
+
+errno_t
+cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data )
+{
+    lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
+    int rc = read( dfd[disk_id], data, CPFS_BLKSIZE );
+    return (rc == CPFS_BLKSIZE) ? 0 : EIO;
+}
+
+
+errno_t
+cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data )
+{
+    lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
+    int rc = write( dfd[disk_id], data, CPFS_BLKSIZE );
+    return (rc == CPFS_BLKSIZE) ? 0 : EIO;
+}
+
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Single thread tests
 //
 // ----------------------------------------------------------------------------
 
@@ -130,6 +205,19 @@ single_test(void)
 
 
 
+
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Multithreaded tests - 2 disks, 2 threads
+//
+// ----------------------------------------------------------------------------
+
+
+
 // multithreaded test - separate FS instances
 static void test_mt(cpfs_fs_t *fs)
 {
@@ -162,119 +250,6 @@ static void test_mt(cpfs_fs_t *fs)
     test_out_of_space(fs);
 
 }
-
-// multithreaded test - one FS instance
-static void test_mp(cpfs_fs_t *fs)
-{
-    // Can do only tests that can be run cuncurrently in any combination
-
-    // can we?
-
-    test_mp_disk_alloc( fs );
-
-    test_mp_inode_alloc( fs );
-
-    //test_mp_files(fs);
-
-}
-
-
-// ----------------------------------------------------------------------------
-//
-// Test main
-//
-// ----------------------------------------------------------------------------
-
-
-
-int main( int ac, char**av )
-{
-    (void) ac;
-    (void) av;
-
-    if(sizeof(uint64_t) < 8)
-        die_rc( "int64", sizeof(uint64_t) );
-
-
-    //d = open( "disk.img", O_RDWR, 0666 );
-    dfd[0] = open( "disk.img", O_RDWR|O_CREAT, 0666 );
-    if( dfd[0] < 0 ) die_rc( "open", dfd[0] );
-
-    dfd[1] = open( "disk1.img", O_RDWR|O_CREAT, 0666 );
-    if( dfd[1] < 0 ) die_rc( "open", dfd[1] );
-
-
-
-    // One thread
-    single_test();
-
-    // 2 threads, 2 disks
-    mt_test();
-
-    // 2 threads, 1 disk
-    mp_test();
-
-
-    return 0;
-}
-
-
-// ----------------------------------------------------------------------------
-//
-// OS interface functions (disk image IO)
-//
-// ----------------------------------------------------------------------------
-
-
-
-
-
-
-errno_t
-cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data )
-{
-    lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
-    int rc = read( dfd[disk_id], data, CPFS_BLKSIZE );
-    return (rc == CPFS_BLKSIZE) ? 0 : EIO;
-}
-
-
-errno_t
-cpfs_disk_write( int disk_id, cpfs_blkno_t block, const void *data )
-{
-    lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
-    int rc = write( dfd[disk_id], data, CPFS_BLKSIZE );
-    return (rc == CPFS_BLKSIZE) ? 0 : EIO;
-}
-
-
-
-
-
-void cpfs_debug_fdump( const char *fn, void *p, unsigned size ) // dump some data to file
-{
-    int fd = open( fn, O_RDWR|O_CREAT, 0666 );
-    if( fd < 0 )
-        cpfs_panic("cpfs_debug_fdump: can't open '%d'", fn);
-
-    if( ((int)size) != write( fd, p, size ) )
-        cpfs_panic("cpfs_debug_fdump: can't write to '%d'", fn);
-
-    close( fd );
-}
-
-
-
-
-
-
-// ----------------------------------------------------------------------------
-//
-// Multithreaded tests
-//
-// ----------------------------------------------------------------------------
-
-
 
 
 
@@ -369,6 +344,30 @@ static void mt_test(void)
 
 
 
+// ----------------------------------------------------------------------------
+//
+// Multithreaded tests - 1 disk, 2 threads
+//
+// ----------------------------------------------------------------------------
+
+
+
+
+// multithreaded test - one FS instance
+static void test_mp(cpfs_fs_t *fs)
+{
+    // Can do only tests that can be run cuncurrently in any combination
+
+    // can we?
+
+    test_mp_disk_alloc( fs );
+
+    test_mp_inode_alloc( fs );
+
+    //test_mp_files(fs);
+
+}
+
 
 
 
@@ -446,6 +445,39 @@ static void mp_test(void)
     //sleep(10000);
 }
 
+
+
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// Util
+//
+// ----------------------------------------------------------------------------
+
+
+void die_rc( const char *msg, int rc )
+{
+    printf("%s, rc = %d (%s) global errno = %s\n", msg, rc, strerror(rc), strerror(errno) );
+    exit( 0 );
+}
+
+
+
+
+void cpfs_debug_fdump( const char *fn, void *p, unsigned size ) // dump some data to file
+{
+    int fd = open( fn, O_RDWR|O_CREAT, 0666 );
+    if( fd < 0 )
+        cpfs_panic("cpfs_debug_fdump: can't open '%d'", fn);
+
+    if( ((int)size) != write( fd, p, size ) )
+        cpfs_panic("cpfs_debug_fdump: can't write to '%d'", fn);
+
+    close( fd );
+}
 
 
 

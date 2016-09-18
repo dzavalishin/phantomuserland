@@ -33,6 +33,10 @@
 //
 // ----------------------------------------------------------------------------
 
+#ifdef __CYGWIN__
+void cygwin_stackdump(void);
+#endif
+
 
 void
 cpfs_panic( const char *fmt, ... )

@@ -34,7 +34,7 @@ static void do_fic_refill( cpfs_fs_t *fs );
 errno_t
 cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpfs_blkno_t *phys )
 {
-    errno_t rc;
+    errno_t rc = 0;
 
     cpfs_assert( phys != 0 );
 
