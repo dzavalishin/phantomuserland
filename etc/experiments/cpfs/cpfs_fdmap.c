@@ -54,6 +54,9 @@ cpfs_fdmap_stop( void )
 {
     if( fdmap ) free( fdmap );
     fdmap = 0;
+
+    cpfs_mutex_stop( fdmap_mutex );
+
 }
 
 

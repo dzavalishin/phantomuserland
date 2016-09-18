@@ -313,6 +313,18 @@ void cpfs_mutex_init( cpfs_mutex *m)
 
 
 
+void
+cpfs_mutex_stop( cpfs_mutex m )
+{
+#if USE_PTHREAD_MUTEX
+    pthread_mutex_t *pm = (void *)m;
+
+    int rc = pthread_mutex_destroy ( pm );
+    cpfs_assert( rc == 0 );
+#else
+    cpfs_assert( m == MUTEX_TEST_VAL );
+#endif
+}
 
 
 

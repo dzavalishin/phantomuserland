@@ -141,6 +141,12 @@ errno_t cpfs_stop( cpfs_fs_t *fs )
     rc = cpfs_stop_sb( fs );
     if( rc ) return rc;
 
+    cpfs_mutex_stop( fs->freelist_mutex );
+    cpfs_mutex_stop( fs->fic_mutex );
+    cpfs_mutex_stop( fs->buf_mutex );
+    cpfs_mutex_stop( fs->inode_mutex );
+    cpfs_mutex_stop( fs->dir_mutex );
+
     return rc;
 }
 

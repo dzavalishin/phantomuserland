@@ -116,6 +116,7 @@ errno_t cpfs_init_sb( cpfs_fs_t *fs )
 
 errno_t cpfs_stop_sb( cpfs_fs_t *fs )
 {
+    cpfs_mutex_stop( fs->sb_mutex );
     return 0;
 }
 

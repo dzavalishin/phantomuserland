@@ -74,10 +74,13 @@ void            cpfs_spin_unlock(cpfs_spinlock l);
 
 typedef void * cpfs_mutex;
 typedef void * cpfs_mutex_t;
-void            cpfs_mutex_init( cpfs_mutex * );
+void            cpfs_mutex_init( cpfs_mutex *mp );
 
 void            cpfs_mutex_lock( cpfs_mutex m );
 void            cpfs_mutex_unlock( cpfs_mutex m );
+
+void            cpfs_mutex_stop( cpfs_mutex m );
+
 
 cpfs_time_t	cpfs_get_current_time(void);
 
