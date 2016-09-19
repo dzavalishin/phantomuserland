@@ -175,7 +175,7 @@ cpfs_fs_dump( struct cpfs_fs *fs )
 {
     cpfs_assert( fs );
 
-    printf("fs size %lld, free %lld\n", fs->sb.disk_size, fs->sb.free_count );
+    printf("fs size %lld, free %lld\n", (long long)fs->sb.disk_size, (long long)fs->sb.free_count );
 
     return 0;
 }

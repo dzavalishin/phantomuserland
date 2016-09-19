@@ -411,7 +411,7 @@ static dir_scan_ret_t dir_print( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void 
     (void) fs;
     (void) farg;
 
-    if( de->inode ) printf("%03lld: '%s'\n", de->inode, de->name );
+    if( de->inode ) printf("%03lld: '%s'\n", (long long)de->inode, de->name );
 
     return dir_scan_continue;
 }

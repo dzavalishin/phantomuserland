@@ -108,7 +108,7 @@ fill_array:
     // ai decrements one more time after filling last (lowest) slot, so we compare to ai+1
     if((ai+1) != *start_index)
     {
-        printf("calc_indir( %lld ) -> ai=%d, start_index=%d, indexes = %lld, %lld, %lld, %lld\n", ilogical, ai, *start_index, indexes[0], indexes[1], indexes[2], indexes[3] );
+        printf("calc_indir( %lld ) -> ai=%d, start_index=%d, indexes = %lld, %lld, %lld, %lld\n", (long long)ilogical, ai, *start_index, (long long)indexes[0], (long long)indexes[1], (long long)indexes[2], (long long)indexes[3] );
     }
     cpfs_assert( (ai+1) == *start_index );
 
