@@ -197,12 +197,12 @@ void fslog( cpfs_fs_t *fs, severity_t severity, const char *fmt, ... )
 // -----------------------------------------------------------------------
 #define FSCK_VERBOSE 0
 
-static errno_t fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, int depth );
+static errno_t fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth );
 
 static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg )
 {
     errno_t rc;
-    int depth = (int)farg;
+    size_t depth = (size_t)farg;
 
     if( de->inode == 0 )    return dir_scan_continue;
 
@@ -237,7 +237,7 @@ static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
 
 
 errno_t
-fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, int depth )
+fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth )
 {
     errno_t rc = cpfs_scan_dir( fs, dir, de_subscan, (void *)depth );
     return rc;
