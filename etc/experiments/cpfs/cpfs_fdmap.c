@@ -52,6 +52,7 @@ cpfs_fdmap_init( void )
 void
 cpfs_fdmap_stop( void )
 {
+
     if( fdmap ) free( fdmap );
     fdmap = 0;
 

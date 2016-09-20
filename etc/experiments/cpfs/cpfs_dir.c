@@ -60,7 +60,8 @@ cpfs_namei_impl( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_ino_
         char data[CPFS_BLKSIZE];
 
         cpfs_mutex_lock( fs->dir_mutex ); // TODO need to use inode mutex here!
-        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+        cpfs_blkno_t phys_blk;
+        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE , &phys_blk);
 
         if( rc )
         {
@@ -217,7 +218,8 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
     while( nblk-- > 0 )
     {
 
-        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+        cpfs_blkno_t phys_blk;
+        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE, &phys_blk );
         if( rc )
         {
             cpfs_mutex_unlock( fs->dir_mutex ); // TODO need to use inode mutex here!
@@ -299,6 +301,29 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
 
     cpfs_unlock_ino( fs, dir_ino );
 
+    if( TRACE ) {
+        //no optimisation
+        
+        
+        int ino_in_blk = dir_ino % CPFS_INO_PER_BLK;
+        int phys_blk = dir_ino/CPFS_INO_PER_BLK+1;
+        
+/*
+        cpfs_fsck_log(fsck_scan_dir_log_file, ino_in_blk,  phys_blk,  rdi);
+*/
+        
+        fprintf(fsck_scan_dir_log_file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", phys_blk, ino_in_blk, *yesno, (long unsigned int)rdi->fsize, rdi->nlinks,  (long unsigned int)rdi->blocks0[0]);        
+        for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, rdi->blocks0[idx]!=0;idx++){
+            fprintf(fsck_scan_dir_log_file,"%s%lld",  idx==0 ? "" :", ", (long unsigned int) rdi->blocks0[idx]);
+        }        
+        fprintf(fsck_scan_dir_log_file,"] indir[");
+        for(int idx=0;idx<CPFS_MAX_INDIR, rdi->indir[idx]!=0;idx++){
+            fprintf(fsck_scan_dir_log_file,"%s%lld", idx==0 ? "" :", ", (long unsigned int) rdi->indir[idx]);
+        }        
+        fprintf(fsck_scan_dir_log_file,"] \n");
+        fflush(fsck_scan_dir_log_file);
+    }
+
     return 0;
 }
 
@@ -332,7 +357,6 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg 
 {
     errno_t rc;
     int isdir = 0;
-
     //cpfs_assert( file_ino != 0 );
 
     rc = cpfs_is_dir( fs, dir_ino, &isdir );
@@ -360,7 +384,8 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg 
     {
         char data[CPFS_BLKSIZE];
 
-        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE );
+        cpfs_blkno_t phys_blk;
+        rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE, &phys_blk );
 
         if( rc )
         {
@@ -378,7 +403,10 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg 
             struct cpfs_dir_entry *de = ((void *)data) + (i*CPFS_DIR_REC_SIZE);
 
             //if( de->inode ) printf("%03lld: '%s'\n", de->inode, de->name );
-
+            if( TRACE ) {
+                fprintf(fsck_scan_dir_log_file,"blk=%lld, pos=%d, data[ino=%lld, name=%s]  \n", (long long)phys_blk, i, (long long)de->inode, de->name );
+                fflush(fsck_scan_dir_log_file);
+            }
             dir_scan_ret_t fret = f( fs, de, farg );
 
             if( fret == dir_scan_success ) return 0;

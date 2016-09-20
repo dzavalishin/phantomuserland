@@ -17,7 +17,10 @@
 
 #define USE_FDMAP 1
 
-
+int TRACE=1;
+int TRACE_TAB=1;
+FILE *fsck_scan_dir_log_file;
+FILE *fsck_scan_ino_log_file;
 
 
 
@@ -125,8 +128,8 @@ cpfs_file_read( int file_id, cpfs_size_t pos, void *data, cpfs_size_t size )
     cpfs_fs_t *fs;
     errno_t rc = cpfs_fdmap_get( file_id, &ino, &fs );
     if( rc ) return rc;
-
-    return cpfs_ino_file_read( fs, ino, pos, data, size );
+cpfs_blkno_t phys_blk;
+    return cpfs_ino_file_read( fs, ino, pos, data, size, &phys_blk );
 }
 
 

@@ -34,7 +34,8 @@
 // ----------------------------------------------------------------------------
 
 #ifdef __CYGWIN__
-void cygwin_stackdump(void);
+    //#include <sys/cygwin.h>
+//void cygwin_stackdump(void);
 #endif
 
 
@@ -51,7 +52,7 @@ cpfs_panic( const char *fmt, ... )
 
     printf( "\nGlobal errno = %s\n\n", strerror(errno) );
 #ifdef __CYGWIN__
-    cygwin_stackdump();
+    //cygwin_stackdump();
 #endif
     exit(33);
 }
@@ -107,6 +108,9 @@ cpfs_get_current_time(void)
 
 void cpfs_mutex_lock( cpfs_mutex m)
 {
+/*
+    if( TRACE ) trace(1, "%*s > cpfs_mutex_lock. mutex=%0x\n", TRACE, " ", m);  
+*/
 #if USE_PTHREAD_MUTEX
     pthread_mutex_t *pm = (void *)m;
 
@@ -120,6 +124,9 @@ void cpfs_mutex_lock( cpfs_mutex m)
 
 void cpfs_mutex_unlock( cpfs_mutex m)
 {
+/*
+    if( TRACE ) trace(-1, "%*s < cpfs_mutex_unlock. mutex=%0x\n", TRACE-TRACE_TAB, " ", m);   
+*/
 #if USE_PTHREAD_MUTEX
     pthread_mutex_t *pm = (void *)m;
 
@@ -132,6 +139,7 @@ void cpfs_mutex_unlock( cpfs_mutex m)
 
 void cpfs_mutex_init( cpfs_mutex *m)
 {
+
 #if USE_PTHREAD_MUTEX
     pthread_mutex_t *pm = calloc( 1, sizeof( pthread_mutex_t ) );
     cpfs_assert( pm != 0 );
@@ -152,6 +160,10 @@ void cpfs_mutex_init( cpfs_mutex *m)
 void
 cpfs_mutex_stop( cpfs_mutex m )
 {
+/*
+if( TRACE ) trace(0, "cpfs_mutex_stop %0x\n",  m); 
+*/
+
 #if USE_PTHREAD_MUTEX
     pthread_mutex_t *pm = (void *)m;
 

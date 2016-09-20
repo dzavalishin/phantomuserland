@@ -18,6 +18,11 @@
 
 #define cpfs_assert(__check) if(!(__check)) cpfs_panic("Assert failed in " __FILE__ " @ %d func %s\n\t" #__check "\n\n", __LINE__, __func__ );
 
+extern int TRACE;
+extern int TRACE_TAB;
+extern FILE *fsck_scan_dir_log_file;
+extern FILE *fsck_scan_ino_log_file;
+
 struct cpfs_fs;
 
 errno_t 	cpfs_init( struct cpfs_fs *fs );
@@ -94,3 +99,4 @@ typedef enum { cpfs_r_other, cpfs_r_read, cpfs_r_write, cpfs_r_stat, cpfs_r_mkdi
 errno_t         cpfs_os_access_rights_check( struct cpfs_fs *fs, cpfs_right_t t, void *user_id_data, const char *fname );
 
 #endif // CPFS_H
+

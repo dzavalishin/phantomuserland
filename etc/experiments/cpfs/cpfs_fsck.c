@@ -18,6 +18,8 @@
 #include "cpfs.h"
 #include "cpfs_local.h"
 
+#include <fcntl.h>
+
 
 typedef enum { msg, warn, err } severity_t;
 
@@ -27,7 +29,7 @@ static errno_t fsck_sb( cpfs_fs_t *fs, int fix );
 static void fsck_scan_dirs( cpfs_fs_t *fs );
 
 
-
+static void fsck_scan_ino( cpfs_fs_t *fs );
 
 errno_t
 cpfs_fsck( cpfs_fs_t *fs, int fix )
@@ -46,7 +48,15 @@ cpfs_fsck( cpfs_fs_t *fs, int fix )
     rc = fsck_sb( fs, fix );
     if( rc ) goto error;
 
+    fsck_scan_dir_log_file=fopen("fsck_scan_dir.log", "wb");
     fsck_scan_dirs( fs );
+    fclose(fsck_scan_dir_log_file);
+    
+    fsck_scan_ino_log_file=fopen("fsck_scan_ino.log", "wb");
+    fsck_scan_ino( fs );
+    fclose(fsck_scan_ino_log_file);
+
+    
 
     printf("FSCK done, %d warnings, %d errors\n", fs->fsck_nWarn, fs->fsck_nErr);
 
@@ -249,7 +259,40 @@ static void fsck_scan_dirs( cpfs_fs_t *fs )
     fsck_scan_dir( fs, 0, 0 );
 }
 
+static void fsck_scan_ino( cpfs_fs_t *fs )
+{
+    printf("fsck scan i-nodes\n");
 
+    cpfs_blkno_t        itable_end=fs->sb.itable_end;
+    cpfs_blkno_t        itable_pos=fs->sb.itable_pos;
+    
+    for(cpfs_blkno_t disk_block=itable_pos; disk_block<itable_end;disk_block++){
+        for(int pos=0; pos<CPFS_INO_PER_BLK; pos++){
+            
+            cpfs_ino_t ino = (disk_block-1)*CPFS_INO_PER_BLK+pos;
+            struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
+            cpfs_unlock_ino( fs, ino );
+             
+            int is_dir = (inode_p->ftype == CPFS_FTYPE_DIR);
+            
+            if(inode_p->nlinks){
+                
+                fprintf(fsck_scan_ino_log_file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", (long long)disk_block, pos, is_dir, (long unsigned int)inode_p->fsize, inode_p->nlinks,  (long unsigned int)inode_p->blocks0[0]);        
+                for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, inode_p->blocks0[idx]!=0;idx++){
+                    fprintf(fsck_scan_ino_log_file,"%s%lld",  idx==0 ? "" :", ", (long unsigned int) inode_p->blocks0[idx]);
+                }        
+                fprintf(fsck_scan_ino_log_file,"] indir[");
+                for(int idx=0;idx<CPFS_MAX_INDIR, inode_p->indir[idx]!=0;idx++){
+                    fprintf(fsck_scan_ino_log_file,"%s%lld", idx==0 ? "" :", ", (long unsigned int) inode_p->indir[idx]);
+                }        
+                fprintf(fsck_scan_ino_log_file,"] \n");
+                fflush(fsck_scan_ino_log_file);
+            }
+            
+        }
+    }
+    
+}
 
 // -----------------------------------------------------------------------
 //
@@ -329,4 +372,19 @@ errno_t fsck_check_block_map( cpfs_fs_t *fs )
 
     return 0;
 }
-
+/*
+void cpfs_fsck_log(FILE *file,  int ino_in_blk, int phys_blk, cpfs_inode inode){
+    int is_dir = (inode->ftype == CPFS_FTYPE_DIR);
+    fprintf(file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", phys_blk, ino_in_blk, is_dir, (long unsigned int)inode->fsize, inode->nlinks,  (long unsigned int)inode->blocks0[0]);        
+    for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, inode->blocks0[idx]!=0;idx++){
+        fprintf(file,"%s%lld",  idx==0 ? "" :", ", (long unsigned int) inode->blocks0[idx]);
+    }        
+    
+    fprintf(file,"] indir[");
+    for(int idx=0;idx<CPFS_MAX_INDIR, inode->indir[idx]!=0;idx++){
+        fprintf(file,"%s%lld", idx==0 ? "" :", ", (long unsigned int) inode->indir[idx]);
+    }        
+    fprintf(file,"] \n");
+    fflush(file);
+}
+ */

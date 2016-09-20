@@ -340,6 +340,7 @@ errno_t                 cpfs_find_or_alloc_block_4_file( cpfs_fs_t *fs, cpfs_ino
 // inode machinery indirect block addressing workers
 errno_t 		calc_indirect_positions( cpfs_fs_t *fs, cpfs_blkno_t indexes[CPFS_MAX_INDIR], int *start_index, cpfs_blkno_t logical );
 
+//void cpfs_fsck_log(FILE *file,  cpfs_ino_t ino_in_blk, cpfs_blkno_t phys_blk, cpfs_inode inode);
 
 struct cpfs_inode *     cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // makes sure that inode is in memory and no one modifies it
 void                    cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ); // marks inode as dirty, will be saved to disk on unlock
@@ -408,7 +409,7 @@ void                    cpfs_unlock_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ); // f
 
 // Internal read/wrire impl, used by user calls and internal directory io code
 
-errno_t                 cpfs_ino_file_read  ( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size );
+errno_t                 cpfs_ino_file_read  ( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size,  cpfs_blkno_t *phys_blk);
 errno_t                 cpfs_ino_file_write ( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, const void *data, cpfs_size_t size );
 
 errno_t                 cpfs_inode_truncate( cpfs_fs_t *fs, cpfs_ino_t ino ); // free all data blocks for inode, set size to 0

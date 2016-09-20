@@ -90,7 +90,7 @@ int main( int ac, char**av )
     single_test();
 
     // 2 threads, 2 disks
-    mt_test();
+    //mt_test();
 
     // 2 threads, 1 disk
     mp_test();
@@ -116,6 +116,9 @@ cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data )
 {
     lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
     int rc = read( dfd[disk_id], data, CPFS_BLKSIZE );
+/*
+    if( TRACE ) trace(0, "%*s < cpfs_disk_read, read bytes=%d from block=%d\n", TRACE-TRACE_TAB, " ", rc, block);   
+*/
     return (rc == CPFS_BLKSIZE) ? 0 : EIO;
 }
 
@@ -172,6 +175,7 @@ single_test(void)
     errno_t 		rc;
 
 
+    TRACE=0;
 
     rc = cpfs_init( &fs0 );
     if( rc ) die_rc( "Init FS", rc );
@@ -193,8 +197,12 @@ single_test(void)
     if( rc ) die_rc( "Umount FS", rc );
 
 #if 1
+    TRACE=1;
+
     printf("\n");
+
     rc = cpfs_fsck( &fs0, 0 );
+    
     if( rc ) cpfs_log_error( "fsck rc=%d", rc );
 #endif
 

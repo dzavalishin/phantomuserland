@@ -33,7 +33,7 @@
 // returns einval if read can be partially done (and is partially done)
 
 errno_t
-cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size )
+cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, cpfs_size_t size,  cpfs_blkno_t *phys_blk1 )
 {
     errno_t rc;
 
@@ -45,6 +45,7 @@ cpfs_ino_file_read( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_size_t pos, void *data, 
 
     cpfs_blkno_t phys_blk;
     rc = cpfs_find_block_4_file( fs, ino, logical_blk, &phys_blk );
+    *phys_blk1=phys_blk;
     if( rc ) return rc;
 
     const char *blk_data = cpfs_lock_blk( fs, phys_blk );

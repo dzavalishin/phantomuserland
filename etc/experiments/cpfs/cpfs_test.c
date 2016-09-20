@@ -229,7 +229,8 @@ test_inode_io(cpfs_fs_t *fsp) 		// read/write directly with inode, no file name
     rc = cpfs_ino_file_write( fsp, ino, 0, test_data, sizeof(test_data) );
     if( rc ) cpfs_panic( "can't write data, %d", rc );
 
-    rc = cpfs_ino_file_read( fsp, ino, 0, test_buf, sizeof(test_data) );
+    cpfs_blkno_t phys_blk;
+    rc = cpfs_ino_file_read( fsp, ino, 0, test_buf, sizeof(test_data) , &phys_blk);
     if( rc ) cpfs_panic( "can't read data, %d", rc );
 
     if( memcmp( test_data, test_buf, sizeof(test_data) ) )
