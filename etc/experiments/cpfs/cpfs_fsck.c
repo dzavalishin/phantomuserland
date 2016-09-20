@@ -279,15 +279,15 @@ static void fsck_scan_ino( cpfs_fs_t *fs )
             struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
             struct cpfs_inode inode = *inode_p;
             cpfs_unlock_ino( fs, ino );
-             
-            int is_dir = (inode.ftype == CPFS_FTYPE_DIR);
+
+            //int is_dir = (inode.ftype == CPFS_FTYPE_DIR);
             
             //write for visualisation START
-             cpfs_fsck_log(fsck_scan_ino_log_file,  pos, disk_block, &inode);
+            cpfs_fsck_log(fsck_scan_ino_log_file,  pos, disk_block, &inode);
 /*
             {
             //if(inode_p->nlinks){                
-                fprintf(fsck_scan_ino_log_file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", (long long)disk_block, pos, is_dir, (long unsigned int)inode.fsize, inode.nlinks,  (long unsigned int)inode.blocks0[0]);        
+                fprintf(fsck_scan_ino_log_file,"blk=%lld, pos=%d, data[isdir=%d, fileSize=%llu, nlink=%u, first block=%llu] blocks0[", (long long)disk_block, pos, is_dir, (long long unsigned int)inode.fsize, inode.nlinks,  (long long unsigned int)inode.blocks0[0]);
                 for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, inode.blocks0[idx]!=0;idx++){
                     fprintf(fsck_scan_ino_log_file,"%s%lld",  idx==0 ? "" :", ", (long unsigned int) inode.blocks0[idx]);
                 }        
@@ -377,7 +377,7 @@ errno_t fsck_check_block_map( cpfs_fs_t *fs )
         if( blk < ilast )
         {
             if( (bs[blk] != bs_inode) && (bs[blk] != bs_unknown) )
-                fslog( fs, err, "blk %lld is not inode (%d)", blk, bs[blk] );
+                fslog( fs, err, "blk %lld is not inode (%d)", (long long)blk, bs[blk] );
 
         }
         else
@@ -390,18 +390,26 @@ errno_t fsck_check_block_map( cpfs_fs_t *fs )
     return 0;
 }
 
-void cpfs_fsck_log(FILE *file,  int ino_in_blk, int phys_blk, struct cpfs_inode *inode){
+void cpfs_fsck_log(FILE *file,  int ino_in_blk, int phys_blk, struct cpfs_inode *inode)
+{
     int is_dir = (inode->ftype == CPFS_FTYPE_DIR);
-    fprintf(file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", phys_blk, ino_in_blk, is_dir, (long unsigned int)inode->fsize, inode->nlinks,  (long unsigned int)inode->blocks0[0]);        
-    for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, inode->blocks0[idx]!=0;idx++){
-        fprintf(file,"%s%lld",  idx==0 ? "" :", ", (long unsigned int) inode->blocks0[idx]);
+
+    fprintf(file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%llu, nlink=%u, first block=%llu] blocks0[",
+            phys_blk, ino_in_blk, is_dir, (long long unsigned int)inode->fsize, inode->nlinks,  (long long unsigned int)inode->blocks0[0]);
+
+    for(int idx=0; idx < CPFS_INO_DIR_BLOCKS; idx++ )
+    {
+        fprintf(file,"%s%llu",  idx==0 ? "" :", ", (long long unsigned int) inode->blocks0[idx]);
     }        
     
     fprintf(file,"] indir[");
-    for(int idx=0;idx<CPFS_MAX_INDIR, inode->indir[idx]!=0;idx++){
-        fprintf(file,"%s%lld", idx==0 ? "" :", ", (long unsigned int) inode->indir[idx]);
+
+    // "," operator is not "&&", and it is wrong to check for "inode->indir[idx]!=0" here
+    for(int idx=0;idx<CPFS_MAX_INDIR ;idx++){
+        fprintf(file,"%s%llu", idx==0 ? "" :", ", (long long unsigned int) inode->indir[idx]);
     }        
+
     fprintf(file,"] \n");
     fflush(file);
 }
- 
+

@@ -12,6 +12,8 @@
 #include "cpfs.h"
 #include "cpfs_local.h"
 
+#include <string.h> // strchr
+
 /**
  *
  * Parse full file name, descend to last directory, return inode of the last directory and
@@ -41,7 +43,8 @@ cpfs_descend_dir( cpfs_fs_t *fs, const char *path, const char **last, cpfs_ino_t
     {
         if( ! *path ) return EINVAL; // ? can't happen? final stray '/'?
 
-        const char *next_slash = index( cur_name_start, '/' );
+        //const char *next_slash = index( cur_name_start, '/' );
+        const char *next_slash = strchr( cur_name_start, '/' );
 
         // No more path elements?
         if( next_slash == 0 )

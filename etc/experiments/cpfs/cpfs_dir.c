@@ -301,7 +301,7 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
     *yesno = (rdi->ftype == CPFS_FTYPE_DIR);
 
     cpfs_unlock_ino( fs, dir_ino );
-
+/*
     if( TRACE ) {
         //no optimisation
         
@@ -309,9 +309,9 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
         int ino_in_blk = dir_ino % CPFS_INO_PER_BLK;
         int phys_blk = dir_ino/CPFS_INO_PER_BLK+1;
         
-/*
+/ *
         cpfs_fsck_log(fsck_scan_dir_log_file, ino_in_blk,  phys_blk,  rdi);
-*/
+* /
         
         fprintf(fsck_scan_dir_log_file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", phys_blk, ino_in_blk, *yesno, (long unsigned int)rdi->fsize, rdi->nlinks,  (long unsigned int)rdi->blocks0[0]);        
         for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, rdi->blocks0[idx]!=0;idx++){
@@ -325,7 +325,7 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
         fflush(fsck_scan_dir_log_file);
         
     }
-
+*/
     return 0;
 }
 
@@ -337,15 +337,9 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
 
 
 
-/**
- *
- * General directory scan function
- *
-**/
-
 // ----------------------------------------------------------------------------
 //
-// 
+// General directory scan function
 //
 // ----------------------------------------------------------------------------
 
@@ -362,7 +356,8 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg)
     //cpfs_assert( file_ino != 0 );
 
     if(TRACE){ //for debug only
-        int stop_line=1;
+        int stop_line = 1;
+        (void) stop_line; // remove unused var warning
     }
     
     rc = cpfs_is_dir( fs, dir_ino, &isdir );
@@ -409,10 +404,10 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg)
             struct cpfs_dir_entry *de = ((void *)data) + (i*CPFS_DIR_REC_SIZE);
 
             //if( de->inode ) printf("%03lld: '%s'\n", de->inode, de->name );
-            if( TRACE ) {
+/*            if( TRACE ) {
                 fprintf(fsck_scan_dir_log_file,"blk=%lld, pos=%d, data[ino=%lld, name=%s]  \n", (long long)phys_blk, i, (long long)de->inode, de->name );
                 fflush(fsck_scan_dir_log_file);
-            }
+            }*/
             dir_scan_ret_t fret = f( fs, de, farg );
 
             if( fret == dir_scan_success ) return 0;

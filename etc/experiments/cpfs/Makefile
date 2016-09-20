@@ -1,5 +1,5 @@
 #ARCHFLAGS = -m32
-CFLAGS +=-g -Wall -Wextra $(ARCHFLAGS)
+CFLAGS +=-g -Wall -Wextra $(ARCHFLAGS) -std=c99
 LDFLAGS += -g -lpthread $(ARCHFLAGS)
 
 cpfs: main.o os.o \
