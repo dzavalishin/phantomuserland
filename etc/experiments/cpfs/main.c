@@ -93,7 +93,7 @@ int main( int ac, char**av )
     //mt_test();
 
     // 2 threads, 1 disk
-    mp_test();
+    //mp_test();
 
 
     return 0;
@@ -201,7 +201,7 @@ single_test(void)
 
     printf("\n");
 
-    rc = cpfs_fsck( &fs0, 0 );
+    rc = cpfs_fsck( &fs0, 0 );    
     
     if( rc ) cpfs_log_error( "fsck rc=%d", rc );
 #endif

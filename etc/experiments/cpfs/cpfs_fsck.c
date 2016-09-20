@@ -8,6 +8,7 @@
  *
 **/
 
+#include "cpfs_fsck.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -22,6 +23,8 @@
 
 
 typedef enum { msg, warn, err } severity_t;
+
+fsck_node_t*  fsck_node_list;
 
 static void fslog( cpfs_fs_t *fs, severity_t severity, const char *fmt, ... );
 
@@ -207,7 +210,7 @@ void fslog( cpfs_fs_t *fs, severity_t severity, const char *fmt, ... )
 // -----------------------------------------------------------------------
 #define FSCK_VERBOSE 0
 
-static errno_t fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth );
+static errno_t fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth, fsck_node_t* parent );
 
 static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void *farg )
 {
@@ -232,7 +235,8 @@ static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
     if( isdir )
     {
         if(FSCK_VERBOSE) printf("/\n");
-        rc = fsck_scan_dir( fs, de->inode, depth+1 );
+        fsck_node_t* root=calloc(1, sizeof(fsck_node_t));
+        rc = fsck_scan_dir( fs, de->inode, depth+1, root );
         if( rc ) return dir_scan_error;
     }
     else
@@ -247,21 +251,22 @@ static dir_scan_ret_t de_subscan( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
 
 
 errno_t
-fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth )
+fsck_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth, fsck_node_t* parent )
 {
-    errno_t rc = cpfs_scan_dir( fs, dir, de_subscan, (void *)depth );
+    errno_t rc = cpfs_scan_dir( fs, dir, de_subscan, (void *)depth, parent );
     return rc;
 }
 
 static void fsck_scan_dirs( cpfs_fs_t *fs )
 {
     printf("fsck scan dirs\n");
-    fsck_scan_dir( fs, 0, 0 );
+    fsck_node_list = calloc(1, sizeof(fsck_node_t));
+    fsck_scan_dir( fs, 0, 0, fsck_node_list );
 }
 
 static void fsck_scan_ino( cpfs_fs_t *fs )
 {
-    printf("fsck scan i-nodes\n");
+    printf("fsck scan i-nodes");
 
     cpfs_blkno_t        itable_end=fs->sb.itable_end;
     cpfs_blkno_t        itable_pos=fs->sb.itable_pos;
@@ -270,13 +275,15 @@ static void fsck_scan_ino( cpfs_fs_t *fs )
         for(int pos=0; pos<CPFS_INO_PER_BLK; pos++){
             
             cpfs_ino_t ino = (disk_block-1)*CPFS_INO_PER_BLK+pos;
+            //get inode info.
             struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
             cpfs_unlock_ino( fs, ino );
              
             int is_dir = (inode_p->ftype == CPFS_FTYPE_DIR);
             
-            if(inode_p->nlinks){
-                
+            //write for visualisation START
+            {
+            //if(inode_p->nlinks){                
                 fprintf(fsck_scan_ino_log_file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", (long long)disk_block, pos, is_dir, (long unsigned int)inode_p->fsize, inode_p->nlinks,  (long unsigned int)inode_p->blocks0[0]);        
                 for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, inode_p->blocks0[idx]!=0;idx++){
                     fprintf(fsck_scan_ino_log_file,"%s%lld",  idx==0 ? "" :", ", (long unsigned int) inode_p->blocks0[idx]);
@@ -287,11 +294,17 @@ static void fsck_scan_ino( cpfs_fs_t *fs )
                 }        
                 fprintf(fsck_scan_ino_log_file,"] \n");
                 fflush(fsck_scan_ino_log_file);
+            //}
             }
+            //write for visualisation FINISH    
+                
+            //scan inode's links.
+            
             
         }
     }
     
+    printf(" DONE\n");
 }
 
 // -----------------------------------------------------------------------

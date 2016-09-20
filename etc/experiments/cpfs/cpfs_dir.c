@@ -11,6 +11,7 @@
 
 #include "cpfs.h"
 #include "cpfs_local.h"
+#include "cpfs_fsck.h"
 
 
 
@@ -217,7 +218,7 @@ cpfs_alloc_dirent( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *fname, cpfs_in
     cpfs_mutex_lock( fs->dir_mutex ); // TODO need to use inode mutex here!
     while( nblk-- > 0 )
     {
-
+        
         cpfs_blkno_t phys_blk;
         rc = cpfs_ino_file_read( fs, dir_ino, blkpos*CPFS_BLKSIZE, data, CPFS_BLKSIZE, &phys_blk );
         if( rc )
@@ -292,7 +293,7 @@ errno_t
 cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
 {
     struct cpfs_inode *rdi = cpfs_lock_ino( fs, dir_ino );
-    if( rdi == 0 )
+    if( rdi == 0 ) 
     {
         return EIO;
     }
@@ -322,6 +323,7 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
         }        
         fprintf(fsck_scan_dir_log_file,"] \n");
         fflush(fsck_scan_dir_log_file);
+        
     }
 
     return 0;
@@ -353,12 +355,25 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
 
 
 errno_t
-cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg )
+cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg, fsck_node_t* parent )
 {
     errno_t rc;
     int isdir = 0;
     //cpfs_assert( file_ino != 0 );
 
+    if(TRACE){ //for debug only
+        int stop_line=1;
+    }
+    
+    fsck_node_t*  fsck_node = calloc(1, sizeof(fsck_node_t));
+    fsck_node->parent=parent;
+    //parent.children.add fsck_node
+    if(parent->children==0){
+        parent->children = calloc(1, sizeof(fsck_node));
+        parent->children[parent->children_size++]=fsck_node;
+        
+    }
+    
     rc = cpfs_is_dir( fs, dir_ino, &isdir );
     if( rc ) return rc;
 
@@ -449,7 +464,8 @@ static dir_scan_ret_t dir_print( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void 
 errno_t
 cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 {
-    return cpfs_scan_dir( fs, dir_ino, dir_print, 0 );
+    fsck_node_t* root = calloc(1, sizeof(fsck_node_t));
+    return cpfs_scan_dir( fs, dir_ino, dir_print, 0, root );
 }
 
 
@@ -477,7 +493,8 @@ static dir_scan_ret_t de_isempty( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
 errno_t
 cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 {
-    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_isempty, 0 );
+fsck_node_t* root = calloc(1, sizeof(fsck_node_t));
+    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_isempty, 0, root );
     if( rc == EMFILE )
         return ENOTEMPTY;
 
@@ -513,7 +530,8 @@ static dir_scan_ret_t de_hasentry( cpfs_fs_t *fs, struct cpfs_dir_entry *de, voi
 errno_t
 cpfs_dir_has_entry( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *name )
 {
-    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_hasentry, (void *)name );
+    fsck_node_t* root = calloc(1, sizeof(fsck_node_t));
+    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_hasentry, (void *)name, root );
     if( rc == EMFILE )
         return EEXIST;
 

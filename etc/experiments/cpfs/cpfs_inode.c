@@ -46,6 +46,7 @@ cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpf
     struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
     if( inode_p ) inode = *inode_p;
     cpfs_unlock_ino( fs, ino );
+    
     if( inode_p == 0 ) return EIO;
 
     if( logical*CPFS_BLKSIZE > inode.fsize )
