@@ -261,7 +261,7 @@ static void fsck_scan_dirs( cpfs_fs_t *fs )
 
 static void fsck_scan_ino( cpfs_fs_t *fs )
 {
-    printf("fsck scan i-nodes\n");
+    printf("fsck scan i-nodes");
 
     cpfs_blkno_t        itable_end=fs->sb.itable_end;
     cpfs_blkno_t        itable_pos=fs->sb.itable_pos;
@@ -270,13 +270,15 @@ static void fsck_scan_ino( cpfs_fs_t *fs )
         for(int pos=0; pos<CPFS_INO_PER_BLK; pos++){
             
             cpfs_ino_t ino = (disk_block-1)*CPFS_INO_PER_BLK+pos;
+            //get inode info.
             struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
             cpfs_unlock_ino( fs, ino );
              
             int is_dir = (inode_p->ftype == CPFS_FTYPE_DIR);
             
-            if(inode_p->nlinks){
-                
+            //write for visualisation START
+            {
+            //if(inode_p->nlinks){                
                 fprintf(fsck_scan_ino_log_file,"blk=%d, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", (long long)disk_block, pos, is_dir, (long unsigned int)inode_p->fsize, inode_p->nlinks,  (long unsigned int)inode_p->blocks0[0]);        
                 for(int idx=0;idx<CPFS_INO_DIR_BLOCKS, inode_p->blocks0[idx]!=0;idx++){
                     fprintf(fsck_scan_ino_log_file,"%s%lld",  idx==0 ? "" :", ", (long unsigned int) inode_p->blocks0[idx]);
@@ -287,11 +289,17 @@ static void fsck_scan_ino( cpfs_fs_t *fs )
                 }        
                 fprintf(fsck_scan_ino_log_file,"] \n");
                 fflush(fsck_scan_ino_log_file);
+            //}
             }
+            //write for visualisation FINISH    
+                
+            //scan inode's links.
+            
             
         }
     }
     
+    printf(" DONE\n");
 }
 
 // -----------------------------------------------------------------------

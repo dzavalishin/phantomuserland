@@ -93,7 +93,7 @@ int main( int ac, char**av )
     //mt_test();
 
     // 2 threads, 1 disk
-    mp_test();
+    //mp_test();
 
 
     return 0;

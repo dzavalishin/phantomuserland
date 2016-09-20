@@ -359,6 +359,9 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg 
     int isdir = 0;
     //cpfs_assert( file_ino != 0 );
 
+    if(TRACE){ //for debug only
+        int stop_line=1;
+    }
     rc = cpfs_is_dir( fs, dir_ino, &isdir );
     if( rc ) return rc;
 
