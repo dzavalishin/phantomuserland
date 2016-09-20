@@ -1,19 +1,43 @@
-/*
-type FILE_MODE_TYPE is (READ, READ_WRITE);
-type MESSAGE_ADDR_TYPE is a continuous area of data defined
-by a starting address (see ARINC 653 Part 1);
+#include "cpfs_types.h"
 
-type MESSAGE_SIZE_TYPE is a numeric type; -- number of bytes
-type FILE_ERRNO_TYPE is numeric type;
+// type FILE_MODE_TYPE is (READ, READ_WRITE);
+
+typedef enum { READ, WRITE } FILE_MODE_TYPE;
+
+// type MESSAGE_ADDR_TYPE is a continuous area of data defined by a starting address (see ARINC 653 Part 1);
+
+typedef void* MESSAGE_ADDR_TYPE;
+
+// type MESSAGE_SIZE_TYPE is a numeric type; -- number of bytes
+
+typedef size_t MESSAGE_SIZE_TYPE;
+
+// type FILE_SEEK_TYPE is (SEEK_SET, SEEK_CUR, SEEK_END);
+
+typedef enum { SEEK_SET, SEEK_CUR, SEEK_END } FILE_SEEK_TYPE;
+
+// type FILE_ERRNO_TYPE is numeric type;
+
+typedef errno_t FILE_ERRNO_TYPE;
+
+// type FILE_ID_TYPE is numeric type;
+
+typedef int FILE_ID_TYPE;
+
+// type DIRECTORY_ID_TYPE is numeric type;
+
+typedef int DIRECTORY_ID_TYPE;
+
+
+// type ENTRY_KIND_TYPE is (FILE_ENTRY, DIRECTORY_ENTRY, OTHER_ENTRY, END_OF_DIRECTORY);
+
+typedef enum { FILE_ENTRY, DIRECTORY_ENTRY, OTHER_ENTRY, END_OF_DIRECTORY } ENTRY_KIND_TYPE;
+
+/*
 type FILE_NAME_TYPE is a n-character string;
-type FILE_ID_TYPE is numeric type;
-type DIRECTORY_ID_TYPE is numeric type;
 type FILE_SIZE_TYPE is numeric type; -- implementation dependent
-type FILE_SEEK_TYPE is (SEEK_SET, SEEK_CUR, SEEK_END);
-type ENTRY_KIND_TYPE is (FILE_ENTRY,
-DIRECTORY_ENTRY,
-OTHER_ENTRY,
-END_OF_DIRECTORY);
+
+
 type TIME_SET_TYPE is (UNSET, SET);
 type MEDIA_TYPE is (VOLATILE, NONVOLATILE, REMOTE);
 type COMPOSITE_TIME_TYPE is record
