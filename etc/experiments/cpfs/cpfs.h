@@ -23,6 +23,10 @@ extern int TRACE_TAB;
 extern FILE *fsck_scan_dir_log_file;
 extern FILE *fsck_scan_ino_log_file;
 
+#ifndef O_CREAT
+#define	O_CREAT		0x0200	/* open with file create */
+#endif
+
 struct cpfs_fs;
 
 errno_t 	cpfs_init( struct cpfs_fs *fs );

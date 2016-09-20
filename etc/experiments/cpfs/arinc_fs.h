@@ -11,9 +11,16 @@
 
 #include "cpfs_types.h"
 
-// TODO right?
+// TODO right? order? numeric value?
 
-typedef int RETURN_CODE_TYPE;
+typedef enum
+{
+    INVALID_CONFIG,
+    INVALID_PARAM,
+    INVALID_MODE,
+    NOT_AVAILABLE,
+}
+RETURN_CODE_TYPE;
 
 
 
