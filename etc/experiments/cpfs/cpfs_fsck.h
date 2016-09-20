@@ -36,21 +36,21 @@
 //    struct fsck_used_blk *next;
 //};
 
-typedef struct fsck_node {
-    cpfs_blkno_t block; //disk block. 
-    int inode_offset; // offset of ino in block = ino % CPFS_INO_PER_BLK. sdir=0 -> inode_offset=0
-    cpfs_ino_t inode; //num inode = (block-1)*CPFS_INO_PER_BLK +offset
-    int isdir;
-    
-    //cpfs_blkno_t* ref_blocks; //blocks0 + blocks are taken from indir-array*
-    //cpfs_ino_t* inodes; //array of referenced inodes
-    
-    struct fsck_node* parent;
-    struct fsck_node** children;
-    int children_size;
-} fsck_node_t;
-
-extern fsck_node_t* fsck_node_list;
+//typedef struct fsck_node {
+//    cpfs_blkno_t block; //disk block. 
+//    int inode_offset; // offset of ino in block = ino % CPFS_INO_PER_BLK. sdir=0 -> inode_offset=0
+//    cpfs_ino_t inode; //num inode = (block-1)*CPFS_INO_PER_BLK +offset
+//    int isdir;
+//    
+//    //cpfs_blkno_t* ref_blocks; //blocks0 + blocks are taken from indir-array*
+//    //cpfs_ino_t* inodes; //array of referenced inodes
+//    
+//    struct fsck_node* parent;
+//    struct fsck_node** children;
+//    int children_size;
+//} fsck_node_t;
+//
+//extern fsck_node_t* fsck_node_list;
 
 #endif // CPFS_FSCK_H
 

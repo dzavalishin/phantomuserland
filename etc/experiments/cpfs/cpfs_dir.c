@@ -355,7 +355,7 @@ cpfs_is_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, int *yesno )
 
 
 errno_t
-cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg, fsck_node_t* parent )
+cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg)
 {
     errno_t rc;
     int isdir = 0;
@@ -363,15 +363,6 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg,
 
     if(TRACE){ //for debug only
         int stop_line=1;
-    }
-    
-    fsck_node_t*  fsck_node = calloc(1, sizeof(fsck_node_t));
-    fsck_node->parent=parent;
-    //parent.children.add fsck_node
-    if(parent->children==0){
-        parent->children = calloc(1, sizeof(fsck_node));
-        parent->children[parent->children_size++]=fsck_node;
-        
     }
     
     rc = cpfs_is_dir( fs, dir_ino, &isdir );
@@ -464,8 +455,7 @@ static dir_scan_ret_t dir_print( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void 
 errno_t
 cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 {
-    fsck_node_t* root = calloc(1, sizeof(fsck_node_t));
-    return cpfs_scan_dir( fs, dir_ino, dir_print, 0, root );
+    return cpfs_scan_dir( fs, dir_ino, dir_print, 0);
 }
 
 
@@ -493,8 +483,7 @@ static dir_scan_ret_t de_isempty( cpfs_fs_t *fs, struct cpfs_dir_entry *de, void
 errno_t
 cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 {
-fsck_node_t* root = calloc(1, sizeof(fsck_node_t));
-    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_isempty, 0, root );
+    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_isempty, 0 );
     if( rc == EMFILE )
         return ENOTEMPTY;
 
@@ -530,8 +519,7 @@ static dir_scan_ret_t de_hasentry( cpfs_fs_t *fs, struct cpfs_dir_entry *de, voi
 errno_t
 cpfs_dir_has_entry( cpfs_fs_t *fs, cpfs_ino_t dir_ino, const char *name )
 {
-    fsck_node_t* root = calloc(1, sizeof(fsck_node_t));
-    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_hasentry, (void *)name, root );
+    errno_t rc = cpfs_scan_dir( fs, dir_ino, de_hasentry, (void *)name );
     if( rc == EMFILE )
         return EEXIST;
 
