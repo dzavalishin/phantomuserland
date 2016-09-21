@@ -17,11 +17,6 @@
 
 #define USE_FDMAP 1
 
-int TRACE=1;
-int TRACE_TAB=1;
-FILE *fsck_scan_dir_log_file;
-FILE *fsck_scan_ino_log_file;
-
 
 
 // ----------------------------------------------------------------------------

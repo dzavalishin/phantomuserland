@@ -15,6 +15,11 @@
 #include "cpfs_types.h"
 #include "cpfs_defs.h"
 
+int TRACE=1;
+int TRACE_TAB=1;
+FILE *fsck_scan_dir_log_file;
+FILE *fsck_scan_ino_log_file;
+
 
 // FSCK makes table of all referred disk blocks (in data block zone, not counting sb/inode table blocks
 
@@ -24,10 +29,10 @@
 //    cpfs_blkno_t referring_blk; // block number of indirect block referring this block, or 0 if this is direct block referenced from inode
 //    int pos_in_blk; // position of this block reference in indirect blk or in inode
 //};
-//
-//
-//// FSCK makes table of all used inodes
-//
+
+
+// FSCK makes table of all used inodes
+
 //struct fsck_used_blk {
 //    cpfs_ino_t ino; // number of used inode
 //    cpfs_ino_t ino; // number of referring inode
@@ -51,6 +56,7 @@
 //} fsck_node_t;
 //
 //extern fsck_node_t* fsck_node_list;
+
 
 #endif // CPFS_FSCK_H
 

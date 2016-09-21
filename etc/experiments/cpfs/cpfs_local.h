@@ -15,7 +15,6 @@
 
 #include "cpfs_types.h"
 #include "cpfs_defs.h"
-#include "cpfs_fsck.h"
 
 #include <errno.h>
 #include <string.h>

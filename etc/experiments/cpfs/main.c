@@ -78,10 +78,10 @@ int main( int ac, char**av )
 
 
     //d = open( "disk.img", O_RDWR, 0666 );
-    dfd[0] = open( "disk.img", O_RDWR|O_CREAT, 0666 );
+    dfd[0] = open( "/Users/vassaeve/NetBeansProjects/DZ/fsck/disk.img", O_RDWR|O_CREAT, 0666 );
     if( dfd[0] < 0 ) die_rc( "open", dfd[0] );
 
-    dfd[1] = open( "disk1.img", O_RDWR|O_CREAT, 0666 );
+    dfd[1] = open( "/Users/vassaeve/NetBeansProjects/DZ/fsck/disk1.img", O_RDWR|O_CREAT, 0666 );
     if( dfd[1] < 0 ) die_rc( "open", dfd[1] );
 
 
@@ -116,9 +116,6 @@ cpfs_disk_read( int disk_id, cpfs_blkno_t block, void *data )
 {
     lseek( dfd[disk_id], (int) (block*CPFS_BLKSIZE), SEEK_SET );
     int rc = read( dfd[disk_id], data, CPFS_BLKSIZE );
-/*
-    if( TRACE ) trace(0, "%*s < cpfs_disk_read, read bytes=%d from block=%d\n", TRACE-TRACE_TAB, " ", rc, block);   
-*/
     return (rc == CPFS_BLKSIZE) ? 0 : EIO;
 }
 
@@ -175,8 +172,6 @@ single_test(void)
     errno_t 		rc;
 
 
-    TRACE=0;
-
     rc = cpfs_init( &fs0 );
     if( rc ) die_rc( "Init FS", rc );
 
@@ -197,7 +192,6 @@ single_test(void)
     if( rc ) die_rc( "Umount FS", rc );
 
 #if 1
-    TRACE=1;
 
     printf("\n");
 

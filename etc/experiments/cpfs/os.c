@@ -108,9 +108,6 @@ cpfs_get_current_time(void)
 
 void cpfs_mutex_lock( cpfs_mutex m)
 {
-/*
-    if( TRACE ) trace(1, "%*s > cpfs_mutex_lock. mutex=%0x\n", TRACE, " ", m);  
-*/
 #if USE_PTHREAD_MUTEX
     pthread_mutex_t *pm = (void *)m;
 
@@ -124,9 +121,6 @@ void cpfs_mutex_lock( cpfs_mutex m)
 
 void cpfs_mutex_unlock( cpfs_mutex m)
 {
-/*
-    if( TRACE ) trace(-1, "%*s < cpfs_mutex_unlock. mutex=%0x\n", TRACE-TRACE_TAB, " ", m);   
-*/
 #if USE_PTHREAD_MUTEX
     pthread_mutex_t *pm = (void *)m;
 
@@ -160,9 +154,6 @@ void cpfs_mutex_init( cpfs_mutex *m)
 void
 cpfs_mutex_stop( cpfs_mutex m )
 {
-/*
-if( TRACE ) trace(0, "cpfs_mutex_stop %0x\n",  m); 
-*/
 
 #if USE_PTHREAD_MUTEX
     pthread_mutex_t *pm = (void *)m;

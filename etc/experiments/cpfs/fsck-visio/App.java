@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -256,6 +255,20 @@ public class App extends javax.swing.JFrame {
                 }
                 data = row[1].replaceAll(",", "<br>").replace("[", "<html>").replace("]", "</html>");
                 mapka.put(blk + "." + offsetInBlock, data);
+            }else{
+                try{
+                    //as is
+                String[] values= str.split(",");
+                String blk = values[0].split("=")[1];
+                
+                String state = values[2].split("=")[1];
+                if (!rowsIdx.contains(blk)) {
+                    rowsIdx.add(blk);
+                    for(int i=0;i<8;i++){
+                    mapka.put(blk + "." + i, "data");
+                    }
+                }
+                }catch(Exception ex){}
             }
         }
 
