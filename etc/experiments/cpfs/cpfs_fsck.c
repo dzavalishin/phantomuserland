@@ -48,6 +48,8 @@ errno_t fsck_update_ino_map (cpfs_fs_t *fs, cpfs_ino_t ino, fsck_inostate_t stat
 
 errno_t fsck_check_block_map (cpfs_fs_t *fs);
 
+void fsck_find_lost_ino (cpfs_fs_t *fs);
+
 errno_t
 cpfs_fsck (cpfs_fs_t *fs, int fix) {
     errno_t rc;
@@ -74,11 +76,13 @@ cpfs_fsck (cpfs_fs_t *fs, int fix) {
     rc = fsck_check_block_map(fs);
     if (rc) goto error;
 
-/*
-    fsck_scan_ino_log_file = fopen("fsck_scan_ino.log", "wb");
-    fsck_scan_ino(fs);
-    fclose(fsck_scan_ino_log_file);
-*/
+    fsck_find_lost_ino(fs);
+
+    /*
+        fsck_scan_ino_log_file = fopen("fsck_scan_ino.log", "wb");
+        fsck_scan_ino(fs);
+        fclose(fsck_scan_ino_log_file);
+     */
 
 
     printf("FSCK done, %d warnings, %d errors\n", fs->fsck_nWarn, fs->fsck_nErr);
@@ -248,7 +252,14 @@ de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs
     }
 
     rc = fsck_update_block_maps(fs, inode_copy, bs_allocated);
-    fsck_update_ino_map(fs, de->inode, is_used);
+    if (rc) {
+        cpfs_panic("inode=%lld uses already allocated block(s).", (long long) de->inode); //debug
+    }
+
+    rc = fsck_update_ino_map(fs, de->inode, is_used);
+    if (rc) {
+        cpfs_panic("more than one use of inode=%lld", (long long) de->inode); //debug
+    }
 
     if (isdir) {
         if (FSCK_VERBOSE) printf("/\n");
@@ -272,8 +283,7 @@ fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth) {
     errno_t rc = cpfs_block_4_inode(fs, dir, &blk);
     if (rc) cpfs_panic("cpfs_block_4_inode: %lld", (long long) dir);
 
-    fsck_update_block_map(fs, blk, bs_inode);
-    fsck_update_ino_map(fs, dir, is_used);
+    rc = fsck_update_block_map(fs, blk, bs_inode);
 
     if (TRACE) {
         //printf("scan inode=%lld, block=%lld, offset=%lld \n", (long long) dir, (long long) blk, (long long) (dir % CPFS_INO_PER_BLK));
@@ -308,30 +318,53 @@ getBlkStateName (fsck_blkstate_t state) { //bs_unknown, bs_allocated, bs_freelis
     }
 }
 
-static void
-fsck_scan_dirs (cpfs_fs_t *fs) {
-    printf("fsck scan dirs\n");
-    fsck_scan_dir(fs, 0, 0);
+void
+fsck_find_lost_ino (cpfs_fs_t *fs) {
+    //test. one inode was found
+    int create_lost_found_dir = 0; //1
 
-    if (TRACE) {
-        int breakpoint = 1;
-        (void) breakpoint;
+    printf("unused inodes:\n");
+    for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
+        if (fs->fsck_ino_state[ino] == is_unknown) {
 
+            printf("ino=%lld, state=%s \n", (long long) ino, getInoStateName(fs->fsck_ino_state[ino]));
 
-        printf("print state of all blocks\n");
-        for (cpfs_blkno_t blk = 0; blk < fs->disk_size; blk++) {
-            printf("blk=%lld, state=%s \n", (long long) blk, getBlkStateName(fs->fsck_blk_state[blk]));
-        }
-        printf("press any key\n");
-        getchar();
+            struct cpfs_inode *inode_p = cpfs_lock_ino(fs, ino);
+            struct cpfs_inode inode = *inode_p;
+            cpfs_unlock_ino(fs, ino);
+            //TODO 
+            
 
-        printf("print state of all inodes\n");
-        for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
-            if (fs->fsck_ino_state[ino] == is_unknown) {
-                printf("ino=%lld, state=%s \n", (long long) ino, getInoStateName(fs->fsck_ino_state[ino]));
+            if (create_lost_found_dir) {
+                errno_t rc = cpfs_mkdir( fs, "lost+found", 0 ); //return ENOSPC
+                if (rc) cpfs_panic("mke %d", rc);
+                create_lost_found_dir=0;
             }
         }
     }
+}
+
+static void
+fsck_scan_dirs (cpfs_fs_t *fs) {
+    printf("fsck scan dirs\n");
+
+    fsck_update_ino_map(fs, 0, is_used); //init
+
+    fsck_scan_dir(fs, 0, 0);
+
+    if (TRACE) {
+        /*
+                printf("bs_unknown blocks:\n");
+                for (cpfs_blkno_t blk = 0; blk < fs->disk_size; blk++) {
+                    if (fs->fsck_blk_state[blk] == bs_unknown) {
+                        printf("blk=%lld, state=%s \n", (long long) blk, getBlkStateName(fs->fsck_blk_state[blk]));
+                    }
+                }
+                printf("press any key\n");
+                getchar();
+         */
+    }
+
 }
 
 static void
@@ -351,14 +384,14 @@ fsck_scan_ino (cpfs_fs_t *fs) {
             cpfs_unlock_ino(fs, ino);
 
             if (TRACE) {
-                printf("scan inode=%lld", (long long) ino);
-
+                //printf("scan inode=%lld", (long long) ino);
                 fsck_log_inode(fsck_scan_ino_log_file, disk_block, pos, inode);
             }
 
-            fsck_update_ino_map(fs, ino, is_used);
-            //scan inode's links.
-
+            errno_t rc = fsck_update_ino_map(fs, ino, is_used);
+            if (rc) {
+                cpfs_panic("more than one use of inode=%lld", ino);
+            }
             //VE is this possible?
             if (inode.nlinks > 1) {
                 if (TRACE) {
@@ -381,13 +414,15 @@ fsck_scan_ino (cpfs_fs_t *fs) {
 
 errno_t
 fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state) {
+    errno_t rc = 0;
     for (int i = 0; i < CPFS_INO_DIR_BLOCKS && inode_copy.blocks0[i] != 0; i++) {
-        fsck_update_block_map(fs, inode_copy.blocks0[i], state);
+        rc += fsck_update_block_map(fs, inode_copy.blocks0[i], state);
         fsck_log_block(fsck_scan_dir_log_file, inode_copy.blocks0[i], state);
     }
     //TODO indir
 
-    return 0;
+    //TODO indir
+    return rc;
 }
 
 errno_t
@@ -396,6 +431,10 @@ fsck_update_ino_map (cpfs_fs_t *fs, cpfs_ino_t ino, fsck_inostate_t state) {
     cpfs_mutex_lock(fs->sb_mutex);
 
     cpfs_assert(ino < fs->sb.ninode);
+    if (fs->fsck_ino_state[ino] == is_used) {
+        printf("++++++++++++ %lld\n", (long long) ino);
+        return 1; //кто-то повторно ссылается на иноду
+    }
     fs->fsck_ino_state[ino] = state;
 
     cpfs_mutex_unlock(fs->sb_mutex);
