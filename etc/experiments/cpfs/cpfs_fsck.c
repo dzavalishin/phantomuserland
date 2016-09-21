@@ -34,9 +34,9 @@ static void fsck_scan_dirs (cpfs_fs_t *fs);
 
 static void fsck_scan_ino (cpfs_fs_t *fs);
 
-void fsck_log_inode (FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_inode inode);
+void fsck_log_inode (FILE *file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs_inode inode);
 
-void fsck_log_de (FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de);
+void fsck_log_de (FILE *file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs_dir_entry *de);
 
 void fsck_log_block (FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state);
 
@@ -208,7 +208,7 @@ fslog (cpfs_fs_t *fs, severity_t severity, const char *fmt, ...) {
 static errno_t fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth);
 
 static dir_scan_ret_t
-de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de, void *farg) {
+de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs_dir_entry *de, void *farg) {
     errno_t rc;
     size_t depth = (size_t) farg;
 
@@ -228,10 +228,12 @@ de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de, voi
     cpfs_unlock_ino(fs, de->inode);
     int isdir = (inode_copy.ftype == CPFS_FTYPE_DIR);
 
-    int pos = de->inode % CPFS_INO_PER_BLK;
-    cpfs_blkno_t disk_block = de->inode / CPFS_INO_PER_BLK + 1;
-    fsck_log_inode(fsck_scan_dir_log_file, pos, disk_block, inode_copy);
-
+    if (TRACE) {
+        fsck_log_de(fsck_scan_dir_log_file, phys_blk, offset, de);
+        int pos = de->inode % CPFS_INO_PER_BLK;
+        cpfs_blkno_t disk_block = de->inode / CPFS_INO_PER_BLK + 1;
+        fsck_log_inode(fsck_scan_dir_log_file, disk_block, pos, inode_copy);
+    }
 
     rc = fsck_update_block_maps(fs, inode_copy, bs_allocated);
 
@@ -242,7 +244,7 @@ de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de, voi
         rc = fsck_scan_dir(fs, de->inode, depth + 1);
         if (rc) return dir_scan_error;
     } else {
-        int stop_line = 1;
+        int stop_line = 1; //for debug only.
         (void) stop_line;
         if (FSCK_VERBOSE) printf("\n");
     }
@@ -259,10 +261,30 @@ fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth) {
     if (rc) cpfs_panic("cpfs_block_4_inode: %lld", (long long) dir);
 
     fsck_update_block_map(fs, blk, bs_inode);
-    printf("scan dir_entry=%lld, block=%lld \n", (long long) dir, (long long)blk);
+
+    if (TRACE) {
+        printf("scan inode=%lld, block=%lld, offset=%lld \n", (long long) dir, (long long) blk, (long long) (dir % CPFS_INO_PER_BLK));
+        struct cpfs_inode *inode_p = cpfs_lock_ino(fs, dir);
+        struct cpfs_inode inode = *inode_p;
+        cpfs_unlock_ino(fs, dir);
+
+        fsck_log_inode(fsck_scan_dir_log_file, blk, dir % CPFS_INO_PER_BLK, inode);
+    }
 
     rc = cpfs_scan_dir(fs, dir, de_subscan, (void *) depth);
     return rc;
+}
+
+const char*
+getBlkStateName (fsck_blkstate_t state) { //bs_unknown, bs_allocated, bs_freelist, bs_freemap, bs_inode, bs_superblk
+    switch (state) {
+        case bs_unknown: return "bs_unknown";
+        case bs_allocated: return "bs_allocated";
+        case bs_freelist: return "bs_freelist";
+        case bs_freemap: return "bs_freemap";
+        case bs_inode: return "bs_inode";
+        case bs_superblk: return "bs_superblk";
+    }
 }
 
 static void
@@ -272,12 +294,20 @@ fsck_scan_dirs (cpfs_fs_t *fs) {
     if (TRACE) {
         int breakpoint = 1;
         (void) breakpoint;
+
+/*
+        for (cpfs_blkno_t blk = 0; blk < fs->disk_size; blk++) {
+            printf("blk=%lld, state=%s \n", (long long) blk, getBlkStateName(fs->fsck_blk_state[blk]));
+        }
+        printf("press any key\n");  
+        getchar();
+*/
     }
 }
 
 static void
 fsck_scan_ino (cpfs_fs_t *fs) {
-    printf("fsck scan i-nodes");
+    printf("fsck scan all i-nodes");
 
     cpfs_blkno_t itable_end = fs->sb.itable_end;
     cpfs_blkno_t itable_pos = fs->sb.itable_pos;
@@ -292,7 +322,7 @@ fsck_scan_ino (cpfs_fs_t *fs) {
             cpfs_unlock_ino(fs, ino);
 
             //write for visualisation START
-            fsck_log_inode(fsck_scan_ino_log_file, pos, disk_block, inode);
+            fsck_log_inode(fsck_scan_ino_log_file, disk_block, pos, inode);
 
             //write for visualisation FINISH    
 
@@ -312,7 +342,7 @@ fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blksta
         fsck_log_block(fsck_scan_dir_log_file, inode_copy.blocks0[i], state);
     }
     //TODO indir
-    
+
     return 0;
 }
 
@@ -390,13 +420,13 @@ fsck_log_block (FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state) {
 }
 
 void
-fsck_log_de (FILE* file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_dir_entry* de) {
+fsck_log_de (FILE* file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs_dir_entry* de) {
     fprintf(file, "blk=%lld, pos=%d, data[ino=%lld, name=%s]  \n", (long long) phys_blk, ino_in_blk, (long long) de->inode, de->name);
     fflush(file);
 }
 
 void
-fsck_log_inode (FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_inode inode) {
+fsck_log_inode (FILE *file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs_inode inode) {
     int is_dir = (inode.ftype == CPFS_FTYPE_DIR);
     fprintf(file, "blk=%lld, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", phys_blk, ino_in_blk, is_dir, (long long) inode.fsize, inode.nlinks, (long long) inode.blocks0[0]);
     for (int idx = 0; idx < CPFS_INO_DIR_BLOCKS && inode.blocks0[idx] != 0; idx++) {

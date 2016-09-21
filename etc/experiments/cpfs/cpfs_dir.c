@@ -380,7 +380,7 @@ cpfs_scan_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino, dir_scan_func_t f, void *farg)
             struct cpfs_dir_entry *de = ((void *)data) + (i*CPFS_DIR_REC_SIZE);
 
             //if( de->inode ) printf("%03lld: '%s'\n", de->inode, de->name );
-            dir_scan_ret_t fret = f( fs, phys_blk, de, farg );
+            dir_scan_ret_t fret = f( fs, phys_blk, i, de, farg );
 
             if( fret == dir_scan_success ) return 0;
             if( fret == dir_scan_error ) return EMFILE;
@@ -436,7 +436,7 @@ cpfs_dump_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 
 
 
-static dir_scan_ret_t de_isempty( cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de, void *farg )
+static dir_scan_ret_t de_isempty( cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs_dir_entry *de, void *farg )
 {
     (void) fs;
     (void) farg;
@@ -468,7 +468,7 @@ cpfs_is_empty_dir( cpfs_fs_t *fs, cpfs_ino_t dir_ino )
 
 
 
-static dir_scan_ret_t de_hasentry( cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de, void *farg )
+static dir_scan_ret_t de_hasentry( cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs_dir_entry *de, void *farg )
 {
     (void) fs;
     (void) farg;
