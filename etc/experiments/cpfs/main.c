@@ -78,10 +78,10 @@ int main( int ac, char**av )
 
 
     //d = open( "disk.img", O_RDWR, 0666 );
-    dfd[0] = open( "/Users/vassaeve/NetBeansProjects/DZ/fsck/disk.img", O_RDWR|O_CREAT, 0666 );
+    dfd[0] = open( "disk.img", O_RDWR|O_CREAT, 0666 );
     if( dfd[0] < 0 ) die_rc( "open", dfd[0] );
 
-    dfd[1] = open( "/Users/vassaeve/NetBeansProjects/DZ/fsck/disk1.img", O_RDWR|O_CREAT, 0666 );
+    dfd[1] = open( "disk1.img", O_RDWR|O_CREAT, 0666 );
     if( dfd[1] < 0 ) die_rc( "open", dfd[1] );
 
 

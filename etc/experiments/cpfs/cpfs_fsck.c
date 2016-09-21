@@ -40,6 +40,10 @@ void fsck_log_de(FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_
 
 void fsck_log_block(FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state) ;
 
+errno_t fsck_update_block_maps(cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state);
+
+errno_t fsck_update_block_map(cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state);
+
 errno_t
 cpfs_fsck(cpfs_fs_t *fs, int fix) {
     errno_t rc;
@@ -56,11 +60,11 @@ cpfs_fsck(cpfs_fs_t *fs, int fix) {
     rc = fsck_sb(fs, fix);
     if (rc) goto error;
 
-    fsck_scan_dir_log_file = fopen("/Users/vassaeve/NetBeansProjects/DZ/fsck/fsck_scan_dir.log", "wb");
+    fsck_scan_dir_log_file = fopen("fsck_scan_dir.log", "wb");
     fsck_scan_dirs(fs);
     fclose(fsck_scan_dir_log_file);
 
-    fsck_scan_ino_log_file = fopen("/Users/vassaeve/NetBeansProjects/DZ/fsck/fsck_scan_ino.log", "wb");
+    fsck_scan_ino_log_file = fopen("fsck_scan_ino.log", "wb");
     fsck_scan_ino(fs);
     fclose(fsck_scan_ino_log_file);
 
