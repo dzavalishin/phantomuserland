@@ -26,26 +26,26 @@ typedef enum {
 } severity_t;
 
 
-static void fslog(cpfs_fs_t *fs, severity_t severity, const char *fmt, ...);
+static void fslog (cpfs_fs_t *fs, severity_t severity, const char *fmt, ...);
 
-static errno_t fsck_sb(cpfs_fs_t *fs, int fix);
-static void fsck_scan_dirs(cpfs_fs_t *fs);
+static errno_t fsck_sb (cpfs_fs_t *fs, int fix);
+static void fsck_scan_dirs (cpfs_fs_t *fs);
 
 
-static void fsck_scan_ino(cpfs_fs_t *fs);
+static void fsck_scan_ino (cpfs_fs_t *fs);
 
-void fsck_log_inode(FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_inode inode);
+void fsck_log_inode (FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_inode inode);
 
-void fsck_log_de(FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de);
+void fsck_log_de (FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de);
 
-void fsck_log_block(FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state) ;
+void fsck_log_block (FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state);
 
-errno_t fsck_update_block_maps(cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state);
+errno_t fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state);
 
-errno_t fsck_update_block_map(cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state);
+errno_t fsck_update_block_map (cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state);
 
 errno_t
-cpfs_fsck(cpfs_fs_t *fs, int fix) {
+cpfs_fsck (cpfs_fs_t *fs, int fix) {
     errno_t rc;
 
     cpfs_assert(fs->disk_size < INT_MAX); // TODO document
@@ -81,7 +81,7 @@ error:
 // TODO fsck is not finished
 
 static errno_t
-fsck_sb(cpfs_fs_t *fs, int fix) {
+fsck_sb (cpfs_fs_t *fs, int fix) {
     //errno_t rc;
 
     printf("FSCK - ckeck superblock\n");
@@ -169,7 +169,8 @@ fsck_sb(cpfs_fs_t *fs, int fix) {
 
 }
 
-void fslog(cpfs_fs_t *fs, severity_t severity, const char *fmt, ...) {
+void
+fslog (cpfs_fs_t *fs, severity_t severity, const char *fmt, ...) {
     switch (severity) {
         case msg:
             printf("FSCK Info: ");
@@ -204,9 +205,10 @@ void fslog(cpfs_fs_t *fs, severity_t severity, const char *fmt, ...) {
 // -----------------------------------------------------------------------
 #define FSCK_VERBOSE 0
 
-static errno_t fsck_scan_dir(cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth);
+static errno_t fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth);
 
-static dir_scan_ret_t de_subscan(cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de, void *farg) {
+static dir_scan_ret_t
+de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cpfs_dir_entry *de, void *farg) {
     errno_t rc;
     size_t depth = (size_t) farg;
 
@@ -250,17 +252,31 @@ static dir_scan_ret_t de_subscan(cpfs_fs_t *fs, cpfs_blkno_t phys_blk, struct cp
 }
 
 errno_t
-fsck_scan_dir(cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth) {
-    errno_t rc = cpfs_scan_dir(fs, dir, de_subscan, (void *) depth);
+fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth) {
+    //put block 
+    cpfs_blkno_t blk;
+    errno_t rc = cpfs_block_4_inode(fs, dir, &blk);
+    if (rc) cpfs_panic("cpfs_block_4_inode: %lld", (long long) dir);
+
+    fsck_update_block_map(fs, blk, bs_inode);
+    printf("scan dir_entry=%lld, block=%lld \n", (long long) dir, (long long)blk);
+
+    rc = cpfs_scan_dir(fs, dir, de_subscan, (void *) depth);
     return rc;
 }
 
-static void fsck_scan_dirs(cpfs_fs_t *fs) {
+static void
+fsck_scan_dirs (cpfs_fs_t *fs) {
     printf("fsck scan dirs\n");
     fsck_scan_dir(fs, 0, 0);
+    if (TRACE) {
+        int breakpoint = 1;
+        (void) breakpoint;
+    }
 }
 
-static void fsck_scan_ino(cpfs_fs_t *fs) {
+static void
+fsck_scan_ino (cpfs_fs_t *fs) {
     printf("fsck scan i-nodes");
 
     cpfs_blkno_t itable_end = fs->sb.itable_end;
@@ -289,14 +305,14 @@ static void fsck_scan_ino(cpfs_fs_t *fs) {
     printf(" DONE\n");
 }
 
-errno_t fsck_update_block_maps(cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state) {
-    for (int i = 0; i < CPFS_INO_DIR_BLOCKS; i++) {
-        if (inode_copy.blocks0[i] != 0) {
-            fsck_update_block_map(fs, inode_copy.blocks0[i], state);
-            fsck_log_block(fsck_scan_dir_log_file,  inode_copy.blocks0[i], state);
-        }
+errno_t
+fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state) {
+    for (int i = 0; i < CPFS_INO_DIR_BLOCKS && inode_copy.blocks0[i] != 0; i++) {
+        fsck_update_block_map(fs, inode_copy.blocks0[i], state);
+        fsck_log_block(fsck_scan_dir_log_file, inode_copy.blocks0[i], state);
     }
     //TODO indir
+    
     return 0;
 }
 
@@ -306,7 +322,8 @@ errno_t fsck_update_block_maps(cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck
 //
 // -----------------------------------------------------------------------
 
-errno_t fsck_update_block_map(cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state) {
+errno_t
+fsck_update_block_map (cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state) {
     cpfs_assert(blk < fs->disk_size); // TODO or superblock disk size? Or shall we check sb before?
 
     if (fs->fsck_blk_state[blk] != bs_unknown) {
@@ -316,14 +333,14 @@ errno_t fsck_update_block_map(cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t s
             fs->fsck_blk_state[blk] = state;
             fs->fsck_rebuild_free = 1;
             return EBUSY;
-        } else
-            if ((fs->fsck_blk_state[blk] == bs_freelist) || (fs->fsck_blk_state[blk] == bs_freemap)) {
+        } else if ((fs->fsck_blk_state[blk] == bs_freelist) || (fs->fsck_blk_state[blk] == bs_freemap)) {
             fslog(fs, err1, "block %lld state was free, attempt to set %d\n", blk, state);
 
             fs->fsck_blk_state[blk] = state;
             fs->fsck_rebuild_free = 1;
             return EBUSY;
-        } else {
+        } else if (fs->fsck_blk_state[blk] != bs_inode) {
+            //
             fslog(fs, err1, "block %lld state %d, attempt to set %d\n", blk, fs->fsck_blk_state[blk], state);
             // TODO and what?
             return EBUSY;
@@ -340,7 +357,8 @@ errno_t fsck_update_block_map(cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t s
  *
  **/
 
-errno_t fsck_check_block_map(cpfs_fs_t *fs) {
+errno_t
+fsck_check_block_map (cpfs_fs_t *fs) {
     cpfs_blkno_t blk;
 
     // no reason to check :)
@@ -365,17 +383,20 @@ errno_t fsck_check_block_map(cpfs_fs_t *fs) {
     return 0;
 }
 
-void fsck_log_block(FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state) {
+void
+fsck_log_block (FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state) {
     fprintf(file, "blk=%lld, pos=-1, state=%d  \n", (long long) phys_blk, state);
     fflush(file);
 }
 
-void fsck_log_de(FILE* file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_dir_entry* de) {
+void
+fsck_log_de (FILE* file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_dir_entry* de) {
     fprintf(file, "blk=%lld, pos=%d, data[ino=%lld, name=%s]  \n", (long long) phys_blk, ino_in_blk, (long long) de->inode, de->name);
     fflush(file);
 }
 
-void fsck_log_inode(FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_inode inode) {
+void
+fsck_log_inode (FILE *file, int ino_in_blk, cpfs_blkno_t phys_blk, struct cpfs_inode inode) {
     int is_dir = (inode.ftype == CPFS_FTYPE_DIR);
     fprintf(file, "blk=%lld, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", phys_blk, ino_in_blk, is_dir, (long long) inode.fsize, inode.nlinks, (long long) inode.blocks0[0]);
     for (int idx = 0; idx < CPFS_INO_DIR_BLOCKS && inode.blocks0[idx] != 0; idx++) {
