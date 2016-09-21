@@ -44,6 +44,8 @@ errno_t fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsc
 
 errno_t fsck_update_block_map (cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state);
 
+errno_t fsck_check_block_map (cpfs_fs_t *fs);
+
 errno_t
 cpfs_fsck (cpfs_fs_t *fs, int fix) {
     errno_t rc;
@@ -63,6 +65,9 @@ cpfs_fsck (cpfs_fs_t *fs, int fix) {
     fsck_scan_dir_log_file = fopen("fsck_scan_dir.log", "wb");
     fsck_scan_dirs(fs);
     fclose(fsck_scan_dir_log_file);
+
+    rc = fsck_check_block_map(fs);
+    if (rc) goto error;
 
     fsck_scan_ino_log_file = fopen("fsck_scan_ino.log", "wb");
     fsck_scan_ino(fs);
@@ -263,7 +268,7 @@ fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth) {
     fsck_update_block_map(fs, blk, bs_inode);
 
     if (TRACE) {
-        printf("scan inode=%lld, block=%lld, offset=%lld \n", (long long) dir, (long long) blk, (long long) (dir % CPFS_INO_PER_BLK));
+        //printf("scan inode=%lld, block=%lld, offset=%lld \n", (long long) dir, (long long) blk, (long long) (dir % CPFS_INO_PER_BLK));
         struct cpfs_inode *inode_p = cpfs_lock_ino(fs, dir);
         struct cpfs_inode inode = *inode_p;
         cpfs_unlock_ino(fs, dir);
@@ -295,13 +300,13 @@ fsck_scan_dirs (cpfs_fs_t *fs) {
         int breakpoint = 1;
         (void) breakpoint;
 
-/*
-        for (cpfs_blkno_t blk = 0; blk < fs->disk_size; blk++) {
-            printf("blk=%lld, state=%s \n", (long long) blk, getBlkStateName(fs->fsck_blk_state[blk]));
-        }
-        printf("press any key\n");  
-        getchar();
-*/
+        /*
+                for (cpfs_blkno_t blk = 0; blk < fs->disk_size; blk++) {
+                    printf("blk=%lld, state=%s \n", (long long) blk, getBlkStateName(fs->fsck_blk_state[blk]));
+                }
+                printf("press any key\n");  
+                getchar();
+         */
     }
 }
 
@@ -321,10 +326,9 @@ fsck_scan_ino (cpfs_fs_t *fs) {
             struct cpfs_inode inode = *inode_p;
             cpfs_unlock_ino(fs, ino);
 
-            //write for visualisation START
-            fsck_log_inode(fsck_scan_ino_log_file, disk_block, pos, inode);
-
-            //write for visualisation FINISH    
+            if (TRACE) {
+                fsck_log_inode(fsck_scan_ino_log_file, disk_block, pos, inode);
+            }
 
             //scan inode's links.
 
@@ -401,11 +405,13 @@ fsck_check_block_map (cpfs_fs_t *fs) {
 
     for (blk = 1; blk < fs->disk_size; blk++) {
         if (blk < ilast) {
-            if ((bs[blk] != bs_inode) && (bs[blk] != bs_unknown))
+            if ((bs[blk] != bs_inode) && (bs[blk] != bs_unknown)) {
                 fslog(fs, err1, "blk %lld is not inode (%d)", blk, bs[blk]);
-
+            }
         } else {
-
+            if (bs[blk] != bs_unknown) {
+                //TODO what?
+            }
         }
 
     }
