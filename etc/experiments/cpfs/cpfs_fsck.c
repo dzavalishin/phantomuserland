@@ -23,7 +23,7 @@
 
 typedef enum {
     msg, warn1, err1
-} severity_t;
+} severity_t; //VE macos reports an error for warn1, err1.
 
 
 static void fslog (cpfs_fs_t *fs, severity_t severity, const char *fmt, ...);
@@ -44,6 +44,8 @@ errno_t fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsc
 
 errno_t fsck_update_block_map (cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state);
 
+errno_t fsck_update_ino_map (cpfs_fs_t *fs, cpfs_ino_t ino, fsck_inostate_t state);
+
 errno_t fsck_check_block_map (cpfs_fs_t *fs);
 
 errno_t
@@ -59,6 +61,9 @@ cpfs_fsck (cpfs_fs_t *fs, int fix) {
     fs->fsck_blk_state = calloc(sizeof ( fsck_blkstate_t), fs->disk_size);
     if (0 == fs->fsck_blk_state) return ENOMEM;
 
+    fs->fsck_ino_state = calloc(sizeof ( fsck_inostate_t), fs->sb.ninode);
+    if (fs->fsck_ino_state == 0) return ENOMEM;
+
     rc = fsck_sb(fs, fix);
     if (rc) goto error;
 
@@ -69,9 +74,11 @@ cpfs_fsck (cpfs_fs_t *fs, int fix) {
     rc = fsck_check_block_map(fs);
     if (rc) goto error;
 
+/*
     fsck_scan_ino_log_file = fopen("fsck_scan_ino.log", "wb");
     fsck_scan_ino(fs);
     fclose(fsck_scan_ino_log_file);
+*/
 
 
     printf("FSCK done, %d warnings, %d errors\n", fs->fsck_nWarn, fs->fsck_nErr);
@@ -241,7 +248,7 @@ de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs
     }
 
     rc = fsck_update_block_maps(fs, inode_copy, bs_allocated);
-
+    fsck_update_ino_map(fs, de->inode, is_used);
 
     if (isdir) {
         if (FSCK_VERBOSE) printf("/\n");
@@ -266,6 +273,7 @@ fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth) {
     if (rc) cpfs_panic("cpfs_block_4_inode: %lld", (long long) dir);
 
     fsck_update_block_map(fs, blk, bs_inode);
+    fsck_update_ino_map(fs, dir, is_used);
 
     if (TRACE) {
         //printf("scan inode=%lld, block=%lld, offset=%lld \n", (long long) dir, (long long) blk, (long long) (dir % CPFS_INO_PER_BLK));
@@ -278,6 +286,14 @@ fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth) {
 
     rc = cpfs_scan_dir(fs, dir, de_subscan, (void *) depth);
     return rc;
+}
+
+const char*
+getInoStateName (fsck_inostate_t state) { //is_unknown, is_used
+    switch (state) {
+        case is_unknown: return "is_unknown";
+        case is_used: return "is_used";
+    }
 }
 
 const char*
@@ -296,23 +312,31 @@ static void
 fsck_scan_dirs (cpfs_fs_t *fs) {
     printf("fsck scan dirs\n");
     fsck_scan_dir(fs, 0, 0);
+
     if (TRACE) {
         int breakpoint = 1;
         (void) breakpoint;
 
-        /*
-                for (cpfs_blkno_t blk = 0; blk < fs->disk_size; blk++) {
-                    printf("blk=%lld, state=%s \n", (long long) blk, getBlkStateName(fs->fsck_blk_state[blk]));
-                }
-                printf("press any key\n");  
-                getchar();
-         */
+
+        printf("print state of all blocks\n");
+        for (cpfs_blkno_t blk = 0; blk < fs->disk_size; blk++) {
+            printf("blk=%lld, state=%s \n", (long long) blk, getBlkStateName(fs->fsck_blk_state[blk]));
+        }
+        printf("press any key\n");
+        getchar();
+
+        printf("print state of all inodes\n");
+        for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
+            if (fs->fsck_ino_state[ino] == is_unknown) {
+                printf("ino=%lld, state=%s \n", (long long) ino, getInoStateName(fs->fsck_ino_state[ino]));
+            }
+        }
     }
 }
 
 static void
 fsck_scan_ino (cpfs_fs_t *fs) {
-    printf("fsck scan all i-nodes");
+    printf("fsck scan all i-nodes START\n");
 
     cpfs_blkno_t itable_end = fs->sb.itable_end;
     cpfs_blkno_t itable_pos = fs->sb.itable_pos;
@@ -327,16 +351,32 @@ fsck_scan_ino (cpfs_fs_t *fs) {
             cpfs_unlock_ino(fs, ino);
 
             if (TRACE) {
+                printf("scan inode=%lld", (long long) ino);
+
                 fsck_log_inode(fsck_scan_ino_log_file, disk_block, pos, inode);
             }
 
+            fsck_update_ino_map(fs, ino, is_used);
             //scan inode's links.
+
+            //VE is this possible?
+            if (inode.nlinks > 1) {
+                if (TRACE) {
+                    printf(" bad\n");
+                }
+
+            } else {
+                if (TRACE) {
+                    printf(" OK\n");
+                }
+            }
+
 
 
         }
     }
 
-    printf(" DONE\n");
+    printf("fsck scan all i-nodes DONE\n");
 }
 
 errno_t
@@ -349,6 +389,19 @@ fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blksta
 
     return 0;
 }
+
+errno_t
+fsck_update_ino_map (cpfs_fs_t *fs, cpfs_ino_t ino, fsck_inostate_t state) {
+
+    cpfs_mutex_lock(fs->sb_mutex);
+
+    cpfs_assert(ino < fs->sb.ninode);
+    fs->fsck_ino_state[ino] = state;
+
+    cpfs_mutex_unlock(fs->sb_mutex);
+    return 0;
+}
+
 
 // -----------------------------------------------------------------------
 //

@@ -271,6 +271,7 @@ struct cpfs_fs
     fsck_blkstate_t 	*fsck_blk_state;        // Map of all blocks
     
     fsck_inostate_t 	*fsck_ino_state;        // Map of inode
+    
     int                 fsck_rebuild_free;  	// Freelist corrupt, need to rebuild
 };
 
