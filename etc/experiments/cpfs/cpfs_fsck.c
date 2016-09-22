@@ -395,7 +395,7 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
                 fsck_log_inode(fsck_scan_dir_log_file, 1 + lost_found_dir_ino / CPFS_INO_PER_BLK, lost_found_dir_ino % CPFS_INO_PER_BLK, lost_dir_inode);
                 //fsck_scan_dir(fs, lost_found_dir_ino, 0);
                 rc = cpfs_scan_dir(fs, lost_found_dir_ino, de_log, 0);
-            }
+            } 
         }
     }
 
