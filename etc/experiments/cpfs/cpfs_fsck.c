@@ -364,13 +364,14 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
             if (create_lost_found_dir) {
                 rc = cpfs_mkdir(fs, lost_found, 0); //ENOSPC=28 (not enough free space ), EEXIST=17 (exists!)
 
-                cpfs_assert(rc != ENOSPC); //пока так.
+                //cpfs_assert(rc != ENOSPC); //пока так.
                 if (rc) {
                     printf("mkdir: %s dir. code=%d \n", lost_found, rc);
                 } else {
                 }
 
                 rc = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);
+                fs->fsck_ino_state[lost_found_dir_ino] = is_used;
                 create_lost_found_dir = 0;
                 if (TRACE) {
                     rc = cpfs_scan_dir(fs, 0, de_log, 0);
