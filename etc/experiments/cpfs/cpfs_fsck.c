@@ -21,6 +21,10 @@
 
 #include <fcntl.h>
 
+#define MAX_FOUND_FN 32
+
+const char* lost_found = "lost+found";
+
 typedef enum {
     msg, warn1, err1
 } severity_t; //VE macos reports an error for warn1, err1.
@@ -70,13 +74,16 @@ cpfs_fsck (cpfs_fs_t *fs, int fix) {
     if (rc) goto error;
 
     fsck_scan_dir_log_file = fopen("fsck_scan_dir.log", "wb");
+
     fsck_scan_dirs(fs);
+
+    fsck_find_lost_ino(fs);
+
     fclose(fsck_scan_dir_log_file);
 
     rc = fsck_check_block_map(fs);
     if (rc) goto error;
 
-    fsck_find_lost_ino(fs);
 
     /*
         fsck_scan_ino_log_file = fopen("fsck_scan_ino.log", "wb");
@@ -224,6 +231,16 @@ fslog (cpfs_fs_t *fs, severity_t severity, const char *fmt, ...) {
 static errno_t fsck_scan_dir (cpfs_fs_t *fs, cpfs_ino_t dir, size_t depth);
 
 static dir_scan_ret_t
+de_log (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs_dir_entry *de, void *farg) {
+
+    if (de->inode == 0) return dir_scan_continue;
+
+    fsck_log_de(fsck_scan_dir_log_file, phys_blk, offset, de);
+
+    return dir_scan_continue;
+}
+
+static dir_scan_ret_t
 de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs_dir_entry *de, void *farg) {
     errno_t rc;
     size_t depth = (size_t) farg;
@@ -321,27 +338,69 @@ getBlkStateName (fsck_blkstate_t state) { //bs_unknown, bs_allocated, bs_freelis
 void
 fsck_find_lost_ino (cpfs_fs_t *fs) {
     //test. one inode was found
-    int create_lost_found_dir = 0; //1
+    errno_t rc;
+    cpfs_ino_t lost_found_dir_ino;
+
+    int create_lost_found_dir = 1; //1
 
     printf("unused inodes:\n");
     for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
         if (fs->fsck_ino_state[ino] == is_unknown) {
 
-            printf("ino=%lld, state=%s \n", (long long) ino, getInoStateName(fs->fsck_ino_state[ino]));
-
             struct cpfs_inode *inode_p = cpfs_lock_ino(fs, ino);
             struct cpfs_inode inode = *inode_p;
             cpfs_unlock_ino(fs, ino);
-            //TODO 
-            
+
+            if (TRACE) {
+                //printf("ino=%lld, state=%s \n", (long long) ino, getInoStateName(fs->fsck_ino_state[ino]));
+                fsck_log_inode(fsck_scan_dir_log_file, 1 + ino / CPFS_INO_PER_BLK, ino % CPFS_INO_PER_BLK, inode);
+            }
+
+            if (!inode.nlinks) {
+                continue;
+            }
+            //write log.
 
             if (create_lost_found_dir) {
-                errno_t rc = cpfs_mkdir( fs, "lost+found", 0 ); //return ENOSPC
-                if (rc) cpfs_panic("mke %d", rc);
-                create_lost_found_dir=0;
+                rc = cpfs_mkdir(fs, lost_found, 0); //ENOSPC=28 (not enough free space ), EEXIST=17 (exists!)
+
+                cpfs_assert(rc != ENOSPC); //пока так.
+                if (rc) {
+                    printf("mkdir: %s dir. code=%d \n", lost_found, rc);
+                } else {
+                }
+
+                rc = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);
+                create_lost_found_dir = 0;
+                if (TRACE) {
+                    rc = cpfs_scan_dir(fs, 0, de_log, 0);
+                }
+            }
+
+            //create dir_entry for lost inode.
+            //no need to check is this dir or file ?
+            //int isdir;
+            //rc = cpfs_is_dir(fs, ino, &isdir); //TODO check rc ?
+
+            char file_name[MAX_FOUND_FN];
+            snprintf(file_name, MAX_FOUND_FN, "found_%d", ino);
+
+            rc = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);
+            rc = cpfs_alloc_dirent(fs, lost_found_dir_ino, file_name, ino);
+
+            if (TRACE) {
+                struct cpfs_inode *lost_dir_inode_p = cpfs_lock_ino(fs, lost_found_dir_ino);
+                struct cpfs_inode lost_dir_inode = *lost_dir_inode_p;
+                cpfs_unlock_ino(fs, lost_found_dir_ino);
+                fsck_log_inode(fsck_scan_dir_log_file, 1 + lost_found_dir_ino / CPFS_INO_PER_BLK, lost_found_dir_ino % CPFS_INO_PER_BLK, lost_dir_inode);
+                //fsck_scan_dir(fs, lost_found_dir_ino, 0);
+                rc = cpfs_scan_dir(fs, lost_found_dir_ino, de_log, 0);
             }
         }
     }
+
+    int stop = 1;
+
 }
 
 static void
