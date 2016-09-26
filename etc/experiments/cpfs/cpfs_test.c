@@ -25,6 +25,7 @@
 #include <fcntl.h>
 
 
+
 void    test_superblock(cpfs_fs_t *fsp)
 {
     (void) fsp;
@@ -629,18 +630,32 @@ static errno_t mk_test_fn( cpfs_fs_t *fsp, char *out, int num )
     snprintf( out, MAX_TEMP_FN, "fill_file_%d", num );
 #else
     errno_t rc;
+    cpfs_ino_t ret;    
+    const char *last;
+    cpfs_ino_t last_dir_ino;
+    cpfs_ino_t file_ino;
 
     snprintf( out, MAX_TEMP_FN, "tdir%d", num/256 );
-    rc = cpfs_mkdir( fsp, out, 0 );
-    if( rc && (rc != EEXIST) ) return rc;
-    //if( rc == ENOSPC ) return rc;
     
+    
+    rc = cpfs_descend_dir( fsp, out, &last, &last_dir_ino );
+    
+    rc = cpfs_namei( fsp, last_dir_ino, last, &file_ino );
+    if(rc==ENOENT){ 
+        rc = cpfs_mkdir( fsp, out, 0 );
+        if( rc && (rc != EEXIST) ) return rc;
+        //if( rc == ENOSPC ) return rc;
+    }
 
-    snprintf( out, MAX_TEMP_FN, "tdir%d/tdir%d", num/256, num/16 );
-    rc = cpfs_mkdir( fsp, out, 0 );
-    if( rc && (rc != EEXIST) ) return rc;
-    //if( rc == ENOSPC ) return rc;
-
+    snprintf( out, MAX_TEMP_FN, "tdir%d/tdir%d", num/256, num/16 );    
+    rc = cpfs_descend_dir( fsp, out, &last, &last_dir_ino );
+    
+    rc = cpfs_namei( fsp, last_dir_ino, last, &file_ino );
+    if(rc==ENOENT){ 
+        rc = cpfs_mkdir( fsp, out, 0 );
+        if( rc && (rc != EEXIST) ) return rc;
+        //if( rc == ENOSPC ) return rc;
+    }
 
     //snprintf( MAX_TEMP_FN, out, "tdir%d/tdir%d/fill_file_%d", num/4096, num/256, num );
     snprintf( out, MAX_TEMP_FN, "tdir%d/tdir%d/fill_file_%d", num/256, num/16, num );
@@ -701,15 +716,45 @@ static errno_t fill_file( cpfs_fs_t *fsp, int num, unsigned size )
     return 0;
 }
 
+static errno_t kill_dir( cpfs_fs_t *fsp, int num )
+{
+    errno_t rc;
+    int deleted=0;
+    char name[MAX_TEMP_FN];
+
+    snprintf( name, MAX_TEMP_FN, "tdir%d/tdir%d", num/256, num/16);
+    
+    /*
+    cpfs_ino_t last_dir_ino;
+    cpfs_ino_t file_ino;
+    const char *last;
+         
+    rc = cpfs_descend_dir( fsp, name, &last, &last_dir_ino );    
+    rc = cpfs_namei( fsp, last_dir_ino, last, &file_ino );
+    */
+    
+    rc = cpfs_file_unlink( fsp, name, 0 );   
+    if(!rc) deleted++;
+
+    snprintf( name, MAX_TEMP_FN, "tdir%d", num/256);
+    rc = cpfs_file_unlink( fsp, name, 0 );  
+    if(!rc) deleted++;
+
+    return deleted;
+}
+
 static errno_t kill_file( cpfs_fs_t *fsp, int num )
 {
     errno_t ret;
     char name[MAX_TEMP_FN];
 
     //sprintf( name, "fill_file_%d", num );
+/*
     ret = mk_test_fn( fsp, name, num );
     if( ret ) return ret;
+*/
 
+    snprintf( name, MAX_TEMP_FN, "tdir%d/tdir%d/fill_file_%d", num/256, num/16, num );
     ret = cpfs_file_unlink( fsp, name, 0 );
     //test_int_eq( ret, 0 );
 
@@ -775,8 +820,16 @@ void    test_out_of_space(cpfs_fs_t *fsp)
         if( ret && (num = (max-1)) ) break; // last one is possibly not created
         test_int_eq( ret, 0 );
     }
-
+    
     printf("Out of space test: deleted %d files\n", max );
+    cpfs_fs_dump( fsp );
+
+    int deleted;
+    for(num=0;num<max;num++){
+        deleted+=kill_dir(fsp, num);
+    }
+    
+    printf("Out of space test: deleted %d dirs\n", deleted );
     cpfs_fs_dump( fsp );
 
     cpfs_fs_stat( fsp, &disk_size, &disk_free );
@@ -810,23 +863,93 @@ void    test_out_of_space(cpfs_fs_t *fsp)
         if( ret && (num = (max-1)) ) break; // last one is possibly not created
         test_int_eq( ret, 0 );
     }
-
-    printf("Out of space test: deleted %d files\n", max );
+    printf("Out of space test: deleted %d files\n", max ); //num
     cpfs_fs_dump( fsp );
 
+    deleted=0;
+    for(num=0;num<max;num++){
+        deleted += kill_dir(fsp, num);
+    }
+    printf("Out of space test: deleted %d dirs\n", deleted );
+    cpfs_fs_dump( fsp );
+    
     cpfs_fs_stat( fsp, &disk_size, &disk_free );
     cpfs_assert( disk_size != 0 );
     cpfs_assert( disk_free != 0 );
 
-
-
-
-
+   
     printf("Out of space test: DONE\n");
 #endif
 
 }
 
 
+void
+test_double_used_block (cpfs_fs_t *fsp) {
+
+    const char *last;
+    cpfs_ino_t last_dir_ino;
+    cpfs_ino_t file_ino_first, file_ino_second;
+    char out [MAX_TEMP_FN];
+    
+    int first=10;
+    int second=11;
+    
+    //create two big files
+    errno_t rc = fill_file(fsp, first, 4096 * (CPFS_INDIRECT_PER_BLK + CPFS_INO_DIR_BLOCKS + 1)); //1795 -max
+    cpfs_fs_dump(fsp);
+
+     rc = fill_file(fsp, second, 4096 * (CPFS_INDIRECT_PER_BLK + CPFS_INO_DIR_BLOCKS + 1));
+    cpfs_fs_dump(fsp);
+    
+    
+    snprintf( out, MAX_TEMP_FN, "tdir%d/tdir%d/fill_file_%d", first/256, first/16, first );
+
+    rc = cpfs_descend_dir(fsp, out, &last, &last_dir_ino);
+    rc = cpfs_namei(fsp, last_dir_ino, last, &file_ino_first);
+    
+    struct cpfs_inode *inode_first_p = cpfs_lock_ino(fsp, file_ino_first);
+    struct cpfs_inode inode_first = *inode_first_p;
+    cpfs_unlock_ino(fsp, file_ino_first);
+    
+    
+    
+    snprintf( out, MAX_TEMP_FN, "tdir%d/tdir%d/fill_file_%d", second/256, second/16, second );
+
+    rc = cpfs_descend_dir(fsp, out, &last, &last_dir_ino);
+    rc = cpfs_namei(fsp, last_dir_ino, last, &file_ino_second);
+    
+    struct cpfs_inode *inode_second_p = cpfs_lock_ino(fsp, file_ino_second);
+    struct cpfs_inode inode_second = *inode_second_p;
+    cpfs_unlock_ino(fsp, file_ino_second);
 
 
+    //duplicate used block (blocks0)
+    struct cpfs_inode *rdi = cpfs_lock_ino( fsp, file_ino_first);
+    cpfs_touch_ino( fsp, file_ino_first );
+    rdi->blocks0[1]=inode_second.blocks0[1];    
+    cpfs_unlock_ino( fsp, file_ino_first );
+    
+
+    struct cpfs_inode *inode_ = cpfs_lock_ino(fsp, file_ino_first);
+    cpfs_unlock_ino(fsp, file_ino_first);
+
+    
+    //duplicate used block (indir)
+    struct cpfs_indir * ib_second_p = cpfs_lock_blk(fsp, inode_second.indir[0]);
+    struct cpfs_indir  ib_second_copy = *ib_second_p;
+    cpfs_unlock_blk( fsp,  inode_second.indir[0] );
+    //cpfs_touch_blk( cpfs_fs_t *fs, cpfs_blkno_t blk ) ;
+    
+
+    struct cpfs_indir * ib_first_p = cpfs_lock_blk(fsp, inode_first.indir[0]);
+    cpfs_touch_blk( fsp, inode_first.indir[0] );
+    ib_first_p->child[2] = ib_second_copy.child[2];
+    cpfs_unlock_blk( fsp,  inode_first.indir[0] );
+        
+    
+    struct cpfs_indir * test = cpfs_lock_blk(fsp, inode_first.indir[0]);
+    cpfs_unlock_blk( fsp,  inode_first.indir[0] );
+
+
+}

@@ -532,8 +532,18 @@ do_fic_refill( cpfs_fs_t *fs )
         return;
 
     // TODO long way - scan through inodes? use map?
+    
+    for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
+        struct cpfs_inode *inode_p = cpfs_lock_ino(fs, ino);
+        struct cpfs_inode copy_inode = *inode_p;
+        cpfs_unlock_ino(fs, ino);
+        if(copy_inode.nlinks==0 && !copy_inode.blocks0[0]){ //???
+            fs->free_inodes_cache[fs->fic_used++] = ino;
+            break;
+        }
+    }
+    
 }
-
 
 void
 fic_refill( cpfs_fs_t *fs )

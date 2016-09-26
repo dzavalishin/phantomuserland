@@ -44,7 +44,9 @@ void fsck_log_de (FILE *file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs
 
 void fsck_log_block (FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state);
 
-errno_t fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state);
+void fsck_log_indir (FILE* file, cpfs_blkno_t phys_blk, struct cpfs_indir * ib);
+
+errno_t fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, cpfs_ino_t ino, fsck_blkstate_t state);
 
 errno_t fsck_update_block_map (cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state);
 
@@ -74,6 +76,23 @@ cpfs_fsck (cpfs_fs_t *fs, int fix) {
     if (rc) goto error;
 
     fsck_scan_dir_log_file = fopen("fsck_scan_dir.log", "wb");
+
+    /*
+        cpfs_blkno_t phys_blk;
+        rc = cpfs_find_block_4_file(fs, 286, 532, &phys_blk);
+
+        struct cpfs_indir * ib = cpfs_lock_blk(fs, 9397);
+
+        cpfs_blkno_t phys_blk1;
+        rc = cpfs_find_block_4_file(fs, 286, 533, &phys_blk1);
+
+        rc = cpfs_mkdir(fs, "dir1", 0);
+        rc = cpfs_mkdir(fs, "dir1/dir1.1", 0);
+        rc = cpfs_mkdir(fs, "dir1/dir1.2", 0);
+    
+        rc = cpfs_file_unlink( fs, "dir1/dir1.2", 0 );
+     */
+
 
     fsck_scan_dirs(fs);
 
@@ -268,7 +287,7 @@ de_subscan (cpfs_fs_t *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs
         fsck_log_inode(fsck_scan_dir_log_file, disk_block, pos, inode_copy);
     }
 
-    rc = fsck_update_block_maps(fs, inode_copy, bs_allocated);
+    rc = fsck_update_block_maps(fs, inode_copy, de->inode, bs_allocated);
     if (rc) {
         cpfs_panic("inode=%lld uses already allocated block(s).", (long long) de->inode); //debug
     }
@@ -341,7 +360,7 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
     errno_t rc;
     cpfs_ino_t lost_found_dir_ino;
 
-    int create_lost_found_dir = 1; //1
+    int create_lost_found_dir = 1;
 
     printf("unused inodes:\n");
     for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
@@ -351,7 +370,7 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
             struct cpfs_inode inode = *inode_p;
             cpfs_unlock_ino(fs, ino);
 
-            if (TRACE) {
+            if (TRACE && (inode.nlinks != 0 || inode.blocks0[0] != 0)) {
                 //printf("ino=%lld, state=%s \n", (long long) ino, getInoStateName(fs->fsck_ino_state[ino]));
                 fsck_log_inode(fsck_scan_dir_log_file, 1 + ino / CPFS_INO_PER_BLK, ino % CPFS_INO_PER_BLK, inode);
             }
@@ -396,7 +415,7 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
                 fsck_log_inode(fsck_scan_dir_log_file, 1 + lost_found_dir_ino / CPFS_INO_PER_BLK, lost_found_dir_ino % CPFS_INO_PER_BLK, lost_dir_inode);
                 //fsck_scan_dir(fs, lost_found_dir_ino, 0);
                 rc = cpfs_scan_dir(fs, lost_found_dir_ino, de_log, 0);
-            } 
+            }
         }
     }
 
@@ -473,15 +492,130 @@ fsck_scan_ino (cpfs_fs_t *fs) {
 }
 
 errno_t
-fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, fsck_blkstate_t state) {
-    errno_t rc = 0;
-    for (int i = 0; i < CPFS_INO_DIR_BLOCKS && inode_copy.blocks0[i] != 0; i++) {
-        rc += fsck_update_block_map(fs, inode_copy.blocks0[i], state);
-        fsck_log_block(fsck_scan_dir_log_file, inode_copy.blocks0[i], state);
-    }
-    //TODO indir
+scan_indir (cpfs_fs_t *fs, cpfs_blkno_t blk, int idx) {
 
-    //TODO indir
+    struct cpfs_indir * ib = cpfs_lock_blk(fs, blk);
+    fsck_log_indir(fsck_scan_dir_log_file, blk, ib);
+    cpfs_unlock_blk(fs, blk);
+
+    errno_t rc = 0;
+    if (idx == 0) {
+        for (int i = 0; i < CPFS_INDIRECT_PER_BLK && ib->child[i] != 0; i++) {
+            rc = fsck_update_block_map(fs, ib->child[i], bs_allocated);
+            if (rc) {
+                //вальнуть в ib->child[i] новый блок, 
+                //считать данные из  ib->child[i] и записать в блок blk
+
+                cpfs_blkno_t blk1 = cpfs_alloc_disk_block(fs);
+                if (!blk1) cpfs_panic("can't allocate block");
+
+
+                char data[CPFS_BLKSIZE];
+                errno_t rc1 = cpfs_disk_read(fs->disk_id, ib->child[i], data);
+
+                rc1 = cpfs_disk_write(fs->disk_id, blk1, data);
+
+                struct cpfs_indir * ib_new = cpfs_lock_blk(fs, blk);
+                cpfs_touch_blk(fs, blk);
+                ib_new->child[i] = blk1;
+                cpfs_unlock_blk(fs, blk);
+
+                if (TRACE) {
+                    struct cpfs_indir * ib1 = cpfs_lock_blk(fs, blk);
+                    fsck_log_indir(fsck_scan_dir_log_file, blk, ib1);
+                    cpfs_unlock_blk(fs, blk);
+                    printf("copy block= %lld to block=%lld\n", (long long) ib->child[i], (long long) blk1);
+                }
+
+            }
+            if (TRACE) {
+                fsck_log_block(fsck_scan_dir_log_file, ib->child[i], bs_allocated);
+            }
+        }
+    } else {
+        for (int i = 0; i < CPFS_INDIRECT_PER_BLK && ib->child[i] != 0; i++) {
+            rc += scan_indir(fs, ib->child[i], idx - 1);
+        }
+    }
+    return rc;
+}
+
+errno_t
+fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, cpfs_ino_t ino, fsck_blkstate_t state) {
+
+    errno_t rc = 0;
+
+    for (int i = 0; i < CPFS_INO_DIR_BLOCKS && inode_copy.blocks0[i] != 0; i++) {
+        rc = fsck_update_block_map(fs, inode_copy.blocks0[i], state);
+        if (rc) {
+            cpfs_blkno_t blk = cpfs_alloc_disk_block(fs);
+            if (!blk) cpfs_panic("can't allocate block");
+
+            //считать данные из  inode_copy.blocks0[i] и записать в блок blk
+
+            char data[CPFS_BLKSIZE];
+            errno_t rc1 = cpfs_disk_read(fs->disk_id, inode_copy.blocks0[i], data);
+
+            rc1 = cpfs_disk_write(fs->disk_id, blk, data);
+
+            //вальнуть в blocks0[i] новый блок, 
+
+            struct cpfs_inode *rdi = cpfs_lock_ino(fs, ino);
+            cpfs_touch_ino(fs, ino);
+            rdi->blocks0[i] = blk;
+            cpfs_unlock_ino(fs, ino);
+
+
+
+            if (TRACE) {
+                struct cpfs_inode *inode_ = cpfs_lock_ino(fs, ino);
+                struct cpfs_inode inode = *inode_;
+                cpfs_unlock_ino(fs, ino);
+                fsck_log_inode(fsck_scan_dir_log_file, 1 + ino / CPFS_INO_PER_BLK, ino % CPFS_INO_PER_BLK, inode);
+                printf("copy block=%lld to block=%lld\n", (long long) inode_copy.blocks0[i], (long long) blk);
+            }
+        }
+
+        if (TRACE) {
+            fsck_log_block(fsck_scan_dir_log_file, inode_copy.blocks0[i], state);
+        }
+    }
+
+    for (int indir_idx = 0; indir_idx < CPFS_MAX_INDIR && inode_copy.indir[indir_idx]; indir_idx++) {
+        rc = fsck_update_block_map(fs, inode_copy.indir[indir_idx], state);
+
+        cpfs_blkno_t blk = inode_copy.indir[indir_idx];
+
+        struct cpfs_indir * ib = cpfs_lock_blk(fs, blk);
+        if (TRACE) {
+            fsck_log_indir(fsck_scan_dir_log_file, inode_copy.indir[indir_idx], ib);
+        }
+        rc = scan_indir(fs, blk, indir_idx);
+    }
+
+
+    /*
+    cpfs_fpos_t fsize = inode_copy.fsize;
+    cpfs_blkno_t max_logical_blk = fsize / CPFS_BLKSIZE + (fsize % CPFS_BLKSIZE == 0 ? 0 : 1);
+
+    for (cpfs_blkno_t idx = 0; idx < max_logical_blk; idx++) {
+
+        if (idx < CPFS_INO_DIR_BLOCKS) {
+            rc += fsck_update_block_map(fs, inode_copy.blocks0[idx], state);
+            fsck_log_block(fsck_scan_dir_log_file, inode_copy.blocks0[idx], state);
+        } else {
+
+            cpfs_blkno_t phys_blk;
+            rc = cpfs_find_block_4_file(fs, ino, idx-1, &phys_blk); //-1???
+
+            rc += fsck_update_block_map(fs, phys_blk, state);
+
+            fsck_log_block(fsck_scan_dir_log_file, phys_blk, state);
+            (void) phys_blk;
+        }
+    }
+     */
+
     return rc;
 }
 
@@ -525,6 +659,10 @@ fsck_update_block_map (cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state) {
             fs->fsck_blk_state[blk] = state;
             fs->fsck_rebuild_free = 1;
             return EBUSY;
+        } else if (fs->fsck_blk_state[blk] == bs_allocated) {
+            fslog(fs, err1, "block %lld state %d, attempt to set %d\n", blk, fs->fsck_blk_state[blk], state);
+            return EBUSY;
+
         } else if (fs->fsck_blk_state[blk] != bs_inode) {
             //
             fslog(fs, err1, "block %lld state %d, attempt to set %d\n", blk, fs->fsck_blk_state[blk], state);
@@ -580,6 +718,19 @@ fsck_log_block (FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state) {
 void
 fsck_log_de (FILE* file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs_dir_entry* de) {
     fprintf(file, "blk=%lld, pos=%d, data[ino=%lld, name=%s]  \n", (long long) phys_blk, ino_in_blk, (long long) de->inode, de->name);
+    fflush(file);
+}
+
+void
+fsck_log_indir (FILE* file, cpfs_blkno_t phys_blk, struct cpfs_indir * ib) {
+
+    fprintf(file, "blk=%lld, pos=%d, data[", (long long) phys_blk, 0);
+
+    for (int idx = 0; ib->child[idx] != 0; idx++) {
+        fprintf(file, "%s%lld", idx == 0 ? "" : ", ", (long long) ib->child[idx]);
+    }
+    fprintf(file, "] \n");
+
     fflush(file);
 }
 
