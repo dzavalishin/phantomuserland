@@ -505,13 +505,13 @@ scan_indir (cpfs_fs_t *fs, cpfs_blkno_t blk, int idx) {
             if (rc) {
                 //вальнуть в ib->child[i] новый блок, 
                 //считать данные из  ib->child[i] и записать в блок blk
-
+                cpfs_blkno_t old_blk = ib->child[i];
                 cpfs_blkno_t blk1 = cpfs_alloc_disk_block(fs);
                 if (!blk1) cpfs_panic("can't allocate block");
 
 
                 char data[CPFS_BLKSIZE];
-                errno_t rc1 = cpfs_disk_read(fs->disk_id, ib->child[i], data);
+                errno_t rc1 = cpfs_disk_read(fs->disk_id, old_blk, data);
 
                 rc1 = cpfs_disk_write(fs->disk_id, blk1, data);
 
@@ -524,7 +524,7 @@ scan_indir (cpfs_fs_t *fs, cpfs_blkno_t blk, int idx) {
                     struct cpfs_indir * ib1 = cpfs_lock_blk(fs, blk);
                     fsck_log_indir(fsck_scan_dir_log_file, blk, ib1);
                     cpfs_unlock_blk(fs, blk);
-                    printf("copy block= %lld to block=%lld\n", (long long) ib->child[i], (long long) blk1);
+                    printf("copy block= %lld to block=%lld\n", (long long) old_blk, (long long) blk1);
                 }
 
             }
