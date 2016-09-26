@@ -33,12 +33,12 @@ public class CreateDisk {
         try {
             count = Integer.parseInt(args[1]);
         } catch (NumberFormatException ex) {
-            System.out.println("");
+            System.out.println("Second parameter is not recognized. Please set number of disks.");
             System.exit(-2);
         }
         int size = 0;
         try {
-            size = Integer.parseInt(args[2]);
+            size = Integer.parseInt(args[2]); 
         } catch (NumberFormatException ex) {
             System.out.println("Third parameter is not recognized. Please set size of disk.");
             System.exit(-3);

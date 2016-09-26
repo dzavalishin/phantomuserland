@@ -1,5 +1,14 @@
+#Рисовалка "карты" диска
 #compile
 javac App.java
 
 #run
 java App
+
+
+#create disks
+#compile
+javac CreateDisk.java
+
+#run
+java CreateDisk
