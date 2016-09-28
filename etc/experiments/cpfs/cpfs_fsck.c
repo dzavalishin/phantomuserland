@@ -357,7 +357,7 @@ getBlkStateName (fsck_blkstate_t state) { //bs_unknown, bs_allocated, bs_freelis
 void
 fsck_find_lost_ino (cpfs_fs_t *fs) {
     //test. one inode was found
-    errno_t rc;
+    errno_t rc, lost_dir_created;
     cpfs_ino_t lost_found_dir_ino;
 
     int create_lost_found_dir = 1;
@@ -381,22 +381,26 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
             //write log.
 
             if (create_lost_found_dir) {
-                rc = cpfs_mkdir(fs, lost_found, 0); //ENOSPC=28 (not enough free space ), EEXIST=17 (exists!)
+                lost_dir_created = cpfs_mkdir(fs, lost_found, 0); //ENOSPC=28 (not enough free space ), EEXIST=17 (exists!)
 
                 //cpfs_assert(rc != ENOSPC); //пока так.
-                if (rc) {
-                    printf("mkdir: %s dir. code=%d \n", lost_found, rc);
+                if (lost_dir_created && lost_dir_created!=EEXIST) {
+                    printf("mkdir: %s dir. code=%d \n", lost_found, lost_dir_created);
                 } else {
                 }
 
-                rc = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);
+                lost_dir_created = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);
+                
                 fs->fsck_ino_state[lost_found_dir_ino] = is_used;
                 create_lost_found_dir = 0;
                 if (TRACE) {
-                    rc = cpfs_scan_dir(fs, 0, de_log, 0);
+                    errno_t rc1 = cpfs_scan_dir(fs, 0, de_log, 0);
                 }
+            }else{
+                lost_dir_created = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);            
             }
-
+            cpfs_assert(lost_dir_created && lost_dir_created!=EEXIST);
+            
             //create dir_entry for lost inode.
             //no need to check is this dir or file ?
             //int isdir;
@@ -404,8 +408,7 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
 
             char file_name[MAX_FOUND_FN];
             snprintf(file_name, MAX_FOUND_FN, "found_%d", ino);
-
-            rc = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);
+            
             rc = cpfs_alloc_dirent(fs, lost_found_dir_ino, file_name, ino);
 
             if (TRACE) {
@@ -545,7 +548,7 @@ fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, cpfs_ino_t 
 
     errno_t rc = 0;
 
-    for (int i = 0; i < CPFS_INO_DIR_BLOCKS && inode_copy.blocks0[i] != 0; i++) {
+    for (int i = 0; i < CPFS_INO_DIR_BLOCKS; i++) {
         rc = fsck_update_block_map(fs, inode_copy.blocks0[i], state);
         if (rc) {
             cpfs_blkno_t blk = cpfs_alloc_disk_block(fs);
@@ -622,8 +625,6 @@ fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, cpfs_ino_t 
 errno_t
 fsck_update_ino_map (cpfs_fs_t *fs, cpfs_ino_t ino, fsck_inostate_t state) {
 
-    cpfs_mutex_lock(fs->sb_mutex);
-
     cpfs_assert(ino < fs->sb.ninode);
     if (fs->fsck_ino_state[ino] == is_used) {
         printf("++++++++++++ %lld\n", (long long) ino);
@@ -631,7 +632,6 @@ fsck_update_ino_map (cpfs_fs_t *fs, cpfs_ino_t ino, fsck_inostate_t state) {
     }
     fs->fsck_ino_state[ino] = state;
 
-    cpfs_mutex_unlock(fs->sb_mutex);
     return 0;
 }
 
@@ -648,13 +648,13 @@ fsck_update_block_map (cpfs_fs_t *fs, cpfs_blkno_t blk, fsck_blkstate_t state) {
 
     if (fs->fsck_blk_state[blk] != bs_unknown) {
         if ((state == bs_freelist) || (state == bs_freemap)) {
-            fslog(fs, err1, "block %lld state was %d, attempt to set free\n", blk, fs->fsck_blk_state[blk]);
+            fslog(fs, err1, "block %lld state was %d, attempt to set free\n", (long long)blk, fs->fsck_blk_state[blk]);
 
             fs->fsck_blk_state[blk] = state;
             fs->fsck_rebuild_free = 1;
             return EBUSY;
         } else if ((fs->fsck_blk_state[blk] == bs_freelist) || (fs->fsck_blk_state[blk] == bs_freemap)) {
-            fslog(fs, err1, "block %lld state was free, attempt to set %d\n", blk, state);
+            fslog(fs, err1, "block %lld state was free, attempt to set %d\n", (long long)blk, state);
 
             fs->fsck_blk_state[blk] = state;
             fs->fsck_rebuild_free = 1;
@@ -738,12 +738,12 @@ void
 fsck_log_inode (FILE *file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs_inode inode) {
     int is_dir = (inode.ftype == CPFS_FTYPE_DIR);
     fprintf(file, "blk=%lld, pos=%d, data[isdir=%d, fileSize=%lld, nlink=%u, first block=%lld] blocks0[", phys_blk, ino_in_blk, is_dir, (long long) inode.fsize, inode.nlinks, (long long) inode.blocks0[0]);
-    for (int idx = 0; idx < CPFS_INO_DIR_BLOCKS && inode.blocks0[idx] != 0; idx++) {
+    for (int idx = 0; idx < CPFS_INO_DIR_BLOCKS; idx++) {
         fprintf(file, "%s%lld", idx == 0 ? "" : ", ", (long long) inode.blocks0[idx]);
     }
 
     fprintf(file, "] indir[");
-    for (int idx = 0; idx < CPFS_MAX_INDIR && inode.indir[idx] != 0; idx++) {
+    for (int idx = 0; idx < CPFS_MAX_INDIR; idx++) {
         fprintf(file, "%s%lld", idx == 0 ? "" : ", ", (long long) inode.indir[idx]);
     }
     fprintf(file, "] \n");
