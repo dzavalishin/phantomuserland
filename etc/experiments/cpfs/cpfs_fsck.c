@@ -44,7 +44,7 @@ void fsck_log_de (FILE *file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs
 
 void fsck_log_block (FILE* file, cpfs_blkno_t phys_blk, fsck_blkstate_t state);
 
-void fsck_log_indir (FILE* file, cpfs_blkno_t phys_blk, struct cpfs_indir * ib);
+void fsck_log_indir (FILE* file, cpfs_blkno_t phys_blk, struct cpfs_indir ib);
 
 errno_t fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, cpfs_ino_t ino, fsck_blkstate_t state);
 
@@ -362,7 +362,9 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
 
     int create_lost_found_dir = 1;
 
+/*
     printf("unused inodes:\n");
+*/
     for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
         if (fs->fsck_ino_state[ino] == is_unknown) {
 
@@ -399,7 +401,7 @@ fsck_find_lost_ino (cpfs_fs_t *fs) {
             } else {
                 lost_dir_created = cpfs_namei(fs, 0, lost_found, &lost_found_dir_ino);
             }
-            cpfs_assert(lost_dir_created && lost_dir_created != EEXIST);
+            cpfs_assert(!lost_dir_created || lost_dir_created == EEXIST);
 
             //create dir_entry for lost inode.
             //no need to check is this dir or file ?
@@ -508,11 +510,14 @@ scan_indir (cpfs_fs_t *fs, cpfs_blkno_t blk, int idx) {
     errno_t rc = 0;
     if (idx == 0) {
         for (int i = 0; i < CPFS_INDIRECT_PER_BLK; i++) { // && ib_copy->child[i] != 0
-            rc = fsck_update_block_map(fs, ib_copy->child[i], bs_allocated);
+            if (!ib_copy.child[i]) {
+                continue;
+            }
+            rc = fsck_update_block_map(fs, ib_copy.child[i], bs_allocated);
             if (rc) {
                 //вальнуть в ib->child[i] новый блок, 
                 //считать данные из  ib->child[i] и записать в блок blk
-                cpfs_blkno_t old_blk = ib_copy->child[i];
+                cpfs_blkno_t old_blk = ib_copy.child[i];
                 cpfs_blkno_t blk1 = cpfs_alloc_disk_block(fs);
                 if (!blk1) cpfs_panic("can't allocate block");
 
@@ -537,12 +542,14 @@ scan_indir (cpfs_fs_t *fs, cpfs_blkno_t blk, int idx) {
 
             }
             if (TRACE) {
-                fsck_log_block(fsck_scan_dir_log_file, ib_copy->child[i], bs_allocated);
+                fsck_log_block(fsck_scan_dir_log_file, ib_copy.child[i], bs_allocated);
             }
         }
     } else {
-        for (int i = 0; i < CPFS_INDIRECT_PER_BLK && ib->child[i] != 0; i++) {
-            rc += scan_indir(fs, ib->child[i], idx - 1);
+        for (int i = 0; i < CPFS_INDIRECT_PER_BLK; i++) { //&& ib_copy.child[i] != 0
+            if (ib_copy.child[i] != 0) {
+                rc += scan_indir(fs, ib_copy.child[i], idx - 1);
+            }
         }
     }
     return rc;
@@ -554,6 +561,9 @@ fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, cpfs_ino_t 
     errno_t rc = 0;
 
     for (int i = 0; i < CPFS_INO_DIR_BLOCKS; i++) {
+        if (!inode_copy.blocks0[i]) {
+            continue;
+        }
         rc = fsck_update_block_map(fs, inode_copy.blocks0[i], state);
         if (rc) {
             cpfs_blkno_t blk = cpfs_alloc_disk_block(fs);
@@ -590,6 +600,9 @@ fsck_update_block_maps (cpfs_fs_t *fs, struct cpfs_inode inode_copy, cpfs_ino_t 
     }
 
     for (int indir_idx = 0; indir_idx < CPFS_MAX_INDIR; indir_idx++) { //&& inode_copy.indir[indir_idx]
+        if (!inode_copy.indir[indir_idx]) {
+            continue;
+        }
         rc = fsck_update_block_map(fs, inode_copy.indir[indir_idx], state);
 
         cpfs_blkno_t blk = inode_copy.indir[indir_idx];
@@ -729,12 +742,12 @@ fsck_log_de (FILE* file, cpfs_blkno_t phys_blk, int ino_in_blk, struct cpfs_dir_
 }
 
 void
-fsck_log_indir (FILE* file, cpfs_blkno_t phys_blk, struct cpfs_indir * ib) {
+fsck_log_indir (FILE* file, cpfs_blkno_t phys_blk, struct cpfs_indir ib) {
 
     fprintf(file, "blk=%lld, pos=%d, data[", (long long) phys_blk, 0);
 
-    for (int idx = 0; ib->child[idx] != 0; idx++) {
-        fprintf(file, "%s%lld", idx == 0 ? "" : ", ", (long long) ib->child[idx]);
+    for (int idx = 0; idx < CPFS_INDIRECT_PER_BLK; idx++) {
+        fprintf(file, "%s%lld", idx == 0 ? "" : ", ", (long long) ib.child[idx]);
     }
     fprintf(file, "] \n");
 
