@@ -1,0 +1,50 @@
+<Partition>
+    <Definition Name="CPFS" />
+    <!-- Amount of ram allocated (code + stack + static variables) [dz] need so much for we have in-mem disk emulation -->
+    <Memory Bytes="50M" />
+
+    <!-- Number of threads that can be created in this partition.
+         Note that this number doesn't include main and error handler threads,
+         (the former always exists, and the latter can always be created).
+
+         Values less than 1 probably don't make sense, because otherwise
+         you won't be able to create any threads that can be run in
+         NORMAL partition state.
+        -->
+    <Threads Count="10" />
+
+    <ARINC653_Buffers Data_Size="4096" Count="16" />
+    <ARINC653_Blackboards Data_Size="4096" Count="16" />
+    <ARINC653_Events Count="16" />
+    <!-- [dz] not sure -->
+    <ARINC653_Semaphores Count="16" />
+
+    <ARINC653_Ports>
+        <!-- Those correspond to 
+             A653_SamplingPortType and A653_QueueingPortType
+             defined in the standard
+        <Queueing_Port Name="QP1" MaxMessageSize="64" Direction="SOURCE" MaxNbMessage="10" />
+        <Queueing_Port Name="QP2" MaxMessageSize="64" Direction="DESTINATION" MaxNbMessage="10" />
+        -->
+    </ARINC653_Ports>
+    <HM_Table>
+        <!-- [dz] unsure
+             This is the list of actions that are taken on partition level when 
+             there's no error handler process.
+
+             Code - internal error code
+             Level - PROCESS or PARTITION (see ARINC-653 for the details)
+             Error code - corresponding ARINC-653 error code (to be passed to error handler)
+             Action - what action to take if it's not handled by the handler (it doesn't exist or level is PARTITION)
+        -->
+        <Error Code="POK_ERROR_KIND_DEADLINE_MISSED" Level="PROCESS" ErrorCode="DEADLINE_MISSED" Action="COLD_START" />
+        <Error Code="POK_ERROR_KIND_APPLICATION_ERROR" Level="PROCESS" ErrorCode="APPLICATION_ERROR" Action="COLD_START" />
+        <Error Code="POK_ERROR_KIND_NUMERIC_ERROR" Level="PROCESS" ErrorCode="NUMERIC_ERROR" Action="COLD_START" />
+        <Error Code="POK_ERROR_KIND_ILLEGAL_REQUEST" Level="PROCESS" ErrorCode="ILLEGAL_REQUEST" Action="COLD_START" />
+        <Error Code="POK_ERROR_KIND_STACK_OVERFLOW" Level="PROCESS" ErrorCode="STACK_OVERFLOW" Action="COLD_START" />
+        <Error Code="POK_ERROR_KIND_MEMORY_VIOLATION" Level="PROCESS" ErrorCode="MEMORY_VIOLATION" Action="COLD_START" />
+        <Error Code="POK_ERROR_KIND_HARDWARE_FAULT" Level="PROCESS" ErrorCode="HARDWARE_FAULT" Action="COLD_START" />
+        <Error Code="POK_ERROR_KIND_POWER_FAIL" Level="PROCESS" ErrorCode="POWER_FAIL" Action="COLD_START" />
+    </HM_Table>
+
+</Partition>
