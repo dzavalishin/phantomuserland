@@ -766,6 +766,39 @@ errno_t cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_dat
     return 0;
 }
 
+errno_t cpfs_fd_stat( int file_id, struct cpfs_stat *stat )
+{
+    cpfs_ino_t ino;
+    cpfs_fs_t *fs;
+
+    errno_t rc = cpfs_fdmap_get( file_id, &ino, &fs );
+    if( rc ) return rc;
+
+    cpfs_assert( stat != 0 );
+
+    struct cpfs_inode *ip = cpfs_lock_ino( fs, ino );
+
+    if( ip == 0 )
+    {
+        cpfs_unlock_ino( fs, ino );
+        return EIO;
+    }
+
+    stat->fsize         = ip->fsize;
+    stat->ftype         = ip->ftype;
+    stat->nlinks        = ip->nlinks;
+
+    stat->ctime         = ip->ctime;
+    stat->atime         = ip->atime;
+    stat->mtime         = ip->mtime;
+
+    cpfs_unlock_ino( fs, ino );
+
+    return 0;
+}
+
+// TODO merge same code - stat by inode
+
 
 // ----------------------------------------------------------------------------
 //

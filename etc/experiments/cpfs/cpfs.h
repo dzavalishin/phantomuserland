@@ -55,6 +55,7 @@ errno_t         cpfs_file_write ( int file_id, cpfs_size_t pos, const void *data
 errno_t         cpfs_mkdir( struct cpfs_fs *fs, const char *path, void * user_id_data );
 errno_t 	cpfs_file_unlink( struct cpfs_fs *fs, const char *name, void * user_id_data );
 errno_t 	cpfs_file_stat( struct cpfs_fs *fs, const char *name, void * user_id_data, struct cpfs_stat *stat );
+errno_t 	cpfs_fd_stat( int file_id, struct cpfs_stat *stat );
 
 #define CPFS_OPEN_FLAG_CREATE  (1<<1)
 

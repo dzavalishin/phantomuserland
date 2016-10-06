@@ -170,18 +170,12 @@ void RENAME_FILE( FILE_NAME_TYPE OLD_FILE_NAME, FILE_NAME_TYPE NEW_FILE_NAME, RE
 void GET_FILE_STATUS( FILE_ID_TYPE FILE_ID, FILE_STATUS_TYPE *FILE_STATUS, RETURN_CODE_TYPE *RETURN_CODE, FILE_ERRNO_TYPE *ERRNO )
 {
     errno_t rc = 0;
-#warning need fstat
-/*
-    struct cpfs_fs *fs;
-    size_t np;
-
-    rc = arinc_find_filesystem( FILE_NAME, &fs, &np );
-    if( rc ) goto fail;
 
     struct cpfs_stat stat;
 
-    rc = cpfs_file_stat( fs, FILE_NAME+np, arinc_get_user_data(), &stat );
+    rc = cpfs_fd_stat( FILE_ID, &stat );
 
+#warning impl time
 #warning impl pos
 #warning impl n changes/errors
 
@@ -193,7 +187,6 @@ void GET_FILE_STATUS( FILE_ID_TYPE FILE_ID, FILE_STATUS_TYPE *FILE_STATUS, RETUR
     FILE_STATUS->NB_OF_WRITE_ERRORS = 0;
 
 fail:
-*/
     fill_arinc_retcodes( rc, RETURN_CODE, ERRNO );
 }
 
