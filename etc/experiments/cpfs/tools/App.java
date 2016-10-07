@@ -1,18 +1,17 @@
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableModel;
@@ -160,9 +159,27 @@ public class App extends javax.swing.JFrame {
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
         int row = jTable1.getSelectedRow();
+        if (row == -1) {
+            return;
+        }
         int column = jTable1.getSelectedColumn();
         String add = mapkaExtend.get(rowsIdx.get(row) + "." + (column - 1));
         jLabel2.setText(add);
+        if (SwingUtilities.isRightMouseButton(evt)) {
+            String msg = mapka.get(rowsIdx.get(row) + "." + (column - 1)); //.replaceAll("<br>", ", ")
+//            String newmsg = "";
+//            String[] blocks = msg.split(",");
+//            int count = 0;
+//            for (String block : blocks) {
+//                newmsg += " " + block;
+//                count++;
+//                if (count > 30) {
+//                    count = 0;
+//                    newmsg += "<br>";
+//                }
+//            }
+            JOptionPane.showMessageDialog(this, msg, "", JOptionPane.PLAIN_MESSAGE);
+        }
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -230,7 +247,7 @@ public class App extends javax.swing.JFrame {
         rowsIdx = new ArrayList<>(0);
         mapka = new HashMap<>(0);
         mapkaExtend = new HashMap<>(0);
-        
+
         FileReader fr = new FileReader(selectedFile);
 //без радостей оптимизации
         BufferedReader br = new BufferedReader(fr);
@@ -256,6 +273,21 @@ public class App extends javax.swing.JFrame {
                 }
                 data = row[1].replaceAll(",", "<br>").replace("[", "<html>").replace("]", "</html>");
                 mapka.put(blk + "." + offsetInBlock, data);
+            } else {
+                try {
+                    //as is
+                    String[] values = str.split(",");
+                    String blk = values[0].split("=")[1];
+
+                    String state = values[2].split("=")[1];
+                    if (!rowsIdx.contains(blk)) {
+                        rowsIdx.add(blk);
+                        for (int i = 0; i < 8; i++) {
+                            mapka.put(blk + "." + i, "data");
+                        }
+                    }
+                } catch (Exception ex) {
+                }
             }
         }
 

@@ -38,9 +38,6 @@ cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpf
 
     cpfs_assert( phys != 0 );
 
-/*
-    if( TRACE ) trace(1, "%*s > cpfs_find_block_4_file. ino=%lld, logical=%lld\n", TRACE, " ", ino, logical); 
-*/
     // Read inode first
     struct cpfs_inode inode;
     struct cpfs_inode *inode_p = cpfs_lock_ino( fs, ino );
@@ -58,9 +55,6 @@ cpfs_find_block_4_file( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t logical, cpf
     if( logical < CPFS_INO_DIR_BLOCKS )
     {
         *phys = inode.blocks0[logical];
-/*
-        if( TRACE ) trace(0, "%*s < cpfs_find_block_4_file.  ino=%lld, logical=%lld, phys=%d\n", TRACE-TRACE_TAB, " ", ino, logical, (int )*phys );
-*/
         return 0;
     }
 #if INDIR
@@ -334,9 +328,6 @@ cpfs_block_4_inode( cpfs_fs_t *fs, cpfs_ino_t ino, cpfs_blkno_t *oblk )
     //if( blk >= fs->sb.itable_end ) return E2BIG;
 
     *oblk = blk;
-/*
-    if( TRACE ) trace(0, "%*s inode=%lld -> phblock=%llu \n", TRACE-TRACE_TAB, " ", ino, blk);   
-*/
     return 0;
 }
 
@@ -541,8 +532,18 @@ do_fic_refill( cpfs_fs_t *fs )
         return;
 
     // TODO long way - scan through inodes? use map?
+    
+    for (cpfs_ino_t ino = 0; ino < fs->sb.ninode; ino++) {
+        struct cpfs_inode *inode_p = cpfs_lock_ino(fs, ino);
+        struct cpfs_inode copy_inode = *inode_p;
+        cpfs_unlock_ino(fs, ino);
+        if(copy_inode.nlinks==0 && !copy_inode.blocks0[0]){ //???
+            fs->free_inodes_cache[fs->fic_used++] = ino;
+            break;
+        }
+    }
+    
 }
-
 
 void
 fic_refill( cpfs_fs_t *fs )

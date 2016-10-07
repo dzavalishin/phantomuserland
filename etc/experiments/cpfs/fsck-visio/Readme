@@ -1,5 +1,0 @@
-#compile
-javac App.java
-
-#run
-java App

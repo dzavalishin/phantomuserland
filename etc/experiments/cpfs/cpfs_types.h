@@ -56,7 +56,7 @@ typedef struct cpfs_stat cpfs_stat_t;
 // TODO dir_scan_remove, dir_scan_update
 typedef enum { dir_scan_continue, dir_scan_success, dir_scan_error } dir_scan_ret_t;
 
-typedef dir_scan_ret_t (*dir_scan_func_t)( struct cpfs_fs *fs, struct cpfs_dir_entry *de, void *farg );
+typedef dir_scan_ret_t (*dir_scan_func_t)( struct cpfs_fs *fs, cpfs_blkno_t phys_blk, cpfs_ino_t offset, struct cpfs_dir_entry *de, void *farg );
 
 
 #endif // CPFS_TYPES_H

@@ -15,7 +15,6 @@
 
 #include "cpfs_types.h"
 #include "cpfs_defs.h"
-#include "cpfs_fsck.h"
 
 #include <errno.h>
 #include <string.h>
@@ -203,6 +202,9 @@ typedef struct cpfs_fid cpfs_fid_t;
 
 typedef enum { bs_unknown, bs_allocated, bs_freelist, bs_freemap, bs_inode, bs_superblk } fsck_blkstate_t; // allocation state
 
+//
+typedef enum { is_unknown, is_used } fsck_inostate_t; // allocation state
+
 
 // In-memory filesystem state
 struct cpfs_fs
@@ -267,6 +269,9 @@ struct cpfs_fs
     int			fsck_nErr;
 
     fsck_blkstate_t 	*fsck_blk_state;        // Map of all blocks
+    
+    fsck_inostate_t 	*fsck_ino_state;        // Map of inode
+    
     int                 fsck_rebuild_free;  	// Freelist corrupt, need to rebuild
 };
 

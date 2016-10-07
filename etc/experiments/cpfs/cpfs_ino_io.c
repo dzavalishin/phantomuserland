@@ -45,9 +45,6 @@ struct cpfs_inode *
 cpfs_lock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // makes sure that block is in memory
 {
     errno_t rc;
-/*
-if( TRACE ) trace(1, "%*s > cpfs_lock_ino. ino=%lld\n", TRACE, " ", ino);   
-*/
     cpfs_mutex_lock( fs->inode_mutex );
 
     if( used ) cpfs_panic( "out of inode buffers" );
@@ -91,8 +88,6 @@ if( TRACE ) trace(1, "%*s > cpfs_lock_ino. ino=%lld\n", TRACE, " ", ino);
 
     //cpfs_mutex_init( &(ip->mutex) );
 
-    //if( TRACE ) trace(0, "%*s < cpfs_lock_ino. ino=%lld, data: [links=%d, ]\n", TRACE, " ", ino, ip->nlinks);     
-
     return ip;
 }
 
@@ -123,9 +118,6 @@ cpfs_touch_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // marks block as dirty, will be
 void
 cpfs_unlock_ino( cpfs_fs_t *fs, cpfs_ino_t ino ) // flushes block to disk before unlocking it, if touched
 {
-/*
-    if( TRACE ) trace(-1, "%*s < cpfs_unlock_ino. ino=%lld\n", TRACE-TRACE_TAB, " ", ino);   
-*/
     if( !used ) cpfs_panic( "double cpfs_unlock_blk" );
     if( curr_ino != ino ) cpfs_panic( "wrong ino in unlock" );
     //if( curr_blk != blk ) cpfs_panic( "wrong blk in inode unlock" );
