@@ -1,7 +1,7 @@
 <Partition>
     <Definition Name="P1" />
     <!-- Amount of ram allocated (code + stack + static variables) [dz] need so much for we have in-mem disk emulation -->
-    <Memory Bytes="50M" />
+    <Memory Bytes="16M" />
 
     <!-- Number of threads that can be created in this partition.
          Note that this number doesn't include main and error handler threads,

@@ -27,10 +27,11 @@
 
 
 static void *diskmem;
-static int   diskmem_sz = 1*1000L*4096;
+static int   diskmem_sz = 1*1000L*4096; // TODO JetOS tried to make smaller disk for partition size is no more than 16m
+//static int   diskmem_sz = 10*1000L*4096;
 
 
-#warning init me
+
 
 
 // ----------------------------------------------------------------------------
@@ -95,7 +96,8 @@ static int
 real_main(void)
 {
     diskmem = calloc ( 1, diskmem_sz );
-    cpfs_assert( diskmem != 0 );
+    //cpfs_assert( diskmem != 0 );
+	if( diskmem != 0 ) panic( "Can't calloc mem disk %dKb", diskmem_sz/1024 );
 
     RETURN_CODE_TYPE ret;
     PROCESS_ID_TYPE pid;
