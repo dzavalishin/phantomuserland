@@ -27,7 +27,7 @@
 
 
 static void *diskmem;
-static int   diskmem_sz = 10*1000L*4096;
+static int   diskmem_sz = 1*1000L*4096;
 
 
 #warning init me
