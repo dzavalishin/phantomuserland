@@ -16,6 +16,9 @@
 #include "cpfs_test.h"
 
 #include <stdio.h>
+
+#ifndef __POK_LIBC_STDIO_H__
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -226,4 +229,6 @@ cpfs_os_access_rights_check( struct cpfs_fs *fs, cpfs_right_t t, void *user_id_d
 
 
 
+
+#endif // POK/JetOS
 

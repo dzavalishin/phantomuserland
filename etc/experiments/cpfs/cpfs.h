@@ -20,11 +20,16 @@
 
 extern int TRACE;
 extern int TRACE_TAB;
-extern FILE *fsck_scan_dir_log_file;
-extern FILE *fsck_scan_ino_log_file;
+//extern FILE *fsck_scan_dir_log_file;
+//extern FILE *fsck_scan_ino_log_file;
 
 #ifndef O_CREAT
 #define	O_CREAT		0x0200	/* open with file create */
+
+#define	O_RDONLY	0		/* +1 == FREAD */
+#define	O_WRONLY	1		/* +1 == FWRITE */
+#define	O_RDWR		2		/* +1 == FREAD|FWRITE */
+
 #endif
 
 struct cpfs_fs;

@@ -13,6 +13,8 @@
 #include "cpfs.h"
 #include "cpfs_local.h"
 
+// to detect we're compiled for POK/JetOS
+#include <stdio.h>
 
 
 static cpfs_fid_t       *fdmap = 0;             // Map of file descriptors - global for all FS instances!
@@ -42,8 +44,10 @@ cpfs_fdmap_init( void )
 
     cpfs_mutex_init( &fdmap_mutex );
 
+#ifndef __POK_LIBC_STDIO_H__
     if( fdmap != 0 )
         atexit( cpfs_fdmap_stop );
+#endif
 
     return fdmap ? 0 : ENOMEM;
 }

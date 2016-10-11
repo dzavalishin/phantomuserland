@@ -20,6 +20,9 @@
 
 #include <string.h>
 #include <stdio.h>
+
+#ifndef __POK_LIBC_STDIO_H__
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -224,7 +227,7 @@ void test_mp_inode_alloc( cpfs_fs_t *fs )
 
 
 
-
+#endif // __POK_LIBC_STDIO_H__
 
 
 

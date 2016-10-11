@@ -29,6 +29,7 @@
 #define CPFS_MAX_FILES_PER_DIR  8192 // open/create timing depends on it - tunable?
 
 #define CPFS_BLKSIZE            4096
+#define CPFS_BLOCKSIZE CPFS_BLKSIZE
 
 // TODO each block (incl data) must have header of this size
 #define CPFF_BLK_HEADER_SIZE	96

@@ -10,16 +10,20 @@
 
 #include "cpfs_fsck.h"
 #include <stdio.h>
+
+// doesn't compile in pok/jetos
+#ifndef __POK_LIBC_STDIO_H__
+
 #include <stdlib.h>
-#include <limits.h>
-#include <sys/types.h>
+//#include <limits.h>
+//#include <sys/types.h>
 
 #include <stdarg.h>
 
 #include "cpfs.h"
 #include "cpfs_local.h"
 
-#include <fcntl.h>
+//#include <fcntl.h>
 
 
 typedef enum { msg, warn, err } severity_t;
@@ -412,4 +416,7 @@ void cpfs_fsck_log(FILE *file,  int ino_in_blk, int phys_blk, struct cpfs_inode 
     fprintf(file,"] \n");
     fflush(file);
 }
+
+
+#endif // POK/JetOS
 

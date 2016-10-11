@@ -16,6 +16,10 @@
 #include "cpfs_test.h"
 
 #include <stdio.h>
+
+// Don't need this file in real OS build
+#ifndef __POK_LIBC_STDIO_H__
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -489,6 +493,7 @@ void cpfs_debug_fdump( const char *fn, void *p, unsigned size ) // dump some dat
 
 
 
+#endif // POK/JetOS
 
 
 

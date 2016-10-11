@@ -1,5 +1,5 @@
 <Partition>
-    <Definition Name="CPFS" />
+    <Definition Name="P1" />
     <!-- Amount of ram allocated (code + stack + static variables) [dz] need so much for we have in-mem disk emulation -->
     <Memory Bytes="50M" />
 
