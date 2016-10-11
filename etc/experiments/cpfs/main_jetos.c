@@ -97,7 +97,7 @@ real_main(void)
 {
     diskmem = calloc ( 1, diskmem_sz );
     //cpfs_assert( diskmem != 0 );
-	if( diskmem != 0 ) panic( "Can't calloc mem disk %dKb", diskmem_sz/1024 );
+	if( diskmem != 0 ) cpfs_panic( "Can't calloc mem disk %dKb", diskmem_sz/1024 );
 
     RETURN_CODE_TYPE ret;
     PROCESS_ID_TYPE pid;
