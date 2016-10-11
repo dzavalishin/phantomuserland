@@ -20,8 +20,12 @@
 
 extern int TRACE;
 extern int TRACE_TAB;
-//extern FILE *fsck_scan_dir_log_file;
-//extern FILE *fsck_scan_ino_log_file;
+
+// TODO remove from here, can't be compiled in JetOS, compile with #ifdef
+#ifndef __POK_LIBC_STDIO_H__
+extern FILE *fsck_scan_dir_log_file;
+extern FILE *fsck_scan_ino_log_file;
+#endif
 
 #ifndef O_CREAT
 #define	O_CREAT		0x0200	/* open with file create */

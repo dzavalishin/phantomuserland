@@ -101,7 +101,6 @@ test_disk_alloc(cpfs_fs_t *fsp)
 
     mass_blk_alloc(fsp,&q,1);   // +
     mass_blk_alloc(fsp,&q,120); // +
-#if 1
     mass_blk_free(fsp,&q,34);   // -
     mass_blk_alloc(fsp,&q,40);  // +
     mass_blk_free(fsp,&q,120);  // -

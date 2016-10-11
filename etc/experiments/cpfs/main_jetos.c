@@ -181,7 +181,7 @@ static void test_all(cpfs_fs_t *fsp)
 
     test_path(fsp);
 
-    test_out_of_space(fsp);
+    //test_out_of_space(fsp);
 }
 
 

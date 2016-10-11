@@ -1,5 +1,10 @@
 Experimental simple and reliable FS code, not so connected to Phantom OS
 
+JetOS howto:
+
+ln -s <this directory> /...path-to-JetOS/examples/<copy-of-pure-arinc653-buffer/P1
+cd there, scons, scons run
+
 
 Questions:
 

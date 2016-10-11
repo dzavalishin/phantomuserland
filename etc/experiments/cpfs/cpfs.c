@@ -19,8 +19,11 @@
 
 int TRACE=1;
 int TRACE_TAB=1;
-//FILE *fsck_scan_dir_log_file;
-//FILE *fsck_scan_ino_log_file;
+
+#ifndef __POK_LIBC_STDIO_H__
+FILE *fsck_scan_dir_log_file;
+FILE *fsck_scan_ino_log_file;
+#endif // __POK_LIBC_STDIO_H__
 
 
 

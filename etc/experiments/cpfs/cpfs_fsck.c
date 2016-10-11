@@ -15,8 +15,8 @@
 #ifndef __POK_LIBC_STDIO_H__
 
 #include <stdlib.h>
-//#include <limits.h>
-//#include <sys/types.h>
+#include <limits.h> // TODO No header in JetOS
+//#include <sys/types.h> // TODO No header in JetOS
 
 #include <stdarg.h>
 
@@ -82,7 +82,7 @@ fsck_sb( cpfs_fs_t *fs, int fix )
 {
     //errno_t rc;
 
-    printf("FSCK - ckeck superblock\n");
+    printf("FSCK - check superblock\n");
 
     struct cpfs_sb      *sb = cpfs_lock_blk( fs, 0 );
     if( sb == 0 ) return EIO;

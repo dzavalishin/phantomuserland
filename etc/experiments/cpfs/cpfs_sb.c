@@ -37,7 +37,8 @@ errno_t cpfs_mkfs( cpfs_fs_t *fs, cpfs_blkno_t disk_size)
     sb->h.magic = CPFS_SB_MAGIC;
 
     //sb->ninode = 8192*8192; // todo magic?
-    sb->ninode = 1024; // todo magic?
+    //sb->ninode = 1024; // todo magic?
+    sb->ninode = disk_size/20; // todo magic?
 
     int ino_table_blkno = CPFS_INO_PER_BLK * sb->ninode;
 

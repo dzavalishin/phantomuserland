@@ -49,7 +49,8 @@ static void mp_test(void); // multithreaded test - one FS instance
 cpfs_fs_t fs0 =
 {
     .disk_id = 0,
-    .disk_size = 10000,
+    .disk_size = 1000, // JetOS env gives us 16 mb max, try 4mb disk
+//    .disk_size = 10000,
 };
 
 cpfs_fs_t fs1 =
