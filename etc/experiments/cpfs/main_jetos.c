@@ -24,10 +24,10 @@
 // ----------------------------------------------------------------------------
 
 
+#define TEST_MEM_DISK_SZ (1*1000L*4096)
 
-
-static void *diskmem;
-static int   diskmem_sz = 1*1000L*4096; // TODO JetOS tried to make smaller disk for partition size is no more than 16m
+static void diskmem[TEST_MEM_DISK_SZ];
+static const int   diskmem_sz = TEST_MEM_DISK_SZ; // TODO JetOS tried to make smaller disk for partition size is no more than 16m
 //static int   diskmem_sz = 10*1000L*4096;
 
 
@@ -95,9 +95,9 @@ void main(void)
 static int
 real_main(void)
 {
-    diskmem = calloc ( 1, diskmem_sz );
-    //cpfs_assert( diskmem != 0 );
-	if( diskmem != 0 ) panic( "Can't calloc mem disk %dKb", diskmem_sz/1024 );
+
+//    diskmem = calloc ( 1, diskmem_sz );
+//	if( diskmem != 0 ) panic( "Can't calloc mem disk %dKb", diskmem_sz/1024 );
 
     RETURN_CODE_TYPE ret;
     PROCESS_ID_TYPE pid;
