@@ -67,6 +67,5 @@ grep '[Ff][Aa][Ii][Ll]\|TEST\|SKIP' $LOGFILE
 grep 'FINISHED\|done, reboot' $LOGFILE || die "Phantom test run error!"
 
 # submit all details into the CI log, cutting off ESC-codes
-[ "$SNAP_CI" ] && cat qemu.log $LOGFILE | sed 's/[^m]*m//g;s/
-//g'
+[ "$SNAP_CI" ] && cat qemu.log $LOGFILE | sed 's/[^m]*m//g'
 exit $EXIT_CODE
