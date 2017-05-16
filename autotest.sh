@@ -46,7 +46,7 @@ at_exit ( ) {
 
 if [ $# -gt 0 ]
 then
-	FOREGROUND=1
+	FOREGROUND=-f
 
 	while [ $# -gt 0 ]
 	do
@@ -58,14 +58,17 @@ then
 			shift
 			[ "$1" -gt 0 ] && PASSES="$1"
 		;;
-		-w)	WARN=1
+		-w)	WARN=-w
 			MSG="No updates for today"
 		;;
 		-nc)	unset COMPILE	;;
-		-ng)	TEXTONLY=1	;;
+		-ng)	TEXTONLY=-ng	;;
 		-ns)	unset SNAPTEST	;;
 		-nt)	unset TESTRUN	;;
-		-v)	VIRTIO=1	;;
+		-v)	VIRTIO=-v	;;
+		-x)	DEBUG=-x
+			set -x
+		;;
 		*)
 			echo "Usage: $0 [-f] [-r] [-u] [-p N] [-w] [-nc] [-ng] [-ns] [-nt] [-v]
 	-f	- force run (even if there is another copy stalled)
@@ -78,6 +81,7 @@ then
 	-ns	- do not run snapshot test (shortcut for -p 0)
 	-ng	- do not show qemu/kvm window
 	-v	- use virtio for snaps
+	-x	- turn on debug output
 "
 			exit 0
 		;;
@@ -166,6 +170,6 @@ Previous test run stalled. Trying gdb..."
 # now it is safe to alter behaviour on exit
 trap at_exit 0 2
 
-[ "$COMPILE" ] && ./ci-build.sh ${FOREGROUND:+-f} $UNATTENDED ${WARN:+-w}
-[ $? -eq 0 -a "$TESTRUN" ] && ./ci-runtest.sh ${FOREGROUND:+-f} $UNATTENDED ${TEXTONLY:+-ng}
-[ $? -eq 0 -a "$SNAPTEST" ] && ./ci-snaptest.sh ${FOREGROUND:+-f} $UNATTENDED ${VIRTIO:+-v} ${TEXTONLY:+-ng} ${PASSES:+-p $PASSES}
+[ "$COMPILE" ] && ./ci-build.sh $FOREGROUND $WARN $DEBUG
+[ $? -eq 0 -a "$TESTRUN" ] && ./ci-runtest.sh $FOREGROUND $UNATTENDED $TEXTONLY $DEBUG
+[ $? -eq 0 -a "$SNAPTEST" ] && ./ci-snaptest.sh $FOREGROUND $UNATTENDED $VIRTIO $TEXTONLY ${PASSES:+-p $PASSES} $DEBUG
