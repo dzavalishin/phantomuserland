@@ -9,6 +9,9 @@
  *
 **/
 
+// VM memory corruption if on
+#define VM_SYNC_NOWAIT_BLOCKED 0
+
 #define DEBUG_MSG_PREFIX "vm.sync"
 #include <debug_ext.h>
 #define debug_level_flow 0
@@ -33,6 +36,10 @@ volatile int     phantom_virtual_machine_snap_request = 0;
 //static 
 volatile int     phantom_virtual_machine_threads_stopped = 0;
 //volatile int     phantom_virtual_machine_threads_got_stop_request = 0;
+
+// n of threads blocked in blocking syscall, see vm_syscall_block
+volatile int     phantom_virtual_machine_threads_blocked = 0;
+
 
 static hal_cond_t   phantom_snap_wait_4_vm_enter;
 static hal_cond_t   phantom_snap_wait_4_vm_leave;
@@ -174,7 +181,11 @@ void phantom_snapper_reenable_threads( void )
 
     SHOW_FLOW( 5, "Snapper will wait for %d threads to awake", phantom_virtual_machine_threads_stopped);
 
+#if VM_SYNC_NOWAIT_BLOCKED
+    while( phantom_virtual_machine_threads_stopped - phantom_virtual_machine_threads_blocked > 0 )
+#else
     while( phantom_virtual_machine_threads_stopped > 0 )
+#endif
     {
         hal_cond_wait( &phantom_snap_wait_4_vm_leave, &interlock_mutex );
         SHOW_FLOW( 5, "Snapper: %d threads still sleep", phantom_virtual_machine_threads_stopped);
@@ -320,6 +331,9 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 
 
 //#define MAX_SYS_ARG 16
+
+// interlock code of VM blocking syscall (part of .internal.connection class) implementation
+// called from si_connection_13_blocking, calls passed syscall worker implemented in cn_*.c in kernel
 int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t , struct data_area_4_thread *, int nmethod, pvm_object_t arg ) )
 {
 
@@ -352,6 +366,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
     hal_mutex_lock( &interlock_mutex );
 
     phantom_virtual_machine_threads_stopped++;
+    phantom_virtual_machine_threads_blocked++;
     hal_cond_broadcast( &phantom_snap_wait_4_vm_enter );
 
     hal_mutex_unlock( &interlock_mutex );
@@ -359,11 +374,11 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 
 
     // now do syscall - can block
-
     pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
 
-    ref_dec_o( arg );
+    ref_dec_o( arg ); // BUG FIXME ref will be lost if restart - add to restart list before call, remove after?
     // BUG FIXME snapper won't continue until this thread is unblocked: end of snap waits for all stooped threads to awake
+    // ? fixed with phantom_virtual_machine_threads_blocked?
 
 #if NEW_SNAP_SYNC
     snap_lock();
@@ -377,6 +392,8 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 
     //SHOW_FLOW0( 15, "VM thread awaken, will report wakeup");
     phantom_virtual_machine_threads_stopped--;
+    phantom_virtual_machine_threads_blocked--;
+
     hal_cond_broadcast( &phantom_snap_wait_4_vm_leave );
 
     hal_mutex_unlock( &interlock_mutex );
