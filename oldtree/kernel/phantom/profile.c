@@ -109,6 +109,8 @@ void profiler_dump_map( void )
     long map_corrupt = 0;
     int total_percent = 0;
 
+    if( total_count == 0 ) return;
+
     int i = 0;
     for( i = 0; i < PROFILER_MAP_SIZE; i++ )
     {
@@ -151,6 +153,85 @@ void profiler_dump_map( void )
     if( map_corrupt )
         SHOW_ERROR( 0, "map corrupt %ld times", map_corrupt );
 }
+
+
+
+void phantom_dump_profiler_buf(char *buf, int len)
+{
+    int rc;
+    rc = snprintf(buf, len, "Profile (%d events total):\n\x1b[35m IP      Count    %%  Name\x1b[37m\n", total_count);
+    buf += rc;
+    len -= rc;
+
+    if( total_count == 0 ) return;
+
+    long map_corrupt = 0;
+    int total_percent = 0;
+
+    int i = 0;
+    for( i = 0; i < PROFILER_MAP_SIZE; i++ )
+    {
+        if( map[i] == 0 )
+            continue;
+
+        if( len < 40 )
+        {
+            rc = snprintf(buf, len, "Out of buffer\n" );
+            buf += rc;
+            len -= rc;
+            return;
+        }
+
+        addr_t ip = i*PROFILER_MAP_DIVIDER;
+
+        char *name = "?";
+        if(phantom_symtab_getname)
+            name = phantom_symtab_getname( (void *)ip );
+
+        int count = map[i];
+        int percentage = (int) ( ((100*(long long)count)/total_count) );
+
+//#if PROFILER_SKIP_0_PERCENT
+        if(percentage == 0) continue;
+//#endif
+        total_percent += percentage;
+        if( (percentage < 0) || (percentage > 100) )
+        {
+            map_corrupt++;
+            continue;
+        }
+
+        if(total_percent > 200)
+        {
+            //printf("% > 200, drop\n");
+            break;
+        }
+
+
+        rc = snprintf(buf, len,
+                      "%6p: %6d (%2d%%) %s\n",
+                      (void *)ip, count, percentage,
+                      name
+                     );
+        buf += rc;
+        len -= rc;
+
+    }
+
+    //if( map_corrupt )        SHOW_ERROR( 0, "map corrupt %ld times", map_corrupt );
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

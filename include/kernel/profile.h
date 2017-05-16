@@ -34,6 +34,8 @@ typedef unsigned profiler_entry_t;
 void profiler_register_interrupt_hit( addr_t ip );
 void profiler_dump_map( void );
 
+void phantom_dump_profiler_buf(char *bp, int len); // for debug window only
+
 int percpu_idle_status[MAX_CPUS];
 int percpu_idle_count[MAX_CPUS][2]; // [cpu][1] increments in idle, [cpu][0] in not idle
 int percpu_cpu_load[MAX_CPUS]; // load percentage

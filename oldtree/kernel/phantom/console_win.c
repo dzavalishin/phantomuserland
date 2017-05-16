@@ -292,7 +292,7 @@ void phantom_init_console_window()
     //phantom_debug_window->flags |= WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT;
     //w_update( phantom_debug_window ); // For dbl buf flags to start working ok
 
-    phantom_debug_window_puts("Phantom debug window\n\nt - threads\nw - windows\ns - stats\n");
+    phantom_debug_window_puts("Phantom debug window\n\nt - threads\nw - windows\ns - stats\np - profiler\n");
     w_update( phantom_debug_window );
     //hal_sleep_msec(4000);
 
@@ -420,9 +420,11 @@ static void phantom_debug_window_loop()
                        "w\t- show windows list\n"
                        "t\t- show threads list\n"
                        "s\t- show stats\n"
+                       "p\t- show profiler\n"
                        "d\t- dump threads to JSON\n"
                       );
                 break;
+            case 'p': // profiler
             case 't':
                 //w_set_title( phantom_debug_window,  "Threads" );
                 //show = c;
@@ -470,6 +472,10 @@ static void phantom_debug_window_loop()
                 case 's':
                     w_set_title( phantom_debug_window,  "Stats" );
                     break;
+
+                case 'p':
+                    w_set_title( phantom_debug_window,  "Profiler" );
+                    break;
                 }
             }
         }
@@ -496,7 +502,7 @@ static void phantom_debug_window_loop()
 
         struct tm mt = *current_time;
 
-        rc = snprintf(bp, len, " Switch view: \x1b[32mt\x1b[37mhreads \x1b[32ms\x1b[37mtats \x1b[32mw\x1b[37mindows        \x1b[32m?\x1b[37m - help\n \x1b[32mStep %d, uptime %dd, %02d:%02d:%02d\x1b[37m, %d events\n Time %04d/%02d/%02d %02d:%02d:%02d GMT, CPU 0 %2d%% idle\n",
+        rc = snprintf(bp, len, " View: \x1b[32mt\x1b[37mhreads \x1b[32ms\x1b[37mtats \x1b[32mw\x1b[37mindows \x1b[32mp\x1b[37mrofile       \x1b[32m?\x1b[37m - help\n \x1b[32mStep %d, uptime %dd, %02d:%02d:%02d\x1b[37m, %d events\n Time %04d/%02d/%02d %02d:%02d:%02d GMT, CPU 0 %2d%% idle\n",
                       step++, days, hr, min, (int)sec,
                       ev_get_n_events_in_q(),
                       mt.tm_year + 1900, mt.tm_mon, mt.tm_mday,
@@ -518,6 +524,10 @@ static void phantom_debug_window_loop()
 
         case 's':
             phantom_dump_stats_buf(bp,len);
+            break;
+
+        case 'p':
+            phantom_dump_profiler_buf(bp,len);
             break;
         }
 
