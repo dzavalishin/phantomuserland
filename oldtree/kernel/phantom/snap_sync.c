@@ -23,6 +23,7 @@
 #include <phantom_libc.h>
 
 #include <kernel/snap_sync.h>
+#include <kernel/init.h>
 #include <hal.h>
 
 /* This is set from snap code to ask us to hold our breath */
