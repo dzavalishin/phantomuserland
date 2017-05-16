@@ -15,7 +15,32 @@ die ( ) {
 	exit 1
 }
 
-[ "$1" = "-s" ] && unset WARN	# ignore warnings in silent mode
+if [ $# -gt 0 ]
+then
+	while [ $# -gt 0 ]
+	do
+		case "$1" in
+		-f)	FOREGROUND=1		;;
+		-w)	WARN=warn		;;
+		-s)	unset WARN		;;
+		-x)	set -x			;;
+		*)
+			echo "Usage: $0 [-f] [-u] [-w|-s] [-x]
+	-f	- foreground (interactive) run
+	-w	- show make warnings
+	-s	- silent (ignore make warnings)
+	-x	- turn on debug output
+"
+			exit 0
+		;;
+		esac
+		shift
+	done
+else
+	CRONMODE=1
+	UNATTENDED=-unattended
+	exec 1>$0.log 2>&1
+fi
 
 make clean > /dev/null 2>&1
 rm -f $LOGFILE			# sanitize against wrong links etc

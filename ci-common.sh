@@ -91,8 +91,9 @@ do
 		shift
 		[ "$1" -gt 0 ] && PANIC_AFTER="$1"
 	;;
+	-x)	set -x		;;	# turn on debug output
 	*)
-		echo "Usage: $0 [-u|-f] [-c] [-p N] [-wl NN] [-wr MM] [-nc] [-ng] [-v]
+		echo "Usage: $0 [-u|-f] [-c] [-p N] [-wl NN] [-wr MM] [-nc] [-ng] [-v] [-x]
 	-f	- run in foreground (no need to specify if other command line args presented)
 	-u	- run unattended (don't stop on panic for gdb)
 	-c	- run 'make all' first (default in CI mode)
@@ -102,6 +103,7 @@ do
 	-ng	- do not show qemu/kvm window (default in CI mode)
 	-v	- use virtio for snaps
 	-vv	- use only virtio (no IDE drives)
+	-x	- turn on debug output
 "
 		exit 0
 	;;
