@@ -13,6 +13,7 @@
 package .phantom;
 
 //import .phantom.util.map;
+// import .internal.bitmap;
 
 /**
  *
@@ -37,6 +38,11 @@ class application
     {
         return "(no description)";
     }
+
+	// So that shell can paint icon of this object.
+// .internal.bitmap getIcon();
+
+	// TODO make it possible for object to update image and/or description dynamically
 
 };
 

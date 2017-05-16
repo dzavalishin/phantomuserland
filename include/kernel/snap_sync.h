@@ -12,6 +12,9 @@
 #include <vm/internal_da.h>
 #include <vm/alloc.h>
 
+void vm_lock_persistent_memory( void );		// request access to persistent memory address space, prevent snapshots - NOT IMPL
+void vm_unlock_persistent_memory( void );	// release access to persistent memory address space, enable snapshots - NOT IMPL
+
 // request snap right now
 void request_snap(void);
 

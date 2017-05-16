@@ -410,8 +410,28 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 }
 
 
+// ----------------------------------------------------------------
+// persistent memory access interlock
+// ----------------------------------------------------------------
 
+static hal_spinlock_t   vm_mem_lock;
 
+static void vm_lock_persistent_memory_init( void )
+{
+    hal_spin_init( &vm_mem_lock );
+}
+
+INIT_ME( vm_lock_persistent_memory_init, 0, 0 );
+
+// request access to persistent memory address space, prevent snapshots
+void vm_lock_persistent_memory( void )
+{
+}
+
+// release access to persistent memory address space, enable snapshots
+void vm_unlock_persistent_memory( void )
+{
+}
 
 
 

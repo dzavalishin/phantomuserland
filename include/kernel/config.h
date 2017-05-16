@@ -44,6 +44,8 @@
 #define OLD_VM_SLEEP 0
 #define NEW_SNAP_SYNC 0
 
+// Interlock access to paged persistent address space with snapshot process
+#define SNAP_MEMORY_LOCK 1
 
 #define COMPILE_PERSISTENT_STATS 1
 
