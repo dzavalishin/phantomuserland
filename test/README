@@ -5,6 +5,9 @@ Subdirs:
 
 	unit		- new unit test framework, in progress
 	external	- external tests (connect to running kernel by tcpip)
+	plc			- tests for Phantom Language Compiler
+
+TODO - move CI scripts and files here too, to ci subdir
 
 See also (old test code):
 
