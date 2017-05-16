@@ -87,7 +87,7 @@
 
 #ifdef ARCH_ia32
 #define HAVE_PCI 1
-#define HAVE_USB 1
+#define HAVE_USB 0
 #endif
 
 
@@ -157,7 +157,12 @@
 #define JSMN_PARENT_LINKS
 
 
-
+#if !HAVE_USB
+# undef COMPILE_UHCI
+# undef COMPILE_OHCI
+# define COMPILE_UHCI 0
+# define COMPILE_OHCI 0
+#endif
 
 
 

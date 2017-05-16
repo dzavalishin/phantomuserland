@@ -16,6 +16,7 @@ HW_BOOT_DEST=/mnt/nfs/phantom-test-machine/boot
 #ARCH=arm
 #ARCH=mips
 #ARCH=amd64
+#ARCH=e2k
 
 # --- TODO what hardware configuration we build for.
 #     Usual Intel PC
