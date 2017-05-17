@@ -32,14 +32,14 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD: src/sys/libkern/divdi3.c,v 1.8.26.1 2008/11/25 02:59:29 kensmith Exp $");
+//__FBSDID("$FreeBSD: src/sys/libkern/divdi3.c,v 1.8.26.1 2008/11/25 02:59:29 kensmith Exp $");
 
 //#include <libkern/quad.h>
 #include "quad.h"
 
 /*
  * Divide two signed quads.
- * ??? if -1/2 should produce -1 on this machine, this code is wrong
+ * ?? if -1/2 should produce -1 on this machine, this code is wrong
  */
 quad_t
 __divdi3(a, b)

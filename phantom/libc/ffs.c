@@ -31,7 +31,7 @@
 //#ifndef ARCH_e2k
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD: src/sys/libkern/ffs.c,v 1.11.26.1 2008/11/25 02:59:29 kensmith Exp $");
+//__FBSDID("$FreeBSD: src/sys/libkern/ffs.c,v 1.11.26.1 2008/11/25 02:59:29 kensmith Exp $");
 
 #include <sys/libkern.h>
 

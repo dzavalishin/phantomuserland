@@ -1,1 +1,1 @@
-include ../../phantom/Makeconf-e2k
+include $(realpath $(PHANTOM_HOME))/phantom/Makeconf-e2k
