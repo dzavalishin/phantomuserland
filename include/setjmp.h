@@ -62,23 +62,15 @@
 typedef int jmp_buf[_JBLEN];
 
 
+
+// Wrapper - define below
 //extern int setjmp (jmp_buf) __attribute__((returns_twice));
-//extern void longjmp (jmp_buf, int);
-//extern int _setjmp (jmp_buf) __attribute__((returns_twice));
-//extern void _longjmp (jmp_buf, int);
+//extern void longjmp (jmp_buf, int) __dead2;
 
-
-// Wrapper
-extern int setjmp (jmp_buf) __attribute__((returns_twice));
-extern void longjmp (jmp_buf, int) __dead2;
-//extern int _setjmp (jmp_buf) __attribute__((returns_twice));
-//extern void _longjmp (jmp_buf, int);
 
 // Machine dependent implementation
 extern int setjmp_machdep (jmp_buf) __attribute__((returns_twice));
 extern void longjmp_machdep (jmp_buf, int) __dead2;
-//extern int _setjmp_machdep (jmp_buf) __attribute__((returns_twice));
-//extern void _longjmp_machdep (jmp_buf, int);
 
 
 #ifdef KERNEL
@@ -107,7 +99,7 @@ extern void longjmp_machdep (jmp_buf, int) __dead2;
 #endif /* _MACH_SETJMP_H_PROCESSED_ */
 
 
-#ifdef // ARCH_e2k
+#endif // ARCH_e2k
 
 
 /*

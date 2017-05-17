@@ -12,10 +12,16 @@ static inline u32 __swab32_constant(u32 val) {
 static inline u64 __swab64_constant(u64 val) {
     return ((u64)__swab32_constant(val) << 32) | __swab32_constant(val>>32);
 }
+
+#ifndef ARCH_is32
+static inline u32 __swab32(u32 val) { return __swab32_constant(val); }
+#else
 static inline u32 __swab32(u32 val) {
     asm("bswapl %0" : "+r"(val));
     return val;
 }
+#endif
+
 static inline u64 __swab64(u64 val) {
     union u64_u32_u i, o;
     i.val = val;
