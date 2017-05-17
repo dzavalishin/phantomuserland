@@ -37,6 +37,9 @@ PHANTOM_CPPFLAGS	+= $(addprefix -I,$(INCDIRS)) -nostdinc -DARCH_$(ARCH)=1 -DBOAR
 PHANTOM_CFLAGS	+= $(PHANTOM_CPPFLAGS) -W -Wall $(PHANTOM_FFLAGS) -fno-stack-protector -pipe
 PHANTOM_LDFLAGS	+= $(addprefix -L,$(LIBDIRS))
 
+ifndef ARCH_e2k
+
+
 # Add a `-g' if the debug option is set.
 ifneq "$(filter debug, $(PHANTOM_OPTIONS))" ""
 PHANTOM_CFLAGS 	+= -O -gstabs+
@@ -46,6 +49,14 @@ else
 PHANTOM_CFLAGS 	+= -O0 -gstabs+
 PHANTOM_ASFLAGS += -gstabs+
 endif
+
+else
+
+PHANTOM_CFLAGS 	+= -O0 -g
+PHANTOM_ASFLAGS += -g
+
+endif
+
 
 ## If -s is passed to make, make things real quiet
 #ifeq (s,$(findstring s,$(MAKEFLAGS)))

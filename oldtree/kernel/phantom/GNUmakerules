@@ -77,6 +77,12 @@ ARCH_OBJS=cache_cpu.o driver_isa_mipsnet.o lowlevel_test.o
 endif
 
 
+ifndef ARCH_e2k
+LD_G_FLAG=-gstabs+
+else
+LD_G_FLAG=-g
+endif
+
 i386/libi386.a:
 	cd i386; make; cd ..
 
@@ -130,7 +136,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	svn_version.o profile.o trace.o $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 
 	@echo "Linking $@ ---------------------------------------------"
-	@$(CC) -gstabs+ -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
+	@$(CC) $(LD_G_FLAG) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > $(TFTP_PATH)/$@
