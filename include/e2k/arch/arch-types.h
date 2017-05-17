@@ -32,7 +32,8 @@ typedef	unsigned long long  u_int64_t;
 
 #endif
 
-#warning fix address types to be 128 bit?
+// added bug to github instead
+//#warning fix address types to be 128 bit?
 typedef void *                vmem_ptr_t;
 typedef u_int64_t 	      addr_t;
 

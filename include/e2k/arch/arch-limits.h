@@ -1,7 +1,8 @@
 #ifndef ARCH_LIMITS_H
 #define ARCH_LIMITS_H
 
-#warning Fix me, i'm from usual 64-bit CPU
+// added bug to github instead
+//#warning Fix me, i'm from usual 64-bit CPU
 
 #define CHAR_BIT 8
 
