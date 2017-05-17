@@ -7,7 +7,7 @@
 TARGET_OBJECT_FORMAT=elf64-e2k
 
 
-BIN_PREFIX=e2k-linux-
+BIN_PREFIX=e2k-linux-gnu-
 
 export AS       = $(BIN_PREFIX)as
 export CC       = $(BIN_PREFIX)gcc
