@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2009-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Sycn: conds.
+ * Unix subsystem system call asm code
  *
  * Licensed under CPL 1.0, see LICENSE file.
  *
@@ -76,6 +76,17 @@
 
 #endif
 
+
+#ifdef ARCH_e2k
+#include <e2k/asm.h>
+
+#warning write me
+
+#define	SYSCALL(x)	
+//ENTRY(x); ldr r12, = SYS_##x; swi  0x0;
+
+
+#endif
 
 
 

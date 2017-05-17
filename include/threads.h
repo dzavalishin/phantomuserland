@@ -113,7 +113,7 @@ errno_t         t_set_snapper_flag(void); // mark myself as snapper thread
 
 
 #define THREAD_FLAG_USER        0x0001 // runs in user mode - not imlp
-#define THREAD_FLAG_VM          0x0002 // runs virtual machine thread, owner points to phantom thread object??? GC??!
+#define THREAD_FLAG_VM          0x0002 // runs virtual machine thread, owner points to phantom thread object?? GC?!
 #define THREAD_FLAG_JIT         0x0004 // JITted VM tread - not imlp
 #define THREAD_FLAG_NATIVE      0x0008 // runs VM native code object - not imlp
 #define THREAD_FLAG_KERNEL      0x0010 // runs some kernel private stuff
