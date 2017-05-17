@@ -1,0 +1,37 @@
+#ARCH_FLAGS      = -EL -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
+#ARCH_FLAGS      = -EB -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
+#-msoft-float 
+#-mpoke-function-name
+
+#TARGET_OBJECT_FORMAT=elf32-littlemips
+TARGET_OBJECT_FORMAT=elf64-e2k
+
+
+BIN_PREFIX=e2k-linux-
+
+export AS       = $(BIN_PREFIX)as
+export CC       = $(BIN_PREFIX)gcc
+export LD       = $(BIN_PREFIX)ld
+export STRIP    = $(BIN_PREFIX)strip
+export AR       = $(BIN_PREFIX)ar
+export RANLIB   = $(BIN_PREFIX)ranlib
+export OBJCOPY  = $(BIN_PREFIX)objcopy
+export NM       = $(BIN_PREFIX)nm
+
+AWK             = gawk
+YACC            = bison -y
+M4              = m4
+
+#USR_LD_ADDR=-Wl,-Ttext-segment,0 -Wl,-Ttext,0
+
+ifeq ($(OSTYPE),cygwin)
+  USR_LD_ADDR=-Wl,-Ttext,0
+else
+  USR_LD_ADDR=-Wl,-Ttext-segment,0
+endif
+
+
+
+
+# Use local overrides, if any
+-include $(realpath $(PHANTOM_HOME))/local-config.$(ARCH).mk
