@@ -4,9 +4,18 @@
 //int write( int, void *, int);
 //int read( int, void *, int);
 
+// TODO sync for all archs
+#ifdef ARCH_e2k
+
+int 		read(int __fd, void *__buf, size_t __nbyte );
+int			write(int __fd, const void *__buf, size_t __nbyte );
+
+#else
+
 ssize_t read(int, void *, size_t);
 ssize_t write(int, void const*, size_t);
 
+#endif
 
 //int open(const char *name, int mode);
 
