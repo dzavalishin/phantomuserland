@@ -251,6 +251,7 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 int
 vm_map_page_fault_trap_handler(struct trap_state *ts)
 {
+
 #ifdef ARCH_ia32
     if (ts->trapno == T_DEBUG)
     {
@@ -261,6 +262,11 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
     if (ts->trapno == T_PAGE_FAULT)
 #endif
     {
+#ifdef ARCH_e2k
+#  warning check me
+        addr_t fa = arch_get_fault_address(); // TODO put it to trap_state!
+        addr_t ip = TS_PROGRAM_COUNTER;
+#endif
 #ifdef ARCH_ia32
         addr_t fa = arch_get_fault_address();
         ts->cr2 = fa;

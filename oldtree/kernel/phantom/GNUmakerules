@@ -77,7 +77,7 @@ ARCH_OBJS=cache_cpu.o driver_isa_mipsnet.o lowlevel_test.o
 endif
 
 
-ifndef ARCH_e2k
+ifneq "$(ARCH)" "e2k"
 LD_G_FLAG=-gstabs+
 else
 LD_G_FLAG=-g
