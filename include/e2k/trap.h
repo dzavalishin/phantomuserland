@@ -288,7 +288,7 @@ struct trap_state {
  */          
         unsigned long long rpr_hi;
         unsigned long long rpr_lo;
-        
+/* TODO define sizes        
         unsigned long long tir_lo [TIR_NUM];
 	unsigned long long tir_hi [TIR_NUM];
 
@@ -302,6 +302,7 @@ struct trap_state {
 	unsigned long long sbbp [SBBP_ENTRIES_NUM];
         
 	unsigned long long mlt [MLT_NUM];
+*/
 
 /*
 // intel regs

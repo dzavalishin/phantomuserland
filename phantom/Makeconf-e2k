@@ -1,9 +1,9 @@
 #ARCH_FLAGS      = -EL -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
-#ARCH_FLAGS      = -EB -march=mips32r2 -G 0 -mno-abicalls -fno-pic -mno-gpopt
-#-msoft-float 
-#-mpoke-function-name
 
-#TARGET_OBJECT_FORMAT=elf32-littlemips
+# [dz] unsure about -fexclude-ctpr2
+
+ARCH_FLAGS      = -fkernel -fexclude-ctpr2
+
 TARGET_OBJECT_FORMAT=elf64-e2k
 
 
