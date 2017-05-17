@@ -28,6 +28,9 @@
 #elif defined(ARCH_amd64)
 #include <amd64/trap.h>
 
+#elif defined(ARCH_e2k)
+#include <e2k/trap.h>
+
 #else
 
 #error No arch?

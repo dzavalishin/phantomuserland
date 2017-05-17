@@ -22,12 +22,24 @@ typedef struct _sha1_ctx {
     u_int32_t h[5];
 } sha1_ctx;
 
+
+#ifndef ARCH_ia32
+
+static inline u_int32_t rol( u_int32_t x, uint32_t n )
+{
+  return (x<<n) | (x>>(32-n));
+}
+
+#else
+
 static inline u_int32_t rol( u_int32_t val, u_int16_t rol) {
     u_int32_t res;
     asm volatile("roll %%cl, %%eax"
                  : "=a" (res) : "a" (val), "c" (rol));
     return res;
 }
+
+#endif
 
 
 static void
