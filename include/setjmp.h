@@ -9,6 +9,11 @@
  *
 **/
 
+#ifdef ARCH_e2k
+
+// We do not have and use setjmp on Elbrus
+
+#else
 
 #ifndef _MACH_SETJMP_H_PROCESSED_
 #define _MACH_SETJMP_H_PROCESSED_ 1
@@ -102,6 +107,7 @@ extern void longjmp_machdep (jmp_buf, int) __dead2;
 #endif /* _MACH_SETJMP_H_PROCESSED_ */
 
 
+#ifdef // ARCH_e2k
 
 
 /*

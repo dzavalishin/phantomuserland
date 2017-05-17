@@ -38,6 +38,10 @@
 #define         MAX_IRQ_COUNT 64
 #endif
 
+#ifdef ARCH_e2k
+#define         MAX_IRQ_COUNT 64
+#endif
+
 
 #ifndef MAX_IRQ_COUNT
 #error Unknown architecture

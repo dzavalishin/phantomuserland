@@ -25,7 +25,7 @@ typedef struct _sha1_ctx {
 
 #ifndef ARCH_ia32
 
-static inline u_int32_t rol( u_int32_t x, uint32_t n )
+static inline u_int32_t rol( u_int32_t x, u_int32_t n )
 {
   return (x<<n) | (x>>(32-n));
 }

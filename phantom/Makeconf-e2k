@@ -3,7 +3,7 @@
 # [dz] unsure about -fexclude-ctpr2
 # [dz] do we have -nostdinc added elsewhere?
 
-ARCH_FLAGS      = -fkernel -fexclude-ctpr2 -nostdinc
+ARCH_FLAGS      = -fkernel -fexclude-ctpr2 -nostdinc -fno-builtin
 
 TARGET_OBJECT_FORMAT=elf64-e2k
 
