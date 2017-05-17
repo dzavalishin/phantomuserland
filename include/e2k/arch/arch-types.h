@@ -54,8 +54,8 @@ typedef u_int64_t             register_t;
 #define _SIZE_T     	
 #define	_SIZE_T_DECLARED
 typedef unsigned              intsize_t;
-typedef int64_t               ssize_t;
-typedef u_int64_t             size_t;
+typedef long                  ssize_t; // e2k compiler wants it
+typedef unsigned long         size_t;  // e2k compiler wants it
 #endif //_SIZE_T
 
 #ifndef _OFF_T
