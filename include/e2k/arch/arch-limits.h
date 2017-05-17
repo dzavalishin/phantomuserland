@@ -1,7 +1,7 @@
 #ifndef ARCH_LIMITS_H
 #define ARCH_LIMITS_H
 
-#warn Fix me, i'm from usual 64-bit CPU
+#warning Fix me, i'm from usual 64-bit CPU
 
 #define CHAR_BIT 8
 
