@@ -53,7 +53,6 @@ static tid_t deferred_refdec_thread_id;
 
 static void deferred_refdec_init(void)
 {
-    inited = 1;
     hal_mutex_init( &deferred_refdec_mutex, "refdec");
 
     hal_cond_init(  &start_refdec_cond, "refdec st" );
@@ -62,6 +61,7 @@ static void deferred_refdec_init(void)
     deferred_refdec_thread_id = hal_start_thread( deferred_refdec_thread, 0, 0 );
     assert(deferred_refdec_thread_id > 0 );
 
+    inited = 1;
 }
 
 /*
