@@ -8,6 +8,9 @@
  *
 **/
 
+// seems to be not needed on E2K 'cause boot calls C entry point directly
+#if 0
+
 //#include <multiboot2.h>
 //#include <e2k/asm.h>
 
@@ -82,3 +85,5 @@ loader:
 
 	.size	loader, . - loader
 
+
+#endif

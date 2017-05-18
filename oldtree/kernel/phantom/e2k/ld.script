@@ -1,4 +1,12 @@
-/*OUTPUT_FORMAT(pei-i386)*/
+
+OUTPUT_FORMAT("elf64-e2k", "elf64-e2k", "elf64-e2k")
+
+// OUTPUT_ARCH(e3m)
+
+//#elif defined(CONFIG_E2K_E2S) || defined(CONFIG_E2K_E2S_SIM)
+ OUTPUT_ARCH(e3s)
+
+// OUTPUT_ARCH(e2k)
 
      SECTIONS
      {
@@ -7,6 +15,44 @@
        .text : 
 		{ 
 		PROVIDE (_start = .);
+
+		_t_entry = .;
+			*(.ttable_entry0)
+			. = _t_entry + 0x800;
+			*(.ttable_entry1)
+			. = _t_entry + 0x1800;
+			*(.ttable_entry3)
+			. = _t_entry + 0x2000;
+			*(.ttable_entry4)
+			. = _t_entry + 0x2800;
+#ifdef CONFIG_COMPAT
+			*(.ttable_entry5)
+			*(.ttable_entry5_table)
+			*(.ttable_entry5_C)
+#endif
+			. = _t_entry + 0x3000;
+			*(.ttable_entry6)
+			*(.ttable_entry6_table)
+			*(.ttable_entry6_C)
+#ifdef CONFIG_PROTECTED_MODE
+			. = _t_entry + 0x3800;
+			*(.ttable_entry7)
+			*(.ttable_entry7_table)
+			*(.ttable_entry7_C)
+#endif
+#ifdef CONFIG_PROTECTED_MODE
+			. = _t_entry + 0x5000;
+			*(.ttable_entry10)
+			*(.ttable_entry10_C)
+#endif
+			. = _t_entry + 0x6000;
+			*(.ttable_entry12)
+		_t_entry_end = .;
+		__entry_handlers_start = .;
+		*(.entry_handlers)
+		__entry_handlers_end = .;
+
+
 		*(.text) 
    		
 		PROVIDE (etext = .);
