@@ -3,6 +3,8 @@
 
 #include <e2k/asm.h>
 
+#if 0
+
 //    .bss
 .section "bss"
     P2ALIGN(PAGE_SHIFT)
@@ -21,3 +23,4 @@ LEXT(phantom_start_heap_size)
     .long	PHANTOM_START_HEAP_SIZE
 
 
+#endif
