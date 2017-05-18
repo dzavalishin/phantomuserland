@@ -78,7 +78,6 @@ loader:
 // Call phantom_multiboot_main()
 	call	%ctpr1, wbs=RBS
 
-// TODO call panic?
 
 	.size	loader, . - loader
 
