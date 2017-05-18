@@ -199,6 +199,8 @@ inet_aton(const char *cp, struct in_addr *addr) {
 	return (1);
 }
 
+// breaks on Elbrus 
+#ifndef ARCH_e2k
 /*
  * Weak aliases for applications that use certain private entry points,
  * and fail to include <arpa/inet.h>.
@@ -207,5 +209,8 @@ inet_aton(const char *cp, struct in_addr *addr) {
 __weak_reference(__inet_addr, inet_addr);
 #undef inet_aton
 __weak_reference(__inet_aton, inet_aton);
+
+
+#endif
 
 /*! \file */
