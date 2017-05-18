@@ -82,7 +82,8 @@
 
 #warning write me
 
-#define	SYSCALL(x)	
+// FIXME temp have SYSCALL(x) just to define label to let Unix apps to build
+#define	SYSCALL(x)	.globl EXT(x); LEXT(x) ; 
 //ENTRY(x); ldr r12, = SYS_##x; swi  0x0;
 
 

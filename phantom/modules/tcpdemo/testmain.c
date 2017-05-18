@@ -52,5 +52,8 @@ int main(int ac, char **av, char **env)
     }
 
     exit(0);
+
+#ifdef ARCH_ia32
     asm("int $3");
+#endif
 }
