@@ -1424,7 +1424,7 @@ void do_snapshot(void)
 
     syslog( 0, "snap: will finalize_snap");
     // scan nonsnapped pages, snap them manually (or just access to cause
-    // page fault??)
+    // page fault?)
     vm_map_for_all( finalize_snap );
 
     // now all pages must have make_page.
