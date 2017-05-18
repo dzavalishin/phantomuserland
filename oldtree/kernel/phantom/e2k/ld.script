@@ -1,0 +1,59 @@
+/*OUTPUT_FORMAT(pei-i386)*/
+
+     SECTIONS
+     {
+       /* . = 0x100000; */
+       .text : 
+		{ 
+		PROVIDE (_start = .);
+		*(.text) 
+   		
+		PROVIDE (etext = .);
+		}
+
+       .data /*BLOCK(__section_alignment__)*/ : 
+		{ 
+		PROVIDE (_data_start__ = .);
+		PROVIDE (__data_start__ = .);
+                *(.data) 
+
+
+        }
+
+.init_array     : { 
+		__init_array_start  = .;
+		_init_array_start  = .;
+		KEEP(*(.init_array))
+		KEEP(*(.ctors)) 
+		__init_array_end    = .;
+		_init_array_end    = .;
+}
+
+
+
+       .rdata /*BLOCK(__section_alignment__)*/ : 
+		{ *(.rdata) }
+
+       .idata /*BLOCK(__section_alignment__)*/ : 
+		{ *(.idata) }
+
+       .bss /*BLOCK(__section_alignment__)*/ :
+ 		{ 
+    		_bss_start__ = . ;
+    		__bss_start__ = . ;
+		*(.bss) 
+        *(COMMON)
+		_bss_end__ = . ;
+		__bss_end__ = . ;
+		}
+
+  .endjunk /*BLOCK(__section_alignment__)*/ :
+  {
+    /* end is deprecated, don't use it */
+    PROVIDE (end = .);
+    PROVIDE ( _end = .);
+    _end__ = .;
+    __end__ = .;
+  }
+
+     }
