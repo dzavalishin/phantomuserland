@@ -54,10 +54,12 @@
 #define __FBSDID(x)
 #define END(x)
 
-// TODO write me
+// TODO write gprof version? we're not using it really
 
-/*
+
 #ifdef GPROF
+
+#error not implemented for e2k
 
 #define MCOUNT		.data; gLB(9) .long 0; .text; lea LBb(x, 9),%edx; call mcount
 #define	ENTRY(x)	.globl EXT(x); .p2align TEXT_ALIGN; LEXT(x) ; \
@@ -85,4 +87,4 @@
 #define	Entry(x)	.globl EXT(x); .p2align TEXT_ALIGN; LEXT(x)
 #define	DATA(x)		.globl EXT(x); .p2align DATA_ALIGN; LEXT(x)
 
-*/
+

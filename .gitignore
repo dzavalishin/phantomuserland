@@ -65,3 +65,4 @@ etc/experiments/cpfs/Makefile~
 etc/experiments/cpfs/cpfs.exe.stackdump
 etc/experiments/cpfs/.gdbrc~
 /etc/experiments/cpfs/nbproject/
+local-config.e2k.mk

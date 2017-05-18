@@ -3,6 +3,8 @@
 
 #include <e2k/asm.h>
 
+
+// moved to .c
 #if 0
 
 //    .bss

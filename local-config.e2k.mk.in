@@ -1,0 +1,4 @@
+# to check build when you have no Elbrus toolkit - will compile for Intel32
+#BIN_PREFIX=
+#ARCH_FLAGS=
+#TARGET_OBJECT_FORMAT=elf32-i386
