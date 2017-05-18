@@ -24,7 +24,7 @@ void __cyg_profile_func_exit(void *this_fn, void *call_site) __attribute__((no_i
 void __cyg_profile_func_enter(void *this_fn, void *call_site)
 {
 // No __sync_fetch_and_add on arm?
-#if ARCH_arm
+#if defined(ARCH_arm) || defined(ARCH_e2k)
     (void) this_fn;
     (void) call_site;
 #else

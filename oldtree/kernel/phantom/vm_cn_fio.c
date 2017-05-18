@@ -121,8 +121,8 @@ errno_t cn_fio_init( struct data_area_4_connection *c, struct data_area_4_thread
 #if HAVE_UNIX
     errno_t rc = k_open( &vp->fd, suffix, O_RDWR|O_CREAT, 0666 ); // TODO flags/mode?
     if( rc )
-#endif // HAVE_UNIX
         return rc;
+#endif // HAVE_UNIX
 
     return 0;
 }
@@ -144,8 +144,8 @@ errno_t cn_fio_disconnect( struct data_area_4_connection *c )
 #if HAVE_UNIX
     errno_t rc = k_close( vp->fd );
     if( rc )
-#endif // HAVE_UNIX
         return rc;
+#endif // HAVE_UNIX
 
     return 0;
 }

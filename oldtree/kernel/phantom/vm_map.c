@@ -266,6 +266,8 @@ vm_map_page_fault_trap_handler(struct trap_state *ts)
 #  warning check me
         addr_t fa = arch_get_fault_address(); // TODO put it to trap_state!
         addr_t ip = TS_PROGRAM_COUNTER;
+#  warning find out if it was a write op
+        int is_write = 0;
 #endif
 #ifdef ARCH_ia32
         addr_t fa = arch_get_fault_address();
