@@ -107,7 +107,7 @@ extern void longjmp_machdep (jmp_buf, int) __dead2;
 #endif /* _MACH_SETJMP_H_PROCESSED_ */
 
 
-#ifdef // ARCH_e2k
+#endif // ARCH_e2k
 
 
 /*
