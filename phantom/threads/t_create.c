@@ -262,7 +262,7 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
 #if CONF_NEW_CTTY
     t_make_ctty( t );
 #else
-    if( 0 == t->ctty ) t->ctty = wtty_init();
+    if( 0 == t->ctty ) t->ctty = wtty_init( WTTY_SMALL_BUF );
 #endif
 
     // malloc uses mutex, so we have to use physalloc which is protected with spinlocks
