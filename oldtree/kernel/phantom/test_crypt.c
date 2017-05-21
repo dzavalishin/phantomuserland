@@ -25,6 +25,7 @@
 #include <kernel/crypt/base64.h>
 #include <kernel/crypt/md5.h>
 #include <kernel/crypt/xtea.h>
+#include <kernel/crypt/sha1.h>
 
 
 
@@ -91,6 +92,30 @@ int do_test_crypt(const char *test_parm)
         XTeaDecrypt(u_int32_t *w, const u_int32_t *v, const XTeaKeyBlock_t k);
     }
 #endif
+
+    {
+        SHOW_FLOW0( 1, "sha1" );
+
+        const char *str = "big brown fox jumps over the lazy dog";
+
+        char must_be[] = {
+            0xfd, 0x4d, 0x5d, 0x5c, 0xe0, 0xc6, 0x3b, 0x88, 0x69, 0x67, 0x0a, 0x3e, 0xd6, 0x08, 0xb5, 0xc2, 0x77, 0x4a, 0x4f, 0x3d
+        };
+
+        u_int8_t hash[SHA1_HASH_SIZE];
+        int l = strlen(str);
+
+        int rc = sha1( (const u_int8_t*)str, l, hash );
+        test_check_false( rc );
+
+        //int res = strncmp( hash, must_be, SHA1_HASH_SIZE );
+        int res = memcmp( hash, must_be, SHA1_HASH_SIZE );
+        if( res )
+        {
+            hexdump( hash, SHA1_HASH_SIZE, "sha1 made hash", HD_OMIT_CHARS|HD_OMIT_COUNT );
+            test_fail_msg(-1,"sha1");
+        }
+    }
 
     return 0;
 }

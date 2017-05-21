@@ -159,7 +159,7 @@ sha1(const u_int8_t *data, u_int32_t length, u_int8_t *hash)
     };
 
     sha1_do(&ctx, data, length);
-    memcpy(hash, &ctx.h[0], 20);
+    memcpy(hash, &ctx.h[0], SHA1_HASH_SIZE);
 
     return 0;
 }
