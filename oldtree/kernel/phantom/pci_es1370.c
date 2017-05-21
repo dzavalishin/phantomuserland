@@ -27,6 +27,11 @@
 
 #include <dev/pci/es1370.h>
 
+
+// TODO correct size? More? Less?
+#define FIFO_SIZE_1370 5120
+
+
 #define u32 u_int32_t
 #define u16 u_int16_t
 #define u8 u_int8_t
@@ -130,8 +135,8 @@ phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage )
 
 #if ES1370_WTTY
     dpc_request_init( &es->w_dpc, w_dpc_func );
-    es->rdq = wtty_init();
-    es->wrq = wtty_init();
+    es->rdq = wtty_init( FIFO_SIZE_1370 );
+    es->wrq = wtty_init( FIFO_SIZE_1370 );
 #endif
 
     dev->drv_private = es;

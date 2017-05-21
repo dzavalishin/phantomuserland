@@ -151,7 +151,7 @@ static struct kolibri_process_state * get_kolibri_state(uuprocess_t *u)
     ks->win_alpha_scale = 0;
     ks->win_user_alpha = 0;
 
-    ks->keys = wtty_init();
+    ks->keys = wtty_init( 5120 ); // TODO size ok?
     assert(ks->keys);
 
     //ks->win_update_timer
