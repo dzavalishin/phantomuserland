@@ -1,3 +1,17 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Load class from filesystem file.
+ * Strinc Phantom kernel environment works withount file system,
+ * but debug env lets us access host file system from within Phantom.
+ * It is handy to have ability toload class files from there.
+ *
+**/
+
+
 #include <vm/bulk.h>
 #include "main.h"
 

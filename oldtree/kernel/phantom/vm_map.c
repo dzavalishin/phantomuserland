@@ -62,8 +62,8 @@
 #if USE_SNAP_WAIT
 
 static void init_snap_wait( void );
-satic void signal_snap_snap_passed( void );
-satic void signal_snap_done_passed( void );
+static void signal_snap_snap_passed( void );
+static void signal_snap_done_passed( void );
 
 #endif
 
@@ -2055,9 +2055,9 @@ static void init_snap_wait( void )
 {
     assert ( 0 == hal_mutex_init( &wait_snap_mutex, "SnapWait" ) );
 
-    assert ( 0 == hal_cond_int( &wait_snap_snap, "SnapSnapWait" ) );
+    assert ( 0 == hal_cond_init( &wait_snap_snap, "SnapSnapWait" ) );
 
-    assert ( 0 == hal_cond_int( &wait_snap_done, "SnapDoneWait" ) );
+    assert ( 0 == hal_cond_init( &wait_snap_done, "SnapDoneWait" ) );
 }
 
 
@@ -2078,23 +2078,23 @@ void phantom_wait_4_snapshot_done( void )
 {
     //errno_t rc;
 
-    assert ( 0 == hal_mutex_lock( wait_snap_mutex ) );
+    assert ( 0 == hal_mutex_lock( &wait_snap_mutex ) );
 
-    assert ( 0 == hal_cond_wait( wait_snap_done, wait_snap_mutex ) );
+    assert ( 0 == hal_cond_wait( &wait_snap_done, &wait_snap_mutex ) );
 
-    assert ( 0 == hal_mutex_unlock( wait_snap_mutex ) );
+    assert ( 0 == hal_mutex_unlock( &wait_snap_mutex ) );
 }
 
 
 
-satic void signal_snap_snap_passed( void )
+static void signal_snap_snap_passed( void )
 {
-    assert ( 0 == hal_cond_broadcast( wait_snap_snap ) );
+    assert ( 0 == hal_cond_broadcast( &wait_snap_snap ) );
 }
 
-satic void signal_snap_done_passed( void )
+static void signal_snap_done_passed( void )
 {
-    assert ( 0 == hal_cond_broadcast( wait_snap_snap ) );
+    assert ( 0 == hal_cond_broadcast( &wait_snap_snap ) );
 }
 
 #endif

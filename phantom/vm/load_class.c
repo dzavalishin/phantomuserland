@@ -2,10 +2,9 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
+ * Load class from binary storage, such as filesystem file or blob from network.
  *
  *
 **/
@@ -36,28 +35,33 @@ static int vm_code_linenum_cmp(const void *, const void *) __attribute__((used))
 
 
 //---------------------------------------------------------------------------
-// Classs loader
+// State keepers
 //---------------------------------------------------------------------------
 
 
 struct method_loader_handler
 {
-    struct pvm_code_handler 		ch;
+    struct pvm_code_handler     ch;
 
-    struct pvm_object 			my_name;
-    struct pvm_object 			my_code;
-    int            			my_ordinal;
+    struct pvm_object           my_name;
+    struct pvm_object           my_code;
+    int                         my_ordinal;
 };
 
 
 struct type_loader_handler
 {
-    struct pvm_code_handler 		ch;
+    struct pvm_code_handler     ch;
 
-    struct pvm_object 			class_name;
-    struct pvm_object 			contained_class_name;
-    int            			is_container;
+    struct pvm_object           class_name;
+    struct pvm_object           contained_class_name;
+    int                         is_container;
 };
+
+
+//---------------------------------------------------------------------------
+// Load type def
+//---------------------------------------------------------------------------
 
 
 static void
@@ -82,6 +86,9 @@ pvm_dump_type( struct type_loader_handler *th )
 
 }
 
+//---------------------------------------------------------------------------
+// Load one method
+//---------------------------------------------------------------------------
 
 
 static void
@@ -110,6 +117,10 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
     mh->my_code = pvm_create_code_object( code_size, (void *)code_data );
 }
 
+
+//---------------------------------------------------------------------------
+// Main entry point
+//---------------------------------------------------------------------------
 
 
 int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *out )
