@@ -1,7 +1,7 @@
 #ifndef	_E2K_TYPES_H_
 #define	_E2K_TYPES_H_
 
-//#include <uapi/asm/types.h>
+#include <uapi/asm/types.h>
 /*
 #ifndef __ASSEMBLY__
 
