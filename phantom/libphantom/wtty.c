@@ -286,10 +286,11 @@ wtty_t * wtty_init(void)
     assert(w);
 
 #if CONF_WTTY_SIZE
-    size_t wsize = WTTY_BUFSIZE; // make to be param, check
-    if( wsize < WTTY_MIN_BUFSIZE ) wsize = WTTY_MIN_BUFSIZE;
+    w->size = WTTY_DEFAULT_BUFSIZE; // make to be param, check
+    if( w->size < WTTY_MIN_BUFSIZE ) w->size = WTTY_MIN_BUFSIZE;
 
-    w->buf = calloc( 1, wsize );
+    w->buf = calloc( 1, w->size );
+    assert(w->buf);
 #endif
 
     //w->getpos = 0;

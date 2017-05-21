@@ -21,18 +21,21 @@
  *  @{
  */
 
-//#define WTTY_BUFSIZE 128
-#define WTTY_BUFSIZE 5120
 
 // See 'tid_t owner' field of window to understand how key events reach some thread
 
 #if CONF_WTTY_SIZE
 
 #define WTTY_MIN_BUFSIZE 128
+#define WTTY_DEFAULT_BUFSIZE 5120
+
+#define WTTY_BUFSIZE  (w->size)
 
 struct wtty
 {
     char            *buf;
+
+    size_t          size;
 
     int	            putpos;
     int             getpos;
@@ -45,6 +48,10 @@ struct wtty
 };
 
 #else // CONF_WTTY_SIZE
+
+//#define WTTY_BUFSIZE 128
+#define WTTY_BUFSIZE 5120
+
 
 struct wtty
 {

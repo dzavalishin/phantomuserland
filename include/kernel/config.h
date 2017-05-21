@@ -13,7 +13,7 @@
 #define CONFIG_H
 
 // Dynamic wtty_t size
-#define CONF_WTTY_SIZE 1
+#define CONF_WTTY_SIZE 0
 
 
 #define UHCI_INTERRUPT 0
