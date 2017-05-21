@@ -122,7 +122,7 @@ void report( int rc, const char *test_name )
 void run_test( const char *test_name, const char *test_parm )
 {
     int all = 0 == strcmp(test_name, "all" );
-    int i;
+    //int i;
 
 #ifndef ARCH_ia32
     printf("sleeping 20 sec");
@@ -130,6 +130,8 @@ void run_test( const char *test_name, const char *test_parm )
 #endif
 
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
+
+    TEST(crypt);
 
     // moved here to test first - rewritten
     TEST(ports);
@@ -184,7 +186,6 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(threads);
 
     TEST(absname);
-    TEST(crypt);
 
 #ifndef ARCH_ia32
 //    TEST(sem);

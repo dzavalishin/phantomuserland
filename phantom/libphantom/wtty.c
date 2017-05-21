@@ -331,9 +331,9 @@ void wtty_destroy(wtty_t * w)
     hal_mutex_destroy( &w->mutex );
     hal_cond_destroy( &w->rcond );
     hal_cond_destroy( &w->wcond );
-    free(w);
 #if CONF_WTTY_SIZE
     free(w->buf);
 #endif
+    free(w);
 }
 

@@ -16,6 +16,9 @@
 #include <phantom_types.h>
 #include <hal.h>
 
+#define CONF_WTTY_SIZE 1
+
+
 /** \ingroup Threads
  *  \defgroup Threads Window subsystem 'controlling terminal' data structures
  *  @{
