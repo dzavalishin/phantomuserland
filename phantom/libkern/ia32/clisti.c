@@ -1,3 +1,4 @@
+#include <hal.h>
 #include <ia32/eflags.h>
 
 

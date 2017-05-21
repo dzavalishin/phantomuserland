@@ -4,8 +4,6 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- *
  *
  * Bulk class saver/loader. The idea is to prepare a huge list of stored classes for
  * a new OS to init itself from. List is to be stored on a CD or on a new system fresh

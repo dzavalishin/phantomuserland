@@ -6,6 +6,6 @@
 
 void ftlbentry(physaddr_t la)
 {
-#warn write me
+#warning write me
     //asm volatile("invlpg (%0)" : : "r" (la) : "memory");
 }

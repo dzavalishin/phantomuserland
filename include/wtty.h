@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
  * Window subsystem 'controlling terminal' data structures. Actually just a simple byte FIFO.
  *
@@ -21,24 +21,54 @@
  *  @{
  */
 
-//#define WTTY_BUFSIZE 128
-#define WTTY_BUFSIZE 5120
 
 // See 'tid_t owner' field of window to understand how key events reach some thread
 
+#if CONF_WTTY_SIZE
+
+#define WTTY_MIN_BUFSIZE 128
+#define WTTY_DEFAULT_BUFSIZE 5120
+
+#define WTTY_BUFSIZE  (w->size)
+
 struct wtty
 {
-    char                buf[WTTY_BUFSIZE];
+    char            *buf;
 
-    int		        putpos;
-    int			getpos;
+    size_t          size;
 
-    hal_mutex_t		mutex;
-    hal_cond_t		rcond; // reader sleeps here
-    hal_cond_t		wcond;
+    int	            putpos;
+    int             getpos;
 
-    bool                started;
+    hal_mutex_t     mutex;
+    hal_cond_t      rcond; // reader sleeps here
+    hal_cond_t      wcond;
+
+    bool            started;
 };
+
+#else // CONF_WTTY_SIZE
+
+//#define WTTY_BUFSIZE 128
+#define WTTY_BUFSIZE 5120
+
+
+struct wtty
+{
+    char            buf[WTTY_BUFSIZE];
+
+    int	            putpos;
+    int             getpos;
+
+    hal_mutex_t     mutex;
+    hal_cond_t      rcond; // reader sleeps here
+    hal_cond_t      wcond;
+
+    bool            started;
+};
+
+#endif
+
 
 typedef struct wtty wtty_t;
 
@@ -53,14 +83,14 @@ int             wtty_read(wtty_t *w, char *data, int cnt, bool nowait);
 int             wtty_is_empty(wtty_t *w);
 int             wtty_is_full(wtty_t *w);
 
-void 		wtty_clear(wtty_t * w);
+void            wtty_clear(wtty_t * w);
 
-void 		wtty_stop(wtty_t * w);          // all blocked calls return EPIPE/-EPIPE/ 0 (getc)
-void 		wtty_start(wtty_t * w);
+void            wtty_stop(wtty_t * w);          // all blocked calls return EPIPE/-EPIPE/ 0 (getc)
+void            wtty_start(wtty_t * w);
 int             wtty_is_started(wtty_t *w);
 
-wtty_t * 	wtty_init(void);
-void 		wtty_destroy(wtty_t * w);
+wtty_t *        wtty_init(void);
+void            wtty_destroy(wtty_t * w);
 
 void            wtty_dump( wtty_t * w );
 

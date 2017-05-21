@@ -9,11 +9,10 @@
  *
 **/
 
-#ifdef ARCH_e2k
-
-// We do not have and use setjmp on Elbrus
-
-#else
+// Sorry
+//#ifdef ARCH_e2k
+//// We do not have and use setjmp on Elbrus
+//#else
 
 #ifndef _MACH_SETJMP_H_PROCESSED_
 #define _MACH_SETJMP_H_PROCESSED_ 1
@@ -55,6 +54,11 @@
 #define	_JBLEN	64*8		// Size of the jmp_buf on MIPS - 64 regs 64 bits each
 #endif
 
+#ifdef ARCH_e2k
+#define	_JBLEN	64*8+10		// Size of the jmp_buf on e2k - wrong, don't know yet FIXME BUG
+#endif
+
+
 #ifndef _JBLEN
 # error setjmp arch
 #endif
@@ -62,23 +66,15 @@
 typedef int jmp_buf[_JBLEN];
 
 
+
+// Wrapper - define below
 //extern int setjmp (jmp_buf) __attribute__((returns_twice));
-//extern void longjmp (jmp_buf, int);
-//extern int _setjmp (jmp_buf) __attribute__((returns_twice));
-//extern void _longjmp (jmp_buf, int);
+//extern void longjmp (jmp_buf, int) __dead2;
 
-
-// Wrapper
-extern int setjmp (jmp_buf) __attribute__((returns_twice));
-extern void longjmp (jmp_buf, int) __dead2;
-//extern int _setjmp (jmp_buf) __attribute__((returns_twice));
-//extern void _longjmp (jmp_buf, int);
 
 // Machine dependent implementation
 extern int setjmp_machdep (jmp_buf) __attribute__((returns_twice));
 extern void longjmp_machdep (jmp_buf, int) __dead2;
-//extern int _setjmp_machdep (jmp_buf) __attribute__((returns_twice));
-//extern void _longjmp_machdep (jmp_buf, int);
 
 
 #ifdef KERNEL
@@ -107,7 +103,8 @@ extern void longjmp_machdep (jmp_buf, int) __dead2;
 #endif /* _MACH_SETJMP_H_PROCESSED_ */
 
 
-#endif // ARCH_e2k
+// Sorry
+//#endif // ARCH_e2k
 
 
 /*

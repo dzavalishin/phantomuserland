@@ -1,6 +1,12 @@
 # default to all, or else it makes all twice
 #default:: all
 
+include $(realpath $(PHANTOM_HOME))/config.mk
+
+ifeq ($(ARCH),e2k)
+EXCLUDED_SUBDIRS=test
+endif
+
 # TODO divide in bin and modules
 SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), tcpdemo test )
 

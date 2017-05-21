@@ -1,1 +1,2 @@
 include $(realpath $(PHANTOM_HOME))/phantom/Makeconf-e2k
+HOST_ARCH	= $(ARCH)
