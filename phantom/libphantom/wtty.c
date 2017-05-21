@@ -285,6 +285,13 @@ wtty_t * wtty_init(void)
     wtty_t *w = calloc( 1, sizeof(wtty_t) );
     assert(w);
 
+#if CONF_WTTY_SIZE
+    size_t wsize = WTTY_BUFSIZE; // make to be param, check
+    if( wsize < WTTY_MIN_BUFSIZE ) wsize = WTTY_MIN_BUFSIZE;
+
+    w->buf = calloc( 1, wsize );
+#endif
+
     //w->getpos = 0;
     //w->putpos = 0;
     hal_mutex_init( &w->mutex, "wtty" );
@@ -324,5 +331,8 @@ void wtty_destroy(wtty_t * w)
     hal_cond_destroy( &w->rcond );
     hal_cond_destroy( &w->wcond );
     free(w);
+#if CONF_WTTY_SIZE
+    free(w->buf);
+#endif
 }
 
