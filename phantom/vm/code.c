@@ -4,10 +4,10 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
+ * Read bytecode from memory.
  *
  *
- **/
+**/
 
 #include "phantom_libc.h"
 

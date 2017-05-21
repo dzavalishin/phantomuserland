@@ -64,10 +64,6 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
-static const char sccsid[] = "@(#)inet_addr.c	8.1 (Berkeley) 6/17/93";
-static const char rcsid[] = "$Id: inet_addr.c,v 1.4.18.1 2005/04/27 05:00:52 sra Exp $";
-#endif /* LIBC_SCCS and not lint */
 #include <sys/cdefs.h>
 //__FBSDID("$FreeBSD: src/lib/libc/inet/inet_addr.c,v 1.4.6.1 2008/11/25 02:59:29 kensmith Exp $");
 
@@ -203,6 +199,8 @@ inet_aton(const char *cp, struct in_addr *addr) {
 	return (1);
 }
 
+// breaks on Elbrus 
+#ifndef ARCH_e2k
 /*
  * Weak aliases for applications that use certain private entry points,
  * and fail to include <arpa/inet.h>.
@@ -211,5 +209,8 @@ inet_aton(const char *cp, struct in_addr *addr) {
 __weak_reference(__inet_addr, inet_addr);
 #undef inet_aton
 __weak_reference(__inet_aton, inet_aton);
+
+
+#endif
 
 /*! \file */

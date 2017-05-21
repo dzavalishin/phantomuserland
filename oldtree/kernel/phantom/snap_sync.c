@@ -415,6 +415,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 // persistent memory access interlock
 // ----------------------------------------------------------------
 
+/* seem to be causing panic sometimes, can it be so?
 static hal_spinlock_t   vm_mem_lock;
 
 static void vm_lock_persistent_memory_init( void )
@@ -423,7 +424,7 @@ static void vm_lock_persistent_memory_init( void )
 }
 
 INIT_ME( vm_lock_persistent_memory_init, 0, 0 );
-
+*/
 // request access to persistent memory address space, prevent snapshots
 void vm_lock_persistent_memory( void )
 {

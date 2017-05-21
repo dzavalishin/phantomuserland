@@ -121,7 +121,8 @@ boot_code:
 
     /* Jump into C code.  */
     call	EXT(phantom_multiboot_main)
-    //call	EXT(multiboot_main)
+
+// TODO call panic?
 
 #include <kernel/page.h>
     /* Data seg. Need PAGE_SHIFT defined! */

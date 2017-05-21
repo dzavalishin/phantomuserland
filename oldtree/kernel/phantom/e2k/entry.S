@@ -8,6 +8,9 @@
  *
 **/
 
+// seems to be not needed on E2K 'cause boot calls C entry point directly
+#if 0
+
 //#include <multiboot2.h>
 //#include <e2k/asm.h>
 
@@ -30,7 +33,8 @@
 
 .section "text"
 .global start
-.global loader
+//.global loader
+.global phantom_multiboot_main
 
 // TODO We are starting first steps and call loader(). See romloader.S
 // TODO Static memory allocation is defined by romloader.lds
@@ -41,6 +45,10 @@ _start_of_kernel:
     .globl	__start_of_kernel
 __start_of_kernel:
 */
+
+    // TODO do we need to catch any parameters passed to us by bootloader?
+
+    // TODO do we need some preparations for stack trace code to stop here?
 
 start:
 {
@@ -55,3 +63,27 @@ start:
 	.size	start, . - start
 
 
+loader:
+
+// TODO do we need to clear BSS?
+
+// TODO do we need to setup memory access? 
+
+// TODO do we need to setup stack?
+
+
+// [dz] just copied from romloader.S
+	addd 0,	[phantom_multiboot_main], %r2
+	movtd	%r2, %ctpr1
+
+	setwd	wsz=RBS+4
+
+// Call phantom_multiboot_main()
+	call	%ctpr1, wbs=RBS
+
+// TODO call panic?
+
+	.size	loader, . - loader
+
+
+#endif

@@ -137,6 +137,8 @@
  */
 
 // FIXME not done
+// TODO do we have all fields?
+// TODO field positions must be checked
 
 struct trap_state {
 #if 0
@@ -323,9 +325,15 @@ struct trap_state {
 	u_int64_t rpr_hi;
 */
 
+// TODO position!
+	int		intno; // interrupt number
+	int		trapno; // trapnumber
+
 };
 
-#define TS_PROGRAM_COUNTER hw_rip
+// FIXME right?
+
+#define TS_PROGRAM_COUNTER ip
 
 #if 0
 

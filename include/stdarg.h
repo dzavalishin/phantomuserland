@@ -38,15 +38,22 @@
 #ifndef _MACHINE_STDARG_H_
 #define	_MACHINE_STDARG_H_
 
+// TODO we need cdefs for it defines __GNUCLIKE_BUILTIN_NEXT_ARG
 //#include <sys/cdefs.h>
 //#include <sys/_types.h>
 
 #include <phantom_types.h>
 
-// It fails on arm & mips, don't know why
-#if defined(ARCH_arm) || defined(ARCH_mips)
-#undef __GNUCLIKE_BUILTIN_STDARG
+// It fails on e2k, arm & mips, don't know why
+#if defined(ARCH_arm) || defined(ARCH_mips) || defined(ARCH_e2k)
+#  undef __GNUCLIKE_BUILTIN_STDARG
 #endif
+
+#if defined(ARCH_e2k)
+#  undef __GNUCLIKE_BUILTIN_NEXT_ARG
+#endif
+
+
 
 
 #ifndef _VA_LIST_DECLARED
