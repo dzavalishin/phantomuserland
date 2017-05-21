@@ -330,8 +330,12 @@ void phantom_init_console_window()
     int nwin = 0;
     for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )
     {
+        char * wname = "win1";
+
+        wname[3] = '0' + nwin;
+
         bh = w_add_button( phantom_launcher_window, nwin, lb_x, 5, &task_button_bmp, &task_button_bmp, BUTTON_FLAG_NOBORDER );
-        w_button_set_text( phantom_launcher_window, bh, "win1", BTEXT_COLOR );
+        w_button_set_text( phantom_launcher_window, bh, wname, BTEXT_COLOR );
         lb_x += 5+task_button_bmp.xsize;
 
         taskbuttons[nwin] = bh;
