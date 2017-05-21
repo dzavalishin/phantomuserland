@@ -18,6 +18,9 @@
 #include <kernel/config.h>
 #include <sys/syslog.h>
 
+#include <assert.h>
+
+
 //---------------------------------------------------------------------------
 
 
@@ -51,9 +54,18 @@
 //#include <kernel/ia32/mmx.h>
 #include <kernel/trap.h>
 
-#define volatile /* */
+//#define volatile /* */
+
+#define USE_SNAP_WAIT 1
 
 
+#if USE_SNAP_WAIT
+
+static void init_snap_wait( void );
+satic void signal_snap_snap_passed( void );
+satic void signal_snap_done_passed( void );
+
+#endif
 
 
 
@@ -350,6 +362,11 @@ static void vm_map_pre_init(void)
 
     hal_cond_init(&deferred_alloc_thread_sleep, "Deferred");
     hal_mutex_unlock(&vm_map_mutex);
+
+#if USE_SNAP_WAIT
+    init_snap_wait();
+#endif
+
 }
 
 INIT_ME(0,vm_map_pre_init,0)
@@ -1410,6 +1427,9 @@ void do_snapshot(void)
     if(enabled) hal_sti();
 
     phantom_snapper_reenable_threads();
+#if USE_SNAP_WAIT
+    signal_snap_snap_passed(); // or before enabling threads?
+#endif
 
     // YES, YES, YES, Snap is nearly done.
 
@@ -1505,6 +1525,9 @@ void do_snapshot(void)
 
     STAT_INC_CNT(STAT_CNT_SNAPSHOT);
 
+#if USE_SNAP_WAIT
+    signal_snap_done_passed();
+#endif
 
     hal_sleep_msec(20000);
     syslog( 0, "snap: wait for 10 sec more");
@@ -2015,8 +2038,65 @@ done:
 
 
 
+//---------------------------------------------------------------------------
+// Wait for snapshot code
+//---------------------------------------------------------------------------
+
+#if USE_SNAP_WAIT
+
+
+static hal_cond_t  wait_snap_snap;
+static hal_cond_t  wait_snap_done;
+static hal_mutex_t wait_snap_mutex;
 
 
 
+static void init_snap_wait( void )
+{
+    assert ( 0 == hal_mutex_init( &wait_snap_mutex, "SnapWait" ) );
+
+    assert ( 0 == hal_cond_int( &wait_snap_snap, "SnapSnapWait" ) );
+
+    assert ( 0 == hal_cond_int( &wait_snap_done, "SnapDoneWait" ) );
+}
+
+
+void phantom_wait_4_snapshot_snap( void )
+{
+    //errno_t rc;
+
+    assert ( 0 == hal_mutex_lock( &wait_snap_mutex ) );
+
+    assert ( 0 == hal_cond_wait( &wait_snap_snap, &wait_snap_mutex ) );
+
+    assert ( 0 == hal_mutex_unlock( &wait_snap_mutex ) );
+}
+
+
+
+void phantom_wait_4_snapshot_done( void )
+{
+    //errno_t rc;
+
+    assert ( 0 == hal_mutex_lock( wait_snap_mutex ) );
+
+    assert ( 0 == hal_cond_wait( wait_snap_done, wait_snap_mutex ) );
+
+    assert ( 0 == hal_mutex_unlock( wait_snap_mutex ) );
+}
+
+
+
+satic void signal_snap_snap_passed( void )
+{
+    assert ( 0 == hal_cond_broadcast( wait_snap_snap ) );
+}
+
+satic void signal_snap_done_passed( void )
+{
+    assert ( 0 == hal_cond_broadcast( wait_snap_snap ) );
+}
+
+#endif
 
 
