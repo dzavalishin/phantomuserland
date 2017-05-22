@@ -61,6 +61,37 @@ static pvm_object_t cn_fio_blocking_syscall_worker( pvm_object_t conn, struct da
     switch( nmethod )
     {
     default:
+
+    case CONN_OP_SEEK:
+        if( !IS_PHANTOM_INT(arg) )
+        {
+            SHOW_ERROR0( 1, "seek arg is not integer" );
+            pvm_object_dump( arg );
+            e = EINVAL;
+            break;
+        }
+        else
+        {
+            int pos = pvm_get_int(arg);
+            int opos;
+
+            SHOW_FLOW( 1, "seek %d", pos );
+            e = k_seek( &opos, vp->fd, pos, 0 ); // BUG FIXME last 0 is SEEK_SET
+
+            if( e )
+            {
+                SHOW_FLOW( 1, "seek failed , errno=%d", e );
+                ret = e;
+                break;
+            }
+            //if( !e && (nread >= 0) )                ret = nwritten;
+            SHOW_FLOW( 1, "seek opos %d", opos );
+            //return pvm_create_string_object_binary( buf, nread );
+        }
+
+        break;
+
+
     case CONN_OP_READ:
         //e = ENOSYS;
 
@@ -91,8 +122,6 @@ static pvm_object_t cn_fio_blocking_syscall_worker( pvm_object_t conn, struct da
             SHOW_FLOW( 1, "read %d '%*s'", nread, nread, buf );
             return pvm_create_string_object_binary( buf, nread );
         }
-
-
 
         break;
 
