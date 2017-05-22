@@ -247,10 +247,20 @@ retry:;
         size_t count = limit_nsect( ndev, nsect );
 
         SHOW_FLOW( 12, "start sect wr sect %d + %d", secno, count );
+#if 1
         int rc = dma_pci_lba28(
                                ndev, CMD_WRITE_DMA,
                                0, count, // feature reg, sect count
                                secno, physaddr, count );
+#else
+        // unsure, test
+        int rc = reg_pio_data_in_lba28( ndev, int cmd,
+                                  unsigned int fr, unsigned int sc,
+                                  unsigned long lba,
+                                  //unsigned int seg, unsigned int off,
+                                  void *addr,
+                                  long numSect, int multiCnt );
+#endif
         SHOW_FLOW( 12, "end   sect wr sect %d", secno );
 
         if ( rc )
@@ -275,7 +285,7 @@ retry:;
 #else // BLOCKED_IO
 
     int i;
-    for( i = nsec; i > 0; i-- )
+    for( i = nsect; i > 0; i-- )
     {
         int rc = dma_pci_lba28(
                                ndev, CMD_WRITE_DMA,
@@ -311,10 +321,19 @@ retry:;
         size_t count = limit_nsect( ndev, nsect );
 
         SHOW_FLOW( 11, "start sect rd sect %d + %d", secno, count );
+#if 1
         int rc = dma_pci_lba28(
                                ndev, CMD_READ_DMA,
                                0, count, // feature reg, sect count
                                secno, physaddr, count );
+#else
+        // unsure, test
+        int rc = reg_pio_data_in_lba28( ndev, CMD_READ_SECTORS,
+                                  0, count,
+                                  secno,
+                                  physaddr,
+                                  count, 1 );
+#endif
         SHOW_FLOW( 12, "end   sect rd sect %d", secno );
 
         if ( rc )
@@ -340,7 +359,7 @@ retry:;
 
 retry:;
     int i;
-    for( i = nsec; i > 0; i-- )
+    for( i = nsect; i > 0; i-- )
     {
         SHOW_FLOW( 12, "start sect rd sect %d", secno );
         int rc = dma_pci_lba28(

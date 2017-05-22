@@ -357,7 +357,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
     if( phantom_sync_read_sector( p, buf, 0, 1 ))
         return;
 
-    //hexdump(buf, 512, "", 0);
+    //hexdump(buf, 512, "pc partition block", 0);
 
 
     //SHOW_FLOW0( 1, "Got block 0" );
