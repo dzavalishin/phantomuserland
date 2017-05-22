@@ -66,6 +66,8 @@ static pvm_object_t cn_fio_blocking_syscall_worker( pvm_object_t conn, struct da
 
         if( !IS_PHANTOM_INT(arg) )
         {
+            SHOW_ERROR0( 1, "read arg is not integer" );
+            pvm_object_dump( arg );
             e = EINVAL;
             break;
         }
@@ -74,11 +76,14 @@ static pvm_object_t cn_fio_blocking_syscall_worker( pvm_object_t conn, struct da
             int len = pvm_get_int(arg);
             int nread = 0;
 
-            char buf[len+1];
+            char buf[len];
+
+            SHOW_FLOW( 1, "read %d", len );
 
             e =  k_read( &nread, vp->fd, buf, len );
             if( e )
             {
+                SHOW_FLOW( 1, "read failed , errno=%d", e );
                 ret = e;
                 break;
             }

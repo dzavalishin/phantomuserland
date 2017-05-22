@@ -68,3 +68,4 @@ etc/experiments/cpfs/.gdbrc~
 local-config.e2k.mk
 run/last_snap.data
 run/prev_snap.data
+run/trace

@@ -30,8 +30,8 @@ class .internal.connection
 
 	int invoke( var object, var operation_id : int ) [11] {}
 
-//	int block( var object : int, var operation_id : int ) [13] {}
 	int block( var object, var operation_id : int ) [13] {}
+	//.internal.object block( var object, var operation_id : int ) [13] {}
 
 };
 
