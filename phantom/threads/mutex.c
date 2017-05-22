@@ -120,6 +120,7 @@ errno_t hal_mutex_unlock(hal_mutex_t *m)
     thread_unblock( next_owner, THREAD_SLEEP_MUTEX );
 
 ret:
+    GET_CURRENT_THREAD()->ownmutex = 0; // do not release anything on thread death
     hal_spin_unlock(&(mi->lock));
     hal_enable_preemption();
     if(ie) hal_sti();
