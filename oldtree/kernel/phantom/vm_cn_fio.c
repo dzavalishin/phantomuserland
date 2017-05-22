@@ -62,7 +62,33 @@ static pvm_object_t cn_fio_blocking_syscall_worker( pvm_object_t conn, struct da
     {
     default:
     case CONN_OP_READ:
-        e = ENOSYS;
+        //e = ENOSYS;
+
+        if( !IS_PHANTOM_INT(arg) )
+        {
+            e = EINVAL;
+            break;
+        }
+        else
+        {
+            int len = pvm_get_int(arg);
+            int nread = 0;
+
+            char buf[len+1];
+
+            e =  k_read( &nread, vp->fd, buf, len );
+            if( e )
+            {
+                ret = e;
+                break;
+            }
+            //if( !e && (nread >= 0) )                ret = nwritten;
+            SHOW_FLOW( 1, "read %d '%*s'", nread, nread, buf );
+            return pvm_create_string_object_binary( buf, nread );
+        }
+
+
+
         break;
 
     case CONN_OP_WRITE:
@@ -74,15 +100,15 @@ static pvm_object_t cn_fio_blocking_syscall_worker( pvm_object_t conn, struct da
         else
         {
             int len = pvm_get_str_len(arg);
+            const char *data = (const char *)pvm_get_str_data(arg);
             int nwritten = 0;
 
-            e =  k_write( &nwritten, vp->fd, (const char *)pvm_get_str_data(arg), len );
+            e =  k_write( &nwritten, vp->fd, data, len );
             //if( !e && (nwritten != len) )                e = EIO;
             if( !e && (nwritten >= 0) )
                 ret = nwritten;
-            SHOW_FLOW( 1, "write %d", nwritten );
+            SHOW_FLOW( 1, "write %d '%*s'", nwritten, len, data );
         }
-
 
         break;
 
@@ -121,7 +147,10 @@ errno_t cn_fio_init( struct data_area_4_connection *c, struct data_area_4_thread
 #if HAVE_UNIX
     errno_t rc = k_open( &vp->fd, suffix, O_RDWR|O_CREAT, 0666 ); // TODO flags/mode?
     if( rc )
+    {
+        SHOW_ERROR( 1, "connect fio '%s' rc=%d", suffix, rc );
         return rc;
+    }
 #endif // HAVE_UNIX
 
     return 0;
