@@ -40,11 +40,16 @@ static void spin_dump(hal_spinlock_t *sl)
 #endif
 
 
+__asm (".p2align 4;\n"); // for profiler to distingush funcs
+
+
 void hal_spin_init(hal_spinlock_t *sl)
 {
     sl->lock = 0;
     sl->ebp = 0;
 }
+
+__asm (".p2align 4;\n"); // for profiler to distingush funcs
 
 void hal_spin_lock(hal_spinlock_t *sl)
 {
@@ -67,6 +72,9 @@ void hal_spin_lock(hal_spinlock_t *sl)
 #endif
 }
 
+__asm (".p2align 4;\n"); // for profiler to distingush funcs
+
+
 void hal_spin_unlock(hal_spinlock_t *sl)
 {
     if (sl) // Scheduler sometimes calls us will sl == 0
@@ -82,6 +90,7 @@ void hal_spin_unlock(hal_spinlock_t *sl)
         printf("\n!spin unlock STI!\n");
 }
 
+__asm (".p2align 4;\n"); // for profiler to distingush funcs
 
 
 

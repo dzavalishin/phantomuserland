@@ -402,7 +402,7 @@ static void phantom_debug_window_loop()
 		panic("console t_new_ctty");
 #else
     // Need separate ctty
-    t_set_ctty( get_current_tid(), wtty_init() );
+    t_set_ctty( get_current_tid(), wtty_init( WTTY_SMALL_BUF ) );
 #endif
     // TODO HACK! Need ioctl to check num of bytes?
     wtty_t *tty;

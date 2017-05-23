@@ -164,7 +164,7 @@ int do_test_wtty(const char *test_parm)
     for( i = 0; i < MAXTB; i++ )
         buf[i] = i;
 
-    wtty_t *w = wtty_init();
+    wtty_t *w = wtty_init( 5120 ); // TODO check size - ok?
     hal_sem_init( &thread_start, "wtty_test" );
 
     on_fail_call( fail_dump, w );

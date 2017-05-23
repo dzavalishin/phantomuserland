@@ -291,6 +291,14 @@ load_dr6(unsigned int dr6)
      })
 
 
+static __inline u_int64_t
+rdtsc(void)
+{
+	u_int64_t rv;
+
+	__asm __volatile("rdtsc" : "=A" (rv));
+	return (rv);
+}
 
 
 
@@ -410,14 +418,6 @@ rdpmc(unsigned int pmc)
 	return (rv);
 }
 
-static __inline u_int64_t
-rdtsc(void)
-{
-	u_int64_t rv;
-
-	__asm __volatile("rdtsc" : "=A" (rv));
-	return (rv);
-}
 
 static __inline void
 wbinvd(void)

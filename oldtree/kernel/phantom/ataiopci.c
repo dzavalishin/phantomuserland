@@ -222,13 +222,12 @@ static int set_up_xfer( int dir, long bc, physaddr_t phyAddr )
 
 #if DEBUG_PCI & 0x02
     printf( "z=>[prd] set_up_xfer()...\n" );
-    printf( "z=>[prd] dir %d bc %lx seg %04x off %04x",
-            dir, bc, seg, off );
+    printf( "z=>[prd] dir %d bc %lx phyAddr %x ", dir, bc, phyAddr );
 
-    printf( "z=>[prd] maxPrd %d prdPtr %Fp bigCnt %lx smallCnt %lx",
+    printf( "z=>[prd] maxPrd %d prdPtr %p bigCnt %x smallCnt %x ",
             maxPrd, prdPtr, bigCnt, smallCnt );
 
-    printf( "z=>[prd] phyAddr %08lx", phyAddr );
+    printf( "z=>[prd] phyAddr %08lx ", phyAddr );
 
 #endif
 

@@ -90,6 +90,8 @@ void call_irq_handler(struct trap_state *s, unsigned irq)
         return;
     }
 
+	profile_interrupt_enter();
+
 #ifdef ARCH_ia32
     // #define RTC interrupt
     if( irq == 8 )
@@ -113,9 +115,11 @@ void call_irq_handler(struct trap_state *s, unsigned irq)
             panic("IRQ %d func is zero", irq );
         it->ihandler( it->arg );
         hal_cli(); // In case handler enabled 'em
+		// TODO assert cli?
     }
     //hal_spin_unlock(&irq_list_lock);
 
+	profile_interrupt_leave( irq );
 }
 
 

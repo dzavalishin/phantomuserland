@@ -218,7 +218,7 @@ int 					hal_time_init(void); // asks RTC
 
 void 					hal_time_tick(int tick_rate);
 
-
+u_int64_t                               hal_get_interrupt_profiling_time(); // returns time in CPU/arch dependent ticks, on ia32 it is RDTSC instruction
 
 
 // ------------------------------------------------------------------------------------------
