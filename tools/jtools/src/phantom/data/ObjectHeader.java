@@ -24,12 +24,15 @@ public class ObjectHeader extends AllocHeader {
 
 	@Override
 	public void loadHeader(ByteBuffer bb) throws DataLoadException {
+		int start = bb.position();
+		
 		super.loadHeader(bb);
 
 		if(!isAllocated())
 		{
 			// not allocated, just empty space? Skip.
-			bb.position(bb.position()+getExactSize()-AllocHeader.PHANTOM_OBJECT_HEADER_SIZE);
+			bb.position(start+getExactSize());
+			//bb.position(bb.position()+getExactSize()-AllocHeader.PHANTOM_OBJECT_HEADER_SIZE);
 			return;
 		}
 		
@@ -42,6 +45,8 @@ public class ObjectHeader extends AllocHeader {
 		bb.get(daArray, 0, daSize);
 		
 		dataArea = ByteBuffer.wrap(daArray).asReadOnlyBuffer();
+
+		bb.position(start+getExactSize());
 	}
 	
 	public ByteBuffer getDataArea() {
@@ -55,6 +60,12 @@ public class ObjectHeader extends AllocHeader {
 		return 
 				((objectFlags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) != 0) && 
 				((objectFlags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) == 0);
+	}
+	public void dump() {
+		if(!isAllocated()) System.out.print("NonAlloc ");
+		System.out.print("size = "+getExactSize() + " da size = "+getDaSize() );		
+		//System.out.print(" allocFlags = "+Integer.toHexString(getAllocFlags()) );		
+		System.out.println();		
 	}
 	
 	
