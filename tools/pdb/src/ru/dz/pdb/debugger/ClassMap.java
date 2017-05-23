@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.Main;
 import ru.dz.pdb.phantom.ClassObject;
 import ru.dz.pdb.phantom.InvalidObjectOperationException;
 import ru.dz.pdb.phantom.ObjectHeader;
-import ru.dz.pdb.phantom.ObjectRef;
 
 /*
  * Cache of class info objects to present class info quickly
