@@ -23,9 +23,16 @@ public class ObjectHeader extends AllocHeader {
 	public String getFlagsList() { return getFlagsList(objectFlags); }
 
 	@Override
-	protected void loadHeader(ByteBuffer bb) throws DataLoadException {
+	public void loadHeader(ByteBuffer bb) throws DataLoadException {
 		super.loadHeader(bb);
 
+		if(!isAllocated())
+		{
+			// not allocated, just empty space? Skip.
+			bb.position(bb.position()+getExactSize()-AllocHeader.PHANTOM_OBJECT_HEADER_SIZE);
+			return;
+		}
+		
 		oClass = new ObjectRef(bb);
 		oSatellites = new ObjectRef(bb);
 		objectFlags = bb.getInt();

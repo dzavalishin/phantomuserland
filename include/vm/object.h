@@ -24,7 +24,7 @@
 
 #define PVM_OBJECT_START_MARKER 0x7FAA7F55
 
-
+// TODO add two bytes after flags to assure alignment
 struct object_PVM_ALLOC_Header
 {
     unsigned int                object_start_marker;
