@@ -47,11 +47,12 @@ CON_F_PROTOS(url)       // curl style HTTP
 
 // Well known connection operation numbers. Not all types of conns use these numbers.
 
-#define CONN_OP_READ		0
-#define CONN_OP_WRITE		1
+#define CONN_OP_READ            0
+#define CONN_OP_WRITE           1
+#define CONN_OP_SEEK            2
 
 
-#define CONN_OP_BIND		16
+#define CONN_OP_BIND           16
 
 
 struct cn_udp_persistent

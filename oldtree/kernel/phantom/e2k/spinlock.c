@@ -7,6 +7,56 @@
 #include <e2k/proc_reg.h>
 #endif
 
+#if HAVE_SMP
+#  error no spinlocks yet
+#endif
+
+
+/*
+#if SPIN_DEBUG && !HAVE_SMP
+int global_lock_entry_count[MAX_CPUS] = {};
+
+static void spin_dump(hal_spinlock_t *sl)
+{
+    printf("spinlock reenter detected, prev enter was here:\n");
+    stack_dump_from((void *)(sl->ebp));
+    panic("reenter");
+}
+#endif
+*/
+
+
+void hal_spin_init(hal_spinlock_t *sl)
+{
+    sl->lock = 0;
+    //sl->stack_frame = 0;
+}
+
+void hal_spin_lock(hal_spinlock_t *sl)
+{
+    (void) sl;
+}
+
+void hal_spin_unlock(hal_spinlock_t *sl)
+{
+    (void) sl;
+}
+
+
+void check_global_lock_entry_count()
+{
+/*
+#if SPIN_DEBUG && 1 && !HAVE_SMP
+    if(global_lock_entry_count[GET_CPU_ID()] > 1)
+    {
+        printf("some spinlock locked!");
+        stack_dump_from( arch_get_frame_pointer() );
+    }
+#endif
+*/
+}
+
+
 /*
 
 // -----------------------------------------------------------------------

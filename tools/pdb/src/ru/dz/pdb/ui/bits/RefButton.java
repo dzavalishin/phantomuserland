@@ -5,8 +5,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.Main;
-import ru.dz.pdb.phantom.ObjectRef;
 
 /**
  * Opens ref (object inspector) on press, shows ref in tip.

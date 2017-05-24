@@ -16,12 +16,12 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.CmdException;
 import ru.dz.pdb.Main;
 import ru.dz.pdb.phantom.IKnownType;
 import ru.dz.pdb.phantom.InvalidObjectOperationException;
 import ru.dz.pdb.phantom.ObjectHeader;
-import ru.dz.pdb.phantom.ObjectRef;
 import ru.dz.pdb.ui.bits.RefButton;
 
 public class InspectorFrame extends JFrame {

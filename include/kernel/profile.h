@@ -41,5 +41,15 @@ int percpu_idle_count[MAX_CPUS][2]; // [cpu][1] increments in idle, [cpu][0] in 
 int percpu_cpu_load[MAX_CPUS]; // load percentage
 
 
+// Profile interrupts - measure service time
+
+
+void profile_interrupt_enter( void );
+void profile_interrupt_leave( int n_interrupt );
+
+extern u_int64_t longest_interrupt_time;
+extern int longest_interrupt_no;
+
+
 #endif // KERNEL_PROFILER_H
 

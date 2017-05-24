@@ -58,6 +58,33 @@ static void start_io(struct disk_q *q)
         return;
     }
 
+#if DISK_Q_RW_SEPARATE
+    if( queue_empty(&(q->requests_r)) && queue_empty(&(q->requests_w)) )
+    {
+        UNLOCK();
+        return;
+    }
+
+    if( !queue_empty(&(q->requests_r)) )
+    {
+        // Have reads - do first
+        pager_io_request *rq = (pager_io_request *)queue_first(&q->requests_r);
+        hal_spin_lock(&rq->chain_lock);
+        rq->flag_chained = 0;
+        queue_remove_first(&(q->requests_r), q->current, pager_io_request *, disk_chain);
+        hal_spin_unlock(&rq->chain_lock);
+    }
+    else
+    {
+        assert(!queue_empty(&(q->requests_w)));
+        // No reads - do writes
+        pager_io_request *rq = (pager_io_request *)queue_first(&q->requests_w);
+        hal_spin_lock(&rq->chain_lock);
+        rq->flag_chained = 0;
+        queue_remove_first(&(q->requests_w), q->current, pager_io_request *, disk_chain);
+        hal_spin_unlock(&rq->chain_lock);
+    }
+#else
     if(queue_empty(&(q->requests)))
     {
         UNLOCK();
@@ -69,6 +96,7 @@ static void start_io(struct disk_q *q)
     rq->flag_chained = 0;
     queue_remove_first(&(q->requests), q->current, pager_io_request *, disk_chain);
     hal_spin_unlock(&rq->chain_lock);
+#endif
 
     UNLOCK();
 
@@ -154,6 +182,32 @@ static errno_t queueAsyncIo( struct phantom_disk_partition *p, pager_io_request 
 
     rq->flag_chained = 1;
 
+#if DISK_Q_RW_SEPARATE
+    if(rq->flag_pagein)
+    {
+        // read
+        if(rq->flag_urgent)
+        {
+            queue_enter_first(&(q->requests_r), rq, pager_io_request *, disk_chain);
+        }
+        else
+        {
+            queue_enter(&(q->requests_r), rq, pager_io_request *, disk_chain);
+        }
+    }
+    else
+    {
+        // write
+        if(rq->flag_urgent)
+        {
+            queue_enter_first(&(q->requests_r), rq, pager_io_request *, disk_chain);
+        }
+        else
+        {
+            queue_enter(&(q->requests_r), rq, pager_io_request *, disk_chain);
+        }
+    }
+#else
     if(rq->flag_urgent)
     {
         queue_enter_first(&(q->requests), rq, pager_io_request *, disk_chain);
@@ -162,6 +216,7 @@ static errno_t queueAsyncIo( struct phantom_disk_partition *p, pager_io_request 
     {
         queue_enter(&(q->requests), rq, pager_io_request *, disk_chain);
     }
+#endif
 
     hal_spin_unlock(&rq->chain_lock);
     UNLOCK();
@@ -190,12 +245,22 @@ static errno_t queueDequeue( struct phantom_disk_partition *p, pager_io_request 
         hal_spin_lock(&rq->chain_lock);
         if(rq->flag_chained)
         {
+#if DISK_Q_RW_SEPARATE
+            assert(  (!queue_empty(&(q->requests_r))) || (!queue_empty(&(q->requests_w))) );
+            // TODO assert that block is really in q
+            queue_remove( &(q->requests_r), rq, pager_io_request *, disk_chain);
+            queue_remove( &(q->requests_w), rq, pager_io_request *, disk_chain);
+            rq->flag_chained = 0;
+            rq->flag_pageout = 0;
+            rq->flag_pagein = 0;
+#else
             assert(!queue_empty(&(q->requests)));
             // TODO assert that block is really in q
             queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
             rq->flag_chained = 0;
             rq->flag_pageout = 0;
             rq->flag_pagein = 0;
+#endif
         }
         else
             ret = ESRCH;
@@ -228,10 +293,26 @@ static errno_t queueRaisePrio( struct phantom_disk_partition *p, pager_io_reques
         hal_spin_lock(&rq->chain_lock);
         if(rq->flag_chained)
         {
+#if DISK_Q_RW_SEPARATE
+            assert(  (!queue_empty(&(q->requests_r))) || (!queue_empty(&(q->requests_w))) );
+            // TODO assert that block is really in q
+            queue_remove( &(q->requests_r), rq, pager_io_request *, disk_chain);
+            queue_remove( &(q->requests_w), rq, pager_io_request *, disk_chain);
+
+            if(rq->flag_pagein)
+            {
+                queue_enter_first( &(q->requests_r), rq, pager_io_request *, disk_chain);
+            }
+            else
+            {
+                queue_enter_first( &(q->requests_w), rq, pager_io_request *, disk_chain);
+            }
+#else
             assert(!queue_empty(&(q->requests)));
             // TODO assert that block is really in q
             queue_remove( &(q->requests), rq, pager_io_request *, disk_chain);
             queue_enter_first( &(q->requests), rq, pager_io_request *, disk_chain);
+#endif
         }
         else
             ret = ESRCH;
@@ -249,7 +330,12 @@ void phantom_init_disk_q(struct disk_q *q, void (*startIo)( struct disk_q *q ))
 {
     q->struct_id = DISK_Q_STRUCT_ID;
     q->ioDone = interrupt;
+#if DISK_Q_RW_SEPARATE
+    queue_init(&(q->requests_r));
+    queue_init(&(q->requests_w));
+#else
     queue_init(&(q->requests));
+#endif
     q->current = 0;
     q->startIo = startIo;
     hal_spin_init(&(q->lock));

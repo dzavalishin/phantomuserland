@@ -29,10 +29,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.sun.security.auth.UserPrincipal;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.debugger.ClassMap;
 import ru.dz.pdb.phantom.ClassObject;
 import ru.dz.pdb.phantom.ObjectHeader;
-import ru.dz.pdb.phantom.ObjectRef;
 import ru.dz.pdb.ui.InspectorFrame;
 import ru.dz.pdb.ui.MainFrame;
 import ru.dz.pdb.ui.config.ConfigFrame;

@@ -35,6 +35,15 @@ class shell_callback //extends runnable
 		// test of fio connection
 		fio = new .internal.connection();
         fio.connect("fio:/amnt1/fio_log.txt");
+
+        var data : .internal.string;
+
+		data = fio.block(10, 0); // 1st arg is max read len
+
+        console.putws("\nfio data: '");
+        console.putws( data );
+        console.putws("'\n");
+
 		fio.block("written from phantom code", 1);
 
     }

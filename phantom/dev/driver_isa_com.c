@@ -184,8 +184,8 @@ phantom_device_t * driver_isa_com_probe( int port, int irq, int stage )
     hal_sem_init( &(cp->rsem), "serialRd" );
     hal_sem_init( &(cp->wsem), "serialWr" );
 
-    cp->rdq = wtty_init(); assert(cp->rdq);
-    cp->wrq = wtty_init(); assert(cp->wrq);
+    cp->rdq = wtty_init( WTTY_SMALL_BUF ); assert(cp->rdq);
+    cp->wrq = wtty_init( WTTY_SMALL_BUF ); assert(cp->wrq);
 
 
     cp->baudRate = 9600;

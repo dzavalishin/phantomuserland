@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.Main;
 import ru.dz.pdb.ui.bits.RefButton;
 
@@ -49,7 +50,8 @@ public class ClassObject implements IInternalObject {
 		field_names = new ObjectRef(bb);
 	}
 	
-	public String getClassName() { return class_name.getObject().getAsString(); }
+	//public String getClassName() { return class_name.getObject().getAsString(); }
+	public String getClassName() { return Main.getPhantomObject(class_name).getAsString(); }
 	/*public String getParentName() {
 		if(class_parent == null)
 			return "-";

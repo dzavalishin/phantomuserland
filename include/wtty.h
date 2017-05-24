@@ -16,6 +16,14 @@
 #include <phantom_types.h>
 #include <hal.h>
 
+#define CONF_WTTY_SIZE 1
+
+// Preset buffer sizes to use as _init() parameter
+
+#define WTTY_SMALL_BUF 128
+
+
+
 /** \ingroup Threads
  *  \defgroup Threads Window subsystem 'controlling terminal' data structures
  *  @{
@@ -89,7 +97,8 @@ void            wtty_stop(wtty_t * w);          // all blocked calls return EPIP
 void            wtty_start(wtty_t * w);
 int             wtty_is_started(wtty_t *w);
 
-wtty_t *        wtty_init(void);
+wtty_t *        wtty_init( size_t bufferSize );
+//wtty_t *        wtty_init_ext(void);
 void            wtty_destroy(wtty_t * w);
 
 void            wtty_dump( wtty_t * w );

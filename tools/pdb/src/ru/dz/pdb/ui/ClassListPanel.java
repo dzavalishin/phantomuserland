@@ -12,11 +12,11 @@ import java.util.logging.Logger;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.CmdException;
 import ru.dz.pdb.Main;
 import ru.dz.pdb.debugger.ClassMap;
 import ru.dz.pdb.phantom.ClassObject;
-import ru.dz.pdb.phantom.ObjectRef;
 
 public class ClassListPanel extends JTable {
 	protected static final Logger log = Logger.getLogger(ClassListPanel.class.getName()); 

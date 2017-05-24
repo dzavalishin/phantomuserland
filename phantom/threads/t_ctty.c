@@ -51,7 +51,7 @@ static void * 	do_ctty_create(void *arg)
 
     ctty_t *ret = calloc( 1, sizeof(ctty_t) );
 
-    ret->wtty = wtty_init(); // DEFAULT_CTTY_QUEUE_SIZE
+    ret->wtty = wtty_init( WTTY_SMALL_BUF ); // DEFAULT_CTTY_QUEUE_SIZE
     if( ret->wtty == 0 )
         return 0;
 

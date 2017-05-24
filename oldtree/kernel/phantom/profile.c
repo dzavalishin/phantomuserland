@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
  * Kernel profiler.
  *
@@ -159,6 +159,11 @@ void profiler_dump_map( void )
 void phantom_dump_profiler_buf(char *buf, int len)
 {
     int rc;
+
+    rc = snprintf(buf, len, "Longest interrupt %d, %ld ticks\n", longest_interrupt_no, (long)longest_interrupt_time );
+    buf += rc;
+    len -= rc;
+
     rc = snprintf(buf, len, "Profile (%d events total):\n\x1b[35m IP      Count    %%  Name\x1b[37m\n", total_count);
     buf += rc;
     len -= rc;
@@ -227,9 +232,38 @@ void phantom_dump_profiler_buf(char *buf, int len)
 
 
 
+// -----------------------------------------------------------------------
+// Profile interrupts - count interrupt time
+// -----------------------------------------------------------------------
 
+static u_int64_t int_start_time;
 
+u_int64_t longest_interrupt_time = 0;
+int longest_interrupt_no = -1;
 
+// must be called in closed interrupts
+void profile_interrupt_enter( void )
+{
+    assert_interrupts_disabled();
+
+    int_start_time = hal_get_interrupt_profiling_time();
+}
+
+// must be called in closed interrupts
+void profile_interrupt_leave( int n_interrupt )
+{
+    assert_interrupts_disabled();
+
+    u_int64_t int_end_time = hal_get_interrupt_profiling_time();
+
+    u_int64_t int_time = int_end_time - int_start_time;
+
+    if( longest_interrupt_time < int_time )
+    {
+        longest_interrupt_time = int_time;
+        longest_interrupt_no = n_interrupt;
+    }
+}
 
 
 

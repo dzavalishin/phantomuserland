@@ -24,7 +24,7 @@
 
 #define PVM_OBJECT_START_MARKER 0x7FAA7F55
 
-
+// TODO add two bytes after flags to assure alignment
 struct object_PVM_ALLOC_Header
 {
     unsigned int                object_start_marker;
@@ -147,26 +147,26 @@ int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tc
  *
 **/
 
-struct pvm_object       pvm_get_field( struct pvm_object_storage *, unsigned int no );
-struct pvm_object       pvm_get_ofield( struct pvm_object, unsigned int no );
-void       		pvm_set_field( struct pvm_object_storage *, unsigned int no, struct pvm_object value );
-void       		pvm_set_ofield( struct pvm_object, unsigned int no, struct pvm_object value );
+struct pvm_object     pvm_get_field( struct pvm_object_storage *, unsigned int no );
+struct pvm_object     pvm_get_ofield( struct pvm_object, unsigned int no );
+void                  pvm_set_field( struct pvm_object_storage *, unsigned int no, struct pvm_object value );
+void                  pvm_set_ofield( struct pvm_object, unsigned int no, struct pvm_object value );
 
 // Need it here? It will be called by usual set field ones...
-struct pvm_object  	pvm_get_array_ofield(struct pvm_object_storage *o, unsigned int slot  );
-void 			pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struct pvm_object value );
+struct pvm_object     pvm_get_array_ofield(struct pvm_object_storage *o, unsigned int slot  );
+void                  pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struct pvm_object value );
 
-int                     get_array_size(struct pvm_object_storage *array);
-void 			pvm_append_array(struct pvm_object_storage *array, struct pvm_object value_to_append );
-void			pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop );
+int                   get_array_size(struct pvm_object_storage *array);
+void                  pvm_append_array(struct pvm_object_storage *array, struct pvm_object value_to_append );
+void                  pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop );
 
 // Debug
 
-void                    pvm_object_print( struct pvm_object );
-void                    pvm_object_dump( struct pvm_object o );
-void                    dumpo( addr_t addr );
-void					pvm_puts(struct pvm_object o );
-struct pvm_object       pvm_get_class_name( struct pvm_object );
+void                  pvm_object_print( struct pvm_object );
+void                  pvm_object_dump( struct pvm_object o );
+void                  dumpo( addr_t addr );
+void                  pvm_puts(struct pvm_object o );
+struct pvm_object     pvm_get_class_name( struct pvm_object );
 
 /**
  *
@@ -217,7 +217,7 @@ struct pvm_object     pvm_create_double_object(double value);
 struct pvm_object     pvm_create_string_object(const char *value);
 struct pvm_object     pvm_create_string_object_binary(const char *value, int length);
 struct pvm_object     pvm_create_string_object_binary_cat(
-	const char *value1, int n_bytes1,
+        const char *value1, int n_bytes1,
         const char *value2, int n_bytes2 );
 
 //struct pvm_object     pvm_create_array_object(void);

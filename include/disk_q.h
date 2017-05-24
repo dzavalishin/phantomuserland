@@ -21,6 +21,8 @@
  * @{
 **/
 
+// Separate read and write queues, see #135, fails yet on second snap/reboot
+#define DISK_Q_RW_SEPARATE 0
 
 // TODO bring 'em to one place, make unique
 #define DISK_Q_STRUCT_ID 0x12120001
@@ -36,7 +38,12 @@ struct disk_q
 
     hal_spinlock_t                      lock;
 
+#if DISK_Q_RW_SEPARATE
+    queue_head_t                        requests_r;
+    queue_head_t                        requests_w;
+#else
     queue_head_t                        requests;
+#endif
 
     pager_io_request                    *current; // The one we do now or null
 

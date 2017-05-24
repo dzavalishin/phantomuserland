@@ -11,10 +11,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.CmdException;
 import ru.dz.pdb.Main;
 import ru.dz.pdb.misc.VisualHelpers;
-import ru.dz.pdb.phantom.ObjectRef;
 
 public class ThreadListPanel extends JTable {
 	protected static final Logger log = Logger.getLogger(ThreadListPanel.class.getName()); 
