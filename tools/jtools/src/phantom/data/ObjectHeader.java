@@ -63,6 +63,7 @@ public class ObjectHeader extends AllocHeader {
 	}
 	public void dump() {
 		if(!isAllocated()) System.out.print("NonAlloc ");
+		if(getRefCount() == 0) System.out.print("Ref0! ");
 		System.out.print("size = "+getExactSize() + " da size = "+getDaSize() );		
 		//System.out.print(" allocFlags = "+Integer.toHexString(getAllocFlags()) );		
 		System.out.println();		
