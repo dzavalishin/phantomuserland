@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.ui.bits.RefButton;
 
 public class OStackObject extends AbstractStackObject {

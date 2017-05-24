@@ -8,10 +8,10 @@ import java.util.logging.Logger;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import phantom.data.ObjectRef;
 import ru.dz.pdb.phantom.ClassObject;
 import ru.dz.pdb.phantom.FileProgramSource;
 import ru.dz.pdb.phantom.IProgramSource;
-import ru.dz.pdb.phantom.ObjectRef;
 import ru.dz.pdb.phantom.PhantomClassNotFoundException;
 
 public class SourceAsmPanel extends JTable {
