@@ -14,6 +14,9 @@ rem SET QCMD=qemu-system-i386w.exe
 
 rem SET QCMD=qemu-system-x86_64w.exe 
 
+rem SET QDIR=C:\bin\qemu
+rem SET QCMD=qemu-system-x86_64.exe
+
 set QEMU_AUDIO_DRV=dsound
 set QEMU_AUDIO_DRV=sdl
 rem set QEMU_AUDIO_DRV=fmod
@@ -44,7 +47,7 @@ SET Q_REDIR=-redir udp:8023::23 -redir udp:8007::7 -redir tcp:8007::7 -redir udp
 
 SET Q_PORTS= -serial file:serial0.log
 
-SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 
+rem SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 
 
 rem SET Q_NET= -net nic,model=ne2k_pci -net nic
 SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
@@ -58,8 +61,10 @@ SET Q_MACHINE=-m 256
 rem SET Q_MACHINE=-m 120
 
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img
-SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb openwrt-x86-ext2.image.kernel -hda fat:fat -hdb phantom.img
-SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -hdb phantom.img
+rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb openwrt-x86-ext2.image.kernel -hda fat:fat -hdb phantom.img
+rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -hdb phantom.img
+rem SET Q_DISKS=-boot a -no-fd-bootchk -fda raw:img/grubfloppy-hd0.img   -hdb phantom.img
+SET Q_DISKS=-boot a -no-fd-bootchk -drive file=img/grubfloppy-hd0.img,index=0,if=floppy,format=raw -drive file=fat:rw:fat,format=raw -drive if=ide,index=1,file=phantom.img,format=raw
 
 rem -fdb kolibri.iso
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb e2.img -hda fat:fat -hdb phantom.img 
@@ -77,7 +82,8 @@ rem -virtioconsole 1
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
-start /wait %QDIR%\%QCMD% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
+rem start /wait 
+%QDIR%\%QCMD% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
 
 
 grep KERNEL.TEST serial0.log
