@@ -1,3 +1,5 @@
+#if 0
+
 #include <hal.h>
 #include <kernel/vm.h>
 #include <disk.h>
@@ -1113,3 +1115,5 @@ extern void trc_llt( unsigned char addr,
 
 
 // end ataio.h
+
+#endif
