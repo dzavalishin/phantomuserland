@@ -1099,6 +1099,9 @@ static void ahci_connect_port( ahci_port_t *p )
 // -----------------------------------------------------------------------
 
 
+#define DWORD u_int32_t
+#define BYTE u_int8_t
+
 typedef volatile struct tagHBA_PORT
 {
     DWORD	clb;		// 0x00, command list base address, 1K-byte aligned
