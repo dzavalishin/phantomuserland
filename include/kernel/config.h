@@ -15,6 +15,9 @@
 // Dynamic wtty_t size
 //#define CONF_WTTY_SIZE 1
 
+// use ide driver ported from embox. faster, but unstable yet :( - snapshot is broken
+#define EMBOX_IDE_DRIVER 0
+
 
 #define UHCI_INTERRUPT 0
 #define OHCI_INTERRUPT 1
@@ -67,7 +70,7 @@
 #  define HAVE_VESA 1
 
 #  define HAVE_FLOPPY 1
-#  define HAVE_AHCI 0
+#  define HAVE_AHCI 1
 #  define HAVE_KOLIBRI 1
 #else
 #  define HAVE_SMP 0

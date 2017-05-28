@@ -1,3 +1,4 @@
+#if !EMBOX_IDE_DRIVER
 #ifdef ARCH_ia32
 
 //********************************************************************
@@ -273,3 +274,4 @@ void dump_ide_stats()
 
 // end ataioint.c
 #endif // ARCH_ia32
+#endif

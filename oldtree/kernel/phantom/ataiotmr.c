@@ -1,3 +1,4 @@
+#if !EMBOX_IDE_DRIVER
 #ifdef ARCH_ia32
 //********************************************************************
 // ATA LOW LEVEL I/O DRIVER -- ATAIOTMR.C
@@ -322,3 +323,4 @@ void tmr_delay_xfer( void )
 
 // end ataiotmr.c
 #endif // ARCH_ia32
+#endif

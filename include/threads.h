@@ -167,8 +167,8 @@ tid_t           hal_start_thread(void (*thread)(void *arg), void *arg, int flags
 //errno_t         hal_set_current_thread_priority( int prio );
 //int             hal_get_current_thread_priority();
 
-#define hal_set_current_thread_name hal_set_thread_name
-void            hal_set_thread_name(const char *name);
+//#define hal_set_current_thread_name hal_set_thread_name
+//void            hal_set_thread_name(const char *name);
 
 
 void            hal_disable_preemption(void);
@@ -225,7 +225,7 @@ void hal_set_thread_death_handler(void (*handler)( phantom_thread_t * ));
 
 int phantom_vm_threads_get_count(void);
 
-void hal_set_thread_name(const char *name);
+//void hal_set_thread_name(const char *name);
 
 
 

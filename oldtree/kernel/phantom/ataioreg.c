@@ -1,3 +1,4 @@
+#if !EMBOX_IDE_DRIVER
 #ifdef ARCH_ia32
 
 //********************************************************************
@@ -2187,3 +2188,4 @@ int reg_packet( int dev,
 
 // end ataioreg.c
 #endif // ARCH_ia32
+#endif

@@ -351,7 +351,9 @@ int main(int argc, char **argv, char **envp)
 #endif
 
 #ifdef ARCH_ia32
+#if !EMBOX_IDE_DRIVER
     connect_ide_io();
+#endif
 #endif
 
     // -----------------------------------------------------------------------

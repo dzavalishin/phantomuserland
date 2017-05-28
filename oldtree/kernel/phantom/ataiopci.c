@@ -1,3 +1,4 @@
+#if !EMBOX_IDE_DRIVER
 #ifdef ARCH_ia32
 
 /**
@@ -571,7 +572,7 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr, long numSect )
     // Start the command by setting the Command register.  The drive
     // should immediately set BUSY status.
 
-    pio_outbyte( CB_CMD, ata->reg_cmd_info.cmd );
+    pio_outbyte( CB_CMD, ata->reg_cmd_info.cmd ); // TODO soutld we start DMA first?
 
     // The drive should start executing the command including any
     // data transfer.
@@ -586,6 +587,7 @@ static int exec_pci_ata_cmd( int dev, physaddr_t physAddr, long numSect )
     sub_writeBusMstrCmd( rwControl | BM_CR_MASK_START );
     sub_readBusMstrCmd();
     sub_readBusMstrStatus();
+
 
     // Data transfer...
     // the device and dma channel transfer the data here while we start
@@ -1251,3 +1253,5 @@ int dma_pci_packet( int dev,
 
 // end ataiopci.c
 #endif // ARCH_ia32
+
+#endif

@@ -91,6 +91,9 @@ typedef struct
 } ahci_t;
 
 
+static void dump_ahci_registers( void *reg );
+
+
 
 static void ahci_interrupt(void *arg);
 
@@ -211,12 +214,12 @@ static inline addr_t ahci_port_base( phantom_device_t *dev, int port)
 
 static inline u_int32_t RP32( phantom_device_t *dev, int port, int displ)
 {
-    return *(u_int32_t*) (ahci_port_base(dev,port)+displ);
+    return *(volatile u_int32_t*) (ahci_port_base(dev,port)+displ);
 }
 
 static inline void WP32( phantom_device_t *dev, int port, int displ, u_int32_t v)
 {
-    *(u_int32_t*) (ahci_port_base(dev,port)+displ) = v;
+    *(volatile u_int32_t*) (ahci_port_base(dev,port)+displ) = v;
 }
 
 
@@ -254,7 +257,7 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
 
     physaddr_t pa;
     void *va;
-    hal_pv_alloc( &(pa), &va, cmd_bytes*AHCI_CL_SIZE );
+    hal_pv_alloc( &(pa), &va, cmd_bytes*AHCI_CL_SIZE ); // TODO alloc a space & mem separately, map with io flag?
     memset( va, cmd_bytes*AHCI_CL_SIZE, 0 );
 
     p->cmds = va;
@@ -294,7 +297,7 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
 
 
     p->sig = RP32( dev, nport, AHCI_P_SIG );
-    if( p->sig == SATA_SIG_ATA )
+    if( (p->sig == SATA_SIG_ATA) || (p->sig == 0xFFFFFFFFu) ) // TODO fix me QEMU returns this sig! Or do we read it in a wrong way?
         SHOW_INFO( 0, DEV_NAME " port %d is ATA", nport );
     else
     {
@@ -408,16 +411,21 @@ static int ahci_init(phantom_device_t *dev)
         {
             a->port[nport].exist = 1;
             SHOW_INFO( 4, "port %d implemented", nport );
-            if( ahci_init_port(dev, nport) )
-                return ENXIO;
+            errno_t rc = ahci_init_port(dev, nport);
+            if( rc )
+            {
+                SHOW_INFO( 4, "port %d init err=%d", nport, rc );
+                //return ENXIO;
+            }
         }
-        ports <<= 1;
+        //ports <<= 1;
+        ports >>= 1;
         nport++;
     }
 
     // now tell us something
 
-    printf("AHCI flags: %s%s%s%s%s%s%s%s%s%s%s%s%s\n",
+    printf("AHCI flags: < %s%s%s%s%s%s%s%s%s%s%s%s%s>\n",
            cap & (1 << 31) ? "64bit " : "",
            cap & (1 << 30) ? "ncq " : "",
            cap & (1 << 28) ? "ilck " : "",
@@ -432,6 +440,8 @@ static int ahci_init(phantom_device_t *dev)
            cap & (1 << 14) ? "slum " : "",
 	       cap & (1 << 13) ? "part " : "");
 
+    dump_ahci_registers( dev->iomem );
+
     return 0;
 }
 
@@ -440,7 +450,8 @@ static void finalize_thread(void *arg)
     phantom_device_t *dev = arg;
     ahci_t *a = dev->drv_private;
 
-    hal_set_current_thread_name(DEV_NAME " drv");
+    //hal_set_current_thread_name(DEV_NAME " drv");
+    t_current_set_name(DEV_NAME " drv");
     while(1)
     {
         // TODO stop driver?
@@ -533,7 +544,8 @@ static void ahci_interrupt(void *arg)
     {
         if( ports & 1 )
             ahci_port_interrupt(dev, nport);
-        ports <<= 1;
+        //ports <<= 1;
+        ports >>= 1;
         nport++;
     }
 
@@ -579,8 +591,13 @@ static void ahci_start_cmd(phantom_device_t *dev, int nport, int ncmd)
 {
     ahci_t *a = dev->drv_private;
     SHOW_FLOW( 8, "start slot %d on port %d ", ncmd, nport );
+
+    // TODO am I right? Don't we loose something?
+    WP32( dev, nport, AHCI_P_IS, -1 ); // reset all interrupts
+
     WP32( dev, nport, AHCI_P_CI, 1 << ncmd);
     atomic_or( (int *)&(a->port[nport].c_started), 1 << ncmd );
+
 }
 
 
@@ -604,12 +621,12 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     assert(pFreeSlot<AHCI_CL_SIZE);
 
-    struct ahci_cmd_tab *       cmd = a->port[nport].cmds+pFreeSlot;
-    struct ahci_cmd_list*	cp = a->port[nport].clb+pFreeSlot;
+    volatile struct ahci_cmd_tab *       cmd = a->port[nport].cmds+pFreeSlot;
+    volatile struct ahci_cmd_list*	cp = a->port[nport].clb+pFreeSlot;
 
     a->port[nport].reqs[pFreeSlot] = req;
 
-    SHOW_FLOW( 6, "rq sect %d", req->blockNo );
+    SHOW_FLOW( 6, "slot %d rq sect %ld nsect %d", pFreeSlot, (long)req->blockNo, req->nSect );
 
     cp->prd_length = 1;
     cp->cmd_flags = ( (req->flag_pageout) ? AHCI_CMD_WRITE : 0);
@@ -618,7 +635,8 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     // TODO assert req->nSect * 512 < max size per prd
 
     cmd->prd_tab[0].dba = req->phys_page;
-    cmd->prd_tab[0].dbc = (req->nSect * 512) - 1; // dbc of 0 means 1 byte!!!!
+    //cmd->prd_tab[0].dbc = (req->nSect * 512) - 1; // dbc of 0 means 1 byte!!!!
+    cmd->prd_tab[0].dbc = (req->nSect * 512); // dbc of 0 means 1 byte!!!! -- check
 
     // This is wrong interrupt cause?
     cmd->prd_tab[0].dbc |= AHCI_PRD_IPC; // Req interrupt!
@@ -631,8 +649,8 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     fis[0] = 0x27;		/* Host to device FIS. */
     fis[1] = 1 << 7;	        /* Command FIS. */
 
-    //fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA_EXT : ATA_CMD_READ_DMA_EXT;	/* Command byte. LBA48 */
-    fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA : ATA_CMD_READ_DMA;	/* Command byte. LBA28 */
+    fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA_EXT : ATA_CMD_READ_DMA_EXT;	/* Command byte. LBA48 */
+    //fis[2] = (req->flag_pageout) ? ATA_CMD_WRITE_DMA : ATA_CMD_READ_DMA;	/* Command byte. LBA28 */
 
     u_int32_t lba = req->blockNo;
     SHOW_FLOW( 1, "lba %d", lba );
@@ -669,7 +687,7 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 
     unsigned fl = sizeof(fis_reg_h2d_t);
     //unsigned fl = 16;
-    cp->cmd_flags |= fl>>2;
+    cp->cmd_flags |= (( fl-1 ) >> 2 ) + 1;
 
     return pFreeSlot;
 }
@@ -805,7 +823,7 @@ static void ahci_finish_cmd(phantom_device_t *dev, int nport, int slot)
         if( cp->bytecount != ((unsigned) (req->nSect * 512)) )
         {
             req->rc = EIO;
-            req->flag_ioerror = 1;
+            //req->flag_ioerror = 1;
             SHOW_ERROR( 1, "IO error port %d, expected %d bytes, got %d", nport, req->nSect * 512, cp->bytecount );
         }
 #endif
@@ -976,7 +994,7 @@ static void startIo( struct disk_q *q )
     pager_io_request *rq = q->current;
     assert(rq);
 
-    rq->flag_ioerror = 0;
+    //rq->flag_ioerror = 0;
     rq->rc = 0;
 
     int slot = ahci_build_req_cmd(dev, p->nport, rq );
@@ -990,7 +1008,7 @@ static errno_t ahci_AsyncIo( struct phantom_disk_partition *part, pager_io_reque
     phantom_device_t *dev = p->dev;
     ahci_t *a = dev->drv_private;
 
-    rq->flag_ioerror = 0;
+    //rq->flag_ioerror = 0;
     rq->rc = 0;
 
     int slot = ahci_build_req_cmd(dev, p->nport, rq );
@@ -1076,7 +1094,70 @@ static void ahci_connect_port( ahci_port_t *p )
 
 
 
+// -----------------------------------------------------------------------
+// Dump port state, using alternative structs defs
+// -----------------------------------------------------------------------
 
+
+typedef volatile struct tagHBA_PORT
+{
+    DWORD	clb;		// 0x00, command list base address, 1K-byte aligned
+    DWORD	clbu;		// 0x04, command list base address upper 32 bits
+    DWORD	fb;		// 0x08, FIS base address, 256-byte aligned
+    DWORD	fbu;		// 0x0C, FIS base address upper 32 bits
+    DWORD	is;		// 0x10, interrupt status
+    DWORD	ie;		// 0x14, interrupt enable
+    DWORD	cmd;		// 0x18, command and status
+    DWORD	rsv0;		// 0x1C, Reserved
+    DWORD	tfd;		// 0x20, task file data
+    DWORD	sig;		// 0x24, signature
+    DWORD	ssts;		// 0x28, SATA status (SCR0:SStatus)
+    DWORD	sctl;		// 0x2C, SATA control (SCR2:SControl)
+    DWORD	serr;		// 0x30, SATA error (SCR1:SError)
+    DWORD	sact;		// 0x34, SATA active (SCR3:SActive)
+    DWORD	ci;		// 0x38, command issue
+    DWORD	sntf;		// 0x3C, SATA notification (SCR4:SNotification)
+    DWORD	fbs;		// 0x40, FIS-based switch control
+    DWORD	rsv1[11];	// 0x44 ~ 0x6F, Reserved
+    DWORD	vendor[4];	// 0x70 ~ 0x7F, vendor specific
+} HBA_PORT;
+
+
+typedef volatile struct tagHBA_DEV
+{
+    // 0x00 - 0x2B, Generic Host Control
+    DWORD	cap;		// 0x00, Host capability
+    DWORD	ghc;		// 0x04, Global host control
+    DWORD	is;		// 0x08, Interrupt status
+    DWORD	pi;		// 0x0C, Port implemented
+    DWORD	vs;		// 0x10, Version
+    DWORD	ccc_ctl;	// 0x14, Command completion coalescing control
+    DWORD	ccc_pts;	// 0x18, Command completion coalescing ports
+    DWORD	em_loc;		// 0x1C, Enclosure management location
+    DWORD	em_ctl;		// 0x20, Enclosure management control
+    DWORD	cap2;		// 0x24, Host capabilities extended
+    DWORD	bohc;		// 0x28, BIOS/OS handoff control and status
+
+    // 0x2C - 0x9F, Reserved
+    BYTE	rsv[0xA0-0x2C];
+
+    // 0xA0 - 0xFF, Vendor specific registers
+    BYTE	vendor[0x100-0xA0];
+
+    // 0x100 - 0x10FF, Port control registers
+    HBA_PORT	ports[1];	// 1 ~ 32
+} HBA_DEV;
+
+
+static void dump_ahci_registers( void *reg )
+{
+    HBA_DEV *dev = reg;
+
+    printf("cap 0x%08x ghc 0x%08x is 0x%08x pi 0x%08x\n", dev->cap, dev->ghc, dev->is, dev->pi );
+    printf("vs %d ccc_ctl 0x%08x ccc_pts 0x%08x bohc 0x%08x\n", dev->vs, dev->ccc_ctl, dev->ccc_pts, dev->bohc );
+    printf("em_loc %d em_ctl 0x%08x cap2 0x%08x\n", dev->em_loc, dev->em_ctl, dev->cap2 );
+
+}
 
 
 #endif // HAVE_AHCI

@@ -1,3 +1,5 @@
+#if !EMBOX_IDE_DRIVER
+
 #ifdef ARCH_ia32
 #if PAGING_PARTITION
 /**
@@ -15,7 +17,7 @@
 #include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 12
-#define debug_level_info 1
+#define debug_level_info 8
 
 #include <errno.h>
 #include <disk.h>
@@ -52,19 +54,21 @@ ataio_t         *ata = &ata_buf;
 
 
 
-
-
-
-
-
-
-
-
-
 // TODO pager does not check for io errors!
 
+
+
+
+
+// Actual versions of QEMU (2.5...2.9?) have some quirk so our DMA code does not work
+
+
+
+
+#define IDE_DMA 0
+
 #define IO_PANIC 0
-#define BLOCKED_IO 1
+#define BLOCKED_IO 0
 #define IDE_TRIM 0
 
 
@@ -287,11 +291,22 @@ retry:;
     int i;
     for( i = nsect; i > 0; i-- )
     {
+#if IDE_DMA
         int rc = dma_pci_lba28(
                                ndev, CMD_WRITE_DMA,
                                0, 1, // feature reg, sect count
                                secno, physaddr,
                                1L );
+#else
+        // unsure, test
+        char sector_buf[512];
+        memcpy_p2v( sector_buf, physaddr, 512 );
+        int rc = reg_pio_data_in_lba28( ndev, CMD_WRITE_SECTORS,
+                                        0, 1,
+                                        secno, sector_buf,
+                                        1, 1 );
+
+#endif
         if ( rc )
         {
             return EIO;
@@ -362,11 +377,22 @@ retry:;
     for( i = nsect; i > 0; i-- )
     {
         SHOW_FLOW( 12, "start sect rd sect %d", secno );
+#if IDE_DMA
         int rc = dma_pci_lba28(
                                ndev, CMD_READ_DMA,
                                0, 1, // feature reg, sect count
                                secno, physaddr,
                                1L );
+#else
+        // unsure, test
+        char sector_buf[512];
+        int rc = reg_pio_data_in_lba28( ndev, CMD_READ_SECTORS,
+                                  0, 1,
+                                  secno, sector_buf,
+                                        1, 1 );
+        memcpy_v2p( physaddr, sector_buf, 512 );
+
+#endif
         SHOW_FLOW( 12, "end   sect rd sect %d", secno );
 
         if ( rc )
@@ -599,3 +625,5 @@ errno_t simple_ide_idenify_device(int dev)
 
 #endif // PAGING_PARTITION
 #endif // ARCH_ia32
+
+#endif
