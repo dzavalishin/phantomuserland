@@ -57,25 +57,28 @@ phantom_device_t * driver_ahci_probe( pci_cfg_t *pci, int stage )
 
 typedef struct
 {
-    phantom_device_t *		dev;            // disk io needs it
-    int                         nport;
+    phantom_device_t                  * dev;            // disk io needs it
+    int                                 nport;
 
-    int                         sig;            // Signature
+    int                                 sig;            // Signature
 
-    int                 	exist;
-    u_int32_t                   nSect;
+    int                 	        exist;
+    u_int32_t                           nSect;
 
-    u_int32_t                   c_started; // which commands are started - to compare with running list
+    u_int32_t                           c_started; // which commands are started - to compare with running list
 
     physaddr_t          	        clb_p;
-    volatile struct ahci_cmd_list*	clb;
+    volatile struct ahci_cmd_list     * clb;
 
     physaddr_t          	        fis_p;
-    volatile void *              	fis;
+    volatile void                     * fis;
 
-    struct ahci_cmd_tab *       cmds;
+    struct ahci_cmd_tab               * cmds;
 
-    pager_io_request *          reqs[AHCI_CL_SIZE];
+    pager_io_request                  * reqs[AHCI_CL_SIZE];
+
+    hal_mutex_t                         mutex;
+
 } ahci_port_t;
 
 
@@ -128,6 +131,23 @@ static void dump_ahci_dev_port_registers( phantom_device_t *dev, int port )
 {
     dump_ahci_port_registers( (void *) ahci_port_base( dev, port ) );
 }
+
+
+
+static void port_mutex_lock(phantom_device_t *dev, int nport)
+{
+    ahci_t *a = dev->drv_private;
+    ahci_port_t *p = a->port+nport;
+    hal_mutex_lock( &p->mutex );
+}
+
+static void port_mutex_unlock(phantom_device_t *dev, int nport)
+{
+    ahci_t *a = dev->drv_private;
+    ahci_port_t *p = a->port+nport;
+    hal_mutex_unlock( &p->mutex );
+}
+
 
 
 
@@ -265,6 +285,7 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
     p->dev = dev;
     p->nport = nport;
 
+    hal_mutex_init( &p->mutex, "ahci port" );
 
     // TODO 64bit -- NEED some define that we support 64 bit on this arch
 #if 0
@@ -619,11 +640,14 @@ static void ahci_wait_for_port_interrupt(phantom_device_t *dev, int nport)
     hal_sleep_msec(1);
 }
 
+
+
 //TODO check max slots value!
 static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 {
     volatile ahci_t *a = dev->drv_private;
 
+    port_mutex_lock( dev, nport );
     while(1)
     {
         u_int32_t slots = RP32(dev, nport, AHCI_P_CI);
@@ -637,6 +661,8 @@ static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
             ahci_wait_for_port_interrupt(dev, nport);
 
         SHOW_FLOW( 8, "found slot %d on port %d ", slot-1, nport );
+
+        port_mutex_unlock( dev, nport );
         return slot - 1; // 0 = none
     }
 
@@ -650,7 +676,9 @@ static void ahci_start_cmd(phantom_device_t *dev, int nport, int ncmd)
     SHOW_FLOW( 8, "start slot %d on port %d ", ncmd, nport );
 
     // TODO am I right? Don't we loose something?
-    WP32( dev, nport, AHCI_P_IS, -1 ); // reset all interrupts
+    //WP32( dev, nport, AHCI_P_IS, -1 ); // reset all interrupts
+
+    //ahci_wait_port_ready( dev, nport );
 
     WP32( dev, nport, AHCI_P_CI, 1 << ncmd);
     atomic_or( (int *)&(a->port[nport].c_started), 1 << ncmd );
@@ -892,8 +920,10 @@ static void ahci_finish_cmd(phantom_device_t *dev, int nport, int slot)
         {
             req->rc = EIO;
             //req->flag_ioerror = 1;
-            SHOW_ERROR( 1, "IO error port %d, expected %d bytes, got %d", nport, req->nSect * 512, cp->bytecount );
+            SHOW_ERROR( 1, "IO error port %d, expected %d bytes, got %d, sector %d", nport, req->nSect * 512, cp->bytecount, req->blockNo );
         }
+        else
+            SHOW_FLOW( 8,  "Done IO port %d, expected %d bytes, got %d, sector %d", nport, req->nSect * 512, cp->bytecount, req->blockNo );
 #endif
         pager_io_request_done( req );
     }
@@ -904,7 +934,7 @@ static void ahci_process_finished_cmd(phantom_device_t *dev, int nport)
 {
     volatile ahci_t *a = dev->drv_private;
 
-    SHOW_FLOW( 7, "look for completed slots on port %d, started %x ", nport, a->port[nport].c_started );
+    SHOW_FLOW( 7, "look for completed slots on port %d, started 0x%08x ", nport, a->port[nport].c_started );
     //dump_ahci_port_registers( a->port+nport );
     dump_ahci_dev_port_registers( dev, nport );
 
@@ -945,11 +975,14 @@ static errno_t ahci_sync_read(phantom_device_t *dev, int nport, void *fis, size_
     hal_pv_alloc( &pa, &va, data_len );
     //va = calloc( data_len, 1 );    pa = va;
 
-    SHOW_FLOW( 7, "pa %p va %p", pa, va );
+    SHOW_FLOW( 7, "sycn read pa %p va %p", pa, va );
 
     int slot = ahci_build_fis_cmd( dev, nport, fis, fis_len, pa, data_len, 0 );
     ahci_start_cmd( dev, nport, slot );
     ahci_wait_cmd( dev, nport, slot );
+
+    SHOW_FLOW( 7, "sync read %d bytes:\n", data_len );
+    hexdump( va, data_len, 0, 0 );
 
     memcpy( data, va, data_len );
     hal_pv_free( pa, va, data_len );
