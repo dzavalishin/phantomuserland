@@ -67,11 +67,11 @@ typedef struct
 
     u_int32_t                   c_started; // which commands are started - to compare with running list
 
-    physaddr_t          	clb_p;
-    struct ahci_cmd_list*	clb;
+    physaddr_t          	        clb_p;
+    volatile struct ahci_cmd_list*	clb;
 
-    physaddr_t          	fis_p;
-    void *              	fis;
+    physaddr_t          	        fis_p;
+    volatile void *              	fis;
 
     struct ahci_cmd_tab *       cmds;
 
@@ -91,7 +91,43 @@ typedef struct
 } ahci_t;
 
 
-static void dump_ahci_registers( void *reg );
+
+
+static inline addr_t ahci_port_base( phantom_device_t *dev, unsigned int port )
+{
+    addr_t base = dev->iomem + 0x100 + (port * 0x80);
+    //printf( "p %d base %p\n", port, base );
+    return base;
+}
+
+static inline u_int32_t RP32( phantom_device_t *dev, int port, unsigned int displ)
+{
+    void *base = (void *)ahci_port_base(dev,port);
+    volatile u_int32_t *reg = base+displ;
+    //printf( "read reg @%p\n", reg );
+    return *reg;
+}
+
+static inline void WP32( phantom_device_t *dev, int port, unsigned int displ, u_int32_t v)
+{
+    void *base = (void *)ahci_port_base(dev,port);
+    volatile u_int32_t *reg = base+displ;
+    *reg = v;
+}
+
+
+#define W32(__d,__p,__v) ( *((volatile u_int32_t*)(__d->iomem+(__p))) ) = __v
+#define R32(__d,__p) ( *((volatile u_int32_t*)( ((int)(__d)->iomem) + (int)(__p))) )
+
+
+
+
+static void dump_ahci_registers( volatile void *reg );
+static void dump_ahci_port_registers( volatile void *reg );
+static void dump_ahci_dev_port_registers( phantom_device_t *dev, int port )
+{
+    dump_ahci_port_registers( (void *) ahci_port_base( dev, port ) );
+}
 
 
 
@@ -117,6 +153,13 @@ static errno_t ahci_do_inquiry(phantom_device_t *dev, int nport, void *data, siz
 //static void ahci_dump_port_info(phantom_device_t *dev, int nport );
 
 static void ahci_connect_port( ahci_port_t *p );
+
+
+static void ahci_wait_port_ready(phantom_device_t *dev, int nport );
+
+
+
+
 
 
 
@@ -207,28 +250,12 @@ free:
 }
 
 
-static inline addr_t ahci_port_base( phantom_device_t *dev, int port)
-{
-    return dev->iomem + 0x100 + (port * 0x80);
-}
-
-static inline u_int32_t RP32( phantom_device_t *dev, int port, int displ)
-{
-    return *(volatile u_int32_t*) (ahci_port_base(dev,port)+displ);
-}
-
-static inline void WP32( phantom_device_t *dev, int port, int displ, u_int32_t v)
-{
-    *(volatile u_int32_t*) (ahci_port_base(dev,port)+displ) = v;
-}
-
-
-#define W32(__d,__p,__v) ( *((volatile u_int32_t*)(__d->iomem+(__p))) ) = __v
-#define R32(__d,__p) ( *((volatile u_int32_t*)( ((int)(__d)->iomem) + (int)(__p))) )
-
 
 static errno_t ahci_init_port(phantom_device_t *dev, int nport)
 {
+    physaddr_t pa;
+    void *va;
+
     ahci_t *a = dev->drv_private;
 
     SHOW_FLOW( 1, "Init " DEV_NAME " at mem %X, port %d", dev->iomem, nport );
@@ -238,25 +265,46 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
     p->dev = dev;
     p->nport = nport;
 
-    // TODO 64bit -- NEED some define that we support 64 bit on this arch
 
+    // TODO 64bit -- NEED some define that we support 64 bit on this arch
+#if 0
     hal_pv_alloc( &(p->clb_p), (void**)&(p->clb), 1024 );
     WP32( dev, nport, AHCI_P_CLB, p->clb_p );
     //WP32( dev, nport, AHCI_P_CLBU, p->clb_p >> 32 );
-    memset( p->clb, 1024, 0 );
+    memset( (void *)p->clb, 0, 1024 );
 
     hal_pv_alloc( &(p->fis_p), (void**)&(p->fis), RECV_FIS_SIZE );
     WP32( dev, nport, AHCI_P_FB, p->fis_p );
     //WP32( dev, nport, AHCI_P_FBU, p->fis_p >> 32 );
-    memset( p->fis, RECV_FIS_SIZE, 0 );
+    memset( (void *)p->fis, 0, RECV_FIS_SIZE );
+#else
 
+    hal_pv_alloc( &pa, &va, 1024 );
+    memset( va, 0, 1024 );
+    p->clb = va;
+    p->clb_p = pa;
+
+    WP32( dev, nport, AHCI_P_CLB, p->clb_p );
+    //WP32( dev, nport, AHCI_P_CLBU, p->clb_p >> 32 );
+
+    printf( "CLB pa %p va %p\n", pa, va );
+
+    hal_pv_alloc( &pa, &va, RECV_FIS_SIZE );
+    memset( (void *)p->fis, 0, RECV_FIS_SIZE );
+    p->fis_p = pa;
+    p->fis = va;
+
+    WP32( dev, nport, AHCI_P_FB, p->fis_p );
+    //WP32( dev, nport, AHCI_P_FBU, p->fis_p >> 32 );
+
+    printf( "FIS pa %p va %p\n", pa, va );
+#endif
     // We allocate 32 commands at once and fill phys addresses right now
+
 
     const unsigned int cmd_bytes = 0x100;
     assert(cmd_bytes >= sizeof(struct ahci_cmd_tab));
 
-    physaddr_t pa;
-    void *va;
     hal_pv_alloc( &(pa), &va, cmd_bytes*AHCI_CL_SIZE ); // TODO alloc a space & mem separately, map with io flag?
     memset( va, cmd_bytes*AHCI_CL_SIZE, 0 );
 
@@ -274,6 +322,14 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
     WP32( dev, nport, AHCI_P_SCTL, 1 ); // Reset
     hal_sleep_msec(2); // need 1 msec
     WP32( dev, nport, AHCI_P_SCTL, 0 ); // Reset done
+
+
+    ahci_wait_port_ready( dev, nport );
+
+    // try to start it here for else signature is insane
+    WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_POD );
+    WP32( dev, nport, AHCI_P_CMD, AHCI_P_CMD_FRE|AHCI_P_CMD_SUD|AHCI_P_CMD_ST|AHCI_P_CMD_ACTIVE|AHCI_P_CMD_POD );
+
 
     u_int32_t sata_status = RP32( dev, nport, AHCI_P_SSTS );
     if( (0xF & (sata_status >> 8)) == 0 )
@@ -297,7 +353,9 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
 
 
     p->sig = RP32( dev, nport, AHCI_P_SIG );
-    if( (p->sig == SATA_SIG_ATA) || (p->sig == 0xFFFFFFFFu) ) // TODO fix me QEMU returns this sig! Or do we read it in a wrong way?
+    SHOW_INFO( 0, DEV_NAME " port %d sig %x", nport, p->sig );
+    //if( (p->sig == SATA_SIG_ATA) || (p->sig == 0xFFFFFFFFu) ) // TODO fix me QEMU returns this sig! Or do we read it in a wrong way?
+    if( p->sig == SATA_SIG_ATA )
         SHOW_INFO( 0, DEV_NAME " port %d is ATA", nport );
     else
     {
@@ -354,7 +412,6 @@ static errno_t ahci_init_port(phantom_device_t *dev, int nport)
         ahci_connect_port( p );
     }
 
-
     return 0;
 }
 
@@ -404,6 +461,23 @@ static int ahci_init(phantom_device_t *dev)
 
     //SHOW_FLOW( 1, " " DEV_NAME ", ports %X", ports );
 
+    // now tell us something
+
+    printf("AHCI flags: < %s%s%s%s%s%s%s%s%s%s%s%s%s>\n",
+           cap & (1 << 31) ? "64bit " : "",           cap & (1 << 30) ? "ncq " : "",
+           cap & (1 << 28) ? "ilck " : "",            cap & (1 << 27) ? "stag " : "",
+           cap & (1 << 26) ? "pm " : "",              cap & (1 << 25) ? "led " : "",
+           cap & (1 << 24) ? "clo " : "",             cap & (1 << 19) ? "nz " : "",
+           cap & (1 << 18) ? "only " : "",            cap & (1 << 17) ? "pmp " : "",
+           cap & (1 << 15) ? "pio " : "",             cap & (1 << 14) ? "slum " : "",
+           cap & (1 << 13) ? "part " : "");
+
+    {
+        dump_ahci_registers( (void *)dev->iomem );
+        //int sig = RP32( dev, 0, AHCI_P_SIG );
+        //SHOW_INFO( 10, DEV_NAME "0 port 0 sig %x", sig );
+    }
+
     int nport = 0;
     while(ports)
     {
@@ -423,24 +497,7 @@ static int ahci_init(phantom_device_t *dev)
         nport++;
     }
 
-    // now tell us something
-
-    printf("AHCI flags: < %s%s%s%s%s%s%s%s%s%s%s%s%s>\n",
-           cap & (1 << 31) ? "64bit " : "",
-           cap & (1 << 30) ? "ncq " : "",
-           cap & (1 << 28) ? "ilck " : "",
-           cap & (1 << 27) ? "stag " : "",
-           cap & (1 << 26) ? "pm " : "",
-           cap & (1 << 25) ? "led " : "",
-           cap & (1 << 24) ? "clo " : "",
-           cap & (1 << 19) ? "nz " : "",
-           cap & (1 << 18) ? "only " : "",
-           cap & (1 << 17) ? "pmp " : "",
-           cap & (1 << 15) ? "pio " : "",
-           cap & (1 << 14) ? "slum " : "",
-	       cap & (1 << 13) ? "part " : "");
-
-    dump_ahci_registers( dev->iomem );
+    dump_ahci_registers( (void *)dev->iomem );
 
     return 0;
 }
@@ -471,8 +528,8 @@ static void finalize_thread(void *arg)
 
 static void ahci_port_interrupt(phantom_device_t *dev, int nport)
 {
-    ahci_t *a = dev->drv_private;
-    ahci_port_t *p = a->port+nport;
+    volatile ahci_t *a = dev->drv_private;
+    volatile ahci_port_t *p = a->port+nport;
 
     u_int32_t is = RP32( dev, nport, AHCI_P_IS );
 
@@ -496,32 +553,32 @@ static void ahci_port_interrupt(phantom_device_t *dev, int nport)
 
 
     //if( is & (AHCI_P_IX_DHR|AHCI_P_IX_PS|AHCI_P_IX_DS|AHCI_P_IX_UF) )
-    //    hexdump( p->fis, 0xA0, 0, 0 );
+    //    hexdump( (void *)p->fis, 0xA0, 0, 0 );
 
     if( is & (AHCI_P_IX_DHR) )
     {
         fis_reg_d2h_t *fis = (void *)p->fis+0x40;
         printf("D2Host FIS I%d S%02x E%x D%02x:\n", fis->i, fis->status, fis->error, fis->device);
-        hexdump( p->fis+0x40, 0x14, 0, 0 );
+        hexdump( (void *)p->fis+0x40, 0x14, 0, 0 );
 
     }
 
     if( is & (AHCI_P_IX_PS) )
     {
         printf("PIO setup FIS:\n");
-        hexdump( p->fis+0x20, 0x14, 0, 0 );
+        hexdump( (void *)p->fis+0x20, 0x14, 0, 0 );
     }
 
     if( is & (AHCI_P_IX_DS) )
     {
         printf("DMA setup FIS:\n");
-        hexdump( p->fis, 0x1C, 0, 0 );
+        hexdump( (void *)p->fis, 0x1C, 0, 0 );
     }
 
     if( is & (AHCI_P_IX_UF) )
     {
         printf("Unknown FIS:\n");
-        hexdump( p->fis+0x60, 0xA0-0x60, 0, 0 );
+        hexdump( (void *)p->fis+0x60, 0xA0-0x60, 0, 0 );
     }
 
     //ahci_process_finished_cmd(dev, nport);
@@ -565,7 +622,7 @@ static void ahci_wait_for_port_interrupt(phantom_device_t *dev, int nport)
 //TODO check max slots value!
 static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 {
-    ahci_t *a = dev->drv_private;
+    volatile ahci_t *a = dev->drv_private;
 
     while(1)
     {
@@ -589,7 +646,7 @@ static int ahci_find_free_cmd(phantom_device_t *dev, int nport)
 
 static void ahci_start_cmd(phantom_device_t *dev, int nport, int ncmd)
 {
-    ahci_t *a = dev->drv_private;
+    volatile ahci_t *a = dev->drv_private;
     SHOW_FLOW( 8, "start slot %d on port %d ", ncmd, nport );
 
     // TODO am I right? Don't we loose something?
@@ -603,9 +660,17 @@ static void ahci_start_cmd(phantom_device_t *dev, int nport, int ncmd)
 
 static void ahci_wait_cmd(phantom_device_t *dev, int nport, int ncmd)
 {
-    //ahci_t *a = dev->drv_private;
-
     while( RP32( dev, nport, AHCI_P_CI ) & (1 << ncmd) )
+    {
+        hal_sleep_msec( 1 );
+    }
+}
+
+
+
+static void ahci_wait_port_ready(phantom_device_t *dev, int nport )
+{
+    while( RP32( dev, nport, AHCI_P_CI ) & AHCI_P_CMD_CR )
     {
         hal_sleep_msec( 1 );
     }
@@ -615,7 +680,7 @@ static void ahci_wait_cmd(phantom_device_t *dev, int nport, int ncmd)
 // returns cmd index
 static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request *req )
 {
-    ahci_t *a = dev->drv_private;
+    volatile ahci_t *a = dev->drv_private;
 
     int pFreeSlot = ahci_find_free_cmd( dev, nport );
 
@@ -678,16 +743,19 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
     fis[12] = nSect;
     fis[13] = nSect >> 8;
 
-    memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
+    memcpy( (void *)cmd->cfis, fis, umin( sizeof(cmd->cfis), sizeof(fis) ) );
 
     SHOW_FLOW( 1, "cfis nsect %d", cmd->cfis[12] + (cmd->cfis[13] << 8) );
 
-    hexdump( cmd->cfis, sizeof(fis), 0, 0 );
+    hexdump( (void *)cmd->cfis, sizeof(fis), 0, 0 );
     //hexdump( cp, sizeof(*cp), 0, 0 );
 
     unsigned fl = sizeof(fis_reg_h2d_t);
     //unsigned fl = 16;
     cp->cmd_flags |= (( fl-1 ) >> 2 ) + 1;
+
+    //mp_ahci_port_registers( a->port+nport );
+    dump_ahci_dev_port_registers( dev, nport );
 
     return pFreeSlot;
 }
@@ -696,7 +764,7 @@ static int ahci_build_req_cmd(phantom_device_t *dev, int nport, pager_io_request
 // returns cmd index
 static int ahci_build_ncq_cmd(phantom_device_t *dev, int nport, pager_io_request *req )
 {
-    ahci_t *a = dev->drv_private;
+    volatile ahci_t *a = dev->drv_private;
 
     int pFreeSlot = ahci_find_free_cmd( dev, nport );
 
@@ -775,14 +843,14 @@ static int ahci_build_ncq_cmd(phantom_device_t *dev, int nport, pager_io_request
 // returns cmd index
 static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_t fis_len, physaddr_t data, size_t data_len, int isWrite )
 {
-    ahci_t *a = dev->drv_private;
+    volatile ahci_t *a = dev->drv_private;
 
     int pFreeSlot = ahci_find_free_cmd( dev, nport );
 
     assert(pFreeSlot<AHCI_CL_SIZE);
 
-    struct ahci_cmd_tab *       cmd = a->port[nport].cmds+pFreeSlot;
-    struct ahci_cmd_list*	cp = a->port[nport].clb+pFreeSlot;
+    volatile struct ahci_cmd_tab *       cmd = a->port[nport].cmds+pFreeSlot;
+    volatile struct ahci_cmd_list*	cp = a->port[nport].clb+pFreeSlot;
 
     a->port[nport].reqs[pFreeSlot] = 0;
 
@@ -794,7 +862,7 @@ static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_
 
     // TODO assert data_len < max size per prd
 
-    memcpy( cmd->cfis, fis, umin( sizeof(cmd->cfis), fis_len ) );
+    memcpy( (void *)cmd->cfis, fis, umin( sizeof(cmd->cfis), fis_len ) );
 
     cmd->prd_tab[0].dba = data;
     cmd->prd_tab[0].dbc = data_len-1;
@@ -806,11 +874,11 @@ static int ahci_build_fis_cmd(phantom_device_t *dev, int nport, void *fis, size_
 
 static void ahci_finish_cmd(phantom_device_t *dev, int nport, int slot)
 {
-    ahci_t *a = dev->drv_private;
+    volatile ahci_t *a = dev->drv_private;
     //ahci_port_t *p = a->port+nport;
 
     //struct ahci_cmd_tab *       cmd = a->port[nport].cmds+slot;
-    struct ahci_cmd_list*	cp = a->port[nport].clb+slot;
+    volatile struct ahci_cmd_list*	cp = a->port[nport].clb+slot;
     pager_io_request *          req = a->port[nport].reqs[slot];
 
     // Now do it
@@ -834,9 +902,11 @@ static void ahci_finish_cmd(phantom_device_t *dev, int nport, int slot)
 
 static void ahci_process_finished_cmd(phantom_device_t *dev, int nport)
 {
-    ahci_t *a = dev->drv_private;
+    volatile ahci_t *a = dev->drv_private;
 
     SHOW_FLOW( 7, "look for completed slots on port %d, started %x ", nport, a->port[nport].c_started );
+    //dump_ahci_port_registers( a->port+nport );
+    dump_ahci_dev_port_registers( dev, nport );
 
     while(a->port[nport].c_started)
     {
@@ -884,8 +954,8 @@ static errno_t ahci_sync_read(phantom_device_t *dev, int nport, void *fis, size_
     memcpy( data, va, data_len );
     hal_pv_free( pa, va, data_len );
 
-    ahci_t *a = dev->drv_private;
-    struct ahci_cmd_list*	cp = a->port[nport].clb+slot;
+    volatile ahci_t *a = dev->drv_private;
+    volatile struct ahci_cmd_list*	cp = a->port[nport].clb+slot;
 
     // check error
 
@@ -1031,6 +1101,7 @@ phantom_disk_partition_t *phantom_create_ahci_partition_struct( ahci_port_t *p, 
 
     return ret;
 #else
+    (void) unit;
     //phantom_device_t *dev = p->dev;
     //ahci_t *a = dev->drv_private;
 
@@ -1151,15 +1222,27 @@ typedef volatile struct tagHBA_DEV
     HBA_PORT	ports[1];	// 1 ~ 32
 } HBA_DEV;
 
-
-static void dump_ahci_registers( void *reg )
+static void dump_ahci_port_registers( volatile void *reg )
 {
-    HBA_DEV *dev = reg;
+    volatile HBA_PORT *p = reg;
+    //printf("  cmd list base 0x %08x %08x FIS base 0x %08x %08x  sig %08x\n", p->clbu, p->clb, p->fbu, p->fb, p->sig );
+    printf("port @%08x:\n", reg );
+    printf("  cmd list base 0x%08x FIS base 0x%08x  sig %08x\n", p->clb, p->fb, p->sig );
+    printf("  is %08x ie %08x cmd %08x tfd %08x\n", p->is, p->ie, p->cmd, p->tfd );
+    printf("  ssts %08x sctl %08x serr %08x sact %08x\n", p->ssts, p->sctl, p->serr, p->sact );
+    printf("  ci %08x sntf %08x fbs %08x\n", p->ci, p->sntf, p->fbs );
+}
+
+
+static void dump_ahci_registers( volatile void *reg )
+{
+    volatile HBA_DEV *dev = reg;
 
     printf("cap 0x%08x ghc 0x%08x is 0x%08x pi 0x%08x\n", dev->cap, dev->ghc, dev->is, dev->pi );
     printf("vs %d ccc_ctl 0x%08x ccc_pts 0x%08x bohc 0x%08x\n", dev->vs, dev->ccc_ctl, dev->ccc_pts, dev->bohc );
     printf("em_loc %d em_ctl 0x%08x cap2 0x%08x\n", dev->em_loc, dev->em_ctl, dev->cap2 );
 
+    dump_ahci_port_registers( dev->ports );
 }
 
 
