@@ -290,11 +290,13 @@ abstract public class Node {
 	}
 
 	
-	// ---------------------------- LLVM code generation ----------------------------
+	// ---------------------------- C code generation ----------------------------
 	
 	protected String cTempName; 
 	
 	
+	// Generate C code for nodes referenced from me and me too
+	// If overriden, override have to call generate_C_code for children
 	public void generate_C_code(C_codegen cgen) throws PlcException {
 		llvmTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
 		if( _l != null ) {
@@ -313,7 +315,7 @@ abstract public class Node {
 	public String getCTempName() { return cTempName; }
 
 	
-	//protected abstract void generateMyLlvmCode(LlvmCodegen llc) throws PlcException;
+	// Generate C code for me only - supposed to be overriden in children
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException
 	{
 		if(Config.llvmDebug) System.err.println("llvm cg failed for "+toString());
