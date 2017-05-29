@@ -296,7 +296,7 @@ abstract public class Node {
 	
 	
 	public void generate_C_code(C_codegen cgen) throws PlcException {
-		llvmTempName = cgen.getPhantomMethod().getLlvmTempName(this.getClass().getSimpleName());
+		llvmTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
 		if( _l != null ) {
 			_l.generate_C_code(cgen);
 			//move_between_stacks(c, _l.is_on_int_stack());

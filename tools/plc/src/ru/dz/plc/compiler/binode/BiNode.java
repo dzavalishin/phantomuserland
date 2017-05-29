@@ -103,7 +103,7 @@ abstract public class BiNode extends Node {
 
 	@Override
 	public void generate_C_code(C_codegen cgen) throws PlcException {
-		cTempName = cgen.getPhantomMethod().getLlvmTempName(this.getClass().getSimpleName());
+		cTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
 		
 	    if(context != null)			cgen.emitComment("Line "+context.getLineNumber());
 

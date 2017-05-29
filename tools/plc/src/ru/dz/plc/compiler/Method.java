@@ -246,6 +246,25 @@ public class Method
 
 	}
 
+	
+	
+	
+	
+	
+	
+	private static int cTempNum = 0;
+
+	public String get_C_TempName(String nodeName ) 
+	{
+		if( null == nodeName )
+			return String.format("tmp_%d", cTempNum++ );
+		return String.format("tmp_%d_%s", cTempNum++, nodeName ); 
+	}
+
+
+	
+	
+	
 	public void generateC_Code(CodeGeneratorState s, BufferedWriter c_File) throws PlcException {
 		// TODO not finished, sketch
 		C_codegen cgen = new C_codegen(s.get_class(),this,c_File);
