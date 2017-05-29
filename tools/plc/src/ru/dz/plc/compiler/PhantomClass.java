@@ -338,15 +338,18 @@ public class PhantomClass {
 		mt.print(ps);
 	}
 
-	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, String version) throws IOException, PlcException
+	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, String version) throws IOException, PlcException
 	{
 		llvmFile.write("; class "+getName()+"\n\n");
 		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
+
+		c_File.write("// class "+getName()+"\n\n");
+		c_File.write("#include <phantom/jit_generated.h>\n");
 		
 		CodeGeneratorState s = new CodeGeneratorState(this);
 		//ft.generateGettersSetters(this);
-		mt.codegen(os, lst, llvmFile, s, version);
-		ft.codegen(os, lst, llvmFile, s, version);
+		mt.codegen(os, lst, llvmFile, c_File, s, version);
+		ft.codegen(os, lst, llvmFile, c_File, s, version);
 	}
 
 	public void preprocess(ParseState ps) throws PlcException

@@ -167,10 +167,9 @@ public class Method
 			argdef.append("i64 %"+a.getName());
 		}
 
-		String llvmMethodName = name;
-		name = name.replaceAll("<init>", "_\\$_Constructor");
+		String llvmMethodName = name.replaceAll("<init>", "_\\$_Constructor");
 
-		llc.putln(String.format("define %s @%s(%s) {", llc.getObjectType(), name, argdef )); // function 
+		llc.putln(String.format("define %s @%s(%s) {", llc.getObjectType(), llvmMethodName, argdef )); // function 
 
 		if(code != null)
 		{
@@ -246,6 +245,104 @@ public class Method
 		llc.flushPostponedCode();
 
 	}
+
+	public void generateC_Code(CodeGeneratorState s, BufferedWriter c_File) throws PlcException {
+		// TODO not finished, sketch
+		C_codegen cgen = new C_codegen(s.get_class(),this,c_File);
+
+		StringBuilder argdef = new StringBuilder();
+
+		boolean firstParm = true;
+		for( ArgDefinition a : args_def )
+		{
+			if(!firstParm)
+				argdef.append(", ");
+
+			firstParm= false;
+
+			argdef.append("jit_object_t "+a.getName());
+		}
+
+		String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
+
+		cgen.putln(String.format("jit_object_t %s(%s) {", cgen.getObjectType(), name, argdef )); // function 
+
+		if(code != null)
+		{
+
+			// ------------------------------------------
+			// traverse tree to allocate automatic vars?
+			// ------------------------------------------
+			//int n_auto_vars = svars.getUsedSlots();
+			//int n_int_auto_vars = isvars.getUsedSlots();
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate prologue code here
+			// ------------------------------------------
+
+			/*
+		// check number of args
+		int n_args = args_def.size();
+		String good_args_label = c.getLabel();
+
+		c.emitIConst_32bit(n_args);
+		c.emitISubLU();
+		c.emitJz(good_args_label);
+
+		// wrong count - throw string
+		// BUG! Need less consuming way of reporting this. Maybe by
+		// calling class object Method? Or by summoning something?
+		c.emitString("arg count: "+name + " in " + s.get_class().getName());
+		c.emitThrow();
+
+		c.markLabel(good_args_label);
+			 */
+
+			if(requestDebug) cgen.emitDebug((byte) 0x1);
+			//if(requestDebug) llc.emitDebug((byte)0x1,"Enabled debug");
+
+			// push nulls to reserve stack space for autovars
+			// BUG! We can execute vars initialization code here, can we?
+			// We can if code does not depend on auto vars itself, or depends only on
+			// previous ones.
+			// 		for( int i = n_auto_vars; i > 0; i-- ) 			c.emitPushNull();
+
+			// Reserve integer stack place for int vars 		for( int i = n_int_auto_vars; i > 0; i-- )			c.emitIConst_0();
+
+			// ------------------------------------------
+
+
+			// ------------------------------------------
+			// generate main code by descending the tree
+			// ------------------------------------------
+			code.generate_C_code( cgen );
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate epilogue code here
+			// ------------------------------------------
+
+			//if(requestDebug) c.emitDebug((byte)0x2,"Disabled debug");
+			if(requestDebug) cgen.emitDebug((byte) 0x2);
+
+		}
+
+		// catch the fall-out TODO must return null phantom ptr const
+		cgen.putln("return 0;"); // empty function code
+		cgen.putln("}"); // end of function 
+
+		// ------------------------------------------
+		// Part of code is generated to the buffer to 
+		// be emitted after the method code. Flush it
+		// now.
+		// ------------------------------------------
+
+		cgen.flushPostponedCode();
+
+		
+	}
+
 
 
 	// ------------------------------------------

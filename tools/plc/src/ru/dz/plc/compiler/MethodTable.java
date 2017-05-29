@@ -201,7 +201,7 @@ public class MethodTable implements IMethodTable
 	 * @see ru.dz.plc.compiler.IMethodTable#codegen(java.io.RandomAccessFile, java.io.FileWriter, java.io.BufferedWriter, ru.dz.plc.compiler.CodeGeneratorState, java.lang.String)
 	 */
 	@Override
-	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, CodeGeneratorState s, String version) throws IOException, PlcException {
+	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws IOException, PlcException {
 		set_ordinals();
 		lst.write("Class version "+version+"\n\n");
 
@@ -223,6 +223,7 @@ public class MethodTable implements IMethodTable
 			ml.write();
 
 			m.generateLlvmCode(s, llvmFile);
+			m.generateC_Code(s, c_File);
 			
 			s.set_method( null );
 			lst.write("--\nmethod end\n\n");
