@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.trinode;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
@@ -75,4 +76,34 @@ public class IfNode extends TriNode {
 		}
 	}
 
+	@Override
+	public void generate_C_code(C_codegen cgen) throws PlcException
+	{
+		if( _l == null ) throw new PlcException("if code", "no expression");
+		cgen.put("if( ");		
+
+		// I need it on int stack!
+		if( !_l.is_on_int_stack() )
+		{
+			cgen.put("JIT_o2i( ");
+			_l.generate_C_code(cgen); // calc value
+			cgen.put(") ");					
+		}
+		else
+			_l.generate_C_code(cgen); // calc value
+
+		cgen.putln(" ) {");					
+		if( _m != null ) _m.generate_C_code(cgen); // 'yes' case
+		else cgen.putln("; // No code");
+		cgen.putln("}");					
+
+		if( _r != null )
+		{
+			cgen.putln("else {");					
+			_r.generate_C_code(cgen); // 'no' case
+			cgen.putln("}");					
+		}
+	}
+	
+	
 }
