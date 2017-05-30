@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import ru.dz.plc.compiler.binode.BiNode;
+import ru.dz.plc.compiler.node.MethodNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -158,7 +160,29 @@ public class C_codegen {
 		}
 
 
+		public void emitMethodCall( Node new_this, int method_ordinal, Node args, CodeGeneratorState s ) throws PlcException
+		{
 
+			putMethodName( new_this, method_ordinal);
+			put("( JIT_vm_state, /* this */ ");
+			
+			new_this.generate_C_code(this,s); // get object
+			if( args != null )
+				put(", ");
+
+			for( Node i = args; i != null; i = ((BiNode)i).getRight() )      
+			{
+				boolean haveNext = ((BiNode)i).getRight() != null;
+				
+				i.generate_C_code(this, s);
+				
+				if( haveNext )
+					put(", ");
+			}
+			//c.emitCall(method_ordinal,n_param);
+			put(")");
+			
+		}
 
 
 

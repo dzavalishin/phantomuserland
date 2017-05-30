@@ -317,11 +317,13 @@ abstract public class Node {
 	
 	// Generate C code for me only - supposed to be overriden in children
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException
+
 	{
-		if(Config.llvmDebug) System.err.println("llvm cg failed for "+toString());
+		if(Config.C_Debug) System.err.println("C cg failed for "+toString());
 		cgen.putln("// C codegen failed for "+toString());
 	}
-
+	
+	
 	public String get_C_Type() {
 		try {
 			return getType().to_C_Type();

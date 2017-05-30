@@ -95,24 +95,7 @@ public class OpMethodCallNode extends TriNode {
 		
 		cgen.putln("// Call method "+method.getIdent());
 
-		cgen.putMethodName(_l,method_ordinal);
-		cgen.put("( /* this */ ");
-		
-		_l.generate_C_code(cgen,s); // get object
-		if( _r != null )
-			cgen.put(", ");
-
-		for( Node i = _r; i != null; i = ((BiNode)i).getRight() )      
-		{
-			boolean haveNext = ((BiNode)i).getRight() != null;
-			
-			i.generate_C_code(cgen, s);
-			
-			if( haveNext )
-				cgen.put(", ");
-		}
-		//c.emitCall(method_ordinal,n_param);
-		cgen.put(")");
+		cgen.emitMethodCall( _l,  method_ordinal, _r, s );
 
 	}
 	
