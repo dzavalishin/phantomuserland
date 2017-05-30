@@ -66,9 +66,8 @@ public class DoWhileNode extends TriNode {
 		s.break_label = prev_break;
 	}
 
-/*
 	@Override
-	public void generate_C_code (C_codegen cgen) throws PlcException
+	public void generate_C_code (C_codegen cgen, CodeGeneratorState s) throws PlcException
 	{
 		if( _m == null ) throw new PlcException("while code", "no expression");
 
@@ -83,28 +82,22 @@ public class DoWhileNode extends TriNode {
 		s.break_label = label_break;
 
 		cgen.markLabel(label_continue);
-		if( _l != null ) _l.generate_code(c,s); // pre code
+		if( _l != null ) _l.generate_C_code(cgen,s); // pre code
 
-		_m.generate_code(c,s); // calc value
-		// I need it on int stack!
-		if( !_m.is_on_int_stack() ) c.emit_o2i();
-		if( !_m.getType().is_int() )
-		{
-			System.out.println("Warning: not an integer expression in while ");
-		}
+		cgen.emitIfNot(_m, s);
+		cgen.emitJump(label_break);
 
-		c.emitJz(label_break);
-		if( _r != null ) _r.generate_code(c,s); // post code
+		if( _r != null ) _r.generate_C_code(cgen,s); // post code
 
 		// TODO need such checks on long runs too, and on method enters
 		cgen.putln("JIT_check_snapshot_trigger(); // If snapshot request is active, pause self");
 		
-		c.emitJmp(label_continue);
+		cgen.emitJump(label_continue);
 
-		c.markLabel(label_break);
+		cgen.markLabel(label_break);
 
 		s.continue_label = prev_continue;
 		s.break_label = prev_break;
 	}
-*/
+
 }

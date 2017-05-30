@@ -284,7 +284,7 @@ public class Method
 
 		String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
 
-		cgen.putln(String.format("jit_object_t %s(%s) {", cgen.getObjectType(), name, argdef )); // function 
+		cgen.putln(String.format("%s %s(%s) {", cgen.getObjectType(), C_MethodName, argdef )); // function 
 
 		if(code != null)
 		{
@@ -335,7 +335,7 @@ public class Method
 			// ------------------------------------------
 			// generate main code by descending the tree
 			// ------------------------------------------
-			code.generate_C_code( cgen );
+			code.generate_C_code( cgen, s );
 			// ------------------------------------------
 
 			// ------------------------------------------

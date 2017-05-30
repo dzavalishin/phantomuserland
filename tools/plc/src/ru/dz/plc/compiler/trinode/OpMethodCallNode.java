@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.trinode;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.MethodSignature;
 import ru.dz.plc.compiler.ParseState;
@@ -85,4 +86,34 @@ public class OpMethodCallNode extends TriNode {
 		c.emitCall(method_ordinal,n_param);
 	}
 
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException 
+	{
+		MethodNode method = (MethodNode)_m;
+
+		int method_ordinal = method.get_ordinal(obj_type);
+		
+		cgen.putln("// Call method "+method.getIdent());
+
+		cgen.putMethodName(_l,method_ordinal);
+		cgen.put("( /* this */ ");
+		
+		_l.generate_C_code(cgen,s); // get object
+		if( _r != null )
+			cgen.put(", ");
+
+		for( Node i = _r; i != null; i = ((BiNode)i).getRight() )      
+		{
+			boolean haveNext = ((BiNode)i).getRight() != null;
+			
+			i.generate_C_code(cgen, s);
+			
+			if( haveNext )
+				cgen.put(", ");
+		}
+		//c.emitCall(method_ordinal,n_param);
+		cgen.put(")");
+
+	}
+	
 }

@@ -40,14 +40,14 @@ public abstract class BinaryOpNode extends BiNode {
 
 	// Supposed to be working for all the children of this class
 	@Override
-	public void generate_C_code(C_codegen cgen) throws PlcException {
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException {
 
 		// JIT_op_plus(left,right)
 		String oname = getLlvmOpName();
 		cgen.put("JIT_op_"+oname+"(");
-		_l.generate_C_code(cgen);
+		_l.generate_C_code(cgen,s);
 		cgen.put(",");
-		_r.generate_C_code(cgen);
+		_r.generate_C_code(cgen,s);
 		cgen.put(")");
 		
 	}

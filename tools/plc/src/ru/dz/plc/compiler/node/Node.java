@@ -297,10 +297,10 @@ abstract public class Node {
 	
 	// Generate C code for nodes referenced from me and me too
 	// If overriden, override have to call generate_C_code for children
-	public void generate_C_code(C_codegen cgen) throws PlcException {
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException {
 		llvmTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
 		if( _l != null ) {
-			_l.generate_C_code(cgen);
+			_l.generate_C_code(cgen, s);
 			//move_between_stacks(c, _l.is_on_int_stack());
 		}
 		if(context != null)
