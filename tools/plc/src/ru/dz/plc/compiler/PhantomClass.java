@@ -343,8 +343,8 @@ public class PhantomClass {
 		llvmFile.write("; class "+getName()+"\n\n");
 		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
 
-		c_File.write("// class "+getName()+"\n\n");
-		c_File.write("#include <phantom/jit_generated.h>\n");
+		c_File.write("// class "+getName()+"\n\n"); // TODO class version
+		c_File.write("#include <phantom/jit/generated.h>\n");
 		
 		CodeGeneratorState s = new CodeGeneratorState(this);
 		//ft.generateGettersSetters(this);

@@ -57,15 +57,20 @@ public class C_codegen {
 		}
 		
 		
-		private void callRuntime1(String funcName, int b) {
-			putln("JIT_PhantomVm_"+funcName+"("+b+");");
+		private void callRuntime(String funcName, int b) {
+			putln(getJitRuntimeFuncPrefix()+funcName+"("+b+");");
 			
+		}
+
+
+		public static String getJitRuntimeFuncPrefix() {
+			return "JIT_PhantomVm_";
 		}
 		
 		
 		
 		public void emitDebug(byte b) {
-			callRuntime1( "debug", (int)b );		
+			callRuntime( "debug", (int)b );		
 		}
 
 
@@ -184,6 +189,32 @@ public class C_codegen {
 			
 		}
 
+
+
+
+
+		public static String getThisVarName() {		return "_vm_this_";		}
+		
+		public static String getLocalVarNamePrefix() {
+			return "_local_var_";
+		}
+
+		public static String get_vm_state_var_name() {
+			return "JIT_vm_state";
+		}
+
+
+
+
+
+		public void emitSnapShotTrigger() {
+			// TODO need such checks on long runs too, and on method enters
+			putln("JIT_check_snapshot_trigger( "+
+			get_vm_state_var_name()
+			+" ); // If snapshot request is active, pause self");
+		}
+
+		
 
 
 

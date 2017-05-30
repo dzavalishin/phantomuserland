@@ -89,8 +89,7 @@ public class DoWhileNode extends TriNode {
 
 		if( _r != null ) _r.generate_C_code(cgen,s); // post code
 
-		// TODO need such checks on long runs too, and on method enters
-		cgen.putln("JIT_check_snapshot_trigger(); // If snapshot request is active, pause self");
+		cgen.emitSnapShotTrigger();
 		
 		cgen.emitJump(label_continue);
 

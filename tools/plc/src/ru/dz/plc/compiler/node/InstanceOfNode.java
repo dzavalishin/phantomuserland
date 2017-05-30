@@ -51,5 +51,11 @@ public class InstanceOfNode extends Node {
 		
 		emitMethodCall( Node new_this, 14, null, s );
 */
+		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"IsInstanceOf( ");
+		_l.generate_C_code(cgen, s);
+		cgen.put(", ");
+		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"GetClass( \"");
+		cgen.put(checkType.get_main_class_name());
+		cgen.put("\" ) ");
 	}
 }

@@ -271,13 +271,17 @@ public class Method
 
 		StringBuilder argdef = new StringBuilder();
 
-		boolean firstParm = true;
+		argdef.append(" jit_vm_state_t "+
+				C_codegen.get_vm_state_var_name()
+				+", jit_object_t "+C_codegen.getThisVarName()+" ");
+		
+		//boolean firstParm = true;
 		for( ArgDefinition a : args_def )
 		{
-			if(!firstParm)
+			//if(!firstParm)
 				argdef.append(", ");
 
-			firstParm= false;
+			//firstParm= false;
 
 			argdef.append("jit_object_t "+a.getName());
 		}
@@ -286,6 +290,8 @@ public class Method
 
 		cgen.putln(String.format("%s %s(%s) {", cgen.getObjectType(), C_MethodName, argdef )); // function 
 
+		cgen.emitSnapShotTrigger(); // on func enter check for snapshot request
+		
 		if(code != null)
 		{
 
