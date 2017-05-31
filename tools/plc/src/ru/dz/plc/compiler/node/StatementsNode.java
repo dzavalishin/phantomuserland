@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -56,6 +57,15 @@ public class StatementsNode extends Node {
 	public void generateLlvmCode(LlvmCodegen llc) throws PlcException {
 		for( Node n : nodes )
 			n.generateLlvmCode(llc);
+	}
+	
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException {
+		for( Node n : nodes )
+		{
+			n.generate_C_code(cgen, s);
+			cgen.putln(";");
+		}
 	}
 	
 	@Override

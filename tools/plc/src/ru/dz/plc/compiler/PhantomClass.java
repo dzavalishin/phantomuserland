@@ -39,7 +39,9 @@ public class PhantomClass {
 		ft = new FieldTable();
 		staticFieldsTable = new FieldTable();
 
-		if (!name.equals(".internal.object")) {
+		boolean noBase = name.equals(".internal.object") || name.equals(".internal.void"); 
+		
+		if (!noBase) {
 			parent_class = ClassMap.get_map().get(parent,false,null);
 			if (parent_class == null)
 				throw new PlcException("PhantomClass constructor",
@@ -344,7 +346,7 @@ public class PhantomClass {
 		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
 
 		c_File.write("// class "+getName()+"\n\n"); // TODO class version
-		c_File.write("#include <phantom/jit/generated.h>\n");
+		c_File.write("#include <phantom/jit/generated.h>\n\n");
 		
 		CodeGeneratorState s = new CodeGeneratorState(this);
 		//ft.generateGettersSetters(this);

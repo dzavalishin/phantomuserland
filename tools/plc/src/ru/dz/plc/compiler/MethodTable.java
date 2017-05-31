@@ -211,7 +211,8 @@ public class MethodTable implements IMethodTable
 			s.set_method( m );
 
 			lst.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
-			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n");
+			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
+			c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 
 			MethodFileInfo mf = new MethodFileInfo(os, lst, m, s);
 			mf.write();
@@ -227,6 +228,8 @@ public class MethodTable implements IMethodTable
 			
 			s.set_method( null );
 			lst.write("--\nmethod end\n\n");
+			llvmFile.write("\n\n; end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
+			c_File.write("\n\n// end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 		}
 	}
 

@@ -169,7 +169,7 @@ public class Method
 
 		String llvmMethodName = name.replaceAll("<init>", "_\\$_Constructor");
 
-		llc.putln(String.format("define %s @%s(%s) {", llc.getObjectType(), llvmMethodName, argdef )); // function 
+		llc.putln(String.format("define %s @%s(%s) {", LlvmCodegen.getObjectType(), llvmMethodName, argdef )); // function 
 
 		if(code != null)
 		{
@@ -233,7 +233,7 @@ public class Method
 		}
 
 		// catch the fall-out
-		llc.putln("ret "+llc.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
+		llc.putln("ret "+LlvmCodegen.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
 		llc.putln("}"); // end of function 
 
 		// ------------------------------------------
@@ -282,13 +282,15 @@ public class Method
 				argdef.append(", ");
 
 			//firstParm= false;
-
-			argdef.append("jit_object_t "+a.getName());
+				
+			argdef.append("jit_object_t "+C_codegen.getLocalVarNamePrefix()+a.getName());
 		}
 
-		String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
+		//String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
+		PhantomClass my_class = s.get_class();
+		String C_MethodName = cgen.getMethodName(my_class, ordinal);
 
-		cgen.putln(String.format("%s %s(%s) {", cgen.getObjectType(), C_MethodName, argdef )); // function 
+		cgen.putln(String.format("%s %s(%s) {", C_codegen.getObjectType(), C_MethodName, argdef )); // function 
 
 		cgen.emitSnapShotTrigger(); // on func enter check for snapshot request
 		
@@ -354,6 +356,8 @@ public class Method
 		}
 
 		// catch the fall-out TODO must return null phantom ptr const
+		cgen.putln(";"); // finish last statement
+		cgen.putln(""); 
 		cgen.putln("return 0;"); // empty function code
 		cgen.putln("}"); // end of function 
 

@@ -24,73 +24,8 @@ public class C_codegen {
 		}
 
 		// ------------------------------------------------------------------------
-		// labels
+		// Getters
 		// ------------------------------------------------------------------------
-
-		private int next_label_no = 0;
-
-		/**
-		 * Create a new unique label name.
-		 * @return Name of a new label.
-		 */
-		public String getLabel()
-		{
-			return "_label_"+Integer.toString(next_label_no++);
-		}
-
-		
-		
-		
-		
-		public void put(String string) {
-			//System.out.println(string);		
-			try {
-				c_File.write(string);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-				//e.printStackTrace();
-			}
-		}
-
-		public void putln(String string) {
-			put(string+"\n");		
-		}
-		
-		
-		private void callRuntime(String funcName, int b) {
-			putln(getJitRuntimeFuncPrefix()+funcName+"("+b+");");
-			
-		}
-
-
-		public static String getJitRuntimeFuncPrefix() {
-			return "JIT_PhantomVm_";
-		}
-		
-		
-		
-		public void emitDebug(byte b) {
-			callRuntime( "debug", (int)b );		
-		}
-
-
-		
-		
-
-		public void emitComment(String string) {
-			putln("// "+string);		
-		}
-
-
-
-		public void recordLineNumberToIPMapping(int lineNumber) {
-			// TODO Auto-generated method stub
-			
-		}
-
-
-
-
 
 		public PhantomStack getIstackVars() { return m.isvars; }
 		public PhantomStack GetOstackVars() { return m.svars; }
@@ -99,26 +34,50 @@ public class C_codegen {
 		public PhantomClass getPhantomClass() { return pc; }
 		public  Method getPhantomMethod() { return m; }
 
+		
+		// ------------------------------------------------------------------------
+		// output
+		// ------------------------------------------------------------------------
+
+		
+		public void put(String string) {	
+			try {
+				c_File.write(string);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		public void putln(String string) {
+			put(string+"\n");		
+		}
+		
+		// ------------------------------------------------------------------------
+		// special keywords
+		// ------------------------------------------------------------------------
+
+		public static String getJitRuntimeFuncPrefix() {	return "JIT_PhantomVm_";	}
+		
+		public static String getThisVarName() {				return "_vm_this_";			}
+		
+		public static String getLocalVarNamePrefix() {		return "_local_var_";		}
+
+		public static String get_vm_state_var_name() {		return "JIT_vm_state";		}
 
 		/** Return C type name for object ref */
-		public static String getObjectType() { return "JIT_object_ref_t"; }
-
-		// ------------------------------------------
-		// Part of code is generated to the buffer to 
-		// be emitted after the method code. 
-		// ------------------------------------------
+		public static String getObjectType() { 				return "JIT_object_ref_t"; 	}
 		
-		private StringBuilder postponed = new StringBuilder();
+		// ------------------------------------------------------------------------
+		// generate specific code
+		// ------------------------------------------------------------------------
 
-		public void postponeCode(String code)
-		{
-			postponed.append(code);
+		private void callRuntime(String funcName, int b) {
+			putln(getJitRuntimeFuncPrefix()+funcName+"("+b+");");			
 		}
 		
-		public void flushPostponedCode() {
-			put(postponed.toString());		
-		}
+		public void emitDebug(byte b) {	callRuntime( "debug", (int)b ); }
 
+		public void emitComment(String string) {	putln(" /* "+string+" */ ");	}
 
 		public void markLabel(String label) {
 			putln(label+":");
@@ -155,13 +114,28 @@ public class C_codegen {
 			doEmitIf(ifValue, s, true);
 		}
 
-
-
-
-
+		public String getMethodName( PhantomClass pc, int ordinal )
+		{
+			String className = pc.toString();
+			// TODO possible conflict - a.b_c will give same result to a_b.c
+			className = className.replace('.', '_');
+			return String.format("generated_class_%s_method_%d", 
+					className, ordinal);			
+		}
+		
+		public String getMethodName( Node new_this, int ordinal ) throws PlcException {
+			
+			String className = new_this.getType().toString();
+			// TODO possible conflict - a.b_c will give same result to a_b.c
+			className = className.replace('.', '_');
+			return String.format("generated_class_%s_method_%d", 
+					className, ordinal);
+			
+			//return getMethodName(new_this.getType().get_class(), ordinal);
+		}
+		
 		public void putMethodName( Node new_this, int ordinal ) throws PlcException {
-			put( String.format("generated_class_%s_method_%d", 
-					new_this.getType().toString(), ordinal) );
+			put( getMethodName( new_this, ordinal ) );
 		}
 
 
@@ -189,32 +163,53 @@ public class C_codegen {
 			
 		}
 
-
-
-
-
-		public static String getThisVarName() {		return "_vm_this_";		}
-		
-		public static String getLocalVarNamePrefix() {
-			return "_local_var_";
-		}
-
-		public static String get_vm_state_var_name() {
-			return "JIT_vm_state";
-		}
-
-
-
-
-
 		public void emitSnapShotTrigger() {
 			// TODO need such checks on long runs too, and on method enters
 			putln("JIT_check_snapshot_trigger( "+
 			get_vm_state_var_name()
 			+" ); // If snapshot request is active, pause self");
 		}
-
 		
+		// ------------------------------------------------------------------------
+		// labels
+		// ------------------------------------------------------------------------
+
+		private int next_label_no = 0;
+
+		/**
+		 * Create a new unique label name.
+		 * @return Name of a new label.
+		 */
+		public String getLabel()
+		{
+			return "_label_"+Integer.toString(next_label_no++);
+		}
+	
+		
+		// ------------------------------------------------------------------------
+		// ip mapping
+		// ------------------------------------------------------------------------
+
+		public void recordLineNumberToIPMapping(int lineNumber) {
+			// TODO Auto-generated method stub			
+		}
+
+
+		// ------------------------------------------
+		// Part of code is generated to the buffer to 
+		// be emitted after the method code. 
+		// ------------------------------------------
+		
+		private StringBuilder postponed = new StringBuilder();
+
+		public void postponeCode(String code)
+		{
+			postponed.append(code);
+		}
+		
+		public void flushPostponedCode() {
+			put(postponed.toString());		
+		}
 
 
 

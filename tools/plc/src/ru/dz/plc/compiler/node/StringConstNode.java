@@ -1,8 +1,10 @@
 package ru.dz.plc.compiler.node;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -39,5 +41,22 @@ public class StringConstNode extends Node {
 		llc.putln(ls.getCast());
 		//llvmTempName = ls.getReference();
 		llc.putln(llvmTempName+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_createStringObjefct( i8* "+ls.getReference()+" );");
+	}
+	
+	@Override
+	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
+		cgen.put( C_codegen.getJitRuntimeFuncPrefix()+ "CreateStringObjefct( \"");
+		
+		byte[] bytes = val.getBytes(Charset.forName("UTF8"));
+		
+		for (int i = 0; i < bytes.length; i++) {
+			int c = ((int)bytes[i]) & 0xFF;
+			if( c < ' ' || c > 'z' )
+				cgen.put(String.format("\\x%02x", c ) );
+			else
+				cgen.put(String.format("%c", c ) );
+		}
+		
+		cgen.put( "\" ) " );
 	}
 }
