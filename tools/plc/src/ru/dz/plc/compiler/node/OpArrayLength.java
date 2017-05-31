@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.node;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -68,4 +69,13 @@ public class OpArrayLength extends Node {
 		//c.emitCall(12,0); // Method number 12, 0 parameters - size
 		llc.putln(llvmTempName+ " = i32 call @PhantomVm_array_length ( "+atom.getLlvmTempName()+") ;");
 	}
+	
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s)
+			throws PlcException {
+		// TODO or generate inline func call for speed? And do the same in 
+		// interpreter?
+		cgen.emitMethodCall(_l, 12, null, s);
+	}
+	
 }
