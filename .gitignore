@@ -64,8 +64,10 @@ etc/experiments/cpfs/disk.img
 etc/experiments/cpfs/Makefile~
 etc/experiments/cpfs/cpfs.exe.stackdump
 etc/experiments/cpfs/.gdbrc~
-/etc/experiments/cpfs/nbproject/
+etc/experiments/cpfs/nbproject/
 local-config.e2k.mk
 run/last_snap.data
 run/prev_snap.data
 run/trace
+etc/attic/plc/bin
+tools/plc/bin
