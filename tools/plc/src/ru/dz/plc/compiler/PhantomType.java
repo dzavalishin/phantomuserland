@@ -259,6 +259,9 @@ public class PhantomType {
 		if( _is_float ) _class = ClassMap.get_map().get(".internal.float",false, null);
 		if( _is_double ) _class = ClassMap.get_map().get(".internal.double",false, null);
 		if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
+		
+		if( _is_void ) 
+			_class = ClassMap.get_map().get(".internal.void",false,null);
 
 		return _class;
 	}
