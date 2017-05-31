@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * <p>Lexical analiser.</p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
- * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * <p>Lexical analyzer.</p>
+ * <p>Copyright: Copyright (c) 2004-20017 Dmitry Zavalishin</p>
+ * <p>Company: <a href="http://dz.ru">Digital Zone</a></p>
  * @author dz
  */
 
