@@ -270,7 +270,7 @@ static void make_mem_map(void)
                 char *s = (char*)phystokv(m[i].string);
                 unsigned len = strlen(s);
 
-                SET_MEM(m[i].string, len, MEM_MAP_MOD_NAME);
+                if (len != 0) SET_MEM(m[i].string, len, MEM_MAP_MOD_NAME);
             }
 
             SET_MEM(m[i].mod_start, m[i].mod_end-m[i].mod_start, MEM_MAP_MODULE );
