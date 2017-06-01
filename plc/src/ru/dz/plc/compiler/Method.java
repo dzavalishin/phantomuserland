@@ -140,7 +140,8 @@ public class Method
     // previous ones.
     // TODO: BUG! autovars in arguments are already on stack, we don't have to reserve space
     for( int i = n_auto_vars; i > 0; i-- )
-      c.emitPushNull();
+      //c.emitPushNull();
+    	c.emitSummonNull();
 
     // TODO introduce instruction to reserve o+i space in one step
     // Reserve integer stack place for int vars

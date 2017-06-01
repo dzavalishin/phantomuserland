@@ -650,12 +650,14 @@ public class Codegen extends opcode_ids {
 		list("ptr neq");
 	}
 
+	/*
 	public void emitPushNull() throws IOException
 	{
 		put_byte(opcode_os_push_null);
 		list("push null");
 	}
-
+	*/
+	
 	public void emitIsNull() throws IOException
 	{
 		put_byte(opcode_os_isnull);

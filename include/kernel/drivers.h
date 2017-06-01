@@ -77,6 +77,8 @@ phantom_device_t * driver_intel_PIIX4_pm_probe( pci_cfg_t *pci, int stage );
 #define ENSONIQ_VENDORID 0x1274
 phantom_device_t * driver_es1370_probe( pci_cfg_t *pci, int stage );
 
+phantom_device_t * driver_embox_ide_probe( pci_cfg_t *pci, int stage );
+
 
 // ---------------------------------------------------------------
 //                               ISA

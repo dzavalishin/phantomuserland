@@ -342,6 +342,7 @@ int virtio_attach_buffer(virtio_device_t *vd, int qindex,
     virtio_ring_t *r = vd->rings[qindex];
 
     assert(buf);
+    assert(bufsize);
 
     VIRTIO_LOCK(r);
     virtio_wait_for_free_descriptors(vd, qindex, r, 1);
@@ -398,6 +399,7 @@ int virtio_attach_buffers_list(virtio_device_t *vd, int qindex,
     while(nDesc-- > 0)
     {
         assert(desc[nDesc].addr);
+        assert(desc[nDesc].len);
 
         last = descrIndex;
         descrIndex = virtio_get_free_descriptor_index(r);
@@ -498,14 +500,18 @@ int virtio_detach_buffers_list(virtio_device_t *vd, int qindex,
     assert(nDesc > 0);
 
     int pos = r->lastUsedIdx % r->vr.num;
-    r->lastUsedIdx++;
-// ?
+    // suppose that incrementing it means we 'released' it? inc later
+    //r->lastUsedIdx++;
+
+    // ?
     //r->lastUsedIdx %= r->vr.num;
 
     unsigned int bufIndex = r->vr.used->ring[pos].id;
 
     if(bufIndex >= r->vr.num)
     {
+        r->lastUsedIdx++;
+
         VIRTIO_UNLOCK(r);
         SHOW_ERROR(0, "bufIndex >= r->vr.num (%d)", bufIndex);
         return -1;
@@ -541,6 +547,8 @@ again:
             SHOW_ERROR0(0, "Can't recv descriptor");
     }
 
+
+        r->lastUsedIdx++;
 
     VIRTIO_UNLOCK(r);
     return nout;
