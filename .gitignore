@@ -72,3 +72,8 @@ run/prev_snap.data
 run/trace
 etc/attic/plc/bin
 tools/plc/bin
+tools/plc/test/pc/*.c
+tools/plc/test/pc/*.pc
+tools/plc/test/pc/*.lstc
+tools/plc/test/pc/*.lst
+tools/plc/test/pc/*.ll
