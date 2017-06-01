@@ -15,8 +15,12 @@ import ru.dz.plc.util.PlcException;
  */
 
 
-public class ValNeqNode extends BiBistackNode {
-	public ValNeqNode( Node l, Node r) {    super(l,r);  }
+public class ValNeqNode extends ValCmpNode {
+	public ValNeqNode( Node l, Node r) {    
+		super(l,r);
+		opName = "Neq";
+		}
+	
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return "!=";  }
 	// todo - must redefine generate_code to be able to process

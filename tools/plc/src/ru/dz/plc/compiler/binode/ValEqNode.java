@@ -12,8 +12,12 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  *
  */
-public class ValEqNode extends BiBistackNode {
-	public ValEqNode( Node l, Node r) {    super(l,r);  }
+public class ValEqNode extends ValCmpNode {
+	public ValEqNode( Node l, Node r) {    
+		super(l,r);  
+		opName = "Eq";
+		}
+	
 	public String toString()  {    return "==";  }
 	public boolean is_on_int_stack() { return true; }
 

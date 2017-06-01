@@ -14,9 +14,13 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  */
 
-public class ValLeNode extends BiNode 
+public class ValLeNode extends ValCmpNode 
 {
-	public ValLeNode( Node l, Node r) {    super(l,r);  }
+	public ValLeNode( Node l, Node r) {    
+		super(l,r);  
+		opName = "Le";
+		}
+	
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return "<=";  }
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {

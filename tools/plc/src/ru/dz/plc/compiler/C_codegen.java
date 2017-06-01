@@ -146,20 +146,19 @@ public class C_codegen {
 			put("( JIT_vm_state, /* this */ ");
 			
 			new_this.generate_C_code(this,s); // get object
-			if( args != null )
-				put(", ");
+			//if( args != null )				put(", ");
 
 			for( Node i = args; i != null; i = ((BiNode)i).getRight() )      
 			{
-				boolean haveNext = ((BiNode)i).getRight() != null;
+				put(", ");
+				//boolean haveNext = ((BiNode)i).getRight() != null;
 				
 				i.generate_C_code(this, s);
 				
-				if( haveNext )
-					put(", ");
+				//if( haveNext )					put(", ");
 			}
 			//c.emitCall(method_ordinal,n_param);
-			put(")");
+			put(" ) ");
 			
 		}
 
