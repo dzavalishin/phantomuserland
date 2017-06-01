@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ru.dz.soot;
 
 import java.io.File;
@@ -27,6 +24,8 @@ import soot.tagkit.Tag;
 import soot.util.Chain;
 
 /**
+ * Java to Phantom bytecode converter. Uses plc code generation backend.
+ * 
  * @author dz
  *
  */
@@ -112,8 +111,8 @@ public class SootMain {
 			doClass("java.lang.ArrayStoreException");
 			doClass("java.lang.ArithmeticException");
 			
-			doClass("java.lang.AbstractStringBuilder");
-			doClass("java.lang.StringBuilder");
+			//doClass("java.lang.AbstractStringBuilder");
+			//doClass("java.lang.StringBuilder");
 		}
 		else
 		{
