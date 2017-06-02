@@ -77,3 +77,7 @@ tools/plc/test/pc/*.pc
 tools/plc/test/pc/*.lstc
 tools/plc/test/pc/*.lst
 tools/plc/test/pc/*.ll
+tools/plc/*.pc
+tools/plc/*.lstc
+tools/plc/*.lst
+tools/plc/*.ll

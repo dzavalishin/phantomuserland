@@ -1,11 +1,18 @@
 include ../../config.mk
 
-JDK_SRC_LIST=java/lang/StringBuilder.java 
-JDK_SRC_LIST1 := addprefix($(PHANTOM_JDK_SRC)/,$(JDK_SRC_LIST))
-#JDK_BIN_LIST := $(patsubst %.java,%.class,$(notdir $(JDK_SRC_LIST)))
-JDK_BIN_LIST := $(patsubst %.java,bin/%.class,$(JDK_SRC_LIST))
+ROOT_SRC_LIST=java/lang/Class.java 
+ROOT_SRC_LIST1 := addprefix(src/,$(ROOT_SRC_LIST))
+##JDK_BIN_LIST := $(patsubst %.java,%.class,$(notdir $(JDK_SRC_LIST)))
+ROOT_BIN_LIST := $(patsubst %.java,bin/%.class,$(ROOT_SRC_LIST))
 
-vpath %.java $(PHANTOM_JDK_SRC)
+
+#JDK_SRC_LIST=java/lang/StringBuilder.java 
+#JDK_SRC_LIST1 := addprefix($(PHANTOM_JDK_SRC)/,$(JDK_SRC_LIST))
+##JDK_BIN_LIST := $(patsubst %.java,%.class,$(notdir $(JDK_SRC_LIST)))
+#JDK_BIN_LIST := $(patsubst %.java,bin/%.class,$(JDK_SRC_LIST))
+
+#vpath %.java $(PHANTOM_JDK_SRC)
+vpath %.java src
 vpath %.class bin
 
 #vpath %.ph $(SRCDIRS)
@@ -13,13 +20,15 @@ vpath %.class bin
 
 %.class: %.java
 	@echo :-- $@
+	jc $@
+	#jpc -cbin;class test.toPhantom.Testable
 	#@$(PLC) $<
 	#@cp $(BINDIR)/$@ $(BOOTCLASSES)
-
 #	@echo -:- $< - $@
 
 
-all: $(JDK_BIN_LIST)
+all: #$(ROOT_BIN_LIST) #$(JDK_BIN_LIST)
+	echo $(ROOT_SRC_LIST)
 
 #SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), src/phantom src/ru.dz src/tetris src/test ../roots/src/internal )
 #BINDIR=../bin
