@@ -4,5 +4,5 @@ package java.lang;
 
 // Placeholder
 
-class String {
+public class String {
 };

@@ -4,7 +4,7 @@ package java.lang;
 
 // Placeholder
 
-class Throwable {
+public class Throwable {
 
 
   /**

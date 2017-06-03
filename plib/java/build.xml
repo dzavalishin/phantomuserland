@@ -1,0 +1,22 @@
+<project name="Java2Phantom" default="compile">
+	<property file="build.properties" />
+	
+	<target name="compile" description="compile java">
+	
+		<path id="classpath">
+			<fileset dir="class" includes="**/*.class" />
+		</path>
+
+		<pathconvert property="compile.classpath" refid="classpath" />
+		<echo>CLASSPATH: ${compile.classpath}</echo>
+		
+		<javac destdir="temp" includeantruntime="false"
+		   source="1.6" target="1.6">
+		   <src path="src" />
+		   <classpath refid="classpath" />
+		 </javac>
+		
+	</target>
+	
+
+</project>
