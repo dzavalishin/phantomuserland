@@ -63,6 +63,7 @@ ataio_t         *ata = &ata_buf;
 
 // TODO pager does not check for io errors!
 
+#define USE_LBA48 0
 #define IO_PANIC 0
 #define BLOCKED_IO 1
 #define IDE_TRIM 0
@@ -322,10 +323,18 @@ retry:;
 
         SHOW_FLOW( 11, "start sect rd sect %d + %d", secno, count );
 #if 1
+#if USE_LBA48
+        int rc = dma_pci_lba48(
+                               ndev, CMD_READ_DMA,
+                               0, count, // feature reg, sect count
+                               0, secno, // hi lo sec no
+                               physaddr, count );
+#else
         int rc = dma_pci_lba28(
                                ndev, CMD_READ_DMA,
                                0, count, // feature reg, sect count
                                secno, physaddr, count );
+#endif
 #else
         // unsure, test
         int rc = reg_pio_data_in_lba28( ndev, CMD_READ_SECTORS,

@@ -332,7 +332,8 @@ void phantom_init_console_window()
     {
         char * wname = "win1";
 
-        wname[3] = '0' + nwin;
+        // crashes in some configurations??
+        //wname[3] = '0' + nwin;
 
         bh = w_add_button( phantom_launcher_window, nwin, lb_x, 5, &task_button_bmp, &task_button_bmp, BUTTON_FLAG_NOBORDER );
         w_button_set_text( phantom_launcher_window, bh, wname, BTEXT_COLOR );

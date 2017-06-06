@@ -17,6 +17,8 @@ rem SET QCMD=qemu-system-x86_64w.exe
 rem SET QDIR=c:\bin\qemu
 
 
+rem SET QDIR=C:\bin\qemu
+rem SET QCMD=qemu-system-x86_64.exe
 
 set QEMU_AUDIO_DRV=dsound
 rem set QEMU_AUDIO_DRV=sdl
@@ -62,14 +64,18 @@ SET Q_MACHINE=-m 256
 rem SET Q_MACHINE=-m 120
 
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img
-SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb openwrt-x86-ext2.image.kernel -hda fat:fat -hdb phantom.img
-SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -hdb phantom.img
 rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -drive file=fat:fat,if=virtio,format=raw -drive file=phantom.img,if=virtio,format=raw 
 rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -drive file=phantom.img,if=virtio,format=raw 
 
 rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -drive file=fat:fat,if=ahci,format=raw -drive file=phantom.img,if=ahci,format=raw 
 rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -drive id=disk0,file=fat:fat,if=none -device ahci,id=ahci0 -device ide-drive,drive=disk0,bus=ahci0.0   -drive id=disk1,file=phantom.img,if=none -device ahci,id=ahci1 -device ide-drive,drive=disk1,bus=ahci1.0
 rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -device ahci,id=ahci0 -drive id=disk1,file=phantom.img,if=none -device ide-drive,drive=disk1,bus=ahci0.0
+
+rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb openwrt-x86-ext2.image.kernel -hda fat:fat -hdb phantom.img
+rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -hdb phantom.img
+rem SET Q_DISKS=-boot a -no-fd-bootchk -fda raw:img/grubfloppy-hd0.img   -hdb phantom.img
+SET Q_DISKS=-boot a -no-fd-bootchk -drive file=img/grubfloppy-hd0.img,index=0,if=floppy,format=raw -drive file=fat:rw:fat,format=raw -drive if=ide,index=1,file=phantom.img,format=raw
+
 
 rem -fdb kolibri.iso
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb e2.img -hda fat:fat -hdb phantom.img 
@@ -90,6 +96,7 @@ del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
 rem start /wait 
+
 %QDIR%\%QCMD% %Q_TRACE% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
 
 
