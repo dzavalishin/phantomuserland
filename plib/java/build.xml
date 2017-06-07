@@ -1,7 +1,11 @@
 <project name="Java2Phantom" default="compile">
 	<property file="build.properties" />
+
+	<target name="prepare" description="make dirs">
+		<mkdir dir="temp"/>
+	</target>
 	
-	<target name="compile" description="compile java">
+	<target name="compile" depends="prepare" description="compile java sources">
 	
 		<path id="classpath">
 			<fileset dir="class" includes="**/*.class" />
@@ -17,6 +21,11 @@
 		 </javac>
 		
 	</target>
-	
+
+	<target name="clean" description="clean intermediate and result files">
+		<delete dir="temp/java"/>
+		<delete dir="temp/test"/>
+	</target>
+
 
 </project>
