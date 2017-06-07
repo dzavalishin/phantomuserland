@@ -3,9 +3,10 @@
 
 	<target name="prepare" description="make dirs">
 		<mkdir dir="temp"/>
+		<copydir src="class" dest="temp" />
 	</target>
 	
-	<target name="compile" depends="prepare" description="compile java sources">
+	<target name="compile" depends="prepare" description="compile Java sources">
 	
 		<path id="classpath">
 			<fileset dir="class" includes="**/*.class" />
@@ -21,6 +22,14 @@
 		 </javac>
 		
 	</target>
+
+	<target name="convert" depends="compile" description="convert Java classes to Phantom classes">
+		<exec executable="sh">
+			<arg value="-c"/>
+			<arg value="jpc -Ctemp"/>
+		</exec>
+	</target>
+
 
 	<target name="clean" description="clean intermediate and result files">
 		<delete dir="temp/java"/>
