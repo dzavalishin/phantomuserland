@@ -41,6 +41,7 @@ public class SootMain {
 	static Logger log = Logger.getLogger(SootMain.class.getName());
 	static ClassMap classes = ClassMap.get_map();
 	private static Set<String> classesToDo = new HashSet<String>();
+	private static Set<String> classesToSkip = new HashSet<String>();
 	private static String sourceClassPath;
 
 
@@ -84,17 +85,17 @@ public class SootMain {
 
 			doClass("test.toPhantom.IPhantomPrinter");
 			doClass("test.toPhantom.AllRun");
-			
+
 			doClass("test.toPhantom.ArrayAssigns");
 			doClass("test.toPhantom.ArraySimple1");
 			doClass("test.toPhantom.Assigns");
 			doClass("test.toPhantom.Arrays");
 			doClass("test.toPhantom.Strings");
 			doClass("test.toPhantom.Loops");
-			
-			
+
+
 			//doClass("java.lang.");
-			
+
 			doClass("java.lang.UnsatisfiedLinkError");
 			doClass("java.lang.NoSuchMethodError");
 			doClass("java.lang.AbstractMethodError");
@@ -116,7 +117,7 @@ public class SootMain {
 			doClass("java.lang.ClassCastException"); 
 			doClass("java.lang.ArrayStoreException");
 			doClass("java.lang.ArithmeticException");
-			
+
 			//doClass("java.lang.AbstractStringBuilder");
 			//doClass("java.lang.StringBuilder");
 		}
@@ -141,28 +142,49 @@ public class SootMain {
 						queueAllClasses(dir);
 						continue;
 					}
-					
+
+					if( a.charAt(1) == 'X' )
+					{
+						String cn = a.substring(2);
+						classesToSkip.add(cn);
+						continue;
+					}
+
 					if( a.charAt(1) == '?' )
 					{
 						System.out.println(
 								"-C<dir> - process all .class files in directory (sets -c dir also)\n"+
-								"-c<java-class-path-list> - set directory to load .class files from\n"+
-								"-o<phantom-class-out-dir>\n"+
-								"-I - ignored (plc compat)"
+										"-c<java-class-path-list> - set directory to load .class files from\n"+
+										"-o<phantom-class-out-dir>\n"+
+										"-X<class.name - skip (do not convert) class"+
+										"-I - ignored (plc compat)"
 								);
 						continue;
 					}
-					
+
 					PlcMain.processFlag(a);
 					continue;
 				}
 				doClass(a);
 			}
 		}
-
+		/*
 		for( String iClass : classesToDo )
 		{
 			String cName = iClass.replace('/', '.');
+			say("Process queued class "+cName);
+			doClass(cName);
+		}
+		 */
+		while( !classesToDo.isEmpty() )
+		{
+			String cName = classesToDo.iterator().next();
+
+			classesToDo.remove(cName);
+
+			cName = cName.replace('/', '.');
+			cName = cName.replace('\\', '.');
+
 			say("Process queued class "+cName);
 			doClass(cName);
 		}
@@ -207,7 +229,7 @@ public class SootMain {
 					//System.out.println("not file "+file);
 					return FileVisitResult.CONTINUE;
 				}
-				
+
 				addPath(file);
 				return FileVisitResult.CONTINUE;
 			}
@@ -225,7 +247,7 @@ public class SootMain {
 			}
 
 		};
-		
+
 		try {
 			say("walk "+start);
 			Files.walkFileTree(start, visitor);
@@ -233,7 +255,7 @@ public class SootMain {
 			System.err.println("Unable to scan "+start);
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	// Add path to queue to be compiled
@@ -242,37 +264,43 @@ public class SootMain {
 		Path start = java.nio.file.Paths.get(sourceClassPath);
 
 		//say("abs = "+file);
-		
+
 		//Path relative = file.relativize(start);
 		Path relative = start.relativize(file);
-		
+
 		//say("relative = "+relative);
-		
+
 		String className = relative.toString();
-		
+
 		className = className.replaceAll("/", ".");
 		className = className.replaceAll("\\\\", "."); // This means replace ONE backslash with .
-	
+
 		if( !className.endsWith(".class") )
 			return;
-		
+
 		// remove .class suffix
 		className = className.substring(0, className.length()-6);
-		
+
 		//say("add "+className);
-		
+
 		classesToDo.add(className);
-		
+
 	}
 
 
 	private static void doClass(String cn) throws PlcException, IOException
 	{
+		if( classesToSkip.contains(cn))
+		{
+			say("Skipping "+cn);
+			return;			
+		}
+		
 		try {
 
 			SootClass c = Scene.v().loadClassAndSupport(cn);
 			//Scene.v().loadNecessaryClasses();
-			
+
 			if( c.isPhantom() )
 			{
 				die("Not loaded "+c.getName());

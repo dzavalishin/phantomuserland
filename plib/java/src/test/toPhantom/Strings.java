@@ -1,5 +1,5 @@
 package test.toPhantom;
-
+/*
 public class Strings implements Testable {
     public String x = "hello";
 
@@ -17,3 +17,4 @@ public class Strings implements Testable {
 	}
 
 }
+*/

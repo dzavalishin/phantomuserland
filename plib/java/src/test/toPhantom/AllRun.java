@@ -1,6 +1,7 @@
 package test.toPhantom;
 
 public class AllRun {
+/*
 	int nErr = 0;
 	private IPhantomPrinter p;
 	
@@ -48,11 +49,13 @@ public class AllRun {
 		AllRun ar = new AllRun();
 		ar.runAll();
 	}
-	*/
+	* /
 	
 	public void setPrinter(IPhantomPrinter p) {
 		this.p = p;
 	}
 
-
+*/
 }
+
+

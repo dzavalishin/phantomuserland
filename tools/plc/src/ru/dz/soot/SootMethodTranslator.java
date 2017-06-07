@@ -114,6 +114,12 @@ public class SootMethodTranslator {
 	public void process() throws PlcException {
 		//say("\n\n-------------------\nMethod "+mName);
 
+		if(!m.isConcrete())
+		{
+			SootMain.say("Skip abstract method "+mName);
+			return;
+		}
+		
 		m.retrieveActiveBody();
 		
 		Body body = m.getActiveBody();

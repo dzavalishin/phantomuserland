@@ -1,7 +1,7 @@
 package test.toPhantom;
 
 public class JavaAllRun {
-
+/*
 	public static void main(String[] args) {
 		
 		IPhantomPrinter p = new IPhantomPrinter() {			
@@ -17,5 +17,5 @@ public class JavaAllRun {
 		ar.setPrinter(p);
 		ar.runAll();
 	}
-
+*/
 }
