@@ -49,6 +49,8 @@ import .internal."class";
 
 import .phantom.osimpl;
 
+import .test.toPhantom.Assigns;
+
 /*
 import .test.toPhantom.PhantomPrinter;
 import .test.toPhantom.AllRun;
@@ -128,6 +130,8 @@ class boot
         print("Starting compiler regression tests\n");
         reg_test.run(boot_object);
         print("Finished compiler regression tests\n");
+
+        runJavaTests();
 
 //print("Wait for 1 sec...\n");
 //sleep(); //sleep(); sleep();
@@ -233,13 +237,28 @@ class boot
 
     .phantom.osimpl get_os_interface_object()
     {
-	var os : .phantom.osimpl;
+        var os : .phantom.osimpl;
         os = new .phantom.osimpl();
 
         os.init(boot_object);
 
-	return os;
+        return os;
     }
+
+    void runJavaTests()
+    {
+        var rc : int;
+
+        print("Running tests of Java compiler ...\n");
+
+        var t1: .test.toPhantom.Assigns;
+        t1 = new .test.toPhantom.Assigns();
+        rc = t1.runTest();
+        if( rc != 0 ) print("Java test FAILED: Assigns\n");
+        else print("Java test PASSED: Assigns\n");
+
+    }
+
 
     // ---------------------------------------------------------------------
     // Helpers
