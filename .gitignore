@@ -48,7 +48,6 @@ plib/bin/*.lst
 plib/bin/*.ll
 oldtree/kernel/phantom/phantom
 run/fat/class/*.pc
-run/*.img
 run/serial0.log*
 run/net.dmp
 tools/jbulk/bin/*
@@ -69,3 +68,11 @@ local-config.e2k.mk
 run/last_snap.data
 run/prev_snap.data
 run/trace
+
+
+CMakeLists.txt
+#IDE dependent folders
+/cmake-build-debug/
+/**/.idea/
+*.iml
+*.DS_Store

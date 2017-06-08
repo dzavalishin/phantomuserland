@@ -18,6 +18,7 @@ public class ObjectHeader extends AllocHeader {
 	public ObjectRef getObjectSatellites() {	return oSatellites; }
 
 	public int getObjectFlags() {		return objectFlags;	}
+	public byte getAllocFlags(){return super.getAllocFlags(); }
 	public int getDaSize() {		return daSize;	}
 
 	public String getFlagsList() { return getFlagsList(objectFlags); }

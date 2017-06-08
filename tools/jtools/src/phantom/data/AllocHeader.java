@@ -14,6 +14,19 @@ public class AllocHeader extends ObjectFlags {
 
 	public int getRefCount() { return refCount;	}
 	public byte getAllocFlags() {		return allocFlags;	}
+
+	public void setAllocFlag(int flag){
+		allocFlags += flag;
+	}
+
+	public void removeAllocFlag(int flag){
+		allocFlags -= flag;
+	}
+
+	//object from that moment is considered to be free
+	public void markObjectFree(){
+		allocFlags = 0;
+	}
 	public byte getGcFlags() {		return gcFlags;	}
 	public int getExactSize() {		return exactSize;	}
 	
@@ -22,7 +35,7 @@ public class AllocHeader extends ObjectFlags {
 	protected void loadHeader(ByteBuffer bb) throws DataLoadException
 	{
 		int objectMarker = bb.getInt();
-		if(objectMarker != PVM_OBJECT_START_MARKER)
+		if(objectMarker != PVM_OBJECT_START_MARKER) // PVM_OBJECT_START_MARKER = 0x7FAA7F55
 		{
 			//System.out.println("ObjectHeader.loadMe() marker is wrong @"+Long.toHexString(phantomObjectAddress));
 			throw new DataLoadException("object header marker is wrong, = "+Integer.toHexString(objectMarker));
