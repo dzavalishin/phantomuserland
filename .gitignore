@@ -65,8 +65,10 @@ etc/experiments/cpfs/cpfs.exe.stackdump
 etc/experiments/cpfs/.gdbrc~
 /etc/experiments/cpfs/nbproject/
 local-config.e2k.mk
-run/last_snap.data
-run/prev_snap.data
+**/*.data
+**/*.class
+tools/**/bin
+tools/**/*.csv
 run/trace
 
 

@@ -3,6 +3,7 @@
  */
 package phantom.gc;
 
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -10,9 +11,18 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+
+import phantom.data.AllocHeader;
 import phantom.data.DataLoadException;
 import phantom.data.ObjectHeader;
+
+
 
 /**
  * @author dz
@@ -45,27 +55,40 @@ public class Main {
 			System.exit(EXIT_CODE_ERROR);
 		}
 
-		String fn = "../../run/last_snap.data";
-		
+		String fn = System.getenv("PHANTOM_HOME") + "run/last_snap.data";
+
 		if( args.length == 1 )
 			fn = args[0];
 		
 		
-		System.out.println("Loding "+fn);
+		System.out.println("Loading " + fn);
 		
 		try {
-			process(fn);	        
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			process(fn);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(EXIT_CODE_FAILED);
 		}
 
+		collectGarbage();
+
+
+		// writing new .data file
+		String output = System.getenv("PHANTOM_HOME") + "tools/big_gc/out.data";
+		try {
+			saveObjectsToDataFile(translateGarbageMapToList(objects, false), output);
+			saveObjectMapToCSVFile(objects, "objects.csv");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(EXIT_CODE_FAILED);
+		}
+		System.out.println("Done!");
+		System.out.println(EXIT_CODE_OK);
 	}
 
-	private static void process(String fn) throws FileNotFoundException, IOException {
+
+	private static void process(String fn) throws IOException {
 		RandomAccessFile aFile;
 		aFile = new RandomAccessFile(fn, "r");
 		FileChannel inChannel = aFile.getChannel();
@@ -79,6 +102,7 @@ public class Main {
 		buffer = inChannel.map(FileChannel.MapMode.READ_ONLY, 0, inChannel.size());
 
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		System.out.println(String.format("Size of buffer while reading = %d", buffer.capacity()));
 
 		/*
 		for(int i = 0; i <10; i++)
@@ -128,6 +152,12 @@ public class Main {
 
 		}
 
+		int size = 0;
+		for( ObjectHeader header : objects.values()){
+			size += header.getExactSize();
+		}
+		System.out.println(String.format("Exact size just after reading: %d", size));
+
 		buffer = null; // let GC collect it
 		aFile.close();
 		// Actually we come here on "phantom.data.DataLoadException: object header marker is wrong"
@@ -137,23 +167,9 @@ public class Main {
 		System.out.println( String.format("Found %d objects, allocated %dK, free %dK.", 
 				objects.size(), allocatedSize/1024, freeSize/1024));
 		System.out.println("Processing.");
+
 		
 		// TODO find biggest free slot
-
-
-		System.out.println("Before garbage collecting:");
-		printStatisticsPerSystem(objects);
-
-		System.out.println("Let's collect garbage");
-
-		// process hash map and do GC
-		collectGarbage();
-
-		System.out.println("After garbage collecting:");
-		printStatisticsPerSystem(objects);
-
-
-		System.exit( EXIT_CODE_OK );
 	}
 
 	private static void collectGarbage() {
@@ -182,7 +198,6 @@ public class Main {
 			currentObject = objects.get(currentObjectAddress);
 			visitedObjects.put(currentObjectAddress, currentObject);
 
-
 			// inspect object
 			// for external objects check whether there are
 			// references to objects that hasn't been visited yet
@@ -198,7 +213,14 @@ public class Main {
 			}
 		}
 
+		// print some statistics and save all garbage objects to a file
+		// file will be saved to /analysis/ folder
 		printGarbageStatistics(visitedObjects, objects);
+		try {
+			saveObjectMapToCSVFile(getGarbage(visitedObjects, objects), "garbageObjects.csv");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		for(Map.Entry<Long,ObjectHeader> entry: objects.entrySet()){
 			//if object isn't garbage -> don't do anything
@@ -257,7 +279,7 @@ public class Main {
 
 	/**
 	 * Prints how many non-garbage was found and distribution depending on
-	 * the amount of refCounters(Now for refCount == 0, refCount == 1, 2<=refCount<=5 , refCount>=5)
+	 * the amount of refCounters
 	 * @param withoutGarbage Map<Long, ObjectHeader> objects after gc
 	 * @param withGarbage Map<Long, ObjectHeader> objects before gc
 	 */
@@ -265,13 +287,8 @@ public class Main {
 											Map<Long, ObjectHeader> withGarbage){
 
 		System.out.println("Printing garbage statistics:");
-		HashMap<Long, ObjectHeader> garbage = new HashMap<>();
+		Map<Long, ObjectHeader> garbage = getGarbage(withoutGarbage, withGarbage);
 
-		for(Map.Entry<Long,ObjectHeader> entry: withGarbage.entrySet()){
-			if(entry.getValue().isAllocated() && (withoutGarbage.get(entry.getKey()) == null)){
-				garbage.put(entry.getKey(), entry.getValue());
-			}
-		}
 		System.out.println(String.format("  Found %d garbage objects", garbage.size()));
 
 
@@ -298,12 +315,10 @@ public class Main {
 		System.out.println(String.format("  1: %d", refCounterDistribution.get(1)));
 		System.out.println(String.format("  2-5: %d", refCounterDistribution.get(2)));
 		System.out.println(String.format("  >5: %d", refCounterDistribution.get(3)));
-
-
 	}
 
 	/**
-	 * convert array of bytes in unsigned int
+	 * convert array of bytes to unsigned int
 	 * 	array must be in big endian order
 	 */
 	private static long byteArrayToInt(byte[] bytes) {
@@ -311,6 +326,176 @@ public class Main {
 	}
 
 
-	private static void analyse
+	/**
+	 * save objects to file in csv format
+	 * needed for analyzing usage of objects using jupyter or other tools
+	 * @param objectsMap Map<Long, ObjectHeader>
+	 */
+	private static void saveObjectMapToCSVFile(Map<Long, ObjectHeader> objectsMap, String filename)
+			throws IOException {
+
+		//csv header, has to be written to file first
+		String csvHeader = "objAddress,isAllocated,isInternal,refCount,allocFlags,gcFlags" +
+				",exactSize,oClass,oSatellites,objectFlags,daSize,dataArea";
+
+
+		// each row corresponds to one and only one object
+		List<String> csvRows = new ArrayList<>(objectsMap.size() + 1);
+		csvRows.add(csvHeader);
+
+		int isInternal, isAllocated;
+
+
+		// iterating over all objects in the map
+		// and creating rows for all of them
+
+		// isInternal has value 1 if object is internal and 0 otherwise
+		// isAllocated has value 1 if object is allocated and 0 otherwise
+		// oClass and oSatellites corresponds to the result of ObjectRef.toString() method now
+		// dataArea corresponds to a string written in a like ref1;ref2;ref3...
+		for(Map.Entry<Long,ObjectHeader> entry : objectsMap.entrySet()){
+			List<String> row = new ArrayList<>();
+
+			row.add(Long.toString(entry.getKey()));
+
+			if(entry.getValue().isAllocated())
+				isAllocated = 1;
+			else
+				isAllocated = 0;
+			row.add(Integer.toString(isAllocated));
+
+			if(entry.getValue().isInternal())
+				isInternal = 1;
+			else
+				isInternal = 0;
+			row.add(Integer.toString(isInternal));
+
+			row.add(Integer.toString(entry.getValue().getRefCount()));
+			row.add(Integer.toString(entry.getValue().getAllocFlags()));
+			row.add(Integer.toString(entry.getValue().getGcFlags()));
+			row.add(Integer.toString(entry.getValue().getExactSize()));
+			if(entry.getValue().getClassRef() != null)
+				row.add(entry.getValue().getClassRef().toString());
+			else
+				row.add("0");
+
+			if(entry.getValue().getObjectSatellites() != null)
+				row.add(entry.getValue().getClassRef().toString());
+			else
+				row.add("0");
+
+			row.add(Integer.toString(entry.getValue().getObjectFlags()));
+			row.add(Integer.toString(entry.getValue().getDaSize()));
+
+			if(isInternal == 0 && isAllocated == 1 && entry.getValue().getDaSize() != 0){
+				List<Long> refs = getListOfObjectPointers(entry.getValue().getDataArea());
+				List<String> stringRefs = refs.stream()
+						.map(Object::toString)
+						.collect(Collectors.toList());
+				row.add(String.join(";", stringRefs));
+			}else{
+				row.add("null");
+			}
+
+			csvRows.add(String.join(",", row));
+		}
+
+
+
+		Path file = Paths.get(System.getenv("PHANTOM_HOME") + "tools/big_gc/analysis/" + filename);
+		String result = String.join("\n", csvRows);
+		BufferedWriter bf = Files.newBufferedWriter(file, Charset.forName("UTF-8"));
+		bf.write(result);
+		bf.close();
+	}
+
+
+	/**
+	 * Get Map of garbage objects
+	 * @param withoutGarbage Map<Long, ObjectHeader>
+	 * @param withGarbage Map<Long, ObjectHeader>
+	 * @return (objects that exist in withoutGarbage and don't exist in withGarbage)
+	 */
+	private static Map<Long, ObjectHeader> getGarbage(Map<Long, ObjectHeader> withoutGarbage,
+													  Map<Long, ObjectHeader> withGarbage){
+
+		Map<Long, ObjectHeader> garbage = new HashMap<>();
+		for(Map.Entry<Long,ObjectHeader> entry: withGarbage.entrySet()){
+			if(entry.getValue().isAllocated() && (withoutGarbage.get(entry.getKey()) == null)){
+				garbage.put(entry.getKey(), entry.getValue());
+			}
+		}
+		return garbage;
+	}
+
+	/**
+	 * Translate Map<Long, ObjectHeader> to List<ObjectHeader>
+	 *     and collapses free objects if needToCollapse is true
+	 * @return List of ObjectHeader objects
+	 */
+	private static List<ObjectHeader> translateGarbageMapToList(Map<Long, ObjectHeader> objectHeaderMap, boolean needToCollapse){
+		List<Map.Entry<Long, ObjectHeader>> entries = new ArrayList<>(objectHeaderMap.entrySet());
+
+		entries.sort((a, b) -> Long.compare(b.getKey(), a.getKey()));
+		List<ObjectHeader> result = new ArrayList<>();
+
+
+
+		if(!needToCollapse){
+			for(Map.Entry<Long, ObjectHeader> entry : entries)
+				result.add(entry.getValue());
+			return result;
+		}
+
+		ObjectHeader prevFreeObj = null;
+		// collapse free objects in one
+		for(Map.Entry<Long, ObjectHeader> entry : entries){
+			if(entry.getValue().isAllocated()){
+				result.add(entry.getValue());
+				if(prevFreeObj != null){
+					result.add(prevFreeObj);
+					prevFreeObj = null;
+				}
+			}else{
+				if(prevFreeObj != null){
+					prevFreeObj.setExactSize(prevFreeObj.getExactSize() + entry.getValue().getExactSize());
+				}else{
+					prevFreeObj = entry.getValue();
+				}
+			}
+		}
+		if(prevFreeObj != null)
+			result.add(prevFreeObj);
+
+		return result;
+	}
+
+
+	/**
+	 * Save list of objects to data file.
+	 * phantom.img ->(using pfsexstruct tool) last_snap.data -> Map<Long, ObjectHeader>
+	 * List<ObjectHeader> -> last_snap.data ->(using some tool) phantom.img
+	 */
+	private static void saveObjectsToDataFile(List<ObjectHeader> headers, String fileName)
+			throws IOException {
+		//determine how big byteBuffer has to be
+		int size = 0;
+		for(ObjectHeader header: headers){
+			size += header.getExactSize();
+		}
+		System.out.println(String.format("Size of byteBuffer to write is %d", size));
+
+		RandomAccessFile outputFile = new RandomAccessFile(fileName, "rw");
+		ByteBuffer buffer = ByteBuffer.allocate(size);
+
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		for(ObjectHeader header : headers){
+			header.writeToByteBuffer(buffer);
+		}
+		outputFile.write(buffer.array());
+		outputFile.close();
+	}
+
+
 
 }

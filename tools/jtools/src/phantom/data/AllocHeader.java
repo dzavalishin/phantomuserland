@@ -29,6 +29,12 @@ public class AllocHeader extends ObjectFlags {
 	}
 	public byte getGcFlags() {		return gcFlags;	}
 	public int getExactSize() {		return exactSize;	}
+
+	// has to be used very carefully
+	// could make snapshot invalid
+	public void setExactSize(int newExactSize){
+		this.exactSize = newExactSize;
+	}
 	
 	public boolean isAllocated() { return (PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED & allocFlags) != 0; }
 	
@@ -58,6 +64,19 @@ public class AllocHeader extends ObjectFlags {
 			throw new DataLoadException("object header marker is wrong");
 		}
 */		
+	}
+
+	// based on loadHeader method
+	protected void writeToByteBuffer(ByteBuffer byteBuffer){
+		byteBuffer.putInt(PVM_OBJECT_START_MARKER);
+		byteBuffer.putInt(this.refCount);
+		byteBuffer.put(allocFlags);
+		byteBuffer.put(gcFlags);
+
+		byteBuffer.put((byte)0x00);
+		byteBuffer.put((byte)0x00);
+
+		byteBuffer.putInt(this.exactSize);
 	}
 
 }

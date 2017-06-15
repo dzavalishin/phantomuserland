@@ -18,7 +18,6 @@ public class ObjectHeader extends AllocHeader {
 	public ObjectRef getObjectSatellites() {	return oSatellites; }
 
 	public int getObjectFlags() {		return objectFlags;	}
-	public byte getAllocFlags(){return super.getAllocFlags(); }
 	public int getDaSize() {		return daSize;	}
 
 	public String getFlagsList() { return getFlagsList(objectFlags); }
@@ -68,6 +67,23 @@ public class ObjectHeader extends AllocHeader {
 		System.out.print("size = "+getExactSize() + " da size = "+getDaSize() );		
 		//System.out.print(" allocFlags = "+Integer.toHexString(getAllocFlags()) );		
 		System.out.println();		
+	}
+
+	public void writeToByteBuffer(ByteBuffer byteBuffer){
+		int start = byteBuffer.position();
+
+		super.writeToByteBuffer(byteBuffer);
+		if(!isAllocated()){
+			byteBuffer.position(start + getExactSize());
+			return;
+		}
+		this.oClass.writeToByteBuffer(byteBuffer);
+		this.oSatellites.writeToByteBuffer(byteBuffer);
+
+		byteBuffer.putInt(this.objectFlags);
+		byteBuffer.putInt(this.daSize);
+		byteBuffer.put(this.dataArea);
+		byteBuffer.position(start + this.getExactSize());
 	}
 	
 	
