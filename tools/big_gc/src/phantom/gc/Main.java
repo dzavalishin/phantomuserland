@@ -168,7 +168,6 @@ public class Main {
 				objects.size(), allocatedSize/1024, freeSize/1024));
 		System.out.println("Processing.");
 
-		
 		// TODO find biggest free slot
 	}
 

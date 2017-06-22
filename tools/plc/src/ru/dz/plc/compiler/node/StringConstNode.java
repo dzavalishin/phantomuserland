@@ -40,4 +40,9 @@ public class StringConstNode extends Node {
 		//llvmTempName = ls.getReference();
 		llc.putln(llvmTempName+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_createStringObjefct( i8* "+ls.getReference()+" );");
 	}
+
+
+	public String getValue(){
+		return val;
+	}
 }

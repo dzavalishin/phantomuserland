@@ -105,7 +105,6 @@ extends GrammarHelper {
 	//private final int id_const;
 	private final int id_summon, id_thread, id_package, id_import;
 
-
 	protected int getInt() throws PlcException { return super.getInt(id_int_const); }
 	protected String getString() throws PlcException { return super.getString(id_string_const); }
 	protected String getIdent() throws PlcException { return super.getIdent(id_ident); }
@@ -1090,15 +1089,28 @@ extends GrammarHelper {
 
 		while(true)
 		{
+			// for calling method by its name like obj.*("method")(arg1, arg2, ... ()
 			if (testAndEat( id_point )) {
-				MethodNode method = (MethodNode) parse_method_id();
-				//String methodIdent = parse_method_id();
-				Node args = parse_call_args();
-				
-				// No arg type info know, can't make sig here
-				//MethodSignature sig = new MethodSignature(method.getIdent(), args);
-				//method.setSignature(sig);
+				boolean isCallingByName = false;
+				if(testAndEat(id_aster)) {
+					isCallingByName = true;
+				}
+				Node expression = parse_method_id();
+				MethodNode method;
+				if(isCallingByName) {
+					if (!(expression instanceof StringConstNode)) {
+						throw new PlcException("parseLvalue", "Method identifier must be type of StringConstNode");
+					}
+					StringConstNode methodName = (StringConstNode) expression;
+					method = (MethodNode) new MethodNode(methodName.getValue()).setContext(l);
+				}else {
+					// No arg type info know, can't make sig here
+					// MethodSignature sig = new MethodSignature(method.getIdent(), args);
+					// method.setSignature(sig);
 
+					method = (MethodNode) expression;
+				}
+				Node args = parse_call_args();
 				out = new OpMethodCallNode(out, method, args).setContext( l );
 			}
 			else if (peek( id_lparen )) {
