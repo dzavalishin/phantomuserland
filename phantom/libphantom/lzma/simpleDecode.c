@@ -23,9 +23,14 @@
 #include <lzma.h>
 
 
-static void *SzAlloc(void *p, size_t size) { p = p; return malloc(size); }
-static void SzFree(void *p, void *address) { p = p; free(address); }
+static void *SzAlloc(void *p, size_t size) { (void) p; return malloc(size); }
+
+static void SzFree(void *p, void *address) { (void) p; free(address); }
+
 static ISzAlloc alloc = { SzAlloc, SzFree };
+
+
+
 
 errno_t plain_lzma_decode( void *dest, size_t *dest_len, void *src, size_t *src_len, int logLevel )
 {
