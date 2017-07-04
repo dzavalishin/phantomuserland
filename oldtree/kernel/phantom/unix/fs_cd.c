@@ -528,7 +528,7 @@ errno_t fs_start_cd(phantom_disk_partition_t *p)
 
         // Primary VD
         //if( (0 == strncmp( buf, cd_marker, 7 )) || (buf[7] != 0) )
-        if( (buf[0] == ISO_VD_PRIMARY) )
+        if( buf[0] == ISO_VD_PRIMARY )
         {
             vd = *(cd_vol_t *)buf;
             primary_vd_found = 1;
