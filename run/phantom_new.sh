@@ -20,6 +20,6 @@ Q_KVM="--enable-kvm"
 # mv serial0.log.old serial0.log.old1
 # mv serial0.log serial0.log.old
 
-qemu-system-i386 $Q_KVM $Q_DEBUG -display sdl -m 8192M $Q_PORTS $Q_BOOT $Q_FLOPPY $Q_CD $Q_DISK_A $Q_DISK_B $Q_NET $VIO
+qemu-system-i386 $Q_KVM $Q_DEBUG -display sdl -m 256M $Q_PORTS $Q_BOOT $Q_FLOPPY $Q_CD $Q_DISK_A $Q_DISK_B $Q_NET $VIO
 
 exit
