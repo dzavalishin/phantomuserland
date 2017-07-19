@@ -41,13 +41,19 @@ ifneq "$(ARCH)" "e2k"
 
 
 # Add a `-g' if the debug option is set.
+ifdef TARGET_OS_MAC
+export PH_DBG:=-g
+else
+export PH_DBG:=-gstabs+
+endif
+
 ifneq "$(filter debug, $(PHANTOM_OPTIONS))" ""
-PHANTOM_CFLAGS 	+= -O -gstabs+
-PHANTOM_ASFLAGS += -gstabs+
+PHANTOM_CFLAGS 	+= -O $(PH_DBG)
+PHANTOM_ASFLAGS += $(PH_DBG)
 else
 # -O2
-PHANTOM_CFLAGS 	+= -O0 -gstabs+
-PHANTOM_ASFLAGS += -gstabs+
+PHANTOM_CFLAGS 	+= -O0 $(PH_DBG)
+PHANTOM_ASFLAGS += $(PH_DBG)
 endif
 
 else

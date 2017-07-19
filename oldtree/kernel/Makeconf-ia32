@@ -7,6 +7,19 @@ HOST_CPU	= i686
 HOST_ARCH	= x86
 unix_host	= NONE
 
+
+ifdef TARGET_OS_MAC
+export CC       = $(CC_DIR)/clang-4.0 -target i386-pc-linux-elf
+export LD       = $(CC_DIR)/ld.lld
+
+export STRIP    = gstrip
+export AR       = $(CC_DIR)/llvm-ar
+export RANLIB   = $(CC_DIR)/llvm-ranlib
+export OBJCOPY  = gobjcopy
+export NM       = $(CC_DIR)/llvm-nm
+
+else
+
 #export CC	= clang -Wno-gnu
 #export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 
 
@@ -16,12 +29,12 @@ unix_host	= NONE
 #export CC	= i686-pc-mingw32-gcc
 #export LD	= i686-pc-mingw32-ld
 
-
 export STRIP	= strip
 export AR	= ar
 export RANLIB	= ranlib
 export OBJCOPY	= objcopy
 export NM	= nm
+endif
 
 AWK		= gawk
 YACC		= bison -y
@@ -38,7 +51,12 @@ INSTALL_INCDIR	= $(prefix)/include
 INSTALL_BINDIR	= $(exec_prefix)/bin
 INSTALL_LIBDIR	= $(exec_prefix)/lib
 
-PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inline-functions
+PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline
+ifdef TARGET_OS_MAC
+PHANTOM_FFLAGS    +=  -Wno-incompatible-library-redeclaration -Wno-gnu-variable-sized-type-not-at-end
+else
+PHANTOM_FFLAGS    +=  -fkeep-inline-functions
+endif
 
 # Uncomment to enable tracing
 # PHANTOM_FFLAGS += -finstrument-functions

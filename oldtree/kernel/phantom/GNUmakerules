@@ -77,11 +77,7 @@ ARCH_OBJS=cache_cpu.o driver_isa_mipsnet.o lowlevel_test.o
 endif
 
 
-ifneq "$(ARCH)" "e2k"
-LD_G_FLAG=-gstabs+
-else
-LD_G_FLAG=-g
-endif
+LD_G_FLAG:=$(PH_DBG)
 
 i386/libi386.a:
 	cd i386; make; cd ..
@@ -136,16 +132,20 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	svn_version.o profile.o trace.o $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 
 	@echo "Linking $@ ---------------------------------------------"
+ifdef TARGET_OS_MAC
+	$(LD) $(LD_G_FLAG) $(LD_ADDR) -o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) crtn.o
+else
 	@$(CC) $(LD_G_FLAG) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
+endif
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > $(TFTP_PATH)/$@
 	cat < $@ > ../../../run/fat/boot/$@
 	cat < $@ > ../../../run/fat/boot/$@.$(ARCH)
 	@echo --- kernel build finished
-	-@mv -t d *.d
-	-@mv -t d unix/*.d
-	-@mv -t d $(ARCH)/boards/*.d
+	-@mv  *.d d
+	-@mv  unix/*.d d
+	-@mv  $(ARCH)/boards/*.d d
 
 #	objdump -x $@.pe >$@.pe.sym
 #	gzip < $@ > $(TFTP_PATH)/$@.gz
