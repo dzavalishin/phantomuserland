@@ -57,7 +57,7 @@ static void vmware_detect2(int xsize, int ysize, int bpp);
 u_int32_t SVGA_ReadReg(u_int32_t index);
 void SVGA_WriteReg(u_int32_t index,  u_int32_t value);
 u_int32_t SVGA_ClearIRQ(void);
-static void SVGAInterruptHandler(void *arg);
+//static void SVGAInterruptHandler(void *arg);
 
 void SVGAFIFOFull(void);
 
@@ -205,6 +205,7 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
     (void) stage;
     // TODO why?
 #if 1
+    (void) pci;
     return 0;
 #else
     SHOW_FLOW0( 0, "Init" );
@@ -502,7 +503,7 @@ u_int32_t SVGA_ClearIRQ(void)
     return ATOMIC_FETCH_AND_SET( (int *) &gSVGA.irq.pending, 0 );
 }
 
-
+#if 0
 /*
  *-----------------------------------------------------------------------------
  *
@@ -566,6 +567,7 @@ SVGAInterruptHandler(void *arg)  // IN (unused)
         }
     */
 }
+#endif
 
 /*
  *-----------------------------------------------------------------------------

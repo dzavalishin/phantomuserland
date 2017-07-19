@@ -49,13 +49,13 @@
 
 
 
-static int rtl8169_init(rtl8169 *r);
-static void rtl8169_int(void* data);
+//static int rtl8169_init(rtl8169 *r);
+//static void rtl8169_int(void* data);
 
-static ssize_t rtl8169_rx(rtl8169 *r, char *buf, ssize_t buf_len);
-static void rtl8169_xmit(rtl8169 *r, const char *ptr, ssize_t len);
+//static ssize_t rtl8169_rx(rtl8169 *r, char *buf, ssize_t buf_len);
+//static void rtl8169_xmit(rtl8169 *r, const char *ptr, ssize_t len);
 
-
+#if 0
 static int rtl8169_read( struct phantom_device *dev, void *buf, int len)
 {
     rtl8169 *nic = (rtl8169 *)dev->drv_private;
@@ -92,7 +92,7 @@ static int rtl8169_get_address( struct phantom_device *dev, void *buf, int len)
 
     return err;
 }
-
+#endif
 
 
 phantom_device_t * driver_rtl_8169_probe( pci_cfg_t *pci, int stage )
@@ -321,7 +321,7 @@ int rtl8169_detect(rtl8169 **rtl8169_list)
 }
 #endif
 
-
+#if 0
 static void rtl8169_setup_descriptors(rtl8169 *r)
 {
     int i;
@@ -362,9 +362,9 @@ static void rtl8169_setup_descriptors(rtl8169 *r)
     RTL_WRITE_32(r, REG_RDSAR_LOW, r->rxdesc_phys);
     RTL_WRITE_32(r, REG_RDSAR_HIGH, UPPER32OF64(r->rxdesc_phys) );
 }
+#endif
 
-
-
+#if 0
 static int rtl8169_init(rtl8169 *r)
 {
     //bigtime_t time;
@@ -603,7 +603,9 @@ out:
 
     return rc;
 }
+#endif
 
+#if 0
 static int rtl8169_rxint(rtl8169 *r, uint16 int_status)
 {
     int rc = INT_NO_RESCHEDULE;
@@ -635,7 +637,9 @@ static int rtl8169_rxint(rtl8169 *r, uint16 int_status)
 
     return rc;
 }
+#endif
 
+#if 0
 static int rtl8169_txint(rtl8169 *r, uint16 int_status)
 {
     //uint32 txstat;
@@ -667,7 +671,9 @@ static int rtl8169_txint(rtl8169 *r, uint16 int_status)
 
     return rc;
 }
+#endif
 
+#if 0
 static void rtl8169_int(void* data)
 {
     int rc = INT_NO_RESCHEDULE;
@@ -697,6 +703,6 @@ done:
     (void) rc;
     //return rc;
 }
-
+#endif
 
 #endif // HAVE_PCI
