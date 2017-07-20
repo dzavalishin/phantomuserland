@@ -1,3 +1,4 @@
+#ifdef ARCH_ia32
 /*
  * @file
  * @brief
@@ -1507,3 +1508,4 @@ void phantom_check_disk_save_virtmem( void * a, int n )
 
 
 
+#endif // #ifdef ARCH_ia32

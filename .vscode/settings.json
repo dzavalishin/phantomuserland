@@ -3,6 +3,21 @@
     "files.associations": {
         "inet.h": "c",
         "in.h": "c",
-        "rtl8169_priv.h": "c"
+        "rtl8169_priv.h": "c",
+        "math.h": "c",
+        "port.c": "cpp",
+        "trap.h": "c",
+        "tftp.h": "c",
+        "testenv.h": "c",
+        "utils.h": "c",
+        "debug_ext.h": "c",
+        "spinlock.c": "cpp",
+        "win_hal.c": "cpp",
+        "pool.c": "cpp",
+        "test_pool.c": "cpp",
+        "suite_pool.c": "cpp",
+        "thread_private.h": "c",
+        "wtty.h": "c",
+        "net_main.c": "cpp"
     }
 }
