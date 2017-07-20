@@ -164,6 +164,7 @@ bootSTK:
 BOOTMP1:
 
 NON_GPROF_ENTRY(bootMP)
+//bootMP:
 	.code16		
 	cli
 	CHECKPOINT(0x34, 1)
@@ -182,12 +183,12 @@ NON_GPROF_ENTRY(bootMP)
 	mov	%ax, %fs
 	mov	%ax, %gs
 	mov	%ax, %ss
-	mov	$(boot_stk-bootMP), %esp
+	mov	$(boot_stk-EXT(bootMP)), %esp
 
 //hlt // ok
 
 	/* Now load the global descriptor table */
-	lgdt	(MP_GDTptr-bootMP)
+	lgdt	(MP_GDTptr-EXT(bootMP))
 
 	/* Enable protected mode */
 	movl	%cr0, %eax
@@ -202,12 +203,12 @@ NON_GPROF_ENTRY(bootMP)
         pushl	$0x18
 	//pushl	$KERNEL_DS
 	//pushl	$KERNEL_CS
-	pushl	$(protmode-bootMP)
+	pushl	$(protmode-EXT(bootMP))
 	lretl
 #else
         pushf
         push	$0x18
-	pushl	$(protmode-bootMP)
+	pushl	$(protmode-EXT(bootMP))
         iretl;
 #endif
 
