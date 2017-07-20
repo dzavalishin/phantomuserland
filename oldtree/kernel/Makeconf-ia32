@@ -10,7 +10,7 @@ unix_host	= NONE
 #export CC	= clang -Wno-gnu
 #export CC	= /usr/share/clang-analyzer/scan-build/ccc-analyzer 
 
-#export CC	= gcc
+export CC	= gcc
 #export LD	= ld
 
 #export CC	= i686-pc-mingw32-gcc

@@ -32,6 +32,29 @@
 //#include <dev/pci/parallels/svga_reg.h>
 //#include <dev/pci/parallels/svga.h>
 
+/*
+
+Видеомоду можно выставить так:
+               WRITE_PORT_UCHAR((UCHAR *)0x3c4, 0xa9);
+               WRITE_PORT_UCHAR((UCHAR *)0x3c5, (UCHAR)Bpp ); // 8/15/16/24/32 
+               WRITE_PORT_USHORT((USHORT *)0x3c5, (USHORT) Width);
+               WRITE_PORT_USHORT((USHORT *)0x3c5, (USHORT) Height);
+               WRITE_PORT_USHORT((USHORT *)0x3c5, (USHORT) BytesPerLine);
+               WRITE_PORT_USHORT((USHORT *)0x3c5, (USHORT) RefreshRate ); // value is ignored 
+               WRITE_PORT_UCHAR((UCHAR *)0x3c5, 1 ); // enable SVGA
+               WRITE_PORT_ULONG((ULONG *)0x3c5, 0 ); //  framebuffer offset 
+ 
+Вернуть текстовый режим:
+               WRITE_PORT_UCHAR((UCHAR *)0x3c4, 0xae);
+               WRITE_PORT_UCHAR((UCHAR *)0x3c5, 0 ); // disable SVGA 
+ 
+Получить адрес начала видеопамяти так:
+                WRITE_PORT_UCHAR((UCHAR *)0x3c4, 0xa2);
+                pLFB = (VOID *)READ_PORT_ULONG((UCHAR *)0x3c5);
+
+*/
+
+
 
 #define PARALLELS_VIDEO_DRV_DEFAULT_X_SIZE 1024
 #define PARALLELS_VIDEO_DRV_DEFAULT_Y_SIZE 768
