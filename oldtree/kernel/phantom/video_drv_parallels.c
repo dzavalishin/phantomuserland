@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
- * Parallels 'SVGA' driver. Unfinished.
+ * Parallels 'SVGA' driver. Untested.
  *
 **/
 
@@ -69,8 +69,8 @@ void parallels_mouse_off_bp2(void);
 static int parallels_video_probe();
 static int parallels_video_start();
 static int parallels_video_stop();
-static void parallels_video_update(void);
-static errno_t parallels_accel_start(void);
+//static void parallels_video_update(void);
+//static errno_t parallels_accel_start(void);
 
 //static void parallels_detect2(int xsize, int ysize, int bpp);
 

@@ -42,6 +42,7 @@ extern struct drv_video_screen_t        video_driver_null;
 
 
 extern struct drv_video_screen_t        video_driver_vmware_svga;
+extern struct drv_video_screen_t        video_driver_parallels_svga;
 
 // TODO: panic must switch to text mode!
 
@@ -66,6 +67,9 @@ struct drv_video_screen_t *video_drivers[] =
 
     // test one. never reports success
     &video_driver_direct_vesa,
+
+    // Parallels paravirt video
+    &video_driver_parallels_svga,
 
     // General reg clone driver
 //    &video_driver_gen_clone,
