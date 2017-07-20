@@ -44,7 +44,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceRoot}",
-                "${workspaceRoot}/include"
+                "${workspaceRoot}/include",
+                "${workspaceRoot}/include/ia32"
             ],
             "defines": [
                 "_DEBUG",
@@ -54,7 +55,8 @@
             "browse": {
                 "path": [
                     "${workspaceRoot}",
-                    "${workspaceRoot}/include"
+                    "${workspaceRoot}/include",
+                    "${workspaceRoot}/include/ia32"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
