@@ -164,7 +164,6 @@ bootSTK:
 BOOTMP1:
 
 NON_GPROF_ENTRY(bootMP)
-bootMP:
 	.code16		
 	cli
 	CHECKPOINT(0x34, 1)

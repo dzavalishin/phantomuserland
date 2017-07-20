@@ -4,6 +4,12 @@
 #
 export PHANTOM_NO_PVM_TEST=true
 export PHANTOM_HOME="`pwd`"
+if [ "`uname`" == "Darwin" ]
+then
+	export TARGET_OS_MAC=1
+	export CC_DIR=/usr/local/Cellar/llvm/4.0.1/bin
+fi
+
 [ -L phantom/kernel ] || ln -s ../oldtree/kernel/phantom phantom/kernel
 make -C phantom "$@"
 make -C oldtree/kernel/phantom "$@"
