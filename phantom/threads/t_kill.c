@@ -177,7 +177,7 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     t_release_snap_locks();
 #endif
 
-    errno_t rc = port_delete_owned_ports( tid, 0 );
+    errno_t rc = phantom_port_delete_owned_ports( tid, 0 );
     if( rc )
         SHOW_ERROR( 0, "Can't kill thread ports: %d", rc );
 

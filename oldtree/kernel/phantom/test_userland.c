@@ -164,6 +164,7 @@ int do_test_userland(const char *test_parm)
 {
     (void) test_parm;
 
+    errno_t err;
     char testdata[5];
     int res;
     int32_t code;
@@ -172,19 +173,20 @@ int do_test_userland(const char *test_parm)
     strcpy(testdata, "abcd");
 
     SHOW_INFO0( 0, "port_create()");
-    uland_port = port_create(1,    "__regress_test_port");
-
+    err = phantom_port_create( &uland_port, 1,    "__regress_test_port");
+    test_check_eq(err,0);
     test_check_ge(uland_port,0);
 
 
     SHOW_INFO0( 0, "port_write()");
-    res = port_write(uland_port, 1, &testdata, sizeof(testdata));
-    test_check_eq(res,0);
+    err = phantom_port_write(uland_port, 1, &testdata, sizeof(testdata));
+    test_check_eq(err,0);
 
     testdata[0] = 0;
 
     SHOW_INFO0( 0, "port_read()");
-    res = port_read_etc(uland_port, &code, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    err = phantom_port_read_etc(&res, uland_port, &code, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    test_check_eq(err,0);
     test_check_eq(res,5);
     test_check_eq(code,0xAA);
 
@@ -192,14 +194,15 @@ int do_test_userland(const char *test_parm)
 
 
     SHOW_INFO0( 0, "port_read() - wait for userland to finish");
-    res = port_read_etc(uland_port, &code, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    err = phantom_port_read_etc( &res, uland_port, &code, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    test_check_eq(err,0);
     test_check_ge(res,0);
     test_check_eq(code,0x55);
 
 
     SHOW_INFO0( 0, "close port");
-    res = port_close(uland_port);
-    test_check_ne(res,0);
+    err = phantom_port_close(uland_port);
+    test_check_ne(err,0);
 
 #if 0
     SHOW_INFO0( 0, "delete port");

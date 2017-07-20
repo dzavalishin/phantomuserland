@@ -268,7 +268,7 @@ int main(int argc, char **argv, char **envp)
     // Used to refill list used to allocate physmem in interrupts
     hal_init_physmem_alloc_thread();
 
-    port_init();
+    phantom_port_init();
     //pressEnter("will start net");
     net_stack_init();
 
