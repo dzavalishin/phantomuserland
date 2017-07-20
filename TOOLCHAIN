@@ -1,3 +1,8 @@
+IDE:
+  C programming (kernel) - Visual Studio Code (supports win/mac/linux)
+  Java programming - Eclipse
+
+
 Linux:
   gcc
 

@@ -1,3 +1,5 @@
+include $(realpath $(PHANTOM_HOME))/config.mk
+
 default::
 	-@mkdir -p lib
 	@$(MAKE) all

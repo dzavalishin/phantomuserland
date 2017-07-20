@@ -192,7 +192,7 @@
 #define	__aligned(x)
 #define	__section(x)
 #else
-#if !__GNUC_PREREQ__(2, 5) && !defined(__INTEL_COMPILER)
+#if !__GNUC_PREREQ__(2, 5) && !defined(__INTEL_COMPILER) && !defined(__clang__)
 #define	__dead2
 #define	__pure2
 #define	__unused
@@ -212,7 +212,7 @@
 #define	__aligned(x)	__attribute__((__aligned__(x)))
 #define	__section(x)	__attribute__((__section__(x)))
 #endif
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__clang__)
 #define __dead2		__attribute__((__noreturn__))
 #define __pure2		__attribute__((__const__))
 #define __unused	__attribute__((__unused__))
