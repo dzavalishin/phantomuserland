@@ -11,9 +11,9 @@ Q_KVM="--enable-kvm "
 
 Q_BOOT="-boot order=d,menu=on "
 
-Q_CD="-cdrom img/grub2.img "
-Q_DISK_A="-drive file=fat:rw:fat,format=raw,media=disk "
-# Q_DISK_A="-drive file=phantom_boot.img,format=raw,media=disk "
+# Q_CD="-cdrom img/grub2.img "
+# Q_DISK_A="-drive file=fat:rw:fat,format=raw,media=disk "
+Q_DISK_A="-drive file=phantom_boot.img,format=raw,media=disk "
 Q_DISK_B="-drive file=phantom.img,format=raw,media=disk "
 
 # Q_NET="-net nic,model=pcnet -net nic,model=rtl8139 -net user,tftp=tftp "
