@@ -9,7 +9,7 @@ Q_KVM="--enable-kvm "
 # Uncomment this to use EFI
 # Q_EFI="-L . --bios OVMF.fd "
 
-Q_BOOT="-boot order=d,menu=on "
+Q_BOOT="-boot order=c,menu=on "
 
 # Q_CD="-cdrom img/grub2.img "
 # Q_DISK_A="-drive file=fat:rw:fat,format=raw,media=disk "
