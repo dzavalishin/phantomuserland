@@ -760,10 +760,11 @@ public class Codegen extends opcode_ids {
 		//put_int32(n_param);
 	}
 
-	public void emitStaticCall(int ordinal) throws IOException {
+	public void emitStaticCall(int ordinal, int n_param) throws IOException {
 		list("static invoke");
 		put_byte(opcode_static_invoke);
 		put_int32(ordinal);
+		put_int32(n_param);
 	}
 
 

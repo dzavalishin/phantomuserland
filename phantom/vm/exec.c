@@ -35,6 +35,7 @@
 
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
+struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
 
 
 /*
@@ -47,7 +48,6 @@ static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 #define DEB_CALLRET 0
 #define DEB_DYNCALL 0
 
-//static int debug_print_instr = 1;
 int debug_print_instr = 0;
 
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
@@ -315,7 +315,14 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
 
 
 
-static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned int method_index, unsigned int n_param, pvm_object_t new_this )
+static void init_cfda(
+    struct data_area_4_thread *da, 
+    struct data_area_4_call_frame *cfda, 
+    unsigned int method_index, 
+    unsigned int n_param, 
+    pvm_object_t new_this,     
+    pvm_object_t class_ref  // for static calls. will do VMT call if null
+     )
 {
     cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
@@ -352,7 +359,13 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
     if( pvm_is_null(new_this) )
         new_this = os_pop();
 
-    struct pvm_object_storage *code = pvm_exec_find_method( new_this, method_index );
+    struct pvm_object_storage *code;
+    
+    /*if( !pvm_is_null(class_ref) )
+        code = pvm_exec_find_static_method( class_ref, method_index );
+    else*/
+        code = pvm_exec_find_method( new_this, method_index );
+
     assert(code != 0);
     pvm_exec_set_cs( cfda, code );
     cfda->this_object = new_this;
@@ -390,7 +403,11 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
     struct pvm_object new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
-    init_cfda(da, cfda, method_index, n_param, new_this);
+    //if( pvm_is_null(new_this) )                new_this = os_pop();
+
+    //struct pvm_object_storage *code = pvm_exec_find_method( new_this, method_index );
+
+    init_cfda(da, cfda, method_index, n_param, new_this, pvm_get_null_object() );
 
     if (!optimize_stack)
         cfda->prev = da->call_frame;  // link
@@ -410,7 +427,38 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
     if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
 }
 
+// TODO combine this and prev funcs where possible
 
+static void
+pvm_exec_static_call(
+    struct data_area_4_thread *da,      // Current thread
+    int method_ordinal,
+    int n_param,
+    pvm_object_t class_ref,             // Class to find method in
+    pvm_object_t new_this)
+{
+    if( DEB_CALLRET || debug_print_instr ) printf( "\nstatic call %d (stack_depth %d -> ", method_ordinal, da->stack_depth );
+
+    // We skip tail recursion optimization here for
+    // static call is for c'tors only and there's no recursion supposed
+
+    pvm_exec_save_fast_acc(da);  
+
+    struct pvm_object new_cf = pvm_create_call_frame_object();
+    struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
+
+    //struct pvm_object_storage *code = pvm_exec_find_static_method( class_ref, method_ordinal );
+
+    init_cfda(da, cfda, method_ordinal, n_param, new_this, class_ref );
+    
+    cfda->prev = da->call_frame;  // link
+    
+    da->stack_depth++;
+    da->call_frame = new_cf;
+    pvm_exec_load_fast_acc(da);
+
+    if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
+}
 
 /**
  *
@@ -1752,6 +1800,19 @@ static void do_pvm_exec(pvm_object_t current_thread)
             }
             break;
 
+        case opcode_static_invoke:
+            {
+                unsigned int method_ordinal = pvm_code_get_int32(&(da->code));
+                unsigned int n_param = pvm_code_get_int32(&(da->code));
+
+                pvm_object_t class_ref = os_pop();
+                pvm_object_t new_this = os_pop();
+
+                // Now there are just parameters on object stack
+                pvm_exec_static_call(da,method_ordinal,n_param,class_ref,new_this);
+            }
+            break;
+
             // object stack --------------------------------------------------------------
 
         case opcode_os_dup:
@@ -1920,6 +1981,60 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
     return tab[syscall_index];
 }
 
+
+static struct pvm_object_storage * 
+    pvm_exec_get_iface_method(
+        struct pvm_object_storage *iface,
+        unsigned int method_index
+        )
+{
+    if( iface == 0 )
+        pvm_exec_panic( "pvm_exec_get_iface_method: no interface found" );
+
+    if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
+        pvm_exec_panic( "pvm_exec_get_iface_method: not an interface object" );
+
+    if(method_index > da_po_limit(iface))
+        pvm_exec_panic( "pvm_exec_get_iface_method: method index is out of bounds" );
+
+    return da_po_ptr(iface->da)[method_index].data;    
+}
+
+/**
+ *
+ * Get method by ordinal from class.
+ * Returns code object.
+ *
+**/
+
+struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal )
+{
+    if( class_ref.data == 0 )
+    {
+        pvm_exec_panic( "pvm_exec_find_static_method: null class!" );
+    }
+
+    struct pvm_object_storage *iface;
+    iface = pvm_object_da( class_ref, class )->object_default_interface.data;
+
+#if 1
+    return pvm_exec_get_iface_method(iface, method_ordinal );        
+#else
+    // Same as in find_method, combine!
+
+    if( iface == 0 )
+        pvm_exec_panic( "pvm_exec_find_method: no interface found" );
+
+    if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
+        pvm_exec_panic( "pvm_exec_find_method: not an interface object" );
+
+    if(method_index > da_po_limit(iface))
+        pvm_exec_panic( "pvm_exec_find_method: method index is out of bounds" );
+
+    return da_po_ptr(iface->da)[method_index].data;
+#endif
+}
+
 /*
  *
  * Returns code object
@@ -1943,7 +2058,9 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned 
     	}
         iface = pvm_object_da( o.data->_class, class )->object_default_interface.data;
     }
-
+#if 1
+    return pvm_exec_get_iface_method(iface, method_index );        
+#else
     if( iface == 0 )
         pvm_exec_panic( "pvm_exec_find_method: no interface found" );
 
@@ -1954,6 +2071,7 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned 
         pvm_exec_panic( "pvm_exec_find_method: method index is out of bounds" );
 
     return da_po_ptr(iface->da)[method_index].data;
+#endif
 }
 
 
@@ -1992,55 +2110,6 @@ static int pvm_exec_find_catch(
 
 
 
-/**
- *
- * Compose object
- *
-**/
-
-//pvm_object
-//pvm_exec_compose_object( pvm_object in_class, pow_ostack in_stack, int to_pop )
-#if 0
-static struct pvm_object pvm_exec_compose_object(
-                                                 struct pvm_object in_class,
-                                                 struct data_area_4_object_stack *in_stack,
-                                                 int to_pop
-                                                )
-{
-    //struct pvm_object out = pvm_object_create_fixed( in_class ); // This one does not initialize internal ones
-    struct pvm_object out = pvm_create_object( in_class ); // This one does initialize internal ones
-
-    //struct pvm_object_storage	* _data = out.data;
-
-    //struct data_area_4_class *cda = (struct data_area_4_class *)in_class.data->da;
-
-    int das = out.data->_da_size;
-
-    struct pvm_object * data_area = (struct pvm_object *)out.data->da;
-
-    int max = das/sizeof(struct pvm_object);
-
-    if( to_pop > max ) pvm_exec_panic("compose: cant compose so many fields");
-
-    int i;
-    for( i = 0; i < to_pop; i++ )
-    {
-        data_area[i] = pvm_ostack_pop( in_stack );
-    }
-
-    for( ; i < max; i++ )
-        data_area[i] = pvm_get_null_object(); // null
-
-    /*
-    struct pvm_object out;
-    out.data = _data;
-
-
-    out.interface = cda->object_default_interface;
-    */
-    return out;
-}
-#endif
 
 // Todo it's a call_frame method!
 void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_storage * code )

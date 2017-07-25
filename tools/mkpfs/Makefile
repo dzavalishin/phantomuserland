@@ -10,3 +10,6 @@ install:: $(OUTPUT)
 
 $(OUTPUT): bin/ru/dz/phantom/pfsformat/*.class bin/ru/dz/phantom/disk/*.class
 	cd bin ; jar cvfe ../$(OUTPUT) $(CLASS) .
+
+clean::
+	-rm -rf bin/*
