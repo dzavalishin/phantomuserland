@@ -2,7 +2,9 @@
 *.h~
 *.c~
 *.o
+run/fat/boot/phantom.ia32
 run/fat/boot/pmod_test
+run/fat/boot/pmod_tcpdemo
 phantom/vm/pvm_test.exe
 run/fat/boot/phantom
 run/tftp/phantom
