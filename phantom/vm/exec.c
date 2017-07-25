@@ -45,11 +45,10 @@ struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref,
  */
 
 
-#define DEB_CALLRET 1
-#define DEB_DYNCALL 1
+#define DEB_CALLRET 0
+#define DEB_DYNCALL 0
 
-//static int debug_print_instr = 1;
-int debug_print_instr = 1;
+int debug_print_instr = 0;
 
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
 #define LISTIA(fmt,a) do { if( debug_print_instr ) { lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } } while(0)
@@ -316,7 +315,14 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
 
 
 
-static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_frame *cfda, unsigned int method_index, unsigned int n_param, pvm_object_t new_this,     struct pvm_object_storage *code )
+static void init_cfda(
+    struct data_area_4_thread *da, 
+    struct data_area_4_call_frame *cfda, 
+    unsigned int method_index, 
+    unsigned int n_param, 
+    pvm_object_t new_this,     
+    pvm_object_t class_ref  // for static calls. will do VMT call if null
+     )
 {
     cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
@@ -352,6 +358,13 @@ static void init_cfda(struct data_area_4_thread *da, struct data_area_4_call_fra
 
     if( pvm_is_null(new_this) )
         new_this = os_pop();
+
+    struct pvm_object_storage *code;
+    
+    /*if( !pvm_is_null(class_ref) )
+        code = pvm_exec_find_static_method( class_ref, method_index );
+    else*/
+        code = pvm_exec_find_method( new_this, method_index );
 
     assert(code != 0);
     pvm_exec_set_cs( cfda, code );
@@ -390,9 +403,11 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
     struct pvm_object new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
-    struct pvm_object_storage *code = pvm_exec_find_method( new_this, method_index );
+    //if( pvm_is_null(new_this) )                new_this = os_pop();
 
-    init_cfda(da, cfda, method_index, n_param, new_this, code );
+    //struct pvm_object_storage *code = pvm_exec_find_method( new_this, method_index );
+
+    init_cfda(da, cfda, method_index, n_param, new_this, pvm_get_null_object() );
 
     if (!optimize_stack)
         cfda->prev = da->call_frame;  // link
@@ -432,9 +447,9 @@ pvm_exec_static_call(
     struct pvm_object new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
-    struct pvm_object_storage *code = pvm_exec_find_static_method( class_ref, method_ordinal );
+    //struct pvm_object_storage *code = pvm_exec_find_static_method( class_ref, method_ordinal );
 
-    init_cfda(da, cfda, method_ordinal, n_param, new_this, code );
+    init_cfda(da, cfda, method_ordinal, n_param, new_this, class_ref );
     
     cfda->prev = da->call_frame;  // link
     
@@ -2043,7 +2058,7 @@ struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned 
     	}
         iface = pvm_object_da( o.data->_class, class )->object_default_interface.data;
     }
-#if 0
+#if 1
     return pvm_exec_get_iface_method(iface, method_index );        
 #else
     if( iface == 0 )
