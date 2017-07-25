@@ -361,9 +361,21 @@ static void init_cfda(
 
     struct pvm_object_storage *code;
     
-    /*if( !pvm_is_null(class_ref) )
+    if( !pvm_is_null(class_ref) )
+    {
+        // we're calling static method - ignoring VMT and method
+        // is selected by class and ordinal
+
+        // Check that object we call method for is related to
+        // method's class
+
+        int related = pvm_object_class_is_or_child( new_this, class_ref );
+        if( !related )
+            pvm_exec_panic( "static_invoke: non-related class is given" );
+
         code = pvm_exec_find_static_method( class_ref, method_index );
-    else*/
+    }
+    else
         code = pvm_exec_find_method( new_this, method_index );
 
     assert(code != 0);
