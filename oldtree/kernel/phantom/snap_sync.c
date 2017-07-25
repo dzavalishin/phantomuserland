@@ -415,6 +415,9 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 // persistent memory access interlock
 // ----------------------------------------------------------------
 
+#ifdef ARCH_ia32   
+#  include <ia32/selector.h>
+#endif
 /* seem to be causing panic sometimes, can it be so?
 static hal_spinlock_t   vm_mem_lock;
 
@@ -428,11 +431,23 @@ INIT_ME( vm_lock_persistent_memory_init, 0, 0 );
 // request access to persistent memory address space, prevent snapshots
 void vm_lock_persistent_memory( void )
 {
+#warning no snapshot interlock yet
+#ifdef ARCH_ia32   
+    assert( 0 == arch_ia32_modify_ds_limit( 0 ) );
+#else
+# warning no vm_lock_persistent_memory impl
+#endif
 }
 
 // release access to persistent memory address space, enable snapshots
 void vm_unlock_persistent_memory( void )
 {
+#warning no snapshot interlock yet
+#ifdef ARCH_ia32   
+    assert( 0 == arch_ia32_modify_ds_limit( 1 ) );
+#else
+# warning no vm_unlock_persistent_memory impl
+#endif
 }
 
 

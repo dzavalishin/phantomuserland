@@ -46,6 +46,27 @@
         "net.h": "c",
         "ff.h": "c",
         "cache.h": "c",
-        "pci_control.h": "c"
+        "pci_control.h": "c",
+        "cpfs_local.h": "c",
+        "disk.h": "c",
+        "vm86.h": "c",
+        "sem.h": "c",
+        "hu_lib.h": "c",
+        "icmp.c": "cpp",
+        "s_sound.c": "cpp",
+        "mpeg2dec.c": "cpp",
+        "mpeg2dec_old.c": "cpp",
+        "cd_audio.c": "cpp",
+        "parse.c": "cpp",
+        "phantom_assert.h": "c",
+        "seg.h": "c",
+        "ftccache.h": "c",
+        "ftcmanag.h": "c",
+        "ftcmru.h": "c",
+        "freetype.h": "c",
+        "ftgloadr.h": "c",
+        "ftobjs.h": "c",
+        "psaux.h": "c",
+        "afhints.h": "c"
     }
 }

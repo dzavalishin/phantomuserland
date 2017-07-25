@@ -1,10 +1,6 @@
 include config.mk
 MAKEFLAGS += --print-directory
-ifeq "$(shell uname)"  "Darwin"
-export TARGET_OS_MAC = 1
-export CC_DIR   = /usr/local/Cellar/llvm/4.0.1/bin
-echo MAC!
-endif
+
 
 default::
 	@echo make all or make install

@@ -1,24 +1,19 @@
 package ru.dz.plc.compiler.binode;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 import ru.dz.phantom.code.Codegen;
-import ru.dz.plc.PlcMain;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.llvm.LlvmStringConstant;
-import ru.dz.plc.compiler.node.ArgDefinitionNode;
-import ru.dz.plc.compiler.node.MethodNode;
 import ru.dz.plc.compiler.node.Node;
-import ru.dz.plc.compiler.trinode.TriNode;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
 
 /**
- * <p>Method call node.</p>
+ * <p>Dynamic method call node.</p>
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * @author dz
@@ -49,7 +44,7 @@ public class OpDynamicMethodCallNode extends BiNode {
 
 	public void find_out_my_type() throws PlcException {
 		checkPresetType();
-		if( type == null ) throw new PlcException("Method call Node","return type is not set");
+		if( type == null ) throw new PlcException("Dynamic method call Node","return type is not set");
 		//type = new ph_type_unknown(); // BUG! Wrong!
 	}
 

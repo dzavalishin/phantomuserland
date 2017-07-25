@@ -69,3 +69,14 @@ local-config.e2k.mk
 run/last_snap.data
 run/prev_snap.data
 run/trace
+test/unit/CMakeFiles
+test/unit/suites/CMakeFiles
+test/plc/bin
+test/external/bin
+tools/snapdump/bin
+tools/pfsck/bin
+tools/jbulk/bin
+tools/pfsextract/bin
+tools/mkpfs/bin
+tools/trfs/bin
+tools/uftpd/bin

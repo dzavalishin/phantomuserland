@@ -138,6 +138,7 @@ id(opcode_general_unlock, 0x63)	// mutex is unlocked on stack top.
 
 // 64-6e
 
+id(opcode_static_invoke,0x6E)  // arg int32 method ordinal. stack (from top): class ptr, this, n_args, args
 id(opcode_dynamic_invoke,0x6F)  // no args. stack (from top): string method name, this (or null for static), n_args, args
 
 

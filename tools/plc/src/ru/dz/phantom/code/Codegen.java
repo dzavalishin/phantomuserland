@@ -200,7 +200,7 @@ public class Codegen extends opcode_ids {
 
 
 	/**
-	 * Decrement top of integer stack. If top of integer stack is not zero – jump to label.
+	 * Decrement top of integer stack. If top of integer stack is not zero ï¿½ jump to label.
 	 * NB! This operation does not pop integer stack!
 	 * @param label Where to jump to.
 	 * @throws IOException
@@ -758,6 +758,12 @@ public class Codegen extends opcode_ids {
 		list("dynamic invoke");
 		put_byte(opcode_dynamic_invoke);
 		//put_int32(n_param);
+	}
+
+	public void emitStaticCall(int ordinal) throws IOException {
+		list("static invoke");
+		put_byte(opcode_static_invoke);
+		put_int32(ordinal);
 	}
 
 
