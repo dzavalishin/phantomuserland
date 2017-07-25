@@ -98,6 +98,7 @@
 #define opcode_general_lock   0x62  // mutex is locked on stack top. 
 #define opcode_general_unlock   0x63  // mutex is unlocked on stack top. 
 // 64-6e
+#define opcode_static_invoke   0x6E  // arg int32 method ordinal. stack (from top): class ptr, this, n_args, args
 #define opcode_dynamic_invoke   0x6F  // no args. stack (from top): string method name, this (or null for static), n_args, args
 #define opcode_ishl   0x70  // shift left
 #define opcode_ishr   0x71  // shift right signed

@@ -57,7 +57,7 @@ public class OpStaticMethodCallNode extends BiNode
 
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
-        /*
+        
 		int n_param = 0;
 		// bug - wrong count of args?
 		for( Node i = _r; i != null; i = ((BiNode)i).getRight() )      
@@ -65,7 +65,7 @@ public class OpStaticMethodCallNode extends BiNode
 
 		if(n_param > 1024)
 			SootMain.warning("too many params in static call: "+n_param);
-		*/
+		
 		if( _r != null ) _r.generate_code(c,s); // calc args
 		//c.emitIConst_32bit(n_param); // n args
 		
@@ -78,7 +78,7 @@ public class OpStaticMethodCallNode extends BiNode
         // call special bytecode 'getClassRef'?
         c.emitSummonByName(_l.getType().get_main_class_name());
 		
-		c.emitStaticCall(ordinal);
+		c.emitStaticCall(ordinal,n_param);
 	}
 
 	/**

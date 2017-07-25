@@ -67,6 +67,9 @@
         "ftgloadr.h": "c",
         "ftobjs.h": "c",
         "psaux.h": "c",
-        "afhints.h": "c"
+        "afhints.h": "c",
+        "exec.h": "c",
+        "object.h": "c",
+        "object_flags.h": "c"
     }
 }
