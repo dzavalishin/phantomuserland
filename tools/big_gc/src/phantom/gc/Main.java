@@ -181,8 +181,7 @@ public class Main {
 		long rootObjectAddress = OBJECT_VMEM_SHIFT;
 
 		Queue<Long> objectsToInspect = new LinkedList<>();
-		HashMap<Long, ObjectHeader> visitedObjects = new HashMap<>();
-		//HashSet<Long> visitedObjects = new HashSet<>();
+		Map<Long, ObjectHeader> visitedObjects = new HashMap<>();
 
 		objectsToInspect.add(rootObjectAddress);
 		ObjectHeader currentObject;
@@ -232,6 +231,13 @@ public class Main {
 	}
 
 
+	public static Map<Long, ObjectHeader> collectGarbage(Map<Long, ObjectHeader> objects){
+		Main.objects = objects;
+		Main.collectGarbage();
+		return Main.objects;
+	}
+
+
 	/**
 	 * Parses da[] field and returns a list of references to objects
 	 * @param buffer ByteBuffer da[] value
@@ -257,10 +263,12 @@ public class Main {
 	 * Prints how many internal, external and free objects there are in the system and sum of all of them
 	 * @param objectsToInspect Map<Long, ObjectHeader> map of objects existing in the system
 	 */
-	private static void printStatisticsPerSystem(Map<Long, ObjectHeader> objectsToInspect){
+	public static void printStatisticsPerSystem(Map<Long, ObjectHeader> objectsToInspect){
+		System.out.println("Printing statistics");
 		int internal = 0;
 		int external = 0;
-		int free = 0;
+		int freeInternal = 0;
+		int freeExternal = 0;
 
 		for(ObjectHeader value : objectsToInspect.values()){
 			if(value.isAllocated()){
@@ -270,10 +278,15 @@ public class Main {
 					external++;
 				}
 			}else{
-				free++;
+				if(value.isInternal()){
+					freeInternal++;
+				}else{
+					freeExternal++;
+				}
 			}
 		}
-		System.out.println(String.format("  Internal: %d, external: %d, free: %d, all: %d", internal, external, free, internal + external + free));
+		System.out.println(String.format("  Internal: %d, external: %d, freeInternal: %d, freeExternal: %d,  all: %d",
+				internal, external, freeInternal,freeExternal, internal + external + freeExternal + freeInternal));
 	}
 
 
@@ -283,7 +296,7 @@ public class Main {
 	 * @param withoutGarbage Map<Long, ObjectHeader> objects after gc
 	 * @param withGarbage Map<Long, ObjectHeader> objects before gc
 	 */
-	private static void printGarbageStatistics(Map<Long, ObjectHeader> withoutGarbage,
+	public static void printGarbageStatistics(Map<Long, ObjectHeader> withoutGarbage,
 											Map<Long, ObjectHeader> withGarbage){
 
 		System.out.println("Printing garbage statistics:");
@@ -331,7 +344,7 @@ public class Main {
 	 * needed for analyzing usage of objects using jupyter or other tools
 	 * @param objectsMap Map<Long, ObjectHeader>
 	 */
-	private static void saveObjectMapToCSVFile(Map<Long, ObjectHeader> objectsMap, String filename)
+	public static void saveObjectMapToCSVFile(Map<Long, ObjectHeader> objectsMap, String filename)
 			throws IOException {
 
 		//csv header, has to be written to file first
