@@ -1306,10 +1306,12 @@ error:
  */
 static void ahci_get_model_name(uint16_t *src, char *dst)
 {
+	unsigned int i;
+
 	uint8_t model[40];
 	memset(model, 0, 40);
 	
-	for (unsigned int i = 0; i < 20; i++) {
+	for (i = 0; i < 20; i++) {
 		uint16_t w = src[i];
 		model[2 * i] = w >> 8;
 		model[2 * i + 1] = w & 0x00ff;
@@ -1320,7 +1322,7 @@ static void ahci_get_model_name(uint16_t *src, char *dst)
 		len--;
 	
 	size_t pos = 0;
-	for (unsigned int i = 0; i < len; i++) {
+	for (i = 0; i < len; i++) {
 		uint8_t c = model[i];
 		if (c >= 0x80)
 			c = '?';

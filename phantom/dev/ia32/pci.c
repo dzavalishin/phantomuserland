@@ -286,4 +286,35 @@ void phantom_pci_dump( pci_cfg_t *pci )
 
 //#pragma GCC diagnostic pop
 
+u_int8_t phantom_pci_read_8(int bus, int dev, int func, int reg)
+{
+    return (u_int8_t) phantom_pci_read(bus, dev, func, reg, 1);
+}
+
+u_int16_t phantom_pci_read_16(int bus, int dev, int func, int reg)
+{
+    return (u_int16_t) phantom_pci_read(bus, dev, func, reg, 2);
+}
+
+u_int32_t phantom_pci_read_32(int bus, int dev, int func, int reg)
+{
+    return phantom_pci_read(bus, dev, func, reg, 4);
+}
+
+
+
+void phantom_pci_write_8(int bus, int dev, int func, int reg, u_int8_t v)
+{
+    phantom_pci_write( bus,  dev, func, reg, v, 1);
+}
+
+void phantom_pci_write_16(int bus, int dev, int func, int reg, u_int8_t v)
+{
+    phantom_pci_write( bus,  dev, func, reg, v, 2);
+}
+
+void phantom_pci_write_32(int bus, int dev, int func, int reg, u_int8_t v)
+{
+    phantom_pci_write( bus,  dev, func, reg, v, 4);
+}
 
