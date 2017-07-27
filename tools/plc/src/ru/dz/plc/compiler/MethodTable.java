@@ -59,12 +59,12 @@ public class MethodTable implements IMethodTable
 	}
 
 	@Override @Deprecated
-	public Method add( String name, PhantomType type ) throws PlcException
+	public Method add( String name, PhantomType type, boolean constructor ) throws PlcException
 	{
 		//assert(name != null);
 		if(name == null)
 			throw new PlcException("Null method name", name);
-		Method m = new Method( name, type );
+		Method m = new Method( name, type, constructor );
 		table.put(name, m);
 		return m;
 	}

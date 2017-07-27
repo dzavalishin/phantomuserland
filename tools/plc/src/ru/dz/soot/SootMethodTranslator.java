@@ -79,7 +79,7 @@ public class SootMethodTranslator {
 		Type returnType = m.getReturnType();
 		
 		PhantomType type = SootExpressionTranslator.convertType(returnType);
-		phantomMethod = new Method(mName, type); 
+		phantomMethod = new Method(mName, type, m.isConstructor()); 
 		pc.addMethod(phantomMethod);
 		phantomMethod.code = nodes;
 	

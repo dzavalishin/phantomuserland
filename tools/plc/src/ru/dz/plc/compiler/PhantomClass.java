@@ -179,8 +179,8 @@ public class PhantomClass {
 	}
 
 	@Deprecated
-	public Method addMethod(String name, PhantomType type) throws PlcException {
-		Method m = mt.add(name, type);
+	public Method addMethod(String name, PhantomType type, boolean constructor ) throws PlcException {
+		Method m = mt.add(name, type, constructor );
 		//check_base_for_method(m);
 		return m;
 	}

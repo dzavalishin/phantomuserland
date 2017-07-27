@@ -86,7 +86,7 @@ public class OpStaticMethodCallNode extends BiNode
 	 * data for dynlinker and will be replaced then with call to real method.
 	 * Finally dynlinker will reset stack to previous frame's state and jump 
 	 * (return) to real method.
-	 */
+	 * /
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
 		String proxyArgdef = "";
@@ -142,7 +142,7 @@ public class OpStaticMethodCallNode extends BiNode
 			}
 		
 		llc.putln(");");
-	}
+	}*/
 	
 	/*
 	@Override

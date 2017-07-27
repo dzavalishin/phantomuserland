@@ -7,7 +7,6 @@ import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -22,6 +21,7 @@ import java.io.IOException;
 
 public class Method
 {
+	private boolean		constructor;
 	private int			ordinal;
 	public Node         code;
 	private String      name;
@@ -40,13 +40,14 @@ public class Method
 
 
 
-	public Method( String name, PhantomType type )
+	public Method( String name, PhantomType type, boolean isConstructor )
 	{
 		this.name = name;
 		this.type = type;
 		//this.args = null;
 		this.ordinal = -1;
 		this.code = null;
+		this.constructor = isConstructor;
 	}
 
 	/** NB! Must be called in correct order! */
@@ -433,6 +434,8 @@ public class Method
 
 		return s.toString();
 	}
+
+	public boolean isConstructor() { return constructor; 	}
 
 
 

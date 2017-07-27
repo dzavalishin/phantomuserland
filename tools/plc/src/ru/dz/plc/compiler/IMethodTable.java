@@ -34,7 +34,7 @@ public interface IMethodTable {
 
 	public abstract Method add(Method m) throws PlcException;
 
-	public abstract Method add(String name, PhantomType type) throws PlcException;
+	public abstract Method add(String name, PhantomType type, boolean constructor ) throws PlcException;
 
 	
 	public abstract void print(PrintStream ps) throws PlcException;

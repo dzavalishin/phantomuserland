@@ -1,8 +1,5 @@
 package ru.dz.plc.compiler.binode;
 
-import java.io.IOException;
-
-import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;

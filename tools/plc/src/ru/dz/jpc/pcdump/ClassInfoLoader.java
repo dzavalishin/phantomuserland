@@ -254,6 +254,7 @@ class method_signature_loader_handler extends loader_handler
 	String    my_name;
 	int       my_ordinal;
 	int       my_args_count = 0;
+	private boolean constructor;
 
 	Method    me = null;
 
@@ -273,9 +274,12 @@ class method_signature_loader_handler extends loader_handler
 		my_args_count = Fileops.get_int32(is);
 		if(debug_print) System.out.println("    Arguments count: " + my_args_count);
 
+		constructor = Fileops.get_int32(is) == 1;
+		if(debug_print) System.out.println("    Is constructor: " + constructor);
+		
 		PhantomType my_return_type = new PhantomType(is);
 
-		me = new Method( my_name, my_return_type );
+		me = new Method( my_name, my_return_type, constructor );
 		me.setOrdinal(my_ordinal);
 
 		//      if(debug_print) System.out.print("Method is: " + my_name + ", ret type is '"+my_return_type.toString()+"', arg count = " );
