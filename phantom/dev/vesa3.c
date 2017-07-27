@@ -1,3 +1,4 @@
+#if 0
 #ifdef ARCH_ia32
 /*
  ** Copyright 2002-2005, Michael Noisternig. All rights reserved.
@@ -960,3 +961,4 @@ errno_t vesa3_bootstrap(void)
 }
 #endif // ARCH_ia32
 
+#endif

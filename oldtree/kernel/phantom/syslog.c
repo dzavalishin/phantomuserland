@@ -65,11 +65,13 @@ void vsyslog(int pri, const char *fmt, va_list ap)
 #endif
     }
 
+    struct tm ct = *current_time;
+
     snprintf( prefix_buf, sizeof(prefix_buf)-1,
 		"<%d>%s %02d %02d:%02d:%02d",
-		pri, monNames[current_time->tm_mon - 1],
-		current_time->tm_mday,	current_time->tm_hour,
-		current_time->tm_min,	current_time->tm_sec
+		pri, monNames[ct.tm_mon - 1],
+		ct.tm_mday,	ct.tm_hour,
+		ct.tm_min,	ct.tm_sec
                 );
     char msg_buf[800];
     (void)vsnprintf(msg_buf, sizeof(msg_buf)-1, fmt, ap);

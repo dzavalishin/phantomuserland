@@ -127,7 +127,7 @@ void json_dump_windows( json_output *jo )
     //json_foreach( jo, "windows", phantom_kernel_threads, sizeof(phantom_thread_t *), MAX_THREADS, json_encode_thread );
 
     drv_video_window_t *w;
-    int i;
+    int i = 0;
 
     json_out_open_array( jo, "windows" );
 

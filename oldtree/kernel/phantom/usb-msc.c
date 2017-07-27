@@ -154,7 +154,7 @@ process_usb_op(struct disk_op_s *op)
         return DISK_RET_EPARAM;
     }
 }
-
+*/
 
 /****************************************************************
  * Setup

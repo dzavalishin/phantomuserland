@@ -1,5 +1,14 @@
 ARCH_FLAGS      = -m32
 
+ifdef TARGET_OS_MAC
+export CC       = $(CC_DIR)/clang-4.0 -target i386-pc-linux-elf
+export LD       = $(CC_DIR)/ld.lld
+export STRIP    = gstrip
+export AR       = $(CC_DIR)/llvm-ar
+export RANLIB   = $(CC_DIR)/llvm-ranlib
+export OBJCOPY  = gobjcopy
+export NM       = $(CC_DIR)/llvm-nm
+else
 export CC	= gcc
 export LD	= ld
 export STRIP	= strip
@@ -7,6 +16,7 @@ export AR	= ar
 export RANLIB	= ranlib
 export OBJCOPY	= objcopy
 export NM	= nm
+endif
 
 AWK		= gawk
 YACC		= bison -y
@@ -16,7 +26,11 @@ M4		= m4
 ifeq ($(OSTYPE),cygwin)
   USR_LD_ADDR=-Wl,-Ttext,0
 else
+ifdef TARGET_OS_MAC
+  USR_LD_ADDR=
+else
   USR_LD_ADDR=-Wl,-Ttext-segment,0
+endif
 endif
 
 TARGET_OBJECT_FORMAT=elf32-i386

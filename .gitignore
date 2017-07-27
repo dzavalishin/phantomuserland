@@ -2,7 +2,9 @@
 *.h~
 *.c~
 *.o
+run/fat/boot/phantom.ia32
 run/fat/boot/pmod_test
+run/fat/boot/pmod_tcpdemo
 phantom/vm/pvm_test.exe
 run/fat/boot/phantom
 run/tftp/phantom
@@ -82,3 +84,15 @@ tools/plc/*.lstc
 tools/plc/*.lst
 tools/plc/*.ll
 plib/java/temp
+test/unit/CMakeFiles
+test/unit/suites/CMakeFiles
+test/plc/bin
+test/external/bin
+tools/snapdump/bin
+tools/pfsck/bin
+tools/jbulk/bin
+tools/pfsextract/bin
+tools/mkpfs/bin
+tools/trfs/bin
+tools/uftpd/bin
+

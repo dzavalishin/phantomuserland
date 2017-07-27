@@ -87,3 +87,6 @@ extern int      irq_nest;
 
 #define assert_int_disabled() assert(!hal_is_sti())
 #define assert_interrupts_disabled() assert_int_disabled()
+
+#define assert_int_enabled() assert(hal_is_sti())
+#define assert_interrupts_enabled() assert_int_enabled()

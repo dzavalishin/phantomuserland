@@ -87,6 +87,8 @@ errno_t t_inherit_ctty( phantom_thread_t *t )
 //! Internal for threads lib, just make a new ctty for thread we create, if no one exist
 errno_t t_make_ctty( phantom_thread_t *t )
 {
+    assert( t != 0 );
+    
     // Already have one?
     if( t->ctty_h )
         return 0;

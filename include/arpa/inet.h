@@ -75,6 +75,7 @@
 
 #include <endian.h>
 
+#include <netinet/in.h>
 
 
 #define	INET_ADDRSTRLEN		16

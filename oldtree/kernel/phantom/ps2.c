@@ -55,9 +55,11 @@
 #define PS2_RES_ACK              0xFA
 #define PS2_RES_RESEND           0xFE
 
+// TODO what is real time? 20 msec now
+#define POLL_TIMEOUT_USEC (20L*1000)
+
 
 #define MAX_EVENTS      64
-
 
 static struct ui_event  ebuf[MAX_EVENTS];
 static int put_pos = 0;
@@ -302,19 +304,44 @@ static void ps2ms_int_handler( void *arg )
 
 static unsigned char ps2ms_get_data()
 {
+    polled_timeout_t timeout;
+    set_polled_timeout( &timeout, POLL_TIMEOUT_USEC );
+
     while((inb(PS2_CTRL_ADDR) & 0x1) == 0)
-        ;
+        if( check_polled_timeout( &timeout ) )
+            return 0; // TODO error handling
+    
     return inb( PS2_DATA_ADDR );
 }
 
-static void wait_write_data()
+static errno_t wait_write_data()
 {
-    while(inb(PS2_CTRL_ADDR) & 0x2);
+    if(!(inb(PS2_CTRL_ADDR) & 0x2))
+        return 0;
+
+    polled_timeout_t timeout;
+    set_polled_timeout( &timeout, POLL_TIMEOUT_USEC );
+
+    while(inb(PS2_CTRL_ADDR) & 0x2)
+        if( check_polled_timeout( &timeout ) )
+            return ETIMEDOUT; // TODO error handling
+
+    return 0;
 }
 
-static void wait_write_ctrl()
+static errno_t wait_write_ctrl()
 {
-    while(inb(PS2_CTRL_ADDR) & 0x3);
+    // Be fast if mouse is ready
+    if(!(inb(PS2_CTRL_ADDR) & 0x3))
+        return 0;
+
+    polled_timeout_t timeout;
+    set_polled_timeout( &timeout, POLL_TIMEOUT_USEC );
+
+    while(inb(PS2_CTRL_ADDR) & 0x3)
+        if( check_polled_timeout( &timeout ) )
+            return ETIMEDOUT; // TODO error handling
+    return 0;
 }
 
 
