@@ -13,9 +13,9 @@ public interface IMethodTable {
 
 	public abstract void set_ordinal(Method m, int ord) throws PlcException;
 
-	public abstract void set_ordinals();
+	public abstract void set_ordinals() throws PlcException;
 
-	public abstract int slots_needed();
+	public abstract int slots_needed() throws PlcException;
 
 	public abstract void preprocess(ParseState ps) throws PlcException;
 

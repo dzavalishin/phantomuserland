@@ -12,7 +12,7 @@ import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
  /**
- *  This Node. Loads this on stack.
+ *  This Node. Loads 'this' (self) on stack.
  */
 
 public class ThisNode extends Node {

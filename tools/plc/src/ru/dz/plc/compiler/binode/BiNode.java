@@ -15,9 +15,13 @@ import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Title: Two children abstract base node.</p>
- * <p>Description: none.</p>
+ * 
+ * <p>Description: mostly used as a base for binary operations (math).</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 

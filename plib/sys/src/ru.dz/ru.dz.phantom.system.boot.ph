@@ -49,7 +49,7 @@ import .internal."class";
 
 import .phantom.osimpl;
 
-import .test.toPhantom.Assigns;
+//import .test.toPhantom.Assigns;
 
 /*
 import .test.toPhantom.PhantomPrinter;
@@ -244,9 +244,9 @@ class boot
 
         return os;
     }
-
     void runJavaTests()
     {
+/*
         var rc : int;
 
         print("Running tests of Java compiler ...\n");
@@ -257,8 +257,8 @@ class boot
         if( rc != 0 ) print("Java test FAILED: Assigns\n");
         else print("Java test PASSED: Assigns\n");
 
+*/
     }
-
 
     // ---------------------------------------------------------------------
     // Helpers
