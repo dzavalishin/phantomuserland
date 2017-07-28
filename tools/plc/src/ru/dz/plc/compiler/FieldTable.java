@@ -121,7 +121,7 @@ public class FieldTable {
 		if(!f.isPublic())
 			return;
 		
-		Method get = new Method(makeGetterName(f.getName()), f.getType());
+		Method get = new Method(makeGetterName(f.getName()), f.getType(), false );
 		pc.addMethod(get);
 		
 		StatementsNode getNodes = new StatementsNode();

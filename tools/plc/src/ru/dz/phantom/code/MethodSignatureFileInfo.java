@@ -36,6 +36,7 @@ public class MethodSignatureFileInfo extends FileInfo {
 		Fileops.put_int32( os, m.getOrdinal() );
 		//Fileops.put_int32( os, m.args_def.size() );
 		Fileops.put_int32( os, m.getArgCount() );
+		Fileops.put_int32( os, m.isConstructor() ? 1 : 0 );
 
 		m.getType().save_to_file(os);
 

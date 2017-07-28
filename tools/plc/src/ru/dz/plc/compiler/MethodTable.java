@@ -53,18 +53,23 @@ public class MethodTable implements IMethodTable
 	{
 		if( !mine( m ) ) 
 			throw new PlcException("set_ordinal","not my Method");
+
 		if( ord != -1 && have_ord( ord ) ) 
 			throw new PlcException("set_ordinal","duplicate");
+
+		//if( m.isConstructor() && (m.getArgCount() == 0) && (ord != 0) )
+		//	throw new PlcException("set_ordinal","argless constructor must have ord 0");
+
 		m.setOrdinal( ord );
 	}
 
 	@Override @Deprecated
-	public Method add( String name, PhantomType type ) throws PlcException
+	public Method add( String name, PhantomType type, boolean constructor ) throws PlcException
 	{
 		//assert(name != null);
 		if(name == null)
 			throw new PlcException("Null method name", name);
-		Method m = new Method( name, type );
+		Method m = new Method( name, type, constructor );
 		table.put(name, m);
 		return m;
 	}
@@ -153,31 +158,51 @@ public class MethodTable implements IMethodTable
 	 * @see ru.dz.plc.compiler.IMethodTable#set_ordinals()
 	 */
 	@Override
-	public void set_ordinals()
+	public void set_ordinals() throws PlcException
 	{
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
-			if( m.getOrdinal() < 0 )
+			setupMethodOrdinal(m);
+		}
+	}
+
+	private void setupMethodOrdinal(Method m) throws PlcException 
 			{
+		if( m.getOrdinal() >= 0 )
+			return;
+
+		int ord;
+/* no! children/parents conflict!
+		// Argless c'tor must have ordinal 0
+		if( m.isConstructor() && (m.getArgCount() == 0) )
+		{
+			ord = 0;
+			if( have_ord( ord ) )
+				throw new PlcException("set_ordinals", "ordinal 0 is used" );
+
+			m.setOrdinal(ord);
+			return;
+		}
+*/
 				while( true )
 				{
-					int ord = ordinals.getNext();
+			ord = ordinals.getNext();
+
 					if( !have_ord( ord ) )
 					{
 						m.setOrdinal(ord);
 						break;
 					}
 				}
+
 			}
-		}
-	}
 
 	/* (non-Javadoc)
 	 * @see ru.dz.plc.compiler.IMethodTable#slots_needed()
 	 */
 	@Override
-	public int slots_needed()
+	public int slots_needed() throws PlcException
 	{
 		set_ordinals();
 
@@ -221,6 +246,8 @@ public class MethodTable implements IMethodTable
 			Method m = i.next();
 			s.set_method( m );
 
+			m.preprocess( s.get_class() );
+			
 			lst.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
 			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
 			c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");

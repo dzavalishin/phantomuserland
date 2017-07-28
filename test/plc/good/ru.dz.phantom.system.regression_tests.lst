@@ -40,19 +40,19 @@ Class .ru.dz.phantom.system.regression_tests
                                       new void[] : void[]
                               void  : void
                                 = : unknown
-                                  [] : unknown
+                                  [] : void
                                     ident test_array : void[]
                                     int const "0" : int const
                                   string const "zero" : string const
                             void  : void
                               = : unknown
-                                [] : unknown
+                                [] : void
                                   ident test_array : void[]
                                   int const "2" : int const
                                 string const "two" : string const
                           void  : void
                             = : unknown
-                              [] : unknown
+                              [] : void
                                 ident test_array : void[]
                                 int const "1" : int const
                               string const "one" : string const
@@ -88,7 +88,7 @@ Class .ru.dz.phantom.system.regression_tests
                               this  : .ru.dz.phantom.system.regression_tests
                               Method print : unknown
                               arg  : unknown
-                                [] : unknown
+                                [] : void
                                   ident test_array : void[]
                                   ident i : int
                         void  : void
@@ -106,19 +106,19 @@ Class .ru.dz.phantom.system.regression_tests
 " : string const
                 void  : void
                   = : unknown
-                    [] : unknown
+                    [] : void
                       ident test_array : void[]
                       int const "0" : int const
                     int const "0" : int const
               void  : void
                 = : unknown
-                  [] : unknown
+                  [] : void
                     ident test_array : void[]
                     int const "2" : int const
                   int const "2" : int const
             void  : void
               = : unknown
-                [] : unknown
+                [] : void
                   ident test_array : void[]
                   int const "1" : int const
                 int const "1" : int const
@@ -137,7 +137,7 @@ Class .ru.dz.phantom.system.regression_tests
                   int const "1" : int const
             if : unknown
               != : unknown
-                [] : unknown
+                [] : void
                   ident test_array : void[]
                   ident i : int
                 ident i : int
@@ -168,7 +168,7 @@ Class .ru.dz.phantom.system.regression_tests
                       this  : .ru.dz.phantom.system.regression_tests
                       Method print : unknown
                       arg  : unknown
-                        [] : unknown
+                        [] : void
                           ident test_array : void[]
                           ident i : int
                 throw  : void const

@@ -80,7 +80,7 @@ class MethGen extends Opcode {
 		NodeEmitter emitter = new NodeEmitter();
 		
 		ru.dz.plc.compiler.Method pMethod = pclass.addMethod( f.name, 
-				new PhantomType( ClassMap.get_map().get(".internal.object",false,null) ) 
+				new PhantomType( ClassMap.get_map().get(".internal.object",false,null) ), false 
 		);
 
 		ps.set_method(pMethod);

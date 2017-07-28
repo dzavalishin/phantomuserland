@@ -6,6 +6,7 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.llvm.LlvmStringConstant;
 import ru.dz.plc.compiler.node.Node;
@@ -25,15 +26,26 @@ import ru.dz.soot.SootMain;
 
 public class OpStaticMethodCallNode extends BiNode 
 {
-	PhantomType obj_type = null; // type of object, which is used as 'this' in call
+	//PhantomType obj_type = null; // type of object, which is used as 'this' in call
 	private int ordinal;
+	private PhantomClass callClass;
 
-    public OpStaticMethodCallNode(Node object, int ordinal, Node args) 
+    public OpStaticMethodCallNode(Node object, int ordinal, Node args, PhantomClass callClass ) 
     { 
         super(object, args);
         this.ordinal = ordinal; 
+		this.callClass = callClass; 
     }
+	
 	public String toString()  {    return ".static_call."+ordinal;  }
+
+	public PhantomClass getCallClass() {
+		return callClass;
+	}
+
+	public int getOrdinal() {
+		return ordinal;
+	}
 
 	@Override
 	public boolean args_on_int_stack() {
@@ -72,12 +84,14 @@ public class OpStaticMethodCallNode extends BiNode
 		_l.generate_code(c,s); // get object
 		move_between_stacks(c, _l.is_on_int_stack());
 
-        //c.emitString(methodName);
-        // Summon class of 'this' by name - right? 
-        // Or have it extracted from this itself? Dup this above and
-        // call special bytecode 'getClassRef'?
-        c.emitSummonByName(_l.getType().get_main_class_name());
+		if( callClass != null )
+			c.emitSummonByName( callClass.getName() );
+		else
+			c.emitSummonByName(_l.getType().get_main_class_name()); // Default       
 		
+        // TODO rewrite bytecode implementation to get class in bytecode if
+        // null is passed as class
+        
 		c.emitStaticCall(ordinal,n_param);
 	}
 

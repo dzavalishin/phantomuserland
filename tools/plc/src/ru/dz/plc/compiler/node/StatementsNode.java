@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.C_codegen;
@@ -84,6 +85,15 @@ public class StatementsNode extends Node {
 
 	protected void print_me(PrintStream ps ) throws PlcException {
 		ps.println(toString());
+	}
+	
+	
+	public void forEach(Consumer<? super Node> action) {
+		nodes.forEach(action);		
+}
+
+	public List<Node> getNodeList() {
+		return nodes;		
 	}
 	
 	

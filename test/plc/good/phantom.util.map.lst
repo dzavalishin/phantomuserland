@@ -30,11 +30,11 @@ Class .phantom.util.map
                 ident key : .internal.object
                 Method equals : unknown
                 arg  : unknown
-                  [] : unknown
+                  [] : void
                     ident pairs : void[]
                     ident i : int
               return : void
-                [] : unknown
+                [] : void
                   ident pairs : void[]
                   + : int
                     ident i : int
@@ -65,13 +65,13 @@ Class .phantom.util.map
                 int const "0" : int const
             void  : void
               = : unknown
-                [] : unknown
+                [] : void
                   ident pairs : void[]
                   ident index : int
                 ident key : .internal.object
           void  : void
             = : unknown
-              [] : unknown
+              [] : void
                 ident pairs : void[]
                 + : int
                   ident index : int

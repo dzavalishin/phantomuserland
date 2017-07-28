@@ -287,6 +287,8 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 pvm_object_t m_name = pvm_code_get_string(&h);
                 int m_ordinal = pvm_code_get_int32(&h);
                 int m_n_args = pvm_code_get_int32(&h);
+                int ctor = pvm_code_get_int32(&h);
+                //if(debug_print) printf(", %d methods", n_method_slots );
 
                 struct type_loader_handler mth;
                 pvm_load_type( &h , &mth );

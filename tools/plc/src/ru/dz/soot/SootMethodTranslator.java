@@ -79,7 +79,7 @@ public class SootMethodTranslator {
 		Type returnType = m.getReturnType();
 		
 		PhantomType type = SootExpressionTranslator.convertType(returnType);
-		phantomMethod = new Method(mName, type); 
+		phantomMethod = new Method(mName, type, m.isConstructor()); 
 		pc.addMethod(phantomMethod);
 		phantomMethod.code = nodes;
 	
@@ -114,6 +114,12 @@ public class SootMethodTranslator {
 	public void process() throws PlcException {
 		//say("\n\n-------------------\nMethod "+mName);
 
+		if(!m.isConcrete())
+		{
+			SootMain.say("Skip abstract method "+mName);
+			return;
+		}
+		
 		m.retrieveActiveBody();
 		
 		Body body = m.getActiveBody();

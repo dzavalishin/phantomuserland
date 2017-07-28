@@ -144,6 +144,14 @@ public class PhantomClass {
 		return mt.get(ordinal);
 	}
 	
+	public Method getDefaultConstructor() 
+	{		
+		List<PhantomType> args = new LinkedList<PhantomType>(); // no args
+		MethodSignature signature = new MethodSignature("<init>", args);
+		return mt.get(signature);
+	}
+
+	
 	static boolean isSameArgs(Method m1, Method m2) {
 		Iterator<ArgDefinition> i1 = m1.getArgIterator();
 		Iterator<ArgDefinition> i2 = m2.getArgIterator();
@@ -183,8 +191,8 @@ public class PhantomClass {
 	}
 
 	@Deprecated
-	public Method addMethod(String name, PhantomType type) throws PlcException {
-		Method m = mt.add(name, type);
+	public Method addMethod(String name, PhantomType type, boolean constructor ) throws PlcException {
+		Method m = mt.add(name, type, constructor );
 		//check_base_for_method(m);
 		return m;
 	}
