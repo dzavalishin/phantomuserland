@@ -48,6 +48,7 @@ plib/bin/*.pc
 plib/bin/*.lstc
 plib/bin/*.lst
 plib/bin/*.ll
+plib/bin/*.c
 oldtree/kernel/phantom/phantom
 run/fat/class/*.pc
 run/*.img

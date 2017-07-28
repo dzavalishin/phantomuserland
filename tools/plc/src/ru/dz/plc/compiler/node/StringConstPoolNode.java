@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.node;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -43,6 +44,17 @@ public class StringConstPoolNode extends Node {
 		//llvmTempName = ls.getReference();
 		llc.putln(llvmTempName+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_loadObjectFromPool( i4* "+id+" );");
 	}
+	
+	@Override
+	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
+
+		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"LoadObjectFromPool( "+
+		C_codegen.get_vm_state_var_name()+","+
+		Integer.toString(id)
+		+" )");
+		
+}
+
 }
 
 

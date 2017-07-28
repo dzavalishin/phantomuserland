@@ -16,6 +16,8 @@ import ru.dz.plc.util.PlcException;
  */
 
 
+//This one is for compiling Python register-based internal representation
+//Not yet finished
 public class MultiuseNode extends Node {
 
 	private final RegisterNodeWrapper myWrapper;

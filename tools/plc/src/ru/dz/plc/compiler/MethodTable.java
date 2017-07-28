@@ -102,6 +102,17 @@ public class MethodTable implements IMethodTable
 		return checkPossibleConversions(signature);
 	}
 	
+	/** get method by ordinal */
+	public Method get(int ordinal) {
+		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		{
+			Method m = i.next();
+			if( m.getOrdinal() == ordinal ) 
+				return m;
+		}
+		return null;
+	}
+
 
 	private Method checkPossibleConversions(MethodSignature signature) {
 		List<Method> all = getAllForName(signature.getName());
@@ -201,7 +212,7 @@ public class MethodTable implements IMethodTable
 	 * @see ru.dz.plc.compiler.IMethodTable#codegen(java.io.RandomAccessFile, java.io.FileWriter, java.io.BufferedWriter, ru.dz.plc.compiler.CodeGeneratorState, java.lang.String)
 	 */
 	@Override
-	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, CodeGeneratorState s, String version) throws IOException, PlcException {
+	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws IOException, PlcException {
 		set_ordinals();
 		lst.write("Class version "+version+"\n\n");
 
@@ -211,7 +222,8 @@ public class MethodTable implements IMethodTable
 			s.set_method( m );
 
 			lst.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
-			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n");
+			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
+			c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 
 			MethodFileInfo mf = new MethodFileInfo(os, lst, m, s);
 			mf.write();
@@ -223,9 +235,12 @@ public class MethodTable implements IMethodTable
 			ml.write();
 
 			m.generateLlvmCode(s, llvmFile);
+			m.generateC_Code(s, c_File);
 			
 			s.set_method( null );
 			lst.write("--\nmethod end\n\n");
+			llvmFile.write("\n\n; end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
+			c_File.write("\n\n// end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 		}
 	}
 
@@ -242,5 +257,6 @@ public class MethodTable implements IMethodTable
 	}
 
 	
+
 }
 

@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.trinode;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.node.Node;
@@ -31,6 +32,7 @@ public class DoWhileNode extends TriNode {
 
 	public boolean is_on_int_stack() { return false; }
 
+	@Override
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		if( _m == null ) throw new PlcException("while code", "no expression");
@@ -63,4 +65,38 @@ public class DoWhileNode extends TriNode {
 		s.continue_label = prev_continue;
 		s.break_label = prev_break;
 	}
+
+	@Override
+	public void generate_C_code (C_codegen cgen, CodeGeneratorState s) throws PlcException
+	{
+		if( _m == null ) throw new PlcException("while code", "no expression");
+
+		// TODO need CodeGeneratorState s
+		
+		String label_continue = cgen.getLabel(), label_break = cgen.getLabel();
+
+		String prev_continue = s.continue_label;
+		String prev_break = s.break_label;
+
+		s.continue_label = label_continue;
+		s.break_label = label_break;
+
+		cgen.markLabel(label_continue);
+		if( _l != null ) _l.generate_C_code(cgen,s); // pre code
+
+		cgen.emitIfNot(_m, s);
+		cgen.emitJump(label_break);
+
+		if( _r != null ) _r.generate_C_code(cgen,s); // post code
+
+		cgen.emitSnapShotTrigger();
+		
+		cgen.emitJump(label_continue);
+
+		cgen.markLabel(label_break);
+
+		s.continue_label = prev_continue;
+		s.break_label = prev_break;
+}
+
 }

@@ -167,10 +167,9 @@ public class Method
 			argdef.append("i64 %"+a.getName());
 		}
 
-		String llvmMethodName = name;
-		name = name.replaceAll("<init>", "_\\$_Constructor");
+		String llvmMethodName = name.replaceAll("<init>", "_\\$_Constructor");
 
-		llc.putln(String.format("define %s @%s(%s) {", llc.getObjectType(), name, argdef )); // function 
+		llc.putln(String.format("define %s @%s(%s) {", LlvmCodegen.getObjectType(), llvmMethodName, argdef )); // function 
 
 		if(code != null)
 		{
@@ -234,7 +233,7 @@ public class Method
 		}
 
 		// catch the fall-out
-		llc.putln("ret "+llc.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
+		llc.putln("ret "+LlvmCodegen.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
 		llc.putln("}"); // end of function 
 
 		// ------------------------------------------
@@ -246,6 +245,137 @@ public class Method
 		llc.flushPostponedCode();
 
 	}
+
+
+
+
+
+
+
+	private static int cTempNum = 0;
+
+	public String get_C_TempName(String nodeName ) 
+	{
+		if( null == nodeName )
+			return String.format("tmp_%d", cTempNum++ );
+		return String.format("tmp_%d_%s", cTempNum++, nodeName ); 
+	}
+
+
+
+
+
+	public void generateC_Code(CodeGeneratorState s, BufferedWriter c_File) throws PlcException 
+	{
+		//if(!preprocessed)
+		//	throw new PlcException("generateC_Code", "not preprocessed");
+
+		// TODO not finished, sketch
+		C_codegen cgen = new C_codegen(s.get_class(),this,c_File);
+
+		StringBuilder argdef = new StringBuilder();
+
+		argdef.append(" jit_vm_state_t "+
+				C_codegen.get_vm_state_var_name()
+		+", jit_object_t "+C_codegen.getThisVarName()+" ");
+
+		//boolean firstParm = true;
+		for( ArgDefinition a : args_def )
+		{
+			//if(!firstParm)
+			argdef.append(", ");
+
+			//firstParm= false;
+
+			argdef.append("jit_object_t "+C_codegen.getLocalVarNamePrefix()+a.getName());
+		}
+
+		//String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
+		PhantomClass my_class = s.get_class();
+		String C_MethodName = cgen.getMethodName(my_class, ordinal);
+
+		cgen.putln(String.format("%s %s(%s) {", C_codegen.getObjectType(), C_MethodName, argdef )); // function 
+
+		cgen.emitSnapShotTrigger(); // on func enter check for snapshot request
+
+		if(code != null)
+		{
+
+	// ------------------------------------------
+			// traverse tree to allocate automatic vars?
+			// ------------------------------------------
+			//int n_auto_vars = svars.getUsedSlots();
+			//int n_int_auto_vars = isvars.getUsedSlots();
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate prologue code here
+			// ------------------------------------------
+
+			/*
+		// check number of args
+		int n_args = args_def.size();
+		String good_args_label = c.getLabel();
+
+		c.emitIConst_32bit(n_args);
+		c.emitISubLU();
+		c.emitJz(good_args_label);
+
+		// wrong count - throw string
+		// BUG! Need less consuming way of reporting this. Maybe by
+		// calling class object Method? Or by summoning something?
+		c.emitString("arg count: "+name + " in " + s.get_class().getName());
+		c.emitThrow();
+
+		c.markLabel(good_args_label);
+			 */
+
+			if(requestDebug) cgen.emitDebug((byte) 0x1);
+			//if(requestDebug) llc.emitDebug((byte)0x1,"Enabled debug");
+
+			// push nulls to reserve stack space for autovars
+			// BUG! We can execute vars initialization code here, can we?
+			// We can if code does not depend on auto vars itself, or depends only on
+			// previous ones.
+			// 		for( int i = n_auto_vars; i > 0; i-- ) 			c.emitPushNull();
+
+			// Reserve integer stack place for int vars 		for( int i = n_int_auto_vars; i > 0; i-- )			c.emitIConst_0();
+
+			// ------------------------------------------
+
+
+			// ------------------------------------------
+			// generate main code by descending the tree
+			// ------------------------------------------
+			code.generate_C_code( cgen, s );
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate epilogue code here
+			// ------------------------------------------
+
+			//if(requestDebug) c.emitDebug((byte)0x2,"Disabled debug");
+			if(requestDebug) cgen.emitDebug((byte) 0x2);
+
+		}
+
+		// catch the fall-out TODO must return null phantom ptr const
+		cgen.putln(";"); // finish last statement
+		cgen.putln(""); 
+		cgen.putln("return 0;"); // empty function code
+		cgen.putln("}"); // end of function 
+
+		// ------------------------------------------
+		// Part of code is generated to the buffer to 
+		// be emitted after the method code. Flush it
+		// now.
+		// ------------------------------------------
+
+		cgen.flushPostponedCode();
+
+
+	}
+
 
 
 	// ------------------------------------------
