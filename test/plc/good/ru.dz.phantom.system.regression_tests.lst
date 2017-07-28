@@ -36,7 +36,8 @@ Class .ru.dz.phantom.system.regression_tests
                                 void  : void
                                   = : void[]
                                     ident test_array : void[]
-                                    new void[] : void[]
+                                    constructor() : void[]
+                                      new void[] : void[]
                               void  : void
                                 = : unknown
                                   [] : unknown

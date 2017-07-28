@@ -1,4 +1,4 @@
-Class version 20160114032155922
+Class version 20170628000055305
 
 method init ordinal 16
 --
@@ -17,10 +17,13 @@ _label_0:	//  @57
   summon class internal.container.array	//  @67
   new				//  @68
   os dup				//  @69
-  save fld=0			//  @70
-  os drop				//  @72
-  ; Line 31			//  @73
-  ret				//  @73
+  call m=0 nparm=0		//  @70
+  os drop				//  @71
+  os dup				//  @72
+  save fld=0			//  @73
+  os drop				//  @75
+  ; Line 31			//  @76
+  ret				//  @76
 --
 method end
 
@@ -138,40 +141,43 @@ _label_5:	//  @172
   summon class phantom.util.hashpair	//  @172
   new				//  @199
   os dup				//  @200
-  set o stk pos=2			//  @201
-  os drop				//  @206
-  ; Line 62			//  @207
-  ; Line 64			//  @207
-  get o stk pos=2			//  @207
-  ; Line 64			//  @212
-  load fld=0			//  @212
-  ; Line 64			//  @214
-  get i stk pos=0			//  @214
-  i2o				//  @219
-  call m=10 nparm=1		//  @220
-  ; Line 64			//  @222
-  call m=18 nparm=1		//  @222
-  os drop				//  @224
+  call m=0 nparm=0		//  @201
+  os drop				//  @202
+  os dup				//  @203
+  set o stk pos=2			//  @204
+  os drop				//  @209
+  ; Line 62			//  @210
+  ; Line 64			//  @210
+  get o stk pos=2			//  @210
+  ; Line 64			//  @215
+  load fld=0			//  @215
+  ; Line 64			//  @217
+  get i stk pos=0			//  @217
+  i2o				//  @222
+  call m=10 nparm=1		//  @223
   ; Line 64			//  @225
-  ; Line 65			//  @225
-  get o stk pos=2			//  @225
-  ; Line 65			//  @230
-  get o stk pos=0			//  @230
-  ; Line 65			//  @235
-  call m=21 nparm=1		//  @235
-  os drop				//  @237
+  call m=18 nparm=1		//  @225
+  os drop				//  @227
+  ; Line 64			//  @228
+  ; Line 65			//  @228
+  get o stk pos=2			//  @228
+  ; Line 65			//  @233
+  get o stk pos=0			//  @233
   ; Line 65			//  @238
-  ; Line 67			//  @238
-  load fld=0			//  @238
-  ; Line 67			//  @240
-  get o stk pos=2			//  @240
-  ; Line 67			//  @245
-  get i stk pos=0			//  @245
-  i2o				//  @250
-  call m=11 nparm=2		//  @251
-  os drop				//  @253
-  ; Line 67			//  @254
-  ret				//  @254
+  call m=21 nparm=1		//  @238
+  os drop				//  @240
+  ; Line 65			//  @241
+  ; Line 67			//  @241
+  load fld=0			//  @241
+  ; Line 67			//  @243
+  get o stk pos=2			//  @243
+  ; Line 67			//  @248
+  get i stk pos=0			//  @248
+  i2o				//  @253
+  call m=11 nparm=2		//  @254
+  os drop				//  @256
+  ; Line 67			//  @257
+  ret				//  @257
 --
 method end
 

@@ -10,7 +10,8 @@ Class .phantom.util.hashmap
       void  : void
         = : .phantom.util.hashpair[]
           ident hashed : .phantom.util.hashpair[]
-          new .phantom.util.hashpair[] : .phantom.util.hashpair[]
+          constructor() : .phantom.util.hashpair[]
+            new .phantom.util.hashpair[] : .phantom.util.hashpair[]
 
   Method void unlock(  ):
   -- No code!
@@ -73,7 +74,8 @@ Class .phantom.util.hashmap
             void  : void
               = : .phantom.util.hashpair
                 ident next : .phantom.util.hashpair
-                new .phantom.util.hashpair : .phantom.util.hashpair
+                constructor() : .phantom.util.hashpair
+                  new .phantom.util.hashpair : .phantom.util.hashpair
           void  : void
             . : void
               ident next : .phantom.util.hashpair

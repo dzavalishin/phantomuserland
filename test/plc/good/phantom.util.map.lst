@@ -10,7 +10,8 @@ Class .phantom.util.map
       void  : void
         = : void[]
           ident pairs : void[]
-          new void[] : void[]
+          constructor() : void[]
+            new void[] : void[]
 
   Method .internal.object get( key: .internal.object ):
     ,  : void
