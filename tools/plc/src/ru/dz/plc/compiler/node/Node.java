@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import ru.dz.jpc.Config;
 import ru.dz.phantom.code.*;
 import ru.dz.plc.compiler.AttributeSet;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -287,6 +288,55 @@ abstract public class Node {
 		else if( !dest.can_be_assigned_from(src) )
 			print_warning("Assignment to "+name+": incompatible source type '"+src+"' for dest type "+dest);
 	}
+
+
+	// ---------------------------- C code generation ----------------------------
+
+	protected String cTempName; 
+
+
+	// Generate C code for nodes referenced from me and me too
+	// If overriden, override have to call generate_C_code for children
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException 
+	{
+		llvmTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
+		if( _l != null ) {
+			_l.generate_C_code(cgen, s);
+			//move_between_stacks(c, _l.is_on_int_stack());
+}
+		if(context != null)
+		{
+			cgen.emitComment("Line "+context.getLineNumber());
+			cgen.recordLineNumberToIPMapping(context.getLineNumber());
+		}
+		log.fine("Node "+this+" llvm codegen");
+		generateMy_C_Code(cgen);
+	}
+
+	public String getCTempName() { return cTempName; }
+
+
+	// Generate C code for me only - supposed to be overriden in children
+	protected void generateMy_C_Code(C_codegen cgen) throws PlcException
+
+	{
+		if(Config.C_Debug) System.err.println("C cg failed for "+toString());
+		cgen.putln("// C codegen failed for "+toString());
+	}
+	
+	
+	public String get_C_Type() {
+		try {
+			return getType().to_C_Type();
+		} catch (PlcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "void";
+		}
+	}
+
+	
+	
 
 
 

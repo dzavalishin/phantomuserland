@@ -404,8 +404,13 @@ extends GrammarHelper {
 					continue;
 				}
 
+				boolean constructor = mname.equals(me.getName());
+				
+				if( constructor && !type.is_void())
+					syntax_error("Non-void constructor");
+				
 				//Method m = me.addMethod( mname, type );
-				Method m = new Method( mname, type );
+				Method m = new Method( mname, type, constructor );
 				int required_method_index = -1;
 
 				//Node args = 

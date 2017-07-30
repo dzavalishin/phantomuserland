@@ -96,7 +96,7 @@ static int gen_clone_video_probe();
 static int gen_clone_video_start();
 static int gen_clone_video_stop();
 
-static int gen_clone_init();
+//static int gen_clone_init();
 
 
 
@@ -222,12 +222,12 @@ free:
 }
 
 
-
+/*
 static int gen_clone_init()
 {
     return 0;
 }
-
+*/
 
 
 

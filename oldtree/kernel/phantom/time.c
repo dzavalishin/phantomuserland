@@ -417,3 +417,27 @@ struct tm *localtime_rb(bigtime_t timer, struct tm *tmb)
 {
     return localtime_helper(timer, tmb);
 }
+
+
+// -----------------------------------------------------------------------
+// Polled timeouts for drivers, interrupts must be enabled
+
+
+
+// Set timeout length
+void set_polled_timeout( polled_timeout_t *timer, bigtime_t timeout_uSec )
+{
+    assert(timer != 0);
+    *timer = sys_time + timeout_uSec;
+}
+
+// Returns true if timeout time passed
+bool check_polled_timeout( polled_timeout_t *timer )
+{
+    assert(timer != 0);
+    assert_interrupts_enabled();
+    return *timer < sys_time;    
+}
+
+
+

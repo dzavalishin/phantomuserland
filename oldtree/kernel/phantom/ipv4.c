@@ -19,6 +19,8 @@
 
 #include <kernel/net.h>
 
+#include <arpa/inet.h>
+
 #include <kernel/khash.h>
 #include <kernel/net/ethernet.h>
 

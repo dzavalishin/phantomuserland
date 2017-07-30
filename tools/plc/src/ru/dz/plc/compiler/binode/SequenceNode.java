@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.binode;
 import java.io.PrintStream;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -29,8 +30,19 @@ public class SequenceNode extends BiNode {
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {}
 	
+    @Override
+    public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException
+    {
+    	if( _l != null ) {
+    		cgen.putln(";// l:"); // TODO Remove one?
+    		_l.generate_C_code(cgen, s);    		
+    	}
+    	if( _r != null ) {
+    		cgen.putln(";// r:");
+    		_r.generate_C_code(cgen, s); 
+    	}
+    }
     
-
 	protected void print_children(PrintStream ps, int level, int start_level) throws PlcException 
 	{
 		if( _l != null )     _l.print(ps, level+1, start_level+1 );

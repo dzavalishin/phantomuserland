@@ -260,6 +260,9 @@ public class PhantomType {
 		if( _is_double ) _class = ClassMap.get_map().get(".internal.double",false, null);
 		if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
 
+		if( _is_void ) 
+			_class = ClassMap.get_map().get(".internal.void",false,null);
+
 		return _class;
 	}
 
@@ -322,6 +325,20 @@ public class PhantomType {
 		return "void";
 	}
 
+	public String to_C_Type() {
+		if( _class != null ) return C_codegen.getObjectType();  
+
+		if( _is_int )     return "int_32_t";
+		if( _is_long )    return "int_64_t";
+		if( _is_float )   return "float";
+		if( _is_double )  return "double";
+		//if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
+		
+		return "void";
+	} 
+
+	
+	
 	// This is used to generate function name with encoded arg type info
 	public String toProxyName() {
 		if( _class != null ) return "o";

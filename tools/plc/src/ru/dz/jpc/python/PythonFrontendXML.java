@@ -428,7 +428,7 @@ public class PythonFrontendXML {
 		}
 		
 		
-		Method m = new Method(funcName, PhantomType.t_string);
+		Method m = new Method(funcName, PhantomType.t_string, false); // false = not constructor
 		pc.addMethod(m);
 		
 		//m.code = useRegister(funcOutReg);

@@ -289,7 +289,7 @@ void virto_ring_dump(virtio_ring_t *r)
                (unsigned)(r->vr.desc[i].next), (unsigned)(r->vr.desc[i].flags)
               );
 #else
-        printf("%d@%lp->", r->vr.desc[i].len, (void *)(r->vr.desc[i].addr ));
+        printf("%d@%lld->", r->vr.desc[i].len, (long long)(r->vr.desc[i].addr));
         printf("%d/", r->vr.desc[i].next );
         printf("%x, \t", r->vr.desc[i].flags );
 #endif

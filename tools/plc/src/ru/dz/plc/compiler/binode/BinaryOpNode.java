@@ -1,8 +1,6 @@
 package ru.dz.plc.compiler.binode;
 
-import java.io.IOException;
-
-import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.node.Node;
@@ -36,4 +34,19 @@ public abstract class BinaryOpNode extends BiNode {
 		else throw new PlcException("Codegen", "op - does not exist for this type");
 	}
 	*/
+
+	// Supposed to be working for all the children of this class
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException {
+
+		// JIT_op_plus(left,right)
+		String oname = getLlvmOpName();
+		cgen.put("JIT_op_"+oname+"(");
+		_l.generate_C_code(cgen,s);
+		cgen.put(",");
+		_r.generate_C_code(cgen,s);
+		cgen.put(")");
+		
+}
+
 }

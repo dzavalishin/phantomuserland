@@ -368,3 +368,36 @@ void free_ldt_selector(selector_id sel)
 #endif
 }
 
+// -----------------------------------------------------------------------
+//
+// Modify kernel DS limit to enable/disable access to paged/persistent memory
+//
+//
+
+errno_t
+arch_ia32_modify_ds_limit( bool on_off)
+{   
+	unsigned int sel;
+
+	__asm __volatile("movw %%ds,%w0" : "=rm" (sel));
+    assert( sel == KERNEL_DS );
+
+	__asm __volatile("movw %%es,%w0" : "=rm" (sel));
+    assert( sel == KERNEL_DS );
+
+	__asm __volatile("movw %%ss,%w0" : "=rm" (sel));
+    assert( sel == KERNEL_DS );
+
+
+    struct real_descriptor *g; 
+    g = (struct real_descriptor *) (((char *)gdt) + (KERNEL_DS & SEL_MASK) );
+
+    set_descriptor_limit( g, on_off ? 0xFFFFFFFF : (PHANTOM_AMAP_START_VM_POOL) );
+
+    asm volatile("movw %w0,%%ds" : : "r" (KERNEL_DS));
+    asm volatile("movw %w0,%%es" : : "r" (KERNEL_DS));
+    asm volatile("movw %w0,%%ss" : : "r" (KERNEL_DS));
+
+    return 0;
+}
+

@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.node;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -46,5 +47,10 @@ public class IntConstNode extends Node {
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
 		llc.putln(getLlvmTempName()+" = add i32 0, "+Integer.toString(val));
 	}
+	
+	@Override
+	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
+		cgen.put(Integer.toString(val));
+}
 }
 

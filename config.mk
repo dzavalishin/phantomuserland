@@ -46,11 +46,19 @@ endif
 # How to compile phantom source
 MKBULK=$(realpath $(PHANTOM_HOME))/build/bin/mkbulk
 
+# Cygwin specific
 ifeq ($(OSTYPE),cygwin)
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc.cmd
 else
 PLC=$(realpath $(PHANTOM_HOME))/build/bin/plc
 endif
+
+# MacOS (Darwin) specific
+ifeq "$(shell uname)"  "Darwin"
+export TARGET_OS_MAC = 1
+export CC_DIR   = /usr/local/Cellar/llvm/4.0.1/bin
+endif
+
 
 %.pc: %.ph
 	$(PLC) $<

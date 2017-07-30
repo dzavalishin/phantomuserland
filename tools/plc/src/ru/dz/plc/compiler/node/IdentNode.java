@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.node;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.Method;
@@ -196,4 +197,52 @@ public class IdentNode extends Node {
 		}
 	}
 
+	
+	@Override
+	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
+
+		if( getterMethod != null )
+		{
+			// if we are here, we have _l - object to call getter in, and it's code is generated
+			// should we have call node instead?
+			// TODO c write codegen
+			cgen.putln("// call getter "+getterMethod.getName());
+			//cgen.emitMethodCall(_l, getterMethod.getOrdinal(), null, s)
+			return;
+}
+
+
+		PhantomField f = cgen.getPhantomClass().find_field(ident);
+		if( f != null )
+		{
+			// TODO llvm field load
+			//c.emitLoad(f.getOrdinal());
+			cgen.put(" "+C_codegen.getJitRuntimeFuncPrefix()+"GetField( "+
+			C_codegen.getThisVarName()+", "+f.getOrdinal()+") ");
+			return;
+		}
+
+		PhantomStackVar svar = cgen.getIstackVars().get_var(ident);
+		if( svar != null )
+		{
+			//c.emitIGet(svar.get_abs_stack_pos()); // get stack variable
+			// TODO llvm
+			//cgen.putln("; %"+llvmTempName+ " = alias "+getType().toLlvmType()+" @"+svar.getName());
+			cgen.put(" "+C_codegen.getLocalVarNamePrefix()+svar.getName()+" ");
+		}
+		else
+		{
+			svar = cgen.GetOstackVars().get_var(ident);
+			if( svar == null )
+				throw new PlcException( toString(), "no field", ident );
+
+			//if (type == null || type.is_unknown()) type = svar.get_type();
+			//c.emitGet(svar.get_abs_stack_pos()); // get stack variable
+			// TODO c
+			//cgen.putln("; %"+llvmTempName+ "= alias "+getType().toLlvmType()+" @"+svar.getName());
+			cgen.put(" "+C_codegen.getLocalVarNamePrefix()+svar.getName()+" ");
+		}
+	}
+	
+	
 }

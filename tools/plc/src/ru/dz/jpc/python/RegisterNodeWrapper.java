@@ -2,6 +2,8 @@ package ru.dz.jpc.python;
 
 import ru.dz.plc.compiler.node.MultiuseNode;
 
+// This one is for compiling Python register-based internal representation
+// Not yet finished
 public class RegisterNodeWrapper 
 {
 	private final ru.dz.plc.compiler.node.Node plcNode;
