@@ -87,4 +87,4 @@ tools/uftpd/bin
 *.iml
 *.class
 tools/big_gc/analysis/*.csv
-Tools/big_gc/out.data
+tools/big_gc/out.data
