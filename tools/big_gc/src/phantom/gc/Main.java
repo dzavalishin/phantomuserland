@@ -55,6 +55,7 @@ public class Main {
 			System.exit(EXIT_CODE_ERROR);
 		}
 
+		System.out.println(System.getenv("PHANTOM_HOME"));
 		String fn = System.getenv("PHANTOM_HOME") + "run/last_snap.data";
 
 		if( args.length == 1 )
@@ -84,7 +85,6 @@ public class Main {
 			System.exit(EXIT_CODE_FAILED);
 		}
 		System.out.println("Done!");
-		System.out.println(EXIT_CODE_OK);
 	}
 
 
@@ -149,7 +149,6 @@ public class Main {
 			
 			// store it to hash map
 			objects.put(objectAddress, h);
-
 		}
 
 		int size = 0;
@@ -201,12 +200,36 @@ public class Main {
 			// for external objects check whether there are
 			// references to objects that hasn't been visited yet
 			// if so -> add them to the queue
-			// since internal objects has no references
-			// to another objects -> just skip them
 			if(!currentObject.isInternal()){
-				List<Long> refs = getListOfObjectPointers(currentObject.getDataArea());
+				ByteBuffer bb =  currentObject.getDataArea();
+
+				// some objects has value "null" or "0"
+				// for almost all fields. In this case
+				// we need to check whether dataArea field exist or not
+				// if not -> skip this object
+				if(bb == null)
+					continue;
+
+				List<Long> refs = getListOfObjectPointers(bb);
 				for(Long ref : refs){
 					if(visitedObjects.get(ref) == null)
+						objectsToInspect.add(ref);
+				}
+			}else{
+				// for internal objects
+				// read 4 bytes with step 1 byte
+				// and check whether there is an object
+				// by this address.
+				// If so - process it, skip otherwise
+				ByteBuffer da = currentObject.getDataArea();
+				da.rewind();
+				long ref;
+				byte[] bb = new byte[4];
+				for(int i = 0; i < da.capacity() - 4; i++){
+					da.position(i);
+					da.get(bb, 0, 4);
+					ref = byteArrayToInt(bb);
+					if(objects.get(ref) != null && visitedObjects.get(ref) == null)
 						objectsToInspect.add(ref);
 				}
 			}
