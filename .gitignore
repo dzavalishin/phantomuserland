@@ -83,3 +83,8 @@ tools/pfsextract/bin
 tools/mkpfs/bin
 tools/trfs/bin
 tools/uftpd/bin
+.idea
+*.iml
+*.class
+tools/big_gc/analysis/*.csv
+tools/big_gc/out.data

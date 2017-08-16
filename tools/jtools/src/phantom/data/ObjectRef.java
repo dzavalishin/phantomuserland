@@ -55,4 +55,12 @@ public class ObjectRef {
 	public String toString() {
 		return Long.toHexString(dataAddr);
 	}
+
+
+	// write itself to the byte buffer
+	// based on constructor
+	public void writeToByteBuffer(ByteBuffer byteBuffer){
+		byteBuffer.putInt((int) this.dataAddr);
+		byteBuffer.putInt((int) this.interfaceAddr);
+	}
 }

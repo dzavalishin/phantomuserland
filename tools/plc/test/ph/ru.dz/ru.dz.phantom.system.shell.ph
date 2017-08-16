@@ -9,7 +9,8 @@
  *
  *
 **/
-
+var a = new Class();
+var b = new *("abc")(arg1, arg2)
 package .ru.dz.phantom.system;
 
 import .phantom.os;
@@ -33,8 +34,8 @@ class shell_callback //extends runnable
         console.putws(time.toString());
         console.putws(" !!\n\n");
     }
-                      
-    void init(var tt : .internal.io.tty ) 
+
+    void init(var tt : .internal.io.tty )
     {
         console = tt;
     }
@@ -152,9 +153,9 @@ class shell //extends runnable
             win.setFg( 0xFF0000FF ); // Blue
             win.drawLine( stat_pos-1, old_idle, cpu_idle-old_idle, 1 );
 
-            old_idle = cpu_idle;            
+            old_idle = cpu_idle;
             stat_pos = stat_next_pos;
-            
+
             /*
             if( stat_pos >= win.getXSize()-1 )
 	        win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
@@ -172,4 +173,4 @@ class shell //extends runnable
 
     }
 };
-
+a.f();
