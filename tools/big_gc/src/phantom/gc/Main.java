@@ -55,6 +55,7 @@ public class Main {
 			System.exit(EXIT_CODE_ERROR);
 		}
 
+		System.out.println(System.getenv("PHANTOM_HOME"));
 		String fn = System.getenv("PHANTOM_HOME") + "run/last_snap.data";
 
 		if( args.length == 1 )
@@ -84,7 +85,6 @@ public class Main {
 			System.exit(EXIT_CODE_FAILED);
 		}
 		System.out.println("Done!");
-		System.out.println(EXIT_CODE_OK);
 	}
 
 
@@ -149,7 +149,6 @@ public class Main {
 			
 			// store it to hash map
 			objects.put(objectAddress, h);
-
 		}
 
 		int size = 0;
@@ -180,8 +179,7 @@ public class Main {
 		long rootObjectAddress = OBJECT_VMEM_SHIFT;
 
 		Queue<Long> objectsToInspect = new LinkedList<>();
-		HashMap<Long, ObjectHeader> visitedObjects = new HashMap<>();
-		//HashSet<Long> visitedObjects = new HashSet<>();
+		Map<Long, ObjectHeader> visitedObjects = new HashMap<>();
 
 		objectsToInspect.add(rootObjectAddress);
 		ObjectHeader currentObject;
@@ -201,12 +199,36 @@ public class Main {
 			// for external objects check whether there are
 			// references to objects that hasn't been visited yet
 			// if so -> add them to the queue
-			// since internal objects has no references
-			// to another objects -> just skip them
 			if(!currentObject.isInternal()){
-				List<Long> refs = getListOfObjectPointers(currentObject.getDataArea());
+				ByteBuffer bb =  currentObject.getDataArea();
+
+				// some objects has value "null" or "0"
+				// for almost all fields. In this case
+				// we need to check whether dataArea field exist or not
+				// if not -> skip this object
+				if(bb == null)
+					continue;
+
+				List<Long> refs = getListOfObjectPointers(bb);
 				for(Long ref : refs){
 					if(visitedObjects.get(ref) == null)
+						objectsToInspect.add(ref);
+				}
+			}else{
+				// for internal objects
+				// read 4 bytes with step 1 byte
+				// and check whether there is an object
+				// by this address.
+				// If so - process it, skip otherwise
+				ByteBuffer da = currentObject.getDataArea();
+				da.rewind();
+				long ref;
+				byte[] bb = new byte[4];
+				for(int i = 0; i < da.capacity() - 4; i++){
+					da.position(i);
+					da.get(bb, 0, 4);
+					ref = byteArrayToInt(bb);
+					if(objects.get(ref) != null && visitedObjects.get(ref) == null)
 						objectsToInspect.add(ref);
 				}
 			}
@@ -228,6 +250,13 @@ public class Main {
 				entry.getValue().markObjectFree();
 			}
 		}
+	}
+
+
+	public static Map<Long, ObjectHeader> collectGarbage(Map<Long, ObjectHeader> objects){
+		Main.objects = objects;
+		Main.collectGarbage();
+		return Main.objects;
 	}
 
 
@@ -256,10 +285,12 @@ public class Main {
 	 * Prints how many internal, external and free objects there are in the system and sum of all of them
 	 * @param objectsToInspect Map<Long, ObjectHeader> map of objects existing in the system
 	 */
-	private static void printStatisticsPerSystem(Map<Long, ObjectHeader> objectsToInspect){
+	public static void printStatisticsPerSystem(Map<Long, ObjectHeader> objectsToInspect){
+		System.out.println("Printing statistics");
 		int internal = 0;
 		int external = 0;
-		int free = 0;
+		int freeInternal = 0;
+		int freeExternal = 0;
 
 		for(ObjectHeader value : objectsToInspect.values()){
 			if(value.isAllocated()){
@@ -269,10 +300,15 @@ public class Main {
 					external++;
 				}
 			}else{
-				free++;
+				if(value.isInternal()){
+					freeInternal++;
+				}else{
+					freeExternal++;
+				}
 			}
 		}
-		System.out.println(String.format("  Internal: %d, external: %d, free: %d, all: %d", internal, external, free, internal + external + free));
+		System.out.println(String.format("  Internal: %d, external: %d, freeInternal: %d, freeExternal: %d,  all: %d",
+				internal, external, freeInternal,freeExternal, internal + external + freeExternal + freeInternal));
 	}
 
 
@@ -282,7 +318,7 @@ public class Main {
 	 * @param withoutGarbage Map<Long, ObjectHeader> objects after gc
 	 * @param withGarbage Map<Long, ObjectHeader> objects before gc
 	 */
-	private static void printGarbageStatistics(Map<Long, ObjectHeader> withoutGarbage,
+	public static void printGarbageStatistics(Map<Long, ObjectHeader> withoutGarbage,
 											Map<Long, ObjectHeader> withGarbage){
 
 		System.out.println("Printing garbage statistics:");
@@ -330,7 +366,7 @@ public class Main {
 	 * needed for analyzing usage of objects using jupyter or other tools
 	 * @param objectsMap Map<Long, ObjectHeader>
 	 */
-	private static void saveObjectMapToCSVFile(Map<Long, ObjectHeader> objectsMap, String filename)
+	public static void saveObjectMapToCSVFile(Map<Long, ObjectHeader> objectsMap, String filename)
 			throws IOException {
 
 		//csv header, has to be written to file first

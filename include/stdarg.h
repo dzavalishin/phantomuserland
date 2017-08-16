@@ -39,7 +39,7 @@
 #define	_MACHINE_STDARG_H_
 
 // TODO we need cdefs for it defines __GNUCLIKE_BUILTIN_NEXT_ARG
-//#include <sys/cdefs.h>
+#include <sys/cdefs.h>
 //#include <sys/_types.h>
 
 #include <phantom_types.h>

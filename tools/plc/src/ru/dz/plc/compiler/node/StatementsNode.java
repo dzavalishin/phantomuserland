@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
@@ -59,6 +61,15 @@ public class StatementsNode extends Node {
 	}
 	
 	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException {
+		for( Node n : nodes )
+		{
+			n.generate_C_code(cgen, s);
+			cgen.putln(";");
+		}
+	}
+	
+	@Override
 	public void preprocess(ParseState s) throws PlcException {
 		for( Node n : nodes )
 			n.preprocess(s);
@@ -74,6 +85,15 @@ public class StatementsNode extends Node {
 
 	protected void print_me(PrintStream ps ) throws PlcException {
 		ps.println(toString());
+	}
+	
+	
+	public void forEach(Consumer<? super Node> action) {
+		nodes.forEach(action);		
+}
+
+	public List<Node> getNodeList() {
+		return nodes;		
 	}
 	
 	

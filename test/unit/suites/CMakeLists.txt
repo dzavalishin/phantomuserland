@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES ( "${CMAKE_SOURCE_DIR}" )
 INCLUDE_DIRECTORIES ( "../../../include" "../../../include/ia32" )
 
 
-SET(CMAKE_C_FLAGS " -std=c99 -O3 -Wall -Wextra -Wimplicit -DARCH_ia32 -DBOARD_ia32-default -include ../../../include/kernel/config.h -include ../../../include/ia32/arch/arch-config.h  -include ../../../include/ia32/arch/board-ia32-default-config.h -L../../../phantom/lib/")
+SET(CMAKE_C_FLAGS " -std=c99 -O3 -Wall -Wextra -Wimplicit -DARCH_ia32 -DBOARD_ia32-default -include ../../../include/kernel/config.h -include ../../../include/ia32/arch/arch-config.h  -include ../../../include/ia32/arch/board-ia32_default-config.h -L../../../phantom/lib/")
 
 
 FOREACH ( module ${C_FILES} )

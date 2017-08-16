@@ -100,6 +100,7 @@ protected static final byte opcode_prefix_double = (byte)0x5E; // next operation
 protected static final byte opcode_general_lock = (byte)0x62; // mutex is locked on stack top. 
 protected static final byte opcode_general_unlock = (byte)0x63; // mutex is unlocked on stack top. 
 // 64-6e
+protected static final byte opcode_static_invoke = (byte)0x6E; // arg int32 method ordinal. stack (from top): class ptr, this, n_args, args
 protected static final byte opcode_dynamic_invoke = (byte)0x6F; // no args. stack (from top): string method name, this (or null for static), n_args, args
 protected static final byte opcode_ishl = (byte)0x70; // shift left
 protected static final byte opcode_ishr = (byte)0x71; // shift right signed

@@ -1,5 +1,7 @@
 #default:: all
 
+include $(realpath $(PHANTOM_HOME))/config.mk
+
 # amp mpeg ping 
 SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), cat cp dmesg echo grep kill ln ls mkdir mode more pwd rm sh sntp stats tcp_echo tcptest tetris top touch udp_echo wavplay wc)
 

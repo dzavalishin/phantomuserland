@@ -1,9 +1,14 @@
 package ru.dz.plc.compiler;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import ru.dz.phantom.code.*;
+import ru.dz.plc.compiler.binode.OpStaticMethodCallNode;
+import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.Node;
+import ru.dz.plc.compiler.node.StatementsNode;
+import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.util.PlcException;
 
 import java.io.BufferedWriter;
@@ -22,6 +27,7 @@ import java.io.IOException;
 
 public class Method
 {
+	private boolean		    constructor;
 	private int			ordinal;
 	public Node         code;
 	private String      name;
@@ -40,23 +46,20 @@ public class Method
 
 
 
-	public Method( String name, PhantomType type )
+	public Method( String name, PhantomType type, boolean isConstructor )
 	{
 		this.name = name;
 		this.type = type;
-		//this.args = null;
 		this.ordinal = -1;
 		this.code = null;
+		this.constructor = isConstructor;
 	}
 
 	/** NB! Must be called in correct order! */
 	public void addArg( String name, PhantomType type ) throws PlcException
 	{
 		if( type == null )
-		{
-			//Object a = null;        a.getClass();
 			throw new PlcException("Method add_arg", "null type of arg", name);
-		}
 
 		args_def.add(new ArgDefinition(name, type));
 		svars.add_stack_var( new PhantomVariable(name, type ) );
@@ -65,7 +68,11 @@ public class Method
 
 	public Codegen get_cg() { return c; }
 
-	public void generate_code( CodeGeneratorState s ) throws PlcException, IOException {
+	public void generate_code( CodeGeneratorState s ) throws PlcException, IOException 
+	{
+		if(!preprocessed)
+			throw new PlcException("generateC_Code", "not preprocessed");
+
 		if(code == null)
 		{
 			c.emitRet(); // empty function code
@@ -150,7 +157,10 @@ public class Method
 
 
 
-	public void generateLlvmCode( CodeGeneratorState s, BufferedWriter llvmFile ) throws PlcException, IOException {
+	public void generateLlvmCode( CodeGeneratorState s, BufferedWriter llvmFile ) throws PlcException, IOException 
+	{
+		if(!preprocessed)
+			throw new PlcException("generateC_Code", "not preprocessed");
 
 		LlvmCodegen llc = new LlvmCodegen(s.get_class(),this,llvmFile);
 
@@ -167,10 +177,9 @@ public class Method
 			argdef.append("i64 %"+a.getName());
 		}
 
-		String llvmMethodName = name;
-		name = name.replaceAll("<init>", "_\\$_Constructor");
+		String llvmMethodName = name.replaceAll("<init>", "_\\$_Constructor");
 
-		llc.putln(String.format("define %s @%s(%s) {", llc.getObjectType(), name, argdef )); // function 
+		llc.putln(String.format("define %s @%s(%s) {", LlvmCodegen.getObjectType(), llvmMethodName, argdef )); // function 
 
 		if(code != null)
 		{
@@ -234,7 +243,7 @@ public class Method
 		}
 
 		// catch the fall-out
-		llc.putln("ret "+llc.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
+		llc.putln("ret "+LlvmCodegen.getObjectType()+" <{ i8* null, i8* null }> ;"); // empty function code
 		llc.putln("}"); // end of function 
 
 		// ------------------------------------------
@@ -246,6 +255,137 @@ public class Method
 		llc.flushPostponedCode();
 
 	}
+
+
+
+
+
+
+
+	private static int cTempNum = 0;
+
+	public String get_C_TempName(String nodeName ) 
+	{
+		if( null == nodeName )
+			return String.format("tmp_%d", cTempNum++ );
+		return String.format("tmp_%d_%s", cTempNum++, nodeName ); 
+	}
+
+
+
+
+
+	public void generateC_Code(CodeGeneratorState s, BufferedWriter c_File) throws PlcException 
+	{
+		if(!preprocessed)
+			throw new PlcException("generateC_Code", "not preprocessed");
+
+		// TODO not finished, sketch
+		C_codegen cgen = new C_codegen(s.get_class(),this,c_File);
+
+		StringBuilder argdef = new StringBuilder();
+
+		argdef.append(" jit_vm_state_t "+
+				C_codegen.get_vm_state_var_name()
+		+", jit_object_t "+C_codegen.getThisVarName()+" ");
+
+		//boolean firstParm = true;
+		for( ArgDefinition a : args_def )
+		{
+			//if(!firstParm)
+			argdef.append(", ");
+
+			//firstParm= false;
+
+			argdef.append("jit_object_t "+C_codegen.getLocalVarNamePrefix()+a.getName());
+		}
+
+		//String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
+		PhantomClass my_class = s.get_class();
+		String C_MethodName = cgen.getMethodName(my_class, ordinal);
+
+		cgen.putln(String.format("%s %s(%s) {", C_codegen.getObjectType(), C_MethodName, argdef )); // function 
+
+		cgen.emitSnapShotTrigger(); // on func enter check for snapshot request
+
+		if(code != null)
+		{
+
+	// ------------------------------------------
+			// traverse tree to allocate automatic vars?
+			// ------------------------------------------
+			//int n_auto_vars = svars.getUsedSlots();
+			//int n_int_auto_vars = isvars.getUsedSlots();
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate prologue code here
+			// ------------------------------------------
+
+			/*
+		// check number of args
+		int n_args = args_def.size();
+		String good_args_label = c.getLabel();
+
+		c.emitIConst_32bit(n_args);
+		c.emitISubLU();
+		c.emitJz(good_args_label);
+
+		// wrong count - throw string
+		// BUG! Need less consuming way of reporting this. Maybe by
+		// calling class object Method? Or by summoning something?
+		c.emitString("arg count: "+name + " in " + s.get_class().getName());
+		c.emitThrow();
+
+		c.markLabel(good_args_label);
+			 */
+
+			if(requestDebug) cgen.emitDebug((byte) 0x1);
+			//if(requestDebug) llc.emitDebug((byte)0x1,"Enabled debug");
+
+			// push nulls to reserve stack space for autovars
+			// BUG! We can execute vars initialization code here, can we?
+			// We can if code does not depend on auto vars itself, or depends only on
+			// previous ones.
+			// 		for( int i = n_auto_vars; i > 0; i-- ) 			c.emitPushNull();
+
+			// Reserve integer stack place for int vars 		for( int i = n_int_auto_vars; i > 0; i-- )			c.emitIConst_0();
+
+			// ------------------------------------------
+
+
+			// ------------------------------------------
+			// generate main code by descending the tree
+			// ------------------------------------------
+			code.generate_C_code( cgen, s );
+			// ------------------------------------------
+
+			// ------------------------------------------
+			// generate epilogue code here
+			// ------------------------------------------
+
+			//if(requestDebug) c.emitDebug((byte)0x2,"Disabled debug");
+			if(requestDebug) cgen.emitDebug((byte) 0x2);
+
+		}
+
+		// catch the fall-out TODO must return null phantom ptr const
+		cgen.putln(";"); // finish last statement
+		cgen.putln(""); 
+		cgen.putln("return 0;"); // empty function code
+		cgen.putln("}"); // end of function 
+
+		// ------------------------------------------
+		// Part of code is generated to the buffer to 
+		// be emitted after the method code. Flush it
+		// now.
+		// ------------------------------------------
+
+		cgen.flushPostponedCode();
+
+
+	}
+
 
 
 	// ------------------------------------------
@@ -267,6 +407,8 @@ public class Method
 
 	public int getArgCount() { return args_def.size(); }
 	public Iterator<ArgDefinition> getArgIterator() { return args_def.iterator(); }
+
+	public boolean isConstructor() { return constructor; 	}
 
 	// ------------------------------------------
 	// Dump/print
@@ -309,8 +451,135 @@ public class Method
 	}
 
 
+	private boolean preprocessed = false;
+	public void preprocess( PhantomClass myClass ) throws PlcException 
+	{
+		// TODO If I am c'tor make sure we have call to parent class c'tor or add one
 
+		preprocessed = true;
+	}
+
+	private void preprocessParentConstructor(PhantomClass myClass) throws PlcException 
+	{
+		// don't call constructor for all classes parent
+		if( myClass.getParent().equals(".internal.object") )
+			return;
+
+		// And for itself
+		if( myClass.getName().equals(".internal.object") )
+			return;
+		
+		if( checkConstructorCall( code, myClass ) == SearchResult.Ok )
+			return;
+
+		// No base class c'tor call found, add call to default c'tor
+
+		String parentClassName = myClass.getParent();
+		
+		if( (parentClassName == null) || (parentClassName.equals(".internal.object")) )
+			return;
+		
+		PhantomClass parentClass = ClassMap.get_map().get(parentClassName, true, null);
+		
+		if( parentClass == null )
+				throw new PlcException("preprocessParentConstructor", "parent class not found: "+parentClassName);
+		
+		Method defCtor = parentClass.getDefaultConstructor();
+
+		if( defCtor == null )
+			throw new PlcException("preprocessParentConstructor", "parent class has no default constructor: "+parentClassName);
+		
+		Node ctorCall = new OpStaticMethodCallNode(
+				new ThisNode(myClass),
+				defCtor.getOrdinal(),
+				null, // no args
+				myClass
+				);
+		
+		Node newRoot = new SequenceNode(ctorCall, code);
+		
+		code = newRoot;
+	}
+
+	static private enum SearchResult {
+		Continue, Ok, Fail
 };
+
+	private SearchResult checkConstructorCall(Node n, final PhantomClass myClass) throws PlcException {
+		// Find first meaningful node, check if it is static call of parent's c'tor
+
+		if( n == null ) return SearchResult.Continue;
+
+		if (n instanceof SequenceNode) {
+			SequenceNode sn = (SequenceNode) n;
+
+			SearchResult r;
+
+			r = checkConstructorCall( sn.getLeft(), myClass );
+			if( r != SearchResult.Continue ) return r;
+
+			return checkConstructorCall( sn.getRight(), myClass );				
+		}
+
+		if (n instanceof StatementsNode) 
+		{
+			StatementsNode sn = (StatementsNode) n;
+
+			List<Node> nodes = sn.getNodeList();
+
+			for( Node t : nodes )
+			{			
+				SearchResult r = checkConstructorCall( t, myClass );
+				if( r != SearchResult.Continue ) return r;
+			}
+
+			return SearchResult.Continue;
+		}
+
+		// not sequence - now check it
+
+		if (n instanceof OpStaticMethodCallNode) {
+			OpStaticMethodCallNode mc = (OpStaticMethodCallNode) n;
+			
+			// got static call - supposedly it calls base class constructor, check it
+			
+			Node new_this = mc.getLeft(); // This for static call
+			
+			if (!(new_this instanceof ThisNode)) {			
+				throw new PlcException("checkConstructorCall", "first call is not for 'this', so it is not a base class constructor");
+			}
+			
+			PhantomClass cc = mc.getCallClass();
+			
+			if( !cc.getName().equals(myClass.getName()) )
+				throw new PlcException("checkConstructorCall", "our base is "+myClass.getName()+", but c'tor call is for "+cc.getName());
+
+			int ord = mc.getOrdinal();
+			
+			Method ctor = cc.getMethod(ord);
+			if( ctor == null )
+				throw new PlcException("checkConstructorCall", "base c'tor is null" );
+			
+			if( !ctor.isConstructor() )
+				throw new PlcException("checkConstructorCall", "base c'tor is not really c'tor" );
+
+			if( !ctor.getName().equals("<init>") )
+				throw new PlcException("checkConstructorCall", "base c'tor method name is not <init>" );
+
+			// Seems we checked it all
+			
+			return SearchResult.Ok;
+		}
+		
+		// First found code is not base c'tor call - fail
+		
+		return SearchResult.Fail;
+	}
+}
+
+
+
+
 
 
 

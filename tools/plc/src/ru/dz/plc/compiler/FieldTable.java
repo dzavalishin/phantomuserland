@@ -121,7 +121,7 @@ public class FieldTable {
 		if(!f.isPublic())
 			return;
 		
-		Method get = new Method(makeGetterName(f.getName()), f.getType());
+		Method get = new Method(makeGetterName(f.getName()), f.getType(), false );
 		pc.addMethod(get);
 		
 		StatementsNode getNodes = new StatementsNode();
@@ -142,7 +142,7 @@ public class FieldTable {
 	}
 	
 	public void codegen(RandomAccessFile os, FileWriter lst,
-			BufferedWriter llvmFile, CodeGeneratorState s, String version) throws PlcException 
+			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException 
 	{
 		//llvmFile.write("; fields: \n");
 		for( PhantomField f : table.values())
@@ -151,6 +151,7 @@ public class FieldTable {
 			try {
 				info.write();
 				llvmFile.write("; - field "+f.getName()+"\n");
+				c_File.write("// - field "+f.getName()+"\n");
 			} catch (IOException e) {
 				throw new PlcException("Writing field "+f.getName(), e.toString());
 			}

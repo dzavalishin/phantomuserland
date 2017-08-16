@@ -246,9 +246,12 @@ class code_handler
       my_args_count = Fileops.get_int32(is);
       if(debug_print) System.out.println(my_args_count);
 
+      boolean constructor = Fileops.get_int32(is) == 1;
+	  if(debug_print) System.out.println("    Is constructor: " + constructor);
+
       PhantomType my_return_type = new PhantomType(is);
 
-      me = new Method( my_name, my_return_type );
+      me = new Method( my_name, my_return_type, constructor );
       me.setOrdinal(my_ordinal);
 
       if(debug_print) System.out.print("Method is: " + my_name + ", ret type is '"+my_return_type.toString()+"', arg count = " );

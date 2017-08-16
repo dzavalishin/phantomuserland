@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.binode;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
@@ -16,7 +17,11 @@ import ru.dz.plc.util.PlcException;
 
 
 public class ValNeqNode extends BiBistackNode {
-	public ValNeqNode( Node l, Node r) {    super(l,r);  }
+	public ValNeqNode( Node l, Node r) {    
+		super(l,r);
+		//opName = "Neq";
+		}
+	
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return "!=";  }
 	// todo - must redefine generate_code to be able to process
@@ -44,5 +49,12 @@ public class ValNeqNode extends BiBistackNode {
 		}
 		//else throw new PlcException("Codegen", "op != does not exist for this type");
 	}
+	
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) 
+			throws PlcException {
+		generate_cmp_C_code(cgen, s, "Neq");
+	}
+
 }
 

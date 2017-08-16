@@ -292,11 +292,13 @@ static void make_mem_map(void)
         // 0th element is zero filled
         for( i = 1; i < num; i++ )
         {
-            SET_MEM(
-                    header[i].sh_addr,
-                    header[i].sh_size,
-                    MEM_MAP_ELF_SEC
-               );
+            // some Elf linker could create 0-sized section (Mac Os lld.ld)
+            if (header[i].sh_size)
+                SET_MEM(
+                        header[i].sh_addr,
+                        header[i].sh_size,
+                        MEM_MAP_ELF_SEC
+                   );
 
         }
 

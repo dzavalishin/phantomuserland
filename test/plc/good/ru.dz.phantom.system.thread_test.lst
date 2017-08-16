@@ -13,7 +13,8 @@ Class .ru.dz.phantom.system.thread_test
           void  : void
             = : .internal.io.tty
               ident console : .internal.io.tty
-              new .internal.io.tty : .internal.io.tty
+              constructor() : .internal.io.tty
+                new .internal.io.tty : .internal.io.tty
         void  : void
           = : int
             ident incr : int

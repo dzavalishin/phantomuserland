@@ -85,6 +85,42 @@ public class ObjectHeader extends AllocHeader {
 		byteBuffer.put(this.dataArea);
 		byteBuffer.position(start + this.getExactSize());
 	}
-	
-	
+
+
+	// setters and getters for all fields
+	// needed to create such objects while
+	// garbage is being generated
+	public ObjectRef getoClass() {
+		return oClass;
+	}
+
+	public void setoClass(ObjectRef oClass) {
+		this.oClass = oClass;
+	}
+
+	public ObjectRef getoSatellites() {
+		return oSatellites;
+	}
+
+	public void setoSatellites(ObjectRef oSatellites) {
+		this.oSatellites = oSatellites;
+	}
+
+	public void setObjectFlags(int objectFlags) {
+		this.objectFlags = objectFlags;
+	}
+	public void setObjectFlag(int objectFlag) {
+		this.objectFlags += objectFlag;
+	}
+	public void removeObjectFlag(int objectFlag) {
+		this.objectFlags -= objectFlag;
+	}
+
+	public void setDaSize(int daSize) {
+		this.daSize = daSize;
+	}
+
+	public void setDataArea(ByteBuffer dataArea) {
+		this.dataArea = dataArea;
+	}
 }

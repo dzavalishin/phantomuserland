@@ -16,8 +16,25 @@ public class ClassMap {
 	ClassTable       imported_classes = new ClassTable();
 
 	private static ClassMap  static_hack;
-	public static ClassMap  get_map() { if(null==static_hack) static_hack = new ClassMap(); return static_hack; }
-	private ClassMap() { static_hack = this; }
+	public static ClassMap  get_map() { 
+		if(null==static_hack)
+		{
+			static_hack = new ClassMap();
+			try {
+				static_hack.imported_classes.add( new PhantomClass(".internal.void") );
+			} catch (PlcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return static_hack; 
+	}
+
+	private ClassMap() { 
+		static_hack = this;
+
+
+	}
 
 
 

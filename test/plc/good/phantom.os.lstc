@@ -1,4 +1,4 @@
-Class version 20160114032155699
+Class version 20170628114523502
 
 method getTimeServer ordinal 16
 --
@@ -43,24 +43,27 @@ _label_0:	//  @47
   summon class internal.world	//  @58
   new				//  @78
   os dup				//  @79
-  set o stk pos=0			//  @80
-  os drop				//  @85
-  ; Line 39			//  @86
-  get o stk pos=0			//  @86
-  call m=8 nparm=0		//  @91
-  os dup				//  @93
-  set o stk pos=1			//  @94
-  os drop				//  @99
-  ; Line 39			//  @100
-  ; Line 41			//  @100
-  get o stk pos=1			//  @100
-  call m=14 nparm=0		//  @105
-  os dup				//  @107
-  save fld=0			//  @108
-  os drop				//  @110
-  ; Line 41			//  @111
-_label_1:	//  @111
-  ret				//  @111
+  call m=0 nparm=0		//  @80
+  os drop				//  @81
+  os dup				//  @82
+  set o stk pos=0			//  @83
+  os drop				//  @88
+  ; Line 39			//  @89
+  get o stk pos=0			//  @89
+  call m=8 nparm=0		//  @94
+  os dup				//  @96
+  set o stk pos=1			//  @97
+  os drop				//  @102
+  ; Line 39			//  @103
+  ; Line 41			//  @103
+  get o stk pos=1			//  @103
+  call m=14 nparm=0		//  @108
+  os dup				//  @110
+  save fld=0			//  @111
+  os drop				//  @113
+  ; Line 41			//  @114
+_label_1:	//  @114
+  ret				//  @114
 --
 method end
 

@@ -29,4 +29,9 @@ public class DupSourceNode extends Node {
 		else
 			c.emitOsDup();
 	}
+	
+	// for llvm and C we need to keep stack in CodeGeneratorState, assign a temp variable
+	// and put var name to stack, pick it up (pop) in dup dest node and use as an expression
+	
+	
 }

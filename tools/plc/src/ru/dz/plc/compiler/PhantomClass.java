@@ -39,7 +39,9 @@ public class PhantomClass {
 		ft = new FieldTable();
 		staticFieldsTable = new FieldTable();
 
-		if (!name.equals(".internal.object")) {
+		boolean noBase = name.equals(".internal.object") || name.equals(".internal.void"); 
+		
+		if (!noBase) {
 			parent_class = ClassMap.get_map().get(parent,false,null);
 			if (parent_class == null)
 				throw new PlcException("PhantomClass constructor",
@@ -137,6 +139,18 @@ public class PhantomClass {
 		return parent_class.findMethod(signature);
 	}
 
+	/** Get just out method, don't search up */
+	public Method getMethod(int ordinal) {
+		return mt.get(ordinal);
+	}
+	
+	public Method getDefaultConstructor() 
+	{		
+		List<PhantomType> args = new LinkedList<PhantomType>(); // no args
+		MethodSignature signature = new MethodSignature("<init>", args);
+		return mt.get(signature);
+	}
+
 	
 	static boolean isSameArgs(Method m1, Method m2) {
 		Iterator<ArgDefinition> i1 = m1.getArgIterator();
@@ -177,8 +191,8 @@ public class PhantomClass {
 	}
 
 	@Deprecated
-	public Method addMethod(String name, PhantomType type) throws PlcException {
-		Method m = mt.add(name, type);
+	public Method addMethod(String name, PhantomType type, boolean constructor ) throws PlcException {
+		Method m = mt.add(name, type, constructor );
 		//check_base_for_method(m);
 		return m;
 	}
@@ -338,15 +352,18 @@ public class PhantomClass {
 		mt.print(ps);
 	}
 
-	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, String version) throws IOException, PlcException
+	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, String version) throws IOException, PlcException
 	{
 		llvmFile.write("; class "+getName()+"\n\n");
 		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
 		
+		c_File.write("// class "+getName()+"\n\n"); // TODO class version
+		c_File.write("#include <phantom/jit/generated.h>\n\n");
+		
 		CodeGeneratorState s = new CodeGeneratorState(this);
 		//ft.generateGettersSetters(this);
-		mt.codegen(os, lst, llvmFile, s, version);
-		ft.codegen(os, lst, llvmFile, s, version);
+		mt.codegen(os, lst, llvmFile, c_File, s, version);
+		ft.codegen(os, lst, llvmFile, c_File, s, version);
 	}
 
 	public void preprocess(ParseState ps) throws PlcException
@@ -375,7 +392,7 @@ public class PhantomClass {
 		return false;
 	}
 
-	public void set_ordinals() {
+	public void set_ordinals() throws PlcException {
 		mt.set_ordinals();		
 	}
 
@@ -383,7 +400,7 @@ public class PhantomClass {
 		return ft.slots_needed();
 	}
 
-	public int getMethodSlotsNeeded() {
+	public int getMethodSlotsNeeded() throws PlcException {
 		return mt.slots_needed();
 	}
 
@@ -423,6 +440,8 @@ public class PhantomClass {
 		SootMain.say("class "+this);		
 		mt.dump();
 	}
+
+
 
 
 

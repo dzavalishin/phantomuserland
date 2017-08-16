@@ -1,4 +1,4 @@
 [autorun]
 action=test autorun
 #icon=test.ico
-open=/bin/quake
+#open=/bin/quake

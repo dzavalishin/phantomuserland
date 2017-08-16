@@ -1,10 +1,12 @@
-/**
- * 
- */
 package ru.dz.soot;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,8 @@ import soot.tagkit.Tag;
 import soot.util.Chain;
 
 /**
+ * Java to Phantom bytecode converter. Uses plc code generation backend.
+ * 
  * @author dz
  *
  */
@@ -37,6 +41,8 @@ public class SootMain {
 	static Logger log = Logger.getLogger(SootMain.class.getName());
 	static ClassMap classes = ClassMap.get_map();
 	private static Set<String> classesToDo = new HashSet<String>();
+	private static Set<String> classesToSkip = new HashSet<String>();
+	private static String sourceClassPath;
 
 
 
@@ -112,8 +118,8 @@ public class SootMain {
 			doClass("java.lang.ArrayStoreException");
 			doClass("java.lang.ArithmeticException");
 			
-			doClass("java.lang.AbstractStringBuilder");
-			doClass("java.lang.StringBuilder");
+			//doClass("java.lang.AbstractStringBuilder");
+			//doClass("java.lang.StringBuilder");
 		}
 		else
 		{
@@ -123,15 +129,34 @@ public class SootMain {
 				{
 					if( a.charAt(1) == 'c' )
 					{
-						Scene.v().setSootClassPath(a.substring(2));
+						setSourceClassPath(a.substring(2));
 						continue;
 					}
 					
+					if( a.charAt(1) == 'C' )
+					{
+						String dir = a.substring(2);
+						//say("-C "+dir);
+						//Scene.v().setSootClassPath(dir);
+						setSourceClassPath(dir);
+						queueAllClasses(dir);
+						continue;
+					}
+
+					if( a.charAt(1) == 'X' )
+					{
+						String cn = a.substring(2);
+						classesToSkip.add(cn);
+						continue;
+					}
+
 					if( a.charAt(1) == '?' )
 					{
 						System.out.println(
-								"-c<java-class-path-list>\n"+
+								"-C<dir> - process all .class files in directory (sets -c dir also)\n"+
+										"-c<java-class-path-list> - set directory to load .class files from\n"+
 								"-o<phantom-class-out-dir>\n"+
+										"-X<class.name - skip (do not convert) class"+
 								"-I - ignored (plc compat)"
 								);
 						continue;
@@ -143,11 +168,24 @@ public class SootMain {
 				doClass(a);
 			}
 		}
-
+		/*
 		for( String iClass : classesToDo )
 		{
 			String cName = iClass.replace('/', '.');
-			say("Now process inner class "+cName);
+			say("Process queued class "+cName);
+			doClass(cName);
+		}
+		 */
+		while( !classesToDo.isEmpty() )
+		{
+			String cName = classesToDo.iterator().next();
+
+			classesToDo.remove(cName);
+
+			cName = cName.replace('/', '.');
+			cName = cName.replace('\\', '.');
+
+			say("Process queued class "+cName);
 			doClass(cName);
 		}
 
@@ -166,8 +204,98 @@ public class SootMain {
 	}
 
 
+	private static void setSourceClassPath(String dir) {
+		sourceClassPath = dir;
+		Scene.v().setSootClassPath(dir);
+	}
+
+
+	private static void queueAllClasses(String dir) {
+		Path start = java.nio.file.Paths.get(dir);
+		FileVisitor<Path> visitor = new FileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				//System.out.println("dir pre "+dir);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				//System.out.println("visit "+file);
+
+				if(!attrs.isRegularFile())
+				{
+					//System.out.println("not file "+file);
+					return FileVisitResult.CONTINUE;
+				}
+
+				addPath(file);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				System.err.println("scan failed "+file+" "+exc);
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				//System.out.println("dir post "+dir);
+				return FileVisitResult.CONTINUE;
+			}
+
+		};
+
+		try {
+			say("walk "+start);
+			Files.walkFileTree(start, visitor);
+		} catch (IOException e) {
+			System.err.println("Unable to scan "+start);
+			e.printStackTrace();
+		}
+
+	}
+
+	// Add path to queue to be compiled
+	protected static void addPath(Path file) 
+	{	
+		Path start = java.nio.file.Paths.get(sourceClassPath);
+
+		//say("abs = "+file);
+
+		//Path relative = file.relativize(start);
+		Path relative = start.relativize(file);
+
+		//say("relative = "+relative);
+
+		String className = relative.toString();
+
+		className = className.replaceAll("/", ".");
+		className = className.replaceAll("\\\\", "."); // This means replace ONE backslash with .
+
+		if( !className.endsWith(".class") )
+			return;
+
+		// remove .class suffix
+		className = className.substring(0, className.length()-6);
+
+		//say("add "+className);
+
+		classesToDo.add(className);
+
+	}
+
+
 	private static void doClass(String cn) throws PlcException, IOException
 	{
+		if( classesToSkip.contains(cn))
+		{
+			say("Skipping "+cn);
+			return;			
+		}
+		
 		try {
 
 			SootClass c = Scene.v().loadClassAndSupport(cn);

@@ -419,7 +419,7 @@ static errno_t     fatff_stat( struct uufile *f, struct stat *dest )
         if(!(fi.fattrib & AM_RDO))         dest->st_mode |= 0222;
 
         if( (fi.fattrib & AM_LFN) || (fi.fattrib & AM_VOL) )
-            dest->st_mode &= ~ (_S_IFREG||S_IFDIR);
+            dest->st_mode &= ~ (_S_IFREG|S_IFDIR);
     }
 
     return fresult2errno(r);

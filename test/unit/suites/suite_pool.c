@@ -131,15 +131,18 @@ TEST_FUNCT(pool) {
     test_check_false(h < 0);
     //_show_free();
     test_check_true( 1 == pool_get_used( pool ) );
+    test_check_true( 1 == pool_el_refcount( pool, h ) );
 
     void *el = pool_get_el( pool, h );
     test_check_eq( el0, el );
-    test_check_true( 2 == pool_get_used( pool ) );
+    test_check_true( 1 == pool_get_used( pool ) );
+    test_check_true( 2 == pool_el_refcount( pool, h ) );
 
     printf("pool_get_used() = %d\n", pool_get_used( pool ) );
 
     test_check_false(pool_release_el( pool, h ));
     test_check_true( 1 == pool_get_used( pool ) );
+    test_check_true( 1 == pool_el_refcount( pool, h ) );
 
     ff_el = 0;
     ff_count = 0;

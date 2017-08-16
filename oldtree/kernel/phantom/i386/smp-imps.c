@@ -759,6 +759,8 @@ imps_force(int ncpus)
 int
 imps_probe(void)
 {
+    int ret = 0;
+
     SHOW_FLOW0( 1, "Start secondary CPUs" );
     assert( 0 == hal_alloc_phys_pages_low( &bootaddr, 4 ) );
 
@@ -802,8 +804,6 @@ imps_probe(void)
         * 1024 > mem_lower) {
         ebda_addr = 0;
     }
-
-    int ret = 0;
 
     if (((ebda_addr && imps_scan(ebda_addr, 1024))
          || (!ebda_addr && imps_scan(mem_lower - 1024, 1024))

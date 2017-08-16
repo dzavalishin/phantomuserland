@@ -18,7 +18,8 @@ Class .ru.dz.phantom.system.class_loader
       void  : void
         = : void[]
           ident classes : void[]
-          new void[] : void[]
+          constructor() : void[]
+            new void[] : void[]
 
   Method void print( input: string ):
     void  : void
@@ -52,7 +53,7 @@ Class .ru.dz.phantom.system.class_loader
                       ident name : string
               void  : void
                 = : unknown
-                  [] : unknown
+                  [] : void
                     ident classes : void[]
                     ident index : int
                   ident name : string
@@ -63,8 +64,8 @@ Class .ru.dz.phantom.system.class_loader
                   ident index : int
                   int const "1" : int const
           void  : void
-            = : unknown
-              [] : unknown
+            = : void
+              [] : void
                 ident classes : void[]
                 ident index : int
               ident new_class : unknown
@@ -92,11 +93,11 @@ Class .ru.dz.phantom.system.class_loader
             if : unknown
               == : unknown
                 ident name : string
-                [] : unknown
+                [] : void
                   ident classes : void[]
                   ident i : int
               return : void
-                [] : unknown
+                [] : void
                   ident classes : void[]
                   + : int
                     ident i : int

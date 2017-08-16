@@ -81,7 +81,7 @@ static void rtl8139_softint(void* data);
 #define DEF_ROUTE_ROUTER        IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2)
 
 
-
+#if 1
 static int rtl8139_read( struct phantom_device *dev, void *buf, int len)
 {
     rtl8139 *nic = (rtl8139 *)dev->drv_private;
@@ -119,7 +119,7 @@ static int rtl8139_get_address( struct phantom_device *dev, void *buf, int len)
     return err;
 }
 
-
+#endif
 
 
 
@@ -237,7 +237,7 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
 
 
 
-
+#if 1
 
 int rtl8139_init(rtl8139 *rtl)
 {
@@ -463,6 +463,7 @@ err1:
 //err:
     return err;
 }
+#endif
 
 static void rtl8139_stop(rtl8139 *rtl)
 {

@@ -79,8 +79,19 @@ void			tenmicrosec(void);
 //
 struct tm *		current_time;
 
-// Called once a second to update per second ststistics
+// Called once a second to update per second statistics
 void stat_update_second_stats(void);
+
+// -----------------------------------------------------------------------
+// Polled timeouts for drivers, interrupts must be enabled
+
+typedef bigtime_t polled_timeout_t;
+
+// Set timeout length
+void set_polled_timeout( polled_timeout_t *timer, bigtime_t timeout_uSec );
+// Returns true if timeout time passed
+bool check_polled_timeout( polled_timeout_t *timer );
+
 
 #include <vm/internal_da.h>
 void phantom_wakeup_after_msec(int msec, struct data_area_4_thread *tc);

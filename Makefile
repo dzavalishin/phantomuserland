@@ -1,5 +1,6 @@
 include config.mk
-MAKEFLAGS += --no-print-directory
+MAKEFLAGS += --print-directory
+
 
 default::
 	@echo make all or make install
@@ -60,5 +61,5 @@ boot:: #all
 	cp oldtree/run/tftp/* $(HW_BOOT_DEST)
 
 test::
-	cd test
-	$(MAKE)
+	#cd test
+	$(MAKE) -C test
