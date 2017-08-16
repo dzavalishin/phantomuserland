@@ -1096,10 +1096,7 @@ extends GrammarHelper {
 		{
 			// for calling method by its name like obj.*("method")(arg1, arg2, ... ()
 			if (testAndEat( id_point )) {
-				boolean isCallingByName = false;
-				if(testAndEat(id_aster)) {
-					isCallingByName = true;
-				}
+				boolean isCallingByName = testAndEat(id_aster);
 				Node expression = parse_method_id();
 				MethodNode method;
 				if(isCallingByName) {
