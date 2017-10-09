@@ -21,7 +21,8 @@ Class .phantom.os
           void  : void
             = : .internal.world
               ident w : .internal.world
-              new .internal.world : .internal.world
+              constructor() : .internal.world
+                new .internal.world : .internal.world
           void  : void
             = : .internal.thread
               ident th : .internal.thread

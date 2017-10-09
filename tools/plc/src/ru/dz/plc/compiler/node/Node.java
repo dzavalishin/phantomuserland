@@ -291,15 +291,14 @@ abstract public class Node {
 
 	
 	// ---------------------------- C code generation ----------------------------
-	
+		
 	protected String cTempName; 
-	
-	
+
 	// Generate C code for nodes referenced from me and me too
 	// If overriden, override have to call generate_C_code for children
 	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException 
 	{
-		llvmTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
+		cTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
 		if( _l != null ) {
 			_l.generate_C_code(cgen, s);
 			//move_between_stacks(c, _l.is_on_int_stack());
@@ -313,9 +312,10 @@ abstract public class Node {
 		generateMy_C_Code(cgen);
 	}
 	
+
 	public String getCTempName() { return cTempName; }
 
-	
+
 	// Generate C code for me only - supposed to be overriden in children
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException
 

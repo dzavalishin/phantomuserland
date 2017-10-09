@@ -47,6 +47,7 @@ public class OpStaticMethodCallNode extends BiNode
 		return ordinal;
 	}
 
+
 	@Override
 	public boolean args_on_int_stack() {
 		return super.args_on_int_stack();
@@ -88,6 +89,7 @@ public class OpStaticMethodCallNode extends BiNode
 			c.emitSummonByName( callClass.getName() );
 		else
 			c.emitSummonByName(_l.getType().get_main_class_name()); // Default       
+
         	
         // TODO rewrite bytecode implementation to get class in bytecode if
         // null is passed as class

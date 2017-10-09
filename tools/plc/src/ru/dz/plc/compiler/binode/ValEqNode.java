@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.binode;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
@@ -12,10 +13,10 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  *
  */
-public class ValEqNode extends ValCmpNode {
+public class ValEqNode extends BiBistackNode {
 	public ValEqNode( Node l, Node r) {    
 		super(l,r);  
-		opName = "Eq";
+		//opName = "Eq";
 		}
 	
 	public String toString()  {    return "==";  }
@@ -49,4 +50,11 @@ public class ValEqNode extends ValCmpNode {
 			c.emit_o2i();
 		}
 	}
+	
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) 
+			throws PlcException {
+		generate_cmp_C_code(cgen, s, "Eq");
+	}
+
 }

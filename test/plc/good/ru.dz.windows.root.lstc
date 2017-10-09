@@ -1,4 +1,4 @@
-Class version 20160114032157242
+Class version 20170909064406557
 
 method init ordinal 16
 --
@@ -325,7 +325,6 @@ _label_1:	//  @106
   get i stk pos=0			//  @106
   ; Line 148			//  @111
   get i stk pos=3			//  @111
-  ; Line 148			//  @116
   ilt <				//  @116
   jz _label_2			//  @117
   ; Line 150			//  @122
@@ -375,7 +374,6 @@ _label_2:	//  @200
   get i stk pos=0			//  @200
   ; Line 163			//  @205
   get i stk pos=3			//  @205
-  ; Line 163			//  @210
   ige >=				//  @210
   jz _label_5			//  @211
   ; Line 165			//  @216

@@ -1,4 +1,4 @@
-Class version 20160114032155087
+Class version 20170909064146179
 
 method getTimeServer ordinal 16
 --
@@ -76,7 +76,6 @@ _label_1:	//  @118
   get i stk pos=1			//  @118
   ; Line 42			//  @123
   const 0				//  @123
-  ; Line 42			//  @128
   igt >				//  @128
   jz _label_2			//  @129
   ; Line 44			//  @134
@@ -114,7 +113,6 @@ _label_1:	//  @118
   get i stk pos=2			//  @193
   ; Line 51			//  @198
   const 0				//  @198
-  ; Line 51			//  @203
   ilt <				//  @203
   jz _label_3			//  @204
   ; Line 52			//  @209

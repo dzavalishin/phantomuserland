@@ -1,4 +1,4 @@
-Class version 20160114032154884
+Class version 20160114032155498
 
 method init ordinal 16
 --
@@ -19,10 +19,13 @@ _label_0:	//  @56
   summon class phantom.util.map	//  @65
   new				//  @87
   os dup				//  @88
-  save fld=0			//  @89
-  os drop				//  @91
-_label_1:	//  @92
-  ret				//  @92
+  call m=0 nparm=0		//  @89
+  os drop				//  @90
+  os dup				//  @91
+  save fld=0			//  @92
+  os drop				//  @94
+_label_1:	//  @95
+  ret				//  @95
 --
 method end
 

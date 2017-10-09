@@ -107,6 +107,7 @@ public class MethodTable implements IMethodTable
 		return checkPossibleConversions(signature);
 	}
 
+
 	/** get method by ordinal */
 	public Method get(int ordinal) {
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
@@ -173,7 +174,7 @@ public class MethodTable implements IMethodTable
 			return;
 
 		int ord;
-/* no! children/parents conflict!
+		/* no! children/parents conflict!
 		// Argless c'tor must have ordinal 0
 		if( m.isConstructor() && (m.getArgCount() == 0) )
 		{
@@ -184,7 +185,7 @@ public class MethodTable implements IMethodTable
 			m.setOrdinal(ord);
 			return;
 		}
-*/
+		 */
 		while( true )
 		{
 			ord = ordinals.getNext();
@@ -197,6 +198,7 @@ public class MethodTable implements IMethodTable
 		}
 
 	}
+
 
 	/* (non-Javadoc)
 	 * @see ru.dz.plc.compiler.IMethodTable#slots_needed()
@@ -247,7 +249,7 @@ public class MethodTable implements IMethodTable
 			s.set_method( m );
 
 			m.preprocess( s.get_class() );
-			
+
 			lst.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
 			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
 			c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
@@ -282,7 +284,6 @@ public class MethodTable implements IMethodTable
 			System.out.println("  Method "+m.toString()+":");
 		}
 	}
-
 
 
 }

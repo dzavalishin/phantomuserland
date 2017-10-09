@@ -17,7 +17,8 @@ Class .ru.dz.phantom.system.shell
       void  : void
         = : .internal.mutex
           ident mtx : .internal.mutex
-          new .internal.mutex : .internal.mutex
+          constructor() : .internal.mutex
+            new .internal.mutex : .internal.mutex
       void  : void
         . : void
           ident mtx : .internal.mutex
@@ -54,7 +55,8 @@ Class .ru.dz.phantom.system.shell
                                               void  : void
                                                 = : .internal.window
                                                   ident win : .internal.window
-                                                  new .internal.window : .internal.window
+                                                  constructor() : .internal.window
+                                                    new .internal.window : .internal.window
                                               void  : void
                                                 . : void
                                                   ident win : .internal.window
@@ -98,7 +100,8 @@ Class .ru.dz.phantom.system.shell
                               void  : void
                                 = : .internal.io.tty
                                   ident console : .internal.io.tty
-                                  new .internal.io.tty : .internal.io.tty
+                                  constructor() : .internal.io.tty
+                                    new .internal.io.tty : .internal.io.tty
                             void  : void
                               = : int
                                 ident incr : int
@@ -120,7 +123,8 @@ Class .ru.dz.phantom.system.shell
                       void  : void
                         = : .internal.connection
                           ident conn : .internal.connection
-                          new .internal.connection : .internal.connection
+                          constructor() : .internal.connection
+                            new .internal.connection : .internal.connection
                     void  : void
                       . : int
                         ident conn : .internal.connection
@@ -130,7 +134,8 @@ Class .ru.dz.phantom.system.shell
                   void  : void
                     = : .ru.dz.phantom.system.shell_callback
                       ident cb : .ru.dz.phantom.system.shell_callback
-                      new .ru.dz.phantom.system.shell_callback : .ru.dz.phantom.system.shell_callback
+                      constructor() : .ru.dz.phantom.system.shell_callback
+                        new .ru.dz.phantom.system.shell_callback : .ru.dz.phantom.system.shell_callback
                 void  : void
                   . : void
                     ident cb : .ru.dz.phantom.system.shell_callback
@@ -156,7 +161,8 @@ Class .ru.dz.phantom.system.shell
           void  : void
             = : .internal.connection
               ident stat_conn : .internal.connection
-              new .internal.connection : .internal.connection
+              constructor() : .internal.connection
+                new .internal.connection : .internal.connection
         void  : void
           . : int
             ident stat_conn : .internal.connection
