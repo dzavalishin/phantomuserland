@@ -34,5 +34,5 @@ public class NullNode extends Node {
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
 		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"GetNullConstant()");
 	}
-	
+
 }

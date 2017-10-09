@@ -21,7 +21,7 @@ public class MethodTable implements IMethodTable
 {
 	private Map<String, Method> table = new HashMap<String, Method>();
 	private Map<MethodSignature, Method> mstable = new HashMap<MethodSignature, Method>();
-	
+
 	protected ordinals_generator ordinals = new ordinals_generator();
 
 	//public MethodTable() { table = new HashMap<String, Method>(); }
@@ -53,8 +53,13 @@ public class MethodTable implements IMethodTable
 	{
 		if( !mine( m ) ) 
 			throw new PlcException("set_ordinal","not my Method");
+
 		if( ord != -1 && have_ord( ord ) ) 
 			throw new PlcException("set_ordinal","duplicate");
+
+		//if( m.isConstructor() && (m.getArgCount() == 0) && (ord != 0) )
+		//	throw new PlcException("set_ordinal","argless constructor must have ord 0");
+
 		m.setOrdinal( ord );
 	}
 
@@ -98,30 +103,42 @@ public class MethodTable implements IMethodTable
 	{ 
 		Method m =  mstable.get(signature);
 		if( m != null ) return m;
-		
+
 		return checkPossibleConversions(signature);
 	}
-	
+
+
+	/** get method by ordinal */
+	public Method get(int ordinal) {
+		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		{
+			Method m = i.next();
+			if( m.getOrdinal() == ordinal ) 
+				return m;
+		}
+		return null;
+	}
+
 
 	private Method checkPossibleConversions(MethodSignature signature) {
 		List<Method> all = getAllForName(signature.getName());
-		
+
 		for( Method m: all)
 		{
 			if( m.getSignature().canBeCalledFor(signature) )
 				return m;
 		}
-		
+
 		return null;
 	}
 
 	private List<Method> getAllForName(String name) {
 		LinkedList<Method> out = new LinkedList<Method>();
-		
+
 		for( Method m : mstable.values() )
 			if(m.getName().equals(name))
 				out.add(m);
-		
+
 		return out;
 	}
 
@@ -142,31 +159,52 @@ public class MethodTable implements IMethodTable
 	 * @see ru.dz.plc.compiler.IMethodTable#set_ordinals()
 	 */
 	@Override
-	public void set_ordinals()
+	public void set_ordinals() throws PlcException
 	{
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
-			if( m.getOrdinal() < 0 )
-			{
-				while( true )
-				{
-					int ord = ordinals.getNext();
-					if( !have_ord( ord ) )
-					{
-						m.setOrdinal(ord);
-						break;
-					}
-				}
-			}
+			setupMethodOrdinal(m);
 		}
 	}
+
+	private void setupMethodOrdinal(Method m) throws PlcException 
+	{
+		if( m.getOrdinal() >= 0 )
+			return;
+
+		int ord;
+		/* no! children/parents conflict!
+		// Argless c'tor must have ordinal 0
+		if( m.isConstructor() && (m.getArgCount() == 0) )
+		{
+			ord = 0;
+			if( have_ord( ord ) )
+				throw new PlcException("set_ordinals", "ordinal 0 is used" );
+
+			m.setOrdinal(ord);
+			return;
+		}
+		 */
+		while( true )
+		{
+			ord = ordinals.getNext();
+
+			if( !have_ord( ord ) )
+			{
+				m.setOrdinal(ord);
+				break;
+			}
+		}
+
+	}
+
 
 	/* (non-Javadoc)
 	 * @see ru.dz.plc.compiler.IMethodTable#slots_needed()
 	 */
 	@Override
-	public int slots_needed()
+	public int slots_needed() throws PlcException
 	{
 		set_ordinals();
 
@@ -210,6 +248,8 @@ public class MethodTable implements IMethodTable
 			Method m = i.next();
 			s.set_method( m );
 
+			m.preprocess( s.get_class() );
+
 			lst.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
 			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
 			c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
@@ -225,7 +265,7 @@ public class MethodTable implements IMethodTable
 
 			m.generateLlvmCode(s, llvmFile);
 			m.generateC_Code(s, c_File);
-			
+
 			s.set_method( null );
 			lst.write("--\nmethod end\n\n");
 			llvmFile.write("\n\n; end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
@@ -245,6 +285,6 @@ public class MethodTable implements IMethodTable
 		}
 	}
 
-	
+
 }
 

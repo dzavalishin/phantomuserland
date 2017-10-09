@@ -15,9 +15,13 @@ import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Title: Two children abstract base node.</p>
- * <p>Description: none.</p>
+ * 
+ * <p>Description: mostly used as a base for binary operations (math).</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -91,32 +95,43 @@ abstract public class BiNode extends Node {
 	@Override
 	public void generateLlvmCode(LlvmCodegen llc) throws PlcException {
 		llvmTempName = llc.getPhantomMethod().getLlvmTempName(this.getClass().getSimpleName());
-		
-	    if( _l != null ) { _l.generateLlvmCode(llc); }
-	    if( _r != null ) { _r.generateLlvmCode(llc); }
 
-	    log.fine("Node "+this+" codegen");
-	    
-	    if(context != null)			llc.emitComment("Line "+context.getLineNumber());
-	    generateMyLlvmCode(llc);
+		if( _l != null ) { _l.generateLlvmCode(llc); }
+		if( _r != null ) { _r.generateLlvmCode(llc); }
+
+		log.fine("Node "+this+" codegen");
+
+		if(context != null)			llc.emitComment("Line "+context.getLineNumber());
+		generateMyLlvmCode(llc);
 	}
 
 	@Override
 	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException {
 		cTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
-		
-	    if(context != null)			cgen.emitComment("Line "+context.getLineNumber());
 
-	    // Generate left child, then me, then right child
-	    // For example, l = const 5, r = read var, me = +
-	    // Result will be ((5) + (var))
-	    if( _l != null ) { _l.generate_C_code(cgen,s); }
-	    generateMy_C_Code(cgen);
-	    if( _r != null ) { _r.generate_C_code(cgen,s); }
+		if(context != null)			cgen.emitComment("Line "+context.getLineNumber());
 
-	    log.fine("Node "+this+" codegen");
-	    
+		// Generate left child, then me, then right child
+		// For example, l = const 5, r = read var, me = +
+		// Result will be ((5) + (var))
+		if( _l != null ) { _l.generate_C_code(cgen,s); }
+		generateMy_C_Code(cgen);
+		if( _r != null ) { _r.generate_C_code(cgen,s); }
+
+		log.fine("Node "+this+" codegen");
+
 	}
+
+	// Used by compare nodes
+	protected void generate_cmp_C_code(C_codegen cgen, CodeGeneratorState s, String opName) throws PlcException 
+	{
+		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"valueCmp_"+opName+"( " );
+		_l.generate_C_code(cgen, s);
+		cgen.put(" ) "); 
+		_r.generate_C_code(cgen, s);	
+		cgen.put(" ) "); 
+	}
+
 	
 }
 

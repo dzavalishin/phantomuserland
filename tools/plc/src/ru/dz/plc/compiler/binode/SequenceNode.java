@@ -33,8 +33,14 @@ public class SequenceNode extends BiNode {
     @Override
     public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException
     {
-    	if( _l != null ) _l.generate_C_code(cgen, s); cgen.putln(";// l"); // TODO Remove one?
-    	if( _r != null ) _r.generate_C_code(cgen, s); cgen.putln(";// r");
+    	if( _l != null ) {
+    		cgen.putln(";// l:"); // TODO Remove one?
+    		_l.generate_C_code(cgen, s);    		
+    	}
+    	if( _r != null ) {
+    		cgen.putln(";// r:");
+    		_r.generate_C_code(cgen, s); 
+    	}
     }
 
 	protected void print_children(PrintStream ps, int level, int start_level) throws PlcException 

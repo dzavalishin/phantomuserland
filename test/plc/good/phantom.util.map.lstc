@@ -1,4 +1,4 @@
-Class version 20160114032154418
+Class version 20170909063910129
 
 method init ordinal 16
 --
@@ -17,10 +17,13 @@ _label_0:	//  @53
   summon class internal.container.array	//  @63
   new				//  @64
   os dup				//  @65
-  save fld=0			//  @66
-  os drop				//  @68
-  ; Line 31			//  @69
-  ret				//  @69
+  call m=0 nparm=0		//  @66
+  os drop				//  @67
+  os dup				//  @68
+  save fld=0			//  @69
+  os drop				//  @71
+  ; Line 31			//  @72
+  ret				//  @72
 --
 method end
 
@@ -46,7 +49,6 @@ _label_1:	//  @66
   ; Line 56			//  @71
   load fld=1			//  @71
   o2i				//  @73
-  ; Line 56			//  @74
   ilt <				//  @74
   jz _label_2			//  @75
   ; Line 62			//  @80

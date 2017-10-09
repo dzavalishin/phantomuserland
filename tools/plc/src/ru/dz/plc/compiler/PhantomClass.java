@@ -139,6 +139,18 @@ public class PhantomClass {
 		return parent_class.findMethod(signature);
 	}
 
+	/** Get just out method, don't search up */
+	public Method getMethod(int ordinal) {
+		return mt.get(ordinal);
+	}
+
+	public Method getDefaultConstructor() 
+	{		
+		List<PhantomType> args = new LinkedList<PhantomType>(); // no args
+		MethodSignature signature = new MethodSignature("<init>", args);
+		return mt.get(signature);
+	}
+
 	
 	static boolean isSameArgs(Method m1, Method m2) {
 		Iterator<ArgDefinition> i1 = m1.getArgIterator();
@@ -380,7 +392,7 @@ public class PhantomClass {
 		return false;
 	}
 
-	public void set_ordinals() {
+	public void set_ordinals() throws PlcException {
 		mt.set_ordinals();		
 	}
 
@@ -388,7 +400,7 @@ public class PhantomClass {
 		return ft.slots_needed();
 	}
 
-	public int getMethodSlotsNeeded() {
+	public int getMethodSlotsNeeded() throws PlcException {
 		return mt.slots_needed();
 	}
 
@@ -428,6 +440,8 @@ public class PhantomClass {
 		SootMain.say("class "+this);		
 		mt.dump();
 	}
+
+
 
 
 
