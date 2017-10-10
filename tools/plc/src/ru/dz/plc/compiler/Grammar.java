@@ -6,7 +6,7 @@ import ru.dz.plc.compiler.binode.BoolAndNode;
 import ru.dz.plc.compiler.binode.BoolOrNode;
 import ru.dz.plc.compiler.binode.CallArgNode;
 import ru.dz.plc.compiler.binode.CatchNode;
-import ru.dz.plc.compiler.binode.ConstructNode;
+//import ru.dz.plc.compiler.binode.ConstructNode;
 import ru.dz.plc.compiler.binode.ForeachNode;
 import ru.dz.plc.compiler.binode.NewNode;
 import ru.dz.plc.compiler.binode.OpAndNode;
@@ -1210,16 +1210,16 @@ extends GrammarHelper {
 			type_expr = parseExpression(false);
 			expect(id_rparen);
 		}
-		else                             type = parseType();
+		else                             
+			type = parseType();
 
 		Node args = parse_call_args();
+		//ConstructNode cn = new ConstructNode( args ); 
 
-		//Node newNode = new NewNode(type,type_expr,args).setContext( l );
-		Node newNode = new NewNode(type,type_expr, null).setContext( l );
-		
-		ConstructNode cn = new ConstructNode( newNode, args ); 
-		
-		return cn;
+		Node newNode = new NewNode(type,type_expr,args).setContext( l );
+		//Node newNode = new NewNode(type,type_expr, cn).setContext( l );
+				
+		return newNode;
 	}
 
 	// --------------------------------------------------------------------------

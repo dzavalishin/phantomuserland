@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
+ * Virtual machine stacks implementation.
  *
  *
 **/
@@ -154,6 +153,25 @@ struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int
     return pvm_object_da(c,object_stack)->stack[displ];
 }
 
+// Return number of elements in stack
+int pvm_ostack_count( struct data_area_4_object_stack* rootda )
+{
+    struct data_area_4_object_stack* s = rootda->curr_da;
+    
+    int count = s->common.free_cell_ptr;
+
+    struct pvm_object c = s->common.curr;
+
+    while( 1 )
+    {
+        c = pvm_object_da(c,object_stack)->common.prev;
+        if( pvm_is_null(c) ) 
+        break;
+        count += s->common.__sSize;
+    }
+
+    return count;    
+}
 
 /**
  *

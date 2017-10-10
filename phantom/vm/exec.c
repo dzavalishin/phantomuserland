@@ -48,7 +48,7 @@ struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref,
 #define DEB_CALLRET 1
 #define DEB_DYNCALL 0
 
-int debug_print_instr = 0;
+int debug_print_instr = 1;
 
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
 #define LISTIA(fmt,a) do { if( debug_print_instr ) { lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } } while(0)
@@ -327,6 +327,9 @@ static void init_cfda(
     cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
 
+    printf("new_this @%p %s\n", new_this.data, pvm_is_null(new_this) ? "null" : "not null"); 
+    printf("class_ref @%p\n", class_ref.data); 
+
 #if 1
     // TODO warn? print call info?
     if( n_param > (1024*16) )
@@ -369,10 +372,14 @@ static void init_cfda(
         // Check that object we call method for is related to
         // method's class
 
+        printf("cmp class:\n");
         int related = pvm_object_class_is_or_child( new_this, class_ref );
         if( !related )
-            pvm_exec_panic( "static_invoke: non-related class is given" );
-
+            {
+                printf("new_this @%p: ", new_this.data); pvm_object_dump( new_this );
+                printf("class_ref @%p: ", class_ref.data); pvm_object_dump( class_ref );
+                pvm_exec_panic( "static_invoke: non-related class is given" );
+            }
         code = pvm_exec_find_static_method( class_ref, method_index );
     }
     else
@@ -1147,8 +1154,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 if( os_empty() ) printf(", ostack empty");
                 else
                 {
-                    printf(",\n\tostack top = {" );
-                    pvm_object_print( os_top() );
+                    printf(",\n\tostack depth %d top = {", pvm_ostack_count(da->_ostack) );
+                    // pvm_object_print( os_top() ); // calls tostring, fails
+                    pvm_object_dump( os_top() );
                     printf("}" );
                 }
                 printf(";\n\n");
@@ -1587,8 +1595,10 @@ static void do_pvm_exec(pvm_object_t current_thread)
             LISTI("new");
             {
                 pvm_object_t cl = os_pop();
-                os_push( pvm_create_object( cl ) );
-                //ref_dec_o( cl );  // object keep class ref
+                pvm_object_t no = pvm_create_object( cl );
+                os_push( no );
+                printf("\nop_new\nclass @%p\n", cl.data );
+                printf("new_this @%p %s\n", no.data, pvm_is_null(no) ? "null" : "not null"); 
             }
             break;
 
@@ -1819,6 +1829,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
                 pvm_object_t class_ref = os_pop();
                 pvm_object_t new_this = os_pop();
+
+                printf("\nstatic_invoke\nnew_this @%p %s\n", new_this.data, pvm_is_null(new_this) ? "null" : "not null"); 
+                printf("class_ref @%p\n", class_ref.data); 
 
                 // Now there are just parameters on object stack
                 pvm_exec_static_call(da,method_ordinal,n_param,class_ref,new_this);

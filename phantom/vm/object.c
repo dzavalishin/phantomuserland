@@ -343,8 +343,9 @@ int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tc
 
     if( pvm_is_null( tclass ) ) return 0;
 
-    while(1)
+    while( !pvm_is_null(oclass) )
     {
+        printf("oclass %p tclass %p\n", oclass.data, tclass.data );
         if( oclass.data == tclass.data )
             return 1;
 
@@ -489,7 +490,7 @@ void dumpo( addr_t addr )
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
     {
         struct data_area_4_class *da = (struct data_area_4_class *)&(o->da);
-        printf("Is class: '"); pvm_object_print( da->class_name ); printf("'\n");
+        printf("Is class: '"); pvm_object_print( da->class_name ); printf(" @%p'\n", o);
     }
     else
     {

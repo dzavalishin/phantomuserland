@@ -1,22 +1,18 @@
 package ru.dz.plc.compiler;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import com.sun.xml.internal.ws.policy.sourcemodel.PolicySourceModelContext;
-
-import ru.dz.phantom.code.*;
+import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.binode.OpStaticMethodCallNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.util.PlcException;
-import soot.baf.Inst;
-import sun.security.jca.GetInstance.Instance;
-
-import java.io.BufferedWriter;
-import java.io.IOException;
 
 /**
  * <p>Represents a method.</p>

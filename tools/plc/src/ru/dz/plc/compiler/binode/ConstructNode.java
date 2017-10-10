@@ -1,3 +1,4 @@
+
 package ru.dz.plc.compiler.binode;
 
 import java.io.IOException;
@@ -6,7 +7,6 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhantomClass;
-import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
@@ -21,11 +21,11 @@ import ru.dz.soot.SootMain;
  * @author dz
  */
 
+/*
+public class ConstructNode extends Node {
 
-public class ConstructNode extends BiNode {
-
-	public ConstructNode(Node newObject, Node args) {
-		super(newObject,args);		
+	public ConstructNode(Node args) {
+		super(args);		
 	}
 
 	@Override
@@ -60,14 +60,13 @@ public class ConstructNode extends BiNode {
 		}
 		
 		// new object
-		_l.generate_code(c, s);
-		move_between_stacks(c, _l.is_on_int_stack());		
-		
-		c.emitOsDup(); // dup new object ptr
+//		_l.generate_code(c, s);
+//		move_between_stacks(c, _l.is_on_int_stack());		
+//		c.emitOsDup(); // dup new object ptr
 
 		// args - TODO are we sure they're on obj stack?
-		if( _r != null ) {
-			_r.generate_code(c, s);
+		if( _l != null ) {
+			_l.generate_code(c, s);
 			//move_between_stacks(c, _l.is_on_int_stack());
 		}
 
@@ -76,7 +75,7 @@ public class ConstructNode extends BiNode {
 		int n_param = 0;
 
 		// bug - wrong count of args?
-		for( Node i = _r; i != null; i = ((BiNode)i).getRight() )      n_param++;
+		for( Node i = _l; i != null; i = ((BiNode)i).getRight() )      n_param++;
 
 		if( n_param > 0 )
 			throw new PlcException(context.get_context(), "can generate just argless c'tors, sorry" );
@@ -94,9 +93,12 @@ public class ConstructNode extends BiNode {
 			SootMain.warning("Can't call c'tor for "+_l.getType());
 		
 		
-		c.emitCall(method_ordinal,n_param);
+		//c.emitCall(method_ordinal,n_param);
+		c.emitStaticCall(method_ordinal, n_param);
+		
 		c.emitOsDrop(); // c'tor is void
 		
 	}	
 	
 }
+*/
