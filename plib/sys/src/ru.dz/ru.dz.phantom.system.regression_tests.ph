@@ -32,7 +32,8 @@ class regression_tests
     var boot_success : int;
     var i : int;
     var j : int;
-    var test_array : void [];
+    var int_array : int [];
+    var str_array : .internal.string [];
 
 
 
@@ -72,34 +73,36 @@ class regression_tests
     {
         print("Checking arrays... ");
 
-        test_array = new void[]();
+        //test_array = new void[]();
+        int_array = new int[]();
+        str_array = new .internal.string[]();
 
-        test_array[0] = "zero";
-        test_array[2] = "two";
-        test_array[1] = "one";
+        str_array[0] = "zero";
+        str_array[2] = "two";
+        str_array[1] = "one";
 
         print("Beeping: ");
         i = 3;
         while( i )
         {
             i = i - 1;
-            print("beep "); print(test_array[i]); print("! ");
+            print("beep "); print(str_array[i]); print("! ");
         }
         print("\n");
 
 
-        test_array[0] = 0;
-        test_array[2] = 2;
-        test_array[1] = 1;
+        int_array[0] = 0;
+        int_array[2] = 2;
+        int_array[1] = 1;
 
         i = 3;
         while( i )
         {
             i = i - 1;
-            if( test_array[i] != i )
+            if( int_array[i] != i )
             {
                 print("array error: array["); print(i);
-                print("] == "); print(test_array[i]);
+                print("] == "); print(int_array[i]);
                 throw "array error";
             }
         }

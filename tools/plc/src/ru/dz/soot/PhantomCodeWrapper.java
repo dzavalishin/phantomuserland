@@ -1,7 +1,6 @@
 package ru.dz.soot;
 
 import ru.dz.plc.compiler.Method;
-import ru.dz.plc.compiler.PhTypeInt;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
@@ -9,12 +8,9 @@ import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.OpDynamicMethodCallNode;
 import ru.dz.plc.compiler.binode.OpSubscriptNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
-import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
-import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
-import ru.dz.plc.compiler.trinode.OpMethodCallNode;
 import ru.dz.plc.util.PlcException;
 import soot.SootClass;
 import soot.SootMethod;

@@ -7,8 +7,8 @@ import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.dz.phantom.code.Codegen;
 import ru.dz.phantom.code.ConstantPoolFileInfo;
-import ru.dz.phantom.code.FieldFileInfo;
 import ru.dz.plc.util.PlcException;
 
 /**

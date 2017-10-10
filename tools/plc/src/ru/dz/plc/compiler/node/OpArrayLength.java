@@ -7,9 +7,7 @@ import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
-import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
-import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
 /**

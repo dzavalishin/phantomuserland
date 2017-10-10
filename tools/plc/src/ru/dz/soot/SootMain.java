@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 
 import ru.dz.plc.PlcMain;
 import ru.dz.plc.compiler.ClassMap;
-import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomType;

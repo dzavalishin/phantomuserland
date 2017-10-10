@@ -4,11 +4,8 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
-import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
-import ru.dz.plc.compiler.PhantomType;
-import ru.dz.plc.compiler.llvm.LlvmStringConstant;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;

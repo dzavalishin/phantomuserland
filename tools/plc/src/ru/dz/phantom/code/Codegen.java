@@ -761,7 +761,7 @@ public class Codegen extends opcode_ids {
 	}
 
 	public void emitStaticCall(int ordinal, int n_param) throws IOException {
-		list("static invoke");
+		list(String.format("static invoke ord=%d n_param=%d", ordinal, n_param));
 		put_byte(opcode_static_invoke);
 		put_int32(ordinal);
 		put_int32(n_param);

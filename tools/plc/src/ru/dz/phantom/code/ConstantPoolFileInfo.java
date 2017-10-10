@@ -3,8 +3,6 @@ package ru.dz.phantom.code;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import ru.dz.plc.compiler.CodeGeneratorState;
-import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 

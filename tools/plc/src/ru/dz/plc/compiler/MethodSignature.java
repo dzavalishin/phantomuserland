@@ -7,7 +7,6 @@ import java.util.List;
 import ru.dz.plc.compiler.binode.CallArgNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
-import ru.dz.soot.SootMain;
 
 /**
  * <p>Represents a signature of a method.</p>
