@@ -47,7 +47,7 @@ public class Method
 
 	public Method( String name, PhantomType type, boolean isConstructor )
 	{
-		this.name = name;
+		this.name = isConstructor ? "<init>" : name; // TODO make c'tor name constant
 		this.type = type;
 		this.ordinal = -1;
 		this.code = null;

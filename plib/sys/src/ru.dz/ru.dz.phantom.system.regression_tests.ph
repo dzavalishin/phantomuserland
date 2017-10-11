@@ -25,6 +25,7 @@ import .internal.directory;
 import .internal.double;
 import .internal.float;
 import .internal.long;
+import .phantom.util.map;
 
 class regression_tests
 {
@@ -34,7 +35,12 @@ class regression_tests
     var j : int;
     var int_array : int [];
     var str_array : .internal.string [];
+    var ctor_called : int;
 
+	void regression_tests()
+	{
+		ctor_called = 3456;
+	}
 
 
     void run (var _boot_object @const )
@@ -48,11 +54,22 @@ class regression_tests
         math_test();
         array_test();
         hashmap_directory_test();
+
+        print("ctor_called ="); print(ctor_called); print("\n");
+		if( ctor_called != 3456 )
+			throw "constructor failed";
+
 /*
         long_test();
         float_test();
         double_test();
 */
+
+	// test c'tor call
+
+		var map : .phantom.util.map;	
+		map = new .phantom.util.map();
+
     }
 
     // ---------------------------------------------------------------------

@@ -31,6 +31,11 @@ class map
         pairs = new void[]();
     }
 
+	void map()
+	{
+		// TODO remove init, use me
+	}
+
     // TODO! Synchronized!
     /** return 0 if already have this one */
     int put( var key : .internal.object, var value : .internal.object )

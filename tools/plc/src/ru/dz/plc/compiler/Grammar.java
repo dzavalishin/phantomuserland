@@ -451,12 +451,12 @@ extends GrammarHelper {
 	}
 	private boolean checkConstructorName(PhantomClass me, String mname) 
 	{
-		System.out.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
+		//System.out.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
 		
 		String[] words = me.getName().split("\\.");
 		String last = words[words.length-1];
 		
-		System.out.println(String.format("!!! is ctor? nmame=%s, me.last = %s", mname, last));
+		//System.out.println(String.format("!!! is ctor? nmame=%s, me.last = %s", mname, last));
 		
 		return mname.equals(last);
 	}

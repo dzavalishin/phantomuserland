@@ -39,7 +39,7 @@
     do {                      \
         if( page_is_empty() ) \
         {                     \
-            if( no_prev() ) pvm_exec_panic( "stack underflow" ); \
+            if( no_prev() ) pvm_exec_panic0( "stack underflow" ); \
             set_me( s->common.prev ); \
         }                             \
     } while(0);
@@ -108,7 +108,7 @@ void pvm_ostack_abs_set( struct data_area_4_object_stack* rootda, int abs_pos, s
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,object_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "o abs_set: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "o abs_set: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -126,7 +126,7 @@ struct pvm_object pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, i
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,object_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "o abs_get: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "o abs_get: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -135,7 +135,7 @@ struct pvm_object pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, i
 
 struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int depth )
 {
-    if( depth < 0 ) pvm_exec_panic( "stack pull: overflow" );
+    if( depth < 0 ) pvm_exec_panic0( "stack pull: overflow" );
 
     struct data_area_4_object_stack* s = rootda->curr_da;
     // steps up to needed slot from the bottom of the current page
@@ -146,7 +146,7 @@ struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int
     while( displ < 0 )
     {
         c = pvm_object_da(c,object_stack)->common.prev;
-        if( pvm_is_null(c) ) pvm_exec_panic( "stack pull: underflow" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "stack pull: underflow" );
         displ += s->common.__sSize;
     }
 
@@ -226,7 +226,7 @@ void pvm_istack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, 
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,integer_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "i abs_set: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "i abs_set: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -241,7 +241,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,integer_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "i abs_get: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "i abs_get: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -277,7 +277,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
     do {                      \
         if( lpage_is_empty() ) \
         {                     \
-            if( no_prev() ) pvm_exec_panic( "stack underflow" ); \
+            if( no_prev() ) pvm_exec_panic0( "stack underflow" ); \
             set_me( s->common.prev ); \
         }                             \
     } while(0);

@@ -427,7 +427,7 @@ struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_obj
     struct pvm_object * data_area = (struct pvm_object *)ret.data->da;
 
     if(pvm_is_null( parent_class ))
-        pvm_exec_panic( "create interface: parent is null" );
+        pvm_exec_panic0( "create interface: parent is null" );
 
     struct pvm_object_storage *base_i =  ((struct data_area_4_class*)parent_class.data->da)->object_default_interface.data;
 
@@ -470,7 +470,7 @@ void pvm_gc_iter_interface(gc_iterator_call_t func, struct pvm_object_storage * 
     (void)arg;
     // Empty
     // Must not be called - this is not really an internal object
-    panic("Interface GC iterator called");
+    pvm_exec_panic0("Interface GC iterator called");
 }
 
 

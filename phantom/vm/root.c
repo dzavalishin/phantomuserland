@@ -439,7 +439,7 @@ static void pvm_boot()
     if( pvm_load_class_from_module(boot_class, &user_boot_class))
     {
         printf("Unable to load boot class '%s'", boot_class );
-        pvm_exec_panic("Unable to load user boot class");
+        pvm_exec_panic0("Unable to load user boot class");
     }
 
     struct pvm_object user_boot = pvm_create_object( user_boot_class );
@@ -581,7 +581,7 @@ static void load_kernel_boot_env(void)
 static o_restart_func_t find_restart_f( struct pvm_object _class )
 {
     if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
-        pvm_exec_panic( "find_restart_f: not a class object" );
+        pvm_exec_panic0( "find_restart_f: not a class object" );
 
     struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
 

@@ -1198,7 +1198,7 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
     pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), me );
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), 1); // pass him real number of parameters
 
-    struct pvm_object_storage *code = pvm_exec_find_method( object, 8 );
+    struct pvm_object_storage *code = pvm_exec_find_method( object, 8, tc );
     pvm_exec_set_cs( cfda, code );
     cfda->this_object = object;
 
