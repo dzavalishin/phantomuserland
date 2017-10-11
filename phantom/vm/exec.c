@@ -339,6 +339,7 @@ static void init_cfda(
     }
 #endif
     // allocate places on stack
+#if 0
     {
         unsigned int i;
         for( i = n_param; i; i-- )
@@ -346,7 +347,10 @@ static void init_cfda(
             pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), pvm_get_null_object() );
         }
     }
-
+#else
+    // push nulls to reserve stack space
+    pvm_ostack_reserve( pvm_object_da(cfda->ostack, object_stack), n_param );
+#endif
     // fill 'em in correct order
     {
         unsigned int i;

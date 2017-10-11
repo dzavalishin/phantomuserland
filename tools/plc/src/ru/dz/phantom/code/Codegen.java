@@ -470,13 +470,15 @@ public class Codegen extends opcode_ids {
 	 * @param method_index Ordinal (VMT offset) of method to call.
 	 * @param n_param Number of parameters.
 	 * @throws IOException
+	 * @throws PlcException parameters
 	 */
-	public void emitCall(int method_index, int n_param ) throws IOException {
+	public void emitCall(int method_index, int n_param ) throws IOException, PlcException {
 
 		if( method_index < 0 )
 		{
 			//SootMain.say("negative method index");
-			throw new IOException("negative method index"); // TODO not IO exc?
+			//throw new IOException("negative method index");
+			throw new PlcException("emitCall", "negative method index");
 		}
 		
 		list("call m="+method_index+" nparm="+n_param);

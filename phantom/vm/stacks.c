@@ -77,6 +77,22 @@ void pvm_ostack_push( struct data_area_4_object_stack* rootda, struct pvm_object
     page_push(o);
 }
 
+// push nulls to reserve stack space
+void pvm_ostack_reserve( struct data_area_4_object_stack* rootda, int n_slots ) 
+{
+    struct data_area_4_object_stack* s = rootda->curr_da;
+
+    pvm_object_t zero = {0,0};
+
+    while( n_slots-- > 0 )
+    {
+        check_overflow();
+        if( page_is_full() ) panic("opush page full after mkpage");
+
+        s->stack[s->common.free_cell_ptr++] = zero;
+    }
+}
+
 struct pvm_object pvm_ostack_pop( struct data_area_4_object_stack* rootda )
 {
     struct data_area_4_object_stack* s = rootda->curr_da;

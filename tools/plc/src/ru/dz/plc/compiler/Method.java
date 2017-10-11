@@ -122,6 +122,9 @@ public class Method
 		for( int i = n_int_auto_vars; i > 0; i-- )
 			c.emitIConst_0();
 
+		// TODO we can provide const pool binary blob with init data and load it with one 
+		// big instruction
+		
 		// ------------------------------------------
 
 
@@ -463,7 +466,7 @@ public class Method
 
 	private void preprocessParentConstructor(PhantomClass myClass) throws PlcException 
 	{
-		// don't call constructor for all classes parent
+		// don't call constructor for parent of all classes
 		if( myClass.getParent().equals(".internal.object") )
 			return;
 
@@ -495,7 +498,8 @@ public class Method
 				new ThisNode(myClass),
 				defCtor.getOrdinal(),
 				null, // no args
-				myClass
+				// myClass // No!!
+				parentClass
 				);
 		
 		Node newRoot = new SequenceNode(ctorCall, code);

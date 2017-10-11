@@ -188,7 +188,7 @@ public class C_codegen {
 		// ------------------------------------------------------------------------
 
 		public void recordLineNumberToIPMapping(int lineNumber) {
-			// TODO Auto-generated method stub			
+			// Not needed?			
 		}
 
 

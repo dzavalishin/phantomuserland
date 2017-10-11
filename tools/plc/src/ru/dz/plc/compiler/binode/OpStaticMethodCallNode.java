@@ -27,6 +27,13 @@ public class OpStaticMethodCallNode extends BiNode
 	private int ordinal;
 	private PhantomClass callClass;
 
+	/**
+	 * 
+	 * @param object object to be this in called method
+	 * @param ordinal method ordinal
+	 * @param args call args
+	 * @param callClass class to call method statically from
+	 */
     public OpStaticMethodCallNode(Node object, int ordinal, Node args, PhantomClass callClass ) 
     { 
         super(object, args);
@@ -74,7 +81,7 @@ public class OpStaticMethodCallNode extends BiNode
 			n_param++;
 
 		if(n_param > 1024)
-			SootMain.warning("too many params in static call: "+n_param);
+			print_warning("too many params in static call: "+n_param);
 		
 		if( _r != null ) _r.generate_code(c,s); // calc args
 		//c.emitIConst_32bit(n_param); // n args

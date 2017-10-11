@@ -8,6 +8,7 @@ import java.io.RandomAccessFile;
 import java.util.*;
 
 import ru.dz.phantom.code.FieldFileInfo;
+import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.compiler.node.StatementsNode;
@@ -129,15 +130,21 @@ public class FieldTable {
 		getNodes.addNode(new ReturnNode(new IdentNode(f.getName())));
 		
 		
-		// TODO write setter!
-		/*
-		Method set = new Method(makeSetterName(f.getName()), f.getType());
+		// TODO test setter!
+		
+		Method set = new Method(makeSetterName(f.getName()), f.getType(), false);
 		pc.addMethod(set);
+		
+		set.addArg("value", f.getType() );
 		
 		StatementsNode setNodes = new StatementsNode();
 		set.code = setNodes;			
-		setNodes.addNode(new ReturnNode(new IdentNode(f.getName()))); 
-		*/
+		//setNodes.addNode(new ReturnNode(new IdentNode(f.getName())));
+		setNodes.addNode(new OpAssignNode(
+				new IdentNode(f.getName()), // assign to
+				new IdentNode("value") // arg name, see above
+				));
+		
 		
 	}
 	

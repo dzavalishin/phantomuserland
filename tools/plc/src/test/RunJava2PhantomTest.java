@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ru.dz.plc.util.PlcException;
-
+/*
 
 public class RunJava2PhantomTest {
 
@@ -73,3 +73,4 @@ public class RunJava2PhantomTest {
 	}
 	
 }
+*/
