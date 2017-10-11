@@ -148,7 +148,9 @@ public class MethodTable implements IMethodTable
 		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
-			ps.println("  Method "+m.toString()+":");
+			ps.println(
+					(m.isConstructor() ? "  C'tor  " : "  Method ")
+							+m.toString()+":");
 			if( m.code != null )      m.code.print(ps,2,2);
 			else ps.println("  -- No code!");
 			ps.println("");

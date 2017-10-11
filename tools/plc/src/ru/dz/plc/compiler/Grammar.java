@@ -404,7 +404,8 @@ extends GrammarHelper {
 					continue;
 				}
 
-				boolean constructor = mname.equals(me.getName());
+				//System.out.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
+				boolean constructor = checkConstructorName(me, mname);
 				
 				if( constructor && !type.is_void())
 					syntax_error("Non-void constructor");
@@ -447,6 +448,17 @@ extends GrammarHelper {
 			// nothing good?
 			syntax_error("Bad class element definition: "+tt.toString());
 		}
+	}
+	private boolean checkConstructorName(PhantomClass me, String mname) 
+	{
+		System.out.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
+		
+		String[] words = me.getName().split("\\.");
+		String last = words[words.length-1];
+		
+		System.out.println(String.format("!!! is ctor? nmame=%s, me.last = %s", mname, last));
+		
+		return mname.equals(last);
 	}
 
 	private Node parseDefinitionArglist(Method m) throws PlcException, IOException {

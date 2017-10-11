@@ -67,7 +67,7 @@ public class NewNode extends Node
 		if( static_type == null && _l == null)
 			throw new PlcException( "new Node", "no type known" );
 
-		c.emitDebug((byte)0, "before new");
+		//c.emitDebug((byte)0, "before new");
 		
 		boolean dynamicClass = _l != null;
 
@@ -90,7 +90,7 @@ public class NewNode extends Node
 		if( !dynamicClass ) // no c'tor call for dyn class - TODO FIXME
 			c.emitOsDup(); // copy of pointer to class - MUST POP BELOW, pull copies me, not moves
 */		
-		c.emitDebug((byte)0, "class for new");
+		//c.emitDebug((byte)0, "class for new");
 
 		c.emitNew();
 
@@ -98,7 +98,7 @@ public class NewNode extends Node
 
 		// prepare to call constructor
 
-		c.emitDebug((byte)0, "new_this");
+		//c.emitDebug((byte)0, "new_this");
 
 
 
@@ -142,7 +142,7 @@ public class NewNode extends Node
 			//c.emitOsDrop(); // Dupped class ref
 		}
 
-		c.emitDebug((byte)0, "after new");
+		//c.emitDebug((byte)0, "after new");
 
 	}
 
