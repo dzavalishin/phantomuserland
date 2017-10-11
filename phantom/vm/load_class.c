@@ -181,10 +181,10 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
         {
         case 'C': // class
             {
-                if(1||debug_print) printf("Class is: " );
+                if(0||debug_print) printf("Class is: " );
 
                 class_name = pvm_code_get_string(&h);//.get_string();
-                if(1||debug_print) pvm_object_print( class_name );
+                if(0||debug_print) pvm_object_print( class_name );
 
                 n_object_slots = pvm_code_get_int32(&h); //.get_int32();
                 if(debug_print) printf(", %d fields", n_object_slots );
@@ -192,7 +192,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 n_method_slots = pvm_code_get_int32(&h);
                 if(debug_print) printf(", %d methods", n_method_slots );
 
-                if(1||debug_print) printf("\n");	// terminate string
+                if(0||debug_print) printf("\n");	// terminate string
 
                 struct pvm_object base_name = pvm_code_get_string(&h);
                 if(debug_print)

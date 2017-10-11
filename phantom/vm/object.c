@@ -345,7 +345,7 @@ int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tc
 
     while( !pvm_is_null(oclass) )
     {
-        printf("oclass %p tclass %p\n", oclass.data, tclass.data );
+        //printf("oclass %p tclass %p\n", oclass.data, tclass.data );
         if( oclass.data == tclass.data )
             return 1;
 
