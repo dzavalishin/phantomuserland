@@ -1887,6 +1887,17 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_is_get32:        pvm_exec_iget(da, pvm_code_get_int32(&(da->code)));	break;
         case opcode_is_set32:        pvm_exec_iset(da, pvm_code_get_int32(&(da->code)));	break;
 
+        case opcode_stack_reserve:
+        {
+            int o_reserve = pvm_code_get_byte(&(da->code));
+            int i_reserve = pvm_code_get_byte(&(da->code));
+
+            //pvm_ostack_reserve( pvm_object_da(da->_ostack, object_stack), o_reserve );
+            //pvm_istack_reserve( pvm_object_da(da->_istack, integer_stack), i_reserve );
+            pvm_ostack_reserve( da->_ostack, o_reserve );
+            pvm_istack_reserve( da->_istack, i_reserve );
+        }
+
         default:
             if( (instruction & 0xF0 ) == opcode_sys_0 )
             {

@@ -23,10 +23,10 @@
 #define opcode_os_load32   0x16 
 #define opcode_os_save32   0x17 
 #define opcode_new   0x18  // create new object, class must be on stack
-#define opcode_copy   0x19  // create new object, copy of stack top (just copy of data area as is)
+#define opcode_copy   0x19  // create new object, copy of stack top (just copy of data area as is) TODO do we need it?
 #define opcode_os_compose32   0x1A  // n objects from ostack combine into the object. topmost is a class
 #define opcode_os_decompose   0x1B  // decompose topmost object on stack
-// deprecated?
+// deprecated? no, we use it
 #define opcode_os_pull32   0x1C  // copy opbject n steps down the ostack on top. pull 0 is dup;
 // deprecated and was not implemented
 //id(opcode_os_assign32,0x1D) // copy stack top opbject n steps down the ostack. pull 0 is nop 
@@ -43,6 +43,9 @@
 #define opcode_is_get32   0x26  // get value from stack absolute-addressed slot, push on top
 #define opcode_is_set32   0x27  // pop stack top, set value in stack absolute-addressed slot
 #define opcode_const_pool   0x28  // int32 follows - get constant with corresponding index from object constant pool of this class
+#define opcode_stack_reserve   0x29  // int8 object stack size to reserve (push zeroes), int8 integer stack size to reserve
+// ? unclear how to init objects
+//id(opcode_stack_init,0x2A)  // int32 const pool id, int8 object stack size to init (push data from const pool??), int8 integer stack size to init (rest of constant data)
 #define opcode_cast   0x2B  // pop class, pop object, cast, push object
 #define opcode_push_catcher   0x2D  // jump address folows, top of o stack - class of objects to catch
 #define opcode_pop_catcher   0x2E 
@@ -98,7 +101,7 @@
 #define opcode_general_lock   0x62  // mutex is locked on stack top. 
 #define opcode_general_unlock   0x63  // mutex is unlocked on stack top. 
 // 64-6e
-#define opcode_static_invoke   0x6E  // arg int32 method ordinal. stack (from top): class ptr, this, n_args, args
+#define opcode_static_invoke   0x6E  // arg int32 method ordinal, int32 n_args. stack (from top): class ptr, this, args
 #define opcode_dynamic_invoke   0x6F  // no args. stack (from top): string method name, this (or null for static), n_args, args
 #define opcode_ishl   0x70  // shift left
 #define opcode_ishr   0x71  // shift right signed

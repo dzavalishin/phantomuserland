@@ -400,6 +400,7 @@ int main(int argc, char* argv[])
     }
     bulk_read_pos = bulk_code;
 
+//pvm_json_test();exit(33);
 
     pvm_root_init();
 

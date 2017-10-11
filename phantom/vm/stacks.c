@@ -230,6 +230,19 @@ int pvm_istack_empty( struct data_area_4_integer_stack* rootda )
 }
 
 
+// push 0 to reserve stack space
+void pvm_istack_reserve( struct data_area_4_integer_stack* rootda, int n_slots ) 
+{
+    struct data_area_4_integer_stack* s = rootda->curr_da;
+
+    while( n_slots-- > 0 )
+    {
+        check_overflow();
+        if( page_is_full() ) panic("ipush page full after mkpage");
+
+        s->stack[s->common.free_cell_ptr++] = 0;
+    }
+}
 
 
 

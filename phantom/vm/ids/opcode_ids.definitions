@@ -27,11 +27,11 @@ id(opcode_os_save8,0x15)	// save (pop) stack top to this object's field
 id(opcode_os_load32,0x16)
 id(opcode_os_save32,0x17)
 id(opcode_new,0x18) // create new object, class must be on stack
-id(opcode_copy,0x19) // create new object, copy of stack top (just copy of data area as is)
+id(opcode_copy,0x19) // create new object, copy of stack top (just copy of data area as is) TODO do we need it?
 id(opcode_os_compose32,0x1A) // n objects from ostack combine into the object. topmost is a class
 id(opcode_os_decompose,0x1B) // decompose topmost object on stack
 
-// deprecated?
+// deprecated? no, we use it
 id(opcode_os_pull32,0x1C) // copy opbject n steps down the ostack on top. pull 0 is dup;
 
 // deprecated and was not implemented
@@ -57,6 +57,10 @@ id(opcode_is_get32,0x26)	// get value from stack absolute-addressed slot, push o
 id(opcode_is_set32,0x27)	// pop stack top, set value in stack absolute-addressed slot
 
 id(opcode_const_pool,0x28)  // int32 follows - get constant with corresponding index from object constant pool of this class
+
+id(opcode_stack_reserve,0x29)  // int8 object stack size to reserve (push zeroes), int8 integer stack size to reserve
+// ? unclear how to init objects
+//id(opcode_stack_init,0x2A)  // int32 const pool id, int8 object stack size to init (push data from const pool??), int8 integer stack size to init (rest of constant data)
 
 
 id(opcode_cast,0x2B) // pop class, pop object, cast, push object

@@ -44,6 +44,8 @@ int 				pvm_istack_pop( struct data_area_4_integer_stack* stack );
 int 				pvm_istack_top( struct data_area_4_integer_stack* stack );
 int 				pvm_istack_empty( struct data_area_4_integer_stack* stack );
 
+// push 0 to reserve stack space
+void pvm_istack_reserve( struct data_area_4_integer_stack* rootda, int n_slots );
 
 void 				pvm_lstack_push( struct data_area_4_integer_stack* rootda, int64_t o );
 int64_t				pvm_lstack_pop( struct data_area_4_integer_stack* rootda );

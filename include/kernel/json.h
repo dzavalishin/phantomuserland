@@ -95,8 +95,7 @@ void json_dump_threads( json_output *jo );
 
 
 //! tokens allocated, must be freed by caller
-errno_t json_parse(const char *js, jsmntok_t **tokens );
-
+errno_t json_parse(const char *js, jsmntok_t **tokens, size_t *o_count );
 
 
 
