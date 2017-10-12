@@ -132,6 +132,7 @@ public class ClassTable {
 				of.close();
 				lst.close();
 				llvmFile.close();
+				c_File.close();
 			}
 
 			{

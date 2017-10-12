@@ -59,8 +59,8 @@ class regression_tests
 		if( ctor_called != 3456 )
 			throw "constructor failed";
 
+/*        long_test();
 /*
-        long_test();
         float_test();
         double_test();
 */
@@ -135,6 +135,16 @@ class regression_tests
     void math_test()
     {
         print("Checking int math... ");
+
+        if( 
+	(
+		12
+		/
+		2
+	) 
+		!= 
+	6 
+	) 	throw "int error";
 
         if( 2+2 != 4 ) throw "int + math error";
         if( 2-2 != 0 ) throw "int - math error";
@@ -262,29 +272,38 @@ class regression_tests
         print("passed\n");
     }
 
-/*
+
     void long_test()
     {
         var a : .internal.long;
         var b : .internal.long;
         var c : .internal.long;
 
+        print("start long tests\n");
+/*
+        a = (long)12;
+        b = (long)2;
+        c = (long)0-3;
+*/
         a = 12;
         b = 2;
-        c = -3;
+        c = 0-3;
+        print("long tests 1\n");
 
         if( (a/b) != 6 ) 	throw "long error 1";
-        if( (b-c) != -1 ) 	throw "long error 2";
-        if( (b*c) != -6 ) 	throw "long error 3";
+        if( (b-c) != 0-1 ) 	throw "long error 2";
+        if( (b*c) != 0-6 ) 	throw "long error 3";
         if( (a+c) != 9 ) 	throw "long error 4";
+        print("long tests 2\n");
 
         if( b<c ) 		throw "long error 5";
         if( b>a ) 		throw "long error 6";
         if( b<=c ) 		throw "long error 7";
         if( b>=a ) 		throw "long error 8";
+        print("long tests passed\n");
     }
 
-
+/*
     void float_test()
     {
         var a : .internal.float;
@@ -304,6 +323,7 @@ class regression_tests
         if( b>a ) 		throw "float error 6";
         if( b<=c ) 		throw "float error 7";
         if( b>=a ) 		throw "float error 8";
+        print("float tests passed\n");
     }
 
 
@@ -326,6 +346,7 @@ class regression_tests
         if( b>a ) 		throw "double error 6";
         if( b<=c ) 		throw "double error 7";
         if( b>=a ) 		throw "double error 8";
+        print("double tests passed\n");
     }
 */
 

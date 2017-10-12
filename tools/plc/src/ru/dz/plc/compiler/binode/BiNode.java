@@ -10,6 +10,7 @@ import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.node.CastNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -132,7 +133,7 @@ abstract public class BiNode extends Node {
 		cgen.put(" ) "); 
 	}
 
-	
+
 }
 
 
@@ -173,6 +174,30 @@ abstract class BiBistackNode extends BiNode {
 		generate_my_code(c,s);
 	}
 
+
+	protected PhantomType common_type;
+	
+	@Override
+	public void preprocess_me(ParseState s) throws PlcException {
+		super.preprocess_me(s);
+
+		common_type = PhantomType.findCompatibleType(_l.getType(),_r.getType());
+		if( common_type == null )
+		{
+			print_error(String.format("types %s and %s are incompatible", 
+					_l.getType().toString(),
+					_r.getType().toString()
+					));
+			throw new PlcException("bibistack find type "+context.get_position(),"types are not compatible");
+		}
+		
+		if( !_l.getType().equals(common_type) ) 
+			_l = new CastNode(_l, common_type);
+
+		if( !_r.getType().equals(common_type) ) 
+			_r = new CastNode(_r, common_type);
+		
+	}
 }
 
 

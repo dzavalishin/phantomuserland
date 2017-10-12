@@ -13,6 +13,7 @@ import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.parser.ILex;
 import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.PlcException;
 
@@ -42,8 +43,10 @@ abstract public class Node {
 	/** Remember where this node was parsed in source file to be able to print error/warning later. */
 	public Node setContext( ParserContext context ) { this.context = context; return this; }
 	
-	/** Remember where this node was parsed in source file to be able to print error/warning later. */
-	public Node setContext( ru.dz.plc.parser.Lex l ) { this.context = new ParserContext(l); return this; }
+	/** Remember where this node was parsed in source file to be able to print error/warning later. 
+	 * @throws PlcException */
+	public Node setContext( ILex l ) throws PlcException 
+		{ this.context = new ParserContext(l); return this; }
 
 	// -------------------------------- getters -------------------------------
 
@@ -195,9 +198,19 @@ abstract public class Node {
 	public boolean is_on_int_stack() { return false; }
 	public boolean args_on_int_stack() { return is_on_int_stack(); }
 
-	protected void move_between_stacks(Codegen c, boolean fromint ) throws IOException {
-		if( args_on_int_stack() && (!fromint) ) c.emit_o2i();
-		if( (!args_on_int_stack()) && fromint ) c.emit_i2o();
+	protected void move_between_stacks(Codegen c, boolean fromint ) throws IOException, PlcException {
+		PhantomType intType = PhantomType.getInt(); // TODO XXX parameter?
+		if( args_on_int_stack() && (!fromint) )
+		{
+			c.emitNumericPrefix(intType);
+			c.emit_o2i();
+		}
+		
+		if( (!args_on_int_stack()) && fromint ) 
+		{
+			c.emitNumericPrefix(intType);
+			c.emit_i2o();
+		}
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException

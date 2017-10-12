@@ -31,6 +31,7 @@ import ru.dz.plc.compiler.binode.ValNeqNode;
 import ru.dz.plc.compiler.node.BinaryConstNode;
 import ru.dz.plc.compiler.node.BoolNotNode;
 import ru.dz.plc.compiler.node.BreakNode;
+import ru.dz.plc.compiler.node.CastNode;
 import ru.dz.plc.compiler.node.ClassDefinitionNode;
 import ru.dz.plc.compiler.node.ContinueNode;
 import ru.dz.plc.compiler.node.EmptyNode;
@@ -41,6 +42,7 @@ import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.OpNotNode;
 import ru.dz.plc.compiler.node.ReturnNode;
+import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.compiler.node.SwitchCaseNode;
 import ru.dz.plc.compiler.node.SwitchDefaultNode;
@@ -80,6 +82,7 @@ extends GrammarHelper {
 	private final boolean    		parser_debug = false;
 	//private final boolean    parser_debug = true;
 
+	private final boolean    		debug = false;
 
 
 	private final int id_ident, id_string_const, id_int_const, id_this, id_null;
@@ -110,14 +113,14 @@ extends GrammarHelper {
 	protected String getString() throws PlcException { return super.getString(id_string_const); }
 	protected String getIdent() throws PlcException { return super.getIdent(id_ident); }
 
-	Node sequence( Node list, Node leaf )
+	Node sequence( Node list, Node leaf ) throws PlcException
 	{
 		if( list == null ) return leaf;
 		if( leaf == null ) return list;
 		return new SequenceNode( list, leaf ).setContext( l );
 	}
 
-	public Grammar(Lex l, String filename) throws PlcException {
+	public Grammar(ILex l, String filename) throws PlcException {
 		super(l,filename);
 
 		// It is a default base class so we need it in any case.
@@ -223,6 +226,7 @@ extends GrammarHelper {
 
 
 	public Node parse() throws PlcException, IOException {
+		/*
 		Node out = null;
 		while (true) {
 
@@ -232,6 +236,20 @@ extends GrammarHelper {
 			Node top = parseTop(t);
 			if( top != null ) out = sequence( out, top );
 			expect( id_semicolon, "semicolon after top level definition expected");
+		}
+		 */
+
+		StatementsNode out = new StatementsNode();
+
+		while (true) {
+
+			Token t = l.get();
+			if (t.is_eof())         break; // eof
+
+			Node top = parseTop(t);
+			if( top != null ) out.addNode(top);
+			expect( id_semicolon, "semicolon after top level definition expected");
+			l.commit(); // no unget after this point
 		}
 
 		out.preprocess(ps);
@@ -244,7 +262,7 @@ extends GrammarHelper {
 	// --------------------------------------------------------------------------
 
 	Node parseTop(Token t) throws IOException, PlcException {
-		if(parser_debug) System.out.println("Top level Token: " + t.toString());
+		if(parser_debug) System.err.println("Top level Token: " + t.toString());
 
 		Node out = null;
 		if (t.get_id() == id_class)                out = parseClass(false);
@@ -289,12 +307,12 @@ extends GrammarHelper {
 				sb.append(getString());
 			else
 				sb.append(getIdent());
-			
+
 			if( !testAndEat( id_point ) )
 				break;
 		}
 
-		if (parser_debug) System.out.println("import: " + sb.toString());
+		if (parser_debug) System.err.println("import: " + sb.toString());
 
 		if( !classes.do_import(sb.toString()) )
 			syntax_error("Can't import " + sb.toString());
@@ -338,6 +356,7 @@ extends GrammarHelper {
 			}
 			else
 				break;
+			l.commit(); // no unget after this point
 		}
 
 		expect(id_block_open);
@@ -345,20 +364,23 @@ extends GrammarHelper {
 		expect(id_block_close);
 
 		me.setReferencedClasses(ps.getReferencedClasses());
-		
+
 		ps.set_class(null); // came out of class
 
 		return out;
 	}
 
 
-	private Node parseClassBody(PhantomClass me, boolean interface_mode) throws PlcException, IOException {
+	private Node parseClassBody(PhantomClass me, boolean interface_mode) throws PlcException, IOException 
+	{
 		Node out = null;
 
 		while(true)
 		{
+			l.commit(); // no long unget after this point
+
 			Token t = l.get();
-			//if (parser_debug) System.out.println("class body Token: " + t.toString());
+			//if (parser_debug) System.err.println("class body Token: " + t.toString());
 
 			if( t.get_id() == id_block_close )
 			{
@@ -389,75 +411,201 @@ extends GrammarHelper {
 			}
 			l.unget();
 
+			// PhantomType type = parseTypeSpeculative(true); // can be used only for existing types
+
 			// Method or field
 			if (possibleType()) {
 				//int required_method_index = -1;
 				PhantomType type = parseType();
-				parse_attributes( false );
-				String mname = getIdent();
 
-				// if not '(' - define a variable.
-				if( !peek(id_lparen) )
-				{
-					me.addField(mname, type);
-					expect( id_semicolon );
+				if( type != null ) {
+					parse_attributes( false );
+					String mname = getIdent();
+
+					// if not '(' - define a variable.
+					if( !peek(id_lparen) )
+					{
+						me.addField(mname, type);
+						expect( id_semicolon );
+						continue;
+					}
+
+					//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
+					boolean constructor = checkConstructorName(me, mname);
+
+					if( constructor && !type.is_void())
+						syntax_error("Non-void constructor");
+
+					//Method m = me.addMethod( mname, type );
+					Method m = new Method( mname, type, constructor );
+					int required_method_index = -1;
+
+					//Node args = 
+					parseDefinitionArglist(m);
+					if( testAndEat(id_lbracket) )
+					{
+						required_method_index = getInt();					
+						//me.setMethodOrdinal(m,required_method_index);
+						expect(id_rbracket);
+					}
+					parse_attributes( false );
+					//Node code =
+					if(interface_mode)
+					{
+						expect(id_semicolon);
+					}
+					else
+					{
+						ps.set_method(m);
+						m.code = parseBlock();
+						ps.set_method(null);
+						//out = sequence( out, code ); // temp!
+						//me.add_method( mname, type, args, code, required_method_index );
+					}
+
+					me.addMethod( m );
+					if( required_method_index >= 0 )					
+						me.setMethodOrdinal(m,required_method_index);
 					continue;
 				}
 
-				//System.out.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
-				boolean constructor = checkConstructorName(me, mname);
-				
-				if( constructor && !type.is_void())
-					syntax_error("Non-void constructor");
-				
-				//Method m = me.addMethod( mname, type );
-				Method m = new Method( mname, type, constructor );
-				int required_method_index = -1;
-
-				//Node args = 
-				parseDefinitionArglist(m);
-				if( testAndEat(id_lbracket) )
-				{
-					required_method_index = getInt();					
-					//me.setMethodOrdinal(m,required_method_index);
-					expect(id_rbracket);
-				}
-				parse_attributes( false );
-				//Node code =
-				if(interface_mode)
-				{
-					expect(id_semicolon);
-				}
-				else
-				{
-					ps.set_method(m);
-					m.code = parseBlock();
-					ps.set_method(null);
-					//out = sequence( out, code ); // temp!
-					//me.add_method( mname, type, args, code, required_method_index );
-				}
-				
-				me.addMethod( m );
-				if( required_method_index >= 0 )					
-					me.setMethodOrdinal(m,required_method_index);
-				continue;
+				Token tt = l.get();
+				if( t.is_eof() ) return out;
+				// nothing good?
+				syntax_error("Bad class element definition: "+tt.toString());
 			}
-
-			Token tt = l.get();
-			if( t.is_eof() ) return out;
-			// nothing good?
-			syntax_error("Bad class element definition: "+tt.toString());
 		}
+	}
+	/**
+	 * Parse type name if code contains one. 
+	 * 
+	 * @param definition true if type is to be defined. Not a reference to existing type.
+	 * @return type if syntax looks like, null otherwise
+	 * @throws PlcException
+	 */
+	private PhantomType parseTypeSpeculative(boolean definition) throws PlcException {
+		l.mark();
+		PhantomType pt = doParseTypeSpeculative(definition);
+		if( pt == null )
+			l.rewind();
+		else
+			l.unmark();
+		return pt;
+	}
+
+	private PhantomType doParseTypeSpeculative(boolean definition) throws PlcException {
+		StringBuffer sb = new StringBuffer();
+		boolean absolute = false;
+
+		if( peek() == id_void )
+		{
+			l.get(); // consume
+			return PhantomType.getVoid();
+		}
+
+		if( testAndEat( id_point ) )  {
+			absolute = true;
+		}
+		else
+		{
+			if(package_name == null)
+				syntax_warning("relative type and no package");
+		}
+
+		boolean first = true;
+
+		while(true)
+		{
+			if(!first) sb.append('.');
+
+			String is;
+
+			int id = peek();
+			if( id == id_string_const)
+				is = getString();
+			if( id == id_ident)
+				is = getIdent();
+			else
+				return null;
+			sb.append(is);
+
+			first = false;
+
+			if( !testAndEat( id_point ) )
+				break;
+		}
+
+		// here we'll look for [] stuff
+		boolean is_container = false;
+
+		if( testAndEat( id_lbracket ) )
+		{
+			is_container = true;
+			expect( id_rbracket );
+			/*
+			if( testAndEat( id_rbracket ) )
+			{
+				main_type.set_is_container(true);
+			}
+			else
+			{
+				main_type.set_is_container(true);
+
+				if( testAndEat( id_aster ) )
+					main_type._container_class_expression = parseExpression(false);
+				else
+					main_type._container_class = new PhantomClass(parseClassName(false));
+
+				expect( id_rbracket );
+			}*/
+		}
+
+		// atrrs
+		parse_attributes( false );
+
+
+		//return checkAndConvertType( sb.toString(), absolute, is_container );
+
+		// TODO add support later? Or we don't need speculative parse of undef type?
+		if(!definition)
+			throw new PlcException("speculative type","must be defined type");
+
+		PhantomType t;
+
+		t = PhantomType.findAbbreviatedType(sb.toString(), is_container);
+		if( t != null ) return t;
+
+		if( (!absolute) && (package_name != null) )
+		{
+			sb.insert(0, ".");
+			sb.insert(0, package_name);
+		}
+
+		String cn = sb.toString();
+		//System.err.println("look up for class "+cn);
+
+		PhantomClass c;
+		c = classes.get( cn, true, null);
+		if( c == null ) return null;
+		t = new PhantomType(c);
+		t.set_is_container(is_container);
+		return t;
+	}
+
+
+	private PhantomType checkAndConvertType(String string) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	private boolean checkConstructorName(PhantomClass me, String mname) 
 	{
-		//System.out.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
-		
+		//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
+
 		String[] words = me.getName().split("\\.");
 		String last = words[words.length-1];
-		
-		//System.out.println(String.format("!!! is ctor? nmame=%s, me.last = %s", mname, last));
-		
+
+		//System.err.println(String.format("!!! is ctor? nmame=%s, me.last = %s", mname, last));
+
 		return mname.equals(last);
 	}
 
@@ -496,7 +644,7 @@ extends GrammarHelper {
 
 	private PhantomType parseType() throws PlcException, IOException {
 		Token t = l.get();
-		if (parser_debug) System.out.println("type Token: " + t.toString());
+		if (parser_debug) System.err.println("type Token: " + t.toString());
 
 		PhantomType main_type = new PhTypeUnknown();
 
@@ -556,7 +704,7 @@ extends GrammarHelper {
 	}
 
 
-	private String parseClassName(boolean definition)  throws PlcException, IOException {
+	private String parseClassName(boolean definition)  throws PlcException {
 		StringBuffer sb = new StringBuffer();
 		boolean absolute = false;
 
@@ -596,7 +744,7 @@ extends GrammarHelper {
 				pname = ".error.package";
 			}
 
-			if (parser_debug) System.out.println("def rel class name: " + pname+sb.toString());
+			if (parser_debug) System.err.println("def rel class name: " + pname+sb.toString());
 			return pname+sb.toString();
 		}
 
@@ -610,11 +758,11 @@ extends GrammarHelper {
 				pname = ".error.package";
 			}
 
-			if (parser_debug) System.out.println("ref rel class name: " + pname+sb.toString());
+			if (parser_debug) System.err.println("ref rel class name: " + pname+sb.toString());
 			return pname+sb.toString();
 		}
 
-		if (parser_debug) System.out.println("abs class name: " + sb.toString());
+		if (parser_debug) System.err.println("abs class name: " + sb.toString());
 		return sb.toString();
 	}
 
@@ -692,7 +840,7 @@ extends GrammarHelper {
 				syntax_error("syntax error in Method body");
 				l.get(); // eat some bad stuff...
 			}
-			
+
 			return new VoidNode( expr );
 		}
 	}
@@ -771,7 +919,7 @@ extends GrammarHelper {
 		}
 
 		code = sequence( code, new BreakNode().setContext( l ) );
-		
+
 		sw_node.add_code(code);
 		return sw_node;
 	}
@@ -869,7 +1017,39 @@ extends GrammarHelper {
 	 * @param leftmost True if this is a good place to look for var definition.
 	 */
 	private Node parseExpression(boolean leftmost) throws PlcException, IOException {
-		return parseRvalue(leftmost);
+		if(debug) System.err.println("in expr");
+		if(false)
+		{
+			return parseRvalue(leftmost);
+		}
+		else
+		if( peek() == id_lparen )
+		{
+			Node out;
+			l.mark();
+			l.get(); // consume (
+
+			//cast?
+			PhantomType pt = parseTypeSpeculative(true);
+			if( pt == null ) // not type, continue as usual
+			{
+				l.rewind();
+				out = parseRvalue(leftmost);
+				//expect(id_rparen);
+				return out;
+			}
+			else
+			{
+				l.unmark();
+				expect(id_rparen);
+				out = parseRvalue(leftmost);
+
+				return new CastNode( out, pt );
+			}
+		}
+		else
+		
+			return parseRvalue(leftmost);
 	}
 
 	private Node parseRvalue(boolean leftmost) throws PlcException, IOException {
@@ -923,6 +1103,7 @@ extends GrammarHelper {
 
 
 	private Node parseLogical(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in logical");
 
 		if( testAndEat(id_exclam) )
 			return new BoolNotNode( parseLogical(false) ).setContext( l );
@@ -943,6 +1124,8 @@ extends GrammarHelper {
 
 
 	private Node parseCmp(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in cmp");
+
 		Node out = parseRefCmp(leftmost);
 		if( out == null ) return null;
 
@@ -977,6 +1160,8 @@ extends GrammarHelper {
 	}
 
 	private Node parseAdditive(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in additive");
+
 		Node out = parseMult(leftmost);
 		if( out == null ) return null;
 
@@ -992,6 +1177,8 @@ extends GrammarHelper {
 	}
 
 	private Node parseMult(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in mult");
+
 		Node out = parseBit(leftmost);
 		if( out == null ) return null;
 
@@ -1000,13 +1187,15 @@ extends GrammarHelper {
 			int id = l.get().get_id();
 			if( id == id_slash )       out = new OpDivideNode( out, parseBit(false) ).setContext( l );
 			else if( id == id_aster )  out = new OpMultiplyNode( out, parseBit(false) ).setContext( l );
-            else if( id == id_percent )out = new OpRemainderNode( out, parseBit(false) ).setContext( l );
+			else if( id == id_percent )out = new OpRemainderNode( out, parseBit(false) ).setContext( l );
 			else                        { l.unget(); break; }
 		}
 		return out;
 	}
 
 	private Node parseBit(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in bit");
+
 		Node out = parseLower(leftmost);
 		if( out == null ) return null;
 
@@ -1023,6 +1212,8 @@ extends GrammarHelper {
 	}
 
 	private Node parseLower(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in lower");
+
 		Token t = l.get();
 		int id = t.get_id();
 
@@ -1093,6 +1284,8 @@ extends GrammarHelper {
 	// var, Method call, array subscription, assignment
 	private Node parseLvalue(boolean leftmost) throws PlcException, IOException
 	{
+		if(debug) System.err.println("in lval");
+
 		Node atom = parseAtom(leftmost);
 		Node out = atom;
 		if( atom == null )
@@ -1111,7 +1304,7 @@ extends GrammarHelper {
 				MethodNode method = (MethodNode) parse_method_id();
 				//String methodIdent = parse_method_id();
 				Node args = parse_call_args();
-				
+
 				// No arg type info know, can't make sig here
 				//MethodSignature sig = new MethodSignature(method.getIdent(), args);
 				//method.setSignature(sig);
@@ -1120,10 +1313,10 @@ extends GrammarHelper {
 			}
 			else if (peek( id_lparen )) {
 				// TODO this is wrong and can't be in loop? What if we already have out?
-				
+
 				if(out != atom)
 					syntax_error("call of non-method?");
-				
+
 				Node object = new ThisNode(ps.get_class()).setContext( l );
 				Node args = parse_call_args();
 
@@ -1156,6 +1349,8 @@ extends GrammarHelper {
 
 	// identifier or expression in ()s
 	private Node parseAtom(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in atom");
+
 		Token t = l.get();
 		int id = t.get_id();
 
@@ -1230,7 +1425,7 @@ extends GrammarHelper {
 
 		Node newNode = new NewNode(type,type_expr,args).setContext( l );
 		//Node newNode = new NewNode(type,type_expr, cn).setContext( l );
-				
+
 		return newNode;
 	}
 
@@ -1238,7 +1433,7 @@ extends GrammarHelper {
 	// Helpers - attributes
 	// --------------------------------------------------------------------------
 
-	private Node parse_attributes( boolean definition ) throws PlcException, IOException {
+	private Node parse_attributes( boolean definition ) throws PlcException {
 		int id = peek();
 		if( id != id_at && id != id_attribute ) return null;
 		l.get(); // eat @/attribute
@@ -1247,7 +1442,7 @@ extends GrammarHelper {
 		return null;
 	}
 
-	private void parse_attribute(boolean definition) throws PlcException, IOException
+	private void parse_attribute(boolean definition) throws PlcException
 	{
 		boolean is_additive = false; 
 		boolean is_multiplicative = false;
@@ -1290,7 +1485,7 @@ extends GrammarHelper {
 
 		if( is_required )
 			syntax_warning("required attribute -- ignored?");
-		
+
 	}
 
 }

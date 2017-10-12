@@ -48,12 +48,12 @@ class hashmap
 
         // pointer != null
         while( next :!= null )
-	{
+        {
             if( key == next.getKey() )
                 return next;
 
             next = next.getNext();
-	}
+        }
 
         // not found
         if( put == 0 )

@@ -1,5 +1,6 @@
 package ru.dz.plc.parser;
 
+import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Title: Phantom Language Compiler</p>
@@ -16,7 +17,7 @@ public class ParserContext
 	private int line_no;
 	private final String fname;
 
-	public ParserContext(Lex l) 
+	public ParserContext(ILex l) throws PlcException 
 	{
 		this.fname = l.getFilename();
 		excerpt = new String( l.get_track() );

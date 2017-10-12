@@ -137,7 +137,9 @@ public class PlcMain {
 
 		l.set_input(fis);
 
-		Grammar g = new Grammar(l,fn);
+		LexStack ls = new LexStack(l); // permit not just LR1
+		
+		Grammar g = new Grammar(ls,fn);
 
 		try {
 			//Node all = 

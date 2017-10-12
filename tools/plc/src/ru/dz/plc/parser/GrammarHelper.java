@@ -25,10 +25,10 @@ public class GrammarHelper {
 		return error_count;
 	}
 
-	protected Lex l;
+	protected ILex l;
 
 
-	public GrammarHelper(Lex l, String fname ) throws PlcException {
+	public GrammarHelper(ILex l, String fname ) throws PlcException {
 		this.l = l;
 		this.fname = fname;
 	}
@@ -45,6 +45,8 @@ public class GrammarHelper {
 	 *            String
 	 */
 	protected void syntax_warning(String warning_text) throws PlcException {
+		System.err.flush();
+
 		// System.out.println("At '"+l.get_track()+"', line "+ (new
 		// Integer(l.get_line_number())).toString() );
 		System.out.print(fname + ":"
@@ -57,6 +59,7 @@ public class GrammarHelper {
 	}
 
 	protected void syntax_error(String err_text) throws PlcException {
+		System.err.flush();
 		// System.out.println("At '"+l.get_track()+"'");
 		// System.out.println("At '"+l.get_track()+"', line "+ (new
 		// Integer(l.get_line_number())).toString() );

@@ -26,7 +26,7 @@ public class PhantomType {
 	protected boolean             _is_long;
 	protected boolean             _is_float;
 	protected boolean             _is_double;
-	
+
 	protected boolean             _is_string;
 
 	Node                _class_expression;
@@ -37,6 +37,9 @@ public class PhantomType {
 		if(_is_container)  return _container_class == null ? "" : _container_class.getName();
 		if(_is_void)       return ".internal.void";
 		if(_is_int)        return ".internal.int";
+		if(_is_long)       return ".internal.long";
+		if(_is_float)      return ".internal.float";
+		if(_is_double)     return ".internal.double";
 		if(_is_string)     return ".internal.string";
 		return _class == null ? "" : _class.getName();
 	}
@@ -47,7 +50,7 @@ public class PhantomType {
 			return _class == null ? "" : _class.getName();
 		return "";
 	}
-	
+
 	protected PhantomType()
 	{
 		_is_void = false;
@@ -65,7 +68,7 @@ public class PhantomType {
 	public PhantomType(PhantomClass _c) throws PlcException
 	{
 		//if( _c == null )			throw new PlcException("PhantomType(PhantomClass)","Class is null");
-		
+
 		_is_void = false;
 		_is_string = false;
 		_is_int = false;
@@ -83,7 +86,7 @@ public class PhantomType {
 		if( _c != null && _c.getName().equals(".internal.double") ) _is_double = true;
 		if( _c != null && _c.getName().equals(".internal.string") ) _is_string = true;
 		if( _c != null && _c.getName().equals(".internal.void") ) _is_void = true;
-		
+
 		// TODO why not true? .object is void?
 		//if( _c != null && _c.get_name().equals(".internal.object") ) _is_void = true;
 	}
@@ -111,16 +114,16 @@ public class PhantomType {
 	public boolean is_container() { return _is_container; }
 	public boolean is_unknown() { return !_is_known; }
 
-    public void set_is_container(boolean is_container) {
-        this._is_container = is_container;
-    }
-	
+	public void set_is_container(boolean is_container) {
+		this._is_container = is_container;
+	}
+
 	public boolean is_on_int_stack() { return _is_int||_is_long||_is_float||_is_double; }
-	
+
 	public boolean equals( Object o )
 	{
 		if( o == null || ! (o instanceof PhantomType ) ) return false;
-		
+
 		PhantomType _t = (PhantomType)o;
 
 		if( !_is_known || !_t._is_known ) return false;
@@ -128,7 +131,7 @@ public class PhantomType {
 		if( _is_void && _t._is_void ) return true;
 		if( _is_void || _t._is_void ) return false;
 
-		
+
 		if( _is_int && _t._is_int ) return true;
 		if( _is_int || _t._is_int ) return false;
 
@@ -141,7 +144,7 @@ public class PhantomType {
 		if( _is_double && _t._is_double ) return true;
 		if( _is_double || _t._is_double ) return false;
 
-				
+
 		if( _is_string && _t._is_string ) return true;
 		if( _is_string || _t._is_string ) return false;
 
@@ -166,10 +169,10 @@ public class PhantomType {
 		}
 
 		return
-		type +
-		(_is_container ?
-				"["+(_container_class == null ? "" : "*"+_container_class.toString())+"]"
-				: "");
+				type +
+				(_is_container ?
+						"["+(_container_class == null ? "" : "*"+_container_class.toString())+"]"
+						: "");
 	}
 
 	public void emit_get_class_object( Codegen c, CodeGeneratorState s ) throws PlcException, IOException 
@@ -259,7 +262,7 @@ public class PhantomType {
 		if( _is_float ) _class = ClassMap.get_map().get(".internal.float",false, null);
 		if( _is_double ) _class = ClassMap.get_map().get(".internal.double",false, null);
 		if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
-		
+
 		if( _is_void ) 
 			_class = ClassMap.get_map().get(".internal.void",false,null);
 
@@ -283,36 +286,48 @@ public class PhantomType {
 
 		if( is_on_int_stack() && src.is_on_int_stack() )
 			return true;
-		
+
 		if(get_class() == null) return true;
-		
+
 		return get_class().can_be_assigned_from( src.get_class() );
 	}
 
-    
-    
-    
-    public static final PhantomType t_string = new PhTypeString();
-    public static final PhantomType t_void = new PhTypeVoid();
-
-    public static PhantomType getVoid()  { return t_void; } 
-    public static PhantomType getString()  { return t_string; }
-    
-    private static PhantomType t_int = null;
-    public static PhantomType getInt() throws PlcException { 
-        if( t_int == null ) t_int = new PhTypeInt();
-        return t_int;
-    }
 
 
-    private static PhantomType t_long = null;
+
+	public static final PhantomType t_string = new PhTypeString();
+	public static final PhantomType t_void = new PhTypeVoid();
+
+	public static PhantomType getVoid()  { return t_void; } 
+	public static PhantomType getString()  { return t_string; }
+
+	private static PhantomType t_int = null;
+	public static PhantomType getInt() throws PlcException { 
+		if( t_int == null ) t_int = new PhTypeInt();
+		return t_int;
+	}
+
+
+	private static PhantomType t_long = null;
 	public static PhantomType getLong() throws PlcException {
-        if( t_long == null ) t_long = new PhTypeLong();
-        return t_long;
+		if( t_long == null ) t_long = new PhTypeLong();
+		return t_long;
+	}
+
+	private static PhantomType t_float = null;
+	public static PhantomType getFloat() throws PlcException {
+		if( t_float == null ) t_float = new PhTypeFloat();
+		return t_float;
+	}
+
+	private static PhantomType t_double = null;
+	public static PhantomType getDouble() throws PlcException {
+		if( t_double == null ) t_double = new PhTypeDouble();
+		return t_double;
 	}
 
 	// ---------------------------- LLVM code generation ----------------------------
-	
+
 	public String toLlvmType() {
 		if( _class != null ) return LlvmCodegen.getObjectType();  
 
@@ -321,7 +336,7 @@ public class PhantomType {
 		if( _is_float )   return "float";
 		if( _is_double )  return "double";
 		//if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
-		
+
 		return "void";
 	}
 
@@ -333,12 +348,12 @@ public class PhantomType {
 		if( _is_float )   return "float";
 		if( _is_double )  return "double";
 		//if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
-		
+
 		return "void";
 	} 
 
-	
-	
+
+
 	// This is used to generate function name with encoded arg type info
 	public String toProxyName() {
 		if( _class != null ) return "o";
@@ -350,6 +365,75 @@ public class PhantomType {
 		if( t_object  == null )
 			t_object = new PhantomType( ClassMap.get_map().get(".internal.object",false, null) );
 		return t_object;
+	}
+
+	public static PhantomType findAbbreviatedType(String tn, boolean is_container) throws PlcException {
+
+		// short type names
+
+		if( tn.startsWith(".") )
+			tn = tn.substring(1);
+
+		switch(tn)
+		{
+		case "internal.object": 
+			return getObject();
+
+		case "void": return PhantomType.getVoid(); 
+
+		case "internal.int": 
+		case "int": 
+			return PhantomType.getInt();
+
+		case "internal.long":
+		case "long": 
+			return PhantomType.getLong(); 
+
+		case "internal.float":
+		case "float": 
+			return PhantomType.getFloat();
+
+		case "internal.double":
+		case "double": 
+			return PhantomType.getDouble();
+
+		case "internal.string":			
+		case "string": 
+			return PhantomType.getString(); 
+		}
+
+		return null;
+	}
+
+	/**
+	 * 
+	 * @param b
+	 * @return true if I am bigger or equal type (must be result type if combined with b )
+	 */
+	public boolean isBigger( PhantomType b )
+	{
+		if( _is_double ) return true;
+		if( b._is_int ) return true;
+		if( b._is_long && _is_float ) return true;
+		return false;
+	}
+
+	static public PhantomType biggerType( PhantomType a, PhantomType b )
+	{
+		return a.isBigger(b) ? a : b; 
+	}
+
+	public static PhantomType findCompatibleType(PhantomType tl, PhantomType tr) {
+		// simple
+		if( tl.equals(tr) )
+			return tl;
+
+		if( (!tl.is_on_int_stack()) || (!tr.is_on_int_stack()) )
+		{
+			return null;
+		}
+
+		return biggerType(tl, tr);
 	}
 
 }

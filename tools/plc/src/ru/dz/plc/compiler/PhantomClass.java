@@ -57,10 +57,11 @@ public class PhantomClass {
 	public String getParent() {  return parent;  }
 
 	public boolean equals(Object o) {
-		if (o == null || o.getClass() != this.getClass())return false;
+		if (o == null || o.getClass() != this.getClass())
+			return false;
 		PhantomClass _t = (PhantomClass) o;
 
-		return name != null && _t.name != null && name == _t.name;
+		return name != null && _t.name != null && name.equals( _t.name );
 	}
 
 	// ------------------------------------------------------------------------

@@ -1,8 +1,15 @@
 package ru.dz.plc.compiler.binode;
 
+import java.io.IOException;
+import java.util.function.Consumer;
+
+import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
+import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.node.CastNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -19,25 +26,20 @@ public abstract class BinaryOpNode extends BiNode {
 	 */
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
+		if(!bop_preprocessed) throw new PlcException("bin op","not preprocessed");
+
 		String on = getLlvmOpName();
 		String lltype = getLlvmType(); 
 
 		llc.putln(String.format("%s = %s %s %s, %s", llvmTempName, on, lltype, _l.getLlvmTempName(), _r.getLlvmTempName() ));
 	}
 
-	// TODO generalized binop codegen for bytecode 
-
-	/*
-	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException 
-	{
-		if(getType().is_int()) c.emitISubLU();
-		else throw new PlcException("Codegen", "op - does not exist for this type");
-	}
-	*/
 
 	// Supposed to be working for all the children of this class
 	@Override
-	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException {
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException 
+	{
+		if(!bop_preprocessed) throw new PlcException("bin op","not preprocessed");
 
 		// JIT_op_plus(left,right)
 		String oname = getLlvmOpName();
@@ -45,8 +47,55 @@ public abstract class BinaryOpNode extends BiNode {
 		_l.generate_C_code(cgen,s);
 		cgen.put(",");
 		_r.generate_C_code(cgen,s);
-		cgen.put(")");
-		
+		cgen.put(")");		
+	}
+
+	private boolean bop_preprocessed = false;
+
+	@Override
+	public void find_out_my_type() throws PlcException 
+	{
+		type = PhantomType.findCompatibleType(_l.getType(),_r.getType());
+		if( type == null )
+		{
+			print_error(String.format("types %s and %s are incompatible", 
+					_l.getType().toString(),
+					_r.getType().toString()
+					));
+			throw new PlcException("bin op find type "+context.get_position(),"types are not compatible");
+		}
+	}
+
+	@Override
+	public void preprocess_me(ParseState s) throws PlcException {
+		super.preprocess_me(s);
+
+		find_out_my_type();
+
+		if(!type.is_on_int_stack())
+			throw new PlcException("bin op preprocess", "not numeric type");
+
+		if( !_l.getType().equals(type) ) 
+			_l = new CastNode(_l, type);
+
+		if( !_r.getType().equals(type) ) 
+			_r = new CastNode(_r, type);
+
+		bop_preprocessed = true;
+	}
+
+
+	protected void generateIntegerStackOp( Codegen c, RunBinaryOp op  ) throws PlcException
+	{
+		if(!bop_preprocessed) throw new PlcException("bin op","not preprocessed");
+
+		try {
+			c.emitNumericPrefix(type);
+			op.run(); // generate actual op
+		} catch (IOException e) {
+			throw new PlcException("io error", e);
+		}
+
 	}
 
 }

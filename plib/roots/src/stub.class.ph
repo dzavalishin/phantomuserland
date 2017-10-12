@@ -4,8 +4,9 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * Stub class to bootstrap compilation. Does not refer 
+ * to classes that not yet compled. Must be replaced as 
+ * soon as dependent classes are compiled.
  *
  *
 **/
