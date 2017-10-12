@@ -84,6 +84,7 @@
       "object.h": "c",
       "object_flags.h": "c",
       "internal.h": "c",
-      "alloc.h": "c"
+      "alloc.h": "c",
+      "jsmn.h": "c"
     }
   }

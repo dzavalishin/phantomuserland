@@ -354,6 +354,21 @@ public class Codegen extends opcode_ids {
 		put_int32(id);
 	}
 
+	
+	public void emitStackReserve( int objectStackReserve, int intStackReserve ) throws IOException
+	{
+		assert( objectStackReserve >= 0 );
+		assert( objectStackReserve < Byte.MAX_VALUE );
+		assert( intStackReserve >= 0 );
+		assert( intStackReserve < Byte.MAX_VALUE );
+		
+		list("stack_reserve obj="+objectStackReserve+" int="+intStackReserve);
+		
+		put_byte(opcode_stack_reserve);
+		put_byte((byte)objectStackReserve);
+		put_byte((byte)intStackReserve);
+	}
+	
 	/**
 	 * <p>Emit cast.</p>
 	 *

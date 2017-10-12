@@ -109,6 +109,12 @@ public class Method
 
 		if(requestDebug) c.emitDebug((byte)0x1,"Enabled debug");
 
+		if( true )
+		{
+			c.emitStackReserve(n_auto_vars, n_int_auto_vars);
+		}
+		else
+		{
 		// push nulls to reserve stack space for autovars
 		// BUG! We can execute vars initialization code here, can we?
 		// We can if code does not depend on auto vars itself, or depends only on
@@ -121,7 +127,7 @@ public class Method
 		// Reserve integer stack place for int vars
 		for( int i = n_int_auto_vars; i > 0; i-- )
 			c.emitIConst_0();
-
+		}
 		// TODO we can provide const pool binary blob with init data and load it with one 
 		// big instruction
 		

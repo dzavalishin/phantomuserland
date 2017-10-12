@@ -1897,6 +1897,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             pvm_ostack_reserve( da->_ostack, o_reserve );
             pvm_istack_reserve( da->_istack, i_reserve );
         }
+            break;
 
         default:
             if( (instruction & 0xF0 ) == opcode_sys_0 )
