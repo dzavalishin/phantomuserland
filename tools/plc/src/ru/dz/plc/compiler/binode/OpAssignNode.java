@@ -57,7 +57,11 @@ public class OpAssignNode extends BiNode {
 		if( _l.getClass() == IdentNode.class )
 		{
 			//if( _l != null ) { _l.generate_code(c,s); move_between_stacks(c, _l.is_on_int_stack()); }
-			if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
+			if( _r != null ) 
+			{ 
+				_r.generate_code(c,s); 
+				move_between_stacks(c, _r.is_on_int_stack(), _r.getType()); 
+			}
 
 			IdentNode dest = (IdentNode) _l;
 			String dest_name = dest.getName();
@@ -107,15 +111,19 @@ public class OpAssignNode extends BiNode {
 
 			// array object to assign to
 			atom.generate_code(c,s);
-			move_between_stacks(c, atom.is_on_int_stack());
+			move_between_stacks(c, atom.is_on_int_stack(), atom.getType());
 
 			// put value to assign
-			if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
+			if( _r != null ) 
+			{ 
+				_r.generate_code(c,s); 
+				move_between_stacks(c, _r.is_on_int_stack(), _r.getType()); 
+				}
 			else System.out.println("OpAssignNode.generate_my_code() _r is null!"); // TODO die here
 
 			// put subscript
 			subscr.generate_code(c,s);
-			move_between_stacks(c, subscr.is_on_int_stack());
+			move_between_stacks(c, subscr.is_on_int_stack(), subscr.getType());
 
 			c.emitCall(11,2); // Method number 11, 2 parameters
 			// NB! Must return copy of assigned stuff! NB! Must increment refcount!

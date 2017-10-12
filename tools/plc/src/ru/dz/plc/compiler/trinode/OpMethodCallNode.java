@@ -56,7 +56,7 @@ public class OpMethodCallNode extends TriNode {
 		// NB! Reverse order - _l, then _r - this opcode is brain damaged,
 		// it needs args pushed AFTER object to call
 		_l.generate_code(c,s); // get object
-		move_between_stacks(c, _l.is_on_int_stack());
+		move_between_stacks(c, _l);
 		
 		if( _r != null ) _r.generate_code(c,s); // calc args
 		

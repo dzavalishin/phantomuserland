@@ -83,8 +83,16 @@ abstract public class BiNode extends Node {
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
-		if( _l != null ) { _l.generate_code(c,s); move_between_stacks(c, _l.is_on_int_stack()); }
-		if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
+		if( _l != null ) 
+		{ 
+			_l.generate_code(c,s); 
+			move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
+		}
+		if( _r != null ) 
+		{ 
+			_r.generate_code(c,s); 
+			move_between_stacks(c, _r.is_on_int_stack(), _r.getType()); 
+		}
 
 		log.fine("Node "+this+" codegen");
 

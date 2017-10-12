@@ -198,8 +198,15 @@ abstract public class Node {
 	public boolean is_on_int_stack() { return false; }
 	public boolean args_on_int_stack() { return is_on_int_stack(); }
 
-	protected void move_between_stacks(Codegen c, boolean fromint ) throws IOException, PlcException {
-		PhantomType intType = PhantomType.getInt(); // TODO XXX parameter?
+	/**
+	 * 
+	 * @param c
+	 * @param fromint
+	 * @param intType type we will move between stacks
+	 * @throws IOException
+	 * @throws PlcException
+	 */
+	protected void move_between_stacks(Codegen c, boolean fromint, PhantomType intType ) throws IOException, PlcException {
 		if( args_on_int_stack() && (!fromint) )
 		{
 			c.emitNumericPrefix(intType);
@@ -213,11 +220,17 @@ abstract public class Node {
 		}
 	}
 
+	protected void move_between_stacks(Codegen c, Node n ) throws IOException, PlcException 
+	{
+		move_between_stacks( c, n.is_on_int_stack(), n.getType() );
+	}
+	
+	
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		if( _l != null ) {
 			_l.generate_code(c, s);
-			move_between_stacks(c, _l.is_on_int_stack());
+			move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
 		}
 		if(context != null)
 		{

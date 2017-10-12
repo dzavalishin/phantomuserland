@@ -27,7 +27,7 @@ public class CastNode extends Node {
 
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException 
 	{
-		if(is_on_int_stack())
+		if(!is_on_int_stack())
 		{
 			generate_object_cast(c);
 			return;

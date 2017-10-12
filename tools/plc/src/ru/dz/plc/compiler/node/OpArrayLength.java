@@ -45,7 +45,8 @@ public class OpArrayLength extends Node {
 
 		// put array object to load from
 		atom.generate_code(c,s);
-		move_between_stacks(c, atom.is_on_int_stack());
+		//move_between_stacks(c, atom.is_on_int_stack(), _l.getType());
+		assert(!atom.is_on_int_stack());
 
 
 		c.emitCall(12,0); // Method number 12, 0 parameters - size

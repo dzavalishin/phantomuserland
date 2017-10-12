@@ -58,11 +58,11 @@ public class OpSubscriptNode extends BiNode {
 
 		// put array object to load from
 		atom.generate_code(c,s);
-		move_between_stacks(c, atom.is_on_int_stack());
+		move_between_stacks(c, atom);
 
 		// put subscript
 		subscr.generate_code(c,s);
-		move_between_stacks(c, subscr.is_on_int_stack());
+		move_between_stacks(c, subscr);
 
 		c.emitCall(10,1); // Method number 10, 1 parameter - get
 	}

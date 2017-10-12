@@ -63,7 +63,7 @@ public class OpDynamicMethodCallNode extends BiNode {
 		c.emitIConst_32bit(n_param); // n args
 		
 		_l.generate_code(c,s); // get object
-		move_between_stacks(c, _l.is_on_int_stack());
+		move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
 
 		c.emitString(methodName);
 		

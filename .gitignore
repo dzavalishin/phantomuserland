@@ -103,3 +103,4 @@ tools/uftpd/bin
 tools/plc/internal.object.c
 tools/plc/ru.dz.phantom.system.regression_tests.c
 tools/plc/internal.object.c
+tools/plc/phantom.util.map.c
