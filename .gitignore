@@ -100,3 +100,6 @@ tools/mkpfs/bin
 tools/trfs/bin
 tools/uftpd/bin
 
+tools/plc/internal.object.c
+tools/plc/ru.dz.phantom.system.regression_tests.c
+tools/plc/internal.object.c
