@@ -625,6 +625,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
+                    if(debug_print_instr) printf("%ld - %ld ;", (long)l, (long)u );
                     ls_push(l-u);
                 }
                 break;
@@ -643,6 +644,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
+                    //if(debug_print_instr) printf("%ld/%ld = %ld;", (long)l, (long)u, (long)(l/u) );
+                    if(debug_print_instr) printf("%lld/%lld = %lld;", l, u, l/u );
                     ls_push(l/u);
                 }
                 break;
@@ -707,7 +710,13 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 // NB! Returns int!
             case opcode_ige:	// >=
                 LISTI("l-ige");
-                { int64_t operand = ls_pop();	is_push( ls_pop() >= operand ); }
+                { 
+                    int64_t o1 = ls_pop();	
+                    int64_t o2 = ls_pop();
+                    int res = o2 >= o1;
+                    //printf("l-ige %ld >= %ld = %d ;", (long)o2, (long)o1, res );
+                    is_push( res ); 
+                }
                 break;
             case opcode_ile:	// <=
                 LISTI("l-ile");
@@ -762,7 +771,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 {
                     struct pvm_object o = os_pop();
                     if( o.data == 0 ) pvm_exec_panic("l-o2i(null)", da);
-                    ls_push( pvm_get_long( o ) );
+                    int64_t p = pvm_get_long( o );
+                    //printf("l-o2i %d ;", (int)p );
+                    ls_push( p );
                     ref_dec_o(o);
                 }
                 break;
@@ -1269,6 +1280,10 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 pvm_object_t o = os_pop();
 
                 // TODO cast here!
+                printf("!!! CAST unimpl !!!\n");
+                printf("obj = "); pvm_object_dump(o);
+                printf("class = "); pvm_object_dump(target_class);
+                printf("\n!!! CAST unimpl !!!\n");
 
                 os_push( o );
                 LISTIA("cast %s", "unimplemented!");
@@ -1580,14 +1595,17 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 LISTI("summon by name");
                 struct pvm_object name = pvm_code_get_string(&(da->code));
                 struct pvm_object cl = pvm_exec_lookup_class_by_name( name );
-                ref_dec_o(name);
                 // TODO: Need throw here?
-                if( pvm_is_null( cl ) ) {
-                    pvm_exec_panic("summon by name: null class", da);
+                if( pvm_is_null( cl ) ) 
+                {
+                    printf("summon class '"); pvm_object_print(name); printf("'\n");
+                    pvm_exec_panic("summon by name: no class found", da);
+                    ref_dec_o(name);
                     //printf("summon by name: null class");
                     //pvm_exec_do_throw(da);
                     break;
                 }
+                ref_dec_o(name);
                 os_push( cl );  // cl popped from stack - don't increment
             }
             break;
