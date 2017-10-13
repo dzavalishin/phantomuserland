@@ -33,12 +33,16 @@ public class NewNode extends Node
 {
 	private PhantomType static_type = null;
 	private Node args;
+	
+	private boolean dynamic; // use dynamic type
 
 	public NewNode(PhantomType static_type, Node dynamic_type, Node args)
 	{
 		super(dynamic_type);
 		this.static_type = static_type;
 		this.args = args;
+		
+		dynamic = dynamic_type != null;
 	}
 
 	@Override
@@ -54,7 +58,15 @@ public class NewNode extends Node
 		super.find_out_my_type();
 	}
 
-	public String toString()  {    return "new " + ((static_type == null) ? "(dynamic type)" : static_type.toString());  }
+	public String toString()  
+	{    
+		if(dynamic)
+		{
+			return "new (dynamic type)" + ((static_type != null) ? static_type.toString() : "");
+		}
+		else
+			return "new " + (dynamic ? "(dynamic type)" : static_type.toString());  
+	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
@@ -69,9 +81,9 @@ public class NewNode extends Node
 
 		//c.emitDebug((byte)0, "before new");
 		
-		boolean dynamicClass = _l != null;
+		//boolean dynamicClass = _l != null;
 
-		if( dynamicClass )
+		if( dynamic )
 		{
 			_l.generate_code(c,s);
 			if(_l.is_on_int_stack())
@@ -102,7 +114,7 @@ public class NewNode extends Node
 
 
 
-		if( dynamicClass )
+		if( dynamic )
 		{
 			print_warning("No constructor call for dynamic new!");
 		}
@@ -112,7 +124,7 @@ public class NewNode extends Node
 			// args - TODO are we sure they're on obj stack?
 			if( args != null ) {
 
-				if( dynamicClass )
+				if( dynamic )
 					throw new PlcException(context.get_context(), "No constructor for dynamic class new" );
 
 				args.generate_code(c, s);
@@ -121,7 +133,7 @@ public class NewNode extends Node
 			
 			c.emit_pull(0+n_param); // get copy of object ptr
 			//c.emit_pull(2+n_param); // get copy of class ptr - NO!
-			if( !dynamicClass ) // no c'tor call for dyn class - TODO FIXME
+			if( !dynamic ) // no c'tor call for dyn class - TODO FIXME
 				static_type.emit_get_class_object(c,s);
 			else
 				throw new PlcException(context.get_context(), "No constructor for dynamic class new" );
@@ -186,7 +198,7 @@ public class NewNode extends Node
 			throw new PlcException( "new Node", "no type known" );
 
 
-		if( _l != null )
+		if( dynamic )
 		{
 			// TODO Auto-generated method stub
 			llc.put("; new dynamic: ");
@@ -220,7 +232,7 @@ public class NewNode extends Node
 		cgen.put( C_codegen.getObjectType()+" tmp_class = ");
 
 
-		if( _l != null )
+		if( dynamic )
 		{
 			// TODO Auto-generated method stub
 			cgen.put("/* new dynamic: */");

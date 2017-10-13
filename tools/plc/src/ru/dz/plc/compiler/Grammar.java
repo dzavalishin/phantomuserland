@@ -1416,6 +1416,9 @@ extends GrammarHelper {
 			expect(id_lparen);
 			type_expr = parseExpression(false);
 			expect(id_rparen);
+			
+			if( testAndEat( id_colon ) )
+				type = parseType();
 		}
 		else                             
 			type = parseType();

@@ -116,7 +116,7 @@ class boot
         loader_class = load_class(".ru.dz.phantom.system.class_loader");
 
         if( debug ) print("creating loader object\n");
-        loader = new *(loader_class)();
+        loader = new *(loader_class) : .ru.dz.phantom.system.class_loader ();
 
         if( debug ) print("initializing loader\n");
         loader.init(boot_object);

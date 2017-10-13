@@ -47,8 +47,20 @@ public class CastNode extends Node {
 
 	private void generate_object_cast(Codegen c) throws IOException 
 	{
+		if(pt.is_unknown())
+		{
+			print_warning("Attempt to cast to unknown class, skip cast. Pray you know what you do.");
+			return;
+		}
+		if(pt.is_void())
+		{
+			print_warning("Attempt to cast to void class, skip cast. Pray you know what you do.");
+			return;
+		}
 		// TODO must check type compatibility
-		c.emitSummonByName(pt.get_main_class_name());
+		String cn = pt.get_main_class_name();
+		//log.severe("Cast to "+cn);
+		c.emitSummonByName(cn);
 		c.emitCast();
 	}
 

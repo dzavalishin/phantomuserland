@@ -174,10 +174,19 @@ abstract class BiBistackNode extends BiNode {
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		_l.generate_code(c, s);
-		if (go_to_object_stack() && _l.is_on_int_stack()) c.emit_i2o();
+		if (go_to_object_stack() && _l.is_on_int_stack()) 
+		{
+			//c.emit_i2o();
+			move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
+		}
+		
 		_r.generate_code(c, s);
-		if (go_to_object_stack() && _r.is_on_int_stack()) c.emit_i2o();
-
+		if (go_to_object_stack() && _r.is_on_int_stack())
+		{
+			//c.emit_i2o();
+			move_between_stacks(c, _r.is_on_int_stack(), _r.getType());
+		}
+		
 		log.fine("Node "+this+" codegen");
 		generate_my_code(c,s);
 	}

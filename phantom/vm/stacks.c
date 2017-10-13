@@ -290,6 +290,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 #if 1
 void pvm_lstack_push( struct data_area_4_integer_stack* rootda, int64_t o )
 {
+    printf("lpush %lld; \n", o);
     pvm_istack_push( rootda, (int)(o >> 32));
     pvm_istack_push( rootda, (int)o);
 }
@@ -299,6 +300,7 @@ int64_t pvm_lstack_pop( struct data_area_4_integer_stack* rootda )
     int64_t o;
     o = pvm_istack_pop( rootda );
     o |= ((int64_t)pvm_istack_pop( rootda )) << 32;
+    return o;
 }
 
 int64_t  pvm_lstack_top( struct data_area_4_integer_stack* rootda )
@@ -307,8 +309,7 @@ int64_t  pvm_lstack_top( struct data_area_4_integer_stack* rootda )
 
     int low = pvm_istack_pop( rootda );
     int hi = pvm_istack_top( rootda );
-    pvm_istack_push( rootda, low );
-    
+    pvm_istack_push( rootda, low );    
 
     o = low; o |= ((int64_t)hi) << 32;
     return o;

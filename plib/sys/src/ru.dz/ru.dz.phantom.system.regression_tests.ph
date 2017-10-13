@@ -59,7 +59,7 @@ class regression_tests
 		if( ctor_called != 3456 )
 			throw "constructor failed";
 
-/*        long_test();
+        long_test();
 /*
         float_test();
         double_test();
@@ -291,7 +291,7 @@ class regression_tests
         print("long tests 1\n");
 
         if( (a/b) != 6 ) 	throw "long error 1";
-        if( (b-c) != 0-1 ) 	throw "long error 2";
+        if( (b-c) != 5 ) 	throw "long error 2";
         if( (b*c) != 0-6 ) 	throw "long error 3";
         if( (a+c) != 9 ) 	throw "long error 4";
         print("long tests 2\n");

@@ -5,9 +5,11 @@ import java.io.IOException;
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomStackVar;
 import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.node.CastNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
@@ -46,6 +48,13 @@ public class OpAssignNode extends BiNode {
 		return args_on_int_stack();
 	}
 
+	@Override
+	public void preprocess_me(ParseState s) throws PlcException 
+	{
+		if( !_l.getType().equals(_r.getType()) )
+			_r = new CastNode(_r, _l.getType());
+	}
+	
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		generate_my_code(c,s);

@@ -31,21 +31,30 @@ public abstract class ValCmpNode extends BiBistackNode {
 		}
 	}
 
+	@Override
+	public boolean args_on_int_stack() {
+		return true; // we allways need em on int stack
+	}
 	 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
-		/*if( _l.getType().is_int() != _r.getType().is_int() )
-		{
-			throw new PlcException("cmp op", "one op is int, other not");
-		}*/
 		
-		if( _l.getType().is_int() || _r.getType().is_int() )
+		if( _l.getType().is_on_int_stack() || _r.getType().is_on_int_stack() )
 		{
 			_l.generate_code(c, s);
-			if (!_l.is_on_int_stack()) c.emit_o2i();
+			if (!_l.is_on_int_stack()) 			
+			{
+				//c.emit_o2i();
+				move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
+			}
+			
 			_r.generate_code(c, s);
-			if (!_r.is_on_int_stack()) c.emit_o2i();
-
+			if (!_r.is_on_int_stack())
+			{
+				//c.emit_o2i();
+				move_between_stacks(c, _r.is_on_int_stack(), _r.getType());
+			}
+			
 			log.fine("Node "+this+" codegen");
 			generate_my_code(c,s);
 		}
