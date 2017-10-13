@@ -290,7 +290,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 #if 1
 void pvm_lstack_push( struct data_area_4_integer_stack* rootda, int64_t o )
 {
-    printf("lpush %lld; \n", o);
+    //printf("lpush %lld; \n", o);
     pvm_istack_push( rootda, (int)(o >> 32));
     pvm_istack_push( rootda, (int)o);
 }

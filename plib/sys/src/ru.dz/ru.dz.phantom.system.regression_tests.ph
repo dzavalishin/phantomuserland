@@ -60,10 +60,9 @@ class regression_tests
 			throw "constructor failed";
 
         long_test();
-/*
         float_test();
         double_test();
-*/
+
 
 	// test c'tor call
 
@@ -303,7 +302,7 @@ class regression_tests
         print("long tests passed\n");
     }
 
-/*
+
     void float_test()
     {
         var a : .internal.float;
@@ -312,11 +311,11 @@ class regression_tests
 
         a = 12;
         b = 2;
-        c = -3;
+        c = 0-3;
 
         if( (a/b) != 6 ) 	throw "float error 1";
-        if( (b-c) != -1 ) 	throw "float error 2";
-        if( (b*c) != -6 ) 	throw "float error 3";
+        if( (b-c) != 5 ) 	throw "float error 2";
+        if( (b*c) != 0-6 ) 	throw "float error 3";
         if( (a+c) != 9 ) 	throw "float error 4";
 
         if( b<c ) 		throw "float error 5";
@@ -335,11 +334,11 @@ class regression_tests
 
         a = 12;
         b = 2;
-        c = -3;
+        c = 0-3;
 
         if( (a/b) != 6 ) 	throw "double error 1";
-        if( (b-c) != -1 ) 	throw "double error 2";
-        if( (b*c) != -6 ) 	throw "double error 3";
+        if( (b-c) != 5 ) 	throw "double error 2";
+        if( (b*c) != 0-6 ) 	throw "double error 3";
         if( (a+c) != 9 ) 	throw "double error 4";
 
         if( b<c ) 		throw "double error 5";
@@ -348,7 +347,7 @@ class regression_tests
         if( b>=a ) 		throw "double error 8";
         print("double tests passed\n");
     }
-*/
+
 
 };
 
