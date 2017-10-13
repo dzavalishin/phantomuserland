@@ -135,15 +135,7 @@ class regression_tests
     {
         print("Checking int math... ");
 
-        if( 
-	(
-		12
-		/
-		2
-	) 
-		!= 
-	6 
-	) 	throw "int error";
+        if( (12/2) != 6 ) 	throw "int error";
 
         if( 2+2 != 4 ) throw "int + math error";
         if( 2-2 != 0 ) throw "int - math error";
@@ -334,7 +326,7 @@ class regression_tests
 
         a = 12;
         b = 2;
-        c = 0-3;
+        c = -3;
 
         if( (a/b) != 6 ) 	throw "double error 1";
         if( (b-c) != 5 ) 	throw "double error 2";

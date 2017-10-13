@@ -1231,6 +1231,14 @@ extends GrammarHelper {
 			TokenIntConstVal ti = (TokenIntConstVal)t;
 			return new IntConstNode(ti.int_value()).setContext( l );
 		}
+		else if(id == id_minus )
+		{
+			t = l.get();
+			if(t.get_id() != id_int_const)
+				syntax_error("not a constant after minus");
+			TokenIntConstVal ti = (TokenIntConstVal)t;
+			return new IntConstNode( - ti.int_value() ).setContext( l );
+		}
 		else if(id == id_new )
 		{
 			l.unget();
