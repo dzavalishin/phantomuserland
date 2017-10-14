@@ -328,7 +328,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
         case 'c': // constant for const pool
             {
-                int c_ordinal = pvm_code_get_int32(&h); // const pool position
+                int c_ordinal = pvm_code_get_int32(&h); // const pool position (id)
 
                 struct type_loader_handler th;
                 pvm_load_type( &h , &th );
@@ -338,14 +338,19 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 // No const containers (yet?)
                 if( th.is_container ) goto unk_const;
 
-                if( EQ_STRING_P2C(class_name,".internal.string") )
+                if( (!th.is_container) && EQ_STRING_P2C(th.class_name,".internal.string") )
                 {
                     c_value = pvm_create_string_object_binary( (void *)(h.code+h.IP), h.IP_max-h.IP);
                 }
 
             unk_const:
                 if( c_value.data )
+                {
+                    // had bug in pool read - no ref inc, fixed, turned daturate off
+                    //ref_saturate_o(c_value);
+                    // but, frankly, maybe saturate is ok here?
                     pvm_set_ofield( const_pool, c_ordinal, c_value );
+                }
                 else
                     //if(debug_print)
                 {
@@ -404,6 +409,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
     cda->ip2line_maps = ip2line_maps;
     cda->method_names = method_names;
     cda->field_names = field_names;
+    cda->const_pool = const_pool; //ref_inc_o(const_pool);
 
     *out = new_class;
     return 0;

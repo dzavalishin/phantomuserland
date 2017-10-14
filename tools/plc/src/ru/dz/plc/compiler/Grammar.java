@@ -44,6 +44,7 @@ import ru.dz.plc.compiler.node.OpNotNode;
 import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.StringConstNode;
+import ru.dz.plc.compiler.node.StringConstPoolNode;
 import ru.dz.plc.compiler.node.SwitchCaseNode;
 import ru.dz.plc.compiler.node.SwitchDefaultNode;
 import ru.dz.plc.compiler.node.SwitchNode;
@@ -1219,7 +1220,8 @@ extends GrammarHelper {
 
 		if(id == id_string_const )
 		{
-			return new StringConstNode(t.value()).setContext( l );
+			//return new StringConstNode(t.value()).setContext( l );
+			return new StringConstPoolNode(t.value(), ps.get_class() ).setContext( l );
 		}
 		else if (t.get_id() == id_import)          
 		{

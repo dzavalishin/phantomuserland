@@ -50,7 +50,7 @@ public class ConstantPool {
 	
 	
 	public void codegen(RandomAccessFile os, FileWriter lst,
-			BufferedWriter llvmFile, CodeGeneratorState s, String version) throws PlcException 
+			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException 
 	{
 		//llvmFile.write("; fields: \n");
 		for( int id : table.keySet())
@@ -70,6 +70,8 @@ public class ConstantPool {
 					info.write();
 					llvmFile.write("; label const_pool"+id+":\n; .string '"+sv+"'\n");
 					llvmFile.write("; - constant for const pool id "+id+" val '"+sv+"'\n");
+					c_File.write("static const char* const_pool"+id+" = \""+sv+"\"\n");
+					//c_File.write("// - constant for const pool id "+id+" val '"+sv+"'\n");
 				} catch (IOException e) {
 					throw new PlcException("Writing const id "+id, e.toString());
 				}		

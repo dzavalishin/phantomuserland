@@ -1269,6 +1269,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
                 int32_t id = pvm_code_get_int32(&(da->code));
                 pvm_object_t co = pvm_get_ofield( cda->const_pool, id );
+                ref_inc_o(co);
                 os_push(co);
                 LISTIA("const_pool id %d", id);
             }

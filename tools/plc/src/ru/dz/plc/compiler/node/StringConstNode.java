@@ -17,6 +17,7 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  *
  */
+@Deprecated
 public class StringConstNode extends Node {
 	private String val;
 	

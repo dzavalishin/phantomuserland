@@ -365,6 +365,7 @@ public class PhantomClass {
 		//ft.generateGettersSetters(this);
 		mt.codegen(os, lst, llvmFile, c_File, s, version);
 		ft.codegen(os, lst, llvmFile, c_File, s, version);
+		constantPool.codegen(os, lst, llvmFile, c_File, s, version);
 	}
 
 	public void preprocess(ParseState ps) throws PlcException
