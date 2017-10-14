@@ -279,7 +279,8 @@ public class PythonFrontendXML {
 			}			
 			else if(nname.equals("string"))
 			{
-				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.StringConstNode(getString(cn,"content")));
+				//setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.StringConstNode(getString(cn,"content")));
+				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.StringConstPoolNode(getString(cn,"content"),pc));
 			}			
 			else if(nname.equals("number"))
 			{

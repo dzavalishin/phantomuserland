@@ -33,6 +33,7 @@ import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.OpArrayLength;
 import ru.dz.plc.compiler.node.StaticLoadNode;
 import ru.dz.plc.compiler.node.StringConstNode;
+import ru.dz.plc.compiler.node.StringConstPoolNode;
 import ru.dz.plc.compiler.node.SummonClassNode;
 import ru.dz.plc.util.PlcException;
 import soot.Local;
@@ -607,7 +608,8 @@ public class SootExpressionTranslator {
 	
 
 	private PhantomCodeWrapper doStringConst(StringConstant v) {
-		return new PhantomCodeWrapper(new StringConstNode(v.value));
+		//return new PhantomCodeWrapper(new StringConstNode(v.value));
+		return new PhantomCodeWrapper(new StringConstPoolNode(v.value,phantomClass));
 	}
 
 	private PhantomCodeWrapper doLength(LengthExpr v) throws PlcException {
