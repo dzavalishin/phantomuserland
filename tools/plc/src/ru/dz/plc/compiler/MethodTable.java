@@ -19,18 +19,19 @@ import ru.dz.plc.util.*;
 
 public class MethodTable implements IMethodTable 
 {
-	private Map<String, Method> table = new HashMap<String, Method>();
+	//private Map<String, Method> table = new HashMap<String, Method>();
 	private Map<MethodSignature, Method> mstable = new HashMap<MethodSignature, Method>();
 
 	protected ordinals_generator ordinals = new ordinals_generator();
 
 	//public MethodTable() { table = new HashMap<String, Method>(); }
 
-	public Iterator<Method> iterator() { return table.values().iterator(); }
+	//public Iterator<Method> iterator() { return table.values().iterator(); }
+	public Iterator<Method> iterator() { return mstable.values().iterator(); }
 
 	private boolean have_ord( int ord )
 	{
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			if( m.getOrdinal() == ord ) return true;
@@ -40,7 +41,7 @@ public class MethodTable implements IMethodTable
 
 	private boolean mine( Method t )
 	{
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 			if( t == i.next() ) return true;
 		return false;
 	}
@@ -62,7 +63,7 @@ public class MethodTable implements IMethodTable
 
 		m.setOrdinal( ord );
 	}
-
+	/*
 	@Override @Deprecated
 	public Method add( String name, PhantomType type, boolean constructor ) throws PlcException
 	{
@@ -73,23 +74,24 @@ public class MethodTable implements IMethodTable
 		table.put(name, m);
 		return m;
 	}
-
+	 */
 	@Override
 	public Method add( Method m ) throws PlcException
 	{
-		//assert(m.getName() != null);
+		//System.err.println("Add method "+m);
+
 		if(m.getName() == null)
 			throw new PlcException("Null method name", m.toString());
 		mstable.put(m.getSignature(), m);
-		table.put(m.getName(), m);
+		//table.put(m.getName(), m);
 		return m;
 	}
-
+	/*
 	@Override @Deprecated
 	public boolean have( String name ) { return table.containsKey(name); }
 	@Override @Deprecated
 	public Method get( String name ) { return (Method)table.get(name); }
-
+	 */
 	/**
 	 * Get method by signature.
 	 * 
@@ -101,6 +103,8 @@ public class MethodTable implements IMethodTable
 	 */
 	public Method get(MethodSignature signature) 
 	{ 
+		//System.err.println("Get method "+signature);
+
 		Method m =  mstable.get(signature);
 		if( m != null ) return m;
 
@@ -110,7 +114,7 @@ public class MethodTable implements IMethodTable
 
 	/** get method by ordinal */
 	public Method get(int ordinal) {
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			if( m.getOrdinal() == ordinal ) 
@@ -145,12 +149,12 @@ public class MethodTable implements IMethodTable
 	@Override
 	public void print(PrintStream ps) throws PlcException
 	{
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			ps.println(
 					(m.isConstructor() ? "  C'tor  " : "  Method ")
-							+m.toString()+":");
+					+m.toString()+":");
 			if( m.code != null )      m.code.print(ps,2,2);
 			else ps.println("  -- No code!");
 			ps.println("");
@@ -163,7 +167,7 @@ public class MethodTable implements IMethodTable
 	@Override
 	public void set_ordinals() throws PlcException
 	{
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			setupMethodOrdinal(m);
@@ -212,7 +216,7 @@ public class MethodTable implements IMethodTable
 
 		int max = -1;
 
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			if( m.getOrdinal() > max )
@@ -228,7 +232,7 @@ public class MethodTable implements IMethodTable
 	@Override
 	public void preprocess( ParseState ps ) throws PlcException
 	{
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			ps.set_method( m );
@@ -245,7 +249,7 @@ public class MethodTable implements IMethodTable
 		set_ordinals();
 		lst.write("Class version "+version+"\n\n");
 
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			s.set_method( m );
@@ -280,7 +284,7 @@ public class MethodTable implements IMethodTable
 	public void dump()
 	{
 		System.out.println("Methods:");
-		for( Iterator<Method> i = table.values().iterator(); i.hasNext(); )
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			System.out.println("  Method "+m.toString()+":");

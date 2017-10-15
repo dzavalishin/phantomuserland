@@ -11,12 +11,13 @@ import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomStackVar;
-import ru.dz.plc.compiler.trinode.OpMethodCallNode;
 import ru.dz.plc.util.PlcException;
-import ru.dz.soot.SootMain;
+
 
 /**
- * Identifier Node. If this Node is executed - it is a variable load.
+ * <p>Identifier Node.</p>
+ * 
+ * <p>If this Node is executed - it is a variable load.</p>
  */
 
 public class IdentNode extends Node {
@@ -26,17 +27,24 @@ public class IdentNode extends Node {
 	private boolean onObjStack = false;
 
 	private Method getterMethod = null;
+	private ParseState ps;
 	//private Node target = null; // if we access field of another object, need code to get it here
 
 	public String getName() { return ident; }
 
-	public IdentNode( /*PhantomClass c,*/ String ident ) {
+	public IdentNode( /*PhantomClass c,*/ String ident,  ParseState ps  ) {
 		super(null);
 		this.ident = ident;
 		//my_class = c;
+		this.ps = ps;
 	}
 
-	public IdentNode( Node target, String ident ) {
+	/**
+	 * 
+	 * @param target to find out which class to call getter in
+	 * @param ident
+	 */
+	public IdentNode( Node target, String ident, ParseState s  ) {
 		super(target);
 		this.ident = ident;
 	}
@@ -47,6 +55,8 @@ public class IdentNode extends Node {
 	public void find_out_my_type() throws PlcException 
 	{ 
 		if( type == null ) 
+			preprocess_me(ps);
+		if( type == null ) 			
 			throw new PlcException( "ident Node", "no type known", ident ); 
 	}
 	
@@ -91,9 +101,7 @@ public class IdentNode extends Node {
 			PhantomClass tc = _l.getType().get_class();
 			//SootMain.say("come load '"+ident+"' by getter from class "+tc);
 
-			// ERROR TODO wrong - must use target class, not our class
-			//getterMethod = s.get_class().getGetter(ident);
-
+			// must use target class, not our class
 			getterMethod = tc.getGetter(ident);
 
 			/*

@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.NewNode;
@@ -42,6 +43,9 @@ public class PythonFrontendXML {
 	private int errorCount = 0;
 	private PhantomClass pc = null;
 
+	private ParseState				ps = new ParseState();
+
+	
 	void incErrors(String msg) 
 	{
 		errorCount++;
@@ -152,7 +156,7 @@ public class PythonFrontendXML {
 
 	private Map<Integer,RegisterNodeWrapper> registers = new HashMap<Integer, RegisterNodeWrapper>();
 
-	private int nregs;
+	//private int nregs;
 	
 	private void setRegister(int reg, ru.dz.plc.compiler.node.Node n )
 	{
@@ -240,6 +244,7 @@ public class PythonFrontendXML {
 						{
 							pc = new PhantomClass(cname);
 							cm.add(pc);
+							ps.set_class(pc);
 						}
 					}
 					else
@@ -269,13 +274,15 @@ public class PythonFrontendXML {
 			{
 				String num = cn.getAttributes().getNamedItem("num").getNodeValue();
 				log.log(Level.INFO,"regs "+num);
-				
+				int nregs;
+
 				try { nregs = Integer.parseInt(num); }
 				catch( NumberFormatException e )
 				{
 					nregs = 0;
 					incErrors("regs arg not parsable: "+num);
 				}
+				log.log(Level.INFO,"regs "+nregs);
 			}			
 			else if(nname.equals("string"))
 			{
@@ -317,14 +324,14 @@ public class PythonFrontendXML {
 			{
 				// TODO this is wrong!
 				String varName = getString(cn, "gVarName");
-				setRegister(getInt(cn,"to"), new IdentNode(varName) );
+				setRegister(getInt(cn,"to"), new IdentNode(varName,ps) );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
 			else if(nname.equals("gset"))
 			{
 				// TODO this is wrong!
 				String varName = getString(cn, "gVarName");
-				out.add( new OpAssignNode(new IdentNode(varName), useRegister(getInt(cn,"fromreg"))) );
+				out.add( new OpAssignNode(new IdentNode(varName,ps), useRegister(getInt(cn,"fromreg"))) );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
 			else if(nname.equals("get"))

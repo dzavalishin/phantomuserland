@@ -7,7 +7,6 @@ import ru.dz.phantom.code.*;
 import ru.dz.plc.PlcMain;
 //import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.*;
-import ru.dz.soot.SootMain;
 
 /**
  * <p>Used to look for classes.</p>

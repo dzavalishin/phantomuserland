@@ -98,7 +98,8 @@ public class FieldTable {
 		char uch = Character.toUpperCase(ch);
 		return new String("")+uch+name.substring(1);
 	}
-	
+
+
 	public static String makeGetterName(String fld)
 	{
 		return "get"+capitalizeFirst(fld);
@@ -108,16 +109,31 @@ public class FieldTable {
 	{
 		return "set"+capitalizeFirst(fld);
 	}
+
 	
-	public void generateGettersSetters(PhantomClass pc) throws PlcException
+	public static MethodSignature makeGetterSignature(String fld)
+	{		
+		List<PhantomType> args = new LinkedList<PhantomType>();
+		return new MethodSignature(makeGetterName(fld), args);
+	}
+	
+	public MethodSignature makeSetterSignature(String fld)
+	{
+		List<PhantomType> args = new LinkedList<PhantomType>();
+		args.add(get(fld).getType());
+		return new MethodSignature(makeSetterName(fld), args);
+	}
+	
+	
+	public void generateGettersSetters(PhantomClass pc, ParseState ps) throws PlcException
 	{
 		for( PhantomField f : table.values())
 		{
-			generategetterSetter(pc,f);
+			generategetterSetter(pc,f,ps);
 		}
 	}
 	
-	private void generategetterSetter(PhantomClass pc, PhantomField f) throws PlcException
+	private void generategetterSetter(PhantomClass pc, PhantomField f, ParseState ps) throws PlcException
 	{
 		if(!f.isPublic())
 			return;
@@ -127,7 +143,7 @@ public class FieldTable {
 		
 		StatementsNode getNodes = new StatementsNode();
 		get.code = getNodes;			
-		getNodes.addNode(new ReturnNode(new IdentNode(f.getName())));
+		getNodes.addNode(new ReturnNode(new IdentNode(f.getName(), ps)));
 		
 		
 		// TODO test setter!
@@ -141,8 +157,8 @@ public class FieldTable {
 		set.code = setNodes;			
 		//setNodes.addNode(new ReturnNode(new IdentNode(f.getName())));
 		setNodes.addNode(new OpAssignNode(
-				new IdentNode(f.getName()), // assign to
-				new IdentNode("value") // arg name, see above
+				new IdentNode(f.getName(), ps), // assign to
+				new IdentNode("value", ps) // arg name, see above
 				));
 		
 		

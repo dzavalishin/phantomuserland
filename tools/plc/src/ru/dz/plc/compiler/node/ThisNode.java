@@ -39,7 +39,7 @@ public class ThisNode extends Node {
 
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
-		llc.putln( getLlvmTempName()+" = call "+llc.getObjectType()+" @PhantomVm_getThis();" );
+		llc.putln( getLlvmTempName()+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_getThis();" );
 	}
 	
 	@Override

@@ -1,11 +1,11 @@
 package ru.dz.plc.compiler;
 
-import ru.dz.plc.PlcMain;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
 
 import java.io.*;
 import java.util.*;
+
 
 /**
  * <p>Class container.</p>
@@ -116,14 +116,14 @@ public class PhantomClass {
 	// Methods
 	// ------------------------------------------------------------------------
 
-	@Deprecated
+	//@Deprecated
 	protected Method findMethod(Method his_m) {
-		Method m = mt.get(his_m.getName());
+		Method m = mt.get(his_m.getSignature());
 		if (m != null) return m;
 		if (!have_nonvoid_parent)return null;
 		return parent_class.findMethod(his_m);
 	}
-
+	/*
 	@Deprecated
 	public Method findMethod(String name) {
 		Method m = mt.get(name);
@@ -131,7 +131,7 @@ public class PhantomClass {
 		if (!have_nonvoid_parent)return null;
 		return parent_class.findMethod(name);
 	}
-
+*/
 	public Method findMethod(MethodSignature signature) {
 		Method m = mt.get(signature);
 		//return null; // TODO why?
@@ -190,14 +190,14 @@ public class PhantomClass {
 		// Here we do it
 		m.setOrdinal(bm.getOrdinal());
 	}
-
+/*
 	@Deprecated
 	public Method addMethod(String name, PhantomType type, boolean constructor ) throws PlcException {
 		Method m = mt.add(name, type, constructor );
 		//check_base_for_method(m);
 		return m;
 	}
-
+*/
 	public Method addMethod(Method m) throws PlcException {
 		//SootMain.say("adding method "+m);
 		mt.add(m);
@@ -308,7 +308,8 @@ public class PhantomClass {
 			Method im = i.next();
 
 			// find corresponding my Method
-			Method m = mt.get(im.getName());
+			//Method m = mt.get(im.getName());
+			Method m = mt.get(im.getSignature());
 
 			if( m == null )
 				throw new PlcException("class "+this.name +" definition",
@@ -420,21 +421,16 @@ public class PhantomClass {
 
 	/** Get getter for given field name */
 	public Method getGetter(String ident) {
-		//SootMain.say("in get method "+ident+" class "+this);		mt.dump();
-		String gName = FieldTable.makeGetterName(ident);
-		//SootMain.say("look for getter "+gName);
-		return mt.get(gName);
+		return mt.get(FieldTable.makeGetterSignature(ident));
 	}
 
 	/** Get setter for given field name */
 	public Method getSetter(String ident) {
-
-		String gName = FieldTable.makeSetterName(ident);
-		return mt.get(gName);
+		return mt.get(ft.makeSetterSignature(ident));
 	}
 
-	public void generateGettersSetters() throws PlcException {
-		ft.generateGettersSetters(this);		
+	public void generateGettersSetters(ParseState ps) throws PlcException {
+		ft.generateGettersSetters(this,ps);		
 		//SootMain.say("class "+this);		mt.dump();
 	}
 

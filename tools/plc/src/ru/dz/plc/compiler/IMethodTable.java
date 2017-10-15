@@ -27,13 +27,13 @@ public interface IMethodTable {
 			CodeGeneratorState s, String version) throws IOException, PlcException;
 
 	
-	public abstract Method get(String name);
+	//public abstract Method get(String name);
 
-	public abstract boolean have(String name);
+	//public abstract boolean have(String name);
 
 	public abstract Method add(Method m) throws PlcException;
 
-	public abstract Method add(String name, PhantomType type, boolean constructor ) throws PlcException;
+	//public abstract Method add(String name, PhantomType type, boolean constructor ) throws PlcException;
 
 	
 	public abstract void print(PrintStream ps) throws PlcException;

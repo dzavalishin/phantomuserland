@@ -8,7 +8,6 @@ import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
-import ru.dz.soot.SootMain;
 
 /**
  * <p>Static method call node.</p>

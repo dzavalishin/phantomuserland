@@ -43,7 +43,6 @@ import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.OpNotNode;
 import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.compiler.node.StatementsNode;
-import ru.dz.plc.compiler.node.StringConstNode;
 import ru.dz.plc.compiler.node.StringConstPoolNode;
 import ru.dz.plc.compiler.node.SwitchCaseNode;
 import ru.dz.plc.compiler.node.SwitchDefaultNode;
@@ -107,7 +106,8 @@ extends GrammarHelper {
 	private final int id_extends, id_implements, id_interface;
 
 	//private final int id_const;
-	private final int id_summon, id_thread, id_package, id_import;
+	//private final int id_summon, id_thread, id_package, id_import;
+	private final int id_package, id_import;
 
 
 	protected int getInt() throws PlcException { return super.getInt(id_int_const); }
@@ -208,8 +208,8 @@ extends GrammarHelper {
 		id_new         = l.create_keyword("new");
 		id_this        = l.create_keyword("this");
 
-		id_summon      = l.create_keyword("summon");
-		id_thread      = l.create_keyword("thread");
+		//id_summon      = l.create_keyword("summon");
+		//id_thread      = l.create_keyword("thread");
 
 		// parametric
 		id_ident = Lex.get_id();
@@ -594,10 +594,11 @@ extends GrammarHelper {
 	}
 
 
-	private PhantomType checkAndConvertType(String string) {
+	/*private PhantomType checkAndConvertType(String string) {
 		// TODO Auto-generated method stub
 		return null;
-	}
+	}*/
+	
 	private boolean checkConstructorName(PhantomClass me, String mname) 
 	{
 		//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
@@ -1019,11 +1020,9 @@ extends GrammarHelper {
 	 */
 	private Node parseExpression(boolean leftmost) throws PlcException, IOException {
 		if(debug) System.err.println("in expr");
-		if(false)
-		{
-			return parseRvalue(leftmost);
-		}
-		else
+
+		//return parseRvalue(leftmost);
+
 		if( peek() == id_lparen )
 		{
 			Node out;
@@ -1048,8 +1047,7 @@ extends GrammarHelper {
 				return new CastNode( out, pt );
 			}
 		}
-		else
-		
+		else		
 			return parseRvalue(leftmost);
 	}
 
@@ -1062,11 +1060,11 @@ extends GrammarHelper {
 		Token t = l.get();
 		int id = t.get_id();
 
-		if( id == id_ident )      return new MethodNode(t.value()).setContext( l );
+		if( id == id_ident )      return new MethodNode(t.value(),ps).setContext( l );
 		else if( id == id_int_const )
 		{
 			l.unget();
-			return new MethodNode(getInt()).setContext( l );
+			return new MethodNode(getInt(),ps).setContext( l );
 		}
 		else
 		{
@@ -1331,7 +1329,10 @@ extends GrammarHelper {
 				Node args = parse_call_args();
 
 				IdentNode ident = (IdentNode)atom;
-				Node method = new MethodNode( ident.getName() ).setContext( l );
+				MethodNode method = new MethodNode( ident.getName(), ps );
+				method.setContext( l );
+				//method.setSignature(new MethodSignature(ident.getName(), args));
+				
 				out = new OpMethodCallNode(object, method, args).setContext( l );
 				//out = new op_method_call_node(object, atom, args);
 			}
@@ -1366,6 +1367,7 @@ extends GrammarHelper {
 
 		if( id == id_ident )
 		{
+			// XXX this is bullshit, use parseTypeSpeculative to find ver defs.
 			// TODO check for var def with leading type
 			if( leftmost) {
 				PhantomType type = null;
@@ -1395,7 +1397,7 @@ extends GrammarHelper {
 				}
 			} 
 
-			return new IdentNode( t.value() ).setContext( l );
+			return new IdentNode( t.value(), ps ).setContext( l );
 		}
 		else if(id == id_null)
 			return new NullNode().setContext( l );

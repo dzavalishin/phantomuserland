@@ -10,12 +10,11 @@ import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.MethodSignature;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
-import ru.dz.plc.compiler.PhantomStackVar;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.llvm.LlvmStringConstant;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
-import ru.dz.soot.SootMain;
+
 
 
 /**
@@ -248,7 +247,7 @@ public class NewNode extends Node
 		
 		cgen.putln(";");
 
-		cgen.put(cgen.getObjectType()+" tmp_new = ");
+		cgen.put(C_codegen.getObjectType()+" tmp_new = ");
 		cgen.putln(C_codegen.getJitRuntimeFuncPrefix()+"New( tmp_class );");
 
 		// TODO call constructor

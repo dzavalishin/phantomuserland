@@ -1,6 +1,6 @@
 
 package ru.dz.plc.compiler.binode;
-
+/*
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
@@ -10,7 +10,7 @@ import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
-
+*/
 /**
  * <p>Constructor call node.</p>
  * 

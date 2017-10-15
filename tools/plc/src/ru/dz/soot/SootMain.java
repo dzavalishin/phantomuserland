@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import ru.dz.plc.PlcMain;
 import ru.dz.plc.compiler.ClassMap;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomType;
@@ -316,8 +317,12 @@ public class SootMain {
 
 			}
 
+			ParseState				ps = new ParseState();
+
 			PhantomClass pc = new PhantomClass(convertClassName(c.getName()));
 
+			ps.set_class(pc);
+			
 			Chain<SootField> fields = c.getFields();
 			for( SootField f : fields )
 			{
@@ -327,13 +332,13 @@ public class SootMain {
 				pf.setPublic(!f.isPrivate());
 			}
 
-			pc.generateGettersSetters();
+			pc.generateGettersSetters(ps);
 
 			List<SootMethod> mlist = c.getMethods();
 
 			for( SootMethod m : mlist )
 			{
-				SootMethodTranslator mt = new SootMethodTranslator(m,pc);
+				SootMethodTranslator mt = new SootMethodTranslator(m,pc, ps);
 				//doMethod(m);
 				mt.process();
 			}
