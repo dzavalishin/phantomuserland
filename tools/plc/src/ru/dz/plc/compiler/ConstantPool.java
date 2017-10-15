@@ -49,8 +49,9 @@ public class ConstantPool {
 	}
 	
 	
-	public void codegen(RandomAccessFile os, FileWriter lst,
-			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException 
+//	public void codegen(RandomAccessFile os, FileWriter lst,
+//			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException 
+	public void codegen(CodeWriters cw) throws PlcException
 	{
 		//llvmFile.write("; fields: \n");
 		for( int id : table.keySet())
@@ -64,13 +65,13 @@ public class ConstantPool {
 				String sv = (String) v;
 				done = true;
 
-				ConstantPoolFileInfo info = new ConstantPoolFileInfo(os, id, sv);
+				ConstantPoolFileInfo info = new ConstantPoolFileInfo(cw.get_os(), id, sv);
 				
 				try {
 					info.write();
-					llvmFile.write("; label const_pool"+id+":\n; .string '"+sv+"'\n");
-					llvmFile.write("; - constant for const pool id "+id+" val '"+sv+"'\n");
-					c_File.write("static const char* const_pool"+id+" = \""+sv+"\"\n");
+					cw.llvmFile.write("; label const_pool"+id+":\n; .string '"+sv+"'\n");
+					cw.llvmFile.write("; - constant for const pool id "+id+" val '"+sv+"'\n");
+					cw.c_File.write("static const char* const_pool"+id+" = \""+sv+"\"\n");
 					//c_File.write("// - constant for const pool id "+id+" val '"+sv+"'\n");
 				} catch (IOException e) {
 					throw new PlcException("Writing const id "+id, e.toString());
@@ -82,6 +83,7 @@ public class ConstantPool {
 			
 		}
 	}
+
 
 	
 }

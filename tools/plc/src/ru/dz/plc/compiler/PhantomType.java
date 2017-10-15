@@ -354,6 +354,17 @@ public class PhantomType {
 		return "void";
 	} 
 
+	public String toJavaType() {
+		if( _class != null ) return "Object"; // TODO must generate real class names  
+
+		if( _is_int )     return "int";
+		if( _is_long )    return "long";
+		if( _is_float )   return "float";
+		if( _is_double )  return "double";
+		//if( _is_string ) _class = ClassMap.get_map().get(".internal.string",false,null);
+
+		return "void";
+	}
 
 
 	// This is used to generate function name with encoded arg type info
@@ -437,6 +448,7 @@ public class PhantomType {
 
 		return biggerType(tl, tr);
 	}
+
 
 }
 

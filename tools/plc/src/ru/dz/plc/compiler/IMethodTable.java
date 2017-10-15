@@ -22,10 +22,12 @@ public interface IMethodTable {
 //			BufferedWriter llvmFile, CodeGeneratorState s, String version)
 //			throws IOException, PlcException;
 
+	/*
 	public abstract void codegen(RandomAccessFile os, FileWriter lst,
 			BufferedWriter llvmFile, BufferedWriter c_File, 
 			CodeGeneratorState s, String version) throws IOException, PlcException;
-
+	*/
+	public abstract void codegen(CodeWriters cw, CodeGeneratorState s) throws IOException, PlcException;
 	
 	//public abstract Method get(String name);
 
@@ -39,5 +41,6 @@ public interface IMethodTable {
 	public abstract void print(PrintStream ps) throws PlcException;
 
 	public abstract void dump();
+
 
 }

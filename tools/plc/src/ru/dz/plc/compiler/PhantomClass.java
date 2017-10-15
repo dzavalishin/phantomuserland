@@ -354,19 +354,29 @@ public class PhantomClass {
 		mt.print(ps);
 	}
 
-	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, String version) throws IOException, PlcException
+	//public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, String version) throws IOException, PlcException
+	public void codegen(CodeWriters cw) throws IOException, PlcException
 	{
-		llvmFile.write("; class "+getName()+"\n\n");
-		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
+		cw.llvmFile.write("; class "+getName()+"\n\n");
+		cw.llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
 
-		c_File.write("// class "+getName()+"\n\n"); // TODO class version
-		c_File.write("#include <phantom/jit/generated.h>\n\n");
+		cw.c_File.write("// class "+getName()+"\n\n"); // TODO class version
+		cw.c_File.write("#include <phantom/jit/generated.h>\n\n");
+		
+		cw.javaFile.write("public abstract class "+getName().substring(1)+" {\n");
 		
 		CodeGeneratorState s = new CodeGeneratorState(this);
+		
 		//ft.generateGettersSetters(this);
-		mt.codegen(os, lst, llvmFile, c_File, s, version);
-		ft.codegen(os, lst, llvmFile, c_File, s, version);
-		constantPool.codegen(os, lst, llvmFile, c_File, s, version);
+		
+		//mt.codegen(os, lst, llvmFile, c_File, s, version);
+		//ft.codegen(os, lst, llvmFile, c_File, s, version);
+		//constantPool.codegen(os, lst, llvmFile, c_File, s, version);
+		mt.codegen(cw,s);
+		ft.codegen(cw,s);
+		constantPool.codegen(cw);
+
+		cw.javaFile.write("}; // end class "+getName().substring(1)+"\n");
 	}
 
 	public void preprocess(ParseState ps) throws PlcException
@@ -438,6 +448,7 @@ public class PhantomClass {
 		SootMain.say("class "+this);		
 		mt.dump();
 	}
+
 
 
 

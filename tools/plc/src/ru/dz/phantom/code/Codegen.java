@@ -29,7 +29,7 @@ public class Codegen extends opcode_ids {
 	// ------------------------------------------------------------------------
 
 	private int next_label_no = 0;
-	private FileWriter lst = null;
+	private Writer lst = null;
 
 	/**
 	 * Create a new unique label name.
@@ -63,9 +63,9 @@ public class Codegen extends opcode_ids {
 		this.os = null;
 	}
 
-	public void set_os(RandomAccessFile f, FileWriter lst ) throws IOException {
+	public void set_os(RandomAccessFile f, Writer lst2 ) throws IOException {
 		this.os = f;
-		this.lst  = lst;
+		this.lst  = lst2;
 		start_position_in_file = os.getFilePointer();
 	}
 

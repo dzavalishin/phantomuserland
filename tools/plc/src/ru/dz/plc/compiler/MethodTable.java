@@ -247,9 +247,10 @@ public class MethodTable implements IMethodTable
 	 * @see ru.dz.plc.compiler.IMethodTable#codegen(java.io.RandomAccessFile, java.io.FileWriter, java.io.BufferedWriter, ru.dz.plc.compiler.CodeGeneratorState, java.lang.String)
 	 */
 	@Override
-	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws IOException, PlcException {
+	//public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws IOException, PlcException {
+	public void codegen(CodeWriters cw, CodeGeneratorState s) throws IOException, PlcException {
 		set_ordinals();
-		lst.write("Class version "+version+"\n\n");
+		cw.lstc.write("Class version "+cw.getVersionString()+"\n\n");
 
 		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
@@ -258,26 +259,42 @@ public class MethodTable implements IMethodTable
 
 			m.preprocess( s.get_class() );
 
-			lst.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
-			llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
-			c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
+			cw.lstc.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
+			cw.llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
+			cw.c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
+			//cw.javaFile.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
+			
+			cw.javaFile.write( "\tpublic abstract "+m.getType().toJavaType()+" "+m.getName()+"( " );
+			Iterator<ArgDefinition> iter = m.getArgIterator();
+			while( iter.hasNext() )
+			{
+				ArgDefinition arg = iter.next();
+				cw.javaFile.write( arg.getType().toJavaType()+" "+arg.getName() );
+				
+				if(iter.hasNext())
+					cw.javaFile.write( ", " );
+			}
+			if(m.getArgCount() == 0)
+				cw.javaFile.write( "void" );
+			
+			cw.javaFile.write( " );\n" );
 
-			MethodFileInfo mf = new MethodFileInfo(os, lst, m, s);
+			MethodFileInfo mf = new MethodFileInfo(cw.get_os(), cw.lstc, m, s);
 			mf.write();
 
-			MethodSignatureFileInfo ms = new MethodSignatureFileInfo(os, m, s);
+			MethodSignatureFileInfo ms = new MethodSignatureFileInfo(cw.get_os(), m, s);
 			ms.write();
 
-			MethodLineNumbersFileInfo ml = new MethodLineNumbersFileInfo(os,m);
+			MethodLineNumbersFileInfo ml = new MethodLineNumbersFileInfo(cw.get_os(),m);
 			ml.write();
 
-			m.generateLlvmCode(s, llvmFile);
-			m.generateC_Code(s, c_File);
+			m.generateLlvmCode(s, cw.llvmFile);
+			m.generateC_Code(s, cw.c_File);
 
 			s.set_method( null );
-			lst.write("--\nmethod end\n\n");
-			llvmFile.write("\n\n; end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
-			c_File.write("\n\n// end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
+			cw.lstc.write("--\nmethod end\n\n");
+			cw.llvmFile.write("\n\n; end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
+			cw.c_File.write("\n\n// end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 		}
 	}
 
@@ -292,6 +309,7 @@ public class MethodTable implements IMethodTable
 			System.out.println("  Method "+m.toString()+":");
 		}
 	}
+
 
 
 }

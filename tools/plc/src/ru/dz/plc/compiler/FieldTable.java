@@ -164,22 +164,25 @@ public class FieldTable {
 		
 	}
 	
-	public void codegen(RandomAccessFile os, FileWriter lst,
-			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException 
+//	public void codegen(RandomAccessFile os, FileWriter lst,
+//			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException
+	public void codegen(CodeWriters cw, CodeGeneratorState s) throws PlcException
 	{
 		//llvmFile.write("; fields: \n");
 		for( PhantomField f : table.values())
 		{
-			FieldFileInfo info = new FieldFileInfo(os, lst, f);
+			FieldFileInfo info = new FieldFileInfo(cw.get_os(), cw.lstc, f);
 			try {
 				info.write();
-				llvmFile.write("; - field "+f.getName()+"\n");
-				c_File.write("// - field "+f.getName()+"\n");
+				cw.llvmFile.write("; - field "+f.getName()+"\n");
+				cw.c_File.write("// - field "+f.getName()+"\n");
+				cw.javaFile.write("\n\t"+f.getType().toJavaType()+"\t"+f.getName()+";\n");
 			} catch (IOException e) {
 				throw new PlcException("Writing field "+f.getName(), e.toString());
 			}
 		}
 	}
+
 
 }
 

@@ -49,6 +49,7 @@ plib/bin/*.lstc
 plib/bin/*.lst
 plib/bin/*.ll
 plib/bin/*.c
+plib/bin/*.java
 oldtree/kernel/phantom/phantom
 run/fat/class/*.pc
 run/*.img
@@ -87,6 +88,7 @@ tools/plc/*.pc
 tools/plc/*.lstc
 tools/plc/*.lst
 tools/plc/*.ll
+tools/plc/*.java
 plib/java/temp
 test/unit/CMakeFiles
 test/unit/suites/CMakeFiles
