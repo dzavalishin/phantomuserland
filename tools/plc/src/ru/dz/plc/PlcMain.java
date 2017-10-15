@@ -47,12 +47,15 @@ public class PlcMain {
 			}
 		catch( PlcException e ) {
 			System.out.println("Failed: " + e.toString());
+			System.exit(2);
 		}
 		catch( java.io.FileNotFoundException e) {
 			System.out.println("File not found: " + e.toString());
+			System.exit(2);
 		}
 		catch( java.io.IOException e) {
 			System.out.println("IO error: " + e.toString());
+			System.exit(2);
 		}
 
 	}

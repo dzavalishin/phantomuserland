@@ -24,6 +24,7 @@ import ru.dz.plc.util.PlcException;
 
 public class MethodSignature {
 
+	private static final String SIGNATURE_DELIMITER = "_#_";
 	private String signature;
 	private List<PhantomType> args;
 	private String name;
@@ -69,13 +70,21 @@ public class MethodSignature {
 		
 		name = Name;
 		this.args = args;
+		
 		// Generate signature string
 		StringBuilder sb = new StringBuilder(Name);
 		
 		for( PhantomType t : args )
 		{
-			sb.append("_#_"); // Some character that can't happen in type name
-			sb.append(t.toString());			
+			sb.append(SIGNATURE_DELIMITER); // Some character that can't happen in type name
+			sb.append(t.toString());
+			assert(!t.is_void());
+		}
+		
+		if( args.size() == 0 )
+		{
+			sb.append(SIGNATURE_DELIMITER);
+			sb.append("void");
 		}
 		
 		signature = sb.toString();
@@ -112,6 +121,8 @@ public class MethodSignature {
 	 */
 	boolean canBeCalledFor( MethodSignature callSignature )
 	{
+		//System.err.println( "canBeCalledFor callee "+toString()+" caller "+callSignature.toString() );
+		
 		Iterator<PhantomType> callerTypeI = callSignature.args.iterator();
 		for( PhantomType ourType : args )
 		{

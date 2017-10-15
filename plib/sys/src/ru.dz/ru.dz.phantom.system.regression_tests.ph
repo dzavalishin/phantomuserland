@@ -37,6 +37,38 @@ class regression_tests
     var str_array : .internal.string [];
     var ctor_called : int;
 
+	var called_string_one : int;
+	var called_int_one : int;
+
+	void sig_func( var a : .internal.string )
+	{
+		called_string_one = 1;
+	}
+
+	void sig_func( var a : .internal.int )
+	{
+		called_int_one = 1;
+	}
+
+
+    void signature_test()
+    {
+		called_string_one = 0;
+		called_int_one = 0;
+
+		sig_func("hello");
+        if( called_string_one == 0 ) 		throw "signature err 1";
+        if( called_int_one != 0 ) 			throw "signature err 2";
+
+		called_string_one = 0;
+		called_int_one = 0;
+
+		sig_func(1);
+        if( called_string_one != 0 ) 		throw "signature err 3";
+        if( called_int_one == 0 ) 			throw "signature err 4";
+    }
+
+
 	void regression_tests()
 	{
 		ctor_called = 3456;
@@ -55,7 +87,7 @@ class regression_tests
         array_test();
         hashmap_directory_test();
 
-        print("ctor_called ="); print(ctor_called); print("\n");
+        print("ctor_called ="); print(ctor_called.toString()); print("\n");
 		if( ctor_called != 3456 )
 			throw "constructor failed";
 
@@ -63,6 +95,7 @@ class regression_tests
         float_test();
         double_test();
 
+		signature_test();
 
 	// test c'tor call
 
@@ -117,8 +150,8 @@ class regression_tests
             i = i - 1;
             if( int_array[i] != i )
             {
-                print("array error: array["); print(i);
-                print("] == "); print(int_array[i]);
+                print("array error: array["); print(i.toString());
+                print("] == "); print(int_array[i].toString());
                 throw "array error";
             }
         }
@@ -231,7 +264,7 @@ class regression_tests
         dir = new .internal.directory();
 
         //print("put 1\n");
-        dir.put( "Hello", "world" );
+        dir.put( "Hello", (.internal.object)"world" );
         //print("put 2\n");
         dir.put( "Privet", "mir" );
         //print("put 3\n");
@@ -339,6 +372,10 @@ class regression_tests
         if( b>=a ) 		throw "double error 8";
         print("double tests passed\n");
     }
+
+
+
+
 
 
 };

@@ -78,11 +78,13 @@ public class MethodTable implements IMethodTable
 	@Override
 	public Method add( Method m ) throws PlcException
 	{
-		//System.err.println("Add method "+m);
-
 		if(m.getName() == null)
 			throw new PlcException("Null method name", m.toString());
-		mstable.put(m.getSignature(), m);
+		MethodSignature signature = m.getSignature();
+
+		//System.err.println("Add method "+m+" sig "+signature);
+
+		mstable.put(signature, m);
 		//table.put(m.getName(), m);
 		return m;
 	}

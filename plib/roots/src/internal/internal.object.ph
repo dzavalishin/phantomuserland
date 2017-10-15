@@ -36,7 +36,9 @@ class .internal.object
 	void destruct_me () [1] {  }
 	.internal."class" getClass () [2] {  }
 	void clone() [3] {  }
-	int equals(var object) [4] { }
+
+//	int equals(var object) [4] { }
+	int equals(var object: .internal.object) [4] { }
 
 	.internal.string toString() [5] {  }
 

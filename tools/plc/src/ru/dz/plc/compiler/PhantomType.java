@@ -277,10 +277,10 @@ public class PhantomType {
 	{
 		if( this.equals(src) ) return true;
 
+		if( is_void() || src.is_void() ) return false;
+		
 		if( !_is_known ) return true; // variables of unknown type can eat anything
 		if( !src._is_known ) return false; // i know my type and he doesn't
-
-		if( _is_void || src._is_void ) return false;
 
 		if( _is_container != src._is_container ) return false;
 

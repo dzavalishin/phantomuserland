@@ -87,7 +87,9 @@ class boot
     void startup(var _boot_object @const ) [8]
     {
         try {
-            do_startup( _boot_object );
+//            do_startup( _boot_object );
+            boot_object = _boot_object;
+            do_startup();
         }
         catch( string e )
         {
@@ -96,7 +98,8 @@ class boot
     }
 
 
-    void do_startup(var _boot_object : .internal.object @const )
+    //void do_startup(var _boot_object : .internal.object @const )
+    void do_startup()
     {
 // uncomment to run Java unit tests
 /*
@@ -105,7 +108,7 @@ class boot
 */
         debug = 1;
 
-        boot_object = _boot_object;
+        //boot_object = _boot_object;
 
         print("Phantom System Environment Setup is running\n");
 

@@ -45,7 +45,7 @@ struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref,
  */
 
 
-#define DEB_CALLRET 0
+#define DEB_CALLRET 1
 #define DEB_DYNCALL 0
 
 int debug_print_instr = 0;
@@ -1280,12 +1280,21 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 pvm_object_t target_class = os_pop();
                 pvm_object_t o = os_pop();
 
-                // TODO cast here!
-                printf("!!! CAST unimpl !!!\n");
-                printf("obj = "); pvm_object_dump(o);
-                printf("class = "); pvm_object_dump(target_class);
-                printf("\n!!! CAST unimpl !!!\n");
+                if( pvm_object_class_exactly_is(o,target_class) )
+                {
+                    // nothing to do, oh, baby, stay in bed
+                    os_push( o );
+                    break;
+                }
 
+                if(1||debug_print_instr)
+                {
+                // TODO cast here!
+                    printf("!!! CAST unimpl !!!\n");
+                    printf("obj = "); pvm_object_dump(o);
+                    printf("class = "); pvm_object_dump(target_class);
+                    printf("\n!!! CAST unimpl !!!\n");
+                }
                 os_push( o );
                 LISTIA("cast %s", "unimplemented!");
             }
