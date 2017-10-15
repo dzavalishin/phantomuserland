@@ -35,7 +35,7 @@ class thread_test // extends runnable
             console.putws("Thread is running... ");
             console.putws("... ");
             incr = incr + 1;
-            console.putws(incr.5());
+            console.putws(incr.toString());
             console.putws("  ");
         }
     }

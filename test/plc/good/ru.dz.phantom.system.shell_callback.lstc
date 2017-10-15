@@ -1,4 +1,4 @@
-Class version 20160114032157520
+Class version 20170915052829453
 
 method init ordinal 16
 --
@@ -8,13 +8,13 @@ method init ordinal 16
   const "arg count: init in .ru.dz.phantom.system.shell_callback"	//  @11
   throw				//  @71
 _label_0:	//  @72
-  summon null			//  @72
-  ; Line 37			//  @73
-  get o stk pos=0			//  @73
-  os dup				//  @78
-  save fld=0			//  @79
-  os drop				//  @81
-  ret				//  @82
+  stack_reserve obj=1 int=0	//  @72
+    ; Line 37			//  @75
+  get o stk pos=0			//  @75
+  os dup				//  @80
+  save fld=0			//  @81
+  os drop				//  @83
+  ret				//  @84
 --
 method end
 
@@ -26,36 +26,32 @@ method run ordinal 17
   const "arg count: run in .ru.dz.phantom.system.shell_callback"	//  @11
   throw				//  @70
 _label_0:	//  @71
-  summon null			//  @71
-  ; Line 30			//  @72
-  load fld=0			//  @72
-  ; Line 30			//  @74
-  const "
-
-Timer callback: "	//  @74
-  ; Line 30			//  @97
-  call m=17 nparm=1		//  @97
-  os drop				//  @99
-  ; Line 31			//  @100
-  load fld=0			//  @100
-  ; Line 31			//  @102
-  get o stk pos=0			//  @102
-  call m=5 nparm=0		//  @107
-  ; Line 31			//  @109
-  call m=17 nparm=1		//  @109
-  os drop				//  @111
-  ; Line 31			//  @112
-  ; Line 32			//  @112
-  load fld=0			//  @112
-  ; Line 32			//  @114
-  const " !!
-
-"			//  @114
-  ; Line 32			//  @124
-  call m=17 nparm=1		//  @124
-  os drop				//  @126
-  ; Line 32			//  @127
-  ret				//  @127
+  stack_reserve obj=1 int=0	//  @71
+    ; Line 30			//  @74
+  load fld=0			//  @74
+    ; Line 30			//  @76
+  const_pool <0>			//  @76
+    ; Line 30			//  @81
+  call m=17 nparm=1		//  @81
+  os drop				//  @83
+    ; Line 31			//  @84
+  load fld=0			//  @84
+    ; Line 31			//  @86
+  get o stk pos=0			//  @86
+  call m=5 nparm=0		//  @91
+    ; Line 31			//  @93
+  call m=17 nparm=1		//  @93
+  os drop				//  @95
+    ; Line 31			//  @96
+    ; Line 32			//  @96
+  load fld=0			//  @96
+    ; Line 32			//  @98
+  const_pool <1>			//  @98
+    ; Line 32			//  @103
+  call m=17 nparm=1		//  @103
+  os drop				//  @105
+    ; Line 32			//  @106
+  ret				//  @106
 --
 method end
 

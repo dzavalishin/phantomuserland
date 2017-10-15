@@ -1,24 +1,6 @@
-Class version 20160114032157727
+Class version 20160109081030898
 
-method init ordinal 16
---
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .test.toPhantom.PhantomPrinter"	//  @11
-  throw				//  @65
-_label_0:	//  @66
-  summon null			//  @66
-  ; Line 45			//  @67
-  get o stk pos=0			//  @67
-  os dup				//  @72
-  save fld=0			//  @73
-  os drop				//  @75
-  ret				//  @76
---
-method end
-
-method print ordinal 17
+method print ordinal 16
 --
   const 1				//  @0
   isublu				//  @5
@@ -26,13 +8,31 @@ method print ordinal 17
   const "arg count: print in .test.toPhantom.PhantomPrinter"	//  @11
   throw				//  @66
 _label_0:	//  @67
-  summon null			//  @67
-  ; Line 32			//  @68
-  load fld=0			//  @68
-  ; Line 32			//  @70
-  get o stk pos=0			//  @70
-  ; Line 32			//  @75
-  call m=17 nparm=1		//  @75
+  stack_reserve obj=1 int=0	//  @67
+    ; Line 32			//  @70
+  load fld=0			//  @70
+    ; Line 32			//  @72
+  get o stk pos=0			//  @72
+    ; Line 32			//  @77
+  call m=17 nparm=1		//  @77
+  os drop				//  @79
+  ret				//  @80
+--
+method end
+
+method init ordinal 17
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: init in .test.toPhantom.PhantomPrinter"	//  @11
+  throw				//  @65
+_label_0:	//  @66
+  stack_reserve obj=1 int=0	//  @66
+    ; Line 45			//  @69
+  get o stk pos=0			//  @69
+  os dup				//  @74
+  save fld=0			//  @75
   os drop				//  @77
   ret				//  @78
 --
@@ -46,16 +46,16 @@ method printInt ordinal 18
   const "arg count: printInt in .test.toPhantom.PhantomPrinter"	//  @11
   throw				//  @69
 _label_0:	//  @70
-  summon null			//  @70
-  ; Line 38			//  @71
-  load fld=0			//  @71
-  ; Line 38			//  @73
-  get o stk pos=0			//  @73
-  call m=5 nparm=0		//  @78
-  ; Line 38			//  @80
-  call m=17 nparm=1		//  @80
-  os drop				//  @82
-  ret				//  @83
+  stack_reserve obj=1 int=0	//  @70
+    ; Line 38			//  @73
+  load fld=0			//  @73
+    ; Line 38			//  @75
+  get o stk pos=0			//  @75
+  call m=5 nparm=0		//  @80
+    ; Line 38			//  @82
+  call m=17 nparm=1		//  @82
+  os drop				//  @84
+  ret				//  @85
 --
 method end
 

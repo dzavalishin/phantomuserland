@@ -1,38 +1,6 @@
-Class version 20160114032154636
+Class version 20170915052436464
 
-method getKey ordinal 16
---
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getKey in .phantom.util.hashpair"	//  @11
-  throw				//  @59
-_label_0:	//  @60
-  ; Line 26			//  @60
-  load fld=0			//  @60
-  ; Line 26			//  @62
-  ret				//  @62
-  ret				//  @63
---
-method end
-
-method getVal ordinal 17
---
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getVal in .phantom.util.hashpair"	//  @11
-  throw				//  @59
-_label_0:	//  @60
-  ; Line 36			//  @60
-  load fld=1			//  @60
-  ; Line 36			//  @62
-  ret				//  @62
-  ret				//  @63
---
-method end
-
-method setNext ordinal 18
+method setNext ordinal 16
 --
   const 1				//  @0
   isublu				//  @5
@@ -40,33 +8,17 @@ method setNext ordinal 18
   const "arg count: setNext in .phantom.util.hashpair"	//  @11
   throw				//  @60
 _label_0:	//  @61
-  summon null			//  @61
-  ; Line 42			//  @62
-  get o stk pos=0			//  @62
-  os dup				//  @67
-  save fld=2			//  @68
-  os drop				//  @70
-  ret				//  @71
+  stack_reserve obj=1 int=0	//  @61
+    ; Line 42			//  @64
+  get o stk pos=0			//  @64
+  os dup				//  @69
+  save fld=2			//  @70
+  os drop				//  @72
+  ret				//  @73
 --
 method end
 
-method getNext ordinal 19
---
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getNext in .phantom.util.hashpair"	//  @11
-  throw				//  @60
-_label_0:	//  @61
-  ; Line 47			//  @61
-  load fld=2			//  @61
-  ; Line 47			//  @63
-  ret				//  @63
-  ret				//  @64
---
-method end
-
-method setVal ordinal 20
+method setVal ordinal 17
 --
   const 1				//  @0
   isublu				//  @5
@@ -74,13 +26,61 @@ method setVal ordinal 20
   const "arg count: setVal in .phantom.util.hashpair"	//  @11
   throw				//  @59
 _label_0:	//  @60
-  summon null			//  @60
-  ; Line 31			//  @61
-  get o stk pos=0			//  @61
-  os dup				//  @66
-  save fld=1			//  @67
-  os drop				//  @69
-  ret				//  @70
+  stack_reserve obj=1 int=0	//  @60
+    ; Line 31			//  @63
+  get o stk pos=0			//  @63
+  os dup				//  @68
+  save fld=1			//  @69
+  os drop				//  @71
+  ret				//  @72
+--
+method end
+
+method getVal ordinal 18
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getVal in .phantom.util.hashpair"	//  @11
+  throw				//  @59
+_label_0:	//  @60
+    ; Line 36			//  @60
+  load fld=1			//  @60
+    ; Line 36			//  @62
+  ret				//  @62
+  ret				//  @63
+--
+method end
+
+method getKey ordinal 19
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getKey in .phantom.util.hashpair"	//  @11
+  throw				//  @59
+_label_0:	//  @60
+    ; Line 26			//  @60
+  load fld=0			//  @60
+    ; Line 26			//  @62
+  ret				//  @62
+  ret				//  @63
+--
+method end
+
+method getNext ordinal 20
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: getNext in .phantom.util.hashpair"	//  @11
+  throw				//  @60
+_label_0:	//  @61
+    ; Line 47			//  @61
+  load fld=2			//  @61
+    ; Line 47			//  @63
+  ret				//  @63
+  ret				//  @64
 --
 method end
 
@@ -92,13 +92,13 @@ method setKey ordinal 21
   const "arg count: setKey in .phantom.util.hashpair"	//  @11
   throw				//  @59
 _label_0:	//  @60
-  summon null			//  @60
-  ; Line 21			//  @61
-  get o stk pos=0			//  @61
-  os dup				//  @66
-  save fld=0			//  @67
-  os drop				//  @69
-  ret				//  @70
+  stack_reserve obj=1 int=0	//  @60
+    ; Line 21			//  @63
+  get o stk pos=0			//  @63
+  os dup				//  @68
+  save fld=0			//  @69
+  os drop				//  @71
+  ret				//  @72
 --
 method end
 

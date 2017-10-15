@@ -10,6 +10,6 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ru.dz.plc.PlcMain"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-IP:\phantomuserland\plib\bin P:\phantomuserland\plib\roots\src\internal\internal.directory.ph P:\phantomuserland\plib\roots\src\stub.object.ph  P:\phantomuserland\plib\sys\src\ru.dz\ru.dz.phantom.system.regression_tests.ph P:\phantomuserland\plib\sys\src\phantom\phantom.util.map.ph"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-IP:\phantomuserland\plib\bin P:\phantomuserland\plib\sys\src\phantom\phantom.osimpl.ph P:\phantomuserland\plib\roots\src\internal\internal.directory.ph P:\phantomuserland\plib\roots\src\stub.object.ph  P:\phantomuserland\plib\sys\src\ru.dz\ru.dz.phantom.system.regression_tests.ph P:\phantomuserland\plib\sys\src\phantom\phantom.util.map.ph"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="plc"/>
 </launchConfiguration>

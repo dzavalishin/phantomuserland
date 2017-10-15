@@ -104,3 +104,5 @@ tools/plc/internal.object.c
 tools/plc/ru.dz.phantom.system.regression_tests.c
 tools/plc/internal.object.c
 tools/plc/phantom.util.map.c
+tools/plc/internal.directory.c
+tools/plc/phantom.osimpl.c

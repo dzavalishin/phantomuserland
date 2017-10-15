@@ -5,11 +5,22 @@ Class .ru.dz.windows.window
   Field xpos
   Field xsize
   Field border_color
+  Method void display(  ):
+  -- No code!
+
   Method void init( r: .ru.dz.windows.base ):
     void  : void
       = : .ru.dz.windows.base
         ident console : .ru.dz.windows.base
         ident r : .ru.dz.windows.base
+
+  Method void putws( s: string ):
+    void  : void
+      . : void
+        ident console : .ru.dz.windows.base
+        Method putws : unknown
+        arg  : unknown
+          ident s : string
 
   Method void gotoxy( x: int, y: int ):
     void  : void
@@ -24,15 +35,4 @@ Class .ru.dz.windows.window
           + : int
             ident y : int
             ident ypos : int
-
-  Method void display(  ):
-  -- No code!
-
-  Method void putws( s: string ):
-    void  : void
-      . : void
-        ident console : .ru.dz.windows.base
-        Method putws : unknown
-        arg  : unknown
-          ident s : string
 

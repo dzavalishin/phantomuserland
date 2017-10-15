@@ -16,6 +16,8 @@ import java.io.*;
  */
 
 public class PhantomType {
+	public static final String DEFAULT_CONTAINER_CLASS = ".internal.container.array";
+	
 	protected PhantomClass        _class;
 	protected PhantomClass        _container_class;
 	protected boolean             _is_void;
@@ -34,7 +36,7 @@ public class PhantomType {
 
 	public String get_main_class_name()
 	{
-		if(_is_container)  return _container_class == null ? "" : _container_class.getName();
+		if(_is_container)  return _container_class == null ? DEFAULT_CONTAINER_CLASS : _container_class.getName();
 		if(_is_void)       return ".internal.void";
 		if(_is_int)        return ".internal.int";
 		if(_is_long)       return ".internal.long";
@@ -186,7 +188,7 @@ public class PhantomType {
 			else if(_container_class_expression != null)
 				_container_class_expression.generate_code(c,s);
 			else
-				c.emitSummonByName(".internal.container.array"); // TODO use class summon shortcuts!
+				c.emitSummonByName(DEFAULT_CONTAINER_CLASS); // TODO use class summon shortcuts!
 		}
 		else if(is_int())    c.emitSummonByName(".internal.int"); // TODO use class summon shortcuts!
 		else if(is_long())   c.emitSummonByName(".internal.long");

@@ -109,7 +109,8 @@ public class Method
 
 		if(requestDebug) c.emitDebug((byte)0x1,"Enabled debug");
 
-		c.emitStackReserve(n_auto_vars, n_int_auto_vars);
+		if( (n_int_auto_vars > 0) || (n_auto_vars > 0) )
+			c.emitStackReserve(n_auto_vars, n_int_auto_vars);
 		
 		/*{
 		// push nulls to reserve stack space for autovars

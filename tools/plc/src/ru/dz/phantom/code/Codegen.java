@@ -601,6 +601,9 @@ public class Codegen extends opcode_ids {
 			name = name.substring(1);
 		name = name.toLowerCase();
 
+		assert(name.length() > 0);
+		
+		//list("summon class '"+name+"'");
 		list("summon class "+name);
 		
 		if( name.equals( "internal.class" ) )                put_byte(opcode_summon_class_class);

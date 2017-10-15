@@ -11,31 +11,6 @@ Class .phantom.os
           ident impl : .phantom.osimpl
           Method getTimeServer : unknown
 
-  Method void init(  ):
-    if : unknown
-      :!= : unknown
-        ident impl : .phantom.osimpl
-        null : .internal.object const
-      ,  : void
-        ,  : void
-          void  : void
-            = : .internal.world
-              ident w : .internal.world
-              constructor() : .internal.world
-                new .internal.world : .internal.world
-          void  : void
-            = : .internal.thread
-              ident th : .internal.thread
-              . : .internal.thread
-                ident w : .internal.world
-                Method getMyThread : unknown
-        void  : void
-          = : .phantom.osimpl
-            ident impl : .phantom.osimpl
-            . : .phantom.osimpl
-              ident th : .internal.thread
-              Method getOsInterface : unknown
-
   Method string getKernelEnvironmentValue( inkey: string ):
     ,  : void
       void  : void
@@ -48,4 +23,28 @@ Class .phantom.os
           Method getKernelEnvironmentValue : unknown
           arg  : unknown
             ident inkey : string
+
+  Method void init(  ):
+    if : unknown
+      :!= : unknown
+        ident impl : .phantom.osimpl
+        null : .internal.object const
+      ,  : void
+        ,  : void
+          void  : void
+            = : .internal.world
+              ident w : .internal.world
+              new .internal.world : .internal.world
+          void  : void
+            = : .internal.thread
+              ident th : .internal.thread
+              . : .internal.thread
+                ident w : .internal.world
+                Method getMyThread : unknown
+        void  : void
+          = : .phantom.osimpl
+            ident impl : .phantom.osimpl
+            . : .phantom.osimpl
+              ident th : .internal.thread
+              Method getOsInterface : unknown
 

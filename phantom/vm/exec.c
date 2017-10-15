@@ -45,7 +45,7 @@ struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref,
  */
 
 
-#define DEB_CALLRET 1
+#define DEB_CALLRET 0
 #define DEB_DYNCALL 0
 
 int debug_print_instr = 0;

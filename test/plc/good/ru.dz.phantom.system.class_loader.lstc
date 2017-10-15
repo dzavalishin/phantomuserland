@@ -1,40 +1,6 @@
-Class version 20170909064232727
+Class version 20170915070054798
 
-method init ordinal 16
---
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .ru.dz.phantom.system.class_loader"	//  @11
-  throw				//  @69
-_label_0:	//  @70
-  summon null			//  @70
-  ; Line 54			//  @71
-  get o stk pos=0			//  @71
-  os dup				//  @76
-  save fld=2			//  @77
-  os drop				//  @79
-  ; Line 55			//  @80
-  const 0				//  @80
-  i2o				//  @85
-  os dup				//  @86
-  save fld=1			//  @87
-  os drop				//  @89
-  ; Line 55			//  @90
-  summon class internal.container.array	//  @90
-  new				//  @91
-  os dup				//  @92
-  call m=0 nparm=0		//  @93
-  os drop				//  @94
-  os dup				//  @95
-  save fld=0			//  @96
-  os drop				//  @98
-  ; Line 57			//  @99
-  ret				//  @99
---
-method end
-
-method print ordinal 17
+method print ordinal 16
 --
   const 1				//  @0
   isublu				//  @5
@@ -42,19 +8,19 @@ method print ordinal 17
   const "arg count: print in .ru.dz.phantom.system.class_loader"	//  @11
   throw				//  @70
 _label_0:	//  @71
-  summon null			//  @71
-  ; Line 62			//  @72
-  load fld=2			//  @72
-  ; Line 62			//  @74
-  get o stk pos=0			//  @74
-  ; Line 62			//  @79
-  call m=16 nparm=1		//  @79
-  os drop				//  @81
-  ret				//  @82
+  stack_reserve obj=1 int=0	//  @71
+    ; Line 62			//  @74
+  load fld=2			//  @74
+    ; Line 62			//  @76
+  get o stk pos=0			//  @76
+    ; Line 62			//  @81
+  call m=16 nparm=1		//  @81
+  os drop				//  @83
+  ret				//  @84
 --
 method end
 
-method load_class ordinal 18
+method load_class ordinal 17
 --
   const 1				//  @0
   isublu				//  @5
@@ -62,85 +28,16 @@ method load_class ordinal 18
   const "arg count: load_class in .ru.dz.phantom.system.class_loader"	//  @11
   throw				//  @75
 _label_0:	//  @76
-  summon null			//  @76
-  ; Line 67			//  @77
-  load fld=2			//  @77
-  ; Line 67			//  @79
-  get o stk pos=0			//  @79
-  ; Line 67			//  @84
-  call m=8 nparm=1		//  @84
-  ; Line 67			//  @86
-  ret				//  @86
-  ret				//  @87
---
-method end
-
-method load ordinal 19
---
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: load in .ru.dz.phantom.system.class_loader"	//  @11
-  throw				//  @69
-_label_0:	//  @70
-  summon null			//  @70
-  ; Line 72			//  @71
-  summon this			//  @71
-  ; Line 72			//  @72
-  get o stk pos=0			//  @72
-  ; Line 72			//  @77
-  call m=18 nparm=1		//  @77
-  os dup				//  @79
-  save fld=3			//  @80
-  os drop				//  @82
-  ; Line 74			//  @83
-  load fld=0			//  @83
-  ; Line 74			//  @85
-  get o stk pos=0			//  @85
-  ; Line 74			//  @90
-  load fld=1			//  @90
-  call m=11 nparm=2		//  @92
-  os drop				//  @94
-  ; Line 74			//  @95
-  ; Line 75			//  @95
-  load fld=1			//  @95
-  o2i				//  @97
-  ; Line 75			//  @98
-  const 1				//  @98
-  ; Line 75			//  @103
-  isum				//  @103
-  i2o				//  @104
-  os dup				//  @105
-  save fld=1			//  @106
-  os drop				//  @108
-  ; Line 75			//  @109
-  ; Line 76			//  @109
-  load fld=0			//  @109
-  ; Line 76			//  @111
-  load fld=3			//  @111
-  ; Line 76			//  @113
-  load fld=1			//  @113
-  call m=11 nparm=2		//  @115
-  os drop				//  @117
-  ; Line 76			//  @118
-  ; Line 77			//  @118
-  load fld=1			//  @118
-  o2i				//  @120
-  ; Line 77			//  @121
-  const 1				//  @121
-  ; Line 77			//  @126
-  isum				//  @126
-  i2o				//  @127
-  os dup				//  @128
-  save fld=1			//  @129
-  os drop				//  @131
-  ; Line 77			//  @132
-  ; Line 79			//  @132
-  load fld=3			//  @132
-  ; Line 79			//  @134
-  ret				//  @134
-  ; Line 79			//  @135
-  ret				//  @135
+  stack_reserve obj=1 int=0	//  @76
+    ; Line 67			//  @79
+  load fld=2			//  @79
+    ; Line 67			//  @81
+  get o stk pos=0			//  @81
+    ; Line 67			//  @86
+  call m=8 nparm=1		//  @86
+    ; Line 67			//  @88
+  ret				//  @88
+  ret				//  @89
 --
 method end
 
@@ -152,73 +49,177 @@ method get_class ordinal 8
   const "arg count: get_class in .ru.dz.phantom.system.class_loader"	//  @11
   throw				//  @74
 _label_0:	//  @75
-  summon null			//  @75
-  ; Line 86			//  @76
-  const 0				//  @76
-  i2o				//  @81
-  os dup				//  @82
-  save fld=4			//  @83
-  os drop				//  @85
-  ; Line 96			//  @86
-_label_1:	//  @86
-  ; Line 88			//  @86
-  load fld=4			//  @86
-  o2i				//  @88
-  ; Line 88			//  @89
-  load fld=1			//  @89
-  o2i				//  @91
-  ilt <				//  @92
-  jz _label_2			//  @93
-  ; Line 95			//  @98
-  ; Line 90			//  @98
-  get o stk pos=0			//  @98
-  ; Line 90			//  @103
-  load fld=0			//  @103
-  ; Line 90			//  @105
-  load fld=4			//  @105
-  call m=10 nparm=1		//  @107
-  call m=4 nparm=1		//  @109
-  o2i				//  @111
-  jz _label_3			//  @112
-  ; Line 93			//  @117
-  load fld=0			//  @117
-  ; Line 93			//  @119
-  load fld=4			//  @119
-  o2i				//  @121
-  ; Line 93			//  @122
-  const 1				//  @122
-  ; Line 93			//  @127
-  isum				//  @127
-  i2o				//  @128
-  call m=10 nparm=1		//  @129
-  ; Line 93			//  @131
-  ret				//  @131
-_label_3:	//  @132
-  ; Line 95			//  @132
-  load fld=4			//  @132
-  o2i				//  @134
-  ; Line 95			//  @135
-  const 2				//  @135
-  ; Line 95			//  @140
-  isum				//  @140
-  i2o				//  @141
-  os dup				//  @142
-  save fld=4			//  @143
-  os drop				//  @145
-  ; Line 95			//  @146
-  jmp _label_1			//  @146
-_label_2:	//  @151
-  ; Line 96			//  @151
-  ; Line 99			//  @151
-  summon this			//  @151
-  ; Line 99			//  @152
-  get o stk pos=0			//  @152
-  ; Line 99			//  @157
-  call m=19 nparm=1		//  @157
-  ; Line 99			//  @159
-  ret				//  @159
-  ; Line 99			//  @160
-  ret				//  @160
+  stack_reserve obj=1 int=0	//  @75
+    ; Line 86			//  @78
+  const 0				//  @78
+  i2o				//  @83
+  os dup				//  @84
+  save fld=4			//  @85
+  os drop				//  @87
+    ; Line 96			//  @88
+_label_1:	//  @88
+    ; Line 88			//  @88
+  load fld=4			//  @88
+  o2i				//  @90
+    ; Line 88			//  @91
+  load fld=1			//  @91
+  o2i				//  @93
+  ilt <				//  @94
+  jz _label_2			//  @95
+    ; Line 94			//  @100
+    ; Line 90			//  @100
+  get o stk pos=0			//  @100
+    ; Line 90			//  @105
+  load fld=0			//  @105
+    ; Line 90			//  @107
+  load fld=4			//  @107
+  call m=10 nparm=1		//  @109
+  call m=4 nparm=1		//  @111
+  o2i				//  @113
+  jz _label_3			//  @114
+    ; Line 93			//  @119
+  load fld=0			//  @119
+    ; Line 93			//  @121
+  load fld=4			//  @121
+  o2i				//  @123
+    ; Line 93			//  @124
+  const 1				//  @124
+    ; Line 93			//  @129
+  isum				//  @129
+  i2o				//  @130
+  call m=10 nparm=1		//  @131
+    ; Line 93			//  @133
+  ret				//  @133
+_label_3:	//  @134
+    ; Line 95			//  @134
+  load fld=4			//  @134
+  o2i				//  @136
+    ; Line 95			//  @137
+  const 2				//  @137
+    ; Line 95			//  @142
+  isum				//  @142
+  i2o				//  @143
+  os dup				//  @144
+  save fld=4			//  @145
+  os drop				//  @147
+    ; Line 95			//  @148
+  jmp _label_1			//  @148
+_label_2:	//  @153
+    ; Line 96			//  @153
+    ; Line 99			//  @153
+  summon this			//  @153
+    ; Line 99			//  @154
+  get o stk pos=0			//  @154
+    ; Line 99			//  @159
+  call m=19 nparm=1		//  @159
+    ; Line 99			//  @161
+  ret				//  @161
+    ; Line 99			//  @162
+  ret				//  @162
+--
+method end
+
+method init ordinal 18
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: init in .ru.dz.phantom.system.class_loader"	//  @11
+  throw				//  @69
+_label_0:	//  @70
+  stack_reserve obj=1 int=0	//  @70
+    ; Line 54			//  @73
+  get o stk pos=0			//  @73
+  os dup				//  @78
+  save fld=2			//  @79
+  os drop				//  @81
+    ; Line 55			//  @82
+  const 0				//  @82
+  i2o				//  @87
+  os dup				//  @88
+  save fld=1			//  @89
+  os drop				//  @91
+    ; Line 55			//  @92
+  summon class internal.container.array	//  @92
+  new				//  @93
+  pull depth=0			//  @94
+  summon class internal.container.array	//  @99
+  static invoke ord=0 n_param=0	//  @100
+  os drop				//  @109
+  os dup				//  @110
+  save fld=0			//  @111
+  os drop				//  @113
+    ; Line 57			//  @114
+  ret				//  @114
+--
+method end
+
+method load ordinal 19
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: load in .ru.dz.phantom.system.class_loader"	//  @11
+  throw				//  @69
+_label_0:	//  @70
+  stack_reserve obj=1 int=0	//  @70
+    ; Line 72			//  @73
+  summon this			//  @73
+    ; Line 72			//  @74
+  get o stk pos=0			//  @74
+    ; Line 72			//  @79
+  call m=17 nparm=1		//  @79
+  os dup				//  @81
+  save fld=3			//  @82
+  os drop				//  @84
+    ; Line 74			//  @85
+  load fld=0			//  @85
+    ; Line 74			//  @87
+  get o stk pos=0			//  @87
+    ; Line 74			//  @92
+  load fld=1			//  @92
+  call m=11 nparm=2		//  @94
+  os drop				//  @96
+    ; Line 74			//  @97
+    ; Line 75			//  @97
+  load fld=1			//  @97
+  o2i				//  @99
+    ; Line 75			//  @100
+  const 1				//  @100
+    ; Line 75			//  @105
+  isum				//  @105
+  i2o				//  @106
+  os dup				//  @107
+  save fld=1			//  @108
+  os drop				//  @110
+    ; Line 75			//  @111
+    ; Line 76			//  @111
+  load fld=0			//  @111
+    ; Line 76			//  @113
+  load fld=3			//  @113
+    ; Line 76			//  @115
+  load fld=1			//  @115
+  call m=11 nparm=2		//  @117
+  os drop				//  @119
+    ; Line 76			//  @120
+    ; Line 77			//  @120
+  load fld=1			//  @120
+  o2i				//  @122
+    ; Line 77			//  @123
+  const 1				//  @123
+    ; Line 77			//  @128
+  isum				//  @128
+  i2o				//  @129
+  os dup				//  @130
+  save fld=1			//  @131
+  os drop				//  @133
+    ; Line 77			//  @134
+    ; Line 79			//  @134
+  load fld=3			//  @134
+    ; Line 79			//  @136
+  ret				//  @136
+    ; Line 79			//  @137
+  ret				//  @137
 --
 method end
 

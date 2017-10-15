@@ -1,28 +1,40 @@
 Class .phantom.util.hashmap
   Field hashed
   Field hashsize
-  Method void init(  ):
+  Method void put( key: .internal.object, val: .internal.object ):
     ,  : void
+      ,  : void
+        ,  : void
+          void  : void
+            . : void
+              this  : .phantom.util.hashmap
+              Method lock : unknown
+          void  : void
+            = : .phantom.util.hashpair
+              ident hp : .phantom.util.hashpair
+              . : .phantom.util.hashpair
+                this  : .phantom.util.hashmap
+                Method find : unknown
+                arg  : .internal.object
+                  ident key : .internal.object
+                arg  : unknown
+                  int const "1" : int const
+        void  : void
+          . : void
+            ident hp : .phantom.util.hashpair
+            Method setVal : unknown
+            arg  : unknown
+              ident val : .internal.object
       void  : void
-        = : int
-          ident hashsize : int
-          int const "20" : int const
-      void  : void
-        = : .phantom.util.hashpair[]
-          ident hashed : .phantom.util.hashpair[]
-          constructor() : .phantom.util.hashpair[]
-            new .phantom.util.hashpair[] : .phantom.util.hashpair[]
+        . : void
+          this  : .phantom.util.hashmap
+          Method unlock : unknown
 
   Method void unlock(  ):
   -- No code!
 
-  Method int pos( data: .internal.object ):
-    return : void
-      % : int
-        . : int
-          ident data : .internal.object
-          Method hashCode : unknown
-        ident hashsize : int
+  Method void lock(  ):
+  -- No code!
 
   Method .phantom.util.hashpair find( key: .internal.object, put: int ):
     ,  : void
@@ -52,7 +64,7 @@ Class .phantom.util.hashmap
                     null : .internal.object const
                   ,  : unknown
                     if : unknown
-                      == : unknown
+                      == : int
                         ident key : .internal.object
                         . : .internal.object
                           ident next : .phantom.util.hashpair
@@ -74,8 +86,7 @@ Class .phantom.util.hashmap
             void  : void
               = : .phantom.util.hashpair
                 ident next : .phantom.util.hashpair
-                constructor() : .phantom.util.hashpair
-                  new .phantom.util.hashpair : .phantom.util.hashpair
+                new .phantom.util.hashpair : .phantom.util.hashpair
           void  : void
             . : void
               ident next : .phantom.util.hashpair
@@ -96,6 +107,14 @@ Class .phantom.util.hashmap
             ident hashed : .phantom.util.hashpair[]
             ident bucket : int
           ident next : .phantom.util.hashpair
+
+  Method int pos( data: .internal.object ):
+    return : void
+      % : int
+        . : int
+          ident data : .internal.object
+          Method hashCode : unknown
+        ident hashsize : int
 
   Method .internal.object get( key: .internal.object ):
     ,  : void
@@ -131,35 +150,14 @@ Class .phantom.util.hashmap
           ident hp : .phantom.util.hashpair
           Method getVal : unknown
 
-  Method void lock(  ):
-  -- No code!
-
-  Method void put( key: .internal.object, val: .internal.object ):
+  Method void init(  ):
     ,  : void
-      ,  : void
-        ,  : void
-          void  : void
-            . : void
-              this  : .phantom.util.hashmap
-              Method lock : unknown
-          void  : void
-            = : .phantom.util.hashpair
-              ident hp : .phantom.util.hashpair
-              . : .phantom.util.hashpair
-                this  : .phantom.util.hashmap
-                Method find : unknown
-                arg  : .internal.object
-                  ident key : .internal.object
-                arg  : unknown
-                  int const "1" : int const
-        void  : void
-          . : void
-            ident hp : .phantom.util.hashpair
-            Method setVal : unknown
-            arg  : unknown
-              ident val : .internal.object
       void  : void
-        . : void
-          this  : .phantom.util.hashmap
-          Method unlock : unknown
+        = : int
+          ident hashsize : int
+          int const "20" : int const
+      void  : void
+        = : .phantom.util.hashpair[]
+          ident hashed : .phantom.util.hashpair[]
+          new .phantom.util.hashpair[] : .phantom.util.hashpair[]
 

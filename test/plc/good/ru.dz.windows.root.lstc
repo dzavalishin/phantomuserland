@@ -1,63 +1,6 @@
-Class version 20170909064406557
+Class version 20170915071917498
 
-method init ordinal 16
---
-  const 2				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .ru.dz.windows.root"	//  @11
-  throw				//  @54
-_label_0:	//  @55
-  summon null			//  @55
-  summon null			//  @56
-  ; Line 18			//  @57
-  get o stk pos=0			//  @57
-  os dup				//  @62
-  save fld=0			//  @63
-  os drop				//  @65
-  ; Line 19			//  @66
-  get o stk pos=1			//  @66
-  os dup				//  @71
-  save fld=1			//  @72
-  os drop				//  @74
-  ; Line 19			//  @75
-  ; Line 20			//  @75
-  load fld=0			//  @75
-  ; Line 20			//  @77
-  const " in root..."		//  @77
-  ; Line 20			//  @93
-  call m=17 nparm=1		//  @93
-  os drop				//  @95
-  ; Line 20			//  @96
-  ret				//  @96
---
-method end
-
-method gotoxy ordinal 17
---
-  const 2				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: gotoxy in .ru.dz.windows.root"	//  @11
-  throw				//  @56
-_label_0:	//  @57
-  summon null			//  @57
-  summon null			//  @58
-  ; Line 36			//  @59
-  load fld=0			//  @59
-  ; Line 36			//  @61
-  get o stk pos=0			//  @61
-  ; Line 36			//  @66
-  get o stk pos=1			//  @66
-  ; Line 36			//  @71
-  ; Line 36			//  @71
-  call m=19 nparm=2		//  @71
-  os drop				//  @73
-  ret				//  @74
---
-method end
-
-method test ordinal 18
+method test ordinal 16
 --
   const 0				//  @0
   isublu				//  @5
@@ -65,83 +8,82 @@ method test ordinal 18
   const "arg count: test in .ru.dz.windows.root"	//  @11
   throw				//  @54
 _label_0:	//  @55
-  ; Line 59			//  @55
+    ; Line 59			//  @55
   load fld=0			//  @55
-  ; Line 59			//  @57
+    ; Line 59			//  @57
   const 0				//  @57
   i2o				//  @62
-  ; Line 59			//  @63
+    ; Line 59			//  @63
   const 3				//  @63
   i2o				//  @68
-  ; Line 59			//  @69
-  ; Line 59			//  @69
+    ; Line 59			//  @69
+    ; Line 59			//  @69
   call m=19 nparm=2		//  @69
   os drop				//  @71
-  ; Line 60			//  @72
+    ; Line 60			//  @72
   load fld=0			//  @72
-  ; Line 60			//  @74
-  const "Hello on new console (root win)!"	//  @74
-  ; Line 60			//  @111
-  call m=17 nparm=1		//  @111
-  os drop				//  @113
-  ; Line 60			//  @114
-  ; Line 61			//  @114
-  load fld=0			//  @114
-  ; Line 61			//  @116
-  const 10			//  @116
-  i2o				//  @121
-  ; Line 61			//  @122
-  const 10			//  @122
+    ; Line 60			//  @74
+  const_pool <1>			//  @74
+    ; Line 60			//  @79
+  call m=17 nparm=1		//  @79
+  os drop				//  @81
+    ; Line 60			//  @82
+    ; Line 61			//  @82
+  load fld=0			//  @82
+    ; Line 61			//  @84
+  const 10			//  @84
+  i2o				//  @89
+    ; Line 61			//  @90
+  const 10			//  @90
+  i2o				//  @95
+    ; Line 61			//  @96
+    ; Line 61			//  @96
+  call m=19 nparm=2		//  @96
+  os drop				//  @98
+    ; Line 61			//  @99
+    ; Line 62			//  @99
+  load fld=0			//  @99
+    ; Line 62			//  @101
+  const 14			//  @101
+  i2o				//  @106
+    ; Line 62			//  @107
+  call m=21 nparm=1		//  @107
+  os drop				//  @109
+    ; Line 62			//  @110
+    ; Line 63			//  @110
+  load fld=0			//  @110
+    ; Line 63			//  @112
+  const_pool <2>			//  @112
+    ; Line 63			//  @117
+  call m=17 nparm=1		//  @117
+  os drop				//  @119
+    ; Line 63			//  @120
+    ; Line 66			//  @120
+  load fld=0			//  @120
+    ; Line 66			//  @122
+  const 0				//  @122
   i2o				//  @127
-  ; Line 61			//  @128
-  ; Line 61			//  @128
-  call m=19 nparm=2		//  @128
-  os drop				//  @130
-  ; Line 61			//  @131
-  ; Line 62			//  @131
-  load fld=0			//  @131
-  ; Line 62			//  @133
-  const 14			//  @133
-  i2o				//  @138
-  ; Line 62			//  @139
-  call m=21 nparm=1		//  @139
-  os drop				//  @141
-  ; Line 62			//  @142
-  ; Line 63			//  @142
-  load fld=0			//  @142
-  ; Line 63			//  @144
-  const "Pos 10,10"		//  @144
-  ; Line 63			//  @158
-  call m=17 nparm=1		//  @158
-  os drop				//  @160
-  ; Line 63			//  @161
-  ; Line 66			//  @161
-  load fld=0			//  @161
-  ; Line 66			//  @163
-  const 0				//  @163
-  i2o				//  @168
-  ; Line 66			//  @169
-  const 0				//  @169
-  i2o				//  @174
-  ; Line 66			//  @175
-  ; Line 66			//  @175
-  call m=19 nparm=2		//  @175
-  os drop				//  @177
-  ; Line 66			//  @178
-  ; Line 67			//  @178
-  load fld=0			//  @178
-  ; Line 67			//  @180
-  const "
-"			//  @180
-  ; Line 67			//  @186
-  call m=17 nparm=1		//  @186
-  os drop				//  @188
-  ; Line 67			//  @189
-  ret				//  @189
+    ; Line 66			//  @128
+  const 0				//  @128
+  i2o				//  @133
+    ; Line 66			//  @134
+    ; Line 66			//  @134
+  call m=19 nparm=2		//  @134
+  os drop				//  @136
+    ; Line 66			//  @137
+    ; Line 67			//  @137
+  load fld=0			//  @137
+    ; Line 67			//  @139
+  const_pool <3>			//  @139
+    ; Line 67			//  @144
+  call m=17 nparm=1		//  @144
+  os drop				//  @146
+    ; Line 67			//  @147
+  ret				//  @147
 --
 method end
 
-method shell ordinal 19
+method shell ordinal 17
 --
   const 0				//  @0
   isublu				//  @5
@@ -149,123 +91,116 @@ method shell ordinal 19
   const "arg count: shell in .ru.dz.windows.root"	//  @11
   throw				//  @55
 _label_0:	//  @56
-  summon null			//  @56
-  summon null			//  @57
-  ; Line 101			//  @58
-  load fld=0			//  @58
-  ; Line 101			//  @60
-  const "
-The very first Phantom command line shell
-"	//  @60
-  ; Line 101			//  @108
-  call m=17 nparm=1		//  @108
-  os drop				//  @110
-  ; Line 103			//  @111
-  const ""			//  @111
-  os dup				//  @116
-  set o stk pos=1			//  @117
-  os drop				//  @122
-  ; Line 103			//  @123
-  ; Line 126			//  @123
-_label_1:	//  @123
-  ; Line 105			//  @123
-  const 1				//  @123
-  jz _label_2			//  @128
-  ; Line 107			//  @133
-  load fld=0			//  @133
-  call m=16 nparm=0		//  @135
-  os dup				//  @137
-  set o stk pos=0			//  @138
-  os drop				//  @143
-  ; Line 120			//  @144
-  ; Line 110			//  @144
-  get o stk pos=0			//  @144
-  ; Line 110			//  @149
-  const "
-"			//  @149
-  ; Line 110			//  @155
-  call m=4 nparm=1		//  @155
-  o2i				//  @157
-  jz _label_3			//  @158
-  ; Line 113			//  @163
-  ; Line 112			//  @163
-  get o stk pos=1			//  @163
-  ; Line 112			//  @168
-  const "quit"			//  @168
-  ; Line 112			//  @177
-  call m=4 nparm=1		//  @177
-  o2i				//  @179
-  jz _label_5			//  @180
-  ; Line 112			//  @185
-  jmp _label_2			//  @185
-_label_5:	//  @190
-  ; Line 113			//  @190
-  summon this			//  @190
-  ; Line 113			//  @191
-  const "
-"			//  @191
-  ; Line 113			//  @197
-  call m=20 nparm=1		//  @197
-  os drop				//  @199
-  ; Line 113			//  @200
-  ; Line 114			//  @200
-  summon this			//  @200
-  ; Line 114			//  @201
-  get o stk pos=1			//  @201
-  ; Line 114			//  @206
-  call m=21 nparm=1		//  @206
-  os drop				//  @208
-  ; Line 114			//  @209
-  ; Line 115			//  @209
-  const ""			//  @209
-  os dup				//  @214
-  set o stk pos=1			//  @215
-  os drop				//  @220
-  ; Line 115			//  @221
-  ; Line 116			//  @221
-  load fld=0			//  @221
-  ; Line 116			//  @223
-  const "
-phantom => 
-"		//  @223
-  ; Line 116			//  @241
-  call m=17 nparm=1		//  @241
-  os drop				//  @243
-  ; Line 116			//  @244
-  jmp _label_4			//  @244
-_label_3:	//  @249
-  ; Line 120			//  @249
-  get o stk pos=1			//  @249
-  ; Line 120			//  @254
-  get o stk pos=0			//  @254
-  ; Line 120			//  @259
-  call m=10 nparm=1		//  @259
-  os dup				//  @261
-  set o stk pos=1			//  @262
-  os drop				//  @267
-_label_4:	//  @268
-  ; Line 120			//  @268
-  ; Line 125			//  @268
-  load fld=0			//  @268
-  ; Line 125			//  @270
-  get o stk pos=0			//  @270
-  ; Line 125			//  @275
-  call m=17 nparm=1		//  @275
-  os drop				//  @277
-  ; Line 125			//  @278
-  jmp _label_1			//  @278
-_label_2:	//  @283
-  ; Line 126			//  @283
-  ; Line 127			//  @283
-  const "shell quit"		//  @283
-  ; Line 127			//  @298
-  throw				//  @298
-  ; Line 127			//  @299
-  ret				//  @299
+  stack_reserve obj=2 int=0	//  @56
+    ; Line 101			//  @59
+  load fld=0			//  @59
+    ; Line 101			//  @61
+  const_pool <4>			//  @61
+    ; Line 101			//  @66
+  call m=17 nparm=1		//  @66
+  os drop				//  @68
+    ; Line 103			//  @69
+  const_pool <5>			//  @69
+  os dup				//  @74
+  set o stk pos=1			//  @75
+  os drop				//  @80
+    ; Line 103			//  @81
+    ; Line 126			//  @81
+_label_1:	//  @81
+    ; Line 105			//  @81
+  const 1				//  @81
+  jz _label_2			//  @86
+    ; Line 107			//  @91
+  load fld=0			//  @91
+  call m=16 nparm=0		//  @93
+  os dup				//  @95
+  set o stk pos=0			//  @96
+  os drop				//  @101
+    ; Line 120			//  @102
+    ; Line 110			//  @102
+  get o stk pos=0			//  @102
+    ; Line 110			//  @107
+  const_pool <6>			//  @107
+    ; Line 110			//  @112
+  call m=4 nparm=1		//  @112
+  o2i				//  @114
+  jz _label_3			//  @115
+    ; Line 112			//  @120
+    ; Line 112			//  @120
+  get o stk pos=1			//  @120
+    ; Line 112			//  @125
+  const_pool <7>			//  @125
+    ; Line 112			//  @130
+  call m=4 nparm=1		//  @130
+  o2i				//  @132
+  jz _label_5			//  @133
+    ; Line 112			//  @138
+  jmp _label_2			//  @138
+_label_5:	//  @143
+    ; Line 113			//  @143
+  summon this			//  @143
+    ; Line 113			//  @144
+  const_pool <8>			//  @144
+    ; Line 113			//  @149
+  call m=18 nparm=1		//  @149
+  os drop				//  @151
+    ; Line 113			//  @152
+    ; Line 114			//  @152
+  summon this			//  @152
+    ; Line 114			//  @153
+  get o stk pos=1			//  @153
+    ; Line 114			//  @158
+  call m=21 nparm=1		//  @158
+  os drop				//  @160
+    ; Line 114			//  @161
+    ; Line 115			//  @161
+  const_pool <9>			//  @161
+  os dup				//  @166
+  set o stk pos=1			//  @167
+  os drop				//  @172
+    ; Line 115			//  @173
+    ; Line 116			//  @173
+  load fld=0			//  @173
+    ; Line 116			//  @175
+  const_pool <10>			//  @175
+    ; Line 116			//  @180
+  call m=17 nparm=1		//  @180
+  os drop				//  @182
+    ; Line 116			//  @183
+  jmp _label_4			//  @183
+_label_3:	//  @188
+    ; Line 120			//  @188
+  get o stk pos=1			//  @188
+    ; Line 120			//  @193
+  get o stk pos=0			//  @193
+    ; Line 120			//  @198
+  call m=10 nparm=1		//  @198
+  os dup				//  @200
+  set o stk pos=1			//  @201
+  os drop				//  @206
+_label_4:	//  @207
+    ; Line 120			//  @207
+    ; Line 125			//  @207
+  load fld=0			//  @207
+    ; Line 125			//  @209
+  get o stk pos=0			//  @209
+    ; Line 125			//  @214
+  call m=17 nparm=1		//  @214
+  os drop				//  @216
+    ; Line 125			//  @217
+  jmp _label_1			//  @217
+_label_2:	//  @222
+    ; Line 126			//  @222
+    ; Line 127			//  @222
+  const_pool <11>			//  @222
+    ; Line 127			//  @227
+  throw				//  @227
+    ; Line 127			//  @228
+  ret				//  @228
 --
 method end
 
-method putws ordinal 20
+method putws ordinal 18
 --
   const 1				//  @0
   isublu				//  @5
@@ -273,15 +208,70 @@ method putws ordinal 20
   const "arg count: putws in .ru.dz.windows.root"	//  @11
   throw				//  @55
 _label_0:	//  @56
-  summon null			//  @56
-  ; Line 41			//  @57
-  load fld=0			//  @57
-  ; Line 41			//  @59
-  get o stk pos=0			//  @59
-  ; Line 41			//  @64
-  call m=17 nparm=1		//  @64
+  stack_reserve obj=1 int=0	//  @56
+    ; Line 41			//  @59
+  load fld=0			//  @59
+    ; Line 41			//  @61
+  get o stk pos=0			//  @61
+    ; Line 41			//  @66
+  call m=17 nparm=1		//  @66
+  os drop				//  @68
+  ret				//  @69
+--
+method end
+
+method gotoxy ordinal 19
+--
+  const 2				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: gotoxy in .ru.dz.windows.root"	//  @11
+  throw				//  @56
+_label_0:	//  @57
+  stack_reserve obj=2 int=0	//  @57
+    ; Line 36			//  @60
+  load fld=0			//  @60
+    ; Line 36			//  @62
+  get o stk pos=0			//  @62
+    ; Line 36			//  @67
+  get o stk pos=1			//  @67
+    ; Line 36			//  @72
+    ; Line 36			//  @72
+  call m=19 nparm=2		//  @72
+  os drop				//  @74
+  ret				//  @75
+--
+method end
+
+method init ordinal 20
+--
+  const 2				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: init in .ru.dz.windows.root"	//  @11
+  throw				//  @54
+_label_0:	//  @55
+  stack_reserve obj=2 int=0	//  @55
+    ; Line 18			//  @58
+  get o stk pos=0			//  @58
+  os dup				//  @63
+  save fld=0			//  @64
   os drop				//  @66
-  ret				//  @67
+    ; Line 19			//  @67
+  get o stk pos=1			//  @67
+  os dup				//  @72
+  save fld=1			//  @73
+  os drop				//  @75
+    ; Line 19			//  @76
+    ; Line 20			//  @76
+  load fld=0			//  @76
+    ; Line 20			//  @78
+  const_pool <0>			//  @78
+    ; Line 20			//  @83
+  call m=17 nparm=1		//  @83
+  os drop				//  @85
+    ; Line 20			//  @86
+  ret				//  @86
 --
 method end
 
@@ -293,301 +283,292 @@ method shell_cmd ordinal 21
   const "arg count: shell_cmd in .ru.dz.windows.root"	//  @11
   throw				//  @59
 _label_0:	//  @60
-  summon null			//  @60
-  summon null			//  @61
-  summon null			//  @62
-  cons 0				//  @63
-  cons 0				//  @64
-  cons 0				//  @65
-  cons 0				//  @66
-  ; Line 141			//  @67
-  get o stk pos=0			//  @67
-  call m=11 nparm=0		//  @72
-  o2i				//  @74
-  is dup				//  @75
-  set i stk pos=3			//  @76
-  is drop				//  @81
-  ; Line 145			//  @82
-  const 0				//  @82
-  is dup				//  @87
-  set i stk pos=0			//  @88
-  is drop				//  @93
-  ; Line 145			//  @94
-  ; Line 146			//  @94
-  const 0				//  @94
-  is dup				//  @99
-  set i stk pos=2			//  @100
-  is drop				//  @105
-  ; Line 146			//  @106
-  ; Line 157			//  @106
-_label_1:	//  @106
-  ; Line 148			//  @106
-  get i stk pos=0			//  @106
-  ; Line 148			//  @111
-  get i stk pos=3			//  @111
-  ilt <				//  @116
-  jz _label_2			//  @117
-  ; Line 150			//  @122
-  get o stk pos=0			//  @122
-  ; Line 150			//  @127
-  get i stk pos=0			//  @127
-  i2o				//  @132
-  ; Line 150			//  @133
-  call m=9 nparm=1		//  @133
-  o2i				//  @135
-  is dup				//  @136
-  set i stk pos=1			//  @137
-  is drop				//  @142
-  ; Line 156			//  @143
-  ; Line 151			//  @143
-  get i stk pos=1			//  @143
-  ; Line 151			//  @148
-  const 32			//  @148
-  isublu				//  @153
-  lognot				//  @154
-  jz _label_3			//  @155
-  ; Line 153			//  @160
-  get i stk pos=0			//  @160
-  is dup				//  @165
-  set i stk pos=2			//  @166
-  is drop				//  @171
-  ; Line 154			//  @172
-  jmp _label_2			//  @172
-  ; Line 154			//  @177
-_label_3:	//  @177
-  ; Line 156			//  @177
-  ; Line 156			//  @177
-  get i stk pos=0			//  @177
-  ; Line 156			//  @182
-  const 1				//  @182
-  ; Line 156			//  @187
-  isum				//  @187
-  is dup				//  @188
-  set i stk pos=0			//  @189
-  is drop				//  @194
-  ; Line 156			//  @195
-  jmp _label_1			//  @195
-_label_2:	//  @200
-  ; Line 157			//  @200
-  ; Line 172			//  @200
-  ; Line 163			//  @200
-  get i stk pos=0			//  @200
-  ; Line 163			//  @205
-  get i stk pos=3			//  @205
-  ige >=				//  @210
-  jz _label_5			//  @211
-  ; Line 165			//  @216
-  get o stk pos=0			//  @216
-  os dup				//  @221
-  set o stk pos=1			//  @222
-  os drop				//  @227
-  ; Line 166			//  @228
-  const ""			//  @228
-  os dup				//  @233
-  set o stk pos=2			//  @234
-  os drop				//  @239
-  ; Line 166			//  @240
-  jmp _label_6			//  @240
-_label_5:	//  @245
-  ; Line 170			//  @245
-  get o stk pos=0			//  @245
-  ; Line 170			//  @250
-  const 0				//  @250
-  i2o				//  @255
-  ; Line 170			//  @256
-  get i stk pos=2			//  @256
-  i2o				//  @261
-  ; Line 170			//  @262
-  ; Line 170			//  @262
-  call m=8 nparm=2		//  @262
-  os dup				//  @264
-  set o stk pos=1			//  @265
-  os drop				//  @270
-  ; Line 171			//  @271
-  get o stk pos=0			//  @271
-  ; Line 171			//  @276
-  get i stk pos=2			//  @276
-  ; Line 171			//  @281
-  const 1				//  @281
-  ; Line 171			//  @286
-  isum				//  @286
-  i2o				//  @287
-  ; Line 171			//  @288
-  get i stk pos=3			//  @288
-  ; Line 171			//  @293
-  get i stk pos=2			//  @293
-  ; Line 171			//  @298
-  isublu				//  @298
-  i2o				//  @299
-  ; Line 171			//  @300
-  ; Line 171			//  @300
-  call m=8 nparm=2		//  @300
-  os dup				//  @302
-  set o stk pos=2			//  @303
-  os drop				//  @308
-  ; Line 171			//  @309
-_label_6:	//  @309
-  ; Line 172			//  @309
-  ; Line 181			//  @309
-  ; Line 175			//  @309
-  get o stk pos=1			//  @309
-  ; Line 175			//  @314
-  const "ls"			//  @314
-  ; Line 175			//  @321
-  call m=4 nparm=1		//  @321
-  o2i				//  @323
-  jz _label_7			//  @324
-  ; Line 177			//  @329
-  summon this			//  @329
-  ; Line 177			//  @330
-  const "We're not in Linux anymore...
-"	//  @330
-  ; Line 177			//  @365
-  call m=20 nparm=1		//  @365
-  os drop				//  @367
-  ; Line 178			//  @368
-  ret				//  @368
-  ; Line 178			//  @369
-_label_7:	//  @369
-  ; Line 181			//  @369
-  ; Line 187			//  @369
-  ; Line 181			//  @369
-  get o stk pos=1			//  @369
-  ; Line 181			//  @374
-  const "man"			//  @374
-  ; Line 181			//  @382
-  call m=4 nparm=1		//  @382
-  o2i				//  @384
-  jz _label_9			//  @385
-  ; Line 183			//  @390
-  summon this			//  @390
-  ; Line 183			//  @391
-  const "Politically correct version of this command is 'person' now
-"	//  @391
-  ; Line 183			//  @456
-  call m=20 nparm=1		//  @456
-  os drop				//  @458
-  ; Line 184			//  @459
-  ret				//  @459
-  ; Line 184			//  @460
-_label_9:	//  @460
-  ; Line 187			//  @460
-  ; Line 193			//  @460
-  ; Line 187			//  @460
-  get o stk pos=1			//  @460
-  ; Line 187			//  @465
-  const "cd"			//  @465
-  ; Line 187			//  @472
-  call m=4 nparm=1		//  @472
-  o2i				//  @474
-  jz _label_11			//  @475
-  ; Line 189			//  @480
-  summon this			//  @480
-  ; Line 189			//  @481
-  const "Nowhere to cd yet...
-"	//  @481
-  ; Line 189			//  @507
-  call m=20 nparm=1		//  @507
-  os drop				//  @509
-  ; Line 190			//  @510
-  ret				//  @510
-  ; Line 190			//  @511
-_label_11:	//  @511
-  ; Line 193			//  @511
-  ; Line 199			//  @511
-  ; Line 193			//  @511
-  get o stk pos=1			//  @511
-  ; Line 193			//  @516
-  const "echo"			//  @516
-  ; Line 193			//  @525
-  call m=4 nparm=1		//  @525
-  o2i				//  @527
-  jz _label_13			//  @528
-  ; Line 195			//  @533
-  summon this			//  @533
-  ; Line 195			//  @534
-  get o stk pos=2			//  @534
-  ; Line 195			//  @539
-  call m=20 nparm=1		//  @539
-  os drop				//  @541
-  ; Line 196			//  @542
-  ret				//  @542
-  ; Line 196			//  @543
-_label_13:	//  @543
-  ; Line 199			//  @543
-  ; Line 205			//  @543
-  ; Line 199			//  @543
-  get o stk pos=1			//  @543
-  ; Line 199			//  @548
-  const "ps"			//  @548
-  ; Line 199			//  @555
-  call m=4 nparm=1		//  @555
-  o2i				//  @557
-  jz _label_15			//  @558
-  ; Line 201			//  @563
-  summon this			//  @563
-  ; Line 201			//  @564
-  get o stk pos=2			//  @564
-  ; Line 201			//  @569
-  call m=20 nparm=1		//  @569
-  os drop				//  @571
-  ; Line 202			//  @572
-  ret				//  @572
-  ; Line 202			//  @573
-_label_15:	//  @573
-  ; Line 205			//  @573
-  ; Line 211			//  @573
-  ; Line 205			//  @573
-  get o stk pos=1			//  @573
-  ; Line 205			//  @578
-  const "exit"			//  @578
-  ; Line 205			//  @587
-  call m=4 nparm=1		//  @587
-  o2i				//  @589
-  jz _label_17			//  @590
-  ; Line 207			//  @595
-  get o stk pos=2			//  @595
-  ; Line 207			//  @600
-  throw				//  @600
-  ; Line 208			//  @601
-  ret				//  @601
-  ; Line 208			//  @602
-_label_17:	//  @602
-  ; Line 211			//  @602
-  ; Line 217			//  @602
-  ; Line 211			//  @602
-  get o stk pos=1			//  @602
-  ; Line 211			//  @607
-  const "help"			//  @607
-  ; Line 211			//  @616
-  call m=4 nparm=1		//  @616
-  o2i				//  @618
-  jz _label_19			//  @619
-  ; Line 213			//  @624
-  summon this			//  @624
-  ; Line 213			//  @625
-  const "help, echo, exit - that's all I know yet..."	//  @625
-  ; Line 213			//  @673
-  call m=20 nparm=1		//  @673
-  os drop				//  @675
-  ; Line 214			//  @676
-  ret				//  @676
-  ; Line 214			//  @677
-_label_19:	//  @677
-  ; Line 217			//  @677
-  ; Line 217			//  @677
-  summon this			//  @677
-  ; Line 217			//  @678
-  const "Unknown command: "	//  @678
-  ; Line 217			//  @700
-  get o stk pos=1			//  @700
-  ; Line 217			//  @705
-  call m=10 nparm=1		//  @705
-  ; Line 217			//  @707
-  call m=20 nparm=1		//  @707
-  os drop				//  @709
-  ; Line 217			//  @710
-  ret				//  @710
+  stack_reserve obj=3 int=4	//  @60
+    ; Line 141			//  @63
+  get o stk pos=0			//  @63
+  call m=11 nparm=0		//  @68
+  o2i				//  @70
+  is dup				//  @71
+  set i stk pos=3			//  @72
+  is drop				//  @77
+    ; Line 145			//  @78
+  const 0				//  @78
+  is dup				//  @83
+  set i stk pos=0			//  @84
+  is drop				//  @89
+    ; Line 145			//  @90
+    ; Line 146			//  @90
+  const 0				//  @90
+  is dup				//  @95
+  set i stk pos=2			//  @96
+  is drop				//  @101
+    ; Line 146			//  @102
+    ; Line 157			//  @102
+_label_1:	//  @102
+    ; Line 148			//  @102
+  get i stk pos=0			//  @102
+    ; Line 148			//  @107
+  get i stk pos=3			//  @107
+  ilt <				//  @112
+  jz _label_2			//  @113
+    ; Line 150			//  @118
+  get o stk pos=0			//  @118
+    ; Line 150			//  @123
+  get i stk pos=0			//  @123
+  i2o				//  @128
+    ; Line 150			//  @129
+  call m=9 nparm=1		//  @129
+  o2i				//  @131
+  is dup				//  @132
+  set i stk pos=1			//  @133
+  is drop				//  @138
+    ; Line 155			//  @139
+    ; Line 151			//  @139
+  get i stk pos=1			//  @139
+    ; Line 151			//  @144
+  const 32			//  @144
+  isublu				//  @149
+  lognot				//  @150
+  jz _label_3			//  @151
+    ; Line 153			//  @156
+  get i stk pos=0			//  @156
+  is dup				//  @161
+  set i stk pos=2			//  @162
+  is drop				//  @167
+    ; Line 154			//  @168
+  jmp _label_2			//  @168
+    ; Line 154			//  @173
+_label_3:	//  @173
+    ; Line 155			//  @173
+    ; Line 156			//  @173
+  get i stk pos=0			//  @173
+    ; Line 156			//  @178
+  const 1				//  @178
+    ; Line 156			//  @183
+  isum				//  @183
+  is dup				//  @184
+  set i stk pos=0			//  @185
+  is drop				//  @190
+    ; Line 156			//  @191
+  jmp _label_1			//  @191
+_label_2:	//  @196
+    ; Line 157			//  @196
+    ; Line 172			//  @196
+    ; Line 163			//  @196
+  get i stk pos=0			//  @196
+    ; Line 163			//  @201
+  get i stk pos=3			//  @201
+  ige >=				//  @206
+  jz _label_5			//  @207
+    ; Line 165			//  @212
+  get o stk pos=0			//  @212
+  os dup				//  @217
+  set o stk pos=1			//  @218
+  os drop				//  @223
+    ; Line 166			//  @224
+  const_pool <12>			//  @224
+  os dup				//  @229
+  set o stk pos=2			//  @230
+  os drop				//  @235
+    ; Line 166			//  @236
+  jmp _label_6			//  @236
+_label_5:	//  @241
+    ; Line 170			//  @241
+  get o stk pos=0			//  @241
+    ; Line 170			//  @246
+  const 0				//  @246
+  i2o				//  @251
+    ; Line 170			//  @252
+  get i stk pos=2			//  @252
+  i2o				//  @257
+    ; Line 170			//  @258
+    ; Line 170			//  @258
+  call m=8 nparm=2		//  @258
+  os dup				//  @260
+  set o stk pos=1			//  @261
+  os drop				//  @266
+    ; Line 171			//  @267
+  get o stk pos=0			//  @267
+    ; Line 171			//  @272
+  get i stk pos=2			//  @272
+    ; Line 171			//  @277
+  const 1				//  @277
+    ; Line 171			//  @282
+  isum				//  @282
+  i2o				//  @283
+    ; Line 171			//  @284
+  get i stk pos=3			//  @284
+    ; Line 171			//  @289
+  get i stk pos=2			//  @289
+    ; Line 171			//  @294
+  isublu				//  @294
+  i2o				//  @295
+    ; Line 171			//  @296
+    ; Line 171			//  @296
+  call m=8 nparm=2		//  @296
+  os dup				//  @298
+  set o stk pos=2			//  @299
+  os drop				//  @304
+    ; Line 171			//  @305
+_label_6:	//  @305
+    ; Line 172			//  @305
+    ; Line 179			//  @305
+    ; Line 175			//  @305
+  get o stk pos=1			//  @305
+    ; Line 175			//  @310
+  const_pool <13>			//  @310
+    ; Line 175			//  @315
+  call m=4 nparm=1		//  @315
+  o2i				//  @317
+  jz _label_7			//  @318
+    ; Line 177			//  @323
+  summon this			//  @323
+    ; Line 177			//  @324
+  const_pool <14>			//  @324
+    ; Line 177			//  @329
+  call m=18 nparm=1		//  @329
+  os drop				//  @331
+    ; Line 178			//  @332
+  ret				//  @332
+    ; Line 178			//  @333
+_label_7:	//  @333
+    ; Line 179			//  @333
+    ; Line 185			//  @333
+    ; Line 181			//  @333
+  get o stk pos=1			//  @333
+    ; Line 181			//  @338
+  const_pool <15>			//  @338
+    ; Line 181			//  @343
+  call m=4 nparm=1		//  @343
+  o2i				//  @345
+  jz _label_9			//  @346
+    ; Line 183			//  @351
+  summon this			//  @351
+    ; Line 183			//  @352
+  const_pool <16>			//  @352
+    ; Line 183			//  @357
+  call m=18 nparm=1		//  @357
+  os drop				//  @359
+    ; Line 184			//  @360
+  ret				//  @360
+    ; Line 184			//  @361
+_label_9:	//  @361
+    ; Line 185			//  @361
+    ; Line 191			//  @361
+    ; Line 187			//  @361
+  get o stk pos=1			//  @361
+    ; Line 187			//  @366
+  const_pool <17>			//  @366
+    ; Line 187			//  @371
+  call m=4 nparm=1		//  @371
+  o2i				//  @373
+  jz _label_11			//  @374
+    ; Line 189			//  @379
+  summon this			//  @379
+    ; Line 189			//  @380
+  const_pool <18>			//  @380
+    ; Line 189			//  @385
+  call m=18 nparm=1		//  @385
+  os drop				//  @387
+    ; Line 190			//  @388
+  ret				//  @388
+    ; Line 190			//  @389
+_label_11:	//  @389
+    ; Line 191			//  @389
+    ; Line 197			//  @389
+    ; Line 193			//  @389
+  get o stk pos=1			//  @389
+    ; Line 193			//  @394
+  const_pool <19>			//  @394
+    ; Line 193			//  @399
+  call m=4 nparm=1		//  @399
+  o2i				//  @401
+  jz _label_13			//  @402
+    ; Line 195			//  @407
+  summon this			//  @407
+    ; Line 195			//  @408
+  get o stk pos=2			//  @408
+    ; Line 195			//  @413
+  call m=18 nparm=1		//  @413
+  os drop				//  @415
+    ; Line 196			//  @416
+  ret				//  @416
+    ; Line 196			//  @417
+_label_13:	//  @417
+    ; Line 197			//  @417
+    ; Line 203			//  @417
+    ; Line 199			//  @417
+  get o stk pos=1			//  @417
+    ; Line 199			//  @422
+  const_pool <20>			//  @422
+    ; Line 199			//  @427
+  call m=4 nparm=1		//  @427
+  o2i				//  @429
+  jz _label_15			//  @430
+    ; Line 201			//  @435
+  summon this			//  @435
+    ; Line 201			//  @436
+  get o stk pos=2			//  @436
+    ; Line 201			//  @441
+  call m=18 nparm=1		//  @441
+  os drop				//  @443
+    ; Line 202			//  @444
+  ret				//  @444
+    ; Line 202			//  @445
+_label_15:	//  @445
+    ; Line 203			//  @445
+    ; Line 209			//  @445
+    ; Line 205			//  @445
+  get o stk pos=1			//  @445
+    ; Line 205			//  @450
+  const_pool <21>			//  @450
+    ; Line 205			//  @455
+  call m=4 nparm=1		//  @455
+  o2i				//  @457
+  jz _label_17			//  @458
+    ; Line 207			//  @463
+  get o stk pos=2			//  @463
+    ; Line 207			//  @468
+  throw				//  @468
+    ; Line 208			//  @469
+  ret				//  @469
+    ; Line 208			//  @470
+_label_17:	//  @470
+    ; Line 209			//  @470
+    ; Line 215			//  @470
+    ; Line 211			//  @470
+  get o stk pos=1			//  @470
+    ; Line 211			//  @475
+  const_pool <22>			//  @475
+    ; Line 211			//  @480
+  call m=4 nparm=1		//  @480
+  o2i				//  @482
+  jz _label_19			//  @483
+    ; Line 213			//  @488
+  summon this			//  @488
+    ; Line 213			//  @489
+  const_pool <23>			//  @489
+    ; Line 213			//  @494
+  call m=18 nparm=1		//  @494
+  os drop				//  @496
+    ; Line 214			//  @497
+  ret				//  @497
+    ; Line 214			//  @498
+_label_19:	//  @498
+    ; Line 215			//  @498
+    ; Line 217			//  @498
+  summon this			//  @498
+    ; Line 217			//  @499
+  const_pool <24>			//  @499
+    ; Line 217			//  @504
+  get o stk pos=1			//  @504
+    ; Line 217			//  @509
+  call m=10 nparm=1		//  @509
+    ; Line 217			//  @511
+  call m=18 nparm=1		//  @511
+  os drop				//  @513
+    ; Line 217			//  @514
+  ret				//  @514
 --
 method end
 

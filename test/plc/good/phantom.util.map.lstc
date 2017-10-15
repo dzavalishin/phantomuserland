@@ -1,29 +1,75 @@
-Class version 20170909063910129
+Class version 20170915052324884
 
-method init ordinal 16
+method put ordinal 16
 --
-  const 0				//  @0
+  const 2				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: init in .phantom.util.map"	//  @11
-  throw				//  @52
-_label_0:	//  @53
-  ; Line 30			//  @53
-  const 0				//  @53
-  i2o				//  @58
-  os dup				//  @59
-  save fld=1			//  @60
-  os drop				//  @62
-  summon class internal.container.array	//  @63
-  new				//  @64
-  os dup				//  @65
-  call m=0 nparm=0		//  @66
-  os drop				//  @67
-  os dup				//  @68
-  save fld=0			//  @69
-  os drop				//  @71
-  ; Line 31			//  @72
-  ret				//  @72
+  const "arg count: put in .phantom.util.map"	//  @11
+  throw				//  @51
+_label_0:	//  @52
+  stack_reserve obj=2 int=0	//  @52
+    ; Line 40			//  @55
+    ; Line 39			//  @55
+  summon this			//  @55
+    ; Line 39			//  @56
+  get o stk pos=0			//  @56
+    ; Line 39			//  @61
+  call m=17 nparm=1		//  @61
+    ; Line 39			//  @63
+  summon null			//  @63
+    ; Line 39			//  @64
+  ptr neq				//  @64
+  jz _label_1			//  @65
+    ; Line 40			//  @70
+  const 0				//  @70
+  i2o				//  @75
+    ; Line 40			//  @76
+  ret				//  @76
+_label_1:	//  @77
+    ; Line 42			//  @77
+  load fld=0			//  @77
+    ; Line 42			//  @79
+  get o stk pos=0			//  @79
+    ; Line 42			//  @84
+  load fld=1			//  @84
+  call m=11 nparm=2		//  @86
+  os drop				//  @88
+    ; Line 42			//  @89
+    ; Line 43			//  @89
+  load fld=0			//  @89
+    ; Line 43			//  @91
+  get o stk pos=1			//  @91
+    ; Line 43			//  @96
+  load fld=1			//  @96
+  o2i				//  @98
+    ; Line 43			//  @99
+  const 1				//  @99
+    ; Line 43			//  @104
+  isum				//  @104
+  i2o				//  @105
+  call m=11 nparm=2		//  @106
+  os drop				//  @108
+    ; Line 43			//  @109
+    ; Line 44			//  @109
+  load fld=1			//  @109
+  o2i				//  @111
+    ; Line 44			//  @112
+  const 2				//  @112
+    ; Line 44			//  @117
+  isum				//  @117
+  i2o				//  @118
+  os dup				//  @119
+  save fld=1			//  @120
+  os drop				//  @122
+    ; Line 44			//  @123
+    ; Line 46			//  @123
+  const 1				//  @123
+  i2o				//  @128
+    ; Line 46			//  @129
+  ret				//  @129
+    ; Line 46			//  @130
+  ret				//  @130
 --
 method end
 
@@ -35,141 +81,94 @@ method get ordinal 17
   const "arg count: get in .phantom.util.map"	//  @11
   throw				//  @51
 _label_0:	//  @52
-  summon null			//  @52
-  cons 0				//  @53
-  ; Line 54			//  @54
-  const 0				//  @54
-  is dup				//  @59
-  set i stk pos=0			//  @60
-  is drop				//  @65
-  ; Line 63			//  @66
-_label_1:	//  @66
-  ; Line 56			//  @66
-  get i stk pos=0			//  @66
-  ; Line 56			//  @71
-  load fld=1			//  @71
-  o2i				//  @73
-  ilt <				//  @74
-  jz _label_2			//  @75
-  ; Line 62			//  @80
-  ; Line 58			//  @80
-  get o stk pos=0			//  @80
-  ; Line 58			//  @85
-  load fld=0			//  @85
-  ; Line 58			//  @87
-  get i stk pos=0			//  @87
-  i2o				//  @92
-  call m=10 nparm=1		//  @93
-  ; Line 58			//  @95
-  call m=4 nparm=1		//  @95
-  o2i				//  @97
-  jz _label_3			//  @98
-  ; Line 60			//  @103
-  load fld=0			//  @103
-  ; Line 60			//  @105
-  get i stk pos=0			//  @105
-  ; Line 60			//  @110
-  const 1				//  @110
-  ; Line 60			//  @115
-  isum				//  @115
-  i2o				//  @116
-  call m=10 nparm=1		//  @117
-  ; Line 60			//  @119
-  ret				//  @119
-_label_3:	//  @120
-  ; Line 62			//  @120
-  get i stk pos=0			//  @120
-  ; Line 62			//  @125
-  const 2				//  @125
-  ; Line 62			//  @130
-  isum				//  @130
-  is dup				//  @131
-  set i stk pos=0			//  @132
-  is drop				//  @137
-  ; Line 62			//  @138
-  jmp _label_1			//  @138
-_label_2:	//  @143
-  ; Line 63			//  @143
-  ; Line 65			//  @143
-  summon null			//  @143
-  ; Line 65			//  @144
-  ret				//  @144
-  ; Line 65			//  @145
+  stack_reserve obj=1 int=1	//  @52
+    ; Line 54			//  @55
+  const 0				//  @55
+  is dup				//  @60
+  set i stk pos=0			//  @61
+  is drop				//  @66
+    ; Line 63			//  @67
+_label_1:	//  @67
+    ; Line 56			//  @67
+  get i stk pos=0			//  @67
+    ; Line 56			//  @72
+  load fld=1			//  @72
+  o2i				//  @74
+  ilt <				//  @75
+  jz _label_2			//  @76
+    ; Line 61			//  @81
+    ; Line 58			//  @81
+  get o stk pos=0			//  @81
+    ; Line 58			//  @86
+  load fld=0			//  @86
+    ; Line 58			//  @88
+  get i stk pos=0			//  @88
+  i2o				//  @93
+  call m=10 nparm=1		//  @94
+    ; Line 58			//  @96
+  call m=4 nparm=1		//  @96
+  o2i				//  @98
+  jz _label_3			//  @99
+    ; Line 60			//  @104
+  load fld=0			//  @104
+    ; Line 60			//  @106
+  get i stk pos=0			//  @106
+    ; Line 60			//  @111
+  const 1				//  @111
+    ; Line 60			//  @116
+  isum				//  @116
+  i2o				//  @117
+  call m=10 nparm=1		//  @118
+    ; Line 60			//  @120
+  ret				//  @120
+_label_3:	//  @121
+    ; Line 62			//  @121
+  get i stk pos=0			//  @121
+    ; Line 62			//  @126
+  const 2				//  @126
+    ; Line 62			//  @131
+  isum				//  @131
+  is dup				//  @132
+  set i stk pos=0			//  @133
+  is drop				//  @138
+    ; Line 62			//  @139
+  jmp _label_1			//  @139
+_label_2:	//  @144
+    ; Line 63			//  @144
+    ; Line 65			//  @144
+  summon null			//  @144
+    ; Line 65			//  @145
   ret				//  @145
+    ; Line 65			//  @146
+  ret				//  @146
 --
 method end
 
-method put ordinal 18
+method init ordinal 18
 --
-  const 2				//  @0
+  const 0				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: put in .phantom.util.map"	//  @11
-  throw				//  @51
-_label_0:	//  @52
-  summon null			//  @52
-  summon null			//  @53
-  ; Line 42			//  @54
-  ; Line 39			//  @54
-  summon this			//  @54
-  ; Line 39			//  @55
-  get o stk pos=0			//  @55
-  ; Line 39			//  @60
-  call m=17 nparm=1		//  @60
-  ; Line 39			//  @62
-  summon null			//  @62
-  ; Line 39			//  @63
-  ptr neq				//  @63
-  jz _label_1			//  @64
-  ; Line 40			//  @69
-  const 0				//  @69
-  i2o				//  @74
-  ; Line 40			//  @75
-  ret				//  @75
-_label_1:	//  @76
-  ; Line 42			//  @76
-  load fld=0			//  @76
-  ; Line 42			//  @78
-  get o stk pos=0			//  @78
-  ; Line 42			//  @83
-  load fld=1			//  @83
-  call m=11 nparm=2		//  @85
-  os drop				//  @87
-  ; Line 42			//  @88
-  ; Line 43			//  @88
-  load fld=0			//  @88
-  ; Line 43			//  @90
-  get o stk pos=1			//  @90
-  ; Line 43			//  @95
-  load fld=1			//  @95
-  o2i				//  @97
-  ; Line 43			//  @98
-  const 1				//  @98
-  ; Line 43			//  @103
-  isum				//  @103
-  i2o				//  @104
-  call m=11 nparm=2		//  @105
-  os drop				//  @107
-  ; Line 43			//  @108
-  ; Line 44			//  @108
-  load fld=1			//  @108
-  o2i				//  @110
-  ; Line 44			//  @111
-  const 2				//  @111
-  ; Line 44			//  @116
-  isum				//  @116
-  i2o				//  @117
-  os dup				//  @118
-  save fld=1			//  @119
-  os drop				//  @121
-  ; Line 44			//  @122
-  ; Line 46			//  @122
-  const 1				//  @122
-  i2o				//  @127
-  ; Line 46			//  @128
-  ret				//  @128
-  ; Line 46			//  @129
-  ret				//  @129
+  const "arg count: init in .phantom.util.map"	//  @11
+  throw				//  @52
+_label_0:	//  @53
+    ; Line 30			//  @53
+  const 0				//  @53
+  i2o				//  @58
+  os dup				//  @59
+  save fld=1			//  @60
+  os drop				//  @62
+  summon class internal.container.array	//  @63
+  new				//  @64
+  pull depth=0			//  @65
+  summon class internal.container.array	//  @70
+  static invoke ord=0 n_param=0	//  @71
+  os drop				//  @80
+  os dup				//  @81
+  save fld=0			//  @82
+  os drop				//  @84
+    ; Line 31			//  @85
+  ret				//  @85
 --
 method end
 
