@@ -55,6 +55,10 @@ run/*.img
 run/serial0.log*
 run/net.dmp
 tools/jbulk/bin/*
+tools/uftpd/bin/*
+tools/snapdump/bin/*
+tools/pfsck/bin/*
+test/external/bin/*
 cov-int
 run/qemu/0.15.1/stderr.txt
 build_log
