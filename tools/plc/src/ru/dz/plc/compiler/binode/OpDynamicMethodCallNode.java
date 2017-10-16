@@ -5,6 +5,7 @@ import java.io.IOException;
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
+import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.llvm.LlvmStringConstant;
@@ -82,7 +83,7 @@ public class OpDynamicMethodCallNode extends BiNode {
 		String proxyName = methodName;
 
 		proxyName += "_"+llc.getPhantomMethod().getLlvmTempName("dyncall");
-		proxyName = proxyName.replaceAll("<init>", "\\$Constructor");
+		proxyName = proxyName.replaceAll(Method.CONSTRUCTOR_M_NAME, "\\$Constructor");
 		proxyName = proxyName.replaceAll("%", "");
 		
 		boolean first = true;

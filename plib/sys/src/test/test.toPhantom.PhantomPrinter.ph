@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
+ * Simple console (window) print class
  *
  *
 **/
@@ -15,11 +14,6 @@ package .test.toPhantom;
 
 import .internal.io.tty;
 
-/**
- *
- * Simple console (window) print class
- *
-**/
 
 class PhantomPrinter 
 //implements IPhantomPrinter

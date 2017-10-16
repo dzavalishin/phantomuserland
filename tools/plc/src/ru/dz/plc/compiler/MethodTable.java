@@ -1,9 +1,17 @@
 package ru.dz.plc.compiler;
 
 import java.util.*;
+
+import com.oracle.xmlns.internal.webservices.jaxws_databinding.JavaMethod;
+
 import java.io.*;
 
 import ru.dz.phantom.code.*;
+import ru.dz.plc.PlcMain;
+import ru.dz.plc.compiler.binode.OpStaticMethodCallNode;
+import ru.dz.plc.compiler.node.EmptyNode;
+import ru.dz.plc.compiler.node.MethodNode;
+import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.util.*;
 
 /**
@@ -39,6 +47,7 @@ public class MethodTable implements IMethodTable
 		return false;
 	}
 
+	// TODO Method.equals?
 	private boolean mine( Method t )
 	{
 		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
@@ -182,18 +191,6 @@ public class MethodTable implements IMethodTable
 			return;
 
 		int ord;
-		/* no! children/parents conflict!
-		// Argless c'tor must have ordinal 0
-		if( m.isConstructor() && (m.getArgCount() == 0) )
-		{
-			ord = 0;
-			if( have_ord( ord ) )
-				throw new PlcException("set_ordinals", "ordinal 0 is used" );
-
-			m.setOrdinal(ord);
-			return;
-		}
-		 */
 		while( true )
 		{
 			ord = ordinals.getNext();
@@ -234,6 +231,18 @@ public class MethodTable implements IMethodTable
 	@Override
 	public void preprocess( ParseState ps ) throws PlcException
 	{
+		// Find all constructors
+		
+		//List<Method> ctors = new LinkedList<>();
+		boolean haveConstructor = false;
+		
+		for( Method cm : mstable.values() )
+			//if( cm.isConstructor() ) ctors.add(cm);
+			haveConstructor = true;
+		
+		if(!haveConstructor)
+			createDefaultConstructor(ps);
+		
 		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
@@ -241,6 +250,41 @@ public class MethodTable implements IMethodTable
 			if( m.code != null ) m.code.preprocess(ps);
 			ps.set_method( null );
 		}
+	}
+
+	private void createDefaultConstructor(ParseState ps) throws PlcException 
+	{
+		PhantomClass me = ps.get_class();
+		String parentName = me.getParent();
+		PhantomClass parent = ClassMap.get_map().get(parentName, true, ps);
+		if( parent == null )
+			throw new PlcException("Can't find base class "+parentName+" for class "+me.getName());
+		
+		Method defc = parent.getDefaultConstructor();
+		
+		if( defc == null )
+			throw new PlcException("createDefaultConstructor","No default constructor in base class "+parentName+" for class "+me.getName());
+		
+		Method cm = new Method( Method.CONSTRUCTOR_M_NAME, PhantomType.getVoid(), true );
+		/*
+		OpStaticMethodCallNode smc = new OpStaticMethodCallNode(
+					new ThisNode(me),
+					defc.getOrdinal(),
+					null,
+					parent
+				);
+		
+		cm.code = smc; // just one static call instruction
+		*/
+		
+		cm.code = new EmptyNode(); // Preprocess must add call to parent c'tor
+		
+		cm.preprocess(me);
+		
+		//cm.setType(PhantomType.getVoid());
+		
+		System.out.println("Created default constructor for "+me.getName());
+		add(cm);
 	}
 
 	/* (non-Javadoc)
@@ -264,7 +308,12 @@ public class MethodTable implements IMethodTable
 			cw.c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 			//cw.javaFile.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 			
-			cw.javaFile.write( "\tpublic abstract "+m.getType().toJavaType()+" "+m.getName()+"( " );
+			String javaMethodName = m.isConstructor() ? s.get_class().getShortName() : m.getName();
+			
+			cw.javaFile.write( "\tpublic abstract " );
+			if(!m.isConstructor()) cw.javaFile.write( m.getType().toJavaType()+" " );
+			cw.javaFile.write( javaMethodName+"( " );
+			
 			Iterator<ArgDefinition> iter = m.getArgIterator();
 			while( iter.hasNext() )
 			{

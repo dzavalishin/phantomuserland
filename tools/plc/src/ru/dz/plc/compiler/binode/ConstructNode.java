@@ -21,6 +21,8 @@ import ru.dz.soot.SootMain;
  * @author dz
  */
 
+import ru.dz.plc.compiler.Method;
+
 /*
 public class ConstructNode extends Node {
 
@@ -86,7 +88,7 @@ public class ConstructNode extends Node {
 		PhantomClass pclass = _l.getType().get_class();
 		if( pclass != null )
 		{
-			Method cm = pclass.findMethod("<init>");
+			Method cm = pclass.findMethod(Method.CONSTRUCTOR_M_NAME);
 			if( cm != null ) method_ordinal = cm.getOrdinal();
 		}
 		else

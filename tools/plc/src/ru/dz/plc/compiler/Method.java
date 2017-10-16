@@ -26,6 +26,8 @@ import ru.dz.plc.util.PlcException;
 
 public class Method
 {
+	public final static String CONSTRUCTOR_M_NAME = "<init>";
+	
 	private boolean		    constructor;
 	private int			    ordinal;
 	public Node             code;
@@ -47,7 +49,8 @@ public class Method
 
 	public Method( String name, PhantomType type, boolean isConstructor )
 	{
-		this.name = isConstructor ? "<init>" : name; // TODO make c'tor name constant
+		//this.name = isConstructor ? "<init>" : name; 
+		this.name = isConstructor ? CONSTRUCTOR_M_NAME : name; 
 		this.type = type;
 		this.ordinal = -1;
 		this.code = null;
@@ -183,7 +186,7 @@ public class Method
 			argdef.append("i64 %"+a.getName());
 		}
 
-		String llvmMethodName = name.replaceAll("<init>", "_\\$_Constructor");
+		String llvmMethodName = name.replaceAll(Method.CONSTRUCTOR_M_NAME, "_\\$_Constructor");
 
 		llc.putln(String.format("define %s @%s(%s) {", LlvmCodegen.getObjectType(), llvmMethodName, argdef )); // function 
 
@@ -306,7 +309,7 @@ public class Method
 			argdef.append("jit_object_t "+C_codegen.getLocalVarNamePrefix()+a.getName());
 		}
 
-		//String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
+		//String C_MethodName = name.replaceAll(Method.CONSTRUCTOR_M_NAME, "_Phantom_Constructor");
 		PhantomClass my_class = s.get_class();
 		String C_MethodName = cgen.getMethodName(my_class, ordinal);
 
@@ -491,12 +494,12 @@ public class Method
 		PhantomClass parentClass = ClassMap.get_map().get(parentClassName, true, null);
 		
 		if( parentClass == null )
-				throw new PlcException("preprocessParentConstructor", "parent class not found: "+parentClassName);
+				throw new PlcException("preprocessParentConstructor", "parent class not found: "+parentClassName, myClass.getName());
 		
 		Method defCtor = parentClass.getDefaultConstructor();
 
 		if( defCtor == null )
-			throw new PlcException("preprocessParentConstructor", "parent class has no default constructor: "+parentClassName);
+			throw new PlcException("preprocessParentConstructor", "parent class ("+parentClassName+") has no default constructor", myClass.getName());
 		
 		Node ctorCall = new OpStaticMethodCallNode(
 				new ThisNode(myClass),
@@ -505,7 +508,7 @@ public class Method
 				// myClass // No!!
 				parentClass
 				);
-		
+		ctorCall.setType(PhantomType.getVoid());
 		Node newRoot = new SequenceNode(ctorCall, code);
 		
 		code = newRoot;
@@ -561,8 +564,9 @@ public class Method
 			
 			PhantomClass cc = mc.getCallClass();
 			
-			if( !cc.getName().equals(myClass.getName()) )
-				throw new PlcException("checkConstructorCall", "our base is "+myClass.getName()+", but c'tor call is for "+cc.getName());
+			if( !cc.getName().equals(myClass.getParent()) )
+				throw new PlcException("checkConstructorCall", "our parent is "+myClass.getParent()+", but c'tor call is for "+cc.getName());
+				//throw new PlcException("checkConstructorCall", "our base is "+myClass.getName()+", but c'tor call is for "+cc.getName());
 
 			int ord = mc.getOrdinal();
 			
@@ -573,8 +577,8 @@ public class Method
 			if( !ctor.isConstructor() )
 				throw new PlcException("checkConstructorCall", "base c'tor is not really c'tor" );
 
-			if( !ctor.getName().equals("<init>") )
-				throw new PlcException("checkConstructorCall", "base c'tor method name is not <init>" );
+			if( !ctor.getName().equals(Method.CONSTRUCTOR_M_NAME) )
+				throw new PlcException("checkConstructorCall", "base c'tor method name is not "+Method.CONSTRUCTOR_M_NAME );
 
 			// Seems we checked it all
 			

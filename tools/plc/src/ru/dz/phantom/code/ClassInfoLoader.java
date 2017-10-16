@@ -106,7 +106,7 @@ public class ClassInfoLoader {
 				//if(debug_print) System.out.println(", %d methods\n", n_method_slots );
 				class_parent_name = Fileops.get_string(is);
 
-				if(class_parent_name != null && class_parent_name.length() > 0 && !class_parent_name.equals(".internal.object"))
+				if( (class_parent_name != null) && (class_parent_name.length() > 0) && (!class_parent_name.equals(".internal.object")) )
 					my_class.addParent(class_parent_name,null);
 
 				if(class_name != null && class_name.equals(".internal.object"))

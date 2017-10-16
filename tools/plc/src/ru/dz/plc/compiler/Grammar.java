@@ -346,8 +346,15 @@ extends GrammarHelper {
 				String class_to_extend = parseClassName(false);
 				if(interface_mode)
 					syntax_error("interface can not extend class");
-				if( !me.addParent(class_to_extend, ps) )
-					syntax_error("just one base class (yet?)");
+				
+				if( me.hasParent() )
+					syntax_error("just one base class");
+				else
+				{
+					//if( !me.addParent(class_to_extend, ps) )
+					//	syntax_error("can't find parent "+class_to_extend+", no import statement?");
+					me.addParent(class_to_extend, ps);
+				}
 			}
 			else if( id == id_implements )
 			{

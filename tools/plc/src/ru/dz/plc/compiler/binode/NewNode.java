@@ -172,8 +172,7 @@ public class NewNode extends Node
 		PhantomClass pclass = static_type.get_class();
 		if( pclass != null )
 		{
-			//Method cm = pclass.findMethod("<init>");
-			Method cm = pclass.findMethod(new MethodSignature("<init>", args));
+			Method cm = pclass.findMethod(new MethodSignature(Method.CONSTRUCTOR_M_NAME, args));
 			if( cm == null )
 			{					
 				if( n_param > 0 )
