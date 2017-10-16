@@ -67,6 +67,10 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
   https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots
 
+## Ready to take part? ##
+
+[Issues to start with](https://github.com/dzavalishin/phantomuserland/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+
 ## O, my. Badges! ##
 
 [![Code coverage][COVERAGE_BADGE]][COVERAGE_LINK]
