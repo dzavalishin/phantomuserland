@@ -1,9 +1,7 @@
 package ru.dz.plc.compiler;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +20,7 @@ import ru.dz.plc.util.PlcException;
 
 
 public class ConstantPool {
+	public static final String FILE_ENCODING = "UTF-8";
 	private Map<Integer, Object> table;
 	private ordinals_generator ordinals = new ordinals_generator();
 
@@ -82,6 +81,18 @@ public class ConstantPool {
 				throw new PlcException("Unknown type writing const id "+id+" val='"+v.toString()+"'");
 			
 		}
+	}
+
+	public void setConstant(int cOrdinal, PhantomType cType, byte[] buf) throws PlcException {
+		if( !cType.is_string() )
+			System.err.println("ConstPool setConst: not string but "+cType);
+		
+		String s = new String( buf, Charset.forName(FILE_ENCODING));
+
+		if( table.get(cOrdinal) != null )
+			throw new PlcException("ConstPool setConst"," ordinal "+cOrdinal+" is used");
+		
+		table.put(cOrdinal, s);
 	}
 
 

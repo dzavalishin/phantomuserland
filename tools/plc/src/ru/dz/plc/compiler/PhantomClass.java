@@ -467,6 +467,22 @@ public class PhantomClass {
 		return have_nonvoid_parent;
 	}
 
+	/**
+	 * Used to load class from object file. Sets field ordinal too.
+	 * 
+	 * @param fName
+	 * @param fType
+	 * @param fOrdinal
+	 * @throws PlcException 
+	 */
+	public void setField(String fName, PhantomType fType, int fOrdinal) throws PlcException {
+		ft.setField( fName, fType, fOrdinal );		
+	}
+
+	public void setPoolConstant(int cOrdinal, PhantomType cType, byte[] buf) throws PlcException {
+		constantPool.setConstant(cOrdinal, cType, buf);		
+	}
+
 
 
 

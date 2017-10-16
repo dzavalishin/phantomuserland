@@ -32,7 +32,10 @@ import .internal."class";
 class .internal.object
 {
 
-	void construct_me () [0] { }
+//	void construct_me () [0] { }
+// when someone explicitly tells that we're base class, compiler wants us to have a constructor
+	void object () [0] { }
+
 	void destruct_me () [1] {  }
 	.internal."class" getClass () [2] {  }
 	void clone() [3] {  }

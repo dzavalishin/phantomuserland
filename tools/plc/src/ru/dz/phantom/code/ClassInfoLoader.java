@@ -7,6 +7,8 @@ import ru.dz.plc.util.*;
 
 import java.util.*;
 
+import polyglot.ast.For;
+
 /**
  * <p>Class file loader.</p>
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
@@ -134,10 +136,50 @@ public class ClassInfoLoader {
 				//methods.push_back(mh);
 
 				//System.out.println(mh.me);
-				
+
 				my_class.addMethod(mh.me);
 			}
 			break;
+
+			case 'f':
+				// Field
+			{
+				String fieldName = Fileops.get_string(is);
+				int fOrdinal = Fileops.get_int32(is);
+				PhantomType fType = new PhantomType(is);
+
+				my_class.setField( fieldName, fType, fOrdinal );				
+				//System.err.println("Field "+fieldName+" @ "+fOrdinal+" : "+fType);				
+			}
+			break;
+
+			case 'l':
+				// Line numbers, just ignore
+				break;
+
+			case 'c':
+				// Constant pool element
+			{
+				int cOrdinal = Fileops.get_int32(is);
+				PhantomType cType = new PhantomType(is);
+				
+				long start = is.getFilePointer();
+				long len = record_size - (start-ptr) - 10; // 10 is record header size
+				
+				// TODO magic 64 mbytes max const len
+				if( (len < 0 ) || (len > 64*1024*1024))
+					throw new PlcException("class load","const size = "+len);
+				
+				byte[] buf = new byte[(int)len];
+				is.readFully(buf, 0, buf.length);
+				
+				my_class.setPoolConstant( cOrdinal, cType, buf );
+			}
+			break;
+
+			default:
+				System.err.println("Record of unknown type "+record_type);
+				break;
 
 			}
 
@@ -277,7 +319,7 @@ class method_signature_loader_handler extends loader_handler
 			me.addArg(arg_name, arg_type);
 		}
 
-		
+
 
 		if(debug_print) System.out.println("");
 	}

@@ -346,7 +346,7 @@ extends GrammarHelper {
 				String class_to_extend = parseClassName(false);
 				if(interface_mode)
 					syntax_error("interface can not extend class");
-				
+
 				if( me.hasParent() )
 					syntax_error("just one base class");
 				else
@@ -605,7 +605,7 @@ extends GrammarHelper {
 		// TODO Auto-generated method stub
 		return null;
 	}*/
-	
+
 	private boolean checkConstructorName(PhantomClass me, String mname) 
 	{
 		//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
@@ -1339,7 +1339,7 @@ extends GrammarHelper {
 				MethodNode method = new MethodNode( ident.getName(), ps );
 				method.setContext( l );
 				//method.setSignature(new MethodSignature(ident.getName(), args));
-				
+
 				out = new OpMethodCallNode(object, method, args).setContext( l );
 				//out = new op_method_call_node(object, atom, args);
 			}
@@ -1377,6 +1377,17 @@ extends GrammarHelper {
 			// XXX this is bullshit, use parseTypeSpeculative to find ver defs.
 			// TODO check for var def with leading type
 			if( leftmost) {
+
+				PhantomType td = parseTypeSpeculative(true);
+
+				if( td != null ) // assume var def
+				{
+					String mname = getIdent();
+
+					ps.get_method().svars.add_stack_var(new PhantomVariable(mname, td));
+					return new EmptyNode();
+				}
+				/*
 				PhantomType type = null;
 
 				String typeName = t.value();
@@ -1402,6 +1413,7 @@ extends GrammarHelper {
 					ps.get_method().svars.add_stack_var(new PhantomVariable(mname, type));
 					return new EmptyNode();
 				}
+				 */
 			} 
 
 			return new IdentNode( t.value(), ps ).setContext( l );
@@ -1435,7 +1447,7 @@ extends GrammarHelper {
 			expect(id_lparen);
 			type_expr = parseExpression(false);
 			expect(id_rparen);
-			
+
 			if( testAndEat( id_colon ) )
 				type = parseType();
 		}

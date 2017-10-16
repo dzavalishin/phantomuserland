@@ -55,6 +55,10 @@ public class FieldTable {
 		table.put(name, new PhantomField( name, type, ordinal ));
 		ordinals.ensureBase(ordinal+1);
 	}
+
+	public void setField(String fName, PhantomType fType, int fOrdinal) throws PlcException {
+		set( fOrdinal, fName, fType );		
+	}
 	
 	/*void add( String name, PhantomType type, int ordinal  ) throws PlcException {
     if( have_ord(ordinal) )
@@ -182,6 +186,7 @@ public class FieldTable {
 			}
 		}
 	}
+
 
 
 }
