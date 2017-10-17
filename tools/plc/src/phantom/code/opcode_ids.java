@@ -108,7 +108,7 @@ protected static final byte opcode_dynamic_invoke = (byte)0x6F; // no args. stac
 protected static final byte opcode_ishl = (byte)0x70; // shift left
 protected static final byte opcode_ishr = (byte)0x71; // shift right signed
 protected static final byte opcode_ushr = (byte)0x72; // shift right unsigned
-// no 73 yet
+protected static final byte opcode_arg_count = (byte)0x73; // byte with number of args this func waits for - compares with int on istack, throws if not eq
 protected static final byte opcode_fromi = (byte)0x74; // cast int from int stack to current (as defined by prefix) type on int stack
 protected static final byte opcode_froml = (byte)0x75; // cast from long
 protected static final byte opcode_fromf = (byte)0x76; // cast from float

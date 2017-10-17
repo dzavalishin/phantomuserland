@@ -150,7 +150,7 @@ id(opcode_ishl,0x70)  // shift left
 id(opcode_ishr,0x71)  // shift right signed
 id(opcode_ushr,0x72)  // shift right unsigned
 
-// no 73 yet
+id(opcode_arg_count,0x73)  // byte with number of args this func waits for - compares with int on istack, throws if not eq
 
 id(opcode_fromi,0x74) // cast int from int stack to current (as defined by prefix) type on int stack
 id(opcode_froml,0x75) // cast from long
@@ -158,6 +158,9 @@ id(opcode_fromf,0x76) // cast from float
 id(opcode_fromd,0x77) // cast from double
 
 // 73-7f
+
+
+
 
 // TODO kill shortcuts for we will have JIT anyway and bytecode size does not matter
 id(opcode_sys_0,0x80) // shortcut for syscall 0

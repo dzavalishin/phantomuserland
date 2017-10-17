@@ -249,12 +249,10 @@ static int pvm_exec_find_catch(
                                unsigned int *jump_to,
                                struct pvm_object thrown_obj );
 
-
-// object to throw is on stack
-static void pvm_exec_do_throw(struct data_area_4_thread *da)
+// object to throw is in parameter
+static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t thrown_obj)
 {
     unsigned int jump_to = (unsigned int)-1; // to cause fault
-    struct pvm_object thrown_obj = os_pop();
     // call_frame.catch_found( &jump_to, thrown_obj )
     while( !(pvm_exec_find_catch( da->_estack, &jump_to, thrown_obj )) )
     {
@@ -279,6 +277,13 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
     LISTIA("except jump to %d", jump_to);
     da->code.IP = jump_to;
     os_push(thrown_obj);
+}
+
+// object to throw is on stack
+static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
+{
+    struct pvm_object thrown_obj = os_pop();
+    pvm_exec_do_throw_object( da, thrown_obj);
 }
 
 
@@ -307,7 +312,7 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
         // OR! in syscall arg pop?
         // OR! in syscall code?
         if( func( o, da ) == 0 )	// exec syscall
-            pvm_exec_do_throw(da); // exception reported
+            pvm_exec_do_throw_pop(da); // exception reported
     }
 
     LISTIA("sys %d end", syscall_index );
@@ -1770,7 +1775,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
         case opcode_throw:
             if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
-            pvm_exec_do_throw(da);
+            pvm_exec_do_throw_pop(da);
             if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
             break;
 
@@ -1798,6 +1803,24 @@ static void do_pvm_exec(pvm_object_t current_thread)
             //call_frame.estack().pop();
             ref_dec_o( es_pop().object );
             break;
+
+            // kind of throw        ------------------------------------------------------
+
+        case opcode_arg_count:
+            LISTI("arg count check");
+            {
+                u_int8_t want_args = pvm_code_get_byte(&(da->code));
+                u_int32_t have_args = is_pop();
+                if( have_args != want_args)
+                {
+                    pvm_object_t msg = pvm_create_string_object("invalid arg count");
+                    if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+                    pvm_exec_do_throw_object( da, msg );
+                    if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
+                }
+            }
+            break;
+        
 
             // ok, now method calls ------------------------------------------------------
 

@@ -106,7 +106,7 @@
 #define opcode_ishl   0x70  // shift left
 #define opcode_ishr   0x71  // shift right signed
 #define opcode_ushr   0x72  // shift right unsigned
-// no 73 yet
+#define opcode_arg_count   0x73  // byte with number of args this func waits for - compares with int on istack, throws if not eq
 #define opcode_fromi   0x74  // cast int from int stack to current (as defined by prefix) type on int stack
 #define opcode_froml   0x75  // cast from long
 #define opcode_fromf   0x76  // cast from float
