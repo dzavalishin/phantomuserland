@@ -49,6 +49,8 @@ import .internal."class";
 
 import .phantom.osimpl;
 
+import .test.suite;
+
 //import .test.toPhantom.Assigns;
 
 /*
@@ -180,6 +182,12 @@ class boot
         windows.test();
 
         print("Finished windows tests\n");
+
+
+		// Run tests in plib/sys/src/test
+		var suite : .test.suite;
+		suite = new .test.suite();
+		suite.run();
 
 // uncomment to run Java unit tests
 /*

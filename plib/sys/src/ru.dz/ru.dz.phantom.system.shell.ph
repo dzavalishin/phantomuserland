@@ -19,6 +19,7 @@ import .internal.window;
 import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 import .ru.dz.phantom.system.shell_callback;
+import .test.suite;
 
 import .ru.dz.demo.start;
 
@@ -104,7 +105,12 @@ class shell //extends runnable
 
         stat_conn = new .internal.connection();
         stat_conn.connect("stt:");
-
+/* moved to run in boot thread
+		// Run tests in plib/sys/src/test
+		var suite : .test.suite;
+		suite = new .test.suite();
+		suite.run();
+*/
 		demo = new .ru.dz.demo.start();
 		demo.run(console);
 

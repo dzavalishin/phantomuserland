@@ -496,7 +496,16 @@ void dumpo( addr_t addr )
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
     {
         struct data_area_4_class *da = (struct data_area_4_class *)&(o->da);
-        printf("Is class: '"); pvm_object_print( da->class_name ); printf(" @%p'", o);
+        printf("Is class: '"); pvm_object_print( da->class_name ); printf("' @%p", o);
+        if(
+            (!pvm_isnull(da->class_parent)) &&
+            (pvm_get_null_class().data != da->class_parent.data )
+            )
+        {
+            printf(" Parent: "); pvm_object_dump( da->class_parent ); 
+            //printf(" Parent: '"); pvm_object_print( da->class_parent ); 
+            //printf("' @%p", da->class_parent.data );
+        }
     }
     else
     {
@@ -505,7 +514,8 @@ void dumpo( addr_t addr )
         //pvm_object_print( o->_class );
         pvm_object_t cl = o->_class;
         struct data_area_4_class *cda = (struct data_area_4_class *)&(cl.data->da);
-        printf("Class: '"); pvm_object_print( cda->class_name ); printf(" @%p'", o);
+        //printf("Class: '"); pvm_object_print( cda->class_name ); printf(" @%p'", o);
+        printf("Class: '"); pvm_object_print( cda->class_name ); printf("' @%p", o);
     }
     printf("\n");
 }

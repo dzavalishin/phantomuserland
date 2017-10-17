@@ -27,7 +27,7 @@
 #include "vm/alloc.h"
 
 
-int debug_print = 0;
+int debug_print = 1;
 
 
 static int vm_code_linenum_cmp(const void *, const void *) __attribute__((used));
