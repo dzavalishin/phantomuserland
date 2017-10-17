@@ -7,6 +7,9 @@ import ru.dz.plc.util.PlcException;
 
 import java.util.*;
 
+import phantom.file.Fileops;
+import phantom.file.pclass.FileInfo;
+
 /**
  * <p>Title: ru.dz.plc.compiler</p>
  * 
@@ -30,8 +33,7 @@ public class MethodSignatureFileInfo extends FileInfo {
 		this.s = s;
 	}
 
-	protected void do_write_specific() throws IOException, PlcException,
-	EmptyPlcException {
+	protected void do_write_specific() throws IOException {
 		Fileops.put_string_bin( os, m.getName() );
 		Fileops.put_int32( os, m.getOrdinal() );
 		//Fileops.put_int32( os, m.args_def.size() );

@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import phantom.code.opcode_ids;
+import phantom.file.Fileops;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.*;
 import ru.dz.soot.SootMain;

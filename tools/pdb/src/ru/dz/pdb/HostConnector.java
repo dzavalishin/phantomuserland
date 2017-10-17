@@ -23,21 +23,23 @@ public class HostConnector {
 
 	public HostConnector() throws UnknownHostException, IOException {
 		host = InetAddress.getByName("127.0.0.1");
-		connect();
+		//connect();
 	}
 
-	private void connect() throws IOException {
+	public void connect() throws IOException {
 		s = new Socket( host , 1256);
 		s.setSoTimeout(300);
 	}
 
 	private void putDebugChar(byte c) throws IOException
 	{
+		if( s == null )	throw new IOException("disconnected");
 		s.getOutputStream().write(c);
 	}
 
 	private byte getDebugChar() throws IOException
 	{
+		if( s == null )	throw new IOException("disconnected");
 		byte c = (byte)s.getInputStream().read();
 		return c;
 	}

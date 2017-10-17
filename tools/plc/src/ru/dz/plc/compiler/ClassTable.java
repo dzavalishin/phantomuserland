@@ -1,6 +1,9 @@
 package ru.dz.plc.compiler;
 
 import java.util.*;
+
+import phantom.file.pclass.ClassFileInfo;
+
 import java.io.*;
 
 import ru.dz.phantom.code.*;

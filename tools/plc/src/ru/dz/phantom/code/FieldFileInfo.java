@@ -4,8 +4,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import phantom.file.Fileops;
+import phantom.file.pclass.FileInfo;
 import ru.dz.plc.compiler.PhantomField;
-import ru.dz.plc.util.PlcException;
+
 
 /**
  * Used to save field info (name, ordinal, type) to class file.
@@ -24,7 +26,7 @@ public class FieldFileInfo extends FileInfo {
 	}
 
 	@Override
-	protected void do_write_specific() throws IOException, PlcException {
+	protected void do_write_specific() throws IOException {
 		Fileops.put_string_bin( os, f.getName());
 		Fileops.put_int32( os, f.getOrdinal() );
 		f.getType().save_to_file(os);

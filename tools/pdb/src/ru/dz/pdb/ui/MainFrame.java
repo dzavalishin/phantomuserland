@@ -8,6 +8,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -40,8 +41,10 @@ public class MainFrame extends JFrame
 		populateMe();
 		setJMenuBar(makeMenu());
 
-		setAlwaysOnTop(true);
-
+		//setAlwaysOnTop(true);
+		
+		this.setIconImage(VisualHelpers.getApplicationIconImage());
+		
 		pack();
 		setVisible(true);
 	}
@@ -123,7 +126,7 @@ public class MainFrame extends JFrame
 		gbc.anchor = GridBagConstraints.NORTHWEST;
 
 		//panel.add( new JLabel("Inspect:"), gbc );
-
+/*
 		{
 			JButton iRoot = new JButton(new AbstractAction("Root") {		
 				@Override
@@ -148,9 +151,33 @@ public class MainFrame extends JFrame
 		}
 		//panel.add( new RefButton(parsed.getClassRef(),"Class"), gbc );
 		//panel.add( new RefButton(parsed.getObjectSatellites(),"Sat"), gbc );
-
+*/
+		addButton(panel, "Root", "root.png", e -> Main.inspectRootObject());
+		addButton(panel, "Reload", "download.png", e -> reloadContent());
+	
+		// TODO conn/disconn icons 
+		addButton(panel, "Connect", "run.png", e -> Main.connect());
+		addButton(panel, "Disconnect", "stop.png", e -> Main.disconnect());
 	}
 
+	protected void addButton( JPanel panel, String buttonName, String iconName, Consumer<ActionEvent> eConsumer )
+	{
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.weightx = gbc.weighty = 1;
+
+		gbc.gridx = GridBagConstraints.RELATIVE;
+		gbc.gridy = 0;	
+
+		gbc.anchor = GridBagConstraints.NORTHWEST;
+		
+		JButton button = new JButton(new AbstractAction(buttonName) {		
+			@Override
+			public void actionPerformed(ActionEvent e) { eConsumer.accept(e); }
+		});
+		
+		if(iconName != null) button.setIcon(VisualHelpers.loadIcon(iconName));
+		panel.add( button, gbc );
+	}
 
 	protected void reloadContent() {
 		tlPanel.reload();

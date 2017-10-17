@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_141" class="java.beans.XMLDecoder">
+ <object class="ru.dz.pdb.Project" id="Project0">
+  <void property="binaryPath">
+   <void property="path">
+    <string>..\..\plib</string>
+   </void>
+  </void>
+  <void property="projectFileName">
+   <object class="java.io.File">
+    <string>Phantom.pd</string>
+   </object>
+  </void>
+  <void property="projectName">
+   <string>TestProject</string>
+  </void>
+  <void property="sourcePath">
+   <void property="path">
+    <string>..\..\plib\src;..\..\..\plib\src;..\..\plib\roots</string>
+   </void>
+  </void>
+ </object>
+</java>

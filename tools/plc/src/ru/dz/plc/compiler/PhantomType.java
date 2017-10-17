@@ -6,6 +6,8 @@ import ru.dz.plc.util.*;
 
 import java.io.*;
 
+import phantom.file.Fileops;
+
 /**
  * <p>Phantom VM Type. Class + possible container attributes.</p>
  * 

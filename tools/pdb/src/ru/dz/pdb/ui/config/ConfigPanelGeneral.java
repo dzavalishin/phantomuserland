@@ -291,6 +291,7 @@ public class ConfigPanelGeneral extends ConfigPanel {
 
 		srcPathField.setText(bean.getSourcePath().toString());
 		binPathField.setText(bean.getBinaryPath().toString());
+		logFileNameField.setText(bean.getLogFile());
 		
 		/*
 		networkActiveField.setSelected(bean.isNetworkActive());
@@ -322,6 +323,7 @@ public class ConfigPanelGeneral extends ConfigPanel {
 		bean.setSourcePath(new FilePath(srcPathField.getText()));
 		bean.setBinaryPath(new FilePath(binPathField.getText()));
 
+		bean.setLogFile(new String(logFileNameField.getText()));
 		/*
 		bean.setNetworkActive(networkActiveField.isSelected());
 		bean.setDemoMode(demoModeField.isSelected());

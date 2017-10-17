@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
 
+import phantom.file.Fileops;
+import phantom.file.pclass.FileInfo;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.util.PlcException;
 
@@ -17,7 +19,7 @@ public class MethodLineNumbersFileInfo extends FileInfo {
 	}
 
 	@Override
-	protected void do_write_specific() throws IOException, PlcException {
+	protected void do_write_specific() throws IOException {
 		Codegen cg = m.get_cg();
 
 		Map<Long, Integer> map = cg.getIpToLine();

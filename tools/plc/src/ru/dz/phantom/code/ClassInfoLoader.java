@@ -7,6 +7,8 @@ import ru.dz.plc.util.*;
 
 import java.util.*;
 
+import phantom.file.Fileops;
+
 /**
  * <p>Class file loader.</p>
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>

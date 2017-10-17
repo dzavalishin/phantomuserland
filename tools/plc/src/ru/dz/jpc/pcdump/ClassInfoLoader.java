@@ -4,9 +4,10 @@ import java.io.*;
 
 import ru.dz.plc.compiler.*;
 import ru.dz.plc.util.*;
-import ru.dz.phantom.code.Fileops;
 
 import java.util.*;
+
+import phantom.file.Fileops;
 
 /**
  * <p>Class file loader.</p>

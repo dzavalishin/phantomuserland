@@ -98,11 +98,11 @@ public class Main {
 		loadProject();
 		
 		hc = new HostConnector();
+		//hc.connect();
 
 		mainFrame = new MainFrame();
 
 		objectSpaceStart = hc.cmdGetPoolAddress();
-
 		inspectRootObject();
 
 		/*{
@@ -450,6 +450,20 @@ public class Main {
 	}
 
 	public static ClassMap getClassMap() { return cmap; }
+
+	public static void connect() {		
+		try {
+			hc.disconnect();
+			hc.connect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void disconnect() {
+		hc.disconnect();
+	}
 
 
 

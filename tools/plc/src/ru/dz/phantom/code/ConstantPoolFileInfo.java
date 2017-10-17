@@ -3,6 +3,8 @@ package ru.dz.phantom.code;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import phantom.file.Fileops;
+import phantom.file.pclass.FileInfo;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.PhantomType;
@@ -37,7 +39,7 @@ public class ConstantPoolFileInfo extends FileInfo {
 	}
 
 	@Override
-	protected void do_write_specific() throws IOException, PlcException 
+	protected void do_write_specific() throws IOException 
 	{
 		Fileops.put_int32( os, ordinal );
 		pt.save_to_file(os);

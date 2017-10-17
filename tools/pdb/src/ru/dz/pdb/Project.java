@@ -27,6 +27,9 @@ public class Project {
 			"../../plib/bin" + File.pathSeparator +
 			"../../../plib/bin" 
 			);
+
+
+	private String logFile = "";
 	
 
 	
@@ -64,6 +67,8 @@ public class Project {
 	public String getProjectName() {		return projectName;	}
 	public void setProjectName(String projectName) {		this.projectName = projectName;	}
 	
+	public void setLogFile(String string) { this.logFile = string; }	
+	public String getLogFile() { return logFile; }
 }
 
 final class FileXMLAdapter extends XmlAdapter<String,File>
