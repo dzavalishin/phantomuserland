@@ -9,6 +9,8 @@ public class Disassembler extends opcode_ids {
 	private final byte[] data;
 	private int ip;
 
+	byte current_prefix = 0; // long/float/double
+	
 	public Disassembler(byte [] data ) 
 	{
 		this.data = data;
@@ -25,12 +27,28 @@ public class Disassembler extends opcode_ids {
 	
 	public boolean hasNext() { return ip < data.length; }
 	
-	public PhantomInstruction next()
+	public PhantomInstruction next(byte prefix)
 	{
 		byte opcode = getByte();
+		current_prefix = prefix;
+
+		switch(opcode)
+		{
+		case opcode_prefix_long:
+		case opcode_prefix_float:
+		case opcode_prefix_double:
+			byte new_prefix = opcode;
+			if( prefix != 0)
+				return simple("!! Double Prefix !!");
+			return next(new_prefix);
+			
+			default:
+				break;
+		}
 		
 		switch(opcode)
 		{
+		
 		case opcode_nop:				return simple("nop");
 		
 		case opcode_debug:
@@ -203,7 +221,9 @@ public class Disassembler extends opcode_ids {
 		case opcode_call_1D:			return int2arg("call", 0x1D, getByte() );
 		case opcode_call_1E:			return int2arg("call", 0x1E, getByte() );
 		case opcode_call_1F:			return int2arg("call", 0x1F, getByte() );
-			
+		
+ 
+		
 		}
 		
 		return intarg("? = ", opcode);
@@ -211,19 +231,19 @@ public class Disassembler extends opcode_ids {
 
 
 	private PhantomInstruction int2arg(String name, int a1, int a2) {
-		return new PhantomInstruction(name, a1, a2);
+		return new PhantomInstruction(current_prefix, name, a1, a2);
 	}
 
 	private PhantomInstruction stringarg(String name, byte[] arg) {
-		return new PhantomInstruction(name, arg);
+		return new PhantomInstruction(current_prefix, name, arg);
 	}
 
 	private PhantomInstruction intarg(String name, int arg) {
-		return new PhantomInstruction(name, arg);
+		return new PhantomInstruction(current_prefix, name, arg);
 	}
 
 	private PhantomInstruction simple(String name) {		
-		return new PhantomInstruction(name);
+		return new PhantomInstruction(current_prefix, name);
 	}
 
 	/*private PhantomInstruction jump(String name, int arg) {
@@ -271,7 +291,7 @@ public class Disassembler extends opcode_ids {
 		while(hasNext())
 		{
 			System.out.print( String.format("%04X: ", getIp() ));
-			System.out.println(next().toString());
+			System.out.println(next((byte)0).toString());
 		}
 	}
 
