@@ -1,1 +1,4 @@
 Class .phantom.os.time
+  C'tor  void <init>(  ):
+    empty : void
+
