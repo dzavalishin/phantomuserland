@@ -385,7 +385,8 @@ static void init_cfda(
         // method's class
 
         //printf("cmp class:\n");
-        int related = pvm_object_class_is_or_parent( new_this, class_ref );
+        //int related = pvm_object_class_is_or_parent( new_this, class_ref );
+        int related = pvm_object_class_is_or_child( new_this, class_ref );
         if( !related )
             {
                 printf("new_this @%p: ", new_this.data); pvm_object_dump( new_this );
