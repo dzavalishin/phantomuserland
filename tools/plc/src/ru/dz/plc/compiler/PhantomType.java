@@ -1,6 +1,7 @@
 package ru.dz.plc.compiler;
 
 import ru.dz.phantom.code.*;
+import ru.dz.phantom.file.pclass.PhantomTypeInfo;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.*;
 
@@ -31,8 +32,8 @@ public class PhantomType {
 
 	protected boolean             _is_string;
 
-	Node                _class_expression;
-	Node                _container_class_expression;
+	Node                          _class_expression;
+	Node                          _container_class_expression;
 
 	public String get_main_class_name()
 	{
@@ -212,6 +213,49 @@ public class PhantomType {
 		Fileops.put_string_bin( os, get_contained_class_name() );
 	}
 
+	private void load(PhantomTypeInfo ti) throws IOException, PlcException {	
+		if(ti.isContainer())
+		{
+			if(!(ti.getContainedClassName().equals("")))
+			{
+				_class = new PhantomClass(ti.getContainedClassName());
+				_is_known = true;
+			}
+			if(!(ti.getMainClassName().equals("")))
+			{
+				_container_class = new PhantomClass(ti.getMainClassName());
+				_is_known = true;
+			}
+		}
+		else
+		{
+			if(!(ti.getMainClassName().equals("")))
+			{
+				_class = new PhantomClass(ti.getMainClassName());
+				_is_known = true;
+			}
+		}
+
+		
+		// TODO separate this check in a method
+		String main_class_name= ti.getMainClassName();
+		
+		_is_void   = main_class_name.equals(".internal.void");
+		_is_int    = main_class_name.equals(".internal.int");
+		_is_long   = main_class_name.equals(".internal.long");
+		_is_float  = main_class_name.equals(".internal.float");
+		_is_double = main_class_name.equals(".internal.double");
+		_is_string = main_class_name.equals(".internal.string");
+	}
+
+	public PhantomType(PhantomTypeInfo ti) throws IOException, PlcException {
+		load(ti);
+	}
+
+	public PhantomType(RandomAccessFile is) throws IOException, PlcException {
+		load(new PhantomTypeInfo(is));
+	}
+	/*
 	public PhantomType(RandomAccessFile is) throws IOException, PlcException {
 		_class_expression = _container_class_expression = null;
 		_class = _container_class = null;
@@ -251,7 +295,7 @@ public class PhantomType {
 		_is_double = main_class_name.equals(".internal.double");
 		_is_string = main_class_name.equals(".internal.string");
 	}
-
+*/
 	/**
 	 * 
 	 * @return Class of this type
@@ -374,6 +418,8 @@ public class PhantomType {
 	}
 
 	private static PhantomType t_object = null;
+
+	private boolean iAmStatic;
 	public static PhantomType getObject() throws PlcException {
 		if( t_object  == null )
 			t_object = new PhantomType( ClassMap.get_map().get(".internal.object",false, null) );
@@ -449,6 +495,8 @@ public class PhantomType {
 		return biggerType(tl, tr);
 	}
 
+	public void setStatic(boolean iAmStatic) { this.iAmStatic = iAmStatic; }
+	public boolean getStatic() { return iAmStatic; }
 
 }
 
