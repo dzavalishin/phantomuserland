@@ -22,6 +22,8 @@
 #include <vm/internal_da.h>
 #include <spinlock.h>
 
+#define debug_print 1
+
 /*
 #include <phantom_libc.h>
 #include <time.h>
@@ -50,9 +52,13 @@
 // pagefault in closed interrupts and spinlock is forbidden
 
 #warning lock
-#define LOCK_DIR(__dir) hal_wired_spin_lock(&(__dir)->lock);
-#define UNLOCK_DIR(__dir) hal_wired_spin_unlock(&(__dir)->lock);
-
+#if DIR_MUTEX_O
+#  define LOCK_DIR(__dir) pvm_spin_lock(&(__dir)->pvm_lock)
+#  define UNLOCK_DIR(__dir) pvm_spin_unlock(&(__dir)->pvm_lock)
+#else
+#  define LOCK_DIR(__dir) hal_wired_spin_lock(&(__dir)->lock)
+#  define UNLOCK_DIR(__dir) hal_wired_spin_unlock(&(__dir)->lock)
+#endif
 //#warning SYS_FREE_O() for removed values - array access funcs do it
 #warning do we need ref_inc for both saved objects and returned copies in get?
 
@@ -123,6 +129,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
             ref_inc_o( *out );
             if( delete_found )
             {
+                // TODO need ref_dec?
                 pvm_set_array_ofield( dir->values.data, keypos, pvm_create_null_object() );
                 pvm_set_array_ofield( dir->keys.data, keypos, pvm_create_null_object() );
                 dir->nEntries--;
@@ -139,7 +146,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     pvm_object_t valarray = pvm_get_array_ofield( dir->values.data, keypos );
     if( pvm_is_null( valarray ) )
     {
-        lprintf("keyarray exists, valertray not"); // don't panic ;), but actually it is inconsistent
+        lprintf("keyarray exists, valarray not"); // don't panic ;), but actually it is inconsistent
         UNLOCK_DIR(dir);
         return ENOENT;
     }
@@ -182,7 +189,7 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     assert(dir->values.data != 0);
     assert(dir->flags != 0);
 
-    printf("---- hdir add %.*s\n", i_key_len, ikey );
+    if(debug_print) printf("---- hdir add %.*s\n", i_key_len, ikey );
 
     LOCK_DIR(dir);
 
@@ -328,8 +335,11 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
 
     printf("---- hdir init sz %d\n", initial_size );
 
+#if DIR_MUTEX_O
+    pvm_spin_init( &dir->pvm_lock );
+#else
     hal_spin_init( &dir->lock );
-
+#endif
     LOCK_DIR(dir);
 
     dir->nEntries = 0;

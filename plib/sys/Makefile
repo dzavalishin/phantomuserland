@@ -88,3 +88,9 @@ $(BINDIR)/ru.dz.phantom.tetris.io.pc: ru.dz.phantom.tetris.utilites.pc
 $(BINDIR)/ru.dz.phantom.tetris.mainmodule.pc: ru.dz.phantom.tetris.imagesmanager.pc ru.dz.phantom.tetris.figure.pc ru.dz.phantom.tetris.io.pc
 
 $(BINDIR)/ru.dz.windows.root.pc: internal.io.tty.pc internal.bitmap.pc
+
+$(BINDIR)/test.hier.child1.pc: test.hier.intermediate.pc
+
+$(BINDIR)/test.hier.intermediate.pc: test.hier.root.pc
+
+$(BINDIR)/test.suite.pc: test.hier.child1.pc

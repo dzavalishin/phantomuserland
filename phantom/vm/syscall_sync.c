@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
  * Synchronization syscalls
  *
@@ -34,8 +34,48 @@
 
 static int debug_print = 0;
 
+void pvm_spin_init( pvm_spinlock_t *ps )
+{
+    assert( ps != 0 );
+    hal_spin_init( &(ps->sl) );
+    ps->wait_spin_flag = 0;
+}
 
+void pvm_spin_lock( pvm_spinlock_t *ps )
+{
+    assert( ps != 0 );
+    hal_spinlock_t *sl = &(ps->sl);
+    volatile int *additional_lock = &(ps->wait_spin_flag);
 
+    volatile int was_locked;
+    while(1) {
+        // just access it out of spinlock to make sure it is not paged out
+        was_locked = *additional_lock; 
+        hal_wired_spin_lock(sl);
+        was_locked = *additional_lock;
+        *additional_lock = 1;
+        hal_wired_spin_unlock(sl);
+
+        if(!was_locked) break;
+
+        hal_sleep_msec(1); // yield TODO hal_yield func
+    } 
+}
+
+void pvm_spin_unlock( pvm_spinlock_t *ps )
+{
+    assert( ps != 0 );
+    hal_spinlock_t *sl = &(ps->sl);
+    volatile int *additional_lock = &(ps->wait_spin_flag);
+    volatile int was_locked;
+    // just access it out of spinlock to make sure it is not paged out
+    was_locked = *additional_lock; 
+
+    hal_wired_spin_lock(sl);
+    assert(*additional_lock);
+    *additional_lock = 0;
+    hal_wired_spin_unlock(sl);
+}
 
 // --------- mutex -------------------------------------------------------
 
@@ -48,8 +88,18 @@ static int debug_print = 0;
 
 void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 {
-#if OLD_VM_SLEEP
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
+#if !OLD_VM_SLEEP
+    //SYSCALL_THROW_STRING("Not this way");
+    lprintf("unimplemented vm_mutex_lock used\r");
+
+    pvm_spin_lock( &(da->pvm_lock) );
+
+
+    pvm_spin_unlock( &(da->pvm_lock) );
+
+#else
+
 
     VM_SPIN_LOCK(da->poor_mans_pagefault_compatible_spinlock);
 
@@ -75,9 +125,6 @@ void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 
 done:
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
-#else
-    //SYSCALL_THROW_STRING("Not this way");
-    lprintf("unimplemented vm_mutex_lock used\r");
 #endif
 }
 

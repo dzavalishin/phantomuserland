@@ -61,9 +61,13 @@ void pvm_fill_syscall_interface( struct pvm_object iface, int syscall_count );
 //#  define VM_SPIN_LOCK(___var) ({ hal_disable_preemption(); atomic_add(&(___var),1); assert( (___var) == 1 ); })
 //#  define VM_SPIN_UNLOCK(___var) ({ atomic_add(&(___var),-1); hal_enable_preemption(); assert( (___var) == 0 ); })
 
-#  define VM_SPIN_LOCK(___var) ({ hal_wired_spin_lock(&___var); })
-#  define VM_SPIN_UNLOCK(___var) ({ hal_wired_spin_unlock(&___var); })
-#  define VM_SPIN_TYPE hal_spinlock_t
+//#  define VM_SPIN_LOCK(___var) ({ hal_wired_spin_lock(&___var); })
+//#  define VM_SPIN_UNLOCK(___var) ({ hal_wired_spin_unlock(&___var); })
+//#  define VM_SPIN_TYPE hal_spinlock_t
+
+#  define VM_SPIN_LOCK(___var) ({ pvm_spin_lock(&___var); })
+#  define VM_SPIN_UNLOCK(___var) ({ pvm_spin_unlock(&___var); })
+#  define VM_SPIN_TYPE pvm_spinlock_t
 #endif
 
 
@@ -360,7 +364,16 @@ struct data_area_4_tty
 struct data_area_4_mutex
 {
     //int                 poor_mans_pagefault_compatible_spinlock;
-    VM_SPIN_TYPE      poor_mans_pagefault_compatible_spinlock;
+    VM_SPIN_TYPE        pvm_lock;
+
+	// We can't lock spin when we access objects or we have chance
+	// to die because of page fault with spin locked.
+	// We lock in_method instead and check if it is locked and
+	// spin around in simple hal_sleep_msec 
+
+	// TODO in_method can be paged out too, try accessing it before locking in spin!
+	// TODO better move it to spinlock struct and write funcs for pvm_spin_lock/unlock
+	//int                 in_method;
 
     struct data_area_4_thread *owner_thread;
 
@@ -465,7 +478,7 @@ struct data_area_4_window
     rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
 #endif
 
-    struct pvm_object   		connector;      // Used for callbacks - events
+    struct pvm_object                   connector;      // Used for callbacks - events
 
     int                                 x, y; // in pixels
     rgba_t                              fg, bg; // colors
@@ -475,27 +488,24 @@ struct data_area_4_window
 };
 
 
+#define DIR_MUTEX_O 1
+
 // Very dumb implementation, redo with hash map or bin search or tree
 // Container entry has struct pvm_object at the beginning and the rest is 0-term name string
 struct data_area_4_directory
 {
-/* old, unused?
-    u_int32_t                           elSize;         // size of one dir entry, bytes, defaults to 256
-
-    u_int32_t                           capacity;       // size of binary container in entries
-    u_int32_t                           nEntries;       // number of actual entries
-
-    struct pvm_object   		container;      // Where we actually hold it
-*/
-
     u_int32_t                           capacity;       // size of 1nd level arrays
     u_int32_t                           nEntries;       // number of actual entries stored
 
-    struct pvm_object   		keys;      	// Where we actually hold keys
-    struct pvm_object   		values;      	// Where we actually hold values
-    u_int8_t 				*flags;      	// Is this keys/values slot pointing to 2nd level array
-
+    struct pvm_object                   keys;      	// Where we actually hold keys
+    struct pvm_object                   values;      	// Where we actually hold values
+    u_int8_t                           *flags;      	// Is this keys/values slot pointing to 2nd level array
+#if DIR_MUTEX_O
+    //struct pvm_object                   mutex;      	// Mutex object
+	pvm_spinlock_t						pvm_lock;
+#else
     hal_spinlock_t                      lock;
+#endif
 
 };
 

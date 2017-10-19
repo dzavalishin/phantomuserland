@@ -1,11 +1,11 @@
 package .test.hier;
 
-import .test.hier.Intermediate;
+import .test.hier.intermediate;
 
-class Child1 extends Intermediate {
+class child1 extends intermediate {
 	var child1_init : int;
 
-	void Child1()
+	void child1()
 	{
 		child1_init = 1;
 	}

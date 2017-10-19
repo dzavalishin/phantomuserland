@@ -1,7 +1,7 @@
 package .test;
 
 import .internal.io.tty;
-import .test.hier.Child1;
+import .test.hier.child1;
 
 class suite {
     var console : .internal.io.tty;
@@ -30,8 +30,8 @@ class suite {
 		println("Run tests suit");
 
 		println("Run hierarchy constructors test");
-		var c1 : hier.Child1;
-		c1 = new hier.Child1();
+		var c1 : hier.child1;
+		c1 = new hier.child1();
 		c1.test();
 		println("PASSED: hierarchy constructors test");
 	}

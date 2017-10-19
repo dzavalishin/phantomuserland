@@ -260,7 +260,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     SHOW_FLOW0( 5, "VM thread awaken");
 }
 
-
+/* dz off
 void phantom_thread_put_asleep( struct data_area_4_thread *thda, VM_SPIN_TYPE *unlock_spin )
 {
     // FIXME can't sleep in spinlock!
@@ -294,7 +294,7 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
 
     hal_mutex_unlock( &interlock_mutex );
 }
-
+*/
 #endif // OLD_VM_SLEEP
 
 

@@ -241,7 +241,7 @@ int phantom_dev_keyboard_getc(void)
 
 
 
-#if OLD_VM_SLEEP
+//#if OLD_VM_SLEEP
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 {
     /*if(phantom_virtual_machine_stop_request)
@@ -264,6 +264,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 
 }
 
+/* dz off
 
 void phantom_thread_put_asleep( struct data_area_4_thread *thda )
 {
@@ -279,7 +280,7 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
     thda->sleep_flag--;
 }
 #endif
-
+*/
 
 void phantom_wakeup_after_msec(long msec)
 {

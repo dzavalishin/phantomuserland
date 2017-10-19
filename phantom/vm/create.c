@@ -619,13 +619,18 @@ void pvm_internal_init_mutex(struct pvm_object_storage * os)
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
 
     da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
-
+    pvm_spin_init( &da->pvm_lock );
+    //hal_spin_init( &da->spinlock );
+    //in_method = 0;
 }
 
 void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
     //int i;
+
+    //pvm_spin_init( &da->pvm_lock );
+//    in_method = 0;
 
     gc_fcall( func, arg, da->waiting_threads_array );
 

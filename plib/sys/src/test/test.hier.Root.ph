@@ -1,9 +1,9 @@
 package .test.hier;
 
-class Root {
+class root {
 	var root_init : int;
 
-	void Root()
+	void root()
 	{
 		root_init = 1;
 	}

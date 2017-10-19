@@ -1,8 +1,8 @@
 package .test.hier;
 
-import .test.hier.Root;
+import .test.hier.root;
 
-class Intermediate extends Root {
+class intermediate extends root {
 
 	// must have no explicit c'tor, generate 
 	// implicit one and call Root c'tor
