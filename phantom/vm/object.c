@@ -345,14 +345,19 @@ int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tc
 
     while( !pvm_is_null(oclass) )
     {
-        //printf("oclass %p tclass %p\n", oclass.data, tclass.data );
+        struct data_area_4_class *oclass_da = pvm_object_da( oclass, class );
+        //tclass_da = pvm_object_da( tclass, class );
+
+        //printf("oclass %p tclass %p, oclass parent=", oclass.data, tclass.data );
+        //pvm_object_dump( oclass_da->class_parent );
+        //printf("\n");
+
         if( oclass.data == tclass.data )
             return 1;
 
         if( oclass.data == nullc )
             break;
-
-        oclass = pvm_object_da( oclass, class )->class_parent;
+        oclass = oclass_da->class_parent;
     }
     return 0;
 }
@@ -515,7 +520,7 @@ void dumpo( addr_t addr )
         pvm_object_t cl = o->_class;
         struct data_area_4_class *cda = (struct data_area_4_class *)&(cl.data->da);
         //printf("Class: '"); pvm_object_print( cda->class_name ); printf(" @%p'", o);
-        printf("Class: '"); pvm_object_print( cda->class_name ); printf("' @%p", o);
+        printf("Class: '"); pvm_object_print( cda->class_name ); printf("' o@%p class@%p", o, cl.data );
     }
     printf("\n");
 }
