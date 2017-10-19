@@ -1,5 +1,6 @@
 package ru.dz.plc.compiler;
 
+import ru.dz.phantom.file.pclass.PhantomTypeInfo;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
 
@@ -479,8 +480,8 @@ public class PhantomClass {
 		ft.setField( fName, fType, fOrdinal );		
 	}
 
-	public void setPoolConstant(int cOrdinal, PhantomType cType, byte[] buf) throws PlcException {
-		constantPool.setConstant(cOrdinal, cType, buf);		
+	public void setPoolConstant(int cOrdinal, PhantomType pt, byte[] buf) throws PlcException, IOException {
+		constantPool.setConstant(cOrdinal, pt, buf);		
 	}
 
 

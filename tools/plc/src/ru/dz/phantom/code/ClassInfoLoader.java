@@ -2,12 +2,14 @@ package ru.dz.phantom.code;
 
 import java.io.*;
 
+import ru.dz.phantom.file.pclass.AbstractClassInfoLoader;
+import ru.dz.phantom.file.pclass.GenericMethodSignatureLoaderHandler;
+import ru.dz.phantom.file.pclass.PhantomTypeInfo;
 import ru.dz.plc.compiler.*;
 import ru.dz.plc.util.*;
 
 import java.util.*;
 
-import polyglot.ast.For;
 
 /**
  * <p>Class file loader.</p>
@@ -16,317 +18,132 @@ import polyglot.ast.For;
  * @author dz
  */
 
-public class ClassInfoLoader {
-	boolean debug_print = false;
-
-	RandomAccessFile is;
-	String class_name, class_parent_name;
+public class ClassInfoLoader extends AbstractClassInfoLoader {
 	PhantomClass my_class;
 
 	public ClassInfoLoader(RandomAccessFile is)
 	{
-		this.is = is;
+		super(is);
 	}
 
-	public String get_class_name() { return class_name; }
 	public PhantomClass get_class() { return my_class; }
 
-	@SuppressWarnings("unused")
-	public boolean load_class_file() throws IOException, PlcException {
+	@Override
+	protected boolean isClassDefined() { return my_class != null; }
 
-		long fsize = is.length();
-		//printf("fsize %d\n", fsize );
 
-		//byte data[] = new byte[fsize];
-		//is.read(data,0,fsize);
-
-		// parse it
-		long record_size = 0;
-		boolean got_class_header = false;
-
-		for( long rec_start = 0; rec_start < fsize; rec_start = rec_start+record_size )
-		{
-			if(debug_print) System.out.print("\n");
-
-			is.seek(rec_start);
-			long ptr = rec_start;
-			//printf("%d bytes left\n", contents + fsize - ptr );
-
-			{
-				byte mrk[] = new byte[5];
-				//is.read(mrk,(int)rec_start,5);
-				is.read(mrk);
-
-				if(
-						mrk[0] != 'p' ||
-						mrk[1] != 'h' ||
-						mrk[2] != 'f' ||
-						mrk[3] != 'r' ||
-						mrk[4] != ':' )
-					throw new PlcException("import","No record marker in class file");
-			}
-
-			ptr += 5;
-
-			char record_type;
-
-			{
-				ptr++;
-				byte rt = is.readByte();
-				record_type = (char)rt;
-			}
-
-			record_size = is.readInt();
-
-			if(debug_print)
-			{
-				System.out.print("type '" + record_type + "', size ");
-				System.out.print(record_size);
-				System.out.print(": ");
-			}
-
-			if( record_size < 6+8 )
-				throw new PlcException("import","Invalid record size");
-
-			// start of record-specific info
-			ptr = is.getFilePointer();
-
-			switch( record_type )
-			{
-			case 'C': // class
-			{
-				if( my_class != null )
-					throw new PlcException("import","more than one class in class file", is.toString() );
-
-				loader_handler h = new loader_handler( is, (int)(record_size - (ptr-rec_start)));
-				class_name = Fileops.get_string(is);
-				my_class = new PhantomClass(class_name);
-				if(debug_print) System.out.println( "Class is: "+class_name+"\n" );
-				int n_object_slots = Fileops.get_int32(is);
-				//if(debug_print) System.out.println(", %d fileds", n_object_slots );
-				int n_method_slots = Fileops.get_int32(is);
-				//if(debug_print) System.out.println(", %d methods\n", n_method_slots );
-				class_parent_name = Fileops.get_string(is);
-
-				if( (class_parent_name != null) && (class_parent_name.length() > 0) && (!class_parent_name.equals(".internal.object")) )
-					my_class.addParent(class_parent_name,null);
-
-				if(class_name != null && class_name.equals(".internal.object"))
-				{
-					// Hack! Hack!
-					ru.dz.plc.compiler.ClassMap.get_map().imported_add_hack(my_class);
-					// or else ww will die on adding Method signatures,
-					// as they need types too
-				}
-
-				got_class_header = true;
-			}
-			break;
-
-			case 'M': // Method
-			{
-				method_loader_handler mh = new method_loader_handler( is, (int)(record_size - (ptr-rec_start)));
-				//methods.push_back(mh);
-			}
-			break;
-
-			case 'S': // Method signature
-			{
-				method_signature_loader_handler mh = new method_signature_loader_handler( is, (int)(record_size - (ptr-rec_start)));
-				//methods.push_back(mh);
-
-				//System.out.println(mh.me);
-
-				my_class.addMethod(mh.me);
-			}
-			break;
-
-			case 'f':
-				// Field
-			{
-				String fieldName = Fileops.get_string(is);
-				int fOrdinal = Fileops.get_int32(is);
-				PhantomType fType = new PhantomType(is);
-
-				my_class.setField( fieldName, fType, fOrdinal );				
-				//System.err.println("Field "+fieldName+" @ "+fOrdinal+" : "+fType);				
-			}
-			break;
-
-			case 'l':
-				// Line numbers, just ignore
-				break;
-
-			case 'c':
-				// Constant pool element
-			{
-				int cOrdinal = Fileops.get_int32(is);
-				PhantomType cType = new PhantomType(is);
-				
-				long start = is.getFilePointer();
-				long len = record_size - (start-ptr) - 10; // 10 is record header size
-				
-				// TODO magic 64 mbytes max const len
-				if( (len < 0 ) || (len > 64*1024*1024))
-					throw new PlcException("class load","const size = "+len);
-				
-				byte[] buf = new byte[(int)len];
-				is.readFully(buf, 0, buf.length);
-				
-				my_class.setPoolConstant( cOrdinal, cType, buf );
-			}
-			break;
-
-			default:
-				System.err.println("Record of unknown type "+record_type);
-				break;
-
-			}
-
+	@Override
+	protected void createPoolConst(int cOrdinal, PhantomTypeInfo ti, byte[] buf) throws IOException {
+		try {
+			my_class.setPoolConstant( cOrdinal, new PhantomType(ti), buf );
+		} catch (PlcException e) {
+			throw new IOError(e);
 		}
+	}
 
-		if( !got_class_header )
-			return false;
+	@Override
+	protected void createField(String fieldName, int fOrdinal, PhantomTypeInfo ti) throws IOException {
+		try {
+			my_class.setField( fieldName, new PhantomType(ti), fOrdinal );
+		} catch (PlcException e) {
+			throw new IOError(e);
+		}
+	}
 
-		return true;
+	@Override
+	protected void createClass() throws IOException {
+		try {
+			my_class = new PhantomClass(class_name);
+
+			if( (class_parent_name != null) && (class_parent_name.length() > 0) && (!class_parent_name.equals(".internal.object")) )
+				my_class.addParent(class_parent_name,null);
+
+			if(class_name != null && class_name.equals(".internal.object"))
+			{
+				// Hack! Hack!
+				ru.dz.plc.compiler.ClassMap.get_map().imported_add_hack(my_class);
+				// or else ww will die on adding Method signatures,
+				// as they need types too
+			}
+		} catch (PlcException e) {
+			throw new IOError(e);
+		}
 	}
 
 
+	@Override
+	protected GenericMethodSignatureLoaderHandler 
+		getMethodSignatureLoaderHandler(RandomAccessFile is2, int in_size) throws IOException 
+	{
+		MethodSignatureLoaderHandler msh = new MethodSignatureLoaderHandler( is, in_size, this);
+		try {
+			my_class.addMethod(msh.getMe());
+		} catch (PlcException e) {
+			throw new IOError(e);
+		}
+		return msh;
+	}
 
 
 }
 
 
-/*
 
-class code_handler
+
+
+
+
+
+class MethodSignatureLoaderHandler extends GenericMethodSignatureLoaderHandler
 {
-  int get_int32( RandomAccessFile is ) throws IOException {
-    byte bb[] = new byte[4];
+	private Method    					me = null;
+	private LinkedList<ArgDefinition> 	args = new LinkedList<ArgDefinition>();
 
-    is.read(bb);
+	public MethodSignatureLoaderHandler(RandomAccessFile is, int in_size, AbstractClassInfoLoader _loader)
+			throws IOException {
+		super(is, in_size, _loader);
+		load();
+		
+		_loader.addMethod(me);
 
-    int v;
-
-    v = bb[3];
-    v |= ((int)bb[2]) << 8;
-    v |= ((int)bb[1]) << 16;
-    v |= ((int)bb[0]) << 24;
-    return (int)v;
-  }
-
-  String get_string( RandomAccessFile is ) throws IOException {
-    int len = get_int32(is);
-
-    byte data[] = new byte[len];
-    is.read(data);
-
-    return new String(data);
-  }
-
-};
- */
-
-
-
-class loader_handler
-{
-	RandomAccessFile is;
-	int size;
-
-	public loader_handler(  RandomAccessFile is, int size )
-	{
-		this.is = is;
-		this.size = size;
-	};
-};
-
-
-
-class method_loader_handler extends loader_handler
-{
-	String    my_name;
-	int       my_ordinal;
-	//phantom_object my_code;
-
-	public method_loader_handler( RandomAccessFile is, int in_size ) throws
-	IOException {
-		super( is, in_size );
-
-		my_name = Fileops.get_string(is);
-		//if(debug_print) System.out.println("Method is: ", my_name );
-
-		my_ordinal = Fileops.get_int32(is);
-		//if(debug_print) System.out.println(", ordinal: ", my_ordinal, "\n" );
 	}
 
-	public int get_ordinal() { return my_ordinal; }
-	public String get_name() { return my_name; }
-};
 
-
-class method_signature_loader_handler extends loader_handler
-{
-	boolean debug_print = false;
-
-	String    my_name;
-	int       my_ordinal;
-	int       my_args_count = 0;
-
-	Method    me = null;
-
-	LinkedList<ArgDefinition> args = new LinkedList<ArgDefinition>();
-
-
-	public method_signature_loader_handler( RandomAccessFile is, int in_size ) throws
-	IOException, PlcException {
-		super( is, in_size );
-
-		my_name = Fileops.get_string(is);
-
-		my_ordinal = Fileops.get_int32(is);
-		//if(debug_print) System.out.println(", ordinal: ", my_ordinal, "\n" );
-
-		my_args_count = Fileops.get_int32(is);
-		if(debug_print) System.out.println(my_args_count);
-
-		boolean constructor = Fileops.get_int32(is) == 1;
-		if(debug_print) System.out.println("    Is constructor: " + constructor);
-
-		PhantomType my_return_type = new PhantomType(is);
-
-		me = new Method( my_name, my_return_type, constructor );
-		me.setOrdinal(my_ordinal);
-
-		if(debug_print) System.out.print("Method is: " + my_name + ", ret type is '"+my_return_type.toString()+"', arg count = " );
-
-		for( int arg_no = 0; arg_no < my_args_count; arg_no++ )
-		{
-			String arg_name = Fileops.get_string(is);
-			PhantomType arg_type = new PhantomType(is);
-
-			if(debug_print) System.out.print("Arg '"+arg_name+"' ");
-			if(debug_print) System.out.print(": '"+arg_type.get_main_class_name()+"' ");
-			if(debug_print && arg_type.is_container())
-			{
-				System.out.print("( "+arg_type.get_contained_class_name()+"[])");
-			}
-			if(debug_print) System.out.println("");
-
+	@Override
+	protected void createArg(String arg_name, PhantomTypeInfo arg_ti) throws IOException {
+		PhantomType arg_type;
+		try {
+			arg_type = new PhantomType(arg_ti);
 			ArgDefinition ad = new ArgDefinition( arg_name, arg_type );
 
 			args.add(ad);
-			me.addArg(arg_name, arg_type);
+			getMe().addArg(arg_name, arg_type);
+		} catch (PlcException e) {
+			throw new IOException(e);
 		}
-
-
-
-		if(debug_print) System.out.println("");
 	}
 
-	public int get_ordinal() { return my_ordinal; }
-	public int get_args_count() { return my_args_count; }
-	public String get_name() { return my_name; }
+	@Override
+	protected void createMethod(boolean constructor, PhantomTypeInfo ret_ti) throws IOException {
+		try {
+			PhantomType myReturnType = new PhantomType(ret_ti);
+
+			//System.out.println("Create meth "+myName);
+
+			me = new Method( myName, myReturnType, constructor );
+			me.setOrdinal(myOrdinal);
+			//return my_return_type;
+		} catch (PlcException e) {
+			throw new IOException(e);
+		}
+	}
+
+	public int getOrdinal() { return myOrdinal; }
+	public int getArgCount() { return myArgCount; }
+	public String getName() { return myName; }
+
+	public Method getMe() {		return me;	}
+
 
 
 };
