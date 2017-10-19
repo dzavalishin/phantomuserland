@@ -1051,6 +1051,29 @@ DECLARE_SIZE(page);
 // --------- bootstrap -------------------------------------------------------
 // ---------------------------------------------------------------------------
 
+static pvm_object_t dir;
+
+errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new_class)
+{
+    printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
+    if( pvm_is_null(dir) )
+        dir = pvm_create_directory_object();
+
+    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+
+    errno_t rc = hdir_find( da, name, name_len, new_class, 0 );
+
+    return rc;
+}
+
+errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_class)
+{
+    printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
+    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+    errno_t rc = hdir_add( da, name, name_len, new_class );
+}
+
+
 static int si_bootstrap_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
     (void)me;
@@ -1069,6 +1092,7 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
 
     const int bufs = 1024;
     char buf[bufs+1];
+    int len;
 
     {
     struct pvm_object name = POP_ARG;
@@ -1077,7 +1101,7 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     struct data_area_4_string *nameda = pvm_object_da( name, string );
 
 
-    int len = nameda->length > bufs ? bufs : nameda->length;
+    len = nameda->length > bufs ? bufs : nameda->length;
     memcpy( buf, nameda->data, len );
     buf[len] = '\0';
 
@@ -1087,6 +1111,13 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     // BUG! Need some diagnostics from loader here
 
     struct pvm_object new_class;
+
+    if( 0 == pvm_class_cache_lookup(buf, len, &new_class) )
+    {
+        printf("got from cache class '%.*s' @%p\n", len, buf, new_class.data );
+        ref_inc_o(new_class);
+    	SYSCALL_RETURN(new_class);
+    }
 
     if( pvm_load_class_from_module(buf, &new_class))
     {
@@ -1103,6 +1134,7 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     }
     else
     {
+        pvm_class_cache_insert(buf, len, new_class);
     	SYSCALL_RETURN(new_class);
     }
 }

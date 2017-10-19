@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
  * Directory: hash map of strings to pvm objects
  *
@@ -19,6 +19,7 @@
 #include <vm/syscall.h>
 #include <vm/object.h>
 #include <vm/alloc.h>
+#include <vm/internal_da.h>
 #include <spinlock.h>
 
 /*
@@ -45,6 +46,8 @@
 */
 
 // TODO very long spin lock
+// TODO crashes for accessed objects can be paged out
+// pagefault in closed interrupts and spinlock is forbidden
 
 #warning lock
 #define LOCK_DIR(__dir) hal_wired_spin_lock(&(__dir)->lock);
@@ -83,7 +86,6 @@ typedef struct hashdir {
 static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey );
 
 
-// TODO add parameter for find and remove mode
 errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out, int delete_found )
 {
     if( dir->nEntries == 0 ) return ENOENT;
@@ -179,6 +181,8 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     assert(dir->keys.data != 0);
     assert(dir->values.data != 0);
     assert(dir->flags != 0);
+
+    printf("---- hdir add %.*s\n", i_key_len, ikey );
 
     LOCK_DIR(dir);
 
@@ -322,6 +326,8 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
         initial_size = DEFAULT_SIZE;
     }
 
+    printf("---- hdir init sz %d\n", initial_size );
+
     hal_spin_init( &dir->lock );
 
     LOCK_DIR(dir);
@@ -372,6 +378,7 @@ void pvm_internal_init_directory(struct pvm_object_storage * os)
     //da->nEntries = 0;
 
     //da->container = pvm_create_binary_object( da->elSize * da->capacity , 0 );
+    printf("---- hdir init obj\n" );
 
     errno_t rc = hdir_init( da, 0 );
     if( rc ) panic("can't create directory"); // TODO do not panic? must return errno?
