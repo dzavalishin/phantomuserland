@@ -27,7 +27,7 @@
 #include "vm/alloc.h"
 
 
-int debug_print = 1;
+int debug_print = 0;
 
 
 static int vm_code_linenum_cmp(const void *, const void *) __attribute__((used));
@@ -135,6 +135,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
     int n_method_slots = 0;
 
 
+    struct pvm_object base_class = pvm_get_null_class();
     struct pvm_object iface        = { 0, 0 };
     struct pvm_object ip2line_maps = { 0, 0 };
     struct pvm_object method_names = { 0, 0 };
@@ -195,12 +196,6 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 if(0||debug_print) printf("\n");	// terminate string
 
                 struct pvm_object base_name = pvm_code_get_string(&h);
-                if(debug_print)
-                {
-                    printf("Based on: ");
-                    pvm_object_print( base_name );
-                    printf("\n");
-                }
 
                 // TODO turn on later, when we're sure all class collections have it
                 //struct pvm_object version_string = pvm_code_get_string(&h);
@@ -209,7 +204,6 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 #if 0
 #warning base class ignored
 #else
-                struct pvm_object base_class;
 
                 if( EQ_STRING_P2C(base_name,".internal.object") )
                     base_class = pvm_get_null_class();
@@ -225,6 +219,15 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                     }
                 }
 #endif
+                if(debug_print)
+                {
+                    printf("Class ");
+                    pvm_object_print( class_name );
+                    printf(" based on: " );
+                    pvm_object_print( base_name );
+                    printf(" @%p\n", base_class.data);
+                }
+
                 ref_dec_o(base_name);
 
                 iface = pvm_create_interface_object( n_method_slots, base_class );
@@ -262,7 +265,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
                 //qsort( bin->data, mapsize, sizeof(struct vm_code_linenum), vm_code_linenum_cmp );
 
-                if(debug_print)
+                if(0 && debug_print)
                 {
                     int i;
                     for( i = 0 ; i < mapsize; i++, sp++ )
@@ -410,6 +413,14 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
     cda->method_names = method_names;
     cda->field_names = field_names;
     cda->const_pool = const_pool; //ref_inc_o(const_pool);
+    cda->class_parent = base_class;
+
+    if(debug_print)
+    {
+        printf("\nDone loading "); 
+        pvm_object_print( class_name );
+        printf(" @%p\n", new_class.data); 
+    }
 
     *out = new_class;
     return 0;
