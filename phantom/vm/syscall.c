@@ -1051,26 +1051,35 @@ DECLARE_SIZE(page);
 // --------- bootstrap -------------------------------------------------------
 // ---------------------------------------------------------------------------
 
-static pvm_object_t dir;
+#define CACHED_CLASSES 0
+
+//static pvm_object_t dir;
 
 errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new_class)
 {
+#if !CACHED_CLASSES
+    return ENOENT;
+#else
     printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
-    if( pvm_is_null(dir) )
-        dir = pvm_create_directory_object();
+    //if( pvm_is_null(dir) )        dir = pvm_create_directory_object();
 
-    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+    struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
 
     errno_t rc = hdir_find( da, name, name_len, new_class, 0 );
 
     return rc;
+#endif
 }
 
 errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_class)
 {
+#if !CACHED_CLASSES
+    return 0;
+#else
     printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
-    struct data_area_4_directory *da = pvm_object_da( dir, directory );
+    struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
     errno_t rc = hdir_add( da, name, name_len, new_class );
+#endif
 }
 
 
