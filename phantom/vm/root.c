@@ -121,8 +121,8 @@ void pvm_root_init(void)
     pvm_root.kernel_environment = pvm_get_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT );
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
     pvm_root.root_dir = pvm_get_field( root, PVM_ROOT_OBJECT_ROOT_DIR );
-
     pvm_root.kernel_stats = pvm_get_field( root, PVM_ROOT_KERNEL_STATISTICS );
+    pvm_root.class_dir = pvm_get_field( root, PVM_ROOT_CLASS_DIR );
 
 
     process_specific_restarts();
@@ -233,6 +233,8 @@ static void pvm_save_root_objects()
     pvm_set_field( root, PVM_ROOT_OBJECT_ROOT_DIR, pvm_root.root_dir);
 
     pvm_set_field( root, PVM_ROOT_KERNEL_STATISTICS, pvm_root.kernel_stats );
+    pvm_set_field( root, PVM_ROOT_CLASS_DIR, pvm_root.class_dir );
+
 
 }
 
@@ -319,6 +321,8 @@ static void pvm_create_root_objects()
     pvm_root.root_dir      = pvm_create_directory_object();
 
     pvm_root.kernel_stats  = pvm_create_binary_object( STAT_CNT_PERSISTENT_DA_SIZE, 0 );
+    pvm_root.class_dir     = pvm_create_directory_object();
+
 
     ref_saturate_o(pvm_root.threads_list); //Need it?
     ref_saturate_o(pvm_root.kernel_environment); //Need it?

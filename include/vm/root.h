@@ -82,8 +82,8 @@ struct pvm_root_t
     struct pvm_object           kernel_environment;     // Array? of users - NOT IMPLEMENTED
     struct pvm_object           os_entry;               // Main OS services entry point
     struct pvm_object           root_dir;               // Root object directory
-
     struct pvm_object           kernel_stats;           // Persisent kernel statistics
+    struct pvm_object           class_dir;              // .internal.directory of all classes used - class load cache - TODO must use weak refs or cleanup on ref cnt == 1
 
 };
 
@@ -215,7 +215,9 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_KERNEL_STATISTICS 72
 
-#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_KERNEL_STATISTICS+31)
+#define PVM_ROOT_CLASS_DIR 73
+
+#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_CLASS_DIR+30)
 
 
 
