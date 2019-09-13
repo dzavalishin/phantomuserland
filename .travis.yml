@@ -21,7 +21,8 @@ compiler:
 #env:
 #  - LUA_PATH="/usr/local/lua/;;"
 
-#before_install:
+before_install:
+  - sudo apt-get install libcunit1
 #  - sudo apt-get install -y lua5.1 # no socket
 #  - sudo apt-get -y install luarocks
 
