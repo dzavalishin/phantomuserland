@@ -1,8 +1,10 @@
 #dist: trusty
 language: c
 
+# /home/travis/build/dzavalishin/phantomuserland
 env:
-  - PHANTOM_HOME=`pwd`
+  - PHANTOM_HOME="/home/travis/build/dzavalishin/phantomuserland"
+#  - PHANTOM_HOME=`pwd`
 
 
 #python:
