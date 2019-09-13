@@ -1,0 +1,25 @@
+#dist: trusty
+language: c
+
+#python:
+#  - "3.6"
+
+compiler:
+  - gcc
+  - clang
+
+#cache:
+#  directories:
+#    - $HOME/.m2
+
+#env:
+#  - LUA_PATH="/usr/local/lua/;;"
+
+#before_install:
+#  - sudo apt-get install -y lua5.1 # no socket
+#  - sudo apt-get -y install luarocks
+
+
+script:
+  - make
+  - make test
