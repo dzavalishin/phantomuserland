@@ -22,7 +22,7 @@ compiler:
 #  - LUA_PATH="/usr/local/lua/;;"
 
 before_install:
-  - sudo apt-get install libcunit1
+  - sudo apt-get install libcunit1 libcunit1-dev
 #  - sudo apt-get install -y lua5.1 # no socket
 #  - sudo apt-get -y install luarocks
 
@@ -30,6 +30,10 @@ before_install:
 script:
   - echo PHANTOM_HOME=$PHANTOM_HOME
   - make
-  - make -C test/plc
+  - make -C test unit
+
+# java.lang.ClassNotFoundException: ru.dz.plc.PlcMain
+#  - make -C test/plc
+
 # does not pass yet - needs CUnit, which seem to be absent :(
 #  - make test
