@@ -30,5 +30,6 @@ before_install:
 script:
   - echo PHANTOM_HOME=$PHANTOM_HOME
   - make
-# does not pass yet
+  - make -C test/plc
+# does not pass yet - needs CUnit, which seem to be absent :(
 #  - make test
