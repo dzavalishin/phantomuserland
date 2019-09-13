@@ -1,6 +1,10 @@
 #dist: trusty
 language: c
 
+env:
+  - PHANTOM_HOME=`pwd`
+
+
 #python:
 #  - "3.6"
 
@@ -21,5 +25,6 @@ compiler:
 
 
 script:
+  - echo PHANTOM_HOME=$PHANTOM_HOME
   - make
   - make test
