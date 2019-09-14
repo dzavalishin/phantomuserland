@@ -12,6 +12,7 @@
  *
 **/
 
+//#include <stdio.h>
 #include <stdarg.h>
 #include <threads.h>
 
@@ -635,9 +636,19 @@ void 	phantom_set_console_getchar( int (*_getchar_impl)(void) )
 {
 }
 
+
+
+// -----------------------------------------------------------
+// output
+// -----------------------------------------------------------
+
+
+#if 0
+
 void debug_console_putc(int c)
 {
-    putchar(c);
+    if( kout_f ) fputc( c, kout_f );
+    else putchar(c);
 }
 
 
@@ -652,9 +663,20 @@ void lprintf(char const *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    vprintf(fmt, ap);
+    if( klog_f )
+        vfprintf( klog_f, fmt, ap);
+    else
+        vprintf(fmt, ap);
     va_end(ap);
 }
+
+
+#endif
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+
+
 
 
 //int set_net_timer( void ) //&e, 10000, stat_update_persistent_storage, 0, 0 );

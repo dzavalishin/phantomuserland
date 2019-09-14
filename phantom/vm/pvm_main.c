@@ -178,6 +178,8 @@ static void usage()
            "Flags:\n"
            "\t-di\t- debug (print) instructions\n"
            "\t-dd\t- on finish start kernel debugger\n"
+           "\t-l<fn>\t- set kernel log file name\n"
+           "\t-o<fn>\t- set kernel console output file name\n"
            "\t-h\t- print this\n"
            "\n"
            "Env:\n"
@@ -232,6 +234,7 @@ static void args(int argc, char* argv[])
             }
             break;
         */
+
         case 'd':
             {
                 char c;
@@ -247,6 +250,23 @@ static void args(int argc, char* argv[])
                 }
             }
             break;
+
+        case 'l':
+            {
+                const char *fn = arg+1;
+                printf("Will log to '%s'\n", fn );
+                win_hal_open_kernel_log_file( fn );
+            }
+            break;
+
+        case 'o':
+            {
+                const char *fn = arg+1;
+                printf("Will send console output to '%s'\n", fn );
+                win_hal_open_kernel_out_file( fn );
+            }
+            break;
+
 
         case 'h':
         default:

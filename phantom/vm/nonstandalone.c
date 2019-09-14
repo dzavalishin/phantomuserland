@@ -25,6 +25,50 @@
 #include "winhal.h"
 
 
+
+// -----------------------------------------------------------
+// output
+// -----------------------------------------------------------
+
+static FILE *klog_f = 0;
+static FILE *kout_f = 0;
+
+void win_hal_open_kernel_log_file( const char *fn )
+{
+    klog_f = fopen( fn, "w" );
+    if( 0 == klog_f )
+    {
+        fprintf( stderr, "Can't open kernel log file '%s'\n", fn );
+        return;
+    }
+
+    FILE *rc = freopen( fn, "w", stderr );
+    if( 0 == rc )
+    {
+        fprintf( stderr, "Can't reopen stdout for kernel log file '%s'\n", fn );
+        return;
+    }
+
+}
+
+void win_hal_open_kernel_out_file( const char *fn )
+{
+    kout_f = fopen( fn, "w" );
+    if( 0 == kout_f )
+        fprintf( stderr, "Can't open kernel console output file '%s'\n", fn );
+
+    FILE *rc = freopen( fn, "w", stdout );
+    if( 0 == rc )
+    {
+        fprintf( stderr, "Can't reopen stdout for kernel console output file '%s'\n", fn );
+        return;
+    }
+
+}
+
+
+
+
 static jmp_buf finish_gdb_socket;
 
 int hal_printf(const char *fmt, ...)
@@ -33,13 +77,53 @@ int hal_printf(const char *fmt, ...)
     int retval;
 
     va_start(ap, fmt);
-    retval = vprintf(fmt, ap);
+
+    if( 0 == klog_f )
+        retval = vprintf(fmt, ap);
+    else
+        retval = vfprintf( klog_f, fmt, ap);
+
     va_end(ap);
 
     fflush(stdout);
 
     return (retval);
 }
+
+
+void debug_console_putc(int c)
+{
+    if( kout_f ) fputc( c, kout_f );
+    else putchar(c);
+}
+
+
+
+
+//#include <kernel/debug.h>
+
+
+// Print to log file only
+void lprintf(char const *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    if( klog_f )
+        vfprintf( klog_f, fmt, ap);
+    else
+        vprintf(fmt, ap);
+    va_end(ap);
+}
+
+
+
+
+// -----------------------------------------------------------
+// 
+// -----------------------------------------------------------
+
+
 
 static void winhal_setport( int sock, int port )
 {
