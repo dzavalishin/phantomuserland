@@ -12,8 +12,11 @@
 **/
 
 
-
-//#include "gcc_replacements.h"
+#define DEBUG_MSG_PREFIX "vm.main"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <stdarg.h>
 
@@ -23,16 +26,17 @@
 #include <kernel/debug.h>
 
 #include <vm/root.h>
-//#include "vm/bulk.h"
-//#include "vm/internal_da.h"
 
 #include <hal.h>
 #include "main.h"
 #include "win_bulk.h"
+#include "winhal.h"
 
-//#include <drv_video_screen.h>
 #include <video/screen.h>
 #include <video/internal.h>
+
+
+
 
 #define MAXENVBUF 128
 static char *envbuf[MAXENVBUF] = { 0 };

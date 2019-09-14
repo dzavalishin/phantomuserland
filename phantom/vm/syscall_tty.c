@@ -4,16 +4,13 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * VM TTY window class implementation
  *
 **/
 
+
 #include <phantom_libc.h>
 
-
-//#include "drv_video_screen.h"
 #include "vm/object.h"
 #include "vm/internal.h"
 #include "vm/internal_da.h"

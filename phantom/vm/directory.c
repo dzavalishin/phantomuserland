@@ -9,6 +9,7 @@
  *
 **/
 
+
 #define DEBUG_MSG_PREFIX "vm.dir"
 #include <debug_ext.h>
 #define debug_level_flow 10
@@ -24,28 +25,6 @@
 
 #define debug_print 1
 
-/*
-#include <phantom_libc.h>
-#include <time.h>
-#include <threads.h>
-
-#include <kernel/snap_sync.h>
-#include <kernel/vm.h>
-#include <kernel/atomic.h>
-
-#include <vm/root.h>
-#include <vm/exec.h>
-#include <vm/bulk.h>
-
-#include <vm/p2c.h>
-
-#include <vm/wrappers.h>
-
-
-#include <video/screen.h>
-#include <video/vops.h>
-#include <video/internal.h>
-*/
 
 // TODO very long spin lock
 // TODO crashes for accessed objects can be paged out

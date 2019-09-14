@@ -9,7 +9,6 @@
  *
 **/
 
-
 #include <phantom_libc.h>
 #include <time.h>
 #include <threads.h>

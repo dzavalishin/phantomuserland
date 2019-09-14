@@ -4,9 +4,6 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: no
- * Preliminary: no
- *
  * This source file implements (attempts to) X11 based wrapper for VM to
  * run in Unix-hosted environment.
  *
@@ -14,12 +11,12 @@
  *
  **/
 
+
 #include <X11/Xlib.h> // preceede most other headers!
 #include <X11/Xutil.h>		/* BitmapOpenFailed, etc. */
 
 #include "x11_screen.h"
 
-//#include <video/screen.h>
 
 
 static Display *display = 0;

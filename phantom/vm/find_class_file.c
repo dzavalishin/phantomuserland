@@ -5,16 +5,25 @@
  * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
  *
  * Load class from filesystem file.
- * Strinc Phantom kernel environment works withount file system,
+ *
+ * Strict Phantom kernel environment works withount file system,
  * but debug env lets us access host file system from within Phantom.
- * It is handy to have ability toload class files from there.
+ * It is handy to have ability to load class files from there.
  *
 **/
 
 
+#define DEBUG_MSG_PREFIX "vm.fcf"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include <vm/bulk.h>
 #include "main.h"
 
+
+#define DEBUG 0
 
 static int do_load_class_from_file(const char *fn, struct pvm_object *out)
 {
@@ -81,12 +90,12 @@ int load_class_from_file(const char *cn, struct pvm_object *out)
         //printf("try '%s'\n", buf );
         if(!do_load_class_from_file(buf, out))
         {
-            printf("OK: File found for class '%s'\n", cn );
+            if(DEBUG) printf("OK: File found for class '%s'\n", cn );
             return 0;
         }
     }
 
-    printf("ERR: File not found for class '%s'\n", cn );
+    if(DEBUG) printf("ERR: File not found for class '%s'\n", cn );
 
     return 1;
 }

@@ -4,9 +4,6 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: no
- * Preliminary: yes
- *
  * This source file implements Windows based wrapper for VM to
  * run in Windows-hosted environment.
  *

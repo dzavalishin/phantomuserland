@@ -7,7 +7,13 @@
  * Bytecode backtrace
  *
  *
- **/
+**/
+
+#define DEBUG_MSG_PREFIX "vm.bt"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <vm/exec.h>
 #include <vm/code.h>

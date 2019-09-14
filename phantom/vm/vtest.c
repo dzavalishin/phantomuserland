@@ -1,11 +1,10 @@
+
 #include <phantom_libc.h>
-//#include <drv_video_screen.h>
 
 #include <video/screen.h>
 #include <video/font.h>
 
 #include "winhal.h"
-//#include "video/win_local.h"
 
 #define WXS (240*2)
 #define WYS (160*2)

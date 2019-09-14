@@ -10,7 +10,6 @@
 **/
 
 
-
 #include "vm/internal.h"
 #include "vm/internal_da.h"
 #include "vm/exception.h"

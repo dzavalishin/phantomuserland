@@ -2,13 +2,18 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Bytecode interpreter.
  *
  *
 **/
 
+#define DEBUG_MSG_PREFIX "vm.exec"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <phantom_assert.h>
 
@@ -326,7 +331,7 @@ static void init_cfda(
     unsigned int method_index, 
     unsigned int n_param, 
     pvm_object_t new_this,     
-    pvm_object_t class_ref  // for static calls. will do VMT call if null
+    pvm_object_t class_ref  // Use for static calls. Will do VMT call if class_ref==null.
      )
 {
     cfda->ordinal = method_index;
@@ -1286,7 +1291,10 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 pvm_object_t target_class = os_pop();
                 pvm_object_t o = os_pop();
 
-                if( pvm_object_class_exactly_is(o,target_class) )
+#if 1
+                LISTIA("cast %s", "?"); // TODO class name
+     
+                if( pvm_object_class_is_or_child(o,target_class) )
                 {
                     // nothing to do, oh, baby, stay in bed
                     os_push( o );
@@ -1295,14 +1303,45 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
                 if(1||debug_print_instr)
                 {
-                // TODO cast here!
-                    printf("!!! CAST unimpl !!!\n");
+                    printf("CAST to class which is not parent\n");
                     printf("obj = "); pvm_object_dump(o);
-                    printf("class = "); pvm_object_dump(target_class);
-                    printf("\n!!! CAST unimpl !!!\n");
+                    printf("to class = "); pvm_object_dump(target_class);
+#if 0
+                    // Throw
+                    pvm_object_t msg = pvm_create_string_object("invalid arg count");
+                    if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+                    pvm_exec_do_throw_object( da, msg );
+                    if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
+#else
+                    // ignore - there's duplicate '.ru.dz.phantom.system.shell' for some reason :(
+                    // TODO fix class duplication, remove this hack
+                    os_push( o );
+#endif
+                    break;
+                }
+#else
+                if( pvm_object_class_exactly_is(o,target_class) )
+                {
+                    // nothing to do, oh, baby, stay in bed
+                    os_push( o );
+                    break;
+                }
+
+                // Compiler generates casts if target variable is of different type.
+                // Suppose it is safe to implement cast as a check if object class is
+                // child or equals to cast class
+
+                if(1||debug_print_instr)
+                {
+                // TODO cast here!
+                    printf("<!!! CAST unimpl !!!>\n");
+                    printf("obj = "); pvm_object_dump(o);
+                    printf("to class = "); pvm_object_dump(target_class);
+                    printf("</!!! CAST unimpl !!!>\n\n");
                 }
                 os_push( o );
                 LISTIA("cast %s", "unimplemented!");
+#endif
             }
             break;
 
@@ -1807,7 +1846,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
             // kind of throw        ------------------------------------------------------
 
-        case opcode_arg_count:
+
+        case opcode_arg_count: // TODO use me in compiler
             LISTI("arg count check");
             {
                 u_int8_t want_args = pvm_code_get_byte(&(da->code));
@@ -2044,8 +2084,8 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
 
     // TODO make sure compiler does not generate such calls and return panic
 #if 0
-        if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
-            pvm_exec_panic("find_syscall: not internal class in SYS" );
+    if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
+        pvm_exec_panic("find_syscall: not internal class in SYS" );
 #else
     // Find parent which is internal. This can happen if class got a method from
     // internal parent, such as .internal.object. Happens often with constructor.
@@ -2064,7 +2104,7 @@ static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned 
         if( pvm_is_null( da->class_parent ) )
             pvm_exec_panic0("find_syscall: not internal class and no internal parent" );
 
-            _class = da->class_parent;
+        _class = da->class_parent;
     }
 
     if( pvm_is_null( da->class_parent ) )

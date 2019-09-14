@@ -16,7 +16,7 @@
 #include "vm/object_flags.h"
 #include "vm/exception.h"
 
-#define hal_printf printf
+//#define hal_printf printf
 
 #define int_size() 4
 #define long_size() 8

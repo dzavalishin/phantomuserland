@@ -4,9 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Fast and dirty garbage collection
  *
 **/
 
@@ -14,6 +12,11 @@
 
 //#include <kernel/snap_sync.h>
 
+#define DEBUG_MSG_PREFIX "vm.gc"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <vm/alloc.h>
 #include <vm/internal.h>

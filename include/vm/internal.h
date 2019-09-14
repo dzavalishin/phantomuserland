@@ -28,9 +28,9 @@ struct internal_class
     const char *                name;
     int                         root_index; 		// index into the root object, where class is stored
     syscall_func_t *            syscalls_table;         // syscalls implementations
-#if CONF_USE_VM_SYS_SIZE
+//#if CONF_USE_VM_SYS_SIZE
     int                         *syscalls_table_size_ptr;    // n of syscalls
-#endif
+//#endif
     init_func_t                 init;                   // constructor
     gc_iterator_func_t          iter;                   // Call func for all the object pointer contained in this internal object
     gc_finalizer_func_t         finalizer;

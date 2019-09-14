@@ -4,11 +4,16 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Create objects of some types
  *
 **/
+
+
+#define DEBUG_MSG_PREFIX "vm.create"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <kernel/vm.h>
 

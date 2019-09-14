@@ -4,11 +4,15 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Virtual machine startup and root objects creation
  *
 **/
+
+#define DEBUG_MSG_PREFIX "vm.root"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <assert.h>
 #include <phantom_libc.h>

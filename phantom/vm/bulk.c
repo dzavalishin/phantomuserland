@@ -11,10 +11,15 @@
  *
  **/
 
+
+#define DEBUG_MSG_PREFIX "vm.bulk"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include <phantom_libc.h>
 #include <assert.h>
-
-//#include "gcc_replacements.h"
 
 
 #include "vm/internal_da.h"

@@ -4,11 +4,10 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Object access
  *
 **/
+
 
 #include "vm/object.h"
 #include "vm/alloc.h"
@@ -19,11 +18,7 @@
 
 #include <phantom_libc.h>
 
-//#include <stdio.h>
-//#include <string.h>
 
-//#define da_po_limit(o)	 (o->_da_size/sizeof(pvm_object))
-//#define da_po_ptr(da)  ((pvm_object)&da)
 
 #if 1
 static inline void verify_p( pvm_object_storage_t *p )
