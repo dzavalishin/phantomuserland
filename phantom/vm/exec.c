@@ -38,6 +38,8 @@
 
 #include <exceptions.h>
 
+#include "main.h"
+
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
@@ -54,6 +56,7 @@ struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref,
 #define DEB_DYNCALL 0
 
 int debug_print_instr = 0;
+int debug_trace = 0;
 
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
 #define LISTIA(fmt,a) do { if( debug_print_instr ) { lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } } while(0)
@@ -411,7 +414,12 @@ static void init_cfda(
 
 static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_index, unsigned int n_param, int do_optimize_ret, pvm_object_t new_this )
 {
-    if( DEB_CALLRET || debug_print_instr ) printf( "\ncall %d (stack_depth %d -> ", method_index, da->stack_depth );
+    if( DEB_CALLRET || debug_print_instr )
+    {
+        printf( "\nnew this: " );
+        pvm_object_dump( new_this );
+        printf( "call %d (stack_depth %d -> ", method_index, da->stack_depth );
+    }
 
     /*
      * Stack growth optimization for bytecode [opcode_call; opcode_ret]
@@ -568,6 +576,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
             run_gc();
         }
 #endif // GC_ENABLED
+
+        if( debug_trace ) pvm_trace_here(da);
+
 
         unsigned char instruction = pvm_code_get_byte(&(da->code));
         //printf("instr 0x%02X ", instruction);
@@ -2136,7 +2147,10 @@ static struct pvm_object_storage *
         pvm_exec_panic0( "pvm_exec_get_iface_method: not an interface object" );
 
     if(method_index > da_po_limit(iface))
+    {
+        lprintf("pvm_exec_get_iface_method: method index %d is out of bounds\n", method_index);
         pvm_exec_panic0( "pvm_exec_get_iface_method: method index is out of bounds" );
+    }
 
     return da_po_ptr(iface->da)[method_index].data;    
 }

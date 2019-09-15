@@ -18,3 +18,7 @@ void checkDiffMem(void);
 
 int load_class_from_file(const char *cn, struct pvm_object *out);
 
+
+extern int debug_print_instr;
+extern int debug_trace;
+

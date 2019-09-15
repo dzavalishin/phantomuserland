@@ -56,6 +56,8 @@ mouse_set_cursor: 	vid_mouse_set_cursor_deflt,
 mouse_disable:          vid_mouse_off_deflt,
 mouse_enable:          	vid_mouse_on_deflt,
 
+
+    .bitblt_part = (void *)vid_null,
 };
 
 

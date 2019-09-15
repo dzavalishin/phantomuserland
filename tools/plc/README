@@ -8,6 +8,7 @@ Building
 It is supposed that you use Eclipse to work with java sources. mkjar script builds binary and puts it 
 to buld direftory to be used by plc command.
 
+Run `mkjar` to put current build to project `/build` directory.
 
 
 Regress tests

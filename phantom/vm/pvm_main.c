@@ -181,6 +181,7 @@ static void usage()
            "Usage: pvm_test [-flags] [env_name=env_val]\n\n"
            "Flags:\n"
            "\t-di\t- debug (print) instructions\n"
+           "\t-dt\t- print trace (class, method, IP)\n"
            "\t-dd\t- on finish start kernel debugger\n"
            "\t-l<fn>\t- set kernel log file name\n"
            "\t-o<fn>\t- set kernel console output file name\n"
@@ -194,7 +195,7 @@ static void usage()
            );
 }
 
-extern int debug_print_instr;
+//extern int debug_print_instr;
 
 int main_envc;
 const char **main_env;
@@ -248,6 +249,7 @@ static void args(int argc, char* argv[])
                     switch(c) {
                     case 'i': debug_print_instr = 1; break;
                     case 'd': arg_run_debugger = 1; break;
+                    case 't': debug_trace = 1; break;
 
                     default: usage(); exit(22);
                     }
