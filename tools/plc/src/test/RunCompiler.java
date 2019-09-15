@@ -54,6 +54,4 @@ public class RunCompiler {
 	public void testShell() 			{		compile("test/ph/ru.dz/ru.dz.phantom.system.shell.ph" ); }
 	
 	
-	
-	
 }
