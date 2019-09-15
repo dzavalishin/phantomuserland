@@ -4,14 +4,14 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * This source file implements Windows based wrapper for VM to
- * run in Windows-hosted environment.
+ * Bulk (multiple class) file read for userland (non-kernel) env.
+ *
+ * NB! Used in Windows and Linux builds, TODO rename to non_kernel_bulk.c
  *
 **/
 
-//#include <stdlib.h>
-#include "win_bulk.h"
 
+#include "win_bulk.h"
 
 #include "gcc_replacements.h"
 

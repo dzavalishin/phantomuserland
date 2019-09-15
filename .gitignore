@@ -110,3 +110,12 @@ tools/big_gc/out.data
 tools/plc/internal.*.c
 tools/plc/ru.dz.phantom.*.c
 tools/plc/phantom.*.c
+phantom/vm/makefile~
+phantom/vm/makerules~
+test/unit/suites/suite_amap.dll
+test/unit/suites/suite_funcs.dll
+test/unit/suites/suite_pool.dll
+test/unit/suites/suite_skeleton.dll
+test/unit/suites/suite_wtty.dll
+test/unit/CMakeCache.txt
+phantom/vm/pvm_headless

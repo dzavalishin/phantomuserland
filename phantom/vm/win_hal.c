@@ -7,6 +7,8 @@
  * This source file implements Windows based wrapper for VM to
  * run in Windows-hosted environment.
  *
+ * NB! Used in Windows and Linux builds, TODO rename to non_kernel_hal.c
+ *
 **/
 
 #define DEBUG_MSG_PREFIX "vm.winhal"
@@ -120,16 +122,16 @@ errno_t t_current_set_priority(int p)
 
 void    hal_halt()
 {
-	//fflush(stderr);
-	printf("\n\nhal halt called, exiting.\n");
-	getchar();
-	exit(1);
+    //fflush(stderr);
+    printf("\n\nhal halt called, exiting.\n");
+    getchar();
+    exit(1);
 }
 
 extern int sleep(int);
-void        hal_sleep_msec( int miliseconds )
+void hal_sleep_msec( int miliseconds )
 {
-	//usleep(1000*miliseconds);
+    //usleep(1000*miliseconds);
     //sleep( ((miliseconds-1)/1000)+1 );
     //Sleep(miliseconds);
     win_hal_sleep_msec( miliseconds );
@@ -297,21 +299,21 @@ errno_t t_get_ctty( tid_t tid, struct wtty **ct ) { return ENOENT; }
 
 void panic(const char *fmt, ...)
 {
-	va_list vl;
+    va_list vl;
 
-	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-	printf("\nPanic: ");
-	va_start(vl, fmt);
-	vprintf(fmt, vl);
-	va_end(vl);
+    // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
+    printf("\nPanic: ");
+    va_start(vl, fmt);
+    vprintf(fmt, vl);
+    va_end(vl);
 
-        //save_mem(mem, size);
-	getchar();
-	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-	printf("\nPress Enter from memcheck...");
-	pvm_memcheck();
-	//printf("\nPress Enter...");	getchar();
-	exit(1);
+    //save_mem(mem, size);
+    getchar();
+    // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
+    printf("\nPress Enter from memcheck...");
+    pvm_memcheck();
+    //printf("\nPress Enter...");	getchar();
+    exit(1);
 }
 
 
@@ -594,7 +596,7 @@ int hal_sem_init( hal_sem_t *s, const char *name )
 
 
 
-void    console_set_fg_color( struct rgba_t c )
+void console_set_fg_color( struct rgba_t c )
 {
 }
 
@@ -626,7 +628,7 @@ void phantom_dev_keyboard_get_key( struct _key_event *out )
     while(1) hal_sleep_msec(10000);
 }
 
-void 	phantom_set_console_getchar( int (*_getchar_impl)(void) )
+void phantom_set_console_getchar( int (*_getchar_impl)(void) )
 {
 }
 
