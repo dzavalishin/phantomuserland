@@ -19,14 +19,15 @@ import .internal.window;
 import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 import .ru.dz.phantom.system.shell_callback;
-import .test.suite;
+//import .test.suite;
 
 import .ru.dz.demo.start;
 
 attribute const * ->!;
 
 
-class shell //extends runnable
+//class shell 
+class shell extends runnable
 {
     var console : .internal.io.tty;
     var incr :  int;
@@ -50,20 +51,20 @@ class shell //extends runnable
 
     //var mtx : .internal.mutex;
 
-	var demo : .ru.dz.demo.start;
-
-
+    var demo : .ru.dz.demo.start;
+/*
     void init()
     {
         //mtx = new .internal.mutex();
         //mtx.lock();
     }
 
+
     void go()
     {
         //mtx.unlock();
     }
-
+*/
     void run(var parent_object @const ) [8]
     {
 

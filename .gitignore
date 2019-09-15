@@ -119,3 +119,5 @@ test/unit/suites/suite_skeleton.dll
 test/unit/suites/suite_wtty.dll
 test/unit/CMakeCache.txt
 phantom/vm/pvm_headless
+phantom/vm/pvm_headless.exe.core
+phantom/vm/pvm_headless.exe.stackdump

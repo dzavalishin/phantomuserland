@@ -41,6 +41,7 @@ import .ru.dz.windows.root;
 
 import .ru.dz.phantom.system.thread_test;
 import .ru.dz.phantom.system.shell;
+import .ru.dz.phantom.system.runnable;
 
 import .ru.dz.phantom.backgrounds;
 import .internal.bitmap;
@@ -80,7 +81,8 @@ class boot
     var windows : .ru.dz.windows.root;
 
 //    var run : .ru.dz.phantom.system.thread_test;
-    var run : .ru.dz.phantom.system.shell;
+//    var run : .ru.dz.phantom.system.shell;
+    var run : .ru.dz.phantom.system.runnable;
 
     var shell_name : string;
     var shell_class : .internal."class";
@@ -205,11 +207,11 @@ class boot
         shell_class = load_class(shell_name);
         run = new *(shell_class)();
 
-        run.init();
+        //run.init();
 
         boot_object.18(run); // Thread run
         //boot_object.18(run); // 2nd thread in same object
-        run.go();
+//        run.go();
 
         //run.8(this);
 
