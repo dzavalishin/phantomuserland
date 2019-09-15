@@ -78,7 +78,7 @@ $(BINDIR)/ru.dz.demo.start.pc: ru.dz.demo.weather.pc ru.dz.demo.chart.pc
 $(BINDIR)/ru.dz.demo.weather.pc: ru.dz.demo.chart.pc internal.bitmap.pc
 
 $(BINDIR)/ru.dz.phantom.backgrounds.pc: ../resources/backgrounds/phantom_dz_new_1024_768.ppm
-$(BINDIR)/ru.dz.phantom.system.boot.pc: ru.dz.phantom.system.regression_tests.pc ru.dz.phantom.system.class_loader.pc ru.dz.windows.root.pc ru.dz.phantom.system.thread_test.pc ru.dz.phantom.system.shell.pc internal.binary.pc
+$(BINDIR)/ru.dz.phantom.system.boot.pc: ru.dz.phantom.system.regression_tests.pc ru.dz.phantom.system.class_loader.pc ru.dz.windows.root.pc ru.dz.phantom.system.thread_test.pc ru.dz.phantom.system.shell.pc internal.binary.pc test.suite.pc
 $(BINDIR)/ru.dz.phantom.system.iterator.pc: ru.dz.phantom.system.iterable.pc
 $(BINDIR)/ru.dz.phantom.system.shell.pc: ru.dz.phantom.system.runnable.pc ru.dz.phantom.system.shell_callback.pc test.toPhantom.PhantomPrinter.pc internal.mutex.pc ru.dz.demo.start.pc
 $(BINDIR)/ru.dz.phantom.system.shell_callback.pc: internal.window.pc internal.connection.pc ru.dz.phantom.system.runnable.pc

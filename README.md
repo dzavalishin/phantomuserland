@@ -7,9 +7,9 @@ de-facto it contains kernel sources as well, though.
 
 ## What Phantom OS is ##
 
-* [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
-* [Short article in English - TheRegister](http://www.theregister.co.uk/2009/02/03/phantom_russian_os/)
-* [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/)
+*   [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
+*   [Short article in English - TheRegister](http://www.theregister.co.uk/2009/02/03/phantom_russian_os/)
+*   [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/)
 
 Basically, most of code we (the original team) upload is very straighforward
 and, sometimes, dumb. That, to some extent, is on purpose. We want to have
@@ -29,7 +29,7 @@ second :), amd64 port is incomplete and does not compile at all.
   Set '''PHANTOM_HOME''' environment variable to the path to Phantom repository root directory,
   "make all" there.
 
-  In Windows you will need Cygwin to do that. http://www.cygwin.com
+  In Windows you will need Cygwin to do that. <http://www.cygwin.com>
   Select, at least: gcc4, subversion, binutils, make, gdb
   (see etc/cygwin_get.cmd)
   
@@ -60,12 +60,12 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
 ## Dox ##
 
-  https://github.com/dzavalishin/phantomuserland/wiki
+  <https://github.com/dzavalishin/phantomuserland/wiki>
   doc/*
 
 ## Screenshots ##
 
-  https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots
+  <https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots>
 
 ## O, my. Badges! ##
 
@@ -87,9 +87,6 @@ Or join us at [Ost.io Forum](http://ost.io/@dzavalishin/phantomuserland)
 
 Just for reference there was [Old Google forum](https://groups.google.com/forum/#!forum/phantom-os)
 
-## Fun Stuff ##
-
-Crazy 3d GitHub project visualizer: http://codeology.braintreepayments.com/dzavalishin/phantomuserland
 
 <hr>
 
