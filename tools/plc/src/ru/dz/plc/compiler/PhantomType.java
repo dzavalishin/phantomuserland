@@ -123,13 +123,18 @@ public class PhantomType {
 
 	public boolean is_on_int_stack() { return _is_int||_is_long||_is_float||_is_double; }
 
+	/**
+	 * NB! Any unknown type is assumed to be different from any other.
+	 * 
+	 * TODO does not conform to equals() contract! Containers will work strangely.
+	 */
 	public boolean equals( Object o )
 	{
 		if( o == null || ! (o instanceof PhantomType ) ) return false;
 
 		PhantomType _t = (PhantomType)o;
 
-		if( !_is_known || !_t._is_known ) return false;
+		if( !_is_known || !_t._is_known ) return false; // TODO really? leave it for caller to check for special cases? Throw?
 
 		if( _is_void && _t._is_void ) return true;
 		if( _is_void || _t._is_void ) return false;
@@ -157,6 +162,18 @@ public class PhantomType {
 		return _class.equals(_t._class);
 	}
 
+	/**
+	 * Checks for type to be the same, even if both are unknown.
+	 * 
+	 * @param o type to compare with
+	 * @return true if types are the same
+	 */
+	public boolean equalsEvenUnknown( PhantomType o )
+	{
+		if( (!_is_known) && (!o._is_known) ) return true;
+		return equals(o);		
+	}
+	
 	public String toString()
 	{
 		String type = "unknown";

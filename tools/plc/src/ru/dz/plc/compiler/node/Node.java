@@ -59,16 +59,24 @@ abstract public class Node {
 		if( context != null ) System.out.print( context.get_position() );
 	}
 	
+	
+	static final String okColor   = "\u001b[0m";
+	static final String msgColor  = "\u001b[32;1m";
+	static final String warnColor = "\u001b[33;1m";
+	static final String errColor  = "\u001b[31;1m";
+	
 	protected void print_warning( String w )
 	{
+		System.out.print(msgColor);
 		printContext();
-		System.out.println("Warning: "+w);
+		System.out.println(warnColor+"Warning: "+w+okColor);
 	}
 
 	protected void print_error( String w )
 	{
+		System.out.print(msgColor);
 		printContext();
-		System.out.println("Error: "+w);
+		System.out.println(errColor+"Error: "+w+okColor);
 	}
 
 	// -------------------------------- types ----------------------------------

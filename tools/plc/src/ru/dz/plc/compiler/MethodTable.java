@@ -359,6 +359,17 @@ public class MethodTable implements IMethodTable
 		}
 	}
 
+	/**
+	 * Is there a method with given name
+	 * @param name Method name
+	 * @return true if at least one method with this name exists.
+	 * 
+	 */
+	public boolean has(String name) {
+		List<Method> ml = getAllForName(name);
+		return !ml.isEmpty();
+	}
+
 
 
 }

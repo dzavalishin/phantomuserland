@@ -1,6 +1,7 @@
 package ru.dz.plc.compiler;
 
 import ru.dz.phantom.file.pclass.PhantomTypeInfo;
+import ru.dz.plc.util.NameUse;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
 
@@ -172,11 +173,15 @@ public class PhantomClass {
 		Iterator<ArgDefinition> i1 = m1.getArgIterator();
 		Iterator<ArgDefinition> i2 = m2.getArgIterator();
 
-		while (i1.hasNext() && i2.hasNext()) {
+		while (i1.hasNext() && i2.hasNext()) 
+		{
 			ArgDefinition ad1 = i1.next();
 			ArgDefinition ad2 = i2.next();
 
-			if (! (ad1.getType().equals(ad2.getType())))
+			PhantomType at1 = ad1.getType();
+			PhantomType at2 = ad2.getType();
+			
+			if(! at1.equalsEvenUnknown(at2) )
 				return false;
 		}
 
@@ -188,12 +193,25 @@ public class PhantomClass {
 
 	static String dumpArgs(Method m) { return m.dumpArgs(); }
 
-	protected void check_base_for_method(Method m) throws PlcException {
-		if (!have_nonvoid_parent)return;
-		Method bm = parent_class.findMethod(m);
-		if (bm == null)return;
+	public static boolean isSameReturnType(Method m, Method bm) 
+	{
+		return !m.getType().equalsEvenUnknown(bm.getType());
+	}
 
-		if (!isSameArgs(m, bm))
+	/**
+	 * Check if method has correct arguments if there is method in base class with the same name
+	 * @param m
+	 * @throws PlcException
+	 */
+	protected void checkBaseForMethod(Method m) throws PlcException 
+	{
+		if(!have_nonvoid_parent) return;
+		
+		Method bm = parent_class.findMethod(m); 
+		
+		if(bm == null) return;
+
+		if(!isSameArgs(m, bm))
 		{
 			String ma1 = dumpArgs(m);	
 			String ma2 = dumpArgs(bm);
@@ -202,9 +220,14 @@ public class PhantomClass {
 					this.name + "::" + m.getName() + " required ("+ma2+"), have ("+ma1+")");
 		}
 
+		if( isSameReturnType(m, bm) )
+			throw new PlcException("Method definition", "incompatible return type",
+					this.name + "::" + m.getName() + " required ("+bm.getType()+"), have ("+m.getType()+")");
+		
 		// Here we do it
 		m.setOrdinal(bm.getOrdinal());
 	}
+
 	/*
 	@Deprecated
 	public Method addMethod(String name, PhantomType type, boolean constructor ) throws PlcException {
@@ -215,6 +238,10 @@ public class PhantomClass {
 	 */
 	public Method addMethod(Method m) throws PlcException {
 		//SootMain.say("adding method "+m);
+		if(isNameUsedAsField(name))
+			throw new PlcException(getName(), "name is used as field", name);
+
+		
 		mt.add(m);
 		//check_base_for_method(m);
 		return m;
@@ -231,7 +258,7 @@ public class PhantomClass {
 		Iterator<Method> i = mt.iterator();
 		while (i.hasNext()) {
 			Method m = i.next();
-			check_base_for_method(m);
+			checkBaseForMethod(m);
 		}
 	}
 
@@ -297,6 +324,10 @@ public class PhantomClass {
 	 */
 	public PhantomField addField(String name, PhantomType type) throws PlcException {
 		//SootMain.say("add var '"+name+"' type "+type);
+		
+		if(isNameUsedAsMethod(name))
+			throw new PlcException(getName(), "name is used as method", name);
+		
 		check_base_for_field(name, type);
 		return ft.add(name, type);
 	}
@@ -310,7 +341,26 @@ public class PhantomClass {
 		ft.set(phantomOrdinal, name, type);
 	}
 
+	// ------------------------------------------------------------------------
+	// Check for name to be used
+	// ------------------------------------------------------------------------
 
+	public NameUse isNameUsed(String name)
+	{
+		return new NameUse(ft.get(name) != null, staticFieldsTable.get(name) != null, mt.has(name));
+	}
+	
+	public boolean isNameUsedAsMethod(String name)
+	{
+		return isNameUsed(name).isUsedAsMethod();
+	}
+		
+	public boolean isNameUsedAsField(String name)
+	{
+		NameUse u = isNameUsed(name);
+		return u.isUsedAsField() || u.isUsedAsStaticField();
+	}
+		
 	// ------------------------------------------------------------------------
 	// Interface compliance
 	// ------------------------------------------------------------------------
