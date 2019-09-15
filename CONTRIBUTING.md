@@ -23,4 +23,3 @@ Please take a look at GitHub Wiki:
 ## Contacts ##
 
 I am (dz) easily contacted at [Facebook](https://www.facebook.com/dmitry.zavalishin), which is fastest way I believe.
-

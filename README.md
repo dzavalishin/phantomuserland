@@ -71,11 +71,9 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
 [![Code coverage][COVERAGE_BADGE]][COVERAGE_LINK]
 
-[COVERAGE_LINK]:
-https://scan.coverity.com/projects/dzavalishin-phantomuserland
+[COVERAGE_LINK]:https://scan.coverity.com/projects/dzavalishin-phantomuserland
 
-[COVERAGE_BADGE]:
-https://scan.coverity.com/projects/8024/badge.svg
+[COVERAGE_BADGE]:https://scan.coverity.com/projects/8024/badge.svg
 
 [![Build Status](https://snap-ci.com/dzavalishin/phantomuserland/branch/master/build_image)](https://snap-ci.com/dzavalishin/phantomuserland/branch/master)
 
@@ -86,7 +84,6 @@ Easiest way is to [Write e-mail to Dmitry Zavalishin](mailto:dz@dz.ru)
 Or join us at [Ost.io Forum](http://ost.io/@dzavalishin/phantomuserland)
 
 Just for reference there was [Old Google forum](https://groups.google.com/forum/#!forum/phantom-os)
-
 
 <hr>
 
