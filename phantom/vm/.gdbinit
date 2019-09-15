@@ -1,8 +1,8 @@
 set confirm off
 
-target exec pvm_test.exe 
-file pvm_test.exe 
-#symbol-file pvm_test.exe 
+target exec pvm_headless.exe 
+file pvm_headless.exe 
+#symbol-file pvm_headless.exe 
 
 break main
 #break pvm_exec
@@ -28,6 +28,6 @@ break e4c_print_exception
 
 break e4c_exception_throw_verbatim_
 
-break pvm_exec_sys
+#break pvm_exec_sys
 
 run
