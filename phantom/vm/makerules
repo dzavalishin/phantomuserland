@@ -56,7 +56,8 @@ pvm_x11: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(X11_TEST_OBJFILE
 	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lX11
 
 pvm_headless: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(HLS_TEST_OBJFILES)
-	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lpthread
+	$(CC) -m32 -g  -o $@ $^ $(OSLIB) libphantom_vm.a -lpthread
+#	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a -lpthread
 
 
 #win_screen_win.o win_hal_win.o
