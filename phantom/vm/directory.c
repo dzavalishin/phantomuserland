@@ -12,9 +12,9 @@
 
 #define DEBUG_MSG_PREFIX "vm.dir"
 #include <debug_ext.h>
-#define debug_level_flow 10
-#define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_flow 11
+#define debug_level_error 11
+#define debug_level_info 11
 
 #include <hashfunc.h>
 #include <vm/syscall.h>
@@ -23,7 +23,7 @@
 #include <vm/internal_da.h>
 #include <spinlock.h>
 
-#define debug_print 1
+#define debug_print 0
 
 
 // TODO very long spin lock
@@ -41,6 +41,8 @@
 //#warning SYS_FREE_O() for removed values - array access funcs do it
 #warning do we need ref_inc for both saved objects and returned copies in get?
 
+//#  define LOCK_DIR(__dir)
+//#  define UNLOCK_DIR(__dir)
 
 /**
  *
@@ -82,6 +84,8 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
 
     LOCK_DIR(dir);
 
+    //hexdump( dir->flags, dir->capacity, "find hdir flags", 0 );
+
     int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
     // Can't access array slot out of array's real size
@@ -98,6 +102,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     }
 
     u_int8_t flags = dir->flags[keypos];
+    //if(debug_print) lprintf("find keypos = %d flags = %d\n", keypos, flags );
 
     // No indirection?
     if( flags == 0 )
@@ -114,8 +119,11 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
                 dir->nEntries--;
             }
             UNLOCK_DIR(dir);
+            lprintf("hdir found\n");
             return 0;
         }
+        UNLOCK_DIR(dir);
+        return ENOENT; // Not found
     }
 
     // Indirect, find by linear search in 2nd level array
@@ -123,6 +131,16 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
 
     pvm_object_t keyarray = pvm_get_array_ofield( dir->keys.data, keypos );
     pvm_object_t valarray = pvm_get_array_ofield( dir->values.data, keypos );
+
+    if(debug_print) lprintf("find indirect keypos = %d\n", keypos );
+    SHOW_INFO( 10, "find indirect keypos = %d", keypos );
+    //if( debug_print || (debug_level_flow >= 10) )
+    if( debug_print )
+    {
+        pvm_object_dump( keyarray );
+        pvm_object_dump( valarray );
+    }
+
     if( pvm_is_null( valarray ) )
     {
         lprintf("keyarray exists, valarray not"); // don't panic ;), but actually it is inconsistent
@@ -148,6 +166,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
                 dir->nEntries--;
             }
             UNLOCK_DIR(dir);
+            lprintf("hdir found\n");
             return 0;
         }
     }
@@ -169,6 +188,8 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     assert(dir->flags != 0);
 
     if(debug_print) printf("---- hdir add %.*s\n", i_key_len, ikey );
+
+    //hexdump( dir->flags, dir->capacity, "find add flags", 0 );
 
     LOCK_DIR(dir);
 
@@ -199,10 +220,13 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     {
         // Just put
 
+        if(debug_print) lprintf("put direct keypos = %d\n", keypos );
         pvm_set_array_ofield( dir->keys.data, keypos, pvm_create_string_object_binary( ikey, i_key_len ) );
         pvm_set_array_ofield( dir->values.data, keypos, add );
         ref_inc_o( add );
         dir->nEntries++;
+
+        if(debug_print) lprintf("put direct flags[] = %d\n", dir->flags[keypos] );
 
         UNLOCK_DIR(dir);
         return 0;
@@ -213,6 +237,7 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 
     if( (!flags) && !pvm_is_null( okey ) && (0 != hdir_cmp_keys( ikey, i_key_len, okey )) )
     {
+        if(debug_print) lprintf("put convert to indirect keypos = %d\n", keypos );
         pvm_object_t oval = pvm_get_array_ofield( dir->values.data, keypos );
 
         // Now create arrays
@@ -233,6 +258,14 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
         pvm_set_array_ofield( dir->values.data, keypos, vala );
         dir->flags[keypos] = 1;
 
+        SHOW_INFO( 10, "create indirection keypos = %d", keypos );
+        //if(debug_level_flow >= 10 )
+        if( debug_print )
+        {
+            pvm_object_dump( keya );
+            pvm_object_dump( vala );
+        }
+
         UNLOCK_DIR(dir);
         return 0;
     }
@@ -240,6 +273,8 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     assert(flags);
 
     // Indirection. Scan and check for key to exist
+
+    if(debug_print) lprintf("put to existing indirect keypos = %d\n", keypos );
 
     size_t indir_size = get_array_size( dir->keys.data );
 
@@ -327,6 +362,8 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
     dir->keys = pvm_create_array_object();
     dir->values = pvm_create_array_object();
     dir->flags = calloc( sizeof(u_int8_t), initial_size );
+
+    //hexdump( dir->flags, dir->capacity, "hdir flags", 0 );
 
     UNLOCK_DIR(dir);
 

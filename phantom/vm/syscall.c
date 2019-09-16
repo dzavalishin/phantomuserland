@@ -1050,7 +1050,10 @@ DECLARE_SIZE(page);
 // --------- bootstrap -------------------------------------------------------
 // ---------------------------------------------------------------------------
 
-#define CACHED_CLASSES 0
+// TODO move cache use to pvm_exec_lookup_class_by_name()? Or use it in both places?
+#define CACHED_CLASSES 1
+#define DEBUG_CACHED_CLASSES 0
+
 
 //static pvm_object_t dir;
 
@@ -1059,13 +1062,18 @@ errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new
 #if !CACHED_CLASSES
     return ENOENT;
 #else
-    printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
+    if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
     //if( pvm_is_null(dir) )        dir = pvm_create_directory_object();
 
     struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
 
     errno_t rc = hdir_find( da, name, name_len, new_class, 0 );
 
+    if( DEBUG_CACHED_CLASSES && (rc == 0) )
+    {
+        printf("---- pvm_class_cache_lookup %.*s FOUND\n", name_len, name );
+        pvm_object_dump( *new_class );
+    }
     return rc;
 #endif
 }
@@ -1075,7 +1083,7 @@ errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_
 #if !CACHED_CLASSES
     return 0;
 #else
-    printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
+    if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
     struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
     errno_t rc = hdir_add( da, name, name_len, new_class );
 #endif

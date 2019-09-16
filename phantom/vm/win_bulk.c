@@ -49,6 +49,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     {
         printf("Can't read code: ret = %d\n", ret );
         free( code );
+        fclose( f );
         return 1;
     }
 
@@ -104,5 +105,6 @@ void save_mem( void *mem, int size )
     if( 1 != fwrite( mem, size, 1, f ) )
         printf("Can't save mem dump, IO error\n" );
 
+    fclose( f );
 }
 

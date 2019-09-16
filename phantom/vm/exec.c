@@ -42,7 +42,9 @@
 
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
-struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
+static struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
+static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index );
+static int pvm_exec_find_catch( struct data_area_4_exception_stack* stack, unsigned int *jump_to, struct pvm_object thrown_obj );
 
 
 /*
@@ -136,9 +138,13 @@ do { \
 
 
 
-/**
+/*************************************************************************
  *
- * Helpers
+ * Fast access helpers.
+ *
+ * We keep copies of some call frame fields in thread object data area for
+ * faster access. Most are read only, but current IP value must be saved back
+ * if we switch call frame (for example, in call instruction).
  *
 **/
 
@@ -252,15 +258,28 @@ static void pvm_exec_do_return(struct data_area_4_thread *da)
 }
 
 
-static int pvm_exec_find_catch(
-                               struct data_area_4_exception_stack* stack,
-                               unsigned int *jump_to,
-                               struct pvm_object thrown_obj );
 
-// object to throw is in parameter
+/**
+  *
+  * \brief Virtual machine throw.
+  *
+  * \param[in]  da         Current thread data area
+  * \param[in]  thrown_obj Object to throw
+  *
+  * Must be called in main interpreter loop right before 'break' of main switch,
+  * i.e. right before next instruction execution.
+  *
+  * Unwinds stack looking for catch for given type.
+  *
+  * On return we are on stack of method which had corresponding catch.
+  *
+**/
 static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t thrown_obj)
 {
     unsigned int jump_to = (unsigned int)-1; // to cause fault
+
+    if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+
     // call_frame.catch_found( &jump_to, thrown_obj )
     while( !(pvm_exec_find_catch( da->_estack, &jump_to, thrown_obj )) )
     {
@@ -285,6 +304,7 @@ static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t
     LISTIA("except jump to %d", jump_to);
     da->code.IP = jump_to;
     os_push(thrown_obj);
+    if( DEB_CALLRET || debug_print_instr ) printf( "throw stack_depth -> %d)", da->stack_depth );
 }
 
 // object to throw is on stack
@@ -295,10 +315,22 @@ static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
 }
 
 
-static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index );
+
+/**
+ *
+ * \brief Exec system call instruction.
+ *
+ * \param[in]  da            Current thread data area
+ * \param[in]  syscall_index Number of syscall to execute,
+ *
+ * Similar to usual methid call, but executes native code.
+ *
+ * Syscall numbers are specific to object class.
+ *
+**/
 
 
-// syscalss numbers are specific to object class
+// 
 static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
 {
     LISTIA("sys %d start", syscall_index );
@@ -313,6 +345,7 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
     if( func == 0 )
     {
         LISTIA("sys %d invalid! ", syscall_index );
+        // TODO VM throw?
     }
     else
     {
@@ -328,14 +361,36 @@ static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_in
 
 
 
+/**
+ *
+ * \brief Init call frame data area.
+ *
+ * \param[in]  da            Current thread data area
+ * \param[in]  cfda          New call frame to fill
+ * \param[in]  method_index  Ordinal of method we call
+ * \param[in]  n_param       Number of parameters to copy on new stack
+ * \param[in]  new_this      This for called method
+ * \param[in]  class_ref     If not null - we do static call. If null - will do VMT call.
+ *
+ * Fill new call stack data area with correct values.
+ *
+ * Copy parameters to new stack (poping from current one).
+ *
+ * Pass number of parameters on integer stack.
+ *
+ * Find and set code object to be executed.
+ *
+**/
+
+
 static void init_cfda(
     struct data_area_4_thread *da, 
-    struct data_area_4_call_frame *cfda,    // new call frame to fill
+    struct data_area_4_call_frame *cfda, 
     unsigned int method_index, 
     unsigned int n_param, 
     pvm_object_t new_this,     
-    pvm_object_t class_ref  // Use for static calls. Will do VMT call if class_ref==null.
-     )
+    pvm_object_t class_ref
+                     )
 {
     cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
@@ -351,19 +406,11 @@ static void init_cfda(
         //n_param = 1024*16; // no - stack underflow will follow
     }
 #endif
+
     // allocate places on stack
-#if 0
-    {
-        unsigned int i;
-        for( i = n_param; i; i-- )
-        {
-            pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), pvm_get_null_object() );
-        }
-    }
-#else
     // push nulls to reserve stack space
     pvm_ostack_reserve( pvm_object_da(cfda->ostack, object_stack), n_param );
-#endif
+
     // fill 'em in correct order
     {
         unsigned int i;
@@ -412,6 +459,27 @@ static void init_cfda(
 }
 
 
+/**
+ *
+ * \brief Execute (dynamic, VMT based) call instruction.
+ *
+ * \param[in]  da              Current thread data area
+ * \param[in]  method_index    Ordinal of method we call
+ * \param[in]  n_param         Number of parameters to copy on new stack
+ * \param[in]  do_optimize_ret Optimize stack if next instuction is opcode_ret
+ * \param[in]  new_this        This for called method
+ *
+ * Create new call frame, init it.
+ *
+ * If optimising, free current call frame and link new one with our caller directly.
+ *
+ * Set new call frame as current.
+ *
+ * \todo Possibly do not even create/free call frame, just reuse? Criteria?
+ *
+**/
+
+
 static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_index, unsigned int n_param, int do_optimize_ret, pvm_object_t new_this )
 {
     if( DEB_CALLRET || debug_print_instr )
@@ -443,6 +511,7 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
         optimize_stack = es_empty();
     }
 
+    // Before call save current fast access data
     pvm_exec_save_fast_acc(da);  // not needed for optimized stack in fact
 
     struct pvm_object new_cf = pvm_create_call_frame_object();
@@ -467,12 +536,33 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
 
     da->stack_depth++;
     da->call_frame = new_cf;
+
+    // We are on a new stack in a new code, load fast access data
     pvm_exec_load_fast_acc(da);
 
     if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
 }
 
-// TODO combine this and prev funcs where possible
+
+
+
+/**
+ *
+ * \brief Execute static call instruction.
+ *
+ * \param[in]  da              Current thread data area
+ * \param[in]  method_ordinal  Ordinal of method we call
+ * \param[in]  n_param         Number of parameters to copy on new stack
+ * \param[in]  class_ref       Class to look up method in (we do static call, not use 'this')
+ * \param[in]  new_this        This for called method
+ *
+ * Create new call frame, init it.
+ *
+ * Set new call frame as current.
+ *
+ * \todo Combine this and prev funcs where possible
+ *
+**/
 
 static void
 pvm_exec_static_call(
@@ -480,7 +570,8 @@ pvm_exec_static_call(
     int method_ordinal,
     int n_param,
     pvm_object_t class_ref,             // Class to find method in
-    pvm_object_t new_this)
+    pvm_object_t new_this
+                    )
 {
     if( DEB_CALLRET || debug_print_instr ) printf( "\nstatic call %d (stack_depth %d -> ", method_ordinal, da->stack_depth );
 
@@ -491,8 +582,6 @@ pvm_exec_static_call(
 
     struct pvm_object new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
-
-    //struct pvm_object_storage *code = pvm_exec_find_static_method( class_ref, method_ordinal );
 
     init_cfda(da, cfda, method_ordinal, n_param, new_this, class_ref );
     
@@ -1320,9 +1409,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
 #if 0
                     // Throw
                     pvm_object_t msg = pvm_create_string_object("invalid arg count");
-                    if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
                     pvm_exec_do_throw_object( da, msg );
-                    if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
 #else
                     // ignore - there's duplicate '.ru.dz.phantom.system.shell' for some reason :(
                     // TODO fix class duplication, remove this hack
@@ -1866,9 +1955,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 if( have_args != want_args)
                 {
                     pvm_object_t msg = pvm_create_string_object("invalid arg count");
-                    if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
                     pvm_exec_do_throw_object( da, msg );
-                    if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
                 }
             }
             break;
@@ -2053,6 +2142,11 @@ static void do_pvm_exec(pvm_object_t current_thread)
     } // while(1)
 }
 
+
+
+
+
+
 void pvm_exec(pvm_object_t current_thread)
 {
 #if CONF_USE_E4C
@@ -2162,7 +2256,7 @@ static struct pvm_object_storage *
  *
 **/
 
-struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal )
+static struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal )
 {
     if( class_ref.data == 0 )
     {
@@ -2244,6 +2338,19 @@ static int catch_comparator( void *backptr, struct pvm_exception_handler *test )
     return 0;
 }
 
+
+/**
+ *
+ * \brief Find catch for given thrown object.
+ *
+ * \param[in]  stack        Exceptions stack to look for catcher on
+ * \param[out] jump_to      IP address to jump to
+ * \param[in]  thrown_obj   Object that is being thrown, class of this object is checked against catcher class
+ *
+ * \return Nonzero if catcher found.
+ *
+**/
+
 static int pvm_exec_find_catch(
                                struct data_area_4_exception_stack* stack,
                                unsigned int *jump_to,
@@ -2279,6 +2386,24 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
     //co.data = code;
     //co.interface = 0;
 }
+
+
+/**
+ *
+ * \brief Find class object by class name.
+ *
+ * \param[in]  name        Name of class to find,
+ *
+ * \return Class obect if class is found and null object otherwise.
+ *
+ * \todo Must have some persistent cache to lookup. Currently can load class twice on
+ *       system start. Cache is implemented in userland and can be absent in early boot time.
+ *       See syscall.c pvm_class_cache_* funcs implementing such cache.
+ *       See also pvm_root.class_dir
+ *
+ * \todo We can speed up class load if we use cache here directly.
+ *
+**/
 
 
 // TODO: implement!

@@ -53,7 +53,10 @@ static void * 	do_ctty_create(void *arg)
 
     ret->wtty = wtty_init( WTTY_SMALL_BUF ); // DEFAULT_CTTY_QUEUE_SIZE
     if( ret->wtty == 0 )
+    {
+        free( ret );
         return 0;
+    }
 
     return ret;
 }

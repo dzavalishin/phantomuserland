@@ -32,7 +32,7 @@ void pressEnter(char *text)
 #if 1
     printf("%s\n", text);
 #if !PREEMPT
-    printf("press Enter...\n...", text);
+    printf("press Enter...\n...");
     while( getchar() >= ' ' )
         ;
 #else

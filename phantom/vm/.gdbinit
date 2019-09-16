@@ -5,8 +5,11 @@ file pvm_headless.exe
 #symbol-file pvm_headless.exe 
 
 break main
-#break pvm_exec
+break panic
+break pvm_exec_panic
+break pvm_exec_panic0
 
+#break pvm_exec
 
 #set debug_print_instr=1
 
@@ -15,7 +18,6 @@ break main
 
 #break alloc.c:1311
 
-break panic
 
 #break pvm_boot
 
@@ -29,5 +31,7 @@ break e4c_print_exception
 break e4c_exception_throw_verbatim_
 
 #break pvm_exec_sys
+
+break hdir_add
 
 run
