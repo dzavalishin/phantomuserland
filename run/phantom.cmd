@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 rem http://dietpc.org/windows/qemu/
 rem http://lassauge.free.fr/qemu/
 
@@ -12,13 +12,14 @@ rem SET QCMD=qemu-system-i386.exe
 rem SET QDIR=qemu\2.4.1
 rem SET QCMD=qemu-system-i386w.exe
 
-rem SET QCMD=qemu-system-x86_64w.exe 
-
-rem SET QDIR=c:\bin\qemu
+rem SET QDIR=qemu\2019.02.18
+rem SET QCMD=qemu-system-x86_64w.exe
 
 
 rem SET QDIR=C:\bin\qemu
 rem SET QCMD=qemu-system-x86_64.exe
+
+
 
 set QEMU_AUDIO_DRV=dsound
 rem set QEMU_AUDIO_DRV=sdl
@@ -97,7 +98,7 @@ ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
 rem start /wait 
 
-%QDIR%\%QCMD% %Q_TRACE% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
+%QDIR%\%QCMD% %Q_TRACE% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR% -L %QDIR%\bios 
 
 
 grep KERNEL.TEST serial0.log
