@@ -52,6 +52,10 @@ public class RunCompiler {
 
 	@Test
 	public void testShell() 			{		compile("test/ph/ru.dz/ru.dz.phantom.system.shell.ph" ); }
+	@Test
+	public void testMethodCall(){
+		compile("test/ph/etc/testMethodCallByName.ph");
+	}
 	
 	
 }

@@ -44,6 +44,9 @@ public class StringConstNode extends Node {
 		llc.putln(llvmTempName+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_createStringObjefct( i8* "+ls.getReference()+" );");
 	}
 	
+	public String getValue(){
+		return val;
+
 	@Override
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
 		cgen.put( C_codegen.getJitRuntimeFuncPrefix()+ "CreateStringObjefct( \"");
