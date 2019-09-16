@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar ${PHANTOM_HOME}/build/jar/jpc.jar -o${PHANTOM_HOME}/plib/bin -I${PHANTOM_HOME}/plib/bin $@
+java -jar ${PHANTOM_HOME}/build/jar/jpc.jar -o${PHANTOM_HOME}/plib/bin -I${PHANTOM_HOME}/plib/bin $@ 

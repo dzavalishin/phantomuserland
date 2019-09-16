@@ -10,5 +10,6 @@ call jpc -cbin;class java.lang.Class
 call jpc -cbin;class java.lang.String
 call jpc -cbin;class java.lang.Throwable
 call jpc -cbin;class java.lang.InterruptedException
+call jpc -cbin;class java.lang.CloneNotSupportedException
 
 call jpc -cbin;class test.toPhantom.Assigns
