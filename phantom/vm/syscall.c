@@ -1055,7 +1055,20 @@ DECLARE_SIZE(page);
 #define DEBUG_CACHED_CLASSES 0
 
 
-//static pvm_object_t dir;
+/**
+ *
+ * \brief Lookup class by name in persistent class cache.
+ *
+ * \param[in]  name       Name of class to lookup
+ * \param[in]  name_len   Length of name
+ * \param[out] new_class  Class found
+ * 
+ * \return 0 if found, ENOENT if not found
+ *
+ * Stores directory in pvm_root.class_dir
+ *
+**/
+
 
 errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new_class)
 {
@@ -1077,6 +1090,21 @@ errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new
     return rc;
 #endif
 }
+
+/**
+ *
+ * \brief Add class to persistent class cache.
+ *
+ * \param[in]  name       Name of class
+ * \param[in]  name_len   Length of name
+ * \param[out] new_class  Class object
+ * 
+ * \return 0 if ok, nonzero (errno) on error.
+ *
+ * Stores directory in pvm_root.class_dir
+ *
+**/
+
 
 errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_class)
 {

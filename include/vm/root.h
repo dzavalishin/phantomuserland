@@ -28,6 +28,14 @@ void pvm_remove_object_from_restart_list( pvm_object_t o );
 int pvm_connect_object(pvm_object_t o, struct data_area_4_thread *tc);
 int pvm_disconnect_object(pvm_object_t o, struct data_area_4_thread *tc);
 
+// Persistent class cache
+//
+// Used twice - both in '.internal.boot' class loader method and
+// in exec.c class name to class resolution. Possibly, we should remove
+// its use from '.internal.boot'.
+//
+errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new_class);
+errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_class);
 
 
 

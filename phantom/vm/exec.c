@@ -2405,14 +2405,29 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
  *
 **/
 
+#define USE_PERSISTENT_CACHE_IN_SUMMON 1
 
 // TODO: implement!
 struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
 {
+    pvm_object_t found_class;
+
+    ref_inc_o(name); // hack
+
     // Try internal
     struct pvm_object ret = pvm_lookup_internal_class(name);
     if( !pvm_is_null(ret) )
         return ret;
+
+#if USE_PERSISTENT_CACHE_IN_SUMMON
+    // Try persistent class cache
+    {
+    //printf("lookup class in pers cache: "); pvm_object_dump(name);
+    errno_t rc = pvm_class_cache_lookup(pvm_get_str_data(name), pvm_get_str_len(name), &found_class );
+    if( rc == 0 )
+        return found_class;
+    }
+#endif
 
     /*
      *
@@ -2430,7 +2445,17 @@ struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
 
     // Try userland loader
     struct pvm_object args[1] = { name };
-    return pvm_exec_run_method( pvm_root.class_loader, 8, 1, args );
+    found_class = pvm_exec_run_method( pvm_root.class_loader, 8, 1, args );
+
+#if USE_PERSISTENT_CACHE_IN_SUMMON
+    if( !pvm_is_null(found_class) )
+    {
+        //errno_t rc = 
+        pvm_class_cache_insert(pvm_get_str_data(name), pvm_get_str_len(name), found_class );
+    }
+#endif
+
+    return found_class;
 }
 
 

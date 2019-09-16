@@ -72,6 +72,21 @@ typedef struct hashdir {
 */
 static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey );
 
+/**
+ *
+ * \brief Lookup object in hash table.
+ *
+ * \param[in]  dir          Directory (hash table) to lookup in
+ * \param[in]  ikey         Key to lookup for (string)
+ * \param[in]  i_key_len    Key length
+ * \param[out] out          Object found (returned even if delete requested)
+ * \param[in]  delete_found Delete key/value from hash
+ * 
+ * \return 0 if found, ENOENT if not found
+ *
+ * Actually implements '.internal.directory' internal class
+ *
+**/
 
 errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out, int delete_found )
 {
@@ -119,7 +134,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
                 dir->nEntries--;
             }
             UNLOCK_DIR(dir);
-            lprintf("hdir found\n");
+            if(debug_print) lprintf("hdir found\n");
             return 0;
         }
         UNLOCK_DIR(dir);
@@ -154,19 +169,22 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     for( i = 0; i < indir_size; i++ )
     {
         pvm_object_t indir_key = pvm_get_array_ofield( keyarray.data, i );
+        
+        if( pvm_is_null(indir_key) )
+            continue;
 
         if( 0 == hdir_cmp_keys( ikey, i_key_len, indir_key ) )
         {
             *out = pvm_get_array_ofield( valarray.data, i );
             ref_inc_o( *out );
-            if( delete_found )
+            if( delete_found ) // TODO refdec?
             {
                 pvm_set_array_ofield( valarray.data, i, pvm_create_null_object() );
                 pvm_set_array_ofield( keyarray.data, i, pvm_create_null_object() );
                 dir->nEntries--;
             }
             UNLOCK_DIR(dir);
-            lprintf("hdir found\n");
+            //lprintf("hdir found\n");
             return 0;
         }
     }
@@ -248,6 +266,12 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
         pvm_append_array( keya.data, okey );
         pvm_append_array( vala.data, oval );
 
+        // pvm_set_array_ofield below will clear prev values in dir->keys.data[keypos] and dir->values.data[keypos]
+        // so ref inc 'em here
+
+        ref_inc_o( okey );
+        ref_inc_o( oval );
+
         // put new key/val
         pvm_append_array( keya.data, pvm_create_string_object_binary( ikey, i_key_len ) );
         pvm_append_array( vala.data, add );
@@ -297,16 +321,18 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     }
 
     // put new key/val
+    pvm_object_t new_key = pvm_create_string_object_binary( ikey, i_key_len );
     if( empty_pos >= 0 )
     {
-        pvm_set_array_ofield( dir->keys.data, empty_pos, pvm_create_string_object_binary( ikey, i_key_len ) );
+        pvm_set_array_ofield( dir->keys.data, empty_pos, new_key );
         pvm_set_array_ofield( dir->values.data, empty_pos, add );
     }
     else
     {
-        pvm_append_array( dir->keys.data, pvm_create_string_object_binary( ikey, i_key_len ) );
+        pvm_append_array( dir->keys.data, new_key );
         pvm_append_array( dir->values.data, add );
     }
+    ref_inc_o( add );
     dir->nEntries++;
 
     UNLOCK_DIR(dir);
