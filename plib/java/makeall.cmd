@@ -2,6 +2,8 @@ call jc src/java/lang/Class.java
 call jc src/java/lang/String.java
 call jc src/java/lang/Throwable.java 
 call jc src/java/lang/InterruptedException.java 
+call jc src/java/lang/CloneNotSupportedException.java 
+
 call jc src/test/toPhantom/Assigns.java
 
 call jpc -cbin;class java.lang.Class
