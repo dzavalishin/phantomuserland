@@ -53,7 +53,7 @@ public abstract class FileInfo {
 		os.writeInt(myLength());
 	}
 
-	int myLength()
+	private int myLength()
 	{
 		long len = end-pos;
 		return (int)len;

@@ -27,7 +27,7 @@ public class FieldTable {
 	private Map<String, PhantomField> table;
 	private ordinals_generator ordinals = new ordinals_generator();
 
-	void setBase(int base) throws PlcException { ordinals.setBase(base); }
+	public void setBase(int base) throws PlcException { ordinals.setBase(base); }
 
 	public FieldTable() { table = new HashMap<String, PhantomField>(); }
 
@@ -100,7 +100,8 @@ public class FieldTable {
 	{
 		char ch = name.charAt(0);
 		char uch = Character.toUpperCase(ch);
-		return new String("")+uch+name.substring(1);
+		//return new String("")+uch+name.substring(1);
+		return ""+uch+name.substring(1);
 	}
 
 
