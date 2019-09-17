@@ -37,7 +37,10 @@ public class VoidNode extends Node {
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException,
 	PlcException {
 		if(_l.is_on_int_stack())
+		{
+			c.emitNumericPrefix(_l.type);
 			c.emitIsDrop();
+		}
 		else
 			c.emitOsDrop();
 	}

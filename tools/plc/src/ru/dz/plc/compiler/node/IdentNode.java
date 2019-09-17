@@ -89,7 +89,7 @@ public class IdentNode extends Node {
 		{
 			onIntStack = true;
 			type = svar.getType();
-			if( !type.is_int() )
+			if( !type.is_on_int_stack() )
 				throw new PlcException("Not an integer auto var on integer stack");
 			return;
 		}
@@ -125,7 +125,9 @@ public class IdentNode extends Node {
 		type = svar.getType();
 	}
 
-	// load variable
+	/**
+	 *  Load variable value
+	 */
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException,
 	PlcException {
 
@@ -150,13 +152,14 @@ public class IdentNode extends Node {
 		PhantomStackVar svar = s.istack_vars().get_var(ident);
 		if( svar != null )
 		{
+			c.emitNumericPrefix(svar.getType());
 			c.emitIGet(svar.get_abs_stack_pos()); // get stack variable
 		}
 		else
 		{
 			svar = s.stack_vars().get_var(ident);
 			if( svar == null )
-				throw new PlcException( "ident Node", "no field", ident );
+				throw new PlcException( "ident Node", "no field or var", ident );
 
 			//if (type == null || type.is_unknown()) type = svar.get_type();
 			c.emitGet(svar.get_abs_stack_pos()); // get stack variable

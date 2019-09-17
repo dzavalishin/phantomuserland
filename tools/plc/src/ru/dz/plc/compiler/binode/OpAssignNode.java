@@ -81,9 +81,11 @@ public class OpAssignNode extends BiNode {
 			if (f != null) {
 				if (type == null || type.is_unknown()) type = f.getType();
 				check_assignment_types(f.getName(), type,_r.getType());
+				
 				c.emitOsDup(); // return a copy
 				c.emitSave(f.getOrdinal());
-				if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
+				
+				if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int for field??!");
 				return;
 			}
 
@@ -93,15 +95,20 @@ public class OpAssignNode extends BiNode {
 			{
 				if (type == null || type.is_unknown()) type = svar.getType();
 				check_assignment_types(svar.getName(), type,_r.getType());
+				
+				c.emitNumericPrefix(type);
 				c.emitIsDup(); // return a copy
+				
+				c.emitNumericPrefix(type);
 				c.emitISet(svar.get_abs_stack_pos()); // set stack variable
+				
 				if(!is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on obj??!");
 			}
 			else
 			{
 				svar = s.stack_vars().get_var(dest_name);
 				if (svar == null)
-					throw new PlcException("= Node", "no field", dest_name);
+					throw new PlcException("= Node", "no field or var", dest_name);
 
 				if (type == null || type.is_unknown()) type = svar.getType();
 				check_assignment_types(svar.getName(), type,_r.getType());

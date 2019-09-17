@@ -122,7 +122,16 @@ public class PhantomType {
 	}
 
 	public boolean is_on_int_stack() { return _is_int||_is_long||_is_float||_is_double; }
+	
+	public boolean isNumeric() { return is_on_int_stack(); }
 
+	/**
+	 * Does it take 2 x 32 bit slots 
+	 * @return True for 64 bit numeric types.
+	 */
+	public boolean is64bit() { return _is_long||_is_double; }
+	
+	
 	/**
 	 * NB! Any unknown type is assumed to be different from any other.
 	 * 
@@ -514,6 +523,7 @@ public class PhantomType {
 
 	public void setStatic(boolean iAmStatic) { this.iAmStatic = iAmStatic; }
 	public boolean getStatic() { return iAmStatic; }
+
 
 }
 

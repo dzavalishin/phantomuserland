@@ -335,6 +335,7 @@ public class Codegen extends opcode_ids {
 	 *
 	 * @param data array of bytes to put out
 	 */
+	@Deprecated
 	public void emitBinary(byte data[]) throws IOException {
 		list("const <bindata>");
 		put_byte(opcode_sconst_bin);
@@ -810,7 +811,7 @@ public class Codegen extends opcode_ids {
 			put_byte(opcode_prefix_long);
 		}
 		else if( !t.is_int())
-			throw new PlcException("unknown type of "+t);
+			throw new PlcException("unknown numeric type: "+t+", possibly untyped variable in numeric context.");
 	}
 	
 	public void emitNumericCast(PhantomType from, PhantomType to) throws PlcException, IOException
@@ -851,6 +852,18 @@ public class Codegen extends opcode_ids {
 			throw new PlcException("unknown type of "+to);
 	}
 	
+	public void emit_arg_count_check(int n_args) throws IOException, PlcException {
+		list("arg_count "+n_args);
+		
+		if(n_args > Byte.MAX_VALUE) 
+			throw new PlcException("emit_arg_count_check", "n_args > 127", Integer.toString(n_args));
+		
+		put_byte(opcode_arg_count);
+		put_byte((byte)n_args);
+	}
+
+
+	
 	
 
 	public void emitComment(String string) throws IOException {
@@ -875,6 +888,7 @@ public class Codegen extends opcode_ids {
 	public Map<Long, Integer> getIpToLine() {
 		return IpToLine;
 	}
+
 
 
 

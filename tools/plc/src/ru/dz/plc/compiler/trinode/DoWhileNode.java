@@ -6,6 +6,7 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.PhTypeUnknown;
+import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -27,7 +28,8 @@ public class DoWhileNode extends TriNode {
 	
 	public void find_out_my_type()
 	{
-		type = new PhTypeUnknown(); // BUG! Void?
+		//type = new PhTypeUnknown(); // BUG! Void?
+		type = new PhTypeVoid();
 	}
 
 	public boolean is_on_int_stack() { return false; }
@@ -53,7 +55,9 @@ public class DoWhileNode extends TriNode {
 		if( !_m.is_on_int_stack() ) c.emit_o2i();
 		if( !_m.getType().is_int() )
 		{
-			System.out.println("Warning: not an integer expression in while ");
+			//System.out.println("Warning: not an integer expression in while ");
+			print_warning("not an integer expression in while: "+ _m.getType().toString());
+			// TODO error?!
 		}
 
 		c.emitJz(label_break);

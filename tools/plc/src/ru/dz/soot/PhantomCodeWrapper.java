@@ -95,7 +95,7 @@ public class PhantomCodeWrapper {
 			try {
 				PhantomType ptype = SootExpressionTranslator.convertType(type);
 				//SootMain.say("var "+jl.getName()+" type "+ptype);
-				m.svars.add_stack_var(new PhantomVariable(jl.getName(), ptype));
+				m.svars.addStackVar(new PhantomVariable(jl.getName(), ptype));
 			} catch (PlcException e) {
 				dest = null;
 				SootMain.error(e);
