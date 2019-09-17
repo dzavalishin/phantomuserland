@@ -281,7 +281,9 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 
 /**
  *
- * Long stack goes - it's integer stack, but 64 bit access
+ * Long stack goes - it's integer stack, but 64 bit access.
+ * 
+ * Least significant bits are above (near stack end).
  *
 **/
 
@@ -313,6 +315,62 @@ int64_t  pvm_lstack_top( struct data_area_4_integer_stack* rootda )
     o = low; o |= ((int64_t)hi) << 32;
     return o;
 }
+
+
+void pvm_lstack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, int64_t val )
+{
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
+
+    while( abs_pos >= pagesize )
+    {
+        c = pvm_object_da(c,integer_stack)->common.next;
+        if( pvm_is_null(c) ) pvm_exec_panic0( "l abs_set: out of stack" );
+        abs_pos -= pagesize;
+    }
+
+    pvm_object_da(c,integer_stack)->stack[abs_pos]   = (int32_t)(val >> 32);
+
+    abs_pos++;
+
+    if( abs_pos >= pagesize )
+    {
+        c = pvm_object_da(c,integer_stack)->common.next;
+        if( pvm_is_null(c) ) pvm_exec_panic0( "l abs_set: out of stack" );
+        abs_pos -= pagesize;
+    }
+
+    pvm_object_da(c,integer_stack)->stack[abs_pos] = (int32_t)val;
+}
+
+int64_t pvm_lstack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
+{
+    unsigned int pagesize = rootda->common.__sSize;
+    struct pvm_object c = rootda->common.root;
+
+    while( abs_pos >= pagesize )
+    {
+        c = pvm_object_da(c,integer_stack)->common.next;
+        if( pvm_is_null(c) ) pvm_exec_panic0( "l abs_get: out of stack" );
+        abs_pos -= pagesize;
+    }
+
+    int hi = pvm_object_da(c,integer_stack)->stack[abs_pos];
+
+    abs_pos++;
+
+    if( abs_pos >= pagesize )
+    {
+        c = pvm_object_da(c,integer_stack)->common.next;
+        if( pvm_is_null(c) ) pvm_exec_panic0( "l abs_set: out of stack" );
+        abs_pos -= pagesize;
+    }
+
+    int lo = pvm_object_da(c,integer_stack)->stack[abs_pos];
+
+    return (((int64_t)hi) << 32) | lo;
+    }
+
 
 #else
 

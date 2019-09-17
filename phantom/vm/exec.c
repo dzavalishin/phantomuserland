@@ -220,7 +220,7 @@ static void pvm_exec_set( struct data_area_4_thread *da, unsigned abs_stack_pos 
     pvm_ostack_abs_set( da->_ostack, abs_stack_pos, os_pop() );
 }
 
-
+/*
 static void pvm_exec_iget( struct data_area_4_thread *da, unsigned abs_stack_pos )
 {
     LISTIA("is stack get %d", abs_stack_pos);
@@ -232,7 +232,7 @@ static void pvm_exec_iset( struct data_area_4_thread *da, unsigned abs_stack_pos
     LISTIA("is stack set %d", abs_stack_pos);
     pvm_istack_abs_set( da->_istack, abs_stack_pos, is_pop() );
 }
-
+*/
 
 static void free_call_frame(struct pvm_object cf, struct data_area_4_thread *da)
 {
@@ -736,7 +736,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
-                    if(debug_print_instr) printf("%ld - %ld ;", (long)l, (long)u );
+                    if(0||debug_print_instr) printf("%lld - %lld ; ", l, u );
                     ls_push(l-u);
                 }
                 break;
@@ -756,7 +756,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
                     //if(debug_print_instr) printf("%ld/%ld = %ld;", (long)l, (long)u, (long)(l/u) );
-                    if(debug_print_instr) printf("%lld/%lld = %lld;", l, u, l/u );
+                    if(0||debug_print_instr) printf("%lld/%lld", l, u ); // next line can crash, let me be printed
+                    if(0||debug_print_instr) printf(" = %lld ; ", l/u ); 
                     ls_push(l/u);
                 }
                 break;
@@ -1318,23 +1319,32 @@ static void do_pvm_exec(pvm_object_t current_thread)
             // int stack ops ---------------------------------------
 
         case opcode_is_dup:
-            LISTI("is dup");
             {
                 if(DO_TWICE)
                 {
-                    int i1 = is_pop();
-                    int i2 = is_pop();
-                    is_push(i1); is_push(i2);
-                    is_push(i1); is_push(i2);
+                    LISTI("l-is dup");
+                    //int i1 = is_pop();
+                    //int i2 = is_pop();
+                    //is_push(i1); is_push(i2);
+                    //is_push(i1); is_push(i2);
+                    int64_t l = ls_top();
+                    ls_push(l);
+                    prefix_long = prefix_double = 0;
+                    //printf("l-is dup = %lld ; ", l);
                 }
                 else
+                {
+                    LISTI("is dup");
                     is_push(is_top());
+                    prefix_float = 0; // same for float
+                }
             }
             break;
 
         case opcode_is_drop:
             LISTI("is drop");
-            is_pop(); if(DO_TWICE) is_pop();
+            is_pop(); if(DO_TWICE) { is_pop(); prefix_long = prefix_double = 0; }
+            prefix_float = 0; // same for float
             break;
 
         case opcode_iconst_0:
@@ -1344,7 +1354,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
         case opcode_iconst_1:
             LISTI("iconst 1");
-            is_push(1); if(DO_TWICE) is_push(1);
+            if(DO_TWICE) ls_push(1);
+            else is_push(1); 
             break;
 
         case opcode_iconst_8bit:
@@ -1786,7 +1797,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             }
             break;
 
-        case opcode_copy:
+        case opcode_copy: // TODO unused? Kill?
             LISTI("copy");
             {
                 pvm_object_t o = os_pop();
@@ -2076,8 +2087,48 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_os_get32:        pvm_exec_get(da, pvm_code_get_int32(&(da->code)));	break;
         case opcode_os_set32:        pvm_exec_set(da, pvm_code_get_int32(&(da->code)));	break;
 
-        case opcode_is_get32:        pvm_exec_iget(da, pvm_code_get_int32(&(da->code)));	break;
-        case opcode_is_set32:        pvm_exec_iset(da, pvm_code_get_int32(&(da->code)));	break;
+        case opcode_is_get32:        
+        {
+            //pvm_exec_iget(da, pvm_code_get_int32(&(da->code)));	
+            int abs_stack_pos = pvm_code_get_int32(&(da->code));
+            LISTIA("is stack get %d", abs_stack_pos);
+
+            if(DO_TWICE) 
+            {
+                LISTIA("l-is stack get %d", abs_stack_pos);
+                int64_t l = pvm_lstack_abs_get(da->_istack, abs_stack_pos);
+                ls_push( l );
+                //printf("l-is stack get @%d = %lld ; ", abs_stack_pos, l);
+                prefix_long = prefix_double = 0;
+            }
+            else 
+            {
+                LISTIA("is stack get %d", abs_stack_pos);
+                is_push( pvm_istack_abs_get(da->_istack, abs_stack_pos) );
+                prefix_float = 0; // same for float
+            }
+        }
+            break;
+        case opcode_is_set32:
+        {
+            //pvm_exec_iset(da, pvm_code_get_int32(&(da->code)));	break;
+            int abs_stack_pos = pvm_code_get_int32(&(da->code));
+            if(DO_TWICE) 
+            {
+                int64_t l = ls_pop();
+                LISTIA("l-is stack set %d", abs_stack_pos);
+                pvm_lstack_abs_set( da->_istack, abs_stack_pos, l );
+                //printf("l-is stack set @%d = %lld ; ", abs_stack_pos, l);
+                prefix_long = prefix_double = 0;
+            }
+            else
+            {
+                LISTIA("is stack set %d", abs_stack_pos);
+                pvm_istack_abs_set( da->_istack, abs_stack_pos, is_pop() );
+                prefix_float = 0; // same for float
+            }
+        }
+            break;
 
         case opcode_stack_reserve:
         {

@@ -39,6 +39,10 @@ int                 pvm_ostack_count( struct data_area_4_object_stack* rootda );
 void                pvm_istack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, int val );
 int                 pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos );
 
+void                pvm_lstack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, int64_t val );
+int64_t             pvm_lstack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos );
+
+
 void                pvm_istack_push( struct data_area_4_integer_stack* stack, int o );
 int                 pvm_istack_pop( struct data_area_4_integer_stack* stack );
 int                 pvm_istack_top( struct data_area_4_integer_stack* stack );
