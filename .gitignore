@@ -123,3 +123,7 @@ phantom/vm/pvm_headless.exe.core
 phantom/vm/pvm_headless.exe.stackdump
 *.ph~
 *.pyc
+test/unit/cmake_install.cmake
+test/unit/Makefile
+test/unit/suites/cmake_install.cmake
+test/unit/suites/Makefile
