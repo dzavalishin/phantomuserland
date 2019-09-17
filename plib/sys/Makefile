@@ -78,19 +78,20 @@ $(BINDIR)/ru.dz.demo.start.pc: ru.dz.demo.weather.pc ru.dz.demo.chart.pc
 $(BINDIR)/ru.dz.demo.weather.pc: ru.dz.demo.chart.pc internal.bitmap.pc
 
 $(BINDIR)/ru.dz.phantom.backgrounds.pc: ../resources/backgrounds/phantom_dz_new_1024_768.ppm
+
 $(BINDIR)/ru.dz.phantom.system.boot.pc: ru.dz.phantom.system.regression_tests.pc ru.dz.phantom.system.class_loader.pc ru.dz.windows.root.pc ru.dz.phantom.system.thread_test.pc ru.dz.phantom.system.shell.pc internal.binary.pc test.suite.pc
-$(BINDIR)/ru.dz.phantom.system.iterator.pc: ru.dz.phantom.system.iterable.pc
-$(BINDIR)/ru.dz.phantom.system.shell.pc: ru.dz.phantom.system.runnable.pc ru.dz.phantom.system.shell_callback.pc test.toPhantom.PhantomPrinter.pc internal.mutex.pc ru.dz.demo.start.pc
-$(BINDIR)/ru.dz.phantom.system.shell_callback.pc: internal.window.pc internal.connection.pc ru.dz.phantom.system.runnable.pc
+$(BINDIR)/ru.dz.phantom.system.iterator.pc: $(BINDIR)/ru.dz.phantom.system.iterable.pc
+$(BINDIR)/ru.dz.phantom.system.shell.pc: $(BINDIR)/ru.dz.phantom.system.runnable.pc $(BINDIR)/ru.dz.phantom.system.shell_callback.pc $(BINDIR)/test.toPhantom.PhantomPrinter.pc $(BINDIR)/internal.mutex.pc $(BINDIR)/ru.dz.demo.start.pc
+$(BINDIR)/ru.dz.phantom.system.shell_callback.pc: $(BINDIR)/internal.window.pc $(BINDIR)/internal.connection.pc $(BINDIR)/ru.dz.phantom.system.runnable.pc
 
-$(BINDIR)/ru.dz.phantom.tetris.figure.pc: ru.dz.phantom.tetris.playingfield.pc
-$(BINDIR)/ru.dz.phantom.tetris.io.pc: ru.dz.phantom.tetris.utilites.pc
-$(BINDIR)/ru.dz.phantom.tetris.mainmodule.pc: ru.dz.phantom.tetris.imagesmanager.pc ru.dz.phantom.tetris.figure.pc ru.dz.phantom.tetris.io.pc
+$(BINDIR)/ru.dz.phantom.tetris.figure.pc: $(BINDIR)/ru.dz.phantom.tetris.playingfield.pc
+$(BINDIR)/ru.dz.phantom.tetris.io.pc: $(BINDIR)/ru.dz.phantom.tetris.utilites.pc
+$(BINDIR)/ru.dz.phantom.tetris.mainmodule.pc: $(BINDIR)/ru.dz.phantom.tetris.imagesmanager.pc $(BINDIR)/ru.dz.phantom.tetris.figure.pc $(BINDIR)/ru.dz.phantom.tetris.io.pc
 
-$(BINDIR)/ru.dz.windows.root.pc: internal.io.tty.pc internal.bitmap.pc
+$(BINDIR)/ru.dz.windows.root.pc: $(BINDIR)/internal.io.tty.pc $(BINDIR)/internal.bitmap.pc
 
-$(BINDIR)/test.hier.child1.pc: test.hier.intermediate.pc
+$(BINDIR)/test.hier.child1.pc: $(BINDIR)/test.hier.intermediate.pc
 
-$(BINDIR)/test.hier.intermediate.pc: test.hier.root.pc
+$(BINDIR)/test.hier.intermediate.pc: $(BINDIR)/test.hier.root.pc
 
-$(BINDIR)/test.suite.pc: test.hier.child1.pc
+$(BINDIR)/test.suite.pc: $(BINDIR)/test.hier.child1.pc
