@@ -9,12 +9,11 @@ import ru.dz.plc.parser.*;
 import ru.dz.plc.util.*;
 
 /**
- * <p>Title: Phantom language parser</p>
+ * <p>Phantom language parser</p>
  * 
- * <p>Description: Old and dirty recursive implementation.<br> Has to be 
- *    rewritten with some parser generator.</p>
+ * <p>Recursive descent implementation.<br></p>
  *    
- * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * <p>Copyright (c) 2004-2019 Dmitry Zavalishin</p>
  * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * 
