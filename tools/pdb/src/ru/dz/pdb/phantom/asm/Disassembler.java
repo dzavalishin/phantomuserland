@@ -101,7 +101,11 @@ public class Disassembler extends opcode_ids {
 		                                                                
 		case opcode_os_get32:			return intarg("os_get", getInt());
 		case opcode_os_set32:			return intarg("os_set", getInt());
-		                                                                
+		     
+		case opcode_const_pool:			return intarg("const pool", getInt());
+		case opcode_stack_reserve:		{ int m = getByte(); return int2arg("stack reserve", m, getByte()); }
+		
+		case opcode_cast:				return simple("cast");
 		                                                                
 		case opcode_push_catcher:		return intarg("push_catcher", getInt());
 		case opcode_pop_catcher:		return simple("pop_catcher");
@@ -132,7 +136,8 @@ public class Disassembler extends opcode_ids {
 		case opcode_summon_code_class:	return simple("summon_code_class");
 		case opcode_summon_array_class:	return simple("summon_array_class");
 		                                                                
-		case opcode_summon_by_name:		return simple("summon_by_name");
+		//case opcode_summon_by_name:		return simple("summon_by_name");
+		case opcode_summon_by_name:		return stringarg("summon_by_name",getString());
 		                                                                
 		                                                                
 		case opcode_i2o:				return simple("i2o");
@@ -165,8 +170,22 @@ public class Disassembler extends opcode_ids {
 		case opcode_os_eq:				return simple("os_eq");
 		case opcode_os_neq:				return simple("os_neq");
 		case opcode_os_isnull:			return simple("os_isnull");
-		                                                                
-		                                                                
+		
+		case opcode_general_lock:		return simple("lock mutex");
+		case opcode_general_unlock:		return simple("unlock mutex");
+		
+		case opcode_static_invoke:		{ int m = getInt(); return int2arg("static invoke", m, getInt()); }
+		case opcode_dynamic_invoke:		return simple("dynamic invoke");
+		
+		case opcode_ishl:				return simple("opcode_ishl");
+		case opcode_ishr:				return simple("opcode_ishr");
+		case opcode_ushr:				return simple("opcode_ushr");
+		case opcode_arg_count:			return intarg("arg count check", getByte());
+		case opcode_fromi:				return simple("cast from int");
+		case opcode_froml:				return simple("cast from long");
+		case opcode_fromf:				return simple("cast from float");
+		case opcode_fromd:				return simple("cast from double");
+		
 		//case opcode_os_push_null:		return simple("os_push_null");		                                                                
 		                                                                
 		case opcode_sys_0:				return intarg("sys", 0x0);
