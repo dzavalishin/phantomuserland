@@ -46,6 +46,7 @@ public class StringConstNode extends Node {
 	
 	public String getValue(){
 		return val;
+    }
 
 	@Override
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
