@@ -8,6 +8,7 @@ import java.io.RandomAccessFile;
 import java.util.*;
 
 import ru.dz.phantom.code.FieldFileInfo;
+import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.compiler.node.StatementsNode;
@@ -26,7 +27,7 @@ public class FieldTable {
 	private Map<String, PhantomField> table;
 	private ordinals_generator ordinals = new ordinals_generator();
 
-	void setBase(int base) throws PlcException { ordinals.setBase(base); }
+	public void setBase(int base) throws PlcException { ordinals.setBase(base); }
 
 	public FieldTable() { table = new HashMap<String, PhantomField>(); }
 
@@ -53,6 +54,10 @@ public class FieldTable {
 	{
 		table.put(name, new PhantomField( name, type, ordinal ));
 		ordinals.ensureBase(ordinal+1);
+	}
+
+	public void setField(String fName, PhantomType fType, int fOrdinal) throws PlcException {
+		set( fOrdinal, fName, fType );		
 	}
 	
 	/*void add( String name, PhantomType type, int ordinal  ) throws PlcException {
@@ -95,9 +100,11 @@ public class FieldTable {
 	{
 		char ch = name.charAt(0);
 		char uch = Character.toUpperCase(ch);
-		return new String("")+uch+name.substring(1);
+		//return new String("")+uch+name.substring(1);
+		return ""+uch+name.substring(1);
 	}
-	
+
+
 	public static String makeGetterName(String fld)
 	{
 		return "get"+capitalizeFirst(fld);
@@ -107,16 +114,31 @@ public class FieldTable {
 	{
 		return "set"+capitalizeFirst(fld);
 	}
+
 	
-	public void generateGettersSetters(PhantomClass pc) throws PlcException
+	public static MethodSignature makeGetterSignature(String fld)
+	{		
+		List<PhantomType> args = new LinkedList<PhantomType>();
+		return new MethodSignature(makeGetterName(fld), args);
+	}
+	
+	public MethodSignature makeSetterSignature(String fld)
+	{
+		List<PhantomType> args = new LinkedList<PhantomType>();
+		args.add(get(fld).getType());
+		return new MethodSignature(makeSetterName(fld), args);
+	}
+	
+	
+	public void generateGettersSetters(PhantomClass pc, ParseState ps) throws PlcException
 	{
 		for( PhantomField f : table.values())
 		{
-			generategetterSetter(pc,f);
+			generategetterSetter(pc,f,ps);
 		}
 	}
 	
-	private void generategetterSetter(PhantomClass pc, PhantomField f) throws PlcException
+	private void generategetterSetter(PhantomClass pc, PhantomField f, ParseState ps) throws PlcException
 	{
 		if(!f.isPublic())
 			return;
@@ -126,37 +148,47 @@ public class FieldTable {
 		
 		StatementsNode getNodes = new StatementsNode();
 		get.code = getNodes;			
-		getNodes.addNode(new ReturnNode(new IdentNode(f.getName())));
+		getNodes.addNode(new ReturnNode(new IdentNode(f.getName(), ps)));
 		
 		
-		// TODO write setter!
-		/*
-		Method set = new Method(makeSetterName(f.getName()), f.getType());
+		// TODO test setter!
+		
+		Method set = new Method(makeSetterName(f.getName()), f.getType(), false);
 		pc.addMethod(set);
+		
+		set.addArg("value", f.getType() );
 		
 		StatementsNode setNodes = new StatementsNode();
 		set.code = setNodes;			
-		setNodes.addNode(new ReturnNode(new IdentNode(f.getName()))); 
-		*/
+		//setNodes.addNode(new ReturnNode(new IdentNode(f.getName())));
+		setNodes.addNode(new OpAssignNode(
+				new IdentNode(f.getName(), ps), // assign to
+				new IdentNode("value", ps) // arg name, see above
+				));
+		
 		
 	}
 	
-	public void codegen(RandomAccessFile os, FileWriter lst,
-			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException 
+//	public void codegen(RandomAccessFile os, FileWriter lst,
+//			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException
+	public void codegen(CodeWriters cw, CodeGeneratorState s) throws PlcException
 	{
 		//llvmFile.write("; fields: \n");
 		for( PhantomField f : table.values())
 		{
-			FieldFileInfo info = new FieldFileInfo(os, lst, f);
+			FieldFileInfo info = new FieldFileInfo(cw.get_os(), cw.lstc, f);
 			try {
 				info.write();
-				llvmFile.write("; - field "+f.getName()+"\n");
-				c_File.write("// - field "+f.getName()+"\n");
+				cw.llvmFile.write("; - field "+f.getName()+"\n");
+				cw.c_File.write("// - field "+f.getName()+"\n");
+				cw.javaFile.write("\n\t"+f.getType().toJavaType()+"\t"+f.getName()+";\n");
 			} catch (IOException e) {
 				throw new PlcException("Writing field "+f.getName(), e.toString());
 			}
 		}
 	}
+
+
 
 }
 

@@ -4,11 +4,16 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Create objects of some types
  *
 **/
+
+
+#define DEBUG_MSG_PREFIX "vm.create"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <kernel/vm.h>
 
@@ -427,7 +432,7 @@ struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_obj
     struct pvm_object * data_area = (struct pvm_object *)ret.data->da;
 
     if(pvm_is_null( parent_class ))
-        pvm_exec_panic( "create interface: parent is null" );
+        pvm_exec_panic0( "create interface: parent is null" );
 
     struct pvm_object_storage *base_i =  ((struct data_area_4_class*)parent_class.data->da)->object_default_interface.data;
 
@@ -470,7 +475,7 @@ void pvm_gc_iter_interface(gc_iterator_call_t func, struct pvm_object_storage * 
     (void)arg;
     // Empty
     // Must not be called - this is not really an internal object
-    panic("Interface GC iterator called");
+    pvm_exec_panic0("Interface GC iterator called");
 }
 
 
@@ -619,13 +624,18 @@ void pvm_internal_init_mutex(struct pvm_object_storage * os)
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
 
     da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
-
+    pvm_spin_init( &da->pvm_lock );
+    //hal_spin_init( &da->spinlock );
+    //in_method = 0;
 }
 
 void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
 {
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
     //int i;
+
+    //pvm_spin_init( &da->pvm_lock );
+//    in_method = 0;
 
     gc_fcall( func, arg, da->waiting_threads_array );
 
@@ -923,7 +933,8 @@ void pvm_gc_iter_window(gc_iterator_call_t func, struct pvm_object_storage * os,
 
 struct pvm_object     pvm_create_window_object(struct pvm_object owned )
 {
-    pvm_object_t ret = pvm_object_create_fixed( pvm_get_window_class() );
+    //pvm_object_t ret = pvm_object_create_fixed( pvm_get_window_class() );
+    pvm_object_t ret = pvm_create_object( pvm_get_window_class() );
     struct data_area_4_window *da = (struct data_area_4_window *)ret.data->da;
 
     (void)da;
@@ -1049,7 +1060,7 @@ void pvm_restart_directory( pvm_object_t o )
 
 struct pvm_object     pvm_create_directory_object(void)
 {
-    pvm_object_t ret = pvm_object_create_fixed( pvm_get_directory_class() );
+    pvm_object_t ret = pvm_create_object( pvm_get_directory_class() );
     return ret;
 }
 
@@ -1083,7 +1094,7 @@ void pvm_internal_init_connection(struct pvm_object_storage * os)
 
 struct pvm_object     pvm_create_connection_object(void)
 {
-    pvm_object_t ret = pvm_object_create_fixed( pvm_get_connection_class() );
+    pvm_object_t ret = pvm_create_object( pvm_get_connection_class() );
     return ret;
 }
 
@@ -1162,7 +1173,7 @@ struct pvm_object     pvm_create_code_object(int size, void *code)
 
 struct pvm_object     pvm_create_thread_object(struct pvm_object start_cf )
 {
-	struct pvm_object ret = pvm_object_create_fixed( pvm_get_thread_class() );
+	struct pvm_object ret = pvm_create_object( pvm_get_thread_class() );
 	struct data_area_4_thread *da = (struct data_area_4_thread *)ret.data->da;
 
 	da->call_frame = start_cf;

@@ -1,4 +1,4 @@
-Class version 20160114031910674
+Class version 20170915052644241
 
 method getName ordinal 16
 --
@@ -8,11 +8,11 @@ method getName ordinal 16
   const "arg count: getName in .phantom.user"	//  @11
   throw				//  @51
 _label_0:	//  @52
-  ; Line 24			//  @52
-  const "undefined.user"		//  @52
-  ; Line 24			//  @71
-  ret				//  @71
-  ret				//  @72
+    ; Line 24			//  @52
+  const_pool <0>			//  @52
+    ; Line 24			//  @57
+  ret				//  @57
+  ret				//  @58
 --
 method end
 

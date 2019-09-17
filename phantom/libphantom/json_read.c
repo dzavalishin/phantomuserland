@@ -17,12 +17,13 @@
 #include <malloc.h>
 
 //! tokens allocated, must be freed by caller
-errno_t json_parse(const char *js, jsmntok_t **tokens )
+errno_t json_parse(const char *js, jsmntok_t **tokens, size_t *o_count )
 {
 	jsmn_parser parser;
 
 	assert(tokens);
 	assert(js);
+	assert( o_count );
 
 	jsmn_init( &parser );
 
@@ -36,12 +37,17 @@ errno_t json_parse(const char *js, jsmntok_t **tokens )
 	if( !*tokens )
 		return ENOMEM;
 
+	jsmn_init( &parser );
+
+
 	if( count != jsmn_parse( &parser, js, jslen, *tokens, count ) )
 		{
 		free( *tokens );
 		*tokens = 0;
 		return EINVAL;
 		}
+
+	*o_count = count;
 
 	return 0;
 }

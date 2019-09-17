@@ -1,14 +1,12 @@
 package ru.dz.plc.compiler;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.dz.phantom.code.Codegen;
 import ru.dz.phantom.code.ConstantPoolFileInfo;
-import ru.dz.phantom.code.FieldFileInfo;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -22,6 +20,7 @@ import ru.dz.plc.util.PlcException;
 
 
 public class ConstantPool {
+	public static final String FILE_ENCODING = "UTF-8";
 	private Map<Integer, Object> table;
 	private ordinals_generator ordinals = new ordinals_generator();
 
@@ -49,8 +48,9 @@ public class ConstantPool {
 	}
 	
 	
-	public void codegen(RandomAccessFile os, FileWriter lst,
-			BufferedWriter llvmFile, CodeGeneratorState s, String version) throws PlcException 
+//	public void codegen(RandomAccessFile os, FileWriter lst,
+//			BufferedWriter llvmFile, BufferedWriter c_File, CodeGeneratorState s, String version) throws PlcException 
+	public void codegen(CodeWriters cw) throws PlcException
 	{
 		//llvmFile.write("; fields: \n");
 		for( int id : table.keySet())
@@ -64,12 +64,14 @@ public class ConstantPool {
 				String sv = (String) v;
 				done = true;
 
-				ConstantPoolFileInfo info = new ConstantPoolFileInfo(os, id, sv);
+				ConstantPoolFileInfo info = new ConstantPoolFileInfo(cw.get_os(), id, sv);
 				
 				try {
 					info.write();
-					llvmFile.write("; label const_pool"+id+":\n; .string '"+sv+"'\n");
-					llvmFile.write("; - constant for const pool id "+id+" val '"+sv+"'\n");
+					cw.llvmFile.write("; label const_pool"+id+":\n; .string '"+sv+"'\n");
+					cw.llvmFile.write("; - constant for const pool id "+id+" val '"+sv+"'\n");
+					cw.c_File.write("static const char* const_pool"+id+" = \""+sv+"\"\n");
+					//c_File.write("// - constant for const pool id "+id+" val '"+sv+"'\n");
 				} catch (IOException e) {
 					throw new PlcException("Writing const id "+id, e.toString());
 				}		
@@ -80,6 +82,19 @@ public class ConstantPool {
 			
 		}
 	}
+
+	public void setConstant(int cOrdinal, PhantomType cType, byte[] buf) throws PlcException {
+		if( !cType.is_string() )
+			System.err.println("ConstPool setConst: not string but "+cType);
+		
+		String s = new String( buf, Charset.forName(FILE_ENCODING));
+
+		if( table.get(cOrdinal) != null )
+			throw new PlcException("ConstPool setConst"," ordinal "+cOrdinal+" is used");
+		
+		table.put(cOrdinal, s);
+	}
+
 
 	
 }

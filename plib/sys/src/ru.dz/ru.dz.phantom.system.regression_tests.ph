@@ -25,6 +25,7 @@ import .internal.directory;
 import .internal.double;
 import .internal.float;
 import .internal.long;
+import .phantom.util.map;
 
 class regression_tests
 {
@@ -32,8 +33,46 @@ class regression_tests
     var boot_success : int;
     var i : int;
     var j : int;
-    var test_array : void [];
+    var int_array : int [];
+    var str_array : .internal.string [];
+    var ctor_called : int;
 
+	var called_string_one : int;
+	var called_int_one : int;
+
+	void sig_func( var a : .internal.string )
+	{
+		called_string_one = 1;
+	}
+
+	void sig_func( var a : .internal.int )
+	{
+		called_int_one = 1;
+	}
+
+
+    void signature_test()
+    {
+		called_string_one = 0;
+		called_int_one = 0;
+
+		sig_func("hello");
+        if( called_string_one == 0 ) 		throw "signature err 1";
+        if( called_int_one != 0 ) 			throw "signature err 2";
+
+		called_string_one = 0;
+		called_int_one = 0;
+
+		sig_func(1);
+        if( called_string_one != 0 ) 		throw "signature err 3";
+        if( called_int_one == 0 ) 			throw "signature err 4";
+    }
+
+
+	void regression_tests()
+	{
+		ctor_called = 3456;
+	}
 
 
     void run (var _boot_object @const )
@@ -47,11 +86,22 @@ class regression_tests
         math_test();
         array_test();
         hashmap_directory_test();
-/*
+
+        print("ctor_called ="); print(ctor_called.toString()); print("\n");
+		if( ctor_called != 3456 )
+			throw "constructor failed";
+
         long_test();
         float_test();
         double_test();
-*/
+
+		signature_test();
+
+	// test c'tor call
+
+		var map : .phantom.util.map;	
+		map = new .phantom.util.map();
+
     }
 
     // ---------------------------------------------------------------------
@@ -72,34 +122,36 @@ class regression_tests
     {
         print("Checking arrays... ");
 
-        test_array = new void[]();
+        //test_array = new void[]();
+        int_array = new int[]();
+        str_array = new .internal.string[]();
 
-        test_array[0] = "zero";
-        test_array[2] = "two";
-        test_array[1] = "one";
+        str_array[0] = "zero";
+        str_array[2] = "two";
+        str_array[1] = "one";
 
         print("Beeping: ");
         i = 3;
         while( i )
         {
             i = i - 1;
-            print("beep "); print(test_array[i]); print("! ");
+            print("beep "); print(str_array[i]); print("! ");
         }
         print("\n");
 
 
-        test_array[0] = 0;
-        test_array[2] = 2;
-        test_array[1] = 1;
+        int_array[0] = 0;
+        int_array[2] = 2;
+        int_array[1] = 1;
 
         i = 3;
         while( i )
         {
             i = i - 1;
-            if( test_array[i] != i )
+            if( int_array[i] != i )
             {
-                print("array error: array["); print(i);
-                print("] == "); print(test_array[i]);
+                print("array error: array["); print(i.toString());
+                print("] == "); print(int_array[i].toString());
                 throw "array error";
             }
         }
@@ -115,6 +167,8 @@ class regression_tests
     void math_test()
     {
         print("Checking int math... ");
+
+        if( (12/2) != 6 ) 	throw "int error";
 
         if( 2+2 != 4 ) throw "int + math error";
         if( 2-2 != 0 ) throw "int - math error";
@@ -210,7 +264,7 @@ class regression_tests
         dir = new .internal.directory();
 
         //print("put 1\n");
-        dir.put( "Hello", "world" );
+        dir.put( "Hello", (.internal.object)"world" );
         //print("put 2\n");
         dir.put( "Privet", "mir" );
         //print("put 3\n");
@@ -242,26 +296,35 @@ class regression_tests
         print("passed\n");
     }
 
-/*
+
     void long_test()
     {
         var a : .internal.long;
         var b : .internal.long;
         var c : .internal.long;
 
+        print("start long tests\n");
+/*
+        a = (long)12;
+        b = (long)2;
+        c = (long)0-3;
+*/
         a = 12;
         b = 2;
-        c = -3;
+        c = 0-3;
+        print("long tests 1\n");
 
         if( (a/b) != 6 ) 	throw "long error 1";
-        if( (b-c) != -1 ) 	throw "long error 2";
-        if( (b*c) != -6 ) 	throw "long error 3";
+        if( (b-c) != 5 ) 	throw "long error 2";
+        if( (b*c) != 0-6 ) 	throw "long error 3";
         if( (a+c) != 9 ) 	throw "long error 4";
+        print("long tests 2\n");
 
         if( b<c ) 		throw "long error 5";
         if( b>a ) 		throw "long error 6";
         if( b<=c ) 		throw "long error 7";
         if( b>=a ) 		throw "long error 8";
+        print("long tests passed\n");
     }
 
 
@@ -273,17 +336,18 @@ class regression_tests
 
         a = 12;
         b = 2;
-        c = -3;
+        c = 0-3;
 
         if( (a/b) != 6 ) 	throw "float error 1";
-        if( (b-c) != -1 ) 	throw "float error 2";
-        if( (b*c) != -6 ) 	throw "float error 3";
+        if( (b-c) != 5 ) 	throw "float error 2";
+        if( (b*c) != 0-6 ) 	throw "float error 3";
         if( (a+c) != 9 ) 	throw "float error 4";
 
         if( b<c ) 		throw "float error 5";
         if( b>a ) 		throw "float error 6";
         if( b<=c ) 		throw "float error 7";
         if( b>=a ) 		throw "float error 8";
+        print("float tests passed\n");
     }
 
 
@@ -298,16 +362,21 @@ class regression_tests
         c = -3;
 
         if( (a/b) != 6 ) 	throw "double error 1";
-        if( (b-c) != -1 ) 	throw "double error 2";
-        if( (b*c) != -6 ) 	throw "double error 3";
+        if( (b-c) != 5 ) 	throw "double error 2";
+        if( (b*c) != 0-6 ) 	throw "double error 3";
         if( (a+c) != 9 ) 	throw "double error 4";
 
         if( b<c ) 		throw "double error 5";
         if( b>a ) 		throw "double error 6";
         if( b<=c ) 		throw "double error 7";
         if( b>=a ) 		throw "double error 8";
+        print("double tests passed\n");
     }
-*/
+
+
+
+
+
 
 };
 

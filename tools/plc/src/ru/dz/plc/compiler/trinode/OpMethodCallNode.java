@@ -44,11 +44,11 @@ public class OpMethodCallNode extends TriNode {
 		obj_type = _l.getType();
 
 		MethodNode method = (MethodNode)_m;
-		type = method.get_return_type(obj_type);
 
 		MethodSignature sig = new MethodSignature(method.getIdent(), _r);
 		method.setSignature(sig);
 
+		type = method.get_return_type(obj_type);
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
@@ -56,7 +56,7 @@ public class OpMethodCallNode extends TriNode {
 		// NB! Reverse order - _l, then _r - this opcode is brain damaged,
 		// it needs args pushed AFTER object to call
 		_l.generate_code(c,s); // get object
-		move_between_stacks(c, _l.is_on_int_stack());
+		move_between_stacks(c, _l);
 		
 		if( _r != null ) _r.generate_code(c,s); // calc args
 		
@@ -66,7 +66,11 @@ public class OpMethodCallNode extends TriNode {
 	}
 
 	public void find_out_my_type() throws PlcException {
-		if( type == null ) throw new PlcException("Method call Node","return type is not set");
+		if( type == null )
+		{
+			print_error("return type is not set");
+			throw new PlcException("Method call Node","return type is not set");
+		}
 		//type = new ph_type_unknown(); // BUG! Wrong!
 	}
 
@@ -97,6 +101,6 @@ public class OpMethodCallNode extends TriNode {
 
 		cgen.emitMethodCall( _l,  method_ordinal, _r, s );
 
-}
+	}
 	
 }

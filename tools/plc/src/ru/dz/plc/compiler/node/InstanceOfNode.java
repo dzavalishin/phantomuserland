@@ -57,5 +57,5 @@ public class InstanceOfNode extends Node {
 		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"GetClass( \"");
 		cgen.put(checkType.get_main_class_name());
 		cgen.put("\" ) ");
-}
+	}
 }

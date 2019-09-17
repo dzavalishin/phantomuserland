@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import java.util.logging.Logger;
 
 import ru.dz.jpc.Config;
-import ru.dz.phantom.code.*;
+import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.AttributeSet;
 import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
@@ -13,10 +13,9 @@ import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.compiler.PhantomType;
-import ru.dz.plc.compiler.binode.NewNode;
-import ru.dz.plc.compiler.binode.OpAssignNode;
+import ru.dz.plc.parser.ILex;
 import ru.dz.plc.parser.ParserContext;
-import ru.dz.plc.util.*;
+import ru.dz.plc.util.PlcException;
 
 /**
  * <p>The most general node class.</p>
@@ -44,8 +43,10 @@ abstract public class Node {
 	/** Remember where this node was parsed in source file to be able to print error/warning later. */
 	public Node setContext( ParserContext context ) { this.context = context; return this; }
 	
-	/** Remember where this node was parsed in source file to be able to print error/warning later. */
-	public Node setContext( ru.dz.plc.parser.Lex l ) { this.context = new ParserContext(l); return this; }
+	/** Remember where this node was parsed in source file to be able to print error/warning later. 
+	 * @throws PlcException */
+	public Node setContext( ILex l ) throws PlcException 
+		{ this.context = new ParserContext(l); return this; }
 
 	// -------------------------------- getters -------------------------------
 
@@ -58,16 +59,24 @@ abstract public class Node {
 		if( context != null ) System.out.print( context.get_position() );
 	}
 	
+	
+	static final String okColor   = "\u001b[0m";
+	static final String msgColor  = "\u001b[32;1m";
+	static final String warnColor = "\u001b[33;1m";
+	static final String errColor  = "\u001b[31;1m";
+	
 	protected void print_warning( String w )
 	{
+		System.out.print(msgColor);
 		printContext();
-		System.out.println("Warning: "+w);
+		System.out.println(warnColor+"Warning: "+w+okColor);
 	}
 
 	protected void print_error( String w )
 	{
+		System.out.print(msgColor);
 		printContext();
-		System.out.println("Error: "+w);
+		System.out.println(errColor+"Error: "+w+okColor);
 	}
 
 	// -------------------------------- types ----------------------------------
@@ -197,16 +206,39 @@ abstract public class Node {
 	public boolean is_on_int_stack() { return false; }
 	public boolean args_on_int_stack() { return is_on_int_stack(); }
 
-	protected void move_between_stacks(Codegen c, boolean fromint ) throws IOException {
-		if( args_on_int_stack() && (!fromint) ) c.emit_o2i();
-		if( (!args_on_int_stack()) && fromint ) c.emit_i2o();
+	/**
+	 * 
+	 * @param c
+	 * @param fromint
+	 * @param intType type we will move between stacks
+	 * @throws IOException
+	 * @throws PlcException
+	 */
+	protected void move_between_stacks(Codegen c, boolean fromint, PhantomType intType ) throws IOException, PlcException {
+		if( args_on_int_stack() && (!fromint) )
+		{
+			c.emitNumericPrefix(intType);
+			c.emit_o2i();
+		}
+		
+		if( (!args_on_int_stack()) && fromint ) 
+		{
+			c.emitNumericPrefix(intType);
+			c.emit_i2o();
+		}
 	}
 
+	protected void move_between_stacks(Codegen c, Node n ) throws IOException, PlcException 
+	{
+		move_between_stacks( c, n.is_on_int_stack(), n.getType() );
+	}
+	
+	
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		if( _l != null ) {
 			_l.generate_code(c, s);
-			move_between_stacks(c, _l.is_on_int_stack());
+			move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
 		}
 		if(context != null)
 		{
@@ -289,21 +321,20 @@ abstract public class Node {
 			print_warning("Assignment to "+name+": incompatible source type '"+src+"' for dest type "+dest);
 	}
 
-
+	
 	// ---------------------------- C code generation ----------------------------
-
+		
 	protected String cTempName; 
-
 
 	// Generate C code for nodes referenced from me and me too
 	// If overriden, override have to call generate_C_code for children
 	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException 
 	{
-		llvmTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
+		cTempName = cgen.getPhantomMethod().get_C_TempName(this.getClass().getSimpleName());
 		if( _l != null ) {
 			_l.generate_C_code(cgen, s);
 			//move_between_stacks(c, _l.is_on_int_stack());
-}
+		}
 		if(context != null)
 		{
 			cgen.emitComment("Line "+context.getLineNumber());
@@ -312,6 +343,7 @@ abstract public class Node {
 		log.fine("Node "+this+" llvm codegen");
 		generateMy_C_Code(cgen);
 	}
+	
 
 	public String getCTempName() { return cTempName; }
 

@@ -2,11 +2,11 @@
 
 We need you. :) If you can take part, please, do contact me, try to checkout, build and run Phantom and choose area of interest:
 
-* Kernel itself
-* Drivers
-* Virtual machine
-* Compilers and translators
-* Userland
+*   Kernel itself
+*   Drivers
+*   Virtual machine
+*   Compilers and translators
+*   Userland
 
 ## Bug reports ##
 
@@ -23,4 +23,3 @@ Please take a look at GitHub Wiki:
 ## Contacts ##
 
 I am (dz) easily contacted at [Facebook](https://www.facebook.com/dmitry.zavalishin), which is fastest way I believe.
-

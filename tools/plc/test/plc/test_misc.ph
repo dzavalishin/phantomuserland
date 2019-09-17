@@ -77,6 +77,10 @@ class regression_tests
 
 	var _utilities : utilites;
 
+	void regression_tests()
+	{
+	}
+
 	int methodReturningInt() { return 0; }
 
 	void failpoint()
@@ -152,8 +156,8 @@ var ch : string;
 		i = i - 1;
 		if( int_array[i] != i )
 			{
-			print("array error: array["); print(i);
-			print("] == "); print(int_array[i]);
+			print("array error: array["); print(i.toString());
+			print("] == "); print(int_array[i].toString());
 			throw "array error";
 			}
 		}

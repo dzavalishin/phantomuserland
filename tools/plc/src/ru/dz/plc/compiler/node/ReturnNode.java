@@ -41,7 +41,7 @@ public class ReturnNode extends Node {
 		}
 		
 		//_l.generateLlvmCode(llc);
-		llc.putln("ret "+llc.getObjectType()+" "+_l.getLlvmTempName()+" ;");
+		llc.putln("ret "+LlvmCodegen.getObjectType()+" "+_l.getLlvmTempName()+" ;");
 	}
 	
 	public void find_out_my_type()  {    type = new PhTypeVoid();  }

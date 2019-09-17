@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 
 import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.NewNode;
@@ -42,14 +43,9 @@ public class PythonFrontendXML {
 	private int errorCount = 0;
 	private PhantomClass pc = null;
 
-	void incErrors(String msg) 
-	{
-		errorCount++;
-		log.severe(msg);
-	}
-	
-	
+	private ParseState				ps = new ParseState();
 
+	
 	private static final boolean really = false;
 	DocumentBuilderFactory docBuilderFactory;
 	DocumentBuilder docBuilder;
@@ -63,6 +59,17 @@ public class PythonFrontendXML {
 	private String currentLineText = "";
 	//private String funcName;
 	
+	private Map<Integer,RegisterNodeWrapper> registers = new HashMap<Integer, RegisterNodeWrapper>();
+
+	
+	void incErrors(String msg) 
+	{
+		errorCount++;
+		log.severe(msg);
+	}
+	
+	
+
 	public PythonFrontendXML() throws ParserConfigurationException {	
         docBuilderFactory = DocumentBuilderFactory.newInstance();
         docBuilder = docBuilderFactory.newDocumentBuilder();				
@@ -150,9 +157,7 @@ public class PythonFrontendXML {
 	}
 
 
-	private Map<Integer,RegisterNodeWrapper> registers = new HashMap<Integer, RegisterNodeWrapper>();
 
-	private int nregs;
 	
 	private void setRegister(int reg, ru.dz.plc.compiler.node.Node n )
 	{
@@ -240,6 +245,7 @@ public class PythonFrontendXML {
 						{
 							pc = new PhantomClass(cname);
 							cm.add(pc);
+							ps.set_class(pc);
 						}
 					}
 					else
@@ -249,7 +255,7 @@ public class PythonFrontendXML {
 				}
 				
 			}			
-			else if(nname.equals("file"))
+			else if("file".equals(nname))
 			{
 				try {
 				String name = cn.getAttributes().getNamedItem("name").getNodeValue();
@@ -259,38 +265,41 @@ public class PythonFrontendXML {
 				} catch( Throwable e )
 				{ /* Ignore */ }
 			}			
-			else if(nname.equals("function"))
+			else if("function".equals(nname))
 			{
 				String name = cn.getAttributes().getNamedItem("name").getNodeValue();
 				funcName = name;
 				log.log(Level.INFO,"Func \""+funcName+"\"");
 			}			
-			else if(nname.equals("regs"))
+			else if("regs".equals(nname))
 			{
 				String num = cn.getAttributes().getNamedItem("num").getNodeValue();
 				log.log(Level.INFO,"regs "+num);
-				
+				int nregs;
+
 				try { nregs = Integer.parseInt(num); }
 				catch( NumberFormatException e )
 				{
 					nregs = 0;
 					incErrors("regs arg not parsable: "+num);
 				}
+				log.log(Level.INFO,"regs "+nregs);
 			}			
-			else if(nname.equals("string"))
+			else if("string".equals(nname))
 			{
-				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.StringConstNode(getString(cn,"content")));
+				//setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.StringConstNode(getString(cn,"content")));
+				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.StringConstPoolNode(getString(cn,"content"),pc));
 			}			
-			else if(nname.equals("number"))
+			else if("number".equals(nname))
 			{
 				// TODO Its FLOAT!
 				setRegister(getInt(cn,"reg"), new ru.dz.plc.compiler.node.IntConstNode((int)getDouble(cn,"val")));
 			}			
-			else if(nname.equals("eof"))
+			else if("eof".equals(nname))
 			{
 				// empty
 			}
-			else if(nname.equals("dict"))
+			else if("dict".equals(nname))
 			{
 				if( cn.getAttributes().getNamedItem("reg") != null )
 				{
@@ -312,21 +321,21 @@ public class PythonFrontendXML {
 					throw new ConnvertException("No dictionary compose code yet");
 				}
 			}
-			else if(nname.equals("gget"))
+			else if("gget".equals(nname))
 			{
 				// TODO this is wrong!
 				String varName = getString(cn, "gVarName");
-				setRegister(getInt(cn,"to"), new IdentNode(varName) );
+				setRegister(getInt(cn,"to"), new IdentNode(varName,ps) );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
-			else if(nname.equals("gset"))
+			else if("gset".equals(nname))
 			{
 				// TODO this is wrong!
 				String varName = getString(cn, "gVarName");
-				out.add( new OpAssignNode(new IdentNode(varName), useRegister(getInt(cn,"fromreg"))) );
+				out.add( new OpAssignNode(new IdentNode(varName,ps), useRegister(getInt(cn,"fromreg"))) );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
-			else if(nname.equals("get"))
+			else if("get".equals(nname))
 			{
 				int toReg = -1;
 				int objectReg = -1;
@@ -351,7 +360,7 @@ public class PythonFrontendXML {
 				setRegister(toReg, new EmptyNode() );
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
-			else if(nname.equals("set"))
+			else if("set".equals(nname))
 			{
 				int fromReg = getInt(cn,"fromreg");
 				int objectReg = getInt(cn,"class");
@@ -363,19 +372,19 @@ public class PythonFrontendXML {
 				// TODO implement
 				if( really ) throw new ConnvertException(nname+" is not implemented");
 			}
-			else if(nname.equals("move"))
+			else if("move".equals(nname))
 			{
 				setRegister(getInt(cn,"to"), getRegister(getInt(cn,"from")));
 			}
-			else if(nname.equals("return"))
+			else if("return".equals(nname))
 			{
 				out.add( new ReturnNode( useRegister(getInt(cn, "reg")) ) );
 			}
-			else if(nname.equals("add"))
+			else if("add".equals(nname))
 			{				
 				setRegister(cn, "out", new OpPlusNode(useRegister(cn,"left"),useRegister(cn,"right")) );
 			}
-			else if(nname.equals("eq"))
+			else if("eq".equals(nname))
 			{				
 				setRegister(cn, "out", new ValEqNode(useRegister(cn,"left"),useRegister(cn,"right")) );
 			}
@@ -385,24 +394,24 @@ public class PythonFrontendXML {
 				
 				new JzNode()
 			}*/
-			else if(nname.equals("label"))
+			else if("label".equals(nname))
 			{				
 				out.add(  new JumpTargetNode(getString(cn,"name")) );
 			}
-			else if(nname.equals("jump"))
+			else if("jump".equals(nname))
 			{
 				out.add(  new JumpNode(getString(cn, "label")) );				
 			}
-			else if(nname.equals("none"))
+			else if("none".equals(nname))
 			{				
 				setRegister(getInt(cn,"reg"),  new NullNode() );
 			}
-			else if(nname.equals("deffunc"))
+			else if("deffunc".equals(nname))
 			{
 				funcOutReg = getInt(cn, "outreg");
-				funcCodeLen = getInt(cn, "len");
+				funcCodeLen = getInt(cn, "len");				
 			}
-			else if(nname.equals("pythoncode"))
+			else if("pythoncode".equals(nname))
 			{
 				// TODO and what now?
 				processFunction(cn,funcOutReg,funcCodeLen);

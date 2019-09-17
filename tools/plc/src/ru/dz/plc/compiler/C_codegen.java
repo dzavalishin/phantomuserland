@@ -1,11 +1,9 @@
 package ru.dz.plc.compiler;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import ru.dz.plc.compiler.binode.BiNode;
-import ru.dz.plc.compiler.node.MethodNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -190,7 +188,7 @@ public class C_codegen {
 		// ------------------------------------------------------------------------
 
 		public void recordLineNumberToIPMapping(int lineNumber) {
-			// TODO Auto-generated method stub			
+			// Not needed?			
 		}
 
 

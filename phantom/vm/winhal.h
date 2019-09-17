@@ -1,3 +1,6 @@
+//#include <stdio.h>
+
+
 //void winhal_setport( int sock, int port );
 
 void winhal_debug_srv_thread(int *arg);
@@ -41,4 +44,6 @@ int win_hal_mutex_unlock(void *_m);
 int win_hal_mutex_is_locked(void *_m);
 
 
+void win_hal_open_kernel_log_file( const char *fn );
+void win_hal_open_kernel_out_file( const char *fn );
 

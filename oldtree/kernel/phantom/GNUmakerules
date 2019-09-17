@@ -100,7 +100,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	ff.o stray_check.o sbrk.o mem_pl050_ps2.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o test_userland.o test_pool.o test_video.o \
-	test_crypt.o test_wtty.o test_misc.o \
+	test_crypt.o test_wtty.o test_misc.o test_hdir.o \
 	events.o smp.o \
 	heap.o heap_pool.o sys.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \

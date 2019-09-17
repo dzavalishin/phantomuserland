@@ -12,18 +12,6 @@ Class .ru.dz.phantom.system.shell
   Field stat_val
   Field win
   Field cb
-  Method void init(  ):
-    ,  : void
-      void  : void
-        = : .internal.mutex
-          ident mtx : .internal.mutex
-          constructor() : .internal.mutex
-            new .internal.mutex : .internal.mutex
-      void  : void
-        . : void
-          ident mtx : .internal.mutex
-          Method lock : unknown
-
   Method void go(  ):
     void  : void
       . : void
@@ -55,8 +43,7 @@ Class .ru.dz.phantom.system.shell
                                               void  : void
                                                 = : .internal.window
                                                   ident win : .internal.window
-                                                  constructor() : .internal.window
-                                                    new .internal.window : .internal.window
+                                                  new .internal.window : .internal.window
                                               void  : void
                                                 . : void
                                                   ident win : .internal.window
@@ -70,7 +57,7 @@ Class .ru.dz.phantom.system.shell
                                                 ident win : .internal.window
                                                 Method setTitle : unknown
                                                 arg  : unknown
-                                                  string const "Disk io stats" : string const
+                                                  string pool const id="0" : string const
                                           void  : void
                                             . : void
                                               ident win : .internal.window
@@ -100,8 +87,7 @@ Class .ru.dz.phantom.system.shell
                               void  : void
                                 = : .internal.io.tty
                                   ident console : .internal.io.tty
-                                  constructor() : .internal.io.tty
-                                    new .internal.io.tty : .internal.io.tty
+                                  new .internal.io.tty : .internal.io.tty
                             void  : void
                               = : int
                                 ident incr : int
@@ -119,23 +105,21 @@ Class .ru.dz.phantom.system.shell
                             ident console : .internal.io.tty
                             Method setTitle : unknown
                             arg  : unknown
-                              string const "VM Shell" : string const
+                              string pool const id="1" : string const
                       void  : void
                         = : .internal.connection
                           ident conn : .internal.connection
-                          constructor() : .internal.connection
-                            new .internal.connection : .internal.connection
+                          new .internal.connection : .internal.connection
                     void  : void
                       . : int
                         ident conn : .internal.connection
                         Method connect : unknown
                         arg  : unknown
-                          string const "tmr:" : string const
+                          string pool const id="2" : string const
                   void  : void
                     = : .ru.dz.phantom.system.shell_callback
                       ident cb : .ru.dz.phantom.system.shell_callback
-                      constructor() : .ru.dz.phantom.system.shell_callback
-                        new .ru.dz.phantom.system.shell_callback : .ru.dz.phantom.system.shell_callback
+                      new .ru.dz.phantom.system.shell_callback : .ru.dz.phantom.system.shell_callback
                 void  : void
                   . : void
                     ident cb : .ru.dz.phantom.system.shell_callback
@@ -161,14 +145,13 @@ Class .ru.dz.phantom.system.shell
           void  : void
             = : .internal.connection
               ident stat_conn : .internal.connection
-              constructor() : .internal.connection
-                new .internal.connection : .internal.connection
+              new .internal.connection : .internal.connection
         void  : void
           . : int
             ident stat_conn : .internal.connection
             Method connect : unknown
             arg  : unknown
-              string const "stt:" : string const
+              string pool const id="3" : string const
       do-while : unknown
         int const "1" : int const
         ,  : void
@@ -208,21 +191,19 @@ Class .ru.dz.phantom.system.shell
                                                                     ident console : .internal.io.tty
                                                                     Method putws : unknown
                                                                     arg  : unknown
-                                                                      string const "I am connected shell!
-" : string const
+                                                                      string pool const id="4" : string const
                                                               void  : void
                                                                 . : void
                                                                   ident console : .internal.io.tty
                                                                   Method putws : unknown
                                                                   arg  : unknown
-                                                                    string const "--------------------------------------------------
-" : string const
+                                                                    string pool const id="5" : string const
                                                             void  : void
                                                               . : void
                                                                 ident console : .internal.io.tty
                                                                 Method putws : unknown
                                                                 arg  : unknown
-                                                                  string const "Thread is running... " : string const
+                                                                  string pool const id="6" : string const
                                                           void  : void
                                                             . : void
                                                               ident console : .internal.io.tty
@@ -236,7 +217,7 @@ Class .ru.dz.phantom.system.shell
                                                             ident console : .internal.io.tty
                                                             Method putws : unknown
                                                             arg  : unknown
-                                                              string const "  " : string const
+                                                              string pool const id="7" : string const
                                                       void  : void
                                                         . : int
                                                           ident conn : .internal.connection
@@ -260,7 +241,7 @@ Class .ru.dz.phantom.system.shell
                                                       ident console : .internal.io.tty
                                                       Method putws : unknown
                                                       arg  : unknown
-                                                        string const "blk io =. " : string const
+                                                        string pool const id="8" : string const
                                                 void  : void
                                                   = : int
                                                     ident cpu_idle : int
@@ -276,7 +257,7 @@ Class .ru.dz.phantom.system.shell
                                                   ident console : .internal.io.tty
                                                   Method putws : unknown
                                                   arg  : unknown
-                                                    string const "cpu idle = " : string const
+                                                    string pool const id="9" : string const
                                             void  : void
                                               . : void
                                                 ident console : .internal.io.tty
@@ -290,8 +271,7 @@ Class .ru.dz.phantom.system.shell
                                               ident console : .internal.io.tty
                                               Method putws : unknown
                                               arg  : unknown
-                                                string const "
-" : string const
+                                                string pool const id="10" : string const
                                         void  : void
                                           = : int
                                             ident cpu_idle : int
@@ -414,4 +394,15 @@ Class .ru.dz.phantom.system.shell
               + : int
                 ident incr : int
                 int const "1" : int const
+
+  Method void init(  ):
+    ,  : void
+      void  : void
+        = : .internal.mutex
+          ident mtx : .internal.mutex
+          new .internal.mutex : .internal.mutex
+      void  : void
+        . : void
+          ident mtx : .internal.mutex
+          Method lock : unknown
 

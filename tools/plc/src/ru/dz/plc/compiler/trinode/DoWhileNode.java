@@ -97,6 +97,6 @@ public class DoWhileNode extends TriNode {
 
 		s.continue_label = prev_continue;
 		s.break_label = prev_break;
-}
+	}
 
 }

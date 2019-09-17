@@ -24,7 +24,7 @@ import .phantom.os.time;
 class osimpl
 {
         .internal.object bootObject;
-	.phantom.os.time timeServer;
+        .phantom.os.time timeServer;
 
         void init(var _bootObject : .internal.object ) { bootObject = _bootObject; }
 

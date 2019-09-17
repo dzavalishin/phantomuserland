@@ -20,11 +20,11 @@ public class MethodFileInfo extends FileInfo {
 
     private Method m;
     private CodeGeneratorState s;
-	private final FileWriter lst;
+	private final Writer lst;
 
-    public MethodFileInfo(RandomAccessFile os, FileWriter lst, Method m, CodeGeneratorState s ) {
+    public MethodFileInfo(RandomAccessFile os, BufferedWriter lstc, Method m, CodeGeneratorState s ) {
     	super( os, (byte)'M' );
-      this.lst = lst;
+      this.lst = lstc;
       this.m = m;
       this.s = s;
     }

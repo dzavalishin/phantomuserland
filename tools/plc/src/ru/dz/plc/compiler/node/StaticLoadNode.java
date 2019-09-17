@@ -3,12 +3,10 @@ package ru.dz.plc.compiler.node;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
-import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
-import ru.dz.plc.compiler.binode.BiNode;
 import ru.dz.plc.util.PlcException;
 
  /**
@@ -61,14 +59,14 @@ public class StaticLoadNode extends Node {
 	@Override
 	public void generate_C_code(C_codegen cgen, CodeGeneratorState s)
 			throws PlcException {
-
+		
 		BiNode args = new BiNode() {
 			
 			@Override
 			public String toString() {
 				// TODO Auto-generated method stub
 				return null;
-}
+			}
 		};
 		cgen.emitMethodCall(new ThisNode(my_class), 11, args , s);
 	}

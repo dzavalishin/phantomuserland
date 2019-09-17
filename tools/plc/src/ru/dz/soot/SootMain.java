@@ -85,17 +85,17 @@ public class SootMain {
 
 			doClass("test.toPhantom.IPhantomPrinter");
 			doClass("test.toPhantom.AllRun");
-			
+
 			doClass("test.toPhantom.ArrayAssigns");
 			doClass("test.toPhantom.ArraySimple1");
 			doClass("test.toPhantom.Assigns");
 			doClass("test.toPhantom.Arrays");
 			doClass("test.toPhantom.Strings");
 			doClass("test.toPhantom.Loops");
-			
-			
+
+
 			//doClass("java.lang.");
-			
+
 			doClass("java.lang.UnsatisfiedLinkError");
 			doClass("java.lang.NoSuchMethodError");
 			doClass("java.lang.AbstractMethodError");
@@ -117,7 +117,7 @@ public class SootMain {
 			doClass("java.lang.ClassCastException"); 
 			doClass("java.lang.ArrayStoreException");
 			doClass("java.lang.ArithmeticException");
-			
+
 			//doClass("java.lang.AbstractStringBuilder");
 			//doClass("java.lang.StringBuilder");
 		}
@@ -132,7 +132,7 @@ public class SootMain {
 						setSourceClassPath(a.substring(2));
 						continue;
 					}
-					
+
 					if( a.charAt(1) == 'C' )
 					{
 						String dir = a.substring(2);
@@ -155,13 +155,13 @@ public class SootMain {
 						System.out.println(
 								"-C<dir> - process all .class files in directory (sets -c dir also)\n"+
 										"-c<java-class-path-list> - set directory to load .class files from\n"+
-								"-o<phantom-class-out-dir>\n"+
+										"-o<phantom-class-out-dir>\n"+
 										"-X<class.name - skip (do not convert) class"+
-								"-I - ignored (plc compat)"
+										"-I - ignored (plc compat)"
 								);
 						continue;
 					}
-					
+
 					PlcMain.processFlag(a);
 					continue;
 				}
@@ -300,7 +300,7 @@ public class SootMain {
 
 			SootClass c = Scene.v().loadClassAndSupport(cn);
 			//Scene.v().loadNecessaryClasses();
-			
+
 			if( c.isPhantom() )
 			{
 				die("Not loaded "+c.getName());
@@ -317,8 +317,12 @@ public class SootMain {
 
 			}
 
+			ParseState				ps = new ParseState();
+
 			PhantomClass pc = new PhantomClass(convertClassName(c.getName()));
 
+			ps.set_class(pc);
+			
 			Chain<SootField> fields = c.getFields();
 			for( SootField f : fields )
 			{
@@ -328,13 +332,13 @@ public class SootMain {
 				pf.setPublic(!f.isPrivate());
 			}
 
-			pc.generateGettersSetters();
+			pc.generateGettersSetters(ps);
 
 			List<SootMethod> mlist = c.getMethods();
 
 			for( SootMethod m : mlist )
 			{
-				SootMethodTranslator mt = new SootMethodTranslator(m,pc);
+				SootMethodTranslator mt = new SootMethodTranslator(m,pc, ps);
 				//doMethod(m);
 				mt.process();
 			}

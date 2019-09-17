@@ -62,7 +62,7 @@ public class CatchNode extends BiNode {
 		c.markLabel(catch_label);
 		// generate cacher header
 		generate_my_code(c, s);
-		if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
+		if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack(), _r.getType()); }
 
 		c.markLabel(out_label);
 	}

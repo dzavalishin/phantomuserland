@@ -1,2 +1,14 @@
-Class version 20160114031911105
+Class version 20170918015241738
+
+method <init> ordinal 16
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: <init> in .phantom.os.time"	//  @11
+  throw				//  @53
+_label_0:	//  @54
+  ret				//  @54
+--
+method end
 

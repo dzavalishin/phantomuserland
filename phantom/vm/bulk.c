@@ -11,10 +11,15 @@
  *
  **/
 
+
+#define DEBUG_MSG_PREFIX "vm.bulk"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include <phantom_libc.h>
 #include <assert.h>
-
-//#include "gcc_replacements.h"
 
 
 #include "vm/internal_da.h"
@@ -39,6 +44,24 @@ static int skip( int len );
 static int load( int len, struct pvm_object   *out );
 static int cncmp( const char *a, const char *b );
 
+
+
+/**
+ *
+ * \brief Find class object by class name.
+ *
+ * \param[in]  class_name        Name of class to find.
+ * \param[out] out               Class object found.
+ *
+ * \return 0 on success, nonzero if not found..
+ *
+ * Called from root.c to load boot class on object land creation
+ * and from syscall (internal boot class) to be used by userland loader
+ * if other methods fail.
+ *
+**/
+
+
 // Return 0 on success
 int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out )
 {
@@ -46,6 +69,8 @@ int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out
 
     if(DEBUG) printf("Bulk: looking for class %s\n", class_name);
 
+    // If we are in user mode (pvm_test/pvm_headless), or kernel
+    // has some disks mounted, try to find class in .pc file.
     if( 0 == load_class_from_file( class_name, out) )
         return 0;
 
@@ -56,7 +81,10 @@ int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out
 
         rlen = readf( sizeof( struct pvm_bulk_class_head ), &ch );
         if( rlen != sizeof( struct pvm_bulk_class_head ) )
+        {
+            // TODO print err
             break;
+        }
 
         if(DEBUG) printf("Bulk: checking class %s\n", ch.name);
 

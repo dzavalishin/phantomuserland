@@ -1,6 +1,24 @@
-Class version 20170628060000180
+Class version 20170915072252776
 
-method print ordinal 16
+method <init> ordinal 16
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: <init> in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @75
+_label_0:	//  @76
+    ; Line 74			//  @76
+  const 3456			//  @76
+  i2o				//  @81
+  os dup				//  @82
+  save fld=6			//  @83
+  os drop				//  @85
+  ret				//  @86
+--
+method end
+
+method print ordinal 17
 --
   const 1				//  @0
   isublu				//  @5
@@ -8,690 +26,269 @@ method print ordinal 16
   const "arg count: print in .ru.dz.phantom.system.regression_tests"	//  @11
   throw				//  @74
 _label_0:	//  @75
-  summon null			//  @75
-  ; Line 53			//  @76
-  load fld=0			//  @76
-  ; Line 53			//  @78
-  get o stk pos=0			//  @78
-  ; Line 53			//  @83
-  call m=16 nparm=1		//  @83
-  os drop				//  @85
-  ret				//  @86
+  stack_reserve obj=1 int=0	//  @75
+    ; Line 113			//  @78
+  load fld=0			//  @78
+    ; Line 113			//  @80
+  get o stk pos=0			//  @80
+    ; Line 113			//  @85
+  call m=16 nparm=1		//  @85
+  os drop				//  @87
+  ret				//  @88
 --
 method end
 
-method array_test ordinal 17
+method long_test ordinal 18
 --
   const 0				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: array_test in .ru.dz.phantom.system.regression_tests"	//  @11
-  throw				//  @79
-_label_0:	//  @80
-  ; Line 63			//  @80
-  summon this			//  @80
-  ; Line 63			//  @81
-  const "Checking arrays... "	//  @81
-  ; Line 63			//  @105
-  call m=16 nparm=1		//  @105
-  os drop				//  @107
-  summon class internal.container.array	//  @108
-  new				//  @109
-  os dup				//  @110
-  call m=0 nparm=0		//  @111
-  os drop				//  @112
-  os dup				//  @113
-  save fld=4			//  @114
-  os drop				//  @116
-  ; Line 65			//  @117
-  ; Line 67			//  @117
-  load fld=4			//  @117
-  ; Line 67			//  @119
-  const "zero"			//  @119
-  ; Line 67			//  @128
-  const 0				//  @128
-  i2o				//  @133
-  call m=11 nparm=2		//  @134
-  os drop				//  @136
-  ; Line 67			//  @137
-  ; Line 68			//  @137
-  load fld=4			//  @137
-  ; Line 68			//  @139
-  const "two"			//  @139
-  ; Line 68			//  @147
-  const 2				//  @147
-  i2o				//  @152
-  call m=11 nparm=2		//  @153
-  os drop				//  @155
-  ; Line 68			//  @156
-  ; Line 69			//  @156
-  load fld=4			//  @156
-  ; Line 69			//  @158
-  const "one"			//  @158
-  ; Line 69			//  @166
-  const 1				//  @166
-  i2o				//  @171
-  call m=11 nparm=2		//  @172
-  os drop				//  @174
-  ; Line 69			//  @175
-  ; Line 71			//  @175
-  summon this			//  @175
-  ; Line 71			//  @176
-  const "Beeping: "		//  @176
-  ; Line 71			//  @190
-  call m=16 nparm=1		//  @190
-  os drop				//  @192
-  ; Line 71			//  @193
-  ; Line 72			//  @193
-  const 3				//  @193
-  i2o				//  @198
-  os dup				//  @199
-  save fld=2			//  @200
-  os drop				//  @202
-  ; Line 72			//  @203
-  ; Line 77			//  @203
-_label_1:	//  @203
-  ; Line 73			//  @203
-  load fld=2			//  @203
-  o2i				//  @205
-  jz _label_2			//  @206
-  ; Line 75			//  @211
-  load fld=2			//  @211
-  o2i				//  @213
-  ; Line 75			//  @214
-  const 1				//  @214
-  ; Line 75			//  @219
-  isublu				//  @219
-  i2o				//  @220
-  os dup				//  @221
-  save fld=2			//  @222
-  os drop				//  @224
-  ; Line 76			//  @225
-  summon this			//  @225
-  ; Line 76			//  @226
-  const "beep "			//  @226
-  ; Line 76			//  @236
-  call m=16 nparm=1		//  @236
-  os drop				//  @238
-  ; Line 76			//  @239
-  ; Line 76			//  @239
-  summon this			//  @239
-  ; Line 76			//  @240
-  load fld=4			//  @240
-  ; Line 76			//  @242
-  load fld=2			//  @242
-  call m=10 nparm=1		//  @244
-  ; Line 76			//  @246
-  call m=16 nparm=1		//  @246
-  os drop				//  @248
-  ; Line 76			//  @249
-  ; Line 76			//  @249
-  summon this			//  @249
-  ; Line 76			//  @250
-  const "! "			//  @250
-  ; Line 76			//  @257
-  call m=16 nparm=1		//  @257
-  os drop				//  @259
-  ; Line 76			//  @260
-  jmp _label_1			//  @260
-_label_2:	//  @265
-  ; Line 77			//  @265
-  ; Line 78			//  @265
-  summon this			//  @265
-  ; Line 78			//  @266
-  const "
-"			//  @266
-  ; Line 78			//  @272
-  call m=16 nparm=1		//  @272
-  os drop				//  @274
-  ; Line 78			//  @275
-  ; Line 81			//  @275
-  load fld=4			//  @275
-  ; Line 81			//  @277
-  const 0				//  @277
-  i2o				//  @282
-  ; Line 81			//  @283
-  const 0				//  @283
-  i2o				//  @288
-  call m=11 nparm=2		//  @289
-  os drop				//  @291
-  ; Line 81			//  @292
-  ; Line 82			//  @292
-  load fld=4			//  @292
-  ; Line 82			//  @294
-  const 2				//  @294
-  i2o				//  @299
-  ; Line 82			//  @300
-  const 2				//  @300
-  i2o				//  @305
-  call m=11 nparm=2		//  @306
-  os drop				//  @308
-  ; Line 82			//  @309
-  ; Line 83			//  @309
-  load fld=4			//  @309
-  ; Line 83			//  @311
-  const 1				//  @311
-  i2o				//  @316
-  ; Line 83			//  @317
-  const 1				//  @317
-  i2o				//  @322
-  call m=11 nparm=2		//  @323
-  os drop				//  @325
-  ; Line 83			//  @326
-  ; Line 85			//  @326
-  const 3				//  @326
-  i2o				//  @331
-  os dup				//  @332
-  save fld=2			//  @333
-  os drop				//  @335
-  ; Line 85			//  @336
-  ; Line 95			//  @336
-_label_3:	//  @336
-  ; Line 86			//  @336
-  load fld=2			//  @336
-  o2i				//  @338
-  jz _label_4			//  @339
-  ; Line 88			//  @344
-  load fld=2			//  @344
-  o2i				//  @346
-  ; Line 88			//  @347
-  const 1				//  @347
-  ; Line 88			//  @352
-  isublu				//  @352
-  i2o				//  @353
-  os dup				//  @354
-  save fld=2			//  @355
-  os drop				//  @357
-  ; Line 95			//  @358
-  ; Line 89			//  @358
-  load fld=4			//  @358
-  ; Line 89			//  @360
-  load fld=2			//  @360
-  call m=10 nparm=1		//  @362
-  ; Line 89			//  @364
-  load fld=2			//  @364
-  call m=4 nparm=1		//  @366
-  o2i				//  @368
-  lognot				//  @369
-  jz _label_5			//  @370
-  ; Line 91			//  @375
-  summon this			//  @375
-  ; Line 91			//  @376
-  const "array error: array["	//  @376
-  ; Line 91			//  @400
-  call m=16 nparm=1		//  @400
-  os drop				//  @402
-  ; Line 91			//  @403
-  summon this			//  @403
-  ; Line 91			//  @404
-  load fld=2			//  @404
-  ; Line 91			//  @406
-  call m=16 nparm=1		//  @406
-  os drop				//  @408
-  ; Line 91			//  @409
-  ; Line 92			//  @409
-  summon this			//  @409
-  ; Line 92			//  @410
-  const "] == "			//  @410
-  ; Line 92			//  @420
-  call m=16 nparm=1		//  @420
-  os drop				//  @422
-  ; Line 92			//  @423
-  ; Line 92			//  @423
-  summon this			//  @423
-  ; Line 92			//  @424
-  load fld=4			//  @424
-  ; Line 92			//  @426
-  load fld=2			//  @426
-  call m=10 nparm=1		//  @428
-  ; Line 92			//  @430
-  call m=16 nparm=1		//  @430
-  os drop				//  @432
-  ; Line 92			//  @433
-  ; Line 93			//  @433
-  const "array error"		//  @433
-  ; Line 93			//  @449
-  throw				//  @449
-  ; Line 93			//  @450
-_label_5:	//  @450
-  ; Line 95			//  @450
-  jmp _label_3			//  @450
-_label_4:	//  @455
-  ; Line 95			//  @455
-  ; Line 98			//  @455
-  summon this			//  @455
-  ; Line 98			//  @456
-  const "passed
-"			//  @456
-  ; Line 98			//  @468
-  call m=16 nparm=1		//  @468
-  os drop				//  @470
-  ; Line 98			//  @471
-  ret				//  @471
---
-method end
-
-method math_test ordinal 18
---
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: math_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  const "arg count: long_test in .ru.dz.phantom.system.regression_tests"	//  @11
   throw				//  @78
 _label_0:	//  @79
-  ; Line 107			//  @79
-  summon this			//  @79
-  ; Line 107			//  @80
-  const "Checking int math... "	//  @80
-  ; Line 107			//  @106
-  call m=16 nparm=1		//  @106
-  os drop				//  @108
-  ; Line 110			//  @109
-  ; Line 109			//  @109
-  const 2				//  @109
-  ; Line 109			//  @114
-  const 2				//  @114
-  ; Line 109			//  @119
-  isum				//  @119
-  ; Line 109			//  @120
-  const 4				//  @120
-  isublu				//  @125
-  jz _label_1			//  @126
-  ; Line 109			//  @131
-  const "int + math error"	//  @131
-  ; Line 109			//  @152
-  throw				//  @152
-_label_1:	//  @153
-  ; Line 110			//  @153
-  ; Line 111			//  @153
-  ; Line 110			//  @153
-  const 2				//  @153
-  ; Line 110			//  @158
-  const 2				//  @158
-  ; Line 110			//  @163
-  isublu				//  @163
-  ; Line 110			//  @164
-  const 0				//  @164
-  isublu				//  @169
-  jz _label_3			//  @170
-  ; Line 110			//  @175
-  const "int - math error"	//  @175
-  ; Line 110			//  @196
-  throw				//  @196
-_label_3:	//  @197
-  ; Line 111			//  @197
-  ; Line 112			//  @197
-  ; Line 111			//  @197
-  const 2				//  @197
-  ; Line 111			//  @202
-  const 2				//  @202
-  ; Line 111			//  @207
-  idivlu				//  @207
-  ; Line 111			//  @208
-  const 1				//  @208
-  isublu				//  @213
-  jz _label_5			//  @214
-  ; Line 111			//  @219
-  const "int / math error"	//  @219
-  ; Line 111			//  @240
-  throw				//  @240
-_label_5:	//  @241
-  ; Line 112			//  @241
-  ; Line 114			//  @241
-  ; Line 112			//  @241
-  const 3				//  @241
-  ; Line 112			//  @246
-  const 3				//  @246
-  ; Line 112			//  @251
-  imul				//  @251
-  ; Line 112			//  @252
-  const 9				//  @252
-  isublu				//  @257
-  jz _label_7			//  @258
-  ; Line 112			//  @263
-  const "int * math error"	//  @263
-  ; Line 112			//  @284
-  throw				//  @284
-_label_7:	//  @285
-  ; Line 114			//  @285
-  ; Line 115			//  @285
-  ; Line 114			//  @285
-  const 3				//  @285
-  ; Line 114			//  @290
-  const 2				//  @290
-  ; Line 114			//  @295
-  ilt <				//  @295
-  jz _label_9			//  @296
-  ; Line 114			//  @301
-  const "int < error"		//  @301
-  ; Line 114			//  @317
-  throw				//  @317
-_label_9:	//  @318
-  ; Line 115			//  @318
-  ; Line 117			//  @318
-  ; Line 115			//  @318
-  const 5				//  @318
-  ; Line 115			//  @323
-  const 6				//  @323
-  ; Line 115			//  @328
-  igt >				//  @328
-  jz _label_11			//  @329
-  ; Line 115			//  @334
-  const "int > error"		//  @334
-  ; Line 115			//  @350
-  throw				//  @350
-_label_11:	//  @351
-  ; Line 117			//  @351
-  ; Line 118			//  @351
-  ; Line 117			//  @351
-  const 3				//  @351
-  ; Line 117			//  @356
-  const 2				//  @356
-  ; Line 117			//  @361
-  ile <=				//  @361
-  jz _label_13			//  @362
-  ; Line 117			//  @367
-  const "int <= error"		//  @367
-  ; Line 117			//  @384
-  throw				//  @384
-_label_13:	//  @385
-  ; Line 118			//  @385
-  ; Line 120			//  @385
-  ; Line 118			//  @385
-  const 5				//  @385
-  ; Line 118			//  @390
-  const 6				//  @390
-  ; Line 118			//  @395
-  ige >=				//  @395
-  jz _label_15			//  @396
-  ; Line 118			//  @401
-  const "int >= error"		//  @401
-  ; Line 118			//  @418
-  throw				//  @418
-_label_15:	//  @419
-  ; Line 120			//  @419
-  ; Line 121			//  @419
-  ; Line 120			//  @419
-  const 3				//  @419
-  ; Line 120			//  @424
-  const 3				//  @424
-  ; Line 120			//  @429
-  ile <=				//  @429
-  ; Line 120			//  @430
-  lognot				//  @430
-  jz _label_17			//  @431
-  ; Line 120			//  @436
-  const "int <= error"		//  @436
-  ; Line 120			//  @453
-  throw				//  @453
-_label_17:	//  @454
-  ; Line 121			//  @454
-  ; Line 123			//  @454
-  ; Line 121			//  @454
-  const 5				//  @454
-  ; Line 121			//  @459
-  const 5				//  @459
-  ; Line 121			//  @464
-  ige >=				//  @464
-  ; Line 121			//  @465
-  lognot				//  @465
-  jz _label_19			//  @466
-  ; Line 121			//  @471
-  const "int >= error"		//  @471
-  ; Line 121			//  @488
-  throw				//  @488
-_label_19:	//  @489
-  ; Line 123			//  @489
-  ; Line 124			//  @489
-  ; Line 123			//  @489
-  const 0				//  @489
-  ; Line 123			//  @494
-  const 0				//  @494
-  ; Line 123			//  @499
-  logor ||			//  @499
-  jz _label_21			//  @500
-  ; Line 123			//  @505
-  const "int || math error"	//  @505
-  ; Line 123			//  @527
-  throw				//  @527
-_label_21:	//  @528
-  ; Line 124			//  @528
-  ; Line 124			//  @528
-  ; Line 124			//  @528
-  const 1				//  @528
-  ; Line 124			//  @533
-  const 0				//  @533
-  ; Line 124			//  @538
-  logor ||			//  @538
-  jz _label_23			//  @539
-  jmp _label_24			//  @544
-_label_23:	//  @549
-  ; Line 124			//  @549
-  const "int || math error"	//  @549
-  ; Line 124			//  @571
-  throw				//  @571
-_label_24:	//  @572
-  ; Line 124			//  @572
-  ; Line 125			//  @572
-  ; Line 125			//  @572
-  const 0				//  @572
-  ; Line 125			//  @577
-  const 1				//  @577
-  ; Line 125			//  @582
-  logor ||			//  @582
-  jz _label_25			//  @583
-  jmp _label_26			//  @588
-_label_25:	//  @593
-  ; Line 125			//  @593
-  const "int || math error"	//  @593
-  ; Line 125			//  @615
-  throw				//  @615
-_label_26:	//  @616
-  ; Line 125			//  @616
-  ; Line 126			//  @616
-  ; Line 126			//  @616
-  const 1				//  @616
-  ; Line 126			//  @621
-  const 1				//  @621
-  ; Line 126			//  @626
-  logor ||			//  @626
-  jz _label_27			//  @627
-  jmp _label_28			//  @632
-_label_27:	//  @637
-  ; Line 126			//  @637
-  const "int || math error"	//  @637
-  ; Line 126			//  @659
-  throw				//  @659
-_label_28:	//  @660
-  ; Line 126			//  @660
-  ; Line 129			//  @660
-  ; Line 128			//  @660
-  const 0				//  @660
-  ; Line 128			//  @665
-  const 0				//  @665
-  ; Line 128			//  @670
-  logand &&			//  @670
-  jz _label_29			//  @671
-  ; Line 128			//  @676
-  const "int && math error"	//  @676
-  ; Line 128			//  @698
-  throw				//  @698
-_label_29:	//  @699
-  ; Line 129			//  @699
-  ; Line 130			//  @699
-  ; Line 129			//  @699
-  const 1				//  @699
-  ; Line 129			//  @704
-  const 0				//  @704
-  ; Line 129			//  @709
-  logand &&			//  @709
-  jz _label_31			//  @710
-  ; Line 129			//  @715
-  const "int && math error"	//  @715
-  ; Line 129			//  @737
-  throw				//  @737
-_label_31:	//  @738
-  ; Line 130			//  @738
-  ; Line 131			//  @738
-  ; Line 130			//  @738
-  const 0				//  @738
-  ; Line 130			//  @743
-  const 1				//  @743
-  ; Line 130			//  @748
-  logand &&			//  @748
-  jz _label_33			//  @749
-  ; Line 130			//  @754
-  const "int && math error"	//  @754
-  ; Line 130			//  @776
-  throw				//  @776
-_label_33:	//  @777
-  ; Line 131			//  @777
-  ; Line 131			//  @777
-  ; Line 131			//  @777
-  const 1				//  @777
-  ; Line 131			//  @782
-  const 1				//  @782
-  ; Line 131			//  @787
-  logand &&			//  @787
-  jz _label_35			//  @788
-  jmp _label_36			//  @793
-_label_35:	//  @798
-  ; Line 131			//  @798
-  const "int && math error"	//  @798
-  ; Line 131			//  @820
-  throw				//  @820
-_label_36:	//  @821
-  ; Line 131			//  @821
-  ; Line 134			//  @821
-  ; Line 133			//  @821
-  const 0				//  @821
-  ; Line 133			//  @826
-  const 0				//  @826
-  ; Line 133			//  @831
-  ior				//  @831
-  jz _label_37			//  @832
-  ; Line 133			//  @837
-  const "int | math error"	//  @837
-  ; Line 133			//  @858
-  throw				//  @858
-_label_37:	//  @859
-  ; Line 134			//  @859
-  ; Line 134			//  @859
-  ; Line 134			//  @859
-  const 1				//  @859
-  ; Line 134			//  @864
-  const 0				//  @864
-  ; Line 134			//  @869
-  ior				//  @869
-  jz _label_39			//  @870
-  jmp _label_40			//  @875
-_label_39:	//  @880
-  ; Line 134			//  @880
-  const "int | math error"	//  @880
-  ; Line 134			//  @901
-  throw				//  @901
-_label_40:	//  @902
-  ; Line 134			//  @902
-  ; Line 135			//  @902
-  ; Line 135			//  @902
-  const 0				//  @902
-  ; Line 135			//  @907
-  const 1				//  @907
-  ; Line 135			//  @912
-  ior				//  @912
-  jz _label_41			//  @913
-  jmp _label_42			//  @918
-_label_41:	//  @923
-  ; Line 135			//  @923
-  const "int | math error"	//  @923
-  ; Line 135			//  @944
-  throw				//  @944
-_label_42:	//  @945
-  ; Line 135			//  @945
-  ; Line 136			//  @945
-  ; Line 136			//  @945
-  const 1				//  @945
-  ; Line 136			//  @950
-  const 1				//  @950
-  ; Line 136			//  @955
-  ior				//  @955
-  jz _label_43			//  @956
-  jmp _label_44			//  @961
-_label_43:	//  @966
-  ; Line 136			//  @966
-  const "int | math error"	//  @966
-  ; Line 136			//  @987
-  throw				//  @987
-_label_44:	//  @988
-  ; Line 136			//  @988
-  ; Line 139			//  @988
-  ; Line 138			//  @988
-  const 0				//  @988
-  ; Line 138			//  @993
-  const 0				//  @993
-  ; Line 138			//  @998
-  iand				//  @998
-  jz _label_45			//  @999
-  ; Line 138			//  @1004
-  const "int & math error"	//  @1004
-  ; Line 138			//  @1025
-  throw				//  @1025
-_label_45:	//  @1026
-  ; Line 139			//  @1026
-  ; Line 140			//  @1026
-  ; Line 139			//  @1026
-  const 1				//  @1026
-  ; Line 139			//  @1031
-  const 0				//  @1031
-  ; Line 139			//  @1036
-  iand				//  @1036
-  jz _label_47			//  @1037
-  ; Line 139			//  @1042
-  const "int & math error"	//  @1042
-  ; Line 139			//  @1063
-  throw				//  @1063
-_label_47:	//  @1064
-  ; Line 140			//  @1064
-  ; Line 141			//  @1064
-  ; Line 140			//  @1064
-  const 0				//  @1064
-  ; Line 140			//  @1069
-  const 1				//  @1069
-  ; Line 140			//  @1074
-  iand				//  @1074
-  jz _label_49			//  @1075
-  ; Line 140			//  @1080
-  const "int & math error"	//  @1080
-  ; Line 140			//  @1101
-  throw				//  @1101
-_label_49:	//  @1102
-  ; Line 141			//  @1102
-  ; Line 141			//  @1102
-  ; Line 141			//  @1102
-  const 1				//  @1102
-  ; Line 141			//  @1107
-  const 1				//  @1107
-  ; Line 141			//  @1112
-  iand				//  @1112
-  jz _label_51			//  @1113
-  jmp _label_52			//  @1118
-_label_51:	//  @1123
-  ; Line 141			//  @1123
-  const "int & math error"	//  @1123
-  ; Line 141			//  @1144
-  throw				//  @1144
-_label_52:	//  @1145
-  ; Line 141			//  @1145
-  ; Line 143			//  @1145
-  summon this			//  @1145
-  ; Line 143			//  @1146
-  const "passed
-"			//  @1146
-  ; Line 143			//  @1158
-  call m=16 nparm=1		//  @1158
-  os drop				//  @1160
-  ; Line 143			//  @1161
-  ret				//  @1161
+  stack_reserve obj=3 int=0	//  @79
+    ; Line 306			//  @82
+  summon this			//  @82
+    ; Line 306			//  @83
+  const_pool <78>			//  @83
+    ; Line 306			//  @88
+  call m=17 nparm=1		//  @88
+  os drop				//  @90
+    ; Line 312			//  @91
+  const 12			//  @91
+  :long				//  @96
+  from int			//  @97
+  :long				//  @98
+  i2o				//  @99
+  os dup				//  @100
+  set o stk pos=0			//  @101
+  os drop				//  @106
+    ; Line 312			//  @107
+    ; Line 313			//  @107
+  const 2				//  @107
+  :long				//  @112
+  from int			//  @113
+  :long				//  @114
+  i2o				//  @115
+  os dup				//  @116
+  set o stk pos=1			//  @117
+  os drop				//  @122
+    ; Line 313			//  @123
+    ; Line 314			//  @123
+  const 0				//  @123
+    ; Line 314			//  @128
+  const 3				//  @128
+    ; Line 314			//  @133
+  isublu				//  @133
+  :long				//  @134
+  from int			//  @135
+  :long				//  @136
+  i2o				//  @137
+  os dup				//  @138
+  set o stk pos=2			//  @139
+  os drop				//  @144
+    ; Line 314			//  @145
+    ; Line 315			//  @145
+  summon this			//  @145
+    ; Line 315			//  @146
+  const_pool <79>			//  @146
+    ; Line 315			//  @151
+  call m=17 nparm=1		//  @151
+  os drop				//  @153
+    ; Line 315			//  @154
+    ; Line 317			//  @154
+    ; Line 317			//  @154
+  get o stk pos=0			//  @154
+  :long				//  @159
+  o2i				//  @160
+    ; Line 317			//  @161
+  get o stk pos=1			//  @161
+  :long				//  @166
+  o2i				//  @167
+    ; Line 317			//  @168
+  :long				//  @168
+  idivlu				//  @169
+    ; Line 317			//  @170
+  const 6				//  @170
+  :long				//  @175
+  from int			//  @176
+  :long				//  @177
+  isublu				//  @178
+  jz _label_1			//  @179
+    ; Line 317			//  @184
+  const_pool <80>			//  @184
+    ; Line 317			//  @189
+  throw				//  @189
+_label_1:	//  @190
+    ; Line 317			//  @190
+    ; Line 318			//  @190
+    ; Line 318			//  @190
+  get o stk pos=1			//  @190
+  :long				//  @195
+  o2i				//  @196
+    ; Line 318			//  @197
+  get o stk pos=2			//  @197
+  :long				//  @202
+  o2i				//  @203
+    ; Line 318			//  @204
+  :long				//  @204
+  isublu				//  @205
+    ; Line 318			//  @206
+  const 5				//  @206
+  :long				//  @211
+  from int			//  @212
+  :long				//  @213
+  isublu				//  @214
+  jz _label_3			//  @215
+    ; Line 318			//  @220
+  const_pool <81>			//  @220
+    ; Line 318			//  @225
+  throw				//  @225
+_label_3:	//  @226
+    ; Line 318			//  @226
+    ; Line 319			//  @226
+    ; Line 319			//  @226
+  get o stk pos=1			//  @226
+  :long				//  @231
+  o2i				//  @232
+    ; Line 319			//  @233
+  get o stk pos=2			//  @233
+  :long				//  @238
+  o2i				//  @239
+    ; Line 319			//  @240
+  :long				//  @240
+  imul				//  @241
+    ; Line 319			//  @242
+  const 0				//  @242
+    ; Line 319			//  @247
+  const 6				//  @247
+    ; Line 319			//  @252
+  isublu				//  @252
+  :long				//  @253
+  from int			//  @254
+  :long				//  @255
+  isublu				//  @256
+  jz _label_5			//  @257
+    ; Line 319			//  @262
+  const_pool <82>			//  @262
+    ; Line 319			//  @267
+  throw				//  @267
+_label_5:	//  @268
+    ; Line 319			//  @268
+    ; Line 320			//  @268
+    ; Line 320			//  @268
+  get o stk pos=0			//  @268
+  :long				//  @273
+  o2i				//  @274
+    ; Line 320			//  @275
+  get o stk pos=2			//  @275
+  :long				//  @280
+  o2i				//  @281
+    ; Line 320			//  @282
+  :long				//  @282
+  isum				//  @283
+    ; Line 320			//  @284
+  const 9				//  @284
+  :long				//  @289
+  from int			//  @290
+  :long				//  @291
+  isublu				//  @292
+  jz _label_7			//  @293
+    ; Line 320			//  @298
+  const_pool <83>			//  @298
+    ; Line 320			//  @303
+  throw				//  @303
+_label_7:	//  @304
+    ; Line 320			//  @304
+    ; Line 321			//  @304
+  summon this			//  @304
+    ; Line 321			//  @305
+  const_pool <84>			//  @305
+    ; Line 321			//  @310
+  call m=17 nparm=1		//  @310
+  os drop				//  @312
+    ; Line 321			//  @313
+    ; Line 323			//  @313
+    ; Line 323			//  @313
+  get o stk pos=1			//  @313
+  :long				//  @318
+  o2i				//  @319
+    ; Line 323			//  @320
+  get o stk pos=2			//  @320
+  :long				//  @325
+  o2i				//  @326
+  :long				//  @327
+  ilt <				//  @328
+  jz _label_9			//  @329
+    ; Line 323			//  @334
+  const_pool <85>			//  @334
+    ; Line 323			//  @339
+  throw				//  @339
+_label_9:	//  @340
+    ; Line 323			//  @340
+    ; Line 324			//  @340
+    ; Line 324			//  @340
+  get o stk pos=1			//  @340
+  :long				//  @345
+  o2i				//  @346
+    ; Line 324			//  @347
+  get o stk pos=0			//  @347
+  :long				//  @352
+  o2i				//  @353
+  :long				//  @354
+  igt >				//  @355
+  jz _label_11			//  @356
+    ; Line 324			//  @361
+  const_pool <86>			//  @361
+    ; Line 324			//  @366
+  throw				//  @366
+_label_11:	//  @367
+    ; Line 324			//  @367
+    ; Line 325			//  @367
+    ; Line 325			//  @367
+  get o stk pos=1			//  @367
+  :long				//  @372
+  o2i				//  @373
+    ; Line 325			//  @374
+  get o stk pos=2			//  @374
+  :long				//  @379
+  o2i				//  @380
+  :long				//  @381
+  ile <=				//  @382
+  jz _label_13			//  @383
+    ; Line 325			//  @388
+  const_pool <87>			//  @388
+    ; Line 325			//  @393
+  throw				//  @393
+_label_13:	//  @394
+    ; Line 325			//  @394
+    ; Line 326			//  @394
+    ; Line 326			//  @394
+  get o stk pos=1			//  @394
+  :long				//  @399
+  o2i				//  @400
+    ; Line 326			//  @401
+  get o stk pos=0			//  @401
+  :long				//  @406
+  o2i				//  @407
+  :long				//  @408
+  ige >=				//  @409
+  jz _label_15			//  @410
+    ; Line 326			//  @415
+  const_pool <88>			//  @415
+    ; Line 326			//  @420
+  throw				//  @420
+_label_15:	//  @421
+    ; Line 326			//  @421
+    ; Line 327			//  @421
+  summon this			//  @421
+    ; Line 327			//  @422
+  const_pool <89>			//  @422
+    ; Line 327			//  @427
+  call m=17 nparm=1		//  @427
+  os drop				//  @429
+    ; Line 327			//  @430
+  ret				//  @430
 --
 method end
 
@@ -703,116 +300,138 @@ method run ordinal 19
   const "arg count: run in .ru.dz.phantom.system.regression_tests"	//  @11
   throw				//  @72
 _label_0:	//  @73
-  summon null			//  @73
-  ; Line 37			//  @74
-  get o stk pos=0			//  @74
-  os dup				//  @79
-  save fld=0			//  @80
-  os drop				//  @82
-  ; Line 38			//  @83
-  const 0				//  @83
-  i2o				//  @88
-  os dup				//  @89
-  save fld=1			//  @90
-  os drop				//  @92
-  ; Line 38			//  @93
-  ; Line 40			//  @93
-  summon this			//  @93
-  ; Line 40			//  @94
-  const "Phantom language regression tests are running
-"	//  @94
-  ; Line 40			//  @145
-  call m=16 nparm=1		//  @145
-  os drop				//  @147
-  ; Line 40			//  @148
-  ; Line 42			//  @148
-  summon this			//  @148
-  call m=21 nparm=0		//  @149
-  os drop				//  @151
-  ; Line 42			//  @152
-  ; Line 43			//  @152
-  summon this			//  @152
-  call m=18 nparm=0		//  @153
-  os drop				//  @155
-  ; Line 43			//  @156
-  ; Line 44			//  @156
-  summon this			//  @156
-  call m=17 nparm=0		//  @157
-  os drop				//  @159
-  ; Line 44			//  @160
-  ret				//  @160
+  stack_reserve obj=2 int=0	//  @73
+    ; Line 80			//  @76
+  get o stk pos=0			//  @76
+  os dup				//  @81
+  save fld=0			//  @82
+  os drop				//  @84
+    ; Line 81			//  @85
+  const 0				//  @85
+  i2o				//  @90
+  os dup				//  @91
+  save fld=1			//  @92
+  os drop				//  @94
+    ; Line 81			//  @95
+    ; Line 83			//  @95
+  summon this			//  @95
+    ; Line 83			//  @96
+  const_pool <5>			//  @96
+    ; Line 83			//  @101
+  call m=17 nparm=1		//  @101
+  os drop				//  @103
+    ; Line 83			//  @104
+    ; Line 85			//  @104
+  summon this			//  @104
+  call m=21 nparm=0		//  @105
+  os drop				//  @107
+    ; Line 85			//  @108
+    ; Line 86			//  @108
+  summon this			//  @108
+  call m=23 nparm=0		//  @109
+  os drop				//  @111
+    ; Line 86			//  @112
+    ; Line 87			//  @112
+  summon this			//  @112
+  call m=24 nparm=0		//  @113
+  os drop				//  @115
+    ; Line 87			//  @116
+    ; Line 88			//  @116
+  summon this			//  @116
+  call m=26 nparm=0		//  @117
+  os drop				//  @119
+    ; Line 88			//  @120
+    ; Line 90			//  @120
+  summon this			//  @120
+    ; Line 90			//  @121
+  const_pool <6>			//  @121
+    ; Line 90			//  @126
+  call m=17 nparm=1		//  @126
+  os drop				//  @128
+    ; Line 90			//  @129
+    ; Line 90			//  @129
+  summon this			//  @129
+    ; Line 90			//  @130
+  load fld=6			//  @130
+  call m=5 nparm=0		//  @132
+    ; Line 90			//  @134
+  call m=17 nparm=1		//  @134
+  os drop				//  @136
+    ; Line 90			//  @137
+    ; Line 90			//  @137
+  summon this			//  @137
+    ; Line 90			//  @138
+  const_pool <7>			//  @138
+    ; Line 90			//  @143
+  call m=17 nparm=1		//  @143
+  os drop				//  @145
+    ; Line 90			//  @146
+    ; Line 92			//  @146
+    ; Line 91			//  @146
+  load fld=6			//  @146
+    ; Line 91			//  @148
+  const 3456			//  @148
+  i2o				//  @153
+  call m=4 nparm=1		//  @154
+  o2i				//  @156
+  lognot				//  @157
+  jz _label_1			//  @158
+    ; Line 92			//  @163
+  const_pool <8>			//  @163
+    ; Line 92			//  @168
+  throw				//  @168
+_label_1:	//  @169
+    ; Line 92			//  @169
+    ; Line 94			//  @169
+  summon this			//  @169
+  call m=18 nparm=0		//  @170
+  os drop				//  @172
+    ; Line 94			//  @173
+    ; Line 95			//  @173
+  summon this			//  @173
+  call m=25 nparm=0		//  @174
+  os drop				//  @176
+    ; Line 95			//  @177
+    ; Line 96			//  @177
+  summon this			//  @177
+  call m=27 nparm=0		//  @178
+  os drop				//  @180
+    ; Line 96			//  @181
+    ; Line 98			//  @181
+  summon this			//  @181
+  call m=28 nparm=0		//  @182
+  os drop				//  @184
+    ; Line 98			//  @185
+  summon class phantom.util.map	//  @185
+  new				//  @207
+  pull depth=0			//  @208
+  summon class phantom.util.map	//  @213
+  static invoke ord=16 n_param=0	//  @235
+  os drop				//  @244
+  os dup				//  @245
+  set o stk pos=1			//  @246
+  os drop				//  @251
+    ; Line 103			//  @252
+  ret				//  @252
 --
 method end
 
-method test_do_while ordinal 20
+method sig_func ordinal 20
 --
-  const 0				//  @0
+  const 1				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: test_do_while in .ru.dz.phantom.system.regression_tests"	//  @11
-  throw				//  @82
-_label_0:	//  @83
-  ; Line 153			//  @83
-  const 3				//  @83
-  i2o				//  @88
-  os dup				//  @89
-  save fld=2			//  @90
-  os drop				//  @92
-  ; Line 154			//  @93
-  const 0				//  @93
-  i2o				//  @98
-  os dup				//  @99
-  save fld=3			//  @100
-  os drop				//  @102
-  ; Line 154			//  @103
-  ; Line 155			//  @103
-_label_1:	//  @103
-  ; Line 155			//  @103
-  load fld=3			//  @103
-  o2i				//  @105
-  ; Line 155			//  @106
-  const 1				//  @106
-  ; Line 155			//  @111
-  isum				//  @111
-  i2o				//  @112
-  os dup				//  @113
-  save fld=3			//  @114
-  os drop				//  @116
-  ; Line 155			//  @117
-  load fld=2			//  @117
-  o2i				//  @119
-  jz _label_2			//  @120
-  ; Line 155			//  @125
-  load fld=2			//  @125
-  o2i				//  @127
-  ; Line 155			//  @128
-  const 1				//  @128
-  ; Line 155			//  @133
-  isublu				//  @133
-  i2o				//  @134
-  os dup				//  @135
-  save fld=2			//  @136
-  os drop				//  @138
-  jmp _label_1			//  @139
-_label_2:	//  @144
-  ; Line 155			//  @144
-  ; Line 158			//  @144
-  ; Line 157			//  @144
-  load fld=3			//  @144
-  ; Line 157			//  @146
-  const 4				//  @146
-  i2o				//  @151
-  call m=4 nparm=1		//  @152
-  o2i				//  @154
-  lognot				//  @155
-  jz _label_3			//  @156
-  ; Line 157			//  @161
-  const "do/while error"		//  @161
-  ; Line 157			//  @180
-  throw				//  @180
-_label_3:	//  @181
-  ; Line 158			//  @181
-  ret				//  @181
+  const "arg count: sig_func in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @77
+_label_0:	//  @78
+  stack_reserve obj=1 int=0	//  @78
+    ; Line 45			//  @81
+  const 1				//  @81
+  i2o				//  @86
+  os dup				//  @87
+  save fld=7			//  @88
+  os drop				//  @90
+  ret				//  @91
 --
 method end
 
@@ -824,161 +443,1683 @@ method flow_test ordinal 21
   const "arg count: flow_test in .ru.dz.phantom.system.regression_tests"	//  @11
   throw				//  @78
 _label_4:	//  @79
-  ; Line 162			//  @79
+    ; Line 226			//  @79
   summon this			//  @79
-  ; Line 162			//  @80
-  const "Checking flow control operators... "	//  @80
-  ; Line 162			//  @120
-  call m=16 nparm=1		//  @120
-  os drop				//  @122
-  ; Line 165			//  @123
-  ; Line 164			//  @123
-  const 0				//  @123
-  jz _label_5			//  @128
-  ; Line 164			//  @133
-  const "if(0) error"		//  @133
-  ; Line 164			//  @149
-  throw				//  @149
-_label_5:	//  @150
-  ; Line 165			//  @150
-  ; Line 166			//  @150
-  ; Line 165			//  @150
-  const 0				//  @150
-  ; Line 165			//  @155
-  const 1				//  @155
-  isublu				//  @160
-  lognot				//  @161
-  jz _label_7			//  @162
-  ; Line 165			//  @167
-  const "if or == error"		//  @167
-  ; Line 165			//  @186
-  throw				//  @186
-_label_7:	//  @187
-  ; Line 166			//  @187
-  ; Line 171			//  @187
-  ; Line 166			//  @187
-  const 0				//  @187
-  ; Line 166			//  @192
-  const 0				//  @192
-  isublu				//  @197
-  jz _label_9			//  @198
-  ; Line 166			//  @203
-  const "if or != error"		//  @203
-  ; Line 166			//  @222
-  throw				//  @222
-_label_9:	//  @223
-  ; Line 171			//  @223
-  ; Line 171			//  @223
-  const 0				//  @223
-  i2o				//  @228
-  os dup				//  @229
-  save fld=3			//  @230
-  os drop				//  @232
-  ; Line 171			//  @233
-  ; Line 173			//  @233
-  ; Line 172			//  @233
-  const 1				//  @233
-  jz _label_11			//  @238
-  ; Line 172			//  @243
-  const 1				//  @243
-  i2o				//  @248
-  os dup				//  @249
-  save fld=3			//  @250
-  os drop				//  @252
-_label_11:	//  @253
-  ; Line 173			//  @253
-  ; Line 175			//  @253
-  ; Line 173			//  @253
-  load fld=3			//  @253
-  ; Line 173			//  @255
-  const 1				//  @255
-  i2o				//  @260
-  call m=4 nparm=1		//  @261
-  o2i				//  @263
-  jz _label_13			//  @264
-  jmp _label_14			//  @269
-_label_13:	//  @274
-  ; Line 175			//  @274
-  const "if(1) error"		//  @274
-  ; Line 175			//  @290
+    ; Line 226			//  @80
+  const_pool <51>			//  @80
+    ; Line 226			//  @85
+  call m=17 nparm=1		//  @85
+  os drop				//  @87
+    ; Line 228			//  @88
+    ; Line 228			//  @88
+  const 0				//  @88
+  jz _label_5			//  @93
+    ; Line 228			//  @98
+  const_pool <52>			//  @98
+    ; Line 228			//  @103
+  throw				//  @103
+_label_5:	//  @104
+    ; Line 228			//  @104
+    ; Line 229			//  @104
+    ; Line 229			//  @104
+  const 0				//  @104
+    ; Line 229			//  @109
+  const 1				//  @109
+  isublu				//  @114
+  lognot				//  @115
+  jz _label_7			//  @116
+    ; Line 229			//  @121
+  const_pool <53>			//  @121
+    ; Line 229			//  @126
+  throw				//  @126
+_label_7:	//  @127
+    ; Line 229			//  @127
+    ; Line 230			//  @127
+    ; Line 230			//  @127
+  const 0				//  @127
+    ; Line 230			//  @132
+  const 0				//  @132
+  isublu				//  @137
+  jz _label_9			//  @138
+    ; Line 230			//  @143
+  const_pool <54>			//  @143
+    ; Line 230			//  @148
+  throw				//  @148
+_label_9:	//  @149
+    ; Line 230			//  @149
+    ; Line 235			//  @149
+  const 0				//  @149
+  i2o				//  @154
+  os dup				//  @155
+  save fld=3			//  @156
+  os drop				//  @158
+    ; Line 235			//  @159
+    ; Line 236			//  @159
+    ; Line 236			//  @159
+  const 1				//  @159
+  jz _label_11			//  @164
+    ; Line 236			//  @169
+  const 1				//  @169
+  i2o				//  @174
+  os dup				//  @175
+  save fld=3			//  @176
+  os drop				//  @178
+_label_11:	//  @179
+    ; Line 236			//  @179
+    ; Line 239			//  @179
+    ; Line 237			//  @179
+  load fld=3			//  @179
+    ; Line 237			//  @181
+  const 1				//  @181
+  i2o				//  @186
+  call m=4 nparm=1		//  @187
+  o2i				//  @189
+  jz _label_13			//  @190
+  jmp _label_14			//  @195
+_label_13:	//  @200
+    ; Line 239			//  @200
+  const_pool <55>			//  @200
+    ; Line 239			//  @205
+  throw				//  @205
+_label_14:	//  @206
+    ; Line 239			//  @206
+    ; Line 241			//  @206
+  summon this			//  @206
+  call m=29 nparm=0		//  @207
+  os drop				//  @209
+    ; Line 241			//  @210
+    ; Line 243			//  @210
+  const 2				//  @210
+  i2o				//  @215
+  os dup				//  @216
+  save fld=2			//  @217
+  os drop				//  @219
+    ; Line 243			//  @220
+    ; Line 244			//  @220
+  load fld=2			//  @220
+  o2i				//  @222
+  is dup				//  @223
+    ; Line 246			//  @224
+  const 1				//  @224
+  isublu				//  @229
+  jz _label_0			//  @230
+  is dup				//  @235
+    ; Line 247			//  @236
+  const 2				//  @236
+  isublu				//  @241
+  jz _label_1			//  @242
+  is dup				//  @247
+    ; Line 248			//  @248
+  const 3				//  @248
+  isublu				//  @253
+  jz _label_2			//  @254
+  jmp _label_3			//  @259
+_label_0:	//  @264
+  is drop				//  @264
+    ; Line 246			//  @265
+  const_pool <56>			//  @265
+    ; Line 246			//  @270
+  throw				//  @270
+    ; Line 246			//  @271
+_label_1:	//  @271
+  is drop				//  @271
+    ; Line 247			//  @272
+    ; Line 247			//  @272
+  jmp _label_15			//  @272
+    ; Line 247			//  @277
+_label_2:	//  @277
+  is drop				//  @277
+    ; Line 248			//  @278
+    ; Line 248			//  @278
+  const_pool <57>			//  @278
+    ; Line 248			//  @283
+  throw				//  @283
+    ; Line 248			//  @284
+_label_3:	//  @284
+  is drop				//  @284
+    ; Line 249			//  @285
+    ; Line 249			//  @285
+  const_pool <58>			//  @285
+    ; Line 249			//  @290
   throw				//  @290
-_label_14:	//  @291
-  ; Line 175			//  @291
-  ; Line 177			//  @291
-  summon this			//  @291
-  call m=20 nparm=0		//  @292
-  os drop				//  @294
-  ; Line 177			//  @295
-  ; Line 179			//  @295
-  const 2				//  @295
-  i2o				//  @300
-  os dup				//  @301
-  save fld=2			//  @302
+    ; Line 249			//  @291
+    ; Line 250			//  @291
+  jmp _label_15			//  @291
+    ; Line 250			//  @296
+_label_15:	//  @296
+    ; Line 250			//  @296
+    ; Line 252			//  @296
+  summon this			//  @296
+    ; Line 252			//  @297
+  const_pool <59>			//  @297
+    ; Line 252			//  @302
+  call m=17 nparm=1		//  @302
   os drop				//  @304
-  ; Line 179			//  @305
-  ; Line 180			//  @305
-  load fld=2			//  @305
-  o2i				//  @307
-  is dup				//  @308
-  ; Line 182			//  @309
-  const 1				//  @309
-  isublu				//  @314
-  jz _label_0			//  @315
-  is dup				//  @320
-  ; Line 183			//  @321
-  const 2				//  @321
-  isublu				//  @326
-  jz _label_1			//  @327
-  is dup				//  @332
-  ; Line 184			//  @333
-  const 3				//  @333
-  isublu				//  @338
-  jz _label_2			//  @339
-  jmp _label_3			//  @344
-_label_0:	//  @349
-  is drop				//  @349
-  ; Line 182			//  @350
-  const "switch fall in error"	//  @350
-  ; Line 182			//  @375
-  throw				//  @375
-  ; Line 182			//  @376
-_label_1:	//  @376
-  is drop				//  @376
-  ; Line 183			//  @377
-  ; Line 183			//  @377
-  jmp _label_15			//  @377
-  ; Line 183			//  @382
-_label_2:	//  @382
-  is drop				//  @382
-  ; Line 184			//  @383
-  ; Line 184			//  @383
-  const "switch fall out error"	//  @383
-  ; Line 184			//  @409
-  throw				//  @409
-  ; Line 184			//  @410
-_label_3:	//  @410
-  is drop				//  @410
-  ; Line 185			//  @411
-  ; Line 185			//  @411
-  const "switch dafault error"	//  @411
-  ; Line 185			//  @436
-  throw				//  @436
-  ; Line 185			//  @437
-  ; Line 186			//  @437
-  jmp _label_15			//  @437
-  ; Line 186			//  @442
-_label_15:	//  @442
-  ; Line 186			//  @442
-  ; Line 188			//  @442
-  summon this			//  @442
-  ; Line 188			//  @443
-  const "passed
-"			//  @443
-  ; Line 188			//  @455
-  call m=16 nparm=1		//  @455
-  os drop				//  @457
-  ; Line 188			//  @458
-  ret				//  @458
+    ; Line 252			//  @305
+  ret				//  @305
+--
+method end
+
+method sig_func ordinal 22
+--
+  const 1				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: sig_func in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @77
+_label_0:	//  @78
+  stack_reserve obj=1 int=0	//  @78
+    ; Line 50			//  @81
+  const 1				//  @81
+  i2o				//  @86
+  os dup				//  @87
+  save fld=8			//  @88
+  os drop				//  @90
+  ret				//  @91
+--
+method end
+
+method math_test ordinal 23
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: math_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @78
+_label_0:	//  @79
+    ; Line 169			//  @79
+  summon this			//  @79
+    ; Line 169			//  @80
+  const_pool <21>			//  @80
+    ; Line 169			//  @85
+  call m=17 nparm=1		//  @85
+  os drop				//  @87
+    ; Line 171			//  @88
+    ; Line 171			//  @88
+  const 12			//  @88
+    ; Line 171			//  @93
+  const 2				//  @93
+    ; Line 171			//  @98
+  idivlu				//  @98
+    ; Line 171			//  @99
+  const 6				//  @99
+  isublu				//  @104
+  jz _label_1			//  @105
+    ; Line 171			//  @110
+  const_pool <22>			//  @110
+    ; Line 171			//  @115
+  throw				//  @115
+_label_1:	//  @116
+    ; Line 171			//  @116
+    ; Line 173			//  @116
+    ; Line 173			//  @116
+  const 2				//  @116
+    ; Line 173			//  @121
+  const 2				//  @121
+    ; Line 173			//  @126
+  isum				//  @126
+    ; Line 173			//  @127
+  const 4				//  @127
+  isublu				//  @132
+  jz _label_3			//  @133
+    ; Line 173			//  @138
+  const_pool <23>			//  @138
+    ; Line 173			//  @143
+  throw				//  @143
+_label_3:	//  @144
+    ; Line 173			//  @144
+    ; Line 174			//  @144
+    ; Line 174			//  @144
+  const 2				//  @144
+    ; Line 174			//  @149
+  const 2				//  @149
+    ; Line 174			//  @154
+  isublu				//  @154
+    ; Line 174			//  @155
+  const 0				//  @155
+  isublu				//  @160
+  jz _label_5			//  @161
+    ; Line 174			//  @166
+  const_pool <24>			//  @166
+    ; Line 174			//  @171
+  throw				//  @171
+_label_5:	//  @172
+    ; Line 174			//  @172
+    ; Line 175			//  @172
+    ; Line 175			//  @172
+  const 2				//  @172
+    ; Line 175			//  @177
+  const 2				//  @177
+    ; Line 175			//  @182
+  idivlu				//  @182
+    ; Line 175			//  @183
+  const 1				//  @183
+  isublu				//  @188
+  jz _label_7			//  @189
+    ; Line 175			//  @194
+  const_pool <25>			//  @194
+    ; Line 175			//  @199
+  throw				//  @199
+_label_7:	//  @200
+    ; Line 175			//  @200
+    ; Line 176			//  @200
+    ; Line 176			//  @200
+  const 3				//  @200
+    ; Line 176			//  @205
+  const 3				//  @205
+    ; Line 176			//  @210
+  imul				//  @210
+    ; Line 176			//  @211
+  const 9				//  @211
+  isublu				//  @216
+  jz _label_9			//  @217
+    ; Line 176			//  @222
+  const_pool <26>			//  @222
+    ; Line 176			//  @227
+  throw				//  @227
+_label_9:	//  @228
+    ; Line 176			//  @228
+    ; Line 178			//  @228
+    ; Line 178			//  @228
+  const 3				//  @228
+    ; Line 178			//  @233
+  const 2				//  @233
+  ilt <				//  @238
+  jz _label_11			//  @239
+    ; Line 178			//  @244
+  const_pool <27>			//  @244
+    ; Line 178			//  @249
+  throw				//  @249
+_label_11:	//  @250
+    ; Line 178			//  @250
+    ; Line 179			//  @250
+    ; Line 179			//  @250
+  const 5				//  @250
+    ; Line 179			//  @255
+  const 6				//  @255
+  igt >				//  @260
+  jz _label_13			//  @261
+    ; Line 179			//  @266
+  const_pool <28>			//  @266
+    ; Line 179			//  @271
+  throw				//  @271
+_label_13:	//  @272
+    ; Line 179			//  @272
+    ; Line 181			//  @272
+    ; Line 181			//  @272
+  const 3				//  @272
+    ; Line 181			//  @277
+  const 2				//  @277
+  ile <=				//  @282
+  jz _label_15			//  @283
+    ; Line 181			//  @288
+  const_pool <29>			//  @288
+    ; Line 181			//  @293
+  throw				//  @293
+_label_15:	//  @294
+    ; Line 181			//  @294
+    ; Line 182			//  @294
+    ; Line 182			//  @294
+  const 5				//  @294
+    ; Line 182			//  @299
+  const 6				//  @299
+  ige >=				//  @304
+  jz _label_17			//  @305
+    ; Line 182			//  @310
+  const_pool <30>			//  @310
+    ; Line 182			//  @315
+  throw				//  @315
+_label_17:	//  @316
+    ; Line 182			//  @316
+    ; Line 184			//  @316
+    ; Line 184			//  @316
+  const 3				//  @316
+    ; Line 184			//  @321
+  const 3				//  @321
+  ile <=				//  @326
+    ; Line 184			//  @327
+  lognot				//  @327
+  jz _label_19			//  @328
+    ; Line 184			//  @333
+  const_pool <31>			//  @333
+    ; Line 184			//  @338
+  throw				//  @338
+_label_19:	//  @339
+    ; Line 184			//  @339
+    ; Line 185			//  @339
+    ; Line 185			//  @339
+  const 5				//  @339
+    ; Line 185			//  @344
+  const 5				//  @344
+  ige >=				//  @349
+    ; Line 185			//  @350
+  lognot				//  @350
+  jz _label_21			//  @351
+    ; Line 185			//  @356
+  const_pool <32>			//  @356
+    ; Line 185			//  @361
+  throw				//  @361
+_label_21:	//  @362
+    ; Line 185			//  @362
+    ; Line 187			//  @362
+    ; Line 187			//  @362
+  const 0				//  @362
+    ; Line 187			//  @367
+  const 0				//  @367
+    ; Line 187			//  @372
+  logor ||			//  @372
+  jz _label_23			//  @373
+    ; Line 187			//  @378
+  const_pool <33>			//  @378
+    ; Line 187			//  @383
+  throw				//  @383
+_label_23:	//  @384
+    ; Line 187			//  @384
+    ; Line 188			//  @384
+    ; Line 188			//  @384
+  const 1				//  @384
+    ; Line 188			//  @389
+  const 0				//  @389
+    ; Line 188			//  @394
+  logor ||			//  @394
+  jz _label_25			//  @395
+  jmp _label_26			//  @400
+_label_25:	//  @405
+    ; Line 188			//  @405
+  const_pool <34>			//  @405
+    ; Line 188			//  @410
+  throw				//  @410
+_label_26:	//  @411
+    ; Line 188			//  @411
+    ; Line 189			//  @411
+    ; Line 189			//  @411
+  const 0				//  @411
+    ; Line 189			//  @416
+  const 1				//  @416
+    ; Line 189			//  @421
+  logor ||			//  @421
+  jz _label_27			//  @422
+  jmp _label_28			//  @427
+_label_27:	//  @432
+    ; Line 189			//  @432
+  const_pool <35>			//  @432
+    ; Line 189			//  @437
+  throw				//  @437
+_label_28:	//  @438
+    ; Line 189			//  @438
+    ; Line 190			//  @438
+    ; Line 190			//  @438
+  const 1				//  @438
+    ; Line 190			//  @443
+  const 1				//  @443
+    ; Line 190			//  @448
+  logor ||			//  @448
+  jz _label_29			//  @449
+  jmp _label_30			//  @454
+_label_29:	//  @459
+    ; Line 190			//  @459
+  const_pool <36>			//  @459
+    ; Line 190			//  @464
+  throw				//  @464
+_label_30:	//  @465
+    ; Line 190			//  @465
+    ; Line 192			//  @465
+    ; Line 192			//  @465
+  const 0				//  @465
+    ; Line 192			//  @470
+  const 0				//  @470
+    ; Line 192			//  @475
+  logand &&			//  @475
+  jz _label_31			//  @476
+    ; Line 192			//  @481
+  const_pool <37>			//  @481
+    ; Line 192			//  @486
+  throw				//  @486
+_label_31:	//  @487
+    ; Line 192			//  @487
+    ; Line 193			//  @487
+    ; Line 193			//  @487
+  const 1				//  @487
+    ; Line 193			//  @492
+  const 0				//  @492
+    ; Line 193			//  @497
+  logand &&			//  @497
+  jz _label_33			//  @498
+    ; Line 193			//  @503
+  const_pool <38>			//  @503
+    ; Line 193			//  @508
+  throw				//  @508
+_label_33:	//  @509
+    ; Line 193			//  @509
+    ; Line 194			//  @509
+    ; Line 194			//  @509
+  const 0				//  @509
+    ; Line 194			//  @514
+  const 1				//  @514
+    ; Line 194			//  @519
+  logand &&			//  @519
+  jz _label_35			//  @520
+    ; Line 194			//  @525
+  const_pool <39>			//  @525
+    ; Line 194			//  @530
+  throw				//  @530
+_label_35:	//  @531
+    ; Line 194			//  @531
+    ; Line 195			//  @531
+    ; Line 195			//  @531
+  const 1				//  @531
+    ; Line 195			//  @536
+  const 1				//  @536
+    ; Line 195			//  @541
+  logand &&			//  @541
+  jz _label_37			//  @542
+  jmp _label_38			//  @547
+_label_37:	//  @552
+    ; Line 195			//  @552
+  const_pool <40>			//  @552
+    ; Line 195			//  @557
+  throw				//  @557
+_label_38:	//  @558
+    ; Line 195			//  @558
+    ; Line 197			//  @558
+    ; Line 197			//  @558
+  const 0				//  @558
+    ; Line 197			//  @563
+  const 0				//  @563
+    ; Line 197			//  @568
+  ior				//  @568
+  jz _label_39			//  @569
+    ; Line 197			//  @574
+  const_pool <41>			//  @574
+    ; Line 197			//  @579
+  throw				//  @579
+_label_39:	//  @580
+    ; Line 197			//  @580
+    ; Line 198			//  @580
+    ; Line 198			//  @580
+  const 1				//  @580
+    ; Line 198			//  @585
+  const 0				//  @585
+    ; Line 198			//  @590
+  ior				//  @590
+  jz _label_41			//  @591
+  jmp _label_42			//  @596
+_label_41:	//  @601
+    ; Line 198			//  @601
+  const_pool <42>			//  @601
+    ; Line 198			//  @606
+  throw				//  @606
+_label_42:	//  @607
+    ; Line 198			//  @607
+    ; Line 199			//  @607
+    ; Line 199			//  @607
+  const 0				//  @607
+    ; Line 199			//  @612
+  const 1				//  @612
+    ; Line 199			//  @617
+  ior				//  @617
+  jz _label_43			//  @618
+  jmp _label_44			//  @623
+_label_43:	//  @628
+    ; Line 199			//  @628
+  const_pool <43>			//  @628
+    ; Line 199			//  @633
+  throw				//  @633
+_label_44:	//  @634
+    ; Line 199			//  @634
+    ; Line 200			//  @634
+    ; Line 200			//  @634
+  const 1				//  @634
+    ; Line 200			//  @639
+  const 1				//  @639
+    ; Line 200			//  @644
+  ior				//  @644
+  jz _label_45			//  @645
+  jmp _label_46			//  @650
+_label_45:	//  @655
+    ; Line 200			//  @655
+  const_pool <44>			//  @655
+    ; Line 200			//  @660
+  throw				//  @660
+_label_46:	//  @661
+    ; Line 200			//  @661
+    ; Line 202			//  @661
+    ; Line 202			//  @661
+  const 0				//  @661
+    ; Line 202			//  @666
+  const 0				//  @666
+    ; Line 202			//  @671
+  iand				//  @671
+  jz _label_47			//  @672
+    ; Line 202			//  @677
+  const_pool <45>			//  @677
+    ; Line 202			//  @682
+  throw				//  @682
+_label_47:	//  @683
+    ; Line 202			//  @683
+    ; Line 203			//  @683
+    ; Line 203			//  @683
+  const 1				//  @683
+    ; Line 203			//  @688
+  const 0				//  @688
+    ; Line 203			//  @693
+  iand				//  @693
+  jz _label_49			//  @694
+    ; Line 203			//  @699
+  const_pool <46>			//  @699
+    ; Line 203			//  @704
+  throw				//  @704
+_label_49:	//  @705
+    ; Line 203			//  @705
+    ; Line 204			//  @705
+    ; Line 204			//  @705
+  const 0				//  @705
+    ; Line 204			//  @710
+  const 1				//  @710
+    ; Line 204			//  @715
+  iand				//  @715
+  jz _label_51			//  @716
+    ; Line 204			//  @721
+  const_pool <47>			//  @721
+    ; Line 204			//  @726
+  throw				//  @726
+_label_51:	//  @727
+    ; Line 204			//  @727
+    ; Line 205			//  @727
+    ; Line 205			//  @727
+  const 1				//  @727
+    ; Line 205			//  @732
+  const 1				//  @732
+    ; Line 205			//  @737
+  iand				//  @737
+  jz _label_53			//  @738
+  jmp _label_54			//  @743
+_label_53:	//  @748
+    ; Line 205			//  @748
+  const_pool <48>			//  @748
+    ; Line 205			//  @753
+  throw				//  @753
+_label_54:	//  @754
+    ; Line 205			//  @754
+    ; Line 207			//  @754
+  summon this			//  @754
+    ; Line 207			//  @755
+  const_pool <49>			//  @755
+    ; Line 207			//  @760
+  call m=17 nparm=1		//  @760
+  os drop				//  @762
+    ; Line 207			//  @763
+  ret				//  @763
+--
+method end
+
+method array_test ordinal 24
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: array_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @79
+_label_0:	//  @80
+    ; Line 123			//  @80
+  summon this			//  @80
+    ; Line 123			//  @81
+  const_pool <9>			//  @81
+    ; Line 123			//  @86
+  call m=17 nparm=1		//  @86
+  os drop				//  @88
+  summon class internal.container.array	//  @89
+  new				//  @90
+  pull depth=0			//  @91
+  summon class internal.container.array	//  @96
+  static invoke ord=0 n_param=0	//  @97
+  os drop				//  @106
+  os dup				//  @107
+  save fld=4			//  @108
+  os drop				//  @110
+    ; Line 126			//  @111
+  summon class internal.container.array	//  @111
+  new				//  @112
+  pull depth=0			//  @113
+  summon class internal.container.array	//  @118
+  static invoke ord=0 n_param=0	//  @119
+  os drop				//  @128
+  os dup				//  @129
+  save fld=5			//  @130
+  os drop				//  @132
+    ; Line 127			//  @133
+    ; Line 129			//  @133
+  load fld=5			//  @133
+    ; Line 129			//  @135
+  const_pool <10>			//  @135
+    ; Line 129			//  @140
+  const 0				//  @140
+  i2o				//  @145
+  call m=11 nparm=2		//  @146
+  os drop				//  @148
+    ; Line 129			//  @149
+    ; Line 130			//  @149
+  load fld=5			//  @149
+    ; Line 130			//  @151
+  const_pool <11>			//  @151
+    ; Line 130			//  @156
+  const 2				//  @156
+  i2o				//  @161
+  call m=11 nparm=2		//  @162
+  os drop				//  @164
+    ; Line 130			//  @165
+    ; Line 131			//  @165
+  load fld=5			//  @165
+    ; Line 131			//  @167
+  const_pool <12>			//  @167
+    ; Line 131			//  @172
+  const 1				//  @172
+  i2o				//  @177
+  call m=11 nparm=2		//  @178
+  os drop				//  @180
+    ; Line 131			//  @181
+    ; Line 133			//  @181
+  summon this			//  @181
+    ; Line 133			//  @182
+  const_pool <13>			//  @182
+    ; Line 133			//  @187
+  call m=17 nparm=1		//  @187
+  os drop				//  @189
+    ; Line 133			//  @190
+    ; Line 134			//  @190
+  const 3				//  @190
+  i2o				//  @195
+  os dup				//  @196
+  save fld=2			//  @197
+  os drop				//  @199
+    ; Line 134			//  @200
+    ; Line 139			//  @200
+_label_1:	//  @200
+    ; Line 135			//  @200
+  load fld=2			//  @200
+  o2i				//  @202
+  jz _label_2			//  @203
+    ; Line 137			//  @208
+  load fld=2			//  @208
+  o2i				//  @210
+    ; Line 137			//  @211
+  const 1				//  @211
+    ; Line 137			//  @216
+  isublu				//  @216
+  i2o				//  @217
+  os dup				//  @218
+  save fld=2			//  @219
+  os drop				//  @221
+    ; Line 138			//  @222
+  summon this			//  @222
+    ; Line 138			//  @223
+  const_pool <14>			//  @223
+    ; Line 138			//  @228
+  call m=17 nparm=1		//  @228
+  os drop				//  @230
+    ; Line 138			//  @231
+    ; Line 138			//  @231
+  summon this			//  @231
+    ; Line 138			//  @232
+  load fld=5			//  @232
+    ; Line 138			//  @234
+  load fld=2			//  @234
+  call m=10 nparm=1		//  @236
+    ; Line 138			//  @238
+  call m=17 nparm=1		//  @238
+  os drop				//  @240
+    ; Line 138			//  @241
+    ; Line 138			//  @241
+  summon this			//  @241
+    ; Line 138			//  @242
+  const_pool <15>			//  @242
+    ; Line 138			//  @247
+  call m=17 nparm=1		//  @247
+  os drop				//  @249
+    ; Line 138			//  @250
+  jmp _label_1			//  @250
+_label_2:	//  @255
+    ; Line 139			//  @255
+    ; Line 140			//  @255
+  summon this			//  @255
+    ; Line 140			//  @256
+  const_pool <16>			//  @256
+    ; Line 140			//  @261
+  call m=17 nparm=1		//  @261
+  os drop				//  @263
+    ; Line 140			//  @264
+    ; Line 143			//  @264
+  load fld=4			//  @264
+    ; Line 143			//  @266
+  const 0				//  @266
+  i2o				//  @271
+    ; Line 143			//  @272
+  const 0				//  @272
+  i2o				//  @277
+  call m=11 nparm=2		//  @278
+  os drop				//  @280
+    ; Line 143			//  @281
+    ; Line 144			//  @281
+  load fld=4			//  @281
+    ; Line 144			//  @283
+  const 2				//  @283
+  i2o				//  @288
+    ; Line 144			//  @289
+  const 2				//  @289
+  i2o				//  @294
+  call m=11 nparm=2		//  @295
+  os drop				//  @297
+    ; Line 144			//  @298
+    ; Line 145			//  @298
+  load fld=4			//  @298
+    ; Line 145			//  @300
+  const 1				//  @300
+  i2o				//  @305
+    ; Line 145			//  @306
+  const 1				//  @306
+  i2o				//  @311
+  call m=11 nparm=2		//  @312
+  os drop				//  @314
+    ; Line 145			//  @315
+    ; Line 147			//  @315
+  const 3				//  @315
+  i2o				//  @320
+  os dup				//  @321
+  save fld=2			//  @322
+  os drop				//  @324
+    ; Line 147			//  @325
+    ; Line 157			//  @325
+_label_3:	//  @325
+    ; Line 148			//  @325
+  load fld=2			//  @325
+  o2i				//  @327
+  jz _label_4			//  @328
+    ; Line 150			//  @333
+  load fld=2			//  @333
+  o2i				//  @335
+    ; Line 150			//  @336
+  const 1				//  @336
+    ; Line 150			//  @341
+  isublu				//  @341
+  i2o				//  @342
+  os dup				//  @343
+  save fld=2			//  @344
+  os drop				//  @346
+    ; Line 156			//  @347
+    ; Line 151			//  @347
+  load fld=4			//  @347
+    ; Line 151			//  @349
+  load fld=2			//  @349
+  call m=10 nparm=1		//  @351
+    ; Line 151			//  @353
+  load fld=2			//  @353
+  call m=4 nparm=1		//  @355
+  o2i				//  @357
+  lognot				//  @358
+  jz _label_5			//  @359
+    ; Line 153			//  @364
+  summon this			//  @364
+    ; Line 153			//  @365
+  const_pool <17>			//  @365
+    ; Line 153			//  @370
+  call m=17 nparm=1		//  @370
+  os drop				//  @372
+    ; Line 153			//  @373
+  summon this			//  @373
+    ; Line 153			//  @374
+  load fld=2			//  @374
+  call m=5 nparm=0		//  @376
+    ; Line 153			//  @378
+  call m=17 nparm=1		//  @378
+  os drop				//  @380
+    ; Line 153			//  @381
+    ; Line 154			//  @381
+  summon this			//  @381
+    ; Line 154			//  @382
+  const_pool <18>			//  @382
+    ; Line 154			//  @387
+  call m=17 nparm=1		//  @387
+  os drop				//  @389
+    ; Line 154			//  @390
+    ; Line 154			//  @390
+  summon this			//  @390
+    ; Line 154			//  @391
+  load fld=4			//  @391
+    ; Line 154			//  @393
+  load fld=2			//  @393
+  call m=10 nparm=1		//  @395
+  call m=5 nparm=0		//  @397
+    ; Line 154			//  @399
+  call m=17 nparm=1		//  @399
+  os drop				//  @401
+    ; Line 154			//  @402
+    ; Line 155			//  @402
+  const_pool <19>			//  @402
+    ; Line 155			//  @407
+  throw				//  @407
+    ; Line 155			//  @408
+_label_5:	//  @408
+    ; Line 156			//  @408
+  jmp _label_3			//  @408
+_label_4:	//  @413
+    ; Line 157			//  @413
+    ; Line 160			//  @413
+  summon this			//  @413
+    ; Line 160			//  @414
+  const_pool <20>			//  @414
+    ; Line 160			//  @419
+  call m=17 nparm=1		//  @419
+  os drop				//  @421
+    ; Line 160			//  @422
+  ret				//  @422
+--
+method end
+
+method float_test ordinal 25
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: float_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @79
+_label_0:	//  @80
+  stack_reserve obj=3 int=0	//  @80
+    ; Line 337			//  @83
+  const 12			//  @83
+  :float				//  @88
+  from int			//  @89
+  :float				//  @90
+  i2o				//  @91
+  os dup				//  @92
+  set o stk pos=0			//  @93
+  os drop				//  @98
+    ; Line 338			//  @99
+  const 2				//  @99
+  :float				//  @104
+  from int			//  @105
+  :float				//  @106
+  i2o				//  @107
+  os dup				//  @108
+  set o stk pos=1			//  @109
+  os drop				//  @114
+    ; Line 338			//  @115
+    ; Line 339			//  @115
+  const 0				//  @115
+    ; Line 339			//  @120
+  const 3				//  @120
+    ; Line 339			//  @125
+  isublu				//  @125
+  :float				//  @126
+  from int			//  @127
+  :float				//  @128
+  i2o				//  @129
+  os dup				//  @130
+  set o stk pos=2			//  @131
+  os drop				//  @136
+    ; Line 339			//  @137
+    ; Line 341			//  @137
+    ; Line 341			//  @137
+  get o stk pos=0			//  @137
+  :float				//  @142
+  o2i				//  @143
+    ; Line 341			//  @144
+  get o stk pos=1			//  @144
+  :float				//  @149
+  o2i				//  @150
+    ; Line 341			//  @151
+  :float				//  @151
+  idivlu				//  @152
+    ; Line 341			//  @153
+  const 6				//  @153
+  :float				//  @158
+  from int			//  @159
+  :float				//  @160
+  isublu				//  @161
+  jz _label_1			//  @162
+    ; Line 341			//  @167
+  const_pool <90>			//  @167
+    ; Line 341			//  @172
+  throw				//  @172
+_label_1:	//  @173
+    ; Line 341			//  @173
+    ; Line 342			//  @173
+    ; Line 342			//  @173
+  get o stk pos=1			//  @173
+  :float				//  @178
+  o2i				//  @179
+    ; Line 342			//  @180
+  get o stk pos=2			//  @180
+  :float				//  @185
+  o2i				//  @186
+    ; Line 342			//  @187
+  :float				//  @187
+  isublu				//  @188
+    ; Line 342			//  @189
+  const 5				//  @189
+  :float				//  @194
+  from int			//  @195
+  :float				//  @196
+  isublu				//  @197
+  jz _label_3			//  @198
+    ; Line 342			//  @203
+  const_pool <91>			//  @203
+    ; Line 342			//  @208
+  throw				//  @208
+_label_3:	//  @209
+    ; Line 342			//  @209
+    ; Line 343			//  @209
+    ; Line 343			//  @209
+  get o stk pos=1			//  @209
+  :float				//  @214
+  o2i				//  @215
+    ; Line 343			//  @216
+  get o stk pos=2			//  @216
+  :float				//  @221
+  o2i				//  @222
+    ; Line 343			//  @223
+  :float				//  @223
+  imul				//  @224
+    ; Line 343			//  @225
+  const 0				//  @225
+    ; Line 343			//  @230
+  const 6				//  @230
+    ; Line 343			//  @235
+  isublu				//  @235
+  :float				//  @236
+  from int			//  @237
+  :float				//  @238
+  isublu				//  @239
+  jz _label_5			//  @240
+    ; Line 343			//  @245
+  const_pool <92>			//  @245
+    ; Line 343			//  @250
+  throw				//  @250
+_label_5:	//  @251
+    ; Line 343			//  @251
+    ; Line 344			//  @251
+    ; Line 344			//  @251
+  get o stk pos=0			//  @251
+  :float				//  @256
+  o2i				//  @257
+    ; Line 344			//  @258
+  get o stk pos=2			//  @258
+  :float				//  @263
+  o2i				//  @264
+    ; Line 344			//  @265
+  :float				//  @265
+  isum				//  @266
+    ; Line 344			//  @267
+  const 9				//  @267
+  :float				//  @272
+  from int			//  @273
+  :float				//  @274
+  isublu				//  @275
+  jz _label_7			//  @276
+    ; Line 344			//  @281
+  const_pool <93>			//  @281
+    ; Line 344			//  @286
+  throw				//  @286
+_label_7:	//  @287
+    ; Line 344			//  @287
+    ; Line 346			//  @287
+    ; Line 346			//  @287
+  get o stk pos=1			//  @287
+  :float				//  @292
+  o2i				//  @293
+    ; Line 346			//  @294
+  get o stk pos=2			//  @294
+  :float				//  @299
+  o2i				//  @300
+  :float				//  @301
+  ilt <				//  @302
+  jz _label_9			//  @303
+    ; Line 346			//  @308
+  const_pool <94>			//  @308
+    ; Line 346			//  @313
+  throw				//  @313
+_label_9:	//  @314
+    ; Line 346			//  @314
+    ; Line 347			//  @314
+    ; Line 347			//  @314
+  get o stk pos=1			//  @314
+  :float				//  @319
+  o2i				//  @320
+    ; Line 347			//  @321
+  get o stk pos=0			//  @321
+  :float				//  @326
+  o2i				//  @327
+  :float				//  @328
+  igt >				//  @329
+  jz _label_11			//  @330
+    ; Line 347			//  @335
+  const_pool <95>			//  @335
+    ; Line 347			//  @340
+  throw				//  @340
+_label_11:	//  @341
+    ; Line 347			//  @341
+    ; Line 348			//  @341
+    ; Line 348			//  @341
+  get o stk pos=1			//  @341
+  :float				//  @346
+  o2i				//  @347
+    ; Line 348			//  @348
+  get o stk pos=2			//  @348
+  :float				//  @353
+  o2i				//  @354
+  :float				//  @355
+  ile <=				//  @356
+  jz _label_13			//  @357
+    ; Line 348			//  @362
+  const_pool <96>			//  @362
+    ; Line 348			//  @367
+  throw				//  @367
+_label_13:	//  @368
+    ; Line 348			//  @368
+    ; Line 349			//  @368
+    ; Line 349			//  @368
+  get o stk pos=1			//  @368
+  :float				//  @373
+  o2i				//  @374
+    ; Line 349			//  @375
+  get o stk pos=0			//  @375
+  :float				//  @380
+  o2i				//  @381
+  :float				//  @382
+  ige >=				//  @383
+  jz _label_15			//  @384
+    ; Line 349			//  @389
+  const_pool <97>			//  @389
+    ; Line 349			//  @394
+  throw				//  @394
+_label_15:	//  @395
+    ; Line 349			//  @395
+    ; Line 350			//  @395
+  summon this			//  @395
+    ; Line 350			//  @396
+  const_pool <98>			//  @396
+    ; Line 350			//  @401
+  call m=17 nparm=1		//  @401
+  os drop				//  @403
+    ; Line 350			//  @404
+  ret				//  @404
+--
+method end
+
+method hashmap_directory_test ordinal 26
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: hashmap_directory_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @91
+_label_0:	//  @92
+  stack_reserve obj=2 int=0	//  @92
+    ; Line 258			//  @95
+  summon this			//  @95
+    ; Line 258			//  @96
+  const_pool <60>			//  @96
+    ; Line 258			//  @101
+  call m=17 nparm=1		//  @101
+  os drop				//  @103
+    ; Line 263			//  @104
+  summon this			//  @104
+    ; Line 263			//  @105
+  const_pool <61>			//  @105
+    ; Line 263			//  @110
+  call m=17 nparm=1		//  @110
+  os drop				//  @112
+    ; Line 263			//  @113
+  summon class internal.directory	//  @113
+  new				//  @137
+  pull depth=0			//  @138
+  summon class internal.directory	//  @143
+  static invoke ord=0 n_param=0	//  @167
+  os drop				//  @176
+  os dup				//  @177
+  set o stk pos=0			//  @178
+  os drop				//  @183
+    ; Line 264			//  @184
+    ; Line 267			//  @184
+  get o stk pos=0			//  @184
+    ; Line 267			//  @189
+  const_pool <62>			//  @189
+    ; Line 267			//  @194
+  const_pool <63>			//  @194
+  summon class internal.object	//  @199
+  cast obj class			//  @220
+    ; Line 267			//  @221
+    ; Line 267			//  @221
+  call m=8 nparm=2		//  @221
+  os drop				//  @223
+    ; Line 267			//  @224
+    ; Line 269			//  @224
+  get o stk pos=0			//  @224
+    ; Line 269			//  @229
+  const_pool <64>			//  @229
+    ; Line 269			//  @234
+  const_pool <65>			//  @234
+    ; Line 269			//  @239
+    ; Line 269			//  @239
+  call m=8 nparm=2		//  @239
+  os drop				//  @241
+    ; Line 269			//  @242
+    ; Line 271			//  @242
+  get o stk pos=0			//  @242
+    ; Line 271			//  @247
+  const_pool <66>			//  @247
+    ; Line 271			//  @252
+  const_pool <67>			//  @252
+    ; Line 271			//  @257
+    ; Line 271			//  @257
+  call m=8 nparm=2		//  @257
+  os drop				//  @259
+    ; Line 271			//  @260
+    ; Line 274			//  @260
+  get o stk pos=0			//  @260
+    ; Line 274			//  @265
+  const_pool <68>			//  @265
+    ; Line 274			//  @270
+  call m=9 nparm=1		//  @270
+  os dup				//  @272
+  set o stk pos=1			//  @273
+  os drop				//  @278
+    ; Line 274			//  @279
+    ; Line 275			//  @279
+    ; Line 275			//  @279
+  get o stk pos=1			//  @279
+    ; Line 275			//  @284
+  const_pool <69>			//  @284
+    ; Line 275			//  @289
+  call m=4 nparm=1		//  @289
+  o2i				//  @291
+    ; Line 275			//  @292
+  lognot				//  @292
+  jz _label_1			//  @293
+    ; Line 275			//  @298
+  const_pool <70>			//  @298
+    ; Line 275			//  @303
+  throw				//  @303
+_label_1:	//  @304
+    ; Line 275			//  @304
+    ; Line 278			//  @304
+  get o stk pos=0			//  @304
+    ; Line 278			//  @309
+  const_pool <71>			//  @309
+    ; Line 278			//  @314
+  call m=9 nparm=1		//  @314
+  os dup				//  @316
+  set o stk pos=1			//  @317
+  os drop				//  @322
+    ; Line 278			//  @323
+    ; Line 279			//  @323
+    ; Line 279			//  @323
+  get o stk pos=1			//  @323
+    ; Line 279			//  @328
+  const_pool <72>			//  @328
+    ; Line 279			//  @333
+  call m=4 nparm=1		//  @333
+  o2i				//  @335
+    ; Line 279			//  @336
+  lognot				//  @336
+  jz _label_3			//  @337
+    ; Line 279			//  @342
+  const_pool <73>			//  @342
+    ; Line 279			//  @347
+  throw				//  @347
+_label_3:	//  @348
+    ; Line 279			//  @348
+    ; Line 282			//  @348
+  get o stk pos=0			//  @348
+    ; Line 282			//  @353
+  const_pool <74>			//  @353
+    ; Line 282			//  @358
+  call m=9 nparm=1		//  @358
+  os dup				//  @360
+  set o stk pos=1			//  @361
+  os drop				//  @366
+    ; Line 282			//  @367
+    ; Line 283			//  @367
+    ; Line 283			//  @367
+  get o stk pos=1			//  @367
+    ; Line 283			//  @372
+  const_pool <75>			//  @372
+    ; Line 283			//  @377
+  call m=4 nparm=1		//  @377
+  o2i				//  @379
+    ; Line 283			//  @380
+  lognot				//  @380
+  jz _label_5			//  @381
+    ; Line 283			//  @386
+  const_pool <76>			//  @386
+    ; Line 283			//  @391
+  throw				//  @391
+_label_5:	//  @392
+    ; Line 283			//  @392
+    ; Line 296			//  @392
+  summon this			//  @392
+    ; Line 296			//  @393
+  const_pool <77>			//  @393
+    ; Line 296			//  @398
+  call m=17 nparm=1		//  @398
+  os drop				//  @400
+    ; Line 296			//  @401
+  ret				//  @401
+--
+method end
+
+method double_test ordinal 27
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: double_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @80
+_label_0:	//  @81
+  stack_reserve obj=3 int=0	//  @81
+    ; Line 360			//  @84
+  const 12			//  @84
+  :double				//  @89
+  from int			//  @90
+  :double				//  @91
+  i2o				//  @92
+  os dup				//  @93
+  set o stk pos=0			//  @94
+  os drop				//  @99
+    ; Line 361			//  @100
+  const 2				//  @100
+  :double				//  @105
+  from int			//  @106
+  :double				//  @107
+  i2o				//  @108
+  os dup				//  @109
+  set o stk pos=1			//  @110
+  os drop				//  @115
+    ; Line 361			//  @116
+    ; Line 362			//  @116
+  const -3			//  @116
+  :double				//  @121
+  from int			//  @122
+  :double				//  @123
+  i2o				//  @124
+  os dup				//  @125
+  set o stk pos=2			//  @126
+  os drop				//  @131
+    ; Line 362			//  @132
+    ; Line 364			//  @132
+    ; Line 364			//  @132
+  get o stk pos=0			//  @132
+  :double				//  @137
+  o2i				//  @138
+    ; Line 364			//  @139
+  get o stk pos=1			//  @139
+  :double				//  @144
+  o2i				//  @145
+    ; Line 364			//  @146
+  :double				//  @146
+  idivlu				//  @147
+    ; Line 364			//  @148
+  const 6				//  @148
+  :double				//  @153
+  from int			//  @154
+  :double				//  @155
+  isublu				//  @156
+  jz _label_1			//  @157
+    ; Line 364			//  @162
+  const_pool <99>			//  @162
+    ; Line 364			//  @167
+  throw				//  @167
+_label_1:	//  @168
+    ; Line 364			//  @168
+    ; Line 365			//  @168
+    ; Line 365			//  @168
+  get o stk pos=1			//  @168
+  :double				//  @173
+  o2i				//  @174
+    ; Line 365			//  @175
+  get o stk pos=2			//  @175
+  :double				//  @180
+  o2i				//  @181
+    ; Line 365			//  @182
+  :double				//  @182
+  isublu				//  @183
+    ; Line 365			//  @184
+  const 5				//  @184
+  :double				//  @189
+  from int			//  @190
+  :double				//  @191
+  isublu				//  @192
+  jz _label_3			//  @193
+    ; Line 365			//  @198
+  const_pool <100>		//  @198
+    ; Line 365			//  @203
+  throw				//  @203
+_label_3:	//  @204
+    ; Line 365			//  @204
+    ; Line 366			//  @204
+    ; Line 366			//  @204
+  get o stk pos=1			//  @204
+  :double				//  @209
+  o2i				//  @210
+    ; Line 366			//  @211
+  get o stk pos=2			//  @211
+  :double				//  @216
+  o2i				//  @217
+    ; Line 366			//  @218
+  :double				//  @218
+  imul				//  @219
+    ; Line 366			//  @220
+  const 0				//  @220
+    ; Line 366			//  @225
+  const 6				//  @225
+    ; Line 366			//  @230
+  isublu				//  @230
+  :double				//  @231
+  from int			//  @232
+  :double				//  @233
+  isublu				//  @234
+  jz _label_5			//  @235
+    ; Line 366			//  @240
+  const_pool <101>		//  @240
+    ; Line 366			//  @245
+  throw				//  @245
+_label_5:	//  @246
+    ; Line 366			//  @246
+    ; Line 367			//  @246
+    ; Line 367			//  @246
+  get o stk pos=0			//  @246
+  :double				//  @251
+  o2i				//  @252
+    ; Line 367			//  @253
+  get o stk pos=2			//  @253
+  :double				//  @258
+  o2i				//  @259
+    ; Line 367			//  @260
+  :double				//  @260
+  isum				//  @261
+    ; Line 367			//  @262
+  const 9				//  @262
+  :double				//  @267
+  from int			//  @268
+  :double				//  @269
+  isublu				//  @270
+  jz _label_7			//  @271
+    ; Line 367			//  @276
+  const_pool <102>		//  @276
+    ; Line 367			//  @281
+  throw				//  @281
+_label_7:	//  @282
+    ; Line 367			//  @282
+    ; Line 369			//  @282
+    ; Line 369			//  @282
+  get o stk pos=1			//  @282
+  :double				//  @287
+  o2i				//  @288
+    ; Line 369			//  @289
+  get o stk pos=2			//  @289
+  :double				//  @294
+  o2i				//  @295
+  :double				//  @296
+  ilt <				//  @297
+  jz _label_9			//  @298
+    ; Line 369			//  @303
+  const_pool <103>		//  @303
+    ; Line 369			//  @308
+  throw				//  @308
+_label_9:	//  @309
+    ; Line 369			//  @309
+    ; Line 370			//  @309
+    ; Line 370			//  @309
+  get o stk pos=1			//  @309
+  :double				//  @314
+  o2i				//  @315
+    ; Line 370			//  @316
+  get o stk pos=0			//  @316
+  :double				//  @321
+  o2i				//  @322
+  :double				//  @323
+  igt >				//  @324
+  jz _label_11			//  @325
+    ; Line 370			//  @330
+  const_pool <104>		//  @330
+    ; Line 370			//  @335
+  throw				//  @335
+_label_11:	//  @336
+    ; Line 370			//  @336
+    ; Line 371			//  @336
+    ; Line 371			//  @336
+  get o stk pos=1			//  @336
+  :double				//  @341
+  o2i				//  @342
+    ; Line 371			//  @343
+  get o stk pos=2			//  @343
+  :double				//  @348
+  o2i				//  @349
+  :double				//  @350
+  ile <=				//  @351
+  jz _label_13			//  @352
+    ; Line 371			//  @357
+  const_pool <105>		//  @357
+    ; Line 371			//  @362
+  throw				//  @362
+_label_13:	//  @363
+    ; Line 371			//  @363
+    ; Line 372			//  @363
+    ; Line 372			//  @363
+  get o stk pos=1			//  @363
+  :double				//  @368
+  o2i				//  @369
+    ; Line 372			//  @370
+  get o stk pos=0			//  @370
+  :double				//  @375
+  o2i				//  @376
+  :double				//  @377
+  ige >=				//  @378
+  jz _label_15			//  @379
+    ; Line 372			//  @384
+  const_pool <106>		//  @384
+    ; Line 372			//  @389
+  throw				//  @389
+_label_15:	//  @390
+    ; Line 372			//  @390
+    ; Line 373			//  @390
+  summon this			//  @390
+    ; Line 373			//  @391
+  const_pool <107>		//  @391
+    ; Line 373			//  @396
+  call m=17 nparm=1		//  @396
+  os drop				//  @398
+    ; Line 373			//  @399
+  ret				//  @399
+--
+method end
+
+method signature_test ordinal 28
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: signature_test in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @83
+_label_0:	//  @84
+    ; Line 56			//  @84
+  const 0				//  @84
+  i2o				//  @89
+  os dup				//  @90
+  save fld=7			//  @91
+  os drop				//  @93
+    ; Line 57			//  @94
+  const 0				//  @94
+  i2o				//  @99
+  os dup				//  @100
+  save fld=8			//  @101
+  os drop				//  @103
+    ; Line 57			//  @104
+    ; Line 59			//  @104
+  summon this			//  @104
+    ; Line 59			//  @105
+  const_pool <0>			//  @105
+    ; Line 59			//  @110
+  call m=20 nparm=1		//  @110
+  os drop				//  @112
+    ; Line 59			//  @113
+    ; Line 60			//  @113
+    ; Line 60			//  @113
+  load fld=7			//  @113
+    ; Line 60			//  @115
+  const 0				//  @115
+  i2o				//  @120
+  call m=4 nparm=1		//  @121
+  o2i				//  @123
+  jz _label_1			//  @124
+    ; Line 60			//  @129
+  const_pool <1>			//  @129
+    ; Line 60			//  @134
+  throw				//  @134
+_label_1:	//  @135
+    ; Line 60			//  @135
+    ; Line 61			//  @135
+    ; Line 61			//  @135
+  load fld=8			//  @135
+    ; Line 61			//  @137
+  const 0				//  @137
+  i2o				//  @142
+  call m=4 nparm=1		//  @143
+  o2i				//  @145
+  lognot				//  @146
+  jz _label_3			//  @147
+    ; Line 61			//  @152
+  const_pool <2>			//  @152
+    ; Line 61			//  @157
+  throw				//  @157
+_label_3:	//  @158
+    ; Line 61			//  @158
+    ; Line 63			//  @158
+  const 0				//  @158
+  i2o				//  @163
+  os dup				//  @164
+  save fld=7			//  @165
+  os drop				//  @167
+    ; Line 63			//  @168
+    ; Line 64			//  @168
+  const 0				//  @168
+  i2o				//  @173
+  os dup				//  @174
+  save fld=8			//  @175
+  os drop				//  @177
+    ; Line 64			//  @178
+    ; Line 66			//  @178
+  summon this			//  @178
+    ; Line 66			//  @179
+  const 1				//  @179
+  i2o				//  @184
+    ; Line 66			//  @185
+  call m=22 nparm=1		//  @185
+  os drop				//  @187
+    ; Line 66			//  @188
+    ; Line 67			//  @188
+    ; Line 67			//  @188
+  load fld=7			//  @188
+    ; Line 67			//  @190
+  const 0				//  @190
+  i2o				//  @195
+  call m=4 nparm=1		//  @196
+  o2i				//  @198
+  lognot				//  @199
+  jz _label_5			//  @200
+    ; Line 67			//  @205
+  const_pool <3>			//  @205
+    ; Line 67			//  @210
+  throw				//  @210
+_label_5:	//  @211
+    ; Line 67			//  @211
+    ; Line 68			//  @211
+    ; Line 68			//  @211
+  load fld=8			//  @211
+    ; Line 68			//  @213
+  const 0				//  @213
+  i2o				//  @218
+  call m=4 nparm=1		//  @219
+  o2i				//  @221
+  jz _label_7			//  @222
+    ; Line 68			//  @227
+  const_pool <4>			//  @227
+    ; Line 68			//  @232
+  throw				//  @232
+_label_7:	//  @233
+    ; Line 68			//  @233
+  ret				//  @233
+--
+method end
+
+method test_do_while ordinal 29
+--
+  const 0				//  @0
+  isublu				//  @5
+  jz _label_0			//  @6
+  const "arg count: test_do_while in .ru.dz.phantom.system.regression_tests"	//  @11
+  throw				//  @82
+_label_0:	//  @83
+    ; Line 217			//  @83
+  const 3				//  @83
+  i2o				//  @88
+  os dup				//  @89
+  save fld=2			//  @90
+  os drop				//  @92
+    ; Line 218			//  @93
+  const 0				//  @93
+  i2o				//  @98
+  os dup				//  @99
+  save fld=3			//  @100
+  os drop				//  @102
+    ; Line 218			//  @103
+    ; Line 219			//  @103
+_label_1:	//  @103
+    ; Line 219			//  @103
+  load fld=3			//  @103
+  o2i				//  @105
+    ; Line 219			//  @106
+  const 1				//  @106
+    ; Line 219			//  @111
+  isum				//  @111
+  i2o				//  @112
+  os dup				//  @113
+  save fld=3			//  @114
+  os drop				//  @116
+    ; Line 219			//  @117
+  load fld=2			//  @117
+  o2i				//  @119
+  jz _label_2			//  @120
+    ; Line 219			//  @125
+  load fld=2			//  @125
+  o2i				//  @127
+    ; Line 219			//  @128
+  const 1				//  @128
+    ; Line 219			//  @133
+  isublu				//  @133
+  i2o				//  @134
+  os dup				//  @135
+  save fld=2			//  @136
+  os drop				//  @138
+  jmp _label_1			//  @139
+_label_2:	//  @144
+    ; Line 219			//  @144
+    ; Line 221			//  @144
+    ; Line 221			//  @144
+  load fld=3			//  @144
+    ; Line 221			//  @146
+  const 4				//  @146
+  i2o				//  @151
+  call m=4 nparm=1		//  @152
+  o2i				//  @154
+  lognot				//  @155
+  jz _label_3			//  @156
+    ; Line 221			//  @161
+  const_pool <50>			//  @161
+    ; Line 221			//  @166
+  throw				//  @166
+_label_3:	//  @167
+    ; Line 221			//  @167
+  ret				//  @167
 --
 method end
 

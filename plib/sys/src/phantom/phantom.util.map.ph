@@ -22,14 +22,19 @@ package .phantom.util;
 
 class map
 {
-    var pairs : void [];
+    var pairs : .internal.object [];
     var index : int;
 
     void init()
     {
         index = 0;
-        pairs = new void[]();
+        pairs = new .internal.object[]();
     }
+
+	void map()
+	{
+		// TODO remove init, use me
+	}
 
     // TODO! Synchronized!
     /** return 0 if already have this one */

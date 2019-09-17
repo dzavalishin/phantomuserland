@@ -17,6 +17,7 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  *
  */
+@Deprecated
 public class StringConstNode extends Node {
 	private String val;
 	
@@ -58,7 +59,7 @@ public class StringConstNode extends Node {
 				cgen.put(String.format("\\x%02x", c ) );
 			else
 				cgen.put(String.format("%c", c ) );
-}
+		}
 		
 		cgen.put( "\" ) " );
 	}

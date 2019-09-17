@@ -16,7 +16,7 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  */
 
-public class ValGtNode extends BiNode 
+public class ValGtNode extends ValCmpNode 
 {
 	public ValGtNode( Node l, Node r) {    
 		super(l,r);  
@@ -26,6 +26,7 @@ public class ValGtNode extends BiNode
 	public boolean is_on_int_stack() { return true; }
 	public String toString()  {    return ">";  }
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
+		/*
 		if(getType().is_int()) c.emit_igt();
 		else
 		{
@@ -34,7 +35,13 @@ public class ValGtNode extends BiNode
 			if( ! (_l.getType().equals(_r.getType())) )
 				throw new PlcException("Codegen", "can't > values of different types: "+_l.getType()+" and "+_r.getType());
 			throw new PlcException("Codegen", "op > does not exist for this type");
-		}
+		}*/
+		
+		if( !common_type.is_on_int_stack() )
+			throw new PlcException("Codegen", "op "+toString()+" does not exist for this type");
+		
+		generateCmpOp(c, () -> c.emit_igt() );
+		
 	}
 	
 	@Override

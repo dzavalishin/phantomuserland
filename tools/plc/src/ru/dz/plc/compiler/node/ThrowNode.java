@@ -37,5 +37,5 @@ public class ThrowNode extends Node {
 		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"Throw(");
 		_l.generate_C_code(cgen, s);
 		cgen.putln(")");
-}
+	}
 }

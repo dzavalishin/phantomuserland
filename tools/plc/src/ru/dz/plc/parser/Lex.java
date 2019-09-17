@@ -18,19 +18,19 @@ import java.util.Iterator;
  */
 
 
-public class Lex {
-	Token for_unget = null;
-	Token current = null;
-	LinkedList<Token> tokens = new LinkedList<Token>();
-	BufferedInputStream is;
-	boolean flag_eof = false;
+public class Lex implements ILex {
+	private Token for_unget = null;
+	private Token current = null;
+	private LinkedList<Token> tokens = new LinkedList<Token>();
+	private BufferedInputStream is;
+	private boolean flag_eof = false;
 
-	int line_number = 1;
+	private int line_number = 1;
 
 	// ----------------------- reporting ----------------------------------
 
-	final int track_len = 128;
-	StringBuffer track = new StringBuffer(track_len);
+	private final int track_len = 128;
+	private StringBuffer track = new StringBuffer(track_len);
 
 	private void add_to_track( char c )
 	{
@@ -53,13 +53,21 @@ public class Lex {
 		track.setLength(track.length()-1);
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#get_track()
+	 */
+	@Override
 	public String get_track() { return track.toString(); }
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#get_line_number()
+	 */
+	@Override
 	public int get_line_number() { return line_number;}
 
 
 	// ----------------------- id ----------------------------------
 
-	static int next_id = 0;
+	private static int next_id = 0;
 	private final String fname;
 	static public int get_id() {
 		return ++next_id;
@@ -81,7 +89,7 @@ public class Lex {
 	// ----------------------- processing ----------------------------------
 
 	// read in and skip whitespace
-	void skip_ws() throws IOException {
+	private void skip_ws() throws IOException {
 		while(true) {
 			is.mark(1);
 			int c = is.read();
@@ -100,7 +108,7 @@ public class Lex {
 		}
 	}
 
-	void skip_to_eol() throws IOException {
+	private void skip_to_eol() throws IOException {
 		//StringBuffer comm = new StringBuffer();
 		while(true) {
 			is.mark(1);
@@ -120,7 +128,7 @@ public class Lex {
 	}
 
 	// read in and skip / * * / style comments
-	boolean skip_long_comment() throws IOException {
+	private boolean skip_long_comment() throws IOException {
 
 		while( true )
 		{
@@ -147,7 +155,7 @@ public class Lex {
 
 
 	// read in and skip comments
-	boolean skip_comments() throws IOException {
+	private boolean skip_comments() throws IOException {
 
 		is.mark(2);
 
@@ -182,7 +190,7 @@ public class Lex {
 
 
 
-	Token some_full_match( String in ) throws PlcException {
+	private Token some_full_match( String in ) throws PlcException {
 		for( Iterator<Token> i = tokens.iterator(); i.hasNext() ; ) {
 			Token t = i.next();
 			if( t.is(in) ) return t;
@@ -190,7 +198,7 @@ public class Lex {
 		return null;
 	}
 
-	boolean some_part_match( String in ) {
+	private boolean some_part_match( String in ) {
 		for( Iterator<Token> i = tokens.iterator(); i.hasNext() ; ) {
 			Token t = i.next();
 			if( t.like(in) ) return true;
@@ -199,7 +207,7 @@ public class Lex {
 	}
 
 
-	Token scan_in() throws PlcException, IOException {
+	private Token scan_in() throws PlcException, IOException {
 		//Token t = null;
 		if( is == null )
 			throw new PlcException( "Lex", "no input", null );
@@ -277,6 +285,10 @@ public class Lex {
 
 	// ----------------------- interface ----------------------------------
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#get()
+	 */
+	@Override
 	public Token get() throws PlcException {
 
 		try {
@@ -291,6 +303,10 @@ public class Lex {
 		return for_unget;
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#unget()
+	 */
+	@Override
 	public void unget() throws PlcException {
 		if( for_unget == null )
 			throw new PlcException("Can't unget", "Lex", null);
@@ -298,20 +314,60 @@ public class Lex {
 		for_unget = null;
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#commit()
+	 */
+	@Override
+	public void commit() {
+		// Empty. Only LexStack needs it.		
+	}
+	
+	
+	@Override
+	public void mark() throws PlcException {
+		throw new PlcException("Lex.mark", "unimpl");		
+	}
+
+	@Override
+	public void unmark() throws PlcException {
+		throw new PlcException("Lex.unmark", "unimpl");		
+	}
+
+	@Override
+	public void rewind() throws PlcException {
+		throw new PlcException("Lex.rewind", "unimpl");		
+	}
+	
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#is_eof()
+	 */
+	@Override
 	public boolean is_eof() { return flag_eof; }
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#create_keyword(java.lang.String)
+	 */
+	@Override
 	public int create_keyword(String w) {
 		int id = get_id();
 		tokens.add( new Keyword( id, w ));
 		return id;
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#create_token(ru.dz.plc.parser.Token)
+	 */
+	@Override
 	public void create_token( Token t ) {
 		//int id = get_id();
 		tokens.add( t );
 		//return id;
 	}
 
+	/* (non-Javadoc)
+	 * @see ru.dz.plc.parser.ILex#getFilename()
+	 */
+	@Override
 	public String getFilename() {
 		return fname;
 	}

@@ -25,7 +25,7 @@ public class OpNotNode extends Node {
 	{
 		cgen.put("!");
 		_l.generate_C_code(cgen, s);
-}
+	}
 }
 
 

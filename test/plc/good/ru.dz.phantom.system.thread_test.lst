@@ -13,8 +13,7 @@ Class .ru.dz.phantom.system.thread_test
           void  : void
             = : .internal.io.tty
               ident console : .internal.io.tty
-              constructor() : .internal.io.tty
-                new .internal.io.tty : .internal.io.tty
+              new .internal.io.tty : .internal.io.tty
         void  : void
           = : int
             ident incr : int
@@ -30,13 +29,13 @@ Class .ru.dz.phantom.system.thread_test
                     ident console : .internal.io.tty
                     Method putws : unknown
                     arg  : unknown
-                      string const "Thread is running... " : string const
+                      string pool const id="0" : string const
                 void  : void
                   . : void
                     ident console : .internal.io.tty
                     Method putws : unknown
                     arg  : unknown
-                      string const "... " : string const
+                      string pool const id="1" : string const
               void  : void
                 = : int
                   ident incr : int
@@ -48,13 +47,13 @@ Class .ru.dz.phantom.system.thread_test
                 ident console : .internal.io.tty
                 Method putws : unknown
                 arg  : unknown
-                  . : unknown
+                  . : string
                     ident incr : int
-                    Method (no. 5) : unknown
+                    Method toString : unknown
           void  : void
             . : void
               ident console : .internal.io.tty
               Method putws : unknown
               arg  : unknown
-                string const "  " : string const
+                string pool const id="2" : string const
 

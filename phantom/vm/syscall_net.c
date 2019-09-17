@@ -5,11 +5,10 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
  *
  *
 **/
+
 
 #define DEBUG_MSG_PERFIX "sys_net"
 #include <debug_ext.h>

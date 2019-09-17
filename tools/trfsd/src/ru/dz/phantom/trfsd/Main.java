@@ -40,7 +40,7 @@ public class Main {
 		serverSessionId = System.currentTimeMillis();
 		
 		String fn = "Phantom.PartitionedDisk";
-		
+		/*
 		if( false )
 		{
 			String home = System.getenv("PHANTOM_HOME");
@@ -49,7 +49,7 @@ public class Main {
 				fn = home + "/build/classes";
 			}
 		}
-
+		*/
 		System.out.println("TRFS Daemon, serving from "+fn);
 		//new BufferedInputStream( new FileInputStream("Phantom.PageFile"), BUF_SIZE);
 		//stream = new FileInputStream("Phantom.ClassFile");

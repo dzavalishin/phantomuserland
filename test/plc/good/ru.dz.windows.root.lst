@@ -1,34 +1,6 @@
 Class .ru.dz.windows.root
   Field console
   Field boot_object
-  Method void init( _console: .internal.io.tty, _booto: unknown ):
-    ,  : void
-      ,  : void
-        void  : void
-          = : .internal.io.tty
-            ident console : .internal.io.tty
-            ident _console : .internal.io.tty
-        void  : void
-          = : unknown
-            ident boot_object : unknown
-            ident _booto : unknown
-      void  : void
-        . : void
-          ident console : .internal.io.tty
-          Method putws : unknown
-          arg  : unknown
-            string const " in root..." : string const
-
-  Method void gotoxy( x: int, y: int ):
-    void  : void
-      . : void
-        ident console : .internal.io.tty
-        Method gotoxy : unknown
-        arg  : int
-          ident x : int
-        arg  : unknown
-          ident y : int
-
   Method void test(  ):
     ,  : void
       ,  : void
@@ -49,7 +21,7 @@ Class .ru.dz.windows.root
                     ident console : .internal.io.tty
                     Method putws : unknown
                     arg  : unknown
-                      string const "Hello on new console (root win)!" : string const
+                      string pool const id="1" : string const
               void  : void
                 . : void
                   ident console : .internal.io.tty
@@ -69,7 +41,7 @@ Class .ru.dz.windows.root
               ident console : .internal.io.tty
               Method putws : unknown
               arg  : unknown
-                string const "Pos 10,10" : string const
+                string pool const id="2" : string const
         void  : void
           . : void
             ident console : .internal.io.tty
@@ -83,8 +55,7 @@ Class .ru.dz.windows.root
           ident console : .internal.io.tty
           Method putws : unknown
           arg  : unknown
-            string const "
-" : string const
+            string pool const id="3" : string const
 
   Method void shell(  ):
     ,  : void
@@ -95,13 +66,11 @@ Class .ru.dz.windows.root
               ident console : .internal.io.tty
               Method putws : unknown
               arg  : unknown
-                string const "
-The very first Phantom command line shell
-" : string const
+                string pool const id="4" : string const
           void  : void
             = : string
               ident str : string
-              string const "" : string const
+              string pool const id="5" : string const
         do-while : unknown
           int const "1" : int const
           ,  : void
@@ -117,8 +86,7 @@ The very first Phantom command line shell
                   ident ch : string
                   Method equals : unknown
                   arg  : unknown
-                    string const "
-" : string const
+                    string pool const id="6" : string const
                 ,  : unknown
                   ,  : unknown
                     ,  : unknown
@@ -128,15 +96,14 @@ The very first Phantom command line shell
                             ident str : string
                             Method equals : unknown
                             arg  : unknown
-                              string const "quit" : string const
+                              string pool const id="7" : string const
                           break : void
                         void  : void
                           . : void
                             this  : .ru.dz.windows.root
                             Method putws : unknown
                             arg  : unknown
-                              string const "
-" : string const
+                              string pool const id="8" : string const
                       void  : void
                         . : void
                           this  : .ru.dz.windows.root
@@ -146,15 +113,13 @@ The very first Phantom command line shell
                     void  : void
                       = : string
                         ident str : string
-                        string const "" : string const
+                        string pool const id="9" : string const
                   void  : void
                     . : void
                       ident console : .internal.io.tty
                       Method putws : unknown
                       arg  : unknown
-                        string const "
-phantom => 
-" : string const
+                        string pool const id="10" : string const
                 void  : void
                   = : string
                     ident str : string
@@ -170,7 +135,7 @@ phantom =>
                 arg  : unknown
                   ident ch : string
       throw  : void const
-        string const "shell quit" : string const
+        string pool const id="11" : string const
 
   Method void putws( s: string ):
     void  : void
@@ -179,6 +144,35 @@ phantom =>
         Method putws : unknown
         arg  : unknown
           ident s : string
+
+  Method void gotoxy( x: int, y: int ):
+    void  : void
+      . : void
+        ident console : .internal.io.tty
+        Method gotoxy : unknown
+        arg  : int
+          ident x : int
+        arg  : unknown
+          ident y : int
+
+  Method void init( _console: .internal.io.tty, _booto: unknown ):
+    ,  : void
+      ,  : void
+        void  : void
+          = : .internal.io.tty
+            ident console : .internal.io.tty
+            ident _console : .internal.io.tty
+        void  : void
+          = : unknown
+            ident boot_object : unknown
+            (cast) : unknown
+              ident _booto : unknown
+      void  : void
+        . : void
+          ident console : .internal.io.tty
+          Method putws : unknown
+          arg  : unknown
+            string pool const id="0" : string const
 
   Method void shell_cmd( cmd: string ):
     ,  : void
@@ -249,7 +243,7 @@ phantom =>
                           void  : void
                             = : string
                               ident parms : string
-                              string const "" : string const
+                              string pool const id="12" : string const
                         ,  : void
                           void  : void
                             = : string
@@ -280,52 +274,49 @@ phantom =>
                         ident verb : string
                         Method equals : unknown
                         arg  : unknown
-                          string const "ls" : string const
+                          string pool const id="13" : string const
                       ,  : void
                         void  : void
                           . : void
                             this  : .ru.dz.windows.root
                             Method putws : unknown
                             arg  : unknown
-                              string const "We're not in Linux anymore...
-" : string const
+                              string pool const id="14" : string const
                         return : void
                   if : unknown
                     . : int
                       ident verb : string
                       Method equals : unknown
                       arg  : unknown
-                        string const "man" : string const
+                        string pool const id="15" : string const
                     ,  : void
                       void  : void
                         . : void
                           this  : .ru.dz.windows.root
                           Method putws : unknown
                           arg  : unknown
-                            string const "Politically correct version of this command is 'person' now
-" : string const
+                            string pool const id="16" : string const
                       return : void
                 if : unknown
                   . : int
                     ident verb : string
                     Method equals : unknown
                     arg  : unknown
-                      string const "cd" : string const
+                      string pool const id="17" : string const
                   ,  : void
                     void  : void
                       . : void
                         this  : .ru.dz.windows.root
                         Method putws : unknown
                         arg  : unknown
-                          string const "Nowhere to cd yet...
-" : string const
+                          string pool const id="18" : string const
                     return : void
               if : unknown
                 . : int
                   ident verb : string
                   Method equals : unknown
                   arg  : unknown
-                    string const "echo" : string const
+                    string pool const id="19" : string const
                 ,  : void
                   void  : void
                     . : void
@@ -339,7 +330,7 @@ phantom =>
                 ident verb : string
                 Method equals : unknown
                 arg  : unknown
-                  string const "ps" : string const
+                  string pool const id="20" : string const
               ,  : void
                 void  : void
                   . : void
@@ -353,7 +344,7 @@ phantom =>
               ident verb : string
               Method equals : unknown
               arg  : unknown
-                string const "exit" : string const
+                string pool const id="21" : string const
             ,  : void
               throw  : void const
                 ident parms : string
@@ -363,14 +354,14 @@ phantom =>
             ident verb : string
             Method equals : unknown
             arg  : unknown
-              string const "help" : string const
+              string pool const id="22" : string const
           ,  : void
             void  : void
               . : void
                 this  : .ru.dz.windows.root
                 Method putws : unknown
                 arg  : unknown
-                  string const "help, echo, exit - that's all I know yet..." : string const
+                  string pool const id="23" : string const
             return : void
       void  : void
         . : void
@@ -378,7 +369,7 @@ phantom =>
           Method putws : unknown
           arg  : unknown
             . : string
-              string const "Unknown command: " : string const
+              string pool const id="24" : string const
               Method concat : unknown
               arg  : unknown
                 ident verb : string

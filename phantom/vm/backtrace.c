@@ -7,7 +7,13 @@
  * Bytecode backtrace
  *
  *
- **/
+**/
+
+#define DEBUG_MSG_PREFIX "vm.bt"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <vm/exec.h>
 #include <vm/code.h>
@@ -41,7 +47,7 @@ E4C_DEFINE_EXCEPTION(UnixSendSignalException, "Unix subsystem error.", UnixExcep
 
 /* Poor man's exceptions */
 /* coverity[+kill] */
-void pvm_exec_panic( const char *reason )
+void pvm_exec_panic0( const char *reason )
 {
     // TO DO: longjmp?
     //panic("pvm_exec_throw: %s", reason );
@@ -58,19 +64,46 @@ void pvm_exec_panic( const char *reason )
 #endif // CONF_USE_E4C
 }
 
+void pvm_exec_panic( const char *reason, struct data_area_4_thread *tda )
+{
+    // TO DO: longjmp?
+    //panic("pvm_exec_throw: %s", reason );
+    //syslog()
+    printf("pvm_exec_panic: %s\n", reason );
+    pvm_backtrace(tda);
+
+    pvm_memcheck();
+#if CONF_USE_E4C
+    printf("pvm_exec_panic: throwing\n", reason );
+    E4C_THROW( PvmException, reason );
+#else // CONF_USE_E4C
+    hal_exit_kernel_thread();
+#endif // CONF_USE_E4C
+}
+
 
 void pvm_backtrace_current_thread(void)
 {
     errno_t e = ENOENT;
     int tid = get_current_tid();
-    if( tid < 0 ) goto nope;
+    if( tid < 0 )
+    {
+        printf("pvm_backtrace - get_current_tid failed!\n");
+        goto nope;
+    }
 
     void *owner;
     if( 0 != (e=t_get_owner( tid, &owner )) )
+    {
+        printf("pvm_backtrace - t_get_owner failed!\n");
         goto nope;
+    }
 
     if( 0 == owner )
+    {
+        printf("pvm_backtrace - owner == 0!\n");
         goto nope;
+    }
 
     pvm_object_storage_t *_ow = owner;
 
@@ -129,10 +162,10 @@ void pvm_backtrace(struct data_area_4_thread *tda)
         pvm_object_dump(thiso);
         printf("\n");
 
-        printf("pvm_backtrace frame IP: %d\n", fda->IP);
-
         pvm_object_t tclass = thiso.data->_class;
         int ord = fda->ordinal;
+
+        printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
 
         int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
         if( lineno >= 0 )
@@ -148,6 +181,71 @@ void pvm_backtrace(struct data_area_4_thread *tda)
     }
 
 }
+
+
+
+void pvm_trace_here(struct data_area_4_thread *tda)
+{
+    struct pvm_code_handler *code = &tda->code;
+
+    if(code->IP > code->IP_max)
+    {
+        printf("pvm_trace_here IP > IP_Max!\n");
+        return;
+    }
+
+
+    //printf("pvm_trace_here thread this:\n");
+    printf("%% ");
+#if 1
+    struct pvm_object cn = pvm_get_class_name( tda->_this_object );
+    pvm_object_print( cn );
+#else
+    pvm_object_dump(tda->_this_object);
+    //printf("\n\n");
+#endif
+    //printf("pvm_trace_here thread IP %d\n", code->IP);
+
+    pvm_object_t sframe = tda->call_frame;
+
+    if( pvm_is_null(sframe) )
+    {
+        printf("pvm_trace_here call frame == 0\n");
+        return;
+    }
+
+    //if( !pvm_object_class_is(sframe, pvm_get_stack_frame_class()) ) ??!
+
+    struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
+
+    //printf("pvm_backtrace frame:\n");    pvm_object_dump(sframe);    printf("\n");
+
+    pvm_object_t thiso = fda->this_object;
+
+    //printf("pvm_backtrace frame this:\n");    pvm_object_dump(thiso);    printf("\n");
+
+    pvm_object_t tclass = thiso.data->_class;
+    int ord = fda->ordinal;
+/*
+    printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
+
+    int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
+    if( lineno >= 0 )
+    {
+        pvm_object_t mname = pvm_get_method_name( tclass, ord );
+
+        pvm_object_print(mname);
+        printf(":%d\n", lineno);
+    }
+*/
+    printf("\tordinal %d", ord );
+    printf("\tIP %d ", code->IP);
+
+    printf("\n");
+
+}
+
+
 
 
 int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)

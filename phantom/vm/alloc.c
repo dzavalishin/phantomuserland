@@ -4,13 +4,16 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * VM memory allocator
  *
 **/
 
 
+#define DEBUG_MSG_PREFIX "vm.alloc"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <vm/alloc.h>
 #include <vm/object_flags.h>

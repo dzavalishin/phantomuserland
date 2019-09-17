@@ -26,7 +26,10 @@ public class OpDivideNode extends BinaryOpNode
     
     protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
     {
-        if(getType().is_int()) c.emitIDivLU();
-        else throw new PlcException("Codegen", "op / does not exist for this type");
+        //if(getType().is_int()) c.emitIDivLU();
+        //else throw new PlcException("Codegen", "op / does not exist for this type");
+        
+		generateIntegerStackOp(c, () -> c.emitIDivLU() );
+
     }
 }

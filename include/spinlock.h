@@ -55,4 +55,26 @@ void check_global_lock_entry_count();
 #define ASSERT_LOCKED_SPIN(sl) assert(hal_spin_is_locked(sl))
 
 
+
+struct pvm_spinlock {
+	hal_spinlock_t	sl;
+	int wait_spin_flag;
+};
+
+typedef struct pvm_spinlock pvm_spinlock_t;
+
+
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+

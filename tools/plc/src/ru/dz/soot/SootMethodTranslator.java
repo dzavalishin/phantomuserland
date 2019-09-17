@@ -48,7 +48,6 @@ import soot.jimple.TableSwitchStmt;
 import soot.jimple.ThrowStmt;
 import soot.jimple.internal.AbstractStmt;
 import soot.tagkit.LineNumberTag;
-import soot.tagkit.SourceLnPosTag;
 import soot.tagkit.Tag;
 
 public class SootMethodTranslator {
@@ -60,21 +59,23 @@ public class SootMethodTranslator {
 	private String mName;
 	private Method phantomMethod;
 	private PhantomClass pc;
-	private ParseState s;
+	//private ParseState s;
 	
 	private StatementsNode nodes = new StatementsNode();
+	private ParseState ps;
 	
 	
-	public SootMethodTranslator(SootMethod m, PhantomClass pc) throws PlcException {
+	public SootMethodTranslator(SootMethod m, PhantomClass pc, ParseState ps) throws PlcException {
 		this.m = m;
 		this.pc = pc;
+		this.ps = ps;
 		mName = m.getName();
 
 		say("\n\n-------------------\nMethod "+mName);
 		
 		//String declaration = m.getDeclaration();		say("method "+mName+" decl "+declaration );
 		
-		s = new ParseState(pc);
+		//s = new ParseState(pc);
 		
 		Type returnType = m.getReturnType();
 		
@@ -82,6 +83,8 @@ public class SootMethodTranslator {
 		phantomMethod = new Method(mName, type, m.isConstructor()); 
 		pc.addMethod(phantomMethod);
 		phantomMethod.code = nodes;
+
+		ps.set_method(phantomMethod);
 	
 		for( int i = 0; i < m.getParameterCount(); i++ )
 		{
@@ -191,8 +194,8 @@ public class SootMethodTranslator {
 		else
 			SootMain.error("Unknown unit"+u);
 		
-		s.set_method(phantomMethod);
-		phantomMethod.code.preprocess(s);
+		ps.set_method(phantomMethod);
+		phantomMethod.code.preprocess(ps);
 		
 		/*
 		List<Tag> tags = u.getTags();
@@ -235,7 +238,7 @@ public class SootMethodTranslator {
 			@Override
 			public void caseEnterMonitorStmt(EnterMonitorStmt as) {
 				try {
-					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc );
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc, ps );
 					ret.w = new PhantomCodeWrapper( new MonitorNode(expression.getNode(),true) );				
 				} catch (PlcException e) {
 					SootMain.error(e);
@@ -245,7 +248,7 @@ public class SootMethodTranslator {
 			@Override
 			public void caseExitMonitorStmt(ExitMonitorStmt as) {
 				try {
-					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc );
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc, ps );
 					ret.w = new PhantomCodeWrapper( new MonitorNode(expression.getNode(),false) );				
 				} catch (PlcException e) {
 					SootMain.error(e);
@@ -278,7 +281,7 @@ public class SootMethodTranslator {
 			@Override
 			public void caseInvokeStmt(InvokeStmt as ) {
 				try {
-					Node node = PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc).getNode();
+					Node node = PhantomCodeWrapper.getInvoke(as.getInvokeExpr(), phantomMethod, pc, ps).getNode();
 					ret.w = new PhantomCodeWrapper(new VoidNode(node));
 				} catch (PlcException e) {
 					SootMain.error(e);
@@ -324,7 +327,7 @@ public class SootMethodTranslator {
 				
 				SwitchListNode switchListNode;
 				try {
-					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( key, phantomMethod, pc );
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( key, phantomMethod, pc, ps );
 					switchListNode = new SwitchListNode(expression.getNode());
 					switchListNode.addDefault(defaultLabel);				
 					SootMain.say("def target = "+defaultTargetBox.getUnit());
@@ -366,7 +369,7 @@ public class SootMethodTranslator {
 
 				SwitchListNode switchListNode;
 				try {
-					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( key, phantomMethod, pc );
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( key, phantomMethod, pc, ps );
 					switchListNode = new SwitchListNode(expression.getNode());
 					switchListNode.addDefault(defaultLabel);				
 					SootMain.say("def target = "+defaultTargetBox.getUnit());
@@ -398,7 +401,7 @@ public class SootMethodTranslator {
 			@Override
 			public void caseThrowStmt(ThrowStmt as) {
 				try {
-					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc );
+					PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getOp(), phantomMethod, pc, ps );
 					ret.w = new PhantomCodeWrapper(new ThrowNode(expression.getNode()));				
 				} catch (PlcException e) {
 					SootMain.error(e);
@@ -448,7 +451,7 @@ public class SootMethodTranslator {
 		//say("      if "+target.toString());
 		
 		
-		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getCondition(), phantomMethod, pc );		
+		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getCondition(), phantomMethod, pc, ps );		
 		return new PhantomCodeWrapper(new IfNode(expression.getNode(),new JumpNode(label), new EmptyNode()));
 	}
 
@@ -465,8 +468,8 @@ public class SootMethodTranslator {
 		
 		say("      Assign '"+ls+"' = '"+rs+"'");
 		*/
-		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getRightOp(), phantomMethod, pc );
-		Node node = PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod, pc ).getNode();
+		PhantomCodeWrapper expression = PhantomCodeWrapper.getExpression( as.getRightOp(), phantomMethod, pc, ps );
+		Node node = PhantomCodeWrapper.getAssign( as.getLeftOp(), expression, phantomMethod, pc, ps ).getNode();
 
 		// TODO find src line info
 		//node.setContext(new ParserContext(fname, line));
@@ -484,7 +487,7 @@ public class SootMethodTranslator {
 
 	private PhantomCodeWrapper doReturn(ReturnStmt as) throws PlcException {
 		Value op = as.getOp();
-		PhantomCodeWrapper v = PhantomCodeWrapper.getExpression( op, phantomMethod, pc );
+		PhantomCodeWrapper v = PhantomCodeWrapper.getExpression( op, phantomMethod, pc, ps );
 		//say("      Return "+op.toString());
 		return PhantomCodeWrapper.getReturnValueNode(v);
 	}
@@ -545,7 +548,7 @@ public class SootMethodTranslator {
 			PhantomVariable v = new PhantomVariable(localName, SootExpressionTranslator.convertType(type));			
 			phantomMethod.svars.add_stack_var(v);
 			
-			OpAssignNode node = new OpAssignNode(new IdentNode(localName) , new ThisNode(pc));
+			OpAssignNode node = new OpAssignNode(new IdentNode(localName, ps) , new ThisNode(pc));
 			
 			return new PhantomCodeWrapper(new VoidNode(node));
 		}

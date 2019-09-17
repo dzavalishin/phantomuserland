@@ -1,11 +1,13 @@
 package ru.dz.plc.compiler;
 
-import ru.dz.plc.PlcMain;
+import ru.dz.phantom.file.pclass.PhantomTypeInfo;
+import ru.dz.plc.util.NameUse;
 import ru.dz.plc.util.PlcException;
 import ru.dz.soot.SootMain;
 
 import java.io.*;
 import java.util.*;
+
 
 /**
  * <p>Class container.</p>
@@ -18,8 +20,8 @@ public class PhantomClass {
 
 	private String name;
 
-//	private String version; // Current class version, must increment each compile
-	
+	//	private String version; // Current class version, must increment each compile
+
 	private MethodTable mt;
 	private FieldTable ft; 
 	private FieldTable staticFieldsTable; 
@@ -40,7 +42,7 @@ public class PhantomClass {
 		staticFieldsTable = new FieldTable();
 
 		boolean noBase = name.equals(".internal.object") || name.equals(".internal.void"); 
-		
+
 		if (!noBase) {
 			parent_class = ClassMap.get_map().get(parent,false,null);
 			if (parent_class == null)
@@ -57,11 +59,18 @@ public class PhantomClass {
 	public String getParent() {  return parent;  }
 
 	public boolean equals(Object o) {
-		if (o == null || o.getClass() != this.getClass())return false;
+		if (o == null || o.getClass() != this.getClass())
+			return false;
 		PhantomClass _t = (PhantomClass) o;
 
-		return name != null && _t.name != null && name == _t.name;
+		return name != null && _t.name != null && name.equals( _t.name );
 	}
+
+	public String getShortName() {
+		int pos = name.lastIndexOf(".");
+		return (pos < 0) ? name : name.substring(pos + 1);
+	}
+
 
 	// ------------------------------------------------------------------------
 	// Parents
@@ -80,26 +89,34 @@ public class PhantomClass {
 	 * @param name Parent name
 	 * @param ps Parse state to notify about dependency on this parent, or <code>null</code>.
 	 */
-	public boolean addParent(String name, ParseState ps) throws PlcException {
-		if (have_nonvoid_parent)return false;
+	//public boolean addParent(String name, ParseState ps) throws PlcException {
+	public void addParent(String name, ParseState ps) throws PlcException {
+		//if (have_nonvoid_parent)return false;
+		if (have_nonvoid_parent)
+			throw new PlcException("addParent", "already have base class for "+getName());
+		
 		parent = name;
 		have_nonvoid_parent = true;
 
 		parent_class = ClassMap.get_map().get(name,false,ps);
 
-		if (parent_class != null) {
-			/*
-      if (mt.nextord > 0 || ft.nextord > 0)
-        throw new PlcException("parent class setup", "internal compiler error",
-                         "mt.nextord > 0 || ft.nextord > 0");*/
+		// Try to import it 
+		if (parent_class == null)
+			ClassMap.get_map().do_import(name);
 
+		parent_class = ClassMap.get_map().get(name,false,ps);
+
+		if (parent_class == null)
+			throw new PlcException("addParent", "can't load base class "+name, getName());
+
+		if (parent_class != null) {
 			// start assigning ordinals from where base class stopped
 			mt.ordinals.setBase( parent_class.mt.slots_needed() );
 			ft.setBase( parent_class.ft.slots_needed() );
 			//ft.nextord = parent_class.ft.slots_needed();
 		}
 
-		return parent_class != null;
+		//return parent_class != null;
 	}
 
 	// ------------------------------------------------------------------------
@@ -110,19 +127,19 @@ public class PhantomClass {
 	{
 		return constantPool.add(constant);
 	}
-	
+
 	// ------------------------------------------------------------------------
 	// Methods
 	// ------------------------------------------------------------------------
 
-	@Deprecated
+	//@Deprecated
 	protected Method findMethod(Method his_m) {
-		Method m = mt.get(his_m.getName());
+		Method m = mt.get(his_m.getSignature());
 		if (m != null) return m;
 		if (!have_nonvoid_parent)return null;
 		return parent_class.findMethod(his_m);
 	}
-
+	/*
 	@Deprecated
 	public Method findMethod(String name) {
 		Method m = mt.get(name);
@@ -130,7 +147,7 @@ public class PhantomClass {
 		if (!have_nonvoid_parent)return null;
 		return parent_class.findMethod(name);
 	}
-
+	 */
 	public Method findMethod(MethodSignature signature) {
 		Method m = mt.get(signature);
 		//return null; // TODO why?
@@ -143,24 +160,28 @@ public class PhantomClass {
 	public Method getMethod(int ordinal) {
 		return mt.get(ordinal);
 	}
-	
+
 	public Method getDefaultConstructor() 
 	{		
 		List<PhantomType> args = new LinkedList<PhantomType>(); // no args
-		MethodSignature signature = new MethodSignature("<init>", args);
+		MethodSignature signature = new MethodSignature(Method.CONSTRUCTOR_M_NAME, args);
 		return mt.get(signature);
 	}
 
-	
+
 	static boolean isSameArgs(Method m1, Method m2) {
 		Iterator<ArgDefinition> i1 = m1.getArgIterator();
 		Iterator<ArgDefinition> i2 = m2.getArgIterator();
 
-		while (i1.hasNext() && i2.hasNext()) {
+		while (i1.hasNext() && i2.hasNext()) 
+		{
 			ArgDefinition ad1 = i1.next();
 			ArgDefinition ad2 = i2.next();
 
-			if (! (ad1.getType().equals(ad2.getType())))
+			PhantomType at1 = ad1.getType();
+			PhantomType at2 = ad2.getType();
+			
+			if(! at1.equalsEvenUnknown(at2) )
 				return false;
 		}
 
@@ -171,34 +192,56 @@ public class PhantomClass {
 	}
 
 	static String dumpArgs(Method m) { return m.dumpArgs(); }
-	
-	protected void check_base_for_method(Method m) throws PlcException {
-		if (!have_nonvoid_parent)return;
-		Method bm = parent_class.findMethod(m);
-		if (bm == null)return;
 
-		if (!isSameArgs(m, bm))
+	public static boolean isSameReturnType(Method m, Method bm) 
+	{
+		return !m.getType().equalsEvenUnknown(bm.getType());
+	}
+
+	/**
+	 * Check if method has correct arguments if there is method in base class with the same name
+	 * @param m
+	 * @throws PlcException
+	 */
+	protected void checkBaseForMethod(Method m) throws PlcException 
+	{
+		if(!have_nonvoid_parent) return;
+		
+		Method bm = parent_class.findMethod(m); 
+		
+		if(bm == null) return;
+
+		if(!isSameArgs(m, bm))
 		{
 			String ma1 = dumpArgs(m);	
 			String ma2 = dumpArgs(bm);
-		
+
 			throw new PlcException("Method definition", "incompatible args",
 					this.name + "::" + m.getName() + " required ("+ma2+"), have ("+ma1+")");
 		}
+
+		if( isSameReturnType(m, bm) )
+			throw new PlcException("Method definition", "incompatible return type",
+					this.name + "::" + m.getName() + " required ("+bm.getType()+"), have ("+m.getType()+")");
 		
 		// Here we do it
 		m.setOrdinal(bm.getOrdinal());
 	}
 
+	/*
 	@Deprecated
 	public Method addMethod(String name, PhantomType type, boolean constructor ) throws PlcException {
 		Method m = mt.add(name, type, constructor );
 		//check_base_for_method(m);
 		return m;
 	}
-
+	 */
 	public Method addMethod(Method m) throws PlcException {
 		//SootMain.say("adding method "+m);
+		if(isNameUsedAsField(name))
+			throw new PlcException(getName(), "name is used as field", name);
+
+		
 		mt.add(m);
 		//check_base_for_method(m);
 		return m;
@@ -215,12 +258,12 @@ public class PhantomClass {
 		Iterator<Method> i = mt.iterator();
 		while (i.hasNext()) {
 			Method m = i.next();
-			check_base_for_method(m);
+			checkBaseForMethod(m);
 		}
 	}
 
-	
-	
+
+
 	// ------------------------------------------------------------------------
 	// Static Fields
 	// ------------------------------------------------------------------------
@@ -281,6 +324,10 @@ public class PhantomClass {
 	 */
 	public PhantomField addField(String name, PhantomType type) throws PlcException {
 		//SootMain.say("add var '"+name+"' type "+type);
+		
+		if(isNameUsedAsMethod(name))
+			throw new PlcException(getName(), "name is used as method", name);
+		
 		check_base_for_field(name, type);
 		return ft.add(name, type);
 	}
@@ -293,8 +340,27 @@ public class PhantomClass {
 		check_base_for_field(name, type);
 		ft.set(phantomOrdinal, name, type);
 	}
+
+	// ------------------------------------------------------------------------
+	// Check for name to be used
+	// ------------------------------------------------------------------------
+
+	public NameUse isNameUsed(String name)
+	{
+		return new NameUse(ft.get(name) != null, staticFieldsTable.get(name) != null, mt.has(name));
+	}
 	
-	
+	public boolean isNameUsedAsMethod(String name)
+	{
+		return isNameUsed(name).isUsedAsMethod();
+	}
+		
+	public boolean isNameUsedAsField(String name)
+	{
+		NameUse u = isNameUsed(name);
+		return u.isUsedAsField() || u.isUsedAsStaticField();
+	}
+		
 	// ------------------------------------------------------------------------
 	// Interface compliance
 	// ------------------------------------------------------------------------
@@ -307,7 +373,8 @@ public class PhantomClass {
 			Method im = i.next();
 
 			// find corresponding my Method
-			Method m = mt.get(im.getName());
+			//Method m = mt.get(im.getName());
+			Method m = mt.get(im.getSignature());
 
 			if( m == null )
 				throw new PlcException("class "+this.name +" definition",
@@ -344,7 +411,7 @@ public class PhantomClass {
 
 	public void print(PrintStream ps) throws PlcException
 	{
-		
+
 		ps.println("Class "+name);
 		//System.out.println("  Fields:");
 		ft.print(ps);
@@ -352,18 +419,29 @@ public class PhantomClass {
 		mt.print(ps);
 	}
 
-	public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, String version) throws IOException, PlcException
+	//public void codegen(RandomAccessFile os, FileWriter lst, BufferedWriter llvmFile, BufferedWriter c_File, String version) throws IOException, PlcException
+	public void codegen(CodeWriters cw) throws IOException, PlcException
 	{
-		llvmFile.write("; class "+getName()+"\n\n");
-		llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
-		
-		c_File.write("// class "+getName()+"\n\n"); // TODO class version
-		c_File.write("#include <phantom/jit/generated.h>\n\n");
-		
+		cw.llvmFile.write("; class "+getName()+"\n\n");
+		cw.llvmFile.write("%OPTR = type <{ i8 *, i8 * }>\n");
+
+		cw.c_File.write("// class "+getName()+"\n\n"); // TODO class version
+		cw.c_File.write("#include <phantom/jit/generated.h>\n\n");
+
+		cw.javaFile.write("public abstract class "+getName().substring(1)+" {\n");
+
 		CodeGeneratorState s = new CodeGeneratorState(this);
+
 		//ft.generateGettersSetters(this);
-		mt.codegen(os, lst, llvmFile, c_File, s, version);
-		ft.codegen(os, lst, llvmFile, c_File, s, version);
+
+		//mt.codegen(os, lst, llvmFile, c_File, s, version);
+		//ft.codegen(os, lst, llvmFile, c_File, s, version);
+		//constantPool.codegen(os, lst, llvmFile, c_File, s, version);
+		mt.codegen(cw,s);
+		ft.codegen(cw,s);
+		constantPool.codegen(cw);
+
+		cw.javaFile.write("}; // end class "+getName().substring(1)+"\n");
 	}
 
 	public void preprocess(ParseState ps) throws PlcException
@@ -418,21 +496,16 @@ public class PhantomClass {
 
 	/** Get getter for given field name */
 	public Method getGetter(String ident) {
-		//SootMain.say("in get method "+ident+" class "+this);		mt.dump();
-		String gName = FieldTable.makeGetterName(ident);
-		//SootMain.say("look for getter "+gName);
-		return mt.get(gName);
+		return mt.get(FieldTable.makeGetterSignature(ident));
 	}
 
 	/** Get setter for given field name */
 	public Method getSetter(String ident) {
-
-		String gName = FieldTable.makeSetterName(ident);
-		return mt.get(gName);
+		return mt.get(ft.makeSetterSignature(ident));
 	}
 
-	public void generateGettersSetters() throws PlcException {
-		ft.generateGettersSetters(this);		
+	public void generateGettersSetters(ParseState ps) throws PlcException {
+		ft.generateGettersSetters(this,ps);		
 		//SootMain.say("class "+this);		mt.dump();
 	}
 
@@ -440,6 +513,27 @@ public class PhantomClass {
 		SootMain.say("class "+this);		
 		mt.dump();
 	}
+
+	public boolean hasParent() {
+		return have_nonvoid_parent;
+	}
+
+	/**
+	 * Used to load class from object file. Sets field ordinal too.
+	 * 
+	 * @param fName
+	 * @param fType
+	 * @param fOrdinal
+	 * @throws PlcException 
+	 */
+	public void setField(String fName, PhantomType fType, int fOrdinal) throws PlcException {
+		ft.setField( fName, fType, fOrdinal );		
+	}
+
+	public void setPoolConstant(int cOrdinal, PhantomType pt, byte[] buf) throws PlcException, IOException {
+		constantPool.setConstant(cOrdinal, pt, buf);		
+	}
+
 
 
 
@@ -466,7 +560,7 @@ class ordinals_generator
 		if(base > nextord)
 			nextord = base;
 	}
-	
+
 	int getNext()
 	{
 		accessed = true;

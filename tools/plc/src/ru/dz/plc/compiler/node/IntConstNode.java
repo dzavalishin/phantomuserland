@@ -51,6 +51,6 @@ public class IntConstNode extends Node {
 	@Override
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
 		cgen.put(Integer.toString(val));
-}
+	}
 }
 

@@ -10,6 +10,7 @@ import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
+import ru.dz.plc.compiler.node.CastNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -82,8 +83,16 @@ abstract public class BiNode extends Node {
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
-		if( _l != null ) { _l.generate_code(c,s); move_between_stacks(c, _l.is_on_int_stack()); }
-		if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
+		if( _l != null ) 
+		{ 
+			_l.generate_code(c,s); 
+			move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
+		}
+		if( _r != null ) 
+		{ 
+			_r.generate_code(c,s); 
+			move_between_stacks(c, _r.is_on_int_stack(), _r.getType()); 
+		}
 
 		log.fine("Node "+this+" codegen");
 
@@ -132,7 +141,7 @@ abstract public class BiNode extends Node {
 		cgen.put(" ) "); 
 	}
 
-	
+
 }
 
 
@@ -165,14 +174,47 @@ abstract class BiBistackNode extends BiNode {
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		_l.generate_code(c, s);
-		if (go_to_object_stack() && _l.is_on_int_stack()) c.emit_i2o();
+		if (go_to_object_stack() && _l.is_on_int_stack()) 
+		{
+			//c.emit_i2o();
+			move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
+		}
+		
 		_r.generate_code(c, s);
-		if (go_to_object_stack() && _r.is_on_int_stack()) c.emit_i2o();
-
+		if (go_to_object_stack() && _r.is_on_int_stack())
+		{
+			//c.emit_i2o();
+			move_between_stacks(c, _r.is_on_int_stack(), _r.getType());
+		}
+		
 		log.fine("Node "+this+" codegen");
 		generate_my_code(c,s);
 	}
 
+
+	protected PhantomType common_type;
+	
+	@Override
+	public void preprocess_me(ParseState s) throws PlcException {
+		super.preprocess_me(s);
+
+		common_type = PhantomType.findCompatibleType(_l.getType(),_r.getType());
+		if( common_type == null )
+		{
+			print_error(String.format("types %s and %s are incompatible", 
+					_l.getType().toString(),
+					_r.getType().toString()
+					));
+			throw new PlcException("bibistack find type "+context.get_position(),"types are not compatible");
+		}
+		
+		if( !_l.getType().equals(common_type) ) 
+			_l = new CastNode(_l, common_type);
+
+		if( !_r.getType().equals(common_type) ) 
+			_r = new CastNode(_r, common_type);
+		
+	}
 }
 
 
