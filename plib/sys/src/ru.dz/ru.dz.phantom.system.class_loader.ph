@@ -30,6 +30,8 @@
  *  At this moment class loader is started from kernel and locks up 
  *  everything (namely - snaps) while is working.
  *
+ * TODO: remove cache as kernel now has its own one.
+ *
 **/
 
 

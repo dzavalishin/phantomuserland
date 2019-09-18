@@ -4,22 +4,15 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
- *
-**/
-
-package .phantom;
-import .phantom.os.time;
-
-/**
- *
  * Main OS services implementation.
  * Current implementation is temporary and lets everybody to 
  * replace OS servivce with own implementation. This will be changed.
  *
 **/
+
+
+package .phantom;
+import .phantom.os.time;
 
 class osimpl
 {

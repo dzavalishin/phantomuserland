@@ -4,21 +4,16 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
- *
-**/
-
-package .phantom.util;
-
-/**
- *
  * Map.
  * Current implementation is temporary and VERY inefficient.
  * Redo ASAP.
  *
+ * There is .internal.directory exist.
+ *
 **/
+
+
+package .phantom.util;
 
 class map
 {

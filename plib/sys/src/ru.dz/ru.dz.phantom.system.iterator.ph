@@ -4,20 +4,12 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: no
- * Preliminary: yes
- *
- *
-**/
-
-package .ru.dz.phantom.system;
-
-/**
- *
  * Iterator. Not finished. Not really used.
  *
 **/
 
+
+package .ru.dz.phantom.system;
 
 import .ru.dz.phantom.system.iterable;
 
