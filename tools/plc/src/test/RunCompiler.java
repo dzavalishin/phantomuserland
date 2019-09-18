@@ -60,5 +60,9 @@ public class RunCompiler {
 	public void testUntypedVar()		{ 		compile("test/plc/test_untyped_var.ph");
 	}
 	
+	@Test
+	public void testBaseFieldAccess()	{ 		compile("test/plc/test_base_field_access.ph");
+	}
+	
 	
 }
