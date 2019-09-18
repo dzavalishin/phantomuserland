@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -21,6 +22,11 @@ public class RefEqNode extends BiNode
 	public boolean is_on_int_stack() { return true; }
 	public boolean args_on_int_stack() { return false; }
 	public String toString()  {    return ":==";  }
+
+	public void find_out_my_type() throws PlcException
+	{
+		type = PhantomType.getInt();
+	}	
 
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		c.emit_ptr_eq();

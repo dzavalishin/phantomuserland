@@ -23,6 +23,8 @@ public class IfNode extends TriNode {
 		super(value, op_true, op_false);
 	}
 	public String toString()  {    return "if";  }
+	
+	// Why no just void? For ?: op?
 	public void find_out_my_type() throws PlcException
 	{
 		if( type != null ) return;
@@ -48,7 +50,7 @@ public class IfNode extends TriNode {
 		if( !_l.is_on_int_stack() ) c.emit_o2i();
 
 		// To use if in expressions we need to find if results are int or not int
-		// or void and thus eithe move them to one stack or do nothing
+		// or void and thus either move them to one stack or do nothing
 
 		//if( _l != null ) { _l.generate_code(c,s); move_between_stacks(c, _l.is_on_int_stack()); }
 		//if( _r != null ) { _r.generate_code(c,s); move_between_stacks(c, _r.is_on_int_stack()); }
@@ -56,9 +58,7 @@ public class IfNode extends TriNode {
 
 		if( !_l.getType().is_int() )
 		{
-			//System.out.println("Warning: not an integer expression in if: "+ _l.getType().toString());
 			print_warning( "Warning: not an integer expression in if: "+ _l.getType().toString() );
-			//c.emit_o2i();
 		}
 
 		String label_no = c.getLabel();

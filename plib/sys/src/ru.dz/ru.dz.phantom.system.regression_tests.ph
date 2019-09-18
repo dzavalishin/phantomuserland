@@ -130,12 +130,12 @@ class regression_tests
         str_array[2] = "two";
         str_array[1] = "one";
 
-        print("Beeping: ");
+        print("Loop start: ");
         i = 3;
         while( i )
         {
             i = i - 1;
-            print("beep "); print(str_array[i]); print("! ");
+            print("loop "); print(str_array[i]); print("! ");
         }
         print("\n");
 

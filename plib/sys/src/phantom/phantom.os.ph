@@ -31,7 +31,7 @@ class os
     void init()
     {
         if( impl :!= null )
-	{
+        {
             var w : .internal.world;
             w = new .internal.world();
 
@@ -39,7 +39,7 @@ class os
             th = w.getMyThread();
 
             impl = th.getOsInterface();
-	}
+        }
     }
 
     .phantom.os.time getTimeServer() { init(); return impl.getTimeServer(); }

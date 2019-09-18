@@ -148,6 +148,14 @@ struct pvm_object pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, i
     return pvm_object_da(c,object_stack)->stack[abs_pos];
 }
 
+/**
+ * 
+ * \brief Dig element from stack.
+ * 
+ * \param[in]  rootda    Root stack page
+ * \param[in]  depth     Distance to object we need from stack top, 0 = last element on stack.
+ * 
+**/
 struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int depth )
 {
     if( depth < 0 ) pvm_exec_panic0( "stack pull: overflow" );

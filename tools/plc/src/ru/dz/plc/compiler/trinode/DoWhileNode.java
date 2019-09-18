@@ -34,6 +34,8 @@ public class DoWhileNode extends TriNode {
 
 	public boolean is_on_int_stack() { return false; }
 
+	// NB! Move between stacks is not done automatically for tri-nodes, do it manually!
+	
 	@Override
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{

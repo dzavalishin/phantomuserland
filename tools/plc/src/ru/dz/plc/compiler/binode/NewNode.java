@@ -178,7 +178,7 @@ public class NewNode extends Node
 				if( n_param > 0 )
 					throw new PlcException(context.get_position(), "No constructor found" );
 
-				print_warning("No constructor found, will call Object constructor");
+				//print_warning("No constructor found, will call Object constructor");
 			}
 			else
 				method_ordinal = cm.getOrdinal();

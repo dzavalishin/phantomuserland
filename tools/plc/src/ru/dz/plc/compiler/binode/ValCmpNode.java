@@ -35,6 +35,11 @@ public abstract class ValCmpNode extends BiBistackNode {
 	public boolean args_on_int_stack() {
 		return true; // we allways need em on int stack
 	}
+
+	public void find_out_my_type() throws PlcException
+	{
+		type = PhantomType.getInt();
+	}	
 	 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
