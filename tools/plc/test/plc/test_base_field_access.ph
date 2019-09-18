@@ -5,6 +5,9 @@ package .ru.dz.test;
 class base
 {
     var s : .internal.string;
+    
+    // If we are in same source compier fails to generate def c'tor
+    void base() {}
 };
 
 

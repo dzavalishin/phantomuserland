@@ -485,6 +485,8 @@ public class Method
 
 	private void preprocessParentConstructor(PhantomClass myClass) throws PlcException 
 	{
+		System.out.println("preprocessParentConstructor for "+myClass.getName());
+		
 		// don't call constructor for parent of all classes
 		if( myClass.getParent().equals(".internal.object") )
 			return;
@@ -496,7 +498,9 @@ public class Method
 		if( checkConstructorCall( code, myClass ) == SearchResult.Ok )
 			return;
 
-		// No base class c'tor call found, add call to default c'tor
+		// No base class c'tor call found
+		// Create call to default c'tor
+		System.out.println("create parent constructor call "+myClass.getName());
 
 		String parentClassName = myClass.getParent();
 

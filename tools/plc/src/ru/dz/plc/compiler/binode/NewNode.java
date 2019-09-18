@@ -80,7 +80,7 @@ public class NewNode extends Node
 
 		//c.emitDebug((byte)0, "before new");
 		
-		//boolean dynamicClass = _l != null;
+		int n_param = countParameters();
 
 		if( dynamic )
 		{
@@ -91,12 +91,18 @@ public class NewNode extends Node
 		}
 		else
 		{
+			if(static_type.get_class().isInternal())
+			{
+				if( n_param > 0 )
+					throw new PlcException( "new Node", "attempt to construct internal class object with parameters" );
+				return;
+			}
+			
 			static_type.emit_get_class_object(c,s);
 		}
 		
 		//dynamicClass = true; // disable ctor call temp FIXME
 		
-		int n_param = countParameters();
 /* can't drop it! will regenerate class ptr below
 		if( !dynamicClass ) // no c'tor call for dyn class - TODO FIXME
 			c.emitOsDup(); // copy of pointer to class - MUST POP BELOW, pull copies me, not moves
@@ -165,6 +171,8 @@ public class NewNode extends Node
 		return n_param;
 	}
 
+
+	/*
 	private int findConstructorOrdinal(int n_param) throws PlcException 
 	{
 		int method_ordinal = 0; // .internal.object constructor
@@ -187,8 +195,28 @@ public class NewNode extends Node
 			print_warning("Can't call c'tor for "+static_type);
 		
 		return method_ordinal;
-	}
+	}*/
 
+	
+	private int findConstructorOrdinal(int n_param) throws PlcException 
+	{
+		PhantomClass pclass = static_type.get_class();
+		if( pclass == null )
+			throw new PlcException("NewNode","Can't call c'tor for "+static_type);
+			
+		Method cm = pclass.findMethod(new MethodSignature(Method.CONSTRUCTOR_M_NAME, args));
+		if( cm == null )
+		{					
+			//if( n_param > 0 )
+			throw new PlcException(context.get_position(), "No constructor found" );
+			
+			//print_warning("No constructor found, will call Object constructor");
+		}
+		
+		return cm.getOrdinal();
+	}
+	
+	
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
 

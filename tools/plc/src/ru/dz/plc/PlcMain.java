@@ -68,6 +68,7 @@ public class PlcMain {
 		ClassMap classes = ClassMap.get_map();
 		if(!stop_codegen)
 		{
+			//classes.set_ordinals(); // NO! we must do it after creating default constructors
 			classes.preprocess();
 			classes.codegen();
 		}
@@ -88,13 +89,14 @@ public class PlcMain {
 			
 			//System.out.println("Compiling " + arg);
 
-			if( !compile(arg) )
+			if( compile(arg) )
 				ok = false;
 		}
 		
-		codegen();		
+		if(ok)
+			codegen();		
 		
-		return ok;
+		return !ok;
 	}
 
 
@@ -150,18 +152,15 @@ public class PlcMain {
 	
 	static boolean compile( String fn ) throws FileNotFoundException, PlcException,
 	IOException {
+
 		FileInputStream  fis = new FileInputStream ( fn );
-
 		Lex l = new Lex(tokens,fn);
-
 		l.set_input(fis);
-
 		LexStack ls = new LexStack(l); // permit not just LR1
-		
+	
 		Grammar g = new Grammar(ls,fn);
 
 		try {
-			//Node all = 
 			g.parse();
 
 			// No, do it after all the compiles

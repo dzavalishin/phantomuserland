@@ -20,5 +20,6 @@ class caller
 	void method()
 	{
 		o = new withparam( "Hello" );
+		//o = new withparam( );
 	}
 };

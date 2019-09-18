@@ -190,16 +190,69 @@ public class ClassTable {
 		}
 	}
 
+	public void set_ordinals() throws PlcException 
+	{
+		for( PhantomClass c : table.values() )
+			c.set_ordinals();
+	}
+
+	
 	public void preprocess() throws PlcException 
 	{
+		// Process referenced classes first
+		
+		/*		
+		List<PhantomClass> todo = new ArrayList<>( table.values() ); 
+		
+		do {
+			boolean skipped = false;
+			PhantomClass c = todo.remove(0);
+			
+			for( PhantomClass ref : todo )
+			{
+				if( c.getReferencedClasses().contains(ref) )
+				{
+					System.err.println("Class "+c.getName()+" depends on "+ref);
+					skipped = true;
+				}
+				
+			}
+
+			if( skipped )
+			{
+				todo.add(c);
+				System.err.println("Reordered "+c.getName());
+				continue;
+			}
+			
+			c.createDefaultConstructor( new ParseState(c) );
+			c.set_ordinals();
+			//c.preprocess( new ParseState(c) );
+			
+		} while(!todo.isEmpty());
+		
 		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomClass c = i.next();
+			
+			//c.getReferencedClasses()
+			
 			//c.listMethods();
 			c.createDefaultConstructor( new ParseState(c) );
 			c.preprocess( new ParseState(c) );
 		}
+		*/
 
+		for( PhantomClass c : table.values() )
+		{
+			c.createDefaultConstructor( new ParseState(c) );
+			c.set_ordinals();
+		}
+
+		for( PhantomClass c : table.values() )
+			c.preprocess( new ParseState(c) );
+		
+		
 	}
 
 

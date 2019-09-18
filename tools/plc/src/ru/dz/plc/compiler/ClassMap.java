@@ -42,7 +42,9 @@ public class ClassMap {
 	public void codegen() throws PlcException, IOException { classes.codegen(); }
 	//public void llvmCodegen() throws PlcException, IOException { classes.llvmCodegen(); }
 	public void preprocess() throws PlcException {		classes.preprocess();	}
+	public void set_ordinals() throws PlcException { classes.set_ordinals(); }
 
+	
 	/**
 	 * do_import - import class
 	 *
@@ -83,6 +85,7 @@ public class ClassMap {
 	public void listMethods() {
 		classes.listMethods();		
 	}
+
 
 
 

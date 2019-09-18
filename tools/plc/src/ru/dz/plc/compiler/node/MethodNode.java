@@ -36,6 +36,7 @@ public class MethodNode extends Node
 
 		Method m = findMethod(pc);
 
+		// TODO hack!
 		pc.set_ordinals();
 
 		int ord = m.getOrdinal();

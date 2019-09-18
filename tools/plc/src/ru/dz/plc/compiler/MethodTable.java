@@ -189,6 +189,8 @@ public class MethodTable implements IMethodTable
 		if( m.getOrdinal() >= 0 )
 			return;
 
+		System.out.println("Set ordinal for "+m.getSignature());
+		
 		int ord;
 		while( true )
 		{
@@ -269,7 +271,7 @@ public class MethodTable implements IMethodTable
 		
 		if(me.isInternal())
 		{
-			// It is pointless to generate anythin for .internal classes, they're hardcoded in VM
+			// It is pointless to generate anything for .internal classes, they're hardcoded in VM
 			return;
 			//throw new PlcException("createDefaultConstructor","Attempt to create c'tor for internal class "+me.getName());
 		}
@@ -279,6 +281,9 @@ public class MethodTable implements IMethodTable
 		if( parent == null )
 			throw new PlcException("Can't find base class "+parentName+" for class "+me.getName());
 
+		// make sure he did it - can't, dies
+		//parent.createDefaultConstructor(new ParseState(parent));
+		
 		Method defc = parent.getDefaultConstructor();
 
 		if( defc == null )
