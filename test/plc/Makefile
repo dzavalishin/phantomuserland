@@ -1,5 +1,7 @@
 include ../../config.mk
 
+goal:: test
+
 .SILENT:
 
 BINDIR := bin

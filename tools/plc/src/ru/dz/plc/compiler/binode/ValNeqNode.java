@@ -47,6 +47,9 @@ public class ValNeqNode extends EqNeqNode {
 
 			c.emitNumericPrefix(common_type);			
 			c.emitISubLU();
+			
+			if(!common_type.is_int())
+				c.emitNumericCast(common_type, PhantomType.getInt());
 		}
 		else
 		{

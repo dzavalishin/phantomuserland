@@ -135,6 +135,7 @@ public class IdentNode extends Node {
 		{
 			// if we are here, we have _l - object to call getter in, and it's code is generated
 			// should we have call node instead?
+			c.emitComment("get "+ident);
 			c.emitCall(getterMethod.getOrdinal(),0);
 			return;
 		}
@@ -152,6 +153,7 @@ public class IdentNode extends Node {
 		PhantomStackVar svar = s.istack_vars().get_var(ident);
 		if( svar != null )
 		{
+			c.emitComment(ident);
 			c.emitNumericPrefix(svar.getType());
 			c.emitIGet(svar.get_abs_stack_pos()); // get stack variable
 		}
@@ -162,6 +164,7 @@ public class IdentNode extends Node {
 				throw new PlcException( "ident Node", "no field or var", ident );
 
 			//if (type == null || type.is_unknown()) type = svar.get_type();
+			c.emitComment(ident);
 			c.emitGet(svar.get_abs_stack_pos()); // get stack variable
 		}
 

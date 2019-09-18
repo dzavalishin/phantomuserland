@@ -1,5 +1,8 @@
 Class .test.toPhantom.PhantomPrinter
   Field console
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void print( s: string ):
     void  : void
       . : void

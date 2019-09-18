@@ -108,10 +108,10 @@ int debug_trace = 0;
 **/
 
 // v must be lvalue
-#define TO_DOUBLE( __v ) (*((double *)&(__v)))
-#define TO_LONG( __v ) (*((u_int64_t *)&(__v)))
-#define TO_FLOAT( __v ) (*((float *)&(__v)))
-#define TO_INT( __v ) (*((u_int32_t *)&(__v)))
+#define TO_DOUBLE( __v )  ( *((double *)    &(__v)) )
+#define TO_LONG( __v )    ( *((u_int64_t *) &(__v)) )
+#define TO_FLOAT( __v )   ( *((float *)     &(__v)) )
+#define TO_INT( __v )     ( *((u_int32_t *) &(__v)) )
 
 #define AS_DOUBLE( __a1, __a2, __op ) (TO_DOUBLE(__a1) __op TO_DOUBLE(__a2))
 #define AS_FLOAT( __a1, __a2, __op )  (TO_FLOAT(__a1)  __op TO_FLOAT(__a2))
@@ -857,7 +857,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             case opcode_fromd:
                 LISTI("l-fromd");
                 {
-                    long l = ls_pop();
+                    int64_t l = ls_pop();
                     double d = TO_DOUBLE( l );
                     ls_push( (long) d );
                 }
@@ -1121,6 +1121,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                     int64_t l = ls_pop();
                     double r = AS_DOUBLE( l, u, - );
                     ls_push( TO_LONG(r) );
+                    //printf("d-sublu %g - %g -> %g ( %g ) ; ", TO_DOUBLE(l), TO_DOUBLE(u), r, TO_LONG(r) );
                 }
                 break;
 
@@ -1141,6 +1142,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                     int64_t l = ls_pop();
                     double r = AS_DOUBLE( l, u, / );
                     ls_push( TO_LONG(r) );
+                    //printf("d-idivlu %g / %g -> %g ( %g ) ; ", TO_DOUBLE(l), TO_DOUBLE(u), r, TO_LONG(r) );
                 }
                 break;
 
@@ -1626,9 +1628,12 @@ static void do_pvm_exec(pvm_object_t current_thread)
             case opcode_fromd:
                 LISTI("i-fromd");
                 {
-                    long l = ls_pop();
+                    int64_t l = ls_pop();
                     double d = TO_DOUBLE( l );
                     is_push( (int) d );
+                    //printf("i-fromd %g", d );
+                    //printf(" ( %g )", l );
+                    //printf(" -> %d ; ", (int) d );
                 }
                 break;
 
@@ -1796,7 +1801,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 //printf("new_this @%p %s\n", no.data, pvm_is_null(no) ? "null" : "not null"); 
             }
             break;
-
+#if 0
         case opcode_copy: // TODO unused? Kill?
             LISTI("copy");
             {
@@ -1805,7 +1810,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 ref_dec_o(o);
             }
             break;
-
+#endif
             // if you want to enable these, work out refcount
             // and security issues first!
             // compose/decompose

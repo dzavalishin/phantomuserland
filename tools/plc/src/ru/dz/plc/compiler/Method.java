@@ -584,7 +584,7 @@ public class Method
 
 			Method ctor = cc.getMethod(ord);
 			if( ctor == null )
-				throw new PlcException("checkConstructorCall", "base c'tor is null" );
+				throw new PlcException("checkConstructorCall", "base c'tor is null", cc.getName() );
 
 			if( !ctor.isConstructor() )
 				throw new PlcException("checkConstructorCall", "base c'tor is not really c'tor" );

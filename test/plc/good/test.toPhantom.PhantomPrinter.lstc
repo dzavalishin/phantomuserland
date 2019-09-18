@@ -1,61 +1,53 @@
-Class version 20160109081030898
+Class version 20190818003214150
 
-method print ordinal 16
+method <init> ordinal 16
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: print in .test.toPhantom.PhantomPrinter"	//  @11
-  throw				//  @66
-_label_0:	//  @67
-  stack_reserve obj=1 int=0	//  @67
-    ; Line 32			//  @70
-  load fld=0			//  @70
-    ; Line 32			//  @72
-  get o stk pos=0			//  @72
-    ; Line 32			//  @77
-  call m=17 nparm=1		//  @77
-  os drop				//  @79
-  ret				//  @80
+  arg_count 0			//  @0
+  ret				//  @2
 --
 method end
 
-method init ordinal 17
+method print ordinal 17
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .test.toPhantom.PhantomPrinter"	//  @11
-  throw				//  @65
-_label_0:	//  @66
-  stack_reserve obj=1 int=0	//  @66
-    ; Line 45			//  @69
-  get o stk pos=0			//  @69
-  os dup				//  @74
-  save fld=0			//  @75
-  os drop				//  @77
-  ret				//  @78
+  arg_count 1			//  @0
+  stack_reserve obj=1 int=0	//  @2
+    ; Line 32			//  @5
+  load fld=0			//  @5
+    ; Line 32			//  @7
+  get o stk pos=0			//  @7
+    ; Line 32			//  @12
+  call m=17 nparm=1		//  @12
+  os drop				//  @14
+  ret				//  @15
 --
 method end
 
-method printInt ordinal 18
+method init ordinal 18
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: printInt in .test.toPhantom.PhantomPrinter"	//  @11
-  throw				//  @69
-_label_0:	//  @70
-  stack_reserve obj=1 int=0	//  @70
-    ; Line 38			//  @73
-  load fld=0			//  @73
-    ; Line 38			//  @75
-  get o stk pos=0			//  @75
-  call m=5 nparm=0		//  @80
-    ; Line 38			//  @82
-  call m=17 nparm=1		//  @82
-  os drop				//  @84
-  ret				//  @85
+  arg_count 1			//  @0
+  stack_reserve obj=1 int=0	//  @2
+    ; Line 45			//  @5
+  get o stk pos=0			//  @5
+  os dup				//  @10
+  save fld=0			//  @11
+  os drop				//  @13
+  ret				//  @14
+--
+method end
+
+method printInt ordinal 19
+--
+  arg_count 1			//  @0
+  stack_reserve obj=1 int=0	//  @2
+    ; Line 38			//  @5
+  load fld=0			//  @5
+    ; Line 38			//  @7
+  get o stk pos=0			//  @7
+  call m=5 nparm=0		//  @12
+    ; Line 38			//  @14
+  call m=17 nparm=1		//  @14
+  os drop				//  @16
+  ret				//  @17
 --
 method end
 

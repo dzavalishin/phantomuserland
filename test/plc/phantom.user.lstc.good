@@ -1,0 +1,19 @@
+
+method <init> ordinal 16
+--
+  arg_count 0			//  @0
+  ret				//  @2
+--
+method end
+
+method getName ordinal 17
+--
+  arg_count 0			//  @0
+    ; Line 24			//  @2
+  const_pool <0>			//  @2
+    ; Line 24			//  @7
+  ret				//  @7
+  ret				//  @8
+--
+method end
+

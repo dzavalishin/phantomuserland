@@ -61,7 +61,7 @@ extends GrammarHelper {
 	}
 
 	public void print() throws PlcException { classes.print(); }
-	public void codegen() throws PlcException, IOException { classes.codegen(); }
+	//public void codegen() throws PlcException, IOException { classes.codegen(); }
 
 
 	public Node parse() throws PlcException, IOException {
@@ -91,7 +91,8 @@ extends GrammarHelper {
 			l.commit(); // no unget after this point
 		}
 
-		out.preprocess(ps);
+		// No, do it in driver
+		//out.preprocess(ps);
 
 		return out;
 	}
@@ -444,6 +445,12 @@ extends GrammarHelper {
 		return null;
 	}*/
 
+	/**
+	 * Check if given method name is constructor name.
+	 * @param me current class
+	 * @param mname method name
+	 * @return True if name is equal to class name
+	 */
 	private boolean checkConstructorName(PhantomClass me, String mname) 
 	{
 		//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));

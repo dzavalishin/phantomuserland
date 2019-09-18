@@ -64,5 +64,8 @@ public class RunCompiler {
 	public void testBaseFieldAccess()	{ 		compile("test/plc/test_base_field_access.ph");
 	}
 	
+	@Test
+	public void testCtorParam()		{ 		compile("test/plc/test_ctor_param.ph");
+	}
 	
 }

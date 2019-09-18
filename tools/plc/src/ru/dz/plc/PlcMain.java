@@ -3,6 +3,8 @@ package ru.dz.plc;
 import java.util.LinkedList;
 import java.io.File;
 import java.io.IOException;
+
+import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.compiler.Grammar;
 import ru.dz.plc.parser.*;
 import ru.dz.plc.util.*;
@@ -21,6 +23,7 @@ public class PlcMain {
 	static LinkedList<Token> tokens = new LinkedList<Token>();
 	private static LinkedList<File> classFileSearchPath = new LinkedList<File>();
 	private static String outputPath = null;
+	private static boolean stop_codegen = false;
 	
 	public PlcMain() { }
 
@@ -43,6 +46,14 @@ public class PlcMain {
 		
 		try { 
 			Boolean err = go(args);
+
+			ClassMap classes = ClassMap.get_map();
+			if(!stop_codegen)
+			{
+				classes.preprocess();
+				classes.codegen();
+			}
+			
 			if(err) System.exit(1);
 			}
 		catch( PlcException e ) {
@@ -148,8 +159,10 @@ public class PlcMain {
 			//Node all = 
 			g.parse();
 
-			if(g.get_error_count() == 0) 
-				g.codegen();
+			// No, do it after all the compiles
+			//if(g.get_error_count() == 0) 				g.codegen();
+			if( g.get_error_count() > 0 )
+				stop_codegen  = true;
 
 			if(g.get_warning_count() > 0)
 				System.out.println(">> "+g.get_warning_count()+" warnings found");

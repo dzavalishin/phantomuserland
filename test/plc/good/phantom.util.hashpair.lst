@@ -8,6 +8,9 @@ Class .phantom.util.hashpair
         ident next : .phantom.util.hashpair
         ident _n : .phantom.util.hashpair
 
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void setVal( _val: .internal.object ):
     void  : void
       = : .internal.object

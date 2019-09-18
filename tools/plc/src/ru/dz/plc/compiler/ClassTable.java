@@ -190,11 +190,13 @@ public class ClassTable {
 		}
 	}
 
-	public void preprocess() throws PlcException {
+	public void preprocess() throws PlcException 
+	{
 		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomClass c = i.next();
 			//c.listMethods();
+			c.createDefaultConstructor( new ParseState(c) );
 			c.preprocess( new ParseState(c) );
 		}
 

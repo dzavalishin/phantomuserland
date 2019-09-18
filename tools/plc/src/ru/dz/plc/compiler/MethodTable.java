@@ -16,9 +16,8 @@ import ru.dz.plc.util.*;
 
 /**
  * <p>Class methods table.</p>
- * <p>Dumb implementation, does not support polymorphism.</p>
  * 
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * <p>Copyright: Copyright (c) 2004-2019 Dmitry Zavalishin</p>
  * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * 
@@ -225,65 +224,73 @@ public class MethodTable implements IMethodTable
 		return max+1;
 	}
 
+	
 	/* (non-Javadoc)
 	 * @see ru.dz.plc.compiler.IMethodTable#preprocess(ru.dz.plc.compiler.ParseState)
 	 */
 	@Override
 	public void preprocess( ParseState ps ) throws PlcException
 	{
-		// Find all constructors
-		
-		//List<Method> ctors = new LinkedList<>();
-		boolean haveConstructor = false;
-		
-		for( Method cm : mstable.values() )
-			//if( cm.isConstructor() ) ctors.add(cm);
-			haveConstructor = true;
-		
-		if(!haveConstructor)
-			createDefaultConstructor(ps);
-		
+
 		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			ps.set_method( m );
+			m.preprocess(ps.get_class());
 			if( m.code != null ) m.code.preprocess(ps);
 			ps.set_method( null );
 		}
 	}
 
+	
+	//@Override
+	public void checkDefaultConstructor( ParseState ps ) throws PlcException
+	{
+		// Find all constructors
+		//System.out.println("Check default constructor for "+ps.get_class().getName());
+		//List<Method> ctors = new LinkedList<>();
+		boolean haveConstructor = false;
+
+		for( Method cm : mstable.values() )
+			if( cm.isConstructor() )
+			{
+				//ctors.add(cm);
+				haveConstructor = true;
+			}
+
+		if(!haveConstructor)
+			createDefaultConstructor(ps);
+		
+	}
+	
 	private void createDefaultConstructor(ParseState ps) throws PlcException 
 	{
 		PhantomClass me = ps.get_class();
+		
+		if(me.isInternal())
+		{
+			// It is pointless to generate anythin for .internal classes, they're hardcoded in VM
+			return;
+			//throw new PlcException("createDefaultConstructor","Attempt to create c'tor for internal class "+me.getName());
+		}
+		
 		String parentName = me.getParent();
 		PhantomClass parent = ClassMap.get_map().get(parentName, true, ps);
 		if( parent == null )
 			throw new PlcException("Can't find base class "+parentName+" for class "+me.getName());
-		
+
 		Method defc = parent.getDefaultConstructor();
-		
+
 		if( defc == null )
 			throw new PlcException("createDefaultConstructor","No default constructor in base class "+parentName+" for class "+me.getName());
-		
+
 		Method cm = new Method( Method.CONSTRUCTOR_M_NAME, PhantomType.getVoid(), true );
-		/*
-		OpStaticMethodCallNode smc = new OpStaticMethodCallNode(
-					new ThisNode(me),
-					defc.getOrdinal(),
-					null,
-					parent
-				);
-		
-		cm.code = smc; // just one static call instruction
-		*/
-		
+
 		cm.code = new EmptyNode(); // Preprocess must add call to parent c'tor
-		
-		cm.preprocess(me);
-		
-		//cm.setType(PhantomType.getVoid());
-		
-		System.out.println("Created default constructor for "+me.getName());
+
+		//cm.preprocess(me);
+
+		//System.out.println("Created default constructor for "+me.getName());
 		add(cm);
 	}
 
@@ -296,37 +303,29 @@ public class MethodTable implements IMethodTable
 		set_ordinals();
 		cw.lstc.write("Class version "+cw.getVersionString()+"\n\n");
 
+		// Preprocess all first
 		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
 		{
 			Method m = i.next();
 			s.set_method( m );
 
 			m.preprocess( s.get_class() );
+		}		
+		
+		// Now codegen
+		for( Iterator<Method> i = mstable.values().iterator(); i.hasNext(); )
+		{
+			Method m = i.next();
+			s.set_method( m );
+
+			//m.preprocess( s.get_class() );
 
 			cw.lstc.write("method "+m.getName()+" ordinal "+m.getOrdinal()+"\n--\n");
 			cw.llvmFile.write("\n\n; method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
 			cw.c_File.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 			//cw.javaFile.write("\n\n// method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
-			
-			String javaMethodName = m.isConstructor() ? s.get_class().getShortName() : m.getName();
-			
-			cw.javaFile.write( "\tpublic abstract " );
-			if(!m.isConstructor()) cw.javaFile.write( m.getType().toJavaType()+" " );
-			cw.javaFile.write( javaMethodName+"( " );
-			
-			Iterator<ArgDefinition> iter = m.getArgIterator();
-			while( iter.hasNext() )
-			{
-				ArgDefinition arg = iter.next();
-				cw.javaFile.write( arg.getType().toJavaType()+" "+arg.getName() );
-				
-				if(iter.hasNext())
-					cw.javaFile.write( ", " );
-			}
-			if(m.getArgCount() == 0)
-				cw.javaFile.write( "void" );
-			
-			cw.javaFile.write( " );\n" );
+
+			generateJavaStub(cw, s, m);
 
 			MethodFileInfo mf = new MethodFileInfo(cw.get_os(), cw.lstc, m, s);
 			mf.write();
@@ -345,6 +344,28 @@ public class MethodTable implements IMethodTable
 			cw.llvmFile.write("\n\n; end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n; --\n\n");
 			cw.c_File.write("\n\n// end of method "+m.getName()+" ordinal "+m.getOrdinal()+"\n// --\n\n");
 		}
+	}
+
+	public void generateJavaStub(CodeWriters cw, CodeGeneratorState s, Method m) throws PlcException, IOException {
+		String javaMethodName = m.isConstructor() ? s.get_class().getShortName() : m.getName();
+
+		cw.javaFile.write( "\tpublic abstract " );
+		if(!m.isConstructor()) cw.javaFile.write( m.getType().toJavaType()+" " );
+		cw.javaFile.write( javaMethodName+"( " );
+
+		Iterator<ArgDefinition> iter = m.getArgIterator();
+		while( iter.hasNext() )
+		{
+			ArgDefinition arg = iter.next();
+			cw.javaFile.write( arg.getType().toJavaType()+" "+arg.getName() );
+
+			if(iter.hasNext())
+				cw.javaFile.write( ", " );
+		}
+		if(m.getArgCount() == 0)
+			cw.javaFile.write( "void" );
+
+		cw.javaFile.write( " );\n" );
 	}
 
 

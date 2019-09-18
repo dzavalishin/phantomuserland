@@ -1,18 +1,20 @@
-Class version 20170915052644241
+Class version 20190818003801717
 
-method getName ordinal 16
+method <init> ordinal 16
 --
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getName in .phantom.user"	//  @11
-  throw				//  @51
-_label_0:	//  @52
-    ; Line 24			//  @52
-  const_pool <0>			//  @52
-    ; Line 24			//  @57
-  ret				//  @57
-  ret				//  @58
+  arg_count 0			//  @0
+  ret				//  @2
+--
+method end
+
+method getName ordinal 17
+--
+  arg_count 0			//  @0
+    ; Line 24			//  @2
+  const_pool <0>			//  @2
+    ; Line 24			//  @7
+  ret				//  @7
+  ret				//  @8
 --
 method end
 

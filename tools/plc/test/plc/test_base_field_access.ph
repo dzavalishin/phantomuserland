@@ -4,11 +4,11 @@ package .ru.dz.test;
 
 class base
 {
-    var s : String;
-}
+    var s : .internal.string;
+};
 
 
-class child extnds base
+class child extends base
 {
 	var s1;
 	
@@ -17,4 +17,4 @@ class child extnds base
 	s = "Hello";
 	s1 = s;
 	}
-}
+};

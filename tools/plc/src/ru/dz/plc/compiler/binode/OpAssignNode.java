@@ -83,6 +83,7 @@ public class OpAssignNode extends BiNode {
 				check_assignment_types(f.getName(), type,_r.getType());
 				
 				c.emitOsDup(); // return a copy
+				c.emitComment("set "+dest_name);
 				c.emitSave(f.getOrdinal());
 				
 				if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int for field??!");
@@ -99,6 +100,7 @@ public class OpAssignNode extends BiNode {
 				c.emitNumericPrefix(type);
 				c.emitIsDup(); // return a copy
 				
+				c.emitComment("set "+dest_name);
 				c.emitNumericPrefix(type);
 				c.emitISet(svar.get_abs_stack_pos()); // set stack variable
 				
@@ -113,6 +115,7 @@ public class OpAssignNode extends BiNode {
 				if (type == null || type.is_unknown()) type = svar.getType();
 				check_assignment_types(svar.getName(), type,_r.getType());
 				c.emitOsDup(); // return a copy
+				c.emitComment("set "+dest_name);
 				c.emitSet(svar.get_abs_stack_pos()); // set stack variable
 				if(is_on_int_stack()) System.out.println("OpAssignNode.generate_my_code() i'm on int??!");
 			}

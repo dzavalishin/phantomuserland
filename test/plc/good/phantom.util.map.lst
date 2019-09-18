@@ -7,7 +7,7 @@ Class .phantom.util.map
         ,  : unknown
           ,  : unknown
             if : unknown
-              :!= : .internal.object
+              :!= : int
                 . : .internal.object
                   this  : .phantom.util.map
                   Method get : unknown
@@ -39,6 +39,9 @@ Class .phantom.util.map
       return : void const
         int const "1" : int const
 
+  C'tor  void <init>(  ):
+    empty : void
+
   Method .internal.object get( key: .internal.object ):
     ,  : void
       ,  : void
@@ -46,7 +49,7 @@ Class .phantom.util.map
           = : int
             ident i : int
             int const "0" : int const
-        do-while : unknown
+        do-while : void
           < : int
             ident i : int
             ident index : int

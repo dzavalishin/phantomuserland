@@ -71,20 +71,32 @@ public class Codegen extends opcode_ids {
 
 	private void list(String s) throws IOException 
 	{
+		boolean isComment = s.startsWith(";");
+		boolean isPrefix = s.startsWith(":");
+
 		if(lst == null ) return;
-		lst.write("  ");
-		if( s.startsWith(";") ) lst.write("  "); // indent comments 
+
+		if( !isComment )
+			lst.write("  ");
+		//if( s.startsWith(";") ) lst.write("  "); // indent comments 
 		lst.write(s);
-		
-		int l = s.length();
-		int ntab = 4;
-		ntab -= l/8;
-		if( ntab < 1 ) ntab = 1;
-		while( ntab-- > 0 )
-			lst.write("\t");
-		
-		lst.write("//  @"+getIP());
-		lst.write('\n');
+
+		if(! (isComment||isPrefix) )
+		{
+			int l = s.length();
+			int ntab = 7;
+			ntab -= l/8;
+			if( ntab < 1 ) ntab = 1;
+			while( ntab-- > 0 )
+				lst.write("\t");
+
+			lst.write("//  @"+getIP());
+		}
+
+		if(isPrefix )
+			lst.write(' ');
+		else
+			lst.write('\n');
 	}
 	private void listlbl(String s) throws IOException 
 	{
@@ -93,7 +105,7 @@ public class Codegen extends opcode_ids {
 		lst.write("\t//  @"+getIP());
 		lst.write('\n');
 	}
-	
+
 	public void put_byte( byte v ) throws IOException { Fileops.put_byte( os, v ); }
 	public void put_int32( int v ) throws IOException { Fileops.put_int32(os, v ); }
 	public void put_int64( long v ) throws IOException { Fileops.put_int64(os, v ); }
@@ -116,7 +128,7 @@ public class Codegen extends opcode_ids {
 	 * @throws IOException
 	 */
 	public void correct_int32( String name, RandomAccessFile f, long address_to_point_to )
-	throws IOException {
+			throws IOException {
 		LinkedList<Long> posl = bmap.get(name);
 
 		if( posl == null ) return;
@@ -228,7 +240,7 @@ public class Codegen extends opcode_ids {
 
 
 	public void emitSwitch(Collection<String> table, int shift, int divisor )
-	throws IOException
+			throws IOException
 	{
 		list("switch -"+shift+" /"+divisor);
 		put_byte(opcode_switch);
@@ -313,7 +325,7 @@ public class Codegen extends opcode_ids {
 		put_byte(opcode_iconst_64bit);
 		put_int64(val);
 	}
-	
+
 	/**
 	 * <p>Emit string.</p>
 	 * 
@@ -341,7 +353,7 @@ public class Codegen extends opcode_ids {
 		put_byte(opcode_sconst_bin);
 		put_string_bin( data );
 	}
-	
+
 	/**
 	 * <p>Emit constant pool reference.</p>
 	 *
@@ -355,21 +367,21 @@ public class Codegen extends opcode_ids {
 		put_int32(id);
 	}
 
-	
+
 	public void emitStackReserve( int objectStackReserve, int intStackReserve ) throws IOException
 	{
 		assert( objectStackReserve >= 0 );
 		assert( objectStackReserve < Byte.MAX_VALUE );
 		assert( intStackReserve >= 0 );
 		assert( intStackReserve < Byte.MAX_VALUE );
-		
+
 		list("stack_reserve obj="+objectStackReserve+" int="+intStackReserve);
-		
+
 		put_byte(opcode_stack_reserve);
 		put_byte((byte)objectStackReserve);
 		put_byte((byte)intStackReserve);
 	}
-	
+
 	/**
 	 * <p>Emit cast.</p>
 	 *
@@ -380,8 +392,8 @@ public class Codegen extends opcode_ids {
 		list("cast obj class");
 		put_byte(opcode_cast);
 	}
-	
-	
+
+
 	/**
 	 * summon
 	 */
@@ -468,7 +480,7 @@ public class Codegen extends opcode_ids {
 		put_byte(opcode_ushr);
 	}
 
-	
+
 
 	public void emitDebug(byte type, String text) throws IOException {
 		list("debug");
@@ -496,9 +508,9 @@ public class Codegen extends opcode_ids {
 			//throw new IOException("negative method index");
 			throw new PlcException("emitCall", "negative method index");
 		}
-		
+
 		list("call m="+method_index+" nparm="+n_param);
-		
+
 		if( n_param == 0 )
 		{
 			switch(method_index) {
@@ -603,10 +615,10 @@ public class Codegen extends opcode_ids {
 		name = name.toLowerCase();
 
 		assert(name.length() > 0);
-		
+
 		//list("summon class '"+name+"'");
 		list("summon class "+name);
-		
+
 		if( name.equals( "internal.class" ) )                put_byte(opcode_summon_class_class);
 		else if( name.equals( "internal.class.class" ))      put_byte(opcode_summon_class_class);
 		else if( name.equals( "internal.interface" ))        put_byte(opcode_summon_interface_class);
@@ -734,8 +746,8 @@ public class Codegen extends opcode_ids {
 		put_int32(pos);
 	}
 
-	
-	
+
+
 	public void emit_ptr_eq() throws IOException
 	{
 		list("ptr eq");
@@ -813,18 +825,18 @@ public class Codegen extends opcode_ids {
 		else if( !t.is_int())
 			throw new PlcException("unknown numeric type: "+t+", possibly untyped variable in numeric context.");
 	}
-	
+
 	public void emitNumericCast(PhantomType from, PhantomType to) throws PlcException, IOException
 	{
 		if( !to.can_be_assigned_from(from) )
 			throw new PlcException("can't cast from "+from+" to "+to);
-		
+
 		if( !from.is_on_int_stack() )
 			throw new PlcException("not on int stack "+from);
-		
+
 		if( !to.is_on_int_stack() )
 			throw new PlcException("not on int stack "+to);
-	
+
 		// generate destination type prefix
 		emitNumericPrefix(to);
 
@@ -851,20 +863,20 @@ public class Codegen extends opcode_ids {
 		else
 			throw new PlcException("unknown type of "+to);
 	}
-	
+
 	public void emit_arg_count_check(int n_args) throws IOException, PlcException {
 		list("arg_count "+n_args);
-		
+
 		if(n_args > Byte.MAX_VALUE) 
 			throw new PlcException("emit_arg_count_check", "n_args > 127", Integer.toString(n_args));
-		
+
 		put_byte(opcode_arg_count);
 		put_byte((byte)n_args);
 	}
 
 
-	
-	
+
+
 
 	public void emitComment(String string) throws IOException {
 		list("; "+string);		
@@ -875,13 +887,13 @@ public class Codegen extends opcode_ids {
 	public void recordLineNumberToIPMapping(int lineNumber) {
 		try {
 			long ip = getIP();
-			
+
 			IpToLine.put(ip, lineNumber);
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();			
 		}
-		
+
 	}
 
 
