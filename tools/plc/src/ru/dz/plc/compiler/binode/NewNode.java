@@ -95,7 +95,7 @@ public class NewNode extends Node
 			{
 				if( n_param > 0 )
 					throw new PlcException( "new Node", "attempt to construct internal class object with parameters" );
-				return;
+				//return;
 			}
 			
 			static_type.emit_get_class_object(c,s);
@@ -123,7 +123,7 @@ public class NewNode extends Node
 		{
 			print_warning("No constructor call for dynamic new!");
 		}
-		else
+		else if(!static_type.get_class().isInternal()) // No c'tor for internal obj
 		{
 
 			// args - TODO are we sure they're on obj stack?

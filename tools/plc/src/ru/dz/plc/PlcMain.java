@@ -68,7 +68,7 @@ public class PlcMain {
 		ClassMap classes = ClassMap.get_map();
 		if(!stop_codegen)
 		{
-			//classes.set_ordinals(); // NO! we must do it after creating default constructors
+			classes.set_ordinals(); // NO! we must do it after creating default constructors
 			classes.preprocess();
 			classes.codegen();
 		}
