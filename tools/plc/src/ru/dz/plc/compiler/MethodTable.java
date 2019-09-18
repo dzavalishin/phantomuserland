@@ -189,7 +189,7 @@ public class MethodTable implements IMethodTable
 		if( m.getOrdinal() >= 0 )
 			return;
 
-		System.out.println("Set ordinal for "+m.getSignature());
+		//System.out.println("Set ordinal for "+m.getSignature());
 		
 		int ord;
 		while( true )

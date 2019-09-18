@@ -485,7 +485,7 @@ public class Method
 
 	private void preprocessParentConstructor(PhantomClass myClass) throws PlcException 
 	{
-		System.out.println("preprocessParentConstructor for "+myClass.getName());
+		//System.out.println("preprocessParentConstructor for "+myClass.getName());
 		
 		// don't call constructor for parent of all classes
 		if( myClass.getParent().equals(".internal.object") )
@@ -500,7 +500,7 @@ public class Method
 
 		// No base class c'tor call found
 		// Create call to default c'tor
-		System.out.println("create parent constructor call "+myClass.getName());
+		//System.out.println("create parent constructor call "+myClass.getName());
 
 		String parentClassName = myClass.getParent();
 
