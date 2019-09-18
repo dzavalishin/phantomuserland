@@ -17,6 +17,7 @@ for CLASS in $JAVA_CLASSES ; do
 	jpc "-cbin;class" $CLASS
 done
 
+
 #call jc src/java/lang/Class.java
 #call jc src/java/lang/String.java
 #call jc src/java/lang/Throwable.java 
