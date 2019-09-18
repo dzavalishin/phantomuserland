@@ -124,7 +124,7 @@ public class NewNode extends Node
 			if( args != null ) {
 
 				if( dynamic )
-					throw new PlcException(context.get_context(), "No constructor for dynamic class new" );
+					throw new PlcException(context.get_context(), "No constructor with args for dynamic class new" );
 
 				args.generate_code(c, s);
 				//move_between_stacks(c, _l.is_on_int_stack());
@@ -140,7 +140,7 @@ public class NewNode extends Node
 			
 			
 
-			if( n_param > 0 )				throw new PlcException(context.get_context(), "can generate just argless c'tors, sorry" );
+			//if( n_param > 0 )				throw new PlcException(context.get_context(), "can generate just argless c'tors, sorry" );
 
 
 			int method_ordinal = findConstructorOrdinal(n_param);

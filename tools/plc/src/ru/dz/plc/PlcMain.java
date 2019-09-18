@@ -47,13 +47,6 @@ public class PlcMain {
 		try { 
 			Boolean err = go(args);
 
-			ClassMap classes = ClassMap.get_map();
-			if(!stop_codegen)
-			{
-				classes.preprocess();
-				classes.codegen();
-			}
-			
 			if(err) System.exit(1);
 			}
 		catch( PlcException e ) {
@@ -71,9 +64,19 @@ public class PlcMain {
 
 	}
 
+	public static void codegen() throws PlcException, IOException {
+		ClassMap classes = ClassMap.get_map();
+		if(!stop_codegen)
+		{
+			classes.preprocess();
+			classes.codegen();
+		}
+	}
+
 	public static Boolean go(String[] args) throws FileNotFoundException,
 	IOException, FileNotFoundException, PlcException
 	{
+		boolean ok = true;
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
 			
@@ -85,11 +88,13 @@ public class PlcMain {
 			
 			//System.out.println("Compiling " + arg);
 
-			if( compile(arg) )
-				return true;
+			if( !compile(arg) )
+				ok = false;
 		}
 		
-		return false;
+		codegen();		
+		
+		return ok;
 	}
 
 
