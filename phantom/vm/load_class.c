@@ -5,7 +5,8 @@
  * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
  * Load class from binary storage, such as filesystem file or blob from network.
- *
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/VmLinker>
  *
 **/
 

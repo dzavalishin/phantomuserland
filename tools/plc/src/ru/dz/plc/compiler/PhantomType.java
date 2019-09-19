@@ -462,7 +462,7 @@ public class PhantomType {
 		switch(tn)
 		{
 		case "internal.object": 
-			return getObject();
+			return PhantomType.getObject();
 
 		case "void": return PhantomType.getVoid(); 
 

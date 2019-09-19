@@ -6,6 +6,7 @@
  *
  * Bytecode interpreter.
  *
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/VirtualMachine>
  *
 **/
 
@@ -45,6 +46,8 @@ static errno_t find_dynamic_method( dynamic_method_info_t *mi );
 static struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
 static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index );
 static int pvm_exec_find_catch( struct data_area_4_exception_stack* stack, unsigned int *jump_to, struct pvm_object thrown_obj );
+
+static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type);
 
 
 /*
@@ -260,19 +263,19 @@ static void pvm_exec_do_return(struct data_area_4_thread *da)
 
 
 /**
-  *
-  * \brief Virtual machine throw.
-  *
-  * \param[in]  da         Current thread data area
-  * \param[in]  thrown_obj Object to throw
-  *
-  * Must be called in main interpreter loop right before 'break' of main switch,
-  * i.e. right before next instruction execution.
-  *
-  * Unwinds stack looking for catch for given type.
-  *
-  * On return we are on stack of method which had corresponding catch.
-  *
+ *
+ * \brief Virtual machine throw.
+ *
+ * \param[in]  da         Current thread data area
+ * \param[in]  thrown_obj Object to throw
+ *
+ * Must be called in main interpreter loop right before 'break' of main switch,
+ * i.e. right before next instruction execution.
+ *
+ * Unwinds stack looking for catch for given type.
+ *
+ * On return we are on stack of method which had corresponding catch.
+ *
 **/
 static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t thrown_obj)
 {
@@ -306,6 +309,35 @@ static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t
     os_push(thrown_obj);
     if( DEB_CALLRET || debug_print_instr ) printf( "throw stack_depth -> %d)", da->stack_depth );
 }
+
+/**
+ *
+ * \brief Check obect type
+ *
+ * \param[in]  da         Current thread data area
+ * \param[in]  obj        Object to check
+ * \param[in]  type       Class object to check type against
+ *
+ * Must be called in main interpreter loop right before 'break' of main switch,
+ * i.e. right before next instruction execution.
+ *
+ * If object is of given type or its child, return 0. Else throw type error 
+ * (temporarily throws string) and return non-zero. Caller must abort instruction
+ * execution and break.
+ *
+ * \return 0 if type is ok, throw and return non-zero otherwise.
+ *
+ * **Example**
+ * 
+ * if(pvm_exec_assert_type(da, obj, pvm_get_double_class()))
+ *     break;
+ * 
+**/
+static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type)
+{
+
+}
+
 
 // object to throw is on stack
 static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
@@ -1218,20 +1250,24 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 }
                 break;
 
-            case opcode_i2o: // ERROR IMPLEMENT ME
+            case opcode_i2o:
                 LISTI("d-i2o");
                 {
-                    //pvm_exec_panic("unimpl double i2o");
                     int64_t d = ls_pop();
                     os_push( pvm_create_double_object( TO_DOUBLE(d) ) );
                 }
                 break;
 
-            case opcode_o2i: // ERROR IMPLEMENT ME
+            case opcode_o2i:
                 LISTI("d-o2i");
-                //pvm_exec_panic("unimpl double o2i");
                 {
-                    struct pvm_object o = os_pop();
+                    struct pvm_object o = os_pop(); // TODO type check
+                    if( pvm_exec_assert_type(da, o, pvm_get_double_class()))
+                    {
+                        ref_dec_o(o);
+                        break;
+                    }
+
                     if( o.data == 0 ) pvm_exec_panic("d-o2i(null)", da);
                     double d = pvm_get_double( o );
                     ls_push( TO_LONG( d ) );
@@ -1714,7 +1750,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             os_push( pvm_get_null_object() ); // so what opcode_os_push_null is for then?
             break;
 
-        case opcode_summon_thread:
+        case opcode_summon_thread: // TODO unused really
             LISTI("summon thread");
             os_push( ref_inc_o( current_thread ) );
             //printf("ERROR: summon thread");
@@ -1725,37 +1761,37 @@ static void do_pvm_exec(pvm_object_t current_thread)
             os_push( ref_inc_o( this_object() ) );
             break;
 
-        case opcode_summon_class_class:
+        case opcode_summon_class_class: // TODO unused really
             LISTI("summon class class");
             // it has locked refcount
             os_push( pvm_get_class_class() );
             break;
 
-        case opcode_summon_interface_class:
+        case opcode_summon_interface_class: // TODO unused really
             LISTI("summon interface class");
             // locked refcnt
             os_push( pvm_get_interface_class() );
             break;
 
-        case opcode_summon_code_class:
+        case opcode_summon_code_class: // TODO unused really
             LISTI("summon code class");
         	// locked refcnt
             os_push( pvm_get_code_class() );
             break;
 
-        case opcode_summon_int_class:
+        case opcode_summon_int_class: // TODO used?
             LISTI("summon int class");
         	// locked refcnt
             os_push( pvm_get_int_class() );
             break;
 
-        case opcode_summon_string_class:
+        case opcode_summon_string_class: // TODO used?
             LISTI("summon string class");
         	// locked refcnt
             os_push( pvm_get_string_class() );
             break;
 
-        case opcode_summon_array_class:
+        case opcode_summon_array_class: // TODO used?
             LISTI("summon array class");
         	// locked refcnt
             os_push( pvm_get_array_class() );
@@ -2001,6 +2037,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 pvm_exec_call(da,method_index,n_param,1,pvm_get_null_object());
             }
             break;
+
+        // TODO
+        //case opcode_interface_invoke:
 
 
         case opcode_dynamic_invoke:
