@@ -1,15 +1,18 @@
 Class .phantom.environment
   Field env
+  C'tor  void <init>(  ):
+    empty : void
+
   Method .internal.object get( key: string ):
     ,  : void
       void  : void
         . : void
           this  : .phantom.environment
-          Method init : unknown
+          Method init : void
       return : void
         . : .internal.object
           ident env : .phantom.util.map
-          Method get : unknown
+          Method get : void
           arg  : unknown
             ident key : string
 
@@ -18,11 +21,11 @@ Class .phantom.environment
       void  : void
         . : void
           this  : .phantom.environment
-          Method init : unknown
+          Method init : void
       return : void
         . : int
           ident env : .phantom.util.map
-          Method put : unknown
+          Method put : void
           arg  : string
             ident key : string
           arg  : unknown
@@ -30,11 +33,11 @@ Class .phantom.environment
 
   Method void init(  ):
     if : unknown
-      :== : unknown
+      :== : int
         ident env : .phantom.util.map
         null : .internal.object const
       void  : void
-        = : .phantom.util.map
+        = : void
           ident env : .phantom.util.map
           new .phantom.util.map : .phantom.util.map
 

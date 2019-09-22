@@ -33,7 +33,7 @@ public class SwitchListNode extends Node {
 
 	@Override
 	public String toString() {		return "switch list";	}
-	public void find_out_my_type() { if( type == null ) type = PhantomType.getVoid(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public boolean is_const() { return true; }
 	public boolean args_on_int_stack() { return true; }
 

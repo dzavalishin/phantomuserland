@@ -9,6 +9,7 @@ import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeString;
 import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -30,7 +31,8 @@ public class StringConstPoolNode extends Node {
 	}
 
 	public String toString()  {    return "string pool const id=\""+id+"\"";  }
-	public void find_out_my_type() { type = new PhTypeString(); }
+	public PhantomType find_out_my_type() { return PhantomType.getString(); }
+	
 	public boolean is_const() { return true; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 

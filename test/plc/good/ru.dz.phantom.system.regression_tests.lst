@@ -10,7 +10,7 @@ Class .ru.dz.phantom.system.regression_tests
   Field str_array
   C'tor  void <init>(  ):
     void  : void
-      = : int
+      = : void
         ident ctor_called : int
         int const "3456" : int const
 
@@ -18,7 +18,7 @@ Class .ru.dz.phantom.system.regression_tests
     void  : void
       . : unknown
         ident boot_object : unknown
-        Method (no. 16) : unknown
+        Method (no. 16) : void
         arg  : unknown
           ident input : string
 
@@ -40,21 +40,21 @@ Class .ru.dz.phantom.system.regression_tests
                                 void  : void
                                   . : void
                                     this  : .ru.dz.phantom.system.regression_tests
-                                    Method print : unknown
+                                    Method print : void
                                     arg  : unknown
                                       string pool const id="78" : string const
                                 void  : void
-                                  = : long
+                                  = : void
                                     ident a : long
                                     (cast) : long const
                                       int const "12" : int const
                               void  : void
-                                = : long
+                                = : void
                                   ident b : long
                                   (cast) : long const
                                     int const "2" : int const
                             void  : void
-                              = : long
+                              = : void
                                 ident c : long
                                 (cast) : long const
                                   - : int const
@@ -63,7 +63,7 @@ Class .ru.dz.phantom.system.regression_tests
                           void  : void
                             . : void
                               this  : .ru.dz.phantom.system.regression_tests
-                              Method print : unknown
+                              Method print : void
                               arg  : unknown
                                 string pool const id="79" : string const
                         if : unknown
@@ -107,7 +107,7 @@ Class .ru.dz.phantom.system.regression_tests
                 void  : void
                   . : void
                     this  : .ru.dz.phantom.system.regression_tests
-                    Method print : unknown
+                    Method print : void
                     arg  : unknown
                       string pool const id="84" : string const
               if : unknown
@@ -137,7 +137,7 @@ Class .ru.dz.phantom.system.regression_tests
       void  : void
         . : void
           this  : .ru.dz.phantom.system.regression_tests
-          Method print : unknown
+          Method print : void
           arg  : unknown
             string pool const id="89" : string const
 
@@ -158,54 +158,54 @@ Class .ru.dz.phantom.system.regression_tests
                               ,  : void
                                 ,  : void
                                   void  : void
-                                    = : unknown
+                                    = : void
                                       ident boot_object : unknown
                                       (cast) : unknown
                                         ident _boot_object : unknown
                                   void  : void
-                                    = : int
+                                    = : void
                                       ident boot_success : int
                                       int const "0" : int const
                                 void  : void
                                   . : void
                                     this  : .ru.dz.phantom.system.regression_tests
-                                    Method print : unknown
+                                    Method print : void
                                     arg  : unknown
                                       string pool const id="5" : string const
                               void  : void
                                 . : void
                                   this  : .ru.dz.phantom.system.regression_tests
-                                  Method flow_test : unknown
+                                  Method flow_test : void
                             void  : void
                               . : void
                                 this  : .ru.dz.phantom.system.regression_tests
-                                Method math_test : unknown
+                                Method math_test : void
                           void  : void
                             . : void
                               this  : .ru.dz.phantom.system.regression_tests
-                              Method array_test : unknown
+                              Method array_test : void
                         void  : void
                           . : void
                             this  : .ru.dz.phantom.system.regression_tests
-                            Method hashmap_directory_test : unknown
+                            Method hashmap_directory_test : void
                       void  : void
                         . : void
                           this  : .ru.dz.phantom.system.regression_tests
-                          Method print : unknown
+                          Method print : void
                           arg  : unknown
                             string pool const id="6" : string const
                     void  : void
                       . : void
                         this  : .ru.dz.phantom.system.regression_tests
-                        Method print : unknown
+                        Method print : void
                         arg  : unknown
                           . : string
                             ident ctor_called : int
-                            Method toString : unknown
+                            Method toString : void
                   void  : void
                     . : void
                       this  : .ru.dz.phantom.system.regression_tests
-                      Method print : unknown
+                      Method print : void
                       arg  : unknown
                         string pool const id="7" : string const
                 if : unknown
@@ -217,27 +217,27 @@ Class .ru.dz.phantom.system.regression_tests
               void  : void
                 . : void
                   this  : .ru.dz.phantom.system.regression_tests
-                  Method long_test : unknown
+                  Method long_test : void
             void  : void
               . : void
                 this  : .ru.dz.phantom.system.regression_tests
-                Method float_test : unknown
+                Method float_test : void
           void  : void
             . : void
               this  : .ru.dz.phantom.system.regression_tests
-              Method double_test : unknown
+              Method double_test : void
         void  : void
           . : void
             this  : .ru.dz.phantom.system.regression_tests
-            Method signature_test : unknown
+            Method signature_test : void
       void  : void
-        = : .phantom.util.map
+        = : void
           ident map : .phantom.util.map
           new .phantom.util.map : .phantom.util.map
 
   Method void sig_func( a: string ):
     void  : void
-      = : int
+      = : void
         ident called_string_one : int
         int const "1" : int const
 
@@ -255,7 +255,7 @@ Class .ru.dz.phantom.system.regression_tests
                         void  : void
                           . : void
                             this  : .ru.dz.phantom.system.regression_tests
-                            Method print : unknown
+                            Method print : void
                             arg  : unknown
                               string pool const id="51" : string const
                         if : unknown
@@ -275,13 +275,13 @@ Class .ru.dz.phantom.system.regression_tests
                       throw  : void const
                         string pool const id="54" : string const
                   void  : void
-                    = : int
+                    = : void
                       ident j : int
                       int const "0" : int const
                 if : unknown
                   int const "1" : int const
                   void  : void
-                    = : int
+                    = : void
                       ident j : int
                       int const "1" : int const
               if : unknown
@@ -293,9 +293,9 @@ Class .ru.dz.phantom.system.regression_tests
             void  : void
               . : void
                 this  : .ru.dz.phantom.system.regression_tests
-                Method test_do_while : unknown
+                Method test_do_while : void
           void  : void
-            = : int
+            = : void
               ident i : int
               int const "2" : int const
         switch  : void const
@@ -325,13 +325,13 @@ Class .ru.dz.phantom.system.regression_tests
       void  : void
         . : void
           this  : .ru.dz.phantom.system.regression_tests
-          Method print : unknown
+          Method print : void
           arg  : unknown
             string pool const id="59" : string const
 
   Method void sig_func( a: int ):
     void  : void
-      = : int
+      = : void
         ident called_int_one : int
         int const "1" : int const
 
@@ -367,7 +367,7 @@ Class .ru.dz.phantom.system.regression_tests
                                                             void  : void
                                                               . : void
                                                                 this  : .ru.dz.phantom.system.regression_tests
-                                                                Method print : unknown
+                                                                Method print : void
                                                                 arg  : unknown
                                                                   string pool const id="21" : string const
                                                             if : unknown
@@ -547,7 +547,7 @@ Class .ru.dz.phantom.system.regression_tests
       void  : void
         . : void
           this  : .ru.dz.phantom.system.regression_tests
-          Method print : unknown
+          Method print : void
           arg  : unknown
             string pool const id="49" : string const
 
@@ -570,31 +570,31 @@ Class .ru.dz.phantom.system.regression_tests
                                   void  : void
                                     . : void
                                       this  : .ru.dz.phantom.system.regression_tests
-                                      Method print : unknown
+                                      Method print : void
                                       arg  : unknown
                                         string pool const id="9" : string const
                                   void  : void
-                                    = : int[]
+                                    = : void
                                       ident int_array : int[]
                                       new int[] : int[]
                                 void  : void
-                                  = : string[]
+                                  = : void
                                     ident str_array : string[]
                                     new string[] : string[]
                               void  : void
-                                = : string
+                                = : void
                                   [] : string
                                     ident str_array : string[]
                                     int const "0" : int const
                                   string pool const id="10" : string const
                             void  : void
-                              = : string
+                              = : void
                                 [] : string
                                   ident str_array : string[]
                                   int const "2" : int const
                                 string pool const id="11" : string const
                           void  : void
-                            = : string
+                            = : void
                               [] : string
                                 ident str_array : string[]
                                 int const "1" : int const
@@ -602,20 +602,20 @@ Class .ru.dz.phantom.system.regression_tests
                         void  : void
                           . : void
                             this  : .ru.dz.phantom.system.regression_tests
-                            Method print : unknown
+                            Method print : void
                             arg  : unknown
                               string pool const id="13" : string const
                       void  : void
-                        = : int
+                        = : void
                           ident i : int
                           int const "3" : int const
-                    do-while : unknown
+                    do-while : void
                       ident i : int
                       ,  : void
                         ,  : void
                           ,  : void
                             void  : void
-                              = : int
+                              = : void
                                 ident i : int
                                 - : int
                                   ident i : int
@@ -623,13 +623,13 @@ Class .ru.dz.phantom.system.regression_tests
                             void  : void
                               . : void
                                 this  : .ru.dz.phantom.system.regression_tests
-                                Method print : unknown
+                                Method print : void
                                 arg  : unknown
                                   string pool const id="14" : string const
                           void  : void
                             . : void
                               this  : .ru.dz.phantom.system.regression_tests
-                              Method print : unknown
+                              Method print : void
                               arg  : unknown
                                 [] : string
                                   ident str_array : string[]
@@ -637,42 +637,42 @@ Class .ru.dz.phantom.system.regression_tests
                         void  : void
                           . : void
                             this  : .ru.dz.phantom.system.regression_tests
-                            Method print : unknown
+                            Method print : void
                             arg  : unknown
                               string pool const id="15" : string const
                   void  : void
                     . : void
                       this  : .ru.dz.phantom.system.regression_tests
-                      Method print : unknown
+                      Method print : void
                       arg  : unknown
                         string pool const id="16" : string const
                 void  : void
-                  = : int
+                  = : void
                     [] : int
                       ident int_array : int[]
                       int const "0" : int const
                     int const "0" : int const
               void  : void
-                = : int
+                = : void
                   [] : int
                     ident int_array : int[]
                     int const "2" : int const
                   int const "2" : int const
             void  : void
-              = : int
+              = : void
                 [] : int
                   ident int_array : int[]
                   int const "1" : int const
                 int const "1" : int const
           void  : void
-            = : int
+            = : void
               ident i : int
               int const "3" : int const
-        do-while : unknown
+        do-while : void
           ident i : int
           ,  : void
             void  : void
-              = : int
+              = : void
                 ident i : int
                 - : int
                   ident i : int
@@ -690,39 +690,39 @@ Class .ru.dz.phantom.system.regression_tests
                       void  : void
                         . : void
                           this  : .ru.dz.phantom.system.regression_tests
-                          Method print : unknown
+                          Method print : void
                           arg  : unknown
                             string pool const id="17" : string const
                       void  : void
                         . : void
                           this  : .ru.dz.phantom.system.regression_tests
-                          Method print : unknown
+                          Method print : void
                           arg  : unknown
                             . : string
                               ident i : int
-                              Method toString : unknown
+                              Method toString : void
                     void  : void
                       . : void
                         this  : .ru.dz.phantom.system.regression_tests
-                        Method print : unknown
+                        Method print : void
                         arg  : unknown
                           string pool const id="18" : string const
                   void  : void
                     . : void
                       this  : .ru.dz.phantom.system.regression_tests
-                      Method print : unknown
+                      Method print : void
                       arg  : unknown
                         . : string
                           [] : int
                             ident int_array : int[]
                             ident i : int
-                          Method toString : unknown
+                          Method toString : void
                 throw  : void const
                   string pool const id="19" : string const
       void  : void
         . : void
           this  : .ru.dz.phantom.system.regression_tests
-          Method print : unknown
+          Method print : void
           arg  : unknown
             string pool const id="20" : string const
 
@@ -739,17 +739,17 @@ Class .ru.dz.phantom.system.regression_tests
                       ,  : void
                         ,  : void
                           void  : void
-                            = : float
+                            = : void
                               ident a : float
                               (cast) : float const
                                 int const "12" : int const
                           void  : void
-                            = : float
+                            = : void
                               ident b : float
                               (cast) : float const
                                 int const "2" : int const
                         void  : void
-                          = : float
+                          = : void
                             ident c : float
                             (cast) : float const
                               - : int const
@@ -820,7 +820,7 @@ Class .ru.dz.phantom.system.regression_tests
       void  : void
         . : void
           this  : .ru.dz.phantom.system.regression_tests
-          Method print : unknown
+          Method print : void
           arg  : unknown
             string pool const id="98" : string const
 
@@ -840,23 +840,23 @@ Class .ru.dz.phantom.system.regression_tests
                             void  : void
                               . : void
                                 this  : .ru.dz.phantom.system.regression_tests
-                                Method print : unknown
+                                Method print : void
                                 arg  : unknown
                                   string pool const id="60" : string const
                             void  : void
                               . : void
                                 this  : .ru.dz.phantom.system.regression_tests
-                                Method print : unknown
+                                Method print : void
                                 arg  : unknown
                                   string pool const id="61" : string const
                           void  : void
-                            = : .internal.directory
+                            = : void
                               ident dir : .internal.directory
                               new .internal.directory : .internal.directory
                         void  : void
                           . : int
                             ident dir : .internal.directory
-                            Method put : unknown
+                            Method put : void
                             arg  : string
                               string pool const id="62" : string const
                             arg  : unknown
@@ -865,7 +865,7 @@ Class .ru.dz.phantom.system.regression_tests
                       void  : void
                         . : int
                           ident dir : .internal.directory
-                          Method put : unknown
+                          Method put : void
                           arg  : string
                             string pool const id="64" : string const
                           arg  : unknown
@@ -873,58 +873,58 @@ Class .ru.dz.phantom.system.regression_tests
                     void  : void
                       . : int
                         ident dir : .internal.directory
-                        Method put : unknown
+                        Method put : void
                         arg  : string
                           string pool const id="66" : string const
                         arg  : unknown
                           string pool const id="67" : string const
                   void  : void
-                    = : .internal.object
+                    = : void
                       ident val : .internal.object
                       . : .internal.object
                         ident dir : .internal.directory
-                        Method get : unknown
+                        Method get : void
                         arg  : unknown
                           string pool const id="68" : string const
                 if : unknown
                   bool not : int
                     . : int
                       ident val : .internal.object
-                      Method equals : unknown
+                      Method equals : void
                       arg  : unknown
                         string pool const id="69" : string const
                   throw  : void const
                     string pool const id="70" : string const
               void  : void
-                = : .internal.object
+                = : void
                   ident val : .internal.object
                   . : .internal.object
                     ident dir : .internal.directory
-                    Method get : unknown
+                    Method get : void
                     arg  : unknown
                       string pool const id="71" : string const
             if : unknown
               bool not : int
                 . : int
                   ident val : .internal.object
-                  Method equals : unknown
+                  Method equals : void
                   arg  : unknown
                     string pool const id="72" : string const
               throw  : void const
                 string pool const id="73" : string const
           void  : void
-            = : .internal.object
+            = : void
               ident val : .internal.object
               . : .internal.object
                 ident dir : .internal.directory
-                Method get : unknown
+                Method get : void
                 arg  : unknown
                   string pool const id="74" : string const
         if : unknown
           bool not : int
             . : int
               ident val : .internal.object
-              Method equals : unknown
+              Method equals : void
               arg  : unknown
                 string pool const id="75" : string const
           throw  : void const
@@ -932,7 +932,7 @@ Class .ru.dz.phantom.system.regression_tests
       void  : void
         . : void
           this  : .ru.dz.phantom.system.regression_tests
-          Method print : unknown
+          Method print : void
           arg  : unknown
             string pool const id="77" : string const
 
@@ -949,17 +949,17 @@ Class .ru.dz.phantom.system.regression_tests
                       ,  : void
                         ,  : void
                           void  : void
-                            = : double
+                            = : void
                               ident a : double
                               (cast) : double const
                                 int const "12" : int const
                           void  : void
-                            = : double
+                            = : void
                               ident b : double
                               (cast) : double const
                                 int const "2" : int const
                         void  : void
-                          = : double
+                          = : void
                             ident c : double
                             (cast) : double const
                               int const "-3" : int const
@@ -1028,7 +1028,7 @@ Class .ru.dz.phantom.system.regression_tests
       void  : void
         . : void
           this  : .ru.dz.phantom.system.regression_tests
-          Method print : unknown
+          Method print : void
           arg  : unknown
             string pool const id="107" : string const
 
@@ -1043,17 +1043,17 @@ Class .ru.dz.phantom.system.regression_tests
                   ,  : void
                     ,  : void
                       void  : void
-                        = : int
+                        = : void
                           ident called_string_one : int
                           int const "0" : int const
                       void  : void
-                        = : int
+                        = : void
                           ident called_int_one : int
                           int const "0" : int const
                     void  : void
                       . : void
                         this  : .ru.dz.phantom.system.regression_tests
-                        Method sig_func : unknown
+                        Method sig_func : void
                         arg  : unknown
                           string pool const id="0" : string const
                   if : unknown
@@ -1069,17 +1069,17 @@ Class .ru.dz.phantom.system.regression_tests
                   throw  : void const
                     string pool const id="2" : string const
               void  : void
-                = : int
+                = : void
                   ident called_string_one : int
                   int const "0" : int const
             void  : void
-              = : int
+              = : void
                 ident called_int_one : int
                 int const "0" : int const
           void  : void
             . : void
               this  : .ru.dz.phantom.system.regression_tests
-              Method sig_func : unknown
+              Method sig_func : void
               arg  : unknown
                 int const "1" : int const
         if : unknown
@@ -1100,23 +1100,23 @@ Class .ru.dz.phantom.system.regression_tests
       ,  : void
         ,  : void
           void  : void
-            = : int
+            = : void
               ident i : int
               int const "3" : int const
           void  : void
-            = : int
+            = : void
               ident j : int
               int const "0" : int const
-        do-while : unknown
+        do-while : void
           void  : void
-            = : int
+            = : void
               ident j : int
               + : int
                 ident j : int
                 int const "1" : int const
           ident i : int
           void  : void
-            = : int
+            = : void
               ident i : int
               - : int
                 ident i : int

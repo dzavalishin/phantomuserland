@@ -157,7 +157,8 @@ public class SootExpressionTranslator {
 				SootMain.error("multidim type "+at);
 			
 			type = convertType(at.baseType.toString());			
-			type.set_is_container(true);
+			//type.set_is_container(true);
+			type = type.toContainer();
 		}
 		else
 		{
@@ -286,7 +287,7 @@ public class SootExpressionTranslator {
 				//v.getType()
 				
 				ret.w = new BinOpWrapper<ValEqNode>() {@Override
-					ValEqNode create(Node l, Node r) { return new ValEqNode(l,r); }} .doBinOp(v);
+					ValEqNode create(Node l, Node r) throws PlcException { return new ValEqNode(l,r); }} .doBinOp(v);
 				
 				//ret.w = new BinOpWrapper<RefEqNode>() {@Override
 				//	RefEqNode create(Node l, Node r) { return new RefEqNode(l,r); }} .doBinOp(v);
@@ -359,7 +360,7 @@ public class SootExpressionTranslator {
 				//ret.w = new BinOpWrapper<RefNeqNode>() {@Override
 				//	RefNeqNode create(Node l, Node r) { return new RefNeqNode(l,r); }} .doBinOp(v);
 				ret.w = new BinOpWrapper<ValNeqNode>() {@Override
-					ValNeqNode create(Node l, Node r) { return new ValNeqNode(l,r); }} .doBinOp(v);
+					ValNeqNode create(Node l, Node r) throws PlcException { return new ValNeqNode(l,r); }} .doBinOp(v);
 			}
 
 			@Override
@@ -723,7 +724,7 @@ public class SootExpressionTranslator {
 	abstract class BinOpWrapper<T extends BiNode>
 	{
 		
-		abstract T create( Node l, Node r );
+		abstract T create( Node l, Node r ) throws PlcException;
 		
 		PhantomCodeWrapper doBinOp(Value _v) {
 			AbstractBinopExpr v = (AbstractBinopExpr) _v;
@@ -737,7 +738,7 @@ public class SootExpressionTranslator {
 				Node e2n = doValue(e2).getNode();
 
 				Node n = create(e1n,e2n);
-				n.setType(SootExpressionTranslator.convertType(t));
+				n.presetType(SootExpressionTranslator.convertType(t));
 				return new PhantomCodeWrapper( n );
 			} catch (PlcException e) {
 				SootMain.error("Exception "+e);

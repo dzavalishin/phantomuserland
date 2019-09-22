@@ -11,6 +11,7 @@ import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
 import ru.dz.plc.compiler.PhantomStackVar;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 
@@ -32,11 +33,12 @@ public class IdentNode extends Node {
 
 	public String getName() { return ident; }
 
-	public IdentNode( /*PhantomClass c,*/ String ident,  ParseState ps  ) {
+	public IdentNode( /*PhantomClass c,*/ String ident,  ParseState ps  ) 
+	{
 		super(null);
 		this.ident = ident;
 		//my_class = c;
-		this.ps = ps;
+		this.ps = new ParseState( ps ); // Passed one will change
 	}
 
 	/**
@@ -52,12 +54,46 @@ public class IdentNode extends Node {
 
 	public String toString()  {    return "ident "+ident;  }
 	
-	public void find_out_my_type() throws PlcException 
+	public PhantomType find_out_my_type() throws PlcException 
 	{ 
-		if( type == null ) 
-			preprocess_me(ps);
-		if( type == null ) 			
-			throw new PlcException( "ident Node", "no type known", ident ); 
+		PhantomField f = ps.get_class().find_field(ident);
+		if( f != null )
+		{
+			onObjStack = true;
+			return f.getType();
+		}
+
+		PhantomStackVar svar = ps.istack_vars().get_var(ident);
+		if(svar != null)
+		{
+			onIntStack = true;
+			if( !svar.getType().is_on_int_stack() )
+				throw new PlcException("Not an integer auto var on integer stack");
+			return svar.getType();
+		}
+
+		svar = ps.stack_vars().get_var(ident);
+
+		if( (svar == null) && (_l != null) )
+		{
+			PhantomClass tc = _l.getType().get_class();
+
+			// must use target class, not our class
+			getterMethod = tc.getGetter(ident);
+
+			if( getterMethod == null )
+				throw new PlcException( "ident Node", "no such field in class and no getter", ident );
+
+			onObjStack = true;
+			return getterMethod.getType();
+		}	
+
+		if( (svar == null) && (getterMethod == null) )
+			throw new PlcException( "ident Node", "no such field in class and no getter", ident );
+
+		onObjStack = true;
+		return svar.getType();
+		//throw new PlcException( "ident Node", "no type known", ident ); 
 	}
 	
 	public boolean is_const() { return false; }
@@ -75,54 +111,8 @@ public class IdentNode extends Node {
 	}
 
 	public void preprocess_me( ParseState s ) throws PlcException {
-
-		PhantomField f = s.get_class().find_field(ident);
-		if( f != null )
-		{
-			type = f.getType();
-			onObjStack = true;
-			return;
-		}
-
-		PhantomStackVar svar = s.istack_vars().get_var(ident);
-		if(svar != null)
-		{
-			onIntStack = true;
-			type = svar.getType();
-			if( !type.is_on_int_stack() )
-				throw new PlcException("Not an integer auto var on integer stack");
-			return;
-		}
-
-		svar = s.stack_vars().get_var(ident);
-
-		if( (svar == null) && (_l != null) )
-		{
-			PhantomClass tc = _l.getType().get_class();
-			//SootMain.say("come load '"+ident+"' by getter from class "+tc);
-
-			// must use target class, not our class
-			getterMethod = tc.getGetter(ident);
-
-			/*
-			Node methodName = new MethodNode(getterMethod.getName()).setContext( context );
-
-			callNode = new OpMethodCallNode(out, methodName, args).setContext( context );
-			 */
-
-			if( getterMethod == null )
-				throw new PlcException( "ident Node", "no such field in class and no getter", ident );
-
-			onObjStack = true;
-			type = getterMethod.getType();
-			return;
-		}	
-
-		if( (svar == null) && (getterMethod == null) )
-			throw new PlcException( "ident Node", "no such field in class and no getter", ident );
-
-		onObjStack = true;
-		type = svar.getType();
+		// Can't request type now, it won't work
+		getType(); // make sure type is found
 	}
 
 	/**

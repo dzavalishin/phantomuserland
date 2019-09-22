@@ -4,7 +4,7 @@ Class .phantom.util.hashpair
   Field key
   Method void setNext( _n: .phantom.util.hashpair ):
     void  : void
-      = : .phantom.util.hashpair
+      = : void
         ident next : .phantom.util.hashpair
         ident _n : .phantom.util.hashpair
 
@@ -13,7 +13,7 @@ Class .phantom.util.hashpair
 
   Method void setVal( _val: .internal.object ):
     void  : void
-      = : .internal.object
+      = : void
         ident val : .internal.object
         ident _val : .internal.object
 
@@ -31,7 +31,7 @@ Class .phantom.util.hashpair
 
   Method void setKey( _key: .internal.object ):
     void  : void
-      = : .internal.object
+      = : void
         ident key : .internal.object
         ident _key : .internal.object
 

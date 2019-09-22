@@ -12,11 +12,14 @@ Class .ru.dz.phantom.system.shell
   Field stat_val
   Field win
   Field cb
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void go(  ):
     void  : void
       . : void
         ident mtx : .internal.mutex
-        Method unlock : unknown
+        Method unlock : void
 
   Method void run( parent_object: unknown ):
     ,  : void
@@ -41,13 +44,13 @@ Class .ru.dz.phantom.system.shell
                                           ,  : void
                                             ,  : void
                                               void  : void
-                                                = : .internal.window
+                                                = : void
                                                   ident win : .internal.window
                                                   new .internal.window : .internal.window
                                               void  : void
                                                 . : void
                                                   ident win : .internal.window
-                                                  Method setWinPosition : unknown
+                                                  Method setWinPosition : void
                                                   arg  : int
                                                     int const "50" : int const
                                                   arg  : unknown
@@ -55,47 +58,47 @@ Class .ru.dz.phantom.system.shell
                                             void  : void
                                               . : void
                                                 ident win : .internal.window
-                                                Method setTitle : unknown
+                                                Method setTitle : void
                                                 arg  : unknown
                                                   string pool const id="0" : string const
                                           void  : void
                                             . : void
                                               ident win : .internal.window
-                                              Method setFg : unknown
+                                              Method setFg : void
                                               arg  : unknown
                                                 int const "-16777216" : int const
                                         void  : void
                                           . : void
                                             ident win : .internal.window
-                                            Method clear : unknown
+                                            Method clear : void
                                       void  : void
                                         . : void
                                           ident win : .internal.window
-                                          Method update : unknown
+                                          Method update : void
                                     void  : void
-                                      = : int
+                                      = : void
                                         ident stat_pos : int
                                         int const "0" : int const
                                   void  : void
-                                    = : int
+                                    = : void
                                       ident old_idle : int
                                       int const "0" : int const
                                 void  : void
-                                  = : int
+                                  = : void
                                     ident white : int
                                     int const "-1" : int const
                               void  : void
-                                = : .internal.io.tty
+                                = : void
                                   ident console : .internal.io.tty
                                   new .internal.io.tty : .internal.io.tty
                             void  : void
-                              = : int
+                              = : void
                                 ident incr : int
                                 int const "1" : int const
                           void  : void
                             . : void
                               ident console : .internal.io.tty
-                              Method moveWindow : unknown
+                              Method moveWindow : void
                               arg  : int
                                 int const "10" : int const
                               arg  : unknown
@@ -103,33 +106,33 @@ Class .ru.dz.phantom.system.shell
                         void  : void
                           . : void
                             ident console : .internal.io.tty
-                            Method setTitle : unknown
+                            Method setTitle : void
                             arg  : unknown
                               string pool const id="1" : string const
                       void  : void
-                        = : .internal.connection
+                        = : void
                           ident conn : .internal.connection
                           new .internal.connection : .internal.connection
                     void  : void
                       . : int
                         ident conn : .internal.connection
-                        Method connect : unknown
+                        Method connect : void
                         arg  : unknown
                           string pool const id="2" : string const
                   void  : void
-                    = : .ru.dz.phantom.system.shell_callback
+                    = : void
                       ident cb : .ru.dz.phantom.system.shell_callback
                       new .ru.dz.phantom.system.shell_callback : .ru.dz.phantom.system.shell_callback
                 void  : void
                   . : void
                     ident cb : .ru.dz.phantom.system.shell_callback
-                    Method init : unknown
+                    Method init : void
                     arg  : unknown
                       ident console : .internal.io.tty
               void  : void
                 . : int
                   ident conn : .internal.connection
-                  Method setCallback : unknown
+                  Method setCallback : void
                   arg  : .ru.dz.phantom.system.shell_callback
                     ident cb : .ru.dz.phantom.system.shell_callback
                   arg  : unknown
@@ -137,22 +140,22 @@ Class .ru.dz.phantom.system.shell
             void  : void
               . : int
                 ident conn : .internal.connection
-                Method invoke : unknown
+                Method invoke : void
                 arg  : int
                   int const "1000" : int const
                 arg  : unknown
                   int const "0" : int const
           void  : void
-            = : .internal.connection
+            = : void
               ident stat_conn : .internal.connection
               new .internal.connection : .internal.connection
         void  : void
           . : int
             ident stat_conn : .internal.connection
-            Method connect : unknown
+            Method connect : void
             arg  : unknown
               string pool const id="3" : string const
-      do-while : unknown
+      do-while : void
         int const "1" : int const
         ,  : void
           ,  : void
@@ -185,53 +188,53 @@ Class .ru.dz.phantom.system.shell
                                                                 void  : void
                                                                   . : void
                                                                     ident mtx : .internal.mutex
-                                                                    Method lock : unknown
+                                                                    Method lock : void
                                                                 void  : void
                                                                   . : void
                                                                     ident console : .internal.io.tty
-                                                                    Method putws : unknown
+                                                                    Method putws : void
                                                                     arg  : unknown
                                                                       string pool const id="4" : string const
                                                               void  : void
                                                                 . : void
                                                                   ident console : .internal.io.tty
-                                                                  Method putws : unknown
+                                                                  Method putws : void
                                                                   arg  : unknown
                                                                     string pool const id="5" : string const
                                                             void  : void
                                                               . : void
                                                                 ident console : .internal.io.tty
-                                                                Method putws : unknown
+                                                                Method putws : void
                                                                 arg  : unknown
                                                                   string pool const id="6" : string const
                                                           void  : void
                                                             . : void
                                                               ident console : .internal.io.tty
-                                                              Method putws : unknown
+                                                              Method putws : void
                                                               arg  : unknown
                                                                 . : string
                                                                   ident incr : int
-                                                                  Method toString : unknown
+                                                                  Method toString : void
                                                         void  : void
                                                           . : void
                                                             ident console : .internal.io.tty
-                                                            Method putws : unknown
+                                                            Method putws : void
                                                             arg  : unknown
                                                               string pool const id="7" : string const
                                                       void  : void
                                                         . : int
                                                           ident conn : .internal.connection
-                                                          Method block : unknown
+                                                          Method block : void
                                                           arg  : .internal.object
                                                             null : .internal.object const
                                                           arg  : unknown
                                                             int const "500" : int const
                                                     void  : void
-                                                      = : int
+                                                      = : void
                                                         ident stat_val : int
                                                         . : int
                                                           ident stat_conn : .internal.connection
-                                                          Method block : unknown
+                                                          Method block : void
                                                           arg  : int
                                                             int const "26" : int const
                                                           arg  : unknown
@@ -239,15 +242,15 @@ Class .ru.dz.phantom.system.shell
                                                   void  : void
                                                     . : void
                                                       ident console : .internal.io.tty
-                                                      Method putws : unknown
+                                                      Method putws : void
                                                       arg  : unknown
                                                         string pool const id="8" : string const
                                                 void  : void
-                                                  = : int
+                                                  = : void
                                                     ident cpu_idle : int
                                                     . : int
                                                       ident stat_conn : .internal.connection
-                                                      Method block : unknown
+                                                      Method block : void
                                                       arg  : int
                                                         int const "0" : int const
                                                       arg  : unknown
@@ -255,31 +258,31 @@ Class .ru.dz.phantom.system.shell
                                               void  : void
                                                 . : void
                                                   ident console : .internal.io.tty
-                                                  Method putws : unknown
+                                                  Method putws : void
                                                   arg  : unknown
                                                     string pool const id="9" : string const
                                             void  : void
                                               . : void
                                                 ident console : .internal.io.tty
-                                                Method putws : unknown
+                                                Method putws : void
                                                 arg  : unknown
                                                   . : string
                                                     ident cpu_idle : int
-                                                    Method toString : unknown
+                                                    Method toString : void
                                           void  : void
                                             . : void
                                               ident console : .internal.io.tty
-                                              Method putws : unknown
+                                              Method putws : void
                                               arg  : unknown
                                                 string pool const id="10" : string const
                                         void  : void
-                                          = : int
+                                          = : void
                                             ident cpu_idle : int
                                             - : int
                                               int const "100" : int const
                                               ident cpu_idle : int
                                       void  : void
-                                        = : int
+                                        = : void
                                           ident stat_next_pos : int
                                           + : int
                                             ident stat_pos : int
@@ -289,21 +292,21 @@ Class .ru.dz.phantom.system.shell
                                         ident stat_next_pos : int
                                         . : int
                                           ident win : .internal.window
-                                          Method getXSize : unknown
+                                          Method getXSize : void
                                       void  : void
-                                        = : int
+                                        = : void
                                           ident stat_next_pos : int
                                           int const "0" : int const
                                   void  : void
                                     . : void
                                       ident win : .internal.window
-                                      Method setFg : unknown
+                                      Method setFg : void
                                       arg  : unknown
                                         int const "-16711936" : int const
                                 void  : void
                                   . : void
                                     ident win : .internal.window
-                                    Method drawLine : unknown
+                                    Method drawLine : void
                                     arg  : int
                                       ident stat_next_pos : int
                                     arg  : int
@@ -315,13 +318,13 @@ Class .ru.dz.phantom.system.shell
                               void  : void
                                 . : void
                                   ident win : .internal.window
-                                  Method setFg : unknown
+                                  Method setFg : void
                                   arg  : unknown
                                     ident white : int
                             void  : void
                               . : void
                                 ident win : .internal.window
-                                Method drawLine : unknown
+                                Method drawLine : void
                                 arg  : int
                                   ident stat_pos : int
                                 arg  : int
@@ -333,13 +336,13 @@ Class .ru.dz.phantom.system.shell
                           void  : void
                             . : void
                               ident win : .internal.window
-                              Method setFg : unknown
+                              Method setFg : void
                               arg  : unknown
                                 int const "-16777216" : int const
                         void  : void
                           . : void
                             ident win : .internal.window
-                            Method drawLine : unknown
+                            Method drawLine : void
                             arg  : int
                               ident stat_pos : int
                             arg  : int
@@ -353,13 +356,13 @@ Class .ru.dz.phantom.system.shell
                       void  : void
                         . : void
                           ident win : .internal.window
-                          Method setFg : unknown
+                          Method setFg : void
                           arg  : unknown
                             int const "-16776961" : int const
                     void  : void
                       . : void
                         ident win : .internal.window
-                        Method drawLine : unknown
+                        Method drawLine : void
                         arg  : int
                           - : int
                             ident stat_pos : int
@@ -373,23 +376,23 @@ Class .ru.dz.phantom.system.shell
                             ident cpu_idle : int
                             ident old_idle : int
                   void  : void
-                    = : int
+                    = : void
                       ident old_idle : int
                       ident cpu_idle : int
                 void  : void
-                  = : int
+                  = : void
                     ident stat_pos : int
                     ident stat_next_pos : int
               void  : void
                 . : void
                   ident win : .internal.window
-                  Method update : unknown
+                  Method update : void
             void  : void
               . : void
                 ident mtx : .internal.mutex
-                Method unlock : unknown
+                Method unlock : void
           void  : void
-            = : int
+            = : void
               ident incr : int
               + : int
                 ident incr : int
@@ -398,11 +401,11 @@ Class .ru.dz.phantom.system.shell
   Method void init(  ):
     ,  : void
       void  : void
-        = : .internal.mutex
+        = : void
           ident mtx : .internal.mutex
           new .internal.mutex : .internal.mutex
       void  : void
         . : void
           ident mtx : .internal.mutex
-          Method lock : unknown
+          Method lock : void
 

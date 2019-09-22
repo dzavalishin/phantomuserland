@@ -489,9 +489,9 @@ public class PhantomClass
 		return false;
 	}
 
-	public void set_ordinals() throws PlcException {
-		mt.set_ordinals();		
-	}
+	public void set_ordinals() throws PlcException {		mt.set_ordinals();	}
+	public void propagateVoid() throws PlcException  { mt.propagateVoid();	}
+
 
 	public int getFieldSlotsNeeded() {
 		return ft.slots_needed();
@@ -562,6 +562,7 @@ public class PhantomClass
 	{		
 		return INTERNAL_CLASS_PREFIX.equals(name.substring(0, INTERNAL_CLASS_PREFIX.length()));
 	}
+
 
 
 

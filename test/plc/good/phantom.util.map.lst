@@ -2,28 +2,28 @@ Class .phantom.util.map
   Field index
   Field pairs
   Method int put( key: .internal.object, value: .internal.object ):
-    ,  : unknown
-      ,  : unknown
-        ,  : unknown
-          ,  : unknown
+    ,  : void
+      ,  : void
+        ,  : void
+          ,  : void
             if : unknown
               :!= : int
                 . : .internal.object
                   this  : .phantom.util.map
-                  Method get : unknown
+                  Method get : void
                   arg  : unknown
                     ident key : .internal.object
                 null : .internal.object const
               return : void const
                 int const "0" : int const
             void  : void
-              = : .internal.object
+              = : void
                 [] : .internal.object
                   ident pairs : .internal.object[]
                   ident index : int
                 ident key : .internal.object
           void  : void
-            = : .internal.object
+            = : void
               [] : .internal.object
                 ident pairs : .internal.object[]
                 + : int
@@ -31,7 +31,7 @@ Class .phantom.util.map
                   int const "1" : int const
               ident value : .internal.object
         void  : void
-          = : int
+          = : void
             ident index : int
             + : int
               ident index : int
@@ -46,18 +46,18 @@ Class .phantom.util.map
     ,  : void
       ,  : void
         void  : void
-          = : int
+          = : void
             ident i : int
             int const "0" : int const
         do-while : void
           < : int
             ident i : int
             ident index : int
-          ,  : unknown
+          ,  : void
             if : unknown
               . : int
                 ident key : .internal.object
-                Method equals : unknown
+                Method equals : void
                 arg  : unknown
                   [] : .internal.object
                     ident pairs : .internal.object[]
@@ -69,7 +69,7 @@ Class .phantom.util.map
                     ident i : int
                     int const "1" : int const
             void  : void
-              = : int
+              = : void
                 ident i : int
                 + : int
                   ident i : int
@@ -80,11 +80,11 @@ Class .phantom.util.map
   Method void init(  ):
     ,  : void
       void  : void
-        = : int
+        = : void
           ident index : int
           int const "0" : int const
       void  : void
-        = : .internal.object[]
+        = : void
           ident pairs : .internal.object[]
           new .internal.object[] : .internal.object[]
 

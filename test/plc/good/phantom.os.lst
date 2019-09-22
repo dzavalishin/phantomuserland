@@ -1,50 +1,53 @@
 Class .phantom.os
   Field impl
+  C'tor  void <init>(  ):
+    empty : void
+
   Method .phantom.os.time getTimeServer(  ):
     ,  : void
       void  : void
         . : void
           this  : .phantom.os
-          Method init : unknown
+          Method init : void
       return : void
         . : .phantom.os.time
           ident impl : .phantom.osimpl
-          Method getTimeServer : unknown
+          Method getTimeServer : void
 
   Method string getKernelEnvironmentValue( inkey: string ):
     ,  : void
       void  : void
         . : void
           this  : .phantom.os
-          Method init : unknown
+          Method init : void
       return : void
         . : string
           ident impl : .phantom.osimpl
-          Method getKernelEnvironmentValue : unknown
+          Method getKernelEnvironmentValue : void
           arg  : unknown
             ident inkey : string
 
   Method void init(  ):
     if : unknown
-      :!= : unknown
+      :!= : int
         ident impl : .phantom.osimpl
         null : .internal.object const
       ,  : void
         ,  : void
           void  : void
-            = : .internal.world
+            = : void
               ident w : .internal.world
               new .internal.world : .internal.world
           void  : void
-            = : .internal.thread
+            = : void
               ident th : .internal.thread
               . : .internal.thread
                 ident w : .internal.world
-                Method getMyThread : unknown
+                Method getMyThread : void
         void  : void
-          = : .phantom.osimpl
+          = : void
             ident impl : .phantom.osimpl
             . : .phantom.osimpl
               ident th : .internal.thread
-              Method getOsInterface : unknown
+              Method getOsInterface : void
 

@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -26,15 +27,33 @@ public class DoWhileNode extends TriNode {
 	
 	public String toString()  {    return "do-while";  }
 	
-	public void find_out_my_type()
+	public PhantomType find_out_my_type()
 	{
-		//type = new PhTypeUnknown(); // BUG! Void?
-		type = new PhTypeVoid();
+		return PhantomType.getVoid();
 	}
 
 	public boolean is_on_int_stack() { return false; }
 
 	// NB! Move between stacks is not done automatically for tri-nodes, do it manually!
+
+	public void propagateVoidParents()
+	{
+		if( _l != null )
+		{
+			_l.setParentIsVoid();
+			_l.propagateVoidParents();
+		}
+		
+		//_m.setParentIsVoid();
+		_m.propagateVoidParents();
+		
+		if( _r != null )
+		{
+			_r.setParentIsVoid();
+			_r.propagateVoidParents();
+		}
+	}
+	
 	
 	@Override
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException

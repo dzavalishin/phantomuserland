@@ -25,21 +25,38 @@ public class IfNode extends TriNode {
 	public String toString()  {    return "if";  }
 	
 	// Why no just void? For ?: op?
-	public void find_out_my_type() throws PlcException
+	public PhantomType find_out_my_type() throws PlcException
 	{
-		if( type != null ) return;
 		PhantomType l_type = null, r_type = null;
 
 		if( _m != null ) l_type = _m.getType();
 		if( _r != null ) r_type = _r.getType();
 
-		if( l_type != null && l_type.equals( r_type ) ) type = l_type;
-		else type = new PhTypeUnknown();
+		if( l_type != null && l_type.equals( r_type ) ) return l_type;
+		else return new PhTypeUnknown();
 	}
 
 	public boolean is_on_int_stack() { return false; }
 
 	// NB! Move between stacks is not done automatically for tri-nodes, do it manually!
+
+	public void propagateVoidParents()
+	{
+		//_l.setParentIsVoid();
+		_l.propagateVoidParents();
+		
+		if( _m != null )
+		{
+			if(isVoidParent()) _m.setParentIsVoid();
+			_m.propagateVoidParents();
+		}
+		
+		if( _r != null )
+		{
+			if(isVoidParent()) _r.setParentIsVoid();
+			_r.propagateVoidParents();
+		}
+	}
 
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{

@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
  /**
@@ -25,7 +26,7 @@ public class StaticSaveNode extends Node {
 		my_class = c;
 	}
 	public String toString()  {    return "save static field "+ident;  }
-	public void find_out_my_type() throws PlcException { if( type == null ) throw new PlcException( "static save Node", "no type known", ident ); }
+	public PhantomType find_out_my_type() throws PlcException { throw new PlcException( "static save Node", "no type known", ident ); }
 	public boolean is_const() { return false; }
 
 	
@@ -58,6 +59,7 @@ public class StaticSaveNode extends Node {
 		move_between_stacks(c, _l.is_on_int_stack(), _l.getType()); 
 		
 		c.emitCall(10,2); // Method number 10, 2 parameters (static field ordinal, value) - write static field		
+		c.emitOsDrop(); // returned value
 	}
 
 }

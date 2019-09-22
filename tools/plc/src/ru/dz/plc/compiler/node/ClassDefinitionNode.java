@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.node;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -19,10 +20,10 @@ public class ClassDefinitionNode extends Node {
 		this.my_class = my_class;
 	}
 	public String toString()  {    return "class def ("+my_class.toString()+")";  }
-	public void find_out_my_type() { type = new PhTypeUnknown(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public void preprocess_me(ParseState ps) throws PlcException
 	{
-		my_class.preprocess(ps);
+		my_class.preprocess(ps); // TODO need?? NO!
 	}
 }
 

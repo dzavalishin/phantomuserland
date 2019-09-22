@@ -1,57 +1,61 @@
-Class version 20170915052829453
+Class version 20190820104141122
+
+method <init> ordinal 18
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method init ordinal 16
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .ru.dz.phantom.system.shell_callback"	//  @11
-  throw				//  @71
-_label_0:	//  @72
-  stack_reserve obj=1 int=0	//  @72
-    ; Line 37			//  @75
-  get o stk pos=0			//  @75
-  os dup				//  @80
-  save fld=0			//  @81
-  os drop				//  @83
-  ret				//  @84
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 37
+; tt
+  get o stk pos=0						//  @5
+; set console
+  save fld=0						//  @10
+  ret							//  @12
 --
 method end
 
 method run ordinal 17
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: run in .ru.dz.phantom.system.shell_callback"	//  @11
-  throw				//  @70
-_label_0:	//  @71
-  stack_reserve obj=1 int=0	//  @71
-    ; Line 30			//  @74
-  load fld=0			//  @74
-    ; Line 30			//  @76
-  const_pool <0>			//  @76
-    ; Line 30			//  @81
-  call m=17 nparm=1		//  @81
-  os drop				//  @83
-    ; Line 31			//  @84
-  load fld=0			//  @84
-    ; Line 31			//  @86
-  get o stk pos=0			//  @86
-  call m=5 nparm=0		//  @91
-    ; Line 31			//  @93
-  call m=17 nparm=1		//  @93
-  os drop				//  @95
-    ; Line 31			//  @96
-    ; Line 32			//  @96
-  load fld=0			//  @96
-    ; Line 32			//  @98
-  const_pool <1>			//  @98
-    ; Line 32			//  @103
-  call m=17 nparm=1		//  @103
-  os drop				//  @105
-    ; Line 32			//  @106
-  ret				//  @106
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 30
+  load fld=0						//  @5
+; Line 30
+; str '
+
+Timer callback: '
+  const_pool <0>						//  @7
+; Line 30
+  call m=17 nparm=1					//  @12
+  os drop							//  @14
+; Line 31
+  load fld=0						//  @15
+; Line 31
+; time
+  get o stk pos=0						//  @17
+  call m=5 nparm=0					//  @22
+; Line 31
+  call m=17 nparm=1					//  @24
+  os drop							//  @26
+; Line 31
+; Line 32
+  load fld=0						//  @27
+; Line 32
+; str ' !!
+
+'
+  const_pool <1>						//  @29
+; Line 32
+  call m=17 nparm=1					//  @34
+  os drop							//  @36
+; Line 32
+  ret							//  @37
 --
 method end
 

@@ -1,81 +1,81 @@
-Class version 20190818003737893
+Class version 20190820103752737
 
 method setNext ordinal 16
 --
-  arg_count 1			//  @0
-  stack_reserve obj=1 int=0	//  @2
-    ; Line 42			//  @5
-  get o stk pos=0			//  @5
-  os dup				//  @10
-  save fld=2			//  @11
-  os drop				//  @13
-  ret				//  @14
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 42
+; _n
+  get o stk pos=0						//  @5
+; set next
+  save fld=2						//  @10
+  ret							//  @12
 --
 method end
 
-method <init> ordinal 17
+method <init> ordinal 22
 --
-  arg_count 0			//  @0
-  ret				//  @2
---
-method end
-
-method setVal ordinal 18
---
-  arg_count 1			//  @0
-  stack_reserve obj=1 int=0	//  @2
-    ; Line 31			//  @5
-  get o stk pos=0			//  @5
-  os dup				//  @10
-  save fld=1			//  @11
-  os drop				//  @13
-  ret				//  @14
+  arg_count 0						//  @0
+  ret							//  @2
 --
 method end
 
-method getVal ordinal 19
+method setVal ordinal 17
 --
-  arg_count 0			//  @0
-    ; Line 36			//  @2
-  load fld=1			//  @2
-    ; Line 36			//  @4
-  ret				//  @4
-  ret				//  @5
---
-method end
-
-method getKey ordinal 20
---
-  arg_count 0			//  @0
-    ; Line 26			//  @2
-  load fld=0			//  @2
-    ; Line 26			//  @4
-  ret				//  @4
-  ret				//  @5
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 31
+; _val
+  get o stk pos=0						//  @5
+; set val
+  save fld=1						//  @10
+  ret							//  @12
 --
 method end
 
-method getNext ordinal 21
+method getVal ordinal 18
 --
-  arg_count 0			//  @0
-    ; Line 47			//  @2
-  load fld=2			//  @2
-    ; Line 47			//  @4
-  ret				//  @4
-  ret				//  @5
+  arg_count 0						//  @0
+; Line 36
+  load fld=1						//  @2
+; Line 36
+  ret							//  @4
+  ret							//  @5
 --
 method end
 
-method setKey ordinal 22
+method getKey ordinal 19
 --
-  arg_count 1			//  @0
-  stack_reserve obj=1 int=0	//  @2
-    ; Line 21			//  @5
-  get o stk pos=0			//  @5
-  os dup				//  @10
-  save fld=0			//  @11
-  os drop				//  @13
-  ret				//  @14
+  arg_count 0						//  @0
+; Line 26
+  load fld=0						//  @2
+; Line 26
+  ret							//  @4
+  ret							//  @5
+--
+method end
+
+method getNext ordinal 20
+--
+  arg_count 0						//  @0
+; Line 47
+  load fld=2						//  @2
+; Line 47
+  ret							//  @4
+  ret							//  @5
+--
+method end
+
+method setKey ordinal 21
+--
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 21
+; _key
+  get o stk pos=0						//  @5
+; set key
+  save fld=0						//  @10
+  ret							//  @12
 --
 method end
 

@@ -8,12 +8,16 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Switch node.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -31,7 +35,7 @@ public class SwitchNode extends Node {
 	
 	
 	public String toString()  {    return "switch "; /*+ident;*/  }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public boolean is_const() { return true; }
 
 	public void add_case( SwitchCaseNode c ) { cases.add(c); }
@@ -56,6 +60,8 @@ public class SwitchNode extends Node {
 		if( expr == null ) throw new PlcException("switch","no expression to switch on");
 
 		//if( !expr.getType().is_int() ) throw new PlcException("switch","not an integer expression");
+		if( !expr.getType().is_int() ) 
+			print_warning("switch: not an integer expression");
 
 		expr.generate_code(c, s);
 		move_between_stacks(c, expr);
@@ -66,7 +72,7 @@ public class SwitchNode extends Node {
 		String prev_break = s.break_label;
 		s.break_label = break_label;
 
-		if( _l != null ) _l.generate_code(c, s);
+		if( _l != null ) _l.generate_code(c, s); // ? _l is allways null?
 
 		c.markLabel(break_label);
 		s.break_label = prev_break;

@@ -29,7 +29,7 @@ class osimpl
             var size : int;
             var i : int;
 
-            size = env.12(); // hack, of course
+            size = (int)env.12(); // hack, of course
             i = size;
 
             while( i > 0 )

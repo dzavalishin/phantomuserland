@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
  /**
@@ -27,7 +28,7 @@ public class StaticLoadNode extends Node {
 		my_class = c;
 	}
 	public String toString()  {    return "load static field "+ident;  }
-	public void find_out_my_type() throws PlcException { if( type == null ) throw new PlcException( "tatic load Node", "no type known", ident ); }
+	public PhantomType find_out_my_type() throws PlcException { throw new PlcException( "static load Node", "no type known", ident ); }
 	public boolean is_const() { return false; }
 
 	

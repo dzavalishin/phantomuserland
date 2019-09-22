@@ -1,53 +1,55 @@
-Class version 20190818003214150
+Class version 20190820101120902
 
-method <init> ordinal 16
+method <init> ordinal 19
 --
-  arg_count 0			//  @0
-  ret				//  @2
+  arg_count 0						//  @0
+  ret							//  @2
 --
 method end
 
-method print ordinal 17
+method print ordinal 16
 --
-  arg_count 1			//  @0
-  stack_reserve obj=1 int=0	//  @2
-    ; Line 32			//  @5
-  load fld=0			//  @5
-    ; Line 32			//  @7
-  get o stk pos=0			//  @7
-    ; Line 32			//  @12
-  call m=17 nparm=1		//  @12
-  os drop				//  @14
-  ret				//  @15
---
-method end
-
-method init ordinal 18
---
-  arg_count 1			//  @0
-  stack_reserve obj=1 int=0	//  @2
-    ; Line 45			//  @5
-  get o stk pos=0			//  @5
-  os dup				//  @10
-  save fld=0			//  @11
-  os drop				//  @13
-  ret				//  @14
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 32
+  load fld=0						//  @5
+; Line 32
+; s
+  get o stk pos=0						//  @7
+; Line 32
+  call m=17 nparm=1					//  @12
+  os drop							//  @14
+  ret							//  @15
 --
 method end
 
-method printInt ordinal 19
+method init ordinal 17
 --
-  arg_count 1			//  @0
-  stack_reserve obj=1 int=0	//  @2
-    ; Line 38			//  @5
-  load fld=0			//  @5
-    ; Line 38			//  @7
-  get o stk pos=0			//  @7
-  call m=5 nparm=0		//  @12
-    ; Line 38			//  @14
-  call m=17 nparm=1		//  @14
-  os drop				//  @16
-  ret				//  @17
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 45
+; tt
+  get o stk pos=0						//  @5
+; set console
+  save fld=0						//  @10
+  ret							//  @12
+--
+method end
+
+method printInt ordinal 18
+--
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 38
+  load fld=0						//  @5
+; Line 38
+; i
+  get o stk pos=0						//  @7
+  call m=5 nparm=0					//  @12
+; Line 38
+  call m=17 nparm=1					//  @14
+  os drop							//  @16
+  ret							//  @17
 --
 method end
 

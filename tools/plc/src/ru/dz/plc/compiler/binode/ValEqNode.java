@@ -16,15 +16,9 @@ import ru.dz.plc.util.PlcException;
  */
 public class ValEqNode extends EqNeqNode {
 
-	public ValEqNode( Node l, Node r) {    
+	public ValEqNode( Node l, Node r) throws PlcException {    
 		super(l,r);  
-		//opName = "Eq";
-		try {
-			// we're allways int
-			setType(PhantomType.getInt());
-		} catch (PlcException e) {
-			throw new RuntimeException(e);
-		}
+		presetType(PhantomType.getInt());
 	}
 
 	public String toString()  {    return "==";  }

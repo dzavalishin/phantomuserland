@@ -52,10 +52,10 @@ public abstract class BinaryOpNode extends BiNode {
 	private boolean bop_preprocessed = false;
 
 	@Override
-	public void find_out_my_type() throws PlcException 
+	public PhantomType find_out_my_type() throws PlcException 
 	{
-		type = PhantomType.findCompatibleType(_l.getType(),_r.getType());
-		if( type == null )
+		PhantomType t =  PhantomType.findCompatibleType(_l.getType(),_r.getType());
+		if( t == null )
 		{
 			print_error(String.format("types %s and %s are incompatible", 
 					_l.getType().toString(),
@@ -63,6 +63,7 @@ public abstract class BinaryOpNode extends BiNode {
 					));
 			throw new PlcException("bin op find type "+context.get_position(),"types are not compatible");
 		}
+		return t;
 	}
 
 	@Override
@@ -71,14 +72,14 @@ public abstract class BinaryOpNode extends BiNode {
 
 		find_out_my_type();
 
-		if(!type.is_on_int_stack())
+		if(!getType().is_on_int_stack())
 			throw new PlcException("bin op preprocess", "not numeric type");
 
-		if( !_l.getType().equals(type) ) 
-			_l = new CastNode(_l, type);
+		if( !_l.getType().equals(getType()) ) 
+			_l = new CastNode(_l, getType());
 
-		if( !_r.getType().equals(type) ) 
-			_r = new CastNode(_r, type);
+		if( !_r.getType().equals(getType()) ) 
+			_r = new CastNode(_r, getType());
 
 		bop_preprocessed = true;
 	}
@@ -89,7 +90,7 @@ public abstract class BinaryOpNode extends BiNode {
 		if(!bop_preprocessed) throw new PlcException("bin op","not preprocessed");
 
 		try {
-			c.emitNumericPrefix(type);
+			c.emitNumericPrefix(getType());
 			op.run(); // generate actual op
 		} catch (IOException e) {
 			throw new PlcException("io error", e);

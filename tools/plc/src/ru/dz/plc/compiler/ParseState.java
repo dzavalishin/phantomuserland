@@ -19,11 +19,17 @@ extends GeneralState
 	{
 		super(c);
 	}
+	
 	public ParseState()
-	{
-		super(null);
+	{		
 	}
 
+	public ParseState(ParseState ps) 
+	{
+		super(ps);
+		referencedClasses = new HashSet<PhantomClass>(ps.referencedClasses);
+	}
+	
 	public void set_class ( PhantomClass c ) { my_class = c; }
 
 

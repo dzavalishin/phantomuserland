@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -24,6 +25,20 @@ public class SequenceNode extends BiNode {
 	public SequenceNode( Node l, Node r) {    super(l,r);  }
 	public String toString()  {    return ", ";  }
 
+	@Override
+	public PhantomType find_out_my_type() throws PlcException
+	{
+		return PhantomType.getVoid();
+	}	
+	
+	public void propagateVoidParents()
+	{
+		_l.setParentIsVoid();
+		_l.propagateVoidParents();
+		_r.setParentIsVoid();
+		_r.propagateVoidParents();
+	}
+	
 	@Override
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) {} // really nothing :)
 	

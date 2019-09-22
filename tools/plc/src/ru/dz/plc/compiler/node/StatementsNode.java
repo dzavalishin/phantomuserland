@@ -12,12 +12,16 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Sequence of statements. Just outputs them sequentally.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2013 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -35,10 +39,21 @@ public class StatementsNode extends Node {
 	public boolean args_on_int_stack() { return false; }
 	public String toString()  {    return "...";  }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
+	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 	}
-	public void find_out_my_type()  {    type = new PhTypeVoid();  }
 
+	public PhantomType find_out_my_type()  {    return PhantomType.getVoid();  }
+
+	public void propagateVoidParents()
+	{
+		for( Node n : nodes )
+		{
+			n.setParentIsVoid();
+			n.propagateVoidParents();
+		}
+	}
+	
 	
 	
 	@Override

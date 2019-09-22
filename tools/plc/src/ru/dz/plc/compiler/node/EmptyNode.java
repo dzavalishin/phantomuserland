@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /** Just does nothing. */
@@ -14,7 +15,7 @@ public class EmptyNode extends Node {
 
 	public EmptyNode() {    super(null);  }
 	public String toString()  {    return "empty"; /*+ident;*/  }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public boolean is_const() { return false; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 

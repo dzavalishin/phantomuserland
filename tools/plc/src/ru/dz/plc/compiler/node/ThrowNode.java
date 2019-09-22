@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -19,7 +20,7 @@ public class ThrowNode extends Node {
 		super(expr);
 	}
 	public String toString()  {    return "throw "; /*+ident;*/  }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public boolean is_const() { return true; }
 
 	// load this

@@ -434,8 +434,8 @@ extends GrammarHelper {
 		PhantomClass c;
 		c = classes.get( cn, true, null);
 		if( c == null ) return null;
-		t = new PhantomType(c);
-		t.set_is_container(is_container);
+		t = new PhantomType(c).toContainer();
+		//t.set_is_container(is_container);
 		return t;
 	}
 
@@ -525,7 +525,7 @@ extends GrammarHelper {
 			else if( cln.equals("long") ) main_type = new PhTypeLong();
 			else if( cln.equals("float") ) main_type = new PhTypeFloat();
 			else if( cln.equals("double") ) main_type = new PhTypeDouble();
-			else if( cln.equals("string") ) main_type = new PhTypeString();
+			else if( cln.equals("string") ) main_type = PhantomType.getString();
 			else
 			{
 				PhantomClass c = classes.get(cln, false, ps);
@@ -542,11 +542,13 @@ extends GrammarHelper {
 		{
 			if( testAndEat( id_rbracket ) )
 			{
-				main_type.set_is_container(true);
+				//main_type.set_is_container(true);
+				main_type = main_type.toContainer();
 			}
 			else
 			{
-				main_type.set_is_container(true);
+				//main_type.set_is_container(true);
+				main_type = main_type.toContainer();
 
 				if( testAndEat( id_aster ) )
 					main_type._container_class_expression = parseExpression(false);
@@ -560,7 +562,8 @@ extends GrammarHelper {
 		// atrrs
 		parse_attributes( false );
 
-		main_type.setStatic(iAmStatic);
+		//main_type.setStatic(iAmStatic);
+		if(iAmStatic) main_type = main_type.toStatic();
 		
 		return main_type;
 	}

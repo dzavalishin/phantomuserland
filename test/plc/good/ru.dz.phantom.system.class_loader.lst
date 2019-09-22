@@ -4,11 +4,14 @@ Class .ru.dz.phantom.system.class_loader
   Field index
   Field i
   Field new_class
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void print( input: string ):
     void  : void
       . : unknown
         ident boot_object : unknown
-        Method (no. 16) : unknown
+        Method (no. 16) : void
         arg  : unknown
           ident input : string
 
@@ -16,7 +19,7 @@ Class .ru.dz.phantom.system.class_loader
     return : void
       . : unknown
         ident boot_object : unknown
-        Method (no. 8) : unknown
+        Method (no. 8) : void
         arg  : unknown
           ident name : string
 
@@ -24,14 +27,14 @@ Class .ru.dz.phantom.system.class_loader
     ,  : void
       ,  : void
         void  : void
-          = : int
+          = : void
             ident i : int
             int const "0" : int const
-        do-while : unknown
+        do-while : void
           < : int
             ident i : int
             ident index : int
-          ,  : unknown
+          ,  : void
             if : unknown
               == : int
                 ident name : string
@@ -45,7 +48,7 @@ Class .ru.dz.phantom.system.class_loader
                     ident i : int
                     int const "1" : int const
             void  : void
-              = : int
+              = : void
                 ident i : int
                 + : int
                   ident i : int
@@ -53,7 +56,7 @@ Class .ru.dz.phantom.system.class_loader
       return : void
         . : .internal.object
           this  : .ru.dz.phantom.system.class_loader
-          Method load : unknown
+          Method load : void
           arg  : unknown
             ident name : string
 
@@ -61,16 +64,16 @@ Class .ru.dz.phantom.system.class_loader
     ,  : void
       ,  : void
         void  : void
-          = : unknown
+          = : void
             ident boot_object : unknown
             (cast) : unknown
               ident _boot_object : unknown
         void  : void
-          = : int
+          = : void
             ident index : int
             int const "0" : int const
       void  : void
-        = : void[]
+        = : void
           ident classes : void[]
           new void[] : void[]
 
@@ -81,12 +84,12 @@ Class .ru.dz.phantom.system.class_loader
           ,  : void
             ,  : void
               void  : void
-                = : unknown
+                = : void
                   ident new_class : unknown
                   (cast) : unknown
                     . : .internal.object
                       this  : .ru.dz.phantom.system.class_loader
-                      Method load_class : unknown
+                      Method load_class : void
                       arg  : unknown
                         ident name : string
               void  : void
@@ -97,7 +100,7 @@ Class .ru.dz.phantom.system.class_loader
                   (cast) : void
                     ident name : string
             void  : void
-              = : int
+              = : void
                 ident index : int
                 + : int
                   ident index : int
@@ -110,7 +113,7 @@ Class .ru.dz.phantom.system.class_loader
               (cast) : void
                 ident new_class : unknown
         void  : void
-          = : int
+          = : void
             ident index : int
             + : int
               ident index : int

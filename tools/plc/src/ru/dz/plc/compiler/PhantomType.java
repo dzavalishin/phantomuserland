@@ -16,7 +16,8 @@ import java.io.*;
  * @author dz
  */
 
-public class PhantomType {
+public class PhantomType 
+{
 	public static final String DEFAULT_CONTAINER_CLASS = ".internal.container.array";
 	
 	protected PhantomClass        _class;
@@ -32,9 +33,34 @@ public class PhantomType {
 
 	protected boolean             _is_string;
 
-	Node                          _class_expression;
-	Node                          _container_class_expression;
+	protected Node                _class_expression;
+	protected Node                _container_class_expression;
 
+	protected boolean 			  iAmStatic;
+
+	public PhantomType(PhantomType src) 
+	{
+		this._class = src._class;
+		this._class_expression = src._class_expression;
+		this._container_class = src._container_class;
+		this._container_class_expression = src._container_class_expression;
+		
+		this._is_container = src._is_container;
+		
+		this._is_double = src._is_double;
+		this._is_float = src._is_float;
+		this._is_int = src._is_int;
+		this._is_long = src._is_long;
+
+		this._is_string = src._is_string;
+		this._is_void = src._is_void;
+		
+		this.iAmStatic = src.iAmStatic;
+		
+		this._is_known = src._is_known;		
+	}
+	
+	
 	public String get_main_class_name()
 	{
 		if(_is_container)  return _container_class == null ? DEFAULT_CONTAINER_CLASS : _container_class.getName();
@@ -68,7 +94,7 @@ public class PhantomType {
 		_container_class = null;
 	}
 
-	public PhantomType(PhantomClass _c) throws PlcException
+	public PhantomType(PhantomClass _c) //throws PlcException
 	{
 		//if( _c == null )			throw new PlcException("PhantomType(PhantomClass)","Class is null");
 
@@ -117,8 +143,12 @@ public class PhantomType {
 	public boolean is_container() { return _is_container; }
 	public boolean is_unknown() { return !_is_known; }
 
-	public void set_is_container(boolean is_container) {
-		this._is_container = is_container;
+	//public void set_is_container(boolean is_container) {		this._is_container = is_container;	}
+	public PhantomType toContainer() 
+	{
+		PhantomType ret = new PhantomType(this);
+		ret._is_container = true;
+		return ret;
 	}
 
 	public boolean is_on_int_stack() { return _is_int||_is_long||_is_float||_is_double; }
@@ -207,7 +237,8 @@ public class PhantomType {
 	public void emit_get_class_object( Codegen c, CodeGeneratorState s ) throws PlcException, IOException 
 	{
 		if(is_void() && !is_container())        //c.emit_summon_null();
-			throw new PlcException("PhantomType","asked to emit void class object"); // Why not, btw?		
+			throw new PlcException("PhantomType","asked to emit void class object"); // Why not, btw?	
+		
 		else if(is_container())
 		{
 			if( _container_class != null )
@@ -281,47 +312,8 @@ public class PhantomType {
 	public PhantomType(RandomAccessFile is) throws IOException, PlcException {
 		load(new PhantomTypeInfo(is));
 	}
-	/*
-	public PhantomType(RandomAccessFile is) throws IOException, PlcException {
-		_class_expression = _container_class_expression = null;
-		_class = _container_class = null;
-		_is_void = _is_known = _is_int = _is_string = _is_long = _is_float = _is_double = false;
-
-		boolean _is_container = Fileops.get_int32(is) != 0;
-		String main_class_name = Fileops.get_string(is);
-		String contained_class_name = Fileops.get_string(is);
 
 
-		if(_is_container)
-		{
-			if(!(contained_class_name.equals("")))
-			{
-				_class = new PhantomClass(contained_class_name);
-				_is_known = true;
-			}
-			if(!(main_class_name.equals("")))
-			{
-				_container_class = new PhantomClass(main_class_name);
-				_is_known = true;
-			}
-		}
-		else
-		{
-			if(!(main_class_name.equals("")))
-			{
-				_class = new PhantomClass(main_class_name);
-				_is_known = true;
-			}
-		}
-
-		_is_void   = main_class_name.equals(".internal.void");
-		_is_int    = main_class_name.equals(".internal.int");
-		_is_long   = main_class_name.equals(".internal.long");
-		_is_float  = main_class_name.equals(".internal.float");
-		_is_double = main_class_name.equals(".internal.double");
-		_is_string = main_class_name.equals(".internal.string");
-	}
-*/
 	/**
 	 * 
 	 * @return Class of this type
@@ -374,26 +366,26 @@ public class PhantomType {
 	public static PhantomType getString()  { return t_string; }
 
 	private static PhantomType t_int = null;
-	public static PhantomType getInt() throws PlcException { 
+	public static PhantomType getInt() { 
 		if( t_int == null ) t_int = new PhTypeInt();
 		return t_int;
 	}
 
 
 	private static PhantomType t_long = null;
-	public static PhantomType getLong() throws PlcException {
+	public static PhantomType getLong() {
 		if( t_long == null ) t_long = new PhTypeLong();
 		return t_long;
 	}
 
 	private static PhantomType t_float = null;
-	public static PhantomType getFloat() throws PlcException {
+	public static PhantomType getFloat() {
 		if( t_float == null ) t_float = new PhTypeFloat();
 		return t_float;
 	}
 
 	private static PhantomType t_double = null;
-	public static PhantomType getDouble() throws PlcException {
+	public static PhantomType getDouble() {
 		if( t_double == null ) t_double = new PhTypeDouble();
 		return t_double;
 	}
@@ -445,7 +437,6 @@ public class PhantomType {
 
 	private static PhantomType t_object = null;
 
-	private boolean iAmStatic;
 	public static PhantomType getObject() throws PlcException {
 		if( t_object  == null )
 			t_object = new PhantomType( ClassMap.get_map().get(".internal.object",false, null) );
@@ -521,9 +512,22 @@ public class PhantomType {
 		return biggerType(tl, tr);
 	}
 
-	public void setStatic(boolean iAmStatic) { this.iAmStatic = iAmStatic; }
+	//public void setStatic(boolean iAmStatic) { this.iAmStatic = iAmStatic; }
 	public boolean getStatic() { return iAmStatic; }
 
+	public PhantomType toStatic()
+	{
+		PhantomType ret = new PhantomType(this);
+		ret.iAmStatic = true;
+		return ret;
+	}
+
+
+	/**
+	 * Do we represent container class with non-default container implementation
+	 * @return True if so.
+	 */
+	public boolean isSpecificContainerClass() {		return _container_class != null ;	}
 
 }
 

@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -66,10 +67,9 @@ public class OpStaticMethodCallNode extends BiNode
 		generate_my_code(c,s);
 	}
 
-	public void find_out_my_type() throws PlcException {
-		checkPresetType();
-		if( type == null ) throw new PlcException("Static method call Node","return type is not set");
-		//type = new ph_type_unknown(); // BUG! Wrong!
+	public PhantomType find_out_my_type() throws PlcException {
+		//if( getType() == null ) 
+		throw new PlcException("Static method call Node","return type is not set");
 	}
 
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException

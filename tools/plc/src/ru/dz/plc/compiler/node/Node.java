@@ -29,13 +29,17 @@ abstract public class Node {
 	//{		log.setLevel(Level.SEVERE);	}
 	
 	protected Node           _l;
-	protected PhantomType   type;
+	
+	//protected PhantomType   type;
+	private PhantomType   type;
+	
 	protected AttributeSet  attributes;
 	protected ParserContext context = null;
+	
+	private boolean parentIsVoid = false;
 
-	public Node(Node l) {
-		//if( (l == null) && (getClass() != EmptyNode.class) && (getClass() != NewNode.class) ) 
-		//	throw new RuntimeException("null left"); 
+	public Node(Node l) 
+	{
 		this._l = l;
 		type = null;
 	}
@@ -81,18 +85,26 @@ abstract public class Node {
 
 	// -------------------------------- types ----------------------------------
 
-	public PhantomType getType() throws PlcException
-	{
-		if( type == null || type.is_unknown() ) find_out_my_type();
-		return type;
-	}
-
-	private PhantomType presetType = null;
+	/** Called by parent to tell that it needs no value from us. Can be used to optimise codegen in var assign. */
+	public void setParentIsVoid() { parentIsVoid  = true; }
+	public boolean isVoidParent() { return parentIsVoid; }
 	
-	protected void checkPresetType()
+
+	//private PhantomType presetType = null;
+	
+	
+	/**
+	 * Method presetType() has higher priority than setType() and overrides any type that was
+	 * found by find_out_my_type()
+	 * @param t type of this node to preset
+	 */
+	public void presetType(PhantomType presetType) // throws PlcException
 	{
 		if( presetType == null )
+		{
+			print_warning("Preset type is null");
 			return;
+		}
 
 		if( type == null ) 
 			{
@@ -108,19 +120,23 @@ abstract public class Node {
 		
 		print_warning("Preset type is "+presetType+", inferred type is "+type);
 	}
-	
-	public void setType(PhantomType t) throws PlcException
+
+
+	public PhantomType getType() throws PlcException
 	{
-		presetType = t;
-		checkPresetType();
+		//if( type == null || type.is_unknown() ) 
+		if( type == null ) 
+			type = find_out_my_type();
+		return type;
 	}
 
+	//public void setType(PhantomType type) {		this.type = type;	}
+
 	// TODO make abstract? Override!
-	public void find_out_my_type() throws PlcException
+	public PhantomType find_out_my_type() throws PlcException
 	{
-		if( type != null ) return;
-		if( _l != null ) type = _l.getType();
-		checkPresetType();
+		if( _l != null ) return _l.getType();
+		return null;
 	}
 
 
@@ -155,8 +171,8 @@ abstract public class Node {
 
 	protected void print_me(PrintStream ps ) throws PlcException {
 		ps.print(toString());
-		if( type == null ) find_out_my_type();
-		if( type != null ) ps.print(" : " + type.toString()+"");
+		if( getType() == null ) find_out_my_type();
+		if( getType() != null ) ps.print(" : " + getType().toString()+"");
 		if( is_const()   ) ps.print(" const");
 		if( attributes != null ) ps.print( " @"+attributes.toString() );
 		ps.println();
@@ -193,7 +209,16 @@ abstract public class Node {
 		System.out.println("Not-overriden preprocess_me called: "+toString());
 	}
 
-
+	/** Override in class if you want to tell children that you don't need their results. */
+	public void propagateVoidParents()
+	{
+		if( _l != null )
+		{
+			//_l.setParentIsVoid();
+			_l.propagateVoidParents();
+		}
+	}
+	
 	// ------------------------------ optimizations ----------------------------
 
 	Node evaluate_const_expr() throws PlcException { throw new PlcException( "Node evaluate_const_expr", "not redefined for this Node", toString() ); }
@@ -367,6 +392,8 @@ abstract public class Node {
 		}
 	}
 
+
+	
 	
 	
 
@@ -392,7 +419,7 @@ abstract class SwitchLabelNode extends Node {
 	public String get_label() { return my_label; }
 
 	public boolean is_const() { return false; }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); }
+	public PhantomType find_out_my_type() { return new PhTypeVoid(); }
 
 	protected SwitchLabelNode( String label, Node expr ) { super(expr); this.my_label = label; }
 
@@ -402,6 +429,15 @@ abstract class SwitchLabelNode extends Node {
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		c.markLabel(my_label);
 	}*/
+
+	public void propagateVoidParents()
+	{
+		if( _l != null )
+		{
+			_l.setParentIsVoid(); // we do not need result of expr
+			_l.propagateVoidParents();
+		}
+	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		c.markLabel(my_label);

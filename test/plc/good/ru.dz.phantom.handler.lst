@@ -1,4 +1,7 @@
 Class .ru.dz.phantom.handler
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void handleEvent(  ):
   -- No code!
 

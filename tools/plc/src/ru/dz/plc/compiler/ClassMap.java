@@ -82,9 +82,8 @@ public class ClassMap {
 		return c;
 	}
 
-	public void listMethods() {
-		classes.listMethods();		
-	}
+	public void listMethods() {		classes.listMethods();	}
+	public void propagateVoid() throws PlcException { classes.propagateVoid(); }
 
 
 

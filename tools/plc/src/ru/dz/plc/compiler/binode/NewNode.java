@@ -46,15 +46,12 @@ public class NewNode extends Node
 
 	@Override
 	public
-	void find_out_my_type() throws PlcException {
+	PhantomType find_out_my_type() throws PlcException {
 
 		if(static_type != null)
-		{
-			type = static_type;
-			return;
-		}
+			return static_type;
 
-		super.find_out_my_type();
+		return super.find_out_my_type(); // TODO right?
 	}
 
 	public String toString()  
@@ -200,7 +197,17 @@ public class NewNode extends Node
 	
 	private int findConstructorOrdinal(int n_param) throws PlcException 
 	{
-		PhantomClass pclass = static_type.get_class();
+		PhantomClass pclass;
+		if( static_type.is_container() )
+		{
+			if( !static_type.isSpecificContainerClass() )
+				return 0; // Default container constructor ordinal
+			
+			String ccn = static_type.get_main_class_name();
+			throw new PlcException("findConstructorOrdinal", "Specific container class support is not implemented", ccn);
+		}
+		pclass = static_type.get_class();
+		
 		if( pclass == null )
 			throw new PlcException("NewNode","Can't call c'tor for "+static_type);
 			

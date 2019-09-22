@@ -22,32 +22,19 @@ public class OpSubscriptNode extends BiNode {
 	public OpSubscriptNode(Node atom, Node subscr) {    super(atom,subscr);  }
 	public String toString()  {    return "[]";  }
 
-	public void find_out_my_type() throws PlcException
+	public PhantomType find_out_my_type() throws PlcException
 	{
 		Node atom = _l;
 
 		PhantomType a_type = atom.getType();
 
 		if( a_type == null || a_type.is_unknown() )
-		{
-			type = new PhTypeUnknown();
-			checkPresetType();
-			return;
-		}
+			return new PhTypeUnknown();
 
 		if( !a_type.is_container() )
 			throw new PlcException( "[] Node", "not a container subscripted" );
 
-		/*if( a_type._class == null )
-	    {
-	      type = new PhTypeUnknown();
-	      return;
-	    }
-
-	    type = new PhantomType( a_type._class );
-		 */
-		type = new PhantomType( a_type.get_class() );
-		checkPresetType();
+		return new PhantomType( a_type.get_class() );		
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException

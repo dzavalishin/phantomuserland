@@ -69,6 +69,7 @@ public class PlcMain {
 		if(!stop_codegen)
 		{
 			classes.set_ordinals(); // NO! we must do it after creating default constructors
+			classes.propagateVoid(); // Before preprocess!
 			classes.preprocess();
 			classes.codegen();
 		}

@@ -1,4 +1,7 @@
 Class .ru.dz.phantom.system.runnable
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void run( parent_object: unknown ):
     throw  : void const
       string pool const id="0" : string const
