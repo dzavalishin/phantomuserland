@@ -471,6 +471,11 @@ public class Method
 		return s.toString();
 	}
 
+	public void propagateVoid() {
+		if( code != null )
+			code.propagateVoidParents();		
+	}
+	
 
 	private boolean preprocessed = false;
 	public void preprocess( PhantomClass myClass ) throws PlcException 
@@ -485,6 +490,7 @@ public class Method
 
 	private void preprocessParentConstructor(PhantomClass myClass) throws PlcException 
 	{
+		// TODO will fail on empty constructors in intermediate classed - code == null
 		//System.out.println("preprocessParentConstructor for "+myClass.getName());
 		
 		// don't call constructor for parent of all classes
@@ -524,7 +530,7 @@ public class Method
 				// myClass // No!!
 				parentClass
 				);
-		ctorCall.setType(PhantomType.getVoid());
+		ctorCall.presetType(PhantomType.getVoid());
 		Node newRoot = new SequenceNode(ctorCall, code);
 
 		code = newRoot;
@@ -605,6 +611,7 @@ public class Method
 
 		return SearchResult.Fail;
 	}
+
 }
 
 

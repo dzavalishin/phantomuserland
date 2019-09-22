@@ -23,9 +23,10 @@ public class RefNeqNode extends BiNode
 	public boolean is_on_int_stack() { return true; }
 	public boolean args_on_int_stack() { return false; }
 
-	public void find_out_my_type() throws PlcException
+	@Override
+	public PhantomType find_out_my_type() throws PlcException
 	{
-		type = PhantomType.getInt();
+		return PhantomType.getInt();
 	}	
 	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {

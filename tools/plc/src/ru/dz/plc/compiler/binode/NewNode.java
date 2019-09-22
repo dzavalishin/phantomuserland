@@ -46,15 +46,12 @@ public class NewNode extends Node
 
 	@Override
 	public
-	void find_out_my_type() throws PlcException {
+	PhantomType find_out_my_type() throws PlcException {
 
 		if(static_type != null)
-		{
-			type = static_type;
-			return;
-		}
+			return static_type;
 
-		super.find_out_my_type();
+		return super.find_out_my_type(); // TODO right?
 	}
 
 	public String toString()  

@@ -1,15 +1,15 @@
-Class version 20190818003034105
+Class version 20190820095810215
 
-method <init> ordinal 16
+method <init> ordinal 17
 --
-  arg_count 0			//  @0
-  ret				//  @2
+  arg_count 0						//  @0
+  ret							//  @2
 --
 method end
 
-method hasNext ordinal 17
+method hasNext ordinal 16
 --
-  ret				//  @0
+  ret							//  @0
 --
 method end
 

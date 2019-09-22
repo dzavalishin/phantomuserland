@@ -24,10 +24,10 @@ vpath %.pc $(BINDIR)
 	@$(PLC) -o$(BINDIR) -I$(PHANTOM_HOME)/plib/bin $<
 	sed -e 1d < bin/$(patsubst %.pc,%.lstc,$@)  > $(patsubst %.pc,%.lstc,$@).bin
 	sed -e 1d < good/$(patsubst %.pc,%.lstc,$@) > $(patsubst %.pc,%.lstc,$@).good
-	diff -w $(patsubst %.pc,%.lstc,$@).bin $(patsubst %.pc,%.lstc,$@).good
+	diff -q -w $(patsubst %.pc,%.lstc,$@).bin $(patsubst %.pc,%.lstc,$@).good
 	cp bin/$(patsubst %.pc,%.lst,$@) $(patsubst %.pc,%.lst,$@).bin
 	cp good/$(patsubst %.pc,%.lst,$@) $(patsubst %.pc,%.lst,$@).good
-	diff -w bin/$(patsubst %.pc,%.lst,$@) good/$(patsubst %.pc,%.lst,$@)
+	diff -q -w bin/$(patsubst %.pc,%.lst,$@) good/$(patsubst %.pc,%.lst,$@)
 	-rm $(patsubst %.pc,%.lstc,$@).bin $(patsubst %.pc,%.lstc,$@).good
 	-rm $(patsubst %.pc,%.lst,$@).bin $(patsubst %.pc,%.lst,$@).good
 

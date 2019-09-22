@@ -25,7 +25,7 @@ public class ThisNode extends Node {
 	
 	
 	public String toString()  {    return "this ";  }
-	public void find_out_my_type() throws PlcException { if( type == null ) type = new PhantomType(myClass); }
+	public PhantomType find_out_my_type() throws PlcException { return new PhantomType(myClass); }
 	public boolean is_const() { return false; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 

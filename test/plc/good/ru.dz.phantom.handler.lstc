@@ -1,8 +1,15 @@
-Class version 20160114031914216
+Class version 20190820114812669
+
+method <init> ordinal 17
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method handleEvent ordinal 16
 --
-  ret				//  @0
+  ret							//  @0
 --
 method end
 

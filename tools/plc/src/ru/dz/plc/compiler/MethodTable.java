@@ -184,6 +184,13 @@ public class MethodTable implements IMethodTable
 		}
 	}
 
+	public void propagateVoid() 
+	{
+		for( Method m : mstable.values() )
+			m.propagateVoid();
+	}
+	
+	
 	private void setupMethodOrdinal(Method m) throws PlcException 
 	{
 		if( m.getOrdinal() >= 0 )
@@ -395,6 +402,7 @@ public class MethodTable implements IMethodTable
 		List<Method> ml = getAllForName(name);
 		return !ml.isEmpty();
 	}
+
 
 
 

@@ -1,20 +1,21 @@
-Class version 20190818003801717
+Class version 20190820103904836
 
-method <init> ordinal 16
+method <init> ordinal 17
 --
-  arg_count 0			//  @0
-  ret				//  @2
+  arg_count 0						//  @0
+  ret							//  @2
 --
 method end
 
-method getName ordinal 17
+method getName ordinal 16
 --
-  arg_count 0			//  @0
-    ; Line 24			//  @2
-  const_pool <0>			//  @2
-    ; Line 24			//  @7
-  ret				//  @7
-  ret				//  @8
+  arg_count 0						//  @0
+; Line 24
+; str 'undefined.user'
+  const_pool <0>						//  @2
+; Line 24
+  ret							//  @7
+  ret							//  @8
 --
 method end
 

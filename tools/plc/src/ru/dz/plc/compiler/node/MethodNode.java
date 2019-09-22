@@ -9,9 +9,12 @@ import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
- * <p>Method definition/call node.</p>
+ * <p>Method definition node. Used as method call node child too.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -102,8 +105,8 @@ public class MethodNode extends Node
 		ordinal = meth_no;
 	}
 
-	// BUG?
-	public void find_out_my_type() { type = new PhTypeUnknown(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
+	
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 
 	public String toString()

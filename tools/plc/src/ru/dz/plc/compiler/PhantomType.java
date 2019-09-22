@@ -35,6 +35,8 @@ public class PhantomType {
 	Node                          _class_expression;
 	Node                          _container_class_expression;
 
+	private boolean 			  iAmStatic;
+
 	public String get_main_class_name()
 	{
 		if(_is_container)  return _container_class == null ? DEFAULT_CONTAINER_CLASS : _container_class.getName();
@@ -68,7 +70,7 @@ public class PhantomType {
 		_container_class = null;
 	}
 
-	public PhantomType(PhantomClass _c) throws PlcException
+	public PhantomType(PhantomClass _c) //throws PlcException
 	{
 		//if( _c == null )			throw new PlcException("PhantomType(PhantomClass)","Class is null");
 
@@ -207,7 +209,8 @@ public class PhantomType {
 	public void emit_get_class_object( Codegen c, CodeGeneratorState s ) throws PlcException, IOException 
 	{
 		if(is_void() && !is_container())        //c.emit_summon_null();
-			throw new PlcException("PhantomType","asked to emit void class object"); // Why not, btw?		
+			throw new PlcException("PhantomType","asked to emit void class object"); // Why not, btw?	
+		
 		else if(is_container())
 		{
 			if( _container_class != null )
@@ -374,26 +377,26 @@ public class PhantomType {
 	public static PhantomType getString()  { return t_string; }
 
 	private static PhantomType t_int = null;
-	public static PhantomType getInt() throws PlcException { 
+	public static PhantomType getInt() { 
 		if( t_int == null ) t_int = new PhTypeInt();
 		return t_int;
 	}
 
 
 	private static PhantomType t_long = null;
-	public static PhantomType getLong() throws PlcException {
+	public static PhantomType getLong() {
 		if( t_long == null ) t_long = new PhTypeLong();
 		return t_long;
 	}
 
 	private static PhantomType t_float = null;
-	public static PhantomType getFloat() throws PlcException {
+	public static PhantomType getFloat() {
 		if( t_float == null ) t_float = new PhTypeFloat();
 		return t_float;
 	}
 
 	private static PhantomType t_double = null;
-	public static PhantomType getDouble() throws PlcException {
+	public static PhantomType getDouble() {
 		if( t_double == null ) t_double = new PhTypeDouble();
 		return t_double;
 	}
@@ -445,7 +448,6 @@ public class PhantomType {
 
 	private static PhantomType t_object = null;
 
-	private boolean iAmStatic;
 	public static PhantomType getObject() throws PlcException {
 		if( t_object  == null )
 			t_object = new PhantomType( ClassMap.get_map().get(".internal.object",false, null) );

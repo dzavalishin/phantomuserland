@@ -33,7 +33,7 @@ public class IntConst64Node extends Node {
 	}
 	
 	public String toString()  {    return "int64 const \""+Long.toString(val)+"\"";  }
-	public void find_out_my_type() throws PlcException { type = PhantomType.getLong(); }
+	public PhantomType find_out_my_type() throws PlcException { return PhantomType.getLong(); }
 	public boolean is_on_int_stack() { return true; }
 	public boolean is_const() { return true; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }

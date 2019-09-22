@@ -6,6 +6,7 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -19,7 +20,7 @@ public class ContinueNode extends Node {
 
 	public ContinueNode() {    super(null);  }
 	public String toString()  {    return "continue"; /*+ident;*/  }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public boolean is_const() { return false; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 

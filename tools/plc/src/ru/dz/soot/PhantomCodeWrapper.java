@@ -246,7 +246,7 @@ public class PhantomCodeWrapper {
 		*/
 		
 		OpDynamicMethodCallNode node = new OpDynamicMethodCallNode(object, name, args); 	
-		node.setType(SootExpressionTranslator.convertType(expr.getType()));
+		node.presetType(SootExpressionTranslator.convertType(expr.getType()));
 		return new PhantomCodeWrapper(node);
 	}
 

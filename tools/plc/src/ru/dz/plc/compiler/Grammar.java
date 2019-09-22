@@ -525,7 +525,7 @@ extends GrammarHelper {
 			else if( cln.equals("long") ) main_type = new PhTypeLong();
 			else if( cln.equals("float") ) main_type = new PhTypeFloat();
 			else if( cln.equals("double") ) main_type = new PhTypeDouble();
-			else if( cln.equals("string") ) main_type = new PhTypeString();
+			else if( cln.equals("string") ) main_type = PhantomType.getString();
 			else
 			{
 				PhantomClass c = classes.get(cln, false, ps);

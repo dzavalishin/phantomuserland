@@ -1,5 +1,0 @@
-Class .phantom.user
-  Method string getName(  ):
-    return : void const
-      string pool const id="0" : string const
-

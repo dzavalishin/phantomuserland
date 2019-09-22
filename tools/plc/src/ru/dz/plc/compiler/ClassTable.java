@@ -255,6 +255,12 @@ public class ClassTable {
 		
 	}
 
+	public void propagateVoid() throws PlcException 
+	{
+		for( PhantomClass c : table.values() )
+			c.propagateVoid();
+	}
+
 
 }
 

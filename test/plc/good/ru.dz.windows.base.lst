@@ -1,11 +1,14 @@
 Class .ru.dz.windows.base
   Field console
   Field boot_object
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void putws( s: string ):
     void  : void
       . : void
         ident console : .internal.io.tty
-        Method putws : unknown
+        Method putws : void
         arg  : unknown
           ident s : string
 
@@ -13,7 +16,7 @@ Class .ru.dz.windows.base
     void  : void
       . : void
         ident console : .internal.io.tty
-        Method gotoxy : unknown
+        Method gotoxy : void
         arg  : int
           ident x : int
         arg  : unknown
@@ -23,18 +26,18 @@ Class .ru.dz.windows.base
     ,  : void
       ,  : void
         void  : void
-          = : .internal.io.tty
+          = : void
             ident console : .internal.io.tty
             ident _console : .internal.io.tty
         void  : void
-          = : unknown
+          = : void
             ident boot_object : unknown
             (cast) : unknown
               ident _booto : unknown
       void  : void
         . : void
           ident console : .internal.io.tty
-          Method putws : unknown
+          Method putws : void
           arg  : unknown
             string pool const id="0" : string const
 

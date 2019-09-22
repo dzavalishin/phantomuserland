@@ -1,8 +1,0 @@
-Class .phantom.user
-  C'tor  void <init>(  ):
-    empty : void
-
-  Method string getName(  ):
-    return : void const
-      string pool const id="0" : string const
-
