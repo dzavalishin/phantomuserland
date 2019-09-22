@@ -1,83 +1,78 @@
-Class version 20170915072436828
+Class version 20190822103932991
+
+method <init> ordinal 20
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method display ordinal 16
 --
-  ret				//  @0
+  ret							//  @0
 --
 method end
 
 method init ordinal 17
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .ru.dz.windows.window"	//  @11
-  throw				//  @56
-_label_0:	//  @57
-  stack_reserve obj=1 int=0	//  @57
-    ; Line 19			//  @60
-  get o stk pos=0			//  @60
-  os dup				//  @65
-  save fld=0			//  @66
-  os drop				//  @68
-  ret				//  @69
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 19
+; r
+  get o stk pos=0						//  @5
+; set console
+  save fld=0						//  @10
+  ret							//  @12
 --
 method end
 
 method putws ordinal 18
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: putws in .ru.dz.windows.window"	//  @11
-  throw				//  @57
-_label_0:	//  @58
-  stack_reserve obj=1 int=0	//  @58
-    ; Line 37			//  @61
-  load fld=0			//  @61
-    ; Line 37			//  @63
-  get o stk pos=0			//  @63
-    ; Line 37			//  @68
-  call m=16 nparm=1		//  @68
-  os drop				//  @70
-  ret				//  @71
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 37
+  load fld=0						//  @5
+; Line 37
+; s
+  get o stk pos=0						//  @7
+; Line 37
+  call m=16 nparm=1					//  @12
+  os drop							//  @14
+  ret							//  @15
 --
 method end
 
 method gotoxy ordinal 19
 --
-  const 2				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: gotoxy in .ru.dz.windows.window"	//  @11
-  throw				//  @58
-_label_0:	//  @59
-  stack_reserve obj=2 int=0	//  @59
-    ; Line 32			//  @62
-  load fld=0			//  @62
-    ; Line 32			//  @64
-  get o stk pos=0			//  @64
-  o2i				//  @69
-    ; Line 32			//  @70
-  load fld=3			//  @70
-  o2i				//  @72
-    ; Line 32			//  @73
-  isum				//  @73
-  i2o				//  @74
-    ; Line 32			//  @75
-  get o stk pos=1			//  @75
-  o2i				//  @80
-    ; Line 32			//  @81
-  load fld=4			//  @81
-  o2i				//  @83
-    ; Line 32			//  @84
-  isum				//  @84
-  i2o				//  @85
-    ; Line 32			//  @86
-    ; Line 32			//  @86
-  call m=17 nparm=2		//  @86
-  os drop				//  @88
-  ret				//  @89
+  arg_count 2						//  @0
+  stack_reserve obj=2 int=0				//  @2
+; Line 32
+  load fld=0						//  @5
+; Line 32
+; x
+  get o stk pos=0						//  @7
+  o2i							//  @12
+; Line 32
+  load fld=3						//  @13
+  o2i							//  @15
+; Line 32
+  isum							//  @16
+  i2o							//  @17
+; Line 32
+; y
+  get o stk pos=1						//  @18
+  o2i							//  @23
+; Line 32
+  load fld=4						//  @24
+  o2i							//  @26
+; Line 32
+  isum							//  @27
+  i2o							//  @28
+; Line 32
+; Line 32
+  call m=17 nparm=2					//  @29
+  os drop							//  @31
+  ret							//  @32
 --
 method end
 

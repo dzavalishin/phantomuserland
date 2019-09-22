@@ -5,12 +5,15 @@ Class .ru.dz.windows.window
   Field xpos
   Field xsize
   Field border_color
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void display(  ):
   -- No code!
 
   Method void init( r: .ru.dz.windows.base ):
     void  : void
-      = : .ru.dz.windows.base
+      = : void
         ident console : .ru.dz.windows.base
         ident r : .ru.dz.windows.base
 
@@ -18,7 +21,7 @@ Class .ru.dz.windows.window
     void  : void
       . : void
         ident console : .ru.dz.windows.base
-        Method putws : unknown
+        Method putws : void
         arg  : unknown
           ident s : string
 
@@ -26,7 +29,7 @@ Class .ru.dz.windows.window
     void  : void
       . : void
         ident console : .ru.dz.windows.base
-        Method gotoxy : unknown
+        Method gotoxy : void
         arg  : int
           + : int
             ident x : int

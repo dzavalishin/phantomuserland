@@ -1,579 +1,547 @@
-Class version 20170915071253354
+Class version 20190822101648663
+
+method <init> ordinal 18
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method go ordinal 16
 --
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: go in .ru.dz.phantom.system.shell"	//  @11
-  throw				//  @60
-_label_0:	//  @61
-    ; Line 82			//  @61
-  load fld=12			//  @61
-  call m=9 nparm=0		//  @63
-  os drop				//  @65
-  ret				//  @66
+  arg_count 0						//  @0
+; Line 82
+  load fld=12						//  @2
+  call m=9 nparm=0					//  @4
+  os drop							//  @6
+  ret							//  @7
 --
 method end
 
 method run ordinal 8
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: run in .ru.dz.phantom.system.shell"	//  @11
-  throw				//  @61
-_label_0:	//  @62
-  stack_reserve obj=1 int=0	//  @62
-  summon class internal.window	//  @65
-  new				//  @86
-  pull depth=0			//  @87
-  summon class internal.window	//  @92
-  static invoke ord=0 n_param=0	//  @113
-  os drop				//  @122
-  os dup				//  @123
-  save fld=8			//  @124
-  os drop				//  @126
-    ; Line 89			//  @127
-  load fld=8			//  @127
-    ; Line 89			//  @129
-  const 50			//  @129
-  i2o				//  @134
-    ; Line 89			//  @135
-  const 310			//  @135
-  i2o				//  @140
-    ; Line 89			//  @141
-    ; Line 89			//  @141
-  call m=27 nparm=2		//  @141
-  os drop				//  @143
-    ; Line 89			//  @144
-    ; Line 90			//  @144
-  load fld=8			//  @144
-    ; Line 90			//  @146
-  const_pool <0>			//  @146
-    ; Line 90			//  @151
-  call m=33 nparm=1		//  @151
-  os drop				//  @160
-    ; Line 90			//  @161
-    ; Line 91			//  @161
-  load fld=8			//  @161
-    ; Line 91			//  @163
-  const -16777216			//  @163
-  i2o				//  @168
-    ; Line 91			//  @169
-  call m=22 nparm=1		//  @169
-  os drop				//  @171
-    ; Line 91			//  @172
-    ; Line 93			//  @172
-  load fld=8			//  @172
-  call m=20 nparm=0		//  @174
-  os drop				//  @176
-    ; Line 93			//  @177
-    ; Line 96			//  @177
-  load fld=8			//  @177
-  call m=34 nparm=0		//  @179
-  os drop				//  @188
-    ; Line 96			//  @189
-    ; Line 97			//  @189
-  const 0				//  @189
-  i2o				//  @194
-  os dup				//  @195
-  save fld=3			//  @196
-  os drop				//  @198
-    ; Line 97			//  @199
-    ; Line 98			//  @199
-  const 0				//  @199
-  i2o				//  @204
-  os dup				//  @205
-  save fld=6			//  @206
-  os drop				//  @208
-    ; Line 98			//  @209
-    ; Line 100			//  @209
-  const -1			//  @209
-  i2o				//  @214
-  os dup				//  @215
-  save fld=7			//  @216
-  os drop				//  @218
-    ; Line 100			//  @219
-  summon class internal.io.tty	//  @219
-  new				//  @240
-  pull depth=0			//  @241
-  summon class internal.io.tty	//  @246
-  static invoke ord=0 n_param=0	//  @267
-  os drop				//  @276
-  os dup				//  @277
-  save fld=0			//  @278
-  os drop				//  @280
-    ; Line 102			//  @281
-    ; Line 103			//  @281
-  const 1				//  @281
-  i2o				//  @286
-  os dup				//  @287
-  save fld=1			//  @288
-  os drop				//  @290
-    ; Line 103			//  @291
-    ; Line 105			//  @291
-  load fld=0			//  @291
-    ; Line 105			//  @293
-  const 10			//  @293
-  i2o				//  @298
-    ; Line 105			//  @299
-  const 10			//  @299
-  i2o				//  @304
-    ; Line 105			//  @305
-    ; Line 105			//  @305
-  call m=24 nparm=2		//  @305
-  os drop				//  @307
-    ; Line 105			//  @308
-    ; Line 106			//  @308
-  load fld=0			//  @308
-    ; Line 106			//  @310
-  const_pool <1>			//  @310
-    ; Line 106			//  @315
-  call m=25 nparm=1		//  @315
-  os drop				//  @317
-    ; Line 106			//  @318
-  summon class internal.connection	//  @318
-  new				//  @343
-  pull depth=0			//  @344
-  summon class internal.connection	//  @349
-  static invoke ord=0 n_param=0	//  @374
-  os drop				//  @383
-  os dup				//  @384
-  save fld=9			//  @385
-  os drop				//  @387
-    ; Line 113			//  @388
-    ; Line 114			//  @388
-  load fld=9			//  @388
-    ; Line 114			//  @390
-  const_pool <2>			//  @390
-    ; Line 114			//  @395
-  call m=8 nparm=1		//  @395
-  os drop				//  @397
-    ; Line 114			//  @398
-  summon class ru.dz.phantom.system.shell_callback	//  @398
-  new				//  @439
-  pull depth=0			//  @440
-  summon class ru.dz.phantom.system.shell_callback	//  @445
-  static invoke ord=0 n_param=0	//  @486
-  os drop				//  @495
-  os dup				//  @496
-  save fld=11			//  @497
-  os drop				//  @499
-    ; Line 116			//  @500
-    ; Line 117			//  @500
-  load fld=11			//  @500
-    ; Line 117			//  @502
-  load fld=0			//  @502
-    ; Line 117			//  @504
-  call m=16 nparm=1		//  @504
-  os drop				//  @506
-    ; Line 117			//  @507
-    ; Line 119			//  @507
-  load fld=9			//  @507
-    ; Line 119			//  @509
-  load fld=11			//  @509
-    ; Line 119			//  @511
-  const 17			//  @511
-  i2o				//  @516
-    ; Line 119			//  @517
-    ; Line 119			//  @517
-  call m=12 nparm=2		//  @517
-  os drop				//  @519
-    ; Line 119			//  @520
-    ; Line 121			//  @520
-  load fld=9			//  @520
-    ; Line 121			//  @522
-  const 1000			//  @522
-  i2o				//  @527
-    ; Line 121			//  @528
-  const 0				//  @528
-  i2o				//  @533
-    ; Line 121			//  @534
-    ; Line 121			//  @534
-  call m=11 nparm=2		//  @534
-  os drop				//  @536
-    ; Line 121			//  @537
-  summon class internal.connection	//  @537
-  new				//  @562
-  pull depth=0			//  @563
-  summon class internal.connection	//  @568
-  static invoke ord=0 n_param=0	//  @593
-  os drop				//  @602
-  os dup				//  @603
-  save fld=10			//  @604
-  os drop				//  @606
-    ; Line 123			//  @607
-    ; Line 124			//  @607
-  load fld=10			//  @607
-    ; Line 124			//  @609
-  const_pool <3>			//  @609
-    ; Line 124			//  @614
-  call m=8 nparm=1		//  @614
-  os drop				//  @616
-    ; Line 124			//  @617
-    ; Line 182			//  @617
-_label_1:	//  @617
-    ; Line 126			//  @617
-  const 1				//  @617
-  jz _label_2			//  @622
-    ; Line 128			//  @627
-  load fld=12			//  @627
-  call m=8 nparm=0		//  @629
-  os drop				//  @631
-    ; Line 130			//  @632
-  load fld=0			//  @632
-    ; Line 130			//  @634
-  const_pool <4>			//  @634
-    ; Line 130			//  @639
-  call m=17 nparm=1		//  @639
-  os drop				//  @641
-    ; Line 130			//  @642
-    ; Line 131			//  @642
-  load fld=0			//  @642
-    ; Line 131			//  @644
-  const_pool <5>			//  @644
-    ; Line 131			//  @649
-  call m=17 nparm=1		//  @649
-  os drop				//  @651
-    ; Line 131			//  @652
-    ; Line 132			//  @652
-  load fld=0			//  @652
-    ; Line 132			//  @654
-  const_pool <6>			//  @654
-    ; Line 132			//  @659
-  call m=17 nparm=1		//  @659
-  os drop				//  @661
-    ; Line 132			//  @662
-    ; Line 133			//  @662
-  load fld=0			//  @662
-    ; Line 133			//  @664
-  load fld=1			//  @664
-  call m=5 nparm=0		//  @666
-    ; Line 133			//  @668
-  call m=17 nparm=1		//  @668
-  os drop				//  @670
-    ; Line 133			//  @671
-    ; Line 134			//  @671
-  load fld=0			//  @671
-    ; Line 134			//  @673
-  const_pool <7>			//  @673
-    ; Line 134			//  @678
-  call m=17 nparm=1		//  @678
-  os drop				//  @680
-    ; Line 134			//  @681
-    ; Line 136			//  @681
-  load fld=9			//  @681
-    ; Line 136			//  @683
-  summon null			//  @683
-    ; Line 136			//  @684
-  const 500			//  @684
-  i2o				//  @689
-    ; Line 136			//  @690
-    ; Line 136			//  @690
-  call m=13 nparm=2		//  @690
-  os drop				//  @692
-    ; Line 136			//  @693
-    ; Line 138			//  @693
-  load fld=10			//  @693
-    ; Line 138			//  @695
-  const 26			//  @695
-  i2o				//  @700
-    ; Line 138			//  @701
-  const 0				//  @701
-  i2o				//  @706
-    ; Line 138			//  @707
-    ; Line 138			//  @707
-  call m=13 nparm=2		//  @707
-  os dup				//  @709
-  save fld=2			//  @710
-  os drop				//  @712
-    ; Line 138			//  @713
-    ; Line 139			//  @713
-  load fld=0			//  @713
-    ; Line 139			//  @715
-  const_pool <8>			//  @715
-    ; Line 139			//  @720
-  call m=17 nparm=1		//  @720
-  os drop				//  @722
-    ; Line 139			//  @723
-    ; Line 141			//  @723
-  load fld=10			//  @723
-    ; Line 141			//  @725
-  const 0				//  @725
-  i2o				//  @730
-    ; Line 141			//  @731
-  const 5				//  @731
-  i2o				//  @736
-    ; Line 141			//  @737
-    ; Line 141			//  @737
-  call m=13 nparm=2		//  @737
-  os dup				//  @739
-  save fld=5			//  @740
-  os drop				//  @742
-    ; Line 141			//  @743
-    ; Line 142			//  @743
-  load fld=0			//  @743
-    ; Line 142			//  @745
-  const_pool <9>			//  @745
-    ; Line 142			//  @750
-  call m=17 nparm=1		//  @750
-  os drop				//  @752
-    ; Line 142			//  @753
-    ; Line 143			//  @753
-  load fld=0			//  @753
-    ; Line 143			//  @755
-  load fld=5			//  @755
-  call m=5 nparm=0		//  @757
-    ; Line 143			//  @759
-  call m=17 nparm=1		//  @759
-  os drop				//  @761
-    ; Line 143			//  @762
-    ; Line 144			//  @762
-  load fld=0			//  @762
-    ; Line 144			//  @764
-  const_pool <10>			//  @764
-    ; Line 144			//  @769
-  call m=17 nparm=1		//  @769
-  os drop				//  @771
-    ; Line 144			//  @772
-    ; Line 146			//  @772
-  const 100			//  @772
-    ; Line 146			//  @777
-  load fld=5			//  @777
-  o2i				//  @779
-    ; Line 146			//  @780
-  isublu				//  @780
-  i2o				//  @781
-  os dup				//  @782
-  save fld=5			//  @783
-  os drop				//  @785
-    ; Line 146			//  @786
-    ; Line 148			//  @786
-  load fld=3			//  @786
-  o2i				//  @788
-    ; Line 148			//  @789
-  const 1				//  @789
-    ; Line 148			//  @794
-  isum				//  @794
-  i2o				//  @795
-  os dup				//  @796
-  save fld=4			//  @797
-  os drop				//  @799
-    ; Line 148			//  @800
-    ; Line 150			//  @800
-    ; Line 149			//  @800
-  load fld=4			//  @800
-  o2i				//  @802
-    ; Line 149			//  @803
-  load fld=8			//  @803
-  call m=16 nparm=0		//  @805
-  o2i				//  @807
-  ige >=				//  @808
-  jz _label_3			//  @809
-    ; Line 150			//  @814
-  const 0				//  @814
-  i2o				//  @819
-  os dup				//  @820
-  save fld=4			//  @821
-  os drop				//  @823
-_label_3:	//  @824
-    ; Line 150			//  @824
-    ; Line 153			//  @824
-  load fld=8			//  @824
-    ; Line 153			//  @826
-  const -16711936			//  @826
-  i2o				//  @831
-    ; Line 153			//  @832
-  call m=22 nparm=1		//  @832
-  os drop				//  @834
-    ; Line 153			//  @835
-    ; Line 154			//  @835
-  load fld=8			//  @835
-    ; Line 154			//  @837
-  load fld=4			//  @837
-    ; Line 154			//  @839
-  const 5				//  @839
-  i2o				//  @844
-    ; Line 154			//  @845
-  const 0				//  @845
-  i2o				//  @850
-    ; Line 154			//  @851
-  const 300			//  @851
-  i2o				//  @856
-    ; Line 154			//  @857
-    ; Line 154			//  @857
-    ; Line 154			//  @857
-    ; Line 154			//  @857
-  call m=28 nparm=4		//  @857
-  os drop				//  @859
-    ; Line 154			//  @860
-    ; Line 157			//  @860
-  load fld=8			//  @860
-    ; Line 157			//  @862
-  load fld=7			//  @862
-    ; Line 157			//  @864
-  call m=22 nparm=1		//  @864
-  os drop				//  @866
-    ; Line 157			//  @867
-    ; Line 158			//  @867
-  load fld=8			//  @867
-    ; Line 158			//  @869
-  load fld=3			//  @869
-    ; Line 158			//  @871
-  const 5				//  @871
-  i2o				//  @876
-    ; Line 158			//  @877
-  const 0				//  @877
-  i2o				//  @882
-    ; Line 158			//  @883
-  const 300			//  @883
-  i2o				//  @888
-    ; Line 158			//  @889
-    ; Line 158			//  @889
-    ; Line 158			//  @889
-    ; Line 158			//  @889
-  call m=28 nparm=4		//  @889
-  os drop				//  @891
-    ; Line 158			//  @892
-    ; Line 160			//  @892
-  load fld=8			//  @892
-    ; Line 160			//  @894
-  const -16777216			//  @894
-  i2o				//  @899
-    ; Line 160			//  @900
-  call m=22 nparm=1		//  @900
-  os drop				//  @902
-    ; Line 160			//  @903
-    ; Line 161			//  @903
-  load fld=8			//  @903
-    ; Line 161			//  @905
-  load fld=3			//  @905
-    ; Line 161			//  @907
-  const 5				//  @907
-  i2o				//  @912
-    ; Line 161			//  @913
-  const 0				//  @913
-  i2o				//  @918
-    ; Line 161			//  @919
-  const 0				//  @919
-    ; Line 161			//  @924
-  load fld=2			//  @924
-  o2i				//  @926
-    ; Line 161			//  @927
-  isum				//  @927
-  i2o				//  @928
-    ; Line 161			//  @929
-    ; Line 161			//  @929
-    ; Line 161			//  @929
-    ; Line 161			//  @929
-  call m=28 nparm=4		//  @929
-  os drop				//  @931
-    ; Line 161			//  @932
-    ; Line 164			//  @932
-  load fld=8			//  @932
-    ; Line 164			//  @934
-  const -16776961			//  @934
-  i2o				//  @939
-    ; Line 164			//  @940
-  call m=22 nparm=1		//  @940
-  os drop				//  @942
-    ; Line 164			//  @943
-    ; Line 165			//  @943
-  load fld=8			//  @943
-    ; Line 165			//  @945
-  load fld=3			//  @945
-  o2i				//  @947
-    ; Line 165			//  @948
-  const 1				//  @948
-    ; Line 165			//  @953
-  isublu				//  @953
-  i2o				//  @954
-    ; Line 165			//  @955
-  load fld=6			//  @955
-    ; Line 165			//  @957
-  const 1				//  @957
-  i2o				//  @962
-    ; Line 165			//  @963
-  load fld=5			//  @963
-  o2i				//  @965
-    ; Line 165			//  @966
-  load fld=6			//  @966
-  o2i				//  @968
-    ; Line 165			//  @969
-  isublu				//  @969
-  i2o				//  @970
-    ; Line 165			//  @971
-    ; Line 165			//  @971
-    ; Line 165			//  @971
-    ; Line 165			//  @971
-  call m=28 nparm=4		//  @971
-  os drop				//  @973
-    ; Line 165			//  @974
-    ; Line 167			//  @974
-  load fld=5			//  @974
-  os dup				//  @976
-  save fld=6			//  @977
-  os drop				//  @979
-    ; Line 167			//  @980
-    ; Line 168			//  @980
-  load fld=4			//  @980
-  os dup				//  @982
-  save fld=3			//  @983
-  os drop				//  @985
-    ; Line 168			//  @986
-    ; Line 177			//  @986
-  load fld=8			//  @986
-  call m=34 nparm=0		//  @988
-  os drop				//  @997
-    ; Line 177			//  @998
-    ; Line 179			//  @998
-  load fld=12			//  @998
-  call m=9 nparm=0		//  @1000
-  os drop				//  @1002
-    ; Line 179			//  @1003
-    ; Line 181			//  @1003
-  load fld=1			//  @1003
-  o2i				//  @1005
-    ; Line 181			//  @1006
-  const 1				//  @1006
-    ; Line 181			//  @1011
-  isum				//  @1011
-  i2o				//  @1012
-  os dup				//  @1013
-  save fld=1			//  @1014
-  os drop				//  @1016
-    ; Line 181			//  @1017
-  jmp _label_1			//  @1017
-_label_2:	//  @1022
-    ; Line 182			//  @1022
-  ret				//  @1022
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+  summon class internal.window				//  @5
+  new							//  @26
+; set win
+  save fld=8						//  @27
+; Line 89
+  load fld=8						//  @29
+; Line 89
+  const 50						//  @31
+  i2o							//  @36
+; Line 89
+  const 310						//  @37
+  i2o							//  @42
+; Line 89
+; Line 89
+  call m=27 nparm=2					//  @43
+  os drop							//  @45
+; Line 89
+; Line 90
+  load fld=8						//  @46
+; Line 90
+; str 'Disk io stats'
+  const_pool <0>						//  @48
+; Line 90
+  call m=33 nparm=1					//  @53
+  os drop							//  @62
+; Line 90
+; Line 91
+  load fld=8						//  @63
+; Line 91
+  const -16777216						//  @65
+  i2o							//  @70
+; Line 91
+  call m=22 nparm=1					//  @71
+  os drop							//  @73
+; Line 91
+; Line 93
+  load fld=8						//  @74
+  call m=20 nparm=0					//  @76
+  os drop							//  @78
+; Line 93
+; Line 96
+  load fld=8						//  @79
+  call m=34 nparm=0					//  @81
+  os drop							//  @90
+; Line 96
+; Line 97
+  const 0							//  @91
+  i2o							//  @96
+; set stat_pos
+  save fld=3						//  @97
+; Line 97
+; Line 98
+  const 0							//  @99
+  i2o							//  @104
+; set old_idle
+  save fld=6						//  @105
+; Line 98
+; Line 100
+  const -1						//  @107
+  i2o							//  @112
+; set white
+  save fld=7						//  @113
+; Line 100
+  summon class internal.io.tty				//  @115
+  new							//  @136
+; set console
+  save fld=0						//  @137
+; Line 102
+; Line 103
+  const 1							//  @139
+  i2o							//  @144
+; set incr
+  save fld=1						//  @145
+; Line 103
+; Line 105
+  load fld=0						//  @147
+; Line 105
+  const 10						//  @149
+  i2o							//  @154
+; Line 105
+  const 10						//  @155
+  i2o							//  @160
+; Line 105
+; Line 105
+  call m=24 nparm=2					//  @161
+  os drop							//  @163
+; Line 105
+; Line 106
+  load fld=0						//  @164
+; Line 106
+; str 'VM Shell'
+  const_pool <1>						//  @166
+; Line 106
+  call m=25 nparm=1					//  @171
+  os drop							//  @173
+; Line 106
+  summon class internal.connection			//  @174
+  new							//  @199
+; set conn
+  save fld=9						//  @200
+; Line 113
+; Line 114
+  load fld=9						//  @202
+; Line 114
+; str 'tmr:'
+  const_pool <2>						//  @204
+; Line 114
+  call m=8 nparm=1					//  @209
+  os drop							//  @211
+; Line 114
+  summon class ru.dz.phantom.system.shell_callback	//  @212
+  new							//  @253
+  pull depth=0						//  @254
+  summon class ru.dz.phantom.system.shell_callback	//  @259
+  static invoke ord=18 n_param=0				//  @300
+  os drop							//  @309
+; set cb
+  save fld=11						//  @310
+; Line 116
+; Line 117
+  load fld=11						//  @312
+; Line 117
+  load fld=0						//  @314
+; Line 117
+  call m=16 nparm=1					//  @316
+  os drop							//  @318
+; Line 117
+; Line 119
+  load fld=9						//  @319
+; Line 119
+  load fld=11						//  @321
+; Line 119
+  const 17						//  @323
+  i2o							//  @328
+; Line 119
+; Line 119
+  call m=12 nparm=2					//  @329
+  os drop							//  @331
+; Line 119
+; Line 121
+  load fld=9						//  @332
+; Line 121
+  const 1000						//  @334
+  i2o							//  @339
+; Line 121
+  const 0							//  @340
+  i2o							//  @345
+; Line 121
+; Line 121
+  call m=11 nparm=2					//  @346
+  os drop							//  @348
+; Line 121
+  summon class internal.connection			//  @349
+  new							//  @374
+; set stat_conn
+  save fld=10						//  @375
+; Line 123
+; Line 124
+  load fld=10						//  @377
+; Line 124
+; str 'stt:'
+  const_pool <3>						//  @379
+; Line 124
+  call m=8 nparm=1					//  @384
+  os drop							//  @386
+; Line 124
+; Line 182
+_label_0:	//  @387
+; Line 126
+  const 1							//  @387
+  jz _label_1						//  @392
+; Line 128
+  load fld=12						//  @397
+  call m=8 nparm=0					//  @399
+  os drop							//  @401
+; Line 130
+  load fld=0						//  @402
+; Line 130
+; str 'I am connected shell!
+'
+  const_pool <4>						//  @404
+; Line 130
+  call m=17 nparm=1					//  @409
+  os drop							//  @411
+; Line 130
+; Line 131
+  load fld=0						//  @412
+; Line 131
+; str '--------------------------------------------------
+'
+  const_pool <5>						//  @414
+; Line 131
+  call m=17 nparm=1					//  @419
+  os drop							//  @421
+; Line 131
+; Line 132
+  load fld=0						//  @422
+; Line 132
+; str 'Thread is running... '
+  const_pool <6>						//  @424
+; Line 132
+  call m=17 nparm=1					//  @429
+  os drop							//  @431
+; Line 132
+; Line 133
+  load fld=0						//  @432
+; Line 133
+  load fld=1						//  @434
+  call m=5 nparm=0					//  @436
+; Line 133
+  call m=17 nparm=1					//  @438
+  os drop							//  @440
+; Line 133
+; Line 134
+  load fld=0						//  @441
+; Line 134
+; str '  '
+  const_pool <7>						//  @443
+; Line 134
+  call m=17 nparm=1					//  @448
+  os drop							//  @450
+; Line 134
+; Line 136
+  load fld=9						//  @451
+; Line 136
+  summon null						//  @453
+; Line 136
+  const 500						//  @454
+  i2o							//  @459
+; Line 136
+; Line 136
+  call m=13 nparm=2					//  @460
+  os drop							//  @462
+; Line 136
+; Line 138
+  load fld=10						//  @463
+; Line 138
+  const 26						//  @465
+  i2o							//  @470
+; Line 138
+  const 0							//  @471
+  i2o							//  @476
+; Line 138
+; Line 138
+  call m=13 nparm=2					//  @477
+; set stat_val
+  save fld=2						//  @479
+; Line 138
+; Line 139
+  load fld=0						//  @481
+; Line 139
+; str 'blk io =. '
+  const_pool <8>						//  @483
+; Line 139
+  call m=17 nparm=1					//  @488
+  os drop							//  @490
+; Line 139
+; Line 141
+  load fld=10						//  @491
+; Line 141
+  const 0							//  @493
+  i2o							//  @498
+; Line 141
+  const 5							//  @499
+  i2o							//  @504
+; Line 141
+; Line 141
+  call m=13 nparm=2					//  @505
+; set cpu_idle
+  save fld=5						//  @507
+; Line 141
+; Line 142
+  load fld=0						//  @509
+; Line 142
+; str 'cpu idle = '
+  const_pool <9>						//  @511
+; Line 142
+  call m=17 nparm=1					//  @516
+  os drop							//  @518
+; Line 142
+; Line 143
+  load fld=0						//  @519
+; Line 143
+  load fld=5						//  @521
+  call m=5 nparm=0					//  @523
+; Line 143
+  call m=17 nparm=1					//  @525
+  os drop							//  @527
+; Line 143
+; Line 144
+  load fld=0						//  @528
+; Line 144
+; str '
+'
+  const_pool <10>						//  @530
+; Line 144
+  call m=17 nparm=1					//  @535
+  os drop							//  @537
+; Line 144
+; Line 146
+  const 100						//  @538
+; Line 146
+  load fld=5						//  @543
+  o2i							//  @545
+; Line 146
+  isublu							//  @546
+  i2o							//  @547
+; set cpu_idle
+  save fld=5						//  @548
+; Line 146
+; Line 148
+  load fld=3						//  @550
+  o2i							//  @552
+; Line 148
+  const 1							//  @553
+; Line 148
+  isum							//  @558
+  i2o							//  @559
+; set stat_next_pos
+  save fld=4						//  @560
+; Line 148
+; Line 150
+; Line 149
+  load fld=4						//  @562
+  o2i							//  @564
+; Line 149
+  load fld=8						//  @565
+  call m=16 nparm=0					//  @567
+  o2i							//  @569
+  ige >=							//  @570
+  jz _label_2						//  @571
+; Line 150
+  const 0							//  @576
+  i2o							//  @581
+; set stat_next_pos
+  save fld=4						//  @582
+_label_2:	//  @584
+; Line 150
+; Line 153
+  load fld=8						//  @584
+; Line 153
+  const -16711936						//  @586
+  i2o							//  @591
+; Line 153
+  call m=22 nparm=1					//  @592
+  os drop							//  @594
+; Line 153
+; Line 154
+  load fld=8						//  @595
+; Line 154
+  load fld=4						//  @597
+; Line 154
+  const 5							//  @599
+  i2o							//  @604
+; Line 154
+  const 0							//  @605
+  i2o							//  @610
+; Line 154
+  const 300						//  @611
+  i2o							//  @616
+; Line 154
+; Line 154
+; Line 154
+; Line 154
+  call m=28 nparm=4					//  @617
+  os drop							//  @619
+; Line 154
+; Line 157
+  load fld=8						//  @620
+; Line 157
+  load fld=7						//  @622
+; Line 157
+  call m=22 nparm=1					//  @624
+  os drop							//  @626
+; Line 157
+; Line 158
+  load fld=8						//  @627
+; Line 158
+  load fld=3						//  @629
+; Line 158
+  const 5							//  @631
+  i2o							//  @636
+; Line 158
+  const 0							//  @637
+  i2o							//  @642
+; Line 158
+  const 300						//  @643
+  i2o							//  @648
+; Line 158
+; Line 158
+; Line 158
+; Line 158
+  call m=28 nparm=4					//  @649
+  os drop							//  @651
+; Line 158
+; Line 160
+  load fld=8						//  @652
+; Line 160
+  const -16777216						//  @654
+  i2o							//  @659
+; Line 160
+  call m=22 nparm=1					//  @660
+  os drop							//  @662
+; Line 160
+; Line 161
+  load fld=8						//  @663
+; Line 161
+  load fld=3						//  @665
+; Line 161
+  const 5							//  @667
+  i2o							//  @672
+; Line 161
+  const 0							//  @673
+  i2o							//  @678
+; Line 161
+  const 0							//  @679
+; Line 161
+  load fld=2						//  @684
+  o2i							//  @686
+; Line 161
+  isum							//  @687
+  i2o							//  @688
+; Line 161
+; Line 161
+; Line 161
+; Line 161
+  call m=28 nparm=4					//  @689
+  os drop							//  @691
+; Line 161
+; Line 164
+  load fld=8						//  @692
+; Line 164
+  const -16776961						//  @694
+  i2o							//  @699
+; Line 164
+  call m=22 nparm=1					//  @700
+  os drop							//  @702
+; Line 164
+; Line 165
+  load fld=8						//  @703
+; Line 165
+  load fld=3						//  @705
+  o2i							//  @707
+; Line 165
+  const 1							//  @708
+; Line 165
+  isublu							//  @713
+  i2o							//  @714
+; Line 165
+  load fld=6						//  @715
+; Line 165
+  const 1							//  @717
+  i2o							//  @722
+; Line 165
+  load fld=5						//  @723
+  o2i							//  @725
+; Line 165
+  load fld=6						//  @726
+  o2i							//  @728
+; Line 165
+  isublu							//  @729
+  i2o							//  @730
+; Line 165
+; Line 165
+; Line 165
+; Line 165
+  call m=28 nparm=4					//  @731
+  os drop							//  @733
+; Line 165
+; Line 167
+  load fld=5						//  @734
+; set old_idle
+  save fld=6						//  @736
+; Line 167
+; Line 168
+  load fld=4						//  @738
+; set stat_pos
+  save fld=3						//  @740
+; Line 168
+; Line 177
+  load fld=8						//  @742
+  call m=34 nparm=0					//  @744
+  os drop							//  @753
+; Line 177
+; Line 179
+  load fld=12						//  @754
+  call m=9 nparm=0					//  @756
+  os drop							//  @758
+; Line 179
+; Line 181
+  load fld=1						//  @759
+  o2i							//  @761
+; Line 181
+  const 1							//  @762
+; Line 181
+  isum							//  @767
+  i2o							//  @768
+; set incr
+  save fld=1						//  @769
+; Line 181
+  jmp _label_0						//  @771
+_label_1:	//  @776
+; Line 182
+  ret							//  @776
 --
 method end
 
 method init ordinal 17
 --
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .ru.dz.phantom.system.shell"	//  @11
-  throw				//  @62
-_label_0:	//  @63
-  summon class internal.mutex	//  @63
-  new				//  @83
-  pull depth=0			//  @84
-  summon class internal.mutex	//  @89
-  static invoke ord=0 n_param=0	//  @109
-  os drop				//  @118
-  os dup				//  @119
-  save fld=12			//  @120
-  os drop				//  @122
-    ; Line 77			//  @123
-  load fld=12			//  @123
-  call m=8 nparm=0		//  @125
-  os drop				//  @127
-    ; Line 77			//  @128
-  ret				//  @128
+  arg_count 0						//  @0
+  summon class internal.mutex				//  @2
+  new							//  @22
+; set mtx
+  save fld=12						//  @23
+; Line 77
+  load fld=12						//  @25
+  call m=8 nparm=0					//  @27
+  os drop							//  @29
+; Line 77
+  ret							//  @30
 --
 method end
 

@@ -8,13 +8,13 @@ Class .phantom.util.hashmap
           void  : void
             . : void
               this  : .phantom.util.hashmap
-              Method lock : unknown
+              Method lock : void
           void  : void
-            = : .phantom.util.hashpair
+            = : void
               ident hp : .phantom.util.hashpair
               . : .phantom.util.hashpair
                 this  : .phantom.util.hashmap
-                Method find : unknown
+                Method find : void
                 arg  : .internal.object
                   ident key : .internal.object
                 arg  : unknown
@@ -22,13 +22,16 @@ Class .phantom.util.hashmap
         void  : void
           . : void
             ident hp : .phantom.util.hashpair
-            Method setVal : unknown
+            Method setVal : void
             arg  : unknown
               ident val : .internal.object
       void  : void
         . : void
           this  : .phantom.util.hashmap
-          Method unlock : unknown
+          Method unlock : void
+
+  C'tor  void <init>(  ):
+    empty : void
 
   Method void unlock(  ):
   -- No code!
@@ -45,38 +48,38 @@ Class .phantom.util.hashmap
               ,  : void
                 ,  : void
                   void  : void
-                    = : int
+                    = : void
                       ident bucket : int
                       . : int
                         this  : .phantom.util.hashmap
-                        Method pos : unknown
+                        Method pos : void
                         arg  : unknown
                           ident key : .internal.object
                   void  : void
-                    = : .phantom.util.hashpair
+                    = : void
                       ident next : .phantom.util.hashpair
                       [] : .phantom.util.hashpair
                         ident hashed : .phantom.util.hashpair[]
                         ident bucket : int
-                do-while : unknown
-                  :!= : unknown
+                do-while : void
+                  :!= : int
                     ident next : .phantom.util.hashpair
                     null : .internal.object const
-                  ,  : unknown
+                  ,  : void
                     if : unknown
                       == : int
                         ident key : .internal.object
                         . : .internal.object
                           ident next : .phantom.util.hashpair
-                          Method getKey : unknown
+                          Method getKey : void
                       return : void
                         ident next : .phantom.util.hashpair
                     void  : void
-                      = : .phantom.util.hashpair
+                      = : void
                         ident next : .phantom.util.hashpair
                         . : .phantom.util.hashpair
                           ident next : .phantom.util.hashpair
-                          Method getNext : unknown
+                          Method getNext : void
               if : unknown
                 == : int
                   ident put : int
@@ -84,13 +87,13 @@ Class .phantom.util.hashmap
                 return : void const
                   null : .internal.object const
             void  : void
-              = : .phantom.util.hashpair
+              = : void
                 ident next : .phantom.util.hashpair
                 new .phantom.util.hashpair : .phantom.util.hashpair
           void  : void
             . : void
               ident next : .phantom.util.hashpair
-              Method setNext : unknown
+              Method setNext : void
               arg  : unknown
                 [] : .phantom.util.hashpair
                   ident hashed : .phantom.util.hashpair[]
@@ -98,11 +101,11 @@ Class .phantom.util.hashmap
         void  : void
           . : void
             ident next : .phantom.util.hashpair
-            Method setKey : unknown
+            Method setKey : void
             arg  : unknown
               ident key : .internal.object
       void  : void
-        = : .phantom.util.hashpair
+        = : void
           [] : .phantom.util.hashpair
             ident hashed : .phantom.util.hashpair[]
             ident bucket : int
@@ -113,7 +116,7 @@ Class .phantom.util.hashmap
       % : int
         . : int
           ident data : .internal.object
-          Method hashCode : unknown
+          Method hashCode : void
         ident hashsize : int
 
   Method .internal.object get( key: .internal.object ):
@@ -124,13 +127,13 @@ Class .phantom.util.hashmap
             void  : void
               . : void
                 this  : .phantom.util.hashmap
-                Method lock : unknown
+                Method lock : void
             void  : void
-              = : .phantom.util.hashpair
+              = : void
                 ident hp : .phantom.util.hashpair
                 . : .phantom.util.hashpair
                   this  : .phantom.util.hashmap
-                  Method find : unknown
+                  Method find : void
                   arg  : .internal.object
                     ident key : .internal.object
                   arg  : unknown
@@ -138,9 +141,9 @@ Class .phantom.util.hashmap
           void  : void
             . : void
               this  : .phantom.util.hashmap
-              Method unlock : unknown
+              Method unlock : void
         if : unknown
-          :== : unknown
+          :== : int
             ident hp : .phantom.util.hashpair
             null : .internal.object const
           return : void const
@@ -148,16 +151,16 @@ Class .phantom.util.hashmap
       return : void
         . : .internal.object
           ident hp : .phantom.util.hashpair
-          Method getVal : unknown
+          Method getVal : void
 
   Method void init(  ):
     ,  : void
       void  : void
-        = : int
+        = : void
           ident hashsize : int
           int const "20" : int const
       void  : void
-        = : .phantom.util.hashpair[]
+        = : void
           ident hashed : .phantom.util.hashpair[]
           new .phantom.util.hashpair[] : .phantom.util.hashpair[]
 

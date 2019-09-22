@@ -522,6 +522,13 @@ public class PhantomType
 		return ret;
 	}
 
+
+	/**
+	 * Do we represent container class with non-default container implementation
+	 * @return True if so.
+	 */
+	public boolean isSpecificContainerClass() {		return _container_class != null ;	}
+
 }
 
 

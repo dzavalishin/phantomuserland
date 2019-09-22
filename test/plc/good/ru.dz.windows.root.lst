@@ -1,6 +1,9 @@
 Class .ru.dz.windows.root
   Field console
   Field boot_object
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void test(  ):
     ,  : void
       ,  : void
@@ -11,7 +14,7 @@ Class .ru.dz.windows.root
                 void  : void
                   . : void
                     ident console : .internal.io.tty
-                    Method gotoxy : unknown
+                    Method gotoxy : void
                     arg  : int
                       int const "0" : int const
                     arg  : unknown
@@ -19,13 +22,13 @@ Class .ru.dz.windows.root
                 void  : void
                   . : void
                     ident console : .internal.io.tty
-                    Method putws : unknown
+                    Method putws : void
                     arg  : unknown
                       string pool const id="1" : string const
               void  : void
                 . : void
                   ident console : .internal.io.tty
-                  Method gotoxy : unknown
+                  Method gotoxy : void
                   arg  : int
                     int const "10" : int const
                   arg  : unknown
@@ -33,19 +36,19 @@ Class .ru.dz.windows.root
             void  : void
               . : void
                 ident console : .internal.io.tty
-                Method setcolor : unknown
+                Method setcolor : void
                 arg  : unknown
                   int const "14" : int const
           void  : void
             . : void
               ident console : .internal.io.tty
-              Method putws : unknown
+              Method putws : void
               arg  : unknown
                 string pool const id="2" : string const
         void  : void
           . : void
             ident console : .internal.io.tty
-            Method gotoxy : unknown
+            Method gotoxy : void
             arg  : int
               int const "0" : int const
             arg  : unknown
@@ -53,7 +56,7 @@ Class .ru.dz.windows.root
       void  : void
         . : void
           ident console : .internal.io.tty
-          Method putws : unknown
+          Method putws : void
           arg  : unknown
             string pool const id="3" : string const
 
@@ -64,74 +67,74 @@ Class .ru.dz.windows.root
           void  : void
             . : void
               ident console : .internal.io.tty
-              Method putws : unknown
+              Method putws : void
               arg  : unknown
                 string pool const id="4" : string const
           void  : void
-            = : string
+            = : void
               ident str : string
               string pool const id="5" : string const
-        do-while : unknown
+        do-while : void
           int const "1" : int const
           ,  : void
             ,  : void
               void  : void
-                = : string
+                = : void
                   ident ch : string
                   . : string
                     ident console : .internal.io.tty
-                    Method getwc : unknown
-              if : unknown
+                    Method getwc : void
+              if : void
                 . : int
                   ident ch : string
-                  Method equals : unknown
+                  Method equals : void
                   arg  : unknown
                     string pool const id="6" : string const
-                ,  : unknown
-                  ,  : unknown
-                    ,  : unknown
-                      ,  : unknown
+                ,  : void
+                  ,  : void
+                    ,  : void
+                      ,  : void
                         if : unknown
                           . : int
                             ident str : string
-                            Method equals : unknown
+                            Method equals : void
                             arg  : unknown
                               string pool const id="7" : string const
                           break : void
                         void  : void
                           . : void
                             this  : .ru.dz.windows.root
-                            Method putws : unknown
+                            Method putws : void
                             arg  : unknown
                               string pool const id="8" : string const
                       void  : void
                         . : void
                           this  : .ru.dz.windows.root
-                          Method shell_cmd : unknown
+                          Method shell_cmd : void
                           arg  : unknown
                             ident str : string
                     void  : void
-                      = : string
+                      = : void
                         ident str : string
                         string pool const id="9" : string const
                   void  : void
                     . : void
                       ident console : .internal.io.tty
-                      Method putws : unknown
+                      Method putws : void
                       arg  : unknown
                         string pool const id="10" : string const
                 void  : void
-                  = : string
+                  = : void
                     ident str : string
                     . : string
                       ident str : string
-                      Method concat : unknown
+                      Method concat : void
                       arg  : unknown
                         ident ch : string
             void  : void
               . : void
                 ident console : .internal.io.tty
-                Method putws : unknown
+                Method putws : void
                 arg  : unknown
                   ident ch : string
       throw  : void const
@@ -141,7 +144,7 @@ Class .ru.dz.windows.root
     void  : void
       . : void
         ident console : .internal.io.tty
-        Method putws : unknown
+        Method putws : void
         arg  : unknown
           ident s : string
 
@@ -149,7 +152,7 @@ Class .ru.dz.windows.root
     void  : void
       . : void
         ident console : .internal.io.tty
-        Method gotoxy : unknown
+        Method gotoxy : void
         arg  : int
           ident x : int
         arg  : unknown
@@ -159,18 +162,18 @@ Class .ru.dz.windows.root
     ,  : void
       ,  : void
         void  : void
-          = : .internal.io.tty
+          = : void
             ident console : .internal.io.tty
             ident _console : .internal.io.tty
         void  : void
-          = : unknown
+          = : void
             ident boot_object : unknown
             (cast) : unknown
               ident _booto : unknown
       void  : void
         . : void
           ident console : .internal.io.tty
-          Method putws : unknown
+          Method putws : void
           arg  : unknown
             string pool const id="0" : string const
 
@@ -188,31 +191,31 @@ Class .ru.dz.windows.root
                         ,  : void
                           ,  : void
                             void  : void
-                              = : int
+                              = : void
                                 ident len : int
                                 . : int
                                   ident cmd : string
-                                  Method length : unknown
+                                  Method length : void
                             void  : void
-                              = : int
+                              = : void
                                 ident i : int
                                 int const "0" : int const
                           void  : void
-                            = : int
+                            = : void
                               ident spacePos : int
                               int const "0" : int const
-                        do-while : unknown
+                        do-while : void
                           < : int
                             ident i : int
                             ident len : int
                           ,  : void
                             ,  : void
                               void  : void
-                                = : int
+                                = : void
                                   ident c : int
                                   . : int
                                     ident cmd : string
-                                    Method charAt : unknown
+                                    Method charAt : void
                                     arg  : unknown
                                       ident i : int
                               if : unknown
@@ -221,12 +224,12 @@ Class .ru.dz.windows.root
                                   int const "32" : int const
                                 ,  : void
                                   void  : void
-                                    = : int
+                                    = : void
                                       ident spacePos : int
                                       ident i : int
                                   break : void
                             void  : void
-                              = : int
+                              = : void
                                 ident i : int
                                 + : int
                                   ident i : int
@@ -237,30 +240,30 @@ Class .ru.dz.windows.root
                           ident len : int
                         ,  : void
                           void  : void
-                            = : string
+                            = : void
                               ident verb : string
                               ident cmd : string
                           void  : void
-                            = : string
+                            = : void
                               ident parms : string
                               string pool const id="12" : string const
                         ,  : void
                           void  : void
-                            = : string
+                            = : void
                               ident verb : string
                               . : string
                                 ident cmd : string
-                                Method substring : unknown
+                                Method substring : void
                                 arg  : int
                                   int const "0" : int const
                                 arg  : unknown
                                   ident spacePos : int
                           void  : void
-                            = : string
+                            = : void
                               ident parms : string
                               . : string
                                 ident cmd : string
-                                Method substring : unknown
+                                Method substring : void
                                 arg  : int
                                   + : int
                                     ident spacePos : int
@@ -272,77 +275,77 @@ Class .ru.dz.windows.root
                     if : unknown
                       . : int
                         ident verb : string
-                        Method equals : unknown
+                        Method equals : void
                         arg  : unknown
                           string pool const id="13" : string const
                       ,  : void
                         void  : void
                           . : void
                             this  : .ru.dz.windows.root
-                            Method putws : unknown
+                            Method putws : void
                             arg  : unknown
                               string pool const id="14" : string const
                         return : void
                   if : unknown
                     . : int
                       ident verb : string
-                      Method equals : unknown
+                      Method equals : void
                       arg  : unknown
                         string pool const id="15" : string const
                     ,  : void
                       void  : void
                         . : void
                           this  : .ru.dz.windows.root
-                          Method putws : unknown
+                          Method putws : void
                           arg  : unknown
                             string pool const id="16" : string const
                       return : void
                 if : unknown
                   . : int
                     ident verb : string
-                    Method equals : unknown
+                    Method equals : void
                     arg  : unknown
                       string pool const id="17" : string const
                   ,  : void
                     void  : void
                       . : void
                         this  : .ru.dz.windows.root
-                        Method putws : unknown
+                        Method putws : void
                         arg  : unknown
                           string pool const id="18" : string const
                     return : void
               if : unknown
                 . : int
                   ident verb : string
-                  Method equals : unknown
+                  Method equals : void
                   arg  : unknown
                     string pool const id="19" : string const
                 ,  : void
                   void  : void
                     . : void
                       this  : .ru.dz.windows.root
-                      Method putws : unknown
+                      Method putws : void
                       arg  : unknown
                         ident parms : string
                   return : void
             if : unknown
               . : int
                 ident verb : string
-                Method equals : unknown
+                Method equals : void
                 arg  : unknown
                   string pool const id="20" : string const
               ,  : void
                 void  : void
                   . : void
                     this  : .ru.dz.windows.root
-                    Method putws : unknown
+                    Method putws : void
                     arg  : unknown
                       ident parms : string
                 return : void
           if : unknown
             . : int
               ident verb : string
-              Method equals : unknown
+              Method equals : void
               arg  : unknown
                 string pool const id="21" : string const
             ,  : void
@@ -352,25 +355,25 @@ Class .ru.dz.windows.root
         if : unknown
           . : int
             ident verb : string
-            Method equals : unknown
+            Method equals : void
             arg  : unknown
               string pool const id="22" : string const
           ,  : void
             void  : void
               . : void
                 this  : .ru.dz.windows.root
-                Method putws : unknown
+                Method putws : void
                 arg  : unknown
                   string pool const id="23" : string const
             return : void
       void  : void
         . : void
           this  : .ru.dz.windows.root
-          Method putws : unknown
+          Method putws : void
           arg  : unknown
             . : string
               string pool const id="24" : string const
-              Method concat : unknown
+              Method concat : void
               arg  : unknown
                 ident verb : string
 

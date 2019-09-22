@@ -197,7 +197,17 @@ public class NewNode extends Node
 	
 	private int findConstructorOrdinal(int n_param) throws PlcException 
 	{
-		PhantomClass pclass = static_type.get_class();
+		PhantomClass pclass;
+		if( static_type.is_container() )
+		{
+			if( !static_type.isSpecificContainerClass() )
+				return 0; // Default container constructor ordinal
+			
+			String ccn = static_type.get_main_class_name();
+			throw new PlcException("findConstructorOrdinal", "Specific container class support is not implemented", ccn);
+		}
+		pclass = static_type.get_class();
+		
 		if( pclass == null )
 			throw new PlcException("NewNode","Can't call c'tor for "+static_type);
 			
