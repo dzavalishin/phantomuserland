@@ -434,8 +434,8 @@ extends GrammarHelper {
 		PhantomClass c;
 		c = classes.get( cn, true, null);
 		if( c == null ) return null;
-		t = new PhantomType(c);
-		t.set_is_container(is_container);
+		t = new PhantomType(c).toContainer();
+		//t.set_is_container(is_container);
 		return t;
 	}
 
@@ -542,11 +542,13 @@ extends GrammarHelper {
 		{
 			if( testAndEat( id_rbracket ) )
 			{
-				main_type.set_is_container(true);
+				//main_type.set_is_container(true);
+				main_type = main_type.toContainer();
 			}
 			else
 			{
-				main_type.set_is_container(true);
+				//main_type.set_is_container(true);
+				main_type = main_type.toContainer();
 
 				if( testAndEat( id_aster ) )
 					main_type._container_class_expression = parseExpression(false);
@@ -560,7 +562,8 @@ extends GrammarHelper {
 		// atrrs
 		parse_attributes( false );
 
-		main_type.setStatic(iAmStatic);
+		//main_type.setStatic(iAmStatic);
+		if(iAmStatic) main_type = main_type.toStatic();
 		
 		return main_type;
 	}

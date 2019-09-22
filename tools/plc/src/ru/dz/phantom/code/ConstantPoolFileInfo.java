@@ -41,8 +41,7 @@ public class ConstantPoolFileInfo extends FileInfo {
 	{
 		Fileops.put_int32( os, ordinal );
 		pt.save_to_file(os);
-		//os.write(sConst.getBytes()); // TODO error! Uses unknown default charset
-		
+		//System.err.println("const type "+pt);
 		byte[] bytes = sConst.getBytes(Charset.forName(ConstantPool.FILE_ENCODING));
 		os.write(bytes); 
 	}

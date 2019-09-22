@@ -16,7 +16,7 @@ Class .phantom.osimpl
         ident bootObject : .internal.object
         ident _bootObject : .internal.object
 
-  Method string[] getKernelEnvironmentValue( inkey: string ):
+  Method string getKernelEnvironmentValue( inkey: string ):
     ,  : void
       ,  : void
         ,  : void
@@ -57,7 +57,7 @@ Class .phantom.osimpl
                             int const "1" : int const
                       void  : void
                         = : void
-                          ident el : string[]
+                          ident el : string
                           [] : string
                             ident env : string[]
                             ident i : int
@@ -65,10 +65,10 @@ Class .phantom.osimpl
                       = : void
                         ident pos : int
                         . : int
-                          ident el : string[]
+                          ident el : string
                           Method strstr : void
                           arg  : unknown
-                            string pool const id="0" : string[] const
+                            string pool const id="0" : string const
                   if : unknown
                     < : int
                       ident pos : int
@@ -76,9 +76,9 @@ Class .phantom.osimpl
                     continue : void
                 void  : void
                   = : void
-                    ident key : string[]
+                    ident key : string
                     . : string
-                      ident el : string[]
+                      ident el : string
                       Method substring : void
                       arg  : int
                         int const "0" : int const
@@ -86,9 +86,9 @@ Class .phantom.osimpl
                         ident pos : int
               void  : void
                 = : void
-                  ident val : string[]
+                  ident val : string
                   . : string
-                    ident el : string[]
+                    ident el : string
                     Method substring : void
                     arg  : int
                       + : int
@@ -98,16 +98,16 @@ Class .phantom.osimpl
                       - : int
                         - : int
                           . : int
-                            ident el : string[]
+                            ident el : string
                             Method length : void
                           ident pos : int
                         int const "1" : int const
             if : unknown
               == : int
-                ident key : string[]
+                ident key : string
                 ident inkey : string
               return : void
-                ident val : string[]
+                ident val : string
       return : void const
         null : .internal.object const
 

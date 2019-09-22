@@ -157,7 +157,8 @@ public class SootExpressionTranslator {
 				SootMain.error("multidim type "+at);
 			
 			type = convertType(at.baseType.toString());			
-			type.set_is_container(true);
+			//type.set_is_container(true);
+			type = type.toContainer();
 		}
 		else
 		{
