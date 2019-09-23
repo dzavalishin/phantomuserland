@@ -65,6 +65,7 @@ vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 
 tid_t hal_start_thread( void (*thread)(void *arg), void *arg, int flags )
 {
+    flags &= ~THREAD_FLAG_VM; // ok with it
     assert(!flags);
 
     unsigned long tid = unix_hal_start_thread( thread, arg );
@@ -105,6 +106,11 @@ errno_t hal_set_current_thread_priority(int p)
 errno_t t_current_set_priority(int p)
 {
     (void) p;
+    return EINVAL;
+}
+
+errno_t         t_set_owner( tid_t tid, void *owner )
+{
     return EINVAL;
 }
 
@@ -179,10 +185,10 @@ void phantom_thread_wait_4_snap()
 }
 
 
-void phantom_activate_thread()
-{
+//void phantom_activate_thread()
+//{
     // Threads do not work in this mode
-}
+//}
 
 
 void hal_exit_kernel_thread()

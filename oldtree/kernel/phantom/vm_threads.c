@@ -1,3 +1,5 @@
+// moved to vm
+#if 0
 /**
  *
  * Phantom OS
@@ -252,3 +254,4 @@ void phantom_finish_all_threads(void)
 // -----------------------------------------------------------------------
 
 
+#ednif

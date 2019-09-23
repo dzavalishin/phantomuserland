@@ -27,8 +27,8 @@
 #include <hal.h>
 
 /* This is set from snap code to ask us to hold our breath */
-
-volatile int     phantom_virtual_machine_stop_request = 0;
+//moved to vm vm_threads
+//volatile int     phantom_virtual_machine_stop_request = 0;
 
 #if !NEW_SNAP_SYNC
 
