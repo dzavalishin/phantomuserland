@@ -705,5 +705,7 @@ errno_t t_current_set_death_handler( void (*handler)(phantom_thread_t *tp) )
 void check_global_lock_entry_count(void) {}
 
 
+void vm_lock_persistent_memory() {}
+void vm_unlock_persistent_memory() {}
 
 

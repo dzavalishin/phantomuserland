@@ -67,6 +67,7 @@ struct phantom_thread
 
 #if CONF_DUAL_PAGEMAP
     int32_t                     cr3; // TODO ARCH DEP!
+    int32_t                     object_land_access_nest_level;
 #endif
 
     //! on which CPU this thread is dispatched now

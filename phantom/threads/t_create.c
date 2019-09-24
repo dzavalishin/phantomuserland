@@ -260,6 +260,8 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
 
     t->cpu_id = GET_CPU_ID();
 
+    t->object_land_access_nest_level = 0;
+
 #if CONF_NEW_CTTY
     t_make_ctty( t );
 #else

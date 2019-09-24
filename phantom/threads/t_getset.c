@@ -305,10 +305,23 @@ void
 t_set_paged_mem(bool enable) //< Enable or disable access to paged memory - calls arch pagemap func.
 {
     TA_LOCK();
-    int32_t cr3 = arch_switch_pdir( enable );
 
     phantom_thread_t * t = GET_CURRENT_THREAD();
     assert(t != 0);
+
+    if(enable)  t->object_land_access_nest_level++;
+    else        t->object_land_access_nest_level--;
+
+    if( (!enable) && (t->object_land_access_nest_level > 0) )
+    {
+        // Do not revoke object land access if it was nested
+        TA_UNLOCK();
+        return;
+    }
+
+    // TODO skip nested enable too
+
+    int32_t cr3 = arch_switch_pdir( enable );
     t->cr3 = cr3;
 
     TA_UNLOCK();

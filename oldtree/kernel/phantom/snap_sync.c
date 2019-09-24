@@ -421,7 +421,7 @@ static volatile int vm_persistent_memory_lock_count = 0;
 
 void vm_lock_persistent_memory( void )
 {
-
+#warning SUPPORT NEDSTED!
 // todo catch thread if we wait for snapshot
 
 #if CONF_DUAL_PAGEMAP
