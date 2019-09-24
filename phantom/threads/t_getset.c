@@ -290,6 +290,24 @@ errno_t t_set_snapper_flag()
 }
 
 
+#if CONF_DUAL_PAGEMAP
+// NB! Can't be used in thread creation for current thread is not thread we create
+void            
+t_set_paged_mem(bool enable) //< Enable or disable access to paged memory - calls arch pagemap func.
+{
+    TA_LOCK();
+    int32_t cr3 = arch_switch_pdir( enable );
+
+    phantom_thread_t * t = GET_CURRENT_THREAD();
+    assert(t != 0);
+    t->cr3 = cr3;
+
+    TA_UNLOCK();
+    //if(t->cr3 == 0) printf(" tid %d set cr3=0x%x ", t->tid, t->cr3);
+}
+#endif
+
+
 // -----------------------------------------------------------
 // old - to rewrite & kill
 // -----------------------------------------------------------

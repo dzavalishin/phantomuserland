@@ -65,6 +65,10 @@ struct phantom_thread
     /** NB! Exactly first! Accessed from asm. */
     cpu_state_save_t            cpu;
 
+#if CONF_DUAL_PAGEMAP
+    int32_t                     cr3; // TODO ARCH DEP!
+#endif
+
     //! on which CPU this thread is dispatched now
     int                         cpu_id; 
 
@@ -140,7 +144,7 @@ struct phantom_thread
     void *                      death_handler; // func to call if thread is killed
 
     //! Func to call on trap (a la unix signals), returns nonzero if can't handle
-    int 			(*trap_handler)( int sig_no, struct trap_state *ts );
+    int                         (*trap_handler)( int sig_no, struct trap_state *ts );
     // --------------------------------------------------------------
     // Scheduler part
     // --------------------------------------------------------------

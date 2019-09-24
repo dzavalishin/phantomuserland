@@ -87,6 +87,9 @@ void            t_migrate_to_boot_CPU(void);
 
 errno_t         t_set_snapper_flag(void); // mark myself as snapper thread
 
+#if CONF_DUAL_PAGEMAP
+void            t_set_paged_mem(bool enable); //< Enable or disable access to paged memory - calls arch pagemap func.
+#endif
 
 // -----------------------------------------------------------------------
 // Priorities

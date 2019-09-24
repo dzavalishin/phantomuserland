@@ -96,6 +96,7 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
     snap_unlock();
 #endif
 
+    //if(0 == t->cr3) printf(" cr th tid %d set cr3=0x%x ", t->tid, t->cr3);
     return t;
 
 }

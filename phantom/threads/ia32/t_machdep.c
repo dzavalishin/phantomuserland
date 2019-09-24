@@ -35,6 +35,11 @@ void phantom_thread_state_init(phantom_thread_t *t)
     t->cpu.eip = (int)phantom_thread_trampoline;
     //t->cpu.flags = 0;
 
+#if CONF_DUAL_PAGEMAP
+    //t_set_paged_mem(0); // by default forbid accessing paged mem
+    int32_t cr3 = arch_switch_pdir( 0 );
+    t->cr3 = cr3;
+#endif
 
     int *esp = (int *)(t->cpu.esp);
 
@@ -128,6 +133,14 @@ void switch_to_user_mode()
 // Do what is required (arch specific) after switching to a new thread
 void arch_adjust_after_thread_switch(phantom_thread_t *t)
 {
+#if CONF_DUAL_PAGEMAP    
+    if(t->cr3 != 0)
+        set_cr3(t->cr3); // flushes TLB too, need G (global) bit to be set on page table entries for kernel range?
+    else
+        printf(" tid %d CR3 == %x ", t->tid, t->cr3);
+    
+#endif
+
 //#warning not SMP compliant
 // must find out which TSS is for our CPU and update it's esp0
     int ncpu = GET_CPU_ID();

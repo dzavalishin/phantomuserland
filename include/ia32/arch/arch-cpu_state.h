@@ -5,14 +5,24 @@
 #if (!defined ASSEMBLER) && (!defined __ASSEMBLY__)
 
 #include <phantom_types.h>
+#include <kernel/config.h>
 
+
+// NB! Don't touch? Accessed from asm by hardcoded offsets?
 struct cpu_state_save
 {
     u_int32_t           flags; // not saved!
     u_int32_t           eip;
     u_int32_t           esp;
     u_int32_t           ebp;
-
+/*
+#if CONF_DUAL_PAGEMAP
+    u_int32_t           cr3;
+    u_int32_t           _fill_1;
+    u_int32_t           _fill_2;
+    u_int32_t           _fill_3;
+#endif
+*/
     // these are just pushed in switch code
     //uint32_t            ebx;
     //uint32_t            esi;

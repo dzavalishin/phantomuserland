@@ -4,7 +4,15 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * ia32 page table support
+ * Intel ia32 page table support.
+ * 
+ * CONF_DUAL_PAGEMAP:
+ * 
+ * We keep two page directories. One covers all memory, other excludes 
+ * persistent (paged) memory range. Two pagemaps are switched to enable/
+ * disable persistent memory access for current thread.
+ * 
+ * TODO rename all funcs to arch_ prefix
  *
 **/
 
@@ -28,29 +36,71 @@
 
 #include "misc.h"
 
+#if CONF_DUAL_PAGEMAP
+static pd_entry_t *pdir_on;
+static pd_entry_t *pdir_off;
+#else
 static pd_entry_t *pdir;
+#endif
 static pt_entry_t *ptabs;
 
 static int paging_inited = 0;
 
+/// Differentiate between page tables in paged and non-page areas
+int ptep_is_paged_area(int npde)
+{
+    unsigned lin = pdenum2lin(npde);
+    
+    //if( lin < PHANTOM_AMAP_START_VADDR_POOL) return 0;    
+    //return lin < (PHANTOM_AMAP_START_VADDR_POOL+PHANTOM_AMAP_SIZE_VADDR_POOL);
+
+    //return lin > (PHANTOM_AMAP_START_VM_POOL+__MEM_GB);
+    return 0;
+}
+
 void phantom_paging_init(void)
 {
-    set_cr0( get_cr0() | CR0_WP );
+    set_cr0( get_cr0() | CR0_WP ); // CPU can't write to read-only pages when privilege level is 0
 
     // On ia32 - allocate all the possible page tables, for simplicity
+#if CONF_DUAL_PAGEMAP
+    extern char phantom_pdir_on_mem[];
+    pdir_on = (pd_entry_t *)&phantom_pdir_on_mem;
+    assert((((unsigned) pdir_on) & (PAGE_SIZE-1)) == 0);
+    assert( ((unsigned) pdir_on) != 0);
+
+    extern char phantom_pdir_off_mem[];
+    pdir_off = (pd_entry_t *)&phantom_pdir_off_mem;
+    assert((((unsigned) pdir_off) & (PAGE_SIZE-1)) == 0);
+    assert( ((unsigned) pdir_off) != 0);
+#else
     extern char phantom_pdir_mem[];
-    extern char phantom_ptab_mem[];
-
     pdir = (pd_entry_t *)&phantom_pdir_mem;
-    ptabs = (pt_entry_t *)&phantom_ptab_mem;
-
     assert((((unsigned) pdir) & (PAGE_SIZE-1)) == 0);
-    assert((((unsigned)ptabs) & (PAGE_SIZE-1)) == 0);
     assert( ((unsigned) pdir) != 0);
+#endif
+
+    extern char phantom_ptab_mem[];
+    ptabs = (pt_entry_t *)&phantom_ptab_mem;
+    assert((((unsigned)ptabs) & (PAGE_SIZE-1)) == 0);
     assert( ((unsigned)ptabs) != 0);
 
     memset( ptabs, 0, PAGE_SIZE*NPDE );
 
+#if CONF_DUAL_PAGEMAP
+    unsigned int *pde_on = pdir_on;
+    unsigned int *pde_off = pdir_off;
+    void *ptep = ptabs;
+    int i;
+
+    for( i = 0; i < NPDE; i++, pde_on++, pde_off++ )
+    {
+        *pde_on = pa_to_pde((int)ptep) | INTEL_PDE_VALID | INTEL_PDE_USER | INTEL_PDE_WRITE;
+        if(!ptep_is_paged_area(i))
+            *pde_off = pa_to_pde((int)ptep) | INTEL_PDE_VALID | INTEL_PDE_USER | INTEL_PDE_WRITE;
+        ptep += PAGE_SIZE;
+    }
+#else
     //pd_entry_t *pde = pdir;
     unsigned int *pde = pdir;
     void *ptep = ptabs;
@@ -61,7 +111,7 @@ void phantom_paging_init(void)
         *pde = pa_to_pde((int)ptep) | INTEL_PDE_VALID | INTEL_PDE_USER | INTEL_PDE_WRITE;
         ptep += PAGE_SIZE;
     }
-
+#endif
     // needed by phantom_map_mem_equally();
     paging_inited = 1;
 
@@ -91,8 +141,12 @@ void phantom_paging_init(void)
 
 void phantom_paging_start(void)
 {
+#if CONF_DUAL_PAGEMAP
+    //set_cr3((int)pdir_on); // temp test
+    set_cr3((int)pdir_off); // By default is off
+#else
     set_cr3((int)pdir);
-
+#endif
     // Tell CPU to start paging
     asm volatile("                      \
                  movl	%0,%%cr0       ;\
@@ -101,9 +155,23 @@ void phantom_paging_start(void)
                  " : : "r" (get_cr0() | CR0_PG));
 }
 
-
-
-
+#if CONF_DUAL_PAGEMAP
+/**
+ * \brief Enable or disable paged mem access. Must be called just 
+ * from t_set_paged_mem() in threads lib, as it saves cr3 state for 
+ * thread switch.
+ * 
+ * \return cr3 value for threads lib to save.
+ * 
+**/
+int32_t arch_switch_pdir( bool paged_mem_enable )
+{
+    int32_t pdir = (int32_t) (paged_mem_enable ? pdir_on : pdir_off);
+    //int32_t pdir = (int32_t) pdir_on;
+    set_cr3(pdir);
+    return pdir;
+}
+#endif
 
 //static pt_entry_t *get_pte( linaddr_t la );
 
