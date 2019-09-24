@@ -54,8 +54,9 @@ int ptep_is_paged_area(int npde)
     //if( lin < PHANTOM_AMAP_START_VADDR_POOL) return 0;    
     //return lin < (PHANTOM_AMAP_START_VADDR_POOL+PHANTOM_AMAP_SIZE_VADDR_POOL);
 
+    return lin > PHANTOM_AMAP_START_VM_POOL;
     //return lin > (PHANTOM_AMAP_START_VM_POOL+__MEM_GB);
-    return 0;
+    //return 0;
 }
 
 void phantom_paging_init(void)
@@ -131,9 +132,9 @@ void phantom_paging_init(void)
     }
 #endif
 
+    // Load page directory phys addr to CR3, enable paging
     phantom_paging_start();
 
-    // Load page directory phys addr to CR3
     // Note that pa = va now
 
 }
@@ -171,6 +172,12 @@ int32_t arch_switch_pdir( bool paged_mem_enable )
     set_cr3(pdir);
     return pdir;
 }
+
+int arch_is_object_land_access_enabled() //< check if current thread attempts to access object space having access disabled
+{
+    return get_cr3() == pdir_on;
+}
+
 #endif
 
 //static pt_entry_t *get_pte( linaddr_t la );
