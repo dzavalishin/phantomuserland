@@ -218,12 +218,14 @@ void activate_all_threads()
 
     SHOW_FLOW( 3, "Activating %d threads", nthreads);
 
+    vm_lock_persistent_memory();
     while(nthreads--)
     {
         struct pvm_object th =  pvm_get_array_ofield(pvm_root.threads_list.data, nthreads );
         pvm_check_is_thread( th );
         start_new_vm_thread( th );
     }
+    vm_unlock_persistent_memory();
 
     all_threads_started = 1;
 }
@@ -233,7 +235,7 @@ void phantom_finish_all_threads(void)
 {
     phantom_virtual_machine_stop_request = 1;
 #if !NEW_SNAP_SYNC
-    phantom_virtual_machine_snap_request = 1;
+    phantom_virtual_machine_snap_request = 1; // TODO check snap_sync to make sure it works as supposed with vm_lock_persistent_memory based code
     SHOW_FLOW( 2, "Finishing %d threads", n_vm_threads);
     while(n_vm_threads > 0)
     {

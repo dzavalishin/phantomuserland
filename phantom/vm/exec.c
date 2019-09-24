@@ -2244,6 +2244,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
 void pvm_exec(pvm_object_t current_thread)
 {
+    vm_lock_persistent_memory();
+
 #if CONF_USE_E4C
     volatile int status = 0;
     //e4c_context_begin( 0 );
@@ -2268,6 +2270,7 @@ void pvm_exec(pvm_object_t current_thread)
 
     (void) status;
 #endif // CONF_USE_E4C
+    vm_unlock_persistent_memory();
 }
 
 
