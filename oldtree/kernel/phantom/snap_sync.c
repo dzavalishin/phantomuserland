@@ -300,6 +300,7 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
 
 void phantom_check_threads_pass_bytecode_instr_boundary( void )
 {
+	// TODO just wait for snapshot?
     SHOW_ERROR0( 0, "unimpl!");
 }
 
@@ -415,39 +416,33 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 // persistent memory access interlock
 // ----------------------------------------------------------------
 
-#ifdef ARCH_ia32   
-#  include <ia32/selector.h>
-#endif
-/* seem to be causing panic sometimes, can it be so?
-static hal_spinlock_t   vm_mem_lock;
 
-static void vm_lock_persistent_memory_init( void )
-{
-    hal_spin_init( &vm_mem_lock );
-}
+static volatile int vm_persistent_memory_lock_count = 0;
 
-INIT_ME( vm_lock_persistent_memory_init, 0, 0 );
-*/
-// request access to persistent memory address space, prevent snapshots
 void vm_lock_persistent_memory( void )
 {
-#warning no snapshot interlock yet
-#ifdef ARCH_ia32   
-    assert( 0 == arch_ia32_modify_ds_limit( 0 ) );
+
+// todo catch thread if we wait for snapshot
+
+#if CONF_DUAL_PAGEMAP
+	atomic_add( &vm_persistent_memory_lock_count, 1 );
+    t_set_paged_mem( 1 ); //< Enable access to paged memory
 #else
-# warning no vm_lock_persistent_memory impl
+#  warning no snapshot interlock yet
 #endif
 }
 
 // release access to persistent memory address space, enable snapshots
 void vm_unlock_persistent_memory( void )
 {
-#warning no snapshot interlock yet
-#ifdef ARCH_ia32   
-    assert( 0 == arch_ia32_modify_ds_limit( 1 ) );
+#if CONF_DUAL_PAGEMAP
+	atomic_add( &vm_persistent_memory_lock_count, -1 );
+    t_set_paged_mem( 0 ); //< Disable access to paged memory
 #else
-# warning no vm_unlock_persistent_memory impl
+#  warning no snapshot interlock yet
 #endif
+
+// todo trigger snapshot if it waits for us
 }
 
 

@@ -102,16 +102,20 @@ static void run_next_init( int level, struct init_record *ir )
     switch( level )
     {
     case INIT_LEVEL_PREPARE:
-        if(ir->init_1) ir->init_1(); break;
+        if(ir->init_1) ir->init_1();
+        break;
 
     case INIT_LEVEL_INIT:
-        if(ir->init_2) ir->init_2(); break;
+        if(ir->init_2) ir->init_2();
+        break;
 
     case INIT_LEVEL_LATE:
-        if(ir->init_3) ir->init_3(); break;
+        if(ir->init_3) ir->init_3();
+        break;
 
     default:
         SHOW_ERROR( 0, "wrong level %d", level );
+        break;
     }
 
     //if( ir->next )
@@ -139,16 +143,20 @@ static void run_next_stop( int level, struct init_record *ir )
     switch( level )
     {
     case INIT_LEVEL_PREPARE:
-        if(ir->init_1) ir->init_1(); break;
+        if(ir->init_1) ir->init_1();
+        break;
 
     case INIT_LEVEL_INIT:
-        if(ir->init_2) ir->init_2(); break;
+        if(ir->init_2) ir->init_2();
+        break;
 
     case INIT_LEVEL_LATE:
-        if(ir->init_3) ir->init_3(); break;
+        if(ir->init_3) ir->init_3();
+        break;
 
     default:
         SHOW_ERROR( 0, "wrong level %d", level );
+        break;
     }
 
     //if( ir->next )

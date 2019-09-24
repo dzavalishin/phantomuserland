@@ -168,6 +168,7 @@ static int debug_read_line(char *buf, int max_len)
             }
             break;
         case '$':
+            /* FALLTHRU */
         case '+':
             /* HACK ALERT!!!
              *
@@ -182,6 +183,7 @@ static int debug_read_line(char *buf, int max_len)
             } else {
                 /* fall thru */
             }
+            /* FALLTHRU */
         default:
             buf[ptr++] = c;
             dbg_putch(c & 0xFFu);

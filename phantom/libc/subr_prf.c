@@ -811,6 +811,7 @@ kvprintf(const char *fmt, void (*func)(int, void*), void *arg, int radix, va_lis
         goto handle_nosign;
     case 'X':
         upper = 1;
+        /* FALLTHRU */
     case 'x':
         base = 16;
         goto handle_nosign;
