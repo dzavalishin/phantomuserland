@@ -173,6 +173,14 @@ int32_t arch_switch_pdir( bool paged_mem_enable )
     return pdir;
 }
 
+
+int32_t arch_get_pdir( bool paged_mem_enable )
+{
+    int32_t pdir = (int32_t) (paged_mem_enable ? pdir_on : pdir_off);
+    return pdir;
+}
+
+
 int arch_is_object_land_access_enabled() //< check if current thread attempts to access object space having access disabled
 {
     return get_cr3() == (u_int32_t)pdir_on;

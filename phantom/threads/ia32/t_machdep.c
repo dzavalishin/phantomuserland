@@ -37,7 +37,7 @@ void phantom_thread_state_init(phantom_thread_t *t)
 
 #if CONF_DUAL_PAGEMAP
     //t_set_paged_mem(0); // by default forbid accessing paged mem
-    int32_t cr3 = arch_switch_pdir( 0 );
+    int32_t cr3 = arch_get_pdir( 0 );
     t->cr3 = cr3;
 #endif
 
