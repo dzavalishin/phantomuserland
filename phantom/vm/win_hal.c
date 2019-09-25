@@ -245,7 +245,7 @@ int phantom_dev_keyboard_getc(void)
 
 
 
-
+/*
 //#if OLD_VM_SLEEP
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 {
@@ -253,7 +253,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     {
         if(DEBUG) printf("Thread will die now\n");
         pthread_exit(0);
-    }*/
+    }* /
 
 
     //phantom_virtual_machine_threads_stopped++;
@@ -268,7 +268,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     //phantom_virtual_machine_threads_stopped--;
 
 }
-
+*/
 /* dz off
 
 void phantom_thread_put_asleep( struct data_area_4_thread *thda )

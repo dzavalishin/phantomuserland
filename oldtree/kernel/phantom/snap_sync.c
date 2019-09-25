@@ -17,6 +17,7 @@
 #define debug_level_info 10
 
 #include <threads.h>
+#include <thread_private.h>
 
 #include <phantom_libc.h>
 
@@ -260,6 +261,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 static void do_vm_lock_persistent_memory( void )
 {
 	atomic_add( &vm_persistent_memory_lock_count, 1 );
+    GET_CURRENT_THREAD()->sub_from_pers_mem_lock_count++; // to update counter above in thread death
     t_set_paged_mem( 1 ); //< Enable access to paged memory
 }
 
@@ -279,6 +281,7 @@ void vm_lock_persistent_memory( void )
 void do_vm_unlock_persistent_memory( void )
 {
 	atomic_add( &vm_persistent_memory_lock_count, -1 );
+    GET_CURRENT_THREAD()->sub_from_pers_mem_lock_count--; // to update counter above in thread death
     t_set_paged_mem( 0 ); //< Disable access to paged memory
 }
 
@@ -295,196 +298,24 @@ void vm_unlock_persistent_memory( void )
 
 }
 
-
+/**
+ * 
+ * Called from thread death handler.
+ * Passed counter is t->sub_from_pers_mem_lock_count
+ * 
+**/
+void vm_release_snap_lock( int count )
+{
+    atomic_add( &vm_persistent_memory_lock_count, - count );
+}
 
 #else // CONF_DUAL_PAGEMAP
 
 // ------------------------------------------- OLD UNUSED CODE --------------------------------------------
 
+// Left for reference to implement pvm thread block/unblock
 
-// VM memory corruption if on
-#define VM_SYNC_NOWAIT_BLOCKED 0
-
-
-/* This is set from snap code to ask us to hold our breath */
-//moved to vm vm_threads
-//volatile int     phantom_virtual_machine_stop_request = 0;
-
-#if !NEW_SNAP_SYNC
-
-volatile int     phantom_virtual_machine_snap_request = 0;
-
-//static 
-volatile int     phantom_virtual_machine_threads_stopped = 0;
-//volatile int     phantom_virtual_machine_threads_got_stop_request = 0;
-
-// n of threads blocked in blocking syscall, see vm_syscall_block
-volatile int     phantom_virtual_machine_threads_blocked = 0;
-
-
-static hal_cond_t   phantom_snap_wait_4_vm_enter;
-static hal_cond_t   phantom_snap_wait_4_vm_leave;
-static hal_cond_t   phantom_vm_wait_4_snap;
-
-// BUG - really inefficient, as it wakes single cond
-// and wakes all threads for most of them to go sleep again
-static hal_mutex_t  interlock_mutex;
-static hal_cond_t   vm_thread_wakeup_cond;
-#endif
-
-void phantom_snap_threads_interlock_init( void )
-{
-#if !NEW_SNAP_SYNC
-    if(
-       hal_cond_init( &phantom_snap_wait_4_vm_enter, "Snap W4E" ) ||
-       hal_cond_init( &phantom_snap_wait_4_vm_leave, "Snap W4L" ) ||
-       hal_cond_init( &phantom_vm_wait_4_snap, "Snap W4S" ) ||
-
-       hal_mutex_init( &interlock_mutex, "Snap ILck" ) ||
-       hal_cond_init( &vm_thread_wakeup_cond, "VmSleep")
-      )
-        panic("Can't init thread/snap interlocks");
-#endif
-}
-
-
-#if !NEW_SNAP_SYNC
-
-/*
- *
- * Called by any virt. machine thread when it sees
- * phantom_virtual_machine_snap_request to be nonzero.
- *
- */
-
-void phantom_thread_wait_4_snap( void )
-{
-    if(phantom_virtual_machine_stop_request)
-    {
-        SHOW_FLOW0( 4, "VM thread will die now");
-        hal_exit_kernel_thread();
-    }
-
-    SHOW_FLOW0( 5, "VM thread will sleep for snap");
-    hal_mutex_lock( &interlock_mutex );
-
-    phantom_virtual_machine_threads_stopped++;
-    hal_cond_broadcast( &phantom_snap_wait_4_vm_enter );
-
-    SHOW_FLOW0( 5, "VM thread reported sleep, will wait now");
-
-    //while(phantom_virtual_machine_snap_request)
-        hal_cond_wait( &phantom_vm_wait_4_snap, &interlock_mutex );
-
-    SHOW_FLOW0( 5, "VM thread awaken, will report wakeup");
-    phantom_virtual_machine_threads_stopped--;
-    hal_cond_broadcast( &phantom_snap_wait_4_vm_leave );
-
-    hal_mutex_unlock( &interlock_mutex );
-    SHOW_FLOW0( 5, "VM thread returns to activity");
-}
-
-/*
- *
- * Make sure all virtual machine threads are asleep waiting for the
- * snapper to do a snap.
- *
- * Used by snapper and GC'or together, so can be reentered.
- */
-
-void phantom_snapper_wait_4_threads( void )
-{
-    SHOW_FLOW0( 5, "phantom_snapper_wait_4_threads");
-
-    phantom_virtual_machine_snap_request++; // Ask them to go sleep
-
-    int threads_4_wait = phantom_vm_threads_get_count();
-
-    while(1)
-    {
-
-        hal_mutex_lock( &interlock_mutex );
-        SHOW_FLOW( 5, "Will wait for %d threads to stop, %d already did", threads_4_wait, phantom_virtual_machine_threads_stopped );
-        while( phantom_virtual_machine_threads_stopped < threads_4_wait )
-        {
-            SHOW_FLOW0( 5, "Wait for thread");
-            hal_cond_wait( &phantom_snap_wait_4_vm_enter, &interlock_mutex );
-            //hal_sleep_msec(2000);
-            SHOW_FLOW( 5, "Woken up aft wait for %d threads, %d stopped", threads_4_wait, phantom_virtual_machine_threads_stopped);
-        }
-
-        SHOW_FLOW0( 5, "Finished waiting for threads");
-        hal_mutex_unlock( &interlock_mutex );
-
-
-        // Check if some new threads were started till we count them
-        int newc = phantom_vm_threads_get_count();
-        if( newc > threads_4_wait )
-        {
-            // Yes - wait for new ones to stop as well
-            threads_4_wait = newc;
-            SHOW_FLOW( 5, "Found more threads (%d total), wait again", threads_4_wait);
-            continue;
-        }
-
-        // TODO FIXME what if someone makes a thread here?
-        break;
-    }
-
-    SHOW_FLOW0( 5, "Snapper is free to snap");
-
-}
-
-
-/*
- *
- * Used by snapper and GC'or together, so can be reentered.
- *
- */
-
-void phantom_snapper_reenable_threads( void )
-{
-    SHOW_FLOW0( 5, "Snapper will reenable threads");
-    hal_mutex_lock( &interlock_mutex );
-    phantom_virtual_machine_snap_request--; // May wake up now
-
-    if(phantom_virtual_machine_snap_request > 0)
-    {
-        // I'm not one here
-        hal_mutex_unlock( &interlock_mutex );
-        return;
-    }
-
-    SHOW_FLOW( 5, "Snapper sleep request is %d, will broadcast", phantom_virtual_machine_snap_request);
-
-    hal_cond_broadcast( &phantom_vm_wait_4_snap );
-
-
-    SHOW_FLOW( 5, "Snapper will wait for %d threads to awake", phantom_virtual_machine_threads_stopped);
-
-#if VM_SYNC_NOWAIT_BLOCKED
-    while( phantom_virtual_machine_threads_stopped - phantom_virtual_machine_threads_blocked > 0 )
-#else
-    while( phantom_virtual_machine_threads_stopped > 0 )
-#endif
-    {
-        hal_cond_wait( &phantom_snap_wait_4_vm_leave, &interlock_mutex );
-        SHOW_FLOW( 5, "Snapper: %d threads still sleep", phantom_virtual_machine_threads_stopped);
-
-    }
-    hal_mutex_unlock( &interlock_mutex );
-
-    SHOW_FLOW0( 5, "Snapper done waiting for awake");
-
-}
-#endif
-
-
-
-
-
-
-#if OLD_VM_SLEEP
+//#if OLD_VM_SLEEP
 // ----------------------------------------------------------------
 // userland sleep/wakeup code
 // ----------------------------------------------------------------
@@ -575,7 +406,7 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
     hal_mutex_unlock( &interlock_mutex );
 }
 */
-#endif // OLD_VM_SLEEP
+//#endif // OLD_VM_SLEEP
 
 
 void phantom_check_threads_pass_bytecode_instr_boundary( void )
@@ -586,143 +417,7 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 
 
 
-/**
- *
- *   BLOCKING VM SYSCALLS IMPL
- *
- * - vm_spin_lock -> regular kernel mutex
- * - keep mutex ptr in object, recreate mutex on restart
- * 
- * - blocking syscall - must not use vm mutex, must be unlocked on restart
- * 
- * blocking sys:
- *    - call kernel (request op)
- *    - push null (will be returned if we're snapped and restarted)
- *    - sleep (snappable, don't use thda->sleep_flag!) - kernel wakes on data ready
- *    - pop null, push ret val
- * 
- * possibly:
- *    - save args, restart syscall on kern resrart
- *
-**/
 
-#include <vm/exec.h>
-#include <vm/stacks.h>
-#include <vm/syscall.h>
-#include <vm/alloc.h>
-
-
-//#define MAX_SYS_ARG 16
-
-// interlock code of VM blocking syscall (part of .internal.connection class) implementation
-// called from si_connection_13_blocking, calls passed syscall worker implemented in cn_*.c in kernel
-int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t , struct data_area_4_thread *, int nmethod, pvm_object_t arg ) )
-{
-
-    // NB args must be popped before we push retcode
-
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 2);
-
-    //if( n_param < 1 ) SYSCALL_THROW(pvm_create_string_object( "blocking: need at least 1 parameter" ));
-
-    int nmethod = POP_INT();
-    pvm_object_t arg = POP_ARG;
-
-    // push zero to obj stack
-
-    pvm_ostack_push( tc->_ostack, pvm_create_null_object() ); 
-
-    pvm_exec_save_fast_acc(tc); // Before snap
-
-    if(phantom_virtual_machine_stop_request)
-    {
-        SHOW_FLOW0( 5, "VM thread will die now");
-        hal_exit_kernel_thread();
-    }
-
-#if NEW_SNAP_SYNC
-    snap_unlock();
-#else
-    SHOW_FLOW0( 15, "VM thread will sleep for blocking syscall");
-    hal_mutex_lock( &interlock_mutex );
-
-    phantom_virtual_machine_threads_stopped++;
-    phantom_virtual_machine_threads_blocked++;
-    hal_cond_broadcast( &phantom_snap_wait_4_vm_enter );
-
-    hal_mutex_unlock( &interlock_mutex );
-#endif // NEW_SNAP_SYNC
-
-
-    // now do syscall - can block
-    pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
-
-    ref_dec_o( arg ); // BUG FIXME ref will be lost if restart - add to restart list before call, remove after?
-    // BUG FIXME snapper won't continue until this thread is unblocked: end of snap waits for all stooped threads to awake
-    // ? fixed with phantom_virtual_machine_threads_blocked?
-
-#if NEW_SNAP_SYNC
-    snap_lock();
-#else
-    hal_mutex_lock( &interlock_mutex );
-
-    //while(tc->sleep_flag)         hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
-
-    if(phantom_virtual_machine_snap_request)
-        hal_cond_wait( &phantom_vm_wait_4_snap, &interlock_mutex );
-
-    //SHOW_FLOW0( 15, "VM thread awaken, will report wakeup");
-    phantom_virtual_machine_threads_stopped--;
-    phantom_virtual_machine_threads_blocked--;
-
-    hal_cond_broadcast( &phantom_snap_wait_4_vm_leave );
-
-    hal_mutex_unlock( &interlock_mutex );
-    SHOW_FLOW0( 15, "VM thread awaken after blocking syscall");
-#endif // NEW_SNAP_SYNC
-
-    // pop zero from obj stack
-    // push ret val to obj stack
-
-    pvm_ostack_pop( tc->_ostack );
-    pvm_ostack_push( tc->_ostack, ret );
-
-    return 1; // not throw
-}
-
-
-// ----------------------------------------------------------------
-// persistent memory access interlock
-// ----------------------------------------------------------------
-
-
-static volatile int vm_persistent_memory_lock_count = 0;
-
-void vm_lock_persistent_memory( void )
-{
-// todo catch thread if we wait for snapshot
-
-#if CONF_DUAL_PAGEMAP
-	atomic_add( &vm_persistent_memory_lock_count, 1 );
-    t_set_paged_mem( 1 ); //< Enable access to paged memory
-#else
-#  warning no snapshot interlock yet
-#endif
-}
-
-// release access to persistent memory address space, enable snapshots
-void vm_unlock_persistent_memory( void )
-{
-#if CONF_DUAL_PAGEMAP
-	atomic_add( &vm_persistent_memory_lock_count, -1 );
-    t_set_paged_mem( 0 ); //< Disable access to paged memory
-#else
-#  warning no snapshot interlock yet
-#endif
-
-// todo trigger snapshot if it waits for us
-}
 
 #endif
 

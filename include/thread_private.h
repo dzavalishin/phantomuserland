@@ -134,7 +134,8 @@ struct phantom_thread
     //* Used to wake with timer, see hal_sleep_msec
     timedcall_t                 sleep_event; 
 
-    int                         snap_lock; // nonzero = can't begin a snapshot
+    //int                         snap_lock; // nonzero = can't begin a snapshot
+    int                         sub_from_pers_mem_lock_count; // Times we incremented vm_persistent_memory_lock_count
 
     int                         preemption_disabled;
 

@@ -681,11 +681,11 @@ static int si_thread_10_pause(struct pvm_object me, struct data_area_4_thread *t
     if(meda != tc)
     	SYSCALL_THROW_STRING("Thread can pause itself only");
 
-#if OLD_VM_SLEEP
-    SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
-#else
+//#if OLD_VM_SLEEP
+//    SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
+//#else
     SYSCALL_THROW_STRING("Not this way");
-#endif
+//#endif
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -693,18 +693,18 @@ static int si_thread_10_pause(struct pvm_object me, struct data_area_4_thread *t
 static int si_thread_11_continue(struct pvm_object me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
-#if OLD_VM_SLEEP
-    struct data_area_4_thread *meda = pvm_object_da( me, thread );
+//#if OLD_VM_SLEEP
+//    struct data_area_4_thread *meda = pvm_object_da( me, thread );
 
     //hal_spin_lock(&meda->spin);
-    if( !meda->sleep_flag )
-    	SYSCALL_THROW_STRING("Thread is not sleeping in continue");
+//    if( !meda->sleep_flag )
+//    	SYSCALL_THROW_STRING("Thread is not sleeping in continue");
     //hal_spin_unlock(&meda->spin);
 
-    SYSCALL_WAKE_THREAD_UP(meda);
-#else
+//    SYSCALL_WAKE_THREAD_UP(meda);
+//#else
     SYSCALL_THROW_STRING("Not this way");
-#endif
+//#endif
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -1376,18 +1376,18 @@ static int si_bootstrap_21_sleep(struct pvm_object me, struct data_area_4_thread
     CHECK_PARAM_COUNT(n_param, 1);
 
     int msec = POP_INT();
-#if OLD_VM_SLEEP
-    phantom_wakeup_after_msec(msec,tc);
+//#if OLD_VM_SLEEP
+//    phantom_wakeup_after_msec(msec,tc);
 
     //#warning to kill
-    SHOW_ERROR0( 0, "si_bootstrap_21_sleep used" );
+//    SHOW_ERROR0( 0, "si_bootstrap_21_sleep used" );
 
-    if(phantom_is_a_real_kernel())
-        SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
-#else
+//    if(phantom_is_a_real_kernel())
+//        SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
+//#else
     (void) msec;
     SHOW_ERROR0( 0, "si_bootstrap_21_sleep used" );
-#endif
+//#endif
     SYSCALL_RETURN_NOTHING;
 }
 

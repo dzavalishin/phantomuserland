@@ -23,6 +23,8 @@
 #include <event.h>
 #include "ev_private.h"
 
+#include <kernel/snap_sync.h>
+
 static void ev_send_key_event_to_q(_key_event *event)
 {
 

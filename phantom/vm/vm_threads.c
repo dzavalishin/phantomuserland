@@ -131,7 +131,7 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 
     while(args_used > 0)
         hal_sleep_msec(1);
-
+/*
 #if OLD_VM_SLEEP
     if(tda->sleep_flag)
     {
@@ -166,6 +166,7 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 
     }
 #endif // OLD_VM_SLEEP
+*/
 }
 
 

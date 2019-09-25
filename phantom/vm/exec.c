@@ -673,13 +673,13 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
     pvm_exec_load_fast_acc(da); // For any case
 
-#if OLD_VM_SLEEP
-    // Thread was snapped sleeping - resleep it
-    if(da->sleep_flag)
-        phantom_thread_sleep_worker( da );
-#else
+//#if OLD_VM_SLEEP
+//    // Thread was snapped sleeping - resleep it
+//    if(da->sleep_flag)
+//        phantom_thread_sleep_worker( da );
+//#else
 #warning resleep?
-#endif
+//#endif
 
     while(1)
     {
@@ -2198,17 +2198,17 @@ static void do_pvm_exec(pvm_object_t current_thread)
             {
                 pvm_exec_sys(da,instruction & 0x0F);
     sys_sleep:
-#if OLD_VM_SLEEP
+//#if OLD_VM_SLEEP
                 // Only sys can put thread asleep
                 // If we are snapped here we, possibly, will continue from
                 // the entry to this func. So save fast acc and recheck
                 // sleep condition on the func entry.
-                if(da->sleep_flag)
-                {
-                    pvm_exec_save_fast_acc(da); // Before snap
-                    phantom_thread_sleep_worker( da );
-                }
-#endif
+//                if(da->sleep_flag)
+//                {
+//                    pvm_exec_save_fast_acc(da); // Before snap
+//                    phantom_thread_sleep_worker( da );
+//                }
+//#endif
                 break;
             }
 
