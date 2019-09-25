@@ -582,7 +582,7 @@ struct pvm_connection_ops
 
 struct data_area_4_connection
 {
-    struct data_area_4_thread *         owner;		// Just this one can use
+    struct data_area_4_thread *         owner;          // Just this one can use
     struct pvm_connection_ops *         kernel;         // Stuff in kernel that serves us
 
     pvm_object_t                        callback;
@@ -594,7 +594,11 @@ struct data_area_4_connection
     pvm_object_t                        p_kernel_state_object;
     void *                              p_kernel_state;
 
-    pvm_object_t 			(*blocking_syscall_worker)( pvm_object_t this, struct data_area_4_thread *tc, int nmethod, pvm_object_t arg );
+    pvm_object_t                        (*blocking_syscall_worker)
+                                            ( 
+                                              pvm_object_t this, struct data_area_4_thread *tc, 
+                                              int nmethod, pvm_object_t arg 
+                                            );
 
     // Volatile kernel state
     size_t                              v_kernel_state_size;

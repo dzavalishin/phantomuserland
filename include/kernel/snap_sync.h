@@ -12,8 +12,8 @@
 #include <vm/internal_da.h>
 #include <vm/alloc.h>
 
-void vm_lock_persistent_memory( void );		// request access to persistent memory address space, prevent snapshots - NOT IMPL
-void vm_unlock_persistent_memory( void );	// release access to persistent memory address space, enable snapshots - NOT IMPL
+void vm_lock_persistent_memory( void );		// request access to persistent memory address space, prevent snapshots
+void vm_unlock_persistent_memory( void );	// release access to persistent memory address space, enable snapshots
 
 // request snap right now
 void request_snap(void);
@@ -35,6 +35,7 @@ extern volatile int     phantom_virtual_machine_stop_request; // Is one (with th
 void phantom_finish_all_threads(void);
 void activate_all_threads(void);
 
+#if 0
 /* dz off ? */
 // supposed to be unused now?
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda );
@@ -58,6 +59,8 @@ void snap_lock(void);
 void snap_unlock(void);
 
 void snap_trap(void);
+
+#endif
 
 #endif
 

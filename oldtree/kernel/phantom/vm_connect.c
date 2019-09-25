@@ -530,15 +530,21 @@ static void run_cb_thread(void *arg)
 
     SHOW_FLOW( 1, "cb conn '%s'", da->name );
 
+    vm_lock_persistent_memory();
+
     while(da->n_active_callbacks > 16)
     {
         SHOW_ERROR( 1, "conn '%s' too much cb: %d", da->name, da->n_active_callbacks );
-        hal_sleep_msec(1000);
+        vm_unlock_persistent_memory();
+        hal_sleep_msec(100);
+        vm_lock_persistent_memory();
     }
 
     da->n_active_callbacks++; // TODO atomic?
     pvm_exec_run_method(da->callback, da->callback_method, 1, args);
     da->n_active_callbacks--; // TODO atomic?
+
+    vm_unlock_persistent_memory();
 
     SHOW_FLOW( 1, "cb conn '%s' done", da->name );
 

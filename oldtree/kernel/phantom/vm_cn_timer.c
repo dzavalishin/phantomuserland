@@ -25,7 +25,11 @@ static void cn_timer_timedcall_func( void *a )
     time_t t = fast_time();
 
     SHOW_FLOW( 1, "timer callback %ld", (long)t );
+
+    vm_lock_persistent_memory();
     phantom_connection_callback_int( c, t );
+    vm_unlock_persistent_memory();
+
 }
 
 

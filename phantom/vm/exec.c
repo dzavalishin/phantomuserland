@@ -335,7 +335,12 @@ static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t
 **/
 static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type)
 {
+#warning implement me
+    if( pvm_object_class_is_or_child( obj, type) )
+        return 0;
 
+    pvm_exec_do_throw_object( da, pvm_create_string_object("type assert failed") );
+    return 1;
 }
 
 
@@ -343,7 +348,7 @@ static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj,
 static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
 {
     struct pvm_object thrown_obj = os_pop();
-    pvm_exec_do_throw_object( da, thrown_obj);
+    pvm_exec_do_throw_object( da, thrown_obj );
 }
 
 
@@ -649,8 +654,10 @@ pvm_exec_static_call(
  *
  *
 **/
+static void do_pvm_exec(pvm_object_t current_thread) 
+__attribute__((hot)); // tell compiler this func must be optimized a lot
 
-static void do_pvm_exec(pvm_object_t current_thread)
+static void do_pvm_exec(pvm_object_t current_thread) 
 {
     int prefix_long = 0;
     int prefix_float = 0;
