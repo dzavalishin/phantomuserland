@@ -631,6 +631,40 @@ pvm_exec_static_call(
     if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
 }
 
+
+/** UNTESTED, UNUSED
+ *
+ * \brief Simulate call - used to call methods on behalf of current thread.
+ *
+ * \param[in]  da              Current thread data area
+ * \param[in]  new_this        This for called method
+ * \param[in]  method_ordinal  Ordinal of method we call
+ * \param[in]  n_args          Number of parameters 
+ * \param[in]  args            Parameters
+ *
+ * Create new call frame, init it.
+ *
+ * Set new call frame as current.
+ *
+**/
+
+pvm_exec_simulated_call(
+                    struct data_area_4_thread *da,
+                    struct pvm_object new_this,
+                    int method,
+                    int n_args,
+                    struct pvm_object args[]
+                   )
+{
+    int i;
+    for( i = 0; i < n_args; i++ )
+    {
+        os_push( args[i] ); // right order? seem so...
+    }
+
+    pvm_exec_call( da, method, n_args, 0, new_this );
+}
+
 /**
  *
  * Well... here is the root of all evil. The bytecode interpreter itself.
@@ -2596,7 +2630,11 @@ pvm_exec_run_method(
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 
+    //vm_unlock_persistent_memory(); // pvm_exec will lock, do not need nested lock - will prevent snaps
+    // NO - we must prevent snap here!! it won't work right after restart, part of state is in C code
     pvm_exec( thread );
+    //vm_lock_persistent_memory();
+
 
     pvm_object_t ret = pvm_ostack_pop( pvm_object_da(cfda->ostack, object_stack) );
 
