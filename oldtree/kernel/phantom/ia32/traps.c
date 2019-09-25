@@ -43,6 +43,8 @@ extern int panic_reenter;
 
 
 
+// We're called from page fault and can't print to screen - it causes
+// window system problems sometimes - use lprintf
 void dump_ss(struct trap_state *st)
 {
     if(panic_reenter > 1)
@@ -50,33 +52,33 @@ void dump_ss(struct trap_state *st)
 
     int from_user = (st->cs & 3) || (st->eflags & EFL_VM);
 
-    printf("Dump of i386 state:\n");
-    printf("EAX %08x EBX %08x ECX %08x EDX %08x\n",
+    lprintf("Dump of i386 state:\n");
+    lprintf("EAX %08x EBX %08x ECX %08x EDX %08x\n",
            st->eax, st->ebx, st->ecx, st->edx);
-    printf("ESI %08x EDI %08x EBP %08x ESP %08x\n",
+    lprintf("ESI %08x EDI %08x EBP %08x ESP %08x\n",
            st->esi, st->edi, st->ebp,
            from_user ? st->esp : (unsigned)&st->esp
           );
-    printf("CS %04x SS %04x DS %04x ES %04x FS %04x GS %04x\n",
+    lprintf("CS %04x SS %04x DS %04x ES %04x FS %04x GS %04x\n",
            st->cs & 0xffff, from_user ? st->ss & 0xffff : get_ss(),
            st->ds & 0xffff, st->es & 0xffff,
            st->fs & 0xffff, st->gs & 0xffff);
     if (st->eflags & EFL_VM)
     {
-        printf("v86:            DS %04x ES %04x FS %04x GS %04x\n",
+        lprintf("v86:            DS %04x ES %04x FS %04x GS %04x\n",
                st->v86_ds & 0xffff, st->v86_es & 0xffff,
                st->v86_gs & 0xffff, st->v86_gs & 0xffff);
     }
-    printf("EIP %08x EFLAGS %08x\n", st->eip, st->eflags);
-    printf("trapno %d: %s, error %08x\n",
+    lprintf("EIP %08x EFLAGS %08x\n", st->eip, st->eflags);
+    lprintf("trapno %d: %s, error %08x\n",
            st->trapno, trap_name(st->trapno),
            st->err);
     if (st->trapno == T_PAGE_FAULT)
-        printf("page fault linear address %08x\n", st->cr2);
+        lprintf("page fault linear address %08x\n", st->cr2);
 
     if(phantom_symtab_getname)
     {
-        printf("EIP %6p: %s\n", (void *)st->eip, phantom_symtab_getname((void *)st->eip) ); // TODO 64 bit machdep
+        lprintf("EIP %6p: %s\n", (void *)st->eip, phantom_symtab_getname((void *)st->eip) ); // TODO 64 bit machdep
     }
 
 

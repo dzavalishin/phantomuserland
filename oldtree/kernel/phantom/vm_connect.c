@@ -6,6 +6,8 @@
  *
  * Virtual machine objects interface.
  *
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/ObjectKernelConnector>
+ *
 **/
 
 #define DEBUG_MSG_PREFIX "vmconnect"

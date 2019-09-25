@@ -148,7 +148,9 @@ static void ev_send_key_event_to_q(_key_event *event)
 
     }
 
+    vm_lock_persistent_memory();
     ev_q_put_key( event->keycode, event->keychar, shifts );
+    vm_unlock_persistent_memory();
 
 }
 

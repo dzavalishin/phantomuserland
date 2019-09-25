@@ -229,7 +229,7 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 	int ola = arch_is_object_land_access_enabled(); //< check if current thread attempts to access object space having access disabled
 	if( !ola )
 	{
-		printf("\nObject land access disabled\n");
+		lprintf("\nObject land access disabled\n");
 		trap_panic(ts);
 	}
 #endif

@@ -26,22 +26,24 @@ static void stack_dump_one(void *fp)
     //void *addr = *( ((void**)fp) - 1);
     void *addr = *( ((void**)fp));
 
-    printf("- %8p", addr);
+    lprintf("- %8p", addr);
 
     if(phantom_symtab_getname)
     {
-        printf(": %s\n", phantom_symtab_getname(addr-8) );
+        lprintf(": %s\n", phantom_symtab_getname(addr-8) );
     }
     else
-        printf("\n");
+        lprintf("\n");
 
 }
 
 
+// We're called from page fault and can't print to screen - it causes
+// window system problems sometimes - use lprintf
 void stack_dump_from(void *fp)
 {
     int i;
-    printf("Stack:\n");
+    lprintf("Stack:\n");
 
     for( i = 0; i < MAX_DEPTH; i++ )
     {
