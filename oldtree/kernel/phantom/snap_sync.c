@@ -168,10 +168,9 @@ void phantom_snapper_reenable_threads( void )
         SHOW_FLOW( 5, "Snapper: %d threads still sleep", phantom_virtual_machine_threads_stopped);
 
     }
-    hal_mutex_unlock( &interlock_mutex );
-
-    SHOW_FLOW0( 5, "Snapper done waiting for awake");
 #endif
+    hal_mutex_unlock( &interlock_mutex );
+    SHOW_FLOW0( 5, "Snapper done waiting for awake"); // TODO we did not wait - OK?
 
 }
 
