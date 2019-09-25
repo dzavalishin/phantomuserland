@@ -78,9 +78,9 @@ void pvm_spin_unlock( pvm_spinlock_t *ps )
 
 // --------- mutex -------------------------------------------------------
 
-#if OLD_VM_SLEEP
-#  warning paging can switch us off with "spin" locked, use kern mutex
-#endif
+//#if OLD_VM_SLEEP
+//#  warning paging can switch us off with "spin" locked, use kern mutex
+//#endif
 // NB - persistent mutexes!
 // TODO have a mark - can this mutex be locked at snapshot
 
@@ -88,7 +88,7 @@ void pvm_spin_unlock( pvm_spinlock_t *ps )
 void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 {
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
-#if !OLD_VM_SLEEP
+//#if !OLD_VM_SLEEP
     //SYSCALL_THROW_STRING("Not this way");
     lprintf("unimplemented vm_mutex_lock used\r");
 
@@ -96,7 +96,7 @@ void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 
 
     pvm_spin_unlock( &(da->pvm_lock) );
-
+/*
 #else
 
 
@@ -125,10 +125,12 @@ void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 done:
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
 #endif
+*/
 }
 
 errno_t vm_mutex_unlock( pvm_object_t me, struct data_area_4_thread *tc )
 {
+/*
 #if OLD_VM_SLEEP
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
 
@@ -163,8 +165,9 @@ done:
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
     return ret;
 #else
+*/
     SYSCALL_THROW_STRING("Not this way");
-#endif
+//#endif
 }
 
 
@@ -339,6 +342,7 @@ static int si_sema_5_tostring(struct pvm_object o, struct data_area_4_thread *tc
 
 static int si_sema_8_acquire(struct pvm_object me, struct data_area_4_thread *tc )
 {
+/*
 #if OLD_VM_SLEEP
     DEBUG_INFO;
     struct data_area_4_sema *da = pvm_object_da( me, sema );
@@ -366,8 +370,9 @@ static int si_sema_8_acquire(struct pvm_object me, struct data_area_4_thread *tc
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
     SYSCALL_RETURN_NOTHING;
 #else
+*/
     SYSCALL_THROW_STRING("Not this way");
-#endif
+//#endif
 }
 
 static int si_sema_9_tacquire(struct pvm_object me, struct data_area_4_thread *tc )
@@ -397,6 +402,7 @@ static int si_sema_10_zero(struct pvm_object me, struct data_area_4_thread *tc )
 
 static int si_sema_11_release(struct pvm_object me, struct data_area_4_thread *tc )
 {
+/*
 #if OLD_VM_SLEEP
     DEBUG_INFO;
     struct data_area_4_sema *da = pvm_object_da( me, sema );
@@ -420,8 +426,9 @@ static int si_sema_11_release(struct pvm_object me, struct data_area_4_thread *t
     VM_SPIN_UNLOCK(da->poor_mans_pagefault_compatible_spinlock);
     SYSCALL_RETURN_NOTHING;
 #else
+*/
     SYSCALL_THROW_STRING("Not this way");
-#endif
+//#endif
 }
 
 

@@ -20,9 +20,10 @@ import .internal.double;
 import .internal.float;
 import .internal.long;
 import .phantom.util.map;
+import .ru.dz.phantom.system.regression_tests_ctor;
 
 
-
+/*
 class regression_tests_ctor
 {
 	var saved : .internal.int;
@@ -37,7 +38,7 @@ class regression_tests_ctor
         if( b != saved ) 		throw "constructor with parameters failed";
 	}
 };
-
+*/
 
 
 class regression_tests

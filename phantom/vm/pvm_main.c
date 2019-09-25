@@ -136,6 +136,11 @@ int main(int argc, char* argv[])
 
     pvm_root_init();
 
+    // Enable multithreading in user mode.
+    // Does not work yet.
+#if 0
+    activate_all_threads();
+#endif
 
     // TODO use stray catcher in pvm_test too
     //stray();

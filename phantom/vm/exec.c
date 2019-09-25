@@ -335,7 +335,12 @@ static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t
 **/
 static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type)
 {
+#warning implement me
+    if( pvm_object_class_is_or_child( obj, type) )
+        return 0;
 
+    pvm_exec_do_throw_object( da, pvm_create_string_object("type assert failed") );
+    return 1;
 }
 
 
@@ -343,7 +348,7 @@ static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj,
 static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
 {
     struct pvm_object thrown_obj = os_pop();
-    pvm_exec_do_throw_object( da, thrown_obj);
+    pvm_exec_do_throw_object( da, thrown_obj );
 }
 
 
@@ -626,6 +631,40 @@ pvm_exec_static_call(
     if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
 }
 
+
+/** UNTESTED, UNUSED
+ *
+ * \brief Simulate call - used to call methods on behalf of current thread.
+ *
+ * \param[in]  da              Current thread data area
+ * \param[in]  new_this        This for called method
+ * \param[in]  method_ordinal  Ordinal of method we call
+ * \param[in]  n_args          Number of parameters 
+ * \param[in]  args            Parameters
+ *
+ * Create new call frame, init it.
+ *
+ * Set new call frame as current.
+ *
+**/
+
+pvm_exec_simulated_call(
+                    struct data_area_4_thread *da,
+                    struct pvm_object new_this,
+                    int method,
+                    int n_args,
+                    struct pvm_object args[]
+                   )
+{
+    int i;
+    for( i = 0; i < n_args; i++ )
+    {
+        os_push( args[i] ); // right order? seem so...
+    }
+
+    pvm_exec_call( da, method, n_args, 0, new_this );
+}
+
 /**
  *
  * Well... here is the root of all evil. The bytecode interpreter itself.
@@ -649,8 +688,10 @@ pvm_exec_static_call(
  *
  *
 **/
+static void do_pvm_exec(pvm_object_t current_thread) 
+__attribute__((hot)); // tell compiler this func must be optimized a lot
 
-static void do_pvm_exec(pvm_object_t current_thread)
+static void do_pvm_exec(pvm_object_t current_thread) 
 {
     int prefix_long = 0;
     int prefix_float = 0;
@@ -666,13 +707,13 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
     pvm_exec_load_fast_acc(da); // For any case
 
-#if OLD_VM_SLEEP
-    // Thread was snapped sleeping - resleep it
-    if(da->sleep_flag)
-        phantom_thread_sleep_worker( da );
-#else
+//#if OLD_VM_SLEEP
+//    // Thread was snapped sleeping - resleep it
+//    if(da->sleep_flag)
+//        phantom_thread_sleep_worker( da );
+//#else
 #warning resleep?
-#endif
+//#endif
 
     while(1)
     {
@@ -2191,17 +2232,17 @@ static void do_pvm_exec(pvm_object_t current_thread)
             {
                 pvm_exec_sys(da,instruction & 0x0F);
     sys_sleep:
-#if OLD_VM_SLEEP
+//#if OLD_VM_SLEEP
                 // Only sys can put thread asleep
                 // If we are snapped here we, possibly, will continue from
                 // the entry to this func. So save fast acc and recheck
                 // sleep condition on the func entry.
-                if(da->sleep_flag)
-                {
-                    pvm_exec_save_fast_acc(da); // Before snap
-                    phantom_thread_sleep_worker( da );
-                }
-#endif
+//                if(da->sleep_flag)
+//                {
+//                    pvm_exec_save_fast_acc(da); // Before snap
+//                    phantom_thread_sleep_worker( da );
+//                }
+//#endif
                 break;
             }
 
@@ -2244,6 +2285,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
 void pvm_exec(pvm_object_t current_thread)
 {
+    vm_lock_persistent_memory();
+
 #if CONF_USE_E4C
     volatile int status = 0;
     //e4c_context_begin( 0 );
@@ -2268,6 +2311,7 @@ void pvm_exec(pvm_object_t current_thread)
 
     (void) status;
 #endif // CONF_USE_E4C
+    vm_unlock_persistent_memory();
 }
 
 
@@ -2586,7 +2630,11 @@ pvm_exec_run_method(
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 
+    //vm_unlock_persistent_memory(); // pvm_exec will lock, do not need nested lock - will prevent snaps
+    // NO - we must prevent snap here!! it won't work right after restart, part of state is in C code
     pvm_exec( thread );
+    //vm_lock_persistent_memory();
+
 
     pvm_object_t ret = pvm_ostack_pop( pvm_object_da(cfda->ostack, object_stack) );
 

@@ -290,6 +290,46 @@ errno_t t_set_snapper_flag()
 }
 
 
+#if CONF_DUAL_PAGEMAP
+
+/**
+ * Set paged (object land) memory access enabled or disabled for current thread.
+ * 
+ * \param[in]  enable         True to enable access.
+ * 
+ * Supposed to be called ONLY from snap_sync.c vm_{lock,unlock}_persistent_memory()
+ * 
+**/
+// NB! Can't be used in thread creation for current thread is not thread we create
+void            
+t_set_paged_mem(bool enable) //< Enable or disable access to paged memory - calls arch pagemap func.
+{
+    TA_LOCK();
+
+    phantom_thread_t * t = GET_CURRENT_THREAD();
+    assert(t != 0);
+
+    if(enable)  t->object_land_access_nest_level++;
+    else        t->object_land_access_nest_level--;
+
+    if( (!enable) && (t->object_land_access_nest_level > 0) )
+    {
+        // Do not revoke object land access if it was nested
+        TA_UNLOCK();
+        return;
+    }
+
+    // TODO skip nested enable too
+
+    int32_t cr3 = arch_switch_pdir( enable );
+    t->cr3 = cr3;
+
+    TA_UNLOCK();
+    //if(t->cr3 == 0) printf(" tid %d set cr3=0x%x ", t->tid, t->cr3);
+}
+#endif
+
+
 // -----------------------------------------------------------
 // old - to rewrite & kill
 // -----------------------------------------------------------

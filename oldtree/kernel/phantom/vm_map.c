@@ -225,6 +225,15 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 {
     (void) ip;
 
+#if CONF_DUAL_PAGEMAP
+	int ola = arch_is_object_land_access_enabled(); //< check if current thread attempts to access object space having access disabled
+	if( !ola )
+	{
+		lprintf("\nObject land access disabled\n");
+		trap_panic(ts);
+	}
+#endif
+
 #if 1
     vm_page *vmp = addr_to_vm_page((addr_t) address, ts);
 #else

@@ -28,6 +28,8 @@
 #include <queue.h>
 #include <phantom_libc.h>
 
+#include <kernel/snap_sync.h>
+
 
 static tid_t            painter_tid = -1;
 static hal_sem_t        painter_sem;
@@ -266,7 +268,9 @@ static void painter_thread(void *arg)
     {
         hal_sem_acquire( &painter_sem );
         hal_sleep_msec(2); // give 'em some chance to put more to queue
+        vm_lock_persistent_memory(); // We access persistent memory now and then
         repaint_q();
+        vm_unlock_persistent_memory(); // We access persistent memory now and then
     }
 
 }

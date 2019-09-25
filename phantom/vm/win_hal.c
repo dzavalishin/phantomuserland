@@ -77,6 +77,7 @@ vmem_ptr_t hal_object_space_address() { return hal.object_vspace; }
 
 tid_t hal_start_thread( void (*thread)(void *arg), void *arg, int flags )
 {
+    flags &= ~THREAD_FLAG_VM; // ok with it
     assert(!flags);
 
     unsigned long tid = win_hal_start_thread( thread, arg );
@@ -107,6 +108,12 @@ errno_t t_current_set_name( const char *name )
     (void) name;
     return EINVAL;
 }
+
+errno_t         t_set_owner( tid_t tid, void *owner )
+{
+    return EINVAL;
+}
+
 
 errno_t hal_set_current_thread_priority(int p)
 {
@@ -196,10 +203,10 @@ void phantom_thread_wait_4_snap()
 }
 
 
-void phantom_activate_thread()
-{
-    // Threads do not work in this mode
-}
+//void phantom_activate_thread()
+//{
+//    // Threads do not work in this mode
+//}
 
 
 void hal_exit_kernel_thread()
@@ -238,7 +245,7 @@ int phantom_dev_keyboard_getc(void)
 
 
 
-
+/*
 //#if OLD_VM_SLEEP
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 {
@@ -246,7 +253,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     {
         if(DEBUG) printf("Thread will die now\n");
         pthread_exit(0);
-    }*/
+    }* /
 
 
     //phantom_virtual_machine_threads_stopped++;
@@ -261,7 +268,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     //phantom_virtual_machine_threads_stopped--;
 
 }
-
+*/
 /* dz off
 
 void phantom_thread_put_asleep( struct data_area_4_thread *thda )
@@ -717,4 +724,6 @@ void check_global_lock_entry_count(void) {}
 
 
 
+void vm_lock_persistent_memory() {}
+void vm_unlock_persistent_memory() {}
 

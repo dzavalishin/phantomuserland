@@ -22,6 +22,9 @@
 #define COMPILE_UHCI 1
 #define COMPILE_OHCI 1
 
+// Keep two different pagetables to swich access to persistent memory on and off
+#define CONF_DUAL_PAGEMAP 1
+
 // Use spinlocks for pool, not mutexes - does not work yet
 #define CONF_POOL_SPIN 0
 

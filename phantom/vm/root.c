@@ -69,10 +69,11 @@ static void process_specific_restarts(void);
 
 void pvm_root_init(void)
 {
+    vm_lock_persistent_memory();
+
     struct pvm_object_storage *root = get_root_object_storage();
 
     dbg_add_command( runclass, "runclass", "runclass class [method ordinal] - create object of given class and run method (ord 8 by default)");
-
 
     if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
     {
@@ -86,19 +87,9 @@ void pvm_root_init(void)
 
         load_kernel_boot_env();
 
-        /* test code
-        {
-            char buf[512];
-            phantom_getenv("root.shell", buf, 511 );
-            printf("Root shell env var is '%s'\n", buf );
-            phantom_getenv("root.init", buf, 511 );
-            printf("Root init env var is '%s'\n", buf );
-            getchar();
-        }
-        */
-
         pvm_boot();
 
+        vm_unlock_persistent_memory(); // We return to main, rest of code assumed to not to have objects access
         return;
     }
 
@@ -114,7 +105,6 @@ void pvm_root_init(void)
     }
 
     set_root_from_table();
-
 
     pvm_root.null_object = pvm_get_field( root, PVM_ROOT_OBJECT_NULL );
     pvm_root.threads_list = pvm_get_field( root, PVM_ROOT_OBJECT_THREAD_LIST );
@@ -132,6 +122,7 @@ void pvm_root_init(void)
     process_specific_restarts();
     process_generic_restarts(root);
 
+    vm_unlock_persistent_memory(); // We return to main, rest of code assumed to not to have objects access
 }
 
 static void process_generic_restarts(struct pvm_object_storage *root)

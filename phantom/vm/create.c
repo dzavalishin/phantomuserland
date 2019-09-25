@@ -536,9 +536,9 @@ void pvm_internal_init_thread(struct pvm_object_storage * os)
 	struct data_area_4_thread *      da = (struct data_area_4_thread *)os->da;
 
 	hal_spin_init(&da->spin);
-#if OLD_VM_SLEEP
-        da->sleep_flag                      = 0;
-#endif
+//#if OLD_VM_SLEEP
+//        da->sleep_flag                      = 0;
+//#endif
 	//hal_cond_init(&(da->wakeup_cond), "VmThrdWake");
 
 	da->call_frame   			= pvm_create_call_frame_object();

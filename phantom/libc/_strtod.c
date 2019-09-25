@@ -267,6 +267,7 @@ __fpmax_t attribute_hidden __XL_NPP(__strtofpmax)(const Wchar *str, Wchar **endp
     negative = 0;
     switch(*pos) {                /* Handle optional sign. */
         case '-': negative = 1;    /* Fall through to increment position. */
+        /* FALLTHRU */
         case '+': ++pos;
     }
 
@@ -412,6 +413,7 @@ __fpmax_t attribute_hidden __XL_NPP(__strtofpmax)(const Wchar *str, Wchar **endp
         negative = 1;
         switch(*++pos) {        /* Handle optional sign. */
             case '-': negative = -1; /* Fall through to increment pos. */
+            /* FALLTHRU */
             case '+': ++pos;
         }
 

@@ -295,6 +295,8 @@ void w_font_tty_string(
                 else
                     color = cmap[v];
 #endif
+                continue;
+
             default:
                 continue;
             }

@@ -1,7 +1,0 @@
-Exception: STATUS_ACCESS_VIOLATION at eip=00000000
-eax=00000000 ebx=00000000 ecx=00000400 edx=FED30088 esi=00000300 edi=00000000
-ebp=FFE4CD28 esp=FFE4CCAC program=P:\phantomuserland\phantom\vm\pvm_headless.exe, pid 988, thread pvm_headless
-cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
-Stack trace:
-Frame     Function  Args
-End of stack trace

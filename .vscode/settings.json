@@ -85,6 +85,13 @@
       "object_flags.h": "c",
       "internal.h": "c",
       "alloc.h": "c",
-      "jsmn.h": "c"
+      "jsmn.h": "c",
+      "mmu.h": "c",
+      "threads.h": "c",
+      "hal.h": "c",
+      "page.h": "c",
+      "machdep.h": "c",
+      "cpu_state.h": "c",
+      "arch-cpu_state.h": "c"
     }
   }
