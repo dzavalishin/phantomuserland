@@ -50,6 +50,8 @@ class .internal.object
     // have hack in compiler which 'finds' method 0 as default c'tor for us
 	//void object() { construct_me(); } // Or else compiler fails to find root default constructor
 
+	void setImmutable() [14] { }
+
 };
 
 

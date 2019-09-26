@@ -42,6 +42,8 @@ class .internal.string
 
 	int strstr( var s : string ) [12] {}
 
+	void setImmutable() [14] { }
+
 };
 
 

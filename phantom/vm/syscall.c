@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- *
+ * Internal (native) classes implementation.
  *
 **/
 
@@ -25,6 +25,7 @@
 
 #include <vm/syscall.h>
 #include <vm/object.h>
+#include <vm/object_flags.h>
 #include <vm/root.h>
 #include <vm/exec.h>
 #include <vm/bulk.h>
@@ -169,19 +170,24 @@ int si_void_7_fromXML(pvm_object_t o, struct data_area_4_thread *tc )
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "(void)" ));
 }
-
+/*
 int si_void_8_def_op_1(pvm_object_t o, struct data_area_4_thread *tc )
 {
     (void)o;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "void default op 1 called" );
 }
-
-int si_void_9_def_op_2(pvm_object_t o, struct data_area_4_thread *tc )
+*/
+int si_void_14_to_immutable(pvm_object_t o, struct data_area_4_thread *tc )
 {
-    (void)o;
     DEBUG_INFO;
-    SYSCALL_THROW_STRING( "void default op 2 called" );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 0);
+
+    o->_ah.alloc_flags |= PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE;
+
+    SYSCALL_RETURN(pvm_create_int_object( 0 ) );
 }
 
 
@@ -205,10 +211,10 @@ syscall_func_t	syscall_table_4_void[16] =
     &si_void_4_equals,              &si_void_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
-    &invalid_syscall,               &si_void_15_hashcode
+    &invalid_syscall,               &invalid_syscall,
+    &si_void_14_to_immutable,        &si_void_15_hashcode
 
 };
 DECLARE_SIZE(void);
@@ -264,13 +270,13 @@ syscall_func_t	syscall_table_4_int[16] =
 {
     &si_void_0_construct,           	&si_void_1_destruct,
     &si_void_2_class,               	&si_int_3_clone,
-    &si_int_4_equals,     		&si_int_5_tostring,
-    &si_int_6_toXML,      		&si_void_7_fromXML,
+    &si_int_4_equals,                   &si_int_5_tostring,
+    &si_int_6_toXML,                    &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            	&si_void_9_def_op_2,
+    &invalid_syscall,                   &invalid_syscall,
     &invalid_syscall,               	&invalid_syscall,
     &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&si_void_15_hashcode
+    &si_void_14_to_immutable,           &si_void_15_hashcode
 };
 //int	n_syscall_table_4_int =	(sizeof syscall_table_4_int) / sizeof(syscall_func_t);
 DECLARE_SIZE(int);
@@ -334,10 +340,10 @@ syscall_func_t	syscall_table_4_long[16] =
     &si_long_4_equals,     	    &si_long_5_tostring,
     &si_long_6_toXML,      	    &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,        &si_void_9_def_op_2,
     &invalid_syscall,           &invalid_syscall,
     &invalid_syscall,           &invalid_syscall,
-    &invalid_syscall,           &si_void_15_hashcode
+    &invalid_syscall,           &invalid_syscall,
+    &si_void_14_to_immutable,   &si_void_15_hashcode
 };
 DECLARE_SIZE(long);
 
@@ -394,10 +400,10 @@ syscall_func_t	syscall_table_4_float[16] =
     &si_float_4_equals,         &si_float_5_tostring,
     &si_float_6_toXML,          &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,        &si_void_9_def_op_2,
     &invalid_syscall,           &invalid_syscall,
     &invalid_syscall,           &invalid_syscall,
-    &invalid_syscall,           &si_void_15_hashcode
+    &invalid_syscall,           &invalid_syscall,
+    &si_void_14_to_immutable,   &si_void_15_hashcode
 };
 DECLARE_SIZE(float);
 
@@ -452,13 +458,13 @@ syscall_func_t	syscall_table_4_double[16] =
 {
     &si_void_0_construct,       &si_void_1_destruct,
     &si_void_2_class,           &si_double_3_clone,
-    &si_double_4_equals,         &si_double_5_tostring,
-    &si_double_6_toXML,          &si_void_7_fromXML,
+    &si_double_4_equals,        &si_double_5_tostring,
+    &si_double_6_toXML,         &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,        &si_void_9_def_op_2,
     &invalid_syscall,           &invalid_syscall,
     &invalid_syscall,           &invalid_syscall,
-    &invalid_syscall,           &si_void_15_hashcode
+    &invalid_syscall,           &invalid_syscall,
+    &si_void_14_to_immutable,   &si_void_15_hashcode
 };
 DECLARE_SIZE(double);
 
@@ -639,13 +645,13 @@ syscall_func_t	syscall_table_4_string[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_string_3_clone,
-    &si_string_4_equals,  &si_string_5_tostring,
+    &si_string_4_equals,            &si_string_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
     &si_string_8_substring, 		&si_string_9_charat,
-    &si_string_10_concat, 		&si_string_11_length,
-    &si_string_12_find,               &invalid_syscall,
-    &invalid_syscall,               &si_void_15_hashcode
+    &si_string_10_concat,           &si_string_11_length,
+    &si_string_12_find,             &invalid_syscall,
+    &si_void_14_to_immutable,       &si_void_15_hashcode
 };
 DECLARE_SIZE(string);
 
@@ -754,7 +760,7 @@ syscall_func_t	syscall_table_4_thread[16] =
     &si_void_4_equals,              &si_thread_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &si_thread_10_pause,            &si_thread_11_continue,
     &si_thread_12_getEnvironment,   &si_thread_13_getUser,
     &si_thread_14_getOsInterface,   &si_void_15_hashcode
@@ -780,7 +786,7 @@ syscall_func_t	syscall_table_4_call_frame[16] =
     &si_void_4_equals,              &si_call_frame_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
@@ -806,7 +812,7 @@ syscall_func_t	syscall_table_4_istack[16] =
     &si_void_4_equals,              &si_istack_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
@@ -832,7 +838,7 @@ syscall_func_t	syscall_table_4_ostack[16] =
     &si_void_4_equals,              &si_ostack_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
@@ -858,7 +864,7 @@ syscall_func_t	syscall_table_4_estack[16] =
     &si_void_4_equals,              &si_estack_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
@@ -959,7 +965,7 @@ syscall_func_t	syscall_table_4_class[16] =
     &si_void_4_equals,              &si_class_class_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_class_class_8_new_class,    &si_void_9_def_op_2,
+    &si_class_class_8_new_class,    &invalid_syscall,
     &si_class_10_set_static,        &si_class_11_get_static,
     &invalid_syscall,               &invalid_syscall,
     &si_class_14_instanceof,        &si_void_15_hashcode
@@ -985,7 +991,7 @@ syscall_func_t	syscall_table_4_interface[16] =
     &si_void_4_equals,              &si_interface_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
@@ -1011,7 +1017,7 @@ syscall_func_t	syscall_table_4_code[16] =
     &si_void_4_equals,              &si_code_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
@@ -1037,7 +1043,7 @@ syscall_func_t	syscall_table_4_page[16] =
     &si_void_4_equals,              &si_page_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_void_8_def_op_1,            &si_void_9_def_op_2,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
@@ -1114,6 +1120,7 @@ errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_
     if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
     struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
     errno_t rc = hdir_add( da, name, name_len, new_class );
+    return rc;
 #endif
 }
 

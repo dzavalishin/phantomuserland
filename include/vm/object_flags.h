@@ -4,10 +4,10 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes?
+ * Object header flags
  *
  *
- **/
+**/
 
 #ifndef PO_OBJECT_FLAGS_H
 #define PO_OBJECT_FLAGS_H
