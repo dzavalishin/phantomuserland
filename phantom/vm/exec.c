@@ -648,6 +648,7 @@ pvm_exec_static_call(
  *
 **/
 
+void
 pvm_exec_simulated_call(
                     struct data_area_4_thread *da,
                     pvm_object_t new_this,

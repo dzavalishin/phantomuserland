@@ -135,11 +135,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
 
     pvm_object_t base_class = pvm_get_null_class();
-    pvm_object_t iface        = { 0, 0 };
-    pvm_object_t ip2line_maps = { 0, 0 };
-    pvm_object_t method_names = { 0, 0 };
-    pvm_object_t field_names  = { 0, 0 };
-    pvm_object_t const_pool  = { 0, 0 };
+    pvm_object_t iface        = 0;
+    pvm_object_t ip2line_maps = 0;
+    pvm_object_t method_names = 0;
+    pvm_object_t field_names  = 0;
+    pvm_object_t const_pool   = 0;
 
     int got_class_header = 0;
 
@@ -290,6 +290,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                 int m_ordinal = pvm_code_get_int32(&h);
                 int m_n_args = pvm_code_get_int32(&h);
                 int is_ctor = pvm_code_get_int32(&h); // 1 = method is constructor
+                (void) is_ctor;
 
                 struct type_loader_handler mth;
                 pvm_load_type( &h , &mth );
@@ -335,7 +336,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                 struct type_loader_handler th;
                 pvm_load_type( &h , &th );
 
-                pvm_object_t c_value = { 0, 0 };
+                pvm_object_t c_value = 0;
 
                 // No const containers (yet?)
                 if( th.is_container ) goto unk_const;

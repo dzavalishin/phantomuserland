@@ -16,6 +16,7 @@
 #define debug_level_info 10
 
 #include <kernel/vm.h>
+#include <spinlock.h>
 
 #include <vm/root.h>
 #include <vm/exec.h>
@@ -24,6 +25,8 @@
 #include <vm/alloc.h>
 #include <vm/internal.h>
 #include <vm/internal_da.h>
+#include <vm/spin.h>
+
 #include "ids/opcode_ids.h"
 
 #include <assert.h>

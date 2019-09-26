@@ -233,7 +233,7 @@ void parse_and_dump( const char * j1 )
 
 void pvm_json_test()
 {
-	sleep(1);
+	//sleep(1);
 	printf("\n");
 
 	//const char j1[] = "{ \"a\" : \"hello\", \"b\" : 122, \"c\" : [ \"c1\", \"c2\" ] }";

@@ -277,28 +277,10 @@ pvm_set_ofield( pvm_object_t op, unsigned int slot, pvm_object_t value )
 
 /**
  *
- * Class is: checks if object's class is tclass or it's parent.
+ * Class exactly is: checks if object's class is tclass.
  *
 **/
-/*
-int pvm_object_class_is( pvm_object_t object, pvm_object_t tclass )
-{
-    pvm_object_t tested = object->_class;
-    pvm_object_t nullc = pvm_get_null_class();
 
-    while( !pvm_is_null( tclass ) )
-    {
-        if( tested == tclass )
-            return 1;
-
-        if( tclass == nullc )
-            break;
-
-        tclass = pvm_object_da( tclass, class )->class_parent;
-    }
-    return 0;
-}
-*/
 
 int pvm_object_class_exactly_is( pvm_object_t object, pvm_object_t tclass )
 {
@@ -311,7 +293,12 @@ int pvm_object_class_exactly_is( pvm_object_t object, pvm_object_t tclass )
     return 0;
 }
 
-// Really need this?
+/**
+ *
+ * Class is or parent: checks if object's class is tclass or it's parent.
+ *
+**/
+
 int pvm_object_class_is_or_parent( pvm_object_t object, pvm_object_t tclass )
 {
     pvm_object_t tested = object->_class;
@@ -330,10 +317,16 @@ int pvm_object_class_is_or_parent( pvm_object_t object, pvm_object_t tclass )
     return 0;
 }
 
+/**
+ *
+ * Class is or child: checks if object's class is tclass or it's child.
+ *
+**/
+
+
 int pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass )
 {
     pvm_object_t oclass = object->_class;
-    //pvm_object_t tested = object->_class;
     pvm_object_t nullc = pvm_get_null_class();
 
     if( pvm_is_null( tclass ) ) return 0;
@@ -341,11 +334,6 @@ int pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass )
     while( !pvm_is_null(oclass) )
     {
         struct data_area_4_class *oclass_da = pvm_object_da( oclass, class );
-        //tclass_da = pvm_object_da( tclass, class );
-
-        //printf("oclass %p tclass %p, oclass parent=", oclass, tclass );
-        //pvm_object_dump( oclass_da->class_parent );
-        //printf("\n");
 
         if( oclass == tclass )
             return 1;
@@ -362,7 +350,7 @@ int pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass )
  *
  * Shallow copy of the object
  *
-**/
+** /
 
 pvm_object_t 
 pvm_copy_object( pvm_object_t in_object )
@@ -389,7 +377,7 @@ pvm_copy_object( pvm_object_t in_object )
 
     return out;
 }
-
+*/
 
 /*
 pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st)

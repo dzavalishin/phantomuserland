@@ -217,16 +217,13 @@ void pvm_trace_here(struct data_area_4_thread *tda)
     //if( !pvm_object_class_is(sframe, pvm_get_stack_frame_class()) ) ??!
 
     struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
-
     //printf("pvm_backtrace frame:\n");    pvm_object_dump(sframe);    printf("\n");
 
-    pvm_object_t thiso = fda->this_object;
-
-    //printf("pvm_backtrace frame this:\n");    pvm_object_dump(thiso);    printf("\n");
-
-    pvm_object_t tclass = thiso->_class;
     int ord = fda->ordinal;
 /*
+    pvm_object_t thiso = fda->this_object;
+    //printf("pvm_backtrace frame this:\n");    pvm_object_dump(thiso);    printf("\n");
+    pvm_object_t tclass = thiso->_class;
     printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
 
     int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);

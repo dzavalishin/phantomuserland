@@ -378,8 +378,9 @@ void do_ref_dec_p(pvm_object_storage_t *p)
     }*/
 
     if(p->_ah.refCount < INT_MAX) // Do we really need this check? Sure, we see many decrements for saturated objects!
-    {
-        if( 0 == ( --(p->_ah.refCount) ) )
+    {        
+        //if( 0 == ( --(p->_ah.refCount) ) )
+        if( 0 == ( ATOMIC_ADD_AND_FETCH( &(p->_ah.refCount), -1 ) ) )
         {
             if( p->_flags & PHANTOM_OBJECT_STORAGE_FLAG_HAS_WEAKREF )
             {
@@ -460,7 +461,8 @@ void ref_inc_p(pvm_object_storage_t *p)
 
     if( p->_ah.refCount < INT_MAX )
     {
-        (p->_ah.refCount)++;
+        //(p->_ah.refCount)++;
+        ATOMIC_ADD_AND_FETCH( &(p->_ah.refCount), 1 );
 
         if ( p->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER )
             p->_ah.alloc_flags &= ~PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN ;  //clear down flag

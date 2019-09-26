@@ -21,7 +21,9 @@
 #include <vm/object.h>
 #include <vm/alloc.h>
 #include <vm/internal_da.h>
-#include <spinlock.h>
+
+#include <vm/spin.h>
+//#include <spinlock.h>
 
 #define debug_print 0
 

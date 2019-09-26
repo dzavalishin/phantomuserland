@@ -34,6 +34,7 @@
 #include <kernel/boot.h>
 #include <kernel/debug.h>
 #include <kernel/stats.h>
+#include <kernel/snap_sync.h>
 
 //#include "vm/systable_id.h"
 

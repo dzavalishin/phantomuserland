@@ -264,7 +264,7 @@ pvm_object_t     pvm_create_object(pvm_object_t type);
  *
 **/
 
-pvm_object_t     pvm_copy_object(pvm_object_t orig);
+//pvm_object_t     pvm_copy_object(pvm_object_t orig);
 
 
 

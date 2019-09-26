@@ -81,7 +81,7 @@ void pvm_ostack_reserve( struct data_area_4_object_stack* rootda, int n_slots )
 {
     struct data_area_4_object_stack* s = rootda->curr_da;
 
-    pvm_object_t zero = {0,0};
+    pvm_object_t zero = 0;
 
     while( n_slots-- > 0 )
     {

@@ -68,7 +68,7 @@ void jit_kernel_func_table_init()
     _SF_( JIT_F_WAIT_SNAP, 		phantom_thread_wait_4_snap );
     _SF_( JIT_F_CODE_GET_BYTE, 		pvm_code_get_byte );
     _SF_( JIT_F_CREATE_OBJ, 		pvm_create_object );
-    _SF_( JIT_F_COPY_OBJ,               pvm_copy_object );
+    //_SF_( JIT_F_COPY_OBJ,               pvm_copy_object );
     _SF_( JIT_F_CREATE_INT_OBJ,         pvm_create_int_object );
 
 };
