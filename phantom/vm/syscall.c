@@ -22,6 +22,7 @@
 #include <kernel/snap_sync.h>
 #include <kernel/vm.h>
 #include <kernel/atomic.h>
+#include <kernel/init.h> // cpu reset
 
 #include <vm/syscall.h>
 #include <vm/object.h>
@@ -1056,7 +1057,6 @@ DECLARE_SIZE(page);
 // --------- bootstrap -------------------------------------------------------
 // ---------------------------------------------------------------------------
 
-// TODO move cache use to pvm_exec_lookup_class_by_name()? Or use it in both places?
 #define CACHED_CLASSES 1
 #define DEBUG_CACHED_CLASSES 0
 
@@ -1422,8 +1422,27 @@ static int si_bootstrap_23_getenv(pvm_object_t me, struct data_area_4_thread *tc
     SYSCALL_RETURN( ref_inc_o( pvm_root.kernel_environment ) );
 }
 
+static int si_bootstrap_24_reboot(pvm_object_t me, struct data_area_4_thread *tc )
+{
+    (void)me;
+    DEBUG_INFO;
 
-syscall_func_t	syscall_table_4_boot[24] =
+    //int n_param = POP_ISTACK;
+    //CHECK_PARAM_COUNT(n_param, 1);
+
+    //pvm_object_t arg = POP_ARG;
+    
+    // F11
+    //phantom_shutdown(0);
+
+    //case KEY_F12:
+    hal_cpu_reset_real();
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+
+syscall_func_t	syscall_table_4_boot[25] =
 {
     &si_void_0_construct,           	&si_void_1_destruct,
     &si_void_2_class,               	&si_void_3_clone,
@@ -1440,7 +1459,7 @@ syscall_func_t	syscall_table_4_boot[24] =
     &si_bootstrap_20_set_screen_background, &si_bootstrap_21_sleep,
     &si_bootstrap_22_set_os_interface,  &si_bootstrap_23_getenv,
     // 24
-    //&si_bootstrap_24_getenv_val
+    &si_bootstrap_24_reboot
 };
 DECLARE_SIZE(boot);
 
