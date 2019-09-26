@@ -113,7 +113,7 @@ unsigned int pvm_code_get_rel_IP_as_abs(struct pvm_code_handler *code)
     return here + (int)pvm_code_get_int32(code);
 }
 
-struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
+pvm_object_t pvm_code_get_string(struct pvm_code_handler *code)
 {
     int len = pvm_code_get_int32(code);
     const unsigned char *sp = code->code+code->IP;
@@ -131,12 +131,12 @@ struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
  *
  **/
 
-void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, struct pvm_object code)
+void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, pvm_object_t code)
 {
-    if( !(code.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
+    if( !(code->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
         pvm_exec_panic0("exec: not a code object");
 
-    struct data_area_4_code *da = (struct data_area_4_code *)&(code.data->da);
+    struct data_area_4_code *da = (struct data_area_4_code *)&(code->da);
 
     cf->code = da->code;
     cf->IP_max = da->code_size;

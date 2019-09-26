@@ -30,16 +30,17 @@
 
 
 /** Extract (typed) object data area pointer from object pointer. */
-#define pvm_object_da( o, type ) ((struct data_area_4_##type *)&(o.data->da))
+#define pvm_object_da( o, type ) ((struct data_area_4_##type *)&(o->da))
 /** Extract (typed) object data area pointer from object pointer. */
-#define pvm_data_area( o, type ) ((struct data_area_4_##type *)&(o.data->da))
+#define pvm_data_area( o, type ) ((struct data_area_4_##type *)&(o->da))
 
 /** Num of slots in normal (noninternal) object. */
-#define da_po_limit(o)	 (((o)->_da_size)/sizeof(struct pvm_object))
+#define da_po_limit(o)	 (((o)->_da_size)/sizeof(pvm_object_t ))
 /** Slots access for noninternal object. */
-#define da_po_ptr(da)  ((struct pvm_object *)&(da))
+#define da_po_ptr(da)  ((pvm_object_t *)&(da))
 
-pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st);
+//pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st);
+#define pvm_storage_to_object( o ) (o)
 
 static inline pvm_object_t pvm_da_to_object(void *da)
 {
@@ -49,7 +50,7 @@ static inline pvm_object_t pvm_da_to_object(void *da)
     return pvm_storage_to_object(st);
 }
 
-void pvm_fill_syscall_interface( struct pvm_object iface, int syscall_count );
+void pvm_fill_syscall_interface( pvm_object_t iface, int syscall_count );
 
 
 
@@ -81,8 +82,8 @@ void pvm_fill_syscall_interface( struct pvm_object iface, int syscall_count );
 
 struct data_area_4_array
 {
-    struct pvm_object      	page;
-    int                 	page_size; // current page size
+    pvm_object_t            page;
+    int                     page_size; // current page size
     int                 	used_slots; // how many slots are used now
 };
 
@@ -90,20 +91,20 @@ struct data_area_4_array
 
 struct data_area_4_call_frame
 {
-    struct pvm_object		istack; // integer (fast calc) stack
-    struct pvm_object		ostack; // main object stack
-    struct pvm_object		estack; // exception catchers
+    pvm_object_t 		istack; // integer (fast calc) stack
+    pvm_object_t 		ostack; // main object stack
+    pvm_object_t 		estack; // exception catchers
 
-    //struct pvm_object		cs; 	// code segment, ref just for gc - OK without
+    //pvm_object_t 		cs; 	// code segment, ref just for gc - OK without
 
     unsigned int		IP_max;	// size of code in bytes
     unsigned char *		code; 	// (byte)code itself
 
     unsigned int    		IP;
 
-    struct pvm_object  		this_object;
+    pvm_object_t            this_object;
 
-    struct pvm_object		prev; // where to return!
+    pvm_object_t 		prev; // where to return!
 
     int                 	ordinal; // num of method we run
 
@@ -126,7 +127,7 @@ struct data_area_4_int
 };
 
 // TODO: make sure it is not an lvalue for security reasons!
-#define pvm_get_int( o )  ( (int) (((struct data_area_4_int *)&(o.data->da))->value))
+#define pvm_get_int( o )  ( (int) (((struct data_area_4_int *)&(o->da))->value))
 
 struct data_area_4_long
 {
@@ -134,7 +135,7 @@ struct data_area_4_long
 };
 
 // TODO: make sure it is not an lvalue for security reasons!
-#define pvm_get_long( o )  ( (int64_t) (((struct data_area_4_long *)&(o.data->da))->value))
+#define pvm_get_long( o )  ( (int64_t) (((struct data_area_4_long *)&(o->da))->value))
 
 
 struct data_area_4_float
@@ -143,7 +144,7 @@ struct data_area_4_float
 };
 
 // TODO: make sure it is not an lvalue for security reasons!
-#define pvm_get_float( o )  ( (float) (((struct data_area_4_float *)&(o.data->da))->value))
+#define pvm_get_float( o )  ( (float) (((struct data_area_4_float *)&(o->da))->value))
 
 struct data_area_4_double
 {
@@ -151,7 +152,7 @@ struct data_area_4_double
 };
 
 // TODO: make sure it is not an lvalue for security reasons!
-#define pvm_get_double( o )  ( (double) (((struct data_area_4_double *)&(o.data->da))->value))
+#define pvm_get_double( o )  ( (double) (((struct data_area_4_double *)&(o->da))->value))
 
 
 
@@ -161,8 +162,8 @@ struct data_area_4_string
     unsigned char		data[];
 };
 
-#define pvm_get_str_len( o )  ( (int) (((struct data_area_4_string *)&(o.data->da))->length))
-#define pvm_get_str_data( o )  ( (char *) (((struct data_area_4_string *)&(o.data->da))->data))
+#define pvm_get_str_len( o )  ( (int) (((struct data_area_4_string *)&(o->da))->length))
+#define pvm_get_str_data( o )  ( (char *) (((struct data_area_4_string *)&(o->da))->data))
 
 int pvm_strcmp(pvm_object_t s1, pvm_object_t s2);
 
@@ -172,20 +173,20 @@ struct data_area_4_class
 {
     unsigned int                object_flags;			// object of this class will have such flags
     unsigned int                object_data_area_size;	// object of this class will have data area of this size
-    struct pvm_object		object_default_interface; // default one
+    pvm_object_t 		object_default_interface; // default one
 
     unsigned int    		sys_table_id; // See above - index into the kernel's syscall tables table
 
-    struct pvm_object		class_name;
-    struct pvm_object		class_parent;
+    pvm_object_t 		class_name;
+    pvm_object_t 		class_parent;
 
-    struct pvm_object		static_vars; // array of static variables
+    pvm_object_t 		static_vars; // array of static variables
 
-    struct pvm_object		ip2line_maps; // array of maps: ip->line number
-    struct pvm_object		method_names; // array of method names
-    struct pvm_object		field_names; // array of field names
+    pvm_object_t 		ip2line_maps; // array of maps: ip->line number
+    pvm_object_t 		method_names; // array of method names
+    pvm_object_t 		field_names; // array of field names
 
-    struct pvm_object		const_pool; // array of object constants
+    pvm_object_t 		const_pool; // array of object constants
 };
 
 
@@ -205,11 +206,11 @@ struct data_area_4_thread
     struct pvm_code_handler             code;           // Loaded by load_fast_acc from frame
 
     //unsigned long   		              thread_id; // Too hard to implement and nobody needs
-    struct pvm_object  	                call_frame; 	// current
+    pvm_object_t  	                call_frame; 	// current
 
     // some owner pointer?
-    struct pvm_object                   owner;
-    struct pvm_object                   environment;
+    pvm_object_t                   owner;
+    pvm_object_t                   environment;
 
     hal_spinlock_t                      spin;           // used on manipulations with sleep_flag
 
@@ -225,7 +226,7 @@ struct data_area_4_thread
 
 // fast access copies
 
-    struct pvm_object  				_this_object; 	// Loaded by load_fast_acc from call_frame
+    pvm_object_t  				_this_object; 	// Loaded by load_fast_acc from call_frame
 
     struct data_area_4_integer_stack *		_istack;        // Loaded by load_fast_acc from call_frame
     struct data_area_4_object_stack *		_ostack;        // Loaded by load_fast_acc from call_frame
@@ -255,7 +256,7 @@ struct pvm_stack_da_common
      * rootda is shortcut pointer to root's data area (struct data_area_4_XXX_stack).
      *
      */
-    struct pvm_object           	root;
+    pvm_object_t           	root;
 
     /**
      *
@@ -267,13 +268,13 @@ struct pvm_stack_da_common
      * See also '#define set_me(to)' in stacks.c.
      *
      */
-    struct pvm_object           	curr;
+    pvm_object_t           	curr;
 
     /** Pointer to previous (older) stack page. */
-    struct pvm_object  			prev;
+    pvm_object_t  			prev;
 
     /** Pointer to next (newer) stack page. */
-    struct pvm_object  			next;
+    pvm_object_t  			next;
 
     /** number of cells used. */
     unsigned int    			free_cell_ptr;
@@ -305,7 +306,7 @@ struct data_area_4_object_stack
 
     struct data_area_4_object_stack *  	curr_da;
 
-    struct pvm_object			stack[PVM_OBJECT_STACK_SIZE];
+    pvm_object_t			stack[PVM_OBJECT_STACK_SIZE];
 };
 
 
@@ -419,7 +420,7 @@ struct data_area_4_binary
 struct data_area_4_closure
 {
     /** Which object to call. */
-    struct pvm_object   object;
+    pvm_object_t   object;
     /** Which method to call. */
     int                 ordinal;
 };
@@ -427,7 +428,7 @@ struct data_area_4_closure
 
 struct data_area_4_bitmap
 {
-    struct pvm_object   image; // .internal.binary
+    pvm_object_t   image; // .internal.binary
     int                 xsize;
     int                 ysize;
 };
@@ -455,7 +456,7 @@ struct data_area_4_world
 struct data_area_4_weakref
 {
     /** Object we point to */
-    struct pvm_object   object;
+    pvm_object_t   object;
 #if WEAKREF_SPIN
     hal_spinlock_t      lock;   // interlocks access tp object from GC finalizer and from getting ref
 #else
@@ -478,12 +479,12 @@ struct data_area_4_window
     rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
 #endif
 
-    struct pvm_object                   connector;      // Used for callbacks - events
+    pvm_object_t                   connector;      // Used for callbacks - events
 
     int                                 x, y; // in pixels
     rgba_t                              fg, bg; // colors
 
-    //struct pvm_object                   event_handler; // connection!
+    //pvm_object_t                   event_handler; // connection!
     char                                title[PVM_MAX_TTY_TITLE+1];
 };
 
@@ -491,17 +492,17 @@ struct data_area_4_window
 #define DIR_MUTEX_O 1
 
 // Very dumb implementation, redo with hash map or bin search or tree
-// Container entry has struct pvm_object at the beginning and the rest is 0-term name string
+// Container entry has pvm_object_t at the beginning and the rest is 0-term name string
 struct data_area_4_directory
 {
     u_int32_t                           capacity;       // size of 1nd level arrays
     u_int32_t                           nEntries;       // number of actual entries stored
 
-    struct pvm_object                   keys;      	// Where we actually hold keys
-    struct pvm_object                   values;      	// Where we actually hold values
+    pvm_object_t                   keys;      	// Where we actually hold keys
+    pvm_object_t                   values;      	// Where we actually hold values
     u_int8_t                           *flags;      	// Is this keys/values slot pointing to 2nd level array
 #if DIR_MUTEX_O
-    //struct pvm_object                   mutex;      	// Mutex object
+    //pvm_object_t                   mutex;      	// Mutex object
 	pvm_spinlock_t						pvm_lock;
 #else
     hal_spinlock_t                      lock;
@@ -543,7 +544,7 @@ struct data_area_4_io
 #else
 #error mutex?
     hal_mutex_t         		mutex;
-    //struct pvm_object   		mutex;          // persistence-compatible mutex
+    //pvm_object_t   		mutex;          // persistence-compatible mutex
 #endif
 
     u_int32_t                           reset;          // not operational, unblock waiting threads

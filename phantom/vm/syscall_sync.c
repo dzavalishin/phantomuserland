@@ -171,7 +171,7 @@ done:
 }
 
 
-static int si_mutex_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+static int si_mutex_5_tostring(pvm_object_t o, struct data_area_4_thread *tc )
 {
     (void)o;
     DEBUG_INFO;
@@ -179,14 +179,14 @@ static int si_mutex_5_tostring(struct pvm_object o, struct data_area_4_thread *t
 }
 
 
-static int si_mutex_8_lock(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_mutex_8_lock(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     vm_mutex_lock( me, tc );
     SYSCALL_RETURN_NOTHING;
 }
 
-static int si_mutex_9_unlock(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_mutex_9_unlock(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     //struct data_area_4_mutex *da = pvm_object_da( me, mutex );
@@ -210,7 +210,7 @@ static int si_mutex_9_unlock(struct pvm_object me, struct data_area_4_thread *tc
     SYSCALL_RETURN_NOTHING;
 }
 
-static int si_mutex_10_trylock(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_mutex_10_trylock(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     //struct data_area_4_mutex *da = pvm_object_da( me, mutex );
@@ -242,7 +242,7 @@ DECLARE_SIZE(mutex);
 
 // --------- cond -------------------------------------------------------
 
-static int si_cond_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+static int si_cond_5_tostring(pvm_object_t o, struct data_area_4_thread *tc )
 {
     (void)o;
     DEBUG_INFO;
@@ -250,7 +250,7 @@ static int si_cond_5_tostring(struct pvm_object o, struct data_area_4_thread *tc
 }
 
 
-static int si_cond_8_wait(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_cond_8_wait(pvm_object_t me, struct data_area_4_thread *tc )
 {
     (void)me;
     DEBUG_INFO;
@@ -266,7 +266,7 @@ static int si_cond_8_wait(struct pvm_object me, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int si_cond_9_twait(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_cond_9_twait(pvm_object_t me, struct data_area_4_thread *tc )
 {
     (void)me;
     DEBUG_INFO;
@@ -284,7 +284,7 @@ static int si_cond_9_twait(struct pvm_object me, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int si_cond_10_broadcast(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_cond_10_broadcast(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_cond *da = pvm_object_da( me, cond );
@@ -298,7 +298,7 @@ static int si_cond_10_broadcast(struct pvm_object me, struct data_area_4_thread 
     SYSCALL_RETURN_NOTHING;
 }
 
-static int si_cond_11_signal(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_cond_11_signal(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_cond *da = pvm_object_da( me, cond );
@@ -332,7 +332,7 @@ DECLARE_SIZE(cond);
 
 // --------- sema -------------------------------------------------------
 
-static int si_sema_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+static int si_sema_5_tostring(pvm_object_t o, struct data_area_4_thread *tc )
 {
     (void)o;
     DEBUG_INFO;
@@ -340,7 +340,7 @@ static int si_sema_5_tostring(struct pvm_object o, struct data_area_4_thread *tc
 }
 
 
-static int si_sema_8_acquire(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_sema_8_acquire(pvm_object_t me, struct data_area_4_thread *tc )
 {
 /*
 #if OLD_VM_SLEEP
@@ -375,7 +375,7 @@ static int si_sema_8_acquire(struct pvm_object me, struct data_area_4_thread *tc
 //#endif
 }
 
-static int si_sema_9_tacquire(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_sema_9_tacquire(pvm_object_t me, struct data_area_4_thread *tc )
 {
     (void)me;
     DEBUG_INFO;
@@ -389,7 +389,7 @@ static int si_sema_9_tacquire(struct pvm_object me, struct data_area_4_thread *t
 }
 
 // Idea is to clear sema before servising request and wait on it (acquire) after
-static int si_sema_10_zero(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_sema_10_zero(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_sema *da = pvm_object_da( me, sema );
@@ -400,7 +400,7 @@ static int si_sema_10_zero(struct pvm_object me, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int si_sema_11_release(struct pvm_object me, struct data_area_4_thread *tc )
+static int si_sema_11_release(pvm_object_t me, struct data_area_4_thread *tc )
 {
 /*
 #if OLD_VM_SLEEP

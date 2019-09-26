@@ -25,7 +25,7 @@ static int debug_print = 0;
 
 
 
-static int si_tcp_tostring_5(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_tostring_5(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     DEBUG_INFO;
@@ -33,7 +33,7 @@ static int si_tcp_tostring_5(struct pvm_object me , struct data_area_4_thread *t
 }
 
 
-static int si_tcp_connect_16(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_connect_16(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
@@ -48,7 +48,7 @@ static int si_tcp_connect_16(struct pvm_object me , struct data_area_4_thread *t
     SYSCALL_THROW_STRING( "not implemented" );
 }
 
-static int si_tcp_disconnect_17(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_disconnect_17(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
@@ -65,7 +65,7 @@ static int si_tcp_disconnect_17(struct pvm_object me , struct data_area_4_thread
 
 
 
-static int si_tcp_waitsend_18(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_waitsend_18(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
@@ -88,7 +88,7 @@ static int si_tcp_waitsend_18(struct pvm_object me , struct data_area_4_thread *
 
 
 
-static int si_tcp_send_19(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_send_19(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
@@ -107,7 +107,7 @@ static int si_tcp_send_19(struct pvm_object me , struct data_area_4_thread *tc )
 
 
 
-static int si_tcp_waitrecv_20(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_waitrecv_20(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
@@ -128,7 +128,7 @@ static int si_tcp_waitrecv_20(struct pvm_object me , struct data_area_4_thread *
 
 
 
-static int si_tcp_recv_21(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_recv_21(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
@@ -148,7 +148,7 @@ static int si_tcp_recv_21(struct pvm_object me , struct data_area_4_thread *tc )
 
 
 
-static int si_tcp_waitaccept_22(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_waitaccept_22(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
@@ -166,7 +166,7 @@ static int si_tcp_waitaccept_22(struct pvm_object me , struct data_area_4_thread
 }
 
 
-static int si_tcp_accept_23(struct pvm_object me , struct data_area_4_thread *tc )
+static int si_tcp_accept_23(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );

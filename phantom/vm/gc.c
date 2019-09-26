@@ -74,8 +74,8 @@ void gc_collect_cycles()
 static int free_unmarked();
 static void mark_tree(pvm_object_storage_t * root);
 
-//typedef void (*gc_iterator_call_t)( struct pvm_object o, void *arg );
-//typedef void (*gc_iterator_func_t)( gc_iterator_call_t func, struct pvm_object_storage * os, void *arg );
+//typedef void (*gc_iterator_call_t)( pvm_object_t o, void *arg );
+//typedef void (*gc_iterator_func_t)( gc_iterator_call_t func, pvm_object_t  os, void *arg );
 
 static void mark_tree_o(pvm_object_t o, void *arg);
 static void gc_process_children(gc_iterator_call_t f, pvm_object_storage_t *p, void *arg);
@@ -184,11 +184,11 @@ static void mark_tree_o(pvm_object_t o, void *arg)
 {
     (void)arg;
 
-    if(o.data == 0) // Don't try to process null objects
+    if(o == 0) // Don't try to process null objects
         return;
 
-    if (o.data->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.data );
-    if (o.interface->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.interface );
+    if (o->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o );
+    //if (o.interface->_ah.gc_flags != gc_flags_last_generation)  mark_tree( o.interface );
 }
 
 
@@ -304,7 +304,7 @@ static void do_refzero_process_children( pvm_object_storage_t *p )
 static void refzero_add_from_internal(pvm_object_t o, void *arg)
 {
     (void) arg;
-    if(o.data == 0) // Don't try to process null objects
+    if(o == 0) // Don't try to process null objects
        return;
 
     ref_dec_o( o );
@@ -495,17 +495,17 @@ void ref_saturate_p(pvm_object_storage_t *p)
 //external calls:
 void ref_saturate_o(pvm_object_t o)
 {
-    if(!(o.data)) return;
-    ref_saturate_p(o.data);
+    if(!(o)) return;
+    ref_saturate_p(o);
 }
 void ref_dec_o(pvm_object_t o)
 {
     // Interface is never refcounted! (But why?)
-    ref_dec_p(o.data);
+    ref_dec_p(o);
 }
 pvm_object_t  ref_inc_o(pvm_object_t o)
 {
-    ref_inc_p(o.data);
+    ref_inc_p(o);
     return o;
 }
 
@@ -519,7 +519,7 @@ static void gc_clear_weakrefs(pvm_object_storage_t *p)
     // holding weakref backpointer only
 
 
-    struct pvm_object w = p->_satellites;
+    pvm_object_t w = p->_satellites;
 
     si_weakref_9_resetMyObject( w );
 #endif

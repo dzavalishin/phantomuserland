@@ -13,6 +13,7 @@
 #include <kernel/init.h>
 #include <kernel/stats.h>
 #include <kernel/debug.h>
+#include <kernel/snap_sync.h>
 #include <time.h>
 
 

@@ -17,7 +17,7 @@
 #include "vm/object.h"
 
 
-int drv_video_bmpblt( struct pvm_object bmp, int xpos, int ypos, int zpos );
+int drv_video_bmpblt( pvm_object_t bmp, int xpos, int ypos, int zpos );
 
 
 
