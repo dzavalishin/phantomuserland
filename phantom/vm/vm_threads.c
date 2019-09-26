@@ -77,20 +77,24 @@ static void thread_death_handler( phantom_thread_t *t )
 
     printf("thread_death_handler called\n");
 
+    vm_lock_persistent_memory();
+
     pvm_object_storage_t *os = t->owner;
     if( os == 0 )
     {
         SHOW_ERROR0( 0, "!!! thread_death_handler - no pointer to Vm thread object!" );
+        vm_unlock_persistent_memory();
         return;
     }
 
     assert( os->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
     //struct data_area_4_thread * tda = ((struct data_area_4_thread *)&(os->da));
-
+    // TODO check os class == thread
 
     remove_vm_thread_from_list(os);
 
+    vm_unlock_persistent_memory();
 }
 
 
