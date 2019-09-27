@@ -103,15 +103,25 @@ errno_t t_get_ctty( tid_t tid, struct wtty **ct )
     *ct = t->ctty_w;
     POST()
 }
-
-//! Detach from existing ctty, make new one
+/**
+ * 
+ * Detach from existing ctty, make new one.
+ * 
+ * NB! This function works with unlocked thread,
+ * don't call in races context.
+ * 
+**/
 errno_t t_new_ctty( tid_t tid )
 {
-    PRE_ANY()
+    assert(threads_inited);
+    int ret = 0;     
+    GETT();
+
     ret = t_kill_ctty( t );
     if( !ret )
         ret = t_make_ctty( t );
-    POST()
+err:
+    return ret;
 }
 
 #else

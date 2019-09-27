@@ -129,6 +129,7 @@ void					hal_pages_control_etc( physaddr_t  pa, void *va, int n_pages, page_mapp
 
 #if CONF_DUAL_PAGEMAP
 int32_t arch_switch_pdir( bool paged_mem_enable ); //< NB! DO NOT CALL, used in t_set_paged_mem() ONLY
+int32_t arch_get_pdir( bool paged_mem_enable ); //< Get pdir (cr3 value) for given mode
 #endif
 
 void * 					hal_alloc_page(void); // allocate (identically) mapped mem page in kern addr space
