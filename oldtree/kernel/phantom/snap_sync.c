@@ -202,7 +202,7 @@ void phantom_snapper_reenable_threads( void )
 #include <vm/syscall.h>
 #include <vm/alloc.h>
 
-
+#define TMP_NO_UNLOCK 1
 //#define MAX_SYS_ARG 16
 
 // interlock code of VM blocking syscall (part of .internal.connection class) implementation
@@ -231,14 +231,18 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
         SHOW_FLOW0( 5, "VM thread will die now");
         hal_exit_kernel_thread();
     }
-
+// JUST FOR TEST - run blocking syscalls with pers mem locked
+// test if it is a cause for VM crash
+#if TMP_NO_UNLOCK
+    pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
+#else
     vm_unlock_persistent_memory();
 
     // now do syscall - can block
     pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
 
     vm_lock_persistent_memory();
-
+#endif
     ref_dec_o( arg ); // BUG FIXME ref will be lost if restart - add to restart list before call, remove after?
     // BUG FIXME snapper won't continue until this thread is unblocked: end of snap waits for all stooped threads to awake
     // ? fixed with phantom_virtual_machine_threads_blocked?

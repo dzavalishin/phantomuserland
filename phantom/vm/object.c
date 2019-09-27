@@ -464,8 +464,8 @@ void dumpo( addr_t addr )
 
     printf("Flags: '");
     print_object_flags(o);
-    //printf("'\n");
-    printf(", da size: %ld, ", (long)(o->_da_size) );
+    printf("', ");
+    //printf("', da size: %ld, ", (long)(o->_da_size) );
 
 
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)

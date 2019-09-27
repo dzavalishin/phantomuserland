@@ -1494,12 +1494,12 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
                 if(1||debug_print_instr)
                 {
-                    printf("CAST to class which is not parent\n");
+                    printf("CAST to class which is not parent \n");
                     printf("obj = "); pvm_object_dump(o);
                     printf("to class = "); pvm_object_dump(target_class);
-#if 0
+#if 1
                     // Throw
-                    pvm_object_t msg = pvm_create_string_object("invalid arg count");
+                    pvm_object_t msg = pvm_create_string_object("cast to not parent");
                     //if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
                     pvm_exec_do_throw_object( da, msg );
                     //if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );

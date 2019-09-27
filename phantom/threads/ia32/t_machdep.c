@@ -13,6 +13,8 @@
 #include <thread_private.h>
 #include <phantom_libc.h>
 
+#include <hal.h>
+
 #include <ia32/seg.h>
 #include <ia32/eflags.h>
 #include <ia32/tss.h>
