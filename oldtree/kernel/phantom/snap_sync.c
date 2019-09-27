@@ -43,7 +43,8 @@ static hal_cond_t   phantom_vm_wait_4_snap;
 
 // BUG - really inefficient, as it wakes single cond
 // and wakes all threads for most of them to go sleep again
-static hal_mutex_t  interlock_mutex;
+//static hal_mutex_t  snap_interlock_mutex;
+hal_mutex_t  snap_interlock_mutex; // accessed from vm_sleep.c
 
 #if NEW_VM_SLEEP
 static hal_cond_t   vm_thread_wakeup_cond;
@@ -56,7 +57,7 @@ void phantom_snap_threads_interlock_init( void )
        //hal_cond_init( &phantom_snap_wait_4_vm_leave, "Snap W4L" ) ||
        hal_cond_init( &phantom_vm_wait_4_snap, "Snap W4S" ) ||
 
-       hal_mutex_init( &interlock_mutex, "Snap ILck" ) 
+       hal_mutex_init( &snap_interlock_mutex, "Snap ILck" ) 
 #if NEW_VM_SLEEP
        || hal_cond_init( &vm_thread_wakeup_cond, "VmSleep")
 #endif
@@ -87,18 +88,18 @@ void phantom_thread_wait_4_snap( void )
     }
 
     SHOW_FLOW0( 5, "VM thread will sleep for snap");
-    hal_mutex_lock( &interlock_mutex );
+    hal_mutex_lock( &snap_interlock_mutex );
 
     hal_cond_broadcast( &phantom_snap_wait_4_vm_enter ); // No
 
     SHOW_FLOW0( 5, "VM thread reported sleep, will wait now");
-    hal_cond_wait( &phantom_vm_wait_4_snap, &interlock_mutex );
+    hal_cond_wait( &phantom_vm_wait_4_snap, &snap_interlock_mutex );
 
     SHOW_FLOW0( 5, "VM thread awaken, will report wakeup");
     do_vm_lock_persistent_memory(); // gain access to pers mem
     //hal_cond_broadcast( &phantom_snap_wait_4_vm_leave );
 
-    hal_mutex_unlock( &interlock_mutex );
+    hal_mutex_unlock( &snap_interlock_mutex );
     SHOW_FLOW0( 5, "VM thread returns to activity");
 }
 
@@ -119,17 +120,17 @@ void phantom_snapper_wait_4_threads( void )
     //phantom_virtual_machine_snap_request++; // Ask them to go sleep
     atomic_add( &phantom_virtual_machine_snap_request, 1 );
 
-    hal_mutex_lock( &interlock_mutex );
+    hal_mutex_lock( &snap_interlock_mutex );
     SHOW_FLOW( 5, "Will wait for %d threads to stop", vm_persistent_memory_lock_count );
     while( vm_persistent_memory_lock_count > 0 )
     {
         SHOW_FLOW0( 5, "Wait for thread");
-        hal_cond_wait( &phantom_snap_wait_4_vm_enter, &interlock_mutex );
+        hal_cond_wait( &phantom_snap_wait_4_vm_enter, &snap_interlock_mutex );
         SHOW_FLOW( 5, "Woken up aft wait for threads, %d not stopped yet", vm_persistent_memory_lock_count );
     }
 
     //SHOW_FLOW0( 5, "Finished waiting for threads");
-    hal_mutex_unlock( &interlock_mutex );
+    hal_mutex_unlock( &snap_interlock_mutex );
 
     SHOW_FLOW0( 5, "Snapper is free to snap");
 }
@@ -145,7 +146,7 @@ void phantom_snapper_wait_4_threads( void )
 void phantom_snapper_reenable_threads( void )
 {
     SHOW_FLOW0( 5, "Snapper will reenable threads");
-    hal_mutex_lock( &interlock_mutex );
+    hal_mutex_lock( &snap_interlock_mutex );
     //phantom_virtual_machine_snap_request--; // May wake up now
     atomic_add( &phantom_virtual_machine_snap_request, -1 );
 
@@ -153,7 +154,7 @@ void phantom_snapper_reenable_threads( void )
     {
         // I'm not one here
         SHOW_FLOW( 5, "Snapper - do not reenable threads, phantom_virtual_machine_snap_request is still not zero (%d)", phantom_virtual_machine_snap_request);
-        hal_mutex_unlock( &interlock_mutex );
+        hal_mutex_unlock( &snap_interlock_mutex );
         return;
     }
 
@@ -169,12 +170,12 @@ void phantom_snapper_reenable_threads( void )
     while( phantom_virtual_machine_threads_stopped > 0 )
 #endif
     {
-        hal_cond_wait( &phantom_snap_wait_4_vm_leave, &interlock_mutex );
+        hal_cond_wait( &phantom_snap_wait_4_vm_leave, &snap_interlock_mutex );
         SHOW_FLOW( 5, "Snapper: %d threads still sleep", phantom_virtual_machine_threads_stopped);
 
     }
 #endif
-    hal_mutex_unlock( &interlock_mutex );
+    hal_mutex_unlock( &snap_interlock_mutex );
     SHOW_FLOW0( 5, "Snapper done waiting for awake"); // TODO we did not wait - OK?
 
 }
@@ -344,102 +345,6 @@ void vm_release_snap_lock( int count )
 {
     atomic_add( &vm_persistent_memory_lock_count, - count );
 }
-
-// ------------------------------------------- UNTESTED CODE --------------------------------------------
-
-
-void phantom_thread_put_asleep( struct data_area_4_thread *thda, VM_SPIN_TYPE *unlock_spin )
-{
-    // FIXME can't sleep in spinlock!
-    //hal_mutex_lock( &interlock_mutex );
-    pvm_spin_lock( thda->lock);
-
-    // TODO atomic assign
-    if( thda->spin_to_unlock )
-        panic( "spin unlock > 1" );
-
-    thda->spin_to_unlock = unlock_spin;
-    thda->sleep_flag++;
-    
-    pvm_spin_unlock( thda->lock);
-    //hal_mutex_unlock( &interlock_mutex );
-    // NB! This will work if called from SYS only! That's
-    // ok since no other bytecode instr can call this.
-    // Real sleep happens in phantom_thread_sleep_worker
-    SHOW_FLOW0( 5, "put thread asleep");
-
-    // Actual sleep happens in sleep_worker    
-}
-
-
-void phantom_thread_wake_up( struct data_area_4_thread *thda )
-{
-    // TODO of course it is a bottleneck - need separate sync objects for threads
-    // we can't keep usual mutexes in objects for objects are in paged mem and mutex uses
-    // spinlock to run its internals
-    // TODO implement old unix style sleep( var address )/wakeup( var address )? 
-    //hal_mutex_lock( &interlock_mutex );
-
-    pvm_spin_lock( thda->lock);
-
-    thda->sleep_flag--;
-
-    assert(thda->sleep_flag >= 0);
-
-    if(thda->sleep_flag <= 0)
-        hal_cond_broadcast( &vm_thread_wakeup_cond );
-
-    pvm_spin_unlock( thda->lock);
-    //hal_mutex_unlock( &interlock_mutex );
-}
-
-
-
-/*
- *
- * Called by any virt. machine thread when it sees
- * thread da->sleep_flag to be nonzero.
- *
- */
-
-void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
-{
-    pvm_exec_save_fast_acc(thda); // Before snap
-
-    if(phantom_virtual_machine_stop_request)
-    {
-        SHOW_FLOW0( 5, "VM thread will die now");
-        hal_exit_kernel_thread();
-    }
-
-    SHOW_FLOW0( 5, "VM thread will sleep for sleep");
-    pvm_spin_lock( thda->lock);
-
-    if( thda->spin_to_unlock )
-    {
-        VM_SPIN_UNLOCK( (*thda->spin_to_unlock) );
-        thda->spin_to_unlock = 0;
-    }
-    else
-    {
-        if(thda->sleep_flag)
-            SHOW_ERROR(0, "Warn: vm th (da %x) sleep, no spin unlock requested", thda);
-    }
-
-    vm_unlock_persistent_memory();    
-    hal_mutex_lock( &interlock_mutex );
-    // TODO pass thread to unlock down there? Or is it ok to unlock here?
-    while(thda->sleep_flag)
-    {
-        SHOW_ERROR(0, "new vm sleep used, th (da %x)", thda);
-        hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
-    }
-    hal_mutex_unlock( &interlock_mutex );
-    vm_lock_persistent_memory();
-
-    SHOW_FLOW0( 5, "VM thread awaken");
-}
-
 
 
 
