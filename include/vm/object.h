@@ -36,8 +36,8 @@ struct pvm_object_storage;
 
 // This is object itself.
 //
-//   	_ah is allocation header, used by allocator/gc
-//   	_class is class object reference.
+//      _ah is allocation header, used by allocator/gc
+//      _class is class object reference.
 //      _satellites is used to keep some related things such as weak ptr backlink
 //      _flags used to keep some shortcut info about object type
 //      _da_size is n of bytes in da[]
@@ -62,8 +62,8 @@ typedef struct pvm_object_storage pvm_object_storage_t;
 // This struct is poorly named. In fact, it is an object reference!
 struct pvm_object
 {
-    struct pvm_object_storage	* data;
-    struct pvm_object_storage	* interface; // method list is here
+    struct pvm_object_storage   * data;
+    struct pvm_object_storage   * interface; // method list is here
 };*/
 
 typedef struct pvm_object_storage * pvm_object_t;
@@ -76,8 +76,8 @@ typedef struct pvm_object_storage * pvm_object_t;
 //#undef _obj_offsetof
 
 //void pvm_weakref_set_object( pvm_object_t wr, pvm_object_t o );
-pvm_object_t pvm_weakref_get_object(pvm_object_t wr );
-errno_t si_weakref_9_resetMyObject(pvm_object_t o );
+pvm_object_t     pvm_weakref_get_object(pvm_object_t wr );
+errno_t          si_weakref_9_resetMyObject(pvm_object_t o );
 
 
 /**
@@ -88,24 +88,24 @@ errno_t si_weakref_9_resetMyObject(pvm_object_t o );
  *
 **/
 
-pvm_object_t 	pvm_create_object(pvm_object_t type);
-//pvm_object_t     	pvm_object_create_fixed( pvm_object_t object_class );
+pvm_object_t     pvm_create_object(pvm_object_t type);
+//pvm_object_t          pvm_object_create_fixed( pvm_object_t object_class );
 
 // THIS CAN'T BE USED FOR INTERNAL ONES! TODO: Remove or fix to use with internals
-pvm_object_t     	pvm_object_create_dynamic( pvm_object_t object_class, int das );
+pvm_object_t     pvm_object_create_dynamic( pvm_object_t object_class, int das );
 
 
 struct data_area_4_thread;
 
 
-pvm_object_t    pvm_get_class( pvm_object_t o );
+pvm_object_t     pvm_get_class( pvm_object_t o );
 
 
 /**
  * Lookup class. TODO reimplement! Can block!
  */
 
-pvm_object_t pvm_exec_lookup_class_by_name( pvm_object_t name );
+pvm_object_t     pvm_exec_lookup_class_by_name( pvm_object_t name );
 
 /**
  *
@@ -129,15 +129,15 @@ pvm_object_t pvm_exec_lookup_class_by_name( pvm_object_t name );
  *
  * 'object' class is:
  *
- *	- exactly tclass
+ *      - exactly tclass
  *      - tclass or its parent
  *      - tclass or its child
  *
 **/
 
-int pvm_object_class_exactly_is( pvm_object_t object, pvm_object_t tclass );
-int pvm_object_class_is_or_parent( pvm_object_t object, pvm_object_t tclass );
-int pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass );
+int              pvm_object_class_exactly_is( pvm_object_t object, pvm_object_t tclass );
+int              pvm_object_class_is_or_parent( pvm_object_t object, pvm_object_t tclass );
+int              pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass );
 
 //#define pvm_class_check(__o,__c) if(!pvm_object_class_is( __o, __c )) pvm_panic("Wrong class");
 
@@ -150,23 +150,23 @@ int pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass );
 
 pvm_object_t     pvm_get_field( pvm_object_t , unsigned int no );
 pvm_object_t     pvm_get_ofield( pvm_object_t , unsigned int no );
-void                  pvm_set_field( pvm_object_t , unsigned int no, pvm_object_t value );
-void                  pvm_set_ofield( pvm_object_t , unsigned int no, pvm_object_t value );
+void             pvm_set_field( pvm_object_t , unsigned int no, pvm_object_t value );
+void             pvm_set_ofield( pvm_object_t , unsigned int no, pvm_object_t value );
 
 // Need it here? It will be called by usual set field ones...
 pvm_object_t     pvm_get_array_ofield(pvm_object_t o, unsigned int slot  );
-void                  pvm_set_array_ofield(pvm_object_t o, unsigned int slot, pvm_object_t value );
+void             pvm_set_array_ofield(pvm_object_t o, unsigned int slot, pvm_object_t value );
 
-int                   get_array_size(pvm_object_t array);
-void                  pvm_append_array(pvm_object_t array, pvm_object_t value_to_append );
-void                  pvm_pop_array(pvm_object_t array, pvm_object_t value_to_pop );
+int              get_array_size(pvm_object_t array);
+void             pvm_append_array(pvm_object_t array, pvm_object_t value_to_append );
+void             pvm_pop_array(pvm_object_t array, pvm_object_t value_to_pop );
 
 // Debug
 
-void                  pvm_object_print( pvm_object_t );
-void                  pvm_object_dump( pvm_object_t o );
-void                  dumpo( addr_t addr );
-void                  pvm_puts(pvm_object_t o );
+void             pvm_object_print( pvm_object_t );
+void             pvm_object_dump( pvm_object_t o );
+void             dumpo( addr_t addr );
+void             pvm_puts(pvm_object_t o );
 pvm_object_t     pvm_get_class_name( pvm_object_t );
 
 /**
@@ -239,13 +239,13 @@ pvm_object_t     pvm_create_directory_object(void);
 pvm_object_t     pvm_create_connection_object(void);
 
 
-void     pvm_release_thread_object( pvm_object_t thread );
+void             pvm_release_thread_object( pvm_object_t thread );
 
 
 //static __inline__ pvm_object_t     pvm_get_null_object() { return pvm_create_null_object(); }
-#define pvm_get_null_object pvm_create_null_object
-#define pvm_get_null pvm_create_null_object
-#define pvm_null pvm_create_null_object()
+#define pvm_get_null_object  pvm_create_null_object
+#define pvm_get_null         pvm_create_null_object
+#define pvm_null             pvm_create_null_object()
 
 /**
  *
@@ -269,7 +269,7 @@ pvm_object_t     pvm_create_object(pvm_object_t type);
 
 
 
-void pvm_check_is_thread( pvm_object_t new_thread );
+void             pvm_check_is_thread( pvm_object_t new_thread );
 
 
 

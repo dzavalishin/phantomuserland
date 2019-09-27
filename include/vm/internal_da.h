@@ -28,11 +28,19 @@
 //#include <kernel/timedcall.h>
 #include <kernel/net_timer.h>
 
-
+#if 0
+#define pvm_object_da_tostring( type ) #type
+/** Extract (typed) object data area pointer from object pointer. */
+#define pvm_object_da( o, type ) ({ if(!pvm_object_class_exactly_is( o, pvm_get_##type##_class() )) pvm_exec_panic0("type err for " pvm_object_da_tostring( type ) ); ((struct data_area_4_##type *)&(o->da)); })
+/** Extract (typed) object data area pointer from object pointer. */
+#define pvm_data_area( o, type ) ((struct data_area_4_##type *)&(o->da))
+#else
 /** Extract (typed) object data area pointer from object pointer. */
 #define pvm_object_da( o, type ) ((struct data_area_4_##type *)&(o->da))
 /** Extract (typed) object data area pointer from object pointer. */
 #define pvm_data_area( o, type ) ((struct data_area_4_##type *)&(o->da))
+#endif
+
 
 /** Num of slots in normal (noninternal) object. */
 #define da_po_limit(o)	 (((o)->_da_size)/sizeof(pvm_object_t ))
