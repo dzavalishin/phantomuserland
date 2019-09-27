@@ -88,8 +88,8 @@ pvm_object_storage_t p =
         .exact_size = 0, // Ok for refcount test :)
     },
 
-    ._class       = {0,0},
-    ._satellites  = {0,0},
+    ._class       = 0,
+    ._satellites  = 0,
     ._flags       = 0,
     ._da_size     = 0
 

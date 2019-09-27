@@ -186,7 +186,7 @@ int si_void_14_to_immutable(pvm_object_t o, struct data_area_4_thread *tc )
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 0);
 
-    o->_ah.alloc_flags |= PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE;
+    o->_flags |= PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE;
 
     SYSCALL_RETURN(pvm_create_int_object( 0 ) );
 }
