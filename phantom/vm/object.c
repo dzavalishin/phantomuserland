@@ -165,10 +165,11 @@ void pvm_pop_array(pvm_object_t array, pvm_object_t value_to_pop )
 /**
  *
  * Fields access for noninternal ones.
+ * 
+ * TODO BUG XXX - races possible, see below
  *
 **/
 
-// TODO BUG XXX - races possible, see below
 pvm_object_t 
 pvm_get_field( pvm_object_t o, unsigned int slot )
 {
@@ -184,13 +185,13 @@ pvm_get_field( pvm_object_t o, unsigned int slot )
 
     if( slot >= da_po_limit(o) )
     {
-        pvm_exec_panic0( "save: slot index out of bounds" );
+        pvm_exec_panic0( "get: slot index out of bounds" );
     }
 
     verify_o(da_po_ptr(o->da)[slot]);
     return da_po_ptr(o->da)[slot];
 }
-
+/*
 // TODO BUG XXX - races possible, read obj, then other thread writes
 // to slot (derements refctr and kills object), then we attempt to
 // use it (even increment refctr) -> death. Need atomic (to slot write? to refcnt dec?)
@@ -216,7 +217,7 @@ pvm_get_ofield( pvm_object_t op, unsigned int slot )
     verify_o(da_po_ptr((op)->da)[slot]);
     return da_po_ptr((op)->da)[slot];
 }
-
+*/
 
 void
 pvm_set_field( pvm_object_t o, unsigned int slot, pvm_object_t value )
@@ -238,13 +239,13 @@ pvm_set_field( pvm_object_t o, unsigned int slot, pvm_object_t value )
 
     if( slot >= da_po_limit(o) )
     {
-        pvm_exec_panic0( "load: slot index out of bounds" );
+        pvm_exec_panic0( "set: slot index out of bounds" );
     }
 
     if(da_po_ptr(o->da)[slot])     ref_dec_o(da_po_ptr(o->da)[slot]);  //decr old value
     da_po_ptr(o->da)[slot] = value;
 }
-
+/*
 void
 pvm_set_ofield( pvm_object_t op, unsigned int slot, pvm_object_t value )
 {
@@ -272,7 +273,7 @@ pvm_set_ofield( pvm_object_t op, unsigned int slot, pvm_object_t value )
     if(da_po_ptr((op)->da)[slot]) ref_dec_o(da_po_ptr((op)->da)[slot]);  //decr old value
     da_po_ptr((op)->da)[slot] = value;
 }
-
+*/
 
 
 /**

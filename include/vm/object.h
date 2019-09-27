@@ -26,13 +26,14 @@
 struct object_PVM_ALLOC_Header
 {
     unsigned int                object_start_marker;
-    volatile int32_t            refCount; // for fast dealloc of locally-owned objects. If grows to INT_MAX it will be fixed at that value and ignored further. Such objects will be GC'ed in usual way
+    volatile int32_t            refCount;   //< for fast dealloc of locally-owned objects. If grows to INT_MAX it will be fixed at that value and ignored further. Such objects will be GC'ed in usual way
     unsigned char               alloc_flags;
     unsigned char               gc_flags;
-    unsigned int                exact_size; // full object size including this header
+    unsigned int                exact_size; //< full object size including this header
 };
 
 struct pvm_object_storage;
+struct data_area_4_thread;
 
 // This is object itself.
 //
@@ -56,16 +57,7 @@ struct pvm_object_storage
     unsigned char                       da[];
 };
 
-typedef struct pvm_object_storage pvm_object_storage_t;
-
-/*
-// This struct is poorly named. In fact, it is an object reference!
-struct pvm_object
-{
-    struct pvm_object_storage   * data;
-    struct pvm_object_storage   * interface; // method list is here
-};*/
-
+typedef struct pvm_object_storage   pvm_object_storage_t;
 typedef struct pvm_object_storage * pvm_object_t;
 
 
@@ -75,27 +67,33 @@ typedef struct pvm_object_storage * pvm_object_t;
 
 //#undef _obj_offsetof
 
-//void pvm_weakref_set_object( pvm_object_t wr, pvm_object_t o );
+//void           pvm_weakref_set_object( pvm_object_t wr, pvm_object_t o );
 pvm_object_t     pvm_weakref_get_object(pvm_object_t wr );
 errno_t          si_weakref_9_resetMyObject(pvm_object_t o );
 
 
 /**
  *
- * Create object. Fixed (in class) or dynamic size.
- *
- * das is data area size in bytes.
+ * This is the most general object creation function. Serves bytecode 'new'.
+ * Must call special creators on special cases.
  *
 **/
-
 pvm_object_t     pvm_create_object(pvm_object_t type);
-//pvm_object_t          pvm_object_create_fixed( pvm_object_t object_class );
 
-// THIS CAN'T BE USED FOR INTERNAL ONES! TODO: Remove or fix to use with internals
+
+/**
+ *
+ * Create object. Dynamic data area size.
+ *
+ * \param[in]  das is data area size in bytes.
+ * 
+ * NB! THIS CAN'T BE USED FOR INTERNAL ONES! 
+ * TODO: Remove or fix to use with internals
+ *
+**/
 pvm_object_t     pvm_object_create_dynamic( pvm_object_t object_class, int das );
 
 
-struct data_area_4_thread;
 
 
 pvm_object_t     pvm_get_class( pvm_object_t o );
@@ -149,9 +147,12 @@ int              pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t
 **/
 
 pvm_object_t     pvm_get_field( pvm_object_t , unsigned int no );
-pvm_object_t     pvm_get_ofield( pvm_object_t , unsigned int no );
+//pvm_object_t     pvm_get_ofield( pvm_object_t , unsigned int no );
 void             pvm_set_field( pvm_object_t , unsigned int no, pvm_object_t value );
-void             pvm_set_ofield( pvm_object_t , unsigned int no, pvm_object_t value );
+//void             pvm_set_ofield( pvm_object_t , unsigned int no, pvm_object_t value );
+
+#define pvm_get_ofield pvm_get_field
+#define pvm_set_ofield pvm_set_field
 
 // Need it here? It will be called by usual set field ones...
 pvm_object_t     pvm_get_array_ofield(pvm_object_t o, unsigned int slot  );
@@ -231,7 +232,6 @@ pvm_object_t     pvm_create_ostack_object(void);
 pvm_object_t     pvm_create_estack_object(void);
 pvm_object_t     pvm_create_binary_object(int size, void *init);
 
-//pvm_object_t     pvm_create_weakref_object(void);
 pvm_object_t     pvm_create_weakref_object(pvm_object_t owned );
 
 
@@ -242,20 +242,10 @@ pvm_object_t     pvm_create_connection_object(void);
 void             pvm_release_thread_object( pvm_object_t thread );
 
 
-//static __inline__ pvm_object_t     pvm_get_null_object() { return pvm_create_null_object(); }
 #define pvm_get_null_object  pvm_create_null_object
 #define pvm_get_null         pvm_create_null_object
 #define pvm_null             pvm_create_null_object()
 
-/**
- *
- * This is the most general object creation function. Serves bytecode 'new'.
- * Must call above creators on special cases.
- *
-**/
-
-
-pvm_object_t     pvm_create_object(pvm_object_t type);
 
 
 /**
