@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Synchronization syscalls
  *

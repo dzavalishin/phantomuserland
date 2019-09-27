@@ -180,7 +180,6 @@ int phantom_scheduler_is_reschedule_needed(void)
 }
 
 // Called from timer interrupt 100 times per sec.
-// todo add call to timer_int_handler() in ../i386/pit.c
 void phantom_scheduler_time_interrupt(void)
 {
     if(GET_CURRENT_THREAD()->priority & THREAD_PRIO_MOD_REALTIME)
@@ -264,19 +263,18 @@ void t_enqueue_runq(phantom_thread_t *t)
 //#define NORM_TICKS 1
 
 static int t_assign_time(void);
-static int t_is_runnable(phantom_thread_t *t) { return t->sleep_flags == 0; }
+static int __inline__ t_is_runnable(phantom_thread_t *t) { return t->sleep_flags == 0; }
 
 
 /**
  *
  * Scheduler itself. Selects a next thread to be run on this CPU.
  * Not sure if it is SMP ready yet, but written with SMP in mind.
- *
+ * 
+ * NB! Must be called under schedlock to make sure thread
+ * is not stolen by another CPU in SMP system.
+ * 
 **/
-
-
-// NB! Must be called under schedlock to make sure thread
-// is not stolen by another CPU in SMP system
 
 phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
 {
@@ -345,6 +343,9 @@ phantom_thread_t *phantom_scheduler_select_thread_to_run(void)
                 {
                     maxprio = it->priority;
                     best = it;
+#if 0 // ignore priority, run first seen
+                    break;
+#endif                    
                 }
             }
             if( best )
