@@ -538,11 +538,13 @@ void pvm_internal_init_thread(pvm_object_t  os)
 {
 	struct data_area_4_thread *      da = (struct data_area_4_thread *)os->da;
 
-	hal_spin_init(&da->spin);
+	///hal_spin_init(&da->spin);
 //#if OLD_VM_SLEEP
 //        da->sleep_flag                      = 0;
 //#endif
 	//hal_cond_init(&(da->wakeup_cond), "VmThrdWake");
+
+    pvm_spin_init( &da->lock );
 
 	da->call_frame   			= pvm_create_call_frame_object();
 	da->stack_depth				= 1;
@@ -551,12 +553,12 @@ void pvm_internal_init_thread(pvm_object_t  os)
 	da->environment = 0;
 
 	da->code.code     			= 0;
-	da->code.IP 			= 0;
-	da->code.IP_max             	= 0;
+	da->code.IP                 = 0;
+	da->code.IP_max             = 0;
 
 	//da->_this_object 			= pvm_get_null_object();
 
-	pvm_exec_load_fast_acc(da); // Just to fill shadows with something non-null
+    pvm_exec_load_fast_acc(da); // Just to fill shadows with something non-null
 }
 
 
@@ -627,7 +629,7 @@ void pvm_internal_init_mutex(pvm_object_t  os)
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
 
     da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
-    pvm_spin_init( &da->pvm_lock );
+    pvm_spin_init( &da->lock );
     //hal_spin_init( &da->spinlock );
     //in_method = 0;
 }

@@ -224,6 +224,10 @@ pvm_set_field( pvm_object_t o, unsigned int slot, pvm_object_t value )
 {
     verify_p(o);
     verify_o(value);
+
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (o->_flags) )
+        pvm_exec_panic0( "attempt to set_field for immutable" );
+
     if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) )
     {
         if( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )
@@ -233,9 +237,6 @@ pvm_set_field( pvm_object_t o, unsigned int slot, pvm_object_t value )
         }
         pvm_exec_panic0( "attempt to save to internal" );
     }
-
-    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (o->_flags) )
-        pvm_exec_panic0( "attempt to set_field for immutable" );
 
     if( slot >= da_po_limit(o) )
     {

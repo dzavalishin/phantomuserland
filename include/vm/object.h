@@ -111,7 +111,7 @@ pvm_object_t     pvm_exec_lookup_class_by_name( pvm_object_t name );
  *
 **/
 
-#define pvm_is_eq( o1, o2 ) ((o1) == (o2) )
+#define          pvm_is_eq( o1, o2 ) ((o1) == (o2) )
 
 
 /**
@@ -120,8 +120,8 @@ pvm_object_t     pvm_exec_lookup_class_by_name( pvm_object_t name );
  *
 **/
 
-#define pvm_is_null( o ) ((o) == 0 || ((o) == pvm_create_null_object()))
-#define pvm_isnull( o ) ((o) == 0 || ((o) == pvm_create_null_object()))
+#define          pvm_is_null( o ) ((o) == 0 || ((o) == pvm_create_null_object()))
+#define          pvm_isnull( o ) pvm_is_null( o )
 
 /**
  *
@@ -142,7 +142,6 @@ int              pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t
 /**
  *
  * Access object fields.
- * TODO: Check for not internal on read.
  *
 **/
 

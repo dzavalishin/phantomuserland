@@ -44,8 +44,10 @@ static hal_cond_t   phantom_vm_wait_4_snap;
 // BUG - really inefficient, as it wakes single cond
 // and wakes all threads for most of them to go sleep again
 static hal_mutex_t  interlock_mutex;
-//static hal_cond_t   vm_thread_wakeup_cond;
 
+#if NEW_VM_SLEEP
+static hal_cond_t   vm_thread_wakeup_cond;
+#endif
 
 void phantom_snap_threads_interlock_init( void )
 {
@@ -55,7 +57,9 @@ void phantom_snap_threads_interlock_init( void )
        hal_cond_init( &phantom_vm_wait_4_snap, "Snap W4S" ) ||
 
        hal_mutex_init( &interlock_mutex, "Snap ILck" ) 
-       //|| hal_cond_init( &vm_thread_wakeup_cond, "VmSleep")
+#if NEW_VM_SLEEP
+       || hal_cond_init( &vm_thread_wakeup_cond, "VmSleep")
+#endif
       )
         panic("Can't init thread/snap interlocks");
     vm_snap_lock_inited++;
@@ -341,27 +345,67 @@ void vm_release_snap_lock( int count )
     atomic_add( &vm_persistent_memory_lock_count, - count );
 }
 
-#else // CONF_DUAL_PAGEMAP
+// ------------------------------------------- UNTESTED CODE --------------------------------------------
 
-// ------------------------------------------- OLD UNUSED CODE --------------------------------------------
 
-// Left for reference to implement pvm thread block/unblock
+void phantom_thread_put_asleep( struct data_area_4_thread *thda, VM_SPIN_TYPE *unlock_spin )
+{
+    // FIXME can't sleep in spinlock!
+    //hal_mutex_lock( &interlock_mutex );
+    pvm_spin_lock( thda->lock);
 
-//#if OLD_VM_SLEEP
-// ----------------------------------------------------------------
-// userland sleep/wakeup code
-// ----------------------------------------------------------------
+    // TODO atomic assign
+    if( thda->spin_to_unlock )
+        panic( "spin unlock > 1" );
+
+    thda->spin_to_unlock = unlock_spin;
+    thda->sleep_flag++;
+    
+    pvm_spin_unlock( thda->lock);
+    //hal_mutex_unlock( &interlock_mutex );
+    // NB! This will work if called from SYS only! That's
+    // ok since no other bytecode instr can call this.
+    // Real sleep happens in phantom_thread_sleep_worker
+    SHOW_FLOW0( 5, "put thread asleep");
+
+    // Actual sleep happens in sleep_worker    
+}
+
+
+void phantom_thread_wake_up( struct data_area_4_thread *thda )
+{
+    // TODO of course it is a bottleneck - need separate sync objects for threads
+    // we can't keep usual mutexes in objects for objects are in paged mem and mutex uses
+    // spinlock to run its internals
+    // TODO implement old unix style sleep( var address )/wakeup( var address )? 
+    //hal_mutex_lock( &interlock_mutex );
+
+    pvm_spin_lock( thda->lock);
+
+    thda->sleep_flag--;
+
+    assert(thda->sleep_flag >= 0);
+
+    if(thda->sleep_flag <= 0)
+        hal_cond_broadcast( &vm_thread_wakeup_cond );
+
+    pvm_spin_unlock( thda->lock);
+    //hal_mutex_unlock( &interlock_mutex );
+}
+
 
 
 /*
  *
  * Called by any virt. machine thread when it sees
- * phantom_virtual_machine_snap_request to be nonzero.
+ * thread da->sleep_flag to be nonzero.
  *
  */
 
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 {
+    pvm_exec_save_fast_acc(thda); // Before snap
+
     if(phantom_virtual_machine_stop_request)
     {
         SHOW_FLOW0( 5, "VM thread will die now");
@@ -369,11 +413,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     }
 
     SHOW_FLOW0( 5, "VM thread will sleep for sleep");
-    hal_mutex_lock( &interlock_mutex );
-
-    phantom_virtual_machine_threads_stopped++;
-    hal_cond_broadcast( &phantom_snap_wait_4_vm_enter );
-    //SHOW_FLOW0( 5, "VM thread reported sleep, will wait now");
+    pvm_spin_lock( thda->lock);
 
     if( thda->spin_to_unlock )
     {
@@ -386,59 +426,29 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
             SHOW_ERROR(0, "Warn: vm th (da %x) sleep, no spin unlock requested", thda);
     }
 
-
-    //while(thda->sleep_flag)        hal_cond_wait( &(thda->wakeup_cond), &interlock_mutex );
+    vm_unlock_persistent_memory();    
+    hal_mutex_lock( &interlock_mutex );
+    // TODO pass thread to unlock down there? Or is it ok to unlock here?
     while(thda->sleep_flag)
     {
-        SHOW_ERROR(0, "Warn: old vm sleep used, th (da %x)", thda);
+        SHOW_ERROR(0, "new vm sleep used, th (da %x)", thda);
         hal_cond_wait( &vm_thread_wakeup_cond, &interlock_mutex );
     }
-
-// TODO if snap is active someone still can wake us up - resleep for snap then!
-
-    //SHOW_FLOW0( 5, "VM thread awaken, will report wakeup");
-    phantom_virtual_machine_threads_stopped--;
-
     hal_mutex_unlock( &interlock_mutex );
+    vm_lock_persistent_memory();
+
     SHOW_FLOW0( 5, "VM thread awaken");
 }
 
-/* dz off
-void phantom_thread_put_asleep( struct data_area_4_thread *thda, VM_SPIN_TYPE *unlock_spin )
-{
-    // FIXME can't sleep in spinlock!
-    hal_mutex_lock( &interlock_mutex );
-    // TODO atomic assign
-    if( thda->spin_to_unlock )
-        panic( "spin unlock > 1" );
-
-    thda->spin_to_unlock = unlock_spin;
-    thda->sleep_flag++;
-    hal_mutex_unlock( &interlock_mutex );
-    // NB! This will work if called from SYS only! That's
-    // ok since no other bytecode instr can call this.
-    // Real sleep happens in phantom_thread_sleep_worker
-    SHOW_FLOW0( 5, "put thread asleep");
-}
 
 
-void phantom_thread_wake_up( struct data_area_4_thread *thda )
-{
-    // TODO of course it is a bottleneck - need separate sync objects for threads
-    // we can't keep usual mutexes in objects for objects are in paged mem and mutex uses
-    // spinlock to run its internals
-    // TODO implement old unix style sleep( var address )/wakeup( var address )? 
-    hal_mutex_lock( &interlock_mutex );
 
-    thda->sleep_flag--;
-    //if(thda->sleep_flag <= 0)        hal_cond_broadcast( &thda->wakeup_cond );
-    if(thda->sleep_flag <= 0)
-        hal_cond_broadcast( &vm_thread_wakeup_cond );
+#else // CONF_DUAL_PAGEMAP
 
-    hal_mutex_unlock( &interlock_mutex );
-}
-*/
-//#endif // OLD_VM_SLEEP
+// ----------------------------------------------------------------
+// userland sleep/wakeup code
+// ----------------------------------------------------------------
+
 
 
 void phantom_check_threads_pass_bytecode_instr_boundary( void )

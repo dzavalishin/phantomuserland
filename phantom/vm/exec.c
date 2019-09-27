@@ -335,7 +335,6 @@ static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t
 **/
 static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type)
 {
-#warning implement me
     if( pvm_object_class_is_or_child( obj, type) )
         return 0;
 
@@ -708,13 +707,11 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
     pvm_exec_load_fast_acc(da); // For any case
 
-//#if OLD_VM_SLEEP
-//    // Thread was snapped sleeping - resleep it
-//    if(da->sleep_flag)
-//        phantom_thread_sleep_worker( da );
-//#else
-#warning resleep?
-//#endif
+#if NEW_VM_SLEEP
+    // Thread was snapped sleeping - resleep it
+    if(da->sleep_flag)
+        phantom_thread_sleep_worker( da );
+#endif
 
     while(1)
     {
@@ -2240,18 +2237,15 @@ static void do_pvm_exec(pvm_object_t current_thread)
             if( instruction  == opcode_sys_8bit )
             {
                 pvm_exec_sys(da,pvm_code_get_byte(&(da->code))); //cf->cs.get_byte( cf->IP ));
-    sys_sleep:
-//#if OLD_VM_SLEEP
+//sys_sleep:
+#if NEW_VM_SLEEP
                 // Only sys can put thread asleep
                 // If we are snapped here we, possibly, will continue from
                 // the entry to this func. So save fast acc and recheck
                 // sleep condition on the func entry.
-//                if(da->sleep_flag)
-//                {
-//                    pvm_exec_save_fast_acc(da); // Before snap
-//                    phantom_thread_sleep_worker( da );
-//                }
-//#endif
+                if(da->sleep_flag)
+                    phantom_thread_sleep_worker( da );
+#endif
                 break;
             }
 
@@ -2343,6 +2337,7 @@ static syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int s
         if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
             break;
 
+        // TODO why?
         // we do that only for 0 = construct, that's a hack, must be gone too )
         if( syscall_index != 0 )
             pvm_exec_panic0("find_syscall: not internal class in SYS > 0" );
@@ -2400,29 +2395,11 @@ static pvm_object_t
 static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal )
 {
     if( class_ref == 0 )
-    {
         pvm_exec_panic0( "pvm_exec_find_static_method: null class!" );
-    }
 
-    pvm_object_t iface;
-    iface = pvm_object_da( class_ref, class )->object_default_interface;
+    pvm_object_t iface = pvm_object_da( class_ref, class )->object_default_interface;
 
-#if 1
     return pvm_exec_get_iface_method(iface, method_ordinal );        
-#else
-    // Same as in find_method, combine!
-
-    if( iface == 0 )
-        pvm_exec_panic( "pvm_exec_find_method: no interface found" );
-
-    if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
-        pvm_exec_panic( "pvm_exec_find_method: not an interface object" );
-
-    if(method_index > da_po_limit(iface))
-        pvm_exec_panic( "pvm_exec_find_method: method index is out of bounds" );
-
-    return da_po_ptr(iface->da)[method_index];
-#endif
 }
 
 /*
@@ -2433,35 +2410,12 @@ static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int me
 
 pvm_object_t  pvm_exec_find_method( pvm_object_t o, unsigned int method_index, struct data_area_4_thread *tda )
 {
-    if( o == 0 )
-    {
-        pvm_exec_panic( "pvm_exec_find_method: null object!", tda );
-    }
+    if( o == 0 )          pvm_exec_panic( "pvm_exec_find_method: null object!", tda );
+    if( o->_class == 0 )  pvm_exec_panic( "pvm_exec_find_method: no interface and no class!", tda );
 
-    pvm_object_t iface; // = pvm_get_default_interface(o); //o.interface;
-    //if( iface == 0 )
-    //{
-    	if( o->_class == 0 )
-    	{
-            //dumpo(o);
-            pvm_exec_panic( "pvm_exec_find_method: no interface and no class!", tda );
-    	}
-        iface = pvm_object_da( o->_class, class )->object_default_interface;
-    //}
-#if 1
+    pvm_object_t iface = pvm_object_da( o->_class, class )->object_default_interface;
+
     return pvm_exec_get_iface_method(iface, method_index );        
-#else
-    if( iface == 0 )
-        pvm_exec_panic( "pvm_exec_find_method: no interface found" );
-
-    if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
-        pvm_exec_panic( "pvm_exec_find_method: not an interface object" );
-
-    if(method_index > da_po_limit(iface))
-        pvm_exec_panic( "pvm_exec_find_method: method index is out of bounds" );
-
-    return da_po_ptr(iface->da)[method_index];
-#endif
 }
 
 

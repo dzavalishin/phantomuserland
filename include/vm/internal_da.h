@@ -204,46 +204,6 @@ struct pvm_code_handler
 
 
 
-// TODO - some sleep/wakeup support
-struct data_area_4_thread
-{
-    struct pvm_code_handler             code;           // Loaded by load_fast_acc from frame
-
-    //unsigned long                     thread_id; // Too hard to implement and nobody needs
-    pvm_object_t                        call_frame;     // current
-
-    // some owner pointer?
-    pvm_object_t                        owner;
-    pvm_object_t                        environment;
-
-    hal_spinlock_t                      spin;           // used on manipulations with sleep_flag
-
-#if OLD_VM_SLEEP
-    volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
-#endif
-    //timedcall_t                         timer;          // Who will wake us
-    net_timer_event                     timer;          // Who will wake us
-    pvm_object_t                        sleep_chain;    // More threads sleeping on the same event, meaningless for running thread
-    VM_SPIN_TYPE *                      spin_to_unlock; // This spin will be unlocked after putting thread asleep
-
-    int                                 tid;            // Actual kernel thread id - reloaded on each kernel restart
-
-// fast access copies
-
-    pvm_object_t                        _this_object;   // Loaded by load_fast_acc from call_frame
-
-    struct data_area_4_integer_stack *  _istack;        // Loaded by load_fast_acc from call_frame
-    struct data_area_4_object_stack *   _ostack;        // Loaded by load_fast_acc from call_frame
-    struct data_area_4_exception_stack *_estack;        // Loaded by load_fast_acc from call_frame
-
-
-    // misc data
-    int                                 stack_depth;    // number of frames
-    //long                              memory_size;    // memory allocated - deallocated by this thread
-};
-
-typedef struct data_area_4_thread thread_context_t;
-
 
 
 
@@ -358,50 +318,6 @@ struct data_area_4_tty
     char                                title[PVM_MAX_TTY_TITLE+1];
 };
 
-
-
-
-struct data_area_4_mutex
-{
-    pvm_spinlock_t                      lock;
-
-        // We can't lock spin when we access objects or we have chance
-        // to die because of page fault with spin locked.
-        // We lock in_method instead and check if it is locked and
-        // spin around in simple hal_sleep_msec 
-
-        // TODO in_method can be paged out too, try accessing it before locking in spin!
-        // TODO better move it to spinlock struct and write funcs for pvm_spin_lock/unlock
-        //int                 in_method;
-
-    struct data_area_4_thread *         owner_thread;
-
-    pvm_object_t                        waiting_threads_array;
-
-    int                                 nwaiting;
-};
-
-struct data_area_4_cond
-{
-    pvm_spinlock_t                      lock;
-
-    struct data_area_4_thread *         owner_thread;
-
-    pvm_object_t                        waiting_threads_array;
-    int                                 nwaiting;
-};
-
-struct data_area_4_sema
-{
-    pvm_spinlock_t                      lock;
-
-    struct data_area_4_thread *         owner_thread;
-
-    pvm_object_t                        waiting_threads_array;
-    int                                 nwaiting;
-
-    int                                 sem_value;
-};
 
 
 
@@ -547,6 +463,119 @@ struct data_area_4_io
 
     u_int32_t                           reset;          // not operational, unblock waiting threads
 };
+
+
+
+// -----------------------------------------------------------------------
+//
+// Sync related
+//
+// -----------------------------------------------------------------------
+
+
+
+
+
+
+
+
+struct data_area_4_thread
+{
+    struct pvm_code_handler             code;           // Loaded by load_fast_acc from frame
+
+    pvm_object_t                        call_frame;     // current
+
+    pvm_object_t                        owner;
+    pvm_object_t                        environment;
+
+    //hal_spinlock_t                      spin;
+    pvm_spinlock_t                      lock;           // used on manipulations with sleep_flag
+
+#if NEW_VM_SLEEP
+    volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
+    VM_SPIN_TYPE *                      spin_to_unlock; // This spin will be unlocked after putting thread asleep
+#endif
+    //timedcall_t                         timer;          // Who will wake us
+    //net_timer_event                     timer;          // Who will wake us
+    //pvm_object_t                        sleep_chain;    // More threads sleeping on the same event, meaningless for running thread
+
+    int                                 tid;            // Actual kernel thread id - reloaded on each kernel restart
+
+// fast access copies
+
+    pvm_object_t                        _this_object;   // Loaded by load_fast_acc from call_frame
+
+    struct data_area_4_integer_stack *  _istack;        // Loaded by load_fast_acc from call_frame
+    struct data_area_4_object_stack *   _ostack;        // Loaded by load_fast_acc from call_frame
+    struct data_area_4_exception_stack *_estack;        // Loaded by load_fast_acc from call_frame
+
+
+    // misc data
+    int                                 stack_depth;    // number of frames
+    //long                              memory_size;    // memory allocated - deallocated by this thread
+};
+
+typedef struct data_area_4_thread thread_context_t;
+
+
+
+
+
+
+
+
+
+
+struct data_area_4_mutex
+{
+    pvm_spinlock_t                      lock;
+
+        // We can't lock spin when we access objects or we have chance
+        // to die because of page fault with spin locked.
+        // We lock in_method instead and check if it is locked and
+        // spin around in simple hal_sleep_msec 
+
+        // TODO in_method can be paged out too, try accessing it before locking in spin!
+        // TODO better move it to spinlock struct and write funcs for pvm_spin_lock/unlock
+        //int                 in_method;
+
+    struct data_area_4_thread *         owner_thread;
+
+    pvm_object_t                        waiting_threads_array;
+
+    int                                 nwaiting;
+};
+
+struct data_area_4_cond
+{
+    pvm_spinlock_t                      lock;
+
+    struct data_area_4_thread *         owner_thread;
+
+    pvm_object_t                        waiting_threads_array;
+    int                                 nwaiting;
+};
+
+struct data_area_4_sema
+{
+    pvm_spinlock_t                      lock;
+
+    struct data_area_4_thread *         owner_thread;
+
+    pvm_object_t                        waiting_threads_array;
+    int                                 nwaiting;
+
+    int                                 sem_value;
+};
+
+
+
+
+
+
+
+
+
 
 
 struct data_area_4_connection;
