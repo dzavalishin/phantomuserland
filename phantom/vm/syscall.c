@@ -5,6 +5,9 @@
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
  * Internal (native) classes implementation.
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
  *
 **/
 

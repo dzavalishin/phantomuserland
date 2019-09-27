@@ -202,8 +202,12 @@ void phantom_snapper_reenable_threads( void )
 #include <vm/syscall.h>
 #include <vm/alloc.h>
 
-#define TMP_NO_UNLOCK 1
+#define TMP_RESTART_CALL 1
+#define TMP_NO_UNLOCK 0
 //#define MAX_SYS_ARG 16
+
+#define VM_SYSCALL_INSTR_SIZE 2
+
 
 // interlock code of VM blocking syscall (part of .internal.connection class) implementation
 // called from si_connection_13_blocking, calls passed syscall worker implemented in cn_*.c in kernel
@@ -217,13 +221,29 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 
     //if( n_param < 1 ) SYSCALL_THROW(pvm_create_string_object( "blocking: need at least 1 parameter" ));
 
-    int nmethod = POP_INT();
+#if TMP_RESTART_CALL
+
+    pvm_object_t __ival = POP_ARG;
+    ASSERT_INT(__ival); 
+    //SYS_FREE_O(__ival);  // no - after syscall is done
+    int nmethod = pvm_get_int(__ival);
+
     pvm_object_t arg = POP_ARG;
 
+    // Attempt to restart us if snap/restart happened
+
+    // Restore stack state and move back IP
+    pvm_istack_push( tc->_istack, n_param ); // arg count
+    pvm_ostack_push( tc->_ostack, arg );
+    pvm_ostack_push( tc->_ostack, __ival );
+
+    tc->code.IP -= VM_SYSCALL_INSTR_SIZE;
+#else
+    int nmethod = POP_INT();
+    pvm_object_t arg = POP_ARG;
     // push zero to obj stack - fake return code if we are snapped during syscall
-
     pvm_ostack_push( tc->_ostack, pvm_create_null_object() ); 
-
+#endif
     pvm_exec_save_fast_acc(tc); // Before snap
 
     if(phantom_virtual_machine_stop_request)
@@ -234,6 +254,7 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 // JUST FOR TEST - run blocking syscalls with pers mem locked
 // test if it is a cause for VM crash
 #if TMP_NO_UNLOCK
+#warning FIX ME
     pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
 #else
     vm_unlock_persistent_memory();
@@ -249,8 +270,15 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 
     // pop zero from obj stack
     // push ret val to obj stack
-
+#if TMP_RESTART_CALL
+    // We did it, now clean up args from stack
     pvm_ostack_pop( tc->_ostack );
+    pvm_ostack_pop( tc->_ostack );
+    pvm_istack_pop( tc->_istack ); // arg count
+    tc->code.IP += VM_SYSCALL_INSTR_SIZE;
+#else
+    pvm_ostack_pop( tc->_ostack );
+#endif
     pvm_ostack_push( tc->_ostack, ret );
 
     return 1; // not throw

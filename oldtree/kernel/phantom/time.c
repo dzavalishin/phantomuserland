@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include <kernel/timedcall.h>
+#include <kernel/atomic.h>
 
 
 static void update_tm();
@@ -108,11 +109,15 @@ void hal_time_tick(int tick_rate)
         diff -= shift;
     }
 
+#if 1
+    ATOMIC_ADD_AND_FETCH( &sys_time, tick_rate );
+#else
     int ei = hal_save_cli();
     hal_spin_lock(&sys_time_spinlock);
     sys_time += tick_rate;
     hal_spin_unlock(&sys_time_spinlock);
     if (ei) hal_sti();
+#endif
 
     msecDivider += tick_rate;
     while(msecDivider > 1000)
@@ -185,11 +190,11 @@ bigtime_t hal_system_time_lores(void)
 {
     bigtime_t val;
 
-    int ei = hal_save_cli();
-    hal_spin_lock(&sys_time_spinlock);
+    //int ei = hal_save_cli();
+    //hal_spin_lock(&sys_time_spinlock);
     val = sys_time;
-    hal_spin_unlock(&sys_time_spinlock);
-    if (ei) hal_sti();
+    //hal_spin_unlock(&sys_time_spinlock);
+    //if (ei) hal_sti();
 
     return val;
 }

@@ -1232,7 +1232,7 @@ void pvm_fill_syscall_interface( pvm_object_t iface, int syscall_count )
 // syscall code segment generator
 static pvm_object_t pvm_create_syscall_code( int sys_num )
 {
-
+/*
 	if( sys_num <= 15 )
 	{
 		char code[2];
@@ -1241,6 +1241,7 @@ static pvm_object_t pvm_create_syscall_code( int sys_num )
 		return pvm_create_code_object( sizeof(code), code );
 	}
 	else
+*/    
 	{
 		char code[3];
 		code[0] = opcode_sys_8bit;

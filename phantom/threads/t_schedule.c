@@ -100,10 +100,14 @@ void phantom_scheduler_yield_locked( hal_spinlock_t *lock )
 }
 
 
-
-
+// Does not speed kernel up. 
+#define TMP_SKIP_SOFTINT 0
 
 static volatile int phantom_scheduler_soft_interrupt_reenter = 0;
+
+#if TMP_SKIP_SOFTINT
+static int thread_switch_skip_count = 0; // TEMP TEST if we spend too much CPU here
+#endif
 
 void phantom_scheduler_soft_interrupt(void)
 {
@@ -132,6 +136,12 @@ void phantom_scheduler_soft_interrupt(void)
         return;
 
     if( (GET_CURRENT_THREAD()->sleep_flags == 0) && hal_is_preemption_disabled() )
+        return;
+#endif
+
+#if TMP_SKIP_SOFTINT
+    thread_switch_skip_count++;
+    if( (GET_CURRENT_THREAD()->sleep_flags == 0) && (thread_switch_skip_count < 10) )
         return;
 #endif
 

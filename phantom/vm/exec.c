@@ -77,10 +77,10 @@ int debug_trace = 0;
 
 
 
-#define os_push( o ) 	pvm_ostack_push( da->_ostack, o )
-#define os_pop() 	pvm_ostack_pop( da->_ostack )
-#define os_top() 	pvm_ostack_top( da->_ostack )
-#define os_empty() 	pvm_ostack_empty( da->_ostack )
+#define os_push( o )    pvm_ostack_push( da->_ostack, o )
+#define os_pop()        pvm_ostack_pop( da->_ostack )
+#define os_top()        pvm_ostack_top( da->_ostack )
+#define os_empty()      pvm_ostack_empty( da->_ostack )
 
 #define os_pull( pos ) 	pvm_ostack_pull( da->_ostack, pos )
 
@@ -2229,9 +2229,17 @@ static void do_pvm_exec(pvm_object_t current_thread)
             break;
 
         default:
+#if 0 // turned off because of syscall restart mechanism needs fixed syscall instr size        
             if( (instruction & 0xF0 ) == opcode_sys_0 )
             {
                 pvm_exec_sys(da,instruction & 0x0F);
+                goto sys_sleep;
+                //break;
+            }
+#endif
+            if( instruction  == opcode_sys_8bit )
+            {
+                pvm_exec_sys(da,pvm_code_get_byte(&(da->code))); //cf->cs.get_byte( cf->IP ));
     sys_sleep:
 //#if OLD_VM_SLEEP
                 // Only sys can put thread asleep
@@ -2245,13 +2253,6 @@ static void do_pvm_exec(pvm_object_t current_thread)
 //                }
 //#endif
                 break;
-            }
-
-            if( instruction  == opcode_sys_8bit )
-            {
-                pvm_exec_sys(da,pvm_code_get_byte(&(da->code))); //cf->cs.get_byte( cf->IP ));
-                goto sys_sleep;
-                //break;
             }
 
             if( (instruction & 0xE0 ) == opcode_call_00 )

@@ -112,23 +112,23 @@
 #define opcode_fromf   0x76  // cast from float
 #define opcode_fromd   0x77  // cast from double
 // 73-7f
-// TODO kill shortcuts for we will have JIT anyway and bytecode size does not matter
-#define opcode_sys_0   0x80  // shortcut for syscall 0
-#define opcode_sys_1   0x81 
-#define opcode_sys_2   0x82 
-#define opcode_sys_3   0x83 
-#define opcode_sys_4   0x84 
-#define opcode_sys_5   0x85 
-#define opcode_sys_6   0x86 
-#define opcode_sys_7   0x87 
-#define opcode_sys_8   0x88 
-#define opcode_sys_9   0x89 
-#define opcode_sys_A   0x8A 
-#define opcode_sys_B   0x8B 
-#define opcode_sys_C   0x8C 
-#define opcode_sys_D   0x8D 
-#define opcode_sys_E   0x8E 
-#define opcode_sys_F   0x8F 
+// We can't have sys shortcuts because of syscall restart needs fixed sycall instr size for restart 
+//id(opcode_sys_0,0x80) // shortcut for syscall 0
+//id(opcode_sys_1,0x81)
+//id(opcode_sys_2,0x82)
+//id(opcode_sys_3,0x83)
+//id(opcode_sys_4,0x84)
+//id(opcode_sys_5,0x85)
+//id(opcode_sys_6,0x86)
+//id(opcode_sys_7,0x87)
+//id(opcode_sys_8,0x88)
+//id(opcode_sys_9,0x89)
+//id(opcode_sys_A,0x8A)
+//id(opcode_sys_B,0x8B)
+//id(opcode_sys_C,0x8C)
+//id(opcode_sys_D,0x8D)
+//id(opcode_sys_E,0x8E)
+//id(opcode_sys_F,0x8F)
 #define opcode_call_00   0xA0  // shortcut for call 0
 #define opcode_call_01   0xA1 
 #define opcode_call_02   0xA2 
