@@ -187,7 +187,7 @@ public class Disassembler extends opcode_ids {
 		case opcode_fromd:				return simple("cast from double");
 		
 		//case opcode_os_push_null:		return simple("os_push_null");		                                                                
-		                                                                
+/*		                                                                
 		case opcode_sys_0:				return intarg("sys", 0x0);
 		case opcode_sys_1:				return intarg("sys", 0x1);
 		case opcode_sys_2:				return intarg("sys", 0x2);
@@ -204,7 +204,7 @@ public class Disassembler extends opcode_ids {
 		case opcode_sys_D:				return intarg("sys", 0xD);
 		case opcode_sys_E:				return intarg("sys", 0xE);
 		case opcode_sys_F:				return intarg("sys", 0xF);
-		                                                                
+*/		                                                                
 		                                                                
 		case opcode_call_00:			return int2arg("call", 0x00, getByte() );
 		case opcode_call_01:			return int2arg("call", 0x01, getByte() );

@@ -1,6 +1,5 @@
 package phantom.gg;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * @author Anton Zuev(anzuev@bk.ru) on 23/06/2017.
@@ -51,7 +50,7 @@ enum InternalObjectType{
 
     public int getSize() {
         if(size < 0)
-            throw new NotImplementedException();
+            throw new RuntimeException("getSize");
         return size;
     }
 }

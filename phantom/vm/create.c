@@ -16,6 +16,7 @@
 #define debug_level_info 10
 
 #include <kernel/vm.h>
+#include <spinlock.h>
 
 #include <vm/root.h>
 #include <vm/exec.h>
@@ -24,6 +25,8 @@
 #include <vm/alloc.h>
 #include <vm/internal.h>
 #include <vm/internal_da.h>
+#include <vm/spin.h>
+
 #include "ids/opcode_ids.h"
 
 #include <assert.h>
@@ -39,32 +42,32 @@
  **/
 
 
-static struct pvm_object
-pvm_object_create_fixed( struct pvm_object object_class )
+static pvm_object_t 
+pvm_object_create_fixed( pvm_object_t object_class )
 {
 	return pvm_object_create_dynamic( object_class, -1 );
 }
 
-struct pvm_object
-pvm_object_create_dynamic( struct pvm_object object_class, int das )
+pvm_object_t 
+pvm_object_create_dynamic( pvm_object_t object_class, int das )
 {
-	struct data_area_4_class *cda = (struct data_area_4_class *)(&(object_class.data->da));
+	struct data_area_4_class *cda = (struct data_area_4_class *)(&(object_class->da));
 
 	if( das < 0 )
 		das = cda->object_data_area_size;
 
 	unsigned int flags = cda->object_flags;
 
-	struct pvm_object_storage * out = pvm_object_alloc( das, flags, 0 );
+	pvm_object_t  out = pvm_object_alloc( das, flags, 0 );
 	out->_class = object_class;
 	//out->_da_size = das; // alloc does it
 	//out->_flags = flags; // alloc does it
 
-	struct pvm_object ret;
-	ret.data = out;
-	ret.interface = cda->object_default_interface.data;
+	//pvm_object_t ret;
+	//ret = out;
+	//ret.interface = cda->object_default_interface.data;
 
-	return ret;
+	return out;
 }
 
 
@@ -74,19 +77,19 @@ pvm_object_create_dynamic( struct pvm_object object_class, int das )
  *
  **/
 
-struct pvm_object     pvm_create_object(struct pvm_object type)
+pvm_object_t     pvm_create_object(pvm_object_t type)
 {
 	struct data_area_4_class *cda = pvm_data_area(type,class);
 
-	struct pvm_object ret = pvm_object_create_fixed(type);
+	pvm_object_t ret = pvm_object_create_fixed(type);
 
 	if( cda->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
 	{
         // init internal object
 
-		int rec = pvm_iclass_by_class( type.data );
+		int rec = pvm_iclass_by_class( type );
 
-		pvm_internal_classes[rec].init( ret.data );
+		pvm_internal_classes[rec].init( ret );
 	}
 
 	return ret;
@@ -104,14 +107,14 @@ struct pvm_object     pvm_create_object(struct pvm_object type)
  **/
 
 //__inline__
-struct pvm_object     pvm_create_null_object()
+pvm_object_t     pvm_create_null_object()
 {
     return pvm_root.null_object;  // already created once forever
 }
 
-void pvm_internal_init_void(struct pvm_object_storage * os) { (void)os; }
+void pvm_internal_init_void(pvm_object_t  os) { (void)os; }
 
-void pvm_gc_iter_void(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_void(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)func;
     (void)os;
@@ -119,19 +122,19 @@ void pvm_gc_iter_void(gc_iterator_call_t func, struct pvm_object_storage * os, v
     // Empty
 }
 
-struct pvm_object     pvm_create_int_object(int _value)
+pvm_object_t     pvm_create_int_object(int _value)
 {
-	struct pvm_object	out = pvm_object_create_fixed( pvm_get_int_class() );
-	((struct data_area_4_int*)&(out.data->da))->value = _value;
+	pvm_object_t 	out = pvm_object_create_fixed( pvm_get_int_class() );
+	((struct data_area_4_int*)&(out->da))->value = _value;
 	return out;
 }
 
-void pvm_internal_init_int(struct pvm_object_storage * os)
+void pvm_internal_init_int(pvm_object_t  os)
 {
     (void)os;
 }
 
-void pvm_gc_iter_int(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_int(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)os;
     (void)arg;
@@ -141,19 +144,19 @@ void pvm_gc_iter_int(gc_iterator_call_t func, struct pvm_object_storage * os, vo
 
 
 
-struct pvm_object     pvm_create_long_object(int64_t _value)
+pvm_object_t     pvm_create_long_object(int64_t _value)
 {
-	struct pvm_object	out = pvm_object_create_fixed( pvm_get_long_class() );
-	((struct data_area_4_long*)&(out.data->da))->value = _value;
+	pvm_object_t 	out = pvm_object_create_fixed( pvm_get_long_class() );
+	((struct data_area_4_long*)&(out->da))->value = _value;
 	return out;
 }
 
-void pvm_internal_init_long(struct pvm_object_storage * os)
+void pvm_internal_init_long(pvm_object_t  os)
 {
     (void)os;
 }
 
-void pvm_gc_iter_long(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_long(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)os;
     (void)arg;
@@ -162,19 +165,19 @@ void pvm_gc_iter_long(gc_iterator_call_t func, struct pvm_object_storage * os, v
 }
 
 
-struct pvm_object     pvm_create_float_object(float _value)
+pvm_object_t     pvm_create_float_object(float _value)
 {
-	struct pvm_object	out = pvm_object_create_fixed( pvm_get_float_class() );
-	((struct data_area_4_float*)&(out.data->da))->value = _value;
+	pvm_object_t 	out = pvm_object_create_fixed( pvm_get_float_class() );
+	((struct data_area_4_float*)&(out->da))->value = _value;
 	return out;
 }
 
-void pvm_internal_init_float(struct pvm_object_storage * os)
+void pvm_internal_init_float(pvm_object_t  os)
 {
     (void)os;
 }
 
-void pvm_gc_iter_float(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_float(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)os;
     (void)arg;
@@ -185,19 +188,19 @@ void pvm_gc_iter_float(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 
 
-struct pvm_object     pvm_create_double_object(double _value)
+pvm_object_t     pvm_create_double_object(double _value)
 {
-	struct pvm_object	out = pvm_object_create_fixed( pvm_get_double_class() );
-	((struct data_area_4_double*)&(out.data->da))->value = _value;
+	pvm_object_t 	out = pvm_object_create_fixed( pvm_get_double_class() );
+	((struct data_area_4_double*)&(out->da))->value = _value;
 	return out;
 }
 
-void pvm_internal_init_double(struct pvm_object_storage * os)
+void pvm_internal_init_double(pvm_object_t  os)
 {
     (void)os;
 }
 
-void pvm_gc_iter_double(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_double(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)os;
     (void)arg;
@@ -218,16 +221,16 @@ void pvm_gc_iter_double(gc_iterator_call_t func, struct pvm_object_storage * os,
 
 
 
-struct pvm_object     pvm_create_string_object_binary(const char *value, int n_bytes)
+pvm_object_t     pvm_create_string_object_binary(const char *value, int n_bytes)
 {
 	int das = sizeof(struct data_area_4_string)+n_bytes;
-	struct pvm_object string_class = pvm_get_string_class();
+	pvm_object_t string_class = pvm_get_string_class();
 
-	struct pvm_object	_data = pvm_object_create_dynamic( string_class, das );
+	pvm_object_t 	_data = pvm_object_create_dynamic( string_class, das );
 
-	struct data_area_4_string* data_area = (struct data_area_4_string*)&(_data.data->da);
+	struct data_area_4_string* data_area = (struct data_area_4_string*)&(_data->da);
 
-	pvm_internal_init_string(_data.data);
+	pvm_internal_init_string(_data);
 
 	if(value)
 		memcpy(data_area->data, value, data_area->length = n_bytes );
@@ -236,24 +239,24 @@ struct pvm_object     pvm_create_string_object_binary(const char *value, int n_b
 
 }
 
-struct pvm_object     pvm_create_string_object(const char *value)
+pvm_object_t     pvm_create_string_object(const char *value)
 {
 	return pvm_create_string_object_binary(value, strlen(value));
 }
 
-struct pvm_object     pvm_create_string_object_binary_cat(
+pvm_object_t     pvm_create_string_object_binary_cat(
 		const char *value1, int n_bytes1,
 		const char *value2, int n_bytes2
 )
 {
 	int das = sizeof(struct data_area_4_string)+n_bytes1+n_bytes2;
-	struct pvm_object string_class = pvm_get_string_class();
+	pvm_object_t string_class = pvm_get_string_class();
 
-	struct pvm_object	_data = pvm_object_create_dynamic( string_class, das );
+	pvm_object_t 	_data = pvm_object_create_dynamic( string_class, das );
 
-	struct data_area_4_string* data_area = (struct data_area_4_string*)&(_data.data->da);
+	struct data_area_4_string* data_area = (struct data_area_4_string*)&(_data->da);
 
-	pvm_internal_init_string(_data.data);
+	pvm_internal_init_string(_data);
 
 	if(value1)
 	{
@@ -270,7 +273,7 @@ struct pvm_object     pvm_create_string_object_binary_cat(
 }
 
 
-void pvm_internal_init_string(struct pvm_object_storage * os)
+void pvm_internal_init_string(pvm_object_t  os)
 {
 	struct data_area_4_string* data_area = (struct data_area_4_string*)&(os->da);
 
@@ -278,7 +281,7 @@ void pvm_internal_init_string(struct pvm_object_storage * os)
 	data_area->length = 0;
 }
 
-void pvm_gc_iter_string(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_string(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)func;
     (void)os;
@@ -313,16 +316,16 @@ int pvm_strcmp(pvm_object_t s1, pvm_object_t s2)
 
 
 
-//struct pvm_object     pvm_create_array_object();
+//pvm_object_t     pvm_create_array_object();
 
-struct pvm_object
-pvm_create_page_object( int n_slots, struct pvm_object *init, int init_slots )
+pvm_object_t 
+pvm_create_page_object( int n_slots, pvm_object_t *init, int init_slots )
 {
-	int das = n_slots*sizeof(struct pvm_object);
+	int das = n_slots*sizeof(pvm_object_t );
 
-	struct pvm_object _data = pvm_object_create_dynamic( pvm_get_page_class(), das );
+	pvm_object_t _data = pvm_object_create_dynamic( pvm_get_page_class(), das );
 
-	struct pvm_object * data_area = (struct pvm_object *)&(_data.data->da);
+	pvm_object_t * data_area = (pvm_object_t *)&(_data->da);
 
 	// NB! Bug! Here is the way to set object pointers to some garbage value
 	//if( init_value )	memcpy( data_area, init_value, das );
@@ -340,22 +343,22 @@ pvm_create_page_object( int n_slots, struct pvm_object *init, int init_slots )
 	return _data;
 }
 
-void pvm_internal_init_page(struct pvm_object_storage * os)
+void pvm_internal_init_page(pvm_object_t  os)
 {
-	assert( ((os->_da_size) % sizeof(struct pvm_object)) == 0); // Natural num of
+	assert( ((os->_da_size) % sizeof(pvm_object_t )) == 0); // Natural num of
 
-	int n_slots = (os->_da_size) / sizeof(struct pvm_object);
-	struct pvm_object * data_area = (struct pvm_object *)&(os->da);
+	int n_slots = (os->_da_size) / sizeof(pvm_object_t );
+	pvm_object_t * data_area = (pvm_object_t *)&(os->da);
 
 	int i;
 	for( i = 0; i < n_slots; i++ )
 		data_area[i] = pvm_get_null_object();
 }
 
-void pvm_gc_iter_page(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_page(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
-	int n_slots = (os->_da_size) / sizeof(struct pvm_object);
-	struct pvm_object * data_area = (struct pvm_object *)&(os->da);
+	int n_slots = (os->_da_size) / sizeof(pvm_object_t );
+	pvm_object_t * data_area = (pvm_object_t *)&(os->da);
 
 	int i;
 	for( i = 0; i < n_slots; i++ )
@@ -369,15 +372,15 @@ void pvm_gc_iter_page(gc_iterator_call_t func, struct pvm_object_storage * os, v
 
 
 
-struct pvm_object     pvm_create_call_frame_object()
+pvm_object_t     pvm_create_call_frame_object()
 {
-	struct pvm_object _data = pvm_object_create_fixed( pvm_get_call_frame_class() );
+	pvm_object_t _data = pvm_object_create_fixed( pvm_get_call_frame_class() );
 
-	pvm_internal_init_call_frame( _data.data );
+	pvm_internal_init_call_frame( _data );
 	return _data;
 }
 
-void pvm_internal_init_call_frame(struct pvm_object_storage * os)
+void pvm_internal_init_call_frame(pvm_object_t  os)
 {
 	//struct data_area_4_call_frame *da = pvm_data_area( os, call_frame );
 	struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(os->da);
@@ -399,7 +402,7 @@ void pvm_internal_init_call_frame(struct pvm_object_storage * os)
 #define gc_fcall( f, arg, o )   f( o, arg )
 
 
-void pvm_gc_iter_call_frame(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_call_frame(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
 	struct data_area_4_call_frame *da = (struct data_area_4_call_frame *)&(os->da);
 	gc_fcall( func, arg, da->this_object );
@@ -415,26 +418,26 @@ void pvm_gc_iter_call_frame(gc_iterator_call_t func, struct pvm_object_storage *
 // we just need an internal interface creation code
 // to be able to start Phantom from scratch
 
-static struct pvm_object create_interface_worker( int n_methods )
+static pvm_object_t create_interface_worker( int n_methods )
 {
 	//if(debug_init) printf("create interface\n");
 
-	int das = n_methods*sizeof(struct pvm_object);
+	int das = n_methods*sizeof(pvm_object_t );
 
 	pvm_object_t ret = pvm_object_create_dynamic( pvm_get_interface_class(), das );
 	return ret;
 }
 
 
-struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_object parent_class )
+pvm_object_t     pvm_create_interface_object( int n_methods, pvm_object_t parent_class )
 {
-    struct pvm_object	ret = create_interface_worker( n_methods );
-    struct pvm_object * data_area = (struct pvm_object *)ret.data->da;
+    pvm_object_t 	ret = create_interface_worker( n_methods );
+    pvm_object_t * data_area = (pvm_object_t *)ret->da;
 
     if(pvm_is_null( parent_class ))
         pvm_exec_panic0( "create interface: parent is null" );
 
-    struct pvm_object_storage *base_i =  ((struct data_area_4_class*)parent_class.data->da)->object_default_interface.data;
+    pvm_object_t base_i =  ((struct data_area_4_class*)parent_class->da)->object_default_interface;
 
     int base_icount = da_po_limit(base_i);
 
@@ -463,12 +466,12 @@ struct pvm_object     pvm_create_interface_object( int n_methods, struct pvm_obj
 }
 
 
-void pvm_internal_init_interface(struct pvm_object_storage * os)
+void pvm_internal_init_interface(pvm_object_t  os)
 {
 	memset( os->da, 0, os->_da_size );
 }
 
-void pvm_gc_iter_interface(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_interface(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)func;
     (void)os;
@@ -482,11 +485,11 @@ void pvm_gc_iter_interface(gc_iterator_call_t func, struct pvm_object_storage * 
 
 
 
-struct pvm_object pvm_create_class_object(struct pvm_object name, struct pvm_object iface, int da_size)
+pvm_object_t pvm_create_class_object(pvm_object_t name, pvm_object_t iface, int da_size)
 {
-	struct pvm_object _data = pvm_object_create_fixed( pvm_get_class_class() );
+	pvm_object_t _data = pvm_object_create_fixed( pvm_get_class_class() );
 
-	struct data_area_4_class *      da = (struct data_area_4_class *)_data.data->da;
+	struct data_area_4_class *      da = (struct data_area_4_class *)_data->da;
 
 	da->object_data_area_size       = da_size;
 	da->object_flags                = 0;
@@ -499,7 +502,7 @@ struct pvm_object pvm_create_class_object(struct pvm_object name, struct pvm_obj
 	return _data;
 }
 
-void pvm_internal_init_class(struct pvm_object_storage * os)
+void pvm_internal_init_class(pvm_object_t  os)
 {
 	struct data_area_4_class *      da = (struct data_area_4_class *)os->da;
 
@@ -515,7 +518,7 @@ void pvm_internal_init_class(struct pvm_object_storage * os)
 }
 
 
-void pvm_gc_iter_class(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_class(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
 	struct data_area_4_class *da = (struct data_area_4_class *)&(os->da);
 	gc_fcall( func, arg, da->object_default_interface );
@@ -531,33 +534,35 @@ void pvm_gc_iter_class(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 
 
-void pvm_internal_init_thread(struct pvm_object_storage * os)
+void pvm_internal_init_thread(pvm_object_t  os)
 {
 	struct data_area_4_thread *      da = (struct data_area_4_thread *)os->da;
 
-	hal_spin_init(&da->spin);
+	///hal_spin_init(&da->spin);
 //#if OLD_VM_SLEEP
 //        da->sleep_flag                      = 0;
 //#endif
 	//hal_cond_init(&(da->wakeup_cond), "VmThrdWake");
 
+    pvm_spin_init( &da->lock );
+
 	da->call_frame   			= pvm_create_call_frame_object();
 	da->stack_depth				= 1;
 
-	da->owner.data = 0;
-	da->environment.data = 0;
+	da->owner = 0;
+	da->environment = 0;
 
 	da->code.code     			= 0;
-	da->code.IP 			= 0;
-	da->code.IP_max             	= 0;
+	da->code.IP                 = 0;
+	da->code.IP_max             = 0;
 
 	//da->_this_object 			= pvm_get_null_object();
 
-	pvm_exec_load_fast_acc(da); // Just to fill shadows with something non-null
+    pvm_exec_load_fast_acc(da); // Just to fill shadows with something non-null
 }
 
 
-void pvm_gc_iter_thread(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_thread(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
 	struct data_area_4_thread *da = (struct data_area_4_thread *)&(os->da);
 	gc_fcall( func, arg, da->call_frame );
@@ -566,14 +571,14 @@ void pvm_gc_iter_thread(gc_iterator_call_t func, struct pvm_object_storage * os,
 }
 
 
-void pvm_internal_init_code(struct pvm_object_storage * os)
+void pvm_internal_init_code(pvm_object_t  os)
 {
 	struct data_area_4_code *      da = (struct data_area_4_code *)os->da;
 
 	da->code_size     			= 0;
 }
 
-void pvm_gc_iter_code(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_code(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)func;
     (void)os;
@@ -583,32 +588,32 @@ void pvm_gc_iter_code(gc_iterator_call_t func, struct pvm_object_storage * os, v
 
 
 
-void pvm_internal_init_array(struct pvm_object_storage * os)
+void pvm_internal_init_array(pvm_object_t  os)
 {
 	struct data_area_4_array *      da = (struct data_area_4_array *)os->da;
 
 	da->used_slots     			= 0;
 	da->page_size                       = 16;
-	da->page.data                       = 0;
+	da->page                       = 0;
 }
 
 
-void pvm_gc_iter_array(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_array(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
 	struct data_area_4_array *da = (struct data_area_4_array *)&(os->da);
-	if(da->page.data != 0)
+	if(da->page != 0)
 		gc_fcall( func, arg, da->page );
 }
 
 
 
-void pvm_internal_init_boot(struct pvm_object_storage * os)
+void pvm_internal_init_boot(pvm_object_t  os)
 {
      (void)os;
      // Nohing!
 }
 
-void pvm_gc_iter_boot(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_boot(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)func;
     (void)os;
@@ -619,17 +624,17 @@ void pvm_gc_iter_boot(gc_iterator_call_t func, struct pvm_object_storage * os, v
 
 
 
-void pvm_internal_init_mutex(struct pvm_object_storage * os)
+void pvm_internal_init_mutex(pvm_object_t  os)
 {
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
 
     da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
-    pvm_spin_init( &da->pvm_lock );
+    pvm_spin_init( &da->lock );
     //hal_spin_init( &da->spinlock );
     //in_method = 0;
 }
 
-void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_mutex(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_mutex *      da = (struct data_area_4_mutex *)os->da;
     //int i;
@@ -650,16 +655,40 @@ void pvm_gc_iter_mutex(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 
 
-void pvm_internal_init_cond(struct pvm_object_storage * os)
+void pvm_internal_init_cond(pvm_object_t  os)
 {
     struct data_area_4_cond *      da = (struct data_area_4_cond *)os->da;
 
     da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
 }
 
-void pvm_gc_iter_cond(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_cond(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_cond *      da = (struct data_area_4_cond *)os->da;
+    //int i;
+
+    gc_fcall( func, arg, da->waiting_threads_array );
+
+    //for( i = 0; i < MAX_MUTEX_THREADS; i++ )
+    //    gc_fcall( func, arg, da->waiting_threads[i] );
+
+    //gc_fcall( func, arg, pvm_da_to_object(da->owner_thread) );
+}
+
+
+
+
+void pvm_internal_init_sema(pvm_object_t  os)
+{
+    struct data_area_4_sema *      da = (struct data_area_4_sema *)os->da;
+
+    da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
+}
+
+void pvm_gc_iter_sema(gc_iterator_call_t func, pvm_object_t  os, void *arg)
+{
+
+    struct data_area_4_sema *      da = (struct data_area_4_sema *)os->da;
     //int i;
 
     gc_fcall( func, arg, da->waiting_threads_array );
@@ -673,43 +702,19 @@ void pvm_gc_iter_cond(gc_iterator_call_t func, struct pvm_object_storage * os, v
 
 
 
-void pvm_internal_init_sema(struct pvm_object_storage * os)
-{
-    struct data_area_4_sema *      da = (struct data_area_4_sema *)os->da;
-
-    da->waiting_threads_array = pvm_create_object( pvm_get_array_class() );
-}
-
-void pvm_gc_iter_sema(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
-{
-
-    struct data_area_4_sema *      da = (struct data_area_4_sema *)os->da;
-    //int i;
-
-    gc_fcall( func, arg, da->waiting_threads_array );
-
-    //for( i = 0; i < MAX_MUTEX_THREADS; i++ )
-    //    gc_fcall( func, arg, da->waiting_threads[i] );
-
-    gc_fcall( func, arg, pvm_da_to_object(da->owner_thread) );
-}
 
 
 
 
 
-
-
-
-
-void pvm_internal_init_binary(struct pvm_object_storage * os)
+void pvm_internal_init_binary(pvm_object_t  os)
 {
     (void)os;
     //struct data_area_4_binary *      da = (struct data_area_4_binary *)os->da;
     // empty
 }
 
-void pvm_gc_iter_binary(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_binary(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)func;
     (void)os;
@@ -718,11 +723,11 @@ void pvm_gc_iter_binary(gc_iterator_call_t func, struct pvm_object_storage * os,
 }
 
 
-struct pvm_object     pvm_create_binary_object(int size, void *init)
+pvm_object_t     pvm_create_binary_object(int size, void *init)
 {
-	struct pvm_object ret = pvm_object_create_dynamic( pvm_get_binary_class(), size + sizeof(struct data_area_4_binary) );
+	pvm_object_t ret = pvm_object_create_dynamic( pvm_get_binary_class(), size + sizeof(struct data_area_4_binary) );
 
-	struct data_area_4_binary *da = (struct data_area_4_binary *)ret.data->da;
+	struct data_area_4_binary *da = (struct data_area_4_binary *)ret->da;
 	da->data_size = size;
 	if( init != NULL ) memcpy( da->data, init, size );
 	return ret;
@@ -730,29 +735,29 @@ struct pvm_object     pvm_create_binary_object(int size, void *init)
 
 
 
-void pvm_internal_init_bitmap(struct pvm_object_storage * os)
+void pvm_internal_init_bitmap(pvm_object_t  os)
 {
     (void)os;
     // Nothing
 }
 
-void pvm_gc_iter_bitmap(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_bitmap(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
 	struct data_area_4_bitmap *da = (struct data_area_4_bitmap *)&(os->da);
-	if(da->image.data != 0)
+	if(da->image != 0)
 		gc_fcall( func, arg, da->image );
 }
 
 
 
-void pvm_internal_init_world(struct pvm_object_storage * os)
+void pvm_internal_init_world(pvm_object_t  os)
 {
     (void)os;
     //struct data_area_4_binary *      da = (struct data_area_4_binary *)os->da;
     // empty
 }
 
-void pvm_gc_iter_world(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_world(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void)func;
     (void)os;
@@ -762,13 +767,13 @@ void pvm_gc_iter_world(gc_iterator_call_t func, struct pvm_object_storage * os, 
 
 
 
-void pvm_internal_init_closure(struct pvm_object_storage * os)
+void pvm_internal_init_closure(pvm_object_t  os)
 {
 	struct data_area_4_closure *      da = (struct data_area_4_closure *)os->da;
-	da->object.data = 0;
+	da->object = 0;
 }
 
-void pvm_gc_iter_closure(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_closure(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_closure *      da = (struct data_area_4_closure *)os->da;
     //if(da->image.object != 0)
@@ -781,10 +786,10 @@ void pvm_gc_iter_closure(gc_iterator_call_t func, struct pvm_object_storage * os
 
 #if COMPILE_WEAKREF
 
-void pvm_internal_init_weakref(struct pvm_object_storage * os)
+void pvm_internal_init_weakref(pvm_object_t  os)
 {
     struct data_area_4_weakref *      da = (struct data_area_4_weakref *)os->da;
-    da->object.data = 0;
+    da->object = 0;
 #if WEAKREF_SPIN
     hal_spin_init( &da->lock );
 #else
@@ -792,7 +797,7 @@ void pvm_internal_init_weakref(struct pvm_object_storage * os)
 #endif
 }
 
-void pvm_gc_iter_weakref(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_weakref(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_weakref *      da = (struct data_area_4_weakref *)os->da;
 
@@ -804,13 +809,13 @@ void pvm_gc_iter_weakref(gc_iterator_call_t func, struct pvm_object_storage * os
 }
 
 
-struct pvm_object     pvm_create_weakref_object(struct pvm_object owned )
+pvm_object_t     pvm_create_weakref_object(pvm_object_t owned )
 {
-    if(owned.data->_satellites.data != 0)
-        return owned.data->_satellites;
+    if(owned->_satellites != 0)
+        return owned->_satellites;
 
-    struct pvm_object ret = pvm_object_create_fixed( pvm_get_weakref_class() );
-    struct data_area_4_weakref *da = (struct data_area_4_weakref *)ret.data->da;
+    pvm_object_t ret = pvm_object_create_fixed( pvm_get_weakref_class() );
+    struct data_area_4_weakref *da = (struct data_area_4_weakref *)ret->da;
 
     // Interlocked to make sure no races can happen
     // (ref ass'ment seems to be non-atomic)
@@ -825,7 +830,7 @@ struct pvm_object     pvm_create_weakref_object(struct pvm_object owned )
 
     // No ref inc!
     da->object = owned;
-    owned.data->_satellites = ret;
+    owned->_satellites = ret;
 
 #if WEAKREF_SPIN
     hal_spin_unlock( &da->lock );
@@ -840,16 +845,16 @@ struct pvm_object     pvm_create_weakref_object(struct pvm_object owned )
 
 
 
-struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
+pvm_object_t pvm_weakref_get_object(pvm_object_t wr )
 {
     struct data_area_4_weakref *da = pvm_object_da( wr, weakref );
-    struct pvm_object out;
+    pvm_object_t out;
 
     // still crashes :(
 
     // HACK HACK HACK BUG - wiring target too. TODO need wire size parameter for page cross situations!
     wire_page_for_addr( &(da->object) );
-    wire_page_for_addr( da->object.data );
+    wire_page_for_addr( da->object );
 
     // All we do is return new reference to our object,
     // incrementing refcount before
@@ -863,7 +868,7 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
 #endif
 
     // TODO should we check refcount before and return null if zero?
-    if( 0 == da->object.data->_ah.refCount )
+    if( 0 == da->object->_ah.refCount )
         printf("zero object in pvm_weakref_get_object\n");
 
     out = ref_inc_o( da->object );
@@ -876,7 +881,7 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
     hal_mutex_unlock( &da->mutex );
 #endif
 
-    unwire_page_for_addr( da->object.data );
+    unwire_page_for_addr( da->object );
     unwire_page_for_addr( &(da->object) );
 
     return out;
@@ -890,7 +895,7 @@ struct pvm_object pvm_weakref_get_object(struct pvm_object wr )
 
 
 
-void pvm_internal_init_window(struct pvm_object_storage * os)
+void pvm_internal_init_window(pvm_object_t  os)
 {
     struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
 
@@ -907,11 +912,11 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
 
     {
     pvm_object_t o;
-    o.data = os;
-    o.interface = pvm_get_default_interface(os).data;
+    o = os;
+    //o.interface = pvm_get_default_interface(os).data;
 
     da->connector = pvm_create_connection_object();
-    struct data_area_4_connection *cda = (struct data_area_4_connection *)da->connector.data->da;
+    struct data_area_4_connection *cda = (struct data_area_4_connection *)da->connector->da;
 
     phantom_connect_object_internal(cda, 0, o, 0);
 
@@ -923,7 +928,7 @@ void pvm_internal_init_window(struct pvm_object_storage * os)
 }
 
 
-void pvm_gc_iter_window(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_window(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_window *da = (struct data_area_4_window *)os->da;
 
@@ -931,18 +936,18 @@ void pvm_gc_iter_window(gc_iterator_call_t func, struct pvm_object_storage * os,
 }
 
 
-struct pvm_object     pvm_create_window_object(struct pvm_object owned )
+pvm_object_t     pvm_create_window_object(pvm_object_t owned )
 {
     //pvm_object_t ret = pvm_object_create_fixed( pvm_get_window_class() );
     pvm_object_t ret = pvm_create_object( pvm_get_window_class() );
-    struct data_area_4_window *da = (struct data_area_4_window *)ret.data->da;
+    struct data_area_4_window *da = (struct data_area_4_window *)ret->da;
 
     (void)da;
 
     return ret;
 }
 
-void pvm_gc_finalizer_window( struct pvm_object_storage * os )
+void pvm_gc_finalizer_window( pvm_object_t  os )
 {
     // is it called?
     struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
@@ -1011,7 +1016,7 @@ void pvm_restart_window( pvm_object_t o )
 
 
 /* moved to directory.c
-void pvm_internal_init_directory(struct pvm_object_storage * os)
+void pvm_internal_init_directory(pvm_object_t  os)
 {
     struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
 
@@ -1023,7 +1028,7 @@ void pvm_internal_init_directory(struct pvm_object_storage * os)
 }
 
 
-void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_directory(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
 
@@ -1042,7 +1047,7 @@ void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * 
 
 
 // Unused, not supposed to be called
-void pvm_gc_finalizer_directory( struct pvm_object_storage * os )
+void pvm_gc_finalizer_directory( pvm_object_t  os )
 {
     // is it called?
     //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
@@ -1058,13 +1063,13 @@ void pvm_restart_directory( pvm_object_t o )
 */
 
 
-struct pvm_object     pvm_create_directory_object(void)
+pvm_object_t     pvm_create_directory_object(void)
 {
     pvm_object_t ret = pvm_create_object( pvm_get_directory_class() );
     return ret;
 }
 
-void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_directory(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
 
@@ -1083,7 +1088,7 @@ void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * 
 
 
 
-void pvm_internal_init_connection(struct pvm_object_storage * os)
+void pvm_internal_init_connection(pvm_object_t  os)
 {
     struct data_area_4_connection      *da = (struct data_area_4_connection *)os->da;
 
@@ -1092,19 +1097,19 @@ void pvm_internal_init_connection(struct pvm_object_storage * os)
 }
 
 
-struct pvm_object     pvm_create_connection_object(void)
+pvm_object_t     pvm_create_connection_object(void)
 {
     pvm_object_t ret = pvm_create_object( pvm_get_connection_class() );
     return ret;
 }
 
-void pvm_gc_iter_connection(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_connection(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_connection      *da = (struct data_area_4_connection *)os->da;
 
     pvm_object_t ot;
-    ot.interface = 0;
-    ot.data = (void *) (((addr_t)da->owner)-DA_OFFSET());
+    //ot.interface = 0;
+    ot = (void *) (((addr_t)da->owner)-DA_OFFSET());
 
     gc_fcall( func, arg, ot );
     gc_fcall( func, arg, da->p_kernel_state_object );
@@ -1112,7 +1117,7 @@ void pvm_gc_iter_connection(gc_iterator_call_t func, struct pvm_object_storage *
 }
 
 
-void pvm_gc_finalizer_connection( struct pvm_object_storage * os )
+void pvm_gc_finalizer_connection( pvm_object_t  os )
 {
     // is it called?
     struct data_area_4_connection *da = (struct data_area_4_connection *)os->da;
@@ -1159,11 +1164,11 @@ printf("restarting connection");
 
 
 
-struct pvm_object     pvm_create_code_object(int size, void *code)
+pvm_object_t     pvm_create_code_object(int size, void *code)
 {
-	struct pvm_object ret = pvm_object_create_dynamic( pvm_get_code_class(), size + sizeof(struct data_area_4_code) );
+	pvm_object_t ret = pvm_object_create_dynamic( pvm_get_code_class(), size + sizeof(struct data_area_4_code) );
 
-	struct data_area_4_code *da = (struct data_area_4_code *)ret.data->da;
+	struct data_area_4_code *da = (struct data_area_4_code *)ret->da;
 	da->code_size = size;
 	memcpy( da->code, code, size );
 	return ret;
@@ -1171,10 +1176,10 @@ struct pvm_object     pvm_create_code_object(int size, void *code)
 
 
 
-struct pvm_object     pvm_create_thread_object(struct pvm_object start_cf )
+pvm_object_t     pvm_create_thread_object(pvm_object_t start_cf )
 {
-	struct pvm_object ret = pvm_create_object( pvm_get_thread_class() );
-	struct data_area_4_thread *da = (struct data_area_4_thread *)ret.data->da;
+	pvm_object_t ret = pvm_create_object( pvm_get_thread_class() );
+	struct data_area_4_thread *da = (struct data_area_4_thread *)ret->da;
 
 	da->call_frame = start_cf;
 	da->stack_depth = 1;
@@ -1182,7 +1187,7 @@ struct pvm_object     pvm_create_thread_object(struct pvm_object start_cf )
 	pvm_exec_load_fast_acc(da);
 
 	// add to system threads list
-	pvm_append_array(pvm_root.threads_list.data, ret);
+	pvm_append_array(pvm_root.threads_list, ret);
 	ref_inc_o(ret);
 
 	// not for each and every one
@@ -1192,12 +1197,12 @@ struct pvm_object     pvm_create_thread_object(struct pvm_object start_cf )
 }
 
 
-void   pvm_release_thread_object( struct pvm_object thread )
+void   pvm_release_thread_object( pvm_object_t thread )
 {
     // the thread was decr once... while executing class loader code... TODO: should be rewritten!
 
     // remove from system threads list.
-    pvm_pop_array(pvm_root.threads_list.data, thread);
+    pvm_pop_array(pvm_root.threads_list, thread);
 
     ref_dec_o( thread );  //free now
 }
@@ -1211,14 +1216,14 @@ void   pvm_release_thread_object( struct pvm_object thread )
  *
  **/
 
-static struct pvm_object pvm_create_syscall_code( int sys_num );
+static pvm_object_t pvm_create_syscall_code( int sys_num );
 
 // creates interface such that each method
 // has just syscall (with a number corresponding to method no)
 // and return
-void pvm_fill_syscall_interface( struct pvm_object iface, int syscall_count )
+void pvm_fill_syscall_interface( pvm_object_t iface, int syscall_count )
 {
-	struct pvm_object *da = (struct pvm_object *)iface.data->da;
+	pvm_object_t *da = (pvm_object_t *)iface->da;
 
 	int i;
 	for( i = 0; i < syscall_count; i++ )
@@ -1227,9 +1232,9 @@ void pvm_fill_syscall_interface( struct pvm_object iface, int syscall_count )
 
 
 // syscall code segment generator
-static struct pvm_object pvm_create_syscall_code( int sys_num )
+static pvm_object_t pvm_create_syscall_code( int sys_num )
 {
-
+/*
 	if( sys_num <= 15 )
 	{
 		char code[2];
@@ -1238,6 +1243,7 @@ static struct pvm_object pvm_create_syscall_code( int sys_num )
 		return pvm_create_code_object( sizeof(code), code );
 	}
 	else
+*/    
 	{
 		char code[3];
 		code[0] = opcode_sys_8bit;

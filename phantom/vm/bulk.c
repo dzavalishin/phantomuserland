@@ -41,7 +41,7 @@ void pvm_bulk_init( pvm_bulk_seek_t sf, pvm_bulk_read_t rd )
 }
 
 static int skip( int len );
-static int load( int len, struct pvm_object   *out );
+static int load( int len, pvm_object_t   *out );
 static int cncmp( const char *a, const char *b );
 
 
@@ -63,7 +63,7 @@ static int cncmp( const char *a, const char *b );
 
 
 // Return 0 on success
-int pvm_load_class_from_module( const char *class_name, struct pvm_object   *out )
+int pvm_load_class_from_module( const char *class_name, pvm_object_t   *out )
 {
     seekf(0);
 
@@ -117,7 +117,7 @@ static int skip( int len )
 }
 
 
-static int load( int len, struct pvm_object   *out )
+static int load( int len, pvm_object_t   *out )
 {
     if(DEBUG) printf("Bulk: loading\n" );
 

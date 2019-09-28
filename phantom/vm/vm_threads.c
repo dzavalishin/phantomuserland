@@ -48,7 +48,7 @@ static void remove_vm_thread_from_list(pvm_object_storage_t *os)
 {
     // TODO check that is is a thread
 
-    int nthreads  = get_array_size(pvm_root.threads_list.data);
+    int nthreads  = get_array_size(pvm_root.threads_list);
 
     if( !nthreads )
         SHOW_ERROR0( 0, "There were 0 live threads in image, and some thread is dead. Now -1?" );
@@ -56,11 +56,11 @@ static void remove_vm_thread_from_list(pvm_object_storage_t *os)
     int nkill = 0;
     while(nthreads--)
     {
-        struct pvm_object th =  pvm_get_array_ofield(pvm_root.threads_list.data, nthreads );
+        pvm_object_t th =  pvm_get_array_ofield(pvm_root.threads_list, nthreads );
         pvm_check_is_thread( th );
-        if( th.data == os )
+        if( th == os )
         {
-            pvm_set_array_ofield(pvm_root.threads_list.data, nthreads, pvm_create_null_object() );
+            pvm_set_array_ofield(pvm_root.threads_list, nthreads, pvm_create_null_object() );
             nkill++;
         }
     }
@@ -72,25 +72,29 @@ static void remove_vm_thread_from_list(pvm_object_storage_t *os)
 
 static void thread_death_handler( phantom_thread_t *t )
 {
-    //struct pvm_object current_thread = *((struct pvm_object *)arg);
+    //pvm_object_t current_thread = *((pvm_object_t *)arg);
     n_vm_threads--;
 
     printf("thread_death_handler called\n");
+
+    vm_lock_persistent_memory();
 
     pvm_object_storage_t *os = t->owner;
     if( os == 0 )
     {
         SHOW_ERROR0( 0, "!!! thread_death_handler - no pointer to Vm thread object!" );
+        vm_unlock_persistent_memory();
         return;
     }
 
     assert( os->_ah.object_start_marker == PVM_OBJECT_START_MARKER );
 
     //struct data_area_4_thread * tda = ((struct data_area_4_thread *)&(os->da));
-
+    // TODO check os class == thread
 
     remove_vm_thread_from_list(os);
 
+    vm_unlock_persistent_memory();
 }
 
 
@@ -102,7 +106,7 @@ static void thread_run_func( void *arg )
 {
     t_current_set_name("VM");
 
-    struct pvm_object current_thread = *((struct pvm_object *)arg);
+    pvm_object_t current_thread = *((pvm_object_t *)arg);
 
     args_used--;
 
@@ -115,7 +119,7 @@ static void thread_run_func( void *arg )
 
 
 
-static void start_new_vm_thread(struct pvm_object new_thread)
+static void start_new_vm_thread(pvm_object_t new_thread)
 {
     args_used++;
 
@@ -125,9 +129,9 @@ static void start_new_vm_thread(struct pvm_object new_thread)
     struct data_area_4_thread *tda = pvm_object_da( new_thread, thread );
     tda->tid = tid;
 
-    t_set_owner( tid, new_thread.data );
+    t_set_owner( tid, new_thread );
     //phantom_thread_t *t = get_thread(tid);
-    //t->owner = new_thread.data;
+    //t->owner = new_thread;
 
     while(args_used > 0)
         hal_sleep_msec(1);
@@ -161,7 +165,7 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 
         if(!didit)
         {
-            SHOW_ERROR( 0, "Sleeping VM thread has no means to wakeup (%p)", new_thread.data );
+            SHOW_ERROR( 0, "Sleeping VM thread has no means to wakeup (%p)", new_thread );
         }
 
     }
@@ -171,7 +175,7 @@ static void start_new_vm_thread(struct pvm_object new_thread)
 
 
 /* static
-phantom_thread_t* vm_thread_2_kernel_thread(struct pvm_object vm_thread)
+phantom_thread_t* vm_thread_2_kernel_thread(pvm_object_t vm_thread)
 {
     struct data_area_4_thread *tda = pvm_object_da( vm_thread, thread );
     return get_thread(tda->tid);
@@ -183,17 +187,17 @@ phantom_thread_t* vm_thread_2_kernel_thread(struct pvm_object vm_thread)
 
 // -----------------------------------------------------------------------
 /*
-static void phantom_add_thread_to_thread_list(struct pvm_object new_thread)
+static void phantom_add_thread_to_thread_list(pvm_object_t new_thread)
 {
     // ERROR! Races? Synchronize? Inside of method!
     
-    pvm_append_array( pvm_root.threads_list.data, new_thread );
+    pvm_append_array( pvm_root.threads_list, new_thread );
 
 }
 */
 
 
-void phantom_activate_thread(struct pvm_object new_thread)
+void phantom_activate_thread(pvm_object_t new_thread)
 {
     pvm_check_is_thread( new_thread );
     // already there, added in object create
@@ -214,7 +218,7 @@ void activate_all_threads()
 {
     vm_lock_persistent_memory();
 
-    int nthreads  = get_array_size(pvm_root.threads_list.data);
+    int nthreads  = get_array_size(pvm_root.threads_list);
 
     if( nthreads == 0 )
         SHOW_ERROR0( 0, "There are 0 live threads in image, system must be dead :(" );
@@ -223,7 +227,7 @@ void activate_all_threads()
 
     while(nthreads--)
     {
-        struct pvm_object th =  pvm_get_array_ofield(pvm_root.threads_list.data, nthreads );
+        pvm_object_t th =  pvm_get_array_ofield(pvm_root.threads_list, nthreads );
         pvm_check_is_thread( th );
         start_new_vm_thread( th );
     }
@@ -252,9 +256,5 @@ void phantom_finish_all_threads(void)
 
 
 
-// -----------------------------------------------------------------------
-// Put to separate src file
-// Connection object support
-// -----------------------------------------------------------------------
 
 

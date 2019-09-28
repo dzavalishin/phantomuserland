@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <setjmp.h>
 
@@ -17,6 +18,7 @@
 #ifndef NO_NETWORK
 #  include <sys/socket.h>
 #  include <netinet/in.h>
+#  include <arpa/inet.h>
 #endif
 
 #include <pthread.h>

@@ -21,7 +21,9 @@
 #include <vm/object.h>
 #include <vm/alloc.h>
 #include <vm/internal_da.h>
-#include <spinlock.h>
+
+#include <vm/spin.h>
+//#include <spinlock.h>
 
 #define debug_print 0
 
@@ -62,8 +64,8 @@ typedef struct hashdir {
     u_int32_t                           capacity;       // size of 1nd level arrays
     u_int32_t                           nEntries;       // number of actual entries stored
 
-    struct pvm_object   		keys;      	// Where we actually hold keys
-    struct pvm_object   		values;      	// Where we actually hold values
+    pvm_object_t   		keys;      	// Where we actually hold keys
+    pvm_object_t   		values;      	// Where we actually hold values
     u_int8_t 				*flags;      	// Is this keys/values slot pointing to 2nd level array
 
     hal_spinlock_t                      lock;
@@ -93,8 +95,8 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     if( dir->nEntries == 0 ) return ENOENT;
 
     assert(dir->capacity);
-    assert(dir->keys.data != 0);
-    assert(dir->values.data != 0);
+    assert(dir->keys != 0);
+    assert(dir->values != 0);
     assert(dir->flags != 0);
 
     LOCK_DIR(dir);
@@ -104,11 +106,11 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
     // Can't access array slot out of array's real size
-    int kasize = get_array_size( dir->keys.data );
+    int kasize = get_array_size( dir->keys );
     if( keypos >= kasize )
         goto not_found;
 
-    pvm_object_t okey = pvm_get_array_ofield( dir->keys.data, keypos );
+    pvm_object_t okey = pvm_get_array_ofield( dir->keys, keypos );
     if( pvm_is_null( okey ) )
     {
     not_found:
@@ -124,13 +126,13 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     {
         if( 0 == hdir_cmp_keys( ikey, i_key_len, okey ) )
         {
-            *out = pvm_get_array_ofield( dir->values.data, keypos );
+            *out = pvm_get_array_ofield( dir->values, keypos );
             ref_inc_o( *out );
             if( delete_found )
             {
                 // TODO need ref_dec?
-                pvm_set_array_ofield( dir->values.data, keypos, pvm_create_null_object() );
-                pvm_set_array_ofield( dir->keys.data, keypos, pvm_create_null_object() );
+                pvm_set_array_ofield( dir->values, keypos, pvm_create_null_object() );
+                pvm_set_array_ofield( dir->keys, keypos, pvm_create_null_object() );
                 dir->nEntries--;
             }
             UNLOCK_DIR(dir);
@@ -144,8 +146,8 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     // Indirect, find by linear search in 2nd level array
     // okey is arrray
 
-    pvm_object_t keyarray = pvm_get_array_ofield( dir->keys.data, keypos );
-    pvm_object_t valarray = pvm_get_array_ofield( dir->values.data, keypos );
+    pvm_object_t keyarray = pvm_get_array_ofield( dir->keys, keypos );
+    pvm_object_t valarray = pvm_get_array_ofield( dir->values, keypos );
 
     if(debug_print) lprintf("find indirect keypos = %d\n", keypos );
     SHOW_INFO( 10, "find indirect keypos = %d", keypos );
@@ -163,24 +165,24 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
         return ENOENT;
     }
 
-    size_t indir_size = get_array_size( keyarray.data );
+    size_t indir_size = get_array_size( keyarray );
 
     int i;
     for( i = 0; i < indir_size; i++ )
     {
-        pvm_object_t indir_key = pvm_get_array_ofield( keyarray.data, i );
+        pvm_object_t indir_key = pvm_get_array_ofield( keyarray, i );
         
         if( pvm_is_null(indir_key) )
             continue;
 
         if( 0 == hdir_cmp_keys( ikey, i_key_len, indir_key ) )
         {
-            *out = pvm_get_array_ofield( valarray.data, i );
+            *out = pvm_get_array_ofield( valarray, i );
             ref_inc_o( *out );
             if( delete_found ) // TODO refdec?
             {
-                pvm_set_array_ofield( valarray.data, i, pvm_create_null_object() );
-                pvm_set_array_ofield( keyarray.data, i, pvm_create_null_object() );
+                pvm_set_array_ofield( valarray, i, pvm_create_null_object() );
+                pvm_set_array_ofield( keyarray, i, pvm_create_null_object() );
                 dir->nEntries--;
             }
             UNLOCK_DIR(dir);
@@ -201,8 +203,8 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     pvm_object_t okey;
 
     assert(dir->capacity);
-    assert(dir->keys.data != 0);
-    assert(dir->values.data != 0);
+    assert(dir->keys != 0);
+    assert(dir->values != 0);
     assert(dir->flags != 0);
 
     if(debug_print) printf("---- hdir add %.*s\n", i_key_len, ikey );
@@ -214,13 +216,13 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
     // Can't access array slot out of array's real size
-    int kasize = get_array_size( dir->keys.data );
+    int kasize = get_array_size( dir->keys );
 #if 1 // turn off to generate pvm_panic and, if E4C enabled, exception
     if( keypos >= kasize )
         okey = pvm_create_null_object();
     else
 #endif
-        okey = pvm_get_array_ofield( dir->keys.data, keypos );
+        okey = pvm_get_array_ofield( dir->keys, keypos );
     u_int8_t flags = dir->flags[keypos];
 
     // No indirection and key is equal
@@ -239,8 +241,8 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
         // Just put
 
         if(debug_print) lprintf("put direct keypos = %d\n", keypos );
-        pvm_set_array_ofield( dir->keys.data, keypos, pvm_create_string_object_binary( ikey, i_key_len ) );
-        pvm_set_array_ofield( dir->values.data, keypos, add );
+        pvm_set_array_ofield( dir->keys, keypos, pvm_create_string_object_binary( ikey, i_key_len ) );
+        pvm_set_array_ofield( dir->values, keypos, add );
         ref_inc_o( add );
         dir->nEntries++;
 
@@ -256,30 +258,30 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     if( (!flags) && !pvm_is_null( okey ) && (0 != hdir_cmp_keys( ikey, i_key_len, okey )) )
     {
         if(debug_print) lprintf("put convert to indirect keypos = %d\n", keypos );
-        pvm_object_t oval = pvm_get_array_ofield( dir->values.data, keypos );
+        pvm_object_t oval = pvm_get_array_ofield( dir->values, keypos );
 
         // Now create arrays
         pvm_object_t keya = pvm_create_array_object();
         pvm_object_t vala = pvm_create_array_object();
 
         // put old key/val
-        pvm_append_array( keya.data, okey );
-        pvm_append_array( vala.data, oval );
+        pvm_append_array( keya, okey );
+        pvm_append_array( vala, oval );
 
-        // pvm_set_array_ofield below will clear prev values in dir->keys.data[keypos] and dir->values.data[keypos]
+        // pvm_set_array_ofield below will clear prev values in dir->keys[keypos] and dir->values[keypos]
         // so ref inc 'em here
 
         ref_inc_o( okey );
         ref_inc_o( oval );
 
         // put new key/val
-        pvm_append_array( keya.data, pvm_create_string_object_binary( ikey, i_key_len ) );
-        pvm_append_array( vala.data, add );
+        pvm_append_array( keya, pvm_create_string_object_binary( ikey, i_key_len ) );
+        pvm_append_array( vala, add );
         ref_inc_o( add );
         dir->nEntries++;
 
-        pvm_set_array_ofield( dir->keys.data, keypos, keya );
-        pvm_set_array_ofield( dir->values.data, keypos, vala );
+        pvm_set_array_ofield( dir->keys, keypos, keya );
+        pvm_set_array_ofield( dir->values, keypos, vala );
         dir->flags[keypos] = 1;
 
         SHOW_INFO( 10, "create indirection keypos = %d", keypos );
@@ -300,12 +302,12 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
 
     if(debug_print) lprintf("put to existing indirect keypos = %d\n", keypos );
 
-    size_t indir_size = get_array_size( dir->keys.data );
+    size_t indir_size = get_array_size( dir->keys );
 
     int i, empty_pos = -1;
     for( i = 0; i < indir_size; i++ )
     {
-        pvm_object_t indir_key = pvm_get_array_ofield( dir->keys.data, i );
+        pvm_object_t indir_key = pvm_get_array_ofield( dir->keys, i );
         if(pvm_is_null(indir_key))
         {
             empty_pos = i;
@@ -324,13 +326,13 @@ errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object
     pvm_object_t new_key = pvm_create_string_object_binary( ikey, i_key_len );
     if( empty_pos >= 0 )
     {
-        pvm_set_array_ofield( dir->keys.data, empty_pos, new_key );
-        pvm_set_array_ofield( dir->values.data, empty_pos, add );
+        pvm_set_array_ofield( dir->keys, empty_pos, new_key );
+        pvm_set_array_ofield( dir->values, empty_pos, add );
     }
     else
     {
-        pvm_append_array( dir->keys.data, new_key );
-        pvm_append_array( dir->values.data, add );
+        pvm_append_array( dir->keys, new_key );
+        pvm_append_array( dir->values, add );
     }
     ref_inc_o( add );
     dir->nEntries++;
@@ -421,7 +423,7 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
 
 
 
-void pvm_internal_init_directory(struct pvm_object_storage * os)
+void pvm_internal_init_directory(pvm_object_t  os)
 {
     struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
 
@@ -439,7 +441,7 @@ void pvm_internal_init_directory(struct pvm_object_storage * os)
 
 // left in create.c
 /*
-void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_directory(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_directory      *da = (struct data_area_4_directory *)os->da;
 
@@ -447,14 +449,14 @@ void pvm_gc_iter_directory(gc_iterator_call_t func, struct pvm_object_storage * 
     gc_fcall( func, arg, da->values );
 }
 
-struct pvm_object     pvm_create_directory_object(void)
+pvm_object_t     pvm_create_directory_object(void)
 {
     pvm_object_t ret = pvm_object_create_fixed( pvm_get_directory_class() );
     return ret;
 } */
 
 // Unused, not supposed to be called
-void pvm_gc_finalizer_directory( struct pvm_object_storage * os )
+void pvm_gc_finalizer_directory( pvm_object_t  os )
 {
     //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
     assert(0);

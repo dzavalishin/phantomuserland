@@ -37,6 +37,9 @@
 
 
 
+hal_mutex_t  snap_interlock_mutex;  // from snap_sync.c
+hal_cond_t   vm_thread_wakeup_cond; // from snap_sync.c
+
 
 #define MAXENVBUF 128
 static char *envbuf[MAXENVBUF] = { 0 };
@@ -68,8 +71,10 @@ static void args(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
-    printf("\n\n\n\n----- Phantom exec test v. 0.5\n\n");
+    printf("\n\n\n\n----- Phantom exec test v. 0.6\n\n");
 
+    hal_mutex_init( &snap_interlock_mutex, "snap_interlock_mutex" );
+    hal_cond_init( &vm_thread_wakeup_cond, "vm_thread_wakeup_cond" );
 
     run_init_functions( INIT_LEVEL_PREPARE );
     run_init_functions( INIT_LEVEL_INIT ); // before video

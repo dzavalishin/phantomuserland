@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2009-2016 Dmitry Zavalishin, dz@dz.ru
  *
- * Thread controlling terminal support, pool of terminal structures.
+ * Thread controlling terminal support, pool of controlling terminal structures.
  *
  * Licensed under CPL 1.0, see LICENSE file.
  *
@@ -33,7 +33,21 @@ static pool_t   *ctty_pool;
 static void * 	do_ctty_create(void *arg);
 static void  	do_ctty_destroy(void *arg);
 
+/**
+ * 
+ * Global note for this file: most thread related funcs work with schedlock
+ * locked. It means we can't switch context inside or even call malloc.
+ * Make sure such calls are made out of schedlock.
+ * 
+ * We check that here in all entry points.
+ * 
+**/
 
+/**
+ * 
+ * Create pool of ctty objects.
+ * 
+**/
 void t_init_ctty_pool(void)
 {
     ctty_pool = create_pool();
@@ -45,9 +59,16 @@ void t_init_ctty_pool(void)
 }
 
 
+/**
+ * 
+ * Called by pool code to create a new pool element.
+ * 
+**/
 static void * 	do_ctty_create(void *arg)
 {
     assert(arg == 0);
+    if( hal_spin_is_locked( &schedlock ) )
+        lprintf("do_ctty_create in schedlock");
 
     ctty_t *ret = calloc( 1, sizeof(ctty_t) );
     if( ret == 0 )
@@ -63,10 +84,17 @@ static void * 	do_ctty_create(void *arg)
     return ret;
 }
 
+/**
+ * 
+ * Called by pool code to destroy pool element.
+ * 
+**/
 static void  	do_ctty_destroy(void *arg)
 {
+    if( hal_spin_is_locked( &schedlock ) )
+        lprintf("do_ctty_destroy in schedlock");
+
     ctty_t *ct = arg;
-    //SHOW_FLOW( 1, "delete part %s", p->name );
 
     wtty_destroy( ct->wtty );
 }
@@ -74,6 +102,9 @@ static void  	do_ctty_destroy(void *arg)
 //! Internal for threads lib, inherit or make a new ctty for thread we create
 errno_t t_inherit_ctty( phantom_thread_t *t )
 {
+    if( hal_spin_is_locked( &schedlock ) )
+        lprintf("t_inherit_ctty in schedlock");
+
     pool_handle_t ih = GET_CURRENT_THREAD()->ctty_h;
 
     if( ih == 0 )
@@ -93,6 +124,8 @@ errno_t t_inherit_ctty( phantom_thread_t *t )
 errno_t t_make_ctty( phantom_thread_t *t )
 {
     assert( t != 0 );
+    if( hal_spin_is_locked( &schedlock ) )
+        lprintf("t_kill_ctty in schedlock");
     
     // Already have one?
     if( t->ctty_h )
@@ -118,6 +151,9 @@ errno_t t_make_ctty( phantom_thread_t *t )
 //! Internal for threads lib, dec refcount or destroy ctty for thread we kill
 errno_t t_kill_ctty( phantom_thread_t *t )
 {
+    if( hal_spin_is_locked( &schedlock ) )
+        lprintf("t_kill_ctty in schedlock");
+
     // No ctty?
     if( !t->ctty_h )
         return 0;

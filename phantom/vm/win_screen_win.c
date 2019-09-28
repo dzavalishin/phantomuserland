@@ -16,6 +16,7 @@
 #ifndef __linux__
 
 #include <windows.h>
+#include <stdio.h>
 #include "winhal.h"
 
 static const char *CLASSNAME = "Phantom", *WINNAME = "Phantom test environment";

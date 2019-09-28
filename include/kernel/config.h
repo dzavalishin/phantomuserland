@@ -48,11 +48,12 @@
 #define VM_INSTOF_RECURSIVE 1
 #define VM_DEFERRED_REFDEC 0
 
-#define OLD_VM_SLEEP 0
-#define NEW_SNAP_SYNC 0
+#define OLD_VM_SLEEP #error do not use me
+#define NEW_VM_SLEEP 1
+#define NEW_SNAP_SYNC 0 // UNUSED?
 
 // Interlock access to paged persistent address space with snapshot process
-#define SNAP_MEMORY_LOCK 1
+#define SNAP_MEMORY_LOCK 1 // UNUSED? TODO KILL
 
 #define COMPILE_PERSISTENT_STATS 1
 
@@ -116,7 +117,7 @@
 #define COMPILE_EXPERIMENTAL 0
 #endif  // COMPILE_EXPERIMENTAL
 
-#  define PAGING_PARTITION 1
+#  define PAGING_PARTITION 1 // TODO killme? long time in use
 
 #if COMPILE_EXPERIMENTAL
 #  define PAGING_PARTITION 1

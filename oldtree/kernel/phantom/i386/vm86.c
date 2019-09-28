@@ -56,6 +56,7 @@
 
 
 static int vm86_ready = 0;
+//static void *mem_page_0 = 0;
 
 
 struct vm86_settings  vm86_setup;
@@ -66,7 +67,7 @@ void phantom_ret_from_vm86();
 //extern int (*base_trap_handlers[])(struct trap_state *ts);
 
 
-static void check_ua( u_int32_t addr )
+static void do_check_ua( u_int32_t addr )
 {
     // BIOS data area is accessible
     if( addr < 0x400u )        return;
@@ -80,6 +81,8 @@ static void check_ua( u_int32_t addr )
 }
 
 
+//#define check_ua( a ) do { do_check_ua( a ); if( a < 0x1000 ) a = (u_int32_t)mem_page_0; } while(0)
+#define check_ua( a ) do_check_ua( a )
 
 
 
@@ -640,6 +643,18 @@ void phantom_init_vm86(void)
 
     // do all soft interrupts in VM86 directly
     memset( tss_vm86.redir, 0, sizeof(tss_vm86.redir) );
+
+#if 0
+    // map phys mem page 0 to access it while serving traps from vm86
+    errno_t rc = hal_alloc_vaddress( &mem_page_0, 1);
+    if( rc )
+    {
+        printf("Skipping VM86 - out of vaddr");
+        return;
+    }
+
+    hal_page_control( 0, mem_page_0, page_map, page_rw );
+#endif
 
     vm86_ready = 1;
 }

@@ -13,6 +13,7 @@
 #include <kernel/init.h>
 #include <kernel/stats.h>
 #include <kernel/debug.h>
+#include <kernel/snap_sync.h>
 #include <time.h>
 
 
@@ -199,11 +200,11 @@ void stat_dump_all( int av, char **ac )
     int i;
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
     {
-        if(*stat_counter_name[i] == 0)
-            continue;
-
         if(stat_counter_name[i] == 0)
             break;
+
+        if(*stat_counter_name[i] == 0)
+            continue;
 
 #if COMPILE_PERSISTENT_STATS
         printf(" %-20s %5d %5ld %10ld %10ld\n",
@@ -243,6 +244,9 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
     int i;
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
     {
+        if(stat_counter_name[i] == 0)
+            break;
+
         if(*stat_counter_name[i] == 0)
             continue;
 #if COMPILE_PERSISTENT_STATS
@@ -260,9 +264,6 @@ static void do_phantom_dump_stats_buf(char *buf, int len)
             continue;
 #endif
 
-
-        if(stat_counter_name[i] == 0)
-            break;
 
         char *scol = "\x1b[37m";
 

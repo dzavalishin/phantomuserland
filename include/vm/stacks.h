@@ -18,19 +18,19 @@
 
 #include "vm/internal_da.h"
 
-void                pvm_ostack_push( struct data_area_4_object_stack* stack, struct pvm_object o );
-struct pvm_object   pvm_ostack_pop( struct data_area_4_object_stack* stack );
-struct pvm_object   pvm_ostack_top( struct data_area_4_object_stack* stack );
+void                pvm_ostack_push( struct data_area_4_object_stack* stack, pvm_object_t o );
+pvm_object_t   pvm_ostack_pop( struct data_area_4_object_stack* stack );
+pvm_object_t   pvm_ostack_top( struct data_area_4_object_stack* stack );
 int                 pvm_ostack_empty( struct data_area_4_object_stack* stack );
 
 // push nulls to reserve stack space
 void                pvm_ostack_reserve( struct data_area_4_object_stack* rootda, int n_slots );
 
 
-struct pvm_object   pvm_ostack_pull( struct data_area_4_object_stack* stack, int pos );
+pvm_object_t   pvm_ostack_pull( struct data_area_4_object_stack* stack, int pos );
 
-void                pvm_ostack_abs_set( struct data_area_4_object_stack* stack, int pos, struct pvm_object o );
-struct pvm_object   pvm_ostack_abs_get( struct data_area_4_object_stack* stack, int pos );
+void                pvm_ostack_abs_set( struct data_area_4_object_stack* stack, int pos, pvm_object_t o );
+pvm_object_t   pvm_ostack_abs_get( struct data_area_4_object_stack* stack, int pos );
 
 // Return number of elements in stack
 int                 pvm_ostack_count( struct data_area_4_object_stack* rootda );

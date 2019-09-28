@@ -58,14 +58,14 @@ static int debug_print = 0;
 */
 
 
-static int tostring_5(struct pvm_object me , struct data_area_4_thread *tc )
+static int tostring_5(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     DEBUG_INFO;
     SYSCALL_RETURN( pvm_create_string_object( "tty window" ));
 }
 
-static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
+static int putws_17(pvm_object_t me , struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
 
@@ -77,7 +77,7 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    struct pvm_object _text = POP_ARG;
+    pvm_object_t _text = POP_ARG;
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );
@@ -103,7 +103,7 @@ static int putws_17(struct pvm_object me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int getwc_16(struct pvm_object me , struct data_area_4_thread *tc )
+static int getwc_16(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     DEBUG_INFO;
@@ -116,7 +116,7 @@ static int getwc_16(struct pvm_object me , struct data_area_4_thread *tc )
 }
 
 
-static int debug_18(struct pvm_object me , struct data_area_4_thread *tc )
+static int debug_18(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     DEBUG_INFO;
@@ -127,11 +127,11 @@ static int debug_18(struct pvm_object me , struct data_area_4_thread *tc )
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    struct pvm_object o = POP_ARG;
+    pvm_object_t o = POP_ARG;
 
     //pvm_object_print( o );
     printf("\n\nobj dump: ");
-    dumpo((addr_t)(o.data));
+    dumpo((addr_t)(o));
     printf("\n\n");
 
     SYS_FREE_O(o);
@@ -140,7 +140,7 @@ static int debug_18(struct pvm_object me , struct data_area_4_thread *tc )
 }
 
 
-static int gotoxy_19(struct pvm_object me , struct data_area_4_thread *tc )
+static int gotoxy_19(pvm_object_t me , struct data_area_4_thread *tc )
 {
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
@@ -158,7 +158,7 @@ static int gotoxy_19(struct pvm_object me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int clear_20(struct pvm_object me , struct data_area_4_thread *tc )
+static int clear_20(pvm_object_t me , struct data_area_4_thread *tc )
 {
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
@@ -172,7 +172,7 @@ static int clear_20(struct pvm_object me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
+static int setcolor_21(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     //struct data_area_4_tty      *da = pvm_data_area( me, tty );
@@ -192,14 +192,14 @@ static int setcolor_21(struct pvm_object me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int fill_22(struct pvm_object me , struct data_area_4_thread *tc )
+static int fill_22(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "not implemented" );
 }
 
-static int putblock_23(struct pvm_object me , struct data_area_4_thread *tc )
+static int putblock_23(pvm_object_t me , struct data_area_4_thread *tc )
 {
     (void) me;
     DEBUG_INFO;
@@ -208,7 +208,7 @@ static int putblock_23(struct pvm_object me , struct data_area_4_thread *tc )
 
 
 
-static int tty_setWinPos_24(struct pvm_object me, struct data_area_4_thread *tc )
+static int tty_setWinPos_24(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
@@ -224,7 +224,7 @@ static int tty_setWinPos_24(struct pvm_object me, struct data_area_4_thread *tc 
     SYSCALL_RETURN_NOTHING;
 }
 
-static int tty_setWinTitle_25(struct pvm_object me , struct data_area_4_thread *tc )
+static int tty_setWinTitle_25(pvm_object_t me , struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
@@ -233,7 +233,7 @@ static int tty_setWinTitle_25(struct pvm_object me , struct data_area_4_thread *
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    struct pvm_object _text = POP_ARG;
+    pvm_object_t _text = POP_ARG;
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );
@@ -279,9 +279,9 @@ DECLARE_SIZE(tty);
 
 
 /*
-struct pvm_object get_text_display_class()
+pvm_object_t get_text_display_class()
 {
-    static struct pvm_object tdc;
+    static pvm_object_t tdc;
     static int got_it = 0;
 
     if( got_it ) return tdc;
@@ -300,7 +300,7 @@ struct pvm_object get_text_display_class()
 */
 
 
-void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
+void pvm_internal_init_tty( pvm_object_t  ttyos )
 {
     struct data_area_4_tty      *tty = (struct data_area_4_tty *)ttyos->da;
 
@@ -328,17 +328,17 @@ void pvm_internal_init_tty( struct pvm_object_storage * ttyos )
 
 
     {
-    pvm_object_t o;
-    o.data = ttyos;
-    o.interface = pvm_get_default_interface(ttyos).data;
+    //pvm_object_t o;
+    //o.data = ttyos;
+    //o.interface = pvm_get_default_interface(ttyos);
 
     // This object needs OS attention at restart
     // TODO do it by class flag in create fixed or earlier?
-    pvm_add_object_to_restart_list( o );
+    pvm_add_object_to_restart_list( ttyos );
     }
 }
 
-void pvm_gc_iter_tty(gc_iterator_call_t func, struct pvm_object_storage * os, void *arg)
+void pvm_gc_iter_tty(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     (void) func;
     (void) os;
@@ -346,7 +346,7 @@ void pvm_gc_iter_tty(gc_iterator_call_t func, struct pvm_object_storage * os, vo
     // Empty
 }
 
-void pvm_gc_finalizer_tty( struct pvm_object_storage * os )
+void pvm_gc_finalizer_tty( pvm_object_t os )
 {
     struct data_area_4_tty      *tty = (struct data_area_4_tty *)os->da;
     drv_video_window_destroy(&(tty->w));

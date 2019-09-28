@@ -144,6 +144,7 @@ class weather
 
     .internal.string getBackgroundImage()
     {
+        //return import "../resources/backgrounds/snow_weather_sm.ppm" ;
         return import "../resources/backgrounds/snow_weather.ppm" ;
     }
 

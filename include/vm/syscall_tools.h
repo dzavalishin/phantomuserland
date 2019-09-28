@@ -73,7 +73,7 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
 
 #define POP_INT() \
     ({ \
-    struct pvm_object __ival = POP_ARG; \
+    pvm_object_t __ival = POP_ARG; \
     ASSERT_INT(__ival); \
     int v = pvm_get_int(__ival); \
     SYS_FREE_O(__ival); \
@@ -83,7 +83,7 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
 /* can't be used since string has to be SYS_FREE_'ed
 #define POP_STRING() \
     ({ \
-    struct pvm_object __sval = POP_ARG; \
+    pvm_object_t __sval = POP_ARG; \
     ASSERT_STRING(__sval); \
     pvm_object_da( __sval, string ); \
     })
@@ -104,10 +104,9 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
 // Types and syscall table declaration macro
 // --------------------------------------------------------------------------
 
-struct pvm_object;
 struct data_area_4_thread;
 
-typedef int (*syscall_func_t)(struct pvm_object o, struct data_area_4_thread *tc );
+typedef int (*syscall_func_t)(pvm_object_t o, struct data_area_4_thread *tc );
 /*
 #define DECLARE_SYSTABLE(type,tab_id) \
     extern syscall_func_t syscall_table_4_##type[]; extern int n_syscall_table_4_##type; \
@@ -118,18 +117,18 @@ typedef int (*syscall_func_t)(struct pvm_object o, struct data_area_4_thread *tc
 // Default syscall implementations for lower methods
 // --------------------------------------------------------------------------
 
-int invalid_syscall(struct pvm_object o, struct data_area_4_thread *tc );
-int si_void_0_construct(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_1_destruct(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_2_class(struct pvm_object this_obj, struct data_area_4_thread *tc );
-int si_void_3_clone(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_4_equals(struct pvm_object me, struct data_area_4_thread *tc );
-int si_void_5_tostring(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_6_toXML(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_7_fromXML(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_8_def_op_1(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_9_def_op_2(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_15_hashcode(struct pvm_object me, struct data_area_4_thread *tc );
+int invalid_syscall(pvm_object_t o, struct data_area_4_thread *tc );
+int si_void_0_construct(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_1_destruct(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_2_class(pvm_object_t this_obj, struct data_area_4_thread *tc );
+int si_void_3_clone(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_4_equals(pvm_object_t me, struct data_area_4_thread *tc );
+int si_void_5_tostring(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_6_toXML(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_7_fromXML(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_8_def_op_1(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_9_def_op_2(pvm_object_t , struct data_area_4_thread *tc );
+int si_void_15_hashcode(pvm_object_t me, struct data_area_4_thread *tc );
 
 
 #endif // SYSCALL_TOOLS_H

@@ -299,6 +299,12 @@ int main(int argc, char **argv, char **envp)
     //SHOW_FLOW0( 0, "Will sleep" );
     //hal_sleep_msec( 120000 );
 
+    // vm86 and VESA die without page 0 mapped
+#if 1
+	// unmap page 0, catch zero ptr access
+	hal_page_control( 0, 0, page_unmap, page_noaccess );
+#endif
+
     init_main_event_q();
 
     //pressEnter("will look for drv stage 2");

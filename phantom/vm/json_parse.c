@@ -233,7 +233,7 @@ void parse_and_dump( const char * j1 )
 
 void pvm_json_test()
 {
-	sleep(1);
+	//sleep(1);
 	printf("\n");
 
 	//const char j1[] = "{ \"a\" : \"hello\", \"b\" : 122, \"c\" : [ \"c1\", \"c2\" ] }";
@@ -301,7 +301,7 @@ static errno_t get_child( pvm_object_t *out, pvm_object_t parent, const char *na
 	int ord;
 	errno_t rc = vm_field_ordinal_by_name( &ord, oc, name );
 
-	int as = get_array_size(parent.data);
+	int as = get_array_size(parent);
 
 
 }
