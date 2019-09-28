@@ -494,6 +494,7 @@ struct data_area_4_thread
 #if NEW_VM_SLEEP
     volatile int                        sleep_flag;     // Is true if thread is put asleep in userland
     VM_SPIN_TYPE *                      spin_to_unlock; // This spin will be unlocked after putting thread asleep
+    pvm_object_t                        cond_mutex;     // If we wait for cond, this mutex was unlocked by cond and has to be relocked
 #endif
     //timedcall_t                         timer;          // Who will wake us
     //net_timer_event                     timer;          // Who will wake us
@@ -542,7 +543,6 @@ struct data_area_4_mutex
     struct data_area_4_thread *         owner_thread;
 
     pvm_object_t                        waiting_threads_array;
-
     int                                 nwaiting;
 };
 
@@ -550,7 +550,7 @@ struct data_area_4_cond
 {
     pvm_spinlock_t                      lock;
 
-    struct data_area_4_thread *         owner_thread;
+    //struct data_area_4_thread *         owner_thread;
 
     pvm_object_t                        waiting_threads_array;
     int                                 nwaiting;

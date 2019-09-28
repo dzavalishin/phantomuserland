@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Synchronization - sleep/wakeup
+ * Synchronization - userland sleep/wakeup
  *
 **/
 
@@ -110,6 +110,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     SHOW_FLOW0( 5, "VM thread will sleep for sleep");
     pvm_spin_lock( &thda->lock );
 
+resleep:
     if( thda->spin_to_unlock )
     {
         pvm_spin_unlock( thda->spin_to_unlock );
@@ -133,6 +134,21 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
     }
     hal_mutex_unlock( &snap_interlock_mutex );
     vm_lock_persistent_memory();
+
+#warning check resleep on mutex
+    // If we wake up after cond, there was some mutex unlocked by cond wait
+    // Now we have to relock it
+    if( thda->cond_mutex )
+    {
+        pvm_spin_lock( &thda->lock );
+
+        pvm_object_t mutex = thda->cond_mutex;
+        thda->cond_mutex = 0;
+
+        vm_mutex_lock( mutex, thda );
+
+        goto resleep;
+    }
 
     SHOW_FLOW0( 5, "VM thread awaken");
 }

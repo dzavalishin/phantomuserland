@@ -47,7 +47,8 @@ static hal_cond_t   phantom_vm_wait_4_snap;
 hal_mutex_t  snap_interlock_mutex; // accessed from vm_sleep.c
 
 #if NEW_VM_SLEEP
-static hal_cond_t   vm_thread_wakeup_cond;
+//static hal_cond_t   vm_thread_wakeup_cond;
+hal_cond_t   vm_thread_wakeup_cond; // accessed from vm_sleep.c
 #endif
 
 void phantom_snap_threads_interlock_init( void )
@@ -349,10 +350,6 @@ void vm_release_snap_lock( int count )
 
 
 #else // CONF_DUAL_PAGEMAP
-
-// ----------------------------------------------------------------
-// userland sleep/wakeup code
-// ----------------------------------------------------------------
 
 
 

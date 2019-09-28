@@ -672,7 +672,7 @@ void pvm_gc_iter_cond(gc_iterator_call_t func, pvm_object_t  os, void *arg)
     //for( i = 0; i < MAX_MUTEX_THREADS; i++ )
     //    gc_fcall( func, arg, da->waiting_threads[i] );
 
-    gc_fcall( func, arg, pvm_da_to_object(da->owner_thread) );
+    //gc_fcall( func, arg, pvm_da_to_object(da->owner_thread) );
 }
 
 
