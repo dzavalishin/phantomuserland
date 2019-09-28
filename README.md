@@ -79,6 +79,8 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8eec7d75d73b4a93b45a1befa3b70696)](https://www.codacy.com/manual/dzavalishin/phantomuserland?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dzavalishin/phantomuserland&amp;utm_campaign=Badge_Grade)
 
+[![Build Status](https://travis-ci.com/dzavalishin/phantomuserland.svg?branch=master)](https://travis-ci.com/dzavalishin/phantomuserland)
+
 [![Code coverage][COVERAGE_BADGE]][COVERAGE_LINK]
 
 [COVERAGE_LINK]:https://scan.coverity.com/projects/dzavalishin-phantomuserland
