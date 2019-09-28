@@ -6,6 +6,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 //import ru.dz.phantom.disk.PhantomSuperBlock;
 import ru.dz.phantom.disk.Const;
+import ru.dz.phantom.disk.DiskIo;
 
 /*
 * Phantom OS
@@ -23,8 +24,9 @@ class Main {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
+	public static void main(String[] args) throws IOException 
+	{
+	
 		System.out.println("Phantom disk extractor");
 		if (args.length != 1) {
 			System.out.println("\nUsage: pfsextract phantom_disk_file_name");
@@ -94,12 +96,12 @@ class Main {
 		return name.trim();		
 	}
 	
-	static void getBootModuleInfo(ByteBuffer modBlock, int magic ) {
+	static void getBootModuleInfo(DiskIo headBlock, int magic ) {
 		System.out.println("getBootModuleInfo");
-		if (modBlock.getInt(0) == magic) {			
+		if (headBlock.getInt(0) == magic) {			
 			byte b[] = new byte[Const.DISK_STRUCT_BM_NAME_SIZE];
-			modBlock.position(16);
-			modBlock.get(b, 0, Const.DISK_STRUCT_BM_NAME_SIZE);
+			headBlock.position(16);
+			headBlock.get(b, 0, Const.DISK_STRUCT_BM_NAME_SIZE);
 			String bm_name = new String(b);
 			System.out.format("boot module name: %s%n", bm_name.trim());
 		}
@@ -107,11 +109,12 @@ class Main {
 	
 	static void storeToFile(FileChannel ifc, int startBlk, String outFn, int _magic ) throws IOException {
 		if (startBlk == 0) return;  // no data
+		
+		System.out.format("pfsextract: read from %X to %s%n", startBlk, outFn);
+		
 		// Read the head block 
-		ByteBuffer headBlock = ByteBuffer.allocate(Const.DISK_STRUCT_BS);
-		ifc.position(startBlk * Const.DISK_STRUCT_BS);
-		ifc.read(headBlock);
-		headBlock.order(ByteOrder.LITTLE_ENDIAN);
+		DiskIo headBlock = new DiskIo(ifc);
+		headBlock.readBlock(startBlk);
 		
 		// Do we need boot module information?
 		if (_magic == Const.DISK_STRUCT_MAGIC_BOOT_MODULE) {
@@ -125,13 +128,13 @@ class Main {
 		FileChannel ofc = out.getChannel();
 		
 		// Scan all headBlocks
-		ByteBuffer dataBlock = ByteBuffer.allocate(Const.DISK_STRUCT_BS);
+		DiskIo dataBlock = new DiskIo(ifc);
 		do {
 			int magic = headBlock.getInt(0); // headBlock.head.magic
 			int used = headBlock.getInt(4); // headBlock.head.used
 			// Scan blocklist in headBlock
 			if (magic != _magic) {
-				System.out.format("pfsextract: bad magic %X instead of %X%n", magic, _magic);
+				System.out.format("pfsextract: bad magic %X instead of %X for %s%n", magic, _magic, outFn);
 				break;
 			}
 			if (used > 0) {
@@ -139,23 +142,20 @@ class Main {
 					int nextDataNum = headBlock.getInt(16 + (i * 4));
 					//if (nextDataNum == 0) break;
 					ifc.position(nextDataNum * Const.DISK_STRUCT_BS);
+					dataBlock.readBlock(nextDataNum);
 					dataBlock.position(0);
-					ifc.read(dataBlock);
-					dataBlock.position(0);
-					ofc.write(dataBlock);
+					dataBlock.write(ofc);
 				}
 			}
 			// go to next blocklist page
 			int nextPage = headBlock.getInt(8); // headBlock.head.next
 			if (nextPage == 0) break; 
-			ifc.position(nextPage * Const.DISK_STRUCT_BS);
-			headBlock.position(0);
-			ifc.read(headBlock);
-			headBlock.order(ByteOrder.LITTLE_ENDIAN);
+			headBlock.readBlock(nextPage);
 		} while (true); 
 		
 		ofc.close();
 		out.close();
 	}
+
 
 }
