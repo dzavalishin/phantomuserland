@@ -117,7 +117,7 @@
 #define COMPILE_EXPERIMENTAL 0
 #endif  // COMPILE_EXPERIMENTAL
 
-#  define PAGING_PARTITION 1
+#  define PAGING_PARTITION 1 // TODO killme? long time in use
 
 #if COMPILE_EXPERIMENTAL
 #  define PAGING_PARTITION 1
