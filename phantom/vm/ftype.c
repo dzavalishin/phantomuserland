@@ -10,9 +10,11 @@
 #include <video/font.h>
 
 
+const size_t MAX_SYMBOLS_COUNT = 256;
+
+
 FT_Glyph getGlyph(FT_Face face, uint32_t charcode);
 FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode);
-//void savePNG(uint8_t *image, int32_t width, int32_t height);
  
 struct ttf_symbol
 {
@@ -23,12 +25,22 @@ struct ttf_symbol
     FT_Glyph glyph;
 };
  
-const size_t MAX_SYMBOLS_COUNT = 128;
  
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
- 
- 
+
+#define W_BLEND_PIXEL( old, new, newalpha ) \
+    ((unsigned char) \
+      ( \
+        ( ((unsigned char)(new)) * (newalpha) ) \
+        + \
+        ( ((unsigned char)(old)) * (1.0f - (newalpha)) ) \
+      )\
+    )
+
+
+
+
 void w_ttfont_draw_string(
                           window_handle_t win,
                           //const drv_video_font_t *font,
@@ -48,8 +60,9 @@ void w_ttfont_draw_string(
         return;
     }
  
+    FT_Set_Pixel_Sizes(ftFace, 200, 0);
     //FT_Set_Pixel_Sizes(ftFace, 100, 0);
-    FT_Set_Pixel_Sizes(ftFace, 50, 0);
+    //FT_Set_Pixel_Sizes(ftFace, 50, 0);
  
     //const char *str = s;
     const size_t strLen = strlen(str);
@@ -65,11 +78,11 @@ void w_ttfont_draw_string(
     int32_t posX = 0;
     int skip_total = 0;
  
-    while(skip_total < strLen)
+    while( (skip_total < strLen) && (numSymbols < MAX_SYMBOLS_COUNT))
     {
         //const uint32_t charcode = str[i];
         int32_t charcode;
-        ssize_t skip = utf8proc_iterate( skip_total+str, strlen, &charcode);
+        ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
 
         skip_total += skip;
 
@@ -109,10 +122,9 @@ void w_ttfont_draw_string(
         symbols[i].posX -= left;
     }
  
-    const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
- 
+    //const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
-    const int32_t imageH = bottom - top;
+    //const int32_t imageH = bottom - top;
  
  
     for (i = 0; i < numSymbols; ++i)
@@ -146,7 +158,7 @@ void w_ttfont_draw_string(
                     continue;
                 }
  
-                //const float a = c / 255.0f;
+                const float a = c / 255.0f;
                 const int32_t dstX = symb->posX + srcX;
                 //uint8_t *dst = image + dstX + dstY * imageW;
                 //dst[0] = (uint8_t)(a * 255 + (1 - a) * dst[0]);
@@ -159,7 +171,15 @@ void w_ttfont_draw_string(
                 if( wx < 0 ) continue; 
                 if( wx > win->xsize ) break;
 
-                win->w_pixel[wx+_wy] = color;
+                rgba_t old = win->w_pixel[wx+_wy];
+
+                win->w_pixel[wx+_wy].r = W_BLEND_PIXEL( old.r, color.r, a );
+                win->w_pixel[wx+_wy].g = W_BLEND_PIXEL( old.g, color.g, a );
+                win->w_pixel[wx+_wy].b = W_BLEND_PIXEL( old.b, color.b, a );
+
+                win->w_pixel[wx+_wy].a = 0xFF;
+
+                //win->w_pixel[wx+_wy] = color;
             }
         }
     }

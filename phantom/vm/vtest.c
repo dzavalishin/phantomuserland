@@ -22,6 +22,10 @@ void videotest(void)
 
     //drv_video_winblt( w1 );
 
+    //w_fill( w, (rgba_t){ 0, 0, 0, 0 } );
+    //w_fill( w, (rgba_t){ 15, 15, 15, 0xFF } );
+    //w_fill( w, (rgba_t){ 65, 65, 65, 0xFF } );
+    //w_fill( w, (rgba_t){ 165, 165, 165, 0xFF } );
 
     w_draw_line( w, 0, 0, WXS, WYS, COLOR_RED );
     w_fill_ellipse( w, 30, 30, 15, 27, COLOR_BLUE );
