@@ -26,12 +26,30 @@
 
 #include <kernel/init.h>
 #include <kernel/debug.h>
+#include <kernel/pool.h>
 
+#include <errno.h>
 
 static FT_Library ftLibrary = 0;
 static int running = 0;
 
+static pool_t   *tt_font_pool;
+
 static hal_mutex_t faces_mutex;
+
+//static void * 	do_ttf_create(void *arg);
+static void  	do_ttf_destroy(void *arg);
+
+
+struct ttf_pool_el
+{
+    char *          font_name;
+    int 	    font_size; // pixels
+    FT_Face	    face;
+    pool_handle_t   fhandle;
+};
+
+
 
 
 // NB!! FT_New_Face and FT_Done_Face are not thread safe!
@@ -47,6 +65,13 @@ void init_truetype(void)
         lprintf("Error starting truetype: %d\n", rc );
         return;
     }
+
+    tt_font_pool = create_pool();
+
+    //tt_font_pool->init    = do_ttf_create;
+    tt_font_pool->destroy = do_ttf_destroy;
+
+    tt_font_pool->flag_autodestroy = 1;
 
     running = 1;
 }
@@ -102,7 +127,7 @@ void w_ttfont_draw_string(
     rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
     if( rc )
     {
-        printf("\ncan't load font\n");
+        lprintf("\ncan't load font\n");
         return;
     }
  
@@ -136,14 +161,11 @@ void w_ttfont_draw_string(
         FT_Glyph glyph = getGlyph(ftFace, charcode);
  
         if (!glyph)
-        {
             continue;
-        }
  
         if (prevCharcode)
-        {
             posX += getKerning(ftFace, prevCharcode, charcode);
-        }
+
         prevCharcode = charcode;
  
         struct ttf_symbol *symb = &(symbols[numSymbols++]);
@@ -206,13 +228,8 @@ void w_ttfont_draw_string(
  
                 const float a = c / 255.0f;
                 const int32_t dstX = symb->posX + srcX;
-                //uint8_t *dst = image + dstX + dstY * imageW;
-                //dst[0] = (uint8_t)(a * 255 + (1 - a) * dst[0]);
 
-                // TODO opacity
                 int wx = win_x + dstX;
-                // wrong, makes bottom to be a baseline
-                //w_draw_pixel( win, wx, wy, color );
 
                 if( wx < 0 ) continue; 
                 if( wx >= win->xsize ) break;
@@ -263,7 +280,165 @@ FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
     FT_Get_Kerning(face, leftIndex, rightIndex, FT_KERNING_DEFAULT, &delta);
     return delta.x;
 }
+
+
+
+
+// -----------------------------------------------------------------------
+//
+// Fonts pool
+//
+// -----------------------------------------------------------------------
+
+
+
+/**
+ * 
+ * Called by pool code to create a new pool element.
+ * 
+** /
+static void * 	do_ttf_create(void *arg)
+{
+    return arg;
+} */
+
+/**
+ * 
+ * Called by pool code to destroy pool element.
+ * 
+**/
+static void  	do_ttf_destroy(void *arg)
+{
+    struct ttf_pool_el *cur = arg;
+
+    lprintf("\ndestroy tt font %s sz %d\n", cur->font_name, cur->font_size );
+
+    hal_mutex_lock( &faces_mutex );
+    FT_Done_Face( cur->face );
+    hal_mutex_unlock( &faces_mutex );
+
+    free(cur->font_name);
+    free( arg );
+}
+
+
+
+static errno_t tt_lookup(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    struct ttf_pool_el *req = arg;
+    struct ttf_pool_el *cur = el;
+
+    if( (0 == strcmp( req->font_name, cur->font_name )) && (req->font_size == cur->font_size) )
+    {
+        req->face = cur->face;
+        req->fhandle = handle;
+        return 1; // found
+    }
+
+    return 0;
+}
+
+pool_handle_t w_get_tt_font( char *name, int size )
+{
+    struct ttf_pool_el req;
+
+    req.font_name = name;
+    req.font_size = size;
+
+    errno_t rc = pool_foreach( tt_font_pool, tt_lookup, &req );
+
+    if( rc == 1 )
+        return req.fhandle; // found
+
+    // Attempt to load
+
+    // tmp run in FS? user mode?
+
+    char buf[1024];
+    snprintf( buf, sizeof(buf)-1, "P:/phantomuserland/plib/resources/ttfonts/opensans/%s", name );
+
+
+    FT_Face ftFace = 0;
+
+    hal_mutex_lock( &faces_mutex );
+    rc = FT_New_Face(ftLibrary, buf, 0, &ftFace);
+    hal_mutex_unlock( &faces_mutex );
+
+    if( rc )
+    {
+        lprintf("\ncan't load font %s, rc = %d\n", buf, rc );
+        return INVALID_POOL_HANDLE;
+    }
  
+    FT_Set_Pixel_Sizes(ftFace, size, 0);
+
+    struct ttf_pool_el *newel = calloc( sizeof(struct ttf_pool_el), 1 );
+    if( 0 == newel )
+    {
+        lprintf("\nout of mem loading font %s\n", buf );
+        return INVALID_POOL_HANDLE;
+    }
+
+    *newel = req;
+    newel->font_name = strdup(req.font_name);
+    if( 0 == newel->font_name )
+    {
+        lprintf("\nout of mem strdup loading font %s\n", buf );
+        free(newel);
+        return INVALID_POOL_HANDLE;
+    }
+
+    pool_handle_t newh = pool_create_el( tt_font_pool, newel );
+
+    //if( newh == INVALID_POOL_HANDLE )
+    return newh;
+}
+
+
+static int w_load_tt_from_mem( FT_Face *ftFace, void *mem_font, size_t mem_font_size, const char* diag_font_name )
+{
+    FT_Open_Args args;
+
+    memset( &args, 0, sizeof(args) );
+
+    args.flags = FT_OPEN_MEMORY;
+    args.memory_base = mem_font;
+    args.memory_size = mem_font_size;
+
+    *ftFace = 0;
+
+    hal_mutex_lock( &faces_mutex );
+    int rc = FT_Open_Face( ftLibrary, &args, 0, ftFace );
+    hal_mutex_unlock( &faces_mutex );
+
+    if(rc)
+        lprintf("\ncan't load font %s, rc = %d\n", diag_font_name, rc );
+
+    return rc;
+}
+
+
+static pool_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const char* diag_font_name )
+{
+    FT_Face ftFace;
+
+    int rc = w_load_tt_from_mem( &ftFace, mem_font, mem_font_size, diag_font_name );
+    if( rc )
+        return INVALID_POOL_HANDLE;
+
+
+}
+
+
+extern char OpenSans_Regular_ttf_font[];
+extern unsigned int OpenSans_Regular_ttf_font_size;
+
+pool_handle_t OpenSans_Regular_ttf_font_handle;
+
+static void w_preload_compiled_fonts(void)
+{
+    OpenSans_Regular_ttf_font_handle = w_get_tt_font_mem( OpenSans_Regular_ttf_font, OpenSans_Regular_ttf_font_size, "OpenSans Regular" );
+}
 
 
 
