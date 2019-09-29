@@ -1,14 +1,13 @@
 include ../../config.mk 
 
 
-#ifeq ($(OSTYPE),cygwin)
-#all: $(TARGET) pvm_test
-#else
-#all: $(TARGET)
-#endif
+all: $(TARGET) 
 
+
+ifeq ($(ARCH),ia32)
 all: $(TARGET) pvm_headless
 #pvm_x11
+endif
 
 ifneq ($(PHANTOM_NO_PVM_TEST),true)
 ifeq ($(OSTYPE),cygwin)
