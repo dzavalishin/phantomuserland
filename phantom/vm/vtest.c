@@ -34,7 +34,7 @@ void videotest(void)
                           //const drv_video_font_t *font,
                                "TrueType rulez рулит",
                                COLOR_LIGHTRED, COLOR_BLACK,
-                               10, 130 );
+                               10, 50 );
 
     drv_video_winblt( w );
     //win_scr_screen_update();

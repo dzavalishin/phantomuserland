@@ -14,7 +14,7 @@ FT_Glyph getGlyph(FT_Face face, uint32_t charcode);
 FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode);
 //void savePNG(uint8_t *image, int32_t width, int32_t height);
  
-struct Symbol
+struct ttf_symbol
 {
     int32_t posX;
     int32_t posY;
@@ -54,7 +54,7 @@ void w_ttfont_draw_string(
     //const char *str = s;
     const size_t strLen = strlen(str);
  
-    struct Symbol symbols[MAX_SYMBOLS_COUNT];
+    struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
     size_t numSymbols = 0;
  
     int32_t left = INT_MAX;
@@ -87,7 +87,7 @@ void w_ttfont_draw_string(
         }
         prevCharcode = charcode;
  
-        struct Symbol *symb = &(symbols[numSymbols++]);
+        struct ttf_symbol *symb = &(symbols[numSymbols++]);
  
         FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) glyph;
         symb->posX = (posX >> 6) + bitmapGlyph->left;
@@ -109,7 +109,7 @@ void w_ttfont_draw_string(
         symbols[i].posX -= left;
     }
  
-    const struct Symbol *lastSymbol = &(symbols[numSymbols - 1]);
+    const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
  
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
     const int32_t imageH = bottom - top;
@@ -117,7 +117,7 @@ void w_ttfont_draw_string(
  
     for (i = 0; i < numSymbols; ++i)
     {
-        const struct Symbol *symb = symbols + i;
+        const struct ttf_symbol *symb = symbols + i;
  
         FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) symb->glyph;
         FT_Bitmap bitmap = bitmapGlyph->bitmap;
@@ -126,6 +126,15 @@ void w_ttfont_draw_string(
         for(srcY = 0; srcY < symb->height; ++srcY)
         {
             const int32_t dstY = symb->posY + srcY - top;
+
+            // we need not total image height, but height above baseline
+            //int wy = win_y + imageH - dstY;
+            int wy = win_y + (-top) - dstY; 
+
+            if( wy < 0 ) continue; // break? we go down
+            if( wy > win->ysize ) continue;
+
+            int _wy = wy * win->xsize;
 
             int32_t srcX;
             for (srcX = 0; srcX < symb->width; ++srcX)
@@ -143,9 +152,14 @@ void w_ttfont_draw_string(
                 //dst[0] = (uint8_t)(a * 255 + (1 - a) * dst[0]);
 
                 // TODO opacity
-
+                int wx = win_x + dstX;
                 // wrong, makes bottom to be a baseline
-                w_draw_pixel( win, win_x + dstX, win_y + imageH - dstY, color );
+                //w_draw_pixel( win, wx, wy, color );
+
+                if( wx < 0 ) continue; 
+                if( wx > win->xsize ) break;
+
+                win->w_pixel[wx+_wy] = color;
             }
         }
     }
