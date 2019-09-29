@@ -14,6 +14,8 @@
 #include <errno.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifndef NO_NETWORK
 #  include <sys/socket.h>
@@ -235,3 +237,75 @@ int get_current_tid()
     //return -1;
 #endif
 }
+
+
+
+int k_open( int *fd, const char *name, int flags, int mode )
+{
+    int rc = open( name, O_RDWR, 0666 );
+    if( rc < 0 )
+        return errno;
+
+    *fd = rc;
+    return 0;
+}
+
+
+int k_read( int *nread, int fd, void *addr, int count )
+{
+    int rc = read( fd, addr, count );
+    if( rc < 0 )
+        return errno;
+    *nread = rc;
+    return 0;
+}
+
+int k_write( int *nwritten, int fd, const void *addr, int count )
+{
+    return EIO;
+}
+
+int k_seek( int *pos, int fd, int offset, int whence )
+{
+    off_t rc = lseek( fd, offset, whence );
+    if( rc < 0 )
+        return errno;
+    *pos = rc; // TODO var size?
+    return 0;
+}
+
+
+/*
+
+  can't be implemmnted here - we're unable to bring both Phantom and host OS struct stat in one C file
+  and move fields by hand.
+
+int k_stat( const char *path, struct stat *data, int statlink )
+{
+
+}
+*/
+
+int k_stat_size( const char *path, unsigned int *size ) // just get file size
+{
+    struct stat sb;
+    int rc = stat( path, &sb );
+    if( rc ) return rc;
+
+    *size = sb.st_size;
+
+    return 0;
+}
+
+
+int k_close( int fd )
+{
+    int rc = close( fd );
+    if( rc ) return errno;
+    return 0;
+}
+
+
+
+
+

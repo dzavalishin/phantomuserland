@@ -121,10 +121,15 @@ typedef struct _phantom_window
     rgba_t       	*pixel;
 } window_t;
 
+
+
+
+
+
 pool_handle_t 	w_create( int xsize, int ysize );
 //void 		w_resize( pool_handle_t h, int xsize, int ysize );
 //void 		w_moveto( pool_handle_t h, int x, int y );
-void        w_blt( pool_handle_t h );
+void            w_blt( pool_handle_t h );
 void		w_set_visible( pool_handle_t h, int v );
 
 //void 		w_to_top(pool_handle_t h);
@@ -136,22 +141,22 @@ void		w_set_visible( pool_handle_t h, int v );
 //void		w_pixel( pool_handle_t h, int x, int y, rgba_t color );
 //void    	w_draw_bitmap( pool_handle_t h, int x, int y, drv_video_bitmap_t *bmp );
 
-void        w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len );
-void        w_draw_v_line( window_handle_t h, rgba_t color, int x, int y, int len );
-//void      w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 );
+void            w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len );
+void            w_draw_v_line( window_handle_t h, rgba_t color, int x, int y, int len );
+//void          w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 );
 
-errno_t     w_scroll_hor( window_handle_t w, int x, int y, int xs, int ys, int s );
-void        w_scroll_up( window_handle_t win, int npix, rgba_t color);
+errno_t         w_scroll_hor( window_handle_t w, int x, int y, int xs, int ys, int s );
+void            w_scroll_up( window_handle_t win, int npix, rgba_t color);
 
 //! Called from object restart code to reinit window struct
 //! contained in VM object. This func just clears pointers.
 //! After calling this func you must reset all the required
 //! fields and call w_restart_attach( w )
 //! to add window to in-kernel lists and repaint it.
-void        w_restart_init(window_handle_t w);
+void            w_restart_init(window_handle_t w);
 
 // Called from vm restart code to reattach window to win system
-void w_restart_attach( window_handle_t w );
+void            w_restart_attach( window_handle_t w );
 
 // Get most bottom (background) window. Used to set scrren background pic.
 window_handle_t w_get_bg_window(void);

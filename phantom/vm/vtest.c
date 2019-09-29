@@ -11,17 +11,16 @@
 
 void videotest(void)
 {
-    drv_video_window_t *w1 = drv_video_window_create( WXS, WYS, 350, 350, COLOR_BLACK, "Test 2", WFLAG_WIN_DECORATED );
-    (void) w1;
+    //drv_video_window_t *w1 = drv_video_window_create( WXS, WYS, 350, 350, COLOR_BLACK, "Test 2", WFLAG_WIN_DECORATED );
 
     drv_video_window_t *w = drv_video_window_create( WXS, WYS, 300, 300, COLOR_BLACK, "Test Window", WFLAG_WIN_DECORATED );
 
     drv_video_winblt( w );
-    win_scr_screen_update();
+    //win_scr_screen_update();
 
-    (void) getchar();
+    //(void) getchar();
 
-    drv_video_winblt( w1 );
+    //drv_video_winblt( w1 );
 
 
     w_draw_line( w, 0, 0, WXS, WYS, COLOR_RED );
@@ -31,9 +30,14 @@ void videotest(void)
 
     w_fill_box( w,  40, 32, 33, 10, COLOR_RED );
 
+    w_ttfont_draw_string( w,
+                          //const drv_video_font_t *font,
+                               "TrueType rulez",
+                               COLOR_LIGHTRED, COLOR_BLACK,
+                               10, 30 );
 
     drv_video_winblt( w );
-    win_scr_screen_update();
+    //win_scr_screen_update();
 
     (void) getchar();
 

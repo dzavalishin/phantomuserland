@@ -6,14 +6,18 @@ HOST_CPU	= i686
 HOST_ARCH	= x86
 unix_host	= NONE
 
-export AS       = arm-elf-as
-export CC       = arm-elf-gcc
-export LD       = arm-elf-ld
-export STRIP	= arm-elf-strip
-export AR       = arm-elf-ar
-export RANLIB   = arm-elf-ranlib
-export OBJCOPY  = arm-elf-objcopy
-export NM       = arm-elf-nm
+
+BIN_PREFIX=arm-linux-gnueabihf-
+
+export AS       = $(BIN_PREFIX)as
+export CC       = $(BIN_PREFIX)gcc
+export LD       = $(BIN_PREFIX)ld
+export STRIP    = $(BIN_PREFIX)strip
+export AR       = $(BIN_PREFIX)ar
+export RANLIB   = $(BIN_PREFIX)ranlib
+export OBJCOPY  = $(BIN_PREFIX)objcopy
+export NM       = $(BIN_PREFIX)nm
+
 
 AWK             = gawk
 YACC            = bison -y

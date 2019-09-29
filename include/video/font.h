@@ -75,5 +75,13 @@ void 	w_font_tty_string(
                                           int *x, int *y );
 
 
+/// truetype fonts - in progress
+void w_ttfont_draw_string(
+                          window_handle_t win,
+                          //const drv_video_font_t *font,
+                          const char *s, const rgba_t color, const rgba_t bg,
+                          int x, int y );
+
+
 
 #endif // FONT_H

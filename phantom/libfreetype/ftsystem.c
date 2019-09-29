@@ -223,9 +223,10 @@
   FT_Stream_Open( FT_Stream    stream,
                   const char*  filepathname )
   {
-    struct stat st;
+    //struct stat st;
+    unsigned size;
 
-    if( k_stat( filepathname, &st, 0 ) )
+    if( k_stat_size( filepathname, &size ) )
     {
       FT_ERROR(( "FT_Stream_Open:" ));
       FT_ERROR(( " could not stat `%s'\n", filepathname ));
@@ -233,7 +234,7 @@
       return FT_Err_Cannot_Open_Resource;
     }
 
-    stream->size = st.st_size;
+    stream->size = size;
 
     int fd;
 

@@ -62,7 +62,7 @@ __inline__ int w_font_draw_char(
     // One char is used for width
     //if( p ) yafter--;
 
-    int bpcx = 1 + ((font->xsize-1) / 8); // Pytes per Character for X coord (for example, 2 bytes for 16 pixels wide)
+    int bpcx = 1 + ((font->xsize-1) / 8); // Bytes per Character for X coord (for example, 2 bytes for 16 pixels wide)
 
     if( xafter <= 0 || yafter <= 0
         || x >= win->xsize || y >= win->ysize )
