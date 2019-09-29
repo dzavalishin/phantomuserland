@@ -2,7 +2,7 @@
 
 
 // TODO float?!
-
+#warning float
 /*
  * setjump + longjmp
  */
