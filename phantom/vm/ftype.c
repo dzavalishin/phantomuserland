@@ -4,6 +4,8 @@
  
 #include <stdint.h>
 
+#include <utf8proc.h>
+
 #include <video/screen.h>
 #include <video/font.h>
 
@@ -30,7 +32,7 @@ const size_t MAX_SYMBOLS_COUNT = 128;
 void w_ttfont_draw_string(
                           window_handle_t win,
                           //const drv_video_font_t *font,
-                          const char *s, const rgba_t color, const rgba_t bg,
+                          const char *str, const rgba_t color, const rgba_t bg,
                           int win_x, int win_y )
 {
     int rc;
@@ -49,8 +51,8 @@ void w_ttfont_draw_string(
     //FT_Set_Pixel_Sizes(ftFace, 100, 0);
     FT_Set_Pixel_Sizes(ftFace, 50, 0);
  
-    const char *exampleString = s;
-    const size_t exampleStringLen = strlen(exampleString);
+    //const char *str = s;
+    const size_t strLen = strlen(str);
  
     struct Symbol symbols[MAX_SYMBOLS_COUNT];
     size_t numSymbols = 0;
@@ -60,13 +62,17 @@ void w_ttfont_draw_string(
     int32_t bottom = INT_MIN;
     uint32_t prevCharcode = 0;
  
-    size_t i = 0;
- 
     int32_t posX = 0;
+    int skip_total = 0;
  
-    for (i = 0; i < exampleStringLen; ++i)
+    while(skip_total < strLen)
     {
-        const uint32_t charcode = exampleString[i];
+        //const uint32_t charcode = str[i];
+        int32_t charcode;
+        ssize_t skip = utf8proc_iterate( skip_total+str, strlen, &charcode);
+
+        skip_total += skip;
+
  
         FT_Glyph glyph = getGlyph(ftFace, charcode);
  
@@ -97,6 +103,7 @@ void w_ttfont_draw_string(
         bottom = MAX(bottom, symb->posY + symb->height);
     }
  
+    size_t i = 0;
     for (i = 0; i < numSymbols; ++i)
     {
         symbols[i].posX -= left;
@@ -104,10 +111,9 @@ void w_ttfont_draw_string(
  
     const struct Symbol *lastSymbol = &(symbols[numSymbols - 1]);
  
-    const int32_t imageW = lastSymbol->posX + lastSymbol->width;
+    //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
     const int32_t imageH = bottom - top;
  
-    //uint8_t *image = malloc(imageW * imageH);
  
     for (i = 0; i < numSymbols; ++i)
     {
@@ -131,7 +137,7 @@ void w_ttfont_draw_string(
                     continue;
                 }
  
-                const float a = c / 255.0f;
+                //const float a = c / 255.0f;
                 const int32_t dstX = symb->posX + srcX;
                 //uint8_t *dst = image + dstX + dstY * imageW;
                 //dst[0] = (uint8_t)(a * 255 + (1 - a) * dst[0]);
@@ -144,9 +150,6 @@ void w_ttfont_draw_string(
         }
     }
  
-    //savePNG(image, imageW, imageH);
- 
-    //free(image);
  
     for (i = 0; i < numSymbols; ++i)
     {
@@ -180,54 +183,4 @@ FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
     return delta.x;
 }
  
-#if 0
-void savePNG(uint8_t *image, int32_t width, int32_t height)
-{
-    FILE *f = fopen("output.png", "wb");
- 
-    png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
- 
-    png_infop info_ptr = png_create_info_struct(png_ptr);
- 
-    png_init_io(png_ptr, f);
- 
-    png_set_IHDR(
-        png_ptr, 
-        info_ptr, 
-        width, 
-        height, 
-        8, 
-        PNG_COLOR_TYPE_RGBA, 
-        PNG_INTERLACE_NONE, 
-        PNG_COMPRESSION_TYPE_BASE, 
-        PNG_FILTER_TYPE_BASE);
- 
-    png_write_info(png_ptr, info_ptr);
- 
-    uint8_t *row = malloc(width * 4);
- 
-    for (int32_t y = 0; y < height; ++y)
-    {
-        for (int32_t x = 0; x < width; ++x)
-        {
-            row[x * 4 + 0] = 0xc0;
-            row[x * 4 + 1] = 0xc0;
-            row[x * 4 + 2] = 0xc0;
-            row[x * 4 + 3] = image[y * width + x];
-        }
- 
-        png_write_row(png_ptr, row);
-    }
- 
-    free(row);
- 
-    png_write_end(png_ptr, 0);    
- 
-    png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
-    png_destroy_write_struct(&png_ptr, 0);
- 
-    fclose(f);
-}
-#endif
-
 

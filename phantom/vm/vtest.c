@@ -1,4 +1,4 @@
-
+﻿
 #include <phantom_libc.h>
 
 #include <video/screen.h>
@@ -32,7 +32,7 @@ void videotest(void)
 
     w_ttfont_draw_string( w,
                           //const drv_video_font_t *font,
-                               "TrueType rulez �㫨�",
+                               "TrueType rulez рулит",
                                COLOR_LIGHTRED, COLOR_BLACK,
                                10, 130 );
 
