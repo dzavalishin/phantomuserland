@@ -4,7 +4,7 @@ language: c
 # /home/travis/build/dzavalishin/phantomuserland
 env:
   - PHANTOM_HOME="/home/travis/build/dzavalishin/phantomuserland"
-  - PHANTOM_HOME="/home/travis/build/dzavalishin/phantomuserland" ARCH=arm
+  - ARCH=arm PHANTOM_HOME="/home/travis/build/dzavalishin/phantomuserland" 
 
 # TODO env?
 #ARCH=ia32
