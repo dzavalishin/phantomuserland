@@ -256,21 +256,28 @@ int k_read( int *nread, int fd, void *addr, int count )
     int rc = read( fd, addr, count );
     if( rc < 0 )
         return errno;
-    *nread = rc;
+    if(nread) *nread = rc;
     return 0;
 }
 
+
 int k_write( int *nwritten, int fd, const void *addr, int count )
 {
-    return EIO;
+    int rc = write( fd, addr, count );
+    if( rc < 0 )
+        return errno;
+    if(nwritten) *nwritten = rc;
+    return 0;
 }
+
+
 
 int k_seek( int *pos, int fd, int offset, int whence )
 {
     off_t rc = lseek( fd, offset, whence );
     if( rc < 0 )
         return errno;
-    *pos = rc; // TODO var size?
+    if( pos ) *pos = rc; // TODO var size?
     return 0;
 }
 
@@ -304,6 +311,31 @@ int k_close( int fd )
     if( rc ) return errno;
     return 0;
 }
+
+
+
+//void machdep_longjmp () __attribute__ ((weak, alias ("longjmp")));
+//void machdep_setjmp () __attribute__ ((weak, alias ("setjmp")));
+
+
+// freetype lib wants 'em in user mode too, provide hacks to call GCC libc ones
+
+#warning untested
+
+asm(".globl _longjmp_machdep;\
+    _longjmp_machdep: jmp _longjmp \
+    ");
+
+asm(".globl _setjmp_machdep;\
+    _setjmp_machdep: jmp _setjmp \
+    ");
+
+
+//void longjmp_machdep ( void *jb, int a ){    __asm__("jmp __longjmp");}
+//int setjmp_machdep ( void *jb ) {    __asm__("jmp __setjmp");}
+
+
+
 
 
 

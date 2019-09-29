@@ -33,11 +33,18 @@ void w_ttfont_draw_string(
                           const char *s, const rgba_t color, const rgba_t bg,
                           int x, int y )
 {
+    int rc;
+
     FT_Library ftLibrary = 0;
     FT_Init_FreeType(&ftLibrary);
  
     FT_Face ftFace = 0;
-    FT_New_Face(ftLibrary, "arial.ttf", 0, &ftFace);
+    rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
+    if( rc )
+    {
+        printf("\ncan't load font\n");
+        return;
+    }
  
     FT_Set_Pixel_Sizes(ftFace, 100, 0);
  
