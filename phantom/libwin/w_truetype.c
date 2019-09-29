@@ -1,4 +1,16 @@
-#if 0
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Truetype fonts support.
+ *
+ * Wrapper for FreeType library.
+ *
+**/
+
+#if CONF_TRUETYPE
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -9,7 +21,39 @@
 #include <utf8proc.h>
 
 #include <video/screen.h>
+#include <video/internal.h>
 #include <video/font.h>
+
+#include <kernel/init.h>
+#include <kernel/debug.h>
+
+
+static FT_Library ftLibrary = 0;
+static int running = 0;
+
+static hal_mutex_t faces_mutex;
+
+
+// NB!! FT_New_Face and FT_Done_Face are not thread safe!
+
+//static
+void init_truetype(void)
+{
+    hal_mutex_init( &faces_mutex, "faces_mutex" );
+
+    int rc = FT_Init_FreeType(&ftLibrary);
+    if( rc )
+    {
+        lprintf("Error starting truetype: %d\n", rc );
+        return;
+    }
+
+    running = 1;
+}
+
+//INIT_ME(0,init_truetype,0)
+
+
 
 
 const size_t MAX_SYMBOLS_COUNT = 256;
@@ -49,9 +93,11 @@ void w_ttfont_draw_string(
                           const char *str, const rgba_t color, const rgba_t bg,
                           int win_x, int win_y )
 {
+
+    if(!running) return;
+
     int rc;
 
- 
     FT_Face ftFace = 0;
     rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
     if( rc )
@@ -219,4 +265,7 @@ FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
 }
  
 
-#endif
+
+
+
+#endif // CONF_TRUETYPE

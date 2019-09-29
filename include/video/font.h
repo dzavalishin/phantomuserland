@@ -84,4 +84,25 @@ void w_ttfont_draw_string(
 
 
 
+
+#if CONF_TRUETYPE
+
+// ------------------------------------------------------------------------
+// TrueType support
+// ------------------------------------------------------------------------
+
+
+//#include <ft2build.h>
+//#include FT_FREETYPE_H
+
+
+//extern FT_Library ftLibrary;
+
+
+
+
+#endif // CONF_TRUETYPE
+
+
+
 #endif // FONT_H
