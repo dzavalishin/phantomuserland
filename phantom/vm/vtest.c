@@ -32,9 +32,9 @@ void videotest(void)
 
     w_ttfont_draw_string( w,
                           //const drv_video_font_t *font,
-                               "TrueType rulez",
+                               "TrueType rulez рулит",
                                COLOR_LIGHTRED, COLOR_BLACK,
-                               10, 30 );
+                               10, 130 );
 
     drv_video_winblt( w );
     //win_scr_screen_update();

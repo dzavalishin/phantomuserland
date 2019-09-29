@@ -31,7 +31,7 @@ void w_ttfont_draw_string(
                           window_handle_t win,
                           //const drv_video_font_t *font,
                           const char *s, const rgba_t color, const rgba_t bg,
-                          int x, int y )
+                          int win_x, int win_y )
 {
     int rc;
 
@@ -46,9 +46,10 @@ void w_ttfont_draw_string(
         return;
     }
  
-    FT_Set_Pixel_Sizes(ftFace, 100, 0);
+    //FT_Set_Pixel_Sizes(ftFace, 100, 0);
+    FT_Set_Pixel_Sizes(ftFace, 50, 0);
  
-    const char *exampleString = "FreeType it's amazing!";
+    const char *exampleString = s;
     const size_t exampleStringLen = strlen(exampleString);
  
     struct Symbol symbols[MAX_SYMBOLS_COUNT];
@@ -106,7 +107,7 @@ void w_ttfont_draw_string(
     const int32_t imageW = lastSymbol->posX + lastSymbol->width;
     const int32_t imageH = bottom - top;
  
-    uint8_t *image = malloc(imageW * imageH);
+    //uint8_t *image = malloc(imageW * imageH);
  
     for (i = 0; i < numSymbols; ++i)
     {
@@ -132,15 +133,20 @@ void w_ttfont_draw_string(
  
                 const float a = c / 255.0f;
                 const int32_t dstX = symb->posX + srcX;
-                uint8_t *dst = image + dstX + dstY * imageW;
-                dst[0] = (uint8_t)(a * 255 + (1 - a) * dst[0]);
+                //uint8_t *dst = image + dstX + dstY * imageW;
+                //dst[0] = (uint8_t)(a * 255 + (1 - a) * dst[0]);
+
+                // TODO opacity
+
+                // wrong, makes bottom to be a baseline
+                w_draw_pixel( win, win_x + dstX, win_y + imageH - dstY, color );
             }
         }
     }
  
     //savePNG(image, imageW, imageH);
  
-    free(image);
+    //free(image);
  
     for (i = 0; i < numSymbols; ++i)
     {
@@ -152,8 +158,6 @@ void w_ttfont_draw_string(
  
     FT_Done_FreeType(ftLibrary);
     ftLibrary = 0;
- 
-    return 0;
 }
  
  

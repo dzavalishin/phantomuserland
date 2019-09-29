@@ -320,7 +320,7 @@ int k_close( int fd )
 
 // freetype lib wants 'em in user mode too, provide hacks to call GCC libc ones
 
-#warning untested
+//#warning untested
 
 asm(".globl _longjmp_machdep;\
     _longjmp_machdep: jmp _longjmp \
