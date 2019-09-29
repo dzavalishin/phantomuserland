@@ -144,7 +144,7 @@ void w_ttfont_draw_string(
             int wy = win_y + (-top) - dstY; 
 
             if( wy < 0 ) continue; // break? we go down
-            if( wy > win->ysize ) continue;
+            if( wy >= win->ysize ) continue;
 
             int _wy = wy * win->xsize;
 
@@ -169,15 +169,16 @@ void w_ttfont_draw_string(
                 //w_draw_pixel( win, wx, wy, color );
 
                 if( wx < 0 ) continue; 
-                if( wx > win->xsize ) break;
+                if( wx >= win->xsize ) break;
 
                 rgba_t old = win->w_pixel[wx+_wy];
+                rgba_t *p = &(win->w_pixel[wx+_wy]);
 
-                win->w_pixel[wx+_wy].r = W_BLEND_PIXEL( old.r, color.r, a );
-                win->w_pixel[wx+_wy].g = W_BLEND_PIXEL( old.g, color.g, a );
-                win->w_pixel[wx+_wy].b = W_BLEND_PIXEL( old.b, color.b, a );
+                p->r = W_BLEND_PIXEL( old.r, color.r, a );
+                p->g = W_BLEND_PIXEL( old.g, color.g, a );
+                p->b = W_BLEND_PIXEL( old.b, color.b, a );
 
-                win->w_pixel[wx+_wy].a = 0xFF;
+                p->a = 0xFF;
 
                 //win->w_pixel[wx+_wy] = color;
             }
