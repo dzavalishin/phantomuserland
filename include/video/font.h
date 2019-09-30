@@ -110,6 +110,8 @@ font_handle_t w_get_system_font( void );
 pool_handle_t w_get_tt_font_file( const char *file_name, int size );
 
 
+errno_t w_release_tt_font( font_handle_t font );
+
 
 #endif // CONF_TRUETYPE
 

@@ -17,6 +17,8 @@ endif
 endif
 endif
 
+../lib/libwin.a: ../libwin/*.c
+	$(MAKE) -C ../libwin
 
 W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
@@ -50,7 +52,7 @@ X11_TEST_OBJFILES=pvm_main.o nonstandalone.o win_hal.o win_bulk.o x11_screen.o x
 HLS_TEST_OBJFILES=pvm_main.o nonstandalone.o win_bulk.o headless_screen.o unix_hal.o unix_hal_unix.o 
 
 
-pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(PVM_TEST_OBJFILES) 
+pvm_test: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(PVM_TEST_OBJFILES) ../lib/libwin.a
 	$(CC) -m32 -g -ffreestanding -o $@ $^ $(OSLIB) libphantom_vm.a 
 
 pvm_x11: pvm_main.o nonstandalone.o $(GLLIB) libphantom_vm.a  $(X11_TEST_OBJFILES)

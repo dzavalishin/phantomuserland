@@ -40,6 +40,9 @@
 
 #define CACHE_FT_FACE 0
 
+// user mode debug - TODO debug_ext.h does not work in user mode
+#define lprintf printf
+
 
 static FT_Library ftLibrary = 0;
 static int running = 0;
@@ -89,6 +92,8 @@ void init_truetype(void)
 }
 
 //INIT_ME(0,init_truetype,0)
+
+static void dump_face( FT_Face ftFace );
 
 
 static int w_load_tt_from_file( FT_Face *ftFace, const char *file_name );
@@ -160,11 +165,14 @@ void w_ttfont_draw_string(
     if( 0 == pe )
     {
         lprintf("\ncan't get font for handle %x\n", font);
+        //printf("\ncan't get font for handle %x\n", font);
         return;
     }
-    printf( "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
+    //printf( "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
 
     FT_Face ftFace = pe->face;;
+
+    //dump_face( ftFace );
 
     //const char *str = s;
     const size_t strLen = strlen(str);
@@ -220,6 +228,8 @@ void w_ttfont_draw_string(
     {
         symbols[i].posX -= left;
     }
+
+    //printf( "\tnumSymbols %d left %d top %d bottom %d\n", numSymbols, left, top, bottom );
  
     //const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
@@ -254,6 +264,7 @@ void w_ttfont_draw_string(
  
                 if (0 == c)
                 {
+                    //putchar('-');
                     continue;
                 }
  
@@ -264,7 +275,7 @@ void w_ttfont_draw_string(
 
                 if( wx < 0 ) continue; 
                 if( wx >= win->xsize ) break;
-
+#if 0
                 rgba_t old = win->w_pixel[wx+_wy];
                 rgba_t *p = &(win->w_pixel[wx+_wy]);
 
@@ -273,8 +284,9 @@ void w_ttfont_draw_string(
                 p->b = W_BLEND_PIXEL( old.b, color.b, a );
 
                 p->a = 0xFF;
-
-                //win->w_pixel[wx+_wy] = color;
+#else
+                win->w_pixel[wx+_wy] = color;
+#endif
             }
         }
     }
@@ -348,7 +360,7 @@ static void  	do_ttf_destroy(void *arg)
 {
     struct ttf_pool_el *cur = arg;
 
-    lprintf("\ndestroy tt font %s sz %d\n", cur->font_name, cur->font_size );
+    //lprintf("\ndestroy tt font %s sz %d\n", cur->font_name, cur->font_size );
 
     hal_mutex_lock( &faces_mutex );
     FT_Done_Face( cur->face );
@@ -461,6 +473,8 @@ static int w_load_tt_from_file( FT_Face *ftFace, const char *file_name )
     if( rc )
         lprintf("\ncan't load font %s, rc = %d\n", buf, rc );
 
+    //dump_face( *ftFace );
+
     return rc;
 }
 
@@ -484,6 +498,8 @@ static int w_load_tt_from_mem( FT_Face *ftFace, void *mem_font, size_t mem_font_
     if(rc)
         lprintf("\ncan't load font %s, rc = %d\n", diag_font_name, rc );
 
+    //dump_face( *ftFace );
+
     return rc;
 }
 
@@ -492,15 +508,22 @@ pool_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 {
     FT_Face ftFace;
 
+    //printf( "w_get_tt_font_mem '%s' %d\n", diag_font_name, font_size );
+
     int rc = w_load_tt_from_mem( &ftFace, mem_font, mem_font_size, diag_font_name );
     if( rc )
+    {
+        printf( "w_get_tt_font_mem FAILED '%s' %d\n", diag_font_name, font_size );
         return INVALID_POOL_HANDLE;
+    }
 
     struct ttf_pool_el req;
 
     req.font_name = diag_font_name;
     req.font_size = font_size;
     req.face = ftFace;
+
+    FT_Set_Pixel_Sizes(ftFace, font_size, 0);
 
     return w_store_tt_to_pool( &req );
 }
@@ -521,7 +544,7 @@ static void w_preload_compiled_fonts(void)
 pool_handle_t w_get_system_font_ext( int font_size )
 {
     //SHOW_FLOW( 1, "w_get_system_font_ext %d", font_size );
-    printf( "w_get_system_font_ext %d\n", font_size );
+    //printf( "w_get_system_font_ext %d\n", font_size );
     return w_get_tt_font_mem( OpenSans_Regular_ttf_font, OpenSans_Regular_ttf_font_size, "OpenSans Regular", font_size );
 }
 
@@ -532,6 +555,25 @@ pool_handle_t w_get_system_font( void )
 }
 
 
+errno_t w_release_tt_font( font_handle_t font )
+{
+    return pool_release_el( tt_font_pool, font );
+}
+
+
+static void dump_face( FT_Face ftFace )
+{
+    //    FT_FaceRec *fr = (FT_FaceRec *)ftFace;
+    FT_Face fr = ftFace;
+
+    printf( "Face:\n" );
+
+    printf( "\tFaces %ld curr %ld glyphs %ld\n", fr->num_faces, fr->face_index, fr->num_glyphs );
+    printf( "\tFamily '%s' style '%s' face flags %lx style flags %lx\n", fr->family_name, fr->style_name, fr->face_flags, fr->style_flags );
+
+    
+
+}
 
 
 
