@@ -1,4 +1,9 @@
-﻿
+#define DEBUG_MSG_PREFIX "vm.vtest"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 #include <phantom_libc.h>
 
 #include <video/screen.h>
@@ -11,6 +16,8 @@
 
 void videotest(void)
 {
+    printf("\n\nTEST\n\n");
+    //SHOW_FLOW0( 1, "videotest()" );
     //drv_video_window_t *w1 = drv_video_window_create( WXS, WYS, 350, 350, COLOR_BLACK, "Test 2", WFLAG_WIN_DECORATED );
 
     drv_video_window_t *w = drv_video_window_create( WXS, WYS, 300, 300, COLOR_BLACK, "Test Window", WFLAG_WIN_DECORATED );
@@ -34,11 +41,18 @@ void videotest(void)
 
     w_fill_box( w,  40, 32, 33, 10, COLOR_RED );
 
-    w_ttfont_draw_string( w,
-                          //const drv_video_font_t *font,
-                               "TrueType rulez рулит",
-                               COLOR_LIGHTRED, COLOR_BLACK,
-                               10, 50 );
+    //font_handle_t font = w_get_system_font_ext( 100 );
+    //rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
+    font_handle_t font = w_get_tt_font_file( "OpenSans-Regular.ttf", 100 );
+
+
+    if( font == INVALID_POOL_HANDLE )
+        w_font_draw_string( w, &drv_video_8x16san_font, "TrueType Font Failed", COLOR_BLACK, COLOR_GREEN, 0, 30 );
+    else
+        w_ttfont_draw_string( w, font,
+                          "TrueType rulez рулит",
+                          COLOR_LIGHTRED, COLOR_BLACK,
+                          10, 50 );
 
     drv_video_winblt( w );
     //win_scr_screen_update();

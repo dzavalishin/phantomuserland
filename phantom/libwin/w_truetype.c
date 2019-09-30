@@ -15,7 +15,14 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
- 
+
+#define DEBUG_MSG_PREFIX "w.ttf"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <stdint.h>
 
 #include <utf8proc.h>
@@ -47,6 +54,7 @@ static void  	do_ttf_destroy(void *arg);
 
 struct ttf_pool_el
 {
+    //char          font_type; // enum font_types_t { ft_binmap, ft_truetype };
     const char *    font_name;
     int 	    font_size; // pixels
     FT_Face	    face;
@@ -126,7 +134,7 @@ struct ttf_symbol
 
 void w_ttfont_draw_string(
                           window_handle_t win,
-                          //const drv_video_font_t *font,
+                          pool_handle_t font,
                           const char *str, const rgba_t color, const rgba_t bg,
                           int win_x, int win_y )
 {
@@ -134,7 +142,7 @@ void w_ttfont_draw_string(
     if(!running) return;
 
     int rc;
-
+    /*
     FT_Face ftFace = 0;
     rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
     if( rc )
@@ -146,7 +154,18 @@ void w_ttfont_draw_string(
     FT_Set_Pixel_Sizes(ftFace, 200, 0);
     //FT_Set_Pixel_Sizes(ftFace, 100, 0);
     //FT_Set_Pixel_Sizes(ftFace, 50, 0);
- 
+    */
+
+    struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
+    if( 0 == pe )
+    {
+        lprintf("\ncan't get font for handle %x\n", font);
+        return;
+    }
+    printf( "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
+
+    FT_Face ftFace = pe->face;;
+
     //const char *str = s;
     const size_t strLen = strlen(str);
  
@@ -265,12 +284,18 @@ void w_ttfont_draw_string(
     {
         FT_Done_Glyph(symbols[i].glyph);
     }
- 
+
+    rc = pool_release_el( tt_font_pool, font );
+    if( rc )
+        lprintf("\ncan't release font for handle %x\n", font);
+
+/*
     FT_Done_Face(ftFace);
     ftFace = 0;
  
     FT_Done_FreeType(ftLibrary);
     ftLibrary = 0;
+*/
 }
  
  
@@ -484,12 +509,28 @@ pool_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 extern char OpenSans_Regular_ttf_font[];
 extern unsigned int OpenSans_Regular_ttf_font_size;
 
-pool_handle_t OpenSans_Regular_ttf_font_handle;
+//pool_handle_t OpenSans_Regular_ttf_font_handle;
 
+/*
 static void w_preload_compiled_fonts(void)
 {
     OpenSans_Regular_ttf_font_handle = w_get_tt_font_mem( OpenSans_Regular_ttf_font, OpenSans_Regular_ttf_font_size, "OpenSans Regular", 14 );
 }
+*/
+
+pool_handle_t w_get_system_font_ext( int font_size )
+{
+    //SHOW_FLOW( 1, "w_get_system_font_ext %d", font_size );
+    printf( "w_get_system_font_ext %d\n", font_size );
+    return w_get_tt_font_mem( OpenSans_Regular_ttf_font, OpenSans_Regular_ttf_font_size, "OpenSans Regular", font_size );
+}
+
+
+pool_handle_t w_get_system_font( void )
+{
+    return w_get_system_font_ext( 14 );
+}
+
 
 
 

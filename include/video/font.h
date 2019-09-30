@@ -17,6 +17,7 @@
 #endif // VCONFIG_H
 
 #include <video/window.h>
+#include <kernel/pool.h>
 
 #define FONT_FLAG_NONE                 0
 #define FONT_FLAG_PROPORTIONAL         (1<<0)
@@ -75,12 +76,6 @@ void 	w_font_tty_string(
                                           int *x, int *y );
 
 
-/// truetype fonts - in progress
-void w_ttfont_draw_string(
-                          window_handle_t win,
-                          //const drv_video_font_t *font,
-                          const char *s, const rgba_t color, const rgba_t bg,
-                          int x, int y );
 
 
 
@@ -98,6 +93,21 @@ void w_ttfont_draw_string(
 
 //extern FT_Library ftLibrary;
 
+typedef pool_handle_t font_handle_t;
+
+/// truetype fonts - in progress
+void w_ttfont_draw_string(
+                          window_handle_t win,
+                          font_handle_t font,
+                          const char *s, const rgba_t color, const rgba_t bg,
+                          int x, int y );
+
+
+font_handle_t w_get_system_font_ext( int font_size );
+font_handle_t w_get_system_font( void );
+
+
+pool_handle_t w_get_tt_font_file( const char *file_name, int size );
 
 
 
