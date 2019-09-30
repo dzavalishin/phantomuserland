@@ -106,7 +106,7 @@ void init_truetype(void)
 
 //INIT_ME(0,init_truetype,0)
 
-static void dump_face( FT_Face ftFace );
+//static void dump_face( FT_Face ftFace );
 
 
 static int w_load_tt_from_file( FT_Face *ftFace, const char *file_name );
@@ -124,7 +124,7 @@ const size_t MAX_SYMBOLS_COUNT = 256;
 
 FT_Glyph getGlyph(FT_Face face, uint32_t charcode);
 FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode);
- 
+
 struct ttf_symbol
 {
     int32_t posX;
@@ -133,8 +133,8 @@ struct ttf_symbol
     int32_t height;
     FT_Glyph glyph;
 };
- 
- 
+
+
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
@@ -148,12 +148,134 @@ struct ttf_symbol
     )
 
 
+static void w_tt_paint_char(window_handle_t win, const struct ttf_symbol *symb, int win_x, int win_y, int top, const rgba_t color )
+{
+    FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) symb->glyph;
+    FT_Bitmap bitmap = bitmapGlyph->bitmap;
+
+    int32_t srcY;
+    for(srcY = 0; srcY < symb->height; ++srcY)
+    {
+        const int32_t dstY = symb->posY + srcY - top;
+
+        // we need not total image height, but height above baseline
+        //int wy = win_y + imageH - dstY;
+        int wy = win_y + (-top) - dstY;
+
+        if( wy < 0 ) continue; // break? we go down
+        if( wy >= win->ysize ) continue;
+
+        int _wy = wy * win->xsize;
+
+        int32_t srcX;
+        for (srcX = 0; srcX < symb->width; ++srcX)
+        {
+            const uint8_t c = bitmap.buffer[srcX + srcY * bitmap.pitch];
+
+            if (0 == c)
+            {
+                //putchar('-');
+                continue;
+            }
+
+            const float a = c / 255.0f;
+            const int32_t dstX = symb->posX + srcX;
+
+            int wx = win_x + dstX;
+
+            if( wx < 0 ) continue;
+            if( wx >= win->xsize ) break;
+#if 1
+            rgba_t old = win->w_pixel[wx+_wy];
+            rgba_t *p = &(win->w_pixel[wx+_wy]);
+
+            p->r = W_BLEND_PIXEL( old.r, color.r, a );
+            p->g = W_BLEND_PIXEL( old.g, color.g, a );
+            p->b = W_BLEND_PIXEL( old.b, color.b, a );
+
+            p->a = 0xFF;
+#else
+            win->w_pixel[wx+_wy] = color;
+#endif
+        }
+}
+}
+
+
+// UTF-8 char!
+void w_ttfont_draw_char(
+                          window_handle_t win,
+                          font_handle_t font,
+                          const char *str, const rgba_t color, 
+                          int win_x, int win_y )
+{
+
+    if(!running) return;
+
+    int rc;
+
+    struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
+    if( 0 == pe )
+    {
+        lprintf("\ncan't get font for handle %x\n", font);
+        return;
+    }
+
+    FT_Face ftFace = pe->face;;
+
+    const size_t strLen = strlen(str);
+
+    struct ttf_symbol symbol;
+
+    int32_t left = INT_MAX;
+    //int32_t top = INT_MAX;
+    //int32_t bottom = INT_MIN;
+    //uint32_t prevCharcode = 0;
+
+    int32_t posX = 0;
+    int skip_total = 0;
+
+    int32_t charcode;
+    //ssize_t skip =
+    utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
+
+
+    FT_Glyph glyph = getGlyph(ftFace, charcode);
+
+    if (!glyph)
+        return;
+
+    struct ttf_symbol *symb = &symbol;
+
+    FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) glyph;
+    symb->posX = (posX >> 6) + bitmapGlyph->left;
+    symb->posY = -bitmapGlyph->top;
+    symb->width = bitmapGlyph->bitmap.width;
+    symb->height = bitmapGlyph->bitmap.rows;
+    symb->glyph = glyph;
+
+    posX += glyph->advance.x >> 10;
+
+    left = MIN(left, symb->posX);
+
+    symbol.posX -= left;
+
+    w_tt_paint_char( win, &symbol, win_x, win_y, symb->posY, color );
+
+    FT_Done_Glyph(symbol.glyph);
+
+    rc = pool_release_el( tt_font_pool, font );
+    if( rc )
+        lprintf("\ndrawc can't release font for handle %x\n", font);
+
+}
+
 
 
 void w_ttfont_draw_string(
                           window_handle_t win,
                           font_handle_t font,
-                          const char *str, const rgba_t color, const rgba_t bg,
+                          const char *str, const rgba_t color, //const rgba_t bg,
                           int win_x, int win_y )
 {
 
@@ -168,7 +290,7 @@ void w_ttfont_draw_string(
         lprintf("\ncan't load font\n");
         return;
     }
- 
+
     FT_Set_Pixel_Sizes(ftFace, 200, 0);
     //FT_Set_Pixel_Sizes(ftFace, 100, 0);
     //FT_Set_Pixel_Sizes(ftFace, 50, 0);
@@ -189,18 +311,18 @@ void w_ttfont_draw_string(
 
     //const char *str = s;
     const size_t strLen = strlen(str);
- 
+
     struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
     size_t numSymbols = 0;
- 
+
     int32_t left = INT_MAX;
     int32_t top = INT_MAX;
     int32_t bottom = INT_MIN;
     uint32_t prevCharcode = 0;
- 
+
     int32_t posX = 0;
     int skip_total = 0;
- 
+
     while( (skip_total < strLen) && (numSymbols < MAX_SYMBOLS_COUNT))
     {
         //const uint32_t charcode = str[i];
@@ -209,33 +331,33 @@ void w_ttfont_draw_string(
 
         skip_total += skip;
 
- 
+
         FT_Glyph glyph = getGlyph(ftFace, charcode);
- 
+
         if (!glyph)
             continue;
- 
+
         if (prevCharcode)
             posX += getKerning(ftFace, prevCharcode, charcode);
 
         prevCharcode = charcode;
- 
+
         struct ttf_symbol *symb = &(symbols[numSymbols++]);
- 
+
         FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) glyph;
         symb->posX = (posX >> 6) + bitmapGlyph->left;
         symb->posY = -bitmapGlyph->top;
         symb->width = bitmapGlyph->bitmap.width;
         symb->height = bitmapGlyph->bitmap.rows;
         symb->glyph = glyph;
- 
+
         posX += glyph->advance.x >> 10;
- 
+
         left = MIN(left, symb->posX);
         top = MIN(top, symb->posY);
         bottom = MAX(bottom, symb->posY + symb->height);
     }
- 
+
     size_t i = 0;
     for (i = 0; i < numSymbols; ++i)
     {
@@ -243,68 +365,19 @@ void w_ttfont_draw_string(
     }
 
     //printf( "\tnumSymbols %d left %d top %d bottom %d\n", numSymbols, left, top, bottom );
- 
+
     //const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
     //const int32_t imageH = bottom - top;
- 
- 
+
+
     for (i = 0; i < numSymbols; ++i)
     {
         const struct ttf_symbol *symb = symbols + i;
- 
-        FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) symb->glyph;
-        FT_Bitmap bitmap = bitmapGlyph->bitmap;
-
-        int32_t srcY;
-        for(srcY = 0; srcY < symb->height; ++srcY)
-        {
-            const int32_t dstY = symb->posY + srcY - top;
-
-            // we need not total image height, but height above baseline
-            //int wy = win_y + imageH - dstY;
-            int wy = win_y + (-top) - dstY; 
-
-            if( wy < 0 ) continue; // break? we go down
-            if( wy >= win->ysize ) continue;
-
-            int _wy = wy * win->xsize;
-
-            int32_t srcX;
-            for (srcX = 0; srcX < symb->width; ++srcX)
-            {
-                const uint8_t c = bitmap.buffer[srcX + srcY * bitmap.pitch];
- 
-                if (0 == c)
-                {
-                    //putchar('-');
-                    continue;
-                }
- 
-                const float a = c / 255.0f;
-                const int32_t dstX = symb->posX + srcX;
-
-                int wx = win_x + dstX;
-
-                if( wx < 0 ) continue; 
-                if( wx >= win->xsize ) break;
-#if 1
-                rgba_t old = win->w_pixel[wx+_wy];
-                rgba_t *p = &(win->w_pixel[wx+_wy]);
-
-                p->r = W_BLEND_PIXEL( old.r, color.r, a );
-                p->g = W_BLEND_PIXEL( old.g, color.g, a );
-                p->b = W_BLEND_PIXEL( old.b, color.b, a );
-
-                p->a = 0xFF;
-#else
-                win->w_pixel[wx+_wy] = color;
-#endif
-            }
-        }
+        w_tt_paint_char( win, symb, win_x, win_y, top, color );
     }
- 
- 
+
+
     for (i = 0; i < numSymbols; ++i)
     {
         FT_Done_Glyph(symbols[i].glyph);
@@ -314,16 +387,9 @@ void w_ttfont_draw_string(
     if( rc )
         lprintf("\ncan't release font for handle %x\n", font);
 
-/*
-    FT_Done_Face(ftFace);
-    ftFace = 0;
- 
-    FT_Done_FreeType(ftLibrary);
-    ftLibrary = 0;
-*/
 }
- 
- 
+
+
 FT_Glyph getGlyph(FT_Face face, uint32_t charcode)
 {
     FT_Load_Char(face, charcode, FT_LOAD_RENDER);
@@ -331,13 +397,13 @@ FT_Glyph getGlyph(FT_Face face, uint32_t charcode)
     FT_Get_Glyph(face->glyph, &glyph);
     return glyph;
 }
- 
- 
+
+
 FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
 {
     FT_UInt leftIndex = FT_Get_Char_Index(face, leftCharcode);
     FT_UInt rightIndex = FT_Get_Char_Index(face, rightCharcode);
- 
+
     FT_Vector delta;
     FT_Get_Kerning(face, leftIndex, rightIndex, FT_KERNING_DEFAULT, &delta);
     return delta.x;
@@ -355,9 +421,9 @@ FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
 
 
 /**
- * 
+ *
  * Called by pool code to create a new pool element.
- * 
+ *
 ** /
 static void * 	do_ttf_create(void *arg)
 {
@@ -365,9 +431,9 @@ static void * 	do_ttf_create(void *arg)
 } */
 
 /**
- * 
+ *
  * Called by pool code to destroy pool element.
- * 
+ *
 **/
 static void  	do_ttf_destroy(void *arg)
 {

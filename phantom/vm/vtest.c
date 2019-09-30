@@ -65,7 +65,7 @@ void videotest(void)
     else
         w_ttfont_draw_string( w, font2,
                           "TrueType rulez рулит",
-                          COLOR_LIGHTRED, COLOR_BLACK,
+                          COLOR_LIGHTRED, //COLOR_BLACK,
                           10, 50 );
 
 

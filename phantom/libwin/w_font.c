@@ -18,6 +18,11 @@
 #include <string.h>
 #include <phantom_libc.h>
 
+// Kills kernel - needs big stack (256 kb or more), calls malloc - must
+// be called out of spinlock, trapno 0: Divide error, error 00000000 EIP 1f5ae0: _gray_render_line
+
+#define TTF_TTY 0
+
 //! Bytes per char
 static __inline__ int _bpc(const drv_video_font_t *font)
 {
@@ -234,6 +239,16 @@ void w_font_tty_string(
     int bright = 0;
     //int startx = *x;
 
+#if TTF_TTY
+    // temp
+    font_handle_t ttfont = w_get_system_mono_font();
+
+    unsigned utf_getc()
+    {
+        return 0;
+    }
+#endif
+
     while(nc--)
     {
         if( *s == '\n' )
@@ -303,6 +318,21 @@ void w_font_tty_string(
 
 
         }
+#if TTF_TTY
+        if( (*x + 8 > win->xsize) && (*y <= 16) )
+        {
+            w_scroll_up( win, 16, back );
+            *y -= 16; // Step down a line
+            *x = 0;
+        }
+
+        w_ttfont_draw_char( win, ttfont, s, color, *x, *y );
+
+        s++;
+        *x += 8;
+
+#else
+
         else if( w_font_draw_char( win, font, *s, color, back, *x, *y ) )
         {
             if( *y <= font->ysize )
@@ -316,8 +346,12 @@ void w_font_tty_string(
         }
         s++;
         *x += font->xsize;
+#endif
     }
 
+#if TTF_TTY
+    w_release_tt_font( ttfont );
+#endif
 }
 
 /*

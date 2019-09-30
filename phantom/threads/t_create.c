@@ -35,8 +35,9 @@ static void common_thread_init(phantom_thread_t *t, int stacksize );
 static hal_spinlock_t tid_lock; //init?
 
 
-#define DEF_STACK_SIZE (128*1024)
-//#define DEF_STACK_SIZE (256*1024)
+//#define DEF_STACK_SIZE (128*1024)
+#define DEF_STACK_SIZE (256*1024)
+//#define DEF_STACK_SIZE (1024*1024)
 
 
 

@@ -99,8 +99,15 @@ typedef pool_handle_t font_handle_t;
 void w_ttfont_draw_string(
                           window_handle_t win,
                           font_handle_t font,
-                          const char *s, const rgba_t color, const rgba_t bg,
+                          const char *s, const rgba_t color, //const rgba_t bg,
                           int x, int y );
+
+
+void w_ttfont_draw_char(
+                          window_handle_t win,
+                          font_handle_t font,
+                          const char *str, const rgba_t color,
+                          int win_x, int win_y );
 
 
 font_handle_t w_get_system_font_ext( int font_size );

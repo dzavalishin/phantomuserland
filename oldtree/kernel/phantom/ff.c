@@ -3641,7 +3641,7 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
     }
 
     u_int8_t signature = *((u_int8_t *)(buf+0x26));
-    SHOW_FLOW( 0, "signature is 0x%X", signature );
+    SHOW_FLOW( 1, "signature is 0x%X", signature );
     switch(signature)
     {
     case 0x28:
@@ -3654,7 +3654,7 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
     }
 
     u_int32_t serial = *((u_int32_t *)(buf+0x27));
-    SHOW_FLOW( 0, "serial num is 0x%X", serial );
+    SHOW_FLOW( 1, "serial num is 0x%X", serial );
 
     // different FATs have it in different places.
 #if 0
@@ -3664,14 +3664,14 @@ errno_t fs_probe_fat(phantom_disk_partition_t *p )
     memset( label, FAT_LABEL_LEN, 0 );
     memcpy( label, buf+0x2B, FAT_LABEL_LEN-1 );
 
-    SHOW_FLOW( 0, "label is %.*s", FAT_LABEL_LEN-1, label );
+    SHOW_FLOW( 1, "label is %.*s", FAT_LABEL_LEN-1, label );
 
 #define FAT_FSTYPE_LEN 9
     char fstype[FAT_FSTYPE_LEN];
     memset( fstype, FAT_FSTYPE_LEN, 0 );
     memcpy( fstype, buf+0x2B, FAT_FSTYPE_LEN-1 );
 
-    SHOW_FLOW( 0, "fstype is %.*s", FAT_FSTYPE_LEN-1, fstype );
+    SHOW_FLOW( 1, "fstype is %.*s", FAT_FSTYPE_LEN-1, fstype );
 
 #endif
 

@@ -161,7 +161,7 @@ void win_make_decorations(drv_video_window_t *w)
     // BUG! It must be +3, not -1 on Y coord!
 #if CONF_TRUETYPE
     w_ttfont_draw_string( w->w_title, decorations_title_font,
-                                w->title, COLOR_BLACK, COLOR_TRANSPARENT,
+                                w->title, COLOR_BLACK, //COLOR_TRANSPARENT,
                                 bordr_size+3, bordr_size+2 );
 #else
     w_font_draw_string( w->w_title, &drv_video_8x16cou_font,
