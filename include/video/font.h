@@ -28,7 +28,7 @@ typedef struct drv_video_font_t
     int 		ysize;
     char *      font;
     int 		flags;
-} drv_video_font_t;
+} drv_video_font_t; // Todo rename to drv_video_bitmap_font_t
 
 extern struct drv_video_font_t         drv_video_16x16_font;
 extern struct drv_video_font_t         drv_video_8x16ant_font;
@@ -90,7 +90,7 @@ void 	w_font_tty_string(
 //#include <ft2build.h>
 //#include FT_FREETYPE_H
 
-
+typedef enum w_font_type { ft_none = 0, ft_bitmap = 1, ft_truetype = 2 } font_type_t;
 //extern FT_Library ftLibrary;
 
 typedef pool_handle_t font_handle_t;

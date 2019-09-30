@@ -57,11 +57,20 @@ static void  	do_ttf_destroy(void *arg);
 
 struct ttf_pool_el
 {
-    //char          font_type; // enum font_types_t { ft_binmap, ft_truetype };
-    const char *    font_name;
-    int 	    font_size; // pixels
-    FT_Face	    face;
-    font_handle_t   fhandle;
+    font_type_t         font_type; // enum font_types_t { ft_bitmap, ft_truetype };
+
+    // For all types
+    const char *        font_name;
+    int 	        font_size; // pixels
+
+    // For ft_truetype
+    FT_Face	        face;
+
+    // For ft_bitmap
+    drv_video_font_t	bmp;
+
+    // Internal use
+    font_handle_t       fhandle;
 };
 
 
@@ -381,7 +390,7 @@ static errno_t tt_lookup(pool_t *pool, void *el, font_handle_t handle, void *arg
     struct ttf_pool_el *req = arg;
     struct ttf_pool_el *cur = el;
 
-    if( (0 == strcmp( req->font_name, cur->font_name )) && (req->font_size == cur->font_size) )
+    if( (req->font_type == cur->font_type) && (req->font_size == cur->font_size) && (0 == strcmp( req->font_name, cur->font_name )) )
     {
         req->face = cur->face;
         req->fhandle = handle;
@@ -398,6 +407,7 @@ font_handle_t w_get_tt_font_file( const char *file_name, int size )
 
     req.font_name = file_name;
     req.font_size = size;
+    req.font_type = ft_truetype;
 
     int rc;
 
@@ -522,6 +532,8 @@ font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
     }
 
     struct ttf_pool_el req;
+
+    memset( &req, 0, sizeof(req) );
 
     req.font_name = diag_font_name;
     req.font_size = font_size;
