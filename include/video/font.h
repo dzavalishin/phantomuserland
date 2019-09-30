@@ -106,8 +106,12 @@ void w_ttfont_draw_string(
 font_handle_t w_get_system_font_ext( int font_size );
 font_handle_t w_get_system_font( void );
 
+font_handle_t w_get_system_mono_font_ext( int font_size );
+font_handle_t w_get_system_mono_font( void );
 
-pool_handle_t w_get_tt_font_file( const char *file_name, int size );
+
+font_handle_t w_get_tt_font_file( const char *file_name, int size );
+font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const char* diag_font_name, int font_size );
 
 
 errno_t w_release_tt_font( font_handle_t font );

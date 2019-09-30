@@ -1,7 +1,7 @@
 #CONV=java -cp $(PHANTOM_HOME)/build/jar/plc.jar ru.dz.pbitmap.Main
 CONV=perl ../../../build/bin/bin2hex.pl
 
-SRCDIRS = opensans
+SRCDIRS = opensans robotomono 
 
 FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
 

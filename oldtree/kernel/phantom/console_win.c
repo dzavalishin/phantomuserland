@@ -51,17 +51,11 @@
 
 
 #define CON_FONT drv_video_8x16san_font
-//#define CON_FONT drv_video_8x16cou_font
-//#define CON_FONT drv_video_gallant12x22_font
-//#define CON_FONT drv_video_freebsd_font
-
-//#define DEB_FONT drv_video_8x16san_font
-//#define DEB_FONT drv_video_gallant12x22_font
-//#define DEB_FONT drv_video_freebsd_font
 #define DEB_FONT drv_video_8x16cou_font
 
 #define BUFS 128
 
+static font_handle_t ttfont;
 
 #if NEW_WINDOWS
 window_handle_t phantom_console_window = 0;
@@ -273,6 +267,9 @@ void phantom_init_console_window()
     {
         cw_x = cw_y = 0;
     }
+
+
+    ttfont = w_get_system_font_ext( 16 );
 
     drv_video_window_t *w = drv_video_window_create( xsize, ysize,
                         cw_x, cw_y, console_bg, "Console", WFLAG_WIN_DECORATED|WFLAG_WIN_DOUBLEBUF );

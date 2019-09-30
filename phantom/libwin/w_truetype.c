@@ -61,13 +61,15 @@ struct ttf_pool_el
     const char *    font_name;
     int 	    font_size; // pixels
     FT_Face	    face;
-    pool_handle_t   fhandle;
+    font_handle_t   fhandle;
 };
 
 
 
 
 // NB!! FT_New_Face and FT_Done_Face are not thread safe!
+
+font_handle_t decorations_title_font = INVALID_POOL_HANDLE;
 
 //static
 void init_truetype(void)
@@ -89,6 +91,8 @@ void init_truetype(void)
     tt_font_pool->flag_autodestroy = 1;
 
     running = 1;
+
+    decorations_title_font = w_get_system_font_ext( 16 );
 }
 
 //INIT_ME(0,init_truetype,0)
@@ -98,10 +102,10 @@ static void dump_face( FT_Face ftFace );
 
 static int w_load_tt_from_file( FT_Face *ftFace, const char *file_name );
 
-pool_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const char* diag_font_name, int font_size );
-pool_handle_t w_get_tt_font_file( const char *file_name, int size );
+font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const char* diag_font_name, int font_size );
+font_handle_t w_get_tt_font_file( const char *file_name, int size );
 
-static pool_handle_t w_store_tt_to_pool( struct ttf_pool_el *req );
+static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req );
 
 
 
@@ -139,7 +143,7 @@ struct ttf_symbol
 
 void w_ttfont_draw_string(
                           window_handle_t win,
-                          pool_handle_t font,
+                          font_handle_t font,
                           const char *str, const rgba_t color, const rgba_t bg,
                           int win_x, int win_y )
 {
@@ -275,7 +279,7 @@ void w_ttfont_draw_string(
 
                 if( wx < 0 ) continue; 
                 if( wx >= win->xsize ) break;
-#if 0
+#if 1
                 rgba_t old = win->w_pixel[wx+_wy];
                 rgba_t *p = &(win->w_pixel[wx+_wy]);
 
@@ -372,7 +376,7 @@ static void  	do_ttf_destroy(void *arg)
 
 
 #if CACHE_FT_FACE
-static errno_t tt_lookup(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+static errno_t tt_lookup(pool_t *pool, void *el, font_handle_t handle, void *arg)
 {
     struct ttf_pool_el *req = arg;
     struct ttf_pool_el *cur = el;
@@ -388,7 +392,7 @@ static errno_t tt_lookup(pool_t *pool, void *el, pool_handle_t handle, void *arg
 }
 #endif // CACHE_FT_FACE
 
-pool_handle_t w_get_tt_font_file( const char *file_name, int size )
+font_handle_t w_get_tt_font_file( const char *file_name, int size )
 {
     struct ttf_pool_el req;
 
@@ -421,7 +425,7 @@ pool_handle_t w_get_tt_font_file( const char *file_name, int size )
 
 
 
-static pool_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
+static font_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
 {
 
     struct ttf_pool_el *newel = calloc( sizeof(struct ttf_pool_el), 1 );
@@ -440,7 +444,7 @@ static pool_handle_t w_store_tt_to_pool( struct ttf_pool_el *req )
         return INVALID_POOL_HANDLE;
     }
 
-    pool_handle_t newh = pool_create_el( tt_font_pool, newel );
+    font_handle_t newh = pool_create_el( tt_font_pool, newel );
 
     if( newh == INVALID_POOL_HANDLE )
     {
@@ -504,7 +508,7 @@ static int w_load_tt_from_mem( FT_Face *ftFace, void *mem_font, size_t mem_font_
 }
 
 
-pool_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const char* diag_font_name, int font_size )
+font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const char* diag_font_name, int font_size )
 {
     FT_Face ftFace;
 
@@ -532,7 +536,11 @@ pool_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 extern char OpenSans_Regular_ttf_font[];
 extern unsigned int OpenSans_Regular_ttf_font_size;
 
-//pool_handle_t OpenSans_Regular_ttf_font_handle;
+extern char RobotoMono_Regular_ttf_font[];
+extern unsigned int RobotoMono_Regular_ttf_font_size;
+
+
+//font_handle_t OpenSans_Regular_ttf_font_handle;
 
 /*
 static void w_preload_compiled_fonts(void)
@@ -541,18 +549,33 @@ static void w_preload_compiled_fonts(void)
 }
 */
 
-pool_handle_t w_get_system_font_ext( int font_size )
+font_handle_t w_get_system_font_ext( int font_size )
 {
-    //SHOW_FLOW( 1, "w_get_system_font_ext %d", font_size );
-    //printf( "w_get_system_font_ext %d\n", font_size );
     return w_get_tt_font_mem( OpenSans_Regular_ttf_font, OpenSans_Regular_ttf_font_size, "OpenSans Regular", font_size );
 }
 
 
-pool_handle_t w_get_system_font( void )
+font_handle_t w_get_system_font( void )
 {
     return w_get_system_font_ext( 14 );
 }
+
+
+
+font_handle_t w_get_system_mono_font_ext( int font_size )
+{
+    return w_get_tt_font_mem( RobotoMono_Regular_ttf_font, RobotoMono_Regular_ttf_font_size, "RobotoMono Regular", font_size );
+}
+
+
+font_handle_t w_get_system_mono_font( void )
+{
+    return w_get_system_mono_font_ext( 14 );
+}
+
+
+
+
 
 
 errno_t w_release_tt_font( font_handle_t font )
@@ -560,7 +583,7 @@ errno_t w_release_tt_font( font_handle_t font )
     return pool_release_el( tt_font_pool, font );
 }
 
-
+/*
 static void dump_face( FT_Face ftFace )
 {
     //    FT_FaceRec *fr = (FT_FaceRec *)ftFace;
@@ -570,10 +593,7 @@ static void dump_face( FT_Face ftFace )
 
     printf( "\tFaces %ld curr %ld glyphs %ld\n", fr->num_faces, fr->face_index, fr->num_glyphs );
     printf( "\tFamily '%s' style '%s' face flags %lx style flags %lx\n", fr->family_name, fr->style_name, fr->face_flags, fr->style_flags );
-
-    
-
-}
+}*/
 
 
 

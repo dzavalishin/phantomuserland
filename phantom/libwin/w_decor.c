@@ -159,9 +159,16 @@ void win_make_decorations(drv_video_window_t *w)
     window_basic_border( w->w_title, brdr, bordr_size );
 
     // BUG! It must be +3, not -1 on Y coord!
+#if CONF_TRUETYPE
+    w_ttfont_draw_string( w->w_title, decorations_title_font,
+                                w->title, COLOR_BLACK, COLOR_TRANSPARENT,
+                                bordr_size+3, bordr_size+2 );
+#else
     w_font_draw_string( w->w_title, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
                                 bordr_size+3, bordr_size-1 );
+#endif
+
 
     //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
     //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );

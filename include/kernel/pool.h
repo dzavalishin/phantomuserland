@@ -108,6 +108,7 @@ int pool_get_free( pool_t *pool );
 //! Inaccurate - no mutex taken
 int pool_get_used( pool_t *pool );
 
+
 errno_t pool_foreach( pool_t *pool, errno_t (*ff)(pool_t *pool, void *el, pool_handle_t handle, void *arg), void *arg );
 
 
