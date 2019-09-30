@@ -142,6 +142,20 @@ static int cirrus_probe()
 
     cir_device = cir_devices+cir_card;
 
+#if 1
+    {
+        memsize = 1*1024*1024;
+
+        // QEMU gives this, and it is unlikelyu that we'll get real Cirrus :)
+        int r15 = read_vga_register( 0x3C4, 0x15 ); 
+        switch( r15 )
+        {
+        case 3: 	memsize = 2*1024*1024; break;
+        case 4: 	memsize = 4*1024*1024; break;
+        }
+        SHOW_FLOW( 1, "Memsize r15=%x (%d Kb)", r15, memsize/1024 );
+    }
+#else
     {
         int dram = read_vga_register( 0x3C4, 0xF );
         int conf = read_vga_register( 0x3C4, 0x17 );
@@ -156,8 +170,14 @@ static int cirrus_probe()
         if( conf & CIRRUS_MEMSIZEEXT_DOUBLE )
             memsize *= 2;
 
+        // HACK on QEMU gives right mem size
+
         SHOW_FLOW( 1, "Memsize reg=%x (%d Kb) conf=%x", dram, memsize/1024, conf );
+
+        if( dram & CIRRUS_MEMFLAGS_BANKSWITCH )
+            SHOW_ERROR( 0, "Bank switch is active! memsize reg=%x", dram );
     }
+#endif
 
     cirrus_unlock();
 
@@ -177,16 +197,18 @@ static errno_t cirrus_accel_start(void)
 {
     if( cir_device == 0 )
         return ENXIO;
-#if 0 // doesn't work
+#if 1 // doesn't work
     SHOW_FLOW( 0, "Cirrus accelerator add on start, chip %s", cir_device->name );
 
     // Take over mouse
-    video_drv->redraw_mouse_cursor = currus_set_cursor_pos;
-    video_drv->set_mouse_cursor = cirrus_set_mouse_cursor;
+    video_drv->mouse_redraw_cursor = currus_set_cursor_pos;
+    video_drv->mouse_set_cursor = cirrus_set_mouse_cursor;
 
     // Turn off unused funcs
     video_drv->mouse_disable = vid_null;
     video_drv->mouse_enable = vid_null;
+#else
+    SHOW_FLOW( 0, "Cirrus accelerator disabled, chip %s", cir_device->name );
 #endif
 
     return 0;
@@ -310,16 +332,19 @@ static void cirrus_unlock(void)
 
 static void currus_set_cursor_pos(void)
 {
-#if 1
-    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
-
     unsigned x = video_drv->mouse_x;
     unsigned y = scr_get_ysize() - video_drv->mouse_y;
 
     SHOW_FLOW( 10, "%d * %d", x, y );
+#if 0
+    outb( 0x3C4, CIRRUS_CURSOR_SHOW );
+    outb( 0x3C4, 0x10 | ((x & 7) << 5) );
+    outb( 0x3C4, 0x11 | ((y & 7) << 5) );
+#else
+    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
 
-    write_vga_register( 0x3C4, 0x10 + ((x & 7) << 5), x >> 3 );
-    write_vga_register( 0x3C4, 0x11 + ((y & 7) << 5), y >> 3 );
+    write_vga_register( 0x3C4, 0x10 | ((x & 7) << 5), x >> 3 );
+    write_vga_register( 0x3C4, 0x11 | ((y & 7) << 5), y >> 3 );
 #endif
 }
 
@@ -333,7 +358,14 @@ static void cirrus_load_cursol_palette(void)
 
     int i = 16*3; // 16 rgb
     while( i-- > 0 )
-        outb( 0x3C9, 0xFF );
+        outb( 0x3C9, 0x2F );
+
+    outb( 0x3C8, 0x0F );
+
+    i = 16*3; // 16 rgb
+    while( i-- > 0 )
+        outb( 0x3C9, 0xAF );
+
 
     write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
 }
