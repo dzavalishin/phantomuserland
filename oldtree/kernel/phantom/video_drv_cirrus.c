@@ -414,20 +414,29 @@ static void cirrus_set_mouse_cursor( drv_video_bitmap_t *cursor )
 
     int i, j;
 
+    const int shift_up = 32 - cursor->ysize;
+    const int shift_left = 32 - cursor->xsize;
+
     rgba_t get_cp( int x, int y )
     {
         y = 31 - y;
 
+        y -= shift_up;
+        x -= shift_left;
+
+        if( x < 0 ) return (rgba_t) { 0, 0, 0, 0 };
+        if( y < 0 ) return (rgba_t) { 0, 0, 0, 0 };
         if( x >= cursor->xsize ) return (rgba_t) { 0, 0, 0, 0 };
         if( y >= cursor->ysize ) return (rgba_t) { 0, 0, 0, 0 };
 
         return cursor->pixel[ (y*cursor->xsize) + x ];
     }
 
+
     for( i=0; i < 32; i++ )
     {
-        u_int32_t andMask = 0x1;
-        u_int32_t xorMask = 0x1;
+        u_int32_t andMask = 0;
+        u_int32_t xorMask = 0;
 
 
         for ( j=0; j < 32; j++ )
