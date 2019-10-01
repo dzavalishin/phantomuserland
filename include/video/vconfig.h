@@ -37,7 +37,7 @@
 //! If window is not covered, we can ignore z buffer when painting
 #define VIDEO_NOZBUF_BLIT 0
 
-
+// Can't turn off :(
 #define VIDEO_NEW_PAINTER 1
 
 #define VIDEO_DRV_WINBLT 0

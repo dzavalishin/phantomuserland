@@ -12,8 +12,8 @@
 
 #define DEBUG_MSG_PREFIX "cirrus"
 #include <debug_ext.h>
-#define debug_level_flow 9
-#define debug_level_error 10
+#define debug_level_flow 0
+#define debug_level_error 0
 
 #include <hal.h>
 //#include <video.h>

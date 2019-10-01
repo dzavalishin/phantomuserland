@@ -50,7 +50,9 @@ struct ui_event
         } k;
 
         struct {
-            int         	buttons;	// Bits correspond to buttons
+            int         	buttons;	// Bits correspond to mouse buttons
+            int         	clicked;       	// Bits correspond to mouse buttons clicked this time
+            int         	released;      	// Bits correspond to mouse buttons released this time
         } m;
 
         // WIN and GLOBAL events
@@ -130,6 +132,14 @@ typedef struct ui_event ui_event_t;
 
 #define UI_EVENT_GLOBAL_REPAINT_RECT    (0xFF00|1) //! Repaint all windows that intersect w. rect
 
+/*/ w.info for UI_EVENT_TYPE_MOUSE
+#define UI_EVENT_MOU_CLICK_1            1
+#define UI_EVENT_MOU_PRESS_1            2
+#define UI_EVENT_WIN_RELEASE_1          3
+#define UI_EVENT_MOU_CLICK_2            11
+#define UI_EVENT_MOU_PRESS_2            12
+#define UI_EVENT_WIN_RELEASE_2          13
+*/
 
 #ifdef KERNEL
 

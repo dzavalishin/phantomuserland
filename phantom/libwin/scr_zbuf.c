@@ -299,7 +299,7 @@ void scr_zbuf_paint()
 {
     int np = scr_get_xsize() * scr_get_ysize();
 
-#if 0
+#if 1
     if(scr_get_bpp() == 24)
     {
         zbuf_t *zbp = zbuf;

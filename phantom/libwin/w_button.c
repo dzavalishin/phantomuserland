@@ -172,7 +172,7 @@ static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, voi
         //SHOW_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cb->id );
         cb->mouse_in_bits |= 1;
 
-        if(env->e.m.buttons)
+        if(env->e.m.clicked & 0x1) // First button click only
         {
             cb->pressed_bits |= 1;
 
