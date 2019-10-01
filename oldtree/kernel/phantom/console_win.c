@@ -309,7 +309,7 @@ void phantom_init_console_window()
 #define BTEXT_COLOR la_txt
 
     phantom_launcher_window = drv_video_window_create( scr_get_xsize(), 32,
-                                                       0, 0, console_bg, "Launcher", WFLAG_WIN_ONTOP );
+                                                       0, 0, console_bg, "Launcher", WFLAG_WIN_ONTOP|WFLAG_WIN_NOFOCUS );
 
     phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
     w_fill( phantom_launcher_window, la_bg );
