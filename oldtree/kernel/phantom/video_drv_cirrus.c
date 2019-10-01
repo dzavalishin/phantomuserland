@@ -147,7 +147,7 @@ static int cirrus_probe()
         memsize = 1*1024*1024;
 
         // QEMU gives this, and it is unlikelyu that we'll get real Cirrus :)
-        int r15 = read_vga_register( 0x3C4, 0x15 ); 
+        int r15 = read_vga_register( 0x3C4, 0x15 );
         switch( r15 )
         {
         case 3: 	memsize = 2*1024*1024; break;
@@ -393,21 +393,67 @@ static void cirrus_dump_cursol_palette(void)
 
 static void cirrus_set_mouse_cursor( drv_video_bitmap_t *cursor )
 {
-    u_int8_t *src = (u_int8_t *) ((addr_t)video_drv->screen + memsize - 16 * 1024);
-    SHOW_FLOW( 0, "vram %p, src %p", video_drv->screen, src );
+    u_int8_t *dst = (u_int8_t *) ((addr_t)video_drv->screen + memsize - 16 * 1024);
+    SHOW_FLOW( 0, "vram %p, dst %p", video_drv->screen, dst );
 
     // optimal value is 48, it takes exact 4Kb from vram
     int r13 = read_vga_register( 0x3C4, 0x13 );
-    src += (r13 & 0x3f) * 256;
-    SHOW_FLOW( 0, "r13 %d, src %p", r13, src );
+    dst += (r13 & 0x3f) * 256;
+    SHOW_FLOW( 0, "r13 %d, dst %p", r13, dst );
 
     // We use 32x32 cursor
-    int cbytes = 32*32*4; // 4K
 
-    memmove( src, cursor->pixel, cbytes ); // TODO wrong - need conversion -- OVERWRITTEN BELOW
+    //memmove( dst, cursor->pixel, cbytes ); // TODO wrong - need conversion -- OVERWRITTEN BELOW
 
-    memset( src, 0xFF, cbytes );
+#if 0
+    int cbytes = 32*32*2/8; // 32 x 32 bits * 2 planes / 8 bits in byte
+    memset( dst, 0xFF, cbytes );
     //SHOW_ERROR0( 0, "not impl");
+#else
+    u_int32_t *p = (void *)dst;
+
+    int i, j;
+
+    rgba_t get_cp( int x, int y )
+    {
+        y = 31 - y;
+
+        if( x >= cursor->xsize ) return (rgba_t) { 0, 0, 0, 0 };
+        if( y >= cursor->ysize ) return (rgba_t) { 0, 0, 0, 0 };
+
+        return cursor->pixel[ (y*cursor->xsize) + x ];
+    }
+
+    for( i=0; i < 32; i++ )
+    {
+        u_int32_t andMask = 0x1;
+        u_int32_t xorMask = 0x1;
+
+
+        for ( j=0; j < 32; j++ )
+        {
+            rgba_t pixel = get_cp( 31-j, i );
+            if( pixel.a )
+            {
+                if( pixel.r || pixel.g || pixel.b )
+                {
+                    andMask|= 1 << j;//foreground
+                    xorMask|= 1 << j;
+                }
+                else
+                    xorMask|= 1 << j;//background
+            }
+            //andMask|=(1<<j);//inverted
+
+        }
+
+
+        p[0]  = andMask;
+        p[32] = xorMask;
+        p++;
+    }
+#endif
+
 }
 
 
