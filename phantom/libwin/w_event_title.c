@@ -61,21 +61,23 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         }
         break;
 
-    case UI_EVENT_WIN_BUTTON: printf("title button %x\n", e->extra );
+    case UI_EVENT_WIN_BUTTON: //printf("title button %x\n", e->extra );
     {
         switch(e->extra)
         {
         case WBUTTON_SYS_ROLLUP:
             if( mainw->state & WSTATE_WIN_ROLLEDUP )
             {
-                printf("roll down\n" );
+                //printf("roll down\n" );
                 mainw->state &= ~WSTATE_WIN_ROLLEDUP;
+                if(mainw->w_decor) mainw->w_decor->state &= ~WSTATE_WIN_ROLLEDUP;
                 goto redecorate;
             }
             else
             {
-                printf("roll up\n" );
+                //printf("roll up\n" );
                 mainw->state |= WSTATE_WIN_ROLLEDUP;
+                if(mainw->w_decor) mainw->w_decor->state |= WSTATE_WIN_ROLLEDUP;
                 if( mainw->w_decor )
                     request_repaint_all_for_win( mainw->w_decor );
                 else

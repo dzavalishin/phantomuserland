@@ -227,6 +227,12 @@ drv_video_window_init( drv_video_window_t *w,
     iw_enter_allwq(w);
     win_make_decorations(w);
     w_unlock();
+
+    // Actually reorders window in all w list - finally it is possible that win
+    // will NOT be on top - some windows with special abilities can still be above
+    // More critical is that w_to_top reorders child (decor and title) windows
+    // in a correct way
+    w_to_top(w);
 }
 
 

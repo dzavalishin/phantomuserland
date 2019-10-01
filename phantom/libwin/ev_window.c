@@ -160,6 +160,13 @@ static void select_event_target(struct ui_event *e)
     {
         if( w->flags & WFLAG_WIN_NOFOCUS )
             continue;
+
+        if( w->state & WSTATE_WIN_ROLLEDUP )
+            continue;
+
+        if( !(w->state & WSTATE_WIN_VISIBLE) )
+            continue;
+
         if( w->z < wz )
             continue;
 
