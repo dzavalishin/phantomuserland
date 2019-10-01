@@ -358,13 +358,13 @@ static void cirrus_load_cursol_palette(void)
 
     int i = 16*3; // 16 rgb
     while( i-- > 0 )
-        outb( 0x3C9, 0x2F );
+        outb( 0x3C9, 0x0 ); // BG
 
     outb( 0x3C8, 0x0F );
 
     i = 16*3; // 16 rgb
     while( i-- > 0 )
-        outb( 0x3C9, 0xAF );
+        outb( 0x3C9, 0xFF ); // FG
 
 
     write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
@@ -446,13 +446,15 @@ static void cirrus_set_mouse_cursor( drv_video_bitmap_t *cursor )
             {
                 if( pixel.r || pixel.g || pixel.b )
                 {
-                    andMask|= 1 << j;//foreground
-                    xorMask|= 1 << j;
+                    // temp use inverted here, need better cursor
+                    //andMask|= 1 << j;  //foreground
+                    //xorMask|= 1 << j;
+
+                    andMask|=(1<<j);     //inverted
                 }
                 else
-                    xorMask|= 1 << j;//background
+                    xorMask|= 1 << j;    //background
             }
-            //andMask|=(1<<j);//inverted
 
         }
 
