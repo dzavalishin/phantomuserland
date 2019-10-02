@@ -101,7 +101,7 @@ void init_truetype(void)
 
     running = 1;
 
-    decorations_title_font = w_get_system_font_ext( 16 );
+    decorations_title_font = w_get_system_font_ext( 20 );
 }
 
 //INIT_ME(0,init_truetype,0)
@@ -614,6 +614,10 @@ font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 extern char OpenSans_Regular_ttf_font[];
 extern unsigned int OpenSans_Regular_ttf_font_size;
 
+extern char OpenSans_SemiBold_ttf_font[];
+extern unsigned int OpenSans_SemiBold_ttf_font_size;
+
+
 extern char RobotoMono_Regular_ttf_font[];
 extern unsigned int RobotoMono_Regular_ttf_font_size;
 
@@ -630,6 +634,7 @@ static void w_preload_compiled_fonts(void)
 font_handle_t w_get_system_font_ext( int font_size )
 {
     return w_get_tt_font_mem( OpenSans_Regular_ttf_font, OpenSans_Regular_ttf_font_size, "OpenSans Regular", font_size );
+    //return w_get_tt_font_mem( OpenSans_SemiBold_ttf_font, OpenSans_SemiBold_ttf_font_size, "OpenSans Semibold", font_size );
 }
 
 

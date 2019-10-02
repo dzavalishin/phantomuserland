@@ -35,7 +35,7 @@ rgba_t title_back_color_focus   = { .r = 213, .g = 172, .b = 101, .a = 0xFF };  
 rgba_t title_back_color_nofocus = { 214, 227, 231, 0xFF }; // border_1_color;  // { 122, 251, 195, 0xFF };
 
 static const int bordr_size = sizeof(brdr)/sizeof(rgba_t);
-static const int title_size = 31; //18;
+static const int title_size = 33; //18;
 
 extern drv_video_bitmap_t vanilla_cream_rollup_bmp;
 #define vanilla_cream_rollup_pressed_bmp vanilla_cream_rollup_bmp
@@ -140,10 +140,10 @@ void win_make_decorations(drv_video_window_t *w)
         int bwidth = vanilla_cream_close_bmp.xsize;
         int bxp = w->w_title->xsize - bwidth - 5;
         // close button with id=1
-        w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 2, &vanilla_cream_close_bmp, &vanilla_cream_close_pressed_bmp, 0 );
+        w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 4, &vanilla_cream_close_bmp, &vanilla_cream_close_pressed_bmp, 0 );
         bxp -= bwidth + 2;
         // roll up button
-        w_add_button( w->w_title, WBUTTON_SYS_ROLLUP, bxp, 2, &vanilla_cream_rollup_bmp, &vanilla_cream_rollup_pressed_bmp, 0 );
+        w_add_button( w->w_title, WBUTTON_SYS_ROLLUP, bxp, 4, &vanilla_cream_rollup_bmp, &vanilla_cream_rollup_pressed_bmp, 0 );
     }
 
     w->w_title->x = w->x-bordr_size;
@@ -169,7 +169,7 @@ void win_make_decorations(drv_video_window_t *w)
 #if CONF_TRUETYPE
     w_ttfont_draw_string( w->w_title, decorations_title_font,
                                 w->title, COLOR_BLACK, //COLOR_TRANSPARENT,
-                                bordr_size+5, bordr_size+5 );
+                                bordr_size+8, bordr_size+8 );
 #else
     w_font_draw_string( w->w_title, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
@@ -181,6 +181,7 @@ void win_make_decorations(drv_video_window_t *w)
         iw_winblt_locked(w->w_title);
     //drv_video_window_free(wtitle);
 #else
+/*
     w->w_decor->inKernelEventProcess = titleWindowEventProcessor;
 
     int focused = w->state & WSTATE_WIN_FOCUSED;
@@ -203,14 +204,14 @@ void win_make_decorations(drv_video_window_t *w)
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
                                 bordr_size+3, bmp_y-4 );
 
-    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - close_bmp.xsize - 5, bmp_y, &close_bmp );
-    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, bmp_y, &pin_bmp );
+    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - close_bmp.xsize - 5, bmp_y+1, &close_bmp );
+    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, bmp_y+1, &pin_bmp );
 
 
     // nSteps is x size, srcSize is y size
     w_replicate_hor( w->w_decor, 0, w->ysize + bordr_size,
                            w->w_decor->xsize, brdr, bordr_size );
-
+*/
 #endif
 
     w_repaint_buttons(w->w_decor);
