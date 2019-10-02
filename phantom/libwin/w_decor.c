@@ -44,6 +44,11 @@ extern drv_video_bitmap_t vanilla_cream_close_bmp;
 #define vanilla_cream_close_pressed_bmp vanilla_cream_close_bmp
 
 
+extern drv_video_bitmap_t title_selected_bmp;
+
+
+
+
 void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, int srcSize )
 {
     int stepOff = srcSize;
@@ -158,11 +163,15 @@ void win_make_decorations(drv_video_window_t *w)
     w_fill( w->w_title, w->w_title->bg );
 
     //w_fill( w->w_title, w->w_title->bg );
-/*
+    /*
     //drv_video_bitmap_t *tbmp = focused ?  &title_brown_bmp : &title_green_bmp;
     drv_video_bitmap_t *tbmp = focused ?  &title_violet_bmp : &title_green_bmp;
     w_replicate_hor( w->w_title, 3, 3, w->w_title->xsize, tbmp->pixel, tbmp->ysize );
-*/
+    */
+
+    drv_video_bitmap_t *tbmp = focused ?  &title_selected_bmp : &title_green_bmp;
+    if( focused ) w_replicate_hor( w->w_title, 3, 3, w->w_title->xsize, tbmp->pixel, tbmp->ysize );
+
     window_basic_border( w->w_title, brdr, bordr_size );
 
     // BUG! It must be +3, not -1 on Y coord!
