@@ -500,11 +500,12 @@ void phantom_shutdown(int flags)
             hal_sleep_msec(1000);
     }
 
-    SHOW_FLOW0( 0, "shutdown now" );
+    SHOW_FLOW0( 0, "shutdown in 5 seconds" );
+    hal_sleep_msec(5000);
 
     t_migrate_to_boot_CPU(); // Make sure other CPUs are stopped
 
-    phantom_finish_all_threads();
+    phantom_finish_all_threads(); // TODO all VM threads?
 
     run_stop_functions( STOP_LEVEL_EARLY );
 

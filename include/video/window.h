@@ -52,6 +52,8 @@ typedef struct drv_video_window * window_handle_t;
 // In double buffered mode window is supposed to completely
 // repaint itself each buffer swap. No buffer copy occures.
 #define WFLAG_WIN_FULLPAINT             (1<<7)
+// Don't bring focus to this window by key event (ctrl-tab)
+#define WFLAG_WIN_NOKEYFOCUS            (1<<8)
 
 
 #define WIN_HAS_FLAG(__w,__f) ((__w)->flags & (__f))

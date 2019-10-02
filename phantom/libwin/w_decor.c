@@ -10,10 +10,6 @@
 
 #include <assert.h>
 #include <phantom_libc.h>
-//#include <event.h>
-//#include <spinlock.h>
-
-//#include "win_local.h"
 
 #include <video/window.h>
 #include <video/internal.h>
@@ -22,7 +18,30 @@
 #include <video/button.h>
 
 
+#define border_0_color { .r = 210, .g = 203, .b = 188, .a = 0xFF } // bgr!
+#define border_1_color { .r = 183, .g = 171, .b = 146, .a = 0xFF }
+#define border_2_color { .r = 210, .g = 203, .b = 188, .a = 0xFF }
 
+#if VIDEO_VANILLA
+static rgba_t brdr[] = { border_0_color, border_1_color, border_2_color };
+#else
+static rgba_t brdr[] = {
+    { 0x40, 0x40, 0x40, 0xFF },
+    { 0x80, 0x80, 0x80, 0xFF },
+    { 0x40, 0x40, 0x40, 0xFF },
+};
+#endif
+rgba_t title_back_color_focus   = { .r = 213, .g = 172, .b = 101, .a = 0xFF };  // { 122, 230, 251, 0xFF };
+rgba_t title_back_color_nofocus = { 214, 227, 231, 0xFF }; // border_1_color;  // { 122, 251, 195, 0xFF };
+
+static const int bordr_size = sizeof(brdr)/sizeof(rgba_t);
+static const int title_size = 31; //18;
+
+extern drv_video_bitmap_t vanilla_cream_rollup_bmp;
+#define vanilla_cream_rollup_pressed_bmp vanilla_cream_rollup_bmp
+
+extern drv_video_bitmap_t vanilla_cream_close_bmp;
+#define vanilla_cream_close_pressed_bmp vanilla_cream_close_bmp
 
 
 void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, int srcSize )
@@ -38,36 +57,23 @@ void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, in
     r.xsize = r.ysize = stepOff;
 
     r.x = r.y = 0;
-    w_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, brdr[1], r );
 
     r.x = 0; r.y = dest->ysize-(stepOff);
-    w_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, brdr[1], r );
 
     r.y = 0; r.x = dest->xsize-(stepOff);
-    w_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, brdr[1], r );
 
     r.x = dest->xsize-(stepOff);
     r.y = dest->ysize-(stepOff);
-    w_fill_rect( dest, COLOR_DARKGRAY, r );
+    w_fill_rect( dest, brdr[1], r );
 }
 
 
 
 
-static rgba_t brdr[] = {
-    { 0x40, 0x40, 0x40, 0xFF },
-    { 0x80, 0x80, 0x80, 0xFF },
-    { 0x40, 0x40, 0x40, 0xFF },
-};
 
-rgba_t title_back_color_focus   = { 122, 230, 251, 0xFF };
-rgba_t title_back_color_nofocus = { 122, 251, 195, 0xFF };
-
-static const int bordr_size = sizeof(brdr)/sizeof(rgba_t);
-static const int title_size = 18;
-
-
-//static int titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e );
 
 
 void win_make_decorations(drv_video_window_t *w)
@@ -85,11 +91,11 @@ void win_make_decorations(drv_video_window_t *w)
 #else
         int dysize = w->ysize+bordr_size*2;
 #endif
-        drv_video_window_t *w2 = private_drv_video_window_create(w->xsize+bordr_size*2, dysize );
+        drv_video_window_t *wdecor = private_drv_video_window_create(w->xsize+bordr_size*2, dysize );
 
-        //w2->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
-        w2->w_owner = w;
-        w->w_decor = w2;
+        //wdecor->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+        wdecor->w_owner = w;
+        w->w_decor = wdecor;
 
 #if VIDEO_T_IN_D
         int bmp_y = w->ysize + bordr_size*2 + 2;
@@ -116,28 +122,28 @@ void win_make_decorations(drv_video_window_t *w)
 
     if(w->w_title == 0)
     {
-        drv_video_window_t *w3 =
+        drv_video_window_t *wtitle =
             private_drv_video_window_create(
                                             w->xsize+bordr_size*2,
                                             title_size+bordr_size*2
                                            );
 
-        //w3->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
-        iw_enter_allwq(w3);
+        //wtitle->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
+        iw_enter_allwq(wtitle);
 
 
-        w3->inKernelEventProcess = w_titleWindowEventProcessor;
+        wtitle->inKernelEventProcess = w_titleWindowEventProcessor;
 
-        w3->w_owner = w;
-        w->w_title = w3;
+        wtitle->w_owner = w;
+        w->w_title = wtitle;
 
-        int bwidth = close_bmp.xsize;
+        int bwidth = vanilla_cream_close_bmp.xsize;
         int bxp = w->w_title->xsize - bwidth - 5;
         // close button with id=1
-        w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 5, &close_bmp, &close_pressed_bmp, 0 );
+        w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 2, &vanilla_cream_close_bmp, &vanilla_cream_close_pressed_bmp, 0 );
         bxp -= bwidth + 2;
         // roll up button
-        w_add_button( w->w_title, WBUTTON_SYS_ROLLUP, bxp, 5, &rollup_bmp, &rollup_pressed_bmp, 0 );
+        w_add_button( w->w_title, WBUTTON_SYS_ROLLUP, bxp, 2, &vanilla_cream_rollup_bmp, &vanilla_cream_rollup_pressed_bmp, 0 );
     }
 
     w->w_title->x = w->x-bordr_size;
@@ -149,20 +155,21 @@ void win_make_decorations(drv_video_window_t *w)
     if( w->w_title->state & WSTATE_WIN_FOCUSED) focused = 1; // w_title can't be null here
 
     w->w_title->bg = focused ? title_back_color_focus : title_back_color_nofocus;
+    w_fill( w->w_title, w->w_title->bg );
 
     //w_fill( w->w_title, w->w_title->bg );
-
+/*
     //drv_video_bitmap_t *tbmp = focused ?  &title_brown_bmp : &title_green_bmp;
     drv_video_bitmap_t *tbmp = focused ?  &title_violet_bmp : &title_green_bmp;
     w_replicate_hor( w->w_title, 3, 3, w->w_title->xsize, tbmp->pixel, tbmp->ysize );
-
+*/
     window_basic_border( w->w_title, brdr, bordr_size );
 
     // BUG! It must be +3, not -1 on Y coord!
 #if CONF_TRUETYPE
     w_ttfont_draw_string( w->w_title, decorations_title_font,
                                 w->title, COLOR_BLACK, //COLOR_TRANSPARENT,
-                                bordr_size+3, bordr_size+2 );
+                                bordr_size+5, bordr_size+5 );
 #else
     w_font_draw_string( w->w_title, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
@@ -170,12 +177,9 @@ void win_make_decorations(drv_video_window_t *w)
 #endif
 
 
-    //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - close_bmp.xsize - 5, 5, &close_bmp );
-    //drv_video_window_draw_bitmap( w->w_title, w->w_title->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, 5, &pin_bmp );
-
     if( w->state & WSTATE_WIN_VISIBLE )
         iw_winblt_locked(w->w_title);
-    //drv_video_window_free(w3);
+    //drv_video_window_free(wtitle);
 #else
     w->w_decor->inKernelEventProcess = titleWindowEventProcessor;
 

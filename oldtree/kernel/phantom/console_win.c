@@ -246,13 +246,16 @@ static struct console_ops win_ops =
 #define DEBWIN_YS 600
 
 //#define MAX_LAUNCH_BUTTONS 64
-#define MAX_LAUNCH_BUTTONS 6
+#define MAX_LAUNCH_BUTTONS 5
 
 static pool_handle_t taskbuttons[MAX_LAUNCH_BUTTONS];
 
 static void phantom_debug_window_loop();
 //static void phantom_launcher_window_loop();
 
+extern drv_video_bitmap_t vanilla_task_button_bmp;
+extern drv_video_bitmap_t slide_switch_on_bmp;
+extern drv_video_bitmap_t slide_switch_off_bmp;
 
 void phantom_init_console_window()
 {
@@ -283,8 +286,8 @@ void phantom_init_console_window()
 
 
     phantom_debug_window = drv_video_window_create(
-                        DEBWIN_XS, DEBWIN_YS,
-                        DEBWIN_X, DEBWIN_Y, console_bg, "Threads", WFLAG_WIN_DECORATED|WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT );
+                                                   DEBWIN_XS, DEBWIN_YS,
+                                                   DEBWIN_X, DEBWIN_Y, console_bg, "Threads", WFLAG_WIN_DECORATED|WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT );
 
     //phantom_debug_window->flags |= WFLAG_WIN_DOUBLEBUF|WFLAG_WIN_FULLPAINT;
     //w_update( phantom_debug_window ); // For dbl buf flags to start working ok
@@ -300,54 +303,59 @@ void phantom_init_console_window()
     // Launcher window
     // -------------------------------------------------------------------
 
-    color_t la_bg = { 0x19, 0x19, 0x19, 0xFF };
-    color_t la_b1 = { 68, 66, 62, 0xFF  };
-    color_t la_b2 = { 88, 84, 79, 0xFF  };
+    //    color_t la_bg = { 0x19, 0x19, 0x19, 0xFF };
+    //color_t la_b1 = { 68, 66, 62, 0xFF  };
+    //color_t la_b2 = { 88, 84, 79, 0xFF  };
 
-    color_t la_txt = { 0x11, 0xd5, 0xff, 0xFF };
+    color_t la_bg = { 214, 227, 231, 0xFF };
+
+    color_t la_b1 = { 214, 227, 231, 0xFF };
+    color_t la_b2 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
+
+    //color_t la_txt = { 0x11, 0xd5, 0xff, 0xFF };
+    color_t la_txt = { 0x0, 0x0, 0x0, 0xFF };
 //#define BTEXT_COLOR COLOR_YELLOW
 #define BTEXT_COLOR la_txt
 
-    phantom_launcher_window = drv_video_window_create( scr_get_xsize(), 32,
-                                                       0, 0, console_bg, "Launcher", WFLAG_WIN_ONTOP|WFLAG_WIN_NOFOCUS );
+    phantom_launcher_window = drv_video_window_create( scr_get_xsize(), 45,
+                                                       0, 0, la_bg, "Launcher", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
 
     phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
     w_fill( phantom_launcher_window, la_bg );
 
     int lb_x = scr_get_xsize();
+    int lb_y = 0;
 
-    lb_x -= power_button_sm_bmp.xsize + 5;
-    w_add_button( phantom_launcher_window, -1, lb_x, 2, &power_button_sm_bmp, &power_button_pressed_sm_bmp, BUTTON_FLAG_NOBORDER );
+    lb_x -= slide_switch_on_bmp.xsize + 5;
+    //lb_y += slide_switch_on_bmp.ysize + 5;
+    lb_y += 8;
+
+    w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, BUTTON_FLAG_NOBORDER );
 
     pool_handle_t bh;
-
 
     lb_x = 5;
 
     int nwin = 0;
     for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )
     {
-        char * wname = "win1";
+        char wname[10] = "Window 1";
 
         // crashes in some configurations??
-        //wname[3] = '0' + nwin;
+        wname[7] = '0' + nwin;
 
-        bh = w_add_button( phantom_launcher_window, nwin, lb_x, 5, &task_button_bmp, &task_button_bmp, BUTTON_FLAG_NOBORDER );
+        bh = w_add_button( phantom_launcher_window, nwin, lb_x, 0, &vanilla_task_button_bmp, &vanilla_task_button_bmp, BUTTON_FLAG_NOBORDER );
         w_button_set_text( phantom_launcher_window, bh, wname, BTEXT_COLOR );
-        lb_x += 5+task_button_bmp.xsize;
+        lb_x += 5+vanilla_task_button_bmp.xsize;
 
         taskbuttons[nwin] = bh;
     }
 
 
-
-    w_draw_line( phantom_launcher_window, 0, 31, scr_get_xsize(), 31, la_b1 );
-    w_draw_line( phantom_launcher_window, 0, 30, scr_get_xsize(), 30, la_b2 );
-
+    w_draw_line( phantom_launcher_window, 0, 44, scr_get_xsize(), 44, la_b1 );
+    w_draw_line( phantom_launcher_window, 0, 43, scr_get_xsize(), 43, la_b2 );
 
     w_update( phantom_launcher_window );
-
-    //hal_start_kernel_thread(phantom_launcher_window_loop);
 }
 
 

@@ -26,6 +26,7 @@
 #include <video/bitmap.h>
 #include <video/button.h>
 #include <video/font.h>
+#include <video/internal.h>
 
 // negative magic produces negative handles
 //#define BUTTONS_POOL_MAGIC ('b' << 24 | 0xFFEEAA)
@@ -48,14 +49,7 @@ static void paint_button(window_handle_t win, button_t *cb )
 
     if( cb->bmp && ! (cb->flags & BUTTON_FLAG_NOPAINT) )
     {
-#if 1
         drv_video_window_draw_bitmap( win, cb->r.x, cb->r.y, pressed ? cb->bmp_pressed : cb->bmp );
-
-#else
-        bitmap2bitmap(
-                            win->pixel, win->xsize, win->ysize, cb->r.x, cb->r.y,
-                            cb->pixels, cb->r.xsize, cb->r.ysize, 0, 0, cb->r.xsize, cb->r.ysize );
-#endif
     }
 
     if(! (cb->flags & BUTTON_FLAG_NOBORDER))
@@ -66,11 +60,21 @@ static void paint_button(window_handle_t win, button_t *cb )
 
     if(cb->text)
     {
+
+#if CONF_TRUETYPE
         int t_height = 16;
         int t_ypos = (cb->r.ysize - t_height) / 2;
-
-        w_font_draw_string( win, &drv_video_8x16san_font, cb->text, cb->text_color,
-                                           COLOR_TRANSPARENT, cb->r.x+t_ypos+2, cb->r.y+t_ypos ); // +2?
+        w_ttfont_draw_string( win, decorations_title_font,
+                              cb->text, cb->text_color,
+                              cb->r.x+t_ypos+2, cb->r.y+t_ypos ); // +2?
+#else
+        int t_height = 16;
+        int t_ypos = (cb->r.ysize - t_height) / 2;
+        w_font_draw_string( win, &drv_video_8x16san_font,
+                            cb->text, cb->text_color,
+                            COLOR_TRANSPARENT,
+                            cb->r.x+t_ypos+2, cb->r.y+t_ypos ); // +2?
+#endif
     }
 
     //w_update( win );
@@ -89,6 +93,7 @@ static void paint_changed_button(window_handle_t win, button_t *cb)
     paint_button( win, cb );
 }
 
+/*
 static errno_t kill_button_by_id(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     button_t *cb = el;
@@ -101,6 +106,7 @@ static errno_t kill_button_by_id(pool_t *pool, void *el, pool_handle_t handle, v
     }
     return 0;
 }
+*/
 
 /*
 static errno_t kill_any_button(pool_t *pool, void *el, pool_handle_t handle, void *arg)
@@ -184,6 +190,9 @@ static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, voi
             e.focus = env->w;
 
             ev_q_put_any( &e );
+
+            if( cb->callback )
+                cb->callback( env->w, handle, cb->callback_arg );
         }
     }
 
@@ -327,6 +336,7 @@ pool_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_b
     return bh;
 }
 
+/*
 void w_delete_button( window_handle_t w, int id )
 {
     if(w->buttons == 0)
@@ -336,7 +346,13 @@ void w_delete_button( window_handle_t w, int id )
 
     pool_foreach( w->buttons, kill_button_by_id, (void *)id );
 }
+*/
 
+void w_delete_button( window_handle_t w, pool_handle_t bh )
+{
+    pool_release_el( w->buttons, bh );
+    pool_destroy_el( w->buttons, bh );
+}
 
 
 
@@ -360,6 +376,25 @@ void w_button_set_text( window_handle_t w, pool_handle_t bh, const char *text, c
     paint_button( w, cb );
 
     pool_release_el( w->buttons, bh );
+}
+
+
+void w_button_set_callback( window_handle_t w, pool_handle_t button_handle, button_callback_t cb, void *arg )
+{
+    if(w->buttons == 0)        return;
+    assert( w->buttons->magic == BUTTONS_POOL_MAGIC );
+    button_t *b = pool_get_el( w->buttons, button_handle );
+
+    if( !b )
+    {
+        SHOW_ERROR0( 0, "can't get just button" );
+        return;
+    }
+
+    b->callback = cb;
+    b->callback_arg = arg;
+
+    pool_release_el( w->buttons, button_handle );
 }
 
 

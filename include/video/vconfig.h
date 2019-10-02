@@ -11,6 +11,10 @@
 #ifndef VCONFIG_H
 #define VCONFIG_H
 
+// New look/fill
+#define VIDEO_VANILLA 1
+
+
 #define VIDEO_NEW_BG_WIN 1
 
 
