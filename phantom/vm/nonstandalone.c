@@ -11,7 +11,7 @@
 
 #include <setjmp.h>
 
-#include <errno.h>
+//#include <errno.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -238,7 +238,9 @@ int get_current_tid()
 #endif
 }
 
-
+// TODO FIXME errno.h breaks compile on Linux :(
+// EPIPE
+#define errno 32
 
 int k_open( int *fd, const char *name, int flags, int mode )
 {

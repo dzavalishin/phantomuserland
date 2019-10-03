@@ -13,11 +13,11 @@
 
 #if HAVE_NET && defined(ARCH_ia32)
 
-#define NE2000_INTR 0
+#define NE2000_INTR 1
 
 #define DEBUG_MSG_PREFIX "ne2000"
 #include <debug_ext.h>
-#define debug_level_flow 2
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -229,7 +229,9 @@ static phantom_device_t * common_ne2000_probe( int port, int irq, int stage )
 
     pvt->thread = hal_start_kernel_thread_arg( ne2000_thread, dev );
 
+#if NE2000_INTR
     ne_ei(dev);
+#endif
 
     pvt->active = 1;
 
