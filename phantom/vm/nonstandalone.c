@@ -20,7 +20,7 @@
 #ifndef NO_NETWORK
 #  include <sys/socket.h>
 #  include <netinet/in.h>
-#  include <arpa/inet.h>
+//#  include <arpa/inet.h> // breaks Travis CI compile
 #endif
 
 #include <pthread.h>
