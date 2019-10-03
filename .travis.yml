@@ -1,4 +1,5 @@
-dist: trusty
+#dist: trusty
+dist: bionic
 language: c
 
 # /home/travis/build/dzavalishin/phantomuserland

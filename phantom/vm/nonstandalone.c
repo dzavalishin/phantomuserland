@@ -18,9 +18,9 @@
 #include <fcntl.h>
 
 #ifndef NO_NETWORK
-#  include <sys/socket.h>
+#  include <sys/socket.h> // breaks Travis CI compile
 #  include <netinet/in.h>
-//#  include <arpa/inet.h> // breaks Travis CI compile
+#  include <arpa/inet.h> 
 #endif
 
 #include <pthread.h>

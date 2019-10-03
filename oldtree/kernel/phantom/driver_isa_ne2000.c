@@ -13,7 +13,7 @@
 
 #if HAVE_NET && defined(ARCH_ia32)
 
-#define NE2000_INTR 1
+#define NE2000_INTR 0
 
 #define DEBUG_MSG_PREFIX "ne2000"
 #include <debug_ext.h>
