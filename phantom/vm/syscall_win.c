@@ -145,8 +145,8 @@ static int win_putString_24(pvm_object_t me , struct data_area_4_thread *tc )
     pvm_object_t _text = POP_ARG;
     ASSERT_STRING(_text);
 
-    int x = POP_INT();
     int y = POP_INT();
+    int x = POP_INT();
 
 
     int len = pvm_get_str_len( _text );
@@ -416,6 +416,45 @@ static int win_scrollHor_35(pvm_object_t me, struct data_area_4_thread *tc )
 }
 
 
+/// Drawe part of bitmap to window
+/// Same as usual putImage, but copies just subset
+static int win_drawImagePart_36(pvm_object_t me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 3);
+
+    int ysize  = POP_INT();
+    int xsize  = POP_INT();
+    int ystart = POP_INT();
+    int xstart = POP_INT();
+
+    pvm_object_t _img = POP_ARG;
+    int y = POP_INT();
+    int x = POP_INT();
+
+    // TODO check class!
+    struct data_area_4_bitmap *_bmp = pvm_object_da( _img, bitmap );
+    //struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
+    struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
+
+    bitmap2bitmap(
+    		da->pixel, da->w.xsize, da->w.ysize, x+xstart, y+ystart,
+    		(rgba_t *)pixels, _bmp->xsize, _bmp->ysize, xstart, ystart,
+    		xsize, ysize
+    );
+
+
+    w_update( &(da->w) );
+
+    SYS_FREE_O(_img);
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+
 
 syscall_func_t	syscall_table_4_window[32+8] =
 {
@@ -441,7 +480,7 @@ syscall_func_t	syscall_table_4_window[32+8] =
     // 32
     &win_setHandler_32,  	    &win_setTitle_33,
     &win_update_34, 	    	    &win_scrollHor_35,
-    &invalid_syscall,               &invalid_syscall,
+    &win_drawImagePart_36,           &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
 
 };

@@ -65,4 +65,9 @@ class window
 
     // errno
     int	scrollHor( var x : int, var y : int, var xsize : int, var ysize : int, var steps : int ) [35] {}
+
+    // One can put bitmap with basic drawImage and redraw part with this call
+	void	drawImagePart( var x : int, var y : int, var img : .internal.object, var xstart : int, var ystart : int, var xsize : int, var ysize : int ) [36] {} // error - param is bitmap
+
+
 };

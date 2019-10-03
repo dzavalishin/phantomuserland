@@ -28,7 +28,7 @@
 #include <kernel/snap_sync.h>
 
 
-
+// TODO looses events?!
 static void w_do_deliver_event(window_handle_t w)
 {
     //if(w != 0 && w->eventDeliverSema)        hal_sem_release(w->eventDeliverSema);

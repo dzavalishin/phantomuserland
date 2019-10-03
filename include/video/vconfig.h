@@ -11,7 +11,7 @@
 #ifndef VCONFIG_H
 #define VCONFIG_H
 
-// New look/fill
+// New look/fill - accept & KILLME
 #define VIDEO_VANILLA 1
 
 

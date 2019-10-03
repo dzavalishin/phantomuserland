@@ -22,3 +22,5 @@ extern drv_video_bitmap_t		vanilla_cream_rollup_bmp;
 extern drv_video_bitmap_t		vanilla_cream_close_bmp;
 extern drv_video_bitmap_t		title_selcted_bmp;
 extern drv_video_bitmap_t		title_selected_bmp;
+extern drv_video_bitmap_t		title_deselected_bmp;
+extern drv_video_bitmap_t		title_selected_bmp;

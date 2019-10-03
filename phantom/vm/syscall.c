@@ -18,6 +18,8 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
+#include <stdlib.h>
+
 #include <phantom_libc.h>
 #include <time.h>
 #include <threads.h>
@@ -645,7 +647,34 @@ static int si_string_12_find(pvm_object_t me, struct data_area_4_thread *tc )
 }
 
 
-syscall_func_t	syscall_table_4_string[16] =
+static int si_string_16_toint(pvm_object_t me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 0);
+
+    struct data_area_4_string *meda = pvm_object_da( me, string );
+
+    SYSCALL_RETURN(pvm_create_int_object( atoin( meda->data, meda->length ) ) );
+}
+
+
+static int si_string_17_tolong(pvm_object_t me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 0);
+
+    struct data_area_4_string *meda = pvm_object_da( me, string );
+
+    SYSCALL_RETURN(pvm_create_long_object( atoln( meda->data, meda->length ) ) );
+}
+
+
+
+syscall_func_t	syscall_table_4_string[18] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_string_3_clone,
@@ -655,7 +684,10 @@ syscall_func_t	syscall_table_4_string[16] =
     &si_string_8_substring, 		&si_string_9_charat,
     &si_string_10_concat,           &si_string_11_length,
     &si_string_12_find,             &invalid_syscall,
-    &si_void_14_to_immutable,       &si_void_15_hashcode
+    &si_void_14_to_immutable,       &si_void_15_hashcode,
+    // 16
+    &si_string_16_toint,            &si_string_17_tolong,
+    //&si_string_18_tofloat,          &si_string_19_todouble,
 };
 DECLARE_SIZE(string);
 
