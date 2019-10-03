@@ -153,7 +153,11 @@ void w_restart_init(drv_video_window_t *w)
     queue_init(&(w->events));
     w->events_count = 0;
 
-    //w_restart_attach( w );
+    // Can't be after reboot
+    w->state &= ~(WSTATE_WIN_FOCUSED|WSTATE_WIN_DRAGGED|WSTATE_WIN_INFB);
+
+    // Unsure, better be off
+    w->state &= ~WSTATE_WIN_UNCOVERED;
 
 }
 

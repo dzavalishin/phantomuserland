@@ -35,7 +35,7 @@ rgba_t title_back_color_focus   = { .r = 213, .g = 172, .b = 101, .a = 0xFF };  
 rgba_t title_back_color_nofocus = { 214, 227, 231, 0xFF }; // border_1_color;  // { 122, 251, 195, 0xFF };
 
 static const int bordr_size = sizeof(brdr)/sizeof(rgba_t);
-static const int title_size = 33; //18;
+static const int title_size = 31; //33; //18;
 
 extern drv_video_bitmap_t vanilla_cream_rollup_bmp;
 #define vanilla_cream_rollup_pressed_bmp vanilla_cream_rollup_bmp
@@ -143,12 +143,12 @@ void win_make_decorations(drv_video_window_t *w)
         w->w_title = wtitle;
 
         int bwidth = vanilla_cream_close_bmp.xsize;
-        int bxp = w->w_title->xsize - bwidth - 5;
+        int bxp = w->w_title->xsize - bwidth - 3;
         // close button with id=1
-        w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 4, &vanilla_cream_close_bmp, &vanilla_cream_close_pressed_bmp, 0 );
-        bxp -= bwidth + 2;
+        w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 3, &vanilla_cream_close_bmp, &vanilla_cream_close_pressed_bmp, 0 );
+        bxp -= bwidth + 0;
         // roll up button
-        w_add_button( w->w_title, WBUTTON_SYS_ROLLUP, bxp, 4, &vanilla_cream_rollup_bmp, &vanilla_cream_rollup_pressed_bmp, 0 );
+        w_add_button( w->w_title, WBUTTON_SYS_ROLLUP, bxp, 3, &vanilla_cream_rollup_bmp, &vanilla_cream_rollup_pressed_bmp, 0 );
     }
 
     w->w_title->x = w->x-bordr_size;
@@ -178,7 +178,7 @@ void win_make_decorations(drv_video_window_t *w)
 #if CONF_TRUETYPE
     w_ttfont_draw_string( w->w_title, decorations_title_font,
                                 w->title, COLOR_BLACK, //COLOR_TRANSPARENT,
-                                bordr_size+8, bordr_size+8 );
+                                bordr_size+7, bordr_size+7 );
 #else
     w_font_draw_string( w->w_title, &drv_video_8x16cou_font,
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
