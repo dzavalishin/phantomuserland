@@ -326,11 +326,15 @@ int k_close( int fd )
 
 //#warning untested
 
-asm(".globl _longjmp_machdep;\
+asm("\
+.weak _longjmp_machdep;\
+.globl _longjmp_machdep;\
     _longjmp_machdep: jmp _longjmp \
     ");
 
-asm(".globl _setjmp_machdep;\
+asm("\
+.weak _setjmp_machdep;\
+.globl _setjmp_machdep;\
     _setjmp_machdep: jmp _setjmp \
     ");
 

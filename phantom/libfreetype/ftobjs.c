@@ -911,7 +911,7 @@
     face->memory   = memory;
     face->stream   = stream;
 
-	FT_TRACE1( ( "depp1\n" ) );
+	//FT_TRACE1( ( "depp1\n" ) );
 #ifdef FT_CONFIG_OPTION_INCREMENTAL
     {
       int  i;
@@ -925,7 +925,7 @@
     }
 #endif
 
-	FT_TRACE1( ( "depp2\n" ) );
+	//FT_TRACE1( ( "depp2\n" ) );
     error = clazz->init_face( stream,
                               face,
                               (FT_Int)face_index,
@@ -933,11 +933,11 @@
                               params );
     if ( error )
       goto Fail;
-	FT_TRACE1( ( "depp3\n" ) );
+	//FT_TRACE1( ( "depp3\n" ) );
 
     /* select Unicode charmap by default */
     error2 = find_unicode_charmap( face );
-	FT_TRACE1( ( "depp4\n" ) );
+	//FT_TRACE1( ( "depp4\n" ) );
 
     /* if no Unicode charmap can be found, FT_Err_Invalid_CharMap_Handle */
     /* is returned.                                                      */
@@ -1574,13 +1574,13 @@
     external_stream = FT_BOOL( ( args->flags & FT_OPEN_STREAM ) &&
                                args->stream                     );
 
-	FT_TRACE1(( "start\n" ));
+	//FT_TRACE1(( "start\n" ));
     /* create input stream */
     error = FT_Stream_New( library, args, &stream );
     if ( error )
       goto Exit;
 
-	FT_TRACE1(( "start1\n" ));
+	//FT_TRACE1(( "start1\n" ));
     memory = library->memory;
 
     /* If the font driver is specified in the `args' structure, use */
@@ -1619,7 +1619,7 @@
       FT_Module*  cur   = library->modules;
       FT_Module*  limit = cur + library->num_modules;
 
-		FT_TRACE1( ( "cur %x limit %x\n", cur, limit ) );
+		//FT_TRACE1( ( "cur %x limit %x\n", cur, limit ) );
 
       for ( ; cur < limit; cur++ )
       {
@@ -1630,7 +1630,7 @@
           FT_Parameter*  params     = 0;
 
 
-		FT_TRACE1(( "is driver\n", cur, limit ));
+		//FT_TRACE1(( "is driver\n", cur, limit ));
           driver = FT_DRIVER( cur[0] );
 
           if ( args->flags & FT_OPEN_PARAMS )

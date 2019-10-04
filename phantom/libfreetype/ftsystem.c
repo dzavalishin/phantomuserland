@@ -256,9 +256,8 @@
     stream->read  = ft_ansi_stream_io;
     stream->close = ft_ansi_stream_close;
 
-    FT_TRACE1(( "FT_Stream_Open:" ));
-    FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",
-                filepathname, stream->size ));
+    //FT_TRACE1(( "FT_Stream_Open:" ));
+    //FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",                filepathname, stream->size ));
 
     return FT_Err_Ok;
   }
@@ -373,9 +372,8 @@
     stream->read  = ft_ansi_stream_io;
     stream->close = ft_ansi_stream_close;
 
-    FT_TRACE1(( "FT_Stream_Open:" ));
-    FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",
-                filepathname, stream->size ));
+    //FT_TRACE1(( "FT_Stream_Open:" ));
+    //FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",                filepathname, stream->size ));
 
     return FT_Err_Ok;
   }
